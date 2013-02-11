@@ -23,6 +23,22 @@ struct fields
   signed char	sc    ;
 } flags;
 
+struct internalvartest
+{
+  unsigned int a : 1;
+  struct
+    {
+      unsigned int b : 1;
+      struct
+	{
+	  unsigned int c : 1;
+	  signed int   d : 1;
+	} deep;
+      signed int   e : 1;
+    } inner;
+  signed int   f : 1;
+} dummy_internalvartest;
+
 void break1 ()
 {
 }

@@ -1233,11 +1233,27 @@ value_assign (struct value *toval, struct value *fromval)
 				   VALUE_INTERNALVAR (toval));
 
     case lval_internalvar_component:
-      set_internalvar_component (VALUE_INTERNALVAR (toval),
-				 value_offset (toval),
-				 value_bitpos (toval),
-				 value_bitsize (toval),
-				 fromval);
+      {
+	int offset = value_offset (toval);
+
+	/* Are we dealing with a bitfield?
+
+	   It is important to mention that `value_parent (toval)' is
+	   non-NULL iff `value_bitsize (toval)' is non-zero.  */
+	if (value_bitsize (toval))
+	  {
+	    /* VALUE_INTERNALVAR below refers to the parent value, while
+	       the offset is relative to this parent value.  */
+	    gdb_assert (value_parent (value_parent (toval)) == NULL);
+	    offset += value_offset (value_parent (toval));
+	  }
+
+	set_internalvar_component (VALUE_INTERNALVAR (toval),
+				   offset,
+				   value_bitpos (toval),
+				   value_bitsize (toval),
+				   fromval);
+      }
       break;
 
     case lval_memory:

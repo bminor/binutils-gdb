@@ -1,3 +1,8 @@
+2013-02-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/bitfields.c (struct internalvartest): New declaration.
+	* gdb.base/bitfields.exp (bitfield_internalvar): New function.
+
 2013-02-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.python/py-prompt.exp: Add to the end a kill of $testpid.
