@@ -2982,6 +2982,10 @@ mips_elf_count_global_tls_entries (void *arg1, void *arg2)
     = (struct mips_elf_link_hash_entry *) arg1;
   struct mips_elf_count_tls_arg *arg = arg2;
 
+  if (hm->root.root.type == bfd_link_hash_indirect
+      || hm->root.root.type == bfd_link_hash_warning)
+    return 1;
+
   if (hm->tls_type & GOT_TLS_GD)
     arg->needed += 2;
   if (hm->tls_type & GOT_TLS_IE)
@@ -2999,6 +3003,10 @@ mips_elf_count_global_tls_relocs (void *arg1, void *arg2)
   struct mips_elf_link_hash_entry *hm
     = (struct mips_elf_link_hash_entry *) arg1;
   struct mips_elf_count_tls_arg *arg = arg2;
+
+  if (hm->root.root.type == bfd_link_hash_indirect
+      || hm->root.root.type == bfd_link_hash_warning)
+    return 1;
 
   arg->needed += mips_tls_got_relocs (arg->info, hm->tls_type, &hm->root);
 
@@ -4688,6 +4696,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
 	 all non-TLS entries.  */
       g->tls_assigned_gotno = g->local_gotno + g->global_gotno;
       htab_traverse (g->got_entries, mips_elf_initialize_tls_index, g);
+      BFD_ASSERT (g->tls_assigned_gotno == assign);
 
       /* Move onto the next GOT.  It will be a secondary GOT if nonull.  */
       g = gn;
@@ -8956,6 +8965,8 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
       /* Set up TLS entries.  */
       g->tls_assigned_gotno = g->global_gotno + g->local_gotno;
       htab_traverse (g->got_entries, mips_elf_initialize_tls_index, g);
+      BFD_ASSERT (g->tls_assigned_gotno
+		  == g->global_gotno + g->local_gotno + g->tls_gotno);
 
       /* Allocate room for the TLS relocations.  */
       arg.info = info;

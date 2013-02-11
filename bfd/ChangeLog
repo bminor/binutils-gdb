@@ -1,5 +1,13 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_count_global_tls_entries)
+	(mips_elf_count_global_tls_relocs): Don't count indirect or
+	warning symbols.
+	(mips_elf_multi_got, mips_elf_lay_out_got): Assert that the right
+	number of TLS entries were allocated.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_sort_hash_table_f): Remove asserts.
 
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
