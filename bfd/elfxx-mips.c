@@ -4275,10 +4275,10 @@ mips_elf_merge_got_with (struct mips_elf_bfd2got_hash *bfd2got,
   estimate += from->local_gotno + to->local_gotno;
   estimate += from->tls_gotno + to->tls_gotno;
 
-  /* If we're merging with the primary got, we will always have
-     the full set of global entries.  Otherwise estimate those
+  /* If we're merging with the primary got, any TLS relocations will
+     come after the full set of global entries.  Otherwise estimate those
      conservatively as well.  */
-  if (to == arg->primary)
+  if (to == arg->primary && from->tls_gotno + to->tls_gotno)
     estimate += arg->global_count;
   else
     estimate += from->global_gotno + to->global_gotno;

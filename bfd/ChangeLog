@@ -1,5 +1,10 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_merge_got_with): Only use arg->global_count
+	if there are TLS relocations.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_recreate_got): Remove free.
 	(mips_elf_resolve_final_got_entries): Remove bogus comment.
 
