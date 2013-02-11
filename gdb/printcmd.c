@@ -1980,7 +1980,7 @@ print_variable_and_value (const char *name, struct symbol *var,
 
 /* Subroutine of ui_printf to simplify it.
    Print VALUE to STREAM using FORMAT.
-   VALUE is either a C-style string on the target, or an internal variable.  */
+   VALUE is a C-style string on the target.  */
 
 static void
 printf_c_string (struct ui_file *stream, const char *format,
@@ -2014,8 +2014,7 @@ printf_c_string (struct ui_file *stream, const char *format,
 
 /* Subroutine of ui_printf to simplify it.
    Print VALUE to STREAM using FORMAT.
-   VALUE is either a wide C-style string on the target,
-   or an internal variable.  */
+   VALUE is a wide C-style string on the target.  */
 
 static void
 printf_wide_c_string (struct ui_file *stream, const char *format,
