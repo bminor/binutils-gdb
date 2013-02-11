@@ -1,3 +1,11 @@
+2013-02-11  Ian Lance Taylor  <iant@google.com>
+
+	* descriptors.cc (Descriptors::close_all): New function.
+	* descriptors.h (class Descriptors): Declare close_all.
+	(close_all_descriptors): New inline function.
+	* plugin.cc: Include "descriptors.h".
+	(Plugin_manager::cleanup): Call close_all_descriptors.
+
 2013-02-06  Alan Modra  <amodra@gmail.com>
 
 	* README: Update coding style link.

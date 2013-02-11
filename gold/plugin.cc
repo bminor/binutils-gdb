@@ -71,6 +71,7 @@ dlerror(void)
 #include "target.h"
 #include "readsyms.h"
 #include "symtab.h"
+#include "descriptors.h"
 #include "elfcpp.h"
 
 namespace gold
@@ -697,6 +698,14 @@ Plugin_manager::layout_deferred_objects()
 void
 Plugin_manager::cleanup()
 {
+  if (this->any_added_)
+    {
+      // If any input files were added, close all the input files.
+      // This is because the plugin may want to remove them, and on
+      // Windows you are not allowed to remove an open file.
+      close_all_descriptors();
+    }
+
   for (this->current_ = this->plugins_.begin();
        this->current_ != this->plugins_.end();
        ++this->current_)
