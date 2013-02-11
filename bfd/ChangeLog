@@ -1,5 +1,31 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_got_entry): Remove tls_ldm_offset.
+	(mips_elf_link_hash_entry): Remove tls_ie_type, tls_gd_type,
+	tls_ie_got_offset and tls_gd_got_offset.
+	(mips_elf_link_hash_newfunc): Remove initialization.
+	(mips_elf_create_got_info): Likewise.
+	(mips_elf_count_local_got_entries, mips_elf_count_global_tls_entries)
+	(mips_tls_single_got_index): Delete.
+	(mips_elf_local_got_index): Always use the GOT entry to track
+	GOT indices.
+	(mips_elf_global_got_index): Likewise.
+	(mips_elf_create_local_got_entry): Assert that TLS entries have
+	already been allocated.
+	(mips_elf_record_global_got_symbol): Don't initialize
+	tls_ie_type or tls_gd_type.
+	(mips_elf_count_got_symbols): Only count reloc-only GOT entries here.
+	(mips_elf_initialize_tls_index): Allocate a GOT index for every TLS
+	entry.
+	(mips_elf_lay_out_got): Use mips_elf_count_got_entries to count
+	the GOT entries.
+	(_bfd_mips_elf_finish_dynamic_symbol): Assert that TLS GOT offsets
+	have been allocated.
+	(_bfd_mips_elf_copy_indirect_symbol): Remove handling of
+	tls_ie_type and tls_gd_type.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_create_local_got_entry): Tidy.  Avoid
 	aliasing violation.  Check for htab allocation failures.
 

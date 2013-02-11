@@ -89,6 +89,12 @@ struct mips_got_entry
   /* The TLS type of this GOT entry: GOT_NORMAL, GOT_TLS_IE, GOT_TLS_GD
      or GOT_TLS_LDM.  An LDM GOT entry will be a local symbol entry with
      r_symndx == 0.  */
+#define GOT_NORMAL	0
+#define GOT_TLS_GD	1
+#define GOT_TLS_LDM	2
+#define GOT_TLS_IE	4
+#define GOT_TLS_TYPE	7
+#define GOT_TLS_DONE    0x80
   unsigned char tls_type;
 
   /* The offset from the beginning of the .got section to the entry
@@ -149,11 +155,6 @@ struct mips_got_info
   /* In multi-got links, a pointer to the next got (err, rather, most
      of the time, it points to the previous got).  */
   struct mips_got_info *next;
-  /* This is the GOT index of the TLS LDM entry for the GOT, MINUS_ONE
-     for none, or MINUS_TWO for not yet assigned.  This is needed
-     because a single-GOT link may have multiple hash table entries
-     for the LDM.  It does not get initialized in multi-GOT mode.  */
-  bfd_vma tls_ldm_offset;
 };
 
 /* Structure passed when merging bfds' gots.  */
@@ -320,23 +321,6 @@ struct mips_elf_link_hash_entry
   /* This is like the call_stub field, but it is used if the function
      being called returns a floating point value.  */
   asection *call_fp_stub;
-
-#define GOT_NORMAL	0
-#define GOT_TLS_GD	1
-#define GOT_TLS_LDM	2
-#define GOT_TLS_IE	4
-#define GOT_TLS_TYPE	7
-#define GOT_TLS_OFFSET_DONE    0x40
-#define GOT_TLS_DONE    0x80
-  unsigned char tls_ie_type;
-  unsigned char tls_gd_type;
-
-  /* These fields are only used in single-GOT mode; in multi-GOT mode there
-     is one mips_got_entry per GOT entry, so the offset is stored
-     there.  In single-GOT mode there may be many mips_got_entry
-     structures all referring to the same GOT slot.  */
-  bfd_vma tls_ie_got_offset;
-  bfd_vma tls_gd_got_offset;
 
   /* The highest GGA_* value that satisfies all references to this symbol.  */
   unsigned int global_got_area : 2;
@@ -1075,8 +1059,6 @@ mips_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       ret->fn_stub = NULL;
       ret->call_stub = NULL;
       ret->call_fp_stub = NULL;
-      ret->tls_ie_type = GOT_NORMAL;
-      ret->tls_gd_type = GOT_NORMAL;
       ret->global_got_area = GGA_NONE;
       ret->got_only_for_calls = TRUE;
       ret->readonly_reloc = FALSE;
@@ -2813,7 +2795,6 @@ mips_elf_create_got_info (bfd *abfd)
   if (g == NULL)
     return NULL;
 
-  g->tls_ldm_offset = MINUS_ONE;
   g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
 				    mips_elf_got_entry_eq, NULL);
   if (g->got_entries == NULL)
@@ -3013,63 +2994,6 @@ mips_elf_count_got_entries (void **entryp, void *data)
   return 1;
 }
 
-/* A htab_traverse callback.  If *SLOT describes a GOT entry for a local
-   symbol, count the number of GOT entries and TLS relocations that it
-   requires.  DATA points to a mips_elf_traverse_got_arg structure.  */
-
-static int
-mips_elf_count_local_got_entries (void **entryp, void *data)
-{
-  struct mips_got_entry *entry;
-  struct mips_elf_traverse_got_arg *arg;
-
-  entry = (struct mips_got_entry *) *entryp;
-  arg = (struct mips_elf_traverse_got_arg *) data;
-  if (entry->abfd != NULL && entry->symndx != -1)
-    {
-      if ((entry->tls_type & GOT_TLS_TYPE) == GOT_TLS_LDM)
-	{
-	  if (arg->g->tls_ldm_offset == MINUS_TWO)
-	    return 1;
-	  arg->g->tls_ldm_offset = MINUS_TWO;
-	}
-      mips_elf_count_got_entry (arg->info, arg->g, entry);
-    }
-
-  return 1;
-}
-
-/* Count the number of TLS GOT entries and relocationss required for the
-   global (or forced-local) symbol in ARG1.  */
-
-static int
-mips_elf_count_global_tls_entries (void *entry, void *data)
-{
-  struct mips_elf_link_hash_entry *hm;
-  struct mips_elf_traverse_got_arg *arg;
-
-  hm = (struct mips_elf_link_hash_entry *) entry;
-  if (hm->root.root.type == bfd_link_hash_indirect
-      || hm->root.root.type == bfd_link_hash_warning)
-    return 1;
-
-  arg = (struct mips_elf_traverse_got_arg *) data;
-  if (hm->tls_gd_type)
-    {
-      arg->g->tls_gotno += 2;
-      arg->g->relocs += mips_tls_got_relocs (arg->info, hm->tls_gd_type,
-					     &hm->root);
-    }
-  if (hm->tls_ie_type)
-    {
-      arg->g->tls_gotno += 1;
-      arg->g->relocs += mips_tls_got_relocs (arg->info, hm->tls_ie_type,
-					     &hm->root);
-    }
-
-  return 1;
-}
-
 /* Output a simple dynamic relocation into SRELOC.  */
 
 static void
@@ -3240,22 +3164,6 @@ mips_tls_got_index (bfd *abfd, bfd_vma got_index, unsigned char *tls_type,
   return got_index;
 }
 
-/* Return the GOT index to use for a relocation of type R_TYPE against H
-   in ABFD.  */
-
-static bfd_vma
-mips_tls_single_got_index (bfd *abfd, int r_type, struct bfd_link_info *info,
-			   struct mips_elf_link_hash_entry *h, bfd_vma symbol)
-{
-  if (tls_gottprel_reloc_p (r_type))
-    return mips_tls_got_index (abfd, h->tls_ie_got_offset, &h->tls_ie_type,
-			       info, h, symbol);
-  if (tls_gd_reloc_p (r_type))
-    return mips_tls_got_index (abfd, h->tls_gd_got_offset, &h->tls_gd_type,
-			       info, h, symbol);
-  abort ();
-}
-
 /* Return the offset from _GLOBAL_OFFSET_TABLE_ of the .got.plt entry
    for global symbol H.  .got.plt comes before the GOT, so the offset
    will be negative.  */
@@ -3314,15 +3222,8 @@ mips_elf_local_got_index (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
     return MINUS_ONE;
 
   if (entry->tls_type)
-    {
-      if (entry->symndx == -1 && htab->got_info->next == NULL)
-	/* A type (3) entry in the single-GOT case.  We use the symbol's
-	   hash table entry to track the index.  */
-	return mips_tls_single_got_index (abfd, r_type, info, h, value);
-      else
-	return mips_tls_got_index (abfd, entry->gotidx, &entry->tls_type,
-				   info, h, value);
-    }
+    return mips_tls_got_index (abfd, entry->gotidx, &entry->tls_type,
+			       info, h, value);
   else
     return entry->gotidx;
 }
@@ -3366,54 +3267,31 @@ mips_elf_global_got_index (bfd *obfd, struct bfd_link_info *info, bfd *ibfd,
 			   struct elf_link_hash_entry *h, int r_type)
 {
   struct mips_elf_link_hash_table *htab;
-  bfd_vma got_index;
-  struct mips_got_info *g, *gg;
+  struct mips_got_info *g;
+  struct mips_got_entry lookup, *entry;
+  bfd_vma gotidx;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
 
-  gg = g = htab->got_info;
-  if (g->next && ibfd)
+  g = mips_elf_bfd_got (ibfd, FALSE);
+  BFD_ASSERT (g);
+
+  lookup.tls_type = mips_elf_reloc_tls_type (r_type);
+  if (!lookup.tls_type && g == mips_elf_bfd_got (obfd, FALSE))
+    return mips_elf_primary_global_got_index (obfd, info, h);
+
+  lookup.abfd = ibfd;
+  lookup.symndx = -1;
+  lookup.d.h = (struct mips_elf_link_hash_entry *) h;
+  entry = htab_find (g->got_entries, &lookup);
+  BFD_ASSERT (entry);
+
+  gotidx = entry->gotidx;
+  BFD_ASSERT (gotidx > 0 && gotidx < htab->sgot->size);
+
+  if (lookup.tls_type)
     {
-      struct mips_got_entry e, *p;
-
-      BFD_ASSERT (h->dynindx >= 0);
-
-      g = mips_elf_bfd_got (ibfd, FALSE);
-      BFD_ASSERT (g);
-      if (g->next != gg || TLS_RELOC_P (r_type))
-	{
-	  e.abfd = ibfd;
-	  e.symndx = -1;
-	  e.d.h = (struct mips_elf_link_hash_entry *)h;
-	  e.tls_type = mips_elf_reloc_tls_type (r_type);
-
-	  p = htab_find (g->got_entries, &e);
-
-	  BFD_ASSERT (p && p->gotidx > 0);
-
-	  if (p->tls_type)
-	    {
-	      bfd_vma value = MINUS_ONE;
-	      if ((h->root.type == bfd_link_hash_defined
-		   || h->root.type == bfd_link_hash_defweak)
-		  && h->root.u.def.section->output_section)
-		value = (h->root.u.def.value
-			 + h->root.u.def.section->output_offset
-			 + h->root.u.def.section->output_section->vma);
-
-	      return mips_tls_got_index (obfd, p->gotidx, &p->tls_type,
-					 info, e.d.h, value);
-	    }
-	  else
-	    return p->gotidx;
-	}
-    }
-
-  if (TLS_RELOC_P (r_type))
-    {
-      struct mips_elf_link_hash_entry *hm
-	= (struct mips_elf_link_hash_entry *) h;
       bfd_vma value = MINUS_ONE;
 
       if ((h->root.type == bfd_link_hash_defined
@@ -3423,13 +3301,10 @@ mips_elf_global_got_index (bfd *obfd, struct bfd_link_info *info, bfd *ibfd,
 		 + h->root.u.def.section->output_offset
 		 + h->root.u.def.section->output_section->vma);
 
-      got_index = mips_tls_single_got_index (obfd, r_type, info, hm, value);
+      return mips_tls_got_index (obfd, gotidx, &entry->tls_type,
+				 info, lookup.d.h, value);
     }
-  else
-    got_index = mips_elf_primary_global_got_index (obfd, info, h);
-  BFD_ASSERT (got_index < htab->sgot->size);
-
-  return got_index;
+  return gotidx;
 }
 
 /* Find a GOT page entry that points to within 32KB of VALUE.  These
@@ -3525,6 +3400,7 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   void **loc;
   struct mips_got_info *g;
   struct mips_elf_link_hash_table *htab;
+  bfd_vma gotidx;
 
   htab = mips_elf_hash_table (info);
   BFD_ASSERT (htab != NULL);
@@ -3562,6 +3438,9 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
 
       entry = (struct mips_got_entry *) htab_find (g->got_entries, &lookup);
       BFD_ASSERT (entry);
+
+      gotidx = entry->gotidx;
+      BFD_ASSERT (gotidx > 0 && gotidx < htab->sgot->size);
 
       return entry;
     }
@@ -3811,10 +3690,6 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
   tls_type = mips_elf_reloc_tls_type (r_type);
   if (tls_type == GOT_NORMAL && hmips->global_got_area > GGA_NORMAL)
     hmips->global_got_area = GGA_NORMAL;
-  else if (tls_type == GOT_TLS_IE && hmips->tls_ie_type == 0)
-    hmips->tls_ie_type = tls_type;
-  else if (tls_type == GOT_TLS_GD && hmips->tls_gd_type == 0)
-    hmips->tls_gd_type = tls_type;
 
   entry.abfd = abfd;
   entry.symndx = -1;
@@ -4108,9 +3983,11 @@ mips_elf_resolve_final_got_entries (struct mips_got_info *g)
   return TRUE;
 }
 
-/* A mips_elf_link_hash_traverse callback for which DATA points
-   to the link_info structure.  Count the number of type (3) entries
-   in the master GOT.  */
+/* A mips_elf_link_hash_traverse callback for which DATA points to the
+   link_info structure.  Decide whether the hash entry needs an entry in
+   the global part of the primary GOT, setting global_got_area accordingly.
+   Count the number of global symbols that are in the primary GOT only
+   because they have relocations against them (reloc_only_gotno).  */
 
 static int
 mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
@@ -4137,14 +4014,10 @@ mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
 	  || (h->got_only_for_calls
 	      ? SYMBOL_CALLS_LOCAL (info, &h->root)
 	      : SYMBOL_REFERENCES_LOCAL (info, &h->root)))
-	{
-	  /* The symbol belongs in the local GOT.  We no longer need this
-	     entry if it was only used for relocations; those relocations
-	     will be against the null or section symbol instead of H.  */
-	  if (h->global_got_area != GGA_RELOC_ONLY)
-	    g->local_gotno++;
-	  h->global_got_area = GGA_NONE;
-	}
+	/* The symbol belongs in the local GOT.  We no longer need this
+	   entry if it was only used for relocations; those relocations
+	   will be against the null or section symbol instead of H.  */
+	h->global_got_area = GGA_NONE;
       else if (htab->is_vxworks
 	       && h->got_only_for_calls
 	       && h->root.plt.offset != MINUS_ONE)
@@ -4152,11 +4025,10 @@ mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
 	   they don't need entries in the regular GOT.  .got.plt entries
 	   will be allocated by _bfd_mips_elf_adjust_dynamic_symbol.  */
 	h->global_got_area = GGA_NONE;
-      else
+      else if (h->global_got_area == GGA_RELOC_ONLY)
 	{
+	  g->reloc_only_gotno++;
 	  g->global_gotno++;
-	  if (h->global_got_area == GGA_RELOC_ONLY)
-	    g->reloc_only_gotno++;
 	}
     }
   return 1;
@@ -4367,8 +4239,6 @@ mips_elf_initialize_tls_index (void **entryp, void *data)
 {
   struct mips_got_entry *entry;
   struct mips_elf_traverse_got_arg *arg;
-  struct mips_got_info *g;
-  bfd_vma next_index;
   unsigned char tls_type;
 
   /* We're only interested in TLS symbols.  */
@@ -4378,52 +4248,14 @@ mips_elf_initialize_tls_index (void **entryp, void *data)
     return 1;
 
   arg = (struct mips_elf_traverse_got_arg *) data;
-  g = arg->g;
-  next_index = arg->value * g->tls_assigned_gotno;
-
-  if (entry->symndx == -1 && g->next == NULL)
+  if (!mips_elf_set_gotidx (entryp, arg->value * arg->g->tls_assigned_gotno))
     {
-      /* A type (3) got entry in the single-GOT case.  We use the symbol's
-	 hash table entry to track its index.  */
-      if (tls_type == GOT_TLS_IE)
-	{
-	  if (entry->d.h->tls_ie_type & GOT_TLS_OFFSET_DONE)
-	    return 1;
-	  entry->d.h->tls_ie_type |= GOT_TLS_OFFSET_DONE;
-	  entry->d.h->tls_ie_got_offset = next_index;
-	}
-      else
-	{
-	  BFD_ASSERT (tls_type == GOT_TLS_GD);
-	  if (entry->d.h->tls_gd_type & GOT_TLS_OFFSET_DONE)
-	    return 1;
-	  entry->d.h->tls_gd_type |= GOT_TLS_OFFSET_DONE;
-	  entry->d.h->tls_gd_got_offset = next_index;
-	}
-    }
-  else
-    {
-      if (tls_type == GOT_TLS_LDM)
-	{
-	  /* There are separate mips_got_entry objects for each input bfd
-	     that requires an LDM entry.  Make sure that all LDM entries in
-	     a GOT resolve to the same index.  */
-	  if (g->tls_ldm_offset != MINUS_TWO && g->tls_ldm_offset != MINUS_ONE)
-	    {
-	      entry->gotidx = g->tls_ldm_offset;
-	      return 1;
-	    }
-	  g->tls_ldm_offset = next_index;
-	}
-      if (!mips_elf_set_gotidx (entryp, next_index))
-	{
-	  arg->g = NULL;
-	  return 0;
-	}
+      arg->g = NULL;
+      return 0;
     }
 
   /* Account for the entries we've just allocated.  */
-  g->tls_assigned_gotno += mips_tls_got_entries (tls_type);
+  arg->g->tls_assigned_gotno += mips_tls_got_entries (tls_type);
   return 1;
 }
 
@@ -8797,7 +8629,8 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   if (!mips_elf_resolve_final_got_entries (g))
     return FALSE;
 
-  /* Count the number of GOT symbols.  */
+  /* Decide which symbols need to go in the global part of the GOT and
+     count the number of reloc-only GOT symbols.  */
   mips_elf_link_hash_traverse (htab, mips_elf_count_got_symbols, info);
 
   /* Calculate the total loadable size of the output.  That
@@ -8835,17 +8668,10 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
 
   g->local_gotno += page_gotno;
 
-  /* Count the number of local GOT entries and TLS relocs.  */
+  /* Count the number of GOT entries and TLS relocs.  */
   tga.info = info;
   tga.g = g;
-  htab_traverse (g->got_entries, mips_elf_count_local_got_entries, &tga);
-
-  /* We need to calculate tls_gotno for global symbols at this point
-     instead of building it up earlier, to avoid doublecounting
-     entries for one global symbol from multiple input files.  */
-  elf_link_hash_traverse (elf_hash_table (info),
-			  mips_elf_count_global_tls_entries,
-			  &tga);
+  htab_traverse (g->got_entries, mips_elf_count_got_entries, &tga);
 
   s->size += g->local_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
   s->size += g->global_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
@@ -10037,6 +9863,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 							   &e)))
 	    {
 	      offset = p->gotidx;
+	      BFD_ASSERT (offset > 0 && offset < htab->sgot->size);
 	      if (info->shared
 		  || (elf_hash_table (info)->dynamic_sections_created
 		      && p->d.h != NULL
@@ -11530,11 +11357,6 @@ _bfd_mips_elf_copy_indirect_symbol (struct bfd_link_info *info,
     indmips->global_got_area = GGA_NONE;
   if (indmips->has_nonpic_branches)
     dirmips->has_nonpic_branches = TRUE;
-
-  if (dirmips->tls_ie_type == 0)
-    dirmips->tls_ie_type = indmips->tls_ie_type;
-  if (dirmips->tls_gd_type == 0)
-    dirmips->tls_gd_type = indmips->tls_gd_type;
 }
 
 #define PDR_SIZE 32
