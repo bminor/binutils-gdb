@@ -4705,9 +4705,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
     }
   while (g);
 
-  got->size = (gg->next->local_gotno
-	       + gg->next->global_gotno
-	       + gg->next->tls_gotno) * MIPS_ELF_GOT_SIZE (abfd);
+  got->size = assign * MIPS_ELF_GOT_SIZE (abfd);
 
   needed_relocs = 0;
   set_got_offset_arg.value = MIPS_ELF_GOT_SIZE (abfd);

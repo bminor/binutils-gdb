@@ -1,5 +1,9 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_multi_got): Simplify size calculation.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_info): Move global_gotsym to...
 	(mips_elf_link_hash_table): ...here.  Update rest of file accordingly.
 
