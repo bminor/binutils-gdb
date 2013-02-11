@@ -3777,9 +3777,9 @@ mips_elf_record_local_got_symbol (bfd *abfd, long symndx, bfd_vma addend,
       return TRUE;
     }
 
+  entry.gotidx = -1;
   if (tls_flag != 0)
     {
-      entry.gotidx = -1;
       entry.tls_type = tls_flag;
       if (tls_flag == GOT_TLS_IE)
 	g->tls_gotno += 1;
@@ -3793,7 +3793,7 @@ mips_elf_record_local_got_symbol (bfd *abfd, long symndx, bfd_vma addend,
     }
   else
     {
-      entry.gotidx = g->local_gotno++;
+      g->local_gotno += 1;
       entry.tls_type = 0;
     }
 
