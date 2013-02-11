@@ -1,3 +1,8 @@
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (mips_elf_recreate_got): Remove free.
+	(mips_elf_resolve_final_got_entries): Remove bogus comment.
+
 2013-02-10  Alan Modra  <amodra@gmail.com>
 
 	* coff-arm.c (coff_arm_link_hash_table_create): Use bfd_zmalloc.
