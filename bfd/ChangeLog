@@ -1,5 +1,9 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_sort_hash_table_f): Remove asserts.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_merge_got_with): Only use arg->global_count
 	if there are TLS relocations.
 

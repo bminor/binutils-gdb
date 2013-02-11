@@ -3640,15 +3640,11 @@ mips_elf_sort_hash_table_f (struct mips_elf_link_hash_entry *h, void *data)
       break;
 
     case GGA_NORMAL:
-      BFD_ASSERT (h->tls_type == GOT_NORMAL);
-
       h->root.dynindx = --hsd->min_got_dynindx;
       hsd->low = (struct elf_link_hash_entry *) h;
       break;
 
     case GGA_RELOC_ONLY:
-      BFD_ASSERT (h->tls_type == GOT_NORMAL);
-
       if (hsd->max_unref_got_dynindx == hsd->min_got_dynindx)
 	hsd->low = (struct elf_link_hash_entry *) h;
       h->root.dynindx = hsd->max_unref_got_dynindx++;
