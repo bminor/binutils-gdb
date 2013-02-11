@@ -1,5 +1,35 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_got_info): Add relocs field.
+	(mips_elf_set_global_got_offset_arg, mips_elf_count_tls_arg): Replace
+	with...
+	(mips_elf_traverse_got_arg): ...this new structure.
+	(mips_elf_count_local_tls_relocs): Delete.
+	(mips_elf_count_global_tls_relocs): Likewise.
+	(mips_elf_count_got_entry): New function.
+	(mips_elf_count_local_got_entries): Likewise.
+	(mips_elf_count_global_tls_entries): Take a mips_elf_traverse_got_arg
+	rather than a mips_elf_count_tls_arg.  Count both relocs and entries.
+	(mips_elf_record_local_got_symbol): Don't count got entries here.
+	(mips_elf_make_got_per_bfd): Use mips_elf_count_got_entry.
+	(mips_elf_set_global_got_offset): Split into...
+	(mips_elf_set_global_got_area, mips_elf_set_global_gotidx): ...these
+	new functions.  Take a mips_elf_traverse_got_arg rather than a
+	mips_elf_set_global_got_offset_arg.  Don't count TLS relocs here.
+	Use g->relocs to record the number of relocs needed for global GOT
+	entries.
+	(mips_elf_multi_got): Use mips_elf_traverse_got_arg rather than
+	mips_elf_set_global_got_offset_arg.  Use the relocs field to count
+	relocations.  Update for above function split.
+	(mips_elf_lay_out_got): Use mips_elf_count_local_got_entries
+	to count both the number of GOT entries and the number of TLS
+	relocs required by local entries.  Likewise
+	mips_elf_count_global_tls_entries and global entries.
+	Remove uses of mips_elf_count_local_tls_relocs and
+	mips_elf_count_global_tls_relocs.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_entry): Update comment above tls_type entry
 	to say that each structure represents only one type of TLS reference.
 	(GOT_TLS_TYPE): New define.

@@ -153,6 +153,8 @@ struct mips_got_info
   unsigned int local_gotno;
   /* The maximum number of page entries needed.  */
   unsigned int page_gotno;
+  /* The number of relocations needed for the GOT entries.  */
+  unsigned int relocs;
   /* The number of local .got entries we have used.  */
   unsigned int assigned_gotno;
   /* A hash table holding members of the got.  */
@@ -210,23 +212,14 @@ struct mips_elf_got_per_bfd_arg
   unsigned int global_count;
 };
 
-/* Another structure used to pass arguments for got entries traversal.  */
+/* A structure used to pass information to htab_traverse callbacks
+   when laying out the GOT.  */
 
-struct mips_elf_set_global_got_offset_arg
+struct mips_elf_traverse_got_arg
 {
+  struct bfd_link_info *info;
   struct mips_got_info *g;
   int value;
-  unsigned int needed_relocs;
-  struct bfd_link_info *info;
-};
-
-/* A structure used to count TLS relocations or GOT entries, for GOT
-   entry or ELF symbol table traversal.  */
-
-struct mips_elf_count_tls_arg
-{
-  struct bfd_link_info *info;
-  unsigned int needed;
 };
 
 struct _mips_elf_section_data
@@ -2999,59 +2992,83 @@ mips_tls_got_relocs (struct bfd_link_info *info, unsigned char tls_type,
     }
 }
 
-/* Count the number of TLS relocations required for the GOT entry in
-   ARG1, if it describes a local symbol.  */
+/* Add the number of GOT entries and TLS relocations required by ENTRY
+   to G.  */
+
+static void
+mips_elf_count_got_entry (struct bfd_link_info *info,
+			  struct mips_got_info *g,
+			  struct mips_got_entry *entry)
+{
+  unsigned char tls_type;
+
+  tls_type = entry->tls_type & GOT_TLS_TYPE;
+  if (tls_type)
+    {
+      g->tls_gotno += mips_tls_got_entries (tls_type);
+      g->relocs += mips_tls_got_relocs (info, tls_type,
+					entry->symndx < 0
+					? &entry->d.h->root : NULL);
+    }
+  else if (entry->symndx >= 0 || entry->d.h->global_got_area == GGA_NONE)
+    g->local_gotno += 1;
+  else
+    g->global_gotno += 1;
+}
+
+/* A htab_traverse callback.  If *SLOT describes a GOT entry for a local
+   symbol, count the number of GOT entries and TLS relocations that it
+   requires.  DATA points to a mips_elf_traverse_got_arg structure.  */
 
 static int
-mips_elf_count_local_tls_relocs (void **arg1, void *arg2)
+mips_elf_count_local_got_entries (void **entryp, void *data)
 {
-  struct mips_got_entry *entry = * (struct mips_got_entry **) arg1;
-  struct mips_elf_count_tls_arg *arg = arg2;
+  struct mips_got_entry *entry;
+  struct mips_elf_traverse_got_arg *arg;
 
+  entry = (struct mips_got_entry *) *entryp;
+  arg = (struct mips_elf_traverse_got_arg *) data;
   if (entry->abfd != NULL && entry->symndx != -1)
-    arg->needed += mips_tls_got_relocs (arg->info, entry->tls_type, NULL);
+    {
+      if ((entry->tls_type & GOT_TLS_TYPE) == GOT_TLS_LDM)
+	{
+	  if (arg->g->tls_ldm_offset == MINUS_TWO)
+	    return 1;
+	  arg->g->tls_ldm_offset = MINUS_TWO;
+	}
+      mips_elf_count_got_entry (arg->info, arg->g, entry);
+    }
 
   return 1;
 }
 
-/* Count the number of TLS GOT entries required for the global (or
-   forced-local) symbol in ARG1.  */
+/* Count the number of TLS GOT entries and relocationss required for the
+   global (or forced-local) symbol in ARG1.  */
 
 static int
-mips_elf_count_global_tls_entries (void *arg1, void *arg2)
+mips_elf_count_global_tls_entries (void *entry, void *data)
 {
-  struct mips_elf_link_hash_entry *hm
-    = (struct mips_elf_link_hash_entry *) arg1;
-  struct mips_elf_count_tls_arg *arg = arg2;
+  struct mips_elf_link_hash_entry *hm;
+  struct mips_elf_traverse_got_arg *arg;
 
+  hm = (struct mips_elf_link_hash_entry *) entry;
   if (hm->root.root.type == bfd_link_hash_indirect
       || hm->root.root.type == bfd_link_hash_warning)
     return 1;
 
+  arg = (struct mips_elf_traverse_got_arg *) data;
   if (hm->tls_gd_type)
-    arg->needed += 2;
+    {
+      arg->g->tls_gotno += 2;
+      arg->g->relocs += mips_tls_got_relocs (arg->info, hm->tls_gd_type,
+					     &hm->root);
+    }
   if (hm->tls_ie_type)
-    arg->needed += 1;
-
-  return 1;
-}
-
-/* Count the number of TLS relocations required for the global (or
-   forced-local) symbol in ARG1.  */
-
-static int
-mips_elf_count_global_tls_relocs (void *arg1, void *arg2)
-{
-  struct mips_elf_link_hash_entry *hm
-    = (struct mips_elf_link_hash_entry *) arg1;
-  struct mips_elf_count_tls_arg *arg = arg2;
-
-  if (hm->root.root.type == bfd_link_hash_indirect
-      || hm->root.root.type == bfd_link_hash_warning)
-    return 1;
-
-  arg->needed += mips_tls_got_relocs (arg->info, hm->tls_ie_type, &hm->root);
-  arg->needed += mips_tls_got_relocs (arg->info, hm->tls_gd_type, &hm->root);
+    {
+      arg->g->tls_gotno += 1;
+      arg->g->relocs += mips_tls_got_relocs (arg->info, hm->tls_ie_type,
+					     &hm->root);
+    }
 
   return 1;
 }
@@ -3789,18 +3806,6 @@ mips_elf_record_local_got_symbol (bfd *abfd, long symndx, bfd_vma addend,
     return TRUE;
 
   entry.gotidx = -1;
-  if (entry.tls_type)
-    {
-      if (entry.tls_type != GOT_TLS_LDM)
-	g->tls_gotno += mips_tls_got_entries (entry.tls_type);
-      else if (g->tls_ldm_offset == MINUS_ONE)
-	{
-	  g->tls_ldm_offset = MINUS_TWO;
-	  g->tls_gotno += mips_tls_got_entries (entry.tls_type);
-	}
-    }
-  else
-    g->local_gotno += 1;
 
   *loc = (struct mips_got_entry *)bfd_alloc (abfd, sizeof entry);
 
@@ -4192,13 +4197,7 @@ mips_elf_make_got_per_bfd (void **entryp, void *p)
     return 1;
 
   *entryp = entry;
-
-  if (entry->tls_type)
-    g->tls_gotno += mips_tls_got_entries (entry->tls_type & GOT_TLS_TYPE);
-  else if (entry->symndx >= 0 || entry->d.h->global_got_area == GGA_NONE)
-    g->local_gotno += 1;
-  else
-    g->global_gotno += 1;
+  mips_elf_count_got_entry (arg->info, g, entry);
 
   return 1;
 }
@@ -4410,47 +4409,48 @@ mips_elf_initialize_tls_index (void **entryp, void *p)
   return 1;
 }
 
-/* If passed a NULL mips_got_info in the argument, set the marker used
-   to tell whether a global symbol needs a got entry (in the primary
-   got) to the given VALUE.
+/* A htab_traverse callback for GOT entries, where DATA points to a
+   mips_elf_traverse_got_arg.  Set the global_got_area of each global
+   symbol to DATA->value.  */
 
-   If passed a pointer G to a mips_got_info in the argument (it must
-   not be the primary GOT), compute the offset from the beginning of
-   the (primary) GOT section to the entry in G corresponding to the
-   global symbol.  G's assigned_gotno must contain the index of the
-   first available global GOT entry in G.  VALUE must contain the size
-   of a GOT entry in bytes.  For each global GOT entry that requires a
-   dynamic relocation, NEEDED_RELOCS is incremented, and the symbol is
-   marked as not eligible for lazy resolution through a function
-   stub.  */
 static int
-mips_elf_set_global_got_offset (void **entryp, void *p)
+mips_elf_set_global_got_area (void **entryp, void *data)
 {
-  struct mips_got_entry *entry = (struct mips_got_entry *)*entryp;
-  struct mips_elf_set_global_got_offset_arg *arg
-    = (struct mips_elf_set_global_got_offset_arg *)p;
-  struct mips_got_info *g = arg->g;
+  struct mips_got_entry *entry;
+  struct mips_elf_traverse_got_arg *arg;
 
-  if (g && entry->tls_type != GOT_NORMAL)
-    arg->needed_relocs +=
-      mips_tls_got_relocs (arg->info, entry->tls_type,
-			   entry->symndx == -1 ? &entry->d.h->root : NULL);
+  entry = (struct mips_got_entry *) *entryp;
+  arg = (struct mips_elf_traverse_got_arg *) data;
+  if (entry->abfd != NULL
+      && entry->symndx == -1
+      && entry->d.h->global_got_area != GGA_NONE)
+    entry->d.h->global_got_area = arg->value;
+  return 1;
+}
 
+/* A htab_traverse callback for secondary GOT entries, where DATA points
+   to a mips_elf_traverse_got_arg.  Assign GOT indices to global entries
+   and record the number of relocations they require.  DATA->value is
+   the size of one GOT entry.  */
+
+static int
+mips_elf_set_global_gotidx (void **entryp, void *data)
+{
+  struct mips_got_entry *entry;
+  struct mips_elf_traverse_got_arg *arg;
+
+  entry = (struct mips_got_entry *) *entryp;
+  arg = (struct mips_elf_traverse_got_arg *) data;
   if (entry->abfd != NULL
       && entry->symndx == -1
       && entry->d.h->global_got_area != GGA_NONE)
     {
-      if (g)
-	{
-	  entry->gotidx = arg->value * (long) g->assigned_gotno++;
-	  if (arg->info->shared
-	      || (elf_hash_table (arg->info)->dynamic_sections_created
-		  && entry->d.h->root.def_dynamic
-		  && !entry->d.h->root.def_regular))
-	    ++arg->needed_relocs;
-	}
-      else
-	entry->d.h->global_got_area = arg->value;
+      entry->gotidx = arg->value * (long) arg->g->assigned_gotno++;
+      if (arg->info->shared
+	  || (elf_hash_table (arg->info)->dynamic_sections_created
+	      && entry->d.h->root.def_dynamic
+	      && !entry->d.h->root.def_regular))
+	arg->g->relocs += 1;
     }
 
   return 1;
@@ -4512,7 +4512,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
 {
   struct mips_elf_link_hash_table *htab;
   struct mips_elf_got_per_bfd_arg got_per_bfd_arg;
-  struct mips_elf_set_global_got_offset_arg set_got_offset_arg;
+  struct mips_elf_traverse_got_arg tga;
   struct mips_got_info *g, *gg;
   unsigned int assign, needed_relocs;
   bfd *dynobj;
@@ -4550,7 +4550,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
 			       - htab->reserved_gotno);
   got_per_bfd_arg.max_pages = pages;
   /* The number of globals that will be included in the primary GOT.
-     See the calls to mips_elf_set_global_got_offset below for more
+     See the calls to mips_elf_set_global_got_area below for more
      information.  */
   got_per_bfd_arg.global_count = g->global_gotno;
 
@@ -4601,13 +4601,11 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
   gg->reloc_only_gotno = gg->global_gotno - g->global_gotno;
   g->global_gotno = gg->global_gotno;
 
-  set_got_offset_arg.g = NULL;
-  set_got_offset_arg.value = GGA_RELOC_ONLY;
-  htab_traverse (gg->got_entries, mips_elf_set_global_got_offset,
-		 &set_got_offset_arg);
-  set_got_offset_arg.value = GGA_NORMAL;
-  htab_traverse (g->got_entries, mips_elf_set_global_got_offset,
-		 &set_got_offset_arg);
+  tga.info = info;
+  tga.value = GGA_RELOC_ONLY;
+  htab_traverse (gg->got_entries, mips_elf_set_global_got_area, &tga);
+  tga.value = GGA_NORMAL;
+  htab_traverse (g->got_entries, mips_elf_set_global_got_area, &tga);
 
   /* Now go through the GOTs assigning them offset ranges.
      [assigned_gotno, local_gotno[ will be set to the range of local
@@ -4664,33 +4662,32 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
   got->size = assign * MIPS_ELF_GOT_SIZE (abfd);
 
   needed_relocs = 0;
-  set_got_offset_arg.value = MIPS_ELF_GOT_SIZE (abfd);
-  set_got_offset_arg.info = info;
   for (g = gg->next; g && g->next != gg; g = g->next)
     {
       unsigned int save_assign;
 
-      /* Assign offsets to global GOT entries.  */
+      /* Assign offsets to global GOT entries and count how many
+	 relocations they need.  */
       save_assign = g->assigned_gotno;
       g->assigned_gotno = g->local_gotno;
-      set_got_offset_arg.g = g;
-      set_got_offset_arg.needed_relocs = 0;
-      htab_traverse (g->got_entries,
-		     mips_elf_set_global_got_offset,
-		     &set_got_offset_arg);
-      needed_relocs += set_got_offset_arg.needed_relocs;
+      tga.info = info;
+      tga.value = MIPS_ELF_GOT_SIZE (abfd);
+      tga.g = g;
+      htab_traverse (g->got_entries, mips_elf_set_global_gotidx, &tga);
       BFD_ASSERT (g->assigned_gotno - g->local_gotno <= g->global_gotno);
 
       g->assigned_gotno = save_assign;
       if (info->shared)
 	{
-	  needed_relocs += g->local_gotno - g->assigned_gotno;
+	  g->relocs += g->local_gotno - g->assigned_gotno;
 	  BFD_ASSERT (g->assigned_gotno == g->next->local_gotno
 		      + g->next->global_gotno
 		      + g->next->tls_gotno
 		      + htab->reserved_gotno);
 	}
+      needed_relocs += g->relocs;
     }
+  needed_relocs += g->relocs;
 
   if (needed_relocs)
     mips_elf_allocate_dynamic_relocations (dynobj, info,
@@ -8773,7 +8770,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   bfd_size_type loadable_size = 0;
   bfd_size_type page_gotno;
   bfd *sub;
-  struct mips_elf_count_tls_arg count_tls_arg;
+  struct mips_elf_traverse_got_arg tga;
   struct mips_elf_link_hash_table *htab;
 
   htab = mips_elf_hash_table (info);
@@ -8838,18 +8835,21 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
     page_gotno = g->page_gotno;
 
   g->local_gotno += page_gotno;
-  s->size += g->local_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
-  s->size += g->global_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
+
+  /* Count the number of local GOT entries and TLS relocs.  */
+  tga.info = info;
+  tga.g = g;
+  htab_traverse (g->got_entries, mips_elf_count_local_got_entries, &tga);
 
   /* We need to calculate tls_gotno for global symbols at this point
      instead of building it up earlier, to avoid doublecounting
      entries for one global symbol from multiple input files.  */
-  count_tls_arg.info = info;
-  count_tls_arg.needed = 0;
   elf_link_hash_traverse (elf_hash_table (info),
 			  mips_elf_count_global_tls_entries,
-			  &count_tls_arg);
-  g->tls_gotno += count_tls_arg.needed;
+			  &tga);
+
+  s->size += g->local_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
+  s->size += g->global_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
   s->size += g->tls_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
 
   /* VxWorks does not support multiple GOTs.  It initializes $gp to
@@ -8875,8 +8875,6 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
     }
   else
     {
-      struct mips_elf_count_tls_arg arg;
-
       /* Set up TLS entries.  */
       g->tls_assigned_gotno = g->global_gotno + g->local_gotno;
       htab_traverse (g->got_entries, mips_elf_initialize_tls_index, g);
@@ -8884,14 +8882,8 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
 		  == g->global_gotno + g->local_gotno + g->tls_gotno);
 
       /* Allocate room for the TLS relocations.  */
-      arg.info = info;
-      arg.needed = 0;
-      htab_traverse (g->got_entries, mips_elf_count_local_tls_relocs, &arg);
-      elf_link_hash_traverse (elf_hash_table (info),
-			      mips_elf_count_global_tls_relocs,
-			      &arg);
-      if (arg.needed)
-	mips_elf_allocate_dynamic_relocations (dynobj, info, arg.needed);
+      if (g->relocs)
+	mips_elf_allocate_dynamic_relocations (dynobj, info, g->relocs);
     }
 
   return TRUE;
