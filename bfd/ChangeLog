@@ -1,5 +1,24 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_got_tls_type): New enum.
+	(mips_got_entry): Add tls_initialized.
+	(mips_elf_got_entry_hash, mips_elf_got_entry_eq, mips_tls_got_relocs)
+	(mips_elf_count_got_entry, mips_elf_initialize_tls_index): Remove
+	GOT_TLS_TYPE masks.
+	(mips_elf_reloc_tls_type, mips_tls_got_entries)
+	(mips_elf_record_global_got_symbol, mips_elf_initialize_tls_index)
+	(_bfd_mips_elf_finish_dynamic_symbol): Use GOT_TLS_NONE rather
+	than GOT_NORMAL.
+	(mips_elf_initialize_tls_slots): Replace got_offset and tls_type_p
+	arguments with a GOT entry.  Remove GOT_TLS_TYPE masks.  Use
+	tls_initialized rather than GOT_TLS_DONE.
+	(mips_tls_got_index): Delete.
+	(mips_elf_local_got_index, mips_elf_global_got_index): Use
+	mips_elf_initialize_tls_slots rather than mips_tls_got_index.
+	(mips_elf_record_got_entry): Initialize tls_initialized.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_entry): Remove tls_ldm_offset.
 	(mips_elf_link_hash_entry): Remove tls_ie_type, tls_gd_type,
 	tls_ie_got_offset and tls_gd_got_offset.
