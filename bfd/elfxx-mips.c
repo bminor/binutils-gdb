@@ -2885,6 +2885,36 @@ mips_got_page_entry_eq (const void *entry1_, const void *entry2_)
   return entry1->abfd == entry2->abfd && entry1->symndx == entry2->symndx;
 }
 
+/* Create and return a new mips_got_info structure.  MASTER_GOT_P
+   is true if this is the master GOT rather than a multigot.  */
+
+static struct mips_got_info *
+mips_elf_create_got_info (bfd *abfd, bfd_boolean master_got_p)
+{
+  struct mips_got_info *g;
+
+  g = bfd_zalloc (abfd, sizeof (struct mips_got_info));
+  if (g == NULL)
+    return NULL;
+
+  g->tls_ldm_offset = MINUS_ONE;
+  if (master_got_p)
+    g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
+				      mips_elf_got_entry_eq, NULL);
+  else
+    g->got_entries = htab_try_create (1, mips_elf_multi_got_entry_hash,
+				      mips_elf_multi_got_entry_eq, NULL);
+  if (g->got_entries == NULL)
+    return NULL;
+
+  g->got_page_entries = htab_try_create (1, mips_got_page_entry_hash,
+					 mips_got_page_entry_eq, NULL);
+  if (g->got_page_entries == NULL)
+    return NULL;
+
+  return g;
+}
+
 /* Return the dynamic relocation section.  If it doesn't exist, try to
    create a new it if CREATE_P, otherwise return NULL.  Also return NULL
    if creation fails.  */
@@ -4138,7 +4168,6 @@ mips_elf_get_got_for_bfd (struct htab *bfd2got, bfd *output_bfd,
 			  bfd *input_bfd)
 {
   struct mips_elf_bfd2got_hash bfdgot_entry, *bfdgot;
-  struct mips_got_info *g;
   void **bfdgotp;
 
   bfdgot_entry.bfd = input_bfd;
@@ -4154,34 +4183,10 @@ mips_elf_get_got_for_bfd (struct htab *bfd2got, bfd *output_bfd,
 
       *bfdgotp = bfdgot;
 
-      g = ((struct mips_got_info *)
-	   bfd_alloc (output_bfd, sizeof (struct mips_got_info)));
-      if (g == NULL)
-	return NULL;
-
       bfdgot->bfd = input_bfd;
-      bfdgot->g = g;
-
-      g->global_gotno = 0;
-      g->reloc_only_gotno = 0;
-      g->local_gotno = 0;
-      g->page_gotno = 0;
-      g->assigned_gotno = -1;
-      g->tls_gotno = 0;
-      g->tls_assigned_gotno = 0;
-      g->tls_ldm_offset = MINUS_ONE;
-      g->got_entries = htab_try_create (1, mips_elf_multi_got_entry_hash,
-					mips_elf_multi_got_entry_eq, NULL);
-      if (g->got_entries == NULL)
+      bfdgot->g = mips_elf_create_got_info (input_bfd, FALSE);
+      if (bfdgot->g == NULL)
 	return NULL;
-
-      g->got_page_entries = htab_try_create (1, mips_got_page_entry_hash,
-					     mips_got_page_entry_eq, NULL);
-      if (g->got_page_entries == NULL)
-	return NULL;
-
-      g->bfd2got = NULL;
-      g->next = NULL;
     }
 
   return bfdgot->g;
@@ -4582,32 +4587,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
 
   /* If we do not find any suitable primary GOT, create an empty one.  */
   if (got_per_bfd_arg.primary == NULL)
-    {
-      g->next = (struct mips_got_info *)
-	bfd_alloc (abfd, sizeof (struct mips_got_info));
-      if (g->next == NULL)
-	return FALSE;
-
-      g->next->global_gotno = 0;
-      g->next->reloc_only_gotno = 0;
-      g->next->local_gotno = 0;
-      g->next->page_gotno = 0;
-      g->next->tls_gotno = 0;
-      g->next->assigned_gotno = 0;
-      g->next->tls_assigned_gotno = 0;
-      g->next->tls_ldm_offset = MINUS_ONE;
-      g->next->got_entries = htab_try_create (1, mips_elf_multi_got_entry_hash,
-					      mips_elf_multi_got_entry_eq,
-					      NULL);
-      if (g->next->got_entries == NULL)
-	return FALSE;
-      g->next->got_page_entries = htab_try_create (1, mips_got_page_entry_hash,
-						   mips_got_page_entry_eq,
-						   NULL);
-      if (g->next->got_page_entries == NULL)
-	return FALSE;
-      g->next->bfd2got = NULL;
-    }
+    g->next = mips_elf_create_got_info (abfd, FALSE);
   else
     g->next = got_per_bfd_arg.primary;
   g->next->next = got_per_bfd_arg.current;
@@ -4891,8 +4871,6 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   register asection *s;
   struct elf_link_hash_entry *h;
   struct bfd_link_hash_entry *bh;
-  struct mips_got_info *g;
-  bfd_size_type amt;
   struct mips_elf_link_hash_table *htab;
 
   htab = mips_elf_hash_table (info);
@@ -4932,28 +4910,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
       && ! bfd_elf_link_record_dynamic_symbol (info, h))
     return FALSE;
 
-  amt = sizeof (struct mips_got_info);
-  g = bfd_alloc (abfd, amt);
-  if (g == NULL)
-    return FALSE;
-  g->global_gotno = 0;
-  g->reloc_only_gotno = 0;
-  g->tls_gotno = 0;
-  g->local_gotno = 0;
-  g->page_gotno = 0;
-  g->assigned_gotno = 0;
-  g->bfd2got = NULL;
-  g->next = NULL;
-  g->tls_ldm_offset = MINUS_ONE;
-  g->got_entries = htab_try_create (1, mips_elf_got_entry_hash,
-				    mips_elf_got_entry_eq, NULL);
-  if (g->got_entries == NULL)
-    return FALSE;
-  g->got_page_entries = htab_try_create (1, mips_got_page_entry_hash,
-					 mips_got_page_entry_eq, NULL);
-  if (g->got_page_entries == NULL)
-    return FALSE;
-  htab->got_info = g;
+  htab->got_info = mips_elf_create_got_info (abfd, TRUE);
   mips_elf_section_data (s)->elf.this_hdr.sh_flags
     |= SHF_ALLOC | SHF_WRITE | SHF_MIPS_GPREL;
 

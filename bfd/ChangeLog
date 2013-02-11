@@ -1,5 +1,11 @@
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_create_got_info): New function.
+	(mips_elf_get_got_for_bfd, mips_elf_multi_got): Use it.
+	(mips_elf_create_got_section): Likewise.
+
+2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_record_local_got_symbol): Always set
 	gotidx to -1.
 
