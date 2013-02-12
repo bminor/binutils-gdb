@@ -8649,20 +8649,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   /* VxWorks does not support multiple GOTs.  It initializes $gp to
      __GOTT_BASE__[__GOTT_INDEX__], the value of which is set by the
      dynamic loader.  */
-  if (htab->is_vxworks)
-    {
-      /* VxWorks executables do not need a GOT.  */
-      if (info->shared)
-	{
-	  /* Each VxWorks GOT entry needs an explicit relocation.  */
-	  unsigned int count;
-
-	  count = g->global_gotno + g->local_gotno - htab->reserved_gotno;
-	  if (count)
-	    mips_elf_allocate_dynamic_relocations (dynobj, info, count);
-	}
-    }
-  else if (s->size > MIPS_ELF_GOT_MAX_SIZE (info))
+  if (!htab->is_vxworks && s->size > MIPS_ELF_GOT_MAX_SIZE (info))
     {
       if (!mips_elf_multi_got (output_bfd, info, s, page_gotno))
 	return FALSE;
@@ -8686,6 +8673,10 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
 	return FALSE;
       BFD_ASSERT (g->tls_assigned_gotno
 		  == g->global_gotno + g->local_gotno + g->tls_gotno);
+
+      /* Each VxWorks GOT entry needs an explicit relocation.  */
+      if (htab->is_vxworks && info->shared)
+	g->relocs += g->global_gotno + g->local_gotno - htab->reserved_gotno;
 
       /* Allocate room for the TLS relocations.  */
       if (g->relocs)
