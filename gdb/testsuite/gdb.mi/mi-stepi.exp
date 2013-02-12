@@ -13,14 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test Machine interface (MI) operations 
-# Verify that, using the MI, we can run a simple program and perform
-# exec-step-instruction and exec-next-instruction.  
-
-# The goal is not to
-# test gdb functionality, which is done by other tests, but to verify
-# the correct output response to MI operations.  
+# Test Machine interface (MI) operations
 #
+# Test MI's stepi and nexti equivalent commands.
+#
+# The goal is not to test gdb functionality, which is done by other
+# tests, but to verify the correct output response to MI operations.
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

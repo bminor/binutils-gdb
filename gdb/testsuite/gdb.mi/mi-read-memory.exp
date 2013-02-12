@@ -13,17 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#
-# test basic Machine interface (MI) operations
-#
-# Verify that, using the MI, we can load a program and do
-# other basic things that are used by all test files through  mi_gdb_exit,
-# mi_gdb_start, mi_delete_breakpoints, mi_gdb_reinitialize_dir and
-# mi_gdb_load, so we can safely use those.
-#
-# The goal is not to test gdb functionality, which is done by other tests,
-# but the command syntax and correct output response to MI operations.
-#
+# Test -data-read-memory.
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

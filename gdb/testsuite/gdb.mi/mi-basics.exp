@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #
-# test basic Machine interface (MI) operations
+# Test basic Machine interface (MI) operations
 #
 # Verify that, using the MI, we can load a program and do
 # other basic things that are used by all test files through  mi_gdb_exit,

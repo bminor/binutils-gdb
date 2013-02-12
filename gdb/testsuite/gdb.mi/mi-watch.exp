@@ -13,16 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# Test Machine interface (MI) operations
 #
-# Test essential Machine interface (MI) operations
+# Test MI watchpoint commands.
 #
-# Verify that, using the MI, we can run a simple program and perform basic
-# debugging activities like: insert breakpoints, run the program,
-# step, next, continue until it ends and, last but not least, quit.
-#
-# The goal is not to test gdb functionality, which is done by other tests,
-# but to verify the correct output response to MI operations.
-#
+# The goal is not to test gdb functionality, which is done by other
+# tests, but to verify the correct output response to MI operations.
 
 load_lib mi-support.exp
 set MIFLAGS "-i=mi"

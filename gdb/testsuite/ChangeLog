@@ -1,3 +1,15 @@
+2013-02-12  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-basics.exp: Tweak intro comment.
+	* gdb.mi/mi-break.exp: Tweak intro comment.
+	* gdb.mi/mi-console.exp: Tweak intro comment.
+	* gdb.mi/mi-file.exp: Tweak intro comment.
+	* gdb.mi/mi-read-memory.exp: Tweak intro comment.
+	* gdb.mi/mi-return.exp: Tweak intro comment.
+	* gdb.mi/mi-stepi.exp: Tweak intro comment.
+	* gdb.mi/mi-until.exp: Tweak intro comment.
+	* gdb.mi/mi-watch.exp: Tweak intro comment.
+
 2013-02-12  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* gdb.server/no-thread-db.exp: New file.
