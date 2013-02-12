@@ -1,7 +1,8 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES = ext-attach ext-run file-transfer server-mon server-run
+EXECUTABLES = ext-attach ext-run file-transfer server-mon server-run \
+	no-thread-db
 
 MISCELLANEOUS =
 

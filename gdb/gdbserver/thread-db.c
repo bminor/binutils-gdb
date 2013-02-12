@@ -494,7 +494,7 @@ thread_db_get_tls_address (struct thread_info *thread, CORE_ADDR offset,
   thread_db = proc->private->thread_db;
 
   /* If the thread layer is not (yet) initialized, fail.  */
-  if (!thread_db->all_symbols_looked_up)
+  if (thread_db == NULL || !thread_db->all_symbols_looked_up)
     return TD_ERR;
 
   if (thread_db->td_thr_tls_get_addr_p == NULL)
