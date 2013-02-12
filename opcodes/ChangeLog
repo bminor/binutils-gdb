@@ -1,5 +1,10 @@
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* aarch64-opc.c (aarch64_sys_regs): Add rmr_el1, rmr_el2 and
+	rmr_el3; remove daifset and daifclr.
+
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* aarch64-opc.c (operand_general_constraint_met_p): Change to
 	check the alignment of addr.offset.imm instead of that of
 	shifter.amount for operand type AARCH64_OPND_ADDR_UIMM12.

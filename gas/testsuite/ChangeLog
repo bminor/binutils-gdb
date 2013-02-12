@@ -1,5 +1,12 @@
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* gas/aarch64/sysreg-1.s: Add tests of rmr_el1, rmr_el2 and rmr_el3.
+	* gas/aarch64/sysreg-1.d: Update.
+	* gas/aarch64/illegal.s: Add tests of daifset and daifclr.
+	* gas/aarch64/illegal.d: Update.
+
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* gas/aarch64/illegal-2.s: Add test case.
 	* gas/aarch64/illegal-2.l: Likewise.
 

@@ -547,3 +547,5 @@
 [^:]*:535: Error: .*`orr x0. x0,#0xff,lsl#1'
 [^:]*:536: Error: .*`orr x0,x0,#0xff lsl#1'
 [^:]*:538: Error: .*`mov x0,##5'
+[^:]*:540: Error: .*`msr daifset,x0'
+[^:]*:541: Error: .*`msr daifclr,x0'
