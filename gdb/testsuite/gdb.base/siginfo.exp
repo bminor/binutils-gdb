@@ -24,7 +24,7 @@
 # nexti/stepi out of such a handler.
 
 if [target_info exists gdb,nosignals] {
-    verbose "Skipping signals.exp because of nosignals."
+    verbose "Skipping siginfo.exp because of nosignals."
     continue
 }
 

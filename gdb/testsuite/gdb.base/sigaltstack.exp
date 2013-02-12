@@ -23,7 +23,7 @@
 # such a stack.
 
 if [target_info exists gdb,nosignals] {
-    verbose "Skipping signals.exp because of nosignals."
+    verbose "Skipping sigaltstack.exp because of nosignals."
     continue
 }
 

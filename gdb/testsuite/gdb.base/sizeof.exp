@@ -16,7 +16,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if [target_info exists gdb,noinferiorio] {
-    verbose "Skipping fileio.exp because of no fileio capabilities."
+    verbose "Skipping sizeof.exp because of no fileio capabilities."
     continue
 }
 

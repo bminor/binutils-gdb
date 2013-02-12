@@ -1,5 +1,13 @@
 2013-02-12  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/catch-signal.exp: Correct test file name in "Skipping"
+	message.
+	* gdb.base/sigaltstack.exp: Ditto.
+	* gdb.base/siginfo.exp: Ditto.
+	* gdb.base/sizeof.exp: Ditto.
+
+2013-02-12  Pedro Alves  <palves@redhat.com>
+
 	* gdb.mi/mi-basics.exp: Tweak intro comment.
 	* gdb.mi/mi-break.exp: Tweak intro comment.
 	* gdb.mi/mi-console.exp: Tweak intro comment.

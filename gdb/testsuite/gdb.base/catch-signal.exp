@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if [target_info exists gdb,nosignals] {
-    verbose "Skipping sigall.exp because of nosignals."
+    verbose "Skipping catch-signal.exp because of nosignals."
     continue
 }
 
