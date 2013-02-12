@@ -2719,6 +2719,10 @@ lex_one_token (void)
 
   if (parse_completion && *lexptr == '\0')
     saw_name_at_eof = 1;
+
+  yylval.ssym.stoken = yylval.sval;
+  yylval.ssym.sym = NULL;
+  yylval.ssym.is_a_field_of_this = 0;
   return NAME;
 }
 
@@ -2859,26 +2863,26 @@ classify_name (const struct block *block)
 }
 
 /* Like classify_name, but used by the inner loop of the lexer, when a
-   name might have already been seen.  FIRST_NAME is true if the token
-   in `yylval' is the first component of a name, false otherwise.  */
+   name might have already been seen.  CONTEXT is the context type, or
+   NULL if this is the first component of a name.  */
 
 static int
-classify_inner_name (const struct block *block, int first_name)
+classify_inner_name (const struct block *block, struct type *context)
 {
   struct type *type;
   char *copy;
 
-  if (first_name)
+  if (context == NULL)
     return classify_name (block);
 
-  type = check_typedef (yylval.tsym.type);
+  type = check_typedef (context);
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_UNION
       && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
     return ERROR;
 
-  copy = copy_name (yylval.tsym.stoken);
-  yylval.ssym.sym = cp_lookup_nested_symbol (yylval.tsym.type, copy, block);
+  copy = copy_name (yylval.ssym.stoken);
+  yylval.ssym.sym = cp_lookup_nested_symbol (type, copy, block);
   if (yylval.ssym.sym == NULL)
     return ERROR;
 
@@ -2893,7 +2897,6 @@ classify_inner_name (const struct block *block, int first_name)
       return TYPENAME;
 
     default:
-      yylval.ssym.is_a_field_of_this = 0;
       return NAME;
     }
   internal_error (__FILE__, __LINE__, _("not reached"));
@@ -2915,6 +2918,7 @@ yylex (void)
 {
   token_and_value current;
   int first_was_coloncolon, last_was_coloncolon, first_iter;
+  struct type *context_type = NULL;
 
   if (popping && !VEC_empty (token_and_value, token_fifo))
     {
@@ -2936,7 +2940,10 @@ yylex (void)
   last_was_coloncolon = first_was_coloncolon;
   obstack_free (&name_obstack, obstack_base (&name_obstack));
   if (!last_was_coloncolon)
-    obstack_grow (&name_obstack, yylval.sval.ptr, yylval.sval.length);
+    {
+      obstack_grow (&name_obstack, yylval.sval.ptr, yylval.sval.length);
+      context_type = yylval.tsym.type;
+    }
   current.value = yylval;
   first_iter = 1;
   while (1)
@@ -2953,7 +2960,7 @@ yylex (void)
 	  classification = classify_inner_name (first_was_coloncolon
 						? NULL
 						: expression_context_block,
-						first_iter);
+						context_type);
 	  /* We keep going until we either run out of names, or until
 	     we have a qualified name which is not a type.  */
 	  if (classification != TYPENAME && classification != NAME)
@@ -2964,7 +2971,7 @@ yylex (void)
 	    }
 
 	  /* Update the partial name we are constructing.  */
-	  if (!first_iter)
+	  if (context_type != NULL)
 	    {
 	      /* We don't want to put a leading "::" into the name.  */
 	      obstack_grow_str (&name_obstack, "::");
@@ -2978,6 +2985,11 @@ yylex (void)
 	  current.token = classification;
 
 	  last_was_coloncolon = 0;
+	  
+	  if (classification == NAME)
+	    break;
+
+	  context_type = yylval.tsym.type;
 	}
       else if (next.token == COLONCOLON && !last_was_coloncolon)
 	last_was_coloncolon = 1;

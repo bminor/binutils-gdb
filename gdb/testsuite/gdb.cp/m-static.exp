@@ -64,6 +64,14 @@ gdb_test "print test1.key2" "\\$\[0-9\]* = 77" "simple object, static long"
 # simple object, static enum
 gdb_test "print test1.value" "\\$\[0-9\]* = oriental" "simple object, static enum"
 
+gdb_test "print test1.'~gnu_obj_1'" \
+    { = {void \(gnu_obj_1 \*( const)?, int\)} 0x[0-9a-f]+ <gnu_obj_1::~gnu_obj_1\(\)>} \
+    "simple object instance, print quoted destructor"
+
+gdb_test "ptype gnu_obj_1::'~gnu_obj_1'" \
+    {type = void \(gnu_obj_1 \* const\)} \
+    "simple object class, ptype quoted destructor"
+
 # Two.
 
 # derived template object, base static const bool

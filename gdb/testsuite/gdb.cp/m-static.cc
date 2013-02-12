@@ -17,6 +17,7 @@ protected:
 
 public:
   gnu_obj_1(antiquities a, long l) {}
+  ~gnu_obj_1() {}
 
   long method ()
   {

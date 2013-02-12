@@ -1,3 +1,8 @@
+2013-02-12  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/m-static.cc (gnu_obj_1::~gnu_obj_1): New destructor.
+	* gdb.cp/m-static.exp: Add tests to print quoted destructor.
+
 2013-02-12  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/catch-signal.c: Update copyright years.

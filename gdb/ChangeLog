@@ -1,3 +1,13 @@
+2013-02-12  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/11464:
+	* c-exp.y (lex_one_token): Initialize other fields of yylval on
+	NAME return.
+	(classify_inner_name): Remove 'first_name' argument, add
+	'context'.  Remove unused variable.
+	(yylex): Explicitly maintain the context type.  Exit loop earlier
+	if NAME result is seen.
+
 2013-02-12  Pedro Alves  <palves@redhat.com>
 
 	* amd64-darwin-tdep.c: Add (C) after Copyright.
