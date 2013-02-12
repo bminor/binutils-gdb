@@ -1,5 +1,58 @@
 2013-02-12  Pedro Alves  <palves@redhat.com>
 
+	* amd64-darwin-tdep.c: Add (C) after Copyright.
+	* cli/cli-cmds.h: Ditto.
+	* cli/cli-decode.c: Ditto.
+	* cli/cli-decode.h: Ditto.
+	* cli/cli-dump.c: Ditto.
+	* cli/cli-dump.h: Ditto.
+	* cli/cli-interp.c: Ditto.
+	* cli/cli-logging.c: Ditto.
+	* cli/cli-script.c: Ditto.
+	* cli/cli-script.h: Ditto.
+	* cli/cli-setshow.c: Ditto.
+	* cli/cli-setshow.h: Ditto.
+	* cli/cli-utils.c: Ditto.
+	* cli/cli-utils.h: Ditto.
+	* config/alpha/nm-osf3.h: Ditto.
+	* config/djgpp/djconfig.sh: Ditto.
+	* config/i386/nm-fbsd.h: Ditto.
+	* config/i386/nm-i386gnu.h: Ditto.
+	* config/nm-linux.h: Ditto.
+	* config/nm-nto.h: Ditto.
+	* config/rs6000/nm-rs6000.h: Ditto.
+	* config/sparc/nm-sol2.h: Ditto.
+	* darwin-nat-info.c: Ditto.
+	* dfp.c: Ditto.
+	* dfp.h: Ditto.
+	* gdb-demangle.h: Ditto.
+	* i386-darwin-nat.c: Ditto.
+	* i386-darwin-tdep.c: Ditto.
+	* linux-fork.h: Ditto.
+	* m32c-tdep.c: Ditto.
+	* microblaze-linux-tdep.c: Ditto.
+	* microblaze-rom.c: Ditto.
+	* microblaze-tdep.c: Ditto.
+	* microblaze-tdep.h: Ditto.
+	* mips-linux-tdep.h: Ditto.
+	* ppc-ravenscar-thread.c: Ditto.
+	* ppc-ravenscar-thread.h: Ditto.
+	* prologue-value.c: Ditto.
+	* prologue-value.h: Ditto.
+	* ravenscar-thread.c: Ditto.
+	* ravenscar-thread.h: Ditto.
+	* sparc-ravenscar-thread.c: Ditto.
+	* sparc-ravenscar-thread.h: Ditto.
+	* tilegx-linux-tdep.c: Ditto.
+	* unwind_stop_reasons.def: Ditto.
+	* windows-nat.h: Ditto.
+	* xtensa-linux-tdep.c: Ditto.
+	* xtensa-xtregs.c: Ditto.
+	* regformats/regdat.sh: Ditto.
+	* regformats/regdef.h: Ditto.
+
+2013-02-12  Pedro Alves  <palves@redhat.com>
+
 	* break-catch-sig.c: Update copyright years.
 
 2013-02-11  Siva Chandra Reddy  <sivachandra@google.com>

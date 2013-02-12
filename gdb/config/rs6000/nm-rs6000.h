@@ -1,5 +1,5 @@
 /* IBM RS/6000 native-dependent macros for GDB, the GNU debugger.
-   Copyright 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 

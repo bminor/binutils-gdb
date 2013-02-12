@@ -1,6 +1,6 @@
 /* GDB CLI command scripting.
 
-   Copyright (c) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
