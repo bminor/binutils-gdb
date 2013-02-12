@@ -26,7 +26,7 @@
 
 2013-02-04  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
-        * linux-low.c (handle_extended_wait, linux_create_inferior)
+	* linux-low.c (handle_extended_wait, linux_create_inferior)
 	(linux_attach_lwp_1, linux_kill_one_lwp, linux_attach_one_lwp)
 	(dequeue_one_deferred_signal, linux_resume_one_thread)
 	(fetch_register, linux_write_memory, linux_enable_event_reporting)
@@ -443,7 +443,7 @@
 
 	PR gdb/7205
 
-        Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
+	Replace TARGET_SIGNAL_ with GDB_SIGNAL_ throughout.
 
 2012-05-24  Pedro Alves  <palves@redhat.com>
 
@@ -515,27 +515,27 @@
 
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
-        * Makefile.in (GNULIB_BUILDDIR): New.
+	* Makefile.in (GNULIB_BUILDDIR): New.
 	(LIBGNU, INCGNU, GNULIB_H): Adjust.
-        (SUBDIRS, CLEANDIRS, REQUIRED_SUBDIRS): New.
-        (all, install-only, uninstall, clean-info, all-lib, clean): No
-        longer pass GNULIB_FLAGS_TO_PASS.  Use subdir_do.
-        (maintainer-clean realclean distclean): Use subdir_do.
-        (subdir_do): New.
-        (gnulib/import/Makefile): Adjust.  Replace gnulib/import with
+	(SUBDIRS, CLEANDIRS, REQUIRED_SUBDIRS): New.
+	(all, install-only, uninstall, clean-info, all-lib, clean): No
+	longer pass GNULIB_FLAGS_TO_PASS.  Use subdir_do.
+	(maintainer-clean realclean distclean): Use subdir_do.
+	(subdir_do): New.
+	(gnulib/import/Makefile): Adjust.  Replace gnulib/import with
 	$(GNULIB_BUILDDIR).  Don't pass argument to config.status.
-        * acinclude.m4: Include acx_configure_dir.m4.
-        * configure.ac: Remove gl_EARLY, gl_INIT, and AM_INIT_AUTOMAKE
-        calls.  Call AC_PROG_RANLIB.  Configure gnulib using
-        ACX_CONFIGURE_DIR.
-        (GNULIB): New.
-        (GNULIB_STDINT_H): Adjust.
-        (AC_OUTPUT): Don't output gnulib/Makefile anymore.
-        * gdbreplay.c: Include build-gnulib/config.h.
-        * server.h: Likewise.
-        * aclocal.m4: Regenerate.
-        * config.in: Regenerate.
-        * configure: Regenerate.
+	* acinclude.m4: Include acx_configure_dir.m4.
+	* configure.ac: Remove gl_EARLY, gl_INIT, and AM_INIT_AUTOMAKE
+	calls.	Call AC_PROG_RANLIB.  Configure gnulib using
+	ACX_CONFIGURE_DIR.
+	(GNULIB): New.
+	(GNULIB_STDINT_H): Adjust.
+	(AC_OUTPUT): Don't output gnulib/Makefile anymore.
+	* gdbreplay.c: Include build-gnulib/config.h.
+	* server.h: Likewise.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
 
 2012-04-19  Pedro Alves  <palves@redhat.com>
 
@@ -1105,7 +1105,7 @@
 	and move to ax.c.
 	(eval_tracepoint_agent_expr): New function.
 	(agent_mem_read, agent_mem_read_string, agent_tsv_read): Make
-	non-static. 
+	non-static.
 	(current_insn_ptr, emit_error, struct bytecode_address): Move to
 	ax.c.
 	(emit_prologue, emit_epilogue, emit_add, emit_sub, emit_mul, emit_lsh,
@@ -1700,7 +1700,8 @@
 	(linux_read_loadmap): New function.
 	(linux_target_ops): Add linux_read_loadmap.
 	* server.c (handle_query): Support qXfer:fdpic:read packet.
-	* win32-low.c (win32_target_ops): Initialize field `read_loadmap' to NULL.
+	* win32-low.c (win32_target_ops): Initialize field `read_loadmap'
+	to NULL.
 
 2011-08-05  Eli Zaretskii  <eliz@gnu.org>
 
@@ -1791,16 +1792,16 @@
 
 	* server.c (handle_query): Add EnableDisableTracepoints to the list
 	of supported features.
-	* tracepoint.c (clear_installed_tracepoints): Uninstall	disabled
+	* tracepoint.c (clear_installed_tracepoints): Uninstall disabled
 	tracepoints.
- 	(cmd_qtenable_disable): New.
- 	(cmd_qtstart): Install tracepoints even if disabled.
- 	(handle_tracepoint_general_set): Add call to cmd_qtenable_disable on
- 	receiving a QTEnable or QTDisable packet.
- 	(gdb_collect): Skip data collection if fast tracepoint is disabled.
- 	(ust_marker_to_static_tracepoint): Do not ignore disabled static
- 	tracepoints.
- 	(gdb_probe): Skip data collection if static tracepoint is disabled.
+	(cmd_qtenable_disable): New.
+	(cmd_qtstart): Install tracepoints even if disabled.
+	(handle_tracepoint_general_set): Add call to cmd_qtenable_disable on
+	receiving a QTEnable or QTDisable packet.
+	(gdb_collect): Skip data collection if fast tracepoint is disabled.
+	(ust_marker_to_static_tracepoint): Do not ignore disabled static
+	tracepoints.
+	(gdb_probe): Skip data collection if static tracepoint is disabled.
 
 2011-05-10  Doug Evans  <dje@google.com>
 
@@ -1829,8 +1830,8 @@
 
 2011-04-26  Yao Qi  <yao@codesourcery.com>
 
-        * linux-low.c: Move common macros to linux-ptrace.h.
-        Include linux-ptrace.h.
+	* linux-low.c: Move common macros to linux-ptrace.h.
+	Include linux-ptrace.h.
 	* Makefile.in (linux_ptrace_h): New.
 	(linux-low.o): Depends on linux-ptrace.h.
 
@@ -2783,7 +2784,8 @@
 	(struct collect_static_trace_data_action): Delete.
 	(enum tracepoint_type): New.
 	(struct tracepoint) <type>: New field `type'.
-	<actions_str, step_actions, step_actions_str>: Only include in GDBserver.
+	<actions_str, step_actions, step_actions_str>: Only include in
+	GDBserver.
 	<orig_size, obj_addr_on_target, adjusted_insn_addr>
 	<adjusted_insn_addr_end, jump_pad, jump_pad_end>: New fields.
 	(tracepoints): Use IP_AGENT_EXPORT.
@@ -3863,7 +3865,8 @@
 	(linux_fetch_registers, linux_store_registers): Ditto.
 	* i387-fp.c (i387_cache_to_fsave): Change prototype to take a
 	regcache.  Adjust.
-	(i387_fsave_to_cache, i387_cache_to_fxsave, i387_fxsave_to_cache): Ditto.
+	(i387_fsave_to_cache, i387_cache_to_fxsave, i387_fxsave_to_cache):
+	Ditto.
 	* i387-fp.h (i387_cache_to_fsave, i387_fsave_to_cache): Change
 	prototype to take a regcache.
 	(i387_cache_to_fxsave, i387_fxsave_to_cache): Ditto.
@@ -3906,8 +3909,8 @@
 	(mips_collect_register_32bit, mips_supply_register_32bit)
 	(mips_fill_gregset, mips_store_gregset, mips_fill_fpregset)
 	(mips_store_fpregset): Ditto.
-	* linux-ppc-low.c (ppc_supply_ptrace_register, ppc_supply_ptrace_register):
-	Ditto.
+	* linux-ppc-low.c (ppc_supply_ptrace_register)
+	(ppc_supply_ptrace_register): Ditto.
 	(parse_spufs_run): Adjust.
 	(ppc_get_pc, ppc_set_pc, ppc_fill_gregset, ppc_fill_vsxregset)
 	(ppc_store_vsxregset, ppc_fill_vrregset, ppc_store_vrregset)
@@ -5336,8 +5339,8 @@
 
 2008-04-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
-	* configure.srv (powerpc64-*-linux*, powerpc-*-linux*): Merge into single
-	powerpc*-*-linux* case.
+	* configure.srv (powerpc64-*-linux*, powerpc-*-linux*): Merge into
+	single powerpc*-*-linux* case.
 	(s390-*-linux*, s390x-*-linux*): Merge into single s390*-*-linux* case.
 
 2008-04-17  Ulrich Weigand  <uweigand@de.ibm.com>

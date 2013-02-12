@@ -327,7 +327,7 @@
 	(iterate_over_some_symtabs): Remove variable name_len and its
 	initialization, remove it from the compare_filenames_for_search calls.
 	* symtab.h (compare_filenames_for_search): Remove the search_len
-	parameter, 
+	parameter.
 
 2012-12-16  Joel Brobecker  <brobecker@adacore.com>
 
@@ -584,27 +584,27 @@
 
 2012-12-14  Tom Tromey  <tromey@redhat.com>
 
-        * NEWS: Mention "info proc" and core files.
-        * corelow.c (core_info_proc): New function.
-        (init_core_ops): Set to_info_proc.
-        * gdbarch.c, gdbarch.h: Rebuild.
-        * gdbarch.sh (core_info_proc): New method.
-        * infcmd.c (info_proc_cmd_1): Invoke target_info_proc first.
-        * linux-tdep.c (linux_core_info_proc_mappings)
-        (linux_core_info_proc): New functions.
-        (linux_find_memory_region_ftype): New typedef.
-        (linux_find_memory_regions_full): New function, from
-        linux_find_memory_regions.
-        (struct linux_find_memory_regions_data): New.
-        (linux_find_memory_regions_thunk): New function.
-        (linux_find_memory_regions): Rewrite.
-        (struct linux_make_mappings_data): New.
-        (linux_make_mappings_callback)
-        (linux_make_mappings_corefile_notes): New functions.
-        (linux_make_corefile_notes): Call linux_make_mappings_corefile_notes.
-        (linux_init_abi): Call set_gdbarch_core_info_proc.
-        * target.c (target_info_proc): Return 'int'.
-        * target.h (target_info_proc): Update.
+	* NEWS: Mention "info proc" and core files.
+	* corelow.c (core_info_proc): New function.
+	(init_core_ops): Set to_info_proc.
+	* gdbarch.c, gdbarch.h: Rebuild.
+	* gdbarch.sh (core_info_proc): New method.
+	* infcmd.c (info_proc_cmd_1): Invoke target_info_proc first.
+	* linux-tdep.c (linux_core_info_proc_mappings)
+	(linux_core_info_proc): New functions.
+	(linux_find_memory_region_ftype): New typedef.
+	(linux_find_memory_regions_full): New function, from
+	linux_find_memory_regions.
+	(struct linux_find_memory_regions_data): New.
+	(linux_find_memory_regions_thunk): New function.
+	(linux_find_memory_regions): Rewrite.
+	(struct linux_make_mappings_data): New.
+	(linux_make_mappings_callback)
+	(linux_make_mappings_corefile_notes): New functions.
+	(linux_make_corefile_notes): Call linux_make_mappings_corefile_notes.
+	(linux_init_abi): Call set_gdbarch_core_info_proc.
+	* target.c (target_info_proc): Return 'int'.
+	* target.h (target_info_proc): Update.
 
 2012-12-14  Pierre Muller  <muller@sourceware.org>
 

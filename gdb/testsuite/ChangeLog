@@ -202,9 +202,9 @@
 
 2013-01-18  Hafiz Abid Qadeer<abidh@codesourcery.com>
 
-        PR gdb/13443
-        * gdb.base/checkpoint.exp: Update test messages to make them
-        unique.
+	PR gdb/13443
+	* gdb.base/checkpoint.exp: Update test messages to make them
+	unique.
 
 2013-01-18  Yao Qi  <yao@codesourcery.com>
 
@@ -236,13 +236,13 @@
 	Merge dg-extract-results.sh from upstream (svn 195224).
 
 	2013-01-15  David Blaikie <dblaikie@gmail.com>
-    	* dg-extract-results.sh: Fix order of summary counts.
+	* dg-extract-results.sh: Fix order of summary counts.
 
 	2013-01-15  David Blaikie <dblaikie@gmail.com>
-    	* dg-extract-results.sh: Constrain the start-of-log pattern.
+	* dg-extract-results.sh: Constrain the start-of-log pattern.
 
 	2013-01-15  David Blaikie <dblaikie@gmail.com>
-    	* dg-extract-results.sh: Handle KPASSes.
+	* dg-extract-results.sh: Handle KPASSes.
 
 	2010-05-25  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
 	* dg-extract-results.sh: Redirect grep output to /dev/null instead
@@ -390,7 +390,7 @@
 
 2012-12-14  Tom Tromey  <tromey@redhat.com>
 
-        * gdb.base/info-proc.exp: Add core file tests.
+	* gdb.base/info-proc.exp: Add core file tests.
 
 2012-12-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
