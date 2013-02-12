@@ -1,5 +1,10 @@
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* aarch64-opc.c (aarch64_prfops): Update to support PLIL1KEEP,
+	PLIL1STRM, PLIL2KEEP, PLIL2STRM, PLIL3KEEP and PLIL3STRM.
+
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* aarch64-opc.c (aarch64_sys_regs): Add rmr_el1, rmr_el2 and
 	rmr_el3; remove daifset and daifclr.
 
