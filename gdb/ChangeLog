@@ -1,3 +1,7 @@
+2013-02-12  Pedro Alves  <palves@redhat.com>
+
+	* break-catch-sig.c: Update copyright years.
+
 2013-02-11  Siva Chandra Reddy  <sivachandra@google.com>
 
 	Add support for a destructor for ui_out data and use it to

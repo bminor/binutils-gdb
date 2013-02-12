@@ -1,5 +1,18 @@
 2013-02-12  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/catch-signal.c: Update copyright years.
+	* gdb.base/catch-signal.exp: Update copyright years.
+	* gdb.dwarf2/dw2-dir-file-name.c: Update copyright years.
+	* gdb.dwarf2/dw2-dir-file-name.exp: Update copyright years.
+	* gdb.dwarf2/dw2-empty-pc-range.S: Update copyright years.
+	* gdb.dwarf2/dw2-error.S: Update copyright years.
+	* gdb.dwarf2/dw2-error.c: Update copyright years.
+	* gdb.dwarf2/dw2-restrict.S: Update copyright years.
+	* gdb.dwarf2/dw2-restrict.c: Update copyright years.
+	* gdb.dwarf2/dw2-restrict.exp: Update copyright years.
+
+2013-02-12  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/catch-signal.exp: Correct test file name in "Skipping"
 	message.
 	* gdb.base/sigaltstack.exp: Ditto.
