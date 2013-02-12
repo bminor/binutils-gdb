@@ -1,5 +1,11 @@
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* gas/aarch64/alias.s: Add new tests.
+	* gas/aarch64/alias.d: Update.
+	* gas/aarch64/no-aliases.d: Update.
+
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* gas/aarch64/diagnostic.s: Add test.
 	* gas/aarch64/diagnostic.l: Update.
 
