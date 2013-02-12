@@ -1,5 +1,14 @@
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* aarch64-opc.c (aarch64_print_operand): Change to print
+	AARCH64_OPND_IMM_MOV in hexadecimal in the instruction and in decimal
+	in comment.
+	* aarch64-tbl.h (aarch64_opcode_table): Remove the 'F_PSEUDO' flag
+	from the opcode entries of OP_MOV_IMM_LOG, OP_MOV_IMM_WIDEN and
+	OP_MOV_IMM_WIDE.
+
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* aarch64-opc.c (aarch64_prfops): Update to support PLIL1KEEP,
 	PLIL1STRM, PLIL2KEEP, PLIL2STRM, PLIL3KEEP and PLIL3STRM.
 

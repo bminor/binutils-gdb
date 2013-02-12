@@ -1,6 +1,6 @@
 #source: emit-relocs-264.s
 #ld: -T relocs.ld --defsym tempy=0x11000 --defsym tempy2=0x45000 --defsym tempy3=0x1234  -e0 --emit-relocs
-#objdump: -dr
+#objdump: -dr -Mno-aliases
 #...
  +10000:	8a000000 	and	x0, x0, x0
  +10004:	92400000 	and	x0, x0, #0x1
