@@ -1,3 +1,8 @@
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/illegal-2.s: Add test case.
+	* gas/aarch64/illegal-2.l: Likewise.
+
 2013-01-22  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches

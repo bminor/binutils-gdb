@@ -1,3 +1,9 @@
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (operand_general_constraint_met_p): Change to
+	check the alignment of addr.offset.imm instead of that of
+	shifter.amount for operand type AARCH64_OPND_ADDR_UIMM12.
+
 2013-01-22  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline patches
