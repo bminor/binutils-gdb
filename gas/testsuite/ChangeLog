@@ -1,5 +1,10 @@
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* gas/aarch64/diagnostic.s: Add test.
+	* gas/aarch64/diagnostic.l: Update.
+
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* gas/aarch64/int-insns.d: Update.
 	* gas/aarch64/mov.d: Update.
 	* gas/aarch64/reloc-insn.d: Update.

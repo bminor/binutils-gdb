@@ -1,3 +1,8 @@
+2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Change to compare the result
+	of function call 'parse_sys_reg' with 'PARSE_FAIL' instead of 'FALSE'.
+
 2013-01-29  Roland McGrath  <mcgrathr@google.com>
 
 	* config/tc-arm.c (md_apply_fix): Use as_bad_where for "bad

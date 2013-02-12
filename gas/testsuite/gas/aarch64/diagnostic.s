@@ -87,3 +87,4 @@
 	ldnp	w7, w15, [x3, #256]
 	movi	v1.2d, 4294967295, lsl #0
 	movi	v1.8b, 97, lsl #8
+	msr	dummy, x1
