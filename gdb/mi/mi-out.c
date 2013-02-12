@@ -88,6 +88,7 @@ struct ui_out_impl mi_ui_out_impl =
   mi_wrap_hint,
   mi_flush,
   mi_redirect,
+  0,
   1, /* Needs MI hacks.  */
 };
 

@@ -1,3 +1,24 @@
+2013-02-11  Siva Chandra Reddy  <sivachandra@google.com>
+
+	Add support for a destructor for ui_out data and use it to
+	provide a ui_out destructor.
+	* ui-out.h: Declare the new ui_out destructor.
+	(ui_out_impl): Add a field for data destructor in ui_out_impl.
+	* ui-out.c (default_data_destroy): Add a default data destructor
+	which does nothing.
+	(default_ui_out_impl): Set the new data_destroy field to
+	default_data_destroy
+	(uo_data_destroy): Local function which invokes the data
+	destructor if present.
+	(clear_table): Local function which clears the table data of a
+	ui_out object.
+	(ui_out_destroy): Public function which frees a ui_out object.
+	(ui_out_table_end): Use the new clear_table function.
+	* cli-out.c (cli_ui_out_impl): Set the new data_destroy field to
+	NULL.
+	* mi/mi-out.c (mi_ui_out_impl): Set the new data_destroy field
+	to NULL.
+
 2013-02-11  Doug Evans  <dje@google.com>
 
 	* printcmd.c (printf_c_string,printf_wide_c_string): New functions.

@@ -370,6 +370,7 @@ struct ui_out_impl cli_ui_out_impl =
   cli_wrap_hint,
   cli_flush,
   cli_redirect,
+  0,
   0, /* Does not need MI hacks (i.e. needs CLI hacks).  */
 };
 
