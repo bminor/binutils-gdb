@@ -108,6 +108,27 @@ struct mips_got_entry
   long gotidx;
 };
 
+/* This structure represents a GOT page reference from an input bfd.
+   Each instance represents a symbol + ADDEND, where the representation
+   of the symbol depends on whether it is local to the input bfd.
+   If it is, then SYMNDX >= 0, and the symbol has index SYMNDX in U.ABFD.
+   Otherwise, SYMNDX < 0 and U.H points to the symbol's hash table entry.
+
+   Page references with SYMNDX >= 0 always become page references
+   in the output.  Page references with SYMNDX < 0 only become page
+   references if the symbol binds locally; in other cases, the page
+   reference decays to a global GOT reference.  */
+struct mips_got_page_ref
+{
+  long symndx;
+  union
+  {
+    struct mips_elf_link_hash_entry *h;
+    bfd *abfd;
+  } u;
+  bfd_vma addend;
+};
+
 /* This structure describes a range of addends: [MIN_ADDEND, MAX_ADDEND].
    The structures form a non-overlapping list that is sorted by increasing
    MIN_ADDEND.  */
@@ -119,13 +140,11 @@ struct mips_got_page_range
 };
 
 /* This structure describes the range of addends that are applied to page
-   relocations against a given symbol.  */
+   relocations against a given section.  */
 struct mips_got_page_entry
 {
-  /* The input bfd in which the symbol is defined.  */
-  bfd *abfd;
-  /* The index of the symbol, as stored in the relocation r_info.  */
-  long symndx;
+  /* The section that these entries are based on.  */
+  asection *sec;
   /* The ranges for this page entry.  */
   struct mips_got_page_range *ranges;
   /* The maximum number of page entries needed for RANGES.  */
@@ -155,6 +174,8 @@ struct mips_got_info
   unsigned int assigned_gotno;
   /* A hash table holding members of the got.  */
   struct htab *got_entries;
+  /* A hash table holding mips_got_page_ref structures.  */
+  struct htab *got_page_refs;
   /* A hash table of mips_got_page_entry structures.  */
   struct htab *got_page_entries;
   /* In multi-got links, a pointer to the next got (err, rather, most
@@ -444,6 +465,9 @@ struct mips_elf_link_hash_table
      The function returns the new section on success, otherwise it
      returns null.  */
   asection *(*add_stub_section) (const char *, asection *, asection *);
+
+  /* Small local sym cache.  */
+  struct sym_cache sym_cache;
 };
 
 /* Get the MIPS ELF linker hash table from a link_info structure.  */
@@ -2771,12 +2795,38 @@ mips_elf_got_entry_eq (const void *entry1, const void *entry2)
 }
 
 static hashval_t
+mips_got_page_ref_hash (const void *ref_)
+{
+  const struct mips_got_page_ref *ref;
+
+  ref = (const struct mips_got_page_ref *) ref_;
+  return ((ref->symndx >= 0
+	   ? (hashval_t) (ref->u.abfd->id + ref->symndx)
+	   : ref->u.h->root.root.root.hash)
+	  + mips_elf_hash_bfd_vma (ref->addend));
+}
+
+static int
+mips_got_page_ref_eq (const void *ref1_, const void *ref2_)
+{
+  const struct mips_got_page_ref *ref1, *ref2;
+
+  ref1 = (const struct mips_got_page_ref *) ref1_;
+  ref2 = (const struct mips_got_page_ref *) ref2_;
+  return (ref1->symndx == ref2->symndx
+	  && (ref1->symndx < 0
+	      ? ref1->u.h == ref2->u.h
+	      : ref1->u.abfd == ref2->u.abfd)
+	  && ref1->addend == ref2->addend);
+}
+
+static hashval_t
 mips_got_page_entry_hash (const void *entry_)
 {
   const struct mips_got_page_entry *entry;
 
   entry = (const struct mips_got_page_entry *) entry_;
-  return entry->abfd->id + entry->symndx;
+  return entry->sec->id;
 }
 
 static int
@@ -2786,7 +2836,7 @@ mips_got_page_entry_eq (const void *entry1_, const void *entry2_)
 
   entry1 = (const struct mips_got_page_entry *) entry1_;
   entry2 = (const struct mips_got_page_entry *) entry2_;
-  return entry1->abfd == entry2->abfd && entry1->symndx == entry2->symndx;
+  return entry1->sec == entry2->sec;
 }
 
 /* Create and return a new mips_got_info structure.  */
@@ -2805,9 +2855,9 @@ mips_elf_create_got_info (bfd *abfd)
   if (g->got_entries == NULL)
     return NULL;
 
-  g->got_page_entries = htab_try_create (1, mips_got_page_entry_hash,
-					 mips_got_page_entry_eq, NULL);
-  if (g->got_page_entries == NULL)
+  g->got_page_refs = htab_try_create (1, mips_got_page_ref_hash,
+				      mips_got_page_ref_eq, NULL);
+  if (g->got_page_refs == NULL)
     return NULL;
 
   return g;
@@ -2844,7 +2894,9 @@ mips_elf_replace_bfd_got (bfd *abfd, struct mips_got_info *g)
       /* The GOT structure itself and the hash table entries are
 	 allocated to a bfd, but the hash tables aren't.  */
       htab_delete (tdata->got->got_entries);
-      htab_delete (tdata->got->got_page_entries);
+      htab_delete (tdata->got->got_page_refs);
+      if (tdata->got->got_page_entries)
+	htab_delete (tdata->got->got_page_entries);
     }
   tdata->got = g;
 }
@@ -3691,30 +3743,18 @@ mips_elf_record_local_got_symbol (bfd *abfd, long symndx, bfd_vma addend,
   return mips_elf_record_got_entry (info, abfd, &entry);
 }
 
-/* Return the maximum number of GOT page entries required for RANGE.  */
-
-static bfd_vma
-mips_elf_pages_for_range (const struct mips_got_page_range *range)
-{
-  return (range->max_addend - range->min_addend + 0x1ffff) >> 16;
-}
-
-/* Record that ABFD has a page relocation against symbol SYMNDX and
-   that ADDEND is the addend for that relocation.
-
-   This function creates an upper bound on the number of GOT slots
-   required; no attempt is made to combine references to non-overridable
-   global symbols across multiple input files.  */
+/* Record that ABFD has a page relocation against SYMNDX + ADDEND.
+   H is the symbol's hash table entry, or null if SYMNDX is local
+   to ABFD.  */
 
 static bfd_boolean
-mips_elf_record_got_page_entry (struct bfd_link_info *info, bfd *abfd,
-				long symndx, bfd_signed_vma addend)
+mips_elf_record_got_page_ref (struct bfd_link_info *info, bfd *abfd,
+			      long symndx, struct elf_link_hash_entry *h,
+			      bfd_signed_vma addend)
 {
   struct mips_elf_link_hash_table *htab;
   struct mips_got_info *g1, *g2;
-  struct mips_got_page_entry lookup, *entry;
-  struct mips_got_page_range **range_ptr, *range;
-  bfd_vma old_pages, new_pages;
+  struct mips_got_page_ref lookup, *entry;
   void **loc, **bfd_loc;
 
   htab = mips_elf_hash_table (info);
@@ -3723,26 +3763,29 @@ mips_elf_record_got_page_entry (struct bfd_link_info *info, bfd *abfd,
   g1 = htab->got_info;
   BFD_ASSERT (g1 != NULL);
 
-  /* Find the mips_got_page_entry hash table entry for this symbol.  */
-  lookup.abfd = abfd;
-  lookup.symndx = symndx;
-  loc = htab_find_slot (g1->got_page_entries, &lookup, INSERT);
+  if (h)
+    {
+      lookup.symndx = -1;
+      lookup.u.h = (struct mips_elf_link_hash_entry *) h;
+    }
+  else
+    {
+      lookup.symndx = symndx;
+      lookup.u.abfd = abfd;
+    }
+  lookup.addend = addend;
+  loc = htab_find_slot (g1->got_page_refs, &lookup, INSERT);
   if (loc == NULL)
     return FALSE;
 
-  /* Create a mips_got_page_entry if this is the first time we've
-     seen the symbol.  */
-  entry = (struct mips_got_page_entry *) *loc;
+  entry = (struct mips_got_page_ref *) *loc;
   if (!entry)
     {
       entry = bfd_alloc (abfd, sizeof (*entry));
       if (!entry)
 	return FALSE;
 
-      entry->abfd = abfd;
-      entry->symndx = symndx;
-      entry->ranges = NULL;
-      entry->num_pages = 0;
+      *entry = lookup;
       *loc = entry;
     }
 
@@ -3751,66 +3794,12 @@ mips_elf_record_got_page_entry (struct bfd_link_info *info, bfd *abfd,
   if (!g2)
     return FALSE;
 
-  bfd_loc = htab_find_slot (g2->got_page_entries, &lookup, INSERT);
+  bfd_loc = htab_find_slot (g2->got_page_refs, &lookup, INSERT);
   if (!bfd_loc)
     return FALSE;
 
   if (!*bfd_loc)
     *bfd_loc = entry;
-
-  /* Skip over ranges whose maximum extent cannot share a page entry
-     with ADDEND.  */
-  range_ptr = &entry->ranges;
-  while (*range_ptr && addend > (*range_ptr)->max_addend + 0xffff)
-    range_ptr = &(*range_ptr)->next;
-
-  /* If we scanned to the end of the list, or found a range whose
-     minimum extent cannot share a page entry with ADDEND, create
-     a new singleton range.  */
-  range = *range_ptr;
-  if (!range || addend < range->min_addend - 0xffff)
-    {
-      range = bfd_alloc (abfd, sizeof (*range));
-      if (!range)
-	return FALSE;
-
-      range->next = *range_ptr;
-      range->min_addend = addend;
-      range->max_addend = addend;
-
-      *range_ptr = range;
-      entry->num_pages++;
-      g1->page_gotno++;
-      g2->page_gotno++;
-      return TRUE;
-    }
-
-  /* Remember how many pages the old range contributed.  */
-  old_pages = mips_elf_pages_for_range (range);
-
-  /* Update the ranges.  */
-  if (addend < range->min_addend)
-    range->min_addend = addend;
-  else if (addend > range->max_addend)
-    {
-      if (range->next && addend >= range->next->min_addend - 0xffff)
-	{
-	  old_pages += mips_elf_pages_for_range (range->next);
-	  range->max_addend = range->next->max_addend;
-	  range->next = range->next->next;
-	}
-      else
-	range->max_addend = addend;
-    }
-
-  /* Record any change in the total estimate.  */
-  new_pages = mips_elf_pages_for_range (range);
-  if (old_pages != new_pages)
-    {
-      entry->num_pages += new_pages - old_pages;
-      g1->page_gotno += new_pages - old_pages;
-      g2->page_gotno += new_pages - old_pages;
-    }
 
   return TRUE;
 }
@@ -3930,8 +3919,188 @@ mips_elf_recreate_got (void **entryp, void *data)
   return 1;
 }
 
+/* Return the maximum number of GOT page entries required for RANGE.  */
+
+static bfd_vma
+mips_elf_pages_for_range (const struct mips_got_page_range *range)
+{
+  return (range->max_addend - range->min_addend + 0x1ffff) >> 16;
+}
+
+/* Record that G requires a page entry that can reach SEC + ADDEND.  */
+
+static bfd_boolean
+mips_elf_record_got_page_entry (struct mips_got_info *g,
+				asection *sec, bfd_signed_vma addend)
+{
+  struct mips_got_page_entry lookup, *entry;
+  struct mips_got_page_range **range_ptr, *range;
+  bfd_vma old_pages, new_pages;
+  void **loc;
+
+  /* Find the mips_got_page_entry hash table entry for this section.  */
+  lookup.sec = sec;
+  loc = htab_find_slot (g->got_page_entries, &lookup, INSERT);
+  if (loc == NULL)
+    return FALSE;
+
+  /* Create a mips_got_page_entry if this is the first time we've
+     seen the section.  */
+  entry = (struct mips_got_page_entry *) *loc;
+  if (!entry)
+    {
+      entry = bfd_zalloc (sec->owner, sizeof (*entry));
+      if (!entry)
+	return FALSE;
+
+      entry->sec = sec;
+      *loc = entry;
+    }
+
+  /* Skip over ranges whose maximum extent cannot share a page entry
+     with ADDEND.  */
+  range_ptr = &entry->ranges;
+  while (*range_ptr && addend > (*range_ptr)->max_addend + 0xffff)
+    range_ptr = &(*range_ptr)->next;
+
+  /* If we scanned to the end of the list, or found a range whose
+     minimum extent cannot share a page entry with ADDEND, create
+     a new singleton range.  */
+  range = *range_ptr;
+  if (!range || addend < range->min_addend - 0xffff)
+    {
+      range = bfd_zalloc (sec->owner, sizeof (*range));
+      if (!range)
+	return FALSE;
+
+      range->next = *range_ptr;
+      range->min_addend = addend;
+      range->max_addend = addend;
+
+      *range_ptr = range;
+      entry->num_pages++;
+      g->page_gotno++;
+      return TRUE;
+    }
+
+  /* Remember how many pages the old range contributed.  */
+  old_pages = mips_elf_pages_for_range (range);
+
+  /* Update the ranges.  */
+  if (addend < range->min_addend)
+    range->min_addend = addend;
+  else if (addend > range->max_addend)
+    {
+      if (range->next && addend >= range->next->min_addend - 0xffff)
+	{
+	  old_pages += mips_elf_pages_for_range (range->next);
+	  range->max_addend = range->next->max_addend;
+	  range->next = range->next->next;
+	}
+      else
+	range->max_addend = addend;
+    }
+
+  /* Record any change in the total estimate.  */
+  new_pages = mips_elf_pages_for_range (range);
+  if (old_pages != new_pages)
+    {
+      entry->num_pages += new_pages - old_pages;
+      g->page_gotno += new_pages - old_pages;
+    }
+
+  return TRUE;
+}
+
+/* A htab_traverse callback for which *REFP points to a mips_got_page_ref
+   and for which DATA points to a mips_elf_traverse_got_arg.  Work out
+   whether the page reference described by *REFP needs a GOT page entry,
+   and record that entry in DATA->g if so.  Set DATA->g to null on failure.  */
+
+static bfd_boolean
+mips_elf_resolve_got_page_ref (void **refp, void *data)
+{
+  struct mips_got_page_ref *ref;
+  struct mips_elf_traverse_got_arg *arg;
+  struct mips_elf_link_hash_table *htab;
+  asection *sec;
+  bfd_vma addend;
+
+  ref = (struct mips_got_page_ref *) *refp;
+  arg = (struct mips_elf_traverse_got_arg *) data;
+  htab = mips_elf_hash_table (arg->info);
+
+  if (ref->symndx < 0)
+    {
+      struct mips_elf_link_hash_entry *h;
+
+      /* Global GOT_PAGEs decay to GOT_DISP and so don't need page entries.  */
+      h = ref->u.h;
+      if (!SYMBOL_REFERENCES_LOCAL (arg->info, &h->root))
+	return 1;
+
+      /* Ignore undefined symbols; we'll issue an error later if
+	 appropriate.  */
+      if (!((h->root.root.type == bfd_link_hash_defined
+	     || h->root.root.type == bfd_link_hash_defweak)
+	    && h->root.root.u.def.section))
+	return 1;
+
+      sec = h->root.root.u.def.section;
+      addend = h->root.root.u.def.value + ref->addend;
+    }
+  else
+    {
+      Elf_Internal_Sym *isym;
+
+      /* Read in the symbol.  */
+      isym = bfd_sym_from_r_symndx (&htab->sym_cache, ref->u.abfd,
+				    ref->symndx);
+      if (isym == NULL)
+	{
+	  arg->g = NULL;
+	  return 0;
+	}
+
+      /* Get the associated input section.  */
+      sec = bfd_section_from_elf_index (ref->u.abfd, isym->st_shndx);
+      if (sec == NULL)
+	{
+	  arg->g = NULL;
+	  return 0;
+	}
+
+      /* If this is a mergable section, work out the section and offset
+	 of the merged data.  For section symbols, the addend specifies
+	 of the offset _of_ the first byte in the data, otherwise it
+	 specifies the offset _from_ the first byte.  */
+      if (sec->flags & SEC_MERGE)
+	{
+	  void *secinfo;
+
+	  secinfo = elf_section_data (sec)->sec_info;
+	  if (ELF_ST_TYPE (isym->st_info) == STT_SECTION)
+	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec, secinfo,
+						 isym->st_value + ref->addend);
+	  else
+	    addend = _bfd_merged_section_offset (ref->u.abfd, &sec, secinfo,
+						 isym->st_value) + ref->addend;
+	}
+      else
+	addend = isym->st_value + ref->addend;
+    }
+  if (!mips_elf_record_got_page_entry (arg->g, sec, addend))
+    {
+      arg->g = NULL;
+      return 0;
+    }
+  return 1;
+}
+
 /* If any entries in G->got_entries are for indirect or warning symbols,
-   replace them with entries for the target symbol.  */
+   replace them with entries for the target symbol.  Convert g->got_page_refs
+   into got_page_entry structures and estimate the number of page entries
+   that they require.  */
 
 static bfd_boolean
 mips_elf_resolve_final_got_entries (struct bfd_link_info *info,
@@ -3961,6 +4130,16 @@ mips_elf_resolve_final_got_entries (struct bfd_link_info *info,
 
       htab_delete (oldg.got_entries);
     }
+
+  g->got_page_entries = htab_try_create (1, mips_got_page_entry_hash,
+					 mips_got_page_entry_eq, NULL);
+  if (g->got_page_entries == NULL)
+    return FALSE;
+
+  tga.info = info;
+  tga.g = g;
+  htab_traverse (g->got_page_refs, mips_elf_resolve_got_page_ref, &tga);
+
   return TRUE;
 }
 
@@ -7823,21 +8002,6 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_MIPS_GOT_PAGE:
 	case R_MICROMIPS_GOT_PAGE:
-	  /* If this is a global, overridable symbol, GOT_PAGE will
-	     decay to GOT_DISP, so we'll need a GOT entry for it.  */
-	  if (h)
-	    {
-	      struct mips_elf_link_hash_entry *hmips =
-		(struct mips_elf_link_hash_entry *) h;
-
-	      /* This symbol is definitely not overridable.  */
-	      if (hmips->root.def_regular
-		  && ! (info->shared && ! info->symbolic
-			&& ! hmips->root.forced_local))
-		h = NULL;
-	    }
-	  /* Fall through.  */
-
 	case R_MIPS16_GOT16:
 	case R_MIPS_GOT16:
 	case R_MIPS_GOT_HI16:
@@ -7866,10 +8030,24 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 	      else
 		addend = rel->r_addend;
-	      if (!mips_elf_record_got_page_entry (info, abfd, r_symndx,
-						   addend))
+	      if (!mips_elf_record_got_page_ref (info, abfd, r_symndx,
+						 h, addend))
 		return FALSE;
+
+	      if (h)
+		{
+		  struct mips_elf_link_hash_entry *hmips =
+		    (struct mips_elf_link_hash_entry *) h;
+
+		  /* This symbol is definitely not overridable.  */
+		  if (hmips->root.def_regular
+		      && ! (info->shared && ! info->symbolic
+			    && ! hmips->root.forced_local))
+		    h = NULL;
+		}
 	    }
+	  /* If this is a global, overridable symbol, GOT_PAGE will
+	     decay to GOT_DISP, so we'll need a GOT entry for it.  */
 	  /* Fall through.  */
 
 	case R_MIPS_GOT_DISP:
@@ -8602,6 +8780,9 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
      count the number of reloc-only GOT symbols.  */
   mips_elf_link_hash_traverse (htab, mips_elf_count_got_symbols, info);
 
+  if (!mips_elf_resolve_final_got_entries (info, g))
+    return FALSE;
+
   /* Calculate the total loadable size of the output.  That
      will give us the maximum number of GOT_PAGE entries
      required.  */
@@ -8630,17 +8811,12 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
        sections.  Is 5 enough?  */
     page_gotno = (loadable_size >> 16) + 5;
 
-  /* Choose the smaller of the two estimates; both are intended to be
+  /* Choose the smaller of the two page estimates; both are intended to be
      conservative.  */
   if (page_gotno > g->page_gotno)
     page_gotno = g->page_gotno;
 
   g->local_gotno += page_gotno;
-
-  /* Replace entries for indirect and warning symbols with entries for
-     the target symbol.  Count the number of GOT entries and TLS relocs.  */
-  if (!mips_elf_resolve_final_got_entries (info, g))
-    return FALSE;
 
   s->size += g->local_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
   s->size += g->global_gotno * MIPS_ELF_GOT_SIZE (output_bfd);

@@ -1,3 +1,19 @@
+2013-02-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/mips16-pic-2.dd,
+	ld-mips-elf/mips16-pic-2.gd: Remove 3 unused local GOT entries.
+	* ld-mips-elf/got-page-4a.s, ld-mips-elf/got-page-4b.s,
+	ld-mips-elf/got-page-4a.d, ld-mips-elf/got-page-4a.got,
+	ld-mips-elf/got-page-4b.d, ld-mips-elf/got-page-4b.got,
+	ld-mips-elf/got-page-5.s, ld-mips-elf/got-page-5.d,
+	ld-mips-elf/got-page-5.got, ld-mips-elf/got-page-6.s,
+	ld-mips-elf/got-page-6.d, ld-mips-elf/got-page-6.got,
+	ld-mips-elf/got-page-7a.s, ld-mips-elf/got-page-7b.s,
+	ld-mips-elf/got-page-7c.s, ld-mips-elf/got-page-7d.s,
+	ld-mips-elf/got-page-7e.s, ld-mips-elf/got-page-7.d,
+	ld-mips-elf/got-page-7.got: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2013-02-11  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/tlsdyn-o32-1.d, ld-mips-elf/tlsdyn-o32-1.got,

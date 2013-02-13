@@ -1,3 +1,29 @@
+2013-02-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (mips_got_page_ref): New structure.
+	(mips_got_page_entry): Use a section rather than a (bfd, symndx)
+	pair to represent the anchor point.
+	(mips_got_info): Add a got_page_refs field.
+	(mips_elf_link_hash_table): Add a sym_cache field.
+	(mips_got_page_ref_hash, mips_got_page_ref_eq): New functions.
+	(mips_got_page_entry_hash, mips_got_page_entry_eq): Update for
+	new anchor representation.
+	(mips_elf_create_got_info): Create got_page_refs rather than
+	got_page_entries.
+	(mips_elf_record_got_page_ref): New function.
+	(mips_elf_pages_for_range): Move further down file.
+	(mips_elf_record_got_page_entry): Likewise.  Take a got as argument.
+	Use a section rather than a (bfd, symndx) pair to represent the
+	anchor point.
+	(mips_elf_resolve_got_page_ref): New function.
+	(mips_elf_resolve_final_got_entries): Use it to populate
+	got_page_entries.
+	(_bfd_mips_elf_check_relocs): Call mips_elf_record_got_page_ref
+	rather than mips_elf_record_got_page_entry.  Only nullify h
+	afterwards.
+	(mips_elf_lay_out_got): Call mips_elf_resolve_final_got_entries
+	earlier.
+
 2013-02-12  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elfxx-mips.c (mips_elf_lay_out_got): Count VxWorks GOT relocs

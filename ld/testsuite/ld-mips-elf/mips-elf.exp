@@ -453,6 +453,46 @@ if { $linux_gnu } {
 	run_dump_test "dyn-sec64"
     }
     run_dump_test "got-page-3"
+    run_ld_link_tests [subst {
+	{"GOT page 4 (one file)" "-shared $abi_ldflags(o32) -T got-page-1.ld"
+	 "$abi_asflags(o32) -mips2" {got-page-4b.s}
+	 {{objdump -dr got-page-4a.d}
+	  {readelf -A got-page-4a.got}}
+	 "got-page-4a.so"}
+	{"GOT page 4 (two files)" "-shared $abi_ldflags(o32) -T got-page-1.ld"
+	 "$abi_asflags(o32) -mips2" {got-page-4a.s got-page-4b.s}
+	 {{objdump -dr got-page-4b.d}
+	  {readelf -A got-page-4b.got}}
+	 "got-page-4b.so"}
+    }]
+    if $has_newabi {
+        run_ld_link_tests [subst {
+	    {"GOT page 5" "-shared $abi_ldflags(n32) -T got-page-1.ld"
+	     "$abi_asflags(n32)" {got-page-5.s}
+	     {{objdump -dr got-page-5.d}
+	      {readelf -A got-page-5.got}}
+	     "got-page-5.so"}
+	    {"GOT page 6" "-shared $abi_ldflags(n32) -T got-page-1.ld"
+	     "$abi_asflags(n32)" {got-page-6.s}
+	     {{objdump -dr got-page-6.d}
+	      {readelf -A got-page-6.got}}
+	     "got-page-6.so"}
+	    {"GOT page 7 (order 1)" "-shared $abi_ldflags(n32) -T got-page-1.ld"
+	     "$abi_asflags(n32)"
+	     {got-page-7a.s got-page-7b.s got-page-7c.s got-page-7d.s
+	      got-page-7e.s}
+	     {{objdump -dr got-page-7.d}
+	      {readelf -A got-page-7.got}}
+	     "got-page-7a.so"}
+	    {"GOT page 7 (order 2)" "-shared $abi_ldflags(n32) -T got-page-1.ld"
+	     "$abi_asflags(n32)"
+	     {got-page-7e.s got-page-7a.s got-page-7b.s got-page-7c.s
+	      got-page-7d.s}
+	     {{objdump -dr got-page-7.d}
+	      {readelf -A got-page-7.got}}
+	     "got-page-7b.so"}
+	}]
+    }
     run_dump_test "got-dump-1"
     if $has_newabi {
 	run_dump_test "got-dump-2"
