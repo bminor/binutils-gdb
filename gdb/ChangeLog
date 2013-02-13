@@ -1,5 +1,10 @@
 2013-02-13  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	       * aarch64-linux-nat.c (aarch64_linux_get_debug_reg_capacity)
+	       Adding _().
+
+2013-02-13  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* aarch64-linux-nat.c (debug_reg_change_callback)
 	(aarch64_linux_get_debug_reg_capacity): ARI fix: Replace %llx with
 	%s and phex().
