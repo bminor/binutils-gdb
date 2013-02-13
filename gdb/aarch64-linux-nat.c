@@ -335,9 +335,10 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
       fprintf_unfiltered (gdb_stdlog,
 			  "debug_reg_change_callback: \n\tOn entry:\n");
       fprintf_unfiltered (gdb_stdlog,
-			  "\tpid%d, dr_changed_bp=0x%llx, "
-			  "dr_changed_wp=0x%llx\n",
-			  pid, info->dr_changed_bp, info->dr_changed_wp);
+			  "\tpid%d, dr_changed_bp=0x%s, "
+			  "dr_changed_wp=0x%s\n",
+			  pid, phex (info->dr_changed_bp, 8),
+			  phex (info->dr_changed_wp, 8));
     }
 
   dr_changed_ptr = is_watchpoint ? &info->dr_changed_wp
@@ -361,9 +362,10 @@ debug_reg_change_callback (struct lwp_info *lwp, void *ptr)
   if (debug_hw_points)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "\tOn exit:\n\tpid%d, dr_changed_bp=0x%llx, "
-			  "dr_changed_wp=0x%llx\n",
-			  pid, info->dr_changed_bp, info->dr_changed_wp);
+			  "\tOn exit:\n\tpid%d, dr_changed_bp=0x%s, "
+			  "dr_changed_wp=0x%s\n",
+			  pid, phex (info->dr_changed_bp, 8),
+			  phex (info->dr_changed_wp, 8));
     }
 
   /* Continue the iteration.  */
@@ -733,16 +735,16 @@ aarch64_linux_get_debug_reg_capacity (void)
       aarch64_num_wp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
       if (aarch64_num_wp_regs > AARCH64_HWP_MAX_NUM)
 	{
-	  warning ("Unexpected number of hardware watchpoint registers reported"
-		   " by ptrace, got %d, expected %d.",
+	  warning (_("Unexpected number of hardware watchpoint registers"
+		     " reported by ptrace, got %d, expected %d."),
 		   aarch64_num_wp_regs, AARCH64_HWP_MAX_NUM);
 	  aarch64_num_wp_regs = AARCH64_HWP_MAX_NUM;
 	}
     }
   else
     {
-      warning ("Unable to determine the number of hardware watchpoints"
-	       " available.");
+      warning (_("Unable to determine the number of hardware watchpoints"
+		 " available."));
       aarch64_num_wp_regs = 0;
     }
 
@@ -753,16 +755,16 @@ aarch64_linux_get_debug_reg_capacity (void)
       aarch64_num_bp_regs = AARCH64_DEBUG_NUM_SLOTS (dreg_state.dbg_info);
       if (aarch64_num_bp_regs > AARCH64_HBP_MAX_NUM)
 	{
-	  warning ("Unexpected number of hardware breakpoint registers reported"
-		   " by ptrace, got %d, expected %d.",
+	  warning (_("Unexpected number of hardware breakpoint registers"
+		     " reported by ptrace, got %d, expected %d."),
 		   aarch64_num_bp_regs, AARCH64_HBP_MAX_NUM);
 	  aarch64_num_bp_regs = AARCH64_HBP_MAX_NUM;
 	}
     }
   else
     {
-      warning ("Unable to determine the number of hardware breakpoints"
-	       " available.");
+      warning (_("Unable to determine the number of hardware breakpoints"
+		 " available."));
       aarch64_num_bp_regs = 0;
     }
 }
