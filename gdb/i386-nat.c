@@ -153,104 +153,102 @@ struct i386_dr_low_type i386_dr_low;
 /* A macro to loop over all debug registers.  */
 #define ALL_DEBUG_REGISTERS(i)	for (i = 0; i < DR_NADDR; i++)
 
-/* Clear the reference counts and forget everything we knew about the
-   debug registers.  */
+/* Per-process data.  We don't bind this to a per-inferior registry
+   because of targets like x86 GNU/Linux that need to keep track of
+   processes that aren't bound to any inferior (e.g., fork children,
+   checkpoints).  */
 
-static void
-i386_init_dregs (struct i386_debug_reg_state *state)
+struct i386_process_info
 {
-  int i;
+  /* Linked list.  */
+  struct i386_process_info *next;
 
-  ALL_DEBUG_REGISTERS (i)
-    {
-      state->dr_mirror[i] = 0;
-      state->dr_ref_count[i] = 0;
-    }
-  state->dr_control_mirror = 0;
-  state->dr_status_mirror  = 0;
-}
+  /* The process identifier.  */
+  pid_t pid;
 
-/* Per-inferior data key.  */
-static const struct inferior_data *i386_inferior_data;
-
-/* Per-inferior data.  */
-struct i386_inferior_data
-{
-  /* Copy of i386 hardware debug registers for performance reasons.  */
+  /* Copy of i386 hardware debug registers.  */
   struct i386_debug_reg_state state;
 };
 
-/* Per-inferior hook for register_inferior_data_with_cleanup.  */
+static struct i386_process_info *i386_process_list = NULL;
 
-static void
-i386_inferior_data_cleanup (struct inferior *inf, void *arg)
+/* Find process data for process PID.  */
+
+static struct i386_process_info *
+i386_find_process_pid (pid_t pid)
 {
-  struct i386_inferior_data *inf_data = arg;
+  struct i386_process_info *proc;
 
-  xfree (inf_data);
+  for (proc = i386_process_list; proc; proc = proc->next)
+    if (proc->pid == pid)
+      return proc;
+
+  return NULL;
 }
 
-/* Get data specific for INFERIOR_PTID LWP.  Return special data area
-   for processes being detached.  */
+/* Add process data for process PID.  Returns newly allocated info
+   object.  */
 
-static struct i386_inferior_data *
-i386_inferior_data_get (void)
+static struct i386_process_info *
+i386_add_process (pid_t pid)
 {
-  struct inferior *inf = current_inferior ();
-  struct i386_inferior_data *inf_data;
+  struct i386_process_info *proc;
 
-  inf_data = inferior_data (inf, i386_inferior_data);
-  if (inf_data == NULL)
-    {
-      inf_data = xzalloc (sizeof (*inf_data));
-      set_inferior_data (current_inferior (), i386_inferior_data, inf_data);
-    }
+  proc = xcalloc (1, sizeof (*proc));
+  proc->pid = pid;
 
-  if (inf->pid != ptid_get_pid (inferior_ptid))
-    {
-      /* INFERIOR_PTID is being detached from the inferior INF.
-	 Provide local cache specific for the detached LWP.  */
+  proc->next = i386_process_list;
+  i386_process_list = proc;
 
-      static struct i386_inferior_data detached_inf_data_local;
-      static int detached_inf_pid = -1;
-
-      if (detached_inf_pid != ptid_get_pid (inferior_ptid))
-	{
-	  /* Reinitialize the local cache if INFERIOR_PTID is
-	     different from the LWP last detached.
- 
-	     Linux kernel before 2.6.33 commit
-	     72f674d203cd230426437cdcf7dd6f681dad8b0d
-	     will inherit hardware debug registers from parent
-	     on fork/vfork/clone.  Newer Linux kernels create such tasks with
-	     zeroed debug registers.
-
-	     GDB will remove all breakpoints (and watchpoints) from the forked
-	     off process.  We also need to reset the debug registers in that
-	     process to be compatible with the older Linux kernels.
-
-	     Copy the debug registers mirrors into the new process so that all
-	     breakpoints and watchpoints can be removed together.  The debug
-	     registers mirror will become zeroed in the end before detaching
-	     the forked off process.  */
-
-	  detached_inf_pid = ptid_get_pid (inferior_ptid);
-	  detached_inf_data_local = *inf_data;
-	}
-
-      return &detached_inf_data_local;
-    }
-
-  return inf_data;
+  return proc;
 }
 
-/* Get debug registers state for INFERIOR_PTID, see
-   i386_inferior_data_get.  */
+/* Get data specific info for process PID, creating it if necessary.
+   Never returns NULL.  */
+
+static struct i386_process_info *
+i386_process_info_get (pid_t pid)
+{
+  struct i386_process_info *proc;
+
+  proc = i386_find_process_pid (pid);
+  if (proc == NULL)
+    proc = i386_add_process (pid);
+
+  return proc;
+}
+
+/* Get debug registers state for process PID.  */
 
 struct i386_debug_reg_state *
-i386_debug_reg_state (void)
+i386_debug_reg_state (pid_t pid)
 {
-  return &i386_inferior_data_get ()->state;
+  return &i386_process_info_get (pid)->state;
+}
+
+/* See declaration in i386-nat.h.  */
+
+void
+i386_forget_process (pid_t pid)
+{
+  struct i386_process_info *proc, **proc_link;
+
+  proc = i386_process_list;
+  proc_link = &i386_process_list;
+
+  while (proc != NULL)
+    {
+      if (proc->pid == pid)
+	{
+	  *proc_link = proc->next;
+
+	  xfree (proc);
+	  return;
+	}
+
+      proc_link = &proc->next;
+      proc = *proc_link;
+    }
 }
 
 /* Whether or not to print the mirrored debug registers.  */
@@ -303,9 +301,8 @@ static int i386_handle_nonaligned_watchpoint (struct i386_debug_reg_state *state
 void
 i386_cleanup_dregs (void)
 {
-  struct i386_debug_reg_state *state = i386_debug_reg_state ();
-
-  i386_init_dregs (state);
+  /* Starting from scratch has the same effect.  */
+  i386_forget_process (ptid_get_pid (inferior_ptid));
 }
 
 /* Print the values of the mirrored debug registers.  This is called
@@ -569,7 +566,8 @@ Invalid value %d of operation in i386_handle_nonaligned_watchpoint.\n"),
 static void
 i386_update_inferior_debug_regs (struct i386_debug_reg_state *new_state)
 {
-  struct i386_debug_reg_state *state = i386_debug_reg_state ();
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
   int i;
 
   ALL_DEBUG_REGISTERS (i)
@@ -594,7 +592,8 @@ static int
 i386_insert_watchpoint (CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
-  struct i386_debug_reg_state *state = i386_debug_reg_state ();
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
   int retval;
   /* Work on a local copy of the debug registers, and on success,
      commit the change back to the inferior.  */
@@ -631,7 +630,8 @@ static int
 i386_remove_watchpoint (CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
-  struct i386_debug_reg_state *state = i386_debug_reg_state ();
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
   int retval;
   /* Work on a local copy of the debug registers, and on success,
      commit the change back to the inferior.  */
@@ -664,7 +664,8 @@ i386_remove_watchpoint (CORE_ADDR addr, int len, int type,
 static int
 i386_region_ok_for_watchpoint (CORE_ADDR addr, int len)
 {
-  struct i386_debug_reg_state *state = i386_debug_reg_state ();
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
   int nregs;
 
   /* Compute how many aligned watchpoints we would need to cover this
@@ -681,7 +682,8 @@ i386_region_ok_for_watchpoint (CORE_ADDR addr, int len)
 static int
 i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
-  struct i386_debug_reg_state *state = i386_debug_reg_state ();
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
   CORE_ADDR addr = 0;
   int i;
   int rc = 0;
@@ -766,7 +768,8 @@ static int
 i386_insert_hw_breakpoint (struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
-  struct i386_debug_reg_state *state = i386_debug_reg_state ();
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
   unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
   CORE_ADDR addr = bp_tgt->placed_address;
   /* Work on a local copy of the debug registers, and on success,
@@ -791,7 +794,8 @@ static int
 i386_remove_hw_breakpoint (struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
-  struct i386_debug_reg_state *state = i386_debug_reg_state ();
+  struct i386_debug_reg_state *state
+    = i386_debug_reg_state (ptid_get_pid (inferior_ptid));
   unsigned len_rw = i386_length_and_rw_bits (1, hw_execute);
   CORE_ADDR addr = bp_tgt->placed_address;
   /* Work on a local copy of the debug registers, and on success,
@@ -869,10 +873,6 @@ i386_use_watchpoints (struct target_ops *t)
   t->to_remove_watchpoint = i386_remove_watchpoint;
   t->to_insert_hw_breakpoint = i386_insert_hw_breakpoint;
   t->to_remove_hw_breakpoint = i386_remove_hw_breakpoint;
-
-  if (i386_inferior_data == NULL)
-    i386_inferior_data
-      = register_inferior_data_with_cleanup (NULL, i386_inferior_data_cleanup);
 }
 
 void

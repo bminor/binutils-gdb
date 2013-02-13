@@ -110,9 +110,14 @@ extern void i386_set_debug_register_length (int len);
 
 extern void i386_cleanup_dregs (void);
 
-/* Return a pointer to the the local mirror of the inferior's debug
-   registers.  */
+/* Return a pointer to the local mirror of the debug registers of
+   process PID.  */
 
-extern struct i386_debug_reg_state *i386_debug_reg_state (void);
+extern struct i386_debug_reg_state *i386_debug_reg_state (pid_t pid);
+
+/* Called whenever GDB is no longer debugging process PID.  It deletes
+   data structures that keep track of debug register state.  */
+
+extern void i386_forget_process (pid_t pid);
 
 #endif /* I386_NAT_H */

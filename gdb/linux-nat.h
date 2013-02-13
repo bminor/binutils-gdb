@@ -154,12 +154,6 @@ struct lwp_info *iterate_over_lwps (ptid_t filter,
 						     void *), 
 				    void *data);
 
-typedef int (*linux_nat_iterate_watchpoint_lwps_ftype) (struct lwp_info *lwp,
-							void *arg);
-
-extern void linux_nat_iterate_watchpoint_lwps
-  (linux_nat_iterate_watchpoint_lwps_ftype callback, void *callback_data);
-
 /* Create a prototype generic GNU/Linux target.  The client can
    override it with local methods.  */
 struct target_ops * linux_target (void);
@@ -175,6 +169,23 @@ void linux_nat_add_target (struct target_ops *);
 
 /* Register a method to call whenever a new thread is attached.  */
 void linux_nat_set_new_thread (struct target_ops *, void (*) (struct lwp_info *));
+
+
+/* Register a method to call whenever a new fork is attached.  */
+typedef void (linux_nat_new_fork_ftype) (struct lwp_info *parent,
+					 pid_t child_pid);
+void linux_nat_set_new_fork (struct target_ops *ops,
+			     linux_nat_new_fork_ftype *fn);
+
+/* Register a method to call whenever a process is killed or
+   detached.  */
+typedef void (linux_nat_forget_process_ftype) (pid_t pid);
+void linux_nat_set_forget_process (struct target_ops *ops,
+				   linux_nat_forget_process_ftype *fn);
+
+/* Call the method registered with the function above.  PID is the
+   process to forget about.  */
+void linux_nat_forget_process (pid_t pid);
 
 /* Register a method that converts a siginfo object between the layout
    that ptrace returns, and the layout in the architecture of the

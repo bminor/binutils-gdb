@@ -142,6 +142,17 @@ amd64fbsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
 }
 
 
+static void (*super_mourn_inferior) (struct target_ops *ops);
+
+static void
+amd64fbsd_mourn_inferior (struct target_ops *ops)
+{
+#ifdef HAVE_PT_GETDBREGS
+  i386_cleanup_dregs ();
+#endif
+  super_mourn_inferior (ops);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64fbsd_nat (void);
 
@@ -169,6 +180,9 @@ _initialize_amd64fbsd_nat (void)
   i386_set_debug_register_length (8);
 
 #endif /* HAVE_PT_GETDBREGS */
+
+  super_mourn_inferior = t->to_mourn_inferior;
+  t->to_mourn_inferior = amd64fbsd_mourn_inferior;
 
   t->to_pid_to_exec_file = fbsd_pid_to_exec_file;
   t->to_find_memory_regions = fbsd_find_memory_regions;

@@ -337,8 +337,8 @@ amd64_linux_dr_get_status (void)
   return amd64_linux_dr_get (inferior_ptid, DR_STATUS);
 }
 
-/* Callback for linux_nat_iterate_watchpoint_lwps.  Update the debug registers
-   of LWP.  */
+/* Callback for iterate_over_lwps.  Update the debug registers of
+   LWP.  */
 
 static int
 update_debug_registers_callback (struct lwp_info *lwp, void *arg)
@@ -364,7 +364,9 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 static void
 amd64_linux_dr_set_control (unsigned long control)
 {
-  linux_nat_iterate_watchpoint_lwps (update_debug_registers_callback, NULL);
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+
+  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
 
 /* Set address REGNUM (zero based) to ADDR in all LWPs of the current
@@ -373,9 +375,11 @@ amd64_linux_dr_set_control (unsigned long control)
 static void
 amd64_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 {
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  linux_nat_iterate_watchpoint_lwps (update_debug_registers_callback, NULL);
+  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
 
 /* Called when resuming a thread.
@@ -394,7 +398,8 @@ amd64_linux_prepare_to_resume (struct lwp_info *lwp)
 
   if (lwp->arch_private->debug_registers_changed)
     {
-      struct i386_debug_reg_state *state = i386_debug_reg_state ();
+      struct i386_debug_reg_state *state
+	= i386_debug_reg_state (ptid_get_pid (lwp->ptid));
       int i;
 
       /* On Linux kernel before 2.6.33 commit
@@ -434,6 +439,41 @@ amd64_linux_new_thread (struct lwp_info *lp)
 
   lp->arch_private = info;
 }
+
+/* linux_nat_new_fork hook.   */
+
+static void
+amd64_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+{
+  pid_t parent_pid;
+  struct i386_debug_reg_state *parent_state;
+  struct i386_debug_reg_state *child_state;
+
+  /* NULL means no watchpoint has ever been set in the parent.  In
+     that case, there's nothing to do.  */
+  if (parent->arch_private == NULL)
+    return;
+
+  /* Linux kernel before 2.6.33 commit
+     72f674d203cd230426437cdcf7dd6f681dad8b0d
+     will inherit hardware debug registers from parent
+     on fork/vfork/clone.  Newer Linux kernels create such tasks with
+     zeroed debug registers.
+
+     GDB core assumes the child inherits the watchpoints/hw
+     breakpoints of the parent, and will remove them all from the
+     forked off process.  Copy the debug registers mirrors into the
+     new process so that all breakpoints and watchpoints can be
+     removed together.  The debug registers mirror will become zeroed
+     in the end before detaching the forked off process, thus making
+     this compatible with older Linux kernels too.  */
+
+  parent_pid = ptid_get_pid (parent->ptid);
+  parent_state = i386_debug_reg_state (parent_pid);
+  child_state = i386_debug_reg_state (child_pid);
+  *child_state = *parent_state;
+}
+
 
 
 /* This function is called by libthread_db as part of its handling of
@@ -1120,6 +1160,8 @@ _initialize_amd64_linux_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, amd64_linux_new_thread);
+  linux_nat_set_new_fork (t, amd64_linux_new_fork);
+  linux_nat_set_forget_process (t, i386_forget_process);
   linux_nat_set_siginfo_fixup (t, amd64_linux_siginfo_fixup);
   linux_nat_set_prepare_to_resume (t, amd64_linux_prepare_to_resume);
 }

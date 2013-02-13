@@ -184,6 +184,13 @@ static struct target_ops linux_ops_saved;
 /* The method to call, if any, when a new thread is attached.  */
 static void (*linux_nat_new_thread) (struct lwp_info *);
 
+/* The method to call, if any, when a new fork is attached.  */
+static linux_nat_new_fork_ftype *linux_nat_new_fork;
+
+/* The method to call, if any, when a process is no longer
+   attached.  */
+static linux_nat_forget_process_ftype *linux_nat_forget_process_hook;
+
 /* Hook to call prior to resuming a thread.  */
 static void (*linux_nat_prepare_to_resume) (struct lwp_info *);
 
@@ -698,15 +705,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 	  child_lp->last_resume_kind = resume_stop;
 	  make_cleanup (delete_lwp_cleanup, child_lp);
 
-	  /* CHILD_LP has new PID, therefore linux_nat_new_thread is not called for it.
-	     See i386_inferior_data_get for the Linux kernel specifics.
-	     Ensure linux_nat_prepare_to_resume will reset the hardware debug
-	     registers.  It is done by the linux_nat_new_thread call, which is
-	     being skipped in add_lwp above for the first lwp of a pid.  */
-	  gdb_assert (num_lwps (GET_PID (child_lp->ptid)) == 1);
-	  if (linux_nat_new_thread != NULL)
-	    linux_nat_new_thread (child_lp);
-
 	  if (linux_nat_prepare_to_resume != NULL)
 	    linux_nat_prepare_to_resume (child_lp);
 	  ptrace (PTRACE_DETACH, child_pid, 0, 0);
@@ -1176,12 +1174,22 @@ purge_lwp_list (int pid)
     }
 }
 
-/* Add the LWP specified by PID to the list.  Return a pointer to the
-   structure describing the new LWP.  The LWP should already be stopped
-   (with an exception for the very first LWP).  */
+/* Add the LWP specified by PTID to the list.  PTID is the first LWP
+   in the process.  Return a pointer to the structure describing the
+   new LWP.
+
+   This differs from add_lwp in that we don't let the arch specific
+   bits know about this new thread.  Current clients of this callback
+   take the opportunity to install watchpoints in the new thread, and
+   we shouldn't do that for the first thread.  If we're spawning a
+   child ("run"), the thread executes the shell wrapper first, and we
+   shouldn't touch it until it execs the program we want to debug.
+   For "attach", it'd be okay to call the callback, but it's not
+   necessary, because watchpoints can't yet have been inserted into
+   the inferior.  */
 
 static struct lwp_info *
-add_lwp (ptid_t ptid)
+add_initial_lwp (ptid_t ptid)
 {
   struct lwp_info *lp;
 
@@ -1200,15 +1208,25 @@ add_lwp (ptid_t ptid)
   lp->next = lwp_list;
   lwp_list = lp;
 
+  return lp;
+}
+
+/* Add the LWP specified by PID to the list.  Return a pointer to the
+   structure describing the new LWP.  The LWP should already be
+   stopped.  */
+
+static struct lwp_info *
+add_lwp (ptid_t ptid)
+{
+  struct lwp_info *lp;
+
+  lp = add_initial_lwp (ptid);
+
   /* Let the arch specific bits know about this new thread.  Current
      clients of this callback take the opportunity to install
-     watchpoints in the new thread.  Don't do this for the first
-     thread though.  If we're spawning a child ("run"), the thread
-     executes the shell wrapper first, and we shouldn't touch it until
-     it execs the program we want to debug.  For "attach", it'd be
-     okay to call the callback, but it's not necessary, because
-     watchpoints can't yet have been inserted into the inferior.  */
-  if (num_lwps (GET_PID (ptid)) > 1 && linux_nat_new_thread != NULL)
+     watchpoints in the new thread.  We don't do this for the first
+     thread though.  See add_initial_lwp.  */
+  if (linux_nat_new_thread != NULL)
     linux_nat_new_thread (lp);
 
   return lp;
@@ -1283,45 +1301,6 @@ iterate_over_lwps (ptid_t filter,
     }
 
   return NULL;
-}
-
-/* Iterate like iterate_over_lwps does except when forking-off a child call
-   CALLBACK with CALLBACK_DATA specifically only for that new child PID.  */
-
-void
-linux_nat_iterate_watchpoint_lwps
-  (linux_nat_iterate_watchpoint_lwps_ftype callback, void *callback_data)
-{
-  int inferior_pid = ptid_get_pid (inferior_ptid);
-  struct inferior *inf = current_inferior ();
-
-  if (inf->pid == inferior_pid)
-    {
-      /* Iterate all the threads of the current inferior.  Without specifying
-	 INFERIOR_PID it would iterate all threads of all inferiors, which is
-	 inappropriate for watchpoints.  */
-
-      iterate_over_lwps (pid_to_ptid (inferior_pid), callback, callback_data);
-    }
-  else
-    {
-      /* Detaching a new child PID temporarily present in INFERIOR_PID.  */
-
-      struct lwp_info *child_lp;
-      struct cleanup *old_chain;
-      pid_t child_pid = GET_PID (inferior_ptid);
-      ptid_t child_ptid = ptid_build (child_pid, child_pid, 0);
-
-      gdb_assert (find_lwp_pid (child_ptid) == NULL);
-      child_lp = add_lwp (child_ptid);
-      child_lp->stopped = 1;
-      child_lp->last_resume_kind = resume_stop;
-      old_chain = make_cleanup (delete_lwp_cleanup, child_lp);
-
-      callback (child_lp, callback_data);
-
-      do_cleanups (old_chain);
-    }
 }
 
 /* Update our internal state when changing from one checkpoint to
@@ -1656,7 +1635,7 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
   thread_change_ptid (inferior_ptid, ptid);
 
   /* Add the initial process as the first LWP to the list.  */
-  lp = add_lwp (ptid);
+  lp = add_initial_lwp (ptid);
 
   status = linux_nat_post_attach_wait (lp->ptid, 1, &lp->cloned,
 				       &lp->signalled);
@@ -2308,6 +2287,15 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	}
 
       ourstatus->value.related_pid = ptid_build (new_pid, new_pid, 0);
+
+      if (event == PTRACE_EVENT_FORK || event == PTRACE_EVENT_VFORK)
+	{
+	  /* The arch-specific native code may need to know about new
+	     forks even if those end up never mapped to an
+	     inferior.  */
+	  if (linux_nat_new_fork != NULL)
+	    linux_nat_new_fork (lp, new_pid);
+	}
 
       if (event == PTRACE_EVENT_FORK
 	  && linux_fork_checkpointing_p (GET_PID (lp->ptid)))
@@ -3489,7 +3477,7 @@ linux_nat_wait_1 (struct target_ops *ops,
 			  BUILD_LWP (GET_PID (inferior_ptid),
 				     GET_PID (inferior_ptid)));
 
-      lp = add_lwp (inferior_ptid);
+      lp = add_initial_lwp (inferior_ptid);
       lp->resumed = 1;
     }
 
@@ -4075,6 +4063,10 @@ linux_nat_kill (struct target_ops *ops)
     {
       ptrace (PT_KILL, PIDGET (last.value.related_pid), 0, 0);
       wait (&status);
+
+      /* Let the arch-specific native code know this process is
+	 gone.  */
+      linux_nat_forget_process (PIDGET (last.value.related_pid));
     }
 
   if (forks_exist_p ())
@@ -4103,7 +4095,9 @@ linux_nat_kill (struct target_ops *ops)
 static void
 linux_nat_mourn_inferior (struct target_ops *ops)
 {
-  purge_lwp_list (ptid_get_pid (inferior_ptid));
+  int pid = ptid_get_pid (inferior_ptid);
+
+  purge_lwp_list (pid);
 
   if (! forks_exist_p ())
     /* Normal case, no other forks available.  */
@@ -4113,6 +4107,9 @@ linux_nat_mourn_inferior (struct target_ops *ops)
        there are other viable forks to debug.  Delete the exiting
        one and context-switch to the first available.  */
     linux_fork_mourn_inferior ();
+
+  /* Let the arch-specific native code know this process is gone.  */
+  linux_nat_forget_process (pid);
 }
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
@@ -5144,6 +5141,35 @@ linux_nat_set_new_thread (struct target_ops *t,
      of the GNU/Linux native target, so we do not need to map this to
      T.  */
   linux_nat_new_thread = new_thread;
+}
+
+/* See declaration in linux-nat.h.  */
+
+void
+linux_nat_set_new_fork (struct target_ops *t,
+			linux_nat_new_fork_ftype *new_fork)
+{
+  /* Save the pointer.  */
+  linux_nat_new_fork = new_fork;
+}
+
+/* See declaration in linux-nat.h.  */
+
+void
+linux_nat_set_forget_process (struct target_ops *t,
+			      linux_nat_forget_process_ftype *fn)
+{
+  /* Save the pointer.  */
+  linux_nat_forget_process_hook = fn;
+}
+
+/* See declaration in linux-nat.h.  */
+
+void
+linux_nat_forget_process (pid_t pid)
+{
+  if (linux_nat_forget_process_hook != NULL)
+    linux_nat_forget_process_hook (pid);
 }
 
 /* Register a method that converts a siginfo object between the layout

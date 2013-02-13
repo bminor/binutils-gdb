@@ -1881,6 +1881,7 @@ windows_detach (struct target_ops *ops, char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
+  i386_cleanup_dregs ();
   inferior_ptid = null_ptid;
   detach_inferior (current_event.dwProcessId);
 
