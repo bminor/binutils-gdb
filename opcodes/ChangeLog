@@ -1,4 +1,4 @@
-2013-02-12  Maciej W. Rozycki  <macro@codesourcery.com>
+2013-02-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-dis.c (is_compressed_mode_p): Only match symbols from the
 	section disassembled.

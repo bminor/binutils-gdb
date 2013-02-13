@@ -1,4 +1,4 @@
-2013-02-12  Maciej W. Rozycki  <macro@codesourcery.com>
+2013-02-13  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* binutils-all/mips/mixed-micromips.d: New test.
 	* binutils-all/mips/mixed-mips16.d: New test.
