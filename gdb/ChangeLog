@@ -1,3 +1,8 @@
+2013-02-13  Pedro Alves  <palves@redhat.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* c-lang.c (c_op_print_tab): Add entry for UNOP_PLUS.
+
 2013-02-12  Tom Tromey  <tromey@redhat.com>
 
 	PR symtab/11464:

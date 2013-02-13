@@ -732,6 +732,7 @@ const struct op_print c_op_print_tab[] =
   {"/", BINOP_DIV, PREC_MUL, 0},
   {"%", BINOP_REM, PREC_MUL, 0},
   {"@", BINOP_REPEAT, PREC_REPEAT, 0},
+  {"+", UNOP_PLUS, PREC_PREFIX, 0},
   {"-", UNOP_NEG, PREC_PREFIX, 0},
   {"!", UNOP_LOGICAL_NOT, PREC_PREFIX, 0},
   {"~", UNOP_COMPLEMENT, PREC_PREFIX, 0},
