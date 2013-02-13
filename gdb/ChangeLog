@@ -12,7 +12,7 @@
 	linux_nat_forget_process hook.
 	* i386-linux-nat.c (update_debug_registers_callback):
 	Update comment.
-	(amd64_linux_dr_set_control, amd64_linux_dr_set_addr): Use
+	(i386_linux_dr_set_control, i386_linux_dr_set_addr): Use
 	iterate_over_lwps.
 	(i386_linux_prepare_to_resume): Pass the lwp's pid to
 	i386_debug_reg_state.
