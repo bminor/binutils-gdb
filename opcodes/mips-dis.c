@@ -2940,6 +2940,9 @@ is_compressed_mode_p (struct disassemble_info *info)
       if (bfd_asymbol_flavour (info->symtab[pos]) != bfd_target_elf_flavour)
 	continue;
 
+      if (info->symtab[pos]->section != info->section)
+	continue;
+
       symbol = (elf_symbol_type *) info->symtab[pos];
       if ((!micromips_ase
 	   && ELF_ST_IS_MIPS16 (symbol->internal_elf_sym.st_other))

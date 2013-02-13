@@ -1,3 +1,8 @@
+2013-02-12  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-dis.c (is_compressed_mode_p): Only match symbols from the
+	section disassembled.
+
 2013-02-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* arm-dis.c: Update strht pattern.
