@@ -1,3 +1,8 @@
+2013-02-13  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* aarch64-linux-nat.c (dr_changed_t): ARI fix: Replace long long
+	with LONGEST.
+
 2013-02-13  Pedro Alves  <palves@redhat.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
