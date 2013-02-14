@@ -565,13 +565,13 @@ save_trace_state_variables (struct ui_file *fp)
    it means that somebody issued the "command" at the top level,
    which is always an error.  */
 
-void
+static void
 end_actions_pseudocommand (char *args, int from_tty)
 {
   error (_("This command cannot be used at the top level."));
 }
 
-void
+static void
 while_stepping_pseudocommand (char *args, int from_tty)
 {
   error (_("This command can only be used in a tracepoint actions list."));
