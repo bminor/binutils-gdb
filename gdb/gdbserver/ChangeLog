@@ -1,5 +1,12 @@
 2013-02-14  Pedro Alves  <palves@redhat.com>
 
+	Plug memory leak.
+
+	* tracepoint.c (cmd_qtnotes): Free TRACING_USER_NAME,
+	TRACING_NOTES and TRACING_STOP_NOTE before clobbering.
+
+2013-02-14  Pedro Alves  <palves@redhat.com>
+
 	* tracepoint.c (cmd_qtdpsrc): Use savestring.
 
 2013-02-14  Pedro Alves  <palves@redhat.com>

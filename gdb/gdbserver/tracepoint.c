@@ -4042,6 +4042,7 @@ cmd_qtnotes (char *own_buf)
 	  user[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
 	  trace_debug ("User is '%s'", user);
+	  xfree (tracing_user_name);
 	  tracing_user_name = user;
 	}
       else if (strncmp ("notes:", packet, strlen ("notes:")) == 0)
@@ -4055,6 +4056,7 @@ cmd_qtnotes (char *own_buf)
 	  notes[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
 	  trace_debug ("Notes is '%s'", notes);
+	  xfree (tracing_notes);
 	  tracing_notes = notes;
 	}
       else if (strncmp ("tstop:", packet, strlen ("tstop:")) == 0)
@@ -4068,6 +4070,7 @@ cmd_qtnotes (char *own_buf)
 	  stopnote[nbytes] = '\0';
 	  ++packet; /* skip the semicolon */
 	  trace_debug ("tstop note is '%s'", stopnote);
+	  xfree (tracing_stop_note);
 	  tracing_stop_note = stopnote;
 	}
       else
