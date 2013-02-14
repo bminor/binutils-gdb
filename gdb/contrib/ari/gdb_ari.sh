@@ -257,21 +257,6 @@ BEGIN {
 
 # Things in comments
 
-BEGIN { doc["GNU/Linux"] = "\
-Do not use `Linux'\'', instead use `Linux kernel'\'' or `GNU/Linux system'\'';\
- comments should clearly differentiate between the two (this test assumes that\
- word `Linux'\'' appears on the same line as the word `GNU'\'' or `kernel'\''\
- or a kernel version"
-    category["GNU/Linux"] = ari_comment
-}
-/(^|[^_[:alnum:]])Linux([^_[:alnum:]]|$)/ \
-&& !/(^|[^_[:alnum:]])Linux\[sic\]([^_[:alnum:]]|$)/ \
-&& !/(^|[^_[:alnum:]])GNU\/Linux([^_[:alnum:]]|$)/ \
-&& !/(^|[^_[:alnum:]])Linux kernel([^_[:alnum:]]|$)/ \
-&& !/(^|[^_[:alnum:]])Linux [[:digit:]]\.[[:digit:]]+)/ {
-    fail("GNU/Linux")
-}
-
 BEGIN { doc["ARGSUSED"] = "\
 Do not use ARGSUSED, unnecessary"
     category["ARGSUSED"] = ari_regression

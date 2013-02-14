@@ -1,3 +1,7 @@
+2013-02-14  Pierre Muller  <muller@sourceware.org>
+
+	* contrib/ari/gdb_ari.sh (GNU/Linux rule): Remove.
+
 2013-02-14  Pedro Alves  <palves@redhat.com>
 
 	* utils.c (savestring): Don't #undef it.  Move function to
