@@ -1,3 +1,10 @@
+2013-02-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15125
+	* objcopy.c (copy_object): Provide a helpful warning message when
+	adding a gnu_debuglink section to an object which already contains
+	one.
+
 2013-02-07  Nick Clifton  <nickc@redhat.com>
 
 	* elfcomm.c (get_archive_member_name): Prevent seg-fault if a

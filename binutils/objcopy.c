@@ -1763,58 +1763,70 @@ copy_object (bfd *ibfd, bfd *obfd, const bfd_arch_info_type *input_arch)
 
   if (gnu_debuglink_filename != NULL)
     {
-      gnu_debuglink_section = bfd_create_gnu_debuglink_section
-	(obfd, gnu_debuglink_filename);
-
-      if (gnu_debuglink_section == NULL)
+      /* PR 15125: Give a helpful warning message if
+	 the debuglink section already exists, and
+	 allow the rest of the copy to complete.  */
+      if (bfd_get_section_by_name (obfd, ".gnu_debuglink"))
 	{
-	  bfd_nonfatal_message (NULL, obfd, NULL,
-				_("cannot create debug link section `%s'"),
-				gnu_debuglink_filename);
-	  return FALSE;
+	  non_fatal (_("%s: debuglink section already exists"),
+		     bfd_get_filename (obfd));
+	  gnu_debuglink_filename = NULL;
 	}
-
-      /* Special processing for PE format files.  We
-	 have no way to distinguish PE from COFF here.  */
-      if (bfd_get_flavour (obfd) == bfd_target_coff_flavour)
+      else
 	{
-	  bfd_vma debuglink_vma;
-	  asection * highest_section;
-	  asection * sec;
+	  gnu_debuglink_section = bfd_create_gnu_debuglink_section
+	    (obfd, gnu_debuglink_filename);
 
-	  /* The PE spec requires that all sections be adjacent and sorted
-	     in ascending order of VMA.  It also specifies that debug
-	     sections should be last.  This is despite the fact that debug
-	     sections are not loaded into memory and so in theory have no
-	     use for a VMA.
+	  if (gnu_debuglink_section == NULL)
+	    {
+	      bfd_nonfatal_message (NULL, obfd, NULL,
+				    _("cannot create debug link section `%s'"),
+				    gnu_debuglink_filename);
+	      return FALSE;
+	    }
 
-	     This means that the debuglink section must be given a non-zero
-	     VMA which makes it contiguous with other debug sections.  So
-	     walk the current section list, find the section with the
-	     highest VMA and start the debuglink section after that one.  */
-	  for (sec = obfd->sections, highest_section = NULL;
-	       sec != NULL;
-	       sec = sec->next)
-	    if (sec->vma > 0
-		&& (highest_section == NULL
-		    || sec->vma > highest_section->vma))
-	      highest_section = sec;
+	  /* Special processing for PE format files.  We
+	     have no way to distinguish PE from COFF here.  */
+	  if (bfd_get_flavour (obfd) == bfd_target_coff_flavour)
+	    {
+	      bfd_vma debuglink_vma;
+	      asection * highest_section;
+	      asection * sec;
 
-	  if (highest_section)
-	    debuglink_vma = BFD_ALIGN (highest_section->vma
-				       + highest_section->size,
-				       /* FIXME: We ought to be using
-					  COFF_PAGE_SIZE here or maybe
-					  bfd_get_section_alignment() (if it
-					  was set) but since this is for PE
-					  and we know the required alignment
-					  it is easier just to hard code it.  */
-				       0x1000);
-	  else
-	    /* Umm, not sure what to do in this case.  */
-	    debuglink_vma = 0x1000;
+	      /* The PE spec requires that all sections be adjacent and sorted
+		 in ascending order of VMA.  It also specifies that debug
+		 sections should be last.  This is despite the fact that debug
+		 sections are not loaded into memory and so in theory have no
+		 use for a VMA.
 
-	  bfd_set_section_vma (obfd, gnu_debuglink_section, debuglink_vma);
+		 This means that the debuglink section must be given a non-zero
+		 VMA which makes it contiguous with other debug sections.  So
+		 walk the current section list, find the section with the
+		 highest VMA and start the debuglink section after that one.  */
+	      for (sec = obfd->sections, highest_section = NULL;
+		   sec != NULL;
+		   sec = sec->next)
+		if (sec->vma > 0
+		    && (highest_section == NULL
+			|| sec->vma > highest_section->vma))
+		  highest_section = sec;
+
+	      if (highest_section)
+		debuglink_vma = BFD_ALIGN (highest_section->vma
+					   + highest_section->size,
+					   /* FIXME: We ought to be using
+					      COFF_PAGE_SIZE here or maybe
+					      bfd_get_section_alignment() (if it
+					      was set) but since this is for PE
+					      and we know the required alignment
+					      it is easier just to hard code it.  */
+					   0x1000);
+	      else
+		/* Umm, not sure what to do in this case.  */
+		debuglink_vma = 0x1000;
+
+	      bfd_set_section_vma (obfd, gnu_debuglink_section, debuglink_vma);
+	    }
 	}
     }
 
