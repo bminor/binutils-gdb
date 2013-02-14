@@ -24,6 +24,7 @@
 #endif
 
 #include "gdb_assert.h"
+#include "gdb_string.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -149,4 +150,14 @@ xsnprintf (char *str, size_t size, const char *format, ...)
   va_end (args);
 
   return ret;
+}
+
+char *
+savestring (const char *ptr, size_t len)
+{
+  char *p = (char *) xmalloc (len + 1);
+
+  memcpy (p, ptr, len);
+  p[len] = 0;
+  return p;
 }

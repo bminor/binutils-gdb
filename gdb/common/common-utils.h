@@ -47,4 +47,10 @@ char *xstrvprintf (const char *format, va_list ap)
 int xsnprintf (char *str, size_t size, const char *format, ...)
      ATTRIBUTE_PRINTF (3, 4);
 
+/* Make a copy of the string at PTR with LEN characters
+   (and add a null character at the end in the copy).
+   Uses malloc to get the space.  Returns the address of the copy.  */
+
+char *savestring (const char *ptr, size_t len);
+
 #endif

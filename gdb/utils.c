@@ -89,9 +89,6 @@ extern PTR realloc ();		/* ARI: PTR */
 extern void free ();
 #endif
 
-/* readline defines this.  */
-#undef savestring
-
 void (*deprecated_error_begin_hook) (void);
 
 /* Prototypes for local functions */
@@ -1184,20 +1181,6 @@ myread (int desc, char *addr, int len)
       addr += val;
     }
   return orglen;
-}
-
-/* Make a copy of the string at PTR with LEN characters
-   (and add a null character at the end in the copy).
-   Uses malloc to get the space.  Returns the address of the copy.  */
-
-char *
-savestring (const char *ptr, size_t len)
-{
-  char *p = (char *) xmalloc (len + 1);
-
-  memcpy (p, ptr, len);
-  p[len] = 0;
-  return p;
 }
 
 void

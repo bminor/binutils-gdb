@@ -1896,18 +1896,6 @@ find_next_tracepoint_by_number (struct tracepoint *prev_tp, int num)
 
 #endif
 
-static char *
-save_string (const char *str, size_t len)
-{
-  char *s;
-
-  s = xmalloc (len + 1);
-  memcpy (s, str, len);
-  s[len] = '\0';
-
-  return s;
-}
-
 /* Append another action to perform when the tracepoint triggers.  */
 
 static void
@@ -2028,7 +2016,7 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 			 * tpoint->num_step_actions));
 	  tpoint->step_actions[tpoint->num_step_actions - 1] = action;
 	  tpoint->step_actions_str[tpoint->num_step_actions - 1]
-	    = save_string (act_start, act - act_start);
+	    = savestring (act_start, act - act_start);
 	}
       else
 	{
@@ -2041,7 +2029,7 @@ add_tracepoint_action (struct tracepoint *tpoint, char *packet)
 			sizeof (*tpoint->actions_str) * tpoint->numactions);
 	  tpoint->actions[tpoint->numactions - 1] = action;
 	  tpoint->actions_str[tpoint->numactions - 1]
-	    = save_string (act_start, act - act_start);
+	    = savestring (act_start, act - act_start);
 	}
     }
 }

@@ -1,5 +1,13 @@
 2013-02-14  Pedro Alves  <palves@redhat.com>
 
+	* utils.c (savestring): Don't #undef it.  Move function to
+	common/common-utils.c.
+	* common/common-utils.c: Include gdb_string.h.
+	(savestring): Move here from utils.c.
+	* common/common-utils.h (savestring): Declare.
+
+2013-02-14  Pedro Alves  <palves@redhat.com>
+
 	* utils.c (savestring): Rename parameter 'size' to 'len'.
 
 2013-02-14  Pedro Alves  <palves@redhat.com>
