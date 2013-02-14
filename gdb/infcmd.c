@@ -137,11 +137,6 @@ ptid_t inferior_ptid;
 
 CORE_ADDR stop_pc;
 
-/* Flag indicating that a command has proceeded the inferior past the
-   current breakpoint.  */
-
-int breakpoint_proceeded;
-
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
 enum stop_stack_kind stop_stack_dummy;

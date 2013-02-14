@@ -1,5 +1,9 @@
 2013-02-14  Yao Qi  <yao@codesourcery.com>
 
+	* infcmd.c (breakpoint_proceeded): Remove it.
+
+2013-02-14  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (end_actions_pseudocommand): Make it static.
 	(while_stepping_pseudocommand): Likewise.
 	* tracepoint.h (end_actions_pseudocommand): Remove the
