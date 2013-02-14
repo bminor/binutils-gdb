@@ -1,4 +1,8 @@
 2013-02-14  Pedro Alves  <palves@redhat.com>
+
+	* utils.c (savestring): Rename parameter 'size' to 'len'.
+
+2013-02-14  Pedro Alves  <palves@redhat.com>
 	    Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-linux-nat.c (aarch64_init_debug_reg_state): Delete.

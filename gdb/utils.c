@@ -1186,17 +1186,17 @@ myread (int desc, char *addr, int len)
   return orglen;
 }
 
-/* Make a copy of the string at PTR with SIZE characters
+/* Make a copy of the string at PTR with LEN characters
    (and add a null character at the end in the copy).
    Uses malloc to get the space.  Returns the address of the copy.  */
 
 char *
-savestring (const char *ptr, size_t size)
+savestring (const char *ptr, size_t len)
 {
-  char *p = (char *) xmalloc (size + 1);
+  char *p = (char *) xmalloc (len + 1);
 
-  memcpy (p, ptr, size);
-  p[size] = 0;
+  memcpy (p, ptr, len);
+  p[len] = 0;
   return p;
 }
 
