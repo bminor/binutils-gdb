@@ -1,5 +1,9 @@
 2013-02-14  Pedro Alves  <palves@redhat.com>
 
+	* tracepoint.c (cmd_qtdpsrc): Use savestring.
+
+2013-02-14  Pedro Alves  <palves@redhat.com>
+
 	* tracepoint.c (save_string): Delete.
 	(add_tracepoint_action): Use savestring instead of save_string.
 
