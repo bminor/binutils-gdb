@@ -1,3 +1,9 @@
+2013-02-14  Pedro Alves  <palves@redhat.com>
+
+	* eval.c (evaluate_subexp_for_address) <default_case_after_eval,
+	EVAL_AVOID_SIDE_EFFECTS>: Swap and handle TYPE_CODE_REF before
+	lval_memory.
+
 2013-02-14  Pedro Alves  <pedro@codesourcery.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
