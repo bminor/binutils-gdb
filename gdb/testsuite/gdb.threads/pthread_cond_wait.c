@@ -59,12 +59,11 @@ int
 main (void)
 {
   pthread_t forever;
-  const struct timespec ts = { 0, 10000000 }; /* 0.01 sec */
 
   pthread_create (&forever, NULL, forever_pthread, NULL);
   for (;;)
     {
-      nanosleep (&ts, NULL);
+      sleep (2);
       break_me();
     }
 
