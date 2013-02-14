@@ -26,5 +26,5 @@ Disassembly of section \.text\.bar:
 [0-9a-f]+ <[^>]*> 6500      	nop
 [0-9a-f]+ <[^>]*> 9707      	lw	a3,28\(sp\)
 [0-9a-f]+ <[^>]*> ef00      	jr	a3
-[0-9a-f]+ <[^>]*> 6500      	nop
+[0-9a-f]+ <[^>]*> 6304      	addiu	sp,32
 	\.\.\.

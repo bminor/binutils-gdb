@@ -25,6 +25,7 @@ bar:
 	sw	$ra, 28($sp)
 	jal	baz
 	lw	$a3, 28($sp)
+	addiu	$sp, 32
 	jr	$a3
 	.end	bar
 
