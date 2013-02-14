@@ -6867,9 +6867,8 @@ md_begin (void)
   for (i = 0; i < ARRAY_SIZE (aarch64_prfops); i++)
     {
       const char* name = aarch64_prfops[i].name;
-      /* Skip 0011x, 01xxx, 1011x and 11xxx - the unallocated hint encodings
-	 as a 5-bit immediate #uimm5.  */
-      if ((i & 0xf) >= 6)
+      /* Skip the unallocated hint encodings.  */
+      if (name == NULL)
 	continue;
       checked_hash_insert (aarch64_pldop_hsh, name,
 			   (void *) (aarch64_prfops + i));

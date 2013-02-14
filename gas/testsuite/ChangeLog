@@ -1,3 +1,8 @@
+2013-02-14  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/system.s: Add tests.
+	* gas/aarch64/system.d: Update.
+
 2013-02-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/archv6t2.s: Add strht and ldrht tests.

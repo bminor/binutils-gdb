@@ -346,32 +346,32 @@ const struct aarch64_name_value_pair aarch64_prfops[32] =
   { "pldl2strm", B(0, 2, 1) },
   { "pldl3keep", B(0, 3, 0) },
   { "pldl3strm", B(0, 3, 1) },
-  { "#0x06", 0x06 },
-  { "#0x07", 0x07 },
+  { NULL, 0x06 },
+  { NULL, 0x07 },
   { "plil1keep", B(1, 1, 0) },
   { "plil1strm", B(1, 1, 1) },
   { "plil2keep", B(1, 2, 0) },
   { "plil2strm", B(1, 2, 1) },
   { "plil3keep", B(1, 3, 0) },
   { "plil3strm", B(1, 3, 1) },
-  { "#0x0e", 0x0e },
-  { "#0x0f", 0x0f },
+  { NULL, 0x0e },
+  { NULL, 0x0f },
   { "pstl1keep", B(2, 1, 0) },
   { "pstl1strm", B(2, 1, 1) },
   { "pstl2keep", B(2, 2, 0) },
   { "pstl2strm", B(2, 2, 1) },
   { "pstl3keep", B(2, 3, 0) },
   { "pstl3strm", B(2, 3, 1) },
-  { "#0x16", 0x16 },
-  { "#0x17", 0x17 },
-  { "#0x18", 0x18 },
-  { "#0x19", 0x19 },
-  { "#0x1a", 0x1a },
-  { "#0x1b", 0x1b },
-  { "#0x1c", 0x1c },
-  { "#0x1d", 0x1d },
-  { "#0x1e", 0x1e },
-  { "#0x1f", 0x1f },
+  { NULL, 0x16 },
+  { NULL, 0x17 },
+  { NULL, 0x18 },
+  { NULL, 0x19 },
+  { NULL, 0x1a },
+  { NULL, 0x1b },
+  { NULL, 0x1c },
+  { NULL, 0x1d },
+  { NULL, 0x1e },
+  { NULL, 0x1f },
 };
 #undef B
 
@@ -2638,7 +2638,10 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_PRFOP:
-      snprintf (buf, size, "%s", opnd->prfop->name);
+      if (opnd->prfop->name != NULL)
+	snprintf (buf, size, "%s", opnd->prfop->name);
+      else
+	snprintf (buf, size, "#0x%02x", opnd->prfop->value);
       break;
 
     default:
