@@ -2357,7 +2357,6 @@ void
 mi_cmd_trace_define_variable (char *command, char **argv, int argc)
 {
   struct expression *expr;
-  struct cleanup *back_to;
   LONGEST initval = 0;
   struct trace_state_variable *tsv;
   char *name = 0;
@@ -2365,19 +2364,11 @@ mi_cmd_trace_define_variable (char *command, char **argv, int argc)
   if (argc != 1 && argc != 2)
     error (_("Usage: -trace-define-variable VARIABLE [VALUE]"));
 
-  expr = parse_expression (argv[0]);
-  back_to = make_cleanup (xfree, expr);
+  name = argv[0];
+  if (*name++ != '$')
+    error (_("Name of trace variable should start with '$'"));
 
-  if (expr->nelts == 3 && expr->elts[0].opcode == OP_INTERNALVAR)
-    {
-      struct internalvar *intvar = expr->elts[1].internalvar;
-
-      if (intvar)
-	name = internalvar_name (intvar);
-    }
-
-  if (!name || *name == '\0')
-    error (_("Invalid name of trace variable"));
+  validate_trace_state_variable_name (name);
 
   tsv = find_trace_state_variable (name);
   if (!tsv)
@@ -2387,8 +2378,6 @@ mi_cmd_trace_define_variable (char *command, char **argv, int argc)
     initval = value_as_long (parse_and_eval (argv[1]));
 
   tsv->initial_value = initval;
-
-  do_cleanups (back_to);
 }
 
 void

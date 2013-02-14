@@ -362,50 +362,67 @@ delete_trace_state_variable (const char *name)
   warning (_("No trace variable named \"$%s\", not deleting"), name);
 }
 
+/* Throws an error if NAME is not valid syntax for a trace state
+   variable's name.  */
+
+void
+validate_trace_state_variable_name (const char *name)
+{
+  const char *p;
+
+  if (*name == '\0')
+    error (_("Must supply a non-empty variable name"));
+
+  /* All digits in the name is reserved for value history
+     references.  */
+  for (p = name; isdigit (*p); p++)
+    ;
+  if (*p == '\0')
+    error (_("$%s is not a valid trace state variable name"), name);
+
+  for (p = name; isalnum (*p) || *p == '_'; p++)
+    ;
+  if (*p != '\0')
+    error (_("$%s is not a valid trace state variable name"), name);
+}
+
 /* The 'tvariable' command collects a name and optional expression to
    evaluate into an initial value.  */
 
 static void
 trace_variable_command (char *args, int from_tty)
 {
-  struct expression *expr;
   struct cleanup *old_chain;
-  struct internalvar *intvar = NULL;
   LONGEST initval = 0;
   struct trace_state_variable *tsv;
+  char *name, *p;
 
   if (!args || !*args)
-    error_no_arg (_("trace state variable name"));
-
-  /* All the possible valid arguments are expressions.  */
-  expr = parse_expression (args);
-  old_chain = make_cleanup (free_current_contents, &expr);
-
-  if (expr->nelts == 0)
-    error (_("No expression?"));
+    error_no_arg (_("Syntax is $NAME [ = EXPR ]"));
 
   /* Only allow two syntaxes; "$name" and "$name=value".  */
-  if (expr->elts[0].opcode == OP_INTERNALVAR)
-    {
-      intvar = expr->elts[1].internalvar;
-    }
-  else if (expr->elts[0].opcode == BINOP_ASSIGN
-	   && expr->elts[1].opcode == OP_INTERNALVAR)
-    {
-      intvar = expr->elts[2].internalvar;
-      initval = value_as_long (evaluate_subexpression_type (expr, 4));
-    }
-  else
+  p = skip_spaces (args);
+
+  if (*p++ != '$')
+    error (_("Name of trace variable should start with '$'"));
+
+  name = p;
+  while (isalnum (*p) || *p == '_')
+    p++;
+  name = savestring (name, p - name);
+  old_chain = make_cleanup (xfree, name);
+
+  p = skip_spaces (p);
+  if (*p != '=' && *p != '\0')
     error (_("Syntax must be $NAME [ = EXPR ]"));
 
-  if (!intvar)
-    error (_("No name given"));
+  validate_trace_state_variable_name (name);
 
-  if (strlen (internalvar_name (intvar)) <= 0)
-    error (_("Must supply a non-empty variable name"));
+  if (*p == '=')
+    initval = value_as_long (parse_and_eval (++p));
 
   /* If the variable already exists, just change its initial value.  */
-  tsv = find_trace_state_variable (internalvar_name (intvar));
+  tsv = find_trace_state_variable (name);
   if (tsv)
     {
       if (tsv->initial_value != initval)
@@ -421,7 +438,7 @@ trace_variable_command (char *args, int from_tty)
     }
 
   /* Create a new variable.  */
-  tsv = create_trace_state_variable (internalvar_name (intvar));
+  tsv = create_trace_state_variable (name);
   tsv->initial_value = initval;
 
   observer_notify_tsv_created (tsv);

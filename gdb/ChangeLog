@@ -1,3 +1,13 @@
+2013-02-14  Pedro Alves  <pedro@codesourcery.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* tracepoint.h (validate_trace_state_variable_name): Declare.
+	* tracepoint.c (validate_trace_state_variable_name): New.
+	(trace_variable_command): Parse the trace state variable's name
+	without using parse_expression.  Do several validations.
+	* mi/mi-main.c (mi_cmd_trace_define_variable): Don't parse the
+	trace state variable's name with parse_expression.  Validate it.
+
 2013-02-14  Yao Qi  <yao@codesourcery.com>
 
 	* infcmd.c (breakpoint_proceeded): Remove it.

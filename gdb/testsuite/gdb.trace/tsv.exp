@@ -46,13 +46,29 @@ gdb_test "tvariable \$tvar3 = 1234567000000" \
   "Trace state variable \\\$tvar3 now has initial value 1234567000000." \
   "Init trace state variable to a 64-bit value"
 
+gdb_test "tvariable $" \
+  "Must supply a non-empty variable name" \
+  "tvariable syntax error, not empty variable name"
+
 gdb_test "tvariable main" \
-  "Syntax must be \\\$NAME \\\[ = EXPR \\\]" \
+  "Name of trace variable should start with '\\\$'" \
   "tvariable syntax error, bad name"
+
+gdb_test "tvariable \$\$" \
+  "Syntax must be \\\$NAME \\\[ = EXPR \\\]" \
+  "tvariable syntax error, bad name 2"
+
+gdb_test "tvariable \$123" \
+  "\\\$123 is not a valid trace state variable name" \
+  "tvariable syntax error, bad name 3"
 
 gdb_test "tvariable \$tvar1 - 93" \
   "Syntax must be \\\$NAME \\\[ = EXPR \\\]" \
   "tvariable syntax error, not an assignment"
+
+gdb_test "tvariable \$tvar0 = 1 = 1" \
+  "Left operand of assignment is not an lvalue\." \
+  "tvariable creation fails with invalid expression"
 
 gdb_test "info tvariables" \
     "Name\[\t \]+Initial\[\t \]+Current.*

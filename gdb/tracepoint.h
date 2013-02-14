@@ -243,6 +243,7 @@ extern void encode_actions (struct breakpoint *t, struct bp_location *tloc,
 			    char ***tdp_actions, char ***stepping_actions);
 
 extern void validate_actionline (char **, struct breakpoint *);
+extern void validate_trace_state_variable_name (const char *name);
 
 extern struct trace_state_variable *find_trace_state_variable (const char *name);
 extern struct trace_state_variable *create_trace_state_variable (const char *name);
