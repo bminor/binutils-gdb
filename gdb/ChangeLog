@@ -1,3 +1,9 @@
+2013-02-14  Yao Qi  <yao@codesourcery.com>
+
+	* cli/cli-decode.c (help_cmd): Remove the declaration of
+	"cmdlist".
+	(help_all): Likewise.
+
 2013-02-13  Pedro Alves  <palves@redhat.com>
 
 	* amd64-linux-nat.c (update_debug_registers_callback):

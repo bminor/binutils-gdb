@@ -917,7 +917,6 @@ void
 help_cmd (char *command, struct ui_file *stream)
 {
   struct cmd_list_element *c;
-  extern struct cmd_list_element *cmdlist;
 
   if (!command)
     {
@@ -1049,7 +1048,6 @@ static void
 help_all (struct ui_file *stream)
 {
   struct cmd_list_element *c;
-  extern struct cmd_list_element *cmdlist;
   int seen_unclassified = 0;
 
   for (c = cmdlist; c; c = c->next)
