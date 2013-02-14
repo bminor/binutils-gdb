@@ -1,4 +1,38 @@
 2013-02-14  Pedro Alves  <palves@redhat.com>
+	    Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-linux-nat.c (aarch64_init_debug_reg_state): Delete.
+	(aarch64_inferior_data, struct aarch64_inferior_data):
+	Delete.
+	(struct aarch64_process_info): New.
+	(aarch64_process_list): New global.
+	(aarch64_find_process_pid, aarch64_add_process)
+	(aarch64_process_info_get): New functions.
+	(aarch64_inferior_data_get): Delete.
+	(aarch64_process_info_get): New function.
+	(aarch64_forget_process): New function.
+	(aarch64_get_debug_reg_state): New parameter 'pid'.  Reimplement.
+	(aarch64_linux_prepare_to_resume): Pass the lwp's pid to
+	aarch64_get_debug_reg_state.
+	(aarch64_notify_debug_reg_change): Use iterate_over_lwps
+	instead of linux_nat_iterate_watchpoint_lwps.
+	(aarch64_linux_new_fork): New function.
+	(aarch64_linux_child_post_startup_inferior): Use
+	aarch64_forget_process instead of aarch64_init_debug_reg_state.
+	(aarch64_handle_breakpoint, aarch64_linux_insert_hw_breakpoint)
+	(aarch64_linux_remove_hw_breakpoint)
+	(aarch64_handle_aligned_watchpoint)
+	(aarch64_handle_unaligned_watchpoint)
+	(aarch64_linux_insert_watchpoint)
+	(aarch64_linux_remove_watchpoint)
+	(aarch64_linux_stopped_data_address): Adjust to pass the current
+	process id to aarch64_debug_reg_state.
+	(_initialize_aarch64_linux_nat): Install aarch64_linux_new_fork as
+	linux_nat_new_fork hook, and aarch64_forget_process as
+	linux_nat_forget_process hook; remove the call to
+	register_inferior_data_with_cleanup.
+
+2013-02-14  Pedro Alves  <palves@redhat.com>
 
 	* eval.c (evaluate_subexp_for_address) <default_case_after_eval,
 	EVAL_AVOID_SIDE_EFFECTS>: Swap and handle TYPE_CODE_REF before

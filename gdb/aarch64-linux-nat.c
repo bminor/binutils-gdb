@@ -189,75 +189,103 @@ struct aarch64_debug_reg_state
   unsigned int dr_ref_count_wp[AARCH64_HWP_MAX_NUM];
 };
 
-/* Clear the reference counts and forget everything we knew about the
-   debug registers.  */
+/* Per-process data.  We don't bind this to a per-inferior registry
+   because of targets like x86 GNU/Linux that need to keep track of
+   processes that aren't bound to any inferior (e.g., fork children,
+   checkpoints).  */
 
-static void
-aarch64_init_debug_reg_state (struct aarch64_debug_reg_state *state)
+struct aarch64_process_info
 {
-  int i;
+  /* Linked list.  */
+  struct aarch64_process_info *next;
 
-  for (i = 0; i < AARCH64_HBP_MAX_NUM; ++i)
-    {
-      state->dr_addr_bp[i] = 0;
-      state->dr_ctrl_bp[i] = 0;
-      state->dr_ref_count_bp[i] = 0;
-    }
+  /* The process identifier.  */
+  pid_t pid;
 
-  for (i = 0; i < AARCH64_HWP_MAX_NUM; ++i)
-    {
-      state->dr_addr_wp[i] = 0;
-      state->dr_ctrl_wp[i] = 0;
-      state->dr_ref_count_wp[i] = 0;
-    }
-}
-
-/* Per-inferior data key.  */
-static const struct inferior_data *aarch64_inferior_data;
-
-/* Per-inferior data.  */
-struct aarch64_inferior_data
-{
-  /* Copy of AArch64 hardware debug registers for performance reasons.  */
+  /* Copy of aarch64 hardware debug registers.  */
   struct aarch64_debug_reg_state state;
 };
 
-/* Per-inferior hook for register_inferior_data_with_cleanup.  */
+static struct aarch64_process_info *aarch64_process_list = NULL;
+
+/* Find process data for process PID.  */
+
+static struct aarch64_process_info *
+aarch64_find_process_pid (pid_t pid)
+{
+  struct aarch64_process_info *proc;
+
+  for (proc = aarch64_process_list; proc; proc = proc->next)
+    if (proc->pid == pid)
+      return proc;
+
+  return NULL;
+}
+
+/* Add process data for process PID.  Returns newly allocated info
+   object.  */
+
+static struct aarch64_process_info *
+aarch64_add_process (pid_t pid)
+{
+  struct aarch64_process_info *proc;
+
+  proc = xcalloc (1, sizeof (*proc));
+  proc->pid = pid;
+
+  proc->next = aarch64_process_list;
+  aarch64_process_list = proc;
+
+  return proc;
+}
+
+/* Get data specific info for process PID, creating it if necessary.
+   Never returns NULL.  */
+
+static struct aarch64_process_info *
+aarch64_process_info_get (pid_t pid)
+{
+  struct aarch64_process_info *proc;
+
+  proc = aarch64_find_process_pid (pid);
+  if (proc == NULL)
+    proc = aarch64_add_process (pid);
+
+  return proc;
+}
+
+/* Called whenever GDB is no longer debugging process PID.  It deletes
+   data structures that keep track of debug register state.  */
 
 static void
-aarch64_inferior_data_cleanup (struct inferior *inf, void *arg)
+aarch64_forget_process (pid_t pid)
 {
-  struct aarch64_inferior_data *inf_data = arg;
+  struct aarch64_process_info *proc, **proc_link;
 
-  xfree (inf_data);
-}
+  proc = aarch64_process_list;
+  proc_link = &aarch64_process_list;
 
-/* Get data specific for INFERIOR_PTID LWP.  Return special data area
-   for processes being detached.  */
-
-static struct aarch64_inferior_data *
-aarch64_inferior_data_get (void)
-{
-  struct inferior *inf = current_inferior ();
-  struct aarch64_inferior_data *inf_data;
-
-  inf_data = inferior_data (inf, aarch64_inferior_data);
-  if (inf_data == NULL)
+  while (proc != NULL)
     {
-      inf_data = xzalloc (sizeof (*inf_data));
-      set_inferior_data (inf, aarch64_inferior_data, inf_data);
-    }
+      if (proc->pid == pid)
+	{
+	  *proc_link = proc->next;
 
-  return inf_data;
+	  xfree (proc);
+	  return;
+	}
+
+      proc_link = &proc->next;
+      proc = *proc_link;
+    }
 }
 
-/* Get debug registers state for INFERIOR_PTID, see
-   aarch64_inferior_data_get.  */
+/* Get debug registers state for process PID.  */
 
 static struct aarch64_debug_reg_state *
-aarch64_get_debug_reg_state (void)
+aarch64_get_debug_reg_state (pid_t pid)
 {
-  return &aarch64_inferior_data_get ()->state;
+  return &aarch64_process_info_get (pid)->state;
 }
 
 /* Per-thread arch-specific data we want to keep.  */
@@ -308,7 +336,7 @@ struct aarch64_dr_update_callback_param
   unsigned int idx;
 };
 
-/* Callback for linux_nat_iterate_watchpoint_lwps.  Records the
+/* Callback for iterate_over_lwps.  Records the
    information about the change of one hardware breakpoint/watchpoint
    setting for the thread LWP.
    The information is passed in via PTR.
@@ -382,12 +410,12 @@ aarch64_notify_debug_reg_change (const struct aarch64_debug_reg_state *state,
 				 int is_watchpoint, unsigned int idx)
 {
   struct aarch64_dr_update_callback_param param;
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
 
   param.is_watchpoint = is_watchpoint;
   param.idx = idx;
 
-  linux_nat_iterate_watchpoint_lwps (debug_reg_change_callback,
-				     (void *) &param);
+  iterate_over_lwps (pid_ptid, debug_reg_change_callback, (void *) &param);
 }
 
 /* Print the values of the cached breakpoint/watchpoint registers.  */
@@ -655,7 +683,8 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
       || DR_HAS_CHANGED (info->dr_changed_wp))
     {
       int tid = GET_LWP (lwp->ptid);
-      struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
+      struct aarch64_debug_reg_state *state
+	= aarch64_get_debug_reg_state (ptid_get_pid (lwp->ptid));
 
       if (debug_hw_points)
 	fprintf_unfiltered (gdb_stdlog, "prepare_to_resume thread %d\n", tid);
@@ -687,6 +716,32 @@ aarch64_linux_new_thread (struct lwp_info *lp)
   DR_MARK_ALL_CHANGED (info->dr_changed_wp, aarch64_num_wp_regs);
 
   lp->arch_private = info;
+}
+
+/* linux_nat_new_fork hook.   */
+
+static void
+aarch64_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+{
+  pid_t parent_pid;
+  struct aarch64_debug_reg_state *parent_state;
+  struct aarch64_debug_reg_state *child_state;
+
+  /* NULL means no watchpoint has ever been set in the parent.  In
+     that case, there's nothing to do.  */
+  if (parent->arch_private == NULL)
+    return;
+
+  /* GDB core assumes the child inherits the watchpoints/hw
+     breakpoints of the parent, and will remove them all from the
+     forked off process.  Copy the debug registers mirrors into the
+     new process so that all breakpoints and watchpoints can be
+     removed together.  */
+
+  parent_pid = ptid_get_pid (parent->ptid);
+  parent_state = aarch64_get_debug_reg_state (parent_pid);
+  child_state = aarch64_get_debug_reg_state (child_pid);
+  *child_state = *parent_state;
 }
 
 
@@ -776,9 +831,7 @@ static void (*super_post_startup_inferior) (ptid_t ptid);
 static void
 aarch64_linux_child_post_startup_inferior (ptid_t ptid)
 {
-  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
-
-  aarch64_init_debug_reg_state (state);
+  aarch64_forget_process (ptid_get_pid (ptid));
   aarch64_linux_get_debug_reg_capacity ();
   super_post_startup_inferior (ptid);
 }
@@ -1132,7 +1185,7 @@ aarch64_handle_breakpoint (int type, CORE_ADDR addr, int len, int is_insert)
   if (!aarch64_point_is_aligned (0 /* is_watchpoint */ , addr, len))
     return -1;
 
-  state = aarch64_get_debug_reg_state ();
+  state = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   if (is_insert)
     return aarch64_dr_state_insert_one_point (state, type, addr, len);
@@ -1161,8 +1214,13 @@ aarch64_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
   ret = aarch64_handle_breakpoint (type, addr, len, 1 /* is_insert */);
 
   if (debug_hw_points > 1)
-    aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
-				  "insert_hw_watchpoint", addr, len, type);
+    {
+      struct aarch64_debug_reg_state *state
+	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+      aarch64_show_debug_reg_state (state,
+				    "insert_hw_watchpoint", addr, len, type);
+    }
 
   return ret;
 }
@@ -1187,8 +1245,13 @@ aarch64_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
   ret = aarch64_handle_breakpoint (type, addr, len, 0 /* is_insert */);
 
   if (debug_hw_points > 1)
-    aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
-				  "remove_hw_watchpoint", addr, len, type);
+    {
+      struct aarch64_debug_reg_state *state
+	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+      aarch64_show_debug_reg_state (state,
+				    "remove_hw_watchpoint", addr, len, type);
+    }
 
   return ret;
 }
@@ -1200,7 +1263,8 @@ static int
 aarch64_handle_aligned_watchpoint (int type, CORE_ADDR addr, int len,
 				   int is_insert)
 {
-  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   if (is_insert)
     return aarch64_dr_state_insert_one_point (state, type, addr, len);
@@ -1219,7 +1283,8 @@ static int
 aarch64_handle_unaligned_watchpoint (int type, CORE_ADDR addr, int len,
 				     int is_insert)
 {
-  struct aarch64_debug_reg_state *state = aarch64_get_debug_reg_state ();
+  struct aarch64_debug_reg_state *state
+    = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
 
   while (len > 0)
     {
@@ -1283,8 +1348,13 @@ aarch64_linux_insert_watchpoint (CORE_ADDR addr, int len, int type,
   ret = aarch64_handle_watchpoint (type, addr, len, 1 /* is_insert */);
 
   if (debug_hw_points > 1)
-    aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
-				  "insert_watchpoint", addr, len, type);
+    {
+      struct aarch64_debug_reg_state *state
+	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+      aarch64_show_debug_reg_state (state,
+				    "insert_watchpoint", addr, len, type);
+    }
 
   return ret;
 }
@@ -1310,8 +1380,13 @@ aarch64_linux_remove_watchpoint (CORE_ADDR addr, int len, int type,
   ret = aarch64_handle_watchpoint (type, addr, len, 0 /* is_insert */);
 
   if (debug_hw_points > 1)
-    aarch64_show_debug_reg_state (aarch64_get_debug_reg_state (),
-				  "remove_watchpoint", addr, len, type);
+    {
+      struct aarch64_debug_reg_state *state
+	= aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
+
+      aarch64_show_debug_reg_state (state,
+				    "remove_watchpoint", addr, len, type);
+    }
 
   return ret;
 }
@@ -1374,7 +1449,7 @@ aarch64_linux_stopped_data_address (struct target_ops *target,
     return 0;
 
   /* Check if the address matches any watched address.  */
-  state = aarch64_get_debug_reg_state ();
+  state = aarch64_get_debug_reg_state (ptid_get_pid (inferior_ptid));
   for (i = aarch64_num_wp_regs - 1; i >= 0; --i)
     {
       const unsigned int len = aarch64_watchpoint_length (state->dr_ctrl_wp[i]);
@@ -1465,10 +1540,6 @@ _initialize_aarch64_linux_nat (void)
   t->to_stopped_data_address = aarch64_linux_stopped_data_address;
   t->to_watchpoint_addr_within_range =
     aarch64_linux_watchpoint_addr_within_range;
-  if (aarch64_inferior_data == NULL)
-    aarch64_inferior_data
-      = register_inferior_data_with_cleanup (NULL,
-					     aarch64_inferior_data_cleanup);
 
   /* Override the GNU/Linux inferior startup hook.  */
   super_post_startup_inferior = t->to_post_startup_inferior;
@@ -1477,5 +1548,7 @@ _initialize_aarch64_linux_nat (void)
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, aarch64_linux_new_thread);
+  linux_nat_set_new_fork (t, aarch64_linux_new_fork);
+  linux_nat_set_forget_process (t, aarch64_forget_process);
   linux_nat_set_prepare_to_resume (t, aarch64_linux_prepare_to_resume);
 }
