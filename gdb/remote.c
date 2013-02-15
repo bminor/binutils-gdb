@@ -5664,7 +5664,7 @@ Packet: '%s'\n"),
    Obviously, the reply in step #1.6 would be unexpected to a vStopped
    query.
 
-   To solve this, whenever we parse a %Stop notification sucessfully,
+   To solve this, whenever we parse a %Stop notification successfully,
    we mark the REMOTE_ASYNC_GET_PENDING_EVENTS_TOKEN, and carry on
    doing whatever we were doing:
 
