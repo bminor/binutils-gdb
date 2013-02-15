@@ -1,3 +1,7 @@
+2013-02-15  Kai Tietz  <ktietz@redhat.com>
+
+	* objcopy.c (copy_main): Initialize context variable.
+
 2013-02-15  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15033

@@ -3662,7 +3662,7 @@ copy_main (int argc, char *argv[])
 	case OPTION_CHANGE_SECTION_VMA:
 	  {
 	    struct section_list * p;
-	    unsigned int context;
+	    unsigned int context = 0;
 	    const char *s;
 	    int len;
 	    char *name;
