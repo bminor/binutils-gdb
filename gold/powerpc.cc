@@ -2940,6 +2940,26 @@ class Stub_table : public Output_relaxed_input_section
     return std::max(user_align, min_align);
   }
 
+  // Return the plt offset for the given call stub.
+  Address
+  plt_off(typename Plt_stub_entries::const_iterator p, bool* is_iplt) const
+  {
+    const Symbol* gsym = p->first.sym_;
+    if (gsym != NULL)
+      {
+	*is_iplt = (gsym->type() == elfcpp::STT_GNU_IFUNC
+		    && gsym->can_use_relative_reloc(false));
+	return gsym->plt_offset();
+      }
+    else
+      {
+	*is_iplt = true;
+	const Sized_relobj_file<size, big_endian>* relobj = p->first.object_;
+	unsigned int local_sym_index = p->first.locsym_;
+	return relobj->local_plt_offset(local_sym_index);
+      }
+  }
+
   // Size of a given plt call stub.
   unsigned int
   plt_call_size(typename Plt_stub_entries::const_iterator p) const
@@ -2947,18 +2967,17 @@ class Stub_table : public Output_relaxed_input_section
     if (size == 32)
       return 16;
 
-    Address pltaddr = p->second;
-    if (p->first.sym_ == NULL 
-	|| (p->first.sym_->type() == elfcpp::STT_GNU_IFUNC
-	    && p->first.sym_->can_use_relative_reloc(false)))
-      pltaddr += this->targ_->iplt_section()->address();
+    bool is_iplt;
+    Address plt_addr = this->plt_off(p, &is_iplt);
+    if (is_iplt)
+      plt_addr += this->targ_->iplt_section()->address();
     else
-      pltaddr += this->targ_->plt_section()->address();
-    Address tocbase = this->targ_->got_section()->output_section()->address();
+      plt_addr += this->targ_->plt_section()->address();
+    Address got_addr = this->targ_->got_section()->output_section()->address();
     const Powerpc_relobj<size, big_endian>* ppcobj = static_cast
       <const Powerpc_relobj<size, big_endian>*>(p->first.object_);
-    tocbase += ppcobj->toc_base_offset();
-    Address off = pltaddr - tocbase;
+    got_addr += ppcobj->toc_base_offset();
+    Address off = plt_addr - got_addr;
     bool static_chain = parameters->options().plt_static_chain();
     bool thread_safe = this->targ_->plt_thread_safe();
     unsigned int bytes = (4 * 5
@@ -3346,25 +3365,10 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	       cs != this->plt_call_stubs_.end();
 	       ++cs)
 	    {
-	      Address pltoff;
-	      bool is_ifunc;
-	      const Symbol* gsym = cs->first.sym_;
-	      if (gsym != NULL)
-		{
-		  is_ifunc = (gsym->type() == elfcpp::STT_GNU_IFUNC
-			      && gsym->can_use_relative_reloc(false));
-		  pltoff = gsym->plt_offset();
-		}
-	      else
-		{
-		  is_ifunc = true;
-		  const Sized_relobj_file<size, big_endian>* relobj
-		    = cs->first.object_;
-		  unsigned int local_sym_index = cs->first.locsym_;
-		  pltoff = relobj->local_plt_offset(local_sym_index);
-		}
+	      bool is_iplt;
+	      Address pltoff = this->plt_off(cs, &is_iplt);
 	      Address plt_addr = pltoff;
-	      if (is_ifunc)
+	      if (is_iplt)
 		{
 		  if (iplt_base == invalid_address)
 		    iplt_base = this->targ_->iplt_section()->address();
@@ -3431,7 +3435,7 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	      else
 		{
 		  write_insn<big_endian>(p, std_2_1 + 40),		p += 4;
-		  write_insn<big_endian>(p, ld_11_2 + l(off)),	p += 4;
+		  write_insn<big_endian>(p, ld_11_2 + l(off)),		p += 4;
 		  if (ha(off + 8 + 8 * static_chain) != ha(off))
 		    {
 		      write_insn<big_endian>(p, addi_2_2 + l(off)),	p += 4;
@@ -3507,24 +3511,9 @@ Stub_table<size, big_endian>::do_write(Output_file* of)
 	       cs != this->plt_call_stubs_.end();
 	       ++cs)
 	    {
-	      Address plt_addr;
-	      bool is_ifunc;
-	      const Symbol* gsym = cs->first.sym_;
-	      if (gsym != NULL)
-		{
-		  is_ifunc = (gsym->type() == elfcpp::STT_GNU_IFUNC
-			      && gsym->can_use_relative_reloc(false));
-		  plt_addr = gsym->plt_offset();
-		}
-	      else
-		{
-		  is_ifunc = true;
-		  const Sized_relobj_file<size, big_endian>* relobj
-		    = cs->first.object_;
-		  unsigned int local_sym_index = cs->first.locsym_;
-		  plt_addr = relobj->local_plt_offset(local_sym_index);
-		}
-	      if (is_ifunc)
+	      bool is_iplt;
+	      Address plt_addr = this->plt_off(cs, &is_iplt);
+	      if (is_iplt)
 		{
 		  if (iplt_base == invalid_address)
 		    iplt_base = this->targ_->iplt_section()->address();
