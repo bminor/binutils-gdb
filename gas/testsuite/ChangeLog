@@ -1,3 +1,16 @@
+2013-02-15  Markos Chandras  <markos.chandras@imgtec.com>
+
+	* gas/metag/labelarithmetic.d: Fix the expected disassembler
+	output to be in little endian format
+	* gas/metag/metacore12.d: likewise
+	* gas/metag/metacore21.d: likewise
+	* gas/metag/metacore21ext.d: likewise
+	* gas/metag/metadsp21.d: likewise
+	* gas/metag/metadsp21ext.d: likewise
+	* gas/metag/metafpu.d: likewise
+	* gas/metag/metafpuext.d: likewise
+	* gas/metag/tls.d: likewise
+
 2013-02-15  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
         * gas/arm/neon-vmov-bad.d: New file.

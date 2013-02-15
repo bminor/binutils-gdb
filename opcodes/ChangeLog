@@ -1,3 +1,9 @@
+2013-02-15  Markos Chandras  <markos.chandras@imgtec.com>
+
+	* metag-dis.c: Initialize outf->bytes_per_chunk to 4
+	which also makes the disassembler output be in little
+	endian like it should be.
+
 2013-02-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (aarch64_prfops): Change unnamed operation 'name'

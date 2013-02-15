@@ -1,3 +1,13 @@
+2013-02-15  Markos Chandras  <markos.chandras@imgtec.com>
+
+	* ld-metag/pcrel.d: Fix the expected disassembler
+	output to be in little endian format
+	* ld-metag/shared.d: likewise
+	* ld-metag/stub.d: likewise
+	* ld-metag/stub_pic_app.d: likewise
+	* ld-metag/stub_pic_shared.d: likewise
+	* ld-metag/stub_shared.d: likewise
+
 2013-02-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/mips16-pic-2.dd,

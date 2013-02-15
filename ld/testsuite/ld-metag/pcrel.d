@@ -4,15 +4,15 @@
 Disassembly of section .text:
 
 .* <_start>:
-.*:	a8 00 00 ab 	          CALLR     D0Re0,10005068 <external>
-.*:	48 00 00 ab 	          CALLR     D0Re0,10005060 <global>
-.*:	48 00 00 ab 	          CALLR     D0Re0,10005064 <local>
+.*:	ab0000a8 	          CALLR     D0Re0,10005068 <external>
+.*:	ab000048 	          CALLR     D0Re0,10005060 <global>
+.*:	ab000048 	          CALLR     D0Re0,10005064 <local>
 
 .* <global>:
-.*:	fe ff ff a0 	          NOP
+.*:	a0fffffe 	          NOP
 
 .* <local>:
-.*:	fe ff ff a0 	          NOP
+.*:	a0fffffe 	          NOP
 
 .* <external>:
-.*:	fe ff ff a0 	          NOP
+.*:	a0fffffe 	          NOP

@@ -7,6870 +7,6870 @@
 Disassembly of section \.text:
 
 00000000 <.text>:
-.*:	04 00 00 00 	          MOV       D0Re0,D0Re0
-.*:	05 20 00 00 	          MOV       D0Re0,RD
-.*:	01 de 01 00 	          ADD       D0Re0,D0\.7,D1\.7
-.*:	01 0e 38 00 	          ADD       D0\.7,D0Re0,A1\.7
-.*:	00 c0 39 00 	          ADD       D0\.7,D0\.7,D0Re0
-.*:	01 fe 39 00 	          ADD       D0\.7,D0\.7,A0\.7
-.*:	01 1e 00 01 	          ADD       D1Re0,D1Re0,D0\.7
-.*:	01 ce 01 01 	          ADD       D1Re0,D1\.7,A1\.7
-.*:	01 02 38 01 	          ADD       D1\.7,D1Re0,A1LbP
-.*:	01 32 38 01 	          ADD       D1\.7,D1Re0,A0FrP
-.*:	01 e0 39 01 	          ADD       D1\.7,D1\.7,RD
-.*:	01 00 04 02 	          ADDT      D0Re0,D0Re0,#0x8000
-.*:	fc ff 07 02 	          MOV       D0Re0,#0xffff
-.*:	01 00 3c 02 	          ADDT      D0\.7,D0\.7,#0x8000
-.*:	fc ff 3f 02 	          MOV       D0\.7,#0xffff
-.*:	01 00 04 03 	          ADDT      D1Re0,D1Re0,#0x8000
-.*:	fc ff 07 03 	          MOV       D1Re0,#0xffff
-.*:	01 00 3c 03 	          ADDT      D1\.7,D1\.7,#0x8000
-.*:	fc ff 3f 03 	          MOV       D1\.7,#0xffff
-.*:	bc 00 00 04 	          ADDLE     PC,D0Re0,D0Re0
-.*:	5d 02 00 04 	          ADDLE     D1Re0,D0Re0,A1LbP
-.*:	1e 0e 00 04 	          ADDNV     TXENABLE,D0Re0,D0\.7
-.*:	5e 0e 00 04 	          ADDNV     D1Re0,D0Re0,D0\.7
-.*:	fe 0e 00 04 	          ADDNV     TXSTAT,D0Re0,D0\.7
-.*:	bd 10 00 04 	          ADDLE     PC,D0Re0,D1Re0
-.*:	5d 1e 00 04 	          ADDLE     D1Re0,D0Re0,D1\.7
-.*:	3d 20 00 04 	          ADDLE     D0Re0,D0Re0,RD
-.*:	1d 32 00 04 	          ADDLE     TXENABLE,D0Re0,A0FrP
-.*:	fd 32 00 04 	          ADDLE     TXSTAT,D0Re0,A0FrP
-.*:	bd 3e 00 04 	          ADDLE     PC,D0Re0,A0\.7
-.*:	54 c0 01 04 	          ADDLS     D1Re0,D0\.7,D0Re0
-.*:	2d c2 01 04 	          ADDPL     D0Re0,D0\.7,A1LbP
-.*:	0c ce 01 04 	          ADDPL     TXENABLE,D0\.7,D0\.7
-.*:	5c ce 01 04 	          ADDLE     D1Re0,D0\.7,D0\.7
-.*:	fc ce 01 04 	          ADDLE     TXSTAT,D0\.7,D0\.7
-.*:	5d d0 01 04 	          ADDLE     D1Re0,D0\.7,D1Re0
-.*:	3d de 01 04 	          ADDLE     D0Re0,D0\.7,D1\.7
-.*:	0d e0 01 04 	          ADDPL     TXENABLE,D0\.7,RD
-.*:	fd e0 01 04 	          ADDLE     TXSTAT,D0\.7,RD
-.*:	bd f2 01 04 	          ADDLE     PC,D0\.7,A0FrP
-.*:	5d fe 01 04 	          ADDLE     D1Re0,D0\.7,A0\.7
-.*:	94 00 08 04 	          ADDLS     A1LbP,D0Re0,D0Re0
-.*:	bd 02 08 04 	          ADDLE     PCX,D0Re0,A1LbP
-.*:	9e 0e 08 04 	          ADDNV     A1LbP,D0Re0,D0\.7
-.*:	9d 10 08 04 	          ADDLE     A1LbP,D0Re0,D1Re0
-.*:	ad 1e 08 04 	          ADDPL     PCX,D0Re0,D1\.7
-.*:	7d 32 08 04 	          ADDLE     A0FrP,D0Re0,A0FrP
-.*:	9d 3e 08 04 	          ADDLE     A1LbP,D0Re0,A0\.7
-.*:	ac c0 09 04 	          ADDPL     PCX,D0\.7,D0Re0
-.*:	64 ce 09 04 	          ADDNE     A0FrP,D0\.7,D0\.7
-.*:	b4 ce 09 04 	          ADDLS     PCX,D0\.7,D0\.7
-.*:	bd d0 09 04 	          ADDLE     PCX,D0\.7,D1Re0
-.*:	7d e0 09 04 	          ADDLE     A0FrP,D0\.7,RD
-.*:	9d f2 09 04 	          ADDLE     A1LbP,D0\.7,A0FrP
-.*:	ad fe 09 04 	          ADDPL     PCX,D0\.7,A0\.7
-.*:	fe 0e 18 04 	          ADDNV     TXMASKI,D0Re0,D0\.7
-.*:	fd 32 18 04 	          ADDLE     TXMASKI,D0Re0,A0FrP
-.*:	ec ce 19 04 	          ADDPL     TXMASKI,D0\.7,D0\.7
-.*:	fd e0 19 04 	          ADDLE     TXMASKI,D0\.7,RD
-.*:	44 00 38 04 	          ADDNE     D1\.7,D0Re0,D0Re0
-.*:	5d 02 38 04 	          ADDLE     D1\.7,D0Re0,A1LbP
-.*:	3e 0e 38 04 	          ADDNV     D0\.7,D0Re0,D0\.7
-.*:	7e 0e 38 04 	          ADDNV     A0\.7,D0Re0,D0\.7
-.*:	4d 10 38 04 	          ADDPL     D1\.7,D0Re0,D1Re0
-.*:	5d 1e 38 04 	          ADDLE     D1\.7,D0Re0,D1\.7
-.*:	4d 20 38 04 	          ADDPL     D1\.7,D0Re0,RD
-.*:	5d 32 38 04 	          ADDLE     D1\.7,D0Re0,A0FrP
-.*:	5d 3e 38 04 	          ADDLE     D1\.7,D0Re0,A0\.7
-.*:	54 c0 39 04 	          ADDLS     D1\.7,D0\.7,D0Re0
-.*:	5d c2 39 04 	          ADDLE     D1\.7,D0\.7,A1LbP
-.*:	3e ce 39 04 	          ADDNV     D0\.7,D0\.7,D0\.7
-.*:	7e ce 39 04 	          ADDNV     A0\.7,D0\.7,D0\.7
-.*:	5d d0 39 04 	          ADDLE     D1\.7,D0\.7,D1Re0
-.*:	5d de 39 04 	          ADDLE     D1\.7,D0\.7,D1\.7
-.*:	5d e0 39 04 	          ADDLE     D1\.7,D0\.7,RD
-.*:	5d f2 39 04 	          ADDLE     D1\.7,D0\.7,A0FrP
-.*:	5d fe 39 04 	          ADDLE     D1\.7,D0\.7,A0\.7
-.*:	dd 02 80 04 	          ADDLE     RA,D0Re0,A1LbP
-.*:	dd 1e 80 04 	          ADDLE     RA,D0Re0,D1\.7
-.*:	cc c0 81 04 	          ADDPL     RA,D0\.7,D0Re0
-.*:	dd d0 81 04 	          ADDLE     RA,D0\.7,D1Re0
-.*:	dd fe 81 04 	          ADDLE     RA,D0\.7,A0\.7
-.*:	de 0e b0 04 	          ADDNV     RAM8X32,D0Re0,D0\.7
-.*:	dd 32 b0 04 	          ADDLE     RAM8X32,D0Re0,A0FrP
-.*:	cc ce b1 04 	          ADDPL     RAM8X32,D0\.7,D0\.7
-.*:	dd e0 b1 04 	          ADDLE     RAM8X32,D0\.7,RD
-.*:	dd 02 b8 04 	          ADDLE     RAM8X,D0Re0,A1LbP
-.*:	dd 1e b8 04 	          ADDLE     RAM8X,D0Re0,D1\.7
-.*:	cc c0 b9 04 	          ADDPL     RAM8X,D0\.7,D0Re0
-.*:	dd d0 b9 04 	          ADDLE     RAM8X,D0\.7,D1Re0
-.*:	dd fe b9 04 	          ADDLE     RAM8X,D0\.7,A0\.7
-.*:	de 0e c0 04 	          ADDNV     RABZ,D0Re0,D0\.7
-.*:	dd 32 c0 04 	          ADDLE     RABZ,D0Re0,A0FrP
-.*:	cc ce c1 04 	          ADDPL     RABZ,D0\.7,D0\.7
-.*:	dd e0 c1 04 	          ADDLE     RABZ,D0\.7,RD
-.*:	dd 02 e8 04 	          ADDLE     RAWX,D0Re0,A1LbP
-.*:	dd 1e e8 04 	          ADDLE     RAWX,D0Re0,D1\.7
-.*:	cc c0 e9 04 	          ADDPL     RAWX,D0\.7,D0Re0
-.*:	dd d0 e9 04 	          ADDLE     RAWX,D0\.7,D1Re0
-.*:	dd fe e9 04 	          ADDLE     RAWX,D0\.7,A0\.7
-.*:	dd 02 f8 04 	          ADDLE     RAMX,D0Re0,A1LbP
-.*:	de 0e f8 04 	          ADDNV     RAMX,D0Re0,D0\.7
-.*:	dd 1e f8 04 	          ADDLE     RAMX,D0Re0,D1\.7
-.*:	dd 32 f8 04 	          ADDLE     RAMX,D0Re0,A0FrP
-.*:	cc c0 f9 04 	          ADDPL     RAMX,D0\.7,D0Re0
-.*:	1e ce f9 04 	          ADDNV     TXIDLECYC,D0\.7,D0\.7
-.*:	dd d0 f9 04 	          ADDLE     RAMX,D0\.7,D1Re0
-.*:	dd e0 f9 04 	          ADDLE     RAMX,D0\.7,RD
-.*:	dd fe f9 04 	          ADDLE     RAMX,D0\.7,A0\.7
-.*:	bc 00 00 05 	          ADDLE     PC,D1Re0,D1Re0
-.*:	5d 02 00 05 	          ADDLE     D1Re0,D1Re0,A1LbP
-.*:	1e 0e 00 05 	          ADDNV     TXENABLE,D1Re0,D1\.7
-.*:	5e 0e 00 05 	          ADDNV     D1Re0,D1Re0,D1\.7
-.*:	fe 0e 00 05 	          ADDNV     TXSTAT,D1Re0,D1\.7
-.*:	bd 10 00 05 	          ADDLE     PC,D1Re0,D0Re0
-.*:	5d 1e 00 05 	          ADDLE     D1Re0,D1Re0,D0\.7
-.*:	3d 20 00 05 	          ADDLE     D0Re0,D1Re0,RD
-.*:	1d 32 00 05 	          ADDLE     TXENABLE,D1Re0,A0FrP
-.*:	fd 32 00 05 	          ADDLE     TXSTAT,D1Re0,A0FrP
-.*:	bd 3e 00 05 	          ADDLE     PC,D1Re0,A0\.7
-.*:	54 c0 01 05 	          ADDLS     D1Re0,D1\.7,D1Re0
-.*:	2d c2 01 05 	          ADDPL     D0Re0,D1\.7,A1LbP
-.*:	0c ce 01 05 	          ADDPL     TXENABLE,D1\.7,D1\.7
-.*:	5c ce 01 05 	          ADDLE     D1Re0,D1\.7,D1\.7
-.*:	fc ce 01 05 	          ADDLE     TXSTAT,D1\.7,D1\.7
-.*:	5d d0 01 05 	          ADDLE     D1Re0,D1\.7,D0Re0
-.*:	3d de 01 05 	          ADDLE     D0Re0,D1\.7,D0\.7
-.*:	0d e0 01 05 	          ADDPL     TXENABLE,D1\.7,RD
-.*:	fd e0 01 05 	          ADDLE     TXSTAT,D1\.7,RD
-.*:	bd f2 01 05 	          ADDLE     PC,D1\.7,A0FrP
-.*:	5d fe 01 05 	          ADDLE     D1Re0,D1\.7,A0\.7
-.*:	94 00 08 05 	          ADDLS     A1LbP,D1Re0,D1Re0
-.*:	bd 02 08 05 	          ADDLE     PCX,D1Re0,A1LbP
-.*:	9e 0e 08 05 	          ADDNV     A1LbP,D1Re0,D1\.7
-.*:	9d 10 08 05 	          ADDLE     A1LbP,D1Re0,D0Re0
-.*:	ad 1e 08 05 	          ADDPL     PCX,D1Re0,D0\.7
-.*:	7d 32 08 05 	          ADDLE     A0FrP,D1Re0,A0FrP
-.*:	9d 3e 08 05 	          ADDLE     A1LbP,D1Re0,A0\.7
-.*:	ac c0 09 05 	          ADDPL     PCX,D1\.7,D1Re0
-.*:	64 ce 09 05 	          ADDNE     A0FrP,D1\.7,D1\.7
-.*:	b4 ce 09 05 	          ADDLS     PCX,D1\.7,D1\.7
-.*:	bd d0 09 05 	          ADDLE     PCX,D1\.7,D0Re0
-.*:	7d e0 09 05 	          ADDLE     A0FrP,D1\.7,RD
-.*:	9d f2 09 05 	          ADDLE     A1LbP,D1\.7,A0FrP
-.*:	ad fe 09 05 	          ADDPL     PCX,D1\.7,A0\.7
-.*:	fe 0e 18 05 	          ADDNV     TXMASKI,D1Re0,D1\.7
-.*:	fd 32 18 05 	          ADDLE     TXMASKI,D1Re0,A0FrP
-.*:	ec ce 19 05 	          ADDPL     TXMASKI,D1\.7,D1\.7
-.*:	fd e0 19 05 	          ADDLE     TXMASKI,D1\.7,RD
-.*:	44 00 38 05 	          ADDNE     D1\.7,D1Re0,D1Re0
-.*:	5d 02 38 05 	          ADDLE     D1\.7,D1Re0,A1LbP
-.*:	3e 0e 38 05 	          ADDNV     D0\.7,D1Re0,D1\.7
-.*:	7e 0e 38 05 	          ADDNV     A0\.7,D1Re0,D1\.7
-.*:	4d 10 38 05 	          ADDPL     D1\.7,D1Re0,D0Re0
-.*:	5d 1e 38 05 	          ADDLE     D1\.7,D1Re0,D0\.7
-.*:	4d 20 38 05 	          ADDPL     D1\.7,D1Re0,RD
-.*:	5d 32 38 05 	          ADDLE     D1\.7,D1Re0,A0FrP
-.*:	5d 3e 38 05 	          ADDLE     D1\.7,D1Re0,A0\.7
-.*:	54 c0 39 05 	          ADDLS     D1\.7,D1\.7,D1Re0
-.*:	5d c2 39 05 	          ADDLE     D1\.7,D1\.7,A1LbP
-.*:	3e ce 39 05 	          ADDNV     D0\.7,D1\.7,D1\.7
-.*:	7e ce 39 05 	          ADDNV     A0\.7,D1\.7,D1\.7
-.*:	5d d0 39 05 	          ADDLE     D1\.7,D1\.7,D0Re0
-.*:	5d de 39 05 	          ADDLE     D1\.7,D1\.7,D0\.7
-.*:	5d e0 39 05 	          ADDLE     D1\.7,D1\.7,RD
-.*:	5d f2 39 05 	          ADDLE     D1\.7,D1\.7,A0FrP
-.*:	5d fe 39 05 	          ADDLE     D1\.7,D1\.7,A0\.7
-.*:	dd 02 80 05 	          ADDLE     RA,D1Re0,A1LbP
-.*:	dd 1e 80 05 	          ADDLE     RA,D1Re0,D0\.7
-.*:	cc c0 81 05 	          ADDPL     RA,D1\.7,D1Re0
-.*:	dd d0 81 05 	          ADDLE     RA,D1\.7,D0Re0
-.*:	dd fe 81 05 	          ADDLE     RA,D1\.7,A0\.7
-.*:	de 0e b0 05 	          ADDNV     RAM8X32,D1Re0,D1\.7
-.*:	dd 32 b0 05 	          ADDLE     RAM8X32,D1Re0,A0FrP
-.*:	cc ce b1 05 	          ADDPL     RAM8X32,D1\.7,D1\.7
-.*:	dd e0 b1 05 	          ADDLE     RAM8X32,D1\.7,RD
-.*:	dd 02 b8 05 	          ADDLE     RAM8X,D1Re0,A1LbP
-.*:	dd 1e b8 05 	          ADDLE     RAM8X,D1Re0,D0\.7
-.*:	cc c0 b9 05 	          ADDPL     RAM8X,D1\.7,D1Re0
-.*:	dd d0 b9 05 	          ADDLE     RAM8X,D1\.7,D0Re0
-.*:	dd fe b9 05 	          ADDLE     RAM8X,D1\.7,A0\.7
-.*:	de 0e c0 05 	          ADDNV     RABZ,D1Re0,D1\.7
-.*:	dd 32 c0 05 	          ADDLE     RABZ,D1Re0,A0FrP
-.*:	cc ce c1 05 	          ADDPL     RABZ,D1\.7,D1\.7
-.*:	dd e0 c1 05 	          ADDLE     RABZ,D1\.7,RD
-.*:	dd 02 e8 05 	          ADDLE     RAWX,D1Re0,A1LbP
-.*:	dd 1e e8 05 	          ADDLE     RAWX,D1Re0,D0\.7
-.*:	cc c0 e9 05 	          ADDPL     RAWX,D1\.7,D1Re0
-.*:	dd d0 e9 05 	          ADDLE     RAWX,D1\.7,D0Re0
-.*:	dd fe e9 05 	          ADDLE     RAWX,D1\.7,A0\.7
-.*:	dd 02 f8 05 	          ADDLE     RAMX,D1Re0,A1LbP
-.*:	de 0e f8 05 	          ADDNV     RAMX,D1Re0,D1\.7
-.*:	dd 1e f8 05 	          ADDLE     RAMX,D1Re0,D0\.7
-.*:	dd 32 f8 05 	          ADDLE     RAMX,D1Re0,A0FrP
-.*:	cc c0 f9 05 	          ADDPL     RAMX,D1\.7,D1Re0
-.*:	1e ce f9 05 	          ADDNV     TXIDLECYC,D1\.7,D1\.7
-.*:	dd d0 f9 05 	          ADDLE     RAMX,D1\.7,D0Re0
-.*:	dd e0 f9 05 	          ADDLE     RAMX,D1\.7,RD
-.*:	dd fe f9 05 	          ADDLE     RAMX,D1\.7,A0\.7
-.*:	1c 20 00 06 	          ADDLE     D0Re0,D0Re0,#0x80
-.*:	e0 3f 00 06 	          ADD       TXENABLE,D0Re0,#0xff
-.*:	e4 df 01 06 	          ADD       D1Re0,D0\.7,#0x7f
-.*:	2a e0 01 06 	          ADD       PC,D0\.7,#0x80
-.*:	ee ff 01 06 	          ADD       TXSTAT,D0\.7,#0xff
-.*:	e8 3f 08 06 	          ADD       A1LbP,D0Re0,#0xff
-.*:	e6 ff 09 06 	          ADD       A0FrP,D0\.7,#0xff
-.*:	ee ff 19 06 	          ADD       TXMASKI,D0\.7,#0xff
-.*:	1e 20 38 06 	          ADDNV     D0\.7,D0Re0,#0x80
-.*:	e4 3f 38 06 	          ADD       D1\.7,D0Re0,#0xff
-.*:	04 e0 39 06 	          ADDNE     D0\.7,D0\.7,#0x80
-.*:	e6 ff 39 06 	          ADD       A0\.7,D0\.7,#0xff
-.*:	ec 1f b0 06 	          ADD       RAM8X32,D0Re0,#0x7f
-.*:	ec 3f b8 06 	          ADD       RAM8X,D0Re0,#0xff
-.*:	2c e0 c1 06 	          ADD       RABZ,D0\.7,#0x80
-.*:	e0 1f f8 06 	          ADD       TXIDLECYC,D0Re0,#0x7f
-.*:	20 e0 f9 06 	          ADD       TXIDLECYC,D0\.7,#0x80
-.*:	ea 1f 00 07 	          ADD       PC,D1Re0,#0x7f
-.*:	cc 3f 00 07 	          ADDPL     D1Re0,D1Re0,#0xff
-.*:	e0 df 01 07 	          ADD       TXENABLE,D1\.7,#0x7f
-.*:	22 e0 01 07 	          ADD       D0Re0,D1\.7,#0x80
-.*:	e4 ff 01 07 	          ADD       D1Re0,D1\.7,#0xff
-.*:	2a 20 08 07 	          ADD       PCX,D1Re0,#0x80
-.*:	28 e0 09 07 	          ADD       A1LbP,D1\.7,#0x80
-.*:	ee df 19 07 	          ADD       TXMASKI,D1\.7,#0x7f
-.*:	e8 1f 38 07 	          ADD       A1\.7,D1Re0,#0x7f
-.*:	de 3f 38 07 	          ADDNV     D1\.7,D1Re0,#0xff
-.*:	e6 df 39 07 	          ADD       A0\.7,D1\.7,#0x7f
-.*:	de ff 39 07 	          ADDNV     D1\.7,D1\.7,#0xff
-.*:	2c e0 81 07 	          ADD       RA,D1\.7,#0x80
-.*:	ec 1f b8 07 	          ADD       RAM8X,D1Re0,#0x7f
-.*:	ec 3f c0 07 	          ADD       RABZ,D1Re0,#0xff
-.*:	2c e0 e9 07 	          ADD       RAWX,D1\.7,#0x80
-.*:	e0 df f9 07 	          ADD       TXIDLECYC,D1\.7,#0x7f
-.*:	01 02 00 08 	          ADDS      D0Re0,D0Re0,A1LbP
-.*:	01 32 00 08 	          ADDS      D0Re0,D0Re0,A0FrP
-.*:	01 e0 01 08 	          ADDS      D0Re0,D0\.7,RD
-.*:	04 0e 38 08 	          MOVS      D0\.7,D0\.7
-.*:	01 c2 39 08 	          ADDS      D0\.7,D0\.7,A1LbP
-.*:	00 00 00 09 	          ADDS      D1Re0,D1Re0,D1Re0
-.*:	01 20 00 09 	          ADDS      D1Re0,D1Re0,RD
-.*:	01 d0 01 09 	          ADDS      D1Re0,D1\.7,D0Re0
-.*:	00 0e 38 09 	          ADDS      D1\.7,D1Re0,D1\.7
-.*:	01 3e 38 09 	          ADDS      D1\.7,D1Re0,A0\.7
-.*:	01 f2 39 09 	          ADDS      D1\.7,D1\.7,A0FrP
-.*:	02 00 04 0a 	          ADDS      D0Re0,D0Re0,#-32768
-.*:	fd ff 07 0a 	          MOVST     D0Re0,#0xffff
-.*:	02 00 3c 0a 	          ADDS      D0\.7,D0\.7,#-32768
-.*:	fd ff 3f 0a 	          MOVST     D0\.7,#0xffff
-.*:	02 00 04 0b 	          ADDS      D1Re0,D1Re0,#-32768
-.*:	fd ff 07 0b 	          MOVST     D1Re0,#0xffff
-.*:	02 00 3c 0b 	          ADDS      D1\.7,D1\.7,#-32768
-.*:	fd ff 3f 0b 	          MOVST     D1\.7,#0xffff
-.*:	bc 00 00 0c 	          ADDSLE    PC,D0Re0,D0Re0
-.*:	5d 02 00 0c 	          ADDSLE    D1Re0,D0Re0,A1LbP
-.*:	1e 0e 00 0c 	          ADDSNV    TXENABLE,D0Re0,D0\.7
-.*:	5e 0e 00 0c 	          ADDSNV    D1Re0,D0Re0,D0\.7
-.*:	fe 0e 00 0c 	          ADDSNV    TXSTAT,D0Re0,D0\.7
-.*:	bd 10 00 0c 	          ADDSLE    PC,D0Re0,D1Re0
-.*:	5d 1e 00 0c 	          ADDSLE    D1Re0,D0Re0,D1\.7
-.*:	3d 20 00 0c 	          ADDSLE    D0Re0,D0Re0,RD
-.*:	1d 32 00 0c 	          ADDSLE    TXENABLE,D0Re0,A0FrP
-.*:	fd 32 00 0c 	          ADDSLE    TXSTAT,D0Re0,A0FrP
-.*:	bd 3e 00 0c 	          ADDSLE    PC,D0Re0,A0\.7
-.*:	54 c0 01 0c 	          ADDSLS    D1Re0,D0\.7,D0Re0
-.*:	2d c2 01 0c 	          ADDSPL    D0Re0,D0\.7,A1LbP
-.*:	0c ce 01 0c 	          ADDSPL    TXENABLE,D0\.7,D0\.7
-.*:	5c ce 01 0c 	          ADDSLE    D1Re0,D0\.7,D0\.7
-.*:	fc ce 01 0c 	          ADDSLE    TXSTAT,D0\.7,D0\.7
-.*:	5d d0 01 0c 	          ADDSLE    D1Re0,D0\.7,D1Re0
-.*:	3d de 01 0c 	          ADDSLE    D0Re0,D0\.7,D1\.7
-.*:	0d e0 01 0c 	          ADDSPL    TXENABLE,D0\.7,RD
-.*:	fd e0 01 0c 	          ADDSLE    TXSTAT,D0\.7,RD
-.*:	bd f2 01 0c 	          ADDSLE    PC,D0\.7,A0FrP
-.*:	5d fe 01 0c 	          ADDSLE    D1Re0,D0\.7,A0\.7
-.*:	94 00 08 0c 	          ADDSLS    A1LbP,D0Re0,D0Re0
-.*:	bd 02 08 0c 	          ADDSLE    PCX,D0Re0,A1LbP
-.*:	9e 0e 08 0c 	          ADDSNV    A1LbP,D0Re0,D0\.7
-.*:	9d 10 08 0c 	          ADDSLE    A1LbP,D0Re0,D1Re0
-.*:	ad 1e 08 0c 	          ADDSPL    PCX,D0Re0,D1\.7
-.*:	7d 32 08 0c 	          ADDSLE    A0FrP,D0Re0,A0FrP
-.*:	9d 3e 08 0c 	          ADDSLE    A1LbP,D0Re0,A0\.7
-.*:	ac c0 09 0c 	          ADDSPL    PCX,D0\.7,D0Re0
-.*:	64 ce 09 0c 	          ADDSNE    A0FrP,D0\.7,D0\.7
-.*:	b4 ce 09 0c 	          ADDSLS    PCX,D0\.7,D0\.7
-.*:	bd d0 09 0c 	          ADDSLE    PCX,D0\.7,D1Re0
-.*:	7d e0 09 0c 	          ADDSLE    A0FrP,D0\.7,RD
-.*:	9d f2 09 0c 	          ADDSLE    A1LbP,D0\.7,A0FrP
-.*:	ad fe 09 0c 	          ADDSPL    PCX,D0\.7,A0\.7
-.*:	fe 0e 18 0c 	          ADDSNV    TXMASKI,D0Re0,D0\.7
-.*:	fd 32 18 0c 	          ADDSLE    TXMASKI,D0Re0,A0FrP
-.*:	ec ce 19 0c 	          ADDSPL    TXMASKI,D0\.7,D0\.7
-.*:	fd e0 19 0c 	          ADDSLE    TXMASKI,D0\.7,RD
-.*:	44 00 38 0c 	          ADDSNE    D1\.7,D0Re0,D0Re0
-.*:	5d 02 38 0c 	          ADDSLE    D1\.7,D0Re0,A1LbP
-.*:	3e 0e 38 0c 	          ADDSNV    D0\.7,D0Re0,D0\.7
-.*:	7e 0e 38 0c 	          ADDSNV    A0\.7,D0Re0,D0\.7
-.*:	4d 10 38 0c 	          ADDSPL    D1\.7,D0Re0,D1Re0
-.*:	5d 1e 38 0c 	          ADDSLE    D1\.7,D0Re0,D1\.7
-.*:	4d 20 38 0c 	          ADDSPL    D1\.7,D0Re0,RD
-.*:	5d 32 38 0c 	          ADDSLE    D1\.7,D0Re0,A0FrP
-.*:	5d 3e 38 0c 	          ADDSLE    D1\.7,D0Re0,A0\.7
-.*:	54 c0 39 0c 	          ADDSLS    D1\.7,D0\.7,D0Re0
-.*:	5d c2 39 0c 	          ADDSLE    D1\.7,D0\.7,A1LbP
-.*:	3e ce 39 0c 	          ADDSNV    D0\.7,D0\.7,D0\.7
-.*:	7e ce 39 0c 	          ADDSNV    A0\.7,D0\.7,D0\.7
-.*:	5d d0 39 0c 	          ADDSLE    D1\.7,D0\.7,D1Re0
-.*:	5d de 39 0c 	          ADDSLE    D1\.7,D0\.7,D1\.7
-.*:	5d e0 39 0c 	          ADDSLE    D1\.7,D0\.7,RD
-.*:	5d f2 39 0c 	          ADDSLE    D1\.7,D0\.7,A0FrP
-.*:	5d fe 39 0c 	          ADDSLE    D1\.7,D0\.7,A0\.7
-.*:	dd 02 80 0c 	          ADDSLE    RA,D0Re0,A1LbP
-.*:	dd 1e 80 0c 	          ADDSLE    RA,D0Re0,D1\.7
-.*:	cc c0 81 0c 	          ADDSPL    RA,D0\.7,D0Re0
-.*:	dd d0 81 0c 	          ADDSLE    RA,D0\.7,D1Re0
-.*:	dd fe 81 0c 	          ADDSLE    RA,D0\.7,A0\.7
-.*:	de 0e b0 0c 	          ADDSNV    RAM8X32,D0Re0,D0\.7
-.*:	dd 32 b0 0c 	          ADDSLE    RAM8X32,D0Re0,A0FrP
-.*:	cc ce b1 0c 	          ADDSPL    RAM8X32,D0\.7,D0\.7
-.*:	dd e0 b1 0c 	          ADDSLE    RAM8X32,D0\.7,RD
-.*:	dd 02 b8 0c 	          ADDSLE    RAM8X,D0Re0,A1LbP
-.*:	dd 1e b8 0c 	          ADDSLE    RAM8X,D0Re0,D1\.7
-.*:	cc c0 b9 0c 	          ADDSPL    RAM8X,D0\.7,D0Re0
-.*:	dd d0 b9 0c 	          ADDSLE    RAM8X,D0\.7,D1Re0
-.*:	dd fe b9 0c 	          ADDSLE    RAM8X,D0\.7,A0\.7
-.*:	de 0e c0 0c 	          ADDSNV    RABZ,D0Re0,D0\.7
-.*:	dd 32 c0 0c 	          ADDSLE    RABZ,D0Re0,A0FrP
-.*:	cc ce c1 0c 	          ADDSPL    RABZ,D0\.7,D0\.7
-.*:	dd e0 c1 0c 	          ADDSLE    RABZ,D0\.7,RD
-.*:	dd 02 e8 0c 	          ADDSLE    RAWX,D0Re0,A1LbP
-.*:	dd 1e e8 0c 	          ADDSLE    RAWX,D0Re0,D1\.7
-.*:	cc c0 e9 0c 	          ADDSPL    RAWX,D0\.7,D0Re0
-.*:	dd d0 e9 0c 	          ADDSLE    RAWX,D0\.7,D1Re0
-.*:	dd fe e9 0c 	          ADDSLE    RAWX,D0\.7,A0\.7
-.*:	dd 02 f8 0c 	          ADDSLE    RAMX,D0Re0,A1LbP
-.*:	de 0e f8 0c 	          ADDSNV    RAMX,D0Re0,D0\.7
-.*:	dd 1e f8 0c 	          ADDSLE    RAMX,D0Re0,D1\.7
-.*:	dd 32 f8 0c 	          ADDSLE    RAMX,D0Re0,A0FrP
-.*:	cc c0 f9 0c 	          ADDSPL    RAMX,D0\.7,D0Re0
-.*:	1e ce f9 0c 	          ADDSNV    TXIDLECYC,D0\.7,D0\.7
-.*:	dd d0 f9 0c 	          ADDSLE    RAMX,D0\.7,D1Re0
-.*:	dd e0 f9 0c 	          ADDSLE    RAMX,D0\.7,RD
-.*:	dd fe f9 0c 	          ADDSLE    RAMX,D0\.7,A0\.7
-.*:	bc 00 00 0d 	          ADDSLE    PC,D1Re0,D1Re0
-.*:	5d 02 00 0d 	          ADDSLE    D1Re0,D1Re0,A1LbP
-.*:	1e 0e 00 0d 	          ADDSNV    TXENABLE,D1Re0,D1\.7
-.*:	5e 0e 00 0d 	          ADDSNV    D1Re0,D1Re0,D1\.7
-.*:	fe 0e 00 0d 	          ADDSNV    TXSTAT,D1Re0,D1\.7
-.*:	bd 10 00 0d 	          ADDSLE    PC,D1Re0,D0Re0
-.*:	5d 1e 00 0d 	          ADDSLE    D1Re0,D1Re0,D0\.7
-.*:	3d 20 00 0d 	          ADDSLE    D0Re0,D1Re0,RD
-.*:	1d 32 00 0d 	          ADDSLE    TXENABLE,D1Re0,A0FrP
-.*:	fd 32 00 0d 	          ADDSLE    TXSTAT,D1Re0,A0FrP
-.*:	bd 3e 00 0d 	          ADDSLE    PC,D1Re0,A0\.7
-.*:	54 c0 01 0d 	          ADDSLS    D1Re0,D1\.7,D1Re0
-.*:	2d c2 01 0d 	          ADDSPL    D0Re0,D1\.7,A1LbP
-.*:	0c ce 01 0d 	          ADDSPL    TXENABLE,D1\.7,D1\.7
-.*:	5c ce 01 0d 	          ADDSLE    D1Re0,D1\.7,D1\.7
-.*:	fc ce 01 0d 	          ADDSLE    TXSTAT,D1\.7,D1\.7
-.*:	5d d0 01 0d 	          ADDSLE    D1Re0,D1\.7,D0Re0
-.*:	3d de 01 0d 	          ADDSLE    D0Re0,D1\.7,D0\.7
-.*:	0d e0 01 0d 	          ADDSPL    TXENABLE,D1\.7,RD
-.*:	fd e0 01 0d 	          ADDSLE    TXSTAT,D1\.7,RD
-.*:	bd f2 01 0d 	          ADDSLE    PC,D1\.7,A0FrP
-.*:	5d fe 01 0d 	          ADDSLE    D1Re0,D1\.7,A0\.7
-.*:	94 00 08 0d 	          ADDSLS    A1LbP,D1Re0,D1Re0
-.*:	bd 02 08 0d 	          ADDSLE    PCX,D1Re0,A1LbP
-.*:	9e 0e 08 0d 	          ADDSNV    A1LbP,D1Re0,D1\.7
-.*:	9d 10 08 0d 	          ADDSLE    A1LbP,D1Re0,D0Re0
-.*:	ad 1e 08 0d 	          ADDSPL    PCX,D1Re0,D0\.7
-.*:	7d 32 08 0d 	          ADDSLE    A0FrP,D1Re0,A0FrP
-.*:	9d 3e 08 0d 	          ADDSLE    A1LbP,D1Re0,A0\.7
-.*:	ac c0 09 0d 	          ADDSPL    PCX,D1\.7,D1Re0
-.*:	64 ce 09 0d 	          ADDSNE    A0FrP,D1\.7,D1\.7
-.*:	b4 ce 09 0d 	          ADDSLS    PCX,D1\.7,D1\.7
-.*:	bd d0 09 0d 	          ADDSLE    PCX,D1\.7,D0Re0
-.*:	7d e0 09 0d 	          ADDSLE    A0FrP,D1\.7,RD
-.*:	9d f2 09 0d 	          ADDSLE    A1LbP,D1\.7,A0FrP
-.*:	ad fe 09 0d 	          ADDSPL    PCX,D1\.7,A0\.7
-.*:	fe 0e 18 0d 	          ADDSNV    TXMASKI,D1Re0,D1\.7
-.*:	fd 32 18 0d 	          ADDSLE    TXMASKI,D1Re0,A0FrP
-.*:	ec ce 19 0d 	          ADDSPL    TXMASKI,D1\.7,D1\.7
-.*:	fd e0 19 0d 	          ADDSLE    TXMASKI,D1\.7,RD
-.*:	44 00 38 0d 	          ADDSNE    D1\.7,D1Re0,D1Re0
-.*:	5d 02 38 0d 	          ADDSLE    D1\.7,D1Re0,A1LbP
-.*:	3e 0e 38 0d 	          ADDSNV    D0\.7,D1Re0,D1\.7
-.*:	7e 0e 38 0d 	          ADDSNV    A0\.7,D1Re0,D1\.7
-.*:	4d 10 38 0d 	          ADDSPL    D1\.7,D1Re0,D0Re0
-.*:	5d 1e 38 0d 	          ADDSLE    D1\.7,D1Re0,D0\.7
-.*:	4d 20 38 0d 	          ADDSPL    D1\.7,D1Re0,RD
-.*:	5d 32 38 0d 	          ADDSLE    D1\.7,D1Re0,A0FrP
-.*:	5d 3e 38 0d 	          ADDSLE    D1\.7,D1Re0,A0\.7
-.*:	54 c0 39 0d 	          ADDSLS    D1\.7,D1\.7,D1Re0
-.*:	5d c2 39 0d 	          ADDSLE    D1\.7,D1\.7,A1LbP
-.*:	3e ce 39 0d 	          ADDSNV    D0\.7,D1\.7,D1\.7
-.*:	7e ce 39 0d 	          ADDSNV    A0\.7,D1\.7,D1\.7
-.*:	5d d0 39 0d 	          ADDSLE    D1\.7,D1\.7,D0Re0
-.*:	5d de 39 0d 	          ADDSLE    D1\.7,D1\.7,D0\.7
-.*:	5d e0 39 0d 	          ADDSLE    D1\.7,D1\.7,RD
-.*:	5d f2 39 0d 	          ADDSLE    D1\.7,D1\.7,A0FrP
-.*:	5d fe 39 0d 	          ADDSLE    D1\.7,D1\.7,A0\.7
-.*:	dd 02 80 0d 	          ADDSLE    RA,D1Re0,A1LbP
-.*:	dd 1e 80 0d 	          ADDSLE    RA,D1Re0,D0\.7
-.*:	cc c0 81 0d 	          ADDSPL    RA,D1\.7,D1Re0
-.*:	dd d0 81 0d 	          ADDSLE    RA,D1\.7,D0Re0
-.*:	dd fe 81 0d 	          ADDSLE    RA,D1\.7,A0\.7
-.*:	de 0e b0 0d 	          ADDSNV    RAM8X32,D1Re0,D1\.7
-.*:	dd 32 b0 0d 	          ADDSLE    RAM8X32,D1Re0,A0FrP
-.*:	cc ce b1 0d 	          ADDSPL    RAM8X32,D1\.7,D1\.7
-.*:	dd e0 b1 0d 	          ADDSLE    RAM8X32,D1\.7,RD
-.*:	dd 02 b8 0d 	          ADDSLE    RAM8X,D1Re0,A1LbP
-.*:	dd 1e b8 0d 	          ADDSLE    RAM8X,D1Re0,D0\.7
-.*:	cc c0 b9 0d 	          ADDSPL    RAM8X,D1\.7,D1Re0
-.*:	dd d0 b9 0d 	          ADDSLE    RAM8X,D1\.7,D0Re0
-.*:	dd fe b9 0d 	          ADDSLE    RAM8X,D1\.7,A0\.7
-.*:	de 0e c0 0d 	          ADDSNV    RABZ,D1Re0,D1\.7
-.*:	dd 32 c0 0d 	          ADDSLE    RABZ,D1Re0,A0FrP
-.*:	cc ce c1 0d 	          ADDSPL    RABZ,D1\.7,D1\.7
-.*:	dd e0 c1 0d 	          ADDSLE    RABZ,D1\.7,RD
-.*:	dd 02 e8 0d 	          ADDSLE    RAWX,D1Re0,A1LbP
-.*:	dd 1e e8 0d 	          ADDSLE    RAWX,D1Re0,D0\.7
-.*:	cc c0 e9 0d 	          ADDSPL    RAWX,D1\.7,D1Re0
-.*:	dd d0 e9 0d 	          ADDSLE    RAWX,D1\.7,D0Re0
-.*:	dd fe e9 0d 	          ADDSLE    RAWX,D1\.7,A0\.7
-.*:	dd 02 f8 0d 	          ADDSLE    RAMX,D1Re0,A1LbP
-.*:	de 0e f8 0d 	          ADDSNV    RAMX,D1Re0,D1\.7
-.*:	dd 1e f8 0d 	          ADDSLE    RAMX,D1Re0,D0\.7
-.*:	dd 32 f8 0d 	          ADDSLE    RAMX,D1Re0,A0FrP
-.*:	cc c0 f9 0d 	          ADDSPL    RAMX,D1\.7,D1Re0
-.*:	1e ce f9 0d 	          ADDSNV    TXIDLECYC,D1\.7,D1\.7
-.*:	dd d0 f9 0d 	          ADDSLE    RAMX,D1\.7,D0Re0
-.*:	dd e0 f9 0d 	          ADDSLE    RAMX,D1\.7,RD
-.*:	dd fe f9 0d 	          ADDSLE    RAMX,D1\.7,A0\.7
-.*:	1c 20 00 0e 	          ADDSLE    D0Re0,D0Re0,#0x80
-.*:	e0 3f 00 0e 	          ADDS      TXENABLE,D0Re0,#0xff
-.*:	e4 df 01 0e 	          ADDS      D1Re0,D0\.7,#0x7f
-.*:	2a e0 01 0e 	          ADDS      PC,D0\.7,#0x80
-.*:	ee ff 01 0e 	          ADDS      TXSTAT,D0\.7,#0xff
-.*:	e8 3f 08 0e 	          ADDS      A1LbP,D0Re0,#0xff
-.*:	e6 ff 09 0e 	          ADDS      A0FrP,D0\.7,#0xff
-.*:	ee ff 19 0e 	          ADDS      TXMASKI,D0\.7,#0xff
-.*:	1e 20 38 0e 	          ADDSNV    D0\.7,D0Re0,#0x80
-.*:	e4 3f 38 0e 	          ADDS      D1\.7,D0Re0,#0xff
-.*:	04 e0 39 0e 	          ADDSNE    D0\.7,D0\.7,#0x80
-.*:	e6 ff 39 0e 	          ADDS      A0\.7,D0\.7,#0xff
-.*:	ec 1f b0 0e 	          ADDS      RAM8X32,D0Re0,#0x7f
-.*:	ec 3f b8 0e 	          ADDS      RAM8X,D0Re0,#0xff
-.*:	2c e0 c1 0e 	          ADDS      RABZ,D0\.7,#0x80
-.*:	e0 1f f8 0e 	          ADDS      TXIDLECYC,D0Re0,#0x7f
-.*:	20 e0 f9 0e 	          ADDS      TXIDLECYC,D0\.7,#0x80
-.*:	ea 1f 00 0f 	          ADDS      PC,D1Re0,#0x7f
-.*:	cc 3f 00 0f 	          ADDSPL    D1Re0,D1Re0,#0xff
-.*:	e0 df 01 0f 	          ADDS      TXENABLE,D1\.7,#0x7f
-.*:	22 e0 01 0f 	          ADDS      D0Re0,D1\.7,#0x80
-.*:	e4 ff 01 0f 	          ADDS      D1Re0,D1\.7,#0xff
-.*:	2a 20 08 0f 	          ADDS      PCX,D1Re0,#0x80
-.*:	28 e0 09 0f 	          ADDS      A1LbP,D1\.7,#0x80
-.*:	ee df 19 0f 	          ADDS      TXMASKI,D1\.7,#0x7f
-.*:	e8 1f 38 0f 	          ADDS      A1\.7,D1Re0,#0x7f
-.*:	de 3f 38 0f 	          ADDSNV    D1\.7,D1Re0,#0xff
-.*:	e6 df 39 0f 	          ADDS      A0\.7,D1\.7,#0x7f
-.*:	de ff 39 0f 	          ADDSNV    D1\.7,D1\.7,#0xff
-.*:	2c e0 81 0f 	          ADDS      RA,D1\.7,#0x80
-.*:	ec 1f b8 0f 	          ADDS      RAM8X,D1Re0,#0x7f
-.*:	ec 3f c0 0f 	          ADDS      RABZ,D1Re0,#0xff
-.*:	2c e0 e9 0f 	          ADDS      RAWX,D1\.7,#0x80
-.*:	e0 df f9 0f 	          ADDS      TXIDLECYC,D1\.7,#0x7f
-.*:	01 02 00 10 	          SUB       D0Re0,D0Re0,A1LbP
-.*:	01 1e 00 10 	          SUB       D0Re0,D0Re0,D1\.7
-.*:	00 c0 01 10 	          SUB       D0Re0,D0\.7,D0Re0
-.*:	01 fe 01 10 	          SUB       D0Re0,D0\.7,A0\.7
-.*:	05 0e 38 10 	          NEG       D0\.7,A1\.7
-.*:	05 32 38 10 	          NEG       D0\.7,A0FrP
-.*:	01 de 39 10 	          SUB       D0\.7,D0\.7,D1\.7
-.*:	00 0e 00 11 	          SUB       D1Re0,D1Re0,D1\.7
-.*:	01 20 00 11 	          SUB       D1Re0,D1Re0,RD
-.*:	00 ce 01 11 	          SUB       D1Re0,D1\.7,D1\.7
-.*:	04 00 38 11 	          NEG       D1\.7,D1Re0
-.*:	05 10 38 11 	          NEG       D1\.7,D0Re0
-.*:	05 3e 38 11 	          NEG       D1\.7,A0\.7
-.*:	01 f2 39 11 	          SUB       D1\.7,D1\.7,A0FrP
-.*:	04 00 04 12 	          NEG       D0Re0,#0x8000
-.*:	f9 ff 3b 12 	          SUBT      D0\.7,D0\.7,#0x7fff
-.*:	f9 ff 3f 12 	          SUBT      D0\.7,D0\.7,#0xffff
-.*:	01 00 04 13 	          SUBT      D1Re0,D1Re0,#0x8000
-.*:	fe ff 07 13 	          NEG       D1Re0,#-1
-.*:	06 00 3c 13 	          NEG       D1\.7,#-32768
-.*:	3c 00 00 14 	          SUBLE     D0Re0,D0Re0,D0Re0
-.*:	1d 02 00 14 	          SUBLE     TXENABLE,D0Re0,A1LbP
-.*:	fd 02 00 14 	          SUBLE     TXSTAT,D0Re0,A1LbP
-.*:	3e 0e 00 14 	          SUBNV     D0Re0,D0Re0,D0\.7
-.*:	be 0e 00 14 	          SUBNV     PC,D0Re0,D0\.7
-.*:	3d 10 00 14 	          SUBLE     D0Re0,D0Re0,D1Re0
-.*:	1d 1e 00 14 	          SUBLE     TXENABLE,D0Re0,D1\.7
-.*:	fd 1e 00 14 	          SUBLE     TXSTAT,D0Re0,D1\.7
-.*:	bd 20 00 14 	          SUBLE     PC,D0Re0,RD
-.*:	5d 32 00 14 	          SUBLE     D1Re0,D0Re0,A0FrP
-.*:	3d 3e 00 14 	          SUBLE     D0Re0,D0Re0,A0\.7
-.*:	04 c0 01 14 	          SUBNE     TXENABLE,D0\.7,D0Re0
-.*:	f4 c0 01 14 	          SUBLS     TXSTAT,D0\.7,D0Re0
-.*:	ad c2 01 14 	          SUBPL     PC,D0\.7,A1LbP
-.*:	34 ce 01 14 	          SUBLS     D0Re0,D0\.7,D0\.7
-.*:	b4 ce 01 14 	          SUBLS     PC,D0\.7,D0\.7
-.*:	0d d0 01 14 	          SUBPL     TXENABLE,D0\.7,D1Re0
-.*:	fd d0 01 14 	          SUBLE     TXSTAT,D0\.7,D1Re0
-.*:	bd de 01 14 	          SUBLE     PC,D0\.7,D1\.7
-.*:	5d e0 01 14 	          SUBLE     D1Re0,D0\.7,RD
-.*:	3d f2 01 14 	          SUBLE     D0Re0,D0\.7,A0FrP
-.*:	1d fe 01 14 	          SUBLE     TXENABLE,D0\.7,A0\.7
-.*:	fd fe 01 14 	          SUBLE     TXSTAT,D0\.7,A0\.7
-.*:	6d 02 08 14 	          SUBPL     A0FrP,D0Re0,A1LbP
-.*:	7e 0e 08 14 	          SUBNV     A0FrP,D0Re0,D0\.7
-.*:	be 0e 08 14 	          SUBNV     PCX,D0Re0,D0\.7
-.*:	7d 1e 08 14 	          SUBLE     A0FrP,D0Re0,D1\.7
-.*:	9d 20 08 14 	          SUBLE     A1LbP,D0Re0,RD
-.*:	ad 32 08 14 	          SUBPL     PCX,D0Re0,A0FrP
-.*:	7c c0 09 14 	          SUBLE     A0FrP,D0\.7,D0Re0
-.*:	9d c2 09 14 	          SUBLE     A1LbP,D0\.7,A1LbP
-.*:	8c ce 09 14 	          SUBPL     A1LbP,D0\.7,D0\.7
-.*:	7d d0 09 14 	          SUBLE     A0FrP,D0\.7,D1Re0
-.*:	9d de 09 14 	          SUBLE     A1LbP,D0\.7,D1\.7
-.*:	bd e0 09 14 	          SUBLE     PCX,D0\.7,RD
-.*:	7d fe 09 14 	          SUBLE     A0FrP,D0\.7,A0\.7
-.*:	fd 02 18 14 	          SUBLE     TXMASKI,D0Re0,A1LbP
-.*:	fd 1e 18 14 	          SUBLE     TXMASKI,D0Re0,D1\.7
-.*:	fc c0 19 14 	          SUBLE     TXMASKI,D0\.7,D0Re0
-.*:	fd d0 19 14 	          SUBLE     TXMASKI,D0\.7,D1Re0
-.*:	fd fe 19 14 	          SUBLE     TXMASKI,D0\.7,A0\.7
-.*:	94 00 38 14 	          SUBLS     A1\.7,D0Re0,D0Re0
-.*:	9d 02 38 14 	          SUBLE     A1\.7,D0Re0,A1LbP
-.*:	5e 0e 38 14 	          SUBNV     D1\.7,D0Re0,D0\.7
-.*:	9e 0e 38 14 	          SUBNV     A1\.7,D0Re0,D0\.7
-.*:	9d 10 38 14 	          SUBLE     A1\.7,D0Re0,D1Re0
-.*:	9d 1e 38 14 	          SUBLE     A1\.7,D0Re0,D1\.7
-.*:	9d 20 38 14 	          SUBLE     A1\.7,D0Re0,RD
-.*:	9d 32 38 14 	          SUBLE     A1\.7,D0Re0,A0FrP
-.*:	9d 3e 38 14 	          SUBLE     A1\.7,D0Re0,A0\.7
-.*:	84 c0 39 14 	          SUBNE     A1\.7,D0\.7,D0Re0
-.*:	9d c2 39 14 	          SUBLE     A1\.7,D0\.7,A1LbP
-.*:	5e ce 39 14 	          SUBNV     D1\.7,D0\.7,D0\.7
-.*:	9e ce 39 14 	          SUBNV     A1\.7,D0\.7,D0\.7
-.*:	8d d0 39 14 	          SUBPL     A1\.7,D0\.7,D1Re0
-.*:	9d de 39 14 	          SUBLE     A1\.7,D0\.7,D1\.7
-.*:	8d e0 39 14 	          SUBPL     A1\.7,D0\.7,RD
-.*:	9d f2 39 14 	          SUBLE     A1\.7,D0\.7,A0FrP
-.*:	9d fe 39 14 	          SUBLE     A1\.7,D0\.7,A0\.7
-.*:	de 0e 80 14 	          SUBNV     RA,D0Re0,D0\.7
-.*:	dd 32 80 14 	          SUBLE     RA,D0Re0,A0FrP
-.*:	cc ce 81 14 	          SUBPL     RA,D0\.7,D0\.7
-.*:	dd e0 81 14 	          SUBLE     RA,D0\.7,RD
-.*:	dd 02 b0 14 	          SUBLE     RAM8X32,D0Re0,A1LbP
-.*:	dd 1e b0 14 	          SUBLE     RAM8X32,D0Re0,D1\.7
-.*:	cc c0 b1 14 	          SUBPL     RAM8X32,D0\.7,D0Re0
-.*:	dd d0 b1 14 	          SUBLE     RAM8X32,D0\.7,D1Re0
-.*:	dd fe b1 14 	          SUBLE     RAM8X32,D0\.7,A0\.7
-.*:	de 0e b8 14 	          SUBNV     RAM8X,D0Re0,D0\.7
-.*:	dd 32 b8 14 	          SUBLE     RAM8X,D0Re0,A0FrP
-.*:	cc ce b9 14 	          SUBPL     RAM8X,D0\.7,D0\.7
-.*:	dd e0 b9 14 	          SUBLE     RAM8X,D0\.7,RD
-.*:	dd 02 c0 14 	          SUBLE     RABZ,D0Re0,A1LbP
-.*:	dd 1e c0 14 	          SUBLE     RABZ,D0Re0,D1\.7
-.*:	cc c0 c1 14 	          SUBPL     RABZ,D0\.7,D0Re0
-.*:	dd d0 c1 14 	          SUBLE     RABZ,D0\.7,D1Re0
-.*:	dd fe c1 14 	          SUBLE     RABZ,D0\.7,A0\.7
-.*:	de 0e e8 14 	          SUBNV     RAWX,D0Re0,D0\.7
-.*:	dd 32 e8 14 	          SUBLE     RAWX,D0Re0,A0FrP
-.*:	cc ce e9 14 	          SUBPL     RAWX,D0\.7,D0\.7
-.*:	dd e0 e9 14 	          SUBLE     RAWX,D0\.7,RD
-.*:	cc 00 f8 14 	          SUBPL     RAMX,D0Re0,D0Re0
-.*:	1e 0e f8 14 	          SUBNV     TXIDLECYC,D0Re0,D0\.7
-.*:	dd 10 f8 14 	          SUBLE     RAMX,D0Re0,D1Re0
-.*:	dd 20 f8 14 	          SUBLE     RAMX,D0Re0,RD
-.*:	dd 3e f8 14 	          SUBLE     RAMX,D0Re0,A0\.7
-.*:	dd c2 f9 14 	          SUBLE     RAMX,D0\.7,A1LbP
-.*:	de ce f9 14 	          SUBNV     RAMX,D0\.7,D0\.7
-.*:	dd de f9 14 	          SUBLE     RAMX,D0\.7,D1\.7
-.*:	dd f2 f9 14 	          SUBLE     RAMX,D0\.7,A0FrP
-.*:	3c 00 00 15 	          SUBLE     D0Re0,D1Re0,D1Re0
-.*:	1d 02 00 15 	          SUBLE     TXENABLE,D1Re0,A1LbP
-.*:	fd 02 00 15 	          SUBLE     TXSTAT,D1Re0,A1LbP
-.*:	3e 0e 00 15 	          SUBNV     D0Re0,D1Re0,D1\.7
-.*:	be 0e 00 15 	          SUBNV     PC,D1Re0,D1\.7
-.*:	3d 10 00 15 	          SUBLE     D0Re0,D1Re0,D0Re0
-.*:	1d 1e 00 15 	          SUBLE     TXENABLE,D1Re0,D0\.7
-.*:	fd 1e 00 15 	          SUBLE     TXSTAT,D1Re0,D0\.7
-.*:	bd 20 00 15 	          SUBLE     PC,D1Re0,RD
-.*:	5d 32 00 15 	          SUBLE     D1Re0,D1Re0,A0FrP
-.*:	3d 3e 00 15 	          SUBLE     D0Re0,D1Re0,A0\.7
-.*:	04 c0 01 15 	          SUBNE     TXENABLE,D1\.7,D1Re0
-.*:	f4 c0 01 15 	          SUBLS     TXSTAT,D1\.7,D1Re0
-.*:	ad c2 01 15 	          SUBPL     PC,D1\.7,A1LbP
-.*:	34 ce 01 15 	          SUBLS     D0Re0,D1\.7,D1\.7
-.*:	b4 ce 01 15 	          SUBLS     PC,D1\.7,D1\.7
-.*:	0d d0 01 15 	          SUBPL     TXENABLE,D1\.7,D0Re0
-.*:	fd d0 01 15 	          SUBLE     TXSTAT,D1\.7,D0Re0
-.*:	bd de 01 15 	          SUBLE     PC,D1\.7,D0\.7
-.*:	5d e0 01 15 	          SUBLE     D1Re0,D1\.7,RD
-.*:	3d f2 01 15 	          SUBLE     D0Re0,D1\.7,A0FrP
-.*:	1d fe 01 15 	          SUBLE     TXENABLE,D1\.7,A0\.7
-.*:	fd fe 01 15 	          SUBLE     TXSTAT,D1\.7,A0\.7
-.*:	6d 02 08 15 	          SUBPL     A0FrP,D1Re0,A1LbP
-.*:	7e 0e 08 15 	          SUBNV     A0FrP,D1Re0,D1\.7
-.*:	be 0e 08 15 	          SUBNV     PCX,D1Re0,D1\.7
-.*:	7d 1e 08 15 	          SUBLE     A0FrP,D1Re0,D0\.7
-.*:	9d 20 08 15 	          SUBLE     A1LbP,D1Re0,RD
-.*:	ad 32 08 15 	          SUBPL     PCX,D1Re0,A0FrP
-.*:	7c c0 09 15 	          SUBLE     A0FrP,D1\.7,D1Re0
-.*:	9d c2 09 15 	          SUBLE     A1LbP,D1\.7,A1LbP
-.*:	8c ce 09 15 	          SUBPL     A1LbP,D1\.7,D1\.7
-.*:	7d d0 09 15 	          SUBLE     A0FrP,D1\.7,D0Re0
-.*:	9d de 09 15 	          SUBLE     A1LbP,D1\.7,D0\.7
-.*:	bd e0 09 15 	          SUBLE     PCX,D1\.7,RD
-.*:	7d fe 09 15 	          SUBLE     A0FrP,D1\.7,A0\.7
-.*:	fd 02 18 15 	          SUBLE     TXMASKI,D1Re0,A1LbP
-.*:	fd 1e 18 15 	          SUBLE     TXMASKI,D1Re0,D0\.7
-.*:	fc c0 19 15 	          SUBLE     TXMASKI,D1\.7,D1Re0
-.*:	fd d0 19 15 	          SUBLE     TXMASKI,D1\.7,D0Re0
-.*:	fd fe 19 15 	          SUBLE     TXMASKI,D1\.7,A0\.7
-.*:	94 00 38 15 	          SUBLS     A1\.7,D1Re0,D1Re0
-.*:	9d 02 38 15 	          SUBLE     A1\.7,D1Re0,A1LbP
-.*:	5e 0e 38 15 	          SUBNV     D1\.7,D1Re0,D1\.7
-.*:	9e 0e 38 15 	          SUBNV     A1\.7,D1Re0,D1\.7
-.*:	9d 10 38 15 	          SUBLE     A1\.7,D1Re0,D0Re0
-.*:	9d 1e 38 15 	          SUBLE     A1\.7,D1Re0,D0\.7
-.*:	9d 20 38 15 	          SUBLE     A1\.7,D1Re0,RD
-.*:	9d 32 38 15 	          SUBLE     A1\.7,D1Re0,A0FrP
-.*:	9d 3e 38 15 	          SUBLE     A1\.7,D1Re0,A0\.7
-.*:	84 c0 39 15 	          SUBNE     A1\.7,D1\.7,D1Re0
-.*:	9d c2 39 15 	          SUBLE     A1\.7,D1\.7,A1LbP
-.*:	5e ce 39 15 	          SUBNV     D1\.7,D1\.7,D1\.7
-.*:	9e ce 39 15 	          SUBNV     A1\.7,D1\.7,D1\.7
-.*:	8d d0 39 15 	          SUBPL     A1\.7,D1\.7,D0Re0
-.*:	9d de 39 15 	          SUBLE     A1\.7,D1\.7,D0\.7
-.*:	8d e0 39 15 	          SUBPL     A1\.7,D1\.7,RD
-.*:	9d f2 39 15 	          SUBLE     A1\.7,D1\.7,A0FrP
-.*:	9d fe 39 15 	          SUBLE     A1\.7,D1\.7,A0\.7
-.*:	de 0e 80 15 	          SUBNV     RA,D1Re0,D1\.7
-.*:	dd 32 80 15 	          SUBLE     RA,D1Re0,A0FrP
-.*:	cc ce 81 15 	          SUBPL     RA,D1\.7,D1\.7
-.*:	dd e0 81 15 	          SUBLE     RA,D1\.7,RD
-.*:	dd 02 b0 15 	          SUBLE     RAM8X32,D1Re0,A1LbP
-.*:	dd 1e b0 15 	          SUBLE     RAM8X32,D1Re0,D0\.7
-.*:	cc c0 b1 15 	          SUBPL     RAM8X32,D1\.7,D1Re0
-.*:	dd d0 b1 15 	          SUBLE     RAM8X32,D1\.7,D0Re0
-.*:	dd fe b1 15 	          SUBLE     RAM8X32,D1\.7,A0\.7
-.*:	de 0e b8 15 	          SUBNV     RAM8X,D1Re0,D1\.7
-.*:	dd 32 b8 15 	          SUBLE     RAM8X,D1Re0,A0FrP
-.*:	cc ce b9 15 	          SUBPL     RAM8X,D1\.7,D1\.7
-.*:	dd e0 b9 15 	          SUBLE     RAM8X,D1\.7,RD
-.*:	dd 02 c0 15 	          SUBLE     RABZ,D1Re0,A1LbP
-.*:	dd 1e c0 15 	          SUBLE     RABZ,D1Re0,D0\.7
-.*:	cc c0 c1 15 	          SUBPL     RABZ,D1\.7,D1Re0
-.*:	dd d0 c1 15 	          SUBLE     RABZ,D1\.7,D0Re0
-.*:	dd fe c1 15 	          SUBLE     RABZ,D1\.7,A0\.7
-.*:	de 0e e8 15 	          SUBNV     RAWX,D1Re0,D1\.7
-.*:	dd 32 e8 15 	          SUBLE     RAWX,D1Re0,A0FrP
-.*:	cc ce e9 15 	          SUBPL     RAWX,D1\.7,D1\.7
-.*:	dd e0 e9 15 	          SUBLE     RAWX,D1\.7,RD
-.*:	cc 00 f8 15 	          SUBPL     RAMX,D1Re0,D1Re0
-.*:	1e 0e f8 15 	          SUBNV     TXIDLECYC,D1Re0,D1\.7
-.*:	dd 10 f8 15 	          SUBLE     RAMX,D1Re0,D0Re0
-.*:	dd 20 f8 15 	          SUBLE     RAMX,D1Re0,RD
-.*:	dd 3e f8 15 	          SUBLE     RAMX,D1Re0,A0\.7
-.*:	dd c2 f9 15 	          SUBLE     RAMX,D1\.7,A1LbP
-.*:	de ce f9 15 	          SUBNV     RAMX,D1\.7,D1\.7
-.*:	dd de f9 15 	          SUBLE     RAMX,D1\.7,D0\.7
-.*:	dd f2 f9 15 	          SUBLE     RAMX,D1\.7,A0FrP
-.*:	e0 1f 00 16 	          SUB       TXENABLE,D0Re0,#0x7f
-.*:	2a 20 00 16 	          SUB       PC,D0Re0,#0x80
-.*:	dc df 01 16 	          SUBLE     D0Re0,D0\.7,#0x7f
-.*:	1e e0 01 16 	          SUBNV     D0Re0,D0\.7,#0x80
-.*:	e0 ff 01 16 	          SUB       TXENABLE,D0\.7,#0xff
-.*:	26 20 08 16 	          SUB       A0FrP,D0Re0,#0x80
-.*:	ea df 09 16 	          SUB       PCX,D0\.7,#0x7f
-.*:	2e 20 18 16 	          SUB       TXMASKI,D0Re0,#0x80
-.*:	e4 1f 38 16 	          SUB       D1\.7,D0Re0,#0x7f
-.*:	28 20 38 16 	          SUB       A1\.7,D0Re0,#0x80
-.*:	de df 39 16 	          SUBNV     D0\.7,D0\.7,#0x7f
-.*:	28 e0 39 16 	          SUB       A1\.7,D0\.7,#0x80
-.*:	ec 3f 80 16 	          SUB       RA,D0Re0,#0xff
-.*:	2c e0 b1 16 	          SUB       RAM8X32,D0\.7,#0x80
-.*:	ec 1f c0 16 	          SUB       RABZ,D0Re0,#0x7f
-.*:	ec 3f e8 16 	          SUB       RAWX,D0Re0,#0xff
-.*:	e0 3f f8 16 	          SUB       TXIDLECYC,D0Re0,#0xff
-.*:	dc 1f 00 17 	          SUBLE     D1Re0,D1Re0,#0x7f
-.*:	20 20 00 17 	          SUB       TXENABLE,D1Re0,#0x80
-.*:	ea 3f 00 17 	          SUB       PC,D1Re0,#0xff
-.*:	ee df 01 17 	          SUB       TXSTAT,D1\.7,#0x7f
-.*:	dc ff 01 17 	          SUBLE     D1Re0,D1\.7,#0xff
-.*:	e8 1f 08 17 	          SUB       A1LbP,D1Re0,#0x7f
-.*:	e6 df 09 17 	          SUB       A0FrP,D1\.7,#0x7f
-.*:	ea ff 09 17 	          SUB       PCX,D1\.7,#0xff
-.*:	de 1f 38 17 	          SUBNV     D1\.7,D1Re0,#0x7f
-.*:	24 20 38 17 	          SUB       D1\.7,D1Re0,#0x80
-.*:	e8 3f 38 17 	          SUB       A1\.7,D1Re0,#0xff
-.*:	22 e0 39 17 	          SUB       D0\.7,D1\.7,#0x80
-.*:	ec 1f 80 17 	          SUB       RA,D1Re0,#0x7f
-.*:	ec 3f b0 17 	          SUB       RAM8X32,D1Re0,#0xff
-.*:	2c e0 b9 17 	          SUB       RAM8X,D1\.7,#0x80
-.*:	ec 1f e8 17 	          SUB       RAWX,D1Re0,#0x7f
-.*:	20 20 f8 17 	          SUB       TXIDLECYC,D1Re0,#0x80
-.*:	e0 ff f9 17 	          SUB       TXIDLECYC,D1\.7,#0xff
-.*:	04 0e 00 18 	          NEGS      D0Re0,D0\.7
-.*:	01 32 00 18 	          SUBS      D0Re0,D0Re0,A0FrP
-.*:	01 d0 01 18 	          SUBS      D0Re0,D0\.7,D1Re0
-.*:	05 02 38 18 	          NEGS      D0\.7,A1LbP
-.*:	05 1e 38 18 	          NEGS      D0\.7,D1\.7
-.*:	01 c2 39 18 	          SUBS      D0\.7,D0\.7,A1LbP
-.*:	00 00 00 19 	          SUBS      D1Re0,D1Re0,D1Re0
-.*:	01 10 00 19 	          SUBS      D1Re0,D1Re0,D0Re0
-.*:	01 3e 00 19 	          SUBS      D1Re0,D1Re0,A0\.7
-.*:	01 e0 01 19 	          SUBS      D1Re0,D1\.7,RD
-.*:	01 0e 38 19 	          SUBS      D1\.7,D1Re0,A1\.7
-.*:	05 20 38 19 	          NEGS      D1\.7,RD
-.*:	01 ce 39 19 	          SUBS      D1\.7,D1\.7,A1\.7
-.*:	fc ff 03 1a 	          NEGS      D0Re0,#0x7fff
-.*:	fa ff 07 1a 	          SUBS      D0Re0,D0Re0,#-1
-.*:	02 00 3c 1a 	          SUBS      D0\.7,D0\.7,#-32768
-.*:	f8 ff 03 1b 	          SUBS      D1Re0,D1Re0,#0x7fff
-.*:	f8 ff 07 1b 	          SUBS      D1Re0,D1Re0,#0xffff
-.*:	00 00 3c 1b 	          SUBS      D1\.7,D1\.7,#0x8000
-.*:	fc ff 3f 1b 	          NEGS      D1\.7,#0xffff
-.*:	bc 00 00 1c 	          SUBSLE    PC,D0Re0,D0Re0
-.*:	5d 02 00 1c 	          SUBSLE    D1Re0,D0Re0,A1LbP
-.*:	1e 0e 00 1c 	          SUBSNV    TXENABLE,D0Re0,D0\.7
-.*:	5e 0e 00 1c 	          SUBSNV    D1Re0,D0Re0,D0\.7
-.*:	fe 0e 00 1c 	          SUBSNV    TXSTAT,D0Re0,D0\.7
-.*:	bd 10 00 1c 	          SUBSLE    PC,D0Re0,D1Re0
-.*:	5d 1e 00 1c 	          SUBSLE    D1Re0,D0Re0,D1\.7
-.*:	3d 20 00 1c 	          SUBSLE    D0Re0,D0Re0,RD
-.*:	1d 32 00 1c 	          SUBSLE    TXENABLE,D0Re0,A0FrP
-.*:	fd 32 00 1c 	          SUBSLE    TXSTAT,D0Re0,A0FrP
-.*:	bd 3e 00 1c 	          SUBSLE    PC,D0Re0,A0\.7
-.*:	54 c0 01 1c 	          SUBSLS    D1Re0,D0\.7,D0Re0
-.*:	2d c2 01 1c 	          SUBSPL    D0Re0,D0\.7,A1LbP
-.*:	0c ce 01 1c 	          SUBSPL    TXENABLE,D0\.7,D0\.7
-.*:	5c ce 01 1c 	          SUBSLE    D1Re0,D0\.7,D0\.7
-.*:	fc ce 01 1c 	          SUBSLE    TXSTAT,D0\.7,D0\.7
-.*:	5d d0 01 1c 	          SUBSLE    D1Re0,D0\.7,D1Re0
-.*:	3d de 01 1c 	          SUBSLE    D0Re0,D0\.7,D1\.7
-.*:	0d e0 01 1c 	          SUBSPL    TXENABLE,D0\.7,RD
-.*:	fd e0 01 1c 	          SUBSLE    TXSTAT,D0\.7,RD
-.*:	bd f2 01 1c 	          SUBSLE    PC,D0\.7,A0FrP
-.*:	5d fe 01 1c 	          SUBSLE    D1Re0,D0\.7,A0\.7
-.*:	94 00 08 1c 	          SUBSLS    A1LbP,D0Re0,D0Re0
-.*:	bd 02 08 1c 	          SUBSLE    PCX,D0Re0,A1LbP
-.*:	9e 0e 08 1c 	          SUBSNV    A1LbP,D0Re0,D0\.7
-.*:	9d 10 08 1c 	          SUBSLE    A1LbP,D0Re0,D1Re0
-.*:	ad 1e 08 1c 	          SUBSPL    PCX,D0Re0,D1\.7
-.*:	7d 32 08 1c 	          SUBSLE    A0FrP,D0Re0,A0FrP
-.*:	9d 3e 08 1c 	          SUBSLE    A1LbP,D0Re0,A0\.7
-.*:	ac c0 09 1c 	          SUBSPL    PCX,D0\.7,D0Re0
-.*:	64 ce 09 1c 	          SUBSNE    A0FrP,D0\.7,D0\.7
-.*:	b4 ce 09 1c 	          SUBSLS    PCX,D0\.7,D0\.7
-.*:	bd d0 09 1c 	          SUBSLE    PCX,D0\.7,D1Re0
-.*:	7d e0 09 1c 	          SUBSLE    A0FrP,D0\.7,RD
-.*:	9d f2 09 1c 	          SUBSLE    A1LbP,D0\.7,A0FrP
-.*:	ad fe 09 1c 	          SUBSPL    PCX,D0\.7,A0\.7
-.*:	fe 0e 18 1c 	          SUBSNV    TXMASKI,D0Re0,D0\.7
-.*:	fd 32 18 1c 	          SUBSLE    TXMASKI,D0Re0,A0FrP
-.*:	ec ce 19 1c 	          SUBSPL    TXMASKI,D0\.7,D0\.7
-.*:	fd e0 19 1c 	          SUBSLE    TXMASKI,D0\.7,RD
-.*:	44 00 38 1c 	          SUBSNE    D1\.7,D0Re0,D0Re0
-.*:	5d 02 38 1c 	          SUBSLE    D1\.7,D0Re0,A1LbP
-.*:	3e 0e 38 1c 	          SUBSNV    D0\.7,D0Re0,D0\.7
-.*:	7e 0e 38 1c 	          SUBSNV    A0\.7,D0Re0,D0\.7
-.*:	4d 10 38 1c 	          SUBSPL    D1\.7,D0Re0,D1Re0
-.*:	5d 1e 38 1c 	          SUBSLE    D1\.7,D0Re0,D1\.7
-.*:	4d 20 38 1c 	          SUBSPL    D1\.7,D0Re0,RD
-.*:	5d 32 38 1c 	          SUBSLE    D1\.7,D0Re0,A0FrP
-.*:	5d 3e 38 1c 	          SUBSLE    D1\.7,D0Re0,A0\.7
-.*:	54 c0 39 1c 	          SUBSLS    D1\.7,D0\.7,D0Re0
-.*:	5d c2 39 1c 	          SUBSLE    D1\.7,D0\.7,A1LbP
-.*:	3e ce 39 1c 	          SUBSNV    D0\.7,D0\.7,D0\.7
-.*:	7e ce 39 1c 	          SUBSNV    A0\.7,D0\.7,D0\.7
-.*:	5d d0 39 1c 	          SUBSLE    D1\.7,D0\.7,D1Re0
-.*:	5d de 39 1c 	          SUBSLE    D1\.7,D0\.7,D1\.7
-.*:	5d e0 39 1c 	          SUBSLE    D1\.7,D0\.7,RD
-.*:	5d f2 39 1c 	          SUBSLE    D1\.7,D0\.7,A0FrP
-.*:	5d fe 39 1c 	          SUBSLE    D1\.7,D0\.7,A0\.7
-.*:	dd 02 80 1c 	          SUBSLE    RA,D0Re0,A1LbP
-.*:	dd 1e 80 1c 	          SUBSLE    RA,D0Re0,D1\.7
-.*:	cc c0 81 1c 	          SUBSPL    RA,D0\.7,D0Re0
-.*:	dd d0 81 1c 	          SUBSLE    RA,D0\.7,D1Re0
-.*:	dd fe 81 1c 	          SUBSLE    RA,D0\.7,A0\.7
-.*:	de 0e b0 1c 	          SUBSNV    RAM8X32,D0Re0,D0\.7
-.*:	dd 32 b0 1c 	          SUBSLE    RAM8X32,D0Re0,A0FrP
-.*:	cc ce b1 1c 	          SUBSPL    RAM8X32,D0\.7,D0\.7
-.*:	dd e0 b1 1c 	          SUBSLE    RAM8X32,D0\.7,RD
-.*:	dd 02 b8 1c 	          SUBSLE    RAM8X,D0Re0,A1LbP
-.*:	dd 1e b8 1c 	          SUBSLE    RAM8X,D0Re0,D1\.7
-.*:	cc c0 b9 1c 	          SUBSPL    RAM8X,D0\.7,D0Re0
-.*:	dd d0 b9 1c 	          SUBSLE    RAM8X,D0\.7,D1Re0
-.*:	dd fe b9 1c 	          SUBSLE    RAM8X,D0\.7,A0\.7
-.*:	de 0e c0 1c 	          SUBSNV    RABZ,D0Re0,D0\.7
-.*:	dd 32 c0 1c 	          SUBSLE    RABZ,D0Re0,A0FrP
-.*:	cc ce c1 1c 	          SUBSPL    RABZ,D0\.7,D0\.7
-.*:	dd e0 c1 1c 	          SUBSLE    RABZ,D0\.7,RD
-.*:	dd 02 e8 1c 	          SUBSLE    RAWX,D0Re0,A1LbP
-.*:	dd 1e e8 1c 	          SUBSLE    RAWX,D0Re0,D1\.7
-.*:	cc c0 e9 1c 	          SUBSPL    RAWX,D0\.7,D0Re0
-.*:	dd d0 e9 1c 	          SUBSLE    RAWX,D0\.7,D1Re0
-.*:	dd fe e9 1c 	          SUBSLE    RAWX,D0\.7,A0\.7
-.*:	dd 02 f8 1c 	          SUBSLE    RAMX,D0Re0,A1LbP
-.*:	de 0e f8 1c 	          SUBSNV    RAMX,D0Re0,D0\.7
-.*:	dd 1e f8 1c 	          SUBSLE    RAMX,D0Re0,D1\.7
-.*:	dd 32 f8 1c 	          SUBSLE    RAMX,D0Re0,A0FrP
-.*:	cc c0 f9 1c 	          SUBSPL    RAMX,D0\.7,D0Re0
-.*:	1e ce f9 1c 	          SUBSNV    TXIDLECYC,D0\.7,D0\.7
-.*:	dd d0 f9 1c 	          SUBSLE    RAMX,D0\.7,D1Re0
-.*:	dd e0 f9 1c 	          SUBSLE    RAMX,D0\.7,RD
-.*:	dd fe f9 1c 	          SUBSLE    RAMX,D0\.7,A0\.7
-.*:	bc 00 00 1d 	          SUBSLE    PC,D1Re0,D1Re0
-.*:	5d 02 00 1d 	          SUBSLE    D1Re0,D1Re0,A1LbP
-.*:	1e 0e 00 1d 	          SUBSNV    TXENABLE,D1Re0,D1\.7
-.*:	5e 0e 00 1d 	          SUBSNV    D1Re0,D1Re0,D1\.7
-.*:	fe 0e 00 1d 	          SUBSNV    TXSTAT,D1Re0,D1\.7
-.*:	bd 10 00 1d 	          SUBSLE    PC,D1Re0,D0Re0
-.*:	5d 1e 00 1d 	          SUBSLE    D1Re0,D1Re0,D0\.7
-.*:	3d 20 00 1d 	          SUBSLE    D0Re0,D1Re0,RD
-.*:	1d 32 00 1d 	          SUBSLE    TXENABLE,D1Re0,A0FrP
-.*:	fd 32 00 1d 	          SUBSLE    TXSTAT,D1Re0,A0FrP
-.*:	bd 3e 00 1d 	          SUBSLE    PC,D1Re0,A0\.7
-.*:	54 c0 01 1d 	          SUBSLS    D1Re0,D1\.7,D1Re0
-.*:	2d c2 01 1d 	          SUBSPL    D0Re0,D1\.7,A1LbP
-.*:	0c ce 01 1d 	          SUBSPL    TXENABLE,D1\.7,D1\.7
-.*:	5c ce 01 1d 	          SUBSLE    D1Re0,D1\.7,D1\.7
-.*:	fc ce 01 1d 	          SUBSLE    TXSTAT,D1\.7,D1\.7
-.*:	5d d0 01 1d 	          SUBSLE    D1Re0,D1\.7,D0Re0
-.*:	3d de 01 1d 	          SUBSLE    D0Re0,D1\.7,D0\.7
-.*:	0d e0 01 1d 	          SUBSPL    TXENABLE,D1\.7,RD
-.*:	fd e0 01 1d 	          SUBSLE    TXSTAT,D1\.7,RD
-.*:	bd f2 01 1d 	          SUBSLE    PC,D1\.7,A0FrP
-.*:	5d fe 01 1d 	          SUBSLE    D1Re0,D1\.7,A0\.7
-.*:	94 00 08 1d 	          SUBSLS    A1LbP,D1Re0,D1Re0
-.*:	bd 02 08 1d 	          SUBSLE    PCX,D1Re0,A1LbP
-.*:	9e 0e 08 1d 	          SUBSNV    A1LbP,D1Re0,D1\.7
-.*:	9d 10 08 1d 	          SUBSLE    A1LbP,D1Re0,D0Re0
-.*:	ad 1e 08 1d 	          SUBSPL    PCX,D1Re0,D0\.7
-.*:	7d 32 08 1d 	          SUBSLE    A0FrP,D1Re0,A0FrP
-.*:	9d 3e 08 1d 	          SUBSLE    A1LbP,D1Re0,A0\.7
-.*:	ac c0 09 1d 	          SUBSPL    PCX,D1\.7,D1Re0
-.*:	64 ce 09 1d 	          SUBSNE    A0FrP,D1\.7,D1\.7
-.*:	b4 ce 09 1d 	          SUBSLS    PCX,D1\.7,D1\.7
-.*:	bd d0 09 1d 	          SUBSLE    PCX,D1\.7,D0Re0
-.*:	7d e0 09 1d 	          SUBSLE    A0FrP,D1\.7,RD
-.*:	9d f2 09 1d 	          SUBSLE    A1LbP,D1\.7,A0FrP
-.*:	ad fe 09 1d 	          SUBSPL    PCX,D1\.7,A0\.7
-.*:	fe 0e 18 1d 	          SUBSNV    TXMASKI,D1Re0,D1\.7
-.*:	fd 32 18 1d 	          SUBSLE    TXMASKI,D1Re0,A0FrP
-.*:	ec ce 19 1d 	          SUBSPL    TXMASKI,D1\.7,D1\.7
-.*:	fd e0 19 1d 	          SUBSLE    TXMASKI,D1\.7,RD
-.*:	44 00 38 1d 	          SUBSNE    D1\.7,D1Re0,D1Re0
-.*:	5d 02 38 1d 	          SUBSLE    D1\.7,D1Re0,A1LbP
-.*:	3e 0e 38 1d 	          SUBSNV    D0\.7,D1Re0,D1\.7
-.*:	7e 0e 38 1d 	          SUBSNV    A0\.7,D1Re0,D1\.7
-.*:	4d 10 38 1d 	          SUBSPL    D1\.7,D1Re0,D0Re0
-.*:	5d 1e 38 1d 	          SUBSLE    D1\.7,D1Re0,D0\.7
-.*:	4d 20 38 1d 	          SUBSPL    D1\.7,D1Re0,RD
-.*:	5d 32 38 1d 	          SUBSLE    D1\.7,D1Re0,A0FrP
-.*:	5d 3e 38 1d 	          SUBSLE    D1\.7,D1Re0,A0\.7
-.*:	54 c0 39 1d 	          SUBSLS    D1\.7,D1\.7,D1Re0
-.*:	5d c2 39 1d 	          SUBSLE    D1\.7,D1\.7,A1LbP
-.*:	3e ce 39 1d 	          SUBSNV    D0\.7,D1\.7,D1\.7
-.*:	7e ce 39 1d 	          SUBSNV    A0\.7,D1\.7,D1\.7
-.*:	5d d0 39 1d 	          SUBSLE    D1\.7,D1\.7,D0Re0
-.*:	5d de 39 1d 	          SUBSLE    D1\.7,D1\.7,D0\.7
-.*:	5d e0 39 1d 	          SUBSLE    D1\.7,D1\.7,RD
-.*:	5d f2 39 1d 	          SUBSLE    D1\.7,D1\.7,A0FrP
-.*:	5d fe 39 1d 	          SUBSLE    D1\.7,D1\.7,A0\.7
-.*:	dd 02 80 1d 	          SUBSLE    RA,D1Re0,A1LbP
-.*:	dd 1e 80 1d 	          SUBSLE    RA,D1Re0,D0\.7
-.*:	cc c0 81 1d 	          SUBSPL    RA,D1\.7,D1Re0
-.*:	dd d0 81 1d 	          SUBSLE    RA,D1\.7,D0Re0
-.*:	dd fe 81 1d 	          SUBSLE    RA,D1\.7,A0\.7
-.*:	de 0e b0 1d 	          SUBSNV    RAM8X32,D1Re0,D1\.7
-.*:	dd 32 b0 1d 	          SUBSLE    RAM8X32,D1Re0,A0FrP
-.*:	cc ce b1 1d 	          SUBSPL    RAM8X32,D1\.7,D1\.7
-.*:	dd e0 b1 1d 	          SUBSLE    RAM8X32,D1\.7,RD
-.*:	dd 02 b8 1d 	          SUBSLE    RAM8X,D1Re0,A1LbP
-.*:	dd 1e b8 1d 	          SUBSLE    RAM8X,D1Re0,D0\.7
-.*:	cc c0 b9 1d 	          SUBSPL    RAM8X,D1\.7,D1Re0
-.*:	dd d0 b9 1d 	          SUBSLE    RAM8X,D1\.7,D0Re0
-.*:	dd fe b9 1d 	          SUBSLE    RAM8X,D1\.7,A0\.7
-.*:	de 0e c0 1d 	          SUBSNV    RABZ,D1Re0,D1\.7
-.*:	dd 32 c0 1d 	          SUBSLE    RABZ,D1Re0,A0FrP
-.*:	cc ce c1 1d 	          SUBSPL    RABZ,D1\.7,D1\.7
-.*:	dd e0 c1 1d 	          SUBSLE    RABZ,D1\.7,RD
-.*:	dd 02 e8 1d 	          SUBSLE    RAWX,D1Re0,A1LbP
-.*:	dd 1e e8 1d 	          SUBSLE    RAWX,D1Re0,D0\.7
-.*:	cc c0 e9 1d 	          SUBSPL    RAWX,D1\.7,D1Re0
-.*:	dd d0 e9 1d 	          SUBSLE    RAWX,D1\.7,D0Re0
-.*:	dd fe e9 1d 	          SUBSLE    RAWX,D1\.7,A0\.7
-.*:	dd 02 f8 1d 	          SUBSLE    RAMX,D1Re0,A1LbP
-.*:	de 0e f8 1d 	          SUBSNV    RAMX,D1Re0,D1\.7
-.*:	dd 1e f8 1d 	          SUBSLE    RAMX,D1Re0,D0\.7
-.*:	dd 32 f8 1d 	          SUBSLE    RAMX,D1Re0,A0FrP
-.*:	cc c0 f9 1d 	          SUBSPL    RAMX,D1\.7,D1Re0
-.*:	1e ce f9 1d 	          SUBSNV    TXIDLECYC,D1\.7,D1\.7
-.*:	dd d0 f9 1d 	          SUBSLE    RAMX,D1\.7,D0Re0
-.*:	dd e0 f9 1d 	          SUBSLE    RAMX,D1\.7,RD
-.*:	dd fe f9 1d 	          SUBSLE    RAMX,D1\.7,A0\.7
-.*:	1c 20 00 1e 	          SUBSLE    D0Re0,D0Re0,#0x80
-.*:	e0 3f 00 1e 	          SUBS      TXENABLE,D0Re0,#0xff
-.*:	e4 df 01 1e 	          SUBS      D1Re0,D0\.7,#0x7f
-.*:	2a e0 01 1e 	          SUBS      PC,D0\.7,#0x80
-.*:	ee ff 01 1e 	          SUBS      TXSTAT,D0\.7,#0xff
-.*:	e8 3f 08 1e 	          SUBS      A1LbP,D0Re0,#0xff
-.*:	e6 ff 09 1e 	          SUBS      A0FrP,D0\.7,#0xff
-.*:	ee ff 19 1e 	          SUBS      TXMASKI,D0\.7,#0xff
-.*:	1e 20 38 1e 	          SUBSNV    D0\.7,D0Re0,#0x80
-.*:	e4 3f 38 1e 	          SUBS      D1\.7,D0Re0,#0xff
-.*:	04 e0 39 1e 	          SUBSNE    D0\.7,D0\.7,#0x80
-.*:	e6 ff 39 1e 	          SUBS      A0\.7,D0\.7,#0xff
-.*:	ec 1f b0 1e 	          SUBS      RAM8X32,D0Re0,#0x7f
-.*:	ec 3f b8 1e 	          SUBS      RAM8X,D0Re0,#0xff
-.*:	2c e0 c1 1e 	          SUBS      RABZ,D0\.7,#0x80
-.*:	e0 1f f8 1e 	          SUBS      TXIDLECYC,D0Re0,#0x7f
-.*:	20 e0 f9 1e 	          SUBS      TXIDLECYC,D0\.7,#0x80
-.*:	ea 1f 00 1f 	          SUBS      PC,D1Re0,#0x7f
-.*:	cc 3f 00 1f 	          SUBSPL    D1Re0,D1Re0,#0xff
-.*:	e0 df 01 1f 	          SUBS      TXENABLE,D1\.7,#0x7f
-.*:	22 e0 01 1f 	          SUBS      D0Re0,D1\.7,#0x80
-.*:	e4 ff 01 1f 	          SUBS      D1Re0,D1\.7,#0xff
-.*:	2a 20 08 1f 	          SUBS      PCX,D1Re0,#0x80
-.*:	28 e0 09 1f 	          SUBS      A1LbP,D1\.7,#0x80
-.*:	ee df 19 1f 	          SUBS      TXMASKI,D1\.7,#0x7f
-.*:	e8 1f 38 1f 	          SUBS      A1\.7,D1Re0,#0x7f
-.*:	de 3f 38 1f 	          SUBSNV    D1\.7,D1Re0,#0xff
-.*:	e6 df 39 1f 	          SUBS      A0\.7,D1\.7,#0x7f
-.*:	de ff 39 1f 	          SUBSNV    D1\.7,D1\.7,#0xff
-.*:	2c e0 81 1f 	          SUBS      RA,D1\.7,#0x80
-.*:	ec 1f b8 1f 	          SUBS      RAM8X,D1Re0,#0x7f
-.*:	ec 3f c0 1f 	          SUBS      RABZ,D1Re0,#0xff
-.*:	2c e0 e9 1f 	          SUBS      RAWX,D1\.7,#0x80
-.*:	e0 df f9 1f 	          SUBS      TXIDLECYC,D1\.7,#0x7f
-.*:	01 02 00 20 	          AND       D0Re0,D0Re0,A1LbP
-.*:	01 10 00 20 	          AND       D0Re0,D0Re0,D1Re0
-.*:	01 34 00 20 	          AND       D0Re0,D0Re0,A0\.2
-.*:	01 c6 01 20 	          AND       D0Re0,D0\.7,A1\.3
-.*:	01 de 01 20 	          AND       D0Re0,D0\.7,D1\.7
-.*:	01 fe 01 20 	          AND       D0Re0,D0\.7,A0\.7
-.*:	00 0e 38 20 	          AND       D0\.7,D0Re0,D0\.7
-.*:	01 20 38 20 	          AND       D0\.7,D0Re0,RD
-.*:	00 c0 39 20 	          AND       D0\.7,D0\.7,D0Re0
-.*:	40 ce 39 20 	          ANDQ      D0\.7,D0\.7,D0\.7,A0\.2
-.*:	01 f2 39 20 	          AND       D0\.7,D0\.7,A0FrP
-.*:	01 02 00 21 	          AND       D1Re0,D1Re0,A1LbP
-.*:	01 10 00 21 	          AND       D1Re0,D1Re0,D0Re0
-.*:	01 34 00 21 	          AND       D1Re0,D1Re0,A0\.2
-.*:	01 c6 01 21 	          AND       D1Re0,D1\.7,A1\.3
-.*:	01 de 01 21 	          AND       D1Re0,D1\.7,D0\.7
-.*:	01 fe 01 21 	          AND       D1Re0,D1\.7,A0\.7
-.*:	00 0e 38 21 	          AND       D1\.7,D1Re0,D1\.7
-.*:	01 20 38 21 	          AND       D1\.7,D1Re0,RD
-.*:	00 c0 39 21 	          AND       D1\.7,D1\.7,D1Re0
-.*:	c0 ce 39 21 	          ANDQ      D1\.7,D1\.7,D1\.7,A1\.3
-.*:	01 f2 39 21 	          AND       D1\.7,D1\.7,A0FrP
-.*:	fc ff 03 22 	          ANDMB     D0Re0,D0Re0,#0x7fff
-.*:	f9 ff 07 22 	          ANDT      D0Re0,D0Re0,#0xffff
-.*:	00 00 3c 22 	          AND       D0\.7,D0\.7,#0x8000
-.*:	fc ff 3f 22 	          ANDMB     D0\.7,D0\.7,#0xffff
-.*:	02 00 04 23 	          AND       D1Re0,D1Re0,#-32768
-.*:	f8 ff 3b 23 	          AND       D1\.7,D1\.7,#0x7fff
-.*:	05 00 3c 23 	          ANDMT     D1\.7,D1\.7,#0x8000
-.*:	3c 00 00 24 	          ANDLE     D0Re0,D0Re0,D0Re0
-.*:	1d 02 00 24 	          ANDLE     TXENABLE,D0Re0,A1LbP
-.*:	fd 02 00 24 	          ANDLE     TXSTAT,D0Re0,A1LbP
-.*:	ad 06 00 24 	          ANDPL     PC,D0Re0,A1\.3
-.*:	24 0e 00 24 	          ANDNE     D0Re0,D0Re0,D0\.7
-.*:	a4 0e 00 24 	          ANDNE     PC,D0Re0,D0\.7
-.*:	1d 10 00 24 	          ANDLE     TXENABLE,D0Re0,D1Re0
-.*:	ed 10 00 24 	          ANDPL     TXSTAT,D0Re0,D1Re0
-.*:	ad 1e 00 24 	          ANDPL     PC,D0Re0,D1\.7
-.*:	4d 20 00 24 	          ANDPL     D1Re0,D0Re0,RD
-.*:	2d 32 00 24 	          ANDPL     D0Re0,D0Re0,A0FrP
-.*:	1d 34 00 24 	          ANDLE     TXENABLE,D0Re0,A0\.2
-.*:	ed 34 00 24 	          ANDPL     TXSTAT,D0Re0,A0\.2
-.*:	bd 3e 00 24 	          ANDLE     PC,D0Re0,A0\.7
-.*:	54 c0 01 24 	          ANDLS     D1Re0,D0\.7,D0Re0
-.*:	2d c2 01 24 	          ANDPL     D0Re0,D0\.7,A1LbP
-.*:	1d c6 01 24 	          ANDLE     TXENABLE,D0\.7,A1\.3
-.*:	fd c6 01 24 	          ANDLE     TXSTAT,D0\.7,A1\.3
-.*:	3e ce 01 24 	          ANDNV     D0Re0,D0\.7,D0\.7
-.*:	be ce 01 24 	          ANDNV     PC,D0\.7,D0\.7
-.*:	3d d0 01 24 	          ANDLE     D0Re0,D0\.7,D1Re0
-.*:	1d de 01 24 	          ANDLE     TXENABLE,D0\.7,D1\.7
-.*:	fd de 01 24 	          ANDLE     TXSTAT,D0\.7,D1\.7
-.*:	bd e0 01 24 	          ANDLE     PC,D0\.7,RD
-.*:	5d f2 01 24 	          ANDLE     D1Re0,D0\.7,A0FrP
-.*:	3d f4 01 24 	          ANDLE     D0Re0,D0\.7,A0\.2
-.*:	1d fe 01 24 	          ANDLE     TXENABLE,D0\.7,A0\.7
-.*:	fd fe 01 24 	          ANDLE     TXSTAT,D0\.7,A0\.7
-.*:	6d 02 08 24 	          ANDPL     A0FrP,D0Re0,A1LbP
-.*:	9d 06 08 24 	          ANDLE     A1LbP,D0Re0,A1\.3
-.*:	9c 0e 08 24 	          ANDLE     A1LbP,D0Re0,D0\.7
-.*:	7d 10 08 24 	          ANDLE     A0FrP,D0Re0,D1Re0
-.*:	9d 1e 08 24 	          ANDLE     A1LbP,D0Re0,D1\.7
-.*:	bd 20 08 24 	          ANDLE     PCX,D0Re0,RD
-.*:	7d 34 08 24 	          ANDLE     A0FrP,D0Re0,A0\.2
-.*:	9d 3e 08 24 	          ANDLE     A1LbP,D0Re0,A0\.7
-.*:	ac c0 09 24 	          ANDPL     PCX,D0\.7,D0Re0
-.*:	6d c6 09 24 	          ANDPL     A0FrP,D0\.7,A1\.3
-.*:	7e ce 09 24 	          ANDNV     A0FrP,D0\.7,D0\.7
-.*:	be ce 09 24 	          ANDNV     PCX,D0\.7,D0\.7
-.*:	6d de 09 24 	          ANDPL     A0FrP,D0\.7,D1\.7
-.*:	8d e0 09 24 	          ANDPL     A1LbP,D0\.7,RD
-.*:	bd f2 09 24 	          ANDLE     PCX,D0\.7,A0FrP
-.*:	7d fe 09 24 	          ANDLE     A0FrP,D0\.7,A0\.7
-.*:	7d 02 10 24 	          ANDLE     A0\.2,D0Re0,A1LbP
-.*:	7d 10 10 24 	          ANDLE     A0\.2,D0Re0,D1Re0
-.*:	7d 34 10 24 	          ANDLE     A0\.2,D0Re0,A0\.2
-.*:	7d c6 11 24 	          ANDLE     A0\.2,D0\.7,A1\.3
-.*:	7d de 11 24 	          ANDLE     A0\.2,D0\.7,D1\.7
-.*:	7d fe 11 24 	          ANDLE     A0\.2,D0\.7,A0\.7
-.*:	fd 02 18 24 	          ANDLE     TXMASKI,D0Re0,A1LbP
-.*:	9e 0e 18 24 	          ANDNV     A1\.3,D0Re0,D0\.7
-.*:	fd 10 18 24 	          ANDLE     TXMASKI,D0Re0,D1Re0
-.*:	fd 20 18 24 	          ANDLE     TXMASKI,D0Re0,RD
-.*:	fd 34 18 24 	          ANDLE     TXMASKI,D0Re0,A0\.2
-.*:	fc c0 19 24 	          ANDLE     TXMASKI,D0\.7,D0Re0
-.*:	fd c6 19 24 	          ANDLE     TXMASKI,D0\.7,A1\.3
-.*:	fe ce 19 24 	          ANDNV     TXMASKI,D0\.7,D0\.7
-.*:	fd de 19 24 	          ANDLE     TXMASKI,D0\.7,D1\.7
-.*:	fd f2 19 24 	          ANDLE     TXMASKI,D0\.7,A0FrP
-.*:	fd fe 19 24 	          ANDLE     TXMASKI,D0\.7,A0\.7
-.*:	94 00 38 24 	          ANDLS     A1\.7,D0Re0,D0Re0
-.*:	9d 02 38 24 	          ANDLE     A1\.7,D0Re0,A1LbP
-.*:	9d 06 38 24 	          ANDLE     A1\.7,D0Re0,A1\.3
-.*:	5e 0e 38 24 	          ANDNV     D1\.7,D0Re0,D0\.7
-.*:	9e 0e 38 24 	          ANDNV     A1\.7,D0Re0,D0\.7
-.*:	9d 10 38 24 	          ANDLE     A1\.7,D0Re0,D1Re0
-.*:	9d 1e 38 24 	          ANDLE     A1\.7,D0Re0,D1\.7
-.*:	9d 20 38 24 	          ANDLE     A1\.7,D0Re0,RD
-.*:	9d 32 38 24 	          ANDLE     A1\.7,D0Re0,A0FrP
-.*:	9d 34 38 24 	          ANDLE     A1\.7,D0Re0,A0\.2
-.*:	9d 3e 38 24 	          ANDLE     A1\.7,D0Re0,A0\.7
-.*:	84 c0 39 24 	          ANDNE     A1\.7,D0\.7,D0Re0
-.*:	9d c2 39 24 	          ANDLE     A1\.7,D0\.7,A1LbP
-.*:	9d c6 39 24 	          ANDLE     A1\.7,D0\.7,A1\.3
-.*:	5e ce 39 24 	          ANDNV     D1\.7,D0\.7,D0\.7
-.*:	9e ce 39 24 	          ANDNV     A1\.7,D0\.7,D0\.7
-.*:	8d d0 39 24 	          ANDPL     A1\.7,D0\.7,D1Re0
-.*:	9d de 39 24 	          ANDLE     A1\.7,D0\.7,D1\.7
-.*:	8d e0 39 24 	          ANDPL     A1\.7,D0\.7,RD
-.*:	9d f2 39 24 	          ANDLE     A1\.7,D0\.7,A0FrP
-.*:	8d f4 39 24 	          ANDPL     A1\.7,D0\.7,A0\.2
-.*:	9d fe 39 24 	          ANDLE     A1\.7,D0\.7,A0\.7
-.*:	cc 0e 80 24 	          ANDPL     RA,D0Re0,D0\.7
-.*:	dd 20 80 24 	          ANDLE     RA,D0Re0,RD
-.*:	cc c0 81 24 	          ANDPL     RA,D0\.7,D0Re0
-.*:	de ce 81 24 	          ANDNV     RA,D0\.7,D0\.7
-.*:	dd f2 81 24 	          ANDLE     RA,D0\.7,A0FrP
-.*:	dd 02 b0 24 	          ANDLE     RAM8X32,D0Re0,A1LbP
-.*:	dd 10 b0 24 	          ANDLE     RAM8X32,D0Re0,D1Re0
-.*:	dd 34 b0 24 	          ANDLE     RAM8X32,D0Re0,A0\.2
-.*:	dd c6 b1 24 	          ANDLE     RAM8X32,D0\.7,A1\.3
-.*:	dd de b1 24 	          ANDLE     RAM8X32,D0\.7,D1\.7
-.*:	dd fe b1 24 	          ANDLE     RAM8X32,D0\.7,A0\.7
-.*:	cc 0e b8 24 	          ANDPL     RAM8X,D0Re0,D0\.7
-.*:	dd 20 b8 24 	          ANDLE     RAM8X,D0Re0,RD
-.*:	cc c0 b9 24 	          ANDPL     RAM8X,D0\.7,D0Re0
-.*:	de ce b9 24 	          ANDNV     RAM8X,D0\.7,D0\.7
-.*:	dd f2 b9 24 	          ANDLE     RAM8X,D0\.7,A0FrP
-.*:	dd 02 c0 24 	          ANDLE     RABZ,D0Re0,A1LbP
-.*:	dd 10 c0 24 	          ANDLE     RABZ,D0Re0,D1Re0
-.*:	dd 34 c0 24 	          ANDLE     RABZ,D0Re0,A0\.2
-.*:	dd c6 c1 24 	          ANDLE     RABZ,D0\.7,A1\.3
-.*:	dd de c1 24 	          ANDLE     RABZ,D0\.7,D1\.7
-.*:	dd fe c1 24 	          ANDLE     RABZ,D0\.7,A0\.7
-.*:	cc 0e e8 24 	          ANDPL     RAWX,D0Re0,D0\.7
-.*:	dd 20 e8 24 	          ANDLE     RAWX,D0Re0,RD
-.*:	cc c0 e9 24 	          ANDPL     RAWX,D0\.7,D0Re0
-.*:	de ce e9 24 	          ANDNV     RAWX,D0\.7,D0\.7
-.*:	dd f2 e9 24 	          ANDLE     RAWX,D0\.7,A0FrP
-.*:	cc 00 f8 24 	          ANDPL     RAMX,D0Re0,D0Re0
-.*:	dd 06 f8 24 	          ANDLE     RAMX,D0Re0,A1\.3
-.*:	de 0e f8 24 	          ANDNV     RAMX,D0Re0,D0\.7
-.*:	dd 1e f8 24 	          ANDLE     RAMX,D0Re0,D1\.7
-.*:	dd 32 f8 24 	          ANDLE     RAMX,D0Re0,A0FrP
-.*:	dd 3e f8 24 	          ANDLE     RAMX,D0Re0,A0\.7
-.*:	dd c2 f9 24 	          ANDLE     RAMX,D0\.7,A1LbP
-.*:	1e ce f9 24 	          ANDNV     TXIDLECYC,D0\.7,D0\.7
-.*:	dd d0 f9 24 	          ANDLE     RAMX,D0\.7,D1Re0
-.*:	dd e0 f9 24 	          ANDLE     RAMX,D0\.7,RD
-.*:	dd f4 f9 24 	          ANDLE     RAMX,D0\.7,A0\.2
-.*:	3c 00 00 25 	          ANDLE     D0Re0,D1Re0,D1Re0
-.*:	1d 02 00 25 	          ANDLE     TXENABLE,D1Re0,A1LbP
-.*:	fd 02 00 25 	          ANDLE     TXSTAT,D1Re0,A1LbP
-.*:	ad 06 00 25 	          ANDPL     PC,D1Re0,A1\.3
-.*:	24 0e 00 25 	          ANDNE     D0Re0,D1Re0,D1\.7
-.*:	a4 0e 00 25 	          ANDNE     PC,D1Re0,D1\.7
-.*:	1d 10 00 25 	          ANDLE     TXENABLE,D1Re0,D0Re0
-.*:	ed 10 00 25 	          ANDPL     TXSTAT,D1Re0,D0Re0
-.*:	ad 1e 00 25 	          ANDPL     PC,D1Re0,D0\.7
-.*:	4d 20 00 25 	          ANDPL     D1Re0,D1Re0,RD
-.*:	2d 32 00 25 	          ANDPL     D0Re0,D1Re0,A0FrP
-.*:	1d 34 00 25 	          ANDLE     TXENABLE,D1Re0,A0\.2
-.*:	ed 34 00 25 	          ANDPL     TXSTAT,D1Re0,A0\.2
-.*:	bd 3e 00 25 	          ANDLE     PC,D1Re0,A0\.7
-.*:	54 c0 01 25 	          ANDLS     D1Re0,D1\.7,D1Re0
-.*:	2d c2 01 25 	          ANDPL     D0Re0,D1\.7,A1LbP
-.*:	1d c6 01 25 	          ANDLE     TXENABLE,D1\.7,A1\.3
-.*:	fd c6 01 25 	          ANDLE     TXSTAT,D1\.7,A1\.3
-.*:	3e ce 01 25 	          ANDNV     D0Re0,D1\.7,D1\.7
-.*:	be ce 01 25 	          ANDNV     PC,D1\.7,D1\.7
-.*:	3d d0 01 25 	          ANDLE     D0Re0,D1\.7,D0Re0
-.*:	1d de 01 25 	          ANDLE     TXENABLE,D1\.7,D0\.7
-.*:	fd de 01 25 	          ANDLE     TXSTAT,D1\.7,D0\.7
-.*:	bd e0 01 25 	          ANDLE     PC,D1\.7,RD
-.*:	5d f2 01 25 	          ANDLE     D1Re0,D1\.7,A0FrP
-.*:	3d f4 01 25 	          ANDLE     D0Re0,D1\.7,A0\.2
-.*:	1d fe 01 25 	          ANDLE     TXENABLE,D1\.7,A0\.7
-.*:	fd fe 01 25 	          ANDLE     TXSTAT,D1\.7,A0\.7
-.*:	6d 02 08 25 	          ANDPL     A0FrP,D1Re0,A1LbP
-.*:	9d 06 08 25 	          ANDLE     A1LbP,D1Re0,A1\.3
-.*:	9c 0e 08 25 	          ANDLE     A1LbP,D1Re0,D1\.7
-.*:	7d 10 08 25 	          ANDLE     A0FrP,D1Re0,D0Re0
-.*:	9d 1e 08 25 	          ANDLE     A1LbP,D1Re0,D0\.7
-.*:	bd 20 08 25 	          ANDLE     PCX,D1Re0,RD
-.*:	7d 34 08 25 	          ANDLE     A0FrP,D1Re0,A0\.2
-.*:	9d 3e 08 25 	          ANDLE     A1LbP,D1Re0,A0\.7
-.*:	ac c0 09 25 	          ANDPL     PCX,D1\.7,D1Re0
-.*:	6d c6 09 25 	          ANDPL     A0FrP,D1\.7,A1\.3
-.*:	7e ce 09 25 	          ANDNV     A0FrP,D1\.7,D1\.7
-.*:	be ce 09 25 	          ANDNV     PCX,D1\.7,D1\.7
-.*:	6d de 09 25 	          ANDPL     A0FrP,D1\.7,D0\.7
-.*:	8d e0 09 25 	          ANDPL     A1LbP,D1\.7,RD
-.*:	bd f2 09 25 	          ANDLE     PCX,D1\.7,A0FrP
-.*:	7d fe 09 25 	          ANDLE     A0FrP,D1\.7,A0\.7
-.*:	7d 02 10 25 	          ANDLE     A0\.2,D1Re0,A1LbP
-.*:	7d 10 10 25 	          ANDLE     A0\.2,D1Re0,D0Re0
-.*:	7d 34 10 25 	          ANDLE     A0\.2,D1Re0,A0\.2
-.*:	7d c6 11 25 	          ANDLE     A0\.2,D1\.7,A1\.3
-.*:	7d de 11 25 	          ANDLE     A0\.2,D1\.7,D0\.7
-.*:	7d fe 11 25 	          ANDLE     A0\.2,D1\.7,A0\.7
-.*:	fd 02 18 25 	          ANDLE     TXMASKI,D1Re0,A1LbP
-.*:	9e 0e 18 25 	          ANDNV     A1\.3,D1Re0,D1\.7
-.*:	fd 10 18 25 	          ANDLE     TXMASKI,D1Re0,D0Re0
-.*:	fd 20 18 25 	          ANDLE     TXMASKI,D1Re0,RD
-.*:	fd 34 18 25 	          ANDLE     TXMASKI,D1Re0,A0\.2
-.*:	fc c0 19 25 	          ANDLE     TXMASKI,D1\.7,D1Re0
-.*:	fd c6 19 25 	          ANDLE     TXMASKI,D1\.7,A1\.3
-.*:	fe ce 19 25 	          ANDNV     TXMASKI,D1\.7,D1\.7
-.*:	fd de 19 25 	          ANDLE     TXMASKI,D1\.7,D0\.7
-.*:	fd f2 19 25 	          ANDLE     TXMASKI,D1\.7,A0FrP
-.*:	fd fe 19 25 	          ANDLE     TXMASKI,D1\.7,A0\.7
-.*:	94 00 38 25 	          ANDLS     A1\.7,D1Re0,D1Re0
-.*:	9d 02 38 25 	          ANDLE     A1\.7,D1Re0,A1LbP
-.*:	9d 06 38 25 	          ANDLE     A1\.7,D1Re0,A1\.3
-.*:	5e 0e 38 25 	          ANDNV     D1\.7,D1Re0,D1\.7
-.*:	9e 0e 38 25 	          ANDNV     A1\.7,D1Re0,D1\.7
-.*:	9d 10 38 25 	          ANDLE     A1\.7,D1Re0,D0Re0
-.*:	9d 1e 38 25 	          ANDLE     A1\.7,D1Re0,D0\.7
-.*:	9d 20 38 25 	          ANDLE     A1\.7,D1Re0,RD
-.*:	9d 32 38 25 	          ANDLE     A1\.7,D1Re0,A0FrP
-.*:	9d 34 38 25 	          ANDLE     A1\.7,D1Re0,A0\.2
-.*:	9d 3e 38 25 	          ANDLE     A1\.7,D1Re0,A0\.7
-.*:	84 c0 39 25 	          ANDNE     A1\.7,D1\.7,D1Re0
-.*:	9d c2 39 25 	          ANDLE     A1\.7,D1\.7,A1LbP
-.*:	9d c6 39 25 	          ANDLE     A1\.7,D1\.7,A1\.3
-.*:	5e ce 39 25 	          ANDNV     D1\.7,D1\.7,D1\.7
-.*:	9e ce 39 25 	          ANDNV     A1\.7,D1\.7,D1\.7
-.*:	8d d0 39 25 	          ANDPL     A1\.7,D1\.7,D0Re0
-.*:	9d de 39 25 	          ANDLE     A1\.7,D1\.7,D0\.7
-.*:	8d e0 39 25 	          ANDPL     A1\.7,D1\.7,RD
-.*:	9d f2 39 25 	          ANDLE     A1\.7,D1\.7,A0FrP
-.*:	8d f4 39 25 	          ANDPL     A1\.7,D1\.7,A0\.2
-.*:	9d fe 39 25 	          ANDLE     A1\.7,D1\.7,A0\.7
-.*:	cc 0e 80 25 	          ANDPL     RA,D1Re0,D1\.7
-.*:	dd 20 80 25 	          ANDLE     RA,D1Re0,RD
-.*:	cc c0 81 25 	          ANDPL     RA,D1\.7,D1Re0
-.*:	de ce 81 25 	          ANDNV     RA,D1\.7,D1\.7
-.*:	dd f2 81 25 	          ANDLE     RA,D1\.7,A0FrP
-.*:	dd 02 b0 25 	          ANDLE     RAM8X32,D1Re0,A1LbP
-.*:	dd 10 b0 25 	          ANDLE     RAM8X32,D1Re0,D0Re0
-.*:	dd 34 b0 25 	          ANDLE     RAM8X32,D1Re0,A0\.2
-.*:	dd c6 b1 25 	          ANDLE     RAM8X32,D1\.7,A1\.3
-.*:	dd de b1 25 	          ANDLE     RAM8X32,D1\.7,D0\.7
-.*:	dd fe b1 25 	          ANDLE     RAM8X32,D1\.7,A0\.7
-.*:	cc 0e b8 25 	          ANDPL     RAM8X,D1Re0,D1\.7
-.*:	dd 20 b8 25 	          ANDLE     RAM8X,D1Re0,RD
-.*:	cc c0 b9 25 	          ANDPL     RAM8X,D1\.7,D1Re0
-.*:	de ce b9 25 	          ANDNV     RAM8X,D1\.7,D1\.7
-.*:	dd f2 b9 25 	          ANDLE     RAM8X,D1\.7,A0FrP
-.*:	dd 02 c0 25 	          ANDLE     RABZ,D1Re0,A1LbP
-.*:	dd 10 c0 25 	          ANDLE     RABZ,D1Re0,D0Re0
-.*:	dd 34 c0 25 	          ANDLE     RABZ,D1Re0,A0\.2
-.*:	dd c6 c1 25 	          ANDLE     RABZ,D1\.7,A1\.3
-.*:	dd de c1 25 	          ANDLE     RABZ,D1\.7,D0\.7
-.*:	dd fe c1 25 	          ANDLE     RABZ,D1\.7,A0\.7
-.*:	cc 0e e8 25 	          ANDPL     RAWX,D1Re0,D1\.7
-.*:	dd 20 e8 25 	          ANDLE     RAWX,D1Re0,RD
-.*:	cc c0 e9 25 	          ANDPL     RAWX,D1\.7,D1Re0
-.*:	de ce e9 25 	          ANDNV     RAWX,D1\.7,D1\.7
-.*:	dd f2 e9 25 	          ANDLE     RAWX,D1\.7,A0FrP
-.*:	cc 00 f8 25 	          ANDPL     RAMX,D1Re0,D1Re0
-.*:	dd 06 f8 25 	          ANDLE     RAMX,D1Re0,A1\.3
-.*:	de 0e f8 25 	          ANDNV     RAMX,D1Re0,D1\.7
-.*:	dd 1e f8 25 	          ANDLE     RAMX,D1Re0,D0\.7
-.*:	dd 32 f8 25 	          ANDLE     RAMX,D1Re0,A0FrP
-.*:	dd 3e f8 25 	          ANDLE     RAMX,D1Re0,A0\.7
-.*:	dd c2 f9 25 	          ANDLE     RAMX,D1\.7,A1LbP
-.*:	1e ce f9 25 	          ANDNV     TXIDLECYC,D1\.7,D1\.7
-.*:	dd d0 f9 25 	          ANDLE     RAMX,D1\.7,D0Re0
-.*:	dd e0 f9 25 	          ANDLE     RAMX,D1\.7,RD
-.*:	dd f4 f9 25 	          ANDLE     RAMX,D1\.7,A0\.2
-.*:	de 1f 00 26 	          ANDNV     D0Re0,D0Re0,#0x7f
-.*:	ee 1f 00 26 	          AND       TXSTAT,D0Re0,#0x7f
-.*:	24 20 00 26 	          AND       D1Re0,D0Re0,#0x80
-.*:	de 3f 00 26 	          ANDNV     D0Re0,D0Re0,#0xff
-.*:	ee 3f 00 26 	          AND       TXSTAT,D0Re0,#0xff
-.*:	e2 df 01 26 	          AND       D0Re0,D0\.7,#0x7f
-.*:	04 e0 01 26 	          ANDNE     D0Re0,D0\.7,#0x80
-.*:	24 e0 01 26 	          AND       D1Re0,D0\.7,#0x80
-.*:	de ff 01 26 	          ANDNV     D0Re0,D0\.7,#0xff
-.*:	ea ff 01 26 	          AND       PC,D0\.7,#0xff
-.*:	ea 1f 08 26 	          AND       PCX,D0Re0,#0x7f
-.*:	e6 3f 08 26 	          AND       A0FrP,D0Re0,#0xff
-.*:	e8 df 09 26 	          AND       A1LbP,D0\.7,#0x7f
-.*:	2a e0 09 26 	          AND       PCX,D0\.7,#0x80
-.*:	e6 1f 10 26 	          AND       A0\.2,D0Re0,#0x7f
-.*:	26 e0 11 26 	          AND       A0\.2,D0\.7,#0x80
-.*:	28 20 18 26 	          AND       A1\.3,D0Re0,#0x80
-.*:	e8 df 19 26 	          AND       A1\.3,D0\.7,#0x7f
-.*:	e8 ff 19 26 	          AND       A1\.3,D0\.7,#0xff
-.*:	e2 1f 38 26 	          AND       D0\.7,D0Re0,#0x7f
-.*:	1c 20 38 26 	          ANDLE     D0\.7,D0Re0,#0x80
-.*:	26 20 38 26 	          AND       A0\.7,D0Re0,#0x80
-.*:	e2 3f 38 26 	          AND       D0\.7,D0Re0,#0xff
-.*:	dc df 39 26 	          ANDLE     D0\.7,D0\.7,#0x7f
-.*:	e8 df 39 26 	          AND       A1\.7,D0\.7,#0x7f
-.*:	26 e0 39 26 	          AND       A0\.7,D0\.7,#0x80
-.*:	e4 ff 39 26 	          AND       D1\.7,D0\.7,#0xff
-.*:	2c 20 80 26 	          AND       RA,D0Re0,#0x80
-.*:	ec ff 81 26 	          AND       RA,D0\.7,#0xff
-.*:	ec df b1 26 	          AND       RAM8X32,D0\.7,#0x7f
-.*:	2c 20 b8 26 	          AND       RAM8X,D0Re0,#0x80
-.*:	ec ff b9 26 	          AND       RAM8X,D0\.7,#0xff
-.*:	ec df c1 26 	          AND       RABZ,D0\.7,#0x7f
-.*:	2c 20 e8 26 	          AND       RAWX,D0Re0,#0x80
-.*:	ec ff e9 26 	          AND       RAWX,D0\.7,#0xff
-.*:	2c 20 f8 26 	          AND       RAMX,D0Re0,#0x80
-.*:	ec df f9 26 	          AND       RAMX,D0\.7,#0x7f
-.*:	ec ff f9 26 	          AND       RAMX,D0\.7,#0xff
-.*:	1c 20 00 27 	          ANDLE     D1Re0,D1Re0,#0x80
-.*:	e0 3f 00 27 	          AND       TXENABLE,D1Re0,#0xff
-.*:	e4 df 01 27 	          AND       D1Re0,D1\.7,#0x7f
-.*:	2a e0 01 27 	          AND       PC,D1\.7,#0x80
-.*:	ee ff 01 27 	          AND       TXSTAT,D1\.7,#0xff
-.*:	e8 3f 08 27 	          AND       A1LbP,D1Re0,#0xff
-.*:	e6 ff 09 27 	          AND       A0FrP,D1\.7,#0xff
-.*:	e6 ff 11 27 	          AND       A0\.2,D1\.7,#0xff
-.*:	ee df 19 27 	          AND       TXMASKI,D1\.7,#0x7f
-.*:	e4 1f 38 27 	          AND       D1\.7,D1Re0,#0x7f
-.*:	28 20 38 27 	          AND       A1\.7,D1Re0,#0x80
-.*:	de df 39 27 	          ANDNV     D1\.7,D1\.7,#0x7f
-.*:	28 e0 39 27 	          AND       A1\.7,D1\.7,#0x80
-.*:	ec 3f 80 27 	          AND       RA,D1Re0,#0xff
-.*:	2c e0 b1 27 	          AND       RAM8X32,D1\.7,#0x80
-.*:	ec 1f c0 27 	          AND       RABZ,D1Re0,#0x7f
-.*:	ec 3f e8 27 	          AND       RAWX,D1Re0,#0xff
-.*:	e0 3f f8 27 	          AND       TXIDLECYC,D1Re0,#0xff
-.*:	00 00 00 28 	          ANDS      D0Re0,D0Re0,D0Re0
-.*:	40 0e 00 28 	          ANDSQ     D0Re0,D0Re0,D0\.7,A0\.2
-.*:	01 32 00 28 	          ANDS      D0Re0,D0Re0,A0FrP
-.*:	01 c2 01 28 	          ANDS      D0Re0,D0\.7,A1LbP
-.*:	01 d0 01 28 	          ANDS      D0Re0,D0\.7,D1Re0
-.*:	01 f4 01 28 	          ANDS      D0Re0,D0\.7,A0\.2
-.*:	01 06 38 28 	          ANDS      D0\.7,D0Re0,A1\.3
-.*:	01 1e 38 28 	          ANDS      D0\.7,D0Re0,D1\.7
-.*:	01 3e 38 28 	          ANDS      D0\.7,D0Re0,A0\.7
-.*:	00 ce 39 28 	          ANDS      D0\.7,D0\.7,D0\.7
-.*:	01 e0 39 28 	          ANDS      D0\.7,D0\.7,RD
-.*:	00 00 00 29 	          ANDS      D1Re0,D1Re0,D1Re0
-.*:	c0 0e 00 29 	          ANDSQ     D1Re0,D1Re0,D1\.7,A1\.3
-.*:	01 32 00 29 	          ANDS      D1Re0,D1Re0,A0FrP
-.*:	01 c2 01 29 	          ANDS      D1Re0,D1\.7,A1LbP
-.*:	01 d0 01 29 	          ANDS      D1Re0,D1\.7,D0Re0
-.*:	01 f4 01 29 	          ANDS      D1Re0,D1\.7,A0\.2
-.*:	01 06 38 29 	          ANDS      D1\.7,D1Re0,A1\.3
-.*:	01 1e 38 29 	          ANDS      D1\.7,D1Re0,D0\.7
-.*:	01 3e 38 29 	          ANDS      D1\.7,D1Re0,A0\.7
-.*:	00 ce 39 29 	          ANDS      D1\.7,D1\.7,D1\.7
-.*:	01 e0 39 29 	          ANDS      D1\.7,D1\.7,RD
-.*:	f8 ff 03 2a 	          ANDS      D0Re0,D0Re0,#0x7fff
-.*:	05 00 04 2a 	          ANDSMT    D0Re0,D0Re0,#0x8000
-.*:	fc ff 3b 2a 	          ANDSMB    D0\.7,D0\.7,#0x7fff
-.*:	f9 ff 3f 2a 	          ANDST     D0\.7,D0\.7,#0xffff
-.*:	00 00 04 2b 	          ANDS      D1Re0,D1Re0,#0x8000
-.*:	fc ff 07 2b 	          ANDSMB    D1Re0,D1Re0,#0xffff
-.*:	02 00 3c 2b 	          ANDS      D1\.7,D1\.7,#-32768
-.*:	14 00 00 2c 	          ANDSLS    TXENABLE,D0Re0,D0Re0
-.*:	e4 00 00 2c 	          ANDSNE    TXSTAT,D0Re0,D0Re0
-.*:	bd 02 00 2c 	          ANDSLE    PC,D0Re0,A1LbP
-.*:	5d 06 00 2c 	          ANDSLE    D1Re0,D0Re0,A1\.3
-.*:	1e 0e 00 2c 	          ANDSNV    TXENABLE,D0Re0,D0\.7
-.*:	5e 0e 00 2c 	          ANDSNV    D1Re0,D0Re0,D0\.7
-.*:	fe 0e 00 2c 	          ANDSNV    TXSTAT,D0Re0,D0\.7
-.*:	bd 10 00 2c 	          ANDSLE    PC,D0Re0,D1Re0
-.*:	5d 1e 00 2c 	          ANDSLE    D1Re0,D0Re0,D1\.7
-.*:	3d 20 00 2c 	          ANDSLE    D0Re0,D0Re0,RD
-.*:	1d 32 00 2c 	          ANDSLE    TXENABLE,D0Re0,A0FrP
-.*:	fd 32 00 2c 	          ANDSLE    TXSTAT,D0Re0,A0FrP
-.*:	bd 34 00 2c 	          ANDSLE    PC,D0Re0,A0\.2
-.*:	5d 3e 00 2c 	          ANDSLE    D1Re0,D0Re0,A0\.7
-.*:	2c c0 01 2c 	          ANDSPL    D0Re0,D0\.7,D0Re0
-.*:	1d c2 01 2c 	          ANDSLE    TXENABLE,D0\.7,A1LbP
-.*:	fd c2 01 2c 	          ANDSLE    TXSTAT,D0\.7,A1LbP
-.*:	bd c6 01 2c 	          ANDSLE    PC,D0\.7,A1\.3
-.*:	34 ce 01 2c 	          ANDSLS    D0Re0,D0\.7,D0\.7
-.*:	b4 ce 01 2c 	          ANDSLS    PC,D0\.7,D0\.7
-.*:	0d d0 01 2c 	          ANDSPL    TXENABLE,D0\.7,D1Re0
-.*:	fd d0 01 2c 	          ANDSLE    TXSTAT,D0\.7,D1Re0
-.*:	bd de 01 2c 	          ANDSLE    PC,D0\.7,D1\.7
-.*:	5d e0 01 2c 	          ANDSLE    D1Re0,D0\.7,RD
-.*:	3d f2 01 2c 	          ANDSLE    D0Re0,D0\.7,A0FrP
-.*:	0d f4 01 2c 	          ANDSPL    TXENABLE,D0\.7,A0\.2
-.*:	fd f4 01 2c 	          ANDSLE    TXSTAT,D0\.7,A0\.2
-.*:	ad fe 01 2c 	          ANDSPL    PC,D0\.7,A0\.7
-.*:	bc 00 08 2c 	          ANDSLE    PCX,D0Re0,D0Re0
-.*:	7d 06 08 2c 	          ANDSLE    A0FrP,D0Re0,A1\.3
-.*:	7e 0e 08 2c 	          ANDSNV    A0FrP,D0Re0,D0\.7
-.*:	be 0e 08 2c 	          ANDSNV    PCX,D0Re0,D0\.7
-.*:	7d 1e 08 2c 	          ANDSLE    A0FrP,D0Re0,D1\.7
-.*:	9d 20 08 2c 	          ANDSLE    A1LbP,D0Re0,RD
-.*:	ad 32 08 2c 	          ANDSPL    PCX,D0Re0,A0FrP
-.*:	6d 3e 08 2c 	          ANDSPL    A0FrP,D0Re0,A0\.7
-.*:	84 c0 09 2c 	          ANDSNE    A1LbP,D0\.7,D0Re0
-.*:	ad c2 09 2c 	          ANDSPL    PCX,D0\.7,A1LbP
-.*:	64 ce 09 2c 	          ANDSNE    A0FrP,D0\.7,D0\.7
-.*:	b4 ce 09 2c 	          ANDSLS    PCX,D0\.7,D0\.7
-.*:	bd d0 09 2c 	          ANDSLE    PCX,D0\.7,D1Re0
-.*:	7d e0 09 2c 	          ANDSLE    A0FrP,D0\.7,RD
-.*:	9d f2 09 2c 	          ANDSLE    A1LbP,D0\.7,A0FrP
-.*:	bd f4 09 2c 	          ANDSLE    PCX,D0\.7,A0\.2
-.*:	6c 00 10 2c 	          ANDSPL    A0\.2,D0Re0,D0Re0
-.*:	7e 0e 10 2c 	          ANDSNV    A0\.2,D0Re0,D0\.7
-.*:	7d 32 10 2c 	          ANDSLE    A0\.2,D0Re0,A0FrP
-.*:	7d c2 11 2c 	          ANDSLE    A0\.2,D0\.7,A1LbP
-.*:	7d d0 11 2c 	          ANDSLE    A0\.2,D0\.7,D1Re0
-.*:	7d f4 11 2c 	          ANDSLE    A0\.2,D0\.7,A0\.2
-.*:	8d 02 18 2c 	          ANDSPL    A1\.3,D0Re0,A1LbP
-.*:	84 0e 18 2c 	          ANDSNE    A1\.3,D0Re0,D0\.7
-.*:	9d 10 18 2c 	          ANDSLE    A1\.3,D0Re0,D1Re0
-.*:	9d 20 18 2c 	          ANDSLE    A1\.3,D0Re0,RD
-.*:	9d 34 18 2c 	          ANDSLE    A1\.3,D0Re0,A0\.2
-.*:	94 c0 19 2c 	          ANDSLS    A1\.3,D0\.7,D0Re0
-.*:	8d c6 19 2c 	          ANDSPL    A1\.3,D0\.7,A1\.3
-.*:	ec ce 19 2c 	          ANDSPL    TXMASKI,D0\.7,D0\.7
-.*:	8d de 19 2c 	          ANDSPL    A1\.3,D0\.7,D1\.7
-.*:	8d f2 19 2c 	          ANDSPL    A1\.3,D0\.7,A0FrP
-.*:	8d fe 19 2c 	          ANDSPL    A1\.3,D0\.7,A0\.7
-.*:	6c 00 38 2c 	          ANDSPL    A0\.7,D0Re0,D0Re0
-.*:	7d 02 38 2c 	          ANDSLE    A0\.7,D0Re0,A1LbP
-.*:	6d 06 38 2c 	          ANDSPL    A0\.7,D0Re0,A1\.3
-.*:	5c 0e 38 2c 	          ANDSLE    D1\.7,D0Re0,D0\.7
-.*:	8c 0e 38 2c 	          ANDSPL    A1\.7,D0Re0,D0\.7
-.*:	7d 10 38 2c 	          ANDSLE    A0\.7,D0Re0,D1Re0
-.*:	6d 1e 38 2c 	          ANDSPL    A0\.7,D0Re0,D1\.7
-.*:	7d 20 38 2c 	          ANDSLE    A0\.7,D0Re0,RD
-.*:	6d 32 38 2c 	          ANDSPL    A0\.7,D0Re0,A0FrP
-.*:	7d 34 38 2c 	          ANDSLE    A0\.7,D0Re0,A0\.2
-.*:	7d 3e 38 2c 	          ANDSLE    A0\.7,D0Re0,A0\.7
-.*:	7c c0 39 2c 	          ANDSLE    A0\.7,D0\.7,D0Re0
-.*:	6d c2 39 2c 	          ANDSPL    A0\.7,D0\.7,A1LbP
-.*:	7d c6 39 2c 	          ANDSLE    A0\.7,D0\.7,A1\.3
-.*:	4c ce 39 2c 	          ANDSPL    D1\.7,D0\.7,D0\.7
-.*:	9c ce 39 2c 	          ANDSLE    A1\.7,D0\.7,D0\.7
-.*:	7d d0 39 2c 	          ANDSLE    A0\.7,D0\.7,D1Re0
-.*:	7d de 39 2c 	          ANDSLE    A0\.7,D0\.7,D1\.7
-.*:	7d e0 39 2c 	          ANDSLE    A0\.7,D0\.7,RD
-.*:	7d f2 39 2c 	          ANDSLE    A0\.7,D0\.7,A0FrP
-.*:	7d f4 39 2c 	          ANDSLE    A0\.7,D0\.7,A0\.2
-.*:	6d fe 39 2c 	          ANDSPL    A0\.7,D0\.7,A0\.7
-.*:	dd 06 80 2c 	          ANDSLE    RA,D0Re0,A1\.3
-.*:	dd 1e 80 2c 	          ANDSLE    RA,D0Re0,D1\.7
-.*:	dd 3e 80 2c 	          ANDSLE    RA,D0Re0,A0\.7
-.*:	cc ce 81 2c 	          ANDSPL    RA,D0\.7,D0\.7
-.*:	dd e0 81 2c 	          ANDSLE    RA,D0\.7,RD
-.*:	cc 00 b0 2c 	          ANDSPL    RAM8X32,D0Re0,D0Re0
-.*:	de 0e b0 2c 	          ANDSNV    RAM8X32,D0Re0,D0\.7
-.*:	dd 32 b0 2c 	          ANDSLE    RAM8X32,D0Re0,A0FrP
-.*:	dd c2 b1 2c 	          ANDSLE    RAM8X32,D0\.7,A1LbP
-.*:	dd d0 b1 2c 	          ANDSLE    RAM8X32,D0\.7,D1Re0
-.*:	dd f4 b1 2c 	          ANDSLE    RAM8X32,D0\.7,A0\.2
-.*:	dd 06 b8 2c 	          ANDSLE    RAM8X,D0Re0,A1\.3
-.*:	dd 1e b8 2c 	          ANDSLE    RAM8X,D0Re0,D1\.7
-.*:	dd 3e b8 2c 	          ANDSLE    RAM8X,D0Re0,A0\.7
-.*:	cc ce b9 2c 	          ANDSPL    RAM8X,D0\.7,D0\.7
-.*:	dd e0 b9 2c 	          ANDSLE    RAM8X,D0\.7,RD
-.*:	cc 00 c0 2c 	          ANDSPL    RABZ,D0Re0,D0Re0
-.*:	de 0e c0 2c 	          ANDSNV    RABZ,D0Re0,D0\.7
-.*:	dd 32 c0 2c 	          ANDSLE    RABZ,D0Re0,A0FrP
-.*:	dd c2 c1 2c 	          ANDSLE    RABZ,D0\.7,A1LbP
-.*:	dd d0 c1 2c 	          ANDSLE    RABZ,D0\.7,D1Re0
-.*:	dd f4 c1 2c 	          ANDSLE    RABZ,D0\.7,A0\.2
-.*:	dd 06 e8 2c 	          ANDSLE    RAWX,D0Re0,A1\.3
-.*:	dd 1e e8 2c 	          ANDSLE    RAWX,D0Re0,D1\.7
-.*:	dd 3e e8 2c 	          ANDSLE    RAWX,D0Re0,A0\.7
-.*:	cc ce e9 2c 	          ANDSPL    RAWX,D0\.7,D0\.7
-.*:	dd e0 e9 2c 	          ANDSLE    RAWX,D0\.7,RD
-.*:	14 00 f8 2c 	          ANDSLS    TXIDLECYC,D0Re0,D0Re0
-.*:	1d 06 f8 2c 	          ANDSLE    TXIDLECYC,D0Re0,A1\.3
-.*:	cc 0e f8 2c 	          ANDSPL    RAMX,D0Re0,D0\.7
-.*:	1d 1e f8 2c 	          ANDSLE    TXIDLECYC,D0Re0,D1\.7
-.*:	1d 32 f8 2c 	          ANDSLE    TXIDLECYC,D0Re0,A0FrP
-.*:	1d 3e f8 2c 	          ANDSLE    TXIDLECYC,D0Re0,A0\.7
-.*:	1d c2 f9 2c 	          ANDSLE    TXIDLECYC,D0\.7,A1LbP
-.*:	14 ce f9 2c 	          ANDSLS    TXIDLECYC,D0\.7,D0\.7
-.*:	1d d0 f9 2c 	          ANDSLE    TXIDLECYC,D0\.7,D1Re0
-.*:	1d e0 f9 2c 	          ANDSLE    TXIDLECYC,D0\.7,RD
-.*:	1d f4 f9 2c 	          ANDSLE    TXIDLECYC,D0\.7,A0\.2
-.*:	14 00 00 2d 	          ANDSLS    TXENABLE,D1Re0,D1Re0
-.*:	e4 00 00 2d 	          ANDSNE    TXSTAT,D1Re0,D1Re0
-.*:	bd 02 00 2d 	          ANDSLE    PC,D1Re0,A1LbP
-.*:	5d 06 00 2d 	          ANDSLE    D1Re0,D1Re0,A1\.3
-.*:	1e 0e 00 2d 	          ANDSNV    TXENABLE,D1Re0,D1\.7
-.*:	5e 0e 00 2d 	          ANDSNV    D1Re0,D1Re0,D1\.7
-.*:	fe 0e 00 2d 	          ANDSNV    TXSTAT,D1Re0,D1\.7
-.*:	bd 10 00 2d 	          ANDSLE    PC,D1Re0,D0Re0
-.*:	5d 1e 00 2d 	          ANDSLE    D1Re0,D1Re0,D0\.7
-.*:	3d 20 00 2d 	          ANDSLE    D0Re0,D1Re0,RD
-.*:	1d 32 00 2d 	          ANDSLE    TXENABLE,D1Re0,A0FrP
-.*:	fd 32 00 2d 	          ANDSLE    TXSTAT,D1Re0,A0FrP
-.*:	bd 34 00 2d 	          ANDSLE    PC,D1Re0,A0\.2
-.*:	5d 3e 00 2d 	          ANDSLE    D1Re0,D1Re0,A0\.7
-.*:	2c c0 01 2d 	          ANDSPL    D0Re0,D1\.7,D1Re0
-.*:	1d c2 01 2d 	          ANDSLE    TXENABLE,D1\.7,A1LbP
-.*:	fd c2 01 2d 	          ANDSLE    TXSTAT,D1\.7,A1LbP
-.*:	bd c6 01 2d 	          ANDSLE    PC,D1\.7,A1\.3
-.*:	34 ce 01 2d 	          ANDSLS    D0Re0,D1\.7,D1\.7
-.*:	b4 ce 01 2d 	          ANDSLS    PC,D1\.7,D1\.7
-.*:	0d d0 01 2d 	          ANDSPL    TXENABLE,D1\.7,D0Re0
-.*:	fd d0 01 2d 	          ANDSLE    TXSTAT,D1\.7,D0Re0
-.*:	bd de 01 2d 	          ANDSLE    PC,D1\.7,D0\.7
-.*:	5d e0 01 2d 	          ANDSLE    D1Re0,D1\.7,RD
-.*:	3d f2 01 2d 	          ANDSLE    D0Re0,D1\.7,A0FrP
-.*:	0d f4 01 2d 	          ANDSPL    TXENABLE,D1\.7,A0\.2
-.*:	fd f4 01 2d 	          ANDSLE    TXSTAT,D1\.7,A0\.2
-.*:	ad fe 01 2d 	          ANDSPL    PC,D1\.7,A0\.7
-.*:	bc 00 08 2d 	          ANDSLE    PCX,D1Re0,D1Re0
-.*:	7d 06 08 2d 	          ANDSLE    A0FrP,D1Re0,A1\.3
-.*:	7e 0e 08 2d 	          ANDSNV    A0FrP,D1Re0,D1\.7
-.*:	be 0e 08 2d 	          ANDSNV    PCX,D1Re0,D1\.7
-.*:	7d 1e 08 2d 	          ANDSLE    A0FrP,D1Re0,D0\.7
-.*:	9d 20 08 2d 	          ANDSLE    A1LbP,D1Re0,RD
-.*:	ad 32 08 2d 	          ANDSPL    PCX,D1Re0,A0FrP
-.*:	6d 3e 08 2d 	          ANDSPL    A0FrP,D1Re0,A0\.7
-.*:	84 c0 09 2d 	          ANDSNE    A1LbP,D1\.7,D1Re0
-.*:	ad c2 09 2d 	          ANDSPL    PCX,D1\.7,A1LbP
-.*:	64 ce 09 2d 	          ANDSNE    A0FrP,D1\.7,D1\.7
-.*:	b4 ce 09 2d 	          ANDSLS    PCX,D1\.7,D1\.7
-.*:	bd d0 09 2d 	          ANDSLE    PCX,D1\.7,D0Re0
-.*:	7d e0 09 2d 	          ANDSLE    A0FrP,D1\.7,RD
-.*:	9d f2 09 2d 	          ANDSLE    A1LbP,D1\.7,A0FrP
-.*:	bd f4 09 2d 	          ANDSLE    PCX,D1\.7,A0\.2
-.*:	6c 00 10 2d 	          ANDSPL    A0\.2,D1Re0,D1Re0
-.*:	7e 0e 10 2d 	          ANDSNV    A0\.2,D1Re0,D1\.7
-.*:	7d 32 10 2d 	          ANDSLE    A0\.2,D1Re0,A0FrP
-.*:	7d c2 11 2d 	          ANDSLE    A0\.2,D1\.7,A1LbP
-.*:	7d d0 11 2d 	          ANDSLE    A0\.2,D1\.7,D0Re0
-.*:	7d f4 11 2d 	          ANDSLE    A0\.2,D1\.7,A0\.2
-.*:	8d 02 18 2d 	          ANDSPL    A1\.3,D1Re0,A1LbP
-.*:	84 0e 18 2d 	          ANDSNE    A1\.3,D1Re0,D1\.7
-.*:	9d 10 18 2d 	          ANDSLE    A1\.3,D1Re0,D0Re0
-.*:	9d 20 18 2d 	          ANDSLE    A1\.3,D1Re0,RD
-.*:	9d 34 18 2d 	          ANDSLE    A1\.3,D1Re0,A0\.2
-.*:	94 c0 19 2d 	          ANDSLS    A1\.3,D1\.7,D1Re0
-.*:	8d c6 19 2d 	          ANDSPL    A1\.3,D1\.7,A1\.3
-.*:	ec ce 19 2d 	          ANDSPL    TXMASKI,D1\.7,D1\.7
-.*:	8d de 19 2d 	          ANDSPL    A1\.3,D1\.7,D0\.7
-.*:	8d f2 19 2d 	          ANDSPL    A1\.3,D1\.7,A0FrP
-.*:	8d fe 19 2d 	          ANDSPL    A1\.3,D1\.7,A0\.7
-.*:	6c 00 38 2d 	          ANDSPL    A0\.7,D1Re0,D1Re0
-.*:	7d 02 38 2d 	          ANDSLE    A0\.7,D1Re0,A1LbP
-.*:	6d 06 38 2d 	          ANDSPL    A0\.7,D1Re0,A1\.3
-.*:	5c 0e 38 2d 	          ANDSLE    D1\.7,D1Re0,D1\.7
-.*:	8c 0e 38 2d 	          ANDSPL    A1\.7,D1Re0,D1\.7
-.*:	7d 10 38 2d 	          ANDSLE    A0\.7,D1Re0,D0Re0
-.*:	6d 1e 38 2d 	          ANDSPL    A0\.7,D1Re0,D0\.7
-.*:	7d 20 38 2d 	          ANDSLE    A0\.7,D1Re0,RD
-.*:	6d 32 38 2d 	          ANDSPL    A0\.7,D1Re0,A0FrP
-.*:	7d 34 38 2d 	          ANDSLE    A0\.7,D1Re0,A0\.2
-.*:	7d 3e 38 2d 	          ANDSLE    A0\.7,D1Re0,A0\.7
-.*:	7c c0 39 2d 	          ANDSLE    A0\.7,D1\.7,D1Re0
-.*:	6d c2 39 2d 	          ANDSPL    A0\.7,D1\.7,A1LbP
-.*:	7d c6 39 2d 	          ANDSLE    A0\.7,D1\.7,A1\.3
-.*:	4c ce 39 2d 	          ANDSPL    D1\.7,D1\.7,D1\.7
-.*:	9c ce 39 2d 	          ANDSLE    A1\.7,D1\.7,D1\.7
-.*:	7d d0 39 2d 	          ANDSLE    A0\.7,D1\.7,D0Re0
-.*:	7d de 39 2d 	          ANDSLE    A0\.7,D1\.7,D0\.7
-.*:	7d e0 39 2d 	          ANDSLE    A0\.7,D1\.7,RD
-.*:	7d f2 39 2d 	          ANDSLE    A0\.7,D1\.7,A0FrP
-.*:	7d f4 39 2d 	          ANDSLE    A0\.7,D1\.7,A0\.2
-.*:	6d fe 39 2d 	          ANDSPL    A0\.7,D1\.7,A0\.7
-.*:	dd 06 80 2d 	          ANDSLE    RA,D1Re0,A1\.3
-.*:	dd 1e 80 2d 	          ANDSLE    RA,D1Re0,D0\.7
-.*:	dd 3e 80 2d 	          ANDSLE    RA,D1Re0,A0\.7
-.*:	cc ce 81 2d 	          ANDSPL    RA,D1\.7,D1\.7
-.*:	dd e0 81 2d 	          ANDSLE    RA,D1\.7,RD
-.*:	cc 00 b0 2d 	          ANDSPL    RAM8X32,D1Re0,D1Re0
-.*:	de 0e b0 2d 	          ANDSNV    RAM8X32,D1Re0,D1\.7
-.*:	dd 32 b0 2d 	          ANDSLE    RAM8X32,D1Re0,A0FrP
-.*:	dd c2 b1 2d 	          ANDSLE    RAM8X32,D1\.7,A1LbP
-.*:	dd d0 b1 2d 	          ANDSLE    RAM8X32,D1\.7,D0Re0
-.*:	dd f4 b1 2d 	          ANDSLE    RAM8X32,D1\.7,A0\.2
-.*:	dd 06 b8 2d 	          ANDSLE    RAM8X,D1Re0,A1\.3
-.*:	dd 1e b8 2d 	          ANDSLE    RAM8X,D1Re0,D0\.7
-.*:	dd 3e b8 2d 	          ANDSLE    RAM8X,D1Re0,A0\.7
-.*:	cc ce b9 2d 	          ANDSPL    RAM8X,D1\.7,D1\.7
-.*:	dd e0 b9 2d 	          ANDSLE    RAM8X,D1\.7,RD
-.*:	cc 00 c0 2d 	          ANDSPL    RABZ,D1Re0,D1Re0
-.*:	de 0e c0 2d 	          ANDSNV    RABZ,D1Re0,D1\.7
-.*:	dd 32 c0 2d 	          ANDSLE    RABZ,D1Re0,A0FrP
-.*:	dd c2 c1 2d 	          ANDSLE    RABZ,D1\.7,A1LbP
-.*:	dd d0 c1 2d 	          ANDSLE    RABZ,D1\.7,D0Re0
-.*:	dd f4 c1 2d 	          ANDSLE    RABZ,D1\.7,A0\.2
-.*:	dd 06 e8 2d 	          ANDSLE    RAWX,D1Re0,A1\.3
-.*:	dd 1e e8 2d 	          ANDSLE    RAWX,D1Re0,D0\.7
-.*:	dd 3e e8 2d 	          ANDSLE    RAWX,D1Re0,A0\.7
-.*:	cc ce e9 2d 	          ANDSPL    RAWX,D1\.7,D1\.7
-.*:	dd e0 e9 2d 	          ANDSLE    RAWX,D1\.7,RD
-.*:	14 00 f8 2d 	          ANDSLS    TXIDLECYC,D1Re0,D1Re0
-.*:	1d 06 f8 2d 	          ANDSLE    TXIDLECYC,D1Re0,A1\.3
-.*:	cc 0e f8 2d 	          ANDSPL    RAMX,D1Re0,D1\.7
-.*:	1d 1e f8 2d 	          ANDSLE    TXIDLECYC,D1Re0,D0\.7
-.*:	1d 32 f8 2d 	          ANDSLE    TXIDLECYC,D1Re0,A0FrP
-.*:	1d 3e f8 2d 	          ANDSLE    TXIDLECYC,D1Re0,A0\.7
-.*:	1d c2 f9 2d 	          ANDSLE    TXIDLECYC,D1\.7,A1LbP
-.*:	14 ce f9 2d 	          ANDSLS    TXIDLECYC,D1\.7,D1\.7
-.*:	1d d0 f9 2d 	          ANDSLE    TXIDLECYC,D1\.7,D0Re0
-.*:	1d e0 f9 2d 	          ANDSLE    TXIDLECYC,D1\.7,RD
-.*:	1d f4 f9 2d 	          ANDSLE    TXIDLECYC,D1\.7,A0\.2
-.*:	dc 1f 00 2e 	          ANDSLE    D0Re0,D0Re0,#0x7f
-.*:	ea 1f 00 2e 	          ANDS      PC,D0Re0,#0x7f
-.*:	20 20 00 2e 	          ANDS      TXENABLE,D0Re0,#0x80
-.*:	cc 3f 00 2e 	          ANDSPL    D0Re0,D0Re0,#0xff
-.*:	ea 3f 00 2e 	          ANDS      PC,D0Re0,#0xff
-.*:	e0 df 01 2e 	          ANDS      TXENABLE,D0\.7,#0x7f
-.*:	ee df 01 2e 	          ANDS      TXSTAT,D0\.7,#0x7f
-.*:	22 e0 01 2e 	          ANDS      D0Re0,D0\.7,#0x80
-.*:	dc ff 01 2e 	          ANDSLE    D0Re0,D0\.7,#0xff
-.*:	e4 ff 01 2e 	          ANDS      D1Re0,D0\.7,#0xff
-.*:	e8 1f 08 2e 	          ANDS      A1LbP,D0Re0,#0x7f
-.*:	2a 20 08 2e 	          ANDS      PCX,D0Re0,#0x80
-.*:	e6 df 09 2e 	          ANDS      A0FrP,D0\.7,#0x7f
-.*:	28 e0 09 2e 	          ANDS      A1LbP,D0\.7,#0x80
-.*:	ea ff 09 2e 	          ANDS      PCX,D0\.7,#0xff
-.*:	e6 df 11 2e 	          ANDS      A0\.2,D0\.7,#0x7f
-.*:	ee 1f 18 2e 	          ANDS      TXMASKI,D0Re0,#0x7f
-.*:	ee 3f 18 2e 	          ANDS      TXMASKI,D0Re0,#0xff
-.*:	2e e0 19 2e 	          ANDS      TXMASKI,D0\.7,#0x80
-.*:	de 1f 38 2e 	          ANDSNV    D0\.7,D0Re0,#0x7f
-.*:	e8 1f 38 2e 	          ANDS      A1\.7,D0Re0,#0x7f
-.*:	24 20 38 2e 	          ANDS      D1\.7,D0Re0,#0x80
-.*:	de 3f 38 2e 	          ANDSNV    D0\.7,D0Re0,#0xff
-.*:	e8 3f 38 2e 	          ANDS      A1\.7,D0Re0,#0xff
-.*:	e6 df 39 2e 	          ANDS      A0\.7,D0\.7,#0x7f
-.*:	24 e0 39 2e 	          ANDS      D1\.7,D0\.7,#0x80
-.*:	de ff 39 2e 	          ANDSNV    D0\.7,D0\.7,#0xff
-.*:	ec 1f 80 2e 	          ANDS      RA,D0Re0,#0x7f
-.*:	2c e0 81 2e 	          ANDS      RA,D0\.7,#0x80
-.*:	ec 3f b0 2e 	          ANDS      RAM8X32,D0Re0,#0xff
-.*:	ec 1f b8 2e 	          ANDS      RAM8X,D0Re0,#0x7f
-.*:	2c e0 b9 2e 	          ANDS      RAM8X,D0\.7,#0x80
-.*:	ec 3f c0 2e 	          ANDS      RABZ,D0Re0,#0xff
-.*:	ec 1f e8 2e 	          ANDS      RAWX,D0Re0,#0x7f
-.*:	2c e0 e9 2e 	          ANDS      RAWX,D0\.7,#0x80
-.*:	20 20 f8 2e 	          ANDS      TXIDLECYC,D0Re0,#0x80
-.*:	e0 df f9 2e 	          ANDS      TXIDLECYC,D0\.7,#0x7f
-.*:	e0 ff f9 2e 	          ANDS      TXIDLECYC,D0\.7,#0xff
-.*:	ea 1f 00 2f 	          ANDS      PC,D1Re0,#0x7f
-.*:	cc 3f 00 2f 	          ANDSPL    D1Re0,D1Re0,#0xff
-.*:	e0 df 01 2f 	          ANDS      TXENABLE,D1\.7,#0x7f
-.*:	22 e0 01 2f 	          ANDS      D0Re0,D1\.7,#0x80
-.*:	e4 ff 01 2f 	          ANDS      D1Re0,D1\.7,#0xff
-.*:	2a 20 08 2f 	          ANDS      PCX,D1Re0,#0x80
-.*:	28 e0 09 2f 	          ANDS      A1LbP,D1\.7,#0x80
-.*:	e6 df 11 2f 	          ANDS      A0\.2,D1\.7,#0x7f
-.*:	ee 3f 18 2f 	          ANDS      TXMASKI,D1Re0,#0xff
-.*:	de 1f 38 2f 	          ANDSNV    D1\.7,D1Re0,#0x7f
-.*:	24 20 38 2f 	          ANDS      D1\.7,D1Re0,#0x80
-.*:	e8 3f 38 2f 	          ANDS      A1\.7,D1Re0,#0xff
-.*:	22 e0 39 2f 	          ANDS      D0\.7,D1\.7,#0x80
-.*:	ec 1f 80 2f 	          ANDS      RA,D1Re0,#0x7f
-.*:	ec 3f b0 2f 	          ANDS      RAM8X32,D1Re0,#0xff
-.*:	2c e0 b9 2f 	          ANDS      RAM8X,D1\.7,#0x80
-.*:	ec 1f e8 2f 	          ANDS      RAWX,D1Re0,#0x7f
-.*:	20 20 f8 2f 	          ANDS      TXIDLECYC,D1Re0,#0x80
-.*:	e0 ff f9 2f 	          ANDS      TXIDLECYC,D1\.7,#0xff
-.*:	00 0e 00 30 	          OR        D0Re0,D0Re0,D0\.7
-.*:	01 20 00 30 	          OR        D0Re0,D0Re0,RD
-.*:	00 c0 01 30 	          OR        D0Re0,D0\.7,D0Re0
-.*:	40 ce 01 30 	          ORQ       D0Re0,D0\.7,D0\.7,A0\.2
-.*:	01 f2 01 30 	          OR        D0Re0,D0\.7,A0FrP
-.*:	01 02 38 30 	          OR        D0\.7,D0Re0,A1LbP
-.*:	01 10 38 30 	          OR        D0\.7,D0Re0,D1Re0
-.*:	01 34 38 30 	          OR        D0\.7,D0Re0,A0\.2
-.*:	01 c6 39 30 	          OR        D0\.7,D0\.7,A1\.3
-.*:	01 de 39 30 	          OR        D0\.7,D0\.7,D1\.7
-.*:	01 fe 39 30 	          OR        D0\.7,D0\.7,A0\.7
-.*:	00 0e 00 31 	          OR        D1Re0,D1Re0,D1\.7
-.*:	01 20 00 31 	          OR        D1Re0,D1Re0,RD
-.*:	00 c0 01 31 	          OR        D1Re0,D1\.7,D1Re0
-.*:	c0 ce 01 31 	          ORQ       D1Re0,D1\.7,D1\.7,A1\.3
-.*:	01 f2 01 31 	          OR        D1Re0,D1\.7,A0FrP
-.*:	01 02 38 31 	          OR        D1\.7,D1Re0,A1LbP
-.*:	01 10 38 31 	          OR        D1\.7,D1Re0,D0Re0
-.*:	01 34 38 31 	          OR        D1\.7,D1Re0,A0\.2
-.*:	01 c6 39 31 	          OR        D1\.7,D1\.7,A1\.3
-.*:	01 de 39 31 	          OR        D1\.7,D1\.7,D0\.7
-.*:	01 fe 39 31 	          OR        D1\.7,D1\.7,A0\.7
-.*:	02 00 04 32 	          OR        D0Re0,D0Re0,#-32768
-.*:	f8 ff 3b 32 	          OR        D0\.7,D0\.7,#0x7fff
-.*:	05 00 3c 32 	          ORMT      D0\.7,D0\.7,#0x8000
-.*:	fc ff 03 33 	          ORMB      D1Re0,D1Re0,#0x7fff
-.*:	f9 ff 07 33 	          ORT       D1Re0,D1Re0,#0xffff
-.*:	00 00 3c 33 	          OR        D1\.7,D1\.7,#0x8000
-.*:	fc ff 3f 33 	          ORMB      D1\.7,D1\.7,#0xffff
-.*:	bc 00 00 34 	          ORLE      PC,D0Re0,D0Re0
-.*:	5d 02 00 34 	          ORLE      D1Re0,D0Re0,A1LbP
-.*:	2d 06 00 34 	          ORPL      D0Re0,D0Re0,A1\.3
-.*:	1c 0e 00 34 	          ORLE      TXENABLE,D0Re0,D0\.7
-.*:	4c 0e 00 34 	          ORPL      D1Re0,D0Re0,D0\.7
-.*:	ec 0e 00 34 	          ORPL      TXSTAT,D0Re0,D0\.7
-.*:	4d 10 00 34 	          ORPL      D1Re0,D0Re0,D1Re0
-.*:	2d 1e 00 34 	          ORPL      D0Re0,D0Re0,D1\.7
-.*:	1d 20 00 34 	          ORLE      TXENABLE,D0Re0,RD
-.*:	ed 20 00 34 	          ORPL      TXSTAT,D0Re0,RD
-.*:	ad 32 00 34 	          ORPL      PC,D0Re0,A0FrP
-.*:	4d 34 00 34 	          ORPL      D1Re0,D0Re0,A0\.2
-.*:	3d 3e 00 34 	          ORLE      D0Re0,D0Re0,A0\.7
-.*:	04 c0 01 34 	          ORNE      TXENABLE,D0\.7,D0Re0
-.*:	f4 c0 01 34 	          ORLS      TXSTAT,D0\.7,D0Re0
-.*:	ad c2 01 34 	          ORPL      PC,D0\.7,A1LbP
-.*:	5d c6 01 34 	          ORLE      D1Re0,D0\.7,A1\.3
-.*:	1e ce 01 34 	          ORNV      TXENABLE,D0\.7,D0\.7
-.*:	5e ce 01 34 	          ORNV      D1Re0,D0\.7,D0\.7
-.*:	fe ce 01 34 	          ORNV      TXSTAT,D0\.7,D0\.7
-.*:	bd d0 01 34 	          ORLE      PC,D0\.7,D1Re0
-.*:	5d de 01 34 	          ORLE      D1Re0,D0\.7,D1\.7
-.*:	3d e0 01 34 	          ORLE      D0Re0,D0\.7,RD
-.*:	1d f2 01 34 	          ORLE      TXENABLE,D0\.7,A0FrP
-.*:	fd f2 01 34 	          ORLE      TXSTAT,D0\.7,A0FrP
-.*:	bd f4 01 34 	          ORLE      PC,D0\.7,A0\.2
-.*:	5d fe 01 34 	          ORLE      D1Re0,D0\.7,A0\.7
-.*:	94 00 08 34 	          ORLS      A1LbP,D0Re0,D0Re0
-.*:	bd 02 08 34 	          ORLE      PCX,D0Re0,A1LbP
-.*:	74 0e 08 34 	          ORLS      A0FrP,D0Re0,D0\.7
-.*:	a4 0e 08 34 	          ORNE      PCX,D0Re0,D0\.7
-.*:	bd 10 08 34 	          ORLE      PCX,D0Re0,D1Re0
-.*:	7d 20 08 34 	          ORLE      A0FrP,D0Re0,RD
-.*:	9d 32 08 34 	          ORLE      A1LbP,D0Re0,A0FrP
-.*:	bd 34 08 34 	          ORLE      PCX,D0Re0,A0\.2
-.*:	7c c0 09 34 	          ORLE      A0FrP,D0\.7,D0Re0
-.*:	9d c2 09 34 	          ORLE      A1LbP,D0\.7,A1LbP
-.*:	bd c6 09 34 	          ORLE      PCX,D0\.7,A1\.3
-.*:	9e ce 09 34 	          ORNV      A1LbP,D0\.7,D0\.7
-.*:	8d d0 09 34 	          ORPL      A1LbP,D0\.7,D1Re0
-.*:	bd de 09 34 	          ORLE      PCX,D0\.7,D1\.7
-.*:	6d f2 09 34 	          ORPL      A0FrP,D0\.7,A0FrP
-.*:	8d f4 09 34 	          ORPL      A1LbP,D0\.7,A0\.2
-.*:	ad fe 09 34 	          ORPL      PCX,D0\.7,A0\.7
-.*:	7c 0e 10 34 	          ORLE      A0\.2,D0Re0,D0\.7
-.*:	7d 20 10 34 	          ORLE      A0\.2,D0Re0,RD
-.*:	6c c0 11 34 	          ORPL      A0\.2,D0\.7,D0Re0
-.*:	7e ce 11 34 	          ORNV      A0\.2,D0\.7,D0\.7
-.*:	7d f2 11 34 	          ORLE      A0\.2,D0\.7,A0FrP
-.*:	fc 00 18 34 	          ORLE      TXMASKI,D0Re0,D0Re0
-.*:	fd 06 18 34 	          ORLE      TXMASKI,D0Re0,A1\.3
-.*:	fe 0e 18 34 	          ORNV      TXMASKI,D0Re0,D0\.7
-.*:	fd 1e 18 34 	          ORLE      TXMASKI,D0Re0,D1\.7
-.*:	fd 32 18 34 	          ORLE      TXMASKI,D0Re0,A0FrP
-.*:	fd 3e 18 34 	          ORLE      TXMASKI,D0Re0,A0\.7
-.*:	fd c2 19 34 	          ORLE      TXMASKI,D0\.7,A1LbP
-.*:	9e ce 19 34 	          ORNV      A1\.3,D0\.7,D0\.7
-.*:	fd d0 19 34 	          ORLE      TXMASKI,D0\.7,D1Re0
-.*:	fd e0 19 34 	          ORLE      TXMASKI,D0\.7,RD
-.*:	fd f4 19 34 	          ORLE      TXMASKI,D0\.7,A0\.2
-.*:	44 00 38 34 	          ORNE      D1\.7,D0Re0,D0Re0
-.*:	5d 02 38 34 	          ORLE      D1\.7,D0Re0,A1LbP
-.*:	5d 06 38 34 	          ORLE      D1\.7,D0Re0,A1\.3
-.*:	3e 0e 38 34 	          ORNV      D0\.7,D0Re0,D0\.7
-.*:	7e 0e 38 34 	          ORNV      A0\.7,D0Re0,D0\.7
-.*:	4d 10 38 34 	          ORPL      D1\.7,D0Re0,D1Re0
-.*:	5d 1e 38 34 	          ORLE      D1\.7,D0Re0,D1\.7
-.*:	4d 20 38 34 	          ORPL      D1\.7,D0Re0,RD
-.*:	5d 32 38 34 	          ORLE      D1\.7,D0Re0,A0FrP
-.*:	4d 34 38 34 	          ORPL      D1\.7,D0Re0,A0\.2
-.*:	5d 3e 38 34 	          ORLE      D1\.7,D0Re0,A0\.7
-.*:	54 c0 39 34 	          ORLS      D1\.7,D0\.7,D0Re0
-.*:	5d c2 39 34 	          ORLE      D1\.7,D0\.7,A1LbP
-.*:	5d c6 39 34 	          ORLE      D1\.7,D0\.7,A1\.3
-.*:	3e ce 39 34 	          ORNV      D0\.7,D0\.7,D0\.7
-.*:	7e ce 39 34 	          ORNV      A0\.7,D0\.7,D0\.7
-.*:	5d d0 39 34 	          ORLE      D1\.7,D0\.7,D1Re0
-.*:	5d de 39 34 	          ORLE      D1\.7,D0\.7,D1\.7
-.*:	5d e0 39 34 	          ORLE      D1\.7,D0\.7,RD
-.*:	5d f2 39 34 	          ORLE      D1\.7,D0\.7,A0FrP
-.*:	5d f4 39 34 	          ORLE      D1\.7,D0\.7,A0\.2
-.*:	5d fe 39 34 	          ORLE      D1\.7,D0\.7,A0\.7
-.*:	dd 02 80 34 	          ORLE      RA,D0Re0,A1LbP
-.*:	dd 10 80 34 	          ORLE      RA,D0Re0,D1Re0
-.*:	dd 34 80 34 	          ORLE      RA,D0Re0,A0\.2
-.*:	dd c6 81 34 	          ORLE      RA,D0\.7,A1\.3
-.*:	dd de 81 34 	          ORLE      RA,D0\.7,D1\.7
-.*:	dd fe 81 34 	          ORLE      RA,D0\.7,A0\.7
-.*:	cc 0e b0 34 	          ORPL      RAM8X32,D0Re0,D0\.7
-.*:	dd 20 b0 34 	          ORLE      RAM8X32,D0Re0,RD
-.*:	cc c0 b1 34 	          ORPL      RAM8X32,D0\.7,D0Re0
-.*:	de ce b1 34 	          ORNV      RAM8X32,D0\.7,D0\.7
-.*:	dd f2 b1 34 	          ORLE      RAM8X32,D0\.7,A0FrP
-.*:	dd 02 b8 34 	          ORLE      RAM8X,D0Re0,A1LbP
-.*:	dd 10 b8 34 	          ORLE      RAM8X,D0Re0,D1Re0
-.*:	dd 34 b8 34 	          ORLE      RAM8X,D0Re0,A0\.2
-.*:	dd c6 b9 34 	          ORLE      RAM8X,D0\.7,A1\.3
-.*:	dd de b9 34 	          ORLE      RAM8X,D0\.7,D1\.7
-.*:	dd fe b9 34 	          ORLE      RAM8X,D0\.7,A0\.7
-.*:	cc 0e c0 34 	          ORPL      RABZ,D0Re0,D0\.7
-.*:	dd 20 c0 34 	          ORLE      RABZ,D0Re0,RD
-.*:	cc c0 c1 34 	          ORPL      RABZ,D0\.7,D0Re0
-.*:	de ce c1 34 	          ORNV      RABZ,D0\.7,D0\.7
-.*:	dd f2 c1 34 	          ORLE      RABZ,D0\.7,A0FrP
-.*:	dd 02 e8 34 	          ORLE      RAWX,D0Re0,A1LbP
-.*:	dd 10 e8 34 	          ORLE      RAWX,D0Re0,D1Re0
-.*:	dd 34 e8 34 	          ORLE      RAWX,D0Re0,A0\.2
-.*:	dd c6 e9 34 	          ORLE      RAWX,D0\.7,A1\.3
-.*:	dd de e9 34 	          ORLE      RAWX,D0\.7,D1\.7
-.*:	dd fe e9 34 	          ORLE      RAWX,D0\.7,A0\.7
-.*:	dd 02 f8 34 	          ORLE      RAMX,D0Re0,A1LbP
-.*:	1e 0e f8 34 	          ORNV      TXIDLECYC,D0Re0,D0\.7
-.*:	dd 10 f8 34 	          ORLE      RAMX,D0Re0,D1Re0
-.*:	dd 20 f8 34 	          ORLE      RAMX,D0Re0,RD
-.*:	dd 34 f8 34 	          ORLE      RAMX,D0Re0,A0\.2
-.*:	cc c0 f9 34 	          ORPL      RAMX,D0\.7,D0Re0
-.*:	dd c6 f9 34 	          ORLE      RAMX,D0\.7,A1\.3
-.*:	de ce f9 34 	          ORNV      RAMX,D0\.7,D0\.7
-.*:	dd de f9 34 	          ORLE      RAMX,D0\.7,D1\.7
-.*:	dd f2 f9 34 	          ORLE      RAMX,D0\.7,A0FrP
-.*:	dd fe f9 34 	          ORLE      RAMX,D0\.7,A0\.7
-.*:	bc 00 00 35 	          ORLE      PC,D1Re0,D1Re0
-.*:	5d 02 00 35 	          ORLE      D1Re0,D1Re0,A1LbP
-.*:	2d 06 00 35 	          ORPL      D0Re0,D1Re0,A1\.3
-.*:	1c 0e 00 35 	          ORLE      TXENABLE,D1Re0,D1\.7
-.*:	4c 0e 00 35 	          ORPL      D1Re0,D1Re0,D1\.7
-.*:	ec 0e 00 35 	          ORPL      TXSTAT,D1Re0,D1\.7
-.*:	4d 10 00 35 	          ORPL      D1Re0,D1Re0,D0Re0
-.*:	2d 1e 00 35 	          ORPL      D0Re0,D1Re0,D0\.7
-.*:	1d 20 00 35 	          ORLE      TXENABLE,D1Re0,RD
-.*:	ed 20 00 35 	          ORPL      TXSTAT,D1Re0,RD
-.*:	ad 32 00 35 	          ORPL      PC,D1Re0,A0FrP
-.*:	4d 34 00 35 	          ORPL      D1Re0,D1Re0,A0\.2
-.*:	3d 3e 00 35 	          ORLE      D0Re0,D1Re0,A0\.7
-.*:	04 c0 01 35 	          ORNE      TXENABLE,D1\.7,D1Re0
-.*:	f4 c0 01 35 	          ORLS      TXSTAT,D1\.7,D1Re0
-.*:	ad c2 01 35 	          ORPL      PC,D1\.7,A1LbP
-.*:	5d c6 01 35 	          ORLE      D1Re0,D1\.7,A1\.3
-.*:	1e ce 01 35 	          ORNV      TXENABLE,D1\.7,D1\.7
-.*:	5e ce 01 35 	          ORNV      D1Re0,D1\.7,D1\.7
-.*:	fe ce 01 35 	          ORNV      TXSTAT,D1\.7,D1\.7
-.*:	bd d0 01 35 	          ORLE      PC,D1\.7,D0Re0
-.*:	5d de 01 35 	          ORLE      D1Re0,D1\.7,D0\.7
-.*:	3d e0 01 35 	          ORLE      D0Re0,D1\.7,RD
-.*:	1d f2 01 35 	          ORLE      TXENABLE,D1\.7,A0FrP
-.*:	fd f2 01 35 	          ORLE      TXSTAT,D1\.7,A0FrP
-.*:	bd f4 01 35 	          ORLE      PC,D1\.7,A0\.2
-.*:	5d fe 01 35 	          ORLE      D1Re0,D1\.7,A0\.7
-.*:	94 00 08 35 	          ORLS      A1LbP,D1Re0,D1Re0
-.*:	bd 02 08 35 	          ORLE      PCX,D1Re0,A1LbP
-.*:	74 0e 08 35 	          ORLS      A0FrP,D1Re0,D1\.7
-.*:	a4 0e 08 35 	          ORNE      PCX,D1Re0,D1\.7
-.*:	bd 10 08 35 	          ORLE      PCX,D1Re0,D0Re0
-.*:	7d 20 08 35 	          ORLE      A0FrP,D1Re0,RD
-.*:	9d 32 08 35 	          ORLE      A1LbP,D1Re0,A0FrP
-.*:	bd 34 08 35 	          ORLE      PCX,D1Re0,A0\.2
-.*:	7c c0 09 35 	          ORLE      A0FrP,D1\.7,D1Re0
-.*:	9d c2 09 35 	          ORLE      A1LbP,D1\.7,A1LbP
-.*:	bd c6 09 35 	          ORLE      PCX,D1\.7,A1\.3
-.*:	9e ce 09 35 	          ORNV      A1LbP,D1\.7,D1\.7
-.*:	8d d0 09 35 	          ORPL      A1LbP,D1\.7,D0Re0
-.*:	bd de 09 35 	          ORLE      PCX,D1\.7,D0\.7
-.*:	6d f2 09 35 	          ORPL      A0FrP,D1\.7,A0FrP
-.*:	8d f4 09 35 	          ORPL      A1LbP,D1\.7,A0\.2
-.*:	ad fe 09 35 	          ORPL      PCX,D1\.7,A0\.7
-.*:	7c 0e 10 35 	          ORLE      A0\.2,D1Re0,D1\.7
-.*:	7d 20 10 35 	          ORLE      A0\.2,D1Re0,RD
-.*:	6c c0 11 35 	          ORPL      A0\.2,D1\.7,D1Re0
-.*:	7e ce 11 35 	          ORNV      A0\.2,D1\.7,D1\.7
-.*:	7d f2 11 35 	          ORLE      A0\.2,D1\.7,A0FrP
-.*:	fc 00 18 35 	          ORLE      TXMASKI,D1Re0,D1Re0
-.*:	fd 06 18 35 	          ORLE      TXMASKI,D1Re0,A1\.3
-.*:	fe 0e 18 35 	          ORNV      TXMASKI,D1Re0,D1\.7
-.*:	fd 1e 18 35 	          ORLE      TXMASKI,D1Re0,D0\.7
-.*:	fd 32 18 35 	          ORLE      TXMASKI,D1Re0,A0FrP
-.*:	fd 3e 18 35 	          ORLE      TXMASKI,D1Re0,A0\.7
-.*:	fd c2 19 35 	          ORLE      TXMASKI,D1\.7,A1LbP
-.*:	9e ce 19 35 	          ORNV      A1\.3,D1\.7,D1\.7
-.*:	fd d0 19 35 	          ORLE      TXMASKI,D1\.7,D0Re0
-.*:	fd e0 19 35 	          ORLE      TXMASKI,D1\.7,RD
-.*:	fd f4 19 35 	          ORLE      TXMASKI,D1\.7,A0\.2
-.*:	44 00 38 35 	          ORNE      D1\.7,D1Re0,D1Re0
-.*:	5d 02 38 35 	          ORLE      D1\.7,D1Re0,A1LbP
-.*:	5d 06 38 35 	          ORLE      D1\.7,D1Re0,A1\.3
-.*:	3e 0e 38 35 	          ORNV      D0\.7,D1Re0,D1\.7
-.*:	7e 0e 38 35 	          ORNV      A0\.7,D1Re0,D1\.7
-.*:	4d 10 38 35 	          ORPL      D1\.7,D1Re0,D0Re0
-.*:	5d 1e 38 35 	          ORLE      D1\.7,D1Re0,D0\.7
-.*:	4d 20 38 35 	          ORPL      D1\.7,D1Re0,RD
-.*:	5d 32 38 35 	          ORLE      D1\.7,D1Re0,A0FrP
-.*:	4d 34 38 35 	          ORPL      D1\.7,D1Re0,A0\.2
-.*:	5d 3e 38 35 	          ORLE      D1\.7,D1Re0,A0\.7
-.*:	54 c0 39 35 	          ORLS      D1\.7,D1\.7,D1Re0
-.*:	5d c2 39 35 	          ORLE      D1\.7,D1\.7,A1LbP
-.*:	5d c6 39 35 	          ORLE      D1\.7,D1\.7,A1\.3
-.*:	3e ce 39 35 	          ORNV      D0\.7,D1\.7,D1\.7
-.*:	7e ce 39 35 	          ORNV      A0\.7,D1\.7,D1\.7
-.*:	5d d0 39 35 	          ORLE      D1\.7,D1\.7,D0Re0
-.*:	5d de 39 35 	          ORLE      D1\.7,D1\.7,D0\.7
-.*:	5d e0 39 35 	          ORLE      D1\.7,D1\.7,RD
-.*:	5d f2 39 35 	          ORLE      D1\.7,D1\.7,A0FrP
-.*:	5d f4 39 35 	          ORLE      D1\.7,D1\.7,A0\.2
-.*:	5d fe 39 35 	          ORLE      D1\.7,D1\.7,A0\.7
-.*:	dd 02 80 35 	          ORLE      RA,D1Re0,A1LbP
-.*:	dd 10 80 35 	          ORLE      RA,D1Re0,D0Re0
-.*:	dd 34 80 35 	          ORLE      RA,D1Re0,A0\.2
-.*:	dd c6 81 35 	          ORLE      RA,D1\.7,A1\.3
-.*:	dd de 81 35 	          ORLE      RA,D1\.7,D0\.7
-.*:	dd fe 81 35 	          ORLE      RA,D1\.7,A0\.7
-.*:	cc 0e b0 35 	          ORPL      RAM8X32,D1Re0,D1\.7
-.*:	dd 20 b0 35 	          ORLE      RAM8X32,D1Re0,RD
-.*:	cc c0 b1 35 	          ORPL      RAM8X32,D1\.7,D1Re0
-.*:	de ce b1 35 	          ORNV      RAM8X32,D1\.7,D1\.7
-.*:	dd f2 b1 35 	          ORLE      RAM8X32,D1\.7,A0FrP
-.*:	dd 02 b8 35 	          ORLE      RAM8X,D1Re0,A1LbP
-.*:	dd 10 b8 35 	          ORLE      RAM8X,D1Re0,D0Re0
-.*:	dd 34 b8 35 	          ORLE      RAM8X,D1Re0,A0\.2
-.*:	dd c6 b9 35 	          ORLE      RAM8X,D1\.7,A1\.3
-.*:	dd de b9 35 	          ORLE      RAM8X,D1\.7,D0\.7
-.*:	dd fe b9 35 	          ORLE      RAM8X,D1\.7,A0\.7
-.*:	cc 0e c0 35 	          ORPL      RABZ,D1Re0,D1\.7
-.*:	dd 20 c0 35 	          ORLE      RABZ,D1Re0,RD
-.*:	cc c0 c1 35 	          ORPL      RABZ,D1\.7,D1Re0
-.*:	de ce c1 35 	          ORNV      RABZ,D1\.7,D1\.7
-.*:	dd f2 c1 35 	          ORLE      RABZ,D1\.7,A0FrP
-.*:	dd 02 e8 35 	          ORLE      RAWX,D1Re0,A1LbP
-.*:	dd 10 e8 35 	          ORLE      RAWX,D1Re0,D0Re0
-.*:	dd 34 e8 35 	          ORLE      RAWX,D1Re0,A0\.2
-.*:	dd c6 e9 35 	          ORLE      RAWX,D1\.7,A1\.3
-.*:	dd de e9 35 	          ORLE      RAWX,D1\.7,D0\.7
-.*:	dd fe e9 35 	          ORLE      RAWX,D1\.7,A0\.7
-.*:	dd 02 f8 35 	          ORLE      RAMX,D1Re0,A1LbP
-.*:	1e 0e f8 35 	          ORNV      TXIDLECYC,D1Re0,D1\.7
-.*:	dd 10 f8 35 	          ORLE      RAMX,D1Re0,D0Re0
-.*:	dd 20 f8 35 	          ORLE      RAMX,D1Re0,RD
-.*:	dd 34 f8 35 	          ORLE      RAMX,D1Re0,A0\.2
-.*:	cc c0 f9 35 	          ORPL      RAMX,D1\.7,D1Re0
-.*:	dd c6 f9 35 	          ORLE      RAMX,D1\.7,A1\.3
-.*:	de ce f9 35 	          ORNV      RAMX,D1\.7,D1\.7
-.*:	dd de f9 35 	          ORLE      RAMX,D1\.7,D0\.7
-.*:	dd f2 f9 35 	          ORLE      RAMX,D1\.7,A0FrP
-.*:	dd fe f9 35 	          ORLE      RAMX,D1\.7,A0\.7
-.*:	e4 1f 00 36 	          OR        D1Re0,D0Re0,#0x7f
-.*:	1e 20 00 36 	          ORNV      D0Re0,D0Re0,#0x80
-.*:	2e 20 00 36 	          OR        TXSTAT,D0Re0,#0x80
-.*:	e4 3f 00 36 	          OR        D1Re0,D0Re0,#0xff
-.*:	de df 01 36 	          ORNV      D0Re0,D0\.7,#0x7f
-.*:	ea df 01 36 	          OR        PC,D0\.7,#0x7f
-.*:	20 e0 01 36 	          OR        TXENABLE,D0\.7,#0x80
-.*:	2e e0 01 36 	          OR        TXSTAT,D0\.7,#0x80
-.*:	e2 ff 01 36 	          OR        D0Re0,D0\.7,#0xff
-.*:	e6 1f 08 36 	          OR        A0FrP,D0Re0,#0x7f
-.*:	28 20 08 36 	          OR        A1LbP,D0Re0,#0x80
-.*:	ea 3f 08 36 	          OR        PCX,D0Re0,#0xff
-.*:	26 e0 09 36 	          OR        A0FrP,D0\.7,#0x80
-.*:	e8 ff 09 36 	          OR        A1LbP,D0\.7,#0xff
-.*:	e6 3f 10 36 	          OR        A0\.2,D0Re0,#0xff
-.*:	e8 1f 18 36 	          OR        A1\.3,D0Re0,#0x7f
-.*:	e8 3f 18 36 	          OR        A1\.3,D0Re0,#0xff
-.*:	28 e0 19 36 	          OR        A1\.3,D0\.7,#0x80
-.*:	dc 1f 38 36 	          ORLE      D0\.7,D0Re0,#0x7f
-.*:	e6 1f 38 36 	          OR        A0\.7,D0Re0,#0x7f
-.*:	22 20 38 36 	          OR        D0\.7,D0Re0,#0x80
-.*:	cc 3f 38 36 	          ORPL      D0\.7,D0Re0,#0xff
-.*:	e6 3f 38 36 	          OR        A0\.7,D0Re0,#0xff
-.*:	e4 df 39 36 	          OR        D1\.7,D0\.7,#0x7f
-.*:	1e e0 39 36 	          ORNV      D0\.7,D0\.7,#0x80
-.*:	dc ff 39 36 	          ORLE      D0\.7,D0\.7,#0xff
-.*:	e8 ff 39 36 	          OR        A1\.7,D0\.7,#0xff
-.*:	ec df 81 36 	          OR        RA,D0\.7,#0x7f
-.*:	2c 20 b0 36 	          OR        RAM8X32,D0Re0,#0x80
-.*:	ec ff b1 36 	          OR        RAM8X32,D0\.7,#0xff
-.*:	ec df b9 36 	          OR        RAM8X,D0\.7,#0x7f
-.*:	2c 20 c0 36 	          OR        RABZ,D0Re0,#0x80
-.*:	ec ff c1 36 	          OR        RABZ,D0\.7,#0xff
-.*:	ec df e9 36 	          OR        RAWX,D0\.7,#0x7f
-.*:	ec 1f f8 36 	          OR        RAMX,D0Re0,#0x7f
-.*:	ec 3f f8 36 	          OR        RAMX,D0Re0,#0xff
-.*:	2c e0 f9 36 	          OR        RAMX,D0\.7,#0x80
-.*:	e0 1f 00 37 	          OR        TXENABLE,D1Re0,#0x7f
-.*:	2a 20 00 37 	          OR        PC,D1Re0,#0x80
-.*:	dc df 01 37 	          ORLE      D1Re0,D1\.7,#0x7f
-.*:	1e e0 01 37 	          ORNV      D1Re0,D1\.7,#0x80
-.*:	e0 ff 01 37 	          OR        TXENABLE,D1\.7,#0xff
-.*:	26 20 08 37 	          OR        A0FrP,D1Re0,#0x80
-.*:	ea df 09 37 	          OR        PCX,D1\.7,#0x7f
-.*:	26 20 10 37 	          OR        A0\.2,D1Re0,#0x80
-.*:	2e 20 18 37 	          OR        TXMASKI,D1Re0,#0x80
-.*:	ee ff 19 37 	          OR        TXMASKI,D1\.7,#0xff
-.*:	1e 20 38 37 	          ORNV      D1\.7,D1Re0,#0x80
-.*:	e4 3f 38 37 	          OR        D1\.7,D1Re0,#0xff
-.*:	04 e0 39 37 	          ORNE      D1\.7,D1\.7,#0x80
-.*:	e6 ff 39 37 	          OR        A0\.7,D1\.7,#0xff
-.*:	ec 1f b0 37 	          OR        RAM8X32,D1Re0,#0x7f
-.*:	ec 3f b8 37 	          OR        RAM8X,D1Re0,#0xff
-.*:	2c e0 c1 37 	          OR        RABZ,D1\.7,#0x80
-.*:	e0 1f f8 37 	          OR        TXIDLECYC,D1Re0,#0x7f
-.*:	20 e0 f9 37 	          OR        TXIDLECYC,D1\.7,#0x80
-.*:	01 06 00 38 	          ORS       D0Re0,D0Re0,A1\.3
-.*:	01 1e 00 38 	          ORS       D0Re0,D0Re0,D1\.7
-.*:	01 3e 00 38 	          ORS       D0Re0,D0Re0,A0\.7
-.*:	00 ce 01 38 	          ORS       D0Re0,D0\.7,D0\.7
-.*:	01 e0 01 38 	          ORS       D0Re0,D0\.7,RD
-.*:	00 00 38 38 	          ORS       D0\.7,D0Re0,D0Re0
-.*:	40 0e 38 38 	          ORSQ      D0\.7,D0Re0,D0\.7,A0\.2
-.*:	01 32 38 38 	          ORS       D0\.7,D0Re0,A0FrP
-.*:	01 c2 39 38 	          ORS       D0\.7,D0\.7,A1LbP
-.*:	01 d0 39 38 	          ORS       D0\.7,D0\.7,D1Re0
-.*:	01 f4 39 38 	          ORS       D0\.7,D0\.7,A0\.2
-.*:	01 06 00 39 	          ORS       D1Re0,D1Re0,A1\.3
-.*:	01 1e 00 39 	          ORS       D1Re0,D1Re0,D0\.7
-.*:	01 3e 00 39 	          ORS       D1Re0,D1Re0,A0\.7
-.*:	00 ce 01 39 	          ORS       D1Re0,D1\.7,D1\.7
-.*:	01 e0 01 39 	          ORS       D1Re0,D1\.7,RD
-.*:	00 00 38 39 	          ORS       D1\.7,D1Re0,D1Re0
-.*:	c0 0e 38 39 	          ORSQ      D1\.7,D1Re0,D1\.7,A1\.3
-.*:	01 32 38 39 	          ORS       D1\.7,D1Re0,A0FrP
-.*:	01 c2 39 39 	          ORS       D1\.7,D1\.7,A1LbP
-.*:	01 d0 39 39 	          ORS       D1\.7,D1\.7,D0Re0
-.*:	01 f4 39 39 	          ORS       D1\.7,D1\.7,A0\.2
-.*:	00 00 04 3a 	          ORS       D0Re0,D0Re0,#0x8000
-.*:	fc ff 07 3a 	          ORSMB     D0Re0,D0Re0,#0xffff
-.*:	02 00 3c 3a 	          ORS       D0\.7,D0\.7,#-32768
-.*:	f8 ff 03 3b 	          ORS       D1Re0,D1Re0,#0x7fff
-.*:	05 00 04 3b 	          ORSMT     D1Re0,D1Re0,#0x8000
-.*:	fc ff 3b 3b 	          ORSMB     D1\.7,D1\.7,#0x7fff
-.*:	f9 ff 3f 3b 	          ORST      D1\.7,D1\.7,#0xffff
-.*:	44 00 00 3c 	          ORSNE     D1Re0,D0Re0,D0Re0
-.*:	3d 02 00 3c 	          ORSLE     D0Re0,D0Re0,A1LbP
-.*:	1d 06 00 3c 	          ORSLE     TXENABLE,D0Re0,A1\.3
-.*:	fd 06 00 3c 	          ORSLE     TXSTAT,D0Re0,A1\.3
-.*:	3e 0e 00 3c 	          ORSNV     D0Re0,D0Re0,D0\.7
-.*:	be 0e 00 3c 	          ORSNV     PC,D0Re0,D0\.7
-.*:	3d 10 00 3c 	          ORSLE     D0Re0,D0Re0,D1Re0
-.*:	1d 1e 00 3c 	          ORSLE     TXENABLE,D0Re0,D1\.7
-.*:	fd 1e 00 3c 	          ORSLE     TXSTAT,D0Re0,D1\.7
-.*:	bd 20 00 3c 	          ORSLE     PC,D0Re0,RD
-.*:	5d 32 00 3c 	          ORSLE     D1Re0,D0Re0,A0FrP
-.*:	3d 34 00 3c 	          ORSLE     D0Re0,D0Re0,A0\.2
-.*:	1d 3e 00 3c 	          ORSLE     TXENABLE,D0Re0,A0\.7
-.*:	fd 3e 00 3c 	          ORSLE     TXSTAT,D0Re0,A0\.7
-.*:	ac c0 01 3c 	          ORSPL     PC,D0\.7,D0Re0
-.*:	5d c2 01 3c 	          ORSLE     D1Re0,D0\.7,A1LbP
-.*:	3d c6 01 3c 	          ORSLE     D0Re0,D0\.7,A1\.3
-.*:	0c ce 01 3c 	          ORSPL     TXENABLE,D0\.7,D0\.7
-.*:	5c ce 01 3c 	          ORSLE     D1Re0,D0\.7,D0\.7
-.*:	fc ce 01 3c 	          ORSLE     TXSTAT,D0\.7,D0\.7
-.*:	5d d0 01 3c 	          ORSLE     D1Re0,D0\.7,D1Re0
-.*:	3d de 01 3c 	          ORSLE     D0Re0,D0\.7,D1\.7
-.*:	0d e0 01 3c 	          ORSPL     TXENABLE,D0\.7,RD
-.*:	fd e0 01 3c 	          ORSLE     TXSTAT,D0\.7,RD
-.*:	bd f2 01 3c 	          ORSLE     PC,D0\.7,A0FrP
-.*:	5d f4 01 3c 	          ORSLE     D1Re0,D0\.7,A0\.2
-.*:	2d fe 01 3c 	          ORSPL     D0Re0,D0\.7,A0\.7
-.*:	6c 00 08 3c 	          ORSPL     A0FrP,D0Re0,D0Re0
-.*:	9d 02 08 3c 	          ORSLE     A1LbP,D0Re0,A1LbP
-.*:	ad 06 08 3c 	          ORSPL     PCX,D0Re0,A1\.3
-.*:	9e 0e 08 3c 	          ORSNV     A1LbP,D0Re0,D0\.7
-.*:	9d 10 08 3c 	          ORSLE     A1LbP,D0Re0,D1Re0
-.*:	ad 1e 08 3c 	          ORSPL     PCX,D0Re0,D1\.7
-.*:	7d 32 08 3c 	          ORSLE     A0FrP,D0Re0,A0FrP
-.*:	9d 34 08 3c 	          ORSLE     A1LbP,D0Re0,A0\.2
-.*:	bd 3e 08 3c 	          ORSLE     PCX,D0Re0,A0\.7
-.*:	7d c2 09 3c 	          ORSLE     A0FrP,D0\.7,A1LbP
-.*:	9d c6 09 3c 	          ORSLE     A1LbP,D0\.7,A1\.3
-.*:	8c ce 09 3c 	          ORSPL     A1LbP,D0\.7,D0\.7
-.*:	7d d0 09 3c 	          ORSLE     A0FrP,D0\.7,D1Re0
-.*:	9d de 09 3c 	          ORSLE     A1LbP,D0\.7,D1\.7
-.*:	bd e0 09 3c 	          ORSLE     PCX,D0\.7,RD
-.*:	7d f4 09 3c 	          ORSLE     A0FrP,D0\.7,A0\.2
-.*:	9d fe 09 3c 	          ORSLE     A1LbP,D0\.7,A0\.7
-.*:	7d 06 10 3c 	          ORSLE     A0\.2,D0Re0,A1\.3
-.*:	7d 1e 10 3c 	          ORSLE     A0\.2,D0Re0,D1\.7
-.*:	7d 3e 10 3c 	          ORSLE     A0\.2,D0Re0,A0\.7
-.*:	7c ce 11 3c 	          ORSLE     A0\.2,D0\.7,D0\.7
-.*:	7d e0 11 3c 	          ORSLE     A0\.2,D0\.7,RD
-.*:	94 00 18 3c 	          ORSLS     A1\.3,D0Re0,D0Re0
-.*:	8d 06 18 3c 	          ORSPL     A1\.3,D0Re0,A1\.3
-.*:	ec 0e 18 3c 	          ORSPL     TXMASKI,D0Re0,D0\.7
-.*:	8d 1e 18 3c 	          ORSPL     A1\.3,D0Re0,D1\.7
-.*:	8d 32 18 3c 	          ORSPL     A1\.3,D0Re0,A0FrP
-.*:	8d 3e 18 3c 	          ORSPL     A1\.3,D0Re0,A0\.7
-.*:	8d c2 19 3c 	          ORSPL     A1\.3,D0\.7,A1LbP
-.*:	84 ce 19 3c 	          ORSNE     A1\.3,D0\.7,D0\.7
-.*:	9d d0 19 3c 	          ORSLE     A1\.3,D0\.7,D1Re0
-.*:	9d e0 19 3c 	          ORSLE     A1\.3,D0\.7,RD
-.*:	9d f4 19 3c 	          ORSLE     A1\.3,D0\.7,A0\.2
-.*:	3c 00 38 3c 	          ORSLE     D0\.7,D0Re0,D0Re0
-.*:	2d 02 38 3c 	          ORSPL     D0\.7,D0Re0,A1LbP
-.*:	3d 06 38 3c 	          ORSLE     D0\.7,D0Re0,A1\.3
-.*:	34 0e 38 3c 	          ORSLS     D0\.7,D0Re0,D0\.7
-.*:	64 0e 38 3c 	          ORSNE     A0\.7,D0Re0,D0\.7
-.*:	3d 10 38 3c 	          ORSLE     D0\.7,D0Re0,D1Re0
-.*:	3d 1e 38 3c 	          ORSLE     D0\.7,D0Re0,D1\.7
-.*:	3d 20 38 3c 	          ORSLE     D0\.7,D0Re0,RD
-.*:	3d 32 38 3c 	          ORSLE     D0\.7,D0Re0,A0FrP
-.*:	3d 34 38 3c 	          ORSLE     D0\.7,D0Re0,A0\.2
-.*:	2d 3e 38 3c 	          ORSPL     D0\.7,D0Re0,A0\.7
-.*:	2c c0 39 3c 	          ORSPL     D0\.7,D0\.7,D0Re0
-.*:	3d c2 39 3c 	          ORSLE     D0\.7,D0\.7,A1LbP
-.*:	2d c6 39 3c 	          ORSPL     D0\.7,D0\.7,A1\.3
-.*:	24 ce 39 3c 	          ORSNE     D0\.7,D0\.7,D0\.7
-.*:	74 ce 39 3c 	          ORSLS     A0\.7,D0\.7,D0\.7
-.*:	3d d0 39 3c 	          ORSLE     D0\.7,D0\.7,D1Re0
-.*:	2d de 39 3c 	          ORSPL     D0\.7,D0\.7,D1\.7
-.*:	3d e0 39 3c 	          ORSLE     D0\.7,D0\.7,RD
-.*:	2d f2 39 3c 	          ORSPL     D0\.7,D0\.7,A0FrP
-.*:	3d f4 39 3c 	          ORSLE     D0\.7,D0\.7,A0\.2
-.*:	3d fe 39 3c 	          ORSLE     D0\.7,D0\.7,A0\.7
-.*:	cc 00 80 3c 	          ORSPL     RA,D0Re0,D0Re0
-.*:	de 0e 80 3c 	          ORSNV     RA,D0Re0,D0\.7
-.*:	dd 32 80 3c 	          ORSLE     RA,D0Re0,A0FrP
-.*:	dd c2 81 3c 	          ORSLE     RA,D0\.7,A1LbP
-.*:	dd d0 81 3c 	          ORSLE     RA,D0\.7,D1Re0
-.*:	dd f4 81 3c 	          ORSLE     RA,D0\.7,A0\.2
-.*:	dd 06 b0 3c 	          ORSLE     RAM8X32,D0Re0,A1\.3
-.*:	dd 1e b0 3c 	          ORSLE     RAM8X32,D0Re0,D1\.7
-.*:	dd 3e b0 3c 	          ORSLE     RAM8X32,D0Re0,A0\.7
-.*:	cc ce b1 3c 	          ORSPL     RAM8X32,D0\.7,D0\.7
-.*:	dd e0 b1 3c 	          ORSLE     RAM8X32,D0\.7,RD
-.*:	cc 00 b8 3c 	          ORSPL     RAM8X,D0Re0,D0Re0
-.*:	de 0e b8 3c 	          ORSNV     RAM8X,D0Re0,D0\.7
-.*:	dd 32 b8 3c 	          ORSLE     RAM8X,D0Re0,A0FrP
-.*:	dd c2 b9 3c 	          ORSLE     RAM8X,D0\.7,A1LbP
-.*:	dd d0 b9 3c 	          ORSLE     RAM8X,D0\.7,D1Re0
-.*:	dd f4 b9 3c 	          ORSLE     RAM8X,D0\.7,A0\.2
-.*:	dd 06 c0 3c 	          ORSLE     RABZ,D0Re0,A1\.3
-.*:	dd 1e c0 3c 	          ORSLE     RABZ,D0Re0,D1\.7
-.*:	dd 3e c0 3c 	          ORSLE     RABZ,D0Re0,A0\.7
-.*:	cc ce c1 3c 	          ORSPL     RABZ,D0\.7,D0\.7
-.*:	dd e0 c1 3c 	          ORSLE     RABZ,D0\.7,RD
-.*:	cc 00 e8 3c 	          ORSPL     RAWX,D0Re0,D0Re0
-.*:	de 0e e8 3c 	          ORSNV     RAWX,D0Re0,D0\.7
-.*:	dd 32 e8 3c 	          ORSLE     RAWX,D0Re0,A0FrP
-.*:	dd c2 e9 3c 	          ORSLE     RAWX,D0\.7,A1LbP
-.*:	dd d0 e9 3c 	          ORSLE     RAWX,D0\.7,D1Re0
-.*:	dd f4 e9 3c 	          ORSLE     RAWX,D0\.7,A0\.2
-.*:	1d 02 f8 3c 	          ORSLE     TXIDLECYC,D0Re0,A1LbP
-.*:	14 0e f8 3c 	          ORSLS     TXIDLECYC,D0Re0,D0\.7
-.*:	1d 10 f8 3c 	          ORSLE     TXIDLECYC,D0Re0,D1Re0
-.*:	1d 20 f8 3c 	          ORSLE     TXIDLECYC,D0Re0,RD
-.*:	1d 34 f8 3c 	          ORSLE     TXIDLECYC,D0Re0,A0\.2
-.*:	14 c0 f9 3c 	          ORSLS     TXIDLECYC,D0\.7,D0Re0
-.*:	1d c6 f9 3c 	          ORSLE     TXIDLECYC,D0\.7,A1\.3
-.*:	cc ce f9 3c 	          ORSPL     RAMX,D0\.7,D0\.7
-.*:	1d de f9 3c 	          ORSLE     TXIDLECYC,D0\.7,D1\.7
-.*:	1d f2 f9 3c 	          ORSLE     TXIDLECYC,D0\.7,A0FrP
-.*:	1d fe f9 3c 	          ORSLE     TXIDLECYC,D0\.7,A0\.7
-.*:	44 00 00 3d 	          ORSNE     D1Re0,D1Re0,D1Re0
-.*:	3d 02 00 3d 	          ORSLE     D0Re0,D1Re0,A1LbP
-.*:	1d 06 00 3d 	          ORSLE     TXENABLE,D1Re0,A1\.3
-.*:	fd 06 00 3d 	          ORSLE     TXSTAT,D1Re0,A1\.3
-.*:	3e 0e 00 3d 	          ORSNV     D0Re0,D1Re0,D1\.7
-.*:	be 0e 00 3d 	          ORSNV     PC,D1Re0,D1\.7
-.*:	3d 10 00 3d 	          ORSLE     D0Re0,D1Re0,D0Re0
-.*:	1d 1e 00 3d 	          ORSLE     TXENABLE,D1Re0,D0\.7
-.*:	fd 1e 00 3d 	          ORSLE     TXSTAT,D1Re0,D0\.7
-.*:	bd 20 00 3d 	          ORSLE     PC,D1Re0,RD
-.*:	5d 32 00 3d 	          ORSLE     D1Re0,D1Re0,A0FrP
-.*:	3d 34 00 3d 	          ORSLE     D0Re0,D1Re0,A0\.2
-.*:	1d 3e 00 3d 	          ORSLE     TXENABLE,D1Re0,A0\.7
-.*:	fd 3e 00 3d 	          ORSLE     TXSTAT,D1Re0,A0\.7
-.*:	ac c0 01 3d 	          ORSPL     PC,D1\.7,D1Re0
-.*:	5d c2 01 3d 	          ORSLE     D1Re0,D1\.7,A1LbP
-.*:	3d c6 01 3d 	          ORSLE     D0Re0,D1\.7,A1\.3
-.*:	0c ce 01 3d 	          ORSPL     TXENABLE,D1\.7,D1\.7
-.*:	5c ce 01 3d 	          ORSLE     D1Re0,D1\.7,D1\.7
-.*:	fc ce 01 3d 	          ORSLE     TXSTAT,D1\.7,D1\.7
-.*:	5d d0 01 3d 	          ORSLE     D1Re0,D1\.7,D0Re0
-.*:	3d de 01 3d 	          ORSLE     D0Re0,D1\.7,D0\.7
-.*:	0d e0 01 3d 	          ORSPL     TXENABLE,D1\.7,RD
-.*:	fd e0 01 3d 	          ORSLE     TXSTAT,D1\.7,RD
-.*:	bd f2 01 3d 	          ORSLE     PC,D1\.7,A0FrP
-.*:	5d f4 01 3d 	          ORSLE     D1Re0,D1\.7,A0\.2
-.*:	2d fe 01 3d 	          ORSPL     D0Re0,D1\.7,A0\.7
-.*:	6c 00 08 3d 	          ORSPL     A0FrP,D1Re0,D1Re0
-.*:	9d 02 08 3d 	          ORSLE     A1LbP,D1Re0,A1LbP
-.*:	ad 06 08 3d 	          ORSPL     PCX,D1Re0,A1\.3
-.*:	9e 0e 08 3d 	          ORSNV     A1LbP,D1Re0,D1\.7
-.*:	9d 10 08 3d 	          ORSLE     A1LbP,D1Re0,D0Re0
-.*:	ad 1e 08 3d 	          ORSPL     PCX,D1Re0,D0\.7
-.*:	7d 32 08 3d 	          ORSLE     A0FrP,D1Re0,A0FrP
-.*:	9d 34 08 3d 	          ORSLE     A1LbP,D1Re0,A0\.2
-.*:	bd 3e 08 3d 	          ORSLE     PCX,D1Re0,A0\.7
-.*:	7d c2 09 3d 	          ORSLE     A0FrP,D1\.7,A1LbP
-.*:	9d c6 09 3d 	          ORSLE     A1LbP,D1\.7,A1\.3
-.*:	8c ce 09 3d 	          ORSPL     A1LbP,D1\.7,D1\.7
-.*:	7d d0 09 3d 	          ORSLE     A0FrP,D1\.7,D0Re0
-.*:	9d de 09 3d 	          ORSLE     A1LbP,D1\.7,D0\.7
-.*:	bd e0 09 3d 	          ORSLE     PCX,D1\.7,RD
-.*:	7d f4 09 3d 	          ORSLE     A0FrP,D1\.7,A0\.2
-.*:	9d fe 09 3d 	          ORSLE     A1LbP,D1\.7,A0\.7
-.*:	7d 06 10 3d 	          ORSLE     A0\.2,D1Re0,A1\.3
-.*:	7d 1e 10 3d 	          ORSLE     A0\.2,D1Re0,D0\.7
-.*:	7d 3e 10 3d 	          ORSLE     A0\.2,D1Re0,A0\.7
-.*:	7c ce 11 3d 	          ORSLE     A0\.2,D1\.7,D1\.7
-.*:	7d e0 11 3d 	          ORSLE     A0\.2,D1\.7,RD
-.*:	94 00 18 3d 	          ORSLS     A1\.3,D1Re0,D1Re0
-.*:	8d 06 18 3d 	          ORSPL     A1\.3,D1Re0,A1\.3
-.*:	ec 0e 18 3d 	          ORSPL     TXMASKI,D1Re0,D1\.7
-.*:	8d 1e 18 3d 	          ORSPL     A1\.3,D1Re0,D0\.7
-.*:	8d 32 18 3d 	          ORSPL     A1\.3,D1Re0,A0FrP
-.*:	8d 3e 18 3d 	          ORSPL     A1\.3,D1Re0,A0\.7
-.*:	8d c2 19 3d 	          ORSPL     A1\.3,D1\.7,A1LbP
-.*:	84 ce 19 3d 	          ORSNE     A1\.3,D1\.7,D1\.7
-.*:	9d d0 19 3d 	          ORSLE     A1\.3,D1\.7,D0Re0
-.*:	9d e0 19 3d 	          ORSLE     A1\.3,D1\.7,RD
-.*:	9d f4 19 3d 	          ORSLE     A1\.3,D1\.7,A0\.2
-.*:	3c 00 38 3d 	          ORSLE     D0\.7,D1Re0,D1Re0
-.*:	2d 02 38 3d 	          ORSPL     D0\.7,D1Re0,A1LbP
-.*:	3d 06 38 3d 	          ORSLE     D0\.7,D1Re0,A1\.3
-.*:	34 0e 38 3d 	          ORSLS     D0\.7,D1Re0,D1\.7
-.*:	64 0e 38 3d 	          ORSNE     A0\.7,D1Re0,D1\.7
-.*:	3d 10 38 3d 	          ORSLE     D0\.7,D1Re0,D0Re0
-.*:	3d 1e 38 3d 	          ORSLE     D0\.7,D1Re0,D0\.7
-.*:	3d 20 38 3d 	          ORSLE     D0\.7,D1Re0,RD
-.*:	3d 32 38 3d 	          ORSLE     D0\.7,D1Re0,A0FrP
-.*:	3d 34 38 3d 	          ORSLE     D0\.7,D1Re0,A0\.2
-.*:	2d 3e 38 3d 	          ORSPL     D0\.7,D1Re0,A0\.7
-.*:	2c c0 39 3d 	          ORSPL     D0\.7,D1\.7,D1Re0
-.*:	3d c2 39 3d 	          ORSLE     D0\.7,D1\.7,A1LbP
-.*:	2d c6 39 3d 	          ORSPL     D0\.7,D1\.7,A1\.3
-.*:	24 ce 39 3d 	          ORSNE     D0\.7,D1\.7,D1\.7
-.*:	74 ce 39 3d 	          ORSLS     A0\.7,D1\.7,D1\.7
-.*:	3d d0 39 3d 	          ORSLE     D0\.7,D1\.7,D0Re0
-.*:	2d de 39 3d 	          ORSPL     D0\.7,D1\.7,D0\.7
-.*:	3d e0 39 3d 	          ORSLE     D0\.7,D1\.7,RD
-.*:	2d f2 39 3d 	          ORSPL     D0\.7,D1\.7,A0FrP
-.*:	3d f4 39 3d 	          ORSLE     D0\.7,D1\.7,A0\.2
-.*:	3d fe 39 3d 	          ORSLE     D0\.7,D1\.7,A0\.7
-.*:	cc 00 80 3d 	          ORSPL     RA,D1Re0,D1Re0
-.*:	de 0e 80 3d 	          ORSNV     RA,D1Re0,D1\.7
-.*:	dd 32 80 3d 	          ORSLE     RA,D1Re0,A0FrP
-.*:	dd c2 81 3d 	          ORSLE     RA,D1\.7,A1LbP
-.*:	dd d0 81 3d 	          ORSLE     RA,D1\.7,D0Re0
-.*:	dd f4 81 3d 	          ORSLE     RA,D1\.7,A0\.2
-.*:	dd 06 b0 3d 	          ORSLE     RAM8X32,D1Re0,A1\.3
-.*:	dd 1e b0 3d 	          ORSLE     RAM8X32,D1Re0,D0\.7
-.*:	dd 3e b0 3d 	          ORSLE     RAM8X32,D1Re0,A0\.7
-.*:	cc ce b1 3d 	          ORSPL     RAM8X32,D1\.7,D1\.7
-.*:	dd e0 b1 3d 	          ORSLE     RAM8X32,D1\.7,RD
-.*:	cc 00 b8 3d 	          ORSPL     RAM8X,D1Re0,D1Re0
-.*:	de 0e b8 3d 	          ORSNV     RAM8X,D1Re0,D1\.7
-.*:	dd 32 b8 3d 	          ORSLE     RAM8X,D1Re0,A0FrP
-.*:	dd c2 b9 3d 	          ORSLE     RAM8X,D1\.7,A1LbP
-.*:	dd d0 b9 3d 	          ORSLE     RAM8X,D1\.7,D0Re0
-.*:	dd f4 b9 3d 	          ORSLE     RAM8X,D1\.7,A0\.2
-.*:	dd 06 c0 3d 	          ORSLE     RABZ,D1Re0,A1\.3
-.*:	dd 1e c0 3d 	          ORSLE     RABZ,D1Re0,D0\.7
-.*:	dd 3e c0 3d 	          ORSLE     RABZ,D1Re0,A0\.7
-.*:	cc ce c1 3d 	          ORSPL     RABZ,D1\.7,D1\.7
-.*:	dd e0 c1 3d 	          ORSLE     RABZ,D1\.7,RD
-.*:	cc 00 e8 3d 	          ORSPL     RAWX,D1Re0,D1Re0
-.*:	de 0e e8 3d 	          ORSNV     RAWX,D1Re0,D1\.7
-.*:	dd 32 e8 3d 	          ORSLE     RAWX,D1Re0,A0FrP
-.*:	dd c2 e9 3d 	          ORSLE     RAWX,D1\.7,A1LbP
-.*:	dd d0 e9 3d 	          ORSLE     RAWX,D1\.7,D0Re0
-.*:	dd f4 e9 3d 	          ORSLE     RAWX,D1\.7,A0\.2
-.*:	1d 02 f8 3d 	          ORSLE     TXIDLECYC,D1Re0,A1LbP
-.*:	14 0e f8 3d 	          ORSLS     TXIDLECYC,D1Re0,D1\.7
-.*:	1d 10 f8 3d 	          ORSLE     TXIDLECYC,D1Re0,D0Re0
-.*:	1d 20 f8 3d 	          ORSLE     TXIDLECYC,D1Re0,RD
-.*:	1d 34 f8 3d 	          ORSLE     TXIDLECYC,D1Re0,A0\.2
-.*:	14 c0 f9 3d 	          ORSLS     TXIDLECYC,D1\.7,D1Re0
-.*:	1d c6 f9 3d 	          ORSLE     TXIDLECYC,D1\.7,A1\.3
-.*:	cc ce f9 3d 	          ORSPL     RAMX,D1\.7,D1\.7
-.*:	1d de f9 3d 	          ORSLE     TXIDLECYC,D1\.7,D0\.7
-.*:	1d f2 f9 3d 	          ORSLE     TXIDLECYC,D1\.7,A0FrP
-.*:	1d fe f9 3d 	          ORSLE     TXIDLECYC,D1\.7,A0\.7
-.*:	e0 1f 00 3e 	          ORS       TXENABLE,D0Re0,#0x7f
-.*:	1c 20 00 3e 	          ORSLE     D0Re0,D0Re0,#0x80
-.*:	2a 20 00 3e 	          ORS       PC,D0Re0,#0x80
-.*:	e0 3f 00 3e 	          ORS       TXENABLE,D0Re0,#0xff
-.*:	dc df 01 3e 	          ORSLE     D0Re0,D0\.7,#0x7f
-.*:	e4 df 01 3e 	          ORS       D1Re0,D0\.7,#0x7f
-.*:	1e e0 01 3e 	          ORSNV     D0Re0,D0\.7,#0x80
-.*:	2a e0 01 3e 	          ORS       PC,D0\.7,#0x80
-.*:	e0 ff 01 3e 	          ORS       TXENABLE,D0\.7,#0xff
-.*:	ee ff 01 3e 	          ORS       TXSTAT,D0\.7,#0xff
-.*:	26 20 08 3e 	          ORS       A0FrP,D0Re0,#0x80
-.*:	e8 3f 08 3e 	          ORS       A1LbP,D0Re0,#0xff
-.*:	ea df 09 3e 	          ORS       PCX,D0\.7,#0x7f
-.*:	e6 ff 09 3e 	          ORS       A0FrP,D0\.7,#0xff
-.*:	26 20 10 3e 	          ORS       A0\.2,D0Re0,#0x80
-.*:	e6 ff 11 3e 	          ORS       A0\.2,D0\.7,#0xff
-.*:	2e 20 18 3e 	          ORS       TXMASKI,D0Re0,#0x80
-.*:	ee df 19 3e 	          ORS       TXMASKI,D0\.7,#0x7f
-.*:	ee ff 19 3e 	          ORS       TXMASKI,D0\.7,#0xff
-.*:	e4 1f 38 3e 	          ORS       D1\.7,D0Re0,#0x7f
-.*:	1e 20 38 3e 	          ORSNV     D0\.7,D0Re0,#0x80
-.*:	28 20 38 3e 	          ORS       A1\.7,D0Re0,#0x80
-.*:	e4 3f 38 3e 	          ORS       D1\.7,D0Re0,#0xff
-.*:	de df 39 3e 	          ORSNV     D0\.7,D0\.7,#0x7f
-.*:	04 e0 39 3e 	          ORSNE     D0\.7,D0\.7,#0x80
-.*:	28 e0 39 3e 	          ORS       A1\.7,D0\.7,#0x80
-.*:	e6 ff 39 3e 	          ORS       A0\.7,D0\.7,#0xff
-.*:	ec 3f 80 3e 	          ORS       RA,D0Re0,#0xff
-.*:	ec 1f b0 3e 	          ORS       RAM8X32,D0Re0,#0x7f
-.*:	2c e0 b1 3e 	          ORS       RAM8X32,D0\.7,#0x80
-.*:	ec 3f b8 3e 	          ORS       RAM8X,D0Re0,#0xff
-.*:	ec 1f c0 3e 	          ORS       RABZ,D0Re0,#0x7f
-.*:	2c e0 c1 3e 	          ORS       RABZ,D0\.7,#0x80
-.*:	ec 3f e8 3e 	          ORS       RAWX,D0Re0,#0xff
-.*:	e0 1f f8 3e 	          ORS       TXIDLECYC,D0Re0,#0x7f
-.*:	e0 3f f8 3e 	          ORS       TXIDLECYC,D0Re0,#0xff
-.*:	20 e0 f9 3e 	          ORS       TXIDLECYC,D0\.7,#0x80
-.*:	dc 1f 00 3f 	          ORSLE     D1Re0,D1Re0,#0x7f
-.*:	20 20 00 3f 	          ORS       TXENABLE,D1Re0,#0x80
-.*:	ea 3f 00 3f 	          ORS       PC,D1Re0,#0xff
-.*:	ee df 01 3f 	          ORS       TXSTAT,D1\.7,#0x7f
-.*:	dc ff 01 3f 	          ORSLE     D1Re0,D1\.7,#0xff
-.*:	e8 1f 08 3f 	          ORS       A1LbP,D1Re0,#0x7f
-.*:	e6 df 09 3f 	          ORS       A0FrP,D1\.7,#0x7f
-.*:	ea ff 09 3f 	          ORS       PCX,D1\.7,#0xff
-.*:	ee 1f 18 3f 	          ORS       TXMASKI,D1Re0,#0x7f
-.*:	2e e0 19 3f 	          ORS       TXMASKI,D1\.7,#0x80
-.*:	e8 1f 38 3f 	          ORS       A1\.7,D1Re0,#0x7f
-.*:	de 3f 38 3f 	          ORSNV     D1\.7,D1Re0,#0xff
-.*:	e6 df 39 3f 	          ORS       A0\.7,D1\.7,#0x7f
-.*:	de ff 39 3f 	          ORSNV     D1\.7,D1\.7,#0xff
-.*:	2c e0 81 3f 	          ORS       RA,D1\.7,#0x80
-.*:	ec 1f b8 3f 	          ORS       RAM8X,D1Re0,#0x7f
-.*:	ec 3f c0 3f 	          ORS       RABZ,D1Re0,#0xff
-.*:	2c e0 e9 3f 	          ORS       RAWX,D1\.7,#0x80
-.*:	e0 df f9 3f 	          ORS       TXIDLECYC,D1\.7,#0x7f
-.*:	01 02 00 40 	          XOR       D0Re0,D0Re0,A1LbP
-.*:	01 10 00 40 	          XOR       D0Re0,D0Re0,D1Re0
-.*:	01 34 00 40 	          XOR       D0Re0,D0Re0,A0\.2
-.*:	01 c6 01 40 	          XOR       D0Re0,D0\.7,A1\.3
-.*:	01 de 01 40 	          XOR       D0Re0,D0\.7,D1\.7
-.*:	01 fe 01 40 	          XOR       D0Re0,D0\.7,A0\.7
-.*:	00 0e 38 40 	          XOR       D0\.7,D0Re0,D0\.7
-.*:	01 20 38 40 	          XOR       D0\.7,D0Re0,RD
-.*:	00 c0 39 40 	          XOR       D0\.7,D0\.7,D0Re0
-.*:	40 ce 39 40 	          XORQ      D0\.7,D0\.7,D0\.7,A0\.2
-.*:	01 f2 39 40 	          XOR       D0\.7,D0\.7,A0FrP
-.*:	01 02 00 41 	          XOR       D1Re0,D1Re0,A1LbP
-.*:	01 10 00 41 	          XOR       D1Re0,D1Re0,D0Re0
-.*:	01 34 00 41 	          XOR       D1Re0,D1Re0,A0\.2
-.*:	01 c6 01 41 	          XOR       D1Re0,D1\.7,A1\.3
-.*:	01 de 01 41 	          XOR       D1Re0,D1\.7,D0\.7
-.*:	01 fe 01 41 	          XOR       D1Re0,D1\.7,A0\.7
-.*:	00 0e 38 41 	          XOR       D1\.7,D1Re0,D1\.7
-.*:	01 20 38 41 	          XOR       D1\.7,D1Re0,RD
-.*:	00 c0 39 41 	          XOR       D1\.7,D1\.7,D1Re0
-.*:	c0 ce 39 41 	          XORQ      D1\.7,D1\.7,D1\.7,A1\.3
-.*:	01 f2 39 41 	          XOR       D1\.7,D1\.7,A0FrP
-.*:	fc ff 03 42 	          XORMB     D0Re0,D0Re0,#0x7fff
-.*:	f9 ff 07 42 	          XORT      D0Re0,D0Re0,#0xffff
-.*:	00 00 3c 42 	          XOR       D0\.7,D0\.7,#0x8000
-.*:	fc ff 3f 42 	          XORMB     D0\.7,D0\.7,#0xffff
-.*:	02 00 04 43 	          XOR       D1Re0,D1Re0,#-32768
-.*:	f8 ff 3b 43 	          XOR       D1\.7,D1\.7,#0x7fff
-.*:	05 00 3c 43 	          XORMT     D1\.7,D1\.7,#0x8000
-.*:	3c 00 00 44 	          XORLE     D0Re0,D0Re0,D0Re0
-.*:	1d 02 00 44 	          XORLE     TXENABLE,D0Re0,A1LbP
-.*:	fd 02 00 44 	          XORLE     TXSTAT,D0Re0,A1LbP
-.*:	ad 06 00 44 	          XORPL     PC,D0Re0,A1\.3
-.*:	24 0e 00 44 	          XORNE     D0Re0,D0Re0,D0\.7
-.*:	a4 0e 00 44 	          XORNE     PC,D0Re0,D0\.7
-.*:	1d 10 00 44 	          XORLE     TXENABLE,D0Re0,D1Re0
-.*:	ed 10 00 44 	          XORPL     TXSTAT,D0Re0,D1Re0
-.*:	ad 1e 00 44 	          XORPL     PC,D0Re0,D1\.7
-.*:	4d 20 00 44 	          XORPL     D1Re0,D0Re0,RD
-.*:	2d 32 00 44 	          XORPL     D0Re0,D0Re0,A0FrP
-.*:	1d 34 00 44 	          XORLE     TXENABLE,D0Re0,A0\.2
-.*:	ed 34 00 44 	          XORPL     TXSTAT,D0Re0,A0\.2
-.*:	bd 3e 00 44 	          XORLE     PC,D0Re0,A0\.7
-.*:	54 c0 01 44 	          XORLS     D1Re0,D0\.7,D0Re0
-.*:	2d c2 01 44 	          XORPL     D0Re0,D0\.7,A1LbP
-.*:	1d c6 01 44 	          XORLE     TXENABLE,D0\.7,A1\.3
-.*:	fd c6 01 44 	          XORLE     TXSTAT,D0\.7,A1\.3
-.*:	3e ce 01 44 	          XORNV     D0Re0,D0\.7,D0\.7
-.*:	be ce 01 44 	          XORNV     PC,D0\.7,D0\.7
-.*:	3d d0 01 44 	          XORLE     D0Re0,D0\.7,D1Re0
-.*:	1d de 01 44 	          XORLE     TXENABLE,D0\.7,D1\.7
-.*:	fd de 01 44 	          XORLE     TXSTAT,D0\.7,D1\.7
-.*:	bd e0 01 44 	          XORLE     PC,D0\.7,RD
-.*:	5d f2 01 44 	          XORLE     D1Re0,D0\.7,A0FrP
-.*:	3d f4 01 44 	          XORLE     D0Re0,D0\.7,A0\.2
-.*:	1d fe 01 44 	          XORLE     TXENABLE,D0\.7,A0\.7
-.*:	fd fe 01 44 	          XORLE     TXSTAT,D0\.7,A0\.7
-.*:	6d 02 08 44 	          XORPL     A0FrP,D0Re0,A1LbP
-.*:	9d 06 08 44 	          XORLE     A1LbP,D0Re0,A1\.3
-.*:	9c 0e 08 44 	          XORLE     A1LbP,D0Re0,D0\.7
-.*:	7d 10 08 44 	          XORLE     A0FrP,D0Re0,D1Re0
-.*:	9d 1e 08 44 	          XORLE     A1LbP,D0Re0,D1\.7
-.*:	bd 20 08 44 	          XORLE     PCX,D0Re0,RD
-.*:	7d 34 08 44 	          XORLE     A0FrP,D0Re0,A0\.2
-.*:	9d 3e 08 44 	          XORLE     A1LbP,D0Re0,A0\.7
-.*:	ac c0 09 44 	          XORPL     PCX,D0\.7,D0Re0
-.*:	6d c6 09 44 	          XORPL     A0FrP,D0\.7,A1\.3
-.*:	7e ce 09 44 	          XORNV     A0FrP,D0\.7,D0\.7
-.*:	be ce 09 44 	          XORNV     PCX,D0\.7,D0\.7
-.*:	6d de 09 44 	          XORPL     A0FrP,D0\.7,D1\.7
-.*:	8d e0 09 44 	          XORPL     A1LbP,D0\.7,RD
-.*:	bd f2 09 44 	          XORLE     PCX,D0\.7,A0FrP
-.*:	7d fe 09 44 	          XORLE     A0FrP,D0\.7,A0\.7
-.*:	7d 02 10 44 	          XORLE     A0\.2,D0Re0,A1LbP
-.*:	7d 10 10 44 	          XORLE     A0\.2,D0Re0,D1Re0
-.*:	7d 34 10 44 	          XORLE     A0\.2,D0Re0,A0\.2
-.*:	7d c6 11 44 	          XORLE     A0\.2,D0\.7,A1\.3
-.*:	7d de 11 44 	          XORLE     A0\.2,D0\.7,D1\.7
-.*:	7d fe 11 44 	          XORLE     A0\.2,D0\.7,A0\.7
-.*:	fd 02 18 44 	          XORLE     TXMASKI,D0Re0,A1LbP
-.*:	9e 0e 18 44 	          XORNV     A1\.3,D0Re0,D0\.7
-.*:	fd 10 18 44 	          XORLE     TXMASKI,D0Re0,D1Re0
-.*:	fd 20 18 44 	          XORLE     TXMASKI,D0Re0,RD
-.*:	fd 34 18 44 	          XORLE     TXMASKI,D0Re0,A0\.2
-.*:	fc c0 19 44 	          XORLE     TXMASKI,D0\.7,D0Re0
-.*:	fd c6 19 44 	          XORLE     TXMASKI,D0\.7,A1\.3
-.*:	fe ce 19 44 	          XORNV     TXMASKI,D0\.7,D0\.7
-.*:	fd de 19 44 	          XORLE     TXMASKI,D0\.7,D1\.7
-.*:	fd f2 19 44 	          XORLE     TXMASKI,D0\.7,A0FrP
-.*:	fd fe 19 44 	          XORLE     TXMASKI,D0\.7,A0\.7
-.*:	94 00 38 44 	          XORLS     A1\.7,D0Re0,D0Re0
-.*:	9d 02 38 44 	          XORLE     A1\.7,D0Re0,A1LbP
-.*:	9d 06 38 44 	          XORLE     A1\.7,D0Re0,A1\.3
-.*:	5e 0e 38 44 	          XORNV     D1\.7,D0Re0,D0\.7
-.*:	9e 0e 38 44 	          XORNV     A1\.7,D0Re0,D0\.7
-.*:	9d 10 38 44 	          XORLE     A1\.7,D0Re0,D1Re0
-.*:	9d 1e 38 44 	          XORLE     A1\.7,D0Re0,D1\.7
-.*:	9d 20 38 44 	          XORLE     A1\.7,D0Re0,RD
-.*:	9d 32 38 44 	          XORLE     A1\.7,D0Re0,A0FrP
-.*:	9d 34 38 44 	          XORLE     A1\.7,D0Re0,A0\.2
-.*:	9d 3e 38 44 	          XORLE     A1\.7,D0Re0,A0\.7
-.*:	84 c0 39 44 	          XORNE     A1\.7,D0\.7,D0Re0
-.*:	9d c2 39 44 	          XORLE     A1\.7,D0\.7,A1LbP
-.*:	9d c6 39 44 	          XORLE     A1\.7,D0\.7,A1\.3
-.*:	5e ce 39 44 	          XORNV     D1\.7,D0\.7,D0\.7
-.*:	9e ce 39 44 	          XORNV     A1\.7,D0\.7,D0\.7
-.*:	8d d0 39 44 	          XORPL     A1\.7,D0\.7,D1Re0
-.*:	9d de 39 44 	          XORLE     A1\.7,D0\.7,D1\.7
-.*:	8d e0 39 44 	          XORPL     A1\.7,D0\.7,RD
-.*:	9d f2 39 44 	          XORLE     A1\.7,D0\.7,A0FrP
-.*:	8d f4 39 44 	          XORPL     A1\.7,D0\.7,A0\.2
-.*:	9d fe 39 44 	          XORLE     A1\.7,D0\.7,A0\.7
-.*:	cc 0e 80 44 	          XORPL     RA,D0Re0,D0\.7
-.*:	dd 20 80 44 	          XORLE     RA,D0Re0,RD
-.*:	cc c0 81 44 	          XORPL     RA,D0\.7,D0Re0
-.*:	de ce 81 44 	          XORNV     RA,D0\.7,D0\.7
-.*:	dd f2 81 44 	          XORLE     RA,D0\.7,A0FrP
-.*:	dd 02 b0 44 	          XORLE     RAM8X32,D0Re0,A1LbP
-.*:	dd 10 b0 44 	          XORLE     RAM8X32,D0Re0,D1Re0
-.*:	dd 34 b0 44 	          XORLE     RAM8X32,D0Re0,A0\.2
-.*:	dd c6 b1 44 	          XORLE     RAM8X32,D0\.7,A1\.3
-.*:	dd de b1 44 	          XORLE     RAM8X32,D0\.7,D1\.7
-.*:	dd fe b1 44 	          XORLE     RAM8X32,D0\.7,A0\.7
-.*:	cc 0e b8 44 	          XORPL     RAM8X,D0Re0,D0\.7
-.*:	dd 20 b8 44 	          XORLE     RAM8X,D0Re0,RD
-.*:	cc c0 b9 44 	          XORPL     RAM8X,D0\.7,D0Re0
-.*:	de ce b9 44 	          XORNV     RAM8X,D0\.7,D0\.7
-.*:	dd f2 b9 44 	          XORLE     RAM8X,D0\.7,A0FrP
-.*:	dd 02 c0 44 	          XORLE     RABZ,D0Re0,A1LbP
-.*:	dd 10 c0 44 	          XORLE     RABZ,D0Re0,D1Re0
-.*:	dd 34 c0 44 	          XORLE     RABZ,D0Re0,A0\.2
-.*:	dd c6 c1 44 	          XORLE     RABZ,D0\.7,A1\.3
-.*:	dd de c1 44 	          XORLE     RABZ,D0\.7,D1\.7
-.*:	dd fe c1 44 	          XORLE     RABZ,D0\.7,A0\.7
-.*:	cc 0e e8 44 	          XORPL     RAWX,D0Re0,D0\.7
-.*:	dd 20 e8 44 	          XORLE     RAWX,D0Re0,RD
-.*:	cc c0 e9 44 	          XORPL     RAWX,D0\.7,D0Re0
-.*:	de ce e9 44 	          XORNV     RAWX,D0\.7,D0\.7
-.*:	dd f2 e9 44 	          XORLE     RAWX,D0\.7,A0FrP
-.*:	cc 00 f8 44 	          XORPL     RAMX,D0Re0,D0Re0
-.*:	dd 06 f8 44 	          XORLE     RAMX,D0Re0,A1\.3
-.*:	de 0e f8 44 	          XORNV     RAMX,D0Re0,D0\.7
-.*:	dd 1e f8 44 	          XORLE     RAMX,D0Re0,D1\.7
-.*:	dd 32 f8 44 	          XORLE     RAMX,D0Re0,A0FrP
-.*:	dd 3e f8 44 	          XORLE     RAMX,D0Re0,A0\.7
-.*:	dd c2 f9 44 	          XORLE     RAMX,D0\.7,A1LbP
-.*:	1e ce f9 44 	          XORNV     TXIDLECYC,D0\.7,D0\.7
-.*:	dd d0 f9 44 	          XORLE     RAMX,D0\.7,D1Re0
-.*:	dd e0 f9 44 	          XORLE     RAMX,D0\.7,RD
-.*:	dd f4 f9 44 	          XORLE     RAMX,D0\.7,A0\.2
-.*:	3c 00 00 45 	          XORLE     D0Re0,D1Re0,D1Re0
-.*:	1d 02 00 45 	          XORLE     TXENABLE,D1Re0,A1LbP
-.*:	fd 02 00 45 	          XORLE     TXSTAT,D1Re0,A1LbP
-.*:	ad 06 00 45 	          XORPL     PC,D1Re0,A1\.3
-.*:	24 0e 00 45 	          XORNE     D0Re0,D1Re0,D1\.7
-.*:	a4 0e 00 45 	          XORNE     PC,D1Re0,D1\.7
-.*:	1d 10 00 45 	          XORLE     TXENABLE,D1Re0,D0Re0
-.*:	ed 10 00 45 	          XORPL     TXSTAT,D1Re0,D0Re0
-.*:	ad 1e 00 45 	          XORPL     PC,D1Re0,D0\.7
-.*:	4d 20 00 45 	          XORPL     D1Re0,D1Re0,RD
-.*:	2d 32 00 45 	          XORPL     D0Re0,D1Re0,A0FrP
-.*:	1d 34 00 45 	          XORLE     TXENABLE,D1Re0,A0\.2
-.*:	ed 34 00 45 	          XORPL     TXSTAT,D1Re0,A0\.2
-.*:	bd 3e 00 45 	          XORLE     PC,D1Re0,A0\.7
-.*:	54 c0 01 45 	          XORLS     D1Re0,D1\.7,D1Re0
-.*:	2d c2 01 45 	          XORPL     D0Re0,D1\.7,A1LbP
-.*:	1d c6 01 45 	          XORLE     TXENABLE,D1\.7,A1\.3
-.*:	fd c6 01 45 	          XORLE     TXSTAT,D1\.7,A1\.3
-.*:	3e ce 01 45 	          XORNV     D0Re0,D1\.7,D1\.7
-.*:	be ce 01 45 	          XORNV     PC,D1\.7,D1\.7
-.*:	3d d0 01 45 	          XORLE     D0Re0,D1\.7,D0Re0
-.*:	1d de 01 45 	          XORLE     TXENABLE,D1\.7,D0\.7
-.*:	fd de 01 45 	          XORLE     TXSTAT,D1\.7,D0\.7
-.*:	bd e0 01 45 	          XORLE     PC,D1\.7,RD
-.*:	5d f2 01 45 	          XORLE     D1Re0,D1\.7,A0FrP
-.*:	3d f4 01 45 	          XORLE     D0Re0,D1\.7,A0\.2
-.*:	1d fe 01 45 	          XORLE     TXENABLE,D1\.7,A0\.7
-.*:	fd fe 01 45 	          XORLE     TXSTAT,D1\.7,A0\.7
-.*:	6d 02 08 45 	          XORPL     A0FrP,D1Re0,A1LbP
-.*:	9d 06 08 45 	          XORLE     A1LbP,D1Re0,A1\.3
-.*:	9c 0e 08 45 	          XORLE     A1LbP,D1Re0,D1\.7
-.*:	7d 10 08 45 	          XORLE     A0FrP,D1Re0,D0Re0
-.*:	9d 1e 08 45 	          XORLE     A1LbP,D1Re0,D0\.7
-.*:	bd 20 08 45 	          XORLE     PCX,D1Re0,RD
-.*:	7d 34 08 45 	          XORLE     A0FrP,D1Re0,A0\.2
-.*:	9d 3e 08 45 	          XORLE     A1LbP,D1Re0,A0\.7
-.*:	ac c0 09 45 	          XORPL     PCX,D1\.7,D1Re0
-.*:	6d c6 09 45 	          XORPL     A0FrP,D1\.7,A1\.3
-.*:	7e ce 09 45 	          XORNV     A0FrP,D1\.7,D1\.7
-.*:	be ce 09 45 	          XORNV     PCX,D1\.7,D1\.7
-.*:	6d de 09 45 	          XORPL     A0FrP,D1\.7,D0\.7
-.*:	8d e0 09 45 	          XORPL     A1LbP,D1\.7,RD
-.*:	bd f2 09 45 	          XORLE     PCX,D1\.7,A0FrP
-.*:	7d fe 09 45 	          XORLE     A0FrP,D1\.7,A0\.7
-.*:	7d 02 10 45 	          XORLE     A0\.2,D1Re0,A1LbP
-.*:	7d 10 10 45 	          XORLE     A0\.2,D1Re0,D0Re0
-.*:	7d 34 10 45 	          XORLE     A0\.2,D1Re0,A0\.2
-.*:	7d c6 11 45 	          XORLE     A0\.2,D1\.7,A1\.3
-.*:	7d de 11 45 	          XORLE     A0\.2,D1\.7,D0\.7
-.*:	7d fe 11 45 	          XORLE     A0\.2,D1\.7,A0\.7
-.*:	fd 02 18 45 	          XORLE     TXMASKI,D1Re0,A1LbP
-.*:	9e 0e 18 45 	          XORNV     A1\.3,D1Re0,D1\.7
-.*:	fd 10 18 45 	          XORLE     TXMASKI,D1Re0,D0Re0
-.*:	fd 20 18 45 	          XORLE     TXMASKI,D1Re0,RD
-.*:	fd 34 18 45 	          XORLE     TXMASKI,D1Re0,A0\.2
-.*:	fc c0 19 45 	          XORLE     TXMASKI,D1\.7,D1Re0
-.*:	fd c6 19 45 	          XORLE     TXMASKI,D1\.7,A1\.3
-.*:	fe ce 19 45 	          XORNV     TXMASKI,D1\.7,D1\.7
-.*:	fd de 19 45 	          XORLE     TXMASKI,D1\.7,D0\.7
-.*:	fd f2 19 45 	          XORLE     TXMASKI,D1\.7,A0FrP
-.*:	fd fe 19 45 	          XORLE     TXMASKI,D1\.7,A0\.7
-.*:	94 00 38 45 	          XORLS     A1\.7,D1Re0,D1Re0
-.*:	9d 02 38 45 	          XORLE     A1\.7,D1Re0,A1LbP
-.*:	9d 06 38 45 	          XORLE     A1\.7,D1Re0,A1\.3
-.*:	5e 0e 38 45 	          XORNV     D1\.7,D1Re0,D1\.7
-.*:	9e 0e 38 45 	          XORNV     A1\.7,D1Re0,D1\.7
-.*:	9d 10 38 45 	          XORLE     A1\.7,D1Re0,D0Re0
-.*:	9d 1e 38 45 	          XORLE     A1\.7,D1Re0,D0\.7
-.*:	9d 20 38 45 	          XORLE     A1\.7,D1Re0,RD
-.*:	9d 32 38 45 	          XORLE     A1\.7,D1Re0,A0FrP
-.*:	9d 34 38 45 	          XORLE     A1\.7,D1Re0,A0\.2
-.*:	9d 3e 38 45 	          XORLE     A1\.7,D1Re0,A0\.7
-.*:	84 c0 39 45 	          XORNE     A1\.7,D1\.7,D1Re0
-.*:	9d c2 39 45 	          XORLE     A1\.7,D1\.7,A1LbP
-.*:	9d c6 39 45 	          XORLE     A1\.7,D1\.7,A1\.3
-.*:	5e ce 39 45 	          XORNV     D1\.7,D1\.7,D1\.7
-.*:	9e ce 39 45 	          XORNV     A1\.7,D1\.7,D1\.7
-.*:	8d d0 39 45 	          XORPL     A1\.7,D1\.7,D0Re0
-.*:	9d de 39 45 	          XORLE     A1\.7,D1\.7,D0\.7
-.*:	8d e0 39 45 	          XORPL     A1\.7,D1\.7,RD
-.*:	9d f2 39 45 	          XORLE     A1\.7,D1\.7,A0FrP
-.*:	8d f4 39 45 	          XORPL     A1\.7,D1\.7,A0\.2
-.*:	9d fe 39 45 	          XORLE     A1\.7,D1\.7,A0\.7
-.*:	cc 0e 80 45 	          XORPL     RA,D1Re0,D1\.7
-.*:	dd 20 80 45 	          XORLE     RA,D1Re0,RD
-.*:	cc c0 81 45 	          XORPL     RA,D1\.7,D1Re0
-.*:	de ce 81 45 	          XORNV     RA,D1\.7,D1\.7
-.*:	dd f2 81 45 	          XORLE     RA,D1\.7,A0FrP
-.*:	dd 02 b0 45 	          XORLE     RAM8X32,D1Re0,A1LbP
-.*:	dd 10 b0 45 	          XORLE     RAM8X32,D1Re0,D0Re0
-.*:	dd 34 b0 45 	          XORLE     RAM8X32,D1Re0,A0\.2
-.*:	dd c6 b1 45 	          XORLE     RAM8X32,D1\.7,A1\.3
-.*:	dd de b1 45 	          XORLE     RAM8X32,D1\.7,D0\.7
-.*:	dd fe b1 45 	          XORLE     RAM8X32,D1\.7,A0\.7
-.*:	cc 0e b8 45 	          XORPL     RAM8X,D1Re0,D1\.7
-.*:	dd 20 b8 45 	          XORLE     RAM8X,D1Re0,RD
-.*:	cc c0 b9 45 	          XORPL     RAM8X,D1\.7,D1Re0
-.*:	de ce b9 45 	          XORNV     RAM8X,D1\.7,D1\.7
-.*:	dd f2 b9 45 	          XORLE     RAM8X,D1\.7,A0FrP
-.*:	dd 02 c0 45 	          XORLE     RABZ,D1Re0,A1LbP
-.*:	dd 10 c0 45 	          XORLE     RABZ,D1Re0,D0Re0
-.*:	dd 34 c0 45 	          XORLE     RABZ,D1Re0,A0\.2
-.*:	dd c6 c1 45 	          XORLE     RABZ,D1\.7,A1\.3
-.*:	dd de c1 45 	          XORLE     RABZ,D1\.7,D0\.7
-.*:	dd fe c1 45 	          XORLE     RABZ,D1\.7,A0\.7
-.*:	cc 0e e8 45 	          XORPL     RAWX,D1Re0,D1\.7
-.*:	dd 20 e8 45 	          XORLE     RAWX,D1Re0,RD
-.*:	cc c0 e9 45 	          XORPL     RAWX,D1\.7,D1Re0
-.*:	de ce e9 45 	          XORNV     RAWX,D1\.7,D1\.7
-.*:	dd f2 e9 45 	          XORLE     RAWX,D1\.7,A0FrP
-.*:	cc 00 f8 45 	          XORPL     RAMX,D1Re0,D1Re0
-.*:	dd 06 f8 45 	          XORLE     RAMX,D1Re0,A1\.3
-.*:	de 0e f8 45 	          XORNV     RAMX,D1Re0,D1\.7
-.*:	dd 1e f8 45 	          XORLE     RAMX,D1Re0,D0\.7
-.*:	dd 32 f8 45 	          XORLE     RAMX,D1Re0,A0FrP
-.*:	dd 3e f8 45 	          XORLE     RAMX,D1Re0,A0\.7
-.*:	dd c2 f9 45 	          XORLE     RAMX,D1\.7,A1LbP
-.*:	1e ce f9 45 	          XORNV     TXIDLECYC,D1\.7,D1\.7
-.*:	dd d0 f9 45 	          XORLE     RAMX,D1\.7,D0Re0
-.*:	dd e0 f9 45 	          XORLE     RAMX,D1\.7,RD
-.*:	dd f4 f9 45 	          XORLE     RAMX,D1\.7,A0\.2
-.*:	de 1f 00 46 	          XORNV     D0Re0,D0Re0,#0x7f
-.*:	ee 1f 00 46 	          XOR       TXSTAT,D0Re0,#0x7f
-.*:	24 20 00 46 	          XOR       D1Re0,D0Re0,#0x80
-.*:	de 3f 00 46 	          XORNV     D0Re0,D0Re0,#0xff
-.*:	ee 3f 00 46 	          XOR       TXSTAT,D0Re0,#0xff
-.*:	e2 df 01 46 	          XOR       D0Re0,D0\.7,#0x7f
-.*:	04 e0 01 46 	          XORNE     D0Re0,D0\.7,#0x80
-.*:	24 e0 01 46 	          XOR       D1Re0,D0\.7,#0x80
-.*:	de ff 01 46 	          XORNV     D0Re0,D0\.7,#0xff
-.*:	ea ff 01 46 	          XOR       PC,D0\.7,#0xff
-.*:	ea 1f 08 46 	          XOR       PCX,D0Re0,#0x7f
-.*:	e6 3f 08 46 	          XOR       A0FrP,D0Re0,#0xff
-.*:	e8 df 09 46 	          XOR       A1LbP,D0\.7,#0x7f
-.*:	2a e0 09 46 	          XOR       PCX,D0\.7,#0x80
-.*:	e6 1f 10 46 	          XOR       A0\.2,D0Re0,#0x7f
-.*:	26 e0 11 46 	          XOR       A0\.2,D0\.7,#0x80
-.*:	28 20 18 46 	          XOR       A1\.3,D0Re0,#0x80
-.*:	e8 df 19 46 	          XOR       A1\.3,D0\.7,#0x7f
-.*:	e8 ff 19 46 	          XOR       A1\.3,D0\.7,#0xff
-.*:	e2 1f 38 46 	          XOR       D0\.7,D0Re0,#0x7f
-.*:	1c 20 38 46 	          XORLE     D0\.7,D0Re0,#0x80
-.*:	26 20 38 46 	          XOR       A0\.7,D0Re0,#0x80
-.*:	e2 3f 38 46 	          XOR       D0\.7,D0Re0,#0xff
-.*:	dc df 39 46 	          XORLE     D0\.7,D0\.7,#0x7f
-.*:	e8 df 39 46 	          XOR       A1\.7,D0\.7,#0x7f
-.*:	26 e0 39 46 	          XOR       A0\.7,D0\.7,#0x80
-.*:	e4 ff 39 46 	          XOR       D1\.7,D0\.7,#0xff
-.*:	2c 20 80 46 	          XOR       RA,D0Re0,#0x80
-.*:	ec ff 81 46 	          XOR       RA,D0\.7,#0xff
-.*:	ec df b1 46 	          XOR       RAM8X32,D0\.7,#0x7f
-.*:	2c 20 b8 46 	          XOR       RAM8X,D0Re0,#0x80
-.*:	ec ff b9 46 	          XOR       RAM8X,D0\.7,#0xff
-.*:	ec df c1 46 	          XOR       RABZ,D0\.7,#0x7f
-.*:	2c 20 e8 46 	          XOR       RAWX,D0Re0,#0x80
-.*:	ec ff e9 46 	          XOR       RAWX,D0\.7,#0xff
-.*:	2c 20 f8 46 	          XOR       RAMX,D0Re0,#0x80
-.*:	ec df f9 46 	          XOR       RAMX,D0\.7,#0x7f
-.*:	ec ff f9 46 	          XOR       RAMX,D0\.7,#0xff
-.*:	1c 20 00 47 	          XORLE     D1Re0,D1Re0,#0x80
-.*:	e0 3f 00 47 	          XOR       TXENABLE,D1Re0,#0xff
-.*:	e4 df 01 47 	          XOR       D1Re0,D1\.7,#0x7f
-.*:	2a e0 01 47 	          XOR       PC,D1\.7,#0x80
-.*:	ee ff 01 47 	          XOR       TXSTAT,D1\.7,#0xff
-.*:	e8 3f 08 47 	          XOR       A1LbP,D1Re0,#0xff
-.*:	e6 ff 09 47 	          XOR       A0FrP,D1\.7,#0xff
-.*:	e6 ff 11 47 	          XOR       A0\.2,D1\.7,#0xff
-.*:	ee df 19 47 	          XOR       TXMASKI,D1\.7,#0x7f
-.*:	e4 1f 38 47 	          XOR       D1\.7,D1Re0,#0x7f
-.*:	28 20 38 47 	          XOR       A1\.7,D1Re0,#0x80
-.*:	de df 39 47 	          XORNV     D1\.7,D1\.7,#0x7f
-.*:	28 e0 39 47 	          XOR       A1\.7,D1\.7,#0x80
-.*:	ec 3f 80 47 	          XOR       RA,D1Re0,#0xff
-.*:	2c e0 b1 47 	          XOR       RAM8X32,D1\.7,#0x80
-.*:	ec 1f c0 47 	          XOR       RABZ,D1Re0,#0x7f
-.*:	ec 3f e8 47 	          XOR       RAWX,D1Re0,#0xff
-.*:	e0 3f f8 47 	          XOR       TXIDLECYC,D1Re0,#0xff
-.*:	00 00 00 48 	          XORS      D0Re0,D0Re0,D0Re0
-.*:	40 0e 00 48 	          XORSQ     D0Re0,D0Re0,D0\.7,A0\.2
-.*:	01 32 00 48 	          XORS      D0Re0,D0Re0,A0FrP
-.*:	01 c2 01 48 	          XORS      D0Re0,D0\.7,A1LbP
-.*:	01 d0 01 48 	          XORS      D0Re0,D0\.7,D1Re0
-.*:	01 f4 01 48 	          XORS      D0Re0,D0\.7,A0\.2
-.*:	01 06 38 48 	          XORS      D0\.7,D0Re0,A1\.3
-.*:	01 1e 38 48 	          XORS      D0\.7,D0Re0,D1\.7
-.*:	01 3e 38 48 	          XORS      D0\.7,D0Re0,A0\.7
-.*:	00 ce 39 48 	          XORS      D0\.7,D0\.7,D0\.7
-.*:	01 e0 39 48 	          XORS      D0\.7,D0\.7,RD
-.*:	00 00 00 49 	          XORS      D1Re0,D1Re0,D1Re0
-.*:	c0 0e 00 49 	          XORSQ     D1Re0,D1Re0,D1\.7,A1\.3
-.*:	01 32 00 49 	          XORS      D1Re0,D1Re0,A0FrP
-.*:	01 c2 01 49 	          XORS      D1Re0,D1\.7,A1LbP
-.*:	01 d0 01 49 	          XORS      D1Re0,D1\.7,D0Re0
-.*:	01 f4 01 49 	          XORS      D1Re0,D1\.7,A0\.2
-.*:	01 06 38 49 	          XORS      D1\.7,D1Re0,A1\.3
-.*:	01 1e 38 49 	          XORS      D1\.7,D1Re0,D0\.7
-.*:	01 3e 38 49 	          XORS      D1\.7,D1Re0,A0\.7
-.*:	00 ce 39 49 	          XORS      D1\.7,D1\.7,D1\.7
-.*:	01 e0 39 49 	          XORS      D1\.7,D1\.7,RD
-.*:	f8 ff 03 4a 	          XORS      D0Re0,D0Re0,#0x7fff
-.*:	05 00 04 4a 	          XORSMT    D0Re0,D0Re0,#0x8000
-.*:	fc ff 3b 4a 	          XORSMB    D0\.7,D0\.7,#0x7fff
-.*:	f9 ff 3f 4a 	          XORST     D0\.7,D0\.7,#0xffff
-.*:	00 00 04 4b 	          XORS      D1Re0,D1Re0,#0x8000
-.*:	fc ff 07 4b 	          XORSMB    D1Re0,D1Re0,#0xffff
-.*:	02 00 3c 4b 	          XORS      D1\.7,D1\.7,#-32768
-.*:	14 00 00 4c 	          XORSLS    TXENABLE,D0Re0,D0Re0
-.*:	e4 00 00 4c 	          XORSNE    TXSTAT,D0Re0,D0Re0
-.*:	bd 02 00 4c 	          XORSLE    PC,D0Re0,A1LbP
-.*:	5d 06 00 4c 	          XORSLE    D1Re0,D0Re0,A1\.3
-.*:	1e 0e 00 4c 	          XORSNV    TXENABLE,D0Re0,D0\.7
-.*:	5e 0e 00 4c 	          XORSNV    D1Re0,D0Re0,D0\.7
-.*:	fe 0e 00 4c 	          XORSNV    TXSTAT,D0Re0,D0\.7
-.*:	bd 10 00 4c 	          XORSLE    PC,D0Re0,D1Re0
-.*:	5d 1e 00 4c 	          XORSLE    D1Re0,D0Re0,D1\.7
-.*:	3d 20 00 4c 	          XORSLE    D0Re0,D0Re0,RD
-.*:	1d 32 00 4c 	          XORSLE    TXENABLE,D0Re0,A0FrP
-.*:	fd 32 00 4c 	          XORSLE    TXSTAT,D0Re0,A0FrP
-.*:	bd 34 00 4c 	          XORSLE    PC,D0Re0,A0\.2
-.*:	5d 3e 00 4c 	          XORSLE    D1Re0,D0Re0,A0\.7
-.*:	2c c0 01 4c 	          XORSPL    D0Re0,D0\.7,D0Re0
-.*:	1d c2 01 4c 	          XORSLE    TXENABLE,D0\.7,A1LbP
-.*:	fd c2 01 4c 	          XORSLE    TXSTAT,D0\.7,A1LbP
-.*:	bd c6 01 4c 	          XORSLE    PC,D0\.7,A1\.3
-.*:	34 ce 01 4c 	          XORSLS    D0Re0,D0\.7,D0\.7
-.*:	b4 ce 01 4c 	          XORSLS    PC,D0\.7,D0\.7
-.*:	0d d0 01 4c 	          XORSPL    TXENABLE,D0\.7,D1Re0
-.*:	fd d0 01 4c 	          XORSLE    TXSTAT,D0\.7,D1Re0
-.*:	bd de 01 4c 	          XORSLE    PC,D0\.7,D1\.7
-.*:	5d e0 01 4c 	          XORSLE    D1Re0,D0\.7,RD
-.*:	3d f2 01 4c 	          XORSLE    D0Re0,D0\.7,A0FrP
-.*:	0d f4 01 4c 	          XORSPL    TXENABLE,D0\.7,A0\.2
-.*:	fd f4 01 4c 	          XORSLE    TXSTAT,D0\.7,A0\.2
-.*:	ad fe 01 4c 	          XORSPL    PC,D0\.7,A0\.7
-.*:	bc 00 08 4c 	          XORSLE    PCX,D0Re0,D0Re0
-.*:	7d 06 08 4c 	          XORSLE    A0FrP,D0Re0,A1\.3
-.*:	7e 0e 08 4c 	          XORSNV    A0FrP,D0Re0,D0\.7
-.*:	be 0e 08 4c 	          XORSNV    PCX,D0Re0,D0\.7
-.*:	7d 1e 08 4c 	          XORSLE    A0FrP,D0Re0,D1\.7
-.*:	9d 20 08 4c 	          XORSLE    A1LbP,D0Re0,RD
-.*:	ad 32 08 4c 	          XORSPL    PCX,D0Re0,A0FrP
-.*:	6d 3e 08 4c 	          XORSPL    A0FrP,D0Re0,A0\.7
-.*:	84 c0 09 4c 	          XORSNE    A1LbP,D0\.7,D0Re0
-.*:	ad c2 09 4c 	          XORSPL    PCX,D0\.7,A1LbP
-.*:	64 ce 09 4c 	          XORSNE    A0FrP,D0\.7,D0\.7
-.*:	b4 ce 09 4c 	          XORSLS    PCX,D0\.7,D0\.7
-.*:	bd d0 09 4c 	          XORSLE    PCX,D0\.7,D1Re0
-.*:	7d e0 09 4c 	          XORSLE    A0FrP,D0\.7,RD
-.*:	9d f2 09 4c 	          XORSLE    A1LbP,D0\.7,A0FrP
-.*:	bd f4 09 4c 	          XORSLE    PCX,D0\.7,A0\.2
-.*:	6c 00 10 4c 	          XORSPL    A0\.2,D0Re0,D0Re0
-.*:	7e 0e 10 4c 	          XORSNV    A0\.2,D0Re0,D0\.7
-.*:	7d 32 10 4c 	          XORSLE    A0\.2,D0Re0,A0FrP
-.*:	7d c2 11 4c 	          XORSLE    A0\.2,D0\.7,A1LbP
-.*:	7d d0 11 4c 	          XORSLE    A0\.2,D0\.7,D1Re0
-.*:	7d f4 11 4c 	          XORSLE    A0\.2,D0\.7,A0\.2
-.*:	8d 02 18 4c 	          XORSPL    A1\.3,D0Re0,A1LbP
-.*:	84 0e 18 4c 	          XORSNE    A1\.3,D0Re0,D0\.7
-.*:	9d 10 18 4c 	          XORSLE    A1\.3,D0Re0,D1Re0
-.*:	9d 20 18 4c 	          XORSLE    A1\.3,D0Re0,RD
-.*:	9d 34 18 4c 	          XORSLE    A1\.3,D0Re0,A0\.2
-.*:	94 c0 19 4c 	          XORSLS    A1\.3,D0\.7,D0Re0
-.*:	8d c6 19 4c 	          XORSPL    A1\.3,D0\.7,A1\.3
-.*:	ec ce 19 4c 	          XORSPL    TXMASKI,D0\.7,D0\.7
-.*:	8d de 19 4c 	          XORSPL    A1\.3,D0\.7,D1\.7
-.*:	8d f2 19 4c 	          XORSPL    A1\.3,D0\.7,A0FrP
-.*:	8d fe 19 4c 	          XORSPL    A1\.3,D0\.7,A0\.7
-.*:	6c 00 38 4c 	          XORSPL    A0\.7,D0Re0,D0Re0
-.*:	7d 02 38 4c 	          XORSLE    A0\.7,D0Re0,A1LbP
-.*:	6d 06 38 4c 	          XORSPL    A0\.7,D0Re0,A1\.3
-.*:	5c 0e 38 4c 	          XORSLE    D1\.7,D0Re0,D0\.7
-.*:	8c 0e 38 4c 	          XORSPL    A1\.7,D0Re0,D0\.7
-.*:	7d 10 38 4c 	          XORSLE    A0\.7,D0Re0,D1Re0
-.*:	6d 1e 38 4c 	          XORSPL    A0\.7,D0Re0,D1\.7
-.*:	7d 20 38 4c 	          XORSLE    A0\.7,D0Re0,RD
-.*:	6d 32 38 4c 	          XORSPL    A0\.7,D0Re0,A0FrP
-.*:	7d 34 38 4c 	          XORSLE    A0\.7,D0Re0,A0\.2
-.*:	7d 3e 38 4c 	          XORSLE    A0\.7,D0Re0,A0\.7
-.*:	7c c0 39 4c 	          XORSLE    A0\.7,D0\.7,D0Re0
-.*:	6d c2 39 4c 	          XORSPL    A0\.7,D0\.7,A1LbP
-.*:	7d c6 39 4c 	          XORSLE    A0\.7,D0\.7,A1\.3
-.*:	4c ce 39 4c 	          XORSPL    D1\.7,D0\.7,D0\.7
-.*:	9c ce 39 4c 	          XORSLE    A1\.7,D0\.7,D0\.7
-.*:	7d d0 39 4c 	          XORSLE    A0\.7,D0\.7,D1Re0
-.*:	7d de 39 4c 	          XORSLE    A0\.7,D0\.7,D1\.7
-.*:	7d e0 39 4c 	          XORSLE    A0\.7,D0\.7,RD
-.*:	7d f2 39 4c 	          XORSLE    A0\.7,D0\.7,A0FrP
-.*:	7d f4 39 4c 	          XORSLE    A0\.7,D0\.7,A0\.2
-.*:	6d fe 39 4c 	          XORSPL    A0\.7,D0\.7,A0\.7
-.*:	dd 06 80 4c 	          XORSLE    RA,D0Re0,A1\.3
-.*:	dd 1e 80 4c 	          XORSLE    RA,D0Re0,D1\.7
-.*:	dd 3e 80 4c 	          XORSLE    RA,D0Re0,A0\.7
-.*:	cc ce 81 4c 	          XORSPL    RA,D0\.7,D0\.7
-.*:	dd e0 81 4c 	          XORSLE    RA,D0\.7,RD
-.*:	cc 00 b0 4c 	          XORSPL    RAM8X32,D0Re0,D0Re0
-.*:	de 0e b0 4c 	          XORSNV    RAM8X32,D0Re0,D0\.7
-.*:	dd 32 b0 4c 	          XORSLE    RAM8X32,D0Re0,A0FrP
-.*:	dd c2 b1 4c 	          XORSLE    RAM8X32,D0\.7,A1LbP
-.*:	dd d0 b1 4c 	          XORSLE    RAM8X32,D0\.7,D1Re0
-.*:	dd f4 b1 4c 	          XORSLE    RAM8X32,D0\.7,A0\.2
-.*:	dd 06 b8 4c 	          XORSLE    RAM8X,D0Re0,A1\.3
-.*:	dd 1e b8 4c 	          XORSLE    RAM8X,D0Re0,D1\.7
-.*:	dd 3e b8 4c 	          XORSLE    RAM8X,D0Re0,A0\.7
-.*:	cc ce b9 4c 	          XORSPL    RAM8X,D0\.7,D0\.7
-.*:	dd e0 b9 4c 	          XORSLE    RAM8X,D0\.7,RD
-.*:	cc 00 c0 4c 	          XORSPL    RABZ,D0Re0,D0Re0
-.*:	de 0e c0 4c 	          XORSNV    RABZ,D0Re0,D0\.7
-.*:	dd 32 c0 4c 	          XORSLE    RABZ,D0Re0,A0FrP
-.*:	dd c2 c1 4c 	          XORSLE    RABZ,D0\.7,A1LbP
-.*:	dd d0 c1 4c 	          XORSLE    RABZ,D0\.7,D1Re0
-.*:	dd f4 c1 4c 	          XORSLE    RABZ,D0\.7,A0\.2
-.*:	dd 06 e8 4c 	          XORSLE    RAWX,D0Re0,A1\.3
-.*:	dd 1e e8 4c 	          XORSLE    RAWX,D0Re0,D1\.7
-.*:	dd 3e e8 4c 	          XORSLE    RAWX,D0Re0,A0\.7
-.*:	cc ce e9 4c 	          XORSPL    RAWX,D0\.7,D0\.7
-.*:	dd e0 e9 4c 	          XORSLE    RAWX,D0\.7,RD
-.*:	14 00 f8 4c 	          XORSLS    TXIDLECYC,D0Re0,D0Re0
-.*:	1d 06 f8 4c 	          XORSLE    TXIDLECYC,D0Re0,A1\.3
-.*:	cc 0e f8 4c 	          XORSPL    RAMX,D0Re0,D0\.7
-.*:	1d 1e f8 4c 	          XORSLE    TXIDLECYC,D0Re0,D1\.7
-.*:	1d 32 f8 4c 	          XORSLE    TXIDLECYC,D0Re0,A0FrP
-.*:	1d 3e f8 4c 	          XORSLE    TXIDLECYC,D0Re0,A0\.7
-.*:	1d c2 f9 4c 	          XORSLE    TXIDLECYC,D0\.7,A1LbP
-.*:	14 ce f9 4c 	          XORSLS    TXIDLECYC,D0\.7,D0\.7
-.*:	1d d0 f9 4c 	          XORSLE    TXIDLECYC,D0\.7,D1Re0
-.*:	1d e0 f9 4c 	          XORSLE    TXIDLECYC,D0\.7,RD
-.*:	1d f4 f9 4c 	          XORSLE    TXIDLECYC,D0\.7,A0\.2
-.*:	14 00 00 4d 	          XORSLS    TXENABLE,D1Re0,D1Re0
-.*:	e4 00 00 4d 	          XORSNE    TXSTAT,D1Re0,D1Re0
-.*:	bd 02 00 4d 	          XORSLE    PC,D1Re0,A1LbP
-.*:	5d 06 00 4d 	          XORSLE    D1Re0,D1Re0,A1\.3
-.*:	1e 0e 00 4d 	          XORSNV    TXENABLE,D1Re0,D1\.7
-.*:	5e 0e 00 4d 	          XORSNV    D1Re0,D1Re0,D1\.7
-.*:	fe 0e 00 4d 	          XORSNV    TXSTAT,D1Re0,D1\.7
-.*:	bd 10 00 4d 	          XORSLE    PC,D1Re0,D0Re0
-.*:	5d 1e 00 4d 	          XORSLE    D1Re0,D1Re0,D0\.7
-.*:	3d 20 00 4d 	          XORSLE    D0Re0,D1Re0,RD
-.*:	1d 32 00 4d 	          XORSLE    TXENABLE,D1Re0,A0FrP
-.*:	fd 32 00 4d 	          XORSLE    TXSTAT,D1Re0,A0FrP
-.*:	bd 34 00 4d 	          XORSLE    PC,D1Re0,A0\.2
-.*:	5d 3e 00 4d 	          XORSLE    D1Re0,D1Re0,A0\.7
-.*:	2c c0 01 4d 	          XORSPL    D0Re0,D1\.7,D1Re0
-.*:	1d c2 01 4d 	          XORSLE    TXENABLE,D1\.7,A1LbP
-.*:	fd c2 01 4d 	          XORSLE    TXSTAT,D1\.7,A1LbP
-.*:	bd c6 01 4d 	          XORSLE    PC,D1\.7,A1\.3
-.*:	34 ce 01 4d 	          XORSLS    D0Re0,D1\.7,D1\.7
-.*:	b4 ce 01 4d 	          XORSLS    PC,D1\.7,D1\.7
-.*:	0d d0 01 4d 	          XORSPL    TXENABLE,D1\.7,D0Re0
-.*:	fd d0 01 4d 	          XORSLE    TXSTAT,D1\.7,D0Re0
-.*:	bd de 01 4d 	          XORSLE    PC,D1\.7,D0\.7
-.*:	5d e0 01 4d 	          XORSLE    D1Re0,D1\.7,RD
-.*:	3d f2 01 4d 	          XORSLE    D0Re0,D1\.7,A0FrP
-.*:	0d f4 01 4d 	          XORSPL    TXENABLE,D1\.7,A0\.2
-.*:	fd f4 01 4d 	          XORSLE    TXSTAT,D1\.7,A0\.2
-.*:	ad fe 01 4d 	          XORSPL    PC,D1\.7,A0\.7
-.*:	bc 00 08 4d 	          XORSLE    PCX,D1Re0,D1Re0
-.*:	7d 06 08 4d 	          XORSLE    A0FrP,D1Re0,A1\.3
-.*:	7e 0e 08 4d 	          XORSNV    A0FrP,D1Re0,D1\.7
-.*:	be 0e 08 4d 	          XORSNV    PCX,D1Re0,D1\.7
-.*:	7d 1e 08 4d 	          XORSLE    A0FrP,D1Re0,D0\.7
-.*:	9d 20 08 4d 	          XORSLE    A1LbP,D1Re0,RD
-.*:	ad 32 08 4d 	          XORSPL    PCX,D1Re0,A0FrP
-.*:	6d 3e 08 4d 	          XORSPL    A0FrP,D1Re0,A0\.7
-.*:	84 c0 09 4d 	          XORSNE    A1LbP,D1\.7,D1Re0
-.*:	ad c2 09 4d 	          XORSPL    PCX,D1\.7,A1LbP
-.*:	64 ce 09 4d 	          XORSNE    A0FrP,D1\.7,D1\.7
-.*:	b4 ce 09 4d 	          XORSLS    PCX,D1\.7,D1\.7
-.*:	bd d0 09 4d 	          XORSLE    PCX,D1\.7,D0Re0
-.*:	7d e0 09 4d 	          XORSLE    A0FrP,D1\.7,RD
-.*:	9d f2 09 4d 	          XORSLE    A1LbP,D1\.7,A0FrP
-.*:	bd f4 09 4d 	          XORSLE    PCX,D1\.7,A0\.2
-.*:	6c 00 10 4d 	          XORSPL    A0\.2,D1Re0,D1Re0
-.*:	7e 0e 10 4d 	          XORSNV    A0\.2,D1Re0,D1\.7
-.*:	7d 32 10 4d 	          XORSLE    A0\.2,D1Re0,A0FrP
-.*:	7d c2 11 4d 	          XORSLE    A0\.2,D1\.7,A1LbP
-.*:	7d d0 11 4d 	          XORSLE    A0\.2,D1\.7,D0Re0
-.*:	7d f4 11 4d 	          XORSLE    A0\.2,D1\.7,A0\.2
-.*:	8d 02 18 4d 	          XORSPL    A1\.3,D1Re0,A1LbP
-.*:	84 0e 18 4d 	          XORSNE    A1\.3,D1Re0,D1\.7
-.*:	9d 10 18 4d 	          XORSLE    A1\.3,D1Re0,D0Re0
-.*:	9d 20 18 4d 	          XORSLE    A1\.3,D1Re0,RD
-.*:	9d 34 18 4d 	          XORSLE    A1\.3,D1Re0,A0\.2
-.*:	94 c0 19 4d 	          XORSLS    A1\.3,D1\.7,D1Re0
-.*:	8d c6 19 4d 	          XORSPL    A1\.3,D1\.7,A1\.3
-.*:	ec ce 19 4d 	          XORSPL    TXMASKI,D1\.7,D1\.7
-.*:	8d de 19 4d 	          XORSPL    A1\.3,D1\.7,D0\.7
-.*:	8d f2 19 4d 	          XORSPL    A1\.3,D1\.7,A0FrP
-.*:	8d fe 19 4d 	          XORSPL    A1\.3,D1\.7,A0\.7
-.*:	6c 00 38 4d 	          XORSPL    A0\.7,D1Re0,D1Re0
-.*:	7d 02 38 4d 	          XORSLE    A0\.7,D1Re0,A1LbP
-.*:	6d 06 38 4d 	          XORSPL    A0\.7,D1Re0,A1\.3
-.*:	5c 0e 38 4d 	          XORSLE    D1\.7,D1Re0,D1\.7
-.*:	8c 0e 38 4d 	          XORSPL    A1\.7,D1Re0,D1\.7
-.*:	7d 10 38 4d 	          XORSLE    A0\.7,D1Re0,D0Re0
-.*:	6d 1e 38 4d 	          XORSPL    A0\.7,D1Re0,D0\.7
-.*:	7d 20 38 4d 	          XORSLE    A0\.7,D1Re0,RD
-.*:	6d 32 38 4d 	          XORSPL    A0\.7,D1Re0,A0FrP
-.*:	7d 34 38 4d 	          XORSLE    A0\.7,D1Re0,A0\.2
-.*:	7d 3e 38 4d 	          XORSLE    A0\.7,D1Re0,A0\.7
-.*:	7c c0 39 4d 	          XORSLE    A0\.7,D1\.7,D1Re0
-.*:	6d c2 39 4d 	          XORSPL    A0\.7,D1\.7,A1LbP
-.*:	7d c6 39 4d 	          XORSLE    A0\.7,D1\.7,A1\.3
-.*:	4c ce 39 4d 	          XORSPL    D1\.7,D1\.7,D1\.7
-.*:	9c ce 39 4d 	          XORSLE    A1\.7,D1\.7,D1\.7
-.*:	7d d0 39 4d 	          XORSLE    A0\.7,D1\.7,D0Re0
-.*:	7d de 39 4d 	          XORSLE    A0\.7,D1\.7,D0\.7
-.*:	7d e0 39 4d 	          XORSLE    A0\.7,D1\.7,RD
-.*:	7d f2 39 4d 	          XORSLE    A0\.7,D1\.7,A0FrP
-.*:	7d f4 39 4d 	          XORSLE    A0\.7,D1\.7,A0\.2
-.*:	6d fe 39 4d 	          XORSPL    A0\.7,D1\.7,A0\.7
-.*:	dd 06 80 4d 	          XORSLE    RA,D1Re0,A1\.3
-.*:	dd 1e 80 4d 	          XORSLE    RA,D1Re0,D0\.7
-.*:	dd 3e 80 4d 	          XORSLE    RA,D1Re0,A0\.7
-.*:	cc ce 81 4d 	          XORSPL    RA,D1\.7,D1\.7
-.*:	dd e0 81 4d 	          XORSLE    RA,D1\.7,RD
-.*:	cc 00 b0 4d 	          XORSPL    RAM8X32,D1Re0,D1Re0
-.*:	de 0e b0 4d 	          XORSNV    RAM8X32,D1Re0,D1\.7
-.*:	dd 32 b0 4d 	          XORSLE    RAM8X32,D1Re0,A0FrP
-.*:	dd c2 b1 4d 	          XORSLE    RAM8X32,D1\.7,A1LbP
-.*:	dd d0 b1 4d 	          XORSLE    RAM8X32,D1\.7,D0Re0
-.*:	dd f4 b1 4d 	          XORSLE    RAM8X32,D1\.7,A0\.2
-.*:	dd 06 b8 4d 	          XORSLE    RAM8X,D1Re0,A1\.3
-.*:	dd 1e b8 4d 	          XORSLE    RAM8X,D1Re0,D0\.7
-.*:	dd 3e b8 4d 	          XORSLE    RAM8X,D1Re0,A0\.7
-.*:	cc ce b9 4d 	          XORSPL    RAM8X,D1\.7,D1\.7
-.*:	dd e0 b9 4d 	          XORSLE    RAM8X,D1\.7,RD
-.*:	cc 00 c0 4d 	          XORSPL    RABZ,D1Re0,D1Re0
-.*:	de 0e c0 4d 	          XORSNV    RABZ,D1Re0,D1\.7
-.*:	dd 32 c0 4d 	          XORSLE    RABZ,D1Re0,A0FrP
-.*:	dd c2 c1 4d 	          XORSLE    RABZ,D1\.7,A1LbP
-.*:	dd d0 c1 4d 	          XORSLE    RABZ,D1\.7,D0Re0
-.*:	dd f4 c1 4d 	          XORSLE    RABZ,D1\.7,A0\.2
-.*:	dd 06 e8 4d 	          XORSLE    RAWX,D1Re0,A1\.3
-.*:	dd 1e e8 4d 	          XORSLE    RAWX,D1Re0,D0\.7
-.*:	dd 3e e8 4d 	          XORSLE    RAWX,D1Re0,A0\.7
-.*:	cc ce e9 4d 	          XORSPL    RAWX,D1\.7,D1\.7
-.*:	dd e0 e9 4d 	          XORSLE    RAWX,D1\.7,RD
-.*:	14 00 f8 4d 	          XORSLS    TXIDLECYC,D1Re0,D1Re0
-.*:	1d 06 f8 4d 	          XORSLE    TXIDLECYC,D1Re0,A1\.3
-.*:	cc 0e f8 4d 	          XORSPL    RAMX,D1Re0,D1\.7
-.*:	1d 1e f8 4d 	          XORSLE    TXIDLECYC,D1Re0,D0\.7
-.*:	1d 32 f8 4d 	          XORSLE    TXIDLECYC,D1Re0,A0FrP
-.*:	1d 3e f8 4d 	          XORSLE    TXIDLECYC,D1Re0,A0\.7
-.*:	1d c2 f9 4d 	          XORSLE    TXIDLECYC,D1\.7,A1LbP
-.*:	14 ce f9 4d 	          XORSLS    TXIDLECYC,D1\.7,D1\.7
-.*:	1d d0 f9 4d 	          XORSLE    TXIDLECYC,D1\.7,D0Re0
-.*:	1d e0 f9 4d 	          XORSLE    TXIDLECYC,D1\.7,RD
-.*:	1d f4 f9 4d 	          XORSLE    TXIDLECYC,D1\.7,A0\.2
-.*:	dc 1f 00 4e 	          XORSLE    D0Re0,D0Re0,#0x7f
-.*:	ea 1f 00 4e 	          XORS      PC,D0Re0,#0x7f
-.*:	20 20 00 4e 	          XORS      TXENABLE,D0Re0,#0x80
-.*:	cc 3f 00 4e 	          XORSPL    D0Re0,D0Re0,#0xff
-.*:	ea 3f 00 4e 	          XORS      PC,D0Re0,#0xff
-.*:	e0 df 01 4e 	          XORS      TXENABLE,D0\.7,#0x7f
-.*:	ee df 01 4e 	          XORS      TXSTAT,D0\.7,#0x7f
-.*:	22 e0 01 4e 	          XORS      D0Re0,D0\.7,#0x80
-.*:	dc ff 01 4e 	          XORSLE    D0Re0,D0\.7,#0xff
-.*:	e4 ff 01 4e 	          XORS      D1Re0,D0\.7,#0xff
-.*:	e8 1f 08 4e 	          XORS      A1LbP,D0Re0,#0x7f
-.*:	2a 20 08 4e 	          XORS      PCX,D0Re0,#0x80
-.*:	e6 df 09 4e 	          XORS      A0FrP,D0\.7,#0x7f
-.*:	28 e0 09 4e 	          XORS      A1LbP,D0\.7,#0x80
-.*:	ea ff 09 4e 	          XORS      PCX,D0\.7,#0xff
-.*:	e6 df 11 4e 	          XORS      A0\.2,D0\.7,#0x7f
-.*:	ee 1f 18 4e 	          XORS      TXMASKI,D0Re0,#0x7f
-.*:	ee 3f 18 4e 	          XORS      TXMASKI,D0Re0,#0xff
-.*:	2e e0 19 4e 	          XORS      TXMASKI,D0\.7,#0x80
-.*:	de 1f 38 4e 	          XORSNV    D0\.7,D0Re0,#0x7f
-.*:	e8 1f 38 4e 	          XORS      A1\.7,D0Re0,#0x7f
-.*:	24 20 38 4e 	          XORS      D1\.7,D0Re0,#0x80
-.*:	de 3f 38 4e 	          XORSNV    D0\.7,D0Re0,#0xff
-.*:	e8 3f 38 4e 	          XORS      A1\.7,D0Re0,#0xff
-.*:	e6 df 39 4e 	          XORS      A0\.7,D0\.7,#0x7f
-.*:	24 e0 39 4e 	          XORS      D1\.7,D0\.7,#0x80
-.*:	de ff 39 4e 	          XORSNV    D0\.7,D0\.7,#0xff
-.*:	ec 1f 80 4e 	          XORS      RA,D0Re0,#0x7f
-.*:	2c e0 81 4e 	          XORS      RA,D0\.7,#0x80
-.*:	ec 3f b0 4e 	          XORS      RAM8X32,D0Re0,#0xff
-.*:	ec 1f b8 4e 	          XORS      RAM8X,D0Re0,#0x7f
-.*:	2c e0 b9 4e 	          XORS      RAM8X,D0\.7,#0x80
-.*:	ec 3f c0 4e 	          XORS      RABZ,D0Re0,#0xff
-.*:	ec 1f e8 4e 	          XORS      RAWX,D0Re0,#0x7f
-.*:	2c e0 e9 4e 	          XORS      RAWX,D0\.7,#0x80
-.*:	20 20 f8 4e 	          XORS      TXIDLECYC,D0Re0,#0x80
-.*:	e0 df f9 4e 	          XORS      TXIDLECYC,D0\.7,#0x7f
-.*:	e0 ff f9 4e 	          XORS      TXIDLECYC,D0\.7,#0xff
-.*:	ea 1f 00 4f 	          XORS      PC,D1Re0,#0x7f
-.*:	cc 3f 00 4f 	          XORSPL    D1Re0,D1Re0,#0xff
-.*:	e0 df 01 4f 	          XORS      TXENABLE,D1\.7,#0x7f
-.*:	22 e0 01 4f 	          XORS      D0Re0,D1\.7,#0x80
-.*:	e4 ff 01 4f 	          XORS      D1Re0,D1\.7,#0xff
-.*:	2a 20 08 4f 	          XORS      PCX,D1Re0,#0x80
-.*:	28 e0 09 4f 	          XORS      A1LbP,D1\.7,#0x80
-.*:	e6 df 11 4f 	          XORS      A0\.2,D1\.7,#0x7f
-.*:	ee 3f 18 4f 	          XORS      TXMASKI,D1Re0,#0xff
-.*:	de 1f 38 4f 	          XORSNV    D1\.7,D1Re0,#0x7f
-.*:	24 20 38 4f 	          XORS      D1\.7,D1Re0,#0x80
-.*:	e8 3f 38 4f 	          XORS      A1\.7,D1Re0,#0xff
-.*:	22 e0 39 4f 	          XORS      D0\.7,D1\.7,#0x80
-.*:	ec 1f 80 4f 	          XORS      RA,D1Re0,#0x7f
-.*:	ec 3f b0 4f 	          XORS      RAM8X32,D1Re0,#0xff
-.*:	2c e0 b9 4f 	          XORS      RAM8X,D1\.7,#0x80
-.*:	ec 1f e8 4f 	          XORS      RAWX,D1Re0,#0x7f
-.*:	20 20 f8 4f 	          XORS      TXIDLECYC,D1Re0,#0x80
-.*:	e0 ff f9 4f 	          XORS      TXIDLECYC,D1\.7,#0xff
-.*:	00 c0 01 50 	          LSL       D0Re0,D0\.7,D0Re0
-.*:	c0 00 38 50 	          ASR       D0\.7,D0Re0,D0Re0
-.*:	40 ce 39 50 	          LSR       D0\.7,D0\.7,D0\.7
-.*:	00 c0 01 51 	          LSL       D1Re0,D1\.7,D1Re0
-.*:	c0 00 38 51 	          ASR       D1\.7,D1Re0,D1Re0
-.*:	40 ce 39 51 	          LSR       D1\.7,D1\.7,D1\.7
-.*:	00 3e 00 52 	          LSL       D0Re0,D0Re0,#0x1f
-.*:	c0 e0 01 52 	          ASR       D0Re0,D0\.7,#0x10
-.*:	40 20 38 52 	          LSR       D0\.7,D0Re0,#0x10
-.*:	00 e0 39 52 	          LSL       D0\.7,D0\.7,#0x10
-.*:	c0 1e 00 53 	          ASR       D1Re0,D1Re0,#0xf
-.*:	40 de 01 53 	          LSR       D1Re0,D1\.7,#0xf
-.*:	00 1e 38 53 	          LSL       D1\.7,D1Re0,#0xf
-.*:	c0 3e 38 53 	          ASR       D1\.7,D1Re0,#0x1f
-.*:	40 fe 39 53 	          LSR       D1\.7,D1\.7,#0x1f
-.*:	4c 00 00 54 	          LSRPL     D0Re0,D0Re0,D0Re0
-.*:	e0 00 00 54 	          ASR       TXENABLE,D0Re0,D0Re0
-.*:	2a 0e 00 54 	          LSL       PC,D0Re0,D0\.7
-.*:	dc 0e 00 54 	          ASRLE     D0Re0,D0Re0,D0\.7
-.*:	20 c0 01 54 	          LSL       TXENABLE,D0\.7,D0Re0
-.*:	6a c0 01 54 	          LSR       PC,D0\.7,D0Re0
-.*:	14 ce 01 54 	          LSLLS     D0Re0,D0\.7,D0\.7
-.*:	60 ce 01 54 	          LSR       TXENABLE,D0\.7,D0\.7
-.*:	ea ce 01 54 	          ASR       PC,D0\.7,D0\.7
-.*:	e6 00 08 54 	          ASR       A0FrP,D0Re0,D0Re0
-.*:	6a 0e 08 54 	          LSR       PCX,D0Re0,D0\.7
-.*:	68 c0 09 54 	          LSR       A1LbP,D0\.7,D0Re0
-.*:	66 ce 09 54 	          LSR       A0FrP,D0\.7,D0\.7
-.*:	ee 00 18 54 	          ASR       TXMASKI,D0Re0,D0Re0
-.*:	6e ce 19 54 	          LSR       TXMASKI,D0\.7,D0\.7
-.*:	5e 00 38 54 	          LSRNV     D0\.7,D0Re0,D0Re0
-.*:	e8 00 38 54 	          ASR       A1\.7,D0Re0,D0Re0
-.*:	64 0e 38 54 	          LSR       D1\.7,D0Re0,D0\.7
-.*:	14 c0 39 54 	          LSLLS     D0\.7,D0\.7,D0Re0
-.*:	66 c0 39 54 	          LSR       A0\.7,D0\.7,D0Re0
-.*:	1e ce 39 54 	          LSLNV     D0\.7,D0\.7,D0\.7
-.*:	68 ce 39 54 	          LSR       A1\.7,D0\.7,D0\.7
-.*:	ec 00 80 54 	          ASR       RA,D0Re0,D0Re0
-.*:	6c ce 81 54 	          LSR       RA,D0\.7,D0\.7
-.*:	2c c0 b1 54 	          LSL       RAM8X32,D0\.7,D0Re0
-.*:	ec 00 b8 54 	          ASR       RAM8X,D0Re0,D0Re0
-.*:	6c ce b9 54 	          LSR       RAM8X,D0\.7,D0\.7
-.*:	2c c0 c1 54 	          LSL       RABZ,D0\.7,D0Re0
-.*:	ec 00 e8 54 	          ASR       RAWX,D0Re0,D0Re0
-.*:	6c ce e9 54 	          LSR       RAWX,D0\.7,D0\.7
-.*:	20 0e f8 54 	          LSL       TXIDLECYC,D0Re0,D0\.7
-.*:	60 c0 f9 54 	          LSR       TXIDLECYC,D0\.7,D0Re0
-.*:	e0 ce f9 54 	          ASR       TXIDLECYC,D0\.7,D0\.7
-.*:	4c 00 00 55 	          LSRPL     D1Re0,D1Re0,D1Re0
-.*:	e0 00 00 55 	          ASR       TXENABLE,D1Re0,D1Re0
-.*:	2a 0e 00 55 	          LSL       PC,D1Re0,D1\.7
-.*:	dc 0e 00 55 	          ASRLE     D1Re0,D1Re0,D1\.7
-.*:	20 c0 01 55 	          LSL       TXENABLE,D1\.7,D1Re0
-.*:	6a c0 01 55 	          LSR       PC,D1\.7,D1Re0
-.*:	14 ce 01 55 	          LSLLS     D1Re0,D1\.7,D1\.7
-.*:	60 ce 01 55 	          LSR       TXENABLE,D1\.7,D1\.7
-.*:	ea ce 01 55 	          ASR       PC,D1\.7,D1\.7
-.*:	e6 00 08 55 	          ASR       A0FrP,D1Re0,D1Re0
-.*:	6a 0e 08 55 	          LSR       PCX,D1Re0,D1\.7
-.*:	68 c0 09 55 	          LSR       A1LbP,D1\.7,D1Re0
-.*:	66 ce 09 55 	          LSR       A0FrP,D1\.7,D1\.7
-.*:	ee 00 18 55 	          ASR       TXMASKI,D1Re0,D1Re0
-.*:	6e ce 19 55 	          LSR       TXMASKI,D1\.7,D1\.7
-.*:	5e 00 38 55 	          LSRNV     D1\.7,D1Re0,D1Re0
-.*:	e8 00 38 55 	          ASR       A1\.7,D1Re0,D1Re0
-.*:	62 0e 38 55 	          LSR       D0\.7,D1Re0,D1\.7
-.*:	14 c0 39 55 	          LSLLS     D1\.7,D1\.7,D1Re0
-.*:	66 c0 39 55 	          LSR       A0\.7,D1\.7,D1Re0
-.*:	1e ce 39 55 	          LSLNV     D1\.7,D1\.7,D1\.7
-.*:	68 ce 39 55 	          LSR       A1\.7,D1\.7,D1\.7
-.*:	ec 00 80 55 	          ASR       RA,D1Re0,D1Re0
-.*:	6c ce 81 55 	          LSR       RA,D1\.7,D1\.7
-.*:	2c c0 b1 55 	          LSL       RAM8X32,D1\.7,D1Re0
-.*:	ec 00 b8 55 	          ASR       RAM8X,D1Re0,D1Re0
-.*:	6c ce b9 55 	          LSR       RAM8X,D1\.7,D1\.7
-.*:	2c c0 c1 55 	          LSL       RABZ,D1\.7,D1Re0
-.*:	ec 00 e8 55 	          ASR       RAWX,D1Re0,D1Re0
-.*:	6c ce e9 55 	          LSR       RAWX,D1\.7,D1\.7
-.*:	20 0e f8 55 	          LSL       TXIDLECYC,D1Re0,D1\.7
-.*:	60 c0 f9 55 	          LSR       TXIDLECYC,D1\.7,D1Re0
-.*:	e0 ce f9 55 	          ASR       TXIDLECYC,D1\.7,D1\.7
-.*:	4c 1e 00 56 	          LSRPL     D0Re0,D0Re0,#0xf
-.*:	e0 1e 00 56 	          ASR       TXENABLE,D0Re0,#0xf
-.*:	2a 20 00 56 	          LSL       PC,D0Re0,#0x10
-.*:	dc 20 00 56 	          ASRLE     D0Re0,D0Re0,#0x10
-.*:	20 3e 00 56 	          LSL       TXENABLE,D0Re0,#0x1f
-.*:	6a 3e 00 56 	          LSR       PC,D0Re0,#0x1f
-.*:	1c de 01 56 	          LSLLE     D0Re0,D0\.7,#0xf
-.*:	60 de 01 56 	          LSR       TXENABLE,D0\.7,#0xf
-.*:	ea de 01 56 	          ASR       PC,D0\.7,#0xf
-.*:	4c e0 01 56 	          LSRPL     D0Re0,D0\.7,#0x10
-.*:	e0 e0 01 56 	          ASR       TXENABLE,D0\.7,#0x10
-.*:	2a fe 01 56 	          LSL       PC,D0\.7,#0x1f
-.*:	dc fe 01 56 	          ASRLE     D0Re0,D0\.7,#0x1f
-.*:	2a 1e 08 56 	          LSL       PCX,D0Re0,#0xf
-.*:	28 20 08 56 	          LSL       A1LbP,D0Re0,#0x10
-.*:	26 3e 08 56 	          LSL       A0FrP,D0Re0,#0x1f
-.*:	ea 3e 08 56 	          ASR       PCX,D0Re0,#0x1f
-.*:	e8 de 09 56 	          ASR       A1LbP,D0\.7,#0xf
-.*:	e6 e0 09 56 	          ASR       A0FrP,D0\.7,#0x10
-.*:	6a fe 09 56 	          LSR       PCX,D0\.7,#0x1f
-.*:	6e 20 18 56 	          LSR       TXMASKI,D0Re0,#0x10
-.*:	2e e0 19 56 	          LSL       TXMASKI,D0\.7,#0x10
-.*:	24 1e 38 56 	          LSL       D1\.7,D0Re0,#0xf
-.*:	dc 1e 38 56 	          ASRLE     D0\.7,D0Re0,#0xf
-.*:	26 20 38 56 	          LSL       A0\.7,D0Re0,#0x10
-.*:	de 20 38 56 	          ASRNV     D0\.7,D0Re0,#0x10
-.*:	28 3e 38 56 	          LSL       A1\.7,D0Re0,#0x1f
-.*:	e4 3e 38 56 	          ASR       D1\.7,D0Re0,#0x1f
-.*:	4c de 39 56 	          LSRPL     D0\.7,D0\.7,#0xf
-.*:	e6 de 39 56 	          ASR       A0\.7,D0\.7,#0xf
-.*:	5e e0 39 56 	          LSRNV     D0\.7,D0\.7,#0x10
-.*:	e8 e0 39 56 	          ASR       A1\.7,D0\.7,#0x10
-.*:	64 fe 39 56 	          LSR       D1\.7,D0\.7,#0x1f
-.*:	2c 1e 80 56 	          LSL       RA,D0Re0,#0xf
-.*:	ec 3e 80 56 	          ASR       RA,D0Re0,#0x1f
-.*:	6c fe 81 56 	          LSR       RA,D0\.7,#0x1f
-.*:	2c 3e b0 56 	          LSL       RAM8X32,D0Re0,#0x1f
-.*:	ec e0 b1 56 	          ASR       RAM8X32,D0\.7,#0x10
-.*:	6c 20 b8 56 	          LSR       RAM8X,D0Re0,#0x10
-.*:	2c e0 b9 56 	          LSL       RAM8X,D0\.7,#0x10
-.*:	ec 1e c0 56 	          ASR       RABZ,D0Re0,#0xf
-.*:	6c de c1 56 	          LSR       RABZ,D0\.7,#0xf
-.*:	2c 1e e8 56 	          LSL       RAWX,D0Re0,#0xf
-.*:	ec 3e e8 56 	          ASR       RAWX,D0Re0,#0x1f
-.*:	6c fe e9 56 	          LSR       RAWX,D0\.7,#0x1f
-.*:	20 20 f8 56 	          LSL       TXIDLECYC,D0Re0,#0x10
-.*:	60 3e f8 56 	          LSR       TXIDLECYC,D0Re0,#0x1f
-.*:	e0 de f9 56 	          ASR       TXIDLECYC,D0\.7,#0xf
-.*:	20 fe f9 56 	          LSL       TXIDLECYC,D0\.7,#0x1f
-.*:	20 1e 00 57 	          LSL       TXENABLE,D1Re0,#0xf
-.*:	6a 1e 00 57 	          LSR       PC,D1Re0,#0xf
-.*:	14 20 00 57 	          LSLLS     D1Re0,D1Re0,#0x10
-.*:	60 20 00 57 	          LSR       TXENABLE,D1Re0,#0x10
-.*:	ea 20 00 57 	          ASR       PC,D1Re0,#0x10
-.*:	4c 3e 00 57 	          LSRPL     D1Re0,D1Re0,#0x1f
-.*:	e0 3e 00 57 	          ASR       TXENABLE,D1Re0,#0x1f
-.*:	2a de 01 57 	          LSL       PC,D1\.7,#0xf
-.*:	dc de 01 57 	          ASRLE     D1Re0,D1\.7,#0xf
-.*:	20 e0 01 57 	          LSL       TXENABLE,D1\.7,#0x10
-.*:	6a e0 01 57 	          LSR       PC,D1\.7,#0x10
-.*:	1c fe 01 57 	          LSLLE     D1Re0,D1\.7,#0x1f
-.*:	60 fe 01 57 	          LSR       TXENABLE,D1\.7,#0x1f
-.*:	ea fe 01 57 	          ASR       PC,D1\.7,#0x1f
-.*:	e6 1e 08 57 	          ASR       A0FrP,D1Re0,#0xf
-.*:	6a 20 08 57 	          LSR       PCX,D1Re0,#0x10
-.*:	68 3e 08 57 	          LSR       A1LbP,D1Re0,#0x1f
-.*:	66 de 09 57 	          LSR       A0FrP,D1\.7,#0xf
-.*:	2a e0 09 57 	          LSL       PCX,D1\.7,#0x10
-.*:	28 fe 09 57 	          LSL       A1LbP,D1\.7,#0x1f
-.*:	2e 1e 18 57 	          LSL       TXMASKI,D1Re0,#0xf
-.*:	ee 3e 18 57 	          ASR       TXMASKI,D1Re0,#0x1f
-.*:	6e fe 19 57 	          LSR       TXMASKI,D1\.7,#0x1f
-.*:	5e 1e 38 57 	          LSRNV     D1\.7,D1Re0,#0xf
-.*:	e8 1e 38 57 	          ASR       A1\.7,D1Re0,#0xf
-.*:	62 20 38 57 	          LSR       D0\.7,D1Re0,#0x10
-.*:	1c 3e 38 57 	          LSLLE     D1\.7,D1Re0,#0x1f
-.*:	66 3e 38 57 	          LSR       A0\.7,D1Re0,#0x1f
-.*:	1e de 39 57 	          LSLNV     D1\.7,D1\.7,#0xf
-.*:	68 de 39 57 	          LSR       A1\.7,D1\.7,#0xf
-.*:	22 e0 39 57 	          LSL       D0\.7,D1\.7,#0x10
-.*:	dc e0 39 57 	          ASRLE     D1\.7,D1\.7,#0x10
-.*:	26 fe 39 57 	          LSL       A0\.7,D1\.7,#0x1f
-.*:	de fe 39 57 	          ASRNV     D1\.7,D1\.7,#0x1f
-.*:	6c 20 80 57 	          LSR       RA,D1Re0,#0x10
-.*:	2c e0 81 57 	          LSL       RA,D1\.7,#0x10
-.*:	ec 1e b0 57 	          ASR       RAM8X32,D1Re0,#0xf
-.*:	6c de b1 57 	          LSR       RAM8X32,D1\.7,#0xf
-.*:	2c 1e b8 57 	          LSL       RAM8X,D1Re0,#0xf
-.*:	ec 3e b8 57 	          ASR       RAM8X,D1Re0,#0x1f
-.*:	6c fe b9 57 	          LSR       RAM8X,D1\.7,#0x1f
-.*:	2c 3e c0 57 	          LSL       RABZ,D1Re0,#0x1f
-.*:	ec e0 c1 57 	          ASR       RABZ,D1\.7,#0x10
-.*:	6c 20 e8 57 	          LSR       RAWX,D1Re0,#0x10
-.*:	2c e0 e9 57 	          LSL       RAWX,D1\.7,#0x10
-.*:	60 1e f8 57 	          LSR       TXIDLECYC,D1Re0,#0xf
-.*:	e0 20 f8 57 	          ASR       TXIDLECYC,D1Re0,#0x10
-.*:	20 de f9 57 	          LSL       TXIDLECYC,D1\.7,#0xf
-.*:	60 e0 f9 57 	          LSR       TXIDLECYC,D1\.7,#0x10
-.*:	e0 fe f9 57 	          ASR       TXIDLECYC,D1\.7,#0x1f
-.*:	00 c0 01 58 	          LSLS      D0Re0,D0\.7,D0Re0
-.*:	c0 00 38 58 	          ASRS      D0\.7,D0Re0,D0Re0
-.*:	40 ce 39 58 	          LSRS      D0\.7,D0\.7,D0\.7
-.*:	00 c0 01 59 	          LSLS      D1Re0,D1\.7,D1Re0
-.*:	c0 00 38 59 	          ASRS      D1\.7,D1Re0,D1Re0
-.*:	40 ce 39 59 	          LSRS      D1\.7,D1\.7,D1\.7
-.*:	00 3e 00 5a 	          LSLS      D0Re0,D0Re0,#0x1f
-.*:	c0 e0 01 5a 	          ASRS      D0Re0,D0\.7,#0x10
-.*:	40 20 38 5a 	          LSRS      D0\.7,D0Re0,#0x10
-.*:	00 e0 39 5a 	          LSLS      D0\.7,D0\.7,#0x10
-.*:	c0 1e 00 5b 	          ASRS      D1Re0,D1Re0,#0xf
-.*:	40 de 01 5b 	          LSRS      D1Re0,D1\.7,#0xf
-.*:	00 1e 38 5b 	          LSLS      D1\.7,D1Re0,#0xf
-.*:	c0 3e 38 5b 	          ASRS      D1\.7,D1Re0,#0x1f
-.*:	40 fe 39 5b 	          LSRS      D1\.7,D1\.7,#0x1f
-.*:	4c 00 00 5c 	          LSRSPL    D0Re0,D0Re0,D0Re0
-.*:	e0 00 00 5c 	          ASRS      TXENABLE,D0Re0,D0Re0
-.*:	2a 0e 00 5c 	          LSLS      PC,D0Re0,D0\.7
-.*:	dc 0e 00 5c 	          ASRSLE    D0Re0,D0Re0,D0\.7
-.*:	20 c0 01 5c 	          LSLS      TXENABLE,D0\.7,D0Re0
-.*:	6a c0 01 5c 	          LSRS      PC,D0\.7,D0Re0
-.*:	14 ce 01 5c 	          LSLSLS    D0Re0,D0\.7,D0\.7
-.*:	60 ce 01 5c 	          LSRS      TXENABLE,D0\.7,D0\.7
-.*:	ea ce 01 5c 	          ASRS      PC,D0\.7,D0\.7
-.*:	e6 00 08 5c 	          ASRS      A0FrP,D0Re0,D0Re0
-.*:	6a 0e 08 5c 	          LSRS      PCX,D0Re0,D0\.7
-.*:	68 c0 09 5c 	          LSRS      A1LbP,D0\.7,D0Re0
-.*:	66 ce 09 5c 	          LSRS      A0FrP,D0\.7,D0\.7
-.*:	ee 00 18 5c 	          ASRS      TXMASKI,D0Re0,D0Re0
-.*:	6e ce 19 5c 	          LSRS      TXMASKI,D0\.7,D0\.7
-.*:	5e 00 38 5c 	          LSRSNV    D0\.7,D0Re0,D0Re0
-.*:	e8 00 38 5c 	          ASRS      A1\.7,D0Re0,D0Re0
-.*:	64 0e 38 5c 	          LSRS      D1\.7,D0Re0,D0\.7
-.*:	14 c0 39 5c 	          LSLSLS    D0\.7,D0\.7,D0Re0
-.*:	66 c0 39 5c 	          LSRS      A0\.7,D0\.7,D0Re0
-.*:	1e ce 39 5c 	          LSLSNV    D0\.7,D0\.7,D0\.7
-.*:	68 ce 39 5c 	          LSRS      A1\.7,D0\.7,D0\.7
-.*:	ec 00 80 5c 	          ASRS      RA,D0Re0,D0Re0
-.*:	6c ce 81 5c 	          LSRS      RA,D0\.7,D0\.7
-.*:	2c c0 b1 5c 	          LSLS      RAM8X32,D0\.7,D0Re0
-.*:	ec 00 b8 5c 	          ASRS      RAM8X,D0Re0,D0Re0
-.*:	6c ce b9 5c 	          LSRS      RAM8X,D0\.7,D0\.7
-.*:	2c c0 c1 5c 	          LSLS      RABZ,D0\.7,D0Re0
-.*:	ec 00 e8 5c 	          ASRS      RAWX,D0Re0,D0Re0
-.*:	6c ce e9 5c 	          LSRS      RAWX,D0\.7,D0\.7
-.*:	20 0e f8 5c 	          LSLS      TXIDLECYC,D0Re0,D0\.7
-.*:	60 c0 f9 5c 	          LSRS      TXIDLECYC,D0\.7,D0Re0
-.*:	e0 ce f9 5c 	          ASRS      TXIDLECYC,D0\.7,D0\.7
-.*:	4c 00 00 5d 	          LSRSPL    D1Re0,D1Re0,D1Re0
-.*:	e0 00 00 5d 	          ASRS      TXENABLE,D1Re0,D1Re0
-.*:	2a 0e 00 5d 	          LSLS      PC,D1Re0,D1\.7
-.*:	dc 0e 00 5d 	          ASRSLE    D1Re0,D1Re0,D1\.7
-.*:	20 c0 01 5d 	          LSLS      TXENABLE,D1\.7,D1Re0
-.*:	6a c0 01 5d 	          LSRS      PC,D1\.7,D1Re0
-.*:	14 ce 01 5d 	          LSLSLS    D1Re0,D1\.7,D1\.7
-.*:	60 ce 01 5d 	          LSRS      TXENABLE,D1\.7,D1\.7
-.*:	ea ce 01 5d 	          ASRS      PC,D1\.7,D1\.7
-.*:	e6 00 08 5d 	          ASRS      A0FrP,D1Re0,D1Re0
-.*:	6a 0e 08 5d 	          LSRS      PCX,D1Re0,D1\.7
-.*:	68 c0 09 5d 	          LSRS      A1LbP,D1\.7,D1Re0
-.*:	66 ce 09 5d 	          LSRS      A0FrP,D1\.7,D1\.7
-.*:	ee 00 18 5d 	          ASRS      TXMASKI,D1Re0,D1Re0
-.*:	6e ce 19 5d 	          LSRS      TXMASKI,D1\.7,D1\.7
-.*:	5e 00 38 5d 	          LSRSNV    D1\.7,D1Re0,D1Re0
-.*:	e8 00 38 5d 	          ASRS      A1\.7,D1Re0,D1Re0
-.*:	62 0e 38 5d 	          LSRS      D0\.7,D1Re0,D1\.7
-.*:	14 c0 39 5d 	          LSLSLS    D1\.7,D1\.7,D1Re0
-.*:	66 c0 39 5d 	          LSRS      A0\.7,D1\.7,D1Re0
-.*:	1e ce 39 5d 	          LSLSNV    D1\.7,D1\.7,D1\.7
-.*:	68 ce 39 5d 	          LSRS      A1\.7,D1\.7,D1\.7
-.*:	ec 00 80 5d 	          ASRS      RA,D1Re0,D1Re0
-.*:	6c ce 81 5d 	          LSRS      RA,D1\.7,D1\.7
-.*:	2c c0 b1 5d 	          LSLS      RAM8X32,D1\.7,D1Re0
-.*:	ec 00 b8 5d 	          ASRS      RAM8X,D1Re0,D1Re0
-.*:	6c ce b9 5d 	          LSRS      RAM8X,D1\.7,D1\.7
-.*:	2c c0 c1 5d 	          LSLS      RABZ,D1\.7,D1Re0
-.*:	ec 00 e8 5d 	          ASRS      RAWX,D1Re0,D1Re0
-.*:	6c ce e9 5d 	          LSRS      RAWX,D1\.7,D1\.7
-.*:	20 0e f8 5d 	          LSLS      TXIDLECYC,D1Re0,D1\.7
-.*:	60 c0 f9 5d 	          LSRS      TXIDLECYC,D1\.7,D1Re0
-.*:	e0 ce f9 5d 	          ASRS      TXIDLECYC,D1\.7,D1\.7
-.*:	4c 1e 00 5e 	          LSRSPL    D0Re0,D0Re0,#0xf
-.*:	e0 1e 00 5e 	          ASRS      TXENABLE,D0Re0,#0xf
-.*:	2a 20 00 5e 	          LSLS      PC,D0Re0,#0x10
-.*:	dc 20 00 5e 	          ASRSLE    D0Re0,D0Re0,#0x10
-.*:	20 3e 00 5e 	          LSLS      TXENABLE,D0Re0,#0x1f
-.*:	6a 3e 00 5e 	          LSRS      PC,D0Re0,#0x1f
-.*:	1c de 01 5e 	          LSLSLE    D0Re0,D0\.7,#0xf
-.*:	60 de 01 5e 	          LSRS      TXENABLE,D0\.7,#0xf
-.*:	ea de 01 5e 	          ASRS      PC,D0\.7,#0xf
-.*:	4c e0 01 5e 	          LSRSPL    D0Re0,D0\.7,#0x10
-.*:	e0 e0 01 5e 	          ASRS      TXENABLE,D0\.7,#0x10
-.*:	2a fe 01 5e 	          LSLS      PC,D0\.7,#0x1f
-.*:	dc fe 01 5e 	          ASRSLE    D0Re0,D0\.7,#0x1f
-.*:	2a 1e 08 5e 	          LSLS      PCX,D0Re0,#0xf
-.*:	28 20 08 5e 	          LSLS      A1LbP,D0Re0,#0x10
-.*:	26 3e 08 5e 	          LSLS      A0FrP,D0Re0,#0x1f
-.*:	ea 3e 08 5e 	          ASRS      PCX,D0Re0,#0x1f
-.*:	e8 de 09 5e 	          ASRS      A1LbP,D0\.7,#0xf
-.*:	e6 e0 09 5e 	          ASRS      A0FrP,D0\.7,#0x10
-.*:	6a fe 09 5e 	          LSRS      PCX,D0\.7,#0x1f
-.*:	6e 20 18 5e 	          LSRS      TXMASKI,D0Re0,#0x10
-.*:	2e e0 19 5e 	          LSLS      TXMASKI,D0\.7,#0x10
-.*:	24 1e 38 5e 	          LSLS      D1\.7,D0Re0,#0xf
-.*:	dc 1e 38 5e 	          ASRSLE    D0\.7,D0Re0,#0xf
-.*:	26 20 38 5e 	          LSLS      A0\.7,D0Re0,#0x10
-.*:	de 20 38 5e 	          ASRSNV    D0\.7,D0Re0,#0x10
-.*:	28 3e 38 5e 	          LSLS      A1\.7,D0Re0,#0x1f
-.*:	e4 3e 38 5e 	          ASRS      D1\.7,D0Re0,#0x1f
-.*:	4c de 39 5e 	          LSRSPL    D0\.7,D0\.7,#0xf
-.*:	e6 de 39 5e 	          ASRS      A0\.7,D0\.7,#0xf
-.*:	5e e0 39 5e 	          LSRSNV    D0\.7,D0\.7,#0x10
-.*:	e8 e0 39 5e 	          ASRS      A1\.7,D0\.7,#0x10
-.*:	64 fe 39 5e 	          LSRS      D1\.7,D0\.7,#0x1f
-.*:	2c 1e 80 5e 	          LSLS      RA,D0Re0,#0xf
-.*:	ec 3e 80 5e 	          ASRS      RA,D0Re0,#0x1f
-.*:	6c fe 81 5e 	          LSRS      RA,D0\.7,#0x1f
-.*:	2c 3e b0 5e 	          LSLS      RAM8X32,D0Re0,#0x1f
-.*:	ec e0 b1 5e 	          ASRS      RAM8X32,D0\.7,#0x10
-.*:	6c 20 b8 5e 	          LSRS      RAM8X,D0Re0,#0x10
-.*:	2c e0 b9 5e 	          LSLS      RAM8X,D0\.7,#0x10
-.*:	ec 1e c0 5e 	          ASRS      RABZ,D0Re0,#0xf
-.*:	6c de c1 5e 	          LSRS      RABZ,D0\.7,#0xf
-.*:	2c 1e e8 5e 	          LSLS      RAWX,D0Re0,#0xf
-.*:	ec 3e e8 5e 	          ASRS      RAWX,D0Re0,#0x1f
-.*:	6c fe e9 5e 	          LSRS      RAWX,D0\.7,#0x1f
-.*:	20 20 f8 5e 	          LSLS      TXIDLECYC,D0Re0,#0x10
-.*:	60 3e f8 5e 	          LSRS      TXIDLECYC,D0Re0,#0x1f
-.*:	e0 de f9 5e 	          ASRS      TXIDLECYC,D0\.7,#0xf
-.*:	20 fe f9 5e 	          LSLS      TXIDLECYC,D0\.7,#0x1f
-.*:	20 1e 00 5f 	          LSLS      TXENABLE,D1Re0,#0xf
-.*:	6a 1e 00 5f 	          LSRS      PC,D1Re0,#0xf
-.*:	14 20 00 5f 	          LSLSLS    D1Re0,D1Re0,#0x10
-.*:	60 20 00 5f 	          LSRS      TXENABLE,D1Re0,#0x10
-.*:	ea 20 00 5f 	          ASRS      PC,D1Re0,#0x10
-.*:	4c 3e 00 5f 	          LSRSPL    D1Re0,D1Re0,#0x1f
-.*:	e0 3e 00 5f 	          ASRS      TXENABLE,D1Re0,#0x1f
-.*:	2a de 01 5f 	          LSLS      PC,D1\.7,#0xf
-.*:	dc de 01 5f 	          ASRSLE    D1Re0,D1\.7,#0xf
-.*:	20 e0 01 5f 	          LSLS      TXENABLE,D1\.7,#0x10
-.*:	6a e0 01 5f 	          LSRS      PC,D1\.7,#0x10
-.*:	1c fe 01 5f 	          LSLSLE    D1Re0,D1\.7,#0x1f
-.*:	60 fe 01 5f 	          LSRS      TXENABLE,D1\.7,#0x1f
-.*:	ea fe 01 5f 	          ASRS      PC,D1\.7,#0x1f
-.*:	e6 1e 08 5f 	          ASRS      A0FrP,D1Re0,#0xf
-.*:	6a 20 08 5f 	          LSRS      PCX,D1Re0,#0x10
-.*:	68 3e 08 5f 	          LSRS      A1LbP,D1Re0,#0x1f
-.*:	66 de 09 5f 	          LSRS      A0FrP,D1\.7,#0xf
-.*:	2a e0 09 5f 	          LSLS      PCX,D1\.7,#0x10
-.*:	28 fe 09 5f 	          LSLS      A1LbP,D1\.7,#0x1f
-.*:	2e 1e 18 5f 	          LSLS      TXMASKI,D1Re0,#0xf
-.*:	ee 3e 18 5f 	          ASRS      TXMASKI,D1Re0,#0x1f
-.*:	6e fe 19 5f 	          LSRS      TXMASKI,D1\.7,#0x1f
-.*:	5e 1e 38 5f 	          LSRSNV    D1\.7,D1Re0,#0xf
-.*:	e8 1e 38 5f 	          ASRS      A1\.7,D1Re0,#0xf
-.*:	62 20 38 5f 	          LSRS      D0\.7,D1Re0,#0x10
-.*:	1c 3e 38 5f 	          LSLSLE    D1\.7,D1Re0,#0x1f
-.*:	66 3e 38 5f 	          LSRS      A0\.7,D1Re0,#0x1f
-.*:	1e de 39 5f 	          LSLSNV    D1\.7,D1\.7,#0xf
-.*:	68 de 39 5f 	          LSRS      A1\.7,D1\.7,#0xf
-.*:	22 e0 39 5f 	          LSLS      D0\.7,D1\.7,#0x10
-.*:	dc e0 39 5f 	          ASRSLE    D1\.7,D1\.7,#0x10
-.*:	26 fe 39 5f 	          LSLS      A0\.7,D1\.7,#0x1f
-.*:	de fe 39 5f 	          ASRSNV    D1\.7,D1\.7,#0x1f
-.*:	6c 20 80 5f 	          LSRS      RA,D1Re0,#0x10
-.*:	2c e0 81 5f 	          LSLS      RA,D1\.7,#0x10
-.*:	ec 1e b0 5f 	          ASRS      RAM8X32,D1Re0,#0xf
-.*:	6c de b1 5f 	          LSRS      RAM8X32,D1\.7,#0xf
-.*:	2c 1e b8 5f 	          LSLS      RAM8X,D1Re0,#0xf
-.*:	ec 3e b8 5f 	          ASRS      RAM8X,D1Re0,#0x1f
-.*:	6c fe b9 5f 	          LSRS      RAM8X,D1\.7,#0x1f
-.*:	2c 3e c0 5f 	          LSLS      RABZ,D1Re0,#0x1f
-.*:	ec e0 c1 5f 	          ASRS      RABZ,D1\.7,#0x10
-.*:	6c 20 e8 5f 	          LSRS      RAWX,D1Re0,#0x10
-.*:	2c e0 e9 5f 	          LSLS      RAWX,D1\.7,#0x10
-.*:	60 1e f8 5f 	          LSRS      TXIDLECYC,D1Re0,#0xf
-.*:	e0 20 f8 5f 	          ASRS      TXIDLECYC,D1Re0,#0x10
-.*:	20 de f9 5f 	          LSLS      TXIDLECYC,D1\.7,#0xf
-.*:	60 e0 f9 5f 	          LSRS      TXIDLECYC,D1\.7,#0x10
-.*:	e0 fe f9 5f 	          ASRS      TXIDLECYC,D1\.7,#0x1f
-.*:	40 0e 00 60 	          MULD      D0Re0,D0Re0,D0\.7
-.*:	01 32 00 60 	          MULW      D0Re0,D0Re0,A0FrP
-.*:	00 ce 01 60 	          MULW      D0Re0,D0\.7,D0\.7
-.*:	01 e0 01 60 	          MULW      D0Re0,D0\.7,RD
-.*:	01 02 38 60 	          MULW      D0\.7,D0Re0,A1LbP
-.*:	01 1e 38 60 	          MULW      D0\.7,D0Re0,D1\.7
-.*:	00 c0 39 60 	          MULW      D0\.7,D0\.7,D0Re0
-.*:	01 d0 39 60 	          MULW      D0\.7,D0\.7,D1Re0
-.*:	01 fe 39 60 	          MULW      D0\.7,D0\.7,A0\.7
-.*:	40 0e 00 61 	          MULD      D1Re0,D1Re0,D1\.7
-.*:	01 32 00 61 	          MULW      D1Re0,D1Re0,A0FrP
-.*:	00 ce 01 61 	          MULW      D1Re0,D1\.7,D1\.7
-.*:	01 e0 01 61 	          MULW      D1Re0,D1\.7,RD
-.*:	01 02 38 61 	          MULW      D1\.7,D1Re0,A1LbP
-.*:	01 1e 38 61 	          MULW      D1\.7,D1Re0,D0\.7
-.*:	00 c0 39 61 	          MULW      D1\.7,D1\.7,D1Re0
-.*:	01 d0 39 61 	          MULW      D1\.7,D1\.7,D0Re0
-.*:	01 fe 39 61 	          MULW      D1\.7,D1\.7,A0\.7
-.*:	02 00 04 62 	          MULW      D0Re0,D0Re0,#-32768
-.*:	fd ff 07 62 	          MULDT     D0Re0,D0Re0,#0xffff
-.*:	02 00 3c 62 	          MULW      D0\.7,D0\.7,#-32768
-.*:	fd ff 3f 62 	          MULDT     D0\.7,D0\.7,#0xffff
-.*:	02 00 04 63 	          MULW      D1Re0,D1Re0,#-32768
-.*:	fd ff 07 63 	          MULDT     D1Re0,D1Re0,#0xffff
-.*:	02 00 3c 63 	          MULW      D1\.7,D1\.7,#-32768
-.*:	fd ff 3f 63 	          MULDT     D1\.7,D1\.7,#0xffff
-.*:	64 00 00 64 	          MULD      D1Re0,D0Re0,D0Re0
-.*:	04 0e 00 64 	          MULWNE    D0Re0,D0Re0,D0\.7
-.*:	2a 0e 00 64 	          MULW      PC,D0Re0,D0\.7
-.*:	21 10 00 64 	          MULW      TXENABLE,D0Re0,D1Re0
-.*:	25 1e 00 64 	          MULW      D1Re0,D0Re0,D1\.7
-.*:	2b 20 00 64 	          MULW      PC,D0Re0,RD
-.*:	2f 32 00 64 	          MULW      TXSTAT,D0Re0,A0FrP
-.*:	65 3e 00 64 	          MULD      D1Re0,D0Re0,A0\.7
-.*:	1d c2 01 64 	          MULWLE    D0Re0,D0\.7,A1LbP
-.*:	1d ce 01 64 	          MULWLE    D0Re0,D0\.7,A1\.7
-.*:	2b ce 01 64 	          MULW      PC,D0\.7,A1\.7
-.*:	25 d0 01 64 	          MULW      D1Re0,D0\.7,D1Re0
-.*:	2b de 01 64 	          MULW      PC,D0\.7,D1\.7
-.*:	2f e0 01 64 	          MULW      TXSTAT,D0\.7,RD
-.*:	65 f2 01 64 	          MULD      D1Re0,D0\.7,A0FrP
-.*:	26 00 08 64 	          MULW      A0FrP,D0Re0,D0Re0
-.*:	67 02 08 64 	          MULD      A0FrP,D0Re0,A1LbP
-.*:	66 0e 08 64 	          MULD      A0FrP,D0Re0,D0\.7
-.*:	69 10 08 64 	          MULD      A1LbP,D0Re0,D1Re0
-.*:	2b 20 08 64 	          MULW      PCX,D0Re0,RD
-.*:	27 3e 08 64 	          MULW      A0FrP,D0Re0,A0\.7
-.*:	66 c0 09 64 	          MULD      A0FrP,D0\.7,D0Re0
-.*:	27 ce 09 64 	          MULW      A0FrP,D0\.7,A1\.7
-.*:	69 ce 09 64 	          MULD      A1LbP,D0\.7,A1\.7
-.*:	2b de 09 64 	          MULW      PCX,D0\.7,D1\.7
-.*:	27 f2 09 64 	          MULW      A0FrP,D0\.7,A0FrP
-.*:	67 fe 09 64 	          MULD      A0FrP,D0\.7,A0\.7
-.*:	2f 20 18 64 	          MULW      TXMASKI,D0Re0,RD
-.*:	2f de 19 64 	          MULW      TXMASKI,D0\.7,D1\.7
-.*:	28 00 38 64 	          MULW      A1\.7,D0Re0,D0Re0
-.*:	29 02 38 64 	          MULW      A1\.7,D0Re0,A1LbP
-.*:	24 0e 38 64 	          MULW      D1\.7,D0Re0,D0\.7
-.*:	66 0e 38 64 	          MULD      A0\.7,D0Re0,D0\.7
-.*:	29 10 38 64 	          MULW      A1\.7,D0Re0,D1Re0
-.*:	29 1e 38 64 	          MULW      A1\.7,D0Re0,D1\.7
-.*:	29 20 38 64 	          MULW      A1\.7,D0Re0,RD
-.*:	29 32 38 64 	          MULW      A1\.7,D0Re0,A0FrP
-.*:	29 3e 38 64 	          MULW      A1\.7,D0Re0,A0\.7
-.*:	28 c0 39 64 	          MULW      A1\.7,D0\.7,D0Re0
-.*:	29 c2 39 64 	          MULW      A1\.7,D0\.7,A1LbP
-.*:	24 ce 39 64 	          MULW      D1\.7,D0\.7,D0\.7
-.*:	66 ce 39 64 	          MULD      A0\.7,D0\.7,D0\.7
-.*:	29 d0 39 64 	          MULW      A1\.7,D0\.7,D1Re0
-.*:	29 de 39 64 	          MULW      A1\.7,D0\.7,D1\.7
-.*:	29 e0 39 64 	          MULW      A1\.7,D0\.7,RD
-.*:	29 f2 39 64 	          MULW      A1\.7,D0\.7,A0FrP
-.*:	29 fe 39 64 	          MULW      A1\.7,D0\.7,A0\.7
-.*:	2d 10 80 64 	          MULW      RA,D0Re0,D1Re0
-.*:	2d ce 81 64 	          MULW      RA,D0\.7,A1\.7
-.*:	2c 0e b0 64 	          MULW      RAM8X32,D0Re0,D0\.7
-.*:	2d c2 b1 64 	          MULW      RAM8X32,D0\.7,A1LbP
-.*:	2c 00 b8 64 	          MULW      RAM8X,D0Re0,D0Re0
-.*:	2d 3e b8 64 	          MULW      RAM8X,D0Re0,A0\.7
-.*:	2d f2 b9 64 	          MULW      RAM8X,D0\.7,A0FrP
-.*:	2d 20 c0 64 	          MULW      RABZ,D0Re0,RD
-.*:	2d de c1 64 	          MULW      RABZ,D0\.7,D1\.7
-.*:	2d 10 e8 64 	          MULW      RAWX,D0Re0,D1Re0
-.*:	2d ce e9 64 	          MULW      RAWX,D0\.7,A1\.7
-.*:	21 02 f8 64 	          MULW      TXIDLECYC,D0Re0,A1LbP
-.*:	21 1e f8 64 	          MULW      TXIDLECYC,D0Re0,D1\.7
-.*:	20 c0 f9 64 	          MULW      TXIDLECYC,D0\.7,D0Re0
-.*:	21 d0 f9 64 	          MULW      TXIDLECYC,D0\.7,D1Re0
-.*:	21 fe f9 64 	          MULW      TXIDLECYC,D0\.7,A0\.7
-.*:	62 00 00 65 	          MULD      D0Re0,D1Re0,D1Re0
-.*:	04 0e 00 65 	          MULWNE    D1Re0,D1Re0,D1\.7
-.*:	2a 0e 00 65 	          MULW      PC,D1Re0,D1\.7
-.*:	21 10 00 65 	          MULW      TXENABLE,D1Re0,D0Re0
-.*:	23 1e 00 65 	          MULW      D0Re0,D1Re0,D0\.7
-.*:	2b 20 00 65 	          MULW      PC,D1Re0,RD
-.*:	2f 32 00 65 	          MULW      TXSTAT,D1Re0,A0FrP
-.*:	63 3e 00 65 	          MULD      D0Re0,D1Re0,A0\.7
-.*:	1d c2 01 65 	          MULWLE    D1Re0,D1\.7,A1LbP
-.*:	1d ce 01 65 	          MULWLE    D1Re0,D1\.7,A1\.7
-.*:	2b ce 01 65 	          MULW      PC,D1\.7,A1\.7
-.*:	23 d0 01 65 	          MULW      D0Re0,D1\.7,D0Re0
-.*:	2b de 01 65 	          MULW      PC,D1\.7,D0\.7
-.*:	2f e0 01 65 	          MULW      TXSTAT,D1\.7,RD
-.*:	63 f2 01 65 	          MULD      D0Re0,D1\.7,A0FrP
-.*:	26 00 08 65 	          MULW      A0FrP,D1Re0,D1Re0
-.*:	67 02 08 65 	          MULD      A0FrP,D1Re0,A1LbP
-.*:	66 0e 08 65 	          MULD      A0FrP,D1Re0,D1\.7
-.*:	69 10 08 65 	          MULD      A1LbP,D1Re0,D0Re0
-.*:	2b 20 08 65 	          MULW      PCX,D1Re0,RD
-.*:	27 3e 08 65 	          MULW      A0FrP,D1Re0,A0\.7
-.*:	66 c0 09 65 	          MULD      A0FrP,D1\.7,D1Re0
-.*:	27 ce 09 65 	          MULW      A0FrP,D1\.7,A1\.7
-.*:	69 ce 09 65 	          MULD      A1LbP,D1\.7,A1\.7
-.*:	2b de 09 65 	          MULW      PCX,D1\.7,D0\.7
-.*:	27 f2 09 65 	          MULW      A0FrP,D1\.7,A0FrP
-.*:	67 fe 09 65 	          MULD      A0FrP,D1\.7,A0\.7
-.*:	2f 20 18 65 	          MULW      TXMASKI,D1Re0,RD
-.*:	2f de 19 65 	          MULW      TXMASKI,D1\.7,D0\.7
-.*:	28 00 38 65 	          MULW      A1\.7,D1Re0,D1Re0
-.*:	29 02 38 65 	          MULW      A1\.7,D1Re0,A1LbP
-.*:	22 0e 38 65 	          MULW      D0\.7,D1Re0,D1\.7
-.*:	66 0e 38 65 	          MULD      A0\.7,D1Re0,D1\.7
-.*:	29 10 38 65 	          MULW      A1\.7,D1Re0,D0Re0
-.*:	29 1e 38 65 	          MULW      A1\.7,D1Re0,D0\.7
-.*:	29 20 38 65 	          MULW      A1\.7,D1Re0,RD
-.*:	29 32 38 65 	          MULW      A1\.7,D1Re0,A0FrP
-.*:	29 3e 38 65 	          MULW      A1\.7,D1Re0,A0\.7
-.*:	28 c0 39 65 	          MULW      A1\.7,D1\.7,D1Re0
-.*:	29 c2 39 65 	          MULW      A1\.7,D1\.7,A1LbP
-.*:	22 ce 39 65 	          MULW      D0\.7,D1\.7,D1\.7
-.*:	66 ce 39 65 	          MULD      A0\.7,D1\.7,D1\.7
-.*:	29 d0 39 65 	          MULW      A1\.7,D1\.7,D0Re0
-.*:	29 de 39 65 	          MULW      A1\.7,D1\.7,D0\.7
-.*:	29 e0 39 65 	          MULW      A1\.7,D1\.7,RD
-.*:	29 f2 39 65 	          MULW      A1\.7,D1\.7,A0FrP
-.*:	29 fe 39 65 	          MULW      A1\.7,D1\.7,A0\.7
-.*:	2d 10 80 65 	          MULW      RA,D1Re0,D0Re0
-.*:	2d ce 81 65 	          MULW      RA,D1\.7,A1\.7
-.*:	2c 0e b0 65 	          MULW      RAM8X32,D1Re0,D1\.7
-.*:	2d c2 b1 65 	          MULW      RAM8X32,D1\.7,A1LbP
-.*:	2c 00 b8 65 	          MULW      RAM8X,D1Re0,D1Re0
-.*:	2d 3e b8 65 	          MULW      RAM8X,D1Re0,A0\.7
-.*:	2d f2 b9 65 	          MULW      RAM8X,D1\.7,A0FrP
-.*:	2d 20 c0 65 	          MULW      RABZ,D1Re0,RD
-.*:	2d de c1 65 	          MULW      RABZ,D1\.7,D0\.7
-.*:	2d 10 e8 65 	          MULW      RAWX,D1Re0,D0Re0
-.*:	2d ce e9 65 	          MULW      RAWX,D1\.7,A1\.7
-.*:	21 02 f8 65 	          MULW      TXIDLECYC,D1Re0,A1LbP
-.*:	21 1e f8 65 	          MULW      TXIDLECYC,D1Re0,D0\.7
-.*:	20 c0 f9 65 	          MULW      TXIDLECYC,D1\.7,D1Re0
-.*:	21 d0 f9 65 	          MULW      TXIDLECYC,D1\.7,D0Re0
-.*:	21 fe f9 65 	          MULW      TXIDLECYC,D1\.7,A0\.7
-.*:	ee 1f 00 66 	          MULW      TXSTAT,D0Re0,#0x7f
-.*:	cc 3f 00 66 	          MULWPL    D0Re0,D0Re0,#0xff
-.*:	de df 01 66 	          MULWNV    D0Re0,D0\.7,#0x7f
-.*:	04 e0 01 66 	          MULWNE    D0Re0,D0\.7,#0x80
-.*:	2e e0 01 66 	          MULW      TXSTAT,D0\.7,#0x80
-.*:	ea ff 01 66 	          MULW      PC,D0\.7,#0xff
-.*:	27 20 08 66 	          MULD      A0FrP,D0Re0,#0x80
-.*:	ea 3f 08 66 	          MULW      PCX,D0Re0,#0xff
-.*:	28 e0 09 66 	          MULW      A1LbP,D0\.7,#0x80
-.*:	ee 1f 18 66 	          MULW      TXMASKI,D0Re0,#0x7f
-.*:	e2 1f 38 66 	          MULW      D0\.7,D0Re0,#0x7f
-.*:	0c 20 38 66 	          MULWPL    D0\.7,D0Re0,#0x80
-.*:	28 20 38 66 	          MULW      A1\.7,D0Re0,#0x80
-.*:	e6 3f 38 66 	          MULW      A0\.7,D0Re0,#0xff
-.*:	e6 df 39 66 	          MULW      A0\.7,D0\.7,#0x7f
-.*:	26 e0 39 66 	          MULW      A0\.7,D0\.7,#0x80
-.*:	e6 ff 39 66 	          MULW      A0\.7,D0\.7,#0xff
-.*:	2c e0 81 66 	          MULW      RA,D0\.7,#0x80
-.*:	ec 1f b8 66 	          MULW      RAM8X,D0Re0,#0x7f
-.*:	ec 3f c0 66 	          MULW      RABZ,D0Re0,#0xff
-.*:	2c e0 e9 66 	          MULW      RAWX,D0\.7,#0x80
-.*:	e0 df f9 66 	          MULW      TXIDLECYC,D0\.7,#0x7f
-.*:	e0 1f 00 67 	          MULW      TXENABLE,D1Re0,#0x7f
-.*:	22 20 00 67 	          MULW      D0Re0,D1Re0,#0x80
-.*:	e3 3f 00 67 	          MULD      D0Re0,D1Re0,#0xff
-.*:	e4 df 01 67 	          MULW      D1Re0,D1\.7,#0x7f
-.*:	23 e0 01 67 	          MULD      D0Re0,D1\.7,#0x80
-.*:	e2 ff 01 67 	          MULW      D0Re0,D1\.7,#0xff
-.*:	e8 1f 08 67 	          MULW      A1LbP,D1Re0,#0x7f
-.*:	e6 3f 08 67 	          MULW      A0FrP,D1Re0,#0xff
-.*:	e9 df 09 67 	          MULD      A1LbP,D1\.7,#0x7f
-.*:	e7 ff 09 67 	          MULD      A0FrP,D1\.7,#0xff
-.*:	2e e0 19 67 	          MULW      TXMASKI,D1\.7,#0x80
-.*:	e6 1f 38 67 	          MULW      A0\.7,D1Re0,#0x7f
-.*:	24 20 38 67 	          MULW      D1\.7,D1Re0,#0x80
-.*:	e2 3f 38 67 	          MULW      D0\.7,D1Re0,#0xff
-.*:	dc df 39 67 	          MULWLE    D1\.7,D1\.7,#0x7f
-.*:	04 e0 39 67 	          MULWNE    D1\.7,D1\.7,#0x80
-.*:	dc ff 39 67 	          MULWLE    D1\.7,D1\.7,#0xff
-.*:	ec 1f 80 67 	          MULW      RA,D1Re0,#0x7f
-.*:	ec 3f b0 67 	          MULW      RAM8X32,D1Re0,#0xff
-.*:	2c e0 b9 67 	          MULW      RAM8X,D1\.7,#0x80
-.*:	ec 1f e8 67 	          MULW      RAWX,D1Re0,#0x7f
-.*:	20 20 f8 67 	          MULW      TXIDLECYC,D1Re0,#0x80
-.*:	e0 ff f9 67 	          MULW      TXIDLECYC,D1\.7,#0xff
-.*:	2c 00 00 70 	          NMIN      D0Re0,D0Re0,D0Re0
-.*:	01 1e 00 70 	          CMP       D0Re0,D1\.7
-.*:	24 c0 01 70 	          MAX       D0Re0,D0\.7,D0Re0
-.*:	2c ce 01 70 	          NMIN      D0Re0,D0\.7,D0\.7
-.*:	20 00 38 70 	          MIN       D0\.7,D0Re0,D0Re0
-.*:	08 c0 39 70 	          NORM      D0\.7,D0\.7
-.*:	00 00 00 71 	          CMP       D1Re0,D1Re0
-.*:	00 0e 00 71 	          CMP       D1Re0,D1\.7
-.*:	01 32 00 71 	          CMP       D1Re0,A0FrP
-.*:	2c c0 01 71 	          NMIN      D1Re0,D1\.7,D1Re0
-.*:	01 de 01 71 	          CMP       D1\.7,D0\.7
-.*:	28 00 38 71 	          ABS       D1\.7,D1Re0
-.*:	24 c0 39 71 	          MAX       D1\.7,D1\.7,D1Re0
-.*:	fc ff 03 72 	          CMPMB     D0Re0,#0x7fff
-.*:	f9 ff 07 72 	          CMPT      D0Re0,#0xffff
-.*:	00 00 3c 72 	          CMP       D0\.7,#0x8000
-.*:	fc ff 3f 72 	          CMPMB     D0\.7,#0xffff
-.*:	02 00 04 73 	          CMP       D1Re0,#-32768
-.*:	f8 ff 3b 73 	          CMP       D1\.7,#0x7fff
-.*:	05 00 3c 73 	          CMPMT     D1\.7,#0x8000
-.*:	1d 02 00 74 	          CMPLE     D0Re0,A1LbP
-.*:	1d 1e 00 74 	          CMPLE     D0Re0,D1\.7
-.*:	04 c0 01 74 	          CMPNE     D0\.7,D0Re0
-.*:	0d d0 01 74 	          CMPPL     D0\.7,D1Re0
-.*:	1d fe 01 74 	          CMPLE     D0\.7,A0\.7
-.*:	1e 0e 00 75 	          CMPNV     D1Re0,D1\.7
-.*:	1d 32 00 75 	          CMPLE     D1Re0,A0FrP
-.*:	1c ce 01 75 	          CMPLE     D1\.7,D1\.7
-.*:	0d e0 01 75 	          CMPPL     D1\.7,RD
-.*:	0c 20 00 76 	          CMPPL     D0Re0,#0x80
-.*:	dc ff 01 76 	          CMPLE     D0\.7,#0xff
-.*:	dc df 01 77 	          CMPLE     D1\.7,#0x7f
-.*:	00 0e 00 78 	          TST       D0Re0,D0\.7
-.*:	01 c2 01 78 	          TST       D0\.7,A1LbP
-.*:	00 00 00 79 	          TST       D1Re0,D1Re0
-.*:	01 3e 00 79 	          TST       D1Re0,A0\.7
-.*:	01 f2 01 79 	          TST       D1\.7,A0FrP
-.*:	02 00 04 7a 	          TST       D0Re0,#-32768
-.*:	f8 ff 3b 7a 	          TST       D0\.7,#0x7fff
-.*:	05 00 3c 7a 	          TSTMT     D0\.7,#0x8000
-.*:	fc ff 03 7b 	          TSTMB     D1Re0,#0x7fff
-.*:	f9 ff 07 7b 	          TSTT      D1Re0,#0xffff
-.*:	00 00 3c 7b 	          TST       D1\.7,#0x8000
-.*:	fc ff 3f 7b 	          TSTMB     D1\.7,#0xffff
-.*:	1e 0e 00 7c 	          TSTNV     D0Re0,D0\.7
-.*:	1d 32 00 7c 	          TSTLE     D0Re0,A0FrP
-.*:	1c ce 01 7c 	          TSTLE     D0\.7,D0\.7
-.*:	0d e0 01 7c 	          TSTPL     D0\.7,RD
-.*:	1d 02 00 7d 	          TSTLE     D1Re0,A1LbP
-.*:	1d 1e 00 7d 	          TSTLE     D1Re0,D0\.7
-.*:	04 c0 01 7d 	          TSTNE     D1\.7,D1Re0
-.*:	0d d0 01 7d 	          TSTPL     D1\.7,D0Re0
-.*:	1d fe 01 7d 	          TSTLE     D1\.7,A0\.7
-.*:	dc df 01 7e 	          TSTLE     D0\.7,#0x7f
-.*:	0c 20 00 7f 	          TSTPL     D1Re0,#0x80
-.*:	dc ff 01 7f 	          TSTLE     D1\.7,#0xff
-.*:	00 4e 08 80 	          ADD       A0FrP,A0FrP,A0\.7
-.*:	00 c2 09 80 	          ADD       A0FrP,A0\.7,A0FrP
-.*:	01 f0 09 80 	          ADD       A0FrP,A0\.7,D1Re0
-.*:	00 20 0c 80 	          ADD       A0FrP,CPC0,CPC0
-.*:	00 42 38 80 	          ADD       A0\.7,A0FrP,A0FrP
-.*:	01 70 38 80 	          ADD       A0\.7,A0FrP,D1Re0
-.*:	00 e0 39 80 	          ADD       A0\.7,A0\.7,CPC0
-.*:	01 10 3c 80 	          ADD       A0\.7,CPC0,D0Re0
-.*:	04 20 08 81 	          MOV       A1LbP,CPC1
-.*:	00 60 08 81 	          ADD       A1LbP,A1LbP,CPC1
-.*:	01 d0 09 81 	          ADD       A1LbP,A1\.7,D0Re0
-.*:	00 0e 0c 81 	          ADD       A1LbP,CPC1,A1\.7
-.*:	04 02 38 81 	          MOV       A1\.7,A1LbP
-.*:	01 50 38 81 	          ADD       A1\.7,A1LbP,D0Re0
-.*:	00 ce 39 81 	          ADD       A1\.7,A1\.7,A1\.7
-.*:	01 00 3c 81 	          ADD       A1\.7,CPC1,D1Re0
-.*:	01 32 3c 81 	          ADD       A1\.7,CPC1,A0FrP
-.*:	02 00 0c 82 	          ADD       A0FrP,A0FrP,#-32768
-.*:	fd ff 0f 82 	          MOVT      A0FrP,#0xffff
-.*:	02 00 3c 82 	          ADD       A0\.7,A0\.7,#-32768
-.*:	fd ff 3f 82 	          MOVT      A0\.7,#0xffff
-.*:	f9 ff 8f 82 	          ADDT      A0FrP,CPC0,#0xffff
-.*:	f9 ff bf 82 	          ADDT      A0\.7,CPC0,#0xffff
-.*:	02 00 0c 83 	          ADD       A1LbP,A1LbP,#-32768
-.*:	fd ff 0f 83 	          MOVT      A1LbP,#0xffff
-.*:	02 00 3c 83 	          ADD       A1\.7,A1\.7,#-32768
-.*:	fd ff 3f 83 	          MOVT      A1\.7,#0xffff
-.*:	f9 ff 8f 83 	          ADDT      A1LbP,CPC1,#0xffff
-.*:	f9 ff bf 83 	          ADDT      A1\.7,CPC1,#0xffff
-.*:	3e 42 00 84 	          ADDNV     D0Re0,A0FrP,A0FrP
-.*:	be 42 00 84 	          ADDNV     PC,A0FrP,A0FrP
-.*:	1e 4e 00 84 	          ADDNV     TXENABLE,A0FrP,A0\.7
-.*:	5e 4e 00 84 	          ADDNV     D1Re0,A0FrP,A0\.7
-.*:	fe 4e 00 84 	          ADDNV     TXSTAT,A0FrP,A0\.7
-.*:	bd 50 00 84 	          ADDLE     PC,A0FrP,D0Re0
-.*:	4d 5e 00 84 	          ADDPL     D1Re0,A0FrP,D0\.7
-.*:	1e 60 00 84 	          ADDNV     TXENABLE,A0FrP,CPC0
-.*:	5e 60 00 84 	          ADDNV     D1Re0,A0FrP,CPC0
-.*:	fe 60 00 84 	          ADDNV     TXSTAT,A0FrP,CPC0
-.*:	bd 70 00 84 	          ADDLE     PC,A0FrP,D1Re0
-.*:	4d 7e 00 84 	          ADDPL     D1Re0,A0FrP,D1\.7
-.*:	1e c2 01 84 	          ADDNV     TXENABLE,A0\.7,A0FrP
-.*:	5e c2 01 84 	          ADDNV     D1Re0,A0\.7,A0FrP
-.*:	fe c2 01 84 	          ADDNV     TXSTAT,A0\.7,A0FrP
-.*:	3e ce 01 84 	          ADDNV     D0Re0,A0\.7,A0\.7
-.*:	be ce 01 84 	          ADDNV     PC,A0\.7,A0\.7
-.*:	2d d0 01 84 	          ADDPL     D0Re0,A0\.7,D0Re0
-.*:	0d de 01 84 	          ADDPL     TXENABLE,A0\.7,D0\.7
-.*:	fd de 01 84 	          ADDLE     TXSTAT,A0\.7,D0\.7
-.*:	3e e0 01 84 	          ADDNV     D0Re0,A0\.7,CPC0
-.*:	be e0 01 84 	          ADDNV     PC,A0\.7,CPC0
-.*:	2d f0 01 84 	          ADDPL     D0Re0,A0\.7,D1Re0
-.*:	0d fe 01 84 	          ADDPL     TXENABLE,A0\.7,D1\.7
-.*:	fd fe 01 84 	          ADDLE     TXSTAT,A0\.7,D1\.7
-.*:	3e 02 04 84 	          ADDNV     D0Re0,CPC0,A0FrP
-.*:	be 02 04 84 	          ADDNV     PC,CPC0,A0FrP
-.*:	1e 0e 04 84 	          ADDNV     TXENABLE,CPC0,A0\.7
-.*:	5e 0e 04 84 	          ADDNV     D1Re0,CPC0,A0\.7
-.*:	fe 0e 04 84 	          ADDNV     TXSTAT,CPC0,A0\.7
-.*:	bd 10 04 84 	          ADDLE     PC,CPC0,D0Re0
-.*:	5d 1e 04 84 	          ADDLE     D1Re0,CPC0,D0\.7
-.*:	1e 20 04 84 	          ADDNV     TXENABLE,CPC0,CPC0
-.*:	5e 20 04 84 	          ADDNV     D1Re0,CPC0,CPC0
-.*:	fe 20 04 84 	          ADDNV     TXSTAT,CPC0,CPC0
-.*:	a5 30 04 84 	          ADDNE     PC,CPC0,D1Re0
-.*:	55 3e 04 84 	          ADDLS     D1Re0,CPC0,D1\.7
-.*:	7e 42 08 84 	          ADDNV     A0FrP,A0FrP,A0FrP
-.*:	be 42 08 84 	          ADDNV     PCX,A0FrP,A0FrP
-.*:	9e 4e 08 84 	          ADDNV     A1LbP,A0FrP,A0\.7
-.*:	8d 50 08 84 	          ADDPL     A1LbP,A0FrP,D0Re0
-.*:	bd 5e 08 84 	          ADDLE     PCX,A0FrP,D0\.7
-.*:	9e 60 08 84 	          ADDNV     A1LbP,A0FrP,CPC0
-.*:	9d 70 08 84 	          ADDLE     A1LbP,A0FrP,D1Re0
-.*:	ad 7e 08 84 	          ADDPL     PCX,A0FrP,D1\.7
-.*:	9e c2 09 84 	          ADDNV     A1LbP,A0\.7,A0FrP
-.*:	7e ce 09 84 	          ADDNV     A0FrP,A0\.7,A0\.7
-.*:	be ce 09 84 	          ADDNV     PCX,A0\.7,A0\.7
-.*:	7d de 09 84 	          ADDLE     A0FrP,A0\.7,D0\.7
-.*:	7e e0 09 84 	          ADDNV     A0FrP,A0\.7,CPC0
-.*:	be e0 09 84 	          ADDNV     PCX,A0\.7,CPC0
-.*:	6d fe 09 84 	          ADDPL     A0FrP,A0\.7,D1\.7
-.*:	7e 02 0c 84 	          ADDNV     A0FrP,CPC0,A0FrP
-.*:	7c 0e 0c 84 	          ADDLE     A0FrP,CPC0,A0\.7
-.*:	be 0e 0c 84 	          ADDNV     PCX,CPC0,A0\.7
-.*:	7d 1e 0c 84 	          ADDLE     A0FrP,CPC0,D0\.7
-.*:	7e 20 0c 84 	          ADDNV     A0FrP,CPC0,CPC0
-.*:	be 20 0c 84 	          ADDNV     PCX,CPC0,CPC0
-.*:	65 3e 0c 84 	          ADDNE     A0FrP,CPC0,D1\.7
-.*:	fe 42 18 84 	          ADDNV     TXMASKI,A0FrP,A0FrP
-.*:	fd 5e 18 84 	          ADDLE     TXMASKI,A0FrP,D0\.7
-.*:	fd 7e 18 84 	          ADDLE     TXMASKI,A0FrP,D1\.7
-.*:	fe ce 19 84 	          ADDNV     TXMASKI,A0\.7,A0\.7
-.*:	fe e0 19 84 	          ADDNV     TXMASKI,A0\.7,CPC0
-.*:	fe 02 1c 84 	          ADDNV     TXMASKI,CPC0,A0FrP
-.*:	fd 1e 1c 84 	          ADDLE     TXMASKI,CPC0,D0\.7
-.*:	ed 3e 1c 84 	          ADDPL     TXMASKI,CPC0,D1\.7
-.*:	5e 42 38 84 	          ADDNV     D1\.7,A0FrP,A0FrP
-.*:	9e 42 38 84 	          ADDNV     A1\.7,A0FrP,A0FrP
-.*:	5e 4e 38 84 	          ADDNV     D1\.7,A0FrP,A0\.7
-.*:	9e 4e 38 84 	          ADDNV     A1\.7,A0FrP,A0\.7
-.*:	9d 50 38 84 	          ADDLE     A1\.7,A0FrP,D0Re0
-.*:	8d 5e 38 84 	          ADDPL     A1\.7,A0FrP,D0\.7
-.*:	5e 60 38 84 	          ADDNV     D1\.7,A0FrP,CPC0
-.*:	9e 60 38 84 	          ADDNV     A1\.7,A0FrP,CPC0
-.*:	95 70 38 84 	          ADDLS     A1\.7,A0FrP,D1Re0
-.*:	9d 7e 38 84 	          ADDLE     A1\.7,A0FrP,D1\.7
-.*:	5e c2 39 84 	          ADDNV     D1\.7,A0\.7,A0FrP
-.*:	9e c2 39 84 	          ADDNV     A1\.7,A0\.7,A0FrP
-.*:	5e ce 39 84 	          ADDNV     D1\.7,A0\.7,A0\.7
-.*:	9e ce 39 84 	          ADDNV     A1\.7,A0\.7,A0\.7
-.*:	9d d0 39 84 	          ADDLE     A1\.7,A0\.7,D0Re0
-.*:	9d de 39 84 	          ADDLE     A1\.7,A0\.7,D0\.7
-.*:	5e e0 39 84 	          ADDNV     D1\.7,A0\.7,CPC0
-.*:	9e e0 39 84 	          ADDNV     A1\.7,A0\.7,CPC0
-.*:	85 f0 39 84 	          ADDNE     A1\.7,A0\.7,D1Re0
-.*:	8d fe 39 84 	          ADDPL     A1\.7,A0\.7,D1\.7
-.*:	5e 02 3c 84 	          ADDNV     D1\.7,CPC0,A0FrP
-.*:	34 0e 3c 84 	          ADDLS     D0\.7,CPC0,A0\.7
-.*:	64 0e 3c 84 	          ADDNE     A0\.7,CPC0,A0\.7
-.*:	5d 10 3c 84 	          ADDLE     D1\.7,CPC0,D0Re0
-.*:	5d 1e 3c 84 	          ADDLE     D1\.7,CPC0,D0\.7
-.*:	3e 20 3c 84 	          ADDNV     D0\.7,CPC0,CPC0
-.*:	7e 20 3c 84 	          ADDNV     A0\.7,CPC0,CPC0
-.*:	5d 30 3c 84 	          ADDLE     D1\.7,CPC0,D1Re0
-.*:	45 3e 3c 84 	          ADDNE     D1\.7,CPC0,D1\.7
-.*:	de 42 80 84 	          ADDNV     RA,A0FrP,A0FrP
-.*:	cd 5e 80 84 	          ADDPL     RA,A0FrP,D0\.7
-.*:	d5 7e 80 84 	          ADDLS     RA,A0FrP,D1\.7
-.*:	de ce 81 84 	          ADDNV     RA,A0\.7,A0\.7
-.*:	de e0 81 84 	          ADDNV     RA,A0\.7,CPC0
-.*:	de 02 84 84 	          ADDNV     RA,CPC0,A0FrP
-.*:	cd 1e 84 84 	          ADDPL     RA,CPC0,D0\.7
-.*:	d5 3e 84 84 	          ADDLS     RA,CPC0,D1\.7
-.*:	de 4e b0 84 	          ADDNV     RAM8X32,A0FrP,A0\.7
-.*:	de 60 b0 84 	          ADDNV     RAM8X32,A0FrP,CPC0
-.*:	de c2 b1 84 	          ADDNV     RAM8X32,A0\.7,A0FrP
-.*:	cd de b1 84 	          ADDPL     RAM8X32,A0\.7,D0\.7
-.*:	d5 fe b1 84 	          ADDLS     RAM8X32,A0\.7,D1\.7
-.*:	de 0e b4 84 	          ADDNV     RAM8X32,CPC0,A0\.7
-.*:	de 20 b4 84 	          ADDNV     RAM8X32,CPC0,CPC0
-.*:	de 42 b8 84 	          ADDNV     RAM8X,A0FrP,A0FrP
-.*:	cd 5e b8 84 	          ADDPL     RAM8X,A0FrP,D0\.7
-.*:	d5 7e b8 84 	          ADDLS     RAM8X,A0FrP,D1\.7
-.*:	de ce b9 84 	          ADDNV     RAM8X,A0\.7,A0\.7
-.*:	de e0 b9 84 	          ADDNV     RAM8X,A0\.7,CPC0
-.*:	de 02 bc 84 	          ADDNV     RAM8X,CPC0,A0FrP
-.*:	cd 1e bc 84 	          ADDPL     RAM8X,CPC0,D0\.7
-.*:	d5 3e bc 84 	          ADDLS     RAM8X,CPC0,D1\.7
-.*:	de 4e c0 84 	          ADDNV     RABZ,A0FrP,A0\.7
-.*:	de 60 c0 84 	          ADDNV     RABZ,A0FrP,CPC0
-.*:	de c2 c1 84 	          ADDNV     RABZ,A0\.7,A0FrP
-.*:	cd de c1 84 	          ADDPL     RABZ,A0\.7,D0\.7
-.*:	d5 fe c1 84 	          ADDLS     RABZ,A0\.7,D1\.7
-.*:	de 0e c4 84 	          ADDNV     RABZ,CPC0,A0\.7
-.*:	de 20 c4 84 	          ADDNV     RABZ,CPC0,CPC0
-.*:	de 42 e8 84 	          ADDNV     RAWX,A0FrP,A0FrP
-.*:	dd 5e e8 84 	          ADDLE     RAWX,A0FrP,D0\.7
-.*:	cd 7e e8 84 	          ADDPL     RAWX,A0FrP,D1\.7
-.*:	de ce e9 84 	          ADDNV     RAWX,A0\.7,A0\.7
-.*:	de e0 e9 84 	          ADDNV     RAWX,A0\.7,CPC0
-.*:	de 02 ec 84 	          ADDNV     RAWX,CPC0,A0FrP
-.*:	dd 1e ec 84 	          ADDLE     RAWX,CPC0,D0\.7
-.*:	cd 3e ec 84 	          ADDPL     RAWX,CPC0,D1\.7
-.*:	de 42 f8 84 	          ADDNV     RAMX,A0FrP,A0FrP
-.*:	de 4e f8 84 	          ADDNV     RAMX,A0FrP,A0\.7
-.*:	dd 5e f8 84 	          ADDLE     RAMX,A0FrP,D0\.7
-.*:	de 60 f8 84 	          ADDNV     RAMX,A0FrP,CPC0
-.*:	cd 7e f8 84 	          ADDPL     RAMX,A0FrP,D1\.7
-.*:	de c2 f9 84 	          ADDNV     RAMX,A0\.7,A0FrP
-.*:	de ce f9 84 	          ADDNV     RAMX,A0\.7,A0\.7
-.*:	dd de f9 84 	          ADDLE     RAMX,A0\.7,D0\.7
-.*:	de e0 f9 84 	          ADDNV     RAMX,A0\.7,CPC0
-.*:	cd fe f9 84 	          ADDPL     RAMX,A0\.7,D1\.7
-.*:	de 02 fc 84 	          ADDNV     RAMX,CPC0,A0FrP
-.*:	de 0e fc 84 	          ADDNV     RAMX,CPC0,A0\.7
-.*:	dd 1e fc 84 	          ADDLE     RAMX,CPC0,D0\.7
-.*:	de 20 fc 84 	          ADDNV     RAMX,CPC0,CPC0
-.*:	cd 3e fc 84 	          ADDPL     RAMX,CPC0,D1\.7
-.*:	ad 40 00 85 	          ADDPL     PC,A1LbP,D1Re0
-.*:	44 42 00 85 	          ADDNE     D1Re0,A1LbP,A1LbP
-.*:	1e 4e 00 85 	          ADDNV     TXENABLE,A1LbP,A1\.7
-.*:	5e 4e 00 85 	          ADDNV     D1Re0,A1LbP,A1\.7
-.*:	fe 4e 00 85 	          ADDNV     TXSTAT,A1LbP,A1\.7
-.*:	ad 50 00 85 	          ADDPL     PC,A1LbP,D0Re0
-.*:	5d 5e 00 85 	          ADDLE     D1Re0,A1LbP,D0\.7
-.*:	1e 60 00 85 	          ADDNV     TXENABLE,A1LbP,CPC1
-.*:	5e 60 00 85 	          ADDNV     D1Re0,A1LbP,CPC1
-.*:	fe 60 00 85 	          ADDNV     TXSTAT,A1LbP,CPC1
-.*:	b5 72 00 85 	          ADDLS     PC,A1LbP,A0FrP
-.*:	5d 7e 00 85 	          ADDLE     D1Re0,A1LbP,A0\.7
-.*:	3d c0 01 85 	          ADDLE     D0Re0,A1\.7,D1Re0
-.*:	04 c2 01 85 	          ADDNE     TXENABLE,A1\.7,A1LbP
-.*:	f4 c2 01 85 	          ADDLS     TXSTAT,A1\.7,A1LbP
-.*:	3e ce 01 85 	          ADDNV     D0Re0,A1\.7,A1\.7
-.*:	be ce 01 85 	          ADDNV     PC,A1\.7,A1\.7
-.*:	3d d0 01 85 	          ADDLE     D0Re0,A1\.7,D0Re0
-.*:	1d de 01 85 	          ADDLE     TXENABLE,A1\.7,D0\.7
-.*:	ed de 01 85 	          ADDPL     TXSTAT,A1\.7,D0\.7
-.*:	3e e0 01 85 	          ADDNV     D0Re0,A1\.7,CPC1
-.*:	be e0 01 85 	          ADDNV     PC,A1\.7,CPC1
-.*:	25 f2 01 85 	          ADDNE     D0Re0,A1\.7,A0FrP
-.*:	1d fe 01 85 	          ADDLE     TXENABLE,A1\.7,A0\.7
-.*:	ed fe 01 85 	          ADDPL     TXSTAT,A1\.7,A0\.7
-.*:	bd 00 04 85 	          ADDLE     PC,CPC1,D1Re0
-.*:	4c 02 04 85 	          ADDPL     D1Re0,CPC1,A1LbP
-.*:	1e 0e 04 85 	          ADDNV     TXENABLE,CPC1,A1\.7
-.*:	5e 0e 04 85 	          ADDNV     D1Re0,CPC1,A1\.7
-.*:	fe 0e 04 85 	          ADDNV     TXSTAT,CPC1,A1\.7
-.*:	bd 10 04 85 	          ADDLE     PC,CPC1,D0Re0
-.*:	5d 1e 04 85 	          ADDLE     D1Re0,CPC1,D0\.7
-.*:	1e 20 04 85 	          ADDNV     TXENABLE,CPC1,CPC1
-.*:	5e 20 04 85 	          ADDNV     D1Re0,CPC1,CPC1
-.*:	fe 20 04 85 	          ADDNV     TXSTAT,CPC1,CPC1
-.*:	ad 32 04 85 	          ADDPL     PC,CPC1,A0FrP
-.*:	5d 3e 04 85 	          ADDLE     D1Re0,CPC1,A0\.7
-.*:	9d 40 08 85 	          ADDLE     A1LbP,A1LbP,D1Re0
-.*:	b4 42 08 85 	          ADDLS     PCX,A1LbP,A1LbP
-.*:	9e 4e 08 85 	          ADDNV     A1LbP,A1LbP,A1\.7
-.*:	9d 50 08 85 	          ADDLE     A1LbP,A1LbP,D0Re0
-.*:	ad 5e 08 85 	          ADDPL     PCX,A1LbP,D0\.7
-.*:	9e 60 08 85 	          ADDNV     A1LbP,A1LbP,CPC1
-.*:	95 72 08 85 	          ADDLS     A1LbP,A1LbP,A0FrP
-.*:	bd 7e 08 85 	          ADDLE     PCX,A1LbP,A0\.7
-.*:	74 c2 09 85 	          ADDLS     A0FrP,A1\.7,A1LbP
-.*:	7e ce 09 85 	          ADDNV     A0FrP,A1\.7,A1\.7
-.*:	be ce 09 85 	          ADDNV     PCX,A1\.7,A1\.7
-.*:	6d de 09 85 	          ADDPL     A0FrP,A1\.7,D0\.7
-.*:	7e e0 09 85 	          ADDNV     A0FrP,A1\.7,CPC1
-.*:	be e0 09 85 	          ADDNV     PCX,A1\.7,CPC1
-.*:	7d fe 09 85 	          ADDLE     A0FrP,A1\.7,A0\.7
-.*:	9d 00 0c 85 	          ADDLE     A1LbP,CPC1,D1Re0
-.*:	bc 02 0c 85 	          ADDLE     PCX,CPC1,A1LbP
-.*:	9e 0e 0c 85 	          ADDNV     A1LbP,CPC1,A1\.7
-.*:	9d 10 0c 85 	          ADDLE     A1LbP,CPC1,D0Re0
-.*:	bd 1e 0c 85 	          ADDLE     PCX,CPC1,D0\.7
-.*:	9e 20 0c 85 	          ADDNV     A1LbP,CPC1,CPC1
-.*:	a5 32 0c 85 	          ADDNE     PCX,CPC1,A0FrP
-.*:	ec 42 18 85 	          ADDPL     TXMASKI,A1LbP,A1LbP
-.*:	fd 5e 18 85 	          ADDLE     TXMASKI,A1LbP,D0\.7
-.*:	ed 7e 18 85 	          ADDPL     TXMASKI,A1LbP,A0\.7
-.*:	fe ce 19 85 	          ADDNV     TXMASKI,A1\.7,A1\.7
-.*:	fe e0 19 85 	          ADDNV     TXMASKI,A1\.7,CPC1
-.*:	fc 02 1c 85 	          ADDLE     TXMASKI,CPC1,A1LbP
-.*:	fd 1e 1c 85 	          ADDLE     TXMASKI,CPC1,D0\.7
-.*:	fd 3e 1c 85 	          ADDLE     TXMASKI,CPC1,A0\.7
-.*:	9d 40 38 85 	          ADDLE     A1\.7,A1LbP,D1Re0
-.*:	84 42 38 85 	          ADDNE     A1\.7,A1LbP,A1LbP
-.*:	5e 4e 38 85 	          ADDNV     D1\.7,A1LbP,A1\.7
-.*:	9e 4e 38 85 	          ADDNV     A1\.7,A1LbP,A1\.7
-.*:	9d 50 38 85 	          ADDLE     A1\.7,A1LbP,D0Re0
-.*:	9d 5e 38 85 	          ADDLE     A1\.7,A1LbP,D0\.7
-.*:	5e 60 38 85 	          ADDNV     D1\.7,A1LbP,CPC1
-.*:	9e 60 38 85 	          ADDNV     A1\.7,A1LbP,CPC1
-.*:	9d 72 38 85 	          ADDLE     A1\.7,A1LbP,A0FrP
-.*:	8d 7e 38 85 	          ADDPL     A1\.7,A1LbP,A0\.7
-.*:	9d c0 39 85 	          ADDLE     A1\.7,A1\.7,D1Re0
-.*:	94 c2 39 85 	          ADDLS     A1\.7,A1\.7,A1LbP
-.*:	5e ce 39 85 	          ADDNV     D1\.7,A1\.7,A1\.7
-.*:	9e ce 39 85 	          ADDNV     A1\.7,A1\.7,A1\.7
-.*:	9d d0 39 85 	          ADDLE     A1\.7,A1\.7,D0Re0
-.*:	8d de 39 85 	          ADDPL     A1\.7,A1\.7,D0\.7
-.*:	5e e0 39 85 	          ADDNV     D1\.7,A1\.7,CPC1
-.*:	9e e0 39 85 	          ADDNV     A1\.7,A1\.7,CPC1
-.*:	8d f2 39 85 	          ADDPL     A1\.7,A1\.7,A0FrP
-.*:	9d fe 39 85 	          ADDLE     A1\.7,A1\.7,A0\.7
-.*:	9d 00 3c 85 	          ADDLE     A1\.7,CPC1,D1Re0
-.*:	9c 02 3c 85 	          ADDLE     A1\.7,CPC1,A1LbP
-.*:	5e 0e 3c 85 	          ADDNV     D1\.7,CPC1,A1\.7
-.*:	9e 0e 3c 85 	          ADDNV     A1\.7,CPC1,A1\.7
-.*:	9d 10 3c 85 	          ADDLE     A1\.7,CPC1,D0Re0
-.*:	9d 1e 3c 85 	          ADDLE     A1\.7,CPC1,D0\.7
-.*:	5e 20 3c 85 	          ADDNV     D1\.7,CPC1,CPC1
-.*:	9e 20 3c 85 	          ADDNV     A1\.7,CPC1,CPC1
-.*:	35 3e 3c 85 	          ADDLS     D0\.7,CPC1,A0\.7
-.*:	d4 42 80 85 	          ADDLS     RA,A1LbP,A1LbP
-.*:	dd 5e 80 85 	          ADDLE     RA,A1LbP,D0\.7
-.*:	c5 7e 80 85 	          ADDNE     RA,A1LbP,A0\.7
-.*:	de ce 81 85 	          ADDNV     RA,A1\.7,A1\.7
-.*:	de e0 81 85 	          ADDNV     RA,A1\.7,CPC1
-.*:	d4 02 84 85 	          ADDLS     RA,CPC1,A1LbP
-.*:	dd 1e 84 85 	          ADDLE     RA,CPC1,D0\.7
-.*:	c5 3e 84 85 	          ADDNE     RA,CPC1,A0\.7
-.*:	de 4e b0 85 	          ADDNV     RAM8X32,A1LbP,A1\.7
-.*:	de 60 b0 85 	          ADDNV     RAM8X32,A1LbP,CPC1
-.*:	d4 c2 b1 85 	          ADDLS     RAM8X32,A1\.7,A1LbP
-.*:	dd de b1 85 	          ADDLE     RAM8X32,A1\.7,D0\.7
-.*:	c5 fe b1 85 	          ADDNE     RAM8X32,A1\.7,A0\.7
-.*:	de 0e b4 85 	          ADDNV     RAM8X32,CPC1,A1\.7
-.*:	de 20 b4 85 	          ADDNV     RAM8X32,CPC1,CPC1
-.*:	d4 42 b8 85 	          ADDLS     RAM8X,A1LbP,A1LbP
-.*:	dd 5e b8 85 	          ADDLE     RAM8X,A1LbP,D0\.7
-.*:	c5 7e b8 85 	          ADDNE     RAM8X,A1LbP,A0\.7
-.*:	de ce b9 85 	          ADDNV     RAM8X,A1\.7,A1\.7
-.*:	de e0 b9 85 	          ADDNV     RAM8X,A1\.7,CPC1
-.*:	d4 02 bc 85 	          ADDLS     RAM8X,CPC1,A1LbP
-.*:	dd 1e bc 85 	          ADDLE     RAM8X,CPC1,D0\.7
-.*:	c5 3e bc 85 	          ADDNE     RAM8X,CPC1,A0\.7
-.*:	de 4e c0 85 	          ADDNV     RABZ,A1LbP,A1\.7
-.*:	de 60 c0 85 	          ADDNV     RABZ,A1LbP,CPC1
-.*:	d4 c2 c1 85 	          ADDLS     RABZ,A1\.7,A1LbP
-.*:	dd de c1 85 	          ADDLE     RABZ,A1\.7,D0\.7
-.*:	c5 fe c1 85 	          ADDNE     RABZ,A1\.7,A0\.7
-.*:	de 0e c4 85 	          ADDNV     RABZ,CPC1,A1\.7
-.*:	de 20 c4 85 	          ADDNV     RABZ,CPC1,CPC1
-.*:	cc 42 e8 85 	          ADDPL     RAWX,A1LbP,A1LbP
-.*:	dd 5e e8 85 	          ADDLE     RAWX,A1LbP,D0\.7
-.*:	dd 7e e8 85 	          ADDLE     RAWX,A1LbP,A0\.7
-.*:	de ce e9 85 	          ADDNV     RAWX,A1\.7,A1\.7
-.*:	de e0 e9 85 	          ADDNV     RAWX,A1\.7,CPC1
-.*:	cc 02 ec 85 	          ADDPL     RAWX,CPC1,A1LbP
-.*:	dd 1e ec 85 	          ADDLE     RAWX,CPC1,D0\.7
-.*:	dd 3e ec 85 	          ADDLE     RAWX,CPC1,A0\.7
-.*:	cc 42 f8 85 	          ADDPL     RAMX,A1LbP,A1LbP
-.*:	de 4e f8 85 	          ADDNV     RAMX,A1LbP,A1\.7
-.*:	dd 5e f8 85 	          ADDLE     RAMX,A1LbP,D0\.7
-.*:	de 60 f8 85 	          ADDNV     RAMX,A1LbP,CPC1
-.*:	dd 7e f8 85 	          ADDLE     RAMX,A1LbP,A0\.7
-.*:	cc c2 f9 85 	          ADDPL     RAMX,A1\.7,A1LbP
-.*:	de ce f9 85 	          ADDNV     RAMX,A1\.7,A1\.7
-.*:	dd de f9 85 	          ADDLE     RAMX,A1\.7,D0\.7
-.*:	de e0 f9 85 	          ADDNV     RAMX,A1\.7,CPC1
-.*:	dd fe f9 85 	          ADDLE     RAMX,A1\.7,A0\.7
-.*:	cc 02 fc 85 	          ADDPL     RAMX,CPC1,A1LbP
-.*:	de 0e fc 85 	          ADDNV     RAMX,CPC1,A1\.7
-.*:	dd 1e fc 85 	          ADDLE     RAMX,CPC1,D0\.7
-.*:	de 20 fc 85 	          ADDNV     RAMX,CPC1,CPC1
-.*:	dd 3e fc 85 	          ADDLE     RAMX,CPC1,A0\.7
-.*:	22 60 00 86 	          ADD       D0Re0,A0FrP,#0x80
-.*:	ee 7f 00 86 	          ADD       TXSTAT,A0FrP,#0xff
-.*:	24 e0 01 86 	          ADD       D1Re0,A0\.7,#0x80
-.*:	cc 5f 08 86 	          ADDPL     A0FrP,A0FrP,#0x7f
-.*:	dc 7f 08 86 	          ADDLE     A0FrP,A0FrP,#0xff
-.*:	ea df 09 86 	          ADD       PCX,A0\.7,#0x7f
-.*:	e6 ff 09 86 	          ADD       A0FrP,A0\.7,#0xff
-.*:	de 3f 0c 86 	          ADDNV     A0FrP,CPC0,#0xff
-.*:	de 5f 38 86 	          ADDNV     A0\.7,A0FrP,#0x7f
-.*:	24 60 38 86 	          ADD       D1\.7,A0FrP,#0x80
-.*:	e8 7f 38 86 	          ADD       A1\.7,A0FrP,#0xff
-.*:	22 e0 39 86 	          ADD       D0\.7,A0\.7,#0x80
-.*:	dc 1f 3c 86 	          ADDLE     A0\.7,CPC0,#0x7f
-.*:	ec 7f 80 86 	          ADD       RA,A0FrP,#0xff
-.*:	2c e0 b1 86 	          ADD       RAM8X32,A0\.7,#0x80
-.*:	ec 5f c0 86 	          ADD       RABZ,A0FrP,#0x7f
-.*:	ec 7f e8 86 	          ADD       RAWX,A0FrP,#0xff
-.*:	e0 7f f8 86 	          ADD       TXIDLECYC,A0FrP,#0xff
-.*:	e0 5f 00 87 	          ADD       TXENABLE,A1LbP,#0x7f
-.*:	2a 60 00 87 	          ADD       PC,A1LbP,#0x80
-.*:	e2 df 01 87 	          ADD       D0Re0,A1\.7,#0x7f
-.*:	2e e0 01 87 	          ADD       TXSTAT,A1\.7,#0x80
-.*:	e6 5f 08 87 	          ADD       A0FrP,A1LbP,#0x7f
-.*:	e6 7f 08 87 	          ADD       A0FrP,A1LbP,#0xff
-.*:	1e e0 09 87 	          ADDNV     A1LbP,A1\.7,#0x80
-.*:	ea ff 09 87 	          ADD       PCX,A1\.7,#0xff
-.*:	2e 60 18 87 	          ADD       TXMASKI,A1LbP,#0x80
-.*:	e4 5f 38 87 	          ADD       D1\.7,A1LbP,#0x7f
-.*:	28 60 38 87 	          ADD       A1\.7,A1LbP,#0x80
-.*:	ce df 39 87 	          ADDVS     A1\.7,A1\.7,#0x7f
-.*:	26 e0 39 87 	          ADD       A0\.7,A1\.7,#0x80
-.*:	04 20 3c 87 	          ADDNE     A1\.7,CPC1,#0x80
-.*:	2c e0 81 87 	          ADD       RA,A1\.7,#0x80
-.*:	ec 5f b8 87 	          ADD       RAM8X,A1LbP,#0x7f
-.*:	ec 7f c0 87 	          ADD       RABZ,A1LbP,#0xff
-.*:	2c e0 e9 87 	          ADD       RAWX,A1\.7,#0x80
-.*:	e0 df f9 87 	          ADD       TXIDLECYC,A1\.7,#0x7f
-.*:	04 0e 08 88 	          NEG       A0FrP,A0\.7
-.*:	00 42 08 88 	          SUB       A0FrP,A0FrP,A0FrP
-.*:	01 70 08 88 	          SUB       A0FrP,A0FrP,D1Re0
-.*:	00 e0 09 88 	          SUB       A0FrP,A0\.7,CPC0
-.*:	01 10 0c 88 	          SUB       A0FrP,CPC0,D0Re0
-.*:	04 0e 38 88 	          NEG       A0\.7,A0\.7
-.*:	00 42 38 88 	          SUB       A0\.7,A0FrP,A0FrP
-.*:	01 70 38 88 	          SUB       A0\.7,A0FrP,D1Re0
-.*:	00 e0 39 88 	          SUB       A0\.7,A0\.7,CPC0
-.*:	01 10 3c 88 	          SUB       A0\.7,CPC0,D0Re0
-.*:	04 0e 08 89 	          NEG       A1LbP,A1\.7
-.*:	01 40 08 89 	          SUB       A1LbP,A1LbP,D1Re0
-.*:	01 72 08 89 	          SUB       A1LbP,A1LbP,A0FrP
-.*:	00 e0 09 89 	          SUB       A1LbP,A1\.7,CPC1
-.*:	01 10 0c 89 	          SUB       A1LbP,CPC1,D0Re0
-.*:	04 0e 38 89 	          NEG       A1\.7,A1\.7
-.*:	01 40 38 89 	          SUB       A1\.7,A1LbP,D1Re0
-.*:	01 72 38 89 	          SUB       A1\.7,A1LbP,A0FrP
-.*:	00 e0 39 89 	          SUB       A1\.7,A1\.7,CPC1
-.*:	01 10 3c 89 	          SUB       A1\.7,CPC1,D0Re0
-.*:	fc ff 0b 8a 	          NEG       A0FrP,#0x7fff
-.*:	fa ff 0f 8a 	          SUB       A0FrP,A0FrP,#-1
-.*:	02 00 3c 8a 	          SUB       A0\.7,A0\.7,#-32768
-.*:	f8 ff 8b 8a 	          SUB       A0FrP,CPC0,#0x7fff
-.*:	f8 ff bb 8a 	          SUB       A0\.7,CPC0,#0x7fff
-.*:	f8 ff 0b 8b 	          SUB       A1LbP,A1LbP,#0x7fff
-.*:	f8 ff 0f 8b 	          SUB       A1LbP,A1LbP,#0xffff
-.*:	00 00 3c 8b 	          SUB       A1\.7,A1\.7,#0x8000
-.*:	fc ff 3f 8b 	          NEG       A1\.7,#0xffff
-.*:	f9 ff 8f 8b 	          SUBT      A1LbP,CPC1,#0xffff
-.*:	f9 ff bf 8b 	          SUBT      A1\.7,CPC1,#0xffff
-.*:	3e 42 00 8c 	          SUBNV     D0Re0,A0FrP,A0FrP
-.*:	be 42 00 8c 	          SUBNV     PC,A0FrP,A0FrP
-.*:	1e 4e 00 8c 	          SUBNV     TXENABLE,A0FrP,A0\.7
-.*:	5e 4e 00 8c 	          SUBNV     D1Re0,A0FrP,A0\.7
-.*:	fe 4e 00 8c 	          SUBNV     TXSTAT,A0FrP,A0\.7
-.*:	bd 50 00 8c 	          SUBLE     PC,A0FrP,D0Re0
-.*:	4d 5e 00 8c 	          SUBPL     D1Re0,A0FrP,D0\.7
-.*:	1e 60 00 8c 	          SUBNV     TXENABLE,A0FrP,CPC0
-.*:	5e 60 00 8c 	          SUBNV     D1Re0,A0FrP,CPC0
-.*:	fe 60 00 8c 	          SUBNV     TXSTAT,A0FrP,CPC0
-.*:	bd 70 00 8c 	          SUBLE     PC,A0FrP,D1Re0
-.*:	4d 7e 00 8c 	          SUBPL     D1Re0,A0FrP,D1\.7
-.*:	1e c2 01 8c 	          SUBNV     TXENABLE,A0\.7,A0FrP
-.*:	5e c2 01 8c 	          SUBNV     D1Re0,A0\.7,A0FrP
-.*:	fe c2 01 8c 	          SUBNV     TXSTAT,A0\.7,A0FrP
-.*:	3e ce 01 8c 	          SUBNV     D0Re0,A0\.7,A0\.7
-.*:	be ce 01 8c 	          SUBNV     PC,A0\.7,A0\.7
-.*:	2d d0 01 8c 	          SUBPL     D0Re0,A0\.7,D0Re0
-.*:	0d de 01 8c 	          SUBPL     TXENABLE,A0\.7,D0\.7
-.*:	fd de 01 8c 	          SUBLE     TXSTAT,A0\.7,D0\.7
-.*:	3e e0 01 8c 	          SUBNV     D0Re0,A0\.7,CPC0
-.*:	be e0 01 8c 	          SUBNV     PC,A0\.7,CPC0
-.*:	2d f0 01 8c 	          SUBPL     D0Re0,A0\.7,D1Re0
-.*:	0d fe 01 8c 	          SUBPL     TXENABLE,A0\.7,D1\.7
-.*:	fd fe 01 8c 	          SUBLE     TXSTAT,A0\.7,D1\.7
-.*:	3e 02 04 8c 	          SUBNV     D0Re0,CPC0,A0FrP
-.*:	be 02 04 8c 	          SUBNV     PC,CPC0,A0FrP
-.*:	1e 0e 04 8c 	          SUBNV     TXENABLE,CPC0,A0\.7
-.*:	5e 0e 04 8c 	          SUBNV     D1Re0,CPC0,A0\.7
-.*:	fe 0e 04 8c 	          SUBNV     TXSTAT,CPC0,A0\.7
-.*:	bd 10 04 8c 	          SUBLE     PC,CPC0,D0Re0
-.*:	5d 1e 04 8c 	          SUBLE     D1Re0,CPC0,D0\.7
-.*:	1e 20 04 8c 	          SUBNV     TXENABLE,CPC0,CPC0
-.*:	5e 20 04 8c 	          SUBNV     D1Re0,CPC0,CPC0
-.*:	fe 20 04 8c 	          SUBNV     TXSTAT,CPC0,CPC0
-.*:	a5 30 04 8c 	          SUBNE     PC,CPC0,D1Re0
-.*:	55 3e 04 8c 	          SUBLS     D1Re0,CPC0,D1\.7
-.*:	7e 42 08 8c 	          SUBNV     A0FrP,A0FrP,A0FrP
-.*:	be 42 08 8c 	          SUBNV     PCX,A0FrP,A0FrP
-.*:	9e 4e 08 8c 	          SUBNV     A1LbP,A0FrP,A0\.7
-.*:	8d 50 08 8c 	          SUBPL     A1LbP,A0FrP,D0Re0
-.*:	bd 5e 08 8c 	          SUBLE     PCX,A0FrP,D0\.7
-.*:	9e 60 08 8c 	          SUBNV     A1LbP,A0FrP,CPC0
-.*:	9d 70 08 8c 	          SUBLE     A1LbP,A0FrP,D1Re0
-.*:	ad 7e 08 8c 	          SUBPL     PCX,A0FrP,D1\.7
-.*:	9e c2 09 8c 	          SUBNV     A1LbP,A0\.7,A0FrP
-.*:	7e ce 09 8c 	          SUBNV     A0FrP,A0\.7,A0\.7
-.*:	be ce 09 8c 	          SUBNV     PCX,A0\.7,A0\.7
-.*:	7d de 09 8c 	          SUBLE     A0FrP,A0\.7,D0\.7
-.*:	7e e0 09 8c 	          SUBNV     A0FrP,A0\.7,CPC0
-.*:	be e0 09 8c 	          SUBNV     PCX,A0\.7,CPC0
-.*:	6d fe 09 8c 	          SUBPL     A0FrP,A0\.7,D1\.7
-.*:	7e 02 0c 8c 	          SUBNV     A0FrP,CPC0,A0FrP
-.*:	7c 0e 0c 8c 	          SUBLE     A0FrP,CPC0,A0\.7
-.*:	be 0e 0c 8c 	          SUBNV     PCX,CPC0,A0\.7
-.*:	7d 1e 0c 8c 	          SUBLE     A0FrP,CPC0,D0\.7
-.*:	7e 20 0c 8c 	          SUBNV     A0FrP,CPC0,CPC0
-.*:	be 20 0c 8c 	          SUBNV     PCX,CPC0,CPC0
-.*:	65 3e 0c 8c 	          SUBNE     A0FrP,CPC0,D1\.7
-.*:	fe 42 18 8c 	          SUBNV     TXMASKI,A0FrP,A0FrP
-.*:	fd 5e 18 8c 	          SUBLE     TXMASKI,A0FrP,D0\.7
-.*:	fd 7e 18 8c 	          SUBLE     TXMASKI,A0FrP,D1\.7
-.*:	fe ce 19 8c 	          SUBNV     TXMASKI,A0\.7,A0\.7
-.*:	fe e0 19 8c 	          SUBNV     TXMASKI,A0\.7,CPC0
-.*:	fe 02 1c 8c 	          SUBNV     TXMASKI,CPC0,A0FrP
-.*:	fd 1e 1c 8c 	          SUBLE     TXMASKI,CPC0,D0\.7
-.*:	ed 3e 1c 8c 	          SUBPL     TXMASKI,CPC0,D1\.7
-.*:	5e 42 38 8c 	          SUBNV     D1\.7,A0FrP,A0FrP
-.*:	9e 42 38 8c 	          SUBNV     A1\.7,A0FrP,A0FrP
-.*:	5e 4e 38 8c 	          SUBNV     D1\.7,A0FrP,A0\.7
-.*:	9e 4e 38 8c 	          SUBNV     A1\.7,A0FrP,A0\.7
-.*:	9d 50 38 8c 	          SUBLE     A1\.7,A0FrP,D0Re0
-.*:	8d 5e 38 8c 	          SUBPL     A1\.7,A0FrP,D0\.7
-.*:	5e 60 38 8c 	          SUBNV     D1\.7,A0FrP,CPC0
-.*:	9e 60 38 8c 	          SUBNV     A1\.7,A0FrP,CPC0
-.*:	95 70 38 8c 	          SUBLS     A1\.7,A0FrP,D1Re0
-.*:	9d 7e 38 8c 	          SUBLE     A1\.7,A0FrP,D1\.7
-.*:	5e c2 39 8c 	          SUBNV     D1\.7,A0\.7,A0FrP
-.*:	9e c2 39 8c 	          SUBNV     A1\.7,A0\.7,A0FrP
-.*:	5e ce 39 8c 	          SUBNV     D1\.7,A0\.7,A0\.7
-.*:	9e ce 39 8c 	          SUBNV     A1\.7,A0\.7,A0\.7
-.*:	9d d0 39 8c 	          SUBLE     A1\.7,A0\.7,D0Re0
-.*:	9d de 39 8c 	          SUBLE     A1\.7,A0\.7,D0\.7
-.*:	5e e0 39 8c 	          SUBNV     D1\.7,A0\.7,CPC0
-.*:	9e e0 39 8c 	          SUBNV     A1\.7,A0\.7,CPC0
-.*:	85 f0 39 8c 	          SUBNE     A1\.7,A0\.7,D1Re0
-.*:	8d fe 39 8c 	          SUBPL     A1\.7,A0\.7,D1\.7
-.*:	5e 02 3c 8c 	          SUBNV     D1\.7,CPC0,A0FrP
-.*:	34 0e 3c 8c 	          SUBLS     D0\.7,CPC0,A0\.7
-.*:	64 0e 3c 8c 	          SUBNE     A0\.7,CPC0,A0\.7
-.*:	5d 10 3c 8c 	          SUBLE     D1\.7,CPC0,D0Re0
-.*:	5d 1e 3c 8c 	          SUBLE     D1\.7,CPC0,D0\.7
-.*:	3e 20 3c 8c 	          SUBNV     D0\.7,CPC0,CPC0
-.*:	7e 20 3c 8c 	          SUBNV     A0\.7,CPC0,CPC0
-.*:	5d 30 3c 8c 	          SUBLE     D1\.7,CPC0,D1Re0
-.*:	45 3e 3c 8c 	          SUBNE     D1\.7,CPC0,D1\.7
-.*:	de 42 80 8c 	          SUBNV     RA,A0FrP,A0FrP
-.*:	cd 5e 80 8c 	          SUBPL     RA,A0FrP,D0\.7
-.*:	d5 7e 80 8c 	          SUBLS     RA,A0FrP,D1\.7
-.*:	de ce 81 8c 	          SUBNV     RA,A0\.7,A0\.7
-.*:	de e0 81 8c 	          SUBNV     RA,A0\.7,CPC0
-.*:	de 02 84 8c 	          SUBNV     RA,CPC0,A0FrP
-.*:	cd 1e 84 8c 	          SUBPL     RA,CPC0,D0\.7
-.*:	d5 3e 84 8c 	          SUBLS     RA,CPC0,D1\.7
-.*:	de 4e b0 8c 	          SUBNV     RAM8X32,A0FrP,A0\.7
-.*:	de 60 b0 8c 	          SUBNV     RAM8X32,A0FrP,CPC0
-.*:	de c2 b1 8c 	          SUBNV     RAM8X32,A0\.7,A0FrP
-.*:	cd de b1 8c 	          SUBPL     RAM8X32,A0\.7,D0\.7
-.*:	d5 fe b1 8c 	          SUBLS     RAM8X32,A0\.7,D1\.7
-.*:	de 0e b4 8c 	          SUBNV     RAM8X32,CPC0,A0\.7
-.*:	de 20 b4 8c 	          SUBNV     RAM8X32,CPC0,CPC0
-.*:	de 42 b8 8c 	          SUBNV     RAM8X,A0FrP,A0FrP
-.*:	cd 5e b8 8c 	          SUBPL     RAM8X,A0FrP,D0\.7
-.*:	d5 7e b8 8c 	          SUBLS     RAM8X,A0FrP,D1\.7
-.*:	de ce b9 8c 	          SUBNV     RAM8X,A0\.7,A0\.7
-.*:	de e0 b9 8c 	          SUBNV     RAM8X,A0\.7,CPC0
-.*:	de 02 bc 8c 	          SUBNV     RAM8X,CPC0,A0FrP
-.*:	cd 1e bc 8c 	          SUBPL     RAM8X,CPC0,D0\.7
-.*:	d5 3e bc 8c 	          SUBLS     RAM8X,CPC0,D1\.7
-.*:	de 4e c0 8c 	          SUBNV     RABZ,A0FrP,A0\.7
-.*:	de 60 c0 8c 	          SUBNV     RABZ,A0FrP,CPC0
-.*:	de c2 c1 8c 	          SUBNV     RABZ,A0\.7,A0FrP
-.*:	cd de c1 8c 	          SUBPL     RABZ,A0\.7,D0\.7
-.*:	d5 fe c1 8c 	          SUBLS     RABZ,A0\.7,D1\.7
-.*:	de 0e c4 8c 	          SUBNV     RABZ,CPC0,A0\.7
-.*:	de 20 c4 8c 	          SUBNV     RABZ,CPC0,CPC0
-.*:	de 42 e8 8c 	          SUBNV     RAWX,A0FrP,A0FrP
-.*:	dd 5e e8 8c 	          SUBLE     RAWX,A0FrP,D0\.7
-.*:	cd 7e e8 8c 	          SUBPL     RAWX,A0FrP,D1\.7
-.*:	de ce e9 8c 	          SUBNV     RAWX,A0\.7,A0\.7
-.*:	de e0 e9 8c 	          SUBNV     RAWX,A0\.7,CPC0
-.*:	de 02 ec 8c 	          SUBNV     RAWX,CPC0,A0FrP
-.*:	dd 1e ec 8c 	          SUBLE     RAWX,CPC0,D0\.7
-.*:	cd 3e ec 8c 	          SUBPL     RAWX,CPC0,D1\.7
-.*:	de 42 f8 8c 	          SUBNV     RAMX,A0FrP,A0FrP
-.*:	de 4e f8 8c 	          SUBNV     RAMX,A0FrP,A0\.7
-.*:	dd 5e f8 8c 	          SUBLE     RAMX,A0FrP,D0\.7
-.*:	de 60 f8 8c 	          SUBNV     RAMX,A0FrP,CPC0
-.*:	cd 7e f8 8c 	          SUBPL     RAMX,A0FrP,D1\.7
-.*:	de c2 f9 8c 	          SUBNV     RAMX,A0\.7,A0FrP
-.*:	de ce f9 8c 	          SUBNV     RAMX,A0\.7,A0\.7
-.*:	dd de f9 8c 	          SUBLE     RAMX,A0\.7,D0\.7
-.*:	de e0 f9 8c 	          SUBNV     RAMX,A0\.7,CPC0
-.*:	cd fe f9 8c 	          SUBPL     RAMX,A0\.7,D1\.7
-.*:	de 02 fc 8c 	          SUBNV     RAMX,CPC0,A0FrP
-.*:	de 0e fc 8c 	          SUBNV     RAMX,CPC0,A0\.7
-.*:	dd 1e fc 8c 	          SUBLE     RAMX,CPC0,D0\.7
-.*:	de 20 fc 8c 	          SUBNV     RAMX,CPC0,CPC0
-.*:	cd 3e fc 8c 	          SUBPL     RAMX,CPC0,D1\.7
-.*:	ad 40 00 8d 	          SUBPL     PC,A1LbP,D1Re0
-.*:	44 42 00 8d 	          SUBNE     D1Re0,A1LbP,A1LbP
-.*:	1e 4e 00 8d 	          SUBNV     TXENABLE,A1LbP,A1\.7
-.*:	5e 4e 00 8d 	          SUBNV     D1Re0,A1LbP,A1\.7
-.*:	fe 4e 00 8d 	          SUBNV     TXSTAT,A1LbP,A1\.7
-.*:	ad 50 00 8d 	          SUBPL     PC,A1LbP,D0Re0
-.*:	5d 5e 00 8d 	          SUBLE     D1Re0,A1LbP,D0\.7
-.*:	1e 60 00 8d 	          SUBNV     TXENABLE,A1LbP,CPC1
-.*:	5e 60 00 8d 	          SUBNV     D1Re0,A1LbP,CPC1
-.*:	fe 60 00 8d 	          SUBNV     TXSTAT,A1LbP,CPC1
-.*:	b5 72 00 8d 	          SUBLS     PC,A1LbP,A0FrP
-.*:	5d 7e 00 8d 	          SUBLE     D1Re0,A1LbP,A0\.7
-.*:	3d c0 01 8d 	          SUBLE     D0Re0,A1\.7,D1Re0
-.*:	04 c2 01 8d 	          SUBNE     TXENABLE,A1\.7,A1LbP
-.*:	f4 c2 01 8d 	          SUBLS     TXSTAT,A1\.7,A1LbP
-.*:	3e ce 01 8d 	          SUBNV     D0Re0,A1\.7,A1\.7
-.*:	be ce 01 8d 	          SUBNV     PC,A1\.7,A1\.7
-.*:	3d d0 01 8d 	          SUBLE     D0Re0,A1\.7,D0Re0
-.*:	1d de 01 8d 	          SUBLE     TXENABLE,A1\.7,D0\.7
-.*:	ed de 01 8d 	          SUBPL     TXSTAT,A1\.7,D0\.7
-.*:	3e e0 01 8d 	          SUBNV     D0Re0,A1\.7,CPC1
-.*:	be e0 01 8d 	          SUBNV     PC,A1\.7,CPC1
-.*:	25 f2 01 8d 	          SUBNE     D0Re0,A1\.7,A0FrP
-.*:	1d fe 01 8d 	          SUBLE     TXENABLE,A1\.7,A0\.7
-.*:	ed fe 01 8d 	          SUBPL     TXSTAT,A1\.7,A0\.7
-.*:	bd 00 04 8d 	          SUBLE     PC,CPC1,D1Re0
-.*:	4c 02 04 8d 	          SUBPL     D1Re0,CPC1,A1LbP
-.*:	1e 0e 04 8d 	          SUBNV     TXENABLE,CPC1,A1\.7
-.*:	5e 0e 04 8d 	          SUBNV     D1Re0,CPC1,A1\.7
-.*:	fe 0e 04 8d 	          SUBNV     TXSTAT,CPC1,A1\.7
-.*:	bd 10 04 8d 	          SUBLE     PC,CPC1,D0Re0
-.*:	5d 1e 04 8d 	          SUBLE     D1Re0,CPC1,D0\.7
-.*:	1e 20 04 8d 	          SUBNV     TXENABLE,CPC1,CPC1
-.*:	5e 20 04 8d 	          SUBNV     D1Re0,CPC1,CPC1
-.*:	fe 20 04 8d 	          SUBNV     TXSTAT,CPC1,CPC1
-.*:	ad 32 04 8d 	          SUBPL     PC,CPC1,A0FrP
-.*:	5d 3e 04 8d 	          SUBLE     D1Re0,CPC1,A0\.7
-.*:	9d 40 08 8d 	          SUBLE     A1LbP,A1LbP,D1Re0
-.*:	b4 42 08 8d 	          SUBLS     PCX,A1LbP,A1LbP
-.*:	9e 4e 08 8d 	          SUBNV     A1LbP,A1LbP,A1\.7
-.*:	9d 50 08 8d 	          SUBLE     A1LbP,A1LbP,D0Re0
-.*:	ad 5e 08 8d 	          SUBPL     PCX,A1LbP,D0\.7
-.*:	9e 60 08 8d 	          SUBNV     A1LbP,A1LbP,CPC1
-.*:	95 72 08 8d 	          SUBLS     A1LbP,A1LbP,A0FrP
-.*:	bd 7e 08 8d 	          SUBLE     PCX,A1LbP,A0\.7
-.*:	74 c2 09 8d 	          SUBLS     A0FrP,A1\.7,A1LbP
-.*:	7e ce 09 8d 	          SUBNV     A0FrP,A1\.7,A1\.7
-.*:	be ce 09 8d 	          SUBNV     PCX,A1\.7,A1\.7
-.*:	6d de 09 8d 	          SUBPL     A0FrP,A1\.7,D0\.7
-.*:	7e e0 09 8d 	          SUBNV     A0FrP,A1\.7,CPC1
-.*:	be e0 09 8d 	          SUBNV     PCX,A1\.7,CPC1
-.*:	7d fe 09 8d 	          SUBLE     A0FrP,A1\.7,A0\.7
-.*:	9d 00 0c 8d 	          SUBLE     A1LbP,CPC1,D1Re0
-.*:	bc 02 0c 8d 	          SUBLE     PCX,CPC1,A1LbP
-.*:	9e 0e 0c 8d 	          SUBNV     A1LbP,CPC1,A1\.7
-.*:	9d 10 0c 8d 	          SUBLE     A1LbP,CPC1,D0Re0
-.*:	bd 1e 0c 8d 	          SUBLE     PCX,CPC1,D0\.7
-.*:	9e 20 0c 8d 	          SUBNV     A1LbP,CPC1,CPC1
-.*:	a5 32 0c 8d 	          SUBNE     PCX,CPC1,A0FrP
-.*:	ec 42 18 8d 	          SUBPL     TXMASKI,A1LbP,A1LbP
-.*:	fd 5e 18 8d 	          SUBLE     TXMASKI,A1LbP,D0\.7
-.*:	ed 7e 18 8d 	          SUBPL     TXMASKI,A1LbP,A0\.7
-.*:	fe ce 19 8d 	          SUBNV     TXMASKI,A1\.7,A1\.7
-.*:	fe e0 19 8d 	          SUBNV     TXMASKI,A1\.7,CPC1
-.*:	fc 02 1c 8d 	          SUBLE     TXMASKI,CPC1,A1LbP
-.*:	fd 1e 1c 8d 	          SUBLE     TXMASKI,CPC1,D0\.7
-.*:	fd 3e 1c 8d 	          SUBLE     TXMASKI,CPC1,A0\.7
-.*:	9d 40 38 8d 	          SUBLE     A1\.7,A1LbP,D1Re0
-.*:	84 42 38 8d 	          SUBNE     A1\.7,A1LbP,A1LbP
-.*:	5e 4e 38 8d 	          SUBNV     D1\.7,A1LbP,A1\.7
-.*:	9e 4e 38 8d 	          SUBNV     A1\.7,A1LbP,A1\.7
-.*:	9d 50 38 8d 	          SUBLE     A1\.7,A1LbP,D0Re0
-.*:	9d 5e 38 8d 	          SUBLE     A1\.7,A1LbP,D0\.7
-.*:	5e 60 38 8d 	          SUBNV     D1\.7,A1LbP,CPC1
-.*:	9e 60 38 8d 	          SUBNV     A1\.7,A1LbP,CPC1
-.*:	9d 72 38 8d 	          SUBLE     A1\.7,A1LbP,A0FrP
-.*:	8d 7e 38 8d 	          SUBPL     A1\.7,A1LbP,A0\.7
-.*:	9d c0 39 8d 	          SUBLE     A1\.7,A1\.7,D1Re0
-.*:	94 c2 39 8d 	          SUBLS     A1\.7,A1\.7,A1LbP
-.*:	5e ce 39 8d 	          SUBNV     D1\.7,A1\.7,A1\.7
-.*:	9e ce 39 8d 	          SUBNV     A1\.7,A1\.7,A1\.7
-.*:	9d d0 39 8d 	          SUBLE     A1\.7,A1\.7,D0Re0
-.*:	8d de 39 8d 	          SUBPL     A1\.7,A1\.7,D0\.7
-.*:	5e e0 39 8d 	          SUBNV     D1\.7,A1\.7,CPC1
-.*:	9e e0 39 8d 	          SUBNV     A1\.7,A1\.7,CPC1
-.*:	8d f2 39 8d 	          SUBPL     A1\.7,A1\.7,A0FrP
-.*:	9d fe 39 8d 	          SUBLE     A1\.7,A1\.7,A0\.7
-.*:	9d 00 3c 8d 	          SUBLE     A1\.7,CPC1,D1Re0
-.*:	9c 02 3c 8d 	          SUBLE     A1\.7,CPC1,A1LbP
-.*:	5e 0e 3c 8d 	          SUBNV     D1\.7,CPC1,A1\.7
-.*:	9e 0e 3c 8d 	          SUBNV     A1\.7,CPC1,A1\.7
-.*:	9d 10 3c 8d 	          SUBLE     A1\.7,CPC1,D0Re0
-.*:	9d 1e 3c 8d 	          SUBLE     A1\.7,CPC1,D0\.7
-.*:	5e 20 3c 8d 	          SUBNV     D1\.7,CPC1,CPC1
-.*:	9e 20 3c 8d 	          SUBNV     A1\.7,CPC1,CPC1
-.*:	35 3e 3c 8d 	          SUBLS     D0\.7,CPC1,A0\.7
-.*:	d4 42 80 8d 	          SUBLS     RA,A1LbP,A1LbP
-.*:	dd 5e 80 8d 	          SUBLE     RA,A1LbP,D0\.7
-.*:	c5 7e 80 8d 	          SUBNE     RA,A1LbP,A0\.7
-.*:	de ce 81 8d 	          SUBNV     RA,A1\.7,A1\.7
-.*:	de e0 81 8d 	          SUBNV     RA,A1\.7,CPC1
-.*:	d4 02 84 8d 	          SUBLS     RA,CPC1,A1LbP
-.*:	dd 1e 84 8d 	          SUBLE     RA,CPC1,D0\.7
-.*:	c5 3e 84 8d 	          SUBNE     RA,CPC1,A0\.7
-.*:	de 4e b0 8d 	          SUBNV     RAM8X32,A1LbP,A1\.7
-.*:	de 60 b0 8d 	          SUBNV     RAM8X32,A1LbP,CPC1
-.*:	d4 c2 b1 8d 	          SUBLS     RAM8X32,A1\.7,A1LbP
-.*:	dd de b1 8d 	          SUBLE     RAM8X32,A1\.7,D0\.7
-.*:	c5 fe b1 8d 	          SUBNE     RAM8X32,A1\.7,A0\.7
-.*:	de 0e b4 8d 	          SUBNV     RAM8X32,CPC1,A1\.7
-.*:	de 20 b4 8d 	          SUBNV     RAM8X32,CPC1,CPC1
-.*:	d4 42 b8 8d 	          SUBLS     RAM8X,A1LbP,A1LbP
-.*:	dd 5e b8 8d 	          SUBLE     RAM8X,A1LbP,D0\.7
-.*:	c5 7e b8 8d 	          SUBNE     RAM8X,A1LbP,A0\.7
-.*:	de ce b9 8d 	          SUBNV     RAM8X,A1\.7,A1\.7
-.*:	de e0 b9 8d 	          SUBNV     RAM8X,A1\.7,CPC1
-.*:	d4 02 bc 8d 	          SUBLS     RAM8X,CPC1,A1LbP
-.*:	dd 1e bc 8d 	          SUBLE     RAM8X,CPC1,D0\.7
-.*:	c5 3e bc 8d 	          SUBNE     RAM8X,CPC1,A0\.7
-.*:	de 4e c0 8d 	          SUBNV     RABZ,A1LbP,A1\.7
-.*:	de 60 c0 8d 	          SUBNV     RABZ,A1LbP,CPC1
-.*:	d4 c2 c1 8d 	          SUBLS     RABZ,A1\.7,A1LbP
-.*:	dd de c1 8d 	          SUBLE     RABZ,A1\.7,D0\.7
-.*:	c5 fe c1 8d 	          SUBNE     RABZ,A1\.7,A0\.7
-.*:	de 0e c4 8d 	          SUBNV     RABZ,CPC1,A1\.7
-.*:	de 20 c4 8d 	          SUBNV     RABZ,CPC1,CPC1
-.*:	cc 42 e8 8d 	          SUBPL     RAWX,A1LbP,A1LbP
-.*:	dd 5e e8 8d 	          SUBLE     RAWX,A1LbP,D0\.7
-.*:	dd 7e e8 8d 	          SUBLE     RAWX,A1LbP,A0\.7
-.*:	de ce e9 8d 	          SUBNV     RAWX,A1\.7,A1\.7
-.*:	de e0 e9 8d 	          SUBNV     RAWX,A1\.7,CPC1
-.*:	cc 02 ec 8d 	          SUBPL     RAWX,CPC1,A1LbP
-.*:	dd 1e ec 8d 	          SUBLE     RAWX,CPC1,D0\.7
-.*:	dd 3e ec 8d 	          SUBLE     RAWX,CPC1,A0\.7
-.*:	cc 42 f8 8d 	          SUBPL     RAMX,A1LbP,A1LbP
-.*:	de 4e f8 8d 	          SUBNV     RAMX,A1LbP,A1\.7
-.*:	dd 5e f8 8d 	          SUBLE     RAMX,A1LbP,D0\.7
-.*:	de 60 f8 8d 	          SUBNV     RAMX,A1LbP,CPC1
-.*:	dd 7e f8 8d 	          SUBLE     RAMX,A1LbP,A0\.7
-.*:	cc c2 f9 8d 	          SUBPL     RAMX,A1\.7,A1LbP
-.*:	de ce f9 8d 	          SUBNV     RAMX,A1\.7,A1\.7
-.*:	dd de f9 8d 	          SUBLE     RAMX,A1\.7,D0\.7
-.*:	de e0 f9 8d 	          SUBNV     RAMX,A1\.7,CPC1
-.*:	dd fe f9 8d 	          SUBLE     RAMX,A1\.7,A0\.7
-.*:	cc 02 fc 8d 	          SUBPL     RAMX,CPC1,A1LbP
-.*:	de 0e fc 8d 	          SUBNV     RAMX,CPC1,A1\.7
-.*:	dd 1e fc 8d 	          SUBLE     RAMX,CPC1,D0\.7
-.*:	de 20 fc 8d 	          SUBNV     RAMX,CPC1,CPC1
-.*:	dd 3e fc 8d 	          SUBLE     RAMX,CPC1,A0\.7
-.*:	22 60 00 8e 	          SUB       D0Re0,A0FrP,#0x80
-.*:	ee 7f 00 8e 	          SUB       TXSTAT,A0FrP,#0xff
-.*:	24 e0 01 8e 	          SUB       D1Re0,A0\.7,#0x80
-.*:	cc 5f 08 8e 	          SUBPL     A0FrP,A0FrP,#0x7f
-.*:	dc 7f 08 8e 	          SUBLE     A0FrP,A0FrP,#0xff
-.*:	ea df 09 8e 	          SUB       PCX,A0\.7,#0x7f
-.*:	e6 ff 09 8e 	          SUB       A0FrP,A0\.7,#0xff
-.*:	de 3f 0c 8e 	          SUBNV     A0FrP,CPC0,#0xff
-.*:	de 5f 38 8e 	          SUBNV     A0\.7,A0FrP,#0x7f
-.*:	24 60 38 8e 	          SUB       D1\.7,A0FrP,#0x80
-.*:	e8 7f 38 8e 	          SUB       A1\.7,A0FrP,#0xff
-.*:	22 e0 39 8e 	          SUB       D0\.7,A0\.7,#0x80
-.*:	dc 1f 3c 8e 	          SUBLE     A0\.7,CPC0,#0x7f
-.*:	ec 7f 80 8e 	          SUB       RA,A0FrP,#0xff
-.*:	2c e0 b1 8e 	          SUB       RAM8X32,A0\.7,#0x80
-.*:	ec 5f c0 8e 	          SUB       RABZ,A0FrP,#0x7f
-.*:	ec 7f e8 8e 	          SUB       RAWX,A0FrP,#0xff
-.*:	e0 7f f8 8e 	          SUB       TXIDLECYC,A0FrP,#0xff
-.*:	e0 5f 00 8f 	          SUB       TXENABLE,A1LbP,#0x7f
-.*:	2a 60 00 8f 	          SUB       PC,A1LbP,#0x80
-.*:	e2 df 01 8f 	          SUB       D0Re0,A1\.7,#0x7f
-.*:	2e e0 01 8f 	          SUB       TXSTAT,A1\.7,#0x80
-.*:	e6 5f 08 8f 	          SUB       A0FrP,A1LbP,#0x7f
-.*:	e6 7f 08 8f 	          SUB       A0FrP,A1LbP,#0xff
-.*:	1e e0 09 8f 	          SUBNV     A1LbP,A1\.7,#0x80
-.*:	ea ff 09 8f 	          SUB       PCX,A1\.7,#0xff
-.*:	2e 60 18 8f 	          SUB       TXMASKI,A1LbP,#0x80
-.*:	e4 5f 38 8f 	          SUB       D1\.7,A1LbP,#0x7f
-.*:	28 60 38 8f 	          SUB       A1\.7,A1LbP,#0x80
-.*:	ce df 39 8f 	          SUBVS     A1\.7,A1\.7,#0x7f
-.*:	26 e0 39 8f 	          SUB       A0\.7,A1\.7,#0x80
-.*:	04 20 3c 8f 	          SUBNE     A1\.7,CPC1,#0x80
-.*:	2c e0 81 8f 	          SUB       RA,A1\.7,#0x80
-.*:	ec 5f b8 8f 	          SUB       RAM8X,A1LbP,#0x7f
-.*:	ec 7f c0 8f 	          SUB       RABZ,A1LbP,#0xff
-.*:	2c e0 e9 8f 	          SUB       RAWX,A1\.7,#0x80
-.*:	e0 df f9 8f 	          SUB       TXIDLECYC,A1\.7,#0x7f
-.*:	fe ff 7f a0 	          BNV       0x.*
-.*:	fe ff ff a0 	          NOP
-.*:	5e 00 80 a1 	          MOVBNV    D1Re0,RD
-.*:	a4 02 80 a1 	          MOVDNE    PC,RD
-.*:	8c 40 80 a1 	          MOVBPL    A1LbP,RD
-.*:	ac 42 80 a1 	          MOVDPL    PCX,RD
-.*:	44 c0 81 a1 	          MOVBNE    D1\.7,RD
-.*:	94 c0 81 a1 	          MOVBLS    A1\.7,RD
-.*:	64 c2 81 a1 	          MOVDNE    A0\.7,RD
-.*:	dc c2 85 a1 	          MOVDLE    RAM8X,RD
-.*:	c4 c2 87 a1 	          MOVDNE    RAMX,RD
-.*:	5c 0e 80 a2 	          MOVLLE    D1Re0,D0\.7,RD
-.*:	74 4e 80 a2 	          MOVLLS    A0FrP,A1\.7,RD
-.*:	74 c2 81 a2 	          MOVLLS    A0\.7,A1LbP,RD
-.*:	74 ce 81 a2 	          MOVLLS    A0\.7,A1\.7,RD
-.*:	5e 00 00 a3 	          MOVNV     D1Re0,TXENABLE
-.*:	24 04 00 a3 	          MOVNE     D0Re0,D0Re0
-.*:	14 06 00 a3 	          SWAPLS    TXENABLE,D0Re0
-.*:	04 08 00 a3 	          MOVNE     TXENABLE,D1Re0
-.*:	f4 08 00 a3 	          MOVLS     TXSTAT,D1Re0
-.*:	e4 0a 00 a3 	          SWAPNE    TXSTAT,D1Re0
-.*:	44 16 00 a3 	          SWAPNE    D1Re0,PC
-.*:	44 1e 00 a3 	          SWAPNE    D1Re0,TXSTAT
-.*:	9e 40 00 a3 	          MOVNV     A1LbP,TXENABLE
-.*:	8c 44 00 a3 	          MOVPL     A1LbP,D0Re0
-.*:	b4 46 00 a3 	          SWAPLS    PCX,D0Re0
-.*:	7c 4a 00 a3 	          SWAPLE    A0FrP,D1Re0
-.*:	94 54 00 a3 	          MOVLS     A1LbP,PC
-.*:	94 5c 00 a3 	          MOVLS     A1LbP,TXSTAT
-.*:	fc c6 00 a3 	          SWAPLE    TXMASKI,D0Re0
-.*:	3e c0 01 a3 	          MOVNV     D0\.7,TXENABLE
-.*:	7e c0 01 a3 	          MOVNV     A0\.7,TXENABLE
-.*:	44 c2 01 a3 	          SWAPNE    D1\.7,TXENABLE
-.*:	5c c4 01 a3 	          MOVLE     D1\.7,D0Re0
-.*:	74 c6 01 a3 	          SWAPLS    A0\.7,D0Re0
-.*:	6c c8 01 a3 	          MOVPL     A0\.7,D1Re0
-.*:	84 ca 01 a3 	          SWAPNE    A1\.7,D1Re0
-.*:	94 d4 01 a3 	          MOVLS     A1\.7,PC
-.*:	94 d6 01 a3 	          SWAPLS    A1\.7,PC
-.*:	94 dc 01 a3 	          MOVLS     A1\.7,TXSTAT
-.*:	94 de 01 a3 	          SWAPLS    A1\.7,TXSTAT
-.*:	c4 88 05 a3 	          MOVNE     RAM8X32,D1Re0
-.*:	c4 08 06 a3 	          MOVNE     RABZ,D1Re0
-.*:	c4 c4 07 a3 	          MOVNE     RAMX,D0Re0
-.*:	0c ca 07 a3 	          SWAPPL    TXIDLECYC,D1Re0
-.*:	b4 0c 08 a3 	          MOVLS     PC,A0FrP
-.*:	54 0e 08 a3 	          SWAPLS    D1Re0,A0FrP
-.*:	2c 10 08 a3 	          MOVPL     D0Re0,A1LbP
-.*:	1c 12 08 a3 	          SWAPLE    TXENABLE,A1LbP
-.*:	f4 12 08 a3 	          SWAPLS    TXSTAT,A1LbP
-.*:	44 16 08 a3 	          SWAPNE    D1Re0,PCX
-.*:	8c 4e 08 a3 	          SWAPPL    A1LbP,A0FrP
-.*:	ac 50 08 a3 	          MOVPL     PCX,A1LbP
-.*:	94 54 08 a3 	          MOVLS     A1LbP,PCX
-.*:	ec ce 08 a3 	          SWAPPL    TXMASKI,A0FrP
-.*:	4c cc 09 a3 	          MOVPL     D1\.7,A0FrP
-.*:	44 ce 09 a3 	          SWAPNE    D1\.7,A0FrP
-.*:	7c d0 09 a3 	          MOVLE     A0\.7,A1LbP
-.*:	74 d2 09 a3 	          SWAPLS    A0\.7,A1LbP
-.*:	94 d4 09 a3 	          MOVLS     A1\.7,PCX
-.*:	94 d6 09 a3 	          SWAPLS    A1\.7,PCX
-.*:	dc 90 0d a3 	          MOVLE     RAM8X32,A1LbP
-.*:	dc 10 0e a3 	          MOVLE     RABZ,A1LbP
-.*:	c4 cc 0f a3 	          MOVNE     RAMX,A0FrP
-.*:	04 d2 0f a3 	          SWAPNE    TXIDLECYC,A1LbP
-.*:	44 1e 18 a3 	          SWAPNE    D1Re0,TXMASKI
-.*:	94 5e 18 a3 	          SWAPLS    A1LbP,TXMASKI
-.*:	94 dc 19 a3 	          MOVLS     A1\.7,TXMASKI
-.*:	94 de 19 a3 	          SWAPLS    A1\.7,TXMASKI
-.*:	94 5c 30 a3 	          MOVLS     A1LbP,TXPOLLI
-.*:	94 dc 31 a3 	          MOVLS     A1\.7,TXPOLLI
-.*:	a4 04 38 a3 	          MOVNE     PC,D0\.7
-.*:	b4 06 38 a3 	          SWAPLS    PC,D0\.7
-.*:	54 08 38 a3 	          MOVLS     D1Re0,D1\.7
-.*:	24 0a 38 a3 	          SWAPNE    D0Re0,D1\.7
-.*:	34 0c 38 a3 	          MOVLS     D0Re0,A0\.7
-.*:	04 0e 38 a3 	          SWAPNE    TXENABLE,A0\.7
-.*:	fc 0e 38 a3 	          SWAPLE    TXSTAT,A0\.7
-.*:	ac 10 38 a3 	          MOVPL     PC,A1\.7
-.*:	4c 12 38 a3 	          SWAPPL    D1Re0,A1\.7
-.*:	8c 44 38 a3 	          MOVPL     A1LbP,D0\.7
-.*:	b4 46 38 a3 	          SWAPLS    PCX,D0\.7
-.*:	7c 4a 38 a3 	          SWAPLE    A0FrP,D1\.7
-.*:	9c 4c 38 a3 	          MOVLE     A1LbP,A0\.7
-.*:	7c 50 38 a3 	          MOVLE     A0FrP,A1\.7
-.*:	bc 52 38 a3 	          SWAPLE    PCX,A1\.7
-.*:	e4 ca 38 a3 	          SWAPNE    TXMASKI,D1\.7
-.*:	f4 d2 38 a3 	          SWAPLS    TXMASKI,A1\.7
-.*:	8c c4 39 a3 	          MOVPL     A1\.7,D0\.7
-.*:	3c c8 39 a3 	          MOVLE     D0\.7,D1\.7
-.*:	34 ca 39 a3 	          SWAPLS    D0\.7,D1\.7
-.*:	4c cc 39 a3 	          MOVPL     D1\.7,A0\.7
-.*:	44 ce 39 a3 	          SWAPNE    D1\.7,A0\.7
-.*:	7c d0 39 a3 	          MOVLE     A0\.7,A1\.7
-.*:	74 d2 39 a3 	          SWAPLS    A0\.7,A1\.7
-.*:	dc 10 3c a3 	          MOVLE     RA,A1\.7
-.*:	dc 90 3d a3 	          MOVLE     RAM8X32,A1\.7
-.*:	cc d0 3d a3 	          MOVPL     RAM8X,A1\.7
-.*:	dc 10 3e a3 	          MOVLE     RABZ,A1\.7
-.*:	cc 50 3f a3 	          MOVPL     RAWX,A1\.7
-.*:	0c c8 3f a3 	          MOVPL     TXIDLECYC,D1\.7
-.*:	c4 cc 3f a3 	          MOVNE     RAMX,A0\.7
-.*:	04 d2 3f a3 	          SWAPNE    TXIDLECYC,A1\.7
-.*:	2e 02 f8 a3 	          SWAPVS    D0Re0,TXIDLECYC
-.*:	6e 42 f8 a3 	          SWAPVS    A0FrP,TXIDLECYC
-.*:	6e c0 f9 a3 	          MOVVS     A0\.7,TXIDLECYC
-.*:	6e c2 f9 a3 	          SWAPVS    A0\.7,TXIDLECYC
-.*:	24 04 00 a4 	          SETBNE    \[D0Re0\],D0Re0
-.*:	24 06 00 a4 	          SETDNE    \[D0Re0\],D0Re0
-.*:	3e 08 00 a4 	          SETBNV    \[D0Re0\],D1Re0
-.*:	4c 0a 00 a4 	          SETDPL    \[D1Re0\],D1Re0
-.*:	34 1e 00 a4 	          SETDLS    \[D0Re0\],TXSTAT
-.*:	1c 44 00 a4 	          SETBLE    \[A1LbP\],D0Re0
-.*:	1c 46 00 a4 	          SETDLE    \[A1LbP\],D0Re0
-.*:	0c 48 00 a4 	          SETBPL    \[A1LbP\],D1Re0
-.*:	0c 4a 00 a4 	          SETDPL    \[A1LbP\],D1Re0
-.*:	1c 56 00 a4 	          SETDLE    \[A1LbP\],PC
-.*:	1c c2 01 a4 	          SETDLE    \[A1\.7\],TXENABLE
-.*:	1c c4 01 a4 	          SETBLE    \[A1\.7\],D0Re0
-.*:	4c c4 01 a4 	          SETBPL    \[D1\.7\],D0Re0
-.*:	1c c6 01 a4 	          SETDLE    \[A1\.7\],D0Re0
-.*:	4c c6 01 a4 	          SETDPL    \[D1\.7\],D0Re0
-.*:	1e c8 01 a4 	          SETBNV    \[A1\.7\],D1Re0
-.*:	5e c8 01 a4 	          SETBNV    \[D1\.7\],D1Re0
-.*:	1e ca 01 a4 	          SETDNV    \[A1\.7\],D1Re0
-.*:	74 ca 01 a4 	          SETDLS    \[A0\.7\],D1Re0
-.*:	4c d6 01 a4 	          SETDPL    \[D1\.7\],PC
-.*:	4c de 01 a4 	          SETDPL    \[D1\.7\],TXSTAT
-.*:	4c 0c 08 a4 	          SETBPL    \[D1Re0\],A0FrP
-.*:	5c 0e 08 a4 	          SETDLE    \[D1Re0\],A0FrP
-.*:	5c 10 08 a4 	          SETBLE    \[D1Re0\],A1LbP
-.*:	5c 12 08 a4 	          SETDLE    \[D1Re0\],A1LbP
-.*:	1c 4c 08 a4 	          SETBLE    \[A1LbP\],A0FrP
-.*:	1c 4e 08 a4 	          SETDLE    \[A1LbP\],A0FrP
-.*:	1e 50 08 a4 	          SETBNV    \[A1LbP\],A1LbP
-.*:	1e 52 08 a4 	          SETDNV    \[A1LbP\],A1LbP
-.*:	1c cc 09 a4 	          SETBLE    \[A1\.7\],A0FrP
-.*:	4c cc 09 a4 	          SETBPL    \[D1\.7\],A0FrP
-.*:	1c ce 09 a4 	          SETDLE    \[A1\.7\],A0FrP
-.*:	5e ce 09 a4 	          SETDNV    \[D1\.7\],A0FrP
-.*:	1e d0 09 a4 	          SETBNV    \[A1\.7\],A1LbP
-.*:	5e d0 09 a4 	          SETBNV    \[D1\.7\],A1LbP
-.*:	1e d2 09 a4 	          SETDNV    \[A1\.7\],A1LbP
-.*:	5e d2 09 a4 	          SETDNV    \[D1\.7\],A1LbP
-.*:	4c d6 09 a4 	          SETDPL    \[D1\.7\],PCX
-.*:	1c 5e 18 a4 	          SETDLE    \[A1LbP\],TXMASKI
-.*:	4c de 19 a4 	          SETDPL    \[D1\.7\],TXMASKI
-.*:	1c 5e 30 a4 	          SETDLE    \[A1LbP\],TXPOLLI
-.*:	4c de 31 a4 	          SETDPL    \[D1\.7\],TXPOLLI
-.*:	4c 04 38 a4 	          SETBPL    \[D1Re0\],D0\.7
-.*:	4c 06 38 a4 	          SETDPL    \[D1Re0\],D0\.7
-.*:	5e 08 38 a4 	          SETBNV    \[D1Re0\],D1\.7
-.*:	24 0c 38 a4 	          SETBNE    \[D0Re0\],A0\.7
-.*:	34 0e 38 a4 	          SETDLS    \[D0Re0\],A0\.7
-.*:	34 10 38 a4 	          SETBLS    \[D0Re0\],A1\.7
-.*:	34 12 38 a4 	          SETDLS    \[D0Re0\],A1\.7
-.*:	1c 44 38 a4 	          SETBLE    \[A1LbP\],D0\.7
-.*:	1c 46 38 a4 	          SETDLE    \[A1LbP\],D0\.7
-.*:	0c 48 38 a4 	          SETBPL    \[A1LbP\],D1\.7
-.*:	0c 4a 38 a4 	          SETDPL    \[A1LbP\],D1\.7
-.*:	1c 4c 38 a4 	          SETBLE    \[A1LbP\],A0\.7
-.*:	1c 4e 38 a4 	          SETDLE    \[A1LbP\],A0\.7
-.*:	1e 50 38 a4 	          SETBNV    \[A1LbP\],A1\.7
-.*:	1e 52 38 a4 	          SETDNV    \[A1LbP\],A1\.7
-.*:	24 c4 39 a4 	          SETBNE    \[D0\.7\],D0\.7
-.*:	74 c4 39 a4 	          SETBLS    \[A0\.7\],D0\.7
-.*:	24 c6 39 a4 	          SETDNE    \[D0\.7\],D0\.7
-.*:	7e c6 39 a4 	          SETDNV    \[A0\.7\],D0\.7
-.*:	3e c8 39 a4 	          SETBNV    \[D0\.7\],D1\.7
-.*:	7e c8 39 a4 	          SETBNV    \[A0\.7\],D1\.7
-.*:	4c ca 39 a4 	          SETDPL    \[D1\.7\],D1\.7
-.*:	1c cc 39 a4 	          SETBLE    \[A1\.7\],A0\.7
-.*:	4c cc 39 a4 	          SETBPL    \[D1\.7\],A0\.7
-.*:	1c ce 39 a4 	          SETDLE    \[A1\.7\],A0\.7
-.*:	5e ce 39 a4 	          SETDNV    \[D1\.7\],A0\.7
-.*:	1e d0 39 a4 	          SETBNV    \[A1\.7\],A1\.7
-.*:	5e d0 39 a4 	          SETBNV    \[D1\.7\],A1\.7
-.*:	1e d2 39 a4 	          SETDNV    \[A1\.7\],A1\.7
-.*:	5e d2 39 a4 	          SETDNV    \[D1\.7\],A1\.7
-.*:	4c 18 80 a4 	          SETBPL    \[D1Re0\],RD
-.*:	4c 1a 80 a4 	          SETDPL    \[D1Re0\],RD
-.*:	74 58 80 a4 	          SETBLS    \[A0FrP\],RD
-.*:	74 5a 80 a4 	          SETDLS    \[A0FrP\],RD
-.*:	24 d8 81 a4 	          SETBNE    \[D0\.7\],RD
-.*:	74 d8 81 a4 	          SETBLS    \[A0\.7\],RD
-.*:	24 da 81 a4 	          SETDNE    \[D0\.7\],RD
-.*:	74 da 81 a4 	          SETDLS    \[A0\.7\],RD
-.*:	1c 42 f8 a4 	          SETDLE    \[A1LbP\],TXIDLECYC
-.*:	4c c2 f9 a4 	          SETDPL    \[D1\.7\],TXIDLECYC
-.*:	91 ff 03 a5 	          SETB      \[A1LbP\+#2047\],D1Re0
-.*:	b0 ff 03 a5 	          SETB      \[D0Re0\+#2047\],D1Re0
-.*:	d0 ff 03 a5 	          SETB      \[D1Re0\+#2047\],D1Re0
-.*:	f1 ff 03 a5 	          SETB      \[A0FrP\+#2047\],D1Re0
-.*:	11 00 04 a5 	          SETB      \[A1LbP\+#-2048\],D1Re0
-.*:	30 00 04 a5 	          SETB      \[D0Re0\+#-2048\],D1Re0
-.*:	50 00 04 a5 	          SETB      \[D1Re0\+#-2048\],D1Re0
-.*:	71 00 04 a5 	          SETB      \[A0FrP\+#-2048\],D1Re0
-.*:	91 ff 07 a5 	          SETB      \[A1LbP\+#-1\],D1Re0
-.*:	b0 ff 07 a5 	          SETB      \[D0Re0\+#-1\],D1Re0
-.*:	d0 ff 07 a5 	          SETB      \[D1Re0\+#-1\],D1Re0
-.*:	f1 ff 07 a5 	          SETB      \[A0FrP\+#-1\],D1Re0
-.*:	99 ff 0b a5 	          SETB      \[A1LbP\+#2047\],A0FrP
-.*:	b8 ff 0b a5 	          SETB      \[D0Re0\+#2047\],A0FrP
-.*:	d8 ff 0b a5 	          SETB      \[D1Re0\+#2047\],A0FrP
-.*:	f9 ff 0b a5 	          SETB      \[A0FrP\+#2047\],A0FrP
-.*:	19 00 0c a5 	          SETB      \[A1LbP\+#-2048\],A0FrP
-.*:	38 00 0c a5 	          SETB      \[D0Re0\+#-2048\],A0FrP
-.*:	58 00 0c a5 	          SETB      \[D1Re0\+#-2048\],A0FrP
-.*:	79 00 0c a5 	          SETB      \[A0FrP\+#-2048\],A0FrP
-.*:	99 ff 0f a5 	          SETB      \[A1LbP\+#-1\],A0FrP
-.*:	b8 ff 0f a5 	          SETB      \[D0Re0\+#-1\],A0FrP
-.*:	d8 ff 0f a5 	          SETB      \[D1Re0\+#-1\],A0FrP
-.*:	f9 ff 0f a5 	          SETB      \[A0FrP\+#-1\],A0FrP
-.*:	89 ff 3b a5 	          SETB      \[A1LbP\+#2047\],D0\.7
-.*:	99 ff 3b a5 	          SETB      \[A1LbP\+#2047\],A0\.7
-.*:	a8 ff 3b a5 	          SETB      \[D0Re0\+#2047\],D0\.7
-.*:	b8 ff 3b a5 	          SETB      \[D0Re0\+#2047\],A0\.7
-.*:	c8 ff 3b a5 	          SETB      \[D1Re0\+#2047\],D0\.7
-.*:	d8 ff 3b a5 	          SETB      \[D1Re0\+#2047\],A0\.7
-.*:	e9 ff 3b a5 	          SETB      \[A0FrP\+#2047\],D0\.7
-.*:	f9 ff 3b a5 	          SETB      \[A0FrP\+#2047\],A0\.7
-.*:	09 00 3c a5 	          SETB      \[A1LbP\+#-2048\],D0\.7
-.*:	19 00 3c a5 	          SETB      \[A1LbP\+#-2048\],A0\.7
-.*:	28 00 3c a5 	          SETB      \[D0Re0\+#-2048\],D0\.7
-.*:	38 00 3c a5 	          SETB      \[D0Re0\+#-2048\],A0\.7
-.*:	48 00 3c a5 	          SETB      \[D1Re0\+#-2048\],D0\.7
-.*:	58 00 3c a5 	          SETB      \[D1Re0\+#-2048\],A0\.7
-.*:	69 00 3c a5 	          SETB      \[A0FrP\+#-2048\],D0\.7
-.*:	79 00 3c a5 	          SETB      \[A0FrP\+#-2048\],A0\.7
-.*:	89 ff 3f a5 	          SETB      \[A1LbP\+#-1\],D0\.7
-.*:	99 ff 3f a5 	          SETB      \[A1LbP\+#-1\],A0\.7
-.*:	a8 ff 3f a5 	          SETB      \[D0Re0\+#-1\],D0\.7
-.*:	b8 ff 3f a5 	          SETB      \[D0Re0\+#-1\],A0\.7
-.*:	c8 ff 3f a5 	          SETB      \[D1Re0\+#-1\],D0\.7
-.*:	d8 ff 3f a5 	          SETB      \[D1Re0\+#-1\],A0\.7
-.*:	e9 ff 3f a5 	          SETB      \[A0FrP\+#-1\],D0\.7
-.*:	f9 ff 3f a5 	          SETB      \[A0FrP\+#-1\],A0\.7
-.*:	a0 ff 83 a6 	          MOVB      RA,\[D0Re0\+#2047\]
-.*:	e1 ff 83 a6 	          MOVB      RA,\[A0FrP\+#2047\]
-.*:	20 00 84 a6 	          MOVB      RA,\[D0Re0\+#-2048\]
-.*:	61 00 84 a6 	          MOVB      RA,\[A0FrP\+#-2048\]
-.*:	a0 ff 87 a6 	          MOVB      RA,\[D0Re0\+#-1\]
-.*:	e1 ff 87 a6 	          MOVB      RA,\[A0FrP\+#-1\]
-.*:	a0 ff b3 a6 	          MOVB      RAM8X32,\[D0Re0\+#2047\]
-.*:	e1 ff b3 a6 	          MOVB      RAM8X32,\[A0FrP\+#2047\]
-.*:	20 00 b4 a6 	          MOVB      RAM8X32,\[D0Re0\+#-2048\]
-.*:	61 00 b4 a6 	          MOVB      RAM8X32,\[A0FrP\+#-2048\]
-.*:	a0 ff b7 a6 	          MOVB      RAM8X32,\[D0Re0\+#-1\]
-.*:	e1 ff b7 a6 	          MOVB      RAM8X32,\[A0FrP\+#-1\]
-.*:	a0 ff bb a6 	          MOVB      RAM8X,\[D0Re0\+#2047\]
-.*:	e1 ff bb a6 	          MOVB      RAM8X,\[A0FrP\+#2047\]
-.*:	20 00 bc a6 	          MOVB      RAM8X,\[D0Re0\+#-2048\]
-.*:	61 00 bc a6 	          MOVB      RAM8X,\[A0FrP\+#-2048\]
-.*:	a0 ff bf a6 	          MOVB      RAM8X,\[D0Re0\+#-1\]
-.*:	e1 ff bf a6 	          MOVB      RAM8X,\[A0FrP\+#-1\]
-.*:	a0 ff c3 a6 	          MOVB      RABZ,\[D0Re0\+#2047\]
-.*:	e1 ff c3 a6 	          MOVB      RABZ,\[A0FrP\+#2047\]
-.*:	20 00 c4 a6 	          MOVB      RABZ,\[D0Re0\+#-2048\]
-.*:	61 00 c4 a6 	          MOVB      RABZ,\[A0FrP\+#-2048\]
-.*:	a0 ff c7 a6 	          MOVB      RABZ,\[D0Re0\+#-1\]
-.*:	e1 ff c7 a6 	          MOVB      RABZ,\[A0FrP\+#-1\]
-.*:	a0 ff eb a6 	          MOVB      RAWX,\[D0Re0\+#2047\]
-.*:	e1 ff eb a6 	          MOVB      RAWX,\[A0FrP\+#2047\]
-.*:	20 00 ec a6 	          MOVB      RAWX,\[D0Re0\+#-2048\]
-.*:	61 00 ec a6 	          MOVB      RAWX,\[A0FrP\+#-2048\]
-.*:	a0 ff ef a6 	          MOVB      RAWX,\[D0Re0\+#-1\]
-.*:	e1 ff ef a6 	          MOVB      RAWX,\[A0FrP\+#-1\]
-.*:	a0 ff fb a6 	          MOVB      RAMX,\[D0Re0\+#2047\]
-.*:	e1 ff fb a6 	          MOVB      RAMX,\[A0FrP\+#2047\]
-.*:	20 00 fc a6 	          MOVB      RAMX,\[D0Re0\+#-2048\]
-.*:	61 00 fc a6 	          MOVB      RAMX,\[A0FrP\+#-2048\]
-.*:	a0 ff ff a6 	          MOVB      RAMX,\[D0Re0\+#-1\]
-.*:	e1 ff ff a6 	          MOVB      RAMX,\[A0FrP\+#-1\]
-.*:	91 ff 03 a7 	          GETB      D1Re0,\[A1LbP\+#2047\]
-.*:	b0 ff 03 a7 	          GETB      D1Re0,\[D0Re0\+#2047\]
-.*:	d0 ff 03 a7 	          GETB      D1Re0,\[D1Re0\+#2047\]
-.*:	f1 ff 03 a7 	          GETB      D1Re0,\[A0FrP\+#2047\]
-.*:	11 00 04 a7 	          GETB      D1Re0,\[A1LbP\+#-2048\]
-.*:	30 00 04 a7 	          GETB      D1Re0,\[D0Re0\+#-2048\]
-.*:	50 00 04 a7 	          GETB      D1Re0,\[D1Re0\+#-2048\]
-.*:	71 00 04 a7 	          GETB      D1Re0,\[A0FrP\+#-2048\]
-.*:	91 ff 07 a7 	          GETB      D1Re0,\[A1LbP\+#-1\]
-.*:	b0 ff 07 a7 	          GETB      D1Re0,\[D0Re0\+#-1\]
-.*:	d0 ff 07 a7 	          GETB      D1Re0,\[D1Re0\+#-1\]
-.*:	f1 ff 07 a7 	          GETB      D1Re0,\[A0FrP\+#-1\]
-.*:	99 ff 0b a7 	          GETB      A0FrP,\[A1LbP\+#2047\]
-.*:	b8 ff 0b a7 	          GETB      A0FrP,\[D0Re0\+#2047\]
-.*:	d8 ff 0b a7 	          GETB      A0FrP,\[D1Re0\+#2047\]
-.*:	f9 ff 0b a7 	          GETB      A0FrP,\[A0FrP\+#2047\]
-.*:	19 00 0c a7 	          GETB      A0FrP,\[A1LbP\+#-2048\]
-.*:	38 00 0c a7 	          GETB      A0FrP,\[D0Re0\+#-2048\]
-.*:	58 00 0c a7 	          GETB      A0FrP,\[D1Re0\+#-2048\]
-.*:	79 00 0c a7 	          GETB      A0FrP,\[A0FrP\+#-2048\]
-.*:	99 ff 0f a7 	          GETB      A0FrP,\[A1LbP\+#-1\]
-.*:	b8 ff 0f a7 	          GETB      A0FrP,\[D0Re0\+#-1\]
-.*:	d8 ff 0f a7 	          GETB      A0FrP,\[D1Re0\+#-1\]
-.*:	f9 ff 0f a7 	          GETB      A0FrP,\[A0FrP\+#-1\]
-.*:	89 ff 3b a7 	          GETB      D0\.7,\[A1LbP\+#2047\]
-.*:	99 ff 3b a7 	          GETB      A0\.7,\[A1LbP\+#2047\]
-.*:	a8 ff 3b a7 	          GETB      D0\.7,\[D0Re0\+#2047\]
-.*:	b8 ff 3b a7 	          GETB      A0\.7,\[D0Re0\+#2047\]
-.*:	c8 ff 3b a7 	          GETB      D0\.7,\[D1Re0\+#2047\]
-.*:	d8 ff 3b a7 	          GETB      A0\.7,\[D1Re0\+#2047\]
-.*:	e9 ff 3b a7 	          GETB      D0\.7,\[A0FrP\+#2047\]
-.*:	f9 ff 3b a7 	          GETB      A0\.7,\[A0FrP\+#2047\]
-.*:	09 00 3c a7 	          GETB      D0\.7,\[A1LbP\+#-2048\]
-.*:	19 00 3c a7 	          GETB      A0\.7,\[A1LbP\+#-2048\]
-.*:	28 00 3c a7 	          GETB      D0\.7,\[D0Re0\+#-2048\]
-.*:	38 00 3c a7 	          GETB      A0\.7,\[D0Re0\+#-2048\]
-.*:	48 00 3c a7 	          GETB      D0\.7,\[D1Re0\+#-2048\]
-.*:	58 00 3c a7 	          GETB      A0\.7,\[D1Re0\+#-2048\]
-.*:	69 00 3c a7 	          GETB      D0\.7,\[A0FrP\+#-2048\]
-.*:	79 00 3c a7 	          GETB      A0\.7,\[A0FrP\+#-2048\]
-.*:	89 ff 3f a7 	          GETB      D0\.7,\[A1LbP\+#-1\]
-.*:	99 ff 3f a7 	          GETB      A0\.7,\[A1LbP\+#-1\]
-.*:	a8 ff 3f a7 	          GETB      D0\.7,\[D0Re0\+#-1\]
-.*:	b8 ff 3f a7 	          GETB      A0\.7,\[D0Re0\+#-1\]
-.*:	c8 ff 3f a7 	          GETB      D0\.7,\[D1Re0\+#-1\]
-.*:	d8 ff 3f a7 	          GETB      A0\.7,\[D1Re0\+#-1\]
-.*:	e9 ff 3f a7 	          GETB      D0\.7,\[A0FrP\+#-1\]
-.*:	f9 ff 3f a7 	          GETB      A0\.7,\[A0FrP\+#-1\]
-.*:	f9 ff 03 a9 	          MOVT      TXENABLE,#0x7fff
-.*:	f9 ff fb a9 	          MOVT      TXIDLECYC,#0x7fff
-.*:	01 00 00 aa 	          XSDB      D1Re0,D1Re0
-.*:	0b 00 00 aa 	          XSDSW     D1Re0,D1Re0
-.*:	07 c0 01 aa 	          RTDW      D1Re0,D1\.7
-.*:	01 00 38 aa 	          XSDB      D1\.7,D1Re0
-.*:	0b 00 38 aa 	          XSDSW     D1\.7,D1Re0
-.*:	07 c0 39 aa 	          RTDW      D1\.7,D1\.7
-.*:	e7 ff 7f ab 	          CALLR     A1\.7,0x.*
-.*:	07 00 80 ab 	          CALLR     A1\.7,0x.*
-.*:	e7 ff ff ab 	          CALLR     A1\.7,0x.*
-.*:	fa ff 03 ac 	          JUMP      D1Re0,#0x7fff
-.*:	fa ff 07 ac 	          JUMP      D1Re0,#0xffff
-.*:	03 00 0c ac 	          JUMP      A0FrP,#0x8000
-.*:	f9 ff 3b ac 	          JUMP      D0\.7,#0x7fff
-.*:	01 00 3c ac 	          JUMP      D0\.7,#0x8000
-.*:	f9 ff 3f ac 	          JUMP      D0\.7,#0xffff
-.*:	30 00 00 ad 	          DCACHE    \[D0Re0\],D1Re0
-.*:	30 02 00 ad 	          DCACHE    \[D0Re0\+#128\],D1Re0
-.*:	30 04 00 ad 	          DCACHE    \[D0Re0\+#256\],D1Re0
-.*:	30 06 00 ad 	          DCACHE    \[D0Re0\+#384\],D1Re0
-.*:	30 08 00 ad 	          DCACHE    \[D0Re0\+#512\],D1Re0
-.*:	30 0a 00 ad 	          DCACHE    \[D0Re0\+#640\],D1Re0
-.*:	30 0c 00 ad 	          DCACHE    \[D0Re0\+#768\],D1Re0
-.*:	30 0e 00 ad 	          DCACHE    \[D0Re0\+#896\],D1Re0
-.*:	30 10 00 ad 	          DCACHE    \[D0Re0\+#1024\],D1Re0
-.*:	30 12 00 ad 	          DCACHE    \[D0Re0\+#1152\],D1Re0
-.*:	30 14 00 ad 	          DCACHE    \[D0Re0\+#1280\],D1Re0
-.*:	30 16 00 ad 	          DCACHE    \[D0Re0\+#1408\],D1Re0
-.*:	30 18 00 ad 	          DCACHE    \[D0Re0\+#1536\],D1Re0
-.*:	30 1a 00 ad 	          DCACHE    \[D0Re0\+#1664\],D1Re0
-.*:	30 1c 00 ad 	          DCACHE    \[D0Re0\+#1792\],D1Re0
-.*:	30 1e 00 ad 	          DCACHE    \[D0Re0\+#1920\],D1Re0
-.*:	30 20 00 ad 	          DCACHE    \[D0Re0\+#-2048\],D1Re0
-.*:	30 22 00 ad 	          DCACHE    \[D0Re0\+#-1920\],D1Re0
-.*:	30 24 00 ad 	          DCACHE    \[D0Re0\+#-1792\],D1Re0
-.*:	30 26 00 ad 	          DCACHE    \[D0Re0\+#-1664\],D1Re0
-.*:	30 28 00 ad 	          DCACHE    \[D0Re0\+#-1536\],D1Re0
-.*:	30 2a 00 ad 	          DCACHE    \[D0Re0\+#-1408\],D1Re0
-.*:	30 2c 00 ad 	          DCACHE    \[D0Re0\+#-1280\],D1Re0
-.*:	30 2e 00 ad 	          DCACHE    \[D0Re0\+#-1152\],D1Re0
-.*:	30 30 00 ad 	          DCACHE    \[D0Re0\+#-1024\],D1Re0
-.*:	30 32 00 ad 	          DCACHE    \[D0Re0\+#-896\],D1Re0
-.*:	30 34 00 ad 	          DCACHE    \[D0Re0\+#-768\],D1Re0
-.*:	30 36 00 ad 	          DCACHE    \[D0Re0\+#-640\],D1Re0
-.*:	30 38 00 ad 	          DCACHE    \[D0Re0\+#-512\],D1Re0
-.*:	30 3a 00 ad 	          DCACHE    \[D0Re0\+#-384\],D1Re0
-.*:	30 3c 00 ad 	          DCACHE    \[D0Re0\+#-256\],D1Re0
-.*:	30 3e 00 ad 	          DCACHE    \[D0Re0\+#-128\],D1Re0
-.*:	10 40 00 ad 	          DCACHE    \[A1LbP\],D1Re0
-.*:	10 42 00 ad 	          DCACHE    \[A1LbP\+#128\],D1Re0
-.*:	10 44 00 ad 	          DCACHE    \[A1LbP\+#256\],D1Re0
-.*:	10 46 00 ad 	          DCACHE    \[A1LbP\+#384\],D1Re0
-.*:	10 48 00 ad 	          DCACHE    \[A1LbP\+#512\],D1Re0
-.*:	10 4a 00 ad 	          DCACHE    \[A1LbP\+#640\],D1Re0
-.*:	10 4c 00 ad 	          DCACHE    \[A1LbP\+#768\],D1Re0
-.*:	10 4e 00 ad 	          DCACHE    \[A1LbP\+#896\],D1Re0
-.*:	10 50 00 ad 	          DCACHE    \[A1LbP\+#1024\],D1Re0
-.*:	10 52 00 ad 	          DCACHE    \[A1LbP\+#1152\],D1Re0
-.*:	10 54 00 ad 	          DCACHE    \[A1LbP\+#1280\],D1Re0
-.*:	10 56 00 ad 	          DCACHE    \[A1LbP\+#1408\],D1Re0
-.*:	10 58 00 ad 	          DCACHE    \[A1LbP\+#1536\],D1Re0
-.*:	10 5a 00 ad 	          DCACHE    \[A1LbP\+#1664\],D1Re0
-.*:	10 5c 00 ad 	          DCACHE    \[A1LbP\+#1792\],D1Re0
-.*:	10 5e 00 ad 	          DCACHE    \[A1LbP\+#1920\],D1Re0
-.*:	10 60 00 ad 	          DCACHE    \[A1LbP\+#-2048\],D1Re0
-.*:	10 62 00 ad 	          DCACHE    \[A1LbP\+#-1920\],D1Re0
-.*:	10 64 00 ad 	          DCACHE    \[A1LbP\+#-1792\],D1Re0
-.*:	10 66 00 ad 	          DCACHE    \[A1LbP\+#-1664\],D1Re0
-.*:	10 68 00 ad 	          DCACHE    \[A1LbP\+#-1536\],D1Re0
-.*:	10 6a 00 ad 	          DCACHE    \[A1LbP\+#-1408\],D1Re0
-.*:	10 6c 00 ad 	          DCACHE    \[A1LbP\+#-1280\],D1Re0
-.*:	10 6e 00 ad 	          DCACHE    \[A1LbP\+#-1152\],D1Re0
-.*:	10 70 00 ad 	          DCACHE    \[A1LbP\+#-1024\],D1Re0
-.*:	10 72 00 ad 	          DCACHE    \[A1LbP\+#-896\],D1Re0
-.*:	10 74 00 ad 	          DCACHE    \[A1LbP\+#-768\],D1Re0
-.*:	10 76 00 ad 	          DCACHE    \[A1LbP\+#-640\],D1Re0
-.*:	10 78 00 ad 	          DCACHE    \[A1LbP\+#-512\],D1Re0
-.*:	10 7a 00 ad 	          DCACHE    \[A1LbP\+#-384\],D1Re0
-.*:	10 7c 00 ad 	          DCACHE    \[A1LbP\+#-256\],D1Re0
-.*:	10 7e 00 ad 	          DCACHE    \[A1LbP\+#-128\],D1Re0
-.*:	10 c0 01 ad 	          DCACHE    \[A1\.7\],D1Re0
-.*:	10 c1 01 ad 	          DCACHE    \[A1\.7\+#64\],D1Re0
-.*:	10 c2 01 ad 	          DCACHE    \[A1\.7\+#128\],D1Re0
-.*:	10 c3 01 ad 	          DCACHE    \[A1\.7\+#192\],D1Re0
-.*:	10 c4 01 ad 	          DCACHE    \[A1\.7\+#256\],D1Re0
-.*:	10 c5 01 ad 	          DCACHE    \[A1\.7\+#320\],D1Re0
-.*:	10 c6 01 ad 	          DCACHE    \[A1\.7\+#384\],D1Re0
-.*:	10 c7 01 ad 	          DCACHE    \[A1\.7\+#448\],D1Re0
-.*:	10 c8 01 ad 	          DCACHE    \[A1\.7\+#512\],D1Re0
-.*:	10 c9 01 ad 	          DCACHE    \[A1\.7\+#576\],D1Re0
-.*:	10 ca 01 ad 	          DCACHE    \[A1\.7\+#640\],D1Re0
-.*:	10 cb 01 ad 	          DCACHE    \[A1\.7\+#704\],D1Re0
-.*:	10 cc 01 ad 	          DCACHE    \[A1\.7\+#768\],D1Re0
-.*:	10 cd 01 ad 	          DCACHE    \[A1\.7\+#832\],D1Re0
-.*:	10 ce 01 ad 	          DCACHE    \[A1\.7\+#896\],D1Re0
-.*:	10 cf 01 ad 	          DCACHE    \[A1\.7\+#960\],D1Re0
-.*:	10 d0 01 ad 	          DCACHE    \[A1\.7\+#1024\],D1Re0
-.*:	10 d1 01 ad 	          DCACHE    \[A1\.7\+#1088\],D1Re0
-.*:	10 d2 01 ad 	          DCACHE    \[A1\.7\+#1152\],D1Re0
-.*:	10 d3 01 ad 	          DCACHE    \[A1\.7\+#1216\],D1Re0
-.*:	10 d4 01 ad 	          DCACHE    \[A1\.7\+#1280\],D1Re0
-.*:	10 d5 01 ad 	          DCACHE    \[A1\.7\+#1344\],D1Re0
-.*:	10 d6 01 ad 	          DCACHE    \[A1\.7\+#1408\],D1Re0
-.*:	10 d7 01 ad 	          DCACHE    \[A1\.7\+#1472\],D1Re0
-.*:	10 d8 01 ad 	          DCACHE    \[A1\.7\+#1536\],D1Re0
-.*:	10 d9 01 ad 	          DCACHE    \[A1\.7\+#1600\],D1Re0
-.*:	10 da 01 ad 	          DCACHE    \[A1\.7\+#1664\],D1Re0
-.*:	10 db 01 ad 	          DCACHE    \[A1\.7\+#1728\],D1Re0
-.*:	10 dc 01 ad 	          DCACHE    \[A1\.7\+#1792\],D1Re0
-.*:	10 dd 01 ad 	          DCACHE    \[A1\.7\+#1856\],D1Re0
-.*:	10 de 01 ad 	          DCACHE    \[A1\.7\+#1920\],D1Re0
-.*:	10 df 01 ad 	          DCACHE    \[A1\.7\+#1984\],D1Re0
-.*:	10 e0 01 ad 	          DCACHE    \[A1\.7\+#-2048\],D1Re0
-.*:	10 e1 01 ad 	          DCACHE    \[A1\.7\+#-1984\],D1Re0
-.*:	10 e2 01 ad 	          DCACHE    \[A1\.7\+#-1920\],D1Re0
-.*:	10 e3 01 ad 	          DCACHE    \[A1\.7\+#-1856\],D1Re0
-.*:	10 e4 01 ad 	          DCACHE    \[A1\.7\+#-1792\],D1Re0
-.*:	10 e5 01 ad 	          DCACHE    \[A1\.7\+#-1728\],D1Re0
-.*:	10 e6 01 ad 	          DCACHE    \[A1\.7\+#-1664\],D1Re0
-.*:	10 e7 01 ad 	          DCACHE    \[A1\.7\+#-1600\],D1Re0
-.*:	10 e8 01 ad 	          DCACHE    \[A1\.7\+#-1536\],D1Re0
-.*:	10 e9 01 ad 	          DCACHE    \[A1\.7\+#-1472\],D1Re0
-.*:	10 ea 01 ad 	          DCACHE    \[A1\.7\+#-1408\],D1Re0
-.*:	10 eb 01 ad 	          DCACHE    \[A1\.7\+#-1344\],D1Re0
-.*:	10 ec 01 ad 	          DCACHE    \[A1\.7\+#-1280\],D1Re0
-.*:	10 ed 01 ad 	          DCACHE    \[A1\.7\+#-1216\],D1Re0
-.*:	10 ee 01 ad 	          DCACHE    \[A1\.7\+#-1152\],D1Re0
-.*:	10 ef 01 ad 	          DCACHE    \[A1\.7\+#-1088\],D1Re0
-.*:	10 f0 01 ad 	          DCACHE    \[A1\.7\+#-1024\],D1Re0
-.*:	10 f1 01 ad 	          DCACHE    \[A1\.7\+#-960\],D1Re0
-.*:	10 f2 01 ad 	          DCACHE    \[A1\.7\+#-896\],D1Re0
-.*:	10 f3 01 ad 	          DCACHE    \[A1\.7\+#-832\],D1Re0
-.*:	10 f4 01 ad 	          DCACHE    \[A1\.7\+#-768\],D1Re0
-.*:	10 f5 01 ad 	          DCACHE    \[A1\.7\+#-704\],D1Re0
-.*:	10 f6 01 ad 	          DCACHE    \[A1\.7\+#-640\],D1Re0
-.*:	10 f7 01 ad 	          DCACHE    \[A1\.7\+#-576\],D1Re0
-.*:	10 f8 01 ad 	          DCACHE    \[A1\.7\+#-512\],D1Re0
-.*:	10 f9 01 ad 	          DCACHE    \[A1\.7\+#-448\],D1Re0
-.*:	10 fa 01 ad 	          DCACHE    \[A1\.7\+#-384\],D1Re0
-.*:	10 fb 01 ad 	          DCACHE    \[A1\.7\+#-320\],D1Re0
-.*:	10 fc 01 ad 	          DCACHE    \[A1\.7\+#-256\],D1Re0
-.*:	10 fd 01 ad 	          DCACHE    \[A1\.7\+#-192\],D1Re0
-.*:	10 fe 01 ad 	          DCACHE    \[A1\.7\+#-128\],D1Re0
-.*:	10 ff 01 ad 	          DCACHE    \[A1\.7\+#-64\],D1Re0
-.*:	38 00 08 ad 	          DCACHE    \[D0Re0\],A0FrP
-.*:	38 02 08 ad 	          DCACHE    \[D0Re0\+#128\],A0FrP
-.*:	38 04 08 ad 	          DCACHE    \[D0Re0\+#256\],A0FrP
-.*:	38 06 08 ad 	          DCACHE    \[D0Re0\+#384\],A0FrP
-.*:	38 08 08 ad 	          DCACHE    \[D0Re0\+#512\],A0FrP
-.*:	38 0a 08 ad 	          DCACHE    \[D0Re0\+#640\],A0FrP
-.*:	38 0c 08 ad 	          DCACHE    \[D0Re0\+#768\],A0FrP
-.*:	38 0e 08 ad 	          DCACHE    \[D0Re0\+#896\],A0FrP
-.*:	38 10 08 ad 	          DCACHE    \[D0Re0\+#1024\],A0FrP
-.*:	38 12 08 ad 	          DCACHE    \[D0Re0\+#1152\],A0FrP
-.*:	38 14 08 ad 	          DCACHE    \[D0Re0\+#1280\],A0FrP
-.*:	38 16 08 ad 	          DCACHE    \[D0Re0\+#1408\],A0FrP
-.*:	38 18 08 ad 	          DCACHE    \[D0Re0\+#1536\],A0FrP
-.*:	38 1a 08 ad 	          DCACHE    \[D0Re0\+#1664\],A0FrP
-.*:	38 1c 08 ad 	          DCACHE    \[D0Re0\+#1792\],A0FrP
-.*:	38 1e 08 ad 	          DCACHE    \[D0Re0\+#1920\],A0FrP
-.*:	38 20 08 ad 	          DCACHE    \[D0Re0\+#-2048\],A0FrP
-.*:	38 22 08 ad 	          DCACHE    \[D0Re0\+#-1920\],A0FrP
-.*:	38 24 08 ad 	          DCACHE    \[D0Re0\+#-1792\],A0FrP
-.*:	38 26 08 ad 	          DCACHE    \[D0Re0\+#-1664\],A0FrP
-.*:	38 28 08 ad 	          DCACHE    \[D0Re0\+#-1536\],A0FrP
-.*:	38 2a 08 ad 	          DCACHE    \[D0Re0\+#-1408\],A0FrP
-.*:	38 2c 08 ad 	          DCACHE    \[D0Re0\+#-1280\],A0FrP
-.*:	38 2e 08 ad 	          DCACHE    \[D0Re0\+#-1152\],A0FrP
-.*:	38 30 08 ad 	          DCACHE    \[D0Re0\+#-1024\],A0FrP
-.*:	38 32 08 ad 	          DCACHE    \[D0Re0\+#-896\],A0FrP
-.*:	38 34 08 ad 	          DCACHE    \[D0Re0\+#-768\],A0FrP
-.*:	38 36 08 ad 	          DCACHE    \[D0Re0\+#-640\],A0FrP
-.*:	38 38 08 ad 	          DCACHE    \[D0Re0\+#-512\],A0FrP
-.*:	38 3a 08 ad 	          DCACHE    \[D0Re0\+#-384\],A0FrP
-.*:	38 3c 08 ad 	          DCACHE    \[D0Re0\+#-256\],A0FrP
-.*:	38 3e 08 ad 	          DCACHE    \[D0Re0\+#-128\],A0FrP
-.*:	18 40 08 ad 	          DCACHE    \[A1LbP\],A0FrP
-.*:	18 42 08 ad 	          DCACHE    \[A1LbP\+#128\],A0FrP
-.*:	18 44 08 ad 	          DCACHE    \[A1LbP\+#256\],A0FrP
-.*:	18 46 08 ad 	          DCACHE    \[A1LbP\+#384\],A0FrP
-.*:	18 48 08 ad 	          DCACHE    \[A1LbP\+#512\],A0FrP
-.*:	18 4a 08 ad 	          DCACHE    \[A1LbP\+#640\],A0FrP
-.*:	18 4c 08 ad 	          DCACHE    \[A1LbP\+#768\],A0FrP
-.*:	18 4e 08 ad 	          DCACHE    \[A1LbP\+#896\],A0FrP
-.*:	18 50 08 ad 	          DCACHE    \[A1LbP\+#1024\],A0FrP
-.*:	18 52 08 ad 	          DCACHE    \[A1LbP\+#1152\],A0FrP
-.*:	18 54 08 ad 	          DCACHE    \[A1LbP\+#1280\],A0FrP
-.*:	18 56 08 ad 	          DCACHE    \[A1LbP\+#1408\],A0FrP
-.*:	18 58 08 ad 	          DCACHE    \[A1LbP\+#1536\],A0FrP
-.*:	18 5a 08 ad 	          DCACHE    \[A1LbP\+#1664\],A0FrP
-.*:	18 5c 08 ad 	          DCACHE    \[A1LbP\+#1792\],A0FrP
-.*:	18 5e 08 ad 	          DCACHE    \[A1LbP\+#1920\],A0FrP
-.*:	18 60 08 ad 	          DCACHE    \[A1LbP\+#-2048\],A0FrP
-.*:	18 62 08 ad 	          DCACHE    \[A1LbP\+#-1920\],A0FrP
-.*:	18 64 08 ad 	          DCACHE    \[A1LbP\+#-1792\],A0FrP
-.*:	18 66 08 ad 	          DCACHE    \[A1LbP\+#-1664\],A0FrP
-.*:	18 68 08 ad 	          DCACHE    \[A1LbP\+#-1536\],A0FrP
-.*:	18 6a 08 ad 	          DCACHE    \[A1LbP\+#-1408\],A0FrP
-.*:	18 6c 08 ad 	          DCACHE    \[A1LbP\+#-1280\],A0FrP
-.*:	18 6e 08 ad 	          DCACHE    \[A1LbP\+#-1152\],A0FrP
-.*:	18 70 08 ad 	          DCACHE    \[A1LbP\+#-1024\],A0FrP
-.*:	18 72 08 ad 	          DCACHE    \[A1LbP\+#-896\],A0FrP
-.*:	18 74 08 ad 	          DCACHE    \[A1LbP\+#-768\],A0FrP
-.*:	18 76 08 ad 	          DCACHE    \[A1LbP\+#-640\],A0FrP
-.*:	18 78 08 ad 	          DCACHE    \[A1LbP\+#-512\],A0FrP
-.*:	18 7a 08 ad 	          DCACHE    \[A1LbP\+#-384\],A0FrP
-.*:	18 7c 08 ad 	          DCACHE    \[A1LbP\+#-256\],A0FrP
-.*:	18 7e 08 ad 	          DCACHE    \[A1LbP\+#-128\],A0FrP
-.*:	18 c0 09 ad 	          DCACHE    \[A1\.7\],A0FrP
-.*:	18 c1 09 ad 	          DCACHE    \[A1\.7\+#64\],A0FrP
-.*:	18 c2 09 ad 	          DCACHE    \[A1\.7\+#128\],A0FrP
-.*:	18 c3 09 ad 	          DCACHE    \[A1\.7\+#192\],A0FrP
-.*:	18 c4 09 ad 	          DCACHE    \[A1\.7\+#256\],A0FrP
-.*:	18 c5 09 ad 	          DCACHE    \[A1\.7\+#320\],A0FrP
-.*:	18 c6 09 ad 	          DCACHE    \[A1\.7\+#384\],A0FrP
-.*:	18 c7 09 ad 	          DCACHE    \[A1\.7\+#448\],A0FrP
-.*:	18 c8 09 ad 	          DCACHE    \[A1\.7\+#512\],A0FrP
-.*:	18 c9 09 ad 	          DCACHE    \[A1\.7\+#576\],A0FrP
-.*:	18 ca 09 ad 	          DCACHE    \[A1\.7\+#640\],A0FrP
-.*:	18 cb 09 ad 	          DCACHE    \[A1\.7\+#704\],A0FrP
-.*:	18 cc 09 ad 	          DCACHE    \[A1\.7\+#768\],A0FrP
-.*:	18 cd 09 ad 	          DCACHE    \[A1\.7\+#832\],A0FrP
-.*:	18 ce 09 ad 	          DCACHE    \[A1\.7\+#896\],A0FrP
-.*:	18 cf 09 ad 	          DCACHE    \[A1\.7\+#960\],A0FrP
-.*:	18 d0 09 ad 	          DCACHE    \[A1\.7\+#1024\],A0FrP
-.*:	18 d1 09 ad 	          DCACHE    \[A1\.7\+#1088\],A0FrP
-.*:	18 d2 09 ad 	          DCACHE    \[A1\.7\+#1152\],A0FrP
-.*:	18 d3 09 ad 	          DCACHE    \[A1\.7\+#1216\],A0FrP
-.*:	18 d4 09 ad 	          DCACHE    \[A1\.7\+#1280\],A0FrP
-.*:	18 d5 09 ad 	          DCACHE    \[A1\.7\+#1344\],A0FrP
-.*:	18 d6 09 ad 	          DCACHE    \[A1\.7\+#1408\],A0FrP
-.*:	18 d7 09 ad 	          DCACHE    \[A1\.7\+#1472\],A0FrP
-.*:	18 d8 09 ad 	          DCACHE    \[A1\.7\+#1536\],A0FrP
-.*:	18 d9 09 ad 	          DCACHE    \[A1\.7\+#1600\],A0FrP
-.*:	18 da 09 ad 	          DCACHE    \[A1\.7\+#1664\],A0FrP
-.*:	18 db 09 ad 	          DCACHE    \[A1\.7\+#1728\],A0FrP
-.*:	18 dc 09 ad 	          DCACHE    \[A1\.7\+#1792\],A0FrP
-.*:	18 dd 09 ad 	          DCACHE    \[A1\.7\+#1856\],A0FrP
-.*:	18 de 09 ad 	          DCACHE    \[A1\.7\+#1920\],A0FrP
-.*:	18 df 09 ad 	          DCACHE    \[A1\.7\+#1984\],A0FrP
-.*:	18 e0 09 ad 	          DCACHE    \[A1\.7\+#-2048\],A0FrP
-.*:	18 e1 09 ad 	          DCACHE    \[A1\.7\+#-1984\],A0FrP
-.*:	18 e2 09 ad 	          DCACHE    \[A1\.7\+#-1920\],A0FrP
-.*:	18 e3 09 ad 	          DCACHE    \[A1\.7\+#-1856\],A0FrP
-.*:	18 e4 09 ad 	          DCACHE    \[A1\.7\+#-1792\],A0FrP
-.*:	18 e5 09 ad 	          DCACHE    \[A1\.7\+#-1728\],A0FrP
-.*:	18 e6 09 ad 	          DCACHE    \[A1\.7\+#-1664\],A0FrP
-.*:	18 e7 09 ad 	          DCACHE    \[A1\.7\+#-1600\],A0FrP
-.*:	18 e8 09 ad 	          DCACHE    \[A1\.7\+#-1536\],A0FrP
-.*:	18 e9 09 ad 	          DCACHE    \[A1\.7\+#-1472\],A0FrP
-.*:	18 ea 09 ad 	          DCACHE    \[A1\.7\+#-1408\],A0FrP
-.*:	18 eb 09 ad 	          DCACHE    \[A1\.7\+#-1344\],A0FrP
-.*:	18 ec 09 ad 	          DCACHE    \[A1\.7\+#-1280\],A0FrP
-.*:	18 ed 09 ad 	          DCACHE    \[A1\.7\+#-1216\],A0FrP
-.*:	18 ee 09 ad 	          DCACHE    \[A1\.7\+#-1152\],A0FrP
-.*:	18 ef 09 ad 	          DCACHE    \[A1\.7\+#-1088\],A0FrP
-.*:	18 f0 09 ad 	          DCACHE    \[A1\.7\+#-1024\],A0FrP
-.*:	18 f1 09 ad 	          DCACHE    \[A1\.7\+#-960\],A0FrP
-.*:	18 f2 09 ad 	          DCACHE    \[A1\.7\+#-896\],A0FrP
-.*:	18 f3 09 ad 	          DCACHE    \[A1\.7\+#-832\],A0FrP
-.*:	18 f4 09 ad 	          DCACHE    \[A1\.7\+#-768\],A0FrP
-.*:	18 f5 09 ad 	          DCACHE    \[A1\.7\+#-704\],A0FrP
-.*:	18 f6 09 ad 	          DCACHE    \[A1\.7\+#-640\],A0FrP
-.*:	18 f7 09 ad 	          DCACHE    \[A1\.7\+#-576\],A0FrP
-.*:	18 f8 09 ad 	          DCACHE    \[A1\.7\+#-512\],A0FrP
-.*:	18 f9 09 ad 	          DCACHE    \[A1\.7\+#-448\],A0FrP
-.*:	18 fa 09 ad 	          DCACHE    \[A1\.7\+#-384\],A0FrP
-.*:	18 fb 09 ad 	          DCACHE    \[A1\.7\+#-320\],A0FrP
-.*:	18 fc 09 ad 	          DCACHE    \[A1\.7\+#-256\],A0FrP
-.*:	18 fd 09 ad 	          DCACHE    \[A1\.7\+#-192\],A0FrP
-.*:	18 fe 09 ad 	          DCACHE    \[A1\.7\+#-128\],A0FrP
-.*:	18 ff 09 ad 	          DCACHE    \[A1\.7\+#-64\],A0FrP
-.*:	28 00 38 ad 	          DCACHE    \[D0Re0\],D0\.7
-.*:	28 01 38 ad 	          DCACHE    \[D0Re0\+#64\],D0\.7
-.*:	28 02 38 ad 	          DCACHE    \[D0Re0\+#128\],D0\.7
-.*:	28 03 38 ad 	          DCACHE    \[D0Re0\+#192\],D0\.7
-.*:	28 04 38 ad 	          DCACHE    \[D0Re0\+#256\],D0\.7
-.*:	28 05 38 ad 	          DCACHE    \[D0Re0\+#320\],D0\.7
-.*:	28 06 38 ad 	          DCACHE    \[D0Re0\+#384\],D0\.7
-.*:	28 07 38 ad 	          DCACHE    \[D0Re0\+#448\],D0\.7
-.*:	28 08 38 ad 	          DCACHE    \[D0Re0\+#512\],D0\.7
-.*:	28 09 38 ad 	          DCACHE    \[D0Re0\+#576\],D0\.7
-.*:	28 0a 38 ad 	          DCACHE    \[D0Re0\+#640\],D0\.7
-.*:	28 0b 38 ad 	          DCACHE    \[D0Re0\+#704\],D0\.7
-.*:	28 0c 38 ad 	          DCACHE    \[D0Re0\+#768\],D0\.7
-.*:	28 0d 38 ad 	          DCACHE    \[D0Re0\+#832\],D0\.7
-.*:	28 0e 38 ad 	          DCACHE    \[D0Re0\+#896\],D0\.7
-.*:	28 0f 38 ad 	          DCACHE    \[D0Re0\+#960\],D0\.7
-.*:	28 10 38 ad 	          DCACHE    \[D0Re0\+#1024\],D0\.7
-.*:	28 11 38 ad 	          DCACHE    \[D0Re0\+#1088\],D0\.7
-.*:	28 12 38 ad 	          DCACHE    \[D0Re0\+#1152\],D0\.7
-.*:	28 13 38 ad 	          DCACHE    \[D0Re0\+#1216\],D0\.7
-.*:	28 14 38 ad 	          DCACHE    \[D0Re0\+#1280\],D0\.7
-.*:	28 15 38 ad 	          DCACHE    \[D0Re0\+#1344\],D0\.7
-.*:	28 16 38 ad 	          DCACHE    \[D0Re0\+#1408\],D0\.7
-.*:	28 17 38 ad 	          DCACHE    \[D0Re0\+#1472\],D0\.7
-.*:	28 18 38 ad 	          DCACHE    \[D0Re0\+#1536\],D0\.7
-.*:	28 19 38 ad 	          DCACHE    \[D0Re0\+#1600\],D0\.7
-.*:	28 1a 38 ad 	          DCACHE    \[D0Re0\+#1664\],D0\.7
-.*:	28 1b 38 ad 	          DCACHE    \[D0Re0\+#1728\],D0\.7
-.*:	28 1c 38 ad 	          DCACHE    \[D0Re0\+#1792\],D0\.7
-.*:	28 1d 38 ad 	          DCACHE    \[D0Re0\+#1856\],D0\.7
-.*:	28 1e 38 ad 	          DCACHE    \[D0Re0\+#1920\],D0\.7
-.*:	28 1f 38 ad 	          DCACHE    \[D0Re0\+#1984\],D0\.7
-.*:	28 20 38 ad 	          DCACHE    \[D0Re0\+#-2048\],D0\.7
-.*:	28 21 38 ad 	          DCACHE    \[D0Re0\+#-1984\],D0\.7
-.*:	28 22 38 ad 	          DCACHE    \[D0Re0\+#-1920\],D0\.7
-.*:	28 23 38 ad 	          DCACHE    \[D0Re0\+#-1856\],D0\.7
-.*:	28 24 38 ad 	          DCACHE    \[D0Re0\+#-1792\],D0\.7
-.*:	28 25 38 ad 	          DCACHE    \[D0Re0\+#-1728\],D0\.7
-.*:	28 26 38 ad 	          DCACHE    \[D0Re0\+#-1664\],D0\.7
-.*:	28 27 38 ad 	          DCACHE    \[D0Re0\+#-1600\],D0\.7
-.*:	28 28 38 ad 	          DCACHE    \[D0Re0\+#-1536\],D0\.7
-.*:	28 29 38 ad 	          DCACHE    \[D0Re0\+#-1472\],D0\.7
-.*:	28 2a 38 ad 	          DCACHE    \[D0Re0\+#-1408\],D0\.7
-.*:	28 2b 38 ad 	          DCACHE    \[D0Re0\+#-1344\],D0\.7
-.*:	28 2c 38 ad 	          DCACHE    \[D0Re0\+#-1280\],D0\.7
-.*:	28 2d 38 ad 	          DCACHE    \[D0Re0\+#-1216\],D0\.7
-.*:	28 2e 38 ad 	          DCACHE    \[D0Re0\+#-1152\],D0\.7
-.*:	28 2f 38 ad 	          DCACHE    \[D0Re0\+#-1088\],D0\.7
-.*:	28 30 38 ad 	          DCACHE    \[D0Re0\+#-1024\],D0\.7
-.*:	28 31 38 ad 	          DCACHE    \[D0Re0\+#-960\],D0\.7
-.*:	28 32 38 ad 	          DCACHE    \[D0Re0\+#-896\],D0\.7
-.*:	28 33 38 ad 	          DCACHE    \[D0Re0\+#-832\],D0\.7
-.*:	28 34 38 ad 	          DCACHE    \[D0Re0\+#-768\],D0\.7
-.*:	28 35 38 ad 	          DCACHE    \[D0Re0\+#-704\],D0\.7
-.*:	28 36 38 ad 	          DCACHE    \[D0Re0\+#-640\],D0\.7
-.*:	28 37 38 ad 	          DCACHE    \[D0Re0\+#-576\],D0\.7
-.*:	28 38 38 ad 	          DCACHE    \[D0Re0\+#-512\],D0\.7
-.*:	28 39 38 ad 	          DCACHE    \[D0Re0\+#-448\],D0\.7
-.*:	28 3a 38 ad 	          DCACHE    \[D0Re0\+#-384\],D0\.7
-.*:	28 3b 38 ad 	          DCACHE    \[D0Re0\+#-320\],D0\.7
-.*:	28 3c 38 ad 	          DCACHE    \[D0Re0\+#-256\],D0\.7
-.*:	28 3d 38 ad 	          DCACHE    \[D0Re0\+#-192\],D0\.7
-.*:	28 3e 38 ad 	          DCACHE    \[D0Re0\+#-128\],D0\.7
-.*:	28 3f 38 ad 	          DCACHE    \[D0Re0\+#-64\],D0\.7
-.*:	08 40 38 ad 	          DCACHE    \[A1LbP\],D0\.7
-.*:	08 41 38 ad 	          DCACHE    \[A1LbP\+#64\],D0\.7
-.*:	08 42 38 ad 	          DCACHE    \[A1LbP\+#128\],D0\.7
-.*:	08 43 38 ad 	          DCACHE    \[A1LbP\+#192\],D0\.7
-.*:	08 44 38 ad 	          DCACHE    \[A1LbP\+#256\],D0\.7
-.*:	08 45 38 ad 	          DCACHE    \[A1LbP\+#320\],D0\.7
-.*:	08 46 38 ad 	          DCACHE    \[A1LbP\+#384\],D0\.7
-.*:	08 47 38 ad 	          DCACHE    \[A1LbP\+#448\],D0\.7
-.*:	08 48 38 ad 	          DCACHE    \[A1LbP\+#512\],D0\.7
-.*:	08 49 38 ad 	          DCACHE    \[A1LbP\+#576\],D0\.7
-.*:	08 4a 38 ad 	          DCACHE    \[A1LbP\+#640\],D0\.7
-.*:	08 4b 38 ad 	          DCACHE    \[A1LbP\+#704\],D0\.7
-.*:	08 4c 38 ad 	          DCACHE    \[A1LbP\+#768\],D0\.7
-.*:	08 4d 38 ad 	          DCACHE    \[A1LbP\+#832\],D0\.7
-.*:	08 4e 38 ad 	          DCACHE    \[A1LbP\+#896\],D0\.7
-.*:	08 4f 38 ad 	          DCACHE    \[A1LbP\+#960\],D0\.7
-.*:	08 50 38 ad 	          DCACHE    \[A1LbP\+#1024\],D0\.7
-.*:	08 51 38 ad 	          DCACHE    \[A1LbP\+#1088\],D0\.7
-.*:	08 52 38 ad 	          DCACHE    \[A1LbP\+#1152\],D0\.7
-.*:	08 53 38 ad 	          DCACHE    \[A1LbP\+#1216\],D0\.7
-.*:	08 54 38 ad 	          DCACHE    \[A1LbP\+#1280\],D0\.7
-.*:	08 55 38 ad 	          DCACHE    \[A1LbP\+#1344\],D0\.7
-.*:	08 56 38 ad 	          DCACHE    \[A1LbP\+#1408\],D0\.7
-.*:	08 57 38 ad 	          DCACHE    \[A1LbP\+#1472\],D0\.7
-.*:	08 58 38 ad 	          DCACHE    \[A1LbP\+#1536\],D0\.7
-.*:	08 59 38 ad 	          DCACHE    \[A1LbP\+#1600\],D0\.7
-.*:	08 5a 38 ad 	          DCACHE    \[A1LbP\+#1664\],D0\.7
-.*:	08 5b 38 ad 	          DCACHE    \[A1LbP\+#1728\],D0\.7
-.*:	08 5c 38 ad 	          DCACHE    \[A1LbP\+#1792\],D0\.7
-.*:	08 5d 38 ad 	          DCACHE    \[A1LbP\+#1856\],D0\.7
-.*:	08 5e 38 ad 	          DCACHE    \[A1LbP\+#1920\],D0\.7
-.*:	08 5f 38 ad 	          DCACHE    \[A1LbP\+#1984\],D0\.7
-.*:	08 60 38 ad 	          DCACHE    \[A1LbP\+#-2048\],D0\.7
-.*:	08 61 38 ad 	          DCACHE    \[A1LbP\+#-1984\],D0\.7
-.*:	08 62 38 ad 	          DCACHE    \[A1LbP\+#-1920\],D0\.7
-.*:	08 63 38 ad 	          DCACHE    \[A1LbP\+#-1856\],D0\.7
-.*:	08 64 38 ad 	          DCACHE    \[A1LbP\+#-1792\],D0\.7
-.*:	08 65 38 ad 	          DCACHE    \[A1LbP\+#-1728\],D0\.7
-.*:	08 66 38 ad 	          DCACHE    \[A1LbP\+#-1664\],D0\.7
-.*:	08 67 38 ad 	          DCACHE    \[A1LbP\+#-1600\],D0\.7
-.*:	08 68 38 ad 	          DCACHE    \[A1LbP\+#-1536\],D0\.7
-.*:	08 69 38 ad 	          DCACHE    \[A1LbP\+#-1472\],D0\.7
-.*:	08 6a 38 ad 	          DCACHE    \[A1LbP\+#-1408\],D0\.7
-.*:	08 6b 38 ad 	          DCACHE    \[A1LbP\+#-1344\],D0\.7
-.*:	08 6c 38 ad 	          DCACHE    \[A1LbP\+#-1280\],D0\.7
-.*:	08 6d 38 ad 	          DCACHE    \[A1LbP\+#-1216\],D0\.7
-.*:	08 6e 38 ad 	          DCACHE    \[A1LbP\+#-1152\],D0\.7
-.*:	08 6f 38 ad 	          DCACHE    \[A1LbP\+#-1088\],D0\.7
-.*:	08 70 38 ad 	          DCACHE    \[A1LbP\+#-1024\],D0\.7
-.*:	08 71 38 ad 	          DCACHE    \[A1LbP\+#-960\],D0\.7
-.*:	08 72 38 ad 	          DCACHE    \[A1LbP\+#-896\],D0\.7
-.*:	08 73 38 ad 	          DCACHE    \[A1LbP\+#-832\],D0\.7
-.*:	08 74 38 ad 	          DCACHE    \[A1LbP\+#-768\],D0\.7
-.*:	08 75 38 ad 	          DCACHE    \[A1LbP\+#-704\],D0\.7
-.*:	08 76 38 ad 	          DCACHE    \[A1LbP\+#-640\],D0\.7
-.*:	08 77 38 ad 	          DCACHE    \[A1LbP\+#-576\],D0\.7
-.*:	08 78 38 ad 	          DCACHE    \[A1LbP\+#-512\],D0\.7
-.*:	08 79 38 ad 	          DCACHE    \[A1LbP\+#-448\],D0\.7
-.*:	08 7a 38 ad 	          DCACHE    \[A1LbP\+#-384\],D0\.7
-.*:	08 7b 38 ad 	          DCACHE    \[A1LbP\+#-320\],D0\.7
-.*:	08 7c 38 ad 	          DCACHE    \[A1LbP\+#-256\],D0\.7
-.*:	08 7d 38 ad 	          DCACHE    \[A1LbP\+#-192\],D0\.7
-.*:	08 7e 38 ad 	          DCACHE    \[A1LbP\+#-128\],D0\.7
-.*:	08 7f 38 ad 	          DCACHE    \[A1LbP\+#-64\],D0\.7
-.*:	08 c0 39 ad 	          DCACHE    \[A1\.7\],D0\.7
-.*:	48 c0 39 ad 	          DCACHE    \[D1\.7\],D0\.7
-.*:	08 c1 39 ad 	          DCACHE    \[A1\.7\+#64\],D0\.7
-.*:	48 c1 39 ad 	          DCACHE    \[D1\.7\+#64\],D0\.7
-.*:	08 c2 39 ad 	          DCACHE    \[A1\.7\+#128\],D0\.7
-.*:	48 c2 39 ad 	          DCACHE    \[D1\.7\+#128\],D0\.7
-.*:	08 c3 39 ad 	          DCACHE    \[A1\.7\+#192\],D0\.7
-.*:	48 c3 39 ad 	          DCACHE    \[D1\.7\+#192\],D0\.7
-.*:	08 c4 39 ad 	          DCACHE    \[A1\.7\+#256\],D0\.7
-.*:	48 c4 39 ad 	          DCACHE    \[D1\.7\+#256\],D0\.7
-.*:	08 c5 39 ad 	          DCACHE    \[A1\.7\+#320\],D0\.7
-.*:	48 c5 39 ad 	          DCACHE    \[D1\.7\+#320\],D0\.7
-.*:	08 c6 39 ad 	          DCACHE    \[A1\.7\+#384\],D0\.7
-.*:	48 c6 39 ad 	          DCACHE    \[D1\.7\+#384\],D0\.7
-.*:	08 c7 39 ad 	          DCACHE    \[A1\.7\+#448\],D0\.7
-.*:	48 c7 39 ad 	          DCACHE    \[D1\.7\+#448\],D0\.7
-.*:	08 c8 39 ad 	          DCACHE    \[A1\.7\+#512\],D0\.7
-.*:	48 c8 39 ad 	          DCACHE    \[D1\.7\+#512\],D0\.7
-.*:	08 c9 39 ad 	          DCACHE    \[A1\.7\+#576\],D0\.7
-.*:	48 c9 39 ad 	          DCACHE    \[D1\.7\+#576\],D0\.7
-.*:	08 ca 39 ad 	          DCACHE    \[A1\.7\+#640\],D0\.7
-.*:	48 ca 39 ad 	          DCACHE    \[D1\.7\+#640\],D0\.7
-.*:	08 cb 39 ad 	          DCACHE    \[A1\.7\+#704\],D0\.7
-.*:	48 cb 39 ad 	          DCACHE    \[D1\.7\+#704\],D0\.7
-.*:	08 cc 39 ad 	          DCACHE    \[A1\.7\+#768\],D0\.7
-.*:	48 cc 39 ad 	          DCACHE    \[D1\.7\+#768\],D0\.7
-.*:	08 cd 39 ad 	          DCACHE    \[A1\.7\+#832\],D0\.7
-.*:	48 cd 39 ad 	          DCACHE    \[D1\.7\+#832\],D0\.7
-.*:	08 ce 39 ad 	          DCACHE    \[A1\.7\+#896\],D0\.7
-.*:	48 ce 39 ad 	          DCACHE    \[D1\.7\+#896\],D0\.7
-.*:	08 cf 39 ad 	          DCACHE    \[A1\.7\+#960\],D0\.7
-.*:	48 cf 39 ad 	          DCACHE    \[D1\.7\+#960\],D0\.7
-.*:	08 d0 39 ad 	          DCACHE    \[A1\.7\+#1024\],D0\.7
-.*:	48 d0 39 ad 	          DCACHE    \[D1\.7\+#1024\],D0\.7
-.*:	08 d1 39 ad 	          DCACHE    \[A1\.7\+#1088\],D0\.7
-.*:	48 d1 39 ad 	          DCACHE    \[D1\.7\+#1088\],D0\.7
-.*:	08 d2 39 ad 	          DCACHE    \[A1\.7\+#1152\],D0\.7
-.*:	48 d2 39 ad 	          DCACHE    \[D1\.7\+#1152\],D0\.7
-.*:	08 d3 39 ad 	          DCACHE    \[A1\.7\+#1216\],D0\.7
-.*:	48 d3 39 ad 	          DCACHE    \[D1\.7\+#1216\],D0\.7
-.*:	08 d4 39 ad 	          DCACHE    \[A1\.7\+#1280\],D0\.7
-.*:	48 d4 39 ad 	          DCACHE    \[D1\.7\+#1280\],D0\.7
-.*:	08 d5 39 ad 	          DCACHE    \[A1\.7\+#1344\],D0\.7
-.*:	48 d5 39 ad 	          DCACHE    \[D1\.7\+#1344\],D0\.7
-.*:	08 d6 39 ad 	          DCACHE    \[A1\.7\+#1408\],D0\.7
-.*:	48 d6 39 ad 	          DCACHE    \[D1\.7\+#1408\],D0\.7
-.*:	08 d7 39 ad 	          DCACHE    \[A1\.7\+#1472\],D0\.7
-.*:	48 d7 39 ad 	          DCACHE    \[D1\.7\+#1472\],D0\.7
-.*:	08 d8 39 ad 	          DCACHE    \[A1\.7\+#1536\],D0\.7
-.*:	48 d8 39 ad 	          DCACHE    \[D1\.7\+#1536\],D0\.7
-.*:	08 d9 39 ad 	          DCACHE    \[A1\.7\+#1600\],D0\.7
-.*:	48 d9 39 ad 	          DCACHE    \[D1\.7\+#1600\],D0\.7
-.*:	08 da 39 ad 	          DCACHE    \[A1\.7\+#1664\],D0\.7
-.*:	48 da 39 ad 	          DCACHE    \[D1\.7\+#1664\],D0\.7
-.*:	08 db 39 ad 	          DCACHE    \[A1\.7\+#1728\],D0\.7
-.*:	48 db 39 ad 	          DCACHE    \[D1\.7\+#1728\],D0\.7
-.*:	08 dc 39 ad 	          DCACHE    \[A1\.7\+#1792\],D0\.7
-.*:	48 dc 39 ad 	          DCACHE    \[D1\.7\+#1792\],D0\.7
-.*:	08 dd 39 ad 	          DCACHE    \[A1\.7\+#1856\],D0\.7
-.*:	48 dd 39 ad 	          DCACHE    \[D1\.7\+#1856\],D0\.7
-.*:	08 de 39 ad 	          DCACHE    \[A1\.7\+#1920\],D0\.7
-.*:	48 de 39 ad 	          DCACHE    \[D1\.7\+#1920\],D0\.7
-.*:	08 df 39 ad 	          DCACHE    \[A1\.7\+#1984\],D0\.7
-.*:	48 df 39 ad 	          DCACHE    \[D1\.7\+#1984\],D0\.7
-.*:	08 e0 39 ad 	          DCACHE    \[A1\.7\+#-2048\],D0\.7
-.*:	48 e0 39 ad 	          DCACHE    \[D1\.7\+#-2048\],D0\.7
-.*:	08 e1 39 ad 	          DCACHE    \[A1\.7\+#-1984\],D0\.7
-.*:	48 e1 39 ad 	          DCACHE    \[D1\.7\+#-1984\],D0\.7
-.*:	08 e2 39 ad 	          DCACHE    \[A1\.7\+#-1920\],D0\.7
-.*:	48 e2 39 ad 	          DCACHE    \[D1\.7\+#-1920\],D0\.7
-.*:	08 e3 39 ad 	          DCACHE    \[A1\.7\+#-1856\],D0\.7
-.*:	48 e3 39 ad 	          DCACHE    \[D1\.7\+#-1856\],D0\.7
-.*:	08 e4 39 ad 	          DCACHE    \[A1\.7\+#-1792\],D0\.7
-.*:	48 e4 39 ad 	          DCACHE    \[D1\.7\+#-1792\],D0\.7
-.*:	08 e5 39 ad 	          DCACHE    \[A1\.7\+#-1728\],D0\.7
-.*:	48 e5 39 ad 	          DCACHE    \[D1\.7\+#-1728\],D0\.7
-.*:	08 e6 39 ad 	          DCACHE    \[A1\.7\+#-1664\],D0\.7
-.*:	48 e6 39 ad 	          DCACHE    \[D1\.7\+#-1664\],D0\.7
-.*:	08 e7 39 ad 	          DCACHE    \[A1\.7\+#-1600\],D0\.7
-.*:	48 e7 39 ad 	          DCACHE    \[D1\.7\+#-1600\],D0\.7
-.*:	08 e8 39 ad 	          DCACHE    \[A1\.7\+#-1536\],D0\.7
-.*:	48 e8 39 ad 	          DCACHE    \[D1\.7\+#-1536\],D0\.7
-.*:	08 e9 39 ad 	          DCACHE    \[A1\.7\+#-1472\],D0\.7
-.*:	48 e9 39 ad 	          DCACHE    \[D1\.7\+#-1472\],D0\.7
-.*:	08 ea 39 ad 	          DCACHE    \[A1\.7\+#-1408\],D0\.7
-.*:	48 ea 39 ad 	          DCACHE    \[D1\.7\+#-1408\],D0\.7
-.*:	08 eb 39 ad 	          DCACHE    \[A1\.7\+#-1344\],D0\.7
-.*:	48 eb 39 ad 	          DCACHE    \[D1\.7\+#-1344\],D0\.7
-.*:	08 ec 39 ad 	          DCACHE    \[A1\.7\+#-1280\],D0\.7
-.*:	48 ec 39 ad 	          DCACHE    \[D1\.7\+#-1280\],D0\.7
-.*:	08 ed 39 ad 	          DCACHE    \[A1\.7\+#-1216\],D0\.7
-.*:	48 ed 39 ad 	          DCACHE    \[D1\.7\+#-1216\],D0\.7
-.*:	08 ee 39 ad 	          DCACHE    \[A1\.7\+#-1152\],D0\.7
-.*:	48 ee 39 ad 	          DCACHE    \[D1\.7\+#-1152\],D0\.7
-.*:	08 ef 39 ad 	          DCACHE    \[A1\.7\+#-1088\],D0\.7
-.*:	48 ef 39 ad 	          DCACHE    \[D1\.7\+#-1088\],D0\.7
-.*:	08 f0 39 ad 	          DCACHE    \[A1\.7\+#-1024\],D0\.7
-.*:	48 f0 39 ad 	          DCACHE    \[D1\.7\+#-1024\],D0\.7
-.*:	08 f1 39 ad 	          DCACHE    \[A1\.7\+#-960\],D0\.7
-.*:	48 f1 39 ad 	          DCACHE    \[D1\.7\+#-960\],D0\.7
-.*:	08 f2 39 ad 	          DCACHE    \[A1\.7\+#-896\],D0\.7
-.*:	48 f2 39 ad 	          DCACHE    \[D1\.7\+#-896\],D0\.7
-.*:	08 f3 39 ad 	          DCACHE    \[A1\.7\+#-832\],D0\.7
-.*:	48 f3 39 ad 	          DCACHE    \[D1\.7\+#-832\],D0\.7
-.*:	08 f4 39 ad 	          DCACHE    \[A1\.7\+#-768\],D0\.7
-.*:	48 f4 39 ad 	          DCACHE    \[D1\.7\+#-768\],D0\.7
-.*:	08 f5 39 ad 	          DCACHE    \[A1\.7\+#-704\],D0\.7
-.*:	48 f5 39 ad 	          DCACHE    \[D1\.7\+#-704\],D0\.7
-.*:	08 f6 39 ad 	          DCACHE    \[A1\.7\+#-640\],D0\.7
-.*:	48 f6 39 ad 	          DCACHE    \[D1\.7\+#-640\],D0\.7
-.*:	08 f7 39 ad 	          DCACHE    \[A1\.7\+#-576\],D0\.7
-.*:	48 f7 39 ad 	          DCACHE    \[D1\.7\+#-576\],D0\.7
-.*:	08 f8 39 ad 	          DCACHE    \[A1\.7\+#-512\],D0\.7
-.*:	48 f8 39 ad 	          DCACHE    \[D1\.7\+#-512\],D0\.7
-.*:	08 f9 39 ad 	          DCACHE    \[A1\.7\+#-448\],D0\.7
-.*:	48 f9 39 ad 	          DCACHE    \[D1\.7\+#-448\],D0\.7
-.*:	08 fa 39 ad 	          DCACHE    \[A1\.7\+#-384\],D0\.7
-.*:	48 fa 39 ad 	          DCACHE    \[D1\.7\+#-384\],D0\.7
-.*:	08 fb 39 ad 	          DCACHE    \[A1\.7\+#-320\],D0\.7
-.*:	48 fb 39 ad 	          DCACHE    \[D1\.7\+#-320\],D0\.7
-.*:	08 fc 39 ad 	          DCACHE    \[A1\.7\+#-256\],D0\.7
-.*:	48 fc 39 ad 	          DCACHE    \[D1\.7\+#-256\],D0\.7
-.*:	08 fd 39 ad 	          DCACHE    \[A1\.7\+#-192\],D0\.7
-.*:	48 fd 39 ad 	          DCACHE    \[D1\.7\+#-192\],D0\.7
-.*:	08 fe 39 ad 	          DCACHE    \[A1\.7\+#-128\],D0\.7
-.*:	48 fe 39 ad 	          DCACHE    \[D1\.7\+#-128\],D0\.7
-.*:	08 ff 39 ad 	          DCACHE    \[A1\.7\+#-64\],D0\.7
-.*:	48 ff 39 ad 	          DCACHE    \[D1\.7\+#-64\],D0\.7
-.*:	00 00 80 af 	          SWITCH    #0x800000
-.*:	24 0e 00 b0 	          SETB      \[D0Re0\+D0\.7\],D1Re0
-.*:	62 42 00 b0 	          SETB      \[A0FrP\+A0FrP\],D0Re0
-.*:	e4 42 00 b0 	          SETB      \[A0FrP\+\+A0FrP\],D1Re0
-.*:	84 4e 00 b0 	          SETB      \[A1LbP\+\+A1\.7\],D1Re0
-.*:	a4 c0 01 b0 	          SETB      \[D0\.7\+\+D0Re0\],D1Re0
-.*:	82 c2 01 b0 	          SETB      \[A1\.7\+\+A1LbP\],D0Re0
-.*:	02 ce 01 b0 	          SETB      \[A1\.7\+A1\.7\],D0Re0
-.*:	84 ce 01 b0 	          SETB      \[A1\.7\+\+A1\.7\],D1Re0
-.*:	e4 ce 01 b0 	          SETB      \[A0\.7\+\+A0\.7\],D1Re0
-.*:	a8 00 08 b0 	          SETB      \[D0Re0\+\+D0Re0\],A1LbP
-.*:	46 0e 08 b0 	          SETB      \[D1Re0\+D1\.7\],A0FrP
-.*:	c8 0e 08 b0 	          SETB      \[D1Re0\+\+D1\.7\],A1LbP
-.*:	06 4e 08 b0 	          SETB      \[A1LbP\+A1\.7\],A0FrP
-.*:	46 c0 09 b0 	          SETB      \[D1\.7\+D1Re0\],A0FrP
-.*:	c8 c0 09 b0 	          SETB      \[D1\.7\+\+D1Re0\],A1LbP
-.*:	06 ce 09 b0 	          SETB      \[A1\.7\+A1\.7\],A0FrP
-.*:	a6 ce 09 b0 	          SETB      \[D0\.7\+\+D0\.7\],A0FrP
-.*:	e8 ce 09 b0 	          SETB      \[A0\.7\+\+A0\.7\],A1LbP
-.*:	a4 00 38 b0 	          SETB      \[D0Re0\+\+D0Re0\],D1\.7
-.*:	c6 00 38 b0 	          SETB      \[D1Re0\+\+D1Re0\],A0\.7
-.*:	46 0e 38 b0 	          SETB      \[D1Re0\+D1\.7\],A0\.7
-.*:	c2 0e 38 b0 	          SETB      \[D1Re0\+\+D1\.7\],D0\.7
-.*:	06 42 38 b0 	          SETB      \[A1LbP\+A1LbP\],A0\.7
-.*:	86 42 38 b0 	          SETB      \[A1LbP\+\+A1LbP\],A0\.7
-.*:	02 4e 38 b0 	          SETB      \[A1LbP\+A1\.7\],D0\.7
-.*:	84 4e 38 b0 	          SETB      \[A1LbP\+\+A1\.7\],D1\.7
-.*:	e8 4e 38 b0 	          SETB      \[A0FrP\+\+A0\.7\],A1\.7
-.*:	a4 c0 39 b0 	          SETB      \[D0\.7\+\+D0Re0\],D1\.7
-.*:	c6 c0 39 b0 	          SETB      \[D1\.7\+\+D1Re0\],A0\.7
-.*:	64 c2 39 b0 	          SETB      \[A0\.7\+A0FrP\],D1\.7
-.*:	e2 c2 39 b0 	          SETB      \[A0\.7\+\+A0FrP\],D0\.7
-.*:	06 ce 39 b0 	          SETB      \[A1\.7\+A1\.7\],A0\.7
-.*:	64 ce 39 b0 	          SETB      \[A0\.7\+A0\.7\],D1\.7
-.*:	a4 ce 39 b0 	          SETB      \[D0\.7\+\+D0\.7\],D1\.7
-.*:	c6 ce 39 b0 	          SETB      \[D1\.7\+\+D1\.7\],A0\.7
-.*:	e8 ce 39 b0 	          SETB      \[A0\.7\+\+A0\.7\],A1\.7
-.*:	2c 0e 80 b0 	          SETB      \[D0Re0\+D0\.7\],RD
-.*:	8c 42 80 b0 	          SETB      \[A1LbP\+\+A1LbP\],RD
-.*:	ec 4e 80 b0 	          SETB      \[A0FrP\+\+A0\.7\],RD
-.*:	0c c2 81 b0 	          SETB      \[A1\.7\+A1LbP\],RD
-.*:	4c ce 81 b0 	          SETB      \[D1\.7\+D1\.7\],RD
-.*:	ec ce 81 b0 	          SETB      \[A0\.7\+\+A0\.7\],RD
-.*:	24 0e 00 b1 	          SETW      \[D0Re0\+D0\.7\],D1Re0
-.*:	62 42 00 b1 	          SETW      \[A0FrP\+A0FrP\],D0Re0
-.*:	e4 42 00 b1 	          SETW      \[A0FrP\+\+A0FrP\],D1Re0
-.*:	84 4e 00 b1 	          SETW      \[A1LbP\+\+A1\.7\],D1Re0
-.*:	a4 c0 01 b1 	          SETW      \[D0\.7\+\+D0Re0\],D1Re0
-.*:	82 c2 01 b1 	          SETW      \[A1\.7\+\+A1LbP\],D0Re0
-.*:	02 ce 01 b1 	          SETW      \[A1\.7\+A1\.7\],D0Re0
-.*:	84 ce 01 b1 	          SETW      \[A1\.7\+\+A1\.7\],D1Re0
-.*:	e4 ce 01 b1 	          SETW      \[A0\.7\+\+A0\.7\],D1Re0
-.*:	a8 00 08 b1 	          SETW      \[D0Re0\+\+D0Re0\],A1LbP
-.*:	46 0e 08 b1 	          SETW      \[D1Re0\+D1\.7\],A0FrP
-.*:	c8 0e 08 b1 	          SETW      \[D1Re0\+\+D1\.7\],A1LbP
-.*:	06 4e 08 b1 	          SETW      \[A1LbP\+A1\.7\],A0FrP
-.*:	46 c0 09 b1 	          SETW      \[D1\.7\+D1Re0\],A0FrP
-.*:	c8 c0 09 b1 	          SETW      \[D1\.7\+\+D1Re0\],A1LbP
-.*:	06 ce 09 b1 	          SETW      \[A1\.7\+A1\.7\],A0FrP
-.*:	a6 ce 09 b1 	          SETW      \[D0\.7\+\+D0\.7\],A0FrP
-.*:	e8 ce 09 b1 	          SETW      \[A0\.7\+\+A0\.7\],A1LbP
-.*:	a4 00 38 b1 	          SETW      \[D0Re0\+\+D0Re0\],D1\.7
-.*:	c6 00 38 b1 	          SETW      \[D1Re0\+\+D1Re0\],A0\.7
-.*:	46 0e 38 b1 	          SETW      \[D1Re0\+D1\.7\],A0\.7
-.*:	c2 0e 38 b1 	          SETW      \[D1Re0\+\+D1\.7\],D0\.7
-.*:	06 42 38 b1 	          SETW      \[A1LbP\+A1LbP\],A0\.7
-.*:	86 42 38 b1 	          SETW      \[A1LbP\+\+A1LbP\],A0\.7
-.*:	02 4e 38 b1 	          SETW      \[A1LbP\+A1\.7\],D0\.7
-.*:	84 4e 38 b1 	          SETW      \[A1LbP\+\+A1\.7\],D1\.7
-.*:	e8 4e 38 b1 	          SETW      \[A0FrP\+\+A0\.7\],A1\.7
-.*:	a4 c0 39 b1 	          SETW      \[D0\.7\+\+D0Re0\],D1\.7
-.*:	c6 c0 39 b1 	          SETW      \[D1\.7\+\+D1Re0\],A0\.7
-.*:	64 c2 39 b1 	          SETW      \[A0\.7\+A0FrP\],D1\.7
-.*:	e2 c2 39 b1 	          SETW      \[A0\.7\+\+A0FrP\],D0\.7
-.*:	06 ce 39 b1 	          SETW      \[A1\.7\+A1\.7\],A0\.7
-.*:	64 ce 39 b1 	          SETW      \[A0\.7\+A0\.7\],D1\.7
-.*:	a4 ce 39 b1 	          SETW      \[D0\.7\+\+D0\.7\],D1\.7
-.*:	c6 ce 39 b1 	          SETW      \[D1\.7\+\+D1\.7\],A0\.7
-.*:	e8 ce 39 b1 	          SETW      \[A0\.7\+\+A0\.7\],A1\.7
-.*:	2c 0e 80 b1 	          SETW      \[D0Re0\+D0\.7\],RD
-.*:	8c 42 80 b1 	          SETW      \[A1LbP\+\+A1LbP\],RD
-.*:	ec 4e 80 b1 	          SETW      \[A0FrP\+\+A0\.7\],RD
-.*:	0c c2 81 b1 	          SETW      \[A1\.7\+A1LbP\],RD
-.*:	4c ce 81 b1 	          SETW      \[D1\.7\+D1\.7\],RD
-.*:	ec ce 81 b1 	          SETW      \[A0\.7\+\+A0\.7\],RD
-.*:	c4 1f 00 b2 	          SETB      \[D1Re0\+\+#31\],D1Re0
-.*:	c4 20 00 b2 	          SETB      \[D1Re0\+\+#-32\],D1Re0
-.*:	c4 3f 00 b2 	          SETB      \[--D1Re0\],D1Re0
-.*:	e4 5f 00 b2 	          SETB      \[A0FrP\+\+#31\],D1Re0
-.*:	e4 60 00 b2 	          SETB      \[A0FrP\+\+#-32\],D1Re0
-.*:	e4 7f 00 b2 	          SETB      \[--A0FrP\],D1Re0
-.*:	62 df 01 b2 	          SETB      \[A0\.7\+#31\],D0Re0
-.*:	a4 df 01 b2 	          SETB      \[D0\.7\+\+#31\],D1Re0
-.*:	e4 df 01 b2 	          SETB      \[A0\.7\+\+#31\],D1Re0
-.*:	62 e0 01 b2 	          SETB      \[A0\.7\+#-32\],D0Re0
-.*:	a4 e0 01 b2 	          SETB      \[D0\.7\+\+#-32\],D1Re0
-.*:	e4 e0 01 b2 	          SETB      \[A0\.7\+\+#-32\],D1Re0
-.*:	62 ff 01 b2 	          SETB      \[A0\.7\+#-1\],D0Re0
-.*:	a4 ff 01 b2 	          SETB      \[--D0\.7\],D1Re0
-.*:	e4 ff 01 b2 	          SETB      \[--A0\.7\],D1Re0
-.*:	c8 1f 08 b2 	          SETB      \[D1Re0\+\+#31\],A1LbP
-.*:	c8 20 08 b2 	          SETB      \[D1Re0\+\+#-32\],A1LbP
-.*:	c8 3f 08 b2 	          SETB      \[--D1Re0\],A1LbP
-.*:	e8 5f 08 b2 	          SETB      \[A0FrP\+\+#31\],A1LbP
-.*:	e8 60 08 b2 	          SETB      \[A0FrP\+\+#-32\],A1LbP
-.*:	e8 7f 08 b2 	          SETB      \[--A0FrP\],A1LbP
-.*:	66 df 09 b2 	          SETB      \[A0\.7\+#31\],A0FrP
-.*:	a8 df 09 b2 	          SETB      \[D0\.7\+\+#31\],A1LbP
-.*:	e8 df 09 b2 	          SETB      \[A0\.7\+\+#31\],A1LbP
-.*:	66 e0 09 b2 	          SETB      \[A0\.7\+#-32\],A0FrP
-.*:	a8 e0 09 b2 	          SETB      \[D0\.7\+\+#-32\],A1LbP
-.*:	e8 e0 09 b2 	          SETB      \[A0\.7\+\+#-32\],A1LbP
-.*:	66 ff 09 b2 	          SETB      \[A0\.7\+#-1\],A0FrP
-.*:	a8 ff 09 b2 	          SETB      \[--D0\.7\],A1LbP
-.*:	e8 ff 09 b2 	          SETB      \[--A0\.7\],A1LbP
-.*:	a8 1f 38 b2 	          SETB      \[D0Re0\+\+#31\],A1\.7
-.*:	c8 1f 38 b2 	          SETB      \[D1Re0\+\+#31\],A1\.7
-.*:	a8 20 38 b2 	          SETB      \[D0Re0\+\+#-32\],A1\.7
-.*:	c8 20 38 b2 	          SETB      \[D1Re0\+\+#-32\],A1\.7
-.*:	a8 3f 38 b2 	          SETB      \[--D0Re0\],A1\.7
-.*:	c8 3f 38 b2 	          SETB      \[--D1Re0\],A1\.7
-.*:	88 5f 38 b2 	          SETB      \[A1LbP\+\+#31\],A1\.7
-.*:	e8 5f 38 b2 	          SETB      \[A0FrP\+\+#31\],A1\.7
-.*:	88 60 38 b2 	          SETB      \[A1LbP\+\+#-32\],A1\.7
-.*:	e8 60 38 b2 	          SETB      \[A0FrP\+\+#-32\],A1\.7
-.*:	88 7f 38 b2 	          SETB      \[--A1LbP\],A1\.7
-.*:	e8 7f 38 b2 	          SETB      \[--A0FrP\],A1\.7
-.*:	26 df 39 b2 	          SETB      \[D0\.7\+#31\],A0\.7
-.*:	66 df 39 b2 	          SETB      \[A0\.7\+#31\],A0\.7
-.*:	88 df 39 b2 	          SETB      \[A1\.7\+\+#31\],A1\.7
-.*:	a8 df 39 b2 	          SETB      \[D0\.7\+\+#31\],A1\.7
-.*:	c8 df 39 b2 	          SETB      \[D1\.7\+\+#31\],A1\.7
-.*:	e8 df 39 b2 	          SETB      \[A0\.7\+\+#31\],A1\.7
-.*:	26 e0 39 b2 	          SETB      \[D0\.7\+#-32\],A0\.7
-.*:	66 e0 39 b2 	          SETB      \[A0\.7\+#-32\],A0\.7
-.*:	88 e0 39 b2 	          SETB      \[A1\.7\+\+#-32\],A1\.7
-.*:	a8 e0 39 b2 	          SETB      \[D0\.7\+\+#-32\],A1\.7
-.*:	c8 e0 39 b2 	          SETB      \[D1\.7\+\+#-32\],A1\.7
-.*:	e8 e0 39 b2 	          SETB      \[A0\.7\+\+#-32\],A1\.7
-.*:	26 ff 39 b2 	          SETB      \[D0\.7\+#-1\],A0\.7
-.*:	66 ff 39 b2 	          SETB      \[A0\.7\+#-1\],A0\.7
-.*:	88 ff 39 b2 	          SETB      \[--A1\.7\],A1\.7
-.*:	a8 ff 39 b2 	          SETB      \[--D0\.7\],A1\.7
-.*:	c8 ff 39 b2 	          SETB      \[--D1\.7\],A1\.7
-.*:	e8 ff 39 b2 	          SETB      \[--A0\.7\],A1\.7
-.*:	2c 20 80 b2 	          SETB      \[D0Re0\+#-32\],RD
-.*:	ac 3f 80 b2 	          SETB      \[--D0Re0\],RD
-.*:	ec 5f 80 b2 	          SETB      \[A0FrP\+\+#31\],RD
-.*:	0c 7f 80 b2 	          SETB      \[A1LbP\+#-1\],RD
-.*:	4c df 81 b2 	          SETB      \[D1\.7\+#31\],RD
-.*:	ec df 81 b2 	          SETB      \[A0\.7\+\+#31\],RD
-.*:	ac e0 81 b2 	          SETB      \[D0\.7\+\+#-32\],RD
-.*:	4c ff 81 b2 	          SETB      \[D1\.7\+#-1\],RD
-.*:	ec ff 81 b2 	          SETB      \[--A0\.7\],RD
-.*:	c4 1f 00 b3 	          SETW      \[D1Re0\+\+#62\],D1Re0
-.*:	c4 20 00 b3 	          SETW      \[D1Re0\+\+#-64\],D1Re0
-.*:	c4 3f 00 b3 	          SETW      \[--D1Re0\],D1Re0
-.*:	e4 5f 00 b3 	          SETW      \[A0FrP\+\+#62\],D1Re0
-.*:	e4 60 00 b3 	          SETW      \[A0FrP\+\+#-64\],D1Re0
-.*:	e4 7f 00 b3 	          SETW      \[--A0FrP\],D1Re0
-.*:	62 df 01 b3 	          SETW      \[A0\.7\+#62\],D0Re0
-.*:	a4 df 01 b3 	          SETW      \[D0\.7\+\+#62\],D1Re0
-.*:	e4 df 01 b3 	          SETW      \[A0\.7\+\+#62\],D1Re0
-.*:	62 e0 01 b3 	          SETW      \[A0\.7\+#-64\],D0Re0
-.*:	a4 e0 01 b3 	          SETW      \[D0\.7\+\+#-64\],D1Re0
-.*:	e4 e0 01 b3 	          SETW      \[A0\.7\+\+#-64\],D1Re0
-.*:	62 ff 01 b3 	          SETW      \[A0\.7\+#-2\],D0Re0
-.*:	a4 ff 01 b3 	          SETW      \[--D0\.7\],D1Re0
-.*:	e4 ff 01 b3 	          SETW      \[--A0\.7\],D1Re0
-.*:	c8 1f 08 b3 	          SETW      \[D1Re0\+\+#62\],A1LbP
-.*:	c8 20 08 b3 	          SETW      \[D1Re0\+\+#-64\],A1LbP
-.*:	c8 3f 08 b3 	          SETW      \[--D1Re0\],A1LbP
-.*:	e8 5f 08 b3 	          SETW      \[A0FrP\+\+#62\],A1LbP
-.*:	e8 60 08 b3 	          SETW      \[A0FrP\+\+#-64\],A1LbP
-.*:	e8 7f 08 b3 	          SETW      \[--A0FrP\],A1LbP
-.*:	66 df 09 b3 	          SETW      \[A0\.7\+#62\],A0FrP
-.*:	a8 df 09 b3 	          SETW      \[D0\.7\+\+#62\],A1LbP
-.*:	e8 df 09 b3 	          SETW      \[A0\.7\+\+#62\],A1LbP
-.*:	66 e0 09 b3 	          SETW      \[A0\.7\+#-64\],A0FrP
-.*:	a8 e0 09 b3 	          SETW      \[D0\.7\+\+#-64\],A1LbP
-.*:	e8 e0 09 b3 	          SETW      \[A0\.7\+\+#-64\],A1LbP
-.*:	66 ff 09 b3 	          SETW      \[A0\.7\+#-2\],A0FrP
-.*:	a8 ff 09 b3 	          SETW      \[--D0\.7\],A1LbP
-.*:	e8 ff 09 b3 	          SETW      \[--A0\.7\],A1LbP
-.*:	a8 1f 38 b3 	          SETW      \[D0Re0\+\+#62\],A1\.7
-.*:	c8 1f 38 b3 	          SETW      \[D1Re0\+\+#62\],A1\.7
-.*:	a8 20 38 b3 	          SETW      \[D0Re0\+\+#-64\],A1\.7
-.*:	c8 20 38 b3 	          SETW      \[D1Re0\+\+#-64\],A1\.7
-.*:	a8 3f 38 b3 	          SETW      \[--D0Re0\],A1\.7
-.*:	c8 3f 38 b3 	          SETW      \[--D1Re0\],A1\.7
-.*:	88 5f 38 b3 	          SETW      \[A1LbP\+\+#62\],A1\.7
-.*:	e8 5f 38 b3 	          SETW      \[A0FrP\+\+#62\],A1\.7
-.*:	88 60 38 b3 	          SETW      \[A1LbP\+\+#-64\],A1\.7
-.*:	e8 60 38 b3 	          SETW      \[A0FrP\+\+#-64\],A1\.7
-.*:	88 7f 38 b3 	          SETW      \[--A1LbP\],A1\.7
-.*:	e8 7f 38 b3 	          SETW      \[--A0FrP\],A1\.7
-.*:	26 df 39 b3 	          SETW      \[D0\.7\+#62\],A0\.7
-.*:	66 df 39 b3 	          SETW      \[A0\.7\+#62\],A0\.7
-.*:	88 df 39 b3 	          SETW      \[A1\.7\+\+#62\],A1\.7
-.*:	a8 df 39 b3 	          SETW      \[D0\.7\+\+#62\],A1\.7
-.*:	c8 df 39 b3 	          SETW      \[D1\.7\+\+#62\],A1\.7
-.*:	e8 df 39 b3 	          SETW      \[A0\.7\+\+#62\],A1\.7
-.*:	26 e0 39 b3 	          SETW      \[D0\.7\+#-64\],A0\.7
-.*:	66 e0 39 b3 	          SETW      \[A0\.7\+#-64\],A0\.7
-.*:	88 e0 39 b3 	          SETW      \[A1\.7\+\+#-64\],A1\.7
-.*:	a8 e0 39 b3 	          SETW      \[D0\.7\+\+#-64\],A1\.7
-.*:	c8 e0 39 b3 	          SETW      \[D1\.7\+\+#-64\],A1\.7
-.*:	e8 e0 39 b3 	          SETW      \[A0\.7\+\+#-64\],A1\.7
-.*:	26 ff 39 b3 	          SETW      \[D0\.7\+#-2\],A0\.7
-.*:	66 ff 39 b3 	          SETW      \[A0\.7\+#-2\],A0\.7
-.*:	88 ff 39 b3 	          SETW      \[--A1\.7\],A1\.7
-.*:	a8 ff 39 b3 	          SETW      \[--D0\.7\],A1\.7
-.*:	c8 ff 39 b3 	          SETW      \[--D1\.7\],A1\.7
-.*:	e8 ff 39 b3 	          SETW      \[--A0\.7\],A1\.7
-.*:	2c 20 80 b3 	          SETW      \[D0Re0\+#-64\],RD
-.*:	ac 3f 80 b3 	          SETW      \[--D0Re0\],RD
-.*:	ec 5f 80 b3 	          SETW      \[A0FrP\+\+#62\],RD
-.*:	0c 7f 80 b3 	          SETW      \[A1LbP\+#-2\],RD
-.*:	4c df 81 b3 	          SETW      \[D1\.7\+#62\],RD
-.*:	ec df 81 b3 	          SETW      \[A0\.7\+\+#62\],RD
-.*:	ac e0 81 b3 	          SETW      \[D0\.7\+\+#-64\],RD
-.*:	4c ff 81 b3 	          SETW      \[D1\.7\+#-2\],RD
-.*:	ec ff 81 b3 	          SETW      \[--A0\.7\],RD
-.*:	4a 00 00 b4 	          SETD      \[D1Re0\+D1Re0\],PC
-.*:	ae 00 00 b4 	          SETD      \[D0Re0\+\+D0Re0\],TXSTAT
-.*:	ce 00 00 b4 	          SETD      \[D1Re0\+\+D1Re0\],TXSTAT
-.*:	4a 0e 00 b4 	          SETD      \[D1Re0\+D1\.7\],PC
-.*:	ae 0e 00 b4 	          SETD      \[D0Re0\+\+D0\.7\],TXSTAT
-.*:	ce 0e 00 b4 	          SETD      \[D1Re0\+\+D1\.7\],TXSTAT
-.*:	62 42 00 b4 	          SETD      \[A0FrP\+A0FrP\],D0Re0
-.*:	84 42 00 b4 	          SETD      \[A1LbP\+\+A1LbP\],D1Re0
-.*:	e2 42 00 b4 	          SETD      \[A0FrP\+\+A0FrP\],D0Re0
-.*:	00 4e 00 b4 	          SETD      \[A1LbP\+A1\.7\],TXENABLE
-.*:	6a 4e 00 b4 	          SETD      \[A0FrP\+A0\.7\],PC
-.*:	8a 4e 00 b4 	          SETD      \[A1LbP\+\+A1\.7\],PC
-.*:	e4 4e 00 b4 	          SETD      \[A0FrP\+\+A0\.7\],D1Re0
-.*:	2a c0 01 b4 	          SETD      \[D0\.7\+D0Re0\],PC
-.*:	a4 c0 01 b4 	          SETD      \[D0\.7\+\+D0Re0\],D1Re0
-.*:	c2 c0 01 b4 	          SETD      \[D1\.7\+\+D1Re0\],D0Re0
-.*:	04 c2 01 b4 	          SETD      \[A1\.7\+A1LbP\],D1Re0
-.*:	80 c2 01 b4 	          SETD      \[A1\.7\+\+A1LbP\],TXENABLE
-.*:	8e c2 01 b4 	          SETD      \[A1\.7\+\+A1LbP\],TXSTAT
-.*:	ea c2 01 b4 	          SETD      \[A0\.7\+\+A0FrP\],PC
-.*:	0e ce 01 b4 	          SETD      \[A1\.7\+A1\.7\],TXSTAT
-.*:	4e ce 01 b4 	          SETD      \[D1\.7\+D1\.7\],TXSTAT
-.*:	82 ce 01 b4 	          SETD      \[A1\.7\+\+A1\.7\],D0Re0
-.*:	a0 ce 01 b4 	          SETD      \[D0\.7\+\+D0\.7\],TXENABLE
-.*:	c0 ce 01 b4 	          SETD      \[D1\.7\+\+D1\.7\],TXENABLE
-.*:	e0 ce 01 b4 	          SETD      \[A0\.7\+\+A0\.7\],TXENABLE
-.*:	ee ce 01 b4 	          SETD      \[A0\.7\+\+A0\.7\],TXSTAT
-.*:	a6 00 08 b4 	          SETD      \[D0Re0\+\+D0Re0\],A0FrP
-.*:	c8 00 08 b4 	          SETD      \[D1Re0\+\+D1Re0\],A1LbP
-.*:	48 0e 08 b4 	          SETD      \[D1Re0\+D1\.7\],A1LbP
-.*:	c6 0e 08 b4 	          SETD      \[D1Re0\+\+D1\.7\],A0FrP
-.*:	68 42 08 b4 	          SETD      \[A0FrP\+A0FrP\],A1LbP
-.*:	ea 42 08 b4 	          SETD      \[A0FrP\+\+A0FrP\],PCX
-.*:	8a 4e 08 b4 	          SETD      \[A1LbP\+\+A1\.7\],PCX
-.*:	2a c0 09 b4 	          SETD      \[D0\.7\+D0Re0\],PCX
-.*:	aa c0 09 b4 	          SETD      \[D0\.7\+\+D0Re0\],PCX
-.*:	06 c2 09 b4 	          SETD      \[A1\.7\+A1LbP\],A0FrP
-.*:	e8 c2 09 b4 	          SETD      \[A0\.7\+\+A0FrP\],A1LbP
-.*:	2a ce 09 b4 	          SETD      \[D0\.7\+D0\.7\],PCX
-.*:	8a ce 09 b4 	          SETD      \[A1\.7\+\+A1\.7\],PCX
-.*:	c6 ce 09 b4 	          SETD      \[D1\.7\+\+D1\.7\],A0FrP
-.*:	ea ce 09 b4 	          SETD      \[A0\.7\+\+A0\.7\],PCX
-.*:	2e 0e 18 b4 	          SETD      \[D0Re0\+D0\.7\],TXMASKI
-.*:	8e 42 18 b4 	          SETD      \[A1LbP\+\+A1LbP\],TXMASKI
-.*:	ee 4e 18 b4 	          SETD      \[A0FrP\+\+A0\.7\],TXMASKI
-.*:	0e c2 19 b4 	          SETD      \[A1\.7\+A1LbP\],TXMASKI
-.*:	4e ce 19 b4 	          SETD      \[D1\.7\+D1\.7\],TXMASKI
-.*:	ee ce 19 b4 	          SETD      \[A0\.7\+\+A0\.7\],TXMASKI
-.*:	2e 0e 30 b4 	          SETD      \[D0Re0\+D0\.7\],TXPOLLI
-.*:	8e 42 30 b4 	          SETD      \[A1LbP\+\+A1LbP\],TXPOLLI
-.*:	ee 4e 30 b4 	          SETD      \[A0FrP\+\+A0\.7\],TXPOLLI
-.*:	0e c2 31 b4 	          SETD      \[A1\.7\+A1LbP\],TXPOLLI
-.*:	4e ce 31 b4 	          SETD      \[D1\.7\+D1\.7\],TXPOLLI
-.*:	ee ce 31 b4 	          SETD      \[A0\.7\+\+A0\.7\],TXPOLLI
-.*:	a4 00 38 b4 	          SETD      \[D0Re0\+\+D0Re0\],D1\.7
-.*:	c6 00 38 b4 	          SETD      \[D1Re0\+\+D1Re0\],A0\.7
-.*:	46 0e 38 b4 	          SETD      \[D1Re0\+D1\.7\],A0\.7
-.*:	c2 0e 38 b4 	          SETD      \[D1Re0\+\+D1\.7\],D0\.7
-.*:	06 42 38 b4 	          SETD      \[A1LbP\+A1LbP\],A0\.7
-.*:	86 42 38 b4 	          SETD      \[A1LbP\+\+A1LbP\],A0\.7
-.*:	02 4e 38 b4 	          SETD      \[A1LbP\+A1\.7\],D0\.7
-.*:	84 4e 38 b4 	          SETD      \[A1LbP\+\+A1\.7\],D1\.7
-.*:	e8 4e 38 b4 	          SETD      \[A0FrP\+\+A0\.7\],A1\.7
-.*:	a4 c0 39 b4 	          SETD      \[D0\.7\+\+D0Re0\],D1\.7
-.*:	c6 c0 39 b4 	          SETD      \[D1\.7\+\+D1Re0\],A0\.7
-.*:	64 c2 39 b4 	          SETD      \[A0\.7\+A0FrP\],D1\.7
-.*:	e2 c2 39 b4 	          SETD      \[A0\.7\+\+A0FrP\],D0\.7
-.*:	06 ce 39 b4 	          SETD      \[A1\.7\+A1\.7\],A0\.7
-.*:	64 ce 39 b4 	          SETD      \[A0\.7\+A0\.7\],D1\.7
-.*:	a4 ce 39 b4 	          SETD      \[D0\.7\+\+D0\.7\],D1\.7
-.*:	c6 ce 39 b4 	          SETD      \[D1\.7\+\+D1\.7\],A0\.7
-.*:	e8 ce 39 b4 	          SETD      \[A0\.7\+\+A0\.7\],A1\.7
-.*:	a6 00 80 b4 	          SETD      \[D0Re0\+\+D0Re0\],CPC0
-.*:	c8 00 80 b4 	          SETD      \[D1Re0\+\+D1Re0\],CPC1
-.*:	48 0e 80 b4 	          SETD      \[D1Re0\+D1\.7\],CPC1
-.*:	c6 0e 80 b4 	          SETD      \[D1Re0\+\+D1\.7\],CPC0
-.*:	68 42 80 b4 	          SETD      \[A0FrP\+A0FrP\],CPC1
-.*:	ec 42 80 b4 	          SETD      \[A0FrP\+\+A0FrP\],RD
-.*:	8c 4e 80 b4 	          SETD      \[A1LbP\+\+A1\.7\],RD
-.*:	2c c0 81 b4 	          SETD      \[D0\.7\+D0Re0\],RD
-.*:	ac c0 81 b4 	          SETD      \[D0\.7\+\+D0Re0\],RD
-.*:	06 c2 81 b4 	          SETD      \[A1\.7\+A1LbP\],CPC0
-.*:	e8 c2 81 b4 	          SETD      \[A0\.7\+\+A0FrP\],CPC1
-.*:	2c ce 81 b4 	          SETD      \[D0\.7\+D0\.7\],RD
-.*:	8c ce 81 b4 	          SETD      \[A1\.7\+\+A1\.7\],RD
-.*:	c6 ce 81 b4 	          SETD      \[D1\.7\+\+D1\.7\],CPC0
-.*:	ec ce 81 b4 	          SETD      \[A0\.7\+\+A0\.7\],RD
-.*:	20 0e f8 b4 	          SETD      \[D0Re0\+D0\.7\],TXIDLECYC
-.*:	80 42 f8 b4 	          SETD      \[A1LbP\+\+A1LbP\],TXIDLECYC
-.*:	e0 4e f8 b4 	          SETD      \[A0FrP\+\+A0\.7\],TXIDLECYC
-.*:	00 c2 f9 b4 	          SETD      \[A1\.7\+A1LbP\],TXIDLECYC
-.*:	40 ce f9 b4 	          SETD      \[D1\.7\+D1\.7\],TXIDLECYC
-.*:	e0 ce f9 b4 	          SETD      \[A0\.7\+\+A0\.7\],TXIDLECYC
-.*:	84 42 00 b5 	          SETL      \[A1LbP\+\+A1LbP\],D1Re0,D0Re0
-.*:	62 4e 00 b5 	          SETL      \[A0FrP\+A0\.7\],D0Re0,D1Re0
-.*:	e4 4e 00 b5 	          SETL      \[A0FrP\+\+A0\.7\],D1Re0,D0Re0
-.*:	84 c2 01 b5 	          SETL      \[A1\.7\+\+A1LbP\],D1Re0,D0Re0
-.*:	62 ce 01 b5 	          SETL      \[A0\.7\+A0\.7\],D0Re0,D1Re0
-.*:	e4 ce 01 b5 	          SETL      \[A0\.7\+\+A0\.7\],D1Re0,D0Re0
-.*:	a8 00 08 b5 	          SETL      \[D0Re0\+\+D0Re0\],A1LbP,A0FrP
-.*:	46 0e 08 b5 	          SETL      \[D1Re0\+D1\.7\],A0FrP,A1LbP
-.*:	c8 0e 08 b5 	          SETL      \[D1Re0\+\+D1\.7\],A1LbP,A0FrP
-.*:	a8 c0 09 b5 	          SETL      \[D0\.7\+\+D0Re0\],A1LbP,A0FrP
-.*:	46 ce 09 b5 	          SETL      \[D1\.7\+D1\.7\],A0FrP,A1LbP
-.*:	c8 ce 09 b5 	          SETL      \[D1\.7\+\+D1\.7\],A1LbP,A0FrP
-.*:	a8 00 38 b5 	          SETL      \[D0Re0\+\+D0Re0\],A1\.7,A0\.7
-.*:	46 0e 38 b5 	          SETL      \[D1Re0\+D1\.7\],A0\.7,A1\.7
-.*:	c8 0e 38 b5 	          SETL      \[D1Re0\+\+D1\.7\],A1\.7,A0\.7
-.*:	84 42 38 b5 	          SETL      \[A1LbP\+\+A1LbP\],D1\.7,D0\.7
-.*:	62 4e 38 b5 	          SETL      \[A0FrP\+A0\.7\],D0\.7,D1\.7
-.*:	e4 4e 38 b5 	          SETL      \[A0FrP\+\+A0\.7\],D1\.7,D0\.7
-.*:	a8 c0 39 b5 	          SETL      \[D0\.7\+\+D0Re0\],A1\.7,A0\.7
-.*:	62 c2 39 b5 	          SETL      \[A0\.7\+A0FrP\],D0\.7,D1\.7
-.*:	e4 c2 39 b5 	          SETL      \[A0\.7\+\+A0FrP\],D1\.7,D0\.7
-.*:	62 ce 39 b5 	          SETL      \[A0\.7\+A0\.7\],D0\.7,D1\.7
-.*:	a8 ce 39 b5 	          SETL      \[D0\.7\+\+D0\.7\],A1\.7,A0\.7
-.*:	e4 ce 39 b5 	          SETL      \[A0\.7\+\+A0\.7\],D1\.7,D0\.7
-.*:	2c 0e 80 b5 	          SETL      \[D0Re0\+D0\.7\],RD
-.*:	8c 42 80 b5 	          SETL      \[A1LbP\+\+A1LbP\],RD
-.*:	ec 4e 80 b5 	          SETL      \[A0FrP\+\+A0\.7\],RD
-.*:	0c c2 81 b5 	          SETL      \[A1\.7\+A1LbP\],RD
-.*:	4c ce 81 b5 	          SETL      \[D1\.7\+D1\.7\],RD
-.*:	ec ce 81 b5 	          SETL      \[A0\.7\+\+A0\.7\],RD
-.*:	a0 1f 00 b6 	          SETD      \[D0Re0\+\+#124\],TXENABLE
-.*:	ae 1f 00 b6 	          SETD      \[D0Re0\+\+#124\],TXSTAT
-.*:	ca 1f 00 b6 	          SETD      \[D1Re0\+\+#124\],PC
-.*:	4a 20 00 b6 	          SETD      \[D1Re0\+#-128\],PC
-.*:	aa 20 00 b6 	          SETD      \[D0Re0\+\+#-128\],PC
-.*:	c4 20 00 b6 	          SETD      \[D1Re0\+\+#-128\],D1Re0
-.*:	2e 3f 00 b6 	          SETD      \[D0Re0\+#-4\],TXSTAT
-.*:	a4 3f 00 b6 	          SETD      \[--D0Re0\],D1Re0
-.*:	c2 3f 00 b6 	          SETD      \[--D1Re0\],D0Re0
-.*:	00 5f 00 b6 	          SETD      \[A1LbP\+#124\],TXENABLE
-.*:	82 5f 00 b6 	          SETD      \[A1LbP\+\+#124\],D0Re0
-.*:	e0 5f 00 b6 	          SETD      \[A0FrP\+\+#124\],TXENABLE
-.*:	ee 5f 00 b6 	          SETD      \[A0FrP\+\+#124\],TXSTAT
-.*:	80 60 00 b6 	          SETD      \[A1LbP\+\+#-128\],TXENABLE
-.*:	8e 60 00 b6 	          SETD      \[A1LbP\+\+#-128\],TXSTAT
-.*:	ea 60 00 b6 	          SETD      \[A0FrP\+\+#-128\],PC
-.*:	6a 7f 00 b6 	          SETD      \[A0FrP\+#-4\],PC
-.*:	8a 7f 00 b6 	          SETD      \[--A1LbP\],PC
-.*:	e4 7f 00 b6 	          SETD      \[--A0FrP\],D1Re0
-.*:	04 df 01 b6 	          SETD      \[A1\.7\+#124\],D1Re0
-.*:	40 df 01 b6 	          SETD      \[D1\.7\+#124\],TXENABLE
-.*:	6a df 01 b6 	          SETD      \[A0\.7\+#124\],PC
-.*:	8a df 01 b6 	          SETD      \[A1\.7\+\+#124\],PC
-.*:	a4 df 01 b6 	          SETD      \[D0\.7\+\+#124\],D1Re0
-.*:	c2 df 01 b6 	          SETD      \[D1\.7\+\+#124\],D0Re0
-.*:	e0 df 01 b6 	          SETD      \[A0\.7\+\+#124\],TXENABLE
-.*:	ee df 01 b6 	          SETD      \[A0\.7\+\+#124\],TXSTAT
-.*:	22 e0 01 b6 	          SETD      \[D0\.7\+#-128\],D0Re0
-.*:	4e e0 01 b6 	          SETD      \[D1\.7\+#-128\],TXSTAT
-.*:	82 e0 01 b6 	          SETD      \[A1\.7\+\+#-128\],D0Re0
-.*:	a0 e0 01 b6 	          SETD      \[D0\.7\+\+#-128\],TXENABLE
-.*:	ae e0 01 b6 	          SETD      \[D0\.7\+\+#-128\],TXSTAT
-.*:	ca e0 01 b6 	          SETD      \[D1\.7\+\+#-128\],PC
-.*:	e4 e0 01 b6 	          SETD      \[A0\.7\+\+#-128\],D1Re0
-.*:	04 ff 01 b6 	          SETD      \[A1\.7\+#-4\],D1Re0
-.*:	40 ff 01 b6 	          SETD      \[D1\.7\+#-4\],TXENABLE
-.*:	6a ff 01 b6 	          SETD      \[A0\.7\+#-4\],PC
-.*:	8a ff 01 b6 	          SETD      \[--A1\.7\],PC
-.*:	a4 ff 01 b6 	          SETD      \[--D0\.7\],D1Re0
-.*:	c2 ff 01 b6 	          SETD      \[--D1\.7\],D0Re0
-.*:	e0 ff 01 b6 	          SETD      \[--A0\.7\],TXENABLE
-.*:	ee ff 01 b6 	          SETD      \[--A0\.7\],TXSTAT
-.*:	aa 1f 08 b6 	          SETD      \[D0Re0\+\+#124\],PCX
-.*:	2a 20 08 b6 	          SETD      \[D0Re0\+#-128\],PCX
-.*:	c6 20 08 b6 	          SETD      \[D1Re0\+\+#-128\],A0FrP
-.*:	a6 3f 08 b6 	          SETD      \[--D0Re0\],A0FrP
-.*:	c8 3f 08 b6 	          SETD      \[--D1Re0\],A1LbP
-.*:	88 5f 08 b6 	          SETD      \[A1LbP\+\+#124\],A1LbP
-.*:	ea 5f 08 b6 	          SETD      \[A0FrP\+\+#124\],PCX
-.*:	8a 60 08 b6 	          SETD      \[A1LbP\+\+#-128\],PCX
-.*:	0a 7f 08 b6 	          SETD      \[A1LbP\+#-4\],PCX
-.*:	e6 7f 08 b6 	          SETD      \[--A0FrP\],A0FrP
-.*:	0a df 09 b6 	          SETD      \[A1\.7\+#124\],PCX
-.*:	68 df 09 b6 	          SETD      \[A0\.7\+#124\],A1LbP
-.*:	a6 df 09 b6 	          SETD      \[D0\.7\+\+#124\],A0FrP
-.*:	c8 df 09 b6 	          SETD      \[D1\.7\+\+#124\],A1LbP
-.*:	ea df 09 b6 	          SETD      \[A0\.7\+\+#124\],PCX
-.*:	46 e0 09 b6 	          SETD      \[D1\.7\+#-128\],A0FrP
-.*:	88 e0 09 b6 	          SETD      \[A1\.7\+\+#-128\],A1LbP
-.*:	aa e0 09 b6 	          SETD      \[D0\.7\+\+#-128\],PCX
-.*:	e6 e0 09 b6 	          SETD      \[A0\.7\+\+#-128\],A0FrP
-.*:	0a ff 09 b6 	          SETD      \[A1\.7\+#-4\],PCX
-.*:	68 ff 09 b6 	          SETD      \[A0\.7\+#-4\],A1LbP
-.*:	a6 ff 09 b6 	          SETD      \[--D0\.7\],A0FrP
-.*:	c8 ff 09 b6 	          SETD      \[--D1\.7\],A1LbP
-.*:	ea ff 09 b6 	          SETD      \[--A0\.7\],PCX
-.*:	2e 20 18 b6 	          SETD      \[D0Re0\+#-128\],TXMASKI
-.*:	ae 3f 18 b6 	          SETD      \[--D0Re0\],TXMASKI
-.*:	ee 5f 18 b6 	          SETD      \[A0FrP\+\+#124\],TXMASKI
-.*:	0e 7f 18 b6 	          SETD      \[A1LbP\+#-4\],TXMASKI
-.*:	4e df 19 b6 	          SETD      \[D1\.7\+#124\],TXMASKI
-.*:	ee df 19 b6 	          SETD      \[A0\.7\+\+#124\],TXMASKI
-.*:	ae e0 19 b6 	          SETD      \[D0\.7\+\+#-128\],TXMASKI
-.*:	4e ff 19 b6 	          SETD      \[D1\.7\+#-4\],TXMASKI
-.*:	ee ff 19 b6 	          SETD      \[--A0\.7\],TXMASKI
-.*:	2e 20 30 b6 	          SETD      \[D0Re0\+#-128\],TXPOLLI
-.*:	ae 3f 30 b6 	          SETD      \[--D0Re0\],TXPOLLI
-.*:	ee 5f 30 b6 	          SETD      \[A0FrP\+\+#124\],TXPOLLI
-.*:	0e 7f 30 b6 	          SETD      \[A1LbP\+#-4\],TXPOLLI
-.*:	4e df 31 b6 	          SETD      \[D1\.7\+#124\],TXPOLLI
-.*:	ee df 31 b6 	          SETD      \[A0\.7\+\+#124\],TXPOLLI
-.*:	ae e0 31 b6 	          SETD      \[D0\.7\+\+#-128\],TXPOLLI
-.*:	4e ff 31 b6 	          SETD      \[D1\.7\+#-4\],TXPOLLI
-.*:	ee ff 31 b6 	          SETD      \[--A0\.7\],TXPOLLI
-.*:	a8 1f 38 b6 	          SETD      \[D0Re0\+\+#124\],A1\.7
-.*:	c8 1f 38 b6 	          SETD      \[D1Re0\+\+#124\],A1\.7
-.*:	a8 20 38 b6 	          SETD      \[D0Re0\+\+#-128\],A1\.7
-.*:	c8 20 38 b6 	          SETD      \[D1Re0\+\+#-128\],A1\.7
-.*:	a8 3f 38 b6 	          SETD      \[--D0Re0\],A1\.7
-.*:	c8 3f 38 b6 	          SETD      \[--D1Re0\],A1\.7
-.*:	88 5f 38 b6 	          SETD      \[A1LbP\+\+#124\],A1\.7
-.*:	e8 5f 38 b6 	          SETD      \[A0FrP\+\+#124\],A1\.7
-.*:	88 60 38 b6 	          SETD      \[A1LbP\+\+#-128\],A1\.7
-.*:	e8 60 38 b6 	          SETD      \[A0FrP\+\+#-128\],A1\.7
-.*:	88 7f 38 b6 	          SETD      \[--A1LbP\],A1\.7
-.*:	e8 7f 38 b6 	          SETD      \[--A0FrP\],A1\.7
-.*:	26 df 39 b6 	          SETD      \[D0\.7\+#124\],A0\.7
-.*:	66 df 39 b6 	          SETD      \[A0\.7\+#124\],A0\.7
-.*:	88 df 39 b6 	          SETD      \[A1\.7\+\+#124\],A1\.7
-.*:	a8 df 39 b6 	          SETD      \[D0\.7\+\+#124\],A1\.7
-.*:	c8 df 39 b6 	          SETD      \[D1\.7\+\+#124\],A1\.7
-.*:	e8 df 39 b6 	          SETD      \[A0\.7\+\+#124\],A1\.7
-.*:	26 e0 39 b6 	          SETD      \[D0\.7\+#-128\],A0\.7
-.*:	66 e0 39 b6 	          SETD      \[A0\.7\+#-128\],A0\.7
-.*:	88 e0 39 b6 	          SETD      \[A1\.7\+\+#-128\],A1\.7
-.*:	a8 e0 39 b6 	          SETD      \[D0\.7\+\+#-128\],A1\.7
-.*:	c8 e0 39 b6 	          SETD      \[D1\.7\+\+#-128\],A1\.7
-.*:	e8 e0 39 b6 	          SETD      \[A0\.7\+\+#-128\],A1\.7
-.*:	26 ff 39 b6 	          SETD      \[D0\.7\+#-4\],A0\.7
-.*:	66 ff 39 b6 	          SETD      \[A0\.7\+#-4\],A0\.7
-.*:	88 ff 39 b6 	          SETD      \[--A1\.7\],A1\.7
-.*:	a8 ff 39 b6 	          SETD      \[--D0\.7\],A1\.7
-.*:	c8 ff 39 b6 	          SETD      \[--D1\.7\],A1\.7
-.*:	e8 ff 39 b6 	          SETD      \[--A0\.7\],A1\.7
-.*:	ac 1f 80 b6 	          SETD      \[D0Re0\+\+#124\],RD
-.*:	2c 20 80 b6 	          SETD      \[D0Re0\+#-128\],RD
-.*:	c6 20 80 b6 	          SETD      \[D1Re0\+\+#-128\],CPC0
-.*:	a6 3f 80 b6 	          SETD      \[--D0Re0\],CPC0
-.*:	c8 3f 80 b6 	          SETD      \[--D1Re0\],CPC1
-.*:	88 5f 80 b6 	          SETD      \[A1LbP\+\+#124\],CPC1
-.*:	ec 5f 80 b6 	          SETD      \[A0FrP\+\+#124\],RD
-.*:	8c 60 80 b6 	          SETD      \[A1LbP\+\+#-128\],RD
-.*:	0c 7f 80 b6 	          SETD      \[A1LbP\+#-4\],RD
-.*:	e6 7f 80 b6 	          SETD      \[--A0FrP\],CPC0
-.*:	0c df 81 b6 	          SETD      \[A1\.7\+#124\],RD
-.*:	68 df 81 b6 	          SETD      \[A0\.7\+#124\],CPC1
-.*:	a6 df 81 b6 	          SETD      \[D0\.7\+\+#124\],CPC0
-.*:	c8 df 81 b6 	          SETD      \[D1\.7\+\+#124\],CPC1
-.*:	ec df 81 b6 	          SETD      \[A0\.7\+\+#124\],RD
-.*:	46 e0 81 b6 	          SETD      \[D1\.7\+#-128\],CPC0
-.*:	88 e0 81 b6 	          SETD      \[A1\.7\+\+#-128\],CPC1
-.*:	ac e0 81 b6 	          SETD      \[D0\.7\+\+#-128\],RD
-.*:	e6 e0 81 b6 	          SETD      \[A0\.7\+\+#-128\],CPC0
-.*:	0c ff 81 b6 	          SETD      \[A1\.7\+#-4\],RD
-.*:	68 ff 81 b6 	          SETD      \[A0\.7\+#-4\],CPC1
-.*:	a6 ff 81 b6 	          SETD      \[--D0\.7\],CPC0
-.*:	c8 ff 81 b6 	          SETD      \[--D1\.7\],CPC1
-.*:	ec ff 81 b6 	          SETD      \[--A0\.7\],RD
-.*:	20 20 f8 b6 	          SETD      \[D0Re0\+#-128\],TXIDLECYC
-.*:	a0 3f f8 b6 	          SETD      \[--D0Re0\],TXIDLECYC
-.*:	e0 5f f8 b6 	          SETD      \[A0FrP\+\+#124\],TXIDLECYC
-.*:	00 7f f8 b6 	          SETD      \[A1LbP\+#-4\],TXIDLECYC
-.*:	40 df f9 b6 	          SETD      \[D1\.7\+#124\],TXIDLECYC
-.*:	e0 df f9 b6 	          SETD      \[A0\.7\+\+#124\],TXIDLECYC
-.*:	a0 e0 f9 b6 	          SETD      \[D0\.7\+\+#-128\],TXIDLECYC
-.*:	40 ff f9 b6 	          SETD      \[D1\.7\+#-4\],TXIDLECYC
-.*:	e0 ff f9 b6 	          SETD      \[--A0\.7\],TXIDLECYC
-.*:	c4 1f 00 b7 	          SETL      \[D1Re0\+\+#248\],D1Re0,D0Re0
-.*:	c4 20 00 b7 	          SETL      \[D1Re0\+\+#-256\],D1Re0,D0Re0
-.*:	c4 3f 00 b7 	          SETL      \[--D1Re0\],D1Re0,D0Re0
-.*:	e4 5f 00 b7 	          SETL      \[A0FrP\+\+#248\],D1Re0,D0Re0
-.*:	e4 60 00 b7 	          SETL      \[A0FrP\+\+#-256\],D1Re0,D0Re0
-.*:	e4 7f 00 b7 	          SETL      \[--A0FrP\],D1Re0,D0Re0
-.*:	62 df 01 b7 	          SETL      \[A0\.7\+#248\],D0Re0,D1Re0
-.*:	a4 df 01 b7 	          SETL      \[D0\.7\+\+#248\],D1Re0,D0Re0
-.*:	e4 df 01 b7 	          SETL      \[A0\.7\+\+#248\],D1Re0,D0Re0
-.*:	62 e0 01 b7 	          SETL      \[A0\.7\+#-256\],D0Re0,D1Re0
-.*:	a4 e0 01 b7 	          SETL      \[D0\.7\+\+#-256\],D1Re0,D0Re0
-.*:	e4 e0 01 b7 	          SETL      \[A0\.7\+\+#-256\],D1Re0,D0Re0
-.*:	62 ff 01 b7 	          SETL      \[A0\.7\+#-8\],D0Re0,D1Re0
-.*:	a4 ff 01 b7 	          SETL      \[--D0\.7\],D1Re0,D0Re0
-.*:	e4 ff 01 b7 	          SETL      \[--A0\.7\],D1Re0,D0Re0
-.*:	c8 1f 08 b7 	          SETL      \[D1Re0\+\+#248\],A1LbP,A0FrP
-.*:	c8 20 08 b7 	          SETL      \[D1Re0\+\+#-256\],A1LbP,A0FrP
-.*:	c8 3f 08 b7 	          SETL      \[--D1Re0\],A1LbP,A0FrP
-.*:	e8 5f 08 b7 	          SETL      \[A0FrP\+\+#248\],A1LbP,A0FrP
-.*:	e8 60 08 b7 	          SETL      \[A0FrP\+\+#-256\],A1LbP,A0FrP
-.*:	e8 7f 08 b7 	          SETL      \[--A0FrP\],A1LbP,A0FrP
-.*:	66 df 09 b7 	          SETL      \[A0\.7\+#248\],A0FrP,A1LbP
-.*:	a8 df 09 b7 	          SETL      \[D0\.7\+\+#248\],A1LbP,A0FrP
-.*:	e8 df 09 b7 	          SETL      \[A0\.7\+\+#248\],A1LbP,A0FrP
-.*:	66 e0 09 b7 	          SETL      \[A0\.7\+#-256\],A0FrP,A1LbP
-.*:	a8 e0 09 b7 	          SETL      \[D0\.7\+\+#-256\],A1LbP,A0FrP
-.*:	e8 e0 09 b7 	          SETL      \[A0\.7\+\+#-256\],A1LbP,A0FrP
-.*:	66 ff 09 b7 	          SETL      \[A0\.7\+#-8\],A0FrP,A1LbP
-.*:	a8 ff 09 b7 	          SETL      \[--D0\.7\],A1LbP,A0FrP
-.*:	e8 ff 09 b7 	          SETL      \[--A0\.7\],A1LbP,A0FrP
-.*:	a8 1f 38 b7 	          SETL      \[D0Re0\+\+#248\],A1\.7,A0\.7
-.*:	c8 1f 38 b7 	          SETL      \[D1Re0\+\+#248\],A1\.7,A0\.7
-.*:	a8 20 38 b7 	          SETL      \[D0Re0\+\+#-256\],A1\.7,A0\.7
-.*:	c8 20 38 b7 	          SETL      \[D1Re0\+\+#-256\],A1\.7,A0\.7
-.*:	a8 3f 38 b7 	          SETL      \[--D0Re0\],A1\.7,A0\.7
-.*:	c8 3f 38 b7 	          SETL      \[--D1Re0\],A1\.7,A0\.7
-.*:	88 5f 38 b7 	          SETL      \[A1LbP\+\+#248\],A1\.7,A0\.7
-.*:	e8 5f 38 b7 	          SETL      \[A0FrP\+\+#248\],A1\.7,A0\.7
-.*:	88 60 38 b7 	          SETL      \[A1LbP\+\+#-256\],A1\.7,A0\.7
-.*:	e8 60 38 b7 	          SETL      \[A0FrP\+\+#-256\],A1\.7,A0\.7
-.*:	88 7f 38 b7 	          SETL      \[--A1LbP\],A1\.7,A0\.7
-.*:	e8 7f 38 b7 	          SETL      \[--A0FrP\],A1\.7,A0\.7
-.*:	26 df 39 b7 	          SETL      \[D0\.7\+#248\],A0\.7,A1\.7
-.*:	66 df 39 b7 	          SETL      \[A0\.7\+#248\],A0\.7,A1\.7
-.*:	88 df 39 b7 	          SETL      \[A1\.7\+\+#248\],A1\.7,A0\.7
-.*:	a8 df 39 b7 	          SETL      \[D0\.7\+\+#248\],A1\.7,A0\.7
-.*:	c8 df 39 b7 	          SETL      \[D1\.7\+\+#248\],A1\.7,A0\.7
-.*:	e8 df 39 b7 	          SETL      \[A0\.7\+\+#248\],A1\.7,A0\.7
-.*:	26 e0 39 b7 	          SETL      \[D0\.7\+#-256\],A0\.7,A1\.7
-.*:	66 e0 39 b7 	          SETL      \[A0\.7\+#-256\],A0\.7,A1\.7
-.*:	88 e0 39 b7 	          SETL      \[A1\.7\+\+#-256\],A1\.7,A0\.7
-.*:	a8 e0 39 b7 	          SETL      \[D0\.7\+\+#-256\],A1\.7,A0\.7
-.*:	c8 e0 39 b7 	          SETL      \[D1\.7\+\+#-256\],A1\.7,A0\.7
-.*:	e8 e0 39 b7 	          SETL      \[A0\.7\+\+#-256\],A1\.7,A0\.7
-.*:	26 ff 39 b7 	          SETL      \[D0\.7\+#-8\],A0\.7,A1\.7
-.*:	66 ff 39 b7 	          SETL      \[A0\.7\+#-8\],A0\.7,A1\.7
-.*:	88 ff 39 b7 	          SETL      \[--A1\.7\],A1\.7,A0\.7
-.*:	a8 ff 39 b7 	          SETL      \[--D0\.7\],A1\.7,A0\.7
-.*:	c8 ff 39 b7 	          SETL      \[--D1\.7\],A1\.7,A0\.7
-.*:	e8 ff 39 b7 	          SETL      \[--A0\.7\],A1\.7,A0\.7
-.*:	2c 20 80 b7 	          SETL      \[D0Re0\+#-256\],RD
-.*:	ac 3f 80 b7 	          SETL      \[--D0Re0\],RD
-.*:	ec 5f 80 b7 	          SETL      \[A0FrP\+\+#248\],RD
-.*:	0c 7f 80 b7 	          SETL      \[A1LbP\+#-8\],RD
-.*:	4c df 81 b7 	          SETL      \[D1\.7\+#248\],RD
-.*:	ec df 81 b7 	          SETL      \[A0\.7\+\+#248\],RD
-.*:	ac e0 81 b7 	          SETL      \[D0\.7\+\+#-256\],RD
-.*:	4c ff 81 b7 	          SETL      \[D1\.7\+#-8\],RD
-.*:	ec ff 81 b7 	          SETL      \[--A0\.7\],RD
-.*:	68 60 00 b8 	          MSETD     \[A0FrP\+\+\],D0Re0,D0\.7
-.*:	68 e0 01 b8 	          MSETD     \[A0\.7\+\+\],D0Re0,D0\.7
-.*:	60 50 08 b8 	          MSETD     \[A0FrP\+\+\],A1LbP,A1\.7
-.*:	60 d0 09 b8 	          MSETD     \[A0\.7\+\+\],A1LbP,A1\.7
-.*:	68 60 00 b9 	          MSETL     \[A0FrP\+\+\],D0Re0,D0\.7
-.*:	68 e0 01 b9 	          MSETL     \[A0\.7\+\+\],D0Re0,D0\.7
-.*:	60 50 08 b9 	          MSETL     \[A0FrP\+\+\],A1LbP,A1\.7
-.*:	60 d0 09 b9 	          MSETL     \[A0\.7\+\+\],A1LbP,A1\.7
-.*:	a4 00 00 c0 	          GETB      D1Re0,\[D0Re0\+\+D0Re0\]
-.*:	42 0e 00 c0 	          GETB      D0Re0,\[D1Re0\+D1\.7\]
-.*:	c4 0e 00 c0 	          GETB      D1Re0,\[D1Re0\+\+D1\.7\]
-.*:	84 42 00 c0 	          GETB      D1Re0,\[A1LbP\+\+A1LbP\]
-.*:	62 4e 00 c0 	          GETB      D0Re0,\[A0FrP\+A0\.7\]
-.*:	e4 4e 00 c0 	          GETB      D1Re0,\[A0FrP\+\+A0\.7\]
-.*:	a4 c0 01 c0 	          GETB      D1Re0,\[D0\.7\+\+D0Re0\]
-.*:	62 c2 01 c0 	          GETB      D0Re0,\[A0\.7\+A0FrP\]
-.*:	e4 c2 01 c0 	          GETB      D1Re0,\[A0\.7\+\+A0FrP\]
-.*:	62 ce 01 c0 	          GETB      D0Re0,\[A0\.7\+A0\.7\]
-.*:	a4 ce 01 c0 	          GETB      D1Re0,\[D0\.7\+\+D0\.7\]
-.*:	e4 ce 01 c0 	          GETB      D1Re0,\[A0\.7\+\+A0\.7\]
-.*:	a8 00 08 c0 	          GETB      A1LbP,\[D0Re0\+\+D0Re0\]
-.*:	46 0e 08 c0 	          GETB      A0FrP,\[D1Re0\+D1\.7\]
-.*:	c8 0e 08 c0 	          GETB      A1LbP,\[D1Re0\+\+D1\.7\]
-.*:	88 42 08 c0 	          GETB      A1LbP,\[A1LbP\+\+A1LbP\]
-.*:	66 4e 08 c0 	          GETB      A0FrP,\[A0FrP\+A0\.7\]
-.*:	e8 4e 08 c0 	          GETB      A1LbP,\[A0FrP\+\+A0\.7\]
-.*:	a8 c0 09 c0 	          GETB      A1LbP,\[D0\.7\+\+D0Re0\]
-.*:	66 c2 09 c0 	          GETB      A0FrP,\[A0\.7\+A0FrP\]
-.*:	e8 c2 09 c0 	          GETB      A1LbP,\[A0\.7\+\+A0FrP\]
-.*:	66 ce 09 c0 	          GETB      A0FrP,\[A0\.7\+A0\.7\]
-.*:	a8 ce 09 c0 	          GETB      A1LbP,\[D0\.7\+\+D0\.7\]
-.*:	e8 ce 09 c0 	          GETB      A1LbP,\[A0\.7\+\+A0\.7\]
-.*:	46 00 38 c0 	          GETB      A0\.7,\[D1Re0\+D1Re0\]
-.*:	a8 00 38 c0 	          GETB      A1\.7,\[D0Re0\+\+D0Re0\]
-.*:	c8 00 38 c0 	          GETB      A1\.7,\[D1Re0\+\+D1Re0\]
-.*:	46 0e 38 c0 	          GETB      A0\.7,\[D1Re0\+D1\.7\]
-.*:	a8 0e 38 c0 	          GETB      A1\.7,\[D0Re0\+\+D0\.7\]
-.*:	c8 0e 38 c0 	          GETB      A1\.7,\[D1Re0\+\+D1\.7\]
-.*:	66 42 38 c0 	          GETB      A0\.7,\[A0FrP\+A0FrP\]
-.*:	88 42 38 c0 	          GETB      A1\.7,\[A1LbP\+\+A1LbP\]
-.*:	e8 42 38 c0 	          GETB      A1\.7,\[A0FrP\+\+A0FrP\]
-.*:	66 4e 38 c0 	          GETB      A0\.7,\[A0FrP\+A0\.7\]
-.*:	88 4e 38 c0 	          GETB      A1\.7,\[A1LbP\+\+A1\.7\]
-.*:	e8 4e 38 c0 	          GETB      A1\.7,\[A0FrP\+\+A0\.7\]
-.*:	46 c0 39 c0 	          GETB      A0\.7,\[D1\.7\+D1Re0\]
-.*:	a8 c0 39 c0 	          GETB      A1\.7,\[D0\.7\+\+D0Re0\]
-.*:	c8 c0 39 c0 	          GETB      A1\.7,\[D1\.7\+\+D1Re0\]
-.*:	66 c2 39 c0 	          GETB      A0\.7,\[A0\.7\+A0FrP\]
-.*:	88 c2 39 c0 	          GETB      A1\.7,\[A1\.7\+\+A1LbP\]
-.*:	e8 c2 39 c0 	          GETB      A1\.7,\[A0\.7\+\+A0FrP\]
-.*:	26 ce 39 c0 	          GETB      A0\.7,\[D0\.7\+D0\.7\]
-.*:	66 ce 39 c0 	          GETB      A0\.7,\[A0\.7\+A0\.7\]
-.*:	88 ce 39 c0 	          GETB      A1\.7,\[A1\.7\+\+A1\.7\]
-.*:	a8 ce 39 c0 	          GETB      A1\.7,\[D0\.7\+\+D0\.7\]
-.*:	c8 ce 39 c0 	          GETB      A1\.7,\[D1\.7\+\+D1\.7\]
-.*:	e8 ce 39 c0 	          GETB      A1\.7,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e 80 c0 	          MOVB      RA,\[D0Re0\+D0\.7\]
-.*:	8c 42 80 c0 	          MOVB      RA,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e 80 c0 	          MOVB      RA,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 81 c0 	          MOVB      RA,\[A1\.7\+A1LbP\]
-.*:	4c ce 81 c0 	          MOVB      RA,\[D1\.7\+D1\.7\]
-.*:	ec ce 81 c0 	          MOVB      RA,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e b0 c0 	          MOVB      RAM8X32,\[D0Re0\+D0\.7\]
-.*:	8c 42 b0 c0 	          MOVB      RAM8X32,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e b0 c0 	          MOVB      RAM8X32,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 b1 c0 	          MOVB      RAM8X32,\[A1\.7\+A1LbP\]
-.*:	4c ce b1 c0 	          MOVB      RAM8X32,\[D1\.7\+D1\.7\]
-.*:	ec ce b1 c0 	          MOVB      RAM8X32,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e b8 c0 	          MOVB      RAM8X,\[D0Re0\+D0\.7\]
-.*:	8c 42 b8 c0 	          MOVB      RAM8X,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e b8 c0 	          MOVB      RAM8X,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 b9 c0 	          MOVB      RAM8X,\[A1\.7\+A1LbP\]
-.*:	4c ce b9 c0 	          MOVB      RAM8X,\[D1\.7\+D1\.7\]
-.*:	ec ce b9 c0 	          MOVB      RAM8X,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e c0 c0 	          MOVB      RABZ,\[D0Re0\+D0\.7\]
-.*:	8c 42 c0 c0 	          MOVB      RABZ,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e c0 c0 	          MOVB      RABZ,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 c1 c0 	          MOVB      RABZ,\[A1\.7\+A1LbP\]
-.*:	4c ce c1 c0 	          MOVB      RABZ,\[D1\.7\+D1\.7\]
-.*:	ec ce c1 c0 	          MOVB      RABZ,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e e8 c0 	          MOVB      RAWX,\[D0Re0\+D0\.7\]
-.*:	8c 42 e8 c0 	          MOVB      RAWX,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e e8 c0 	          MOVB      RAWX,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 e9 c0 	          MOVB      RAWX,\[A1\.7\+A1LbP\]
-.*:	4c ce e9 c0 	          MOVB      RAWX,\[D1\.7\+D1\.7\]
-.*:	ec ce e9 c0 	          MOVB      RAWX,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e f8 c0 	          MOVB      RAMX,\[D0Re0\+D0\.7\]
-.*:	8c 42 f8 c0 	          MOVB      RAMX,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e f8 c0 	          MOVB      RAMX,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 f9 c0 	          MOVB      RAMX,\[A1\.7\+A1LbP\]
-.*:	4c ce f9 c0 	          MOVB      RAMX,\[D1\.7\+D1\.7\]
-.*:	ec ce f9 c0 	          MOVB      RAMX,\[A0\.7\+\+A0\.7\]
-.*:	a4 00 00 c1 	          GETW      D1Re0,\[D0Re0\+\+D0Re0\]
-.*:	42 0e 00 c1 	          GETW      D0Re0,\[D1Re0\+D1\.7\]
-.*:	c4 0e 00 c1 	          GETW      D1Re0,\[D1Re0\+\+D1\.7\]
-.*:	84 42 00 c1 	          GETW      D1Re0,\[A1LbP\+\+A1LbP\]
-.*:	62 4e 00 c1 	          GETW      D0Re0,\[A0FrP\+A0\.7\]
-.*:	e4 4e 00 c1 	          GETW      D1Re0,\[A0FrP\+\+A0\.7\]
-.*:	a4 c0 01 c1 	          GETW      D1Re0,\[D0\.7\+\+D0Re0\]
-.*:	62 c2 01 c1 	          GETW      D0Re0,\[A0\.7\+A0FrP\]
-.*:	e4 c2 01 c1 	          GETW      D1Re0,\[A0\.7\+\+A0FrP\]
-.*:	62 ce 01 c1 	          GETW      D0Re0,\[A0\.7\+A0\.7\]
-.*:	a4 ce 01 c1 	          GETW      D1Re0,\[D0\.7\+\+D0\.7\]
-.*:	e4 ce 01 c1 	          GETW      D1Re0,\[A0\.7\+\+A0\.7\]
-.*:	a8 00 08 c1 	          GETW      A1LbP,\[D0Re0\+\+D0Re0\]
-.*:	46 0e 08 c1 	          GETW      A0FrP,\[D1Re0\+D1\.7\]
-.*:	c8 0e 08 c1 	          GETW      A1LbP,\[D1Re0\+\+D1\.7\]
-.*:	88 42 08 c1 	          GETW      A1LbP,\[A1LbP\+\+A1LbP\]
-.*:	66 4e 08 c1 	          GETW      A0FrP,\[A0FrP\+A0\.7\]
-.*:	e8 4e 08 c1 	          GETW      A1LbP,\[A0FrP\+\+A0\.7\]
-.*:	a8 c0 09 c1 	          GETW      A1LbP,\[D0\.7\+\+D0Re0\]
-.*:	66 c2 09 c1 	          GETW      A0FrP,\[A0\.7\+A0FrP\]
-.*:	e8 c2 09 c1 	          GETW      A1LbP,\[A0\.7\+\+A0FrP\]
-.*:	66 ce 09 c1 	          GETW      A0FrP,\[A0\.7\+A0\.7\]
-.*:	a8 ce 09 c1 	          GETW      A1LbP,\[D0\.7\+\+D0\.7\]
-.*:	e8 ce 09 c1 	          GETW      A1LbP,\[A0\.7\+\+A0\.7\]
-.*:	46 00 38 c1 	          GETW      A0\.7,\[D1Re0\+D1Re0\]
-.*:	a8 00 38 c1 	          GETW      A1\.7,\[D0Re0\+\+D0Re0\]
-.*:	c8 00 38 c1 	          GETW      A1\.7,\[D1Re0\+\+D1Re0\]
-.*:	46 0e 38 c1 	          GETW      A0\.7,\[D1Re0\+D1\.7\]
-.*:	a8 0e 38 c1 	          GETW      A1\.7,\[D0Re0\+\+D0\.7\]
-.*:	c8 0e 38 c1 	          GETW      A1\.7,\[D1Re0\+\+D1\.7\]
-.*:	66 42 38 c1 	          GETW      A0\.7,\[A0FrP\+A0FrP\]
-.*:	88 42 38 c1 	          GETW      A1\.7,\[A1LbP\+\+A1LbP\]
-.*:	e8 42 38 c1 	          GETW      A1\.7,\[A0FrP\+\+A0FrP\]
-.*:	66 4e 38 c1 	          GETW      A0\.7,\[A0FrP\+A0\.7\]
-.*:	88 4e 38 c1 	          GETW      A1\.7,\[A1LbP\+\+A1\.7\]
-.*:	e8 4e 38 c1 	          GETW      A1\.7,\[A0FrP\+\+A0\.7\]
-.*:	46 c0 39 c1 	          GETW      A0\.7,\[D1\.7\+D1Re0\]
-.*:	a8 c0 39 c1 	          GETW      A1\.7,\[D0\.7\+\+D0Re0\]
-.*:	c8 c0 39 c1 	          GETW      A1\.7,\[D1\.7\+\+D1Re0\]
-.*:	66 c2 39 c1 	          GETW      A0\.7,\[A0\.7\+A0FrP\]
-.*:	88 c2 39 c1 	          GETW      A1\.7,\[A1\.7\+\+A1LbP\]
-.*:	e8 c2 39 c1 	          GETW      A1\.7,\[A0\.7\+\+A0FrP\]
-.*:	26 ce 39 c1 	          GETW      A0\.7,\[D0\.7\+D0\.7\]
-.*:	66 ce 39 c1 	          GETW      A0\.7,\[A0\.7\+A0\.7\]
-.*:	88 ce 39 c1 	          GETW      A1\.7,\[A1\.7\+\+A1\.7\]
-.*:	a8 ce 39 c1 	          GETW      A1\.7,\[D0\.7\+\+D0\.7\]
-.*:	c8 ce 39 c1 	          GETW      A1\.7,\[D1\.7\+\+D1\.7\]
-.*:	e8 ce 39 c1 	          GETW      A1\.7,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e 80 c1 	          MOVW      RA,\[D0Re0\+D0\.7\]
-.*:	8c 42 80 c1 	          MOVW      RA,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e 80 c1 	          MOVW      RA,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 81 c1 	          MOVW      RA,\[A1\.7\+A1LbP\]
-.*:	4c ce 81 c1 	          MOVW      RA,\[D1\.7\+D1\.7\]
-.*:	ec ce 81 c1 	          MOVW      RA,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e b0 c1 	          MOVW      RAM8X32,\[D0Re0\+D0\.7\]
-.*:	8c 42 b0 c1 	          MOVW      RAM8X32,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e b0 c1 	          MOVW      RAM8X32,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 b1 c1 	          MOVW      RAM8X32,\[A1\.7\+A1LbP\]
-.*:	4c ce b1 c1 	          MOVW      RAM8X32,\[D1\.7\+D1\.7\]
-.*:	ec ce b1 c1 	          MOVW      RAM8X32,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e b8 c1 	          MOVW      RAM8X,\[D0Re0\+D0\.7\]
-.*:	8c 42 b8 c1 	          MOVW      RAM8X,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e b8 c1 	          MOVW      RAM8X,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 b9 c1 	          MOVW      RAM8X,\[A1\.7\+A1LbP\]
-.*:	4c ce b9 c1 	          MOVW      RAM8X,\[D1\.7\+D1\.7\]
-.*:	ec ce b9 c1 	          MOVW      RAM8X,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e c0 c1 	          MOVW      RABZ,\[D0Re0\+D0\.7\]
-.*:	8c 42 c0 c1 	          MOVW      RABZ,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e c0 c1 	          MOVW      RABZ,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 c1 c1 	          MOVW      RABZ,\[A1\.7\+A1LbP\]
-.*:	4c ce c1 c1 	          MOVW      RABZ,\[D1\.7\+D1\.7\]
-.*:	ec ce c1 c1 	          MOVW      RABZ,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e e8 c1 	          MOVW      RAWX,\[D0Re0\+D0\.7\]
-.*:	8c 42 e8 c1 	          MOVW      RAWX,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e e8 c1 	          MOVW      RAWX,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 e9 c1 	          MOVW      RAWX,\[A1\.7\+A1LbP\]
-.*:	4c ce e9 c1 	          MOVW      RAWX,\[D1\.7\+D1\.7\]
-.*:	ec ce e9 c1 	          MOVW      RAWX,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e f8 c1 	          MOVW      RAMX,\[D0Re0\+D0\.7\]
-.*:	8c 42 f8 c1 	          MOVW      RAMX,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e f8 c1 	          MOVW      RAMX,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 f9 c1 	          MOVW      RAMX,\[A1\.7\+A1LbP\]
-.*:	4c ce f9 c1 	          MOVW      RAMX,\[D1\.7\+D1\.7\]
-.*:	ec ce f9 c1 	          MOVW      RAMX,\[A0\.7\+\+A0\.7\]
-.*:	c4 1f 00 c2 	          GETB      D1Re0,\[D1Re0\+\+#31\]
-.*:	c4 20 00 c2 	          GETB      D1Re0,\[D1Re0\+\+#-32\]
-.*:	c4 3f 00 c2 	          GETB      D1Re0,\[--D1Re0\]
-.*:	e4 5f 00 c2 	          GETB      D1Re0,\[A0FrP\+\+#31\]
-.*:	e4 60 00 c2 	          GETB      D1Re0,\[A0FrP\+\+#-32\]
-.*:	e4 7f 00 c2 	          GETB      D1Re0,\[--A0FrP\]
-.*:	62 df 01 c2 	          GETB      D0Re0,\[A0\.7\+#31\]
-.*:	a4 df 01 c2 	          GETB      D1Re0,\[D0\.7\+\+#31\]
-.*:	e4 df 01 c2 	          GETB      D1Re0,\[A0\.7\+\+#31\]
-.*:	62 e0 01 c2 	          GETB      D0Re0,\[A0\.7\+#-32\]
-.*:	a4 e0 01 c2 	          GETB      D1Re0,\[D0\.7\+\+#-32\]
-.*:	e4 e0 01 c2 	          GETB      D1Re0,\[A0\.7\+\+#-32\]
-.*:	62 ff 01 c2 	          GETB      D0Re0,\[A0\.7\+#-1\]
-.*:	a4 ff 01 c2 	          GETB      D1Re0,\[--D0\.7\]
-.*:	e4 ff 01 c2 	          GETB      D1Re0,\[--A0\.7\]
-.*:	c8 1f 08 c2 	          GETB      A1LbP,\[D1Re0\+\+#31\]
-.*:	c8 20 08 c2 	          GETB      A1LbP,\[D1Re0\+\+#-32\]
-.*:	c8 3f 08 c2 	          GETB      A1LbP,\[--D1Re0\]
-.*:	e8 5f 08 c2 	          GETB      A1LbP,\[A0FrP\+\+#31\]
-.*:	e8 60 08 c2 	          GETB      A1LbP,\[A0FrP\+\+#-32\]
-.*:	e8 7f 08 c2 	          GETB      A1LbP,\[--A0FrP\]
-.*:	66 df 09 c2 	          GETB      A0FrP,\[A0\.7\+#31\]
-.*:	a8 df 09 c2 	          GETB      A1LbP,\[D0\.7\+\+#31\]
-.*:	e8 df 09 c2 	          GETB      A1LbP,\[A0\.7\+\+#31\]
-.*:	66 e0 09 c2 	          GETB      A0FrP,\[A0\.7\+#-32\]
-.*:	a8 e0 09 c2 	          GETB      A1LbP,\[D0\.7\+\+#-32\]
-.*:	e8 e0 09 c2 	          GETB      A1LbP,\[A0\.7\+\+#-32\]
-.*:	66 ff 09 c2 	          GETB      A0FrP,\[A0\.7\+#-1\]
-.*:	a8 ff 09 c2 	          GETB      A1LbP,\[--D0\.7\]
-.*:	e8 ff 09 c2 	          GETB      A1LbP,\[--A0\.7\]
-.*:	a8 1f 38 c2 	          GETB      A1\.7,\[D0Re0\+\+#31\]
-.*:	c8 1f 38 c2 	          GETB      A1\.7,\[D1Re0\+\+#31\]
-.*:	a8 20 38 c2 	          GETB      A1\.7,\[D0Re0\+\+#-32\]
-.*:	c8 20 38 c2 	          GETB      A1\.7,\[D1Re0\+\+#-32\]
-.*:	a8 3f 38 c2 	          GETB      A1\.7,\[--D0Re0\]
-.*:	c8 3f 38 c2 	          GETB      A1\.7,\[--D1Re0\]
-.*:	88 5f 38 c2 	          GETB      A1\.7,\[A1LbP\+\+#31\]
-.*:	e8 5f 38 c2 	          GETB      A1\.7,\[A0FrP\+\+#31\]
-.*:	88 60 38 c2 	          GETB      A1\.7,\[A1LbP\+\+#-32\]
-.*:	e8 60 38 c2 	          GETB      A1\.7,\[A0FrP\+\+#-32\]
-.*:	88 7f 38 c2 	          GETB      A1\.7,\[--A1LbP\]
-.*:	e8 7f 38 c2 	          GETB      A1\.7,\[--A0FrP\]
-.*:	26 df 39 c2 	          GETB      A0\.7,\[D0\.7\+#31\]
-.*:	66 df 39 c2 	          GETB      A0\.7,\[A0\.7\+#31\]
-.*:	88 df 39 c2 	          GETB      A1\.7,\[A1\.7\+\+#31\]
-.*:	a8 df 39 c2 	          GETB      A1\.7,\[D0\.7\+\+#31\]
-.*:	c8 df 39 c2 	          GETB      A1\.7,\[D1\.7\+\+#31\]
-.*:	e8 df 39 c2 	          GETB      A1\.7,\[A0\.7\+\+#31\]
-.*:	26 e0 39 c2 	          GETB      A0\.7,\[D0\.7\+#-32\]
-.*:	66 e0 39 c2 	          GETB      A0\.7,\[A0\.7\+#-32\]
-.*:	88 e0 39 c2 	          GETB      A1\.7,\[A1\.7\+\+#-32\]
-.*:	a8 e0 39 c2 	          GETB      A1\.7,\[D0\.7\+\+#-32\]
-.*:	c8 e0 39 c2 	          GETB      A1\.7,\[D1\.7\+\+#-32\]
-.*:	e8 e0 39 c2 	          GETB      A1\.7,\[A0\.7\+\+#-32\]
-.*:	26 ff 39 c2 	          GETB      A0\.7,\[D0\.7\+#-1\]
-.*:	66 ff 39 c2 	          GETB      A0\.7,\[A0\.7\+#-1\]
-.*:	88 ff 39 c2 	          GETB      A1\.7,\[--A1\.7\]
-.*:	a8 ff 39 c2 	          GETB      A1\.7,\[--D0\.7\]
-.*:	c8 ff 39 c2 	          GETB      A1\.7,\[--D1\.7\]
-.*:	e8 ff 39 c2 	          GETB      A1\.7,\[--A0\.7\]
-.*:	cc 20 80 c2 	          MOVB      RA,\[D1Re0\+\+#-32\]
-.*:	ec 5f 80 c2 	          MOVB      RA,\[A0FrP\+\+#31\]
-.*:	ec 7f 80 c2 	          MOVB      RA,\[--A0FrP\]
-.*:	ec df 81 c2 	          MOVB      RA,\[A0\.7\+\+#31\]
-.*:	ec e0 81 c2 	          MOVB      RA,\[A0\.7\+\+#-32\]
-.*:	ec ff 81 c2 	          MOVB      RA,\[--A0\.7\]
-.*:	cc 20 b0 c2 	          MOVB      RAM8X32,\[D1Re0\+\+#-32\]
-.*:	ec 5f b0 c2 	          MOVB      RAM8X32,\[A0FrP\+\+#31\]
-.*:	ec 7f b0 c2 	          MOVB      RAM8X32,\[--A0FrP\]
-.*:	ec df b1 c2 	          MOVB      RAM8X32,\[A0\.7\+\+#31\]
-.*:	ec e0 b1 c2 	          MOVB      RAM8X32,\[A0\.7\+\+#-32\]
-.*:	ec ff b1 c2 	          MOVB      RAM8X32,\[--A0\.7\]
-.*:	cc 20 b8 c2 	          MOVB      RAM8X,\[D1Re0\+\+#-32\]
-.*:	ec 5f b8 c2 	          MOVB      RAM8X,\[A0FrP\+\+#31\]
-.*:	ec 7f b8 c2 	          MOVB      RAM8X,\[--A0FrP\]
-.*:	ec df b9 c2 	          MOVB      RAM8X,\[A0\.7\+\+#31\]
-.*:	ec e0 b9 c2 	          MOVB      RAM8X,\[A0\.7\+\+#-32\]
-.*:	ec ff b9 c2 	          MOVB      RAM8X,\[--A0\.7\]
-.*:	cc 20 c0 c2 	          MOVB      RABZ,\[D1Re0\+\+#-32\]
-.*:	ec 5f c0 c2 	          MOVB      RABZ,\[A0FrP\+\+#31\]
-.*:	ec 7f c0 c2 	          MOVB      RABZ,\[--A0FrP\]
-.*:	ec df c1 c2 	          MOVB      RABZ,\[A0\.7\+\+#31\]
-.*:	ec e0 c1 c2 	          MOVB      RABZ,\[A0\.7\+\+#-32\]
-.*:	ec ff c1 c2 	          MOVB      RABZ,\[--A0\.7\]
-.*:	cc 20 e8 c2 	          MOVB      RAWX,\[D1Re0\+\+#-32\]
-.*:	ec 5f e8 c2 	          MOVB      RAWX,\[A0FrP\+\+#31\]
-.*:	ec 7f e8 c2 	          MOVB      RAWX,\[--A0FrP\]
-.*:	ec df e9 c2 	          MOVB      RAWX,\[A0\.7\+\+#31\]
-.*:	ec e0 e9 c2 	          MOVB      RAWX,\[A0\.7\+\+#-32\]
-.*:	ec ff e9 c2 	          MOVB      RAWX,\[--A0\.7\]
-.*:	cc 20 f8 c2 	          MOVB      RAMX,\[D1Re0\+\+#-32\]
-.*:	ec 5f f8 c2 	          MOVB      RAMX,\[A0FrP\+\+#31\]
-.*:	ec 7f f8 c2 	          MOVB      RAMX,\[--A0FrP\]
-.*:	ec df f9 c2 	          MOVB      RAMX,\[A0\.7\+\+#31\]
-.*:	ec e0 f9 c2 	          MOVB      RAMX,\[A0\.7\+\+#-32\]
-.*:	ec ff f9 c2 	          MOVB      RAMX,\[--A0\.7\]
-.*:	c4 1f 00 c3 	          GETW      D1Re0,\[D1Re0\+\+#62\]
-.*:	c4 20 00 c3 	          GETW      D1Re0,\[D1Re0\+\+#-64\]
-.*:	c4 3f 00 c3 	          GETW      D1Re0,\[--D1Re0\]
-.*:	e4 5f 00 c3 	          GETW      D1Re0,\[A0FrP\+\+#62\]
-.*:	e4 60 00 c3 	          GETW      D1Re0,\[A0FrP\+\+#-64\]
-.*:	e4 7f 00 c3 	          GETW      D1Re0,\[--A0FrP\]
-.*:	62 df 01 c3 	          GETW      D0Re0,\[A0\.7\+#62\]
-.*:	a4 df 01 c3 	          GETW      D1Re0,\[D0\.7\+\+#62\]
-.*:	e4 df 01 c3 	          GETW      D1Re0,\[A0\.7\+\+#62\]
-.*:	62 e0 01 c3 	          GETW      D0Re0,\[A0\.7\+#-64\]
-.*:	a4 e0 01 c3 	          GETW      D1Re0,\[D0\.7\+\+#-64\]
-.*:	e4 e0 01 c3 	          GETW      D1Re0,\[A0\.7\+\+#-64\]
-.*:	62 ff 01 c3 	          GETW      D0Re0,\[A0\.7\+#-2\]
-.*:	a4 ff 01 c3 	          GETW      D1Re0,\[--D0\.7\]
-.*:	e4 ff 01 c3 	          GETW      D1Re0,\[--A0\.7\]
-.*:	c8 1f 08 c3 	          GETW      A1LbP,\[D1Re0\+\+#62\]
-.*:	c8 20 08 c3 	          GETW      A1LbP,\[D1Re0\+\+#-64\]
-.*:	c8 3f 08 c3 	          GETW      A1LbP,\[--D1Re0\]
-.*:	e8 5f 08 c3 	          GETW      A1LbP,\[A0FrP\+\+#62\]
-.*:	e8 60 08 c3 	          GETW      A1LbP,\[A0FrP\+\+#-64\]
-.*:	e8 7f 08 c3 	          GETW      A1LbP,\[--A0FrP\]
-.*:	66 df 09 c3 	          GETW      A0FrP,\[A0\.7\+#62\]
-.*:	a8 df 09 c3 	          GETW      A1LbP,\[D0\.7\+\+#62\]
-.*:	e8 df 09 c3 	          GETW      A1LbP,\[A0\.7\+\+#62\]
-.*:	66 e0 09 c3 	          GETW      A0FrP,\[A0\.7\+#-64\]
-.*:	a8 e0 09 c3 	          GETW      A1LbP,\[D0\.7\+\+#-64\]
-.*:	e8 e0 09 c3 	          GETW      A1LbP,\[A0\.7\+\+#-64\]
-.*:	66 ff 09 c3 	          GETW      A0FrP,\[A0\.7\+#-2\]
-.*:	a8 ff 09 c3 	          GETW      A1LbP,\[--D0\.7\]
-.*:	e8 ff 09 c3 	          GETW      A1LbP,\[--A0\.7\]
-.*:	a8 1f 38 c3 	          GETW      A1\.7,\[D0Re0\+\+#62\]
-.*:	c8 1f 38 c3 	          GETW      A1\.7,\[D1Re0\+\+#62\]
-.*:	a8 20 38 c3 	          GETW      A1\.7,\[D0Re0\+\+#-64\]
-.*:	c8 20 38 c3 	          GETW      A1\.7,\[D1Re0\+\+#-64\]
-.*:	a8 3f 38 c3 	          GETW      A1\.7,\[--D0Re0\]
-.*:	c8 3f 38 c3 	          GETW      A1\.7,\[--D1Re0\]
-.*:	88 5f 38 c3 	          GETW      A1\.7,\[A1LbP\+\+#62\]
-.*:	e8 5f 38 c3 	          GETW      A1\.7,\[A0FrP\+\+#62\]
-.*:	88 60 38 c3 	          GETW      A1\.7,\[A1LbP\+\+#-64\]
-.*:	e8 60 38 c3 	          GETW      A1\.7,\[A0FrP\+\+#-64\]
-.*:	88 7f 38 c3 	          GETW      A1\.7,\[--A1LbP\]
-.*:	e8 7f 38 c3 	          GETW      A1\.7,\[--A0FrP\]
-.*:	26 df 39 c3 	          GETW      A0\.7,\[D0\.7\+#62\]
-.*:	66 df 39 c3 	          GETW      A0\.7,\[A0\.7\+#62\]
-.*:	88 df 39 c3 	          GETW      A1\.7,\[A1\.7\+\+#62\]
-.*:	a8 df 39 c3 	          GETW      A1\.7,\[D0\.7\+\+#62\]
-.*:	c8 df 39 c3 	          GETW      A1\.7,\[D1\.7\+\+#62\]
-.*:	e8 df 39 c3 	          GETW      A1\.7,\[A0\.7\+\+#62\]
-.*:	26 e0 39 c3 	          GETW      A0\.7,\[D0\.7\+#-64\]
-.*:	66 e0 39 c3 	          GETW      A0\.7,\[A0\.7\+#-64\]
-.*:	88 e0 39 c3 	          GETW      A1\.7,\[A1\.7\+\+#-64\]
-.*:	a8 e0 39 c3 	          GETW      A1\.7,\[D0\.7\+\+#-64\]
-.*:	c8 e0 39 c3 	          GETW      A1\.7,\[D1\.7\+\+#-64\]
-.*:	e8 e0 39 c3 	          GETW      A1\.7,\[A0\.7\+\+#-64\]
-.*:	26 ff 39 c3 	          GETW      A0\.7,\[D0\.7\+#-2\]
-.*:	66 ff 39 c3 	          GETW      A0\.7,\[A0\.7\+#-2\]
-.*:	88 ff 39 c3 	          GETW      A1\.7,\[--A1\.7\]
-.*:	a8 ff 39 c3 	          GETW      A1\.7,\[--D0\.7\]
-.*:	c8 ff 39 c3 	          GETW      A1\.7,\[--D1\.7\]
-.*:	e8 ff 39 c3 	          GETW      A1\.7,\[--A0\.7\]
-.*:	cc 20 80 c3 	          MOVW      RA,\[D1Re0\+\+#-64\]
-.*:	ec 5f 80 c3 	          MOVW      RA,\[A0FrP\+\+#62\]
-.*:	ec 7f 80 c3 	          MOVW      RA,\[--A0FrP\]
-.*:	ec df 81 c3 	          MOVW      RA,\[A0\.7\+\+#62\]
-.*:	ec e0 81 c3 	          MOVW      RA,\[A0\.7\+\+#-64\]
-.*:	ec ff 81 c3 	          MOVW      RA,\[--A0\.7\]
-.*:	cc 20 b0 c3 	          MOVW      RAM8X32,\[D1Re0\+\+#-64\]
-.*:	ec 5f b0 c3 	          MOVW      RAM8X32,\[A0FrP\+\+#62\]
-.*:	ec 7f b0 c3 	          MOVW      RAM8X32,\[--A0FrP\]
-.*:	ec df b1 c3 	          MOVW      RAM8X32,\[A0\.7\+\+#62\]
-.*:	ec e0 b1 c3 	          MOVW      RAM8X32,\[A0\.7\+\+#-64\]
-.*:	ec ff b1 c3 	          MOVW      RAM8X32,\[--A0\.7\]
-.*:	cc 20 b8 c3 	          MOVW      RAM8X,\[D1Re0\+\+#-64\]
-.*:	ec 5f b8 c3 	          MOVW      RAM8X,\[A0FrP\+\+#62\]
-.*:	ec 7f b8 c3 	          MOVW      RAM8X,\[--A0FrP\]
-.*:	ec df b9 c3 	          MOVW      RAM8X,\[A0\.7\+\+#62\]
-.*:	ec e0 b9 c3 	          MOVW      RAM8X,\[A0\.7\+\+#-64\]
-.*:	ec ff b9 c3 	          MOVW      RAM8X,\[--A0\.7\]
-.*:	cc 20 c0 c3 	          MOVW      RABZ,\[D1Re0\+\+#-64\]
-.*:	ec 5f c0 c3 	          MOVW      RABZ,\[A0FrP\+\+#62\]
-.*:	ec 7f c0 c3 	          MOVW      RABZ,\[--A0FrP\]
-.*:	ec df c1 c3 	          MOVW      RABZ,\[A0\.7\+\+#62\]
-.*:	ec e0 c1 c3 	          MOVW      RABZ,\[A0\.7\+\+#-64\]
-.*:	ec ff c1 c3 	          MOVW      RABZ,\[--A0\.7\]
-.*:	cc 20 e8 c3 	          MOVW      RAWX,\[D1Re0\+\+#-64\]
-.*:	ec 5f e8 c3 	          MOVW      RAWX,\[A0FrP\+\+#62\]
-.*:	ec 7f e8 c3 	          MOVW      RAWX,\[--A0FrP\]
-.*:	ec df e9 c3 	          MOVW      RAWX,\[A0\.7\+\+#62\]
-.*:	ec e0 e9 c3 	          MOVW      RAWX,\[A0\.7\+\+#-64\]
-.*:	ec ff e9 c3 	          MOVW      RAWX,\[--A0\.7\]
-.*:	cc 20 f8 c3 	          MOVW      RAMX,\[D1Re0\+\+#-64\]
-.*:	ec 5f f8 c3 	          MOVW      RAMX,\[A0FrP\+\+#62\]
-.*:	ec 7f f8 c3 	          MOVW      RAMX,\[--A0FrP\]
-.*:	ec df f9 c3 	          MOVW      RAMX,\[A0\.7\+\+#62\]
-.*:	ec e0 f9 c3 	          MOVW      RAMX,\[A0\.7\+\+#-64\]
-.*:	ec ff f9 c3 	          MOVW      RAMX,\[--A0\.7\]
-.*:	42 00 00 c4 	          GETD      D0Re0,\[D1Re0\+D1Re0\]
-.*:	a4 00 00 c4 	          GETD      D1Re0,\[D0Re0\+\+D0Re0\]
-.*:	c2 00 00 c4 	          GETD      D0Re0,\[D1Re0\+\+D1Re0\]
-.*:	20 0e 00 c4 	          GETD      TXENABLE,\[D0Re0\+D0\.7\]
-.*:	4a 0e 00 c4 	          GETD      PC,\[D1Re0\+D1\.7\]
-.*:	aa 0e 00 c4 	          GETD      PC,\[D0Re0\+\+D0\.7\]
-.*:	c4 0e 00 c4 	          GETD      D1Re0,\[D1Re0\+\+D1\.7\]
-.*:	04 42 00 c4 	          GETD      D1Re0,\[A1LbP\+A1LbP\]
-.*:	80 42 00 c4 	          GETD      TXENABLE,\[A1LbP\+\+A1LbP\]
-.*:	8e 42 00 c4 	          GETD      TXSTAT,\[A1LbP\+\+A1LbP\]
-.*:	ea 42 00 c4 	          GETD      PC,\[A0FrP\+\+A0FrP\]
-.*:	0e 4e 00 c4 	          GETD      TXSTAT,\[A1LbP\+A1\.7\]
-.*:	82 4e 00 c4 	          GETD      D0Re0,\[A1LbP\+\+A1\.7\]
-.*:	e0 4e 00 c4 	          GETD      TXENABLE,\[A0FrP\+\+A0\.7\]
-.*:	ee 4e 00 c4 	          GETD      TXSTAT,\[A0FrP\+\+A0\.7\]
-.*:	42 c0 01 c4 	          GETD      D0Re0,\[D1\.7\+D1Re0\]
-.*:	a4 c0 01 c4 	          GETD      D1Re0,\[D0\.7\+\+D0Re0\]
-.*:	c2 c0 01 c4 	          GETD      D0Re0,\[D1\.7\+\+D1Re0\]
-.*:	00 c2 01 c4 	          GETD      TXENABLE,\[A1\.7\+A1LbP\]
-.*:	6a c2 01 c4 	          GETD      PC,\[A0\.7\+A0FrP\]
-.*:	8a c2 01 c4 	          GETD      PC,\[A1\.7\+\+A1LbP\]
-.*:	e4 c2 01 c4 	          GETD      D1Re0,\[A0\.7\+\+A0FrP\]
-.*:	04 ce 01 c4 	          GETD      D1Re0,\[A1\.7\+A1\.7\]
-.*:	40 ce 01 c4 	          GETD      TXENABLE,\[D1\.7\+D1\.7\]
-.*:	6a ce 01 c4 	          GETD      PC,\[A0\.7\+A0\.7\]
-.*:	8a ce 01 c4 	          GETD      PC,\[A1\.7\+\+A1\.7\]
-.*:	a4 ce 01 c4 	          GETD      D1Re0,\[D0\.7\+\+D0\.7\]
-.*:	c2 ce 01 c4 	          GETD      D0Re0,\[D1\.7\+\+D1\.7\]
-.*:	e0 ce 01 c4 	          GETD      TXENABLE,\[A0\.7\+\+A0\.7\]
-.*:	ee ce 01 c4 	          GETD      TXSTAT,\[A0\.7\+\+A0\.7\]
-.*:	a6 00 08 c4 	          GETD      A0FrP,\[D0Re0\+\+D0Re0\]
-.*:	c8 00 08 c4 	          GETD      A1LbP,\[D1Re0\+\+D1Re0\]
-.*:	48 0e 08 c4 	          GETD      A1LbP,\[D1Re0\+D1\.7\]
-.*:	c6 0e 08 c4 	          GETD      A0FrP,\[D1Re0\+\+D1\.7\]
-.*:	0a 42 08 c4 	          GETD      PCX,\[A1LbP\+A1LbP\]
-.*:	8a 42 08 c4 	          GETD      PCX,\[A1LbP\+\+A1LbP\]
-.*:	06 4e 08 c4 	          GETD      A0FrP,\[A1LbP\+A1\.7\]
-.*:	88 4e 08 c4 	          GETD      A1LbP,\[A1LbP\+\+A1\.7\]
-.*:	ea 4e 08 c4 	          GETD      PCX,\[A0FrP\+\+A0\.7\]
-.*:	a6 c0 09 c4 	          GETD      A0FrP,\[D0\.7\+\+D0Re0\]
-.*:	c8 c0 09 c4 	          GETD      A1LbP,\[D1\.7\+\+D1Re0\]
-.*:	68 c2 09 c4 	          GETD      A1LbP,\[A0\.7\+A0FrP\]
-.*:	e6 c2 09 c4 	          GETD      A0FrP,\[A0\.7\+\+A0FrP\]
-.*:	0a ce 09 c4 	          GETD      PCX,\[A1\.7\+A1\.7\]
-.*:	68 ce 09 c4 	          GETD      A1LbP,\[A0\.7\+A0\.7\]
-.*:	a6 ce 09 c4 	          GETD      A0FrP,\[D0\.7\+\+D0\.7\]
-.*:	c8 ce 09 c4 	          GETD      A1LbP,\[D1\.7\+\+D1\.7\]
-.*:	ea ce 09 c4 	          GETD      PCX,\[A0\.7\+\+A0\.7\]
-.*:	2e 0e 18 c4 	          GETD      TXMASKI,\[D0Re0\+D0\.7\]
-.*:	8e 42 18 c4 	          GETD      TXMASKI,\[A1LbP\+\+A1LbP\]
-.*:	ee 4e 18 c4 	          GETD      TXMASKI,\[A0FrP\+\+A0\.7\]
-.*:	0e c2 19 c4 	          GETD      TXMASKI,\[A1\.7\+A1LbP\]
-.*:	4e ce 19 c4 	          GETD      TXMASKI,\[D1\.7\+D1\.7\]
-.*:	ee ce 19 c4 	          GETD      TXMASKI,\[A0\.7\+\+A0\.7\]
-.*:	46 00 38 c4 	          GETD      A0\.7,\[D1Re0\+D1Re0\]
-.*:	a8 00 38 c4 	          GETD      A1\.7,\[D0Re0\+\+D0Re0\]
-.*:	c8 00 38 c4 	          GETD      A1\.7,\[D1Re0\+\+D1Re0\]
-.*:	46 0e 38 c4 	          GETD      A0\.7,\[D1Re0\+D1\.7\]
-.*:	a8 0e 38 c4 	          GETD      A1\.7,\[D0Re0\+\+D0\.7\]
-.*:	c8 0e 38 c4 	          GETD      A1\.7,\[D1Re0\+\+D1\.7\]
-.*:	66 42 38 c4 	          GETD      A0\.7,\[A0FrP\+A0FrP\]
-.*:	88 42 38 c4 	          GETD      A1\.7,\[A1LbP\+\+A1LbP\]
-.*:	e8 42 38 c4 	          GETD      A1\.7,\[A0FrP\+\+A0FrP\]
-.*:	66 4e 38 c4 	          GETD      A0\.7,\[A0FrP\+A0\.7\]
-.*:	88 4e 38 c4 	          GETD      A1\.7,\[A1LbP\+\+A1\.7\]
-.*:	e8 4e 38 c4 	          GETD      A1\.7,\[A0FrP\+\+A0\.7\]
-.*:	46 c0 39 c4 	          GETD      A0\.7,\[D1\.7\+D1Re0\]
-.*:	a8 c0 39 c4 	          GETD      A1\.7,\[D0\.7\+\+D0Re0\]
-.*:	c8 c0 39 c4 	          GETD      A1\.7,\[D1\.7\+\+D1Re0\]
-.*:	66 c2 39 c4 	          GETD      A0\.7,\[A0\.7\+A0FrP\]
-.*:	88 c2 39 c4 	          GETD      A1\.7,\[A1\.7\+\+A1LbP\]
-.*:	e8 c2 39 c4 	          GETD      A1\.7,\[A0\.7\+\+A0FrP\]
-.*:	26 ce 39 c4 	          GETD      A0\.7,\[D0\.7\+D0\.7\]
-.*:	66 ce 39 c4 	          GETD      A0\.7,\[A0\.7\+A0\.7\]
-.*:	88 ce 39 c4 	          GETD      A1\.7,\[A1\.7\+\+A1\.7\]
-.*:	a8 ce 39 c4 	          GETD      A1\.7,\[D0\.7\+\+D0\.7\]
-.*:	c8 ce 39 c4 	          GETD      A1\.7,\[D1\.7\+\+D1\.7\]
-.*:	e8 ce 39 c4 	          GETD      A1\.7,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e 80 c4 	          MOVD      RA,\[D0Re0\+D0\.7\]
-.*:	8c 42 80 c4 	          MOVD      RA,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e 80 c4 	          MOVD      RA,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 81 c4 	          MOVD      RA,\[A1\.7\+A1LbP\]
-.*:	4c ce 81 c4 	          MOVD      RA,\[D1\.7\+D1\.7\]
-.*:	ec ce 81 c4 	          MOVD      RA,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e b0 c4 	          MOVD      RAM8X32,\[D0Re0\+D0\.7\]
-.*:	8c 42 b0 c4 	          MOVD      RAM8X32,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e b0 c4 	          MOVD      RAM8X32,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 b1 c4 	          MOVD      RAM8X32,\[A1\.7\+A1LbP\]
-.*:	4c ce b1 c4 	          MOVD      RAM8X32,\[D1\.7\+D1\.7\]
-.*:	ec ce b1 c4 	          MOVD      RAM8X32,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e b8 c4 	          MOVD      RAM8X,\[D0Re0\+D0\.7\]
-.*:	8c 42 b8 c4 	          MOVD      RAM8X,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e b8 c4 	          MOVD      RAM8X,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 b9 c4 	          MOVD      RAM8X,\[A1\.7\+A1LbP\]
-.*:	4c ce b9 c4 	          MOVD      RAM8X,\[D1\.7\+D1\.7\]
-.*:	ec ce b9 c4 	          MOVD      RAM8X,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e c0 c4 	          MOVD      RABZ,\[D0Re0\+D0\.7\]
-.*:	8c 42 c0 c4 	          MOVD      RABZ,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e c0 c4 	          MOVD      RABZ,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 c1 c4 	          MOVD      RABZ,\[A1\.7\+A1LbP\]
-.*:	4c ce c1 c4 	          MOVD      RABZ,\[D1\.7\+D1\.7\]
-.*:	ec ce c1 c4 	          MOVD      RABZ,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e e8 c4 	          MOVD      RAWX,\[D0Re0\+D0\.7\]
-.*:	8c 42 e8 c4 	          MOVD      RAWX,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e e8 c4 	          MOVD      RAWX,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 e9 c4 	          MOVD      RAWX,\[A1\.7\+A1LbP\]
-.*:	4c ce e9 c4 	          MOVD      RAWX,\[D1\.7\+D1\.7\]
-.*:	ec ce e9 c4 	          MOVD      RAWX,\[A0\.7\+\+A0\.7\]
-.*:	ac 00 f8 c4 	          MOVD      RAMX,\[D0Re0\+\+D0Re0\]
-.*:	40 0e f8 c4 	          GETD      TXIDLECYC,\[D1Re0\+D1\.7\]
-.*:	cc 0e f8 c4 	          MOVD      RAMX,\[D1Re0\+\+D1\.7\]
-.*:	8c 42 f8 c4 	          MOVD      RAMX,\[A1LbP\+\+A1LbP\]
-.*:	60 4e f8 c4 	          GETD      TXIDLECYC,\[A0FrP\+A0\.7\]
-.*:	ec 4e f8 c4 	          MOVD      RAMX,\[A0FrP\+\+A0\.7\]
-.*:	ac c0 f9 c4 	          MOVD      RAMX,\[D0\.7\+\+D0Re0\]
-.*:	60 c2 f9 c4 	          GETD      TXIDLECYC,\[A0\.7\+A0FrP\]
-.*:	ec c2 f9 c4 	          MOVD      RAMX,\[A0\.7\+\+A0FrP\]
-.*:	60 ce f9 c4 	          GETD      TXIDLECYC,\[A0\.7\+A0\.7\]
-.*:	ac ce f9 c4 	          MOVD      RAMX,\[D0\.7\+\+D0\.7\]
-.*:	ec ce f9 c4 	          MOVD      RAMX,\[A0\.7\+\+A0\.7\]
-.*:	a4 00 00 c5 	          GETL      D1Re0,D0Re0,\[D0Re0\+\+D0Re0\]
-.*:	42 0e 00 c5 	          GETL      D0Re0,D1Re0,\[D1Re0\+D1\.7\]
-.*:	c4 0e 00 c5 	          GETL      D1Re0,D0Re0,\[D1Re0\+\+D1\.7\]
-.*:	84 42 00 c5 	          GETL      D1Re0,D0Re0,\[A1LbP\+\+A1LbP\]
-.*:	62 4e 00 c5 	          GETL      D0Re0,D1Re0,\[A0FrP\+A0\.7\]
-.*:	e4 4e 00 c5 	          GETL      D1Re0,D0Re0,\[A0FrP\+\+A0\.7\]
-.*:	a4 c0 01 c5 	          GETL      D1Re0,D0Re0,\[D0\.7\+\+D0Re0\]
-.*:	62 c2 01 c5 	          GETL      D0Re0,D1Re0,\[A0\.7\+A0FrP\]
-.*:	e4 c2 01 c5 	          GETL      D1Re0,D0Re0,\[A0\.7\+\+A0FrP\]
-.*:	62 ce 01 c5 	          GETL      D0Re0,D1Re0,\[A0\.7\+A0\.7\]
-.*:	a4 ce 01 c5 	          GETL      D1Re0,D0Re0,\[D0\.7\+\+D0\.7\]
-.*:	e4 ce 01 c5 	          GETL      D1Re0,D0Re0,\[A0\.7\+\+A0\.7\]
-.*:	a8 00 08 c5 	          GETL      A1LbP,A0FrP,\[D0Re0\+\+D0Re0\]
-.*:	46 0e 08 c5 	          GETL      A0FrP,A1LbP,\[D1Re0\+D1\.7\]
-.*:	c8 0e 08 c5 	          GETL      A1LbP,A0FrP,\[D1Re0\+\+D1\.7\]
-.*:	88 42 08 c5 	          GETL      A1LbP,A0FrP,\[A1LbP\+\+A1LbP\]
-.*:	66 4e 08 c5 	          GETL      A0FrP,A1LbP,\[A0FrP\+A0\.7\]
-.*:	e8 4e 08 c5 	          GETL      A1LbP,A0FrP,\[A0FrP\+\+A0\.7\]
-.*:	a8 c0 09 c5 	          GETL      A1LbP,A0FrP,\[D0\.7\+\+D0Re0\]
-.*:	66 c2 09 c5 	          GETL      A0FrP,A1LbP,\[A0\.7\+A0FrP\]
-.*:	e8 c2 09 c5 	          GETL      A1LbP,A0FrP,\[A0\.7\+\+A0FrP\]
-.*:	66 ce 09 c5 	          GETL      A0FrP,A1LbP,\[A0\.7\+A0\.7\]
-.*:	a8 ce 09 c5 	          GETL      A1LbP,A0FrP,\[D0\.7\+\+D0\.7\]
-.*:	e8 ce 09 c5 	          GETL      A1LbP,A0FrP,\[A0\.7\+\+A0\.7\]
-.*:	46 00 38 c5 	          GETL      A0\.7,A1\.7,\[D1Re0\+D1Re0\]
-.*:	a8 00 38 c5 	          GETL      A1\.7,A0\.7,\[D0Re0\+\+D0Re0\]
-.*:	c8 00 38 c5 	          GETL      A1\.7,A0\.7,\[D1Re0\+\+D1Re0\]
-.*:	46 0e 38 c5 	          GETL      A0\.7,A1\.7,\[D1Re0\+D1\.7\]
-.*:	a8 0e 38 c5 	          GETL      A1\.7,A0\.7,\[D0Re0\+\+D0\.7\]
-.*:	c8 0e 38 c5 	          GETL      A1\.7,A0\.7,\[D1Re0\+\+D1\.7\]
-.*:	66 42 38 c5 	          GETL      A0\.7,A1\.7,\[A0FrP\+A0FrP\]
-.*:	88 42 38 c5 	          GETL      A1\.7,A0\.7,\[A1LbP\+\+A1LbP\]
-.*:	e8 42 38 c5 	          GETL      A1\.7,A0\.7,\[A0FrP\+\+A0FrP\]
-.*:	66 4e 38 c5 	          GETL      A0\.7,A1\.7,\[A0FrP\+A0\.7\]
-.*:	88 4e 38 c5 	          GETL      A1\.7,A0\.7,\[A1LbP\+\+A1\.7\]
-.*:	e8 4e 38 c5 	          GETL      A1\.7,A0\.7,\[A0FrP\+\+A0\.7\]
-.*:	46 c0 39 c5 	          GETL      A0\.7,A1\.7,\[D1\.7\+D1Re0\]
-.*:	a8 c0 39 c5 	          GETL      A1\.7,A0\.7,\[D0\.7\+\+D0Re0\]
-.*:	c8 c0 39 c5 	          GETL      A1\.7,A0\.7,\[D1\.7\+\+D1Re0\]
-.*:	66 c2 39 c5 	          GETL      A0\.7,A1\.7,\[A0\.7\+A0FrP\]
-.*:	88 c2 39 c5 	          GETL      A1\.7,A0\.7,\[A1\.7\+\+A1LbP\]
-.*:	e8 c2 39 c5 	          GETL      A1\.7,A0\.7,\[A0\.7\+\+A0FrP\]
-.*:	26 ce 39 c5 	          GETL      A0\.7,A1\.7,\[D0\.7\+D0\.7\]
-.*:	66 ce 39 c5 	          GETL      A0\.7,A1\.7,\[A0\.7\+A0\.7\]
-.*:	88 ce 39 c5 	          GETL      A1\.7,A0\.7,\[A1\.7\+\+A1\.7\]
-.*:	a8 ce 39 c5 	          GETL      A1\.7,A0\.7,\[D0\.7\+\+D0\.7\]
-.*:	c8 ce 39 c5 	          GETL      A1\.7,A0\.7,\[D1\.7\+\+D1\.7\]
-.*:	e8 ce 39 c5 	          GETL      A1\.7,A0\.7,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e 80 c5 	          MOVL      RA,\[D0Re0\+D0\.7\]
-.*:	8c 42 80 c5 	          MOVL      RA,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e 80 c5 	          MOVL      RA,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 81 c5 	          MOVL      RA,\[A1\.7\+A1LbP\]
-.*:	4c ce 81 c5 	          MOVL      RA,\[D1\.7\+D1\.7\]
-.*:	ec ce 81 c5 	          MOVL      RA,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e b0 c5 	          MOVL      RAM8X32,\[D0Re0\+D0\.7\]
-.*:	8c 42 b0 c5 	          MOVL      RAM8X32,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e b0 c5 	          MOVL      RAM8X32,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 b1 c5 	          MOVL      RAM8X32,\[A1\.7\+A1LbP\]
-.*:	4c ce b1 c5 	          MOVL      RAM8X32,\[D1\.7\+D1\.7\]
-.*:	ec ce b1 c5 	          MOVL      RAM8X32,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e b8 c5 	          MOVL      RAM8X,\[D0Re0\+D0\.7\]
-.*:	8c 42 b8 c5 	          MOVL      RAM8X,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e b8 c5 	          MOVL      RAM8X,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 b9 c5 	          MOVL      RAM8X,\[A1\.7\+A1LbP\]
-.*:	4c ce b9 c5 	          MOVL      RAM8X,\[D1\.7\+D1\.7\]
-.*:	ec ce b9 c5 	          MOVL      RAM8X,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e c0 c5 	          MOVL      RABZ,\[D0Re0\+D0\.7\]
-.*:	8c 42 c0 c5 	          MOVL      RABZ,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e c0 c5 	          MOVL      RABZ,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 c1 c5 	          MOVL      RABZ,\[A1\.7\+A1LbP\]
-.*:	4c ce c1 c5 	          MOVL      RABZ,\[D1\.7\+D1\.7\]
-.*:	ec ce c1 c5 	          MOVL      RABZ,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e e8 c5 	          MOVL      RAWX,\[D0Re0\+D0\.7\]
-.*:	8c 42 e8 c5 	          MOVL      RAWX,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e e8 c5 	          MOVL      RAWX,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 e9 c5 	          MOVL      RAWX,\[A1\.7\+A1LbP\]
-.*:	4c ce e9 c5 	          MOVL      RAWX,\[D1\.7\+D1\.7\]
-.*:	ec ce e9 c5 	          MOVL      RAWX,\[A0\.7\+\+A0\.7\]
-.*:	2c 0e f8 c5 	          MOVL      RAMX,\[D0Re0\+D0\.7\]
-.*:	8c 42 f8 c5 	          MOVL      RAMX,\[A1LbP\+\+A1LbP\]
-.*:	ec 4e f8 c5 	          MOVL      RAMX,\[A0FrP\+\+A0\.7\]
-.*:	0c c2 f9 c5 	          MOVL      RAMX,\[A1\.7\+A1LbP\]
-.*:	4c ce f9 c5 	          MOVL      RAMX,\[D1\.7\+D1\.7\]
-.*:	ec ce f9 c5 	          MOVL      RAMX,\[A0\.7\+\+A0\.7\]
-.*:	a0 1f 00 c6 	          GETD      TXENABLE,\[D0Re0\+\+#124\]
-.*:	ae 1f 00 c6 	          GETD      TXSTAT,\[D0Re0\+\+#124\]
-.*:	ca 1f 00 c6 	          GETD      PC,\[D1Re0\+\+#124\]
-.*:	4a 20 00 c6 	          GETD      PC,\[D1Re0\+#-128\]
-.*:	aa 20 00 c6 	          GETD      PC,\[D0Re0\+\+#-128\]
-.*:	c4 20 00 c6 	          GETD      D1Re0,\[D1Re0\+\+#-128\]
-.*:	2e 3f 00 c6 	          GETD      TXSTAT,\[D0Re0\+#-4\]
-.*:	a4 3f 00 c6 	          GETD      D1Re0,\[--D0Re0\]
-.*:	c2 3f 00 c6 	          GETD      D0Re0,\[--D1Re0\]
-.*:	00 5f 00 c6 	          GETD      TXENABLE,\[A1LbP\+#124\]
-.*:	82 5f 00 c6 	          GETD      D0Re0,\[A1LbP\+\+#124\]
-.*:	e0 5f 00 c6 	          GETD      TXENABLE,\[A0FrP\+\+#124\]
-.*:	ee 5f 00 c6 	          GETD      TXSTAT,\[A0FrP\+\+#124\]
-.*:	80 60 00 c6 	          GETD      TXENABLE,\[A1LbP\+\+#-128\]
-.*:	8e 60 00 c6 	          GETD      TXSTAT,\[A1LbP\+\+#-128\]
-.*:	ea 60 00 c6 	          GETD      PC,\[A0FrP\+\+#-128\]
-.*:	6a 7f 00 c6 	          GETD      PC,\[A0FrP\+#-4\]
-.*:	8a 7f 00 c6 	          GETD      PC,\[--A1LbP\]
-.*:	e4 7f 00 c6 	          GETD      D1Re0,\[--A0FrP\]
-.*:	04 df 01 c6 	          GETD      D1Re0,\[A1\.7\+#124\]
-.*:	40 df 01 c6 	          GETD      TXENABLE,\[D1\.7\+#124\]
-.*:	6a df 01 c6 	          GETD      PC,\[A0\.7\+#124\]
-.*:	8a df 01 c6 	          GETD      PC,\[A1\.7\+\+#124\]
-.*:	a4 df 01 c6 	          GETD      D1Re0,\[D0\.7\+\+#124\]
-.*:	c2 df 01 c6 	          GETD      D0Re0,\[D1\.7\+\+#124\]
-.*:	e0 df 01 c6 	          GETD      TXENABLE,\[A0\.7\+\+#124\]
-.*:	ee df 01 c6 	          GETD      TXSTAT,\[A0\.7\+\+#124\]
-.*:	22 e0 01 c6 	          GETD      D0Re0,\[D0\.7\+#-128\]
-.*:	4e e0 01 c6 	          GETD      TXSTAT,\[D1\.7\+#-128\]
-.*:	82 e0 01 c6 	          GETD      D0Re0,\[A1\.7\+\+#-128\]
-.*:	a0 e0 01 c6 	          GETD      TXENABLE,\[D0\.7\+\+#-128\]
-.*:	ae e0 01 c6 	          GETD      TXSTAT,\[D0\.7\+\+#-128\]
-.*:	ca e0 01 c6 	          GETD      PC,\[D1\.7\+\+#-128\]
-.*:	e4 e0 01 c6 	          GETD      D1Re0,\[A0\.7\+\+#-128\]
-.*:	04 ff 01 c6 	          GETD      D1Re0,\[A1\.7\+#-4\]
-.*:	40 ff 01 c6 	          GETD      TXENABLE,\[D1\.7\+#-4\]
-.*:	6a ff 01 c6 	          GETD      PC,\[A0\.7\+#-4\]
-.*:	8a ff 01 c6 	          GETD      PC,\[--A1\.7\]
-.*:	a4 ff 01 c6 	          GETD      D1Re0,\[--D0\.7\]
-.*:	c2 ff 01 c6 	          GETD      D0Re0,\[--D1\.7\]
-.*:	e0 ff 01 c6 	          GETD      TXENABLE,\[--A0\.7\]
-.*:	ee ff 01 c6 	          GETD      TXSTAT,\[--A0\.7\]
-.*:	aa 1f 08 c6 	          GETD      PCX,\[D0Re0\+\+#124\]
-.*:	2a 20 08 c6 	          GETD      PCX,\[D0Re0\+#-128\]
-.*:	c6 20 08 c6 	          GETD      A0FrP,\[D1Re0\+\+#-128\]
-.*:	a6 3f 08 c6 	          GETD      A0FrP,\[--D0Re0\]
-.*:	c8 3f 08 c6 	          GETD      A1LbP,\[--D1Re0\]
-.*:	88 5f 08 c6 	          GETD      A1LbP,\[A1LbP\+\+#124\]
-.*:	ea 5f 08 c6 	          GETD      PCX,\[A0FrP\+\+#124\]
-.*:	8a 60 08 c6 	          GETD      PCX,\[A1LbP\+\+#-128\]
-.*:	0a 7f 08 c6 	          GETD      PCX,\[A1LbP\+#-4\]
-.*:	e6 7f 08 c6 	          GETD      A0FrP,\[--A0FrP\]
-.*:	0a df 09 c6 	          GETD      PCX,\[A1\.7\+#124\]
-.*:	68 df 09 c6 	          GETD      A1LbP,\[A0\.7\+#124\]
-.*:	a6 df 09 c6 	          GETD      A0FrP,\[D0\.7\+\+#124\]
-.*:	c8 df 09 c6 	          GETD      A1LbP,\[D1\.7\+\+#124\]
-.*:	ea df 09 c6 	          GETD      PCX,\[A0\.7\+\+#124\]
-.*:	46 e0 09 c6 	          GETD      A0FrP,\[D1\.7\+#-128\]
-.*:	88 e0 09 c6 	          GETD      A1LbP,\[A1\.7\+\+#-128\]
-.*:	aa e0 09 c6 	          GETD      PCX,\[D0\.7\+\+#-128\]
-.*:	e6 e0 09 c6 	          GETD      A0FrP,\[A0\.7\+\+#-128\]
-.*:	0a ff 09 c6 	          GETD      PCX,\[A1\.7\+#-4\]
-.*:	68 ff 09 c6 	          GETD      A1LbP,\[A0\.7\+#-4\]
-.*:	a6 ff 09 c6 	          GETD      A0FrP,\[--D0\.7\]
-.*:	c8 ff 09 c6 	          GETD      A1LbP,\[--D1\.7\]
-.*:	ea ff 09 c6 	          GETD      PCX,\[--A0\.7\]
-.*:	2e 20 18 c6 	          GETD      TXMASKI,\[D0Re0\+#-128\]
-.*:	ae 3f 18 c6 	          GETD      TXMASKI,\[--D0Re0\]
-.*:	ee 5f 18 c6 	          GETD      TXMASKI,\[A0FrP\+\+#124\]
-.*:	0e 7f 18 c6 	          GETD      TXMASKI,\[A1LbP\+#-4\]
-.*:	4e df 19 c6 	          GETD      TXMASKI,\[D1\.7\+#124\]
-.*:	ee df 19 c6 	          GETD      TXMASKI,\[A0\.7\+\+#124\]
-.*:	ae e0 19 c6 	          GETD      TXMASKI,\[D0\.7\+\+#-128\]
-.*:	4e ff 19 c6 	          GETD      TXMASKI,\[D1\.7\+#-4\]
-.*:	ee ff 19 c6 	          GETD      TXMASKI,\[--A0\.7\]
-.*:	a8 1f 38 c6 	          GETD      A1\.7,\[D0Re0\+\+#124\]
-.*:	c8 1f 38 c6 	          GETD      A1\.7,\[D1Re0\+\+#124\]
-.*:	a8 20 38 c6 	          GETD      A1\.7,\[D0Re0\+\+#-128\]
-.*:	c8 20 38 c6 	          GETD      A1\.7,\[D1Re0\+\+#-128\]
-.*:	a8 3f 38 c6 	          GETD      A1\.7,\[--D0Re0\]
-.*:	c8 3f 38 c6 	          GETD      A1\.7,\[--D1Re0\]
-.*:	88 5f 38 c6 	          GETD      A1\.7,\[A1LbP\+\+#124\]
-.*:	e8 5f 38 c6 	          GETD      A1\.7,\[A0FrP\+\+#124\]
-.*:	88 60 38 c6 	          GETD      A1\.7,\[A1LbP\+\+#-128\]
-.*:	e8 60 38 c6 	          GETD      A1\.7,\[A0FrP\+\+#-128\]
-.*:	88 7f 38 c6 	          GETD      A1\.7,\[--A1LbP\]
-.*:	e8 7f 38 c6 	          GETD      A1\.7,\[--A0FrP\]
-.*:	26 df 39 c6 	          GETD      A0\.7,\[D0\.7\+#124\]
-.*:	66 df 39 c6 	          GETD      A0\.7,\[A0\.7\+#124\]
-.*:	88 df 39 c6 	          GETD      A1\.7,\[A1\.7\+\+#124\]
-.*:	a8 df 39 c6 	          GETD      A1\.7,\[D0\.7\+\+#124\]
-.*:	c8 df 39 c6 	          GETD      A1\.7,\[D1\.7\+\+#124\]
-.*:	e8 df 39 c6 	          GETD      A1\.7,\[A0\.7\+\+#124\]
-.*:	26 e0 39 c6 	          GETD      A0\.7,\[D0\.7\+#-128\]
-.*:	66 e0 39 c6 	          GETD      A0\.7,\[A0\.7\+#-128\]
-.*:	88 e0 39 c6 	          GETD      A1\.7,\[A1\.7\+\+#-128\]
-.*:	a8 e0 39 c6 	          GETD      A1\.7,\[D0\.7\+\+#-128\]
-.*:	c8 e0 39 c6 	          GETD      A1\.7,\[D1\.7\+\+#-128\]
-.*:	e8 e0 39 c6 	          GETD      A1\.7,\[A0\.7\+\+#-128\]
-.*:	26 ff 39 c6 	          GETD      A0\.7,\[D0\.7\+#-4\]
-.*:	66 ff 39 c6 	          GETD      A0\.7,\[A0\.7\+#-4\]
-.*:	88 ff 39 c6 	          GETD      A1\.7,\[--A1\.7\]
-.*:	a8 ff 39 c6 	          GETD      A1\.7,\[--D0\.7\]
-.*:	c8 ff 39 c6 	          GETD      A1\.7,\[--D1\.7\]
-.*:	e8 ff 39 c6 	          GETD      A1\.7,\[--A0\.7\]
-.*:	cc 20 80 c6 	          MOVD      RA,\[D1Re0\+\+#-128\]
-.*:	ec 5f 80 c6 	          MOVD      RA,\[A0FrP\+\+#124\]
-.*:	ec 7f 80 c6 	          MOVD      RA,\[--A0FrP\]
-.*:	ec df 81 c6 	          MOVD      RA,\[A0\.7\+\+#124\]
-.*:	ec e0 81 c6 	          MOVD      RA,\[A0\.7\+\+#-128\]
-.*:	ec ff 81 c6 	          MOVD      RA,\[--A0\.7\]
-.*:	cc 20 b0 c6 	          MOVD      RAM8X32,\[D1Re0\+\+#-128\]
-.*:	ec 5f b0 c6 	          MOVD      RAM8X32,\[A0FrP\+\+#124\]
-.*:	ec 7f b0 c6 	          MOVD      RAM8X32,\[--A0FrP\]
-.*:	ec df b1 c6 	          MOVD      RAM8X32,\[A0\.7\+\+#124\]
-.*:	ec e0 b1 c6 	          MOVD      RAM8X32,\[A0\.7\+\+#-128\]
-.*:	ec ff b1 c6 	          MOVD      RAM8X32,\[--A0\.7\]
-.*:	cc 20 b8 c6 	          MOVD      RAM8X,\[D1Re0\+\+#-128\]
-.*:	ec 5f b8 c6 	          MOVD      RAM8X,\[A0FrP\+\+#124\]
-.*:	ec 7f b8 c6 	          MOVD      RAM8X,\[--A0FrP\]
-.*:	ec df b9 c6 	          MOVD      RAM8X,\[A0\.7\+\+#124\]
-.*:	ec e0 b9 c6 	          MOVD      RAM8X,\[A0\.7\+\+#-128\]
-.*:	ec ff b9 c6 	          MOVD      RAM8X,\[--A0\.7\]
-.*:	cc 20 c0 c6 	          MOVD      RABZ,\[D1Re0\+\+#-128\]
-.*:	ec 5f c0 c6 	          MOVD      RABZ,\[A0FrP\+\+#124\]
-.*:	ec 7f c0 c6 	          MOVD      RABZ,\[--A0FrP\]
-.*:	ec df c1 c6 	          MOVD      RABZ,\[A0\.7\+\+#124\]
-.*:	ec e0 c1 c6 	          MOVD      RABZ,\[A0\.7\+\+#-128\]
-.*:	ec ff c1 c6 	          MOVD      RABZ,\[--A0\.7\]
-.*:	cc 20 e8 c6 	          MOVD      RAWX,\[D1Re0\+\+#-128\]
-.*:	ec 5f e8 c6 	          MOVD      RAWX,\[A0FrP\+\+#124\]
-.*:	ec 7f e8 c6 	          MOVD      RAWX,\[--A0FrP\]
-.*:	ec df e9 c6 	          MOVD      RAWX,\[A0\.7\+\+#124\]
-.*:	ec e0 e9 c6 	          MOVD      RAWX,\[A0\.7\+\+#-128\]
-.*:	ec ff e9 c6 	          MOVD      RAWX,\[--A0\.7\]
-.*:	c0 1f f8 c6 	          GETD      TXIDLECYC,\[D1Re0\+\+#124\]
-.*:	ac 20 f8 c6 	          MOVD      RAMX,\[D0Re0\+\+#-128\]
-.*:	a0 3f f8 c6 	          GETD      TXIDLECYC,\[--D0Re0\]
-.*:	00 5f f8 c6 	          GETD      TXIDLECYC,\[A1LbP\+#124\]
-.*:	ec 5f f8 c6 	          MOVD      RAMX,\[A0FrP\+\+#124\]
-.*:	e0 60 f8 c6 	          GETD      TXIDLECYC,\[A0FrP\+\+#-128\]
-.*:	8c 7f f8 c6 	          MOVD      RAMX,\[--A1LbP\]
-.*:	40 df f9 c6 	          GETD      TXIDLECYC,\[D1\.7\+#124\]
-.*:	ac df f9 c6 	          MOVD      RAMX,\[D0\.7\+\+#124\]
-.*:	ec df f9 c6 	          MOVD      RAMX,\[A0\.7\+\+#124\]
-.*:	8c e0 f9 c6 	          MOVD      RAMX,\[A1\.7\+\+#-128\]
-.*:	cc e0 f9 c6 	          MOVD      RAMX,\[D1\.7\+\+#-128\]
-.*:	40 ff f9 c6 	          GETD      TXIDLECYC,\[D1\.7\+#-4\]
-.*:	ac ff f9 c6 	          MOVD      RAMX,\[--D0\.7\]
-.*:	ec ff f9 c6 	          MOVD      RAMX,\[--A0\.7\]
-.*:	c4 1f 00 c7 	          GETL      D1Re0,D0Re0,\[D1Re0\+\+#248\]
-.*:	c4 20 00 c7 	          GETL      D1Re0,D0Re0,\[D1Re0\+\+#-256\]
-.*:	c4 3f 00 c7 	          GETL      D1Re0,D0Re0,\[--D1Re0\]
-.*:	e4 5f 00 c7 	          GETL      D1Re0,D0Re0,\[A0FrP\+\+#248\]
-.*:	e4 60 00 c7 	          GETL      D1Re0,D0Re0,\[A0FrP\+\+#-256\]
-.*:	e4 7f 00 c7 	          GETL      D1Re0,D0Re0,\[--A0FrP\]
-.*:	62 df 01 c7 	          GETL      D0Re0,D1Re0,\[A0\.7\+#248\]
-.*:	a4 df 01 c7 	          GETL      D1Re0,D0Re0,\[D0\.7\+\+#248\]
-.*:	e4 df 01 c7 	          GETL      D1Re0,D0Re0,\[A0\.7\+\+#248\]
-.*:	62 e0 01 c7 	          GETL      D0Re0,D1Re0,\[A0\.7\+#-256\]
-.*:	a4 e0 01 c7 	          GETL      D1Re0,D0Re0,\[D0\.7\+\+#-256\]
-.*:	e4 e0 01 c7 	          GETL      D1Re0,D0Re0,\[A0\.7\+\+#-256\]
-.*:	62 ff 01 c7 	          GETL      D0Re0,D1Re0,\[A0\.7\+#-8\]
-.*:	a4 ff 01 c7 	          GETL      D1Re0,D0Re0,\[--D0\.7\]
-.*:	e4 ff 01 c7 	          GETL      D1Re0,D0Re0,\[--A0\.7\]
-.*:	c8 1f 08 c7 	          GETL      A1LbP,A0FrP,\[D1Re0\+\+#248\]
-.*:	c8 20 08 c7 	          GETL      A1LbP,A0FrP,\[D1Re0\+\+#-256\]
-.*:	c8 3f 08 c7 	          GETL      A1LbP,A0FrP,\[--D1Re0\]
-.*:	e8 5f 08 c7 	          GETL      A1LbP,A0FrP,\[A0FrP\+\+#248\]
-.*:	e8 60 08 c7 	          GETL      A1LbP,A0FrP,\[A0FrP\+\+#-256\]
-.*:	e8 7f 08 c7 	          GETL      A1LbP,A0FrP,\[--A0FrP\]
-.*:	66 df 09 c7 	          GETL      A0FrP,A1LbP,\[A0\.7\+#248\]
-.*:	a8 df 09 c7 	          GETL      A1LbP,A0FrP,\[D0\.7\+\+#248\]
-.*:	e8 df 09 c7 	          GETL      A1LbP,A0FrP,\[A0\.7\+\+#248\]
-.*:	66 e0 09 c7 	          GETL      A0FrP,A1LbP,\[A0\.7\+#-256\]
-.*:	a8 e0 09 c7 	          GETL      A1LbP,A0FrP,\[D0\.7\+\+#-256\]
-.*:	e8 e0 09 c7 	          GETL      A1LbP,A0FrP,\[A0\.7\+\+#-256\]
-.*:	66 ff 09 c7 	          GETL      A0FrP,A1LbP,\[A0\.7\+#-8\]
-.*:	a8 ff 09 c7 	          GETL      A1LbP,A0FrP,\[--D0\.7\]
-.*:	e8 ff 09 c7 	          GETL      A1LbP,A0FrP,\[--A0\.7\]
-.*:	a8 1f 38 c7 	          GETL      A1\.7,A0\.7,\[D0Re0\+\+#248\]
-.*:	c8 1f 38 c7 	          GETL      A1\.7,A0\.7,\[D1Re0\+\+#248\]
-.*:	a8 20 38 c7 	          GETL      A1\.7,A0\.7,\[D0Re0\+\+#-256\]
-.*:	c8 20 38 c7 	          GETL      A1\.7,A0\.7,\[D1Re0\+\+#-256\]
-.*:	a8 3f 38 c7 	          GETL      A1\.7,A0\.7,\[--D0Re0\]
-.*:	c8 3f 38 c7 	          GETL      A1\.7,A0\.7,\[--D1Re0\]
-.*:	88 5f 38 c7 	          GETL      A1\.7,A0\.7,\[A1LbP\+\+#248\]
-.*:	e8 5f 38 c7 	          GETL      A1\.7,A0\.7,\[A0FrP\+\+#248\]
-.*:	88 60 38 c7 	          GETL      A1\.7,A0\.7,\[A1LbP\+\+#-256\]
-.*:	e8 60 38 c7 	          GETL      A1\.7,A0\.7,\[A0FrP\+\+#-256\]
-.*:	88 7f 38 c7 	          GETL      A1\.7,A0\.7,\[--A1LbP\]
-.*:	e8 7f 38 c7 	          GETL      A1\.7,A0\.7,\[--A0FrP\]
-.*:	26 df 39 c7 	          GETL      A0\.7,A1\.7,\[D0\.7\+#248\]
-.*:	66 df 39 c7 	          GETL      A0\.7,A1\.7,\[A0\.7\+#248\]
-.*:	88 df 39 c7 	          GETL      A1\.7,A0\.7,\[A1\.7\+\+#248\]
-.*:	a8 df 39 c7 	          GETL      A1\.7,A0\.7,\[D0\.7\+\+#248\]
-.*:	c8 df 39 c7 	          GETL      A1\.7,A0\.7,\[D1\.7\+\+#248\]
-.*:	e8 df 39 c7 	          GETL      A1\.7,A0\.7,\[A0\.7\+\+#248\]
-.*:	26 e0 39 c7 	          GETL      A0\.7,A1\.7,\[D0\.7\+#-256\]
-.*:	66 e0 39 c7 	          GETL      A0\.7,A1\.7,\[A0\.7\+#-256\]
-.*:	88 e0 39 c7 	          GETL      A1\.7,A0\.7,\[A1\.7\+\+#-256\]
-.*:	a8 e0 39 c7 	          GETL      A1\.7,A0\.7,\[D0\.7\+\+#-256\]
-.*:	c8 e0 39 c7 	          GETL      A1\.7,A0\.7,\[D1\.7\+\+#-256\]
-.*:	e8 e0 39 c7 	          GETL      A1\.7,A0\.7,\[A0\.7\+\+#-256\]
-.*:	26 ff 39 c7 	          GETL      A0\.7,A1\.7,\[D0\.7\+#-8\]
-.*:	66 ff 39 c7 	          GETL      A0\.7,A1\.7,\[A0\.7\+#-8\]
-.*:	88 ff 39 c7 	          GETL      A1\.7,A0\.7,\[--A1\.7\]
-.*:	a8 ff 39 c7 	          GETL      A1\.7,A0\.7,\[--D0\.7\]
-.*:	c8 ff 39 c7 	          GETL      A1\.7,A0\.7,\[--D1\.7\]
-.*:	e8 ff 39 c7 	          GETL      A1\.7,A0\.7,\[--A0\.7\]
-.*:	cc 20 80 c7 	          MOVL      RA,\[D1Re0\+\+#-256\]
-.*:	ec 5f 80 c7 	          MOVL      RA,\[A0FrP\+\+#248\]
-.*:	ec 7f 80 c7 	          MOVL      RA,\[--A0FrP\]
-.*:	ec df 81 c7 	          MOVL      RA,\[A0\.7\+\+#248\]
-.*:	ec e0 81 c7 	          MOVL      RA,\[A0\.7\+\+#-256\]
-.*:	ec ff 81 c7 	          MOVL      RA,\[--A0\.7\]
-.*:	cc 20 b0 c7 	          MOVL      RAM8X32,\[D1Re0\+\+#-256\]
-.*:	ec 5f b0 c7 	          MOVL      RAM8X32,\[A0FrP\+\+#248\]
-.*:	ec 7f b0 c7 	          MOVL      RAM8X32,\[--A0FrP\]
-.*:	ec df b1 c7 	          MOVL      RAM8X32,\[A0\.7\+\+#248\]
-.*:	ec e0 b1 c7 	          MOVL      RAM8X32,\[A0\.7\+\+#-256\]
-.*:	ec ff b1 c7 	          MOVL      RAM8X32,\[--A0\.7\]
-.*:	cc 20 b8 c7 	          MOVL      RAM8X,\[D1Re0\+\+#-256\]
-.*:	ec 5f b8 c7 	          MOVL      RAM8X,\[A0FrP\+\+#248\]
-.*:	ec 7f b8 c7 	          MOVL      RAM8X,\[--A0FrP\]
-.*:	ec df b9 c7 	          MOVL      RAM8X,\[A0\.7\+\+#248\]
-.*:	ec e0 b9 c7 	          MOVL      RAM8X,\[A0\.7\+\+#-256\]
-.*:	ec ff b9 c7 	          MOVL      RAM8X,\[--A0\.7\]
-.*:	cc 20 c0 c7 	          MOVL      RABZ,\[D1Re0\+\+#-256\]
-.*:	ec 5f c0 c7 	          MOVL      RABZ,\[A0FrP\+\+#248\]
-.*:	ec 7f c0 c7 	          MOVL      RABZ,\[--A0FrP\]
-.*:	ec df c1 c7 	          MOVL      RABZ,\[A0\.7\+\+#248\]
-.*:	ec e0 c1 c7 	          MOVL      RABZ,\[A0\.7\+\+#-256\]
-.*:	ec ff c1 c7 	          MOVL      RABZ,\[--A0\.7\]
-.*:	cc 20 e8 c7 	          MOVL      RAWX,\[D1Re0\+\+#-256\]
-.*:	ec 5f e8 c7 	          MOVL      RAWX,\[A0FrP\+\+#248\]
-.*:	ec 7f e8 c7 	          MOVL      RAWX,\[--A0FrP\]
-.*:	ec df e9 c7 	          MOVL      RAWX,\[A0\.7\+\+#248\]
-.*:	ec e0 e9 c7 	          MOVL      RAWX,\[A0\.7\+\+#-256\]
-.*:	ec ff e9 c7 	          MOVL      RAWX,\[--A0\.7\]
-.*:	cc 20 f8 c7 	          MOVL      RAMX,\[D1Re0\+\+#-256\]
-.*:	ec 5f f8 c7 	          MOVL      RAMX,\[A0FrP\+\+#248\]
-.*:	ec 7f f8 c7 	          MOVL      RAMX,\[--A0FrP\]
-.*:	ec df f9 c7 	          MOVL      RAMX,\[A0\.7\+\+#248\]
-.*:	ec e0 f9 c7 	          MOVL      RAMX,\[A0\.7\+\+#-256\]
-.*:	ec ff f9 c7 	          MOVL      RAMX,\[--A0\.7\]
-.*:	08 e0 01 c8 	          MGETD     D0Re0,D0\.7,\[A1\.7\+\+\]
-.*:	40 10 08 c8 	          MGETD     A1LbP,A1\.7,\[D1Re0\+\+\]
-.*:	58 d0 09 c8 	          MGETD     A0FrP,A0\.7,\[D1\.7\+\+\]
-.*:	68 e0 01 c9 	          MGETL     D0Re0,D0\.7,\[A0\.7\+\+\]
-.*:	40 d0 09 c9 	          MGETL     A1LbP,A1\.7,\[D1\.7\+\+\]
-.*:	a0 07 80 ca 	          MMOVD     RA,RA,RA,RA,RA,\[D0Re0\+\+\]
-.*:	80 40 80 ca 	          MMOVD     RA,RA,\[A1LbP\+\+\]
-.*:	80 4f 80 ca 	          MMOVD     RA,RA,RA,RA,RA,RA,\[A1LbP\+\+\]
-.*:	c0 c0 81 ca 	          MMOVD     RA,RA,\[D1\.7\+\+\]
-.*:	c0 c3 81 ca 	          MMOVD     RA,RA,RA,RA,\[D1\.7\+\+\]
-.*:	c0 cf 81 ca 	          MMOVD     RA,RA,RA,RA,RA,RA,\[D1\.7\+\+\]
-.*:	c0 ff 81 ca 	          MMOVD     RA,RA,RA,RA,RA,RA,RA,RA,\[D1\.7\+\+\]
-.*:	a0 07 c0 ca 	          MMOVD     RABZ,RABZ,RABZ,RABZ,RABZ,\[D0Re0\+\+\]
-.*:	80 40 c0 ca 	          MMOVD     RABZ,RABZ,\[A1LbP\+\+\]
-.*:	80 4f c0 ca 	          MMOVD     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[A1LbP\+\+\]
-.*:	c0 c0 c1 ca 	          MMOVD     RABZ,RABZ,\[D1\.7\+\+\]
-.*:	c0 c3 c1 ca 	          MMOVD     RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
-.*:	c0 cf c1 ca 	          MMOVD     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
-.*:	c0 ff c1 ca 	          MMOVD     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
-.*:	a0 07 e8 ca 	          MMOVD     RAWX,RAWX,RAWX,RAWX,RAWX,\[D0Re0\+\+\]
-.*:	80 40 e8 ca 	          MMOVD     RAWX,RAWX,\[A1LbP\+\+\]
-.*:	80 4f e8 ca 	          MMOVD     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[A1LbP\+\+\]
-.*:	c0 c0 e9 ca 	          MMOVD     RAWX,RAWX,\[D1\.7\+\+\]
-.*:	c0 c3 e9 ca 	          MMOVD     RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
-.*:	c0 cf e9 ca 	          MMOVD     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
-.*:	c0 ff e9 ca 	          MMOVD     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
-.*:	a0 07 80 cb 	          MMOVL     RA,RA,RA,RA,RA,\[D0Re0\+\+\]
-.*:	80 40 80 cb 	          MMOVL     RA,RA,\[A1LbP\+\+\]
-.*:	80 4f 80 cb 	          MMOVL     RA,RA,RA,RA,RA,RA,\[A1LbP\+\+\]
-.*:	c0 c0 81 cb 	          MMOVL     RA,RA,\[D1\.7\+\+\]
-.*:	c0 c3 81 cb 	          MMOVL     RA,RA,RA,RA,\[D1\.7\+\+\]
-.*:	c0 cf 81 cb 	          MMOVL     RA,RA,RA,RA,RA,RA,\[D1\.7\+\+\]
-.*:	c0 ff 81 cb 	          MMOVL     RA,RA,RA,RA,RA,RA,RA,RA,\[D1\.7\+\+\]
-.*:	a0 07 c0 cb 	          MMOVL     RABZ,RABZ,RABZ,RABZ,RABZ,\[D0Re0\+\+\]
-.*:	80 40 c0 cb 	          MMOVL     RABZ,RABZ,\[A1LbP\+\+\]
-.*:	80 4f c0 cb 	          MMOVL     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[A1LbP\+\+\]
-.*:	c0 c0 c1 cb 	          MMOVL     RABZ,RABZ,\[D1\.7\+\+\]
-.*:	c0 c3 c1 cb 	          MMOVL     RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
-.*:	c0 cf c1 cb 	          MMOVL     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
-.*:	c0 ff c1 cb 	          MMOVL     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
-.*:	a0 07 e8 cb 	          MMOVL     RAWX,RAWX,RAWX,RAWX,RAWX,\[D0Re0\+\+\]
-.*:	80 40 e8 cb 	          MMOVL     RAWX,RAWX,\[A1LbP\+\+\]
-.*:	80 4f e8 cb 	          MMOVL     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[A1LbP\+\+\]
-.*:	c0 c0 e9 cb 	          MMOVL     RAWX,RAWX,\[D1\.7\+\+\]
-.*:	c0 c3 e9 cb 	          MMOVL     RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
-.*:	c0 cf e9 cb 	          MMOVL     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
-.*:	c0 ff e9 cb 	          MMOVL     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
-.*:	82 01 00 cc 	          MDRD      #0x3
-.*:	10 20 00 cc 	          MMOVD     D1Re0,D1\.7,RD
-.*:	80 00 08 cc 	          MMOVD     A1LbP,A1\.2,RD
-.*:	00 10 08 cc 	          MMOVD     A1LbP,A1\.7,RD
-.*:	00 11 08 cc 	          MMOVD     A1LbP,A1\.3,A1\.7,RD
-.*:	10 08 10 cc 	          MMOVD     D1Ar3,D1\.7,RD
-.*:	08 01 00 cd 	          MMOVL     D0Re0,D0Ar4,RD
-.*:	08 21 00 cd 	          MMOVL     D0Re0,D0Ar4,D0\.7,RD
-.*:	00 01 08 cd 	          MMOVL     A1LbP,A1\.3,RD
-.*:	80 10 08 cd 	          MMOVL     A1LbP,A1\.2,A1\.7,RD
-.*:	80 00 10 cd 	          MMOVL     A1\.2,A1\.3,RD
-.*:	00 04 18 cd 	          MMOVL     A1\.3,A1\.7,RD
-.*:	18 02 00 d0 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+D1Re0\]
-.*:	14 0e 00 d0 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+D0Re0\]
-.*:	79 0e 00 d0 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+D1Re0\]
-.*:	18 c2 01 d0 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+D1\.7\]
-.*:	14 ce 01 d0 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+D0\.7\]
-.*:	79 ce 01 d0 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+D1\.7\]
-.*:	7d 40 08 d0 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+A0FrP\]
-.*:	0d 4e 08 d0 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+A0FrP\]
-.*:	7d 4e 08 d0 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+A0FrP\]
-.*:	7d c0 09 d0 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+A0\.7\]
-.*:	0d ce 09 d0 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+A0\.7\]
-.*:	7d ce 09 d0 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+A0\.7\]
-.*:	18 02 38 d0 	          XFRD      \[A1LbP\+A1LbP\],\[D1\.7\+D1Re0\]
-.*:	14 0e 38 d0 	          XFRD      \[A1\.7\+A1LbP\],\[D0\.7\+D0Re0\]
-.*:	79 0e 38 d0 	          XFRD      \[D0\.7\+D0\.7\],\[D1\.7\+D1Re0\]
-.*:	7d 40 38 d0 	          XFRD      \[D0Re0\+D0\.7\],\[A0\.7\+A0FrP\]
-.*:	0d 4e 38 d0 	          XFRD      \[D0\.7\+D0Re0\],\[A0\.7\+A0FrP\]
-.*:	7d 4e 38 d0 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+A0FrP\]
-.*:	71 c0 39 d0 	          XFRD      \[D0Re0\+D0\.7\],\[A1\.7\+A1\.7\]
-.*:	17 c2 39 d0 	          XFRD      \[A0FrP\+A0FrP\],\[D0\.7\+D0\.7\]
-.*:	7b c2 39 d0 	          XFRD      \[A0FrP\+A0\.7\],\[D1\.7\+D1\.7\]
-.*:	13 ce 39 d0 	          XFRD      \[A0\.7\+A0FrP\],\[A1\.7\+A1\.7\]
-.*:	73 ce 39 d0 	          XFRD      \[A0\.7\+A0\.7\],\[A1\.7\+A1\.7\]
-.*:	7d ce 39 d0 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+A0\.7\]
-.*:	18 02 00 d2 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+D1Re0\]
-.*:	14 0e 00 d2 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+D0Re0\]
-.*:	79 0e 00 d2 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+D1Re0\]
-.*:	18 c2 01 d2 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+D1\.7\]
-.*:	14 ce 01 d2 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+D0\.7\]
-.*:	79 ce 01 d2 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+D1\.7\]
-.*:	7d 40 08 d2 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+A0FrP\]
-.*:	0d 4e 08 d2 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+A0FrP\]
-.*:	7d 4e 08 d2 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+A0FrP\]
-.*:	7d c0 09 d2 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+A0\.7\]
-.*:	0d ce 09 d2 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+A0\.7\]
-.*:	7d ce 09 d2 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+A0\.7\]
-.*:	18 02 38 d2 	          XFRL      \[A1LbP\+A1LbP\],\[D1\.7\+D1Re0\]
-.*:	14 0e 38 d2 	          XFRL      \[A1\.7\+A1LbP\],\[D0\.7\+D0Re0\]
-.*:	79 0e 38 d2 	          XFRL      \[D0\.7\+D0\.7\],\[D1\.7\+D1Re0\]
-.*:	7d 40 38 d2 	          XFRL      \[D0Re0\+D0\.7\],\[A0\.7\+A0FrP\]
-.*:	0d 4e 38 d2 	          XFRL      \[D0\.7\+D0Re0\],\[A0\.7\+A0FrP\]
-.*:	7d 4e 38 d2 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+A0FrP\]
-.*:	71 c0 39 d2 	          XFRL      \[D0Re0\+D0\.7\],\[A1\.7\+A1\.7\]
-.*:	17 c2 39 d2 	          XFRL      \[A0FrP\+A0FrP\],\[D0\.7\+D0\.7\]
-.*:	7b c2 39 d2 	          XFRL      \[A0FrP\+A0\.7\],\[D1\.7\+D1\.7\]
-.*:	13 ce 39 d2 	          XFRL      \[A0\.7\+A0FrP\],\[A1\.7\+A1\.7\]
-.*:	73 ce 39 d2 	          XFRL      \[A0\.7\+A0\.7\],\[A1\.7\+A1\.7\]
-.*:	7d ce 39 d2 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+A0\.7\]
-.*:	18 02 00 d4 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1Re0\+D1Re0\]
-.*:	14 0e 00 d4 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0Re0\+D0Re0\]
-.*:	79 0e 00 d4 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1Re0\+D1Re0\]
-.*:	18 c2 01 d4 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1Re0\+D1\.7\]
-.*:	14 ce 01 d4 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0Re0\+D0\.7\]
-.*:	79 ce 01 d4 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1Re0\+D1\.7\]
-.*:	7d 40 08 d4 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0FrP\+A0FrP\]
-.*:	0d 4e 08 d4 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0FrP\+A0FrP\]
-.*:	7d 4e 08 d4 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0FrP\+A0FrP\]
-.*:	7d c0 09 d4 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0FrP\+A0\.7\]
-.*:	0d ce 09 d4 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0FrP\+A0\.7\]
-.*:	7d ce 09 d4 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0FrP\+A0\.7\]
-.*:	18 02 38 d4 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1\.7\+D1Re0\]
-.*:	14 0e 38 d4 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0\.7\+D0Re0\]
-.*:	79 0e 38 d4 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1\.7\+D1Re0\]
-.*:	7d 40 38 d4 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0\.7\+A0FrP\]
-.*:	0d 4e 38 d4 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0\.7\+A0FrP\]
-.*:	7d 4e 38 d4 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0\.7\+A0FrP\]
-.*:	71 c0 39 d4 	          XFRD      \[D0Re0\+\+D0\.7\],\[A1\.7\+A1\.7\]
-.*:	17 c2 39 d4 	          XFRD      \[A0FrP\+\+A0FrP\],\[D0\.7\+D0\.7\]
-.*:	7b c2 39 d4 	          XFRD      \[A0FrP\+\+A0\.7\],\[D1\.7\+D1\.7\]
-.*:	13 ce 39 d4 	          XFRD      \[A0\.7\+\+A0FrP\],\[A1\.7\+A1\.7\]
-.*:	73 ce 39 d4 	          XFRD      \[A0\.7\+\+A0\.7\],\[A1\.7\+A1\.7\]
-.*:	7d ce 39 d4 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0\.7\+A0\.7\]
-.*:	18 02 00 d5 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1Re0\]
-.*:	14 0e 00 d5 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0Re0\]
-.*:	79 0e 00 d5 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1Re0\]
-.*:	18 c2 01 d5 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1\.7\]
-.*:	14 ce 01 d5 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0\.7\]
-.*:	79 ce 01 d5 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1\.7\]
-.*:	7d 40 08 d5 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0FrP\]
-.*:	0d 4e 08 d5 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0FrP\]
-.*:	7d 4e 08 d5 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0FrP\]
-.*:	7d c0 09 d5 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0\.7\]
-.*:	0d ce 09 d5 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0\.7\]
-.*:	7d ce 09 d5 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0\.7\]
-.*:	18 02 38 d5 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1\.7\+D1Re0\]
-.*:	14 0e 38 d5 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0\.7\+D0Re0\]
-.*:	79 0e 38 d5 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1\.7\+D1Re0\]
-.*:	7d 40 38 d5 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0\.7\+A0FrP\]
-.*:	0d 4e 38 d5 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0\.7\+A0FrP\]
-.*:	7d 4e 38 d5 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0FrP\]
-.*:	71 c0 39 d5 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A1\.7\+A1\.7\]
-.*:	17 c2 39 d5 	          XFRD      \[A0FrP\+A0FrP\+\+\],\[D0\.7\+D0\.7\]
-.*:	7b c2 39 d5 	          XFRD      \[A0FrP\+A0\.7\+\+\],\[D1\.7\+D1\.7\]
-.*:	13 ce 39 d5 	          XFRD      \[A0\.7\+A0FrP\+\+\],\[A1\.7\+A1\.7\]
-.*:	73 ce 39 d5 	          XFRD      \[A0\.7\+A0\.7\+\+\],\[A1\.7\+A1\.7\]
-.*:	7d ce 39 d5 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0\.7\]
-.*:	18 02 00 d6 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1Re0\+D1Re0\]
-.*:	14 0e 00 d6 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0Re0\+D0Re0\]
-.*:	79 0e 00 d6 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1Re0\+D1Re0\]
-.*:	18 c2 01 d6 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1Re0\+D1\.7\]
-.*:	14 ce 01 d6 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0Re0\+D0\.7\]
-.*:	79 ce 01 d6 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1Re0\+D1\.7\]
-.*:	7d 40 08 d6 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0FrP\+A0FrP\]
-.*:	0d 4e 08 d6 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0FrP\+A0FrP\]
-.*:	7d 4e 08 d6 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0FrP\+A0FrP\]
-.*:	7d c0 09 d6 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0FrP\+A0\.7\]
-.*:	0d ce 09 d6 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0FrP\+A0\.7\]
-.*:	7d ce 09 d6 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0FrP\+A0\.7\]
-.*:	18 02 38 d6 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1\.7\+D1Re0\]
-.*:	14 0e 38 d6 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0\.7\+D0Re0\]
-.*:	79 0e 38 d6 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1\.7\+D1Re0\]
-.*:	7d 40 38 d6 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0\.7\+A0FrP\]
-.*:	0d 4e 38 d6 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0\.7\+A0FrP\]
-.*:	7d 4e 38 d6 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0\.7\+A0FrP\]
-.*:	71 c0 39 d6 	          XFRL      \[D0Re0\+\+D0\.7\],\[A1\.7\+A1\.7\]
-.*:	17 c2 39 d6 	          XFRL      \[A0FrP\+\+A0FrP\],\[D0\.7\+D0\.7\]
-.*:	7b c2 39 d6 	          XFRL      \[A0FrP\+\+A0\.7\],\[D1\.7\+D1\.7\]
-.*:	13 ce 39 d6 	          XFRL      \[A0\.7\+\+A0FrP\],\[A1\.7\+A1\.7\]
-.*:	73 ce 39 d6 	          XFRL      \[A0\.7\+\+A0\.7\],\[A1\.7\+A1\.7\]
-.*:	7d ce 39 d6 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0\.7\+A0\.7\]
-.*:	18 02 00 d7 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1Re0\]
-.*:	14 0e 00 d7 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0Re0\]
-.*:	79 0e 00 d7 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1Re0\]
-.*:	18 c2 01 d7 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1\.7\]
-.*:	14 ce 01 d7 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0\.7\]
-.*:	79 ce 01 d7 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1\.7\]
-.*:	7d 40 08 d7 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0FrP\]
-.*:	0d 4e 08 d7 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0FrP\]
-.*:	7d 4e 08 d7 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0FrP\]
-.*:	7d c0 09 d7 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0\.7\]
-.*:	0d ce 09 d7 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0\.7\]
-.*:	7d ce 09 d7 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0\.7\]
-.*:	18 02 38 d7 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1\.7\+D1Re0\]
-.*:	14 0e 38 d7 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0\.7\+D0Re0\]
-.*:	79 0e 38 d7 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1\.7\+D1Re0\]
-.*:	7d 40 38 d7 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0\.7\+A0FrP\]
-.*:	0d 4e 38 d7 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0\.7\+A0FrP\]
-.*:	7d 4e 38 d7 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0FrP\]
-.*:	71 c0 39 d7 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A1\.7\+A1\.7\]
-.*:	17 c2 39 d7 	          XFRL      \[A0FrP\+A0FrP\+\+\],\[D0\.7\+D0\.7\]
-.*:	7b c2 39 d7 	          XFRL      \[A0FrP\+A0\.7\+\+\],\[D1\.7\+D1\.7\]
-.*:	13 ce 39 d7 	          XFRL      \[A0\.7\+A0FrP\+\+\],\[A1\.7\+A1\.7\]
-.*:	73 ce 39 d7 	          XFRL      \[A0\.7\+A0\.7\+\+\],\[A1\.7\+A1\.7\]
-.*:	7d ce 39 d7 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0\.7\]
-.*:	18 02 00 d8 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+\+D1Re0\]
-.*:	14 0e 00 d8 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+\+D0Re0\]
-.*:	79 0e 00 d8 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+\+D1Re0\]
-.*:	18 c2 01 d8 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+\+D1\.7\]
-.*:	14 ce 01 d8 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+\+D0\.7\]
-.*:	79 ce 01 d8 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+\+D1\.7\]
-.*:	7d 40 08 d8 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+\+A0FrP\]
-.*:	0d 4e 08 d8 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+\+A0FrP\]
-.*:	7d 4e 08 d8 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+\+A0FrP\]
-.*:	7d c0 09 d8 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+\+A0\.7\]
-.*:	0d ce 09 d8 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+\+A0\.7\]
-.*:	7d ce 09 d8 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+\+A0\.7\]
-.*:	18 02 38 d8 	          XFRD      \[A1LbP\+A1LbP\],\[D1\.7\+\+D1Re0\]
-.*:	14 0e 38 d8 	          XFRD      \[A1\.7\+A1LbP\],\[D0\.7\+\+D0Re0\]
-.*:	79 0e 38 d8 	          XFRD      \[D0\.7\+D0\.7\],\[D1\.7\+\+D1Re0\]
-.*:	7d 40 38 d8 	          XFRD      \[D0Re0\+D0\.7\],\[A0\.7\+\+A0FrP\]
-.*:	0d 4e 38 d8 	          XFRD      \[D0\.7\+D0Re0\],\[A0\.7\+\+A0FrP\]
-.*:	7d 4e 38 d8 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+\+A0FrP\]
-.*:	71 c0 39 d8 	          XFRD      \[D0Re0\+D0\.7\],\[A1\.7\+\+A1\.7\]
-.*:	17 c2 39 d8 	          XFRD      \[A0FrP\+A0FrP\],\[D0\.7\+\+D0\.7\]
-.*:	7b c2 39 d8 	          XFRD      \[A0FrP\+A0\.7\],\[D1\.7\+\+D1\.7\]
-.*:	13 ce 39 d8 	          XFRD      \[A0\.7\+A0FrP\],\[A1\.7\+\+A1\.7\]
-.*:	73 ce 39 d8 	          XFRD      \[A0\.7\+A0\.7\],\[A1\.7\+\+A1\.7\]
-.*:	7d ce 39 d8 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+\+A0\.7\]
-.*:	18 02 00 d9 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+D1Re0\+\+\]
-.*:	14 0e 00 d9 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+D0Re0\+\+\]
-.*:	79 0e 00 d9 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+D1Re0\+\+\]
-.*:	18 c2 01 d9 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+D1\.7\+\+\]
-.*:	14 ce 01 d9 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+D0\.7\+\+\]
-.*:	79 ce 01 d9 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+D1\.7\+\+\]
-.*:	7d 40 08 d9 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+A0FrP\+\+\]
-.*:	0d 4e 08 d9 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+A0FrP\+\+\]
-.*:	7d 4e 08 d9 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+A0FrP\+\+\]
-.*:	7d c0 09 d9 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+A0\.7\+\+\]
-.*:	0d ce 09 d9 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+A0\.7\+\+\]
-.*:	7d ce 09 d9 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+A0\.7\+\+\]
-.*:	18 02 38 d9 	          XFRD      \[A1LbP\+A1LbP\],\[D1\.7\+D1Re0\+\+\]
-.*:	14 0e 38 d9 	          XFRD      \[A1\.7\+A1LbP\],\[D0\.7\+D0Re0\+\+\]
-.*:	79 0e 38 d9 	          XFRD      \[D0\.7\+D0\.7\],\[D1\.7\+D1Re0\+\+\]
-.*:	7d 40 38 d9 	          XFRD      \[D0Re0\+D0\.7\],\[A0\.7\+A0FrP\+\+\]
-.*:	0d 4e 38 d9 	          XFRD      \[D0\.7\+D0Re0\],\[A0\.7\+A0FrP\+\+\]
-.*:	7d 4e 38 d9 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+A0FrP\+\+\]
-.*:	71 c0 39 d9 	          XFRD      \[D0Re0\+D0\.7\],\[A1\.7\+A1\.7\+\+\]
-.*:	17 c2 39 d9 	          XFRD      \[A0FrP\+A0FrP\],\[D0\.7\+D0\.7\+\+\]
-.*:	7b c2 39 d9 	          XFRD      \[A0FrP\+A0\.7\],\[D1\.7\+D1\.7\+\+\]
-.*:	13 ce 39 d9 	          XFRD      \[A0\.7\+A0FrP\],\[A1\.7\+A1\.7\+\+\]
-.*:	73 ce 39 d9 	          XFRD      \[A0\.7\+A0\.7\],\[A1\.7\+A1\.7\+\+\]
-.*:	7d ce 39 d9 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+A0\.7\+\+\]
-.*:	18 02 00 da 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+\+D1Re0\]
-.*:	14 0e 00 da 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+\+D0Re0\]
-.*:	79 0e 00 da 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+\+D1Re0\]
-.*:	18 c2 01 da 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+\+D1\.7\]
-.*:	14 ce 01 da 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+\+D0\.7\]
-.*:	79 ce 01 da 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+\+D1\.7\]
-.*:	7d 40 08 da 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+\+A0FrP\]
-.*:	0d 4e 08 da 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+\+A0FrP\]
-.*:	7d 4e 08 da 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+\+A0FrP\]
-.*:	7d c0 09 da 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+\+A0\.7\]
-.*:	0d ce 09 da 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+\+A0\.7\]
-.*:	7d ce 09 da 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+\+A0\.7\]
-.*:	18 02 38 da 	          XFRL      \[A1LbP\+A1LbP\],\[D1\.7\+\+D1Re0\]
-.*:	14 0e 38 da 	          XFRL      \[A1\.7\+A1LbP\],\[D0\.7\+\+D0Re0\]
-.*:	79 0e 38 da 	          XFRL      \[D0\.7\+D0\.7\],\[D1\.7\+\+D1Re0\]
-.*:	7d 40 38 da 	          XFRL      \[D0Re0\+D0\.7\],\[A0\.7\+\+A0FrP\]
-.*:	0d 4e 38 da 	          XFRL      \[D0\.7\+D0Re0\],\[A0\.7\+\+A0FrP\]
-.*:	7d 4e 38 da 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+\+A0FrP\]
-.*:	71 c0 39 da 	          XFRL      \[D0Re0\+D0\.7\],\[A1\.7\+\+A1\.7\]
-.*:	17 c2 39 da 	          XFRL      \[A0FrP\+A0FrP\],\[D0\.7\+\+D0\.7\]
-.*:	7b c2 39 da 	          XFRL      \[A0FrP\+A0\.7\],\[D1\.7\+\+D1\.7\]
-.*:	13 ce 39 da 	          XFRL      \[A0\.7\+A0FrP\],\[A1\.7\+\+A1\.7\]
-.*:	73 ce 39 da 	          XFRL      \[A0\.7\+A0\.7\],\[A1\.7\+\+A1\.7\]
-.*:	7d ce 39 da 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+\+A0\.7\]
-.*:	18 02 00 db 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+D1Re0\+\+\]
-.*:	14 0e 00 db 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+D0Re0\+\+\]
-.*:	79 0e 00 db 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+D1Re0\+\+\]
-.*:	18 c2 01 db 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+D1\.7\+\+\]
-.*:	14 ce 01 db 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+D0\.7\+\+\]
-.*:	79 ce 01 db 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+D1\.7\+\+\]
-.*:	7d 40 08 db 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+A0FrP\+\+\]
-.*:	0d 4e 08 db 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+A0FrP\+\+\]
-.*:	7d 4e 08 db 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+A0FrP\+\+\]
-.*:	7d c0 09 db 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+A0\.7\+\+\]
-.*:	0d ce 09 db 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+A0\.7\+\+\]
-.*:	7d ce 09 db 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+A0\.7\+\+\]
-.*:	18 02 38 db 	          XFRL      \[A1LbP\+A1LbP\],\[D1\.7\+D1Re0\+\+\]
-.*:	14 0e 38 db 	          XFRL      \[A1\.7\+A1LbP\],\[D0\.7\+D0Re0\+\+\]
-.*:	79 0e 38 db 	          XFRL      \[D0\.7\+D0\.7\],\[D1\.7\+D1Re0\+\+\]
-.*:	7d 40 38 db 	          XFRL      \[D0Re0\+D0\.7\],\[A0\.7\+A0FrP\+\+\]
-.*:	0d 4e 38 db 	          XFRL      \[D0\.7\+D0Re0\],\[A0\.7\+A0FrP\+\+\]
-.*:	7d 4e 38 db 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+A0FrP\+\+\]
-.*:	71 c0 39 db 	          XFRL      \[D0Re0\+D0\.7\],\[A1\.7\+A1\.7\+\+\]
-.*:	17 c2 39 db 	          XFRL      \[A0FrP\+A0FrP\],\[D0\.7\+D0\.7\+\+\]
-.*:	7b c2 39 db 	          XFRL      \[A0FrP\+A0\.7\],\[D1\.7\+D1\.7\+\+\]
-.*:	13 ce 39 db 	          XFRL      \[A0\.7\+A0FrP\],\[A1\.7\+A1\.7\+\+\]
-.*:	73 ce 39 db 	          XFRL      \[A0\.7\+A0\.7\],\[A1\.7\+A1\.7\+\+\]
-.*:	7d ce 39 db 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+A0\.7\+\+\]
-.*:	18 02 00 dc 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1Re0\+\+D1Re0\]
-.*:	14 0e 00 dc 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0Re0\+\+D0Re0\]
-.*:	79 0e 00 dc 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1Re0\+\+D1Re0\]
-.*:	18 c2 01 dc 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1Re0\+\+D1\.7\]
-.*:	14 ce 01 dc 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0Re0\+\+D0\.7\]
-.*:	79 ce 01 dc 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1Re0\+\+D1\.7\]
-.*:	7d 40 08 dc 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0FrP\+\+A0FrP\]
-.*:	0d 4e 08 dc 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0FrP\+\+A0FrP\]
-.*:	7d 4e 08 dc 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0FrP\+\+A0FrP\]
-.*:	7d c0 09 dc 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0FrP\+\+A0\.7\]
-.*:	0d ce 09 dc 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0FrP\+\+A0\.7\]
-.*:	7d ce 09 dc 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0FrP\+\+A0\.7\]
-.*:	18 02 38 dc 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1\.7\+\+D1Re0\]
-.*:	14 0e 38 dc 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0\.7\+\+D0Re0\]
-.*:	79 0e 38 dc 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1\.7\+\+D1Re0\]
-.*:	7d 40 38 dc 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0\.7\+\+A0FrP\]
-.*:	0d 4e 38 dc 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0\.7\+\+A0FrP\]
-.*:	7d 4e 38 dc 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0\.7\+\+A0FrP\]
-.*:	71 c0 39 dc 	          XFRD      \[D0Re0\+\+D0\.7\],\[A1\.7\+\+A1\.7\]
-.*:	17 c2 39 dc 	          XFRD      \[A0FrP\+\+A0FrP\],\[D0\.7\+\+D0\.7\]
-.*:	7b c2 39 dc 	          XFRD      \[A0FrP\+\+A0\.7\],\[D1\.7\+\+D1\.7\]
-.*:	13 ce 39 dc 	          XFRD      \[A0\.7\+\+A0FrP\],\[A1\.7\+\+A1\.7\]
-.*:	73 ce 39 dc 	          XFRD      \[A0\.7\+\+A0\.7\],\[A1\.7\+\+A1\.7\]
-.*:	7d ce 39 dc 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0\.7\+\+A0\.7\]
-.*:	18 02 00 dd 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1Re0\+\+\]
-.*:	14 0e 00 dd 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0Re0\+\+\]
-.*:	79 0e 00 dd 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1Re0\+\+\]
-.*:	18 c2 01 dd 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1\.7\+\+\]
-.*:	14 ce 01 dd 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0\.7\+\+\]
-.*:	79 ce 01 dd 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1\.7\+\+\]
-.*:	7d 40 08 dd 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0FrP\+\+\]
-.*:	0d 4e 08 dd 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0FrP\+\+\]
-.*:	7d 4e 08 dd 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0FrP\+\+\]
-.*:	7d c0 09 dd 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0\.7\+\+\]
-.*:	0d ce 09 dd 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0\.7\+\+\]
-.*:	7d ce 09 dd 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0\.7\+\+\]
-.*:	18 02 38 dd 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1\.7\+D1Re0\+\+\]
-.*:	14 0e 38 dd 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0\.7\+D0Re0\+\+\]
-.*:	79 0e 38 dd 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1\.7\+D1Re0\+\+\]
-.*:	7d 40 38 dd 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0\.7\+A0FrP\+\+\]
-.*:	0d 4e 38 dd 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0\.7\+A0FrP\+\+\]
-.*:	7d 4e 38 dd 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0FrP\+\+\]
-.*:	71 c0 39 dd 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A1\.7\+A1\.7\+\+\]
-.*:	17 c2 39 dd 	          XFRD      \[A0FrP\+A0FrP\+\+\],\[D0\.7\+D0\.7\+\+\]
-.*:	7b c2 39 dd 	          XFRD      \[A0FrP\+A0\.7\+\+\],\[D1\.7\+D1\.7\+\+\]
-.*:	13 ce 39 dd 	          XFRD      \[A0\.7\+A0FrP\+\+\],\[A1\.7\+A1\.7\+\+\]
-.*:	73 ce 39 dd 	          XFRD      \[A0\.7\+A0\.7\+\+\],\[A1\.7\+A1\.7\+\+\]
-.*:	7d ce 39 dd 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0\.7\+\+\]
-.*:	18 02 00 de 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1Re0\+\+D1Re0\]
-.*:	14 0e 00 de 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0Re0\+\+D0Re0\]
-.*:	79 0e 00 de 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1Re0\+\+D1Re0\]
-.*:	18 c2 01 de 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1Re0\+\+D1\.7\]
-.*:	14 ce 01 de 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0Re0\+\+D0\.7\]
-.*:	79 ce 01 de 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1Re0\+\+D1\.7\]
-.*:	7d 40 08 de 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0FrP\+\+A0FrP\]
-.*:	0d 4e 08 de 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0FrP\+\+A0FrP\]
-.*:	7d 4e 08 de 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0FrP\+\+A0FrP\]
-.*:	7d c0 09 de 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0FrP\+\+A0\.7\]
-.*:	0d ce 09 de 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0FrP\+\+A0\.7\]
-.*:	7d ce 09 de 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0FrP\+\+A0\.7\]
-.*:	18 02 38 de 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1\.7\+\+D1Re0\]
-.*:	14 0e 38 de 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0\.7\+\+D0Re0\]
-.*:	79 0e 38 de 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1\.7\+\+D1Re0\]
-.*:	7d 40 38 de 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0\.7\+\+A0FrP\]
-.*:	0d 4e 38 de 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0\.7\+\+A0FrP\]
-.*:	7d 4e 38 de 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0\.7\+\+A0FrP\]
-.*:	71 c0 39 de 	          XFRL      \[D0Re0\+\+D0\.7\],\[A1\.7\+\+A1\.7\]
-.*:	17 c2 39 de 	          XFRL      \[A0FrP\+\+A0FrP\],\[D0\.7\+\+D0\.7\]
-.*:	7b c2 39 de 	          XFRL      \[A0FrP\+\+A0\.7\],\[D1\.7\+\+D1\.7\]
-.*:	13 ce 39 de 	          XFRL      \[A0\.7\+\+A0FrP\],\[A1\.7\+\+A1\.7\]
-.*:	73 ce 39 de 	          XFRL      \[A0\.7\+\+A0\.7\],\[A1\.7\+\+A1\.7\]
-.*:	7d ce 39 de 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0\.7\+\+A0\.7\]
-.*:	18 02 00 df 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1Re0\+\+\]
-.*:	14 0e 00 df 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0Re0\+\+\]
-.*:	79 0e 00 df 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1Re0\+\+\]
-.*:	18 c2 01 df 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1\.7\+\+\]
-.*:	14 ce 01 df 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0\.7\+\+\]
-.*:	79 ce 01 df 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1\.7\+\+\]
-.*:	7d 40 08 df 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0FrP\+\+\]
-.*:	0d 4e 08 df 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0FrP\+\+\]
-.*:	7d 4e 08 df 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0FrP\+\+\]
-.*:	7d c0 09 df 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0\.7\+\+\]
-.*:	0d ce 09 df 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0\.7\+\+\]
-.*:	7d ce 09 df 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0\.7\+\+\]
-.*:	18 02 38 df 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1\.7\+D1Re0\+\+\]
-.*:	14 0e 38 df 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0\.7\+D0Re0\+\+\]
-.*:	79 0e 38 df 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1\.7\+D1Re0\+\+\]
-.*:	7d 40 38 df 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0\.7\+A0FrP\+\+\]
-.*:	0d 4e 38 df 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0\.7\+A0FrP\+\+\]
-.*:	7d 4e 38 df 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0FrP\+\+\]
-.*:	71 c0 39 df 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A1\.7\+A1\.7\+\+\]
-.*:	17 c2 39 df 	          XFRL      \[A0FrP\+A0FrP\+\+\],\[D0\.7\+D0\.7\+\+\]
-.*:	7b c2 39 df 	          XFRL      \[A0FrP\+A0\.7\+\+\],\[D1\.7\+D1\.7\+\+\]
-.*:	13 ce 39 df 	          XFRL      \[A0\.7\+A0FrP\+\+\],\[A1\.7\+A1\.7\+\+\]
-.*:	73 ce 39 df 	          XFRL      \[A0\.7\+A0\.7\+\+\],\[A1\.7\+A1\.7\+\+\]
-.*:	7d ce 39 df 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0\.7\+\+\]
+.*:	00000004 	          MOV       D0Re0,D0Re0
+.*:	00002005 	          MOV       D0Re0,RD
+.*:	0001de01 	          ADD       D0Re0,D0\.7,D1\.7
+.*:	00380e01 	          ADD       D0\.7,D0Re0,A1\.7
+.*:	0039c000 	          ADD       D0\.7,D0\.7,D0Re0
+.*:	0039fe01 	          ADD       D0\.7,D0\.7,A0\.7
+.*:	01001e01 	          ADD       D1Re0,D1Re0,D0\.7
+.*:	0101ce01 	          ADD       D1Re0,D1\.7,A1\.7
+.*:	01380201 	          ADD       D1\.7,D1Re0,A1LbP
+.*:	01383201 	          ADD       D1\.7,D1Re0,A0FrP
+.*:	0139e001 	          ADD       D1\.7,D1\.7,RD
+.*:	02040001 	          ADDT      D0Re0,D0Re0,#0x8000
+.*:	0207fffc 	          MOV       D0Re0,#0xffff
+.*:	023c0001 	          ADDT      D0\.7,D0\.7,#0x8000
+.*:	023ffffc 	          MOV       D0\.7,#0xffff
+.*:	03040001 	          ADDT      D1Re0,D1Re0,#0x8000
+.*:	0307fffc 	          MOV       D1Re0,#0xffff
+.*:	033c0001 	          ADDT      D1\.7,D1\.7,#0x8000
+.*:	033ffffc 	          MOV       D1\.7,#0xffff
+.*:	040000bc 	          ADDLE     PC,D0Re0,D0Re0
+.*:	0400025d 	          ADDLE     D1Re0,D0Re0,A1LbP
+.*:	04000e1e 	          ADDNV     TXENABLE,D0Re0,D0\.7
+.*:	04000e5e 	          ADDNV     D1Re0,D0Re0,D0\.7
+.*:	04000efe 	          ADDNV     TXSTAT,D0Re0,D0\.7
+.*:	040010bd 	          ADDLE     PC,D0Re0,D1Re0
+.*:	04001e5d 	          ADDLE     D1Re0,D0Re0,D1\.7
+.*:	0400203d 	          ADDLE     D0Re0,D0Re0,RD
+.*:	0400321d 	          ADDLE     TXENABLE,D0Re0,A0FrP
+.*:	040032fd 	          ADDLE     TXSTAT,D0Re0,A0FrP
+.*:	04003ebd 	          ADDLE     PC,D0Re0,A0\.7
+.*:	0401c054 	          ADDLS     D1Re0,D0\.7,D0Re0
+.*:	0401c22d 	          ADDPL     D0Re0,D0\.7,A1LbP
+.*:	0401ce0c 	          ADDPL     TXENABLE,D0\.7,D0\.7
+.*:	0401ce5c 	          ADDLE     D1Re0,D0\.7,D0\.7
+.*:	0401cefc 	          ADDLE     TXSTAT,D0\.7,D0\.7
+.*:	0401d05d 	          ADDLE     D1Re0,D0\.7,D1Re0
+.*:	0401de3d 	          ADDLE     D0Re0,D0\.7,D1\.7
+.*:	0401e00d 	          ADDPL     TXENABLE,D0\.7,RD
+.*:	0401e0fd 	          ADDLE     TXSTAT,D0\.7,RD
+.*:	0401f2bd 	          ADDLE     PC,D0\.7,A0FrP
+.*:	0401fe5d 	          ADDLE     D1Re0,D0\.7,A0\.7
+.*:	04080094 	          ADDLS     A1LbP,D0Re0,D0Re0
+.*:	040802bd 	          ADDLE     PCX,D0Re0,A1LbP
+.*:	04080e9e 	          ADDNV     A1LbP,D0Re0,D0\.7
+.*:	0408109d 	          ADDLE     A1LbP,D0Re0,D1Re0
+.*:	04081ead 	          ADDPL     PCX,D0Re0,D1\.7
+.*:	0408327d 	          ADDLE     A0FrP,D0Re0,A0FrP
+.*:	04083e9d 	          ADDLE     A1LbP,D0Re0,A0\.7
+.*:	0409c0ac 	          ADDPL     PCX,D0\.7,D0Re0
+.*:	0409ce64 	          ADDNE     A0FrP,D0\.7,D0\.7
+.*:	0409ceb4 	          ADDLS     PCX,D0\.7,D0\.7
+.*:	0409d0bd 	          ADDLE     PCX,D0\.7,D1Re0
+.*:	0409e07d 	          ADDLE     A0FrP,D0\.7,RD
+.*:	0409f29d 	          ADDLE     A1LbP,D0\.7,A0FrP
+.*:	0409fead 	          ADDPL     PCX,D0\.7,A0\.7
+.*:	04180efe 	          ADDNV     TXMASKI,D0Re0,D0\.7
+.*:	041832fd 	          ADDLE     TXMASKI,D0Re0,A0FrP
+.*:	0419ceec 	          ADDPL     TXMASKI,D0\.7,D0\.7
+.*:	0419e0fd 	          ADDLE     TXMASKI,D0\.7,RD
+.*:	04380044 	          ADDNE     D1\.7,D0Re0,D0Re0
+.*:	0438025d 	          ADDLE     D1\.7,D0Re0,A1LbP
+.*:	04380e3e 	          ADDNV     D0\.7,D0Re0,D0\.7
+.*:	04380e7e 	          ADDNV     A0\.7,D0Re0,D0\.7
+.*:	0438104d 	          ADDPL     D1\.7,D0Re0,D1Re0
+.*:	04381e5d 	          ADDLE     D1\.7,D0Re0,D1\.7
+.*:	0438204d 	          ADDPL     D1\.7,D0Re0,RD
+.*:	0438325d 	          ADDLE     D1\.7,D0Re0,A0FrP
+.*:	04383e5d 	          ADDLE     D1\.7,D0Re0,A0\.7
+.*:	0439c054 	          ADDLS     D1\.7,D0\.7,D0Re0
+.*:	0439c25d 	          ADDLE     D1\.7,D0\.7,A1LbP
+.*:	0439ce3e 	          ADDNV     D0\.7,D0\.7,D0\.7
+.*:	0439ce7e 	          ADDNV     A0\.7,D0\.7,D0\.7
+.*:	0439d05d 	          ADDLE     D1\.7,D0\.7,D1Re0
+.*:	0439de5d 	          ADDLE     D1\.7,D0\.7,D1\.7
+.*:	0439e05d 	          ADDLE     D1\.7,D0\.7,RD
+.*:	0439f25d 	          ADDLE     D1\.7,D0\.7,A0FrP
+.*:	0439fe5d 	          ADDLE     D1\.7,D0\.7,A0\.7
+.*:	048002dd 	          ADDLE     RA,D0Re0,A1LbP
+.*:	04801edd 	          ADDLE     RA,D0Re0,D1\.7
+.*:	0481c0cc 	          ADDPL     RA,D0\.7,D0Re0
+.*:	0481d0dd 	          ADDLE     RA,D0\.7,D1Re0
+.*:	0481fedd 	          ADDLE     RA,D0\.7,A0\.7
+.*:	04b00ede 	          ADDNV     RAM8X32,D0Re0,D0\.7
+.*:	04b032dd 	          ADDLE     RAM8X32,D0Re0,A0FrP
+.*:	04b1cecc 	          ADDPL     RAM8X32,D0\.7,D0\.7
+.*:	04b1e0dd 	          ADDLE     RAM8X32,D0\.7,RD
+.*:	04b802dd 	          ADDLE     RAM8X,D0Re0,A1LbP
+.*:	04b81edd 	          ADDLE     RAM8X,D0Re0,D1\.7
+.*:	04b9c0cc 	          ADDPL     RAM8X,D0\.7,D0Re0
+.*:	04b9d0dd 	          ADDLE     RAM8X,D0\.7,D1Re0
+.*:	04b9fedd 	          ADDLE     RAM8X,D0\.7,A0\.7
+.*:	04c00ede 	          ADDNV     RABZ,D0Re0,D0\.7
+.*:	04c032dd 	          ADDLE     RABZ,D0Re0,A0FrP
+.*:	04c1cecc 	          ADDPL     RABZ,D0\.7,D0\.7
+.*:	04c1e0dd 	          ADDLE     RABZ,D0\.7,RD
+.*:	04e802dd 	          ADDLE     RAWX,D0Re0,A1LbP
+.*:	04e81edd 	          ADDLE     RAWX,D0Re0,D1\.7
+.*:	04e9c0cc 	          ADDPL     RAWX,D0\.7,D0Re0
+.*:	04e9d0dd 	          ADDLE     RAWX,D0\.7,D1Re0
+.*:	04e9fedd 	          ADDLE     RAWX,D0\.7,A0\.7
+.*:	04f802dd 	          ADDLE     RAMX,D0Re0,A1LbP
+.*:	04f80ede 	          ADDNV     RAMX,D0Re0,D0\.7
+.*:	04f81edd 	          ADDLE     RAMX,D0Re0,D1\.7
+.*:	04f832dd 	          ADDLE     RAMX,D0Re0,A0FrP
+.*:	04f9c0cc 	          ADDPL     RAMX,D0\.7,D0Re0
+.*:	04f9ce1e 	          ADDNV     TXIDLECYC,D0\.7,D0\.7
+.*:	04f9d0dd 	          ADDLE     RAMX,D0\.7,D1Re0
+.*:	04f9e0dd 	          ADDLE     RAMX,D0\.7,RD
+.*:	04f9fedd 	          ADDLE     RAMX,D0\.7,A0\.7
+.*:	050000bc 	          ADDLE     PC,D1Re0,D1Re0
+.*:	0500025d 	          ADDLE     D1Re0,D1Re0,A1LbP
+.*:	05000e1e 	          ADDNV     TXENABLE,D1Re0,D1\.7
+.*:	05000e5e 	          ADDNV     D1Re0,D1Re0,D1\.7
+.*:	05000efe 	          ADDNV     TXSTAT,D1Re0,D1\.7
+.*:	050010bd 	          ADDLE     PC,D1Re0,D0Re0
+.*:	05001e5d 	          ADDLE     D1Re0,D1Re0,D0\.7
+.*:	0500203d 	          ADDLE     D0Re0,D1Re0,RD
+.*:	0500321d 	          ADDLE     TXENABLE,D1Re0,A0FrP
+.*:	050032fd 	          ADDLE     TXSTAT,D1Re0,A0FrP
+.*:	05003ebd 	          ADDLE     PC,D1Re0,A0\.7
+.*:	0501c054 	          ADDLS     D1Re0,D1\.7,D1Re0
+.*:	0501c22d 	          ADDPL     D0Re0,D1\.7,A1LbP
+.*:	0501ce0c 	          ADDPL     TXENABLE,D1\.7,D1\.7
+.*:	0501ce5c 	          ADDLE     D1Re0,D1\.7,D1\.7
+.*:	0501cefc 	          ADDLE     TXSTAT,D1\.7,D1\.7
+.*:	0501d05d 	          ADDLE     D1Re0,D1\.7,D0Re0
+.*:	0501de3d 	          ADDLE     D0Re0,D1\.7,D0\.7
+.*:	0501e00d 	          ADDPL     TXENABLE,D1\.7,RD
+.*:	0501e0fd 	          ADDLE     TXSTAT,D1\.7,RD
+.*:	0501f2bd 	          ADDLE     PC,D1\.7,A0FrP
+.*:	0501fe5d 	          ADDLE     D1Re0,D1\.7,A0\.7
+.*:	05080094 	          ADDLS     A1LbP,D1Re0,D1Re0
+.*:	050802bd 	          ADDLE     PCX,D1Re0,A1LbP
+.*:	05080e9e 	          ADDNV     A1LbP,D1Re0,D1\.7
+.*:	0508109d 	          ADDLE     A1LbP,D1Re0,D0Re0
+.*:	05081ead 	          ADDPL     PCX,D1Re0,D0\.7
+.*:	0508327d 	          ADDLE     A0FrP,D1Re0,A0FrP
+.*:	05083e9d 	          ADDLE     A1LbP,D1Re0,A0\.7
+.*:	0509c0ac 	          ADDPL     PCX,D1\.7,D1Re0
+.*:	0509ce64 	          ADDNE     A0FrP,D1\.7,D1\.7
+.*:	0509ceb4 	          ADDLS     PCX,D1\.7,D1\.7
+.*:	0509d0bd 	          ADDLE     PCX,D1\.7,D0Re0
+.*:	0509e07d 	          ADDLE     A0FrP,D1\.7,RD
+.*:	0509f29d 	          ADDLE     A1LbP,D1\.7,A0FrP
+.*:	0509fead 	          ADDPL     PCX,D1\.7,A0\.7
+.*:	05180efe 	          ADDNV     TXMASKI,D1Re0,D1\.7
+.*:	051832fd 	          ADDLE     TXMASKI,D1Re0,A0FrP
+.*:	0519ceec 	          ADDPL     TXMASKI,D1\.7,D1\.7
+.*:	0519e0fd 	          ADDLE     TXMASKI,D1\.7,RD
+.*:	05380044 	          ADDNE     D1\.7,D1Re0,D1Re0
+.*:	0538025d 	          ADDLE     D1\.7,D1Re0,A1LbP
+.*:	05380e3e 	          ADDNV     D0\.7,D1Re0,D1\.7
+.*:	05380e7e 	          ADDNV     A0\.7,D1Re0,D1\.7
+.*:	0538104d 	          ADDPL     D1\.7,D1Re0,D0Re0
+.*:	05381e5d 	          ADDLE     D1\.7,D1Re0,D0\.7
+.*:	0538204d 	          ADDPL     D1\.7,D1Re0,RD
+.*:	0538325d 	          ADDLE     D1\.7,D1Re0,A0FrP
+.*:	05383e5d 	          ADDLE     D1\.7,D1Re0,A0\.7
+.*:	0539c054 	          ADDLS     D1\.7,D1\.7,D1Re0
+.*:	0539c25d 	          ADDLE     D1\.7,D1\.7,A1LbP
+.*:	0539ce3e 	          ADDNV     D0\.7,D1\.7,D1\.7
+.*:	0539ce7e 	          ADDNV     A0\.7,D1\.7,D1\.7
+.*:	0539d05d 	          ADDLE     D1\.7,D1\.7,D0Re0
+.*:	0539de5d 	          ADDLE     D1\.7,D1\.7,D0\.7
+.*:	0539e05d 	          ADDLE     D1\.7,D1\.7,RD
+.*:	0539f25d 	          ADDLE     D1\.7,D1\.7,A0FrP
+.*:	0539fe5d 	          ADDLE     D1\.7,D1\.7,A0\.7
+.*:	058002dd 	          ADDLE     RA,D1Re0,A1LbP
+.*:	05801edd 	          ADDLE     RA,D1Re0,D0\.7
+.*:	0581c0cc 	          ADDPL     RA,D1\.7,D1Re0
+.*:	0581d0dd 	          ADDLE     RA,D1\.7,D0Re0
+.*:	0581fedd 	          ADDLE     RA,D1\.7,A0\.7
+.*:	05b00ede 	          ADDNV     RAM8X32,D1Re0,D1\.7
+.*:	05b032dd 	          ADDLE     RAM8X32,D1Re0,A0FrP
+.*:	05b1cecc 	          ADDPL     RAM8X32,D1\.7,D1\.7
+.*:	05b1e0dd 	          ADDLE     RAM8X32,D1\.7,RD
+.*:	05b802dd 	          ADDLE     RAM8X,D1Re0,A1LbP
+.*:	05b81edd 	          ADDLE     RAM8X,D1Re0,D0\.7
+.*:	05b9c0cc 	          ADDPL     RAM8X,D1\.7,D1Re0
+.*:	05b9d0dd 	          ADDLE     RAM8X,D1\.7,D0Re0
+.*:	05b9fedd 	          ADDLE     RAM8X,D1\.7,A0\.7
+.*:	05c00ede 	          ADDNV     RABZ,D1Re0,D1\.7
+.*:	05c032dd 	          ADDLE     RABZ,D1Re0,A0FrP
+.*:	05c1cecc 	          ADDPL     RABZ,D1\.7,D1\.7
+.*:	05c1e0dd 	          ADDLE     RABZ,D1\.7,RD
+.*:	05e802dd 	          ADDLE     RAWX,D1Re0,A1LbP
+.*:	05e81edd 	          ADDLE     RAWX,D1Re0,D0\.7
+.*:	05e9c0cc 	          ADDPL     RAWX,D1\.7,D1Re0
+.*:	05e9d0dd 	          ADDLE     RAWX,D1\.7,D0Re0
+.*:	05e9fedd 	          ADDLE     RAWX,D1\.7,A0\.7
+.*:	05f802dd 	          ADDLE     RAMX,D1Re0,A1LbP
+.*:	05f80ede 	          ADDNV     RAMX,D1Re0,D1\.7
+.*:	05f81edd 	          ADDLE     RAMX,D1Re0,D0\.7
+.*:	05f832dd 	          ADDLE     RAMX,D1Re0,A0FrP
+.*:	05f9c0cc 	          ADDPL     RAMX,D1\.7,D1Re0
+.*:	05f9ce1e 	          ADDNV     TXIDLECYC,D1\.7,D1\.7
+.*:	05f9d0dd 	          ADDLE     RAMX,D1\.7,D0Re0
+.*:	05f9e0dd 	          ADDLE     RAMX,D1\.7,RD
+.*:	05f9fedd 	          ADDLE     RAMX,D1\.7,A0\.7
+.*:	0600201c 	          ADDLE     D0Re0,D0Re0,#0x80
+.*:	06003fe0 	          ADD       TXENABLE,D0Re0,#0xff
+.*:	0601dfe4 	          ADD       D1Re0,D0\.7,#0x7f
+.*:	0601e02a 	          ADD       PC,D0\.7,#0x80
+.*:	0601ffee 	          ADD       TXSTAT,D0\.7,#0xff
+.*:	06083fe8 	          ADD       A1LbP,D0Re0,#0xff
+.*:	0609ffe6 	          ADD       A0FrP,D0\.7,#0xff
+.*:	0619ffee 	          ADD       TXMASKI,D0\.7,#0xff
+.*:	0638201e 	          ADDNV     D0\.7,D0Re0,#0x80
+.*:	06383fe4 	          ADD       D1\.7,D0Re0,#0xff
+.*:	0639e004 	          ADDNE     D0\.7,D0\.7,#0x80
+.*:	0639ffe6 	          ADD       A0\.7,D0\.7,#0xff
+.*:	06b01fec 	          ADD       RAM8X32,D0Re0,#0x7f
+.*:	06b83fec 	          ADD       RAM8X,D0Re0,#0xff
+.*:	06c1e02c 	          ADD       RABZ,D0\.7,#0x80
+.*:	06f81fe0 	          ADD       TXIDLECYC,D0Re0,#0x7f
+.*:	06f9e020 	          ADD       TXIDLECYC,D0\.7,#0x80
+.*:	07001fea 	          ADD       PC,D1Re0,#0x7f
+.*:	07003fcc 	          ADDPL     D1Re0,D1Re0,#0xff
+.*:	0701dfe0 	          ADD       TXENABLE,D1\.7,#0x7f
+.*:	0701e022 	          ADD       D0Re0,D1\.7,#0x80
+.*:	0701ffe4 	          ADD       D1Re0,D1\.7,#0xff
+.*:	0708202a 	          ADD       PCX,D1Re0,#0x80
+.*:	0709e028 	          ADD       A1LbP,D1\.7,#0x80
+.*:	0719dfee 	          ADD       TXMASKI,D1\.7,#0x7f
+.*:	07381fe8 	          ADD       A1\.7,D1Re0,#0x7f
+.*:	07383fde 	          ADDNV     D1\.7,D1Re0,#0xff
+.*:	0739dfe6 	          ADD       A0\.7,D1\.7,#0x7f
+.*:	0739ffde 	          ADDNV     D1\.7,D1\.7,#0xff
+.*:	0781e02c 	          ADD       RA,D1\.7,#0x80
+.*:	07b81fec 	          ADD       RAM8X,D1Re0,#0x7f
+.*:	07c03fec 	          ADD       RABZ,D1Re0,#0xff
+.*:	07e9e02c 	          ADD       RAWX,D1\.7,#0x80
+.*:	07f9dfe0 	          ADD       TXIDLECYC,D1\.7,#0x7f
+.*:	08000201 	          ADDS      D0Re0,D0Re0,A1LbP
+.*:	08003201 	          ADDS      D0Re0,D0Re0,A0FrP
+.*:	0801e001 	          ADDS      D0Re0,D0\.7,RD
+.*:	08380e04 	          MOVS      D0\.7,D0\.7
+.*:	0839c201 	          ADDS      D0\.7,D0\.7,A1LbP
+.*:	09000000 	          ADDS      D1Re0,D1Re0,D1Re0
+.*:	09002001 	          ADDS      D1Re0,D1Re0,RD
+.*:	0901d001 	          ADDS      D1Re0,D1\.7,D0Re0
+.*:	09380e00 	          ADDS      D1\.7,D1Re0,D1\.7
+.*:	09383e01 	          ADDS      D1\.7,D1Re0,A0\.7
+.*:	0939f201 	          ADDS      D1\.7,D1\.7,A0FrP
+.*:	0a040002 	          ADDS      D0Re0,D0Re0,#-32768
+.*:	0a07fffd 	          MOVST     D0Re0,#0xffff
+.*:	0a3c0002 	          ADDS      D0\.7,D0\.7,#-32768
+.*:	0a3ffffd 	          MOVST     D0\.7,#0xffff
+.*:	0b040002 	          ADDS      D1Re0,D1Re0,#-32768
+.*:	0b07fffd 	          MOVST     D1Re0,#0xffff
+.*:	0b3c0002 	          ADDS      D1\.7,D1\.7,#-32768
+.*:	0b3ffffd 	          MOVST     D1\.7,#0xffff
+.*:	0c0000bc 	          ADDSLE    PC,D0Re0,D0Re0
+.*:	0c00025d 	          ADDSLE    D1Re0,D0Re0,A1LbP
+.*:	0c000e1e 	          ADDSNV    TXENABLE,D0Re0,D0\.7
+.*:	0c000e5e 	          ADDSNV    D1Re0,D0Re0,D0\.7
+.*:	0c000efe 	          ADDSNV    TXSTAT,D0Re0,D0\.7
+.*:	0c0010bd 	          ADDSLE    PC,D0Re0,D1Re0
+.*:	0c001e5d 	          ADDSLE    D1Re0,D0Re0,D1\.7
+.*:	0c00203d 	          ADDSLE    D0Re0,D0Re0,RD
+.*:	0c00321d 	          ADDSLE    TXENABLE,D0Re0,A0FrP
+.*:	0c0032fd 	          ADDSLE    TXSTAT,D0Re0,A0FrP
+.*:	0c003ebd 	          ADDSLE    PC,D0Re0,A0\.7
+.*:	0c01c054 	          ADDSLS    D1Re0,D0\.7,D0Re0
+.*:	0c01c22d 	          ADDSPL    D0Re0,D0\.7,A1LbP
+.*:	0c01ce0c 	          ADDSPL    TXENABLE,D0\.7,D0\.7
+.*:	0c01ce5c 	          ADDSLE    D1Re0,D0\.7,D0\.7
+.*:	0c01cefc 	          ADDSLE    TXSTAT,D0\.7,D0\.7
+.*:	0c01d05d 	          ADDSLE    D1Re0,D0\.7,D1Re0
+.*:	0c01de3d 	          ADDSLE    D0Re0,D0\.7,D1\.7
+.*:	0c01e00d 	          ADDSPL    TXENABLE,D0\.7,RD
+.*:	0c01e0fd 	          ADDSLE    TXSTAT,D0\.7,RD
+.*:	0c01f2bd 	          ADDSLE    PC,D0\.7,A0FrP
+.*:	0c01fe5d 	          ADDSLE    D1Re0,D0\.7,A0\.7
+.*:	0c080094 	          ADDSLS    A1LbP,D0Re0,D0Re0
+.*:	0c0802bd 	          ADDSLE    PCX,D0Re0,A1LbP
+.*:	0c080e9e 	          ADDSNV    A1LbP,D0Re0,D0\.7
+.*:	0c08109d 	          ADDSLE    A1LbP,D0Re0,D1Re0
+.*:	0c081ead 	          ADDSPL    PCX,D0Re0,D1\.7
+.*:	0c08327d 	          ADDSLE    A0FrP,D0Re0,A0FrP
+.*:	0c083e9d 	          ADDSLE    A1LbP,D0Re0,A0\.7
+.*:	0c09c0ac 	          ADDSPL    PCX,D0\.7,D0Re0
+.*:	0c09ce64 	          ADDSNE    A0FrP,D0\.7,D0\.7
+.*:	0c09ceb4 	          ADDSLS    PCX,D0\.7,D0\.7
+.*:	0c09d0bd 	          ADDSLE    PCX,D0\.7,D1Re0
+.*:	0c09e07d 	          ADDSLE    A0FrP,D0\.7,RD
+.*:	0c09f29d 	          ADDSLE    A1LbP,D0\.7,A0FrP
+.*:	0c09fead 	          ADDSPL    PCX,D0\.7,A0\.7
+.*:	0c180efe 	          ADDSNV    TXMASKI,D0Re0,D0\.7
+.*:	0c1832fd 	          ADDSLE    TXMASKI,D0Re0,A0FrP
+.*:	0c19ceec 	          ADDSPL    TXMASKI,D0\.7,D0\.7
+.*:	0c19e0fd 	          ADDSLE    TXMASKI,D0\.7,RD
+.*:	0c380044 	          ADDSNE    D1\.7,D0Re0,D0Re0
+.*:	0c38025d 	          ADDSLE    D1\.7,D0Re0,A1LbP
+.*:	0c380e3e 	          ADDSNV    D0\.7,D0Re0,D0\.7
+.*:	0c380e7e 	          ADDSNV    A0\.7,D0Re0,D0\.7
+.*:	0c38104d 	          ADDSPL    D1\.7,D0Re0,D1Re0
+.*:	0c381e5d 	          ADDSLE    D1\.7,D0Re0,D1\.7
+.*:	0c38204d 	          ADDSPL    D1\.7,D0Re0,RD
+.*:	0c38325d 	          ADDSLE    D1\.7,D0Re0,A0FrP
+.*:	0c383e5d 	          ADDSLE    D1\.7,D0Re0,A0\.7
+.*:	0c39c054 	          ADDSLS    D1\.7,D0\.7,D0Re0
+.*:	0c39c25d 	          ADDSLE    D1\.7,D0\.7,A1LbP
+.*:	0c39ce3e 	          ADDSNV    D0\.7,D0\.7,D0\.7
+.*:	0c39ce7e 	          ADDSNV    A0\.7,D0\.7,D0\.7
+.*:	0c39d05d 	          ADDSLE    D1\.7,D0\.7,D1Re0
+.*:	0c39de5d 	          ADDSLE    D1\.7,D0\.7,D1\.7
+.*:	0c39e05d 	          ADDSLE    D1\.7,D0\.7,RD
+.*:	0c39f25d 	          ADDSLE    D1\.7,D0\.7,A0FrP
+.*:	0c39fe5d 	          ADDSLE    D1\.7,D0\.7,A0\.7
+.*:	0c8002dd 	          ADDSLE    RA,D0Re0,A1LbP
+.*:	0c801edd 	          ADDSLE    RA,D0Re0,D1\.7
+.*:	0c81c0cc 	          ADDSPL    RA,D0\.7,D0Re0
+.*:	0c81d0dd 	          ADDSLE    RA,D0\.7,D1Re0
+.*:	0c81fedd 	          ADDSLE    RA,D0\.7,A0\.7
+.*:	0cb00ede 	          ADDSNV    RAM8X32,D0Re0,D0\.7
+.*:	0cb032dd 	          ADDSLE    RAM8X32,D0Re0,A0FrP
+.*:	0cb1cecc 	          ADDSPL    RAM8X32,D0\.7,D0\.7
+.*:	0cb1e0dd 	          ADDSLE    RAM8X32,D0\.7,RD
+.*:	0cb802dd 	          ADDSLE    RAM8X,D0Re0,A1LbP
+.*:	0cb81edd 	          ADDSLE    RAM8X,D0Re0,D1\.7
+.*:	0cb9c0cc 	          ADDSPL    RAM8X,D0\.7,D0Re0
+.*:	0cb9d0dd 	          ADDSLE    RAM8X,D0\.7,D1Re0
+.*:	0cb9fedd 	          ADDSLE    RAM8X,D0\.7,A0\.7
+.*:	0cc00ede 	          ADDSNV    RABZ,D0Re0,D0\.7
+.*:	0cc032dd 	          ADDSLE    RABZ,D0Re0,A0FrP
+.*:	0cc1cecc 	          ADDSPL    RABZ,D0\.7,D0\.7
+.*:	0cc1e0dd 	          ADDSLE    RABZ,D0\.7,RD
+.*:	0ce802dd 	          ADDSLE    RAWX,D0Re0,A1LbP
+.*:	0ce81edd 	          ADDSLE    RAWX,D0Re0,D1\.7
+.*:	0ce9c0cc 	          ADDSPL    RAWX,D0\.7,D0Re0
+.*:	0ce9d0dd 	          ADDSLE    RAWX,D0\.7,D1Re0
+.*:	0ce9fedd 	          ADDSLE    RAWX,D0\.7,A0\.7
+.*:	0cf802dd 	          ADDSLE    RAMX,D0Re0,A1LbP
+.*:	0cf80ede 	          ADDSNV    RAMX,D0Re0,D0\.7
+.*:	0cf81edd 	          ADDSLE    RAMX,D0Re0,D1\.7
+.*:	0cf832dd 	          ADDSLE    RAMX,D0Re0,A0FrP
+.*:	0cf9c0cc 	          ADDSPL    RAMX,D0\.7,D0Re0
+.*:	0cf9ce1e 	          ADDSNV    TXIDLECYC,D0\.7,D0\.7
+.*:	0cf9d0dd 	          ADDSLE    RAMX,D0\.7,D1Re0
+.*:	0cf9e0dd 	          ADDSLE    RAMX,D0\.7,RD
+.*:	0cf9fedd 	          ADDSLE    RAMX,D0\.7,A0\.7
+.*:	0d0000bc 	          ADDSLE    PC,D1Re0,D1Re0
+.*:	0d00025d 	          ADDSLE    D1Re0,D1Re0,A1LbP
+.*:	0d000e1e 	          ADDSNV    TXENABLE,D1Re0,D1\.7
+.*:	0d000e5e 	          ADDSNV    D1Re0,D1Re0,D1\.7
+.*:	0d000efe 	          ADDSNV    TXSTAT,D1Re0,D1\.7
+.*:	0d0010bd 	          ADDSLE    PC,D1Re0,D0Re0
+.*:	0d001e5d 	          ADDSLE    D1Re0,D1Re0,D0\.7
+.*:	0d00203d 	          ADDSLE    D0Re0,D1Re0,RD
+.*:	0d00321d 	          ADDSLE    TXENABLE,D1Re0,A0FrP
+.*:	0d0032fd 	          ADDSLE    TXSTAT,D1Re0,A0FrP
+.*:	0d003ebd 	          ADDSLE    PC,D1Re0,A0\.7
+.*:	0d01c054 	          ADDSLS    D1Re0,D1\.7,D1Re0
+.*:	0d01c22d 	          ADDSPL    D0Re0,D1\.7,A1LbP
+.*:	0d01ce0c 	          ADDSPL    TXENABLE,D1\.7,D1\.7
+.*:	0d01ce5c 	          ADDSLE    D1Re0,D1\.7,D1\.7
+.*:	0d01cefc 	          ADDSLE    TXSTAT,D1\.7,D1\.7
+.*:	0d01d05d 	          ADDSLE    D1Re0,D1\.7,D0Re0
+.*:	0d01de3d 	          ADDSLE    D0Re0,D1\.7,D0\.7
+.*:	0d01e00d 	          ADDSPL    TXENABLE,D1\.7,RD
+.*:	0d01e0fd 	          ADDSLE    TXSTAT,D1\.7,RD
+.*:	0d01f2bd 	          ADDSLE    PC,D1\.7,A0FrP
+.*:	0d01fe5d 	          ADDSLE    D1Re0,D1\.7,A0\.7
+.*:	0d080094 	          ADDSLS    A1LbP,D1Re0,D1Re0
+.*:	0d0802bd 	          ADDSLE    PCX,D1Re0,A1LbP
+.*:	0d080e9e 	          ADDSNV    A1LbP,D1Re0,D1\.7
+.*:	0d08109d 	          ADDSLE    A1LbP,D1Re0,D0Re0
+.*:	0d081ead 	          ADDSPL    PCX,D1Re0,D0\.7
+.*:	0d08327d 	          ADDSLE    A0FrP,D1Re0,A0FrP
+.*:	0d083e9d 	          ADDSLE    A1LbP,D1Re0,A0\.7
+.*:	0d09c0ac 	          ADDSPL    PCX,D1\.7,D1Re0
+.*:	0d09ce64 	          ADDSNE    A0FrP,D1\.7,D1\.7
+.*:	0d09ceb4 	          ADDSLS    PCX,D1\.7,D1\.7
+.*:	0d09d0bd 	          ADDSLE    PCX,D1\.7,D0Re0
+.*:	0d09e07d 	          ADDSLE    A0FrP,D1\.7,RD
+.*:	0d09f29d 	          ADDSLE    A1LbP,D1\.7,A0FrP
+.*:	0d09fead 	          ADDSPL    PCX,D1\.7,A0\.7
+.*:	0d180efe 	          ADDSNV    TXMASKI,D1Re0,D1\.7
+.*:	0d1832fd 	          ADDSLE    TXMASKI,D1Re0,A0FrP
+.*:	0d19ceec 	          ADDSPL    TXMASKI,D1\.7,D1\.7
+.*:	0d19e0fd 	          ADDSLE    TXMASKI,D1\.7,RD
+.*:	0d380044 	          ADDSNE    D1\.7,D1Re0,D1Re0
+.*:	0d38025d 	          ADDSLE    D1\.7,D1Re0,A1LbP
+.*:	0d380e3e 	          ADDSNV    D0\.7,D1Re0,D1\.7
+.*:	0d380e7e 	          ADDSNV    A0\.7,D1Re0,D1\.7
+.*:	0d38104d 	          ADDSPL    D1\.7,D1Re0,D0Re0
+.*:	0d381e5d 	          ADDSLE    D1\.7,D1Re0,D0\.7
+.*:	0d38204d 	          ADDSPL    D1\.7,D1Re0,RD
+.*:	0d38325d 	          ADDSLE    D1\.7,D1Re0,A0FrP
+.*:	0d383e5d 	          ADDSLE    D1\.7,D1Re0,A0\.7
+.*:	0d39c054 	          ADDSLS    D1\.7,D1\.7,D1Re0
+.*:	0d39c25d 	          ADDSLE    D1\.7,D1\.7,A1LbP
+.*:	0d39ce3e 	          ADDSNV    D0\.7,D1\.7,D1\.7
+.*:	0d39ce7e 	          ADDSNV    A0\.7,D1\.7,D1\.7
+.*:	0d39d05d 	          ADDSLE    D1\.7,D1\.7,D0Re0
+.*:	0d39de5d 	          ADDSLE    D1\.7,D1\.7,D0\.7
+.*:	0d39e05d 	          ADDSLE    D1\.7,D1\.7,RD
+.*:	0d39f25d 	          ADDSLE    D1\.7,D1\.7,A0FrP
+.*:	0d39fe5d 	          ADDSLE    D1\.7,D1\.7,A0\.7
+.*:	0d8002dd 	          ADDSLE    RA,D1Re0,A1LbP
+.*:	0d801edd 	          ADDSLE    RA,D1Re0,D0\.7
+.*:	0d81c0cc 	          ADDSPL    RA,D1\.7,D1Re0
+.*:	0d81d0dd 	          ADDSLE    RA,D1\.7,D0Re0
+.*:	0d81fedd 	          ADDSLE    RA,D1\.7,A0\.7
+.*:	0db00ede 	          ADDSNV    RAM8X32,D1Re0,D1\.7
+.*:	0db032dd 	          ADDSLE    RAM8X32,D1Re0,A0FrP
+.*:	0db1cecc 	          ADDSPL    RAM8X32,D1\.7,D1\.7
+.*:	0db1e0dd 	          ADDSLE    RAM8X32,D1\.7,RD
+.*:	0db802dd 	          ADDSLE    RAM8X,D1Re0,A1LbP
+.*:	0db81edd 	          ADDSLE    RAM8X,D1Re0,D0\.7
+.*:	0db9c0cc 	          ADDSPL    RAM8X,D1\.7,D1Re0
+.*:	0db9d0dd 	          ADDSLE    RAM8X,D1\.7,D0Re0
+.*:	0db9fedd 	          ADDSLE    RAM8X,D1\.7,A0\.7
+.*:	0dc00ede 	          ADDSNV    RABZ,D1Re0,D1\.7
+.*:	0dc032dd 	          ADDSLE    RABZ,D1Re0,A0FrP
+.*:	0dc1cecc 	          ADDSPL    RABZ,D1\.7,D1\.7
+.*:	0dc1e0dd 	          ADDSLE    RABZ,D1\.7,RD
+.*:	0de802dd 	          ADDSLE    RAWX,D1Re0,A1LbP
+.*:	0de81edd 	          ADDSLE    RAWX,D1Re0,D0\.7
+.*:	0de9c0cc 	          ADDSPL    RAWX,D1\.7,D1Re0
+.*:	0de9d0dd 	          ADDSLE    RAWX,D1\.7,D0Re0
+.*:	0de9fedd 	          ADDSLE    RAWX,D1\.7,A0\.7
+.*:	0df802dd 	          ADDSLE    RAMX,D1Re0,A1LbP
+.*:	0df80ede 	          ADDSNV    RAMX,D1Re0,D1\.7
+.*:	0df81edd 	          ADDSLE    RAMX,D1Re0,D0\.7
+.*:	0df832dd 	          ADDSLE    RAMX,D1Re0,A0FrP
+.*:	0df9c0cc 	          ADDSPL    RAMX,D1\.7,D1Re0
+.*:	0df9ce1e 	          ADDSNV    TXIDLECYC,D1\.7,D1\.7
+.*:	0df9d0dd 	          ADDSLE    RAMX,D1\.7,D0Re0
+.*:	0df9e0dd 	          ADDSLE    RAMX,D1\.7,RD
+.*:	0df9fedd 	          ADDSLE    RAMX,D1\.7,A0\.7
+.*:	0e00201c 	          ADDSLE    D0Re0,D0Re0,#0x80
+.*:	0e003fe0 	          ADDS      TXENABLE,D0Re0,#0xff
+.*:	0e01dfe4 	          ADDS      D1Re0,D0\.7,#0x7f
+.*:	0e01e02a 	          ADDS      PC,D0\.7,#0x80
+.*:	0e01ffee 	          ADDS      TXSTAT,D0\.7,#0xff
+.*:	0e083fe8 	          ADDS      A1LbP,D0Re0,#0xff
+.*:	0e09ffe6 	          ADDS      A0FrP,D0\.7,#0xff
+.*:	0e19ffee 	          ADDS      TXMASKI,D0\.7,#0xff
+.*:	0e38201e 	          ADDSNV    D0\.7,D0Re0,#0x80
+.*:	0e383fe4 	          ADDS      D1\.7,D0Re0,#0xff
+.*:	0e39e004 	          ADDSNE    D0\.7,D0\.7,#0x80
+.*:	0e39ffe6 	          ADDS      A0\.7,D0\.7,#0xff
+.*:	0eb01fec 	          ADDS      RAM8X32,D0Re0,#0x7f
+.*:	0eb83fec 	          ADDS      RAM8X,D0Re0,#0xff
+.*:	0ec1e02c 	          ADDS      RABZ,D0\.7,#0x80
+.*:	0ef81fe0 	          ADDS      TXIDLECYC,D0Re0,#0x7f
+.*:	0ef9e020 	          ADDS      TXIDLECYC,D0\.7,#0x80
+.*:	0f001fea 	          ADDS      PC,D1Re0,#0x7f
+.*:	0f003fcc 	          ADDSPL    D1Re0,D1Re0,#0xff
+.*:	0f01dfe0 	          ADDS      TXENABLE,D1\.7,#0x7f
+.*:	0f01e022 	          ADDS      D0Re0,D1\.7,#0x80
+.*:	0f01ffe4 	          ADDS      D1Re0,D1\.7,#0xff
+.*:	0f08202a 	          ADDS      PCX,D1Re0,#0x80
+.*:	0f09e028 	          ADDS      A1LbP,D1\.7,#0x80
+.*:	0f19dfee 	          ADDS      TXMASKI,D1\.7,#0x7f
+.*:	0f381fe8 	          ADDS      A1\.7,D1Re0,#0x7f
+.*:	0f383fde 	          ADDSNV    D1\.7,D1Re0,#0xff
+.*:	0f39dfe6 	          ADDS      A0\.7,D1\.7,#0x7f
+.*:	0f39ffde 	          ADDSNV    D1\.7,D1\.7,#0xff
+.*:	0f81e02c 	          ADDS      RA,D1\.7,#0x80
+.*:	0fb81fec 	          ADDS      RAM8X,D1Re0,#0x7f
+.*:	0fc03fec 	          ADDS      RABZ,D1Re0,#0xff
+.*:	0fe9e02c 	          ADDS      RAWX,D1\.7,#0x80
+.*:	0ff9dfe0 	          ADDS      TXIDLECYC,D1\.7,#0x7f
+.*:	10000201 	          SUB       D0Re0,D0Re0,A1LbP
+.*:	10001e01 	          SUB       D0Re0,D0Re0,D1\.7
+.*:	1001c000 	          SUB       D0Re0,D0\.7,D0Re0
+.*:	1001fe01 	          SUB       D0Re0,D0\.7,A0\.7
+.*:	10380e05 	          NEG       D0\.7,A1\.7
+.*:	10383205 	          NEG       D0\.7,A0FrP
+.*:	1039de01 	          SUB       D0\.7,D0\.7,D1\.7
+.*:	11000e00 	          SUB       D1Re0,D1Re0,D1\.7
+.*:	11002001 	          SUB       D1Re0,D1Re0,RD
+.*:	1101ce00 	          SUB       D1Re0,D1\.7,D1\.7
+.*:	11380004 	          NEG       D1\.7,D1Re0
+.*:	11381005 	          NEG       D1\.7,D0Re0
+.*:	11383e05 	          NEG       D1\.7,A0\.7
+.*:	1139f201 	          SUB       D1\.7,D1\.7,A0FrP
+.*:	12040004 	          NEG       D0Re0,#0x8000
+.*:	123bfff9 	          SUBT      D0\.7,D0\.7,#0x7fff
+.*:	123ffff9 	          SUBT      D0\.7,D0\.7,#0xffff
+.*:	13040001 	          SUBT      D1Re0,D1Re0,#0x8000
+.*:	1307fffe 	          NEG       D1Re0,#-1
+.*:	133c0006 	          NEG       D1\.7,#-32768
+.*:	1400003c 	          SUBLE     D0Re0,D0Re0,D0Re0
+.*:	1400021d 	          SUBLE     TXENABLE,D0Re0,A1LbP
+.*:	140002fd 	          SUBLE     TXSTAT,D0Re0,A1LbP
+.*:	14000e3e 	          SUBNV     D0Re0,D0Re0,D0\.7
+.*:	14000ebe 	          SUBNV     PC,D0Re0,D0\.7
+.*:	1400103d 	          SUBLE     D0Re0,D0Re0,D1Re0
+.*:	14001e1d 	          SUBLE     TXENABLE,D0Re0,D1\.7
+.*:	14001efd 	          SUBLE     TXSTAT,D0Re0,D1\.7
+.*:	140020bd 	          SUBLE     PC,D0Re0,RD
+.*:	1400325d 	          SUBLE     D1Re0,D0Re0,A0FrP
+.*:	14003e3d 	          SUBLE     D0Re0,D0Re0,A0\.7
+.*:	1401c004 	          SUBNE     TXENABLE,D0\.7,D0Re0
+.*:	1401c0f4 	          SUBLS     TXSTAT,D0\.7,D0Re0
+.*:	1401c2ad 	          SUBPL     PC,D0\.7,A1LbP
+.*:	1401ce34 	          SUBLS     D0Re0,D0\.7,D0\.7
+.*:	1401ceb4 	          SUBLS     PC,D0\.7,D0\.7
+.*:	1401d00d 	          SUBPL     TXENABLE,D0\.7,D1Re0
+.*:	1401d0fd 	          SUBLE     TXSTAT,D0\.7,D1Re0
+.*:	1401debd 	          SUBLE     PC,D0\.7,D1\.7
+.*:	1401e05d 	          SUBLE     D1Re0,D0\.7,RD
+.*:	1401f23d 	          SUBLE     D0Re0,D0\.7,A0FrP
+.*:	1401fe1d 	          SUBLE     TXENABLE,D0\.7,A0\.7
+.*:	1401fefd 	          SUBLE     TXSTAT,D0\.7,A0\.7
+.*:	1408026d 	          SUBPL     A0FrP,D0Re0,A1LbP
+.*:	14080e7e 	          SUBNV     A0FrP,D0Re0,D0\.7
+.*:	14080ebe 	          SUBNV     PCX,D0Re0,D0\.7
+.*:	14081e7d 	          SUBLE     A0FrP,D0Re0,D1\.7
+.*:	1408209d 	          SUBLE     A1LbP,D0Re0,RD
+.*:	140832ad 	          SUBPL     PCX,D0Re0,A0FrP
+.*:	1409c07c 	          SUBLE     A0FrP,D0\.7,D0Re0
+.*:	1409c29d 	          SUBLE     A1LbP,D0\.7,A1LbP
+.*:	1409ce8c 	          SUBPL     A1LbP,D0\.7,D0\.7
+.*:	1409d07d 	          SUBLE     A0FrP,D0\.7,D1Re0
+.*:	1409de9d 	          SUBLE     A1LbP,D0\.7,D1\.7
+.*:	1409e0bd 	          SUBLE     PCX,D0\.7,RD
+.*:	1409fe7d 	          SUBLE     A0FrP,D0\.7,A0\.7
+.*:	141802fd 	          SUBLE     TXMASKI,D0Re0,A1LbP
+.*:	14181efd 	          SUBLE     TXMASKI,D0Re0,D1\.7
+.*:	1419c0fc 	          SUBLE     TXMASKI,D0\.7,D0Re0
+.*:	1419d0fd 	          SUBLE     TXMASKI,D0\.7,D1Re0
+.*:	1419fefd 	          SUBLE     TXMASKI,D0\.7,A0\.7
+.*:	14380094 	          SUBLS     A1\.7,D0Re0,D0Re0
+.*:	1438029d 	          SUBLE     A1\.7,D0Re0,A1LbP
+.*:	14380e5e 	          SUBNV     D1\.7,D0Re0,D0\.7
+.*:	14380e9e 	          SUBNV     A1\.7,D0Re0,D0\.7
+.*:	1438109d 	          SUBLE     A1\.7,D0Re0,D1Re0
+.*:	14381e9d 	          SUBLE     A1\.7,D0Re0,D1\.7
+.*:	1438209d 	          SUBLE     A1\.7,D0Re0,RD
+.*:	1438329d 	          SUBLE     A1\.7,D0Re0,A0FrP
+.*:	14383e9d 	          SUBLE     A1\.7,D0Re0,A0\.7
+.*:	1439c084 	          SUBNE     A1\.7,D0\.7,D0Re0
+.*:	1439c29d 	          SUBLE     A1\.7,D0\.7,A1LbP
+.*:	1439ce5e 	          SUBNV     D1\.7,D0\.7,D0\.7
+.*:	1439ce9e 	          SUBNV     A1\.7,D0\.7,D0\.7
+.*:	1439d08d 	          SUBPL     A1\.7,D0\.7,D1Re0
+.*:	1439de9d 	          SUBLE     A1\.7,D0\.7,D1\.7
+.*:	1439e08d 	          SUBPL     A1\.7,D0\.7,RD
+.*:	1439f29d 	          SUBLE     A1\.7,D0\.7,A0FrP
+.*:	1439fe9d 	          SUBLE     A1\.7,D0\.7,A0\.7
+.*:	14800ede 	          SUBNV     RA,D0Re0,D0\.7
+.*:	148032dd 	          SUBLE     RA,D0Re0,A0FrP
+.*:	1481cecc 	          SUBPL     RA,D0\.7,D0\.7
+.*:	1481e0dd 	          SUBLE     RA,D0\.7,RD
+.*:	14b002dd 	          SUBLE     RAM8X32,D0Re0,A1LbP
+.*:	14b01edd 	          SUBLE     RAM8X32,D0Re0,D1\.7
+.*:	14b1c0cc 	          SUBPL     RAM8X32,D0\.7,D0Re0
+.*:	14b1d0dd 	          SUBLE     RAM8X32,D0\.7,D1Re0
+.*:	14b1fedd 	          SUBLE     RAM8X32,D0\.7,A0\.7
+.*:	14b80ede 	          SUBNV     RAM8X,D0Re0,D0\.7
+.*:	14b832dd 	          SUBLE     RAM8X,D0Re0,A0FrP
+.*:	14b9cecc 	          SUBPL     RAM8X,D0\.7,D0\.7
+.*:	14b9e0dd 	          SUBLE     RAM8X,D0\.7,RD
+.*:	14c002dd 	          SUBLE     RABZ,D0Re0,A1LbP
+.*:	14c01edd 	          SUBLE     RABZ,D0Re0,D1\.7
+.*:	14c1c0cc 	          SUBPL     RABZ,D0\.7,D0Re0
+.*:	14c1d0dd 	          SUBLE     RABZ,D0\.7,D1Re0
+.*:	14c1fedd 	          SUBLE     RABZ,D0\.7,A0\.7
+.*:	14e80ede 	          SUBNV     RAWX,D0Re0,D0\.7
+.*:	14e832dd 	          SUBLE     RAWX,D0Re0,A0FrP
+.*:	14e9cecc 	          SUBPL     RAWX,D0\.7,D0\.7
+.*:	14e9e0dd 	          SUBLE     RAWX,D0\.7,RD
+.*:	14f800cc 	          SUBPL     RAMX,D0Re0,D0Re0
+.*:	14f80e1e 	          SUBNV     TXIDLECYC,D0Re0,D0\.7
+.*:	14f810dd 	          SUBLE     RAMX,D0Re0,D1Re0
+.*:	14f820dd 	          SUBLE     RAMX,D0Re0,RD
+.*:	14f83edd 	          SUBLE     RAMX,D0Re0,A0\.7
+.*:	14f9c2dd 	          SUBLE     RAMX,D0\.7,A1LbP
+.*:	14f9cede 	          SUBNV     RAMX,D0\.7,D0\.7
+.*:	14f9dedd 	          SUBLE     RAMX,D0\.7,D1\.7
+.*:	14f9f2dd 	          SUBLE     RAMX,D0\.7,A0FrP
+.*:	1500003c 	          SUBLE     D0Re0,D1Re0,D1Re0
+.*:	1500021d 	          SUBLE     TXENABLE,D1Re0,A1LbP
+.*:	150002fd 	          SUBLE     TXSTAT,D1Re0,A1LbP
+.*:	15000e3e 	          SUBNV     D0Re0,D1Re0,D1\.7
+.*:	15000ebe 	          SUBNV     PC,D1Re0,D1\.7
+.*:	1500103d 	          SUBLE     D0Re0,D1Re0,D0Re0
+.*:	15001e1d 	          SUBLE     TXENABLE,D1Re0,D0\.7
+.*:	15001efd 	          SUBLE     TXSTAT,D1Re0,D0\.7
+.*:	150020bd 	          SUBLE     PC,D1Re0,RD
+.*:	1500325d 	          SUBLE     D1Re0,D1Re0,A0FrP
+.*:	15003e3d 	          SUBLE     D0Re0,D1Re0,A0\.7
+.*:	1501c004 	          SUBNE     TXENABLE,D1\.7,D1Re0
+.*:	1501c0f4 	          SUBLS     TXSTAT,D1\.7,D1Re0
+.*:	1501c2ad 	          SUBPL     PC,D1\.7,A1LbP
+.*:	1501ce34 	          SUBLS     D0Re0,D1\.7,D1\.7
+.*:	1501ceb4 	          SUBLS     PC,D1\.7,D1\.7
+.*:	1501d00d 	          SUBPL     TXENABLE,D1\.7,D0Re0
+.*:	1501d0fd 	          SUBLE     TXSTAT,D1\.7,D0Re0
+.*:	1501debd 	          SUBLE     PC,D1\.7,D0\.7
+.*:	1501e05d 	          SUBLE     D1Re0,D1\.7,RD
+.*:	1501f23d 	          SUBLE     D0Re0,D1\.7,A0FrP
+.*:	1501fe1d 	          SUBLE     TXENABLE,D1\.7,A0\.7
+.*:	1501fefd 	          SUBLE     TXSTAT,D1\.7,A0\.7
+.*:	1508026d 	          SUBPL     A0FrP,D1Re0,A1LbP
+.*:	15080e7e 	          SUBNV     A0FrP,D1Re0,D1\.7
+.*:	15080ebe 	          SUBNV     PCX,D1Re0,D1\.7
+.*:	15081e7d 	          SUBLE     A0FrP,D1Re0,D0\.7
+.*:	1508209d 	          SUBLE     A1LbP,D1Re0,RD
+.*:	150832ad 	          SUBPL     PCX,D1Re0,A0FrP
+.*:	1509c07c 	          SUBLE     A0FrP,D1\.7,D1Re0
+.*:	1509c29d 	          SUBLE     A1LbP,D1\.7,A1LbP
+.*:	1509ce8c 	          SUBPL     A1LbP,D1\.7,D1\.7
+.*:	1509d07d 	          SUBLE     A0FrP,D1\.7,D0Re0
+.*:	1509de9d 	          SUBLE     A1LbP,D1\.7,D0\.7
+.*:	1509e0bd 	          SUBLE     PCX,D1\.7,RD
+.*:	1509fe7d 	          SUBLE     A0FrP,D1\.7,A0\.7
+.*:	151802fd 	          SUBLE     TXMASKI,D1Re0,A1LbP
+.*:	15181efd 	          SUBLE     TXMASKI,D1Re0,D0\.7
+.*:	1519c0fc 	          SUBLE     TXMASKI,D1\.7,D1Re0
+.*:	1519d0fd 	          SUBLE     TXMASKI,D1\.7,D0Re0
+.*:	1519fefd 	          SUBLE     TXMASKI,D1\.7,A0\.7
+.*:	15380094 	          SUBLS     A1\.7,D1Re0,D1Re0
+.*:	1538029d 	          SUBLE     A1\.7,D1Re0,A1LbP
+.*:	15380e5e 	          SUBNV     D1\.7,D1Re0,D1\.7
+.*:	15380e9e 	          SUBNV     A1\.7,D1Re0,D1\.7
+.*:	1538109d 	          SUBLE     A1\.7,D1Re0,D0Re0
+.*:	15381e9d 	          SUBLE     A1\.7,D1Re0,D0\.7
+.*:	1538209d 	          SUBLE     A1\.7,D1Re0,RD
+.*:	1538329d 	          SUBLE     A1\.7,D1Re0,A0FrP
+.*:	15383e9d 	          SUBLE     A1\.7,D1Re0,A0\.7
+.*:	1539c084 	          SUBNE     A1\.7,D1\.7,D1Re0
+.*:	1539c29d 	          SUBLE     A1\.7,D1\.7,A1LbP
+.*:	1539ce5e 	          SUBNV     D1\.7,D1\.7,D1\.7
+.*:	1539ce9e 	          SUBNV     A1\.7,D1\.7,D1\.7
+.*:	1539d08d 	          SUBPL     A1\.7,D1\.7,D0Re0
+.*:	1539de9d 	          SUBLE     A1\.7,D1\.7,D0\.7
+.*:	1539e08d 	          SUBPL     A1\.7,D1\.7,RD
+.*:	1539f29d 	          SUBLE     A1\.7,D1\.7,A0FrP
+.*:	1539fe9d 	          SUBLE     A1\.7,D1\.7,A0\.7
+.*:	15800ede 	          SUBNV     RA,D1Re0,D1\.7
+.*:	158032dd 	          SUBLE     RA,D1Re0,A0FrP
+.*:	1581cecc 	          SUBPL     RA,D1\.7,D1\.7
+.*:	1581e0dd 	          SUBLE     RA,D1\.7,RD
+.*:	15b002dd 	          SUBLE     RAM8X32,D1Re0,A1LbP
+.*:	15b01edd 	          SUBLE     RAM8X32,D1Re0,D0\.7
+.*:	15b1c0cc 	          SUBPL     RAM8X32,D1\.7,D1Re0
+.*:	15b1d0dd 	          SUBLE     RAM8X32,D1\.7,D0Re0
+.*:	15b1fedd 	          SUBLE     RAM8X32,D1\.7,A0\.7
+.*:	15b80ede 	          SUBNV     RAM8X,D1Re0,D1\.7
+.*:	15b832dd 	          SUBLE     RAM8X,D1Re0,A0FrP
+.*:	15b9cecc 	          SUBPL     RAM8X,D1\.7,D1\.7
+.*:	15b9e0dd 	          SUBLE     RAM8X,D1\.7,RD
+.*:	15c002dd 	          SUBLE     RABZ,D1Re0,A1LbP
+.*:	15c01edd 	          SUBLE     RABZ,D1Re0,D0\.7
+.*:	15c1c0cc 	          SUBPL     RABZ,D1\.7,D1Re0
+.*:	15c1d0dd 	          SUBLE     RABZ,D1\.7,D0Re0
+.*:	15c1fedd 	          SUBLE     RABZ,D1\.7,A0\.7
+.*:	15e80ede 	          SUBNV     RAWX,D1Re0,D1\.7
+.*:	15e832dd 	          SUBLE     RAWX,D1Re0,A0FrP
+.*:	15e9cecc 	          SUBPL     RAWX,D1\.7,D1\.7
+.*:	15e9e0dd 	          SUBLE     RAWX,D1\.7,RD
+.*:	15f800cc 	          SUBPL     RAMX,D1Re0,D1Re0
+.*:	15f80e1e 	          SUBNV     TXIDLECYC,D1Re0,D1\.7
+.*:	15f810dd 	          SUBLE     RAMX,D1Re0,D0Re0
+.*:	15f820dd 	          SUBLE     RAMX,D1Re0,RD
+.*:	15f83edd 	          SUBLE     RAMX,D1Re0,A0\.7
+.*:	15f9c2dd 	          SUBLE     RAMX,D1\.7,A1LbP
+.*:	15f9cede 	          SUBNV     RAMX,D1\.7,D1\.7
+.*:	15f9dedd 	          SUBLE     RAMX,D1\.7,D0\.7
+.*:	15f9f2dd 	          SUBLE     RAMX,D1\.7,A0FrP
+.*:	16001fe0 	          SUB       TXENABLE,D0Re0,#0x7f
+.*:	1600202a 	          SUB       PC,D0Re0,#0x80
+.*:	1601dfdc 	          SUBLE     D0Re0,D0\.7,#0x7f
+.*:	1601e01e 	          SUBNV     D0Re0,D0\.7,#0x80
+.*:	1601ffe0 	          SUB       TXENABLE,D0\.7,#0xff
+.*:	16082026 	          SUB       A0FrP,D0Re0,#0x80
+.*:	1609dfea 	          SUB       PCX,D0\.7,#0x7f
+.*:	1618202e 	          SUB       TXMASKI,D0Re0,#0x80
+.*:	16381fe4 	          SUB       D1\.7,D0Re0,#0x7f
+.*:	16382028 	          SUB       A1\.7,D0Re0,#0x80
+.*:	1639dfde 	          SUBNV     D0\.7,D0\.7,#0x7f
+.*:	1639e028 	          SUB       A1\.7,D0\.7,#0x80
+.*:	16803fec 	          SUB       RA,D0Re0,#0xff
+.*:	16b1e02c 	          SUB       RAM8X32,D0\.7,#0x80
+.*:	16c01fec 	          SUB       RABZ,D0Re0,#0x7f
+.*:	16e83fec 	          SUB       RAWX,D0Re0,#0xff
+.*:	16f83fe0 	          SUB       TXIDLECYC,D0Re0,#0xff
+.*:	17001fdc 	          SUBLE     D1Re0,D1Re0,#0x7f
+.*:	17002020 	          SUB       TXENABLE,D1Re0,#0x80
+.*:	17003fea 	          SUB       PC,D1Re0,#0xff
+.*:	1701dfee 	          SUB       TXSTAT,D1\.7,#0x7f
+.*:	1701ffdc 	          SUBLE     D1Re0,D1\.7,#0xff
+.*:	17081fe8 	          SUB       A1LbP,D1Re0,#0x7f
+.*:	1709dfe6 	          SUB       A0FrP,D1\.7,#0x7f
+.*:	1709ffea 	          SUB       PCX,D1\.7,#0xff
+.*:	17381fde 	          SUBNV     D1\.7,D1Re0,#0x7f
+.*:	17382024 	          SUB       D1\.7,D1Re0,#0x80
+.*:	17383fe8 	          SUB       A1\.7,D1Re0,#0xff
+.*:	1739e022 	          SUB       D0\.7,D1\.7,#0x80
+.*:	17801fec 	          SUB       RA,D1Re0,#0x7f
+.*:	17b03fec 	          SUB       RAM8X32,D1Re0,#0xff
+.*:	17b9e02c 	          SUB       RAM8X,D1\.7,#0x80
+.*:	17e81fec 	          SUB       RAWX,D1Re0,#0x7f
+.*:	17f82020 	          SUB       TXIDLECYC,D1Re0,#0x80
+.*:	17f9ffe0 	          SUB       TXIDLECYC,D1\.7,#0xff
+.*:	18000e04 	          NEGS      D0Re0,D0\.7
+.*:	18003201 	          SUBS      D0Re0,D0Re0,A0FrP
+.*:	1801d001 	          SUBS      D0Re0,D0\.7,D1Re0
+.*:	18380205 	          NEGS      D0\.7,A1LbP
+.*:	18381e05 	          NEGS      D0\.7,D1\.7
+.*:	1839c201 	          SUBS      D0\.7,D0\.7,A1LbP
+.*:	19000000 	          SUBS      D1Re0,D1Re0,D1Re0
+.*:	19001001 	          SUBS      D1Re0,D1Re0,D0Re0
+.*:	19003e01 	          SUBS      D1Re0,D1Re0,A0\.7
+.*:	1901e001 	          SUBS      D1Re0,D1\.7,RD
+.*:	19380e01 	          SUBS      D1\.7,D1Re0,A1\.7
+.*:	19382005 	          NEGS      D1\.7,RD
+.*:	1939ce01 	          SUBS      D1\.7,D1\.7,A1\.7
+.*:	1a03fffc 	          NEGS      D0Re0,#0x7fff
+.*:	1a07fffa 	          SUBS      D0Re0,D0Re0,#-1
+.*:	1a3c0002 	          SUBS      D0\.7,D0\.7,#-32768
+.*:	1b03fff8 	          SUBS      D1Re0,D1Re0,#0x7fff
+.*:	1b07fff8 	          SUBS      D1Re0,D1Re0,#0xffff
+.*:	1b3c0000 	          SUBS      D1\.7,D1\.7,#0x8000
+.*:	1b3ffffc 	          NEGS      D1\.7,#0xffff
+.*:	1c0000bc 	          SUBSLE    PC,D0Re0,D0Re0
+.*:	1c00025d 	          SUBSLE    D1Re0,D0Re0,A1LbP
+.*:	1c000e1e 	          SUBSNV    TXENABLE,D0Re0,D0\.7
+.*:	1c000e5e 	          SUBSNV    D1Re0,D0Re0,D0\.7
+.*:	1c000efe 	          SUBSNV    TXSTAT,D0Re0,D0\.7
+.*:	1c0010bd 	          SUBSLE    PC,D0Re0,D1Re0
+.*:	1c001e5d 	          SUBSLE    D1Re0,D0Re0,D1\.7
+.*:	1c00203d 	          SUBSLE    D0Re0,D0Re0,RD
+.*:	1c00321d 	          SUBSLE    TXENABLE,D0Re0,A0FrP
+.*:	1c0032fd 	          SUBSLE    TXSTAT,D0Re0,A0FrP
+.*:	1c003ebd 	          SUBSLE    PC,D0Re0,A0\.7
+.*:	1c01c054 	          SUBSLS    D1Re0,D0\.7,D0Re0
+.*:	1c01c22d 	          SUBSPL    D0Re0,D0\.7,A1LbP
+.*:	1c01ce0c 	          SUBSPL    TXENABLE,D0\.7,D0\.7
+.*:	1c01ce5c 	          SUBSLE    D1Re0,D0\.7,D0\.7
+.*:	1c01cefc 	          SUBSLE    TXSTAT,D0\.7,D0\.7
+.*:	1c01d05d 	          SUBSLE    D1Re0,D0\.7,D1Re0
+.*:	1c01de3d 	          SUBSLE    D0Re0,D0\.7,D1\.7
+.*:	1c01e00d 	          SUBSPL    TXENABLE,D0\.7,RD
+.*:	1c01e0fd 	          SUBSLE    TXSTAT,D0\.7,RD
+.*:	1c01f2bd 	          SUBSLE    PC,D0\.7,A0FrP
+.*:	1c01fe5d 	          SUBSLE    D1Re0,D0\.7,A0\.7
+.*:	1c080094 	          SUBSLS    A1LbP,D0Re0,D0Re0
+.*:	1c0802bd 	          SUBSLE    PCX,D0Re0,A1LbP
+.*:	1c080e9e 	          SUBSNV    A1LbP,D0Re0,D0\.7
+.*:	1c08109d 	          SUBSLE    A1LbP,D0Re0,D1Re0
+.*:	1c081ead 	          SUBSPL    PCX,D0Re0,D1\.7
+.*:	1c08327d 	          SUBSLE    A0FrP,D0Re0,A0FrP
+.*:	1c083e9d 	          SUBSLE    A1LbP,D0Re0,A0\.7
+.*:	1c09c0ac 	          SUBSPL    PCX,D0\.7,D0Re0
+.*:	1c09ce64 	          SUBSNE    A0FrP,D0\.7,D0\.7
+.*:	1c09ceb4 	          SUBSLS    PCX,D0\.7,D0\.7
+.*:	1c09d0bd 	          SUBSLE    PCX,D0\.7,D1Re0
+.*:	1c09e07d 	          SUBSLE    A0FrP,D0\.7,RD
+.*:	1c09f29d 	          SUBSLE    A1LbP,D0\.7,A0FrP
+.*:	1c09fead 	          SUBSPL    PCX,D0\.7,A0\.7
+.*:	1c180efe 	          SUBSNV    TXMASKI,D0Re0,D0\.7
+.*:	1c1832fd 	          SUBSLE    TXMASKI,D0Re0,A0FrP
+.*:	1c19ceec 	          SUBSPL    TXMASKI,D0\.7,D0\.7
+.*:	1c19e0fd 	          SUBSLE    TXMASKI,D0\.7,RD
+.*:	1c380044 	          SUBSNE    D1\.7,D0Re0,D0Re0
+.*:	1c38025d 	          SUBSLE    D1\.7,D0Re0,A1LbP
+.*:	1c380e3e 	          SUBSNV    D0\.7,D0Re0,D0\.7
+.*:	1c380e7e 	          SUBSNV    A0\.7,D0Re0,D0\.7
+.*:	1c38104d 	          SUBSPL    D1\.7,D0Re0,D1Re0
+.*:	1c381e5d 	          SUBSLE    D1\.7,D0Re0,D1\.7
+.*:	1c38204d 	          SUBSPL    D1\.7,D0Re0,RD
+.*:	1c38325d 	          SUBSLE    D1\.7,D0Re0,A0FrP
+.*:	1c383e5d 	          SUBSLE    D1\.7,D0Re0,A0\.7
+.*:	1c39c054 	          SUBSLS    D1\.7,D0\.7,D0Re0
+.*:	1c39c25d 	          SUBSLE    D1\.7,D0\.7,A1LbP
+.*:	1c39ce3e 	          SUBSNV    D0\.7,D0\.7,D0\.7
+.*:	1c39ce7e 	          SUBSNV    A0\.7,D0\.7,D0\.7
+.*:	1c39d05d 	          SUBSLE    D1\.7,D0\.7,D1Re0
+.*:	1c39de5d 	          SUBSLE    D1\.7,D0\.7,D1\.7
+.*:	1c39e05d 	          SUBSLE    D1\.7,D0\.7,RD
+.*:	1c39f25d 	          SUBSLE    D1\.7,D0\.7,A0FrP
+.*:	1c39fe5d 	          SUBSLE    D1\.7,D0\.7,A0\.7
+.*:	1c8002dd 	          SUBSLE    RA,D0Re0,A1LbP
+.*:	1c801edd 	          SUBSLE    RA,D0Re0,D1\.7
+.*:	1c81c0cc 	          SUBSPL    RA,D0\.7,D0Re0
+.*:	1c81d0dd 	          SUBSLE    RA,D0\.7,D1Re0
+.*:	1c81fedd 	          SUBSLE    RA,D0\.7,A0\.7
+.*:	1cb00ede 	          SUBSNV    RAM8X32,D0Re0,D0\.7
+.*:	1cb032dd 	          SUBSLE    RAM8X32,D0Re0,A0FrP
+.*:	1cb1cecc 	          SUBSPL    RAM8X32,D0\.7,D0\.7
+.*:	1cb1e0dd 	          SUBSLE    RAM8X32,D0\.7,RD
+.*:	1cb802dd 	          SUBSLE    RAM8X,D0Re0,A1LbP
+.*:	1cb81edd 	          SUBSLE    RAM8X,D0Re0,D1\.7
+.*:	1cb9c0cc 	          SUBSPL    RAM8X,D0\.7,D0Re0
+.*:	1cb9d0dd 	          SUBSLE    RAM8X,D0\.7,D1Re0
+.*:	1cb9fedd 	          SUBSLE    RAM8X,D0\.7,A0\.7
+.*:	1cc00ede 	          SUBSNV    RABZ,D0Re0,D0\.7
+.*:	1cc032dd 	          SUBSLE    RABZ,D0Re0,A0FrP
+.*:	1cc1cecc 	          SUBSPL    RABZ,D0\.7,D0\.7
+.*:	1cc1e0dd 	          SUBSLE    RABZ,D0\.7,RD
+.*:	1ce802dd 	          SUBSLE    RAWX,D0Re0,A1LbP
+.*:	1ce81edd 	          SUBSLE    RAWX,D0Re0,D1\.7
+.*:	1ce9c0cc 	          SUBSPL    RAWX,D0\.7,D0Re0
+.*:	1ce9d0dd 	          SUBSLE    RAWX,D0\.7,D1Re0
+.*:	1ce9fedd 	          SUBSLE    RAWX,D0\.7,A0\.7
+.*:	1cf802dd 	          SUBSLE    RAMX,D0Re0,A1LbP
+.*:	1cf80ede 	          SUBSNV    RAMX,D0Re0,D0\.7
+.*:	1cf81edd 	          SUBSLE    RAMX,D0Re0,D1\.7
+.*:	1cf832dd 	          SUBSLE    RAMX,D0Re0,A0FrP
+.*:	1cf9c0cc 	          SUBSPL    RAMX,D0\.7,D0Re0
+.*:	1cf9ce1e 	          SUBSNV    TXIDLECYC,D0\.7,D0\.7
+.*:	1cf9d0dd 	          SUBSLE    RAMX,D0\.7,D1Re0
+.*:	1cf9e0dd 	          SUBSLE    RAMX,D0\.7,RD
+.*:	1cf9fedd 	          SUBSLE    RAMX,D0\.7,A0\.7
+.*:	1d0000bc 	          SUBSLE    PC,D1Re0,D1Re0
+.*:	1d00025d 	          SUBSLE    D1Re0,D1Re0,A1LbP
+.*:	1d000e1e 	          SUBSNV    TXENABLE,D1Re0,D1\.7
+.*:	1d000e5e 	          SUBSNV    D1Re0,D1Re0,D1\.7
+.*:	1d000efe 	          SUBSNV    TXSTAT,D1Re0,D1\.7
+.*:	1d0010bd 	          SUBSLE    PC,D1Re0,D0Re0
+.*:	1d001e5d 	          SUBSLE    D1Re0,D1Re0,D0\.7
+.*:	1d00203d 	          SUBSLE    D0Re0,D1Re0,RD
+.*:	1d00321d 	          SUBSLE    TXENABLE,D1Re0,A0FrP
+.*:	1d0032fd 	          SUBSLE    TXSTAT,D1Re0,A0FrP
+.*:	1d003ebd 	          SUBSLE    PC,D1Re0,A0\.7
+.*:	1d01c054 	          SUBSLS    D1Re0,D1\.7,D1Re0
+.*:	1d01c22d 	          SUBSPL    D0Re0,D1\.7,A1LbP
+.*:	1d01ce0c 	          SUBSPL    TXENABLE,D1\.7,D1\.7
+.*:	1d01ce5c 	          SUBSLE    D1Re0,D1\.7,D1\.7
+.*:	1d01cefc 	          SUBSLE    TXSTAT,D1\.7,D1\.7
+.*:	1d01d05d 	          SUBSLE    D1Re0,D1\.7,D0Re0
+.*:	1d01de3d 	          SUBSLE    D0Re0,D1\.7,D0\.7
+.*:	1d01e00d 	          SUBSPL    TXENABLE,D1\.7,RD
+.*:	1d01e0fd 	          SUBSLE    TXSTAT,D1\.7,RD
+.*:	1d01f2bd 	          SUBSLE    PC,D1\.7,A0FrP
+.*:	1d01fe5d 	          SUBSLE    D1Re0,D1\.7,A0\.7
+.*:	1d080094 	          SUBSLS    A1LbP,D1Re0,D1Re0
+.*:	1d0802bd 	          SUBSLE    PCX,D1Re0,A1LbP
+.*:	1d080e9e 	          SUBSNV    A1LbP,D1Re0,D1\.7
+.*:	1d08109d 	          SUBSLE    A1LbP,D1Re0,D0Re0
+.*:	1d081ead 	          SUBSPL    PCX,D1Re0,D0\.7
+.*:	1d08327d 	          SUBSLE    A0FrP,D1Re0,A0FrP
+.*:	1d083e9d 	          SUBSLE    A1LbP,D1Re0,A0\.7
+.*:	1d09c0ac 	          SUBSPL    PCX,D1\.7,D1Re0
+.*:	1d09ce64 	          SUBSNE    A0FrP,D1\.7,D1\.7
+.*:	1d09ceb4 	          SUBSLS    PCX,D1\.7,D1\.7
+.*:	1d09d0bd 	          SUBSLE    PCX,D1\.7,D0Re0
+.*:	1d09e07d 	          SUBSLE    A0FrP,D1\.7,RD
+.*:	1d09f29d 	          SUBSLE    A1LbP,D1\.7,A0FrP
+.*:	1d09fead 	          SUBSPL    PCX,D1\.7,A0\.7
+.*:	1d180efe 	          SUBSNV    TXMASKI,D1Re0,D1\.7
+.*:	1d1832fd 	          SUBSLE    TXMASKI,D1Re0,A0FrP
+.*:	1d19ceec 	          SUBSPL    TXMASKI,D1\.7,D1\.7
+.*:	1d19e0fd 	          SUBSLE    TXMASKI,D1\.7,RD
+.*:	1d380044 	          SUBSNE    D1\.7,D1Re0,D1Re0
+.*:	1d38025d 	          SUBSLE    D1\.7,D1Re0,A1LbP
+.*:	1d380e3e 	          SUBSNV    D0\.7,D1Re0,D1\.7
+.*:	1d380e7e 	          SUBSNV    A0\.7,D1Re0,D1\.7
+.*:	1d38104d 	          SUBSPL    D1\.7,D1Re0,D0Re0
+.*:	1d381e5d 	          SUBSLE    D1\.7,D1Re0,D0\.7
+.*:	1d38204d 	          SUBSPL    D1\.7,D1Re0,RD
+.*:	1d38325d 	          SUBSLE    D1\.7,D1Re0,A0FrP
+.*:	1d383e5d 	          SUBSLE    D1\.7,D1Re0,A0\.7
+.*:	1d39c054 	          SUBSLS    D1\.7,D1\.7,D1Re0
+.*:	1d39c25d 	          SUBSLE    D1\.7,D1\.7,A1LbP
+.*:	1d39ce3e 	          SUBSNV    D0\.7,D1\.7,D1\.7
+.*:	1d39ce7e 	          SUBSNV    A0\.7,D1\.7,D1\.7
+.*:	1d39d05d 	          SUBSLE    D1\.7,D1\.7,D0Re0
+.*:	1d39de5d 	          SUBSLE    D1\.7,D1\.7,D0\.7
+.*:	1d39e05d 	          SUBSLE    D1\.7,D1\.7,RD
+.*:	1d39f25d 	          SUBSLE    D1\.7,D1\.7,A0FrP
+.*:	1d39fe5d 	          SUBSLE    D1\.7,D1\.7,A0\.7
+.*:	1d8002dd 	          SUBSLE    RA,D1Re0,A1LbP
+.*:	1d801edd 	          SUBSLE    RA,D1Re0,D0\.7
+.*:	1d81c0cc 	          SUBSPL    RA,D1\.7,D1Re0
+.*:	1d81d0dd 	          SUBSLE    RA,D1\.7,D0Re0
+.*:	1d81fedd 	          SUBSLE    RA,D1\.7,A0\.7
+.*:	1db00ede 	          SUBSNV    RAM8X32,D1Re0,D1\.7
+.*:	1db032dd 	          SUBSLE    RAM8X32,D1Re0,A0FrP
+.*:	1db1cecc 	          SUBSPL    RAM8X32,D1\.7,D1\.7
+.*:	1db1e0dd 	          SUBSLE    RAM8X32,D1\.7,RD
+.*:	1db802dd 	          SUBSLE    RAM8X,D1Re0,A1LbP
+.*:	1db81edd 	          SUBSLE    RAM8X,D1Re0,D0\.7
+.*:	1db9c0cc 	          SUBSPL    RAM8X,D1\.7,D1Re0
+.*:	1db9d0dd 	          SUBSLE    RAM8X,D1\.7,D0Re0
+.*:	1db9fedd 	          SUBSLE    RAM8X,D1\.7,A0\.7
+.*:	1dc00ede 	          SUBSNV    RABZ,D1Re0,D1\.7
+.*:	1dc032dd 	          SUBSLE    RABZ,D1Re0,A0FrP
+.*:	1dc1cecc 	          SUBSPL    RABZ,D1\.7,D1\.7
+.*:	1dc1e0dd 	          SUBSLE    RABZ,D1\.7,RD
+.*:	1de802dd 	          SUBSLE    RAWX,D1Re0,A1LbP
+.*:	1de81edd 	          SUBSLE    RAWX,D1Re0,D0\.7
+.*:	1de9c0cc 	          SUBSPL    RAWX,D1\.7,D1Re0
+.*:	1de9d0dd 	          SUBSLE    RAWX,D1\.7,D0Re0
+.*:	1de9fedd 	          SUBSLE    RAWX,D1\.7,A0\.7
+.*:	1df802dd 	          SUBSLE    RAMX,D1Re0,A1LbP
+.*:	1df80ede 	          SUBSNV    RAMX,D1Re0,D1\.7
+.*:	1df81edd 	          SUBSLE    RAMX,D1Re0,D0\.7
+.*:	1df832dd 	          SUBSLE    RAMX,D1Re0,A0FrP
+.*:	1df9c0cc 	          SUBSPL    RAMX,D1\.7,D1Re0
+.*:	1df9ce1e 	          SUBSNV    TXIDLECYC,D1\.7,D1\.7
+.*:	1df9d0dd 	          SUBSLE    RAMX,D1\.7,D0Re0
+.*:	1df9e0dd 	          SUBSLE    RAMX,D1\.7,RD
+.*:	1df9fedd 	          SUBSLE    RAMX,D1\.7,A0\.7
+.*:	1e00201c 	          SUBSLE    D0Re0,D0Re0,#0x80
+.*:	1e003fe0 	          SUBS      TXENABLE,D0Re0,#0xff
+.*:	1e01dfe4 	          SUBS      D1Re0,D0\.7,#0x7f
+.*:	1e01e02a 	          SUBS      PC,D0\.7,#0x80
+.*:	1e01ffee 	          SUBS      TXSTAT,D0\.7,#0xff
+.*:	1e083fe8 	          SUBS      A1LbP,D0Re0,#0xff
+.*:	1e09ffe6 	          SUBS      A0FrP,D0\.7,#0xff
+.*:	1e19ffee 	          SUBS      TXMASKI,D0\.7,#0xff
+.*:	1e38201e 	          SUBSNV    D0\.7,D0Re0,#0x80
+.*:	1e383fe4 	          SUBS      D1\.7,D0Re0,#0xff
+.*:	1e39e004 	          SUBSNE    D0\.7,D0\.7,#0x80
+.*:	1e39ffe6 	          SUBS      A0\.7,D0\.7,#0xff
+.*:	1eb01fec 	          SUBS      RAM8X32,D0Re0,#0x7f
+.*:	1eb83fec 	          SUBS      RAM8X,D0Re0,#0xff
+.*:	1ec1e02c 	          SUBS      RABZ,D0\.7,#0x80
+.*:	1ef81fe0 	          SUBS      TXIDLECYC,D0Re0,#0x7f
+.*:	1ef9e020 	          SUBS      TXIDLECYC,D0\.7,#0x80
+.*:	1f001fea 	          SUBS      PC,D1Re0,#0x7f
+.*:	1f003fcc 	          SUBSPL    D1Re0,D1Re0,#0xff
+.*:	1f01dfe0 	          SUBS      TXENABLE,D1\.7,#0x7f
+.*:	1f01e022 	          SUBS      D0Re0,D1\.7,#0x80
+.*:	1f01ffe4 	          SUBS      D1Re0,D1\.7,#0xff
+.*:	1f08202a 	          SUBS      PCX,D1Re0,#0x80
+.*:	1f09e028 	          SUBS      A1LbP,D1\.7,#0x80
+.*:	1f19dfee 	          SUBS      TXMASKI,D1\.7,#0x7f
+.*:	1f381fe8 	          SUBS      A1\.7,D1Re0,#0x7f
+.*:	1f383fde 	          SUBSNV    D1\.7,D1Re0,#0xff
+.*:	1f39dfe6 	          SUBS      A0\.7,D1\.7,#0x7f
+.*:	1f39ffde 	          SUBSNV    D1\.7,D1\.7,#0xff
+.*:	1f81e02c 	          SUBS      RA,D1\.7,#0x80
+.*:	1fb81fec 	          SUBS      RAM8X,D1Re0,#0x7f
+.*:	1fc03fec 	          SUBS      RABZ,D1Re0,#0xff
+.*:	1fe9e02c 	          SUBS      RAWX,D1\.7,#0x80
+.*:	1ff9dfe0 	          SUBS      TXIDLECYC,D1\.7,#0x7f
+.*:	20000201 	          AND       D0Re0,D0Re0,A1LbP
+.*:	20001001 	          AND       D0Re0,D0Re0,D1Re0
+.*:	20003401 	          AND       D0Re0,D0Re0,A0\.2
+.*:	2001c601 	          AND       D0Re0,D0\.7,A1\.3
+.*:	2001de01 	          AND       D0Re0,D0\.7,D1\.7
+.*:	2001fe01 	          AND       D0Re0,D0\.7,A0\.7
+.*:	20380e00 	          AND       D0\.7,D0Re0,D0\.7
+.*:	20382001 	          AND       D0\.7,D0Re0,RD
+.*:	2039c000 	          AND       D0\.7,D0\.7,D0Re0
+.*:	2039ce40 	          ANDQ      D0\.7,D0\.7,D0\.7,A0\.2
+.*:	2039f201 	          AND       D0\.7,D0\.7,A0FrP
+.*:	21000201 	          AND       D1Re0,D1Re0,A1LbP
+.*:	21001001 	          AND       D1Re0,D1Re0,D0Re0
+.*:	21003401 	          AND       D1Re0,D1Re0,A0\.2
+.*:	2101c601 	          AND       D1Re0,D1\.7,A1\.3
+.*:	2101de01 	          AND       D1Re0,D1\.7,D0\.7
+.*:	2101fe01 	          AND       D1Re0,D1\.7,A0\.7
+.*:	21380e00 	          AND       D1\.7,D1Re0,D1\.7
+.*:	21382001 	          AND       D1\.7,D1Re0,RD
+.*:	2139c000 	          AND       D1\.7,D1\.7,D1Re0
+.*:	2139cec0 	          ANDQ      D1\.7,D1\.7,D1\.7,A1\.3
+.*:	2139f201 	          AND       D1\.7,D1\.7,A0FrP
+.*:	2203fffc 	          ANDMB     D0Re0,D0Re0,#0x7fff
+.*:	2207fff9 	          ANDT      D0Re0,D0Re0,#0xffff
+.*:	223c0000 	          AND       D0\.7,D0\.7,#0x8000
+.*:	223ffffc 	          ANDMB     D0\.7,D0\.7,#0xffff
+.*:	23040002 	          AND       D1Re0,D1Re0,#-32768
+.*:	233bfff8 	          AND       D1\.7,D1\.7,#0x7fff
+.*:	233c0005 	          ANDMT     D1\.7,D1\.7,#0x8000
+.*:	2400003c 	          ANDLE     D0Re0,D0Re0,D0Re0
+.*:	2400021d 	          ANDLE     TXENABLE,D0Re0,A1LbP
+.*:	240002fd 	          ANDLE     TXSTAT,D0Re0,A1LbP
+.*:	240006ad 	          ANDPL     PC,D0Re0,A1\.3
+.*:	24000e24 	          ANDNE     D0Re0,D0Re0,D0\.7
+.*:	24000ea4 	          ANDNE     PC,D0Re0,D0\.7
+.*:	2400101d 	          ANDLE     TXENABLE,D0Re0,D1Re0
+.*:	240010ed 	          ANDPL     TXSTAT,D0Re0,D1Re0
+.*:	24001ead 	          ANDPL     PC,D0Re0,D1\.7
+.*:	2400204d 	          ANDPL     D1Re0,D0Re0,RD
+.*:	2400322d 	          ANDPL     D0Re0,D0Re0,A0FrP
+.*:	2400341d 	          ANDLE     TXENABLE,D0Re0,A0\.2
+.*:	240034ed 	          ANDPL     TXSTAT,D0Re0,A0\.2
+.*:	24003ebd 	          ANDLE     PC,D0Re0,A0\.7
+.*:	2401c054 	          ANDLS     D1Re0,D0\.7,D0Re0
+.*:	2401c22d 	          ANDPL     D0Re0,D0\.7,A1LbP
+.*:	2401c61d 	          ANDLE     TXENABLE,D0\.7,A1\.3
+.*:	2401c6fd 	          ANDLE     TXSTAT,D0\.7,A1\.3
+.*:	2401ce3e 	          ANDNV     D0Re0,D0\.7,D0\.7
+.*:	2401cebe 	          ANDNV     PC,D0\.7,D0\.7
+.*:	2401d03d 	          ANDLE     D0Re0,D0\.7,D1Re0
+.*:	2401de1d 	          ANDLE     TXENABLE,D0\.7,D1\.7
+.*:	2401defd 	          ANDLE     TXSTAT,D0\.7,D1\.7
+.*:	2401e0bd 	          ANDLE     PC,D0\.7,RD
+.*:	2401f25d 	          ANDLE     D1Re0,D0\.7,A0FrP
+.*:	2401f43d 	          ANDLE     D0Re0,D0\.7,A0\.2
+.*:	2401fe1d 	          ANDLE     TXENABLE,D0\.7,A0\.7
+.*:	2401fefd 	          ANDLE     TXSTAT,D0\.7,A0\.7
+.*:	2408026d 	          ANDPL     A0FrP,D0Re0,A1LbP
+.*:	2408069d 	          ANDLE     A1LbP,D0Re0,A1\.3
+.*:	24080e9c 	          ANDLE     A1LbP,D0Re0,D0\.7
+.*:	2408107d 	          ANDLE     A0FrP,D0Re0,D1Re0
+.*:	24081e9d 	          ANDLE     A1LbP,D0Re0,D1\.7
+.*:	240820bd 	          ANDLE     PCX,D0Re0,RD
+.*:	2408347d 	          ANDLE     A0FrP,D0Re0,A0\.2
+.*:	24083e9d 	          ANDLE     A1LbP,D0Re0,A0\.7
+.*:	2409c0ac 	          ANDPL     PCX,D0\.7,D0Re0
+.*:	2409c66d 	          ANDPL     A0FrP,D0\.7,A1\.3
+.*:	2409ce7e 	          ANDNV     A0FrP,D0\.7,D0\.7
+.*:	2409cebe 	          ANDNV     PCX,D0\.7,D0\.7
+.*:	2409de6d 	          ANDPL     A0FrP,D0\.7,D1\.7
+.*:	2409e08d 	          ANDPL     A1LbP,D0\.7,RD
+.*:	2409f2bd 	          ANDLE     PCX,D0\.7,A0FrP
+.*:	2409fe7d 	          ANDLE     A0FrP,D0\.7,A0\.7
+.*:	2410027d 	          ANDLE     A0\.2,D0Re0,A1LbP
+.*:	2410107d 	          ANDLE     A0\.2,D0Re0,D1Re0
+.*:	2410347d 	          ANDLE     A0\.2,D0Re0,A0\.2
+.*:	2411c67d 	          ANDLE     A0\.2,D0\.7,A1\.3
+.*:	2411de7d 	          ANDLE     A0\.2,D0\.7,D1\.7
+.*:	2411fe7d 	          ANDLE     A0\.2,D0\.7,A0\.7
+.*:	241802fd 	          ANDLE     TXMASKI,D0Re0,A1LbP
+.*:	24180e9e 	          ANDNV     A1\.3,D0Re0,D0\.7
+.*:	241810fd 	          ANDLE     TXMASKI,D0Re0,D1Re0
+.*:	241820fd 	          ANDLE     TXMASKI,D0Re0,RD
+.*:	241834fd 	          ANDLE     TXMASKI,D0Re0,A0\.2
+.*:	2419c0fc 	          ANDLE     TXMASKI,D0\.7,D0Re0
+.*:	2419c6fd 	          ANDLE     TXMASKI,D0\.7,A1\.3
+.*:	2419cefe 	          ANDNV     TXMASKI,D0\.7,D0\.7
+.*:	2419defd 	          ANDLE     TXMASKI,D0\.7,D1\.7
+.*:	2419f2fd 	          ANDLE     TXMASKI,D0\.7,A0FrP
+.*:	2419fefd 	          ANDLE     TXMASKI,D0\.7,A0\.7
+.*:	24380094 	          ANDLS     A1\.7,D0Re0,D0Re0
+.*:	2438029d 	          ANDLE     A1\.7,D0Re0,A1LbP
+.*:	2438069d 	          ANDLE     A1\.7,D0Re0,A1\.3
+.*:	24380e5e 	          ANDNV     D1\.7,D0Re0,D0\.7
+.*:	24380e9e 	          ANDNV     A1\.7,D0Re0,D0\.7
+.*:	2438109d 	          ANDLE     A1\.7,D0Re0,D1Re0
+.*:	24381e9d 	          ANDLE     A1\.7,D0Re0,D1\.7
+.*:	2438209d 	          ANDLE     A1\.7,D0Re0,RD
+.*:	2438329d 	          ANDLE     A1\.7,D0Re0,A0FrP
+.*:	2438349d 	          ANDLE     A1\.7,D0Re0,A0\.2
+.*:	24383e9d 	          ANDLE     A1\.7,D0Re0,A0\.7
+.*:	2439c084 	          ANDNE     A1\.7,D0\.7,D0Re0
+.*:	2439c29d 	          ANDLE     A1\.7,D0\.7,A1LbP
+.*:	2439c69d 	          ANDLE     A1\.7,D0\.7,A1\.3
+.*:	2439ce5e 	          ANDNV     D1\.7,D0\.7,D0\.7
+.*:	2439ce9e 	          ANDNV     A1\.7,D0\.7,D0\.7
+.*:	2439d08d 	          ANDPL     A1\.7,D0\.7,D1Re0
+.*:	2439de9d 	          ANDLE     A1\.7,D0\.7,D1\.7
+.*:	2439e08d 	          ANDPL     A1\.7,D0\.7,RD
+.*:	2439f29d 	          ANDLE     A1\.7,D0\.7,A0FrP
+.*:	2439f48d 	          ANDPL     A1\.7,D0\.7,A0\.2
+.*:	2439fe9d 	          ANDLE     A1\.7,D0\.7,A0\.7
+.*:	24800ecc 	          ANDPL     RA,D0Re0,D0\.7
+.*:	248020dd 	          ANDLE     RA,D0Re0,RD
+.*:	2481c0cc 	          ANDPL     RA,D0\.7,D0Re0
+.*:	2481cede 	          ANDNV     RA,D0\.7,D0\.7
+.*:	2481f2dd 	          ANDLE     RA,D0\.7,A0FrP
+.*:	24b002dd 	          ANDLE     RAM8X32,D0Re0,A1LbP
+.*:	24b010dd 	          ANDLE     RAM8X32,D0Re0,D1Re0
+.*:	24b034dd 	          ANDLE     RAM8X32,D0Re0,A0\.2
+.*:	24b1c6dd 	          ANDLE     RAM8X32,D0\.7,A1\.3
+.*:	24b1dedd 	          ANDLE     RAM8X32,D0\.7,D1\.7
+.*:	24b1fedd 	          ANDLE     RAM8X32,D0\.7,A0\.7
+.*:	24b80ecc 	          ANDPL     RAM8X,D0Re0,D0\.7
+.*:	24b820dd 	          ANDLE     RAM8X,D0Re0,RD
+.*:	24b9c0cc 	          ANDPL     RAM8X,D0\.7,D0Re0
+.*:	24b9cede 	          ANDNV     RAM8X,D0\.7,D0\.7
+.*:	24b9f2dd 	          ANDLE     RAM8X,D0\.7,A0FrP
+.*:	24c002dd 	          ANDLE     RABZ,D0Re0,A1LbP
+.*:	24c010dd 	          ANDLE     RABZ,D0Re0,D1Re0
+.*:	24c034dd 	          ANDLE     RABZ,D0Re0,A0\.2
+.*:	24c1c6dd 	          ANDLE     RABZ,D0\.7,A1\.3
+.*:	24c1dedd 	          ANDLE     RABZ,D0\.7,D1\.7
+.*:	24c1fedd 	          ANDLE     RABZ,D0\.7,A0\.7
+.*:	24e80ecc 	          ANDPL     RAWX,D0Re0,D0\.7
+.*:	24e820dd 	          ANDLE     RAWX,D0Re0,RD
+.*:	24e9c0cc 	          ANDPL     RAWX,D0\.7,D0Re0
+.*:	24e9cede 	          ANDNV     RAWX,D0\.7,D0\.7
+.*:	24e9f2dd 	          ANDLE     RAWX,D0\.7,A0FrP
+.*:	24f800cc 	          ANDPL     RAMX,D0Re0,D0Re0
+.*:	24f806dd 	          ANDLE     RAMX,D0Re0,A1\.3
+.*:	24f80ede 	          ANDNV     RAMX,D0Re0,D0\.7
+.*:	24f81edd 	          ANDLE     RAMX,D0Re0,D1\.7
+.*:	24f832dd 	          ANDLE     RAMX,D0Re0,A0FrP
+.*:	24f83edd 	          ANDLE     RAMX,D0Re0,A0\.7
+.*:	24f9c2dd 	          ANDLE     RAMX,D0\.7,A1LbP
+.*:	24f9ce1e 	          ANDNV     TXIDLECYC,D0\.7,D0\.7
+.*:	24f9d0dd 	          ANDLE     RAMX,D0\.7,D1Re0
+.*:	24f9e0dd 	          ANDLE     RAMX,D0\.7,RD
+.*:	24f9f4dd 	          ANDLE     RAMX,D0\.7,A0\.2
+.*:	2500003c 	          ANDLE     D0Re0,D1Re0,D1Re0
+.*:	2500021d 	          ANDLE     TXENABLE,D1Re0,A1LbP
+.*:	250002fd 	          ANDLE     TXSTAT,D1Re0,A1LbP
+.*:	250006ad 	          ANDPL     PC,D1Re0,A1\.3
+.*:	25000e24 	          ANDNE     D0Re0,D1Re0,D1\.7
+.*:	25000ea4 	          ANDNE     PC,D1Re0,D1\.7
+.*:	2500101d 	          ANDLE     TXENABLE,D1Re0,D0Re0
+.*:	250010ed 	          ANDPL     TXSTAT,D1Re0,D0Re0
+.*:	25001ead 	          ANDPL     PC,D1Re0,D0\.7
+.*:	2500204d 	          ANDPL     D1Re0,D1Re0,RD
+.*:	2500322d 	          ANDPL     D0Re0,D1Re0,A0FrP
+.*:	2500341d 	          ANDLE     TXENABLE,D1Re0,A0\.2
+.*:	250034ed 	          ANDPL     TXSTAT,D1Re0,A0\.2
+.*:	25003ebd 	          ANDLE     PC,D1Re0,A0\.7
+.*:	2501c054 	          ANDLS     D1Re0,D1\.7,D1Re0
+.*:	2501c22d 	          ANDPL     D0Re0,D1\.7,A1LbP
+.*:	2501c61d 	          ANDLE     TXENABLE,D1\.7,A1\.3
+.*:	2501c6fd 	          ANDLE     TXSTAT,D1\.7,A1\.3
+.*:	2501ce3e 	          ANDNV     D0Re0,D1\.7,D1\.7
+.*:	2501cebe 	          ANDNV     PC,D1\.7,D1\.7
+.*:	2501d03d 	          ANDLE     D0Re0,D1\.7,D0Re0
+.*:	2501de1d 	          ANDLE     TXENABLE,D1\.7,D0\.7
+.*:	2501defd 	          ANDLE     TXSTAT,D1\.7,D0\.7
+.*:	2501e0bd 	          ANDLE     PC,D1\.7,RD
+.*:	2501f25d 	          ANDLE     D1Re0,D1\.7,A0FrP
+.*:	2501f43d 	          ANDLE     D0Re0,D1\.7,A0\.2
+.*:	2501fe1d 	          ANDLE     TXENABLE,D1\.7,A0\.7
+.*:	2501fefd 	          ANDLE     TXSTAT,D1\.7,A0\.7
+.*:	2508026d 	          ANDPL     A0FrP,D1Re0,A1LbP
+.*:	2508069d 	          ANDLE     A1LbP,D1Re0,A1\.3
+.*:	25080e9c 	          ANDLE     A1LbP,D1Re0,D1\.7
+.*:	2508107d 	          ANDLE     A0FrP,D1Re0,D0Re0
+.*:	25081e9d 	          ANDLE     A1LbP,D1Re0,D0\.7
+.*:	250820bd 	          ANDLE     PCX,D1Re0,RD
+.*:	2508347d 	          ANDLE     A0FrP,D1Re0,A0\.2
+.*:	25083e9d 	          ANDLE     A1LbP,D1Re0,A0\.7
+.*:	2509c0ac 	          ANDPL     PCX,D1\.7,D1Re0
+.*:	2509c66d 	          ANDPL     A0FrP,D1\.7,A1\.3
+.*:	2509ce7e 	          ANDNV     A0FrP,D1\.7,D1\.7
+.*:	2509cebe 	          ANDNV     PCX,D1\.7,D1\.7
+.*:	2509de6d 	          ANDPL     A0FrP,D1\.7,D0\.7
+.*:	2509e08d 	          ANDPL     A1LbP,D1\.7,RD
+.*:	2509f2bd 	          ANDLE     PCX,D1\.7,A0FrP
+.*:	2509fe7d 	          ANDLE     A0FrP,D1\.7,A0\.7
+.*:	2510027d 	          ANDLE     A0\.2,D1Re0,A1LbP
+.*:	2510107d 	          ANDLE     A0\.2,D1Re0,D0Re0
+.*:	2510347d 	          ANDLE     A0\.2,D1Re0,A0\.2
+.*:	2511c67d 	          ANDLE     A0\.2,D1\.7,A1\.3
+.*:	2511de7d 	          ANDLE     A0\.2,D1\.7,D0\.7
+.*:	2511fe7d 	          ANDLE     A0\.2,D1\.7,A0\.7
+.*:	251802fd 	          ANDLE     TXMASKI,D1Re0,A1LbP
+.*:	25180e9e 	          ANDNV     A1\.3,D1Re0,D1\.7
+.*:	251810fd 	          ANDLE     TXMASKI,D1Re0,D0Re0
+.*:	251820fd 	          ANDLE     TXMASKI,D1Re0,RD
+.*:	251834fd 	          ANDLE     TXMASKI,D1Re0,A0\.2
+.*:	2519c0fc 	          ANDLE     TXMASKI,D1\.7,D1Re0
+.*:	2519c6fd 	          ANDLE     TXMASKI,D1\.7,A1\.3
+.*:	2519cefe 	          ANDNV     TXMASKI,D1\.7,D1\.7
+.*:	2519defd 	          ANDLE     TXMASKI,D1\.7,D0\.7
+.*:	2519f2fd 	          ANDLE     TXMASKI,D1\.7,A0FrP
+.*:	2519fefd 	          ANDLE     TXMASKI,D1\.7,A0\.7
+.*:	25380094 	          ANDLS     A1\.7,D1Re0,D1Re0
+.*:	2538029d 	          ANDLE     A1\.7,D1Re0,A1LbP
+.*:	2538069d 	          ANDLE     A1\.7,D1Re0,A1\.3
+.*:	25380e5e 	          ANDNV     D1\.7,D1Re0,D1\.7
+.*:	25380e9e 	          ANDNV     A1\.7,D1Re0,D1\.7
+.*:	2538109d 	          ANDLE     A1\.7,D1Re0,D0Re0
+.*:	25381e9d 	          ANDLE     A1\.7,D1Re0,D0\.7
+.*:	2538209d 	          ANDLE     A1\.7,D1Re0,RD
+.*:	2538329d 	          ANDLE     A1\.7,D1Re0,A0FrP
+.*:	2538349d 	          ANDLE     A1\.7,D1Re0,A0\.2
+.*:	25383e9d 	          ANDLE     A1\.7,D1Re0,A0\.7
+.*:	2539c084 	          ANDNE     A1\.7,D1\.7,D1Re0
+.*:	2539c29d 	          ANDLE     A1\.7,D1\.7,A1LbP
+.*:	2539c69d 	          ANDLE     A1\.7,D1\.7,A1\.3
+.*:	2539ce5e 	          ANDNV     D1\.7,D1\.7,D1\.7
+.*:	2539ce9e 	          ANDNV     A1\.7,D1\.7,D1\.7
+.*:	2539d08d 	          ANDPL     A1\.7,D1\.7,D0Re0
+.*:	2539de9d 	          ANDLE     A1\.7,D1\.7,D0\.7
+.*:	2539e08d 	          ANDPL     A1\.7,D1\.7,RD
+.*:	2539f29d 	          ANDLE     A1\.7,D1\.7,A0FrP
+.*:	2539f48d 	          ANDPL     A1\.7,D1\.7,A0\.2
+.*:	2539fe9d 	          ANDLE     A1\.7,D1\.7,A0\.7
+.*:	25800ecc 	          ANDPL     RA,D1Re0,D1\.7
+.*:	258020dd 	          ANDLE     RA,D1Re0,RD
+.*:	2581c0cc 	          ANDPL     RA,D1\.7,D1Re0
+.*:	2581cede 	          ANDNV     RA,D1\.7,D1\.7
+.*:	2581f2dd 	          ANDLE     RA,D1\.7,A0FrP
+.*:	25b002dd 	          ANDLE     RAM8X32,D1Re0,A1LbP
+.*:	25b010dd 	          ANDLE     RAM8X32,D1Re0,D0Re0
+.*:	25b034dd 	          ANDLE     RAM8X32,D1Re0,A0\.2
+.*:	25b1c6dd 	          ANDLE     RAM8X32,D1\.7,A1\.3
+.*:	25b1dedd 	          ANDLE     RAM8X32,D1\.7,D0\.7
+.*:	25b1fedd 	          ANDLE     RAM8X32,D1\.7,A0\.7
+.*:	25b80ecc 	          ANDPL     RAM8X,D1Re0,D1\.7
+.*:	25b820dd 	          ANDLE     RAM8X,D1Re0,RD
+.*:	25b9c0cc 	          ANDPL     RAM8X,D1\.7,D1Re0
+.*:	25b9cede 	          ANDNV     RAM8X,D1\.7,D1\.7
+.*:	25b9f2dd 	          ANDLE     RAM8X,D1\.7,A0FrP
+.*:	25c002dd 	          ANDLE     RABZ,D1Re0,A1LbP
+.*:	25c010dd 	          ANDLE     RABZ,D1Re0,D0Re0
+.*:	25c034dd 	          ANDLE     RABZ,D1Re0,A0\.2
+.*:	25c1c6dd 	          ANDLE     RABZ,D1\.7,A1\.3
+.*:	25c1dedd 	          ANDLE     RABZ,D1\.7,D0\.7
+.*:	25c1fedd 	          ANDLE     RABZ,D1\.7,A0\.7
+.*:	25e80ecc 	          ANDPL     RAWX,D1Re0,D1\.7
+.*:	25e820dd 	          ANDLE     RAWX,D1Re0,RD
+.*:	25e9c0cc 	          ANDPL     RAWX,D1\.7,D1Re0
+.*:	25e9cede 	          ANDNV     RAWX,D1\.7,D1\.7
+.*:	25e9f2dd 	          ANDLE     RAWX,D1\.7,A0FrP
+.*:	25f800cc 	          ANDPL     RAMX,D1Re0,D1Re0
+.*:	25f806dd 	          ANDLE     RAMX,D1Re0,A1\.3
+.*:	25f80ede 	          ANDNV     RAMX,D1Re0,D1\.7
+.*:	25f81edd 	          ANDLE     RAMX,D1Re0,D0\.7
+.*:	25f832dd 	          ANDLE     RAMX,D1Re0,A0FrP
+.*:	25f83edd 	          ANDLE     RAMX,D1Re0,A0\.7
+.*:	25f9c2dd 	          ANDLE     RAMX,D1\.7,A1LbP
+.*:	25f9ce1e 	          ANDNV     TXIDLECYC,D1\.7,D1\.7
+.*:	25f9d0dd 	          ANDLE     RAMX,D1\.7,D0Re0
+.*:	25f9e0dd 	          ANDLE     RAMX,D1\.7,RD
+.*:	25f9f4dd 	          ANDLE     RAMX,D1\.7,A0\.2
+.*:	26001fde 	          ANDNV     D0Re0,D0Re0,#0x7f
+.*:	26001fee 	          AND       TXSTAT,D0Re0,#0x7f
+.*:	26002024 	          AND       D1Re0,D0Re0,#0x80
+.*:	26003fde 	          ANDNV     D0Re0,D0Re0,#0xff
+.*:	26003fee 	          AND       TXSTAT,D0Re0,#0xff
+.*:	2601dfe2 	          AND       D0Re0,D0\.7,#0x7f
+.*:	2601e004 	          ANDNE     D0Re0,D0\.7,#0x80
+.*:	2601e024 	          AND       D1Re0,D0\.7,#0x80
+.*:	2601ffde 	          ANDNV     D0Re0,D0\.7,#0xff
+.*:	2601ffea 	          AND       PC,D0\.7,#0xff
+.*:	26081fea 	          AND       PCX,D0Re0,#0x7f
+.*:	26083fe6 	          AND       A0FrP,D0Re0,#0xff
+.*:	2609dfe8 	          AND       A1LbP,D0\.7,#0x7f
+.*:	2609e02a 	          AND       PCX,D0\.7,#0x80
+.*:	26101fe6 	          AND       A0\.2,D0Re0,#0x7f
+.*:	2611e026 	          AND       A0\.2,D0\.7,#0x80
+.*:	26182028 	          AND       A1\.3,D0Re0,#0x80
+.*:	2619dfe8 	          AND       A1\.3,D0\.7,#0x7f
+.*:	2619ffe8 	          AND       A1\.3,D0\.7,#0xff
+.*:	26381fe2 	          AND       D0\.7,D0Re0,#0x7f
+.*:	2638201c 	          ANDLE     D0\.7,D0Re0,#0x80
+.*:	26382026 	          AND       A0\.7,D0Re0,#0x80
+.*:	26383fe2 	          AND       D0\.7,D0Re0,#0xff
+.*:	2639dfdc 	          ANDLE     D0\.7,D0\.7,#0x7f
+.*:	2639dfe8 	          AND       A1\.7,D0\.7,#0x7f
+.*:	2639e026 	          AND       A0\.7,D0\.7,#0x80
+.*:	2639ffe4 	          AND       D1\.7,D0\.7,#0xff
+.*:	2680202c 	          AND       RA,D0Re0,#0x80
+.*:	2681ffec 	          AND       RA,D0\.7,#0xff
+.*:	26b1dfec 	          AND       RAM8X32,D0\.7,#0x7f
+.*:	26b8202c 	          AND       RAM8X,D0Re0,#0x80
+.*:	26b9ffec 	          AND       RAM8X,D0\.7,#0xff
+.*:	26c1dfec 	          AND       RABZ,D0\.7,#0x7f
+.*:	26e8202c 	          AND       RAWX,D0Re0,#0x80
+.*:	26e9ffec 	          AND       RAWX,D0\.7,#0xff
+.*:	26f8202c 	          AND       RAMX,D0Re0,#0x80
+.*:	26f9dfec 	          AND       RAMX,D0\.7,#0x7f
+.*:	26f9ffec 	          AND       RAMX,D0\.7,#0xff
+.*:	2700201c 	          ANDLE     D1Re0,D1Re0,#0x80
+.*:	27003fe0 	          AND       TXENABLE,D1Re0,#0xff
+.*:	2701dfe4 	          AND       D1Re0,D1\.7,#0x7f
+.*:	2701e02a 	          AND       PC,D1\.7,#0x80
+.*:	2701ffee 	          AND       TXSTAT,D1\.7,#0xff
+.*:	27083fe8 	          AND       A1LbP,D1Re0,#0xff
+.*:	2709ffe6 	          AND       A0FrP,D1\.7,#0xff
+.*:	2711ffe6 	          AND       A0\.2,D1\.7,#0xff
+.*:	2719dfee 	          AND       TXMASKI,D1\.7,#0x7f
+.*:	27381fe4 	          AND       D1\.7,D1Re0,#0x7f
+.*:	27382028 	          AND       A1\.7,D1Re0,#0x80
+.*:	2739dfde 	          ANDNV     D1\.7,D1\.7,#0x7f
+.*:	2739e028 	          AND       A1\.7,D1\.7,#0x80
+.*:	27803fec 	          AND       RA,D1Re0,#0xff
+.*:	27b1e02c 	          AND       RAM8X32,D1\.7,#0x80
+.*:	27c01fec 	          AND       RABZ,D1Re0,#0x7f
+.*:	27e83fec 	          AND       RAWX,D1Re0,#0xff
+.*:	27f83fe0 	          AND       TXIDLECYC,D1Re0,#0xff
+.*:	28000000 	          ANDS      D0Re0,D0Re0,D0Re0
+.*:	28000e40 	          ANDSQ     D0Re0,D0Re0,D0\.7,A0\.2
+.*:	28003201 	          ANDS      D0Re0,D0Re0,A0FrP
+.*:	2801c201 	          ANDS      D0Re0,D0\.7,A1LbP
+.*:	2801d001 	          ANDS      D0Re0,D0\.7,D1Re0
+.*:	2801f401 	          ANDS      D0Re0,D0\.7,A0\.2
+.*:	28380601 	          ANDS      D0\.7,D0Re0,A1\.3
+.*:	28381e01 	          ANDS      D0\.7,D0Re0,D1\.7
+.*:	28383e01 	          ANDS      D0\.7,D0Re0,A0\.7
+.*:	2839ce00 	          ANDS      D0\.7,D0\.7,D0\.7
+.*:	2839e001 	          ANDS      D0\.7,D0\.7,RD
+.*:	29000000 	          ANDS      D1Re0,D1Re0,D1Re0
+.*:	29000ec0 	          ANDSQ     D1Re0,D1Re0,D1\.7,A1\.3
+.*:	29003201 	          ANDS      D1Re0,D1Re0,A0FrP
+.*:	2901c201 	          ANDS      D1Re0,D1\.7,A1LbP
+.*:	2901d001 	          ANDS      D1Re0,D1\.7,D0Re0
+.*:	2901f401 	          ANDS      D1Re0,D1\.7,A0\.2
+.*:	29380601 	          ANDS      D1\.7,D1Re0,A1\.3
+.*:	29381e01 	          ANDS      D1\.7,D1Re0,D0\.7
+.*:	29383e01 	          ANDS      D1\.7,D1Re0,A0\.7
+.*:	2939ce00 	          ANDS      D1\.7,D1\.7,D1\.7
+.*:	2939e001 	          ANDS      D1\.7,D1\.7,RD
+.*:	2a03fff8 	          ANDS      D0Re0,D0Re0,#0x7fff
+.*:	2a040005 	          ANDSMT    D0Re0,D0Re0,#0x8000
+.*:	2a3bfffc 	          ANDSMB    D0\.7,D0\.7,#0x7fff
+.*:	2a3ffff9 	          ANDST     D0\.7,D0\.7,#0xffff
+.*:	2b040000 	          ANDS      D1Re0,D1Re0,#0x8000
+.*:	2b07fffc 	          ANDSMB    D1Re0,D1Re0,#0xffff
+.*:	2b3c0002 	          ANDS      D1\.7,D1\.7,#-32768
+.*:	2c000014 	          ANDSLS    TXENABLE,D0Re0,D0Re0
+.*:	2c0000e4 	          ANDSNE    TXSTAT,D0Re0,D0Re0
+.*:	2c0002bd 	          ANDSLE    PC,D0Re0,A1LbP
+.*:	2c00065d 	          ANDSLE    D1Re0,D0Re0,A1\.3
+.*:	2c000e1e 	          ANDSNV    TXENABLE,D0Re0,D0\.7
+.*:	2c000e5e 	          ANDSNV    D1Re0,D0Re0,D0\.7
+.*:	2c000efe 	          ANDSNV    TXSTAT,D0Re0,D0\.7
+.*:	2c0010bd 	          ANDSLE    PC,D0Re0,D1Re0
+.*:	2c001e5d 	          ANDSLE    D1Re0,D0Re0,D1\.7
+.*:	2c00203d 	          ANDSLE    D0Re0,D0Re0,RD
+.*:	2c00321d 	          ANDSLE    TXENABLE,D0Re0,A0FrP
+.*:	2c0032fd 	          ANDSLE    TXSTAT,D0Re0,A0FrP
+.*:	2c0034bd 	          ANDSLE    PC,D0Re0,A0\.2
+.*:	2c003e5d 	          ANDSLE    D1Re0,D0Re0,A0\.7
+.*:	2c01c02c 	          ANDSPL    D0Re0,D0\.7,D0Re0
+.*:	2c01c21d 	          ANDSLE    TXENABLE,D0\.7,A1LbP
+.*:	2c01c2fd 	          ANDSLE    TXSTAT,D0\.7,A1LbP
+.*:	2c01c6bd 	          ANDSLE    PC,D0\.7,A1\.3
+.*:	2c01ce34 	          ANDSLS    D0Re0,D0\.7,D0\.7
+.*:	2c01ceb4 	          ANDSLS    PC,D0\.7,D0\.7
+.*:	2c01d00d 	          ANDSPL    TXENABLE,D0\.7,D1Re0
+.*:	2c01d0fd 	          ANDSLE    TXSTAT,D0\.7,D1Re0
+.*:	2c01debd 	          ANDSLE    PC,D0\.7,D1\.7
+.*:	2c01e05d 	          ANDSLE    D1Re0,D0\.7,RD
+.*:	2c01f23d 	          ANDSLE    D0Re0,D0\.7,A0FrP
+.*:	2c01f40d 	          ANDSPL    TXENABLE,D0\.7,A0\.2
+.*:	2c01f4fd 	          ANDSLE    TXSTAT,D0\.7,A0\.2
+.*:	2c01fead 	          ANDSPL    PC,D0\.7,A0\.7
+.*:	2c0800bc 	          ANDSLE    PCX,D0Re0,D0Re0
+.*:	2c08067d 	          ANDSLE    A0FrP,D0Re0,A1\.3
+.*:	2c080e7e 	          ANDSNV    A0FrP,D0Re0,D0\.7
+.*:	2c080ebe 	          ANDSNV    PCX,D0Re0,D0\.7
+.*:	2c081e7d 	          ANDSLE    A0FrP,D0Re0,D1\.7
+.*:	2c08209d 	          ANDSLE    A1LbP,D0Re0,RD
+.*:	2c0832ad 	          ANDSPL    PCX,D0Re0,A0FrP
+.*:	2c083e6d 	          ANDSPL    A0FrP,D0Re0,A0\.7
+.*:	2c09c084 	          ANDSNE    A1LbP,D0\.7,D0Re0
+.*:	2c09c2ad 	          ANDSPL    PCX,D0\.7,A1LbP
+.*:	2c09ce64 	          ANDSNE    A0FrP,D0\.7,D0\.7
+.*:	2c09ceb4 	          ANDSLS    PCX,D0\.7,D0\.7
+.*:	2c09d0bd 	          ANDSLE    PCX,D0\.7,D1Re0
+.*:	2c09e07d 	          ANDSLE    A0FrP,D0\.7,RD
+.*:	2c09f29d 	          ANDSLE    A1LbP,D0\.7,A0FrP
+.*:	2c09f4bd 	          ANDSLE    PCX,D0\.7,A0\.2
+.*:	2c10006c 	          ANDSPL    A0\.2,D0Re0,D0Re0
+.*:	2c100e7e 	          ANDSNV    A0\.2,D0Re0,D0\.7
+.*:	2c10327d 	          ANDSLE    A0\.2,D0Re0,A0FrP
+.*:	2c11c27d 	          ANDSLE    A0\.2,D0\.7,A1LbP
+.*:	2c11d07d 	          ANDSLE    A0\.2,D0\.7,D1Re0
+.*:	2c11f47d 	          ANDSLE    A0\.2,D0\.7,A0\.2
+.*:	2c18028d 	          ANDSPL    A1\.3,D0Re0,A1LbP
+.*:	2c180e84 	          ANDSNE    A1\.3,D0Re0,D0\.7
+.*:	2c18109d 	          ANDSLE    A1\.3,D0Re0,D1Re0
+.*:	2c18209d 	          ANDSLE    A1\.3,D0Re0,RD
+.*:	2c18349d 	          ANDSLE    A1\.3,D0Re0,A0\.2
+.*:	2c19c094 	          ANDSLS    A1\.3,D0\.7,D0Re0
+.*:	2c19c68d 	          ANDSPL    A1\.3,D0\.7,A1\.3
+.*:	2c19ceec 	          ANDSPL    TXMASKI,D0\.7,D0\.7
+.*:	2c19de8d 	          ANDSPL    A1\.3,D0\.7,D1\.7
+.*:	2c19f28d 	          ANDSPL    A1\.3,D0\.7,A0FrP
+.*:	2c19fe8d 	          ANDSPL    A1\.3,D0\.7,A0\.7
+.*:	2c38006c 	          ANDSPL    A0\.7,D0Re0,D0Re0
+.*:	2c38027d 	          ANDSLE    A0\.7,D0Re0,A1LbP
+.*:	2c38066d 	          ANDSPL    A0\.7,D0Re0,A1\.3
+.*:	2c380e5c 	          ANDSLE    D1\.7,D0Re0,D0\.7
+.*:	2c380e8c 	          ANDSPL    A1\.7,D0Re0,D0\.7
+.*:	2c38107d 	          ANDSLE    A0\.7,D0Re0,D1Re0
+.*:	2c381e6d 	          ANDSPL    A0\.7,D0Re0,D1\.7
+.*:	2c38207d 	          ANDSLE    A0\.7,D0Re0,RD
+.*:	2c38326d 	          ANDSPL    A0\.7,D0Re0,A0FrP
+.*:	2c38347d 	          ANDSLE    A0\.7,D0Re0,A0\.2
+.*:	2c383e7d 	          ANDSLE    A0\.7,D0Re0,A0\.7
+.*:	2c39c07c 	          ANDSLE    A0\.7,D0\.7,D0Re0
+.*:	2c39c26d 	          ANDSPL    A0\.7,D0\.7,A1LbP
+.*:	2c39c67d 	          ANDSLE    A0\.7,D0\.7,A1\.3
+.*:	2c39ce4c 	          ANDSPL    D1\.7,D0\.7,D0\.7
+.*:	2c39ce9c 	          ANDSLE    A1\.7,D0\.7,D0\.7
+.*:	2c39d07d 	          ANDSLE    A0\.7,D0\.7,D1Re0
+.*:	2c39de7d 	          ANDSLE    A0\.7,D0\.7,D1\.7
+.*:	2c39e07d 	          ANDSLE    A0\.7,D0\.7,RD
+.*:	2c39f27d 	          ANDSLE    A0\.7,D0\.7,A0FrP
+.*:	2c39f47d 	          ANDSLE    A0\.7,D0\.7,A0\.2
+.*:	2c39fe6d 	          ANDSPL    A0\.7,D0\.7,A0\.7
+.*:	2c8006dd 	          ANDSLE    RA,D0Re0,A1\.3
+.*:	2c801edd 	          ANDSLE    RA,D0Re0,D1\.7
+.*:	2c803edd 	          ANDSLE    RA,D0Re0,A0\.7
+.*:	2c81cecc 	          ANDSPL    RA,D0\.7,D0\.7
+.*:	2c81e0dd 	          ANDSLE    RA,D0\.7,RD
+.*:	2cb000cc 	          ANDSPL    RAM8X32,D0Re0,D0Re0
+.*:	2cb00ede 	          ANDSNV    RAM8X32,D0Re0,D0\.7
+.*:	2cb032dd 	          ANDSLE    RAM8X32,D0Re0,A0FrP
+.*:	2cb1c2dd 	          ANDSLE    RAM8X32,D0\.7,A1LbP
+.*:	2cb1d0dd 	          ANDSLE    RAM8X32,D0\.7,D1Re0
+.*:	2cb1f4dd 	          ANDSLE    RAM8X32,D0\.7,A0\.2
+.*:	2cb806dd 	          ANDSLE    RAM8X,D0Re0,A1\.3
+.*:	2cb81edd 	          ANDSLE    RAM8X,D0Re0,D1\.7
+.*:	2cb83edd 	          ANDSLE    RAM8X,D0Re0,A0\.7
+.*:	2cb9cecc 	          ANDSPL    RAM8X,D0\.7,D0\.7
+.*:	2cb9e0dd 	          ANDSLE    RAM8X,D0\.7,RD
+.*:	2cc000cc 	          ANDSPL    RABZ,D0Re0,D0Re0
+.*:	2cc00ede 	          ANDSNV    RABZ,D0Re0,D0\.7
+.*:	2cc032dd 	          ANDSLE    RABZ,D0Re0,A0FrP
+.*:	2cc1c2dd 	          ANDSLE    RABZ,D0\.7,A1LbP
+.*:	2cc1d0dd 	          ANDSLE    RABZ,D0\.7,D1Re0
+.*:	2cc1f4dd 	          ANDSLE    RABZ,D0\.7,A0\.2
+.*:	2ce806dd 	          ANDSLE    RAWX,D0Re0,A1\.3
+.*:	2ce81edd 	          ANDSLE    RAWX,D0Re0,D1\.7
+.*:	2ce83edd 	          ANDSLE    RAWX,D0Re0,A0\.7
+.*:	2ce9cecc 	          ANDSPL    RAWX,D0\.7,D0\.7
+.*:	2ce9e0dd 	          ANDSLE    RAWX,D0\.7,RD
+.*:	2cf80014 	          ANDSLS    TXIDLECYC,D0Re0,D0Re0
+.*:	2cf8061d 	          ANDSLE    TXIDLECYC,D0Re0,A1\.3
+.*:	2cf80ecc 	          ANDSPL    RAMX,D0Re0,D0\.7
+.*:	2cf81e1d 	          ANDSLE    TXIDLECYC,D0Re0,D1\.7
+.*:	2cf8321d 	          ANDSLE    TXIDLECYC,D0Re0,A0FrP
+.*:	2cf83e1d 	          ANDSLE    TXIDLECYC,D0Re0,A0\.7
+.*:	2cf9c21d 	          ANDSLE    TXIDLECYC,D0\.7,A1LbP
+.*:	2cf9ce14 	          ANDSLS    TXIDLECYC,D0\.7,D0\.7
+.*:	2cf9d01d 	          ANDSLE    TXIDLECYC,D0\.7,D1Re0
+.*:	2cf9e01d 	          ANDSLE    TXIDLECYC,D0\.7,RD
+.*:	2cf9f41d 	          ANDSLE    TXIDLECYC,D0\.7,A0\.2
+.*:	2d000014 	          ANDSLS    TXENABLE,D1Re0,D1Re0
+.*:	2d0000e4 	          ANDSNE    TXSTAT,D1Re0,D1Re0
+.*:	2d0002bd 	          ANDSLE    PC,D1Re0,A1LbP
+.*:	2d00065d 	          ANDSLE    D1Re0,D1Re0,A1\.3
+.*:	2d000e1e 	          ANDSNV    TXENABLE,D1Re0,D1\.7
+.*:	2d000e5e 	          ANDSNV    D1Re0,D1Re0,D1\.7
+.*:	2d000efe 	          ANDSNV    TXSTAT,D1Re0,D1\.7
+.*:	2d0010bd 	          ANDSLE    PC,D1Re0,D0Re0
+.*:	2d001e5d 	          ANDSLE    D1Re0,D1Re0,D0\.7
+.*:	2d00203d 	          ANDSLE    D0Re0,D1Re0,RD
+.*:	2d00321d 	          ANDSLE    TXENABLE,D1Re0,A0FrP
+.*:	2d0032fd 	          ANDSLE    TXSTAT,D1Re0,A0FrP
+.*:	2d0034bd 	          ANDSLE    PC,D1Re0,A0\.2
+.*:	2d003e5d 	          ANDSLE    D1Re0,D1Re0,A0\.7
+.*:	2d01c02c 	          ANDSPL    D0Re0,D1\.7,D1Re0
+.*:	2d01c21d 	          ANDSLE    TXENABLE,D1\.7,A1LbP
+.*:	2d01c2fd 	          ANDSLE    TXSTAT,D1\.7,A1LbP
+.*:	2d01c6bd 	          ANDSLE    PC,D1\.7,A1\.3
+.*:	2d01ce34 	          ANDSLS    D0Re0,D1\.7,D1\.7
+.*:	2d01ceb4 	          ANDSLS    PC,D1\.7,D1\.7
+.*:	2d01d00d 	          ANDSPL    TXENABLE,D1\.7,D0Re0
+.*:	2d01d0fd 	          ANDSLE    TXSTAT,D1\.7,D0Re0
+.*:	2d01debd 	          ANDSLE    PC,D1\.7,D0\.7
+.*:	2d01e05d 	          ANDSLE    D1Re0,D1\.7,RD
+.*:	2d01f23d 	          ANDSLE    D0Re0,D1\.7,A0FrP
+.*:	2d01f40d 	          ANDSPL    TXENABLE,D1\.7,A0\.2
+.*:	2d01f4fd 	          ANDSLE    TXSTAT,D1\.7,A0\.2
+.*:	2d01fead 	          ANDSPL    PC,D1\.7,A0\.7
+.*:	2d0800bc 	          ANDSLE    PCX,D1Re0,D1Re0
+.*:	2d08067d 	          ANDSLE    A0FrP,D1Re0,A1\.3
+.*:	2d080e7e 	          ANDSNV    A0FrP,D1Re0,D1\.7
+.*:	2d080ebe 	          ANDSNV    PCX,D1Re0,D1\.7
+.*:	2d081e7d 	          ANDSLE    A0FrP,D1Re0,D0\.7
+.*:	2d08209d 	          ANDSLE    A1LbP,D1Re0,RD
+.*:	2d0832ad 	          ANDSPL    PCX,D1Re0,A0FrP
+.*:	2d083e6d 	          ANDSPL    A0FrP,D1Re0,A0\.7
+.*:	2d09c084 	          ANDSNE    A1LbP,D1\.7,D1Re0
+.*:	2d09c2ad 	          ANDSPL    PCX,D1\.7,A1LbP
+.*:	2d09ce64 	          ANDSNE    A0FrP,D1\.7,D1\.7
+.*:	2d09ceb4 	          ANDSLS    PCX,D1\.7,D1\.7
+.*:	2d09d0bd 	          ANDSLE    PCX,D1\.7,D0Re0
+.*:	2d09e07d 	          ANDSLE    A0FrP,D1\.7,RD
+.*:	2d09f29d 	          ANDSLE    A1LbP,D1\.7,A0FrP
+.*:	2d09f4bd 	          ANDSLE    PCX,D1\.7,A0\.2
+.*:	2d10006c 	          ANDSPL    A0\.2,D1Re0,D1Re0
+.*:	2d100e7e 	          ANDSNV    A0\.2,D1Re0,D1\.7
+.*:	2d10327d 	          ANDSLE    A0\.2,D1Re0,A0FrP
+.*:	2d11c27d 	          ANDSLE    A0\.2,D1\.7,A1LbP
+.*:	2d11d07d 	          ANDSLE    A0\.2,D1\.7,D0Re0
+.*:	2d11f47d 	          ANDSLE    A0\.2,D1\.7,A0\.2
+.*:	2d18028d 	          ANDSPL    A1\.3,D1Re0,A1LbP
+.*:	2d180e84 	          ANDSNE    A1\.3,D1Re0,D1\.7
+.*:	2d18109d 	          ANDSLE    A1\.3,D1Re0,D0Re0
+.*:	2d18209d 	          ANDSLE    A1\.3,D1Re0,RD
+.*:	2d18349d 	          ANDSLE    A1\.3,D1Re0,A0\.2
+.*:	2d19c094 	          ANDSLS    A1\.3,D1\.7,D1Re0
+.*:	2d19c68d 	          ANDSPL    A1\.3,D1\.7,A1\.3
+.*:	2d19ceec 	          ANDSPL    TXMASKI,D1\.7,D1\.7
+.*:	2d19de8d 	          ANDSPL    A1\.3,D1\.7,D0\.7
+.*:	2d19f28d 	          ANDSPL    A1\.3,D1\.7,A0FrP
+.*:	2d19fe8d 	          ANDSPL    A1\.3,D1\.7,A0\.7
+.*:	2d38006c 	          ANDSPL    A0\.7,D1Re0,D1Re0
+.*:	2d38027d 	          ANDSLE    A0\.7,D1Re0,A1LbP
+.*:	2d38066d 	          ANDSPL    A0\.7,D1Re0,A1\.3
+.*:	2d380e5c 	          ANDSLE    D1\.7,D1Re0,D1\.7
+.*:	2d380e8c 	          ANDSPL    A1\.7,D1Re0,D1\.7
+.*:	2d38107d 	          ANDSLE    A0\.7,D1Re0,D0Re0
+.*:	2d381e6d 	          ANDSPL    A0\.7,D1Re0,D0\.7
+.*:	2d38207d 	          ANDSLE    A0\.7,D1Re0,RD
+.*:	2d38326d 	          ANDSPL    A0\.7,D1Re0,A0FrP
+.*:	2d38347d 	          ANDSLE    A0\.7,D1Re0,A0\.2
+.*:	2d383e7d 	          ANDSLE    A0\.7,D1Re0,A0\.7
+.*:	2d39c07c 	          ANDSLE    A0\.7,D1\.7,D1Re0
+.*:	2d39c26d 	          ANDSPL    A0\.7,D1\.7,A1LbP
+.*:	2d39c67d 	          ANDSLE    A0\.7,D1\.7,A1\.3
+.*:	2d39ce4c 	          ANDSPL    D1\.7,D1\.7,D1\.7
+.*:	2d39ce9c 	          ANDSLE    A1\.7,D1\.7,D1\.7
+.*:	2d39d07d 	          ANDSLE    A0\.7,D1\.7,D0Re0
+.*:	2d39de7d 	          ANDSLE    A0\.7,D1\.7,D0\.7
+.*:	2d39e07d 	          ANDSLE    A0\.7,D1\.7,RD
+.*:	2d39f27d 	          ANDSLE    A0\.7,D1\.7,A0FrP
+.*:	2d39f47d 	          ANDSLE    A0\.7,D1\.7,A0\.2
+.*:	2d39fe6d 	          ANDSPL    A0\.7,D1\.7,A0\.7
+.*:	2d8006dd 	          ANDSLE    RA,D1Re0,A1\.3
+.*:	2d801edd 	          ANDSLE    RA,D1Re0,D0\.7
+.*:	2d803edd 	          ANDSLE    RA,D1Re0,A0\.7
+.*:	2d81cecc 	          ANDSPL    RA,D1\.7,D1\.7
+.*:	2d81e0dd 	          ANDSLE    RA,D1\.7,RD
+.*:	2db000cc 	          ANDSPL    RAM8X32,D1Re0,D1Re0
+.*:	2db00ede 	          ANDSNV    RAM8X32,D1Re0,D1\.7
+.*:	2db032dd 	          ANDSLE    RAM8X32,D1Re0,A0FrP
+.*:	2db1c2dd 	          ANDSLE    RAM8X32,D1\.7,A1LbP
+.*:	2db1d0dd 	          ANDSLE    RAM8X32,D1\.7,D0Re0
+.*:	2db1f4dd 	          ANDSLE    RAM8X32,D1\.7,A0\.2
+.*:	2db806dd 	          ANDSLE    RAM8X,D1Re0,A1\.3
+.*:	2db81edd 	          ANDSLE    RAM8X,D1Re0,D0\.7
+.*:	2db83edd 	          ANDSLE    RAM8X,D1Re0,A0\.7
+.*:	2db9cecc 	          ANDSPL    RAM8X,D1\.7,D1\.7
+.*:	2db9e0dd 	          ANDSLE    RAM8X,D1\.7,RD
+.*:	2dc000cc 	          ANDSPL    RABZ,D1Re0,D1Re0
+.*:	2dc00ede 	          ANDSNV    RABZ,D1Re0,D1\.7
+.*:	2dc032dd 	          ANDSLE    RABZ,D1Re0,A0FrP
+.*:	2dc1c2dd 	          ANDSLE    RABZ,D1\.7,A1LbP
+.*:	2dc1d0dd 	          ANDSLE    RABZ,D1\.7,D0Re0
+.*:	2dc1f4dd 	          ANDSLE    RABZ,D1\.7,A0\.2
+.*:	2de806dd 	          ANDSLE    RAWX,D1Re0,A1\.3
+.*:	2de81edd 	          ANDSLE    RAWX,D1Re0,D0\.7
+.*:	2de83edd 	          ANDSLE    RAWX,D1Re0,A0\.7
+.*:	2de9cecc 	          ANDSPL    RAWX,D1\.7,D1\.7
+.*:	2de9e0dd 	          ANDSLE    RAWX,D1\.7,RD
+.*:	2df80014 	          ANDSLS    TXIDLECYC,D1Re0,D1Re0
+.*:	2df8061d 	          ANDSLE    TXIDLECYC,D1Re0,A1\.3
+.*:	2df80ecc 	          ANDSPL    RAMX,D1Re0,D1\.7
+.*:	2df81e1d 	          ANDSLE    TXIDLECYC,D1Re0,D0\.7
+.*:	2df8321d 	          ANDSLE    TXIDLECYC,D1Re0,A0FrP
+.*:	2df83e1d 	          ANDSLE    TXIDLECYC,D1Re0,A0\.7
+.*:	2df9c21d 	          ANDSLE    TXIDLECYC,D1\.7,A1LbP
+.*:	2df9ce14 	          ANDSLS    TXIDLECYC,D1\.7,D1\.7
+.*:	2df9d01d 	          ANDSLE    TXIDLECYC,D1\.7,D0Re0
+.*:	2df9e01d 	          ANDSLE    TXIDLECYC,D1\.7,RD
+.*:	2df9f41d 	          ANDSLE    TXIDLECYC,D1\.7,A0\.2
+.*:	2e001fdc 	          ANDSLE    D0Re0,D0Re0,#0x7f
+.*:	2e001fea 	          ANDS      PC,D0Re0,#0x7f
+.*:	2e002020 	          ANDS      TXENABLE,D0Re0,#0x80
+.*:	2e003fcc 	          ANDSPL    D0Re0,D0Re0,#0xff
+.*:	2e003fea 	          ANDS      PC,D0Re0,#0xff
+.*:	2e01dfe0 	          ANDS      TXENABLE,D0\.7,#0x7f
+.*:	2e01dfee 	          ANDS      TXSTAT,D0\.7,#0x7f
+.*:	2e01e022 	          ANDS      D0Re0,D0\.7,#0x80
+.*:	2e01ffdc 	          ANDSLE    D0Re0,D0\.7,#0xff
+.*:	2e01ffe4 	          ANDS      D1Re0,D0\.7,#0xff
+.*:	2e081fe8 	          ANDS      A1LbP,D0Re0,#0x7f
+.*:	2e08202a 	          ANDS      PCX,D0Re0,#0x80
+.*:	2e09dfe6 	          ANDS      A0FrP,D0\.7,#0x7f
+.*:	2e09e028 	          ANDS      A1LbP,D0\.7,#0x80
+.*:	2e09ffea 	          ANDS      PCX,D0\.7,#0xff
+.*:	2e11dfe6 	          ANDS      A0\.2,D0\.7,#0x7f
+.*:	2e181fee 	          ANDS      TXMASKI,D0Re0,#0x7f
+.*:	2e183fee 	          ANDS      TXMASKI,D0Re0,#0xff
+.*:	2e19e02e 	          ANDS      TXMASKI,D0\.7,#0x80
+.*:	2e381fde 	          ANDSNV    D0\.7,D0Re0,#0x7f
+.*:	2e381fe8 	          ANDS      A1\.7,D0Re0,#0x7f
+.*:	2e382024 	          ANDS      D1\.7,D0Re0,#0x80
+.*:	2e383fde 	          ANDSNV    D0\.7,D0Re0,#0xff
+.*:	2e383fe8 	          ANDS      A1\.7,D0Re0,#0xff
+.*:	2e39dfe6 	          ANDS      A0\.7,D0\.7,#0x7f
+.*:	2e39e024 	          ANDS      D1\.7,D0\.7,#0x80
+.*:	2e39ffde 	          ANDSNV    D0\.7,D0\.7,#0xff
+.*:	2e801fec 	          ANDS      RA,D0Re0,#0x7f
+.*:	2e81e02c 	          ANDS      RA,D0\.7,#0x80
+.*:	2eb03fec 	          ANDS      RAM8X32,D0Re0,#0xff
+.*:	2eb81fec 	          ANDS      RAM8X,D0Re0,#0x7f
+.*:	2eb9e02c 	          ANDS      RAM8X,D0\.7,#0x80
+.*:	2ec03fec 	          ANDS      RABZ,D0Re0,#0xff
+.*:	2ee81fec 	          ANDS      RAWX,D0Re0,#0x7f
+.*:	2ee9e02c 	          ANDS      RAWX,D0\.7,#0x80
+.*:	2ef82020 	          ANDS      TXIDLECYC,D0Re0,#0x80
+.*:	2ef9dfe0 	          ANDS      TXIDLECYC,D0\.7,#0x7f
+.*:	2ef9ffe0 	          ANDS      TXIDLECYC,D0\.7,#0xff
+.*:	2f001fea 	          ANDS      PC,D1Re0,#0x7f
+.*:	2f003fcc 	          ANDSPL    D1Re0,D1Re0,#0xff
+.*:	2f01dfe0 	          ANDS      TXENABLE,D1\.7,#0x7f
+.*:	2f01e022 	          ANDS      D0Re0,D1\.7,#0x80
+.*:	2f01ffe4 	          ANDS      D1Re0,D1\.7,#0xff
+.*:	2f08202a 	          ANDS      PCX,D1Re0,#0x80
+.*:	2f09e028 	          ANDS      A1LbP,D1\.7,#0x80
+.*:	2f11dfe6 	          ANDS      A0\.2,D1\.7,#0x7f
+.*:	2f183fee 	          ANDS      TXMASKI,D1Re0,#0xff
+.*:	2f381fde 	          ANDSNV    D1\.7,D1Re0,#0x7f
+.*:	2f382024 	          ANDS      D1\.7,D1Re0,#0x80
+.*:	2f383fe8 	          ANDS      A1\.7,D1Re0,#0xff
+.*:	2f39e022 	          ANDS      D0\.7,D1\.7,#0x80
+.*:	2f801fec 	          ANDS      RA,D1Re0,#0x7f
+.*:	2fb03fec 	          ANDS      RAM8X32,D1Re0,#0xff
+.*:	2fb9e02c 	          ANDS      RAM8X,D1\.7,#0x80
+.*:	2fe81fec 	          ANDS      RAWX,D1Re0,#0x7f
+.*:	2ff82020 	          ANDS      TXIDLECYC,D1Re0,#0x80
+.*:	2ff9ffe0 	          ANDS      TXIDLECYC,D1\.7,#0xff
+.*:	30000e00 	          OR        D0Re0,D0Re0,D0\.7
+.*:	30002001 	          OR        D0Re0,D0Re0,RD
+.*:	3001c000 	          OR        D0Re0,D0\.7,D0Re0
+.*:	3001ce40 	          ORQ       D0Re0,D0\.7,D0\.7,A0\.2
+.*:	3001f201 	          OR        D0Re0,D0\.7,A0FrP
+.*:	30380201 	          OR        D0\.7,D0Re0,A1LbP
+.*:	30381001 	          OR        D0\.7,D0Re0,D1Re0
+.*:	30383401 	          OR        D0\.7,D0Re0,A0\.2
+.*:	3039c601 	          OR        D0\.7,D0\.7,A1\.3
+.*:	3039de01 	          OR        D0\.7,D0\.7,D1\.7
+.*:	3039fe01 	          OR        D0\.7,D0\.7,A0\.7
+.*:	31000e00 	          OR        D1Re0,D1Re0,D1\.7
+.*:	31002001 	          OR        D1Re0,D1Re0,RD
+.*:	3101c000 	          OR        D1Re0,D1\.7,D1Re0
+.*:	3101cec0 	          ORQ       D1Re0,D1\.7,D1\.7,A1\.3
+.*:	3101f201 	          OR        D1Re0,D1\.7,A0FrP
+.*:	31380201 	          OR        D1\.7,D1Re0,A1LbP
+.*:	31381001 	          OR        D1\.7,D1Re0,D0Re0
+.*:	31383401 	          OR        D1\.7,D1Re0,A0\.2
+.*:	3139c601 	          OR        D1\.7,D1\.7,A1\.3
+.*:	3139de01 	          OR        D1\.7,D1\.7,D0\.7
+.*:	3139fe01 	          OR        D1\.7,D1\.7,A0\.7
+.*:	32040002 	          OR        D0Re0,D0Re0,#-32768
+.*:	323bfff8 	          OR        D0\.7,D0\.7,#0x7fff
+.*:	323c0005 	          ORMT      D0\.7,D0\.7,#0x8000
+.*:	3303fffc 	          ORMB      D1Re0,D1Re0,#0x7fff
+.*:	3307fff9 	          ORT       D1Re0,D1Re0,#0xffff
+.*:	333c0000 	          OR        D1\.7,D1\.7,#0x8000
+.*:	333ffffc 	          ORMB      D1\.7,D1\.7,#0xffff
+.*:	340000bc 	          ORLE      PC,D0Re0,D0Re0
+.*:	3400025d 	          ORLE      D1Re0,D0Re0,A1LbP
+.*:	3400062d 	          ORPL      D0Re0,D0Re0,A1\.3
+.*:	34000e1c 	          ORLE      TXENABLE,D0Re0,D0\.7
+.*:	34000e4c 	          ORPL      D1Re0,D0Re0,D0\.7
+.*:	34000eec 	          ORPL      TXSTAT,D0Re0,D0\.7
+.*:	3400104d 	          ORPL      D1Re0,D0Re0,D1Re0
+.*:	34001e2d 	          ORPL      D0Re0,D0Re0,D1\.7
+.*:	3400201d 	          ORLE      TXENABLE,D0Re0,RD
+.*:	340020ed 	          ORPL      TXSTAT,D0Re0,RD
+.*:	340032ad 	          ORPL      PC,D0Re0,A0FrP
+.*:	3400344d 	          ORPL      D1Re0,D0Re0,A0\.2
+.*:	34003e3d 	          ORLE      D0Re0,D0Re0,A0\.7
+.*:	3401c004 	          ORNE      TXENABLE,D0\.7,D0Re0
+.*:	3401c0f4 	          ORLS      TXSTAT,D0\.7,D0Re0
+.*:	3401c2ad 	          ORPL      PC,D0\.7,A1LbP
+.*:	3401c65d 	          ORLE      D1Re0,D0\.7,A1\.3
+.*:	3401ce1e 	          ORNV      TXENABLE,D0\.7,D0\.7
+.*:	3401ce5e 	          ORNV      D1Re0,D0\.7,D0\.7
+.*:	3401cefe 	          ORNV      TXSTAT,D0\.7,D0\.7
+.*:	3401d0bd 	          ORLE      PC,D0\.7,D1Re0
+.*:	3401de5d 	          ORLE      D1Re0,D0\.7,D1\.7
+.*:	3401e03d 	          ORLE      D0Re0,D0\.7,RD
+.*:	3401f21d 	          ORLE      TXENABLE,D0\.7,A0FrP
+.*:	3401f2fd 	          ORLE      TXSTAT,D0\.7,A0FrP
+.*:	3401f4bd 	          ORLE      PC,D0\.7,A0\.2
+.*:	3401fe5d 	          ORLE      D1Re0,D0\.7,A0\.7
+.*:	34080094 	          ORLS      A1LbP,D0Re0,D0Re0
+.*:	340802bd 	          ORLE      PCX,D0Re0,A1LbP
+.*:	34080e74 	          ORLS      A0FrP,D0Re0,D0\.7
+.*:	34080ea4 	          ORNE      PCX,D0Re0,D0\.7
+.*:	340810bd 	          ORLE      PCX,D0Re0,D1Re0
+.*:	3408207d 	          ORLE      A0FrP,D0Re0,RD
+.*:	3408329d 	          ORLE      A1LbP,D0Re0,A0FrP
+.*:	340834bd 	          ORLE      PCX,D0Re0,A0\.2
+.*:	3409c07c 	          ORLE      A0FrP,D0\.7,D0Re0
+.*:	3409c29d 	          ORLE      A1LbP,D0\.7,A1LbP
+.*:	3409c6bd 	          ORLE      PCX,D0\.7,A1\.3
+.*:	3409ce9e 	          ORNV      A1LbP,D0\.7,D0\.7
+.*:	3409d08d 	          ORPL      A1LbP,D0\.7,D1Re0
+.*:	3409debd 	          ORLE      PCX,D0\.7,D1\.7
+.*:	3409f26d 	          ORPL      A0FrP,D0\.7,A0FrP
+.*:	3409f48d 	          ORPL      A1LbP,D0\.7,A0\.2
+.*:	3409fead 	          ORPL      PCX,D0\.7,A0\.7
+.*:	34100e7c 	          ORLE      A0\.2,D0Re0,D0\.7
+.*:	3410207d 	          ORLE      A0\.2,D0Re0,RD
+.*:	3411c06c 	          ORPL      A0\.2,D0\.7,D0Re0
+.*:	3411ce7e 	          ORNV      A0\.2,D0\.7,D0\.7
+.*:	3411f27d 	          ORLE      A0\.2,D0\.7,A0FrP
+.*:	341800fc 	          ORLE      TXMASKI,D0Re0,D0Re0
+.*:	341806fd 	          ORLE      TXMASKI,D0Re0,A1\.3
+.*:	34180efe 	          ORNV      TXMASKI,D0Re0,D0\.7
+.*:	34181efd 	          ORLE      TXMASKI,D0Re0,D1\.7
+.*:	341832fd 	          ORLE      TXMASKI,D0Re0,A0FrP
+.*:	34183efd 	          ORLE      TXMASKI,D0Re0,A0\.7
+.*:	3419c2fd 	          ORLE      TXMASKI,D0\.7,A1LbP
+.*:	3419ce9e 	          ORNV      A1\.3,D0\.7,D0\.7
+.*:	3419d0fd 	          ORLE      TXMASKI,D0\.7,D1Re0
+.*:	3419e0fd 	          ORLE      TXMASKI,D0\.7,RD
+.*:	3419f4fd 	          ORLE      TXMASKI,D0\.7,A0\.2
+.*:	34380044 	          ORNE      D1\.7,D0Re0,D0Re0
+.*:	3438025d 	          ORLE      D1\.7,D0Re0,A1LbP
+.*:	3438065d 	          ORLE      D1\.7,D0Re0,A1\.3
+.*:	34380e3e 	          ORNV      D0\.7,D0Re0,D0\.7
+.*:	34380e7e 	          ORNV      A0\.7,D0Re0,D0\.7
+.*:	3438104d 	          ORPL      D1\.7,D0Re0,D1Re0
+.*:	34381e5d 	          ORLE      D1\.7,D0Re0,D1\.7
+.*:	3438204d 	          ORPL      D1\.7,D0Re0,RD
+.*:	3438325d 	          ORLE      D1\.7,D0Re0,A0FrP
+.*:	3438344d 	          ORPL      D1\.7,D0Re0,A0\.2
+.*:	34383e5d 	          ORLE      D1\.7,D0Re0,A0\.7
+.*:	3439c054 	          ORLS      D1\.7,D0\.7,D0Re0
+.*:	3439c25d 	          ORLE      D1\.7,D0\.7,A1LbP
+.*:	3439c65d 	          ORLE      D1\.7,D0\.7,A1\.3
+.*:	3439ce3e 	          ORNV      D0\.7,D0\.7,D0\.7
+.*:	3439ce7e 	          ORNV      A0\.7,D0\.7,D0\.7
+.*:	3439d05d 	          ORLE      D1\.7,D0\.7,D1Re0
+.*:	3439de5d 	          ORLE      D1\.7,D0\.7,D1\.7
+.*:	3439e05d 	          ORLE      D1\.7,D0\.7,RD
+.*:	3439f25d 	          ORLE      D1\.7,D0\.7,A0FrP
+.*:	3439f45d 	          ORLE      D1\.7,D0\.7,A0\.2
+.*:	3439fe5d 	          ORLE      D1\.7,D0\.7,A0\.7
+.*:	348002dd 	          ORLE      RA,D0Re0,A1LbP
+.*:	348010dd 	          ORLE      RA,D0Re0,D1Re0
+.*:	348034dd 	          ORLE      RA,D0Re0,A0\.2
+.*:	3481c6dd 	          ORLE      RA,D0\.7,A1\.3
+.*:	3481dedd 	          ORLE      RA,D0\.7,D1\.7
+.*:	3481fedd 	          ORLE      RA,D0\.7,A0\.7
+.*:	34b00ecc 	          ORPL      RAM8X32,D0Re0,D0\.7
+.*:	34b020dd 	          ORLE      RAM8X32,D0Re0,RD
+.*:	34b1c0cc 	          ORPL      RAM8X32,D0\.7,D0Re0
+.*:	34b1cede 	          ORNV      RAM8X32,D0\.7,D0\.7
+.*:	34b1f2dd 	          ORLE      RAM8X32,D0\.7,A0FrP
+.*:	34b802dd 	          ORLE      RAM8X,D0Re0,A1LbP
+.*:	34b810dd 	          ORLE      RAM8X,D0Re0,D1Re0
+.*:	34b834dd 	          ORLE      RAM8X,D0Re0,A0\.2
+.*:	34b9c6dd 	          ORLE      RAM8X,D0\.7,A1\.3
+.*:	34b9dedd 	          ORLE      RAM8X,D0\.7,D1\.7
+.*:	34b9fedd 	          ORLE      RAM8X,D0\.7,A0\.7
+.*:	34c00ecc 	          ORPL      RABZ,D0Re0,D0\.7
+.*:	34c020dd 	          ORLE      RABZ,D0Re0,RD
+.*:	34c1c0cc 	          ORPL      RABZ,D0\.7,D0Re0
+.*:	34c1cede 	          ORNV      RABZ,D0\.7,D0\.7
+.*:	34c1f2dd 	          ORLE      RABZ,D0\.7,A0FrP
+.*:	34e802dd 	          ORLE      RAWX,D0Re0,A1LbP
+.*:	34e810dd 	          ORLE      RAWX,D0Re0,D1Re0
+.*:	34e834dd 	          ORLE      RAWX,D0Re0,A0\.2
+.*:	34e9c6dd 	          ORLE      RAWX,D0\.7,A1\.3
+.*:	34e9dedd 	          ORLE      RAWX,D0\.7,D1\.7
+.*:	34e9fedd 	          ORLE      RAWX,D0\.7,A0\.7
+.*:	34f802dd 	          ORLE      RAMX,D0Re0,A1LbP
+.*:	34f80e1e 	          ORNV      TXIDLECYC,D0Re0,D0\.7
+.*:	34f810dd 	          ORLE      RAMX,D0Re0,D1Re0
+.*:	34f820dd 	          ORLE      RAMX,D0Re0,RD
+.*:	34f834dd 	          ORLE      RAMX,D0Re0,A0\.2
+.*:	34f9c0cc 	          ORPL      RAMX,D0\.7,D0Re0
+.*:	34f9c6dd 	          ORLE      RAMX,D0\.7,A1\.3
+.*:	34f9cede 	          ORNV      RAMX,D0\.7,D0\.7
+.*:	34f9dedd 	          ORLE      RAMX,D0\.7,D1\.7
+.*:	34f9f2dd 	          ORLE      RAMX,D0\.7,A0FrP
+.*:	34f9fedd 	          ORLE      RAMX,D0\.7,A0\.7
+.*:	350000bc 	          ORLE      PC,D1Re0,D1Re0
+.*:	3500025d 	          ORLE      D1Re0,D1Re0,A1LbP
+.*:	3500062d 	          ORPL      D0Re0,D1Re0,A1\.3
+.*:	35000e1c 	          ORLE      TXENABLE,D1Re0,D1\.7
+.*:	35000e4c 	          ORPL      D1Re0,D1Re0,D1\.7
+.*:	35000eec 	          ORPL      TXSTAT,D1Re0,D1\.7
+.*:	3500104d 	          ORPL      D1Re0,D1Re0,D0Re0
+.*:	35001e2d 	          ORPL      D0Re0,D1Re0,D0\.7
+.*:	3500201d 	          ORLE      TXENABLE,D1Re0,RD
+.*:	350020ed 	          ORPL      TXSTAT,D1Re0,RD
+.*:	350032ad 	          ORPL      PC,D1Re0,A0FrP
+.*:	3500344d 	          ORPL      D1Re0,D1Re0,A0\.2
+.*:	35003e3d 	          ORLE      D0Re0,D1Re0,A0\.7
+.*:	3501c004 	          ORNE      TXENABLE,D1\.7,D1Re0
+.*:	3501c0f4 	          ORLS      TXSTAT,D1\.7,D1Re0
+.*:	3501c2ad 	          ORPL      PC,D1\.7,A1LbP
+.*:	3501c65d 	          ORLE      D1Re0,D1\.7,A1\.3
+.*:	3501ce1e 	          ORNV      TXENABLE,D1\.7,D1\.7
+.*:	3501ce5e 	          ORNV      D1Re0,D1\.7,D1\.7
+.*:	3501cefe 	          ORNV      TXSTAT,D1\.7,D1\.7
+.*:	3501d0bd 	          ORLE      PC,D1\.7,D0Re0
+.*:	3501de5d 	          ORLE      D1Re0,D1\.7,D0\.7
+.*:	3501e03d 	          ORLE      D0Re0,D1\.7,RD
+.*:	3501f21d 	          ORLE      TXENABLE,D1\.7,A0FrP
+.*:	3501f2fd 	          ORLE      TXSTAT,D1\.7,A0FrP
+.*:	3501f4bd 	          ORLE      PC,D1\.7,A0\.2
+.*:	3501fe5d 	          ORLE      D1Re0,D1\.7,A0\.7
+.*:	35080094 	          ORLS      A1LbP,D1Re0,D1Re0
+.*:	350802bd 	          ORLE      PCX,D1Re0,A1LbP
+.*:	35080e74 	          ORLS      A0FrP,D1Re0,D1\.7
+.*:	35080ea4 	          ORNE      PCX,D1Re0,D1\.7
+.*:	350810bd 	          ORLE      PCX,D1Re0,D0Re0
+.*:	3508207d 	          ORLE      A0FrP,D1Re0,RD
+.*:	3508329d 	          ORLE      A1LbP,D1Re0,A0FrP
+.*:	350834bd 	          ORLE      PCX,D1Re0,A0\.2
+.*:	3509c07c 	          ORLE      A0FrP,D1\.7,D1Re0
+.*:	3509c29d 	          ORLE      A1LbP,D1\.7,A1LbP
+.*:	3509c6bd 	          ORLE      PCX,D1\.7,A1\.3
+.*:	3509ce9e 	          ORNV      A1LbP,D1\.7,D1\.7
+.*:	3509d08d 	          ORPL      A1LbP,D1\.7,D0Re0
+.*:	3509debd 	          ORLE      PCX,D1\.7,D0\.7
+.*:	3509f26d 	          ORPL      A0FrP,D1\.7,A0FrP
+.*:	3509f48d 	          ORPL      A1LbP,D1\.7,A0\.2
+.*:	3509fead 	          ORPL      PCX,D1\.7,A0\.7
+.*:	35100e7c 	          ORLE      A0\.2,D1Re0,D1\.7
+.*:	3510207d 	          ORLE      A0\.2,D1Re0,RD
+.*:	3511c06c 	          ORPL      A0\.2,D1\.7,D1Re0
+.*:	3511ce7e 	          ORNV      A0\.2,D1\.7,D1\.7
+.*:	3511f27d 	          ORLE      A0\.2,D1\.7,A0FrP
+.*:	351800fc 	          ORLE      TXMASKI,D1Re0,D1Re0
+.*:	351806fd 	          ORLE      TXMASKI,D1Re0,A1\.3
+.*:	35180efe 	          ORNV      TXMASKI,D1Re0,D1\.7
+.*:	35181efd 	          ORLE      TXMASKI,D1Re0,D0\.7
+.*:	351832fd 	          ORLE      TXMASKI,D1Re0,A0FrP
+.*:	35183efd 	          ORLE      TXMASKI,D1Re0,A0\.7
+.*:	3519c2fd 	          ORLE      TXMASKI,D1\.7,A1LbP
+.*:	3519ce9e 	          ORNV      A1\.3,D1\.7,D1\.7
+.*:	3519d0fd 	          ORLE      TXMASKI,D1\.7,D0Re0
+.*:	3519e0fd 	          ORLE      TXMASKI,D1\.7,RD
+.*:	3519f4fd 	          ORLE      TXMASKI,D1\.7,A0\.2
+.*:	35380044 	          ORNE      D1\.7,D1Re0,D1Re0
+.*:	3538025d 	          ORLE      D1\.7,D1Re0,A1LbP
+.*:	3538065d 	          ORLE      D1\.7,D1Re0,A1\.3
+.*:	35380e3e 	          ORNV      D0\.7,D1Re0,D1\.7
+.*:	35380e7e 	          ORNV      A0\.7,D1Re0,D1\.7
+.*:	3538104d 	          ORPL      D1\.7,D1Re0,D0Re0
+.*:	35381e5d 	          ORLE      D1\.7,D1Re0,D0\.7
+.*:	3538204d 	          ORPL      D1\.7,D1Re0,RD
+.*:	3538325d 	          ORLE      D1\.7,D1Re0,A0FrP
+.*:	3538344d 	          ORPL      D1\.7,D1Re0,A0\.2
+.*:	35383e5d 	          ORLE      D1\.7,D1Re0,A0\.7
+.*:	3539c054 	          ORLS      D1\.7,D1\.7,D1Re0
+.*:	3539c25d 	          ORLE      D1\.7,D1\.7,A1LbP
+.*:	3539c65d 	          ORLE      D1\.7,D1\.7,A1\.3
+.*:	3539ce3e 	          ORNV      D0\.7,D1\.7,D1\.7
+.*:	3539ce7e 	          ORNV      A0\.7,D1\.7,D1\.7
+.*:	3539d05d 	          ORLE      D1\.7,D1\.7,D0Re0
+.*:	3539de5d 	          ORLE      D1\.7,D1\.7,D0\.7
+.*:	3539e05d 	          ORLE      D1\.7,D1\.7,RD
+.*:	3539f25d 	          ORLE      D1\.7,D1\.7,A0FrP
+.*:	3539f45d 	          ORLE      D1\.7,D1\.7,A0\.2
+.*:	3539fe5d 	          ORLE      D1\.7,D1\.7,A0\.7
+.*:	358002dd 	          ORLE      RA,D1Re0,A1LbP
+.*:	358010dd 	          ORLE      RA,D1Re0,D0Re0
+.*:	358034dd 	          ORLE      RA,D1Re0,A0\.2
+.*:	3581c6dd 	          ORLE      RA,D1\.7,A1\.3
+.*:	3581dedd 	          ORLE      RA,D1\.7,D0\.7
+.*:	3581fedd 	          ORLE      RA,D1\.7,A0\.7
+.*:	35b00ecc 	          ORPL      RAM8X32,D1Re0,D1\.7
+.*:	35b020dd 	          ORLE      RAM8X32,D1Re0,RD
+.*:	35b1c0cc 	          ORPL      RAM8X32,D1\.7,D1Re0
+.*:	35b1cede 	          ORNV      RAM8X32,D1\.7,D1\.7
+.*:	35b1f2dd 	          ORLE      RAM8X32,D1\.7,A0FrP
+.*:	35b802dd 	          ORLE      RAM8X,D1Re0,A1LbP
+.*:	35b810dd 	          ORLE      RAM8X,D1Re0,D0Re0
+.*:	35b834dd 	          ORLE      RAM8X,D1Re0,A0\.2
+.*:	35b9c6dd 	          ORLE      RAM8X,D1\.7,A1\.3
+.*:	35b9dedd 	          ORLE      RAM8X,D1\.7,D0\.7
+.*:	35b9fedd 	          ORLE      RAM8X,D1\.7,A0\.7
+.*:	35c00ecc 	          ORPL      RABZ,D1Re0,D1\.7
+.*:	35c020dd 	          ORLE      RABZ,D1Re0,RD
+.*:	35c1c0cc 	          ORPL      RABZ,D1\.7,D1Re0
+.*:	35c1cede 	          ORNV      RABZ,D1\.7,D1\.7
+.*:	35c1f2dd 	          ORLE      RABZ,D1\.7,A0FrP
+.*:	35e802dd 	          ORLE      RAWX,D1Re0,A1LbP
+.*:	35e810dd 	          ORLE      RAWX,D1Re0,D0Re0
+.*:	35e834dd 	          ORLE      RAWX,D1Re0,A0\.2
+.*:	35e9c6dd 	          ORLE      RAWX,D1\.7,A1\.3
+.*:	35e9dedd 	          ORLE      RAWX,D1\.7,D0\.7
+.*:	35e9fedd 	          ORLE      RAWX,D1\.7,A0\.7
+.*:	35f802dd 	          ORLE      RAMX,D1Re0,A1LbP
+.*:	35f80e1e 	          ORNV      TXIDLECYC,D1Re0,D1\.7
+.*:	35f810dd 	          ORLE      RAMX,D1Re0,D0Re0
+.*:	35f820dd 	          ORLE      RAMX,D1Re0,RD
+.*:	35f834dd 	          ORLE      RAMX,D1Re0,A0\.2
+.*:	35f9c0cc 	          ORPL      RAMX,D1\.7,D1Re0
+.*:	35f9c6dd 	          ORLE      RAMX,D1\.7,A1\.3
+.*:	35f9cede 	          ORNV      RAMX,D1\.7,D1\.7
+.*:	35f9dedd 	          ORLE      RAMX,D1\.7,D0\.7
+.*:	35f9f2dd 	          ORLE      RAMX,D1\.7,A0FrP
+.*:	35f9fedd 	          ORLE      RAMX,D1\.7,A0\.7
+.*:	36001fe4 	          OR        D1Re0,D0Re0,#0x7f
+.*:	3600201e 	          ORNV      D0Re0,D0Re0,#0x80
+.*:	3600202e 	          OR        TXSTAT,D0Re0,#0x80
+.*:	36003fe4 	          OR        D1Re0,D0Re0,#0xff
+.*:	3601dfde 	          ORNV      D0Re0,D0\.7,#0x7f
+.*:	3601dfea 	          OR        PC,D0\.7,#0x7f
+.*:	3601e020 	          OR        TXENABLE,D0\.7,#0x80
+.*:	3601e02e 	          OR        TXSTAT,D0\.7,#0x80
+.*:	3601ffe2 	          OR        D0Re0,D0\.7,#0xff
+.*:	36081fe6 	          OR        A0FrP,D0Re0,#0x7f
+.*:	36082028 	          OR        A1LbP,D0Re0,#0x80
+.*:	36083fea 	          OR        PCX,D0Re0,#0xff
+.*:	3609e026 	          OR        A0FrP,D0\.7,#0x80
+.*:	3609ffe8 	          OR        A1LbP,D0\.7,#0xff
+.*:	36103fe6 	          OR        A0\.2,D0Re0,#0xff
+.*:	36181fe8 	          OR        A1\.3,D0Re0,#0x7f
+.*:	36183fe8 	          OR        A1\.3,D0Re0,#0xff
+.*:	3619e028 	          OR        A1\.3,D0\.7,#0x80
+.*:	36381fdc 	          ORLE      D0\.7,D0Re0,#0x7f
+.*:	36381fe6 	          OR        A0\.7,D0Re0,#0x7f
+.*:	36382022 	          OR        D0\.7,D0Re0,#0x80
+.*:	36383fcc 	          ORPL      D0\.7,D0Re0,#0xff
+.*:	36383fe6 	          OR        A0\.7,D0Re0,#0xff
+.*:	3639dfe4 	          OR        D1\.7,D0\.7,#0x7f
+.*:	3639e01e 	          ORNV      D0\.7,D0\.7,#0x80
+.*:	3639ffdc 	          ORLE      D0\.7,D0\.7,#0xff
+.*:	3639ffe8 	          OR        A1\.7,D0\.7,#0xff
+.*:	3681dfec 	          OR        RA,D0\.7,#0x7f
+.*:	36b0202c 	          OR        RAM8X32,D0Re0,#0x80
+.*:	36b1ffec 	          OR        RAM8X32,D0\.7,#0xff
+.*:	36b9dfec 	          OR        RAM8X,D0\.7,#0x7f
+.*:	36c0202c 	          OR        RABZ,D0Re0,#0x80
+.*:	36c1ffec 	          OR        RABZ,D0\.7,#0xff
+.*:	36e9dfec 	          OR        RAWX,D0\.7,#0x7f
+.*:	36f81fec 	          OR        RAMX,D0Re0,#0x7f
+.*:	36f83fec 	          OR        RAMX,D0Re0,#0xff
+.*:	36f9e02c 	          OR        RAMX,D0\.7,#0x80
+.*:	37001fe0 	          OR        TXENABLE,D1Re0,#0x7f
+.*:	3700202a 	          OR        PC,D1Re0,#0x80
+.*:	3701dfdc 	          ORLE      D1Re0,D1\.7,#0x7f
+.*:	3701e01e 	          ORNV      D1Re0,D1\.7,#0x80
+.*:	3701ffe0 	          OR        TXENABLE,D1\.7,#0xff
+.*:	37082026 	          OR        A0FrP,D1Re0,#0x80
+.*:	3709dfea 	          OR        PCX,D1\.7,#0x7f
+.*:	37102026 	          OR        A0\.2,D1Re0,#0x80
+.*:	3718202e 	          OR        TXMASKI,D1Re0,#0x80
+.*:	3719ffee 	          OR        TXMASKI,D1\.7,#0xff
+.*:	3738201e 	          ORNV      D1\.7,D1Re0,#0x80
+.*:	37383fe4 	          OR        D1\.7,D1Re0,#0xff
+.*:	3739e004 	          ORNE      D1\.7,D1\.7,#0x80
+.*:	3739ffe6 	          OR        A0\.7,D1\.7,#0xff
+.*:	37b01fec 	          OR        RAM8X32,D1Re0,#0x7f
+.*:	37b83fec 	          OR        RAM8X,D1Re0,#0xff
+.*:	37c1e02c 	          OR        RABZ,D1\.7,#0x80
+.*:	37f81fe0 	          OR        TXIDLECYC,D1Re0,#0x7f
+.*:	37f9e020 	          OR        TXIDLECYC,D1\.7,#0x80
+.*:	38000601 	          ORS       D0Re0,D0Re0,A1\.3
+.*:	38001e01 	          ORS       D0Re0,D0Re0,D1\.7
+.*:	38003e01 	          ORS       D0Re0,D0Re0,A0\.7
+.*:	3801ce00 	          ORS       D0Re0,D0\.7,D0\.7
+.*:	3801e001 	          ORS       D0Re0,D0\.7,RD
+.*:	38380000 	          ORS       D0\.7,D0Re0,D0Re0
+.*:	38380e40 	          ORSQ      D0\.7,D0Re0,D0\.7,A0\.2
+.*:	38383201 	          ORS       D0\.7,D0Re0,A0FrP
+.*:	3839c201 	          ORS       D0\.7,D0\.7,A1LbP
+.*:	3839d001 	          ORS       D0\.7,D0\.7,D1Re0
+.*:	3839f401 	          ORS       D0\.7,D0\.7,A0\.2
+.*:	39000601 	          ORS       D1Re0,D1Re0,A1\.3
+.*:	39001e01 	          ORS       D1Re0,D1Re0,D0\.7
+.*:	39003e01 	          ORS       D1Re0,D1Re0,A0\.7
+.*:	3901ce00 	          ORS       D1Re0,D1\.7,D1\.7
+.*:	3901e001 	          ORS       D1Re0,D1\.7,RD
+.*:	39380000 	          ORS       D1\.7,D1Re0,D1Re0
+.*:	39380ec0 	          ORSQ      D1\.7,D1Re0,D1\.7,A1\.3
+.*:	39383201 	          ORS       D1\.7,D1Re0,A0FrP
+.*:	3939c201 	          ORS       D1\.7,D1\.7,A1LbP
+.*:	3939d001 	          ORS       D1\.7,D1\.7,D0Re0
+.*:	3939f401 	          ORS       D1\.7,D1\.7,A0\.2
+.*:	3a040000 	          ORS       D0Re0,D0Re0,#0x8000
+.*:	3a07fffc 	          ORSMB     D0Re0,D0Re0,#0xffff
+.*:	3a3c0002 	          ORS       D0\.7,D0\.7,#-32768
+.*:	3b03fff8 	          ORS       D1Re0,D1Re0,#0x7fff
+.*:	3b040005 	          ORSMT     D1Re0,D1Re0,#0x8000
+.*:	3b3bfffc 	          ORSMB     D1\.7,D1\.7,#0x7fff
+.*:	3b3ffff9 	          ORST      D1\.7,D1\.7,#0xffff
+.*:	3c000044 	          ORSNE     D1Re0,D0Re0,D0Re0
+.*:	3c00023d 	          ORSLE     D0Re0,D0Re0,A1LbP
+.*:	3c00061d 	          ORSLE     TXENABLE,D0Re0,A1\.3
+.*:	3c0006fd 	          ORSLE     TXSTAT,D0Re0,A1\.3
+.*:	3c000e3e 	          ORSNV     D0Re0,D0Re0,D0\.7
+.*:	3c000ebe 	          ORSNV     PC,D0Re0,D0\.7
+.*:	3c00103d 	          ORSLE     D0Re0,D0Re0,D1Re0
+.*:	3c001e1d 	          ORSLE     TXENABLE,D0Re0,D1\.7
+.*:	3c001efd 	          ORSLE     TXSTAT,D0Re0,D1\.7
+.*:	3c0020bd 	          ORSLE     PC,D0Re0,RD
+.*:	3c00325d 	          ORSLE     D1Re0,D0Re0,A0FrP
+.*:	3c00343d 	          ORSLE     D0Re0,D0Re0,A0\.2
+.*:	3c003e1d 	          ORSLE     TXENABLE,D0Re0,A0\.7
+.*:	3c003efd 	          ORSLE     TXSTAT,D0Re0,A0\.7
+.*:	3c01c0ac 	          ORSPL     PC,D0\.7,D0Re0
+.*:	3c01c25d 	          ORSLE     D1Re0,D0\.7,A1LbP
+.*:	3c01c63d 	          ORSLE     D0Re0,D0\.7,A1\.3
+.*:	3c01ce0c 	          ORSPL     TXENABLE,D0\.7,D0\.7
+.*:	3c01ce5c 	          ORSLE     D1Re0,D0\.7,D0\.7
+.*:	3c01cefc 	          ORSLE     TXSTAT,D0\.7,D0\.7
+.*:	3c01d05d 	          ORSLE     D1Re0,D0\.7,D1Re0
+.*:	3c01de3d 	          ORSLE     D0Re0,D0\.7,D1\.7
+.*:	3c01e00d 	          ORSPL     TXENABLE,D0\.7,RD
+.*:	3c01e0fd 	          ORSLE     TXSTAT,D0\.7,RD
+.*:	3c01f2bd 	          ORSLE     PC,D0\.7,A0FrP
+.*:	3c01f45d 	          ORSLE     D1Re0,D0\.7,A0\.2
+.*:	3c01fe2d 	          ORSPL     D0Re0,D0\.7,A0\.7
+.*:	3c08006c 	          ORSPL     A0FrP,D0Re0,D0Re0
+.*:	3c08029d 	          ORSLE     A1LbP,D0Re0,A1LbP
+.*:	3c0806ad 	          ORSPL     PCX,D0Re0,A1\.3
+.*:	3c080e9e 	          ORSNV     A1LbP,D0Re0,D0\.7
+.*:	3c08109d 	          ORSLE     A1LbP,D0Re0,D1Re0
+.*:	3c081ead 	          ORSPL     PCX,D0Re0,D1\.7
+.*:	3c08327d 	          ORSLE     A0FrP,D0Re0,A0FrP
+.*:	3c08349d 	          ORSLE     A1LbP,D0Re0,A0\.2
+.*:	3c083ebd 	          ORSLE     PCX,D0Re0,A0\.7
+.*:	3c09c27d 	          ORSLE     A0FrP,D0\.7,A1LbP
+.*:	3c09c69d 	          ORSLE     A1LbP,D0\.7,A1\.3
+.*:	3c09ce8c 	          ORSPL     A1LbP,D0\.7,D0\.7
+.*:	3c09d07d 	          ORSLE     A0FrP,D0\.7,D1Re0
+.*:	3c09de9d 	          ORSLE     A1LbP,D0\.7,D1\.7
+.*:	3c09e0bd 	          ORSLE     PCX,D0\.7,RD
+.*:	3c09f47d 	          ORSLE     A0FrP,D0\.7,A0\.2
+.*:	3c09fe9d 	          ORSLE     A1LbP,D0\.7,A0\.7
+.*:	3c10067d 	          ORSLE     A0\.2,D0Re0,A1\.3
+.*:	3c101e7d 	          ORSLE     A0\.2,D0Re0,D1\.7
+.*:	3c103e7d 	          ORSLE     A0\.2,D0Re0,A0\.7
+.*:	3c11ce7c 	          ORSLE     A0\.2,D0\.7,D0\.7
+.*:	3c11e07d 	          ORSLE     A0\.2,D0\.7,RD
+.*:	3c180094 	          ORSLS     A1\.3,D0Re0,D0Re0
+.*:	3c18068d 	          ORSPL     A1\.3,D0Re0,A1\.3
+.*:	3c180eec 	          ORSPL     TXMASKI,D0Re0,D0\.7
+.*:	3c181e8d 	          ORSPL     A1\.3,D0Re0,D1\.7
+.*:	3c18328d 	          ORSPL     A1\.3,D0Re0,A0FrP
+.*:	3c183e8d 	          ORSPL     A1\.3,D0Re0,A0\.7
+.*:	3c19c28d 	          ORSPL     A1\.3,D0\.7,A1LbP
+.*:	3c19ce84 	          ORSNE     A1\.3,D0\.7,D0\.7
+.*:	3c19d09d 	          ORSLE     A1\.3,D0\.7,D1Re0
+.*:	3c19e09d 	          ORSLE     A1\.3,D0\.7,RD
+.*:	3c19f49d 	          ORSLE     A1\.3,D0\.7,A0\.2
+.*:	3c38003c 	          ORSLE     D0\.7,D0Re0,D0Re0
+.*:	3c38022d 	          ORSPL     D0\.7,D0Re0,A1LbP
+.*:	3c38063d 	          ORSLE     D0\.7,D0Re0,A1\.3
+.*:	3c380e34 	          ORSLS     D0\.7,D0Re0,D0\.7
+.*:	3c380e64 	          ORSNE     A0\.7,D0Re0,D0\.7
+.*:	3c38103d 	          ORSLE     D0\.7,D0Re0,D1Re0
+.*:	3c381e3d 	          ORSLE     D0\.7,D0Re0,D1\.7
+.*:	3c38203d 	          ORSLE     D0\.7,D0Re0,RD
+.*:	3c38323d 	          ORSLE     D0\.7,D0Re0,A0FrP
+.*:	3c38343d 	          ORSLE     D0\.7,D0Re0,A0\.2
+.*:	3c383e2d 	          ORSPL     D0\.7,D0Re0,A0\.7
+.*:	3c39c02c 	          ORSPL     D0\.7,D0\.7,D0Re0
+.*:	3c39c23d 	          ORSLE     D0\.7,D0\.7,A1LbP
+.*:	3c39c62d 	          ORSPL     D0\.7,D0\.7,A1\.3
+.*:	3c39ce24 	          ORSNE     D0\.7,D0\.7,D0\.7
+.*:	3c39ce74 	          ORSLS     A0\.7,D0\.7,D0\.7
+.*:	3c39d03d 	          ORSLE     D0\.7,D0\.7,D1Re0
+.*:	3c39de2d 	          ORSPL     D0\.7,D0\.7,D1\.7
+.*:	3c39e03d 	          ORSLE     D0\.7,D0\.7,RD
+.*:	3c39f22d 	          ORSPL     D0\.7,D0\.7,A0FrP
+.*:	3c39f43d 	          ORSLE     D0\.7,D0\.7,A0\.2
+.*:	3c39fe3d 	          ORSLE     D0\.7,D0\.7,A0\.7
+.*:	3c8000cc 	          ORSPL     RA,D0Re0,D0Re0
+.*:	3c800ede 	          ORSNV     RA,D0Re0,D0\.7
+.*:	3c8032dd 	          ORSLE     RA,D0Re0,A0FrP
+.*:	3c81c2dd 	          ORSLE     RA,D0\.7,A1LbP
+.*:	3c81d0dd 	          ORSLE     RA,D0\.7,D1Re0
+.*:	3c81f4dd 	          ORSLE     RA,D0\.7,A0\.2
+.*:	3cb006dd 	          ORSLE     RAM8X32,D0Re0,A1\.3
+.*:	3cb01edd 	          ORSLE     RAM8X32,D0Re0,D1\.7
+.*:	3cb03edd 	          ORSLE     RAM8X32,D0Re0,A0\.7
+.*:	3cb1cecc 	          ORSPL     RAM8X32,D0\.7,D0\.7
+.*:	3cb1e0dd 	          ORSLE     RAM8X32,D0\.7,RD
+.*:	3cb800cc 	          ORSPL     RAM8X,D0Re0,D0Re0
+.*:	3cb80ede 	          ORSNV     RAM8X,D0Re0,D0\.7
+.*:	3cb832dd 	          ORSLE     RAM8X,D0Re0,A0FrP
+.*:	3cb9c2dd 	          ORSLE     RAM8X,D0\.7,A1LbP
+.*:	3cb9d0dd 	          ORSLE     RAM8X,D0\.7,D1Re0
+.*:	3cb9f4dd 	          ORSLE     RAM8X,D0\.7,A0\.2
+.*:	3cc006dd 	          ORSLE     RABZ,D0Re0,A1\.3
+.*:	3cc01edd 	          ORSLE     RABZ,D0Re0,D1\.7
+.*:	3cc03edd 	          ORSLE     RABZ,D0Re0,A0\.7
+.*:	3cc1cecc 	          ORSPL     RABZ,D0\.7,D0\.7
+.*:	3cc1e0dd 	          ORSLE     RABZ,D0\.7,RD
+.*:	3ce800cc 	          ORSPL     RAWX,D0Re0,D0Re0
+.*:	3ce80ede 	          ORSNV     RAWX,D0Re0,D0\.7
+.*:	3ce832dd 	          ORSLE     RAWX,D0Re0,A0FrP
+.*:	3ce9c2dd 	          ORSLE     RAWX,D0\.7,A1LbP
+.*:	3ce9d0dd 	          ORSLE     RAWX,D0\.7,D1Re0
+.*:	3ce9f4dd 	          ORSLE     RAWX,D0\.7,A0\.2
+.*:	3cf8021d 	          ORSLE     TXIDLECYC,D0Re0,A1LbP
+.*:	3cf80e14 	          ORSLS     TXIDLECYC,D0Re0,D0\.7
+.*:	3cf8101d 	          ORSLE     TXIDLECYC,D0Re0,D1Re0
+.*:	3cf8201d 	          ORSLE     TXIDLECYC,D0Re0,RD
+.*:	3cf8341d 	          ORSLE     TXIDLECYC,D0Re0,A0\.2
+.*:	3cf9c014 	          ORSLS     TXIDLECYC,D0\.7,D0Re0
+.*:	3cf9c61d 	          ORSLE     TXIDLECYC,D0\.7,A1\.3
+.*:	3cf9cecc 	          ORSPL     RAMX,D0\.7,D0\.7
+.*:	3cf9de1d 	          ORSLE     TXIDLECYC,D0\.7,D1\.7
+.*:	3cf9f21d 	          ORSLE     TXIDLECYC,D0\.7,A0FrP
+.*:	3cf9fe1d 	          ORSLE     TXIDLECYC,D0\.7,A0\.7
+.*:	3d000044 	          ORSNE     D1Re0,D1Re0,D1Re0
+.*:	3d00023d 	          ORSLE     D0Re0,D1Re0,A1LbP
+.*:	3d00061d 	          ORSLE     TXENABLE,D1Re0,A1\.3
+.*:	3d0006fd 	          ORSLE     TXSTAT,D1Re0,A1\.3
+.*:	3d000e3e 	          ORSNV     D0Re0,D1Re0,D1\.7
+.*:	3d000ebe 	          ORSNV     PC,D1Re0,D1\.7
+.*:	3d00103d 	          ORSLE     D0Re0,D1Re0,D0Re0
+.*:	3d001e1d 	          ORSLE     TXENABLE,D1Re0,D0\.7
+.*:	3d001efd 	          ORSLE     TXSTAT,D1Re0,D0\.7
+.*:	3d0020bd 	          ORSLE     PC,D1Re0,RD
+.*:	3d00325d 	          ORSLE     D1Re0,D1Re0,A0FrP
+.*:	3d00343d 	          ORSLE     D0Re0,D1Re0,A0\.2
+.*:	3d003e1d 	          ORSLE     TXENABLE,D1Re0,A0\.7
+.*:	3d003efd 	          ORSLE     TXSTAT,D1Re0,A0\.7
+.*:	3d01c0ac 	          ORSPL     PC,D1\.7,D1Re0
+.*:	3d01c25d 	          ORSLE     D1Re0,D1\.7,A1LbP
+.*:	3d01c63d 	          ORSLE     D0Re0,D1\.7,A1\.3
+.*:	3d01ce0c 	          ORSPL     TXENABLE,D1\.7,D1\.7
+.*:	3d01ce5c 	          ORSLE     D1Re0,D1\.7,D1\.7
+.*:	3d01cefc 	          ORSLE     TXSTAT,D1\.7,D1\.7
+.*:	3d01d05d 	          ORSLE     D1Re0,D1\.7,D0Re0
+.*:	3d01de3d 	          ORSLE     D0Re0,D1\.7,D0\.7
+.*:	3d01e00d 	          ORSPL     TXENABLE,D1\.7,RD
+.*:	3d01e0fd 	          ORSLE     TXSTAT,D1\.7,RD
+.*:	3d01f2bd 	          ORSLE     PC,D1\.7,A0FrP
+.*:	3d01f45d 	          ORSLE     D1Re0,D1\.7,A0\.2
+.*:	3d01fe2d 	          ORSPL     D0Re0,D1\.7,A0\.7
+.*:	3d08006c 	          ORSPL     A0FrP,D1Re0,D1Re0
+.*:	3d08029d 	          ORSLE     A1LbP,D1Re0,A1LbP
+.*:	3d0806ad 	          ORSPL     PCX,D1Re0,A1\.3
+.*:	3d080e9e 	          ORSNV     A1LbP,D1Re0,D1\.7
+.*:	3d08109d 	          ORSLE     A1LbP,D1Re0,D0Re0
+.*:	3d081ead 	          ORSPL     PCX,D1Re0,D0\.7
+.*:	3d08327d 	          ORSLE     A0FrP,D1Re0,A0FrP
+.*:	3d08349d 	          ORSLE     A1LbP,D1Re0,A0\.2
+.*:	3d083ebd 	          ORSLE     PCX,D1Re0,A0\.7
+.*:	3d09c27d 	          ORSLE     A0FrP,D1\.7,A1LbP
+.*:	3d09c69d 	          ORSLE     A1LbP,D1\.7,A1\.3
+.*:	3d09ce8c 	          ORSPL     A1LbP,D1\.7,D1\.7
+.*:	3d09d07d 	          ORSLE     A0FrP,D1\.7,D0Re0
+.*:	3d09de9d 	          ORSLE     A1LbP,D1\.7,D0\.7
+.*:	3d09e0bd 	          ORSLE     PCX,D1\.7,RD
+.*:	3d09f47d 	          ORSLE     A0FrP,D1\.7,A0\.2
+.*:	3d09fe9d 	          ORSLE     A1LbP,D1\.7,A0\.7
+.*:	3d10067d 	          ORSLE     A0\.2,D1Re0,A1\.3
+.*:	3d101e7d 	          ORSLE     A0\.2,D1Re0,D0\.7
+.*:	3d103e7d 	          ORSLE     A0\.2,D1Re0,A0\.7
+.*:	3d11ce7c 	          ORSLE     A0\.2,D1\.7,D1\.7
+.*:	3d11e07d 	          ORSLE     A0\.2,D1\.7,RD
+.*:	3d180094 	          ORSLS     A1\.3,D1Re0,D1Re0
+.*:	3d18068d 	          ORSPL     A1\.3,D1Re0,A1\.3
+.*:	3d180eec 	          ORSPL     TXMASKI,D1Re0,D1\.7
+.*:	3d181e8d 	          ORSPL     A1\.3,D1Re0,D0\.7
+.*:	3d18328d 	          ORSPL     A1\.3,D1Re0,A0FrP
+.*:	3d183e8d 	          ORSPL     A1\.3,D1Re0,A0\.7
+.*:	3d19c28d 	          ORSPL     A1\.3,D1\.7,A1LbP
+.*:	3d19ce84 	          ORSNE     A1\.3,D1\.7,D1\.7
+.*:	3d19d09d 	          ORSLE     A1\.3,D1\.7,D0Re0
+.*:	3d19e09d 	          ORSLE     A1\.3,D1\.7,RD
+.*:	3d19f49d 	          ORSLE     A1\.3,D1\.7,A0\.2
+.*:	3d38003c 	          ORSLE     D0\.7,D1Re0,D1Re0
+.*:	3d38022d 	          ORSPL     D0\.7,D1Re0,A1LbP
+.*:	3d38063d 	          ORSLE     D0\.7,D1Re0,A1\.3
+.*:	3d380e34 	          ORSLS     D0\.7,D1Re0,D1\.7
+.*:	3d380e64 	          ORSNE     A0\.7,D1Re0,D1\.7
+.*:	3d38103d 	          ORSLE     D0\.7,D1Re0,D0Re0
+.*:	3d381e3d 	          ORSLE     D0\.7,D1Re0,D0\.7
+.*:	3d38203d 	          ORSLE     D0\.7,D1Re0,RD
+.*:	3d38323d 	          ORSLE     D0\.7,D1Re0,A0FrP
+.*:	3d38343d 	          ORSLE     D0\.7,D1Re0,A0\.2
+.*:	3d383e2d 	          ORSPL     D0\.7,D1Re0,A0\.7
+.*:	3d39c02c 	          ORSPL     D0\.7,D1\.7,D1Re0
+.*:	3d39c23d 	          ORSLE     D0\.7,D1\.7,A1LbP
+.*:	3d39c62d 	          ORSPL     D0\.7,D1\.7,A1\.3
+.*:	3d39ce24 	          ORSNE     D0\.7,D1\.7,D1\.7
+.*:	3d39ce74 	          ORSLS     A0\.7,D1\.7,D1\.7
+.*:	3d39d03d 	          ORSLE     D0\.7,D1\.7,D0Re0
+.*:	3d39de2d 	          ORSPL     D0\.7,D1\.7,D0\.7
+.*:	3d39e03d 	          ORSLE     D0\.7,D1\.7,RD
+.*:	3d39f22d 	          ORSPL     D0\.7,D1\.7,A0FrP
+.*:	3d39f43d 	          ORSLE     D0\.7,D1\.7,A0\.2
+.*:	3d39fe3d 	          ORSLE     D0\.7,D1\.7,A0\.7
+.*:	3d8000cc 	          ORSPL     RA,D1Re0,D1Re0
+.*:	3d800ede 	          ORSNV     RA,D1Re0,D1\.7
+.*:	3d8032dd 	          ORSLE     RA,D1Re0,A0FrP
+.*:	3d81c2dd 	          ORSLE     RA,D1\.7,A1LbP
+.*:	3d81d0dd 	          ORSLE     RA,D1\.7,D0Re0
+.*:	3d81f4dd 	          ORSLE     RA,D1\.7,A0\.2
+.*:	3db006dd 	          ORSLE     RAM8X32,D1Re0,A1\.3
+.*:	3db01edd 	          ORSLE     RAM8X32,D1Re0,D0\.7
+.*:	3db03edd 	          ORSLE     RAM8X32,D1Re0,A0\.7
+.*:	3db1cecc 	          ORSPL     RAM8X32,D1\.7,D1\.7
+.*:	3db1e0dd 	          ORSLE     RAM8X32,D1\.7,RD
+.*:	3db800cc 	          ORSPL     RAM8X,D1Re0,D1Re0
+.*:	3db80ede 	          ORSNV     RAM8X,D1Re0,D1\.7
+.*:	3db832dd 	          ORSLE     RAM8X,D1Re0,A0FrP
+.*:	3db9c2dd 	          ORSLE     RAM8X,D1\.7,A1LbP
+.*:	3db9d0dd 	          ORSLE     RAM8X,D1\.7,D0Re0
+.*:	3db9f4dd 	          ORSLE     RAM8X,D1\.7,A0\.2
+.*:	3dc006dd 	          ORSLE     RABZ,D1Re0,A1\.3
+.*:	3dc01edd 	          ORSLE     RABZ,D1Re0,D0\.7
+.*:	3dc03edd 	          ORSLE     RABZ,D1Re0,A0\.7
+.*:	3dc1cecc 	          ORSPL     RABZ,D1\.7,D1\.7
+.*:	3dc1e0dd 	          ORSLE     RABZ,D1\.7,RD
+.*:	3de800cc 	          ORSPL     RAWX,D1Re0,D1Re0
+.*:	3de80ede 	          ORSNV     RAWX,D1Re0,D1\.7
+.*:	3de832dd 	          ORSLE     RAWX,D1Re0,A0FrP
+.*:	3de9c2dd 	          ORSLE     RAWX,D1\.7,A1LbP
+.*:	3de9d0dd 	          ORSLE     RAWX,D1\.7,D0Re0
+.*:	3de9f4dd 	          ORSLE     RAWX,D1\.7,A0\.2
+.*:	3df8021d 	          ORSLE     TXIDLECYC,D1Re0,A1LbP
+.*:	3df80e14 	          ORSLS     TXIDLECYC,D1Re0,D1\.7
+.*:	3df8101d 	          ORSLE     TXIDLECYC,D1Re0,D0Re0
+.*:	3df8201d 	          ORSLE     TXIDLECYC,D1Re0,RD
+.*:	3df8341d 	          ORSLE     TXIDLECYC,D1Re0,A0\.2
+.*:	3df9c014 	          ORSLS     TXIDLECYC,D1\.7,D1Re0
+.*:	3df9c61d 	          ORSLE     TXIDLECYC,D1\.7,A1\.3
+.*:	3df9cecc 	          ORSPL     RAMX,D1\.7,D1\.7
+.*:	3df9de1d 	          ORSLE     TXIDLECYC,D1\.7,D0\.7
+.*:	3df9f21d 	          ORSLE     TXIDLECYC,D1\.7,A0FrP
+.*:	3df9fe1d 	          ORSLE     TXIDLECYC,D1\.7,A0\.7
+.*:	3e001fe0 	          ORS       TXENABLE,D0Re0,#0x7f
+.*:	3e00201c 	          ORSLE     D0Re0,D0Re0,#0x80
+.*:	3e00202a 	          ORS       PC,D0Re0,#0x80
+.*:	3e003fe0 	          ORS       TXENABLE,D0Re0,#0xff
+.*:	3e01dfdc 	          ORSLE     D0Re0,D0\.7,#0x7f
+.*:	3e01dfe4 	          ORS       D1Re0,D0\.7,#0x7f
+.*:	3e01e01e 	          ORSNV     D0Re0,D0\.7,#0x80
+.*:	3e01e02a 	          ORS       PC,D0\.7,#0x80
+.*:	3e01ffe0 	          ORS       TXENABLE,D0\.7,#0xff
+.*:	3e01ffee 	          ORS       TXSTAT,D0\.7,#0xff
+.*:	3e082026 	          ORS       A0FrP,D0Re0,#0x80
+.*:	3e083fe8 	          ORS       A1LbP,D0Re0,#0xff
+.*:	3e09dfea 	          ORS       PCX,D0\.7,#0x7f
+.*:	3e09ffe6 	          ORS       A0FrP,D0\.7,#0xff
+.*:	3e102026 	          ORS       A0\.2,D0Re0,#0x80
+.*:	3e11ffe6 	          ORS       A0\.2,D0\.7,#0xff
+.*:	3e18202e 	          ORS       TXMASKI,D0Re0,#0x80
+.*:	3e19dfee 	          ORS       TXMASKI,D0\.7,#0x7f
+.*:	3e19ffee 	          ORS       TXMASKI,D0\.7,#0xff
+.*:	3e381fe4 	          ORS       D1\.7,D0Re0,#0x7f
+.*:	3e38201e 	          ORSNV     D0\.7,D0Re0,#0x80
+.*:	3e382028 	          ORS       A1\.7,D0Re0,#0x80
+.*:	3e383fe4 	          ORS       D1\.7,D0Re0,#0xff
+.*:	3e39dfde 	          ORSNV     D0\.7,D0\.7,#0x7f
+.*:	3e39e004 	          ORSNE     D0\.7,D0\.7,#0x80
+.*:	3e39e028 	          ORS       A1\.7,D0\.7,#0x80
+.*:	3e39ffe6 	          ORS       A0\.7,D0\.7,#0xff
+.*:	3e803fec 	          ORS       RA,D0Re0,#0xff
+.*:	3eb01fec 	          ORS       RAM8X32,D0Re0,#0x7f
+.*:	3eb1e02c 	          ORS       RAM8X32,D0\.7,#0x80
+.*:	3eb83fec 	          ORS       RAM8X,D0Re0,#0xff
+.*:	3ec01fec 	          ORS       RABZ,D0Re0,#0x7f
+.*:	3ec1e02c 	          ORS       RABZ,D0\.7,#0x80
+.*:	3ee83fec 	          ORS       RAWX,D0Re0,#0xff
+.*:	3ef81fe0 	          ORS       TXIDLECYC,D0Re0,#0x7f
+.*:	3ef83fe0 	          ORS       TXIDLECYC,D0Re0,#0xff
+.*:	3ef9e020 	          ORS       TXIDLECYC,D0\.7,#0x80
+.*:	3f001fdc 	          ORSLE     D1Re0,D1Re0,#0x7f
+.*:	3f002020 	          ORS       TXENABLE,D1Re0,#0x80
+.*:	3f003fea 	          ORS       PC,D1Re0,#0xff
+.*:	3f01dfee 	          ORS       TXSTAT,D1\.7,#0x7f
+.*:	3f01ffdc 	          ORSLE     D1Re0,D1\.7,#0xff
+.*:	3f081fe8 	          ORS       A1LbP,D1Re0,#0x7f
+.*:	3f09dfe6 	          ORS       A0FrP,D1\.7,#0x7f
+.*:	3f09ffea 	          ORS       PCX,D1\.7,#0xff
+.*:	3f181fee 	          ORS       TXMASKI,D1Re0,#0x7f
+.*:	3f19e02e 	          ORS       TXMASKI,D1\.7,#0x80
+.*:	3f381fe8 	          ORS       A1\.7,D1Re0,#0x7f
+.*:	3f383fde 	          ORSNV     D1\.7,D1Re0,#0xff
+.*:	3f39dfe6 	          ORS       A0\.7,D1\.7,#0x7f
+.*:	3f39ffde 	          ORSNV     D1\.7,D1\.7,#0xff
+.*:	3f81e02c 	          ORS       RA,D1\.7,#0x80
+.*:	3fb81fec 	          ORS       RAM8X,D1Re0,#0x7f
+.*:	3fc03fec 	          ORS       RABZ,D1Re0,#0xff
+.*:	3fe9e02c 	          ORS       RAWX,D1\.7,#0x80
+.*:	3ff9dfe0 	          ORS       TXIDLECYC,D1\.7,#0x7f
+.*:	40000201 	          XOR       D0Re0,D0Re0,A1LbP
+.*:	40001001 	          XOR       D0Re0,D0Re0,D1Re0
+.*:	40003401 	          XOR       D0Re0,D0Re0,A0\.2
+.*:	4001c601 	          XOR       D0Re0,D0\.7,A1\.3
+.*:	4001de01 	          XOR       D0Re0,D0\.7,D1\.7
+.*:	4001fe01 	          XOR       D0Re0,D0\.7,A0\.7
+.*:	40380e00 	          XOR       D0\.7,D0Re0,D0\.7
+.*:	40382001 	          XOR       D0\.7,D0Re0,RD
+.*:	4039c000 	          XOR       D0\.7,D0\.7,D0Re0
+.*:	4039ce40 	          XORQ      D0\.7,D0\.7,D0\.7,A0\.2
+.*:	4039f201 	          XOR       D0\.7,D0\.7,A0FrP
+.*:	41000201 	          XOR       D1Re0,D1Re0,A1LbP
+.*:	41001001 	          XOR       D1Re0,D1Re0,D0Re0
+.*:	41003401 	          XOR       D1Re0,D1Re0,A0\.2
+.*:	4101c601 	          XOR       D1Re0,D1\.7,A1\.3
+.*:	4101de01 	          XOR       D1Re0,D1\.7,D0\.7
+.*:	4101fe01 	          XOR       D1Re0,D1\.7,A0\.7
+.*:	41380e00 	          XOR       D1\.7,D1Re0,D1\.7
+.*:	41382001 	          XOR       D1\.7,D1Re0,RD
+.*:	4139c000 	          XOR       D1\.7,D1\.7,D1Re0
+.*:	4139cec0 	          XORQ      D1\.7,D1\.7,D1\.7,A1\.3
+.*:	4139f201 	          XOR       D1\.7,D1\.7,A0FrP
+.*:	4203fffc 	          XORMB     D0Re0,D0Re0,#0x7fff
+.*:	4207fff9 	          XORT      D0Re0,D0Re0,#0xffff
+.*:	423c0000 	          XOR       D0\.7,D0\.7,#0x8000
+.*:	423ffffc 	          XORMB     D0\.7,D0\.7,#0xffff
+.*:	43040002 	          XOR       D1Re0,D1Re0,#-32768
+.*:	433bfff8 	          XOR       D1\.7,D1\.7,#0x7fff
+.*:	433c0005 	          XORMT     D1\.7,D1\.7,#0x8000
+.*:	4400003c 	          XORLE     D0Re0,D0Re0,D0Re0
+.*:	4400021d 	          XORLE     TXENABLE,D0Re0,A1LbP
+.*:	440002fd 	          XORLE     TXSTAT,D0Re0,A1LbP
+.*:	440006ad 	          XORPL     PC,D0Re0,A1\.3
+.*:	44000e24 	          XORNE     D0Re0,D0Re0,D0\.7
+.*:	44000ea4 	          XORNE     PC,D0Re0,D0\.7
+.*:	4400101d 	          XORLE     TXENABLE,D0Re0,D1Re0
+.*:	440010ed 	          XORPL     TXSTAT,D0Re0,D1Re0
+.*:	44001ead 	          XORPL     PC,D0Re0,D1\.7
+.*:	4400204d 	          XORPL     D1Re0,D0Re0,RD
+.*:	4400322d 	          XORPL     D0Re0,D0Re0,A0FrP
+.*:	4400341d 	          XORLE     TXENABLE,D0Re0,A0\.2
+.*:	440034ed 	          XORPL     TXSTAT,D0Re0,A0\.2
+.*:	44003ebd 	          XORLE     PC,D0Re0,A0\.7
+.*:	4401c054 	          XORLS     D1Re0,D0\.7,D0Re0
+.*:	4401c22d 	          XORPL     D0Re0,D0\.7,A1LbP
+.*:	4401c61d 	          XORLE     TXENABLE,D0\.7,A1\.3
+.*:	4401c6fd 	          XORLE     TXSTAT,D0\.7,A1\.3
+.*:	4401ce3e 	          XORNV     D0Re0,D0\.7,D0\.7
+.*:	4401cebe 	          XORNV     PC,D0\.7,D0\.7
+.*:	4401d03d 	          XORLE     D0Re0,D0\.7,D1Re0
+.*:	4401de1d 	          XORLE     TXENABLE,D0\.7,D1\.7
+.*:	4401defd 	          XORLE     TXSTAT,D0\.7,D1\.7
+.*:	4401e0bd 	          XORLE     PC,D0\.7,RD
+.*:	4401f25d 	          XORLE     D1Re0,D0\.7,A0FrP
+.*:	4401f43d 	          XORLE     D0Re0,D0\.7,A0\.2
+.*:	4401fe1d 	          XORLE     TXENABLE,D0\.7,A0\.7
+.*:	4401fefd 	          XORLE     TXSTAT,D0\.7,A0\.7
+.*:	4408026d 	          XORPL     A0FrP,D0Re0,A1LbP
+.*:	4408069d 	          XORLE     A1LbP,D0Re0,A1\.3
+.*:	44080e9c 	          XORLE     A1LbP,D0Re0,D0\.7
+.*:	4408107d 	          XORLE     A0FrP,D0Re0,D1Re0
+.*:	44081e9d 	          XORLE     A1LbP,D0Re0,D1\.7
+.*:	440820bd 	          XORLE     PCX,D0Re0,RD
+.*:	4408347d 	          XORLE     A0FrP,D0Re0,A0\.2
+.*:	44083e9d 	          XORLE     A1LbP,D0Re0,A0\.7
+.*:	4409c0ac 	          XORPL     PCX,D0\.7,D0Re0
+.*:	4409c66d 	          XORPL     A0FrP,D0\.7,A1\.3
+.*:	4409ce7e 	          XORNV     A0FrP,D0\.7,D0\.7
+.*:	4409cebe 	          XORNV     PCX,D0\.7,D0\.7
+.*:	4409de6d 	          XORPL     A0FrP,D0\.7,D1\.7
+.*:	4409e08d 	          XORPL     A1LbP,D0\.7,RD
+.*:	4409f2bd 	          XORLE     PCX,D0\.7,A0FrP
+.*:	4409fe7d 	          XORLE     A0FrP,D0\.7,A0\.7
+.*:	4410027d 	          XORLE     A0\.2,D0Re0,A1LbP
+.*:	4410107d 	          XORLE     A0\.2,D0Re0,D1Re0
+.*:	4410347d 	          XORLE     A0\.2,D0Re0,A0\.2
+.*:	4411c67d 	          XORLE     A0\.2,D0\.7,A1\.3
+.*:	4411de7d 	          XORLE     A0\.2,D0\.7,D1\.7
+.*:	4411fe7d 	          XORLE     A0\.2,D0\.7,A0\.7
+.*:	441802fd 	          XORLE     TXMASKI,D0Re0,A1LbP
+.*:	44180e9e 	          XORNV     A1\.3,D0Re0,D0\.7
+.*:	441810fd 	          XORLE     TXMASKI,D0Re0,D1Re0
+.*:	441820fd 	          XORLE     TXMASKI,D0Re0,RD
+.*:	441834fd 	          XORLE     TXMASKI,D0Re0,A0\.2
+.*:	4419c0fc 	          XORLE     TXMASKI,D0\.7,D0Re0
+.*:	4419c6fd 	          XORLE     TXMASKI,D0\.7,A1\.3
+.*:	4419cefe 	          XORNV     TXMASKI,D0\.7,D0\.7
+.*:	4419defd 	          XORLE     TXMASKI,D0\.7,D1\.7
+.*:	4419f2fd 	          XORLE     TXMASKI,D0\.7,A0FrP
+.*:	4419fefd 	          XORLE     TXMASKI,D0\.7,A0\.7
+.*:	44380094 	          XORLS     A1\.7,D0Re0,D0Re0
+.*:	4438029d 	          XORLE     A1\.7,D0Re0,A1LbP
+.*:	4438069d 	          XORLE     A1\.7,D0Re0,A1\.3
+.*:	44380e5e 	          XORNV     D1\.7,D0Re0,D0\.7
+.*:	44380e9e 	          XORNV     A1\.7,D0Re0,D0\.7
+.*:	4438109d 	          XORLE     A1\.7,D0Re0,D1Re0
+.*:	44381e9d 	          XORLE     A1\.7,D0Re0,D1\.7
+.*:	4438209d 	          XORLE     A1\.7,D0Re0,RD
+.*:	4438329d 	          XORLE     A1\.7,D0Re0,A0FrP
+.*:	4438349d 	          XORLE     A1\.7,D0Re0,A0\.2
+.*:	44383e9d 	          XORLE     A1\.7,D0Re0,A0\.7
+.*:	4439c084 	          XORNE     A1\.7,D0\.7,D0Re0
+.*:	4439c29d 	          XORLE     A1\.7,D0\.7,A1LbP
+.*:	4439c69d 	          XORLE     A1\.7,D0\.7,A1\.3
+.*:	4439ce5e 	          XORNV     D1\.7,D0\.7,D0\.7
+.*:	4439ce9e 	          XORNV     A1\.7,D0\.7,D0\.7
+.*:	4439d08d 	          XORPL     A1\.7,D0\.7,D1Re0
+.*:	4439de9d 	          XORLE     A1\.7,D0\.7,D1\.7
+.*:	4439e08d 	          XORPL     A1\.7,D0\.7,RD
+.*:	4439f29d 	          XORLE     A1\.7,D0\.7,A0FrP
+.*:	4439f48d 	          XORPL     A1\.7,D0\.7,A0\.2
+.*:	4439fe9d 	          XORLE     A1\.7,D0\.7,A0\.7
+.*:	44800ecc 	          XORPL     RA,D0Re0,D0\.7
+.*:	448020dd 	          XORLE     RA,D0Re0,RD
+.*:	4481c0cc 	          XORPL     RA,D0\.7,D0Re0
+.*:	4481cede 	          XORNV     RA,D0\.7,D0\.7
+.*:	4481f2dd 	          XORLE     RA,D0\.7,A0FrP
+.*:	44b002dd 	          XORLE     RAM8X32,D0Re0,A1LbP
+.*:	44b010dd 	          XORLE     RAM8X32,D0Re0,D1Re0
+.*:	44b034dd 	          XORLE     RAM8X32,D0Re0,A0\.2
+.*:	44b1c6dd 	          XORLE     RAM8X32,D0\.7,A1\.3
+.*:	44b1dedd 	          XORLE     RAM8X32,D0\.7,D1\.7
+.*:	44b1fedd 	          XORLE     RAM8X32,D0\.7,A0\.7
+.*:	44b80ecc 	          XORPL     RAM8X,D0Re0,D0\.7
+.*:	44b820dd 	          XORLE     RAM8X,D0Re0,RD
+.*:	44b9c0cc 	          XORPL     RAM8X,D0\.7,D0Re0
+.*:	44b9cede 	          XORNV     RAM8X,D0\.7,D0\.7
+.*:	44b9f2dd 	          XORLE     RAM8X,D0\.7,A0FrP
+.*:	44c002dd 	          XORLE     RABZ,D0Re0,A1LbP
+.*:	44c010dd 	          XORLE     RABZ,D0Re0,D1Re0
+.*:	44c034dd 	          XORLE     RABZ,D0Re0,A0\.2
+.*:	44c1c6dd 	          XORLE     RABZ,D0\.7,A1\.3
+.*:	44c1dedd 	          XORLE     RABZ,D0\.7,D1\.7
+.*:	44c1fedd 	          XORLE     RABZ,D0\.7,A0\.7
+.*:	44e80ecc 	          XORPL     RAWX,D0Re0,D0\.7
+.*:	44e820dd 	          XORLE     RAWX,D0Re0,RD
+.*:	44e9c0cc 	          XORPL     RAWX,D0\.7,D0Re0
+.*:	44e9cede 	          XORNV     RAWX,D0\.7,D0\.7
+.*:	44e9f2dd 	          XORLE     RAWX,D0\.7,A0FrP
+.*:	44f800cc 	          XORPL     RAMX,D0Re0,D0Re0
+.*:	44f806dd 	          XORLE     RAMX,D0Re0,A1\.3
+.*:	44f80ede 	          XORNV     RAMX,D0Re0,D0\.7
+.*:	44f81edd 	          XORLE     RAMX,D0Re0,D1\.7
+.*:	44f832dd 	          XORLE     RAMX,D0Re0,A0FrP
+.*:	44f83edd 	          XORLE     RAMX,D0Re0,A0\.7
+.*:	44f9c2dd 	          XORLE     RAMX,D0\.7,A1LbP
+.*:	44f9ce1e 	          XORNV     TXIDLECYC,D0\.7,D0\.7
+.*:	44f9d0dd 	          XORLE     RAMX,D0\.7,D1Re0
+.*:	44f9e0dd 	          XORLE     RAMX,D0\.7,RD
+.*:	44f9f4dd 	          XORLE     RAMX,D0\.7,A0\.2
+.*:	4500003c 	          XORLE     D0Re0,D1Re0,D1Re0
+.*:	4500021d 	          XORLE     TXENABLE,D1Re0,A1LbP
+.*:	450002fd 	          XORLE     TXSTAT,D1Re0,A1LbP
+.*:	450006ad 	          XORPL     PC,D1Re0,A1\.3
+.*:	45000e24 	          XORNE     D0Re0,D1Re0,D1\.7
+.*:	45000ea4 	          XORNE     PC,D1Re0,D1\.7
+.*:	4500101d 	          XORLE     TXENABLE,D1Re0,D0Re0
+.*:	450010ed 	          XORPL     TXSTAT,D1Re0,D0Re0
+.*:	45001ead 	          XORPL     PC,D1Re0,D0\.7
+.*:	4500204d 	          XORPL     D1Re0,D1Re0,RD
+.*:	4500322d 	          XORPL     D0Re0,D1Re0,A0FrP
+.*:	4500341d 	          XORLE     TXENABLE,D1Re0,A0\.2
+.*:	450034ed 	          XORPL     TXSTAT,D1Re0,A0\.2
+.*:	45003ebd 	          XORLE     PC,D1Re0,A0\.7
+.*:	4501c054 	          XORLS     D1Re0,D1\.7,D1Re0
+.*:	4501c22d 	          XORPL     D0Re0,D1\.7,A1LbP
+.*:	4501c61d 	          XORLE     TXENABLE,D1\.7,A1\.3
+.*:	4501c6fd 	          XORLE     TXSTAT,D1\.7,A1\.3
+.*:	4501ce3e 	          XORNV     D0Re0,D1\.7,D1\.7
+.*:	4501cebe 	          XORNV     PC,D1\.7,D1\.7
+.*:	4501d03d 	          XORLE     D0Re0,D1\.7,D0Re0
+.*:	4501de1d 	          XORLE     TXENABLE,D1\.7,D0\.7
+.*:	4501defd 	          XORLE     TXSTAT,D1\.7,D0\.7
+.*:	4501e0bd 	          XORLE     PC,D1\.7,RD
+.*:	4501f25d 	          XORLE     D1Re0,D1\.7,A0FrP
+.*:	4501f43d 	          XORLE     D0Re0,D1\.7,A0\.2
+.*:	4501fe1d 	          XORLE     TXENABLE,D1\.7,A0\.7
+.*:	4501fefd 	          XORLE     TXSTAT,D1\.7,A0\.7
+.*:	4508026d 	          XORPL     A0FrP,D1Re0,A1LbP
+.*:	4508069d 	          XORLE     A1LbP,D1Re0,A1\.3
+.*:	45080e9c 	          XORLE     A1LbP,D1Re0,D1\.7
+.*:	4508107d 	          XORLE     A0FrP,D1Re0,D0Re0
+.*:	45081e9d 	          XORLE     A1LbP,D1Re0,D0\.7
+.*:	450820bd 	          XORLE     PCX,D1Re0,RD
+.*:	4508347d 	          XORLE     A0FrP,D1Re0,A0\.2
+.*:	45083e9d 	          XORLE     A1LbP,D1Re0,A0\.7
+.*:	4509c0ac 	          XORPL     PCX,D1\.7,D1Re0
+.*:	4509c66d 	          XORPL     A0FrP,D1\.7,A1\.3
+.*:	4509ce7e 	          XORNV     A0FrP,D1\.7,D1\.7
+.*:	4509cebe 	          XORNV     PCX,D1\.7,D1\.7
+.*:	4509de6d 	          XORPL     A0FrP,D1\.7,D0\.7
+.*:	4509e08d 	          XORPL     A1LbP,D1\.7,RD
+.*:	4509f2bd 	          XORLE     PCX,D1\.7,A0FrP
+.*:	4509fe7d 	          XORLE     A0FrP,D1\.7,A0\.7
+.*:	4510027d 	          XORLE     A0\.2,D1Re0,A1LbP
+.*:	4510107d 	          XORLE     A0\.2,D1Re0,D0Re0
+.*:	4510347d 	          XORLE     A0\.2,D1Re0,A0\.2
+.*:	4511c67d 	          XORLE     A0\.2,D1\.7,A1\.3
+.*:	4511de7d 	          XORLE     A0\.2,D1\.7,D0\.7
+.*:	4511fe7d 	          XORLE     A0\.2,D1\.7,A0\.7
+.*:	451802fd 	          XORLE     TXMASKI,D1Re0,A1LbP
+.*:	45180e9e 	          XORNV     A1\.3,D1Re0,D1\.7
+.*:	451810fd 	          XORLE     TXMASKI,D1Re0,D0Re0
+.*:	451820fd 	          XORLE     TXMASKI,D1Re0,RD
+.*:	451834fd 	          XORLE     TXMASKI,D1Re0,A0\.2
+.*:	4519c0fc 	          XORLE     TXMASKI,D1\.7,D1Re0
+.*:	4519c6fd 	          XORLE     TXMASKI,D1\.7,A1\.3
+.*:	4519cefe 	          XORNV     TXMASKI,D1\.7,D1\.7
+.*:	4519defd 	          XORLE     TXMASKI,D1\.7,D0\.7
+.*:	4519f2fd 	          XORLE     TXMASKI,D1\.7,A0FrP
+.*:	4519fefd 	          XORLE     TXMASKI,D1\.7,A0\.7
+.*:	45380094 	          XORLS     A1\.7,D1Re0,D1Re0
+.*:	4538029d 	          XORLE     A1\.7,D1Re0,A1LbP
+.*:	4538069d 	          XORLE     A1\.7,D1Re0,A1\.3
+.*:	45380e5e 	          XORNV     D1\.7,D1Re0,D1\.7
+.*:	45380e9e 	          XORNV     A1\.7,D1Re0,D1\.7
+.*:	4538109d 	          XORLE     A1\.7,D1Re0,D0Re0
+.*:	45381e9d 	          XORLE     A1\.7,D1Re0,D0\.7
+.*:	4538209d 	          XORLE     A1\.7,D1Re0,RD
+.*:	4538329d 	          XORLE     A1\.7,D1Re0,A0FrP
+.*:	4538349d 	          XORLE     A1\.7,D1Re0,A0\.2
+.*:	45383e9d 	          XORLE     A1\.7,D1Re0,A0\.7
+.*:	4539c084 	          XORNE     A1\.7,D1\.7,D1Re0
+.*:	4539c29d 	          XORLE     A1\.7,D1\.7,A1LbP
+.*:	4539c69d 	          XORLE     A1\.7,D1\.7,A1\.3
+.*:	4539ce5e 	          XORNV     D1\.7,D1\.7,D1\.7
+.*:	4539ce9e 	          XORNV     A1\.7,D1\.7,D1\.7
+.*:	4539d08d 	          XORPL     A1\.7,D1\.7,D0Re0
+.*:	4539de9d 	          XORLE     A1\.7,D1\.7,D0\.7
+.*:	4539e08d 	          XORPL     A1\.7,D1\.7,RD
+.*:	4539f29d 	          XORLE     A1\.7,D1\.7,A0FrP
+.*:	4539f48d 	          XORPL     A1\.7,D1\.7,A0\.2
+.*:	4539fe9d 	          XORLE     A1\.7,D1\.7,A0\.7
+.*:	45800ecc 	          XORPL     RA,D1Re0,D1\.7
+.*:	458020dd 	          XORLE     RA,D1Re0,RD
+.*:	4581c0cc 	          XORPL     RA,D1\.7,D1Re0
+.*:	4581cede 	          XORNV     RA,D1\.7,D1\.7
+.*:	4581f2dd 	          XORLE     RA,D1\.7,A0FrP
+.*:	45b002dd 	          XORLE     RAM8X32,D1Re0,A1LbP
+.*:	45b010dd 	          XORLE     RAM8X32,D1Re0,D0Re0
+.*:	45b034dd 	          XORLE     RAM8X32,D1Re0,A0\.2
+.*:	45b1c6dd 	          XORLE     RAM8X32,D1\.7,A1\.3
+.*:	45b1dedd 	          XORLE     RAM8X32,D1\.7,D0\.7
+.*:	45b1fedd 	          XORLE     RAM8X32,D1\.7,A0\.7
+.*:	45b80ecc 	          XORPL     RAM8X,D1Re0,D1\.7
+.*:	45b820dd 	          XORLE     RAM8X,D1Re0,RD
+.*:	45b9c0cc 	          XORPL     RAM8X,D1\.7,D1Re0
+.*:	45b9cede 	          XORNV     RAM8X,D1\.7,D1\.7
+.*:	45b9f2dd 	          XORLE     RAM8X,D1\.7,A0FrP
+.*:	45c002dd 	          XORLE     RABZ,D1Re0,A1LbP
+.*:	45c010dd 	          XORLE     RABZ,D1Re0,D0Re0
+.*:	45c034dd 	          XORLE     RABZ,D1Re0,A0\.2
+.*:	45c1c6dd 	          XORLE     RABZ,D1\.7,A1\.3
+.*:	45c1dedd 	          XORLE     RABZ,D1\.7,D0\.7
+.*:	45c1fedd 	          XORLE     RABZ,D1\.7,A0\.7
+.*:	45e80ecc 	          XORPL     RAWX,D1Re0,D1\.7
+.*:	45e820dd 	          XORLE     RAWX,D1Re0,RD
+.*:	45e9c0cc 	          XORPL     RAWX,D1\.7,D1Re0
+.*:	45e9cede 	          XORNV     RAWX,D1\.7,D1\.7
+.*:	45e9f2dd 	          XORLE     RAWX,D1\.7,A0FrP
+.*:	45f800cc 	          XORPL     RAMX,D1Re0,D1Re0
+.*:	45f806dd 	          XORLE     RAMX,D1Re0,A1\.3
+.*:	45f80ede 	          XORNV     RAMX,D1Re0,D1\.7
+.*:	45f81edd 	          XORLE     RAMX,D1Re0,D0\.7
+.*:	45f832dd 	          XORLE     RAMX,D1Re0,A0FrP
+.*:	45f83edd 	          XORLE     RAMX,D1Re0,A0\.7
+.*:	45f9c2dd 	          XORLE     RAMX,D1\.7,A1LbP
+.*:	45f9ce1e 	          XORNV     TXIDLECYC,D1\.7,D1\.7
+.*:	45f9d0dd 	          XORLE     RAMX,D1\.7,D0Re0
+.*:	45f9e0dd 	          XORLE     RAMX,D1\.7,RD
+.*:	45f9f4dd 	          XORLE     RAMX,D1\.7,A0\.2
+.*:	46001fde 	          XORNV     D0Re0,D0Re0,#0x7f
+.*:	46001fee 	          XOR       TXSTAT,D0Re0,#0x7f
+.*:	46002024 	          XOR       D1Re0,D0Re0,#0x80
+.*:	46003fde 	          XORNV     D0Re0,D0Re0,#0xff
+.*:	46003fee 	          XOR       TXSTAT,D0Re0,#0xff
+.*:	4601dfe2 	          XOR       D0Re0,D0\.7,#0x7f
+.*:	4601e004 	          XORNE     D0Re0,D0\.7,#0x80
+.*:	4601e024 	          XOR       D1Re0,D0\.7,#0x80
+.*:	4601ffde 	          XORNV     D0Re0,D0\.7,#0xff
+.*:	4601ffea 	          XOR       PC,D0\.7,#0xff
+.*:	46081fea 	          XOR       PCX,D0Re0,#0x7f
+.*:	46083fe6 	          XOR       A0FrP,D0Re0,#0xff
+.*:	4609dfe8 	          XOR       A1LbP,D0\.7,#0x7f
+.*:	4609e02a 	          XOR       PCX,D0\.7,#0x80
+.*:	46101fe6 	          XOR       A0\.2,D0Re0,#0x7f
+.*:	4611e026 	          XOR       A0\.2,D0\.7,#0x80
+.*:	46182028 	          XOR       A1\.3,D0Re0,#0x80
+.*:	4619dfe8 	          XOR       A1\.3,D0\.7,#0x7f
+.*:	4619ffe8 	          XOR       A1\.3,D0\.7,#0xff
+.*:	46381fe2 	          XOR       D0\.7,D0Re0,#0x7f
+.*:	4638201c 	          XORLE     D0\.7,D0Re0,#0x80
+.*:	46382026 	          XOR       A0\.7,D0Re0,#0x80
+.*:	46383fe2 	          XOR       D0\.7,D0Re0,#0xff
+.*:	4639dfdc 	          XORLE     D0\.7,D0\.7,#0x7f
+.*:	4639dfe8 	          XOR       A1\.7,D0\.7,#0x7f
+.*:	4639e026 	          XOR       A0\.7,D0\.7,#0x80
+.*:	4639ffe4 	          XOR       D1\.7,D0\.7,#0xff
+.*:	4680202c 	          XOR       RA,D0Re0,#0x80
+.*:	4681ffec 	          XOR       RA,D0\.7,#0xff
+.*:	46b1dfec 	          XOR       RAM8X32,D0\.7,#0x7f
+.*:	46b8202c 	          XOR       RAM8X,D0Re0,#0x80
+.*:	46b9ffec 	          XOR       RAM8X,D0\.7,#0xff
+.*:	46c1dfec 	          XOR       RABZ,D0\.7,#0x7f
+.*:	46e8202c 	          XOR       RAWX,D0Re0,#0x80
+.*:	46e9ffec 	          XOR       RAWX,D0\.7,#0xff
+.*:	46f8202c 	          XOR       RAMX,D0Re0,#0x80
+.*:	46f9dfec 	          XOR       RAMX,D0\.7,#0x7f
+.*:	46f9ffec 	          XOR       RAMX,D0\.7,#0xff
+.*:	4700201c 	          XORLE     D1Re0,D1Re0,#0x80
+.*:	47003fe0 	          XOR       TXENABLE,D1Re0,#0xff
+.*:	4701dfe4 	          XOR       D1Re0,D1\.7,#0x7f
+.*:	4701e02a 	          XOR       PC,D1\.7,#0x80
+.*:	4701ffee 	          XOR       TXSTAT,D1\.7,#0xff
+.*:	47083fe8 	          XOR       A1LbP,D1Re0,#0xff
+.*:	4709ffe6 	          XOR       A0FrP,D1\.7,#0xff
+.*:	4711ffe6 	          XOR       A0\.2,D1\.7,#0xff
+.*:	4719dfee 	          XOR       TXMASKI,D1\.7,#0x7f
+.*:	47381fe4 	          XOR       D1\.7,D1Re0,#0x7f
+.*:	47382028 	          XOR       A1\.7,D1Re0,#0x80
+.*:	4739dfde 	          XORNV     D1\.7,D1\.7,#0x7f
+.*:	4739e028 	          XOR       A1\.7,D1\.7,#0x80
+.*:	47803fec 	          XOR       RA,D1Re0,#0xff
+.*:	47b1e02c 	          XOR       RAM8X32,D1\.7,#0x80
+.*:	47c01fec 	          XOR       RABZ,D1Re0,#0x7f
+.*:	47e83fec 	          XOR       RAWX,D1Re0,#0xff
+.*:	47f83fe0 	          XOR       TXIDLECYC,D1Re0,#0xff
+.*:	48000000 	          XORS      D0Re0,D0Re0,D0Re0
+.*:	48000e40 	          XORSQ     D0Re0,D0Re0,D0\.7,A0\.2
+.*:	48003201 	          XORS      D0Re0,D0Re0,A0FrP
+.*:	4801c201 	          XORS      D0Re0,D0\.7,A1LbP
+.*:	4801d001 	          XORS      D0Re0,D0\.7,D1Re0
+.*:	4801f401 	          XORS      D0Re0,D0\.7,A0\.2
+.*:	48380601 	          XORS      D0\.7,D0Re0,A1\.3
+.*:	48381e01 	          XORS      D0\.7,D0Re0,D1\.7
+.*:	48383e01 	          XORS      D0\.7,D0Re0,A0\.7
+.*:	4839ce00 	          XORS      D0\.7,D0\.7,D0\.7
+.*:	4839e001 	          XORS      D0\.7,D0\.7,RD
+.*:	49000000 	          XORS      D1Re0,D1Re0,D1Re0
+.*:	49000ec0 	          XORSQ     D1Re0,D1Re0,D1\.7,A1\.3
+.*:	49003201 	          XORS      D1Re0,D1Re0,A0FrP
+.*:	4901c201 	          XORS      D1Re0,D1\.7,A1LbP
+.*:	4901d001 	          XORS      D1Re0,D1\.7,D0Re0
+.*:	4901f401 	          XORS      D1Re0,D1\.7,A0\.2
+.*:	49380601 	          XORS      D1\.7,D1Re0,A1\.3
+.*:	49381e01 	          XORS      D1\.7,D1Re0,D0\.7
+.*:	49383e01 	          XORS      D1\.7,D1Re0,A0\.7
+.*:	4939ce00 	          XORS      D1\.7,D1\.7,D1\.7
+.*:	4939e001 	          XORS      D1\.7,D1\.7,RD
+.*:	4a03fff8 	          XORS      D0Re0,D0Re0,#0x7fff
+.*:	4a040005 	          XORSMT    D0Re0,D0Re0,#0x8000
+.*:	4a3bfffc 	          XORSMB    D0\.7,D0\.7,#0x7fff
+.*:	4a3ffff9 	          XORST     D0\.7,D0\.7,#0xffff
+.*:	4b040000 	          XORS      D1Re0,D1Re0,#0x8000
+.*:	4b07fffc 	          XORSMB    D1Re0,D1Re0,#0xffff
+.*:	4b3c0002 	          XORS      D1\.7,D1\.7,#-32768
+.*:	4c000014 	          XORSLS    TXENABLE,D0Re0,D0Re0
+.*:	4c0000e4 	          XORSNE    TXSTAT,D0Re0,D0Re0
+.*:	4c0002bd 	          XORSLE    PC,D0Re0,A1LbP
+.*:	4c00065d 	          XORSLE    D1Re0,D0Re0,A1\.3
+.*:	4c000e1e 	          XORSNV    TXENABLE,D0Re0,D0\.7
+.*:	4c000e5e 	          XORSNV    D1Re0,D0Re0,D0\.7
+.*:	4c000efe 	          XORSNV    TXSTAT,D0Re0,D0\.7
+.*:	4c0010bd 	          XORSLE    PC,D0Re0,D1Re0
+.*:	4c001e5d 	          XORSLE    D1Re0,D0Re0,D1\.7
+.*:	4c00203d 	          XORSLE    D0Re0,D0Re0,RD
+.*:	4c00321d 	          XORSLE    TXENABLE,D0Re0,A0FrP
+.*:	4c0032fd 	          XORSLE    TXSTAT,D0Re0,A0FrP
+.*:	4c0034bd 	          XORSLE    PC,D0Re0,A0\.2
+.*:	4c003e5d 	          XORSLE    D1Re0,D0Re0,A0\.7
+.*:	4c01c02c 	          XORSPL    D0Re0,D0\.7,D0Re0
+.*:	4c01c21d 	          XORSLE    TXENABLE,D0\.7,A1LbP
+.*:	4c01c2fd 	          XORSLE    TXSTAT,D0\.7,A1LbP
+.*:	4c01c6bd 	          XORSLE    PC,D0\.7,A1\.3
+.*:	4c01ce34 	          XORSLS    D0Re0,D0\.7,D0\.7
+.*:	4c01ceb4 	          XORSLS    PC,D0\.7,D0\.7
+.*:	4c01d00d 	          XORSPL    TXENABLE,D0\.7,D1Re0
+.*:	4c01d0fd 	          XORSLE    TXSTAT,D0\.7,D1Re0
+.*:	4c01debd 	          XORSLE    PC,D0\.7,D1\.7
+.*:	4c01e05d 	          XORSLE    D1Re0,D0\.7,RD
+.*:	4c01f23d 	          XORSLE    D0Re0,D0\.7,A0FrP
+.*:	4c01f40d 	          XORSPL    TXENABLE,D0\.7,A0\.2
+.*:	4c01f4fd 	          XORSLE    TXSTAT,D0\.7,A0\.2
+.*:	4c01fead 	          XORSPL    PC,D0\.7,A0\.7
+.*:	4c0800bc 	          XORSLE    PCX,D0Re0,D0Re0
+.*:	4c08067d 	          XORSLE    A0FrP,D0Re0,A1\.3
+.*:	4c080e7e 	          XORSNV    A0FrP,D0Re0,D0\.7
+.*:	4c080ebe 	          XORSNV    PCX,D0Re0,D0\.7
+.*:	4c081e7d 	          XORSLE    A0FrP,D0Re0,D1\.7
+.*:	4c08209d 	          XORSLE    A1LbP,D0Re0,RD
+.*:	4c0832ad 	          XORSPL    PCX,D0Re0,A0FrP
+.*:	4c083e6d 	          XORSPL    A0FrP,D0Re0,A0\.7
+.*:	4c09c084 	          XORSNE    A1LbP,D0\.7,D0Re0
+.*:	4c09c2ad 	          XORSPL    PCX,D0\.7,A1LbP
+.*:	4c09ce64 	          XORSNE    A0FrP,D0\.7,D0\.7
+.*:	4c09ceb4 	          XORSLS    PCX,D0\.7,D0\.7
+.*:	4c09d0bd 	          XORSLE    PCX,D0\.7,D1Re0
+.*:	4c09e07d 	          XORSLE    A0FrP,D0\.7,RD
+.*:	4c09f29d 	          XORSLE    A1LbP,D0\.7,A0FrP
+.*:	4c09f4bd 	          XORSLE    PCX,D0\.7,A0\.2
+.*:	4c10006c 	          XORSPL    A0\.2,D0Re0,D0Re0
+.*:	4c100e7e 	          XORSNV    A0\.2,D0Re0,D0\.7
+.*:	4c10327d 	          XORSLE    A0\.2,D0Re0,A0FrP
+.*:	4c11c27d 	          XORSLE    A0\.2,D0\.7,A1LbP
+.*:	4c11d07d 	          XORSLE    A0\.2,D0\.7,D1Re0
+.*:	4c11f47d 	          XORSLE    A0\.2,D0\.7,A0\.2
+.*:	4c18028d 	          XORSPL    A1\.3,D0Re0,A1LbP
+.*:	4c180e84 	          XORSNE    A1\.3,D0Re0,D0\.7
+.*:	4c18109d 	          XORSLE    A1\.3,D0Re0,D1Re0
+.*:	4c18209d 	          XORSLE    A1\.3,D0Re0,RD
+.*:	4c18349d 	          XORSLE    A1\.3,D0Re0,A0\.2
+.*:	4c19c094 	          XORSLS    A1\.3,D0\.7,D0Re0
+.*:	4c19c68d 	          XORSPL    A1\.3,D0\.7,A1\.3
+.*:	4c19ceec 	          XORSPL    TXMASKI,D0\.7,D0\.7
+.*:	4c19de8d 	          XORSPL    A1\.3,D0\.7,D1\.7
+.*:	4c19f28d 	          XORSPL    A1\.3,D0\.7,A0FrP
+.*:	4c19fe8d 	          XORSPL    A1\.3,D0\.7,A0\.7
+.*:	4c38006c 	          XORSPL    A0\.7,D0Re0,D0Re0
+.*:	4c38027d 	          XORSLE    A0\.7,D0Re0,A1LbP
+.*:	4c38066d 	          XORSPL    A0\.7,D0Re0,A1\.3
+.*:	4c380e5c 	          XORSLE    D1\.7,D0Re0,D0\.7
+.*:	4c380e8c 	          XORSPL    A1\.7,D0Re0,D0\.7
+.*:	4c38107d 	          XORSLE    A0\.7,D0Re0,D1Re0
+.*:	4c381e6d 	          XORSPL    A0\.7,D0Re0,D1\.7
+.*:	4c38207d 	          XORSLE    A0\.7,D0Re0,RD
+.*:	4c38326d 	          XORSPL    A0\.7,D0Re0,A0FrP
+.*:	4c38347d 	          XORSLE    A0\.7,D0Re0,A0\.2
+.*:	4c383e7d 	          XORSLE    A0\.7,D0Re0,A0\.7
+.*:	4c39c07c 	          XORSLE    A0\.7,D0\.7,D0Re0
+.*:	4c39c26d 	          XORSPL    A0\.7,D0\.7,A1LbP
+.*:	4c39c67d 	          XORSLE    A0\.7,D0\.7,A1\.3
+.*:	4c39ce4c 	          XORSPL    D1\.7,D0\.7,D0\.7
+.*:	4c39ce9c 	          XORSLE    A1\.7,D0\.7,D0\.7
+.*:	4c39d07d 	          XORSLE    A0\.7,D0\.7,D1Re0
+.*:	4c39de7d 	          XORSLE    A0\.7,D0\.7,D1\.7
+.*:	4c39e07d 	          XORSLE    A0\.7,D0\.7,RD
+.*:	4c39f27d 	          XORSLE    A0\.7,D0\.7,A0FrP
+.*:	4c39f47d 	          XORSLE    A0\.7,D0\.7,A0\.2
+.*:	4c39fe6d 	          XORSPL    A0\.7,D0\.7,A0\.7
+.*:	4c8006dd 	          XORSLE    RA,D0Re0,A1\.3
+.*:	4c801edd 	          XORSLE    RA,D0Re0,D1\.7
+.*:	4c803edd 	          XORSLE    RA,D0Re0,A0\.7
+.*:	4c81cecc 	          XORSPL    RA,D0\.7,D0\.7
+.*:	4c81e0dd 	          XORSLE    RA,D0\.7,RD
+.*:	4cb000cc 	          XORSPL    RAM8X32,D0Re0,D0Re0
+.*:	4cb00ede 	          XORSNV    RAM8X32,D0Re0,D0\.7
+.*:	4cb032dd 	          XORSLE    RAM8X32,D0Re0,A0FrP
+.*:	4cb1c2dd 	          XORSLE    RAM8X32,D0\.7,A1LbP
+.*:	4cb1d0dd 	          XORSLE    RAM8X32,D0\.7,D1Re0
+.*:	4cb1f4dd 	          XORSLE    RAM8X32,D0\.7,A0\.2
+.*:	4cb806dd 	          XORSLE    RAM8X,D0Re0,A1\.3
+.*:	4cb81edd 	          XORSLE    RAM8X,D0Re0,D1\.7
+.*:	4cb83edd 	          XORSLE    RAM8X,D0Re0,A0\.7
+.*:	4cb9cecc 	          XORSPL    RAM8X,D0\.7,D0\.7
+.*:	4cb9e0dd 	          XORSLE    RAM8X,D0\.7,RD
+.*:	4cc000cc 	          XORSPL    RABZ,D0Re0,D0Re0
+.*:	4cc00ede 	          XORSNV    RABZ,D0Re0,D0\.7
+.*:	4cc032dd 	          XORSLE    RABZ,D0Re0,A0FrP
+.*:	4cc1c2dd 	          XORSLE    RABZ,D0\.7,A1LbP
+.*:	4cc1d0dd 	          XORSLE    RABZ,D0\.7,D1Re0
+.*:	4cc1f4dd 	          XORSLE    RABZ,D0\.7,A0\.2
+.*:	4ce806dd 	          XORSLE    RAWX,D0Re0,A1\.3
+.*:	4ce81edd 	          XORSLE    RAWX,D0Re0,D1\.7
+.*:	4ce83edd 	          XORSLE    RAWX,D0Re0,A0\.7
+.*:	4ce9cecc 	          XORSPL    RAWX,D0\.7,D0\.7
+.*:	4ce9e0dd 	          XORSLE    RAWX,D0\.7,RD
+.*:	4cf80014 	          XORSLS    TXIDLECYC,D0Re0,D0Re0
+.*:	4cf8061d 	          XORSLE    TXIDLECYC,D0Re0,A1\.3
+.*:	4cf80ecc 	          XORSPL    RAMX,D0Re0,D0\.7
+.*:	4cf81e1d 	          XORSLE    TXIDLECYC,D0Re0,D1\.7
+.*:	4cf8321d 	          XORSLE    TXIDLECYC,D0Re0,A0FrP
+.*:	4cf83e1d 	          XORSLE    TXIDLECYC,D0Re0,A0\.7
+.*:	4cf9c21d 	          XORSLE    TXIDLECYC,D0\.7,A1LbP
+.*:	4cf9ce14 	          XORSLS    TXIDLECYC,D0\.7,D0\.7
+.*:	4cf9d01d 	          XORSLE    TXIDLECYC,D0\.7,D1Re0
+.*:	4cf9e01d 	          XORSLE    TXIDLECYC,D0\.7,RD
+.*:	4cf9f41d 	          XORSLE    TXIDLECYC,D0\.7,A0\.2
+.*:	4d000014 	          XORSLS    TXENABLE,D1Re0,D1Re0
+.*:	4d0000e4 	          XORSNE    TXSTAT,D1Re0,D1Re0
+.*:	4d0002bd 	          XORSLE    PC,D1Re0,A1LbP
+.*:	4d00065d 	          XORSLE    D1Re0,D1Re0,A1\.3
+.*:	4d000e1e 	          XORSNV    TXENABLE,D1Re0,D1\.7
+.*:	4d000e5e 	          XORSNV    D1Re0,D1Re0,D1\.7
+.*:	4d000efe 	          XORSNV    TXSTAT,D1Re0,D1\.7
+.*:	4d0010bd 	          XORSLE    PC,D1Re0,D0Re0
+.*:	4d001e5d 	          XORSLE    D1Re0,D1Re0,D0\.7
+.*:	4d00203d 	          XORSLE    D0Re0,D1Re0,RD
+.*:	4d00321d 	          XORSLE    TXENABLE,D1Re0,A0FrP
+.*:	4d0032fd 	          XORSLE    TXSTAT,D1Re0,A0FrP
+.*:	4d0034bd 	          XORSLE    PC,D1Re0,A0\.2
+.*:	4d003e5d 	          XORSLE    D1Re0,D1Re0,A0\.7
+.*:	4d01c02c 	          XORSPL    D0Re0,D1\.7,D1Re0
+.*:	4d01c21d 	          XORSLE    TXENABLE,D1\.7,A1LbP
+.*:	4d01c2fd 	          XORSLE    TXSTAT,D1\.7,A1LbP
+.*:	4d01c6bd 	          XORSLE    PC,D1\.7,A1\.3
+.*:	4d01ce34 	          XORSLS    D0Re0,D1\.7,D1\.7
+.*:	4d01ceb4 	          XORSLS    PC,D1\.7,D1\.7
+.*:	4d01d00d 	          XORSPL    TXENABLE,D1\.7,D0Re0
+.*:	4d01d0fd 	          XORSLE    TXSTAT,D1\.7,D0Re0
+.*:	4d01debd 	          XORSLE    PC,D1\.7,D0\.7
+.*:	4d01e05d 	          XORSLE    D1Re0,D1\.7,RD
+.*:	4d01f23d 	          XORSLE    D0Re0,D1\.7,A0FrP
+.*:	4d01f40d 	          XORSPL    TXENABLE,D1\.7,A0\.2
+.*:	4d01f4fd 	          XORSLE    TXSTAT,D1\.7,A0\.2
+.*:	4d01fead 	          XORSPL    PC,D1\.7,A0\.7
+.*:	4d0800bc 	          XORSLE    PCX,D1Re0,D1Re0
+.*:	4d08067d 	          XORSLE    A0FrP,D1Re0,A1\.3
+.*:	4d080e7e 	          XORSNV    A0FrP,D1Re0,D1\.7
+.*:	4d080ebe 	          XORSNV    PCX,D1Re0,D1\.7
+.*:	4d081e7d 	          XORSLE    A0FrP,D1Re0,D0\.7
+.*:	4d08209d 	          XORSLE    A1LbP,D1Re0,RD
+.*:	4d0832ad 	          XORSPL    PCX,D1Re0,A0FrP
+.*:	4d083e6d 	          XORSPL    A0FrP,D1Re0,A0\.7
+.*:	4d09c084 	          XORSNE    A1LbP,D1\.7,D1Re0
+.*:	4d09c2ad 	          XORSPL    PCX,D1\.7,A1LbP
+.*:	4d09ce64 	          XORSNE    A0FrP,D1\.7,D1\.7
+.*:	4d09ceb4 	          XORSLS    PCX,D1\.7,D1\.7
+.*:	4d09d0bd 	          XORSLE    PCX,D1\.7,D0Re0
+.*:	4d09e07d 	          XORSLE    A0FrP,D1\.7,RD
+.*:	4d09f29d 	          XORSLE    A1LbP,D1\.7,A0FrP
+.*:	4d09f4bd 	          XORSLE    PCX,D1\.7,A0\.2
+.*:	4d10006c 	          XORSPL    A0\.2,D1Re0,D1Re0
+.*:	4d100e7e 	          XORSNV    A0\.2,D1Re0,D1\.7
+.*:	4d10327d 	          XORSLE    A0\.2,D1Re0,A0FrP
+.*:	4d11c27d 	          XORSLE    A0\.2,D1\.7,A1LbP
+.*:	4d11d07d 	          XORSLE    A0\.2,D1\.7,D0Re0
+.*:	4d11f47d 	          XORSLE    A0\.2,D1\.7,A0\.2
+.*:	4d18028d 	          XORSPL    A1\.3,D1Re0,A1LbP
+.*:	4d180e84 	          XORSNE    A1\.3,D1Re0,D1\.7
+.*:	4d18109d 	          XORSLE    A1\.3,D1Re0,D0Re0
+.*:	4d18209d 	          XORSLE    A1\.3,D1Re0,RD
+.*:	4d18349d 	          XORSLE    A1\.3,D1Re0,A0\.2
+.*:	4d19c094 	          XORSLS    A1\.3,D1\.7,D1Re0
+.*:	4d19c68d 	          XORSPL    A1\.3,D1\.7,A1\.3
+.*:	4d19ceec 	          XORSPL    TXMASKI,D1\.7,D1\.7
+.*:	4d19de8d 	          XORSPL    A1\.3,D1\.7,D0\.7
+.*:	4d19f28d 	          XORSPL    A1\.3,D1\.7,A0FrP
+.*:	4d19fe8d 	          XORSPL    A1\.3,D1\.7,A0\.7
+.*:	4d38006c 	          XORSPL    A0\.7,D1Re0,D1Re0
+.*:	4d38027d 	          XORSLE    A0\.7,D1Re0,A1LbP
+.*:	4d38066d 	          XORSPL    A0\.7,D1Re0,A1\.3
+.*:	4d380e5c 	          XORSLE    D1\.7,D1Re0,D1\.7
+.*:	4d380e8c 	          XORSPL    A1\.7,D1Re0,D1\.7
+.*:	4d38107d 	          XORSLE    A0\.7,D1Re0,D0Re0
+.*:	4d381e6d 	          XORSPL    A0\.7,D1Re0,D0\.7
+.*:	4d38207d 	          XORSLE    A0\.7,D1Re0,RD
+.*:	4d38326d 	          XORSPL    A0\.7,D1Re0,A0FrP
+.*:	4d38347d 	          XORSLE    A0\.7,D1Re0,A0\.2
+.*:	4d383e7d 	          XORSLE    A0\.7,D1Re0,A0\.7
+.*:	4d39c07c 	          XORSLE    A0\.7,D1\.7,D1Re0
+.*:	4d39c26d 	          XORSPL    A0\.7,D1\.7,A1LbP
+.*:	4d39c67d 	          XORSLE    A0\.7,D1\.7,A1\.3
+.*:	4d39ce4c 	          XORSPL    D1\.7,D1\.7,D1\.7
+.*:	4d39ce9c 	          XORSLE    A1\.7,D1\.7,D1\.7
+.*:	4d39d07d 	          XORSLE    A0\.7,D1\.7,D0Re0
+.*:	4d39de7d 	          XORSLE    A0\.7,D1\.7,D0\.7
+.*:	4d39e07d 	          XORSLE    A0\.7,D1\.7,RD
+.*:	4d39f27d 	          XORSLE    A0\.7,D1\.7,A0FrP
+.*:	4d39f47d 	          XORSLE    A0\.7,D1\.7,A0\.2
+.*:	4d39fe6d 	          XORSPL    A0\.7,D1\.7,A0\.7
+.*:	4d8006dd 	          XORSLE    RA,D1Re0,A1\.3
+.*:	4d801edd 	          XORSLE    RA,D1Re0,D0\.7
+.*:	4d803edd 	          XORSLE    RA,D1Re0,A0\.7
+.*:	4d81cecc 	          XORSPL    RA,D1\.7,D1\.7
+.*:	4d81e0dd 	          XORSLE    RA,D1\.7,RD
+.*:	4db000cc 	          XORSPL    RAM8X32,D1Re0,D1Re0
+.*:	4db00ede 	          XORSNV    RAM8X32,D1Re0,D1\.7
+.*:	4db032dd 	          XORSLE    RAM8X32,D1Re0,A0FrP
+.*:	4db1c2dd 	          XORSLE    RAM8X32,D1\.7,A1LbP
+.*:	4db1d0dd 	          XORSLE    RAM8X32,D1\.7,D0Re0
+.*:	4db1f4dd 	          XORSLE    RAM8X32,D1\.7,A0\.2
+.*:	4db806dd 	          XORSLE    RAM8X,D1Re0,A1\.3
+.*:	4db81edd 	          XORSLE    RAM8X,D1Re0,D0\.7
+.*:	4db83edd 	          XORSLE    RAM8X,D1Re0,A0\.7
+.*:	4db9cecc 	          XORSPL    RAM8X,D1\.7,D1\.7
+.*:	4db9e0dd 	          XORSLE    RAM8X,D1\.7,RD
+.*:	4dc000cc 	          XORSPL    RABZ,D1Re0,D1Re0
+.*:	4dc00ede 	          XORSNV    RABZ,D1Re0,D1\.7
+.*:	4dc032dd 	          XORSLE    RABZ,D1Re0,A0FrP
+.*:	4dc1c2dd 	          XORSLE    RABZ,D1\.7,A1LbP
+.*:	4dc1d0dd 	          XORSLE    RABZ,D1\.7,D0Re0
+.*:	4dc1f4dd 	          XORSLE    RABZ,D1\.7,A0\.2
+.*:	4de806dd 	          XORSLE    RAWX,D1Re0,A1\.3
+.*:	4de81edd 	          XORSLE    RAWX,D1Re0,D0\.7
+.*:	4de83edd 	          XORSLE    RAWX,D1Re0,A0\.7
+.*:	4de9cecc 	          XORSPL    RAWX,D1\.7,D1\.7
+.*:	4de9e0dd 	          XORSLE    RAWX,D1\.7,RD
+.*:	4df80014 	          XORSLS    TXIDLECYC,D1Re0,D1Re0
+.*:	4df8061d 	          XORSLE    TXIDLECYC,D1Re0,A1\.3
+.*:	4df80ecc 	          XORSPL    RAMX,D1Re0,D1\.7
+.*:	4df81e1d 	          XORSLE    TXIDLECYC,D1Re0,D0\.7
+.*:	4df8321d 	          XORSLE    TXIDLECYC,D1Re0,A0FrP
+.*:	4df83e1d 	          XORSLE    TXIDLECYC,D1Re0,A0\.7
+.*:	4df9c21d 	          XORSLE    TXIDLECYC,D1\.7,A1LbP
+.*:	4df9ce14 	          XORSLS    TXIDLECYC,D1\.7,D1\.7
+.*:	4df9d01d 	          XORSLE    TXIDLECYC,D1\.7,D0Re0
+.*:	4df9e01d 	          XORSLE    TXIDLECYC,D1\.7,RD
+.*:	4df9f41d 	          XORSLE    TXIDLECYC,D1\.7,A0\.2
+.*:	4e001fdc 	          XORSLE    D0Re0,D0Re0,#0x7f
+.*:	4e001fea 	          XORS      PC,D0Re0,#0x7f
+.*:	4e002020 	          XORS      TXENABLE,D0Re0,#0x80
+.*:	4e003fcc 	          XORSPL    D0Re0,D0Re0,#0xff
+.*:	4e003fea 	          XORS      PC,D0Re0,#0xff
+.*:	4e01dfe0 	          XORS      TXENABLE,D0\.7,#0x7f
+.*:	4e01dfee 	          XORS      TXSTAT,D0\.7,#0x7f
+.*:	4e01e022 	          XORS      D0Re0,D0\.7,#0x80
+.*:	4e01ffdc 	          XORSLE    D0Re0,D0\.7,#0xff
+.*:	4e01ffe4 	          XORS      D1Re0,D0\.7,#0xff
+.*:	4e081fe8 	          XORS      A1LbP,D0Re0,#0x7f
+.*:	4e08202a 	          XORS      PCX,D0Re0,#0x80
+.*:	4e09dfe6 	          XORS      A0FrP,D0\.7,#0x7f
+.*:	4e09e028 	          XORS      A1LbP,D0\.7,#0x80
+.*:	4e09ffea 	          XORS      PCX,D0\.7,#0xff
+.*:	4e11dfe6 	          XORS      A0\.2,D0\.7,#0x7f
+.*:	4e181fee 	          XORS      TXMASKI,D0Re0,#0x7f
+.*:	4e183fee 	          XORS      TXMASKI,D0Re0,#0xff
+.*:	4e19e02e 	          XORS      TXMASKI,D0\.7,#0x80
+.*:	4e381fde 	          XORSNV    D0\.7,D0Re0,#0x7f
+.*:	4e381fe8 	          XORS      A1\.7,D0Re0,#0x7f
+.*:	4e382024 	          XORS      D1\.7,D0Re0,#0x80
+.*:	4e383fde 	          XORSNV    D0\.7,D0Re0,#0xff
+.*:	4e383fe8 	          XORS      A1\.7,D0Re0,#0xff
+.*:	4e39dfe6 	          XORS      A0\.7,D0\.7,#0x7f
+.*:	4e39e024 	          XORS      D1\.7,D0\.7,#0x80
+.*:	4e39ffde 	          XORSNV    D0\.7,D0\.7,#0xff
+.*:	4e801fec 	          XORS      RA,D0Re0,#0x7f
+.*:	4e81e02c 	          XORS      RA,D0\.7,#0x80
+.*:	4eb03fec 	          XORS      RAM8X32,D0Re0,#0xff
+.*:	4eb81fec 	          XORS      RAM8X,D0Re0,#0x7f
+.*:	4eb9e02c 	          XORS      RAM8X,D0\.7,#0x80
+.*:	4ec03fec 	          XORS      RABZ,D0Re0,#0xff
+.*:	4ee81fec 	          XORS      RAWX,D0Re0,#0x7f
+.*:	4ee9e02c 	          XORS      RAWX,D0\.7,#0x80
+.*:	4ef82020 	          XORS      TXIDLECYC,D0Re0,#0x80
+.*:	4ef9dfe0 	          XORS      TXIDLECYC,D0\.7,#0x7f
+.*:	4ef9ffe0 	          XORS      TXIDLECYC,D0\.7,#0xff
+.*:	4f001fea 	          XORS      PC,D1Re0,#0x7f
+.*:	4f003fcc 	          XORSPL    D1Re0,D1Re0,#0xff
+.*:	4f01dfe0 	          XORS      TXENABLE,D1\.7,#0x7f
+.*:	4f01e022 	          XORS      D0Re0,D1\.7,#0x80
+.*:	4f01ffe4 	          XORS      D1Re0,D1\.7,#0xff
+.*:	4f08202a 	          XORS      PCX,D1Re0,#0x80
+.*:	4f09e028 	          XORS      A1LbP,D1\.7,#0x80
+.*:	4f11dfe6 	          XORS      A0\.2,D1\.7,#0x7f
+.*:	4f183fee 	          XORS      TXMASKI,D1Re0,#0xff
+.*:	4f381fde 	          XORSNV    D1\.7,D1Re0,#0x7f
+.*:	4f382024 	          XORS      D1\.7,D1Re0,#0x80
+.*:	4f383fe8 	          XORS      A1\.7,D1Re0,#0xff
+.*:	4f39e022 	          XORS      D0\.7,D1\.7,#0x80
+.*:	4f801fec 	          XORS      RA,D1Re0,#0x7f
+.*:	4fb03fec 	          XORS      RAM8X32,D1Re0,#0xff
+.*:	4fb9e02c 	          XORS      RAM8X,D1\.7,#0x80
+.*:	4fe81fec 	          XORS      RAWX,D1Re0,#0x7f
+.*:	4ff82020 	          XORS      TXIDLECYC,D1Re0,#0x80
+.*:	4ff9ffe0 	          XORS      TXIDLECYC,D1\.7,#0xff
+.*:	5001c000 	          LSL       D0Re0,D0\.7,D0Re0
+.*:	503800c0 	          ASR       D0\.7,D0Re0,D0Re0
+.*:	5039ce40 	          LSR       D0\.7,D0\.7,D0\.7
+.*:	5101c000 	          LSL       D1Re0,D1\.7,D1Re0
+.*:	513800c0 	          ASR       D1\.7,D1Re0,D1Re0
+.*:	5139ce40 	          LSR       D1\.7,D1\.7,D1\.7
+.*:	52003e00 	          LSL       D0Re0,D0Re0,#0x1f
+.*:	5201e0c0 	          ASR       D0Re0,D0\.7,#0x10
+.*:	52382040 	          LSR       D0\.7,D0Re0,#0x10
+.*:	5239e000 	          LSL       D0\.7,D0\.7,#0x10
+.*:	53001ec0 	          ASR       D1Re0,D1Re0,#0xf
+.*:	5301de40 	          LSR       D1Re0,D1\.7,#0xf
+.*:	53381e00 	          LSL       D1\.7,D1Re0,#0xf
+.*:	53383ec0 	          ASR       D1\.7,D1Re0,#0x1f
+.*:	5339fe40 	          LSR       D1\.7,D1\.7,#0x1f
+.*:	5400004c 	          LSRPL     D0Re0,D0Re0,D0Re0
+.*:	540000e0 	          ASR       TXENABLE,D0Re0,D0Re0
+.*:	54000e2a 	          LSL       PC,D0Re0,D0\.7
+.*:	54000edc 	          ASRLE     D0Re0,D0Re0,D0\.7
+.*:	5401c020 	          LSL       TXENABLE,D0\.7,D0Re0
+.*:	5401c06a 	          LSR       PC,D0\.7,D0Re0
+.*:	5401ce14 	          LSLLS     D0Re0,D0\.7,D0\.7
+.*:	5401ce60 	          LSR       TXENABLE,D0\.7,D0\.7
+.*:	5401ceea 	          ASR       PC,D0\.7,D0\.7
+.*:	540800e6 	          ASR       A0FrP,D0Re0,D0Re0
+.*:	54080e6a 	          LSR       PCX,D0Re0,D0\.7
+.*:	5409c068 	          LSR       A1LbP,D0\.7,D0Re0
+.*:	5409ce66 	          LSR       A0FrP,D0\.7,D0\.7
+.*:	541800ee 	          ASR       TXMASKI,D0Re0,D0Re0
+.*:	5419ce6e 	          LSR       TXMASKI,D0\.7,D0\.7
+.*:	5438005e 	          LSRNV     D0\.7,D0Re0,D0Re0
+.*:	543800e8 	          ASR       A1\.7,D0Re0,D0Re0
+.*:	54380e64 	          LSR       D1\.7,D0Re0,D0\.7
+.*:	5439c014 	          LSLLS     D0\.7,D0\.7,D0Re0
+.*:	5439c066 	          LSR       A0\.7,D0\.7,D0Re0
+.*:	5439ce1e 	          LSLNV     D0\.7,D0\.7,D0\.7
+.*:	5439ce68 	          LSR       A1\.7,D0\.7,D0\.7
+.*:	548000ec 	          ASR       RA,D0Re0,D0Re0
+.*:	5481ce6c 	          LSR       RA,D0\.7,D0\.7
+.*:	54b1c02c 	          LSL       RAM8X32,D0\.7,D0Re0
+.*:	54b800ec 	          ASR       RAM8X,D0Re0,D0Re0
+.*:	54b9ce6c 	          LSR       RAM8X,D0\.7,D0\.7
+.*:	54c1c02c 	          LSL       RABZ,D0\.7,D0Re0
+.*:	54e800ec 	          ASR       RAWX,D0Re0,D0Re0
+.*:	54e9ce6c 	          LSR       RAWX,D0\.7,D0\.7
+.*:	54f80e20 	          LSL       TXIDLECYC,D0Re0,D0\.7
+.*:	54f9c060 	          LSR       TXIDLECYC,D0\.7,D0Re0
+.*:	54f9cee0 	          ASR       TXIDLECYC,D0\.7,D0\.7
+.*:	5500004c 	          LSRPL     D1Re0,D1Re0,D1Re0
+.*:	550000e0 	          ASR       TXENABLE,D1Re0,D1Re0
+.*:	55000e2a 	          LSL       PC,D1Re0,D1\.7
+.*:	55000edc 	          ASRLE     D1Re0,D1Re0,D1\.7
+.*:	5501c020 	          LSL       TXENABLE,D1\.7,D1Re0
+.*:	5501c06a 	          LSR       PC,D1\.7,D1Re0
+.*:	5501ce14 	          LSLLS     D1Re0,D1\.7,D1\.7
+.*:	5501ce60 	          LSR       TXENABLE,D1\.7,D1\.7
+.*:	5501ceea 	          ASR       PC,D1\.7,D1\.7
+.*:	550800e6 	          ASR       A0FrP,D1Re0,D1Re0
+.*:	55080e6a 	          LSR       PCX,D1Re0,D1\.7
+.*:	5509c068 	          LSR       A1LbP,D1\.7,D1Re0
+.*:	5509ce66 	          LSR       A0FrP,D1\.7,D1\.7
+.*:	551800ee 	          ASR       TXMASKI,D1Re0,D1Re0
+.*:	5519ce6e 	          LSR       TXMASKI,D1\.7,D1\.7
+.*:	5538005e 	          LSRNV     D1\.7,D1Re0,D1Re0
+.*:	553800e8 	          ASR       A1\.7,D1Re0,D1Re0
+.*:	55380e62 	          LSR       D0\.7,D1Re0,D1\.7
+.*:	5539c014 	          LSLLS     D1\.7,D1\.7,D1Re0
+.*:	5539c066 	          LSR       A0\.7,D1\.7,D1Re0
+.*:	5539ce1e 	          LSLNV     D1\.7,D1\.7,D1\.7
+.*:	5539ce68 	          LSR       A1\.7,D1\.7,D1\.7
+.*:	558000ec 	          ASR       RA,D1Re0,D1Re0
+.*:	5581ce6c 	          LSR       RA,D1\.7,D1\.7
+.*:	55b1c02c 	          LSL       RAM8X32,D1\.7,D1Re0
+.*:	55b800ec 	          ASR       RAM8X,D1Re0,D1Re0
+.*:	55b9ce6c 	          LSR       RAM8X,D1\.7,D1\.7
+.*:	55c1c02c 	          LSL       RABZ,D1\.7,D1Re0
+.*:	55e800ec 	          ASR       RAWX,D1Re0,D1Re0
+.*:	55e9ce6c 	          LSR       RAWX,D1\.7,D1\.7
+.*:	55f80e20 	          LSL       TXIDLECYC,D1Re0,D1\.7
+.*:	55f9c060 	          LSR       TXIDLECYC,D1\.7,D1Re0
+.*:	55f9cee0 	          ASR       TXIDLECYC,D1\.7,D1\.7
+.*:	56001e4c 	          LSRPL     D0Re0,D0Re0,#0xf
+.*:	56001ee0 	          ASR       TXENABLE,D0Re0,#0xf
+.*:	5600202a 	          LSL       PC,D0Re0,#0x10
+.*:	560020dc 	          ASRLE     D0Re0,D0Re0,#0x10
+.*:	56003e20 	          LSL       TXENABLE,D0Re0,#0x1f
+.*:	56003e6a 	          LSR       PC,D0Re0,#0x1f
+.*:	5601de1c 	          LSLLE     D0Re0,D0\.7,#0xf
+.*:	5601de60 	          LSR       TXENABLE,D0\.7,#0xf
+.*:	5601deea 	          ASR       PC,D0\.7,#0xf
+.*:	5601e04c 	          LSRPL     D0Re0,D0\.7,#0x10
+.*:	5601e0e0 	          ASR       TXENABLE,D0\.7,#0x10
+.*:	5601fe2a 	          LSL       PC,D0\.7,#0x1f
+.*:	5601fedc 	          ASRLE     D0Re0,D0\.7,#0x1f
+.*:	56081e2a 	          LSL       PCX,D0Re0,#0xf
+.*:	56082028 	          LSL       A1LbP,D0Re0,#0x10
+.*:	56083e26 	          LSL       A0FrP,D0Re0,#0x1f
+.*:	56083eea 	          ASR       PCX,D0Re0,#0x1f
+.*:	5609dee8 	          ASR       A1LbP,D0\.7,#0xf
+.*:	5609e0e6 	          ASR       A0FrP,D0\.7,#0x10
+.*:	5609fe6a 	          LSR       PCX,D0\.7,#0x1f
+.*:	5618206e 	          LSR       TXMASKI,D0Re0,#0x10
+.*:	5619e02e 	          LSL       TXMASKI,D0\.7,#0x10
+.*:	56381e24 	          LSL       D1\.7,D0Re0,#0xf
+.*:	56381edc 	          ASRLE     D0\.7,D0Re0,#0xf
+.*:	56382026 	          LSL       A0\.7,D0Re0,#0x10
+.*:	563820de 	          ASRNV     D0\.7,D0Re0,#0x10
+.*:	56383e28 	          LSL       A1\.7,D0Re0,#0x1f
+.*:	56383ee4 	          ASR       D1\.7,D0Re0,#0x1f
+.*:	5639de4c 	          LSRPL     D0\.7,D0\.7,#0xf
+.*:	5639dee6 	          ASR       A0\.7,D0\.7,#0xf
+.*:	5639e05e 	          LSRNV     D0\.7,D0\.7,#0x10
+.*:	5639e0e8 	          ASR       A1\.7,D0\.7,#0x10
+.*:	5639fe64 	          LSR       D1\.7,D0\.7,#0x1f
+.*:	56801e2c 	          LSL       RA,D0Re0,#0xf
+.*:	56803eec 	          ASR       RA,D0Re0,#0x1f
+.*:	5681fe6c 	          LSR       RA,D0\.7,#0x1f
+.*:	56b03e2c 	          LSL       RAM8X32,D0Re0,#0x1f
+.*:	56b1e0ec 	          ASR       RAM8X32,D0\.7,#0x10
+.*:	56b8206c 	          LSR       RAM8X,D0Re0,#0x10
+.*:	56b9e02c 	          LSL       RAM8X,D0\.7,#0x10
+.*:	56c01eec 	          ASR       RABZ,D0Re0,#0xf
+.*:	56c1de6c 	          LSR       RABZ,D0\.7,#0xf
+.*:	56e81e2c 	          LSL       RAWX,D0Re0,#0xf
+.*:	56e83eec 	          ASR       RAWX,D0Re0,#0x1f
+.*:	56e9fe6c 	          LSR       RAWX,D0\.7,#0x1f
+.*:	56f82020 	          LSL       TXIDLECYC,D0Re0,#0x10
+.*:	56f83e60 	          LSR       TXIDLECYC,D0Re0,#0x1f
+.*:	56f9dee0 	          ASR       TXIDLECYC,D0\.7,#0xf
+.*:	56f9fe20 	          LSL       TXIDLECYC,D0\.7,#0x1f
+.*:	57001e20 	          LSL       TXENABLE,D1Re0,#0xf
+.*:	57001e6a 	          LSR       PC,D1Re0,#0xf
+.*:	57002014 	          LSLLS     D1Re0,D1Re0,#0x10
+.*:	57002060 	          LSR       TXENABLE,D1Re0,#0x10
+.*:	570020ea 	          ASR       PC,D1Re0,#0x10
+.*:	57003e4c 	          LSRPL     D1Re0,D1Re0,#0x1f
+.*:	57003ee0 	          ASR       TXENABLE,D1Re0,#0x1f
+.*:	5701de2a 	          LSL       PC,D1\.7,#0xf
+.*:	5701dedc 	          ASRLE     D1Re0,D1\.7,#0xf
+.*:	5701e020 	          LSL       TXENABLE,D1\.7,#0x10
+.*:	5701e06a 	          LSR       PC,D1\.7,#0x10
+.*:	5701fe1c 	          LSLLE     D1Re0,D1\.7,#0x1f
+.*:	5701fe60 	          LSR       TXENABLE,D1\.7,#0x1f
+.*:	5701feea 	          ASR       PC,D1\.7,#0x1f
+.*:	57081ee6 	          ASR       A0FrP,D1Re0,#0xf
+.*:	5708206a 	          LSR       PCX,D1Re0,#0x10
+.*:	57083e68 	          LSR       A1LbP,D1Re0,#0x1f
+.*:	5709de66 	          LSR       A0FrP,D1\.7,#0xf
+.*:	5709e02a 	          LSL       PCX,D1\.7,#0x10
+.*:	5709fe28 	          LSL       A1LbP,D1\.7,#0x1f
+.*:	57181e2e 	          LSL       TXMASKI,D1Re0,#0xf
+.*:	57183eee 	          ASR       TXMASKI,D1Re0,#0x1f
+.*:	5719fe6e 	          LSR       TXMASKI,D1\.7,#0x1f
+.*:	57381e5e 	          LSRNV     D1\.7,D1Re0,#0xf
+.*:	57381ee8 	          ASR       A1\.7,D1Re0,#0xf
+.*:	57382062 	          LSR       D0\.7,D1Re0,#0x10
+.*:	57383e1c 	          LSLLE     D1\.7,D1Re0,#0x1f
+.*:	57383e66 	          LSR       A0\.7,D1Re0,#0x1f
+.*:	5739de1e 	          LSLNV     D1\.7,D1\.7,#0xf
+.*:	5739de68 	          LSR       A1\.7,D1\.7,#0xf
+.*:	5739e022 	          LSL       D0\.7,D1\.7,#0x10
+.*:	5739e0dc 	          ASRLE     D1\.7,D1\.7,#0x10
+.*:	5739fe26 	          LSL       A0\.7,D1\.7,#0x1f
+.*:	5739fede 	          ASRNV     D1\.7,D1\.7,#0x1f
+.*:	5780206c 	          LSR       RA,D1Re0,#0x10
+.*:	5781e02c 	          LSL       RA,D1\.7,#0x10
+.*:	57b01eec 	          ASR       RAM8X32,D1Re0,#0xf
+.*:	57b1de6c 	          LSR       RAM8X32,D1\.7,#0xf
+.*:	57b81e2c 	          LSL       RAM8X,D1Re0,#0xf
+.*:	57b83eec 	          ASR       RAM8X,D1Re0,#0x1f
+.*:	57b9fe6c 	          LSR       RAM8X,D1\.7,#0x1f
+.*:	57c03e2c 	          LSL       RABZ,D1Re0,#0x1f
+.*:	57c1e0ec 	          ASR       RABZ,D1\.7,#0x10
+.*:	57e8206c 	          LSR       RAWX,D1Re0,#0x10
+.*:	57e9e02c 	          LSL       RAWX,D1\.7,#0x10
+.*:	57f81e60 	          LSR       TXIDLECYC,D1Re0,#0xf
+.*:	57f820e0 	          ASR       TXIDLECYC,D1Re0,#0x10
+.*:	57f9de20 	          LSL       TXIDLECYC,D1\.7,#0xf
+.*:	57f9e060 	          LSR       TXIDLECYC,D1\.7,#0x10
+.*:	57f9fee0 	          ASR       TXIDLECYC,D1\.7,#0x1f
+.*:	5801c000 	          LSLS      D0Re0,D0\.7,D0Re0
+.*:	583800c0 	          ASRS      D0\.7,D0Re0,D0Re0
+.*:	5839ce40 	          LSRS      D0\.7,D0\.7,D0\.7
+.*:	5901c000 	          LSLS      D1Re0,D1\.7,D1Re0
+.*:	593800c0 	          ASRS      D1\.7,D1Re0,D1Re0
+.*:	5939ce40 	          LSRS      D1\.7,D1\.7,D1\.7
+.*:	5a003e00 	          LSLS      D0Re0,D0Re0,#0x1f
+.*:	5a01e0c0 	          ASRS      D0Re0,D0\.7,#0x10
+.*:	5a382040 	          LSRS      D0\.7,D0Re0,#0x10
+.*:	5a39e000 	          LSLS      D0\.7,D0\.7,#0x10
+.*:	5b001ec0 	          ASRS      D1Re0,D1Re0,#0xf
+.*:	5b01de40 	          LSRS      D1Re0,D1\.7,#0xf
+.*:	5b381e00 	          LSLS      D1\.7,D1Re0,#0xf
+.*:	5b383ec0 	          ASRS      D1\.7,D1Re0,#0x1f
+.*:	5b39fe40 	          LSRS      D1\.7,D1\.7,#0x1f
+.*:	5c00004c 	          LSRSPL    D0Re0,D0Re0,D0Re0
+.*:	5c0000e0 	          ASRS      TXENABLE,D0Re0,D0Re0
+.*:	5c000e2a 	          LSLS      PC,D0Re0,D0\.7
+.*:	5c000edc 	          ASRSLE    D0Re0,D0Re0,D0\.7
+.*:	5c01c020 	          LSLS      TXENABLE,D0\.7,D0Re0
+.*:	5c01c06a 	          LSRS      PC,D0\.7,D0Re0
+.*:	5c01ce14 	          LSLSLS    D0Re0,D0\.7,D0\.7
+.*:	5c01ce60 	          LSRS      TXENABLE,D0\.7,D0\.7
+.*:	5c01ceea 	          ASRS      PC,D0\.7,D0\.7
+.*:	5c0800e6 	          ASRS      A0FrP,D0Re0,D0Re0
+.*:	5c080e6a 	          LSRS      PCX,D0Re0,D0\.7
+.*:	5c09c068 	          LSRS      A1LbP,D0\.7,D0Re0
+.*:	5c09ce66 	          LSRS      A0FrP,D0\.7,D0\.7
+.*:	5c1800ee 	          ASRS      TXMASKI,D0Re0,D0Re0
+.*:	5c19ce6e 	          LSRS      TXMASKI,D0\.7,D0\.7
+.*:	5c38005e 	          LSRSNV    D0\.7,D0Re0,D0Re0
+.*:	5c3800e8 	          ASRS      A1\.7,D0Re0,D0Re0
+.*:	5c380e64 	          LSRS      D1\.7,D0Re0,D0\.7
+.*:	5c39c014 	          LSLSLS    D0\.7,D0\.7,D0Re0
+.*:	5c39c066 	          LSRS      A0\.7,D0\.7,D0Re0
+.*:	5c39ce1e 	          LSLSNV    D0\.7,D0\.7,D0\.7
+.*:	5c39ce68 	          LSRS      A1\.7,D0\.7,D0\.7
+.*:	5c8000ec 	          ASRS      RA,D0Re0,D0Re0
+.*:	5c81ce6c 	          LSRS      RA,D0\.7,D0\.7
+.*:	5cb1c02c 	          LSLS      RAM8X32,D0\.7,D0Re0
+.*:	5cb800ec 	          ASRS      RAM8X,D0Re0,D0Re0
+.*:	5cb9ce6c 	          LSRS      RAM8X,D0\.7,D0\.7
+.*:	5cc1c02c 	          LSLS      RABZ,D0\.7,D0Re0
+.*:	5ce800ec 	          ASRS      RAWX,D0Re0,D0Re0
+.*:	5ce9ce6c 	          LSRS      RAWX,D0\.7,D0\.7
+.*:	5cf80e20 	          LSLS      TXIDLECYC,D0Re0,D0\.7
+.*:	5cf9c060 	          LSRS      TXIDLECYC,D0\.7,D0Re0
+.*:	5cf9cee0 	          ASRS      TXIDLECYC,D0\.7,D0\.7
+.*:	5d00004c 	          LSRSPL    D1Re0,D1Re0,D1Re0
+.*:	5d0000e0 	          ASRS      TXENABLE,D1Re0,D1Re0
+.*:	5d000e2a 	          LSLS      PC,D1Re0,D1\.7
+.*:	5d000edc 	          ASRSLE    D1Re0,D1Re0,D1\.7
+.*:	5d01c020 	          LSLS      TXENABLE,D1\.7,D1Re0
+.*:	5d01c06a 	          LSRS      PC,D1\.7,D1Re0
+.*:	5d01ce14 	          LSLSLS    D1Re0,D1\.7,D1\.7
+.*:	5d01ce60 	          LSRS      TXENABLE,D1\.7,D1\.7
+.*:	5d01ceea 	          ASRS      PC,D1\.7,D1\.7
+.*:	5d0800e6 	          ASRS      A0FrP,D1Re0,D1Re0
+.*:	5d080e6a 	          LSRS      PCX,D1Re0,D1\.7
+.*:	5d09c068 	          LSRS      A1LbP,D1\.7,D1Re0
+.*:	5d09ce66 	          LSRS      A0FrP,D1\.7,D1\.7
+.*:	5d1800ee 	          ASRS      TXMASKI,D1Re0,D1Re0
+.*:	5d19ce6e 	          LSRS      TXMASKI,D1\.7,D1\.7
+.*:	5d38005e 	          LSRSNV    D1\.7,D1Re0,D1Re0
+.*:	5d3800e8 	          ASRS      A1\.7,D1Re0,D1Re0
+.*:	5d380e62 	          LSRS      D0\.7,D1Re0,D1\.7
+.*:	5d39c014 	          LSLSLS    D1\.7,D1\.7,D1Re0
+.*:	5d39c066 	          LSRS      A0\.7,D1\.7,D1Re0
+.*:	5d39ce1e 	          LSLSNV    D1\.7,D1\.7,D1\.7
+.*:	5d39ce68 	          LSRS      A1\.7,D1\.7,D1\.7
+.*:	5d8000ec 	          ASRS      RA,D1Re0,D1Re0
+.*:	5d81ce6c 	          LSRS      RA,D1\.7,D1\.7
+.*:	5db1c02c 	          LSLS      RAM8X32,D1\.7,D1Re0
+.*:	5db800ec 	          ASRS      RAM8X,D1Re0,D1Re0
+.*:	5db9ce6c 	          LSRS      RAM8X,D1\.7,D1\.7
+.*:	5dc1c02c 	          LSLS      RABZ,D1\.7,D1Re0
+.*:	5de800ec 	          ASRS      RAWX,D1Re0,D1Re0
+.*:	5de9ce6c 	          LSRS      RAWX,D1\.7,D1\.7
+.*:	5df80e20 	          LSLS      TXIDLECYC,D1Re0,D1\.7
+.*:	5df9c060 	          LSRS      TXIDLECYC,D1\.7,D1Re0
+.*:	5df9cee0 	          ASRS      TXIDLECYC,D1\.7,D1\.7
+.*:	5e001e4c 	          LSRSPL    D0Re0,D0Re0,#0xf
+.*:	5e001ee0 	          ASRS      TXENABLE,D0Re0,#0xf
+.*:	5e00202a 	          LSLS      PC,D0Re0,#0x10
+.*:	5e0020dc 	          ASRSLE    D0Re0,D0Re0,#0x10
+.*:	5e003e20 	          LSLS      TXENABLE,D0Re0,#0x1f
+.*:	5e003e6a 	          LSRS      PC,D0Re0,#0x1f
+.*:	5e01de1c 	          LSLSLE    D0Re0,D0\.7,#0xf
+.*:	5e01de60 	          LSRS      TXENABLE,D0\.7,#0xf
+.*:	5e01deea 	          ASRS      PC,D0\.7,#0xf
+.*:	5e01e04c 	          LSRSPL    D0Re0,D0\.7,#0x10
+.*:	5e01e0e0 	          ASRS      TXENABLE,D0\.7,#0x10
+.*:	5e01fe2a 	          LSLS      PC,D0\.7,#0x1f
+.*:	5e01fedc 	          ASRSLE    D0Re0,D0\.7,#0x1f
+.*:	5e081e2a 	          LSLS      PCX,D0Re0,#0xf
+.*:	5e082028 	          LSLS      A1LbP,D0Re0,#0x10
+.*:	5e083e26 	          LSLS      A0FrP,D0Re0,#0x1f
+.*:	5e083eea 	          ASRS      PCX,D0Re0,#0x1f
+.*:	5e09dee8 	          ASRS      A1LbP,D0\.7,#0xf
+.*:	5e09e0e6 	          ASRS      A0FrP,D0\.7,#0x10
+.*:	5e09fe6a 	          LSRS      PCX,D0\.7,#0x1f
+.*:	5e18206e 	          LSRS      TXMASKI,D0Re0,#0x10
+.*:	5e19e02e 	          LSLS      TXMASKI,D0\.7,#0x10
+.*:	5e381e24 	          LSLS      D1\.7,D0Re0,#0xf
+.*:	5e381edc 	          ASRSLE    D0\.7,D0Re0,#0xf
+.*:	5e382026 	          LSLS      A0\.7,D0Re0,#0x10
+.*:	5e3820de 	          ASRSNV    D0\.7,D0Re0,#0x10
+.*:	5e383e28 	          LSLS      A1\.7,D0Re0,#0x1f
+.*:	5e383ee4 	          ASRS      D1\.7,D0Re0,#0x1f
+.*:	5e39de4c 	          LSRSPL    D0\.7,D0\.7,#0xf
+.*:	5e39dee6 	          ASRS      A0\.7,D0\.7,#0xf
+.*:	5e39e05e 	          LSRSNV    D0\.7,D0\.7,#0x10
+.*:	5e39e0e8 	          ASRS      A1\.7,D0\.7,#0x10
+.*:	5e39fe64 	          LSRS      D1\.7,D0\.7,#0x1f
+.*:	5e801e2c 	          LSLS      RA,D0Re0,#0xf
+.*:	5e803eec 	          ASRS      RA,D0Re0,#0x1f
+.*:	5e81fe6c 	          LSRS      RA,D0\.7,#0x1f
+.*:	5eb03e2c 	          LSLS      RAM8X32,D0Re0,#0x1f
+.*:	5eb1e0ec 	          ASRS      RAM8X32,D0\.7,#0x10
+.*:	5eb8206c 	          LSRS      RAM8X,D0Re0,#0x10
+.*:	5eb9e02c 	          LSLS      RAM8X,D0\.7,#0x10
+.*:	5ec01eec 	          ASRS      RABZ,D0Re0,#0xf
+.*:	5ec1de6c 	          LSRS      RABZ,D0\.7,#0xf
+.*:	5ee81e2c 	          LSLS      RAWX,D0Re0,#0xf
+.*:	5ee83eec 	          ASRS      RAWX,D0Re0,#0x1f
+.*:	5ee9fe6c 	          LSRS      RAWX,D0\.7,#0x1f
+.*:	5ef82020 	          LSLS      TXIDLECYC,D0Re0,#0x10
+.*:	5ef83e60 	          LSRS      TXIDLECYC,D0Re0,#0x1f
+.*:	5ef9dee0 	          ASRS      TXIDLECYC,D0\.7,#0xf
+.*:	5ef9fe20 	          LSLS      TXIDLECYC,D0\.7,#0x1f
+.*:	5f001e20 	          LSLS      TXENABLE,D1Re0,#0xf
+.*:	5f001e6a 	          LSRS      PC,D1Re0,#0xf
+.*:	5f002014 	          LSLSLS    D1Re0,D1Re0,#0x10
+.*:	5f002060 	          LSRS      TXENABLE,D1Re0,#0x10
+.*:	5f0020ea 	          ASRS      PC,D1Re0,#0x10
+.*:	5f003e4c 	          LSRSPL    D1Re0,D1Re0,#0x1f
+.*:	5f003ee0 	          ASRS      TXENABLE,D1Re0,#0x1f
+.*:	5f01de2a 	          LSLS      PC,D1\.7,#0xf
+.*:	5f01dedc 	          ASRSLE    D1Re0,D1\.7,#0xf
+.*:	5f01e020 	          LSLS      TXENABLE,D1\.7,#0x10
+.*:	5f01e06a 	          LSRS      PC,D1\.7,#0x10
+.*:	5f01fe1c 	          LSLSLE    D1Re0,D1\.7,#0x1f
+.*:	5f01fe60 	          LSRS      TXENABLE,D1\.7,#0x1f
+.*:	5f01feea 	          ASRS      PC,D1\.7,#0x1f
+.*:	5f081ee6 	          ASRS      A0FrP,D1Re0,#0xf
+.*:	5f08206a 	          LSRS      PCX,D1Re0,#0x10
+.*:	5f083e68 	          LSRS      A1LbP,D1Re0,#0x1f
+.*:	5f09de66 	          LSRS      A0FrP,D1\.7,#0xf
+.*:	5f09e02a 	          LSLS      PCX,D1\.7,#0x10
+.*:	5f09fe28 	          LSLS      A1LbP,D1\.7,#0x1f
+.*:	5f181e2e 	          LSLS      TXMASKI,D1Re0,#0xf
+.*:	5f183eee 	          ASRS      TXMASKI,D1Re0,#0x1f
+.*:	5f19fe6e 	          LSRS      TXMASKI,D1\.7,#0x1f
+.*:	5f381e5e 	          LSRSNV    D1\.7,D1Re0,#0xf
+.*:	5f381ee8 	          ASRS      A1\.7,D1Re0,#0xf
+.*:	5f382062 	          LSRS      D0\.7,D1Re0,#0x10
+.*:	5f383e1c 	          LSLSLE    D1\.7,D1Re0,#0x1f
+.*:	5f383e66 	          LSRS      A0\.7,D1Re0,#0x1f
+.*:	5f39de1e 	          LSLSNV    D1\.7,D1\.7,#0xf
+.*:	5f39de68 	          LSRS      A1\.7,D1\.7,#0xf
+.*:	5f39e022 	          LSLS      D0\.7,D1\.7,#0x10
+.*:	5f39e0dc 	          ASRSLE    D1\.7,D1\.7,#0x10
+.*:	5f39fe26 	          LSLS      A0\.7,D1\.7,#0x1f
+.*:	5f39fede 	          ASRSNV    D1\.7,D1\.7,#0x1f
+.*:	5f80206c 	          LSRS      RA,D1Re0,#0x10
+.*:	5f81e02c 	          LSLS      RA,D1\.7,#0x10
+.*:	5fb01eec 	          ASRS      RAM8X32,D1Re0,#0xf
+.*:	5fb1de6c 	          LSRS      RAM8X32,D1\.7,#0xf
+.*:	5fb81e2c 	          LSLS      RAM8X,D1Re0,#0xf
+.*:	5fb83eec 	          ASRS      RAM8X,D1Re0,#0x1f
+.*:	5fb9fe6c 	          LSRS      RAM8X,D1\.7,#0x1f
+.*:	5fc03e2c 	          LSLS      RABZ,D1Re0,#0x1f
+.*:	5fc1e0ec 	          ASRS      RABZ,D1\.7,#0x10
+.*:	5fe8206c 	          LSRS      RAWX,D1Re0,#0x10
+.*:	5fe9e02c 	          LSLS      RAWX,D1\.7,#0x10
+.*:	5ff81e60 	          LSRS      TXIDLECYC,D1Re0,#0xf
+.*:	5ff820e0 	          ASRS      TXIDLECYC,D1Re0,#0x10
+.*:	5ff9de20 	          LSLS      TXIDLECYC,D1\.7,#0xf
+.*:	5ff9e060 	          LSRS      TXIDLECYC,D1\.7,#0x10
+.*:	5ff9fee0 	          ASRS      TXIDLECYC,D1\.7,#0x1f
+.*:	60000e40 	          MULD      D0Re0,D0Re0,D0\.7
+.*:	60003201 	          MULW      D0Re0,D0Re0,A0FrP
+.*:	6001ce00 	          MULW      D0Re0,D0\.7,D0\.7
+.*:	6001e001 	          MULW      D0Re0,D0\.7,RD
+.*:	60380201 	          MULW      D0\.7,D0Re0,A1LbP
+.*:	60381e01 	          MULW      D0\.7,D0Re0,D1\.7
+.*:	6039c000 	          MULW      D0\.7,D0\.7,D0Re0
+.*:	6039d001 	          MULW      D0\.7,D0\.7,D1Re0
+.*:	6039fe01 	          MULW      D0\.7,D0\.7,A0\.7
+.*:	61000e40 	          MULD      D1Re0,D1Re0,D1\.7
+.*:	61003201 	          MULW      D1Re0,D1Re0,A0FrP
+.*:	6101ce00 	          MULW      D1Re0,D1\.7,D1\.7
+.*:	6101e001 	          MULW      D1Re0,D1\.7,RD
+.*:	61380201 	          MULW      D1\.7,D1Re0,A1LbP
+.*:	61381e01 	          MULW      D1\.7,D1Re0,D0\.7
+.*:	6139c000 	          MULW      D1\.7,D1\.7,D1Re0
+.*:	6139d001 	          MULW      D1\.7,D1\.7,D0Re0
+.*:	6139fe01 	          MULW      D1\.7,D1\.7,A0\.7
+.*:	62040002 	          MULW      D0Re0,D0Re0,#-32768
+.*:	6207fffd 	          MULDT     D0Re0,D0Re0,#0xffff
+.*:	623c0002 	          MULW      D0\.7,D0\.7,#-32768
+.*:	623ffffd 	          MULDT     D0\.7,D0\.7,#0xffff
+.*:	63040002 	          MULW      D1Re0,D1Re0,#-32768
+.*:	6307fffd 	          MULDT     D1Re0,D1Re0,#0xffff
+.*:	633c0002 	          MULW      D1\.7,D1\.7,#-32768
+.*:	633ffffd 	          MULDT     D1\.7,D1\.7,#0xffff
+.*:	64000064 	          MULD      D1Re0,D0Re0,D0Re0
+.*:	64000e04 	          MULWNE    D0Re0,D0Re0,D0\.7
+.*:	64000e2a 	          MULW      PC,D0Re0,D0\.7
+.*:	64001021 	          MULW      TXENABLE,D0Re0,D1Re0
+.*:	64001e25 	          MULW      D1Re0,D0Re0,D1\.7
+.*:	6400202b 	          MULW      PC,D0Re0,RD
+.*:	6400322f 	          MULW      TXSTAT,D0Re0,A0FrP
+.*:	64003e65 	          MULD      D1Re0,D0Re0,A0\.7
+.*:	6401c21d 	          MULWLE    D0Re0,D0\.7,A1LbP
+.*:	6401ce1d 	          MULWLE    D0Re0,D0\.7,A1\.7
+.*:	6401ce2b 	          MULW      PC,D0\.7,A1\.7
+.*:	6401d025 	          MULW      D1Re0,D0\.7,D1Re0
+.*:	6401de2b 	          MULW      PC,D0\.7,D1\.7
+.*:	6401e02f 	          MULW      TXSTAT,D0\.7,RD
+.*:	6401f265 	          MULD      D1Re0,D0\.7,A0FrP
+.*:	64080026 	          MULW      A0FrP,D0Re0,D0Re0
+.*:	64080267 	          MULD      A0FrP,D0Re0,A1LbP
+.*:	64080e66 	          MULD      A0FrP,D0Re0,D0\.7
+.*:	64081069 	          MULD      A1LbP,D0Re0,D1Re0
+.*:	6408202b 	          MULW      PCX,D0Re0,RD
+.*:	64083e27 	          MULW      A0FrP,D0Re0,A0\.7
+.*:	6409c066 	          MULD      A0FrP,D0\.7,D0Re0
+.*:	6409ce27 	          MULW      A0FrP,D0\.7,A1\.7
+.*:	6409ce69 	          MULD      A1LbP,D0\.7,A1\.7
+.*:	6409de2b 	          MULW      PCX,D0\.7,D1\.7
+.*:	6409f227 	          MULW      A0FrP,D0\.7,A0FrP
+.*:	6409fe67 	          MULD      A0FrP,D0\.7,A0\.7
+.*:	6418202f 	          MULW      TXMASKI,D0Re0,RD
+.*:	6419de2f 	          MULW      TXMASKI,D0\.7,D1\.7
+.*:	64380028 	          MULW      A1\.7,D0Re0,D0Re0
+.*:	64380229 	          MULW      A1\.7,D0Re0,A1LbP
+.*:	64380e24 	          MULW      D1\.7,D0Re0,D0\.7
+.*:	64380e66 	          MULD      A0\.7,D0Re0,D0\.7
+.*:	64381029 	          MULW      A1\.7,D0Re0,D1Re0
+.*:	64381e29 	          MULW      A1\.7,D0Re0,D1\.7
+.*:	64382029 	          MULW      A1\.7,D0Re0,RD
+.*:	64383229 	          MULW      A1\.7,D0Re0,A0FrP
+.*:	64383e29 	          MULW      A1\.7,D0Re0,A0\.7
+.*:	6439c028 	          MULW      A1\.7,D0\.7,D0Re0
+.*:	6439c229 	          MULW      A1\.7,D0\.7,A1LbP
+.*:	6439ce24 	          MULW      D1\.7,D0\.7,D0\.7
+.*:	6439ce66 	          MULD      A0\.7,D0\.7,D0\.7
+.*:	6439d029 	          MULW      A1\.7,D0\.7,D1Re0
+.*:	6439de29 	          MULW      A1\.7,D0\.7,D1\.7
+.*:	6439e029 	          MULW      A1\.7,D0\.7,RD
+.*:	6439f229 	          MULW      A1\.7,D0\.7,A0FrP
+.*:	6439fe29 	          MULW      A1\.7,D0\.7,A0\.7
+.*:	6480102d 	          MULW      RA,D0Re0,D1Re0
+.*:	6481ce2d 	          MULW      RA,D0\.7,A1\.7
+.*:	64b00e2c 	          MULW      RAM8X32,D0Re0,D0\.7
+.*:	64b1c22d 	          MULW      RAM8X32,D0\.7,A1LbP
+.*:	64b8002c 	          MULW      RAM8X,D0Re0,D0Re0
+.*:	64b83e2d 	          MULW      RAM8X,D0Re0,A0\.7
+.*:	64b9f22d 	          MULW      RAM8X,D0\.7,A0FrP
+.*:	64c0202d 	          MULW      RABZ,D0Re0,RD
+.*:	64c1de2d 	          MULW      RABZ,D0\.7,D1\.7
+.*:	64e8102d 	          MULW      RAWX,D0Re0,D1Re0
+.*:	64e9ce2d 	          MULW      RAWX,D0\.7,A1\.7
+.*:	64f80221 	          MULW      TXIDLECYC,D0Re0,A1LbP
+.*:	64f81e21 	          MULW      TXIDLECYC,D0Re0,D1\.7
+.*:	64f9c020 	          MULW      TXIDLECYC,D0\.7,D0Re0
+.*:	64f9d021 	          MULW      TXIDLECYC,D0\.7,D1Re0
+.*:	64f9fe21 	          MULW      TXIDLECYC,D0\.7,A0\.7
+.*:	65000062 	          MULD      D0Re0,D1Re0,D1Re0
+.*:	65000e04 	          MULWNE    D1Re0,D1Re0,D1\.7
+.*:	65000e2a 	          MULW      PC,D1Re0,D1\.7
+.*:	65001021 	          MULW      TXENABLE,D1Re0,D0Re0
+.*:	65001e23 	          MULW      D0Re0,D1Re0,D0\.7
+.*:	6500202b 	          MULW      PC,D1Re0,RD
+.*:	6500322f 	          MULW      TXSTAT,D1Re0,A0FrP
+.*:	65003e63 	          MULD      D0Re0,D1Re0,A0\.7
+.*:	6501c21d 	          MULWLE    D1Re0,D1\.7,A1LbP
+.*:	6501ce1d 	          MULWLE    D1Re0,D1\.7,A1\.7
+.*:	6501ce2b 	          MULW      PC,D1\.7,A1\.7
+.*:	6501d023 	          MULW      D0Re0,D1\.7,D0Re0
+.*:	6501de2b 	          MULW      PC,D1\.7,D0\.7
+.*:	6501e02f 	          MULW      TXSTAT,D1\.7,RD
+.*:	6501f263 	          MULD      D0Re0,D1\.7,A0FrP
+.*:	65080026 	          MULW      A0FrP,D1Re0,D1Re0
+.*:	65080267 	          MULD      A0FrP,D1Re0,A1LbP
+.*:	65080e66 	          MULD      A0FrP,D1Re0,D1\.7
+.*:	65081069 	          MULD      A1LbP,D1Re0,D0Re0
+.*:	6508202b 	          MULW      PCX,D1Re0,RD
+.*:	65083e27 	          MULW      A0FrP,D1Re0,A0\.7
+.*:	6509c066 	          MULD      A0FrP,D1\.7,D1Re0
+.*:	6509ce27 	          MULW      A0FrP,D1\.7,A1\.7
+.*:	6509ce69 	          MULD      A1LbP,D1\.7,A1\.7
+.*:	6509de2b 	          MULW      PCX,D1\.7,D0\.7
+.*:	6509f227 	          MULW      A0FrP,D1\.7,A0FrP
+.*:	6509fe67 	          MULD      A0FrP,D1\.7,A0\.7
+.*:	6518202f 	          MULW      TXMASKI,D1Re0,RD
+.*:	6519de2f 	          MULW      TXMASKI,D1\.7,D0\.7
+.*:	65380028 	          MULW      A1\.7,D1Re0,D1Re0
+.*:	65380229 	          MULW      A1\.7,D1Re0,A1LbP
+.*:	65380e22 	          MULW      D0\.7,D1Re0,D1\.7
+.*:	65380e66 	          MULD      A0\.7,D1Re0,D1\.7
+.*:	65381029 	          MULW      A1\.7,D1Re0,D0Re0
+.*:	65381e29 	          MULW      A1\.7,D1Re0,D0\.7
+.*:	65382029 	          MULW      A1\.7,D1Re0,RD
+.*:	65383229 	          MULW      A1\.7,D1Re0,A0FrP
+.*:	65383e29 	          MULW      A1\.7,D1Re0,A0\.7
+.*:	6539c028 	          MULW      A1\.7,D1\.7,D1Re0
+.*:	6539c229 	          MULW      A1\.7,D1\.7,A1LbP
+.*:	6539ce22 	          MULW      D0\.7,D1\.7,D1\.7
+.*:	6539ce66 	          MULD      A0\.7,D1\.7,D1\.7
+.*:	6539d029 	          MULW      A1\.7,D1\.7,D0Re0
+.*:	6539de29 	          MULW      A1\.7,D1\.7,D0\.7
+.*:	6539e029 	          MULW      A1\.7,D1\.7,RD
+.*:	6539f229 	          MULW      A1\.7,D1\.7,A0FrP
+.*:	6539fe29 	          MULW      A1\.7,D1\.7,A0\.7
+.*:	6580102d 	          MULW      RA,D1Re0,D0Re0
+.*:	6581ce2d 	          MULW      RA,D1\.7,A1\.7
+.*:	65b00e2c 	          MULW      RAM8X32,D1Re0,D1\.7
+.*:	65b1c22d 	          MULW      RAM8X32,D1\.7,A1LbP
+.*:	65b8002c 	          MULW      RAM8X,D1Re0,D1Re0
+.*:	65b83e2d 	          MULW      RAM8X,D1Re0,A0\.7
+.*:	65b9f22d 	          MULW      RAM8X,D1\.7,A0FrP
+.*:	65c0202d 	          MULW      RABZ,D1Re0,RD
+.*:	65c1de2d 	          MULW      RABZ,D1\.7,D0\.7
+.*:	65e8102d 	          MULW      RAWX,D1Re0,D0Re0
+.*:	65e9ce2d 	          MULW      RAWX,D1\.7,A1\.7
+.*:	65f80221 	          MULW      TXIDLECYC,D1Re0,A1LbP
+.*:	65f81e21 	          MULW      TXIDLECYC,D1Re0,D0\.7
+.*:	65f9c020 	          MULW      TXIDLECYC,D1\.7,D1Re0
+.*:	65f9d021 	          MULW      TXIDLECYC,D1\.7,D0Re0
+.*:	65f9fe21 	          MULW      TXIDLECYC,D1\.7,A0\.7
+.*:	66001fee 	          MULW      TXSTAT,D0Re0,#0x7f
+.*:	66003fcc 	          MULWPL    D0Re0,D0Re0,#0xff
+.*:	6601dfde 	          MULWNV    D0Re0,D0\.7,#0x7f
+.*:	6601e004 	          MULWNE    D0Re0,D0\.7,#0x80
+.*:	6601e02e 	          MULW      TXSTAT,D0\.7,#0x80
+.*:	6601ffea 	          MULW      PC,D0\.7,#0xff
+.*:	66082027 	          MULD      A0FrP,D0Re0,#0x80
+.*:	66083fea 	          MULW      PCX,D0Re0,#0xff
+.*:	6609e028 	          MULW      A1LbP,D0\.7,#0x80
+.*:	66181fee 	          MULW      TXMASKI,D0Re0,#0x7f
+.*:	66381fe2 	          MULW      D0\.7,D0Re0,#0x7f
+.*:	6638200c 	          MULWPL    D0\.7,D0Re0,#0x80
+.*:	66382028 	          MULW      A1\.7,D0Re0,#0x80
+.*:	66383fe6 	          MULW      A0\.7,D0Re0,#0xff
+.*:	6639dfe6 	          MULW      A0\.7,D0\.7,#0x7f
+.*:	6639e026 	          MULW      A0\.7,D0\.7,#0x80
+.*:	6639ffe6 	          MULW      A0\.7,D0\.7,#0xff
+.*:	6681e02c 	          MULW      RA,D0\.7,#0x80
+.*:	66b81fec 	          MULW      RAM8X,D0Re0,#0x7f
+.*:	66c03fec 	          MULW      RABZ,D0Re0,#0xff
+.*:	66e9e02c 	          MULW      RAWX,D0\.7,#0x80
+.*:	66f9dfe0 	          MULW      TXIDLECYC,D0\.7,#0x7f
+.*:	67001fe0 	          MULW      TXENABLE,D1Re0,#0x7f
+.*:	67002022 	          MULW      D0Re0,D1Re0,#0x80
+.*:	67003fe3 	          MULD      D0Re0,D1Re0,#0xff
+.*:	6701dfe4 	          MULW      D1Re0,D1\.7,#0x7f
+.*:	6701e023 	          MULD      D0Re0,D1\.7,#0x80
+.*:	6701ffe2 	          MULW      D0Re0,D1\.7,#0xff
+.*:	67081fe8 	          MULW      A1LbP,D1Re0,#0x7f
+.*:	67083fe6 	          MULW      A0FrP,D1Re0,#0xff
+.*:	6709dfe9 	          MULD      A1LbP,D1\.7,#0x7f
+.*:	6709ffe7 	          MULD      A0FrP,D1\.7,#0xff
+.*:	6719e02e 	          MULW      TXMASKI,D1\.7,#0x80
+.*:	67381fe6 	          MULW      A0\.7,D1Re0,#0x7f
+.*:	67382024 	          MULW      D1\.7,D1Re0,#0x80
+.*:	67383fe2 	          MULW      D0\.7,D1Re0,#0xff
+.*:	6739dfdc 	          MULWLE    D1\.7,D1\.7,#0x7f
+.*:	6739e004 	          MULWNE    D1\.7,D1\.7,#0x80
+.*:	6739ffdc 	          MULWLE    D1\.7,D1\.7,#0xff
+.*:	67801fec 	          MULW      RA,D1Re0,#0x7f
+.*:	67b03fec 	          MULW      RAM8X32,D1Re0,#0xff
+.*:	67b9e02c 	          MULW      RAM8X,D1\.7,#0x80
+.*:	67e81fec 	          MULW      RAWX,D1Re0,#0x7f
+.*:	67f82020 	          MULW      TXIDLECYC,D1Re0,#0x80
+.*:	67f9ffe0 	          MULW      TXIDLECYC,D1\.7,#0xff
+.*:	7000002c 	          NMIN      D0Re0,D0Re0,D0Re0
+.*:	70001e01 	          CMP       D0Re0,D1\.7
+.*:	7001c024 	          MAX       D0Re0,D0\.7,D0Re0
+.*:	7001ce2c 	          NMIN      D0Re0,D0\.7,D0\.7
+.*:	70380020 	          MIN       D0\.7,D0Re0,D0Re0
+.*:	7039c008 	          NORM      D0\.7,D0\.7
+.*:	71000000 	          CMP       D1Re0,D1Re0
+.*:	71000e00 	          CMP       D1Re0,D1\.7
+.*:	71003201 	          CMP       D1Re0,A0FrP
+.*:	7101c02c 	          NMIN      D1Re0,D1\.7,D1Re0
+.*:	7101de01 	          CMP       D1\.7,D0\.7
+.*:	71380028 	          ABS       D1\.7,D1Re0
+.*:	7139c024 	          MAX       D1\.7,D1\.7,D1Re0
+.*:	7203fffc 	          CMPMB     D0Re0,#0x7fff
+.*:	7207fff9 	          CMPT      D0Re0,#0xffff
+.*:	723c0000 	          CMP       D0\.7,#0x8000
+.*:	723ffffc 	          CMPMB     D0\.7,#0xffff
+.*:	73040002 	          CMP       D1Re0,#-32768
+.*:	733bfff8 	          CMP       D1\.7,#0x7fff
+.*:	733c0005 	          CMPMT     D1\.7,#0x8000
+.*:	7400021d 	          CMPLE     D0Re0,A1LbP
+.*:	74001e1d 	          CMPLE     D0Re0,D1\.7
+.*:	7401c004 	          CMPNE     D0\.7,D0Re0
+.*:	7401d00d 	          CMPPL     D0\.7,D1Re0
+.*:	7401fe1d 	          CMPLE     D0\.7,A0\.7
+.*:	75000e1e 	          CMPNV     D1Re0,D1\.7
+.*:	7500321d 	          CMPLE     D1Re0,A0FrP
+.*:	7501ce1c 	          CMPLE     D1\.7,D1\.7
+.*:	7501e00d 	          CMPPL     D1\.7,RD
+.*:	7600200c 	          CMPPL     D0Re0,#0x80
+.*:	7601ffdc 	          CMPLE     D0\.7,#0xff
+.*:	7701dfdc 	          CMPLE     D1\.7,#0x7f
+.*:	78000e00 	          TST       D0Re0,D0\.7
+.*:	7801c201 	          TST       D0\.7,A1LbP
+.*:	79000000 	          TST       D1Re0,D1Re0
+.*:	79003e01 	          TST       D1Re0,A0\.7
+.*:	7901f201 	          TST       D1\.7,A0FrP
+.*:	7a040002 	          TST       D0Re0,#-32768
+.*:	7a3bfff8 	          TST       D0\.7,#0x7fff
+.*:	7a3c0005 	          TSTMT     D0\.7,#0x8000
+.*:	7b03fffc 	          TSTMB     D1Re0,#0x7fff
+.*:	7b07fff9 	          TSTT      D1Re0,#0xffff
+.*:	7b3c0000 	          TST       D1\.7,#0x8000
+.*:	7b3ffffc 	          TSTMB     D1\.7,#0xffff
+.*:	7c000e1e 	          TSTNV     D0Re0,D0\.7
+.*:	7c00321d 	          TSTLE     D0Re0,A0FrP
+.*:	7c01ce1c 	          TSTLE     D0\.7,D0\.7
+.*:	7c01e00d 	          TSTPL     D0\.7,RD
+.*:	7d00021d 	          TSTLE     D1Re0,A1LbP
+.*:	7d001e1d 	          TSTLE     D1Re0,D0\.7
+.*:	7d01c004 	          TSTNE     D1\.7,D1Re0
+.*:	7d01d00d 	          TSTPL     D1\.7,D0Re0
+.*:	7d01fe1d 	          TSTLE     D1\.7,A0\.7
+.*:	7e01dfdc 	          TSTLE     D0\.7,#0x7f
+.*:	7f00200c 	          TSTPL     D1Re0,#0x80
+.*:	7f01ffdc 	          TSTLE     D1\.7,#0xff
+.*:	80084e00 	          ADD       A0FrP,A0FrP,A0\.7
+.*:	8009c200 	          ADD       A0FrP,A0\.7,A0FrP
+.*:	8009f001 	          ADD       A0FrP,A0\.7,D1Re0
+.*:	800c2000 	          ADD       A0FrP,CPC0,CPC0
+.*:	80384200 	          ADD       A0\.7,A0FrP,A0FrP
+.*:	80387001 	          ADD       A0\.7,A0FrP,D1Re0
+.*:	8039e000 	          ADD       A0\.7,A0\.7,CPC0
+.*:	803c1001 	          ADD       A0\.7,CPC0,D0Re0
+.*:	81082004 	          MOV       A1LbP,CPC1
+.*:	81086000 	          ADD       A1LbP,A1LbP,CPC1
+.*:	8109d001 	          ADD       A1LbP,A1\.7,D0Re0
+.*:	810c0e00 	          ADD       A1LbP,CPC1,A1\.7
+.*:	81380204 	          MOV       A1\.7,A1LbP
+.*:	81385001 	          ADD       A1\.7,A1LbP,D0Re0
+.*:	8139ce00 	          ADD       A1\.7,A1\.7,A1\.7
+.*:	813c0001 	          ADD       A1\.7,CPC1,D1Re0
+.*:	813c3201 	          ADD       A1\.7,CPC1,A0FrP
+.*:	820c0002 	          ADD       A0FrP,A0FrP,#-32768
+.*:	820ffffd 	          MOVT      A0FrP,#0xffff
+.*:	823c0002 	          ADD       A0\.7,A0\.7,#-32768
+.*:	823ffffd 	          MOVT      A0\.7,#0xffff
+.*:	828ffff9 	          ADDT      A0FrP,CPC0,#0xffff
+.*:	82bffff9 	          ADDT      A0\.7,CPC0,#0xffff
+.*:	830c0002 	          ADD       A1LbP,A1LbP,#-32768
+.*:	830ffffd 	          MOVT      A1LbP,#0xffff
+.*:	833c0002 	          ADD       A1\.7,A1\.7,#-32768
+.*:	833ffffd 	          MOVT      A1\.7,#0xffff
+.*:	838ffff9 	          ADDT      A1LbP,CPC1,#0xffff
+.*:	83bffff9 	          ADDT      A1\.7,CPC1,#0xffff
+.*:	8400423e 	          ADDNV     D0Re0,A0FrP,A0FrP
+.*:	840042be 	          ADDNV     PC,A0FrP,A0FrP
+.*:	84004e1e 	          ADDNV     TXENABLE,A0FrP,A0\.7
+.*:	84004e5e 	          ADDNV     D1Re0,A0FrP,A0\.7
+.*:	84004efe 	          ADDNV     TXSTAT,A0FrP,A0\.7
+.*:	840050bd 	          ADDLE     PC,A0FrP,D0Re0
+.*:	84005e4d 	          ADDPL     D1Re0,A0FrP,D0\.7
+.*:	8400601e 	          ADDNV     TXENABLE,A0FrP,CPC0
+.*:	8400605e 	          ADDNV     D1Re0,A0FrP,CPC0
+.*:	840060fe 	          ADDNV     TXSTAT,A0FrP,CPC0
+.*:	840070bd 	          ADDLE     PC,A0FrP,D1Re0
+.*:	84007e4d 	          ADDPL     D1Re0,A0FrP,D1\.7
+.*:	8401c21e 	          ADDNV     TXENABLE,A0\.7,A0FrP
+.*:	8401c25e 	          ADDNV     D1Re0,A0\.7,A0FrP
+.*:	8401c2fe 	          ADDNV     TXSTAT,A0\.7,A0FrP
+.*:	8401ce3e 	          ADDNV     D0Re0,A0\.7,A0\.7
+.*:	8401cebe 	          ADDNV     PC,A0\.7,A0\.7
+.*:	8401d02d 	          ADDPL     D0Re0,A0\.7,D0Re0
+.*:	8401de0d 	          ADDPL     TXENABLE,A0\.7,D0\.7
+.*:	8401defd 	          ADDLE     TXSTAT,A0\.7,D0\.7
+.*:	8401e03e 	          ADDNV     D0Re0,A0\.7,CPC0
+.*:	8401e0be 	          ADDNV     PC,A0\.7,CPC0
+.*:	8401f02d 	          ADDPL     D0Re0,A0\.7,D1Re0
+.*:	8401fe0d 	          ADDPL     TXENABLE,A0\.7,D1\.7
+.*:	8401fefd 	          ADDLE     TXSTAT,A0\.7,D1\.7
+.*:	8404023e 	          ADDNV     D0Re0,CPC0,A0FrP
+.*:	840402be 	          ADDNV     PC,CPC0,A0FrP
+.*:	84040e1e 	          ADDNV     TXENABLE,CPC0,A0\.7
+.*:	84040e5e 	          ADDNV     D1Re0,CPC0,A0\.7
+.*:	84040efe 	          ADDNV     TXSTAT,CPC0,A0\.7
+.*:	840410bd 	          ADDLE     PC,CPC0,D0Re0
+.*:	84041e5d 	          ADDLE     D1Re0,CPC0,D0\.7
+.*:	8404201e 	          ADDNV     TXENABLE,CPC0,CPC0
+.*:	8404205e 	          ADDNV     D1Re0,CPC0,CPC0
+.*:	840420fe 	          ADDNV     TXSTAT,CPC0,CPC0
+.*:	840430a5 	          ADDNE     PC,CPC0,D1Re0
+.*:	84043e55 	          ADDLS     D1Re0,CPC0,D1\.7
+.*:	8408427e 	          ADDNV     A0FrP,A0FrP,A0FrP
+.*:	840842be 	          ADDNV     PCX,A0FrP,A0FrP
+.*:	84084e9e 	          ADDNV     A1LbP,A0FrP,A0\.7
+.*:	8408508d 	          ADDPL     A1LbP,A0FrP,D0Re0
+.*:	84085ebd 	          ADDLE     PCX,A0FrP,D0\.7
+.*:	8408609e 	          ADDNV     A1LbP,A0FrP,CPC0
+.*:	8408709d 	          ADDLE     A1LbP,A0FrP,D1Re0
+.*:	84087ead 	          ADDPL     PCX,A0FrP,D1\.7
+.*:	8409c29e 	          ADDNV     A1LbP,A0\.7,A0FrP
+.*:	8409ce7e 	          ADDNV     A0FrP,A0\.7,A0\.7
+.*:	8409cebe 	          ADDNV     PCX,A0\.7,A0\.7
+.*:	8409de7d 	          ADDLE     A0FrP,A0\.7,D0\.7
+.*:	8409e07e 	          ADDNV     A0FrP,A0\.7,CPC0
+.*:	8409e0be 	          ADDNV     PCX,A0\.7,CPC0
+.*:	8409fe6d 	          ADDPL     A0FrP,A0\.7,D1\.7
+.*:	840c027e 	          ADDNV     A0FrP,CPC0,A0FrP
+.*:	840c0e7c 	          ADDLE     A0FrP,CPC0,A0\.7
+.*:	840c0ebe 	          ADDNV     PCX,CPC0,A0\.7
+.*:	840c1e7d 	          ADDLE     A0FrP,CPC0,D0\.7
+.*:	840c207e 	          ADDNV     A0FrP,CPC0,CPC0
+.*:	840c20be 	          ADDNV     PCX,CPC0,CPC0
+.*:	840c3e65 	          ADDNE     A0FrP,CPC0,D1\.7
+.*:	841842fe 	          ADDNV     TXMASKI,A0FrP,A0FrP
+.*:	84185efd 	          ADDLE     TXMASKI,A0FrP,D0\.7
+.*:	84187efd 	          ADDLE     TXMASKI,A0FrP,D1\.7
+.*:	8419cefe 	          ADDNV     TXMASKI,A0\.7,A0\.7
+.*:	8419e0fe 	          ADDNV     TXMASKI,A0\.7,CPC0
+.*:	841c02fe 	          ADDNV     TXMASKI,CPC0,A0FrP
+.*:	841c1efd 	          ADDLE     TXMASKI,CPC0,D0\.7
+.*:	841c3eed 	          ADDPL     TXMASKI,CPC0,D1\.7
+.*:	8438425e 	          ADDNV     D1\.7,A0FrP,A0FrP
+.*:	8438429e 	          ADDNV     A1\.7,A0FrP,A0FrP
+.*:	84384e5e 	          ADDNV     D1\.7,A0FrP,A0\.7
+.*:	84384e9e 	          ADDNV     A1\.7,A0FrP,A0\.7
+.*:	8438509d 	          ADDLE     A1\.7,A0FrP,D0Re0
+.*:	84385e8d 	          ADDPL     A1\.7,A0FrP,D0\.7
+.*:	8438605e 	          ADDNV     D1\.7,A0FrP,CPC0
+.*:	8438609e 	          ADDNV     A1\.7,A0FrP,CPC0
+.*:	84387095 	          ADDLS     A1\.7,A0FrP,D1Re0
+.*:	84387e9d 	          ADDLE     A1\.7,A0FrP,D1\.7
+.*:	8439c25e 	          ADDNV     D1\.7,A0\.7,A0FrP
+.*:	8439c29e 	          ADDNV     A1\.7,A0\.7,A0FrP
+.*:	8439ce5e 	          ADDNV     D1\.7,A0\.7,A0\.7
+.*:	8439ce9e 	          ADDNV     A1\.7,A0\.7,A0\.7
+.*:	8439d09d 	          ADDLE     A1\.7,A0\.7,D0Re0
+.*:	8439de9d 	          ADDLE     A1\.7,A0\.7,D0\.7
+.*:	8439e05e 	          ADDNV     D1\.7,A0\.7,CPC0
+.*:	8439e09e 	          ADDNV     A1\.7,A0\.7,CPC0
+.*:	8439f085 	          ADDNE     A1\.7,A0\.7,D1Re0
+.*:	8439fe8d 	          ADDPL     A1\.7,A0\.7,D1\.7
+.*:	843c025e 	          ADDNV     D1\.7,CPC0,A0FrP
+.*:	843c0e34 	          ADDLS     D0\.7,CPC0,A0\.7
+.*:	843c0e64 	          ADDNE     A0\.7,CPC0,A0\.7
+.*:	843c105d 	          ADDLE     D1\.7,CPC0,D0Re0
+.*:	843c1e5d 	          ADDLE     D1\.7,CPC0,D0\.7
+.*:	843c203e 	          ADDNV     D0\.7,CPC0,CPC0
+.*:	843c207e 	          ADDNV     A0\.7,CPC0,CPC0
+.*:	843c305d 	          ADDLE     D1\.7,CPC0,D1Re0
+.*:	843c3e45 	          ADDNE     D1\.7,CPC0,D1\.7
+.*:	848042de 	          ADDNV     RA,A0FrP,A0FrP
+.*:	84805ecd 	          ADDPL     RA,A0FrP,D0\.7
+.*:	84807ed5 	          ADDLS     RA,A0FrP,D1\.7
+.*:	8481cede 	          ADDNV     RA,A0\.7,A0\.7
+.*:	8481e0de 	          ADDNV     RA,A0\.7,CPC0
+.*:	848402de 	          ADDNV     RA,CPC0,A0FrP
+.*:	84841ecd 	          ADDPL     RA,CPC0,D0\.7
+.*:	84843ed5 	          ADDLS     RA,CPC0,D1\.7
+.*:	84b04ede 	          ADDNV     RAM8X32,A0FrP,A0\.7
+.*:	84b060de 	          ADDNV     RAM8X32,A0FrP,CPC0
+.*:	84b1c2de 	          ADDNV     RAM8X32,A0\.7,A0FrP
+.*:	84b1decd 	          ADDPL     RAM8X32,A0\.7,D0\.7
+.*:	84b1fed5 	          ADDLS     RAM8X32,A0\.7,D1\.7
+.*:	84b40ede 	          ADDNV     RAM8X32,CPC0,A0\.7
+.*:	84b420de 	          ADDNV     RAM8X32,CPC0,CPC0
+.*:	84b842de 	          ADDNV     RAM8X,A0FrP,A0FrP
+.*:	84b85ecd 	          ADDPL     RAM8X,A0FrP,D0\.7
+.*:	84b87ed5 	          ADDLS     RAM8X,A0FrP,D1\.7
+.*:	84b9cede 	          ADDNV     RAM8X,A0\.7,A0\.7
+.*:	84b9e0de 	          ADDNV     RAM8X,A0\.7,CPC0
+.*:	84bc02de 	          ADDNV     RAM8X,CPC0,A0FrP
+.*:	84bc1ecd 	          ADDPL     RAM8X,CPC0,D0\.7
+.*:	84bc3ed5 	          ADDLS     RAM8X,CPC0,D1\.7
+.*:	84c04ede 	          ADDNV     RABZ,A0FrP,A0\.7
+.*:	84c060de 	          ADDNV     RABZ,A0FrP,CPC0
+.*:	84c1c2de 	          ADDNV     RABZ,A0\.7,A0FrP
+.*:	84c1decd 	          ADDPL     RABZ,A0\.7,D0\.7
+.*:	84c1fed5 	          ADDLS     RABZ,A0\.7,D1\.7
+.*:	84c40ede 	          ADDNV     RABZ,CPC0,A0\.7
+.*:	84c420de 	          ADDNV     RABZ,CPC0,CPC0
+.*:	84e842de 	          ADDNV     RAWX,A0FrP,A0FrP
+.*:	84e85edd 	          ADDLE     RAWX,A0FrP,D0\.7
+.*:	84e87ecd 	          ADDPL     RAWX,A0FrP,D1\.7
+.*:	84e9cede 	          ADDNV     RAWX,A0\.7,A0\.7
+.*:	84e9e0de 	          ADDNV     RAWX,A0\.7,CPC0
+.*:	84ec02de 	          ADDNV     RAWX,CPC0,A0FrP
+.*:	84ec1edd 	          ADDLE     RAWX,CPC0,D0\.7
+.*:	84ec3ecd 	          ADDPL     RAWX,CPC0,D1\.7
+.*:	84f842de 	          ADDNV     RAMX,A0FrP,A0FrP
+.*:	84f84ede 	          ADDNV     RAMX,A0FrP,A0\.7
+.*:	84f85edd 	          ADDLE     RAMX,A0FrP,D0\.7
+.*:	84f860de 	          ADDNV     RAMX,A0FrP,CPC0
+.*:	84f87ecd 	          ADDPL     RAMX,A0FrP,D1\.7
+.*:	84f9c2de 	          ADDNV     RAMX,A0\.7,A0FrP
+.*:	84f9cede 	          ADDNV     RAMX,A0\.7,A0\.7
+.*:	84f9dedd 	          ADDLE     RAMX,A0\.7,D0\.7
+.*:	84f9e0de 	          ADDNV     RAMX,A0\.7,CPC0
+.*:	84f9fecd 	          ADDPL     RAMX,A0\.7,D1\.7
+.*:	84fc02de 	          ADDNV     RAMX,CPC0,A0FrP
+.*:	84fc0ede 	          ADDNV     RAMX,CPC0,A0\.7
+.*:	84fc1edd 	          ADDLE     RAMX,CPC0,D0\.7
+.*:	84fc20de 	          ADDNV     RAMX,CPC0,CPC0
+.*:	84fc3ecd 	          ADDPL     RAMX,CPC0,D1\.7
+.*:	850040ad 	          ADDPL     PC,A1LbP,D1Re0
+.*:	85004244 	          ADDNE     D1Re0,A1LbP,A1LbP
+.*:	85004e1e 	          ADDNV     TXENABLE,A1LbP,A1\.7
+.*:	85004e5e 	          ADDNV     D1Re0,A1LbP,A1\.7
+.*:	85004efe 	          ADDNV     TXSTAT,A1LbP,A1\.7
+.*:	850050ad 	          ADDPL     PC,A1LbP,D0Re0
+.*:	85005e5d 	          ADDLE     D1Re0,A1LbP,D0\.7
+.*:	8500601e 	          ADDNV     TXENABLE,A1LbP,CPC1
+.*:	8500605e 	          ADDNV     D1Re0,A1LbP,CPC1
+.*:	850060fe 	          ADDNV     TXSTAT,A1LbP,CPC1
+.*:	850072b5 	          ADDLS     PC,A1LbP,A0FrP
+.*:	85007e5d 	          ADDLE     D1Re0,A1LbP,A0\.7
+.*:	8501c03d 	          ADDLE     D0Re0,A1\.7,D1Re0
+.*:	8501c204 	          ADDNE     TXENABLE,A1\.7,A1LbP
+.*:	8501c2f4 	          ADDLS     TXSTAT,A1\.7,A1LbP
+.*:	8501ce3e 	          ADDNV     D0Re0,A1\.7,A1\.7
+.*:	8501cebe 	          ADDNV     PC,A1\.7,A1\.7
+.*:	8501d03d 	          ADDLE     D0Re0,A1\.7,D0Re0
+.*:	8501de1d 	          ADDLE     TXENABLE,A1\.7,D0\.7
+.*:	8501deed 	          ADDPL     TXSTAT,A1\.7,D0\.7
+.*:	8501e03e 	          ADDNV     D0Re0,A1\.7,CPC1
+.*:	8501e0be 	          ADDNV     PC,A1\.7,CPC1
+.*:	8501f225 	          ADDNE     D0Re0,A1\.7,A0FrP
+.*:	8501fe1d 	          ADDLE     TXENABLE,A1\.7,A0\.7
+.*:	8501feed 	          ADDPL     TXSTAT,A1\.7,A0\.7
+.*:	850400bd 	          ADDLE     PC,CPC1,D1Re0
+.*:	8504024c 	          ADDPL     D1Re0,CPC1,A1LbP
+.*:	85040e1e 	          ADDNV     TXENABLE,CPC1,A1\.7
+.*:	85040e5e 	          ADDNV     D1Re0,CPC1,A1\.7
+.*:	85040efe 	          ADDNV     TXSTAT,CPC1,A1\.7
+.*:	850410bd 	          ADDLE     PC,CPC1,D0Re0
+.*:	85041e5d 	          ADDLE     D1Re0,CPC1,D0\.7
+.*:	8504201e 	          ADDNV     TXENABLE,CPC1,CPC1
+.*:	8504205e 	          ADDNV     D1Re0,CPC1,CPC1
+.*:	850420fe 	          ADDNV     TXSTAT,CPC1,CPC1
+.*:	850432ad 	          ADDPL     PC,CPC1,A0FrP
+.*:	85043e5d 	          ADDLE     D1Re0,CPC1,A0\.7
+.*:	8508409d 	          ADDLE     A1LbP,A1LbP,D1Re0
+.*:	850842b4 	          ADDLS     PCX,A1LbP,A1LbP
+.*:	85084e9e 	          ADDNV     A1LbP,A1LbP,A1\.7
+.*:	8508509d 	          ADDLE     A1LbP,A1LbP,D0Re0
+.*:	85085ead 	          ADDPL     PCX,A1LbP,D0\.7
+.*:	8508609e 	          ADDNV     A1LbP,A1LbP,CPC1
+.*:	85087295 	          ADDLS     A1LbP,A1LbP,A0FrP
+.*:	85087ebd 	          ADDLE     PCX,A1LbP,A0\.7
+.*:	8509c274 	          ADDLS     A0FrP,A1\.7,A1LbP
+.*:	8509ce7e 	          ADDNV     A0FrP,A1\.7,A1\.7
+.*:	8509cebe 	          ADDNV     PCX,A1\.7,A1\.7
+.*:	8509de6d 	          ADDPL     A0FrP,A1\.7,D0\.7
+.*:	8509e07e 	          ADDNV     A0FrP,A1\.7,CPC1
+.*:	8509e0be 	          ADDNV     PCX,A1\.7,CPC1
+.*:	8509fe7d 	          ADDLE     A0FrP,A1\.7,A0\.7
+.*:	850c009d 	          ADDLE     A1LbP,CPC1,D1Re0
+.*:	850c02bc 	          ADDLE     PCX,CPC1,A1LbP
+.*:	850c0e9e 	          ADDNV     A1LbP,CPC1,A1\.7
+.*:	850c109d 	          ADDLE     A1LbP,CPC1,D0Re0
+.*:	850c1ebd 	          ADDLE     PCX,CPC1,D0\.7
+.*:	850c209e 	          ADDNV     A1LbP,CPC1,CPC1
+.*:	850c32a5 	          ADDNE     PCX,CPC1,A0FrP
+.*:	851842ec 	          ADDPL     TXMASKI,A1LbP,A1LbP
+.*:	85185efd 	          ADDLE     TXMASKI,A1LbP,D0\.7
+.*:	85187eed 	          ADDPL     TXMASKI,A1LbP,A0\.7
+.*:	8519cefe 	          ADDNV     TXMASKI,A1\.7,A1\.7
+.*:	8519e0fe 	          ADDNV     TXMASKI,A1\.7,CPC1
+.*:	851c02fc 	          ADDLE     TXMASKI,CPC1,A1LbP
+.*:	851c1efd 	          ADDLE     TXMASKI,CPC1,D0\.7
+.*:	851c3efd 	          ADDLE     TXMASKI,CPC1,A0\.7
+.*:	8538409d 	          ADDLE     A1\.7,A1LbP,D1Re0
+.*:	85384284 	          ADDNE     A1\.7,A1LbP,A1LbP
+.*:	85384e5e 	          ADDNV     D1\.7,A1LbP,A1\.7
+.*:	85384e9e 	          ADDNV     A1\.7,A1LbP,A1\.7
+.*:	8538509d 	          ADDLE     A1\.7,A1LbP,D0Re0
+.*:	85385e9d 	          ADDLE     A1\.7,A1LbP,D0\.7
+.*:	8538605e 	          ADDNV     D1\.7,A1LbP,CPC1
+.*:	8538609e 	          ADDNV     A1\.7,A1LbP,CPC1
+.*:	8538729d 	          ADDLE     A1\.7,A1LbP,A0FrP
+.*:	85387e8d 	          ADDPL     A1\.7,A1LbP,A0\.7
+.*:	8539c09d 	          ADDLE     A1\.7,A1\.7,D1Re0
+.*:	8539c294 	          ADDLS     A1\.7,A1\.7,A1LbP
+.*:	8539ce5e 	          ADDNV     D1\.7,A1\.7,A1\.7
+.*:	8539ce9e 	          ADDNV     A1\.7,A1\.7,A1\.7
+.*:	8539d09d 	          ADDLE     A1\.7,A1\.7,D0Re0
+.*:	8539de8d 	          ADDPL     A1\.7,A1\.7,D0\.7
+.*:	8539e05e 	          ADDNV     D1\.7,A1\.7,CPC1
+.*:	8539e09e 	          ADDNV     A1\.7,A1\.7,CPC1
+.*:	8539f28d 	          ADDPL     A1\.7,A1\.7,A0FrP
+.*:	8539fe9d 	          ADDLE     A1\.7,A1\.7,A0\.7
+.*:	853c009d 	          ADDLE     A1\.7,CPC1,D1Re0
+.*:	853c029c 	          ADDLE     A1\.7,CPC1,A1LbP
+.*:	853c0e5e 	          ADDNV     D1\.7,CPC1,A1\.7
+.*:	853c0e9e 	          ADDNV     A1\.7,CPC1,A1\.7
+.*:	853c109d 	          ADDLE     A1\.7,CPC1,D0Re0
+.*:	853c1e9d 	          ADDLE     A1\.7,CPC1,D0\.7
+.*:	853c205e 	          ADDNV     D1\.7,CPC1,CPC1
+.*:	853c209e 	          ADDNV     A1\.7,CPC1,CPC1
+.*:	853c3e35 	          ADDLS     D0\.7,CPC1,A0\.7
+.*:	858042d4 	          ADDLS     RA,A1LbP,A1LbP
+.*:	85805edd 	          ADDLE     RA,A1LbP,D0\.7
+.*:	85807ec5 	          ADDNE     RA,A1LbP,A0\.7
+.*:	8581cede 	          ADDNV     RA,A1\.7,A1\.7
+.*:	8581e0de 	          ADDNV     RA,A1\.7,CPC1
+.*:	858402d4 	          ADDLS     RA,CPC1,A1LbP
+.*:	85841edd 	          ADDLE     RA,CPC1,D0\.7
+.*:	85843ec5 	          ADDNE     RA,CPC1,A0\.7
+.*:	85b04ede 	          ADDNV     RAM8X32,A1LbP,A1\.7
+.*:	85b060de 	          ADDNV     RAM8X32,A1LbP,CPC1
+.*:	85b1c2d4 	          ADDLS     RAM8X32,A1\.7,A1LbP
+.*:	85b1dedd 	          ADDLE     RAM8X32,A1\.7,D0\.7
+.*:	85b1fec5 	          ADDNE     RAM8X32,A1\.7,A0\.7
+.*:	85b40ede 	          ADDNV     RAM8X32,CPC1,A1\.7
+.*:	85b420de 	          ADDNV     RAM8X32,CPC1,CPC1
+.*:	85b842d4 	          ADDLS     RAM8X,A1LbP,A1LbP
+.*:	85b85edd 	          ADDLE     RAM8X,A1LbP,D0\.7
+.*:	85b87ec5 	          ADDNE     RAM8X,A1LbP,A0\.7
+.*:	85b9cede 	          ADDNV     RAM8X,A1\.7,A1\.7
+.*:	85b9e0de 	          ADDNV     RAM8X,A1\.7,CPC1
+.*:	85bc02d4 	          ADDLS     RAM8X,CPC1,A1LbP
+.*:	85bc1edd 	          ADDLE     RAM8X,CPC1,D0\.7
+.*:	85bc3ec5 	          ADDNE     RAM8X,CPC1,A0\.7
+.*:	85c04ede 	          ADDNV     RABZ,A1LbP,A1\.7
+.*:	85c060de 	          ADDNV     RABZ,A1LbP,CPC1
+.*:	85c1c2d4 	          ADDLS     RABZ,A1\.7,A1LbP
+.*:	85c1dedd 	          ADDLE     RABZ,A1\.7,D0\.7
+.*:	85c1fec5 	          ADDNE     RABZ,A1\.7,A0\.7
+.*:	85c40ede 	          ADDNV     RABZ,CPC1,A1\.7
+.*:	85c420de 	          ADDNV     RABZ,CPC1,CPC1
+.*:	85e842cc 	          ADDPL     RAWX,A1LbP,A1LbP
+.*:	85e85edd 	          ADDLE     RAWX,A1LbP,D0\.7
+.*:	85e87edd 	          ADDLE     RAWX,A1LbP,A0\.7
+.*:	85e9cede 	          ADDNV     RAWX,A1\.7,A1\.7
+.*:	85e9e0de 	          ADDNV     RAWX,A1\.7,CPC1
+.*:	85ec02cc 	          ADDPL     RAWX,CPC1,A1LbP
+.*:	85ec1edd 	          ADDLE     RAWX,CPC1,D0\.7
+.*:	85ec3edd 	          ADDLE     RAWX,CPC1,A0\.7
+.*:	85f842cc 	          ADDPL     RAMX,A1LbP,A1LbP
+.*:	85f84ede 	          ADDNV     RAMX,A1LbP,A1\.7
+.*:	85f85edd 	          ADDLE     RAMX,A1LbP,D0\.7
+.*:	85f860de 	          ADDNV     RAMX,A1LbP,CPC1
+.*:	85f87edd 	          ADDLE     RAMX,A1LbP,A0\.7
+.*:	85f9c2cc 	          ADDPL     RAMX,A1\.7,A1LbP
+.*:	85f9cede 	          ADDNV     RAMX,A1\.7,A1\.7
+.*:	85f9dedd 	          ADDLE     RAMX,A1\.7,D0\.7
+.*:	85f9e0de 	          ADDNV     RAMX,A1\.7,CPC1
+.*:	85f9fedd 	          ADDLE     RAMX,A1\.7,A0\.7
+.*:	85fc02cc 	          ADDPL     RAMX,CPC1,A1LbP
+.*:	85fc0ede 	          ADDNV     RAMX,CPC1,A1\.7
+.*:	85fc1edd 	          ADDLE     RAMX,CPC1,D0\.7
+.*:	85fc20de 	          ADDNV     RAMX,CPC1,CPC1
+.*:	85fc3edd 	          ADDLE     RAMX,CPC1,A0\.7
+.*:	86006022 	          ADD       D0Re0,A0FrP,#0x80
+.*:	86007fee 	          ADD       TXSTAT,A0FrP,#0xff
+.*:	8601e024 	          ADD       D1Re0,A0\.7,#0x80
+.*:	86085fcc 	          ADDPL     A0FrP,A0FrP,#0x7f
+.*:	86087fdc 	          ADDLE     A0FrP,A0FrP,#0xff
+.*:	8609dfea 	          ADD       PCX,A0\.7,#0x7f
+.*:	8609ffe6 	          ADD       A0FrP,A0\.7,#0xff
+.*:	860c3fde 	          ADDNV     A0FrP,CPC0,#0xff
+.*:	86385fde 	          ADDNV     A0\.7,A0FrP,#0x7f
+.*:	86386024 	          ADD       D1\.7,A0FrP,#0x80
+.*:	86387fe8 	          ADD       A1\.7,A0FrP,#0xff
+.*:	8639e022 	          ADD       D0\.7,A0\.7,#0x80
+.*:	863c1fdc 	          ADDLE     A0\.7,CPC0,#0x7f
+.*:	86807fec 	          ADD       RA,A0FrP,#0xff
+.*:	86b1e02c 	          ADD       RAM8X32,A0\.7,#0x80
+.*:	86c05fec 	          ADD       RABZ,A0FrP,#0x7f
+.*:	86e87fec 	          ADD       RAWX,A0FrP,#0xff
+.*:	86f87fe0 	          ADD       TXIDLECYC,A0FrP,#0xff
+.*:	87005fe0 	          ADD       TXENABLE,A1LbP,#0x7f
+.*:	8700602a 	          ADD       PC,A1LbP,#0x80
+.*:	8701dfe2 	          ADD       D0Re0,A1\.7,#0x7f
+.*:	8701e02e 	          ADD       TXSTAT,A1\.7,#0x80
+.*:	87085fe6 	          ADD       A0FrP,A1LbP,#0x7f
+.*:	87087fe6 	          ADD       A0FrP,A1LbP,#0xff
+.*:	8709e01e 	          ADDNV     A1LbP,A1\.7,#0x80
+.*:	8709ffea 	          ADD       PCX,A1\.7,#0xff
+.*:	8718602e 	          ADD       TXMASKI,A1LbP,#0x80
+.*:	87385fe4 	          ADD       D1\.7,A1LbP,#0x7f
+.*:	87386028 	          ADD       A1\.7,A1LbP,#0x80
+.*:	8739dfce 	          ADDVS     A1\.7,A1\.7,#0x7f
+.*:	8739e026 	          ADD       A0\.7,A1\.7,#0x80
+.*:	873c2004 	          ADDNE     A1\.7,CPC1,#0x80
+.*:	8781e02c 	          ADD       RA,A1\.7,#0x80
+.*:	87b85fec 	          ADD       RAM8X,A1LbP,#0x7f
+.*:	87c07fec 	          ADD       RABZ,A1LbP,#0xff
+.*:	87e9e02c 	          ADD       RAWX,A1\.7,#0x80
+.*:	87f9dfe0 	          ADD       TXIDLECYC,A1\.7,#0x7f
+.*:	88080e04 	          NEG       A0FrP,A0\.7
+.*:	88084200 	          SUB       A0FrP,A0FrP,A0FrP
+.*:	88087001 	          SUB       A0FrP,A0FrP,D1Re0
+.*:	8809e000 	          SUB       A0FrP,A0\.7,CPC0
+.*:	880c1001 	          SUB       A0FrP,CPC0,D0Re0
+.*:	88380e04 	          NEG       A0\.7,A0\.7
+.*:	88384200 	          SUB       A0\.7,A0FrP,A0FrP
+.*:	88387001 	          SUB       A0\.7,A0FrP,D1Re0
+.*:	8839e000 	          SUB       A0\.7,A0\.7,CPC0
+.*:	883c1001 	          SUB       A0\.7,CPC0,D0Re0
+.*:	89080e04 	          NEG       A1LbP,A1\.7
+.*:	89084001 	          SUB       A1LbP,A1LbP,D1Re0
+.*:	89087201 	          SUB       A1LbP,A1LbP,A0FrP
+.*:	8909e000 	          SUB       A1LbP,A1\.7,CPC1
+.*:	890c1001 	          SUB       A1LbP,CPC1,D0Re0
+.*:	89380e04 	          NEG       A1\.7,A1\.7
+.*:	89384001 	          SUB       A1\.7,A1LbP,D1Re0
+.*:	89387201 	          SUB       A1\.7,A1LbP,A0FrP
+.*:	8939e000 	          SUB       A1\.7,A1\.7,CPC1
+.*:	893c1001 	          SUB       A1\.7,CPC1,D0Re0
+.*:	8a0bfffc 	          NEG       A0FrP,#0x7fff
+.*:	8a0ffffa 	          SUB       A0FrP,A0FrP,#-1
+.*:	8a3c0002 	          SUB       A0\.7,A0\.7,#-32768
+.*:	8a8bfff8 	          SUB       A0FrP,CPC0,#0x7fff
+.*:	8abbfff8 	          SUB       A0\.7,CPC0,#0x7fff
+.*:	8b0bfff8 	          SUB       A1LbP,A1LbP,#0x7fff
+.*:	8b0ffff8 	          SUB       A1LbP,A1LbP,#0xffff
+.*:	8b3c0000 	          SUB       A1\.7,A1\.7,#0x8000
+.*:	8b3ffffc 	          NEG       A1\.7,#0xffff
+.*:	8b8ffff9 	          SUBT      A1LbP,CPC1,#0xffff
+.*:	8bbffff9 	          SUBT      A1\.7,CPC1,#0xffff
+.*:	8c00423e 	          SUBNV     D0Re0,A0FrP,A0FrP
+.*:	8c0042be 	          SUBNV     PC,A0FrP,A0FrP
+.*:	8c004e1e 	          SUBNV     TXENABLE,A0FrP,A0\.7
+.*:	8c004e5e 	          SUBNV     D1Re0,A0FrP,A0\.7
+.*:	8c004efe 	          SUBNV     TXSTAT,A0FrP,A0\.7
+.*:	8c0050bd 	          SUBLE     PC,A0FrP,D0Re0
+.*:	8c005e4d 	          SUBPL     D1Re0,A0FrP,D0\.7
+.*:	8c00601e 	          SUBNV     TXENABLE,A0FrP,CPC0
+.*:	8c00605e 	          SUBNV     D1Re0,A0FrP,CPC0
+.*:	8c0060fe 	          SUBNV     TXSTAT,A0FrP,CPC0
+.*:	8c0070bd 	          SUBLE     PC,A0FrP,D1Re0
+.*:	8c007e4d 	          SUBPL     D1Re0,A0FrP,D1\.7
+.*:	8c01c21e 	          SUBNV     TXENABLE,A0\.7,A0FrP
+.*:	8c01c25e 	          SUBNV     D1Re0,A0\.7,A0FrP
+.*:	8c01c2fe 	          SUBNV     TXSTAT,A0\.7,A0FrP
+.*:	8c01ce3e 	          SUBNV     D0Re0,A0\.7,A0\.7
+.*:	8c01cebe 	          SUBNV     PC,A0\.7,A0\.7
+.*:	8c01d02d 	          SUBPL     D0Re0,A0\.7,D0Re0
+.*:	8c01de0d 	          SUBPL     TXENABLE,A0\.7,D0\.7
+.*:	8c01defd 	          SUBLE     TXSTAT,A0\.7,D0\.7
+.*:	8c01e03e 	          SUBNV     D0Re0,A0\.7,CPC0
+.*:	8c01e0be 	          SUBNV     PC,A0\.7,CPC0
+.*:	8c01f02d 	          SUBPL     D0Re0,A0\.7,D1Re0
+.*:	8c01fe0d 	          SUBPL     TXENABLE,A0\.7,D1\.7
+.*:	8c01fefd 	          SUBLE     TXSTAT,A0\.7,D1\.7
+.*:	8c04023e 	          SUBNV     D0Re0,CPC0,A0FrP
+.*:	8c0402be 	          SUBNV     PC,CPC0,A0FrP
+.*:	8c040e1e 	          SUBNV     TXENABLE,CPC0,A0\.7
+.*:	8c040e5e 	          SUBNV     D1Re0,CPC0,A0\.7
+.*:	8c040efe 	          SUBNV     TXSTAT,CPC0,A0\.7
+.*:	8c0410bd 	          SUBLE     PC,CPC0,D0Re0
+.*:	8c041e5d 	          SUBLE     D1Re0,CPC0,D0\.7
+.*:	8c04201e 	          SUBNV     TXENABLE,CPC0,CPC0
+.*:	8c04205e 	          SUBNV     D1Re0,CPC0,CPC0
+.*:	8c0420fe 	          SUBNV     TXSTAT,CPC0,CPC0
+.*:	8c0430a5 	          SUBNE     PC,CPC0,D1Re0
+.*:	8c043e55 	          SUBLS     D1Re0,CPC0,D1\.7
+.*:	8c08427e 	          SUBNV     A0FrP,A0FrP,A0FrP
+.*:	8c0842be 	          SUBNV     PCX,A0FrP,A0FrP
+.*:	8c084e9e 	          SUBNV     A1LbP,A0FrP,A0\.7
+.*:	8c08508d 	          SUBPL     A1LbP,A0FrP,D0Re0
+.*:	8c085ebd 	          SUBLE     PCX,A0FrP,D0\.7
+.*:	8c08609e 	          SUBNV     A1LbP,A0FrP,CPC0
+.*:	8c08709d 	          SUBLE     A1LbP,A0FrP,D1Re0
+.*:	8c087ead 	          SUBPL     PCX,A0FrP,D1\.7
+.*:	8c09c29e 	          SUBNV     A1LbP,A0\.7,A0FrP
+.*:	8c09ce7e 	          SUBNV     A0FrP,A0\.7,A0\.7
+.*:	8c09cebe 	          SUBNV     PCX,A0\.7,A0\.7
+.*:	8c09de7d 	          SUBLE     A0FrP,A0\.7,D0\.7
+.*:	8c09e07e 	          SUBNV     A0FrP,A0\.7,CPC0
+.*:	8c09e0be 	          SUBNV     PCX,A0\.7,CPC0
+.*:	8c09fe6d 	          SUBPL     A0FrP,A0\.7,D1\.7
+.*:	8c0c027e 	          SUBNV     A0FrP,CPC0,A0FrP
+.*:	8c0c0e7c 	          SUBLE     A0FrP,CPC0,A0\.7
+.*:	8c0c0ebe 	          SUBNV     PCX,CPC0,A0\.7
+.*:	8c0c1e7d 	          SUBLE     A0FrP,CPC0,D0\.7
+.*:	8c0c207e 	          SUBNV     A0FrP,CPC0,CPC0
+.*:	8c0c20be 	          SUBNV     PCX,CPC0,CPC0
+.*:	8c0c3e65 	          SUBNE     A0FrP,CPC0,D1\.7
+.*:	8c1842fe 	          SUBNV     TXMASKI,A0FrP,A0FrP
+.*:	8c185efd 	          SUBLE     TXMASKI,A0FrP,D0\.7
+.*:	8c187efd 	          SUBLE     TXMASKI,A0FrP,D1\.7
+.*:	8c19cefe 	          SUBNV     TXMASKI,A0\.7,A0\.7
+.*:	8c19e0fe 	          SUBNV     TXMASKI,A0\.7,CPC0
+.*:	8c1c02fe 	          SUBNV     TXMASKI,CPC0,A0FrP
+.*:	8c1c1efd 	          SUBLE     TXMASKI,CPC0,D0\.7
+.*:	8c1c3eed 	          SUBPL     TXMASKI,CPC0,D1\.7
+.*:	8c38425e 	          SUBNV     D1\.7,A0FrP,A0FrP
+.*:	8c38429e 	          SUBNV     A1\.7,A0FrP,A0FrP
+.*:	8c384e5e 	          SUBNV     D1\.7,A0FrP,A0\.7
+.*:	8c384e9e 	          SUBNV     A1\.7,A0FrP,A0\.7
+.*:	8c38509d 	          SUBLE     A1\.7,A0FrP,D0Re0
+.*:	8c385e8d 	          SUBPL     A1\.7,A0FrP,D0\.7
+.*:	8c38605e 	          SUBNV     D1\.7,A0FrP,CPC0
+.*:	8c38609e 	          SUBNV     A1\.7,A0FrP,CPC0
+.*:	8c387095 	          SUBLS     A1\.7,A0FrP,D1Re0
+.*:	8c387e9d 	          SUBLE     A1\.7,A0FrP,D1\.7
+.*:	8c39c25e 	          SUBNV     D1\.7,A0\.7,A0FrP
+.*:	8c39c29e 	          SUBNV     A1\.7,A0\.7,A0FrP
+.*:	8c39ce5e 	          SUBNV     D1\.7,A0\.7,A0\.7
+.*:	8c39ce9e 	          SUBNV     A1\.7,A0\.7,A0\.7
+.*:	8c39d09d 	          SUBLE     A1\.7,A0\.7,D0Re0
+.*:	8c39de9d 	          SUBLE     A1\.7,A0\.7,D0\.7
+.*:	8c39e05e 	          SUBNV     D1\.7,A0\.7,CPC0
+.*:	8c39e09e 	          SUBNV     A1\.7,A0\.7,CPC0
+.*:	8c39f085 	          SUBNE     A1\.7,A0\.7,D1Re0
+.*:	8c39fe8d 	          SUBPL     A1\.7,A0\.7,D1\.7
+.*:	8c3c025e 	          SUBNV     D1\.7,CPC0,A0FrP
+.*:	8c3c0e34 	          SUBLS     D0\.7,CPC0,A0\.7
+.*:	8c3c0e64 	          SUBNE     A0\.7,CPC0,A0\.7
+.*:	8c3c105d 	          SUBLE     D1\.7,CPC0,D0Re0
+.*:	8c3c1e5d 	          SUBLE     D1\.7,CPC0,D0\.7
+.*:	8c3c203e 	          SUBNV     D0\.7,CPC0,CPC0
+.*:	8c3c207e 	          SUBNV     A0\.7,CPC0,CPC0
+.*:	8c3c305d 	          SUBLE     D1\.7,CPC0,D1Re0
+.*:	8c3c3e45 	          SUBNE     D1\.7,CPC0,D1\.7
+.*:	8c8042de 	          SUBNV     RA,A0FrP,A0FrP
+.*:	8c805ecd 	          SUBPL     RA,A0FrP,D0\.7
+.*:	8c807ed5 	          SUBLS     RA,A0FrP,D1\.7
+.*:	8c81cede 	          SUBNV     RA,A0\.7,A0\.7
+.*:	8c81e0de 	          SUBNV     RA,A0\.7,CPC0
+.*:	8c8402de 	          SUBNV     RA,CPC0,A0FrP
+.*:	8c841ecd 	          SUBPL     RA,CPC0,D0\.7
+.*:	8c843ed5 	          SUBLS     RA,CPC0,D1\.7
+.*:	8cb04ede 	          SUBNV     RAM8X32,A0FrP,A0\.7
+.*:	8cb060de 	          SUBNV     RAM8X32,A0FrP,CPC0
+.*:	8cb1c2de 	          SUBNV     RAM8X32,A0\.7,A0FrP
+.*:	8cb1decd 	          SUBPL     RAM8X32,A0\.7,D0\.7
+.*:	8cb1fed5 	          SUBLS     RAM8X32,A0\.7,D1\.7
+.*:	8cb40ede 	          SUBNV     RAM8X32,CPC0,A0\.7
+.*:	8cb420de 	          SUBNV     RAM8X32,CPC0,CPC0
+.*:	8cb842de 	          SUBNV     RAM8X,A0FrP,A0FrP
+.*:	8cb85ecd 	          SUBPL     RAM8X,A0FrP,D0\.7
+.*:	8cb87ed5 	          SUBLS     RAM8X,A0FrP,D1\.7
+.*:	8cb9cede 	          SUBNV     RAM8X,A0\.7,A0\.7
+.*:	8cb9e0de 	          SUBNV     RAM8X,A0\.7,CPC0
+.*:	8cbc02de 	          SUBNV     RAM8X,CPC0,A0FrP
+.*:	8cbc1ecd 	          SUBPL     RAM8X,CPC0,D0\.7
+.*:	8cbc3ed5 	          SUBLS     RAM8X,CPC0,D1\.7
+.*:	8cc04ede 	          SUBNV     RABZ,A0FrP,A0\.7
+.*:	8cc060de 	          SUBNV     RABZ,A0FrP,CPC0
+.*:	8cc1c2de 	          SUBNV     RABZ,A0\.7,A0FrP
+.*:	8cc1decd 	          SUBPL     RABZ,A0\.7,D0\.7
+.*:	8cc1fed5 	          SUBLS     RABZ,A0\.7,D1\.7
+.*:	8cc40ede 	          SUBNV     RABZ,CPC0,A0\.7
+.*:	8cc420de 	          SUBNV     RABZ,CPC0,CPC0
+.*:	8ce842de 	          SUBNV     RAWX,A0FrP,A0FrP
+.*:	8ce85edd 	          SUBLE     RAWX,A0FrP,D0\.7
+.*:	8ce87ecd 	          SUBPL     RAWX,A0FrP,D1\.7
+.*:	8ce9cede 	          SUBNV     RAWX,A0\.7,A0\.7
+.*:	8ce9e0de 	          SUBNV     RAWX,A0\.7,CPC0
+.*:	8cec02de 	          SUBNV     RAWX,CPC0,A0FrP
+.*:	8cec1edd 	          SUBLE     RAWX,CPC0,D0\.7
+.*:	8cec3ecd 	          SUBPL     RAWX,CPC0,D1\.7
+.*:	8cf842de 	          SUBNV     RAMX,A0FrP,A0FrP
+.*:	8cf84ede 	          SUBNV     RAMX,A0FrP,A0\.7
+.*:	8cf85edd 	          SUBLE     RAMX,A0FrP,D0\.7
+.*:	8cf860de 	          SUBNV     RAMX,A0FrP,CPC0
+.*:	8cf87ecd 	          SUBPL     RAMX,A0FrP,D1\.7
+.*:	8cf9c2de 	          SUBNV     RAMX,A0\.7,A0FrP
+.*:	8cf9cede 	          SUBNV     RAMX,A0\.7,A0\.7
+.*:	8cf9dedd 	          SUBLE     RAMX,A0\.7,D0\.7
+.*:	8cf9e0de 	          SUBNV     RAMX,A0\.7,CPC0
+.*:	8cf9fecd 	          SUBPL     RAMX,A0\.7,D1\.7
+.*:	8cfc02de 	          SUBNV     RAMX,CPC0,A0FrP
+.*:	8cfc0ede 	          SUBNV     RAMX,CPC0,A0\.7
+.*:	8cfc1edd 	          SUBLE     RAMX,CPC0,D0\.7
+.*:	8cfc20de 	          SUBNV     RAMX,CPC0,CPC0
+.*:	8cfc3ecd 	          SUBPL     RAMX,CPC0,D1\.7
+.*:	8d0040ad 	          SUBPL     PC,A1LbP,D1Re0
+.*:	8d004244 	          SUBNE     D1Re0,A1LbP,A1LbP
+.*:	8d004e1e 	          SUBNV     TXENABLE,A1LbP,A1\.7
+.*:	8d004e5e 	          SUBNV     D1Re0,A1LbP,A1\.7
+.*:	8d004efe 	          SUBNV     TXSTAT,A1LbP,A1\.7
+.*:	8d0050ad 	          SUBPL     PC,A1LbP,D0Re0
+.*:	8d005e5d 	          SUBLE     D1Re0,A1LbP,D0\.7
+.*:	8d00601e 	          SUBNV     TXENABLE,A1LbP,CPC1
+.*:	8d00605e 	          SUBNV     D1Re0,A1LbP,CPC1
+.*:	8d0060fe 	          SUBNV     TXSTAT,A1LbP,CPC1
+.*:	8d0072b5 	          SUBLS     PC,A1LbP,A0FrP
+.*:	8d007e5d 	          SUBLE     D1Re0,A1LbP,A0\.7
+.*:	8d01c03d 	          SUBLE     D0Re0,A1\.7,D1Re0
+.*:	8d01c204 	          SUBNE     TXENABLE,A1\.7,A1LbP
+.*:	8d01c2f4 	          SUBLS     TXSTAT,A1\.7,A1LbP
+.*:	8d01ce3e 	          SUBNV     D0Re0,A1\.7,A1\.7
+.*:	8d01cebe 	          SUBNV     PC,A1\.7,A1\.7
+.*:	8d01d03d 	          SUBLE     D0Re0,A1\.7,D0Re0
+.*:	8d01de1d 	          SUBLE     TXENABLE,A1\.7,D0\.7
+.*:	8d01deed 	          SUBPL     TXSTAT,A1\.7,D0\.7
+.*:	8d01e03e 	          SUBNV     D0Re0,A1\.7,CPC1
+.*:	8d01e0be 	          SUBNV     PC,A1\.7,CPC1
+.*:	8d01f225 	          SUBNE     D0Re0,A1\.7,A0FrP
+.*:	8d01fe1d 	          SUBLE     TXENABLE,A1\.7,A0\.7
+.*:	8d01feed 	          SUBPL     TXSTAT,A1\.7,A0\.7
+.*:	8d0400bd 	          SUBLE     PC,CPC1,D1Re0
+.*:	8d04024c 	          SUBPL     D1Re0,CPC1,A1LbP
+.*:	8d040e1e 	          SUBNV     TXENABLE,CPC1,A1\.7
+.*:	8d040e5e 	          SUBNV     D1Re0,CPC1,A1\.7
+.*:	8d040efe 	          SUBNV     TXSTAT,CPC1,A1\.7
+.*:	8d0410bd 	          SUBLE     PC,CPC1,D0Re0
+.*:	8d041e5d 	          SUBLE     D1Re0,CPC1,D0\.7
+.*:	8d04201e 	          SUBNV     TXENABLE,CPC1,CPC1
+.*:	8d04205e 	          SUBNV     D1Re0,CPC1,CPC1
+.*:	8d0420fe 	          SUBNV     TXSTAT,CPC1,CPC1
+.*:	8d0432ad 	          SUBPL     PC,CPC1,A0FrP
+.*:	8d043e5d 	          SUBLE     D1Re0,CPC1,A0\.7
+.*:	8d08409d 	          SUBLE     A1LbP,A1LbP,D1Re0
+.*:	8d0842b4 	          SUBLS     PCX,A1LbP,A1LbP
+.*:	8d084e9e 	          SUBNV     A1LbP,A1LbP,A1\.7
+.*:	8d08509d 	          SUBLE     A1LbP,A1LbP,D0Re0
+.*:	8d085ead 	          SUBPL     PCX,A1LbP,D0\.7
+.*:	8d08609e 	          SUBNV     A1LbP,A1LbP,CPC1
+.*:	8d087295 	          SUBLS     A1LbP,A1LbP,A0FrP
+.*:	8d087ebd 	          SUBLE     PCX,A1LbP,A0\.7
+.*:	8d09c274 	          SUBLS     A0FrP,A1\.7,A1LbP
+.*:	8d09ce7e 	          SUBNV     A0FrP,A1\.7,A1\.7
+.*:	8d09cebe 	          SUBNV     PCX,A1\.7,A1\.7
+.*:	8d09de6d 	          SUBPL     A0FrP,A1\.7,D0\.7
+.*:	8d09e07e 	          SUBNV     A0FrP,A1\.7,CPC1
+.*:	8d09e0be 	          SUBNV     PCX,A1\.7,CPC1
+.*:	8d09fe7d 	          SUBLE     A0FrP,A1\.7,A0\.7
+.*:	8d0c009d 	          SUBLE     A1LbP,CPC1,D1Re0
+.*:	8d0c02bc 	          SUBLE     PCX,CPC1,A1LbP
+.*:	8d0c0e9e 	          SUBNV     A1LbP,CPC1,A1\.7
+.*:	8d0c109d 	          SUBLE     A1LbP,CPC1,D0Re0
+.*:	8d0c1ebd 	          SUBLE     PCX,CPC1,D0\.7
+.*:	8d0c209e 	          SUBNV     A1LbP,CPC1,CPC1
+.*:	8d0c32a5 	          SUBNE     PCX,CPC1,A0FrP
+.*:	8d1842ec 	          SUBPL     TXMASKI,A1LbP,A1LbP
+.*:	8d185efd 	          SUBLE     TXMASKI,A1LbP,D0\.7
+.*:	8d187eed 	          SUBPL     TXMASKI,A1LbP,A0\.7
+.*:	8d19cefe 	          SUBNV     TXMASKI,A1\.7,A1\.7
+.*:	8d19e0fe 	          SUBNV     TXMASKI,A1\.7,CPC1
+.*:	8d1c02fc 	          SUBLE     TXMASKI,CPC1,A1LbP
+.*:	8d1c1efd 	          SUBLE     TXMASKI,CPC1,D0\.7
+.*:	8d1c3efd 	          SUBLE     TXMASKI,CPC1,A0\.7
+.*:	8d38409d 	          SUBLE     A1\.7,A1LbP,D1Re0
+.*:	8d384284 	          SUBNE     A1\.7,A1LbP,A1LbP
+.*:	8d384e5e 	          SUBNV     D1\.7,A1LbP,A1\.7
+.*:	8d384e9e 	          SUBNV     A1\.7,A1LbP,A1\.7
+.*:	8d38509d 	          SUBLE     A1\.7,A1LbP,D0Re0
+.*:	8d385e9d 	          SUBLE     A1\.7,A1LbP,D0\.7
+.*:	8d38605e 	          SUBNV     D1\.7,A1LbP,CPC1
+.*:	8d38609e 	          SUBNV     A1\.7,A1LbP,CPC1
+.*:	8d38729d 	          SUBLE     A1\.7,A1LbP,A0FrP
+.*:	8d387e8d 	          SUBPL     A1\.7,A1LbP,A0\.7
+.*:	8d39c09d 	          SUBLE     A1\.7,A1\.7,D1Re0
+.*:	8d39c294 	          SUBLS     A1\.7,A1\.7,A1LbP
+.*:	8d39ce5e 	          SUBNV     D1\.7,A1\.7,A1\.7
+.*:	8d39ce9e 	          SUBNV     A1\.7,A1\.7,A1\.7
+.*:	8d39d09d 	          SUBLE     A1\.7,A1\.7,D0Re0
+.*:	8d39de8d 	          SUBPL     A1\.7,A1\.7,D0\.7
+.*:	8d39e05e 	          SUBNV     D1\.7,A1\.7,CPC1
+.*:	8d39e09e 	          SUBNV     A1\.7,A1\.7,CPC1
+.*:	8d39f28d 	          SUBPL     A1\.7,A1\.7,A0FrP
+.*:	8d39fe9d 	          SUBLE     A1\.7,A1\.7,A0\.7
+.*:	8d3c009d 	          SUBLE     A1\.7,CPC1,D1Re0
+.*:	8d3c029c 	          SUBLE     A1\.7,CPC1,A1LbP
+.*:	8d3c0e5e 	          SUBNV     D1\.7,CPC1,A1\.7
+.*:	8d3c0e9e 	          SUBNV     A1\.7,CPC1,A1\.7
+.*:	8d3c109d 	          SUBLE     A1\.7,CPC1,D0Re0
+.*:	8d3c1e9d 	          SUBLE     A1\.7,CPC1,D0\.7
+.*:	8d3c205e 	          SUBNV     D1\.7,CPC1,CPC1
+.*:	8d3c209e 	          SUBNV     A1\.7,CPC1,CPC1
+.*:	8d3c3e35 	          SUBLS     D0\.7,CPC1,A0\.7
+.*:	8d8042d4 	          SUBLS     RA,A1LbP,A1LbP
+.*:	8d805edd 	          SUBLE     RA,A1LbP,D0\.7
+.*:	8d807ec5 	          SUBNE     RA,A1LbP,A0\.7
+.*:	8d81cede 	          SUBNV     RA,A1\.7,A1\.7
+.*:	8d81e0de 	          SUBNV     RA,A1\.7,CPC1
+.*:	8d8402d4 	          SUBLS     RA,CPC1,A1LbP
+.*:	8d841edd 	          SUBLE     RA,CPC1,D0\.7
+.*:	8d843ec5 	          SUBNE     RA,CPC1,A0\.7
+.*:	8db04ede 	          SUBNV     RAM8X32,A1LbP,A1\.7
+.*:	8db060de 	          SUBNV     RAM8X32,A1LbP,CPC1
+.*:	8db1c2d4 	          SUBLS     RAM8X32,A1\.7,A1LbP
+.*:	8db1dedd 	          SUBLE     RAM8X32,A1\.7,D0\.7
+.*:	8db1fec5 	          SUBNE     RAM8X32,A1\.7,A0\.7
+.*:	8db40ede 	          SUBNV     RAM8X32,CPC1,A1\.7
+.*:	8db420de 	          SUBNV     RAM8X32,CPC1,CPC1
+.*:	8db842d4 	          SUBLS     RAM8X,A1LbP,A1LbP
+.*:	8db85edd 	          SUBLE     RAM8X,A1LbP,D0\.7
+.*:	8db87ec5 	          SUBNE     RAM8X,A1LbP,A0\.7
+.*:	8db9cede 	          SUBNV     RAM8X,A1\.7,A1\.7
+.*:	8db9e0de 	          SUBNV     RAM8X,A1\.7,CPC1
+.*:	8dbc02d4 	          SUBLS     RAM8X,CPC1,A1LbP
+.*:	8dbc1edd 	          SUBLE     RAM8X,CPC1,D0\.7
+.*:	8dbc3ec5 	          SUBNE     RAM8X,CPC1,A0\.7
+.*:	8dc04ede 	          SUBNV     RABZ,A1LbP,A1\.7
+.*:	8dc060de 	          SUBNV     RABZ,A1LbP,CPC1
+.*:	8dc1c2d4 	          SUBLS     RABZ,A1\.7,A1LbP
+.*:	8dc1dedd 	          SUBLE     RABZ,A1\.7,D0\.7
+.*:	8dc1fec5 	          SUBNE     RABZ,A1\.7,A0\.7
+.*:	8dc40ede 	          SUBNV     RABZ,CPC1,A1\.7
+.*:	8dc420de 	          SUBNV     RABZ,CPC1,CPC1
+.*:	8de842cc 	          SUBPL     RAWX,A1LbP,A1LbP
+.*:	8de85edd 	          SUBLE     RAWX,A1LbP,D0\.7
+.*:	8de87edd 	          SUBLE     RAWX,A1LbP,A0\.7
+.*:	8de9cede 	          SUBNV     RAWX,A1\.7,A1\.7
+.*:	8de9e0de 	          SUBNV     RAWX,A1\.7,CPC1
+.*:	8dec02cc 	          SUBPL     RAWX,CPC1,A1LbP
+.*:	8dec1edd 	          SUBLE     RAWX,CPC1,D0\.7
+.*:	8dec3edd 	          SUBLE     RAWX,CPC1,A0\.7
+.*:	8df842cc 	          SUBPL     RAMX,A1LbP,A1LbP
+.*:	8df84ede 	          SUBNV     RAMX,A1LbP,A1\.7
+.*:	8df85edd 	          SUBLE     RAMX,A1LbP,D0\.7
+.*:	8df860de 	          SUBNV     RAMX,A1LbP,CPC1
+.*:	8df87edd 	          SUBLE     RAMX,A1LbP,A0\.7
+.*:	8df9c2cc 	          SUBPL     RAMX,A1\.7,A1LbP
+.*:	8df9cede 	          SUBNV     RAMX,A1\.7,A1\.7
+.*:	8df9dedd 	          SUBLE     RAMX,A1\.7,D0\.7
+.*:	8df9e0de 	          SUBNV     RAMX,A1\.7,CPC1
+.*:	8df9fedd 	          SUBLE     RAMX,A1\.7,A0\.7
+.*:	8dfc02cc 	          SUBPL     RAMX,CPC1,A1LbP
+.*:	8dfc0ede 	          SUBNV     RAMX,CPC1,A1\.7
+.*:	8dfc1edd 	          SUBLE     RAMX,CPC1,D0\.7
+.*:	8dfc20de 	          SUBNV     RAMX,CPC1,CPC1
+.*:	8dfc3edd 	          SUBLE     RAMX,CPC1,A0\.7
+.*:	8e006022 	          SUB       D0Re0,A0FrP,#0x80
+.*:	8e007fee 	          SUB       TXSTAT,A0FrP,#0xff
+.*:	8e01e024 	          SUB       D1Re0,A0\.7,#0x80
+.*:	8e085fcc 	          SUBPL     A0FrP,A0FrP,#0x7f
+.*:	8e087fdc 	          SUBLE     A0FrP,A0FrP,#0xff
+.*:	8e09dfea 	          SUB       PCX,A0\.7,#0x7f
+.*:	8e09ffe6 	          SUB       A0FrP,A0\.7,#0xff
+.*:	8e0c3fde 	          SUBNV     A0FrP,CPC0,#0xff
+.*:	8e385fde 	          SUBNV     A0\.7,A0FrP,#0x7f
+.*:	8e386024 	          SUB       D1\.7,A0FrP,#0x80
+.*:	8e387fe8 	          SUB       A1\.7,A0FrP,#0xff
+.*:	8e39e022 	          SUB       D0\.7,A0\.7,#0x80
+.*:	8e3c1fdc 	          SUBLE     A0\.7,CPC0,#0x7f
+.*:	8e807fec 	          SUB       RA,A0FrP,#0xff
+.*:	8eb1e02c 	          SUB       RAM8X32,A0\.7,#0x80
+.*:	8ec05fec 	          SUB       RABZ,A0FrP,#0x7f
+.*:	8ee87fec 	          SUB       RAWX,A0FrP,#0xff
+.*:	8ef87fe0 	          SUB       TXIDLECYC,A0FrP,#0xff
+.*:	8f005fe0 	          SUB       TXENABLE,A1LbP,#0x7f
+.*:	8f00602a 	          SUB       PC,A1LbP,#0x80
+.*:	8f01dfe2 	          SUB       D0Re0,A1\.7,#0x7f
+.*:	8f01e02e 	          SUB       TXSTAT,A1\.7,#0x80
+.*:	8f085fe6 	          SUB       A0FrP,A1LbP,#0x7f
+.*:	8f087fe6 	          SUB       A0FrP,A1LbP,#0xff
+.*:	8f09e01e 	          SUBNV     A1LbP,A1\.7,#0x80
+.*:	8f09ffea 	          SUB       PCX,A1\.7,#0xff
+.*:	8f18602e 	          SUB       TXMASKI,A1LbP,#0x80
+.*:	8f385fe4 	          SUB       D1\.7,A1LbP,#0x7f
+.*:	8f386028 	          SUB       A1\.7,A1LbP,#0x80
+.*:	8f39dfce 	          SUBVS     A1\.7,A1\.7,#0x7f
+.*:	8f39e026 	          SUB       A0\.7,A1\.7,#0x80
+.*:	8f3c2004 	          SUBNE     A1\.7,CPC1,#0x80
+.*:	8f81e02c 	          SUB       RA,A1\.7,#0x80
+.*:	8fb85fec 	          SUB       RAM8X,A1LbP,#0x7f
+.*:	8fc07fec 	          SUB       RABZ,A1LbP,#0xff
+.*:	8fe9e02c 	          SUB       RAWX,A1\.7,#0x80
+.*:	8ff9dfe0 	          SUB       TXIDLECYC,A1\.7,#0x7f
+.*:	a07ffffe 	          BNV       0x.*
+.*:	a0fffffe 	          NOP
+.*:	a180005e 	          MOVBNV    D1Re0,RD
+.*:	a18002a4 	          MOVDNE    PC,RD
+.*:	a180408c 	          MOVBPL    A1LbP,RD
+.*:	a18042ac 	          MOVDPL    PCX,RD
+.*:	a181c044 	          MOVBNE    D1\.7,RD
+.*:	a181c094 	          MOVBLS    A1\.7,RD
+.*:	a181c264 	          MOVDNE    A0\.7,RD
+.*:	a185c2dc 	          MOVDLE    RAM8X,RD
+.*:	a187c2c4 	          MOVDNE    RAMX,RD
+.*:	a2800e5c 	          MOVLLE    D1Re0,D0\.7,RD
+.*:	a2804e74 	          MOVLLS    A0FrP,A1\.7,RD
+.*:	a281c274 	          MOVLLS    A0\.7,A1LbP,RD
+.*:	a281ce74 	          MOVLLS    A0\.7,A1\.7,RD
+.*:	a300005e 	          MOVNV     D1Re0,TXENABLE
+.*:	a3000424 	          MOVNE     D0Re0,D0Re0
+.*:	a3000614 	          SWAPLS    TXENABLE,D0Re0
+.*:	a3000804 	          MOVNE     TXENABLE,D1Re0
+.*:	a30008f4 	          MOVLS     TXSTAT,D1Re0
+.*:	a3000ae4 	          SWAPNE    TXSTAT,D1Re0
+.*:	a3001644 	          SWAPNE    D1Re0,PC
+.*:	a3001e44 	          SWAPNE    D1Re0,TXSTAT
+.*:	a300409e 	          MOVNV     A1LbP,TXENABLE
+.*:	a300448c 	          MOVPL     A1LbP,D0Re0
+.*:	a30046b4 	          SWAPLS    PCX,D0Re0
+.*:	a3004a7c 	          SWAPLE    A0FrP,D1Re0
+.*:	a3005494 	          MOVLS     A1LbP,PC
+.*:	a3005c94 	          MOVLS     A1LbP,TXSTAT
+.*:	a300c6fc 	          SWAPLE    TXMASKI,D0Re0
+.*:	a301c03e 	          MOVNV     D0\.7,TXENABLE
+.*:	a301c07e 	          MOVNV     A0\.7,TXENABLE
+.*:	a301c244 	          SWAPNE    D1\.7,TXENABLE
+.*:	a301c45c 	          MOVLE     D1\.7,D0Re0
+.*:	a301c674 	          SWAPLS    A0\.7,D0Re0
+.*:	a301c86c 	          MOVPL     A0\.7,D1Re0
+.*:	a301ca84 	          SWAPNE    A1\.7,D1Re0
+.*:	a301d494 	          MOVLS     A1\.7,PC
+.*:	a301d694 	          SWAPLS    A1\.7,PC
+.*:	a301dc94 	          MOVLS     A1\.7,TXSTAT
+.*:	a301de94 	          SWAPLS    A1\.7,TXSTAT
+.*:	a30588c4 	          MOVNE     RAM8X32,D1Re0
+.*:	a30608c4 	          MOVNE     RABZ,D1Re0
+.*:	a307c4c4 	          MOVNE     RAMX,D0Re0
+.*:	a307ca0c 	          SWAPPL    TXIDLECYC,D1Re0
+.*:	a3080cb4 	          MOVLS     PC,A0FrP
+.*:	a3080e54 	          SWAPLS    D1Re0,A0FrP
+.*:	a308102c 	          MOVPL     D0Re0,A1LbP
+.*:	a308121c 	          SWAPLE    TXENABLE,A1LbP
+.*:	a30812f4 	          SWAPLS    TXSTAT,A1LbP
+.*:	a3081644 	          SWAPNE    D1Re0,PCX
+.*:	a3084e8c 	          SWAPPL    A1LbP,A0FrP
+.*:	a30850ac 	          MOVPL     PCX,A1LbP
+.*:	a3085494 	          MOVLS     A1LbP,PCX
+.*:	a308ceec 	          SWAPPL    TXMASKI,A0FrP
+.*:	a309cc4c 	          MOVPL     D1\.7,A0FrP
+.*:	a309ce44 	          SWAPNE    D1\.7,A0FrP
+.*:	a309d07c 	          MOVLE     A0\.7,A1LbP
+.*:	a309d274 	          SWAPLS    A0\.7,A1LbP
+.*:	a309d494 	          MOVLS     A1\.7,PCX
+.*:	a309d694 	          SWAPLS    A1\.7,PCX
+.*:	a30d90dc 	          MOVLE     RAM8X32,A1LbP
+.*:	a30e10dc 	          MOVLE     RABZ,A1LbP
+.*:	a30fccc4 	          MOVNE     RAMX,A0FrP
+.*:	a30fd204 	          SWAPNE    TXIDLECYC,A1LbP
+.*:	a3181e44 	          SWAPNE    D1Re0,TXMASKI
+.*:	a3185e94 	          SWAPLS    A1LbP,TXMASKI
+.*:	a319dc94 	          MOVLS     A1\.7,TXMASKI
+.*:	a319de94 	          SWAPLS    A1\.7,TXMASKI
+.*:	a3305c94 	          MOVLS     A1LbP,TXPOLLI
+.*:	a331dc94 	          MOVLS     A1\.7,TXPOLLI
+.*:	a33804a4 	          MOVNE     PC,D0\.7
+.*:	a33806b4 	          SWAPLS    PC,D0\.7
+.*:	a3380854 	          MOVLS     D1Re0,D1\.7
+.*:	a3380a24 	          SWAPNE    D0Re0,D1\.7
+.*:	a3380c34 	          MOVLS     D0Re0,A0\.7
+.*:	a3380e04 	          SWAPNE    TXENABLE,A0\.7
+.*:	a3380efc 	          SWAPLE    TXSTAT,A0\.7
+.*:	a33810ac 	          MOVPL     PC,A1\.7
+.*:	a338124c 	          SWAPPL    D1Re0,A1\.7
+.*:	a338448c 	          MOVPL     A1LbP,D0\.7
+.*:	a33846b4 	          SWAPLS    PCX,D0\.7
+.*:	a3384a7c 	          SWAPLE    A0FrP,D1\.7
+.*:	a3384c9c 	          MOVLE     A1LbP,A0\.7
+.*:	a338507c 	          MOVLE     A0FrP,A1\.7
+.*:	a33852bc 	          SWAPLE    PCX,A1\.7
+.*:	a338cae4 	          SWAPNE    TXMASKI,D1\.7
+.*:	a338d2f4 	          SWAPLS    TXMASKI,A1\.7
+.*:	a339c48c 	          MOVPL     A1\.7,D0\.7
+.*:	a339c83c 	          MOVLE     D0\.7,D1\.7
+.*:	a339ca34 	          SWAPLS    D0\.7,D1\.7
+.*:	a339cc4c 	          MOVPL     D1\.7,A0\.7
+.*:	a339ce44 	          SWAPNE    D1\.7,A0\.7
+.*:	a339d07c 	          MOVLE     A0\.7,A1\.7
+.*:	a339d274 	          SWAPLS    A0\.7,A1\.7
+.*:	a33c10dc 	          MOVLE     RA,A1\.7
+.*:	a33d90dc 	          MOVLE     RAM8X32,A1\.7
+.*:	a33dd0cc 	          MOVPL     RAM8X,A1\.7
+.*:	a33e10dc 	          MOVLE     RABZ,A1\.7
+.*:	a33f50cc 	          MOVPL     RAWX,A1\.7
+.*:	a33fc80c 	          MOVPL     TXIDLECYC,D1\.7
+.*:	a33fccc4 	          MOVNE     RAMX,A0\.7
+.*:	a33fd204 	          SWAPNE    TXIDLECYC,A1\.7
+.*:	a3f8022e 	          SWAPVS    D0Re0,TXIDLECYC
+.*:	a3f8426e 	          SWAPVS    A0FrP,TXIDLECYC
+.*:	a3f9c06e 	          MOVVS     A0\.7,TXIDLECYC
+.*:	a3f9c26e 	          SWAPVS    A0\.7,TXIDLECYC
+.*:	a4000424 	          SETBNE    \[D0Re0\],D0Re0
+.*:	a4000624 	          SETDNE    \[D0Re0\],D0Re0
+.*:	a400083e 	          SETBNV    \[D0Re0\],D1Re0
+.*:	a4000a4c 	          SETDPL    \[D1Re0\],D1Re0
+.*:	a4001e34 	          SETDLS    \[D0Re0\],TXSTAT
+.*:	a400441c 	          SETBLE    \[A1LbP\],D0Re0
+.*:	a400461c 	          SETDLE    \[A1LbP\],D0Re0
+.*:	a400480c 	          SETBPL    \[A1LbP\],D1Re0
+.*:	a4004a0c 	          SETDPL    \[A1LbP\],D1Re0
+.*:	a400561c 	          SETDLE    \[A1LbP\],PC
+.*:	a401c21c 	          SETDLE    \[A1\.7\],TXENABLE
+.*:	a401c41c 	          SETBLE    \[A1\.7\],D0Re0
+.*:	a401c44c 	          SETBPL    \[D1\.7\],D0Re0
+.*:	a401c61c 	          SETDLE    \[A1\.7\],D0Re0
+.*:	a401c64c 	          SETDPL    \[D1\.7\],D0Re0
+.*:	a401c81e 	          SETBNV    \[A1\.7\],D1Re0
+.*:	a401c85e 	          SETBNV    \[D1\.7\],D1Re0
+.*:	a401ca1e 	          SETDNV    \[A1\.7\],D1Re0
+.*:	a401ca74 	          SETDLS    \[A0\.7\],D1Re0
+.*:	a401d64c 	          SETDPL    \[D1\.7\],PC
+.*:	a401de4c 	          SETDPL    \[D1\.7\],TXSTAT
+.*:	a4080c4c 	          SETBPL    \[D1Re0\],A0FrP
+.*:	a4080e5c 	          SETDLE    \[D1Re0\],A0FrP
+.*:	a408105c 	          SETBLE    \[D1Re0\],A1LbP
+.*:	a408125c 	          SETDLE    \[D1Re0\],A1LbP
+.*:	a4084c1c 	          SETBLE    \[A1LbP\],A0FrP
+.*:	a4084e1c 	          SETDLE    \[A1LbP\],A0FrP
+.*:	a408501e 	          SETBNV    \[A1LbP\],A1LbP
+.*:	a408521e 	          SETDNV    \[A1LbP\],A1LbP
+.*:	a409cc1c 	          SETBLE    \[A1\.7\],A0FrP
+.*:	a409cc4c 	          SETBPL    \[D1\.7\],A0FrP
+.*:	a409ce1c 	          SETDLE    \[A1\.7\],A0FrP
+.*:	a409ce5e 	          SETDNV    \[D1\.7\],A0FrP
+.*:	a409d01e 	          SETBNV    \[A1\.7\],A1LbP
+.*:	a409d05e 	          SETBNV    \[D1\.7\],A1LbP
+.*:	a409d21e 	          SETDNV    \[A1\.7\],A1LbP
+.*:	a409d25e 	          SETDNV    \[D1\.7\],A1LbP
+.*:	a409d64c 	          SETDPL    \[D1\.7\],PCX
+.*:	a4185e1c 	          SETDLE    \[A1LbP\],TXMASKI
+.*:	a419de4c 	          SETDPL    \[D1\.7\],TXMASKI
+.*:	a4305e1c 	          SETDLE    \[A1LbP\],TXPOLLI
+.*:	a431de4c 	          SETDPL    \[D1\.7\],TXPOLLI
+.*:	a438044c 	          SETBPL    \[D1Re0\],D0\.7
+.*:	a438064c 	          SETDPL    \[D1Re0\],D0\.7
+.*:	a438085e 	          SETBNV    \[D1Re0\],D1\.7
+.*:	a4380c24 	          SETBNE    \[D0Re0\],A0\.7
+.*:	a4380e34 	          SETDLS    \[D0Re0\],A0\.7
+.*:	a4381034 	          SETBLS    \[D0Re0\],A1\.7
+.*:	a4381234 	          SETDLS    \[D0Re0\],A1\.7
+.*:	a438441c 	          SETBLE    \[A1LbP\],D0\.7
+.*:	a438461c 	          SETDLE    \[A1LbP\],D0\.7
+.*:	a438480c 	          SETBPL    \[A1LbP\],D1\.7
+.*:	a4384a0c 	          SETDPL    \[A1LbP\],D1\.7
+.*:	a4384c1c 	          SETBLE    \[A1LbP\],A0\.7
+.*:	a4384e1c 	          SETDLE    \[A1LbP\],A0\.7
+.*:	a438501e 	          SETBNV    \[A1LbP\],A1\.7
+.*:	a438521e 	          SETDNV    \[A1LbP\],A1\.7
+.*:	a439c424 	          SETBNE    \[D0\.7\],D0\.7
+.*:	a439c474 	          SETBLS    \[A0\.7\],D0\.7
+.*:	a439c624 	          SETDNE    \[D0\.7\],D0\.7
+.*:	a439c67e 	          SETDNV    \[A0\.7\],D0\.7
+.*:	a439c83e 	          SETBNV    \[D0\.7\],D1\.7
+.*:	a439c87e 	          SETBNV    \[A0\.7\],D1\.7
+.*:	a439ca4c 	          SETDPL    \[D1\.7\],D1\.7
+.*:	a439cc1c 	          SETBLE    \[A1\.7\],A0\.7
+.*:	a439cc4c 	          SETBPL    \[D1\.7\],A0\.7
+.*:	a439ce1c 	          SETDLE    \[A1\.7\],A0\.7
+.*:	a439ce5e 	          SETDNV    \[D1\.7\],A0\.7
+.*:	a439d01e 	          SETBNV    \[A1\.7\],A1\.7
+.*:	a439d05e 	          SETBNV    \[D1\.7\],A1\.7
+.*:	a439d21e 	          SETDNV    \[A1\.7\],A1\.7
+.*:	a439d25e 	          SETDNV    \[D1\.7\],A1\.7
+.*:	a480184c 	          SETBPL    \[D1Re0\],RD
+.*:	a4801a4c 	          SETDPL    \[D1Re0\],RD
+.*:	a4805874 	          SETBLS    \[A0FrP\],RD
+.*:	a4805a74 	          SETDLS    \[A0FrP\],RD
+.*:	a481d824 	          SETBNE    \[D0\.7\],RD
+.*:	a481d874 	          SETBLS    \[A0\.7\],RD
+.*:	a481da24 	          SETDNE    \[D0\.7\],RD
+.*:	a481da74 	          SETDLS    \[A0\.7\],RD
+.*:	a4f8421c 	          SETDLE    \[A1LbP\],TXIDLECYC
+.*:	a4f9c24c 	          SETDPL    \[D1\.7\],TXIDLECYC
+.*:	a503ff91 	          SETB      \[A1LbP\+#2047\],D1Re0
+.*:	a503ffb0 	          SETB      \[D0Re0\+#2047\],D1Re0
+.*:	a503ffd0 	          SETB      \[D1Re0\+#2047\],D1Re0
+.*:	a503fff1 	          SETB      \[A0FrP\+#2047\],D1Re0
+.*:	a5040011 	          SETB      \[A1LbP\+#-2048\],D1Re0
+.*:	a5040030 	          SETB      \[D0Re0\+#-2048\],D1Re0
+.*:	a5040050 	          SETB      \[D1Re0\+#-2048\],D1Re0
+.*:	a5040071 	          SETB      \[A0FrP\+#-2048\],D1Re0
+.*:	a507ff91 	          SETB      \[A1LbP\+#-1\],D1Re0
+.*:	a507ffb0 	          SETB      \[D0Re0\+#-1\],D1Re0
+.*:	a507ffd0 	          SETB      \[D1Re0\+#-1\],D1Re0
+.*:	a507fff1 	          SETB      \[A0FrP\+#-1\],D1Re0
+.*:	a50bff99 	          SETB      \[A1LbP\+#2047\],A0FrP
+.*:	a50bffb8 	          SETB      \[D0Re0\+#2047\],A0FrP
+.*:	a50bffd8 	          SETB      \[D1Re0\+#2047\],A0FrP
+.*:	a50bfff9 	          SETB      \[A0FrP\+#2047\],A0FrP
+.*:	a50c0019 	          SETB      \[A1LbP\+#-2048\],A0FrP
+.*:	a50c0038 	          SETB      \[D0Re0\+#-2048\],A0FrP
+.*:	a50c0058 	          SETB      \[D1Re0\+#-2048\],A0FrP
+.*:	a50c0079 	          SETB      \[A0FrP\+#-2048\],A0FrP
+.*:	a50fff99 	          SETB      \[A1LbP\+#-1\],A0FrP
+.*:	a50fffb8 	          SETB      \[D0Re0\+#-1\],A0FrP
+.*:	a50fffd8 	          SETB      \[D1Re0\+#-1\],A0FrP
+.*:	a50ffff9 	          SETB      \[A0FrP\+#-1\],A0FrP
+.*:	a53bff89 	          SETB      \[A1LbP\+#2047\],D0\.7
+.*:	a53bff99 	          SETB      \[A1LbP\+#2047\],A0\.7
+.*:	a53bffa8 	          SETB      \[D0Re0\+#2047\],D0\.7
+.*:	a53bffb8 	          SETB      \[D0Re0\+#2047\],A0\.7
+.*:	a53bffc8 	          SETB      \[D1Re0\+#2047\],D0\.7
+.*:	a53bffd8 	          SETB      \[D1Re0\+#2047\],A0\.7
+.*:	a53bffe9 	          SETB      \[A0FrP\+#2047\],D0\.7
+.*:	a53bfff9 	          SETB      \[A0FrP\+#2047\],A0\.7
+.*:	a53c0009 	          SETB      \[A1LbP\+#-2048\],D0\.7
+.*:	a53c0019 	          SETB      \[A1LbP\+#-2048\],A0\.7
+.*:	a53c0028 	          SETB      \[D0Re0\+#-2048\],D0\.7
+.*:	a53c0038 	          SETB      \[D0Re0\+#-2048\],A0\.7
+.*:	a53c0048 	          SETB      \[D1Re0\+#-2048\],D0\.7
+.*:	a53c0058 	          SETB      \[D1Re0\+#-2048\],A0\.7
+.*:	a53c0069 	          SETB      \[A0FrP\+#-2048\],D0\.7
+.*:	a53c0079 	          SETB      \[A0FrP\+#-2048\],A0\.7
+.*:	a53fff89 	          SETB      \[A1LbP\+#-1\],D0\.7
+.*:	a53fff99 	          SETB      \[A1LbP\+#-1\],A0\.7
+.*:	a53fffa8 	          SETB      \[D0Re0\+#-1\],D0\.7
+.*:	a53fffb8 	          SETB      \[D0Re0\+#-1\],A0\.7
+.*:	a53fffc8 	          SETB      \[D1Re0\+#-1\],D0\.7
+.*:	a53fffd8 	          SETB      \[D1Re0\+#-1\],A0\.7
+.*:	a53fffe9 	          SETB      \[A0FrP\+#-1\],D0\.7
+.*:	a53ffff9 	          SETB      \[A0FrP\+#-1\],A0\.7
+.*:	a683ffa0 	          MOVB      RA,\[D0Re0\+#2047\]
+.*:	a683ffe1 	          MOVB      RA,\[A0FrP\+#2047\]
+.*:	a6840020 	          MOVB      RA,\[D0Re0\+#-2048\]
+.*:	a6840061 	          MOVB      RA,\[A0FrP\+#-2048\]
+.*:	a687ffa0 	          MOVB      RA,\[D0Re0\+#-1\]
+.*:	a687ffe1 	          MOVB      RA,\[A0FrP\+#-1\]
+.*:	a6b3ffa0 	          MOVB      RAM8X32,\[D0Re0\+#2047\]
+.*:	a6b3ffe1 	          MOVB      RAM8X32,\[A0FrP\+#2047\]
+.*:	a6b40020 	          MOVB      RAM8X32,\[D0Re0\+#-2048\]
+.*:	a6b40061 	          MOVB      RAM8X32,\[A0FrP\+#-2048\]
+.*:	a6b7ffa0 	          MOVB      RAM8X32,\[D0Re0\+#-1\]
+.*:	a6b7ffe1 	          MOVB      RAM8X32,\[A0FrP\+#-1\]
+.*:	a6bbffa0 	          MOVB      RAM8X,\[D0Re0\+#2047\]
+.*:	a6bbffe1 	          MOVB      RAM8X,\[A0FrP\+#2047\]
+.*:	a6bc0020 	          MOVB      RAM8X,\[D0Re0\+#-2048\]
+.*:	a6bc0061 	          MOVB      RAM8X,\[A0FrP\+#-2048\]
+.*:	a6bfffa0 	          MOVB      RAM8X,\[D0Re0\+#-1\]
+.*:	a6bfffe1 	          MOVB      RAM8X,\[A0FrP\+#-1\]
+.*:	a6c3ffa0 	          MOVB      RABZ,\[D0Re0\+#2047\]
+.*:	a6c3ffe1 	          MOVB      RABZ,\[A0FrP\+#2047\]
+.*:	a6c40020 	          MOVB      RABZ,\[D0Re0\+#-2048\]
+.*:	a6c40061 	          MOVB      RABZ,\[A0FrP\+#-2048\]
+.*:	a6c7ffa0 	          MOVB      RABZ,\[D0Re0\+#-1\]
+.*:	a6c7ffe1 	          MOVB      RABZ,\[A0FrP\+#-1\]
+.*:	a6ebffa0 	          MOVB      RAWX,\[D0Re0\+#2047\]
+.*:	a6ebffe1 	          MOVB      RAWX,\[A0FrP\+#2047\]
+.*:	a6ec0020 	          MOVB      RAWX,\[D0Re0\+#-2048\]
+.*:	a6ec0061 	          MOVB      RAWX,\[A0FrP\+#-2048\]
+.*:	a6efffa0 	          MOVB      RAWX,\[D0Re0\+#-1\]
+.*:	a6efffe1 	          MOVB      RAWX,\[A0FrP\+#-1\]
+.*:	a6fbffa0 	          MOVB      RAMX,\[D0Re0\+#2047\]
+.*:	a6fbffe1 	          MOVB      RAMX,\[A0FrP\+#2047\]
+.*:	a6fc0020 	          MOVB      RAMX,\[D0Re0\+#-2048\]
+.*:	a6fc0061 	          MOVB      RAMX,\[A0FrP\+#-2048\]
+.*:	a6ffffa0 	          MOVB      RAMX,\[D0Re0\+#-1\]
+.*:	a6ffffe1 	          MOVB      RAMX,\[A0FrP\+#-1\]
+.*:	a703ff91 	          GETB      D1Re0,\[A1LbP\+#2047\]
+.*:	a703ffb0 	          GETB      D1Re0,\[D0Re0\+#2047\]
+.*:	a703ffd0 	          GETB      D1Re0,\[D1Re0\+#2047\]
+.*:	a703fff1 	          GETB      D1Re0,\[A0FrP\+#2047\]
+.*:	a7040011 	          GETB      D1Re0,\[A1LbP\+#-2048\]
+.*:	a7040030 	          GETB      D1Re0,\[D0Re0\+#-2048\]
+.*:	a7040050 	          GETB      D1Re0,\[D1Re0\+#-2048\]
+.*:	a7040071 	          GETB      D1Re0,\[A0FrP\+#-2048\]
+.*:	a707ff91 	          GETB      D1Re0,\[A1LbP\+#-1\]
+.*:	a707ffb0 	          GETB      D1Re0,\[D0Re0\+#-1\]
+.*:	a707ffd0 	          GETB      D1Re0,\[D1Re0\+#-1\]
+.*:	a707fff1 	          GETB      D1Re0,\[A0FrP\+#-1\]
+.*:	a70bff99 	          GETB      A0FrP,\[A1LbP\+#2047\]
+.*:	a70bffb8 	          GETB      A0FrP,\[D0Re0\+#2047\]
+.*:	a70bffd8 	          GETB      A0FrP,\[D1Re0\+#2047\]
+.*:	a70bfff9 	          GETB      A0FrP,\[A0FrP\+#2047\]
+.*:	a70c0019 	          GETB      A0FrP,\[A1LbP\+#-2048\]
+.*:	a70c0038 	          GETB      A0FrP,\[D0Re0\+#-2048\]
+.*:	a70c0058 	          GETB      A0FrP,\[D1Re0\+#-2048\]
+.*:	a70c0079 	          GETB      A0FrP,\[A0FrP\+#-2048\]
+.*:	a70fff99 	          GETB      A0FrP,\[A1LbP\+#-1\]
+.*:	a70fffb8 	          GETB      A0FrP,\[D0Re0\+#-1\]
+.*:	a70fffd8 	          GETB      A0FrP,\[D1Re0\+#-1\]
+.*:	a70ffff9 	          GETB      A0FrP,\[A0FrP\+#-1\]
+.*:	a73bff89 	          GETB      D0\.7,\[A1LbP\+#2047\]
+.*:	a73bff99 	          GETB      A0\.7,\[A1LbP\+#2047\]
+.*:	a73bffa8 	          GETB      D0\.7,\[D0Re0\+#2047\]
+.*:	a73bffb8 	          GETB      A0\.7,\[D0Re0\+#2047\]
+.*:	a73bffc8 	          GETB      D0\.7,\[D1Re0\+#2047\]
+.*:	a73bffd8 	          GETB      A0\.7,\[D1Re0\+#2047\]
+.*:	a73bffe9 	          GETB      D0\.7,\[A0FrP\+#2047\]
+.*:	a73bfff9 	          GETB      A0\.7,\[A0FrP\+#2047\]
+.*:	a73c0009 	          GETB      D0\.7,\[A1LbP\+#-2048\]
+.*:	a73c0019 	          GETB      A0\.7,\[A1LbP\+#-2048\]
+.*:	a73c0028 	          GETB      D0\.7,\[D0Re0\+#-2048\]
+.*:	a73c0038 	          GETB      A0\.7,\[D0Re0\+#-2048\]
+.*:	a73c0048 	          GETB      D0\.7,\[D1Re0\+#-2048\]
+.*:	a73c0058 	          GETB      A0\.7,\[D1Re0\+#-2048\]
+.*:	a73c0069 	          GETB      D0\.7,\[A0FrP\+#-2048\]
+.*:	a73c0079 	          GETB      A0\.7,\[A0FrP\+#-2048\]
+.*:	a73fff89 	          GETB      D0\.7,\[A1LbP\+#-1\]
+.*:	a73fff99 	          GETB      A0\.7,\[A1LbP\+#-1\]
+.*:	a73fffa8 	          GETB      D0\.7,\[D0Re0\+#-1\]
+.*:	a73fffb8 	          GETB      A0\.7,\[D0Re0\+#-1\]
+.*:	a73fffc8 	          GETB      D0\.7,\[D1Re0\+#-1\]
+.*:	a73fffd8 	          GETB      A0\.7,\[D1Re0\+#-1\]
+.*:	a73fffe9 	          GETB      D0\.7,\[A0FrP\+#-1\]
+.*:	a73ffff9 	          GETB      A0\.7,\[A0FrP\+#-1\]
+.*:	a903fff9 	          MOVT      TXENABLE,#0x7fff
+.*:	a9fbfff9 	          MOVT      TXIDLECYC,#0x7fff
+.*:	aa000001 	          XSDB      D1Re0,D1Re0
+.*:	aa00000b 	          XSDSW     D1Re0,D1Re0
+.*:	aa01c007 	          RTDW      D1Re0,D1\.7
+.*:	aa380001 	          XSDB      D1\.7,D1Re0
+.*:	aa38000b 	          XSDSW     D1\.7,D1Re0
+.*:	aa39c007 	          RTDW      D1\.7,D1\.7
+.*:	ab7fffe7 	          CALLR     A1\.7,0x.*
+.*:	ab800007 	          CALLR     A1\.7,0x.*
+.*:	abffffe7 	          CALLR     A1\.7,0x.*
+.*:	ac03fffa 	          JUMP      D1Re0,#0x7fff
+.*:	ac07fffa 	          JUMP      D1Re0,#0xffff
+.*:	ac0c0003 	          JUMP      A0FrP,#0x8000
+.*:	ac3bfff9 	          JUMP      D0\.7,#0x7fff
+.*:	ac3c0001 	          JUMP      D0\.7,#0x8000
+.*:	ac3ffff9 	          JUMP      D0\.7,#0xffff
+.*:	ad000030 	          DCACHE    \[D0Re0\],D1Re0
+.*:	ad000230 	          DCACHE    \[D0Re0\+#128\],D1Re0
+.*:	ad000430 	          DCACHE    \[D0Re0\+#256\],D1Re0
+.*:	ad000630 	          DCACHE    \[D0Re0\+#384\],D1Re0
+.*:	ad000830 	          DCACHE    \[D0Re0\+#512\],D1Re0
+.*:	ad000a30 	          DCACHE    \[D0Re0\+#640\],D1Re0
+.*:	ad000c30 	          DCACHE    \[D0Re0\+#768\],D1Re0
+.*:	ad000e30 	          DCACHE    \[D0Re0\+#896\],D1Re0
+.*:	ad001030 	          DCACHE    \[D0Re0\+#1024\],D1Re0
+.*:	ad001230 	          DCACHE    \[D0Re0\+#1152\],D1Re0
+.*:	ad001430 	          DCACHE    \[D0Re0\+#1280\],D1Re0
+.*:	ad001630 	          DCACHE    \[D0Re0\+#1408\],D1Re0
+.*:	ad001830 	          DCACHE    \[D0Re0\+#1536\],D1Re0
+.*:	ad001a30 	          DCACHE    \[D0Re0\+#1664\],D1Re0
+.*:	ad001c30 	          DCACHE    \[D0Re0\+#1792\],D1Re0
+.*:	ad001e30 	          DCACHE    \[D0Re0\+#1920\],D1Re0
+.*:	ad002030 	          DCACHE    \[D0Re0\+#-2048\],D1Re0
+.*:	ad002230 	          DCACHE    \[D0Re0\+#-1920\],D1Re0
+.*:	ad002430 	          DCACHE    \[D0Re0\+#-1792\],D1Re0
+.*:	ad002630 	          DCACHE    \[D0Re0\+#-1664\],D1Re0
+.*:	ad002830 	          DCACHE    \[D0Re0\+#-1536\],D1Re0
+.*:	ad002a30 	          DCACHE    \[D0Re0\+#-1408\],D1Re0
+.*:	ad002c30 	          DCACHE    \[D0Re0\+#-1280\],D1Re0
+.*:	ad002e30 	          DCACHE    \[D0Re0\+#-1152\],D1Re0
+.*:	ad003030 	          DCACHE    \[D0Re0\+#-1024\],D1Re0
+.*:	ad003230 	          DCACHE    \[D0Re0\+#-896\],D1Re0
+.*:	ad003430 	          DCACHE    \[D0Re0\+#-768\],D1Re0
+.*:	ad003630 	          DCACHE    \[D0Re0\+#-640\],D1Re0
+.*:	ad003830 	          DCACHE    \[D0Re0\+#-512\],D1Re0
+.*:	ad003a30 	          DCACHE    \[D0Re0\+#-384\],D1Re0
+.*:	ad003c30 	          DCACHE    \[D0Re0\+#-256\],D1Re0
+.*:	ad003e30 	          DCACHE    \[D0Re0\+#-128\],D1Re0
+.*:	ad004010 	          DCACHE    \[A1LbP\],D1Re0
+.*:	ad004210 	          DCACHE    \[A1LbP\+#128\],D1Re0
+.*:	ad004410 	          DCACHE    \[A1LbP\+#256\],D1Re0
+.*:	ad004610 	          DCACHE    \[A1LbP\+#384\],D1Re0
+.*:	ad004810 	          DCACHE    \[A1LbP\+#512\],D1Re0
+.*:	ad004a10 	          DCACHE    \[A1LbP\+#640\],D1Re0
+.*:	ad004c10 	          DCACHE    \[A1LbP\+#768\],D1Re0
+.*:	ad004e10 	          DCACHE    \[A1LbP\+#896\],D1Re0
+.*:	ad005010 	          DCACHE    \[A1LbP\+#1024\],D1Re0
+.*:	ad005210 	          DCACHE    \[A1LbP\+#1152\],D1Re0
+.*:	ad005410 	          DCACHE    \[A1LbP\+#1280\],D1Re0
+.*:	ad005610 	          DCACHE    \[A1LbP\+#1408\],D1Re0
+.*:	ad005810 	          DCACHE    \[A1LbP\+#1536\],D1Re0
+.*:	ad005a10 	          DCACHE    \[A1LbP\+#1664\],D1Re0
+.*:	ad005c10 	          DCACHE    \[A1LbP\+#1792\],D1Re0
+.*:	ad005e10 	          DCACHE    \[A1LbP\+#1920\],D1Re0
+.*:	ad006010 	          DCACHE    \[A1LbP\+#-2048\],D1Re0
+.*:	ad006210 	          DCACHE    \[A1LbP\+#-1920\],D1Re0
+.*:	ad006410 	          DCACHE    \[A1LbP\+#-1792\],D1Re0
+.*:	ad006610 	          DCACHE    \[A1LbP\+#-1664\],D1Re0
+.*:	ad006810 	          DCACHE    \[A1LbP\+#-1536\],D1Re0
+.*:	ad006a10 	          DCACHE    \[A1LbP\+#-1408\],D1Re0
+.*:	ad006c10 	          DCACHE    \[A1LbP\+#-1280\],D1Re0
+.*:	ad006e10 	          DCACHE    \[A1LbP\+#-1152\],D1Re0
+.*:	ad007010 	          DCACHE    \[A1LbP\+#-1024\],D1Re0
+.*:	ad007210 	          DCACHE    \[A1LbP\+#-896\],D1Re0
+.*:	ad007410 	          DCACHE    \[A1LbP\+#-768\],D1Re0
+.*:	ad007610 	          DCACHE    \[A1LbP\+#-640\],D1Re0
+.*:	ad007810 	          DCACHE    \[A1LbP\+#-512\],D1Re0
+.*:	ad007a10 	          DCACHE    \[A1LbP\+#-384\],D1Re0
+.*:	ad007c10 	          DCACHE    \[A1LbP\+#-256\],D1Re0
+.*:	ad007e10 	          DCACHE    \[A1LbP\+#-128\],D1Re0
+.*:	ad01c010 	          DCACHE    \[A1\.7\],D1Re0
+.*:	ad01c110 	          DCACHE    \[A1\.7\+#64\],D1Re0
+.*:	ad01c210 	          DCACHE    \[A1\.7\+#128\],D1Re0
+.*:	ad01c310 	          DCACHE    \[A1\.7\+#192\],D1Re0
+.*:	ad01c410 	          DCACHE    \[A1\.7\+#256\],D1Re0
+.*:	ad01c510 	          DCACHE    \[A1\.7\+#320\],D1Re0
+.*:	ad01c610 	          DCACHE    \[A1\.7\+#384\],D1Re0
+.*:	ad01c710 	          DCACHE    \[A1\.7\+#448\],D1Re0
+.*:	ad01c810 	          DCACHE    \[A1\.7\+#512\],D1Re0
+.*:	ad01c910 	          DCACHE    \[A1\.7\+#576\],D1Re0
+.*:	ad01ca10 	          DCACHE    \[A1\.7\+#640\],D1Re0
+.*:	ad01cb10 	          DCACHE    \[A1\.7\+#704\],D1Re0
+.*:	ad01cc10 	          DCACHE    \[A1\.7\+#768\],D1Re0
+.*:	ad01cd10 	          DCACHE    \[A1\.7\+#832\],D1Re0
+.*:	ad01ce10 	          DCACHE    \[A1\.7\+#896\],D1Re0
+.*:	ad01cf10 	          DCACHE    \[A1\.7\+#960\],D1Re0
+.*:	ad01d010 	          DCACHE    \[A1\.7\+#1024\],D1Re0
+.*:	ad01d110 	          DCACHE    \[A1\.7\+#1088\],D1Re0
+.*:	ad01d210 	          DCACHE    \[A1\.7\+#1152\],D1Re0
+.*:	ad01d310 	          DCACHE    \[A1\.7\+#1216\],D1Re0
+.*:	ad01d410 	          DCACHE    \[A1\.7\+#1280\],D1Re0
+.*:	ad01d510 	          DCACHE    \[A1\.7\+#1344\],D1Re0
+.*:	ad01d610 	          DCACHE    \[A1\.7\+#1408\],D1Re0
+.*:	ad01d710 	          DCACHE    \[A1\.7\+#1472\],D1Re0
+.*:	ad01d810 	          DCACHE    \[A1\.7\+#1536\],D1Re0
+.*:	ad01d910 	          DCACHE    \[A1\.7\+#1600\],D1Re0
+.*:	ad01da10 	          DCACHE    \[A1\.7\+#1664\],D1Re0
+.*:	ad01db10 	          DCACHE    \[A1\.7\+#1728\],D1Re0
+.*:	ad01dc10 	          DCACHE    \[A1\.7\+#1792\],D1Re0
+.*:	ad01dd10 	          DCACHE    \[A1\.7\+#1856\],D1Re0
+.*:	ad01de10 	          DCACHE    \[A1\.7\+#1920\],D1Re0
+.*:	ad01df10 	          DCACHE    \[A1\.7\+#1984\],D1Re0
+.*:	ad01e010 	          DCACHE    \[A1\.7\+#-2048\],D1Re0
+.*:	ad01e110 	          DCACHE    \[A1\.7\+#-1984\],D1Re0
+.*:	ad01e210 	          DCACHE    \[A1\.7\+#-1920\],D1Re0
+.*:	ad01e310 	          DCACHE    \[A1\.7\+#-1856\],D1Re0
+.*:	ad01e410 	          DCACHE    \[A1\.7\+#-1792\],D1Re0
+.*:	ad01e510 	          DCACHE    \[A1\.7\+#-1728\],D1Re0
+.*:	ad01e610 	          DCACHE    \[A1\.7\+#-1664\],D1Re0
+.*:	ad01e710 	          DCACHE    \[A1\.7\+#-1600\],D1Re0
+.*:	ad01e810 	          DCACHE    \[A1\.7\+#-1536\],D1Re0
+.*:	ad01e910 	          DCACHE    \[A1\.7\+#-1472\],D1Re0
+.*:	ad01ea10 	          DCACHE    \[A1\.7\+#-1408\],D1Re0
+.*:	ad01eb10 	          DCACHE    \[A1\.7\+#-1344\],D1Re0
+.*:	ad01ec10 	          DCACHE    \[A1\.7\+#-1280\],D1Re0
+.*:	ad01ed10 	          DCACHE    \[A1\.7\+#-1216\],D1Re0
+.*:	ad01ee10 	          DCACHE    \[A1\.7\+#-1152\],D1Re0
+.*:	ad01ef10 	          DCACHE    \[A1\.7\+#-1088\],D1Re0
+.*:	ad01f010 	          DCACHE    \[A1\.7\+#-1024\],D1Re0
+.*:	ad01f110 	          DCACHE    \[A1\.7\+#-960\],D1Re0
+.*:	ad01f210 	          DCACHE    \[A1\.7\+#-896\],D1Re0
+.*:	ad01f310 	          DCACHE    \[A1\.7\+#-832\],D1Re0
+.*:	ad01f410 	          DCACHE    \[A1\.7\+#-768\],D1Re0
+.*:	ad01f510 	          DCACHE    \[A1\.7\+#-704\],D1Re0
+.*:	ad01f610 	          DCACHE    \[A1\.7\+#-640\],D1Re0
+.*:	ad01f710 	          DCACHE    \[A1\.7\+#-576\],D1Re0
+.*:	ad01f810 	          DCACHE    \[A1\.7\+#-512\],D1Re0
+.*:	ad01f910 	          DCACHE    \[A1\.7\+#-448\],D1Re0
+.*:	ad01fa10 	          DCACHE    \[A1\.7\+#-384\],D1Re0
+.*:	ad01fb10 	          DCACHE    \[A1\.7\+#-320\],D1Re0
+.*:	ad01fc10 	          DCACHE    \[A1\.7\+#-256\],D1Re0
+.*:	ad01fd10 	          DCACHE    \[A1\.7\+#-192\],D1Re0
+.*:	ad01fe10 	          DCACHE    \[A1\.7\+#-128\],D1Re0
+.*:	ad01ff10 	          DCACHE    \[A1\.7\+#-64\],D1Re0
+.*:	ad080038 	          DCACHE    \[D0Re0\],A0FrP
+.*:	ad080238 	          DCACHE    \[D0Re0\+#128\],A0FrP
+.*:	ad080438 	          DCACHE    \[D0Re0\+#256\],A0FrP
+.*:	ad080638 	          DCACHE    \[D0Re0\+#384\],A0FrP
+.*:	ad080838 	          DCACHE    \[D0Re0\+#512\],A0FrP
+.*:	ad080a38 	          DCACHE    \[D0Re0\+#640\],A0FrP
+.*:	ad080c38 	          DCACHE    \[D0Re0\+#768\],A0FrP
+.*:	ad080e38 	          DCACHE    \[D0Re0\+#896\],A0FrP
+.*:	ad081038 	          DCACHE    \[D0Re0\+#1024\],A0FrP
+.*:	ad081238 	          DCACHE    \[D0Re0\+#1152\],A0FrP
+.*:	ad081438 	          DCACHE    \[D0Re0\+#1280\],A0FrP
+.*:	ad081638 	          DCACHE    \[D0Re0\+#1408\],A0FrP
+.*:	ad081838 	          DCACHE    \[D0Re0\+#1536\],A0FrP
+.*:	ad081a38 	          DCACHE    \[D0Re0\+#1664\],A0FrP
+.*:	ad081c38 	          DCACHE    \[D0Re0\+#1792\],A0FrP
+.*:	ad081e38 	          DCACHE    \[D0Re0\+#1920\],A0FrP
+.*:	ad082038 	          DCACHE    \[D0Re0\+#-2048\],A0FrP
+.*:	ad082238 	          DCACHE    \[D0Re0\+#-1920\],A0FrP
+.*:	ad082438 	          DCACHE    \[D0Re0\+#-1792\],A0FrP
+.*:	ad082638 	          DCACHE    \[D0Re0\+#-1664\],A0FrP
+.*:	ad082838 	          DCACHE    \[D0Re0\+#-1536\],A0FrP
+.*:	ad082a38 	          DCACHE    \[D0Re0\+#-1408\],A0FrP
+.*:	ad082c38 	          DCACHE    \[D0Re0\+#-1280\],A0FrP
+.*:	ad082e38 	          DCACHE    \[D0Re0\+#-1152\],A0FrP
+.*:	ad083038 	          DCACHE    \[D0Re0\+#-1024\],A0FrP
+.*:	ad083238 	          DCACHE    \[D0Re0\+#-896\],A0FrP
+.*:	ad083438 	          DCACHE    \[D0Re0\+#-768\],A0FrP
+.*:	ad083638 	          DCACHE    \[D0Re0\+#-640\],A0FrP
+.*:	ad083838 	          DCACHE    \[D0Re0\+#-512\],A0FrP
+.*:	ad083a38 	          DCACHE    \[D0Re0\+#-384\],A0FrP
+.*:	ad083c38 	          DCACHE    \[D0Re0\+#-256\],A0FrP
+.*:	ad083e38 	          DCACHE    \[D0Re0\+#-128\],A0FrP
+.*:	ad084018 	          DCACHE    \[A1LbP\],A0FrP
+.*:	ad084218 	          DCACHE    \[A1LbP\+#128\],A0FrP
+.*:	ad084418 	          DCACHE    \[A1LbP\+#256\],A0FrP
+.*:	ad084618 	          DCACHE    \[A1LbP\+#384\],A0FrP
+.*:	ad084818 	          DCACHE    \[A1LbP\+#512\],A0FrP
+.*:	ad084a18 	          DCACHE    \[A1LbP\+#640\],A0FrP
+.*:	ad084c18 	          DCACHE    \[A1LbP\+#768\],A0FrP
+.*:	ad084e18 	          DCACHE    \[A1LbP\+#896\],A0FrP
+.*:	ad085018 	          DCACHE    \[A1LbP\+#1024\],A0FrP
+.*:	ad085218 	          DCACHE    \[A1LbP\+#1152\],A0FrP
+.*:	ad085418 	          DCACHE    \[A1LbP\+#1280\],A0FrP
+.*:	ad085618 	          DCACHE    \[A1LbP\+#1408\],A0FrP
+.*:	ad085818 	          DCACHE    \[A1LbP\+#1536\],A0FrP
+.*:	ad085a18 	          DCACHE    \[A1LbP\+#1664\],A0FrP
+.*:	ad085c18 	          DCACHE    \[A1LbP\+#1792\],A0FrP
+.*:	ad085e18 	          DCACHE    \[A1LbP\+#1920\],A0FrP
+.*:	ad086018 	          DCACHE    \[A1LbP\+#-2048\],A0FrP
+.*:	ad086218 	          DCACHE    \[A1LbP\+#-1920\],A0FrP
+.*:	ad086418 	          DCACHE    \[A1LbP\+#-1792\],A0FrP
+.*:	ad086618 	          DCACHE    \[A1LbP\+#-1664\],A0FrP
+.*:	ad086818 	          DCACHE    \[A1LbP\+#-1536\],A0FrP
+.*:	ad086a18 	          DCACHE    \[A1LbP\+#-1408\],A0FrP
+.*:	ad086c18 	          DCACHE    \[A1LbP\+#-1280\],A0FrP
+.*:	ad086e18 	          DCACHE    \[A1LbP\+#-1152\],A0FrP
+.*:	ad087018 	          DCACHE    \[A1LbP\+#-1024\],A0FrP
+.*:	ad087218 	          DCACHE    \[A1LbP\+#-896\],A0FrP
+.*:	ad087418 	          DCACHE    \[A1LbP\+#-768\],A0FrP
+.*:	ad087618 	          DCACHE    \[A1LbP\+#-640\],A0FrP
+.*:	ad087818 	          DCACHE    \[A1LbP\+#-512\],A0FrP
+.*:	ad087a18 	          DCACHE    \[A1LbP\+#-384\],A0FrP
+.*:	ad087c18 	          DCACHE    \[A1LbP\+#-256\],A0FrP
+.*:	ad087e18 	          DCACHE    \[A1LbP\+#-128\],A0FrP
+.*:	ad09c018 	          DCACHE    \[A1\.7\],A0FrP
+.*:	ad09c118 	          DCACHE    \[A1\.7\+#64\],A0FrP
+.*:	ad09c218 	          DCACHE    \[A1\.7\+#128\],A0FrP
+.*:	ad09c318 	          DCACHE    \[A1\.7\+#192\],A0FrP
+.*:	ad09c418 	          DCACHE    \[A1\.7\+#256\],A0FrP
+.*:	ad09c518 	          DCACHE    \[A1\.7\+#320\],A0FrP
+.*:	ad09c618 	          DCACHE    \[A1\.7\+#384\],A0FrP
+.*:	ad09c718 	          DCACHE    \[A1\.7\+#448\],A0FrP
+.*:	ad09c818 	          DCACHE    \[A1\.7\+#512\],A0FrP
+.*:	ad09c918 	          DCACHE    \[A1\.7\+#576\],A0FrP
+.*:	ad09ca18 	          DCACHE    \[A1\.7\+#640\],A0FrP
+.*:	ad09cb18 	          DCACHE    \[A1\.7\+#704\],A0FrP
+.*:	ad09cc18 	          DCACHE    \[A1\.7\+#768\],A0FrP
+.*:	ad09cd18 	          DCACHE    \[A1\.7\+#832\],A0FrP
+.*:	ad09ce18 	          DCACHE    \[A1\.7\+#896\],A0FrP
+.*:	ad09cf18 	          DCACHE    \[A1\.7\+#960\],A0FrP
+.*:	ad09d018 	          DCACHE    \[A1\.7\+#1024\],A0FrP
+.*:	ad09d118 	          DCACHE    \[A1\.7\+#1088\],A0FrP
+.*:	ad09d218 	          DCACHE    \[A1\.7\+#1152\],A0FrP
+.*:	ad09d318 	          DCACHE    \[A1\.7\+#1216\],A0FrP
+.*:	ad09d418 	          DCACHE    \[A1\.7\+#1280\],A0FrP
+.*:	ad09d518 	          DCACHE    \[A1\.7\+#1344\],A0FrP
+.*:	ad09d618 	          DCACHE    \[A1\.7\+#1408\],A0FrP
+.*:	ad09d718 	          DCACHE    \[A1\.7\+#1472\],A0FrP
+.*:	ad09d818 	          DCACHE    \[A1\.7\+#1536\],A0FrP
+.*:	ad09d918 	          DCACHE    \[A1\.7\+#1600\],A0FrP
+.*:	ad09da18 	          DCACHE    \[A1\.7\+#1664\],A0FrP
+.*:	ad09db18 	          DCACHE    \[A1\.7\+#1728\],A0FrP
+.*:	ad09dc18 	          DCACHE    \[A1\.7\+#1792\],A0FrP
+.*:	ad09dd18 	          DCACHE    \[A1\.7\+#1856\],A0FrP
+.*:	ad09de18 	          DCACHE    \[A1\.7\+#1920\],A0FrP
+.*:	ad09df18 	          DCACHE    \[A1\.7\+#1984\],A0FrP
+.*:	ad09e018 	          DCACHE    \[A1\.7\+#-2048\],A0FrP
+.*:	ad09e118 	          DCACHE    \[A1\.7\+#-1984\],A0FrP
+.*:	ad09e218 	          DCACHE    \[A1\.7\+#-1920\],A0FrP
+.*:	ad09e318 	          DCACHE    \[A1\.7\+#-1856\],A0FrP
+.*:	ad09e418 	          DCACHE    \[A1\.7\+#-1792\],A0FrP
+.*:	ad09e518 	          DCACHE    \[A1\.7\+#-1728\],A0FrP
+.*:	ad09e618 	          DCACHE    \[A1\.7\+#-1664\],A0FrP
+.*:	ad09e718 	          DCACHE    \[A1\.7\+#-1600\],A0FrP
+.*:	ad09e818 	          DCACHE    \[A1\.7\+#-1536\],A0FrP
+.*:	ad09e918 	          DCACHE    \[A1\.7\+#-1472\],A0FrP
+.*:	ad09ea18 	          DCACHE    \[A1\.7\+#-1408\],A0FrP
+.*:	ad09eb18 	          DCACHE    \[A1\.7\+#-1344\],A0FrP
+.*:	ad09ec18 	          DCACHE    \[A1\.7\+#-1280\],A0FrP
+.*:	ad09ed18 	          DCACHE    \[A1\.7\+#-1216\],A0FrP
+.*:	ad09ee18 	          DCACHE    \[A1\.7\+#-1152\],A0FrP
+.*:	ad09ef18 	          DCACHE    \[A1\.7\+#-1088\],A0FrP
+.*:	ad09f018 	          DCACHE    \[A1\.7\+#-1024\],A0FrP
+.*:	ad09f118 	          DCACHE    \[A1\.7\+#-960\],A0FrP
+.*:	ad09f218 	          DCACHE    \[A1\.7\+#-896\],A0FrP
+.*:	ad09f318 	          DCACHE    \[A1\.7\+#-832\],A0FrP
+.*:	ad09f418 	          DCACHE    \[A1\.7\+#-768\],A0FrP
+.*:	ad09f518 	          DCACHE    \[A1\.7\+#-704\],A0FrP
+.*:	ad09f618 	          DCACHE    \[A1\.7\+#-640\],A0FrP
+.*:	ad09f718 	          DCACHE    \[A1\.7\+#-576\],A0FrP
+.*:	ad09f818 	          DCACHE    \[A1\.7\+#-512\],A0FrP
+.*:	ad09f918 	          DCACHE    \[A1\.7\+#-448\],A0FrP
+.*:	ad09fa18 	          DCACHE    \[A1\.7\+#-384\],A0FrP
+.*:	ad09fb18 	          DCACHE    \[A1\.7\+#-320\],A0FrP
+.*:	ad09fc18 	          DCACHE    \[A1\.7\+#-256\],A0FrP
+.*:	ad09fd18 	          DCACHE    \[A1\.7\+#-192\],A0FrP
+.*:	ad09fe18 	          DCACHE    \[A1\.7\+#-128\],A0FrP
+.*:	ad09ff18 	          DCACHE    \[A1\.7\+#-64\],A0FrP
+.*:	ad380028 	          DCACHE    \[D0Re0\],D0\.7
+.*:	ad380128 	          DCACHE    \[D0Re0\+#64\],D0\.7
+.*:	ad380228 	          DCACHE    \[D0Re0\+#128\],D0\.7
+.*:	ad380328 	          DCACHE    \[D0Re0\+#192\],D0\.7
+.*:	ad380428 	          DCACHE    \[D0Re0\+#256\],D0\.7
+.*:	ad380528 	          DCACHE    \[D0Re0\+#320\],D0\.7
+.*:	ad380628 	          DCACHE    \[D0Re0\+#384\],D0\.7
+.*:	ad380728 	          DCACHE    \[D0Re0\+#448\],D0\.7
+.*:	ad380828 	          DCACHE    \[D0Re0\+#512\],D0\.7
+.*:	ad380928 	          DCACHE    \[D0Re0\+#576\],D0\.7
+.*:	ad380a28 	          DCACHE    \[D0Re0\+#640\],D0\.7
+.*:	ad380b28 	          DCACHE    \[D0Re0\+#704\],D0\.7
+.*:	ad380c28 	          DCACHE    \[D0Re0\+#768\],D0\.7
+.*:	ad380d28 	          DCACHE    \[D0Re0\+#832\],D0\.7
+.*:	ad380e28 	          DCACHE    \[D0Re0\+#896\],D0\.7
+.*:	ad380f28 	          DCACHE    \[D0Re0\+#960\],D0\.7
+.*:	ad381028 	          DCACHE    \[D0Re0\+#1024\],D0\.7
+.*:	ad381128 	          DCACHE    \[D0Re0\+#1088\],D0\.7
+.*:	ad381228 	          DCACHE    \[D0Re0\+#1152\],D0\.7
+.*:	ad381328 	          DCACHE    \[D0Re0\+#1216\],D0\.7
+.*:	ad381428 	          DCACHE    \[D0Re0\+#1280\],D0\.7
+.*:	ad381528 	          DCACHE    \[D0Re0\+#1344\],D0\.7
+.*:	ad381628 	          DCACHE    \[D0Re0\+#1408\],D0\.7
+.*:	ad381728 	          DCACHE    \[D0Re0\+#1472\],D0\.7
+.*:	ad381828 	          DCACHE    \[D0Re0\+#1536\],D0\.7
+.*:	ad381928 	          DCACHE    \[D0Re0\+#1600\],D0\.7
+.*:	ad381a28 	          DCACHE    \[D0Re0\+#1664\],D0\.7
+.*:	ad381b28 	          DCACHE    \[D0Re0\+#1728\],D0\.7
+.*:	ad381c28 	          DCACHE    \[D0Re0\+#1792\],D0\.7
+.*:	ad381d28 	          DCACHE    \[D0Re0\+#1856\],D0\.7
+.*:	ad381e28 	          DCACHE    \[D0Re0\+#1920\],D0\.7
+.*:	ad381f28 	          DCACHE    \[D0Re0\+#1984\],D0\.7
+.*:	ad382028 	          DCACHE    \[D0Re0\+#-2048\],D0\.7
+.*:	ad382128 	          DCACHE    \[D0Re0\+#-1984\],D0\.7
+.*:	ad382228 	          DCACHE    \[D0Re0\+#-1920\],D0\.7
+.*:	ad382328 	          DCACHE    \[D0Re0\+#-1856\],D0\.7
+.*:	ad382428 	          DCACHE    \[D0Re0\+#-1792\],D0\.7
+.*:	ad382528 	          DCACHE    \[D0Re0\+#-1728\],D0\.7
+.*:	ad382628 	          DCACHE    \[D0Re0\+#-1664\],D0\.7
+.*:	ad382728 	          DCACHE    \[D0Re0\+#-1600\],D0\.7
+.*:	ad382828 	          DCACHE    \[D0Re0\+#-1536\],D0\.7
+.*:	ad382928 	          DCACHE    \[D0Re0\+#-1472\],D0\.7
+.*:	ad382a28 	          DCACHE    \[D0Re0\+#-1408\],D0\.7
+.*:	ad382b28 	          DCACHE    \[D0Re0\+#-1344\],D0\.7
+.*:	ad382c28 	          DCACHE    \[D0Re0\+#-1280\],D0\.7
+.*:	ad382d28 	          DCACHE    \[D0Re0\+#-1216\],D0\.7
+.*:	ad382e28 	          DCACHE    \[D0Re0\+#-1152\],D0\.7
+.*:	ad382f28 	          DCACHE    \[D0Re0\+#-1088\],D0\.7
+.*:	ad383028 	          DCACHE    \[D0Re0\+#-1024\],D0\.7
+.*:	ad383128 	          DCACHE    \[D0Re0\+#-960\],D0\.7
+.*:	ad383228 	          DCACHE    \[D0Re0\+#-896\],D0\.7
+.*:	ad383328 	          DCACHE    \[D0Re0\+#-832\],D0\.7
+.*:	ad383428 	          DCACHE    \[D0Re0\+#-768\],D0\.7
+.*:	ad383528 	          DCACHE    \[D0Re0\+#-704\],D0\.7
+.*:	ad383628 	          DCACHE    \[D0Re0\+#-640\],D0\.7
+.*:	ad383728 	          DCACHE    \[D0Re0\+#-576\],D0\.7
+.*:	ad383828 	          DCACHE    \[D0Re0\+#-512\],D0\.7
+.*:	ad383928 	          DCACHE    \[D0Re0\+#-448\],D0\.7
+.*:	ad383a28 	          DCACHE    \[D0Re0\+#-384\],D0\.7
+.*:	ad383b28 	          DCACHE    \[D0Re0\+#-320\],D0\.7
+.*:	ad383c28 	          DCACHE    \[D0Re0\+#-256\],D0\.7
+.*:	ad383d28 	          DCACHE    \[D0Re0\+#-192\],D0\.7
+.*:	ad383e28 	          DCACHE    \[D0Re0\+#-128\],D0\.7
+.*:	ad383f28 	          DCACHE    \[D0Re0\+#-64\],D0\.7
+.*:	ad384008 	          DCACHE    \[A1LbP\],D0\.7
+.*:	ad384108 	          DCACHE    \[A1LbP\+#64\],D0\.7
+.*:	ad384208 	          DCACHE    \[A1LbP\+#128\],D0\.7
+.*:	ad384308 	          DCACHE    \[A1LbP\+#192\],D0\.7
+.*:	ad384408 	          DCACHE    \[A1LbP\+#256\],D0\.7
+.*:	ad384508 	          DCACHE    \[A1LbP\+#320\],D0\.7
+.*:	ad384608 	          DCACHE    \[A1LbP\+#384\],D0\.7
+.*:	ad384708 	          DCACHE    \[A1LbP\+#448\],D0\.7
+.*:	ad384808 	          DCACHE    \[A1LbP\+#512\],D0\.7
+.*:	ad384908 	          DCACHE    \[A1LbP\+#576\],D0\.7
+.*:	ad384a08 	          DCACHE    \[A1LbP\+#640\],D0\.7
+.*:	ad384b08 	          DCACHE    \[A1LbP\+#704\],D0\.7
+.*:	ad384c08 	          DCACHE    \[A1LbP\+#768\],D0\.7
+.*:	ad384d08 	          DCACHE    \[A1LbP\+#832\],D0\.7
+.*:	ad384e08 	          DCACHE    \[A1LbP\+#896\],D0\.7
+.*:	ad384f08 	          DCACHE    \[A1LbP\+#960\],D0\.7
+.*:	ad385008 	          DCACHE    \[A1LbP\+#1024\],D0\.7
+.*:	ad385108 	          DCACHE    \[A1LbP\+#1088\],D0\.7
+.*:	ad385208 	          DCACHE    \[A1LbP\+#1152\],D0\.7
+.*:	ad385308 	          DCACHE    \[A1LbP\+#1216\],D0\.7
+.*:	ad385408 	          DCACHE    \[A1LbP\+#1280\],D0\.7
+.*:	ad385508 	          DCACHE    \[A1LbP\+#1344\],D0\.7
+.*:	ad385608 	          DCACHE    \[A1LbP\+#1408\],D0\.7
+.*:	ad385708 	          DCACHE    \[A1LbP\+#1472\],D0\.7
+.*:	ad385808 	          DCACHE    \[A1LbP\+#1536\],D0\.7
+.*:	ad385908 	          DCACHE    \[A1LbP\+#1600\],D0\.7
+.*:	ad385a08 	          DCACHE    \[A1LbP\+#1664\],D0\.7
+.*:	ad385b08 	          DCACHE    \[A1LbP\+#1728\],D0\.7
+.*:	ad385c08 	          DCACHE    \[A1LbP\+#1792\],D0\.7
+.*:	ad385d08 	          DCACHE    \[A1LbP\+#1856\],D0\.7
+.*:	ad385e08 	          DCACHE    \[A1LbP\+#1920\],D0\.7
+.*:	ad385f08 	          DCACHE    \[A1LbP\+#1984\],D0\.7
+.*:	ad386008 	          DCACHE    \[A1LbP\+#-2048\],D0\.7
+.*:	ad386108 	          DCACHE    \[A1LbP\+#-1984\],D0\.7
+.*:	ad386208 	          DCACHE    \[A1LbP\+#-1920\],D0\.7
+.*:	ad386308 	          DCACHE    \[A1LbP\+#-1856\],D0\.7
+.*:	ad386408 	          DCACHE    \[A1LbP\+#-1792\],D0\.7
+.*:	ad386508 	          DCACHE    \[A1LbP\+#-1728\],D0\.7
+.*:	ad386608 	          DCACHE    \[A1LbP\+#-1664\],D0\.7
+.*:	ad386708 	          DCACHE    \[A1LbP\+#-1600\],D0\.7
+.*:	ad386808 	          DCACHE    \[A1LbP\+#-1536\],D0\.7
+.*:	ad386908 	          DCACHE    \[A1LbP\+#-1472\],D0\.7
+.*:	ad386a08 	          DCACHE    \[A1LbP\+#-1408\],D0\.7
+.*:	ad386b08 	          DCACHE    \[A1LbP\+#-1344\],D0\.7
+.*:	ad386c08 	          DCACHE    \[A1LbP\+#-1280\],D0\.7
+.*:	ad386d08 	          DCACHE    \[A1LbP\+#-1216\],D0\.7
+.*:	ad386e08 	          DCACHE    \[A1LbP\+#-1152\],D0\.7
+.*:	ad386f08 	          DCACHE    \[A1LbP\+#-1088\],D0\.7
+.*:	ad387008 	          DCACHE    \[A1LbP\+#-1024\],D0\.7
+.*:	ad387108 	          DCACHE    \[A1LbP\+#-960\],D0\.7
+.*:	ad387208 	          DCACHE    \[A1LbP\+#-896\],D0\.7
+.*:	ad387308 	          DCACHE    \[A1LbP\+#-832\],D0\.7
+.*:	ad387408 	          DCACHE    \[A1LbP\+#-768\],D0\.7
+.*:	ad387508 	          DCACHE    \[A1LbP\+#-704\],D0\.7
+.*:	ad387608 	          DCACHE    \[A1LbP\+#-640\],D0\.7
+.*:	ad387708 	          DCACHE    \[A1LbP\+#-576\],D0\.7
+.*:	ad387808 	          DCACHE    \[A1LbP\+#-512\],D0\.7
+.*:	ad387908 	          DCACHE    \[A1LbP\+#-448\],D0\.7
+.*:	ad387a08 	          DCACHE    \[A1LbP\+#-384\],D0\.7
+.*:	ad387b08 	          DCACHE    \[A1LbP\+#-320\],D0\.7
+.*:	ad387c08 	          DCACHE    \[A1LbP\+#-256\],D0\.7
+.*:	ad387d08 	          DCACHE    \[A1LbP\+#-192\],D0\.7
+.*:	ad387e08 	          DCACHE    \[A1LbP\+#-128\],D0\.7
+.*:	ad387f08 	          DCACHE    \[A1LbP\+#-64\],D0\.7
+.*:	ad39c008 	          DCACHE    \[A1\.7\],D0\.7
+.*:	ad39c048 	          DCACHE    \[D1\.7\],D0\.7
+.*:	ad39c108 	          DCACHE    \[A1\.7\+#64\],D0\.7
+.*:	ad39c148 	          DCACHE    \[D1\.7\+#64\],D0\.7
+.*:	ad39c208 	          DCACHE    \[A1\.7\+#128\],D0\.7
+.*:	ad39c248 	          DCACHE    \[D1\.7\+#128\],D0\.7
+.*:	ad39c308 	          DCACHE    \[A1\.7\+#192\],D0\.7
+.*:	ad39c348 	          DCACHE    \[D1\.7\+#192\],D0\.7
+.*:	ad39c408 	          DCACHE    \[A1\.7\+#256\],D0\.7
+.*:	ad39c448 	          DCACHE    \[D1\.7\+#256\],D0\.7
+.*:	ad39c508 	          DCACHE    \[A1\.7\+#320\],D0\.7
+.*:	ad39c548 	          DCACHE    \[D1\.7\+#320\],D0\.7
+.*:	ad39c608 	          DCACHE    \[A1\.7\+#384\],D0\.7
+.*:	ad39c648 	          DCACHE    \[D1\.7\+#384\],D0\.7
+.*:	ad39c708 	          DCACHE    \[A1\.7\+#448\],D0\.7
+.*:	ad39c748 	          DCACHE    \[D1\.7\+#448\],D0\.7
+.*:	ad39c808 	          DCACHE    \[A1\.7\+#512\],D0\.7
+.*:	ad39c848 	          DCACHE    \[D1\.7\+#512\],D0\.7
+.*:	ad39c908 	          DCACHE    \[A1\.7\+#576\],D0\.7
+.*:	ad39c948 	          DCACHE    \[D1\.7\+#576\],D0\.7
+.*:	ad39ca08 	          DCACHE    \[A1\.7\+#640\],D0\.7
+.*:	ad39ca48 	          DCACHE    \[D1\.7\+#640\],D0\.7
+.*:	ad39cb08 	          DCACHE    \[A1\.7\+#704\],D0\.7
+.*:	ad39cb48 	          DCACHE    \[D1\.7\+#704\],D0\.7
+.*:	ad39cc08 	          DCACHE    \[A1\.7\+#768\],D0\.7
+.*:	ad39cc48 	          DCACHE    \[D1\.7\+#768\],D0\.7
+.*:	ad39cd08 	          DCACHE    \[A1\.7\+#832\],D0\.7
+.*:	ad39cd48 	          DCACHE    \[D1\.7\+#832\],D0\.7
+.*:	ad39ce08 	          DCACHE    \[A1\.7\+#896\],D0\.7
+.*:	ad39ce48 	          DCACHE    \[D1\.7\+#896\],D0\.7
+.*:	ad39cf08 	          DCACHE    \[A1\.7\+#960\],D0\.7
+.*:	ad39cf48 	          DCACHE    \[D1\.7\+#960\],D0\.7
+.*:	ad39d008 	          DCACHE    \[A1\.7\+#1024\],D0\.7
+.*:	ad39d048 	          DCACHE    \[D1\.7\+#1024\],D0\.7
+.*:	ad39d108 	          DCACHE    \[A1\.7\+#1088\],D0\.7
+.*:	ad39d148 	          DCACHE    \[D1\.7\+#1088\],D0\.7
+.*:	ad39d208 	          DCACHE    \[A1\.7\+#1152\],D0\.7
+.*:	ad39d248 	          DCACHE    \[D1\.7\+#1152\],D0\.7
+.*:	ad39d308 	          DCACHE    \[A1\.7\+#1216\],D0\.7
+.*:	ad39d348 	          DCACHE    \[D1\.7\+#1216\],D0\.7
+.*:	ad39d408 	          DCACHE    \[A1\.7\+#1280\],D0\.7
+.*:	ad39d448 	          DCACHE    \[D1\.7\+#1280\],D0\.7
+.*:	ad39d508 	          DCACHE    \[A1\.7\+#1344\],D0\.7
+.*:	ad39d548 	          DCACHE    \[D1\.7\+#1344\],D0\.7
+.*:	ad39d608 	          DCACHE    \[A1\.7\+#1408\],D0\.7
+.*:	ad39d648 	          DCACHE    \[D1\.7\+#1408\],D0\.7
+.*:	ad39d708 	          DCACHE    \[A1\.7\+#1472\],D0\.7
+.*:	ad39d748 	          DCACHE    \[D1\.7\+#1472\],D0\.7
+.*:	ad39d808 	          DCACHE    \[A1\.7\+#1536\],D0\.7
+.*:	ad39d848 	          DCACHE    \[D1\.7\+#1536\],D0\.7
+.*:	ad39d908 	          DCACHE    \[A1\.7\+#1600\],D0\.7
+.*:	ad39d948 	          DCACHE    \[D1\.7\+#1600\],D0\.7
+.*:	ad39da08 	          DCACHE    \[A1\.7\+#1664\],D0\.7
+.*:	ad39da48 	          DCACHE    \[D1\.7\+#1664\],D0\.7
+.*:	ad39db08 	          DCACHE    \[A1\.7\+#1728\],D0\.7
+.*:	ad39db48 	          DCACHE    \[D1\.7\+#1728\],D0\.7
+.*:	ad39dc08 	          DCACHE    \[A1\.7\+#1792\],D0\.7
+.*:	ad39dc48 	          DCACHE    \[D1\.7\+#1792\],D0\.7
+.*:	ad39dd08 	          DCACHE    \[A1\.7\+#1856\],D0\.7
+.*:	ad39dd48 	          DCACHE    \[D1\.7\+#1856\],D0\.7
+.*:	ad39de08 	          DCACHE    \[A1\.7\+#1920\],D0\.7
+.*:	ad39de48 	          DCACHE    \[D1\.7\+#1920\],D0\.7
+.*:	ad39df08 	          DCACHE    \[A1\.7\+#1984\],D0\.7
+.*:	ad39df48 	          DCACHE    \[D1\.7\+#1984\],D0\.7
+.*:	ad39e008 	          DCACHE    \[A1\.7\+#-2048\],D0\.7
+.*:	ad39e048 	          DCACHE    \[D1\.7\+#-2048\],D0\.7
+.*:	ad39e108 	          DCACHE    \[A1\.7\+#-1984\],D0\.7
+.*:	ad39e148 	          DCACHE    \[D1\.7\+#-1984\],D0\.7
+.*:	ad39e208 	          DCACHE    \[A1\.7\+#-1920\],D0\.7
+.*:	ad39e248 	          DCACHE    \[D1\.7\+#-1920\],D0\.7
+.*:	ad39e308 	          DCACHE    \[A1\.7\+#-1856\],D0\.7
+.*:	ad39e348 	          DCACHE    \[D1\.7\+#-1856\],D0\.7
+.*:	ad39e408 	          DCACHE    \[A1\.7\+#-1792\],D0\.7
+.*:	ad39e448 	          DCACHE    \[D1\.7\+#-1792\],D0\.7
+.*:	ad39e508 	          DCACHE    \[A1\.7\+#-1728\],D0\.7
+.*:	ad39e548 	          DCACHE    \[D1\.7\+#-1728\],D0\.7
+.*:	ad39e608 	          DCACHE    \[A1\.7\+#-1664\],D0\.7
+.*:	ad39e648 	          DCACHE    \[D1\.7\+#-1664\],D0\.7
+.*:	ad39e708 	          DCACHE    \[A1\.7\+#-1600\],D0\.7
+.*:	ad39e748 	          DCACHE    \[D1\.7\+#-1600\],D0\.7
+.*:	ad39e808 	          DCACHE    \[A1\.7\+#-1536\],D0\.7
+.*:	ad39e848 	          DCACHE    \[D1\.7\+#-1536\],D0\.7
+.*:	ad39e908 	          DCACHE    \[A1\.7\+#-1472\],D0\.7
+.*:	ad39e948 	          DCACHE    \[D1\.7\+#-1472\],D0\.7
+.*:	ad39ea08 	          DCACHE    \[A1\.7\+#-1408\],D0\.7
+.*:	ad39ea48 	          DCACHE    \[D1\.7\+#-1408\],D0\.7
+.*:	ad39eb08 	          DCACHE    \[A1\.7\+#-1344\],D0\.7
+.*:	ad39eb48 	          DCACHE    \[D1\.7\+#-1344\],D0\.7
+.*:	ad39ec08 	          DCACHE    \[A1\.7\+#-1280\],D0\.7
+.*:	ad39ec48 	          DCACHE    \[D1\.7\+#-1280\],D0\.7
+.*:	ad39ed08 	          DCACHE    \[A1\.7\+#-1216\],D0\.7
+.*:	ad39ed48 	          DCACHE    \[D1\.7\+#-1216\],D0\.7
+.*:	ad39ee08 	          DCACHE    \[A1\.7\+#-1152\],D0\.7
+.*:	ad39ee48 	          DCACHE    \[D1\.7\+#-1152\],D0\.7
+.*:	ad39ef08 	          DCACHE    \[A1\.7\+#-1088\],D0\.7
+.*:	ad39ef48 	          DCACHE    \[D1\.7\+#-1088\],D0\.7
+.*:	ad39f008 	          DCACHE    \[A1\.7\+#-1024\],D0\.7
+.*:	ad39f048 	          DCACHE    \[D1\.7\+#-1024\],D0\.7
+.*:	ad39f108 	          DCACHE    \[A1\.7\+#-960\],D0\.7
+.*:	ad39f148 	          DCACHE    \[D1\.7\+#-960\],D0\.7
+.*:	ad39f208 	          DCACHE    \[A1\.7\+#-896\],D0\.7
+.*:	ad39f248 	          DCACHE    \[D1\.7\+#-896\],D0\.7
+.*:	ad39f308 	          DCACHE    \[A1\.7\+#-832\],D0\.7
+.*:	ad39f348 	          DCACHE    \[D1\.7\+#-832\],D0\.7
+.*:	ad39f408 	          DCACHE    \[A1\.7\+#-768\],D0\.7
+.*:	ad39f448 	          DCACHE    \[D1\.7\+#-768\],D0\.7
+.*:	ad39f508 	          DCACHE    \[A1\.7\+#-704\],D0\.7
+.*:	ad39f548 	          DCACHE    \[D1\.7\+#-704\],D0\.7
+.*:	ad39f608 	          DCACHE    \[A1\.7\+#-640\],D0\.7
+.*:	ad39f648 	          DCACHE    \[D1\.7\+#-640\],D0\.7
+.*:	ad39f708 	          DCACHE    \[A1\.7\+#-576\],D0\.7
+.*:	ad39f748 	          DCACHE    \[D1\.7\+#-576\],D0\.7
+.*:	ad39f808 	          DCACHE    \[A1\.7\+#-512\],D0\.7
+.*:	ad39f848 	          DCACHE    \[D1\.7\+#-512\],D0\.7
+.*:	ad39f908 	          DCACHE    \[A1\.7\+#-448\],D0\.7
+.*:	ad39f948 	          DCACHE    \[D1\.7\+#-448\],D0\.7
+.*:	ad39fa08 	          DCACHE    \[A1\.7\+#-384\],D0\.7
+.*:	ad39fa48 	          DCACHE    \[D1\.7\+#-384\],D0\.7
+.*:	ad39fb08 	          DCACHE    \[A1\.7\+#-320\],D0\.7
+.*:	ad39fb48 	          DCACHE    \[D1\.7\+#-320\],D0\.7
+.*:	ad39fc08 	          DCACHE    \[A1\.7\+#-256\],D0\.7
+.*:	ad39fc48 	          DCACHE    \[D1\.7\+#-256\],D0\.7
+.*:	ad39fd08 	          DCACHE    \[A1\.7\+#-192\],D0\.7
+.*:	ad39fd48 	          DCACHE    \[D1\.7\+#-192\],D0\.7
+.*:	ad39fe08 	          DCACHE    \[A1\.7\+#-128\],D0\.7
+.*:	ad39fe48 	          DCACHE    \[D1\.7\+#-128\],D0\.7
+.*:	ad39ff08 	          DCACHE    \[A1\.7\+#-64\],D0\.7
+.*:	ad39ff48 	          DCACHE    \[D1\.7\+#-64\],D0\.7
+.*:	af800000 	          SWITCH    #0x800000
+.*:	b0000e24 	          SETB      \[D0Re0\+D0\.7\],D1Re0
+.*:	b0004262 	          SETB      \[A0FrP\+A0FrP\],D0Re0
+.*:	b00042e4 	          SETB      \[A0FrP\+\+A0FrP\],D1Re0
+.*:	b0004e84 	          SETB      \[A1LbP\+\+A1\.7\],D1Re0
+.*:	b001c0a4 	          SETB      \[D0\.7\+\+D0Re0\],D1Re0
+.*:	b001c282 	          SETB      \[A1\.7\+\+A1LbP\],D0Re0
+.*:	b001ce02 	          SETB      \[A1\.7\+A1\.7\],D0Re0
+.*:	b001ce84 	          SETB      \[A1\.7\+\+A1\.7\],D1Re0
+.*:	b001cee4 	          SETB      \[A0\.7\+\+A0\.7\],D1Re0
+.*:	b00800a8 	          SETB      \[D0Re0\+\+D0Re0\],A1LbP
+.*:	b0080e46 	          SETB      \[D1Re0\+D1\.7\],A0FrP
+.*:	b0080ec8 	          SETB      \[D1Re0\+\+D1\.7\],A1LbP
+.*:	b0084e06 	          SETB      \[A1LbP\+A1\.7\],A0FrP
+.*:	b009c046 	          SETB      \[D1\.7\+D1Re0\],A0FrP
+.*:	b009c0c8 	          SETB      \[D1\.7\+\+D1Re0\],A1LbP
+.*:	b009ce06 	          SETB      \[A1\.7\+A1\.7\],A0FrP
+.*:	b009cea6 	          SETB      \[D0\.7\+\+D0\.7\],A0FrP
+.*:	b009cee8 	          SETB      \[A0\.7\+\+A0\.7\],A1LbP
+.*:	b03800a4 	          SETB      \[D0Re0\+\+D0Re0\],D1\.7
+.*:	b03800c6 	          SETB      \[D1Re0\+\+D1Re0\],A0\.7
+.*:	b0380e46 	          SETB      \[D1Re0\+D1\.7\],A0\.7
+.*:	b0380ec2 	          SETB      \[D1Re0\+\+D1\.7\],D0\.7
+.*:	b0384206 	          SETB      \[A1LbP\+A1LbP\],A0\.7
+.*:	b0384286 	          SETB      \[A1LbP\+\+A1LbP\],A0\.7
+.*:	b0384e02 	          SETB      \[A1LbP\+A1\.7\],D0\.7
+.*:	b0384e84 	          SETB      \[A1LbP\+\+A1\.7\],D1\.7
+.*:	b0384ee8 	          SETB      \[A0FrP\+\+A0\.7\],A1\.7
+.*:	b039c0a4 	          SETB      \[D0\.7\+\+D0Re0\],D1\.7
+.*:	b039c0c6 	          SETB      \[D1\.7\+\+D1Re0\],A0\.7
+.*:	b039c264 	          SETB      \[A0\.7\+A0FrP\],D1\.7
+.*:	b039c2e2 	          SETB      \[A0\.7\+\+A0FrP\],D0\.7
+.*:	b039ce06 	          SETB      \[A1\.7\+A1\.7\],A0\.7
+.*:	b039ce64 	          SETB      \[A0\.7\+A0\.7\],D1\.7
+.*:	b039cea4 	          SETB      \[D0\.7\+\+D0\.7\],D1\.7
+.*:	b039cec6 	          SETB      \[D1\.7\+\+D1\.7\],A0\.7
+.*:	b039cee8 	          SETB      \[A0\.7\+\+A0\.7\],A1\.7
+.*:	b0800e2c 	          SETB      \[D0Re0\+D0\.7\],RD
+.*:	b080428c 	          SETB      \[A1LbP\+\+A1LbP\],RD
+.*:	b0804eec 	          SETB      \[A0FrP\+\+A0\.7\],RD
+.*:	b081c20c 	          SETB      \[A1\.7\+A1LbP\],RD
+.*:	b081ce4c 	          SETB      \[D1\.7\+D1\.7\],RD
+.*:	b081ceec 	          SETB      \[A0\.7\+\+A0\.7\],RD
+.*:	b1000e24 	          SETW      \[D0Re0\+D0\.7\],D1Re0
+.*:	b1004262 	          SETW      \[A0FrP\+A0FrP\],D0Re0
+.*:	b10042e4 	          SETW      \[A0FrP\+\+A0FrP\],D1Re0
+.*:	b1004e84 	          SETW      \[A1LbP\+\+A1\.7\],D1Re0
+.*:	b101c0a4 	          SETW      \[D0\.7\+\+D0Re0\],D1Re0
+.*:	b101c282 	          SETW      \[A1\.7\+\+A1LbP\],D0Re0
+.*:	b101ce02 	          SETW      \[A1\.7\+A1\.7\],D0Re0
+.*:	b101ce84 	          SETW      \[A1\.7\+\+A1\.7\],D1Re0
+.*:	b101cee4 	          SETW      \[A0\.7\+\+A0\.7\],D1Re0
+.*:	b10800a8 	          SETW      \[D0Re0\+\+D0Re0\],A1LbP
+.*:	b1080e46 	          SETW      \[D1Re0\+D1\.7\],A0FrP
+.*:	b1080ec8 	          SETW      \[D1Re0\+\+D1\.7\],A1LbP
+.*:	b1084e06 	          SETW      \[A1LbP\+A1\.7\],A0FrP
+.*:	b109c046 	          SETW      \[D1\.7\+D1Re0\],A0FrP
+.*:	b109c0c8 	          SETW      \[D1\.7\+\+D1Re0\],A1LbP
+.*:	b109ce06 	          SETW      \[A1\.7\+A1\.7\],A0FrP
+.*:	b109cea6 	          SETW      \[D0\.7\+\+D0\.7\],A0FrP
+.*:	b109cee8 	          SETW      \[A0\.7\+\+A0\.7\],A1LbP
+.*:	b13800a4 	          SETW      \[D0Re0\+\+D0Re0\],D1\.7
+.*:	b13800c6 	          SETW      \[D1Re0\+\+D1Re0\],A0\.7
+.*:	b1380e46 	          SETW      \[D1Re0\+D1\.7\],A0\.7
+.*:	b1380ec2 	          SETW      \[D1Re0\+\+D1\.7\],D0\.7
+.*:	b1384206 	          SETW      \[A1LbP\+A1LbP\],A0\.7
+.*:	b1384286 	          SETW      \[A1LbP\+\+A1LbP\],A0\.7
+.*:	b1384e02 	          SETW      \[A1LbP\+A1\.7\],D0\.7
+.*:	b1384e84 	          SETW      \[A1LbP\+\+A1\.7\],D1\.7
+.*:	b1384ee8 	          SETW      \[A0FrP\+\+A0\.7\],A1\.7
+.*:	b139c0a4 	          SETW      \[D0\.7\+\+D0Re0\],D1\.7
+.*:	b139c0c6 	          SETW      \[D1\.7\+\+D1Re0\],A0\.7
+.*:	b139c264 	          SETW      \[A0\.7\+A0FrP\],D1\.7
+.*:	b139c2e2 	          SETW      \[A0\.7\+\+A0FrP\],D0\.7
+.*:	b139ce06 	          SETW      \[A1\.7\+A1\.7\],A0\.7
+.*:	b139ce64 	          SETW      \[A0\.7\+A0\.7\],D1\.7
+.*:	b139cea4 	          SETW      \[D0\.7\+\+D0\.7\],D1\.7
+.*:	b139cec6 	          SETW      \[D1\.7\+\+D1\.7\],A0\.7
+.*:	b139cee8 	          SETW      \[A0\.7\+\+A0\.7\],A1\.7
+.*:	b1800e2c 	          SETW      \[D0Re0\+D0\.7\],RD
+.*:	b180428c 	          SETW      \[A1LbP\+\+A1LbP\],RD
+.*:	b1804eec 	          SETW      \[A0FrP\+\+A0\.7\],RD
+.*:	b181c20c 	          SETW      \[A1\.7\+A1LbP\],RD
+.*:	b181ce4c 	          SETW      \[D1\.7\+D1\.7\],RD
+.*:	b181ceec 	          SETW      \[A0\.7\+\+A0\.7\],RD
+.*:	b2001fc4 	          SETB      \[D1Re0\+\+#31\],D1Re0
+.*:	b20020c4 	          SETB      \[D1Re0\+\+#-32\],D1Re0
+.*:	b2003fc4 	          SETB      \[--D1Re0\],D1Re0
+.*:	b2005fe4 	          SETB      \[A0FrP\+\+#31\],D1Re0
+.*:	b20060e4 	          SETB      \[A0FrP\+\+#-32\],D1Re0
+.*:	b2007fe4 	          SETB      \[--A0FrP\],D1Re0
+.*:	b201df62 	          SETB      \[A0\.7\+#31\],D0Re0
+.*:	b201dfa4 	          SETB      \[D0\.7\+\+#31\],D1Re0
+.*:	b201dfe4 	          SETB      \[A0\.7\+\+#31\],D1Re0
+.*:	b201e062 	          SETB      \[A0\.7\+#-32\],D0Re0
+.*:	b201e0a4 	          SETB      \[D0\.7\+\+#-32\],D1Re0
+.*:	b201e0e4 	          SETB      \[A0\.7\+\+#-32\],D1Re0
+.*:	b201ff62 	          SETB      \[A0\.7\+#-1\],D0Re0
+.*:	b201ffa4 	          SETB      \[--D0\.7\],D1Re0
+.*:	b201ffe4 	          SETB      \[--A0\.7\],D1Re0
+.*:	b2081fc8 	          SETB      \[D1Re0\+\+#31\],A1LbP
+.*:	b20820c8 	          SETB      \[D1Re0\+\+#-32\],A1LbP
+.*:	b2083fc8 	          SETB      \[--D1Re0\],A1LbP
+.*:	b2085fe8 	          SETB      \[A0FrP\+\+#31\],A1LbP
+.*:	b20860e8 	          SETB      \[A0FrP\+\+#-32\],A1LbP
+.*:	b2087fe8 	          SETB      \[--A0FrP\],A1LbP
+.*:	b209df66 	          SETB      \[A0\.7\+#31\],A0FrP
+.*:	b209dfa8 	          SETB      \[D0\.7\+\+#31\],A1LbP
+.*:	b209dfe8 	          SETB      \[A0\.7\+\+#31\],A1LbP
+.*:	b209e066 	          SETB      \[A0\.7\+#-32\],A0FrP
+.*:	b209e0a8 	          SETB      \[D0\.7\+\+#-32\],A1LbP
+.*:	b209e0e8 	          SETB      \[A0\.7\+\+#-32\],A1LbP
+.*:	b209ff66 	          SETB      \[A0\.7\+#-1\],A0FrP
+.*:	b209ffa8 	          SETB      \[--D0\.7\],A1LbP
+.*:	b209ffe8 	          SETB      \[--A0\.7\],A1LbP
+.*:	b2381fa8 	          SETB      \[D0Re0\+\+#31\],A1\.7
+.*:	b2381fc8 	          SETB      \[D1Re0\+\+#31\],A1\.7
+.*:	b23820a8 	          SETB      \[D0Re0\+\+#-32\],A1\.7
+.*:	b23820c8 	          SETB      \[D1Re0\+\+#-32\],A1\.7
+.*:	b2383fa8 	          SETB      \[--D0Re0\],A1\.7
+.*:	b2383fc8 	          SETB      \[--D1Re0\],A1\.7
+.*:	b2385f88 	          SETB      \[A1LbP\+\+#31\],A1\.7
+.*:	b2385fe8 	          SETB      \[A0FrP\+\+#31\],A1\.7
+.*:	b2386088 	          SETB      \[A1LbP\+\+#-32\],A1\.7
+.*:	b23860e8 	          SETB      \[A0FrP\+\+#-32\],A1\.7
+.*:	b2387f88 	          SETB      \[--A1LbP\],A1\.7
+.*:	b2387fe8 	          SETB      \[--A0FrP\],A1\.7
+.*:	b239df26 	          SETB      \[D0\.7\+#31\],A0\.7
+.*:	b239df66 	          SETB      \[A0\.7\+#31\],A0\.7
+.*:	b239df88 	          SETB      \[A1\.7\+\+#31\],A1\.7
+.*:	b239dfa8 	          SETB      \[D0\.7\+\+#31\],A1\.7
+.*:	b239dfc8 	          SETB      \[D1\.7\+\+#31\],A1\.7
+.*:	b239dfe8 	          SETB      \[A0\.7\+\+#31\],A1\.7
+.*:	b239e026 	          SETB      \[D0\.7\+#-32\],A0\.7
+.*:	b239e066 	          SETB      \[A0\.7\+#-32\],A0\.7
+.*:	b239e088 	          SETB      \[A1\.7\+\+#-32\],A1\.7
+.*:	b239e0a8 	          SETB      \[D0\.7\+\+#-32\],A1\.7
+.*:	b239e0c8 	          SETB      \[D1\.7\+\+#-32\],A1\.7
+.*:	b239e0e8 	          SETB      \[A0\.7\+\+#-32\],A1\.7
+.*:	b239ff26 	          SETB      \[D0\.7\+#-1\],A0\.7
+.*:	b239ff66 	          SETB      \[A0\.7\+#-1\],A0\.7
+.*:	b239ff88 	          SETB      \[--A1\.7\],A1\.7
+.*:	b239ffa8 	          SETB      \[--D0\.7\],A1\.7
+.*:	b239ffc8 	          SETB      \[--D1\.7\],A1\.7
+.*:	b239ffe8 	          SETB      \[--A0\.7\],A1\.7
+.*:	b280202c 	          SETB      \[D0Re0\+#-32\],RD
+.*:	b2803fac 	          SETB      \[--D0Re0\],RD
+.*:	b2805fec 	          SETB      \[A0FrP\+\+#31\],RD
+.*:	b2807f0c 	          SETB      \[A1LbP\+#-1\],RD
+.*:	b281df4c 	          SETB      \[D1\.7\+#31\],RD
+.*:	b281dfec 	          SETB      \[A0\.7\+\+#31\],RD
+.*:	b281e0ac 	          SETB      \[D0\.7\+\+#-32\],RD
+.*:	b281ff4c 	          SETB      \[D1\.7\+#-1\],RD
+.*:	b281ffec 	          SETB      \[--A0\.7\],RD
+.*:	b3001fc4 	          SETW      \[D1Re0\+\+#62\],D1Re0
+.*:	b30020c4 	          SETW      \[D1Re0\+\+#-64\],D1Re0
+.*:	b3003fc4 	          SETW      \[--D1Re0\],D1Re0
+.*:	b3005fe4 	          SETW      \[A0FrP\+\+#62\],D1Re0
+.*:	b30060e4 	          SETW      \[A0FrP\+\+#-64\],D1Re0
+.*:	b3007fe4 	          SETW      \[--A0FrP\],D1Re0
+.*:	b301df62 	          SETW      \[A0\.7\+#62\],D0Re0
+.*:	b301dfa4 	          SETW      \[D0\.7\+\+#62\],D1Re0
+.*:	b301dfe4 	          SETW      \[A0\.7\+\+#62\],D1Re0
+.*:	b301e062 	          SETW      \[A0\.7\+#-64\],D0Re0
+.*:	b301e0a4 	          SETW      \[D0\.7\+\+#-64\],D1Re0
+.*:	b301e0e4 	          SETW      \[A0\.7\+\+#-64\],D1Re0
+.*:	b301ff62 	          SETW      \[A0\.7\+#-2\],D0Re0
+.*:	b301ffa4 	          SETW      \[--D0\.7\],D1Re0
+.*:	b301ffe4 	          SETW      \[--A0\.7\],D1Re0
+.*:	b3081fc8 	          SETW      \[D1Re0\+\+#62\],A1LbP
+.*:	b30820c8 	          SETW      \[D1Re0\+\+#-64\],A1LbP
+.*:	b3083fc8 	          SETW      \[--D1Re0\],A1LbP
+.*:	b3085fe8 	          SETW      \[A0FrP\+\+#62\],A1LbP
+.*:	b30860e8 	          SETW      \[A0FrP\+\+#-64\],A1LbP
+.*:	b3087fe8 	          SETW      \[--A0FrP\],A1LbP
+.*:	b309df66 	          SETW      \[A0\.7\+#62\],A0FrP
+.*:	b309dfa8 	          SETW      \[D0\.7\+\+#62\],A1LbP
+.*:	b309dfe8 	          SETW      \[A0\.7\+\+#62\],A1LbP
+.*:	b309e066 	          SETW      \[A0\.7\+#-64\],A0FrP
+.*:	b309e0a8 	          SETW      \[D0\.7\+\+#-64\],A1LbP
+.*:	b309e0e8 	          SETW      \[A0\.7\+\+#-64\],A1LbP
+.*:	b309ff66 	          SETW      \[A0\.7\+#-2\],A0FrP
+.*:	b309ffa8 	          SETW      \[--D0\.7\],A1LbP
+.*:	b309ffe8 	          SETW      \[--A0\.7\],A1LbP
+.*:	b3381fa8 	          SETW      \[D0Re0\+\+#62\],A1\.7
+.*:	b3381fc8 	          SETW      \[D1Re0\+\+#62\],A1\.7
+.*:	b33820a8 	          SETW      \[D0Re0\+\+#-64\],A1\.7
+.*:	b33820c8 	          SETW      \[D1Re0\+\+#-64\],A1\.7
+.*:	b3383fa8 	          SETW      \[--D0Re0\],A1\.7
+.*:	b3383fc8 	          SETW      \[--D1Re0\],A1\.7
+.*:	b3385f88 	          SETW      \[A1LbP\+\+#62\],A1\.7
+.*:	b3385fe8 	          SETW      \[A0FrP\+\+#62\],A1\.7
+.*:	b3386088 	          SETW      \[A1LbP\+\+#-64\],A1\.7
+.*:	b33860e8 	          SETW      \[A0FrP\+\+#-64\],A1\.7
+.*:	b3387f88 	          SETW      \[--A1LbP\],A1\.7
+.*:	b3387fe8 	          SETW      \[--A0FrP\],A1\.7
+.*:	b339df26 	          SETW      \[D0\.7\+#62\],A0\.7
+.*:	b339df66 	          SETW      \[A0\.7\+#62\],A0\.7
+.*:	b339df88 	          SETW      \[A1\.7\+\+#62\],A1\.7
+.*:	b339dfa8 	          SETW      \[D0\.7\+\+#62\],A1\.7
+.*:	b339dfc8 	          SETW      \[D1\.7\+\+#62\],A1\.7
+.*:	b339dfe8 	          SETW      \[A0\.7\+\+#62\],A1\.7
+.*:	b339e026 	          SETW      \[D0\.7\+#-64\],A0\.7
+.*:	b339e066 	          SETW      \[A0\.7\+#-64\],A0\.7
+.*:	b339e088 	          SETW      \[A1\.7\+\+#-64\],A1\.7
+.*:	b339e0a8 	          SETW      \[D0\.7\+\+#-64\],A1\.7
+.*:	b339e0c8 	          SETW      \[D1\.7\+\+#-64\],A1\.7
+.*:	b339e0e8 	          SETW      \[A0\.7\+\+#-64\],A1\.7
+.*:	b339ff26 	          SETW      \[D0\.7\+#-2\],A0\.7
+.*:	b339ff66 	          SETW      \[A0\.7\+#-2\],A0\.7
+.*:	b339ff88 	          SETW      \[--A1\.7\],A1\.7
+.*:	b339ffa8 	          SETW      \[--D0\.7\],A1\.7
+.*:	b339ffc8 	          SETW      \[--D1\.7\],A1\.7
+.*:	b339ffe8 	          SETW      \[--A0\.7\],A1\.7
+.*:	b380202c 	          SETW      \[D0Re0\+#-64\],RD
+.*:	b3803fac 	          SETW      \[--D0Re0\],RD
+.*:	b3805fec 	          SETW      \[A0FrP\+\+#62\],RD
+.*:	b3807f0c 	          SETW      \[A1LbP\+#-2\],RD
+.*:	b381df4c 	          SETW      \[D1\.7\+#62\],RD
+.*:	b381dfec 	          SETW      \[A0\.7\+\+#62\],RD
+.*:	b381e0ac 	          SETW      \[D0\.7\+\+#-64\],RD
+.*:	b381ff4c 	          SETW      \[D1\.7\+#-2\],RD
+.*:	b381ffec 	          SETW      \[--A0\.7\],RD
+.*:	b400004a 	          SETD      \[D1Re0\+D1Re0\],PC
+.*:	b40000ae 	          SETD      \[D0Re0\+\+D0Re0\],TXSTAT
+.*:	b40000ce 	          SETD      \[D1Re0\+\+D1Re0\],TXSTAT
+.*:	b4000e4a 	          SETD      \[D1Re0\+D1\.7\],PC
+.*:	b4000eae 	          SETD      \[D0Re0\+\+D0\.7\],TXSTAT
+.*:	b4000ece 	          SETD      \[D1Re0\+\+D1\.7\],TXSTAT
+.*:	b4004262 	          SETD      \[A0FrP\+A0FrP\],D0Re0
+.*:	b4004284 	          SETD      \[A1LbP\+\+A1LbP\],D1Re0
+.*:	b40042e2 	          SETD      \[A0FrP\+\+A0FrP\],D0Re0
+.*:	b4004e00 	          SETD      \[A1LbP\+A1\.7\],TXENABLE
+.*:	b4004e6a 	          SETD      \[A0FrP\+A0\.7\],PC
+.*:	b4004e8a 	          SETD      \[A1LbP\+\+A1\.7\],PC
+.*:	b4004ee4 	          SETD      \[A0FrP\+\+A0\.7\],D1Re0
+.*:	b401c02a 	          SETD      \[D0\.7\+D0Re0\],PC
+.*:	b401c0a4 	          SETD      \[D0\.7\+\+D0Re0\],D1Re0
+.*:	b401c0c2 	          SETD      \[D1\.7\+\+D1Re0\],D0Re0
+.*:	b401c204 	          SETD      \[A1\.7\+A1LbP\],D1Re0
+.*:	b401c280 	          SETD      \[A1\.7\+\+A1LbP\],TXENABLE
+.*:	b401c28e 	          SETD      \[A1\.7\+\+A1LbP\],TXSTAT
+.*:	b401c2ea 	          SETD      \[A0\.7\+\+A0FrP\],PC
+.*:	b401ce0e 	          SETD      \[A1\.7\+A1\.7\],TXSTAT
+.*:	b401ce4e 	          SETD      \[D1\.7\+D1\.7\],TXSTAT
+.*:	b401ce82 	          SETD      \[A1\.7\+\+A1\.7\],D0Re0
+.*:	b401cea0 	          SETD      \[D0\.7\+\+D0\.7\],TXENABLE
+.*:	b401cec0 	          SETD      \[D1\.7\+\+D1\.7\],TXENABLE
+.*:	b401cee0 	          SETD      \[A0\.7\+\+A0\.7\],TXENABLE
+.*:	b401ceee 	          SETD      \[A0\.7\+\+A0\.7\],TXSTAT
+.*:	b40800a6 	          SETD      \[D0Re0\+\+D0Re0\],A0FrP
+.*:	b40800c8 	          SETD      \[D1Re0\+\+D1Re0\],A1LbP
+.*:	b4080e48 	          SETD      \[D1Re0\+D1\.7\],A1LbP
+.*:	b4080ec6 	          SETD      \[D1Re0\+\+D1\.7\],A0FrP
+.*:	b4084268 	          SETD      \[A0FrP\+A0FrP\],A1LbP
+.*:	b40842ea 	          SETD      \[A0FrP\+\+A0FrP\],PCX
+.*:	b4084e8a 	          SETD      \[A1LbP\+\+A1\.7\],PCX
+.*:	b409c02a 	          SETD      \[D0\.7\+D0Re0\],PCX
+.*:	b409c0aa 	          SETD      \[D0\.7\+\+D0Re0\],PCX
+.*:	b409c206 	          SETD      \[A1\.7\+A1LbP\],A0FrP
+.*:	b409c2e8 	          SETD      \[A0\.7\+\+A0FrP\],A1LbP
+.*:	b409ce2a 	          SETD      \[D0\.7\+D0\.7\],PCX
+.*:	b409ce8a 	          SETD      \[A1\.7\+\+A1\.7\],PCX
+.*:	b409cec6 	          SETD      \[D1\.7\+\+D1\.7\],A0FrP
+.*:	b409ceea 	          SETD      \[A0\.7\+\+A0\.7\],PCX
+.*:	b4180e2e 	          SETD      \[D0Re0\+D0\.7\],TXMASKI
+.*:	b418428e 	          SETD      \[A1LbP\+\+A1LbP\],TXMASKI
+.*:	b4184eee 	          SETD      \[A0FrP\+\+A0\.7\],TXMASKI
+.*:	b419c20e 	          SETD      \[A1\.7\+A1LbP\],TXMASKI
+.*:	b419ce4e 	          SETD      \[D1\.7\+D1\.7\],TXMASKI
+.*:	b419ceee 	          SETD      \[A0\.7\+\+A0\.7\],TXMASKI
+.*:	b4300e2e 	          SETD      \[D0Re0\+D0\.7\],TXPOLLI
+.*:	b430428e 	          SETD      \[A1LbP\+\+A1LbP\],TXPOLLI
+.*:	b4304eee 	          SETD      \[A0FrP\+\+A0\.7\],TXPOLLI
+.*:	b431c20e 	          SETD      \[A1\.7\+A1LbP\],TXPOLLI
+.*:	b431ce4e 	          SETD      \[D1\.7\+D1\.7\],TXPOLLI
+.*:	b431ceee 	          SETD      \[A0\.7\+\+A0\.7\],TXPOLLI
+.*:	b43800a4 	          SETD      \[D0Re0\+\+D0Re0\],D1\.7
+.*:	b43800c6 	          SETD      \[D1Re0\+\+D1Re0\],A0\.7
+.*:	b4380e46 	          SETD      \[D1Re0\+D1\.7\],A0\.7
+.*:	b4380ec2 	          SETD      \[D1Re0\+\+D1\.7\],D0\.7
+.*:	b4384206 	          SETD      \[A1LbP\+A1LbP\],A0\.7
+.*:	b4384286 	          SETD      \[A1LbP\+\+A1LbP\],A0\.7
+.*:	b4384e02 	          SETD      \[A1LbP\+A1\.7\],D0\.7
+.*:	b4384e84 	          SETD      \[A1LbP\+\+A1\.7\],D1\.7
+.*:	b4384ee8 	          SETD      \[A0FrP\+\+A0\.7\],A1\.7
+.*:	b439c0a4 	          SETD      \[D0\.7\+\+D0Re0\],D1\.7
+.*:	b439c0c6 	          SETD      \[D1\.7\+\+D1Re0\],A0\.7
+.*:	b439c264 	          SETD      \[A0\.7\+A0FrP\],D1\.7
+.*:	b439c2e2 	          SETD      \[A0\.7\+\+A0FrP\],D0\.7
+.*:	b439ce06 	          SETD      \[A1\.7\+A1\.7\],A0\.7
+.*:	b439ce64 	          SETD      \[A0\.7\+A0\.7\],D1\.7
+.*:	b439cea4 	          SETD      \[D0\.7\+\+D0\.7\],D1\.7
+.*:	b439cec6 	          SETD      \[D1\.7\+\+D1\.7\],A0\.7
+.*:	b439cee8 	          SETD      \[A0\.7\+\+A0\.7\],A1\.7
+.*:	b48000a6 	          SETD      \[D0Re0\+\+D0Re0\],CPC0
+.*:	b48000c8 	          SETD      \[D1Re0\+\+D1Re0\],CPC1
+.*:	b4800e48 	          SETD      \[D1Re0\+D1\.7\],CPC1
+.*:	b4800ec6 	          SETD      \[D1Re0\+\+D1\.7\],CPC0
+.*:	b4804268 	          SETD      \[A0FrP\+A0FrP\],CPC1
+.*:	b48042ec 	          SETD      \[A0FrP\+\+A0FrP\],RD
+.*:	b4804e8c 	          SETD      \[A1LbP\+\+A1\.7\],RD
+.*:	b481c02c 	          SETD      \[D0\.7\+D0Re0\],RD
+.*:	b481c0ac 	          SETD      \[D0\.7\+\+D0Re0\],RD
+.*:	b481c206 	          SETD      \[A1\.7\+A1LbP\],CPC0
+.*:	b481c2e8 	          SETD      \[A0\.7\+\+A0FrP\],CPC1
+.*:	b481ce2c 	          SETD      \[D0\.7\+D0\.7\],RD
+.*:	b481ce8c 	          SETD      \[A1\.7\+\+A1\.7\],RD
+.*:	b481cec6 	          SETD      \[D1\.7\+\+D1\.7\],CPC0
+.*:	b481ceec 	          SETD      \[A0\.7\+\+A0\.7\],RD
+.*:	b4f80e20 	          SETD      \[D0Re0\+D0\.7\],TXIDLECYC
+.*:	b4f84280 	          SETD      \[A1LbP\+\+A1LbP\],TXIDLECYC
+.*:	b4f84ee0 	          SETD      \[A0FrP\+\+A0\.7\],TXIDLECYC
+.*:	b4f9c200 	          SETD      \[A1\.7\+A1LbP\],TXIDLECYC
+.*:	b4f9ce40 	          SETD      \[D1\.7\+D1\.7\],TXIDLECYC
+.*:	b4f9cee0 	          SETD      \[A0\.7\+\+A0\.7\],TXIDLECYC
+.*:	b5004284 	          SETL      \[A1LbP\+\+A1LbP\],D1Re0,D0Re0
+.*:	b5004e62 	          SETL      \[A0FrP\+A0\.7\],D0Re0,D1Re0
+.*:	b5004ee4 	          SETL      \[A0FrP\+\+A0\.7\],D1Re0,D0Re0
+.*:	b501c284 	          SETL      \[A1\.7\+\+A1LbP\],D1Re0,D0Re0
+.*:	b501ce62 	          SETL      \[A0\.7\+A0\.7\],D0Re0,D1Re0
+.*:	b501cee4 	          SETL      \[A0\.7\+\+A0\.7\],D1Re0,D0Re0
+.*:	b50800a8 	          SETL      \[D0Re0\+\+D0Re0\],A1LbP,A0FrP
+.*:	b5080e46 	          SETL      \[D1Re0\+D1\.7\],A0FrP,A1LbP
+.*:	b5080ec8 	          SETL      \[D1Re0\+\+D1\.7\],A1LbP,A0FrP
+.*:	b509c0a8 	          SETL      \[D0\.7\+\+D0Re0\],A1LbP,A0FrP
+.*:	b509ce46 	          SETL      \[D1\.7\+D1\.7\],A0FrP,A1LbP
+.*:	b509cec8 	          SETL      \[D1\.7\+\+D1\.7\],A1LbP,A0FrP
+.*:	b53800a8 	          SETL      \[D0Re0\+\+D0Re0\],A1\.7,A0\.7
+.*:	b5380e46 	          SETL      \[D1Re0\+D1\.7\],A0\.7,A1\.7
+.*:	b5380ec8 	          SETL      \[D1Re0\+\+D1\.7\],A1\.7,A0\.7
+.*:	b5384284 	          SETL      \[A1LbP\+\+A1LbP\],D1\.7,D0\.7
+.*:	b5384e62 	          SETL      \[A0FrP\+A0\.7\],D0\.7,D1\.7
+.*:	b5384ee4 	          SETL      \[A0FrP\+\+A0\.7\],D1\.7,D0\.7
+.*:	b539c0a8 	          SETL      \[D0\.7\+\+D0Re0\],A1\.7,A0\.7
+.*:	b539c262 	          SETL      \[A0\.7\+A0FrP\],D0\.7,D1\.7
+.*:	b539c2e4 	          SETL      \[A0\.7\+\+A0FrP\],D1\.7,D0\.7
+.*:	b539ce62 	          SETL      \[A0\.7\+A0\.7\],D0\.7,D1\.7
+.*:	b539cea8 	          SETL      \[D0\.7\+\+D0\.7\],A1\.7,A0\.7
+.*:	b539cee4 	          SETL      \[A0\.7\+\+A0\.7\],D1\.7,D0\.7
+.*:	b5800e2c 	          SETL      \[D0Re0\+D0\.7\],RD
+.*:	b580428c 	          SETL      \[A1LbP\+\+A1LbP\],RD
+.*:	b5804eec 	          SETL      \[A0FrP\+\+A0\.7\],RD
+.*:	b581c20c 	          SETL      \[A1\.7\+A1LbP\],RD
+.*:	b581ce4c 	          SETL      \[D1\.7\+D1\.7\],RD
+.*:	b581ceec 	          SETL      \[A0\.7\+\+A0\.7\],RD
+.*:	b6001fa0 	          SETD      \[D0Re0\+\+#124\],TXENABLE
+.*:	b6001fae 	          SETD      \[D0Re0\+\+#124\],TXSTAT
+.*:	b6001fca 	          SETD      \[D1Re0\+\+#124\],PC
+.*:	b600204a 	          SETD      \[D1Re0\+#-128\],PC
+.*:	b60020aa 	          SETD      \[D0Re0\+\+#-128\],PC
+.*:	b60020c4 	          SETD      \[D1Re0\+\+#-128\],D1Re0
+.*:	b6003f2e 	          SETD      \[D0Re0\+#-4\],TXSTAT
+.*:	b6003fa4 	          SETD      \[--D0Re0\],D1Re0
+.*:	b6003fc2 	          SETD      \[--D1Re0\],D0Re0
+.*:	b6005f00 	          SETD      \[A1LbP\+#124\],TXENABLE
+.*:	b6005f82 	          SETD      \[A1LbP\+\+#124\],D0Re0
+.*:	b6005fe0 	          SETD      \[A0FrP\+\+#124\],TXENABLE
+.*:	b6005fee 	          SETD      \[A0FrP\+\+#124\],TXSTAT
+.*:	b6006080 	          SETD      \[A1LbP\+\+#-128\],TXENABLE
+.*:	b600608e 	          SETD      \[A1LbP\+\+#-128\],TXSTAT
+.*:	b60060ea 	          SETD      \[A0FrP\+\+#-128\],PC
+.*:	b6007f6a 	          SETD      \[A0FrP\+#-4\],PC
+.*:	b6007f8a 	          SETD      \[--A1LbP\],PC
+.*:	b6007fe4 	          SETD      \[--A0FrP\],D1Re0
+.*:	b601df04 	          SETD      \[A1\.7\+#124\],D1Re0
+.*:	b601df40 	          SETD      \[D1\.7\+#124\],TXENABLE
+.*:	b601df6a 	          SETD      \[A0\.7\+#124\],PC
+.*:	b601df8a 	          SETD      \[A1\.7\+\+#124\],PC
+.*:	b601dfa4 	          SETD      \[D0\.7\+\+#124\],D1Re0
+.*:	b601dfc2 	          SETD      \[D1\.7\+\+#124\],D0Re0
+.*:	b601dfe0 	          SETD      \[A0\.7\+\+#124\],TXENABLE
+.*:	b601dfee 	          SETD      \[A0\.7\+\+#124\],TXSTAT
+.*:	b601e022 	          SETD      \[D0\.7\+#-128\],D0Re0
+.*:	b601e04e 	          SETD      \[D1\.7\+#-128\],TXSTAT
+.*:	b601e082 	          SETD      \[A1\.7\+\+#-128\],D0Re0
+.*:	b601e0a0 	          SETD      \[D0\.7\+\+#-128\],TXENABLE
+.*:	b601e0ae 	          SETD      \[D0\.7\+\+#-128\],TXSTAT
+.*:	b601e0ca 	          SETD      \[D1\.7\+\+#-128\],PC
+.*:	b601e0e4 	          SETD      \[A0\.7\+\+#-128\],D1Re0
+.*:	b601ff04 	          SETD      \[A1\.7\+#-4\],D1Re0
+.*:	b601ff40 	          SETD      \[D1\.7\+#-4\],TXENABLE
+.*:	b601ff6a 	          SETD      \[A0\.7\+#-4\],PC
+.*:	b601ff8a 	          SETD      \[--A1\.7\],PC
+.*:	b601ffa4 	          SETD      \[--D0\.7\],D1Re0
+.*:	b601ffc2 	          SETD      \[--D1\.7\],D0Re0
+.*:	b601ffe0 	          SETD      \[--A0\.7\],TXENABLE
+.*:	b601ffee 	          SETD      \[--A0\.7\],TXSTAT
+.*:	b6081faa 	          SETD      \[D0Re0\+\+#124\],PCX
+.*:	b608202a 	          SETD      \[D0Re0\+#-128\],PCX
+.*:	b60820c6 	          SETD      \[D1Re0\+\+#-128\],A0FrP
+.*:	b6083fa6 	          SETD      \[--D0Re0\],A0FrP
+.*:	b6083fc8 	          SETD      \[--D1Re0\],A1LbP
+.*:	b6085f88 	          SETD      \[A1LbP\+\+#124\],A1LbP
+.*:	b6085fea 	          SETD      \[A0FrP\+\+#124\],PCX
+.*:	b608608a 	          SETD      \[A1LbP\+\+#-128\],PCX
+.*:	b6087f0a 	          SETD      \[A1LbP\+#-4\],PCX
+.*:	b6087fe6 	          SETD      \[--A0FrP\],A0FrP
+.*:	b609df0a 	          SETD      \[A1\.7\+#124\],PCX
+.*:	b609df68 	          SETD      \[A0\.7\+#124\],A1LbP
+.*:	b609dfa6 	          SETD      \[D0\.7\+\+#124\],A0FrP
+.*:	b609dfc8 	          SETD      \[D1\.7\+\+#124\],A1LbP
+.*:	b609dfea 	          SETD      \[A0\.7\+\+#124\],PCX
+.*:	b609e046 	          SETD      \[D1\.7\+#-128\],A0FrP
+.*:	b609e088 	          SETD      \[A1\.7\+\+#-128\],A1LbP
+.*:	b609e0aa 	          SETD      \[D0\.7\+\+#-128\],PCX
+.*:	b609e0e6 	          SETD      \[A0\.7\+\+#-128\],A0FrP
+.*:	b609ff0a 	          SETD      \[A1\.7\+#-4\],PCX
+.*:	b609ff68 	          SETD      \[A0\.7\+#-4\],A1LbP
+.*:	b609ffa6 	          SETD      \[--D0\.7\],A0FrP
+.*:	b609ffc8 	          SETD      \[--D1\.7\],A1LbP
+.*:	b609ffea 	          SETD      \[--A0\.7\],PCX
+.*:	b618202e 	          SETD      \[D0Re0\+#-128\],TXMASKI
+.*:	b6183fae 	          SETD      \[--D0Re0\],TXMASKI
+.*:	b6185fee 	          SETD      \[A0FrP\+\+#124\],TXMASKI
+.*:	b6187f0e 	          SETD      \[A1LbP\+#-4\],TXMASKI
+.*:	b619df4e 	          SETD      \[D1\.7\+#124\],TXMASKI
+.*:	b619dfee 	          SETD      \[A0\.7\+\+#124\],TXMASKI
+.*:	b619e0ae 	          SETD      \[D0\.7\+\+#-128\],TXMASKI
+.*:	b619ff4e 	          SETD      \[D1\.7\+#-4\],TXMASKI
+.*:	b619ffee 	          SETD      \[--A0\.7\],TXMASKI
+.*:	b630202e 	          SETD      \[D0Re0\+#-128\],TXPOLLI
+.*:	b6303fae 	          SETD      \[--D0Re0\],TXPOLLI
+.*:	b6305fee 	          SETD      \[A0FrP\+\+#124\],TXPOLLI
+.*:	b6307f0e 	          SETD      \[A1LbP\+#-4\],TXPOLLI
+.*:	b631df4e 	          SETD      \[D1\.7\+#124\],TXPOLLI
+.*:	b631dfee 	          SETD      \[A0\.7\+\+#124\],TXPOLLI
+.*:	b631e0ae 	          SETD      \[D0\.7\+\+#-128\],TXPOLLI
+.*:	b631ff4e 	          SETD      \[D1\.7\+#-4\],TXPOLLI
+.*:	b631ffee 	          SETD      \[--A0\.7\],TXPOLLI
+.*:	b6381fa8 	          SETD      \[D0Re0\+\+#124\],A1\.7
+.*:	b6381fc8 	          SETD      \[D1Re0\+\+#124\],A1\.7
+.*:	b63820a8 	          SETD      \[D0Re0\+\+#-128\],A1\.7
+.*:	b63820c8 	          SETD      \[D1Re0\+\+#-128\],A1\.7
+.*:	b6383fa8 	          SETD      \[--D0Re0\],A1\.7
+.*:	b6383fc8 	          SETD      \[--D1Re0\],A1\.7
+.*:	b6385f88 	          SETD      \[A1LbP\+\+#124\],A1\.7
+.*:	b6385fe8 	          SETD      \[A0FrP\+\+#124\],A1\.7
+.*:	b6386088 	          SETD      \[A1LbP\+\+#-128\],A1\.7
+.*:	b63860e8 	          SETD      \[A0FrP\+\+#-128\],A1\.7
+.*:	b6387f88 	          SETD      \[--A1LbP\],A1\.7
+.*:	b6387fe8 	          SETD      \[--A0FrP\],A1\.7
+.*:	b639df26 	          SETD      \[D0\.7\+#124\],A0\.7
+.*:	b639df66 	          SETD      \[A0\.7\+#124\],A0\.7
+.*:	b639df88 	          SETD      \[A1\.7\+\+#124\],A1\.7
+.*:	b639dfa8 	          SETD      \[D0\.7\+\+#124\],A1\.7
+.*:	b639dfc8 	          SETD      \[D1\.7\+\+#124\],A1\.7
+.*:	b639dfe8 	          SETD      \[A0\.7\+\+#124\],A1\.7
+.*:	b639e026 	          SETD      \[D0\.7\+#-128\],A0\.7
+.*:	b639e066 	          SETD      \[A0\.7\+#-128\],A0\.7
+.*:	b639e088 	          SETD      \[A1\.7\+\+#-128\],A1\.7
+.*:	b639e0a8 	          SETD      \[D0\.7\+\+#-128\],A1\.7
+.*:	b639e0c8 	          SETD      \[D1\.7\+\+#-128\],A1\.7
+.*:	b639e0e8 	          SETD      \[A0\.7\+\+#-128\],A1\.7
+.*:	b639ff26 	          SETD      \[D0\.7\+#-4\],A0\.7
+.*:	b639ff66 	          SETD      \[A0\.7\+#-4\],A0\.7
+.*:	b639ff88 	          SETD      \[--A1\.7\],A1\.7
+.*:	b639ffa8 	          SETD      \[--D0\.7\],A1\.7
+.*:	b639ffc8 	          SETD      \[--D1\.7\],A1\.7
+.*:	b639ffe8 	          SETD      \[--A0\.7\],A1\.7
+.*:	b6801fac 	          SETD      \[D0Re0\+\+#124\],RD
+.*:	b680202c 	          SETD      \[D0Re0\+#-128\],RD
+.*:	b68020c6 	          SETD      \[D1Re0\+\+#-128\],CPC0
+.*:	b6803fa6 	          SETD      \[--D0Re0\],CPC0
+.*:	b6803fc8 	          SETD      \[--D1Re0\],CPC1
+.*:	b6805f88 	          SETD      \[A1LbP\+\+#124\],CPC1
+.*:	b6805fec 	          SETD      \[A0FrP\+\+#124\],RD
+.*:	b680608c 	          SETD      \[A1LbP\+\+#-128\],RD
+.*:	b6807f0c 	          SETD      \[A1LbP\+#-4\],RD
+.*:	b6807fe6 	          SETD      \[--A0FrP\],CPC0
+.*:	b681df0c 	          SETD      \[A1\.7\+#124\],RD
+.*:	b681df68 	          SETD      \[A0\.7\+#124\],CPC1
+.*:	b681dfa6 	          SETD      \[D0\.7\+\+#124\],CPC0
+.*:	b681dfc8 	          SETD      \[D1\.7\+\+#124\],CPC1
+.*:	b681dfec 	          SETD      \[A0\.7\+\+#124\],RD
+.*:	b681e046 	          SETD      \[D1\.7\+#-128\],CPC0
+.*:	b681e088 	          SETD      \[A1\.7\+\+#-128\],CPC1
+.*:	b681e0ac 	          SETD      \[D0\.7\+\+#-128\],RD
+.*:	b681e0e6 	          SETD      \[A0\.7\+\+#-128\],CPC0
+.*:	b681ff0c 	          SETD      \[A1\.7\+#-4\],RD
+.*:	b681ff68 	          SETD      \[A0\.7\+#-4\],CPC1
+.*:	b681ffa6 	          SETD      \[--D0\.7\],CPC0
+.*:	b681ffc8 	          SETD      \[--D1\.7\],CPC1
+.*:	b681ffec 	          SETD      \[--A0\.7\],RD
+.*:	b6f82020 	          SETD      \[D0Re0\+#-128\],TXIDLECYC
+.*:	b6f83fa0 	          SETD      \[--D0Re0\],TXIDLECYC
+.*:	b6f85fe0 	          SETD      \[A0FrP\+\+#124\],TXIDLECYC
+.*:	b6f87f00 	          SETD      \[A1LbP\+#-4\],TXIDLECYC
+.*:	b6f9df40 	          SETD      \[D1\.7\+#124\],TXIDLECYC
+.*:	b6f9dfe0 	          SETD      \[A0\.7\+\+#124\],TXIDLECYC
+.*:	b6f9e0a0 	          SETD      \[D0\.7\+\+#-128\],TXIDLECYC
+.*:	b6f9ff40 	          SETD      \[D1\.7\+#-4\],TXIDLECYC
+.*:	b6f9ffe0 	          SETD      \[--A0\.7\],TXIDLECYC
+.*:	b7001fc4 	          SETL      \[D1Re0\+\+#248\],D1Re0,D0Re0
+.*:	b70020c4 	          SETL      \[D1Re0\+\+#-256\],D1Re0,D0Re0
+.*:	b7003fc4 	          SETL      \[--D1Re0\],D1Re0,D0Re0
+.*:	b7005fe4 	          SETL      \[A0FrP\+\+#248\],D1Re0,D0Re0
+.*:	b70060e4 	          SETL      \[A0FrP\+\+#-256\],D1Re0,D0Re0
+.*:	b7007fe4 	          SETL      \[--A0FrP\],D1Re0,D0Re0
+.*:	b701df62 	          SETL      \[A0\.7\+#248\],D0Re0,D1Re0
+.*:	b701dfa4 	          SETL      \[D0\.7\+\+#248\],D1Re0,D0Re0
+.*:	b701dfe4 	          SETL      \[A0\.7\+\+#248\],D1Re0,D0Re0
+.*:	b701e062 	          SETL      \[A0\.7\+#-256\],D0Re0,D1Re0
+.*:	b701e0a4 	          SETL      \[D0\.7\+\+#-256\],D1Re0,D0Re0
+.*:	b701e0e4 	          SETL      \[A0\.7\+\+#-256\],D1Re0,D0Re0
+.*:	b701ff62 	          SETL      \[A0\.7\+#-8\],D0Re0,D1Re0
+.*:	b701ffa4 	          SETL      \[--D0\.7\],D1Re0,D0Re0
+.*:	b701ffe4 	          SETL      \[--A0\.7\],D1Re0,D0Re0
+.*:	b7081fc8 	          SETL      \[D1Re0\+\+#248\],A1LbP,A0FrP
+.*:	b70820c8 	          SETL      \[D1Re0\+\+#-256\],A1LbP,A0FrP
+.*:	b7083fc8 	          SETL      \[--D1Re0\],A1LbP,A0FrP
+.*:	b7085fe8 	          SETL      \[A0FrP\+\+#248\],A1LbP,A0FrP
+.*:	b70860e8 	          SETL      \[A0FrP\+\+#-256\],A1LbP,A0FrP
+.*:	b7087fe8 	          SETL      \[--A0FrP\],A1LbP,A0FrP
+.*:	b709df66 	          SETL      \[A0\.7\+#248\],A0FrP,A1LbP
+.*:	b709dfa8 	          SETL      \[D0\.7\+\+#248\],A1LbP,A0FrP
+.*:	b709dfe8 	          SETL      \[A0\.7\+\+#248\],A1LbP,A0FrP
+.*:	b709e066 	          SETL      \[A0\.7\+#-256\],A0FrP,A1LbP
+.*:	b709e0a8 	          SETL      \[D0\.7\+\+#-256\],A1LbP,A0FrP
+.*:	b709e0e8 	          SETL      \[A0\.7\+\+#-256\],A1LbP,A0FrP
+.*:	b709ff66 	          SETL      \[A0\.7\+#-8\],A0FrP,A1LbP
+.*:	b709ffa8 	          SETL      \[--D0\.7\],A1LbP,A0FrP
+.*:	b709ffe8 	          SETL      \[--A0\.7\],A1LbP,A0FrP
+.*:	b7381fa8 	          SETL      \[D0Re0\+\+#248\],A1\.7,A0\.7
+.*:	b7381fc8 	          SETL      \[D1Re0\+\+#248\],A1\.7,A0\.7
+.*:	b73820a8 	          SETL      \[D0Re0\+\+#-256\],A1\.7,A0\.7
+.*:	b73820c8 	          SETL      \[D1Re0\+\+#-256\],A1\.7,A0\.7
+.*:	b7383fa8 	          SETL      \[--D0Re0\],A1\.7,A0\.7
+.*:	b7383fc8 	          SETL      \[--D1Re0\],A1\.7,A0\.7
+.*:	b7385f88 	          SETL      \[A1LbP\+\+#248\],A1\.7,A0\.7
+.*:	b7385fe8 	          SETL      \[A0FrP\+\+#248\],A1\.7,A0\.7
+.*:	b7386088 	          SETL      \[A1LbP\+\+#-256\],A1\.7,A0\.7
+.*:	b73860e8 	          SETL      \[A0FrP\+\+#-256\],A1\.7,A0\.7
+.*:	b7387f88 	          SETL      \[--A1LbP\],A1\.7,A0\.7
+.*:	b7387fe8 	          SETL      \[--A0FrP\],A1\.7,A0\.7
+.*:	b739df26 	          SETL      \[D0\.7\+#248\],A0\.7,A1\.7
+.*:	b739df66 	          SETL      \[A0\.7\+#248\],A0\.7,A1\.7
+.*:	b739df88 	          SETL      \[A1\.7\+\+#248\],A1\.7,A0\.7
+.*:	b739dfa8 	          SETL      \[D0\.7\+\+#248\],A1\.7,A0\.7
+.*:	b739dfc8 	          SETL      \[D1\.7\+\+#248\],A1\.7,A0\.7
+.*:	b739dfe8 	          SETL      \[A0\.7\+\+#248\],A1\.7,A0\.7
+.*:	b739e026 	          SETL      \[D0\.7\+#-256\],A0\.7,A1\.7
+.*:	b739e066 	          SETL      \[A0\.7\+#-256\],A0\.7,A1\.7
+.*:	b739e088 	          SETL      \[A1\.7\+\+#-256\],A1\.7,A0\.7
+.*:	b739e0a8 	          SETL      \[D0\.7\+\+#-256\],A1\.7,A0\.7
+.*:	b739e0c8 	          SETL      \[D1\.7\+\+#-256\],A1\.7,A0\.7
+.*:	b739e0e8 	          SETL      \[A0\.7\+\+#-256\],A1\.7,A0\.7
+.*:	b739ff26 	          SETL      \[D0\.7\+#-8\],A0\.7,A1\.7
+.*:	b739ff66 	          SETL      \[A0\.7\+#-8\],A0\.7,A1\.7
+.*:	b739ff88 	          SETL      \[--A1\.7\],A1\.7,A0\.7
+.*:	b739ffa8 	          SETL      \[--D0\.7\],A1\.7,A0\.7
+.*:	b739ffc8 	          SETL      \[--D1\.7\],A1\.7,A0\.7
+.*:	b739ffe8 	          SETL      \[--A0\.7\],A1\.7,A0\.7
+.*:	b780202c 	          SETL      \[D0Re0\+#-256\],RD
+.*:	b7803fac 	          SETL      \[--D0Re0\],RD
+.*:	b7805fec 	          SETL      \[A0FrP\+\+#248\],RD
+.*:	b7807f0c 	          SETL      \[A1LbP\+#-8\],RD
+.*:	b781df4c 	          SETL      \[D1\.7\+#248\],RD
+.*:	b781dfec 	          SETL      \[A0\.7\+\+#248\],RD
+.*:	b781e0ac 	          SETL      \[D0\.7\+\+#-256\],RD
+.*:	b781ff4c 	          SETL      \[D1\.7\+#-8\],RD
+.*:	b781ffec 	          SETL      \[--A0\.7\],RD
+.*:	b8006068 	          MSETD     \[A0FrP\+\+\],D0Re0,D0\.7
+.*:	b801e068 	          MSETD     \[A0\.7\+\+\],D0Re0,D0\.7
+.*:	b8085060 	          MSETD     \[A0FrP\+\+\],A1LbP,A1\.7
+.*:	b809d060 	          MSETD     \[A0\.7\+\+\],A1LbP,A1\.7
+.*:	b9006068 	          MSETL     \[A0FrP\+\+\],D0Re0,D0\.7
+.*:	b901e068 	          MSETL     \[A0\.7\+\+\],D0Re0,D0\.7
+.*:	b9085060 	          MSETL     \[A0FrP\+\+\],A1LbP,A1\.7
+.*:	b909d060 	          MSETL     \[A0\.7\+\+\],A1LbP,A1\.7
+.*:	c00000a4 	          GETB      D1Re0,\[D0Re0\+\+D0Re0\]
+.*:	c0000e42 	          GETB      D0Re0,\[D1Re0\+D1\.7\]
+.*:	c0000ec4 	          GETB      D1Re0,\[D1Re0\+\+D1\.7\]
+.*:	c0004284 	          GETB      D1Re0,\[A1LbP\+\+A1LbP\]
+.*:	c0004e62 	          GETB      D0Re0,\[A0FrP\+A0\.7\]
+.*:	c0004ee4 	          GETB      D1Re0,\[A0FrP\+\+A0\.7\]
+.*:	c001c0a4 	          GETB      D1Re0,\[D0\.7\+\+D0Re0\]
+.*:	c001c262 	          GETB      D0Re0,\[A0\.7\+A0FrP\]
+.*:	c001c2e4 	          GETB      D1Re0,\[A0\.7\+\+A0FrP\]
+.*:	c001ce62 	          GETB      D0Re0,\[A0\.7\+A0\.7\]
+.*:	c001cea4 	          GETB      D1Re0,\[D0\.7\+\+D0\.7\]
+.*:	c001cee4 	          GETB      D1Re0,\[A0\.7\+\+A0\.7\]
+.*:	c00800a8 	          GETB      A1LbP,\[D0Re0\+\+D0Re0\]
+.*:	c0080e46 	          GETB      A0FrP,\[D1Re0\+D1\.7\]
+.*:	c0080ec8 	          GETB      A1LbP,\[D1Re0\+\+D1\.7\]
+.*:	c0084288 	          GETB      A1LbP,\[A1LbP\+\+A1LbP\]
+.*:	c0084e66 	          GETB      A0FrP,\[A0FrP\+A0\.7\]
+.*:	c0084ee8 	          GETB      A1LbP,\[A0FrP\+\+A0\.7\]
+.*:	c009c0a8 	          GETB      A1LbP,\[D0\.7\+\+D0Re0\]
+.*:	c009c266 	          GETB      A0FrP,\[A0\.7\+A0FrP\]
+.*:	c009c2e8 	          GETB      A1LbP,\[A0\.7\+\+A0FrP\]
+.*:	c009ce66 	          GETB      A0FrP,\[A0\.7\+A0\.7\]
+.*:	c009cea8 	          GETB      A1LbP,\[D0\.7\+\+D0\.7\]
+.*:	c009cee8 	          GETB      A1LbP,\[A0\.7\+\+A0\.7\]
+.*:	c0380046 	          GETB      A0\.7,\[D1Re0\+D1Re0\]
+.*:	c03800a8 	          GETB      A1\.7,\[D0Re0\+\+D0Re0\]
+.*:	c03800c8 	          GETB      A1\.7,\[D1Re0\+\+D1Re0\]
+.*:	c0380e46 	          GETB      A0\.7,\[D1Re0\+D1\.7\]
+.*:	c0380ea8 	          GETB      A1\.7,\[D0Re0\+\+D0\.7\]
+.*:	c0380ec8 	          GETB      A1\.7,\[D1Re0\+\+D1\.7\]
+.*:	c0384266 	          GETB      A0\.7,\[A0FrP\+A0FrP\]
+.*:	c0384288 	          GETB      A1\.7,\[A1LbP\+\+A1LbP\]
+.*:	c03842e8 	          GETB      A1\.7,\[A0FrP\+\+A0FrP\]
+.*:	c0384e66 	          GETB      A0\.7,\[A0FrP\+A0\.7\]
+.*:	c0384e88 	          GETB      A1\.7,\[A1LbP\+\+A1\.7\]
+.*:	c0384ee8 	          GETB      A1\.7,\[A0FrP\+\+A0\.7\]
+.*:	c039c046 	          GETB      A0\.7,\[D1\.7\+D1Re0\]
+.*:	c039c0a8 	          GETB      A1\.7,\[D0\.7\+\+D0Re0\]
+.*:	c039c0c8 	          GETB      A1\.7,\[D1\.7\+\+D1Re0\]
+.*:	c039c266 	          GETB      A0\.7,\[A0\.7\+A0FrP\]
+.*:	c039c288 	          GETB      A1\.7,\[A1\.7\+\+A1LbP\]
+.*:	c039c2e8 	          GETB      A1\.7,\[A0\.7\+\+A0FrP\]
+.*:	c039ce26 	          GETB      A0\.7,\[D0\.7\+D0\.7\]
+.*:	c039ce66 	          GETB      A0\.7,\[A0\.7\+A0\.7\]
+.*:	c039ce88 	          GETB      A1\.7,\[A1\.7\+\+A1\.7\]
+.*:	c039cea8 	          GETB      A1\.7,\[D0\.7\+\+D0\.7\]
+.*:	c039cec8 	          GETB      A1\.7,\[D1\.7\+\+D1\.7\]
+.*:	c039cee8 	          GETB      A1\.7,\[A0\.7\+\+A0\.7\]
+.*:	c0800e2c 	          MOVB      RA,\[D0Re0\+D0\.7\]
+.*:	c080428c 	          MOVB      RA,\[A1LbP\+\+A1LbP\]
+.*:	c0804eec 	          MOVB      RA,\[A0FrP\+\+A0\.7\]
+.*:	c081c20c 	          MOVB      RA,\[A1\.7\+A1LbP\]
+.*:	c081ce4c 	          MOVB      RA,\[D1\.7\+D1\.7\]
+.*:	c081ceec 	          MOVB      RA,\[A0\.7\+\+A0\.7\]
+.*:	c0b00e2c 	          MOVB      RAM8X32,\[D0Re0\+D0\.7\]
+.*:	c0b0428c 	          MOVB      RAM8X32,\[A1LbP\+\+A1LbP\]
+.*:	c0b04eec 	          MOVB      RAM8X32,\[A0FrP\+\+A0\.7\]
+.*:	c0b1c20c 	          MOVB      RAM8X32,\[A1\.7\+A1LbP\]
+.*:	c0b1ce4c 	          MOVB      RAM8X32,\[D1\.7\+D1\.7\]
+.*:	c0b1ceec 	          MOVB      RAM8X32,\[A0\.7\+\+A0\.7\]
+.*:	c0b80e2c 	          MOVB      RAM8X,\[D0Re0\+D0\.7\]
+.*:	c0b8428c 	          MOVB      RAM8X,\[A1LbP\+\+A1LbP\]
+.*:	c0b84eec 	          MOVB      RAM8X,\[A0FrP\+\+A0\.7\]
+.*:	c0b9c20c 	          MOVB      RAM8X,\[A1\.7\+A1LbP\]
+.*:	c0b9ce4c 	          MOVB      RAM8X,\[D1\.7\+D1\.7\]
+.*:	c0b9ceec 	          MOVB      RAM8X,\[A0\.7\+\+A0\.7\]
+.*:	c0c00e2c 	          MOVB      RABZ,\[D0Re0\+D0\.7\]
+.*:	c0c0428c 	          MOVB      RABZ,\[A1LbP\+\+A1LbP\]
+.*:	c0c04eec 	          MOVB      RABZ,\[A0FrP\+\+A0\.7\]
+.*:	c0c1c20c 	          MOVB      RABZ,\[A1\.7\+A1LbP\]
+.*:	c0c1ce4c 	          MOVB      RABZ,\[D1\.7\+D1\.7\]
+.*:	c0c1ceec 	          MOVB      RABZ,\[A0\.7\+\+A0\.7\]
+.*:	c0e80e2c 	          MOVB      RAWX,\[D0Re0\+D0\.7\]
+.*:	c0e8428c 	          MOVB      RAWX,\[A1LbP\+\+A1LbP\]
+.*:	c0e84eec 	          MOVB      RAWX,\[A0FrP\+\+A0\.7\]
+.*:	c0e9c20c 	          MOVB      RAWX,\[A1\.7\+A1LbP\]
+.*:	c0e9ce4c 	          MOVB      RAWX,\[D1\.7\+D1\.7\]
+.*:	c0e9ceec 	          MOVB      RAWX,\[A0\.7\+\+A0\.7\]
+.*:	c0f80e2c 	          MOVB      RAMX,\[D0Re0\+D0\.7\]
+.*:	c0f8428c 	          MOVB      RAMX,\[A1LbP\+\+A1LbP\]
+.*:	c0f84eec 	          MOVB      RAMX,\[A0FrP\+\+A0\.7\]
+.*:	c0f9c20c 	          MOVB      RAMX,\[A1\.7\+A1LbP\]
+.*:	c0f9ce4c 	          MOVB      RAMX,\[D1\.7\+D1\.7\]
+.*:	c0f9ceec 	          MOVB      RAMX,\[A0\.7\+\+A0\.7\]
+.*:	c10000a4 	          GETW      D1Re0,\[D0Re0\+\+D0Re0\]
+.*:	c1000e42 	          GETW      D0Re0,\[D1Re0\+D1\.7\]
+.*:	c1000ec4 	          GETW      D1Re0,\[D1Re0\+\+D1\.7\]
+.*:	c1004284 	          GETW      D1Re0,\[A1LbP\+\+A1LbP\]
+.*:	c1004e62 	          GETW      D0Re0,\[A0FrP\+A0\.7\]
+.*:	c1004ee4 	          GETW      D1Re0,\[A0FrP\+\+A0\.7\]
+.*:	c101c0a4 	          GETW      D1Re0,\[D0\.7\+\+D0Re0\]
+.*:	c101c262 	          GETW      D0Re0,\[A0\.7\+A0FrP\]
+.*:	c101c2e4 	          GETW      D1Re0,\[A0\.7\+\+A0FrP\]
+.*:	c101ce62 	          GETW      D0Re0,\[A0\.7\+A0\.7\]
+.*:	c101cea4 	          GETW      D1Re0,\[D0\.7\+\+D0\.7\]
+.*:	c101cee4 	          GETW      D1Re0,\[A0\.7\+\+A0\.7\]
+.*:	c10800a8 	          GETW      A1LbP,\[D0Re0\+\+D0Re0\]
+.*:	c1080e46 	          GETW      A0FrP,\[D1Re0\+D1\.7\]
+.*:	c1080ec8 	          GETW      A1LbP,\[D1Re0\+\+D1\.7\]
+.*:	c1084288 	          GETW      A1LbP,\[A1LbP\+\+A1LbP\]
+.*:	c1084e66 	          GETW      A0FrP,\[A0FrP\+A0\.7\]
+.*:	c1084ee8 	          GETW      A1LbP,\[A0FrP\+\+A0\.7\]
+.*:	c109c0a8 	          GETW      A1LbP,\[D0\.7\+\+D0Re0\]
+.*:	c109c266 	          GETW      A0FrP,\[A0\.7\+A0FrP\]
+.*:	c109c2e8 	          GETW      A1LbP,\[A0\.7\+\+A0FrP\]
+.*:	c109ce66 	          GETW      A0FrP,\[A0\.7\+A0\.7\]
+.*:	c109cea8 	          GETW      A1LbP,\[D0\.7\+\+D0\.7\]
+.*:	c109cee8 	          GETW      A1LbP,\[A0\.7\+\+A0\.7\]
+.*:	c1380046 	          GETW      A0\.7,\[D1Re0\+D1Re0\]
+.*:	c13800a8 	          GETW      A1\.7,\[D0Re0\+\+D0Re0\]
+.*:	c13800c8 	          GETW      A1\.7,\[D1Re0\+\+D1Re0\]
+.*:	c1380e46 	          GETW      A0\.7,\[D1Re0\+D1\.7\]
+.*:	c1380ea8 	          GETW      A1\.7,\[D0Re0\+\+D0\.7\]
+.*:	c1380ec8 	          GETW      A1\.7,\[D1Re0\+\+D1\.7\]
+.*:	c1384266 	          GETW      A0\.7,\[A0FrP\+A0FrP\]
+.*:	c1384288 	          GETW      A1\.7,\[A1LbP\+\+A1LbP\]
+.*:	c13842e8 	          GETW      A1\.7,\[A0FrP\+\+A0FrP\]
+.*:	c1384e66 	          GETW      A0\.7,\[A0FrP\+A0\.7\]
+.*:	c1384e88 	          GETW      A1\.7,\[A1LbP\+\+A1\.7\]
+.*:	c1384ee8 	          GETW      A1\.7,\[A0FrP\+\+A0\.7\]
+.*:	c139c046 	          GETW      A0\.7,\[D1\.7\+D1Re0\]
+.*:	c139c0a8 	          GETW      A1\.7,\[D0\.7\+\+D0Re0\]
+.*:	c139c0c8 	          GETW      A1\.7,\[D1\.7\+\+D1Re0\]
+.*:	c139c266 	          GETW      A0\.7,\[A0\.7\+A0FrP\]
+.*:	c139c288 	          GETW      A1\.7,\[A1\.7\+\+A1LbP\]
+.*:	c139c2e8 	          GETW      A1\.7,\[A0\.7\+\+A0FrP\]
+.*:	c139ce26 	          GETW      A0\.7,\[D0\.7\+D0\.7\]
+.*:	c139ce66 	          GETW      A0\.7,\[A0\.7\+A0\.7\]
+.*:	c139ce88 	          GETW      A1\.7,\[A1\.7\+\+A1\.7\]
+.*:	c139cea8 	          GETW      A1\.7,\[D0\.7\+\+D0\.7\]
+.*:	c139cec8 	          GETW      A1\.7,\[D1\.7\+\+D1\.7\]
+.*:	c139cee8 	          GETW      A1\.7,\[A0\.7\+\+A0\.7\]
+.*:	c1800e2c 	          MOVW      RA,\[D0Re0\+D0\.7\]
+.*:	c180428c 	          MOVW      RA,\[A1LbP\+\+A1LbP\]
+.*:	c1804eec 	          MOVW      RA,\[A0FrP\+\+A0\.7\]
+.*:	c181c20c 	          MOVW      RA,\[A1\.7\+A1LbP\]
+.*:	c181ce4c 	          MOVW      RA,\[D1\.7\+D1\.7\]
+.*:	c181ceec 	          MOVW      RA,\[A0\.7\+\+A0\.7\]
+.*:	c1b00e2c 	          MOVW      RAM8X32,\[D0Re0\+D0\.7\]
+.*:	c1b0428c 	          MOVW      RAM8X32,\[A1LbP\+\+A1LbP\]
+.*:	c1b04eec 	          MOVW      RAM8X32,\[A0FrP\+\+A0\.7\]
+.*:	c1b1c20c 	          MOVW      RAM8X32,\[A1\.7\+A1LbP\]
+.*:	c1b1ce4c 	          MOVW      RAM8X32,\[D1\.7\+D1\.7\]
+.*:	c1b1ceec 	          MOVW      RAM8X32,\[A0\.7\+\+A0\.7\]
+.*:	c1b80e2c 	          MOVW      RAM8X,\[D0Re0\+D0\.7\]
+.*:	c1b8428c 	          MOVW      RAM8X,\[A1LbP\+\+A1LbP\]
+.*:	c1b84eec 	          MOVW      RAM8X,\[A0FrP\+\+A0\.7\]
+.*:	c1b9c20c 	          MOVW      RAM8X,\[A1\.7\+A1LbP\]
+.*:	c1b9ce4c 	          MOVW      RAM8X,\[D1\.7\+D1\.7\]
+.*:	c1b9ceec 	          MOVW      RAM8X,\[A0\.7\+\+A0\.7\]
+.*:	c1c00e2c 	          MOVW      RABZ,\[D0Re0\+D0\.7\]
+.*:	c1c0428c 	          MOVW      RABZ,\[A1LbP\+\+A1LbP\]
+.*:	c1c04eec 	          MOVW      RABZ,\[A0FrP\+\+A0\.7\]
+.*:	c1c1c20c 	          MOVW      RABZ,\[A1\.7\+A1LbP\]
+.*:	c1c1ce4c 	          MOVW      RABZ,\[D1\.7\+D1\.7\]
+.*:	c1c1ceec 	          MOVW      RABZ,\[A0\.7\+\+A0\.7\]
+.*:	c1e80e2c 	          MOVW      RAWX,\[D0Re0\+D0\.7\]
+.*:	c1e8428c 	          MOVW      RAWX,\[A1LbP\+\+A1LbP\]
+.*:	c1e84eec 	          MOVW      RAWX,\[A0FrP\+\+A0\.7\]
+.*:	c1e9c20c 	          MOVW      RAWX,\[A1\.7\+A1LbP\]
+.*:	c1e9ce4c 	          MOVW      RAWX,\[D1\.7\+D1\.7\]
+.*:	c1e9ceec 	          MOVW      RAWX,\[A0\.7\+\+A0\.7\]
+.*:	c1f80e2c 	          MOVW      RAMX,\[D0Re0\+D0\.7\]
+.*:	c1f8428c 	          MOVW      RAMX,\[A1LbP\+\+A1LbP\]
+.*:	c1f84eec 	          MOVW      RAMX,\[A0FrP\+\+A0\.7\]
+.*:	c1f9c20c 	          MOVW      RAMX,\[A1\.7\+A1LbP\]
+.*:	c1f9ce4c 	          MOVW      RAMX,\[D1\.7\+D1\.7\]
+.*:	c1f9ceec 	          MOVW      RAMX,\[A0\.7\+\+A0\.7\]
+.*:	c2001fc4 	          GETB      D1Re0,\[D1Re0\+\+#31\]
+.*:	c20020c4 	          GETB      D1Re0,\[D1Re0\+\+#-32\]
+.*:	c2003fc4 	          GETB      D1Re0,\[--D1Re0\]
+.*:	c2005fe4 	          GETB      D1Re0,\[A0FrP\+\+#31\]
+.*:	c20060e4 	          GETB      D1Re0,\[A0FrP\+\+#-32\]
+.*:	c2007fe4 	          GETB      D1Re0,\[--A0FrP\]
+.*:	c201df62 	          GETB      D0Re0,\[A0\.7\+#31\]
+.*:	c201dfa4 	          GETB      D1Re0,\[D0\.7\+\+#31\]
+.*:	c201dfe4 	          GETB      D1Re0,\[A0\.7\+\+#31\]
+.*:	c201e062 	          GETB      D0Re0,\[A0\.7\+#-32\]
+.*:	c201e0a4 	          GETB      D1Re0,\[D0\.7\+\+#-32\]
+.*:	c201e0e4 	          GETB      D1Re0,\[A0\.7\+\+#-32\]
+.*:	c201ff62 	          GETB      D0Re0,\[A0\.7\+#-1\]
+.*:	c201ffa4 	          GETB      D1Re0,\[--D0\.7\]
+.*:	c201ffe4 	          GETB      D1Re0,\[--A0\.7\]
+.*:	c2081fc8 	          GETB      A1LbP,\[D1Re0\+\+#31\]
+.*:	c20820c8 	          GETB      A1LbP,\[D1Re0\+\+#-32\]
+.*:	c2083fc8 	          GETB      A1LbP,\[--D1Re0\]
+.*:	c2085fe8 	          GETB      A1LbP,\[A0FrP\+\+#31\]
+.*:	c20860e8 	          GETB      A1LbP,\[A0FrP\+\+#-32\]
+.*:	c2087fe8 	          GETB      A1LbP,\[--A0FrP\]
+.*:	c209df66 	          GETB      A0FrP,\[A0\.7\+#31\]
+.*:	c209dfa8 	          GETB      A1LbP,\[D0\.7\+\+#31\]
+.*:	c209dfe8 	          GETB      A1LbP,\[A0\.7\+\+#31\]
+.*:	c209e066 	          GETB      A0FrP,\[A0\.7\+#-32\]
+.*:	c209e0a8 	          GETB      A1LbP,\[D0\.7\+\+#-32\]
+.*:	c209e0e8 	          GETB      A1LbP,\[A0\.7\+\+#-32\]
+.*:	c209ff66 	          GETB      A0FrP,\[A0\.7\+#-1\]
+.*:	c209ffa8 	          GETB      A1LbP,\[--D0\.7\]
+.*:	c209ffe8 	          GETB      A1LbP,\[--A0\.7\]
+.*:	c2381fa8 	          GETB      A1\.7,\[D0Re0\+\+#31\]
+.*:	c2381fc8 	          GETB      A1\.7,\[D1Re0\+\+#31\]
+.*:	c23820a8 	          GETB      A1\.7,\[D0Re0\+\+#-32\]
+.*:	c23820c8 	          GETB      A1\.7,\[D1Re0\+\+#-32\]
+.*:	c2383fa8 	          GETB      A1\.7,\[--D0Re0\]
+.*:	c2383fc8 	          GETB      A1\.7,\[--D1Re0\]
+.*:	c2385f88 	          GETB      A1\.7,\[A1LbP\+\+#31\]
+.*:	c2385fe8 	          GETB      A1\.7,\[A0FrP\+\+#31\]
+.*:	c2386088 	          GETB      A1\.7,\[A1LbP\+\+#-32\]
+.*:	c23860e8 	          GETB      A1\.7,\[A0FrP\+\+#-32\]
+.*:	c2387f88 	          GETB      A1\.7,\[--A1LbP\]
+.*:	c2387fe8 	          GETB      A1\.7,\[--A0FrP\]
+.*:	c239df26 	          GETB      A0\.7,\[D0\.7\+#31\]
+.*:	c239df66 	          GETB      A0\.7,\[A0\.7\+#31\]
+.*:	c239df88 	          GETB      A1\.7,\[A1\.7\+\+#31\]
+.*:	c239dfa8 	          GETB      A1\.7,\[D0\.7\+\+#31\]
+.*:	c239dfc8 	          GETB      A1\.7,\[D1\.7\+\+#31\]
+.*:	c239dfe8 	          GETB      A1\.7,\[A0\.7\+\+#31\]
+.*:	c239e026 	          GETB      A0\.7,\[D0\.7\+#-32\]
+.*:	c239e066 	          GETB      A0\.7,\[A0\.7\+#-32\]
+.*:	c239e088 	          GETB      A1\.7,\[A1\.7\+\+#-32\]
+.*:	c239e0a8 	          GETB      A1\.7,\[D0\.7\+\+#-32\]
+.*:	c239e0c8 	          GETB      A1\.7,\[D1\.7\+\+#-32\]
+.*:	c239e0e8 	          GETB      A1\.7,\[A0\.7\+\+#-32\]
+.*:	c239ff26 	          GETB      A0\.7,\[D0\.7\+#-1\]
+.*:	c239ff66 	          GETB      A0\.7,\[A0\.7\+#-1\]
+.*:	c239ff88 	          GETB      A1\.7,\[--A1\.7\]
+.*:	c239ffa8 	          GETB      A1\.7,\[--D0\.7\]
+.*:	c239ffc8 	          GETB      A1\.7,\[--D1\.7\]
+.*:	c239ffe8 	          GETB      A1\.7,\[--A0\.7\]
+.*:	c28020cc 	          MOVB      RA,\[D1Re0\+\+#-32\]
+.*:	c2805fec 	          MOVB      RA,\[A0FrP\+\+#31\]
+.*:	c2807fec 	          MOVB      RA,\[--A0FrP\]
+.*:	c281dfec 	          MOVB      RA,\[A0\.7\+\+#31\]
+.*:	c281e0ec 	          MOVB      RA,\[A0\.7\+\+#-32\]
+.*:	c281ffec 	          MOVB      RA,\[--A0\.7\]
+.*:	c2b020cc 	          MOVB      RAM8X32,\[D1Re0\+\+#-32\]
+.*:	c2b05fec 	          MOVB      RAM8X32,\[A0FrP\+\+#31\]
+.*:	c2b07fec 	          MOVB      RAM8X32,\[--A0FrP\]
+.*:	c2b1dfec 	          MOVB      RAM8X32,\[A0\.7\+\+#31\]
+.*:	c2b1e0ec 	          MOVB      RAM8X32,\[A0\.7\+\+#-32\]
+.*:	c2b1ffec 	          MOVB      RAM8X32,\[--A0\.7\]
+.*:	c2b820cc 	          MOVB      RAM8X,\[D1Re0\+\+#-32\]
+.*:	c2b85fec 	          MOVB      RAM8X,\[A0FrP\+\+#31\]
+.*:	c2b87fec 	          MOVB      RAM8X,\[--A0FrP\]
+.*:	c2b9dfec 	          MOVB      RAM8X,\[A0\.7\+\+#31\]
+.*:	c2b9e0ec 	          MOVB      RAM8X,\[A0\.7\+\+#-32\]
+.*:	c2b9ffec 	          MOVB      RAM8X,\[--A0\.7\]
+.*:	c2c020cc 	          MOVB      RABZ,\[D1Re0\+\+#-32\]
+.*:	c2c05fec 	          MOVB      RABZ,\[A0FrP\+\+#31\]
+.*:	c2c07fec 	          MOVB      RABZ,\[--A0FrP\]
+.*:	c2c1dfec 	          MOVB      RABZ,\[A0\.7\+\+#31\]
+.*:	c2c1e0ec 	          MOVB      RABZ,\[A0\.7\+\+#-32\]
+.*:	c2c1ffec 	          MOVB      RABZ,\[--A0\.7\]
+.*:	c2e820cc 	          MOVB      RAWX,\[D1Re0\+\+#-32\]
+.*:	c2e85fec 	          MOVB      RAWX,\[A0FrP\+\+#31\]
+.*:	c2e87fec 	          MOVB      RAWX,\[--A0FrP\]
+.*:	c2e9dfec 	          MOVB      RAWX,\[A0\.7\+\+#31\]
+.*:	c2e9e0ec 	          MOVB      RAWX,\[A0\.7\+\+#-32\]
+.*:	c2e9ffec 	          MOVB      RAWX,\[--A0\.7\]
+.*:	c2f820cc 	          MOVB      RAMX,\[D1Re0\+\+#-32\]
+.*:	c2f85fec 	          MOVB      RAMX,\[A0FrP\+\+#31\]
+.*:	c2f87fec 	          MOVB      RAMX,\[--A0FrP\]
+.*:	c2f9dfec 	          MOVB      RAMX,\[A0\.7\+\+#31\]
+.*:	c2f9e0ec 	          MOVB      RAMX,\[A0\.7\+\+#-32\]
+.*:	c2f9ffec 	          MOVB      RAMX,\[--A0\.7\]
+.*:	c3001fc4 	          GETW      D1Re0,\[D1Re0\+\+#62\]
+.*:	c30020c4 	          GETW      D1Re0,\[D1Re0\+\+#-64\]
+.*:	c3003fc4 	          GETW      D1Re0,\[--D1Re0\]
+.*:	c3005fe4 	          GETW      D1Re0,\[A0FrP\+\+#62\]
+.*:	c30060e4 	          GETW      D1Re0,\[A0FrP\+\+#-64\]
+.*:	c3007fe4 	          GETW      D1Re0,\[--A0FrP\]
+.*:	c301df62 	          GETW      D0Re0,\[A0\.7\+#62\]
+.*:	c301dfa4 	          GETW      D1Re0,\[D0\.7\+\+#62\]
+.*:	c301dfe4 	          GETW      D1Re0,\[A0\.7\+\+#62\]
+.*:	c301e062 	          GETW      D0Re0,\[A0\.7\+#-64\]
+.*:	c301e0a4 	          GETW      D1Re0,\[D0\.7\+\+#-64\]
+.*:	c301e0e4 	          GETW      D1Re0,\[A0\.7\+\+#-64\]
+.*:	c301ff62 	          GETW      D0Re0,\[A0\.7\+#-2\]
+.*:	c301ffa4 	          GETW      D1Re0,\[--D0\.7\]
+.*:	c301ffe4 	          GETW      D1Re0,\[--A0\.7\]
+.*:	c3081fc8 	          GETW      A1LbP,\[D1Re0\+\+#62\]
+.*:	c30820c8 	          GETW      A1LbP,\[D1Re0\+\+#-64\]
+.*:	c3083fc8 	          GETW      A1LbP,\[--D1Re0\]
+.*:	c3085fe8 	          GETW      A1LbP,\[A0FrP\+\+#62\]
+.*:	c30860e8 	          GETW      A1LbP,\[A0FrP\+\+#-64\]
+.*:	c3087fe8 	          GETW      A1LbP,\[--A0FrP\]
+.*:	c309df66 	          GETW      A0FrP,\[A0\.7\+#62\]
+.*:	c309dfa8 	          GETW      A1LbP,\[D0\.7\+\+#62\]
+.*:	c309dfe8 	          GETW      A1LbP,\[A0\.7\+\+#62\]
+.*:	c309e066 	          GETW      A0FrP,\[A0\.7\+#-64\]
+.*:	c309e0a8 	          GETW      A1LbP,\[D0\.7\+\+#-64\]
+.*:	c309e0e8 	          GETW      A1LbP,\[A0\.7\+\+#-64\]
+.*:	c309ff66 	          GETW      A0FrP,\[A0\.7\+#-2\]
+.*:	c309ffa8 	          GETW      A1LbP,\[--D0\.7\]
+.*:	c309ffe8 	          GETW      A1LbP,\[--A0\.7\]
+.*:	c3381fa8 	          GETW      A1\.7,\[D0Re0\+\+#62\]
+.*:	c3381fc8 	          GETW      A1\.7,\[D1Re0\+\+#62\]
+.*:	c33820a8 	          GETW      A1\.7,\[D0Re0\+\+#-64\]
+.*:	c33820c8 	          GETW      A1\.7,\[D1Re0\+\+#-64\]
+.*:	c3383fa8 	          GETW      A1\.7,\[--D0Re0\]
+.*:	c3383fc8 	          GETW      A1\.7,\[--D1Re0\]
+.*:	c3385f88 	          GETW      A1\.7,\[A1LbP\+\+#62\]
+.*:	c3385fe8 	          GETW      A1\.7,\[A0FrP\+\+#62\]
+.*:	c3386088 	          GETW      A1\.7,\[A1LbP\+\+#-64\]
+.*:	c33860e8 	          GETW      A1\.7,\[A0FrP\+\+#-64\]
+.*:	c3387f88 	          GETW      A1\.7,\[--A1LbP\]
+.*:	c3387fe8 	          GETW      A1\.7,\[--A0FrP\]
+.*:	c339df26 	          GETW      A0\.7,\[D0\.7\+#62\]
+.*:	c339df66 	          GETW      A0\.7,\[A0\.7\+#62\]
+.*:	c339df88 	          GETW      A1\.7,\[A1\.7\+\+#62\]
+.*:	c339dfa8 	          GETW      A1\.7,\[D0\.7\+\+#62\]
+.*:	c339dfc8 	          GETW      A1\.7,\[D1\.7\+\+#62\]
+.*:	c339dfe8 	          GETW      A1\.7,\[A0\.7\+\+#62\]
+.*:	c339e026 	          GETW      A0\.7,\[D0\.7\+#-64\]
+.*:	c339e066 	          GETW      A0\.7,\[A0\.7\+#-64\]
+.*:	c339e088 	          GETW      A1\.7,\[A1\.7\+\+#-64\]
+.*:	c339e0a8 	          GETW      A1\.7,\[D0\.7\+\+#-64\]
+.*:	c339e0c8 	          GETW      A1\.7,\[D1\.7\+\+#-64\]
+.*:	c339e0e8 	          GETW      A1\.7,\[A0\.7\+\+#-64\]
+.*:	c339ff26 	          GETW      A0\.7,\[D0\.7\+#-2\]
+.*:	c339ff66 	          GETW      A0\.7,\[A0\.7\+#-2\]
+.*:	c339ff88 	          GETW      A1\.7,\[--A1\.7\]
+.*:	c339ffa8 	          GETW      A1\.7,\[--D0\.7\]
+.*:	c339ffc8 	          GETW      A1\.7,\[--D1\.7\]
+.*:	c339ffe8 	          GETW      A1\.7,\[--A0\.7\]
+.*:	c38020cc 	          MOVW      RA,\[D1Re0\+\+#-64\]
+.*:	c3805fec 	          MOVW      RA,\[A0FrP\+\+#62\]
+.*:	c3807fec 	          MOVW      RA,\[--A0FrP\]
+.*:	c381dfec 	          MOVW      RA,\[A0\.7\+\+#62\]
+.*:	c381e0ec 	          MOVW      RA,\[A0\.7\+\+#-64\]
+.*:	c381ffec 	          MOVW      RA,\[--A0\.7\]
+.*:	c3b020cc 	          MOVW      RAM8X32,\[D1Re0\+\+#-64\]
+.*:	c3b05fec 	          MOVW      RAM8X32,\[A0FrP\+\+#62\]
+.*:	c3b07fec 	          MOVW      RAM8X32,\[--A0FrP\]
+.*:	c3b1dfec 	          MOVW      RAM8X32,\[A0\.7\+\+#62\]
+.*:	c3b1e0ec 	          MOVW      RAM8X32,\[A0\.7\+\+#-64\]
+.*:	c3b1ffec 	          MOVW      RAM8X32,\[--A0\.7\]
+.*:	c3b820cc 	          MOVW      RAM8X,\[D1Re0\+\+#-64\]
+.*:	c3b85fec 	          MOVW      RAM8X,\[A0FrP\+\+#62\]
+.*:	c3b87fec 	          MOVW      RAM8X,\[--A0FrP\]
+.*:	c3b9dfec 	          MOVW      RAM8X,\[A0\.7\+\+#62\]
+.*:	c3b9e0ec 	          MOVW      RAM8X,\[A0\.7\+\+#-64\]
+.*:	c3b9ffec 	          MOVW      RAM8X,\[--A0\.7\]
+.*:	c3c020cc 	          MOVW      RABZ,\[D1Re0\+\+#-64\]
+.*:	c3c05fec 	          MOVW      RABZ,\[A0FrP\+\+#62\]
+.*:	c3c07fec 	          MOVW      RABZ,\[--A0FrP\]
+.*:	c3c1dfec 	          MOVW      RABZ,\[A0\.7\+\+#62\]
+.*:	c3c1e0ec 	          MOVW      RABZ,\[A0\.7\+\+#-64\]
+.*:	c3c1ffec 	          MOVW      RABZ,\[--A0\.7\]
+.*:	c3e820cc 	          MOVW      RAWX,\[D1Re0\+\+#-64\]
+.*:	c3e85fec 	          MOVW      RAWX,\[A0FrP\+\+#62\]
+.*:	c3e87fec 	          MOVW      RAWX,\[--A0FrP\]
+.*:	c3e9dfec 	          MOVW      RAWX,\[A0\.7\+\+#62\]
+.*:	c3e9e0ec 	          MOVW      RAWX,\[A0\.7\+\+#-64\]
+.*:	c3e9ffec 	          MOVW      RAWX,\[--A0\.7\]
+.*:	c3f820cc 	          MOVW      RAMX,\[D1Re0\+\+#-64\]
+.*:	c3f85fec 	          MOVW      RAMX,\[A0FrP\+\+#62\]
+.*:	c3f87fec 	          MOVW      RAMX,\[--A0FrP\]
+.*:	c3f9dfec 	          MOVW      RAMX,\[A0\.7\+\+#62\]
+.*:	c3f9e0ec 	          MOVW      RAMX,\[A0\.7\+\+#-64\]
+.*:	c3f9ffec 	          MOVW      RAMX,\[--A0\.7\]
+.*:	c4000042 	          GETD      D0Re0,\[D1Re0\+D1Re0\]
+.*:	c40000a4 	          GETD      D1Re0,\[D0Re0\+\+D0Re0\]
+.*:	c40000c2 	          GETD      D0Re0,\[D1Re0\+\+D1Re0\]
+.*:	c4000e20 	          GETD      TXENABLE,\[D0Re0\+D0\.7\]
+.*:	c4000e4a 	          GETD      PC,\[D1Re0\+D1\.7\]
+.*:	c4000eaa 	          GETD      PC,\[D0Re0\+\+D0\.7\]
+.*:	c4000ec4 	          GETD      D1Re0,\[D1Re0\+\+D1\.7\]
+.*:	c4004204 	          GETD      D1Re0,\[A1LbP\+A1LbP\]
+.*:	c4004280 	          GETD      TXENABLE,\[A1LbP\+\+A1LbP\]
+.*:	c400428e 	          GETD      TXSTAT,\[A1LbP\+\+A1LbP\]
+.*:	c40042ea 	          GETD      PC,\[A0FrP\+\+A0FrP\]
+.*:	c4004e0e 	          GETD      TXSTAT,\[A1LbP\+A1\.7\]
+.*:	c4004e82 	          GETD      D0Re0,\[A1LbP\+\+A1\.7\]
+.*:	c4004ee0 	          GETD      TXENABLE,\[A0FrP\+\+A0\.7\]
+.*:	c4004eee 	          GETD      TXSTAT,\[A0FrP\+\+A0\.7\]
+.*:	c401c042 	          GETD      D0Re0,\[D1\.7\+D1Re0\]
+.*:	c401c0a4 	          GETD      D1Re0,\[D0\.7\+\+D0Re0\]
+.*:	c401c0c2 	          GETD      D0Re0,\[D1\.7\+\+D1Re0\]
+.*:	c401c200 	          GETD      TXENABLE,\[A1\.7\+A1LbP\]
+.*:	c401c26a 	          GETD      PC,\[A0\.7\+A0FrP\]
+.*:	c401c28a 	          GETD      PC,\[A1\.7\+\+A1LbP\]
+.*:	c401c2e4 	          GETD      D1Re0,\[A0\.7\+\+A0FrP\]
+.*:	c401ce04 	          GETD      D1Re0,\[A1\.7\+A1\.7\]
+.*:	c401ce40 	          GETD      TXENABLE,\[D1\.7\+D1\.7\]
+.*:	c401ce6a 	          GETD      PC,\[A0\.7\+A0\.7\]
+.*:	c401ce8a 	          GETD      PC,\[A1\.7\+\+A1\.7\]
+.*:	c401cea4 	          GETD      D1Re0,\[D0\.7\+\+D0\.7\]
+.*:	c401cec2 	          GETD      D0Re0,\[D1\.7\+\+D1\.7\]
+.*:	c401cee0 	          GETD      TXENABLE,\[A0\.7\+\+A0\.7\]
+.*:	c401ceee 	          GETD      TXSTAT,\[A0\.7\+\+A0\.7\]
+.*:	c40800a6 	          GETD      A0FrP,\[D0Re0\+\+D0Re0\]
+.*:	c40800c8 	          GETD      A1LbP,\[D1Re0\+\+D1Re0\]
+.*:	c4080e48 	          GETD      A1LbP,\[D1Re0\+D1\.7\]
+.*:	c4080ec6 	          GETD      A0FrP,\[D1Re0\+\+D1\.7\]
+.*:	c408420a 	          GETD      PCX,\[A1LbP\+A1LbP\]
+.*:	c408428a 	          GETD      PCX,\[A1LbP\+\+A1LbP\]
+.*:	c4084e06 	          GETD      A0FrP,\[A1LbP\+A1\.7\]
+.*:	c4084e88 	          GETD      A1LbP,\[A1LbP\+\+A1\.7\]
+.*:	c4084eea 	          GETD      PCX,\[A0FrP\+\+A0\.7\]
+.*:	c409c0a6 	          GETD      A0FrP,\[D0\.7\+\+D0Re0\]
+.*:	c409c0c8 	          GETD      A1LbP,\[D1\.7\+\+D1Re0\]
+.*:	c409c268 	          GETD      A1LbP,\[A0\.7\+A0FrP\]
+.*:	c409c2e6 	          GETD      A0FrP,\[A0\.7\+\+A0FrP\]
+.*:	c409ce0a 	          GETD      PCX,\[A1\.7\+A1\.7\]
+.*:	c409ce68 	          GETD      A1LbP,\[A0\.7\+A0\.7\]
+.*:	c409cea6 	          GETD      A0FrP,\[D0\.7\+\+D0\.7\]
+.*:	c409cec8 	          GETD      A1LbP,\[D1\.7\+\+D1\.7\]
+.*:	c409ceea 	          GETD      PCX,\[A0\.7\+\+A0\.7\]
+.*:	c4180e2e 	          GETD      TXMASKI,\[D0Re0\+D0\.7\]
+.*:	c418428e 	          GETD      TXMASKI,\[A1LbP\+\+A1LbP\]
+.*:	c4184eee 	          GETD      TXMASKI,\[A0FrP\+\+A0\.7\]
+.*:	c419c20e 	          GETD      TXMASKI,\[A1\.7\+A1LbP\]
+.*:	c419ce4e 	          GETD      TXMASKI,\[D1\.7\+D1\.7\]
+.*:	c419ceee 	          GETD      TXMASKI,\[A0\.7\+\+A0\.7\]
+.*:	c4380046 	          GETD      A0\.7,\[D1Re0\+D1Re0\]
+.*:	c43800a8 	          GETD      A1\.7,\[D0Re0\+\+D0Re0\]
+.*:	c43800c8 	          GETD      A1\.7,\[D1Re0\+\+D1Re0\]
+.*:	c4380e46 	          GETD      A0\.7,\[D1Re0\+D1\.7\]
+.*:	c4380ea8 	          GETD      A1\.7,\[D0Re0\+\+D0\.7\]
+.*:	c4380ec8 	          GETD      A1\.7,\[D1Re0\+\+D1\.7\]
+.*:	c4384266 	          GETD      A0\.7,\[A0FrP\+A0FrP\]
+.*:	c4384288 	          GETD      A1\.7,\[A1LbP\+\+A1LbP\]
+.*:	c43842e8 	          GETD      A1\.7,\[A0FrP\+\+A0FrP\]
+.*:	c4384e66 	          GETD      A0\.7,\[A0FrP\+A0\.7\]
+.*:	c4384e88 	          GETD      A1\.7,\[A1LbP\+\+A1\.7\]
+.*:	c4384ee8 	          GETD      A1\.7,\[A0FrP\+\+A0\.7\]
+.*:	c439c046 	          GETD      A0\.7,\[D1\.7\+D1Re0\]
+.*:	c439c0a8 	          GETD      A1\.7,\[D0\.7\+\+D0Re0\]
+.*:	c439c0c8 	          GETD      A1\.7,\[D1\.7\+\+D1Re0\]
+.*:	c439c266 	          GETD      A0\.7,\[A0\.7\+A0FrP\]
+.*:	c439c288 	          GETD      A1\.7,\[A1\.7\+\+A1LbP\]
+.*:	c439c2e8 	          GETD      A1\.7,\[A0\.7\+\+A0FrP\]
+.*:	c439ce26 	          GETD      A0\.7,\[D0\.7\+D0\.7\]
+.*:	c439ce66 	          GETD      A0\.7,\[A0\.7\+A0\.7\]
+.*:	c439ce88 	          GETD      A1\.7,\[A1\.7\+\+A1\.7\]
+.*:	c439cea8 	          GETD      A1\.7,\[D0\.7\+\+D0\.7\]
+.*:	c439cec8 	          GETD      A1\.7,\[D1\.7\+\+D1\.7\]
+.*:	c439cee8 	          GETD      A1\.7,\[A0\.7\+\+A0\.7\]
+.*:	c4800e2c 	          MOVD      RA,\[D0Re0\+D0\.7\]
+.*:	c480428c 	          MOVD      RA,\[A1LbP\+\+A1LbP\]
+.*:	c4804eec 	          MOVD      RA,\[A0FrP\+\+A0\.7\]
+.*:	c481c20c 	          MOVD      RA,\[A1\.7\+A1LbP\]
+.*:	c481ce4c 	          MOVD      RA,\[D1\.7\+D1\.7\]
+.*:	c481ceec 	          MOVD      RA,\[A0\.7\+\+A0\.7\]
+.*:	c4b00e2c 	          MOVD      RAM8X32,\[D0Re0\+D0\.7\]
+.*:	c4b0428c 	          MOVD      RAM8X32,\[A1LbP\+\+A1LbP\]
+.*:	c4b04eec 	          MOVD      RAM8X32,\[A0FrP\+\+A0\.7\]
+.*:	c4b1c20c 	          MOVD      RAM8X32,\[A1\.7\+A1LbP\]
+.*:	c4b1ce4c 	          MOVD      RAM8X32,\[D1\.7\+D1\.7\]
+.*:	c4b1ceec 	          MOVD      RAM8X32,\[A0\.7\+\+A0\.7\]
+.*:	c4b80e2c 	          MOVD      RAM8X,\[D0Re0\+D0\.7\]
+.*:	c4b8428c 	          MOVD      RAM8X,\[A1LbP\+\+A1LbP\]
+.*:	c4b84eec 	          MOVD      RAM8X,\[A0FrP\+\+A0\.7\]
+.*:	c4b9c20c 	          MOVD      RAM8X,\[A1\.7\+A1LbP\]
+.*:	c4b9ce4c 	          MOVD      RAM8X,\[D1\.7\+D1\.7\]
+.*:	c4b9ceec 	          MOVD      RAM8X,\[A0\.7\+\+A0\.7\]
+.*:	c4c00e2c 	          MOVD      RABZ,\[D0Re0\+D0\.7\]
+.*:	c4c0428c 	          MOVD      RABZ,\[A1LbP\+\+A1LbP\]
+.*:	c4c04eec 	          MOVD      RABZ,\[A0FrP\+\+A0\.7\]
+.*:	c4c1c20c 	          MOVD      RABZ,\[A1\.7\+A1LbP\]
+.*:	c4c1ce4c 	          MOVD      RABZ,\[D1\.7\+D1\.7\]
+.*:	c4c1ceec 	          MOVD      RABZ,\[A0\.7\+\+A0\.7\]
+.*:	c4e80e2c 	          MOVD      RAWX,\[D0Re0\+D0\.7\]
+.*:	c4e8428c 	          MOVD      RAWX,\[A1LbP\+\+A1LbP\]
+.*:	c4e84eec 	          MOVD      RAWX,\[A0FrP\+\+A0\.7\]
+.*:	c4e9c20c 	          MOVD      RAWX,\[A1\.7\+A1LbP\]
+.*:	c4e9ce4c 	          MOVD      RAWX,\[D1\.7\+D1\.7\]
+.*:	c4e9ceec 	          MOVD      RAWX,\[A0\.7\+\+A0\.7\]
+.*:	c4f800ac 	          MOVD      RAMX,\[D0Re0\+\+D0Re0\]
+.*:	c4f80e40 	          GETD      TXIDLECYC,\[D1Re0\+D1\.7\]
+.*:	c4f80ecc 	          MOVD      RAMX,\[D1Re0\+\+D1\.7\]
+.*:	c4f8428c 	          MOVD      RAMX,\[A1LbP\+\+A1LbP\]
+.*:	c4f84e60 	          GETD      TXIDLECYC,\[A0FrP\+A0\.7\]
+.*:	c4f84eec 	          MOVD      RAMX,\[A0FrP\+\+A0\.7\]
+.*:	c4f9c0ac 	          MOVD      RAMX,\[D0\.7\+\+D0Re0\]
+.*:	c4f9c260 	          GETD      TXIDLECYC,\[A0\.7\+A0FrP\]
+.*:	c4f9c2ec 	          MOVD      RAMX,\[A0\.7\+\+A0FrP\]
+.*:	c4f9ce60 	          GETD      TXIDLECYC,\[A0\.7\+A0\.7\]
+.*:	c4f9ceac 	          MOVD      RAMX,\[D0\.7\+\+D0\.7\]
+.*:	c4f9ceec 	          MOVD      RAMX,\[A0\.7\+\+A0\.7\]
+.*:	c50000a4 	          GETL      D1Re0,D0Re0,\[D0Re0\+\+D0Re0\]
+.*:	c5000e42 	          GETL      D0Re0,D1Re0,\[D1Re0\+D1\.7\]
+.*:	c5000ec4 	          GETL      D1Re0,D0Re0,\[D1Re0\+\+D1\.7\]
+.*:	c5004284 	          GETL      D1Re0,D0Re0,\[A1LbP\+\+A1LbP\]
+.*:	c5004e62 	          GETL      D0Re0,D1Re0,\[A0FrP\+A0\.7\]
+.*:	c5004ee4 	          GETL      D1Re0,D0Re0,\[A0FrP\+\+A0\.7\]
+.*:	c501c0a4 	          GETL      D1Re0,D0Re0,\[D0\.7\+\+D0Re0\]
+.*:	c501c262 	          GETL      D0Re0,D1Re0,\[A0\.7\+A0FrP\]
+.*:	c501c2e4 	          GETL      D1Re0,D0Re0,\[A0\.7\+\+A0FrP\]
+.*:	c501ce62 	          GETL      D0Re0,D1Re0,\[A0\.7\+A0\.7\]
+.*:	c501cea4 	          GETL      D1Re0,D0Re0,\[D0\.7\+\+D0\.7\]
+.*:	c501cee4 	          GETL      D1Re0,D0Re0,\[A0\.7\+\+A0\.7\]
+.*:	c50800a8 	          GETL      A1LbP,A0FrP,\[D0Re0\+\+D0Re0\]
+.*:	c5080e46 	          GETL      A0FrP,A1LbP,\[D1Re0\+D1\.7\]
+.*:	c5080ec8 	          GETL      A1LbP,A0FrP,\[D1Re0\+\+D1\.7\]
+.*:	c5084288 	          GETL      A1LbP,A0FrP,\[A1LbP\+\+A1LbP\]
+.*:	c5084e66 	          GETL      A0FrP,A1LbP,\[A0FrP\+A0\.7\]
+.*:	c5084ee8 	          GETL      A1LbP,A0FrP,\[A0FrP\+\+A0\.7\]
+.*:	c509c0a8 	          GETL      A1LbP,A0FrP,\[D0\.7\+\+D0Re0\]
+.*:	c509c266 	          GETL      A0FrP,A1LbP,\[A0\.7\+A0FrP\]
+.*:	c509c2e8 	          GETL      A1LbP,A0FrP,\[A0\.7\+\+A0FrP\]
+.*:	c509ce66 	          GETL      A0FrP,A1LbP,\[A0\.7\+A0\.7\]
+.*:	c509cea8 	          GETL      A1LbP,A0FrP,\[D0\.7\+\+D0\.7\]
+.*:	c509cee8 	          GETL      A1LbP,A0FrP,\[A0\.7\+\+A0\.7\]
+.*:	c5380046 	          GETL      A0\.7,A1\.7,\[D1Re0\+D1Re0\]
+.*:	c53800a8 	          GETL      A1\.7,A0\.7,\[D0Re0\+\+D0Re0\]
+.*:	c53800c8 	          GETL      A1\.7,A0\.7,\[D1Re0\+\+D1Re0\]
+.*:	c5380e46 	          GETL      A0\.7,A1\.7,\[D1Re0\+D1\.7\]
+.*:	c5380ea8 	          GETL      A1\.7,A0\.7,\[D0Re0\+\+D0\.7\]
+.*:	c5380ec8 	          GETL      A1\.7,A0\.7,\[D1Re0\+\+D1\.7\]
+.*:	c5384266 	          GETL      A0\.7,A1\.7,\[A0FrP\+A0FrP\]
+.*:	c5384288 	          GETL      A1\.7,A0\.7,\[A1LbP\+\+A1LbP\]
+.*:	c53842e8 	          GETL      A1\.7,A0\.7,\[A0FrP\+\+A0FrP\]
+.*:	c5384e66 	          GETL      A0\.7,A1\.7,\[A0FrP\+A0\.7\]
+.*:	c5384e88 	          GETL      A1\.7,A0\.7,\[A1LbP\+\+A1\.7\]
+.*:	c5384ee8 	          GETL      A1\.7,A0\.7,\[A0FrP\+\+A0\.7\]
+.*:	c539c046 	          GETL      A0\.7,A1\.7,\[D1\.7\+D1Re0\]
+.*:	c539c0a8 	          GETL      A1\.7,A0\.7,\[D0\.7\+\+D0Re0\]
+.*:	c539c0c8 	          GETL      A1\.7,A0\.7,\[D1\.7\+\+D1Re0\]
+.*:	c539c266 	          GETL      A0\.7,A1\.7,\[A0\.7\+A0FrP\]
+.*:	c539c288 	          GETL      A1\.7,A0\.7,\[A1\.7\+\+A1LbP\]
+.*:	c539c2e8 	          GETL      A1\.7,A0\.7,\[A0\.7\+\+A0FrP\]
+.*:	c539ce26 	          GETL      A0\.7,A1\.7,\[D0\.7\+D0\.7\]
+.*:	c539ce66 	          GETL      A0\.7,A1\.7,\[A0\.7\+A0\.7\]
+.*:	c539ce88 	          GETL      A1\.7,A0\.7,\[A1\.7\+\+A1\.7\]
+.*:	c539cea8 	          GETL      A1\.7,A0\.7,\[D0\.7\+\+D0\.7\]
+.*:	c539cec8 	          GETL      A1\.7,A0\.7,\[D1\.7\+\+D1\.7\]
+.*:	c539cee8 	          GETL      A1\.7,A0\.7,\[A0\.7\+\+A0\.7\]
+.*:	c5800e2c 	          MOVL      RA,\[D0Re0\+D0\.7\]
+.*:	c580428c 	          MOVL      RA,\[A1LbP\+\+A1LbP\]
+.*:	c5804eec 	          MOVL      RA,\[A0FrP\+\+A0\.7\]
+.*:	c581c20c 	          MOVL      RA,\[A1\.7\+A1LbP\]
+.*:	c581ce4c 	          MOVL      RA,\[D1\.7\+D1\.7\]
+.*:	c581ceec 	          MOVL      RA,\[A0\.7\+\+A0\.7\]
+.*:	c5b00e2c 	          MOVL      RAM8X32,\[D0Re0\+D0\.7\]
+.*:	c5b0428c 	          MOVL      RAM8X32,\[A1LbP\+\+A1LbP\]
+.*:	c5b04eec 	          MOVL      RAM8X32,\[A0FrP\+\+A0\.7\]
+.*:	c5b1c20c 	          MOVL      RAM8X32,\[A1\.7\+A1LbP\]
+.*:	c5b1ce4c 	          MOVL      RAM8X32,\[D1\.7\+D1\.7\]
+.*:	c5b1ceec 	          MOVL      RAM8X32,\[A0\.7\+\+A0\.7\]
+.*:	c5b80e2c 	          MOVL      RAM8X,\[D0Re0\+D0\.7\]
+.*:	c5b8428c 	          MOVL      RAM8X,\[A1LbP\+\+A1LbP\]
+.*:	c5b84eec 	          MOVL      RAM8X,\[A0FrP\+\+A0\.7\]
+.*:	c5b9c20c 	          MOVL      RAM8X,\[A1\.7\+A1LbP\]
+.*:	c5b9ce4c 	          MOVL      RAM8X,\[D1\.7\+D1\.7\]
+.*:	c5b9ceec 	          MOVL      RAM8X,\[A0\.7\+\+A0\.7\]
+.*:	c5c00e2c 	          MOVL      RABZ,\[D0Re0\+D0\.7\]
+.*:	c5c0428c 	          MOVL      RABZ,\[A1LbP\+\+A1LbP\]
+.*:	c5c04eec 	          MOVL      RABZ,\[A0FrP\+\+A0\.7\]
+.*:	c5c1c20c 	          MOVL      RABZ,\[A1\.7\+A1LbP\]
+.*:	c5c1ce4c 	          MOVL      RABZ,\[D1\.7\+D1\.7\]
+.*:	c5c1ceec 	          MOVL      RABZ,\[A0\.7\+\+A0\.7\]
+.*:	c5e80e2c 	          MOVL      RAWX,\[D0Re0\+D0\.7\]
+.*:	c5e8428c 	          MOVL      RAWX,\[A1LbP\+\+A1LbP\]
+.*:	c5e84eec 	          MOVL      RAWX,\[A0FrP\+\+A0\.7\]
+.*:	c5e9c20c 	          MOVL      RAWX,\[A1\.7\+A1LbP\]
+.*:	c5e9ce4c 	          MOVL      RAWX,\[D1\.7\+D1\.7\]
+.*:	c5e9ceec 	          MOVL      RAWX,\[A0\.7\+\+A0\.7\]
+.*:	c5f80e2c 	          MOVL      RAMX,\[D0Re0\+D0\.7\]
+.*:	c5f8428c 	          MOVL      RAMX,\[A1LbP\+\+A1LbP\]
+.*:	c5f84eec 	          MOVL      RAMX,\[A0FrP\+\+A0\.7\]
+.*:	c5f9c20c 	          MOVL      RAMX,\[A1\.7\+A1LbP\]
+.*:	c5f9ce4c 	          MOVL      RAMX,\[D1\.7\+D1\.7\]
+.*:	c5f9ceec 	          MOVL      RAMX,\[A0\.7\+\+A0\.7\]
+.*:	c6001fa0 	          GETD      TXENABLE,\[D0Re0\+\+#124\]
+.*:	c6001fae 	          GETD      TXSTAT,\[D0Re0\+\+#124\]
+.*:	c6001fca 	          GETD      PC,\[D1Re0\+\+#124\]
+.*:	c600204a 	          GETD      PC,\[D1Re0\+#-128\]
+.*:	c60020aa 	          GETD      PC,\[D0Re0\+\+#-128\]
+.*:	c60020c4 	          GETD      D1Re0,\[D1Re0\+\+#-128\]
+.*:	c6003f2e 	          GETD      TXSTAT,\[D0Re0\+#-4\]
+.*:	c6003fa4 	          GETD      D1Re0,\[--D0Re0\]
+.*:	c6003fc2 	          GETD      D0Re0,\[--D1Re0\]
+.*:	c6005f00 	          GETD      TXENABLE,\[A1LbP\+#124\]
+.*:	c6005f82 	          GETD      D0Re0,\[A1LbP\+\+#124\]
+.*:	c6005fe0 	          GETD      TXENABLE,\[A0FrP\+\+#124\]
+.*:	c6005fee 	          GETD      TXSTAT,\[A0FrP\+\+#124\]
+.*:	c6006080 	          GETD      TXENABLE,\[A1LbP\+\+#-128\]
+.*:	c600608e 	          GETD      TXSTAT,\[A1LbP\+\+#-128\]
+.*:	c60060ea 	          GETD      PC,\[A0FrP\+\+#-128\]
+.*:	c6007f6a 	          GETD      PC,\[A0FrP\+#-4\]
+.*:	c6007f8a 	          GETD      PC,\[--A1LbP\]
+.*:	c6007fe4 	          GETD      D1Re0,\[--A0FrP\]
+.*:	c601df04 	          GETD      D1Re0,\[A1\.7\+#124\]
+.*:	c601df40 	          GETD      TXENABLE,\[D1\.7\+#124\]
+.*:	c601df6a 	          GETD      PC,\[A0\.7\+#124\]
+.*:	c601df8a 	          GETD      PC,\[A1\.7\+\+#124\]
+.*:	c601dfa4 	          GETD      D1Re0,\[D0\.7\+\+#124\]
+.*:	c601dfc2 	          GETD      D0Re0,\[D1\.7\+\+#124\]
+.*:	c601dfe0 	          GETD      TXENABLE,\[A0\.7\+\+#124\]
+.*:	c601dfee 	          GETD      TXSTAT,\[A0\.7\+\+#124\]
+.*:	c601e022 	          GETD      D0Re0,\[D0\.7\+#-128\]
+.*:	c601e04e 	          GETD      TXSTAT,\[D1\.7\+#-128\]
+.*:	c601e082 	          GETD      D0Re0,\[A1\.7\+\+#-128\]
+.*:	c601e0a0 	          GETD      TXENABLE,\[D0\.7\+\+#-128\]
+.*:	c601e0ae 	          GETD      TXSTAT,\[D0\.7\+\+#-128\]
+.*:	c601e0ca 	          GETD      PC,\[D1\.7\+\+#-128\]
+.*:	c601e0e4 	          GETD      D1Re0,\[A0\.7\+\+#-128\]
+.*:	c601ff04 	          GETD      D1Re0,\[A1\.7\+#-4\]
+.*:	c601ff40 	          GETD      TXENABLE,\[D1\.7\+#-4\]
+.*:	c601ff6a 	          GETD      PC,\[A0\.7\+#-4\]
+.*:	c601ff8a 	          GETD      PC,\[--A1\.7\]
+.*:	c601ffa4 	          GETD      D1Re0,\[--D0\.7\]
+.*:	c601ffc2 	          GETD      D0Re0,\[--D1\.7\]
+.*:	c601ffe0 	          GETD      TXENABLE,\[--A0\.7\]
+.*:	c601ffee 	          GETD      TXSTAT,\[--A0\.7\]
+.*:	c6081faa 	          GETD      PCX,\[D0Re0\+\+#124\]
+.*:	c608202a 	          GETD      PCX,\[D0Re0\+#-128\]
+.*:	c60820c6 	          GETD      A0FrP,\[D1Re0\+\+#-128\]
+.*:	c6083fa6 	          GETD      A0FrP,\[--D0Re0\]
+.*:	c6083fc8 	          GETD      A1LbP,\[--D1Re0\]
+.*:	c6085f88 	          GETD      A1LbP,\[A1LbP\+\+#124\]
+.*:	c6085fea 	          GETD      PCX,\[A0FrP\+\+#124\]
+.*:	c608608a 	          GETD      PCX,\[A1LbP\+\+#-128\]
+.*:	c6087f0a 	          GETD      PCX,\[A1LbP\+#-4\]
+.*:	c6087fe6 	          GETD      A0FrP,\[--A0FrP\]
+.*:	c609df0a 	          GETD      PCX,\[A1\.7\+#124\]
+.*:	c609df68 	          GETD      A1LbP,\[A0\.7\+#124\]
+.*:	c609dfa6 	          GETD      A0FrP,\[D0\.7\+\+#124\]
+.*:	c609dfc8 	          GETD      A1LbP,\[D1\.7\+\+#124\]
+.*:	c609dfea 	          GETD      PCX,\[A0\.7\+\+#124\]
+.*:	c609e046 	          GETD      A0FrP,\[D1\.7\+#-128\]
+.*:	c609e088 	          GETD      A1LbP,\[A1\.7\+\+#-128\]
+.*:	c609e0aa 	          GETD      PCX,\[D0\.7\+\+#-128\]
+.*:	c609e0e6 	          GETD      A0FrP,\[A0\.7\+\+#-128\]
+.*:	c609ff0a 	          GETD      PCX,\[A1\.7\+#-4\]
+.*:	c609ff68 	          GETD      A1LbP,\[A0\.7\+#-4\]
+.*:	c609ffa6 	          GETD      A0FrP,\[--D0\.7\]
+.*:	c609ffc8 	          GETD      A1LbP,\[--D1\.7\]
+.*:	c609ffea 	          GETD      PCX,\[--A0\.7\]
+.*:	c618202e 	          GETD      TXMASKI,\[D0Re0\+#-128\]
+.*:	c6183fae 	          GETD      TXMASKI,\[--D0Re0\]
+.*:	c6185fee 	          GETD      TXMASKI,\[A0FrP\+\+#124\]
+.*:	c6187f0e 	          GETD      TXMASKI,\[A1LbP\+#-4\]
+.*:	c619df4e 	          GETD      TXMASKI,\[D1\.7\+#124\]
+.*:	c619dfee 	          GETD      TXMASKI,\[A0\.7\+\+#124\]
+.*:	c619e0ae 	          GETD      TXMASKI,\[D0\.7\+\+#-128\]
+.*:	c619ff4e 	          GETD      TXMASKI,\[D1\.7\+#-4\]
+.*:	c619ffee 	          GETD      TXMASKI,\[--A0\.7\]
+.*:	c6381fa8 	          GETD      A1\.7,\[D0Re0\+\+#124\]
+.*:	c6381fc8 	          GETD      A1\.7,\[D1Re0\+\+#124\]
+.*:	c63820a8 	          GETD      A1\.7,\[D0Re0\+\+#-128\]
+.*:	c63820c8 	          GETD      A1\.7,\[D1Re0\+\+#-128\]
+.*:	c6383fa8 	          GETD      A1\.7,\[--D0Re0\]
+.*:	c6383fc8 	          GETD      A1\.7,\[--D1Re0\]
+.*:	c6385f88 	          GETD      A1\.7,\[A1LbP\+\+#124\]
+.*:	c6385fe8 	          GETD      A1\.7,\[A0FrP\+\+#124\]
+.*:	c6386088 	          GETD      A1\.7,\[A1LbP\+\+#-128\]
+.*:	c63860e8 	          GETD      A1\.7,\[A0FrP\+\+#-128\]
+.*:	c6387f88 	          GETD      A1\.7,\[--A1LbP\]
+.*:	c6387fe8 	          GETD      A1\.7,\[--A0FrP\]
+.*:	c639df26 	          GETD      A0\.7,\[D0\.7\+#124\]
+.*:	c639df66 	          GETD      A0\.7,\[A0\.7\+#124\]
+.*:	c639df88 	          GETD      A1\.7,\[A1\.7\+\+#124\]
+.*:	c639dfa8 	          GETD      A1\.7,\[D0\.7\+\+#124\]
+.*:	c639dfc8 	          GETD      A1\.7,\[D1\.7\+\+#124\]
+.*:	c639dfe8 	          GETD      A1\.7,\[A0\.7\+\+#124\]
+.*:	c639e026 	          GETD      A0\.7,\[D0\.7\+#-128\]
+.*:	c639e066 	          GETD      A0\.7,\[A0\.7\+#-128\]
+.*:	c639e088 	          GETD      A1\.7,\[A1\.7\+\+#-128\]
+.*:	c639e0a8 	          GETD      A1\.7,\[D0\.7\+\+#-128\]
+.*:	c639e0c8 	          GETD      A1\.7,\[D1\.7\+\+#-128\]
+.*:	c639e0e8 	          GETD      A1\.7,\[A0\.7\+\+#-128\]
+.*:	c639ff26 	          GETD      A0\.7,\[D0\.7\+#-4\]
+.*:	c639ff66 	          GETD      A0\.7,\[A0\.7\+#-4\]
+.*:	c639ff88 	          GETD      A1\.7,\[--A1\.7\]
+.*:	c639ffa8 	          GETD      A1\.7,\[--D0\.7\]
+.*:	c639ffc8 	          GETD      A1\.7,\[--D1\.7\]
+.*:	c639ffe8 	          GETD      A1\.7,\[--A0\.7\]
+.*:	c68020cc 	          MOVD      RA,\[D1Re0\+\+#-128\]
+.*:	c6805fec 	          MOVD      RA,\[A0FrP\+\+#124\]
+.*:	c6807fec 	          MOVD      RA,\[--A0FrP\]
+.*:	c681dfec 	          MOVD      RA,\[A0\.7\+\+#124\]
+.*:	c681e0ec 	          MOVD      RA,\[A0\.7\+\+#-128\]
+.*:	c681ffec 	          MOVD      RA,\[--A0\.7\]
+.*:	c6b020cc 	          MOVD      RAM8X32,\[D1Re0\+\+#-128\]
+.*:	c6b05fec 	          MOVD      RAM8X32,\[A0FrP\+\+#124\]
+.*:	c6b07fec 	          MOVD      RAM8X32,\[--A0FrP\]
+.*:	c6b1dfec 	          MOVD      RAM8X32,\[A0\.7\+\+#124\]
+.*:	c6b1e0ec 	          MOVD      RAM8X32,\[A0\.7\+\+#-128\]
+.*:	c6b1ffec 	          MOVD      RAM8X32,\[--A0\.7\]
+.*:	c6b820cc 	          MOVD      RAM8X,\[D1Re0\+\+#-128\]
+.*:	c6b85fec 	          MOVD      RAM8X,\[A0FrP\+\+#124\]
+.*:	c6b87fec 	          MOVD      RAM8X,\[--A0FrP\]
+.*:	c6b9dfec 	          MOVD      RAM8X,\[A0\.7\+\+#124\]
+.*:	c6b9e0ec 	          MOVD      RAM8X,\[A0\.7\+\+#-128\]
+.*:	c6b9ffec 	          MOVD      RAM8X,\[--A0\.7\]
+.*:	c6c020cc 	          MOVD      RABZ,\[D1Re0\+\+#-128\]
+.*:	c6c05fec 	          MOVD      RABZ,\[A0FrP\+\+#124\]
+.*:	c6c07fec 	          MOVD      RABZ,\[--A0FrP\]
+.*:	c6c1dfec 	          MOVD      RABZ,\[A0\.7\+\+#124\]
+.*:	c6c1e0ec 	          MOVD      RABZ,\[A0\.7\+\+#-128\]
+.*:	c6c1ffec 	          MOVD      RABZ,\[--A0\.7\]
+.*:	c6e820cc 	          MOVD      RAWX,\[D1Re0\+\+#-128\]
+.*:	c6e85fec 	          MOVD      RAWX,\[A0FrP\+\+#124\]
+.*:	c6e87fec 	          MOVD      RAWX,\[--A0FrP\]
+.*:	c6e9dfec 	          MOVD      RAWX,\[A0\.7\+\+#124\]
+.*:	c6e9e0ec 	          MOVD      RAWX,\[A0\.7\+\+#-128\]
+.*:	c6e9ffec 	          MOVD      RAWX,\[--A0\.7\]
+.*:	c6f81fc0 	          GETD      TXIDLECYC,\[D1Re0\+\+#124\]
+.*:	c6f820ac 	          MOVD      RAMX,\[D0Re0\+\+#-128\]
+.*:	c6f83fa0 	          GETD      TXIDLECYC,\[--D0Re0\]
+.*:	c6f85f00 	          GETD      TXIDLECYC,\[A1LbP\+#124\]
+.*:	c6f85fec 	          MOVD      RAMX,\[A0FrP\+\+#124\]
+.*:	c6f860e0 	          GETD      TXIDLECYC,\[A0FrP\+\+#-128\]
+.*:	c6f87f8c 	          MOVD      RAMX,\[--A1LbP\]
+.*:	c6f9df40 	          GETD      TXIDLECYC,\[D1\.7\+#124\]
+.*:	c6f9dfac 	          MOVD      RAMX,\[D0\.7\+\+#124\]
+.*:	c6f9dfec 	          MOVD      RAMX,\[A0\.7\+\+#124\]
+.*:	c6f9e08c 	          MOVD      RAMX,\[A1\.7\+\+#-128\]
+.*:	c6f9e0cc 	          MOVD      RAMX,\[D1\.7\+\+#-128\]
+.*:	c6f9ff40 	          GETD      TXIDLECYC,\[D1\.7\+#-4\]
+.*:	c6f9ffac 	          MOVD      RAMX,\[--D0\.7\]
+.*:	c6f9ffec 	          MOVD      RAMX,\[--A0\.7\]
+.*:	c7001fc4 	          GETL      D1Re0,D0Re0,\[D1Re0\+\+#248\]
+.*:	c70020c4 	          GETL      D1Re0,D0Re0,\[D1Re0\+\+#-256\]
+.*:	c7003fc4 	          GETL      D1Re0,D0Re0,\[--D1Re0\]
+.*:	c7005fe4 	          GETL      D1Re0,D0Re0,\[A0FrP\+\+#248\]
+.*:	c70060e4 	          GETL      D1Re0,D0Re0,\[A0FrP\+\+#-256\]
+.*:	c7007fe4 	          GETL      D1Re0,D0Re0,\[--A0FrP\]
+.*:	c701df62 	          GETL      D0Re0,D1Re0,\[A0\.7\+#248\]
+.*:	c701dfa4 	          GETL      D1Re0,D0Re0,\[D0\.7\+\+#248\]
+.*:	c701dfe4 	          GETL      D1Re0,D0Re0,\[A0\.7\+\+#248\]
+.*:	c701e062 	          GETL      D0Re0,D1Re0,\[A0\.7\+#-256\]
+.*:	c701e0a4 	          GETL      D1Re0,D0Re0,\[D0\.7\+\+#-256\]
+.*:	c701e0e4 	          GETL      D1Re0,D0Re0,\[A0\.7\+\+#-256\]
+.*:	c701ff62 	          GETL      D0Re0,D1Re0,\[A0\.7\+#-8\]
+.*:	c701ffa4 	          GETL      D1Re0,D0Re0,\[--D0\.7\]
+.*:	c701ffe4 	          GETL      D1Re0,D0Re0,\[--A0\.7\]
+.*:	c7081fc8 	          GETL      A1LbP,A0FrP,\[D1Re0\+\+#248\]
+.*:	c70820c8 	          GETL      A1LbP,A0FrP,\[D1Re0\+\+#-256\]
+.*:	c7083fc8 	          GETL      A1LbP,A0FrP,\[--D1Re0\]
+.*:	c7085fe8 	          GETL      A1LbP,A0FrP,\[A0FrP\+\+#248\]
+.*:	c70860e8 	          GETL      A1LbP,A0FrP,\[A0FrP\+\+#-256\]
+.*:	c7087fe8 	          GETL      A1LbP,A0FrP,\[--A0FrP\]
+.*:	c709df66 	          GETL      A0FrP,A1LbP,\[A0\.7\+#248\]
+.*:	c709dfa8 	          GETL      A1LbP,A0FrP,\[D0\.7\+\+#248\]
+.*:	c709dfe8 	          GETL      A1LbP,A0FrP,\[A0\.7\+\+#248\]
+.*:	c709e066 	          GETL      A0FrP,A1LbP,\[A0\.7\+#-256\]
+.*:	c709e0a8 	          GETL      A1LbP,A0FrP,\[D0\.7\+\+#-256\]
+.*:	c709e0e8 	          GETL      A1LbP,A0FrP,\[A0\.7\+\+#-256\]
+.*:	c709ff66 	          GETL      A0FrP,A1LbP,\[A0\.7\+#-8\]
+.*:	c709ffa8 	          GETL      A1LbP,A0FrP,\[--D0\.7\]
+.*:	c709ffe8 	          GETL      A1LbP,A0FrP,\[--A0\.7\]
+.*:	c7381fa8 	          GETL      A1\.7,A0\.7,\[D0Re0\+\+#248\]
+.*:	c7381fc8 	          GETL      A1\.7,A0\.7,\[D1Re0\+\+#248\]
+.*:	c73820a8 	          GETL      A1\.7,A0\.7,\[D0Re0\+\+#-256\]
+.*:	c73820c8 	          GETL      A1\.7,A0\.7,\[D1Re0\+\+#-256\]
+.*:	c7383fa8 	          GETL      A1\.7,A0\.7,\[--D0Re0\]
+.*:	c7383fc8 	          GETL      A1\.7,A0\.7,\[--D1Re0\]
+.*:	c7385f88 	          GETL      A1\.7,A0\.7,\[A1LbP\+\+#248\]
+.*:	c7385fe8 	          GETL      A1\.7,A0\.7,\[A0FrP\+\+#248\]
+.*:	c7386088 	          GETL      A1\.7,A0\.7,\[A1LbP\+\+#-256\]
+.*:	c73860e8 	          GETL      A1\.7,A0\.7,\[A0FrP\+\+#-256\]
+.*:	c7387f88 	          GETL      A1\.7,A0\.7,\[--A1LbP\]
+.*:	c7387fe8 	          GETL      A1\.7,A0\.7,\[--A0FrP\]
+.*:	c739df26 	          GETL      A0\.7,A1\.7,\[D0\.7\+#248\]
+.*:	c739df66 	          GETL      A0\.7,A1\.7,\[A0\.7\+#248\]
+.*:	c739df88 	          GETL      A1\.7,A0\.7,\[A1\.7\+\+#248\]
+.*:	c739dfa8 	          GETL      A1\.7,A0\.7,\[D0\.7\+\+#248\]
+.*:	c739dfc8 	          GETL      A1\.7,A0\.7,\[D1\.7\+\+#248\]
+.*:	c739dfe8 	          GETL      A1\.7,A0\.7,\[A0\.7\+\+#248\]
+.*:	c739e026 	          GETL      A0\.7,A1\.7,\[D0\.7\+#-256\]
+.*:	c739e066 	          GETL      A0\.7,A1\.7,\[A0\.7\+#-256\]
+.*:	c739e088 	          GETL      A1\.7,A0\.7,\[A1\.7\+\+#-256\]
+.*:	c739e0a8 	          GETL      A1\.7,A0\.7,\[D0\.7\+\+#-256\]
+.*:	c739e0c8 	          GETL      A1\.7,A0\.7,\[D1\.7\+\+#-256\]
+.*:	c739e0e8 	          GETL      A1\.7,A0\.7,\[A0\.7\+\+#-256\]
+.*:	c739ff26 	          GETL      A0\.7,A1\.7,\[D0\.7\+#-8\]
+.*:	c739ff66 	          GETL      A0\.7,A1\.7,\[A0\.7\+#-8\]
+.*:	c739ff88 	          GETL      A1\.7,A0\.7,\[--A1\.7\]
+.*:	c739ffa8 	          GETL      A1\.7,A0\.7,\[--D0\.7\]
+.*:	c739ffc8 	          GETL      A1\.7,A0\.7,\[--D1\.7\]
+.*:	c739ffe8 	          GETL      A1\.7,A0\.7,\[--A0\.7\]
+.*:	c78020cc 	          MOVL      RA,\[D1Re0\+\+#-256\]
+.*:	c7805fec 	          MOVL      RA,\[A0FrP\+\+#248\]
+.*:	c7807fec 	          MOVL      RA,\[--A0FrP\]
+.*:	c781dfec 	          MOVL      RA,\[A0\.7\+\+#248\]
+.*:	c781e0ec 	          MOVL      RA,\[A0\.7\+\+#-256\]
+.*:	c781ffec 	          MOVL      RA,\[--A0\.7\]
+.*:	c7b020cc 	          MOVL      RAM8X32,\[D1Re0\+\+#-256\]
+.*:	c7b05fec 	          MOVL      RAM8X32,\[A0FrP\+\+#248\]
+.*:	c7b07fec 	          MOVL      RAM8X32,\[--A0FrP\]
+.*:	c7b1dfec 	          MOVL      RAM8X32,\[A0\.7\+\+#248\]
+.*:	c7b1e0ec 	          MOVL      RAM8X32,\[A0\.7\+\+#-256\]
+.*:	c7b1ffec 	          MOVL      RAM8X32,\[--A0\.7\]
+.*:	c7b820cc 	          MOVL      RAM8X,\[D1Re0\+\+#-256\]
+.*:	c7b85fec 	          MOVL      RAM8X,\[A0FrP\+\+#248\]
+.*:	c7b87fec 	          MOVL      RAM8X,\[--A0FrP\]
+.*:	c7b9dfec 	          MOVL      RAM8X,\[A0\.7\+\+#248\]
+.*:	c7b9e0ec 	          MOVL      RAM8X,\[A0\.7\+\+#-256\]
+.*:	c7b9ffec 	          MOVL      RAM8X,\[--A0\.7\]
+.*:	c7c020cc 	          MOVL      RABZ,\[D1Re0\+\+#-256\]
+.*:	c7c05fec 	          MOVL      RABZ,\[A0FrP\+\+#248\]
+.*:	c7c07fec 	          MOVL      RABZ,\[--A0FrP\]
+.*:	c7c1dfec 	          MOVL      RABZ,\[A0\.7\+\+#248\]
+.*:	c7c1e0ec 	          MOVL      RABZ,\[A0\.7\+\+#-256\]
+.*:	c7c1ffec 	          MOVL      RABZ,\[--A0\.7\]
+.*:	c7e820cc 	          MOVL      RAWX,\[D1Re0\+\+#-256\]
+.*:	c7e85fec 	          MOVL      RAWX,\[A0FrP\+\+#248\]
+.*:	c7e87fec 	          MOVL      RAWX,\[--A0FrP\]
+.*:	c7e9dfec 	          MOVL      RAWX,\[A0\.7\+\+#248\]
+.*:	c7e9e0ec 	          MOVL      RAWX,\[A0\.7\+\+#-256\]
+.*:	c7e9ffec 	          MOVL      RAWX,\[--A0\.7\]
+.*:	c7f820cc 	          MOVL      RAMX,\[D1Re0\+\+#-256\]
+.*:	c7f85fec 	          MOVL      RAMX,\[A0FrP\+\+#248\]
+.*:	c7f87fec 	          MOVL      RAMX,\[--A0FrP\]
+.*:	c7f9dfec 	          MOVL      RAMX,\[A0\.7\+\+#248\]
+.*:	c7f9e0ec 	          MOVL      RAMX,\[A0\.7\+\+#-256\]
+.*:	c7f9ffec 	          MOVL      RAMX,\[--A0\.7\]
+.*:	c801e008 	          MGETD     D0Re0,D0\.7,\[A1\.7\+\+\]
+.*:	c8081040 	          MGETD     A1LbP,A1\.7,\[D1Re0\+\+\]
+.*:	c809d058 	          MGETD     A0FrP,A0\.7,\[D1\.7\+\+\]
+.*:	c901e068 	          MGETL     D0Re0,D0\.7,\[A0\.7\+\+\]
+.*:	c909d040 	          MGETL     A1LbP,A1\.7,\[D1\.7\+\+\]
+.*:	ca8007a0 	          MMOVD     RA,RA,RA,RA,RA,\[D0Re0\+\+\]
+.*:	ca804080 	          MMOVD     RA,RA,\[A1LbP\+\+\]
+.*:	ca804f80 	          MMOVD     RA,RA,RA,RA,RA,RA,\[A1LbP\+\+\]
+.*:	ca81c0c0 	          MMOVD     RA,RA,\[D1\.7\+\+\]
+.*:	ca81c3c0 	          MMOVD     RA,RA,RA,RA,\[D1\.7\+\+\]
+.*:	ca81cfc0 	          MMOVD     RA,RA,RA,RA,RA,RA,\[D1\.7\+\+\]
+.*:	ca81ffc0 	          MMOVD     RA,RA,RA,RA,RA,RA,RA,RA,\[D1\.7\+\+\]
+.*:	cac007a0 	          MMOVD     RABZ,RABZ,RABZ,RABZ,RABZ,\[D0Re0\+\+\]
+.*:	cac04080 	          MMOVD     RABZ,RABZ,\[A1LbP\+\+\]
+.*:	cac04f80 	          MMOVD     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[A1LbP\+\+\]
+.*:	cac1c0c0 	          MMOVD     RABZ,RABZ,\[D1\.7\+\+\]
+.*:	cac1c3c0 	          MMOVD     RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
+.*:	cac1cfc0 	          MMOVD     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
+.*:	cac1ffc0 	          MMOVD     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
+.*:	cae807a0 	          MMOVD     RAWX,RAWX,RAWX,RAWX,RAWX,\[D0Re0\+\+\]
+.*:	cae84080 	          MMOVD     RAWX,RAWX,\[A1LbP\+\+\]
+.*:	cae84f80 	          MMOVD     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[A1LbP\+\+\]
+.*:	cae9c0c0 	          MMOVD     RAWX,RAWX,\[D1\.7\+\+\]
+.*:	cae9c3c0 	          MMOVD     RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
+.*:	cae9cfc0 	          MMOVD     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
+.*:	cae9ffc0 	          MMOVD     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
+.*:	cb8007a0 	          MMOVL     RA,RA,RA,RA,RA,\[D0Re0\+\+\]
+.*:	cb804080 	          MMOVL     RA,RA,\[A1LbP\+\+\]
+.*:	cb804f80 	          MMOVL     RA,RA,RA,RA,RA,RA,\[A1LbP\+\+\]
+.*:	cb81c0c0 	          MMOVL     RA,RA,\[D1\.7\+\+\]
+.*:	cb81c3c0 	          MMOVL     RA,RA,RA,RA,\[D1\.7\+\+\]
+.*:	cb81cfc0 	          MMOVL     RA,RA,RA,RA,RA,RA,\[D1\.7\+\+\]
+.*:	cb81ffc0 	          MMOVL     RA,RA,RA,RA,RA,RA,RA,RA,\[D1\.7\+\+\]
+.*:	cbc007a0 	          MMOVL     RABZ,RABZ,RABZ,RABZ,RABZ,\[D0Re0\+\+\]
+.*:	cbc04080 	          MMOVL     RABZ,RABZ,\[A1LbP\+\+\]
+.*:	cbc04f80 	          MMOVL     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[A1LbP\+\+\]
+.*:	cbc1c0c0 	          MMOVL     RABZ,RABZ,\[D1\.7\+\+\]
+.*:	cbc1c3c0 	          MMOVL     RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
+.*:	cbc1cfc0 	          MMOVL     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
+.*:	cbc1ffc0 	          MMOVL     RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,RABZ,\[D1\.7\+\+\]
+.*:	cbe807a0 	          MMOVL     RAWX,RAWX,RAWX,RAWX,RAWX,\[D0Re0\+\+\]
+.*:	cbe84080 	          MMOVL     RAWX,RAWX,\[A1LbP\+\+\]
+.*:	cbe84f80 	          MMOVL     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[A1LbP\+\+\]
+.*:	cbe9c0c0 	          MMOVL     RAWX,RAWX,\[D1\.7\+\+\]
+.*:	cbe9c3c0 	          MMOVL     RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
+.*:	cbe9cfc0 	          MMOVL     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
+.*:	cbe9ffc0 	          MMOVL     RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,RAWX,\[D1\.7\+\+\]
+.*:	cc000182 	          MDRD      #0x3
+.*:	cc002010 	          MMOVD     D1Re0,D1\.7,RD
+.*:	cc080080 	          MMOVD     A1LbP,A1\.2,RD
+.*:	cc081000 	          MMOVD     A1LbP,A1\.7,RD
+.*:	cc081100 	          MMOVD     A1LbP,A1\.3,A1\.7,RD
+.*:	cc100810 	          MMOVD     D1Ar3,D1\.7,RD
+.*:	cd000108 	          MMOVL     D0Re0,D0Ar4,RD
+.*:	cd002108 	          MMOVL     D0Re0,D0Ar4,D0\.7,RD
+.*:	cd080100 	          MMOVL     A1LbP,A1\.3,RD
+.*:	cd081080 	          MMOVL     A1LbP,A1\.2,A1\.7,RD
+.*:	cd100080 	          MMOVL     A1\.2,A1\.3,RD
+.*:	cd180400 	          MMOVL     A1\.3,A1\.7,RD
+.*:	d0000218 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+D1Re0\]
+.*:	d0000e14 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+D0Re0\]
+.*:	d0000e79 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+D1Re0\]
+.*:	d001c218 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+D1\.7\]
+.*:	d001ce14 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+D0\.7\]
+.*:	d001ce79 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+D1\.7\]
+.*:	d008407d 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+A0FrP\]
+.*:	d0084e0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+A0FrP\]
+.*:	d0084e7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+A0FrP\]
+.*:	d009c07d 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+A0\.7\]
+.*:	d009ce0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+A0\.7\]
+.*:	d009ce7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+A0\.7\]
+.*:	d0380218 	          XFRD      \[A1LbP\+A1LbP\],\[D1\.7\+D1Re0\]
+.*:	d0380e14 	          XFRD      \[A1\.7\+A1LbP\],\[D0\.7\+D0Re0\]
+.*:	d0380e79 	          XFRD      \[D0\.7\+D0\.7\],\[D1\.7\+D1Re0\]
+.*:	d038407d 	          XFRD      \[D0Re0\+D0\.7\],\[A0\.7\+A0FrP\]
+.*:	d0384e0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0\.7\+A0FrP\]
+.*:	d0384e7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+A0FrP\]
+.*:	d039c071 	          XFRD      \[D0Re0\+D0\.7\],\[A1\.7\+A1\.7\]
+.*:	d039c217 	          XFRD      \[A0FrP\+A0FrP\],\[D0\.7\+D0\.7\]
+.*:	d039c27b 	          XFRD      \[A0FrP\+A0\.7\],\[D1\.7\+D1\.7\]
+.*:	d039ce13 	          XFRD      \[A0\.7\+A0FrP\],\[A1\.7\+A1\.7\]
+.*:	d039ce73 	          XFRD      \[A0\.7\+A0\.7\],\[A1\.7\+A1\.7\]
+.*:	d039ce7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+A0\.7\]
+.*:	d2000218 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+D1Re0\]
+.*:	d2000e14 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+D0Re0\]
+.*:	d2000e79 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+D1Re0\]
+.*:	d201c218 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+D1\.7\]
+.*:	d201ce14 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+D0\.7\]
+.*:	d201ce79 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+D1\.7\]
+.*:	d208407d 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+A0FrP\]
+.*:	d2084e0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+A0FrP\]
+.*:	d2084e7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+A0FrP\]
+.*:	d209c07d 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+A0\.7\]
+.*:	d209ce0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+A0\.7\]
+.*:	d209ce7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+A0\.7\]
+.*:	d2380218 	          XFRL      \[A1LbP\+A1LbP\],\[D1\.7\+D1Re0\]
+.*:	d2380e14 	          XFRL      \[A1\.7\+A1LbP\],\[D0\.7\+D0Re0\]
+.*:	d2380e79 	          XFRL      \[D0\.7\+D0\.7\],\[D1\.7\+D1Re0\]
+.*:	d238407d 	          XFRL      \[D0Re0\+D0\.7\],\[A0\.7\+A0FrP\]
+.*:	d2384e0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0\.7\+A0FrP\]
+.*:	d2384e7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+A0FrP\]
+.*:	d239c071 	          XFRL      \[D0Re0\+D0\.7\],\[A1\.7\+A1\.7\]
+.*:	d239c217 	          XFRL      \[A0FrP\+A0FrP\],\[D0\.7\+D0\.7\]
+.*:	d239c27b 	          XFRL      \[A0FrP\+A0\.7\],\[D1\.7\+D1\.7\]
+.*:	d239ce13 	          XFRL      \[A0\.7\+A0FrP\],\[A1\.7\+A1\.7\]
+.*:	d239ce73 	          XFRL      \[A0\.7\+A0\.7\],\[A1\.7\+A1\.7\]
+.*:	d239ce7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+A0\.7\]
+.*:	d4000218 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1Re0\+D1Re0\]
+.*:	d4000e14 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0Re0\+D0Re0\]
+.*:	d4000e79 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1Re0\+D1Re0\]
+.*:	d401c218 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1Re0\+D1\.7\]
+.*:	d401ce14 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0Re0\+D0\.7\]
+.*:	d401ce79 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1Re0\+D1\.7\]
+.*:	d408407d 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0FrP\+A0FrP\]
+.*:	d4084e0d 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0FrP\+A0FrP\]
+.*:	d4084e7d 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0FrP\+A0FrP\]
+.*:	d409c07d 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0FrP\+A0\.7\]
+.*:	d409ce0d 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0FrP\+A0\.7\]
+.*:	d409ce7d 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0FrP\+A0\.7\]
+.*:	d4380218 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1\.7\+D1Re0\]
+.*:	d4380e14 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0\.7\+D0Re0\]
+.*:	d4380e79 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1\.7\+D1Re0\]
+.*:	d438407d 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0\.7\+A0FrP\]
+.*:	d4384e0d 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0\.7\+A0FrP\]
+.*:	d4384e7d 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0\.7\+A0FrP\]
+.*:	d439c071 	          XFRD      \[D0Re0\+\+D0\.7\],\[A1\.7\+A1\.7\]
+.*:	d439c217 	          XFRD      \[A0FrP\+\+A0FrP\],\[D0\.7\+D0\.7\]
+.*:	d439c27b 	          XFRD      \[A0FrP\+\+A0\.7\],\[D1\.7\+D1\.7\]
+.*:	d439ce13 	          XFRD      \[A0\.7\+\+A0FrP\],\[A1\.7\+A1\.7\]
+.*:	d439ce73 	          XFRD      \[A0\.7\+\+A0\.7\],\[A1\.7\+A1\.7\]
+.*:	d439ce7d 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0\.7\+A0\.7\]
+.*:	d5000218 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1Re0\]
+.*:	d5000e14 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0Re0\]
+.*:	d5000e79 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1Re0\]
+.*:	d501c218 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1\.7\]
+.*:	d501ce14 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0\.7\]
+.*:	d501ce79 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1\.7\]
+.*:	d508407d 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0FrP\]
+.*:	d5084e0d 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0FrP\]
+.*:	d5084e7d 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0FrP\]
+.*:	d509c07d 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0\.7\]
+.*:	d509ce0d 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0\.7\]
+.*:	d509ce7d 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0\.7\]
+.*:	d5380218 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1\.7\+D1Re0\]
+.*:	d5380e14 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0\.7\+D0Re0\]
+.*:	d5380e79 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1\.7\+D1Re0\]
+.*:	d538407d 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0\.7\+A0FrP\]
+.*:	d5384e0d 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0\.7\+A0FrP\]
+.*:	d5384e7d 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0FrP\]
+.*:	d539c071 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A1\.7\+A1\.7\]
+.*:	d539c217 	          XFRD      \[A0FrP\+A0FrP\+\+\],\[D0\.7\+D0\.7\]
+.*:	d539c27b 	          XFRD      \[A0FrP\+A0\.7\+\+\],\[D1\.7\+D1\.7\]
+.*:	d539ce13 	          XFRD      \[A0\.7\+A0FrP\+\+\],\[A1\.7\+A1\.7\]
+.*:	d539ce73 	          XFRD      \[A0\.7\+A0\.7\+\+\],\[A1\.7\+A1\.7\]
+.*:	d539ce7d 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0\.7\]
+.*:	d6000218 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1Re0\+D1Re0\]
+.*:	d6000e14 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0Re0\+D0Re0\]
+.*:	d6000e79 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1Re0\+D1Re0\]
+.*:	d601c218 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1Re0\+D1\.7\]
+.*:	d601ce14 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0Re0\+D0\.7\]
+.*:	d601ce79 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1Re0\+D1\.7\]
+.*:	d608407d 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0FrP\+A0FrP\]
+.*:	d6084e0d 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0FrP\+A0FrP\]
+.*:	d6084e7d 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0FrP\+A0FrP\]
+.*:	d609c07d 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0FrP\+A0\.7\]
+.*:	d609ce0d 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0FrP\+A0\.7\]
+.*:	d609ce7d 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0FrP\+A0\.7\]
+.*:	d6380218 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1\.7\+D1Re0\]
+.*:	d6380e14 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0\.7\+D0Re0\]
+.*:	d6380e79 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1\.7\+D1Re0\]
+.*:	d638407d 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0\.7\+A0FrP\]
+.*:	d6384e0d 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0\.7\+A0FrP\]
+.*:	d6384e7d 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0\.7\+A0FrP\]
+.*:	d639c071 	          XFRL      \[D0Re0\+\+D0\.7\],\[A1\.7\+A1\.7\]
+.*:	d639c217 	          XFRL      \[A0FrP\+\+A0FrP\],\[D0\.7\+D0\.7\]
+.*:	d639c27b 	          XFRL      \[A0FrP\+\+A0\.7\],\[D1\.7\+D1\.7\]
+.*:	d639ce13 	          XFRL      \[A0\.7\+\+A0FrP\],\[A1\.7\+A1\.7\]
+.*:	d639ce73 	          XFRL      \[A0\.7\+\+A0\.7\],\[A1\.7\+A1\.7\]
+.*:	d639ce7d 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0\.7\+A0\.7\]
+.*:	d7000218 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1Re0\]
+.*:	d7000e14 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0Re0\]
+.*:	d7000e79 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1Re0\]
+.*:	d701c218 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1\.7\]
+.*:	d701ce14 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0\.7\]
+.*:	d701ce79 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1\.7\]
+.*:	d708407d 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0FrP\]
+.*:	d7084e0d 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0FrP\]
+.*:	d7084e7d 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0FrP\]
+.*:	d709c07d 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0\.7\]
+.*:	d709ce0d 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0\.7\]
+.*:	d709ce7d 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0\.7\]
+.*:	d7380218 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1\.7\+D1Re0\]
+.*:	d7380e14 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0\.7\+D0Re0\]
+.*:	d7380e79 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1\.7\+D1Re0\]
+.*:	d738407d 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0\.7\+A0FrP\]
+.*:	d7384e0d 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0\.7\+A0FrP\]
+.*:	d7384e7d 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0FrP\]
+.*:	d739c071 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A1\.7\+A1\.7\]
+.*:	d739c217 	          XFRL      \[A0FrP\+A0FrP\+\+\],\[D0\.7\+D0\.7\]
+.*:	d739c27b 	          XFRL      \[A0FrP\+A0\.7\+\+\],\[D1\.7\+D1\.7\]
+.*:	d739ce13 	          XFRL      \[A0\.7\+A0FrP\+\+\],\[A1\.7\+A1\.7\]
+.*:	d739ce73 	          XFRL      \[A0\.7\+A0\.7\+\+\],\[A1\.7\+A1\.7\]
+.*:	d739ce7d 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0\.7\]
+.*:	d8000218 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+\+D1Re0\]
+.*:	d8000e14 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+\+D0Re0\]
+.*:	d8000e79 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+\+D1Re0\]
+.*:	d801c218 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+\+D1\.7\]
+.*:	d801ce14 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+\+D0\.7\]
+.*:	d801ce79 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+\+D1\.7\]
+.*:	d808407d 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+\+A0FrP\]
+.*:	d8084e0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+\+A0FrP\]
+.*:	d8084e7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+\+A0FrP\]
+.*:	d809c07d 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+\+A0\.7\]
+.*:	d809ce0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+\+A0\.7\]
+.*:	d809ce7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+\+A0\.7\]
+.*:	d8380218 	          XFRD      \[A1LbP\+A1LbP\],\[D1\.7\+\+D1Re0\]
+.*:	d8380e14 	          XFRD      \[A1\.7\+A1LbP\],\[D0\.7\+\+D0Re0\]
+.*:	d8380e79 	          XFRD      \[D0\.7\+D0\.7\],\[D1\.7\+\+D1Re0\]
+.*:	d838407d 	          XFRD      \[D0Re0\+D0\.7\],\[A0\.7\+\+A0FrP\]
+.*:	d8384e0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0\.7\+\+A0FrP\]
+.*:	d8384e7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+\+A0FrP\]
+.*:	d839c071 	          XFRD      \[D0Re0\+D0\.7\],\[A1\.7\+\+A1\.7\]
+.*:	d839c217 	          XFRD      \[A0FrP\+A0FrP\],\[D0\.7\+\+D0\.7\]
+.*:	d839c27b 	          XFRD      \[A0FrP\+A0\.7\],\[D1\.7\+\+D1\.7\]
+.*:	d839ce13 	          XFRD      \[A0\.7\+A0FrP\],\[A1\.7\+\+A1\.7\]
+.*:	d839ce73 	          XFRD      \[A0\.7\+A0\.7\],\[A1\.7\+\+A1\.7\]
+.*:	d839ce7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+\+A0\.7\]
+.*:	d9000218 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+D1Re0\+\+\]
+.*:	d9000e14 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+D0Re0\+\+\]
+.*:	d9000e79 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+D1Re0\+\+\]
+.*:	d901c218 	          XFRD      \[A1LbP\+A1LbP\],\[D1Re0\+D1\.7\+\+\]
+.*:	d901ce14 	          XFRD      \[A1\.7\+A1LbP\],\[D0Re0\+D0\.7\+\+\]
+.*:	d901ce79 	          XFRD      \[D0\.7\+D0\.7\],\[D1Re0\+D1\.7\+\+\]
+.*:	d908407d 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+A0FrP\+\+\]
+.*:	d9084e0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+A0FrP\+\+\]
+.*:	d9084e7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+A0FrP\+\+\]
+.*:	d909c07d 	          XFRD      \[D0Re0\+D0\.7\],\[A0FrP\+A0\.7\+\+\]
+.*:	d909ce0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0FrP\+A0\.7\+\+\]
+.*:	d909ce7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0FrP\+A0\.7\+\+\]
+.*:	d9380218 	          XFRD      \[A1LbP\+A1LbP\],\[D1\.7\+D1Re0\+\+\]
+.*:	d9380e14 	          XFRD      \[A1\.7\+A1LbP\],\[D0\.7\+D0Re0\+\+\]
+.*:	d9380e79 	          XFRD      \[D0\.7\+D0\.7\],\[D1\.7\+D1Re0\+\+\]
+.*:	d938407d 	          XFRD      \[D0Re0\+D0\.7\],\[A0\.7\+A0FrP\+\+\]
+.*:	d9384e0d 	          XFRD      \[D0\.7\+D0Re0\],\[A0\.7\+A0FrP\+\+\]
+.*:	d9384e7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+A0FrP\+\+\]
+.*:	d939c071 	          XFRD      \[D0Re0\+D0\.7\],\[A1\.7\+A1\.7\+\+\]
+.*:	d939c217 	          XFRD      \[A0FrP\+A0FrP\],\[D0\.7\+D0\.7\+\+\]
+.*:	d939c27b 	          XFRD      \[A0FrP\+A0\.7\],\[D1\.7\+D1\.7\+\+\]
+.*:	d939ce13 	          XFRD      \[A0\.7\+A0FrP\],\[A1\.7\+A1\.7\+\+\]
+.*:	d939ce73 	          XFRD      \[A0\.7\+A0\.7\],\[A1\.7\+A1\.7\+\+\]
+.*:	d939ce7d 	          XFRD      \[D0\.7\+D0\.7\],\[A0\.7\+A0\.7\+\+\]
+.*:	da000218 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+\+D1Re0\]
+.*:	da000e14 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+\+D0Re0\]
+.*:	da000e79 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+\+D1Re0\]
+.*:	da01c218 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+\+D1\.7\]
+.*:	da01ce14 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+\+D0\.7\]
+.*:	da01ce79 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+\+D1\.7\]
+.*:	da08407d 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+\+A0FrP\]
+.*:	da084e0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+\+A0FrP\]
+.*:	da084e7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+\+A0FrP\]
+.*:	da09c07d 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+\+A0\.7\]
+.*:	da09ce0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+\+A0\.7\]
+.*:	da09ce7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+\+A0\.7\]
+.*:	da380218 	          XFRL      \[A1LbP\+A1LbP\],\[D1\.7\+\+D1Re0\]
+.*:	da380e14 	          XFRL      \[A1\.7\+A1LbP\],\[D0\.7\+\+D0Re0\]
+.*:	da380e79 	          XFRL      \[D0\.7\+D0\.7\],\[D1\.7\+\+D1Re0\]
+.*:	da38407d 	          XFRL      \[D0Re0\+D0\.7\],\[A0\.7\+\+A0FrP\]
+.*:	da384e0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0\.7\+\+A0FrP\]
+.*:	da384e7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+\+A0FrP\]
+.*:	da39c071 	          XFRL      \[D0Re0\+D0\.7\],\[A1\.7\+\+A1\.7\]
+.*:	da39c217 	          XFRL      \[A0FrP\+A0FrP\],\[D0\.7\+\+D0\.7\]
+.*:	da39c27b 	          XFRL      \[A0FrP\+A0\.7\],\[D1\.7\+\+D1\.7\]
+.*:	da39ce13 	          XFRL      \[A0\.7\+A0FrP\],\[A1\.7\+\+A1\.7\]
+.*:	da39ce73 	          XFRL      \[A0\.7\+A0\.7\],\[A1\.7\+\+A1\.7\]
+.*:	da39ce7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+\+A0\.7\]
+.*:	db000218 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+D1Re0\+\+\]
+.*:	db000e14 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+D0Re0\+\+\]
+.*:	db000e79 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+D1Re0\+\+\]
+.*:	db01c218 	          XFRL      \[A1LbP\+A1LbP\],\[D1Re0\+D1\.7\+\+\]
+.*:	db01ce14 	          XFRL      \[A1\.7\+A1LbP\],\[D0Re0\+D0\.7\+\+\]
+.*:	db01ce79 	          XFRL      \[D0\.7\+D0\.7\],\[D1Re0\+D1\.7\+\+\]
+.*:	db08407d 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+A0FrP\+\+\]
+.*:	db084e0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+A0FrP\+\+\]
+.*:	db084e7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+A0FrP\+\+\]
+.*:	db09c07d 	          XFRL      \[D0Re0\+D0\.7\],\[A0FrP\+A0\.7\+\+\]
+.*:	db09ce0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0FrP\+A0\.7\+\+\]
+.*:	db09ce7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0FrP\+A0\.7\+\+\]
+.*:	db380218 	          XFRL      \[A1LbP\+A1LbP\],\[D1\.7\+D1Re0\+\+\]
+.*:	db380e14 	          XFRL      \[A1\.7\+A1LbP\],\[D0\.7\+D0Re0\+\+\]
+.*:	db380e79 	          XFRL      \[D0\.7\+D0\.7\],\[D1\.7\+D1Re0\+\+\]
+.*:	db38407d 	          XFRL      \[D0Re0\+D0\.7\],\[A0\.7\+A0FrP\+\+\]
+.*:	db384e0d 	          XFRL      \[D0\.7\+D0Re0\],\[A0\.7\+A0FrP\+\+\]
+.*:	db384e7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+A0FrP\+\+\]
+.*:	db39c071 	          XFRL      \[D0Re0\+D0\.7\],\[A1\.7\+A1\.7\+\+\]
+.*:	db39c217 	          XFRL      \[A0FrP\+A0FrP\],\[D0\.7\+D0\.7\+\+\]
+.*:	db39c27b 	          XFRL      \[A0FrP\+A0\.7\],\[D1\.7\+D1\.7\+\+\]
+.*:	db39ce13 	          XFRL      \[A0\.7\+A0FrP\],\[A1\.7\+A1\.7\+\+\]
+.*:	db39ce73 	          XFRL      \[A0\.7\+A0\.7\],\[A1\.7\+A1\.7\+\+\]
+.*:	db39ce7d 	          XFRL      \[D0\.7\+D0\.7\],\[A0\.7\+A0\.7\+\+\]
+.*:	dc000218 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1Re0\+\+D1Re0\]
+.*:	dc000e14 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0Re0\+\+D0Re0\]
+.*:	dc000e79 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1Re0\+\+D1Re0\]
+.*:	dc01c218 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1Re0\+\+D1\.7\]
+.*:	dc01ce14 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0Re0\+\+D0\.7\]
+.*:	dc01ce79 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1Re0\+\+D1\.7\]
+.*:	dc08407d 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0FrP\+\+A0FrP\]
+.*:	dc084e0d 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0FrP\+\+A0FrP\]
+.*:	dc084e7d 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0FrP\+\+A0FrP\]
+.*:	dc09c07d 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0FrP\+\+A0\.7\]
+.*:	dc09ce0d 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0FrP\+\+A0\.7\]
+.*:	dc09ce7d 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0FrP\+\+A0\.7\]
+.*:	dc380218 	          XFRD      \[A1LbP\+\+A1LbP\],\[D1\.7\+\+D1Re0\]
+.*:	dc380e14 	          XFRD      \[A1\.7\+\+A1LbP\],\[D0\.7\+\+D0Re0\]
+.*:	dc380e79 	          XFRD      \[D0\.7\+\+D0\.7\],\[D1\.7\+\+D1Re0\]
+.*:	dc38407d 	          XFRD      \[D0Re0\+\+D0\.7\],\[A0\.7\+\+A0FrP\]
+.*:	dc384e0d 	          XFRD      \[D0\.7\+\+D0Re0\],\[A0\.7\+\+A0FrP\]
+.*:	dc384e7d 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0\.7\+\+A0FrP\]
+.*:	dc39c071 	          XFRD      \[D0Re0\+\+D0\.7\],\[A1\.7\+\+A1\.7\]
+.*:	dc39c217 	          XFRD      \[A0FrP\+\+A0FrP\],\[D0\.7\+\+D0\.7\]
+.*:	dc39c27b 	          XFRD      \[A0FrP\+\+A0\.7\],\[D1\.7\+\+D1\.7\]
+.*:	dc39ce13 	          XFRD      \[A0\.7\+\+A0FrP\],\[A1\.7\+\+A1\.7\]
+.*:	dc39ce73 	          XFRD      \[A0\.7\+\+A0\.7\],\[A1\.7\+\+A1\.7\]
+.*:	dc39ce7d 	          XFRD      \[D0\.7\+\+D0\.7\],\[A0\.7\+\+A0\.7\]
+.*:	dd000218 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1Re0\+\+\]
+.*:	dd000e14 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0Re0\+\+\]
+.*:	dd000e79 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1Re0\+\+\]
+.*:	dd01c218 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1\.7\+\+\]
+.*:	dd01ce14 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0\.7\+\+\]
+.*:	dd01ce79 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1\.7\+\+\]
+.*:	dd08407d 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0FrP\+\+\]
+.*:	dd084e0d 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0FrP\+\+\]
+.*:	dd084e7d 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0FrP\+\+\]
+.*:	dd09c07d 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0\.7\+\+\]
+.*:	dd09ce0d 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0\.7\+\+\]
+.*:	dd09ce7d 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0\.7\+\+\]
+.*:	dd380218 	          XFRD      \[A1LbP\+A1LbP\+\+\],\[D1\.7\+D1Re0\+\+\]
+.*:	dd380e14 	          XFRD      \[A1\.7\+A1LbP\+\+\],\[D0\.7\+D0Re0\+\+\]
+.*:	dd380e79 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[D1\.7\+D1Re0\+\+\]
+.*:	dd38407d 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A0\.7\+A0FrP\+\+\]
+.*:	dd384e0d 	          XFRD      \[D0\.7\+D0Re0\+\+\],\[A0\.7\+A0FrP\+\+\]
+.*:	dd384e7d 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0FrP\+\+\]
+.*:	dd39c071 	          XFRD      \[D0Re0\+D0\.7\+\+\],\[A1\.7\+A1\.7\+\+\]
+.*:	dd39c217 	          XFRD      \[A0FrP\+A0FrP\+\+\],\[D0\.7\+D0\.7\+\+\]
+.*:	dd39c27b 	          XFRD      \[A0FrP\+A0\.7\+\+\],\[D1\.7\+D1\.7\+\+\]
+.*:	dd39ce13 	          XFRD      \[A0\.7\+A0FrP\+\+\],\[A1\.7\+A1\.7\+\+\]
+.*:	dd39ce73 	          XFRD      \[A0\.7\+A0\.7\+\+\],\[A1\.7\+A1\.7\+\+\]
+.*:	dd39ce7d 	          XFRD      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0\.7\+\+\]
+.*:	de000218 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1Re0\+\+D1Re0\]
+.*:	de000e14 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0Re0\+\+D0Re0\]
+.*:	de000e79 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1Re0\+\+D1Re0\]
+.*:	de01c218 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1Re0\+\+D1\.7\]
+.*:	de01ce14 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0Re0\+\+D0\.7\]
+.*:	de01ce79 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1Re0\+\+D1\.7\]
+.*:	de08407d 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0FrP\+\+A0FrP\]
+.*:	de084e0d 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0FrP\+\+A0FrP\]
+.*:	de084e7d 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0FrP\+\+A0FrP\]
+.*:	de09c07d 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0FrP\+\+A0\.7\]
+.*:	de09ce0d 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0FrP\+\+A0\.7\]
+.*:	de09ce7d 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0FrP\+\+A0\.7\]
+.*:	de380218 	          XFRL      \[A1LbP\+\+A1LbP\],\[D1\.7\+\+D1Re0\]
+.*:	de380e14 	          XFRL      \[A1\.7\+\+A1LbP\],\[D0\.7\+\+D0Re0\]
+.*:	de380e79 	          XFRL      \[D0\.7\+\+D0\.7\],\[D1\.7\+\+D1Re0\]
+.*:	de38407d 	          XFRL      \[D0Re0\+\+D0\.7\],\[A0\.7\+\+A0FrP\]
+.*:	de384e0d 	          XFRL      \[D0\.7\+\+D0Re0\],\[A0\.7\+\+A0FrP\]
+.*:	de384e7d 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0\.7\+\+A0FrP\]
+.*:	de39c071 	          XFRL      \[D0Re0\+\+D0\.7\],\[A1\.7\+\+A1\.7\]
+.*:	de39c217 	          XFRL      \[A0FrP\+\+A0FrP\],\[D0\.7\+\+D0\.7\]
+.*:	de39c27b 	          XFRL      \[A0FrP\+\+A0\.7\],\[D1\.7\+\+D1\.7\]
+.*:	de39ce13 	          XFRL      \[A0\.7\+\+A0FrP\],\[A1\.7\+\+A1\.7\]
+.*:	de39ce73 	          XFRL      \[A0\.7\+\+A0\.7\],\[A1\.7\+\+A1\.7\]
+.*:	de39ce7d 	          XFRL      \[D0\.7\+\+D0\.7\],\[A0\.7\+\+A0\.7\]
+.*:	df000218 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1Re0\+\+\]
+.*:	df000e14 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0Re0\+\+\]
+.*:	df000e79 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1Re0\+\+\]
+.*:	df01c218 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1Re0\+D1\.7\+\+\]
+.*:	df01ce14 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0Re0\+D0\.7\+\+\]
+.*:	df01ce79 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1Re0\+D1\.7\+\+\]
+.*:	df08407d 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0FrP\+\+\]
+.*:	df084e0d 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0FrP\+\+\]
+.*:	df084e7d 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0FrP\+\+\]
+.*:	df09c07d 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0FrP\+A0\.7\+\+\]
+.*:	df09ce0d 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0FrP\+A0\.7\+\+\]
+.*:	df09ce7d 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0FrP\+A0\.7\+\+\]
+.*:	df380218 	          XFRL      \[A1LbP\+A1LbP\+\+\],\[D1\.7\+D1Re0\+\+\]
+.*:	df380e14 	          XFRL      \[A1\.7\+A1LbP\+\+\],\[D0\.7\+D0Re0\+\+\]
+.*:	df380e79 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[D1\.7\+D1Re0\+\+\]
+.*:	df38407d 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A0\.7\+A0FrP\+\+\]
+.*:	df384e0d 	          XFRL      \[D0\.7\+D0Re0\+\+\],\[A0\.7\+A0FrP\+\+\]
+.*:	df384e7d 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0FrP\+\+\]
+.*:	df39c071 	          XFRL      \[D0Re0\+D0\.7\+\+\],\[A1\.7\+A1\.7\+\+\]
+.*:	df39c217 	          XFRL      \[A0FrP\+A0FrP\+\+\],\[D0\.7\+D0\.7\+\+\]
+.*:	df39c27b 	          XFRL      \[A0FrP\+A0\.7\+\+\],\[D1\.7\+D1\.7\+\+\]
+.*:	df39ce13 	          XFRL      \[A0\.7\+A0FrP\+\+\],\[A1\.7\+A1\.7\+\+\]
+.*:	df39ce73 	          XFRL      \[A0\.7\+A0\.7\+\+\],\[A1\.7\+A1\.7\+\+\]
+.*:	df39ce7d 	          XFRL      \[D0\.7\+D0\.7\+\+\],\[A0\.7\+A0\.7\+\+\]
