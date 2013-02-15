@@ -43,7 +43,7 @@
 # -z compress using dwz
 # -m compress using dwz -m
 # -i make an index
-# -p create .dwp files (Fission)
+# -p create .dwp files (Fission), you need to also use gcc option -gsplit-dwarf
 # If nothing is given, no changes are made
 
 myname=cc-with-tweaks.sh

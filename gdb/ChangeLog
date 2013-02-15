@@ -1,5 +1,9 @@
 2013-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* contrib/cc-with-tweaks.sh: Extend the comment for -p option.
+
+2013-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb-gdb.gdb.in: Wrap set complaints, b internal_error, b info_command
 	and dir commands into an if block.
 
