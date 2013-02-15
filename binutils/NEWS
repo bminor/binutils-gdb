@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Objcopy now supports wildcard characters in command line options that take
+  section names.
+
 * Add support for Altera Nios II.
 
 Changes in 2.23:

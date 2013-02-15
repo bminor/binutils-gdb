@@ -1,3 +1,20 @@
+2013-02-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15033
+	* objcopy.c (enum change_action): Delete.
+	(struct section_list): Delete remove, copy, change_vma, change_lma
+	and set_flags fields.  Add context field.
+	(find_section_list): Add a context parameter.  Add support for
+	wildcard characters in section names.
+	(is_strip_section): Check for sections being both  copied and
+	removed.
+	(copy_object): Pass context to find_section_list.
+	(setup_section): Likewise.
+	(copy_section): Likewise.
+	(copy_main): Likewise.
+	* doc/binutils: Document the new behaviour.
+	* NEWS: Mention the new feature
+
 2013-02-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15125
