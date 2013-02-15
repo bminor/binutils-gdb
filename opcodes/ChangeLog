@@ -1,3 +1,9 @@
+2013-02-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (aarch64_prfops): Change unnamed operation 'name'
+	fields to NULL.
+	(aarch64_print_operand): Adjust the printing for AARCH64_OPND_PRFOP.
+
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Flag sshll, sshll2, ushll and

@@ -1,3 +1,8 @@
+2013-02-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/system.s: Add tests.
+	* gas/aarch64/system.d: Update.
+
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/alias.s: Add new tests.
