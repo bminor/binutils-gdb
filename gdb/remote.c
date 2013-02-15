@@ -10701,7 +10701,7 @@ remote_get_trace_status (struct trace_status *ts)
     return -1;
 
   /* We're working with a live target.  */
-  ts->from_file = 0;
+  ts->filename = NULL;
 
   if (*p++ != 'T')
     error (_("Bogus trace status reply from target: %s"), target_buf);

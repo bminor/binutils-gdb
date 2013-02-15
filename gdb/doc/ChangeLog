@@ -1,3 +1,9 @@
+2013-02-15  Pedro Alves  <pedro@codesourcery.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Tracepoint Commands) <-trace-status>:
+	Document the "trace-file" field.
+
 2013-02-07  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Machine Code): Clarify argument to disassemble

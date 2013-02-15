@@ -1940,7 +1940,7 @@ trace_status_command (char *args, int from_tty)
 
   if (status == -1)
     {
-      if (ts->from_file)
+      if (ts->filename != NULL)
 	printf_filtered (_("Using a trace file.\n"));
       else
 	{
@@ -2100,16 +2100,19 @@ trace_status_mi (int on_stop)
 
   status = target_get_trace_status (ts);
 
-  if (status == -1 && !ts->from_file)
+  if (status == -1 && ts->filename == NULL)
     {
       ui_out_field_string (uiout, "supported", "0");
       return;
     }
 
-  if (ts->from_file)
+  if (ts->filename != NULL)
     ui_out_field_string (uiout, "supported", "file");
   else if (!on_stop)
     ui_out_field_string (uiout, "supported", "1");
+
+  if (ts->filename != NULL)
+    ui_out_field_string (uiout, "trace-file", ts->filename);
 
   gdb_assert (ts->running_known);
 
@@ -2399,7 +2402,8 @@ trace_find_command (char *args, int from_tty)
 { /* This should only be called with a numeric argument.  */
   int frameno = -1;
 
-  if (current_trace_status ()->running && !current_trace_status ()->from_file)
+  if (current_trace_status ()->running
+      && current_trace_status ()->filename == NULL)
     error (_("May not look at trace frames while trace is running."));
   
   if (args == 0 || *args == 0)
@@ -2450,7 +2454,8 @@ trace_find_pc_command (char *args, int from_tty)
 {
   CORE_ADDR pc;
 
-  if (current_trace_status ()->running && !current_trace_status ()->from_file)
+  if (current_trace_status ()->running
+      && current_trace_status ()->filename == NULL)
     error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
@@ -2468,7 +2473,8 @@ trace_find_tracepoint_command (char *args, int from_tty)
   int tdp;
   struct tracepoint *tp;
 
-  if (current_trace_status ()->running && !current_trace_status ()->from_file)
+  if (current_trace_status ()->running
+      && current_trace_status ()->filename == NULL)
     error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
@@ -2507,7 +2513,8 @@ trace_find_line_command (char *args, int from_tty)
   struct symtab_and_line sal;
   struct cleanup *old_chain;
 
-  if (current_trace_status ()->running && !current_trace_status ()->from_file)
+  if (current_trace_status ()->running
+      && current_trace_status ()->filename == NULL)
     error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
@@ -2572,7 +2579,8 @@ trace_find_range_command (char *args, int from_tty)
   static CORE_ADDR start, stop;
   char *tmp;
 
-  if (current_trace_status ()->running && !current_trace_status ()->from_file)
+  if (current_trace_status ()->running
+      && current_trace_status ()->filename == NULL)
     error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
@@ -2605,7 +2613,8 @@ trace_find_outside_command (char *args, int from_tty)
   CORE_ADDR start, stop;
   char *tmp;
 
-  if (current_trace_status ()->running && !current_trace_status ()->from_file)
+  if (current_trace_status ()->running
+      && current_trace_status ()->filename == NULL)
     error (_("May not look at trace frames while trace is running."));
 
   if (args == 0 || *args == 0)
@@ -3762,8 +3771,8 @@ tfile_open (char *filename, int from_tty)
 
   trace_regblock_size = 0;
   ts = current_trace_status ();
-  /* We know we're working with a file.  */
-  ts->from_file = 1;
+  /* We know we're working with a file.  Record its name.  */
+  ts->filename = trace_filename;
   /* Set defaults in case there is no status line.  */
   ts->running_known = 0;
   ts->stop_reason = trace_stop_reason_unknown;
@@ -4213,8 +4222,7 @@ tfile_close (int quitting)
 static void
 tfile_files_info (struct target_ops *t)
 {
-  /* (it would be useful to mention the name of the file).  */
-  printf_filtered ("Looking at a trace file.\n");
+  printf_filtered ("\t`%s'\n", trace_filename);
 }
 
 /* The trace status for a file is that tracing can never be run.  */

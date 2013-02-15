@@ -150,6 +150,9 @@ show filename-display
   ** The response to breakpoint commands and breakpoint async records
      includes an "installed" field containing a boolean state about each
      non-pending tracepoint location is whether installed on target or not.
+  ** Output of the "-trace-status" command includes a "trace-file" field 
+     containing the name of the trace file being examined.  This field is
+     optional, and only present when examining a trace file.
 
 * GDB now supports the "mini debuginfo" section, .gnu_debugdata.
   You must have the LZMA library available when configuring GDB for this

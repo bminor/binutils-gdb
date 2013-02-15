@@ -1,3 +1,25 @@
+2013-02-15  Pedro Alves  <pedro@codesourcery.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* NEWS: Mention new field "trace-file".
+	* tracepoint.c (trace_status_mi): Output "trace-file" field.
+	(tfile_open): Record the trace file's filename in the trace
+	status.
+	(tfile_files_info): Mention the name of the trace file.
+	Check the "filename" field explicitely.
+	(trace_status_command): Explicitely check "filename" field.
+	(trace_find_command): Ditto.
+	(trace_find_pc_command): Ditto.
+	(trace_find_tracepoint_command): Ditto.
+	(trace_find_line_command): Ditto.
+	(trace_find_range_command): Ditto.
+	(trace_find_outside_command): Ditto.
+	* tracepoint.h (struct trace_status) <from_file>: Rename it
+	to "filename" and make it hold the trace file's filename
+	instead of a boolean.
+	* remote.c (remote_get_trace_status): Initialize "filename"
+	field with NULL instead	of 0.
+
 2013-02-15  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c: Fix a typo.

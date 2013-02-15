@@ -1,3 +1,8 @@
+2013-02-15  Pedro Alves  <pedro@codesourcery.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* gdb.trace/tfile.exp: Add test for -trace-status command.
+
 2013-02-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/pthread_cond_wait.c (main): Remove variable ts.  Replace

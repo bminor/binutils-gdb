@@ -72,9 +72,9 @@ enum trace_stop_reason
 
 struct trace_status
 {
-  /* This is true if the status is coming from a file rather
-     than a live target.  */
-  int from_file;
+  /* If the status is coming from a file rather than a live target,
+     this points at the file's filename.  Otherwise, this is NULL.  */
+  const char *filename;
 
   /* This is true if the value of the running field is known.  */
   int running_known;
