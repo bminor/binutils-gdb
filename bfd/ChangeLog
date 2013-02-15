@@ -1,3 +1,10 @@
+2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/15151
+	* archive.c (_bfd_find_nested_archive): Don't allow a nested
+	archive pointing to itself.
+	(_bfd_get_elt_at_filepos): Revert the last 2 changes.
+
 2013-02-15  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15140
