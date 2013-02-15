@@ -1,3 +1,7 @@
+2013-02-15  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+        * config/tc-arm.c (do_neon_mov): Break on NS_NULL.
+
 2013-02-15  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* configure.tgt: Add nios2-*-rtems*.

@@ -1,3 +1,9 @@
+2013-02-15  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+        * gas/arm/neon-vmov-bad.d: New file.
+        * gas/arm/neon-vmov-bad.s: Likewise.
+        * gas/arm/neon-vmov-bad.l: Likewise.
+
 2013-02-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/system.s: Add tests.

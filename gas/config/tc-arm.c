@@ -15494,6 +15494,11 @@ do_neon_mov (void)
       do_vfp_nsyn_opcode ("fmsrr");
       break;
 
+    case NS_NULL:
+      /* neon_select_shape has determined that the instruction
+	 shape is wrong and has already set the error message.  */
+      break;
+
     default:
       abort ();
     }
