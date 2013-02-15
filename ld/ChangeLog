@@ -1,3 +1,8 @@
+2013-02-15  Kai Tietz  <ktietz@redhat.com>
+
+	* scripttempl/pep.sc (.xdata): Merge .xdata* into .xdata section.
+	(.pdata): Merge .pdata* into .pdata section.
+
 2013-02-11  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (get_init_priority): Comment typo.

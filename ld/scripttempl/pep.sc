@@ -127,12 +127,12 @@ SECTIONS
 
   .pdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    *(.pdata)
+    *(.pdata*)
   }
 
   .xdata ${RELOCATING+BLOCK(__section_alignment__)} :
   {
-    *(.xdata)
+    *(.xdata*)
   }
 
   .bss ${RELOCATING+BLOCK(__section_alignment__)} :
