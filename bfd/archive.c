@@ -1,7 +1,5 @@
 /* BFD back-end for archive files (libraries).
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-   2012  Free Software Foundation, Inc.
+   Copyright 1990-2013 Free Software Foundation, Inc.
    Written by Cygnus Support.  Mostly Gumby Henkel-Wallace's fault.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -619,6 +617,7 @@ _bfd_append_relative_path (bfd *arch, char *elt_name)
 bfd *
 _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 {
+  static file_ptr prev_filepos;
   struct areltdata *new_areldata;
   bfd *n_nfd;
   char *filename;
@@ -626,6 +625,12 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   n_nfd = _bfd_look_for_bfd_in_cache (archive, filepos);
   if (n_nfd)
     return n_nfd;
+  /* PR15140: Prevent an inifnite recursion scanning a malformed nested archive.  */
+  if (filepos == prev_filepos)
+    {
+      bfd_set_error (bfd_error_malformed_archive);
+      return NULL;
+    }
 
   if (0 > bfd_seek (archive, filepos, SEEK_SET))
     return NULL;
@@ -634,6 +639,7 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
     return NULL;
 
   filename = new_areldata->filename;
+  prev_filepos = filepos;
 
   if (bfd_is_thin_archive (archive))
     {

@@ -1,3 +1,9 @@
+2013-02-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15140
+	* archive.c (_bfd_get_elt_at_filepos): Prevent an infinite loop
+	accessing a corrupt nested archive.
+
 2013-02-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elfxx-mips.c (mips_got_page_ref): New structure.

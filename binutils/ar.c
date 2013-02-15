@@ -1,7 +1,5 @@
 /* ar.c - Archive modify and extract.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
-   Free Software Foundation, Inc.
+   Copyright 1991-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -917,6 +915,25 @@ open_inarch (const char *archive_filename, const char *file)
 	}
       xexit (1);
     }
+
+  if ((operation == replace || operation == quick_append)
+      && bfd_openr_next_archived_file (arch, NULL) != NULL)
+    {
+      /* PR 15140: Catch attempts to convert a normal
+	 archive into a thin archive or vice versa.  */
+      if (make_thin_archive && ! bfd_is_thin_archive (arch))
+	{
+	  fatal (_("Cannot convert existing library %s to thin format"),
+		 bfd_get_filename (arch));
+	  goto bloser;
+	}
+      else if (! make_thin_archive && bfd_is_thin_archive (arch))
+	{
+	  fatal (_("Cannot convert existing thin library %s to normal format"),
+		 bfd_get_filename (arch));
+	  goto bloser;
+	}
+    }  
 
   last_one = &(arch->archive_next);
   /* Read all the contents right away, regardless.  */

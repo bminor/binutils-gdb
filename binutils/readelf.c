@@ -13975,6 +13975,15 @@ process_archive (char * file_name, FILE * file, bfd_boolean is_thin_archive)
         }
       else if (is_thin_archive)
         {
+	  /* PR 15140: Allow for corrupt thin archives.  */
+	  if (nested_arch.file == NULL)
+	    {
+	      error (_("%s: contains corrupt thin archive: %s\n"),
+		     file_name, name);
+	      ret = 1;
+	      break;
+	    }
+
           /* This is a proxy for a member of a nested archive.  */
           archive_file_offset = arch.nested_member_origin + sizeof arch.arhdr;
 

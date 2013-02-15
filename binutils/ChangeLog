@@ -4,6 +4,17 @@
 
 2013-02-15  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/15140
+	* ar.c (open_inarch): Fail on attempts to convert a normal archive
+	to a thin archive or vice versa.
+	* elfcomm.c (make_qualified_name): Handle corrupted thin
+	archives.
+	* readelf.c (process_archive): Likewise.
+	* doc/binutils.texi: Clarify documentation describing thin
+	archives.
+
+2013-02-15  Nick Clifton  <nickc@redhat.com>
+
 	PR binutils/15033
 	* objcopy.c (enum change_action): Delete.
 	(struct section_list): Delete remove, copy, change_vma, change_lma
