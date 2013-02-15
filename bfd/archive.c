@@ -618,6 +618,7 @@ bfd *
 _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
 {
   static file_ptr prev_filepos;
+  static unsigned int dup_filepos_count = 0;
   struct areltdata *new_areldata;
   bfd *n_nfd;
   char *filename;
@@ -625,12 +626,17 @@ _bfd_get_elt_at_filepos (bfd *archive, file_ptr filepos)
   n_nfd = _bfd_look_for_bfd_in_cache (archive, filepos);
   if (n_nfd)
     return n_nfd;
-  /* PR15140: Prevent an inifnite recursion scanning a malformed nested archive.  */
+  /* PR15140: Prevent an infinite recursion scanning a malformed nested archive.  */
   if (filepos == prev_filepos)
     {
-      bfd_set_error (bfd_error_malformed_archive);
-      return NULL;
+      if (++ dup_filepos_count > 100)
+	{
+	  bfd_set_error (bfd_error_malformed_archive);
+	  return NULL;
+	}
     }
+  else
+    dup_filepos_count = 0;
 
   if (0 > bfd_seek (archive, filepos, SEEK_SET))
     return NULL;
