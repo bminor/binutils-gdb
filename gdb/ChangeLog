@@ -1,3 +1,8 @@
+2013-02-15  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* python/py-breakpoint (struct pybp_code):  Use int instead of
+	enum type_code.
+
 2013-02-15  Pedro Alves  <pedro@codesourcery.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 

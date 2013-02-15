@@ -48,7 +48,7 @@ struct pybp_code
   /* The name.  */
   const char *name;
   /* The code.  */
-  enum type_code code;
+  int code;
 };
 
 /* Entries related to the type of user set breakpoints.  */
