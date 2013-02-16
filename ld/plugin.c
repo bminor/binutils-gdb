@@ -962,14 +962,14 @@ plugin_notice (struct bfd_link_info *info,
     {
       bfd *sym_bfd;
 
-      /* No further processing if this def/ref is from an IR dummy BFD.  */
+      /* Nothing to do here if this def/ref is from an IR dummy BFD.  */
       if (is_ir_dummy_bfd (abfd))
-	return TRUE;
+	;
 
       /* Making an indirect symbol counts as a reference unless this
 	 is a brand new symbol.  */
-      if (bfd_is_ind_section (section)
-	  || (flags & BSF_INDIRECT) != 0)
+      else if (bfd_is_ind_section (section)
+	       || (flags & BSF_INDIRECT) != 0)
 	{
 	  if (h->type != bfd_link_hash_new)
 	    {

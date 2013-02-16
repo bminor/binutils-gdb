@@ -1,3 +1,8 @@
+2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15141
+	* plugin.c (plugin_notice): Also trace symbol from the IR bfd.
+
 2013-02-15  Kai Tietz  <ktietz@redhat.com>
 
 	* scripttempl/pep.sc (.xdata): Merge .xdata* into .xdata section.
@@ -20,7 +25,7 @@
 	rather than userdata->flags.just_syms.
 
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
-            Andrew Jenner <andrew@codesourcery.com>
+	    Andrew Jenner <andrew@codesourcery.com>
 
 	Based on patches from Altera Corporation.
 
