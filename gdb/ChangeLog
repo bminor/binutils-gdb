@@ -1,3 +1,8 @@
+2013-02-16  Yuanhui Zhang  <asmwarrior@gmail.com>
+
+	* frame.c: Remove one extra white space after #include
+	directive.
+
 2013-02-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* contrib/cc-with-tweaks.sh: Extend the comment for -p option.

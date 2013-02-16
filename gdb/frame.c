@@ -42,7 +42,7 @@
 #include "gdbthread.h"
 #include "block.h"
 #include "inline-frame.h"
-#include  "tracepoint.h"
+#include "tracepoint.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
