@@ -1,5 +1,11 @@
 2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/15146
+	* elflink.c (elf_link_add_object_symbols): Don't add DT_NEEDED
+	for references from the dummy bfd.
+
+2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/15149
 	* elflink.c (elf_link_add_object_symbols): Also track weak
 	references.

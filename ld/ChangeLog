@@ -1,5 +1,11 @@
 2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR ld/15146
+	* plugin.c (plugin_notice): Replace the undefined dummy bfd with
+	the real one.
+
+2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR ld/15141
 	* plugin.c (plugin_notice): Also trace symbol from the IR bfd.
 

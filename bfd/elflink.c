@@ -4480,10 +4480,13 @@ error_free_dyn:
 		break;
 	      }
 
+	  /* Don't add DT_NEEDED for references from the dummy bfd.  */
 	  if (!add_needed
 	      && definition
 	      && ((dynsym
-		   && h->ref_regular)
+		   && h->ref_regular
+		   && (undef_bfd == NULL
+		       || (undef_bfd->flags & BFD_PLUGIN) == 0))
 		  || (h->ref_dynamic
 		      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
 		      && !on_needed_list (elf_dt_name (abfd), htab->needed))))

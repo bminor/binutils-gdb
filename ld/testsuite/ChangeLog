@@ -1,3 +1,14 @@
+2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15146
+	* ld-plugin/pr15146.d: New file.
+	* ld-plugin/pr15146a.c: Likewise.
+	* ld-plugin/pr15146b.c: Likewise.
+	* ld-plugin/pr15146c.c: Likewise.
+	* ld-plugin/pr15146d.c: Likewise.
+
+	* ld-plugin/lto.exp: Add tests for PR ld/15146.
+
 2013-02-15  Markos Chandras  <markos.chandras@imgtec.com>
 
 	* ld-metag/pcrel.d: Fix the expected disassembler
