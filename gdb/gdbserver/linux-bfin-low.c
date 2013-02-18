@@ -102,7 +102,7 @@ struct linux_target_ops the_low_target = {
   bfin_set_pc,
   bfin_breakpoint,
   bfin_breakpoint_len,
-  0,
+  NULL, /* breakpoint_reinsert_addr */
   2,
   bfin_breakpoint_at,
 };
