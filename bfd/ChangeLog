@@ -1,3 +1,13 @@
+2013-02-18  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_obj_tdata): Move find_line_info, local_stubs,
+	local_call_stubs, elf_data_symbol, elf_text_symbol, elf_data_section,
+	and elf_text_section to..
+	* elfxx-mips.c (struct mips_elf_obj_tdata): ..here.  Update all refs.
+	* elf64-alpha.c (struct mips_elf_find_line): Rename to..
+	(struct alpha_elf_find_line): ..this.
+	(struct alpha_elf_obj_tdata): Add find_line_info, update refs.
+
 2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15146

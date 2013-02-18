@@ -299,6 +299,15 @@ elf64_alpha_bfd_link_hash_table_create (bfd *abfd)
   return &ret->root.root;
 }
 
+/* Alpha ELF follows MIPS ELF in using a special find_nearest_line
+   routine in order to handle the ECOFF debugging information.  */
+
+struct alpha_elf_find_line
+{
+  struct ecoff_debug_info d;
+  struct ecoff_find_line i;
+};
+
 /* We have some private fields hanging off of the elf_tdata structure.  */
 
 struct alpha_elf_obj_tdata
@@ -328,6 +337,10 @@ struct alpha_elf_obj_tdata
   /* For every got, this is the sum of the number of words required
      to hold all of the member object's local got.  */
   int local_got_size;
+
+  /* Used by elf64_alpha_find_nearest_line entry point.  */
+  struct alpha_elf_find_line *find_line_info;
+
 };
 
 #define alpha_elf_tdata(abfd) \
@@ -1430,17 +1443,6 @@ elf64_alpha_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED, const char *name)
   return name[0] == '$';
 }
 
-/* Alpha ELF follows MIPS ELF in using a special find_nearest_line
-   routine in order to handle the ECOFF debugging information.  We
-   still call this mips_elf_find_line because of the slot
-   find_line_info in elf_obj_tdata is declared that way.  */
-
-struct mips_elf_find_line
-{
-  struct ecoff_debug_info d;
-  struct ecoff_find_line i;
-};
-
 static bfd_boolean
 elf64_alpha_find_nearest_line (bfd *abfd, asection *section, asymbol **symbols,
 			       bfd_vma offset, const char **filename_ptr,
@@ -1460,7 +1462,7 @@ elf64_alpha_find_nearest_line (bfd *abfd, asection *section, asymbol **symbols,
   if (msec != NULL)
     {
       flagword origflags;
-      struct mips_elf_find_line *fi;
+      struct alpha_elf_find_line *fi;
       const struct ecoff_debug_swap * const swap =
 	get_elf_backend_data (abfd)->elf_backend_ecoff_debug_swap;
 
@@ -1471,16 +1473,16 @@ elf64_alpha_find_nearest_line (bfd *abfd, asection *section, asymbol **symbols,
       if (elf_section_data (msec)->this_hdr.sh_type != SHT_NOBITS)
 	msec->flags |= SEC_HAS_CONTENTS;
 
-      fi = elf_tdata (abfd)->find_line_info;
+      fi = alpha_elf_tdata (abfd)->find_line_info;
       if (fi == NULL)
 	{
 	  bfd_size_type external_fdr_size;
 	  char *fraw_src;
 	  char *fraw_end;
 	  struct fdr *fdr_ptr;
-	  bfd_size_type amt = sizeof (struct mips_elf_find_line);
+	  bfd_size_type amt = sizeof (struct alpha_elf_find_line);
 
-	  fi = (struct mips_elf_find_line *) bfd_zalloc (abfd, amt);
+	  fi = (struct alpha_elf_find_line *) bfd_zalloc (abfd, amt);
 	  if (fi == NULL)
 	    {
 	      msec->flags = origflags;
@@ -1509,7 +1511,7 @@ elf64_alpha_find_nearest_line (bfd *abfd, asection *section, asymbol **symbols,
 	  for (; fraw_src < fraw_end; fraw_src += external_fdr_size, fdr_ptr++)
 	    (*swap->swap_fdr_in) (abfd, fraw_src, fdr_ptr);
 
-	  elf_tdata (abfd)->find_line_info = fi;
+	  alpha_elf_tdata (abfd)->find_line_info = fi;
 
 	  /* Note that we don't bother to ever free this information.
              find_nearest_line is either called all the time, as in

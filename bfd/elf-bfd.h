@@ -1586,12 +1586,6 @@ struct elf_obj_tdata
   /* Used by find_nearest_line entry point.  */
   void *line_info;
 
-  /* Used by MIPS ELF find_nearest_line entry point.  The structure
-     could be included directly in this one, but there's no point to
-     wasting the memory just for the infrequently called
-     find_nearest_line.  */
-  struct mips_elf_find_line *find_line_info;
-
   /* A place to stash dwarf1 info for this bfd.  */
   struct dwarf1_debug *dwarf1_find_line_info;
 
@@ -1600,12 +1594,6 @@ struct elf_obj_tdata
 
   /* Stash away info for yet another find line/function variant.  */
   void *elf_find_function_cache;
-
-  /* An array of stub sections indexed by symbol number, used by the
-     MIPS ELF linker.  FIXME: We should figure out some way to only
-     include this field for a MIPS ELF target.  */
-  asection **local_stubs;
-  asection **local_call_stubs;
 
   /* Used to determine if PT_GNU_EH_FRAME segment header should be
      created.  */
@@ -1628,13 +1616,6 @@ struct elf_obj_tdata
 
   /* Symbol version references to external objects.  */
   Elf_Internal_Verneed *verref;
-
-  /* The Irix 5 support uses two virtual sections, which represent
-     text/data symbols defined in dynamic objects.  */
-  asymbol *elf_data_symbol;
-  asymbol *elf_text_symbol;
-  asection *elf_data_section;
-  asection *elf_text_section;
 
   /* A pointer to the .eh_frame section.  */
   asection *eh_frame_section;

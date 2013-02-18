@@ -499,6 +499,22 @@ struct mips_elf_obj_tdata
 
   /* The GOT requirements of input bfds.  */
   struct mips_got_info *got;
+
+  /* Used by _bfd_mips_elf_find_nearest_line.  The structure could be
+     included directly in this one, but there's no point to wasting
+     the memory just for the infrequently called find_nearest_line.  */
+  struct mips_elf_find_line *find_line_info;
+
+  /* An array of stub sections indexed by symbol number.  */
+  asection **local_stubs;
+  asection **local_call_stubs;
+
+  /* The Irix 5 support uses two virtual sections, which represent
+     text/data symbols defined in dynamic objects.  */
+  asymbol *elf_data_symbol;
+  asymbol *elf_text_symbol;
+  asection *elf_data_section;
+  asection *elf_text_section;
 };
 
 /* Get MIPS ELF private object data from BFD's tdata.  */
@@ -5180,8 +5196,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	   && h->fn_stub != NULL
 	   && (r_type != R_MIPS16_CALL16 || h->need_fn_stub))
 	  || (local_p
-	      && elf_tdata (input_bfd)->local_stubs != NULL
-	      && elf_tdata (input_bfd)->local_stubs[r_symndx] != NULL))
+	      && mips_elf_tdata (input_bfd)->local_stubs != NULL
+	      && mips_elf_tdata (input_bfd)->local_stubs[r_symndx] != NULL))
       && !section_allows_mips16_refs_p (input_section))
     {
       /* This is a 32- or 64-bit call to a 16-bit function.  We should
@@ -5189,7 +5205,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	 stub.  */
       if (local_p)
 	{
-	  sec = elf_tdata (input_bfd)->local_stubs[r_symndx];
+	  sec = mips_elf_tdata (input_bfd)->local_stubs[r_symndx];
 	  value = 0;
 	}
       else
@@ -5220,12 +5236,12 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   else if (r_type == R_MIPS16_26 && !info->relocatable
 	   && ((h != NULL && (h->call_stub != NULL || h->call_fp_stub != NULL))
 	       || (local_p
-		   && elf_tdata (input_bfd)->local_call_stubs != NULL
-		   && elf_tdata (input_bfd)->local_call_stubs[r_symndx] != NULL))
+		   && mips_elf_tdata (input_bfd)->local_call_stubs != NULL
+		   && mips_elf_tdata (input_bfd)->local_call_stubs[r_symndx] != NULL))
 	   && !target_is_16_bit_code_p)
     {
       if (local_p)
-	sec = elf_tdata (input_bfd)->local_call_stubs[r_symndx];
+	sec = mips_elf_tdata (input_bfd)->local_call_stubs[r_symndx];
       else
 	{
 	  /* If both call_stub and call_fp_stub are defined, we can figure
@@ -7009,7 +7025,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 
     case SHN_MIPS_TEXT:
       /* This section is used in a shared object.  */
-      if (elf_tdata (abfd)->elf_text_section == NULL)
+      if (mips_elf_tdata (abfd)->elf_text_section == NULL)
 	{
 	  asymbol *elf_text_symbol;
 	  asection *elf_text_section;
@@ -7026,11 +7042,11 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 
 	  /* Initialize the section.  */
 
-	  elf_tdata (abfd)->elf_text_section = elf_text_section;
-	  elf_tdata (abfd)->elf_text_symbol = elf_text_symbol;
+	  mips_elf_tdata (abfd)->elf_text_section = elf_text_section;
+	  mips_elf_tdata (abfd)->elf_text_symbol = elf_text_symbol;
 
 	  elf_text_section->symbol = elf_text_symbol;
-	  elf_text_section->symbol_ptr_ptr = &elf_tdata (abfd)->elf_text_symbol;
+	  elf_text_section->symbol_ptr_ptr = &mips_elf_tdata (abfd)->elf_text_symbol;
 
 	  elf_text_section->name = ".text";
 	  elf_text_section->flags = SEC_NO_FLAGS;
@@ -7043,14 +7059,14 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
       /* This code used to do *secp = bfd_und_section_ptr if
          info->shared.  I don't know why, and that doesn't make sense,
          so I took it out.  */
-      *secp = elf_tdata (abfd)->elf_text_section;
+      *secp = mips_elf_tdata (abfd)->elf_text_section;
       break;
 
     case SHN_MIPS_ACOMMON:
       /* Fall through. XXX Can we treat this as allocated data?  */
     case SHN_MIPS_DATA:
       /* This section is used in a shared object.  */
-      if (elf_tdata (abfd)->elf_data_section == NULL)
+      if (mips_elf_tdata (abfd)->elf_data_section == NULL)
 	{
 	  asymbol *elf_data_symbol;
 	  asection *elf_data_section;
@@ -7067,11 +7083,11 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 
 	  /* Initialize the section.  */
 
-	  elf_tdata (abfd)->elf_data_section = elf_data_section;
-	  elf_tdata (abfd)->elf_data_symbol = elf_data_symbol;
+	  mips_elf_tdata (abfd)->elf_data_section = elf_data_section;
+	  mips_elf_tdata (abfd)->elf_data_symbol = elf_data_symbol;
 
 	  elf_data_section->symbol = elf_data_symbol;
-	  elf_data_section->symbol_ptr_ptr = &elf_tdata (abfd)->elf_data_symbol;
+	  elf_data_section->symbol_ptr_ptr = &mips_elf_tdata (abfd)->elf_data_symbol;
 
 	  elf_data_section->name = ".data";
 	  elf_data_section->flags = SEC_NO_FLAGS;
@@ -7084,7 +7100,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
       /* This code used to do *secp = bfd_und_section_ptr if
          info->shared.  I don't know why, and that doesn't make sense,
          so I took it out.  */
-      *secp = elf_tdata (abfd)->elf_data_section;
+      *secp = mips_elf_tdata (abfd)->elf_data_section;
       break;
 
     case SHN_MIPS_SUNDEFINED:
@@ -7590,7 +7606,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* Record this stub in an array of local symbol stubs for
              this BFD.  */
-	  if (elf_tdata (abfd)->local_stubs == NULL)
+	  if (mips_elf_tdata (abfd)->local_stubs == NULL)
 	    {
 	      unsigned long symcount;
 	      asection **n;
@@ -7604,11 +7620,11 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      n = bfd_zalloc (abfd, amt);
 	      if (n == NULL)
 		return FALSE;
-	      elf_tdata (abfd)->local_stubs = n;
+	      mips_elf_tdata (abfd)->local_stubs = n;
 	    }
 
 	  sec->flags |= SEC_KEEP;
-	  elf_tdata (abfd)->local_stubs[r_symndx] = sec;
+	  mips_elf_tdata (abfd)->local_stubs[r_symndx] = sec;
 
 	  /* We don't need to set mips16_stubs_seen in this case.
              That flag is used to see whether we need to look through
@@ -7715,7 +7731,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* Record this stub in an array of local symbol call_stubs for
              this BFD.  */
-	  if (elf_tdata (abfd)->local_call_stubs == NULL)
+	  if (mips_elf_tdata (abfd)->local_call_stubs == NULL)
 	    {
 	      unsigned long symcount;
 	      asection **n;
@@ -7729,11 +7745,11 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      n = bfd_zalloc (abfd, amt);
 	      if (n == NULL)
 		return FALSE;
-	      elf_tdata (abfd)->local_call_stubs = n;
+	      mips_elf_tdata (abfd)->local_call_stubs = n;
 	    }
 
 	  sec->flags |= SEC_KEEP;
-	  elf_tdata (abfd)->local_call_stubs[r_symndx] = sec;
+	  mips_elf_tdata (abfd)->local_call_stubs[r_symndx] = sec;
 
 	  /* We don't need to set mips16_stubs_seen in this case.
              That flag is used to see whether we need to look through
@@ -11649,7 +11665,7 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asection *section,
       if (elf_section_data (msec)->this_hdr.sh_type != SHT_NOBITS)
 	msec->flags |= SEC_HAS_CONTENTS;
 
-      fi = elf_tdata (abfd)->find_line_info;
+      fi = mips_elf_tdata (abfd)->find_line_info;
       if (fi == NULL)
 	{
 	  bfd_size_type external_fdr_size;
@@ -11687,7 +11703,7 @@ _bfd_mips_elf_find_nearest_line (bfd *abfd, asection *section,
 	  for (; fraw_src < fraw_end; fraw_src += external_fdr_size, fdr_ptr++)
 	    (*swap->swap_fdr_in) (abfd, fraw_src, fdr_ptr);
 
-	  elf_tdata (abfd)->find_line_info = fi;
+	  mips_elf_tdata (abfd)->find_line_info = fi;
 
 	  /* Note that we don't bother to ever free this information.
              find_nearest_line is either called all the time, as in
