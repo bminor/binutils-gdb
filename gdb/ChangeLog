@@ -1,3 +1,9 @@
+2013-02-18  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/15102:
+	* dwarf2read.c (read_subrange_type): Use result of
+	'check_typedef'.
+
 2013-02-16  Yuanhui Zhang  <asmwarrior@gmail.com>
 
 	* frame.c: Remove one extra white space after #include
