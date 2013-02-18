@@ -1512,6 +1512,28 @@ struct sdt_note
   bfd_byte data[1];
 };
 
+/* NT_GNU_BUILD_ID note type info.  */
+struct elf_build_id_info
+{
+  union
+  {
+    /* Used on output bfd by linker.  */
+    struct elf_build_id_out
+    {
+      size_t zero;       /* Always zero */
+      bfd_boolean (*after_write_object_contents) (bfd *);
+      const char *style;
+      asection *sec;
+    } o;
+    /* Used for input bfd.  */
+    struct elf_build_id
+    {
+      size_t size;       /* Always non-zero */
+      bfd_byte data[1];
+    } i;
+  } u;
+};
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1645,13 +1667,8 @@ struct elf_obj_tdata
   obj_attribute known_obj_attributes[2][NUM_KNOWN_OBJ_ATTRIBUTES];
   obj_attribute_list *other_obj_attributes[2];
 
-  /* Called at the end of _bfd_elf_write_object_contents if not NULL.  */
-  bfd_boolean (*after_write_object_contents) (bfd *);
-  void *after_write_object_contents_info;
-
   /* NT_GNU_BUILD_ID note type.  */
-  bfd_size_type build_id_size;
-  bfd_byte *build_id;
+  struct elf_build_id_info *build_id;
 
   /* Linked-list containing information about every Systemtap section
      found in the object file.  Each section corresponds to one entry

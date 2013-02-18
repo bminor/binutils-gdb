@@ -1,3 +1,16 @@
+2013-02-19  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (emit_note_gnu_build_id): New static var.
+	Replace all info->emit_note_gnu_build_id refs.
+	(id_note_section_size): Rename from
+	gld${EMULATION_NAME}_id_note_section_size.
+	(struct build_id_info): Delete.
+	(write_build_id): Rename from
+	gld${EMULATION_NAME}_write_build_id_section.
+	Update elf_tdata usage.  Style, formatting.
+	(setup_build_id): New function.
+	(gld${EMULATION_NAME}_after_open): Use setup_build_id.
+
 2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15146

@@ -5292,6 +5292,7 @@ _bfd_elf_write_object_contents (bfd *abfd)
   Elf_Internal_Shdr **i_shdrp;
   bfd_boolean failed;
   unsigned int count, num_sec;
+  struct elf_obj_tdata *t;
 
   if (! abfd->output_has_begun
       && ! _bfd_elf_compute_section_file_positions (abfd, NULL))
@@ -5323,21 +5324,22 @@ _bfd_elf_write_object_contents (bfd *abfd)
     }
 
   /* Write out the section header names.  */
+  t = elf_tdata (abfd);
   if (elf_shstrtab (abfd) != NULL
-      && (bfd_seek (abfd, elf_tdata (abfd)->shstrtab_hdr.sh_offset, SEEK_SET) != 0
+      && (bfd_seek (abfd, t->shstrtab_hdr.sh_offset, SEEK_SET) != 0
 	  || !_bfd_elf_strtab_emit (abfd, elf_shstrtab (abfd))))
     return FALSE;
 
   if (bed->elf_backend_final_write_processing)
-    (*bed->elf_backend_final_write_processing) (abfd,
-						elf_tdata (abfd)->linker);
+    (*bed->elf_backend_final_write_processing) (abfd, t->linker);
 
   if (!bed->s->write_shdrs_and_ehdr (abfd))
     return FALSE;
 
   /* This is last since write_shdrs_and_ehdr can touch i_shdrp[0].  */
-  if (elf_tdata (abfd)->after_write_object_contents)
-    return (*elf_tdata (abfd)->after_write_object_contents) (abfd);
+  if (t->build_id != NULL
+      && t->build_id->u.o.zero == 0)
+    return (*t->build_id->u.o.after_write_object_contents) (abfd);
 
   return TRUE;
 }
@@ -8692,12 +8694,18 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 static bfd_boolean
 elfobj_grok_gnu_build_id (bfd *abfd, Elf_Internal_Note *note)
 {
-  elf_tdata (abfd)->build_id_size = note->descsz;
-  elf_tdata (abfd)->build_id = (bfd_byte *) bfd_alloc (abfd, note->descsz);
-  if (elf_tdata (abfd)->build_id == NULL)
+  struct elf_obj_tdata *t;
+
+  if (note->descsz == 0)
     return FALSE;
 
-  memcpy (elf_tdata (abfd)->build_id, note->descdata, note->descsz);
+  t = elf_tdata (abfd);
+  t->build_id = bfd_alloc (abfd, sizeof (t->build_id->u.i) - 1 + note->descsz);
+  if (t->build_id == NULL)
+    return FALSE;
+
+  t->build_id->u.i.size = note->descsz;
+  memcpy (t->build_id->u.i.data, note->descdata, note->descsz);
 
   return TRUE;
 }

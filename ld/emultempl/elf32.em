@@ -165,6 +165,9 @@ static bfd_boolean global_vercheck_failed;
 static char *audit; /* colon (typically) separated list of libs */
 static char *depaudit; /* colon (typically) separated list of libs */
 
+/* Style of .note.gnu.build-id section.  */
+static const char *emit_note_gnu_build_id;
+
 /* On Linux, it's possible to have different versions of the same
    shared library linked against different versions of libc.  The
    dynamic linker somehow tags which libc version to use in
@@ -890,10 +893,9 @@ if test x"$LDEMUL_AFTER_OPEN" != xgld"$EMULATION_NAME"_after_open; then
 fragment <<EOF
 
 static bfd_size_type
-gld${EMULATION_NAME}_id_note_section_size (bfd *abfd,
-					   struct bfd_link_info *linfo)
+id_note_section_size (bfd *abfd)
 {
-  const char *style = linfo->emit_note_gnu_build_id;
+  const char *style = emit_note_gnu_build_id;
   bfd_size_type size;
 
   abfd = abfd;
@@ -944,25 +946,22 @@ read_hex (const char xdigit)
   return 0;
 }
 
-struct build_id_info
-{
-  const char *style;
-  asection *sec;
-};
-
 static bfd_boolean
-gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
+write_build_id (bfd *abfd)
 {
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-  struct build_id_info *info = (struct build_id_info *)
-    elf_tdata (abfd)->after_write_object_contents_info;
+  struct elf_obj_tdata *t = elf_tdata (abfd);
+  const char *style;
   asection *asec;
   Elf_Internal_Shdr *i_shdr;
   unsigned char *contents, *id_bits;
   bfd_size_type size;
+  file_ptr position;
   Elf_External_Note *e_note;
+  typedef void (*sum_fn) (const void *, size_t, void *);
 
-  asec = info->sec;
+  style = t->build_id->u.o.style;
+  asec = t->build_id->u.o.sec;
   if (bfd_is_abs_section (asec->output_section))
     {
       einfo (_("%P: warning: .note.gnu.build-id section discarded,"
@@ -991,31 +990,25 @@ gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
   bfd_h_put_32 (abfd, NT_GNU_BUILD_ID, &e_note->type);
   memcpy (e_note->name, "GNU", sizeof "GNU");
 
-  if (!strcmp (info->style, "md5"))
+  if (strcmp (style, "md5") == 0)
     {
       struct md5_ctx ctx;
+
       md5_init_ctx (&ctx);
-      if (bed->s->checksum_contents (abfd,
-				     (void (*) (const void *, size_t, void *))
-				     &md5_process_bytes,
-				     &ctx))
-	md5_finish_ctx (&ctx, id_bits);
-      else
+      if (!bed->s->checksum_contents (abfd, (sum_fn) &md5_process_bytes, &ctx))
 	return FALSE;
+      md5_finish_ctx (&ctx, id_bits);
     }
-  else if (!strcmp (info->style, "sha1"))
+  else if (strcmp (style, "sha1") == 0)
     {
       struct sha1_ctx ctx;
+
       sha1_init_ctx (&ctx);
-      if (bed->s->checksum_contents (abfd,
-				     (void (*) (const void *, size_t, void *))
-				     &sha1_process_bytes,
-				     &ctx))
-	sha1_finish_ctx (&ctx, id_bits);
-      else
+      if (!bed->s->checksum_contents (abfd, (sum_fn) &sha1_process_bytes, &ctx))
 	return FALSE;
+      sha1_finish_ctx (&ctx, id_bits);
     }
-  else if (!strcmp (info->style, "uuid"))
+  else if (strcmp (style, "uuid") == 0)
     {
       int n;
       int fd = open ("/dev/urandom", O_RDONLY);
@@ -1026,10 +1019,10 @@ gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
       if (n < (int) size)
 	return FALSE;
     }
-  else if (!strncmp (info->style, "0x", 2))
+  else if (strncmp (style, "0x", 2) == 0)
     {
       /* ID is in string form (hex).  Convert to bits.  */
-      const char *id = info->style + 2;
+      const char *id = style + 2;
       size_t n = 0;
       do
 	{
@@ -1047,12 +1040,51 @@ gld${EMULATION_NAME}_write_build_id_section (bfd *abfd)
   else
     abort ();			/* Should have been validated earlier.  */
 
+  position = i_shdr->sh_offset + asec->output_offset;
   size = asec->size;
-  return (bfd_seek (abfd,
-		    i_shdr->sh_offset + asec->output_offset, SEEK_SET) == 0
+  return (bfd_seek (abfd, position, SEEK_SET) == 0
 	  && bfd_bwrite (contents, size, abfd) == size);
 }
 
+/* Make .note.gnu.build-id section, and set up elf_tdata->build_id.  */
+
+static bfd_boolean
+setup_build_id (bfd *ibfd)
+{
+  asection *s;
+  bfd_size_type size;
+  flagword flags;
+
+  size = id_note_section_size (ibfd);
+  if (size == 0)
+    {
+      einfo ("%P: warning: unrecognized --build-id style ignored.\n");
+      return FALSE;
+    }
+
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_IN_MEMORY
+	   | SEC_LINKER_CREATED | SEC_READONLY | SEC_DATA);
+  s = bfd_make_section_with_flags (ibfd, ".note.gnu.build-id", flags);
+  if (s != NULL && bfd_set_section_alignment (ibfd, s, 2))
+    {
+      struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
+      t->build_id = bfd_alloc (link_info.output_bfd, sizeof (t->build_id->u.o));
+      if (t->build_id != NULL)
+	{
+	  t->build_id->u.o.zero = 0;
+	  t->build_id->u.o.after_write_object_contents = &write_build_id;
+	  t->build_id->u.o.style = emit_note_gnu_build_id;
+	  t->build_id->u.o.sec = s;
+	  elf_section_type (s) = SHT_NOTE;
+	  s->size = size;
+	  return TRUE;
+	}
+    }
+
+  einfo ("%P: warning: Cannot create .note.gnu.build-id section,"
+	 " --build-id ignored.\n");
+  return FALSE;
+}
 
 /* This is called after all the input files have been opened.  */
 
@@ -1068,11 +1100,9 @@ gld${EMULATION_NAME}_after_open (void)
   if (!is_elf_hash_table (htab))
     return;
 
-  if (link_info.emit_note_gnu_build_id)
+  if (emit_note_gnu_build_id != NULL)
     {
       bfd *abfd;
-      asection *s;
-      bfd_size_type size;
 
       /* Find an ELF input.  */
       for (abfd = link_info.input_bfds;
@@ -1080,50 +1110,13 @@ gld${EMULATION_NAME}_after_open (void)
 	if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
 	  break;
 
-      if (abfd == NULL)
+      /* PR 10555: If there are no ELF input files do not try to
+	 create a .note.gnu-build-id section.  */
+      if (abfd == NULL
+	  || !setup_build_id (abfd))
 	{
-	  /* PR 10555: If there are no input files do not
-	     try to create a .note.gnu-build-id section.  */
-	  free (link_info.emit_note_gnu_build_id);
-	  link_info.emit_note_gnu_build_id = NULL;
-	}
-      else
-	{
-	  size = gld${EMULATION_NAME}_id_note_section_size (abfd, &link_info);
-	  if (size == 0)
-	    {
-	      einfo ("%P: warning: unrecognized --build-id style ignored.\n");
-	      free (link_info.emit_note_gnu_build_id);
-	      link_info.emit_note_gnu_build_id = NULL;
-	    }
-	  else
-	    {
-	      s = bfd_make_section_with_flags (abfd, ".note.gnu.build-id",
-					       SEC_ALLOC | SEC_LOAD
-					       | SEC_IN_MEMORY | SEC_LINKER_CREATED
-					       | SEC_READONLY | SEC_DATA);
-	      if (s != NULL && bfd_set_section_alignment (abfd, s, 2))
-		{
-		  struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
-		  struct build_id_info *b =
-		      (struct build_id_info *) xmalloc (sizeof *b);
-
-		  b->style = link_info.emit_note_gnu_build_id;
-		  b->sec = s;
-		  elf_section_type (s) = SHT_NOTE;
-		  s->size = size;
-		  t->after_write_object_contents
-		    = &gld${EMULATION_NAME}_write_build_id_section;
-		  t->after_write_object_contents_info = b;
-		}
-	      else
-		{
-		  einfo ("%P: warning: Cannot create .note.gnu.build-id section,"
-			 " --build-id ignored.\n");
-		  free (link_info.emit_note_gnu_build_id);
-		  link_info.emit_note_gnu_build_id = NULL;
-		}
-	    }
+	  free ((char *) emit_note_gnu_build_id);
+	  emit_note_gnu_build_id = NULL;
 	}
     }
 
@@ -2192,15 +2185,15 @@ gld${EMULATION_NAME}_handle_option (int optc)
       return FALSE;
 
     case OPTION_BUILD_ID:
-      if (link_info.emit_note_gnu_build_id != NULL)
+      if (emit_note_gnu_build_id != NULL)
 	{
-	  free (link_info.emit_note_gnu_build_id);
-	  link_info.emit_note_gnu_build_id = NULL;
+	  free ((char *) emit_note_gnu_build_id);
+	  emit_note_gnu_build_id = NULL;
 	}
       if (optarg == NULL)
 	optarg = DEFAULT_BUILD_ID_STYLE;
       if (strcmp (optarg, "none"))
-	link_info.emit_note_gnu_build_id = xstrdup (optarg);
+	emit_note_gnu_build_id = xstrdup (optarg);
       break;
 
 EOF

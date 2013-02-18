@@ -1,3 +1,13 @@
+2013-02-19  Alan Modra  <amodra@gmail.com>
+
+	* elfread.c (struct build_id): Delete.  Use struct elf_build_id
+	throughout file instead.
+	(build_id_bfd_get): Update to use new elf_tdata build_id field.
+	Don't xmalloc return value.
+	(build_id_verify): Similarly.  Don't xfree.
+	(build_id_to_debug_filename): Update.
+	(find_separate_debug_file_by_buildid): Update, don't xfree.
+
 2013-02-18  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/15102:
@@ -1151,7 +1161,7 @@
 
 2013-01-24  Tiago Stürmer Daitx  <tdaitx@linux.vnet.ibm.com>
 
-	* MAINTAINERS (Write After Approval): Add myself to the list. 
+	* MAINTAINERS (Write After Approval): Add myself to the list.
 
 2013-01-24  Tom Tromey  <tromey@redhat.com>
 
