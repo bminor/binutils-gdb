@@ -1,3 +1,9 @@
+2013-02-18  Alan Modra  <amodra@gmail.com>
+
+	* ld-plugin/lto.exp (Build pr15146b.so) Add -Wl,--no-as-needed.
+	(PR ld/15146 (1), (2)): Likewise.
+	(LTO 7): Likewise.
+
 2013-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15146

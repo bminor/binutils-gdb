@@ -187,10 +187,10 @@ set lto_link_elf_tests {
    "-shared" "-O2 -fpic"
    {pr15146b.c} {} "pr15146b.so" "c"}
   {"Build pr15146c.so"
-   "-shared tmpdir/pr15146b.so" "-O2 -fpic"
+   "-shared -Wl,--no-as-needed tmpdir/pr15146b.so" "-O2 -fpic"
    {pr15146c.c} {} "pr15146c.so" "c"}
   {"PR ld/15146 (1)"
-   "-O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries tmpdir/pr15146a.o tmpdir/pr15146c.so" ""
+   "-O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146a.o tmpdir/pr15146c.so" ""
    {dummy.c} {{"readelf" {-d} "pr15146.d"}} "pr15146a.exe"}
   {"Build libpr15146d.a"
    "" "-flto -O2"
@@ -271,7 +271,7 @@ set lto_run_tests {
 # LTO run-time tests for ELF
 set lto_run_elf_tests {
   {"LTO 7"
-   "-O2 -flto -fuse-linker-plugin tmpdir/lto-7b.o tmpdir/lto-7c.o tmpdir/lto-7a.o tmpdir/liblto-7.so" ""
+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-7b.o tmpdir/lto-7c.o tmpdir/lto-7a.o -Wl,--no-as-needed tmpdir/liblto-7.so" ""
    {dummy.c} "lto-7.exe" "lto-7.out" "" "c"}
   {"LTO 8"
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-8b.o tmpdir/lto-8a.o" ""
@@ -288,7 +288,7 @@ if { [is_elf_format]
      && [run_host_cmd_yesno $CC "-shared -fPIC $srcdir/$subdir/dummy.c -o tmpdir/t.so"] } {
     run_cc_link_tests $lto_link_elf_tests
     set testname "PR ld/15146 (2)"
-    set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries tmpdir/pr15146d.o tmpdir/pr15146c.so"]
+    set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
     if { [ regexp "ltrans.o: undefined reference to symbol 'xxx'" $exec_output ] } {
 	pass $testname
     } {
