@@ -1,3 +1,8 @@
+2013-02-18  Paul Brook  <paul@codesourcery.com>
+
+	* elfxx-mips.c (MICROMIPS_P): New macro.
+	(_bfd_mips_elf_symbol_processing): Use it.
+
 2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_create_dynamic_sections): Clarify
