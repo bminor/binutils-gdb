@@ -1,3 +1,14 @@
+2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elf64-mips.c (micromips_elf64_howto_table_rel): Add
+	R_MICROMIPS_SCN_DISP and R_MICROMIPS_JALR.
+	(micromips_elf64_howto_table_rela): Likewise.
+	(micromips_reloc_map): Add BFD_RELOC_MICROMIPS_JALR.
+	* elfn32-mips.c (elf_micromips_howto_table_rel): Add
+	R_MICROMIPS_SCN_DISP and R_MICROMIPS_JALR.
+	(elf_micromips_howto_table_rela): Likewise.
+	(micromips_reloc_map): Add BFD_RELOC_MICROMIPS_JALR.
+
 2013-02-18  Paul Brook  <paul@codesourcery.com>
 
 	* elfxx-mips.c (MICROMIPS_P): New macro.
