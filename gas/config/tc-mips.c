@@ -4644,12 +4644,10 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
     {
       unsigned int i;
 
-    mips_no_prev_insn ();
+      mips_no_prev_insn ();
 
       for (i = 0; i < ARRAY_SIZE (history); i++)
-      {
-        history[i].cleared_p = 1;
-      }
+	history[i].cleared_p = 1;
     }
 
   /* We need to emit a label at the end of branch-likely macros.  */

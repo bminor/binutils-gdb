@@ -1,3 +1,8 @@
+2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (append_insn): Correcting indentation, remove
+	extraneous braces.
+
 2013-02-15  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
         * config/tc-arm.c (do_neon_mov): Break on NS_NULL.
