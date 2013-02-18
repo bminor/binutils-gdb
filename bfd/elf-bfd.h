@@ -1936,10 +1936,10 @@ extern void _bfd_elf_strtab_delref
   (struct elf_strtab_hash *, bfd_size_type);
 extern unsigned int _bfd_elf_strtab_refcount
   (struct elf_strtab_hash *, bfd_size_type);
-extern void _bfd_elf_strtab_clear_refs
+extern void _bfd_elf_strtab_clear_all_refs
+  (struct elf_strtab_hash *tab);
+extern void _bfd_elf_strtab_restore_size
   (struct elf_strtab_hash *, bfd_size_type);
-#define _bfd_elf_strtab_clear_all_refs(tab) \
-  do { _bfd_elf_strtab_clear_refs (tab, 1); } while (0)
 extern bfd_size_type _bfd_elf_strtab_size
   (struct elf_strtab_hash *);
 extern bfd_size_type _bfd_elf_strtab_offset
