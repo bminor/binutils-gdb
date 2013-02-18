@@ -1,5 +1,11 @@
 2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* config/tc-mips.c (s_cpload): Call mips_mark_labels and set
+	mips_assembling_insn appropriately.
+	(s_cpsetup, s_cprestore, s_cpreturn, s_cpadd): Likewise.
+
+2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* config/tc-mips.c (append_insn): Correct indentation, remove
 	extraneous braces.
 

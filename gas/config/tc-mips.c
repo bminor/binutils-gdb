@@ -16621,6 +16621,9 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
   /* In ELF, this symbol is implicitly an STT_OBJECT symbol.  */
   symbol_get_bfdsym (ex.X_add_symbol)->flags |= BSF_OBJECT;
 
+  mips_mark_labels ();
+  mips_assembling_insn = TRUE;
+
   macro_start ();
   macro_build_lui (&ex, mips_gp_register);
   macro_build (&ex, "addiu", "t,r,j", mips_gp_register,
@@ -16630,6 +16633,7 @@ s_cpload (int ignore ATTRIBUTE_UNUSED)
 		 mips_gp_register, reg);
   macro_end ();
 
+  mips_assembling_insn = FALSE;
   demand_empty_rest_of_line ();
 }
 
@@ -16706,6 +16710,9 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
   SKIP_WHITESPACE ();
   expression (&ex_sym);
 
+  mips_mark_labels ();
+  mips_assembling_insn = TRUE;
+
   macro_start ();
   if (mips_cpreturn_register == -1)
     {
@@ -16753,6 +16760,7 @@ s_cpsetup (int ignore ATTRIBUTE_UNUSED)
 
   macro_end ();
 
+  mips_assembling_insn = FALSE;
   demand_empty_rest_of_line ();
 }
 
@@ -16810,11 +16818,15 @@ s_cprestore (int ignore ATTRIBUTE_UNUSED)
   ex.X_op_symbol = NULL;
   ex.X_add_number = mips_cprestore_offset;
 
+  mips_mark_labels ();
+  mips_assembling_insn = TRUE;
+
   macro_start ();
   macro_build_ldst_constoffset (&ex, ADDRESS_STORE_INSN, mips_gp_register,
 				SP, HAVE_64BIT_ADDRESSES);
   macro_end ();
 
+  mips_assembling_insn = FALSE;
   demand_empty_rest_of_line ();
 }
 
@@ -16845,6 +16857,9 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
+  mips_mark_labels ();
+  mips_assembling_insn = TRUE;
+
   macro_start ();
   if (mips_cpreturn_register == -1)
     {
@@ -16860,6 +16875,7 @@ s_cpreturn (int ignore ATTRIBUTE_UNUSED)
 		 mips_cpreturn_register, 0);
   macro_end ();
 
+  mips_assembling_insn = FALSE;
   demand_empty_rest_of_line ();
 }
 
@@ -17039,12 +17055,16 @@ s_cpadd (int ignore ATTRIBUTE_UNUSED)
       return;
     }
 
+  mips_mark_labels ();
+  mips_assembling_insn = TRUE;
+
   /* Add $gp to the register named as an argument.  */
   macro_start ();
   reg = tc_get_register (0);
   macro_build (NULL, ADDRESS_ADD_INSN, "d,v,t", reg, reg, mips_gp_register);
   macro_end ();
 
+  mips_assembling_insn = FALSE;
   demand_empty_rest_of_line ();
 }
 
