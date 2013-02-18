@@ -29,7 +29,7 @@ Disassembly of section \.text:
  4400038:	f8be 0024 	sw	a1,36\(s8\)
  440003c:	41a2 0440 	lui	v0,0x440
  4400040:	3082 02a0 	addiu	a0,v0,672
- 4400044:	f110 0028 	jalx	44000a0 <_PROCEDURE_LINKAGE_TABLE_\+0x20>
+ 4400044:	f110 0028 	jalx	44000a0 <printf@plt>
  4400048:	0000 0000 	nop
  440004c:	f620 0010 	jal	4400020 <internal_function>
  4400050:	0000 0000 	nop
@@ -52,6 +52,8 @@ Disassembly of section \.plt:
  4400094:	0018c082 	srl	t8,t8,0x2
  4400098:	0320f809 	jalr	t9
  440009c:	2718fffe 	addiu	t8,t8,-2
+
+044000a0 <printf@plt>:
  44000a0:	3c0f0440 	lui	t7,0x440
  44000a4:	8df900e0 	lw	t9,224\(t7\)
  44000a8:	03200008 	jr	t9

@@ -1,3 +1,9 @@
+2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
+        * ld-mips-elf/jalx-2.ld: Include .rel.plt in output, give .plt a
+	mapping.
+        * ld-mips-elf/jalx-2.dd: Adjust disassembly accordingly.
+
 2013-02-18  Alan Modra  <amodra@gmail.com>
 
 	* ld-plugin/lto.exp (Build pr15146b.so) Add -Wl,--no-as-needed.
