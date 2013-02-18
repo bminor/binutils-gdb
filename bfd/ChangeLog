@@ -1,3 +1,8 @@
+2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_create_dynamic_sections): Clarify
+	comment on _PROCEDURE_LINKAGE_TABLE_ creation.
+
 2013-02-18  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12549

@@ -7324,7 +7324,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* Create the .plt, .rel(a).plt, .dynbss and .rel(a).bss sections.
-     Also create the _PROCEDURE_LINKAGE_TABLE symbol.  */
+     Also, on VxWorks, create the _PROCEDURE_LINKAGE_TABLE_ symbol.  */
   if (!_bfd_elf_create_dynamic_sections (abfd, info))
     return FALSE;
 
