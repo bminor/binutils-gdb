@@ -25,25 +25,25 @@ if { ![istarget vax-*-*] || ![is_elf_format] } {
 
 run_ld_link_tests [list \
     [list "PLT test (shared library)" \
-	  "-shared -T plt-local-lib.ld" \
+	  "-shared -T plt-local-lib.ld" "" \
 	  "-k" \
 	  { plt-local-lib.s } \
 	  { { objdump -d plt-local-lib.dd } } \
 	  "plt-local-lib.so"] \
     [list "PLT test (object 1)" \
-	  "-r" \
+	  "-r" "" \
 	  "-k" \
 	  { plt-local-hidden-pic.s } \
 	  {} \
 	  "plt-local-hidden-pic-r.o"] \
     [list "PLT test (object 2)" \
-	  "-r" \
+	  "-r" "" \
 	  "-k" \
 	  { plt-local-rehidden-pic.s } \
 	  {} \
 	  "plt-local-rehidden-pic-r.o"] \
     [list "PLT test (executable)" \
-	  "-T plt-local.ld tmpdir/plt-local-hidden-pic-r.o tmpdir/plt-local-rehidden-pic-r.o tmpdir/plt-local-lib.so" \
+	  "-T plt-local.ld tmpdir/plt-local-hidden-pic-r.o tmpdir/plt-local-rehidden-pic-r.o tmpdir/plt-local-lib.so" "" \
 	  "" \
 	  { plt-local.s } \
 	  { { objdump -d plt-local.dd } } \

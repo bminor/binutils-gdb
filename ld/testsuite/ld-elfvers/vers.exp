@@ -934,15 +934,15 @@ if [istarget sparc*-*-*] {
   set as_pic_flags "-K PIC"
 }
 run_ld_link_tests [list "\"vers24a\"
-			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
+			 \"-shared --version-script $srcdir/$subdir/vers24.map\" \"\"
 			 \"$as_pic_flags $as_options\" {vers24a.c vers24b.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24a.so\" \"-fpic\""]
 run_ld_link_tests [list "\"vers24b\"
-			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
+			 \"-shared --version-script $srcdir/$subdir/vers24.map\" \"\"
 			 \"$as_pic_flags $as_options\" {vers24b.c vers24a.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24b.so\" \"-fpic\""]
 run_ld_link_tests [list "\"vers24c\"
-			 \"-shared --version-script $srcdir/$subdir/vers24.map\"
+			 \"-shared --version-script $srcdir/$subdir/vers24.map\" \"\"
 			 \"$as_pic_flags $as_options\" {vers24c.c} { { readelf -Wrs vers24.rd } }
 			 \"libvers24c.so\" \"-fpic\""]
 

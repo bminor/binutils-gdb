@@ -43,7 +43,7 @@ proc mips_comm_data_test { abi flag emul reloc } {
     run_ld_link_tests [list \
 	[list \
 	    "$testname (auxiliary shared object build)" \
-	    "$LDFLAGS -shared" \
+	    "$LDFLAGS -shared" "" \
 	    "$AFLAGS -call_shared" \
 	    { ../ld-elf/comm-data1.s } \
 	    { \
@@ -64,7 +64,7 @@ proc mips_comm_data_test { abi flag emul reloc } {
     run_ld_link_tests [list \
 	[list \
 	    "$testname" \
-	    "$LDFLAGS $ZFLAG -Ltmpdir -lmips-$abi-$reloc-comm-data" \
+	    "$LDFLAGS $ZFLAG -Ltmpdir -lmips-$abi-$reloc-comm-data" "" \
 	    "$AFLAGS -call_nonpic" \
 	    { ../ld-elf/comm-data2.s } \
 	    { \

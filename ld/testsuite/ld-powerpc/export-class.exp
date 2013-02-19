@@ -53,7 +53,7 @@ proc powerpc_export_class_test { abi emul } {
     run_ld_link_tests [list \
 	[list \
 	    "$testname (auxiliary shared object)" \
-	    "$LDFLAGS -shared -version-script ../ld-elf/export-class-lib.ver" \
+	    "$LDFLAGS -shared -version-script ../ld-elf/export-class-lib.ver" "" \
 	    "$AFLAGS" \
 	    { ../ld-elf/export-class-lib.s } \
 	    {} \
@@ -67,7 +67,7 @@ proc powerpc_export_class_test { abi emul } {
     run_ld_link_tests [list \
 	[list \
 	    "$testname (initial static object)" \
-	    "$LDFLAGS -r" \
+	    "$LDFLAGS -r" "" \
 	    "$AFLAGS" \
 	    { ../ld-elf/export-class-ref.s } \
 	    {} \
@@ -84,7 +84,7 @@ proc powerpc_export_class_test { abi emul } {
     run_ld_link_tests [list \
 	[list \
 	    "$testname (final shared object)" \
-	    "$LDFLAGS -shared -Tdata=0x12340000 tmpdir/powerpc-$abi-export-class-ref-r.o tmpdir/powerpc-$abi-export-class-lib.so" \
+	    "$LDFLAGS -shared -Tdata=0x12340000 tmpdir/powerpc-$abi-export-class-ref-r.o tmpdir/powerpc-$abi-export-class-lib.so" "" \
 	    "$AFLAGS" \
 	    { ../ld-elf/export-class-dep.s ../ld-elf/export-class-def.s } \
 	    [list \

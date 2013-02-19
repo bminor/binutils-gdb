@@ -24,8 +24,8 @@ if { ![is_elf_format] || ![istarget "aarch64*-*-*"] } {
 }
 
 # List contains test-items with 3 items followed by 2 lists:
-# 0:name 1:ld options 2:assembler options
-# 3:filenames of assembler files 4: action and options. 5: name of output file
+# 0:name 1:ld early options 2:ld late options 3:assembler options
+# 4:filenames of assembler files 5: action and options. 6: name of output file
 
 # Actions:
 # objdump: Apply objdump options on result.  Compare with regex (last arg).
@@ -33,7 +33,7 @@ if { ![is_elf_format] || ![istarget "aarch64*-*-*"] } {
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
 
 set aarch64elftests {
-    {"EH Frame merge" "-Ttext 0x8000" "" {eh-frame-bar.s eh-frame-foo.s}
+    {"EH Frame merge" "-Ttext 0x8000" "" "" {eh-frame-bar.s eh-frame-foo.s}
 	{{objdump --dwarf=frames eh-frame.d}} "eh-frame"}
 }
 

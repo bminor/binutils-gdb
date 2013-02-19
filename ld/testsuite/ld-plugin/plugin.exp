@@ -95,37 +95,37 @@ set libs "[ld_simple_link_defsyms] --defsym ${_}printf=${_}main --defsym ${_}put
 
 set plugin_tests [list \
     [list "load plugin" "-plugin $plugin_path \
-    $testobjfiles $libs" "" "" {{ld plugin-1.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-1.d}} "main.x" ] \
     [list "fail plugin onload" "-plugin $plugin_path -plugin-opt failonload \
-    $testobjfiles $libs" "" "" {{ld plugin-2.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-2.d}} "main.x" ] \
     [list "fail plugin allsymbolsread" "-plugin $plugin_path $regas \
 			-plugin-opt failallsymbolsread \
-    $testobjfiles $libs" "" "" {{ld plugin-3.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-3.d}} "main.x" ] \
     [list "fail plugin cleanup" "-plugin $plugin_path -plugin-opt failcleanup \
 			$regcln \
-    $testobjfiles $libs" "" "" {{ld plugin-4.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-4.d}} "main.x" ] \
     [list "plugin all hooks" "-plugin $plugin_path $regclm $regas $regcln \
-    $testobjfiles $libs" "" "" {{ld plugin-5.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-5.d}} "main.x" ] \
     [list "plugin claimfile lost symbol" "-plugin $plugin_path $regclm \
 			$regas $regcln -plugin-opt claim:tmpdir/func.o \
-    $testobjfiles $libs" "" "" {{ld plugin-6.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-6.d}} "main.x" ] \
     [list "plugin claimfile replace symbol" "-plugin $plugin_path $regclm \
 			$regas $regcln -plugin-opt claim:tmpdir/func.o \
 			-plugin-opt sym:${_}func::0:0:0 \
-    $testobjfiles $libs" "" "" {{ld plugin-7.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-7.d}} "main.x" ] \
     [list "plugin claimfile resolve symbol" "-plugin $plugin_path $regclm \
 			$regas $regcln -plugin-opt claim:tmpdir/func.o \
 			-plugin-opt sym:${_}func::0:0:0 \
 			-plugin-opt sym:${_}func2::0:0:0 \
 			-plugin-opt dumpresolutions \
-    $testobjfiles $libs" "" "" {{ld plugin-8.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-8.d}} "main.x" ] \
     [list "plugin claimfile replace file" "-plugin $plugin_path $regclm \
 			$regas $regcln -plugin-opt claim:tmpdir/func.o \
 			-plugin-opt sym:${_}func::0:0:0 \
 			-plugin-opt sym:${_}func2::0:0:0 \
 			-plugin-opt dumpresolutions \
 			-plugin-opt add:tmpdir/func.o \
-    $testobjfiles $libs" "" "" {{ld plugin-9.d}} "main.x" ] \
+    $testobjfiles $libs" "" "" "" {{ld plugin-9.d}} "main.x" ] \
 ]
 
 set plugin_lib_tests [list \
@@ -135,7 +135,7 @@ set plugin_lib_tests [list \
 			-plugin-opt sym:${_}func2::0:0:0 \
 			-plugin-opt dumpresolutions \
 			-plugin-opt add:tmpdir/func.o \
-    $testobjfiles_notext -Ltmpdir -ltext $libs" "" "" {{ld plugin-10.d}} "main.x" ] \
+    $testobjfiles_notext -Ltmpdir -ltext $libs" "" "" "" {{ld plugin-10.d}} "main.x" ] \
     [list "plugin claimfile replace lib" "-plugin $plugin_path $regclm \
 			$regas $regcln -plugin-opt claim:tmpdir/func.o \
 			-plugin-opt sym:${_}func::0:0:0 \
@@ -145,7 +145,7 @@ set plugin_lib_tests [list \
 			-plugin-opt claim:tmpdir/libtext.a \
 			-plugin-opt sym:${_}text::0:0:0 \
 			-plugin-opt add:tmpdir/text.o \
-    $testobjfiles_notext -Ltmpdir -ltext $libs" "" "" {{ld plugin-11.d}} "main.x" ] \
+    $testobjfiles_notext -Ltmpdir -ltext $libs" "" "" "" {{ld plugin-11.d}} "main.x" ] \
 ]
 
 set plugin_extra_elf_tests [list \
@@ -160,7 +160,7 @@ set plugin_extra_elf_tests [list \
 			-plugin-opt add:tmpdir/func1p.o \
 			-plugin-opt add:tmpdir/func2i.o \
 			-plugin-opt add:tmpdir/func3h.o \
-    $testobjfiles $libs --verbose=2" "" "" {{ld plugin-12.d} \
+    $testobjfiles $libs --verbose=2" "" "" "" {{ld plugin-12.d} \
 				{readelf -s plugin-vis-1.d}} "main.x" ] \
 ]
 

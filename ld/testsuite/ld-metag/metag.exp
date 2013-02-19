@@ -26,32 +26,32 @@ if {!([istarget "metag-*-*"]) } {
 # Set up a list as described in ld-lib.exp
 
 set metag_tests {
-    {"Meta pc-relative relocs linker test" "" ""
+    {"Meta pc-relative relocs linker test" "" "" ""
      { "pcrel.s" "external.s" }
      { {objdump -Dz pcrel.d} }
      "pcrel"
     }
-    {"Simple PIC shared library" "-shared" ""
+    {"Simple PIC shared library" "-shared" "" ""
      {shared.s}
      { {objdump -fdw shared.d} {objdump -Rw shared.r} }
      "shared.so"
     }
-    {"Long branch stub" "" ""
+    {"Long branch stub" "" "" ""
      {stub.s}
      { {objdump -fdw stub.d} }
      "stub"
     }
-    {"Shared library for stub tests" "-shared" ""
+    {"Shared library for stub tests" "-shared" "" ""
      {stub_shared.s}
      { {objdump -fdw stub_shared.d} {objdump -Rw stub_shared.r} }
      "stub_shared.so"
     }
-    {"Long branch stub (PIC, app)" "tmpdir/stub_shared.so" ""
+    {"Long branch stub (PIC, app)" "tmpdir/stub_shared.so" "" ""
      {stub_pic_app.s}
      { {objdump -fdw stub_pic_app.d} {objdump -Rw stub_pic_app.r} }
      "stub_pic_app"
     }
-    {"Long branch stub (PIC, shared)" "-shared" ""
+    {"Long branch stub (PIC, shared)" "-shared" "" ""
      {stub_pic_shared.s}
      { {objdump -fdw stub_pic_shared.d} }
      "stub_pic_shared.so"

@@ -37,7 +37,7 @@ set testname "ARM symbol export class test"
 run_ld_link_tests [list \
     [list \
 	"$testname (auxiliary shared object)" \
-	"-marmelf_linux_eabi -shared -version-script ../ld-elf/export-class-lib.ver" \
+	"-marmelf_linux_eabi -shared -version-script ../ld-elf/export-class-lib.ver" "" \
 	"-EL" \
 	{ ../ld-elf/export-class-lib.s } \
 	{} \
@@ -51,7 +51,7 @@ run_ld_link_tests [list \
 run_ld_link_tests [list \
     [list \
 	"$testname (initial static object)" \
-	"-marmelf_linux_eabi -r" \
+	"-marmelf_linux_eabi -r" "" \
 	"-EL" \
 	{ ../ld-elf/export-class-ref.s } \
 	{} \
@@ -68,7 +68,7 @@ run_ld_link_tests [list \
 run_ld_link_tests [list \
     [list \
 	"$testname (final shared object)" \
-	"-marmelf_linux_eabi -shared -Tdata=0x12340000 tmpdir/arm-export-class-ref-r.o tmpdir/arm-export-class-lib.so" \
+	"-marmelf_linux_eabi -shared -Tdata=0x12340000 tmpdir/arm-export-class-ref-r.o tmpdir/arm-export-class-lib.so" "" \
 	"-EL" \
 	{ ../ld-elf/export-class-dep.s ../ld-elf/export-class-def.s } \
 	{ \

@@ -26,14 +26,14 @@ if {!([istarget "tilegx-*-*"]) } {
 
 set tilegx_tests {
     {   "tilegx little-endian relocation resolution linker test"
-        "-EL"
+        "-EL" ""
         "-EL"
         { "reloc.s" "external.s" }
         { {objdump -ds reloc-le.d} }
         "reloc"
     }
     {   "tilegx big-endian relocation resolution linker test"
-        "-EB"
+        "-EB" ""
         "-EB"
         { "reloc.s" "external.s" }
         { {objdump -ds reloc-be.d} }

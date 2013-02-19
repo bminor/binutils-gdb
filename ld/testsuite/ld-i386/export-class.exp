@@ -44,7 +44,7 @@ set testname "i386 symbol export class test"
 run_ld_link_tests [list \
     [list \
 	"$testname (auxiliary shared object)" \
-	"-shared -version-script ../ld-elf/export-class-lib.ver" \
+	"-shared -version-script ../ld-elf/export-class-lib.ver" "" \
 	"" \
 	{ ../ld-elf/export-class-lib.s } \
 	{} \
@@ -58,7 +58,7 @@ run_ld_link_tests [list \
 run_ld_link_tests [list \
     [list \
 	"$testname (initial static object)" \
-	"-r" \
+	"-r" "" \
 	"" \
 	{ ../ld-elf/export-class-ref.s } \
 	{} \
@@ -75,7 +75,7 @@ run_ld_link_tests [list \
 run_ld_link_tests [list \
     [list \
 	"$testname (final shared object)" \
-	"-shared -Tdata=0x12340000 tmpdir/i386-export-class-ref-r.o tmpdir/i386-export-class-lib.so" \
+	"-shared -Tdata=0x12340000 tmpdir/i386-export-class-ref-r.o tmpdir/i386-export-class-lib.so" "" \
 	"" \
 	{ ../ld-elf/export-class-dep.s ../ld-elf/export-class-def.s } \
 	{ \

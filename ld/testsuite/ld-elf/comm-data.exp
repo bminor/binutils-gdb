@@ -43,7 +43,7 @@ set testname "Common symbol override test"
 run_ld_link_tests [list \
     [list \
 	"$testname (auxiliary shared object build)" \
-	"-shared" \
+	"-shared" "" \
 	"" \
 	{ comm-data1.s } \
 	{ \
@@ -67,7 +67,7 @@ setup_xfail "arm*-*-*" "ld/13802"
 run_ld_link_tests [list \
     [list \
 	"$testname" \
-	"-Ltmpdir -lcomm-data" \
+	"-Ltmpdir -lcomm-data" "" \
 	"$AFLAGS" \
 	{ comm-data2.s } \
 	{ \
@@ -79,7 +79,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"$testname 3a" \
-	"-static" \
+	"-static" "" \
 	"" \
 	{ comm-data3a.s comm-data3b.s } \
 	{ \
@@ -89,7 +89,7 @@ run_ld_link_tests [list \
     ] \
     [list \
 	"$testname 3b" \
-	"-static" \
+	"-static" "" \
 	"" \
 	{ comm-data3b.s comm-data3a.s } \
 	{ \

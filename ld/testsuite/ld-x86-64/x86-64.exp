@@ -36,8 +36,8 @@ if [istarget "*-*-nacl*"] {
 }
 
 # List contains test-items with 3 items followed by 2 lists:
-# 0:name 1:ld options 2:assembler options
-# 3:filenames of assembler files 4: action and options. 5: name of output file
+# 0:name 1:ld early options 2:ld late options 3:assembler options
+# 4:filenames of assembler files 5: action and options. 6: name of output file
 
 # Actions:
 # objdump: Apply objdump options on result.  Compare with regex (last arg).
@@ -46,87 +46,88 @@ if [istarget "*-*-nacl*"] {
 
 set x86_64tests {
     {"Helper shared library (basic PLT test)"
-      "-shared -melf_x86_64" "--64" {pltlib.s} {} "libpltlib.so"}
+      "-shared -melf_x86_64" "" "--64" {pltlib.s} {} "libpltlib.so"}
     {"basic PLT generation"
-     "-melf_x86_64 tmpdir/libpltlib.so" "--64" {plt.s}
+     "-melf_x86_64 tmpdir/libpltlib.so" "" "--64" {plt.s}
      {{objdump -drj.plt plt.pd}} "plt"}
     {"TLS -fpic -shared transitions"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info"
+     "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
      "--64" {tlspic1.s tlspic2.s}
      {{readelf -WSsrl tlspic.rd} {objdump -drj.text tlspic.dd}
       {objdump -sj.got tlspic.sd} {objdump -sj.tdata tlspic.td}}
       "libtlspic.so"}
     {"TLS descriptor -fpic -shared transitions"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info"
+     "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
      "--64" {tlsdesc.s tlspic2.s}
      {{readelf -WSsrld tlsdesc.rd} {objdump -drj.text tlsdesc.dd}
       {objdump "-s -j.got -j.got.plt" tlsdesc.sd} {objdump -sj.tdata tlsdesc.td}
       {objdump -drj.plt tlsdesc.pd}} "libtlsdesc.so"}
-    {"Helper shared library" "-shared -melf_x86_64"
+    {"Helper shared library" "-shared -melf_x86_64" ""
      "--64" {tlslib.s} {} "libtlslib.so"}
     {"TLS -fpic and -fno-pic exec transitions"
-     "-melf_x86_64 tmpdir/libtlslib.so --no-ld-generated-unwind-info"
+     "-melf_x86_64 tmpdir/libtlslib.so --no-ld-generated-unwind-info" ""
      "--64" {tlsbinpic.s tlsbin.s}
      {{readelf -WSsrl tlsbin.rd} {objdump -drj.text tlsbin.dd}
       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
       "tlsbin"}
     {"TLS descriptor -fpic and -fno-pic exec transitions"
-     "-melf_x86_64 tmpdir/libtlslib.so --no-ld-generated-unwind-info"
+     "-melf_x86_64 tmpdir/libtlslib.so --no-ld-generated-unwind-info" ""
      "--64" {tlsbindesc.s tlsbin.s}
      {{readelf -WSsrl tlsbindesc.rd} {objdump -drj.text tlsbindesc.dd}
       {objdump -sj.got tlsbindesc.sd} {objdump -sj.tdata tlsbindesc.td}}
       "tlsbindesc"}
     {"TLS with global dynamic and descriptors"
-     "-shared -melf_x86_64 --no-ld-generated-unwind-info"
+     "-shared -melf_x86_64 --no-ld-generated-unwind-info" ""
      "--64" {tlsgdesc.s}
      {{readelf -WSsrl tlsgdesc.rd} {objdump -drj.text tlsgdesc.dd}}
       "libtlsgdesc.so"}
-    {"TLS in debug sections" "-melf_x86_64"
+    {"TLS in debug sections" "-melf_x86_64" ""
      "--64" {tlsg.s}
      {{objdump -sj.debug_foobar tlsg.sd}} "tlsg"}
-    {"TLS GD->LE transition" "-melf_x86_64"
+    {"TLS GD->LE transition" "-melf_x86_64" ""
      "--64" {tlsgd1.s}
      {{objdump -dwr tlsgd1.dd}} "tlsgd1"}
-    {"TLS LD->LE transition" "-melf_x86_64"
+    {"TLS LD->LE transition" "-melf_x86_64" ""
      "--64" {tlsld1.s}
      {{objdump -dwr tlsld1.dd}} "tlsld1"}
-    {"TLS IE->LE transition" "-melf_x86_64"
+    {"TLS IE->LE transition" "-melf_x86_64" ""
      "--64" {tlsie1.s}
      {{objdump -dwr tlsie1.dd}} "tlsie1"}
-    {"Helper 64bit object 1" "-r -melf_x86_64"
+    {"Helper 64bit object 1" "-r -melf_x86_64" ""
      "--64" {mixed1a.s} {} "libmixe1a.o"}
-    {"Helper 32bit object 1" "-r -melf_i386"
+    {"Helper 32bit object 1" "-r -melf_i386" ""
      "--32" {mixed1b.s} {} "libmixe1b.o"}
-    {"Helper 64bit object 2" "-r -melf_x86_64"
+    {"Helper 64bit object 2" "-r -melf_x86_64" ""
      "--64" {mixed2a.s} {} "libmixe2a.o"}
-    {"Helper 32bit object 2" "-r -melf_i386"
+    {"Helper 32bit object 2" "-r -melf_i386" ""
      "--32" {mixed2b.s} {} "libmixe2b.o"}
-    {"Split by file with 'l' flag on section." "-split-by-file -r -melf_x86_64"
+    {"Split by file with 'l' flag on section."
+     "-split-by-file -r -melf_x86_64" ""
      "--64" {split-by-file1.s split-by-file2.s}
      {{readelf -SW split-by-file.rd}} "split-by-file.o"}
-    {"TLS X32 IE->LE transition" "-melf32_x86_64"
+    {"TLS X32 IE->LE transition" "-melf32_x86_64" ""
      "--x32" {tlsie4.s}
      {{objdump -dwr tlsie4.dd}} "tlsie4"}
-    {"TLS X32 GD->LE transition" "-melf32_x86_64"
+    {"TLS X32 GD->LE transition" "-melf32_x86_64" ""
      "--x32" {tlsgd4.s}
      {{objdump -dwr tlsgd4.dd}} "tlsgd4"}
-    {"Helper TLS GD->IE transition DSO" "-shared -melf_x86_64"
+    {"Helper TLS GD->IE transition DSO" "-shared -melf_x86_64" ""
      "--64" {tlsgd5b.s} {} "libtlsgd5.so"}
-    {"TLS GD->IE transition" "-melf_x86_64 tmpdir/libtlsgd5.so"
+    {"TLS GD->IE transition" "-melf_x86_64 tmpdir/libtlsgd5.so" ""
      "--64" {tlsgd5a.s}
      {{objdump -dwr tlsgd5.dd}} "tlsgd5"}
-    {"Helper TLS X32 GD->IE transition DSO" "-shared -melf32_x86_64"
+    {"Helper TLS X32 GD->IE transition DSO" "-shared -melf32_x86_64" ""
      "--x32" {tlsgd6b.s} {} "libtlsgd6.so"}
-    {"TLS X32 GD->IE transition" "-melf32_x86_64 tmpdir/libtlsgd6.so"
+    {"TLS X32 GD->IE transition" "-melf32_x86_64 tmpdir/libtlsgd6.so" ""
      "--x32" {tlsgd6a.s}
      {{objdump -dwr tlsgd6.dd}} "tlsgd6"}
-    {"TLS X32 LD->LE transition" "-melf32_x86_64"
+    {"TLS X32 LD->LE transition" "-melf32_x86_64" ""
      "--x32" {tlsld2.s}
      {{objdump -dwr tlsld2.dd}} "tlsld2"}
 
-     {"build 32-bit object with 33 locals" "-melf_x86_64 -e 0" "--32" {32bit.s} {{ ld incompatible.l }} "dummy" }
-     {"build 64-bit object" "-melf_x86_64 -e 0 --defsym foo=1" "--64" {64bit.s} {} "dummy" }
-     {"link mixed objects"  "-melf_x86_64 -e 0 tmpdir/32bit.o tmpdir/64bit.o" "" {} { { ld incompatible.l } } "mixed"}
+     {"build 32-bit object with 33 locals" "-melf_x86_64 -e 0" "" "--32" {32bit.s} {{ ld incompatible.l }} "dummy" }
+     {"build 64-bit object" "-melf_x86_64 -e 0 --defsym foo=1" "" "--64" {64bit.s} {} "dummy" }
+     {"link mixed objects"  "-melf_x86_64 -e 0 tmpdir/32bit.o tmpdir/64bit.o" "" "" {} { { ld incompatible.l } } "mixed"}
 }
 
 # So as to avoid rewriting every last test case here in a nacl variant,
@@ -311,7 +312,7 @@ if { [isnative] && [which $CC] != 0 } {
 
     run_ld_link_tests {
 	{"X32 DSO from x86-64 object"
-	 "-shared -melf32_x86_64 tmpdir/simple-x32.o" "--x32"
+	 "-shared -melf32_x86_64 tmpdir/simple-x32.o" "" "--x32"
 	{dummy.s} {{readelf {-s --wide} x86-64-x32.rd}} "x86-64-x32"}
     }
 }

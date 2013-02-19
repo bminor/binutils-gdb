@@ -42,10 +42,10 @@ if { !([istarget "x86_64-*-elf*"]
 
 set build_tests_ld {
   {"Build dwarfreloc1x.o"
-   "-r" ""
+   "-r" "" ""
    {dwarfreloc1.s} {} "dwarfreloc1x.o"}
   {"Build dwarfreloc2.o"
-   "-r" ""
+   "-r" "" ""
    {dwarfreloc2.s} {} "dwarfreloc2x.o"}
 }
 
