@@ -3053,3 +3053,7 @@ xstore, 0, 0xfa7, 0xc0, 2, CpuPadLock, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|N
 adcx, 2, 0x660f38f6, None, 3, CpuADX, Modrm|CheckRegSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32|Reg64 }
 adox, 2, 0xf30f38f6, None, 3, CpuADX, Modrm|CheckRegSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { Reg32|Reg64|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32|Reg64 }
 rdseed, 1, 0xfc7, 0x7, 2, CpuRdSeed, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Reg64 }
+
+// SMAP instructions.
+clac, 0, 0xf01, 0xca, 2, CpuSMAP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+stac, 0, 0xf01, 0xcb, 2, CpuSMAP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }

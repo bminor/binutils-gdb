@@ -1,3 +1,12 @@
+2013-02-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/15159
+	* gas/i386/i386.exp: Run smap and x86-64-smap.
+
+	* gas/i386/smap.d: New file.
+	* gas/i386/smap.s: likewise.
+	* gas/i386/x86-64-smap.d: likewise.
+
 2013-02-15  Markos Chandras  <markos.chandras@imgtec.com>
 
 	* gas/metag/labelarithmetic.d: Fix the expected disassembler
@@ -13,9 +22,9 @@
 
 2013-02-15  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
-        * gas/arm/neon-vmov-bad.d: New file.
-        * gas/arm/neon-vmov-bad.s: Likewise.
-        * gas/arm/neon-vmov-bad.l: Likewise.
+	* gas/arm/neon-vmov-bad.d: New file.
+	* gas/arm/neon-vmov-bad.s: Likewise.
+	* gas/arm/neon-vmov-bad.l: Likewise.
 
 2013-02-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
@@ -47,7 +56,7 @@
 	(run_list_test): Delete.  Adjust callers to use standard version.
 
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
-            Andrew Jenner <andrew@codesourcery.com>
+	    Andrew Jenner <andrew@codesourcery.com>
 
 	Based on patches from Altera Corporation.
 

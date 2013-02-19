@@ -1,3 +1,19 @@
+2013-02-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/15159
+	* i386-dis.c (rm_table): Add clac and stac to RM_0F01_REG_1.
+
+	* i386-gen.c (cpu_flag_init): Add CPU_SMAP_FLAGS.
+	(cpu_flags): Add CpuSMAP.
+
+	* i386-opc.h (CpuSMAP): New.
+	(i386_cpu_flags): Add cpusmap.
+
+	* i386-opc.tbl: Add clac and stac.
+
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2013-02-15  Markos Chandras  <markos.chandras@imgtec.com>
 
 	* metag-dis.c: Initialize outf->bytes_per_chunk to 4

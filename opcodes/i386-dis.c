@@ -10600,6 +10600,8 @@ static const struct dis386 rm_table[][8] = {
     /* RM_0F01_REG_1 */
     { "monitor",	{ { OP_Monitor, 0 } } },
     { "mwait",		{ { OP_Mwait, 0 } } },
+    { "clac",		{ Skip_MODRM } },
+    { "stac",		{ Skip_MODRM } },
   },
   {
     /* RM_0F01_REG_2 */

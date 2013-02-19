@@ -1,3 +1,10 @@
+2013-02-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/15159
+	* config/tc-i386.c (cpu_arch): Add ".smap".
+
+	* doc/c-i386.texi: Document smap.
+
 2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (s_cpload): Call mips_mark_labels and set
@@ -11,7 +18,7 @@
 
 2013-02-15  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
-        * config/tc-arm.c (do_neon_mov): Break on NS_NULL.
+	* config/tc-arm.c (do_neon_mov): Break on NS_NULL.
 
 2013-02-15  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
@@ -33,7 +40,7 @@
 	core.
 
 2013-02-06  Sandra Loosemore  <sandra@codesourcery.com>
-            Andrew Jenner <andrew@codesourcery.com>
+	    Andrew Jenner <andrew@codesourcery.com>
 
 	Based on patches from Altera Corporation.
 
