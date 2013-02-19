@@ -1,3 +1,8 @@
+2013-02-19  Lei Liu  <lei.liu2@windriver.com>
+
+	* mips-linux-nat.c (mips64_linux_regsets_store_registers):
+	Don't check DSP register number if HAVE_DSP is not set.
+
 2013-02-19  Alan Modra  <amodra@gmail.com>
 
 	* elfread.c (struct build_id): Delete.  Use struct elf_build_id
