@@ -292,7 +292,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   int argreg = TILEGX_R0_REGNUM;
   int i, j;
   int typelen, slacklen, alignlen;
-  static const gdb_byte two_zero_words[8] = { 0 };
+  static const gdb_byte four_zero_words[16] = { 0 };
 
   /* If struct_return is 1, then the struct return address will
      consume one argument-passing register.  */
@@ -326,18 +326,6 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   /* Align SP.  */
   stack_dest = tilegx_frame_align (gdbarch, stack_dest);
 
-  /* Loop backwards through arguments to determine stack alignment.  */
-  alignlen = 0;
-
-  for (j = nargs - 1; j >= i; j--)
-    {
-      typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
-      alignlen += (typelen + 3) & (~3);
-    }
-
-  if (alignlen & 0x4)
-    stack_dest -= 4;
-
   /* Loop backwards through remaining arguments and push them on
      the stack, word aligned.  */
   for (j = nargs - 1; j >= i; j--)
@@ -347,7 +335,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
       const gdb_byte *contents = value_contents (args[j]);
 
       typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
-      slacklen = ((typelen + 3) & (~3)) - typelen;
+      slacklen = align_up (typelen, 8) - typelen;
       val = xmalloc (typelen + slacklen);
       back_to = make_cleanup (xfree, val);
       memcpy (val, contents, typelen);
@@ -359,9 +347,9 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
       do_cleanups (back_to);
     }
 
-  /* Add 2 words for linkage space to the stack.  */
-  stack_dest = stack_dest - 8;
-  write_memory (stack_dest, two_zero_words, 8);
+  /* Add 16 bytes for linkage space to the stack.  */
+  stack_dest = stack_dest - 16;
+  write_memory (stack_dest, four_zero_words, 16);
 
   /* Update stack pointer.  */
   regcache_cooked_write_unsigned (regcache, TILEGX_SP_REGNUM, stack_dest);
