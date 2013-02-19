@@ -1,5 +1,16 @@
 2013-02-19  Pedro Alves  <palves@redhat.com>
 
+	Garbage collect 'struct monitor_ops'::load_routine.
+
+	* monitor.h (struct monitor_ops) <load_routine>: Remove field.
+	* monitor.c (monitor_load): No longer call
+	current_monitor->load_routine.
+	* dbug-rom.c (init_dbug_cmds): Don't set 'load_routine'.
+	* m32r-rom.c (init_m32r_cmds): Don't set 'load_routine'.
+	* ppcbug-rom.c (init_ppc_cmds): Don't set 'load_routine'.
+
+2013-02-19  Pedro Alves  <palves@redhat.com>
+
 	PR gdb/15161
 
 	Harmonize with generic_load.

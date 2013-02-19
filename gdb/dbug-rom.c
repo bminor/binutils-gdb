@@ -142,7 +142,6 @@ init_dbug_cmds (void)
 					/* register_pattern */
   dbug_cmds.register_pattern = "\\(\\w+\\) +:\\([0-9a-fA-F]+\\b\\)";
   dbug_cmds.supply_register = dbug_supply_register;
-  dbug_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
   dbug_cmds.load = "dl\r";	/* download command */
   dbug_cmds.loadresp = "\n";	/* load response */
   dbug_cmds.prompt = "dBUG>";	/* monitor command prompt */

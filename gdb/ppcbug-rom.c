@@ -168,7 +168,6 @@ init_ppc_cmds (char *LOAD_CMD,
   OPS->register_pattern = "\\(\\w+\\) +=\\([0-9a-fA-F]+\\b\\)";
   OPS->supply_register = ppcbug_supply_register;
   OPS->dump_registers = "rd\r";	/* dump all registers */
-  OPS->load_routine = NULL;	/* load_routine (defaults to SRECs) */
   OPS->load = LOAD_CMD;		/* download command */
   OPS->loadresp = NULL;		/* load response */
   OPS->prompt = "PPC1-Bug>";	/* monitor command prompt */

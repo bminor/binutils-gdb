@@ -2178,55 +2178,50 @@ monitor_wait_srec_ack (void)
 static void
 monitor_load (char *args, int from_tty)
 {
+  CORE_ADDR load_offset = 0;
+  char **argv;
+  struct cleanup *old_cleanups;
+  char *filename;
+
   monitor_debug ("MON load\n");
 
-  if (current_monitor->load_routine)
-    current_monitor->load_routine (monitor_desc, args, hashmark);
-  else
-    {				/* The default is ascii S-records.  */
-      CORE_ADDR load_offset = 0;
-      char **argv;
-      struct cleanup *old_cleanups;
-      char *filename;
+  if (args == NULL)
+    error_no_arg (_("file to load"));
 
-      if (args == NULL)
-	error_no_arg (_("file to load"));
+  argv = gdb_buildargv (args);
+  old_cleanups = make_cleanup_freeargv (argv);
 
-      argv = gdb_buildargv (args);
-      old_cleanups = make_cleanup_freeargv (argv);
+  filename = tilde_expand (argv[0]);
+  make_cleanup (xfree, filename);
 
-      filename = tilde_expand (argv[0]);
-      make_cleanup (xfree, filename);
+  /* Enable user to specify address for downloading as 2nd arg to load.  */
+  if (argv[1] != NULL)
+    {
+      const char *endptr;
 
-      /* Enable user to specify address for downloading as 2nd arg to load.  */
-      if (argv[1] != NULL)
-	{
-	  const char *endptr;
+      load_offset = strtoulst (argv[1], &endptr, 0);
 
-	  load_offset = strtoulst (argv[1], &endptr, 0);
+      /* If the last word was not a valid number then
+	 treat it as a file name with spaces in.  */
+      if (argv[1] == endptr)
+	error (_("Invalid download offset:%s."), argv[1]);
 
-	  /* If the last word was not a valid number then
-	     treat it as a file name with spaces in.  */
-	  if (argv[1] == endptr)
-	    error (_("Invalid download offset:%s."), argv[1]);
-
-	  if (argv[2] != NULL)
-	    error (_("Too many parameters."));
-	}
-
-      monitor_printf (current_monitor->load);
-      if (current_monitor->loadresp)
-	monitor_expect (current_monitor->loadresp, NULL, 0);
-
-      load_srec (monitor_desc, filename, load_offset,
-		 32, SREC_ALL, hashmark,
-		 current_monitor->flags & MO_SREC_ACK ?
-		 monitor_wait_srec_ack : NULL);
-
-      monitor_expect_prompt (NULL, 0);
-
-      do_cleanups (old_cleanups);
+      if (argv[2] != NULL)
+	error (_("Too many parameters."));
     }
+
+  monitor_printf (current_monitor->load);
+  if (current_monitor->loadresp)
+    monitor_expect (current_monitor->loadresp, NULL, 0);
+
+  load_srec (monitor_desc, filename, load_offset,
+	     32, SREC_ALL, hashmark,
+	     current_monitor->flags & MO_SREC_ACK ?
+	     monitor_wait_srec_ack : NULL);
+
+  monitor_expect_prompt (NULL, 0);
+
+  do_cleanups (old_cleanups);
 
   /* Finally, make the PC point at the start address.  */
   if (exec_bfd)
