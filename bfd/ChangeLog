@@ -1,3 +1,8 @@
+2013-02-19  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Also clear
+	STO_MICROMIPS annotation.
+
 2013-02-19  Alan Modra  <amodra@gmail.com>
 
 	* configure.in: Bump version to 2.23.52.

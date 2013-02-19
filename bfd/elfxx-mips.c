@@ -10118,12 +10118,17 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
   if (IRIX_COMPAT (output_bfd) == ict_irix6)
     mips_elf_irix6_finish_dynamic_symbol (output_bfd, name, sym);
 
-  /* Keep dynamic MIPS16 symbols odd.  This allows the dynamic linker to
-     treat MIPS16 symbols like any other.  */
+  /* Keep dynamic compressed symbols odd.  This allows the dynamic linker
+     to treat compressed symbols like any other.  */
   if (ELF_ST_IS_MIPS16 (sym->st_other))
     {
       BFD_ASSERT (sym->st_value & 1);
       sym->st_other -= STO_MIPS16;
+    }
+  else if (ELF_ST_IS_MICROMIPS (sym->st_other))
+    {
+      BFD_ASSERT (sym->st_value & 1);
+      sym->st_other -= STO_MICROMIPS;
     }
 
   return TRUE;
