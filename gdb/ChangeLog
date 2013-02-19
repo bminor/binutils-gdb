@@ -1,5 +1,9 @@
 2013-02-19  Jiong Wang  <jiwang@tilera.com>
 
+	* tilegx-tdep.c (itilegx_gdbarch_init): char type should be signed.
+
+2013-02-13  Jiong Wang  <jiwang@tilera.com>
+
 	* tilegx-tdep.c (tilegx_skip_prologue): Use skip_prologue_using_sal. 
 
 2013-02-19  Jiong Wang  <jiwang@tilera.com>
