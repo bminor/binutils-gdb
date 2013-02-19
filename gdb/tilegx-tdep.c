@@ -393,7 +393,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
   struct tilegx_reverse_regs
     new_reverse_frame[TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE];
   int dest_regs[TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE];
-  int reverse_frame_valid, prolog_done, branch_seen;
+  int reverse_frame_valid, prolog_done, branch_seen, lr_saved_on_stack_p;
   LONGEST prev_sp_value;
   int i, j;
 
@@ -409,6 +409,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
   prolog_done = 0;
   branch_seen = 0;
   prev_sp_value = 0;
+  lr_saved_on_stack_p = 0;
 
   /* To cut down on round-trip overhead, we fetch multiple bundles
      at once.  These variables describe the range of memory we have
@@ -472,7 +473,11 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 		     See trad-frame.h.  */
 		  cache->saved_regs[saved_register].realreg = saved_register;
 		  cache->saved_regs[saved_register].addr = saved_address;
-		}
+		} 
+	      else if (cache
+		       && (operands[0] == TILEGX_SP_REGNUM) 
+		       && (operands[1] == TILEGX_LR_REGNUM))
+		lr_saved_on_stack_p = 1;
 	      break;
 	    case TILEGX_OPC_ADDI:
 	    case TILEGX_OPC_ADDLI:
@@ -725,6 +730,13 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 	}
     }
 
+  if (lr_saved_on_stack_p)
+    {
+      cache->saved_regs[TILEGX_LR_REGNUM].realreg = TILEGX_LR_REGNUM;
+      cache->saved_regs[TILEGX_LR_REGNUM].addr =
+	cache->saved_regs[TILEGX_SP_REGNUM].addr;
+    }
+
   return prolog_end;
 }
 
@@ -840,10 +852,11 @@ tilegx_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache->base = get_frame_register_unsigned (this_frame, TILEGX_SP_REGNUM);
   trad_frame_set_value (cache->saved_regs, TILEGX_SP_REGNUM, cache->base);
 
-  cache->saved_regs[TILEGX_PC_REGNUM] = cache->saved_regs[TILEGX_LR_REGNUM];
   if (cache->start_pc)
     tilegx_analyze_prologue (gdbarch, cache->start_pc, current_pc,
 			     cache, this_frame);
+
+  cache->saved_regs[TILEGX_PC_REGNUM] = cache->saved_regs[TILEGX_LR_REGNUM];
 
   return cache;
 }
