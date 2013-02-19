@@ -1,3 +1,12 @@
+2013-02-19  Pedro Alves  <palves@redhat.com>
+	    Kai Tietz <ktietz@redhat.com>
+
+	PR gdb/15161
+
+	* server.c (handle_query) <CRC check>: Use unpack_varlen_hex
+	instead of strtoul to extract address from packet.
+	(process_serial_event) <'z'>: Likewise.
+
 2013-02-18  Yao Qi  <yao@codesourcery.com>
 
 	* linux-bfin-low.c (the_low_target): Use NULL instead of 0.
