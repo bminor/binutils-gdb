@@ -997,7 +997,8 @@ plugin_notice (struct bfd_link_info *info,
 	  /* Replace the undefined dummy bfd with the real one.  */
 	  if ((h->type == bfd_link_hash_undefined
 	       || h->type == bfd_link_hash_undefweak)
-	      && (h->u.undef.abfd->flags & BFD_PLUGIN) != 0)
+	      && (h->u.undef.abfd == NULL
+		  || (h->u.undef.abfd->flags & BFD_PLUGIN) != 0))
 	    h->u.undef.abfd = abfd;
 	  h->non_ir_ref = TRUE;
 	}
