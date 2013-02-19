@@ -155,7 +155,7 @@ tilegx_register_name (struct gdbarch *gdbarch, int regnum)
       "r40",  "r41",  "r42",  "r43",  "r44",  "r45",  "r46",  "r47",
       "r48",  "r49",  "r50",  "r51",  "r52",  "tp",   "sp",   "lr",
       "sn",   "idn0", "idn1", "udn0", "udn1", "udn2", "udn3", "zero",
-      "pc"
+      "pc",   "faultnum",
     };
 
   if (regnum < 0 || regnum >= TILEGX_NUM_REGS)
@@ -772,6 +772,36 @@ tilegx_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
+/* by assigning the 'faultnum' reg in kernel pt_regs with this value,
+   kernel do_signal will not check r0. see tilegx kernel/signal.c
+   for details.  */
+#define INT_SWINT_1_SIGRETURN (~0)
+
+/* Implement the "write_pc" gdbarch method.  */
+
+static void
+tilegx_write_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  regcache_cooked_write_unsigned (regcache, TILEGX_PC_REGNUM, pc);
+
+  /* We must be careful with modifying the program counter.  If we
+     just interrupted a system call, the kernel might try to restart
+     it when we resume the inferior.  On restarting the system call,
+     the kernel will try backing up the program counter even though it
+     no longer points at the system call.  This typically results in a
+     SIGSEGV or SIGILL.  We can prevent this by writing INT_SWINT_1_SIGRETURN
+     in the "faultnum" pseudo-register.
+
+     Note that "faultnum" is saved when setting up a dummy call frame.
+     This means that it is properly restored when that frame is
+     popped, and that the interrupted system call will be restarted
+     when we resume the inferior on return from a function call from
+     within GDB.  In all other cases the system call will not be
+     restarted.  */
+  regcache_cooked_write_unsigned (regcache, TILEGX_FAULTNUM_REGNUM,
+                                  INT_SWINT_1_SIGRETURN);
+}
+
 /* This is the implementation of gdbarch method breakpoint_from_pc.  */
 
 static const unsigned char *
@@ -903,7 +933,8 @@ tilegx_cannot_reference_register (struct gdbarch *gdbarch, int regno)
 {
   if (regno >= 0 && regno < TILEGX_NUM_EASY_REGS)
     return 0;
-  else if (regno == TILEGX_PC_REGNUM)
+  else if (regno == TILEGX_PC_REGNUM
+           || regno == TILEGX_FAULTNUM_REGNUM)
     return 0;
   else
     return 1;
@@ -986,6 +1017,7 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* These values and methods are used when gdb calls a target function.  */
   set_gdbarch_push_dummy_call (gdbarch, tilegx_push_dummy_call);
+  set_gdbarch_write_pc (gdbarch, tilegx_write_pc);
   set_gdbarch_breakpoint_from_pc (gdbarch, tilegx_breakpoint_from_pc);
   set_gdbarch_return_value (gdbarch, tilegx_return_value);
 

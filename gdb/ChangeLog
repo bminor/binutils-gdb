@@ -1,5 +1,18 @@
 2013-02-19  Jiong Wang  <jiwang@tilera.com>
 
+        * tilegx-tdep.c (INT_SWINT_1_SIGRETURN): New macro.
+	(tilegx_write_pc): New function.
+	(tilegx_cannot_reference_register): Return zero if REGNO
+	is TILEGX_FAULTNUM_REGNUM.
+	(tilegx_gdbarch_init): Add call to set_gdbarch_write_pc.
+	(tilegx_register_name): Add handling of "faultnum" register.
+	* tilegx-tdep.h (enum tilegx_regnum): Add TILEGX_FAULTNUM_REGNUM.
+	* tilegx-linux-tdep.c (tilegx_linux_supply_regset): Add
+	handling of TILEGX_FAULTNUM_REGNUM.
+	* tilegx-linux-nat.c (regmap): Add entry for TILEGX_FAULTNUM_REGNUM.
+
+2013-02-19  Jiong Wang  <jiwang@tilera.com>
+
 	* tilegx-tdep.c (tilegx_push_dummy_call): args pushed on stack
 	should be aligned to 64bit. 
 

@@ -100,8 +100,8 @@ enum tilegx_regnum
 
     TILEGX_PC_REGNUM,
     TILEGX_NUM_PHYS_REGS = TILEGX_PC_REGNUM, /* 64 */
-
-    TILEGX_NUM_REGS /* 65 */
+    TILEGX_FAULTNUM_REGNUM,
+    TILEGX_NUM_REGS, /* 66 */
   };
 
 enum { tilegx_reg_size = 8 };
