@@ -2313,8 +2313,8 @@ windows_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
   SIZE_T done = 0;
   if (write)
     {
-      DEBUG_MEM (("gdb: write target memory, %d bytes at 0x%08lx\n",
-		  len, (DWORD) (uintptr_t) memaddr));
+      DEBUG_MEM (("gdb: write target memory, %d bytes at %s\n",
+		  len, core_addr_to_string (memaddr)));
       if (!WriteProcessMemory (current_process_handle,
 			       (LPVOID) (uintptr_t) memaddr, our,
 			       len, &done))
@@ -2324,8 +2324,8 @@ windows_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
     }
   else
     {
-      DEBUG_MEM (("gdb: read target memory, %d bytes at 0x%08lx\n",
-		  len, (DWORD) (uintptr_t) memaddr));
+      DEBUG_MEM (("gdb: read target memory, %d bytes at %s\n",
+		  len, core_addr_to_string (memaddr)));
       if (!ReadProcessMemory (current_process_handle,
 			      (LPCVOID) (uintptr_t) memaddr, our,
 			      len, &done))
