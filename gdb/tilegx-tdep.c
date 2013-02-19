@@ -731,24 +731,25 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 /* This is the implementation of gdbarch method skip_prologue.  */
 
 static CORE_ADDR
-tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
+tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
-  struct symtab_and_line sal;
-  CORE_ADDR func_start, func_end;
+  CORE_ADDR func_start;
 
   /* This is the preferred method, find the end of the prologue by
      using the debugging information.  */
-  if (find_pc_partial_function (pc, NULL, &func_start, &func_end))
+  if (find_pc_partial_function (start_pc, NULL, &func_start, NULL))
     {
-	sal = find_pc_line (func_start, 0);
+      CORE_ADDR post_prologue_pc
+        = skip_prologue_using_sal (gdbarch, func_start);
 
-	if (sal.end < func_end && pc <= sal.end)
-	  return sal.end;
+      if (post_prologue_pc != 0)
+        return max (start_pc, post_prologue_pc);
     }
 
   /* Otherwise, try to skip prologue the hard way.  */
   return tilegx_analyze_prologue (gdbarch,
-				  pc, pc + 8 * TILEGX_BUNDLE_SIZE_IN_BYTES,
+				  start_pc,
+				  start_pc + 8 * TILEGX_BUNDLE_SIZE_IN_BYTES,
 				  NULL, NULL);
 }
 

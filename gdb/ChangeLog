@@ -1,5 +1,9 @@
 2013-02-19  Jiong Wang  <jiwang@tilera.com>
 
+	* tilegx-tdep.c (tilegx_skip_prologue): Use skip_prologue_using_sal. 
+
+2013-02-19  Jiong Wang  <jiwang@tilera.com>
+
         * tilegx-tdep.c (INT_SWINT_1_SIGRETURN): New macro.
 	(tilegx_write_pc): New function.
 	(tilegx_cannot_reference_register): Return zero if REGNO
