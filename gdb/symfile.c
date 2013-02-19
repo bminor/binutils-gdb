@@ -1948,7 +1948,7 @@ add_section_size_callback (bfd *abfd, asection *asec, void *data)
 
 /* Opaque data for load_section_callback.  */
 struct load_section_data {
-  unsigned long load_offset;
+  CORE_ADDR load_offset;
   struct load_progress_data *progress_data;
   VEC(memory_write_request_s) *requests;
 };
@@ -2126,9 +2126,9 @@ generic_load (char *args, int from_tty)
 
   if (argv[1] != NULL)
     {
-      char *endptr;
+      const char *endptr;
 
-      cbdata.load_offset = strtoul (argv[1], &endptr, 0);
+      cbdata.load_offset = strtoulst (argv[1], &endptr, 0);
 
       /* If the last word was not a valid number then
          treat it as a file name with spaces in.  */

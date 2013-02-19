@@ -1,3 +1,11 @@
+2013-02-19  Kai Tietz  <ktietz@redhat.com>
+
+	PR gdb/15161
+	* symfile.c (load_section_data): Change type of load_offset
+	to CORE_ADDR.
+	(generic_load): User strtoulst instead of strtoul for conversion
+	of load_offset.
+
 2013-02-19  Jiong Wang  <jiwang@tilera.com>
 
 	* tilegx-tdep.c (tilegx_analyze_prologue): add check for
