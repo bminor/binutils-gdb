@@ -1,3 +1,16 @@
+2013-02-19  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15161
+
+	Harmonize with generic_load.
+
+	* monitor.c: Include "readline/readline.h".
+	(monitor_load): Rename parameter 'file' to 'args'.  Use build_argv
+	instead of sscanf.  Use CORE_ADDR/strtoulst instead of unsigned
+	long/strtol for the 'load_offset' local.  Error out if no argument
+	is given or if too many arguments are given.  Tilde expand the
+	passed in file name.
+
 2013-02-19  Kai Tietz  <ktietz@redhat.com>
 
 	PR gdb/15161
