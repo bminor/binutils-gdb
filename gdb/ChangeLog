@@ -1,3 +1,7 @@
+2013-02-20  Jiong Wang  <jiwang@tilera.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2013-02-19  Pedro Alves  <palves@redhat.com>
 
 	Garbage collect 'struct monitor_ops'::load_routine.
@@ -43,11 +47,11 @@
 
 2013-02-19  Jiong Wang  <jiwang@tilera.com>
 
-	* tilegx-tdep.c (tilegx_skip_prologue): Use skip_prologue_using_sal. 
+	* tilegx-tdep.c (tilegx_skip_prologue): Use skip_prologue_using_sal.
 
 2013-02-19  Jiong Wang  <jiwang@tilera.com>
 
-        * tilegx-tdep.c (INT_SWINT_1_SIGRETURN): New macro.
+	* tilegx-tdep.c (INT_SWINT_1_SIGRETURN): New macro.
 	(tilegx_write_pc): New function.
 	(tilegx_cannot_reference_register): Return zero if REGNO
 	is TILEGX_FAULTNUM_REGNUM.
@@ -61,7 +65,7 @@
 2013-02-19  Jiong Wang  <jiwang@tilera.com>
 
 	* tilegx-tdep.c (tilegx_push_dummy_call): args pushed on stack
-	should be aligned to 64bit. 
+	should be aligned to 64bit.
 
 2013-02-19  Kai Tietz  <ktietz@redhat.com>
 
