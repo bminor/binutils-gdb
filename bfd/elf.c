@@ -263,7 +263,10 @@ bfd_boolean
 bfd_elf_mkcorefile (bfd *abfd)
 {
   /* I think this can be done just like an object file.  */
-  return abfd->xvec->_bfd_set_format[(int) bfd_object] (abfd);
+  if (!abfd->xvec->_bfd_set_format[(int) bfd_object] (abfd))
+    return FALSE;
+  elf_tdata (abfd)->core = bfd_zalloc (abfd, sizeof (*elf_tdata (abfd)->core));
+  return elf_tdata (abfd)->core != NULL;
 }
 
 static char *
@@ -7913,9 +7916,9 @@ elfcore_make_pid (bfd *abfd)
 {
   int pid;
 
-  pid = elf_tdata (abfd)->core_lwpid;
+  pid = elf_tdata (abfd)->core->lwpid;
   if (pid == 0)
-    pid = elf_tdata (abfd)->core_pid;
+    pid = elf_tdata (abfd)->core->pid;
 
   return pid;
 }
@@ -8005,10 +8008,10 @@ elfcore_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
       /* Do not overwrite the core signal if it
 	 has already been set by another thread.  */
-      if (elf_tdata (abfd)->core_signal == 0)
-	elf_tdata (abfd)->core_signal = prstat.pr_cursig;
-      if (elf_tdata (abfd)->core_pid == 0)
-	elf_tdata (abfd)->core_pid = prstat.pr_pid;
+      if (elf_tdata (abfd)->core->signal == 0)
+	elf_tdata (abfd)->core->signal = prstat.pr_cursig;
+      if (elf_tdata (abfd)->core->pid == 0)
+	elf_tdata (abfd)->core->pid = prstat.pr_pid;
 
       /* pr_who exists on:
 	 solaris 2.5+
@@ -8017,9 +8020,9 @@ elfcore_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	 linux 2.[01]
 	 */
 #if defined (HAVE_PRSTATUS_T_PR_WHO)
-      elf_tdata (abfd)->core_lwpid = prstat.pr_who;
+      elf_tdata (abfd)->core->lwpid = prstat.pr_who;
 #else
-      elf_tdata (abfd)->core_lwpid = prstat.pr_pid;
+      elf_tdata (abfd)->core->lwpid = prstat.pr_pid;
 #endif
     }
 #if defined (HAVE_PRSTATUS32_T)
@@ -8034,10 +8037,10 @@ elfcore_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
       /* Do not overwrite the core signal if it
 	 has already been set by another thread.  */
-      if (elf_tdata (abfd)->core_signal == 0)
-	elf_tdata (abfd)->core_signal = prstat.pr_cursig;
-      if (elf_tdata (abfd)->core_pid == 0)
-	elf_tdata (abfd)->core_pid = prstat.pr_pid;
+      if (elf_tdata (abfd)->core->signal == 0)
+	elf_tdata (abfd)->core->signal = prstat.pr_cursig;
+      if (elf_tdata (abfd)->core->pid == 0)
+	elf_tdata (abfd)->core->pid = prstat.pr_pid;
 
       /* pr_who exists on:
 	 solaris 2.5+
@@ -8046,9 +8049,9 @@ elfcore_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 	 linux 2.[01]
 	 */
 #if defined (HAVE_PRSTATUS32_T_PR_WHO)
-      elf_tdata (abfd)->core_lwpid = prstat.pr_who;
+      elf_tdata (abfd)->core->lwpid = prstat.pr_who;
 #else
-      elf_tdata (abfd)->core_lwpid = prstat.pr_pid;
+      elf_tdata (abfd)->core->lwpid = prstat.pr_pid;
 #endif
     }
 #endif /* HAVE_PRSTATUS32_T */
@@ -8240,13 +8243,13 @@ elfcore_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
       memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
 #if defined (HAVE_PSINFO_T_PR_PID) || defined (HAVE_PRPSINFO_T_PR_PID)
-      elf_tdata (abfd)->core_pid = psinfo.pr_pid;
+      elf_tdata (abfd)->core->pid = psinfo.pr_pid;
 #endif
-      elf_tdata (abfd)->core_program
+      elf_tdata (abfd)->core->program
 	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname,
 				sizeof (psinfo.pr_fname));
 
-      elf_tdata (abfd)->core_command
+      elf_tdata (abfd)->core->command
 	= _bfd_elfcore_strndup (abfd, psinfo.pr_psargs,
 				sizeof (psinfo.pr_psargs));
     }
@@ -8259,13 +8262,13 @@ elfcore_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
       memcpy (&psinfo, note->descdata, sizeof (psinfo));
 
 #if defined (HAVE_PSINFO32_T_PR_PID) || defined (HAVE_PRPSINFO32_T_PR_PID)
-      elf_tdata (abfd)->core_pid = psinfo.pr_pid;
+      elf_tdata (abfd)->core->pid = psinfo.pr_pid;
 #endif
-      elf_tdata (abfd)->core_program
+      elf_tdata (abfd)->core->program
 	= _bfd_elfcore_strndup (abfd, psinfo.pr_fname,
 				sizeof (psinfo.pr_fname));
 
-      elf_tdata (abfd)->core_command
+      elf_tdata (abfd)->core->command
 	= _bfd_elfcore_strndup (abfd, psinfo.pr_psargs,
 				sizeof (psinfo.pr_psargs));
     }
@@ -8283,7 +8286,7 @@ elfcore_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
      implementations, so strip it off if it exists.  */
 
   {
-    char *command = elf_tdata (abfd)->core_command;
+    char *command = elf_tdata (abfd)->core->command;
     int n = strlen (command);
 
     if (0 < n && command[n - 1] == ' ')
@@ -8308,7 +8311,7 @@ elfcore_grok_pstatus (bfd *abfd, Elf_Internal_Note *note)
 
       memcpy (&pstat, note->descdata, sizeof (pstat));
 
-      elf_tdata (abfd)->core_pid = pstat.pr_pid;
+      elf_tdata (abfd)->core->pid = pstat.pr_pid;
     }
 #if defined (HAVE_PSTATUS32_T)
   else if (note->descsz == sizeof (pstatus32_t))
@@ -8318,7 +8321,7 @@ elfcore_grok_pstatus (bfd *abfd, Elf_Internal_Note *note)
 
       memcpy (&pstat, note->descdata, sizeof (pstat));
 
-      elf_tdata (abfd)->core_pid = pstat.pr_pid;
+      elf_tdata (abfd)->core->pid = pstat.pr_pid;
     }
 #endif
   /* Could grab some more details from the "representative"
@@ -8348,11 +8351,11 @@ elfcore_grok_lwpstatus (bfd *abfd, Elf_Internal_Note *note)
 
   memcpy (&lwpstat, note->descdata, sizeof (lwpstat));
 
-  elf_tdata (abfd)->core_lwpid = lwpstat.pr_lwpid;
+  elf_tdata (abfd)->core->lwpid = lwpstat.pr_lwpid;
   /* Do not overwrite the core signal if it has already been set by
      another thread.  */
-  if (elf_tdata (abfd)->core_signal == 0)
-    elf_tdata (abfd)->core_signal = lwpstat.pr_cursig;
+  if (elf_tdata (abfd)->core->signal == 0)
+    elf_tdata (abfd)->core->signal = lwpstat.pr_cursig;
 
   /* Make a ".reg/999" section.  */
 
@@ -8435,11 +8438,11 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
   switch (type)
     {
     case 1 /* NOTE_INFO_PROCESS */:
-      /* FIXME: need to add ->core_command.  */
+      /* FIXME: need to add ->core->command.  */
       /* process_info.pid */
-      elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, note->descdata + 8);
+      elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, note->descdata + 8);
       /* process_info.signal */
-      elf_tdata (abfd)->core_signal = bfd_get_32 (abfd, note->descdata + 12);
+      elf_tdata (abfd)->core->signal = bfd_get_32 (abfd, note->descdata + 12);
       break;
 
     case 2 /* NOTE_INFO_THREAD */:
@@ -8764,15 +8767,15 @@ static bfd_boolean
 elfcore_grok_netbsd_procinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   /* Signal number at offset 0x08. */
-  elf_tdata (abfd)->core_signal
+  elf_tdata (abfd)->core->signal
     = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + 0x08);
 
   /* Process ID at offset 0x50. */
-  elf_tdata (abfd)->core_pid
+  elf_tdata (abfd)->core->pid
     = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + 0x50);
 
   /* Command name at 0x7c (max 32 bytes, including nul). */
-  elf_tdata (abfd)->core_command
+  elf_tdata (abfd)->core->command
     = _bfd_elfcore_strndup (abfd, note->descdata + 0x7c, 31);
 
   return elfcore_make_note_pseudosection (abfd, ".note.netbsdcore.procinfo",
@@ -8785,7 +8788,7 @@ elfcore_grok_netbsd_note (bfd *abfd, Elf_Internal_Note *note)
   int lwp;
 
   if (elfcore_netbsd_get_lwpid (note, &lwp))
-    elf_tdata (abfd)->core_lwpid = lwp;
+    elf_tdata (abfd)->core->lwpid = lwp;
 
   if (note->type == NT_NETBSDCORE_PROCINFO)
     {
@@ -8848,15 +8851,15 @@ static bfd_boolean
 elfcore_grok_openbsd_procinfo (bfd *abfd, Elf_Internal_Note *note)
 {
   /* Signal number at offset 0x08. */
-  elf_tdata (abfd)->core_signal
+  elf_tdata (abfd)->core->signal
     = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + 0x08);
 
   /* Process ID at offset 0x20. */
-  elf_tdata (abfd)->core_pid
+  elf_tdata (abfd)->core->pid
     = bfd_h_get_32 (abfd, (bfd_byte *) note->descdata + 0x20);
 
   /* Command name at 0x48 (max 32 bytes, including nul). */
-  elf_tdata (abfd)->core_command
+  elf_tdata (abfd)->core->command
     = _bfd_elfcore_strndup (abfd, note->descdata + 0x48, 31);
 
   return TRUE;
@@ -8919,7 +8922,7 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, long *tid)
   unsigned flags;
 
   /* nto_procfs_status 'pid' field is at offset 0.  */
-  elf_tdata (abfd)->core_pid = bfd_get_32 (abfd, (bfd_byte *) ddata);
+  elf_tdata (abfd)->core->pid = bfd_get_32 (abfd, (bfd_byte *) ddata);
 
   /* nto_procfs_status 'tid' field is at offset 4.  Pass it back.  */
   *tid = bfd_get_32 (abfd, (bfd_byte *) ddata + 4);
@@ -8930,15 +8933,15 @@ elfcore_grok_nto_status (bfd *abfd, Elf_Internal_Note *note, long *tid)
   /* nto_procfs_status 'what' field is at offset 14.  */
   if ((sig = bfd_get_16 (abfd, (bfd_byte *) ddata + 14)) > 0)
     {
-      elf_tdata (abfd)->core_signal = sig;
-      elf_tdata (abfd)->core_lwpid = *tid;
+      elf_tdata (abfd)->core->signal = sig;
+      elf_tdata (abfd)->core->lwpid = *tid;
     }
 
   /* _DEBUG_FLAG_CURTID (current thread) is 0x80.  Some cores
      do not come from signals so we make sure we set the current
      thread just in case.  */
   if (flags & 0x00000080)
-    elf_tdata (abfd)->core_lwpid = *tid;
+    elf_tdata (abfd)->core->lwpid = *tid;
 
   /* Make a ".qnx_core_status/%d" section.  */
   sprintf (buf, ".qnx_core_status/%ld", *tid);
@@ -8986,7 +8989,7 @@ elfcore_grok_nto_regs (bfd *abfd,
   sect->alignment_power = 2;
 
   /* This is the current thread.  */
-  if (elf_tdata (abfd)->core_lwpid == tid)
+  if (elf_tdata (abfd)->core->lwpid == tid)
     return elfcore_maybe_make_sect (abfd, base, sect);
 
   return TRUE;

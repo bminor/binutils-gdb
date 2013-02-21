@@ -1531,11 +1531,11 @@ elf64_aarch64_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 
       case 408:		/* sizeof(struct elf_prstatus) on Linux/arm64.  */
 	/* pr_cursig */
-	elf_tdata (abfd)->core_signal
+	elf_tdata (abfd)->core->signal
 	  = bfd_get_16 (abfd, note->descdata + 12);
 
 	/* pr_pid */
-	elf_tdata (abfd)->core_lwpid
+	elf_tdata (abfd)->core->lwpid
 	  = bfd_get_32 (abfd, note->descdata + 32);
 
 	/* pr_reg */

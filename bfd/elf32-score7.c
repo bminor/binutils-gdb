@@ -3722,10 +3722,10 @@ s7_bfd_score_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
     case 272:                  /* Linux/Score elf_prstatus */
 
       /* pr_cursig */
-      elf_tdata (abfd)->core_signal = bfd_get_16 (abfd, note->descdata + 12);
+      elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
 
       /* pr_pid */
-      elf_tdata (abfd)->core_lwpid = bfd_get_32 (abfd, note->descdata + 24);
+      elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 24);
 
       /* pr_reg */
       offset = 72;
@@ -3737,7 +3737,8 @@ s7_bfd_score_elf_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
     }
 
   /* Make a ".reg/999" section.  */
-  return _bfd_elfcore_make_pseudosection (abfd, ".reg", raw_size, note->descpos + offset);
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg", raw_size,
+					  note->descpos + offset);
 }
 
 bfd_boolean
@@ -3750,10 +3751,12 @@ s7_bfd_score_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 
     case 128:                  /* Linux/Score elf_prpsinfo.  */
       /* pr_fname */
-      elf_tdata (abfd)->core_program = _bfd_elfcore_strndup (abfd, note->descdata + 32, 16);
+      elf_tdata (abfd)->core->program
+	= _bfd_elfcore_strndup (abfd, note->descdata + 32, 16);
 
       /* pr_psargs */
-      elf_tdata (abfd)->core_command = _bfd_elfcore_strndup (abfd, note->descdata + 48, 80);
+      elf_tdata (abfd)->core->command
+	= _bfd_elfcore_strndup (abfd, note->descdata + 48, 80);
       break;
     }
 
@@ -3762,7 +3765,7 @@ s7_bfd_score_elf_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
      implementations, so strip it off if it exists.  */
 
   {
-    char *command = elf_tdata (abfd)->core_command;
+    char *command = elf_tdata (abfd)->core->command;
     int n = strlen (command);
 
     if (0 < n && command[n - 1] == ' ')

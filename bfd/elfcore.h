@@ -22,19 +22,19 @@
 char*
 elf_core_file_failing_command (bfd *abfd)
 {
-  return elf_tdata (abfd)->core_command;
+  return elf_tdata (abfd)->core->command;
 }
 
 int
 elf_core_file_failing_signal (bfd *abfd)
 {
-  return elf_tdata (abfd)->core_signal;
+  return elf_tdata (abfd)->core->signal;
 }
 
 int
 elf_core_file_pid (bfd *abfd)
 {
-  return elf_tdata (abfd)->core_pid;
+  return elf_tdata (abfd)->core->pid;
 }
 
 bfd_boolean
@@ -51,7 +51,7 @@ elf_core_file_matches_executable_p (bfd *core_bfd, bfd *exec_bfd)
     }
 
   /* See if the name in the corefile matches the executable name.  */
-  corename = elf_tdata (core_bfd)->core_program;
+  corename = elf_tdata (core_bfd)->core->program;
   if (corename != NULL)
     {
       const char* execname = strrchr (exec_bfd->filename, '/');

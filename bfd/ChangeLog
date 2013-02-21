@@ -1,5 +1,21 @@
 2013-02-21  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct core_elf_obj_tdata): New.
+	(struct elf_obj_tdata): Delete core_signal, core_pid, core_lwpid,
+	core_program, and core_command.  Add "core".
+	* elf.c (bfd_elf_mkcorefile): Allocate "core" struct.
+	Update all refs to tdata core fields.
+	* elf32-am33lin.c, * elf32-arm.c, * elf32-cris.c, * elf32-frv.c,
+	* elf32-hppa.c, * elf32-i386.c, * elf32-m68k.c, * elf32-mips.c,
+	* elf32-nios2.c, * elf32-ppc.c, * elf32-s390.c, * elf32-score.c,
+	* elf32-score7.c, * elf32-sh.c, * elf32-sparc.c, * elf32-tilegx.c,
+	* elf32-tilepro.c, * elf32-xtensa.c, * elf64-aarch64.c,
+	* elf64-hppa.c, * elf64-mips.c, * elf64-ppc.c, * elf64-tilegx.c,
+	* elf64-x86-64.c, * elfcore.h, * elfn32-mips.c: Update all refs
+	to tdata core fields.
+
+2013-02-21  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (struct elf_obj_tdata): Rename segment_map to seg_map.
 	Delete num_locals and num_globals.
 	(elf_num_locals, elf_num_globals): Don't define.

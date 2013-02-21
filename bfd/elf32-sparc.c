@@ -41,16 +41,16 @@ elf32_sparc_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
       return FALSE;
 
     case 260:			/* Solaris prpsinfo_t.  */
-      elf_tdata (abfd)->core_program
+      elf_tdata (abfd)->core->program
 	= _bfd_elfcore_strndup (abfd, note->descdata + 84, 16);
-      elf_tdata (abfd)->core_command
+      elf_tdata (abfd)->core->command
 	= _bfd_elfcore_strndup (abfd, note->descdata + 100, 80);
       break;
 
     case 336:			/* Solaris psinfo_t.  */
-      elf_tdata (abfd)->core_program
+      elf_tdata (abfd)->core->program
 	= _bfd_elfcore_strndup (abfd, note->descdata + 88, 16);
-      elf_tdata (abfd)->core_command
+      elf_tdata (abfd)->core->command
 	= _bfd_elfcore_strndup (abfd, note->descdata + 104, 80);
       break;
     }

@@ -1534,6 +1534,16 @@ struct elf_build_id_info
   } u;
 };
 
+/* tdata information grabbed from an elf core file.  */
+struct core_elf_obj_tdata
+{
+  int signal;
+  int pid;
+  int lwpid;
+  char* program;
+  char* command;
+};
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1563,13 +1573,6 @@ struct elf_obj_tdata
   file_ptr next_file_pos;
   bfd_vma gp;				/* The gp value */
   unsigned int gp_size;			/* The gp size */
-
-  /* Information grabbed from an elf core file.  */
-  int core_signal;
-  int core_pid;
-  int core_lwpid;
-  char* core_program;
-  char* core_command;
 
   /* A mapping from external symbols to entries in the linker hash
      table, used when linking.  This is indexed by the symbol index
@@ -1681,6 +1684,9 @@ struct elf_obj_tdata
   /* An identifier used to distinguish different target
      specific extensions to this structure.  */
   enum elf_target_id object_id;
+
+  /* Information grabbed from an elf core file.  */
+  struct core_elf_obj_tdata *core;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
