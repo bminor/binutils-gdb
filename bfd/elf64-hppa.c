@@ -2687,7 +2687,7 @@ elf64_hppa_modify_segment_map (bfd *abfd,
   s = bfd_get_section_by_name (abfd, ".interp");
   if (! s)
     {
-      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
 	if (m->p_type == PT_PHDR)
 	  break;
       if (m == NULL)
@@ -2703,12 +2703,12 @@ elf64_hppa_modify_segment_map (bfd *abfd,
 	  m->p_paddr_valid = 1;
 	  m->includes_phdrs = 1;
 
-	  m->next = elf_tdata (abfd)->segment_map;
-	  elf_tdata (abfd)->segment_map = m;
+	  m->next = elf_seg_map (abfd);
+	  elf_seg_map (abfd) = m;
 	}
     }
 
-  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+  for (m = elf_seg_map (abfd); m != NULL; m = m->next)
     if (m->p_type == PT_LOAD)
       {
 	unsigned int i;

@@ -15531,7 +15531,7 @@ elf32_arm_modify_segment_map (bfd *abfd,
       /* If there is already a PT_ARM_EXIDX header, then we do not
 	 want to add another one.  This situation arises when running
 	 "strip"; the input binary already has the header.  */
-      m = elf_tdata (abfd)->segment_map;
+      m = elf_seg_map (abfd);
       while (m && m->p_type != PT_ARM_EXIDX)
 	m = m->next;
       if (!m)
@@ -15544,8 +15544,8 @@ elf32_arm_modify_segment_map (bfd *abfd,
 	  m->count = 1;
 	  m->sections[0] = sec;
 
-	  m->next = elf_tdata (abfd)->segment_map;
-	  elf_tdata (abfd)->segment_map = m;
+	  m->next = elf_seg_map (abfd);
+	  elf_seg_map (abfd) = m;
 	}
     }
 
@@ -16138,15 +16138,15 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
   dynsec = bfd_get_section_by_name (abfd, ".dynamic");
   if (dynsec)
     {
-      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
 	if (m->p_type == PT_DYNAMIC)
 	  break;
 
       if (m == NULL)
 	{
 	  m = _bfd_elf_make_dynamic_segment (abfd, dynsec);
-	  m->next = elf_tdata (abfd)->segment_map;
-	  elf_tdata (abfd)->segment_map = m;
+	  m->next = elf_seg_map (abfd);
+	  elf_seg_map (abfd) = m;
 	}
     }
 

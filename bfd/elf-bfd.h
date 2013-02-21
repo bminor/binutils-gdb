@@ -1542,10 +1542,8 @@ struct elf_obj_tdata
   Elf_Internal_Ehdr elf_header[1];	/* Actual data, but ref like ptr */
   Elf_Internal_Shdr **elf_sect_ptr;
   Elf_Internal_Phdr *phdr;
-  struct elf_segment_map *segment_map;
+  struct elf_segment_map *seg_map;
   struct elf_strtab_hash *strtab_ptr;
-  int num_locals;
-  int num_globals;
   unsigned int num_elf_sections;	/* elf_sect_ptr size */
   int num_section_syms;
   asymbol **section_syms;		/* STT_SECTION symbols for each section */
@@ -1692,9 +1690,16 @@ struct elf_obj_tdata
 #define elf_elfheader(bfd)	(elf_tdata(bfd) -> elf_header)
 #define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
 #define elf_numsections(bfd)	(elf_tdata(bfd) -> num_elf_sections)
+#define elf_seg_map(bfd)	(elf_tdata(bfd) -> seg_map)
+#define elf_next_file_pos(bfd)	(elf_tdata(bfd) -> next_file_pos)
+#define elf_eh_frame_hdr(bfd)	(elf_tdata(bfd) -> eh_frame_hdr)
+#define elf_linker(bfd)		(elf_tdata(bfd) -> linker)
+#define elf_stack_flags(bfd)	(elf_tdata(bfd) -> stack_flags)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
 #define elf_symtab_shndx(bfd)	(elf_tdata(bfd) -> symtab_shndx_section)
+#define elf_strtab_sec(bfd)	(elf_tdata(bfd) -> strtab_section)
+#define elf_shstrtab_sec(bfd)	(elf_tdata(bfd) -> shstrtab_section)
 #define elf_symtab_hdr(bfd)	(elf_tdata(bfd) -> symtab_hdr)
 #define elf_dynsymtab(bfd)	(elf_tdata(bfd) -> dynsymtab_section)
 #define elf_dynversym(bfd)	(elf_tdata(bfd) -> dynversym_section)
@@ -1702,8 +1707,6 @@ struct elf_obj_tdata
 #define elf_dynverref(bfd)	(elf_tdata(bfd) -> dynverref_section)
 #define elf_eh_frame_section(bfd) \
 				(elf_tdata(bfd) -> eh_frame_section)
-#define elf_num_locals(bfd)	(elf_tdata(bfd) -> num_locals)
-#define elf_num_globals(bfd)	(elf_tdata(bfd) -> num_globals)
 #define elf_section_syms(bfd)	(elf_tdata(bfd) -> section_syms)
 #define elf_num_section_syms(bfd) (elf_tdata(bfd) -> num_section_syms)
 #define core_prpsinfo(bfd)	(elf_tdata(bfd) -> prpsinfo)

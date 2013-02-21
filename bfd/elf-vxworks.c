@@ -227,7 +227,7 @@ elf_vxworks_final_write_processing (bfd *abfd,
   if (!sec)
     return;
   d = elf_section_data (sec);
-  d->this_hdr.sh_link = elf_tdata (abfd)->symtab_section;
+  d->this_hdr.sh_link = elf_onesymtab (abfd);
   sec = bfd_get_section_by_name (abfd, ".plt");
   if (sec)
     d->this_hdr.sh_info = elf_section_data (sec)->this_idx;

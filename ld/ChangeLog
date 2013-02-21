@@ -1,3 +1,8 @@
+2013-02-21  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf-generic.em: Use newly defined elf_obj_tdata
+	accessor macros.
+
 2013-02-20  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am: Use $(ELF_DEPS) on a number of eelf*.c rules.

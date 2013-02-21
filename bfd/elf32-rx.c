@@ -3510,7 +3510,7 @@ elf32_rx_modify_program_headers (bfd * abfd ATTRIBUTE_UNUSED,
   bed = get_elf_backend_data (abfd);
   tdata = elf_tdata (abfd);
   phdr = tdata->phdr;
-  count = tdata->program_header_size / bed->s->sizeof_phdr;
+  count = elf_program_header_size (abfd) / bed->s->sizeof_phdr;
 
   if (ignore_lma)
     for (i = count; i-- != 0;)

@@ -2152,7 +2152,7 @@ spu_elf_check_vma (struct bfd_link_info *info)
 
   htab->local_store = hi + 1 - lo;
 
-  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+  for (m = elf_seg_map (abfd); m != NULL; m = m->next)
     if (m->p_type == PT_LOAD)
       for (i = 0; i < m->count; i++)
 	if (m->sections[i]->size != 0
@@ -4175,7 +4175,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info)
   /* Find the extents of our loadable image.  */
   lo = (unsigned int) -1;
   hi = 0;
-  for (m = elf_tdata (info->output_bfd)->segment_map; m != NULL; m = m->next)
+  for (m = elf_seg_map (info->output_bfd); m != NULL; m = m->next)
     if (m->p_type == PT_LOAD)
       for (i = 0; i < m->count; i++)
 	if (m->sections[i]->size != 0)
@@ -5198,7 +5198,7 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
     return TRUE;
 
   toe = bfd_get_section_by_name (abfd, ".toe");
-  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+  for (m = elf_seg_map (abfd); m != NULL; m = m->next)
     if (m->p_type == PT_LOAD && m->count > 1)
       for (i = 0; i < m->count; i++)
 	if ((s = m->sections[i]) == toe
@@ -5248,7 +5248,7 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
      as PF_OVERLAY) will be placed into SPU local store on startup.  */
 
   /* Move all overlay segments onto a separate list.  */
-  p = &elf_tdata (abfd)->segment_map;
+  p = &elf_seg_map (abfd);
   p_overlay = &m_overlay;
   while (*p != NULL)
     {
@@ -5266,8 +5266,8 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* Re-insert overlay segments at the head of the segment map.  */
-  *p_overlay = elf_tdata (abfd)->segment_map;
-  elf_tdata (abfd)->segment_map = m_overlay;
+  *p_overlay = elf_seg_map (abfd);
+  elf_seg_map (abfd) = m_overlay;
 
   return TRUE;
 }
@@ -5302,14 +5302,14 @@ spu_elf_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
   bed = get_elf_backend_data (abfd);
   tdata = elf_tdata (abfd);
   phdr = tdata->phdr;
-  count = tdata->program_header_size / bed->s->sizeof_phdr;
+  count = elf_program_header_size (abfd) / bed->s->sizeof_phdr;
   htab = spu_hash_table (info);
   if (htab->num_overlays != 0)
     {
       struct elf_segment_map *m;
       unsigned int o;
 
-      for (i = 0, m = elf_tdata (abfd)->segment_map; m; ++i, m = m->next)
+      for (i = 0, m = elf_seg_map (abfd); m; ++i, m = m->next)
 	if (m->count != 0
 	    && (o = spu_elf_section_data (m->sections[0])->u.o.ovl_index) != 0)
 	  {

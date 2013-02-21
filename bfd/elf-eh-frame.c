@@ -1243,7 +1243,7 @@ _bfd_elf_discard_section_eh_frame_hdr (bfd *abfd, struct bfd_link_info *info)
   if (hdr_info->table)
     sec->size += 4 + hdr_info->fde_count * 8;
 
-  elf_tdata (abfd)->eh_frame_hdr = sec;
+  elf_eh_frame_hdr (abfd) = sec;
   return TRUE;
 }
 

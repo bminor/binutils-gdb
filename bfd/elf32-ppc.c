@@ -2436,7 +2436,7 @@ ppc_elf_modify_segment_map (bfd *abfd,
      If we find that case, we split the segment.
      We maintain the original output section order.  */
 
-  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+  for (m = elf_seg_map (abfd); m != NULL; m = m->next)
     {
       if (m->count == 0)
 	continue;

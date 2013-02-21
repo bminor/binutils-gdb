@@ -1094,7 +1094,7 @@ elfNN_ia64_modify_segment_map (bfd *abfd,
   s = bfd_get_section_by_name (abfd, ELF_STRING_ia64_archext);
   if (s && (s->flags & SEC_LOAD))
     {
-      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
 	if (m->p_type == PT_IA_64_ARCHEXT)
 	  break;
       if (m == NULL)
@@ -1109,7 +1109,7 @@ elfNN_ia64_modify_segment_map (bfd *abfd,
 	  m->sections[0] = s;
 
 	  /* We want to put it after the PHDR and INTERP segments.  */
-	  pm = &elf_tdata (abfd)->segment_map;
+	  pm = &elf_seg_map (abfd);
 	  while (*pm != NULL
 		 && ((*pm)->p_type == PT_PHDR
 		     || (*pm)->p_type == PT_INTERP))
@@ -1129,7 +1129,7 @@ elfNN_ia64_modify_segment_map (bfd *abfd,
 
       if (s && (s->flags & SEC_LOAD))
 	{
-	  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	  for (m = elf_seg_map (abfd); m != NULL; m = m->next)
 	    if (m->p_type == PT_IA_64_UNWIND)
 	      {
 		int i;
@@ -1158,7 +1158,7 @@ elfNN_ia64_modify_segment_map (bfd *abfd,
 	      m->next = NULL;
 
 	      /* We want to put it last.  */
-	      pm = &elf_tdata (abfd)->segment_map;
+	      pm = &elf_seg_map (abfd);
 	      while (*pm != NULL)
 		pm = &(*pm)->next;
 	      *pm = m;
@@ -1181,7 +1181,7 @@ elfNN_ia64_modify_program_headers (bfd *abfd,
   struct elf_segment_map *m;
   Elf_Internal_Phdr *p;
 
-  for (p = tdata->phdr, m = tdata->segment_map; m != NULL; m = m->next, p++)
+  for (p = tdata->phdr, m = elf_seg_map (abfd); m != NULL; m = m->next, p++)
     if (m->p_type == PT_LOAD)
       {
 	int i;

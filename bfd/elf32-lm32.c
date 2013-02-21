@@ -775,8 +775,7 @@ _lm32fdpic_osec_to_segment (bfd *output_bfd, asection *osec)
   Elf_Internal_Phdr *p;
 
   /* Find the segment that contains the output_section.  */
-  for (m = elf_tdata (output_bfd)->segment_map,
-	 p = elf_tdata (output_bfd)->phdr;
+  for (m = elf_seg_map (output_bfd), p = elf_tdata (output_bfd)->phdr;
        m != NULL;
        m = m->next, p++)
     {

@@ -71,7 +71,7 @@ segment_eligible_for_headers (struct elf_segment_map *seg,
 bfd_boolean
 nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 {
-  struct elf_segment_map **m = &elf_tdata (abfd)->segment_map;
+  struct elf_segment_map **m = &elf_seg_map (abfd);
   struct elf_segment_map **first_load = NULL;
   struct elf_segment_map **last_load = NULL;
   bfd_boolean moved_headers = FALSE;
@@ -151,7 +151,7 @@ nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 bfd_boolean
 nacl_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 {
-  struct elf_segment_map **m = &elf_tdata (abfd)->segment_map;
+  struct elf_segment_map **m = &elf_seg_map (abfd);
   Elf_Internal_Phdr *phdr = elf_tdata (abfd)->phdr;
   Elf_Internal_Phdr *p = phdr;
 

@@ -1580,7 +1580,7 @@ bfd_record_phdr (bfd *abfd,
   if (count > 0)
     memcpy (m->sections, secs, count * sizeof (asection *));
 
-  for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL; pm = &(*pm)->next)
+  for (pm = &elf_seg_map (abfd); *pm != NULL; pm = &(*pm)->next)
     ;
   *pm = m;
 

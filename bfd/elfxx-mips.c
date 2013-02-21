@@ -11141,7 +11141,7 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
   s = bfd_get_section_by_name (abfd, ".reginfo");
   if (s != NULL && (s->flags & SEC_LOAD) != 0)
     {
-      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
 	if (m->p_type == PT_MIPS_REGINFO)
 	  break;
       if (m == NULL)
@@ -11156,7 +11156,7 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 	  m->sections[0] = s;
 
 	  /* We want to put it after the PHDR and INTERP segments.  */
-	  pm = &elf_tdata (abfd)->segment_map;
+	  pm = &elf_seg_map (abfd);
 	  while (*pm != NULL
 		 && ((*pm)->p_type == PT_PHDR
 		     || (*pm)->p_type == PT_INTERP))
@@ -11186,7 +11186,7 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 	{
 	  struct elf_segment_map *options_segment;
 
-	  pm = &elf_tdata (abfd)->segment_map;
+	  pm = &elf_seg_map (abfd);
 	  while (*pm != NULL
 		 && ((*pm)->p_type == PT_PHDR
 		     || (*pm)->p_type == PT_INTERP))
@@ -11216,7 +11216,7 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 	      && bfd_get_section_by_name (abfd, ".dynamic") != NULL
 	      && bfd_get_section_by_name (abfd, ".mdebug") != NULL)
 	    {
-	      for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+	      for (m = elf_seg_map (abfd); m != NULL; m = m->next)
 		if (m->p_type == PT_MIPS_RTPROC)
 		  break;
 	      if (m == NULL)
@@ -11242,7 +11242,7 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
 		    }
 
 		  /* We want to put it after the DYNAMIC segment.  */
-		  pm = &elf_tdata (abfd)->segment_map;
+		  pm = &elf_seg_map (abfd);
 		  while (*pm != NULL && (*pm)->p_type != PT_DYNAMIC)
 		    pm = &(*pm)->next;
 		  if (*pm != NULL)
@@ -11256,7 +11256,7 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
       /* On IRIX5, the PT_DYNAMIC segment includes the .dynamic,
 	 .dynstr, .dynsym, and .hash sections, and everything in
 	 between.  */
-      for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL;
+      for (pm = &elf_seg_map (abfd); *pm != NULL;
 	   pm = &(*pm)->next)
 	if ((*pm)->p_type == PT_DYNAMIC)
 	  break;
@@ -11363,7 +11363,7 @@ _bfd_mips_elf_modify_segment_map (bfd *abfd,
       && !SGI_COMPAT (abfd)
       && bfd_get_section_by_name (abfd, ".dynamic"))
     {
-      for (pm = &elf_tdata (abfd)->segment_map; *pm != NULL; pm = &(*pm)->next)
+      for (pm = &elf_seg_map (abfd); *pm != NULL; pm = &(*pm)->next)
 	if ((*pm)->p_type == PT_NULL)
 	  break;
       if (*pm == NULL)

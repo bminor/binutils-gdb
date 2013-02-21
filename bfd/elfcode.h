@@ -1152,9 +1152,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	verhdr = NULL;
       else
 	verhdr = &elf_tdata (abfd)->dynversym_hdr;
-      if ((elf_tdata (abfd)->dynverdef_section != 0
+      if ((elf_dynverdef (abfd) != 0
 	   && elf_tdata (abfd)->verdef == NULL)
-	  || (elf_tdata (abfd)->dynverref_section != 0
+	  || (elf_dynverref (abfd) != 0
 	      && elf_tdata (abfd)->verref == NULL))
 	{
 	  if (!_bfd_elf_slurp_version_tables (abfd, FALSE))

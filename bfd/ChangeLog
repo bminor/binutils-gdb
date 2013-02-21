@@ -1,3 +1,19 @@
+2013-02-21  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_obj_tdata): Rename segment_map to seg_map.
+	Delete num_locals and num_globals.
+	(elf_num_locals, elf_num_globals): Don't define.
+	(elf_seg_map, elf_next_file_pos, elf_eh_frame_hdr, elf_linker,
+	elf_stack_flags, elf_strtab_sec, elf_shstrtab_sec): Define.
+	* bfd.c, * elf-eh-frame.c, * elf-nacl.c, * elf-vxworks.c, * elf.c,
+	* elf32-arm.c, * elf32-lm32.c, * elf32-ppc.c, * elf32-rx.c,
+	* elf32-spu.c, * elf64-hppa.c, * elfcode.h, * elflink.c,
+	* elfnn-ia64.c, * elfxx-mips.c: Use newly defined elf_obj_tdata
+	accessor macros.
+	* elf.c (elf_map_symbols): Add pnum_locals param.  Return
+	number of locals syms via new param.
+	(swap_out_syms): Adjust to suit elf_map_symbols change.
+
 2013-02-19  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_finish_dynamic_symbol): Also clear
