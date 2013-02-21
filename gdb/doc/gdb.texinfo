@@ -28,7 +28,6 @@
 @c readline appendices use @vindex, @findex and @ftable,
 @c annotate.texi and gdbmi use @findex.
 @syncodeindex vr fn
-@syncodeindex fn fn
 
 @c !!set GDB manual's edition---not the same as GDB version!
 @c This is updated by GNU Press.
@@ -23224,7 +23223,6 @@ Any values returned from a function call will be stored as a
 
 The following attributes are provided:
 
-@table @code
 @defvar Value.address
 If this object is addressable, this read-only attribute holds a
 @code{gdb.Value} object representing the address.  Otherwise,
@@ -23272,11 +23270,9 @@ The value of @code{somevar} is not fetched at this time.  It will be
 fetched when the value is needed, or when the @code{fetch_lazy}
 method is invoked.  
 @end defvar
-@end table
 
 The following methods are provided:
 
-@table @code
 @defun Value.__init__ (@var{val})
 Many Python values can be converted directly to a @code{gdb.Value} via
 this object initializer.  Specifically:
@@ -23491,7 +23487,6 @@ has no effect.
 This method does not return a value.
 @end defun
 
-@end table
 
 @node Types In Python
 @subsubsection Types In Python
@@ -23532,7 +23527,6 @@ description of the @code{Type.fields} method for a description of the
 
 An instance of @code{Type} has the following attributes:
 
-@table @code
 @defvar Type.code
 The type code for this type.  The type code will be one of the
 @code{TYPE_CODE_} constants defined below.
@@ -23550,11 +23544,9 @@ The tag name for this type.  The tag name is the name after
 languages have this concept.  If this type has no tag name, then
 @code{None} is returned.
 @end defvar
-@end table
 
 The following methods are provided:
 
-@table @code
 @defun Type.fields ()
 For structure and union types, this method returns the fields.  Range
 types have two fields, the minimum and maximum values.  Enum types
@@ -23682,7 +23674,6 @@ exception.  Ordinarily, only C@t{++} code will have template types.
 If @var{block} is given, then @var{name} is looked up in that scope.
 Otherwise, it is searched for globally.
 @end defun
-@end table
 
 
 Each type has a code, which indicates what category this type falls
@@ -24220,7 +24211,6 @@ Return an object representing the current inferior.
 
 A @code{gdb.Inferior} object has the following attributes:
 
-@table @code
 @defvar Inferior.num
 ID of inferior, as assigned by GDB.
 @end defvar
@@ -24234,11 +24224,9 @@ system.
 Boolean signaling whether the inferior was created using `attach', or
 started by @value{GDBN} itself.
 @end defvar
-@end table
 
 A @code{gdb.Inferior} object has the following methods:
 
-@table @code
 @defun Inferior.is_valid ()
 Returns @code{True} if the @code{gdb.Inferior} object is valid,
 @code{False} if not.  A @code{gdb.Inferior} object will become invalid
@@ -24281,7 +24269,6 @@ object returned from @code{gdb.read_memory}.  Returns a Python @code{Long}
 containing the address where the pattern was found, or @code{None} if
 the pattern could not be found.
 @end defun
-@end table
 
 @node Events In Python
 @subsubsection Events In Python
@@ -24300,7 +24287,6 @@ with an @dfn{event registry}.  An event registry is an object in the
 @code{gdb.events} module which dispatches particular events.  A registry
 provides methods to register and unregister event handlers:
 
-@table @code
 @defun EventRegistry.connect (object)
 Add the given callable @var{object} to the registry.  This object will be
 called when an event corresponding to this registry occurs.
@@ -24310,7 +24296,6 @@ called when an event corresponding to this registry occurs.
 Remove the given @var{object} from the registry.  Once removed, the object
 will no longer receive notifications of events.
 @end defun
-@end table
 
 Here is an example:
 
@@ -24344,12 +24329,10 @@ events which are emitted by this or other modules might extend this event.
 Examples of these events are @code{gdb.BreakpointEvent} and
 @code{gdb.ContinueEvent}.
 
-@table @code
 @defvar ThreadEvent.inferior_thread
 In non-stop mode this attribute will be set to the specific thread which was
 involved in the emitted event. Otherwise, it will be set to @code{None}.
 @end defvar
-@end table
 
 Emits @code{gdb.ContinueEvent} which extends @code{gdb.ThreadEvent}.
 
@@ -24359,7 +24342,6 @@ inherited attribute refer to @code{gdb.ThreadEvent} above.
 @item events.exited
 Emits @code{events.ExitedEvent} which indicates that the inferior has exited.
 @code{events.ExitedEvent} has two attributes:
-@table @code
 @defvar ExitedEvent.exit_code
 An integer representing the exit code, if available, which the inferior 
 has returned.  (The exit code could be unavailable if, for example,
@@ -24369,7 +24351,6 @@ the attribute does not exist.
 @defvar ExitedEvent inferior
 A reference to the inferior which triggered the @code{exited} event.
 @end defvar
-@end table
 
 @item events.stop
 Emits @code{gdb.StopEvent} which extends @code{gdb.ThreadEvent}.
@@ -24384,20 +24365,17 @@ Emits @code{gdb.SignalEvent} which extends @code{gdb.StopEvent}.
 This event indicates that the inferior or one of its threads has received as
 signal.  @code{gdb.SignalEvent} has the following attributes:
 
-@table @code
 @defvar SignalEvent.stop_signal
 A string representing the signal received by the inferior.  A list of possible
 signal values can be obtained by running the command @code{info signals} in
 the @value{GDBN} command prompt.
 @end defvar
-@end table
 
 Also emits  @code{gdb.BreakpointEvent} which extends @code{gdb.StopEvent}.
 
 @code{gdb.BreakpointEvent} event indicates that one or more breakpoints have
 been hit, and has the following attributes:
 
-@table @code
 @defvar BreakpointEvent.breakpoints
 A sequence containing references to all the breakpoints (type 
 @code{gdb.Breakpoint}) that were hit.
@@ -24408,18 +24386,15 @@ A reference to the first breakpoint that was hit.
 This function is maintained for backward compatibility and is now deprecated 
 in favor of the @code{gdb.BreakpointEvent.breakpoints} attribute.
 @end defvar
-@end table
 
 @item events.new_objfile
 Emits @code{gdb.NewObjFileEvent} which indicates that a new object file has
 been loaded by @value{GDBN}.  @code{gdb.NewObjFileEvent} has one attribute:
 
-@table @code
 @defvar NewObjFileEvent.new_objfile
 A reference to the object file (@code{gdb.Objfile}) which has been loaded.
 @xref{Objfiles In Python}, for details of the @code{gdb.Objfile} object.
 @end defvar
-@end table
 
 @end table
 
@@ -24442,7 +24417,6 @@ is no selected thread, this will return @code{None}.
 
 A @code{gdb.InferiorThread} object has the following attributes:
 
-@table @code
 @defvar InferiorThread.name
 The name of the thread.  If the user specified a name using
 @code{thread name}, then this returns that name.  Otherwise, if an
@@ -24465,11 +24439,9 @@ is the Lightweight Process ID (LWPID), and the third is the Thread ID (TID).
 Either the LWPID or TID may be 0, which indicates that the operating system
 does not  use that identifier.
 @end defvar
-@end table
 
 A @code{gdb.InferiorThread} object has the following methods:
 
-@table @code
 @defun InferiorThread.is_valid ()
 Returns @code{True} if the @code{gdb.InferiorThread} object is valid,
 @code{False} if not.  A @code{gdb.InferiorThread} object will become
@@ -24494,7 +24466,6 @@ Return a Boolean indicating whether the thread is running.
 @defun InferiorThread.is_exited ()
 Return a Boolean indicating whether the thread is exited.
 @end defun
-@end table
 
 @node Commands In Python
 @subsubsection Commands In Python
@@ -25146,7 +25117,6 @@ frames, as expressed by the given @var{reason} code (an integer, see the
 
 A @code{gdb.Frame} object has the following methods:
 
-@table @code
 @defun Frame.is_valid ()
 Returns true if the @code{gdb.Frame} object is valid, false if not.
 A frame object can become invalid if the frame it refers to doesn't
@@ -25285,7 +25255,6 @@ must be a string or a @code{gdb.Symbol} object.  @var{block} must be a
 Set this frame to be the selected frame.  @xref{Stack, ,Examining the
 Stack}.
 @end defun
-@end table
 
 @node Blocks In Python
 @subsubsection Accessing frame blocks from Python.
@@ -25320,7 +25289,6 @@ will return @code{None}.
 
 A @code{gdb.Block} object has the following methods:
 
-@table @code
 @defun Block.is_valid ()
 Returns @code{True} if the @code{gdb.Block} object is valid,
 @code{False} if not.  A block object can become invalid if the block it
@@ -25329,11 +25297,9 @@ refers to doesn't exist anymore in the inferior.  All other
 the time the method is called.  The block's validity is also checked
 during iteration over symbols of the block.
 @end defun
-@end table
 
 A @code{gdb.Block} object has the following attributes:
 
-@table @code
 @defvar Block.start
 The start address of the block.  This attribute is not writable.
 @end defvar
@@ -25373,7 +25339,6 @@ writable.
 @code{True} if the @code{gdb.Block} object is a static block,
 @code{False} if not.  This attribute is not writable.
 @end defvar
-@end table
 
 @node Symbols In Python
 @subsubsection Python representation of Symbols.
@@ -25429,7 +25394,6 @@ is not found.
 
 A @code{gdb.Symbol} object has the following attributes:
 
-@table @code
 @defvar Symbol.type
 The type of the symbol or @code{None} if no type is recorded.
 This attribute is represented as a @code{gdb.Type} object.
@@ -25489,11 +25453,9 @@ local variables will require a frame, but other symbols will not.
 @defvar Symbol.is_variable
 @code{True} if the symbol is a variable.
 @end defvar
-@end table
 
 A @code{gdb.Symbol} object has the following methods:
 
-@table @code
 @defun Symbol.is_valid ()
 Returns @code{True} if the @code{gdb.Symbol} object is valid,
 @code{False} if not.  A @code{gdb.Symbol} object can become invalid if
@@ -25510,7 +25472,6 @@ its value, then @var{frame} must be given.  If @var{frame} is not
 given, or if @var{frame} is invalid, then this method will throw an
 exception.
 @end defun
-@end table
 
 The available domain categories in @code{gdb.Symbol} are represented
 as constants in the @code{gdb} module:
@@ -25639,7 +25600,6 @@ For more information on @value{GDBN}'s symbol table management, see
 
 A @code{gdb.Symtab_and_line} object has the following attributes:
 
-@table @code
 @defvar Symtab_and_line.symtab
 The symbol table object (@code{gdb.Symtab}) for this frame.
 This attribute is not writable.
@@ -25659,11 +25619,9 @@ source line.  This attribute is not writable.
 Indicates the current line number for this object.  This
 attribute is not writable.
 @end defvar
-@end table
 
 A @code{gdb.Symtab_and_line} object has the following methods:
 
-@table @code
 @defun Symtab_and_line.is_valid ()
 Returns @code{True} if the @code{gdb.Symtab_and_line} object is valid,
 @code{False} if not.  A @code{gdb.Symtab_and_line} object can become
@@ -25672,11 +25630,9 @@ exist in @value{GDBN} any longer.  All other
 @code{gdb.Symtab_and_line} methods will throw an exception if it is
 invalid at the time the method is called.
 @end defun
-@end table
 
 A @code{gdb.Symtab} object has the following attributes:
 
-@table @code
 @defvar Symtab.filename
 The symbol table's source filename.  This attribute is not writable.
 @end defvar
@@ -25685,11 +25641,9 @@ The symbol table's source filename.  This attribute is not writable.
 The symbol table's backing object file.  @xref{Objfiles In Python}.
 This attribute is not writable.
 @end defvar
-@end table
 
 A @code{gdb.Symtab} object has the following methods:
 
-@table @code
 @defun Symtab.is_valid ()
 Returns @code{True} if the @code{gdb.Symtab} object is valid,
 @code{False} if not.  A @code{gdb.Symtab} object can become invalid if
@@ -25711,7 +25665,6 @@ Return the global block of the underlying symbol table.
 Return the static block of the underlying symbol table.
 @xref{Blocks In Python}.
 @end defun
-@end table
 
 @node Breakpoints In Python
 @subsubsection Manipulating breakpoints using Python
@@ -36144,7 +36097,7 @@ Reply:
 the register's value
 @item E @var{NN}
 for an error
-@item
+@item @w{}
 Indicating an unrecognized @var{query}.
 @end table
 
@@ -36314,7 +36267,7 @@ Reply:
 @item vCont@r{[};@var{action}@dots{}@r{]}
 The @samp{vCont} packet is supported.  Each @var{action} is a supported
 command in the @samp{vCont} packet.
-@item
+@item @w{}
 The @samp{vCont} packet is not supported.
 @end table
 
@@ -36503,7 +36456,7 @@ Reply:
 @table @samp
 @item OK
 success
-@item
+@item @w{}
 not supported
 @item E @var{NN}
 for an error
@@ -36527,7 +36480,7 @@ Reply:
 @table @samp
 @item OK
 success
-@item
+@item @w{}
 not supported
 @item E @var{NN}
 for an error
@@ -36544,7 +36497,7 @@ Reply:
 @table @samp
 @item OK
 success
-@item
+@item @w{}
 not supported
 @item E @var{NN}
 for an error
@@ -36561,7 +36514,7 @@ Reply:
 @table @samp
 @item OK
 success
-@item
+@item @w{}
 not supported
 @item E @var{NN}
 for an error
@@ -36578,7 +36531,7 @@ Reply:
 @table @samp
 @item OK
 success
-@item
+@item @w{}
 not supported
 @item E @var{NN}
 for an error
@@ -36840,7 +36793,7 @@ The request succeeded.
 @item E @var{nn}
 An error occurred.  @var{nn} are hex digits.
 
-@item
+@item @w{}
 An empty reply indicates that @samp{QDisableRandomization} is not supported
 by the stub.
 @end table
@@ -36911,7 +36864,7 @@ local storage requested.
 @item E @var{nn}
 An error occurred.  @var{nn} are hex digits.
 
-@item
+@item @w{}
 An empty reply indicates that @samp{qGetTLSAddr} is not supported by the stub.
 @end table
 
@@ -36932,7 +36885,7 @@ thread information block.
 An error occured.  This means that either the thread was not found, or the
 address could not be retrieved.
 
-@item
+@item @w{}
 An empty reply indicates that @samp{qGetTIBAddr} is not supported by the stub.
 @end table
 
@@ -37015,7 +36968,7 @@ The request succeeded.
 @item E @var{nn}
 An error occurred.  @var{nn} are hex digits.
 
-@item
+@item @w{}
 An empty reply indicates that @samp{QNonStop} is not supported by
 the stub.
 @end table
@@ -37047,7 +37000,7 @@ The request succeeded.
 @item E @var{nn}
 An error occurred.  @var{nn} are hex digits.
 
-@item
+@item @w{}
 An empty reply indicates that @samp{QPassSignals} is not supported by
 the stub.
 @end table
@@ -37089,7 +37042,7 @@ The request succeeded.
 @item E @var{nn}
 An error occurred.  @var{nn} are hex digits.
 
-@item
+@item @w{}
 An empty reply indicates that @samp{QProgramSignals} is not supported
 by the stub.
 @end table
@@ -37117,7 +37070,7 @@ A command response with no output.
 A command response with the hex encoded output string @var{OUTPUT}.
 @item E @var{NN}
 Indicate a badly formed request.
-@item
+@item @w{}
 An empty reply indicates that @samp{qRcmd} is not recognized.
 @end table
 
@@ -37142,7 +37095,7 @@ The pattern was not found.
 The pattern was found at @var{address}.
 @item E @var{NN}
 A badly formed request or an error was encountered while searching memory.
-@item
+@item @w{}
 An empty reply indicates that @samp{qSearch:memory} is not recognized.
 @end table
 
@@ -37159,7 +37112,7 @@ The stub has switched to no-acknowledgment mode.
 @value{GDBN} acknowledges this reponse,
 but neither the stub nor @value{GDBN} shall send or expect further
 @samp{+}/@samp{-} acknowledgments in the current connection.
-@item
+@item @w{}
 An empty reply indicates that the stub does not support no-acknowledgment mode.
 @end table
 
@@ -37189,7 +37142,7 @@ Reply:
 The stub supports or does not support each returned @var{stubfeature},
 depending on the form of each @var{stubfeature} (see below for the
 possible forms).
-@item
+@item @w{}
 An empty reply indicates that @samp{qSupported} is not recognized,
 or that no features needed to be reported to @value{GDBN}.
 @end table
@@ -37848,7 +37801,7 @@ The request was malformed, or @var{annex} was invalid.
 The offset was invalid, or there was an error encountered reading the data.
 @var{nn} is a hex-encoded @code{errno} value.
 
-@item
+@item @w{}
 An empty reply indicates the @var{object} string was not recognized by
 the stub, or that the object does not support reading.
 @end table
@@ -37903,7 +37856,7 @@ The request was malformed, or @var{annex} was invalid.
 The offset was invalid, or there was an error encountered writing the data.
 @var{nn} is a hex-encoded @code{errno} value.
 
-@item
+@item @w{}
 An empty reply indicates the @var{object} string was not
 recognized by the stub, or that the object does not support writing.
 @end table
@@ -38064,7 +38017,7 @@ Replies:
 The packet was understood and carried out.
 @item qRelocInsn
 @xref{Tracepoint Packets,,Relocate instruction reply packet}.
-@item 
+@item  @w{}
 The packet was not recognized.
 @end table
 
@@ -38130,7 +38083,7 @@ Replies:
 The packet was understood and carried out.
 @item qRelocInsn
 @xref{Tracepoint Packets,,Relocate instruction reply packet}.
-@item 
+@item  @w{}
 The packet was not recognized.
 @end table
 
@@ -38242,7 +38195,7 @@ or equal to 1.  @var{length} is a hexadecimal number.  A reply of 1 means
 that a fast tracepoint may be placed on any instruction regardless of size.
 @item E
 An error has occurred.
-@item
+@item @w{}
 An empty reply indicates that the request is not supported by the stub.
 @end table
 
@@ -38454,7 +38407,7 @@ a comma-separated list of markers
 (lower case letter @samp{L}) denotes end of list.
 @item E @var{nn}
 An error occurred.  @var{nn} are hex digits.
-@item
+@item @w{}
 An empty reply indicates that the request is not supported by the
 stub.
 @end table
@@ -38591,7 +38544,7 @@ normal way (@pxref{Binary Data}).  See the individual packet
 documentation for the interpretation of @var{result} and
 @var{attachment}.
 
-@item
+@item @w{}
 An empty response indicates that this operation is not recognized.
 
 @end table

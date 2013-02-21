@@ -1,3 +1,13 @@
+2013-02-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo: Remove bad @syncodeindex.
+	(Values From Inferior, Types In Python, Inferiors In Python)
+	(Events In Python, Threads In Python, Frames In Python, Blocks In
+	Python, Symbols In Python, Symbol Tables In Python): Remove
+	@tables.
+	(Packets, General Query Packets, Tracepoint Packets)
+	(Host I/O Packets): Use @w{} for empty @item.
+
 2013-02-20  Siva Chandra Reddy <sivachandra@google.com>
 
 	* gdb.texinfo (Architectures In Python): Add description about
