@@ -1081,11 +1081,10 @@ build_id_bfd_get (bfd *abfd)
 {
   if (!bfd_check_format (abfd, bfd_object)
       || bfd_get_flavour (abfd) != bfd_target_elf_flavour
-      || elf_tdata (abfd)->build_id == NULL
-      || elf_tdata (abfd)->build_id->u.i.size == 0)
+      || elf_tdata (abfd)->build_id == NULL)
     return NULL;
 
-  return &elf_tdata (abfd)->build_id->u.i;
+  return elf_tdata (abfd)->build_id;
 }
 
 /* Return if FILENAME has NT_GNU_BUILD_ID matching the CHECK value.  */

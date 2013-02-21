@@ -246,7 +246,14 @@ bfd_elf_allocate_object (bfd *abfd,
     return FALSE;
 
   elf_object_id (abfd) = object_id;
-  elf_program_header_size (abfd) = (bfd_size_type) -1;
+  if (abfd->direction != read_direction)
+    {
+      struct output_elf_obj_tdata *o = bfd_zalloc (abfd, sizeof *o);
+      if (o == NULL)
+	return FALSE;
+      elf_tdata (abfd)->o = o;
+      elf_program_header_size (abfd) = (bfd_size_type) -1;
+    }
   return TRUE;
 }
 
@@ -5333,9 +5340,8 @@ _bfd_elf_write_object_contents (bfd *abfd)
     return FALSE;
 
   /* This is last since write_shdrs_and_ehdr can touch i_shdrp[0].  */
-  if (t->build_id != NULL
-      && t->build_id->u.o.zero == 0)
-    return (*t->build_id->u.o.after_write_object_contents) (abfd);
+  if (t->o->build_id.after_write_object_contents != NULL)
+    return (*t->o->build_id.after_write_object_contents) (abfd);
 
   return TRUE;
 }
@@ -7874,7 +7880,7 @@ _bfd_elf_close_and_cleanup (bfd *abfd)
   struct elf_obj_tdata *tdata = elf_tdata (abfd);
   if (bfd_get_format (abfd) == bfd_object && tdata != NULL)
     {
-      if (elf_shstrtab (abfd) != NULL)
+      if (elf_tdata (abfd)->o != NULL && elf_shstrtab (abfd) != NULL)
 	_bfd_elf_strtab_free (elf_shstrtab (abfd));
       _bfd_dwarf2_cleanup_debug_info (abfd, &tdata->dwarf2_find_line_info);
     }
@@ -8697,12 +8703,12 @@ elfobj_grok_gnu_build_id (bfd *abfd, Elf_Internal_Note *note)
     return FALSE;
 
   t = elf_tdata (abfd);
-  t->build_id = bfd_alloc (abfd, sizeof (t->build_id->u.i) - 1 + note->descsz);
+  t->build_id = bfd_alloc (abfd, sizeof (*t->build_id) - 1 + note->descsz);
   if (t->build_id == NULL)
     return FALSE;
 
-  t->build_id->u.i.size = note->descsz;
-  memcpy (t->build_id->u.i.data, note->descdata, note->descsz);
+  t->build_id->size = note->descsz;
+  memcpy (t->build_id->data, note->descdata, note->descsz);
 
   return TRUE;
 }

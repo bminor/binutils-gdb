@@ -1,3 +1,7 @@
+2013-02-21  Alan Modra  <amodra@gmail.com>
+
+	* elfread.c (build_id_bfd_get): Adjust for elf_tdata changes.
+
 2013-02-20  Siva Chandra Reddy  <sivachandra@google.com>
 
 	Add a new method 'disassemble' to gdb.Architecture class.

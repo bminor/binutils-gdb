@@ -1,5 +1,10 @@
 2013-02-21  Alan Modra  <amodra@gmail.com>
 
+	* emultempl/elf32.em (write_build_id, setup_build_id): Adjust
+	for elf_tdata changes.
+
+2013-02-21  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf-generic.em: Use newly defined elf_obj_tdata
 	accessor macros.
 

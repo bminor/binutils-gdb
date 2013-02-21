@@ -960,8 +960,8 @@ write_build_id (bfd *abfd)
   Elf_External_Note *e_note;
   typedef void (*sum_fn) (const void *, size_t, void *);
 
-  style = t->build_id->u.o.style;
-  asec = t->build_id->u.o.sec;
+  style = t->o->build_id.style;
+  asec = t->o->build_id.sec;
   if (bfd_is_abs_section (asec->output_section))
     {
       einfo (_("%P: warning: .note.gnu.build-id section discarded,"
@@ -1068,17 +1068,12 @@ setup_build_id (bfd *ibfd)
   if (s != NULL && bfd_set_section_alignment (ibfd, s, 2))
     {
       struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
-      t->build_id = bfd_alloc (link_info.output_bfd, sizeof (t->build_id->u.o));
-      if (t->build_id != NULL)
-	{
-	  t->build_id->u.o.zero = 0;
-	  t->build_id->u.o.after_write_object_contents = &write_build_id;
-	  t->build_id->u.o.style = emit_note_gnu_build_id;
-	  t->build_id->u.o.sec = s;
-	  elf_section_type (s) = SHT_NOTE;
-	  s->size = size;
-	  return TRUE;
-	}
+      t->o->build_id.after_write_object_contents = &write_build_id;
+      t->o->build_id.style = emit_note_gnu_build_id;
+      t->o->build_id.sec = s;
+      elf_section_type (s) = SHT_NOTE;
+      s->size = size;
+      return TRUE;
     }
 
   einfo ("%P: warning: Cannot create .note.gnu.build-id section,"

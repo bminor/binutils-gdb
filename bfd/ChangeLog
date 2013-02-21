@@ -1,5 +1,23 @@
 2013-02-21  Alan Modra  <amodra@gmail.com>
 
+	* elf-bfd.h (struct elf_build_id): Extracted from..
+	(struct elf_build_id_info): ..here.  Delete.
+	(struct output_elf_obj_tdata): New, extracted from..
+	(struct elf_obj_tdata): ..here.  Reorganize for better packing.
+	Add "o" field.
+	(elf_program_header_size): Reference tdata->o.
+	(elf_seg_map, elf_next_file_pos, elf_eh_frame_hdr, elf_linker,
+	elf_stack_flags, elf_shstrtab, elf_strtab_sec, elf_shstrtab_sec,
+	elf_section_syms, elf_num_section_syms, elf_flags_init): Likewise.
+	* elf.c (bfd_elf_allocate_object): Allocate output_elf_obj_tdata
+	when opening bfd in any mode that might write.
+	(_bfd_elf_write_object_contents): Use build_id field in
+	output_elf_obj_tdata.
+	(_bfd_elf_close_and_cleanup): Tweak elf_shstrtab test.
+	(elfobj_grok_gnu_build_id): Adjust for elf_tdata changes.
+
+2013-02-21  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (struct core_elf_obj_tdata): New.
 	(struct elf_obj_tdata): Delete core_signal, core_pid, core_lwpid,
 	core_program, and core_command.  Add "core".
