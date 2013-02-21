@@ -26040,6 +26040,42 @@ A @code{gdb.Architecture} class has the following methods:
 Return the name (string value) of the architecture.
 @end defun
 
+@defun Architecture.disassemble (@var{start_pc} @r{[}, @var{end_pc} @r{[}, @var{count}@r{]]})
+Return a list of disassembled instructions starting from the memory
+address @var{start_pc}.  The optional arguments @var{end_pc} and
+@var{count} determine the number of instructions in the returned list.
+If both the optional arguments @var{end_pc} and @var{count} are
+specified, then a list of at most @var{count} disassembled instructions
+whose start address falls in the closed memory address interval from
+@var{start_pc} to @var{end_pc} are returned.  If @var{end_pc} is not
+specified, but @var{count} is specified, then @var{count} number of
+instructions starting from the address @var{start_pc} are returned.  If
+@var{count} is not specified but @var{end_pc} is specified, then all
+instructions whose start address falls in the closed memory address
+interval from @var{start_pc} to @var{end_pc} are returned.  If neither
+@var{end_pc} nor @var{count} are specified, then a single instruction at
+@var{start_pc} is returned.  For all of these cases, each element of the
+returned list is a Python @code{dict} with the following string keys:
+
+@table @code
+
+@item addr
+The value corresponding to this key is a Python long integer capturing
+the memory address of the instruction.
+
+@item asm
+The value corresponding to this key is a string value which represents
+the instruction with assembly language mnemonics.  The assembly
+language flavor used is the same as that specified by the current CLI
+variable @code{disassembly-flavor}.  @xref{Machine Code}.
+
+@item length
+The value corresponding to this key is the length (integer value) of the
+instruction in bytes.
+
+@end table
+@end defun
+
 @node Python Auto-loading
 @subsection Python Auto-loading
 @cindex Python auto-loading

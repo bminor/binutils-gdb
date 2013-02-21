@@ -6,7 +6,7 @@ EXECUTABLES = py-type py-value py-prettyprint py-template py-block \
 	py-shared python lib-types py-events py-evthreads py-frame \
 	py-mi py-pp-maint py-progspace py-section-script py-objfile \
 	py-finish-breakpoint py-finish-breakpoint2 py-value-cc py-explore \
-	py-explore-cc
+	py-explore-cc py-arch
 
 MISCELLANEOUS = py-shared-sl.sl py-events-shlib.so py-events-shlib-nodebug.so 
 

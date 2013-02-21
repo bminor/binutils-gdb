@@ -1,3 +1,8 @@
+2013-02-20  Siva Chandra Reddy <sivachandra@google.com>
+
+	* gdb.texinfo (Architectures In Python): Add description about
+	the new method gdb.Architecture.disassemble.
+
 2013-02-15  Pedro Alves  <pedro@codesourcery.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 

@@ -1,3 +1,11 @@
+2013-02-20  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-arch.c: New test case
+	* gdb.python/py-arch.exp: New tests to test
+	gdb.Architecture.disassemble
+	* gdb.python/Makefile.in: Add py-arch to the list of
+	EXECUTABLES.
+
 2013-02-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/subrange.exp: New file.

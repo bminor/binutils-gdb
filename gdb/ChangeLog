@@ -1,3 +1,10 @@
+2013-02-20  Siva Chandra Reddy  <sivachandra@google.com>
+
+	Add a new method 'disassemble' to gdb.Architecture class.
+	* python/py-arch.c (archpy_disassmble): Implementation of the
+	new method gdb.Architecture.disassemble.
+	(arch_object_methods): Add entry for the new method.
+
 2013-02-20  Jiong Wang  <jiwang@tilera.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.
