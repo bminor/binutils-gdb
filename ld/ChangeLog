@@ -1,5 +1,12 @@
 2013-02-21  Alan Modra  <amodra@gmail.com>
 
+	* scripttempl/elf.sc (.init_array, .fini_array): Don't sort all
+	.init_array/.fini_array input sections before .ctors/.dtors input
+	sections.
+	(CTORS_IN_INIT_ARRAY, DTORS_IN_INIT_ARRAY): Adjust to suit.
+
+2013-02-21  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf32.em (write_build_id, setup_build_id): Adjust
 	for elf_tdata changes.
 
