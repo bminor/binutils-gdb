@@ -1076,7 +1076,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
 
 /* Locate NT_GNU_BUILD_ID from ABFD and return its content.  */
 
-static struct elf_build_id *
+static const struct elf_build_id *
 build_id_bfd_get (bfd *abfd)
 {
   if (!bfd_check_format (abfd, bfd_object)
@@ -1090,10 +1090,10 @@ build_id_bfd_get (bfd *abfd)
 /* Return if FILENAME has NT_GNU_BUILD_ID matching the CHECK value.  */
 
 static int
-build_id_verify (const char *filename, struct elf_build_id *check)
+build_id_verify (const char *filename, const struct elf_build_id *check)
 {
   bfd *abfd;
-  struct elf_build_id *found;
+  const struct elf_build_id *found;
   int retval = 0;
 
   /* We expect to be silent on the non-existing files.  */
@@ -1118,7 +1118,7 @@ build_id_verify (const char *filename, struct elf_build_id *check)
 }
 
 static char *
-build_id_to_debug_filename (struct elf_build_id *build_id)
+build_id_to_debug_filename (const struct elf_build_id *build_id)
 {
   char *link, *debugdir, *retval = NULL;
   VEC (char_ptr) *debugdir_vec;
@@ -1138,7 +1138,7 @@ build_id_to_debug_filename (struct elf_build_id *build_id)
   for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
     {
       size_t debugdir_len = strlen (debugdir);
-      gdb_byte *data = build_id->data;
+      const gdb_byte *data = build_id->data;
       size_t size = build_id->size;
       char *s;
 
@@ -1177,7 +1177,7 @@ build_id_to_debug_filename (struct elf_build_id *build_id)
 static char *
 find_separate_debug_file_by_buildid (struct objfile *objfile)
 {
-  struct elf_build_id *build_id;
+  const struct elf_build_id *build_id;
 
   build_id = build_id_bfd_get (objfile->obfd);
   if (build_id != NULL)

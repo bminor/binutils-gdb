@@ -1,3 +1,12 @@
+2013-02-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* elfread.c (build_id_bfd_get): Make the return type const.
+	(build_id_verify): Make the check parameter const.
+	(build_id_to_debug_filename): Make the build_id parameter and variable
+	data const.
+	(find_separate_debug_file_by_buildid): Make the variable build_id const.
+
 2013-02-21  Alan Modra  <amodra@gmail.com>
 
 	* elfread.c (build_id_bfd_get): Adjust for elf_tdata changes.
