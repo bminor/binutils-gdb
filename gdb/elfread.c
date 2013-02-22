@@ -556,21 +556,14 @@ elf_symtab_read (struct objfile *objfile, int type,
 
 	  if (msym)
 	    {
-	      /* Pass symbol size field in via BFD.  FIXME!!!  */
-	      elf_symbol_type *elf_sym;
-
 	      /* NOTE: uweigand-20071112: A synthetic symbol does not have an
-		 ELF-private part.  However, in some cases (e.g. synthetic
-		 'dot' symbols on ppc64) the udata.p entry is set to point back
-		 to the original ELF symbol it was derived from.  Get the size
-		 from that symbol.  */
+		 ELF-private part.  */
 	      if (type != ST_SYNTHETIC)
-		elf_sym = (elf_symbol_type *) sym;
-	      else
-		elf_sym = (elf_symbol_type *) sym->udata.p;
-
-	      if (elf_sym)
-		SET_MSYMBOL_SIZE (msym, elf_sym->internal_elf_sym.st_size);
+		{
+		  /* Pass symbol size field in via BFD.  FIXME!!!  */
+		  elf_symbol_type *elf_sym = (elf_symbol_type *) sym;
+		  SET_MSYMBOL_SIZE (msym, elf_sym->internal_elf_sym.st_size);
+		}
 
 	      msym->filename = filesymname;
 	      gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);

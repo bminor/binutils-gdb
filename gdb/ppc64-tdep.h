@@ -31,4 +31,6 @@ extern CORE_ADDR ppc64_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 						   CORE_ADDR addr,
 						   struct target_ops *targ);
 
+extern void ppc64_elf_make_msymbol_special (asymbol *,
+					    struct minimal_symbol *);
 #endif /* PPC64_TDEP_H  */

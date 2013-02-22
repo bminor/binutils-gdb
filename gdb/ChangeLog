@@ -1,3 +1,12 @@
+2013-02-23  Alan Modra  <amodra@gmail.com>
+
+	* elfread.c (elf_symtab_read): Do not use udata.p here to find
+	symbol size.
+	* ppc64-tdep.c (ppc64_elf_make_msymbol_special): New function.
+	* ppc64-tdep.h (ppc64_elf_make_msymbol_special): Declare.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Set up to use the above.
+	* ppcfbsd-tdep.c (ppcfbsd_init_abi): Likewise.
+
 2013-02-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

@@ -22,6 +22,7 @@
 #include "gdbcore.h"
 #include "ppc-tdep.h"
 #include "ppc64-tdep.h"
+#include "elf-bfd.h"
 
 /* Macros for matching instructions.  Note that, since all the
    operands are masked off before they're or-ed into the instruction,
@@ -360,4 +361,18 @@ ppc64_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
    }
 
   return addr;
+}
+
+/* A synthetic 'dot' symbols on ppc64 has the udata.p entry pointing
+   back to the original ELF symbol it was derived from.  Get the size
+   from that symbol.  */
+
+void
+ppc64_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
+{
+  if ((sym->flags & BSF_SYNTHETIC) != 0 && sym->udata.p != NULL)
+    {
+      elf_symbol_type *elf_sym = (elf_symbol_type *) sym->udata.p;
+      SET_MSYMBOL_SIZE (msym, elf_sym->internal_elf_sym.st_size);
+    }
 }

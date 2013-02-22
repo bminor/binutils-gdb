@@ -1336,6 +1336,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
       set_gdbarch_convert_from_func_ptr_addr
 	(gdbarch, ppc64_convert_from_func_ptr_addr);
 
+      set_gdbarch_elf_make_msymbol_special (gdbarch,
+					    ppc64_elf_make_msymbol_special);
+
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets
