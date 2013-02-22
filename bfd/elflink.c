@@ -1262,9 +1262,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
       return TRUE;
     }
 
-  if (bind == STB_GNU_UNIQUE)
-    h->unique_global = 1;
-
   /* If a new weak symbol definition comes from a regular file and the
      old symbol comes from a dynamic library, we treat the new one as
      strong.  Similarly, an old weak symbol definition from a regular
@@ -4197,8 +4194,6 @@ error_free_dyn:
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
       *sym_hash = h;
-      if (is_elf_hash_table (htab))
-	h->unique_global = (flags & BSF_GNU_UNIQUE) != 0;
 
       new_weak = (flags & BSF_WEAK) != 0;
       new_weakdef = FALSE;
@@ -4425,7 +4420,10 @@ error_free_dyn:
 	    dynsym = FALSE;
 
 	  if (definition)
-	    h->target_internal = isym->st_target_internal;
+	    {
+	      h->target_internal = isym->st_target_internal;
+	      h->unique_global = (flags & BSF_GNU_UNIQUE) != 0;
+	    }
 
 	  /* Check to see if we need to add an indirect symbol for
 	     the default name.  */

@@ -5046,7 +5046,8 @@ error_free_dyn:
 	h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
       *sym_hash = h;
-      h->unique_global = (flags & BSF_GNU_UNIQUE) != 0;
+      if (definition)
+	h->unique_global = (flags & BSF_GNU_UNIQUE) != 0;
 
       /* Set the alignment of a common symbol.  */
       if ((common || bfd_is_com_section (sec))

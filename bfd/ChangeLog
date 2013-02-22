@@ -1,3 +1,13 @@
+2013-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15167
+	* elf64-ia64-vms.c (elf64_vms_link_add_object_symbols): Set
+	unique_global only for definition.
+	* elflink.c (_bfd_elf_merge_symbol): Don't set unique_global
+	here.
+	(elf_link_add_object_symbols): Set unique_global only
+	for definition.
+
 2013-02-21  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_build_id): Extracted from..
