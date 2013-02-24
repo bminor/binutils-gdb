@@ -3273,6 +3273,7 @@ restart:
 	      frame_reg = 30;
 	      frame_addr = get_frame_register_signed
 		(this_frame, gdbarch_num_regs (gdbarch) + 30);
+	      frame_offset = 0;
 
 	      alloca_adjust = (unsigned) (frame_addr - (sp + low_word));
 	      if (alloca_adjust > 0)

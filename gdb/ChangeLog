@@ -1,3 +1,8 @@
+2013-02-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips32_scan_prologue): Reset frame_offset to zero
+	if $fp is used as the virtual frame pointer.
+
 2013-02-23  Alan Modra  <amodra@gmail.com>
 
 	* elfread.c (elf_symtab_read): Do not use udata.p here to find
