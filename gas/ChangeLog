@@ -1,3 +1,11 @@
+2013-02-25  Terry Guo  <terry.guo@arm.com>
+
+	Apply mainline patche
+	2013-02-25  Terry Guo  <terry.guo@arm.com>
+	* config/tc-arm.c (arm_cpus): Add cortex-r7 entry.
+	* doc/c-arm.texi: Add cortex-r7 and missing cortex-r5 to
+	list of accepted CPUs.
+
 2013-02-15  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (md_begin): Change to check if 'name' is
