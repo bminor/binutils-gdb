@@ -224,8 +224,9 @@ linux_ptrace_test_ret_to_nx (void)
 	       "address %p nor is the return instruction %p!"),
 	     pc, return_address, &linux_ptrace_test_ret_to_nx_instr);
   else
-    warning (_("Cannot call inferior functions, you have broken "
-	       "Linux kernel i386 NX (non-executable pages) support!"));
+    warning (_("Cannot call inferior functions on this system - "
+	       "Linux kernel with broken i386 NX (non-executable pages) "
+	       "support detected!"));
 #endif /* defined __i386__ || defined __x86_64__ */
 }
 

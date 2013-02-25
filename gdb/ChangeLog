@@ -1,3 +1,8 @@
+2013-02-25  Pedro Alves  <palves@redhat.com>
+
+	* common/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Change
+	warning text.
+
 2013-02-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips32_scan_prologue): Reset frame_offset to zero
