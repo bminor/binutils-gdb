@@ -1,6 +1,5 @@
 /* rl78-parse.y  Renesas RL78 parser
-   Copyright 2011
-   Free Software Foundation, Inc.
+   Copyright 2011-2013 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -513,8 +512,13 @@ statement :
 	| DIVHU
 	  { B3 (0xce, 0xfb, 0x03); }
 
+/* Note that the DIVWU encoding was changed from [0xce,0xfb,0x04] to
+   [0xce,0xfb,0x0b].  Different versions of the Software Manual exist
+   with the same version number, but varying encodings.  The version
+   here matches the hardware.  */
+
 	| DIVWU
-	  { B3 (0xce, 0xfb, 0x04); }
+	  { B3 (0xce, 0xfb, 0x0b); }
 
 	| MACHU
 	  { B3 (0xce, 0xfb, 0x05); }

@@ -1,6 +1,6 @@
 #line 1 "rl78-decode.opc"
 /* -*- c -*- */
-/* Copyright 2012 Free Software Foundation, Inc.
+/* Copyright 2012-2013 Free Software Foundation, Inc.
    Contributed by Red Hat.
    Written by DJ Delorie.
 
@@ -5167,7 +5167,7 @@ rl78_decode_opcode (unsigned long pc AU,
         	rl78->syntax = "divhu"; ID(divhu);
         	break;
               case 0x04:
-        	rl78->syntax = "divwu"; ID(divwu);
+        	rl78->syntax = "divwu <old-encoding>"; ID(divwu);
         	break;
               case 0x05:
         	rl78->syntax = "machu"; ID(machu);
@@ -5175,9 +5175,11 @@ rl78_decode_opcode (unsigned long pc AU,
               case 0x06:
         	rl78->syntax = "mach"; ID(mach);
         	break;
+              case 0x0b:
+        	rl78->syntax = "divwu"; ID(divwu);
+        	break;
               }
-        
-        }
+         }
       break;
     case 0xcf:
         {
