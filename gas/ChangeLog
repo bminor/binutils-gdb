@@ -1,3 +1,9 @@
+2013-02-25  Terry Guo  <terry.guo@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add cortex-r7 entry.
+	* doc/c-arm.texi: Add cortex-r7 and missing cortex-r5 to
+	list of accepted CPUs.
+
 2013-02-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/15159
