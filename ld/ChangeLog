@@ -1,3 +1,8 @@
+2013-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/15188
+	* ld.texinfo: Fix typos.
+
 2013-02-21  Alan Modra  <amodra@gmail.com>
 
 	* scripttempl/elf.sc (.init_array, .fini_array): Don't sort all
