@@ -436,7 +436,7 @@ case "${targ}" in
     targ_selvecs=bfd_elf32_frv_vec
     ;;
 
-  moxie-*-elf | moxie-*-rtems | moxie-*-uclinux)
+  moxie-*-elf | moxie-*-rtems* | moxie-*-uclinux)
     targ_defvec=bfd_elf32_bigmoxie_vec
     targ_selvecs=bfd_elf32_littlemoxie_vec
     ;;
