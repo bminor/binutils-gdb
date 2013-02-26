@@ -139,7 +139,7 @@ frv-*-*)
 	gdb_sim=../sim/frv/libsim.a
 	;;
 
-moxie-*-elf)
+moxie-*-elf | moxie-*-rtems*)
 	gdb_target_obs="moxie-tdep.o"
 	gdb_sim=../sim/moxie/libsim.a
 	;;
