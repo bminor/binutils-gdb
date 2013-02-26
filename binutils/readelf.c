@@ -4751,16 +4751,19 @@ process_section_headers (FILE * file)
 #define CHECK_ENTSIZE_VALUES(section, i, size32, size64) \
   do									    \
     {									    \
-      size_t expected_entsize						    \
-	= is_32bit_elf ? size32 : size64;				    \
+      bfd_size_type expected_entsize = is_32bit_elf ? size32 : size64;	    \
       if (section->sh_entsize != expected_entsize)			    \
-	error (_("Section %d has invalid sh_entsize %lx (expected %lx)\n"), \
-	       i, (unsigned long int) section->sh_entsize,		    \
-	       (unsigned long int) expected_entsize);			    \
-      section->sh_entsize = expected_entsize;				    \
+	{								\
+	  error (_("Section %d has invalid an sh_entsize of %" BFD_VMA_FMT "x\n"), \
+		 i, section->sh_entsize);	\
+	  error (_("(Using the expected size of %d for the rest of this dump)\n"), \
+		   (int) expected_entsize); \
+	  section->sh_entsize = expected_entsize;			\
+	} \
     }									    \
   while (0)
-#define CHECK_ENTSIZE(section, i, type) \
+
+#define CHECK_ENTSIZE(section, i, type)					\
   CHECK_ENTSIZE_VALUES (section, i, sizeof (Elf32_External_##type),	    \
 			sizeof (Elf64_External_##type))
 
@@ -13337,6 +13340,7 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
   Elf_External_Note * pnotes;
   Elf_External_Note * external;
   int res = 1;
+  bfd_signed_vma data_remaining;
 
   if (length <= 0)
     return 0;
@@ -13348,10 +13352,11 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 
   external = pnotes;
 
-  printf (_("\nNotes at offset 0x%08lx with length 0x%08lx:\n"),
+  printf (_("\nDisplaying notes found at file offset 0x%08lx with length 0x%08lx:\n"),
 	  (unsigned long) offset, (unsigned long) length);
   printf (_("  %-20s %10s\tDescription\n"), _("Owner"), _("Data size"));
 
+  data_remaining = length;
   while (external < (Elf_External_Note *) ((char *) pnotes + length))
     {
       Elf_External_Note * next;
@@ -13360,6 +13365,14 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
 
       if (!is_ia64_vms ())
         {
+	  /* PR binutils/15191
+	     Make sure that there is enough data to read.  */
+	  if (data_remaining < sizeof * next)
+	    {
+	      warn (_("Corrupt note: only %d bytes remain, not enough for a full note\n"),
+		    (int) data_remaining);
+	      break;
+	    }
           inote.type     = BYTE_GET (external->type);
           inote.namesz   = BYTE_GET (external->namesz);
           inote.namedata = external->name;
@@ -13373,7 +13386,16 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
         {
           Elf64_External_VMS_Note *vms_external;
 
-          vms_external = (Elf64_External_VMS_Note *)external;
+	  /* PR binutils/15191
+	     Make sure that there is enough data to read.  */
+	  if (data_remaining < sizeof * vms_external)
+	    {
+	      warn (_("Corrupt note: only %d bytes remain, not enough for a full note\n"),
+		    (int) data_remaining);
+	      break;
+	    }
+	  
+          vms_external = (Elf64_External_VMS_Note *) external;
           inote.type     = BYTE_GET (vms_external->type);
           inote.namesz   = BYTE_GET (vms_external->namesz);
           inote.namedata = vms_external->name;
@@ -13385,12 +13407,12 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
             (inote.descdata + align_power (inote.descsz, 3));
         }
 
-      if (   ((char *) next > ((char *) pnotes) + length)
-	  || ((char *) next <  (char *) pnotes))
+      data_remaining -= ((char *) next - (char *) external);
+      if (data_remaining < 0)
 	{
-	  warn (_("corrupt note found at offset %lx into core notes\n"),
+	  warn (_("note with invalid namesz &/or descsz found at offset 0x%lx\n"),
 		(unsigned long) ((char *) external - (char *) pnotes));
-	  warn (_(" type: %lx, namesize: %08lx, descsize: %08lx\n"),
+	  warn (_(" type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx\n"),
 		inote.type, inote.namesz, inote.descsz);
 	  break;
 	}
@@ -13401,9 +13423,9 @@ process_corefile_note_segment (FILE * file, bfd_vma offset, bfd_vma length)
       if (inote.namedata + inote.namesz > (char *) pnotes + length
 	  || inote.namedata + inote.namesz < inote.namedata)
         {
-          warn (_("corrupt note found at offset %lx into core notes\n"),
+          warn (_("note with invalid namesz found at offset 0x%lx\n"),
                 (unsigned long) ((char *) external - (char *) pnotes));
-          warn (_(" type: %lx, namesize: %08lx, descsize: %08lx\n"),
+          warn (_(" type: 0x%lx, namesize: 0x%08lx, descsize: 0x%08lx\n"),
                 inote.type, inote.namesz, inote.descsz);
           break;
         }

@@ -1,3 +1,8 @@
+2013-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15191
+	* binutils-all/readelf.n: Updare expected output from readelf.
+
 2013-02-14  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* binutils-all/mips/mixed-mips16.s: Add missing stack adjustment.

@@ -1,3 +1,9 @@
+2013-02-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15191
+	* readelf.c (process_corefile_note_segment): Prevent attempts to
+	read beyond the end of the note buffer.
+
 2013-02-15  Kai Tietz  <ktietz@redhat.com>
 
 	* objcopy.c (copy_main): Initialize context variable.
