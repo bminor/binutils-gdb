@@ -4002,7 +4002,6 @@ cmd_qtbuffer (char *own_buf)
     num = (PBUFSIZ - 16) / 2;
 
   convert_int_to_ascii (tbp, own_buf, num);
-  own_buf[num] = '\0';
 }
 
 static void
