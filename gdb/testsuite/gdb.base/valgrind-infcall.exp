@@ -79,6 +79,7 @@ gdb_test_multiple "" $test {
 }
 
 # Do not kill valgrind.
+set valgrind_pid [exp_pid -i [board_info host fileid]]
 unset gdb_spawn_id
 set board [host_info name]
 unset_board_info fileid
@@ -122,3 +123,6 @@ gdb_test_multiple $test $test {
 	pass $test
     }
 }
+
+# Only if valgrind got stuck.
+remote_exec host "kill -9 ${valgrind_pid}"
