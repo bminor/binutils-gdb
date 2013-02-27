@@ -1,3 +1,10 @@
+2013-02-27  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (tfile_trace_find): For tfind
+    	pc/tp/range/outside, look for the next trace frame instead of
+    	always starting from frame 0.
+
 2013-02-26  Anthony Green  <green@moxielogic.com>
 
 	* configure.tgt: Add support for moxie-*-rtems* target.

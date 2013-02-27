@@ -4316,35 +4316,46 @@ tfile_trace_find (enum trace_find_type type, int num,
                                      ((gdb_byte *) &data_size, 4,
 				      gdbarch_byte_order (target_gdbarch ()));
       offset += 4;
-      switch (type)
+
+      if (type == tfind_number)
 	{
-	case tfind_number:
+	  /* Looking for a specific trace frame.  */
 	  if (tfnum == num)
 	    found = 1;
-	  break;
-	case tfind_pc:
-	  tfaddr = tfile_get_traceframe_address (tframe_offset);
-	  if (tfaddr == addr1)
-	    found = 1;
-	  break;
-	case tfind_tp:
-	  tp = get_tracepoint (num);
-	  if (tp && tpnum == tp->number_on_target)
-	    found = 1;
-	  break;
-	case tfind_range:
-	  tfaddr = tfile_get_traceframe_address (tframe_offset);
-	  if (addr1 <= tfaddr && tfaddr <= addr2)
-	    found = 1;
-	  break;
-	case tfind_outside:
-	  tfaddr = tfile_get_traceframe_address (tframe_offset);
-	  if (!(addr1 <= tfaddr && tfaddr <= addr2))
-	    found = 1;
-	  break;
-	default:
-	  internal_error (__FILE__, __LINE__, _("unknown tfind type"));
 	}
+      else
+	{
+	  /* Start from the _next_ trace frame.  */
+	  if (tfnum > traceframe_number)
+	    {
+	      switch (type)
+		{
+		case tfind_pc:
+		  tfaddr = tfile_get_traceframe_address (tframe_offset);
+		  if (tfaddr == addr1)
+		    found = 1;
+		  break;
+		case tfind_tp:
+		  tp = get_tracepoint (num);
+		  if (tp && tpnum == tp->number_on_target)
+		    found = 1;
+		  break;
+		case tfind_range:
+		  tfaddr = tfile_get_traceframe_address (tframe_offset);
+		  if (addr1 <= tfaddr && tfaddr <= addr2)
+		    found = 1;
+		  break;
+		case tfind_outside:
+		  tfaddr = tfile_get_traceframe_address (tframe_offset);
+		  if (!(addr1 <= tfaddr && tfaddr <= addr2))
+		    found = 1;
+		  break;
+		default:
+		  internal_error (__FILE__, __LINE__, _("unknown tfind type"));
+		}
+	    }
+	}
+
       if (found)
 	{
 	  if (tpp)
