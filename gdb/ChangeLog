@@ -1,5 +1,9 @@
 2013-02-27  Jiong Wang  <jiwang@tilera.com>
 
+	* configure.tgt (tilegx-*-linux*): Enable gdbserver.
+
+2013-02-27  Jiong Wang  <jiwang@tilera.com>
+
 	* configure.tgt (tilegx-*-linux*): Replace whitespace with tab.
 
 2013-02-27  Yao Qi  <yao@codesourcery.com>
