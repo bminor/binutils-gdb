@@ -1,3 +1,30 @@
+2013-02-28  Alan Modra  <amodra@gmail.com>
+
+	* target.h (Target::plt_fde_location, do_plt_fde_location): Declare.
+	* target.cc (Target::do_plt_fde_location): New function.
+	* ehframe.h (class FDE): Add post_map field to u_.from_linker,
+	accessor function, and constructor param.
+	(struct Post_fde, Post_fdes): Declare.
+	(Cie::write): Add post_fdes param.
+	* ehframe.cc (Fde::write): Use plt_fde_location.
+	(struct Post_fde): Define.
+	(Cie::write): Stash FDEs added post merge mapping.
+	(Eh_frame::add_ehframe_for_plt): Assert no new CIEs after mapping.
+	Adjust Fde constructor call.  Bump final_data_size_ for post map FDEs.
+	(Eh_frame::do_sized_write): Arrange to write post map FDES after
+	other FDEs.
+	* powerpc.cc (Target_powerpc::do_plt_fde_location): New function.
+	(Target_powerpc::has_glink): New function.
+	(Target_powerpc::do_relax): Add eh_frame info for stubs.
+	(struct Eh_cie, eh_frame_cie, glink_eh_frame_fde_64,
+	glink_eh_frame_fde_32, default_fde): New data.
+	(Stub_table::eh_frame_added_): New var.
+	(Stub_table::find_long_branch_entry, stub_address, stub_offset):
+	Make const.
+	(Stub_table::add_eh_frame): New function.
+	(Output_data_glink::add_eh_frame): New function.
+	(Target_powerpc::make_glink_section): Call add_eh_frame.
+
 2013-02-15  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (DEFINE_uint64_alias): Define.

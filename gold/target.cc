@@ -203,6 +203,15 @@ Target::set_view_to_nop(unsigned char* view, section_size_type view_size,
     }
 }
 
+// Return address and size to plug into eh_frame FDEs associated with a PLT.
+void
+Target::do_plt_fde_location(const Output_data* plt, unsigned char*,
+			    uint64_t* address, off_t* len) const
+{
+  *address = plt->address();
+  *len = plt->data_size();
+}
+
 // Class Sized_target.
 
 // Set the EI_OSABI field of the ELF header if requested.

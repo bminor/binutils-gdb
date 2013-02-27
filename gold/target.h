@@ -240,6 +240,12 @@ class Target
   adjust_elf_header(unsigned char* view, int len) const
   { return this->do_adjust_elf_header(view, len); }
 
+  // Return address and size to plug into eh_frame FDEs associated with a PLT.
+  void
+  plt_fde_location(const Output_data* plt, unsigned char* oview,
+		   uint64_t* address, off_t* len) const
+  { return this->do_plt_fde_location(plt, oview, address, len); }
+
   // Return whether NAME is a local label name.  This is used to implement the
   // --discard-locals options.
   bool
@@ -529,6 +535,11 @@ class Target
   // Sized_target).
   virtual void
   do_adjust_elf_header(unsigned char*, int) const = 0;
+
+  // Return address and size to plug into eh_frame FDEs associated with a PLT.
+  virtual void
+  do_plt_fde_location(const Output_data* plt, unsigned char* oview,
+		      uint64_t* address, off_t* len) const;
 
   // Virtual function which may be overridden by the child class.
   virtual bool

@@ -25,6 +25,7 @@
 
 #include <algorithm>
 #include "elfcpp.h"
+#include "dwarf.h"
 #include "parameters.h"
 #include "reloc.h"
 #include "powerpc.h"
@@ -394,6 +395,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
   bool
   do_relax(int, const Input_objects*, Symbol_table*, Layout*, const Task*);
 
+  void
+  do_plt_fde_location(const Output_data*, unsigned char*,
+		      uint64_t*, off_t*) const;
+
   // Stash info about branches, for stub generation.
   void
   push_branch(Powerpc_relobj<size, big_endian>* ppc_object,
@@ -525,6 +530,9 @@ class Target_powerpc : public Sized_target<size, big_endian>
     gold_assert(this->glink_ != NULL);
     return this->glink_;
   }
+
+  bool has_glink() const
+  { return this->glink_ != NULL; }
 
   // Get the GOT section.
   const Output_data_got_powerpc<size, big_endian>*
@@ -2277,6 +2285,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
       if ((*p)->size_update())
 	{
 	  again = true;
+	  (*p)->add_eh_frame(layout);
 	  os_need_update.insert((*p)->output_section());
 	}
     }
@@ -2330,6 +2339,54 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
       this->brlt_section_->finalize_data_size();
     }
   return again;
+}
+
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::do_plt_fde_location(const Output_data* plt,
+						      unsigned char* oview,
+						      uint64_t* paddress,
+						      off_t* plen) const
+{
+  uint64_t address = plt->address();
+  off_t len = plt->data_size();
+
+  if (plt == this->glink_)
+    {
+      // See Output_data_glink::do_write() for glink contents.
+      if (size == 64)
+	{
+	  // There is one word before __glink_PLTresolve
+	  address += 8;
+	  len -= 8;
+	}
+      else if (parameters->options().output_is_position_independent())
+	{
+	  // There are two FDEs for a position independent glink.
+	  // The first covers the branch table, the second
+	  // __glink_PLTresolve at the end of glink.
+	  off_t resolve_size = this->glink_->pltresolve_size;
+	  if (oview[9] == 0)
+	    len -= resolve_size;
+	  else
+	    {
+	      address += len - resolve_size;
+	      len = resolve_size;
+	    }
+	}
+    }
+  else
+    {
+      // Must be a stub table.
+      const Stub_table<size, big_endian>* stub_table
+	= static_cast<const Stub_table<size, big_endian>*>(plt);
+      uint64_t stub_address = stub_table->stub_address();
+      len -= stub_address - address;
+      address = stub_address;
+    }
+
+  *paddress = address;
+  *plen = len;
 }
 
 // A class to handle the PLT data.
@@ -2774,6 +2831,60 @@ ha(uint32_t a)
   return hi(a + 0x8000);
 }
 
+template<int size>
+struct Eh_cie
+{
+  static const unsigned char eh_frame_cie[12];
+};
+
+template<int size>
+const unsigned char Eh_cie<size>::eh_frame_cie[] =
+{
+  1,					// CIE version.
+  'z', 'R', 0,				// Augmentation string.
+  4,					// Code alignment.
+  0x80 - size / 8 ,			// Data alignment.
+  65,					// RA reg.
+  1,					// Augmentation size.
+  (elfcpp::DW_EH_PE_pcrel
+   | elfcpp::DW_EH_PE_sdata4),		// FDE encoding.
+  elfcpp::DW_CFA_def_cfa, 1, 0		// def_cfa: r1 offset 0.
+};
+
+// Describe __glink_PLTresolve use of LR, 64-bit version.
+static const unsigned char glink_eh_frame_fde_64[] =
+{
+  0, 0, 0, 0,				// Replaced with offset to .glink.
+  0, 0, 0, 0,				// Replaced with size of .glink.
+  0,					// Augmentation size.
+  elfcpp::DW_CFA_advance_loc + 1,
+  elfcpp::DW_CFA_register, 65, 12,
+  elfcpp::DW_CFA_advance_loc + 4,
+  elfcpp::DW_CFA_restore_extended, 65
+};
+
+// Describe __glink_PLTresolve use of LR, 32-bit version.
+static const unsigned char glink_eh_frame_fde_32[] =
+{
+  0, 0, 0, 0,				// Replaced with offset to .glink.
+  0, 0, 0, 0,				// Replaced with size of .glink.
+  0,					// Augmentation size.
+  elfcpp::DW_CFA_advance_loc + 2,
+  elfcpp::DW_CFA_register, 65, 0,
+  elfcpp::DW_CFA_advance_loc + 4,
+  elfcpp::DW_CFA_restore_extended, 65
+};
+
+static const unsigned char default_fde[] =
+{
+  0, 0, 0, 0,				// Replaced with offset to stubs.
+  0, 0, 0, 0,				// Replaced with size of stubs.
+  0,					// Augmentation size.
+  elfcpp::DW_CFA_nop,			// Pad.
+  elfcpp::DW_CFA_nop,
+  elfcpp::DW_CFA_nop
+};
+
 template<bool big_endian>
 static inline void
 write_insn(unsigned char* p, uint32_t v)
@@ -2797,7 +2908,7 @@ class Stub_table : public Output_relaxed_input_section
     : Output_relaxed_input_section(NULL, 0, 0),
       targ_(targ), plt_call_stubs_(), long_branch_stubs_(),
       orig_data_size_(0), plt_size_(0), last_plt_size_(0),
-      branch_size_(0), last_branch_size_(0)
+      branch_size_(0), last_branch_size_(0), eh_frame_added_(false)
   { }
 
   // Delayed Output_relaxed_input_section init.
@@ -2842,7 +2953,8 @@ class Stub_table : public Output_relaxed_input_section
   add_long_branch_entry(const Powerpc_relobj<size, big_endian>*, Address);
 
   Address
-  find_long_branch_entry(const Powerpc_relobj<size, big_endian>*, Address);
+  find_long_branch_entry(const Powerpc_relobj<size, big_endian>*,
+			 Address) const;
 
   void
   clear_stubs()
@@ -2871,14 +2983,14 @@ class Stub_table : public Output_relaxed_input_section
   }
 
   Address
-  stub_address()
+  stub_address() const
   {
     return align_address(this->address() + this->orig_data_size_,
 			 this->stub_align());
   }
 
   Address
-  stub_offset()
+  stub_offset() const
   {
     return align_address(this->offset() + this->orig_data_size_,
 			 this->stub_align());
@@ -2917,6 +3029,35 @@ class Stub_table : public Output_relaxed_input_section
 	return true;
       }
     return false;
+  }
+
+  // Add .eh_frame info for this stub section.  Unlike other linker
+  // generated .eh_frame this is added late in the link, because we
+  // only want the .eh_frame info if this particular stub section is
+  // non-empty.
+  void
+  add_eh_frame(Layout* layout)
+  {
+    if (!this->eh_frame_added_)
+      {
+	if (!parameters->options().ld_generated_unwind_info())
+	  return;
+
+	// Since we add stub .eh_frame info late, it must be placed
+	// after all other linker generated .eh_frame info so that
+	// merge mapping need not be updated for input sections.
+	// There is no provision to use a different CIE to that used
+	// by .glink.
+	if (!this->targ_->has_glink())
+	  return;
+
+	layout->add_eh_frame_for_plt(this,
+				     Eh_cie<size>::eh_frame_cie,
+				     sizeof (Eh_cie<size>::eh_frame_cie),
+				     default_fde,
+				     sizeof (default_fde));
+	this->eh_frame_added_ = true;
+      }
   }
 
   Target_powerpc<size, big_endian>*
@@ -3118,6 +3259,8 @@ class Stub_table : public Output_relaxed_input_section
   section_size_type orig_data_size_;
   // size of stubs
   section_size_type plt_size_, last_plt_size_, branch_size_, last_branch_size_;
+  // Whether .eh_frame info has been created for this stub section.
+  bool eh_frame_added_;
 };
 
 // Make a new stub table, and record.
@@ -3261,7 +3404,7 @@ template<int size, bool big_endian>
 typename Stub_table<size, big_endian>::Address
 Stub_table<size, big_endian>::find_long_branch_entry(
     const Powerpc_relobj<size, big_endian>* object,
-    Address to)
+    Address to) const
 {
   Branch_stub_ent ent(object, to);
   typename Branch_stub_entries::const_iterator p
@@ -3280,6 +3423,37 @@ class Output_data_glink : public Output_section_data
   Output_data_glink(Target_powerpc<size, big_endian>* targ)
     : Output_section_data(16), targ_(targ)
   { }
+
+  void
+  add_eh_frame(Layout* layout)
+  {
+    if (!parameters->options().ld_generated_unwind_info())
+      return;
+
+    if (size == 64)
+      layout->add_eh_frame_for_plt(this,
+				   Eh_cie<64>::eh_frame_cie,
+				   sizeof (Eh_cie<64>::eh_frame_cie),
+				   glink_eh_frame_fde_64,
+				   sizeof (glink_eh_frame_fde_64));
+    else
+      {
+	// 32-bit .glink can use the default since the CIE return
+	// address reg, LR, is valid.
+	layout->add_eh_frame_for_plt(this,
+				     Eh_cie<32>::eh_frame_cie,
+				     sizeof (Eh_cie<32>::eh_frame_cie),
+				     default_fde,
+				     sizeof (default_fde));
+	// Except where LR is used in a PIC __glink_PLTresolve.
+	if (parameters->options().output_is_position_independent())
+	  layout->add_eh_frame_for_plt(this,
+				       Eh_cie<32>::eh_frame_cie,
+				       sizeof (Eh_cie<32>::eh_frame_cie),
+				       glink_eh_frame_fde_32,
+				       sizeof (glink_eh_frame_fde_32));
+      }
+  }
 
  protected:
   // Write to a map file.
@@ -4086,6 +4260,7 @@ Target_powerpc<size, big_endian>::make_glink_section(Layout* layout)
   if (this->glink_ == NULL)
     {
       this->glink_ = new Output_data_glink<size, big_endian>(this);
+      this->glink_->add_eh_frame(layout);
       layout->add_output_section_data(".text", elfcpp::SHT_PROGBITS,
 				      elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR,
 				      this->glink_, ORDER_TEXT, false);
