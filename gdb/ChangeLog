@@ -1,3 +1,11 @@
+2013-02-27  Corinna Vinschen  <vinschen@redhat.com>
+
+	* windows-nat.c: Throughout, fix format strings and casts of
+	printf-like functions to avoid type related warnings on all
+	platforms.
+	(handle_output_debug_string): Fetch context information address
+	from debug string using string_to_core_addr.
+
 2013-02-27  Jiong Wang  <jiwang@tilera.com>
 
 	* regformats/reg-tilegx.dat (name): Change abi name to "tilegx".
