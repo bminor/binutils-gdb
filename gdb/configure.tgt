@@ -596,10 +596,10 @@ tic6x-*-*)
 	;;
 
 tilegx-*-linux*)
-        # Target: TILE-Gx
-        gdb_target_obs="tilegx-tdep.o tilegx-linux-tdep.o solib-svr4.o \
+	# Target: TILE-Gx
+	gdb_target_obs="tilegx-tdep.o tilegx-linux-tdep.o solib-svr4.o \
 			symfile-mem.o glibc-tdep.o linux-tdep.o"
-        ;;
+	;;
 
 xstormy16-*-*)
 	# Target: Sanyo Xstormy16a processor
