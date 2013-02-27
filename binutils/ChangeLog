@@ -1,3 +1,12 @@
+2013-02-27  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/15191
+	* readelf.c (offsetof): Define.
+	(CHECK_ENTSIZE_VALUES): Remove extraneous indefinite article.
+	(process_corefile_note_segment): Allow notes without name or
+	desc.  Combine out-of-range checks.  Disallow "negative"
+	notesz or descsz.
+
 2013-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15191
@@ -78,14 +87,14 @@
 
 2013-01-25  Cary Coutant  <ccoutant@google.com>
 
-    	* dwarf.c (display_loc_list): Update offset for each line
-    	printed.
-    	(print_addr_index): New function.
-    	(display_loc_list_dwo): Update offset for each line printed.
-    	Fix problems displaying loclists in .dwo files.  Add support
-    	for type 4 entries.
-    	(display_debug_loc): Remove custom header for .dwo files.
-    	(display_debug_addr): Adjust formatting.
+	* dwarf.c (display_loc_list): Update offset for each line
+	printed.
+	(print_addr_index): New function.
+	(display_loc_list_dwo): Update offset for each line printed.
+	Fix problems displaying loclists in .dwo files.  Add support
+	for type 4 entries.
+	(display_debug_loc): Remove custom header for .dwo files.
+	(display_debug_addr): Adjust formatting.
 
 2013-01-25  Marco Atzeri  <marco.atzeri@gmail.com>
 
