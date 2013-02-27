@@ -1,3 +1,8 @@
+2013-02-27  Alan Modra  <amodra@gmail.com>
+
+	* rl78-decode.opc (rl78_decode_opcode): Fix typo.
+	* rl78-decode.c: Regenerate.
+
 2013-02-25  Kaushik Phatak  <Kaushik.Phatak@kpitcummins.com>
 
 	* rl78-decode.opc: Fix encoding of DIVWU insn.

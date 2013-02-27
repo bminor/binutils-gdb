@@ -762,7 +762,7 @@ rl78_decode_opcode (unsigned long pc AU,
 	rl78->syntax = "divhu"; ID(divhu);
 	break;
       case 0x04:
-	rl78->syntax = "divwu <old-encoding>" ID(divwu);
+	rl78->syntax = "divwu <old-encoding>"; ID(divwu);
 	break;
       case 0x05:
 	rl78->syntax = "machu"; ID(machu);
