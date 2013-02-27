@@ -2860,7 +2860,8 @@ process_point_options (CORE_ADDR point_addr, char **packet)
       if (*dataptr == 'X')
 	{
 	  /* Conditional expression.  */
-	  fprintf (stderr, "Found breakpoint condition.\n");
+	  if (debug_threads)
+	    fprintf (stderr, "Found breakpoint condition.\n");
 	  add_breakpoint_condition (point_addr, &dataptr);
 	}
       else if (strncmp (dataptr, "cmds:", strlen ("cmds:")) == 0)

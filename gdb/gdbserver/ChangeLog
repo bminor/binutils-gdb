@@ -1,3 +1,8 @@
+2013-02-27  Yao Qi  <yao@codesourcery.com>
+
+	* server.c (process_point_options): Print debug message when
+	debug_threads is true.
+
 2013-02-26  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (cmd_qtbuffer): Don't set '\0' in OWN_BUF.
