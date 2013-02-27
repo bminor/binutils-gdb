@@ -778,6 +778,8 @@ rl78_elf_relocate_section
 			       + sec->output_section->vma
 			       + sec->output_offset
 			       + rel->r_addend);
+	      else if (h->root.type == bfd_link_hash_undefweak)
+		RL78_STACK_PUSH (0);
 	      else
 		_bfd_error_handler (_("Warning: RL78_SYM reloc with an unknown symbol"));
 	    }

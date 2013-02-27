@@ -194,6 +194,9 @@ rl78_op (expressionS exp, int nbytes, int type)
     }
   else
     {
+      if (nbytes > 2
+	  && exp.X_md == BFD_RELOC_RL78_CODE)
+	exp.X_md = 0;
       rl78_op_fixup (exp, rl78_bytes.n_ops * 8, nbytes * 8, type);
       memset (rl78_bytes.ops + rl78_bytes.n_ops, 0, nbytes);
       rl78_bytes.n_ops += nbytes;
@@ -337,6 +340,7 @@ static struct
 }
 reloc_functions[] =
 {
+  { "code", BFD_RELOC_RL78_CODE },
   { "lo16", BFD_RELOC_RL78_LO16 },
   { "hi16", BFD_RELOC_RL78_HI16 },
   { "hi8",  BFD_RELOC_RL78_HI8 },
@@ -556,6 +560,10 @@ rl78_cons_fix_new (fragS *	frag,
 
   switch (exp->X_md)
     {
+    case BFD_RELOC_RL78_CODE:
+      if (size == 2)
+	type = exp->X_md;
+      break;
     case BFD_RELOC_RL78_LO16:
     case BFD_RELOC_RL78_HI16:
       if (size != 2)
@@ -665,6 +673,11 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
       OP (ABS32);
       break;
 
+    case BFD_RELOC_RL78_CODE:
+      SYM0 ();
+      OP (ABS16);
+      break;
+
     case BFD_RELOC_RL78_LO16:
       SYM0 ();
       OPIMM (0xffff);
@@ -771,6 +784,7 @@ md_apply_fix (struct fix * f ATTRIBUTE_UNUSED,
 
     case BFD_RELOC_16:
     case BFD_RELOC_16_PCREL:
+    case BFD_RELOC_RL78_CODE:
       op[0] = val;
       op[1] = val >> 8;
       break;

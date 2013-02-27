@@ -4239,6 +4239,7 @@ in .byte hlo8(symbol)  */
   BFD_RELOC_RL78_HI16,
   BFD_RELOC_RL78_HI8,
   BFD_RELOC_RL78_LO16,
+  BFD_RELOC_RL78_CODE,
 
 /* Renesas RX Relocations.  */
   BFD_RELOC_RX_NEG8,

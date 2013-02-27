@@ -1,3 +1,11 @@
+2013-02-27  DJ Delorie  <dj@redhat.com>
+
+	* reloc.c (BFD_RELOC_RL78_CODE): Add.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* elf32-rl78.c (rl78_elf_relocate_section): Handle weak code
+	references in compuated relocs.
+
 2013-02-26  Anthony Green  <green@moxielogic.com>
 
 	* config.bfd: Extend moxie-rtems target triplet name support.

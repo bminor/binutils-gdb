@@ -1,3 +1,11 @@
+2013-02-27  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-rl78.c (reloc_function): Add %code -> BFD_RELOC_RL78_CODE.
+	(rl78_op): Handle %code().
+	(rl78_cons_fix_new): Likewise, but ignore for 20-bit operands.
+	(tc_gen_reloc): Likwise; convert to a computed reloc.
+	(md_apply_fix): Likewise.
+
 2013-02-25  Kaushik Phatak  <Kaushik.Phatak@kpitcummins.com>
 
 	* config/rl78-parse.y: Fix encoding of DIVWU insn.
