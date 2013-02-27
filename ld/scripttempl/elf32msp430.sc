@@ -144,7 +144,7 @@ SECTIONS
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
     ${RELOCATING+. = ALIGN(2);}
     *(.data)
-    ${RELOCATING+. = ALIGN(2);}
+    *(.data.*)
     *(.gnu.linkonce.d*)
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
@@ -177,6 +177,7 @@ SECTIONS
 
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
+    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__bss_start = .) ; }
     *(.bss)
     *(COMMON)

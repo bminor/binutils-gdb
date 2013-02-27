@@ -1,3 +1,9 @@
+2013-02-27  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc: Add placement of .data.* sections.
+	Add alignment of .bss section.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+
 2013-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/15188
