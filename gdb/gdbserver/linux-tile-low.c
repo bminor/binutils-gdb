@@ -20,10 +20,13 @@
 #include "server.h"
 #include "linux-low.h"
 
+#include <arch/abi.h>
 #include <sys/ptrace.h>
 
-/* Defined in auto-generated file reg-tile.c.  */
-void init_registers_tile (void);
+/* Defined in auto-generated file reg-tilegx.c.  */
+void init_registers_tilegx (void);
+/* Defined in auto-generated file reg-tilegx32.c.  */
+void init_registers_tilegx32 (void);
 
 #define tile_num_regs 65
 
@@ -103,7 +106,7 @@ tile_fill_gregset (struct regcache *regcache, void *buf)
 
   for (i = 0; i < tile_num_regs; i++)
     if (tile_regmap[i] != -1)
-      collect_register (regcache, i, ((unsigned int *) buf) + tile_regmap[i]);
+      collect_register (regcache, i, ((uint_reg_t *) buf) + tile_regmap[i]);
 }
 
 static void
@@ -113,7 +116,7 @@ tile_store_gregset (struct regcache *regcache, const void *buf)
 
   for (i = 0; i < tile_num_regs; i++)
     if (tile_regmap[i] != -1)
-      supply_register (regcache, i, ((unsigned long *) buf) + tile_regmap[i]);
+      supply_register (regcache, i, ((uint_reg_t *) buf) + tile_regmap[i]);
 }
 
 struct regset_info target_regsets[] =
@@ -123,9 +126,27 @@ struct regset_info target_regsets[] =
   { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
+static void
+tile_arch_setup (void)
+{
+  int pid = pid_of (get_thread_lwp (current_inferior));
+  unsigned int machine;
+  int is_elf64 = linux_pid_exe_is_elf_64_file (pid, &machine);
+
+  if (sizeof (void *) == 4)
+    if (is_elf64 > 0)
+      error (_("Can't debug 64-bit process with 32-bit GDBserver"));
+
+  if (!is_elf64)
+    init_registers_tilegx32();
+  else
+    init_registers_tilegx();
+}
+
+
 struct linux_target_ops the_low_target =
 {
-  init_registers_tile,
+  tile_arch_setup,
   tile_num_regs,
   tile_regmap,
   NULL,

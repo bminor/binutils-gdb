@@ -1,3 +1,15 @@
+2013-02-27  Jiong Wang  <jiwang@tilera.com>
+
+	* Makefile.in (clean): Remove reg-tilegx.c, reg-tilegx32.c.
+	(reg-tilegx32.c): New rule.
+	* configure.srv (tilegx-*-linux*): Add reg-tilegx32.o to srv_regobj.
+	* linux-tile-low.c (tile_arch_setup): New function.  Invoke
+	different register info initializer according to elf class.
+	(init_registers_tilgx32): New function.  The tilegx32 register info
+	initializer.
+	(tile_fill_gregset): Use "uint_reg_t" to represent register size.
+	(tile_store_gregset): Likewise.
+
 2013-02-27  Yao Qi  <yao@codesourcery.com>
 
 	* server.c (process_point_options): Print debug message when

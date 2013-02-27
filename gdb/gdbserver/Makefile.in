@@ -320,6 +320,7 @@ clean:
 	rm -f reg-arm.c reg-bfin.c i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-sh.c reg-sparc.c reg-spu.c amd64.c i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c amd64-linux.c reg-xtensa.c
+	rm -f reg-tilegx.c reg-tilegx32.c
 	rm -f arm-with-iwmmxt.c
 	rm -f arm-with-vfpv2.c arm-with-vfpv3.c arm-with-neon.c
 	rm -f mips-linux.c mips64-linux.c
@@ -694,6 +695,8 @@ reg-xtensa.c : $(srcdir)/../regformats/reg-xtensa.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-xtensa.dat reg-xtensa.c
 reg-tilegx.c : $(srcdir)/../regformats/reg-tilegx.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-tilegx.dat reg-tilegx.c
+reg-tilegx32.c : $(srcdir)/../regformats/reg-tilegx32.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-tilegx32.dat reg-tilegx32.c
 
 #
 # Dependency tracking.  Most of this is conditional on GNU Make being

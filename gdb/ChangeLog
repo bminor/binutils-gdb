@@ -1,5 +1,10 @@
 2013-02-27  Jiong Wang  <jiwang@tilera.com>
 
+	* regformats/reg-tilegx.dat (name): Change abi name to "tilegx".
+	* regformats/reg-tilegx32.dat: New.
+
+2013-02-27  Jiong Wang  <jiwang@tilera.com>
+
 	* configure.tgt (tilegx-*-linux*): Enable gdbserver.
 
 2013-02-27  Jiong Wang  <jiwang@tilera.com>

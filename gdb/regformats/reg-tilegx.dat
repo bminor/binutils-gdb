@@ -1,4 +1,4 @@
-name:tile
+name:tilegx
 expedite:sp,lr,pc
 64:r0
 64:r1
