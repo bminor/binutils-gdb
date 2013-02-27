@@ -1,5 +1,9 @@
 2013-02-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.threads/fork-thread-pending.c (main): Add alarm.
+
+2013-02-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/valgrind-infcall.exp (valgrind_pid): New variable.
 	Add final kill of ${valgrind_pid}.
 

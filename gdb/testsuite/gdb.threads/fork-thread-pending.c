@@ -94,6 +94,8 @@ main (void)
   int args[NUMTHREADS];
   int i, j;
 
+  alarm (600);
+
   i = pthread_barrier_init (&barrier, NULL, NUMTHREADS);
   assert (i == 0);
 
