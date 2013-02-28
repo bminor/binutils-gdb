@@ -293,8 +293,8 @@ struct _i386_insn
     /* REP prefix.  */
     const char *rep_prefix;
 
-    /* Have HLE prefix.  */
-    unsigned int have_hle;
+    /* HLE prefix.  */
+    const char *hle_prefix;
 
     /* Error message.  */
     enum i386_error error;
@@ -3073,20 +3073,13 @@ check_hle (void)
     default:
       abort ();
     case HLEPrefixNone:
-      if (i.prefix[HLE_PREFIX] == XACQUIRE_PREFIX_OPCODE)
-	as_bad (_("invalid instruction `%s' after `xacquire'"),
-		i.tm.name);
-      else
-	as_bad (_("invalid instruction `%s' after `xrelease'"),
-		i.tm.name);
+      as_bad (_("invalid instruction `%s' after `%s'"),
+	      i.tm.name, i.hle_prefix);
       return 0;
     case HLEPrefixLock:
       if (i.prefix[LOCK_PREFIX])
 	return 1;
-      if (i.prefix[HLE_PREFIX] == XACQUIRE_PREFIX_OPCODE)
-	as_bad (_("missing `lock' with `xacquire'"));
-      else
-	as_bad (_("missing `lock' with `xrelease'"));
+      as_bad (_("missing `lock' with `%s'"), i.hle_prefix);
       return 0;
     case HLEPrefixAny:
       return 1;
@@ -3235,7 +3228,7 @@ md_assemble (char *line)
     }
 
   /* Check if HLE prefix is OK.  */
-  if (i.have_hle && !check_hle ())
+  if (i.hle_prefix && !check_hle ())
     return;
 
   /* Check string instruction segment overrides.  */
@@ -3439,7 +3432,7 @@ parse_insn (char *line, char *mnemonic)
 	      return NULL;
 	    case PREFIX_REP:
 	      if (current_templates->start->cpu_flags.bitfield.cpuhle)
-		i.have_hle = 1;
+		i.hle_prefix = current_templates->start->name;
 	      else
 		i.rep_prefix = current_templates->start->name;
 	      break;

@@ -1,5 +1,12 @@
 2013-02-28  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (_i386_insn): Replace have_hle with hle_prefix.
+	(check_hle): Updated.
+	(md_assemble): Likewise.
+	(parse_insn): Likewise.
+
+2013-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (_i386_insn): Add rep_prefix.
 	(md_assemble): Check if REP prefix is OK. 
 	(parse_insn): Remove expecting_string_instruction.  Set
