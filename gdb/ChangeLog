@@ -1,5 +1,11 @@
 2013-02-28  Tom Tromey  <tromey@redhat.com>
 
+	* contrib/excheck.py: New file.
+	* contrib/exsummary.py: New file.
+	* contrib/gcc-with-excheck: New file.
+
+2013-02-28  Tom Tromey  <tromey@redhat.com>
+
 	* python/python.c (gdbpy_print_stack): Call begin_line and
 	fprintf_filtered inside TRY_CATCH.
 
