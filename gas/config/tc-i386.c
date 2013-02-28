@@ -290,6 +290,9 @@ struct _i386_insn
 	disp_encoding_32bit
       } disp_encoding;
 
+    /* REP prefix.  */
+    const char *rep_prefix;
+
     /* Have HLE prefix.  */
     unsigned int have_hle;
 
@@ -3211,6 +3214,14 @@ md_assemble (char *line)
     if (!add_prefix (FWAIT_OPCODE))
       return;
 
+  /* Check if REP prefix is OK.  */
+  if (i.rep_prefix && !i.tm.opcode_modifier.repprefixok)
+    {
+      as_bad (_("invalid instruction `%s' after `%s'"),
+		i.tm.name, i.rep_prefix);
+      return;
+    }
+
   /* Check for lock without a lockable instruction.  Destination operand
      must be memory unless it is xchg (0x86).  */
   if (i.prefix[LOCK_PREFIX]
@@ -3359,9 +3370,6 @@ parse_insn (char *line, char *mnemonic)
   const insn_template *t;
   char *dot_p = NULL;
 
-  /* Non-zero if we found a prefix only acceptable with string insns.  */
-  const char *expecting_string_instruction = NULL;
-
   while (1)
     {
       mnem_p = mnemonic;
@@ -3433,7 +3441,7 @@ parse_insn (char *line, char *mnemonic)
 	      if (current_templates->start->cpu_flags.bitfield.cpuhle)
 		i.have_hle = 1;
 	      else
-		expecting_string_instruction = current_templates->start->name;
+		i.rep_prefix = current_templates->start->name;
 	      break;
 	    default:
 	      break;
@@ -3580,27 +3588,6 @@ skip:
 	   && (flag_code != CODE_16BIT))
     {
       as_warn (_("use .code16 to ensure correct addressing mode"));
-    }
-
-  /* Check for rep/repne without a string (or other allowed) instruction.  */
-  if (expecting_string_instruction)
-    {
-      static templates override;
-
-      for (t = current_templates->start; t < current_templates->end; ++t)
-	if (t->opcode_modifier.repprefixok)
-	  break;
-      if (t >= current_templates->end)
-	{
-	  as_bad (_("expecting string instruction after `%s'"),
-		  expecting_string_instruction);
-	  return NULL;
-	}
-      for (override.start = t; t < current_templates->end; ++t)
-	if (!t->opcode_modifier.repprefixok)
-	  break;
-      override.end = t;
-      current_templates = &override;
     }
 
   return l;

@@ -1,3 +1,10 @@
+2013-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (_i386_insn): Add rep_prefix.
+	(md_assemble): Check if REP prefix is OK. 
+	(parse_insn): Remove expecting_string_instruction.  Set
+	i.rep_prefix.
+
 2013-02-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (aarch64_features): Add the 'crc' option.

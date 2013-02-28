@@ -1,3 +1,12 @@
+2013-02-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run inval-rep and x86-64-inval-rep.
+
+	* gas/i386/inval-rep.l: New file.
+	* gas/i386/inval-rep.s: Likewise.
+	* gas/i386/x86-64-inval-rep.l: Likewise.
+	* gas/i386/x86-64-inval-rep.s: Likewise.
+
 2013-02-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/crc32.s: New test.
