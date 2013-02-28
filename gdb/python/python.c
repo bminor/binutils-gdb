@@ -740,7 +740,7 @@ gdbpy_find_pc_line (PyObject *self, PyObject *args)
 {
   gdb_py_ulongest pc_llu;
   volatile struct gdb_exception except;
-  PyObject *result;
+  PyObject *result = NULL; /* init for gcc -Wall */
 
   if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc_llu))
     return NULL;

@@ -1,3 +1,8 @@
+2013-02-28  Doug Evans  <dje@google.com>
+
+	* python/py-finishbreakpoint.c (bpfinishpy_init): gcc -Wall lint.
+	* python/python.c (gdbpy_find_pc_line): Ditto.
+
 2013-02-28  Tom Tromey  <tromey@redhat.com>
 
 	* contrib/excheck.py: New file.

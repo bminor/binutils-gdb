@@ -160,7 +160,8 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   int type = bp_breakpoint;
   PyObject *frame_obj = NULL;
   int thread;
-  struct frame_info *frame, *prev_frame = NULL;
+  struct frame_info *frame = NULL; /* init for gcc -Wall */
+  struct frame_info *prev_frame = NULL;
   struct frame_id frame_id;
   PyObject *internal = NULL;
   int internal_bp = 0;
