@@ -1,5 +1,10 @@
 2013-02-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* gas/aarch64/crc32.s: New test.
+	* gas/aarch64/crc32.d: Ditto.
+
+2013-02-28  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* gas/aarch64/illegal.l: Delete the error message for
 	msr S3_1_C13_C15_1,x7.
 	* gas/aarch64/sysreg.s: Add new tests.

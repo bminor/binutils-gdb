@@ -1,5 +1,9 @@
 2013-02-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* config/tc-aarch64.c (aarch64_features): Add the 'crc' option.
+
+2013-02-28  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* config/tc-aarch64.c (parse_sys_reg): Allow the full range of CRn
 	for system registers.
 
