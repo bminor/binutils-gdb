@@ -1,3 +1,11 @@
+2013-02-28  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/report.exp: Move some code to ...
+	(use_collected_data): New.
+	(top level): Call use_collected_data once on the live target.
+	Save at file of the current trace session, load it with target
+	tfile, and call use_collected_data again.
+
 2013-02-27  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/fork-thread-pending.c (main): Add alarm.
