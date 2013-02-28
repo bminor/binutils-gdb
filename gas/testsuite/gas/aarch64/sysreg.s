@@ -22,3 +22,7 @@
 	mrs x0, id_isar3_el1
 	mrs x0, id_isar4_el1
 	mrs x0, id_isar5_el1
+
+	mrs x0, s3_0_c12_c12_0
+	mrs x0, s3_0_c4_c6_0
+	msr s3_0_c4_c6_0, x0

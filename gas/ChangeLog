@@ -1,3 +1,8 @@
+2013-02-28  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (parse_sys_reg): Allow the full range of CRn
+	for system registers.
+
 2013-02-27  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-rl78.c (reloc_function): Add %code -> BFD_RELOC_RL78_CODE.
