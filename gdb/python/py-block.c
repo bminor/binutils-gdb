@@ -370,7 +370,7 @@ PyObject *
 gdbpy_block_for_pc (PyObject *self, PyObject *args)
 {
   gdb_py_ulongest pc;
-  struct block *block;
+  struct block *block = NULL;
   struct obj_section *section = NULL;
   struct symtab *symtab = NULL;
   volatile struct gdb_exception except;
@@ -382,6 +382,9 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
     {
       section = find_pc_mapped_section (pc);
       symtab = find_pc_sect_symtab (pc, section);
+
+      if (symtab != NULL && symtab->objfile != NULL)
+	block = block_for_pc (pc);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
@@ -392,7 +395,6 @@ gdbpy_block_for_pc (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  block = block_for_pc (pc);
   if (block)
     return block_to_block_object (block, symtab->objfile);
 

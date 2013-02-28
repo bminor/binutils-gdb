@@ -1,5 +1,10 @@
 2013-02-28  Tom Tromey  <tromey@redhat.com>
 
+	* py-block.c (gdbpy_block_for_pc): Call block_for_pc inside
+	TRY_CATCH.
+
+2013-02-28  Tom Tromey  <tromey@redhat.com>
+
 	* objfiles.h (ALL_PSPACE_OBJFILES): Remove trailing backlash.
 
 2013-02-27  Corinna Vinschen  <vinschen@redhat.com>
