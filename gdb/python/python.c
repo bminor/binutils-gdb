@@ -1043,6 +1043,8 @@ gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
 void
 gdbpy_print_stack (void)
 {
+  volatile struct gdb_exception except;
+
   /* Print "none", just clear exception.  */
   if (gdbpy_should_print_stack == python_excp_none)
     {
@@ -1055,7 +1057,10 @@ gdbpy_print_stack (void)
       /* PyErr_Print doesn't necessarily end output with a newline.
 	 This works because Python's stdout/stderr is fed through
 	 printf_filtered.  */
-      begin_line ();
+      TRY_CATCH (except, RETURN_MASK_ALL)
+	{
+	  begin_line ();
+	}
     }
   /* Print "message", just error print message.  */
   else
@@ -1068,17 +1073,21 @@ gdbpy_print_stack (void)
       /* Fetch the error message contained within ptype, pvalue.  */
       msg = gdbpy_exception_to_string (ptype, pvalue);
       type = gdbpy_obj_to_string (ptype);
-      if (msg == NULL)
+
+      TRY_CATCH (except, RETURN_MASK_ALL)
 	{
-	  /* An error occurred computing the string representation of the
-	     error message.  */
-	  fprintf_filtered (gdb_stderr,
-			    _("Error occurred computing Python error"	\
-			      "message.\n"));
+	  if (msg == NULL)
+	    {
+	      /* An error occurred computing the string representation of the
+		 error message.  */
+	      fprintf_filtered (gdb_stderr,
+				_("Error occurred computing Python error" \
+				  "message.\n"));
+	    }
+	  else
+	    fprintf_filtered (gdb_stderr, "Python Exception %s %s: \n",
+			      type, msg);
 	}
-      else
-	fprintf_filtered (gdb_stderr, "Python Exception %s %s: \n",
-			  type, msg);
 
       Py_XDECREF (ptype);
       Py_XDECREF (pvalue);
