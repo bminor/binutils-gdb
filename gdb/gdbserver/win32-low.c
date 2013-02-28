@@ -448,7 +448,7 @@ strwinerror (DWORD error)
       LocalFree (msgbuf);
     }
   else
-    sprintf (buf, "unknown win32 error (%ld)", error);
+    sprintf (buf, "unknown win32 error (%u)", (unsigned) error);
 
   SetLastError (lasterr);
   return buf;
@@ -1317,10 +1317,10 @@ handle_exception (struct target_waitstatus *ourstatus)
 	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
 	  return;
 	}
-      OUTMSG2 (("gdbserver: unknown target exception 0x%08lx at 0x%s",
-		current_event.u.Exception.ExceptionRecord.ExceptionCode,
-		phex_nz ((uintptr_t) current_event.u.Exception.ExceptionRecord.
-		ExceptionAddress, sizeof (uintptr_t))));
+      OUTMSG2 (("gdbserver: unknown target exception 0x%08x at 0x%s",
+	    (unsigned) current_event.u.Exception.ExceptionRecord.ExceptionCode,
+	    phex_nz ((uintptr_t) current_event.u.Exception.ExceptionRecord.
+	    ExceptionAddress, sizeof (uintptr_t))));
       ourstatus->value.sig = GDB_SIGNAL_UNKNOWN;
       break;
     }
@@ -1452,7 +1452,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
     {
     case CREATE_THREAD_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event CREATE_THREAD_DEBUG_EVENT "
-		"for pid=%d tid=%x)\n",
+		"for pid=%u tid=%x)\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
 
@@ -1465,7 +1465,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
     case EXIT_THREAD_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event EXIT_THREAD_DEBUG_EVENT "
-		"for pid=%d tid=%x\n",
+		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       child_delete_thread (current_event.dwProcessId,
@@ -1476,7 +1476,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
     case CREATE_PROCESS_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event CREATE_PROCESS_DEBUG_EVENT "
-		"for pid=%d tid=%x\n",
+		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       CloseHandle (current_event.u.CreateProcessInfo.hFile);
@@ -1510,7 +1510,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
     case EXIT_PROCESS_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event EXIT_PROCESS_DEBUG_EVENT "
-		"for pid=%d tid=%x\n",
+		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       ourstatus->kind = TARGET_WAITKIND_EXITED;
@@ -1522,7 +1522,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
     case LOAD_DLL_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event LOAD_DLL_DEBUG_EVENT "
-		"for pid=%d tid=%x\n",
+		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       CloseHandle (current_event.u.LoadDll.hFile);
@@ -1534,7 +1534,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
     case UNLOAD_DLL_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event UNLOAD_DLL_DEBUG_EVENT "
-		"for pid=%d tid=%x\n",
+		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       handle_unload_dll ();
@@ -1544,7 +1544,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
     case EXCEPTION_DEBUG_EVENT:
       OUTMSG2 (("gdbserver: kernel event EXCEPTION_DEBUG_EVENT "
-		"for pid=%d tid=%x\n",
+		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       handle_exception (ourstatus);
@@ -1553,7 +1553,7 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
     case OUTPUT_DEBUG_STRING_EVENT:
       /* A message from the kernel (or Cygwin).  */
       OUTMSG2 (("gdbserver: kernel event OUTPUT_DEBUG_STRING_EVENT "
-		"for pid=%d tid=%x\n",
+		"for pid=%u tid=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId));
       handle_output_debug_string (ourstatus);
@@ -1561,10 +1561,10 @@ get_child_debug_event (struct target_waitstatus *ourstatus)
 
     default:
       OUTMSG2 (("gdbserver: kernel event unknown "
-		"for pid=%d tid=%x code=%ld\n",
+		"for pid=%u tid=%x code=%x\n",
 		(unsigned) current_event.dwProcessId,
 		(unsigned) current_event.dwThreadId,
-		current_event.dwDebugEventCode));
+		(unsigned) current_event.dwDebugEventCode));
       break;
     }
 

@@ -1,3 +1,11 @@
+2013-02-28  Corinna Vinschen  <vinschen@redhat.com>
+
+	* win32-low.c: Throughout, fix format strings and casts of
+	printf-like functions to avoid type related warnings on all
+	platforms.
+	(get_child_debug_event): Print dwDebugEventCode as hex since
+	that's how it's usually documented.
+
 2013-02-28  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (cmd_qtbuffer): Call phex_nz instead of
