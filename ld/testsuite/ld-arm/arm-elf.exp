@@ -142,6 +142,9 @@ set armelftests_common {
     {"TLS descseq relaxation BE32" "-T arm-dyn.ld -EB" "" "-mbig-endian" {tls-descrelax-be32.s}
      {{objdump -fdw tls-descrelax-be32.d}}
      "tls-descrelax-be32"}
+    {"TLS local PIC symbol static link" "-T arm.ld" "" "" {tls-local-static.s}
+      {{objdump -fdw tls-local-static.d}}
+      "tls-local-static"}
     {"Thumb entry point" "-T arm.ld" "" "" {thumb-entry.s}
      {{readelf -h thumb-entry.d}}
      "thumb-entry"}

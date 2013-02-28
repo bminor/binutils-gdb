@@ -13648,14 +13648,18 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 		  && (local_iplt == NULL
 		      || local_iplt->arm.noncall_refcount == 0))
 		elf32_arm_allocate_irelocs (info, srel, 1);
-	      else if ((info->shared && !(*local_tls_type & GOT_TLS_GDESC))
-		       || *local_tls_type & GOT_TLS_GD)
-		elf32_arm_allocate_dynrelocs (info, srel, 1);
-
-	      if (info->shared && *local_tls_type & GOT_TLS_GDESC)
+	      else if (info->shared || output_bfd->flags & DYNAMIC)
 		{
-		  elf32_arm_allocate_dynrelocs (info, htab->root.srelplt, 1);
-		  htab->tls_trampoline = -1;
+		  if ((info->shared && !(*local_tls_type & GOT_TLS_GDESC))
+		      || *local_tls_type & GOT_TLS_GD)
+		    elf32_arm_allocate_dynrelocs (info, srel, 1);
+		  
+		  if (info->shared && *local_tls_type & GOT_TLS_GDESC)
+		    {
+		      elf32_arm_allocate_dynrelocs (info,
+						    htab->root.srelplt, 1);
+		      htab->tls_trampoline = -1;
+		    }
 		}
 	    }
 	  else

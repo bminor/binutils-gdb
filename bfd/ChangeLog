@@ -1,3 +1,8 @@
+2013-02-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_size_dynamic_sections): Don't call
+	elf32_arm_allocate_dynrelocs for source reloc for non-dynamic link.
+
 2013-02-27  DJ Delorie  <dj@redhat.com>
 
 	* reloc.c (BFD_RELOC_RL78_CODE): Add.

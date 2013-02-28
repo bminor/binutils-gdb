@@ -1,4 +1,10 @@
-013-02-21  H.J. Lu  <hongjiu.lu@intel.com>
+2013-02-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-arm/tls-local-static.s: New test.
+	* ld-arm/tls-local-static.d: New.
+	* ld-arm/arm-elf.exp (tls-local-static): Add test.
+
+2013-02-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15167
 	* ld-unique/unique.exp: Add a test for shared library with
