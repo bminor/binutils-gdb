@@ -3969,7 +3969,7 @@ cmd_qtbuffer (char *own_buf)
   unpack_varlen_hex (packet, &num);
 
   trace_debug ("Want to get trace buffer, %d bytes at offset 0x%s",
-	       (int) num, pulongest (offset));
+	       (int) num, phex_nz (offset, 0));
 
   tot = (trace_buffer_hi - trace_buffer_lo) - free_space ();
 

@@ -1,3 +1,8 @@
+2013-02-28  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (cmd_qtbuffer): Call phex_nz instead of
+	pulongest.
+
 2013-02-27  Jiong Wang  <jiwang@tilera.com>
 
 	* Makefile.in (clean): Remove reg-tilegx.c, reg-tilegx32.c.
