@@ -517,7 +517,7 @@ extern void default_iterate_over_objfiles_in_search_order
 /* Traverse all object files in program space SS.  */
 
 #define ALL_PSPACE_OBJFILES(ss, obj)					\
-  for ((obj) = ss->objfiles; (obj) != NULL; (obj) = (obj)->next)	\
+  for ((obj) = ss->objfiles; (obj) != NULL; (obj) = (obj)->next)
 
 #define ALL_PSPACE_OBJFILES_SAFE(ss, obj, nxt)		\
   for ((obj) = ss->objfiles;			\

@@ -1,3 +1,7 @@
+2013-02-28  Tom Tromey  <tromey@redhat.com>
+
+	* objfiles.h (ALL_PSPACE_OBJFILES): Remove trailing backlash.
+
 2013-02-27  Corinna Vinschen  <vinschen@redhat.com>
 
 	* windows-nat.c: Throughout, fix format strings and casts of
