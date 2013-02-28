@@ -738,16 +738,25 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
 static PyObject *
 gdbpy_find_pc_line (PyObject *self, PyObject *args)
 {
-  struct symtab_and_line sal;
-  CORE_ADDR pc;
   gdb_py_ulongest pc_llu;
+  volatile struct gdb_exception except;
+  PyObject *result;
 
   if (!PyArg_ParseTuple (args, GDB_PY_LLU_ARG, &pc_llu))
     return NULL;
 
-  pc = (CORE_ADDR) pc_llu;
-  sal = find_pc_line (pc, 0);
-  return symtab_and_line_to_sal_object (sal);
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      struct symtab_and_line sal;
+      CORE_ADDR pc;
+
+      pc = (CORE_ADDR) pc_llu;
+      sal = find_pc_line (pc, 0);
+      result = symtab_and_line_to_sal_object (sal);
+    }
+  GDB_PY_HANDLE_EXCEPTION (except);
+
+  return result;
 }
 
 /* Read a file as Python code.

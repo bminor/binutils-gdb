@@ -1,5 +1,10 @@
 2013-02-28  Tom Tromey  <tromey@redhat.com>
 
+	* python/python.c (gdbpy_find_pc_line): Call find_pc_line
+	inside TRY_CATCH.
+
+2013-02-28  Tom Tromey  <tromey@redhat.com>
+
 	* py-finishbreakpoint.c (bpfinishpy_init): Reorganize to call
 	frame_object_to_frame_info inside TRY_CATCH.
 
