@@ -111,12 +111,12 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
   start = start_temp;
   if (end_obj)
     {
-      if (PyObject_TypeCheck (end_obj, &PyInt_Type))
+      if (PyLong_Check (end_obj))
+        end = PyLong_AsUnsignedLongLong (end_obj);
+      else if (PyInt_Check (end_obj))
         /* If the end_pc value is specified without a trailing 'L', end_obj will
            be an integer and not a long integer.  */
         end = PyInt_AsLong (end_obj);
-      else if (PyObject_TypeCheck (end_obj, &PyLong_Type))
-        end = PyLong_AsUnsignedLongLong (end_obj);
       else
         {
           Py_DECREF (end_obj);
