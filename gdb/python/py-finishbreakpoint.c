@@ -173,39 +173,43 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
                                     &frame_obj, &internal))
     return -1;
 
-  /* Default frame to gdb.newest_frame if necessary.  */
-  if (!frame_obj)
-    frame_obj = gdbpy_newest_frame (NULL, NULL);
-  else
-    Py_INCREF (frame_obj);
-
-  frame = frame_object_to_frame_info (frame_obj);
-  Py_DECREF (frame_obj);
-
-  if (frame == NULL)
-    goto invalid_frame;
-  
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      prev_frame = get_prev_frame (frame);
-      if (prev_frame == 0)
-        {
-          PyErr_SetString (PyExc_ValueError, _("\"FinishBreakpoint\" not "   \
-                                               "meaningful in the outermost "\
-                                               "frame."));
-        }
-      else if (get_frame_type (prev_frame) == DUMMY_FRAME)
-        {
-          PyErr_SetString (PyExc_ValueError, _("\"FinishBreakpoint\" cannot "\
-                                               "be set on a dummy frame."));
-        }
+      /* Default frame to newest frame if necessary.  */
+      if (frame_obj == NULL)
+	frame = get_current_frame ();
       else
-        {
-          frame_id = get_frame_id (prev_frame);
-          if (frame_id_eq (frame_id, null_frame_id))
-            PyErr_SetString (PyExc_ValueError,
-                             _("Invalid ID for the `frame' object."));
-        }
+	frame = frame_object_to_frame_info (frame_obj);
+
+      if (frame == NULL)
+	{
+	  PyErr_SetString (PyExc_ValueError, 
+			   _("Invalid ID for the `frame' object."));
+	}
+      else
+	{
+	  prev_frame = get_prev_frame (frame);
+	  if (prev_frame == 0)
+	    {
+	      PyErr_SetString (PyExc_ValueError,
+			       _("\"FinishBreakpoint\" not "
+				 "meaningful in the outermost "
+				 "frame."));
+	    }
+	  else if (get_frame_type (prev_frame) == DUMMY_FRAME)
+	    {
+	      PyErr_SetString (PyExc_ValueError,
+			       _("\"FinishBreakpoint\" cannot "
+				 "be set on a dummy frame."));
+	    }
+	  else
+	    {
+	      frame_id = get_frame_id (prev_frame);
+	      if (frame_id_eq (frame_id, null_frame_id))
+		PyErr_SetString (PyExc_ValueError,
+				 _("Invalid ID for the `frame' object."));
+	    }
+	}
     }
   if (except.reason < 0)
     {
@@ -305,11 +309,6 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   self_bpfinish->py_bp.bp->pspace = current_program_space;
 
   return 0;
-  
- invalid_frame:
-  PyErr_SetString (PyExc_ValueError, 
-                   _("Invalid ID for the `frame' object."));
-  return -1;
 }
 
 /* Called when GDB notices that the finish breakpoint BP_OBJ is out of
