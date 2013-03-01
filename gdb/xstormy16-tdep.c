@@ -181,7 +181,7 @@ xstormy16_store_return_value (struct type *type, struct regcache *regcache,
   if (TYPE_LENGTH (type) == 1)
     {    
       /* Add leading zeros to the value.  */
-      char buf[xstormy16_reg_size];
+      gdb_byte buf[xstormy16_reg_size];
       memset (buf, 0, xstormy16_reg_size);
       memcpy (buf, valbuf, 1);
       regcache_raw_write (regcache, E_1ST_ARG_REGNUM, buf);
@@ -238,7 +238,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
   int i, j;
   int typelen, slacklen;
   const gdb_byte *val;
-  char buf[xstormy16_pc_size];
+  gdb_byte buf[xstormy16_pc_size];
 
   /* If struct_return is true, then the struct return address will
      consume one argument-passing register.  */
@@ -525,7 +525,7 @@ xstormy16_resolve_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
   if (faddr_sect)
     {
       LONGEST inst, inst2, addr;
-      char buf[2 * xstormy16_inst_size];
+      gdb_byte buf[2 * xstormy16_inst_size];
 
       /* Return faddr if it's not pointing into the jump table.  */
       if (strcmp (faddr_sect->the_bfd_section->name, ".plt"))
@@ -577,7 +577,7 @@ xstormy16_find_jmp_table_entry (struct gdbarch *gdbarch, CORE_ADDR faddr)
 	  for (; addr < endaddr; addr += 2 * xstormy16_inst_size)
 	    {
 	      LONGEST inst, inst2, faddr2;
-	      char buf[2 * xstormy16_inst_size];
+	      gdb_byte buf[2 * xstormy16_inst_size];
 
 	      if (target_read_memory (addr, buf, sizeof buf))
 		return 0;

@@ -98,7 +98,7 @@ insns_match_pattern (struct gdbarch *gdbarch, CORE_ADDR pc,
 
   for (i = 0; pattern[i].mask; i++)
     {
-      char buf[4];
+      gdb_byte buf[4];
 
       target_read_memory (npc, buf, 4);
       insn[i] = extract_unsigned_integer (buf, 4, byte_order);
@@ -344,7 +344,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
   if (faddr & 2)
     {
       int status;
-      char buf[4];
+      gdb_byte buf[4];
 
       faddr &= ~3;
 
@@ -381,7 +381,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
 	    {
 	      int status;
 	      LONGEST tag;
-	      char buf[4];
+	      gdb_byte buf[4];
 
 	      status = target_read_memory (addr, buf, sizeof (buf));
 	      if (status != 0)

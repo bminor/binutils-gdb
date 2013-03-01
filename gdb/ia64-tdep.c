@@ -1380,7 +1380,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc,
   int frameless = 1;
   int i;
   CORE_ADDR addr;
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR bof, sor, sol, sof, cfm, rrb_gr;
 
   memset (instores, 0, sizeof instores);
@@ -1514,7 +1514,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc,
 	  else if (qp == 0 && rN == 2 
 	        && ((rM == fp_reg && fp_reg != 0) || rM == 12))
 	    {
-	      char buf[MAX_REGISTER_SIZE];
+	      gdb_byte buf[MAX_REGISTER_SIZE];
 	      CORE_ADDR saved_sp = 0;
 	      /* adds r2, spilloffset, rFramePointer 
 	           or
@@ -1850,7 +1850,7 @@ ia64_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct ia64_frame_cache *cache;
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR cfm, psr;
 
   if (*this_cache)
@@ -1918,7 +1918,7 @@ ia64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct ia64_frame_cache *cache = ia64_frame_cache (this_frame, this_cache);
-  char buf[8];
+  gdb_byte buf[8];
 
   gdb_assert (regnum >= 0);
 
@@ -2238,7 +2238,7 @@ ia64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct ia64_frame_cache *cache;
-  char buf[8];
+  gdb_byte buf[8];
 
   if (*this_cache)
     return *this_cache;
@@ -2288,7 +2288,7 @@ static struct value *
 ia64_sigtramp_frame_prev_register (struct frame_info *this_frame,
 				   void **this_cache, int regnum)
 {
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
 
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2494,7 +2494,7 @@ ia64_access_reg (unw_addr_space_t as, unw_regnum_t uw_regnum, unw_word_t *val,
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   long new_sof, old_sof;
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -2574,7 +2574,7 @@ ia64_access_rse_reg (unw_addr_space_t as, unw_regnum_t uw_regnum,
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   long new_sof, old_sof;
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
   
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
@@ -2929,7 +2929,7 @@ ia64_libunwind_frame_this_id (struct frame_info *this_frame, void **this_cache,
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct frame_id id = outer_frame_id;
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR bsp;
 
   libunwind_frame_this_id (this_frame, this_cache, &id);
@@ -2981,7 +2981,7 @@ ia64_libunwind_frame_prev_register (struct frame_info *this_frame,
 	{
 	  int rrb_pr = 0;
 	  ULONGEST cfm;
-	  unsigned char buf[MAX_REGISTER_SIZE];
+	  gdb_byte buf[MAX_REGISTER_SIZE];
 
 	  /* Fetch predicate register rename base from current frame
 	     marker for this frame.  */
@@ -3060,7 +3060,7 @@ ia64_libunwind_sigtramp_frame_this_id (struct frame_info *this_frame,
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR bsp;
   struct frame_id id = outer_frame_id;
   CORE_ADDR prev_ip;
@@ -3480,7 +3480,7 @@ ia64_find_global_pointer_from_dynamic_section (struct gdbarch *gdbarch,
 	    {
 	      int status;
 	      LONGEST tag;
-	      char buf[8];
+	      gdb_byte buf[8];
 
 	      status = target_read_memory (addr, buf, sizeof (buf));
 	      if (status != 0)
@@ -3563,7 +3563,7 @@ find_extant_func_descr (struct gdbarch *gdbarch, CORE_ADDR faddr)
 	    {
 	      int status;
 	      LONGEST faddr2;
-	      char buf[8];
+	      gdb_byte buf[8];
 
 	      status = target_read_memory (addr, buf, sizeof (buf));
 	      if (status != 0)
@@ -3596,7 +3596,7 @@ find_func_descr (struct regcache *regcache, CORE_ADDR faddr, CORE_ADDR *fdaptr)
   if (fdesc == 0)
     {
       ULONGEST global_pointer;
-      char buf[16];
+      gdb_byte buf[16];
 
       fdesc = *fdaptr;
       *fdaptr += 16;
@@ -3903,7 +3903,7 @@ static struct frame_id
 ia64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR sp, bsp;
 
   get_frame_register (this_frame, sp_regnum, buf);
@@ -3925,7 +3925,7 @@ static CORE_ADDR
 ia64_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR ip, psr, pc;
 
   frame_unwind_register (next_frame, IA64_IP_REGNUM, buf);

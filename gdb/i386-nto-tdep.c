@@ -294,7 +294,7 @@ i386nto_sigcontext_addr (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR ptrctx;
 
   /* We store __ucontext_t addr in EDI register.  */

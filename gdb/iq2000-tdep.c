@@ -508,7 +508,7 @@ iq2000_store_return_value (struct type *type, struct regcache *regcache,
 
   while (len > 0)
     {
-      char buf[4];
+      gdb_byte buf[4];
       int size = len % 4 ?: 4;
 
       memset (buf, 0, 4);

@@ -1143,7 +1143,7 @@ mep_pseudo_cr32_read (struct gdbarch *gdbarch,
   /* Read the raw register into a 64-bit buffer, and then return the
      appropriate end of that buffer.  */
   int rawnum = mep_pseudo_to_raw[cookednum];
-  char buf64[8];
+  gdb_byte buf64[8];
 
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, rawnum)) == sizeof (buf64));
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, cookednum)) == 4);
@@ -1229,7 +1229,7 @@ mep_pseudo_cr32_write (struct gdbarch *gdbarch,
   /* Expand the 32-bit value into a 64-bit value, and write that to
      the pseudoregister.  */
   int rawnum = mep_pseudo_to_raw[cookednum];
-  char buf64[8];
+  gdb_byte buf64[8];
   
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, rawnum)) == sizeof (buf64));
   gdb_assert (TYPE_LENGTH (register_type (gdbarch, cookednum)) == 4);
@@ -1430,7 +1430,7 @@ mep_get_insn (struct gdbarch *gdbarch, CORE_ADDR pc, long *insn)
   int pc_in_vliw_section;
   int vliw_mode;
   int insn_len;
-  char buf[2];
+  gdb_byte buf[2];
 
   *insn = 0;
 
@@ -2358,7 +2358,7 @@ mep_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
         }
       else
         {
-          char buf[MEP_GPR_SIZE];
+          gdb_byte buf[MEP_GPR_SIZE];
           store_unsigned_integer (buf, MEP_GPR_SIZE, byte_order, value);
           write_memory (arg_stack, buf, MEP_GPR_SIZE);
           arg_stack += MEP_GPR_SIZE;

@@ -60,7 +60,7 @@ parse_spufs_run (ptid_t ptid, int *fd, CORE_ADDR *addr)
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   struct gdbarch_tdep *tdep;
   struct regcache *regcache;
-  char buf[4];
+  gdb_byte buf[4];
   ULONGEST regval;
 
   /* If we're not on PPU, there's nothing to detect.  */
@@ -163,7 +163,7 @@ spu_fetch_registers (struct target_ops *ops,
   /* The ID register holds the spufs file handle.  */
   if (regno == -1 || regno == SPU_ID_REGNUM)
     {
-      char buf[4];
+      gdb_byte buf[4];
       store_unsigned_integer (buf, 4, byte_order, spufs_fd);
       regcache_raw_supply (regcache, SPU_ID_REGNUM, buf);
     }
@@ -171,7 +171,7 @@ spu_fetch_registers (struct target_ops *ops,
   /* The NPC register is found in PPC memory at SPUFS_ADDR.  */
   if (regno == -1 || regno == SPU_PC_REGNUM)
     {
-      char buf[4];
+      gdb_byte buf[4];
 
       if (target_read (ops_beneath, TARGET_OBJECT_MEMORY, NULL,
 		       buf, spufs_addr, sizeof buf) == sizeof buf)
@@ -181,7 +181,8 @@ spu_fetch_registers (struct target_ops *ops,
   /* The GPRs are found in the "regs" spufs file.  */
   if (regno == -1 || (regno >= 0 && regno < SPU_NUM_GPRS))
     {
-      char buf[16 * SPU_NUM_GPRS], annex[32];
+      gdb_byte buf[16 * SPU_NUM_GPRS];
+      char annex[32];
       int i;
 
       xsnprintf (annex, sizeof annex, "%d/regs", spufs_fd);
@@ -220,7 +221,7 @@ spu_store_registers (struct target_ops *ops,
   /* The NPC register is found in PPC memory at SPUFS_ADDR.  */
   if (regno == -1 || regno == SPU_PC_REGNUM)
     {
-      char buf[4];
+      gdb_byte buf[4];
       regcache_raw_collect (regcache, SPU_PC_REGNUM, buf);
 
       target_write (ops_beneath, TARGET_OBJECT_MEMORY, NULL,
@@ -230,7 +231,8 @@ spu_store_registers (struct target_ops *ops,
   /* The GPRs are found in the "regs" spufs file.  */
   if (regno == -1 || (regno >= 0 && regno < SPU_NUM_GPRS))
     {
-      char buf[16 * SPU_NUM_GPRS], annex[32];
+      gdb_byte buf[16 * SPU_NUM_GPRS];
+      char annex[32];
       int i;
 
       for (i = 0; i < SPU_NUM_GPRS; i++)

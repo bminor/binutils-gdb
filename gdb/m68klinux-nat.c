@@ -109,7 +109,7 @@ fetch_register (struct regcache *regcache, int regno)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   long regaddr, val;
   int i;
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
   int tid;
 
   /* Overload thread id onto process id.  */
@@ -164,7 +164,7 @@ store_register (const struct regcache *regcache, int regno)
   long regaddr, val;
   int i;
   int tid;
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
 
   /* Overload thread id onto process id.  */
   tid = TIDGET (inferior_ptid);

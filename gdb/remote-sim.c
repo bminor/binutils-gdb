@@ -446,7 +446,7 @@ gdbsim_fetch_register (struct target_ops *ops,
       {
 	/* For moment treat a `does not exist' register the same way
            as an ``unavailable'' register.  */
-	char buf[MAX_REGISTER_SIZE];
+	gdb_byte buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
 
 	memset (buf, 0, MAX_REGISTER_SIZE);
@@ -457,7 +457,7 @@ gdbsim_fetch_register (struct target_ops *ops,
     default:
       {
 	static int warn_user = 1;
-	char buf[MAX_REGISTER_SIZE];
+	gdb_byte buf[MAX_REGISTER_SIZE];
 	int nr_bytes;
 
 	gdb_assert (regno >= 0 && regno < gdbarch_num_regs (gdbarch));

@@ -351,7 +351,7 @@ frv_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 
       int raw_regnum = accg0123_regnum + (reg - accg0_regnum) / 4;
       int byte_num = (reg - accg0_regnum) % 4;
-      char buf[4];
+      gdb_byte buf[4];
 
       regcache_raw_read (regcache, raw_regnum, buf);
       buf[byte_num] = ((bfd_byte *) buffer)[0];
@@ -602,7 +602,7 @@ frv_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
   /* Scan the prologue.  */
   while (pc < lim_pc)
     {
-      char buf[frv_instr_size];
+      gdb_byte buf[frv_instr_size];
       LONGEST op;
 
       if (target_read_memory (pc, buf, sizeof buf) != 0)

@@ -269,7 +269,7 @@ darwin_current_sos (void)
   for (i = 0; i < info->all_image.count; i++)
     {
       CORE_ADDR iinfo = info->all_image.info + i * image_info_size;
-      char buf[image_info_size];
+      gdb_byte buf[image_info_size];
       CORE_ADDR load_addr;
       CORE_ADDR path_addr;
       struct mach_o_header_external hdr;
@@ -347,7 +347,7 @@ darwin_read_exec_load_addr (struct darwin_info *info)
   for (i = 0; i < info->all_image.count; i++)
     {
       CORE_ADDR iinfo = info->all_image.info + i * image_info_size;
-      char buf[image_info_size];
+      gdb_byte buf[image_info_size];
       CORE_ADDR load_addr;
       struct mach_o_header_external hdr;
       unsigned long hdr_val;

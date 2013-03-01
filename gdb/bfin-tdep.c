@@ -503,7 +503,7 @@ bfin_push_dummy_call (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  char buf[4];
+  gdb_byte buf[4];
   int i;
   long reg_r0, reg_r1, reg_r2;
   int total_len = 0;

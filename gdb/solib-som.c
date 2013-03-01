@@ -189,7 +189,7 @@ som_solib_create_inferior_hook (int from_tty)
   struct minimal_symbol *msymbol;
   unsigned int dld_flags, status, have_endo;
   asection *shlib_info;
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR anaddr;
 
   if (symfile_objfile == NULL)
@@ -528,7 +528,7 @@ link_map_start (void)
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   struct minimal_symbol *sym;
   CORE_ADDR addr;
-  char buf[4];
+  gdb_byte buf[4];
   unsigned int dld_flags;
 
   sym = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
@@ -697,7 +697,7 @@ som_open_symbol_file_object (void *from_ttyp)
   char *filename;
   int errcode;
   int from_tty = *(int *)from_ttyp;
-  char buf[4];
+  gdb_byte buf[4];
 
   if (symfile_objfile)
     if (!query (_("Attempt to reload symbols from process? ")))

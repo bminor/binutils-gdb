@@ -547,7 +547,7 @@ fetch_register (struct regcache *regcache, int tid, int regno)
   CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int bytes_transferred;
   unsigned int offset;         /* Offset of registers within the u area.  */
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
 
   if (altivec_register_p (gdbarch, regno))
     {
@@ -1034,7 +1034,7 @@ store_register (const struct regcache *regcache, int tid, int regno)
   CORE_ADDR regaddr = ppc_register_u_addr (gdbarch, regno);
   int i;
   size_t bytes_to_transfer;
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
 
   if (altivec_register_p (gdbarch, regno))
     {

@@ -86,7 +86,7 @@ static void
 i386fbsd_supply_uthread (struct regcache *regcache,
 			 int regnum, CORE_ADDR addr)
 {
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   gdb_assert (regnum >= -1);
@@ -106,7 +106,7 @@ static void
 i386fbsd_collect_uthread (const struct regcache *regcache,
 			  int regnum, CORE_ADDR addr)
 {
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   gdb_assert (regnum >= -1);

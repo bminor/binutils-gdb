@@ -54,7 +54,7 @@ ia64_linux_sigcontext_register_address (struct gdbarch *gdbarch,
 					CORE_ADDR sp, int regno)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  char buf[8];
+  gdb_byte buf[8];
   CORE_ADDR sigcontext_addr = 0;
 
   /* The address of the sigcontext area is found at offset 16 in the

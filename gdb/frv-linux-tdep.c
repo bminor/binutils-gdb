@@ -46,7 +46,7 @@ frv_linux_pc_in_sigtramp (struct gdbarch *gdbarch, CORE_ADDR pc,
 			  const char *name)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  char buf[frv_instr_size];
+  gdb_byte buf[frv_instr_size];
   LONGEST instr;
   int retval = 0;
 
@@ -182,7 +182,7 @@ frv_linux_sigcontext_reg_addr (struct frame_info *this_frame, int regno,
   else
     {
       CORE_ADDR pc, sp;
-      char buf[4];
+      gdb_byte buf[4];
       int tramp_type;
 
       pc = get_frame_pc (this_frame);
@@ -266,7 +266,7 @@ frv_linux_sigtramp_frame_cache (struct frame_info *this_frame,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct trad_frame_cache *cache;
   CORE_ADDR addr;
-  char buf[4];
+  gdb_byte buf[4];
   int regnum;
   CORE_ADDR sc_addr_cache_val = 0;
   struct frame_id this_id;

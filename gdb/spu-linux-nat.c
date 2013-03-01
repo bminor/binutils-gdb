@@ -493,7 +493,7 @@ spu_fetch_inferior_registers (struct target_ops *ops,
     {
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-      char buf[4];
+      gdb_byte buf[4];
       store_unsigned_integer (buf, 4, byte_order, fd);
       regcache_raw_supply (regcache, SPU_ID_REGNUM, buf);
     }

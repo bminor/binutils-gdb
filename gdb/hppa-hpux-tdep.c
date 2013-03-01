@@ -772,7 +772,7 @@ hppa32_hpux_find_global_pointer (struct gdbarch *gdbarch,
   if (faddr & 2)
     {
       int status;
-      char buf[4];
+      gdb_byte buf[4];
 
       faddr &= ~3;
 
@@ -790,7 +790,7 @@ hppa64_hpux_find_global_pointer (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR faddr;
-  char buf[32];
+  gdb_byte buf[32];
 
   faddr = value_as_address (function);
 
@@ -857,7 +857,7 @@ hppa32_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
   struct frame_info *frame;
   struct unwind_table_entry *u;
   CORE_ADDR addr, rp;
-  char buf[4];
+  gdb_byte buf[4];
   unsigned int insn;
 
   sec = find_pc_section (pc);
@@ -1355,7 +1355,7 @@ hppa_hpux_supply_save_state (const struct regset *regset,
   if (regnum == -1 || regnum == HPPA_FLAGS_REGNUM)
     {
       size_t size = register_size (gdbarch, HPPA_FLAGS_REGNUM);
-      char buf[8];
+      gdb_byte buf[8];
 
       store_unsigned_integer (buf, size, byte_order, flags);
       regcache_raw_supply (regcache, HPPA_FLAGS_REGNUM, buf);

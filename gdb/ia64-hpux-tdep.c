@@ -265,7 +265,7 @@ ia64_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 {
   ULONGEST cfm;
   int sof, sol, sor, soo;
-  char buf[16];
+  gdb_byte buf[16];
 
   regcache_cooked_read_unsigned (regcache, IA64_CFM_REGNUM, &cfm);
   sof = cfm & 0x7f;

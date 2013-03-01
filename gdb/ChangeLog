@@ -1,3 +1,77 @@
+2013-03-01  Pedro Alves  <palves@redhat.com>
+
+	Use gdb_byte for bytes from the program being debugged.
+
+	* arm-tdep.c (arm_store_return_value, arm_get_longjmp_target):
+	Change type of local 'buf' to gdb_byte.
+	* avr-tdep.c (avr_frame_prev_register, avr_push_dummy_call): Likewise.
+	* bfin-tdep.c (bfin_push_dummy_call): Likewise.
+	* cris-tdep.c (cris_sigcontext_addr)
+	(cris_sigtramp_frame_unwind_cache): Likewise.
+	* frv-linux-tdep.c (frv_linux_pc_in_sigtramp)
+	(frv_linux_sigcontext_reg_addr, frv_linux_sigtramp_frame_cache):
+	Likewise.
+	* frv-tdep.c (frv_pseudo_register_write, frv_analyze_prologue): Likewise.
+	* hppa-hpux-tdep.c (hppa32_hpux_find_global_pointer)
+	(hppa32_hpux_search_dummy_call_sequence)
+	(hppa_hpux_supply_save_state): Likewise.
+	* hppa-linux-tdep.c (insns_match_pattern)
+	(hppa_linux_find_global_pointer): Likewise.
+	* hppa-tdep.c (hppa_in_function_epilogue_p)
+	(skip_prologue_hard_way, hppa_frame_cache): Likewise.
+	* i386-nto-tdep.c (i386nto_sigcontext_addr): Likewise.
+	* i386fbsd-tdep.c (i386fbsd_supply_uthread)
+	(i386fbsd_collect_uthread): Likewise.
+	* ia64-hpux-tdep.c (ia64_hpux_push_dummy_code): Likewise.
+	* ia64-linux-tdep.c (ia64_linux_sigcontext_register_address): Likewise.
+	* ia64-tdep.c (examine_prologue, ia64_frame_cache)
+	(ia64_frame_prev_register, ia64_sigtramp_frame_cache)
+	(ia64_sigtramp_frame_prev_register, ia64_access_reg)
+	(ia64_access_rse_reg, ia64_libunwind_frame_this_id)
+	(ia64_libunwind_frame_prev_register)
+	(ia64_libunwind_sigtramp_frame_this_id)
+	(ia64_find_global_pointer_from_dynamic_section)
+	(find_extant_func_descr, find_func_descr, ia64_dummy_id)
+	(ia64_unwind_pc): Likewise.
+	* iq2000-tdep.c (iq2000_store_return_value): Likewise.
+	* m68hc11-tdep.c (m68hc11_push_dummy_call)
+	(m68hc11_extract_return_value): Likewise.
+	* m68klinux-nat.c (fetch_register, store_register): Likewise.
+	* mep-tdep.c (mep_pseudo_cr32_read, mep_pseudo_cr32_write)
+	(mep_get_insn, mep_push_dummy_call): Likewise.
+	* mips-linux-tdep.c (mips_linux_get_longjmp_target)
+	(mips_linux_in_dynsym_stub): Likewise.
+	* mn10300-tdep.c (mep_pseudo_cr32_write): Likewise.
+	* ppc-linux-nat.c (fetch_register, store_register): Likewise.
+	* regcache.c (dump_endian_bytes): Change type of parameter 'buf'
+	to gdb_byte.
+	* remote-mips.c (mips_set_register): Likewise.
+	* remote-sim.c (gdbsim_fetch_register): Likewise.
+	* score-tdep.c (score7_fetch_inst): Change type of parameter
+	'memblock' and local 'buf' to gdb_byte.
+	(score7_malloc_and_get_memblock): Change return type to gdb_byte.
+	Change type of local 'buf' to gdb_byte.  Adjust.
+	(score7_adjust_memblock_ptr): Change type of parameter 'memblock'
+	to gdb_byte**.
+	(score7_analyze_prologue): Change type of 'memblock' and
+	'memblock_ptr' locals to gdb_byte*.
+	* sh64-tdep.c (sh64_extract_return_value)
+	(sh64_store_return_value): Change type of local 'buf' to gdb_byte.
+	* solib-darwin.c (darwin_current_sos, darwin_read_exec_load_addr):
+	* solib-pa64.c (pa64_solib_create_inferior_hook)
+	(pa64_open_symbol_file_object): Remove local 'buf'.
+	* solib-som.c (som_solib_create_inferior_hook, link_map_start)
+	(som_open_symbol_file_object): Likewise.
+	* solib-spu.c (spu_current_sos): Likewise.
+	* spu-linux-nat.c (spu_fetch_inferior_registers): Likewise.
+	* spu-multiarch.c (parse_spufs_run, spu_fetch_registers)
+	(spu_store_registers): Likewise.
+	* target.c (debug_print_register): Likewise.
+	* tic6x-tdep.c (tic6x_get_longjmp_target): Likewise.
+	* xstormy16-tdep.c (xstormy16_store_return_value)
+	(xstormy16_push_dummy_call, xstormy16_resolve_jmp_table_entry)
+	(xstormy16_find_jmp_table_entry): Likewise.
+
 2013-03-01  Jiong Wang  <jiwang@tilera.com>
 
 	* tilegx-tdep.c (tilegx_get_longjmp_target): New function.

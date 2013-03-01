@@ -1794,7 +1794,7 @@ mips_signal_from_protocol (int sig)
 static void
 mips_set_register (int regno, ULONGEST value)
 {
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);

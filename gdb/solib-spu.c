@@ -162,7 +162,7 @@ spu_current_sos (void)
   struct so_list *head;
   struct so_list **link_ptr;
 
-  char buf[MAX_SPE_FD * 4];
+  gdb_byte buf[MAX_SPE_FD * 4];
   int i, size;
 
   /* First, retrieve the SVR4 shared library list.  */

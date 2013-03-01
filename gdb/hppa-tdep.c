@@ -541,7 +541,7 @@ hppa_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned long status;
   unsigned int inst;
-  char buf[4];
+  gdb_byte buf[4];
 
   status = target_read_memory (pc, buf, 4);
   if (status != 0)
@@ -1446,7 +1446,7 @@ skip_prologue_hard_way (struct gdbarch *gdbarch, CORE_ADDR pc,
 			int stop_before_branch)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR orig_pc = pc;
   unsigned long inst, stack_remaining, save_gr, save_fr, save_rp, save_sp;
   unsigned long args_stored, status, i, restart_gr, restart_fr;
@@ -1897,7 +1897,7 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
 	 pc += 4)
       {
 	int reg;
-	char buf4[4];
+	gdb_byte buf4[4];
 	long inst;
 
 	if (!safe_frame_unwind_memory (this_frame, pc, buf4, sizeof buf4)) 

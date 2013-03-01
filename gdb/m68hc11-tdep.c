@@ -1174,7 +1174,7 @@ m68hc11_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   int first_stack_argnum;
   struct type *type;
   char *val;
-  char buf[2];
+  gdb_byte buf[2];
   
   first_stack_argnum = 0;
   if (struct_return)
@@ -1288,7 +1288,7 @@ static void
 m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
                               void *valbuf)
 {
-  char buf[M68HC11_REG_SIZE];
+  gdb_byte buf[M68HC11_REG_SIZE];
 
   regcache_raw_read (regcache, HARD_D_REGNUM, buf);
   switch (TYPE_LENGTH (type))

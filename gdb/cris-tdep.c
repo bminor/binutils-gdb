@@ -261,7 +261,7 @@ cris_sigcontext_addr (struct frame_info *this_frame)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR pc;
   CORE_ADDR sp;
-  char buf[4];
+  gdb_byte buf[4];
 
   get_frame_register (this_frame, gdbarch_sp_regnum (gdbarch), buf);
   sp = extract_unsigned_integer (buf, 4, byte_order);
@@ -323,7 +323,7 @@ cris_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct cris_unwind_cache *info;
   CORE_ADDR addr;
-  char buf[4];
+  gdb_byte buf[4];
   int i;
 
   if ((*this_cache))

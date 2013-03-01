@@ -1103,7 +1103,7 @@ avr_frame_prev_register (struct frame_info *this_frame,
 	     everything else about the avr is little endian.  Ick!  */
 	  ULONGEST pc;
 	  int i;
-	  unsigned char buf[3];
+	  gdb_byte buf[3];
 	  struct gdbarch *gdbarch = get_frame_arch (this_frame);
 	  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
@@ -1245,7 +1245,7 @@ avr_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int i;
-  unsigned char buf[3];
+  gdb_byte buf[3];
   int call_length = gdbarch_tdep (gdbarch)->call_length;
   CORE_ADDR return_pc = avr_convert_iaddr_to_raw (bp_addr);
   int regnum = AVR_ARGN_REGNUM;
