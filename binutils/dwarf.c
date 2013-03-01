@@ -71,6 +71,36 @@ unsigned long dwarf_start_die;
 
 int dwarf_check = 0;
 
+/* Collection of CU/TU section sets from .debug_cu_index and .debug_tu_index
+   sections.  For version 1 package files, each set is stored in SHNDX_POOL
+   as a zero-terminated list of section indexes comprising one set of debug
+   sections from a .dwo file.  */
+
+static int cu_tu_indexes_read = 0;
+static unsigned int *shndx_pool = NULL;
+static unsigned int shndx_pool_size = 0;
+static unsigned int shndx_pool_used = 0;
+
+/* For version 2 package files, each set contains an array of section offsets
+   and an array of section sizes, giving the offset and size of the
+   contribution from a CU or TU within one of the debug sections.
+   When displaying debug info from a package file, we need to use these
+   tables to locate the corresponding contributions to each section.  */
+
+struct cu_tu_set
+{
+  uint64_t signature;
+  dwarf_vma section_offsets[DW_SECT_MAX];
+  size_t section_sizes[DW_SECT_MAX];
+};
+
+static int cu_count = 0;
+static int tu_count = 0;
+static struct cu_tu_set *cu_sets = NULL;
+static struct cu_tu_set *tu_sets = NULL;
+
+static void load_cu_tu_indexes (void *file);
+
 /* Values for do_debug_lines.  */
 #define FLAG_DEBUG_LINES_RAW	 1
 #define FLAG_DEBUG_LINES_DECODED 2
@@ -450,7 +480,8 @@ fetch_indirect_string (dwarf_vma offset)
 }
 
 static const char *
-fetch_indexed_string (dwarf_vma idx, dwarf_vma offset_size, int dwo)
+fetch_indexed_string (dwarf_vma idx, struct cu_tu_set *this_set,
+		      dwarf_vma offset_size, int dwo)
 {
   enum dwarf_section_display_enum str_sec_idx = dwo ? str_dwo : str;
   enum dwarf_section_display_enum idx_sec_idx = dwo ? str_index_dwo : str_index;
@@ -465,6 +496,8 @@ fetch_indexed_string (dwarf_vma idx, dwarf_vma offset_size, int dwo)
 
   /* DWARF sections under Mach-O have non-zero addresses.  */
   index_offset -= index_section->address;
+  if (this_set != NULL)
+    index_offset += this_set->section_offsets [DW_SECT_STR_OFFSETS];
   if (index_offset > index_section->size)
     {
       warn (_("DW_FORM_GNU_str_index offset too big: %s\n"),
@@ -1253,6 +1286,38 @@ decode_location_expression (unsigned char * data,
   return need_frame_base;
 }
 
+/* Find the CU or TU set corresponding to the given CU_OFFSET.
+   This is used for DWARF package files.  */
+
+static struct cu_tu_set *
+find_cu_tu_set_v2 (dwarf_vma cu_offset, int do_types)
+{
+  struct cu_tu_set *p;
+  unsigned int nsets;
+  unsigned int dw_sect;
+
+  if (do_types)
+    {
+      p = tu_sets;
+      nsets = tu_count;
+      dw_sect = DW_SECT_TYPES;
+    }
+  else
+    {
+      p = cu_sets;
+      nsets = cu_count;
+      dw_sect = DW_SECT_INFO;
+    }
+  while (nsets > 0)
+    {
+      if (p->section_offsets [dw_sect] == cu_offset)
+	return p;
+      p++;
+      nsets--;
+    }
+  return NULL;
+}
+
 static unsigned char *
 read_and_display_attr_value (unsigned long attribute,
 			     unsigned long form,
@@ -1263,7 +1328,8 @@ read_and_display_attr_value (unsigned long attribute,
 			     int dwarf_version,
 			     debug_info * debug_info_p,
 			     int do_loc,
-			     struct dwarf_section * section)
+			     struct dwarf_section * section,
+			     struct cu_tu_set * this_set)
 {
   dwarf_vma uvalue = 0;
   unsigned char *block_start = NULL;
@@ -1351,7 +1417,7 @@ read_and_display_attr_value (unsigned long attribute,
 					  cu_offset, pointer_size,
 					  offset_size, dwarf_version,
 					  debug_info_p, do_loc,
-					  section);
+					  section, this_set);
     case DW_FORM_GNU_addr_index:
       uvalue = read_leb128 (data, & bytes_read, 0);
       data += bytes_read;
@@ -1475,7 +1541,7 @@ read_and_display_attr_value (unsigned long attribute,
 
           printf (_(" (indexed string: 0x%s): %s"),
                   dwarf_vmatoa ("x", uvalue),
-                  fetch_indexed_string (uvalue, offset_size, dwo));
+                  fetch_indexed_string (uvalue, this_set, offset_size, dwo));
         }
       break;
 
@@ -1553,6 +1619,8 @@ read_and_display_attr_value (unsigned long attribute,
 				 lmax, sizeof (*debug_info_p->have_frame_base));
 		  debug_info_p->max_loc_offsets = lmax;
 		}
+	      if (this_set != NULL)
+	        uvalue += this_set->section_offsets [DW_SECT_LOC];
 	      debug_info_p->loc_offsets [num] = uvalue;
 	      debug_info_p->have_frame_base [num] = have_frame_base;
 	      debug_info_p->num_loc_offsets++;
@@ -1904,19 +1972,19 @@ read_and_display_attr (unsigned long attribute,
 		       int dwarf_version,
 		       debug_info * debug_info_p,
 		       int do_loc,
-		       struct dwarf_section * section)
+		       struct dwarf_section * section,
+		       struct cu_tu_set * this_set)
 {
   if (!do_loc)
     printf ("   %-18s:", get_AT_name (attribute));
   data = read_and_display_attr_value (attribute, form, data, cu_offset,
 				      pointer_size, offset_size,
 				      dwarf_version, debug_info_p,
-				      do_loc, section);
+				      do_loc, section, this_set);
   if (!do_loc)
     printf ("\n");
   return data;
 }
-
 
 /* Process the contents of a .debug_info section.  If do_loc is non-zero
    then we are scanning for location lists and we do not want to display
@@ -2025,6 +2093,9 @@ process_debug_info (struct dwarf_section *section,
       dwarf_vma signature_high = 0;
       dwarf_vma signature_low = 0;
       dwarf_vma type_offset = 0;
+      struct cu_tu_set *this_set;
+      dwarf_vma abbrev_base;
+      size_t abbrev_size;
 
       hdrptr = start;
 
@@ -2049,8 +2120,21 @@ process_debug_info (struct dwarf_section *section,
 
       cu_offset = start - section_begin;
 
+      this_set = find_cu_tu_set_v2 (cu_offset, do_types);
+
       compunit.cu_abbrev_offset = byte_get (hdrptr, offset_size);
       hdrptr += offset_size;
+
+      if (this_set == NULL)
+	{
+	  abbrev_base = 0;
+	  abbrev_size = debug_displays [abbrev_sec].section.size;
+	}
+      else
+	{
+	  abbrev_base = this_set->section_offsets [DW_SECT_ABBREV];
+	  abbrev_size = this_set->section_sizes [DW_SECT_ABBREV];
+	}
 
       compunit.cu_pointer_size = byte_get (hdrptr, 1);
       hdrptr += 1;
@@ -2105,6 +2189,25 @@ process_debug_info (struct dwarf_section *section,
 	      printf (_("   Type Offset:   0x%s\n"),
 		      dwarf_vmatoa ("x", type_offset));
 	    }
+	  if (this_set != NULL)
+	    {
+	      dwarf_vma *offsets = this_set->section_offsets;
+	      size_t *sizes = this_set->section_sizes;
+
+	      printf (_("   Section contributions:\n"));
+	      printf (_("    .debug_abbrev.dwo:       0x%s  0x%s\n"),
+		      dwarf_vmatoa ("x", offsets [DW_SECT_ABBREV]),
+		      dwarf_vmatoa ("x", sizes [DW_SECT_ABBREV]));
+	      printf (_("    .debug_line.dwo:         0x%s  0x%s\n"),
+		      dwarf_vmatoa ("x", offsets [DW_SECT_LINE]),
+		      dwarf_vmatoa ("x", sizes [DW_SECT_LINE]));
+	      printf (_("    .debug_loc.dwo:          0x%s  0x%s\n"),
+		      dwarf_vmatoa ("x", offsets [DW_SECT_LOC]),
+		      dwarf_vmatoa ("x", sizes [DW_SECT_LOC]));
+	      printf (_("    .debug_str_offsets.dwo:  0x%s  0x%s\n"),
+		      dwarf_vmatoa ("x", offsets [DW_SECT_STR_OFFSETS]),
+		      dwarf_vmatoa ("x", sizes [DW_SECT_STR_OFFSETS]));
+	    }
 	}
 
       if (cu_offset + compunit.cu_length + initial_length_size
@@ -2133,16 +2236,16 @@ process_debug_info (struct dwarf_section *section,
 
       /* Process the abbrevs used by this compilation unit. DWARF
 	 sections under Mach-O have non-zero addresses.  */
-      if (compunit.cu_abbrev_offset >= debug_displays [abbrev_sec].section.size)
+      if (compunit.cu_abbrev_offset >= abbrev_size)
 	warn (_("Debug info is corrupted, abbrev offset (%lx) is larger than abbrev section size (%lx)\n"),
 	      (unsigned long) compunit.cu_abbrev_offset,
-	      (unsigned long) debug_displays [abbrev_sec].section.size);
+	      (unsigned long) abbrev_size);
       else
 	process_abbrev_section
-	  ((unsigned char *) debug_displays [abbrev_sec].section.start
-	   + compunit.cu_abbrev_offset,
-	   (unsigned char *) debug_displays [abbrev_sec].section.start
-	   + debug_displays [abbrev_sec].section.size);
+	  (((unsigned char *) debug_displays [abbrev_sec].section.start
+	    + abbrev_base + compunit.cu_abbrev_offset),
+	   ((unsigned char *) debug_displays [abbrev_sec].section.start
+	    + abbrev_base + abbrev_size));
 
       level = 0;
       last_level = level;
@@ -2274,12 +2377,15 @@ process_debug_info (struct dwarf_section *section,
 
 	      tags = read_and_display_attr (attr->attribute,
 					    attr->form,
-					    tags, cu_offset,
+					    tags,
+					    cu_offset,
 					    compunit.cu_pointer_size,
 					    offset_size,
 					    compunit.cu_version,
 					    arg,
-					    do_loc || ! do_printing, section);
+					    do_loc || ! do_printing,
+					    section,
+					    this_set);
 	    }
 
  	  if (entry->children)
@@ -2322,6 +2428,9 @@ load_debug_info (void * file)
   /* If we already have the information there is nothing else to do.  */
   if (num_debug_info_entries > 0)
     return num_debug_info_entries;
+
+  /* If this is a DWARF package file, load the CU and TU indexes.  */
+  load_cu_tu_indexes (file);
 
   if (load_debug_section (info, file)
       && process_debug_info (&debug_displays [info].section, file, abbrev, 1, 0))
@@ -3715,7 +3824,8 @@ display_debug_macro (struct dwarf_section *section,
 		      curr
 			= read_and_display_attr_value (0, byte_get (desc++, 1),
 						       curr, 0, 0, offset_size,
-						       version, NULL, 0, NULL);
+						       version, NULL, 0, NULL,
+						       NULL);
 		      if (n != nargs - 1)
 			printf (",");
 		    }
@@ -3888,7 +3998,7 @@ print_addr_index (unsigned int idx, unsigned int len)
 {
   static char buf[15];
   snprintf (buf, sizeof (buf), "[%d]", idx);
-  printf("%*s ", len, buf);
+  printf ("%*s ", len, buf);
 }
 
 /* Display a location list from a .dwo section. It uses address indexes rather
@@ -5878,15 +5988,6 @@ display_gdb_index (struct dwarf_section *section,
   return 1;
 }
 
-/* Collection of CU/TU section sets from .debug_cu_index and .debug_tu_index
-   sections.  Each set is stored in SHNDX_POOL as a zero-terminated list of
-   section indexes comprising one set of debug sections from a .dwo file.  */
-
-int cu_tu_indexes_read = 0;
-unsigned int *shndx_pool = NULL;
-unsigned int shndx_pool_size = 0;
-unsigned int shndx_pool_used = 0;
-
 /* Pre-allocate enough space for the CU/TU sets needed.  */
 
 static void
@@ -5929,7 +6030,42 @@ end_cu_tu_entry (void)
   shndx_pool [shndx_pool_used++] = 0;
 }
 
-/* Process a CU or TU index.  If DO_DISPLAY is true, print the contents.  */
+/* Return the short name of a DWARF section given by a DW_SECT enumerator.  */
+
+static const char *
+get_DW_SECT_short_name (unsigned int dw_sect)
+{
+  static char buf[16];
+
+  switch (dw_sect)
+    {
+      case DW_SECT_INFO:
+	return "info";
+      case DW_SECT_TYPES:
+	return "types";
+      case DW_SECT_ABBREV:
+	return "abbrev";
+      case DW_SECT_LINE:
+	return "line";
+      case DW_SECT_LOC:
+	return "loc";
+      case DW_SECT_STR_OFFSETS:
+	return "str_off";
+      case DW_SECT_MACINFO:
+	return "macinfo";
+      case DW_SECT_MACRO:
+	return "macro";
+      default:
+        break;
+    }
+
+  snprintf (buf, sizeof (buf), "%d", dw_sect);
+  return buf;
+}
+
+/* Process a CU or TU index.  If DO_DISPLAY is true, print the contents.
+   These sections are extensions for Fission.
+   See http://gcc.gnu.org/wiki/DebugFissionDWP.  */
 
 static int
 process_cu_tu_index (struct dwarf_section *section, int do_display)
@@ -5940,24 +6076,30 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
   unsigned char *pindex;
   unsigned char *ppool;
   unsigned int version;
+  unsigned int ncols = 0;
   unsigned int nused;
   unsigned int nslots;
   unsigned int i;
+  unsigned int j;
+  dwarf_vma signature_high;
+  dwarf_vma signature_low;
+  char buf[64];
 
   version = byte_get (phdr, 4);
+  if (version >= 2)
+    ncols = byte_get (phdr + 4, 4);
   nused = byte_get (phdr + 8, 4);
   nslots = byte_get (phdr + 12, 4);
   phash = phdr + 16;
   pindex = phash + nslots * 8;
   ppool = pindex + nslots * 4;
 
-  if (!do_display)
-    prealloc_cu_tu_list((limit - ppool) / 4);
-
   if (do_display)
     {
       printf (_("Contents of the %s section:\n\n"), section->name);
       printf (_("  Version:                 %d\n"), version);
+      if (version >= 2)
+	printf (_("  Number of columns:       %d\n"), ncols);
       printf (_("  Number of used entries:  %d\n"), nused);
       printf (_("  Number of slots:         %d\n\n"), nslots);
     }
@@ -5969,49 +6111,182 @@ process_cu_tu_index (struct dwarf_section *section, int do_display)
       return 0;
     }
 
-  for (i = 0; i < nslots; i++)
+  if (version == 1)
     {
-      dwarf_vma signature_high;
-      dwarf_vma signature_low;
-      unsigned int j;
-      unsigned char *shndx_list;
-      unsigned int shndx;
-      char buf[64];
-
-      byte_get_64 (phash, &signature_high, &signature_low);
-      if (signature_high != 0 || signature_low != 0)
+      if (!do_display)
+	prealloc_cu_tu_list ((limit - ppool) / 4);
+      for (i = 0; i < nslots; i++)
 	{
-	  j = byte_get (pindex, 4);
-	  shndx_list = ppool + j * 4;
-	  if (do_display)
-	    printf (_("  [%3d] Signature:  0x%s  Sections: "),
-		    i, dwarf_vmatoa64 (signature_high, signature_low,
-				       buf, sizeof (buf)));
-	  for (;;)
+	  unsigned char *shndx_list;
+	  unsigned int shndx;
+
+	  byte_get_64 (phash, &signature_high, &signature_low);
+	  if (signature_high != 0 || signature_low != 0)
 	    {
-	      if (shndx_list >= limit)
-		{
-		  warn (_("Section %s too small for shndx pool\n"),
-			section->name);
-		  return 0;
-		}
-	      shndx = byte_get (shndx_list, 4);
-	      if (shndx == 0)
-		break;
+	      j = byte_get (pindex, 4);
+	      shndx_list = ppool + j * 4;
 	      if (do_display)
-		printf (" %d", shndx);
+		printf (_("  [%3d] Signature:  0x%s  Sections: "),
+			i, dwarf_vmatoa64 (signature_high, signature_low,
+					   buf, sizeof (buf)));
+	      for (;;)
+		{
+		  if (shndx_list >= limit)
+		    {
+		      warn (_("Section %s too small for shndx pool\n"),
+			    section->name);
+		      return 0;
+		    }
+		  shndx = byte_get (shndx_list, 4);
+		  if (shndx == 0)
+		    break;
+		  if (do_display)
+		    printf (" %d", shndx);
+		  else
+		    add_shndx_to_cu_tu_entry (shndx);
+		  shndx_list += 4;
+		}
+	      if (do_display)
+		printf ("\n");
 	      else
-		add_shndx_to_cu_tu_entry (shndx);
-	      shndx_list += 4;
+		end_cu_tu_entry ();
 	    }
-	  if (do_display)
-	    printf ("\n");
-	  else
-	    end_cu_tu_entry ();
+	  phash += 8;
+	  pindex += 4;
 	}
-      phash += 8;
-      pindex += 4;
     }
+  else if (version == 2)
+    {
+      unsigned int val;
+      unsigned int dw_sect;
+      unsigned char *ph = phash;
+      unsigned char *pi = pindex;
+      unsigned char *poffsets = ppool + ncols * 4;
+      unsigned char *psizes = poffsets + nused * ncols * 4;
+      unsigned char *pend = psizes + nused * ncols * 4;
+      bfd_boolean is_tu_index;
+      struct cu_tu_set *this_set = NULL;
+      unsigned int row;
+      unsigned char *prow;
+
+      is_tu_index = strcmp (section->name, ".debug_tu_index") == 0;
+
+      if (pend > limit)
+	{
+	  warn (_("Section %s too small for offset and size tables\n"),
+		section->name);
+	  return 0;
+	}
+
+      if (do_display)
+	{
+	  printf (_("  Offset table\n"));
+	  printf ("  slot  %-16s  ",
+		 is_tu_index ? _("signature") : _("dwo_id"));
+	}
+      else
+	{
+	  if (is_tu_index)
+	    {
+	      tu_count = nused;
+	      tu_sets = xcmalloc (nused, sizeof (struct cu_tu_set));
+	      this_set = tu_sets;
+	    }
+	  else
+	    {
+	      cu_count = nused;
+	      cu_sets = xcmalloc (nused, sizeof (struct cu_tu_set));
+	      this_set = cu_sets;
+	    }
+	}
+      if (do_display)
+	{
+	  for (j = 0; j < ncols; j++)
+	    {
+	      dw_sect = byte_get (ppool + j * 4, 4);
+	      printf (" %8s", get_DW_SECT_short_name (dw_sect));
+	    }
+	  printf ("\n");
+	}
+      for (i = 0; i < nslots; i++)
+	{
+	  byte_get_64 (ph, &signature_high, &signature_low);
+	  row = byte_get (pi, 4);
+	  if (row != 0)
+	    {
+	      if (!do_display)
+		memcpy (&this_set[row - 1].signature, ph, sizeof (uint64_t));
+	      prow = poffsets + (row - 1) * ncols * 4;
+	      if (do_display)
+		printf (_("  [%3d] 0x%s"),
+			i, dwarf_vmatoa64 (signature_high, signature_low,
+					   buf, sizeof (buf)));
+	      for (j = 0; j < ncols; j++)
+		{
+		  val = byte_get (prow + j * 4, 4);
+		  if (do_display)
+		    printf (" %8d", val);
+		  else
+		    {
+		      dw_sect = byte_get (ppool + j * 4, 4);
+		      this_set [row - 1].section_offsets [dw_sect] = val;
+		    }
+		}
+	      if (do_display)
+		printf ("\n");
+	    }
+	  ph += 8;
+	  pi += 4;
+	}
+
+      ph = phash;
+      pi = pindex;
+      if (do_display)
+        {
+	  printf ("\n");
+	  printf (_("  Size table\n"));
+	  printf ("  slot  %-16s  ",
+		 is_tu_index ? _("signature") : _("dwo_id"));
+        }
+      for (j = 0; j < ncols; j++)
+	{
+	  val = byte_get (ppool + j * 4, 4);
+	  if (do_display)
+	    printf (" %8s", get_DW_SECT_short_name (val));
+	}
+      if (do_display)
+	printf ("\n");
+      for (i = 0; i < nslots; i++)
+	{
+	  byte_get_64 (ph, &signature_high, &signature_low);
+	  row = byte_get (pi, 4);
+	  if (row != 0)
+	    {
+	      prow = psizes + (row - 1) * ncols * 4;
+	      if (do_display)
+		printf (_("  [%3d] 0x%s"),
+			i, dwarf_vmatoa64 (signature_high, signature_low,
+					   buf, sizeof (buf)));
+	      for (j = 0; j < ncols; j++)
+		{
+		  val = byte_get (prow + j * 4, 4);
+		  if (do_display)
+		    printf (" %8d", val);
+		  else
+		    {
+		      dw_sect = byte_get (ppool + j * 4, 4);
+		      this_set [row - 1].section_sizes [dw_sect] = val;
+		    }
+		}
+	      if (do_display)
+		printf ("\n");
+	    }
+	  ph += 8;
+	  pi += 4;
+	}
+    }
+  else if (do_display)
+    printf (_("  Unsupported version\n"));
 
   if (do_display)
       printf ("\n");

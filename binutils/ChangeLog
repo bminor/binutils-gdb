@@ -1,3 +1,18 @@
+2013-03-01  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (cu_tu_indexes_read, shndx_pool, shndx_pool_size)
+	(shndx_pool_used): Move to top of file.
+	(struct cu_tu_set): New type.
+	(cu_count, tu_count, cu_sets, tu_sets): New file scope variables.
+	(fetch_indexed_string): Add "this_set" parameter.  Update all callers.
+	(find_cu_tu_set_v2): New function.
+	(read_and_display_attr_value): Add "this_set" parameter.
+	(read_and_display_attr): Likewise.
+	(process_debug_info): Track base offsets for DWARF package files.
+	(load_debug_info): Call load_cu_tu_indexes.
+	(get_DW_SECT_short_name): New function.
+	(process_cu_tu_index): Add support for version 2 DWARF package files.
+
 2013-02-27  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/15191
