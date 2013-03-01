@@ -799,9 +799,21 @@ class Dwarf_info_reader
   { this->reloc_mapper_->reset(checkpoint); }
 
  private:
+  // Print a warning about a corrupt debug section.
+  void
+  warn_corrupt_debug_section() const;
+
   // Check that P is within the bounds of the current section.
   bool
-  check_buffer(const unsigned char* p) const;
+  check_buffer(const unsigned char* p) const
+  {
+    if (p > this->buffer_ + this->cu_offset_ + this->cu_length_)
+      {
+	this->warn_corrupt_debug_section();
+	return false;
+      }
+    return true;
+  }
 
   // Read the DWARF string table.
   bool

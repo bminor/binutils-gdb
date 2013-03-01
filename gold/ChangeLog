@@ -1,3 +1,12 @@
+2013-03-01  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf_reader.cc (Dwarf_info_reader::check_buffer): Move
+	function into class definition in header file.
+	(Dwarf_info_reader::warn_corrupt_debug_section): New function.
+	* dwarf_reader.h (Dwarf_info_reader::warn_corrupt_debug_section):
+	New function.
+	(Dwarf_info_reader::check_buffer): Move here from .cc file.
+
 2013-02-28  Alan Modra  <amodra@gmail.com>
 
 	* target.h (Target::plt_fde_location, do_plt_fde_location): Declare.
