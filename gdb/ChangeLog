@@ -1,3 +1,8 @@
+2013-03-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (call_site_find_chain_1): New variable save_callee_pc,
+	use it.
+
 2013-03-01  Pedro Alves  <palves@redhat.com>
 
 	Use gdb_byte for bytes from the program being debugged.

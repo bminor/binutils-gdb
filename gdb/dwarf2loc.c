@@ -793,6 +793,7 @@ static struct call_site_chain *
 call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 			CORE_ADDR callee_pc)
 {
+  CORE_ADDR save_callee_pc = callee_pc;
   struct obstack addr_obstack;
   struct cleanup *back_to_retval, *back_to_workdata;
   struct call_site_chain *retval = NULL;
@@ -811,7 +812,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
   callee_pc = get_pc_function_start (callee_pc);
   if (callee_pc == 0)
     throw_error (NO_ENTRY_VALUE_ERROR, _("Unable to find function for PC %s"),
-		 paddress (gdbarch, callee_pc));
+		 paddress (gdbarch, save_callee_pc));
 
   back_to_retval = make_cleanup (free_current_contents, &retval);
 
