@@ -1,3 +1,8 @@
+2013-03-01  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.h (enum DW_LANG): Adjust spacing for consistency.
+	(enum DW_SECT): New enum type.
+
 2012-12-17  Nick Clifton  <nickc@redhat.com>
 
 	* README: Add copyright notice.
