@@ -785,6 +785,29 @@ tilegx_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
+/* This is the implementation of gdbarch method get_longjmp_target.  */
+
+static int
+tilegx_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR jb_addr;
+  gdb_byte buf[8];
+
+  jb_addr = get_frame_register_unsigned (frame, TILEGX_R0_REGNUM);
+
+  /* TileGX jmp_buf contains 32 elements of type __uint_reg_t which
+     has a size of 8 bytes.  The return address is stored in the 25th
+     slot.  */
+  if (target_read_memory (jb_addr + 25 * 8, buf, 8))
+    return 0;
+
+  *pc = extract_unsigned_integer (buf, 8, byte_order);
+
+  return 1;
+}
+
 /* by assigning the 'faultnum' reg in kernel pt_regs with this value,
    kernel do_signal will not check r0. see tilegx kernel/signal.c
    for details.  */
@@ -1030,6 +1053,7 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* These values and methods are used when gdb calls a target function.  */
   set_gdbarch_push_dummy_call (gdbarch, tilegx_push_dummy_call);
+  set_gdbarch_get_longjmp_target (gdbarch, tilegx_get_longjmp_target);
   set_gdbarch_write_pc (gdbarch, tilegx_write_pc);
   set_gdbarch_breakpoint_from_pc (gdbarch, tilegx_breakpoint_from_pc);
   set_gdbarch_return_value (gdbarch, tilegx_return_value);
