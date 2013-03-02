@@ -35,6 +35,7 @@
 
 enum
   {
+    /* General purpose registers.  */
     E_R0_REGNUM,
     E_R1_REGNUM,
     E_R2_REGNUM,
@@ -67,6 +68,8 @@ enum
     E_R29_REGNUM, E_FP_REGNUM = E_R29_REGNUM,
     E_R30_REGNUM, E_EP_REGNUM = E_R30_REGNUM,
     E_R31_REGNUM, E_LP_REGNUM = E_R31_REGNUM,
+
+    /* System registers - main banks.  */
     E_R32_REGNUM, E_SR0_REGNUM = E_R32_REGNUM,
     E_R33_REGNUM,
     E_R34_REGNUM,
@@ -99,12 +102,14 @@ enum
     E_R61_REGNUM,
     E_R62_REGNUM,
     E_R63_REGNUM,
+
+    /* PC.  */
     E_R64_REGNUM, E_PC_REGNUM = E_R64_REGNUM,
     E_R65_REGNUM,
     E_NUM_OF_V850_REGS,
     E_NUM_OF_V850E_REGS = E_NUM_OF_V850_REGS,
 
-    /* mpu0 system registers */
+    /* System registers - MPV (PROT00) bank.  */
     E_R66_REGNUM = E_NUM_OF_V850_REGS,
     E_R67_REGNUM,
     E_R68_REGNUM,
@@ -134,8 +139,7 @@ enum
     E_R92_REGNUM,
     E_R93_REGNUM,
 
-    /* mpu1 system registers */
-
+    /* System registers - MPU (PROT01) bank.  */
     E_R94_REGNUM,
     E_R95_REGNUM,
     E_R96_REGNUM,
@@ -165,7 +169,7 @@ enum
     E_R120_REGNUM,
     E_R121_REGNUM,
 
-    /* fpu system registers */
+    /* FPU system registers.  */
     E_R122_REGNUM,
     E_R123_REGNUM,
     E_R124_REGNUM,
@@ -273,34 +277,39 @@ v850e2_register_name (struct gdbarch *gdbarch, int regnum)
 {
   static const char *v850e2_reg_names[] =
   {
+    /* General purpose registers.  */
     "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",
     "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",
     "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",
 
-    "eipc", "eipsw", "fepc", "fepsw", "ecr", "psw", "sr6", "sr7",
-    "sr8", "sr9", "sr10", "sr11", "sr12", "sr13", "sr14", "sr15",
-    "ctpc", "ctpsw", "dbpc", "dbpsw", "ctbp", "sr21", "sr22", "sr23",
-    "sr24", "sr25", "sr26", "sr27", "sr28", "sr29", "sr30", "sr31",
-    "pc", "fp"
+    /* System registers - main banks.  */
+    "eipc", "eipsw", "fepc", "fepsw", "ecr", "psw", "pid", "cfg",
+    "", "", "", "sccfg", "scbp", "eiic", "feic", "dbic",
+    "ctpc", "ctpsw", "dbpc", "dbpsw", "ctbp", "dir", "", "",
+    "", "", "", "", "eiwr", "fewr", "dbwr", "bsel",
 
-    /* mpu0 system registers */
-    "vip", "sr33", "sr34", "sr35", "vmecr", "vmtid", "vmadr", "sr39",
-    "vpecr", "vptid", "vpadr", "sr43", "vdecr", "vdtid", "sr46", "sr47",
-    "sr48", "sr49", "sr50", "sr51", "sr52", "sr53", "sr54", "sr55",
-    "sr56", "sr57", "sr58", "sr59",
 
-    /* mpu1 system registers */
-    "mpm", "mpc", "tid", "ppa", "ppm", "ppc", "dcc", "dcv0",
-    "dcv1", "sr69", "spal", "spau", "ipa0l", "ipa0u", "ipa1l", "ipa1u",
-    "iap2l", "ipa2u", "ipa3l", "ipa3u", "dpa0l", "dpa0u", "dpa1l", "dpa1u",
-    "dpa2l", "dpa2u", "dpa3l", "dpa3u",
+    /* PC.  */
+    "pc", "",
 
-    /* fpu system registers */
-    "sr88", "sr89", "sr90", "sr91", "sr92", "sr93", "fpsr", "fpepc",
-    "fpst", "fpcc", "fpcfg", "sr99", "sr100", "sr101", "sr102", "sr103",
-    "sr104", "sr105", "sr106", "sr107", "sr108", "sr109", "sr110", "sr111",
-    "sr112", "sr113", "sr114", "sr115"
+    /* System registers - MPV (PROT00) bank.  */
+    "vsecr", "vstid", "vsadr", "", "vmecr", "vmtid", "vmadr", "",
+    "vpecr", "vptid", "vpadr", "", "", "", "", "",
+    "", "", "", "", "", "", "", "",
+    "mca", "mcs", "mcc", "mcr",
+
+    /* System registers - MPU (PROT01) bank.  */
+    "mpm", "mpc", "tid", "", "", "", "ipa0l", "ipa0u",
+    "ipa1l", "ipa1u", "ipa2l", "ipa2u", "ipa3l", "ipa3u", "ipa4l", "ipa4u",
+    "dpa0l", "dpa0u", "dpa1l", "dpa1u", "dpa2l", "dpa2u", "dpa3l", "dpa3u",
+    "dpa4l", "dpa4u", "dpa5l", "dpa5u",
+
+    /* FPU system registers.  */
+    "", "", "", "", "", "", "fpsr", "fpepc",
+    "fpst", "fpcc", "fpcfg", "fpec", "", "", "", "",
+    "", "", "", "", "", "", "", "",
+    "", "", "", "fpspc"
   };
   if (regnum < 0 || regnum >= E_NUM_REGS)
     return NULL;
