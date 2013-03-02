@@ -1,8 +1,8 @@
 2013-03-02  Kevin Buettner  <kevinb@redhat.com>
 
-	* v850-tdep.c: (v850e2_register_name): (v850e2_reg_names):
-	Revise system register names to match current V850E2M
-	architecture specifications.
+	* v850-tdep.c: (v850e2_register_name): Revise system register
+	names to match current V850E2M architecture specifications.
+	Update register number enum comments too.
 	
 2013-03-01  Jiong Wang  <jiwang@tilera.com>
 	    Pedro Alves  <palves@redhat.com>
