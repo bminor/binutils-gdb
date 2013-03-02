@@ -1,3 +1,8 @@
+2013-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-reg.tbl (riz): Add RegRex64.
+	* i386-tbl.h: Regenerated.
+
 2013-02-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-tbl.h (QL_I3SAMEW, QL_I3WWX): New macros.
