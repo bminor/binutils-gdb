@@ -433,6 +433,8 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 
 	  if (instbuf_size > size_on_same_page)
 	    instbuf_size = size_on_same_page;
+
+	  instbuf_size = min (instbuf_size, (end_addr - next_addr));
 	  instbuf_start = next_addr;
 
 	  status = safe_frame_unwind_memory (next_frame, instbuf_start,
@@ -745,7 +747,8 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 static CORE_ADDR
 tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
-  CORE_ADDR func_start;
+  CORE_ADDR func_start, end_pc;
+  struct obj_section *s;
 
   /* This is the preferred method, find the end of the prologue by
      using the debugging information.  */
@@ -758,10 +761,16 @@ tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
         return max (start_pc, post_prologue_pc);
     }
 
+  /* Don't straddle a section boundary.  */
+  s = find_pc_section (start_pc);
+  end_pc = start_pc + 8 * TILEGX_BUNDLE_SIZE_IN_BYTES;
+  if (s != NULL)
+    end_pc = min (end_pc, obj_section_endaddr (s));
+
   /* Otherwise, try to skip prologue the hard way.  */
   return tilegx_analyze_prologue (gdbarch,
 				  start_pc,
-				  start_pc + 8 * TILEGX_BUNDLE_SIZE_IN_BYTES,
+				  end_pc,
 				  NULL, NULL);
 }
 
