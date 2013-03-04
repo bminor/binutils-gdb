@@ -379,6 +379,7 @@ read_pe_exported_syms (struct objfile *objfile)
       /* This is not a recognized PE format file.  Abort now, because
 	 the code is untested on anything else.  *FIXME* test on
 	 further architectures and loosen or remove this test.  */
+      do_cleanups (back_to);
       return;
     }
 
@@ -392,6 +393,7 @@ read_pe_exported_syms (struct objfile *objfile)
 
   if (num_entries < 1)		/* No exports.  */
     {
+      do_cleanups (back_to);
       return;
     }
   if (is_pe64)
@@ -448,6 +450,7 @@ read_pe_exported_syms (struct objfile *objfile)
   if (export_size == 0)
     {
       /* Empty export table.  */
+      do_cleanups (back_to);
       return;
     }
 

@@ -1,3 +1,8 @@
+2013-03-04  Corinna Vinschen  <vinschen@redhat.com>
+
+	* coff-pe-read.c (read_pe_exported_syms): Don't return without
+	calling do_cleanup.
+
 2013-03-04  Luis Machado  <lgustavo@codesourcery.com>
 
 	* tracepoint.c (build_traceframe_info): Add code for byte order.
