@@ -1,6 +1,5 @@
-/* MIPS-specific support for 64-bit ELF
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007,
-   2010, 2012  Free Software Foundation, Inc.
+/* Support for 64-bit ELF archives.
+   Copyright 1996-2013 Free Software Foundation, Inc.
    Ian Lance Taylor, Cygnus Support
    Linker support added by Mark Mitchell, CodeSourcery, LLC.
    <mark@codesourcery.com>
@@ -200,7 +199,7 @@ bfd_elf64_archive_write_armap (bfd *arch,
        current = current->archive_next)
     {
       /* For each symbol which is used defined in this object, write out
-	 the object file's address in the archive */
+	 the object file's address in the archive.  */
 
       for (;
 	   count < symbol_count && map[count].u.abfd == current;
@@ -210,9 +209,11 @@ bfd_elf64_archive_write_armap (bfd *arch,
 	  if (bfd_bwrite (buf, 8, arch) != 8)
 	    return FALSE;
 	}
+
       /* Add size of this archive entry */
-      archive_member_file_ptr += (arelt_size (current)
-				  + sizeof (struct ar_hdr));
+      archive_member_file_ptr += sizeof (struct ar_hdr);
+      if (! bfd_is_thin_archive (arch))
+	archive_member_file_ptr += arelt_size (current);
       /* remember about the even alignment */
       archive_member_file_ptr += archive_member_file_ptr % 2;
     }

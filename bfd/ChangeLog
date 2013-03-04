@@ -1,3 +1,8 @@
+2013-03-04  Nick Clifton  <nickc@redhat.com>
+
+	* archive64.c (bfd_elf64_archive_write_armap): Fix calculation of
+	file pointer offsets for thin archives.
+
 2013-02-28  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_size_dynamic_sections): Don't call
