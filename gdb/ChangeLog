@@ -1,5 +1,9 @@
 2013-03-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linespec.c (decode_line_2): Fix duplicate request off by two message.
+
+2013-03-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* linespec.c (struct linespec_canonical_name): New.
 	(struct linespec_state): Change canonical_names type to it.
 	(add_sal_to_sals): Change variable canonical_name to canonical.  Change

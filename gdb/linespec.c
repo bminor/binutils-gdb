@@ -1461,7 +1461,7 @@ decode_line_2 (struct linespec_state *self,
 	  else
 	    {
 	      printf_unfiltered (_("duplicate request for %d ignored.\n"),
-				 num);
+				 num + 2);
 	    }
 	}
     }
