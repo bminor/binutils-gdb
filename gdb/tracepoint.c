@@ -4716,7 +4716,14 @@ build_traceframe_info (char blocktype, void *data)
 	unsigned short mlen;
 
 	tfile_read ((gdb_byte *) &maddr, 8);
+	maddr = extract_unsigned_integer ((gdb_byte *) &maddr, 8,
+					  gdbarch_byte_order
+					  (target_gdbarch ()));
 	tfile_read ((gdb_byte *) &mlen, 2);
+	mlen = (unsigned short)
+		extract_unsigned_integer ((gdb_byte *) &mlen,
+					  2, gdbarch_byte_order
+					  (target_gdbarch ()));
 
 	r = VEC_safe_push (mem_range_s, info->memory, NULL);
 

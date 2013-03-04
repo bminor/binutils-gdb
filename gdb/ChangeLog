@@ -1,3 +1,7 @@
+2013-03-04  Luis Machado  <lgustavo@codesourcery.com>
+
+	* tracepoint.c (build_traceframe_info): Add code for byte order.
+
 2013-03-02  Kevin Buettner  <kevinb@redhat.com>
 
 	* v850-tdep.c: (v850e2_register_name): Revise system register
