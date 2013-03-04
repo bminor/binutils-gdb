@@ -7472,7 +7472,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	{
 	  if (got2 != NULL
 	      && r_type == R_PPC_PLTREL24
-	      && rel->r_addend >= 32768)
+	      && rel->r_addend != 0)
 	    {
 	      /* R_PPC_PLTREL24 is rather special.  If non-zero, the
 		 addend specifies the GOT pointer offset within .got2.  */
@@ -8477,33 +8477,37 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  break;
 
 	case R_PPC_PLTREL24:
-	  if (h == NULL || ifunc != NULL)
-	    break;
-	  /* Relocation is to the entry for this symbol in the
-	     procedure linkage table.  */
-	  {
-	    struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2,
-						  info->shared ? addend : 0);
-	    addend = 0;
-	    if (ent == NULL
-		|| htab->plt == NULL)
-	      {
-		/* We didn't make a PLT entry for this symbol.  This
-		   happens when statically linking PIC code, or when
-		   using -Bsymbolic.  */
-		break;
-	      }
+	  if (h != NULL && ifunc == NULL)
+	    {
+	      struct plt_entry *ent = find_plt_ent (&h->plt.plist, got2,
+						    info->shared ? addend : 0);
+	      if (ent == NULL
+		  || htab->plt == NULL)
+		{
+		  /* We didn't make a PLT entry for this symbol.  This
+		     happens when statically linking PIC code, or when
+		     using -Bsymbolic.  */
+		}
+	      else
+		{
+		  /* Relocation is to the entry for this symbol in the
+		     procedure linkage table.  */
+		  unresolved_reloc = FALSE;
+		  if (htab->plt_type == PLT_NEW)
+		    relocation = (htab->glink->output_section->vma
+				  + htab->glink->output_offset
+				  + ent->glink_offset);
+		  else
+		    relocation = (htab->plt->output_section->vma
+				  + htab->plt->output_offset
+				  + ent->plt.offset);
+		}
+	    }
 
-	    unresolved_reloc = FALSE;
-	    if (htab->plt_type == PLT_NEW)
-	      relocation = (htab->glink->output_section->vma
-			    + htab->glink->output_offset
-			    + ent->glink_offset);
-	    else
-	      relocation = (htab->plt->output_section->vma
-			    + htab->plt->output_offset
-			    + ent->plt.offset);
-	  }
+	  /* R_PPC_PLTREL24 is rather special.  If non-zero, the
+	     addend specifies the GOT pointer offset within .got2.
+	     Don't apply it to the relocation field.  */
+	  addend = 0;
 	  break;
 
 	  /* Relocate against _SDA_BASE_.  */
