@@ -1,3 +1,9 @@
+2013-03-04  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_relocate_section <R_PPC_PLTREL24>): Adjust
+	non-zero addends when relocatable, rather than addends >= 32768.
+	Always zero "addend" before applying relocation.
+
 2013-02-18  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12549
