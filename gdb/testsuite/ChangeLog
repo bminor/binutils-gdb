@@ -1,3 +1,12 @@
+2013-03-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.linespec/base/one/thefile.cc (twodup): New.
+	(m): Call it.
+	* gdb.linespec/base/two/thefile.cc (dupname): New.
+	(n): Call it.
+	* gdb.linespec/break-ask.exp: New file.
+	* gdb.linespec/lspec.cc (body_elsewhere): New comment marker.
+
 2013-02-28  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/report.exp: Move some code to ...

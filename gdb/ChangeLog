@@ -1,3 +1,16 @@
+2013-03-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* linespec.c (struct linespec_canonical_name): New.
+	(struct linespec_state): Change canonical_names type to it.
+	(add_sal_to_sals): Change variable canonical_name to canonical.  Change
+	xrealloc element size.  Initialize the different CANONICAL fields.
+	(canonical_to_fullform): New.
+	(filter_results): Use it.  Add variables canonical, fullform and
+	cleanup.
+	(struct decode_line_2_item, decode_line_2_compare_items): New.
+	(decode_line_2): Remove variables iter and item_names, add variables
+	items and items_count.  Modify the code for these new variables.
+
 2013-03-04  Corinna Vinschen  <vinschen@redhat.com>
 
 	* coff-pe-read.c (read_pe_exported_syms): Don't return without

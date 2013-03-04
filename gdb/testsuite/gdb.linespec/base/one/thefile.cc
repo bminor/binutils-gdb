@@ -9,9 +9,14 @@
 
 
 
+static int twodup ()
+{
+  return 0;
+}
+
 int m(int x)
 {
-  return x + 23;		/* thefile breakpoint */
+  return x + 23 + twodup ();	/* thefile breakpoint */
 }
 
 int NameSpace::overload(int x)

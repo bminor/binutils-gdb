@@ -9,7 +9,7 @@ int NameSpace::overload()
 
 int body_elsewhere()
 {
-  int x = 5;
+  int x = 5;	/* body_elsewhere marker */
 #include "body.h"
 }
 
