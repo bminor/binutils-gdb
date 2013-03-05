@@ -539,3 +539,7 @@
 
 	msr	daifset, x0
 	msr	daifclr, x0
+
+	fmov    s0, #0x11
+	fmov    s0, #0xC0280000C1400000
+	fmov    d0, #0xC02f800000000000

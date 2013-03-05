@@ -1989,49 +1989,140 @@ encode_imm_float_bits (uint32_t imm)
     | ((imm >> (31 - 7)) & 0x80);	/* b[31]    -> b[7]   */
 }
 
-/* Return TRUE if IMM is a valid floating-point immediate; return FALSE
-   otherwise.  */
+/* Return TRUE if the single-precision floating-point value encoded in IMM
+   can be expressed in the AArch64 8-bit signed floating-point format with
+   3-bit exponent and normalized 4 bits of precision; in other words, the
+   floating-point value must be expressable as
+     (+/-) n / 16 * power (2, r)
+   where n and r are integers such that 16 <= n <=31 and -3 <= r <= 4.  */
+
 static bfd_boolean
 aarch64_imm_float_p (uint32_t imm)
 {
-  /* 3 32222222 2221111111111
-     1 09876543 21098765432109876543210
-     n Eeeeeexx xxxx0000000000000000000  */
-  uint32_t e;
+  /* If a single-precision floating-point value has the following bit
+     pattern, it can be expressed in the AArch64 8-bit floating-point
+     format:
 
-  e = (imm >> 30) & 0x1;
-  if (e == 0)
-    e = 0x3e000000;
+     3 32222222 2221111111111
+     1 09876543 21098765432109876543210
+     n Eeeeeexx xxxx0000000000000000000
+
+     where n, e and each x are either 0 or 1 independently, with
+     E == ~ e.  */
+
+  uint32_t pattern;
+
+  /* Prepare the pattern for 'Eeeeee'.  */
+  if (((imm >> 30) & 0x1) == 0)
+    pattern = 0x3e000000;
   else
-    e = 0x40000000;
-  return (imm & 0x7ffff) == 0	/* lower 19 bits are 0 */
-    && ((imm & 0x7e000000) == e);	/* bits 25-29 = ~ bit 30 */
+    pattern = 0x40000000;
+
+  return (imm & 0x7ffff) == 0		/* lower 19 bits are 0.  */
+    && ((imm & 0x7e000000) == pattern);	/* bits 25 - 29 == ~ bit 30.  */
 }
 
-/* Note: this accepts the floating-point 0 constant.  */
+/* Like aarch64_imm_float_p but for a double-precision floating-point value.
+
+   Return TRUE if the value encoded in IMM can be expressed in the AArch64
+   8-bit signed floating-point format with 3-bit exponent and normalized 4
+   bits of precision (i.e. can be used in an FMOV instruction); return the
+   equivalent single-precision encoding in *FPWORD.
+
+   Otherwise return FALSE.  */
+
 static bfd_boolean
-parse_aarch64_imm_float (char **ccp, int *immed)
+aarch64_double_precision_fmovable (uint64_t imm, uint32_t *fpword)
+{
+  /* If a double-precision floating-point value has the following bit
+     pattern, it can be expressed in the AArch64 8-bit floating-point
+     format:
+
+     6 66655555555 554444444...21111111111
+     3 21098765432 109876543...098765432109876543210
+     n Eeeeeeeeexx xxxx00000...000000000000000000000
+
+     where n, e and each x are either 0 or 1 independently, with
+     E == ~ e.  */
+
+  uint32_t pattern;
+  uint32_t high32 = imm >> 32;
+
+  /* Lower 32 bits need to be 0s.  */
+  if ((imm & 0xffffffff) != 0)
+    return FALSE;
+
+  /* Prepare the pattern for 'Eeeeeeeee'.  */
+  if (((high32 >> 30) & 0x1) == 0)
+    pattern = 0x3fc00000;
+  else
+    pattern = 0x40000000;
+
+  if ((high32 & 0xffff) == 0			/* bits 32 - 47 are 0.  */
+      && (high32 & 0x7fc00000) == pattern)	/* bits 54 - 61 == ~ bit 62.  */
+    {
+      /* Convert to the single-precision encoding.
+         i.e. convert
+	   n Eeeeeeeeexx xxxx00000...000000000000000000000
+	 to
+	   n Eeeeeexx xxxx0000000000000000000.  */
+      *fpword = ((high32 & 0xfe000000)			/* nEeeeee.  */
+		 | (((high32 >> 16) & 0x3f) << 19));	/* xxxxxx.  */
+      return TRUE;
+    }
+  else
+    return FALSE;
+}
+
+/* Parse a floating-point immediate.  Return TRUE on success and return the
+   value in *IMMED in the format of IEEE754 single-precision encoding.
+   *CCP points to the start of the string; DP_P is TRUE when the immediate
+   is expected to be in double-precision (N.B. this only matters when
+   hexadecimal representation is involved).
+
+   N.B. 0.0 is accepted by this function.  */
+
+static bfd_boolean
+parse_aarch64_imm_float (char **ccp, int *immed, bfd_boolean dp_p)
 {
   char *str = *ccp;
   char *fpnum;
   LITTLENUM_TYPE words[MAX_LITTLENUMS];
   int found_fpchar = 0;
+  int64_t val = 0;
+  unsigned fpword = 0;
+  bfd_boolean hex_p = FALSE;
 
   skip_past_char (&str, '#');
 
-  /* We must not accidentally parse an integer as a floating-point number.  Make
-     sure that the value we parse is not an integer by checking for special
-     characters '.' or 'e'.
-     FIXME: This is a hack that is not very efficient, but doing better is
-     tricky because type information isn't in a very usable state at parse
-     time.  */
   fpnum = str;
   skip_whitespace (fpnum);
 
   if (strncmp (fpnum, "0x", 2) == 0)
-    return FALSE;
+    {
+      /* Support the hexadecimal representation of the IEEE754 encoding.
+	 Double-precision is expected when DP_P is TRUE, otherwise the
+	 representation should be in single-precision.  */
+      if (! parse_constant_immediate (&str, &val))
+	goto invalid_fp;
+
+      if (dp_p)
+	{
+	  if (! aarch64_double_precision_fmovable (val, &fpword))
+	    goto invalid_fp;
+	}
+      else if ((uint64_t) val > 0xffffffff)
+	goto invalid_fp;
+      else
+	fpword = val;
+
+      hex_p = TRUE;
+    }
   else
     {
+      /* We must not accidentally parse an integer as a floating-point number.
+	 Make sure that the value we parse is not an integer by checking for
+	 special characters '.' or 'e'.  */
       for (; *fpnum != '\0' && *fpnum != ' ' && *fpnum != '\n'; fpnum++)
 	if (*fpnum == '.' || *fpnum == 'e' || *fpnum == 'E')
 	  {
@@ -2043,10 +2134,12 @@ parse_aarch64_imm_float (char **ccp, int *immed)
 	return FALSE;
     }
 
-  if ((str = atof_ieee (str, 's', words)) != NULL)
+  if (! hex_p)
     {
-      unsigned fpword = 0;
       int i;
+
+      if ((str = atof_ieee (str, 's', words)) == NULL)
+	goto invalid_fp;
 
       /* Our FP word must be 32 bits (single-precision FP).  */
       for (i = 0; i < 32 / LITTLENUM_NUMBER_OF_BITS; i++)
@@ -2054,14 +2147,12 @@ parse_aarch64_imm_float (char **ccp, int *immed)
 	  fpword <<= LITTLENUM_NUMBER_OF_BITS;
 	  fpword |= words[i];
 	}
+    }
 
-      if (aarch64_imm_float_p (fpword) || (fpword & 0x7fffffff) == 0)
-	*immed = fpword;
-      else
-	goto invalid_fp;
-
+  if (aarch64_imm_float_p (fpword) || (fpword & 0x7fffffff) == 0)
+    {
+      *immed = fpword;
       *ccp = str;
-
       return TRUE;
     }
 
@@ -4637,7 +4728,7 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	    bfd_boolean res1 = FALSE, res2 = FALSE;
 	    /* N.B. -0.0 will be rejected; although -0.0 shouldn't be rejected,
 	       it is probably not worth the effort to support it.  */
-	    if (!(res1 = parse_aarch64_imm_float (&str, &qfloat))
+	    if (!(res1 = parse_aarch64_imm_float (&str, &qfloat, FALSE))
 		&& !(res2 = parse_constant_immediate (&str, &val)))
 	      goto failure;
 	    if ((res1 && qfloat == 0) || (res2 && val == 0))
@@ -4698,7 +4789,10 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	case AARCH64_OPND_SIMD_FPIMM:
 	  {
 	    int qfloat;
-	    if (! parse_aarch64_imm_float (&str, &qfloat))
+	    bfd_boolean dp_p
+	      = (aarch64_get_qualifier_esize (inst.base.operands[0].qualifier)
+		 == 8);
+	    if (! parse_aarch64_imm_float (&str, &qfloat, dp_p))
 	      goto failure;
 	    if (qfloat == 0)
 	      {

@@ -549,3 +549,6 @@
 [^:]*:538: Error: .*`mov x0,##5'
 [^:]*:540: Error: .*`msr daifset,x0'
 [^:]*:541: Error: .*`msr daifclr,x0'
+[^:]*:543: Error: .*`fmov s0,#0x11'
+[^:]*:544: Error: .*`fmov s0,#0xC0280000C1400000'
+[^:]*:545: Error: .*`fmov d0,#0xC02f800000000000'

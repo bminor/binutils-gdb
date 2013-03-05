@@ -1,3 +1,12 @@
+2013-03-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/diagnostic.s: Add test.
+	* gas/aarch64/diagnostic.l: Update.
+	* gas/aarch64/illegal.s: Add test.
+	* gas/aarch64/illegal.l: Update.
+	* gas/aarch64/fpmov.s: New file.
+	* gas/aarch64/fpmov.d: New file.
+
 2013-02-15  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/system.s: Add tests.

@@ -1,3 +1,12 @@
+2013-03-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (aarch64_imm_float_p): Rename 'e' to 'pattern';
+	add comment.
+	(aarch64_double_precision_fmovable): New function.
+	(parse_aarch64_imm_float): Add parameter 'dp_p'; call the new
+	function; handle hexadecimal representation of IEEE754 encoding.
+	(parse_operands): Update the call to parse_aarch64_imm_float.
+
 2013-02-25  Terry Guo  <terry.guo@arm.com>
 
 	Apply mainline patche
