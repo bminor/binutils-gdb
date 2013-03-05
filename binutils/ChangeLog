@@ -1,3 +1,8 @@
+2013-03-05  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.in: Build DLL tools on x86_64-*-cygwin* as well.
+	* configure: Regenerate.
+
 2013-03-04  Nick Clifton  <nickc@redhat.com>
 
 	* elfcomm.c (error): Flush stdout before emitting the error
