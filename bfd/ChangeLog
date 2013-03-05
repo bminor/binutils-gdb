@@ -1,3 +1,7 @@
+2013-03-05  Corinna Vinschen  <vinschen@redhat.com>
+
+	* config.bfd: Add x86_64-*-cygwin to list of supported targets.
+
 2013-03-04  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_relocate_section <R_PPC_PLTREL24>): Adjust
