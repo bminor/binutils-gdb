@@ -326,9 +326,9 @@ struct language_defn
     /* Find all symbols in the current program space matching NAME in
        DOMAIN, according to this language's rules.
 
-       The search starts with BLOCK.  This function iterates upward
-       through blocks.  When the outermost block has been finished,
-       the function returns.
+       The search is done in BLOCK only.
+       The caller is responsible for iterating up through superblocks
+       if desired.
 
        For each one, call CALLBACK with the symbol and the DATA
        argument.  If CALLBACK returns zero, the iteration ends at that

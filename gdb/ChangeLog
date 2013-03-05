@@ -1,3 +1,23 @@
+2013-03-05  Doug Evans  <dje@google.com>
+
+	* ada-lang.c (ada_lookup_symbol_list_worker): New function, contents
+	of old ada_lookup_symbol_list.  In !full_search case, don't
+	search superblocks.
+	(ada_lookup_symbol_list): Delete arg full_search, all callers
+	updated.  Call ada_lookup_symbol_list_worker.
+	(ada_iterate_over_symbols): Call ada_lookup_symbol_list_worker.
+	* ada-lang.h (ada_lookup_symbol_list): Update.
+	* language.h (language_defn): Update comment for
+	la_iterate_over_symbols.
+	* linespec.c (iterate_over_file_blocks): New function.
+	(iterate_over_all_matching_symtabs): Call it.
+	(lookup_prefix_sym): Ditto.
+	(get_current_search_block): New function.
+	(get_search_block): Delete.
+	(find_label_symbols): Call get_current_search_block.
+	(add_matching_symbols_to_info): Call iterate_over_file_blocks.
+	* symtab.c (iterate_over_symbols): Don't search superblocks.
+
 2013-03-05  Yao Qi  <yao@codesourcery.com>
 
 	* cli/cli-decode.c (add_setshow_zuinteger_unlimited_cmd): Change

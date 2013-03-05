@@ -2023,16 +2023,13 @@ lookup_block_symbol (const struct block *block, const char *name,
     }
 }
 
-/* Iterate over the symbols named NAME, matching DOMAIN, starting with
-   BLOCK.
+/* Iterate over the symbols named NAME, matching DOMAIN, in BLOCK.
    
    For each symbol that matches, CALLBACK is called.  The symbol and
    DATA are passed to the callback.
    
    If CALLBACK returns zero, the iteration ends.  Otherwise, the
-   search continues.  This function iterates upward through blocks.
-   When the outermost block has been finished, the function
-   returns.  */
+   search continues.  */
 
 void
 iterate_over_symbols (const struct block *block, const char *name,
@@ -2040,24 +2037,19 @@ iterate_over_symbols (const struct block *block, const char *name,
 		      symbol_found_callback_ftype *callback,
 		      void *data)
 {
-  while (block)
+  struct block_iterator iter;
+  struct symbol *sym;
+
+  for (sym = block_iter_name_first (block, name, &iter);
+       sym != NULL;
+       sym = block_iter_name_next (name, &iter))
     {
-      struct block_iterator iter;
-      struct symbol *sym;
-
-      for (sym = block_iter_name_first (block, name, &iter);
-	   sym != NULL;
-	   sym = block_iter_name_next (name, &iter))
+      if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				 SYMBOL_DOMAIN (sym), domain))
 	{
-	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
-				     SYMBOL_DOMAIN (sym), domain))
-	    {
-	      if (!callback (sym, data))
-		return;
-	    }
+	  if (!callback (sym, data))
+	    return;
 	}
-
-      block = BLOCK_SUPERBLOCK (block);
     }
 }
 

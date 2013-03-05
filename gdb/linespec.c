@@ -318,6 +318,11 @@ typedef struct ls_parser linespec_parser;
 
 /* Prototypes for local functions.  */
 
+static void iterate_over_file_blocks (struct symtab *symtab,
+				      const char *name, domain_enum domain,
+				      symbol_found_callback_ftype *callback,
+				      void *data);
+
 static void initialize_defaults (struct symtab **default_symtab,
 				 int *default_line);
 
@@ -1039,15 +1044,12 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
 
       ALL_OBJFILE_PRIMARY_SYMTABS (objfile, symtab)
 	{
-	  struct block *block;
-
-	  block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
-	  state->language->la_iterate_over_symbols (block, name, domain,
-						    callback, data);
+	  iterate_over_file_blocks (symtab, name, domain, callback, data);
 
 	  if (include_inline)
 	    {
 	      struct symbol_and_data_callback cad = { callback, data };
+	      struct block *block;
 	      int i;
 
 	      for (i = FIRST_LOCAL_BLOCK;
@@ -1063,28 +1065,37 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
   }
 }
 
-/* Returns the block to be used for symbol searches for the given SYMTAB,
-   which may be NULL.  */
+/* Returns the block to be used for symbol searches from
+   the current location.  */
 
 static struct block *
-get_search_block (struct symtab *symtab)
+get_current_search_block ()
+{
+  struct block *block;
+  enum language save_language;
+
+  /* get_selected_block can change the current language when there is
+     no selected frame yet.  */
+  save_language = current_language->la_language;
+  block = get_selected_block (0);
+  set_language (save_language);
+
+  return block;
+}
+
+/* Iterate over static and global blocks.  */
+
+static void
+iterate_over_file_blocks (struct symtab *symtab,
+			  const char *name, domain_enum domain,
+			  symbol_found_callback_ftype *callback, void *data)
 {
   struct block *block;
 
-  if (symtab != NULL)
-    block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
-  else
-    {
-      enum language save_language;
-
-      /* get_selected_block can change the current language when there is
-	 no selected frame yet.  */
-      save_language = current_language->la_language;
-      block = get_selected_block (0);
-      set_language (save_language);
-    }
-
-  return block;
+  for (block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
+       block != NULL;
+       block = BLOCK_SUPERBLOCK (block))
+    LA_ITERATE_OVER_SYMBOLS (block, name, domain, callback, data);
 }
 
 /* A helper for find_method.  This finds all methods in type T which
@@ -2711,17 +2722,14 @@ lookup_prefix_sym (struct linespec_state *state, VEC (symtab_p) *file_symtabs,
 	}
       else
 	{
-	  struct block *search_block;
-
 	  /* Program spaces that are executing startup should have
 	     been filtered out earlier.  */
 	  gdb_assert (!SYMTAB_PSPACE (elt)->executing_startup);
 	  set_current_program_space (SYMTAB_PSPACE (elt));
-	  search_block = get_search_block (elt);
-	  LA_ITERATE_OVER_SYMBOLS (search_block, class_name, STRUCT_DOMAIN,
-				   collect_one_symbol, &collector);
-	  LA_ITERATE_OVER_SYMBOLS (search_block, class_name, VAR_DOMAIN,
-				   collect_one_symbol, &collector);
+	  iterate_over_file_blocks (elt, class_name, STRUCT_DOMAIN,
+				    collect_one_symbol, &collector);
+	  iterate_over_file_blocks (elt, class_name, VAR_DOMAIN,
+				    collect_one_symbol, &collector);
 	}
     }
 
@@ -3176,7 +3184,7 @@ find_label_symbols (struct linespec_state *self,
   if (function_symbols == NULL)
     {
       set_current_program_space (self->program_space);
-      block = get_search_block (NULL);
+      block = get_current_search_block ();
 
       for (;
 	   block && !BLOCK_FUNCTION (block);
@@ -3580,9 +3588,8 @@ add_matching_symbols_to_info (const char *name,
 	     been filtered out earlier.  */
 	  gdb_assert (!SYMTAB_PSPACE (elt)->executing_startup);
 	  set_current_program_space (SYMTAB_PSPACE (elt));
-	  LA_ITERATE_OVER_SYMBOLS (get_search_block (elt), name,
-				   VAR_DOMAIN, collect_symbols,
-				   info);
+	  iterate_over_file_blocks (elt, name, VAR_DOMAIN,
+				    collect_symbols, info);
 	}
     }
 }

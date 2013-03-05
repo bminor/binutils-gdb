@@ -3110,7 +3110,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
             ada_lookup_symbol_list (SYMBOL_LINKAGE_NAME
                                     (exp->elts[pc + 2].symbol),
                                     exp->elts[pc + 1].block, VAR_DOMAIN,
-                                    &candidates, 1);
+                                    &candidates);
 
           if (n_candidates > 1)
             {
@@ -3202,7 +3202,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
               ada_lookup_symbol_list (SYMBOL_LINKAGE_NAME
                                       (exp->elts[pc + 5].symbol),
                                       exp->elts[pc + 4].block, VAR_DOMAIN,
-                                      &candidates, 1);
+                                      &candidates);
             if (n_candidates == 1)
               i = 0;
             else
@@ -3254,7 +3254,7 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
           n_candidates =
             ada_lookup_symbol_list (ada_encode (ada_decoded_op_name (op)),
                                     (struct block *) NULL, VAR_DOMAIN,
-                                    &candidates, 1);
+                                    &candidates);
           i = ada_resolve_function (candidates, n_candidates, argvec, nargs,
                                     ada_decoded_op_name (op), NULL);
           if (i < 0)
@@ -5052,26 +5052,28 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
     }      	
 }
 
-/* Find symbols in DOMAIN matching NAME0, in BLOCK0 and enclosing
-   scope and in global scopes, returning the number of matches.
+/* Find symbols in DOMAIN matching NAME0, in BLOCK0 and, if full_search is
+   non-zero, enclosing scope and in global scopes, returning the number of
+   matches.
    Sets *RESULTS to point to a vector of (SYM,BLOCK) tuples,
    indicating the symbols found and the blocks and symbol tables (if
-   any) in which they were found.  This vector are transient---good only to
-   the next call of ada_lookup_symbol_list.  Any non-function/non-enumeral
+   any) in which they were found.  This vector is transient---good only to
+   the next call of ada_lookup_symbol_list.
+
+   When full_search is non-zero, any non-function/non-enumeral
    symbol match within the nest of blocks whose innermost member is BLOCK0,
    is the one match returned (no other matches in that or
    enclosing blocks is returned).  If there are any matches in or
-   surrounding BLOCK0, then these alone are returned.  Otherwise, if
-   FULL_SEARCH is non-zero, then the search extends to global and
-   file-scope (static) symbol tables.
+   surrounding BLOCK0, then these alone are returned.
+
    Names prefixed with "standard__" are handled specially: "standard__"
    is first stripped off, and only static and global symbols are searched.  */
 
-int
-ada_lookup_symbol_list (const char *name0, const struct block *block0,
-			domain_enum namespace,
-			struct ada_symbol_info **results,
-			int full_search)
+static int
+ada_lookup_symbol_list_worker (const char *name0, const struct block *block0,
+			       domain_enum namespace,
+			       struct ada_symbol_info **results,
+			       int full_search)
 {
   struct symbol *sym;
   struct block *block;
@@ -5107,10 +5109,24 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
 
   /* Check the non-global symbols.  If we have ANY match, then we're done.  */
 
-  ada_add_local_symbols (&symbol_list_obstack, name, block, namespace,
-                         wild_match_p);
-  if (num_defns_collected (&symbol_list_obstack) > 0 || !full_search)
-    goto done;
+  if (block != NULL)
+    {
+      if (full_search)
+	{
+	  ada_add_local_symbols (&symbol_list_obstack, name, block,
+				 namespace, wild_match_p);
+	}
+      else
+	{
+	  /* In the !full_search case we're are being called by
+	     ada_iterate_over_symbols, and we don't want to search
+	     superblocks.  */
+	  ada_add_block_symbols (&symbol_list_obstack, block, name,
+				 namespace, NULL, wild_match_p);
+	}
+      if (num_defns_collected (&symbol_list_obstack) > 0 || !full_search)
+	goto done;
+    }
 
   /* No non-global symbols found.  Check our cache to see if we have
      already performed this search before.  If we have, then return
@@ -5153,6 +5169,37 @@ done:
   return ndefns;
 }
 
+/* Find symbols in DOMAIN matching NAME0, in BLOCK0 and enclosing scope and
+   in global scopes, returning the number of matches, and setting *RESULTS
+   to a vector of (SYM,BLOCK) tuples.
+   See ada_lookup_symbol_list_worker for further details.  */
+
+int
+ada_lookup_symbol_list (const char *name0, const struct block *block0,
+			domain_enum domain, struct ada_symbol_info **results)
+{
+  return ada_lookup_symbol_list_worker (name0, block0, domain, results, 1);
+}
+
+/* Implementation of the la_iterate_over_symbols method.  */
+
+static void
+ada_iterate_over_symbols (const struct block *block,
+			  const char *name, domain_enum domain,
+			  symbol_found_callback_ftype *callback,
+			  void *data)
+{
+  int ndefs, i;
+  struct ada_symbol_info *results;
+
+  ndefs = ada_lookup_symbol_list_worker (name, block, domain, &results, 0);
+  for (i = 0; i < ndefs; ++i)
+    {
+      if (! (*callback) (results[i].sym, data))
+	break;
+    }
+}
+
 /* If NAME is the name of an entity, return a string that should
    be used to look that entity up in Ada units.  This string should
    be deallocated after use using xfree.
@@ -5178,25 +5225,6 @@ ada_name_for_lookup (const char *name)
   return canon;
 }
 
-/* Implementation of the la_iterate_over_symbols method.  */
-
-static void
-ada_iterate_over_symbols (const struct block *block,
-			  const char *name, domain_enum domain,
-			  symbol_found_callback_ftype *callback,
-			  void *data)
-{
-  int ndefs, i;
-  struct ada_symbol_info *results;
-
-  ndefs = ada_lookup_symbol_list (name, block, domain, &results, 0);
-  for (i = 0; i < ndefs; ++i)
-    {
-      if (! (*callback) (results[i].sym, data))
-	break;
-    }
-}
-
 /* The result is as for ada_lookup_symbol_list with FULL_SEARCH set
    to 1, but choosing the first symbol found if there are multiple
    choices.
@@ -5215,9 +5243,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block,
   gdb_assert (info != NULL);
   memset (info, 0, sizeof (struct ada_symbol_info));
 
-  n_candidates = ada_lookup_symbol_list (name, block, namespace, &candidates,
-					 1);
-
+  n_candidates = ada_lookup_symbol_list (name, block, namespace, &candidates);
   if (n_candidates == 0)
     return;
 
@@ -5509,8 +5535,7 @@ full_match (const char *sym_name, const char *search_name)
 /* Add symbols from BLOCK matching identifier NAME in DOMAIN to
    vector *defn_symbols, updating the list of symbols in OBSTACKP 
    (if necessary).  If WILD, treat as NAME with a wildcard prefix.
-   OBJFILE is the section containing BLOCK.
-   SYMTAB is recorded with each symbol added.  */
+   OBJFILE is the section containing BLOCK.  */
 
 static void
 ada_add_block_symbols (struct obstack *obstackp,
@@ -10692,7 +10717,7 @@ get_var_value (char *name, char *err_msg)
   int nsyms;
 
   nsyms = ada_lookup_symbol_list (name, get_selected_block (0), VAR_DOMAIN,
-                                  &syms, 1);
+                                  &syms);
 
   if (nsyms != 1)
     {
