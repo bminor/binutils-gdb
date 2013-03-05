@@ -652,7 +652,7 @@ x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
 			i387-tdep.o i386bsd-tdep.o i386fbsd-tdep.o \
 			bsd-uthread.o solib-svr4.o"
 	;;
-x86_64-*-mingw*)
+x86_64-*-mingw* | x86_64-*-cygwin*)
         # Target: MingW/amd64
 	gdb_target_obs="amd64-tdep.o amd64-windows-tdep.o \
                         i386-tdep.o i386-cygwin-tdep.o i387-tdep.o \

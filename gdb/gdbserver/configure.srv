@@ -326,6 +326,10 @@ case "${target}" in
 			srv_xmlfiles="$srv_i386_xmlfiles $srv_amd64_xmlfiles"
 			srv_mingw=yes
 			;;
+  x86_64-*-cygwin*)	srv_regobj="$srv_amd64_regobj"
+			srv_tgtobj="i386-low.o i387-fp.o win32-low.o win32-i386-low.o"
+			srv_xmlfiles="$srv_i386_xmlfiles"
+			;;
 
   xtensa*-*-linux*)	srv_regobj=reg-xtensa.o
 			srv_tgtobj="linux-low.o linux-osdata.o linux-xtensa-low.o linux-procfs.o"

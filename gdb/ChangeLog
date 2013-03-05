@@ -1,3 +1,9 @@
+2013-03-05  Corinna Vinschen  <vinschen@redhat.de>
+
+	* configure.host: Add x86_64-*-cygwin* as host.
+	* configure.tgt: Add x86_64-*-cygwin* as target.
+	* config/i386/cygwin64.mh: New file.
+
 2013-03-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linespec.c (decode_line_2): Fix duplicate request off by two message.
