@@ -171,7 +171,7 @@ i[3-7]86-pc-interix*)
   HOSTING_LIBS='-L $$X/local_bin -L $$INTERIX_ROOT/usr/lib '"$HOSTING_LIBS"' -lcpsx -lc -lcpsx $$INTERIX_ROOT/usr/lib/psxdll.a $$INTERIX_ROOT/usr/lib/psxdll2.a'
   ;;
 
-i[3-7]86-*-cygwin*)
+i[3-7]86-*-cygwin* | x86_64-*-cygwin*)
   HOSTING_LIBS="$HOSTING_LIBS"' -lcygwin -L/usr/lib/w32api -luser32 -lkernel32 -ladvapi32 -lshell32 `if [ -f ../gcc/libgcc.a ] ; then echo ../gcc/libgcc.a ; else ${CC} -print-libgcc-file-name; fi`'
   ;;
 

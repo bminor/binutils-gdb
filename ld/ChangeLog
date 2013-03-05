@@ -1,3 +1,11 @@
+2013-03-05  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.host: Add x86_64-*-cygwin* as valid host.
+	* configure.tgt: Add x86_64-*-cygwin* as valid target.
+	* emultempl/pep.em: Handle different requirements for Cygwin in terms
+	of start addresses for executables and DLLs, based on memory model in
+	http://cygwin.com/ml/cygwin-developers/2013-02/msg00027.html
+
 2013-03-05  Alan Modra  <amodra@gmail.com>
 
 	PR ld/15222
