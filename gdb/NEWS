@@ -13,6 +13,7 @@ FreeBSD/powerpc			powerpc*-*-freebsd
 ARM AArch64			aarch64*-*-elf
 ARM AArch64 GNU/Linux		aarch64*-*-linux
 Lynx 178 PowerPC		powerpc-*-lynx*178
+x86_64/Cygwin			x86_64-*-cygwin*
 
 * If the configured location of system.gdbinit file (as given by the
   --with-system-gdbinit option at configure time) is in the

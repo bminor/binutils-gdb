@@ -1,5 +1,9 @@
 2013-03-05  Corinna Vinschen  <vinschen@redhat.de>
 
+	* NEWS: Mention new target x86_64-*-cygwin*.
+
+2013-03-05  Corinna Vinschen  <vinschen@redhat.de>
+
 	* configure.host: Add x86_64-*-cygwin* as host.
 	* configure.tgt: Add x86_64-*-cygwin* as target.
 	* config/i386/cygwin64.mh: New file.
