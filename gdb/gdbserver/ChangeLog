@@ -1,6 +1,6 @@
 2013-03-05  Corinna Vinschen  <vinschen@redhat.de>
 
-	* gdbserver/configure.srv: Add x86_64-*-cygwin* as target.
+	* configure.srv: Add x86_64-*-cygwin* as target.
 
 2013-02-28  Tom Tromey  <tromey@redhat.com>
 
