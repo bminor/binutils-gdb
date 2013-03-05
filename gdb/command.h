@@ -99,8 +99,9 @@ typedef enum var_types
     /* ZeroableUnsignedInteger.  *VAR is an unsigned int.  Zero really
        means zero.  */
     var_zuinteger,
-    /* ZeroableUnsignedInteger with unlimited value.  *VAR is an unsigned
-       int, but its range is [0, INT_MAX].  -1 stands for unlimited.  */
+    /* ZeroableUnsignedInteger with unlimited value.  *VAR is an int,
+       but its range is [0, INT_MAX].  -1 stands for unlimited and
+       other negative numbers are not allowed.  */
     var_zuinteger_unlimited,
     /* Enumerated type.  Can only have one of the specified values.
        *VAR is a char pointer to the name of the element that we
@@ -361,7 +362,7 @@ extern void add_setshow_zuinteger_cmd (char *name,
 extern void
   add_setshow_zuinteger_unlimited_cmd (char *name,
 				       enum command_class class,
-				       unsigned int *var,
+				       int *var,
 				       const char *set_doc,
 				       const char *show_doc,
 				       const char *help_doc,

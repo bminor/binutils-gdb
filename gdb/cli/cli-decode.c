@@ -708,7 +708,7 @@ add_setshow_zinteger_cmd (char *name, enum command_class class,
 void
 add_setshow_zuinteger_unlimited_cmd (char *name,
 				     enum command_class class,
-				     unsigned int *var,
+				     int *var,
 				     const char *set_doc,
 				     const char *show_doc,
 				     const char *help_doc,

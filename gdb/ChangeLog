@@ -1,3 +1,10 @@
+2013-03-05  Yao Qi  <yao@codesourcery.com>
+
+	* cli/cli-decode.c (add_setshow_zuinteger_unlimited_cmd): Change
+	parameter VAR's type from "unsigned int" to "int".
+	* command.h (var_zuinteger_unlimited): Update its comments.
+	(add_setshow_zuinteger_unlimited_cmd): Update the declaration.
+
 2013-03-05  Corinna Vinschen  <vinschen@redhat.de>
 
 	* NEWS: Mention new target x86_64-*-cygwin*.
