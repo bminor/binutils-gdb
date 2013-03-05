@@ -86,3 +86,4 @@
 [^:]*:88: Error: shift is not permitted at operand 2 -- `movi v1.2d,4294967295,lsl#0'
 [^:]*:89: Error: shift amount expected to be 0 at operand 2 -- `movi v1.8b,97,lsl#8'
 [^:]*:90: Error: unknown or missing system register name at operand 1 -- `msr dummy,x1'
+[^:]*:91: Error: invalid floating-point constant at operand 2 -- `fmov s0,0x42000000'

@@ -88,3 +88,4 @@
 	movi	v1.2d, 4294967295, lsl #0
 	movi	v1.8b, 97, lsl #8
 	msr	dummy, x1
+	fmov	s0, 0x42000000
