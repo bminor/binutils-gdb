@@ -1,3 +1,8 @@
+2013-03-05  Alan Modra  <amodra@gmail.com>
+
+	* ld-scripts/rgn-at6.s, * ld-scripts/rgn-at6.t, * ld-scripts/rgn-at6.d,
+	* ld-scripts/rgn-at7.t, * ld-scripts/rgn-at7.d: New tests.
+
 2013-02-12  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* ld-aarch64/emit-relocs-264.d: Append the '-Mno-aliases' option to
