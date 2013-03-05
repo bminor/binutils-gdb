@@ -4963,6 +4963,13 @@ lang_size_sections_1
 	      {
 		bfd_vma lma = os->lma_region->current;
 
+		/* When LMA_REGION is the same as REGION, align the LMA
+		   as we did for the VMA, possibly including alignment
+		   from the bfd section.  If a different region, then
+		   only align according to the value in the output
+		   statement.  */
+		if (os->lma_region != os->region)
+		  section_alignment = os->section_alignment;
 		if (section_alignment > 0)
 		  lma = align_power (lma, section_alignment);
 		os->bfd_section->lma = lma;

@@ -1,3 +1,9 @@
+2013-03-05  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15222
+	* ldlang.c (lang_size_sections_1): When given an lma_region align
+	LMA as per VMA only if lma_region is the same as region.
+
 2013-02-27  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elf32msp430.sc: Add placement of .data.* sections.
