@@ -1,3 +1,9 @@
+2013-03-06  Pedro Alves  <palves@redhat.com>
+
+	* python/py-utils.c (target_string_to_unicode): Delete function.
+	* python/python-internal.h (target_string_to_unicode): Delete
+	declaration.
+
 2013-03-06  Pierre Muller  <muller@sourceware.org>
 
 	* linespec.c (get_current_search_block): ARI fix, use (void)

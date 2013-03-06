@@ -335,7 +335,6 @@ char *unicode_to_target_string (PyObject *unicode_str);
 char *python_string_to_target_string (PyObject *obj);
 PyObject *python_string_to_target_python_string (PyObject *obj);
 char *python_string_to_host_string (PyObject *obj);
-PyObject *target_string_to_unicode (const gdb_byte *str, int length);
 int gdbpy_is_string (PyObject *obj);
 char *gdbpy_obj_to_string (PyObject *obj);
 char *gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue);
