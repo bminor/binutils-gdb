@@ -455,8 +455,7 @@ static long
 get_char (FILE *stream, file_ptr *address, int *magiccount, char **magic)
 {
   int c, i;
-  long r = EOF;
-  unsigned char buf[4];
+  long r = 0;
 
   for (i = 0; i < encoding_bytes; i++)
     {
@@ -484,33 +483,21 @@ get_char (FILE *stream, file_ptr *address, int *magiccount, char **magic)
 	}
 
       (*address)++;
-      buf[i] = c;
+      r = (r << 8) | (c & 0xff);
     }
 
   switch (encoding)
     {
-    case 'S':
-    case 's':
-      r = buf[0];
-      break;
-    case 'b':
-      r = (buf[0] << 8) | buf[1];
+    default:
       break;
     case 'l':
-      r = buf[0] | (buf[1] << 8);
-      break;
-    case 'B':
-      r = ((long) buf[0] << 24) | ((long) buf[1] << 16) |
-	((long) buf[2] << 8) | buf[3];
+      r = ((r & 0xff) << 8) | ((r & 0xff00) >> 8);
       break;
     case 'L':
-      r = buf[0] | ((long) buf[1] << 8) | ((long) buf[2] << 16) |
-	((long) buf[3] << 24);
+      r = (((r & 0xff) << 24) | ((r & 0xff00) << 8)
+	   | ((r & 0xff0000) >> 8) | ((r & 0xff000000) >> 24));
       break;
     }
-
-  if (r == EOF)
-    return 0;
 
   return r;
 }

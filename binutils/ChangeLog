@@ -1,3 +1,9 @@
+2013-03-07  Alan Modra  <amodra@gmail.com>
+
+	* strings.c (get_char): Dispense with buf[].  Instead shift
+	chars into big-endian value and byte-swap later if
+	little-endian.  Don't EOF check value read from object.
+
 2013-03-05  Corinna Vinschen  <vinschen@redhat.com>
 
 	* configure.in: Build DLL tools on x86_64-*-cygwin* as well.
