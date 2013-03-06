@@ -147,43 +147,6 @@ public:
     this->opd_ent_[ndx].discard = true;
   }
 
-  Access_from*
-  access_from_map()
-  { return &this->access_from_map_; }
-
-  // Add a reference from SRC_OBJ, SRC_INDX to this object's .opd
-  // section at DST_OFF.
-  void
-  add_reference(Object* src_obj,
-		unsigned int src_indx,
-		typename elfcpp::Elf_types<size>::Elf_Addr dst_off)
-  {
-    Section_id src_id(src_obj, src_indx);
-    this->access_from_map_[dst_off].insert(src_id);
-  }
-
-  // Add a reference to the code section specified by the .opd entry
-  // at DST_OFF
-  void
-  add_gc_mark(typename elfcpp::Elf_types<size>::Elf_Addr dst_off)
-  {
-    size_t ndx = this->opd_ent_ndx(dst_off);
-    if (ndx >= this->opd_ent_.size())
-      this->opd_ent_.resize(ndx + 1);
-    this->opd_ent_[ndx].gc_mark = true;
-  }
-
-  void
-  process_gc_mark(Symbol_table* symtab)
-  {
-    for (size_t i = 0; i < this->opd_ent_.size(); i++)
-      if (this->opd_ent_[i].gc_mark)
-	{
-	  unsigned int shndx = this->opd_ent_[i].shndx;
-	  symtab->gc()->worklist().push(Section_id(this, shndx));
-	}
-  }
-
   bool
   opd_valid() const
   { return this->opd_valid_; }
@@ -220,6 +183,43 @@ public:
 	  return false;
       }
     return true;
+  }
+
+  Access_from*
+  access_from_map()
+  { return &this->access_from_map_; }
+
+  // Add a reference from SRC_OBJ, SRC_INDX to this object's .opd
+  // section at DST_OFF.
+  void
+  add_reference(Object* src_obj,
+		unsigned int src_indx,
+		typename elfcpp::Elf_types<size>::Elf_Addr dst_off)
+  {
+    Section_id src_id(src_obj, src_indx);
+    this->access_from_map_[dst_off].insert(src_id);
+  }
+
+  // Add a reference to the code section specified by the .opd entry
+  // at DST_OFF
+  void
+  add_gc_mark(typename elfcpp::Elf_types<size>::Elf_Addr dst_off)
+  {
+    size_t ndx = this->opd_ent_ndx(dst_off);
+    if (ndx >= this->opd_ent_.size())
+      this->opd_ent_.resize(ndx + 1);
+    this->opd_ent_[ndx].gc_mark = true;
+  }
+
+  void
+  process_gc_mark(Symbol_table* symtab)
+  {
+    for (size_t i = 0; i < this->opd_ent_.size(); i++)
+      if (this->opd_ent_[i].gc_mark)
+	{
+	  unsigned int shndx = this->opd_ent_[i].shndx;
+	  symtab->gc()->worklist().push(Section_id(this, shndx));
+	}
   }
 
   // Return offset in output GOT section that this object will use
@@ -796,7 +796,8 @@ class Target_powerpc : public Sized_target<size, big_endian>
   };
 
   Address
-  symval_for_branch(Address value, const Sized_symbol<size>* gsym,
+  symval_for_branch(const Symbol_table* symtab, Address value,
+		    const Sized_symbol<size>* gsym,
 		    Powerpc_relobj<size, big_endian>* object,
 		    unsigned int *dest_shndx);
 
@@ -2163,7 +2164,8 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
       if (size == 64 && is_branch_reloc(this->r_type_))
 	{
 	  unsigned int dest_shndx;
-	  to = stub_table->targ()->symval_for_branch(to, gsym, this->object_,
+	  to = stub_table->targ()->symval_for_branch(symtab, to, gsym,
+						     this->object_,
 						     &dest_shndx);
 	}
       Address delta = to - from;
@@ -5527,11 +5529,12 @@ Target_powerpc<size, big_endian>::do_gc_add_reference(
     unsigned int dst_shndx,
     Address dst_off) const
 {
+  if (size != 64 || dst_obj->is_dynamic())
+    return;
+
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(dst_obj);
-  if (size == 64
-      && !ppc_object->is_dynamic()
-      && dst_shndx == ppc_object->opd_shndx())
+  if (dst_shndx == ppc_object->opd_shndx())
     {
       if (ppc_object->opd_valid())
 	{
@@ -5637,10 +5640,12 @@ class Global_symbol_visitor_opd
 	|| !sym->in_real_elf())
       return;
 
+    if (sym->object()->is_dynamic())
+      return;
+
     Powerpc_relobj<64, big_endian>* symobj
       = static_cast<Powerpc_relobj<64, big_endian>*>(sym->object());
-    if (symobj->is_dynamic()
-	|| symobj->opd_shndx() == 0)
+    if (symobj->opd_shndx() == 0)
       return;
 
     bool is_ordinary;
@@ -5827,6 +5832,7 @@ ok_lo_toc_insn(uint32_t insn)
 template<int size, bool big_endian>
 typename Target_powerpc<size, big_endian>::Address
 Target_powerpc<size, big_endian>::symval_for_branch(
+    const Symbol_table* symtab,
     Address value,
     const Sized_symbol<size>* gsym,
     Powerpc_relobj<size, big_endian>* object,
@@ -5854,6 +5860,13 @@ Target_powerpc<size, big_endian>::symval_for_branch(
     {
       Address sec_off;
       *dest_shndx = symobj->get_opd_ent(value - opd_addr, &sec_off);
+      if (symtab->is_section_folded(symobj, *dest_shndx))
+	{
+	  Section_id folded
+	    = symtab->icf()->get_folded_section(symobj, *dest_shndx);
+	  symobj = static_cast<Powerpc_relobj<size, big_endian>*>(folded.first);
+	  *dest_shndx = folded.second;
+	}
       Address sec_addr = symobj->get_output_section_offset(*dest_shndx);
       gold_assert(sec_addr != invalid_address);
       sec_addr += symobj->output_section(*dest_shndx)->address();
@@ -5996,8 +6009,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 		  Address addend = rela.get_r_addend();
 		  unsigned int dest_shndx;
 		  Address opdent = psymval->value(object, addend);
-		  code = target->symval_for_branch(opdent, gsym, object,
-						   &dest_shndx);
+		  code = target->symval_for_branch(relinfo->symtab, opdent,
+						   gsym, object, &dest_shndx);
 		  bool is_ordinary;
 		  if (dest_shndx == 0)
 		    dest_shndx = gsym->shndx(&is_ordinary);
@@ -6259,7 +6272,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	addend = rela.get_r_addend();
       value = psymval->value(object, addend);
       if (size == 64 && is_branch_reloc(r_type))
-	value = target->symval_for_branch(value, gsym, object, &dest_shndx);
+	value = target->symval_for_branch(relinfo->symtab, value,
+					  gsym, object, &dest_shndx);
       unsigned int max_branch_offset = 0;
       if (r_type == elfcpp::R_POWERPC_REL24
 	  || r_type == elfcpp::R_PPC_PLTREL24

@@ -1,3 +1,12 @@
+2013-03-06  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (class Powerpc_relobj): Move some member functions.
+	(Target_powerpc::symval_for_branch):  Add symtab param.  Update
+	all callers.  Handle folded sections.
+	(Target_powerpc::do_gc_add_reference): Don't cast dynamic object
+	to Powerpc_relobj.
+	(Global_symbol_visitor_opd::operator()): Likewise.
+
 2013-03-04  Alan Modra  <amodra@gmail.com>
 
 	* testsuite/Makefile.am (final_layout_script.lds): Add .sbss.
