@@ -1,3 +1,8 @@
+2013-03-06  Pierre Muller  <muller@sourceware.org>
+
+	* linespec.c (get_current_search_block): ARI fix, use (void)
+	for empty parameter list.
+
 2013-03-05  Doug Evans  <dje@google.com>
 
 	* ada-lang.c (ada_lookup_symbol_list_worker): New function, contents

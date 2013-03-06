@@ -1069,7 +1069,7 @@ iterate_over_all_matching_symtabs (struct linespec_state *state,
    the current location.  */
 
 static struct block *
-get_current_search_block ()
+get_current_search_block (void)
 {
   struct block *block;
   enum language save_language;
