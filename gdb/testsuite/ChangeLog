@@ -1,3 +1,11 @@
+2013-03-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/tstatus.exp (run_trace_experiment): When the target
+	doesn't support the tested optional feature, call "unsupported"
+	with the same test message as the "pass" case, instead of calling
+	"pass" with a different message.  Use the same text for the "fail"
+	cases too.
+
 2013-03-06  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/tstatus.exp: Remove the invocation of
