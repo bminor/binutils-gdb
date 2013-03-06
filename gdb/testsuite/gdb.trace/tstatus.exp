@@ -107,7 +107,7 @@ proc run_trace_experiment {} {
     gdb_test_no_output "tstop because I can" "trace stopped with note"
 
     gdb_test_multiple "tstatus" "check on trace status after stop" {
-	-re "Trace stopped by a tstop command (because I can)\..*Trace will stop if GDB disconnects\.\[\r\n\]+Trace user is me me me\.\[\r\n\]+Trace notes: different note\.\[\r\n\]+Not looking at any trace frame\..*\r\n$gdb_prompt $" {
+	-re "Trace stopped by a tstop command \\(because I can\\)\..*Trace will stop if GDB disconnects\.\[\r\n\]+Trace user is me me me\.\[\r\n\]+Trace notes: different note\.\[\r\n\]+Not looking at any trace frame\..*\r\n$gdb_prompt $" {
 	    pass "tstatus reports trace stop reason"
 	}
 	-re "Trace stopped by a tstop command\..*\r\n$gdb_prompt $" {
