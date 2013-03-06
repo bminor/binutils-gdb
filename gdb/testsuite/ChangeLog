@@ -1,5 +1,12 @@
 2013-03-06  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/tstatus.exp: Remove the invocation of
+	gdb_load_shlibs, gdb_compile, clean_restart and runto_main.
+	(test_tracepoints): Don't set fast tracepoint.
+	(top level): Don't check agent library is loaded or not.
+
+2013-03-06  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.trace/tstatus.exp (run_trace_experiment): Escape
 	parentheses by "\\".
 

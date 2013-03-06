@@ -34,25 +34,6 @@ if ![gdb_target_supports_trace] {
     return -1
 }
 
-set libipa [get_in_proc_agent]
-gdb_load_shlibs $libipa
-
-# Can't use prepare_for_testing, because that splits compiling into
-# building objects and then linking, and we'd fail with "linker input
-# file unused because linking not done" when building the object.
-
-if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
-	  executable [list debug shlib=$libipa] ] != "" } {
-    untested "failed to compile ftrace tests"
-    return -1
-}
-clean_restart ${executable}
-
-if ![runto_main] {
-    fail "Can't run to main for ftrace tests"
-    return 0
-}
-
 proc run_trace_experiment {} {
     global gdb_prompt
     global decimal
@@ -141,34 +122,9 @@ proc test_tracepoints {} {
     gdb_trace_setactions "collect at set_point: define actions" \
 	"" \
 	"collect parm" "^$"
-    set fastgood 0
-
-    gdb_test_multiple "ftrace gdb_recursion_test" "set fast tracepoint" {
-	-re "May not have a fast tracepoint at .*\r\n$gdb_prompt $" {
-	    pass "4-byte fast tracepoint could not be set"
-	}
-	-re "Fast tracepoint .*\r\n$gdb_prompt $" {
-	    pass "4-byte fast tracepoint is set"
-	    set fastgood 1
-	}
-    }
-
-    if { $fastgood } {
-
-	gdb_trace_setactions "collect at four_byter: define actions" \
-	    "" \
-	    "collect globvar, anarg" "^$"
-    }
 
     run_trace_experiment
 
-}
-
-gdb_reinitialize_dir $srcdir/$subdir
-
-if { [gdb_test "info sharedlibrary" ".*${libipa}.*" "IPA loaded"] != 0 } {
-    untested "Could not find IPA lib loaded"
-    return 1
 }
 
 test_tracepoints
