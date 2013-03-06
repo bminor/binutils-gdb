@@ -1,3 +1,8 @@
+2013-03-07  Alan Modra  <amodra@gmail.com>
+
+	* ldfile.c (ldfile_open_command_file_1): Return after einfo
+	to avoid warning.
+
 2013-03-05  Corinna Vinschen  <vinschen@redhat.com>
 
 	* configure.host: Add x86_64-*-cygwin* as valid host.

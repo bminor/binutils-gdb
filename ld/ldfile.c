@@ -602,6 +602,7 @@ ldfile_open_command_file_1 (const char *name, bfd_boolean default_only)
     {
       bfd_set_error (bfd_error_system_call);
       einfo (_("%P%F: cannot open linker script file %s: %E\n"), name);
+      return;
     }
 
   lex_push_file (ldlex_input_stack, name, sysrooted);
