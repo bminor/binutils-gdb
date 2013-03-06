@@ -1,3 +1,8 @@
+2013-03-06  Doug Evans  <dje@google.com>
+
+	* elfread.c (elf_symfile_read): Move debugging printf to more
+	logical location.
+
 2013-03-06  Pedro Alves  <palves@redhat.com>
 
 	* python/py-utils.c (target_string_to_unicode): Delete function.
