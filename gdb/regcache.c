@@ -225,14 +225,14 @@ regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
       regcache->registers
 	= XCALLOC (descr->sizeof_cooked_registers, gdb_byte);
       regcache->register_status
-	= XCALLOC (descr->sizeof_cooked_register_status, gdb_byte);
+	= XCALLOC (descr->sizeof_cooked_register_status, signed char);
     }
   else
     {
       regcache->registers
 	= XCALLOC (descr->sizeof_raw_registers, gdb_byte);
       regcache->register_status
-	= XCALLOC (descr->sizeof_raw_register_status, gdb_byte);
+	= XCALLOC (descr->sizeof_raw_register_status, signed char);
     }
   regcache->aspace = aspace;
   regcache->ptid = minus_one_ptid;

@@ -1,5 +1,10 @@
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
+	* regcache.c (regcache_xmalloc_1): Call XCALLOC with signed char
+	for 'regcache->register_status'.
+
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (breakpoint_xfer_memory): Change type of local to
 	int.
 
