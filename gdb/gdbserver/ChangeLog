@@ -1,3 +1,11 @@
+2013-03-07  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (cur_action, cur_step_action): Make them unsigned.
+	(cmd_qtfp): Initialize cur_action and cur_step_action 0 instead
+	of -1.
+	(cmd_qtsp): Adjust condition.  Do post increment.
+	Set cur_action and cur_step_action back to 0.
+
 2013-03-07  Jeremy Bennett  <jeremy.bennett@embecosm.com>
 
 	PR server/15236

@@ -3684,8 +3684,8 @@ cmd_qtp (char *own_buf)
 
 /* State variables to help return all the tracepoint bits.  */
 static struct tracepoint *cur_tpoint;
-static int cur_action;
-static int cur_step_action;
+static unsigned int cur_action;
+static unsigned int cur_step_action;
 static struct source_string *cur_source_string;
 static struct trace_state_variable *cur_tsv;
 
@@ -3759,7 +3759,7 @@ cmd_qtfp (char *packet)
   trace_debug ("Returning first tracepoint definition piece");
 
   cur_tpoint = tracepoints;
-  cur_action = cur_step_action = -1;
+  cur_action = cur_step_action = 0;
   cur_source_string = NULL;
 
   if (cur_tpoint)
@@ -3784,17 +3784,17 @@ cmd_qtsp (char *packet)
 	 GDB misbehavior.  */
       strcpy (packet, "l");
     }
-  else if (cur_action < cur_tpoint->numactions - 1)
+  else if (cur_action < cur_tpoint->numactions)
     {
-      ++cur_action;
       response_action (packet, cur_tpoint,
 		       cur_tpoint->actions_str[cur_action], 0);
+      ++cur_action;
     }
-  else if (cur_step_action < cur_tpoint->num_step_actions - 1)
+  else if (cur_step_action < cur_tpoint->num_step_actions)
     {
-      ++cur_step_action;
       response_action (packet, cur_tpoint,
 		       cur_tpoint->step_actions_str[cur_step_action], 1);
+      ++cur_step_action;
     }
   else if ((cur_source_string
 	    ? cur_source_string->next
@@ -3809,7 +3809,7 @@ cmd_qtsp (char *packet)
   else
     {
       cur_tpoint = cur_tpoint->next;
-      cur_action = cur_step_action = -1;
+      cur_action = cur_step_action = 0;
       cur_source_string = NULL;
       if (cur_tpoint)
 	response_tracepoint (packet, cur_tpoint);
