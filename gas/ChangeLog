@@ -1,3 +1,8 @@
+2013-03-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (flag_code_names): Removed.
+	(i386_index_check): Rewrote.
+
 2013-03-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (aarch64_imm_float_p): Rename 'e' to 'pattern';
