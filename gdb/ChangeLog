@@ -1,6 +1,6 @@
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
-	* breakpoint.c.c (breakpoint_xfer_memory): Change type of local to
+	* breakpoint.c (breakpoint_xfer_memory): Change type of local to
 	int.
 
 2013-03-07  Pedro Alves  <palves@redhat.com>
