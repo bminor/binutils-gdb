@@ -571,7 +571,7 @@ struct wchar_iterator
   iconv_t desc;
 
   /* The input string.  This is updated as convert characters.  */
-  char *input;
+  const gdb_byte *input;
   /* The number of bytes remaining in the input.  */
   size_t bytes;
 
@@ -597,7 +597,7 @@ make_wchar_iterator (const gdb_byte *input, size_t bytes,
 
   result = XNEW (struct wchar_iterator);
   result->desc = desc;
-  result->input = (char *) input;
+  result->input = input;
   result->bytes = bytes;
   result->width = width;
 
@@ -641,7 +641,7 @@ wchar_iterate (struct wchar_iterator *iter,
   while (iter->bytes > 0)
     {
       char *outptr = (char *) &iter->out[0];
-      char *orig_inptr = iter->input;
+      const gdb_byte *orig_inptr = iter->input;
       size_t orig_in = iter->bytes;
       size_t out_avail = out_request * sizeof (gdb_wchar_t);
       size_t num;

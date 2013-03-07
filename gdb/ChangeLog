@@ -1,5 +1,12 @@
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
+	* charset.c (struct wchar_iterator) <input>: Change type to 'const
+	gdb_byte *'.
+	(make_wchar_iterator): Remove cast to char*.
+	(wchar_iterate): Change type of local.
+
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
 	* regcache.c (regcache_xmalloc_1): Call XCALLOC with signed char
 	for 'regcache->register_status'.
 
