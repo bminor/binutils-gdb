@@ -1,5 +1,9 @@
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
+	* stap-probe.c (handle_stap_probe): Add cast to char*.
+
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
 	* linux-record.c (record_linux_system_call) <gdb_sys_msgrcv,
 	RECORD_MSGRCV>: Pass a signed variable to
 	regcache_raw_read_signed, instead of an unsigned one.

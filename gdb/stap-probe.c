@@ -1303,7 +1303,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   ret->p.objfile = objfile;
 
   /* Provider and the name of the probe.  */
-  ret->p.provider = &el->data[3 * size];
+  ret->p.provider = (char *) &el->data[3 * size];
   ret->p.name = memchr (ret->p.provider, '\0',
 			(char *) el->data + el->size - ret->p.provider);
   /* Making sure there is a name.  */
