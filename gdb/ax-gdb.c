@@ -2558,7 +2558,7 @@ gen_trace_for_return_address (CORE_ADDR scope, struct gdbarch *gdbarch)
 struct agent_expr *
 gen_printf (CORE_ADDR scope, struct gdbarch *gdbarch,
 	    CORE_ADDR function, LONGEST channel,
-	    char *format, int fmtlen,
+	    const char *format, int fmtlen,
 	    struct format_piece *frags,
 	    int nargs, struct expression **exprs)
 {

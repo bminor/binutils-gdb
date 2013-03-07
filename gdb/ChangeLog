@@ -1,3 +1,11 @@
+ChangeLog
+2013-03-06  Keith Seitz  <keiths@redhat.com>
+
+	* ax-gdb.c (gen_printf): Make FORMAT const.
+	* ax-gdb.h (gen_printf): Likewise.
+	* ax-general.c (ax_string): Make STR const.
+	* ax.h (ax_string): Likewise.
+
 2013-03-06  Doug Evans  <dje@google.com>
 
 	* elfread.c (elf_symfile_read): Move debugging printf to more

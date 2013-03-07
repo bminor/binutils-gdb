@@ -117,7 +117,7 @@ extern void require_rvalue (struct agent_expr *ax, struct axs_value *value);
 
 struct format_piece;
 extern struct agent_expr *gen_printf (CORE_ADDR, struct gdbarch *,
-				      CORE_ADDR, LONGEST, char *, int,
+				      CORE_ADDR, LONGEST, const char *, int,
 				      struct format_piece *,
 				      int, struct expression **);
 

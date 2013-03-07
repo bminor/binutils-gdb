@@ -337,7 +337,7 @@ ax_tsv (struct agent_expr *x, enum agent_op op, int num)
    is counted in the length.)  */
 
 void
-ax_string (struct agent_expr *x, char *str, int slen)
+ax_string (struct agent_expr *x, const char *str, int slen)
 {
   int i;
 
