@@ -47,6 +47,7 @@
 #include "cli/cli-script.h"
 #include "cli/cli-setshow.h"
 #include "cli/cli-cmds.h"
+#include "cli/cli-utils.h"
 
 #include "python/python.h"
 
@@ -624,8 +625,7 @@ source_command (char *args, int from_tty)
 	{
 	  /* Make sure leading white space does not break the
 	     comparisons.  */
-	  while (isspace(args[0]))
-	    args++;
+	  args = skip_spaces (args);
 
 	  if (args[0] != '-')
 	    break;
@@ -648,9 +648,7 @@ source_command (char *args, int from_tty)
 	    break;
 	}
 
-      while (isspace (args[0]))
-	args++;
-      file = args;
+      file = skip_spaces (args);
     }
 
   source_script_with_search (file, from_tty, search_path);
@@ -1141,8 +1139,7 @@ disassemble_command (char *arg, int from_tty)
 	    }
 	}
 
-      while (isspace (*arg))
-	++arg;
+      arg = skip_spaces (arg);
     }
 
   if (! arg || ! *arg)
@@ -1175,8 +1172,7 @@ disassemble_command (char *arg, int from_tty)
       /* Two arguments.  */
       int incl_flag = 0;
       low = pc;
-      while (isspace (*arg))
-	arg++;
+      arg = skip_spaces (arg);
       if (arg[0] == '+')
 	{
 	  ++arg;

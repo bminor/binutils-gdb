@@ -40,6 +40,7 @@
 #include "go-lang.h"
 #include "p-lang.h"
 #include "addrmap.h"
+#include "cli/cli-utils.h"
 
 #include "hashtab.h"
 
@@ -3879,8 +3880,7 @@ rbreak_command (char *regexp, int from_tty)
 	    file_name[colon_index--] = 0; 
 	  files = &file_name;
 	  nfiles = 1;
-	  regexp = colon + 1;
-	  while (isspace (*regexp))  regexp++; 
+	  regexp = skip_spaces (colon + 1);
 	}
     }
 

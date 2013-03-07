@@ -225,8 +225,7 @@ read_mapping (const char *line,
     p++;
   *endaddr = strtoulst (p, &p, 16);
 
-  while (*p && isspace (*p))
-    p++;
+  p = skip_spaces_const (p);
   *permissions = p;
   while (*p && !isspace (*p))
     p++;
@@ -234,8 +233,7 @@ read_mapping (const char *line,
 
   *offset = strtoulst (p, &p, 16);
 
-  while (*p && isspace (*p))
-    p++;
+  p = skip_spaces_const (p);
   *device = p;
   while (*p && !isspace (*p))
     p++;
@@ -243,8 +241,7 @@ read_mapping (const char *line,
 
   *inode = strtoulst (p, &p, 10);
 
-  while (*p && isspace (*p))
-    p++;
+  p = skip_spaces_const (p);
   *filename = p;
 }
 
@@ -409,8 +406,7 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
 	  printf_filtered (_("Process: %s\n"),
 			   pulongest (strtoulst (p, &p, 10)));
 
-	  while (*p && isspace (*p))
-	    p++;
+	  p = skip_spaces_const (p);
 	  if (*p == '(')
 	    {
 	      const char *ep = strchr (p, ')');
@@ -422,8 +418,7 @@ linux_info_proc (struct gdbarch *gdbarch, char *args,
 		}
 	    }
 
-	  while (*p && isspace (*p))
-	    p++;
+	  p = skip_spaces_const (p);
 	  if (*p)
 	    printf_filtered (_("State: %c\n"), *p++);
 

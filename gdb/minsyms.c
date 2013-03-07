@@ -50,6 +50,7 @@
 #include "target.h"
 #include "cp-support.h"
 #include "language.h"
+#include "cli/cli-utils.h"
 
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's
@@ -85,8 +86,7 @@ msymbol_hash_iw (const char *string)
 
   while (*string && *string != '(')
     {
-      while (isspace (*string))
-	++string;
+      string = skip_spaces_const (string);
       if (*string && *string != '(')
 	{
 	  hash = SYMBOL_HASH_NEXT (hash, *string);

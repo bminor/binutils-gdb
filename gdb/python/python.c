@@ -32,6 +32,7 @@
 #include "serial.h"
 #include "readline/tilde.h"
 #include "python.h"
+#include "cli/cli-utils.h"
 
 #include <ctype.h>
 
@@ -222,8 +223,7 @@ python_interactive_command (char *arg, int from_tty)
   cleanup = make_cleanup_restore_integer (&interpreter_async);
   interpreter_async = 0;
 
-  while (arg && *arg && isspace (*arg))
-    ++arg;
+  arg = skip_spaces (arg);
 
   ensure_python_env (get_current_arch (), current_language);
 
@@ -367,8 +367,7 @@ python_command (char *arg, int from_tty)
   make_cleanup_restore_integer (&interpreter_async);
   interpreter_async = 0;
 
-  while (arg && *arg && isspace (*arg))
-    ++arg;
+  arg = skip_spaces (arg);
   if (arg && *arg)
     {
       if (PyRun_SimpleString (arg))
@@ -1333,8 +1332,7 @@ free_type_printers (void *arg)
 static void
 python_interactive_command (char *arg, int from_tty)
 {
-  while (arg && *arg && isspace (*arg))
-    ++arg;
+  arg = skip_spaces (arg);
   if (arg && *arg)
     error (_("Python scripting is not supported in this copy of GDB."));
   else

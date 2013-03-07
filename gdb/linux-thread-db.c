@@ -42,6 +42,7 @@
 #include "linux-procfs.h"
 #include "linux-osdata.h"
 #include "auto-load.h"
+#include "cli/cli-utils.h"
 
 #include <signal.h>
 #include <ctype.h>
@@ -1926,8 +1927,7 @@ info_auto_load_libthread_db (char *args, int from_tty)
   char *pids;
   int i;
 
-  while (isspace (*cs))
-    cs++;
+  cs = skip_spaces_const (cs);
   if (*cs)
     error (_("'info auto-load libthread-db' does not accept any parameters"));
 

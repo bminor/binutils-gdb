@@ -1,3 +1,58 @@
+2013-03-07  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (catch_syscall_split_args): Use skip_spaces.
+	(trace_pass_command): Likewise.
+	* cli/cli-cmds.c: Include cli/cli-utils.h.
+	(source_command): Use skip-spaces.
+	(disassemble_command): Likewise.
+	* findcmd.c: Include cli/cli-utils.h.
+	(parse_find_args): Use skip_spaces.
+	* go32-nat.c: Include cli/cli-utils.h.
+	(go32_sldt): Use skip_spaces.
+	(go32_sgdt): Likewise.
+	(go32_sidt): Likewise.
+	(go32_pde): Likewise.
+	(go32_pte): Likewise.
+	(go32_pte_for_address): Likewise.
+	* infcmd.c: Include cli/cli-utils.h.
+	(registers_info): Use skip_spaces.
+	* linux-tdep.c (read_mapping): Use skip_spaces_const.
+	(linux_info_proc): Likewise.
+	* linux-thread-db.c: Include cli/cli-utils.h.
+	(info_auto_load_libthread_db): Use skip_spaces_const.
+	* m32r-rom.c: Include cli/cli-utils.h.
+	(m32r_upload_command): Use skip_spaces.
+	* maint.c: Include cli/cli-utils.h.
+	(maintenance_translate_address): Use skip_spaces.
+	* mi/mi-parse.c: Include cli/cli-utils.h.
+	(mi_parse_argv): Use skip_spaces.
+	(mi_parse): Likewise.
+	* minsyms.c: Include cli/cli-utils.h.
+	(msymbol_hash_iw): Use skip_spaces_const.
+	* objc-lang.c: Include cli/cli-utils.h.
+	(parse_selector): Use skip_spaces.
+	(parse_method): Likewise.
+	* python/python.c: Include cli/cli-utils.h.
+	(python_interactive_command)[HAVE_PYTHON]: Use skip_spaces.
+	(python_command)[HAVE_PYTHON]: Likewise.
+	(python_interactive_command)[!HAVE_PYTHON]: Likewise.
+	* remote-m32r-sdi.c: Include cli/cli-utils.h.
+	(m32r_load): Use skip_spaces.
+	* serial.c: Include cli/cli-utils.h.
+	(serial_open): Use skip_spaces_const.
+	* stack.c: Include cli/cli-utils.h.
+	(parse_frame_specification_1): Use skip_spaces_const.
+	* symfile.c: Include cli/cli-utils.h.
+	(set_ext_lang_command): Use skip_spaces.
+	* symtab.c: Include cli/cli-utils.h.
+	(rbreak_command): Use skip_spaces.
+	* thread.c (thread_name_command): Use skip_spaces.
+	* tracepoint.c (validate_actionline): Use skip_spaces.
+	(encode_actions_1): Likewise.
+	(trace_find_range_command): Likewise.
+	(trace_find_outside_command): Likewise.
+	(trace_dump_actions): Likewise.
+
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
 	* c-lang.c (parse_one_string): Cast argument to gdb_byte *.

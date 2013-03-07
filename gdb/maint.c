@@ -38,6 +38,7 @@
 #include "gdb_assert.h"
 
 #include "cli/cli-decode.h"
+#include "cli/cli-utils.h"
 
 extern void _initialize_maint_cmds (void);
 
@@ -460,8 +461,7 @@ maintenance_translate_address (char *arg, int from_tty)
       if (*p == '\000')		/* End of command?  */
 	error (_("Need to specify <section-name> and <address>"));
       *p++ = '\000';
-      while (isspace (*p))
-	p++;			/* Skip whitespace.  */
+      p = skip_spaces (p);
 
       ALL_OBJSECTIONS (objfile, sect)
       {

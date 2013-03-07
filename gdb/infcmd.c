@@ -56,6 +56,7 @@
 #include "inf-loop.h"
 #include "continuations.h"
 #include "linespec.h"
+#include "cli/cli-utils.h"
 
 /* Local functions: */
 
@@ -2185,12 +2186,8 @@ registers_info (char *addr_exp, int fpregs)
       char *start;
       const char *end;
 
-      /* Keep skipping leading white space.  */
-      if (isspace ((*addr_exp)))
-	{
-	  addr_exp++;
-	  continue;
-	}
+      /* Skip leading white space.  */
+      addr_exp = skip_spaces (addr_exp);
 
       /* Discard any leading ``$''.  Check that there is something
          resembling a register following it.  */

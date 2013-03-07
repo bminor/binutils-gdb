@@ -46,6 +46,7 @@
 #include "disasm.h"
 #include "inline-frame.h"
 #include "linespec.h"
+#include "cli/cli-utils.h"
 
 #include "gdb_assert.h"
 #include <ctype.h>
@@ -1249,8 +1250,7 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
 	  const char *p;
 
 	  /* Skip leading white space, bail of EOL.  */
-	  while (isspace (*frame_exp))
-	    frame_exp++;
+	  frame_exp = skip_spaces_const (frame_exp);
 	  if (!*frame_exp)
 	    break;
 

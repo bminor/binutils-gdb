@@ -1300,8 +1300,7 @@ thread_name_command (char *arg, int from_tty)
   if (ptid_equal (inferior_ptid, null_ptid))
     error (_("No thread selected"));
 
-  while (arg && isspace (*arg))
-    ++arg;
+  arg = skip_spaces (arg);
 
   info = inferior_thread ();
   xfree (info->name);

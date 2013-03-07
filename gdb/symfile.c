@@ -56,6 +56,7 @@
 #include "remote.h"
 #include "stack.h"
 #include "gdb_bfd.h"
+#include "cli/cli-utils.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -2738,8 +2739,7 @@ set_ext_lang_command (char *args, int from_tty, struct cmd_list_element *e)
   *cp++ = '\0';
 
   /* Find beginning of second arg, which should be a source language.  */
-  while (*cp && isspace (*cp))
-    cp++;
+  cp = skip_spaces (cp);
 
   if (*cp == '\0')
     error (_("'%s': two arguments required -- "

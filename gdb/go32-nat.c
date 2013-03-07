@@ -100,6 +100,7 @@
 #include "regcache.h"
 #include "gdb_string.h"
 #include "top.h"
+#include "cli/cli-utils.h"
 
 #include <stdio.h>		/* might be required for __DJGPP_MINOR__ */
 #include <stdlib.h>
@@ -1702,8 +1703,7 @@ go32_sldt (char *arg, int from_tty)
 
   if (arg && *arg)
     {
-      while (*arg && isspace(*arg))
-	arg++;
+      arg = skip_spaces (arg);
 
       if (*arg)
 	{
@@ -1773,8 +1773,7 @@ go32_sgdt (char *arg, int from_tty)
 
   if (arg && *arg)
     {
-      while (*arg && isspace(*arg))
-	arg++;
+      arg = skip_spaces (arg);
 
       if (*arg)
 	{
@@ -1815,8 +1814,7 @@ go32_sidt (char *arg, int from_tty)
 
   if (arg && *arg)
     {
-      while (*arg && isspace(*arg))
-	arg++;
+      arg = skip_spaces (arg);
 
       if (*arg)
 	{
@@ -1986,8 +1984,7 @@ go32_pde (char *arg, int from_tty)
 
   if (arg && *arg)
     {
-      while (*arg && isspace(*arg))
-	arg++;
+      arg = skip_spaces (arg);
 
       if (*arg)
 	{
@@ -2037,8 +2034,7 @@ go32_pte (char *arg, int from_tty)
 
   if (arg && *arg)
     {
-      while (*arg && isspace(*arg))
-	arg++;
+      arg = skip_spaces (arg);
 
       if (*arg)
 	{
@@ -2065,8 +2061,7 @@ go32_pte_for_address (char *arg, int from_tty)
 
   if (arg && *arg)
     {
-      while (*arg && isspace(*arg))
-	arg++;
+      arg = skip_spaces (arg);
 
       if (*arg)
 	addr = parse_and_eval_address (arg);

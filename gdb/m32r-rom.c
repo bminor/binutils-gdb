@@ -40,6 +40,7 @@
 #include <ctype.h>
 #include "regcache.h"
 #include "gdb_bfd.h"
+#include "cli/cli-utils.h"
 
 /*
  * All this stuff just to get my host computer's IP address!
@@ -448,8 +449,7 @@ m32r_upload_command (char *args, int from_tty)
       /* Scan second colon in the output from the "ust" command.  */
       char *myIPaddress = strchr (strchr (buf, ':') + 1, ':') + 1;
 
-      while (isspace (*myIPaddress))
-	myIPaddress++;
+      myIPaddress = skip_spaces (myIPaddress);
 
       if (!strncmp (myIPaddress, "0.0.", 4))	/* empty */
 	error (_("Please use 'set board-address' to "

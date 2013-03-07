@@ -26,6 +26,7 @@
 
 #include <ctype.h>
 #include "gdb_string.h"
+#include "cli/cli-utils.h"
 
 /* Like parse_escape, but leave the results as a host char, not a
    target char.  */
@@ -114,8 +115,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
       char *arg;
 
       /* Skip leading white space.  */
-      while (isspace (*chp))
-	chp++;
+      chp = skip_spaces (chp);
       /* Three possibilities: EOF, quoted string, or other text. */
       switch (*chp)
 	{
@@ -244,8 +244,7 @@ mi_parse (char *cmd, char **token)
   cleanup = make_cleanup (mi_parse_cleanup, parse);
 
   /* Before starting, skip leading white space.  */
-  while (isspace (*cmd))
-    cmd++;
+  cmd = skip_spaces (cmd);
 
   /* Find/skip any token and then extract it.  */
   for (chp = cmd; *chp >= '0' && *chp <= '9'; chp++)
@@ -257,8 +256,7 @@ mi_parse (char *cmd, char **token)
   /* This wasn't a real MI command.  Return it as a CLI_COMMAND.  */
   if (*chp != '-')
     {
-      while (isspace (*chp))
-	chp++;
+      chp = skip_spaces (chp);
       parse->command = xstrdup (chp);
       parse->op = CLI_COMMAND;
 
@@ -284,8 +282,7 @@ mi_parse (char *cmd, char **token)
     error (_("Undefined MI command: %s"), parse->command);
 
   /* Skip white space following the command.  */
-  while (isspace (*chp))
-    chp++;
+  chp = skip_spaces (chp);
 
   /* Parse the --thread and --frame options, if present.  At present,
      some important commands, like '-break-*' are implemented by
@@ -343,8 +340,7 @@ mi_parse (char *cmd, char **token)
 
       if (*chp != '\0' && !isspace (*chp))
 	error (_("Invalid value for the '%s' option"), option);
-      while (isspace (*chp))
-	chp++;
+      chp = skip_spaces (chp);
     }
 
   /* For new argv commands, attempt to return the parsed argument

@@ -40,7 +40,7 @@
 #include <signal.h>
 #include <time.h>
 #include "gdb_bfd.h"
-
+#include "cli/cli-utils.h"
 
 #include "serial.h"
 
@@ -1234,8 +1234,7 @@ m32r_load (char *args, int from_tty)
     {
       char *arg;
 
-      while (isspace (*args))
-	args++;
+      args = skip_spaces (arg);
 
       arg = args;
 

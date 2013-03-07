@@ -22,6 +22,7 @@
 #include "serial.h"
 #include "gdb_string.h"
 #include "gdbcmd.h"
+#include "cli/cli-utils.h"
 
 extern void _initialize_serial (void);
 
@@ -194,8 +195,7 @@ serial_open (const char *name)
       ops = serial_interface_lookup ("pipe");
       /* Discard ``|'' and any space before the command itself.  */
       ++open_name;
-      while (isspace (*open_name))
-	++open_name;
+      open_name = skip_spaces_const (open_name);
     }
   /* Check for a colon, suggesting an IP address/port pair.
      Do this *after* checking for all the interesting prefixes.  We

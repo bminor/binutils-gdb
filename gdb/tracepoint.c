@@ -709,8 +709,7 @@ validate_actionline (char **line, struct breakpoint *b)
   if (*line == NULL)
     return;
 
-  for (p = *line; isspace ((int) *p);)
-    p++;
+  p = skip_spaces (*line);
 
   /* Symbol lookup etc.  */
   if (*p == '\0')	/* empty line: just prompt for another line.  */
@@ -732,8 +731,7 @@ validate_actionline (char **line, struct breakpoint *b)
       do
 	{			/* Repeat over a comma-separated list.  */
 	  QUIT;			/* Allow user to bail out with ^C.  */
-	  while (isspace ((int) *p))
-	    p++;
+	  p = skip_spaces (p);
 
 	  if (*p == '$')	/* Look for special pseudo-symbols.  */
 	    {
@@ -798,8 +796,7 @@ validate_actionline (char **line, struct breakpoint *b)
       do
 	{			/* Repeat over a comma-separated list.  */
 	  QUIT;			/* Allow user to bail out with ^C.  */
-	  while (isspace ((int) *p))
-	    p++;
+	  p = skip_spaces (p);
 
 	  tmp_p = p;
 	  for (loc = t->base.loc; loc; loc = loc->next)
@@ -832,8 +829,7 @@ validate_actionline (char **line, struct breakpoint *b)
     {
       char *steparg;		/* In case warning is necessary.  */
 
-      while (isspace ((int) *p))
-	p++;
+      p = skip_spaces (p);
       steparg = p;
 
       if (*p == '\0' || (t->step_count = strtol (p, &p, 0)) == 0)
@@ -1379,8 +1375,7 @@ encode_actions_1 (struct command_line *action,
     {
       QUIT;			/* Allow user to bail out with ^C.  */
       action_exp = action->line;
-      while (isspace ((int) *action_exp))
-	action_exp++;
+      action_exp = skip_spaces (action_exp);
 
       cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
       if (cmd == 0)
@@ -1395,8 +1390,7 @@ encode_actions_1 (struct command_line *action,
 	  do
 	    {			/* Repeat over a comma-separated list.  */
 	      QUIT;		/* Allow user to bail out with ^C.  */
-	      while (isspace ((int) *action_exp))
-		action_exp++;
+	      action_exp = skip_spaces (action_exp);
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
@@ -1557,8 +1551,7 @@ encode_actions_1 (struct command_line *action,
 	  do
 	    {			/* Repeat over a comma-separated list.  */
 	      QUIT;		/* Allow user to bail out with ^C.  */
-	      while (isspace ((int) *action_exp))
-		action_exp++;
+	      action_exp = skip_spaces (action_exp);
 
 		{
 		  struct cleanup *old_chain = NULL;
@@ -2589,8 +2582,7 @@ trace_find_range_command (char *args, int from_tty)
   if (0 != (tmp = strchr (args, ',')))
     {
       *tmp++ = '\0';	/* Terminate start address.  */
-      while (isspace ((int) *tmp))
-	tmp++;
+      tmp = skip_spaces (tmp);
       start = parse_and_eval_address (args);
       stop = parse_and_eval_address (tmp);
     }
@@ -2623,8 +2615,7 @@ trace_find_outside_command (char *args, int from_tty)
   if (0 != (tmp = strchr (args, ',')))
     {
       *tmp++ = '\0';	/* Terminate start address.  */
-      while (isspace ((int) *tmp))
-	tmp++;
+      tmp = skip_spaces (tmp);
       start = parse_and_eval_address (args);
       stop = parse_and_eval_address (tmp);
     }
@@ -2819,8 +2810,7 @@ trace_dump_actions (struct command_line *action,
 
       QUIT;			/* Allow user to bail out with ^C.  */
       action_exp = action->line;
-      while (isspace ((int) *action_exp))
-	action_exp++;
+      action_exp = skip_spaces (action_exp);
 
       /* The collection actions to be done while stepping are
          bracketed by the commands "while-stepping" and "end".  */
@@ -2858,8 +2848,7 @@ trace_dump_actions (struct command_line *action,
 		  QUIT;		/* Allow user to bail out with ^C.  */
 		  if (*action_exp == ',')
 		    action_exp++;
-		  while (isspace ((int) *action_exp))
-		    action_exp++;
+		  action_exp = skip_spaces (action_exp);
 
 		  next_comma = strchr (action_exp, ',');
 

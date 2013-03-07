@@ -24,6 +24,7 @@
 #include "gdbcmd.h"
 #include "value.h"
 #include "target.h"
+#include "cli/cli-utils.h"
 
 /* Copied from bfd_put_bits.  */
 
@@ -109,8 +110,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 	    }
 	}
 
-      while (isspace (*s))
-	++s;
+      s = skip_spaces (s);
     }
 
   /* Get the search range.  */
@@ -120,8 +120,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 
   if (*s == ',')
     ++s;
-  while (isspace (*s))
-    ++s;
+  s = skip_spaces (s);
 
   if (*s == '+')
     {
@@ -172,8 +171,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
       struct type *t;
       ULONGEST pattern_buf_size_need;
 
-      while (isspace (*s))
-	++s;
+      s = skip_spaces (s);
 
       v = parse_to_comma_and_eval (&s);
       t = value_type (v);
@@ -221,8 +219,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 
       if (*s == ',')
 	++s;
-      while (isspace (*s))
-	++s;
+      s = skip_spaces (s);
     }
 
   if (pattern_buf_end == pattern_buf)
