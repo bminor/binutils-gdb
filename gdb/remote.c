@@ -183,10 +183,6 @@ static void record_currthread (ptid_t currthread);
 
 static int fromhex (int a);
 
-extern int hex2bin (const char *hex, gdb_byte *bin, int count);
-
-extern int bin2hex (const gdb_byte *bin, char *hex, int count);
-
 static int putpkt_binary (char *buf, int cnt);
 
 static void check_binary_download (CORE_ADDR addr);

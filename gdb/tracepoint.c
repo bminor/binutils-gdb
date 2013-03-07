@@ -69,9 +69,6 @@
 #define O_LARGEFILE 0
 #endif
 
-extern int hex2bin (const char *hex, gdb_byte *bin, int count);
-extern int bin2hex (const gdb_byte *bin, char *hex, int count);
-
 /* Maximum length of an agent aexpression.
    This accounts for the fact that packets are limited to 400 bytes
    (which includes everything -- including the checksum), and assumes

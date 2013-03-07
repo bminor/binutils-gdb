@@ -1,3 +1,9 @@
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (hex2bin, bin2hex): Move extern declarations to ...
+	* remote.h (hex2bin, bin2hex): ... here.
+	* tracepoint.c (hex2bin, bin2hex): Remove extern declarations.
+
 2013-03-07  Eli Zaretskii  <eliz@gnu.org>
 
 	* utils.c (initialize_utils): Improve doc strings of "set/show
