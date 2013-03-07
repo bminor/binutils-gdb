@@ -1471,7 +1471,8 @@ host_char_to_target (struct gdbarch *gdbarch, int c, int *target_c)
   cleanups = make_cleanup_obstack_free (&host_data);
 
   convert_between_encodings (target_charset (gdbarch), host_charset (),
-			     &the_char, 1, 1, &host_data, translit_none);
+			     (gdb_byte *) &the_char, 1, 1,
+			     &host_data, translit_none);
 
   if (obstack_object_size (&host_data) == 1)
     {

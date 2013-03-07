@@ -2844,7 +2844,7 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 {
   struct ui_file *stb;
   struct cleanup *old_chain;
-  gdb_byte *thevalue = NULL;
+  char *thevalue = NULL;
   struct value_print_options opts;
   struct type *type = NULL;
   long len = 0;
@@ -2956,7 +2956,7 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 
   /* If the THEVALUE has contents, it is a regular string.  */
   if (thevalue)
-    LA_PRINT_STRING (stb, type, thevalue, len, encoding, 0, &opts);
+    LA_PRINT_STRING (stb, type, (gdb_byte *) thevalue, len, encoding, 0, &opts);
   else if (string_print)
     /* Otherwise, if string_print is set, and it is not a regular
        string, it is a lazy string.  */

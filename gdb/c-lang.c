@@ -536,7 +536,7 @@ parse_one_string (struct obstack *output, char *data, int len,
       /* If we saw a run of characters, convert them all.  */
       if (p > data)
 	convert_between_encodings (host_charset (), dest_charset,
-				   data, p - data, 1,
+				   (gdb_byte *) data, p - data, 1,
 				   output, translit_none);
       /* If we saw an escape, convert it.  */
       if (p < limit)

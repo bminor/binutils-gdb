@@ -1,5 +1,14 @@
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
+	* c-lang.c (parse_one_string): Cast argument to gdb_byte *.
+	* expprint.c (print_subexp_standard): Likewise.
+	* utils.c (host_char_to_target): Likewise.
+	* valprint.c (generic_emit_char, generic_printstr): Likewise.
+	* varobj.c (value_get_print_value): Change type of local to char*.
+	Cast it gdb_byte * in call to language printer.
+
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
 	* charset.c (struct wchar_iterator) <input>: Change type to 'const
 	gdb_byte *'.
 	(make_wchar_iterator): Remove cast to char*.
