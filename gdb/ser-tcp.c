@@ -72,7 +72,7 @@ static int tcp_auto_retry = 1;
 
 /* Timeout period for connections, in seconds.  */
 
-static int tcp_retry_limit = 15;
+static unsigned int tcp_retry_limit = 15;
 
 /* How many times per second to poll deprecated_ui_loop_hook.  */
 
