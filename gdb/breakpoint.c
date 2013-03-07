@@ -1567,7 +1567,7 @@ breakpoint_xfer_memory (gdb_byte *readbuf, gdb_byte *writebuf,
 	struct gdbarch *gdbarch = bl->gdbarch;
 	const unsigned char *bp;
 	CORE_ADDR placed_address = bl->target_info.placed_address;
-	unsigned placed_size = bl->target_info.placed_size;
+	int placed_size = bl->target_info.placed_size;
 
 	/* Update the shadow with what we want to write to memory.  */
 	memcpy (bl->target_info.shadow_contents + bptoffset,
