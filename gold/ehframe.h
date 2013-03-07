@@ -246,10 +246,20 @@ class Fde
   std::string contents_;
 };
 
-// FDEs stashed for later processing.
+// A FDE plus some info from a CIE to allow later writing of the FDE.
 
-struct Post_fde;
-typedef std::vector<Post_fde*> Post_fdes;
+struct Post_fde
+{
+  Post_fde(Fde* f, section_offset_type cie_off, unsigned char encoding)
+    : fde(f), cie_offset(cie_off), fde_encoding(encoding)
+  { }
+
+  Fde* fde;
+  section_offset_type cie_offset;
+  unsigned char fde_encoding;
+};
+
+typedef std::vector<Post_fde> Post_fdes;
 
 // This class holds a CIE.
 

@@ -441,19 +441,6 @@ Cie::set_output_offset(section_offset_type output_offset,
   return output_offset + length;
 }
 
-// A FDE plus some info from a CIE to allow later writing of the FDE.
-
-struct Post_fde
-{
-  Post_fde(Fde* f, section_offset_type cie_off, unsigned char encoding)
-    : fde(f), cie_offset(cie_off), fde_encoding(encoding)
-  { }
-
-  Fde* fde;
-  section_offset_type cie_offset;
-  unsigned char fde_encoding;
-};
-
 // Write the CIE to OVIEW starting at OFFSET.  Round up the bytes to
 // ADDRALIGN.  ADDRESS is the virtual address of OVIEW.
 // EH_FRAME_HDR is the exception frame header for FDE recording.
@@ -499,7 +486,7 @@ Cie::write(unsigned char* oview, section_offset_type offset,
        ++p)
     {
       if ((*p)->post_map())
-	post_fdes->push_back(new Post_fde(*p, cie_offset, fde_encoding));
+	post_fdes->push_back(Post_fde(*p, cie_offset, fde_encoding));
       else
 	offset = (*p)->write<size, big_endian>(oview, offset, address,
 					       addralign, cie_offset,
@@ -1211,13 +1198,10 @@ Eh_frame::do_sized_write(unsigned char* oview)
   for (Post_fdes::iterator p = post_fdes.begin();
        p != post_fdes.end();
        ++p)
-    {
-      o = (*p)->fde->write<size, big_endian>(oview, o, address, addralign,
-					     (*p)->cie_offset,
-					     (*p)->fde_encoding,
-					     this->eh_frame_hdr_);
-      delete *p;
-    }
+    o = (*p).fde->write<size, big_endian>(oview, o, address, addralign,
+					  (*p).cie_offset,
+					  (*p).fde_encoding,
+					  this->eh_frame_hdr_);
 }
 
 #ifdef HAVE_TARGET_32_LITTLE
