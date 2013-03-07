@@ -42,7 +42,7 @@
 
 #include <string.h>
 
-unsigned int notif_debug = 0;
+int notif_debug = 0;
 
 /* Supported clients of notifications.  */
 

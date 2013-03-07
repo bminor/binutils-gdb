@@ -80,6 +80,6 @@ void remote_notif_unregister_async_event_handler (void);
 void remote_notif_process (struct notif_client *except);
 extern struct notif_client notif_client_stop;
 
-extern unsigned int notif_debug;
+extern int notif_debug;
 
 #endif /* REMOTE_NOTIF_H */

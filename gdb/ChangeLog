@@ -1,5 +1,10 @@
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
+	* remote-notif.c (notif_debug): Change type to int.
+	* remote-notif.h (notif_debug): Likewise.
+
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
 	* ser-tcp.c (tcp_retry_limit): Change type to unsigned int.
 
 2013-03-07  Pedro Alves  <palves@redhat.com>
