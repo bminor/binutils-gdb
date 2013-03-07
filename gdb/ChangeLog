@@ -1,3 +1,8 @@
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
+	* corefile.c (read_memory_string): Cast pointer to gdb_byte* in
+	call.
+
 2013-03-07  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.c (catch_syscall_split_args): Use skip_spaces.
