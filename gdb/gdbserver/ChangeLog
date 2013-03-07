@@ -1,3 +1,9 @@
+2013-03-07  Jeremy Bennett  <jeremy.bennett@embecosm.com>
+
+	PR server/15236
+	* linux-low.c (linux_write_memory): Return early success if LEN is
+	zero.
+
 2013-03-05  Corinna Vinschen  <vinschen@redhat.de>
 
 	* configure.srv: Add x86_64-*-cygwin* as target.

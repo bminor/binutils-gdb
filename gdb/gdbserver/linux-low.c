@@ -4481,7 +4481,7 @@ linux_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 
 /* Copy LEN bytes of data from debugger memory at MYADDR to inferior's
    memory at MEMADDR.  On failure (cannot write to the inferior)
-   returns the value of errno.  */
+   returns the value of errno.  Always succeeds if LEN is zero.  */
 
 static int
 linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
@@ -4499,6 +4499,12 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
     alloca (count * sizeof (PTRACE_XFER_TYPE));
 
   int pid = lwpid_of (get_thread_lwp (current_inferior));
+
+  if (len == 0)
+    {
+      /* Zero length write always succeeds.  */
+      return 0;
+    }
 
   if (debug_threads)
     {
