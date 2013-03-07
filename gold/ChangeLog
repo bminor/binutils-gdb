@@ -1,3 +1,8 @@
+2013-03-07  Alan Modra  <amodra@gmail.com>
+
+	* testsuite/script_test_10.sh: Don't test .bss section
+	header number.
+
 2013-03-06  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (class Powerpc_relobj): Move some member functions.
