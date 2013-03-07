@@ -1,4 +1,8 @@
-ChangeLog
+2013-03-07  Eli Zaretskii  <eliz@gnu.org>
+
+	* utils.c (initialize_utils): Improve doc strings of "set/show
+	width", "set/show height", and "set/show pagination".
+
 2013-03-06  Keith Seitz  <keiths@redhat.com>
 
 	* ax-gdb.c (gen_printf): Make FORMAT const.
