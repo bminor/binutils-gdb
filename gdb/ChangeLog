@@ -1,5 +1,10 @@
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
+	* target.c (target_read_stralloc, target_fileio_read_alloc):
+	*Cast pointer to 'gdb_byte *' in target call.
+
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
 	* corefile.c (read_memory_string): Cast pointer to gdb_byte* in
 	call.
 

@@ -2359,10 +2359,11 @@ char *
 target_read_stralloc (struct target_ops *ops, enum target_object object,
 		      const char *annex)
 {
-  gdb_byte *buffer;
+  char *buffer;
   LONGEST i, transferred;
 
-  transferred = target_read_alloc_1 (ops, object, annex, &buffer, 1);
+  transferred = target_read_alloc_1 (ops, object, annex,
+				     (gdb_byte **) &buffer, 1);
 
   if (transferred < 0)
     return NULL;
@@ -2382,7 +2383,7 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
 	break;
       }
 
-  return (char *) buffer;
+  return buffer;
 }
 
 /* Memory transfer methods.  */
@@ -3522,10 +3523,11 @@ target_fileio_read_alloc (const char *filename, gdb_byte **buf_p)
 char *
 target_fileio_read_stralloc (const char *filename)
 {
-  gdb_byte *buffer;
+  char *buffer;
   LONGEST i, transferred;
 
-  transferred = target_fileio_read_alloc_1 (filename, &buffer, 1);
+  transferred = target_fileio_read_alloc_1 (filename,
+					    (gdb_byte **) &buffer, 1);
 
   if (transferred < 0)
     return NULL;
@@ -3545,7 +3547,7 @@ target_fileio_read_stralloc (const char *filename)
 	break;
       }
 
-  return (char *) buffer;
+  return buffer;
 }
 
 
