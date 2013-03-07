@@ -1,5 +1,10 @@
 2013-03-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/ifunc-sel.h (ifunc_sel, ifunc_one): Mark
+	always_inline.  Add assembly for powerpc to avoid GOT.
+
+2013-03-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/script_test_10.sh: Don't test .bss section
 	header number.
 
