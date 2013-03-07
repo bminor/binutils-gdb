@@ -1,5 +1,11 @@
 2013-03-07  Alan Modra  <amodra@gmail.com>
 
+	* testsuite/discard_locals_relocatable_test.c: Add a powerpc
+	relocation referencing .LC0.
+	* testsuite/discard_locals_test.sh: Remove FIXMEs.
+
+2013-03-07  Alan Modra  <amodra@gmail.com>
+
 	* testsuite/ifunc-sel.h (ifunc_sel, ifunc_one): Mark
 	always_inline.  Add assembly for powerpc to avoid GOT.
 
