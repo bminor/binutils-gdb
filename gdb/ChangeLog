@@ -1,5 +1,11 @@
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
+	* linux-record.c (record_linux_system_call) <gdb_sys_msgrcv,
+	RECORD_MSGRCV>: Pass a signed variable to
+	regcache_raw_read_signed, instead of an unsigned one.
+
+2013-03-07  Pedro Alves  <palves@redhat.com>
+
 	* remote-notif.c (notif_debug): Change type to int.
 	* remote-notif.h (notif_debug): Likewise.
 

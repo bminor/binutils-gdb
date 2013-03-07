@@ -1148,10 +1148,11 @@ Do you want to stop the program?"),
     case gdb_sys_msgrcv:
       {
         ULONGEST msgp;
+        LONGEST l;
 
-        regcache_raw_read_signed (regcache, tdep->arg3, &tmpulongest);
+        regcache_raw_read_signed (regcache, tdep->arg3, &l);
         regcache_raw_read_unsigned (regcache, tdep->arg2, &msgp);
-        tmpint = (int) tmpulongest + tdep->size_long;
+        tmpint = l + tdep->size_long;
         if (record_arch_list_add_mem ((CORE_ADDR) msgp, tmpint))
           return -1;
       }
@@ -1180,7 +1181,7 @@ Do you want to stop the program?"),
           break;
         case RECORD_MSGRCV:
           {
-            ULONGEST second;
+            LONGEST second;
             ULONGEST ptr;
 
             regcache_raw_read_signed (regcache, tdep->arg3, &second);
