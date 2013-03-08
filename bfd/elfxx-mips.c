@@ -8920,7 +8920,7 @@ mips_elf_estimate_stub_size (bfd *output_bfd, struct bfd_link_info *info)
    allocate an entry in the stubs section.  */
 
 static bfd_boolean
-mips_elf_allocate_lazy_stub (struct mips_elf_link_hash_entry *h, void **data)
+mips_elf_allocate_lazy_stub (struct mips_elf_link_hash_entry *h, void *data)
 {
   struct mips_elf_link_hash_table *htab;
 

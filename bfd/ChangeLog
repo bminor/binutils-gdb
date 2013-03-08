@@ -1,3 +1,7 @@
+2013-03-08  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_allocate_lazy_stub): Correct data type.
+
 2013-03-05  Corinna Vinschen  <vinschen@redhat.com>
 
 	* config.bfd: Add x86_64-*-cygwin to list of supported targets.
