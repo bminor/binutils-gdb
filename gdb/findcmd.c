@@ -29,7 +29,7 @@
 /* Copied from bfd_put_bits.  */
 
 static void
-put_bits (bfd_uint64_t data, char *buf, int bits, bfd_boolean big_p)
+put_bits (bfd_uint64_t data, gdb_byte *buf, int bits, bfd_boolean big_p)
 {
   int i;
   int bytes;
@@ -51,7 +51,7 @@ put_bits (bfd_uint64_t data, char *buf, int bits, bfd_boolean big_p)
 
 static void
 parse_find_args (char *args, ULONGEST *max_countp,
-		 char **pattern_bufp, ULONGEST *pattern_lenp,
+		 gdb_byte **pattern_bufp, ULONGEST *pattern_lenp,
 		 CORE_ADDR *start_addrp, ULONGEST *search_space_lenp,
 		 bfd_boolean big_p)
 {
@@ -59,13 +59,13 @@ parse_find_args (char *args, ULONGEST *max_countp,
   char size = '\0';
   ULONGEST max_count = ~(ULONGEST) 0;
   /* Buffer to hold the search pattern.  */
-  char *pattern_buf;
+  gdb_byte *pattern_buf;
   /* Current size of search pattern buffer.
      We realloc space as needed.  */
 #define INITIAL_PATTERN_BUF_SIZE 100
   ULONGEST pattern_buf_size = INITIAL_PATTERN_BUF_SIZE;
   /* Pointer to one past the last in-use part of pattern_buf.  */
-  char *pattern_buf_end;
+  gdb_byte *pattern_buf_end;
   ULONGEST pattern_len;
   CORE_ADDR start_addr;
   ULONGEST search_space_len;
@@ -249,7 +249,7 @@ find_command (char *args, int from_tty)
   /* Command line parameters.
      These are initialized to avoid uninitialized warnings from -Wall.  */
   ULONGEST max_count = 0;
-  char *pattern_buf = 0;
+  gdb_byte *pattern_buf = 0;
   ULONGEST pattern_len = 0;
   CORE_ADDR start_addr = 0;
   ULONGEST search_space_len = 0;
