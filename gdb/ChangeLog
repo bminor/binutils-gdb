@@ -1,3 +1,8 @@
+2013-03-08  Tom Tromey  <tromey@redhat.com>
+
+	* remote-m32r-sdi.c (m32r_load): Call skip_spaces on correct
+	variable.
+
 2013-03-07  Pedro Alves  <palves@redhat.com>
 
 	* target.c (target_read_stralloc, target_fileio_read_alloc):

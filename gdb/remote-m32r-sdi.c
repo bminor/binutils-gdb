@@ -1234,7 +1234,7 @@ m32r_load (char *args, int from_tty)
     {
       char *arg;
 
-      args = skip_spaces (arg);
+      args = skip_spaces (args);
 
       arg = args;
 
