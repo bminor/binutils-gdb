@@ -1735,7 +1735,10 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 
   /* Save the value of dot for the fixup code.  */
   if (rank == 0)
-    dot_value = frag_now_fix ();
+    {
+      dot_value = frag_now_fix ();
+      dot_frag = frag_now;
+    }
 
   retval = operand (resultP, mode);
 

@@ -88,6 +88,9 @@ struct fix
   /* The value of dot when the fixup expression was parsed.  */
   addressT fx_dot_value;
 
+  /* The frag fx_dot_value is based on.  */
+  fragS *fx_dot_frag;
+
   /* Next fixS in linked list, or NULL.  */
   struct fix *fx_next;
 
@@ -162,6 +165,7 @@ struct reloc_list
 extern int finalize_syms;
 extern symbolS *abs_section_sym;
 extern addressT dot_value;
+extern fragS *dot_frag;
 extern struct reloc_list* reloc_list;
 
 extern void append (char **charPP, char *fromP, unsigned long length);

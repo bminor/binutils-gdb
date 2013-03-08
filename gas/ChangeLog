@@ -1,3 +1,14 @@
+2013-03-08  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* write.h (struct fix): Add fx_dot_frag field.
+	(dot_frag): Declare.
+	* write.c (dot_frag): New variable.
+	(fix_new_internal): Set fx_dot_frag field with dot_frag.
+	(fixup_segment): Base calculation of fx_offset with fx_dot_frag.
+	* expr.c (expr): Save value of frag_now in dot_frag when setting
+	dot_value.
+	* read.c (emit_expr): Likewise. Delete comments.
+
 2013-03-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (flag_code_names): Removed.
