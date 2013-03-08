@@ -1,3 +1,8 @@
+2013-03-08  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
+
+        * lib/ld-lib.exp (check_gc_sections_available): Remove aarch64
+	from list of targets that don't support gc-section.
+
 2013-03-05  Alan Modra  <amodra@gmail.com>
 
 	* ld-scripts/rgn-at6.s, * ld-scripts/rgn-at6.t, * ld-scripts/rgn-at6.d,

@@ -1,7 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#    2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-#    Free Software Foundation, Inc.
+#   Copyright 1994-2013 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -1518,22 +1516,21 @@ proc check_gc_sections_available { } {
     if {![info exists gc_sections_available_saved]} {
 	# Some targets don't support gc-sections despite whatever's
 	# advertised by ld's options.
-	if {[istarget aarch64*-*-*]
-	     || [istarget arc-*-*]
-	     || [istarget d30v-*-*]
-	     || [istarget dlx-*-*]
-	     || [istarget i960-*-*]
-	     || [istarget or32-*-*]
-	     || [istarget pj*-*-*]
-	     || [istarget alpha-*-*]
-	     || [istarget hppa*64-*-*]
-	     || [istarget i370-*-*]
-	     || [istarget i860-*-*]
-	     || [istarget ia64-*-*]
-	     || [istarget mep-*-*]
-	     || [istarget mn10200-*-*]
-	     || [istarget *-*-cygwin]
-	     || [istarget *-*-mingw*] } {
+	if {   [istarget arc-*-*]
+	    || [istarget d30v-*-*]
+	    || [istarget dlx-*-*]
+	    || [istarget i960-*-*]
+	    || [istarget or32-*-*]
+	    || [istarget pj*-*-*]
+	    || [istarget alpha-*-*]
+	    || [istarget hppa*64-*-*]
+	    || [istarget i370-*-*]
+	    || [istarget i860-*-*]
+	    || [istarget ia64-*-*]
+	    || [istarget mep-*-*]
+	    || [istarget mn10200-*-*]
+	    || [istarget *-*-cygwin]
+	    || [istarget *-*-mingw*] } {
 	    set gc_sections_available_saved 0
 	    return 0
 	}

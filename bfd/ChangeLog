@@ -1,3 +1,10 @@
+2013-03-08  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
+
+        * elf64-aarch64.c (elf_backend_can_gc_sections): Enable gc-section
+	support.
+        (elf64_aarch64_gc_sweep_hook): Handle GOT, TLS and PLT related
+	relocs.
+
 2013-03-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* elf-bfd.h (elfcore_write_s390_tdb): Add prototype.

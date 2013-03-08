@@ -1,5 +1,5 @@
 /* ELF support for AArch64.
-   Copyright 2009, 2010, 2011, 2012  Free Software Foundation, Inc.
+   Copyright 2009-2013 Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -4875,6 +4875,137 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 			     const Elf_Internal_Rela *
 			     relocs ATTRIBUTE_UNUSED)
 {
+  struct elf64_aarch64_link_hash_table *htab;
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes;
+  bfd_signed_vma *local_got_refcounts;
+  const Elf_Internal_Rela *rel, *relend;
+
+  if (info->relocatable)
+    return TRUE;
+
+  htab = elf64_aarch64_hash_table (info);
+
+  if (htab == NULL)
+    return FALSE;
+
+  elf_section_data (sec)->local_dynrel = NULL;
+
+  symtab_hdr = &elf_symtab_hdr (abfd);
+  sym_hashes = elf_sym_hashes (abfd);
+
+  local_got_refcounts = elf_local_got_refcounts (abfd);
+
+  relend = relocs + sec->reloc_count;
+  for (rel = relocs; rel < relend; rel++)
+    {
+      unsigned long r_symndx;
+      unsigned int r_type;
+      struct elf_link_hash_entry *h = NULL;
+
+      r_symndx = ELF64_R_SYM (rel->r_info);
+
+      if (r_symndx >= symtab_hdr->sh_info)
+	{
+	  struct elf64_aarch64_link_hash_entry *eh;
+	  struct elf_dyn_relocs **pp;
+	  struct elf_dyn_relocs *p;
+
+	  h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+	  while (h->root.type == bfd_link_hash_indirect
+		 || h->root.type == bfd_link_hash_warning)
+	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+	  eh = (struct elf64_aarch64_link_hash_entry *) h;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
+	    {
+	      if (p->sec == sec)
+		{
+		  /* Everything must go for SEC.  */
+		  *pp = p->next;
+		  break;
+		}
+	    }
+        }
+      else
+	{
+	  Elf_Internal_Sym *isym;
+
+	  /* A local symbol.  */
+	  isym = bfd_sym_from_r_symndx (&htab->sym_cache,
+					abfd, r_symndx);
+	  if (isym == NULL)
+	    return FALSE;
+	}
+
+      r_type = ELF64_R_TYPE (rel->r_info);
+      r_type = aarch64_tls_transition (abfd,info, r_type, h ,r_symndx);
+      switch (r_type)
+	{
+	case R_AARCH64_LD64_GOT_LO12_NC:
+	case R_AARCH64_GOT_LD_PREL19:
+	case R_AARCH64_ADR_GOT_PAGE:
+	case R_AARCH64_TLSGD_ADR_PAGE21:
+	case R_AARCH64_TLSGD_ADD_LO12_NC:
+	case R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
+	case R_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+	case R_AARCH64_TLSLE_ADD_TPREL_LO12:
+	case R_AARCH64_TLSLE_ADD_TPREL_HI12:
+	case R_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
+	case R_AARCH64_TLSLE_MOVW_TPREL_G2:
+	case R_AARCH64_TLSLE_MOVW_TPREL_G1:
+	case R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
+	case R_AARCH64_TLSLE_MOVW_TPREL_G0:
+	case R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
+	case R_AARCH64_TLSDESC_ADR_PAGE:
+	case R_AARCH64_TLSDESC_ADD_LO12_NC:
+	case R_AARCH64_TLSDESC_LD64_LO12_NC:
+          if (h != NULL)
+	    {
+	      if (h->got.refcount > 0)
+		h->got.refcount -= 1;
+	    }
+	  else if (local_got_refcounts != NULL)
+	    {
+	      if (local_got_refcounts[r_symndx] > 0)
+		local_got_refcounts[r_symndx] -= 1;
+	    }
+	  break;
+
+	case R_AARCH64_ADR_PREL_PG_HI21_NC:
+	case R_AARCH64_ADR_PREL_PG_HI21:
+	case R_AARCH64_ADR_PREL_LO21:
+	  if (h != NULL && info->executable)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  break;
+
+	case R_AARCH64_CALL26:
+	case R_AARCH64_JUMP26:
+          /* If this is a local symbol then we resolve it
+             directly without creating a PLT entry.  */
+	  if (h == NULL)
+	    continue;
+
+	  if (h->plt.refcount > 0)
+	    h->plt.refcount -= 1;
+	  break;
+
+	case R_AARCH64_ABS64:
+	  if (h != NULL && info->executable)
+	    {
+	      if (h->plt.refcount > 0)
+		h->plt.refcount -= 1;
+	    }
+	  break;
+        
+	default:
+	  break;
+	}
+    }
+
   return TRUE;
 }
 
@@ -7049,7 +7180,7 @@ const struct elf_size_info elf64_aarch64_size_info =
   elf64_aarch64_size_info
 
 #define elf_backend_can_refcount       1
-#define elf_backend_can_gc_sections    0
+#define elf_backend_can_gc_sections    1
 #define elf_backend_plt_readonly       1
 #define elf_backend_want_got_plt       1
 #define elf_backend_want_plt_sym       0
