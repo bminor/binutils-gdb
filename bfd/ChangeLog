@@ -1,3 +1,11 @@
+2013-03-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* elf-bfd.h (elfcore_write_s390_tdb): Add prototype.
+	* elf.c (elfcore_write_s390_tdb): New function.
+	(elfcore_write_register_note): Call it.
+	(elfcore_grok_s390_tdb): New function.
+	(elfcore_grok_note): Call it.
+
 2013-03-08  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_allocate_lazy_stub): Correct data type.

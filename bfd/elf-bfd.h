@@ -1,7 +1,5 @@
 /* BFD back-end data structures for ELF files.
-   Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
-   Free Software Foundation, Inc.
+   Copyright 1992-2013 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2290,6 +2288,8 @@ extern char *elfcore_write_s390_prefix
 extern char *elfcore_write_s390_last_break
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_s390_system_call
+  (bfd *, char *, int *, const void *, int);
+extern char *elfcore_write_s390_tdb
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_arm_vfp
   (bfd *, char *, int *, const void *, int);
