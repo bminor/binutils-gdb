@@ -1,3 +1,9 @@
+2013-03-08  Yann Sionneau  <yann.sionneau@gmail.com>
+
+	PR binutils/15241
+	* lm32.cpu (Control and status registers): Add CFG2, PSW,
+	TLBVADDR, TLBPADDR and TLBBADVADDR.
+
 2012-11-30  Oleg Raikhman  <oleg@adapteva.com>
 	    Joern Rennecke  <joern.rennecke@embecosm.com>
 
