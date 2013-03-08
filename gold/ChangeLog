@@ -1,3 +1,8 @@
+2013-03-08  Ian Lance Taylor  <iant@google.com>
+
+	* options.cc (General_options::string_to_object_format): Accept
+	"default".
+
 2013-03-08  Alan Modra  <amodra@gmail.com>
 
 	* ehframe.h (Post_fdes) Make it a vector of Post_fde rather than
