@@ -1,3 +1,7 @@
+2013-03-08  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (_initialize_tracepoint): Indent the code.
+
 2013-03-08  Pedro Alves  <palves@redhat.com>
 
 	* findcmd.c (put_bits): Change type of parameter to 'gdb_byte *'.

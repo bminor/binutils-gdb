@@ -5423,14 +5423,14 @@ up and stopping the trace run."),
 			   &showlist);
 
   add_setshow_zuinteger_unlimited_cmd ("trace-buffer-size", no_class,
-			    &trace_buffer_size, _("\
+				       &trace_buffer_size, _("\
 Set requested size of trace buffer."), _("\
 Show requested size of trace buffer."), _("\
 Use this to choose a size for the trace buffer.  Some targets\n\
 may have fixed or limited buffer sizes.  A value of -1 disables\n\
 any attempt to set the buffer size and lets the target choose."),
-			    set_trace_buffer_size, NULL,
-			    &setlist, &showlist);
+				       set_trace_buffer_size, NULL,
+				       &setlist, &showlist);
 
   add_setshow_string_cmd ("trace-user", class_trace,
 			  &trace_user, _("\
