@@ -1,3 +1,13 @@
+2013-03-08  Christian Groessler  <chris@groessler.org>
+
+	Backport from mainline:
+
+	2012-10-26  Christian Groessler  <chris@groessler.org>
+
+	* gas/z8k/z8k.exp: Run translate-ops test.
+	* gas/z8k/translate-ops.s: New file.
+	* gas/z8k/translate-ops.d: New file.
+
 2013-03-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/diagnostic.s: Add test.

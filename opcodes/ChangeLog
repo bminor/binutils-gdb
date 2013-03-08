@@ -1,3 +1,14 @@
+2013-03-08  Christian Groessler  <chris@groessler.org>
+
+	Backport from mainline:
+
+	2012-10-26  Christian Groessler  <chris@groessler.org>
+
+	* z8kgen.c (struct op): Fix encoding for translate opcodes (trdb,
+	trdrb, trib, trirb, trtdb, trtdrb, trtib, trtirb).  Remove
+	non-existing opcode trtrb.
+	* z8k-opc.h: Regenerate.
+
 2013-02-15  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (aarch64_prfops): Change unnamed operation 'name'
