@@ -1637,6 +1637,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	  strcat (own_buf, ";qXfer:statictrace:read+");
 	  strcat (own_buf, ";qXfer:traceframe-info:read+");
 	  strcat (own_buf, ";EnableDisableTracepoints+");
+	  strcat (own_buf, ";QTBuffer:size+");
 	  strcat (own_buf, ";tracenz+");
 	}
 

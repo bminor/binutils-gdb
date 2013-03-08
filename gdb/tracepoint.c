@@ -170,6 +170,11 @@ static int disconnected_tracing;
 
 static int circular_trace_buffer;
 
+/* This variable is the requested trace buffer size, or -1 to indicate
+   that we don't care and leave it up to the target to set a size.  */
+
+static int trace_buffer_size = -1;
+
 /* Textual notes applying to the current and/or future trace runs.  */
 
 char *trace_user = NULL;
@@ -1819,6 +1824,7 @@ start_tracing (char *notes)
   /* Set some mode flags.  */
   target_set_disconnected_tracing (disconnected_tracing);
   target_set_circular_trace_buffer (circular_trace_buffer);
+  target_set_trace_buffer_size (trace_buffer_size);
 
   if (!notes)
     notes = trace_notes;
@@ -3214,6 +3220,13 @@ set_circular_trace_buffer (char *args, int from_tty,
 			   struct cmd_list_element *c)
 {
   target_set_circular_trace_buffer (circular_trace_buffer);
+}
+
+static void
+set_trace_buffer_size (char *args, int from_tty,
+			   struct cmd_list_element *c)
+{
+  target_set_trace_buffer_size (trace_buffer_size);
 }
 
 static void
@@ -5408,6 +5421,16 @@ up and stopping the trace run."),
 			   NULL,
 			   &setlist,
 			   &showlist);
+
+  add_setshow_zuinteger_unlimited_cmd ("trace-buffer-size", no_class,
+			    &trace_buffer_size, _("\
+Set requested size of trace buffer."), _("\
+Show requested size of trace buffer."), _("\
+Use this to choose a size for the trace buffer.  Some targets\n\
+may have fixed or limited buffer sizes.  A value of -1 disables\n\
+any attempt to set the buffer size and lets the target choose."),
+			    set_trace_buffer_size, NULL,
+			    &setlist, &showlist);
 
   add_setshow_string_cmd ("trace-user", class_trace,
 			  &trace_user, _("\

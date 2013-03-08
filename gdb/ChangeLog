@@ -1,3 +1,23 @@
+2012-03-08  Stan Shebs  <stan@codesourcery.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* NEWS: Mention set and show trace-buffer-size commands.
+	Mention new packet.
+	* target.h (struct target_ops): New method
+	to_set_trace_buffer_size.
+	(target_set_trace_buffer_size): New macro.
+	* target.c (update_current_target): Set up new method.
+	* tracepoint.c (trace_buffer_size): New global.
+	(start_tracing): Send it to the target.
+	(set_trace_buffer_size): New function.
+	(_initialize_tracepoint): Add new setshow for trace-buffer-size.
+	* remote.c (remote_set_trace_buffer_size): New function.
+	(_initialize_remote): Use it.
+	(QTBuffer:size) New remote command.
+	(PACKET_QTBuffer_size): New enum.
+	(remote_protocol_features): Add an entry for
+	PACKET_QTBuffer_size.
+
 2013-03-08  Tom Tromey  <tromey@redhat.com>
 
 	* remote-m32r-sdi.c (m32r_load): Call skip_spaces on correct

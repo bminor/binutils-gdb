@@ -693,6 +693,7 @@ update_current_target (void)
       INHERIT (to_get_min_fast_tracepoint_insn_len, t);
       INHERIT (to_set_disconnected_tracing, t);
       INHERIT (to_set_circular_trace_buffer, t);
+      INHERIT (to_set_trace_buffer_size, t);
       INHERIT (to_set_trace_notes, t);
       INHERIT (to_get_tib_address, t);
       INHERIT (to_set_permissions, t);
@@ -911,6 +912,9 @@ update_current_target (void)
 	    target_ignore);
   de_fault (to_set_circular_trace_buffer,
 	    (void (*) (int))
+	    target_ignore);
+  de_fault (to_set_trace_buffer_size,
+	    (void (*) (LONGEST))
 	    target_ignore);
   de_fault (to_set_trace_notes,
 	    (int (*) (char *, char *, char *))

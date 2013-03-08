@@ -806,6 +806,8 @@ struct target_ops
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
     void (*to_set_disconnected_tracing) (int val);
     void (*to_set_circular_trace_buffer) (int val);
+    /* Set the size of trace buffer in the target.  */
+    void (*to_set_trace_buffer_size) (LONGEST val);
 
     /* Add/change textual notes about the trace run, returning 1 if
        successful, 0 otherwise.  */
@@ -1699,6 +1701,9 @@ extern char *target_fileio_read_stralloc (const char *filename);
 
 #define	target_set_circular_trace_buffer(val)	\
   (*current_target.to_set_circular_trace_buffer) (val)
+
+#define	target_set_trace_buffer_size(val)	\
+  (*current_target.to_set_trace_buffer_size) (val)
 
 #define	target_set_trace_notes(user,notes,stopnotes)		\
   (*current_target.to_set_trace_notes) ((user), (notes), (stopnotes))

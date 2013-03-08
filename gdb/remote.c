@@ -1280,6 +1280,7 @@ enum {
   PACKET_qXfer_fdpic,
   PACKET_QDisableRandomization,
   PACKET_QAgent,
+  PACKET_QTBuffer_size,
   PACKET_MAX
 };
 
@@ -3989,6 +3990,8 @@ static struct protocol_feature remote_protocol_features[] = {
   { "QDisableRandomization", PACKET_DISABLE, remote_supported_packet,
     PACKET_QDisableRandomization },
   { "QAgent", PACKET_DISABLE, remote_supported_packet, PACKET_QAgent},
+  { "QTBuffer:size", PACKET_DISABLE,
+    remote_supported_packet, PACKET_QTBuffer_size},
   { "tracenz", PACKET_DISABLE,
     remote_string_tracing_feature, -1 },
 };
@@ -11038,6 +11041,38 @@ remote_get_min_fast_tracepoint_insn_len (void)
     }
 }
 
+static void
+remote_set_trace_buffer_size (LONGEST val)
+{
+  if (remote_protocol_packets[PACKET_QTBuffer_size].support !=
+      PACKET_DISABLE)
+    {
+      struct remote_state *rs = get_remote_state ();
+      char *buf = rs->buf;
+      char *endbuf = rs->buf + get_remote_packet_size ();
+      enum packet_result result;
+
+      gdb_assert (val >= 0 || val == -1);
+      buf += xsnprintf (buf, endbuf - buf, "QTBuffer:size:");
+      /* Send -1 as literal "-1" to avoid host size dependency.  */
+      if (val < 0)
+	{
+	  *buf++ = '-';
+          buf += hexnumstr (buf, (ULONGEST) -val);
+	}
+      else
+	buf += hexnumstr (buf, (ULONGEST) val);
+
+      putpkt (rs->buf);
+      remote_get_noisy_reply (&rs->buf, &rs->buf_size);
+      result = packet_ok (rs->buf,
+		  &remote_protocol_packets[PACKET_QTBuffer_size]);
+
+      if (result != PACKET_OK)
+	warning (_("Bogus reply from target: %s"), rs->buf);
+    }
+}
+
 static int
 remote_set_trace_notes (char *user, char *notes, char *stop_notes)
 {
@@ -11215,6 +11250,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_get_min_fast_tracepoint_insn_len = remote_get_min_fast_tracepoint_insn_len;
   remote_ops.to_set_disconnected_tracing = remote_set_disconnected_tracing;
   remote_ops.to_set_circular_trace_buffer = remote_set_circular_trace_buffer;
+  remote_ops.to_set_trace_buffer_size = remote_set_trace_buffer_size;
   remote_ops.to_set_trace_notes = remote_set_trace_notes;
   remote_ops.to_core_of_thread = remote_core_of_thread;
   remote_ops.to_verify_memory = remote_verify_memory;
@@ -11750,6 +11786,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QAgent],
 			 "QAgent", "agent", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QTBuffer_size],
+			 "QTBuffer:size", "trace-buffer-size", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

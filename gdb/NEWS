@@ -105,6 +105,10 @@ set debug notification
 show debug notification
   Control display of debugging info for async remote notification.
 
+set trace-buffer-size
+show trace-buffer-size
+  Request target to change the size of trace buffer.
+
 * Removed commands
 
   ** For the Renesas Super-H architecture, the "regs" command has been removed
@@ -159,6 +163,12 @@ show filename-display
   You must have the LZMA library available when configuring GDB for this
   feature to be enabled.  For more information, see:
       http://fedoraproject.org/wiki/Features/MiniDebugInfo
+
+* New remote packets
+
+QTBuffer:size
+   Set the size of trace buffer.  The remote stub reports support for this
+   packet to gdb's qSupported query.
 
 *** Changes in GDB 7.5
 

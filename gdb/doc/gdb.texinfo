@@ -11728,6 +11728,25 @@ for instance if you are looking at frames from a trace file.
 @end table
 
 @table @code
+@item set trace-buffer-size @var{n}
+@kindex set trace-buffer-size
+Request that the target use a trace buffer of @var{n} bytes.  Not all
+targets will honor the request; they may have a compiled-in size for
+the trace buffer, or some other limitation.  Set to a value of
+@code{-1} to let the target use whatever size it likes.  This is also
+the default.
+
+@item show trace-buffer-size
+@kindex show trace-buffer-size
+Show the current requested size for the trace buffer.  Note that this
+will only match the actual size if the target supports size-setting,
+and was able to handle the requested size.  For instance, if the
+target can only change buffer size between runs, this variable will
+not reflect the change until the next run starts.  Use @code{tstatus}
+to get a report of the actual buffer size.
+@end table
+
+@table @code
 @item set trace-user @var{text}
 @kindex set trace-user
 
@@ -37373,6 +37392,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab No
 
+@item @samp{QTBuffer:size}
+@tab No
+@tab @samp{-}
+@tab No
+
 @item @samp{tracenz}
 @tab No
 @tab @samp{-}
@@ -37526,6 +37550,10 @@ The remote stub supports installing tracepoint in tracing.
 The remote stub supports the @samp{QTEnable} (@pxref{QTEnable}) and
 @samp{QTDisable} (@pxref{QTDisable}) packets that allow tracepoints
 to be enabled and disabled while a trace experiment is running.
+
+@item QTBuffer:size
+The remote stub supports the @samp{QTBuffer:size} (@pxref{QTBuffer:size})
+packet that allows to change the size of the trace buffer.
 
 @item tracenz
 @cindex string tracing, in remote protocol
@@ -38449,6 +38477,11 @@ available.
 @item QTBuffer:circular:@var{value}
 This packet directs the target to use a circular trace buffer if
 @var{value} is 1, or a linear buffer if the value is 0.
+
+@item QTBuffer:size:@var{size}
+This packet directs the target to make the trace buffer be of size
+@var{size} if possible.  A value of @code{-1} tells the target to
+use whatever size it prefers.
 
 @item QTNotes:@r{[}@var{type}:@var{text}@r{]}@r{[};@var{type}:@var{text}@r{]}@dots{}
 @cindex @samp{QTNotes} packet

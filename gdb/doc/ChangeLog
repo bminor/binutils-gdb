@@ -1,3 +1,11 @@
+2012-03-08  Stan Shebs  <stan@codesourcery.com>
+	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* gdb.texinfo (Starting and Stopping Trace Experiments): Document
+	trace-buffer-size set and show commands.
+	(Tracepoint Packets): Document QTBuffer:size.
+	(General Query Packets): Document QTBuffer:size.
+
 2013-02-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo: Remove bad @syncodeindex.
