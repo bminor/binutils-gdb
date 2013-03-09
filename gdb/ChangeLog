@@ -8,7 +8,7 @@
 	(parse_find_args, find_command): Change type of pattern buffer
 	locals to 'gdb_byte *'.
 
-2012-03-08  Stan Shebs  <stan@codesourcery.com>
+2013-03-08  Stan Shebs  <stan@codesourcery.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* NEWS: Mention set and show trace-buffer-size commands.

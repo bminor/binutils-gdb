@@ -3,11 +3,11 @@
 	* gdb.texinfo (General Query Packets, Tracepoint Packets): Don't
 	use colons in @anchor and @cindex entries.
 
-2012-03-09  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+2013-03-09  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* gdb.texinfo (QTBuffer:size): Add cindex and anchor.
 
-2012-03-08  Stan Shebs  <stan@codesourcery.com>
+2013-03-08  Stan Shebs  <stan@codesourcery.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* gdb.texinfo (Starting and Stopping Trace Experiments): Document
