@@ -38479,6 +38479,8 @@ This packet directs the target to use a circular trace buffer if
 @var{value} is 1, or a linear buffer if the value is 0.
 
 @item QTBuffer:size:@var{size}
+@anchor{QTBuffer:size}
+@cindex @samp{QTBuffer:size} packet
 This packet directs the target to make the trace buffer be of size
 @var{size} if possible.  A value of @code{-1} tells the target to
 use whatever size it prefers.
