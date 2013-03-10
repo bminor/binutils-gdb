@@ -74,7 +74,7 @@ linux_ptrace_test_ret_to_nx (void)
   pid_t child, got_pid;
   gdb_byte *return_address, *pc;
   long l;
-  int status;
+  int status, kill_status;
 
   return_address = mmap (NULL, 2, PROT_READ | PROT_WRITE,
 			 MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
@@ -177,32 +177,24 @@ linux_ptrace_test_ret_to_nx (void)
     }
   pc = (void *) (uintptr_t) l;
 
-  if (ptrace (PTRACE_KILL, child, NULL, NULL) != 0)
+  kill (child, SIGKILL);
+  ptrace (PTRACE_KILL, child, NULL, NULL);
+
+  errno = 0;
+  got_pid = waitpid (child, &kill_status, 0);
+  if (got_pid != child)
     {
-      warning (_("linux_ptrace_test_ret_to_nx: Cannot PTRACE_KILL: %s"),
-	       strerror (errno));
+      warning (_("linux_ptrace_test_ret_to_nx: "
+		 "PTRACE_KILL waitpid returned %ld: %s"),
+	       (long) got_pid, strerror (errno));
       return;
     }
-  else
+  if (!WIFSIGNALED (kill_status))
     {
-      int kill_status;
-
-      errno = 0;
-      got_pid = waitpid (child, &kill_status, 0);
-      if (got_pid != child)
-	{
-	  warning (_("linux_ptrace_test_ret_to_nx: "
-		     "PTRACE_KILL waitpid returned %ld: %s"),
-		   (long) got_pid, strerror (errno));
-	  return;
-	}
-      if (!WIFSIGNALED (kill_status))
-	{
-	  warning (_("linux_ptrace_test_ret_to_nx: "
-		     "PTRACE_KILL status %d is not WIFSIGNALED!"),
-		   status);
-	  return;
-	}
+      warning (_("linux_ptrace_test_ret_to_nx: "
+		 "PTRACE_KILL status %d is not WIFSIGNALED!"),
+	       status);
+      return;
     }
 
   /* + 1 is there as x86* stops after the 'int3' instruction.  */

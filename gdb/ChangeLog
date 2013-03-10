@@ -1,5 +1,11 @@
 2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* common/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Call also kill
+	for CHILD, ignore PTRACE_KILL errors, move the inner block variable
+	kill_status to outer block.
+
+2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix entry-values if the callee called a noreturn function.
 	* dwarf2-frame-tailcall.c (dwarf2_tailcall_sniffer_first): Use
 	get_frame_address_in_block.  Add new comment.
