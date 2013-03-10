@@ -9812,9 +9812,18 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       gdb_assert (target_cu->objfile == objfile);
       if (die_is_declaration (target_die, target_cu))
 	{
-	  const char *target_physname;
+	  const char *target_physname = NULL;
+	  struct attribute *target_attr;
 
-	  target_physname = dwarf2_physname (NULL, target_die, target_cu);
+	  /* Prefer the mangled name; otherwise compute the demangled one.  */
+	  target_attr = dwarf2_attr (target_die, DW_AT_linkage_name, target_cu);
+	  if (target_attr == NULL)
+	    target_attr = dwarf2_attr (target_die, DW_AT_MIPS_linkage_name,
+				       target_cu);
+	  if (target_attr != NULL && DW_STRING (target_attr) != NULL)
+	    target_physname = DW_STRING (target_attr);
+	  else
+	    target_physname = dwarf2_physname (NULL, target_die, target_cu);
 	  if (target_physname == NULL)
 	    complaint (&symfile_complaints,
 		       _("DW_AT_GNU_call_site_target target DIE has invalid "

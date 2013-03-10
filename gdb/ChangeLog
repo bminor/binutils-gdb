@@ -1,3 +1,12 @@
+2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix entry-values in C++ across CUs.
+	* dwarf2loc.c (call_site_to_target_addr) <FIELD_LOC_KIND_PHYSNAME>: Use
+	lookup_minimal_symbol.  Add a comment.
+	* dwarf2read.c
+	(read_call_site_scope) <is_ref_attr> <die_is_declaration>: Prefer
+	DW_AT_linkage_name.
+
 2013-03-08  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (_initialize_tracepoint): Indent the code.

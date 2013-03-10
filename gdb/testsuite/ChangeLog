@@ -1,3 +1,12 @@
+2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix entry-values in C++ across CUs.
+	* gdb.arch/amd64-tailcall-cxx.exp: New file.
+	* gdb.arch/amd64-tailcall-cxx1.S: New file.
+	* gdb.arch/amd64-tailcall-cxx1.cc: New file.
+	* gdb.arch/amd64-tailcall-cxx2.S: New file.
+	* gdb.arch/amd64-tailcall-cxx2.cc: New file.
+
 2013-03-08  Stan Shebs  <stan@codesourcery.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 

@@ -542,7 +542,9 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	struct minimal_symbol *msym;
 
 	physname = FIELD_STATIC_PHYSNAME (call_site->target);
-	msym = lookup_minimal_symbol_text (physname, NULL);
+
+	/* Handle both the mangled and demangled PHYSNAME.  */
+	msym = lookup_minimal_symbol (physname, NULL, NULL);
 	if (msym == NULL)
 	  {
 	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
