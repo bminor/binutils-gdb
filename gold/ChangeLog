@@ -1,3 +1,23 @@
+2013-03-11  Alan Modra  <amodra@gmail.com>
+
+	* gold.cc (queue_middle_tasks): Move detect_odr_violations..
+	* layout.cc (Layout_task_runner::run): ..to here.
+	* symtab.h (struct Symbol_location): Extract from..
+	(class Symbol_table): ..here.
+	* symtab.cc (Symbol_table::linenos_from_loc): Invoke function_location.
+	* target.h (class Target): Add function_location and
+	do_function_location functions.
+	(class Sized_target): Add do_function_location.
+	* object.h (class Sized_relobj_file): Move find_shdr..
+	(class Object): ..to here.
+	* object.cc: Likewise.  Update to suit.  Instantiate.
+	(Sized_relobj_file::find_eh_frame): Update find_shdr call.
+	* powerpc.cc (class Powerpc_dynobj): New.
+	(Target_powerpc::do_function_location): New function.
+	(Powerpc_relobj::do_find_special_sections): Update find_shdr call.
+	(Powerpc_dynobj::do_read_symbols): New function.
+	(Target_powerpc::do_make_elf_object): Make a Powerpc_dynobj.
+
 2013-03-08  Ian Lance Taylor  <iant@google.com>
 
 	* options.cc (General_options::string_to_object_format): Accept

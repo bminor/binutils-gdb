@@ -23,6 +23,7 @@
 
 #include "gold.h"
 
+#include <set>
 #include <algorithm>
 #include "elfcpp.h"
 #include "dwarf.h"
@@ -320,6 +321,109 @@ private:
 };
 
 template<int size, bool big_endian>
+class Powerpc_dynobj : public Sized_dynobj<size, big_endian>
+{
+public:
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+
+  Powerpc_dynobj(const std::string& name, Input_file* input_file, off_t offset,
+		 const typename elfcpp::Ehdr<size, big_endian>& ehdr)
+    : Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr),
+      opd_shndx_(0), opd_ent_()
+  { }
+
+  ~Powerpc_dynobj()
+  { }
+
+  // Call Sized_dynobj::do_read_symbols to read the symbols then
+  // read .opd from a dynamic object, filling in opd_ent_ vector,
+  void
+  do_read_symbols(Read_symbols_data*);
+
+  // The .opd section shndx.
+  unsigned int
+  opd_shndx() const
+  {
+    return this->opd_shndx_;
+  }
+
+  // The .opd section address.
+  Address
+  opd_address() const
+  {
+    return this->opd_address_;
+  }
+
+  // Init OPD entry arrays.
+  void
+  init_opd(size_t opd_size)
+  {
+    size_t count = this->opd_ent_ndx(opd_size);
+    this->opd_ent_.resize(count);
+  }
+
+  // Return section and offset of function entry for .opd + R_OFF.
+  unsigned int
+  get_opd_ent(Address r_off, Address* value = NULL) const
+  {
+    size_t ndx = this->opd_ent_ndx(r_off);
+    gold_assert(ndx < this->opd_ent_.size());
+    gold_assert(this->opd_ent_[ndx].shndx != 0);
+    if (value != NULL)
+      *value = this->opd_ent_[ndx].off;
+    return this->opd_ent_[ndx].shndx;
+  }
+
+  // Set section and offset of function entry for .opd + R_OFF.
+  void
+  set_opd_ent(Address r_off, unsigned int shndx, Address value)
+  {
+    size_t ndx = this->opd_ent_ndx(r_off);
+    gold_assert(ndx < this->opd_ent_.size());
+    this->opd_ent_[ndx].shndx = shndx;
+    this->opd_ent_[ndx].off = value;
+  }
+
+private:
+  // Used to specify extent of executable sections.
+  struct Sec_info
+  {
+    Sec_info(Address start_, Address len_, unsigned int shndx_)
+      : start(start_), len(len_), shndx(shndx_)
+    { }
+
+    bool
+    operator<(const Sec_info& that) const
+    { return this->start < that.start; }
+
+    Address start;
+    Address len;
+    unsigned int shndx;
+  };
+
+  struct Opd_ent
+  {
+    unsigned int shndx;
+    Address off;
+  };
+
+  // Return index into opd_ent_ array for .opd entry at OFF.
+  size_t
+  opd_ent_ndx(size_t off) const
+  { return off >> 4;}
+
+  // For 64-bit the .opd section shndx and address.
+  unsigned int opd_shndx_;
+  Address opd_address_;
+
+  // The first 8-byte word of an OPD entry gives the address of the
+  // entry point of the function.  Records the section and offset
+  // corresponding to the address.  Note that in dynamic objects,
+  // offset is *not* relative to the section.
+  std::vector<Opd_ent> opd_ent_;
+};
+
+template<int size, bool big_endian>
 class Target_powerpc : public Sized_target<size, big_endian>
 {
  public:
@@ -447,6 +551,9 @@ class Target_powerpc : public Sized_target<size, big_endian>
   // for global tls symbol GSYM.
   int64_t
   do_tls_offset_for_global(Symbol* gsym, unsigned int got_indx) const;
+
+  void
+  do_function_location(Symbol_location*) const;
 
   // Relocate a section.
   void
@@ -1518,8 +1625,9 @@ Powerpc_relobj<size, big_endian>::do_find_special_sections(
   section_size_type names_size = sd->section_names_size;
   const unsigned char* s;
 
-  s = this->find_shdr(pshdrs, size == 32 ? ".got2" : ".opd",
-		      names, names_size, NULL);
+  s = this->template find_shdr<size, big_endian>(pshdrs,
+						 size == 32 ? ".got2" : ".opd",
+						 names, names_size, NULL);
   if (s != NULL)
     {
       unsigned int ndx = (s - pshdrs) / elfcpp::Elf_sizes<size>::shdr_size;
@@ -1634,6 +1742,105 @@ Powerpc_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
     }
 }
 
+// Call Sized_dynobj::do_read_symbols to read the symbols then
+// read .opd from a dynamic object, filling in opd_ent_ vector,
+
+template<int size, bool big_endian>
+void
+Powerpc_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
+{
+  Sized_dynobj<size, big_endian>::do_read_symbols(sd);
+  if (size == 64)
+    {
+      const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
+      const unsigned char* const pshdrs = sd->section_headers->data();
+      const unsigned char* namesu = sd->section_names->data();
+      const char* names = reinterpret_cast<const char*>(namesu);
+      const unsigned char* s = NULL;
+      const unsigned char* opd;
+      section_size_type opd_size;
+
+      // Find and read .opd section.
+      while (1)
+	{
+	  s = this->template find_shdr<size, big_endian>(pshdrs, ".opd", names,
+							 sd->section_names_size,
+							 s);
+	  if (s == NULL)
+	    return;
+
+	  typename elfcpp::Shdr<size, big_endian> shdr(s);
+	  if (shdr.get_sh_type() == elfcpp::SHT_PROGBITS
+	      && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) != 0)
+	    {
+	      this->opd_shndx_ = (s - pshdrs) / shdr_size;
+	      this->opd_address_ = shdr.get_sh_addr();
+	      opd_size = convert_to_section_size_type(shdr.get_sh_size());
+	      opd = this->get_view(shdr.get_sh_offset(), opd_size,
+				   true, false);
+	      break;
+	    }
+	}
+
+      // Build set of executable sections.
+      // Using a set is probably overkill.  There is likely to be only
+      // a few executable sections, typically .init, .text and .fini,
+      // and they are generally grouped together.
+      typedef std::set<Sec_info> Exec_sections;
+      Exec_sections exec_sections;
+      s = pshdrs;
+      for (unsigned int i = 1; i < this->shnum(); ++i, s += shdr_size)
+	{
+	  typename elfcpp::Shdr<size, big_endian> shdr(s);
+	  if (shdr.get_sh_type() == elfcpp::SHT_PROGBITS
+	      && ((shdr.get_sh_flags()
+		   & (elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR))
+		  == (elfcpp::SHF_ALLOC | elfcpp::SHF_EXECINSTR))
+	      && shdr.get_sh_size() != 0)
+	    {
+	      exec_sections.insert(Sec_info(shdr.get_sh_addr(),
+					    shdr.get_sh_size(), i));
+	    }
+	}
+      if (exec_sections.empty())
+	return;
+
+      // Look over the OPD entries.  This is complicated by the fact
+      // that some binaries will use two-word entries while others
+      // will use the standard three-word entries.  In most cases
+      // the third word (the environment pointer for languages like
+      // Pascal) is unused and will be zero.  If the third word is
+      // used it should not be pointing into executable sections,
+      // I think.
+      this->init_opd(opd_size);
+      for (const unsigned char* p = opd; p < opd + opd_size; p += 8)
+	{
+	  typedef typename elfcpp::Swap<64, big_endian>::Valtype Valtype;
+	  const Valtype* valp = reinterpret_cast<const Valtype*>(p);
+	  Valtype val = elfcpp::Swap<64, big_endian>::readval(valp);
+	  if (val == 0)
+	    // Chances are that this is the third word of an OPD entry.
+	    continue;
+	  typename Exec_sections::const_iterator e
+	    = exec_sections.upper_bound(Sec_info(val, 0, 0));
+	  if (e != exec_sections.begin())
+	    {
+	      --e;
+	      if (e->start <= val && val < e->start + e->len)
+		{
+		  // We have an address in an executable section.
+		  // VAL ought to be the function entry, set it up.
+		  this->set_opd_ent(p - opd, e->shndx, val);
+		  // Skip second word of OPD entry, the TOC pointer.
+		  p += 8;
+		}
+	    }
+	  // If we didn't match any executable sections, we likely
+	  // have a non-zero third word in the OPD entry.
+	}
+    }
+}
+
 // Set up some symbols.
 
 template<int size, bool big_endian>
@@ -1706,8 +1913,8 @@ Target_powerpc<size, big_endian>::do_make_elf_object(
     }
   else if (et == elfcpp::ET_DYN)
     {
-      Sized_dynobj<size, big_endian>* obj =
-	new Sized_dynobj<size, big_endian>(name, input_file, offset, ehdr);
+      Powerpc_dynobj<size, big_endian>* obj =
+	new Powerpc_dynobj<size, big_endian>(name, input_file, offset, ehdr);
       obj->setup();
       return obj;
     }
@@ -5577,6 +5784,42 @@ Target_powerpc<size, big_endian>::do_gc_mark_symbol(
 	    }
 	  else
 	    ppc_object->add_gc_mark(dst_off);
+	}
+    }
+}
+
+// For a symbol location in .opd, set LOC to the location of the
+// function entry.
+
+template<int size, bool big_endian>
+void
+Target_powerpc<size, big_endian>::do_function_location(
+    Symbol_location* loc) const
+{
+  if (size == 64)
+    {
+      if (loc->object->is_dynamic())
+	{
+	  Powerpc_dynobj<size, big_endian>* ppc_object
+	    = static_cast<Powerpc_dynobj<size, big_endian>*>(loc->object);
+	  if (loc->shndx == ppc_object->opd_shndx())
+	    {
+	      Address dest_off;
+	      Address off = loc->offset - ppc_object->opd_address();
+	      loc->shndx = ppc_object->get_opd_ent(off, &dest_off);
+	      loc->offset = dest_off;
+	    }
+	}
+      else
+	{
+	  const Powerpc_relobj<size, big_endian>* ppc_object
+	    = static_cast<const Powerpc_relobj<size, big_endian>*>(loc->object);
+	  if (loc->shndx == ppc_object->opd_shndx())
+	    {
+	      Address dest_off;
+	      loc->shndx = ppc_object->get_opd_ent(loc->offset, &dest_off);
+	      loc->offset = dest_off;
+	    }
 	}
     }
 }

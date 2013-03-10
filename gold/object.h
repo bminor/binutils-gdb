@@ -881,6 +881,16 @@ class Object
   read_section_data(elfcpp::Elf_file<size, big_endian, Object>*,
 		    Read_symbols_data*);
 
+  // Find the section header with the given NAME.  If HDR is non-NULL
+  // then it is a section header returned from a previous call to this
+  // function and the next section header with the same name will be
+  // returned.
+  template<int size, bool big_endian>
+  const unsigned char*
+  find_shdr(const unsigned char* pshdrs, const char* name,
+	    const char* names, section_size_type names_size,
+	    const unsigned char* hdr) const;
+
   // Let the child class initialize the xindex object directly.
   void
   set_xindex(Xindex* xindex)
@@ -2160,15 +2170,6 @@ class Sized_relobj_file : public Sized_relobj<size, big_endian>
   // debugging sections.
   Address
   map_to_kept_section(unsigned int shndx, bool* found) const;
-
-  // Find the section header with the given NAME.  If HDR is non-NULL
-  // then it is a section header returned from a previous call to this
-  // function and the next section header with the same name will be
-  // returned.
-  const unsigned char*
-  find_shdr(const unsigned char* pshdrs, const char* name,
-	    const char* names, section_size_type names_size,
-	    const unsigned char* hdr) const;
 
   // Compute final local symbol value.  R_SYM is the local symbol index.
   // LV_IN points to a local symbol value containing the input value.

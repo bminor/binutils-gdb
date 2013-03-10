@@ -653,10 +653,6 @@ queue_middle_tasks(const General_options& options,
   // dynamic objects that it depends upon.
   input_objects->check_dynamic_dependencies();
 
-  // See if any of the input definitions violate the One Definition Rule.
-  // TODO: if this is too slow, do this as a task, rather than inline.
-  symtab->detect_odr_violations(task, options.output_file_name());
-
   // Do the --no-undefined-version check.
   if (!parameters->options().undefined_version())
     {

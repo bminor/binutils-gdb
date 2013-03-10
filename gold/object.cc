@@ -517,15 +517,16 @@ Sized_relobj_file<size, big_endian>::check_eh_frame_flags(
 
 template<int size, bool big_endian>
 const unsigned char*
-Sized_relobj_file<size, big_endian>::find_shdr(
+Object::find_shdr(
     const unsigned char* pshdrs,
     const char* name,
     const char* names,
     section_size_type names_size,
     const unsigned char* hdr) const
 {
+  const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   const unsigned int shnum = this->shnum();
-  const unsigned char* hdr_end = pshdrs + This::shdr_size * shnum;
+  const unsigned char* hdr_end = pshdrs + shdr_size * shnum;
   size_t sh_name = 0;
 
   while (1)
@@ -533,7 +534,7 @@ Sized_relobj_file<size, big_endian>::find_shdr(
       if (hdr)
 	{
 	  // We found HDR last time we were called, continue looking.
-	  typename This::Shdr shdr(hdr);
+	  typename elfcpp::Shdr<size, big_endian> shdr(hdr);
 	  sh_name = shdr.get_sh_name();
 	}
       else
@@ -557,13 +558,13 @@ Sized_relobj_file<size, big_endian>::find_shdr(
 	    return hdr;
 	}
 
-      hdr += This::shdr_size;
+      hdr += shdr_size;
       while (hdr < hdr_end)
 	{
-	  typename This::Shdr shdr(hdr);
+	  typename elfcpp::Shdr<size, big_endian> shdr(hdr);
 	  if (shdr.get_sh_name() == sh_name)
 	    return hdr;
-	  hdr += This::shdr_size;
+	  hdr += shdr_size;
 	}
       hdr = NULL;
       if (sh_name == 0)
@@ -585,7 +586,8 @@ Sized_relobj_file<size, big_endian>::find_eh_frame(
 
   while (1)
     {
-      s = this->find_shdr(pshdrs, ".eh_frame", names, names_size, s);
+      s = this->template find_shdr<size, big_endian>(pshdrs, ".eh_frame",
+						     names, names_size, s);
       if (s == NULL)
 	return false;
 
@@ -3163,6 +3165,10 @@ template
 void
 Object::read_section_data<32, false>(elfcpp::Elf_file<32, false, Object>*,
 				     Read_symbols_data*);
+template
+const unsigned char*
+Object::find_shdr<32,false>(const unsigned char*, const char*, const char*,
+			    section_size_type, const unsigned char*) const;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -3170,6 +3176,10 @@ template
 void
 Object::read_section_data<32, true>(elfcpp::Elf_file<32, true, Object>*,
 				    Read_symbols_data*);
+template
+const unsigned char*
+Object::find_shdr<32,true>(const unsigned char*, const char*, const char*,
+			   section_size_type, const unsigned char*) const;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -3177,6 +3187,10 @@ template
 void
 Object::read_section_data<64, false>(elfcpp::Elf_file<64, false, Object>*,
 				     Read_symbols_data*);
+template
+const unsigned char*
+Object::find_shdr<64,false>(const unsigned char*, const char*, const char*,
+			    section_size_type, const unsigned char*) const;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -3184,6 +3198,10 @@ template
 void
 Object::read_section_data<64, true>(elfcpp::Elf_file<64, true, Object>*,
 				    Read_symbols_data*);
+template
+const unsigned char*
+Object::find_shdr<64,true>(const unsigned char*, const char*, const char*,
+			   section_size_type, const unsigned char*) const;
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE
