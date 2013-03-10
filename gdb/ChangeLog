@@ -1,5 +1,11 @@
 2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix entry-values if the callee called a noreturn function.
+	* dwarf2-frame-tailcall.c (dwarf2_tailcall_sniffer_first): Use
+	get_frame_address_in_block.  Add new comment.
+
+2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix entry-values in C++ across CUs.
 	* dwarf2loc.c (call_site_to_target_addr) <FIELD_LOC_KIND_PHYSNAME>: Use
 	lookup_minimal_symbol.  Add a comment.

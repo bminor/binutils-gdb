@@ -1,5 +1,12 @@
 2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix entry-values if the callee called a noreturn function.
+	* gdb.arch/amd64-tailcall-noret.S: New file.
+	* gdb.arch/amd64-tailcall-noret.c: New file.
+	* gdb.arch/amd64-tailcall-noret.exp: New file.
+
+2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix entry-values in C++ across CUs.
 	* gdb.arch/amd64-tailcall-cxx.exp: New file.
 	* gdb.arch/amd64-tailcall-cxx1.S: New file.

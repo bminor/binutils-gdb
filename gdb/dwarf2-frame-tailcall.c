@@ -374,7 +374,9 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
 
   gdb_assert (*tailcall_cachep == NULL);
 
-  this_pc = get_frame_pc (this_frame);
+  /* PC may be after the function if THIS_FRAME calls noreturn function,
+     get_frame_address_in_block will decrease it by 1 in such case.  */
+  this_pc = get_frame_address_in_block (this_frame);
 
   /* Catch any unwinding errors.  */
   TRY_CATCH (except, RETURN_MASK_ERROR)
