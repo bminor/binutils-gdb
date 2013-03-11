@@ -1,5 +1,12 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (btrace_insn_history): Omit the pc prefix in
+	the instruction history disassembly.
+	* disasm.c (dump_insns): Omit the pc prefix, if requested.
+	* disasm.h (DISASSEMBLY_OMIT_PC): New.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* Makefile.in (SFILES): Add record-btrace.c
 	(COMMON_OBS): Add record-btrace.o
 	* record-btrace.c: New.

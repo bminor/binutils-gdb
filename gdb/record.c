@@ -411,6 +411,9 @@ get_insn_history_modifiers (char **arg)
 	    case 'f':
 	      modifiers |= DISASSEMBLY_OMIT_FNAME;
 	      break;
+	    case 'p':
+	      modifiers |= DISASSEMBLY_OMIT_PC;
+	      break;
 	    default:
 	      error (_("Invalid modifier: %c."), *args);
 	    }
@@ -691,6 +694,7 @@ Print disassembled instructions stored in the execution log.\n\
 With a /m modifier, source lines are included (if available).\n\
 With a /r modifier, raw instructions in hex are included.\n\
 With a /f modifier, function names are omitted.\n\
+With a /p modifier, current position markers are omitted.\n\
 With no argument, disassembles ten more instructions after the previous \
 disassembly.\n\
 \"record instruction-history -\" disassembles ten instructions before a \
