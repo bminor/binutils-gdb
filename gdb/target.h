@@ -882,6 +882,9 @@ struct target_ops
     VEC (btrace_block_s) *(*to_read_btrace) (struct btrace_target_info *,
 					     enum btrace_read_type);
 
+    /* Stop trace recording.  */
+    void (*to_stop_recording) (void);
+
     /* Print information about the recording.  */
     void (*to_info_record) (void);
 
@@ -1966,6 +1969,9 @@ extern void target_teardown_btrace (struct btrace_target_info *btinfo);
 /* See to_read_btrace in struct target_ops.  */
 extern VEC (btrace_block_s) *target_read_btrace (struct btrace_target_info *,
 						 enum btrace_read_type);
+
+/* See to_stop_recording in struct target_ops.  */
+extern void target_stop_recording (void);
 
 /* See to_info_record in struct target_ops.  */
 extern void target_info_record (void);

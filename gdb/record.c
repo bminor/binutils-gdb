@@ -33,6 +33,10 @@ struct cmd_list_element *set_record_cmdlist = NULL;
 struct cmd_list_element *show_record_cmdlist = NULL;
 struct cmd_list_element *info_record_cmdlist = NULL;
 
+#define DEBUG(msg, args...)						\
+  if (record_debug)							\
+    fprintf_unfiltered (gdb_stdlog, "record: " msg "\n", ##args)
+
 /* Find the record target in the target stack.  */
 
 static struct target_ops *
@@ -71,11 +75,94 @@ record_read_memory (struct gdbarch *gdbarch,
 {
   int ret = target_read_memory (memaddr, myaddr, len);
 
-  if (ret && record_debug)
-    printf_unfiltered (_("Process record: error reading memory "
-			 "at addr %s len = %ld.\n"),
-		       paddress (gdbarch, memaddr), (long) len);
+  if (ret != 0)
+    DEBUG ("error reading memory at addr %s len = %ld.\n",
+	   paddress (gdbarch, memaddr), (long) len);
+
   return ret;
+}
+
+/* Stop recording.  */
+
+static void
+record_stop (struct target_ops *t)
+{
+  DEBUG ("stop %s", t->to_shortname);
+
+  if (t->to_stop_recording != NULL)
+    t->to_stop_recording ();
+}
+
+/* Unpush the record target.  */
+
+static void
+record_unpush (struct target_ops *t)
+{
+  DEBUG ("unpush %s", t->to_shortname);
+
+  unpush_target (t);
+}
+
+/* See record.h.  */
+
+void
+record_disconnect (struct target_ops *t, char *args, int from_tty)
+{
+  gdb_assert (t->to_stratum == record_stratum);
+
+  DEBUG ("disconnect %s", t->to_shortname);
+
+  record_stop (t);
+  record_unpush (t);
+
+  target_disconnect (args, from_tty);
+}
+
+/* See record.h.  */
+
+void
+record_detach (struct target_ops *t, char *args, int from_tty)
+{
+  gdb_assert (t->to_stratum == record_stratum);
+
+  DEBUG ("detach %s", t->to_shortname);
+
+  record_stop (t);
+  record_unpush (t);
+
+  target_detach (args, from_tty);
+}
+
+/* See record.h.  */
+
+void
+record_mourn_inferior (struct target_ops *t)
+{
+  gdb_assert (t->to_stratum == record_stratum);
+
+  DEBUG ("mourn inferior %s", t->to_shortname);
+
+  /* It is safer to not stop recording.  Resources will be freed when
+     threads are discarded.  */
+  record_unpush (t);
+
+  target_mourn_inferior ();
+}
+
+/* See record.h.  */
+
+void
+record_kill (struct target_ops *t)
+{
+  gdb_assert (t->to_stratum == record_stratum);
+
+  DEBUG ("kill %s", t->to_shortname);
+
+  /* It is safer to not stop recording.  Resources will be freed when
+     threads are discarded.  */
+  record_unpush (t);
+
+  target_kill ();
 }
 
 /* Implement "show record debug" command.  */
@@ -131,7 +218,9 @@ cmd_record_stop (char *args, int from_tty)
   struct target_ops *t;
 
   t = require_record_target ();
-  unpush_target (t);
+
+  record_stop (t);
+  record_unpush (t);
 
   printf_unfiltered (_("Process record is stopped and all execution "
 		       "logs are deleted.\n"));

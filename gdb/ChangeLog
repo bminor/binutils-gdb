@@ -1,5 +1,25 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record.h (record_disconnect): New.
+	(record_detach): New.
+	(record_mourn_inferior): New.
+	(record_kill): New.
+	* record-full.c (record_disconnect, record_detach,
+	record_mourn_inferior, record_kill): Move to...
+	* record.c: ...here.
+	(DEBUG): New.
+	(record_stop): New.
+	(record_unpush): New.
+	(cmd_record_stop): Call record_stop. Replace unpush_target
+	call with record_unpush call.
+	(record_disconnect, record_detach): Assert that the target
+	is of record stratum. Call record_unpush, record_stop, and
+	DEBUG.
+	(record_mourn_inferior, record_kill): Assert that the target
+	is of record stratum. Call record_unpush and DEBUG.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-full.h, record-full.c (record_memory_query): Rename
 	to ...
 	(record_full_memory_query): ...this. Update all users.

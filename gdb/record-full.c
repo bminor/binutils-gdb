@@ -1523,56 +1523,6 @@ record_full_stopped_by_watchpoint (void)
     return record_full_beneath_to_stopped_by_watchpoint ();
 }
 
-/* "to_disconnect" method for process record target.  */
-
-static void
-record_full_disconnect (struct target_ops *target, char *args, int from_tty)
-{
-  if (record_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"Process record: record_full_disconnect\n");
-
-  unpush_target (&record_full_ops);
-  target_disconnect (args, from_tty);
-}
-
-/* "to_detach" method for process record target.  */
-
-static void
-record_full_detach (struct target_ops *ops, char *args, int from_tty)
-{
-  if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "Process record: record_full_detach\n");
-
-  unpush_target (&record_full_ops);
-  target_detach (args, from_tty);
-}
-
-/* "to_mourn_inferior" method for process record target.  */
-
-static void
-record_full_mourn_inferior (struct target_ops *ops)
-{
-  if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "Process record: "
-			            "record_full_mourn_inferior\n");
-
-  unpush_target (&record_full_ops);
-  target_mourn_inferior ();
-}
-
-/* Close process record target before killing the inferior process.  */
-
-static void
-record_full_kill (struct target_ops *ops)
-{
-  if (record_debug)
-    fprintf_unfiltered (gdb_stdlog, "Process record: record_full_kill\n");
-
-  unpush_target (&record_full_ops);
-  target_kill ();
-}
-
 static int
 record_full_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
@@ -2117,10 +2067,10 @@ init_record_full_ops (void)
   record_full_ops.to_close = record_full_close;
   record_full_ops.to_resume = record_full_resume;
   record_full_ops.to_wait = record_full_wait;
-  record_full_ops.to_disconnect = record_full_disconnect;
-  record_full_ops.to_detach = record_full_detach;
-  record_full_ops.to_mourn_inferior = record_full_mourn_inferior;
-  record_full_ops.to_kill = record_full_kill;
+  record_full_ops.to_disconnect = record_disconnect;
+  record_full_ops.to_detach = record_detach;
+  record_full_ops.to_mourn_inferior = record_mourn_inferior;
+  record_full_ops.to_kill = record_kill;
   record_full_ops.to_create_inferior = find_default_create_inferior;
   record_full_ops.to_store_registers = record_full_store_registers;
   record_full_ops.to_xfer_partial = record_full_xfer_partial;

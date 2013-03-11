@@ -4244,6 +4244,23 @@ target_read_btrace (struct btrace_target_info *btinfo,
 /* See target.h.  */
 
 void
+target_stop_recording (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_stop_recording != NULL)
+      {
+	t->to_stop_recording ();
+	return;
+      }
+
+  /* This is optional.  */
+}
+
+/* See target.h.  */
+
+void
 target_info_record (void)
 {
   struct target_ops *t;
