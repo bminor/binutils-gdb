@@ -4153,6 +4153,79 @@ target_ranged_break_num_registers (void)
   return -1;
 }
 
+/* See target.h.  */
+
+int
+target_supports_btrace (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_supports_btrace != NULL)
+      return t->to_supports_btrace ();
+
+  return 0;
+}
+
+/* See target.h.  */
+
+struct btrace_target_info *
+target_enable_btrace (ptid_t ptid)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_enable_btrace != NULL)
+      return t->to_enable_btrace (ptid);
+
+  tcomplain ();
+  return NULL;
+}
+
+/* See target.h.  */
+
+void
+target_disable_btrace (struct btrace_target_info *btinfo)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_disable_btrace != NULL)
+      return t->to_disable_btrace (btinfo);
+
+  tcomplain ();
+}
+
+/* See target.h.  */
+
+void
+target_teardown_btrace (struct btrace_target_info *btinfo)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_teardown_btrace != NULL)
+      return t->to_teardown_btrace (btinfo);
+
+  tcomplain ();
+}
+
+/* See target.h.  */
+
+VEC (btrace_block_s) *
+target_read_btrace (struct btrace_target_info *btinfo,
+		    enum btrace_read_type type)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_read_btrace != NULL)
+      return t->to_read_btrace (btinfo, type);
+
+  tcomplain ();
+  return NULL;
+}
+
 static void
 debug_to_prepare_to_store (struct regcache *regcache)
 {

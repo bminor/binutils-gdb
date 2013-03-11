@@ -62,6 +62,7 @@ struct expression;
 #include "memattr.h"
 #include "vec.h"
 #include "gdb_signals.h"
+#include "btrace.h"
 
 enum strata
   {
@@ -286,7 +287,7 @@ enum target_object
   /* Darwin dynamic linker info data.  */
   TARGET_OBJECT_DARWIN_DYLD_INFO,
   /* OpenVMS Unwind Information Block.  */
-  TARGET_OBJECT_OPENVMS_UIB
+  TARGET_OBJECT_OPENVMS_UIB,
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
@@ -858,6 +859,26 @@ struct target_ops
 
     /* Is the target able to use agent in current state?  */
     int (*to_can_use_agent) (void);
+
+    /* Check whether the target supports branch tracing.  */
+    int (*to_supports_btrace) (void);
+
+    /* Enable branch tracing for PTID and allocate a branch trace target
+       information struct for reading and for disabling branch trace.  */
+    struct btrace_target_info *(*to_enable_btrace) (ptid_t ptid);
+
+    /* Disable branch tracing and deallocate TINFO.  */
+    void (*to_disable_btrace) (struct btrace_target_info *tinfo);
+
+    /* Disable branch tracing and deallocate TINFO.  This function is similar
+       to to_disable_btrace, except that it is called during teardown and is
+       only allowed to perform actions that are safe.  A counter-example would
+       be attempting to talk to a remote target.  */
+    void (*to_teardown_btrace) (struct btrace_target_info *tinfo);
+
+    /* Read branch trace data.  */
+    VEC (btrace_block_s) *(*to_read_btrace) (struct btrace_target_info *,
+					     enum btrace_read_type);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1901,5 +1922,22 @@ extern void update_target_permissions (void);
 
 /* Blank target vector entries are initialized to target_ignore.  */
 void target_ignore (void);
+
+/* See to_supports_btrace in struct target_ops.  */
+extern int target_supports_btrace (void);
+
+/* See to_enable_btrace in struct target_ops.  */
+extern struct btrace_target_info *target_enable_btrace (ptid_t ptid);
+
+/* See to_disable_btrace in struct target_ops.  */
+extern void target_disable_btrace (struct btrace_target_info *btinfo);
+
+/* See to_teardown_btrace in struct target_ops.  */
+extern void target_teardown_btrace (struct btrace_target_info *btinfo);
+
+/* See to_read_btrace in struct target_ops.  */
+extern VEC (btrace_block_s) *target_read_btrace (struct btrace_target_info *,
+						 enum btrace_read_type);
+
 
 #endif /* !defined (TARGET_H) */

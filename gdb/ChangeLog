@@ -1,3 +1,22 @@
+2013-03-13  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* target.h: Include btrace.h.
+	(struct target_ops) <to_supports_btrace, to_enable_btrace,
+	to_disable_btrace, to_teardown_btrace, to_read_btrace>: New.
+	* target.c (target_supports_btrace): New function.
+	(target_enable_btrace): New function.
+	(target_disable_btrace): New function.
+	(target_teardown_btrace): New function.
+	(target_read_btrace): New function.
+	* btrace.h: New file.
+	* btrace.c: New file.
+	* Makefile.in: Add btrace.c.
+	* gdbthread.h: Include btrace.h.
+	(struct thread_info): Add btrace field.
+	* thread.c: Include btrace.h.
+	(clear_thread_inferior_resources): Call target_teardown_btrace.
+	* common/btrace-common.h: New file.
+
 2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* common/linux-ptrace.c (linux_ptrace_test_ret_to_nx): Call also kill

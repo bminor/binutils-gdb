@@ -33,6 +33,7 @@
 #include "regcache.h"
 #include "gdb.h"
 #include "gdb_string.h"
+#include "btrace.h"
 
 #include <ctype.h>
 #include <sys/types.h>
@@ -115,6 +116,8 @@ clear_thread_inferior_resources (struct thread_info *tp)
   delete_longjmp_breakpoint_at_next_stop (tp->num);
 
   bpstat_clear (&tp->control.stop_bpstat);
+
+  btrace_teardown (tp);
 
   do_all_intermediate_continuations_thread (tp, 1);
   do_all_continuations_thread (tp, 1);
