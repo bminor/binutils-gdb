@@ -1,5 +1,19 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* target.c (target_call_history, target_call_history_from,
+	target_call_history_range): New.
+	* target.h (target_ops) <to_call_history, to_call_history_from,
+	to_call_history_range>: New fields.
+	(target_call_history, target_call_history_from,
+	target_call_history_range): New declaration.
+	* record.c (get_call_history_modifiers, cmd_record_call_history,
+	record_call_history_size): New.
+	(_initialize_record): Add the "record function-call-history" command.
+	Add "set/show record function-call-history-size" commands.
+	* record.h (record_print_flag): New.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* target.h (target_ops) <to_insn_history, to_insn_history_from,
 	to_insn_history_range>: New fields.
 	(target_insn_history): New.

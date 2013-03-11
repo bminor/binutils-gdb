@@ -922,6 +922,21 @@ struct target_ops
        BEGIN (inclusive) to instruction END (exclusive).  */
     void (*to_insn_history_range) (ULONGEST begin, ULONGEST end, int flags);
 
+    /* Print a function trace of the recorded execution trace.
+       If SIZE < 0, print abs (SIZE) preceding functions; otherwise, print SIZE
+       succeeding functions.  */
+    void (*to_call_history) (int size, int flags);
+
+    /* Print a function trace of the recorded execution trace starting
+       at function FROM.
+       If SIZE < 0, print abs (SIZE) functions before FROM; otherwise, print
+       SIZE functions after FROM.  */
+    void (*to_call_history_from) (ULONGEST begin, int size, int flags);
+
+    /* Print a function trace of an execution trace section from function BEGIN
+       (inclusive) to function END (exclusive).  */
+    void (*to_call_history_range) (ULONGEST begin, ULONGEST end, int flags);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -2021,5 +2036,14 @@ extern void target_insn_history_from (ULONGEST from, int size, int flags);
 
 /* See to_insn_history_range.  */
 extern void target_insn_history_range (ULONGEST begin, ULONGEST end, int flags);
+
+/* See to_call_history.  */
+extern void target_call_history (int size, int flags);
+
+/* See to_call_history_from.  */
+extern void target_call_history_from (ULONGEST begin, int size, int flags);
+
+/* See to_call_history_range.  */
+extern void target_call_history_range (ULONGEST begin, ULONGEST end, int flags);
 
 #endif /* !defined (TARGET_H) */

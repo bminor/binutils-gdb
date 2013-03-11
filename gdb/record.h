@@ -32,6 +32,16 @@ extern struct cmd_list_element *set_record_cmdlist;
 extern struct cmd_list_element *show_record_cmdlist;
 extern struct cmd_list_element *info_record_cmdlist;
 
+/* A list of flags specifying what record target methods should print.  */
+enum record_print_flag
+{
+  /* Print the source file and line (if applicable).  */
+  record_print_src_line = (1 << 0),
+
+  /* Print the instruction number range (if applicable).  */
+  record_print_insn_range = (1 << 1),
+};
+
 /* Wrapper for target_read_memory that prints a debug message if
    reading memory fails.  */
 extern int record_read_memory (struct gdbarch *gdbarch,

@@ -35,6 +35,9 @@ unsigned int record_debug = 0;
 /* The number of instructions to print in "record instruction-history".  */
 static unsigned int record_insn_history_size = 10;
 
+/* The number of functions to print in "record function-call-history".  */
+static unsigned int record_call_history_size = 10;
+
 struct cmd_list_element *record_cmdlist = NULL;
 struct cmd_list_element *set_record_cmdlist = NULL;
 struct cmd_list_element *show_record_cmdlist = NULL;
@@ -491,6 +494,126 @@ cmd_record_insn_history (char *arg, int from_tty)
     }
 }
 
+/* Read function-call-history modifiers from an argument string.  */
+
+static int
+get_call_history_modifiers (char **arg)
+{
+  int modifiers;
+  char *args;
+
+  modifiers = 0;
+  args = *arg;
+
+  if (args == NULL)
+    return modifiers;
+
+  while (*args == '/')
+    {
+      ++args;
+
+      if (*args == '\0')
+	error (_("Missing modifier."));
+
+      for (; *args; ++args)
+	{
+	  if (isspace (*args))
+	    break;
+
+	  if (*args == '/')
+	    continue;
+
+	  switch (*args)
+	    {
+	    case 'l':
+	      modifiers |= record_print_src_line;
+	      break;
+	    case 'i':
+	      modifiers |= record_print_insn_range;
+	      break;
+	    default:
+	      error (_("Invalid modifier: %c."), *args);
+	    }
+	}
+
+      args = skip_spaces (args);
+    }
+
+  /* Update the argument string.  */
+  *arg = args;
+
+  return modifiers;
+}
+
+/* The "record function-call-history" command.  */
+
+static void
+cmd_record_call_history (char *arg, int from_tty)
+{
+  int flags, size;
+
+  require_record_target ();
+
+  flags = get_call_history_modifiers (&arg);
+
+  /* We use a signed size to also indicate the direction.  Make sure that
+     unlimited remains unlimited.  */
+  size = (int) record_call_history_size;
+  if (size < 0)
+    size = INT_MAX;
+
+  if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
+    target_call_history (size, flags);
+  else if (strcmp (arg, "-") == 0)
+    target_call_history (-size, flags);
+  else
+    {
+      ULONGEST begin, end;
+
+      begin = get_insn_number (&arg);
+
+      if (*arg == ',')
+	{
+	  arg = skip_spaces (++arg);
+
+	  if (*arg == '+')
+	    {
+	      arg += 1;
+	      size = get_context_size (&arg);
+
+	      no_chunk (arg);
+
+	      target_call_history_from (begin, size, flags);
+	    }
+	  else if (*arg == '-')
+	    {
+	      arg += 1;
+	      size = get_context_size (&arg);
+
+	      no_chunk (arg);
+
+	      target_call_history_from (begin, -size, flags);
+	    }
+	  else
+	    {
+	      end = get_insn_number (&arg);
+
+	      no_chunk (arg);
+
+	      target_call_history_range (begin, end, flags);
+	    }
+	}
+      else
+	{
+	  no_chunk (arg);
+
+	  target_call_history_from (begin, size, flags);
+	}
+
+      dont_repeat ();
+    }
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_record;
 
@@ -511,6 +634,13 @@ _initialize_record (void)
 			    &record_insn_history_size, _("\
 Set number of instructions to print in \"record instruction-history\"."), _("\
 Show number of instructions to print in \"record instruction-history\"."),
+			    NULL, NULL, NULL, &set_record_cmdlist,
+			    &show_record_cmdlist);
+
+  add_setshow_uinteger_cmd ("function-call-history-size", no_class,
+			    &record_call_history_size, _("\
+Set number of function to print in \"record function-call-history\"."), _("\
+Show number of functions to print in \"record function-call-history\"."),
 			    NULL, NULL, NULL, &set_record_cmdlist,
 			    &show_record_cmdlist);
 
@@ -573,5 +703,24 @@ If the second argument is preceded by '+' or '-', it specifies the distance \
 from the first argument.\n\
 The number of instructions to disassemble can be defined with \"set record \
 instruction-history-size\"."),
+           &record_cmdlist);
+
+  add_cmd ("function-call-history", class_obscure, cmd_record_call_history, _("\
+Prints the execution history at function granularity.\n\
+It prints one line for each sequence of instructions that belong to the same \
+function.\n\
+Without modifiers, it prints the function name.\n\
+With a /l modifier, the source file and line number range is included.\n\
+With a /i modifier, the instruction number range is included.\n\
+With no argument, prints ten more lines after the previous ten-line print.\n\
+\"record function-call-history -\" prints ten lines before a previous ten-line \
+print.\n\
+One argument specifies a function number as shown by 'info record', and \
+ten lines are printed after that function.\n\
+Two arguments with comma between them specify a range of functions to print.\n\
+If the second argument is preceded by '+' or '-', it specifies the distance \
+from the first argument.\n\
+The number of functions to print can be defined with \"set record \
+function-call-history-size\"."),
            &record_cmdlist);
 }
