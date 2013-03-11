@@ -44,7 +44,7 @@
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_I386 "syscalls/i386-linux.xml"
 
-#include "record.h"
+#include "record-full.h"
 #include "linux-record.h"
 #include <stdint.h>
 

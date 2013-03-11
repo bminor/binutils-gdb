@@ -52,6 +52,7 @@
 #include "i386-xstate.h"
 
 #include "record.h"
+#include "record-full.h"
 #include <stdint.h>
 
 #include "features/i386/i386.c"

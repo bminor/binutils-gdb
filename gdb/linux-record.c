@@ -22,6 +22,7 @@
 #include "gdbtypes.h"
 #include "regcache.h"
 #include "record.h"
+#include "record-full.h"
 #include "linux-record.h"
 
 /* These macros are the values of the first argument of system call

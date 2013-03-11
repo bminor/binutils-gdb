@@ -37,6 +37,7 @@
 #include "trad-frame.h"
 #include "dis-asm.h"
 #include "record.h"
+#include "record-full.h"
 
 #include "gdb_assert.h"
 

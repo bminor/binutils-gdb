@@ -20,20 +20,25 @@
 #ifndef _RECORD_H_
 #define _RECORD_H_
 
+struct cmd_list_element;
+
 #define RECORD_IS_USED	(current_target.to_stratum == record_stratum)
 
 extern unsigned int record_debug;
-extern int record_memory_query;
 
-extern int record_arch_list_add_reg (struct regcache *regcache, int num);
-extern int record_arch_list_add_mem (CORE_ADDR addr, int len);
-extern int record_arch_list_add_end (void);
-extern struct cleanup *record_gdb_operation_disable_set (void);
+/* Allow record targets to add their own sub-commands.  */
+extern struct cmd_list_element *record_cmdlist;
+extern struct cmd_list_element *set_record_cmdlist;
+extern struct cmd_list_element *show_record_cmdlist;
+extern struct cmd_list_element *info_record_cmdlist;
 
 /* Wrapper for target_read_memory that prints a debug message if
    reading memory fails.  */
 extern int record_read_memory (struct gdbarch *gdbarch,
 			       CORE_ADDR memaddr, gdb_byte *myaddr,
 			       ssize_t len);
+
+/* The "record goto" command.  */
+extern void cmd_record_goto (char *arg, int from_tty);
 
 #endif /* _RECORD_H_ */

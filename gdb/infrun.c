@@ -49,6 +49,7 @@
 #include "mi/mi-common.h"
 #include "event-top.h"
 #include "record.h"
+#include "record-full.h"
 #include "inline-frame.h"
 #include "jit.h"
 #include "tracepoint.h"

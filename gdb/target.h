@@ -882,6 +882,27 @@ struct target_ops
     VEC (btrace_block_s) *(*to_read_btrace) (struct btrace_target_info *,
 					     enum btrace_read_type);
 
+    /* Print information about the recording.  */
+    void (*to_info_record) (void);
+
+    /* Save the recorded execution trace into a file.  */
+    void (*to_save_record) (char *filename);
+
+    /* Delete the recorded execution trace from the current position onwards.  */
+    void (*to_delete_record) (void);
+
+    /* Query if the record target is currently replaying.  */
+    int (*to_record_is_replaying) (void);
+
+    /* Go to the begin of the execution trace.  */
+    void (*to_goto_record_begin) (void);
+
+    /* Go to the end of the execution trace.  */
+    void (*to_goto_record_end) (void);
+
+    /* Go to a specific location in the recorded execution trace.  */
+    void (*to_goto_record) (ULONGEST insn);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1946,5 +1967,28 @@ extern void target_teardown_btrace (struct btrace_target_info *btinfo);
 extern VEC (btrace_block_s) *target_read_btrace (struct btrace_target_info *,
 						 enum btrace_read_type);
 
+/* See to_info_record in struct target_ops.  */
+extern void target_info_record (void);
+
+/* See to_save_record in struct target_ops.  */
+extern void target_save_record (char *filename);
+
+/* Query if the target supports deleting the execution log.  */
+extern int target_supports_delete_record (void);
+
+/* See to_delete_record in struct target_ops.  */
+extern void target_delete_record (void);
+
+/* See to_record_is_replaying in struct target_ops.  */
+extern int target_record_is_replaying (void);
+
+/* See to_goto_record_begin in struct target_ops.  */
+extern void target_goto_record_begin (void);
+
+/* See to_goto_record_end in struct target_ops.  */
+extern void target_goto_record_end (void);
+
+/* See to_goto_record in struct target_ops.  */
+extern void target_goto_record (ULONGEST insn);
 
 #endif /* !defined (TARGET_H) */

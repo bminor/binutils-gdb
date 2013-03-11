@@ -753,7 +753,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	valarith.c valops.c valprint.c value.c varobj.c common/vec.c \
 	xml-tdesc.c xml-support.c \
 	inferior.c gdb_usleep.c \
-	record.c gcore.c \
+	record.c record-full.c gcore.c \
 	jit.c \
 	xml-syscall.c \
 	annotate.c common/signals.c copying.c dfp.c gdb.c inf-child.c \
@@ -829,6 +829,7 @@ dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
 i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h \
 osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
+record-full.h \
 solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
 gnulib/import/extra/snippet/arg-nonnull.h gnulib/import/extra/snippet/c++defs.h \
 gnulib/import/extra/snippet/warn-on-use.h \
@@ -926,7 +927,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	prologue-value.o memory-map.o memrange.o \
 	xml-support.o xml-syscall.o xml-utils.o \
 	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
-	inferior.o osdata.o gdb_usleep.o record.o gcore.o \
+	inferior.o osdata.o gdb_usleep.o record.o record-full.o gcore.o \
 	gdb_vecs.o jit.o progspace.o skip.o probe.o \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
 	format.o registry.o btrace.o

@@ -56,6 +56,7 @@
 #include "vec.h"
 
 #include "record.h"
+#include "record-full.h"
 
 #include "features/arm-with-m.c"
 #include "features/arm-with-m-fpa-layout.c"

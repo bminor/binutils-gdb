@@ -1,5 +1,98 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record.h: Split into this and ...
+	* record-full.h: ... this.
+	* record.c: Split into this and ...
+	* record-full.c: ... this.
+	* target.h (target_ops): Add new fields to_info_record,
+	to_save_record, to_delete_record, to_record_is_replaying,
+	to_goto_record_begin, to_goto_record_end, to_goto_record.
+	(target_info_record): New.
+	(target_save_record): New.
+	(target_supports_delete_record): New.
+	(target_delete_record): New.
+	(target_record_is_replaying): New.
+	(target_goto_record_begin): New.
+	(target_goto_record_end): New.
+	(target_goto_record): New.
+	* target.c (target_info_record): New.
+	(target_save_record): New.
+	(target_supports_delete_record): New.
+	(target_delete_record): New.
+	(target_record_is_replaying): New.
+	(target_goto_record_begin): New.
+	(target_goto_record_end): New.
+	(target_goto_record): New.
+	* record.h: Declare struct cmd_list_element.
+	(record_cmdlist): New declaration.
+	(set_record_cmdlist): New declaration.
+	(show_record_cmdlist): New declaration.
+	(info_record_cmdlist): New declaration.
+	(cmd_record_goto): New declaration.
+	* record.c: Remove unnecessary includes.
+	Include inferior.h.
+	(cmd_record_goto): Remove declaration.
+	(record_cmdlist): Now extern. Initialize.
+	(set_record_cmdlist): Now extern. Initialize.
+	(show_record_cmdlist): Now extern. Initialize.
+	(info_record_cmdlist): Now extern. Initialize.
+	(find_record_target): New.
+	(require_record_target): New.
+	(cmd_record_start): Update.
+	(cmd_record_delete): Remove target-specific code.
+	Call target_delete_record.
+	(cmd_record_stop): Unpush any record target.
+	(set_record_insn_max_num): Move to record-full.c
+	(set_record_command): Add comment.
+	(show_record_command): Add comment.
+	(info_record_command): Update comment.
+	Remove target-specific code.
+	Call the record target's to_info_record.
+	(cmd_record_start): New.
+	(cmd_record_goto): Now extern.
+	Remove target-specific code.
+	Call target_goto_begin,  target_goto_end, or target_goto.
+	(_initialize_record): Move record target ops initialization to
+	record-full.c.
+	Change "record" command help text.
+	Move "record restore", "record set", and "record show" commands to
+	record-full.c.
+	* Makefile.in (SFILES): Add record-full.c.
+	(HFILES_NO_SRCDIR): Add record-full.h.
+	(COMMON_OBS): Add record-full.o.
+	* amd64-linux-tdep.c: Include record-full.h instead of record.h.
+	* arm-tdep.c: Include record-full.h.
+	* i386-linux-tdep.c: Include record-full.h instead of record.h.
+	* i386-tdep.c: Include record-full.h.
+	* infrun.c: Include record-full.h.
+	* linux-record.c: Include record-full.h.
+	* moxie-tdep.c: Include record-full.h.
+	* record-full.c: Include record-full.h.
+	Change module comment.
+	(set_record_full_cmdlist): New.
+	(show_record_full_cmdlist): New.
+	(record_full_cmdlist): New.
+	(record_goto_insn): New declaration.
+	(record_save): New declaration.
+	(record_check_insn_num): Change query string.
+	(record_info): New.
+	(record_delete): New.
+	(record_is_replaying): New.
+	(record_goto_entry): New.
+	(record_goto_begin): New.
+	(record_goto_end): New.
+	(record_goto): New.
+	(init_record_ops): Update.
+	(init_record_core_ops): Update.
+	(cmd_record_save): Rename to record_save. Remove target and arg checks.
+	(cmd_record_start): New.
+	(set_record_insn_max_num): Moved from record.c
+	(set_record_full_command): New.
+	(show_record_full_command): New.
+	(_initialize_record_full): New.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* target.h (add_deprecated_target_alias): New.
 	* target.c (add_deprecated_target_alias): New.
 

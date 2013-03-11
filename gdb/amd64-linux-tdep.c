@@ -48,7 +48,7 @@
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_AMD64 "syscalls/amd64-linux.xml"
 
-#include "record.h"
+#include "record-full.h"
 #include "linux-record.h"
 
 /* Supported register note sections.  */

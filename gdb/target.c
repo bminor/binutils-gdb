@@ -4241,6 +4241,136 @@ target_read_btrace (struct btrace_target_info *btinfo,
   return NULL;
 }
 
+/* See target.h.  */
+
+void
+target_info_record (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_info_record != NULL)
+      {
+	t->to_info_record ();
+	return;
+      }
+
+  tcomplain ();
+}
+
+/* See target.h.  */
+
+void
+target_save_record (char *filename)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_save_record != NULL)
+      {
+	t->to_save_record (filename);
+	return;
+      }
+
+  tcomplain ();
+}
+
+/* See target.h.  */
+
+int
+target_supports_delete_record (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_delete_record != NULL)
+      return 1;
+
+  return 0;
+}
+
+/* See target.h.  */
+
+void
+target_delete_record (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_delete_record != NULL)
+      {
+	t->to_delete_record ();
+	return;
+      }
+
+  tcomplain ();
+}
+
+/* See target.h.  */
+
+int
+target_record_is_replaying (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_record_is_replaying != NULL)
+	return t->to_record_is_replaying ();
+
+  return 0;
+}
+
+/* See target.h.  */
+
+void
+target_goto_record_begin (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_goto_record_begin != NULL)
+      {
+	t->to_goto_record_begin ();
+	return;
+      }
+
+  tcomplain ();
+}
+
+/* See target.h.  */
+
+void
+target_goto_record_end (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_goto_record_end != NULL)
+      {
+	t->to_goto_record_end ();
+	return;
+      }
+
+  tcomplain ();
+}
+
+/* See target.h.  */
+
+void
+target_goto_record (ULONGEST insn)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_goto_record != NULL)
+      {
+	t->to_goto_record (insn);
+	return;
+      }
+
+  tcomplain ();
+}
+
 static void
 debug_to_prepare_to_store (struct regcache *regcache)
 {
