@@ -1,3 +1,9 @@
+2013-03-11  Doug Evans  <dje@google.com>
+	    Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (find_linespec_symbols): Call find_function_symbols
+	first, and then call lookup_prefix_sym/find_method.
+
 2013-03-11  Pedro Alves  <palves@redhat.com>
 
 	* charset.c (convert_between_encodings): Don't cast between
