@@ -892,10 +892,10 @@ struct qxfer
      data-specific information to the target.
 
      Return the number of bytes actually transfered, zero when no
-     further transfer is possible, -1 on error, and -2 when the
-     transfer is not supported.  Return of a positive value smaller
-     than LEN does not indicate the end of the object, only the end of
-     the transfer.
+     further transfer is possible, -1 on error, -2 when the transfer
+     is not supported, and -3 on a verbose error message that should
+     be preserved.  Return of a positive value smaller than LEN does
+     not indicate the end of the object, only the end of the transfer.
 
      One, and only one, of readbuf or writebuf must be non-NULL.  */
   int (*xfer) (const char *annex,
@@ -1323,6 +1323,10 @@ handle_qxfer (char *own_buf, int packet_len, int *new_packet_len_p)
 		  free (data);
 		  return 0;
 		}
+	      else if (n == -3)
+		{
+		  /* Preserve error message.  */
+		}
 	      else if (n < 0)
 		write_enn (own_buf);
 	      else if (n > len)
@@ -1360,6 +1364,10 @@ handle_qxfer (char *own_buf, int packet_len, int *new_packet_len_p)
 		{
 		  free (data);
 		  return 0;
+		}
+	      else if (n == -3)
+		{
+		  /* Preserve error message.  */
 		}
 	      else if (n < 0)
 		write_enn (own_buf);

@@ -1,5 +1,11 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* server.c (handle_qxfer): Preserve error message if -3 is
+	returned.
+	(qxfer): Document the -3 return value.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* Makefile.in (SFILES): Add $(srcdir)/common/linux-btrace.c.
 	(linux_btrace_h): New variable.
 	(linux-btrace.o): New rule.
