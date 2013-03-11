@@ -20,11 +20,11 @@
 #ifndef RECORD_FULL_H
 #define RECORD_FULL_H
 
-extern int record_memory_query;
+extern int record_full_memory_query;
 
-extern int record_arch_list_add_reg (struct regcache *regcache, int num);
-extern int record_arch_list_add_mem (CORE_ADDR addr, int len);
-extern int record_arch_list_add_end (void);
-extern struct cleanup *record_gdb_operation_disable_set (void);
+extern int record_full_arch_list_add_reg (struct regcache *regcache, int num);
+extern int record_full_arch_list_add_mem (CORE_ADDR addr, int len);
+extern int record_full_arch_list_add_end (void);
+extern struct cleanup *record_full_gdb_operation_disable_set (void);
 
 #endif /* RECORD_FULL_H */

@@ -313,39 +313,39 @@ amd64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 static int
 amd64_all_but_ip_registers_record (struct regcache *regcache)
 {
-  if (record_arch_list_add_reg (regcache, AMD64_RAX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RAX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_RCX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RCX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_RDX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RDX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_RBX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RBX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_RSP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RSP_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_RBP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RBP_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_RSI_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RSI_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_RDI_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RDI_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R8_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R8_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R9_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R9_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R10_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R10_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R11_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R11_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R12_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R12_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R13_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R13_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R14_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R14_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R15_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R15_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_EFLAGS_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_EFLAGS_REGNUM))
     return -1;
 
   return 0;
@@ -1164,7 +1164,7 @@ amd64_canonicalize_syscall (enum amd64_syscall syscall_number)
 
 /* Parse the arguments of current system call instruction and record
    the values of the registers and memory that will be changed into
-   "record_arch_list".  This instruction is "syscall".
+   "record_full_arch_list".  This instruction is "syscall".
 
    Return -1 if something wrong.  */
 
@@ -1203,8 +1203,8 @@ amd64_linux_syscall_record (struct regcache *regcache)
 	    regcache_raw_read_unsigned (regcache,
 					amd64_linux_record_tdep.arg2,
 					&addr);
-	    if (record_arch_list_add_mem (addr,
-					  amd64_linux_record_tdep.size_ulong))
+	    if (record_full_arch_list_add_mem
+		(addr, amd64_linux_record_tdep.size_ulong))
 	      return -1;
 	  }
 	goto record_regs;
@@ -1231,9 +1231,9 @@ amd64_linux_syscall_record (struct regcache *regcache)
 
  record_regs:
   /* Record the return value of the system call.  */
-  if (record_arch_list_add_reg (regcache, AMD64_RCX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RCX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, AMD64_R11_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_R11_REGNUM))
     return -1;
 
   return 0;
@@ -1253,7 +1253,7 @@ amd64_linux_record_signal (struct gdbarch *gdbarch,
   if (amd64_all_but_ip_registers_record (regcache))
     return -1;
 
-  if (record_arch_list_add_reg (regcache, AMD64_RIP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, AMD64_RIP_REGNUM))
     return -1;
 
   /* Record the change in the stack.  */
@@ -1267,12 +1267,12 @@ amd64_linux_record_signal (struct gdbarch *gdbarch,
   /* This is for frame_size.
      sp -= sizeof (struct rt_sigframe);  */
   rsp -= AMD64_LINUX_frame_size;
-  if (record_arch_list_add_mem (rsp, AMD64_LINUX_redzone
+  if (record_full_arch_list_add_mem (rsp, AMD64_LINUX_redzone
                                      + AMD64_LINUX_xstate
                                      + AMD64_LINUX_frame_size))
     return -1;
 
-  if (record_arch_list_add_end ())
+  if (record_full_arch_list_add_end ())
     return -1;
 
   return 0;

@@ -156,7 +156,7 @@ struct record_full_entry
 
 /* If true, query if PREC cannot record memory
    change of next instruction.  */
-int record_memory_query = 0;
+int record_full_memory_query = 0;
 
 struct record_full_core_buf_entry
 {
@@ -483,7 +483,7 @@ record_full_get_loc (struct record_full_entry *rec)
 /* Record the value of a register NUM to record_full_arch_list.  */
 
 int
-record_arch_list_add_reg (struct regcache *regcache, int regnum)
+record_full_arch_list_add_reg (struct regcache *regcache, int regnum)
 {
   struct record_full_entry *rec;
 
@@ -506,7 +506,7 @@ record_arch_list_add_reg (struct regcache *regcache, int regnum)
    length is LEN to record_full_arch_list.  */
 
 int
-record_arch_list_add_mem (CORE_ADDR addr, int len)
+record_full_arch_list_add_mem (CORE_ADDR addr, int len)
 {
   struct record_full_entry *rec;
 
@@ -537,7 +537,7 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
    record_full_arch_list.  */
 
 int
-record_arch_list_add_end (void)
+record_full_arch_list_add_end (void)
 {
   struct record_full_entry *rec;
 
@@ -701,7 +701,7 @@ record_full_message_wrapper_safe (struct regcache *regcache,
 static int record_full_gdb_operation_disable = 0;
 
 struct cleanup *
-record_gdb_operation_disable_set (void)
+record_full_gdb_operation_disable_set (void)
 {
   struct cleanup *old_cleanups = NULL;
 
@@ -1189,7 +1189,7 @@ record_full_wait_1 (struct target_ops *ops,
 		    ptid_t ptid, struct target_waitstatus *status,
 		    int options)
 {
-  struct cleanup *set_cleanups = record_gdb_operation_disable_set ();
+  struct cleanup *set_cleanups = record_full_gdb_operation_disable_set ();
 
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -1599,7 +1599,7 @@ record_full_registers_change (struct regcache *regcache, int regnum)
 
       for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)
 	{
-	  if (record_arch_list_add_reg (regcache, i))
+	  if (record_full_arch_list_add_reg (regcache, i))
 	    {
 	      record_full_list_release (record_full_arch_list_tail);
 	      error (_("Process record: failed to record execution log."));
@@ -1608,13 +1608,13 @@ record_full_registers_change (struct regcache *regcache, int regnum)
     }
   else
     {
-      if (record_arch_list_add_reg (regcache, regnum))
+      if (record_full_arch_list_add_reg (regcache, regnum))
 	{
 	  record_full_list_release (record_full_arch_list_tail);
 	  error (_("Process record: failed to record execution log."));
 	}
     }
-  if (record_arch_list_add_end ())
+  if (record_full_arch_list_add_end ())
     {
       record_full_list_release (record_full_arch_list_tail);
       error (_("Process record: failed to record execution log."));
@@ -1721,7 +1721,7 @@ record_full_xfer_partial (struct target_ops *ops, enum target_object object,
       /* Record registers change to list as an instruction.  */
       record_full_arch_list_head = NULL;
       record_full_arch_list_tail = NULL;
-      if (record_arch_list_add_mem (offset, len))
+      if (record_full_arch_list_add_mem (offset, len))
 	{
 	  record_full_list_release (record_full_arch_list_tail);
 	  if (record_debug)
@@ -1730,7 +1730,7 @@ record_full_xfer_partial (struct target_ops *ops, enum target_object object,
 				"execution log.");
 	  return -1;
 	}
-      if (record_arch_list_add_end ())
+      if (record_full_arch_list_add_end ())
 	{
 	  record_full_list_release (record_full_arch_list_tail);
 	  if (record_debug)
@@ -1831,7 +1831,7 @@ record_full_insert_breakpoint (struct gdbarch *gdbarch,
       struct cleanup *old_cleanups;
       int ret;
 
-      old_cleanups = record_gdb_operation_disable_set ();
+      old_cleanups = record_full_gdb_operation_disable_set ();
       ret = record_full_beneath_to_insert_breakpoint (gdbarch, bp_tgt);
       do_cleanups (old_cleanups);
 
@@ -1871,7 +1871,7 @@ record_full_remove_breakpoint (struct gdbarch *gdbarch,
 	      struct cleanup *old_cleanups;
 	      int ret;
 
-	      old_cleanups = record_gdb_operation_disable_set ();
+	      old_cleanups = record_full_gdb_operation_disable_set ();
 	      ret = record_full_beneath_to_remove_breakpoint (gdbarch, bp_tgt);
 	      do_cleanups (old_cleanups);
 
@@ -2717,7 +2717,7 @@ record_full_save (char *recfilename)
   gdbarch = get_regcache_arch (regcache);
 
   /* Disable the GDB operation record.  */
-  set_cleanups = record_gdb_operation_disable_set ();
+  set_cleanups = record_full_gdb_operation_disable_set ();
 
   /* Reverse execute to the begin of record list.  */
   while (1)
@@ -2897,7 +2897,7 @@ static void
 record_full_goto_insn (struct record_full_entry *entry,
 		       enum exec_direction_kind dir)
 {
-  struct cleanup *set_cleanups = record_gdb_operation_disable_set ();
+  struct cleanup *set_cleanups = record_full_gdb_operation_disable_set ();
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
@@ -3043,7 +3043,7 @@ record/replay buffer.  Zero means unlimited.  Default is 200000."),
   deprecate_cmd (c, "show record full insn-number-max");
 
   add_setshow_boolean_cmd ("memory-query", no_class,
-			   &record_memory_query, _("\
+			   &record_full_memory_query, _("\
 Set whether query if PREC cannot record memory change of next instruction."),
                            _("\
 Show whether query if PREC cannot record memory change of next instruction."),

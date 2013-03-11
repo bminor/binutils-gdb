@@ -370,23 +370,23 @@ i386_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 static int
 i386_all_but_ip_registers_record (struct regcache *regcache)
 {
-  if (record_arch_list_add_reg (regcache, I386_EAX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EAX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_ECX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_ECX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EDX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EDX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EBX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EBX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_ESP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_ESP_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EBP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EBP_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_ESI_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_ESI_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EDI_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EDI_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EFLAGS_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EFLAGS_REGNUM))
     return -1;
 
   return 0;
@@ -450,7 +450,7 @@ i386_linux_intx80_sysenter_syscall_record (struct regcache *regcache)
     return ret;
 
   /* Record the return value of the system call.  */
-  if (record_arch_list_add_reg (regcache, I386_EAX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EAX_REGNUM))
     return -1;
 
   return 0;
@@ -469,7 +469,7 @@ i386_linux_record_signal (struct gdbarch *gdbarch,
   if (i386_all_but_ip_registers_record (regcache))
     return -1;
 
-  if (record_arch_list_add_reg (regcache, I386_EIP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EIP_REGNUM))
     return -1;
 
   /* Record the change in the stack.  */
@@ -480,11 +480,11 @@ i386_linux_record_signal (struct gdbarch *gdbarch,
   /* This is for frame_size.
      sp -= sizeof (struct rt_sigframe);  */
   esp -= I386_LINUX_frame_size;
-  if (record_arch_list_add_mem (esp,
-                                I386_LINUX_xstate + I386_LINUX_frame_size))
+  if (record_full_arch_list_add_mem (esp,
+				     I386_LINUX_xstate + I386_LINUX_frame_size))
     return -1;
 
-  if (record_arch_list_add_end ())
+  if (record_full_arch_list_add_end ())
     return -1;
 
   return 0;

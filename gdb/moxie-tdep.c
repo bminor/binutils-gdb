@@ -573,7 +573,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    case 0x02: /* gsr */
 	      {
 		int reg = (inst >> 8) & 0xf;
-		if (record_arch_list_add_reg (regcache, reg))
+		if (record_full_arch_list_add_reg (regcache, reg))
 		  return -1;
 	      }
 	      break;
@@ -603,7 +603,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	case 0x02: /* mov (register-to-register) */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -613,25 +613,25 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 			       MOXIE_SP_REGNUM, (gdb_byte *) & tmpu32);
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
-	    if (record_arch_list_add_reg (regcache, MOXIE_FP_REGNUM)
-		|| (record_arch_list_add_reg (regcache, 
-					      MOXIE_SP_REGNUM))
-		|| record_arch_list_add_mem (tmpu32 - 12, 12))
+	    if (record_full_arch_list_add_reg (regcache, MOXIE_FP_REGNUM)
+		|| (record_full_arch_list_add_reg (regcache,
+						   MOXIE_SP_REGNUM))
+		|| record_full_arch_list_add_mem (tmpu32 - 12, 12))
 	      return -1;
 	  }
 	  break;
 	case 0x04: /* ret */
 	  {
-	    if (record_arch_list_add_reg (regcache, MOXIE_FP_REGNUM)
-		|| (record_arch_list_add_reg (regcache, 
-					      MOXIE_SP_REGNUM)))
+	    if (record_full_arch_list_add_reg (regcache, MOXIE_FP_REGNUM)
+		|| (record_full_arch_list_add_reg (regcache,
+						   MOXIE_SP_REGNUM)))
 	      return -1;
 	  }
 	  break;
 	case 0x05: /* add.l */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -641,8 +641,8 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    regcache_raw_read (regcache, reg, (gdb_byte *) & tmpu32);
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
-	    if (record_arch_list_add_reg (regcache, reg)
-		|| record_arch_list_add_mem (tmpu32 - 4, 4))
+	    if (record_full_arch_list_add_reg (regcache, reg)
+		|| record_full_arch_list_add_mem (tmpu32 - 4, 4))
 	      return -1;
 	  }
 	  break;
@@ -650,15 +650,15 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  {
 	    int a = (inst >> 4) & 0xf;
 	    int b = inst & 0xf;
-	    if (record_arch_list_add_reg (regcache, a)
-		|| record_arch_list_add_reg (regcache, b))
+	    if (record_full_arch_list_add_reg (regcache, a)
+		|| record_full_arch_list_add_reg (regcache, b))
 	      return -1;
 	  }
 	  break;
 	case 0x08: /* lda.l */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -666,14 +666,14 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  {
 	    tmpu32 = (uint32_t) moxie_process_readu (addr+2, buf, 
 						     4, byte_order);
-	    if (record_arch_list_add_mem (tmpu32, 4))
+	    if (record_full_arch_list_add_mem (tmpu32, 4))
 	      return -1;
 	  }
 	  break;
 	case 0x0a: /* ld.l (register indirect) */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -683,14 +683,14 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    regcache_raw_read (regcache, reg, (gdb_byte *) & tmpu32);
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
-	    if (record_arch_list_add_mem (tmpu32, 4))
+	    if (record_full_arch_list_add_mem (tmpu32, 4))
 	      return -1;
 	  }
 	  break;
 	case 0x0c: /* ldo.l */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -703,13 +703,13 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
 	    tmpu32 += offset;
-	    if (record_arch_list_add_mem (tmpu32, 4))
+	    if (record_full_arch_list_add_mem (tmpu32, 4))
 	      return -1;
 	  }
 	  break;
 	case 0x0e: /* cmp */
 	  {
-	    if (record_arch_list_add_reg (regcache, MOXIE_CC_REGNUM))
+	    if (record_full_arch_list_add_reg (regcache, MOXIE_CC_REGNUM))
 	      return -1;
 	  }
 	  break;
@@ -733,10 +733,10 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 			       MOXIE_SP_REGNUM, (gdb_byte *) & tmpu32);
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
-	    if (record_arch_list_add_reg (regcache, MOXIE_FP_REGNUM)
-		|| (record_arch_list_add_reg (regcache, 
-					      MOXIE_SP_REGNUM))
-		|| record_arch_list_add_mem (tmpu32 - 12, 12))
+	    if (record_full_arch_list_add_reg (regcache, MOXIE_FP_REGNUM)
+		|| (record_full_arch_list_add_reg (regcache,
+						   MOXIE_SP_REGNUM))
+		|| record_full_arch_list_add_mem (tmpu32 - 12, 12))
 	      return -1;
 	  }
 	  break;
@@ -750,7 +750,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	case 0x1d: /* lda.b */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -760,7 +760,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    regcache_raw_read (regcache, reg, (gdb_byte *) & tmpu32);
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
-	    if (record_arch_list_add_mem (tmpu32, 1))
+	    if (record_full_arch_list_add_mem (tmpu32, 1))
 	      return -1;
 	  }
 	  break;
@@ -768,7 +768,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  {
 	    tmpu32 = moxie_process_readu (addr+2, (char *) buf, 
 					  4, byte_order);
-	    if (record_arch_list_add_mem (tmpu32, 1))
+	    if (record_full_arch_list_add_mem (tmpu32, 1))
 	      return -1;
 	  }
 	  break;
@@ -777,7 +777,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	case 0x22: /* lda.s */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -787,7 +787,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    regcache_raw_read (regcache, reg, (gdb_byte *) & tmpu32);
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
-	    if (record_arch_list_add_mem (tmpu32, 2))
+	    if (record_full_arch_list_add_mem (tmpu32, 2))
 	      return -1;
 	  }
 	  break;
@@ -795,7 +795,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  {
 	    tmpu32 = moxie_process_readu (addr+2, (char *) buf, 
 					  4, byte_order);
-	    if (record_arch_list_add_mem (tmpu32, 2))
+	    if (record_full_arch_list_add_mem (tmpu32, 2))
 	      return -1;
 	  }
 	  break;
@@ -816,7 +816,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	case 0x2f: /* mul.l */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -837,7 +837,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		break;
 	      case 0x2: /* SYS_open */
 		{
-		  if (record_arch_list_add_reg (regcache, RET1_REGNUM))
+		  if (record_full_arch_list_add_reg (regcache, RET1_REGNUM))
 		    return -1;
 		}
 		break;
@@ -858,13 +858,13 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 		  length = moxie_process_readu (tmpu32+20, (char *) buf, 
 						4, byte_order);
 
-		  if (record_arch_list_add_mem (ptr, length))
+		  if (record_full_arch_list_add_mem (ptr, length))
 		    return -1;
 		}
 		break;
 	      case 0x5: /* SYS_write */
 		{
-		  if (record_arch_list_add_reg (regcache, RET1_REGNUM))
+		  if (record_full_arch_list_add_reg (regcache, RET1_REGNUM))
 		    return -1;
 		}
 		break;
@@ -879,7 +879,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	case 0x34: /* umod.l */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -889,7 +889,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	case 0x36: /* ldo.b */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -902,14 +902,14 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
 	    tmpu32 += offset;
-	    if (record_arch_list_add_mem (tmpu32, 1))
+	    if (record_full_arch_list_add_mem (tmpu32, 1))
 	      return -1;
 	  }
 	  break;
 	case 0x38: /* ldo.s */
 	  {
 	    int reg = (inst >> 4) & 0xf;
-	    if (record_arch_list_add_reg (regcache, reg))
+	    if (record_full_arch_list_add_reg (regcache, reg))
 	      return -1;
 	  }
 	  break;
@@ -922,7 +922,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 					       4, byte_order);
 	    tmpu32 += offset;
-	    if (record_arch_list_add_mem (tmpu32, 2))
+	    if (record_full_arch_list_add_mem (tmpu32, 2))
 	      return -1;
 	  }
 	  break;
@@ -932,9 +932,9 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	}
     }
 
-  if (record_arch_list_add_reg (regcache, MOXIE_PC_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, MOXIE_PC_REGNUM))
     return -1;
-  if (record_arch_list_add_end ())
+  if (record_full_arch_list_add_end ())
     return -1;
   return 0;
 }

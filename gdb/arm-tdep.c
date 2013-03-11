@@ -12601,13 +12601,13 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
   if (0 == ret)
     {
       /* Record registers.  */
-      record_arch_list_add_reg (arm_record.regcache, ARM_PC_REGNUM);
+      record_full_arch_list_add_reg (arm_record.regcache, ARM_PC_REGNUM);
       if (arm_record.arm_regs)
         {
           for (no_of_rec = 0; no_of_rec < arm_record.reg_rec_count; no_of_rec++)
             {
-              if (record_arch_list_add_reg (arm_record.regcache , 
-                                            arm_record.arm_regs[no_of_rec]))
+              if (record_full_arch_list_add_reg
+		  (arm_record.regcache , arm_record.arm_regs[no_of_rec]))
               ret = -1;
             }
         }
@@ -12616,14 +12616,14 @@ arm_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
         {
           for (no_of_rec = 0; no_of_rec < arm_record.mem_rec_count; no_of_rec++)
             {
-              if (record_arch_list_add_mem 
+              if (record_full_arch_list_add_mem
                   ((CORE_ADDR)arm_record.arm_mems[no_of_rec].addr,
-                  arm_record.arm_mems[no_of_rec].len))
+		   arm_record.arm_mems[no_of_rec].len))
                 ret = -1;
             }
         }
 
-      if (record_arch_list_add_end ())
+      if (record_full_arch_list_add_end ())
         ret = -1;
     }
 
