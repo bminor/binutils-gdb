@@ -814,6 +814,12 @@ proc test_no_hw_watchpoints {} {
 
     gdb_test_no_output "delete \$bpnum" "delete watch ival3"
 
+    gdb_test "watch ival3 if  count > 1  thread 1 " \
+         "Watchpoint \[0-9\]*: ival3.*" \
+         "set slow condition watch w/thread"
+
+    gdb_test_no_output "delete \$bpnum" "delete watch w/condition and thread"
+
     # We've explicitly disabled hardware watches.  Verify that GDB
     # refrains from using them.
     #
