@@ -1,5 +1,13 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* Makefile.in (SFILES): Add record-btrace.c
+	(COMMON_OBS): Add record-btrace.o
+	* record-btrace.c: New.
+	* objfiles.c: Include btrace.h.
+	(free_objfile): call btrace_free_objfile.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* target.c (target_call_history, target_call_history_from,
 	target_call_history_range): New.
 	* target.h (target_ops) <to_call_history, to_call_history_from,

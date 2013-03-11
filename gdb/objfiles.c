@@ -53,6 +53,7 @@
 #include "psymtab.h"
 #include "solist.h"
 #include "gdb_bfd.h"
+#include "btrace.h"
 
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
@@ -567,6 +568,7 @@ free_objfile (struct objfile *objfile)
   forget_cached_source_info_for_objfile (objfile);
 
   breakpoint_free_objfile (objfile);
+  btrace_free_objfile (objfile);
 
   /* First do any symbol file specific actions required when we are
      finished with a particular symbol file.  Note that if the objfile
