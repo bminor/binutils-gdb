@@ -1,3 +1,9 @@
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* Makefile.in (SFILES): Add $(srcdir)/common/linux-btrace.c.
+	(linux_btrace_h): New variable.
+	(linux-btrace.o): New rule.
+
 2013-03-08  Stan Shebs  <stan@codesourcery.com>
 	    Hafiz Abid Qadeer  <abidh@codesourcery.com>
 

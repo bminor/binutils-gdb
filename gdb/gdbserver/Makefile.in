@@ -155,7 +155,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/vec.c $(srcdir)/common/gdb_vecs.c \
 	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
 	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
-	$(srcdir)/common/buffer.c
+	$(srcdir)/common/buffer.c $(srcdir)/common/linux-btrace.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -425,6 +425,8 @@ signals_h = $(srcdir)/../../include/gdb/signals.h $(signals_def)
 ptid_h = $(srcdir)/../common/ptid.h
 ax_h = $(srcdir)/ax.h
 agent_h = $(srcdir)/../common/agent.h
+linux_btrace_h = $(srcdir)/../common/linux-btrace.h \
+		$(srcdir)/../common/btrace-common.h $(vec_h) $(ptid_h)
 linux_osdata_h = $(srcdir)/../common/linux-osdata.h
 vec_h = $(srcdir)/../common/vec.h
 gdb_vecs_h = $(srcdir)/../common/gdb_vecs.h
@@ -543,6 +545,9 @@ format.o: ../common/format.c
 agent.o: ../common/agent.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
+
+linux-btrace.o: ../common/linux-btrace.c $(linux_btrace_h) $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 # We build vasprintf with -DHAVE_CONFIG_H because we want that unit to
 # include our config.h file.  Otherwise, some system headers do not get

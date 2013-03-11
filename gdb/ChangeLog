@@ -1,5 +1,14 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* common/linux_btrace.h: New file.
+	* common/linux_btrace.c: New file.
+	* Makefile.in (SFILES): Add btrace.c.
+	(HFILES_NO_SRCDIR): Add common/linux-btrace.h.
+	(COMMON_OBS): Add btrace.o.
+	(linux-btrace.o): New rule.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* target.h: Include btrace.h.
 	(struct target_ops) <to_supports_btrace, to_enable_btrace,
 	to_disable_btrace, to_teardown_btrace, to_read_btrace>: New.
