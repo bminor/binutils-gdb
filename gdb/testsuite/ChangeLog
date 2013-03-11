@@ -1,3 +1,18 @@
+2013-03-11  Christian Himpel  <christian.himpel@intel.com>
+
+	* Makefile.in: Add btrace testsuite.
+	* configure: Regenerated.
+	* configure.ac: Add btrace testsuite.
+	* gdb.btrace/Makefile.in: New file.
+	* gdb.btrace/enable.c: New file.
+	* gdb.btrace/enable.exp: New file.
+	* gdb.btrace/function_call_history.c: New file.
+	* gdb.btrace/function_call_history.exp: New file.
+	* gdb.btrace/instruction_history.c: New file.
+	* gdb.btrace/instruction_history.exp: New file.
+	* gdb.btrace/instruction_history.S: New file.
+	* lib/gdb.exp: Add btrace skip proc.
+
 2013-03-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix entry-values if the callee called a noreturn function.

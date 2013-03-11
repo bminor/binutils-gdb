@@ -2097,6 +2097,74 @@ proc skip_vsx_tests {} {
     return $skip_vsx_tests_saved
 }
 
+# Run a test on the target to see if it supports btrace hardware.  Return 0 if so,
+# 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
+
+proc skip_btrace_tests {} {
+    global skip_btrace_tests_saved
+    global srcdir subdir gdb_prompt inferior_exited_re
+
+    # Use the cached value, if it exists.
+    set me "skip_btrace_tests"
+    if [info exists skip_btrace_tests_saved] {
+        verbose "$me:  returning saved $skip_btrace_tests_saved" 2
+        return $skip_btrace_tests_saved
+    }
+
+    if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } {
+        verbose "$me:  target does not support btrace, returning 1" 2
+        return [set skip_btrace_tests_saved 1]
+    }
+
+    # Set up, compile, and execute a test program.
+    # Include the current process ID in the file names to prevent conflicts
+    # with invocations for multiple testsuites.
+    set src [standard_output_file btrace[pid].c]
+    set exe [standard_output_file btrace[pid].x]
+
+    set f [open $src "w"]
+    puts $f "int main(void) { return 0; }"
+    close $f
+
+    verbose "$me:  compiling testfile $src" 2
+    set compile_flags {debug nowarnings quiet}
+    set lines [gdb_compile $src $exe executable $compile_flags]
+    file delete $src
+
+    if ![string match "" $lines] then {
+        verbose "$me:  testfile compilation failed, returning 1" 2
+        return [set skip_btrace_tests_saved 1]
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    clean_restart btrace[pid].x
+    if ![runto_main] {
+        return [set skip_btrace_tests_saved 1]
+    }
+    # In case of an unexpected output, we return 2 as a fail value.
+    set skip_btrace_tests_saved 2
+    gdb_test_multiple "record btrace" "check btrace support" {
+        -re "You can't do that when your target is.*\r\n$gdb_prompt $" {
+            set skip_btrace_tests_saved 1
+        }
+        -re "Target does not support branch tracing.*\r\n$gdb_prompt $" {
+            set skip_btrace_tests_saved 1
+        }
+        -re "Could not enable branch tracing.*\r\n$gdb_prompt $" {
+            set skip_btrace_tests_saved 1
+        }
+        -re "^record btrace\r\n$gdb_prompt $" {
+            set skip_btrace_tests_saved 0
+        }
+    }
+    gdb_exit
+    remote_file build delete $exe
+
+    verbose "$me:  returning $skip_btrace_tests_saved" 2
+    return $skip_btrace_tests_saved
+}
+
 # Skip all the tests in the file if you are not on an hppa running
 # hpux target.
 
