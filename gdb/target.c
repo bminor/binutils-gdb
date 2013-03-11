@@ -2378,11 +2378,12 @@ char *
 target_read_stralloc (struct target_ops *ops, enum target_object object,
 		      const char *annex)
 {
-  char *buffer;
+  gdb_byte *buffer;
+  char *bufstr;
   LONGEST i, transferred;
 
-  transferred = target_read_alloc_1 (ops, object, annex,
-				     (gdb_byte **) &buffer, 1);
+  transferred = target_read_alloc_1 (ops, object, annex, &buffer, 1);
+  bufstr = (char *) buffer;
 
   if (transferred < 0)
     return NULL;
@@ -2390,11 +2391,11 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
   if (transferred == 0)
     return xstrdup ("");
 
-  buffer[transferred] = 0;
+  bufstr[transferred] = 0;
 
   /* Check for embedded NUL bytes; but allow trailing NULs.  */
-  for (i = strlen (buffer); i < transferred; i++)
-    if (buffer[i] != 0)
+  for (i = strlen (bufstr); i < transferred; i++)
+    if (bufstr[i] != 0)
       {
 	warning (_("target object %d, annex %s, "
 		   "contained unexpected null characters"),
@@ -2402,7 +2403,7 @@ target_read_stralloc (struct target_ops *ops, enum target_object object,
 	break;
       }
 
-  return buffer;
+  return bufstr;
 }
 
 /* Memory transfer methods.  */
@@ -3542,11 +3543,12 @@ target_fileio_read_alloc (const char *filename, gdb_byte **buf_p)
 char *
 target_fileio_read_stralloc (const char *filename)
 {
-  char *buffer;
+  gdb_byte *buffer;
+  char *bufstr;
   LONGEST i, transferred;
 
-  transferred = target_fileio_read_alloc_1 (filename,
-					    (gdb_byte **) &buffer, 1);
+  transferred = target_fileio_read_alloc_1 (filename, &buffer, 1);
+  bufstr = (char *) buffer;
 
   if (transferred < 0)
     return NULL;
@@ -3554,11 +3556,11 @@ target_fileio_read_stralloc (const char *filename)
   if (transferred == 0)
     return xstrdup ("");
 
-  buffer[transferred] = 0;
+  bufstr[transferred] = 0;
 
   /* Check for embedded NUL bytes; but allow trailing NULs.  */
-  for (i = strlen (buffer); i < transferred; i++)
-    if (buffer[i] != 0)
+  for (i = strlen (bufstr); i < transferred; i++)
+    if (bufstr[i] != 0)
       {
 	warning (_("target file %s "
 		   "contained unexpected null characters"),
@@ -3566,7 +3568,7 @@ target_fileio_read_stralloc (const char *filename)
 	break;
       }
 
-  return buffer;
+  return bufstr;
 }
 
 

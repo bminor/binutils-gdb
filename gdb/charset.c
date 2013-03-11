@@ -474,7 +474,7 @@ convert_between_encodings (const char *from, const char *to,
   iconv_t desc;
   struct cleanup *cleanups;
   size_t inleft;
-  char *inp;
+  ICONV_CONST char *inp;
   unsigned int space_request;
 
   /* Often, the host and target charsets will be the same.  */
@@ -490,7 +490,7 @@ convert_between_encodings (const char *from, const char *to,
   cleanups = make_cleanup (cleanup_iconv, &desc);
 
   inleft = num_bytes;
-  inp = (char *) bytes;
+  inp = (ICONV_CONST char *) bytes;
 
   space_request = num_bytes;
 
@@ -506,7 +506,7 @@ convert_between_encodings (const char *from, const char *to,
       outp = obstack_base (output) + old_size;
       outleft = space_request;
 
-      r = iconv (desc, (ICONV_CONST char **) &inp, &inleft, &outp, &outleft);
+      r = iconv (desc, &inp, &inleft, &outp, &outleft);
 
       /* Now make sure that the object on the obstack only includes
 	 bytes we have converted.  */
@@ -640,14 +640,15 @@ wchar_iterate (struct wchar_iterator *iter,
   out_request = 1;
   while (iter->bytes > 0)
     {
+      ICONV_CONST char *inptr = (ICONV_CONST char *) iter->input;
       char *outptr = (char *) &iter->out[0];
       const gdb_byte *orig_inptr = iter->input;
       size_t orig_in = iter->bytes;
       size_t out_avail = out_request * sizeof (gdb_wchar_t);
       size_t num;
-      size_t r = iconv (iter->desc,
-			(ICONV_CONST char **) &iter->input, 
-			&iter->bytes, &outptr, &out_avail);
+      size_t r = iconv (iter->desc, &inptr, &iter->bytes, &outptr, &out_avail);
+
+      iter->input = (gdb_byte *) inptr;
 
       if (r == (size_t) -1)
 	{

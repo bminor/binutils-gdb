@@ -1,3 +1,15 @@
+2013-03-11  Pedro Alves  <palves@redhat.com>
+
+	* charset.c (convert_between_encodings): Don't cast between
+	different pointer to pointer types.  Instead, make the 'inp' local
+	be of the type iconv expects.
+	(wchar_iterate): Don't cast between different pointer to pointer
+	types.  Instead, use new pointer local of the type iconv expects.
+	* target.c (target_read_stralloc, target_fileio_read_stralloc):
+	Add new local of type char pointer, and use it to get a
+	char/string view of the byte buffer, instead of casting between
+	pointer to pointer types.
+
 2013-03-11  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* remote.c (remote_set_trace_buffer_size): Move != operator
