@@ -1,5 +1,15 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* common/linux-btrace.c: Include sys/ptrace, sys/types, sys/wait.h,
+	and signal.h.
+	(linux_supports_btrace): Add kernel and
+	cpuid check.
+	(kernel_supports_btrace): New function.
+	(cpu_supports_btrace): New function.
+	(intel_supports_btrace): New function.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* target.h (enum target_object): Add TARGET_OBJECT_BTRACE.
 	* remote.c: Include btrace.h.
 	(struct btrace_target_info): New struct.

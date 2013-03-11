@@ -40,6 +40,10 @@
 #include <sys/syscall.h>
 #include <sys/mman.h>
 #include <sys/user.h>
+#include <sys/ptrace.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#include <signal.h>
 
 /* A branch trace record in perf_event.  */
 struct perf_event_bts
@@ -247,12 +251,193 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
   return btrace;
 }
 
+/* Check whether the kernel supports branch tracing.  */
+
+static int
+kernel_supports_btrace (void)
+{
+  struct perf_event_attr attr;
+  pid_t child, pid;
+  int status, file;
+
+  errno = 0;
+  child = fork ();
+  switch (child)
+    {
+    case -1:
+      warning (_("test branch tracing: cannot fork: %s."), strerror (errno));
+      return 0;
+
+    case 0:
+      status = ptrace (PTRACE_TRACEME, 0, NULL, NULL);
+      if (status != 0)
+	{
+	  warning (_("test branch tracing: cannot PTRACE_TRACEME: %s."),
+		   strerror (errno));
+	  _exit (1);
+	}
+
+      status = raise (SIGTRAP);
+      if (status != 0)
+	{
+	  warning (_("test branch tracing: cannot raise SIGTRAP: %s."),
+		   strerror (errno));
+	  _exit (1);
+	}
+
+      _exit (1);
+
+    default:
+      pid = waitpid (child, &status, 0);
+      if (pid != child)
+	{
+	  warning (_("test branch tracing: bad pid %ld, error: %s."),
+		   (long) pid, strerror (errno));
+	  return 0;
+	}
+
+      if (!WIFSTOPPED (status))
+	{
+	  warning (_("test branch tracing: expected stop. status: %d."),
+		   status);
+	  return 0;
+	}
+
+      memset (&attr, 0, sizeof (attr));
+
+      attr.type = PERF_TYPE_HARDWARE;
+      attr.config = PERF_COUNT_HW_BRANCH_INSTRUCTIONS;
+      attr.sample_period = 1;
+      attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR;
+      attr.exclude_kernel = 1;
+      attr.exclude_hv = 1;
+      attr.exclude_idle = 1;
+
+      file = syscall (SYS_perf_event_open, &attr, child, -1, -1, 0);
+      if (file >= 0)
+	close (file);
+
+      kill (child, SIGKILL);
+      ptrace (PTRACE_KILL, child, NULL, NULL);
+
+      pid = waitpid (child, &status, 0);
+      if (pid != child)
+	{
+	  warning (_("test branch tracing: bad pid %ld, error: %s."),
+		   (long) pid, strerror (errno));
+	  if (!WIFSIGNALED (status))
+	    warning (_("test branch tracing: expected killed. status: %d."),
+		     status);
+	}
+
+      return (file >= 0);
+    }
+}
+
+/* Check whether an Intel cpu supports branch tracing.  */
+
+static int
+intel_supports_btrace (void)
+{
+#if defined __i386__ || defined __x86_64__
+    unsigned int cpuid, model, family;
+
+    __asm__ __volatile__ ("movl   $1, %%eax;"
+			  "cpuid;"
+			  : "=a" (cpuid)
+			  :: "%ebx", "%ecx", "%edx");
+
+    family = (cpuid >> 8) & 0xf;
+    model = (cpuid >> 4) & 0xf;
+
+    switch (family)
+      {
+      case 0x6:
+	model += (cpuid >> 12) & 0xf0;
+
+	switch (model)
+	  {
+	  case 0x1a: /* Nehalem */
+	  case 0x1f:
+	  case 0x1e:
+	  case 0x2e:
+	  case 0x25: /* Westmere */
+	  case 0x2c:
+	  case 0x2f:
+	  case 0x2a: /* Sandy Bridge */
+	  case 0x2d:
+	  case 0x3a: /* Ivy Bridge */
+
+	    /* AAJ122: LBR, BTM, or BTS records may have incorrect branch
+	       "from" information afer an EIST transition, T-states, C1E, or
+	       Adaptive Thermal Throttling.  */
+	    return 0;
+	  }
+      }
+
+  return 1;
+
+#else /* !defined __i386__ && !defined __x86_64__ */
+
+  return 0;
+
+#endif /* !defined __i386__ && !defined __x86_64__ */
+}
+
+/* Check whether the cpu supports branch tracing.  */
+
+static int
+cpu_supports_btrace (void)
+{
+#if defined __i386__ || defined __x86_64__
+  char vendor[13];
+
+  __asm__ __volatile__ ("xorl   %%ebx, %%ebx;"
+			"xorl   %%ecx, %%ecx;"
+			"xorl   %%edx, %%edx;"
+			"movl   $0,    %%eax;"
+			"cpuid;"
+			"movl   %%ebx,  %0;"
+			"movl   %%edx,  %1;"
+			"movl   %%ecx,  %2;"
+			: "=m" (vendor[0]),
+			  "=m" (vendor[4]),
+			  "=m" (vendor[8])
+			:
+			: "%eax", "%ebx", "%ecx", "%edx");
+  vendor[12] = '\0';
+
+  if (strcmp (vendor, "GenuineIntel") == 0)
+    return intel_supports_btrace ();
+
+  /* Don't know about others.  Let's assume they do.  */
+  return 1;
+
+#else /* !defined __i386__ && !defined __x86_64__ */
+
+  return 0;
+
+#endif /* !defined __i386__ && !defined __x86_64__ */
+}
+
 /* See linux-btrace.h.  */
 
 int
 linux_supports_btrace (void)
 {
-  return 1;
+  static int cached;
+
+  if (cached == 0)
+    {
+      if (!kernel_supports_btrace ())
+	cached = -1;
+      else if (!cpu_supports_btrace ())
+	cached = -1;
+      else
+	cached = 1;
+    }
+
+  return cached > 0;
 }
 
 /* See linux-btrace.h.  */
