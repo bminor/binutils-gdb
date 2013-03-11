@@ -84,6 +84,10 @@
 #endif
 #endif
 
+#ifdef HAVE_LINUX_BTRACE
+# include "linux-btrace.h"
+#endif
+
 #ifndef HAVE_ELF32_AUXV_T
 /* Copied from glibc's elf.h.  */
 typedef struct
@@ -5821,6 +5825,47 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
   return len;
 }
 
+#ifdef HAVE_LINUX_BTRACE
+
+/* Enable branch tracing.  */
+
+static struct btrace_target_info *
+linux_low_enable_btrace (ptid_t ptid)
+{
+  struct btrace_target_info *tinfo;
+
+  tinfo = linux_enable_btrace (ptid);
+  if (tinfo != NULL)
+    tinfo->ptr_bits = register_size (0) * 8;
+
+  return tinfo;
+}
+
+/* Read branch trace data as btrace xml document.  */
+
+static void
+linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
+		       int type)
+{
+  VEC (btrace_block_s) *btrace;
+  struct btrace_block *block;
+  int i;
+
+  btrace = linux_read_btrace (tinfo, type);
+
+  buffer_grow_str (buffer, "<!DOCTYPE btrace SYSTEM \"btrace.dtd\">\n");
+  buffer_grow_str (buffer, "<btrace version=\"1.0\">\n");
+
+  for (i = 0; VEC_iterate (btrace_block_s, btrace, i, block); i++)
+    buffer_xml_printf (buffer, "<block begin=\"0x%s\" end=\"0x%s\"/>\n",
+		       paddress (block->begin), paddress (block->end));
+
+  buffer_grow_str (buffer, "</btrace>\n");
+
+  VEC_free (btrace_block_s, btrace);
+}
+#endif /* HAVE_LINUX_BTRACE */
+
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -5885,6 +5930,18 @@ static struct target_ops linux_target_ops = {
   linux_get_min_fast_tracepoint_insn_len,
   linux_qxfer_libraries_svr4,
   linux_supports_agent,
+#ifdef HAVE_LINUX_BTRACE
+  linux_supports_btrace,
+  linux_low_enable_btrace,
+  linux_disable_btrace,
+  linux_low_read_btrace,
+#else
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+#endif
 };
 
 static void

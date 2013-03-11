@@ -1,5 +1,21 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* target.h (enum target_object): Add TARGET_OBJECT_BTRACE.
+	* remote.c: Include btrace.h.
+	(struct btrace_target_info): New struct.
+	(remote_supports_btrace): New function.
+	(send_Qbtrace): New function.
+	(remote_enable_btrace): New function.
+	(remote_disable_btrace): New function.
+	(remote_teardown_btrace): New function.
+	(remote_read_btrace): New function.
+	(init_remote_ops): Add btrace ops.
+	(enum <unnamed>): Add btrace packets.
+	(struct protocol_feature remote_protocol_features[]): Add btrace packets.
+	(_initialize_remote): Add packet configuration for branch tracing.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* features/btrace.dtd: New file.
 	* Makefile.in (XMLFILES): Add btrace.dtd.
 	* btrace.h (parse_xml_btrace): New declaration.

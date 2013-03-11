@@ -73,6 +73,9 @@
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
 
+/* Define if the target supports branch tracing. */
+#undef HAVE_LINUX_BTRACE
+
 /* Define to 1 if you have the <linux/elf.h> header file. */
 #undef HAVE_LINUX_ELF_H
 

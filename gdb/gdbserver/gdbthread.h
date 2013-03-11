@@ -21,6 +21,8 @@
 
 #include "server.h"
 
+struct btrace_target_info;
+
 struct thread_info
 {
   struct inferior_list_entry entry;
@@ -57,6 +59,9 @@ struct thread_info
    Each item in the list holds the current step of the while-stepping
    action.  */
   struct wstep_state *while_stepping;
+
+  /* Branch trace target information for this thread.  */
+  struct btrace_target_info *btrace;
 };
 
 extern struct inferior_list all_threads;

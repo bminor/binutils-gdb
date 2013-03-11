@@ -161,6 +161,9 @@ free_one_thread (struct inferior_list_entry *inf)
 void
 remove_thread (struct thread_info *thread)
 {
+  if (thread->btrace != NULL)
+    target_disable_btrace (thread->btrace);
+
   remove_inferior (&all_threads, (struct inferior_list_entry *) thread);
   free_one_thread (&thread->entry);
 }

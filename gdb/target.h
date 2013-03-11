@@ -288,6 +288,8 @@ enum target_object
   TARGET_OBJECT_DARWIN_DYLD_INFO,
   /* OpenVMS Unwind Information Block.  */
   TARGET_OBJECT_OPENVMS_UIB,
+  /* Branch trace data, in XML format.  */
+  TARGET_OBJECT_BTRACE
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 

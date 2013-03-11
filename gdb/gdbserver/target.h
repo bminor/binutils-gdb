@@ -22,6 +22,8 @@
 #define TARGET_H
 
 struct emit_ops;
+struct btrace_target_info;
+struct buffer;
 
 /* Ways to "resume" a thread.  */
 
@@ -397,6 +399,21 @@ struct target_ops
 
   /* Return true if target supports debugging agent.  */
   int (*supports_agent) (void);
+
+  /* Check whether the target supports branch tracing.  */
+  int (*supports_btrace) (void);
+
+  /* Enable branch tracing for @ptid and allocate a branch trace target
+     information struct for reading and for disabling branch trace.  */
+  struct btrace_target_info *(*enable_btrace) (ptid_t ptid);
+
+  /* Disable branch tracing.  */
+  int (*disable_btrace) (struct btrace_target_info *tinfo);
+
+  /* Read branch trace data into buffer.  We use an int to specify the type
+     to break a cyclic dependency.  */
+  void (*read_btrace) (struct btrace_target_info *, struct buffer *, int type);
+
 };
 
 extern struct target_ops *the_target;
@@ -519,6 +536,18 @@ int kill_inferior (int);
 #define target_supports_agent() \
   (the_target->supports_agent ? \
    (*the_target->supports_agent) () : 0)
+
+#define target_supports_btrace() \
+  (the_target->supports_btrace ? (*the_target->supports_btrace) () : 0)
+
+#define target_enable_btrace(ptid) \
+  (*the_target->enable_btrace) (ptid)
+
+#define target_disable_btrace(tinfo) \
+  (*the_target->disable_btrace) (tinfo)
+
+#define target_read_btrace(tinfo, buffer, type)	\
+  (*the_target->read_btrace) (tinfo, buffer, type)
 
 /* Start non-stop mode, returns 0 on success, -1 on failure.   */
 

@@ -292,6 +292,11 @@ if test "${srv_linux_regsets}" = "yes"; then
   fi
 fi
 
+if test "${srv_linux_btrace}" = "yes"; then
+  AC_DEFINE(HAVE_LINUX_BTRACE, 1,
+	    [Define if the target supports branch tracing.])
+fi
+
 if test "$ac_cv_header_sys_procfs_h" = yes; then
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)

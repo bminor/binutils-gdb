@@ -68,6 +68,7 @@
 #include "ax.h"
 #include "ax-gdb.h"
 #include "agent.h"
+#include "btrace.h"
 
 /* Temp hacks for tracepoint encoding migration.  */
 static char *target_buf;
@@ -1281,6 +1282,9 @@ enum {
   PACKET_QDisableRandomization,
   PACKET_QAgent,
   PACKET_QTBuffer_size,
+  PACKET_Qbtrace_off,
+  PACKET_Qbtrace_bts,
+  PACKET_qXfer_btrace,
   PACKET_MAX
 };
 
@@ -3994,6 +3998,10 @@ static struct protocol_feature remote_protocol_features[] = {
     remote_supported_packet, PACKET_QTBuffer_size},
   { "tracenz", PACKET_DISABLE,
     remote_string_tracing_feature, -1 },
+  { "Qbtrace:off", PACKET_DISABLE, remote_supported_packet, PACKET_Qbtrace_off },
+  { "Qbtrace:bts", PACKET_DISABLE, remote_supported_packet, PACKET_Qbtrace_bts },
+  { "qXfer:btrace:read", PACKET_DISABLE, remote_supported_packet,
+    PACKET_qXfer_btrace }
 };
 
 static char *remote_support_xml;
@@ -8795,6 +8803,10 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       return remote_read_qxfer (ops, "uib", annex, readbuf, offset, len,
 				&remote_protocol_packets[PACKET_qXfer_uib]);
 
+    case TARGET_OBJECT_BTRACE:
+      return remote_read_qxfer (ops, "btrace", annex, readbuf, offset, len,
+        &remote_protocol_packets[PACKET_qXfer_btrace]);
+
     default:
       return -1;
     }
@@ -11146,6 +11158,150 @@ remote_can_use_agent (void)
   return (remote_protocol_packets[PACKET_QAgent].support != PACKET_DISABLE);
 }
 
+struct btrace_target_info
+{
+  /* The ptid of the traced thread.  */
+  ptid_t ptid;
+};
+
+/* Check whether the target supports branch tracing.  */
+
+static int
+remote_supports_btrace (void)
+{
+  if (remote_protocol_packets[PACKET_Qbtrace_off].support != PACKET_ENABLE)
+    return 0;
+  if (remote_protocol_packets[PACKET_Qbtrace_bts].support != PACKET_ENABLE)
+    return 0;
+  if (remote_protocol_packets[PACKET_qXfer_btrace].support != PACKET_ENABLE)
+    return 0;
+
+  return 1;
+}
+
+/* Enable branch tracing.  */
+
+static struct btrace_target_info *
+remote_enable_btrace (ptid_t ptid)
+{
+  struct btrace_target_info *tinfo = NULL;
+  struct packet_config *packet = &remote_protocol_packets[PACKET_Qbtrace_bts];
+  struct remote_state *rs = get_remote_state ();
+  char *buf = rs->buf;
+  char *endbuf = rs->buf + get_remote_packet_size ();
+
+  if (packet->support != PACKET_ENABLE)
+    error (_("Target does not support branch tracing."));
+
+  set_general_thread (ptid);
+
+  buf += xsnprintf (buf, endbuf - buf, "%s", packet->name);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (packet_ok (rs->buf, packet) == PACKET_ERROR)
+    {
+      if (rs->buf[0] == 'E' && rs->buf[1] == '.')
+	error (_("Could not enable branch tracing for %s: %s"),
+	       target_pid_to_str (ptid), rs->buf + 2);
+      else
+	error (_("Could not enable branch tracing for %s."),
+	       target_pid_to_str (ptid));
+    }
+
+  tinfo = xzalloc (sizeof (*tinfo));
+  tinfo->ptid = ptid;
+
+  return tinfo;
+}
+
+/* Disable branch tracing.  */
+
+static void
+remote_disable_btrace (struct btrace_target_info *tinfo)
+{
+  struct packet_config *packet = &remote_protocol_packets[PACKET_Qbtrace_off];
+  struct remote_state *rs = get_remote_state ();
+  char *buf = rs->buf;
+  char *endbuf = rs->buf + get_remote_packet_size ();
+
+  if (packet->support != PACKET_ENABLE)
+    error (_("Target does not support branch tracing."));
+
+  set_general_thread (tinfo->ptid);
+
+  buf += xsnprintf (buf, endbuf - buf, "%s", packet->name);
+  putpkt (rs->buf);
+  getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (packet_ok (rs->buf, packet) == PACKET_ERROR)
+    {
+      if (rs->buf[0] == 'E' && rs->buf[1] == '.')
+	error (_("Could not disable branch tracing for %s: %s"),
+	       target_pid_to_str (tinfo->ptid), rs->buf + 2);
+      else
+	error (_("Could not disable branch tracing for %s."),
+	       target_pid_to_str (tinfo->ptid));
+    }
+
+  xfree (tinfo);
+}
+
+/* Teardown branch tracing.  */
+
+static void
+remote_teardown_btrace (struct btrace_target_info *tinfo)
+{
+  /* We must not talk to the target during teardown.  */
+  xfree (tinfo);
+}
+
+/* Read the branch trace.  */
+
+static VEC (btrace_block_s) *
+remote_read_btrace (struct btrace_target_info *tinfo,
+		    enum btrace_read_type type)
+{
+  struct packet_config *packet = &remote_protocol_packets[PACKET_qXfer_btrace];
+  struct remote_state *rs = get_remote_state ();
+  VEC (btrace_block_s) *btrace = NULL;
+  const char *annex;
+  char *xml;
+
+  if (packet->support != PACKET_ENABLE)
+    error (_("Target does not support branch tracing."));
+
+#if !defined(HAVE_LIBEXPAT)
+  error (_("Cannot process branch tracing result. XML parsing not supported."));
+#endif
+
+  switch (type)
+    {
+    case btrace_read_all:
+      annex = "all";
+      break;
+    case btrace_read_new:
+      annex = "new";
+      break;
+    default:
+      internal_error (__FILE__, __LINE__,
+		      _("Bad branch tracing read type: %u."),
+		      (unsigned int) type);
+    }
+
+  xml = target_read_stralloc (&current_target,
+                              TARGET_OBJECT_BTRACE, annex);
+  if (xml != NULL)
+    {
+      struct cleanup *cleanup = make_cleanup (xfree, xml);
+
+      btrace = parse_xml_btrace (xml);
+      do_cleanups (cleanup);
+    }
+
+  return btrace;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -11263,6 +11419,11 @@ Specify the serial device it is connected to\n\
   remote_ops.to_traceframe_info = remote_traceframe_info;
   remote_ops.to_use_agent = remote_use_agent;
   remote_ops.to_can_use_agent = remote_can_use_agent;
+  remote_ops.to_supports_btrace = remote_supports_btrace;
+  remote_ops.to_enable_btrace = remote_enable_btrace;
+  remote_ops.to_disable_btrace = remote_disable_btrace;
+  remote_ops.to_teardown_btrace = remote_teardown_btrace;
+  remote_ops.to_read_btrace = remote_read_btrace;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -11789,6 +11950,15 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_QTBuffer_size],
 			 "QTBuffer:size", "trace-buffer-size", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_off],
+       "Qbtrace:off", "disable-btrace", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_bts],
+       "Qbtrace:bts", "enable-btrace", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_btrace],
+       "qXfer:btrace", "read-btrace", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may

@@ -1,5 +1,33 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* target.h (struct target_ops): Add btrace ops.
+	(target_supports_btrace): New macro.
+	(target_enable_btrace): New macro.
+	(target_disable_btrace): New macro.
+	(target_read_btrace): New macro.
+	* gdbthread.h (struct thread_info): Add btrace field.
+	* server.c: Include btrace-common.h.
+	(handle_btrace_general_set): New function.
+	(handle_btrace_enable): New function.
+	(handle_btrace_disable): New function.
+	(handle_general_set): Call handle_btrace_general_set.
+	(handle_qxfer_btrace): New function.
+	(struct qxfer qxfer_packets[]): Add btrace entry.
+	* inferiors.c (remove_thread): Disable btrace.
+	* linux-low: Include linux-btrace.h.
+	(linux_low_enable_btrace): New function.
+	(linux_low_read_btrace): New function.
+	(linux_target_ops): Add btrace ops.
+	* configure.srv (i[34567]86-*-linux*): Add linux-btrace.o.
+	Add srv_linux_btrace=yes.
+	(x86_64-*-linux*): Add linux-btrace.o.
+	Add srv_linux_btrace=yes.
+	* configure.ac: Define HAVE_LINUX_BTRACE.
+	* config.in: Regenerated.
+	* configure: Regenerated.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* server.c (handle_qxfer): Preserve error message if -3 is
 	returned.
 	(qxfer): Document the -3 return value.
