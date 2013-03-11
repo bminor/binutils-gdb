@@ -1,3 +1,8 @@
+2013-03-11  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* remote.c (remote_set_trace_buffer_size): Move != operator
+	to the start of next line to fix an ARI warning.
+
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* NEWS: Add record changes.

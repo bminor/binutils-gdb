@@ -11056,8 +11056,8 @@ remote_get_min_fast_tracepoint_insn_len (void)
 static void
 remote_set_trace_buffer_size (LONGEST val)
 {
-  if (remote_protocol_packets[PACKET_QTBuffer_size].support !=
-      PACKET_DISABLE)
+  if (remote_protocol_packets[PACKET_QTBuffer_size].support
+      != PACKET_DISABLE)
     {
       struct remote_state *rs = get_remote_state ();
       char *buf = rs->buf;
