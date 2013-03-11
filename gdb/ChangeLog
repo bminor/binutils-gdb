@@ -1,5 +1,20 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* amd64-linux-nat.c: Include btrace.h and linux-btrace.h.
+	(amd64_linux_enable_btrace): New.
+	(amd64_linux_disable_btrace): New.
+	(amd64_linux_teardown_btrace): New.
+	(_initialize_amd64_linux_nat): Initialize btrace ops.
+	* i386-linux.nat.c: Include btrace.h and linux-btrace.h.
+	(i386_linux_enable_btrace): New.
+	(i386_linux_disable_btrace): New.
+	(i386_linux_teardown_btrace): New.
+	(_initialize_i386_linux_nat): Initialize btrace ops.
+	* config/i386/linux.mh: Add linux-btrace.o.
+	* config/i386/linux64.mh: Add linux-btrace.o.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/linux_btrace.h: New file.
 	* common/linux_btrace.c: New file.
 	* Makefile.in (SFILES): Add btrace.c.

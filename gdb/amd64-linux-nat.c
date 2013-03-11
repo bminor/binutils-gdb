@@ -25,6 +25,8 @@
 #include "regset.h"
 #include "linux-nat.h"
 #include "amd64-linux-tdep.h"
+#include "linux-btrace.h"
+#include "btrace.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -1119,6 +1121,48 @@ amd64_linux_read_description (struct target_ops *ops)
     }
 }
 
+/* Enable branch tracing.  */
+
+static struct btrace_target_info *
+amd64_linux_enable_btrace (ptid_t ptid)
+{
+  struct btrace_target_info *tinfo;
+  struct gdbarch *gdbarch;
+
+  errno = 0;
+  tinfo = linux_enable_btrace (ptid);
+
+  if (tinfo == NULL)
+    error (_("Could not enable branch tracing for %s: %s."),
+	   target_pid_to_str (ptid), safe_strerror (errno));
+
+  /* Fill in the size of a pointer in bits.  */
+  gdbarch = target_thread_architecture (ptid);
+  tinfo->ptr_bits = gdbarch_ptr_bit (gdbarch);
+
+  return tinfo;
+}
+
+/* Disable branch tracing.  */
+
+static void
+amd64_linux_disable_btrace (struct btrace_target_info *tinfo)
+{
+  int errcode = linux_disable_btrace (tinfo);
+
+  if (errcode != 0)
+    error (_("Could not disable branch tracing: %s."), safe_strerror (errcode));
+}
+
+/* Teardown branch tracing.  */
+
+static void
+amd64_linux_teardown_btrace (struct btrace_target_info *tinfo)
+{
+  /* Ignore errors.  */
+  linux_disable_btrace (tinfo);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64_linux_nat (void);
 
@@ -1156,6 +1200,13 @@ _initialize_amd64_linux_nat (void)
   t->to_store_registers = amd64_linux_store_inferior_registers;
 
   t->to_read_description = amd64_linux_read_description;
+
+  /* Add btrace methods.  */
+  t->to_supports_btrace = linux_supports_btrace;
+  t->to_enable_btrace = amd64_linux_enable_btrace;
+  t->to_disable_btrace = amd64_linux_disable_btrace;
+  t->to_teardown_btrace = amd64_linux_teardown_btrace;
+  t->to_read_btrace = linux_read_btrace;
 
   /* Register the target.  */
   linux_nat_add_target (t);
