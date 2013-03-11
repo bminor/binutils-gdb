@@ -136,4 +136,7 @@ extern void btrace_clear (struct thread_info *);
 /* Clear the branch trace for all threads when an object file goes away.  */
 extern void btrace_free_objfile (struct objfile *);
 
+/* Parse a branch trace xml document into a block vector.  */
+extern VEC (btrace_block_s) *parse_xml_btrace (const char*);
+
 #endif /* BTRACE_H */

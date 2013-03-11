@@ -29,6 +29,7 @@
 #include "disasm.h"
 #include "source.h"
 #include "filenames.h"
+#include "xml-support.h"
 
 /* Print a record debug message.  Use do ... while (0) to avoid ambiguities
    when used in if statements.  */
@@ -446,4 +447,97 @@ btrace_free_objfile (struct objfile *objfile)
 
   ALL_THREADS (tp)
     btrace_clear (tp);
+}
+
+#if defined (HAVE_LIBEXPAT)
+
+/* Check the btrace document version.  */
+
+static void
+check_xml_btrace_version (struct gdb_xml_parser *parser,
+			  const struct gdb_xml_element *element,
+			  void *user_data, VEC (gdb_xml_value_s) *attributes)
+{
+  const char *version = xml_find_attribute (attributes, "version")->value;
+
+  if (strcmp (version, "1.0") != 0)
+    gdb_xml_error (parser, _("Unsupported btrace version: \"%s\""), version);
+}
+
+/* Parse a btrace "block" xml record.  */
+
+static void
+parse_xml_btrace_block (struct gdb_xml_parser *parser,
+			const struct gdb_xml_element *element,
+			void *user_data, VEC (gdb_xml_value_s) *attributes)
+{
+  VEC (btrace_block_s) **btrace;
+  struct btrace_block *block;
+  ULONGEST *begin, *end;
+
+  btrace = user_data;
+  block = VEC_safe_push (btrace_block_s, *btrace, NULL);
+
+  begin = xml_find_attribute (attributes, "begin")->value;
+  end = xml_find_attribute (attributes, "end")->value;
+
+  block->begin = *begin;
+  block->end = *end;
+}
+
+static const struct gdb_xml_attribute block_attributes[] = {
+  { "begin", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { "end", GDB_XML_AF_NONE, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_attribute btrace_attributes[] = {
+  { "version", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element btrace_children[] = {
+  { "block", block_attributes, NULL,
+    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL, parse_xml_btrace_block, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element btrace_elements[] = {
+  { "btrace", btrace_attributes, btrace_children, GDB_XML_EF_NONE,
+    check_xml_btrace_version, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+#endif /* defined (HAVE_LIBEXPAT) */
+
+/* See btrace.h.  */
+
+VEC (btrace_block_s) *
+parse_xml_btrace (const char *buffer)
+{
+  VEC (btrace_block_s) *btrace = NULL;
+  struct cleanup *cleanup;
+  int errcode;
+
+#if defined (HAVE_LIBEXPAT)
+
+  cleanup = make_cleanup (VEC_cleanup (btrace_block_s), &btrace);
+  errcode = gdb_xml_parse_quick (_("btrace"), "btrace.dtd", btrace_elements,
+				 buffer, &btrace);
+  if (errcode != 0)
+    {
+      do_cleanups (cleanup);
+      return NULL;
+    }
+
+  /* Keep parse results.  */
+  discard_cleanups (cleanup);
+
+#else  /* !defined (HAVE_LIBEXPAT) */
+
+  error (_("Cannot process branch trace.  XML parsing is not supported."));
+
+#endif  /* !defined (HAVE_LIBEXPAT) */
+
+  return btrace;
 }

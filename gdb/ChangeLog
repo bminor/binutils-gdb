@@ -1,5 +1,18 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* features/btrace.dtd: New file.
+	* Makefile.in (XMLFILES): Add btrace.dtd.
+	* btrace.h (parse_xml_btrace): New declaration.
+	* btrace.c: Include xml-support.h.
+	(parse_xml_btrace): New function.
+	(parse_xml_btrace_block): New function.
+	(block_attributes): New struct.
+	(btrace_attributes): New struct.
+	(btrace_children): New struct.
+	(btrace_elements): New struct.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* amd64-linux-nat.c: Include btrace.h and linux-btrace.h.
 	(amd64_linux_enable_btrace): New.
 	(amd64_linux_disable_btrace): New.
