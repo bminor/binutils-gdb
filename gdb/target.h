@@ -1788,6 +1788,11 @@ int target_verify_memory (const gdb_byte *data,
 
 extern void add_target (struct target_ops *);
 
+/* Adds a command ALIAS for target T and marks it deprecated.  This is useful
+   for maintaining backwards compatibility when renaming targets.  */
+
+extern void add_deprecated_target_alias (struct target_ops *t, char *alias);
+
 extern void push_target (struct target_ops *);
 
 extern int unpush_target (struct target_ops *);

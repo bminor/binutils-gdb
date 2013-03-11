@@ -434,6 +434,21 @@ information on the arguments for a particular protocol, type\n\
   add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc, &targetlist);
 }
 
+/* See target.h.  */
+
+void
+add_deprecated_target_alias (struct target_ops *t, char *alias)
+{
+  struct cmd_list_element *c;
+  char *alt;
+
+  /* If we use add_alias_cmd, here, we do not get the deprecated warning,
+     see PR cli/15104.  */
+  c = add_cmd (alias, no_class, t->to_open, t->to_doc, &targetlist);
+  alt = xstrprintf ("target %s", t->to_shortname);
+  deprecate_cmd (c, alt);
+}
+
 /* Stub functions */
 
 void

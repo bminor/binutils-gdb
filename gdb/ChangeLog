@@ -1,5 +1,10 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* target.h (add_deprecated_target_alias): New.
+	* target.c (add_deprecated_target_alias): New.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/linux-btrace.c: Include sys/ptrace, sys/types, sys/wait.h,
 	and signal.h.
 	(linux_supports_btrace): Add kernel and
