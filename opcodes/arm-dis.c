@@ -903,6 +903,13 @@ static const struct opcode32 arm_opcodes[] =
   {ARM_EXT_V8,	 0x01d00c9f, 0x0ff00fff, "ldab%c\t%12-15r, [%16-19R]"},
   {ARM_EXT_V8,	 0x01e0fc90, 0x0ff0fff0, "stlh%c\t%0-3r, [%16-19R]"},
   {ARM_EXT_V8,	 0x01f00c9f, 0x0ff00fff, "ldaexh%c\t%12-15r, [%16-19R]"},
+  /* CRC32 instructions.  */
+  {CRC_EXT_ARMV8, 0xe1000040, 0xfff00ff0, "crc32b\t%12-15R, %16-19R, %0-3R"},
+  {CRC_EXT_ARMV8, 0xe1200040, 0xfff00ff0, "crc32h\t%12-15R, %16-19R, %0-3R"},
+  {CRC_EXT_ARMV8, 0xe1400040, 0xfff00ff0, "crc32w\t%12-15R, %16-19R, %0-3R"},
+  {CRC_EXT_ARMV8, 0xe1000240, 0xfff00ff0, "crc32cb\t%12-15R, %16-19R, %0-3R"},
+  {CRC_EXT_ARMV8, 0xe1200240, 0xfff00ff0, "crc32ch\t%12-15R, %16-19R, %0-3R"},
+  {CRC_EXT_ARMV8, 0xe1400240, 0xfff00ff0, "crc32cw\t%12-15R, %16-19R, %0-3R"},
 
   /* Virtualization Extension instructions.  */
   {ARM_EXT_VIRT, 0x0160006e, 0x0fffffff, "eret%c"},
@@ -1455,7 +1462,8 @@ static const struct opcode16 thumb_opcodes[] =
        %<bitfield>d	print bitfield in decimal
        %<bitfield>W	print bitfield*4 in decimal
        %<bitfield>r	print bitfield as an ARM register
-       %<bitfield>R	as %<>r bit r15 is UNPREDICTABLE
+       %<bitfield>R	as %<>r but r15 is UNPREDICTABLE
+       %<bitfield>S	as %<>R but r13 is UNPREDICTABLE
        %<bitfield>c	print bitfield as a condition code
 
        %<bitfield>'c	print specified char iff bitfield is all ones
@@ -1489,6 +1497,14 @@ static const struct opcode32 thumb32_opcodes[] =
   {ARM_EXT_V8, 0xe8d00fdf, 0xfff00fff, "ldaexh%c\t%12-15r, [%16-19R]"},
   {ARM_EXT_V8, 0xe8d00fef, 0xfff00fff, "ldaex%c\t%12-15r, [%16-19R]"},
   {ARM_EXT_V8, 0xe8d000ff, 0xfff000ff, "ldaexd%c\t%12-15r, %8-11r, [%16-19R]"},
+
+  /* CRC32 instructions.  */
+  {CRC_EXT_ARMV8, 0xfac0f080, 0xfff0f0f0, "crc32b\t%8-11S, %16-19S, %0-3S"},
+  {CRC_EXT_ARMV8, 0xfac0f090, 0xfff0f0f0, "crc32h\t%9-11S, %16-19S, %0-3S"},
+  {CRC_EXT_ARMV8, 0xfac0f0a0, 0xfff0f0f0, "crc32w\t%8-11S, %16-19S, %0-3S"},
+  {CRC_EXT_ARMV8, 0xfad0f080, 0xfff0f0f0, "crc32cb\t%8-11S, %16-19S, %0-3S"},
+  {CRC_EXT_ARMV8, 0xfad0f090, 0xfff0f0f0, "crc32ch\t%8-11S, %16-19S, %0-3S"},
+  {CRC_EXT_ARMV8, 0xfad0f0a0, 0xfff0f0f0, "crc32cw\t%8-11S, %16-19S, %0-3S"},
 
   /* V7 instructions.  */
   {ARM_EXT_V7, 0xf910f000, 0xff70f000, "pli%c\t%a"},
@@ -4427,6 +4443,10 @@ print_insn_thumb32 (bfd_vma pc, struct disassemble_info *info, long given)
 		      value_in_comment = val * 4;
 		      break;
 
+		    case 'S':
+		      if (val == 13)
+			is_unpredictable = TRUE;
+		      /* Fall through.  */
 		    case 'R':
 		      if (val == 15)
 			is_unpredictable = TRUE;

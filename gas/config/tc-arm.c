@@ -238,6 +238,8 @@ static const arm_feature_set fpu_neon_ext_armv8 =
   ARM_FEATURE (0, FPU_NEON_EXT_ARMV8);
 static const arm_feature_set fpu_crypto_ext_armv8 =
   ARM_FEATURE (0, FPU_CRYPTO_EXT_ARMV8);
+static const arm_feature_set crc_ext_armv8 =
+  ARM_FEATURE (0, CRC_EXT_ARMV8);
 
 static int mfloat_abi_opt = -1;
 /* Record user cpu selection for object attributes.  */
@@ -748,6 +750,7 @@ struct asm_opcode
 #define BAD_PC_WRITEBACK \
 	_("cannot use writeback with PC-relative addressing")
 #define BAD_RANGE     _("branch out of range")
+#define UNPRED_REG(R)	_("using " R " results in unpredictable behaviour")
 
 static struct hash_control * arm_ops_hsh;
 static struct hash_control * arm_cond_hsh;
@@ -16314,6 +16317,63 @@ do_sha256su0 (void)
 {
   do_crypto_2op_1 (N_32, 1);
 }
+
+static void
+do_crc32_1 (unsigned int poly, unsigned int sz)
+{
+  unsigned int Rd = inst.operands[0].reg;
+  unsigned int Rn = inst.operands[1].reg;
+  unsigned int Rm = inst.operands[2].reg;
+
+  set_it_insn_type (OUTSIDE_IT_INSN);
+  inst.instruction |= LOW4 (Rd) << (thumb_mode ? 8 : 12);
+  inst.instruction |= LOW4 (Rn) << 16;
+  inst.instruction |= LOW4 (Rm);
+  inst.instruction |= sz << (thumb_mode ? 4 : 21);
+  inst.instruction |= poly << (thumb_mode ? 20 : 9);
+
+  if (Rd == REG_PC || Rn == REG_PC || Rm == REG_PC)
+    as_warn (UNPRED_REG ("r15"));
+  if (thumb_mode && (Rd == REG_SP || Rn == REG_SP || Rm == REG_SP))
+    as_warn (UNPRED_REG ("r13"));
+}
+
+static void
+do_crc32b (void)
+{
+  do_crc32_1 (0, 0);
+}
+
+static void
+do_crc32h (void)
+{
+  do_crc32_1 (0, 1);
+}
+
+static void
+do_crc32w (void)
+{
+  do_crc32_1 (0, 2);
+}
+
+static void
+do_crc32cb (void)
+{
+  do_crc32_1 (1, 0);
+}
+
+static void
+do_crc32ch (void)
+{
+  do_crc32_1 (1, 1);
+}
+
+static void
+do_crc32cw (void)
+{
+  do_crc32_1 (1, 2);
+}
+
 
 /* Overall per-instruction processing.	*/
 
@@ -17799,6 +17859,13 @@ static struct asm_barrier_opt barrier_opt_names[] =
   { mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
     THUMB_VARIANT, do_##ae, do_##te }
 
+/* Same as TUE but the encoding function for ARM and Thumb modes is the same.
+   Used by mnemonics that have very minimal differences in the encoding for
+   ARM and Thumb variants and can be handled in a common function.  */
+#define TUEc(mnem, op, top, nops, ops, en) \
+  { mnem, OPS##nops ops, OT_unconditional, 0x##op, 0x##top, ARM_VARIANT, \
+    THUMB_VARIANT, do_##en, do_##en }
+
 /* Mnemonic that cannot be conditionalized, and bears 0xF in its ARM
    condition code field.  */
 #define TUF(mnem, op, top, nops, ops, ae, te)				\
@@ -18535,6 +18602,17 @@ static const struct asm_opcode insns[] =
   nUF(sha1h, _sha1h, 2, (RNQ, RNQ), sha1h),
   nUF(sha1su1, _sha2op, 2, (RNQ, RNQ), sha1su1),
   nUF(sha256su0, _sha2op, 2, (RNQ, RNQ), sha256su0),
+
+#undef  ARM_VARIANT
+#define ARM_VARIANT & crc_ext_armv8
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT & crc_ext_armv8
+  TUEc("crc32b", 1000040, fac0f080, 3, (RR, oRR, RR), crc32b),
+  TUEc("crc32h", 1200040, fac0f090, 3, (RR, oRR, RR), crc32h),
+  TUEc("crc32w", 1400040, fac0f0a0, 3, (RR, oRR, RR), crc32w),
+  TUEc("crc32cb",1000240, fad0f080, 3, (RR, oRR, RR), crc32cb),
+  TUEc("crc32ch",1200240, fad0f090, 3, (RR, oRR, RR), crc32ch),
+  TUEc("crc32cw",1400240, fad0f0a0, 3, (RR, oRR, RR), crc32cw),
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT  & fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
@@ -23991,6 +24069,7 @@ struct arm_option_extension_value_table
 #define ARM_EXT_OPT(N, V, AA) { N, sizeof (N) - 1, V, AA }
 static const struct arm_option_extension_value_table arm_extensions[] =
 {
+  ARM_EXT_OPT ("crc",  ARCH_CRC_ARMV8, ARM_FEATURE (ARM_EXT_V8, 0)),
   ARM_EXT_OPT ("crypto", FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 				   ARM_FEATURE (ARM_EXT_V8, 0)),
   ARM_EXT_OPT ("fp",     FPU_ARCH_VFP_ARMV8,

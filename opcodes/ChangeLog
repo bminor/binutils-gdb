@@ -1,3 +1,9 @@
+2013-03-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* arm-dis.c (arm_opcodes): Add entries for CRC instructions.
+	(thumb32_opcodes): Likewise.
+	(print_insn_thumb32): Handle 'S' control char.
+
 2013-03-08  Yann Sionneau  <yann.sionneau@gmail.com>
 
 	* lm32-desc.c: Regenerate.

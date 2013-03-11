@@ -1,3 +1,14 @@
+2013-03-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c (crc_ext_armv8): New feature set.
+	(UNPRED_REG): New macro.
+	(do_crc32_1): New function.
+	(do_crc32b, do_crc32h, do_crc32w, do_crc32cb,
+	do_crc32ch, do_crc32cw): Likewise.
+	(TUEc): New macro.
+	(insns): Add entries for crc32 mnemonics.
+	(arm_extensions): Add entry for crc.
+
 2013-03-08  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* write.h (struct fix): Add fx_dot_frag field.
