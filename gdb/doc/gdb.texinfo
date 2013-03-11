@@ -6117,16 +6117,40 @@ For architecture environments that support process record and replay,
 
 @table @code
 @kindex target record
+@kindex target record-full
+@kindex target record-btrace
 @kindex record
+@kindex record full
+@kindex record btrace
 @kindex rec
-@item target record
-This command starts the process record and replay target.  The process
-record and replay target can only debug a process that is already
-running.  Therefore, you need first to start the process with the
-@kbd{run} or @kbd{start} commands, and then start the recording with
-the @kbd{target record} command.
+@kindex rec full
+@kindex rec btrace
+@item record @var{method}
+This command starts the process record and replay target.  The
+recording method can be specified as parameter.  Without a parameter
+the command uses the @code{full} recording method.  The following
+recording methods are available:
 
-Both @code{record} and @code{rec} are aliases of @code{target record}.
+@table @code
+@item full
+Full record/replay recording using @value{GDBN}'s software record and
+replay implementation.  This method allows replaying and reverse
+execution.
+
+@item btrace
+Hardware-supported instruction recording.  This method does not allow
+replaying and reverse execution.
+
+This recording method may not be available on all processors.
+@end table
+
+The process record and replay target can only debug a process that is
+already running.  Therefore, you need first to start the process with
+the @kbd{run} or @kbd{start} commands, and then start the recording
+with the @kbd{record @var{method}} command.
+
+Both @code{record @var{method}} and @code{rec @var{method}} are
+aliases of @code{target record-@var{method}}.
 
 @cindex displaced stepping, and process record and replay
 Displaced stepping (@pxref{Maintenance Commands,, displaced stepping})
@@ -6137,9 +6161,9 @@ doesn't support displaced stepping.
 @cindex non-stop mode, and process record and replay
 @cindex asynchronous execution, and process record and replay
 If the inferior is in the non-stop mode (@pxref{Non-Stop Mode}) or in
-the asynchronous execution mode (@pxref{Background Execution}), the
-process record and replay target cannot be started because it doesn't
-support these two modes.
+the asynchronous execution mode (@pxref{Background Execution}), not
+all recording methods are available.  The @code{full} recording method
+does not support these two modes.
 
 @kindex record stop
 @kindex rec s
@@ -6169,14 +6193,17 @@ Save the execution log to a file @file{@var{filename}}.
 Default filename is @file{gdb_record.@var{process_id}}, where
 @var{process_id} is the process ID of the inferior.
 
+This command may not be available for all recording methods.
+
 @kindex record restore
 @item record restore @var{filename}
 Restore the execution log from a file @file{@var{filename}}.
 File must have been created with @code{record save}.
 
-@kindex set record insn-number-max
-@item set record insn-number-max @var{limit}
-Set the limit of instructions to be recorded.  Default value is 200000.
+@kindex set record full
+@item set record full insn-number-max @var{limit}
+Set the limit of instructions to be recorded for the @code{full}
+recording method.  Default value is 200000.
 
 If @var{limit} is a positive number, then @value{GDBN} will start
 deleting instructions from the log once the number of the record
@@ -6191,31 +6218,31 @@ If @var{limit} is zero, @value{GDBN} will never delete recorded
 instructions from the execution log.  The number of recorded
 instructions is unlimited in this case.
 
-@kindex show record insn-number-max
-@item show record insn-number-max
-Show the limit of instructions to be recorded.
+@kindex show record full
+@item show record full insn-number-max
+Show the limit of instructions to be recorded with the @code{full}
+recording method.
 
-@kindex set record stop-at-limit
-@item set record stop-at-limit
-Control the behavior when the number of recorded instructions reaches
-the limit.  If ON (the default), @value{GDBN} will stop when the limit
-is reached for the first time and ask you whether you want to stop the
-inferior or continue running it and recording the execution log.  If
-you decide to continue recording, each new recorded instruction will
-cause the oldest one to be deleted.
+@item set record full stop-at-limit
+Control the behavior of the  @code{full} recording method when the
+number of recorded instructions reaches the limit.  If ON (the
+default), @value{GDBN} will stop when the limit is reached for the
+first time and ask you whether you want to stop the inferior or
+continue running it and recording the execution log.  If you decide
+to continue recording, each new recorded instruction will cause the
+oldest one to be deleted.
 
 If this option is OFF, @value{GDBN} will automatically delete the
 oldest record to make room for each new one, without asking.
 
-@kindex show record stop-at-limit
-@item show record stop-at-limit
+@item show record full stop-at-limit
 Show the current setting of @code{stop-at-limit}.
 
-@kindex set record memory-query
-@item set record memory-query
+@item set record full memory-query
 Control the behavior when @value{GDBN} is unable to record memory
-changes caused by an instruction.  If ON, @value{GDBN} will query
-whether to stop the inferior in that case.
+changes caused by an instruction for the @code{full} recording method.
+If ON, @value{GDBN} will query whether to stop the inferior in that
+case.
 
 If this option is OFF (the default), @value{GDBN} will automatically
 ignore the effect of such instructions on memory.  Later, when
@@ -6223,14 +6250,18 @@ ignore the effect of such instructions on memory.  Later, when
 instruction as not accessible, and it will not affect the replay
 results.
 
-@kindex show record memory-query
-@item show record memory-query
+@item show record full memory-query
 Show the current setting of @code{memory-query}.
 
 @kindex info record
 @item info record
-Show various statistics about the state of process record and its
-in-memory execution log buffer, including:
+Show various statistics about the recording depending on the recording
+method:
+
+@table @code
+@item full
+For the @code{full} recording method, it shows the state of process
+record and its in-memory execution log buffer, including:
 
 @itemize @bullet
 @item
@@ -6247,6 +6278,12 @@ Number of instructions contained in the execution log.
 Maximum number of instructions that may be contained in the execution log.
 @end itemize
 
+@item btrace
+For the @code{btrace} recording method, it shows the number of
+instructions that have been recorded and the number of blocks of
+sequential control-flow that is formed by the recorded instructions.
+@end table
+
 @kindex record delete
 @kindex rec del
 @item record delete
@@ -6254,6 +6291,116 @@ When record target runs in replay mode (``in the past''), delete the
 subsequent execution log and begin to record a new execution log starting
 from the current address.  This means you will abandon the previously
 recorded ``future'' and begin recording a new ``future''.
+
+@kindex record instruction-history
+@kindex rec instruction-history
+@item record instruction-history
+Disassembles instructions from the recorded execution log.  By
+default, ten instructions are disassembled.  This can be changed using
+the @code{set record instruction-history-size} command.  Instructions
+are printed in execution order.  There are several ways to specify
+what part of the execution log to disassemble:
+
+@table @code
+@item record instruction-history @var{insn}
+Disassembles ten instructions starting from instruction number
+@var{insn}.
+
+@item record instruction-history @var{insn}, +/-@var{n}
+Disassembles @var{n} instructions around instruction number
+@var{insn}.  If @var{n} is preceded with @code{+}, disassembles
+@var{n} instructions after instruction number @var{insn}.  If
+@var{n} is preceded with @code{-}, disassembles @var{n}
+instructions before instruction number @var{insn}.
+
+@item record instruction-history
+Disassembles ten more instructions after the last disassembly.
+
+@item record instruction-history -
+Disassembles ten more instructions before the last disassembly.
+
+@item record instruction-history @var{begin} @var{end}
+Disassembles instructions beginning with instruction number
+@var{begin} until instruction number @var{end}.  The instruction
+number @var{end} is not included.
+@end table
+
+This command may not be available for all recording methods.
+
+@kindex set record
+@item set record instruction-history-size
+Define how many instructions to disassemble in the @code{record
+instruction-history} command.  The default value is 10.
+
+@kindex show record
+@item show record instruction-history-size
+Show how many instructions to disassemble in the @code{record
+instruction-history} command.
+
+@kindex record function-call-history
+@kindex rec function-call-history
+@item record function-call-history
+Prints the execution history at function granularity. It prints one
+line for each sequence of instructions that belong to the same
+function giving the name of that function, the source lines
+for this instruction sequence (if the @code{/l} modifier is
+specified), and the instructions numbers that form the sequence (if
+the @code{/i} modifier is specified).
+
+@smallexample
+(@value{GDBP}) @b{list 1, 10}
+1   void foo (void)
+2   @{
+3   @}
+4
+5   void bar (void)
+6   @{
+7     ...
+8     foo ();
+9     ...
+10  @}
+(@value{GDBP}) @b{record function-call-history /l}
+1  foo.c:6-8   bar
+2  foo.c:2-3   foo
+3  foo.c:9-10  bar
+@end smallexample
+
+By default, ten lines are printed.  This can be changed using the
+@code{set record function-call-history-size} command.  Functions are
+printed in execution order.  There are several ways to specify what
+to print:
+
+@table @code
+@item record function-call-history @var{func}
+Prints ten functions starting from function number @var{func}.
+
+@item record function-call-history @var{func}, +/-@var{n}
+Prints @var{n} functions around function number @var{func}.  If
+@var{n} is preceded with @code{+}, prints @var{n} functions after
+function number @var{func}.  If @var{n} is preceded with @code{-},
+prints @var{n} functions before function number @var{func}.
+
+@item record function-call-history
+Prints ten more functions after the last ten-line print.
+
+@item record function-call-history -
+Prints ten more functions before the last ten-line print.
+
+@item record function-call-history @var{begin} @var{end}
+Prints functions beginning with function number @var{begin} until
+function number @var{end}.  The function number @var{end} is not
+included.
+@end table
+
+This command may not be available for all recording methods.
+
+@item set record function-call-history-size
+Define how many lines to print in the
+@code{record function-call-history} command.  The default value is 10.
+
+@item show record function-call-history-size
+Show how many lines to print in the
+@code{record function-call-history} command.
 @end table
 
 

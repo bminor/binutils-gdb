@@ -3,6 +3,36 @@
 
 *** Changes since GDB 7.5
 
+* Target record has been renamed to record-full.
+  Record/replay is now enabled with the "record full" command.
+  This also affects settings that are associated with full record/replay
+  that have been moved from "set/show record" to "set/show record full":
+
+set|show record full insn-number-max
+set|show record full stop-at-limit
+set|show record full memory-query
+
+* A new record target "record-btrace" has been added.  The new target
+  uses hardware support to record the control-flow of a process.  It
+  does not support replaying the execution, but it implements the
+  below new commands for investigating the recorded execution log.
+  This new recording method can be enabled using:
+
+record btrace
+
+  The "record-btrace" target is only available on Intel Atom processors
+  and requires a Linux kernel 2.6.32 or later.
+
+* Two new commands have been added for record/replay to give information
+  about the recorded execution without having to replay the execution.
+  The commands are only supported by "record btrace".
+
+record instruction-history      prints the execution history at
+                                instruction granularity
+
+record function-call-history    prints the execution history at
+                                function granularity
+
 * New native configurations
 
 ARM AArch64 GNU/Linux		aarch64*-*-linux-gnu

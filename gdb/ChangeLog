@@ -1,5 +1,9 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* NEWS: Add record changes.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (btrace_insn_history): Omit the pc prefix in
 	the instruction history disassembly.
 	* disasm.c (dump_insns): Omit the pc prefix, if requested.

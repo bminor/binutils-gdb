@@ -1,5 +1,10 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.texinfo (Process Record and Replay): Document record
+	changes.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.texinfo (Requirements): List qXfer:btrace:read requiring expat.
 	(General Query Packets): Describe Qbtrace:bts, Qbtrace:off, and
 	qXfer:btrace:read.
