@@ -906,6 +906,22 @@ struct target_ops
     /* Go to a specific location in the recorded execution trace.  */
     void (*to_goto_record) (ULONGEST insn);
 
+    /* Disassemble SIZE instructions in the recorded execution trace from
+       the current position.
+       If SIZE < 0, disassemble abs (SIZE) preceding instructions; otherwise,
+       disassemble SIZE succeeding instructions.  */
+    void (*to_insn_history) (int size, int flags);
+
+    /* Disassemble SIZE instructions in the recorded execution trace around
+       FROM.
+       If SIZE < 0, disassemble abs (SIZE) instructions before FROM; otherwise,
+       disassemble SIZE instructions after FROM.  */
+    void (*to_insn_history_from) (ULONGEST from, int size, int flags);
+
+    /* Disassemble a section of the recorded execution trace from instruction
+       BEGIN (inclusive) to instruction END (exclusive).  */
+    void (*to_insn_history_range) (ULONGEST begin, ULONGEST end, int flags);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1996,5 +2012,14 @@ extern void target_goto_record_end (void);
 
 /* See to_goto_record in struct target_ops.  */
 extern void target_goto_record (ULONGEST insn);
+
+/* See to_insn_history.  */
+extern void target_insn_history (int size, int flags);
+
+/* See to_insn_history_from.  */
+extern void target_insn_history_from (ULONGEST from, int size, int flags);
+
+/* See to_insn_history_range.  */
+extern void target_insn_history_range (ULONGEST begin, ULONGEST end, int flags);
 
 #endif /* !defined (TARGET_H) */

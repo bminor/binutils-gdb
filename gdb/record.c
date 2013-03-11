@@ -24,9 +24,16 @@
 #include "observer.h"
 #include "inferior.h"
 #include "common/common-utils.h"
+#include "cli/cli-utils.h"
+#include "disasm.h"
+
+#include <ctype.h>
 
 /* This is the debug switch for process record.  */
 unsigned int record_debug = 0;
+
+/* The number of instructions to print in "record instruction-history".  */
+static unsigned int record_insn_history_size = 10;
 
 struct cmd_list_element *record_cmdlist = NULL;
 struct cmd_list_element *set_record_cmdlist = NULL;
@@ -314,6 +321,176 @@ cmd_record_goto (char *arg, int from_tty)
     }
 }
 
+/* Read an instruction number from an argument string.  */
+
+static ULONGEST
+get_insn_number (char **arg)
+{
+  ULONGEST number;
+  const char *begin, *end, *pos;
+
+  begin = *arg;
+  pos = skip_spaces_const (begin);
+
+  if (!isdigit (*pos))
+    error (_("Expected positive number, got: %s."), pos);
+
+  number = strtoulst (pos, &end, 10);
+
+  *arg += (end - begin);
+
+  return number;
+}
+
+/* Read a context size from an argument string.  */
+
+static int
+get_context_size (char **arg)
+{
+  char *pos;
+  int number;
+
+  pos = skip_spaces (*arg);
+
+  if (!isdigit (*pos))
+    error (_("Expected positive number, got: %s."), pos);
+
+  return strtol (pos, arg, 10);
+}
+
+/* Complain about junk at the end of an argument string.  */
+
+static void
+no_chunk (char *arg)
+{
+  if (*arg != 0)
+    error (_("Junk after argument: %s."), arg);
+}
+
+/* Read instruction-history modifiers from an argument string.  */
+
+static int
+get_insn_history_modifiers (char **arg)
+{
+  int modifiers;
+  char *args;
+
+  modifiers = 0;
+  args = *arg;
+
+  if (args == NULL)
+    return modifiers;
+
+  while (*args == '/')
+    {
+      ++args;
+
+      if (*args == '\0')
+	error (_("Missing modifier."));
+
+      for (; *args; ++args)
+	{
+	  if (isspace (*args))
+	    break;
+
+	  if (*args == '/')
+	    continue;
+
+	  switch (*args)
+	    {
+	    case 'm':
+	      modifiers |= DISASSEMBLY_SOURCE;
+	      modifiers |= DISASSEMBLY_FILENAME;
+	      break;
+	    case 'r':
+	      modifiers |= DISASSEMBLY_RAW_INSN;
+	      break;
+	    case 'f':
+	      modifiers |= DISASSEMBLY_OMIT_FNAME;
+	      break;
+	    default:
+	      error (_("Invalid modifier: %c."), *args);
+	    }
+	}
+
+      args = skip_spaces (args);
+    }
+
+  /* Update the argument string.  */
+  *arg = args;
+
+  return modifiers;
+}
+
+/* The "record instruction-history" command.  */
+
+static void
+cmd_record_insn_history (char *arg, int from_tty)
+{
+  int flags, size;
+
+  require_record_target ();
+
+  flags = get_insn_history_modifiers (&arg);
+
+  /* We use a signed size to also indicate the direction.  Make sure that
+     unlimited remains unlimited.  */
+  size = (int) record_insn_history_size;
+  if (size < 0)
+    size = INT_MAX;
+
+  if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
+    target_insn_history (size, flags);
+  else if (strcmp (arg, "-") == 0)
+    target_insn_history (-size, flags);
+  else
+    {
+      ULONGEST begin, end;
+
+      begin = get_insn_number (&arg);
+
+      if (*arg == ',')
+	{
+	  arg = skip_spaces (++arg);
+
+	  if (*arg == '+')
+	    {
+	      arg += 1;
+	      size = get_context_size (&arg);
+
+	      no_chunk (arg);
+
+	      target_insn_history_from (begin, size, flags);
+	    }
+	  else if (*arg == '-')
+	    {
+	      arg += 1;
+	      size = get_context_size (&arg);
+
+	      no_chunk (arg);
+
+	      target_insn_history_from (begin, -size, flags);
+	    }
+	  else
+	    {
+	      end = get_insn_number (&arg);
+
+	      no_chunk (arg);
+
+	      target_insn_history_range (begin, end, flags);
+	    }
+	}
+      else
+	{
+	  no_chunk (arg);
+
+	  target_insn_history_from (begin, size, flags);
+	}
+
+      dont_repeat ();
+    }
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_record;
 
@@ -329,6 +506,13 @@ _initialize_record (void)
 			       "record/replay feature is displayed."),
 			     NULL, show_record_debug, &setdebuglist,
 			     &showdebuglist);
+
+  add_setshow_uinteger_cmd ("instruction-history-size", no_class,
+			    &record_insn_history_size, _("\
+Set number of instructions to print in \"record instruction-history\"."), _("\
+Show number of instructions to print in \"record instruction-history\"."),
+			    NULL, NULL, NULL, &set_record_cmdlist,
+			    &show_record_cmdlist);
 
   c = add_prefix_cmd ("record", class_obscure, cmd_record_start,
 		      _("Start recording."),
@@ -371,4 +555,23 @@ Default filename is 'gdb_record.<process_id>'."),
 Restore the program to its state at instruction number N.\n\
 Argument is instruction number, as shown by 'info record'."),
 	   &record_cmdlist);
+
+  add_cmd ("instruction-history", class_obscure, cmd_record_insn_history, _("\
+Print disassembled instructions stored in the execution log.\n\
+With a /m modifier, source lines are included (if available).\n\
+With a /r modifier, raw instructions in hex are included.\n\
+With a /f modifier, function names are omitted.\n\
+With no argument, disassembles ten more instructions after the previous \
+disassembly.\n\
+\"record instruction-history -\" disassembles ten instructions before a \
+previous disassembly.\n\
+One argument specifies an instruction number as shown by 'info record', and \
+ten instructions are disassembled after that instruction.\n\
+Two arguments with comma between them specify starting and ending instruction \
+numbers to disassemble.\n\
+If the second argument is preceded by '+' or '-', it specifies the distance \
+from the first argument.\n\
+The number of instructions to disassemble can be defined with \"set record \
+instruction-history-size\"."),
+           &record_cmdlist);
 }

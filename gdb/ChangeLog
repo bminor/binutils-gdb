@@ -1,5 +1,25 @@
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* target.h (target_ops) <to_insn_history, to_insn_history_from,
+	to_insn_history_range>: New fields.
+	(target_insn_history): New.
+	(target_insn_history_from): New.
+	(target_insn_history_range): New.
+	* target.c (target_insn_history): New.
+	(target_insn_history_from): New.
+	(target_insn_history_range): New.
+	* record.c: Include cli/cli-utils.h, disasm.h, ctype.h.
+	(record_insn_history_size): New.
+	(get_insn_number): New.
+	(get_context_size): New.
+	(no_chunk): New.
+	(get_insn_history_modifiers): New.
+	(cmd_record_insn_history): New.
+	(_initialize_record): Add "set/show record instruction-history-size"
+	command. Add "record instruction-history" command.
+
+2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record.h (record_disconnect): New.
 	(record_detach): New.
 	(record_mourn_inferior): New.
