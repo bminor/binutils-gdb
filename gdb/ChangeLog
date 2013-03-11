@@ -1,3 +1,10 @@
+2013-03-11  Pedro Alves  <palves@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure: Regenerate.
+	* configure.ac (check dynamic export flag): Link python test with
+	$PYTHON_LIBS.
+
 2013-03-11  Doug Evans  <dje@google.com>
 	    Keith Seitz  <keiths@redhat.com>
 

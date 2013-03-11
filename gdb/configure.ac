@@ -1687,6 +1687,8 @@ if test "${gdb_native}" = yes; then
      # Problem does not happen for the recommended libpythonX.Y.so linkage.
      old_CFLAGS="$CFLAGS"
      CFLAGS="$CFLAGS $PYTHON_CFLAGS"
+     old_LIBS="$LIBS"
+     LIBS="$LIBS $PYTHON_LIBS"
      AC_RUN_IFELSE(
        AC_LANG_PROGRAM(
          [#include "]${have_libpython}[/Python.h"],
@@ -1696,6 +1698,7 @@ if test "${gdb_native}" = yes; then
           Py_Finalize ();
           return err == 0 ? 0 : 1;]),
        [dynamic_list=true], [], [true])
+     LIBS="$old_LIBS"
      CFLAGS="$old_CFLAGS"
    fi
    LDFLAGS="$old_LDFLAGS"
