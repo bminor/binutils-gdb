@@ -34783,6 +34783,8 @@ or alternatively @pxref{Library List Format for SVR4 Targets})
 MS-Windows shared libraries (@pxref{Shared Libraries})
 @item
 Traceframe info (@pxref{Traceframe Info Format})
+@item
+Branch trace (@pxref{Branch Trace Format})
 @end itemize
 
 @item zlib
@@ -35644,6 +35646,7 @@ Show the current setting of the target wait timeout.
 * Memory Map Format::
 * Thread List Format::
 * Traceframe Info Format::
+* Branch Trace Format::
 @end menu
 
 @node Overview
@@ -37267,6 +37270,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:btrace:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{qXfer:features:read}
 @tab No
 @tab @samp{-}
@@ -37324,6 +37332,16 @@ These are the currently defined stub features and their properties:
 
 @item @samp{qXfer:fdpic:read}
 @tab No
+@tab @samp{-}
+@tab Yes
+
+@item @samp{Qbtrace:off}
+@tab Yes
+@tab @samp{-}
+@tab Yes
+
+@item @samp{Qbtrace:bts}
+@tab Yes
 @tab @samp{-}
 @tab Yes
 
@@ -37426,6 +37444,10 @@ byte in its buffer for the NUL.  If this stub feature is not supported,
 @item qXfer:auxv:read
 The remote stub understands the @samp{qXfer:auxv:read} packet
 (@pxref{qXfer auxiliary vector read}).
+
+@item qXfer:btrace:read
+The remote stub understands the @samp{qXfer:btrace:read}
+packet (@pxref{qXfer btrace read}).
 
 @item qXfer:features:read
 The remote stub understands the @samp{qXfer:features:read} packet
@@ -37565,6 +37587,12 @@ See @ref{Bytecode Descriptions} for details about the bytecode.
 The remote stub supports running a breakpoint's command list itself,
 rather than reporting the hit to @value{GDBN}.
 
+@item Qbtrace:off
+The remote stub understands the @samp{Qbtrace:off} packet.
+
+@item Qbtrace:bts
+The remote stub understands the @samp{Qbtrace:bts} packet.
+
 @end table
 
 @item qSymbol::
@@ -37681,6 +37709,25 @@ Access the target's @dfn{auxiliary vector}.  @xref{OS Information,
 auxiliary vector}.  Note @var{annex} must be empty.
 
 This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:btrace:read:@var{annex}:@var{offset},@var{length}
+@anchor{qXfer btrace read}
+
+Return a description of the current branch trace.
+@xref{Branch Trace Format}.  The annex part of the generic @samp{qXfer}
+packet may have one of the following values:
+
+@table @code
+@item all
+Returns all available branch trace.
+
+@item new
+Returns all available branch trace if the branch trace changed since
+the last read request.
+@end table
+
+This packet is not probed by default; the remote stub must request it
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 
 @item qXfer:features:read:@var{annex}:@var{offset},@var{length}
@@ -37916,6 +37963,28 @@ The remote server attached to an existing process.
 @item 0
 The remote server created a new process.
 @item E @var{NN}
+A badly formed request or an error was encountered.
+@end table
+
+@item Qbtrace:bts
+Enable branch tracing for the current thread using bts tracing.
+
+Reply:
+@table @samp
+@item OK
+Branch tracing has been enabled.
+@item E.errtext
+A badly formed request or an error was encountered.
+@end table
+
+@item Qbtrace:off
+Disable branch tracing for the current thread.
+
+Reply:
+@table @samp
+@item OK
+Branch tracing has been disabled.
+@item E.errtext
 A badly formed request or an error was encountered.
 @end table
 
@@ -40375,6 +40444,56 @@ The formal DTD for the traceframe info format is given below:
 <!ELEMENT memory        EMPTY>
 <!ATTLIST memory        start   CDATA   #REQUIRED
                         length  CDATA   #REQUIRED>
+@end smallexample
+
+@node Branch Trace Format
+@section Branch Trace Format
+@cindex branch trace format
+
+In order to display the branch trace of an inferior thread,
+@value{GDBN} needs to obtain the list of branches.  This list is
+represented as list of sequential code blocks that are connected via
+branches.  The code in each block has been executed sequentially.
+
+This list is obtained using the @samp{qXfer:btrace:read}
+(@pxref{qXfer btrace read}) packet and is an XML document.
+
+@value{GDBN} must be linked with the Expat library to support XML
+traceframe info discovery.  @xref{Expat}.
+
+The top-level structure of the document is shown below:
+
+@smallexample
+<?xml version="1.0"?>
+<!DOCTYPE btrace
+          PUBLIC "+//IDN gnu.org//DTD GDB Branch Trace V1.0//EN"
+                 "http://sourceware.org/gdb/gdb-btrace.dtd">
+<btrace>
+   block...
+</btrace>
+@end smallexample
+
+@itemize
+
+@item
+A block of sequentially executed instructions starting at @var{begin}
+and ending at @var{end}:
+
+@smallexample
+<block begin="@var{begin}" end="@var{end}"/>
+@end smallexample
+
+@end itemize
+
+The formal DTD for the branch trace format is given below:
+
+@smallexample
+<!ELEMENT btrace  (block)* >
+<!ATTLIST btrace  version CDATA   #FIXED "1.0">
+
+<!ELEMENT block        EMPTY>
+<!ATTLIST block        begin  CDATA   #REQUIRED
+                       end    CDATA   #REQUIRED>
 @end smallexample
 
 @include agentexpr.texi
