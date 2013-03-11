@@ -1,3 +1,8 @@
+2013-03-11  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (General Query Packets): Don't use colon in index
+	entries visible to Info format.
+
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (Process Record and Replay): Document record

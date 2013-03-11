@@ -37250,7 +37250,10 @@ packets.)
 
 @item qSearch:memory:@var{address};@var{length};@var{search-pattern}
 @cindex searching memory, in remote debugging
+@ifnotinfo
 @cindex @samp{qSearch:memory} packet
+@end ifnotinfo
+@cindex @samp{qSearch memory} packet
 @anchor{qSearch memory}
 Search @var{length} bytes at @var{address} for @var{search-pattern}.
 @var{address} and @var{length} are encoded in hex.
