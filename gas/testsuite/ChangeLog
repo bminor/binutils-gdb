@@ -1,5 +1,11 @@
 2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
 
+	* gas/nios2/nios2.exp: Run wrprs.
+	* gas/nios2/wrprs.d: New file.
+	* gas/nios2/wrprs.s: Likewise.
+
+2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
 	* gas/nios2/nios2.exp: Run rdprs.
 	* gas/nios2/rdprs.d: New file.
 	* gas/nios2/rdprs.s: Likewise.

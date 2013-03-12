@@ -1,3 +1,8 @@
+2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
+	* config/tc-nios2.c (nios2_assemble_args_ds): New function.
+	(nios2_arg_info_structs): Add "d,s" and "d,s,E" entries.
+
 2013-03-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (crc_ext_armv8): New feature set.

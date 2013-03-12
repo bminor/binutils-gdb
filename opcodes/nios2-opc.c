@@ -393,6 +393,8 @@ const struct nios2_opcode nios2_builtin_opcodes[] =
    OP_MATCH_CUSTOM, OP_MASK_ROP, 0, custom_opcode_overflow},
   {"wrctl", "c,s", "c,s,E", 2,
    OP_MATCH_WRCTL, OP_MASK_WRCTL, 0, no_overflow},
+  {"wrprs", "d,s", "d,s,E", 2,
+   OP_MATCH_WRPRS, OP_MASK_RRT|OP_MASK_ROPX|OP_MASK_ROP, 0, no_overflow},
   {"xor", "d,s,t", "d,s,t,E", 3,
    OP_MATCH_XOR, OP_MASK_ROPX | OP_MASK_ROP, 0, no_overflow},
   {"xorhi", "t,s,u", "t,s,u,E", 3,

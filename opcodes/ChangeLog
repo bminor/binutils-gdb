@@ -1,5 +1,9 @@
 2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
 
+	* nios2-opc.c (nios2_builtin_opcodes): Add entry for wrprs.
+
+2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
 	* nios2-opc.c (nios2_builtin_opcodes): Add entry for rdprs.
 
 2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>

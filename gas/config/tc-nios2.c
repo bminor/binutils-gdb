@@ -1694,6 +1694,28 @@ nios2_assemble_args_cs (nios2_insn_infoS *insn_info)
 }
 
 static void
+nios2_assemble_args_ds (nios2_insn_infoS * insn_info)
+{
+  if (insn_info->insn_tokens[1] != NULL && insn_info->insn_tokens[2] != NULL)
+    {
+      struct nios2_reg *dst = nios2_reg_lookup (insn_info->insn_tokens[1]);
+      struct nios2_reg *src = nios2_reg_lookup (insn_info->insn_tokens[2]);
+
+      if (dst == NULL)
+	as_bad (_("unknown register %s"), insn_info->insn_tokens[1]);
+      else
+	SET_INSN_FIELD (RRD, insn_info->insn_code, dst->index);
+
+      if (src == NULL)
+	as_bad (_("unknown register %s"), insn_info->insn_tokens[2]);
+      else
+	SET_INSN_FIELD (RRS, insn_info->insn_code, src->index);
+
+      nios2_check_assembly (insn_info->insn_code, insn_info->insn_tokens[3]);
+    }
+}
+
+static void
 nios2_assemble_args_ldst (nios2_insn_infoS *insn_info)
 {
   if (insn_info->insn_tokens[1] != NULL
@@ -1850,6 +1872,8 @@ const nios2_arg_infoS nios2_arg_info_structs[] = {
   {"d,c,E", nios2_assemble_args_dc},
   {"c,s", nios2_assemble_args_cs},
   {"c,s,E", nios2_assemble_args_cs},
+  {"d,s", nios2_assemble_args_ds},
+  {"d,s,E", nios2_assemble_args_ds},
   {"l,d,s,t", nios2_assemble_args_ldst},
   {"l,d,s,t,E", nios2_assemble_args_ldst},
   {"d,s,j", nios2_assemble_args_dsj},
