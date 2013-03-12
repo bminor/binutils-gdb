@@ -1273,7 +1273,9 @@ print_insn_args (const char *d,
 	case 'U':
 	  {
 	    /* First check for both rd and rt being equal.  */
-	    unsigned int reg = GET_OP (l, RD);
+	    unsigned int reg;
+
+	    reg = GET_OP (l, RD);
 	    if (reg == GET_OP (l, RT))
 	      infprintf (is, "%s", mips_gpr_names[reg]);
 	    else
