@@ -1,7 +1,9 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 7.5
+*** Changes since GDB 7.6
+
+*** Changes in GDB 7.6
 
 * Target record has been renamed to record-full.
   Record/replay is now enabled with the "record full" command.
