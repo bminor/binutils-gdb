@@ -1,3 +1,10 @@
+2013-03-12  Paul Hilfinger  <hilfingr@adacore.com>
+
+        * gdb.ada/expr_delims.exp: New file.
+        * gdb.ada/expr_delims/foo.adb: New file.
+	* gdb.ada/expr_delims/pck.ads: New file.
+	* gdb.ada/expr_delims/pck.adb: New file.
+
 2013-03-11  Keith Seitz  <keiths@redhat.com>
 
 	* watchpoint.exp (test_no_hw_watchpoints): Add test using

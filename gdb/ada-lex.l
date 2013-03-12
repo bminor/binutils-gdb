@@ -53,6 +53,7 @@ static int processReal (const char *);
 static struct stoken processId (const char *, int);
 static int processAttribute (const char *);
 static int find_dot_all (const char *);
+static void rewind_to_char (int);
 
 #undef YY_DECL
 #define YY_DECL static int yylex ( void )
@@ -157,18 +158,19 @@ static int find_dot_all (const char *);
 
 
 if		{
-		  while (*lexptr != 'i' && *lexptr != 'I')
-		    lexptr -= 1;
-		  yyrestart(NULL);
+                  rewind_to_char ('i');
 		  return 0;
 		}
 
-(task|thread)	{
+task            {
+                  rewind_to_char ('t');
+		  return 0;
+		}
+
+thread{WHITE}+{DIG} {
                   /* This keyword signals the end of the expression and
                      will be processed separately.  */
-		  while (*lexptr != 't' && *lexptr != 'T')
-		    lexptr--;
-		  yyrestart(NULL);
+                  rewind_to_char ('t');
 		  return 0;
 		}
 
@@ -218,8 +220,7 @@ false		{ return FALSEKEYWORD; }
 
 ","		{ if (paren_depth == 0 && comma_terminates)
 		    {
-		      lexptr -= 1;
-		      yyrestart(NULL);
+		      rewind_to_char (',');
 		      return 0;
 		    }
 		  else
@@ -229,8 +230,7 @@ false		{ return FALSEKEYWORD; }
 "("		{ paren_depth += 1; return '('; }
 ")"		{ if (paren_depth == 0)
 		    {
-		      lexptr -= 1;
-		      yyrestart(NULL);
+		      rewind_to_char (')');
 		      return 0;
 		    }
 		  else
@@ -614,6 +614,23 @@ processAttribute (const char *str)
     error (_("unrecognized attribute: `%s'"), str);
 
   return attributes[k].code;
+}
+
+/* Back up lexptr by yyleng and then to the rightmost occurrence of
+   character CH, case-folded (there must be one).  WARNING: since
+   lexptr points to the next input character that Flex has not yet
+   transferred to its internal buffer, the use of this function
+   depends on the assumption that Flex calls YY_INPUT only when it is
+   logically necessary to do so (thus, there is no reading ahead
+   farther than needed to identify the next token.)  */
+
+static void
+rewind_to_char (int ch)
+{
+  lexptr -= yyleng;
+  while (toupper (*lexptr) != toupper (ch))
+    lexptr -= 1;
+  yyrestart (NULL);
 }
 
 int
