@@ -345,6 +345,8 @@ const struct nios2_opcode nios2_builtin_opcodes[] =
    OP_MATCH_ORI, OP_MASK_IOP, NIOS2_INSN_ORI, unsigned_immed16_overflow},
   {"rdctl", "d,c", "d,c,E", 2,
    OP_MATCH_RDCTL, OP_MASK_RDCTL, 0, no_overflow},
+  {"rdprs", "t,s,i", "t,s,i,E", 3,
+   OP_MATCH_RDPRS, OP_MASK_IOP, 0, unsigned_immed16_overflow},
   {"ret", "", "E", 0,
    OP_MATCH_RET, OP_MASK, 0, no_overflow},
   {"rol", "d,s,t", "d,s,t,E", 3,

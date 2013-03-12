@@ -53,6 +53,7 @@ if { [istarget nios2-*-*] } then {
     run_dump_test "ret"
     run_dump_test "rotate"
     run_dump_test "registers"
+    run_dump_test "rdprs"
     
     run_dump_test "stw"
     run_dump_test "sth"
