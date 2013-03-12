@@ -32,7 +32,7 @@
    target char.  */
 
 static int
-mi_parse_escape (char **string_ptr)
+mi_parse_escape (const char **string_ptr)
 {
   int c = *(*string_ptr)++;
 
@@ -103,9 +103,9 @@ mi_parse_escape (char **string_ptr)
 }
 
 static void
-mi_parse_argv (char *args, struct mi_parse *parse)
+mi_parse_argv (const char *args, struct mi_parse *parse)
 {
-  char *chp = args;
+  const char *chp = args;
   int argc = 0;
   char **argv = xmalloc ((argc + 1) * sizeof (char *));
 
@@ -115,7 +115,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
       char *arg;
 
       /* Skip leading white space.  */
-      chp = skip_spaces (chp);
+      chp = skip_spaces_const (chp);
       /* Three possibilities: EOF, quoted string, or other text. */
       switch (*chp)
 	{
@@ -127,7 +127,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 	  {
 	    /* A quoted string.  */
 	    int len;
-	    char *start = chp + 1;
+	    const char *start = chp + 1;
 
 	    /* Determine the buffer size.  */
 	    chp = start;
@@ -184,7 +184,7 @@ mi_parse_argv (char *args, struct mi_parse *parse)
 	    /* An unquoted string.  Accumulate all non-blank
 	       characters into a buffer.  */
 	    int len;
-	    char *start = chp;
+	    const char *start = chp;
 
 	    while (*chp != '\0' && !isspace (*chp))
 	      {
@@ -229,9 +229,9 @@ mi_parse_cleanup (void *arg)
 }
 
 struct mi_parse *
-mi_parse (char *cmd, char **token)
+mi_parse (const char *cmd, char **token)
 {
-  char *chp;
+  const char *chp;
   struct mi_parse *parse = XMALLOC (struct mi_parse);
   struct cleanup *cleanup;
 
@@ -244,7 +244,7 @@ mi_parse (char *cmd, char **token)
   cleanup = make_cleanup (mi_parse_cleanup, parse);
 
   /* Before starting, skip leading white space.  */
-  cmd = skip_spaces (cmd);
+  cmd = skip_spaces_const (cmd);
 
   /* Find/skip any token and then extract it.  */
   for (chp = cmd; *chp >= '0' && *chp <= '9'; chp++)
@@ -256,7 +256,7 @@ mi_parse (char *cmd, char **token)
   /* This wasn't a real MI command.  Return it as a CLI_COMMAND.  */
   if (*chp != '-')
     {
-      chp = skip_spaces (chp);
+      chp = skip_spaces_const (chp);
       parse->command = xstrdup (chp);
       parse->op = CLI_COMMAND;
 
@@ -267,7 +267,7 @@ mi_parse (char *cmd, char **token)
 
   /* Extract the command.  */
   {
-    char *tmp = chp + 1;	/* discard ``-'' */
+    const char *tmp = chp + 1;	/* discard ``-'' */
 
     for (; *chp && !isspace (*chp); chp++)
       ;
@@ -282,7 +282,7 @@ mi_parse (char *cmd, char **token)
     error (_("Undefined MI command: %s"), parse->command);
 
   /* Skip white space following the command.  */
-  chp = skip_spaces (chp);
+  chp = skip_spaces_const (chp);
 
   /* Parse the --thread and --frame options, if present.  At present,
      some important commands, like '-break-*' are implemented by
@@ -310,6 +310,8 @@ mi_parse (char *cmd, char **token)
         }
       if (strncmp (chp, "--thread-group ", tgs) == 0)
 	{
+	  char *endp;
+
 	  option = "--thread-group";
 	  if (parse->thread_group != -1)
 	    error (_("Duplicate '--thread-group' option"));
@@ -317,30 +319,37 @@ mi_parse (char *cmd, char **token)
 	  if (*chp != 'i')
 	    error (_("Invalid thread group id"));
 	  chp += 1;
-	  parse->thread_group = strtol (chp, &chp, 10);
+	  parse->thread_group = strtol (chp, &endp, 10);
+	  chp = endp;
 	}
       else if (strncmp (chp, "--thread ", ts) == 0)
 	{
+	  char *endp;
+
 	  option = "--thread";
 	  if (parse->thread != -1)
 	    error (_("Duplicate '--thread' option"));
 	  chp += ts;
-	  parse->thread = strtol (chp, &chp, 10);
+	  parse->thread = strtol (chp, &endp, 10);
+	  chp = endp;
 	}
       else if (strncmp (chp, "--frame ", fs) == 0)
 	{
+	  char *endp;
+
 	  option = "--frame";
 	  if (parse->frame != -1)
 	    error (_("Duplicate '--frame' option"));
 	  chp += fs;
-	  parse->frame = strtol (chp, &chp, 10);
+	  parse->frame = strtol (chp, &endp, 10);
+	  chp = endp;
 	}
       else
 	break;
 
       if (*chp != '\0' && !isspace (*chp))
 	error (_("Invalid value for the '%s' option"), option);
-      chp = skip_spaces (chp);
+      chp = skip_spaces_const (chp);
     }
 
   /* For new argv commands, attempt to return the parsed argument

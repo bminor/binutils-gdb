@@ -1,5 +1,18 @@
 2013-03-12  Keith Seitz  <keiths@redhat.com>
 
+	* mi/mi-cmds.h (mi_execute_command): Make "cmd" const.
+	* mi/mi-interp.c (mi_interpreter_exec): Make "command" const.
+	Remove temporary copy of input string.
+	(mi_execute_command_wrapper): Make "cmd" const.
+	* mi/mi-main.c (mi_execute_command): Make "string_ptr" const.
+	* mi/mi-parse.c (mi_parse_argv): Make "args" const.
+	Use const strings.
+	(mi_parse): Make "cmd" const.
+	Use const strings.
+	* mi/mi-parse.h (mi_parse): Make "cmd" const.
+
+2013-03-12  Keith Seitz  <keiths@redhat.com>
+
 	* ada-lang.c (ada_read_renaming_var_value): Pass const
 	pointer to expression string to parse_exp_1.
 	(create_excep_cond_exprs): Likewise.

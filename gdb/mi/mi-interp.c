@@ -41,7 +41,7 @@
 /* These are the interpreter setup, etc. functions for the MI
    interpreter.  */
 
-static void mi_execute_command_wrapper (char *cmd);
+static void mi_execute_command_wrapper (const char *cmd);
 static void mi_execute_command_input_handler (char *cmd);
 static void mi_command_loop (int mi_version);
 
@@ -217,10 +217,7 @@ mi_interpreter_suspend (void *data)
 static struct gdb_exception
 mi_interpreter_exec (void *data, const char *command)
 {
-  char *tmp = alloca (strlen (command) + 1);
-
-  strcpy (tmp, command);
-  mi_execute_command_wrapper (tmp);
+  mi_execute_command_wrapper (command);
   return exception_none;
 }
 
@@ -309,7 +306,7 @@ mi_interp_query_hook (const char *ctlstr, va_list ap)
 }
 
 static void
-mi_execute_command_wrapper (char *cmd)
+mi_execute_command_wrapper (const char *cmd)
 {
   mi_execute_command (cmd, stdin == instream);
 }

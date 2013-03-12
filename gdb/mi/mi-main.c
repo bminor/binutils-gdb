@@ -1962,7 +1962,7 @@ mi_print_exception (const char *token, struct gdb_exception exception)
 }
 
 void
-mi_execute_command (char *cmd, int from_tty)
+mi_execute_command (const char *cmd, int from_tty)
 {
   char *token;
   struct mi_parse *command = NULL;
