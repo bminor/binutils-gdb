@@ -2934,8 +2934,8 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	      size = addr_size;
 
 	    if (size != 1 && size != 2 && size != 4 && size != 8)
-	      error (_("Refn doesn't support size %d"),
-		     size * TARGET_CHAR_BIT);
+	      error (_("Unsupported size %d in %s"),
+		     size, get_DW_OP_name (op));
 	    access_memory (arch, expr, size * TARGET_CHAR_BIT);
 	  }
 	  break;

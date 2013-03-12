@@ -1,3 +1,7 @@
+2013-03-12  Hui Zhu  <hui@codesourcery.com>
+
+	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Update error message.
+
 2013-03-12  Yao Qi  <yao@codesourcery.com>
 	    Hui Zhu  <hui@codesourcery.com>
 
