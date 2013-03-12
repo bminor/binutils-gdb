@@ -158,7 +158,7 @@ static int type_aggregate_p (struct type *);
     struct ttype tsym;
     struct symtoken ssym;
     int voidval;
-    struct block *bval;
+    const struct block *bval;
     enum exp_opcode opcode;
 
     struct stoken_vector svec;

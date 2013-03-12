@@ -559,7 +559,7 @@ static void
 list_args_or_locals (enum what_to_list what, enum print_values values,
 		     struct frame_info *fi, int skip_unavailable)
 {
-  struct block *block;
+  const struct block *block;
   struct symbol *sym;
   struct block_iterator iter;
   struct cleanup *cleanup_list;

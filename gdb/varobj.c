@@ -299,7 +299,7 @@ varobj_create (char *objname,
     {
       struct frame_info *fi;
       struct frame_id old_id = null_frame_id;
-      struct block *block;
+      const struct block *block;
       const char *p;
       struct value *value = NULL;
       volatile struct gdb_exception except;

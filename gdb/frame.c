@@ -699,7 +699,7 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
 	   && l.special_addr == r.special_addr)
     {
       /* Same function, different inlined functions.  */
-      struct block *lb, *rb;
+      const struct block *lb, *rb;
 
       gdb_assert (l.code_addr_p && r.code_addr_p);
 

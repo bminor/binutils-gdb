@@ -1,3 +1,60 @@
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* varobj.c (varobj_create): Update.
+	* valops.c (value_of_this): Update.
+	* tracepoint.c (add_local_symbols, scope_info): Update.
+	* symtab.h (struct general_symbol_info) <block>: Now const.
+	* symtab.c (skip_prologue_sal)
+	(default_make_symbol_completion_list_break_on)
+	(skip_prologue_using_sal): Update.
+	* stack.h (iterate_over_block_locals)
+	(iterate_over_block_local_vars): Update.
+	* stack.c (print_frame_args): Update.
+	(iterate_over_block_locals, iterate_over_block_local_vars): Make
+	parameter const.
+	(get_selected_block): Make return type const.
+	* python/py-frame.c (frapy_block): Update.
+	* python/py-block.c (gdbpy_block_for_pc): Update.
+	* p-exp.y (%union) <bval>: Now const.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Update.
+	* mdebugread.c (mylookup_symbol, parse_procedure): Update.
+	* m2-exp.y (%union) <bval>: Now const.
+	* linespec.c (get_current_search_block): Make return type const.
+	(create_sals_line_offset, find_label_symbols): Update.
+	* inline-frame.c (inline_frame_sniffer, skip_inline_frames):
+	Update.
+	(block_starting_point_at): Make "block" const.
+	* infrun.c (insert_exception_resume_breakpoint): Make "b" const.
+	(check_exception_resume): Update.
+	* guile/scm-frame.c (gdbscm_frame_block): Update.
+	* guile/scm-block.c (gdbscm_lookup_block): Update.
+	* frame.h (get_frame_block): Update.
+	(get_selected_block): Make return type const.
+	* frame.c (frame_id_inner): Update.
+	* f-valprint.c (info_common_command_for_block)
+	(info_common_command): Update.
+	* dwarf2loc.c (dwarf2_find_location_expression)
+	(dwarf_expr_frame_base, dwarf2_compile_expr_to_ax)
+	(locexpr_describe_location_piece): Update.
+	* c-exp.y (%union) <bval>: Now const.
+	* breakpoint.c (resolve_sal_pc): Update.
+	* blockframe.c (get_frame_block):Make return type const.
+	(get_pc_function_start, get_frame_function, find_pc_sect_function)
+	(block_innermost_frame): Update.
+	* block.h (blockvector_for_pc, blockvector_for_pc_sect)
+	(block_for_pc, block_for_pc_sect): Update.
+	* block.c (blockvector_for_pc_sect, blockvector_for_pc): Make
+	'pblock' const.
+	(block_for_pc_sect, block_for_pc): Make return type const.
+	* ax-gdb.c (gen_expr): Update.
+	* alpha-mdebug-tdep.c (find_proc_desc): Update.
+	* ada-lang.c (ada_read_renaming_var_value): Make 'block' const.
+	(ada_make_symbol_completion_list, ada_add_exceptions_from_frame)
+	(ada_read_var_value): Update.
+	* ada-exp.y (struct name_info) <block>: Now const.
+	(%union): Likewise.
+	(block_lookup): Constify.
+
 2014-06-18  Gary Benson  <gbenson@redhat.com>
 
 	* nat/i386-dregs.h: New file.

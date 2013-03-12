@@ -2877,7 +2877,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
   const char *name;
   struct objfile *objfile;
   struct gdbarch *gdbarch;
-  struct block *b, *function_block;
+  const struct block *b, *function_block;
   int force_skip, skip;
 
   /* Do not change the SAL if PC was specified explicitly.  */
@@ -4313,7 +4313,7 @@ default_make_symbol_completion_list_break_on (const char *text,
   struct symtab *s;
   struct minimal_symbol *msymbol;
   struct objfile *objfile;
-  struct block *b;
+  const struct block *b;
   const struct block *surrounding_static_block, *surrounding_global_block;
   struct block_iterator iter;
   /* The symbol we are completing on.  Points in same buffer as text.  */
@@ -4923,7 +4923,7 @@ skip_prologue_using_sal (struct gdbarch *gdbarch, CORE_ADDR func_addr)
   struct symtab_and_line prologue_sal;
   CORE_ADDR start_pc;
   CORE_ADDR end_pc;
-  struct block *bl;
+  const struct block *bl;
 
   /* Get an initial range for the function.  */
   find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);

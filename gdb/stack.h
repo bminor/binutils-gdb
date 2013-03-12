@@ -29,11 +29,11 @@ typedef void (*iterate_over_block_arg_local_vars_cb) (const char *print_name,
 						      struct symbol *sym,
 						      void *cb_data);
 
-void iterate_over_block_arg_vars (struct block *block,
+void iterate_over_block_arg_vars (const struct block *block,
 				  iterate_over_block_arg_local_vars_cb cb,
 				  void *cb_data);
 
-void iterate_over_block_local_vars (struct block *block,
+void iterate_over_block_local_vars (const struct block *block,
 				    iterate_over_block_arg_local_vars_cb cb,
 				    void *cb_data);
 

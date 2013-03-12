@@ -411,7 +411,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 }
 
 static void
-info_common_command_for_block (struct block *block, const char *comname,
+info_common_command_for_block (const struct block *block, const char *comname,
 			       int *any_printed)
 {
   struct block_iterator iter;
@@ -472,7 +472,7 @@ static void
 info_common_command (char *comname, int from_tty)
 {
   struct frame_info *fi;
-  struct block *block;
+  const struct block *block;
   int values_printed = 0;
 
   /* We have been told to display the contents of F77 COMMON 

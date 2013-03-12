@@ -110,7 +110,7 @@
 struct name_info {
   struct symbol *sym;
   struct minimal_symbol *msym;
-  struct block *block;
+  const struct block *block;
   struct stoken stoken;
 };
 
@@ -145,7 +145,7 @@ static void write_name_assoc (struct parser_state *, struct stoken);
 static void write_exp_op_with_string (struct parser_state *, enum exp_opcode,
 				      struct stoken);
 
-static struct block *block_lookup (struct block *, const char *);
+static const struct block *block_lookup (const struct block *, const char *);
 
 static LONGEST convert_char_literal (struct type *, LONGEST);
 
@@ -185,7 +185,7 @@ static struct type *type_system_address (struct parser_state *);
     } typed_val_float;
     struct type *tval;
     struct stoken sval;
-    struct block *bval;
+    const struct block *bval;
     struct internalvar *ivar;
   }
 
@@ -1010,8 +1010,8 @@ write_object_renaming (struct parser_state *par_state,
   error (_("Internal error in encoding of renaming declaration"));
 }
 
-static struct block*
-block_lookup (struct block *context, const char *raw_name)
+static const struct block*
+block_lookup (const struct block *context, const char *raw_name)
 {
   const char *name;
   struct ada_symbol_info *syms;

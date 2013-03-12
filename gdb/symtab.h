@@ -114,7 +114,7 @@ struct general_symbol_info
   {
     LONGEST ivalue;
 
-    struct block *block;
+    const struct block *block;
 
     const gdb_byte *bytes;
 

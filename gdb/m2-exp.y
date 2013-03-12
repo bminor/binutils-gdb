@@ -143,7 +143,7 @@ static int number_sign = 1;
     struct type *tval;
     struct stoken sval;
     int voidval;
-    struct block *bval;
+    const struct block *bval;
     enum exp_opcode opcode;
     struct internalvar *ivar;
 

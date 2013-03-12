@@ -5620,7 +5620,7 @@ insert_longjmp_resume_breakpoint (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 static void
 insert_exception_resume_breakpoint (struct thread_info *tp,
-				    struct block *b,
+				    const struct block *b,
 				    struct frame_info *frame,
 				    struct symbol *sym)
 {
@@ -5717,7 +5717,7 @@ check_exception_resume (struct execution_control_state *ecs,
 
   TRY_CATCH (e, RETURN_MASK_ERROR)
     {
-      struct block *b;
+      const struct block *b;
       struct block_iterator iter;
       struct symbol *sym;
       int argno = 0;

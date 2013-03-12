@@ -242,7 +242,7 @@ static PyObject *
 frapy_block (PyObject *self, PyObject *args)
 {
   struct frame_info *frame;
-  struct block *block = NULL, *fn_block;
+  const struct block *block = NULL, *fn_block;
   volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ALL)

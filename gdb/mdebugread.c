@@ -248,8 +248,8 @@ static struct blockvector *new_bvect (int);
 static struct type *parse_type (int, union aux_ext *, unsigned int, int *,
 				int, char *);
 
-static struct symbol *mylookup_symbol (char *, struct block *, domain_enum,
-				       enum address_class);
+static struct symbol *mylookup_symbol (char *, const struct block *,
+				       domain_enum, enum address_class);
 
 static void sort_blocks (struct symtab *);
 
@@ -1928,7 +1928,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
 		 struct partial_symtab *pst)
 {
   struct symbol *s, *i;
-  struct block *b;
+  const struct block *b;
   char *sh_name;
 
   /* Simple rule to find files linked "-x".  */
@@ -4570,7 +4570,7 @@ cross_ref (int fd, union aux_ext *ax, struct type **tpp,
    keeping the symtab sorted.  */
 
 static struct symbol *
-mylookup_symbol (char *name, struct block *block,
+mylookup_symbol (char *name, const struct block *block,
 		 domain_enum domain, enum address_class class)
 {
   struct block_iterator iter;
