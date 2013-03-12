@@ -19,61 +19,8 @@
 # Some generic Nios II tests
 #
 
-if { [istarget nios2-*-*] } then {
-    
-    run_dump_test "add"
-    run_dump_test "and"
-    run_dump_test "align_fill"
-    run_dump_test "align_text"
-    
-    run_dump_test "branch"
-
-    run_dump_test "break"
-    run_dump_test "bret"
-    run_dump_test "cache"
-    
-    run_dump_test "call"
-    run_dump_test "call26"
-    
-    run_dump_test "cmp"
-   
-    run_dump_test "jmp" 
-    run_dump_test "ldw"
-    run_dump_test "ldh"
-    run_dump_test "ldb"
-
-    run_dump_test "flushda" 
-     
-    run_dump_test "mul"
- 
-    run_dump_test "nor"  
-    run_dump_test "or"
-    
-    run_dump_test "ctl"
-    run_dump_test "ret"
-    run_dump_test "rotate"
-    run_dump_test "registers"
-    run_dump_test "rdprs"
-    run_dump_test "wrprs"
-    
-    run_dump_test "stw"
-    run_dump_test "sth"
-    run_dump_test "stb"
-    
-    run_dump_test "sub"
-    run_dump_test "sync"
-    run_dump_test "trap"
-    run_dump_test "tret"
-    
-    run_dump_test "custom"
-    run_dump_test "xor"
-    run_dump_test "movia"
-    
-    run_dump_test "complex"
-    run_dump_test "comments"
-    run_dump_test "etbt"
-    run_dump_test "lineseparator"
-    run_dump_test "movi"
+if { [istarget nios2-*-*] } {
+    run_dump_tests [lsort [glob -nocomplain $srcdir/$subdir/*.d]]
     
     run_list_test "illegal" ""
     run_list_test "warn_nobreak" ""

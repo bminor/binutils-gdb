@@ -1,5 +1,49 @@
 2013-03-12  Sebastian Huber <sebastian.huber@embedded-brains.de>
 
+	* gas/nios2/nios2.exp: Use run_dump_tests.
+	* gas/nios2/mov.d: Delete file.
+	* gas/nios2/mov.s: Likewise.
+	* gas/nios2/rol.d: Likewise.
+	* gas/nios2/rol.s: Likewise.
+	* gas/nios2/add.d: Check instruction values.
+	* gas/nios2/align_fill.d: Likewise.
+	* gas/nios2/and.d: Likewise.
+	* gas/nios2/branch.d: Likewise.
+	* gas/nios2/bret.d: Likewise.
+	* gas/nios2/cache.d: Likewise.
+	* gas/nios2/call.d: Likewise.
+	* gas/nios2/call26.d: Likewise.
+	* gas/nios2/cmp.d: Likewise.
+	* gas/nios2/comments.d: Likewise.
+	* gas/nios2/complex.d: Likewise.
+	* gas/nios2/ctl.d: Likewise.
+	* gas/nios2/custom.d: Likewise.
+	* gas/nios2/etbt.d: Likewise.
+	* gas/nios2/flushda.d: Likewise.
+	* gas/nios2/jmp.d: Likewise.
+	* gas/nios2/ldb.d: Likewise.
+	* gas/nios2/ldh.d: Likewise.
+	* gas/nios2/ldw.d: Likewise.
+	* gas/nios2/lineseparator.d: Likewise.
+	* gas/nios2/movi.d: Likewise.
+	* gas/nios2/movia.d: Likewise.
+	* gas/nios2/mul.d: Likewise.
+	* gas/nios2/nor.d: Likewise.
+	* gas/nios2/or.d: Likewise.
+	* gas/nios2/registers.d: Likewise.
+	* gas/nios2/ret.d: Likewise.
+	* gas/nios2/rotate.d: Likewise.
+	* gas/nios2/stb.d: Likewise.
+	* gas/nios2/sth.d: Likewise.
+	* gas/nios2/stw.d: Likewise.
+	* gas/nios2/sub.d: Likewise.
+	* gas/nios2/sync.d: Likewise.
+	* gas/nios2/trap.d: Likewise.
+	* gas/nios2/tret.d: Likewise.
+	* gas/nios2/xor.d: Likewise.
+
+2013-03-12  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
 	* gas/nios2/break.d: Check instruction values.
 
 2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
