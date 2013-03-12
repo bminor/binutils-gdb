@@ -28,11 +28,12 @@
 #include "format.h"
 
 struct format_piece *
-parse_format_string (char **arg)
+parse_format_string (const char **arg)
 {
-  char *s, *f, *string;
-  char *prev_start;
-  char *percent_loc;
+  const char *s;
+  char *f, *string;
+  const char *prev_start;
+  const char *percent_loc;
   char *sub_start, *current_substring;
   struct format_piece *pieces;
   int next_frag;

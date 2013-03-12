@@ -754,9 +754,12 @@ validate_actionline (char **line, struct breakpoint *b)
 	  tmp_p = p;
 	  for (loc = t->base.loc; loc; loc = loc->next)
 	    {
-	      p = tmp_p;
-	      exp = parse_exp_1 (&p, loc->address,
+	      const char *q;
+
+	      q = tmp_p;
+	      exp = parse_exp_1 (&q, loc->address,
 				 block_for_pc (loc->address), 1);
+	      p = (char *) q;
 	      old_chain = make_cleanup (free_current_contents, &exp);
 
 	      if (exp->elts[0].opcode == OP_VAR_VALUE)
@@ -806,10 +809,13 @@ validate_actionline (char **line, struct breakpoint *b)
 	  tmp_p = p;
 	  for (loc = t->base.loc; loc; loc = loc->next)
 	    {
-	      p = tmp_p;
+	      const char *q;
+
+	      q = tmp_p;
 	      /* Only expressions are allowed for this action.  */
-	      exp = parse_exp_1 (&p, loc->address,
+	      exp = parse_exp_1 (&q, loc->address,
 				 block_for_pc (loc->address), 1);
+	      p = (char *) q;
 	      old_chain = make_cleanup (free_current_contents, &exp);
 
 	      /* We have something to evaluate, make sure that the expr to
@@ -1470,9 +1476,12 @@ encode_actions_1 (struct command_line *action,
 		  unsigned long addr;
 		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
+		  const char *q;
 
-		  exp = parse_exp_1 (&action_exp, tloc->address,
+		  q = action_exp;
+		  exp = parse_exp_1 (&q, tloc->address,
 				     block_for_pc (tloc->address), 1);
+		  action_exp = (char *) q;
 		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  switch (exp->elts[0].opcode)
@@ -1561,9 +1570,12 @@ encode_actions_1 (struct command_line *action,
 		{
 		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
+		  const char *q;
 
-		  exp = parse_exp_1 (&action_exp, tloc->address,
+		  q = action_exp;
+		  exp = parse_exp_1 (&q, tloc->address,
 				     block_for_pc (tloc->address), 1);
+		  action_exp = (char *) q;
 		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  aexpr = gen_eval_for_expr (tloc->address, exp);

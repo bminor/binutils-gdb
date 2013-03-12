@@ -2608,6 +2608,7 @@ agent_eval_command_one (char *exp, int eval, CORE_ADDR pc)
   struct cleanup *old_chain = 0;
   struct expression *expr;
   struct agent_expr *agent;
+  const char *arg;
 
   if (!eval)
     {
@@ -2616,14 +2617,15 @@ agent_eval_command_one (char *exp, int eval, CORE_ADDR pc)
         exp = decode_agent_options (exp);
     }
 
-  if (!eval && strcmp (exp, "$_ret") == 0)
+  arg = exp;
+  if (!eval && strcmp (arg, "$_ret") == 0)
     {
       agent = gen_trace_for_return_address (pc, get_current_arch ());
       old_chain = make_cleanup_free_agent_expr (agent);
     }
   else
     {
-      expr = parse_exp_1 (&exp, pc, block_for_pc (pc), 0);
+      expr = parse_exp_1 (&arg, pc, block_for_pc (pc), 0);
       old_chain = make_cleanup (free_current_contents, &expr);
       if (eval)
 	agent = gen_eval_for_expr (pc, expr);
@@ -2716,8 +2718,8 @@ maint_agent_printf_command (char *exp, int from_tty)
   struct expression *argvec[100];
   struct agent_expr *agent;
   struct frame_info *fi = get_current_frame ();	/* need current scope */
-  char *cmdrest;
-  char *format_start, *format_end;
+  const char *cmdrest;
+  const char *format_start, *format_end;
   struct format_piece *fpieces;
   int nargs;
 
@@ -2733,7 +2735,7 @@ maint_agent_printf_command (char *exp, int from_tty)
 
   cmdrest = exp;
 
-  cmdrest = skip_spaces (cmdrest);
+  cmdrest = skip_spaces_const (cmdrest);
 
   if (*cmdrest++ != '"')
     error (_("Must start with a format string."));
@@ -2749,19 +2751,19 @@ maint_agent_printf_command (char *exp, int from_tty)
   if (*cmdrest++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
   
-  cmdrest = skip_spaces (cmdrest);
+  cmdrest = skip_spaces_const (cmdrest);
 
   if (*cmdrest != ',' && *cmdrest != 0)
     error (_("Invalid argument syntax"));
 
   if (*cmdrest == ',')
     cmdrest++;
-  cmdrest = skip_spaces (cmdrest);
+  cmdrest = skip_spaces_const (cmdrest);
 
   nargs = 0;
   while (*cmdrest != '\0')
     {
-      char *cmd1;
+      const char *cmd1;
 
       cmd1 = cmdrest;
       expr = parse_exp_1 (&cmd1, 0, (struct block *) 0, 1);

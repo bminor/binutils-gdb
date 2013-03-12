@@ -1125,10 +1125,18 @@ prefixify_subexp (struct expression *inexpr,
    If COMMA is nonzero, stop if a comma is reached.  */
 
 struct expression *
-parse_exp_1 (char **stringptr, CORE_ADDR pc, const struct block *block,
+parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
 	     int comma)
 {
-  return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL);
+  struct expression *expr;
+  char *const_hack = *stringptr ? xstrdup (*stringptr) : NULL;
+  char *orig = const_hack;
+  struct cleanup *back_to = make_cleanup (xfree, const_hack);
+
+  expr = parse_exp_in_context (&const_hack, pc, block, comma, 0, NULL);
+  (*stringptr) += const_hack - orig;
+  do_cleanups (back_to);
+  return expr;
 }
 
 /* As for parse_exp_1, except that if VOID_CONTEXT_P, then
@@ -1264,7 +1272,7 @@ parse_exp_in_context (char **stringptr, CORE_ADDR pc, const struct block *block,
    to use up all of the contents of STRING.  */
 
 struct expression *
-parse_expression (char *string)
+parse_expression (const char *string)
 {
   struct expression *exp;
 

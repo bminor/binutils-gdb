@@ -620,7 +620,7 @@ varobj_create (char *objname,
       struct frame_info *fi;
       struct frame_id old_id = null_frame_id;
       struct block *block;
-      char *p;
+      const char *p;
       enum varobj_languages lang;
       struct value *value = NULL;
       volatile struct gdb_exception except;
@@ -1469,7 +1469,7 @@ varobj_set_value (struct varobj *var, char *expression)
   struct expression *exp;
   struct value *value = NULL; /* Initialize to keep gcc happy.  */
   int saved_input_radix = input_radix;
-  char *s = expression;
+  const char *s = expression;
   volatile struct gdb_exception except;
 
   gdb_assert (varobj_editable_p (var));

@@ -95,12 +95,12 @@ struct expression
 
 /* From parse.c */
 
-extern struct expression *parse_expression (char *);
+extern struct expression *parse_expression (const char *);
 
 extern struct type *parse_expression_for_completion (char *, char **,
 						     enum type_code *);
 
-extern struct expression *parse_exp_1 (char **, CORE_ADDR pc,
+extern struct expression *parse_exp_1 (const char **, CORE_ADDR pc,
 				       const struct block *, int);
 
 /* For use by parsers; set if we want to parse an expression and

@@ -101,7 +101,11 @@ extern const char *skip_spaces_const (const char *inp);
 /* Skip leading non-whitespace characters in INP, returning an updated
    pointer.  If INP is NULL, return NULL.  */
 
-extern char *skip_to_space (char *inp);
+#define skip_to_space(INP) ((char *) skip_to_space_const (INP))
+
+/* A const-correct version of the above.  */
+
+extern const char *skip_to_space_const (const char *inp);
 
 /* Reverse S to the last non-whitespace character without skipping past
    START.  */

@@ -1,3 +1,64 @@
+2013-03-12  Keith Seitz  <keiths@redhat.com>
+
+	* ada-lang.c (ada_read_renaming_var_value): Pass const
+	pointer to expression string to parse_exp_1.
+	(create_excep_cond_exprs): Likewise.
+	* ax-gdb.c (agent_eval_command_one): Likewise.
+	(maint_agent_printf_command): Likewise.
+	Constify much of the string handling/parsing.
+	* breakpoint.c (set_breakpoint_condition): Pass const
+	pointer to expression string to parse_exp_1.
+	(update_watchpoint): Likewise.
+	(parse_cmd_to_aexpr): Constify string handling.
+	Pass const pointer to parse_exp_1.
+	(init_breakpoint_sal): Pass const pointer to parse_exp_1.
+	(find_condition_and_thread): Likewise.
+	Make TOK const.
+	(watch_command_1): Make "arg" const.
+	Constify string handling.
+	Copy the expression string instead of changing the input
+	string.
+	(update_breakpoint_location): Pass const pointer to
+	parse_exp_1.
+	* eval.c (parse_and_eval_address): Make "exp" const.
+	(parse_to_comma_and_eval): Make "expp" const.
+	(parse_and_eval): Make "exp" const.
+	* expression.h (parse_expression): Make argument const.
+	(parse_exp_1): Make first argument const.
+	* findcmd.c (parse_find_args): Treat "args" as const.
+	* linespec.c (parse_linespec): Pass const pointer to
+	linespec_expression_to_pc.
+	(linespec_expression_to_pc): Make "exp_ptr" const.
+	* parse.c (parse_exp_1): Make "stringptr" const.
+	Make a copy of the expression to pass to parse_exp_in_context until
+	this whole interface can be constified.
+	(parse_expression): Make "string" const.
+	* printcmd.c (ui_printf): Treat "arg" as const.
+	Handle const strings.
+	* tracepoint.c (validate_actionline): Pass const pointer to
+	all calls to parse_exp_1.
+	(encode_actions_1): Likewise.
+	* value.h (parse_to_comma_and_eval): Make argument const.
+	(parse_and_eval_address): Likewise.
+	(parse_and_eval): Likewise.
+	* varobj.c (varobj_create): Pass const pointer to parse_exp_1.
+	(varobj_set_value): Likewise.
+	* cli/cli-cmds.c (disassemble_command): Treat "arg" as const and
+	constify string handling.
+	Pass const pointers to parse_and_eval_address and
+	parse_to_comman_and_eval.
+	* cli/cli-utils.c (skip_to_space): Rename to ...
+	(skip_to_space_const): ... this. Handle const strings.
+	* cli/cli-utils.h (skip_to_space): Turn into macro which invokes
+	skip_to_space_const.
+	(skip_to_space_const): Declare.
+	* common/format.c (parse_format_string): Make "arg" const.
+	Handle const strings.
+	* common/format.h (parse_format_string): Make "arg" const.
+	* gdbserver/ax.c (ax_printf): Make "format" const.
+	* python/python.c (gdbpy_parse_and_eval): Do not make a copy
+	of the expression string.
+
 2013-03-12  Hui Zhu  <hui@codesourcery.com>
 
 	* dwarf2loc.c (dwarf2_compile_expr_to_ax): Update error message.

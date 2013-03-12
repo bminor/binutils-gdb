@@ -2215,10 +2215,10 @@ printf_pointer (struct ui_file *stream, const char *format,
 /* printf "printf format string" ARG to STREAM.  */
 
 static void
-ui_printf (char *arg, struct ui_file *stream)
+ui_printf (const char *arg, struct ui_file *stream)
 {
   struct format_piece *fpieces;
-  char *s = arg;
+  const char *s = arg;
   struct value **val_args;
   int allocated_args = 20;
   struct cleanup *old_cleanups;
@@ -2229,7 +2229,7 @@ ui_printf (char *arg, struct ui_file *stream)
   if (s == 0)
     error_no_arg (_("format-control string and values to print"));
 
-  s = skip_spaces (s);
+  s = skip_spaces_const (s);
 
   /* A format string should follow, enveloped in double quotes.  */
   if (*s++ != '"')
@@ -2242,14 +2242,14 @@ ui_printf (char *arg, struct ui_file *stream)
   if (*s++ != '"')
     error (_("Bad format string, non-terminated '\"'."));
   
-  s = skip_spaces (s);
+  s = skip_spaces_const (s);
 
   if (*s != ',' && *s != 0)
     error (_("Invalid argument syntax"));
 
   if (*s == ',')
     s++;
-  s = skip_spaces (s);
+  s = skip_spaces_const (s);
 
   {
     int nargs = 0;
@@ -2267,7 +2267,7 @@ ui_printf (char *arg, struct ui_file *stream)
 
     while (*s != '\0')
       {
-	char *s1;
+	const char *s1;
 
 	if (nargs == allocated_args)
 	  val_args = (struct value **) xrealloc ((char *) val_args,

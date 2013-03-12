@@ -798,10 +798,10 @@ compile_bytecodes (struct agent_expr *aexpr)
    in.  */
 
 static void
-ax_printf (CORE_ADDR fn, CORE_ADDR chan, char *format,
+ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
 	   int nargs, ULONGEST *args)
 {
-  char *f = format;
+  const char *f = format;
   struct format_piece *fpieces;
   int i, fp;
   char *current_substring;

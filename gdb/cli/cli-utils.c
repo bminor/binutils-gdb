@@ -237,8 +237,8 @@ skip_spaces_const (const char *chp)
 
 /* See documentation in cli-utils.h.  */
 
-char *
-skip_to_space (char *chp)
+const char *
+skip_to_space_const (const char *chp)
 {
   if (chp == NULL)
     return NULL;

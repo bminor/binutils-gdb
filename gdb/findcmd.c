@@ -69,7 +69,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
   ULONGEST pattern_len;
   CORE_ADDR start_addr;
   ULONGEST search_space_len;
-  char *s = args;
+  const char *s = args;
   struct cleanup *old_cleanups;
   struct value *v;
 
@@ -110,7 +110,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 	    }
 	}
 
-      s = skip_spaces (s);
+      s = skip_spaces_const (s);
     }
 
   /* Get the search range.  */
@@ -120,7 +120,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 
   if (*s == ',')
     ++s;
-  s = skip_spaces (s);
+  s = skip_spaces_const (s);
 
   if (*s == '+')
     {
@@ -171,7 +171,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
       struct type *t;
       ULONGEST pattern_buf_size_need;
 
-      s = skip_spaces (s);
+      s = skip_spaces_const (s);
 
       v = parse_to_comma_and_eval (&s);
       t = value_type (v);
@@ -219,7 +219,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 
       if (*s == ',')
 	++s;
-      s = skip_spaces (s);
+      s = skip_spaces_const (s);
     }
 
   if (pattern_buf_end == pattern_buf)

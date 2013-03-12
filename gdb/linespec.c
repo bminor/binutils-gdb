@@ -326,7 +326,7 @@ static void iterate_over_file_blocks (struct symtab *symtab,
 static void initialize_defaults (struct symtab **default_symtab,
 				 int *default_line);
 
-static CORE_ADDR linespec_expression_to_pc (char **exp_ptr);
+static CORE_ADDR linespec_expression_to_pc (const char **exp_ptr);
 
 static struct symtabs_and_lines decode_objc (struct linespec_state *self,
 					     linespec_p ls,
@@ -2181,7 +2181,8 @@ parse_linespec (linespec_parser *parser, char **argptr)
   /* It must be either LSTOKEN_STRING or LSTOKEN_NUMBER.  */
   if (token.type == LSTOKEN_STRING && *LS_TOKEN_STOKEN (token).ptr == '*')
     {
-      char *expr, *copy;
+      char *expr;
+      const char *copy;
 
       /* User specified an expression, *EXPR.  */
       copy = expr = copy_token_string (token);
@@ -2565,7 +2566,7 @@ initialize_defaults (struct symtab **default_symtab, int *default_line)
    advancing EXP_PTR past any parsed text.  */
 
 static CORE_ADDR
-linespec_expression_to_pc (char **exp_ptr)
+linespec_expression_to_pc (const char **exp_ptr)
 {
   if (current_program_space->executing_startup)
     /* The error message doesn't really matter, because this case

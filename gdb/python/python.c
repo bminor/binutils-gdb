@@ -720,11 +720,7 @@ gdbpy_parse_and_eval (PyObject *self, PyObject *args)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      char *copy = xstrdup (expr_str);
-      struct cleanup *cleanup = make_cleanup (xfree, copy);
-
-      result = parse_and_eval (copy);
-      do_cleanups (cleanup);
+      result = parse_and_eval (expr_str);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
