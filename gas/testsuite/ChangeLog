@@ -1,3 +1,9 @@
+2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
+	* gas/nios2/nios2.exp: Run registers.
+	* gas/nios2/registers.d: New file.
+	* gas/nios2/registers.s: Likewise.
+
 2013-03-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/crc32-bad.d: New file.
