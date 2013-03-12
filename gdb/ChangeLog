@@ -1,3 +1,10 @@
+2013-03-12  Yao Qi  <yao@codesourcery.com>
+	    Hui Zhu  <hui@codesourcery.com>
+
+	* dwarf2loc.c (access_memory): Change nbits to nbytes in gdb_assert.
+	(dwarf2_compile_expr_to_ax): Call access_memory in DW_OP_deref and
+	DW_OP_deref_size.
+
 2013-03-12  Paul Hilfinger  <hilfingr@adacore.com>
 
         * ada-lex.l (rules): Only recognize 'thread' as a

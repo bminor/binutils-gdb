@@ -2539,7 +2539,7 @@ access_memory (struct gdbarch *arch, struct agent_expr *expr, ULONGEST nbits)
 {
   ULONGEST nbytes = (nbits + 7) / 8;
 
-  gdb_assert (nbits > 0 && nbits <= sizeof (LONGEST));
+  gdb_assert (nbytes > 0 && nbytes <= sizeof (LONGEST));
 
   if (trace_kludge)
     ax_trace_quick (expr, nbytes);
@@ -2933,26 +2933,10 @@ dwarf2_compile_expr_to_ax (struct agent_expr *expr, struct axs_value *loc,
 	    else
 	      size = addr_size;
 
-	    switch (size)
-	      {
-	      case 8:
-		ax_simple (expr, aop_ref8);
-		break;
-	      case 16:
-		ax_simple (expr, aop_ref16);
-		break;
-	      case 32:
-		ax_simple (expr, aop_ref32);
-		break;
-	      case 64:
-		ax_simple (expr, aop_ref64);
-		break;
-	      default:
-		/* Note that get_DW_OP_name will never return
-		   NULL here.  */
-		error (_("Unsupported size %d in %s"),
-		       size, get_DW_OP_name (op));
-	      }
+	    if (size != 1 && size != 2 && size != 4 && size != 8)
+	      error (_("Refn doesn't support size %d"),
+		     size * TARGET_CHAR_BIT);
+	    access_memory (arch, expr, size * TARGET_CHAR_BIT);
 	  }
 	  break;
 
