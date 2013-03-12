@@ -7475,9 +7475,9 @@ disable_breakpoints_in_shlibs (void)
   }
 }
 
-/* Disable any breakpoints and tracepoints that are in an unloaded shared
-   library.  Only apply to enabled breakpoints, disabled ones can just stay
-   disabled.  */
+/* Disable any breakpoints and tracepoints that are in SOLIB upon
+   notification of unloaded_shlib.  Only apply to enabled breakpoints,
+   disabled ones can just stay disabled.  */
 
 static void
 disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
@@ -7527,6 +7527,66 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
 	disabled_shlib_breaks = 1;
       }
   }
+}
+
+/* Disable any breakpoints and tracepoints in OBJFILE upon
+   notification of free_objfile.  Only apply to enabled breakpoints,
+   disabled ones can just stay disabled.  */
+
+static void
+disable_breakpoints_in_freed_objfile (struct objfile *objfile)
+{
+  struct breakpoint *b;
+
+  if (objfile == NULL)
+    return;
+
+  /* If the file is a shared library not loaded by the user then
+     solib_unloaded was notified and disable_breakpoints_in_unloaded_shlib
+     was called.  In that case there is no need to take action again.  */
+  if ((objfile->flags & OBJF_SHARED) && !(objfile->flags & OBJF_USERLOADED))
+    return;
+
+  ALL_BREAKPOINTS (b)
+    {
+      struct bp_location *loc;
+      int bp_modified = 0;
+
+      if (!is_breakpoint (b) && !is_tracepoint (b))
+	continue;
+
+      for (loc = b->loc; loc != NULL; loc = loc->next)
+	{
+	  CORE_ADDR loc_addr = loc->address;
+
+	  if (loc->loc_type != bp_loc_hardware_breakpoint
+	      && loc->loc_type != bp_loc_software_breakpoint)
+	    continue;
+
+	  if (loc->shlib_disabled != 0)
+	    continue;
+
+	  if (objfile->pspace != loc->pspace)
+	    continue;
+
+	  if (loc->loc_type != bp_loc_hardware_breakpoint
+	      && loc->loc_type != bp_loc_software_breakpoint)
+	    continue;
+
+	  if (is_addr_in_objfile (loc_addr, objfile))
+	    {
+	      loc->shlib_disabled = 1;
+	      loc->inserted = 0;
+
+	      mark_breakpoint_location_modified (loc);
+
+	      bp_modified = 1;
+	    }
+	}
+
+      if (bp_modified)
+	observer_notify_breakpoint_modified (b);
+    }
 }
 
 /* FORK & VFORK catchpoints.  */
@@ -16007,6 +16067,7 @@ _initialize_breakpoint (void)
   initialize_breakpoint_ops ();
 
   observer_attach_solib_unloaded (disable_breakpoints_in_unloaded_shlib);
+  observer_attach_free_objfile (disable_breakpoints_in_freed_objfile);
   observer_attach_inferior_exit (clear_syscall_counts);
   observer_attach_memory_changed (invalidate_bp_value_on_memory_change);
 

@@ -2342,6 +2342,82 @@ add_symbol_file_command (char *args, int from_tty)
 }
 
 
+/* This function removes a symbol file that was added via add-symbol-file.  */
+
+static void
+remove_symbol_file_command (char *args, int from_tty)
+{
+  char **argv;
+  struct objfile *objf = NULL;
+  struct cleanup *my_cleanups;
+  struct program_space *pspace = current_program_space;
+  struct gdbarch *gdbarch = get_current_arch ();
+
+  dont_repeat ();
+
+  if (args == NULL)
+    error (_("remove-symbol-file: no symbol file provided"));
+
+  my_cleanups = make_cleanup (null_cleanup, NULL);
+
+  argv = gdb_buildargv (args);
+
+  if (strcmp (argv[0], "-a") == 0)
+    {
+      /* Interpret the next argument as an address.  */
+      CORE_ADDR addr;
+
+      if (argv[1] == NULL)
+	error (_("Missing address argument"));
+
+      if (argv[2] != NULL)
+	error (_("Junk after %s"), argv[1]);
+
+      addr = parse_and_eval_address (argv[1]);
+
+      ALL_OBJFILES (objf)
+	{
+	  if (objf != 0
+	      && objf->flags & OBJF_USERLOADED
+	      && objf->pspace == pspace && is_addr_in_objfile (addr, objf))
+	    break;
+	}
+    }
+  else if (argv[0] != NULL)
+    {
+      /* Interpret the current argument as a file name.  */
+      char *filename;
+
+      if (argv[1] != NULL)
+	error (_("Junk after %s"), argv[0]);
+
+      filename = tilde_expand (argv[0]);
+      make_cleanup (xfree, filename);
+
+      ALL_OBJFILES (objf)
+	{
+	  if (objf != 0
+	      && objf->flags & OBJF_USERLOADED
+	      && objf->pspace == pspace
+	      && filename_cmp (filename, objfile_name (objf)) == 0)
+	    break;
+	}
+    }
+
+  if (objf == NULL)
+    error (_("No symbol file found"));
+
+  if (from_tty
+      && !query (_("Remove symbol table from file \"%s\"? "),
+		 objfile_name (objf)))
+    error (_("Not confirmed."));
+
+  free_objfile (objf);
+  clear_symtab_users (0);
+
+  do_cleanups (my_cleanups);
+}
+
 typedef struct objfile *objfilep;
 
 DEF_VEC_P (objfilep);
@@ -3763,6 +3839,15 @@ should be specified if the data and bss segments are not contiguous\n\
 with the text.  SECT is a section name to be loaded at SECT_ADDR."),
 	       &cmdlist);
   set_cmd_completer (c, filename_completer);
+
+  c = add_cmd ("remove-symbol-file", class_files,
+	       remove_symbol_file_command, _("\
+Remove a symbol file added via the add-symbol-file command.\n\
+Usage: remove-symbol-file FILENAME\n\
+       remove-symbol-file -a ADDRESS\n\
+The file to remove can be identified by its filename or by an address\n\
+that lies within the boundaries of this symbol file in memory."),
+	       &cmdlist);
 
   c = add_cmd ("load", class_files, load_command, _("\
 Dynamically load FILE into the running program, and record its symbols\n\

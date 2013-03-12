@@ -138,6 +138,10 @@ Called with @var{objfile} equal to @code{NULL} to indicate
 previously loaded symbol table data has now been invalidated.
 @end deftypefun
 
+@deftypefun void free_objfile (struct objfile *@var{objfile})
+The object file specified by @var{objfile} is about to be freed.
+@end deftypefun
+
 @deftypefun void new_thread (struct thread_info *@var{t})
 The thread specified by @var{t} has been created.
 @end deftypefun

@@ -548,6 +548,9 @@ free_objfile_separate_debug (struct objfile *objfile)
 void
 free_objfile (struct objfile *objfile)
 {
+  /* First notify observers that this objfile is about to be freed.  */
+  observer_notify_free_objfile (objfile);
+
   /* Free all separate debug objfiles.  */
   free_objfile_separate_debug (objfile);
 
@@ -1462,6 +1465,29 @@ void
 resume_section_map_updates_cleanup (void *arg)
 {
   resume_section_map_updates (arg);
+}
+
+/* Return 1 if ADDR maps into one of the sections of OBJFILE and 0
+   otherwise.  */
+
+int
+is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile)
+{
+  struct obj_section *osect;
+
+  if (objfile == NULL)
+    return 0;
+
+  ALL_OBJFILE_OSECTIONS (objfile, osect)
+    {
+      if (section_is_overlay (osect) && !section_is_mapped (osect))
+	continue;
+
+      if (obj_section_addr (osect) <= addr
+	  && addr < obj_section_endaddr (osect))
+	return 1;
+    }
+  return 0;
 }
 
 /* The default implementation for the "iterate_over_objfiles_in_search_order"

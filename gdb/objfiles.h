@@ -485,6 +485,8 @@ extern void objfile_set_sym_fns (struct objfile *objfile,
 
 extern void objfiles_changed (void);
 
+extern int is_addr_in_objfile (CORE_ADDR addr, const struct objfile *objfile);
+
 /* This operation deletes all objfile entries that represent solibs that
    weren't explicitly loaded by the user, via e.g., the add-symbol-file
    command.  */

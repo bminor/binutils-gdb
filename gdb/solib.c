@@ -1496,12 +1496,31 @@ gdb_bfd_lookup_symbol (bfd *abfd,
   return symaddr;
 }
 
+/* SO_LIST_HEAD may contain user-loaded object files that can be removed
+   out-of-band by the user.  So upon notification of free_objfile remove
+   all references to any user-loaded file that is about to be freed.  */
+
+static void
+remove_user_added_objfile (struct objfile *objfile)
+{
+  struct so_list *so;
+
+  if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
+    {
+      for (so = so_list_head; so != NULL; so = so->next)
+	if (so->objfile == objfile)
+	  so->objfile = NULL;
+    }
+}
+
 extern initialize_file_ftype _initialize_solib; /* -Wmissing-prototypes */
 
 void
 _initialize_solib (void)
 {
   solib_data = gdbarch_data_register_pre_init (solib_init);
+
+  observer_attach_free_objfile (remove_user_added_objfile);
 
   add_com ("sharedlibrary", class_files, sharedlibrary_command,
 	   _("Load shared object library symbols for files matching REGEXP."));
