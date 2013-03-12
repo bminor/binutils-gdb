@@ -1981,14 +1981,16 @@ nios2_consume_arg (nios2_insn_infoS *insn, char *argstr, const char *parsestr)
       break;
     case 'm':
     case 'j':
-    case 'k':
     case 'l':
     case 'b':
       /* We can't have %hi, %lo or %hiadj here.  */
       if (*argstr == '%')
 	as_bad (_("badly formed expression near %s"), argstr);
       break;
+    case 'o':
+      break;
     default:
+      BAD_CASE (*parsestr);
       break;
     }
 

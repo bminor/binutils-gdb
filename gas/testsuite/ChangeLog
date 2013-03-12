@@ -1,3 +1,7 @@
+2013-03-12  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
+	* gas/nios2/break.d: Check instruction values.
+
 2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
 
 	* gas/nios2/nios2.exp: Run wrprs.
