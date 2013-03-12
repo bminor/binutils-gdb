@@ -62,6 +62,9 @@ class Output_data_glink;
 template<int size, bool big_endian>
 class Stub_table;
 
+inline bool
+is_branch_reloc(unsigned int r_type);
+
 template<int size, bool big_endian>
 class Powerpc_relobj : public Sized_relobj_file<size, big_endian>
 {
@@ -555,6 +558,10 @@ class Target_powerpc : public Sized_target<size, big_endian>
   void
   do_function_location(Symbol_location*) const;
 
+  bool
+  do_can_check_for_function_pointers() const
+  { return true; }
+
   // Relocate a section.
   void
   relocate_section(const Relocate_info<size, big_endian>*,
@@ -863,9 +870,18 @@ class Target_powerpc : public Sized_target<size, big_endian>
 					unsigned int ,
 					Output_section* ,
 					const elfcpp::Rela<size, big_endian>& ,
-					unsigned int ,
+					unsigned int r_type,
 					const elfcpp::Sym<size, big_endian>&)
-    { return false; }
+    {
+      // PowerPC64 .opd is not folded, so any identical function text
+      // may be folded and we'll still keep function addresses distinct.
+      // That means no reloc is of concern here.
+      if (size == 64)
+	return false;
+      // For 32-bit, conservatively assume anything but calls to
+      // function code might be taking the address of the function.
+      return !is_branch_reloc(r_type);
+    }
 
     inline bool
     global_reloc_may_be_function_pointer(Symbol_table* , Layout* ,
@@ -873,10 +889,15 @@ class Target_powerpc : public Sized_target<size, big_endian>
 					 Sized_relobj_file<size, big_endian>* ,
 					 unsigned int ,
 					 Output_section* ,
-					 const elfcpp::Rela<size,
-							    big_endian>& ,
-					 unsigned int , Symbol*)
-    { return false; }
+					 const elfcpp::Rela<size, big_endian>& ,
+					 unsigned int r_type,
+					 Symbol*)
+    {
+      // As above.
+      if (size == 64)
+	return false;
+      return !is_branch_reloc(r_type);
+    }
 
   private:
     static void

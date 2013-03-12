@@ -53,6 +53,26 @@ TEST_AR = $(top_builddir)/../binutils/ar
 TEST_NM = $(top_builddir)/../binutils/nm-new
 TEST_AS = $(top_builddir)/../gas/as-new
 
+# Make the default target available to scripts as $DEFAULT_TARGET.
+if DEFAULT_TARGET_ARM
+export DEFAULT_TARGET = arm
+endif
+if DEFAULT_TARGET_I386
+export DEFAULT_TARGET = i386
+endif
+if DEFAULT_TARGET_POWERPC
+export DEFAULT_TARGET = powerpc
+endif
+if DEFAULT_TARGET_SPARC
+export DEFAULT_TARGET = sparc
+endif
+if DEFAULT_TARGET_X86_64
+export DEFAULT_TARGET = x86_64
+endif
+if DEFAULT_TARGET_TILEGX
+export DEFAULT_TARGET = tilegx
+endif
+
 if PLUGINS
 LIBDL = -ldl
 endif
@@ -201,14 +221,12 @@ pr14265.stdout: pr14265
 	$(TEST_NM) --format=bsd --numeric-sort $< > $@
 
 check_SCRIPTS += icf_test.sh
-check_DATA += icf_test.stdout
-MOSTLYCLEANFILES += icf_test
+check_DATA += icf_test.map
+MOSTLYCLEANFILES += icf_test icf_test.map
 icf_test.o: icf_test.cc 
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
-icf_test: icf_test.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all icf_test.o
-icf_test.stdout: icf_test
-	$(TEST_NM) -C icf_test > icf_test.stdout
+icf_test icf_test.map: icf_test.o gcctestdir/ld
+	$(CXXLINK) -o icf_test -Bgcctestdir/ -Wl,--icf=all,-Map,icf_test.map icf_test.o
 
 check_SCRIPTS += icf_keep_unique_test.sh
 check_DATA += icf_keep_unique_test.stdout
@@ -218,31 +236,31 @@ icf_keep_unique_test.o: icf_keep_unique_test.cc
 icf_keep_unique_test: icf_keep_unique_test.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=all -Wl,--keep-unique,_Z11unique_funcv icf_keep_unique_test.o
 icf_keep_unique_test.stdout: icf_keep_unique_test
-	$(TEST_NM) -C icf_keep_unique_test > icf_keep_unique_test.stdout
+	$(TEST_NM) -C $< > $@
 
 check_SCRIPTS += icf_safe_test.sh
-check_DATA += icf_safe_test_1.stdout icf_safe_test_2.stdout
-MOSTLYCLEANFILES += icf_safe_test
+check_DATA += icf_safe_test_1.stdout icf_safe_test_2.stdout icf_safe_test.map
+MOSTLYCLEANFILES += icf_safe_test icf_safe_test.map
 icf_safe_test.o: icf_safe_test.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
-icf_safe_test: icf_safe_test.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=safe icf_safe_test.o
+icf_safe_test icf_safe_test.map: icf_safe_test.o gcctestdir/ld
+	$(CXXLINK) -o icf_safe_test -Bgcctestdir/ -Wl,--icf=safe,-Map,icf_safe_test.map icf_safe_test.o
 icf_safe_test_1.stdout: icf_safe_test
-	$(TEST_NM) icf_safe_test > icf_safe_test_1.stdout
+	$(TEST_NM) $< > $@
 icf_safe_test_2.stdout: icf_safe_test
-	$(TEST_READELF) -h icf_safe_test > icf_safe_test_2.stdout
+	$(TEST_READELF) -h $< > $@
 
 check_SCRIPTS += icf_safe_so_test.sh
-check_DATA += icf_safe_so_test_1.stdout icf_safe_so_test_2.stdout
-MOSTLYCLEANFILES += icf_safe_so_test
+check_DATA += icf_safe_so_test_1.stdout icf_safe_so_test_2.stdout icf_safe_so_test.map
+MOSTLYCLEANFILES += icf_safe_so_test icf_safe_so_test.map
 icf_safe_so_test.o: icf_safe_so_test.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIC -g -o $@ $<
-icf_safe_so_test: icf_safe_so_test.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -Wl,--icf=safe icf_safe_so_test.o -fPIC -shared
+icf_safe_so_test icf_safe_so_test.map: icf_safe_so_test.o gcctestdir/ld
+	$(CXXLINK) -o icf_safe_so_test -Bgcctestdir/ -Wl,--icf=safe,-Map,icf_safe_so_test.map icf_safe_so_test.o -fPIC -shared
 icf_safe_so_test_1.stdout: icf_safe_so_test
-	$(TEST_NM) icf_safe_so_test > icf_safe_so_test_1.stdout
+	$(TEST_NM) $< > $@
 icf_safe_so_test_2.stdout: icf_safe_so_test
-	$(TEST_READELF) -h icf_safe_so_test > icf_safe_so_test_2.stdout
+	$(TEST_READELF) -h $< > $@
 
 check_SCRIPTS += final_layout.sh
 check_DATA += final_layout.stdout
