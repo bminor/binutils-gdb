@@ -1,3 +1,9 @@
+2013-03-12  Alan Modra  <amodra@gmail.com>
+
+	* gc.h (gc_process_relocs): Look through function descriptors
+	to determine shndx, symvalue and addend used by ICF.  Tidy
+	variable duplication.
+
 2013-03-11  Alan Modra  <amodra@gmail.com>
 
 	* gold.cc (queue_middle_tasks): Move detect_odr_violations..
