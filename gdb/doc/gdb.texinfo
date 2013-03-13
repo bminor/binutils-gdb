@@ -35339,7 +35339,7 @@ If not, generate remote agent bytecode for current frame PC address.
 Translate the given format string and list of argument expressions
 into remote agent bytecodes and display them as a disassembled list.
 This command is useful for debugging the agent version of dynamic
-printf (@pxref{Dynamic Printf}.
+printf (@pxref{Dynamic Printf}).
 
 @kindex maint info breakpoints
 @item @anchor{maint info breakpoints}maint info breakpoints

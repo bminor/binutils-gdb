@@ -1,3 +1,8 @@
+2013-03-13  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.texinfo (Maintenance Commands): Add missing ')' for
+	"maint agent" reference to Dynamic printf.
+
 2013-03-11  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (General Query Packets): Don't use colon in index
