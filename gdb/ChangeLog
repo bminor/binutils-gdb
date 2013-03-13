@@ -1,5 +1,9 @@
 2013-03-13  Pedro Alves  <palves@redhat.com>
 
+	* hppa-hpux-nat.c (hppa_hpux_save_state_offset): Make static.
+
+2013-03-13  Pedro Alves  <palves@redhat.com>
+
 	* dbxread.c (read_ofile_symtab, process_one_symbol): Remove
 	commented out code.
 	* demangle.c (current_demangling_style_string): Make it const.

@@ -41,7 +41,7 @@
    the register size (32-bit or 64-bit).  These are taken from
    REGCACHE.  */
 
-LONGEST
+static LONGEST
 hppa_hpux_save_state_offset (struct regcache *regcache, int regnum)
 {
   LONGEST offset;
