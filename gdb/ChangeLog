@@ -1,3 +1,8 @@
+2013-03-13  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (tfile_get_trace_state_variable_value): Look for
+	the last matched 'V' blcok in trace frame.
+
 2013-03-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

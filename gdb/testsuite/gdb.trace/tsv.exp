@@ -142,7 +142,36 @@ gdb_test "print \$tvar5" " = 16" \
 
 gdb_test_no_output "tstop" ""
 
-gdb_test "print \$tvar5" " = 16" \
-    "Print a trace state variable after run"
+# Save trace frames to tfile.
+set tracefile [standard_output_file ${testfile}]
+gdb_test "tsave ${tracefile}.tf" \
+    "Trace data saved to file '${tracefile}.tf'.*" \
+    "save tfile trace file"
 
+proc check_tsv { data_source } {
+    with_test_prefix "${data_source}" {
+	gdb_test "tfind 0"
+	gdb_test "print \$tvar5" " = 16" \
+	    "Print a trace state variable"
+	gdb_test "tfind" \
+	    "Target failed to find requested trace frame.*"
+    }
+}
 
+# Check the tsv from the live inferior.
+check_tsv "live"
+
+# Change target to tfile.
+set test "change to tfile target"
+gdb_test_multiple "target tfile ${tracefile}.tf" "$test" {
+    -re "A program is being debugged already.  Kill it. .y or n. " {
+	send_gdb "y\n"
+	exp_continue
+    }
+    -re "$gdb_prompt $" {
+	pass "$test"
+    }
+}
+
+# Check the tsv from tfile.
+check_tsv "tfile"

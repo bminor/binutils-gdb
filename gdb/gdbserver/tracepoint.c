@@ -5257,6 +5257,7 @@ traceframe_read_tsv (int tsvnum, LONGEST *val)
   unsigned char *database, *dataptr;
   unsigned int datasize;
   int vnum;
+  int found = 0;
 
   trace_debug ("traceframe_read_tsv");
 
@@ -5279,7 +5280,8 @@ traceframe_read_tsv (int tsvnum, LONGEST *val)
   datasize = tframe->data_size;
   database = dataptr = &tframe->data[0];
 
-  /* Iterate through a traceframe's blocks, looking for the tsv.  */
+  /* Iterate through a traceframe's blocks, looking for the last
+     matched tsv.  */
   while ((dataptr = traceframe_find_block_type (dataptr,
 						datasize
 						- (dataptr - database),
@@ -5294,16 +5296,17 @@ traceframe_read_tsv (int tsvnum, LONGEST *val)
       if (tsvnum == vnum)
 	{
 	  memcpy (val, dataptr, sizeof (*val));
-	  return 0;
+	  found = 1;
 	}
 
       /* Skip over this block.  */
       dataptr += sizeof (LONGEST);
     }
 
-  trace_debug ("traceframe %d has no data for variable %d",
-	       tfnum, tsvnum);
-  return 1;
+  if (!found)
+    trace_debug ("traceframe %d has no data for variable %d",
+		 tfnum, tsvnum);
+  return !found;
 }
 
 /* Read a requested block of static tracepoint data from a trace

@@ -1,5 +1,12 @@
 2013-03-13  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/tsv.exp (check_tsv): New.
+	(top level): Save a tfile on current trace session. Call
+	check_tsv on live target.  Load the tfile with target tfile
+	and call check_tsv again.
+
+2013-03-13  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.trace/tsv.exp: Remove code unrelated to testing TSV.
 	Replace some "gdb_test" with "gdb_test_no_output".
 

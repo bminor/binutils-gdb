@@ -4655,7 +4655,12 @@ static int
 tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 {
   int pos;
+  int found = 0;
 
+  /* Iterate over blocks in current frame and find the last 'V'
+     block in which tsv number is TSVNUM.  In one trace frame, there
+     may be multiple 'V' blocks created for a given trace variable,
+     and the last matched 'V' block contains the updated value.  */
   pos = 0;
   while ((pos = traceframe_find_block_type ('V', pos)) >= 0)
     {
@@ -4671,13 +4676,12 @@ tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
 	  *val = extract_signed_integer ((gdb_byte *) val, 8,
 					 gdbarch_byte_order
 					 (target_gdbarch ()));
-	  return 1;
+	  found = 1;
 	}
       pos += (4 + 8);
     }
 
-  /* Didn't find anything.  */
-  return 0;
+  return found;
 }
 
 static int
