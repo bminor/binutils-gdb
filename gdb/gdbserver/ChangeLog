@@ -1,3 +1,8 @@
+2013-03-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* linux-low.c (linux_target_ops) [!HAVE_LINUX_BTRACE]:
+	Remove extraneous NULL element.
+
 2013-03-11  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* target.h (struct target_ops): Add btrace ops.
