@@ -1,3 +1,8 @@
+2013-03-13  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tsv.exp: Remove code unrelated to testing TSV.
+	Replace some "gdb_test" with "gdb_test_no_output".
+
 2013-03-12  Paul Hilfinger  <hilfingr@adacore.com>
 
         * gdb.ada/expr_delims.exp: New file.
