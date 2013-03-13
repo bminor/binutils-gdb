@@ -610,8 +610,8 @@ teval_pseudocommand (char *args, int from_tty)
 
 /* Parse any collection options, such as /s for strings.  */
 
-char *
-decode_agent_options (char *exp)
+const char *
+decode_agent_options (const char *exp)
 {
   struct value_print_options opts;
 
@@ -643,7 +643,7 @@ decode_agent_options (char *exp)
   else
     error (_("Undefined collection format \"%c\"."), *exp);
 
-  exp = skip_spaces (exp);
+  exp = skip_spaces_const (exp);
 
   return exp;
 }
@@ -700,21 +700,22 @@ report_agent_reqs_errors (struct agent_expr *aexpr)
 
 /* worker function */
 void
-validate_actionline (char **line, struct breakpoint *b)
+validate_actionline (const char *line, struct breakpoint *b)
 {
   struct cmd_list_element *c;
   struct expression *exp = NULL;
   struct cleanup *old_chain = NULL;
-  char *p, *tmp_p;
+  const char *tmp_p;
+  const char *p;
   struct bp_location *loc;
   struct agent_expr *aexpr;
   struct tracepoint *t = (struct tracepoint *) b;
 
   /* If EOF is typed, *line is NULL.  */
-  if (*line == NULL)
+  if (line == NULL)
     return;
 
-  p = skip_spaces (*line);
+  p = skip_spaces_const (line);
 
   /* Symbol lookup etc.  */
   if (*p == '\0')	/* empty line: just prompt for another line.  */
@@ -736,7 +737,7 @@ validate_actionline (char **line, struct breakpoint *b)
       do
 	{			/* Repeat over a comma-separated list.  */
 	  QUIT;			/* Allow user to bail out with ^C.  */
-	  p = skip_spaces (p);
+	  p = skip_spaces_const (p);
 
 	  if (*p == '$')	/* Look for special pseudo-symbols.  */
 	    {
@@ -754,12 +755,9 @@ validate_actionline (char **line, struct breakpoint *b)
 	  tmp_p = p;
 	  for (loc = t->base.loc; loc; loc = loc->next)
 	    {
-	      const char *q;
-
-	      q = tmp_p;
-	      exp = parse_exp_1 (&q, loc->address,
+	      p = tmp_p;
+	      exp = parse_exp_1 (&p, loc->address,
 				 block_for_pc (loc->address), 1);
-	      p = (char *) q;
 	      old_chain = make_cleanup (free_current_contents, &exp);
 
 	      if (exp->elts[0].opcode == OP_VAR_VALUE)
@@ -804,18 +802,16 @@ validate_actionline (char **line, struct breakpoint *b)
       do
 	{			/* Repeat over a comma-separated list.  */
 	  QUIT;			/* Allow user to bail out with ^C.  */
-	  p = skip_spaces (p);
+	  p = skip_spaces_const (p);
 
 	  tmp_p = p;
 	  for (loc = t->base.loc; loc; loc = loc->next)
 	    {
-	      const char *q;
+	      p = tmp_p;
 
-	      q = tmp_p;
 	      /* Only expressions are allowed for this action.  */
-	      exp = parse_exp_1 (&q, loc->address,
+	      exp = parse_exp_1 (&p, loc->address,
 				 block_for_pc (loc->address), 1);
-	      p = (char *) q;
 	      old_chain = make_cleanup (free_current_contents, &exp);
 
 	      /* We have something to evaluate, make sure that the expr to
@@ -838,20 +834,20 @@ validate_actionline (char **line, struct breakpoint *b)
 
   else if (cmd_cfunc_eq (c, while_stepping_pseudocommand))
     {
-      char *steparg;		/* In case warning is necessary.  */
+      char *endp;
 
-      p = skip_spaces (p);
-      steparg = p;
-
-      if (*p == '\0' || (t->step_count = strtol (p, &p, 0)) == 0)
-	error (_("while-stepping step count `%s' is malformed."), *line);
+      p = skip_spaces_const (p);
+      t->step_count = strtol (p, &endp, 0);
+      if (endp == p || t->step_count == 0)
+	error (_("while-stepping step count `%s' is malformed."), line);
+      p = endp;
     }
 
   else if (cmd_cfunc_eq (c, end_actions_pseudocommand))
     ;
 
   else
-    error (_("`%s' is not a supported tracepoint action."), *line);
+    error (_("`%s' is not a supported tracepoint action."), line);
 }
 
 enum {
@@ -1375,7 +1371,7 @@ encode_actions_1 (struct command_line *action,
 		  struct collection_list *collect,
 		  struct collection_list *stepping_list)
 {
-  char *action_exp;
+  const char *action_exp;
   struct expression *exp = NULL;
   int i;
   struct value *tempval;
@@ -1386,7 +1382,7 @@ encode_actions_1 (struct command_line *action,
     {
       QUIT;			/* Allow user to bail out with ^C.  */
       action_exp = action->line;
-      action_exp = skip_spaces (action_exp);
+      action_exp = skip_spaces_const (action_exp);
 
       cmd = lookup_cmd (&action_exp, cmdlist, "", -1, 1);
       if (cmd == 0)
@@ -1401,7 +1397,7 @@ encode_actions_1 (struct command_line *action,
 	  do
 	    {			/* Repeat over a comma-separated list.  */
 	      QUIT;		/* Allow user to bail out with ^C.  */
-	      action_exp = skip_spaces (action_exp);
+	      action_exp = skip_spaces_const (action_exp);
 
 	      if (0 == strncasecmp ("$reg", action_exp, 4))
 		{
@@ -1476,12 +1472,9 @@ encode_actions_1 (struct command_line *action,
 		  unsigned long addr;
 		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
-		  const char *q;
 
-		  q = action_exp;
-		  exp = parse_exp_1 (&q, tloc->address,
+		  exp = parse_exp_1 (&action_exp, tloc->address,
 				     block_for_pc (tloc->address), 1);
-		  action_exp = (char *) q;
 		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  switch (exp->elts[0].opcode)
@@ -1565,17 +1558,14 @@ encode_actions_1 (struct command_line *action,
 	  do
 	    {			/* Repeat over a comma-separated list.  */
 	      QUIT;		/* Allow user to bail out with ^C.  */
-	      action_exp = skip_spaces (action_exp);
+	      action_exp = skip_spaces_const (action_exp);
 
 		{
 		  struct cleanup *old_chain = NULL;
 		  struct cleanup *old_chain1 = NULL;
-		  const char *q;
 
-		  q = action_exp;
-		  exp = parse_exp_1 (&q, tloc->address,
+		  exp = parse_exp_1 (&action_exp, tloc->address,
 				     block_for_pc (tloc->address), 1);
-		  action_exp = (char *) q;
 		  old_chain = make_cleanup (free_current_contents, &exp);
 
 		  aexpr = gen_eval_for_expr (tloc->address, exp);
@@ -1643,18 +1633,15 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
      the fly, and don't cache it.  */
   if (*default_collect)
     {
-      char *line;
-
       default_collect_line =  xstrprintf ("collect %s", default_collect);
       make_cleanup (xfree, default_collect_line);
 
-      line = default_collect_line;
-      validate_actionline (&line, t);
+      validate_actionline (default_collect_line, t);
 
       default_collect_action = xmalloc (sizeof (struct command_line));
       make_cleanup (xfree, default_collect_action);
       default_collect_action->next = actions;
-      default_collect_action->line = line;
+      default_collect_action->line = default_collect_line;
       actions = default_collect_action;
     }
   encode_actions_1 (actions, t, tloc, frame_reg, frame_offset,
@@ -2800,15 +2787,6 @@ scope_info (char *args, int from_tty)
 		     save_args);
 }
 
-/* worker function (cleanup) */
-static void
-replace_comma (void *data)
-{
-  char *comma = data;
-  *comma = ',';
-}
-
-
 /* Helper for trace_dump_command.  Dump the action list starting at
    ACTION.  STEPPING_ACTIONS is true if we're iterating over the
    actions of the body of a while-stepping action.  STEPPING_FRAME is
@@ -2820,7 +2798,7 @@ trace_dump_actions (struct command_line *action,
 		    int stepping_actions, int stepping_frame,
 		    int from_tty)
 {
-  char *action_exp, *next_comma;
+  const char *action_exp, *next_comma;
 
   for (; action != NULL; action = action->next)
     {
@@ -2828,7 +2806,7 @@ trace_dump_actions (struct command_line *action,
 
       QUIT;			/* Allow user to bail out with ^C.  */
       action_exp = action->line;
-      action_exp = skip_spaces (action_exp);
+      action_exp = skip_spaces_const (action_exp);
 
       /* The collection actions to be done while stepping are
          bracketed by the commands "while-stepping" and "end".  */
@@ -2858,6 +2836,10 @@ trace_dump_actions (struct command_line *action,
 	     STEPPING_ACTIONS should be equal.  */
 	  if (stepping_frame == stepping_actions)
 	    {
+	      char *cmd = NULL;
+	      struct cleanup *old_chain
+		= make_cleanup (free_current_contents, &cmd);
+
 	      if (*action_exp == '/')
 		action_exp = decode_agent_options (action_exp);
 
@@ -2866,7 +2848,7 @@ trace_dump_actions (struct command_line *action,
 		  QUIT;		/* Allow user to bail out with ^C.  */
 		  if (*action_exp == ',')
 		    action_exp++;
-		  action_exp = skip_spaces (action_exp);
+		  action_exp = skip_spaces_const (action_exp);
 
 		  next_comma = strchr (action_exp, ',');
 
@@ -2880,20 +2862,31 @@ trace_dump_actions (struct command_line *action,
 		    args_info (NULL, from_tty);
 		  else
 		    {		/* variable */
-		      if (next_comma)
+		      if (next_comma != NULL)
 			{
-			  make_cleanup (replace_comma, next_comma);
-			  *next_comma = '\0';
+			  size_t len = next_comma - action_exp;
+
+			  cmd = xrealloc (cmd, len + 1);
+			  memcpy (cmd, action_exp, len);
+			  cmd[len] = 0;
 			}
-		      printf_filtered ("%s = ", action_exp);
-		      output_command (action_exp, from_tty);
+		      else
+			{
+			  size_t len = strlen (action_exp);
+
+			  cmd = xrealloc (cmd, len + 1);
+			  memcpy (cmd, action_exp, len + 1);
+			}
+
+		      printf_filtered ("%s = ", cmd);
+		      output_command_const (cmd, from_tty);
 		      printf_filtered ("\n");
 		    }
-		  if (next_comma)
-		    *next_comma = ',';
 		  action_exp = next_comma;
 		}
 	      while (action_exp && *action_exp == ',');
+
+	      do_cleanups (old_chain);
 	    }
 	}
     }
@@ -2908,7 +2901,7 @@ trace_dump_command (char *args, int from_tty)
   struct tracepoint *t;
   int stepping_frame = 0;
   struct bp_location *loc;
-  char *line, *default_collect_line = NULL;
+  char *default_collect_line = NULL;
   struct command_line *actions, *default_collect_action = NULL;
   struct cleanup *old_chain = NULL;
 
@@ -2952,12 +2945,11 @@ trace_dump_command (char *args, int from_tty)
     {
       default_collect_line = xstrprintf ("collect %s", default_collect);
       old_chain = make_cleanup (xfree, default_collect_line);
-      line = default_collect_line;
-      validate_actionline (&line, &t->base);
+      validate_actionline (default_collect_line, &t->base);
       default_collect_action = xmalloc (sizeof (struct command_line));
       make_cleanup (xfree, default_collect_action);
       default_collect_action->next = actions;
-      default_collect_action->line = line;
+      default_collect_action->line = default_collect_line;
       actions = default_collect_action;
     }
 

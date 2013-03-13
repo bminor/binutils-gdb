@@ -470,7 +470,7 @@ add_setshow_generic (int parmclass, enum command_class cmdclass,
 		     struct cmd_list_element **show_list)
 {
   struct cmd_list_element *param = NULL;
-  char *tmp_name = NULL;
+  const char *tmp_name = NULL;
 
   switch (parmclass)
     {

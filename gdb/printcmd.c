@@ -191,10 +191,10 @@ static void do_one_display (struct display *);
    past the specification and past all whitespace following it.  */
 
 static struct format_data
-decode_format (char **string_ptr, int oformat, int osize)
+decode_format (const char **string_ptr, int oformat, int osize)
 {
   struct format_data val;
-  char *p = *string_ptr;
+  const char *p = *string_ptr;
 
   val.format = '?';
   val.size = '?';
@@ -933,7 +933,7 @@ validate_format (struct format_data fmt, char *cmdname)
    first argument ("/x myvar" for example, to print myvar in hex).  */
 
 static void
-print_command_1 (char *exp, int voidprint)
+print_command_1 (const char *exp, int voidprint)
 {
   struct expression *expr;
   struct cleanup *old_chain = 0;
@@ -1013,8 +1013,18 @@ call_command (char *exp, int from_tty)
   print_command_1 (exp, 0);
 }
 
-void
+/* Implementation of the "output" command.  */
+
+static void
 output_command (char *exp, int from_tty)
+{
+  output_command_const (exp, from_tty);
+}
+
+/* Like output_command, but takes a const string as argument.  */
+
+void
+output_command_const (const char *exp, int from_tty)
 {
   struct expression *expr;
   struct cleanup *old_chain;
@@ -1402,8 +1412,10 @@ x_command (char *exp, int from_tty)
 
   if (exp && *exp == '/')
     {
-      exp++;
-      fmt = decode_format (&exp, last_format, last_size);
+      const char *tmp = exp + 1;
+
+      fmt = decode_format (&tmp, last_format, last_size);
+      exp = (char *) tmp;
     }
 
   /* If we have an expression, evaluate it and use it as the address.  */
@@ -1473,12 +1485,13 @@ x_command (char *exp, int from_tty)
    Specify the expression.  */
 
 static void
-display_command (char *exp, int from_tty)
+display_command (char *arg, int from_tty)
 {
   struct format_data fmt;
   struct expression *expr;
   struct display *new;
   int display_it = 1;
+  const char *exp = arg;
 
 #if defined(TUI)
   /* NOTE: cagney/2003-02-13 The `tui_active' was previously

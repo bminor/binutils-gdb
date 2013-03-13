@@ -229,7 +229,8 @@ f_word_break_characters (void)
    class.  */
 
 static VEC (char_ptr) *
-f_make_symbol_completion_list (char *text, char *word, enum type_code code)
+f_make_symbol_completion_list (const char *text, const char *word,
+			       enum type_code code)
 {
   return default_make_symbol_completion_list_break_on (text, word, ":", code);
 }

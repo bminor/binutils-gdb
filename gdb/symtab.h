@@ -1176,20 +1176,24 @@ extern void forget_cached_source_info (void);
 extern void select_source_symtab (struct symtab *);
 
 extern VEC (char_ptr) *default_make_symbol_completion_list_break_on
-  (char *text, char *word, const char *break_on,
+  (const char *text, const char *word, const char *break_on,
    enum type_code code);
-extern VEC (char_ptr) *default_make_symbol_completion_list (char *, char *,
+extern VEC (char_ptr) *default_make_symbol_completion_list (const char *,
+							    const char *,
 							    enum type_code);
-extern VEC (char_ptr) *make_symbol_completion_list (char *, char *);
-extern VEC (char_ptr) *make_symbol_completion_type (char *, char *,
+extern VEC (char_ptr) *make_symbol_completion_list (const char *, const char *);
+extern VEC (char_ptr) *make_symbol_completion_type (const char *, const char *,
 						    enum type_code);
 extern VEC (char_ptr) *make_symbol_completion_list_fn (struct cmd_list_element *,
-						       char *, char *);
+						       const char *,
+						       const char *);
 
-extern VEC (char_ptr) *make_file_symbol_completion_list (char *,
-							 char *, char *);
+extern VEC (char_ptr) *make_file_symbol_completion_list (const char *,
+							 const char *,
+							 const char *);
 
-extern VEC (char_ptr) *make_source_files_completion_list (char *, char *);
+extern VEC (char_ptr) *make_source_files_completion_list (const char *,
+							  const char *);
 
 /* symtab.c */
 

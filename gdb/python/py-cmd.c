@@ -103,7 +103,7 @@ cmdpy_destroyer (struct cmd_list_element *self, void *context)
 
   /* We allocated the name, doc string, and perhaps the prefix
      name.  */
-  xfree (self->name);
+  xfree ((char *) self->name);
   xfree (self->doc);
   xfree (self->prefixname);
 
@@ -207,7 +207,8 @@ cmdpy_function (struct cmd_list_element *command, char *args, int from_tty)
 /* Called by gdb for command completion.  */
 
 static VEC (char_ptr) *
-cmdpy_completer (struct cmd_list_element *command, char *text, char *word)
+cmdpy_completer (struct cmd_list_element *command,
+		 const char *text, const char *word)
 {
   cmdpy_object *obj = (cmdpy_object *) get_cmd_context (command);
   PyObject *textobj, *wordobj, *resultobj = NULL;
@@ -319,7 +320,8 @@ gdbpy_parse_command_name (const char *name,
   struct cmd_list_element *elt;
   int len = strlen (name);
   int i, lastchar;
-  char *prefix_text, *prefix_text2;
+  char *prefix_text;
+  const char *prefix_text2;
   char *result;
 
   /* Skip trailing whitespace.  */

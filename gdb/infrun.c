@@ -6471,7 +6471,7 @@ Are you sure you want to change it? "),
 
 static VEC (char_ptr) *
 handle_completer (struct cmd_list_element *ignore,
-		  char *text, char *word)
+		  const char *text, const char *word)
 {
   VEC (char_ptr) *vec_signals, *vec_keywords, *return_val;
   static const char * const keywords[] =

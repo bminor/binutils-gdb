@@ -11612,7 +11612,7 @@ _initialize_remote (void)
 {
   struct remote_state *rs;
   struct cmd_list_element *cmd;
-  char *cmd_name;
+  const char *cmd_name;
 
   /* architecture specific data */
   remote_gdbarch_data_handle =

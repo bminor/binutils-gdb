@@ -991,12 +991,13 @@ set_breakpoint_condition (struct breakpoint *b, char *exp,
 /* Completion for the "condition" command.  */
 
 static VEC (char_ptr) *
-condition_completer (struct cmd_list_element *cmd, char *text, char *word)
+condition_completer (struct cmd_list_element *cmd,
+		     const char *text, const char *word)
 {
-  char *space;
+  const char *space;
 
-  text = skip_spaces (text);
-  space = skip_to_space (text);
+  text = skip_spaces_const (text);
+  space = skip_to_space_const (text);
   if (*space == '\0')
     {
       int len;
@@ -1041,7 +1042,7 @@ condition_completer (struct cmd_list_element *cmd, char *text, char *word)
     }
 
   /* We're completing the expression part.  */
-  text = skip_spaces (space);
+  text = skip_spaces_const (space);
   return expression_completer (cmd, text, word);
 }
 
@@ -1264,7 +1265,7 @@ check_tracepoint_command (char *line, void *closure)
 {
   struct breakpoint *b = closure;
 
-  validate_actionline (&line, b);
+  validate_actionline (line, b);
 }
 
 /* A structure used to pass information through
@@ -15084,7 +15085,7 @@ catching_syscall_number (int syscall_number)
 /* Complete syscall names.  Used by "catch syscall".  */
 static VEC (char_ptr) *
 catch_syscall_completer (struct cmd_list_element *cmd,
-                         char *text, char *word)
+                         const char *text, const char *word)
 {
   const char **list = get_syscall_names ();
   VEC (char_ptr) *retlist

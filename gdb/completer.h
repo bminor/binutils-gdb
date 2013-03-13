@@ -27,22 +27,22 @@ extern char *readline_line_completion_function (const char *text,
 						int matches);
 
 extern VEC (char_ptr) *noop_completer (struct cmd_list_element *,
-				       char *, char *);
+				       const char *, const char *);
 
 extern VEC (char_ptr) *filename_completer (struct cmd_list_element *,
-					   char *, char *);
+					   const char *, const char *);
 
 extern VEC (char_ptr) *expression_completer (struct cmd_list_element *,
-					     char *, char *);
+					     const char *, const char *);
 
 extern VEC (char_ptr) *location_completer (struct cmd_list_element *,
-					   char *, char *);
+					   const char *, const char *);
 
 extern VEC (char_ptr) *command_completer (struct cmd_list_element *,
-					  char *, char *);
+					  const char *, const char *);
 
 extern VEC (char_ptr) *signal_completer (struct cmd_list_element *,
-					 char *, char *);
+					 const char *, const char *);
 
 extern char *get_gdb_completer_quote_characters (void);
 

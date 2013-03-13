@@ -318,7 +318,7 @@ set_cp_abi_cmd (char *args, int from_tty)
 
 static VEC (char_ptr) *
 cp_abi_completer (struct cmd_list_element *ignore,
-		  char *text, char *word)
+		  const char *text, const char *word)
 {
   static const char **cp_abi_names;
 

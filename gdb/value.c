@@ -2130,7 +2130,7 @@ function_command (char *command, int from_tty)
 static void
 function_destroyer (struct cmd_list_element *self, void *ignore)
 {
-  xfree (self->name);
+  xfree ((char *) self->name);
   xfree (self->doc);
 }
 

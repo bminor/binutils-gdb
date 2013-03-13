@@ -5807,10 +5807,10 @@ symbol_completion_add (VEC(char_ptr) **sv,
 struct add_partial_datum
 {
   VEC(char_ptr) **completions;
-  char *text;
+  const char *text;
   int text_len;
-  char *text0;
-  char *word;
+  const char *text0;
+  const char *word;
   int wild_match;
   int encoded;
 };
@@ -5829,7 +5829,8 @@ ada_expand_partial_symbol_name (const char *name, void *user_data)
    the entire command on which completion is made.  */
 
 static VEC (char_ptr) *
-ada_make_symbol_completion_list (char *text0, char *word, enum type_code code)
+ada_make_symbol_completion_list (const char *text0, const char *word,
+				 enum type_code code)
 {
   char *text;
   int text_len;

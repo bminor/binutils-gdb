@@ -97,7 +97,7 @@ struct expression
 
 extern struct expression *parse_expression (const char *);
 
-extern struct type *parse_expression_for_completion (char *, char **,
+extern struct type *parse_expression_for_completion (const char *, char **,
 						     enum type_code *);
 
 extern struct expression *parse_exp_1 (const char **, CORE_ADDR pc,

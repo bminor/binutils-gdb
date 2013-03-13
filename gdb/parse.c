@@ -120,9 +120,12 @@ static void free_funcalls (void *ignore);
 static int prefixify_subexp (struct expression *, struct expression *, int,
 			     int);
 
-static struct expression *parse_exp_in_context (char **, CORE_ADDR,
+static struct expression *parse_exp_in_context (const char **, CORE_ADDR,
 						const struct block *, int, 
 						int, int *);
+static struct expression *parse_exp_in_context_1 (char **, CORE_ADDR,
+						  const struct block *, int,
+						  int, int *);
 
 void _initialize_parse (void);
 
@@ -1128,12 +1131,21 @@ struct expression *
 parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
 	     int comma)
 {
+  return parse_exp_in_context (stringptr, pc, block, comma, 0, NULL);
+}
+
+static struct expression *
+parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
+		      const struct block *block,
+		      int comma, int void_context_p, int *out_subexp)
+{
   struct expression *expr;
   char *const_hack = *stringptr ? xstrdup (*stringptr) : NULL;
   char *orig = const_hack;
   struct cleanup *back_to = make_cleanup (xfree, const_hack);
 
-  expr = parse_exp_in_context (&const_hack, pc, block, comma, 0, NULL);
+  expr = parse_exp_in_context_1 (&const_hack, pc, block, comma,
+				 void_context_p, out_subexp);
   (*stringptr) += const_hack - orig;
   do_cleanups (back_to);
   return expr;
@@ -1147,8 +1159,9 @@ parse_exp_1 (const char **stringptr, CORE_ADDR pc, const struct block *block,
    is left untouched.  */
 
 static struct expression *
-parse_exp_in_context (char **stringptr, CORE_ADDR pc, const struct block *block,
-		      int comma, int void_context_p, int *out_subexp)
+parse_exp_in_context_1 (char **stringptr, CORE_ADDR pc,
+			const struct block *block,
+			int comma, int void_context_p, int *out_subexp)
 {
   volatile struct gdb_exception except;
   struct cleanup *old_chain, *inner_chain;
@@ -1291,7 +1304,7 @@ parse_expression (const char *string)
    *NAME must be freed by the caller.  */
 
 struct type *
-parse_expression_for_completion (char *string, char **name,
+parse_expression_for_completion (const char *string, char **name,
 				 enum type_code *code)
 {
   struct expression *exp = NULL;

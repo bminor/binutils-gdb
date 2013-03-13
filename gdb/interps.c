@@ -456,7 +456,8 @@ interpreter_exec_cmd (char *args, int from_tty)
 
 /* List the possible interpreters which could complete the given text.  */
 static VEC (char_ptr) *
-interpreter_completer (struct cmd_list_element *ignore, char *text, char *word)
+interpreter_completer (struct cmd_list_element *ignore,
+		       const char *text, const char *word)
 {
   int textlen;
   VEC (char_ptr) *matches = NULL;

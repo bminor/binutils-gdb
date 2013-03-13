@@ -59,7 +59,7 @@ struct cmd_list_element
     struct cmd_list_element *next;
 
     /* Name of this command.  */
-    char *name;
+    const char *name;
 
     /* Command class; class values are chosen by application program.  */
     enum command_class class;

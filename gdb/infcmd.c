@@ -2938,7 +2938,7 @@ _initialize_infcmd (void)
 {
   static struct cmd_list_element *info_proc_cmdlist;
   struct cmd_list_element *c = NULL;
-  char *cmd_name;
+  const char *cmd_name;
 
   /* Add the filename of the terminal connected to inferior I/O.  */
   add_setshow_filename_cmd ("inferior-tty", class_run,

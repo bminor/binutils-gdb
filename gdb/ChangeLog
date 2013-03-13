@@ -1,5 +1,162 @@
 2013-03-13  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (struct add_partial_datum) <text, text0, word>: Make
+	fields const.
+	(ada_make_symbol_completion_list): Make "text0" parameter const.
+	* ax-gdb.c (agent_eval_command_one): Make "exp" parameter const.
+	* breakpoint.c (condition_completer): Make "text" and "word"
+	parameters const.  Adjust.
+	(check_tracepoint_command): Adjust to validate_actionline
+	prototype change.
+	(catch_syscall_completer): Make "text" and "word" parameters
+	const.
+	* cli/cli-cmds.c (show_user): Make "comname" local const.
+	(valid_command_p): Make "command" parameter const.
+	(alias_command): Make "alias_prefix" and "command_prefix" locals
+	const.
+	* cli/cli-decode.c (add_cmd): Make "name" parameter const.
+	(add_alias_cmd): Make "name" and "oldname" parameters const.
+	Adjust.  No longer make copy of OLDNAME.
+	(add_prefix_cmd, add_abbrev_prefix_cmd, add_set_or_show_cmd)
+	(add_setshow_cmd_full, add_setshow_enum_cmd)
+	(add_setshow_auto_boolean_cmd, add_setshow_boolean_cmd)
+	(add_setshow_filename_cmd, add_setshow_string_cmd)
+	(add_setshow_string_noescape_cmd)
+	(add_setshow_optional_filename_cmd, add_setshow_integer_cmd)
+	(add_setshow_uinteger_cmd, add_setshow_zinteger_cmd)
+	(add_setshow_zuinteger_unlimited_cmd, add_setshow_zuinteger_cmd)
+	(delete_cmd, add_info, add_info_alias, add_com, add_com_alias):
+	Make "name" parameter const.
+	(help_cmd): Rename "command" parameter to "arg".  New const local
+	"command".
+	(find_cmd): Make "command" parameter const.
+	(lookup_cmd_1): Make "text" parameter pointer to const.  Adjust to
+	deprecated_cmd_warning prototype change.
+	(undef_cmd_error): Make "cmdtype" parameter const.
+	(lookup_cmd): Make "line" parameter const.
+	(deprecated_cmd_warning): Change type of "text" parameter to
+	pointer to const char, from pointer to pointer to char.  Adjust.
+	(lookup_cmd_composition): Make "text" parameter const.
+	(complete_on_cmdlist, complete_on_enum): Make "text" and "word"
+	parameters const.
+	* cli/cli-decode.h (struct cmd_list_element) <name>: Make field
+	const.
+	* cli/cli-script.c (validate_comname): Make "tem" local const.
+	(define_command): New const local "tem_c".  Use it in calls to
+	lookup_cmd.
+	(document_command): Make "tem" and "comfull" locals const.
+	(show_user_1): Make "prefix" and "name" parameters const.
+	* cli-script.h (show_user_1): Make "prefix" and "name" parameters
+	const.
+	* command.h (add_cmd, add_alias_cmd, add_prefix_cmd)
+	(add_abbrev_prefix_cmd, completer_ftype, lookup_cmd, lookup_cmd_1)
+	(deprecated_cmd_warning, lookup_cmd_composition, add_com)
+	(add_com_alias, add_info, add_info_alias, complete_on_cmdlist)
+	(complete_on_enum, add_setshow_enum_cmd)
+	(add_setshow_auto_boolean_cmd, add_setshow_boolean_cmd)
+	(add_setshow_filename_cmd, add_setshow_string_cmd)
+	(add_setshow_string_noescape_cmd)
+	(add_setshow_optional_filename_cmd, add_setshow_integer_cmd)
+	(add_setshow_uinteger_cmd, add_setshow_zinteger_cmd)
+	(add_setshow_zuinteger_cmd, add_setshow_zuinteger_unlimited_cmd):
+	Change prototypes, constifying strings.
+	* completer.c (noop_completer, filename_completer): Make "text"
+	and "prefix" parameters const.
+	(location_completer, expression_completer)
+	(complete_line_internal): Make "text" and "prefix" parameters
+	const and adjust.
+	(command_completer, signal_completer): Make "text" and "prefix"
+	parameters const.
+	* completer.h (noop_completer, filename_completer)
+	(expression_completer, location_completer, command_completer)
+	(signal_completer): Change prototypes.
+	* corefile.c (complete_set_gnutarget): Make "text" and "word"
+	parameters const.
+	* cp-abi.c (cp_abi_completer): Likewise.
+	* expression.h (parse_expression_for_completion): Change
+	prototype.
+	* f-lang.c (f_make_symbol_completion_list): Make "text" and "word"
+	parameters const.
+	* infcmd.c (_initialize_infcmd): Make "cmd_name" local const.
+	* infrun.c (handle_completer): Make "text" and "word" parameters
+	const.
+	* interps.c (interpreter_completer): Make "text" and "word"
+	parameters const.
+	* language.h (struct language_defn)
+	<la_make_symbol_completion_list>: Make "text" and "word"
+	parameters const.
+	* parse.c (parse_exp_1): Move const hack to parse_exp_in_context.
+	(parse_exp_in_context): Rename to ...
+	(parse_exp_in_context_1): ... this.
+	(parse_exp_in_context): Reimplement, with const hack from
+	parse_exp_1.
+	(parse_expression_for_completion): Make "string" parameter const.
+	* printcmd.c (decode_format): Make "string_ptr" parameter pointer
+	to pointer to const char.  Adjust.
+	(print_command_1): Make "exp" parameter const.
+	(output_command): Rename to ...
+	(output_command_const): ... this.  Make "exp" parameter const.
+	(output_command): Reimplement.
+	(x_command): Adjust.
+	(display_command): Rename "exp" parameter to "arg".  New "exp"
+	local, const version of "arg".
+	* python/py-auto-load.c (gdbpy_initialize_auto_load): Make
+	"cmd_name" local const.
+	* python/py-cmd.c (cmdpy_destroyer): Cast const away in xfree
+	call.
+	(cmdpy_completer): Make "text" and "word" parameters const.
+	(gdbpy_parse_command_name): Make "prefix_text2" local const.
+	* python/py-param.c (add_setshow_generic): Make "tmp_name" local
+	const.
+	* remote.c (_initialize_remote): Make "cmd_name" local const.
+	* symtab.c (language_search_unquoted_string): Make "text" and "p"
+	parameters const.  Adjust.
+	(completion_list_add_fields): Make "sym_text", "text" and "word"
+	parameters const.
+	(struct add_name_data) <sym_text, text, word>: Make fields const.
+	(default_make_symbol_completion_list_break_on): Make "text" and
+	"word" parameters const.  Adjust locals.
+	(default_make_symbol_completion_list)
+	(make_symbol_completion_list, make_symbol_completion_type)
+	(make_symbol_completion_list_fn): Make "text" and "word"
+	parameters const.
+	(make_file_symbol_completion_list): Make "text", "word" and
+	"srcfile" parameters const.  Adjust locals.
+	(add_filename_to_list): Make "text" and "word" parameters const.
+	(struct add_partial_filename_data) <text, word>: Make fields
+	const.
+	(make_source_files_completion_list): Make "text" and "word"
+	parameters const.
+	* symtab.h (default_make_symbol_completion_list_break_on)
+	(default_make_symbol_completion_list, make_symbol_completion_list)
+	(make_symbol_completion_type enum type_code)
+	(make_symbol_completion_list_fn make_file_symbol_completion_list)
+	(make_source_files_completion_list): Change prototype.
+	* top.c (execute_command): Adjust to pass pointer to pointer to
+	const char to lookup_cmd, and to deprecated_cmd_warning prototype
+	change.
+	(set_verbose): Make "cmdname" local const.
+	* tracepoint.c (decode_agent_options): Make "exp" parameter const,
+	and adjust.
+	(validate_actionline): Make "line" parameter a pointer to const
+	char, and adjust.
+	(encode_actions_1): Make "action_exp" local const, and adjust.
+	(encode_actions): Adjust.
+	(replace_comma): Delete.
+	(trace_dump_actions): Make "action_exp" and "next_comma" locals
+	const, and adjust.  Don't frob the action string while splitting
+	it at commas.  Instead, make a copy of each split substring in
+	turn.
+	(trace_dump_command): Adjust to validate_actionline prototype
+	change.
+	* tracepoint.h (decode_agent_options, decode_agent_options)
+	(encode_actions, validate_actionline): Change prototypes.
+	* valprint.h (output_command): Delete declaration.
+	(output_command_const): Declare.
+	* value.c (function_destroyer): Cast const away in xfree call.
+
+2013-03-13  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (ada_decode_symbol): Cast away constness of GSYMBOL
 	rather than casting 'const char * const *' to 'const char **'.
 	* ada-lex.l (processInt): Make "trailer" local const.  Remove

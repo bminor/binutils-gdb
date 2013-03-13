@@ -237,12 +237,12 @@ struct cleanup *make_cleanup_restore_traceframe_number (void);
 
 void free_actions (struct breakpoint *);
 
-extern char *decode_agent_options (char *exp);
+extern const char *decode_agent_options (const char *exp);
 
 extern void encode_actions (struct breakpoint *t, struct bp_location *tloc,
 			    char ***tdp_actions, char ***stepping_actions);
 
-extern void validate_actionline (char **, struct breakpoint *);
+extern void validate_actionline (const char *, struct breakpoint *);
 extern void validate_trace_state_variable_name (const char *name);
 
 extern struct trace_state_variable *find_trace_state_variable (const char *name);

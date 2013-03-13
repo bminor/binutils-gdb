@@ -1213,7 +1213,7 @@ show_user (char *args, int from_tty)
 
   if (args)
     {
-      char *comname = args;
+      const char *comname = args;
 
       c = lookup_cmd (&comname, cmdlist, "", 0, 1);
       /* c->user_commands would be NULL if it's a python command.  */
@@ -1291,7 +1291,7 @@ argv_to_dyn_string (char **argv, int n)
    Return TRUE if COMMAND exists, unambiguously.  Otherwise FALSE.  */
 
 static int
-valid_command_p (char *command)
+valid_command_p (const char *command)
 {
   struct cmd_list_element *c;
 
@@ -1400,7 +1400,7 @@ alias_command (char *args, int from_tty)
   else
     {
       dyn_string_t alias_prefix_dyn_string, command_prefix_dyn_string;
-      char *alias_prefix, *command_prefix;
+      const char *alias_prefix, *command_prefix;
       struct cmd_list_element *c_alias, *c_command;
 
       if (alias_argc != command_argc)

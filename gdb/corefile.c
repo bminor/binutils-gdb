@@ -434,7 +434,8 @@ set_gnutarget_command (char *ignore, int from_tty,
 /* A completion function for "set gnutarget".  */
 
 static VEC (char_ptr) *
-complete_set_gnutarget (struct cmd_list_element *cmd, char *text, char *word)
+complete_set_gnutarget (struct cmd_list_element *cmd,
+			const char *text, const char *word)
 {
   static const char **bfd_targets;
 

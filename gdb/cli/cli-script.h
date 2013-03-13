@@ -25,8 +25,10 @@ struct cmd_list_element;
 
 extern void script_from_file (FILE *stream, const char *file);
 
-extern void show_user_1 (struct cmd_list_element *c, char *prefix,
-			 char *name, struct ui_file *stream);
+extern void show_user_1 (struct cmd_list_element *c,
+			 const char *prefix,
+			 const char *name,
+			 struct ui_file *stream);
 
 /* Exported to gdb/breakpoint.c */
 

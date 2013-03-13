@@ -286,7 +286,8 @@ struct language_defn
        completion is being made.  If CODE is TYPE_CODE_UNDEF, then all
        symbols should be examined; otherwise, only STRUCT_DOMAIN
        symbols whose type has a code of CODE should be matched.  */
-    VEC (char_ptr) *(*la_make_symbol_completion_list) (char *text, char *word,
+    VEC (char_ptr) *(*la_make_symbol_completion_list) (const char *text,
+						       const char *word,
 						       enum type_code code);
 
     /* The per-architecture (OS/ABI) language information.  */

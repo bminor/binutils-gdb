@@ -432,13 +432,15 @@ execute_command (char *p, int from_tty)
     p++;
   if (*p)
     {
+      const char *cmd = p;
       char *arg;
       line = p;
 
       /* If trace-commands is set then this will print this command.  */
       print_command_trace (p);
 
-      c = lookup_cmd (&p, cmdlist, "", 0, 1);
+      c = lookup_cmd (&cmd, cmdlist, "", 0, 1);
+      p = (char *) cmd;
 
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
@@ -467,7 +469,7 @@ execute_command (char *p, int from_tty)
       execute_cmd_pre_hook (c);
 
       if (c->flags & DEPRECATED_WARN_USER)
-	deprecated_cmd_warning (&line);
+	deprecated_cmd_warning (line);
 
       /* c->user_commands would be NULL in the case of a python command.  */
       if (c->class == class_user && c->user_commands)
@@ -1475,7 +1477,7 @@ int info_verbose = 0;		/* Default verbose msgs off.  */
 void
 set_verbose (char *args, int from_tty, struct cmd_list_element *c)
 {
-  char *cmdname = "verbose";
+  const char *cmdname = "verbose";
   struct cmd_list_element *showcmd;
 
   showcmd = lookup_cmd_1 (&cmdname, showlist, NULL, 1);

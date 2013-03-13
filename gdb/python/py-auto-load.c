@@ -242,7 +242,7 @@ void
 gdbpy_initialize_auto_load (void)
 {
   struct cmd_list_element *cmd;
-  char *cmd_name;
+  const char *cmd_name;
 
   add_setshow_boolean_cmd ("python-scripts", class_support,
 			   &auto_load_python_scripts, _("\

@@ -2603,7 +2603,7 @@ gen_printf (CORE_ADDR scope, struct gdbarch *gdbarch,
 }
 
 static void
-agent_eval_command_one (char *exp, int eval, CORE_ADDR pc)
+agent_eval_command_one (const char *exp, int eval, CORE_ADDR pc)
 {
   struct cleanup *old_chain = 0;
   struct expression *expr;

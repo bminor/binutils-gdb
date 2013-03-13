@@ -203,6 +203,10 @@ extern void generic_printstr (struct ui_file *stream, struct type *type,
 			      int quote_char, int c_style_terminator,
 			      const struct value_print_options *options);
 
-extern void output_command (char *exp, int from_tty);
+/* Run the "output" command.  ARGS and FROM_TTY are the usual
+   arguments passed to all command implementations, except ARGS is
+   const.  */
+
+extern void output_command_const (const char *args, int from_tty);
 
 #endif
