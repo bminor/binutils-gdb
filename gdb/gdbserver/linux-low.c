@@ -5940,7 +5940,6 @@ static struct target_ops linux_target_ops = {
   NULL,
   NULL,
   NULL,
-  NULL,
 #endif
 };
 
