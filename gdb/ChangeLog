@@ -1,3 +1,21 @@
+2013-03-13  Pedro Alves  <palves@redhat.com>
+
+	* ada-lang.c (ada_decode_symbol): Cast away constness of GSYMBOL
+	rather than casting 'const char * const *' to 'const char **'.
+	* ada-lex.l (processInt): Make "trailer" local const.  Remove
+	'const char **' cast.
+	* arm-linux-tdep.c (arm_stap_parse_special_token): Add 'char *'
+	locals, and use those as strtol output pointer, instead than doing
+	invalid casts to from 'const char **' to 'char **'.
+	(_initialize_demangle): Remove cast.
+	* i386-tdep.c (i386_stap_parse_special_token): : Add 'char *'
+	locals, and use those as strtol output pointer, instead than doing
+	invalid casts to from 'const char **' to 'char **'.
+	* solib-dsbt.c (dsbt_get_initial_loadmaps): Remove 'gdb_byte**'
+	casts.
+	* stap-probe.c (stap_parse_register_operand)
+	(stap_parse_single_operand): Likewise.
+
 2013-03-13  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (tfile_get_trace_state_variable_value): Look for

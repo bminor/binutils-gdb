@@ -422,9 +422,11 @@ stap_parse_register_operand (struct stap_parse_info *p)
     {
       /* The value of the displacement.  */
       long displacement;
+      char *endp;
 
       disp_p = 1;
-      displacement = strtol (p->arg, (char **) &p->arg, 10);
+      displacement = strtol (p->arg, &endp, 10);
+      p->arg = endp;
 
       /* Generating the expression for the displacement.  */
       write_exp_elt_opcode (OP_LONG);
@@ -598,7 +600,12 @@ stap_parse_single_operand (struct stap_parse_info *p)
 	tmp = skip_spaces_const (tmp);
 
       if (isdigit (*tmp))
-	number = strtol (tmp, (char **) &tmp, 10);
+	{
+	  char *endp;
+
+	  number = strtol (tmp, &endp, 10);
+	  tmp = endp;
+	}
 
       if (!reg_ind_prefix
 	  || strncmp (tmp, reg_ind_prefix, reg_ind_prefix_len) != 0)
@@ -627,11 +634,13 @@ stap_parse_single_operand (struct stap_parse_info *p)
     {
       /* A temporary variable, needed for lookahead.  */
       const char *tmp = p->arg;
+      char *endp;
       long number;
 
       /* We can be dealing with a numeric constant (if `const_prefix' is
 	 NULL), or with a register displacement.  */
-      number = strtol (tmp, (char **) &tmp, 10);
+      number = strtol (tmp, &endp, 10);
+      tmp = endp;
 
       if (p->inside_paren_p)
 	tmp = skip_spaces_const (tmp);
@@ -667,9 +676,11 @@ stap_parse_single_operand (struct stap_parse_info *p)
     {
       /* We are dealing with a numeric constant.  */
       long number;
+      char *endp;
 
       p->arg += const_prefix_len;
-      number = strtol (p->arg, (char **) &p->arg, 10);
+      number = strtol (p->arg, &endp, 10);
+      p->arg = endp;
 
       write_exp_elt_opcode (OP_LONG);
       write_exp_elt_type (builtin_type (gdbarch)->builtin_long);

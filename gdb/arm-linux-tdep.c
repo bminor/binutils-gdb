@@ -1088,6 +1088,7 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
     {
       /* Temporary holder for lookahead.  */
       const char *tmp = p->arg;
+      char *endp;
       /* Used to save the register name.  */
       const char *start;
       char *regname;
@@ -1140,7 +1141,8 @@ arm_stap_parse_special_token (struct gdbarch *gdbarch,
 	  got_minus = 1;
 	}
 
-      displacement = strtol (tmp, (char **) &tmp, 10);
+      displacement = strtol (tmp, &endp, 10);
+      tmp = endp;
 
       /* Skipping last `]'.  */
       if (*tmp++ != ']')

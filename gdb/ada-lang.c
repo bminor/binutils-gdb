@@ -1299,8 +1299,10 @@ static struct htab *decoded_names_store;
 const char *
 ada_decode_symbol (const struct general_symbol_info *gsymbol)
 {
-  const char **resultp =
-    (const char **) &gsymbol->language_specific.mangled_lang.demangled_name;
+  struct general_symbol_info *gsymbol_rw
+    = (struct general_symbol_info *) gsymbol;
+  const char **resultp
+    = &gsymbol_rw->language_specific.mangled_lang.demangled_name;
 
   if (*resultp == NULL)
     {

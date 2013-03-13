@@ -329,8 +329,7 @@ processInt (const char *base0, const char *num0, const char *exp0)
   ULONGEST result;
   long exp;
   int base;
-
-  char *trailer;
+  const char *trailer;
 
   if (base0 == NULL)
     base = 10;
@@ -347,7 +346,7 @@ processInt (const char *base0, const char *num0, const char *exp0)
     exp = strtol(exp0, (char **) NULL, 10);
 
   errno = 0;
-  result = strtoulst (num0, (const char **) &trailer, base);
+  result = strtoulst (num0, &trailer, base);
   if (errno == ERANGE)
     error (_("Integer literal out of range"));
   if (isxdigit(*trailer))

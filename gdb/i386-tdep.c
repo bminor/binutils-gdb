@@ -3494,6 +3494,7 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 		  char *regname;
 		  int len;
 		  struct stoken str;
+		  char *endp;
 
 		  got_minus[0] = 0;
 		  if (*s == '+')
@@ -3504,7 +3505,8 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 		      got_minus[0] = 1;
 		    }
 
-		  displacements[0] = strtol (s, (char **) &s, 10);
+		  displacements[0] = strtol (s, &endp, 10);
+		  s = endp;
 
 		  if (*s != '+' && *s != '-')
 		    {
@@ -3521,7 +3523,8 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 		      got_minus[1] = 1;
 		    }
 
-		  displacements[1] = strtol (s, (char **) &s, 10);
+		  displacements[1] = strtol (s, &endp, 10);
+		  s = endp;
 
 		  if (*s != '+' && *s != '-')
 		    {
@@ -3538,7 +3541,8 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 		      got_minus[2] = 1;
 		    }
 
-		  displacements[2] = strtol (s, (char **) &s, 10);
+		  displacements[2] = strtol (s, &endp, 10);
+		  s = endp;
 
 		  if (*s != '(' || s[1] != '%')
 		    break;
@@ -3628,7 +3632,12 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 		    break;
 
 		  if (isdigit (*s))
-		    offset = strtol (s, (char **) &s, 10);
+		    {
+		      char *endp;
+
+		      offset = strtol (s, &endp, 10);
+		      s = endp;
+		    }
 
 		  if (*s != '(' || s[1] != '%')
 		    break;
@@ -3675,6 +3684,8 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 
 		  if (*s == ',')
 		    {
+		      char *endp;
+
 		      ++s;
 		      if (*s == '+')
 			++s;
@@ -3684,7 +3695,8 @@ i386_stap_parse_special_token (struct gdbarch *gdbarch,
 			  size_minus = 1;
 			}
 
-		      size = strtol (s, (char **) &s, 10);
+		      size = strtol (s, &endp, 10);
+		      s = endp;
 
 		      if (*s != ')')
 			break;

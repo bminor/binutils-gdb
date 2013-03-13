@@ -298,7 +298,7 @@ dsbt_get_initial_loadmaps (void)
   struct dsbt_info *info = get_dsbt_info ();
 
   if (0 >= target_read_alloc (&current_target, TARGET_OBJECT_FDPIC,
-			      "exec", (gdb_byte**) &buf))
+			      "exec", &buf))
     {
       info->exec_loadmap = NULL;
       error (_("Error reading DSBT exec loadmap"));
@@ -308,7 +308,7 @@ dsbt_get_initial_loadmaps (void)
     dsbt_print_loadmap (info->exec_loadmap);
 
   if (0 >= target_read_alloc (&current_target, TARGET_OBJECT_FDPIC,
-			      "interp", (gdb_byte**)&buf))
+			      "interp", &buf))
     {
       info->interp_loadmap = NULL;
       error (_("Error reading DSBT interp loadmap"));
