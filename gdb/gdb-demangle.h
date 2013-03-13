@@ -28,9 +28,6 @@ extern int demangle;
    DEMANGLE is zero, names are printed raw, i.e. DEMANGLE controls.  */
 extern int asm_demangle;
 
-/* Fake a "set demangle-style" command.  */
-extern void set_demangling_style (char *);
-
 /* Check if a character is one of the commonly used C++ marker characters.  */
 extern int is_cplus_marker (int);
 

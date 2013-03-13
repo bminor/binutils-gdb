@@ -1,5 +1,21 @@
 2013-03-13  Pedro Alves  <palves@redhat.com>
 
+	* dbxread.c (read_ofile_symtab, process_one_symbol): Remove
+	commented out code.
+	* demangle.c (current_demangling_style_string): Make it const.
+	(set_demangling_command): Assert the demangling style is known.
+	Remove all handling of unknown styles.  Set
+	'current_demangling_style_string' to an element of the
+	demangling_style_names array.
+	(set_demangling_style): Delete.
+	(_initialize_demangler): Set current_demangling_style_string to the
+	element of the demangling_style_names array that corresponds to
+	the default demangling style.  Remove FIXME note.  Don't call
+	set_demangling_style.
+	* gdb-demangle.h (set_demangling_style): Remove declaration.
+
+2013-03-13  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (struct add_partial_datum) <text, text0, word>: Make
 	fields const.
 	(ada_make_symbol_completion_list): Make "text0" parameter const.
