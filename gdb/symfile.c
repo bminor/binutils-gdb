@@ -1304,43 +1304,6 @@ symbol_file_clear (int from_tty)
     printf_unfiltered (_("No symbol file now.\n"));
 }
 
-/* Return 32-bit CRC for ABFD.  If successful store it to *FILE_CRC_RETURN and
-   return 1.  Otherwise print a warning and return 0.  ABFD seek position is
-   not preserved.  */
-
-static int
-get_file_crc (bfd *abfd, unsigned long *file_crc_return)
-{
-  unsigned long file_crc = 0;
-
-  if (bfd_seek (abfd, 0, SEEK_SET) != 0)
-    {
-      warning (_("Problem reading \"%s\" for CRC: %s"),
-	       bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
-      return 0;
-    }
-
-  for (;;)
-    {
-      gdb_byte buffer[8 * 1024];
-      bfd_size_type count;
-
-      count = bfd_bread (buffer, sizeof (buffer), abfd);
-      if (count == (bfd_size_type) -1)
-	{
-	  warning (_("Problem reading \"%s\" for CRC: %s"),
-		   bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
-	  return 0;
-	}
-      if (count == 0)
-	break;
-      file_crc = bfd_calc_gnu_debuglink_crc32 (file_crc, buffer, count);
-    }
-
-  *file_crc_return = file_crc;
-  return 1;
-}
-
 static int
 separate_debug_file_exists (const char *name, unsigned long crc,
 			    struct objfile *parent_objfile)
@@ -1390,7 +1353,7 @@ separate_debug_file_exists (const char *name, unsigned long crc,
   else
     verified_as_different = 0;
 
-  file_crc_p = get_file_crc (abfd, &file_crc);
+  file_crc_p = gdb_bfd_crc (abfd, &file_crc);
 
   gdb_bfd_unref (abfd);
 
@@ -1399,19 +1362,19 @@ separate_debug_file_exists (const char *name, unsigned long crc,
 
   if (crc != file_crc)
     {
+      unsigned long parent_crc;
+
       /* If one (or both) the files are accessed for example the via "remote:"
 	 gdbserver way it does not support the bfd_stat operation.  Verify
 	 whether those two files are not the same manually.  */
 
-      if (!verified_as_different && !parent_objfile->crc32_p)
+      if (!verified_as_different)
 	{
-	  parent_objfile->crc32_p = get_file_crc (parent_objfile->obfd,
-						  &parent_objfile->crc32);
-	  if (!parent_objfile->crc32_p)
+	  if (!gdb_bfd_crc (parent_objfile->obfd, &parent_crc))
 	    return 0;
 	}
 
-      if (verified_as_different || parent_objfile->crc32 != file_crc)
+      if (verified_as_different || parent_crc != file_crc)
 	warning (_("the debug information found in \"%s\""
 		   " does not match \"%s\" (CRC mismatch).\n"),
 		 name, parent_objfile->name);

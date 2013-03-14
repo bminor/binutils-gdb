@@ -1,5 +1,16 @@
 2013-03-14  Tom Tromey  <tromey@redhat.com>
 
+	* gdb_bfd.c (struct gdb_bfd_data) <crc_computed, crc>:
+	New fields.
+	(get_file_crc): Move from symfile.c.
+	(gdb_bfd_crc): New function.
+	* gdb_bfd.h (gdb_bfd_crc): Declare.
+	* objfiles.h (struct objfile) <crc32, crc32_p>: Remove.
+	* symfile.c (get_file_crc): Move to gdb_bfd.c.
+	(separate_debug_file_exists): Use gdb_bfd_crc.
+
+2013-03-14  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (get_debug_link_info): Remove.
 	(find_separate_debug_file_by_debuglink): Use
 	bfd_get_debug_link_info.

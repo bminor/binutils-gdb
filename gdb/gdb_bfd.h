@@ -70,6 +70,12 @@ void gdb_bfd_mark_parent (bfd *child, bfd *parent);
 
 const gdb_byte *gdb_bfd_map_section (asection *section, bfd_size_type *size);
 
+/* Compute the CRC for ABFD.  The CRC is used to find and verify
+   separate debug files.  When successful, this fills in *CRC_OUT and
+   returns 1.  Otherwise, this issues a warning and returns 0.  */
+
+int gdb_bfd_crc (struct bfd *abfd, unsigned long *crc_out);
+
 
 
 /* A wrapper for bfd_fopen that initializes the gdb-specific reference
