@@ -1616,6 +1616,20 @@ lookup_symbol_in_objfile_from_linkage_name (struct objfile *objfile,
   return NULL;
 }
 
+/* A helper function that throws an exception when a symbol was found
+   in a psymtab but not in a symtab.  */
+
+static void ATTRIBUTE_NORETURN
+error_in_psymtab_expansion (int kind, const char *name, struct symtab *symtab)
+{
+  error (_("\
+Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
+%s may be an inlined function, or may be a template function\n	 \
+(if a template, try specifying an instantiation: %s<type>)."),
+	 kind == GLOBAL_BLOCK ? "global" : "static",
+	 name, symtab_to_filename_for_display (symtab), name, name);
+}
+
 /* A helper function for lookup_symbol_aux that interfaces with the
    "quick" symbol table functions.  */
 
@@ -1638,30 +1652,7 @@ lookup_symbol_aux_quick (struct objfile *objfile, int kind,
   block = BLOCKVECTOR_BLOCK (bv, kind);
   sym = lookup_block_symbol (block, name, domain);
   if (!sym)
-    {
-      /* This shouldn't be necessary, but as a last resort try
-	 looking in the statics even though the psymtab claimed
-	 the symbol was global, or vice-versa.  It's possible
-	 that the psymtab gets it wrong in some cases.  */
-
-      /* FIXME: carlton/2002-09-30: Should we really do that?
-	 If that happens, isn't it likely to be a GDB error, in
-	 which case we should fix the GDB error rather than
-	 silently dealing with it here?  So I'd vote for
-	 removing the check for the symbol in the other
-	 block.  */
-      block = BLOCKVECTOR_BLOCK (bv,
-				 kind == GLOBAL_BLOCK ?
-				 STATIC_BLOCK : GLOBAL_BLOCK);
-      sym = lookup_block_symbol (block, name, domain);
-      if (!sym)
-	error (_("\
-Internal: %s symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>)."),
-	       kind == GLOBAL_BLOCK ? "global" : "static",
-	       name, symtab_to_filename_for_display (symtab), name, name);
-    }
+    error_in_psymtab_expansion (kind, name, symtab);
   return fixup_symbol_section (sym, objfile);
 }
 
@@ -1849,24 +1840,8 @@ basic_lookup_transparent_type_quick (struct objfile *objfile, int kind,
   block = BLOCKVECTOR_BLOCK (bv, kind);
   sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
   if (!sym)
-    {
-      int other_kind = kind == GLOBAL_BLOCK ? STATIC_BLOCK : GLOBAL_BLOCK;
+    error_in_psymtab_expansion (kind, name, symtab);
 
-      /* This shouldn't be necessary, but as a last resort
-       * try looking in the 'other kind' even though the psymtab
-       * claimed the symbol was one thing.  It's possible that
-       * the psymtab gets it wrong in some cases.
-       */
-      block = BLOCKVECTOR_BLOCK (bv, other_kind);
-      sym = lookup_block_symbol (block, name, STRUCT_DOMAIN);
-      if (!sym)
-	/* FIXME; error is wrong in one case.  */
-	error (_("\
-Internal: global symbol `%s' found in %s psymtab but not in symtab.\n\
-%s may be an inlined function, or may be a template function\n\
-(if a template, try specifying an instantiation: %s<type>)."),
-	       name, symtab_to_filename_for_display (symtab), name, name);
-    }
   if (!TYPE_IS_OPAQUE (SYMBOL_TYPE (sym)))
     return SYMBOL_TYPE (sym);
 
