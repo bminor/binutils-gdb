@@ -1,3 +1,9 @@
+2013-03-14  Andreas Schwab  <schwab@suse.de>
+
+	* doc/c-arc.texi (ARC Directives): Revert last change and use
+	@itemize instead of @table.
+	* doc/c-arm.texi (ARM-Instruction-Set): Likewise.
+
 2013-03-14  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/15273
@@ -7,7 +13,7 @@
 2013-03-14  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/15212
-	* doc/c-arc.texi (ARC Directives): Use @code instead of @bullte
+	* doc/c-arc.texi (ARC Directives): Use @code instead of @bullet
 	for table format.
 	* doc/c-arm.texi (ARM-Instruction-Set): Likewise.  Also add text
 	to the @item directives.
@@ -73,7 +79,7 @@
 2013-02-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (_i386_insn): Add rep_prefix.
-	(md_assemble): Check if REP prefix is OK. 
+	(md_assemble): Check if REP prefix is OK.
 	(parse_insn): Remove expecting_string_instruction.  Set
 	i.rep_prefix.
 

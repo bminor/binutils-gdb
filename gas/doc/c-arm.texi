@@ -389,32 +389,32 @@ ARM and THUMB instructions had their own, separate syntaxes.  The new,
 @code{unified} syntax, which can be selected via the @code{.syntax}
 directive, and has the following main features:
 
-@table @code
-@item 1
+@itemize @bullet
+@item
 Immediate operands do not require a @code{#} prefix.
 
-@item 2
+@item
 The @code{IT} instruction may appear, and if it does it is validated
 against subsequent conditional affixes.  In ARM mode it does not
 generate machine code, in THUMB mode it does.
 
-@item 3
+@item
 For ARM instructions the conditional affixes always appear at the end
 of the instruction.  For THUMB instructions conditional affixes can be
 used, but only inside the scope of an @code{IT} instruction.
 
-@item 4
+@item
 All of the instructions new to the V6T2 architecture (and later) are
 available.  (Only a few such instructions can be written in the
 @code{divided} syntax).
 
-@item 5
+@item
 The @code{.N} and @code{.W} suffixes are recognized and honored.
 
-@item 6
+@item
 All instructions set the flags if and only if they have an @code{s}
 affix.
-@end table
+@end itemize
 
 @node ARM-Chars
 @subsection Special Characters
