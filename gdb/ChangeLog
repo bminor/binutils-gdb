@@ -1,3 +1,8 @@
+2013-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* source.c (print_source_lines_base): Make a local copy of
+	symtab_to_fullname.
+
 2013-03-14  Hui Zhu  <hui_zhu@mentor.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 
