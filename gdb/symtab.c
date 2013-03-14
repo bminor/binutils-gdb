@@ -212,6 +212,7 @@ iterate_over_some_symtabs (const char *name,
 	{
 	  if (callback (s, data))
 	    return 1;
+	  continue;
 	}
 
     /* Before we invoke realpath, which can get expensive when many
@@ -224,6 +225,7 @@ iterate_over_some_symtabs (const char *name,
       {
 	if (callback (s, data))
 	  return 1;
+	continue;
       }
 
     /* If the user gave us an absolute path, try to find the file in
@@ -239,6 +241,7 @@ iterate_over_some_symtabs (const char *name,
 	  {
 	    if (callback (s, data))
 	      return 1;
+	    continue;
 	  }
       }
     }

@@ -183,6 +183,7 @@ partial_map_symtabs_matching_filename (struct objfile *objfile,
 	if (partial_map_expand_apply (objfile, name, real_path,
 				      pst, callback, data))
 	  return 1;
+	continue;
       }
 
     /* Before we invoke realpath, which can get expensive when many
@@ -196,6 +197,7 @@ partial_map_symtabs_matching_filename (struct objfile *objfile,
 	if (partial_map_expand_apply (objfile, name, real_path,
 				      pst, callback, data))
 	  return 1;
+	continue;
       }
 
     /* If the user gave us an absolute path, try to find the file in
@@ -209,6 +211,7 @@ partial_map_symtabs_matching_filename (struct objfile *objfile,
 	    if (partial_map_expand_apply (objfile, name, real_path,
 					  pst, callback, data))
 	      return 1;
+	    continue;
 	  }
       }
   }

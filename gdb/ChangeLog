@@ -1,3 +1,11 @@
+2013-03-14  Doug Evans  <dje@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (dw2_map_symtabs_matching_filename): Put continue after
+	any successful compare_filenames_for_search or FILENAME_CMP.
+	* psymtab.c (partial_map_symtabs_matching_filename): Likewise.
+	* symtab.c (iterate_over_some_symtabs): Likewise.
+
 2013-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* source.c (print_source_lines_base): Make a local copy of

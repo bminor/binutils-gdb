@@ -3079,6 +3079,7 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 	      if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
 					callback, data))
 		return 1;
+	      continue;
 	    }
 
 	  /* Before we invoke realpath, which can get expensive when many
@@ -3093,6 +3094,7 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 	      if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
 					callback, data))
 		return 1;
+	      continue;
 	    }
 
 	  if (real_path != NULL)
@@ -3105,6 +3107,7 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
 		  if (dw2_map_expand_apply (objfile, per_cu, name, real_path,
 					    callback, data))
 		    return 1;
+		  continue;
 		}
 	    }
 	}
