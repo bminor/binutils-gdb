@@ -1355,11 +1355,18 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 				 symtab_to_filename_for_display (s));
 	  if (ui_out_is_mi_like_p (uiout)
 	      || !ui_out_test_flags (uiout, ui_source_list))
-	    {
-	      const char *fullname = symtab_to_fullname (s);
+ 	    {
+	      const char *s_fullname = symtab_to_fullname (s);
+	      char *local_fullname;
 
-	      ui_out_field_string (uiout, "fullname", fullname);
-	    }
+	      /* ui_out_field_string may free S_FULLNAME by calling
+		 open_source_file for it again.  See e.g.,
+		 tui_field_string->tui_show_source.  */
+	      local_fullname = alloca (strlen (s_fullname) + 1);
+	      strcpy (local_fullname, s_fullname);
+
+	      ui_out_field_string (uiout, "fullname", local_fullname);
+ 	    }
 
 	  ui_out_text (uiout, "\n");
 	}
