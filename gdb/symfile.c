@@ -1304,36 +1304,6 @@ symbol_file_clear (int from_tty)
     printf_unfiltered (_("No symbol file now.\n"));
 }
 
-static char *
-get_debug_link_info (struct objfile *objfile, unsigned long *crc32_out)
-{
-  asection *sect;
-  bfd_size_type debuglink_size;
-  unsigned long crc32;
-  char *contents;
-  int crc_offset;
-
-  sect = bfd_get_section_by_name (objfile->obfd, ".gnu_debuglink");
-
-  if (sect == NULL)
-    return NULL;
-
-  debuglink_size = bfd_section_size (objfile->obfd, sect);
-
-  contents = xmalloc (debuglink_size);
-  bfd_get_section_contents (objfile->obfd, sect, contents,
-			    (file_ptr)0, (bfd_size_type)debuglink_size);
-
-  /* Crc value is stored after the filename, aligned up to 4 bytes.  */
-  crc_offset = strlen (contents) + 1;
-  crc_offset = (crc_offset + 3) & ~3;
-
-  crc32 = bfd_get_32 (objfile->obfd, (bfd_byte *) (contents + crc_offset));
-
-  *crc32_out = crc32;
-  return contents;
-}
-
 /* Return 32-bit CRC for ABFD.  If successful store it to *FILE_CRC_RETURN and
    return 1.  Otherwise print a warning and return 0.  ABFD seek position is
    not preserved.  */
@@ -1584,7 +1554,7 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
   unsigned long crc32;
   struct cleanup *cleanups;
 
-  debuglink = get_debug_link_info (objfile, &crc32);
+  debuglink = bfd_get_debug_link_info (objfile->obfd, &crc32);
 
   if (debuglink == NULL)
     {

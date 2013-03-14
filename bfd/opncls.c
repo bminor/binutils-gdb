@@ -1,6 +1,6 @@
 /* opncls.c -- open and close a BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012, 2013
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -1140,20 +1140,22 @@ bfd_calc_gnu_debuglink_crc32 (unsigned long crc,
 
 
 /*
-INTERNAL_FUNCTION
-	get_debug_link_info
+FUNCTION
+	bfd_get_debug_link_info
 
 SYNOPSIS
-	char *get_debug_link_info (bfd *abfd, unsigned long *crc32_out);
+	char *bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out);
 
 DESCRIPTION
 	fetch the filename and CRC32 value for any separate debuginfo
 	associated with @var{abfd}. Return NULL if no such info found,
-	otherwise return filename and update @var{crc32_out}.
+	otherwise return filename and update @var{crc32_out}.  The
+	returned filename is allocated with @code{malloc}; freeing it
+	is the responsibility of the caller.
 */
 
-static char *
-get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
+char *
+bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out)
 {
   asection *sect;
   unsigned long crc32;
@@ -1261,7 +1263,7 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
       return NULL;
     }
 
-  base = get_debug_link_info (abfd, & crc32);
+  base = bfd_get_debug_link_info (abfd, & crc32);
   if (base == NULL)
     return NULL;
 

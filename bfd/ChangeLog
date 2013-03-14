@@ -1,3 +1,10 @@
+2013-03-14  Tom Tromey  <tromey@redhat.com>
+
+	* opncls.c (bfd_get_debug_link_info): Rename from
+	get_debug_link_info.  Export.  Update comment.
+	(find_separate_debug_file): Update.
+	* bfd-in2.h: Rebuild.
+
 2013-03-08  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
         * elf64-aarch64.c (elf_backend_can_gc_sections): Enable gc-section
