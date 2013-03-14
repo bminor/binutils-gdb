@@ -1,3 +1,8 @@
+2013-03-14  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* Makefile.in: Include build directory in search path to find
+	config.h
+
 2012-08-16  Nick Clifton  <nickc@redhat.com>
 
 	* end.c: Include config.h before system header files.

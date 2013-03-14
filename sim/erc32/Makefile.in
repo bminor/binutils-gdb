@@ -45,7 +45,7 @@ sis: sis.o $(SIS_OFILES) $(COMMON_OBJS) $(LIBDEPS)
 # There is AC_C_BIGENDIAN but it doesn't handle float endianness.
 # [Are int/float endians every different on a sparc?]
 end: $(srcdir)/end.c
-	$(CC_FOR_BUILD) $(srcdir)/end.c -o end
+	$(CC_FOR_BUILD) -I. $(srcdir)/end.c -o end
 end.h: end
 	./end > end.h
 
