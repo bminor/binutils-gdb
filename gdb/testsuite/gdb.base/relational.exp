@@ -30,7 +30,7 @@ if { [prepare_for_testing relational.exp relational int-type.c {debug nowarnings
 }
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 #

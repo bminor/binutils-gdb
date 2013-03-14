@@ -55,7 +55,7 @@ if ![runto_main] {
 
 if { ![gdb_target_supports_trace] } then {
     unsupported "Current target does not support trace"
-    return -1;
+    return -1
 }
 
 if [is_amd64_regs_target] {

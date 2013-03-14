@@ -55,23 +55,23 @@ proc initialize {} {
     global srcfile
 
     if [gdb_test "break marker1" "Breakpoint 1 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker1" ] { 
-      return 0; 
+      return 0
     }
 
 
     if [gdb_test "break marker2" "Breakpoint 2 at $hex: file .*$srcfile, line $decimal.*" "set breakpoint at marker2" ] { 
-      return 0; 
+      return 0
     }
 
 
     if [gdb_test "info break" "1\[ \]*breakpoint.*marker1.*\r\n2\[ \]*breakpoint.*marker2.*" "info break in watchpoint.exp" ] { 
-      return 0; 
+      return 0
     }
 
     gdb_test "watch ival3" ".*\[Ww\]atchpoint 3: ival3.*" "set watchpoint on ival3"
 
     if [gdb_test "info watch" "3\[ \]*.*watchpoint.*ival3" "watchpoint found in watchpoint/breakpoint table" ] { 
-      return 0; 
+      return 0
     }
 
 
@@ -80,7 +80,7 @@ proc initialize {} {
     # we get to the first marker function.
 
     if [gdb_test "disable 3" "disable 3\[\r\n\]+" "disable watchpoint" ] { 
-      return 0; 
+      return 0
     }
 
 
@@ -99,7 +99,7 @@ proc test_simple_watchpoint {} {
     # Ensure that the watchpoint is disabled when we startup.
 
     if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint in test_simple_watchpoint" ] { 
-      return 0; 
+      return 0
     }
 
     # Run until we get to the first marker function.
@@ -120,7 +120,7 @@ proc test_simple_watchpoint {} {
     # After reaching the marker function, enable the watchpoint.
 
     if [gdb_test "enable 3" "^enable 3\[\r\n\]+" "enable watchpoint" ] { 
-      return ; 
+      return
     }
 
 
@@ -187,7 +187,7 @@ Continuing.*\[Ww\]atchpoint.*ival3.*Old value = -1.*New value = 0.*ival3 = count
     # Disable the watchpoint so we run at full speed until we exit.
 
     if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "watchpoint disabled" ] { 
-      return ; 
+      return
     }
 
 
@@ -212,7 +212,7 @@ proc test_disabling_watchpoints {} {
     # Ensure that the watchpoint is disabled when we startup.
 
     if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint in test_disabling_watchpoints" ] { 
-      return 0; 
+      return 0
     }
 
 
@@ -234,7 +234,7 @@ proc test_disabling_watchpoints {} {
     # After reaching the marker function, enable the watchpoint.
 
     if [gdb_test "enable 3" "^enable 3\[\r\n\]+" "watchpoint enabled" ] { 
-      return ; 
+      return
     }
 
 
@@ -249,7 +249,7 @@ proc test_disabling_watchpoints {} {
     # Disable the watchpoint but leave breakpoints
 
     if [gdb_test "disable 3" "^disable 3\[\r\n\]+" "disable watchpoint #2 in test_disabling_watchpoints" ] { 
-      return 0; 
+      return 0
     }
 
 
@@ -371,7 +371,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 	    }
 	    default {
 		fail "continue to read";
-		return ;
+		return
 	    }
 	}
 

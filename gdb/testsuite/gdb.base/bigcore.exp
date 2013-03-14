@@ -103,7 +103,7 @@ proc extract_heap { dir } {
 	    fail "$test (timeout)"
 	}
     }
-    return $heap;
+    return $heap
 }
 set next_heap [extract_heap next]
 set prev_heap [extract_heap prev]

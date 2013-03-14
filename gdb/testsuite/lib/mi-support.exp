@@ -126,7 +126,7 @@ proc default_mi_gdb_start { args } {
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS"
 
     if [info exists gdb_spawn_id] {
-	return 0;
+	return 0
     }
 
     if ![is_remote host] {
@@ -148,7 +148,7 @@ proc default_mi_gdb_start { args } {
     set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS [host_info gdb_opts]"];
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
-	return 1;
+	return 1
     }
     gdb_expect {
 	-re "~\"GNU.*\r\n~\".*$mi_gdb_prompt$" {
@@ -158,7 +158,7 @@ proc default_mi_gdb_start { args } {
 	    if { $MIFLAGS == "-i=mi1" } {
 	        perror "(mi startup) Got unexpected new mi prompt."
 	        remote_close host;
-	        return -1;
+	        return -1
 	    }
 	    verbose "GDB initialized."
 	}
@@ -169,19 +169,19 @@ proc default_mi_gdb_start { args } {
 	    if { $MIFLAGS != "-i=mi1" } {
 	        perror "(mi startup) Got unexpected old mi prompt."
 	        remote_close host;
-	        return -1;
+	        return -1
 	    }
 	    verbose "GDB initialized."
 	}
 	-re ".*unrecognized option.*for a complete list of options." {
 	    untested "Skip mi tests (not compiled with mi support)."
 	    remote_close host;
-	    return -1;
+	    return -1
 	}
 	-re ".*Interpreter `mi' unrecognized." {
 	    untested "Skip mi tests (not compiled with mi support)."
 	    remote_close host;
-	    return -1;
+	    return -1
 	}
 	timeout {
 	    perror "(timeout) GDB never initialized after 10 seconds."
@@ -228,7 +228,7 @@ proc default_mi_gdb_start { args } {
 
     mi_detect_async
 
-    return 0;
+    return 0
 }
 
 #
@@ -288,7 +288,7 @@ proc mi_gdb_reinitialize_dir { subdir } {
     }
 
     if [is_remote host] {
-	return "";
+	return ""
     }
 
     if { $MIFLAGS == "-i=mi1" } {
@@ -339,7 +339,7 @@ proc mi_gdb_target_cmd { targetname serialport } {
 	gdb_expect 60 {
 	    -re "47\\^connected.*$mi_gdb_prompt" {
 		verbose "Set target to $targetname";
-		return 0;
+		return 0
 	    }
 	    -re "unknown host.*$mi_gdb_prompt" {
 	        verbose "Couldn't look up $serialport"
@@ -349,19 +349,19 @@ proc mi_gdb_target_cmd { targetname serialport } {
 	    }
 	    -re "Remote MIPS debugging.*$mi_gdb_prompt$" {
 		verbose "Set target to $targetname";
-		return 0;
+		return 0
 	    }
 	    -re "Remote debugging using .*$serialport_re.*$mi_gdb_prompt$" {
 		verbose "Set target to $targetname";
-		return 0;
+		return 0
 	    }
 	    -re "Remote target $targetname connected to.*$mi_gdb_prompt$" {
 		verbose "Set target to $targetname";
-		return 0;
+		return 0
 	    }
 	    -re "Connected to.*$mi_gdb_prompt$" { 
 		verbose "Set target to $targetname";
-		return 0;
+		return 0
 	    }
 	    -re "Ending remote.*$mi_gdb_prompt$" { }
 	    -re "Connection refused.*$mi_gdb_prompt$" {
@@ -404,7 +404,7 @@ proc mi_gdb_file_cmd { arg } {
 	set arg [remote_download host $arg];
 	if { $arg == "" } {
 	    error "download failed"
-	    return -1;
+	    return -1
 	}
     }
 
@@ -620,7 +620,7 @@ proc mi_gdb_test { args } {
 			perror "Couldn't send $command to GDB.";
 		    }
 		    fail "$message";
-		    return $result;
+		    return $result
 		}
 		gdb_expect 2 {
 		    -re "\[\r\n\]" { }
@@ -639,7 +639,7 @@ proc mi_gdb_test { args } {
 		    perror "Couldn't send $command to GDB.";
 		}
 		fail "$message";
-		return $result;
+		return $result
 	    }
 	}
     }
@@ -666,7 +666,7 @@ proc mi_gdb_test { args } {
 		 fail "$message";
 	     }
 	     gdb_suppress_entire_file "GDB died";
-	     return -1;
+	     return -1
 	 }
 	 -re "Ending remote debugging.*$mi_gdb_prompt\[ \]*$" {
 	    if ![isnative] then {
@@ -814,7 +814,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 	    -re "$mi_gdb_prompt$" { }
 	    default {
 		perror "gdb_init_command for target failed";
-		return -1;
+		return -1
 	    }
 	}
     }
@@ -830,7 +830,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 		-re "${run_match}\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt" {}
 		default {}
 	    }
-	    return 0;
+	    return 0
 	}
 
 	if [target_info exists gdb,start_symbol] {
@@ -1123,7 +1123,7 @@ proc mi_expect_interrupt { test } {
     gdb_expect {
 	-re "\\*stopped,${r}$any\r\n$prompt_re" {
 	    pass "$test"
-	    return 0;
+	    return 0
 	}
 	-re ".*\r\n$mi_gdb_prompt$" {
 	    verbose -log "got $expect_out(buffer)"

@@ -242,7 +242,7 @@ with_test_prefix "trace_same_addr $type" {
 	    if [string equal $type "ftrace"] {
 		# The instruction may be not long enough to set a fast
 		# tracepoint.  Skip the rest of this test.
-		return -1;
+		return -1
 	    } else {
 		fail $test
 	    }
@@ -257,7 +257,7 @@ with_test_prefix "trace_same_addr $type" {
 	    if [string equal $type "ftrace"] {
 		# The instruction may be not long enough to set a fast
 		# tracepoint.  Skip the rest of this test.
-		return -1;
+		return -1
 	    } else {
 		fail $test
 	    }
@@ -365,7 +365,7 @@ if { ![gdb_target_supports_trace] } then {
     # the socket file.
     gdb_test "detach" "Detaching .*, process .*"
     unsupported "Current target does not support trace"
-    return -1;
+    return -1
 }
 
 strace_probe_marker

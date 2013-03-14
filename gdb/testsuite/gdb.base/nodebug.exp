@@ -21,7 +21,7 @@ set srcfile $srcdir/$subdir/$testfile.c
 set binfile $objdir/$subdir/$testfile
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 if [test_compiler_info "xlc-*"] {

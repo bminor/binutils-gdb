@@ -51,7 +51,7 @@ set timeout 10
 # Create and source the file that provides information about the compiler
 # used to compile the test case.
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 gdb_exit

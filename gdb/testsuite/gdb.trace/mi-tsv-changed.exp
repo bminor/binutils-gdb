@@ -70,7 +70,7 @@ proc test_create_delete_modify_tsv { } {with_test_prefix "create delete modify" 
 
     if ![gdb_target_supports_trace] {
 	unsupported "Current target does not support trace"
-	return -1;
+	return -1
     }
     gdb_exit
     if [mi_gdb_start] {
@@ -235,7 +235,7 @@ if ![runto_main] {
 
 if ![gdb_target_supports_trace] {
     unsupported "Current target does not support trace"
-    return -1;
+    return -1
 }
 
 gdb_exit

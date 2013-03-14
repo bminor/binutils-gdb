@@ -68,10 +68,10 @@ proc gdb_start { } {
 
 	    set state [spawn_vxgdb];
 	    if { $state == "pass" } {
-		return 0;
+		return 0
 	    }
 	    if { $state == "fail" } {
-		return -1;
+		return -1
 	    }
 	}
 	remote_reboot target;
@@ -97,7 +97,7 @@ proc spawn_vxgdb { } {
 	-re "Done\..*$gdb_prompt $"	{
 	    verbose "Set target to [target_info hostname]" 1
 	    set timeout 10;
-	    return "pass";
+	    return "pass"
 	}
 	-re "net_connect: RPC: (Program not registered|.*Timed out).*$" {
 	    warning "Couldn't set GDB to target [target_info netport]."
@@ -106,7 +106,7 @@ proc spawn_vxgdb { } {
 	    warning "Couldn't set target for vxworks."
 	}
     }
-    return "retry";
+    return "retry"
 }
 
 proc gdb_exit { } {

@@ -37,7 +37,7 @@ proc default_prompt_gdb_start { } {
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
     if [info exists gdb_spawn_id] {
-	return 0;
+	return 0
     }
 
     if ![is_remote host] {
@@ -49,7 +49,7 @@ proc default_prompt_gdb_start { } {
     set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts]"];
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
-	return 1;
+	return 1
     }
     gdb_expect 360 {
 	-re ".*$gdb_prompt_fail.*$gdb_prompt_fail.*" {
@@ -79,7 +79,7 @@ proc default_prompt_gdb_start { } {
 	}
     }
     set gdb_spawn_id -1;
-    return 0;
+    return 0
 }
 
 #

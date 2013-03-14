@@ -99,7 +99,7 @@ gdb_test "" "Breakpoint ${decimal}, main.*"
 
 if { ![gdb_target_supports_trace] } then {
     unsupported "Current target does not support trace"
-    return 1;
+    return 1
 }
 
 gdb_test "break end" "Breakpoint \[0-9\] at .*"

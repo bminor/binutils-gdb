@@ -29,7 +29,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 # Test depends on printf, which the sparclet stub doesn't support.  
 if { [istarget "sparclet-*-*"] } {
-    return 0;
+    return 0
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {

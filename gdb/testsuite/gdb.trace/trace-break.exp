@@ -34,7 +34,7 @@ if ![runto_main] {
 
 if ![gdb_target_supports_trace] {
     unsupported "target does not support trace"
-    return -1;
+    return -1
 }
 
 set fpreg "fp"

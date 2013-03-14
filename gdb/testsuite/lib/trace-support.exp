@@ -107,7 +107,7 @@ proc gdb_trace_setactions { testname tracepoint args } {
     gdb_expect 5 {
 	-re "No tracepoint number .*$gdb_prompt $" {
 	    fail $testname
-	    return 1;
+	    return 1
 	}
 	-re "Enter actions for tracepoint $tracepoint.*>" {
 	    if { [llength $args] > 0 } {
@@ -159,9 +159,9 @@ proc gdb_trace_setactions { testname tracepoint args } {
 	$passfail $testname;
     }
     if { $passfail == "pass" } then { 
-	return 0;
+	return 0
     } else {
-	return 1;
+	return 1
     }
 }
 
@@ -202,9 +202,9 @@ proc gdb_tfind_test { testname tfind_arg exp_res args } {
     }
     $passfail "$testname";
     if { $passfail == "pass" } then { 
-	return 0;
+	return 0
     } else {
-	return 1;
+	return 1
     }
 }
 
@@ -229,7 +229,7 @@ proc gdb_readexpr { gdb_expr } {
 	-re "$gdb_prompt $" { }
 	default { }
     }
-    return $result;
+    return $result
 }
 
 #
@@ -246,7 +246,7 @@ proc gdb_gettpnum { tracepoint } {
     if { $tracepoint != "" } {
 	gdb_test "trace $tracepoint" "" ""
     }
-    return [gdb_readexpr "\$tpnum"];
+    return [gdb_readexpr "\$tpnum"]
 }
 
 
@@ -299,7 +299,7 @@ proc gdb_find_recursion_test_baseline { filename } {
 	-re "$gdb_prompt $" { }
 	default { }
     }
-    return $baseline;
+    return $baseline
 }
 
 # Return the location of the IPA library.

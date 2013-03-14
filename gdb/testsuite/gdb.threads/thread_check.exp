@@ -43,7 +43,7 @@ clean_restart ${binfile}
 
 if ![runto_main] then {
    fail "Can't run to main"
-      return 1;
+      return 1
 }
 
 

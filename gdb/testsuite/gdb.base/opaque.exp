@@ -42,7 +42,7 @@ if  { [gdb_compile "${binfile}0.o ${binfile}1.o" ${binfile} executable {debug}] 
 # Create and source the file that provides information about the compiler
 # used to compile the test case.
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 # Start with a fresh gdb.

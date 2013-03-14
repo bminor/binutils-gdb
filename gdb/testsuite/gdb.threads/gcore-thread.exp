@@ -59,7 +59,7 @@ gdb_test_multiple "help gcore" "help gcore" {
     -re "Undefined command: .gcore.*$gdb_prompt $" {
 	# gcore command not supported -- nothing to test here.
 	unsupported "gdb does not support gcore on this target"
-	return -1;
+	return -1
     }
     -re "Save a core file .*$gdb_prompt $" {
 	pass "help gcore"
@@ -77,7 +77,7 @@ gdb_test_multiple "info threads" "threads are supported" {
     }
     -re "${nl}$gdb_prompt $" {
 	unsupported "gdb does not support threads on this target"
-	return -1;
+	return -1
     }
 }
 
@@ -137,12 +137,12 @@ proc load_core { corefile } {
 	    -re " is not a core dump:.*\r\n$gdb_prompt $" {
 		fail "re-load generated corefile (bad file format)"
 		# No use proceeding from here.
-		return 0;
+		return 0
 	    }
 	    -re ": No such file or directory.*\r\n$gdb_prompt $" {
 		fail "re-load generated corefile (file not found)"
 		# No use proceeding from here.
-		return 0;
+		return 0
 	    }
 	    -re "Couldn't find .* registers in core file.*\r\n$gdb_prompt $" {
 		fail "re-load generated corefile (incomplete note section)"

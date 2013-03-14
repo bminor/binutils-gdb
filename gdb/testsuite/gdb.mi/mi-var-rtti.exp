@@ -27,7 +27,7 @@ standard_testfile .cc
 set opts {debug c++}
 
 if [build_executable $testfile.exp $testfile $srcfile $opts] {
-    return -1;
+    return -1
 }
 
 mi_gdb_load ${binfile}

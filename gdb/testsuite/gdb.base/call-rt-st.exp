@@ -28,7 +28,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 # Test depends on printf, which the sparclet stub doesn't support.  
 if { [istarget "sparclet-*-*"] } {
-    return 0;
+    return 0
 }
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
@@ -42,7 +42,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # used to compile the test case.
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 # Some targets can't do function calls, so don't even bother with this

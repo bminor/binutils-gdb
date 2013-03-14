@@ -30,7 +30,7 @@ set srcfile ${testfile}.cc
 set binfile ${objdir}/${subdir}/${testfile}
 
 if [get_compiler_info "c++"] {
-    return -1;
+    return -1
 }
 
 set additional_flags {-ffunction-sections -Wl,--gc-sections}

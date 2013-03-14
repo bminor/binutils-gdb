@@ -26,7 +26,7 @@ if { [skip_cplus_tests] } { continue }
 standard_testfile cttiadd.cc cttiadd1.cc cttiadd2.cc cttiadd3.cc
 
 if [get_compiler_info "c++"] {
-    return -1;
+    return -1
 }
 
 if {[prepare_for_testing $testfile.exp $testfile \

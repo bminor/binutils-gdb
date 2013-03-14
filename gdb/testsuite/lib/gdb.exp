@@ -123,7 +123,7 @@ proc default_gdb_version {} {
 }
 
 proc gdb_version { } {
-    return [default_gdb_version];
+    return [default_gdb_version]
 }
 
 #
@@ -310,7 +310,7 @@ proc gdb_start_cmd {args} {
 	    -re "$gdb_prompt $" { }
 	    default {
 		perror "gdb_init_command for target failed";
-		return -1;
+		return -1
 	    }
 	}
     }
@@ -421,7 +421,7 @@ proc gdb_breakpoint { function args } {
     if { $print_pass } {
 	pass $test_name
     }
-    return 1;
+    return 1
 }    
 
 # Set breakpoint at function and run gdb until it breaks there.
@@ -466,7 +466,7 @@ proc runto { function args } {
     # elements, and we don't want Tcl to move the remaining elements after
     # the first to $args.  That is why $function is wrapped in {}.
     if ![eval gdb_breakpoint {$function} $args] {
-	return 0;
+	return 0
     }
 
     gdb_run_cmd
@@ -758,7 +758,7 @@ proc gdb_test_multiple { command message user_code } {
 			perror "Couldn't send $command to GDB.";
 		    }
 		    fail "$message";
-		    return $result;
+		    return $result
 		}
 		# since we're checking if each line of the multi-line
 		# command are 'accepted' by GDB here,
@@ -783,7 +783,7 @@ proc gdb_test_multiple { command message user_code } {
 		    perror "Couldn't send $command to GDB.";
 		}
 		fail "$message";
-		return $result;
+		return $result
 	    }
 	}
     }
@@ -1208,7 +1208,7 @@ proc gdb_reinitialize_dir { subdir } {
     global gdb_prompt
 
     if [is_remote host] {
-	return "";
+	return ""
     }
     send_gdb "dir\n"
     gdb_expect 60 {
@@ -1418,7 +1418,7 @@ proc default_gdb_start { } {
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
     if [info exists gdb_spawn_id] {
-	return 0;
+	return 0
     }
 
     if ![is_remote host] {
@@ -1430,7 +1430,7 @@ proc default_gdb_start { } {
     set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts]"];
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
-	return 1;
+	return 1
     }
     gdb_expect 360 {
 	-re "\[\r\n\]$gdb_prompt $" {
@@ -1468,7 +1468,7 @@ proc default_gdb_start { } {
 	    warning "Couldn't set the width to 0."
 	}
     }
-    return 0;
+    return 0
 }
 
 # Examine the output of compilation to determine whether compilation
@@ -2452,7 +2452,7 @@ proc get_compiler_info {{arg ""}} {
       uplevel \#0 { set false false }
     }
 
-    return 0;
+    return 0
 }
 
 proc test_compiler_info { {compiler ""} } {
@@ -2670,7 +2670,7 @@ proc gdb_compile {source dest type options} {
 	    clone_output "gdb compile failed, $result"
 	}
     }
-    return $result;
+    return $result
 }
 
 
@@ -2863,9 +2863,9 @@ proc gdb_compile_objc {source dest type options} {
 proc send_gdb { string } {
     global suppress_flag;
     if { $suppress_flag } {
-	return "suppressed";
+	return "suppressed"
     }
-    return [remote_send host "$string"];
+    return [remote_send host "$string"]
 }
 
 #
@@ -3263,7 +3263,7 @@ proc gdb_reload { } {
 proc gdb_continue { function } {
     global decimal
 
-    return [gdb_test "continue" ".*Breakpoint $decimal, $function .*" "continue to $function"];
+    return [gdb_test "continue" ".*Breakpoint $decimal, $function .*" "continue to $function"]
 }
 
 proc default_gdb_init { args } {
@@ -3470,7 +3470,7 @@ proc gdb_init { args } {
     set gdbserver_reconnect_p 1
     unset gdbserver_reconnect_p
 
-    return [eval default_gdb_init $args];
+    return [eval default_gdb_init $args]
 }
 
 proc gdb_finish { } {
@@ -3520,19 +3520,19 @@ proc get_debug_format { } {
 	-re "Compiled with (.*) debugging format.\r\n.*$gdb_prompt $" {
 	    set debug_format $expect_out(1,string)
 	    verbose "debug format is $debug_format"
-	    return 1;
+	    return 1
 	}
 	-re "No current source file.\r\n$gdb_prompt $" {
 	    perror "get_debug_format used when no current source file"
-	    return 0;
+	    return 0
 	}
 	-re "$gdb_prompt $" {
 	    warning "couldn't check debug format (no valid response)."
-	    return 1;
+	    return 1
 	}
 	timeout {
 	    warning "couldn't check debug format (timeout)."
-	    return 1;
+	    return 1
 	}
     }
 }
@@ -3561,7 +3561,7 @@ proc setup_xfail_format { format } {
     if {$ret} then {
 	setup_xfail "*-*-*"
     }
-    return $ret;
+    return $ret
 }
 
 # gdb_get_line_number TEXT [FILE]
@@ -3745,9 +3745,9 @@ proc rerun_to_main {} {
 proc gdb_skip_float_test { msg } {
     if [target_info exists gdb,skip_float_tests] {
 	verbose "Skipping test '$msg': no float tests.";
-	return 1;
+	return 1
     }
-    return 0;
+    return 0
 }
 
 # Print a message and return true if a test should be skipped
@@ -3756,13 +3756,13 @@ proc gdb_skip_float_test { msg } {
 proc gdb_skip_stdio_test { msg } {
     if [target_info exists gdb,noinferiorio] {
 	verbose "Skipping test '$msg': no inferior i/o.";
-	return 1;
+	return 1
     }
-    return 0;
+    return 0
 }
 
 proc gdb_skip_bogus_test { msg } {
-    return 0;
+    return 0
 }
 
 # Return true if a test should be skipped due to lack of XML support
@@ -3832,7 +3832,7 @@ proc build_id_debug_filename_get { exec } {
     # Convert it to hex.
     binary scan $data H* data
     regsub {^..} $data {\0/} data
-    return ".build-id/${data}.debug";
+    return ".build-id/${data}.debug"
 }
 
 # Create stripped files for DEST, replacing it.  If ARGS is passed, it is a
@@ -4136,7 +4136,7 @@ proc get_remotetimeout { } {
 
     gdb_test_multiple "show remotetimeout" "" {
 	-re "Timeout limit to wait for target to respond is ($decimal).*$gdb_prompt $" {
-	    return $expect_out(1,string);
+	    return $expect_out(1,string)
 	}
     }
 

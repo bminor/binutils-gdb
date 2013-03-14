@@ -35,7 +35,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 # Create and source the file that provides information about the compiler
 # used to compile the test case.
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 gdb_exit
@@ -95,11 +95,11 @@ proc test_set { args } {
 	    verbose "doing $arg $match"
 	    if [gdb_test "$arg" "$match" "$mess"] {
 		fail "$message -- $match";
-		return 1;
+		return 1
 	    }
 	}
     }
-    return 0;
+    return 0
 }
 
 #

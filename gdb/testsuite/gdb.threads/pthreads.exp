@@ -79,7 +79,7 @@ proc all_threads_running {} {
     }
 
     if { $return_me == 1 } then {
-	return 0;
+	return 0
     }
 
     # Check that we stopped when we actually expected to stop, by
@@ -139,7 +139,7 @@ proc test_startup {} {
     }
 
     if { $return_me == 1 } then {
-	return 0;
+	return 0
     }
 
     # Extract the thread id number of main thread from "info threads" output.
@@ -209,7 +209,7 @@ proc check_control_c {} {
 	}
 	timeout {
 	    fail "$description (timeout)"
-	    return 1;
+	    return 1
 	}
     }
     gdb_test "bt" ".*"
@@ -218,7 +218,7 @@ proc check_control_c {} {
     if [all_threads_running] then {
 	pass "All threads running after continuing from ^C stop"
     }
-    return 0;
+    return 0
 }
 
 proc check_backtraces {} {

@@ -129,7 +129,7 @@ runto_main
 
 if { ![gdb_target_supports_trace] } then {
     unsupported "Current target does not support trace"
-    return 1;
+    return 1
 }
 
 # Body of test encased in a proc so we can return prematurely.

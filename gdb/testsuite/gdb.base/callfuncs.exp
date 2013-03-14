@@ -34,7 +34,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $com
 # used to compile the test case.
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 if {$hp_aCC_compiler} {

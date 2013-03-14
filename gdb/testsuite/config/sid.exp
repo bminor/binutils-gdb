@@ -213,5 +213,5 @@ proc gdb_load { arg } {
     }
     set timeout $prev_timeout
     verbose "Timeout is now $timeout seconds" 2
-    return $retval;
+    return $retval
 }

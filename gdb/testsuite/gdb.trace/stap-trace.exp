@@ -117,7 +117,7 @@ if { ![runto_main] } {
 
 if { ![gdb_target_supports_trace] } {
     # Test cannot run on this target.
-    return 1;
+    return 1
 }
 
 gdb_collect_probe_arg "probe args without semaphore" "-probe-stap user" "23"

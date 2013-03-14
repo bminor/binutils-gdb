@@ -34,7 +34,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 
 if { ![gdb_target_supports_trace] } then {
     unsupported "Current target does not support trace"
-    return 1;
+    return 1
 
 }
 

@@ -30,7 +30,7 @@ if { [skip_cplus_tests] } { continue }
 standard_testfile .cc namespace1.cc
 
 if [get_compiler_info c++] {
-    return -1;
+    return -1
 }
 
 set xfail_class_types 0

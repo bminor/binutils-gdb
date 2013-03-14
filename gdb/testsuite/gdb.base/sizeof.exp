@@ -33,7 +33,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 }
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 gdb_exit

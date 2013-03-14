@@ -23,7 +23,7 @@
 set testfile "gdb11531"
 
 if { [prepare_for_testing $testfile.exp $testfile $testfile.c {debug}] } {
-    return -1;
+    return -1
 }
 
 # Disable hardware watchpoints if necessary.

@@ -65,7 +65,7 @@ gdb_load_shlibs ${lib_so}
 
 if ![runto_main] then {
     fail "Can't run to main"
-    return 1;
+    return 1
 }
 
 # The "if" condition is artifical to test regression of a former patch.

@@ -27,7 +27,7 @@ set bp_location [gdb_get_line_number "START" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 if {[test_compiler_info {gcc-[0-3]-*}]

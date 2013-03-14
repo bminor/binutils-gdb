@@ -71,7 +71,7 @@ if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug 
 }
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 gdb_exit

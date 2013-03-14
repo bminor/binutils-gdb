@@ -42,7 +42,7 @@ if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug 
 }
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 gdb_exit
@@ -165,7 +165,7 @@ gdb_test "continue" "Continuing\\..*Breakpoint \[0-9\]+, main \\(argc=.*, argv=.
 # stop location, but avoids clutter when possible.
 #
 # Suppose you have a function written completely on one source line, like:
-#    int foo (int x) { return 0; }
+#    int foo (int x) { return 0 }
 # Setting a breakpoint at `foo' actually places the breakpoint after
 # foo's prologue.
 #

@@ -86,7 +86,7 @@ gdb_test_multiple $cmd $cmd {
 
 if ![runto_main] then {
   fail "run to main"
-  return -1;
+  return -1
 }
 
 gdb_test "list" ".*\[0-9\].*main \\(int argc.*" "can list sources"

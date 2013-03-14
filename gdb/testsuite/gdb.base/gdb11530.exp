@@ -25,15 +25,15 @@ set binfile ${testfile}${EXEEXT}
 # to gcc compiler.
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
 if { ![test_compiler_info gcc*] } {
-    return 0;
+    return 0
 }
 
 if { [prepare_for_testing $testfile.exp $testfile $testfile.c {debug}] } {
-    return -1;
+    return -1
 }
 
 

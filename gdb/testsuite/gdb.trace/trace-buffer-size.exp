@@ -30,7 +30,7 @@ if ![runto_main] {
 
 if ![gdb_target_supports_trace] {
     unsupported "target does not support trace"
-    return -1;
+    return -1
 }
 
 set BUFFER_SIZE 4
@@ -48,7 +48,7 @@ gdb_test_multiple "tstatus" $test {
 # If we did not get the default size then there is no point in running the
 # tests below.
 if { $default_size < 0 } {
-  return -1;
+  return -1
 }
 
 # Change buffer size to 'BUFFER_SIZE'.

@@ -26,5 +26,5 @@ proc set_lang_objc {} {
 	   "set language to \"objective-c\""] {
 	return 0
     }
-    return 1;
+    return 1
 }

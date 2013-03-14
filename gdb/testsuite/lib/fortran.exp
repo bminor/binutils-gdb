@@ -26,5 +26,5 @@ proc set_lang_fortran {} {
 	   "set language to \"fortran\""] {
 	return 0
     }
-    return 1;
+    return 1
 }
