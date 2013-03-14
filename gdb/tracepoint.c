@@ -2979,36 +2979,319 @@ encode_source_string (int tpnum, ULONGEST addr,
   return -1;
 }
 
-extern int trace_regblock_size;
+/* Free trace file writer.  */
 
-/* Save tracepoint data to file named FILENAME.  If TARGET_DOES_SAVE is
-   non-zero, the save is performed on the target, otherwise GDB obtains all
-   trace data and saves it locally.  */
-
-void
-trace_save (const char *filename, int target_does_save)
+static void
+trace_file_writer_xfree (void *arg)
 {
-  struct cleanup *cleanup;
-  char *pathname;
-  struct trace_status *ts = current_trace_status ();
-  int err, status;
+  struct trace_file_writer *writer = arg;
+
+  writer->ops->dtor (writer);
+  xfree (writer);
+}
+
+/* TFILE trace writer.  */
+
+struct tfile_trace_file_writer
+{
+  struct trace_file_writer base;
+
+  /* File pointer to tfile trace file.  */
   FILE *fp;
-  struct uploaded_tp *uploaded_tps = NULL, *utp;
-  struct uploaded_tsv *uploaded_tsvs = NULL, *utsv;
+  /* Path name of the tfile trace file.  */
+  char *pathname;
+};
+
+/* This is the implementation of trace_file_write_ops method
+   target_save.  We just call the generic target
+   target_save_trace_data to do target-side saving.  */
+
+static int
+tfile_target_save (struct trace_file_writer *self,
+		   const char *filename)
+{
+  int err = target_save_trace_data (filename);
+
+  return (err >= 0);
+}
+
+/* This is the implementation of trace_file_write_ops method
+   dtor.  */
+
+static void
+tfile_dtor (struct trace_file_writer *self)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+
+  xfree (writer->pathname);
+
+  if (writer->fp != NULL)
+    fclose (writer->fp);
+}
+
+/* This is the implementation of trace_file_write_ops method
+   start.  It creates the trace file FILENAME and registers some
+   cleanups.  */
+
+static void
+tfile_start (struct trace_file_writer *self, const char *filename)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+
+  writer->pathname = tilde_expand (filename);
+  writer->fp = fopen (writer->pathname, "wb");
+  if (writer->fp == NULL)
+    error (_("Unable to open file '%s' for saving trace data (%s)"),
+	   filename, safe_strerror (errno));
+}
+
+/* This is the implementation of trace_file_write_ops method
+   write_header.  Write the TFILE header.  */
+
+static void
+tfile_write_header (struct trace_file_writer *self)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+  int written;
+
+  /* Write a file header, with a high-bit-set char to indicate a
+     binary file, plus a hint as what this file is, and a version
+     number in case of future needs.  */
+  written = fwrite ("\x7fTRACE0\n", 8, 1, writer->fp);
+  if (written < 1)
+    perror_with_name (writer->pathname);
+}
+
+/* This is the implementation of trace_file_write_ops method
+   write_regblock_type.  Write the size of register block.  */
+
+static void
+tfile_write_regblock_type (struct trace_file_writer *self, int size)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+
+  fprintf (writer->fp, "R %x\n", size);
+}
+
+/* This is the implementation of trace_file_write_ops method
+   write_status.  */
+
+static void
+tfile_write_status (struct trace_file_writer *self,
+		    struct trace_status *ts)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+
+  fprintf (writer->fp, "status %c;%s",
+	   (ts->running ? '1' : '0'), stop_reason_names[ts->stop_reason]);
+  if (ts->stop_reason == tracepoint_error)
+    {
+      char *buf = (char *) alloca (strlen (ts->stop_desc) * 2 + 1);
+
+      bin2hex ((gdb_byte *) ts->stop_desc, buf, 0);
+      fprintf (writer->fp, ":%s", buf);
+    }
+  fprintf (writer->fp, ":%x", ts->stopping_tracepoint);
+  if (ts->traceframe_count >= 0)
+    fprintf (writer->fp, ";tframes:%x", ts->traceframe_count);
+  if (ts->traceframes_created >= 0)
+    fprintf (writer->fp, ";tcreated:%x", ts->traceframes_created);
+  if (ts->buffer_free >= 0)
+    fprintf (writer->fp, ";tfree:%x", ts->buffer_free);
+  if (ts->buffer_size >= 0)
+    fprintf (writer->fp, ";tsize:%x", ts->buffer_size);
+  if (ts->disconnected_tracing)
+    fprintf (writer->fp, ";disconn:%x", ts->disconnected_tracing);
+  if (ts->circular_buffer)
+    fprintf (writer->fp, ";circular:%x", ts->circular_buffer);
+  fprintf (writer->fp, "\n");
+}
+
+/* This is the implementation of trace_file_write_ops method
+   write_uploaded_tsv.  */
+
+static void
+tfile_write_uploaded_tsv (struct trace_file_writer *self,
+			  struct uploaded_tsv *utsv)
+{
+  char *buf = "";
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+
+  if (utsv->name)
+    {
+      buf = (char *) xmalloc (strlen (utsv->name) * 2 + 1);
+      bin2hex ((gdb_byte *) (utsv->name), buf, 0);
+    }
+
+  fprintf (writer->fp, "tsv %x:%s:%x:%s\n",
+	   utsv->number, phex_nz (utsv->initial_value, 8),
+	   utsv->builtin, buf);
+
+  if (utsv->name)
+    xfree (buf);
+}
+
+#define MAX_TRACE_UPLOAD 2000
+
+/* This is the implementation of trace_file_write_ops method
+   write_uploaded_tp.  */
+
+static void
+tfile_write_uploaded_tp (struct trace_file_writer *self,
+			 struct uploaded_tp *utp)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
   int a;
   char *act;
-  LONGEST gotten = 0;
+  gdb_byte buf[MAX_TRACE_UPLOAD];
+
+  fprintf (writer->fp, "tp T%x:%s:%c:%x:%x",
+	   utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
+	   (utp->enabled ? 'E' : 'D'), utp->step, utp->pass);
+  if (utp->type == bp_fast_tracepoint)
+    fprintf (writer->fp, ":F%x", utp->orig_size);
+  if (utp->cond)
+    fprintf (writer->fp,
+	     ":X%x,%s", (unsigned int) strlen (utp->cond) / 2,
+	     utp->cond);
+  fprintf (writer->fp, "\n");
+  for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
+    fprintf (writer->fp, "tp A%x:%s:%s\n",
+	     utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
+  for (a = 0; VEC_iterate (char_ptr, utp->step_actions, a, act); ++a)
+    fprintf (writer->fp, "tp S%x:%s:%s\n",
+	     utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
+  if (utp->at_string)
+    {
+      encode_source_string (utp->number, utp->addr,
+			    "at", utp->at_string, buf, MAX_TRACE_UPLOAD);
+      fprintf (writer->fp, "tp Z%s\n", buf);
+    }
+  if (utp->cond_string)
+    {
+      encode_source_string (utp->number, utp->addr,
+			    "cond", utp->cond_string,
+			    buf, MAX_TRACE_UPLOAD);
+      fprintf (writer->fp, "tp Z%s\n", buf);
+    }
+  for (a = 0; VEC_iterate (char_ptr, utp->cmd_strings, a, act); ++a)
+    {
+      encode_source_string (utp->number, utp->addr, "cmd", act,
+			    buf, MAX_TRACE_UPLOAD);
+      fprintf (writer->fp, "tp Z%s\n", buf);
+    }
+  fprintf (writer->fp, "tp V%x:%s:%x:%s\n",
+	   utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
+	   utp->hit_count,
+	   phex_nz (utp->traceframe_usage,
+		    sizeof (utp->traceframe_usage)));
+}
+
+/* This is the implementation of trace_file_write_ops method
+   write_definition_end.  */
+
+static void
+tfile_write_definition_end (struct trace_file_writer *self)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+
+  fprintf (writer->fp, "\n");
+}
+
+/* This is the implementation of trace_file_write_ops method
+   write_raw_data.  */
+
+static void
+tfile_write_raw_data (struct trace_file_writer *self, gdb_byte *buf,
+		      LONGEST len)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+
+  if (fwrite (buf, len, 1, writer->fp) < 1)
+    perror_with_name (writer->pathname);
+}
+
+/* This is the implementation of trace_file_write_ops method
+   end.  */
+
+static void
+tfile_end (struct trace_file_writer *self)
+{
+  struct tfile_trace_file_writer *writer
+    = (struct tfile_trace_file_writer *) self;
+  uint32_t gotten = 0;
+
+  /* Mark the end of trace data.  */
+  if (fwrite (&gotten, 4, 1, writer->fp) < 1)
+    perror_with_name (writer->pathname);
+}
+
+/* Operations to write trace buffers into TFILE format.  */
+
+static const struct trace_file_write_ops tfile_write_ops =
+{
+  tfile_dtor,
+  tfile_target_save,
+  tfile_start,
+  tfile_write_header,
+  tfile_write_regblock_type,
+  tfile_write_status,
+  tfile_write_uploaded_tsv,
+  tfile_write_uploaded_tp,
+  tfile_write_definition_end,
+  tfile_write_raw_data,
+  NULL,
+  tfile_end,
+};
+
+/* Helper macros.  */
+
+#define TRACE_WRITE_R_BLOCK(writer, buf, size)	\
+  writer->ops->frame_ops->write_r_block ((writer), (buf), (size))
+#define TRACE_WRITE_M_BLOCK_HEADER(writer, addr, size)		  \
+  writer->ops->frame_ops->write_m_block_header ((writer), (addr), \
+						(size))
+#define TRACE_WRITE_M_BLOCK_MEMORY(writer, buf, size)	  \
+  writer->ops->frame_ops->write_m_block_memory ((writer), (buf), \
+						(size))
+#define TRACE_WRITE_V_BLOCK(writer, num, val)	\
+  writer->ops->frame_ops->write_v_block ((writer), (num), (val))
+
+extern int trace_regblock_size;
+
+/* Save tracepoint data to file named FILENAME through WRITER.  WRITER
+   determines the trace file format.  If TARGET_DOES_SAVE is non-zero,
+   the save is performed on the target, otherwise GDB obtains all trace
+   data and saves it locally.  */
+
+static void
+trace_save (const char *filename, struct trace_file_writer *writer,
+	    int target_does_save)
+{
+  struct trace_status *ts = current_trace_status ();
+  int status;
+  struct uploaded_tp *uploaded_tps = NULL, *utp;
+  struct uploaded_tsv *uploaded_tsvs = NULL, *utsv;
+
   ULONGEST offset = 0;
-#define MAX_TRACE_UPLOAD 2000
   gdb_byte buf[MAX_TRACE_UPLOAD];
   int written;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
   /* If the target is to save the data to a file on its own, then just
      send the command and be done with it.  */
   if (target_does_save)
     {
-      err = target_save_trace_data (filename);
-      if (err < 0)
+      if (!writer->ops->target_save (writer, filename))
 	error (_("Target failed to save trace data to '%s'."),
 	       filename);
       return;
@@ -3018,51 +3301,17 @@ trace_save (const char *filename, int target_does_save)
      target is losing, we can get out without touching files.  */
   status = target_get_trace_status (ts);
 
-  pathname = tilde_expand (filename);
-  cleanup = make_cleanup (xfree, pathname);
+  writer->ops->start (writer, filename);
 
-  fp = fopen (pathname, "wb");
-  if (!fp)
-    error (_("Unable to open file '%s' for saving trace data (%s)"),
-	   filename, safe_strerror (errno));
-  make_cleanup_fclose (fp);
-
-  /* Write a file header, with a high-bit-set char to indicate a
-     binary file, plus a hint as what this file is, and a version
-     number in case of future needs.  */
-  written = fwrite ("\x7fTRACE0\n", 8, 1, fp);
-  if (written < 1)
-    perror_with_name (pathname);
+  writer->ops->write_header (writer);
 
   /* Write descriptive info.  */
 
   /* Write out the size of a register block.  */
-  fprintf (fp, "R %x\n", trace_regblock_size);
+  writer->ops->write_regblock_type (writer, trace_regblock_size);
 
   /* Write out status of the tracing run (aka "tstatus" info).  */
-  fprintf (fp, "status %c;%s",
-	   (ts->running ? '1' : '0'), stop_reason_names[ts->stop_reason]);
-  if (ts->stop_reason == tracepoint_error)
-    {
-      char *buf = (char *) alloca (strlen (ts->stop_desc) * 2 + 1);
-
-      bin2hex ((gdb_byte *) ts->stop_desc, buf, 0);
-      fprintf (fp, ":%s", buf);
-    }
-  fprintf (fp, ":%x", ts->stopping_tracepoint);
-  if (ts->traceframe_count >= 0)
-    fprintf (fp, ";tframes:%x", ts->traceframe_count);
-  if (ts->traceframes_created >= 0)
-    fprintf (fp, ";tcreated:%x", ts->traceframes_created);
-  if (ts->buffer_free >= 0)
-    fprintf (fp, ";tfree:%x", ts->buffer_free);
-  if (ts->buffer_size >= 0)
-    fprintf (fp, ";tsize:%x", ts->buffer_size);
-  if (ts->disconnected_tracing)
-    fprintf (fp, ";disconn:%x", ts->disconnected_tracing);
-  if (ts->circular_buffer)
-    fprintf (fp, ";circular:%x", ts->circular_buffer);
-  fprintf (fp, "\n");
+  writer->ops->write_status (writer, ts);
 
   /* Note that we want to upload tracepoints and save those, rather
      than simply writing out the local ones, because the user may have
@@ -3077,22 +3326,7 @@ trace_save (const char *filename, int target_does_save)
   target_upload_trace_state_variables (&uploaded_tsvs);
 
   for (utsv = uploaded_tsvs; utsv; utsv = utsv->next)
-    {
-      char *buf = "";
-
-      if (utsv->name)
-	{
-	  buf = (char *) xmalloc (strlen (utsv->name) * 2 + 1);
-	  bin2hex ((gdb_byte *) (utsv->name), buf, 0);
-	}
-
-      fprintf (fp, "tsv %x:%s:%x:%s\n",
-	       utsv->number, phex_nz (utsv->initial_value, 8),
-	       utsv->builtin, buf);
-
-      if (utsv->name)
-	xfree (buf);
-    }
+    writer->ops->write_uploaded_tsv (writer, utsv);
 
   free_uploaded_tsvs (&uploaded_tsvs);
 
@@ -3102,76 +3336,205 @@ trace_save (const char *filename, int target_does_save)
     target_get_tracepoint_status (NULL, utp);
 
   for (utp = uploaded_tps; utp; utp = utp->next)
-    {
-      fprintf (fp, "tp T%x:%s:%c:%x:%x",
-	       utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
-	       (utp->enabled ? 'E' : 'D'), utp->step, utp->pass);
-      if (utp->type == bp_fast_tracepoint)
-	fprintf (fp, ":F%x", utp->orig_size);
-      if (utp->cond)
-	fprintf (fp, ":X%x,%s", (unsigned int) strlen (utp->cond) / 2,
-		 utp->cond);
-      fprintf (fp, "\n");
-      for (a = 0; VEC_iterate (char_ptr, utp->actions, a, act); ++a)
-	fprintf (fp, "tp A%x:%s:%s\n",
-		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
-      for (a = 0; VEC_iterate (char_ptr, utp->step_actions, a, act); ++a)
-	fprintf (fp, "tp S%x:%s:%s\n",
-		 utp->number, phex_nz (utp->addr, sizeof (utp->addr)), act);
-      if (utp->at_string)
-	{
-	  encode_source_string (utp->number, utp->addr,
-				"at", utp->at_string, buf, MAX_TRACE_UPLOAD);
-	  fprintf (fp, "tp Z%s\n", buf);
-	}
-      if (utp->cond_string)
-	{
-	  encode_source_string (utp->number, utp->addr,
-				"cond", utp->cond_string,
-				buf, MAX_TRACE_UPLOAD);
-	  fprintf (fp, "tp Z%s\n", buf);
-	}
-      for (a = 0; VEC_iterate (char_ptr, utp->cmd_strings, a, act); ++a)
-	{
-	  encode_source_string (utp->number, utp->addr, "cmd", act,
-				buf, MAX_TRACE_UPLOAD);
-	  fprintf (fp, "tp Z%s\n", buf);
-	}
-      fprintf (fp, "tp V%x:%s:%x:%s\n",
-	       utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
-	       utp->hit_count,
-	       phex_nz (utp->traceframe_usage,
-			sizeof (utp->traceframe_usage)));
-    }
+    writer->ops->write_uploaded_tp (writer, utp);
 
   free_uploaded_tps (&uploaded_tps);
 
   /* Mark the end of the definition section.  */
-  fprintf (fp, "\n");
+  writer->ops->write_definition_end (writer);
 
-  /* Get and write the trace data proper.  We ask for big blocks, in
-     the hopes of efficiency, but will take less if the target has
-     packet size limitations or some such.  */
+  /* Get and write the trace data proper.  */
   while (1)
     {
-      gotten = target_get_raw_trace_data (buf, offset, MAX_TRACE_UPLOAD);
-      if (gotten < 0)
-	error (_("Failure to get requested trace buffer data"));
-      /* No more data is forthcoming, we're done.  */
-      if (gotten == 0)
-	break;
-      written = fwrite (buf, gotten, 1, fp);
-      if (written < 1)
-	perror_with_name (pathname);
-      offset += gotten;
+      LONGEST gotten = 0;
+
+      /* The writer supports writing the contents of trace buffer
+	  directly to trace file.  Don't parse the contents of trace
+	  buffer.  */
+      if (writer->ops->write_trace_buffer != NULL)
+	{
+	  /* We ask for big blocks, in the hopes of efficiency, but
+	     will take less if the target has packet size limitations
+	     or some such.  */
+	  gotten = target_get_raw_trace_data (buf, offset,
+					      MAX_TRACE_UPLOAD);
+	  if (gotten < 0)
+	    error (_("Failure to get requested trace buffer data"));
+	  /* No more data is forthcoming, we're done.  */
+	  if (gotten == 0)
+	    break;
+
+	  writer->ops->write_trace_buffer (writer, buf, gotten);
+
+	  offset += gotten;
+	}
+      else
+	{
+	  uint16_t tp_num;
+	  uint32_t tf_size;
+	  /* Parse the trace buffers according to how data are stored
+	     in trace buffer in GDBserver.  */
+
+	  gotten = target_get_raw_trace_data (buf, offset, 6);
+
+	  if (gotten == 0)
+	    break;
+
+	  /* Read the first six bytes in, which is the tracepoint
+	     number and trace frame size.  */
+	  tp_num = (uint16_t)
+	    extract_unsigned_integer (&buf[0], 2, byte_order);
+
+	  tf_size = (uint32_t)
+	    extract_unsigned_integer (&buf[2], 4, byte_order);
+
+	  writer->ops->frame_ops->start (writer, tp_num);
+	  gotten = 6;
+
+	  if (tf_size > 0)
+	    {
+	      unsigned int block;
+
+	      offset += 6;
+
+	      for (block = 0; block < tf_size; )
+		{
+		  gdb_byte block_type;
+
+		  /* We'll fetch one block each time, in order to
+		     handle the extremely large 'M' block.  We first
+		     fetch one byte to get the type of the block.  */
+		  gotten = target_get_raw_trace_data (buf, offset, 1);
+		  if (gotten < 1)
+		    error (_("Failure to get requested trace buffer data"));
+
+		  gotten = 1;
+		  block += 1;
+		  offset += 1;
+
+		  block_type = buf[0];
+		  switch (block_type)
+		    {
+		    case 'R':
+		      gotten
+			= target_get_raw_trace_data (buf, offset,
+						     trace_regblock_size);
+		      if (gotten < trace_regblock_size)
+			error (_("Failure to get requested trace"
+				 " buffer data"));
+
+		      TRACE_WRITE_R_BLOCK (writer, buf,
+					   trace_regblock_size);
+		      break;
+		    case 'M':
+		      {
+			unsigned short mlen;
+			ULONGEST addr;
+			LONGEST t;
+			int j;
+
+			t = target_get_raw_trace_data (buf,offset, 10);
+			if (t < 10)
+			  error (_("Failure to get requested trace"
+				   " buffer data"));
+
+			offset += 10;
+			block += 10;
+
+			gotten = 0;
+			addr = (ULONGEST)
+			  extract_unsigned_integer (buf, 8,
+						    byte_order);
+			mlen = (unsigned short)
+			  extract_unsigned_integer (&buf[8], 2,
+						    byte_order);
+
+			TRACE_WRITE_M_BLOCK_HEADER (writer, addr,
+						    mlen);
+
+			/* The memory contents in 'M' block may be
+			   very large.  Fetch the data from the target
+			   and write them into file one by one.  */
+			for (j = 0; j < mlen; )
+			  {
+			    unsigned int read_length;
+
+			    if (mlen - j > MAX_TRACE_UPLOAD)
+			      read_length = MAX_TRACE_UPLOAD;
+			    else
+			      read_length = mlen - j;
+
+			    t = target_get_raw_trace_data (buf,
+							   offset + j,
+							   read_length);
+			    if (t < read_length)
+			      error (_("Failure to get requested"
+				       " trace buffer data"));
+
+			    TRACE_WRITE_M_BLOCK_MEMORY (writer, buf,
+							read_length);
+
+			    j += read_length;
+			    gotten += read_length;
+			  }
+
+			break;
+		      }
+		    case 'V':
+		      {
+			int vnum;
+			LONGEST val;
+
+			gotten
+			  = target_get_raw_trace_data (buf, offset,
+						       12);
+			if (gotten < 12)
+			  error (_("Failure to get requested"
+				   " trace buffer data"));
+
+			vnum  = (int) extract_signed_integer (buf,
+							      4,
+							      byte_order);
+			val
+			  = extract_signed_integer (&buf[4], 8,
+						    byte_order);
+
+			TRACE_WRITE_V_BLOCK (writer, vnum, val);
+		      }
+		      break;
+		    default:
+		      error (_("Unknown block type '%c' (0x%x) in"
+			       " trace frame"),
+			     block_type, block_type);
+		    }
+
+		  block += gotten;
+		  offset += gotten;
+		}
+	    }
+	  else
+	    offset += gotten;
+
+	  writer->ops->frame_ops->end (writer);
+	}
     }
 
-  /* Mark the end of trace data.  (We know that gotten is 0 at this point.)  */
-  written = fwrite (&gotten, 4, 1, fp);
-  if (written < 1)
-    perror_with_name (pathname);
+  writer->ops->end (writer);
+}
 
-  do_cleanups (cleanup);
+/* Return a trace writer for TFILE format.  */
+
+static struct trace_file_writer *
+tfile_trace_file_writer_new (void)
+{
+  struct tfile_trace_file_writer *writer
+    = xmalloc (sizeof (struct tfile_trace_file_writer));
+
+  writer->base.ops = &tfile_write_ops;
+  writer->fp = NULL;
+  writer->pathname = NULL;
+
+  return (struct trace_file_writer *) writer;
 }
 
 static void
@@ -3181,6 +3544,7 @@ trace_save_command (char *args, int from_tty)
   char **argv;
   char *filename = NULL;
   struct cleanup *back_to;
+  struct trace_file_writer *writer = NULL;
 
   if (args == NULL)
     error_no_arg (_("file in which to save trace data"));
@@ -3201,11 +3565,29 @@ trace_save_command (char *args, int from_tty)
   if (!filename)
     error_no_arg (_("file in which to save trace data"));
 
-  trace_save (filename, target_does_save);
+  writer = tfile_trace_file_writer_new ();
+
+  make_cleanup (trace_file_writer_xfree, writer);
+
+  trace_save (filename, writer, target_does_save);
 
   if (from_tty)
     printf_filtered (_("Trace data saved to file '%s'.\n"), filename);
 
+  do_cleanups (back_to);
+}
+
+/* Save the trace data to file FILENAME of tfile format.  */
+
+void
+trace_save_tfile (const char *filename, int target_does_save)
+{
+  struct trace_file_writer *writer;
+  struct cleanup *back_to;
+
+  writer = tfile_trace_file_writer_new ();
+  back_to = make_cleanup (trace_file_writer_xfree, writer);
+  trace_save (filename, writer, target_does_save);
   do_cleanups (back_to);
 }
 

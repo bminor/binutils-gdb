@@ -1,3 +1,30 @@
+2013-03-14  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (trace_file_writer_xfree): New.
+	(struct tfile_writer_data): New.
+	(tfile_dtor, tfile_can_target_save, tfile_start): New.
+	(tfile_write_header, tfile_write_regblock_type): New.
+	(tfile_write_status, tfile_write_uploaded_tsv): New.
+	(tfile_write_uploaded_tp, tfile_write_definition_end): New.
+	(tfile_write_raw_data, (tfile_end): New.
+	(tfile_write_ops): New global variable.
+	(TRACE_WRITE_R_BLOCK): New macro.
+	(TRACE_WRITE_M_BLOCK_HEADER): New macro.
+	(TRACE_WRITE_M_BLOCK_MEMORY): New macro.
+	(TRACE_WRITE_V_BLOCK): New macro.
+	(trace_save): Add extra one parameter WRITER.  Make it static.
+	Use WRITER to writer trace.
+	(tfile_trace_file_writer_new): New.
+	(trace_save_command): Caller update.
+	(trace_save_tfile): Write trace data in TFILE format.
+	* tracepoint.h (struct trace_frame_write_ops): New.
+	(struct trace_file_write_ops): New.
+	(struct trace_file_writer): New.
+	(trace_save): Remove its declaration.
+	(trace_save_tfile): Declare it.
+	* mi/mi-main.c (mi_cmd_trace_save): Call trace_save_tfile
+	instead of trace_save.
+
 2013-03-13  Pedro Alves  <palves@redhat.com>
 
 	* hppa-hpux-nat.c (hppa_hpux_save_state_offset): Make static.

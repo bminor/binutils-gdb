@@ -2495,7 +2495,7 @@ mi_cmd_trace_save (char *command, char **argv, int argc)
       filename = argv[0];
     }
 
-  trace_save (filename, target_saves);
+  trace_save_tfile (filename, target_saves);
 }
 
 void
