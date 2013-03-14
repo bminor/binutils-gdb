@@ -2804,7 +2804,7 @@ static void
 cmd_qtv (char *own_buf)
 {
   ULONGEST num;
-  LONGEST val;
+  LONGEST val = 0;
   int err;
   char *packet = own_buf;
 
