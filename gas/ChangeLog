@@ -1,5 +1,11 @@
 2013-03-14  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/15273
+	* config/tc-arm.c (do_co_reg): Do not call check_obsolete with a
+	NULL message, instead just check ARM_CPU_IS_ANY directly.
+
+2013-03-14  Nick Clifton  <nickc@redhat.com>
+
 	PR gas/15212
 	* doc/c-arc.texi (ARC Directives): Use @code instead of @bullte
 	for table format.

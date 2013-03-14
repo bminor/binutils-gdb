@@ -7828,7 +7828,7 @@ do_co_reg (void)
 	    && inst.operands[4].reg == r->crm
 	    && inst.operands[5].imm == r->opc2)
 	  {
-	    if (!check_obsolete (&r->obsoleted, r->obs_msg)
+	    if (! ARM_CPU_IS_ANY (cpu_variant)
 	        && warn_on_deprecated
 		&& ARM_CPU_HAS_FEATURE (cpu_variant, r->deprecated))
 	      as_warn ("%s", r->dep_msg);
