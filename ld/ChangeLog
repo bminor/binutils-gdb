@@ -1,3 +1,8 @@
+2013-03-14  Jakub Jelinek  <jakub@redhat.com>
+
+	* emulparams/aarch64linux.sh (LIBPATH_SUFFIX): Set to 64 for
+	aarch64linux* emulations.
+
 2013-03-07  Alan Modra  <amodra@gmail.com>
 
 	* ldfile.c (ldfile_open_command_file_1): Return after einfo

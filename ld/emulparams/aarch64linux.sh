@@ -34,3 +34,13 @@ OTHER_SECTIONS='.note.gnu.arm.ident 0 : { KEEP (*(.note.gnu.arm.ident)) }'
 ATTRS_SECTIONS='.ARM.attributes 0 : { KEEP (*(.ARM.attributes)) KEEP (*(.gnu.attributes)) }'
 # Ensure each PLT entry is aligned to a cache line.
 PLT=".plt          ${RELOCATING-0} : ALIGN(16) { *(.plt)${IREL_IN_PLT+ *(.iplt)} }"
+
+# Linux modifies the default library search path to first include
+# a 64-bit specific directory.
+case "$target" in
+  aarch64*-linux*)
+    case "$EMULATION_NAME" in
+      aarch64linux*) LIBPATH_SUFFIX=64 ;;
+    esac
+    ;;
+esac
