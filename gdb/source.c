@@ -1344,11 +1344,15 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 	{
 	  ui_out_field_int (uiout, "line", line);
 	  ui_out_text (uiout, "\tin ");
-	  ui_out_field_string (uiout, "file",
-			       symtab_to_filename_for_display (s));
 
-	  /* TUI expects the "fullname" field.  While it is
-	     !ui_out_is_mi_like_p compared to CLI it is !ui_source_list.  */
+	  /* CLI expects only the "file" field.  TUI expects only the
+	     "fullname" field (and TUI does break if "file" is printed).
+	     MI expects both fields.  ui_source_list is set only for CLI,
+	     not for TUI.  */
+	  if (ui_out_is_mi_like_p (uiout)
+	      || ui_out_test_flags (uiout, ui_source_list))
+	    ui_out_field_string (uiout, "file",
+				 symtab_to_filename_for_display (s));
 	  if (ui_out_is_mi_like_p (uiout)
 	      || !ui_out_test_flags (uiout, ui_source_list))
 	    {
@@ -1356,6 +1360,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline,
 
 	      ui_out_field_string (uiout, "fullname", fullname);
 	    }
+
 	  ui_out_text (uiout, "\n");
 	}
 

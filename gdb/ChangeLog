@@ -1,3 +1,8 @@
+2013-03-14  Hui Zhu  <hui_zhu@mentor.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* source.c (print_source_lines_base): Suppress "file" for TUI.
+
 2013-03-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 7.5.91.20130312-cvs.
