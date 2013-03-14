@@ -812,6 +812,11 @@ cp_lookup_nested_symbol (struct type *parent_type,
 	   base classes.  */
 	return find_symbol_in_baseclass (parent_type, nested_name, block);
       }
+
+    case TYPE_CODE_FUNC:
+    case TYPE_CODE_METHOD:
+      return NULL;
+
     default:
       internal_error (__FILE__, __LINE__,
 		      _("cp_lookup_nested_symbol called "
