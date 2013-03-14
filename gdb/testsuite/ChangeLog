@@ -1,3 +1,10 @@
+2013-03-14  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tstatus.exp (run_trace_experiment): Save the output
+	of 'tstatus' into tstatus_output.
+	(top level): Save the trace data to tfile.  Read trace file in
+	tfile target.  Check the trace status.
+
 2013-03-13  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/tsv.exp (check_tsv): New.
