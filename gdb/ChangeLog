@@ -1,3 +1,8 @@
+2013-03-14  Hui Zhu  <hui_zhu@mentor.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* source.c (print_source_lines_base): Suppress "file" for TUI.
+
 2013-03-14  Keith Seitz  <keiths@redhat.com>
 	    Alan Matsuoka  <alanm@redhat.com>
 
