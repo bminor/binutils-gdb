@@ -1,5 +1,10 @@
 2013-03-14  Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (tfile_write_status): Write 'stop_desc' of trace
+	status to tfile if trace is stopped by command 'tstop'.
+
+2013-03-14  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (tfile_write_status): Write trace notes and user
 	name into tfile if they are not NULL.
 

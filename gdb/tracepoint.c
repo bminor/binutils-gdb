@@ -3090,7 +3090,8 @@ tfile_write_status (struct trace_file_writer *self,
 
   fprintf (writer->fp, "status %c;%s",
 	   (ts->running ? '1' : '0'), stop_reason_names[ts->stop_reason]);
-  if (ts->stop_reason == tracepoint_error)
+  if (ts->stop_reason == tracepoint_error
+      || ts->stop_reason == tstop_command)
     {
       char *buf = (char *) alloca (strlen (ts->stop_desc) * 2 + 1);
 
