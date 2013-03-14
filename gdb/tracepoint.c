@@ -3110,6 +3110,20 @@ tfile_write_status (struct trace_file_writer *self,
     fprintf (writer->fp, ";disconn:%x", ts->disconnected_tracing);
   if (ts->circular_buffer)
     fprintf (writer->fp, ";circular:%x", ts->circular_buffer);
+  if (ts->notes != NULL)
+    {
+      char *buf = (char *) alloca (strlen (ts->notes) * 2 + 1);
+
+      bin2hex ((gdb_byte *) ts->notes, buf, 0);
+      fprintf (writer->fp, ";notes:%s", buf);
+    }
+  if (ts->user_name != NULL)
+    {
+      char *buf = (char *) alloca (strlen (ts->user_name) * 2 + 1);
+
+      bin2hex ((gdb_byte *) ts->user_name, buf, 0);
+      fprintf (writer->fp, ";username:%s", buf);
+    }
   fprintf (writer->fp, "\n");
 }
 
