@@ -12286,6 +12286,7 @@ of trace data, via the @code{target tfile} command.
 
 @kindex tsave
 @item tsave [ -r ] @var{filename}
+@itemx tsave [-ctf] @var{dirname}
 Save the trace data to @var{filename}.  By default, this command
 assumes that @var{filename} refers to the host filesystem, so if
 necessary @value{GDBN} will copy raw trace data up from the target and
@@ -12294,6 +12295,11 @@ optional argument @code{-r} (``remote'') to direct the target to save
 the data directly into @var{filename} in its own filesystem, which may be
 more efficient if the trace buffer is very large.  (Note, however, that
 @code{target tfile} can only read from files accessible to the host.)
+By default, this command will save trace frame in tfile format.
+You can supply the optional argument @code{-ctf} to save date in CTF
+format.  The @dfn{Common Trace Format} (CTF) is proposed as a trace format
+that can be shared by multiple debugging and tracing tools.  Please go to
+@indicateurl{http://www.efficios.com/ctf} to get more information.
 
 @kindex target tfile
 @kindex tfile

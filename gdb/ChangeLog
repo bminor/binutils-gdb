@@ -1,3 +1,22 @@
+2013-03-14  Hui Zhu  <hui@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (REMOTE_OBS): Add ctf.o.
+	(SFILES): Add ctf.c.
+	(HFILES_NO_SRCDIR): Add ctf.h.
+	* ctf.c, ctf.h: New files.
+	* tracepoint.c: Include 'ctf.h'.
+	(collect_pseudocommand): Remove static.
+	(trace_save_command): Parse option "-ctf".
+	Produce different trace file writers per option.
+	Adjust output message.
+	(trace_save_tfile, trace_save_ctf): New.
+	* tracepoint.h (trace_save_tfile, trace_save_ctf): Declare.
+	* mi/mi-main.c: Include 'ctf.h'.
+	(mi_cmd_trace_save): Handle option '-ctf'.  Call either
+	trace_save_tfile or trace_save_ctf.
+	* NEWS: Mention these changes.
+
 2013-03-14  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (trace_file_writer_xfree): New.

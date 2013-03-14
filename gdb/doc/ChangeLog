@@ -1,3 +1,8 @@
+2013-03-14  Hui Zhu  <hui@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Trace Files): Add "tsave -ctf".
+
 2013-03-13  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.texinfo (Maintenance Commands): Add missing ')' for

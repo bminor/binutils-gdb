@@ -49,6 +49,7 @@
 #include "osdata.h"
 #include "splay-tree.h"
 #include "tracepoint.h"
+#include "ctf.h"
 #include "ada-lang.h"
 #include "linespec.h"
 
@@ -2477,25 +2478,45 @@ void
 mi_cmd_trace_save (char *command, char **argv, int argc)
 {
   int target_saves = 0;
+  int generate_ctf = 0;
   char *filename;
+  int oind = 0;
+  char *oarg;
 
-  if (argc != 1 && argc != 2)
-    error (_("Usage: -trace-save [-r] filename"));
-
-  if (argc == 2)
+  enum opt
+  {
+    TARGET_SAVE_OPT, CTF_OPT
+  };
+  static const struct mi_opt opts[] =
     {
-      filename = argv[1];
-      if (strcmp (argv[0], "-r") == 0)
-	target_saves = 1;
-      else
-	error (_("Invalid option: %s"), argv[0]);
+      {"r", TARGET_SAVE_OPT, 0},
+      {"ctf", CTF_OPT, 0},
+      { 0, 0, 0 }
+    };
+
+  while (1)
+    {
+      int opt = mi_getopt ("-trace-save", argc, argv, opts,
+			   &oind, &oarg);
+
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+	{
+	case TARGET_SAVE_OPT:
+	  target_saves = 1;
+	  break;
+	case CTF_OPT:
+	  generate_ctf = 1;
+	  break;
+	}
     }
+  filename = argv[oind];
+
+  if (generate_ctf)
+    trace_save_ctf (filename, target_saves);
   else
-    {
-      filename = argv[0];
-    }
-
-  trace_save_tfile (filename, target_saves);
+    trace_save_tfile (filename, target_saves);
 }
 
 void

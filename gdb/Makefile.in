@@ -511,7 +511,7 @@ SER_HARDWIRE = @SER_HARDWIRE@
 # The `remote' debugging target is supported for most architectures,
 # but not all (e.g. 960)
 REMOTE_OBS = remote.o dcache.o tracepoint.o ax-general.o ax-gdb.o remote-fileio.o \
-	remote-notif.o
+	remote-notif.o ctf.o
 
 # This is remote-sim.o if a simulator is to be linked in.
 SIM_OBS = @SIM_OBS@
@@ -760,7 +760,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	regset.c sol-thread.c windows-termcap.c \
 	common/gdb_vecs.c common/common-utils.c common/xml-utils.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
-	common/format.c btrace.c record-btrace.c
+	common/format.c btrace.c record-btrace.c ctf.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -837,7 +837,8 @@ gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/format.h common/host-defs.h utils.h common/queue.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
-gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h common/linux-btrace.h
+gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h common/linux-btrace.h \
+ctf.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 

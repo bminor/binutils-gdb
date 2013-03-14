@@ -53,6 +53,7 @@
 #include "exceptions.h"
 #include "cli/cli-utils.h"
 #include "probe.h"
+#include "ctf.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -3544,6 +3545,7 @@ trace_save_command (char *args, int from_tty)
   char **argv;
   char *filename = NULL;
   struct cleanup *back_to;
+  int generate_ctf = 0;
   struct trace_file_writer *writer = NULL;
 
   if (args == NULL)
@@ -3556,6 +3558,8 @@ trace_save_command (char *args, int from_tty)
     {
       if (strcmp (*argv, "-r") == 0)
 	target_does_save = 1;
+      if (strcmp (*argv, "-ctf") == 0)
+	generate_ctf = 1;
       else if (**argv == '-')
 	error (_("unknown option `%s'"), *argv);
       else
@@ -3565,14 +3569,18 @@ trace_save_command (char *args, int from_tty)
   if (!filename)
     error_no_arg (_("file in which to save trace data"));
 
-  writer = tfile_trace_file_writer_new ();
+  if (generate_ctf)
+    writer = ctf_trace_file_writer_new ();
+  else
+    writer = tfile_trace_file_writer_new ();
 
   make_cleanup (trace_file_writer_xfree, writer);
 
   trace_save (filename, writer, target_does_save);
 
   if (from_tty)
-    printf_filtered (_("Trace data saved to file '%s'.\n"), filename);
+    printf_filtered (_("Trace data saved to %s '%s'.\n"),
+		     generate_ctf ? "directory" : "file", filename);
 
   do_cleanups (back_to);
 }
@@ -3588,6 +3596,21 @@ trace_save_tfile (const char *filename, int target_does_save)
   writer = tfile_trace_file_writer_new ();
   back_to = make_cleanup (trace_file_writer_xfree, writer);
   trace_save (filename, writer, target_does_save);
+  do_cleanups (back_to);
+}
+
+/* Save the trace data to dir DIRNAME of ctf format.  */
+
+void
+trace_save_ctf (const char *dirname, int target_does_save)
+{
+  struct trace_file_writer *writer;
+  struct cleanup *back_to;
+
+  writer = ctf_trace_file_writer_new ();
+  back_to = make_cleanup (trace_file_writer_xfree, writer);
+
+  trace_save (dirname, writer, target_does_save);
   do_cleanups (back_to);
 }
 
@@ -5657,6 +5680,7 @@ _initialize_tracepoint (void)
 
   add_com ("tsave", class_trace, trace_save_command, _("\
 Save the trace data to a file.\n\
+Use the '-ctf' option to save the data to CTF format.\n\
 Use the '-r' option to direct the target to save directly to the file,\n\
 using its own filesystem."));
 

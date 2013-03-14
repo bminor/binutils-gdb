@@ -3,6 +3,14 @@
 
 *** Changes since GDB 7.6
 
+* The command 'tsave' can now support new option '-ctf' to save trace
+  buffer in Common Trace Format.
+
+* MI changes
+
+  ** The -trace-save MI command can optionally save trace buffer in Common
+     Trace Format now.
+
 *** Changes in GDB 7.6
 
 * Target record has been renamed to record-full.
