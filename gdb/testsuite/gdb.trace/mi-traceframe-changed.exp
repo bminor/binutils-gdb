@@ -34,39 +34,41 @@ remote_exec target "$binfile"
 # Copy tracefile from target to host.
 remote_download host [remote_upload target basic.tf] basic.tf
 
-proc test_tfind_tfile { } { with_test_prefix "tfile" {
-    global binfile
-    global decimal
+proc test_tfind_tfile { } {
+    with_test_prefix "tfile" {
+	global binfile
+	global decimal
 
-    if [mi_gdb_start] {
-	return
+	if [mi_gdb_start] {
+	    return
+	}
+	mi_gdb_load ${binfile}
+
+	mi_gdb_test "-target-select tfile basic.tf" \
+	    ".*=breakpoint-created,bkpt=\{number=\"${decimal}\",type=\"tracepoint\",disp=\"keep\",enabled=\"y\",.*,func=\"write_basic_trace_file\".*\\^connected" \
+	    "select trace file"
+
+	mi_gdb_test "tfind 0" \
+	    ".*=traceframe-changed,num=\"0\",tracepoint=\"${decimal}\".*\\^done" \
+	    "tfind 0"
+
+	# No MI notification is sent because traceframe is not changed.
+	mi_gdb_test "tfind 0" \
+	    "\\&\"tfind 0\\\\n\"\r\n\~\"Found.*\\^done" \
+	    "tfind 0 again"
+
+	mi_gdb_test "tfind end" \
+	    ".*=traceframe-changed,end.*\\^done" \
+	    "tfind end"
+
+	# No MI notification is send because request is from MI command.
+	mi_gdb_test "-trace-find frame-number 0" \
+	    "-trace-find frame-number 0\r\n\\^done,found=\"1\",tracepoint=\"${decimal}\",traceframe=\"0\",frame=\{.*" \
+	    "-trace-find frame-number 0"
+
+	mi_gdb_exit
     }
-    mi_gdb_load ${binfile}
-
-    mi_gdb_test "-target-select tfile basic.tf" \
-	".*=breakpoint-created,bkpt=\{number=\"${decimal}\",type=\"tracepoint\",disp=\"keep\",enabled=\"y\",.*,func=\"write_basic_trace_file\".*\\^connected" \
-	"select trace file"
-
-    mi_gdb_test "tfind 0" \
-	".*=traceframe-changed,num=\"0\",tracepoint=\"${decimal}\".*\\^done" \
-	"tfind 0"
-
-    # No MI notification is sent because traceframe is not changed.
-    mi_gdb_test "tfind 0" \
-	"\\&\"tfind 0\\\\n\"\r\n\~\"Found.*\\^done" \
-	"tfind 0 again"
-
-    mi_gdb_test "tfind end" \
-	".*=traceframe-changed,end.*\\^done" \
-	"tfind end"
-
-    # No MI notification is send because request is from MI command.
-    mi_gdb_test "-trace-find frame-number 0" \
-	"-trace-find frame-number 0\r\n\\^done,found=\"1\",tracepoint=\"${decimal}\",traceframe=\"0\",frame=\{.*" \
-	"-trace-find frame-number 0"
-
-    mi_gdb_exit
-}}
+}
 
 test_tfind_tfile
 
@@ -99,38 +101,40 @@ if ![gdb_target_supports_trace] {
 
 gdb_exit
 
-proc test_tfind_remote { } { with_test_prefix "remote" {
-    global decimal
+proc test_tfind_remote { } {
+    with_test_prefix "remote" {
+	global decimal
 
-    if [mi_gdb_start] {
-	return
+	if [mi_gdb_start] {
+	    return
+	}
+	mi_run_to_main
+
+	mi_gdb_test "-break-insert end" "\\^done.*" "break end"
+	mi_gdb_test "-break-insert -a func2" "\\^done.*" "break func2"
+	mi_gdb_test "-trace-start" "=breakpoint-modified,bkpt={.*installed=\"y\".*}.*\\^done.*" \
+	    "trace start"
+
+	mi_execute_to "exec-continue" "breakpoint-hit" end "" ".*" ".*" \
+	    { "" "disp=\"keep\"" } \
+	    "continue to end"
+	mi_gdb_test "-trace-stop" "\\^done.*" "trace stop"
+
+	mi_gdb_test "tfind 0" \
+	    ".*=traceframe-changed,num=\"0\",tracepoint=\"${decimal}\".*\\^done" \
+	    "tfind 0"
+
+	mi_gdb_test "tfind" \
+	    ".*=traceframe-changed,num=\"1\",tracepoint=\"${decimal}\".*\\^done" \
+	    "tfind"
+
+	mi_gdb_test "tfind end" \
+	    ".*=traceframe-changed,end.*\\^done" \
+	    "tfind end"
+
+	mi_gdb_exit
     }
-    mi_run_to_main
-
-    mi_gdb_test "-break-insert end" "\\^done.*" "break end"
-    mi_gdb_test "-break-insert -a func2" "\\^done.*" "break func2"
-    mi_gdb_test "-trace-start" "=breakpoint-modified,bkpt={.*installed=\"y\".*}.*\\^done.*" \
-	"trace start"
-
-    mi_execute_to "exec-continue" "breakpoint-hit" end "" ".*" ".*" \
-	{ "" "disp=\"keep\"" } \
-	"continue to end"
-    mi_gdb_test "-trace-stop" "\\^done.*" "trace stop"
-
-    mi_gdb_test "tfind 0" \
-	".*=traceframe-changed,num=\"0\",tracepoint=\"${decimal}\".*\\^done" \
-	"tfind 0"
-
-    mi_gdb_test "tfind" \
-	".*=traceframe-changed,num=\"1\",tracepoint=\"${decimal}\".*\\^done" \
-	"tfind"
-
-    mi_gdb_test "tfind end" \
-	".*=traceframe-changed,end.*\\^done" \
-	"tfind end"
-
-    mi_gdb_exit
-}}
+}
 
 test_tfind_remote
 

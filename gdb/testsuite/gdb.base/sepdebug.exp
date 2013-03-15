@@ -648,101 +648,103 @@ test_next_with_recursion
 
 #********
 
-proc test_different_dir {type test_different_dir xfail} { with_test_prefix "$type" {
-    global srcdir subdir objdir binfile srcfile timeout gdb_prompt
-    global bp_location6 decimal hex
+proc test_different_dir {type test_different_dir xfail} {
+    with_test_prefix "$type" {
+	global srcdir subdir objdir binfile srcfile timeout gdb_prompt
+	global bp_location6 decimal hex
 
-    gdb_exit
-    gdb_start
-    gdb_reinitialize_dir $srcdir/$subdir
-    gdb_test_no_output "set debug-file-directory ${test_different_dir}" \
-	"set separate debug location"
-    gdb_load ${binfile}
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_test_no_output "set debug-file-directory ${test_different_dir}" \
+	    "set separate debug location"
+	gdb_load ${binfile}
 
-    #
-    # test break at function
-    #
-    if {$xfail} {
-	setup_xfail "*-*-*"
-    }
-    gdb_test "break main" \
-	"Breakpoint.*at.* file .*$srcfile, line.*" \
-	"breakpoint function, optimized file"
-
-    #
-    # test break at function
-    #
-    if {$xfail} {
-	setup_xfail "*-*-*"
-    }
-    gdb_test "break marker4" \
-	"Breakpoint.*at.* file .*$srcfile, line.*" \
-	"breakpoint small function, optimized file"
-
-    #
-    # run until the breakpoint at main is hit. For non-stubs-using targets.
-    #
-    gdb_run_cmd
-    if {$xfail} {
-	setup_xfail "*-*-*"
-    }
-    gdb_expect {
-	-re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*$gdb_prompt $" {
-	    pass "run until function breakpoint, optimized file"
+	#
+	# test break at function
+	#
+	if {$xfail} {
+	    setup_xfail "*-*-*"
 	}
-	-re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$gdb_prompt $" {
-	    pass "run until function breakpoint, optimized file (code motion)"
+	gdb_test "break main" \
+	    "Breakpoint.*at.* file .*$srcfile, line.*" \
+	    "breakpoint function, optimized file"
+
+	#
+	# test break at function
+	#
+	if {$xfail} {
+	    setup_xfail "*-*-*"
 	}
-	-re "$gdb_prompt $" {
-	    fail "run until function breakpoint, optimized file"
+	gdb_test "break marker4" \
+	    "Breakpoint.*at.* file .*$srcfile, line.*" \
+	    "breakpoint small function, optimized file"
+
+	#
+	# run until the breakpoint at main is hit. For non-stubs-using targets.
+	#
+	gdb_run_cmd
+	if {$xfail} {
+	    setup_xfail "*-*-*"
 	}
-	timeout {
-	    fail "run until function breakpoint, optimized file (timeout)"
+	gdb_expect {
+	    -re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$srcfile:$bp_location6.*$bp_location6\[\t \]+if .argc.* \{.*$gdb_prompt $" {
+		pass "run until function breakpoint, optimized file"
+	    }
+	    -re "Breakpoint \[0-9\]+,.*main .*argc.*argv.* at .*$gdb_prompt $" {
+		pass "run until function breakpoint, optimized file (code motion)"
+	    }
+	    -re "$gdb_prompt $" {
+		fail "run until function breakpoint, optimized file"
+	    }
+	    timeout {
+		fail "run until function breakpoint, optimized file (timeout)"
+	    }
 	}
+
+	#
+	# run until the breakpoint at a small function
+	#
+
+	#
+	# Add a second pass pattern.  The behavior differs here between stabs
+	# and dwarf for one-line functions.  Stabs preserves two line symbols
+	# (one before the prologue and one after) with the same line number, 
+	# but dwarf regards these as duplicates and discards one of them.
+	# Therefore the address after the prologue (where the breakpoint is)
+	# has no exactly matching line symbol, and GDB reports the breakpoint
+	# as if it were in the middle of a line rather than at the beginning.
+
+	set bp_location13 [gdb_get_line_number "set breakpoint 13 here"]
+	set bp_location14 [gdb_get_line_number "set breakpoint 14 here"]
+	if {$xfail} {
+	    setup_xfail "*-*-*"
+	}
+
+	gdb_test_multiple "continue" "run until breakpoint set at small function, optimized file" {
+	    -re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile:$bp_location13\[\r\n\]+$bp_location13\[\t \]+void marker4.*$gdb_prompt $" {
+		pass "run until breakpoint set at small function, optimized file"
+	    }
+	    -re "Breakpoint $decimal, $hex in marker4 \\(d=177601976\\) at .*$srcfile:$bp_location13\[\r\n\]+$bp_location13\[\t \]+void marker4.*$gdb_prompt $" {
+		pass "run until breakpoint set at small function, optimized file"
+	    }
+	    -re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile:$bp_location14\[\r\n\]+$bp_location14\[\t \]+void marker4.*$gdb_prompt $" {
+		# marker4() is defined at line 46 when compiled with -DPROTOTYPES
+		pass "run until breakpoint set at small function, optimized file (line bp_location14)"
+	    }
+	}
+
+
+	# Reset the default arguments for VxWorks
+	if [istarget "*-*-vxworks*"] {
+	    set timeout 10
+	    verbose "Timeout is now $timeout seconds" 2
+	    gdb_test_no_output "set args main"
+	}
+
+	# proc test_different_dir
     }
-
-    #
-    # run until the breakpoint at a small function
-    #
-
-    #
-    # Add a second pass pattern.  The behavior differs here between stabs
-    # and dwarf for one-line functions.  Stabs preserves two line symbols
-    # (one before the prologue and one after) with the same line number, 
-    # but dwarf regards these as duplicates and discards one of them.
-    # Therefore the address after the prologue (where the breakpoint is)
-    # has no exactly matching line symbol, and GDB reports the breakpoint
-    # as if it were in the middle of a line rather than at the beginning.
-
-    set bp_location13 [gdb_get_line_number "set breakpoint 13 here"]
-    set bp_location14 [gdb_get_line_number "set breakpoint 14 here"]
-    if {$xfail} {
-	setup_xfail "*-*-*"
-    }
-
-    gdb_test_multiple "continue" "run until breakpoint set at small function, optimized file" {
-	-re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile:$bp_location13\[\r\n\]+$bp_location13\[\t \]+void marker4.*$gdb_prompt $" {
-	    pass "run until breakpoint set at small function, optimized file"
-	}
-	-re "Breakpoint $decimal, $hex in marker4 \\(d=177601976\\) at .*$srcfile:$bp_location13\[\r\n\]+$bp_location13\[\t \]+void marker4.*$gdb_prompt $" {
-	    pass "run until breakpoint set at small function, optimized file"
-	}
-	-re "Breakpoint $decimal, marker4 \\(d=177601976\\) at .*$srcfile:$bp_location14\[\r\n\]+$bp_location14\[\t \]+void marker4.*$gdb_prompt $" {
-	    # marker4() is defined at line 46 when compiled with -DPROTOTYPES
-	    pass "run until breakpoint set at small function, optimized file (line bp_location14)"
-	}
-    }
-
-
-    # Reset the default arguments for VxWorks
-    if [istarget "*-*-vxworks*"] {
-	set timeout 10
-	verbose "Timeout is now $timeout seconds" 2
-	gdb_test_no_output "set args main"
-    }
-
-# proc test_different_dir
-}}
+}
 
 
 # now move the .debug file to a different location so that we can test

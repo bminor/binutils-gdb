@@ -1,5 +1,58 @@
 2013-03-15  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.threads/non-ldr-exc-1.exp (do_test): Fix the indent of
+	using with_test_prefix.
+	* gdb.threads/non-ldr-exc-2.exp (do_test): Likewise.
+	* gdb.threads/non-ldr-exc-3.exp (do_test): Likewise.
+	* gdb.threads/non-ldr-exc-4.exp (do_test): Likewise.
+	* gdb.threads/watchpoint-fork.exp (test): Likewise.
+	* gdb.base/break-interp.exp (test_core): Likewise.
+	(test_attach_gdb): Likewise.
+	* gdb.base/catch-load.exp (one_catch_load_test): Likewise.
+	* gdb.base/disp-step-syscall.exp (disp_step_cross_syscall):
+	Likewise.
+	* gdb.base/jit-so.exp (one_jit_test): Likewise.
+	* gdb.base/jit.exp (one_jit_test): Likewise.
+	* gdb.base/sepdebug.exp (test_different_dir): Likewise.
+	* gdb.dwarf2/dw2-dir-file-name.exp (test): Likewise.
+	* gdb.dwarf2/dw2-noloc.exp (file_symbols): Likewise.
+	* gdb.mi/mi-breakpoint-changed.exp (test_pending_resolved):
+	Likewise.
+	* gdb.mi/mi-cmd-param-changed.exp (test_command_param_changed):
+	Likewise.
+	* gdb.mi/mi-watch.exp test_watchpoint_all): Likewise.
+	* gdb.mi/pr11022.exp (test_memory_changed_observer): Likewise.
+	* gdb.trace/change-loc.exp (tracepoint_change_loc_1): Likewise.
+	(tracepoint_change_loc_2): Likewise.
+	* gdb.trace/disconnected-tracing.exp (disconnected_tracing):
+	Likewise.
+	(disconnected_tfind): Likewise.
+	* gdb.trace/mi-traceframe-changed.exp (test_tfind_tfile):
+	Likewise.
+	(test_tfind_remote): Likewise.
+	* gdb.trace/mi-tracepoint-changed.exp (test_reconnect):
+	Likewise.
+	(test_pending_resolved): Likewise.
+	* gdb.trace/mi-tsv-changed.exp (test_create_delete_modify_tsv):
+	Likewise.
+	(test_upload_tsv): Likewise.
+	* gdb.trace/pending.exp (pending_tracepoint_resolved):
+	Likewise.
+	(pending_tracepoint_works): Likewise.
+	* gdb.trace/report.exp (use_collected_data): Likewise.
+	* gdb.trace/status-stop.exp (test_tstart_tstop_tstart):
+	Likewise.
+	(test_tstart_tstart, test_buffer_full_tstart): Likewise.
+	* gdb.trace/strace.exp (strace_info_marker): Likewise.
+	(strace_trace_on_same_addr): Likewise.
+	(strace_trace_on_diff_addr): Likewise.
+	* gdb.trace/unavailable.exp (gdb_collect_args_test): Likewise.
+	(gdb_collect_locals_test): Likewise.
+	(gdb_unavailable_registers_test): Likewise.
+	(gdb_collect_globals_test): Likewise.
+
+2013-03-15  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.base/condbreak.exp: Add semicolon back which was removed
 	by my previous commit.
 

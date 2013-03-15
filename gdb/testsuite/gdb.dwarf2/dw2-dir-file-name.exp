@@ -335,34 +335,36 @@ if ![runto_main] {
 
 gdb_test "cd ${srcabsdir}/rdir" "Working directory [string_to_regexp ${srcabsdir}]/rdir\\." "cd .../rdir"
 
-proc test { func compdir filename } { with_test_prefix "$func" {
-    # Clear the GDB cache.
-    gdb_test_no_output "set directories" ""
+proc test { func compdir filename } {
+    with_test_prefix "$func" {
+	# Clear the GDB cache.
+	gdb_test_no_output "set directories" ""
 
-    if {$compdir == ""} {
-        set absolute "$filename"
-    } else {
-        set absolute "$compdir/$filename"
+	if {$compdir == ""} {
+	    set absolute "$filename"
+	} else {
+	    set absolute "$compdir/$filename"
+	}
+	if {[string index $absolute 0] != "/"} {
+	    error "not absolute"
+	}
+
+	gdb_breakpoint $func
+	gdb_continue_to_breakpoint $func "$func \\(\\) at .*"
+
+	gdb_test_no_output "set filename-display absolute"
+	verbose -log "expect: ${absolute}"
+	gdb_test "frame" " in $func \\(\\) at [string_to_regexp ${absolute}]:999" "absolute"
+
+	gdb_test_no_output "set filename-display basename"
+	verbose -log "expect: [file tail $filename]"
+	gdb_test "frame" " in $func \\(\\) at [string_to_regexp [file tail $filename]]:999" "basename"
+
+	gdb_test_no_output "set filename-display relative"
+	verbose -log "expect: $filename"
+	gdb_test "frame" " in $func \\(\\) at [string_to_regexp $filename]:999" "relative"
     }
-    if {[string index $absolute 0] != "/"} {
-	error "not absolute"
-    }
-
-    gdb_breakpoint $func
-    gdb_continue_to_breakpoint $func "$func \\(\\) at .*"
-
-    gdb_test_no_output "set filename-display absolute"
-    verbose -log "expect: ${absolute}"
-    gdb_test "frame" " in $func \\(\\) at [string_to_regexp ${absolute}]:999" "absolute"
-
-    gdb_test_no_output "set filename-display basename"
-    verbose -log "expect: [file tail $filename]"
-    gdb_test "frame" " in $func \\(\\) at [string_to_regexp [file tail $filename]]:999" "basename"
-
-    gdb_test_no_output "set filename-display relative"
-    verbose -log "expect: $filename"
-    gdb_test "frame" " in $func \\(\\) at [string_to_regexp $filename]:999" "relative"
-}}
+}
 
 set bdir "${srcabsdir}"
 set file "${srctmpfile}"
