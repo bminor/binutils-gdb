@@ -1,4 +1,4 @@
-#target: arm*-*-*eabi
+#target: arm*-*-*eabi*
 #source: main.s
 #source: gcdfn.s
 #source: hidfn.s

@@ -1,3 +1,10 @@
+2013-03-15  Will Newton  <will.newton@linaro.org>
+
+	* ld-arm/arm-elf.exp: Expand *-*eabi test to cover *-*eabi*.
+	* ld-arm/gc-hidden-1.d: Likewise.
+	* ld-elfvsb/elfvsb.exp: Likewise.
+	* ld-shared/shared.exp: Likewise.
+
 2013-03-08  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
         * lib/ld-lib.exp (check_gc_sections_available): Remove aarch64
