@@ -1,5 +1,21 @@
 2013-03-15  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Target_powerpc::Scan::reloc_needs_plt_for_ifunc): Make
+	static and public.  Add report_err param.  Return false for data refs.
+	(Target_powerpc::rela_dyn_section): New overloaded function.
+	(Target_powerpc::plt_, iplt_): Elucidate.
+	(Output_data_plt_powerpc::entry_count): Handle current_data_size()==0.
+	(Output_data_plt_powerpc::do_write): Don't write .iplt.
+	(Output_data_plt_powerpc::plt_entry_count): Don't add .iplt entries.
+	(Target_powerpc::Scan::local, global): Adjust reloc_needs_plt_for_ifunc
+	calls.  Put ifunc dynamic relocs in irela_dyn_section.  Only
+	push_branch and make_plt_entry for ifunc syms when
+	reloc_needs_plt_for_ifunc.
+	(Target_powerpc::Relocate::relocate): Don't use plt entry value
+	for ifunc unless reloc_needs_plt_for_ifunc.
+
+2013-03-15  Alan Modra  <amodra@gmail.com>
+
 	* gc.h (gc_process_relocs): Don't look through function descriptors.
 	* icf.cc (get_section_contents): Do so here instead.
 
