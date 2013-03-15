@@ -1,3 +1,7 @@
+2013-03-15  Steve Ellcey  <sellcey@mips.com>
+
+	* remote-sim.c (sim_command_completer): Make char arguments const.
+
 2013-03-15  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/15116:

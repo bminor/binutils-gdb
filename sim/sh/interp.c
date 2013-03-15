@@ -2789,7 +2789,7 @@ sim_set_callbacks (p)
 }
 
 char **
-sim_complete_command (SIM_DESC sd, char *text, char *word)
+sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 {
   return NULL;
 }

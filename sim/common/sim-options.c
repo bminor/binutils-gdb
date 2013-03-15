@@ -950,7 +950,7 @@ complete_option_list (char **ret, size_t *cnt, const struct option_list *ol,
    completed is stored in @word.  Trailing text of @word is not.  */
 
 char **
-sim_complete_command (SIM_DESC sd, char *text, char *word)
+sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 {
   char **ret = NULL;
   size_t cnt = 1;

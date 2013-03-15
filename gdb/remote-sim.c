@@ -1196,7 +1196,8 @@ simulator_command (char *args, int from_tty)
 }
 
 static VEC (char_ptr) *
-sim_command_completer (struct cmd_list_element *ignore, char *text, char *word)
+sim_command_completer (struct cmd_list_element *ignore, const char *text,
+		       const char *word)
 {
   struct sim_inferior_data *sim_data;
   char **tmp;

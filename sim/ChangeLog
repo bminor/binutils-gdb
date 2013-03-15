@@ -1,3 +1,17 @@
+2013-03-15  Steve Ellcey  <sellcey@mips.com>
+
+	* arm/wrapper.c (sim_complete_command): Make char arguments const.
+	* avr/interp.c (sim_complete_command): Ditto.
+	* common/sim-options.c (sim_complete_command): Ditto.
+	* cr16/interp.c (sim_complete_command): Ditto.
+	* erc32/interf.c (sim_complete_command): Ditto.
+	* m32c/gdb-if.c (sim_complete_command): Ditto.
+	* microblaze/interp.c (sim_complete_command): Ditto.
+	* ppc/sim_calls.c (sim_complete_command): Ditto.
+	* rl78/gdb-if.c (sim_complete_command): Ditto.
+	* rx/gdb-if.c (sim_complete_command): Ditto.
+	* sh/interp.c (sim_complete_command): Ditto.
+
 2013-01-01  Joel Brobecker  <brobecker@adacore.com>
 
 	Update year range in copyright notice of all files.
