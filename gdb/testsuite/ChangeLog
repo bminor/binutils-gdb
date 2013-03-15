@@ -1,3 +1,8 @@
+2013-03-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/condbreak.exp: Add semicolon back which was removed
+	by my previous commit.
+
 2013-03-14  Yao Qi  <yao@codesourcery.com>
 
 	* config/monitor.exp (gdb_target_cmd): Remove semicolon after
