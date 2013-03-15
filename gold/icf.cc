@@ -288,6 +288,25 @@ get_section_contents(bool first_iteration,
 
       for (; it_v != v.end(); ++it_v, ++it_s, ++it_a, ++it_o, ++it_addend_size)
         {
+	  if (first_iteration
+	      && it_v->first != NULL)
+	    {
+	      Symbol_location loc;
+	      loc.object = it_v->first;
+	      loc.shndx = it_v->second;
+	      loc.offset = convert_types<off_t, long long>(it_a->first
+							   + it_a->second);
+	      // Look through function descriptors
+	      parameters->target().function_location(&loc);
+	      if (loc.shndx != it_v->second)
+		{
+		  it_v->second = loc.shndx;
+		  // Modify symvalue/addend to the code entry.
+		  it_a->first = loc.offset;
+		  it_a->second = 0;
+		}
+	    }
+
           // ADDEND_STR stores the symbol value and addend and offset,
           // each at most 16 hex digits long.  it_a points to a pair
           // where first is the symbol value and second is the

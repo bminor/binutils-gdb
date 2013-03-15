@@ -253,21 +253,7 @@ gc_process_relocs(
             {
 	      Address symvalue = dst_off - addend;
 	      if (is_ordinary) 
-		{
-		  Symbol_location loc;
-		  loc.object = dst_obj;
-		  loc.shndx = dst_indx;
-		  loc.offset = convert_types<off_t, Address>(dst_off);
-		  // Look through function descriptors.
-		  parameters->target().function_location(&loc);
-		  if (loc.shndx != dst_indx)
-		    {
-		      // Modify symvalue/addend to the code entry.
-		      symvalue = loc.offset;
-		      addend = 0;
-		    }
-		  (*secvec).push_back(Section_id(loc.object, loc.shndx));
-		}
+		(*secvec).push_back(Section_id(dst_obj, dst_indx));
 	      else
                 (*secvec).push_back(Section_id(NULL, 0));
               (*symvec).push_back(NULL);
@@ -343,21 +329,7 @@ gc_process_relocs(
             {
 	      Address symvalue = dst_off - addend;
               if (is_ordinary && gsym->source() == Symbol::FROM_OBJECT)
-		{
-		  Symbol_location loc;
-		  loc.object = dst_obj;
-		  loc.shndx = dst_indx;
-		  loc.offset = convert_types<off_t, Address>(dst_off);
-		  // Look through function descriptors.
-		  parameters->target().function_location(&loc);
-		  if (loc.shndx != dst_indx)
-		    {
-		      // Modify symvalue/addend to the code entry.
-		      symvalue = loc.offset;
-		      addend = 0;
-		    }
-		  (*secvec).push_back(Section_id(loc.object, loc.shndx));
-		}
+		(*secvec).push_back(Section_id(dst_obj, dst_indx));
 	      else
                 (*secvec).push_back(Section_id(NULL, 0));
               (*symvec).push_back(gsym);
