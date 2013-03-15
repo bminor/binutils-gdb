@@ -1,3 +1,8 @@
+2013-03-15  Tony Theodore  <tonyt@logyst.com>
+
+	PR build/9098:
+	* Makefile.in (SHELL): Use @SHELL@.
+
 2013-03-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* linux-low.c (linux_target_ops) [!HAVE_LINUX_BTRACE]:
