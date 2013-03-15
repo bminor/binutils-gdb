@@ -1,3 +1,8 @@
+2013-03-15  Tony Theodore  <tonyt@logyst.com>
+
+	PR build/9098:
+	* Makefile.in (SHELL): Use @SHELL@.
+
 2013-03-14  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* tracepoint.c (cmd_qtv): Initialize `val' with zero, silencing

@@ -41,7 +41,7 @@ infodir = @infodir@
 htmldir = $(prefix)/html
 includedir = @includedir@
 
-SHELL = /bin/sh
+SHELL = @SHELL@
 EXEEXT = @EXEEXT@
 
 INSTALL = @INSTALL@
