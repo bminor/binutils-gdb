@@ -2,6 +2,7 @@
 #as: -march=armv7-a+mp
 #objdump: -dr --prefix-addresses --show-raw-insn
 #source: arch7ar-mp.s
+#not-target: *-*-*coff *-*-pe *-*-wince *-*-*aout* *-*-netbsd *-*-riscix*
 
 .*: +file format .*arm.*
 

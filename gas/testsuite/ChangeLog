@@ -1,3 +1,11 @@
+2013-03-15  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arch7.d: Skip for non-ELF ARM targets.
+	* gas/arm/arch7a-mp.d: Likewise.
+	* gas/arm/arch7em.d: Likewise.
+	* gas/arm/crc32-bad.d: Likewise.
+	* gas/arm/crc32.d: Likewise.
+
 2013-03-15  Will Newton  <will.newton@linaro.org>
 
 	* gas/arm/vstr-thumb-bad.d: Assemble with -mcpu=arm1156t2f-s.
