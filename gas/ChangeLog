@@ -1,3 +1,8 @@
+2013-03-15  Will Newton  <will.newton@linaro.org>
+
+	* config/tc-arm.c (do_neon_ldr_str): Fix error check for PC register
+	in vstr in Thumb mode for pre-ARMv7 cores.
+
 2013-03-14  Andreas Schwab  <schwab@suse.de>
 
 	* doc/c-arc.texi (ARC Directives): Revert last change and use

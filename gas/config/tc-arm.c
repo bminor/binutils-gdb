@@ -15690,7 +15690,7 @@ do_neon_ldr_str (void)
      And is UNPREDICTABLE in thumb mode.  */
   if (!is_ldr
       && inst.operands[1].reg == REG_PC
-      && ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v7))
+      && (ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v7) || thumb_mode))
     {
       if (!thumb_mode && warn_on_deprecated)
 	as_warn (_("Use of PC here is deprecated"));

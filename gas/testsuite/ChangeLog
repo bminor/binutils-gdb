@@ -1,3 +1,7 @@
+2013-03-15  Will Newton  <will.newton@linaro.org>
+
+	* gas/arm/vstr-thumb-bad.d: Assemble with -mcpu=arm1156t2f-s.
+
 2013-03-12  Sebastian Huber <sebastian.huber@embedded-brains.de>
 
 	* gas/nios2/nios2.exp: Use run_dump_tests.
