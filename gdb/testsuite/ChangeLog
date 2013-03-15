@@ -1,3 +1,8 @@
+2013-03-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/overload.cc (intintfunc): New.
+	* gdb.cp/overload.exp: Add regression test.
+
 2013-03-15  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.threads/non-ldr-exc-1.exp (do_test): Fix the indent of

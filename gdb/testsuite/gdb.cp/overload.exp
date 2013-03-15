@@ -139,6 +139,9 @@ gdb_test "print foo_instance3" "\\$\[0-9\]+ = \{ifoo = 222, ccpfoo = $hex \"A\"\
 gdb_test "print foo_instance1.overloadargs(1)" "\\$\[0-9\]+ = 1" \
     "print call overloaded func 1 arg"
 
+# Regression test for overloading with function pointer type.
+gdb_test "print foo_instance1.overloadfnarg(23, intintfunc)" " = 23"
+
 # If GDB fails to restore the selected frame properly after the
 # inferior function call above (see GDB PR 1155 for an explanation of
 # why this might happen), all the subsequent tests will fail.  We

@@ -1,3 +1,8 @@
+2013-03-15  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/15116:
+	* gdbtypes.c (types_equal): Handle TYPE_CODE_FUNC.
+
 2013-03-14  Tom Tromey  <tromey@redhat.com>
 
 	* gdb_bfd.c (struct gdb_bfd_data) <crc_computed, crc>:
