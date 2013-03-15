@@ -1,3 +1,9 @@
+2013-03-15  Nick Clifton  <nickc@redhat.com>
+
+	* addr2line.c (slurp_symtab): If canonicalization reveals that
+	there were no ordinary symbols, try loading the dynamic symbols
+	instead.
+
 2013-03-14  Markos Chandras  <markos.chandras@imgtec.com>
 
 	* MAINTAINERS: Add myself as Meta maintainer.
