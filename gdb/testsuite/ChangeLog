@@ -1,3 +1,10 @@
+2013-03-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/valgrind-infcall.exp
+	(continue #$continue_count) <remote connection closed>
+	(continue #$continue_count) <valgrind vgdb has terminated>: Add kill of
+	$valgrind_pid.
+
 2013-03-12  Paul Hilfinger  <hilfingr@adacore.com>
 
         * gdb.ada/expr_delims.exp: New file.

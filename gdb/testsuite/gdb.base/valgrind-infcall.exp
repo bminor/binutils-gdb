@@ -101,10 +101,14 @@ while {$loop && $continue_count < 100} {
 	}
 	-re "Remote connection closed.*\r\n$gdb_prompt $" {
 	    fail "$test (remote connection closed)"
+	    # Only if valgrind got stuck.
+	    remote_exec host "kill -9 ${valgrind_pid}"
 	    return -1
 	}
 	-re "The program is not being run\\.\r\n$gdb_prompt $" {
 	    fail "$test (valgrind vgdb has terminated)"
+	    # Only if valgrind got stuck.
+	    remote_exec host "kill -9 ${valgrind_pid}"
 	    return -1
 	}
 	-re "\r\n$gdb_prompt $" {
