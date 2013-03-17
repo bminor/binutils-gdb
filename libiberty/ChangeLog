@@ -1,3 +1,8 @@
+2013-03-17  Eli Zaretskii  <eliz@gnu.org>
+
+	* setenv.c [!HAVE_ENVIRON_DECL]: Avoid declaring environ if it is
+	a macro, as this causes compiler warnings with MinGW.
+
 2013-03-01  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* obstacks.texi (Obstacks): Trim @node to only contain the
