@@ -63,10 +63,7 @@ extern int errno;
 
 #define __environ	environ
 #ifndef HAVE_ENVIRON_DECL
-/* MinGW defines environ to call a function.  */
-#ifndef environ
 extern char **environ;
-#endif
 #endif
 
 #undef setenv
