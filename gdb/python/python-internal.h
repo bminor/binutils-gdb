@@ -41,6 +41,11 @@
    around technique as above.  */
 #undef _FILE_OFFSET_BITS
 
+/* A kludge to avoid redefinition of snprintf on Windows by pyerrors.h.  */
+#if defined(_WIN32) && defined(HAVE_DECL_SNPRINTF)
+#define HAVE_SNPRINTF 1
+#endif
+
 /* Request clean size types from Python.  */
 #define PY_SSIZE_T_CLEAN
 
