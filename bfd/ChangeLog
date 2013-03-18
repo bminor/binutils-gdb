@@ -1,3 +1,9 @@
+2013-03-18  Alan Modra  <amodra@gmail.com>
+
+	PR ld/12549
+	* elflink.c (elf_link_add_object_symbols): Exclude weak refs when
+	considering whether an --as-needed library is needed.
+
 2013-03-14  Tom Tromey  <tromey@redhat.com>
 
 	* opncls.c (bfd_get_debug_link_info): Rename from

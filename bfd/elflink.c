@@ -4482,10 +4482,10 @@ error_free_dyn:
 	  if (!add_needed
 	      && definition
 	      && ((dynsym
-		   && h->ref_regular
+		   && h->ref_regular_nonweak
 		   && (undef_bfd == NULL
 		       || (undef_bfd->flags & BFD_PLUGIN) == 0))
-		  || (h->ref_dynamic
+		  || (h->ref_dynamic_nonweak
 		      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
 		      && !on_needed_list (elf_dt_name (abfd), htab->needed))))
 	    {

@@ -1,3 +1,7 @@
+2013-03-18  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/pr14862.out: Expect no output.
+
 2013-03-15  Will Newton  <will.newton@linaro.org>
 
 	* ld-arm/arm-elf.exp: Expand *-*eabi test to cover *-*eabi*.
