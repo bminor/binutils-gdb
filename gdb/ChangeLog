@@ -1,3 +1,13 @@
+2013-03-14  Keith Seitz  <keiths@redhat.com>
+	    Alan Matsuoka  <alanm@redhat.com>
+
+	PR c++/15203
+	PR c++/15210
+	* cp-namespace.c (cp_lookup_nested_symbol): Handle TYPE_CODE_FUNC and
+	TYPE_CODE_METHOD.
+	* elfread.c (elf_symtab_read): Handle BSF_GNU_UNIQUE for certain
+	symbols.
+
 2013-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* source.c (print_source_lines_base): Make a local copy of

@@ -1,3 +1,11 @@
+2013-03-14  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR c++/15203
+	PR c++/15210
+	* gdb.cp/m-static.cc (keepalive_int): New function.
+	(gnu_obj_1::method): New variable `sintvar', call `keepalive_int'.
+	* gdb.cp/m-static.exp: New test for `sintvar'.
+
 2013-03-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-infcall.exp
