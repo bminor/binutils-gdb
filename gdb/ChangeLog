@@ -1,3 +1,15 @@
+2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* frame-unwind.c: Include target.h.
+	(frame_unwind_try_unwinder): New function with code from ...
+	(frame_unwind_find_by_frame): ... here.  New variable
+	unwinder_from_target, call also target_get_unwinder)
+	(target_get_tailcall_unwinder, and frame_unwind_try_unwinder for it.
+	* target.c (target_get_unwinder, target_get_tailcall_unwinder): New.
+	* target.h (struct target_ops): New fields to_get_unwinder and
+	to_get_tailcall_unwinder.
+	(target_get_unwinder, target_get_tailcall_unwinder): New declarations.
+
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record-btrace.c (record_btrace_fetch_registers)

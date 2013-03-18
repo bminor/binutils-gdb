@@ -900,6 +900,11 @@ struct target_ops
        non-empty annex.  */
     int (*to_augmented_libraries_svr4_read) (void);
 
+    /* Those unwinders are tried before any other arch unwinders.  Use NULL if
+       it is not used.  */
+    const struct frame_unwind *to_get_unwinder;
+    const struct frame_unwind *to_get_tailcall_unwinder;
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1790,6 +1795,12 @@ extern char *target_fileio_read_stralloc (const char *filename);
 
 
 extern int target_core_of_thread (ptid_t ptid);
+
+/* See to_get_unwinder in struct target_ops.  */
+extern const struct frame_unwind *target_get_unwinder (void);
+
+/* See to_get_tailcall_unwinder in struct target_ops.  */
+extern const struct frame_unwind *target_get_tailcall_unwinder (void);
 
 /* Verify that the memory in the [MEMADDR, MEMADDR+SIZE) range matches
    the contents of [DATA,DATA+SIZE).  Returns 1 if there's a match, 0

@@ -4471,6 +4471,34 @@ debug_to_prepare_to_store (struct target_ops *self, struct regcache *regcache)
   fprintf_unfiltered (gdb_stdlog, "target_prepare_to_store ()\n");
 }
 
+/* See target.h.  */
+
+const struct frame_unwind *
+target_get_unwinder (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_get_unwinder != NULL)
+      return t->to_get_unwinder;
+
+  return NULL;
+}
+
+/* See target.h.  */
+
+const struct frame_unwind *
+target_get_tailcall_unwinder (void)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_get_tailcall_unwinder != NULL)
+      return t->to_get_tailcall_unwinder;
+
+  return NULL;
+}
+
 static int
 deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
 			      int write, struct mem_attrib *attrib,
