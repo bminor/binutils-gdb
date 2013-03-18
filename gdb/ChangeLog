@@ -1,5 +1,10 @@
 2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2-frame.c (dwarf2_frame_cfa): Move UNWIND_UNAVAILABLE check
+	earlier.
+
+2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* frame-unwind.c: Include target.h.
 	(frame_unwind_try_unwinder): New function with code from ...
 	(frame_unwind_find_by_frame): ... here.  New variable
