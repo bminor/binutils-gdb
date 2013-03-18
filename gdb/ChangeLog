@@ -1,4 +1,14 @@
 2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+            Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c: Include frame-unwind.h.
+	(record_btrace_frame_unwind_stop_reason)
+	(record_btrace_frame_this_id, record_btrace_frame_prev_register)
+	(record_btrace_frame_sniffer, record_btrace_frame_unwind):
+	New.
+	(init_record_btrace_ops): Install it.
+
+2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* frame.c (get_frame_unwind_stop_reason): Unconditionally call
 	get_prev_frame_1.

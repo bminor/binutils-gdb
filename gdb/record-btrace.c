@@ -33,6 +33,7 @@
 #include "symtab.h"
 #include "filenames.h"
 #include "regcache.h"
+#include "frame-unwind.h"
 
 /* The target_ops of record-btrace.  */
 static struct target_ops record_btrace_ops;
@@ -839,6 +840,68 @@ record_btrace_prepare_to_store (struct target_ops *ops,
       }
 }
 
+/* Implement stop_reason method for record_btrace_frame_unwind.  */
+
+static enum unwind_stop_reason
+record_btrace_frame_unwind_stop_reason (struct frame_info *this_frame,
+					void **this_cache)
+{
+  return UNWIND_UNAVAILABLE;
+}
+
+/* Implement this_id method for record_btrace_frame_unwind.  */
+
+static void
+record_btrace_frame_this_id (struct frame_info *this_frame, void **this_cache,
+			     struct frame_id *this_id)
+{
+  /* Leave there the outer_frame_id value.  */
+}
+
+/* Implement prev_register method for record_btrace_frame_unwind.  */
+
+static struct value *
+record_btrace_frame_prev_register (struct frame_info *this_frame,
+				   void **this_cache,
+				   int regnum)
+{
+  throw_error (NOT_AVAILABLE_ERROR,
+              _("Registers are not available in btrace record history"));
+}
+
+/* Implement sniffer method for record_btrace_frame_unwind.  */
+
+static int
+record_btrace_frame_sniffer (const struct frame_unwind *self,
+			     struct frame_info *this_frame,
+			     void **this_cache)
+{
+  struct thread_info *tp;
+  struct btrace_thread_info *btinfo;
+  struct btrace_insn_iterator *replay;
+
+  /* THIS_FRAME does not contain a reference to its thread.  */
+  tp = find_thread_ptid (inferior_ptid);
+  gdb_assert (tp != NULL);
+
+  return btrace_is_replaying (tp);
+}
+
+/* btrace recording does not store previous memory content, neither the stack
+   frames content.  Any unwinding would return errorneous results as the stack
+   contents no longer matches the changed PC value restored from history.
+   Therefore this unwinder reports any possibly unwound registers as
+   <unavailable>.  */
+
+static const struct frame_unwind record_btrace_frame_unwind =
+{
+  NORMAL_FRAME,
+  record_btrace_frame_unwind_stop_reason,
+  record_btrace_frame_this_id,
+  record_btrace_frame_prev_register,
+  NULL,
+  record_btrace_frame_sniffer
+};
 /* Initialize the record-btrace target ops.  */
 
 static void
@@ -869,6 +932,7 @@ init_record_btrace_ops (void)
   ops->to_fetch_registers = record_btrace_fetch_registers;
   ops->to_store_registers = record_btrace_store_registers;
   ops->to_prepare_to_store = record_btrace_prepare_to_store;
+  ops->to_get_unwinder = &record_btrace_frame_unwind;
   ops->to_stratum = record_stratum;
   ops->to_magic = OPS_MAGIC;
 }
