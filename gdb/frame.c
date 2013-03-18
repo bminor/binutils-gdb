@@ -2522,13 +2522,10 @@ get_frame_sp (struct frame_info *this_frame)
 enum unwind_stop_reason
 get_frame_unwind_stop_reason (struct frame_info *frame)
 {
-  /* If we haven't tried to unwind past this point yet, then assume
-     that unwinding would succeed.  */
-  if (frame->prev_p == 0)
-    return UNWIND_NO_REASON;
+  /* Fill-in STOP_REASON.  */
+  get_prev_frame_1 (frame);
+  gdb_assert (frame->prev_p);
 
-  /* Otherwise, we set a reason when we succeeded (or failed) to
-     unwind.  */
   return frame->stop_reason;
 }
 

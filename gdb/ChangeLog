@@ -1,5 +1,10 @@
 2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* frame.c (get_frame_unwind_stop_reason): Unconditionally call
+	get_prev_frame_1.
+
+2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* dwarf2-frame.c (dwarf2_frame_cfa): Move UNWIND_UNAVAILABLE check
 	earlier.
 
