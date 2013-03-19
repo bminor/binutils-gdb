@@ -973,7 +973,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
       if (gotasig)
 	{
 	  LPCVOID x;
-	  DWORD n;
+	  SIZE_T n;
 	  ourstatus->kind = TARGET_WAITKIND_STOPPED;
 	  retval = strtoul (p, &p, 0);
 	  if (!retval)

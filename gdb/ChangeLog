@@ -1,3 +1,8 @@
+2013-03-19  Corinna Vinschen  <vinschen@redhat.com>
+
+	* windows-nat.c (handle_output_debug_string): Change type of n to
+	SIZE_T to avoid crash on 64 bit systems.
+
 2013-03-17  Eli Zaretskii  <eliz@gnu.org>
 
 	* python/python-internal.h (HAVE_SNPRINTF)
