@@ -8,6 +8,12 @@
 	* elfread.c (elf_symtab_read): Handle BSF_GNU_UNIQUE for certain
 	symbols.
 
+2013-03-19  Eli Zaretskii  <eliz@gnu.org>
+
+	* python/python-internal.h (HAVE_SNPRINTF)
+	[_WIN32 && HAVE_DECL_SNPRINTF]: Define, to avoid compiler warnings
+	about redefinition of snprintf by pyerrors.h.
+
 2013-03-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* source.c (print_source_lines_base): Make a local copy of
