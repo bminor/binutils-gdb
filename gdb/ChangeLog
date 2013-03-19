@@ -1,3 +1,35 @@
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* aix-thread.c (aix_thread_detach): Update.
+	* corelow.c (core_detach): Update.
+	* darwin-nat.c (darwin_detach): Update.
+	* dec-thread.c (dec_thread_detach): Update.
+	* gnu-nat.c (gnu_detach): Update.
+	* go32-nat.c (go32_detach): Update.
+	* inf-ptrace.c (inf_ptrace_detach): Update.
+	* inf-ttrace.c (inf_ttrace_detach): Update.
+	* linux-fork.c (linux_fork_detach): Update.
+	* linux-fork.h (linux_fork_detach): Update.
+	* linux-nat.c (linux_nat_detach): Update.  Introduce "tem"
+	local for const-correctness.
+	* linux-thread-db.c (thread_db_detach): Update.
+	* monitor.c (monitor_detach): Update.
+	* nto-procfs.c (procfs_detach): Update.
+	* procfs.c (procfs_detach): Update.
+	* record.c (record_detach): Update.
+	* record.h (record_detach): Update.
+	* remote-m32r-sdi.c (m32r_detach): Update.
+	* remote-mips.c (mips_detach): Update.
+	* remote-sim.c (gdbsim_detach): Update.
+	* remote.c (remote_detach_1, remote_detach)
+	(extended_remote_detach): Update.
+	* sol-thread.c (sol_thread_detach): Update.
+	* target.c (target_detach): Make "args" const.
+	(init_dummy_target): Update.
+	* target.h (struct target_ops) <to_detach>: Make argument const.
+	(target_detach): Likewise.
+	* windows-nat.c (windows_detach): Update.
+
 2013-11-07  Doug Evans  <dje@google.com>
 
 	PR 11786

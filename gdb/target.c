@@ -2612,7 +2612,7 @@ target_preopen (int from_tty)
 /* Detach a target after doing deferred register stores.  */
 
 void
-target_detach (char *args, int from_tty)
+target_detach (const char *args, int from_tty)
 {
   struct target_ops* t;
   
@@ -3748,7 +3748,7 @@ init_dummy_target (void)
   dummy_target.to_doc = "";
   dummy_target.to_attach = find_default_attach;
   dummy_target.to_detach = 
-    (void (*)(struct target_ops *, char *, int))target_ignore;
+    (void (*)(struct target_ops *, const char *, int))target_ignore;
   dummy_target.to_create_inferior = find_default_create_inferior;
   dummy_target.to_can_async_p = find_default_can_async_p;
   dummy_target.to_is_async_p = find_default_is_async_p;

@@ -1340,7 +1340,7 @@ detach_thread (ptid_t ptid)
 }
 
 static void
-thread_db_detach (struct target_ops *ops, char *args, int from_tty)
+thread_db_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   struct target_ops *target_beneath = find_target_beneath (ops);
   struct thread_db_info *info;

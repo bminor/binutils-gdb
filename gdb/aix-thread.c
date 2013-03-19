@@ -967,7 +967,7 @@ aix_thread_attach (struct target_ops *ops, char *args, int from_tty)
 /* Detach from the process attached to by aix_thread_attach().  */
 
 static void
-aix_thread_detach (struct target_ops *ops, char *args, int from_tty)
+aix_thread_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   struct target_ops *beneath = find_target_beneath (ops);
 

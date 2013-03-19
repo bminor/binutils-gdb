@@ -133,8 +133,6 @@ static int remote_is_async_p (void);
 static void remote_async (void (*callback) (enum inferior_event_type event_type,
 					    void *context), void *context);
 
-static void remote_detach (struct target_ops *ops, char *args, int from_tty);
-
 static void sync_remote_interrupt_twice (int signo);
 
 static void interrupt_query (void);
@@ -4425,7 +4423,7 @@ remote_open_1 (char *name, int from_tty,
    die when it hits one.  */
 
 static void
-remote_detach_1 (char *args, int from_tty, int extended)
+remote_detach_1 (const char *args, int from_tty, int extended)
 {
   int pid = ptid_get_pid (inferior_ptid);
   struct remote_state *rs = get_remote_state ();
@@ -4469,13 +4467,13 @@ remote_detach_1 (char *args, int from_tty, int extended)
 }
 
 static void
-remote_detach (struct target_ops *ops, char *args, int from_tty)
+remote_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   remote_detach_1 (args, from_tty, 0);
 }
 
 static void
-extended_remote_detach (struct target_ops *ops, char *args, int from_tty)
+extended_remote_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   remote_detach_1 (args, from_tty, 1);
 }

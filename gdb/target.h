@@ -359,7 +359,7 @@ struct target_ops
     void (*to_close) (void);
     void (*to_attach) (struct target_ops *ops, char *, int);
     void (*to_post_attach) (int);
-    void (*to_detach) (struct target_ops *ops, char *, int);
+    void (*to_detach) (struct target_ops *ops, const char *, int);
     void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal);
     ptid_t (*to_wait) (struct target_ops *,
@@ -949,7 +949,7 @@ void target_attach (char *, int);
    typed by the user (e.g. a signal to send the process).  FROM_TTY
    says whether to be verbose or not.  */
 
-extern void target_detach (char *, int);
+extern void target_detach (const char *, int);
 
 /* Disconnect from the current target without resuming it (leaving it
    waiting for a debugger).  */

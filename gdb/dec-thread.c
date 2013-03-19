@@ -444,7 +444,7 @@ resync_thread_list (struct target_ops *ops)
 /* The "to_detach" method of the dec_thread_ops.  */
 
 static void
-dec_thread_detach (struct target_ops *ops, char *args, int from_tty)
+dec_thread_detach (struct target_ops *ops, const char *args, int from_tty)
 {   
   struct target_ops *beneath = find_target_beneath (ops);
 

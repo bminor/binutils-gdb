@@ -86,8 +86,6 @@ static void lsi_open (char *name, int from_tty);
 
 static void mips_close (void);
 
-static void mips_detach (struct target_ops *ops, char *args, int from_tty);
-
 static int mips_map_regno (struct gdbarch *, int);
 
 static void mips_set_register (int regno, ULONGEST value);
@@ -1749,7 +1747,7 @@ mips_close (void)
 /* Detach from the remote board.  */
 
 static void
-mips_detach (struct target_ops *ops, char *args, int from_tty)
+mips_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));
