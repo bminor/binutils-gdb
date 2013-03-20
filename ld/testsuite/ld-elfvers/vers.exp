@@ -246,9 +246,9 @@ proc objdump_symstuff { objdump object expectfile } {
 
     if ![info exists SOBJDUMP_FLAGS] { set SOBJDUMP_FLAGS "" }
 
-    verbose -log "$objdump $SOBJDUMP_FLAGS $object | grep \@ | sort  > $tmpdir/objdump.out"
+    verbose -log "$objdump $SOBJDUMP_FLAGS $object | grep \@ | sort -k 6  > $tmpdir/objdump.out"
 
-    catch "exec $objdump $SOBJDUMP_FLAGS $object | grep \@ | sort  > $tmpdir/objdump.out" exec_output
+    catch "exec $objdump $SOBJDUMP_FLAGS $object | grep \@ | sort -k 6 > $tmpdir/objdump.out" exec_output
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
 

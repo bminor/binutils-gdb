@@ -1,3 +1,13 @@
+2013-03-20  Will Newton  <will.newton@linaro.org>
+
+        * ld-elfvers/vers.exp (objdump_symstuff): Sort objdump output
+	based on the symbol name rather than address.
+	* ld-elfvers/vers1.sym: Reorder contents to match changes to vers.exp.
+	* ld-elfvers/vers15.sym: Likewise.
+	* ld-elfvers/vers18.sym: Likewise.
+	* ld-elfvers/vers21.sym: Likewise.
+	* ld-elfvers/vers9.sym: Likewise.
+
 2013-03-20  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/rel.c, ld-elf/relmain.c, ld-elf/relmain.out: New test.
