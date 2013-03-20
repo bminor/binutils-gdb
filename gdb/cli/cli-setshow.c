@@ -272,13 +272,17 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
       break;
     case var_uinteger:
     case var_zuinteger:
-      if (arg == NULL)
-	error_no_arg (_("integer to set it to."));
       {
-	unsigned int val = parse_and_eval_long (arg);
+	LONGEST val;
+
+	if (arg == NULL)
+	  error_no_arg (_("integer to set it to."));
+	val = parse_and_eval_long (arg);
 
 	if (c->var_type == var_uinteger && val == 0)
 	  val = UINT_MAX;
+	else if (val > UINT_MAX)
+	  error (_("integer %s out of range"), plongest (val));
 
 	if (*(unsigned int *) c->var != val)
 	  {
@@ -291,15 +295,16 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
     case var_integer:
     case var_zinteger:
       {
-	unsigned int val;
+	LONGEST val;
 
 	if (arg == NULL)
 	  error_no_arg (_("integer to set it to."));
 	val = parse_and_eval_long (arg);
+
 	if (val == 0 && c->var_type == var_integer)
 	  val = INT_MAX;
-	else if (val >= INT_MAX)
-	  error (_("integer %u out of range"), val);
+	else if (val > INT_MAX || val < INT_MIN)
+	  error (_("integer %s out of range"), plongest (val));
 
 	if (*(int *) c->var != val)
 	  {
@@ -387,7 +392,7 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  error_no_arg (_("integer to set it to."));
 	val = parse_and_eval_long (arg);
 
-	if (val >= INT_MAX)
+	if (val > INT_MAX)
 	  error (_("integer %s out of range"), plongest (val));
 	else if (val < -1)
 	  error (_("only -1 is allowed to set as unlimited"));
@@ -588,7 +593,7 @@ do_show_command (char *arg, int from_tty, struct cmd_list_element *c)
 	if (*(int *) c->var == -1)
 	  fputs_filtered ("unlimited", stb);
 	else
-	  fprintf_filtered (stb, "%u", *(int *) c->var);
+	  fprintf_filtered (stb, "%d", *(int *) c->var);
       }
       break;
     default:

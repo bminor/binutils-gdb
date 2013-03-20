@@ -1,3 +1,22 @@
+2013-03-20  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15289
+
+	* cli/cli-setshow.c (do_set_command)
+	<var_uinteger, var_zuinteger>: Use LONGEST for variable holding
+	the result of parsing the command argument.  Throw error if the
+	value is greater than UINT_MAX.  Print the invalid value with
+	plongest.
+	<var_integer, var_zinteger>: Use LONGEST for variable holding the
+	result of parsing the command argument.  Throw error if the value
+	is greater than INT_MAX, not greater or equal.  Also throw error
+	if the value is less than INT_MIN.  Print the invalid value with
+	plongest.
+	<var_zuinteger_unlimited>: Throw error if the value is greater
+	than INT_MAX, not greater or equal.
+	(do_show_command) <var_integer, var_zinteger,
+	var_zuinteger_unlimited>: Use %d for printing int, not %u.
+
 2013-03-14  Keith Seitz  <keiths@redhat.com>
 	    Alan Matsuoka  <alanm@redhat.com>
 

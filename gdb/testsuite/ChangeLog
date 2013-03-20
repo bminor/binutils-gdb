@@ -1,3 +1,13 @@
+2013-03-20  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15289
+
+	* gdb.base/remote.exp: Test
+	"set remote hardware-watchpoint-limit -1",
+	"set remote hardware-breakpoint-limit -1",
+	"set remote hardware-watchpoint-limit 2147483647" and
+	"set remote hardware-breakpoint-limit 2147483647".
+
 2013-03-14  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR c++/15203

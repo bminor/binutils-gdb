@@ -155,4 +155,14 @@ gdb_test "show remote memory-read-packet-size" \
 gdb_test "x/17ub random_data" \
 	"<random_data>:\[ \t\]+60\[ \t\]+74\[ \t\]+216\[ \t\]+38\[ \t\]+149\[ \t\]+49\[ \t\]+207\[ \t\]+44.*<random_data\\+8>:\[ \t\]+124\[ \t\]+38\[ \t\]+93\[ \t\]+125\[ \t\]+232\[ \t\]+67\[ \t\]+228\[ \t\]+56.*<random_data\\+16>:\[ \t\]+161"
 
+# Regression test for gdb/15289.  Make sure -1 is accepted and handled
+# as "unlimited".
+gdb_test_no_output "set remote hardware-watchpoint-limit -1"
+gdb_test_no_output "set remote hardware-breakpoint-limit -1"
+
+# This is just being thorough.  Assume (at least) a 32-bit host int,
+# and make sure 32-bit INT_MAX is accepted by a zinteger command.
+gdb_test_no_output "set remote hardware-watchpoint-limit 2147483647"
+gdb_test_no_output "set remote hardware-breakpoint-limit 2147483647"
+
 gdb_exit
