@@ -726,7 +726,8 @@ struct breakpoint
        there is no condition.  */
     char *cond_string;
 
-    /* String form of extra parameters, or NULL if there are none.  */
+    /* String form of extra parameters, or NULL if there are none.
+     Malloc'd.  */
     char *extra_string;
 
     /* Holds the address of the related watchpoint_scope breakpoint

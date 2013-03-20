@@ -12788,6 +12788,7 @@ base_breakpoint_dtor (struct breakpoint *self)
 {
   decref_counted_command_line (&self->commands);
   xfree (self->cond_string);
+  xfree (self->extra_string);
   xfree (self->addr_string);
   xfree (self->filter);
   xfree (self->addr_string_range_end);

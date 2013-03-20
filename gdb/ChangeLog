@@ -1,3 +1,9 @@
+2013-03-20  Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.h (struct breakpoint): Add comment to
+	extra_string indicating that this member is mallod'd.
+	* breakpoint.c (base_breakpoint_dtor): Free extra_string.
+
 2013-03-20  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15289
