@@ -542,6 +542,11 @@ static const struct symbol_register_ops mdebug_register_funcs = {
   mdebug_reg_to_regnum
 };
 
+/* The "aclass" indices for computed symbols.  */
+
+static int mdebug_register_index;
+static int mdebug_regparm_index;
+
 static int
 parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	      struct section_offsets *section_offsets, struct objfile *objfile)
@@ -626,16 +631,13 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s = new_symbol (name);
       SYMBOL_VALUE (s) = svalue;
       if (sh->sc == scRegister)
-	{
-	  class = LOC_REGISTER;
-	  SYMBOL_REGISTER_OPS (s) = &mdebug_register_funcs;
-	}
+	class = mdebug_register_index;
       else
 	class = LOC_LOCAL;
 
     data:			/* Common code for symbols describing data.  */
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
-      SYMBOL_CLASS (s) = class;
+      SYMBOL_ACLASS_INDEX (s) = class;
       add_symbol (s, top_stack->cur_st, b);
 
       /* Type could be missing if file is compiled without debugging info.  */
@@ -664,21 +666,19 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	{
 	case scRegister:
 	  /* Pass by value in register.  */
-	  SYMBOL_CLASS (s) = LOC_REGISTER;
-	  SYMBOL_REGISTER_OPS (s) = &mdebug_register_funcs;
+	  SYMBOL_ACLASS_INDEX (s) = mdebug_register_index;
 	  break;
 	case scVar:
 	  /* Pass by reference on stack.  */
-	  SYMBOL_CLASS (s) = LOC_REF_ARG;
+	  SYMBOL_ACLASS_INDEX (s) = LOC_REF_ARG;
 	  break;
 	case scVarRegister:
 	  /* Pass by reference in register.  */
-	  SYMBOL_CLASS (s) = LOC_REGPARM_ADDR;
-	  SYMBOL_REGISTER_OPS (s) = &mdebug_register_funcs;
+	  SYMBOL_ACLASS_INDEX (s) = mdebug_regparm_index;
 	  break;
 	default:
 	  /* Pass by value on stack.  */
-	  SYMBOL_CLASS (s) = LOC_ARG;
+	  SYMBOL_ACLASS_INDEX (s) = LOC_ARG;
 	  break;
 	}
       SYMBOL_VALUE (s) = svalue;
@@ -689,7 +689,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
     case stLabel:		/* label, goes into current block.  */
       s = new_symbol (name);
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;	/* So that it can be used */
-      SYMBOL_CLASS (s) = LOC_LABEL;	/* but not misused.  */
+      SYMBOL_ACLASS_INDEX (s) = LOC_LABEL;	/* but not misused.  */
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
       SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_int;
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -731,7 +731,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
         }
       s = new_symbol (name);
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
-      SYMBOL_CLASS (s) = LOC_BLOCK;
+      SYMBOL_ACLASS_INDEX (s) = LOC_BLOCK;
       /* Type of the return value.  */
       if (SC_IS_UNDEF (sh->sc) || sh->sc == scNil)
 	t = objfile_type (objfile)->builtin_int;
@@ -1056,7 +1056,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		  (enum_sym,
 		   obstack_copy0 (&mdebugread_objfile->objfile_obstack,
 				  f->name, strlen (f->name)));
-		SYMBOL_CLASS (enum_sym) = LOC_CONST;
+		SYMBOL_ACLASS_INDEX (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
 		SYMBOL_VALUE (enum_sym) = tsym.value;
@@ -1089,7 +1089,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 
 	s = new_symbol (name);
 	SYMBOL_DOMAIN (s) = STRUCT_DOMAIN;
-	SYMBOL_CLASS (s) = LOC_TYPEDEF;
+	SYMBOL_ACLASS_INDEX (s) = LOC_TYPEDEF;
 	SYMBOL_VALUE (s) = 0;
 	SYMBOL_TYPE (s) = t;
 	add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -1145,7 +1145,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  /* Make up special symbol to contain procedure specific info.  */
 	  s = new_symbol (MDEBUG_EFI_SYMBOL_NAME);
 	  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
-	  SYMBOL_CLASS (s) = LOC_CONST;
+	  SYMBOL_ACLASS_INDEX (s) = LOC_CONST;
 	  SYMBOL_TYPE (s) = objfile_type (mdebugread_objfile)->builtin_void;
 	  e = ((struct mdebug_extra_func_info *)
 	       obstack_alloc (&mdebugread_objfile->objfile_obstack,
@@ -1285,7 +1285,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	break;
       s = new_symbol (name);
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
-      SYMBOL_CLASS (s) = LOC_TYPEDEF;
+      SYMBOL_ACLASS_INDEX (s) = LOC_TYPEDEF;
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
       SYMBOL_TYPE (s) = t;
       add_symbol (s, top_stack->cur_st, top_stack->cur_block);
@@ -4119,7 +4119,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 
 		  memset (e, 0, sizeof (struct mdebug_extra_func_info));
 		  SYMBOL_DOMAIN (s) = LABEL_DOMAIN;
-		  SYMBOL_CLASS (s) = LOC_CONST;
+		  SYMBOL_ACLASS_INDEX (s) = LOC_CONST;
 		  SYMBOL_TYPE (s) = objfile_type (objfile)->builtin_void;
 		  SYMBOL_VALUE_BYTES (s) = (gdb_byte *) e;
 		  e->pdr.framereg = -1;
@@ -4940,4 +4940,9 @@ void
 _initialize_mdebugread (void)
 {
   basic_type_data = register_objfile_data ();
+
+  mdebug_register_index
+    = register_symbol_register_impl (LOC_REGISTER, &mdebug_register_funcs);
+  mdebug_regparm_index
+    = register_symbol_register_impl (LOC_REGPARM_ADDR, &mdebug_register_funcs);
 }

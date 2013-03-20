@@ -357,32 +357,59 @@ dwarf_expr_frame_base (void *baton, const gdb_byte **start, size_t * length)
 			   start, length);
 }
 
+/* Implement find_frame_base_location method for LOC_BLOCK functions using
+   DWARF expression for its DW_AT_frame_base.  */
+
+static void
+locexpr_find_frame_base_location (struct symbol *framefunc, CORE_ADDR pc,
+				  const gdb_byte **start, size_t *length)
+{
+  struct dwarf2_locexpr_baton *symbaton = SYMBOL_LOCATION_BATON (framefunc);
+
+  *length = symbaton->size;
+  *start = symbaton->data;
+}
+
+/* Vector for inferior functions as represented by LOC_BLOCK, if the inferior
+   function uses DWARF expression for its DW_AT_frame_base.  */
+
+const struct symbol_block_ops dwarf2_block_frame_base_locexpr_funcs =
+{
+  locexpr_find_frame_base_location
+};
+
+/* Implement find_frame_base_location method for LOC_BLOCK functions using
+   DWARF location list for its DW_AT_frame_base.  */
+
+static void
+loclist_find_frame_base_location (struct symbol *framefunc, CORE_ADDR pc,
+				  const gdb_byte **start, size_t *length)
+{
+  struct dwarf2_loclist_baton *symbaton = SYMBOL_LOCATION_BATON (framefunc);
+
+  *start = dwarf2_find_location_expression (symbaton, length, pc);
+}
+
+/* Vector for inferior functions as represented by LOC_BLOCK, if the inferior
+   function uses DWARF location list for its DW_AT_frame_base.  */
+
+const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs =
+{
+  loclist_find_frame_base_location
+};
+
 static void
 dwarf_expr_frame_base_1 (struct symbol *framefunc, CORE_ADDR pc,
 			 const gdb_byte **start, size_t *length)
 {
-  if (SYMBOL_LOCATION_BATON (framefunc) == NULL)
-    *length = 0;
-  else if (SYMBOL_COMPUTED_OPS (framefunc) == &dwarf2_loclist_funcs)
+  if (SYMBOL_BLOCK_OPS (framefunc) != NULL)
     {
-      struct dwarf2_loclist_baton *symbaton;
+      const struct symbol_block_ops *ops_block = SYMBOL_BLOCK_OPS (framefunc);
 
-      symbaton = SYMBOL_LOCATION_BATON (framefunc);
-      *start = dwarf2_find_location_expression (symbaton, length, pc);
+      ops_block->find_frame_base_location (framefunc, pc, start, length);
     }
   else
-    {
-      struct dwarf2_locexpr_baton *symbaton;
-
-      symbaton = SYMBOL_LOCATION_BATON (framefunc);
-      if (symbaton != NULL)
-	{
-	  *length = symbaton->size;
-	  *start = symbaton->data;
-	}
-      else
-	*length = 0;
-    }
+    *length = 0;
 
   if (*length == 0)
     error (_("Could not find the frame base for \"%s\"."),
@@ -3963,6 +3990,7 @@ const struct symbol_computed_ops dwarf2_locexpr_funcs = {
   locexpr_read_variable_at_entry,
   locexpr_read_needs_frame,
   locexpr_describe_location,
+  0,	/* location_has_loclist */
   locexpr_tracepoint_var_ref
 };
 
@@ -4141,6 +4169,7 @@ const struct symbol_computed_ops dwarf2_loclist_funcs = {
   loclist_read_variable_at_entry,
   loclist_read_needs_frame,
   loclist_describe_location,
+  1,	/* location_has_loclist */
   loclist_tracepoint_var_ref
 };
 

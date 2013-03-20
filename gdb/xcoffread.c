@@ -1562,7 +1562,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
       SYMBOL_SET_LINKAGE_NAME (sym, SYMNAME_ALLOC (name, symname_alloced));
       SYMBOL_TYPE (sym) = objfile_type (objfile)->nodebug_text_symbol;
 
-      SYMBOL_CLASS (sym) = LOC_BLOCK;
+      SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
       SYMBOL_DUP (sym, sym2);
 
       if (cs->c_sclass == C_EXT)

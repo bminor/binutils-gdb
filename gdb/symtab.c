@@ -5012,9 +5012,111 @@ producer_is_realview (const char *producer)
   return 0;
 }
 
+
+
+/* The next index to hand out in response to a registration request.  */
+
+static int next_aclass_value = LOC_FINAL_VALUE;
+
+/* The maximum number of "aclass" registrations we support.  This is
+   constant for convenience.  */
+#define MAX_SYMBOL_IMPLS (LOC_FINAL_VALUE + 10)
+
+/* The objects representing the various "aclass" values.  The elements
+   from 0 up to LOC_FINAL_VALUE-1 represent themselves, and subsequent
+   elements are those registered at gdb initialization time.  */
+
+static struct symbol_impl symbol_impl[MAX_SYMBOL_IMPLS];
+
+/* The globally visible pointer.  This is separate from 'symbol_impl'
+   so that it can be const.  */
+
+const struct symbol_impl *symbol_impls = &symbol_impl[0];
+
+/* Make sure we saved enough room in struct symbol.  */
+
+gdb_static_assert (MAX_SYMBOL_IMPLS <= (1 << SYMBOL_ACLASS_BITS));
+
+/* Register a computed symbol type.  ACLASS must be LOC_COMPUTED.  OPS
+   is the ops vector associated with this index.  This returns the new
+   index, which should be used as the aclass_index field for symbols
+   of this type.  */
+
+int
+register_symbol_computed_impl (enum address_class aclass,
+			       const struct symbol_computed_ops *ops)
+{
+  int result = next_aclass_value++;
+
+  gdb_assert (aclass == LOC_COMPUTED);
+  gdb_assert (result < MAX_SYMBOL_IMPLS);
+  symbol_impl[result].aclass = aclass;
+  symbol_impl[result].ops_computed = ops;
+
+  return result;
+}
+
+/* Register a function with frame base type.  ACLASS must be LOC_BLOCK.
+   OPS is the ops vector associated with this index.  This returns the
+   new index, which should be used as the aclass_index field for symbols
+   of this type.  */
+
+int
+register_symbol_block_impl (enum address_class aclass,
+			    const struct symbol_block_ops *ops)
+{
+  int result = next_aclass_value++;
+
+  gdb_assert (aclass == LOC_BLOCK);
+  gdb_assert (result < MAX_SYMBOL_IMPLS);
+  symbol_impl[result].aclass = aclass;
+  symbol_impl[result].ops_block = ops;
+
+  /* Sanity check OPS.  */
+  gdb_assert (ops != NULL);
+  gdb_assert (ops->find_frame_base_location != NULL);
+
+  return result;
+}
+
+/* Register a register symbol type.  ACLASS must be LOC_REGISTER or
+   LOC_REGPARM_ADDR.  OPS is the register ops vector associated with
+   this index.  This returns the new index, which should be used as
+   the aclass_index field for symbols of this type.  */
+
+int
+register_symbol_register_impl (enum address_class aclass,
+			       const struct symbol_register_ops *ops)
+{
+  int result = next_aclass_value++;
+
+  gdb_assert (aclass == LOC_REGISTER || aclass == LOC_REGPARM_ADDR);
+  gdb_assert (result < MAX_SYMBOL_IMPLS);
+  symbol_impl[result].aclass = aclass;
+  symbol_impl[result].ops_register = ops;
+
+  return result;
+}
+
+/* Initialize elements of 'symbol_impl' for the constants in enum
+   address_class.  */
+
+static void
+initialize_ordinary_address_classes (void)
+{
+  int i;
+
+  for (i = 0; i < LOC_FINAL_VALUE; ++i)
+    symbol_impl[i].aclass = i;
+}
+
+
+
 void
 _initialize_symtab (void)
 {
+  initialize_ordinary_address_classes ();
+
   add_info ("variables", variables_info, _("\
 All global and static variable names, or those matching REGEXP."));
   if (dbx_commands)

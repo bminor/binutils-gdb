@@ -92,6 +92,13 @@ static int use_deprecated_index_sections = 0;
 
 static const struct objfile_data *dwarf2_objfile_data_key;
 
+/* The "aclass" indices for various kinds of computed DWARF symbols.  */
+
+static int dwarf2_locexpr_index;
+static int dwarf2_loclist_index;
+static int dwarf2_locexpr_block_index;
+static int dwarf2_loclist_block_index;
+
 struct dwarf2_section_info
 {
   asection *asection;
@@ -1626,7 +1633,8 @@ static void fill_in_loclist_baton (struct dwarf2_cu *cu,
 
 static void dwarf2_symbol_mark_computed (struct attribute *attr,
 					 struct symbol *sym,
-					 struct dwarf2_cu *cu);
+					 struct dwarf2_cu *cu,
+					 int is_block);
 
 static gdb_byte *skip_one_die (const struct die_reader_specs *reader,
 			       gdb_byte *info_ptr,
@@ -6850,7 +6858,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
 	 e.g., "main" finds the "main" module and not C's main().  */
       SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
-      SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+      SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
       SYMBOL_TYPE (sym) = type;
 
       add_symbol_to_list (sym, &global_symbols);
@@ -9523,7 +9531,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
        has nothing to do with the location of the function, ouch!  The
        relationship should be: a function's symbol has-a frame base; a
        frame-base has-a location expression.  */
-    dwarf2_symbol_mark_computed (attr, new->name, cu);
+    dwarf2_symbol_mark_computed (attr, new->name, cu, 1);
 
   cu->list_in_scope = &local_symbols;
 
@@ -11956,9 +11964,8 @@ mark_common_block_symbol_computed (struct symbol *sym,
   *ptr++ = DW_OP_plus;
   gdb_assert (ptr - baton->data == baton->size);
 
-  SYMBOL_COMPUTED_OPS (sym) = &dwarf2_locexpr_funcs;
   SYMBOL_LOCATION_BATON (sym) = baton;
-  SYMBOL_CLASS (sym) = LOC_COMPUTED;
+  SYMBOL_ACLASS_INDEX (sym) = dwarf2_locexpr_index;
 }
 
 /* Create appropriate locally-scoped variables for all the
@@ -15725,7 +15732,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
      variable has been optimized away.  */
   if (attr_form_is_block (attr) && DW_BLOCK (attr)->size == 0)
     {
-      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
+      SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
       return;
     }
 
@@ -15749,7 +15756,7 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
       else
 	SYMBOL_VALUE_ADDRESS (sym) =
 	  read_addr_index_from_leb128 (cu, DW_BLOCK (attr)->data + 1, &dummy);
-      SYMBOL_CLASS (sym) = LOC_STATIC;
+      SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
       fixup_symbol_section (sym, objfile);
       SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets,
 					      SYMBOL_SECTION (sym));
@@ -15763,10 +15770,9 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
      not be worthwhile.  I'm assuming that it isn't unless performance
      or memory numbers show me otherwise.  */
 
-  dwarf2_symbol_mark_computed (attr, sym, cu);
-  SYMBOL_CLASS (sym) = LOC_COMPUTED;
+  dwarf2_symbol_mark_computed (attr, sym, cu, 0);
 
-  if (SYMBOL_COMPUTED_OPS (sym) == &dwarf2_loclist_funcs)
+  if (SYMBOL_COMPUTED_OPS (sym)->location_has_loclist)
     cu->has_loclist = 1;
 }
 
@@ -15822,7 +15828,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       /* Default assumptions.
          Use the passed type or decode it from the die.  */
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
-      SYMBOL_CLASS (sym) = LOC_OPTIMIZED_OUT;
+      SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
       if (type != NULL)
 	SYMBOL_TYPE (sym) = type;
       else
@@ -15865,13 +15871,13 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	    }
 	  SYMBOL_TYPE (sym) = objfile_type (objfile)->builtin_core_addr;
 	  SYMBOL_DOMAIN (sym) = LABEL_DOMAIN;
-	  SYMBOL_CLASS (sym) = LOC_LABEL;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_LABEL;
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
 	case DW_TAG_subprogram:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
 	     finish_block.  */
-	  SYMBOL_CLASS (sym) = LOC_BLOCK;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
 	  attr2 = dwarf2_attr (die, DW_AT_external, cu);
 	  if ((attr2 && (DW_UNSND (attr2) != 0))
               || cu->language == language_ada)
@@ -15892,7 +15898,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_inlined_subroutine:
 	  /* SYMBOL_BLOCK_VALUE (sym) will be filled in later by
 	     finish_block.  */
-	  SYMBOL_CLASS (sym) = LOC_BLOCK;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
 	  SYMBOL_INLINED (sym) = 1;
 	  list_to_add = cu->list_in_scope;
 	  break;
@@ -15967,7 +15973,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		      && die->parent->tag == DW_TAG_module
 		      && cu->producer
 		      && strncmp (cu->producer, "GNU Fortran ", 12) == 0)
-		    SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
+		    SYMBOL_ACLASS_INDEX (sym) = LOC_UNRESOLVED;
 
 		  /* A variable with DW_AT_external is never static,
 		     but it may be block-scoped.  */
@@ -16005,7 +16011,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 		  list_to_add = (cu->list_in_scope == &file_symbols
 				 ? &global_symbols : cu->list_in_scope);
 
-		  SYMBOL_CLASS (sym) = LOC_UNRESOLVED;
+		  SYMBOL_ACLASS_INDEX (sym) = LOC_UNRESOLVED;
 		}
 	      else if (!die_is_declaration (die, cu))
 		{
@@ -16052,7 +16058,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_union_type:
 	case DW_TAG_set_type:
 	case DW_TAG_enumeration_type:
-	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 
 	  {
@@ -16089,13 +16095,13 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  }
 	  break;
 	case DW_TAG_typedef:
-	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  list_to_add = cu->list_in_scope;
 	  break;
 	case DW_TAG_base_type:
         case DW_TAG_subrange_type:
-	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  list_to_add = cu->list_in_scope;
 	  break;
@@ -16116,11 +16122,11 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	  }
 	  break;
 	case DW_TAG_namespace:
-	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  list_to_add = &global_symbols;
 	  break;
 	case DW_TAG_common_block:
-	  SYMBOL_CLASS (sym) = LOC_COMMON_BLOCK;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_COMMON_BLOCK;
 	  SYMBOL_DOMAIN (sym) = COMMON_BLOCK_DOMAIN;
 	  add_symbol_to_list (sym, cu->list_in_scope);
 	  break;
@@ -16327,19 +16333,18 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 
   if (baton != NULL)
     {
-      SYMBOL_COMPUTED_OPS (sym) = &dwarf2_locexpr_funcs;
       SYMBOL_LOCATION_BATON (sym) = baton;
-      SYMBOL_CLASS (sym) = LOC_COMPUTED;
+      SYMBOL_ACLASS_INDEX (sym) = dwarf2_locexpr_index;
     }
   else if (bytes != NULL)
      {
       SYMBOL_VALUE_BYTES (sym) = bytes;
-      SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
+      SYMBOL_ACLASS_INDEX (sym) = LOC_CONST_BYTES;
     }
   else
     {
       SYMBOL_VALUE (sym) = value;
-      SYMBOL_CLASS (sym) = LOC_CONST;
+      SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
     }
 }
 
@@ -19060,7 +19065,7 @@ fill_in_loclist_baton (struct dwarf2_cu *cu,
 
 static void
 dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
-			     struct dwarf2_cu *cu)
+			     struct dwarf2_cu *cu, int is_block)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = cu_debug_loc_section (cu);
@@ -19083,7 +19088,9 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 		   _("Location list used without "
 		     "specifying the CU base address."));
 
-      SYMBOL_COMPUTED_OPS (sym) = &dwarf2_loclist_funcs;
+      SYMBOL_ACLASS_INDEX (sym) = (is_block
+				   ? dwarf2_loclist_block_index
+				   : dwarf2_loclist_index);
       SYMBOL_LOCATION_BATON (sym) = baton;
     }
   else
@@ -19112,7 +19119,9 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 	  baton->size = 0;
 	}
 
-      SYMBOL_COMPUTED_OPS (sym) = &dwarf2_locexpr_funcs;
+      SYMBOL_ACLASS_INDEX (sym) = (is_block
+				   ? dwarf2_locexpr_block_index
+				   : dwarf2_locexpr_index);
       SYMBOL_LOCATION_BATON (sym) = baton;
     }
 }
@@ -20718,4 +20727,14 @@ Save a gdb-index file.\n\
 Usage: save gdb-index DIRECTORY"),
 	       &save_cmdlist);
   set_cmd_completer (c, filename_completer);
+
+  dwarf2_locexpr_index = register_symbol_computed_impl (LOC_COMPUTED,
+							&dwarf2_locexpr_funcs);
+  dwarf2_loclist_index = register_symbol_computed_impl (LOC_COMPUTED,
+							&dwarf2_loclist_funcs);
+
+  dwarf2_locexpr_block_index = register_symbol_block_impl (LOC_BLOCK,
+					&dwarf2_block_frame_base_locexpr_funcs);
+  dwarf2_loclist_block_index = register_symbol_block_impl (LOC_BLOCK,
+					&dwarf2_block_frame_base_loclist_funcs);
 }

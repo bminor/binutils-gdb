@@ -539,6 +539,9 @@ enum address_class
   /* The variable uses general_symbol_info->value->common_block field.
      It also always uses COMMON_BLOCK_DOMAIN.  */
   LOC_COMMON_BLOCK,
+
+  /* Not used, just notes the boundary of the enum.  */
+  LOC_FINAL_VALUE
 };
 
 /* The methods needed to implement LOC_COMPUTED.  These methods can
@@ -572,6 +575,9 @@ struct symbol_computed_ops
   void (*describe_location) (struct symbol * symbol, CORE_ADDR addr,
 			     struct ui_file * stream);
 
+  /* Non-zero if this symbol's address computation is dependent on PC.  */
+  unsigned char location_has_loclist;
+
   /* Tracepoint support.  Append bytecodes to the tracepoint agent
      expression AX that push the address of the object SYMBOL.  Set
      VALUE appropriately.  Note --- for objects in registers, this
@@ -583,12 +589,50 @@ struct symbol_computed_ops
 			      struct agent_expr *ax, struct axs_value *value);
 };
 
+/* The methods needed to implement LOC_BLOCK for inferior functions.
+   These methods can use the symbol's .aux_value for additional
+   per-symbol information.  */
+
+struct symbol_block_ops
+{
+  /* Fill in *START and *LENGTH with DWARF block data of function
+     FRAMEFUNC valid for inferior context address PC.  Set *LENGTH to
+     zero if such location is not valid for PC; *START is left
+     uninitialized in such case.  */
+  void (*find_frame_base_location) (struct symbol *framefunc, CORE_ADDR pc,
+				    const gdb_byte **start, size_t *length);
+};
+
 /* Functions used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
 
 struct symbol_register_ops
 {
   int (*register_number) (struct symbol *symbol, struct gdbarch *gdbarch);
 };
+
+/* Objects of this type are used to find the address class and the
+   various computed ops vectors of a symbol.  */
+
+struct symbol_impl
+{
+  enum address_class aclass;
+
+  /* Used with LOC_COMPUTED.  */
+  const struct symbol_computed_ops *ops_computed;
+
+  /* Used with LOC_BLOCK.  */
+  const struct symbol_block_ops *ops_block;
+
+  /* Used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
+  const struct symbol_register_ops *ops_register;
+};
+
+/* The number of bits we reserve in a symbol for the aclass index.
+   This is a #define so that we can have a assertion elsewhere to
+   verify that we have reserved enough space for synthetic address
+   classes.  */
+
+#define SYMBOL_ACLASS_BITS 6
 
 /* This structure is space critical.  See space comments at the top.  */
 
@@ -612,15 +656,11 @@ struct symbol
 
   ENUM_BITFIELD(domain_enum_tag) domain : 6;
 
-  /* Address class */
-  /* NOTE: cagney/2003-11-02: The fields "aclass" and "ops" contain
-     overlapping information.  By creating a per-aclass ops vector, or
-     using the aclass as an index into an ops table, the aclass and
-     ops fields can be merged.  The latter, for instance, would shave
-     32-bits from each symbol (relative to a symbol lookup, any table
-     index overhead would be in the noise).  */
+  /* Address class.  This holds an index into the 'symbol_impls'
+     table.  The actual enum address_class value is stored there,
+     alongside any per-class ops vectors.  */
 
-  ENUM_BITFIELD(address_class) aclass : 6;
+  unsigned int aclass_index : SYMBOL_ACLASS_BITS;
 
   /* Whether this is an argument.  */
 
@@ -645,18 +685,6 @@ struct symbol
 
   unsigned short line;
 
-  /* Method's for symbol's of this class.  */
-  /* NOTE: cagney/2003-11-02: See comment above attached to "aclass".  */
-
-  union
-    {
-      /* Used with LOC_COMPUTED.  */
-      const struct symbol_computed_ops *ops_computed;
-
-      /* Used with LOC_REGISTER and LOC_REGPARM_ADDR.  */
-      const struct symbol_register_ops *ops_register;
-    } ops;
-
   /* An arbitrary data pointer, allowing symbol readers to record
      additional information on a per-symbol basis.  Note that this data
      must be allocated using the same obstack as the symbol itself.  */
@@ -675,9 +703,12 @@ struct symbol
   struct symbol *hash_next;
 };
 
+extern const struct symbol_impl *symbol_impls;
 
 #define SYMBOL_DOMAIN(symbol)	(symbol)->domain
-#define SYMBOL_CLASS(symbol)		(symbol)->aclass
+#define SYMBOL_IMPL(symbol)		(symbol_impls[(symbol)->aclass_index])
+#define SYMBOL_ACLASS_INDEX(symbol)	(symbol)->aclass_index
+#define SYMBOL_CLASS(symbol)		(SYMBOL_IMPL (symbol).aclass)
 #define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_INLINED(symbol)		(symbol)->is_inlined
 #define SYMBOL_IS_CPLUS_TEMPLATE_FUNCTION(symbol) \
@@ -685,9 +716,19 @@ struct symbol
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_SYMTAB(symbol)		(symbol)->symtab
-#define SYMBOL_COMPUTED_OPS(symbol)     (symbol)->ops.ops_computed
-#define SYMBOL_REGISTER_OPS(symbol)     (symbol)->ops.ops_register
+#define SYMBOL_COMPUTED_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_computed)
+#define SYMBOL_BLOCK_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_block)
+#define SYMBOL_REGISTER_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_register)
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
+
+extern int register_symbol_computed_impl (enum address_class,
+					  const struct symbol_computed_ops *);
+
+extern int register_symbol_block_impl (enum address_class aclass,
+				       const struct symbol_block_ops *ops);
+
+extern int register_symbol_register_impl (enum address_class,
+					  const struct symbol_register_ops *);
 
 /* An instance of this type is used to represent a C++ template
    function.  It includes a "struct symbol" as a kind of base class;

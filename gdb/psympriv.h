@@ -45,7 +45,9 @@ struct partial_symbol
 
   ENUM_BITFIELD(domain_enum_tag) domain : 6;
 
-  /* Address class (for info_symbols).  */
+  /* Address class (for info_symbols).  Note that we don't allow
+     synthetic "aclass" values here at present, simply because there's
+     no need.  */
 
   ENUM_BITFIELD(address_class) aclass : 6;
 

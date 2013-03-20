@@ -1,3 +1,62 @@
+2013-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/8421:
+	* coffread.c (coff_register_index): New global.
+	(process_coff_symbol, coff_read_enum_type): Set
+	SYMBOL_ACLASS_INDEX.
+	(_initialize_coffread): Initialize new global.
+	* dwarf2loc.c (locexpr_find_frame_base_location)
+	(dwarf2_block_frame_base_locexpr_funcs)
+	(loclist_find_frame_base_location)
+	(dwarf2_block_frame_base_loclist_funcs): New.
+	(dwarf_expr_frame_base_1): Call SYMBOL_BLOCK_OPS, remove internal_error.
+	(dwarf2_locexpr_funcs, dwarf2_loclist_funcs): Add location_has_loclist.
+	* dwarf2loc.h (dwarf2_block_frame_base_locexpr_funcs)
+	(dwarf2_block_frame_base_loclist_funcs): New.
+	* dwarf2read.c (dwarf2_locexpr_index, dwarf2_loclist_index)
+	(dwarf2_locexpr_block_index, dwarf2_loclist_block_index): New
+	globals.
+	(read_func_scope): Update.
+	(fixup_go_packaging, mark_common_block_symbol_computed)
+	(var_decode_location, new_symbol_full, dwarf2_const_value):
+	Set SYMBOL_ACLASS_INDEX.
+	(dwarf2_symbol_mark_computed): Likewise.  Add 'is_block' argument.
+	(_initialize_dwarf2_read): Initialize new globals.
+	* jit.c (finalize_symtab): Set SYMBOL_ACLASS_INDEX.
+	* jv-lang.c (add_class_symbol): Set SYMBOL_ACLASS_INDEX.
+	* mdebugread.c (mdebug_register_index, mdebug_regparm_index): New
+	globals.
+	(parse_symbol, psymtab_to_symtab_1): Set SYMBOL_ACLASS_INDEX.
+	(_initialize_mdebugread): Initialize new globals.
+	* psympriv.h (struct partial_symbol) <aclass>: Update comment.
+	* stabsread.c (patch_block_stabs): Set SYMBOL_ACLASS_INDEX.
+	(stab_register_index, stab_regparm_index): New globals.
+	(define_symbol, read_enum_type, common_block_end): Set
+	SYMBOL_ACLASS_INDEX.
+	(_initialize_stabsread): Initialize new globals.
+	* symtab.c (next_aclass_value, symbol_impl, symbol_impls): New
+	globals.
+	(MAX_SYMBOL_IMPLS): New define.
+	(register_symbol_computed_impl, register_symbol_block_impl)
+	(register_symbol_register_impl)
+	(initialize_ordinary_address_classes): New functions.
+	(_initialize_symtab): Call initialize_ordinary_address_classes.
+	* symtab.h (enum address_class) <LOC_FINAL_VALUE>: New constant.
+	(struct symbol_impl): New.
+	(SYMBOL_ACLASS_BITS): New define.
+	(struct symbol) <aclass, ops>: Remove fields.
+	<aclass_index>: New field.
+	(symbol_impls): Declare.
+	(SYMBOL_CLASS, SYMBOL_COMPUTED_OPS, SYMBOL_REGISTER_OPS): Redefine.
+	(SYMBOL_IMPL, SYMBOL_ACLASS_INDEX): New defines.
+	(register_symbol_computed_impl, register_symbol_block_impl)
+	(register_symbol_register_impl): Declare.
+	(struct symbol_computed_ops): Add location_has_loclist.
+	(struct symbol_block_ops): New.
+	(SYMBOL_BLOCK_OPS): New.
+	* xcoffread.c (process_xcoff_symbol): Set SYMBOL_ACLASS_INDEX.
+
 2013-03-20  Tom Tromey  <tromey@redhat.com>
 
 	* psymtab.c (find_pc_sect_psymbol, fixup_psymbol_section)

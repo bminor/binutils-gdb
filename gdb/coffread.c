@@ -1529,6 +1529,10 @@ static const struct symbol_register_ops coff_register_funcs = {
   coff_reg_to_regnum
 };
 
+/* The "aclass" index for computed COFF symbols.  */
+
+static int coff_register_index;
+
 static struct symbol *
 process_coff_symbol (struct coff_symbol *cs,
 		     union internal_auxent *aux,
@@ -1558,7 +1562,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	lookup_function_type (decode_function_type (cs, cs->c_type,
 						    aux, objfile));
 
-      SYMBOL_CLASS (sym) = LOC_BLOCK;
+      SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;
       if (cs->c_sclass == C_STAT || cs->c_sclass == C_THUMBSTAT
 	  || cs->c_sclass == C_THUMBSTATFUNC)
 	add_symbol_to_list (sym, &file_symbols);
@@ -1575,14 +1579,14 @@ process_coff_symbol (struct coff_symbol *cs,
 	  break;
 
 	case C_AUTO:
-	  SYMBOL_CLASS (sym) = LOC_LOCAL;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_LOCAL;
 	  add_symbol_to_list (sym, &local_symbols);
 	  break;
 
 	case C_THUMBEXT:
 	case C_THUMBEXTFUNC:
 	case C_EXT:
-	  SYMBOL_CLASS (sym) = LOC_STATIC;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
 	  SYMBOL_VALUE_ADDRESS (sym) = (CORE_ADDR) cs->c_value;
 	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets,
 						  SECT_OFF_TEXT (objfile));
@@ -1592,7 +1596,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_THUMBSTAT:
 	case C_THUMBSTATFUNC:
 	case C_STAT:
-	  SYMBOL_CLASS (sym) = LOC_STATIC;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_STATIC;
 	  SYMBOL_VALUE_ADDRESS (sym) = (CORE_ADDR) cs->c_value;
 	  SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets,
 						  SECT_OFF_TEXT (objfile));
@@ -1612,8 +1616,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_GLBLREG:
 #endif
 	case C_REG:
-	  SYMBOL_CLASS (sym) = LOC_REGISTER;
-	  SYMBOL_REGISTER_OPS (sym) = &coff_register_funcs;
+	  SYMBOL_ACLASS_INDEX (sym) = coff_register_index;
 	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, &local_symbols);
 	  break;
@@ -1623,21 +1626,20 @@ process_coff_symbol (struct coff_symbol *cs,
 	  break;
 
 	case C_ARG:
-	  SYMBOL_CLASS (sym) = LOC_ARG;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_ARG;
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  add_symbol_to_list (sym, &local_symbols);
 	  break;
 
 	case C_REGPARM:
-	  SYMBOL_CLASS (sym) = LOC_REGISTER;
-	  SYMBOL_REGISTER_OPS (sym) = &coff_register_funcs;
+	  SYMBOL_ACLASS_INDEX (sym) = coff_register_index;
 	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  SYMBOL_VALUE (sym) = cs->c_value;
 	  add_symbol_to_list (sym, &local_symbols);
 	  break;
 
 	case C_TPDEF:
-	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 
 	  /* If type has no name, give it one.  */
@@ -1693,7 +1695,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	case C_STRTAG:
 	case C_UNTAG:
 	case C_ENTAG:
-	  SYMBOL_CLASS (sym) = LOC_TYPEDEF;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  SYMBOL_DOMAIN (sym) = STRUCT_DOMAIN;
 
 	  /* Some compilers try to be helpful by inventing "fake"
@@ -2104,7 +2106,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 	  SYMBOL_SET_LINKAGE_NAME (sym,
 				   obstack_copy0 (&objfile->objfile_obstack,
 						  name, strlen (name)));
-	  SYMBOL_CLASS (sym) = LOC_CONST;
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;
 	  add_symbol_to_list (sym, symlist);
@@ -2207,4 +2209,7 @@ _initialize_coffread (void)
 
   coff_objfile_data_key = register_objfile_data_with_cleanup (NULL,
 							      coff_free_info);
+
+  coff_register_index
+    = register_symbol_register_impl (LOC_REGISTER, &coff_register_funcs);
 }

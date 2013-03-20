@@ -133,6 +133,9 @@ struct dwarf2_loclist_baton
 extern const struct symbol_computed_ops dwarf2_locexpr_funcs;
 extern const struct symbol_computed_ops dwarf2_loclist_funcs;
 
+extern const struct symbol_block_ops dwarf2_block_frame_base_locexpr_funcs;
+extern const struct symbol_block_ops dwarf2_block_frame_base_loclist_funcs;
+
 /* Compile a DWARF location expression to an agent expression.
    
    EXPR is the agent expression we are building.
