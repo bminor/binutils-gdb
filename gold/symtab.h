@@ -121,6 +121,10 @@ class Symbol
   version() const
   { return this->version_; }
 
+  void
+  clear_version()
+  { this->version_ = NULL; }
+
   // Return whether this version is the default for this symbol name
   // (eg, "foo@@V2" is a default version; "foo@V1" is not).  Only
   // meaningful for versioned symbols.

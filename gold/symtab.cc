@@ -2368,6 +2368,8 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 				 Stringpool* dynpool,
 				 Versions* versions)
 {
+  std::vector<Symbol*> as_needed_sym;
+
   for (Symbol_table_type::iterator p = this->table_.begin();
        p != this->table_.end();
        ++p)
@@ -2387,16 +2389,41 @@ Symbol_table::set_dynsym_indexes(unsigned int index,
 	  syms->push_back(sym);
 	  dynpool->add(sym->name(), false, NULL);
 
-	  // Record any version information.
-          if (sym->version() != NULL)
-            versions->record_version(this, dynpool, sym);
-
 	  // If the symbol is defined in a dynamic object and is
-	  // referenced in a regular object, then mark the dynamic
-	  // object as needed.  This is used to implement --as-needed.
-	  if (sym->is_from_dynobj() && sym->in_reg())
+	  // referenced strongly in a regular object, then mark the
+	  // dynamic object as needed.  This is used to implement
+	  // --as-needed.
+	  if (sym->is_from_dynobj()
+	      && sym->in_reg()
+	      && !sym->is_undef_binding_weak())
 	    sym->object()->set_is_needed();
+
+	  // Record any version information, except those from
+	  // as-needed libraries not seen to be needed.  Note that the
+	  // is_needed state for such libraries can change in this loop.
+	  if (sym->version() != NULL)
+	    {
+	      if (!sym->is_from_dynobj()
+		  || !sym->object()->as_needed()
+		  || sym->object()->is_needed())
+		versions->record_version(this, dynpool, sym);
+	      else
+		as_needed_sym.push_back(sym);
+	    }
 	}
+    }
+
+  // Process version information for symbols from as-needed libraries.
+  for (std::vector<Symbol*>::iterator p = as_needed_sym.begin();
+       p != as_needed_sym.end();
+       ++p)
+    {
+      Symbol* sym = *p;
+
+      if (sym->object()->is_needed())
+	versions->record_version(this, dynpool, sym);
+      else
+	sym->clear_version();
     }
 
   // Finish up the versions.  In some cases this may add new dynamic

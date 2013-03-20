@@ -1,3 +1,10 @@
+2013-03-20  Alan Modra  <amodra@gmail.com>
+
+	* symtab.h (Symbol::clear_version): New function.
+	* symtab.cc (Symbol_table::set_dynsym_indexes): Don't set object
+	is_needed by weak references.  Clear version for symbols defined
+	in as-needed objects that are not needed.
+
 2013-03-15  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Scan::reloc_needs_plt_for_ifunc): Make
