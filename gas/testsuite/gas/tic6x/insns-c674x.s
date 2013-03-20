@@ -682,6 +682,7 @@ f:
 	mpy .M2 5,b9,b10
 	[a2] mpy .M2X -4,a11,b12
 	mpydp .M1 a1:a0,a3:a2,a5:a4
+	mpydp .M2X b1:b0,a1:a0,b1:b0
 	[b2] mpydp .M2 b7:b6,b9:b8,b11:b10
 	mpyh .M1 a0,a1,a2
 	[!a2] mpyh .M1X a3,b4,a5
