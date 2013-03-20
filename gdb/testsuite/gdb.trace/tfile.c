@@ -13,11 +13,17 @@ char trbuf[1000];
 char *trptr;
 char *tfsizeptr;
 
+/* These globals are put in the trace buffer.  */
+
 int testglob = 31415;
 
 int testglob2 = 271828;
 
+/* But these below are not.  */
+
 const int constglob = 10000;
+
+int nonconstglob = 14124;
 
 int
 start_trace_file (char *filename)

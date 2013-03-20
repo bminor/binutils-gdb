@@ -1,3 +1,12 @@
+2013-03-20  Pedro Alves  <palves@redhat.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.c: Add comments.
+	(nonconstglob): New global.
+	* gdb.trace/tfile.exp: Add comments.  Test printing a non-const
+	global that is not covered by the trace frame.  Test
+	disassembling.
+
 2013-03-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/valgrind-infcall.exp

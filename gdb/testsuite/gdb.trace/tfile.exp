@@ -64,7 +64,22 @@ gdb_test "print testglob" " = 31415" "print testglob on trace file"
 
 gdb_test "print testglob2" " = 271828" "print testglob2 on trace file"
 
+# This global is not covered by the trace frame, but since it's const,
+# we should be able to read it from the executable.
+
 gdb_test "print constglob" " = 10000" "print constglob on trace file"
+
+# Similarly, disassembly should find the read-only pieces in the executable.
+gdb_test "disassemble main" \
+    "Dump of assembler code for function main:.*   $hex <\\+0\\>:.*End of assembler dump\."
+
+# This global is also not covered by the trace frame, and since it's
+# non-const, we should _not_ read it from the executable, as that
+# would show the variable's initial value, not the current at time the
+# trace frame was created.
+
+gdb_test "print nonconstglob" \
+    " = <unavailable>" "print nonconstglob on trace file"
 
 gdb_test "tfind" "Target failed to find requested trace frame." \
     "tfind does not find a second frame in trace file"
