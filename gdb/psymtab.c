@@ -420,7 +420,7 @@ find_pc_sect_psymbol (struct objfile *objfile,
     {
       p = *pp;
       if (SYMBOL_DOMAIN (p) == VAR_DOMAIN
-	  && SYMBOL_CLASS (p) == LOC_BLOCK
+	  && PSYMBOL_CLASS (p) == LOC_BLOCK
 	  && pc >= SYMBOL_VALUE_ADDRESS (p)
 	  && (SYMBOL_VALUE_ADDRESS (p) > best_pc
 	      || (psymtab->textlow == 0
@@ -444,7 +444,7 @@ find_pc_sect_psymbol (struct objfile *objfile,
     {
       p = *pp;
       if (SYMBOL_DOMAIN (p) == VAR_DOMAIN
-	  && SYMBOL_CLASS (p) == LOC_BLOCK
+	  && PSYMBOL_CLASS (p) == LOC_BLOCK
 	  && pc >= SYMBOL_VALUE_ADDRESS (p)
 	  && (SYMBOL_VALUE_ADDRESS (p) > best_pc
 	      || (psymtab->textlow == 0
@@ -474,7 +474,7 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 
   gdb_assert (objfile);
 
-  switch (SYMBOL_CLASS (psym))
+  switch (PSYMBOL_CLASS (psym))
     {
     case LOC_STATIC:
     case LOC_LABEL:
@@ -890,7 +890,7 @@ print_partial_symbols (struct gdbarch *gdbarch,
 	  fputs_filtered ("<invalid domain>, ", outfile);
 	  break;
 	}
-      switch (SYMBOL_CLASS (*p))
+      switch (PSYMBOL_CLASS (*p))
 	{
 	case LOC_UNDEF:
 	  fputs_filtered ("undefined", outfile);
@@ -1343,12 +1343,12 @@ recursively_search_psymtabs (struct partial_symtab *ps,
 
 	  if ((kind == ALL_DOMAIN
 	       || (kind == VARIABLES_DOMAIN
-		   && SYMBOL_CLASS (*psym) != LOC_TYPEDEF
-		   && SYMBOL_CLASS (*psym) != LOC_BLOCK)
+		   && PSYMBOL_CLASS (*psym) != LOC_TYPEDEF
+		   && PSYMBOL_CLASS (*psym) != LOC_BLOCK)
 	       || (kind == FUNCTIONS_DOMAIN
-		   && SYMBOL_CLASS (*psym) == LOC_BLOCK)
+		   && PSYMBOL_CLASS (*psym) == LOC_BLOCK)
 	       || (kind == TYPES_DOMAIN
-		   && SYMBOL_CLASS (*psym) == LOC_TYPEDEF))
+		   && PSYMBOL_CLASS (*psym) == LOC_TYPEDEF))
 	      && (*name_matcher) (SYMBOL_SEARCH_NAME (*psym), data))
 	    {
 	      /* Found a match, so notify our caller.  */

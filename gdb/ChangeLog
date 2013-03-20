@@ -1,3 +1,9 @@
+2013-03-20  Tom Tromey  <tromey@redhat.com>
+
+	* psymtab.c (find_pc_sect_psymbol, fixup_psymbol_section)
+	(print_partial_symbols, recursively_search_psymtabs): Use
+	PSYMBOL_CLASS.
+
 2013-03-20  Pierre Muller  <muller@sourceware.org>
 
 	* contrib/ari/gdb_ari.sh (OP eol rule): Also check
