@@ -1,3 +1,8 @@
+2013-03-20  Pierre Muller  <muller@sourceware.org>
+
+	* contrib/ari/gdb_ari.sh (OP eol rule): Also check
+	addtion, subtraction, multiplication and division binary operator.
+
 2013-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
