@@ -430,10 +430,10 @@ m32r_open (char *args, int from_tty)
 /* Close out all files and local state before this target loses control.  */
 
 static void
-m32r_close (int quitting)
+m32r_close (void)
 {
   if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "m32r_close(%d)\n", quitting);
+    fprintf_unfiltered (gdb_stdlog, "m32r_close()\n");
 
   if (sdi_desc)
     {

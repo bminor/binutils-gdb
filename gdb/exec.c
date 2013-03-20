@@ -115,7 +115,7 @@ exec_close (void)
    sections and closes all executable bfds from all program spaces.  */
 
 static void
-exec_close_1 (int quitting)
+exec_close_1 (void)
 {
   struct vmap *vp, *nxt;
 

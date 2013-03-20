@@ -78,7 +78,7 @@ static void gdbsim_load (char *prog, int fromtty);
 
 static void gdbsim_open (char *args, int from_tty);
 
-static void gdbsim_close (int quitting);
+static void gdbsim_close (void);
 
 static void gdbsim_detach (struct target_ops *ops, char *args, int from_tty);
 
@@ -782,23 +782,16 @@ gdbsim_close_inferior (struct inferior *inf, void *arg)
   return 0;
 }
 
-/* Does whatever cleanup is required for a target that we are no longer
-   going to be calling.  Argument says whether we are quitting gdb and
-   should not get hung in case of errors, or whether we want a clean
-   termination even if it takes a while.  This routine is automatically
-   always called just before a routine is popped off the target stack.
-   Closing file descriptors and freeing memory are typical things it should
-   do.  */
 /* Close out all files and local state before this target loses control.  */
 
 static void
-gdbsim_close (int quitting)
+gdbsim_close (void)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
 
   if (remote_debug)
-    printf_filtered ("gdbsim_close: quitting %d\n", quitting);
+    printf_filtered ("gdbsim_close\n");
 
   iterate_over_inferiors (gdbsim_close_inferior, NULL);
 

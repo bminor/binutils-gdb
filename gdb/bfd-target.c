@@ -67,7 +67,7 @@ target_bfd_get_section_table (struct target_ops *ops)
 }
 
 static void
-target_bfd_xclose (struct target_ops *t, int quitting)
+target_bfd_xclose (struct target_ops *t)
 {
   struct target_bfd_data *data = t->to_data;
 

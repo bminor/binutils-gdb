@@ -4625,7 +4625,7 @@ parse_tsv_definition (char *line, struct uploaded_tsv **utsvp)
 /* Close the trace file and generally clean up.  */
 
 static void
-tfile_close (int quitting)
+tfile_close (void)
 {
   int pid;
 

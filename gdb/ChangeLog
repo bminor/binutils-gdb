@@ -1,3 +1,53 @@
+2013-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* bfd-target.c (target_bfd_xclose): Remove parameter quitting.
+	* bsd-kvm.c (bsd_kvm_close): Likewise.
+	* bsd-uthread.c (bsd_uthread_close): Likewise.
+	* corelow.c (core_close): Likewise.
+	(core_close_cleanup): Remove parameter quitting from a caller.
+	* event-top.c (async_disconnect): Likewise.
+	* exec.c (exec_close_1): Remove parameter quitting.
+	* go32-nat.c (go32_close): Likewise.
+	* linux-nat.c (linux_nat_close): Remove parameter quitting.  Remove
+	parameter quitting from a caller.
+	* mips-linux-nat.c (super_close): Remove parameter quitting from the
+	variable.
+	(mips_linux_close): Remove parameter quitting.  Remove parameter
+	quitting from a caller.
+	* monitor.c (monitor_close): Remove parameter quitting.
+	* monitor.h (monitor_close): Likewise.
+	* record-btrace.c (record_btrace_close): Likewise.
+	* record-full.c (record_full_close): Likewise.
+	* remote-m32r-sdi.c (m32r_close): Remove parameter quitting and remove
+	it also from fprintf_unfiltered.
+	* remote-mips.c (mips_close): Remove parameter quitting.
+	(mips_detach): Remove parameter quitting from a caller.
+	* remote-sim.c (gdbsim_close): Remove parameter quitting.
+	(gdbsim_close): Remove duplicate function comment.  Remove parameter
+	quitting and remove it also from printf_filtered.
+	* remote.c (remote_close): Remove parameter quitting.
+	* solib-svr4.c (enable_break): Remove parameter quitting from a caller.
+	* target.c (update_current_target): Remove parameter int from to_close
+	de_fault.
+	(push_target, unpush_target, pop_target): Remove parameter quitting from
+	a caller.
+	(pop_all_targets_above, pop_all_targets): Remove parameter quitting.
+	Remove parameter quitting from a caller.
+	(target_preopen): Remove parameter quitting from a caller.
+	(target_close): Remove parameter quitting.  Remove parameter quitting
+	from a caller two times.  Remove parameter quitting also from
+	fprintf_unfiltered.
+	* target.h (struct target_ops): Remove parameter quitting and as int
+	from fields to_xclose and to_close.
+	(extern struct target_ops current_target):
+	(target_close, pop_all_targets): Remove parameter quitting.  Update the
+	comment.
+	(pop_all_targets_above): Remove parameter quitting.
+	* top.c (quit_target): Remove parameter quitting from a caller.
+	* tracepoint.c (tfile_close): Remove parameter quitting.
+	* windows-nat.c (windows_close): Remove parameter quitting.
+
 2013-03-20  Corinna Vinschen  <vinschen@redhat.com>
 
 	* windows-nat.c (handle_output_debug_string): Replace call

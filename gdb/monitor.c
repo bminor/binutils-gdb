@@ -853,7 +853,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
    control.  */
 
 void
-monitor_close (int quitting)
+monitor_close (void)
 {
   if (monitor_desc)
     serial_close (monitor_desc);

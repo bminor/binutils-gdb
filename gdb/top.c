@@ -1295,7 +1295,7 @@ quit_target (void *arg)
 
   /* Give all pushed targets a chance to do minimal cleanup, and pop
      them all out.  */
-  pop_all_targets (1);
+  pop_all_targets ();
 
   /* Save the history information if it is appropriate to do so.  */
   if (write_history_p && history_filename)

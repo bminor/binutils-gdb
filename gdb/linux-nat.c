@@ -5022,14 +5022,14 @@ linux_nat_stop (ptid_t ptid)
 }
 
 static void
-linux_nat_close (int quitting)
+linux_nat_close (void)
 {
   /* Unregister from the event loop.  */
   if (linux_nat_is_async_p ())
     linux_nat_async (NULL, 0);
 
   if (linux_ops->to_close)
-    linux_ops->to_close (quitting);
+    linux_ops->to_close ();
 }
 
 /* When requests are passed down from the linux-nat layer to the

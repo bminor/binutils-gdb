@@ -204,7 +204,7 @@ bsd_uthread_activate (struct objfile *objfile)
 /* Cleanup due to deactivation.  */
 
 static void
-bsd_uthread_close (int quitting)
+bsd_uthread_close (void)
 {
   bsd_uthread_active = 0;
   bsd_uthread_thread_run_addr = 0;

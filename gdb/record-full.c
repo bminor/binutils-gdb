@@ -1021,7 +1021,7 @@ record_full_open (char *name, int from_tty)
 /* "to_close" target method.  Close the process record target.  */
 
 static void
-record_full_close (int quitting)
+record_full_close (void)
 {
   struct record_full_core_buf_entry *entry;
 

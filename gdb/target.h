@@ -420,8 +420,8 @@ struct target_ops
     /* Old targets with a static target vector provide "to_close".
        New re-entrant targets provide "to_xclose" and that is expected
        to xfree everything (including the "struct target_ops").  */
-    void (*to_xclose) (struct target_ops *targ, int quitting);
-    void (*to_close) (int);
+    void (*to_xclose) (struct target_ops *targ);
+    void (*to_close) (void);
     void (*to_attach) (struct target_ops *ops, char *, int);
     void (*to_post_attach) (int);
     void (*to_detach) (struct target_ops *ops, char *, int);
@@ -959,15 +959,13 @@ extern struct target_ops current_target;
 #define	target_longname		(current_target.to_longname)
 
 /* Does whatever cleanup is required for a target that we are no
-   longer going to be calling.  QUITTING indicates that GDB is exiting
-   and should not get hung on an error (otherwise it is important to
-   perform clean termination, even if it takes a while).  This routine
-   is automatically always called after popping the target off the
-   target stack - the target's own methods are no longer available
-   through the target vector.  Closing file descriptors and freeing all
-   memory allocated memory are typical things it should do.  */
+   longer going to be calling.  This routine is automatically always
+   called after popping the target off the target stack - the target's
+   own methods are no longer available through the target vector.
+   Closing file descriptors and freeing all memory allocated memory are
+   typical things it should do.  */
 
-void target_close (struct target_ops *targ, int quitting);
+void target_close (struct target_ops *targ);
 
 /* Attaches to a process on the target side.  Arguments are as passed
    to the `attach' command by the user.  This routine can be called
@@ -1858,16 +1856,12 @@ extern void target_preopen (int);
 
 extern void pop_target (void);
 
-/* Does whatever cleanup is required to get rid of all pushed targets.
-   QUITTING is propagated to target_close; it indicates that GDB is
-   exiting and should not get hung on an error (otherwise it is
-   important to perform clean termination, even if it takes a
-   while).  */
-extern void pop_all_targets (int quitting);
+/* Does whatever cleanup is required to get rid of all pushed targets.  */
+extern void pop_all_targets (void);
 
 /* Like pop_all_targets, but pops only targets whose stratum is
    strictly above ABOVE_STRATUM.  */
-extern void pop_all_targets_above (enum strata above_stratum, int quitting);
+extern void pop_all_targets_above (enum strata above_stratum);
 
 extern int target_is_pushed (struct target_ops *t);
 

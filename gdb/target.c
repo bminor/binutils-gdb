@@ -738,7 +738,7 @@ update_current_target (void)
 	    (void (*) (char *, int))
 	    tcomplain);
   de_fault (to_close,
-	    (void (*) (int))
+	    (void (*) (void))
 	    target_ignore);
   de_fault (to_post_attach,
 	    (void (*) (int))
@@ -1015,7 +1015,7 @@ push_target (struct target_ops *t)
 
       (*cur) = (*cur)->beneath;
       tmp->beneath = NULL;
-      target_close (tmp, 0);
+      target_close (tmp);
     }
 
   /* We have removed all targets in our stratum, now add the new one.  */
@@ -1062,7 +1062,7 @@ unpush_target (struct target_ops *t)
   /* Finally close the target.  Note we do this after unchaining, so
      any target method calls from within the target_close
      implementation don't end up in T anymore.  */
-  target_close (t, 0);
+  target_close (t);
 
   return 1;
 }
@@ -1070,7 +1070,7 @@ unpush_target (struct target_ops *t)
 void
 pop_target (void)
 {
-  target_close (target_stack, 0);	/* Let it clean up.  */
+  target_close (target_stack);		/* Let it clean up.  */
   if (unpush_target (target_stack) == 1)
     return;
 
@@ -1082,11 +1082,11 @@ pop_target (void)
 }
 
 void
-pop_all_targets_above (enum strata above_stratum, int quitting)
+pop_all_targets_above (enum strata above_stratum)
 {
   while ((int) (current_target.to_stratum) > (int) above_stratum)
     {
-      target_close (target_stack, quitting);
+      target_close (target_stack);
       if (!unpush_target (target_stack))
 	{
 	  fprintf_unfiltered (gdb_stderr,
@@ -1100,9 +1100,9 @@ pop_all_targets_above (enum strata above_stratum, int quitting)
 }
 
 void
-pop_all_targets (int quitting)
+pop_all_targets (void)
 {
-  pop_all_targets_above (dummy_stratum, quitting);
+  pop_all_targets_above (dummy_stratum);
 }
 
 /* Return 1 if T is now pushed in the target stack.  Return 0 otherwise.  */
@@ -2573,7 +2573,7 @@ target_preopen (int from_tty)
      it doesn't (which seems like a win for UDI), remove it now.  */
   /* Leave the exec target, though.  The user may be switching from a
      live process to a core of the same program.  */
-  pop_all_targets_above (file_stratum, 0);
+  pop_all_targets_above (file_stratum);
 
   target_pre_inferior (from_tty);
 }
@@ -3775,15 +3775,15 @@ debug_to_open (char *args, int from_tty)
 }
 
 void
-target_close (struct target_ops *targ, int quitting)
+target_close (struct target_ops *targ)
 {
   if (targ->to_xclose != NULL)
-    targ->to_xclose (targ, quitting);
+    targ->to_xclose (targ);
   else if (targ->to_close != NULL)
-    targ->to_close (quitting);
+    targ->to_close ();
 
   if (targetdebug)
-    fprintf_unfiltered (gdb_stdlog, "target_close (%d)\n", quitting);
+    fprintf_unfiltered (gdb_stdlog, "target_close ()\n");
 }
 
 void

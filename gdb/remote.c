@@ -108,7 +108,7 @@ static void extended_remote_open (char *name, int from_tty);
 
 static void remote_open_1 (char *, int, struct target_ops *, int extended_p);
 
-static void remote_close (int quitting);
+static void remote_close (void);
 
 static void remote_mourn (struct target_ops *ops);
 
@@ -3001,7 +3001,7 @@ extended_remote_restart (void)
 /* Clean up connection to a remote debugger.  */
 
 static void
-remote_close (int quitting)
+remote_close (void)
 {
   if (remote_desc == NULL)
     return; /* already closed */

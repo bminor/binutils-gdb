@@ -2367,7 +2367,7 @@ windows_can_run (void)
 }
 
 static void
-windows_close (int x)
+windows_close (void)
 {
   DEBUG_EVENTS (("gdb: windows_close, inferior_ptid=%d\n",
 		PIDGET (inferior_ptid)));

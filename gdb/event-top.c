@@ -867,7 +867,7 @@ async_disconnect (gdb_client_data arg)
 
   TRY_CATCH (exception, RETURN_MASK_ALL)
     {
-      pop_all_targets (1);
+      pop_all_targets ();
     }
 
   signal (SIGHUP, SIG_DFL);	/*FIXME: ???????????  */

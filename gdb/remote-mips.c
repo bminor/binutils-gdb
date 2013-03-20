@@ -84,7 +84,7 @@ static void ddb_open (char *name, int from_tty);
 
 static void lsi_open (char *name, int from_tty);
 
-static void mips_close (int quitting);
+static void mips_close (void);
 
 static void mips_detach (struct target_ops *ops, char *args, int from_tty);
 
@@ -1723,7 +1723,7 @@ lsi_open (char *name, int from_tty)
 /* Close a connection to the remote board.  */
 
 static void
-mips_close (int quitting)
+mips_close (void)
 {
   if (mips_is_open)
     {
@@ -1746,7 +1746,7 @@ mips_detach (struct target_ops *ops, char *args, int from_tty)
 
   pop_target ();
 
-  mips_close (1);
+  mips_close ();
 
   if (from_tty)
     printf_unfiltered ("Ending remote MIPS debugging.\n");
