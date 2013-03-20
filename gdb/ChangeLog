@@ -1,3 +1,8 @@
+2013-03-20  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_save_metadata_header): Define macro HOST_ENDIANNESS
+	and write it to CTF metadata.
+
 2013-03-19  Corinna Vinschen  <vinschen@redhat.com>
 
 	* windows-nat.c (handle_output_debug_string): Change type of n to

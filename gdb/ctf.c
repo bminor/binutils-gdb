@@ -218,9 +218,17 @@ ctf_save_metadata_header (struct trace_write_handler *handler)
 			   " := uint64_t;\n");
   ctf_save_write_metadata (handler, "\n");
 
+  /* Get the byte order of the host and write CTF data in this byte
+     order.  */
+#if WORDS_BIGENDIAN
+#define HOST_ENDIANNESS "be"
+#else
+#define HOST_ENDIANNESS "le"
+#endif
+
   ctf_save_write_metadata (handler, metadata_fmt,
 			   CTF_SAVE_MAJOR, CTF_SAVE_MINOR,
-			   BYTE_ORDER == LITTLE_ENDIAN ? "le" : "be");
+			   HOST_ENDIANNESS);
   ctf_save_write_metadata (handler, "\n");
 }
 
