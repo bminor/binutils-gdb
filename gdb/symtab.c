@@ -5053,6 +5053,13 @@ register_symbol_computed_impl (enum address_class aclass,
   symbol_impl[result].aclass = aclass;
   symbol_impl[result].ops_computed = ops;
 
+  /* Sanity check OPS.  */
+  gdb_assert (ops != NULL);
+  gdb_assert (ops->tracepoint_var_ref != NULL);
+  gdb_assert (ops->describe_location != NULL);
+  gdb_assert (ops->read_needs_frame != NULL);
+  gdb_assert (ops->read_variable != NULL);
+
   return result;
 }
 

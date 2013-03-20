@@ -323,7 +323,8 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	}
     }
 
-  if (SYMBOL_CLASS (sym) == LOC_COMPUTED
+  if (SYMBOL_COMPUTED_OPS (sym) != NULL
+      && SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry != NULL
       && print_entry_values != print_entry_values_no
       && (print_entry_values != print_entry_values_if_needed
 	  || !val || value_optimized_out (val)))

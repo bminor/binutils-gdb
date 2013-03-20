@@ -1,3 +1,20 @@
+2013-03-20  Tom Tromey  <tromey@redhat.com>
+
+	* ax-gdb.c (gen_var_ref): Unconditionally call via computed ops,
+	if possible.
+	* dwarf2read.c (read_func_scope): Remove old FIXME.
+	* eval.c (evaluate_subexp_standard): Check SYMBOL_COMPUTED_OPS,
+	not LOC_COMPUTED.
+	* findvar.c (symbol_read_needs_frame, default_read_var_value):
+	Unconditionally call via computed ops, if possible.
+	* printcmd.c (address_info): Unconditionally call via computed ops,
+	if possible.
+	* stack.c (read_frame_arg): Unconditionally call via computed ops,
+	if possible.
+	* symtab.c (register_symbol_computed_impl): Sanity check 'ops'.
+	* tracepoint.c (scope_info): Unconditionally call via computed ops,
+	if possible.
+
 2013-03-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 

@@ -367,17 +367,15 @@ address_to_signed_pointer (struct gdbarch *gdbarch, struct type *type,
 int
 symbol_read_needs_frame (struct symbol *sym)
 {
+  if (SYMBOL_COMPUTED_OPS (sym) != NULL)
+    return SYMBOL_COMPUTED_OPS (sym)->read_needs_frame (sym);
+
   switch (SYMBOL_CLASS (sym))
     {
       /* All cases listed explicitly so that gcc -Wall will detect it if
          we failed to consider one.  */
     case LOC_COMPUTED:
-      /* FIXME: cagney/2004-01-26: It should be possible to
-	 unconditionally call the SYMBOL_COMPUTED_OPS method when available.
-	 Unfortunately DWARF 2 stores the frame-base (instead of the
-	 function) location in a function's symbol.  Oops!  For the
-	 moment enable this when/where applicable.  */
-      return SYMBOL_COMPUTED_OPS (sym)->read_needs_frame (sym);
+      gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
 
     case LOC_REGISTER:
     case LOC_ARG:
@@ -455,6 +453,9 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 
   if (symbol_read_needs_frame (var))
     gdb_assert (frame);
+
+  if (SYMBOL_COMPUTED_OPS (var) != NULL)
+    return SYMBOL_COMPUTED_OPS (var)->read_variable (var, frame);
 
   switch (SYMBOL_CLASS (var))
     {
@@ -578,12 +579,7 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
       break;
 
     case LOC_COMPUTED:
-      /* FIXME: cagney/2004-01-26: It should be possible to
-	 unconditionally call the SYMBOL_COMPUTED_OPS method when available.
-	 Unfortunately DWARF 2 stores the frame-base (instead of the
-	 function) location in a function's symbol.  Oops!  For the
-	 moment enable this when/where applicable.  */
-      return SYMBOL_COMPUTED_OPS (var)->read_variable (var, frame);
+      gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
 
     case LOC_UNRESOLVED:
       {

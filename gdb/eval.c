@@ -792,7 +792,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	  return value_zero (SYMBOL_TYPE (sym), not_lval);
 
-	if (SYMBOL_CLASS (sym) != LOC_COMPUTED
+	if (SYMBOL_COMPUTED_OPS (sym) == NULL
 	    || SYMBOL_COMPUTED_OPS (sym)->read_variable_at_entry == NULL)
 	  error (_("Symbol \"%s\" does not have any specific entry value"),
 		 SYMBOL_PRINT_NAME (sym));

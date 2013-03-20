@@ -1251,6 +1251,14 @@ address_info (char *exp, int from_tty)
   section = SYMBOL_OBJ_SECTION (sym);
   gdbarch = get_objfile_arch (SYMBOL_SYMTAB (sym)->objfile);
 
+  if (SYMBOL_COMPUTED_OPS (sym) != NULL)
+    {
+      SYMBOL_COMPUTED_OPS (sym)->describe_location (sym, context_pc,
+						    gdb_stdout);
+      printf_filtered (".\n");
+      return;
+    }
+
   switch (SYMBOL_CLASS (sym))
     {
     case LOC_CONST:
@@ -1273,14 +1281,7 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_COMPUTED:
-      /* FIXME: cagney/2004-01-26: It should be possible to
-	 unconditionally call the SYMBOL_COMPUTED_OPS method when available.
-	 Unfortunately DWARF 2 stores the frame-base (instead of the
-	 function) location in a function's symbol.  Oops!  For the
-	 moment enable this when/where applicable.  */
-      SYMBOL_COMPUTED_OPS (sym)->describe_location (sym, context_pc,
-						    gdb_stdout);
-      break;
+      gdb_assert_not_reached (_("LOC_COMPUTED variable missing a method"));
 
     case LOC_REGISTER:
       /* GDBARCH is the architecture associated with the objfile the symbol
