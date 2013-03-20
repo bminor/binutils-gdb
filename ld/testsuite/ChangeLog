@@ -1,4 +1,9 @@
 2013-03-20  Alan Modra  <amodra@gmail.com>
+
+	* ld-elf/rel.c, ld-elf/relmain.c, ld-elf/relmain.out: New test.
+	* ld-elf/shared.exp: Build and run it.
+
+2013-03-20  Alan Modra  <amodra@gmail.com>
 	    Will Newton <will.newton@linaro.org
 
 	* ld-elfvers/vers.exp: Add -Wl,--no-as-needed to all tests

@@ -13025,6 +13025,11 @@ _bfd_elf_make_dynamic_reloc_section (asection *         sec,
 	  reloc_sec = bfd_make_section_anyway_with_flags (dynobj, name, flags);
 	  if (reloc_sec != NULL)
 	    {
+	      /* _bfd_elf_get_sec_type_attr chooses a section type by
+		 name.  Override as it may be wrong, eg. for a user
+		 section named "auto" we'll get ".relauto" which is
+		 seen to be a .rela section.  */
+	      elf_section_type (reloc_sec) = is_rela ? SHT_RELA : SHT_REL;
 	      if (! bfd_set_section_alignment (dynobj, reloc_sec, alignment))
 		reloc_sec = NULL;
 	    }

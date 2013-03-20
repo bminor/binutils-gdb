@@ -1,3 +1,8 @@
+2013-03-20  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_make_dynamic_reloc_section): Override
+	sh_type according to is_rela.
+
 2013-03-18  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12549

@@ -203,6 +203,9 @@ set build_tests {
   {"Build needed1b.so with --no-copy-dt-needed-entries"
    "-shared tmpdir/libneeded1pic.o -Wl,--no-copy-dt-needed-entries -Ltmpdir -lneeded1a" ""
    {dummy.c} {} "needed1d.so"}
+  {"Build librel.so"
+   "-shared" "-fPIC"
+   {rel.c} {} "librel.so"}
 }
 
 run_cc_link_tests $build_tests
@@ -347,6 +350,9 @@ set run_tests {
     {"Link with --copy-dt-needed-entries"
      "tmpdir/libneeded1c.o --copy-dt-needed-entries -rpath=tmpdir -Ltmpdir -lneeded1a" ""
      {dummy.c} "needed1b" "needed1.out"}
+    {"Run relmain"
+     "--no-as-needed -rpath=tmpdir -Ltmpdir -lrel" ""
+     {relmain.c} "relmain" "relmain.out"}
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
