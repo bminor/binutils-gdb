@@ -1,6 +1,15 @@
+2013-03-20  Alexis Deruelle  <alexis.deruelle@gmail.com>
+
+	PR gas/15095
+	* tic6x-dis.c (print_insn_tic6x): Decode opcodes that have
+	individual msb and lsb halves in src1 & src2 fields.  Discard the
+	src1 (lsb) value and only use src2 (msb), discarding bit 0, to
+	follow what Ti SDK does in that case as any value in the src1
+	field yields the same output with SDK disassembler.
+
 2013-03-12  Michael Eager <eager@eagercon.com>
 
-	* opcodes/mips-dis.c (print_insn_args): Modify def of reg. 
+	* opcodes/mips-dis.c (print_insn_args): Modify def of reg.
 
 2013-03-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
 

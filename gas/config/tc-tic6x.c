@@ -1,6 +1,5 @@
 /* TI C6X assembler.
-   Copyright 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright 2010-2013 Free Software Foundation, Inc.
    Contributed by Joseph Myers <joseph@codesourcery.com>
    		  Bernd Schmidt  <bernds@codesourcery.com>
 
@@ -2715,6 +2714,30 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	       known relocation.  */
 	    abort ();
 	  *fix_adda = FALSE;
+	  break;
+
+	case tic6x_coding_regpair_lsb:
+	  switch (operands[opno].form)
+	    {
+	    case TIC6X_OP_REGPAIR:
+	      value = operands[opno].value.reg.num;
+	      break;
+
+	    default:
+	      abort ();
+	    }
+	  break;
+
+	case tic6x_coding_regpair_msb:
+	  switch (operands[opno].form)
+	    {
+	    case TIC6X_OP_REGPAIR:
+	      value = operands[opno].value.reg.num + 1;
+	      break;
+
+	    default:
+	      abort ();
+	    }
 	  break;
 
 	case tic6x_coding_reg:

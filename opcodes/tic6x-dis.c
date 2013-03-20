@@ -1,6 +1,5 @@
 /* TI C6X disassembler.
-   Copyright 2010
-   Free Software Foundation, Inc.
+   Copyright 2010-2013 Free Software Foundation, Inc.
    Contributed by Joseph Myers <joseph@codesourcery.com>
    		  Bernd Schmidt  <bernds@codesourcery.com>
 
@@ -630,6 +629,15 @@ print_insn_tic6x (bfd_vma addr, struct disassemble_info *info)
 		    signed_fld_val *= 4;
 		  operands_pcrel[op_num] = TRUE;
 		  operands_addresses[op_num] = fp_addr + signed_fld_val;
+		  break;
+
+		case tic6x_coding_regpair_msb:
+		  if (opc->operand_info[op_num].form != tic6x_operand_regpair)
+		    abort ();
+		  operands_text[op_num] = TRUE;
+		  snprintf (operands[op_num], 24, "%c%u:%c%u",
+			    (func_unit_side == 2 ? 'b' : 'a'), (fld_val | 0x1),
+			    (func_unit_side == 2 ? 'b' : 'a'), (fld_val | 0x1) - 1);
 		  break;
 
 		case tic6x_coding_reg_shift:

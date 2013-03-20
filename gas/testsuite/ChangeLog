@@ -1,3 +1,10 @@
+2013-03-20  Alexis Deruelle  <alexis.deruelle@gmail.com>
+
+	PR gas/15095
+	* gas/tic6x/insns-c674x.s: Add test cases for the newly generated
+	opcode.
+	* gas/tic6x/insns-c674x.d: Update expected disassembly.
+
 2013-03-15  Will Newton  <will.newton@linaro.org>
 
 	* gas/arm/any-idiv.d: Expand *-*eabi test to cover *-*eabi*.

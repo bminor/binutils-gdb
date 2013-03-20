@@ -1,3 +1,10 @@
+2013-03-20  Alexis Deruelle  <alexis.deruelle@gmail.com>
+
+	PR gas/15095
+	* config/tc-tic6x.c (tic6x_try_encode): Handle
+	tic6x_coding_dreg_(msb|lsb) field coding types and use it to
+	encode register pair numbers when required.
+
 2013-03-15  Will Newton  <will.newton@linaro.org>
 
 	* config/tc-arm.c (do_neon_ldr_str): Fix error check for PC register
