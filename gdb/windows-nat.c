@@ -978,7 +978,7 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 	  retval = strtoul (p, &p, 0);
 	  if (!retval)
 	    retval = main_thread_id;
-	  else if ((x = (LPCVOID) string_to_core_addr (p))
+	  else if ((x = (LPCVOID) strtoull (p, NULL, 0))
 		   && ReadProcessMemory (current_process_handle, x,
 					 &saved_context,
 					 __COPY_CONTEXT_SIZE, &n)

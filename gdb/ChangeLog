@@ -1,3 +1,8 @@
+2013-03-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* windows-nat.c (handle_output_debug_string): Replace call
+	to string_to_core_addr with call to strtoull.
+
 2013-03-20  Yao Qi  <yao@codesourcery.com>
 
 	* ctf.c (ctf_save_metadata_header): Define macro HOST_ENDIANNESS
