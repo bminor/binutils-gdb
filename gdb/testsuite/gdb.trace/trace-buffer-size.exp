@@ -39,7 +39,7 @@ set test "get default buffer size"
 
 # Save default trace buffer size in 'default_size'.
 gdb_test_multiple "tstatus" $test {
-    -re ".*Trace buffer has ($decimal) bytes of ($decimal) bytes free.*" {
+    -re ".*Trace buffer has ($decimal) bytes of ($decimal) bytes free.*$gdb_prompt $" {
         set default_size $expect_out(2,string)
         pass $test
     }

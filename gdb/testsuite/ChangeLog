@@ -1,3 +1,8 @@
+2013-03-21  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/trace-buffer-size.exp (get default buffer size):
+	Expect $gdb_prompt in gdb_test_multiple.
+
 2013-03-20  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15289
