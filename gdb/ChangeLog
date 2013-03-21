@@ -1,4 +1,4 @@
-2013-03-11  Tom Tromey  <tromey@redhat.com>
+2013-03-21  Tom Tromey  <tromey@redhat.com>
 
 	* tracepoint.h (decode_agent_options): Add 'trace_string'
 	argument.
