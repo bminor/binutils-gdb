@@ -4498,6 +4498,7 @@ error_free_dyn:
 		 --no-add-needed is used and the reference was not
 		 a weak one.  */
 	      if (undef_bfd != NULL
+		  && h->ref_regular_nonweak
 		  && (elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
 		{
 		  (*_bfd_error_handler)

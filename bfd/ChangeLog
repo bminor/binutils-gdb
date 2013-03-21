@@ -1,3 +1,13 @@
+2013-03-21  Michael Schewe  <michael.schewe@gmx.net>
+
+	* elf32-h8300 (h8_relax_section): Add new relaxation of mov
+	@(disp:32,ERx) to mov @(disp:16,ERx).
+	(R_H8_DISP32A16): New reloc.
+	Comments added and corrected.
+	* reloc.c (BFD_RELOC_H8_DISP32A16): New reloc.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2013-03-21  Kai Tietz  <ktietz@redhat.com>
 
 	* coffgen.c (coff_real_object_p): Make global.

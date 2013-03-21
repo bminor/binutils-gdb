@@ -1,3 +1,10 @@
+2013-03-21  Michael Schewe  <michael.schewe@gmx.net>
+
+	* config/tc-h8300.c (do_a_fix_imm): Add relaxation of mov
+	@(disp:32,ERx) to mov @(disp:16,ERx) insns by new reloc
+	R_H8_DISP32A16.
+	* config/tc-h8300.h: Remove duplicated defines.
+
 2013-03-21  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR gas/15282

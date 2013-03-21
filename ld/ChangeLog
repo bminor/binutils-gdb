@@ -1,3 +1,8 @@
+2013-03-21  Michael Schewe  <michael.schewe@gmx.net>
+
+	* ld.texinfo (H8/300): Add description of relaxation of
+	mov @(disp:32,ERx) to mov @(disp:16,ERx).
+
 2013-03-21  Kai Tietz  <ktietz@redhat.com>
 
 	* pe-dll.c (process_def_file_and_drectve): Don't handle VC

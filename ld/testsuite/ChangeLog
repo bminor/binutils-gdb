@@ -1,3 +1,14 @@
+2013-02-02  Michael Schewe  <michael.schewe@gmx.net>
+
+	* ld-h8300/h8300.exp: Add new relax-7 test on ELF.
+	* ld-h8300/relax-2.s: Add other direction and .w/.l variants of
+	mov insns.
+	* ld-h8300/relax-2.d: Update expected disassembly.
+	* ld-h8300/relax-7a.s: New: tests for mov @(disp:32,ERx) -> mov
+	@(disp:16,ERx).
+	* ld-h8300/relax-7b.s: New: Likewise.
+	* ld-h8300/relax-7.d: New: expected disassembly.
+
 2013-03-20  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
 	* ld-elf/group8a.d (notarget): Remove aarch64*-*-*.
