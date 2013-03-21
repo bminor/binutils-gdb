@@ -197,7 +197,9 @@ find_lowest_section (bfd *abfd, asection *sect, void *obj)
     *lowest = sect;
 }
 
-/* Create a new section_addr_info, with room for NUM_SECTIONS.  */
+/* Create a new section_addr_info, with room for NUM_SECTIONS.  The
+   new object's 'num_sections' field is set to 0; it must be updated
+   by the caller.  */
 
 struct section_addr_info *
 alloc_section_addr_info (size_t num_sections)
@@ -209,7 +211,6 @@ alloc_section_addr_info (size_t num_sections)
 	  +  sizeof (struct other_sections) * (num_sections - 1));
   sap = (struct section_addr_info *) xmalloc (size);
   memset (sap, 0, size);
-  sap->num_sections = num_sections;
 
   return sap;
 }
@@ -241,6 +242,8 @@ build_section_addr_info_from_section_table (const struct target_section *start,
 	}
     }
 
+  sap->num_sections = oidx;
+
   return sap;
 }
 
@@ -262,6 +265,9 @@ build_section_addr_info_from_bfd (bfd *abfd)
 	sap->other[i].sectindex = sec->index;
 	i++;
       }
+
+  sap->num_sections = i;
+
   return sap;
 }
 
@@ -277,7 +283,7 @@ build_section_addr_info_from_objfile (const struct objfile *objfile)
      gdb_assert (objfile->num_sections == bfd_count_sections (objfile->obfd));
      */
   sap = build_section_addr_info_from_bfd (objfile->obfd);
-  for (i = 0; i < sap->num_sections && sap->other[i].name; i++)
+  for (i = 0; i < sap->num_sections; i++)
     {
       int sectindex = sap->other[i].sectindex;
 
@@ -294,8 +300,7 @@ free_section_addr_info (struct section_addr_info *sap)
   int idx;
 
   for (idx = 0; idx < sap->num_sections; idx++)
-    if (sap->other[idx].name)
-      xfree (sap->other[idx].name);
+    xfree (sap->other[idx].name);
   xfree (sap);
 }
 
@@ -446,7 +451,7 @@ relative_addr_info_to_section_offsets (struct section_offsets *section_offsets,
   memset (section_offsets, 0, SIZEOF_N_SECTION_OFFSETS (num_sections));
 
   /* Now calculate offsets for section that were specified by the caller.  */
-  for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
+  for (i = 0; i < addrs->num_sections; i++)
     {
       struct other_sections *osp;
 
@@ -506,7 +511,7 @@ addrs_section_sort (struct section_addr_info *addrs)
 
   /* `+ 1' for the NULL terminator.  */
   array = xmalloc (sizeof (*array) * (addrs->num_sections + 1));
-  for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
+  for (i = 0; i < addrs->num_sections; i++)
     array[i] = &addrs->other[i];
   array[i] = NULL;
 
@@ -605,7 +610,7 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
      (the loadable section directly below it in memory).
      this_offset = lower_offset = lower_addr - lower_orig_addr */
 
-  for (i = 0; i < addrs->num_sections && addrs->other[i].name; i++)
+  for (i = 0; i < addrs->num_sections; i++)
     {
       struct other_sections *sect = addrs_to_abfd_addrs[i];
 
@@ -997,7 +1002,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 
      We no longer warn if the lowest section is not a text segment (as
      happens for the PA64 port.  */
-  if (addrs && addrs->other[0].name)
+  if (addrs && addrs->num_sections > 0)
     addr_info_make_relative (addrs, objfile->obfd);
 
   /* Initialize symbol reading routines for this objfile, allow complaints to
@@ -2341,6 +2346,7 @@ add_symbol_file_command (char *args, int from_tty)
 	 At this point, we don't know what file type this is,
 	 so we can't determine what section names are valid.  */
     }
+  section_addrs->num_sections = sec_num;
 
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));

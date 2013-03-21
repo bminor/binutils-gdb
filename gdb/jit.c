@@ -923,6 +923,7 @@ JITed symbol file is not an object file, ignoring it.\n"));
         sai->other[i].sectindex = sec->index;
         ++i;
       }
+  sai->num_sections = i;
 
   /* This call does not take ownership of SAI.  */
   make_cleanup_bfd_unref (nbfd);

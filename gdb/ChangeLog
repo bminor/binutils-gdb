@@ -1,5 +1,26 @@
 2013-03-21  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (alloc_section_addr_info): Update header.  Don't set
+	'num_sections' field.
+	(build_section_addr_info_from_section_table): Set 'num_sections'.
+	(build_section_addr_info_from_bfd): Likewise.
+	(build_section_addr_info_from_objfile): Remove dead loop
+	condition.
+	(free_section_addr_info): Unconditionally call xfree.
+	(relative_addr_info_to_section_offsets, addrs_section_sort)
+	(addr_info_make_relative, syms_from_objfile_1): Remove dead loop
+	condition.
+	(syms_from_objfile_1): Remove dead 'if' condition.  Check
+	'num_sections'.
+	(add_symbol_file_command): Set 'num_sections'.
+	* symfile-mem.c (symbol_file_add_from_memory): Set
+	'num_sections'.
+	* somread.c (som_symfile_offsets): Remove dead loop condition.
+	* machoread.c (macho_symfile_offsets): Remove dead 'if'.
+	* jit.c (jit_bfd_try_read_symtab): Set 'num_sections'.
+
+2013-03-21  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.h (decode_agent_options): Add 'trace_string'
 	argument.
 	* tracepoint.c (decode_agent_options): Add 'trace_string'

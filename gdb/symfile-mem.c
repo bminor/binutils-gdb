@@ -127,6 +127,7 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
 	sai->other[i].sectindex = sec->index;
 	++i;
       }
+  sai->num_sections = i;
 
   objf = symbol_file_add_from_bfd (nbfd, from_tty ? SYMFILE_VERBOSE : 0,
                                    sai, OBJF_SHARED, NULL);
