@@ -1,3 +1,7 @@
+2013-03-21  Tom Tromey  <tromey@redhat.com>
+
+	* c-exp.y (%union) <sym, ivar, ivec>: Remove.
+
 2013-03-21  Yao Qi  <yao@codesourcery.com>
 
 	* ctf.c: Include "gdb_stat.h".

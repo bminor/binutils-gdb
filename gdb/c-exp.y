@@ -145,7 +145,6 @@ void yyerror (char *);
       gdb_byte val[16];
       struct type *type;
     } typed_val_decfloat;
-    struct symbol *sym;
     struct type *tval;
     struct stoken sval;
     struct typed_stoken tsval;
@@ -154,11 +153,9 @@ void yyerror (char *);
     int voidval;
     struct block *bval;
     enum exp_opcode opcode;
-    struct internalvar *ivar;
 
     struct stoken_vector svec;
     VEC (type_ptr) *tvec;
-    int *ivec;
 
     struct type_stack *type_stack;
 
