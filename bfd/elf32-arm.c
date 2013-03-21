@@ -10958,6 +10958,20 @@ bfd_arm_get_mach_from_attributes (bfd * abfd)
 
 	    if (strcmp (name, "IWMMXT") == 0)
 	      return bfd_mach_arm_iWMMXt;
+
+	    if (strcmp (name, "XSCALE") == 0)
+	      {
+		int wmmx;
+
+		BFD_ASSERT (Tag_WMMX_arch < NUM_KNOWN_OBJ_ATTRIBUTES);
+		wmmx = elf_known_obj_attributes (abfd) [OBJ_ATTR_PROC][Tag_WMMX_arch].i;
+		switch (wmmx)
+		  {
+		  case 1: return bfd_mach_arm_iWMMXt;
+		  case 2: return bfd_mach_arm_iWMMXt2;
+		  default: return bfd_mach_arm_XScale;
+		  }
+	      }
 	  }
 
 	return bfd_mach_arm_5TE;

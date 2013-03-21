@@ -1,3 +1,9 @@
+2013-03-21  Nick Clifton  <nickc@redhat.com>
+
+	PR sim/15286
+	* elf32-arm.c (bfd_arm_get_mach_from_attributes): Identify XScale,
+	iWMMXt and iWMMXt2 processors from attributes.
+
 2013-03-20  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_make_dynamic_reloc_section): Override
