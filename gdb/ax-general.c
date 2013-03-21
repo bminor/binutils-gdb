@@ -58,6 +58,9 @@ new_agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope)
   x->reg_mask = xmalloc (x->reg_mask_len * sizeof (x->reg_mask[0]));
   memset (x->reg_mask, 0, x->reg_mask_len * sizeof (x->reg_mask[0]));
 
+  x->tracing = 0;
+  x->trace_string = 0;
+
   return x;
 }
 

@@ -342,7 +342,7 @@ struct cleanup *make_cleanup_restore_traceframe_number (void);
 
 void free_actions (struct breakpoint *);
 
-extern const char *decode_agent_options (const char *exp);
+extern const char *decode_agent_options (const char *exp, int *trace_string);
 
 extern void encode_actions (struct breakpoint *t, struct bp_location *tloc,
 			    char ***tdp_actions, char ***stepping_actions);

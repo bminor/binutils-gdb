@@ -1,3 +1,28 @@
+2013-03-11  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.h (decode_agent_options): Add 'trace_string'
+	argument.
+	* tracepoint.c (decode_agent_options): Add 'trace_string'
+	argument.
+	(validate_actionline): Update.
+	(collect_symbol): Add 'trace_string' argument.
+	(struct add_local_symbols_data) <trace_string>: New field.
+	(do_collect_symbol): Update.
+	(add_local_symbols): Add 'trace_string' argument.
+	(encode_actions_1): Update.
+	(trace_dump_actions): Update.
+	* dwarf2loc.c (access_memory): Update.
+	* ax.h (struct agent_expr) <tracing, trace_string>: New fields.
+	* ax-general.c (new_agent_expr): Update.
+	* ax-gdb.h (gen_trace_for_expr, gen_trace_for_var)
+	(gen_trace_for_return_address): Add argument.
+	(trace_kludge, trace_string_kludge): Remove.
+	* ax-gdb.c (trace_kludge, trace_string_kludge): Remove.
+	(gen_traced_pop, gen_fetch, gen_bitfield_ref, gen_expr): Update.
+	(gen_trace_for_var): Add 'trace_string' argument.
+	(gen_trace_for_expr, gen_trace_for_return_address): Likewise.
+	(gen_printf, agent_eval_command_one): Update.
+
 2013-03-21  Tom Tromey  <tromey@redhat.com>
 
 	PR exp/15109:

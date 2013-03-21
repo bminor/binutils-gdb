@@ -2568,7 +2568,7 @@ access_memory (struct gdbarch *arch, struct agent_expr *expr, ULONGEST nbits)
 
   gdb_assert (nbytes > 0 && nbytes <= sizeof (LONGEST));
 
-  if (trace_kludge)
+  if (expr->tracing)
     ax_trace_quick (expr, nbytes);
 
   if (nbits <= 8)
