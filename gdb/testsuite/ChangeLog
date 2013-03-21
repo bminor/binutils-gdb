@@ -1,3 +1,8 @@
+2013-03-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/cpexprs.exp: Add test for FILENAME:: case.
+	* gdb.cp/misc.exp: Add test for FILENAME:: case.
+
 2013-03-20  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15289

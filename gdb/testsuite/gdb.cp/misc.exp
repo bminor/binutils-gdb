@@ -107,3 +107,6 @@ gdb_test "print (bool)17.93" "\\$\[0-9\]* = true" "(bool)17.93"
 gdb_test "print (bool)0.0" "\\$\[0-9\]* = false" "(bool)0.0"
 gdb_test "print (int)true" "\\$\[0-9\]* = 1" "(int)true"
 gdb_test "print (int)false" "\\$\[0-9\]* = 0" "(int)false"
+
+gdb_test "print 'misc.cc'::v_bool" " = true" \
+    "expression using block qualifier"

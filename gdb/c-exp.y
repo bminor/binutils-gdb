@@ -2917,58 +2917,91 @@ static int
 yylex (void)
 {
   token_and_value current;
-  int first_was_coloncolon, last_was_coloncolon, first_iter;
+  int first_was_coloncolon, last_was_coloncolon;
   struct type *context_type = NULL;
+  int last_to_examine, next_to_examine, checkpoint;
+  const struct block *search_block;
 
   if (popping && !VEC_empty (token_and_value, token_fifo))
-    {
-      token_and_value tv = *VEC_index (token_and_value, token_fifo, 0);
-      VEC_ordered_remove (token_and_value, token_fifo, 0);
-      yylval = tv.value;
-      return tv.token;
-    }
+    goto do_pop;
   popping = 0;
 
+  /* Read the first token and decide what to do.  Most of the
+     subsequent code is C++-only; but also depends on seeing a "::" or
+     name-like token.  */
   current.token = lex_one_token ();
   if (current.token == NAME)
     current.token = classify_name (expression_context_block);
   if (parse_language->la_language != language_cplus
-      || (current.token != TYPENAME && current.token != COLONCOLON))
+      || (current.token != TYPENAME && current.token != COLONCOLON
+	  && current.token != FILENAME))
     return current.token;
+
+  /* Read any sequence of alternating "::" and name-like tokens into
+     the token FIFO.  */
+  current.value = yylval;
+  VEC_safe_push (token_and_value, token_fifo, &current);
+  last_was_coloncolon = current.token == COLONCOLON;
+  while (1)
+    {
+      current.token = lex_one_token ();
+      current.value = yylval;
+      VEC_safe_push (token_and_value, token_fifo, &current);
+
+      if ((last_was_coloncolon && current.token != NAME)
+	  || (!last_was_coloncolon && current.token != COLONCOLON))
+	break;
+      last_was_coloncolon = !last_was_coloncolon;
+    }
+  popping = 1;
+
+  /* We always read one extra token, so compute the number of tokens
+     to examine accordingly.  */
+  last_to_examine = VEC_length (token_and_value, token_fifo) - 2;
+  next_to_examine = 0;
+
+  current = *VEC_index (token_and_value, token_fifo, next_to_examine);
+  ++next_to_examine;
+
+  obstack_free (&name_obstack, obstack_base (&name_obstack));
+  checkpoint = 0;
+  if (current.token == FILENAME)
+    search_block = current.value.bval;
+  else if (current.token == COLONCOLON)
+    search_block = NULL;
+  else
+    {
+      gdb_assert (current.token == TYPENAME);
+      search_block = expression_context_block;
+      obstack_grow (&name_obstack, current.value.sval.ptr,
+		    current.value.sval.length);
+      context_type = current.value.tsym.type;
+      checkpoint = 1;
+    }
 
   first_was_coloncolon = current.token == COLONCOLON;
   last_was_coloncolon = first_was_coloncolon;
-  obstack_free (&name_obstack, obstack_base (&name_obstack));
-  if (!last_was_coloncolon)
-    {
-      obstack_grow (&name_obstack, yylval.sval.ptr, yylval.sval.length);
-      context_type = yylval.tsym.type;
-    }
-  current.value = yylval;
-  first_iter = 1;
-  while (1)
-    {
-      token_and_value next;
 
-      next.token = lex_one_token ();
-      next.value = yylval;
+  while (next_to_examine <= last_to_examine)
+    {
+      token_and_value *next;
 
-      if (next.token == NAME && last_was_coloncolon)
+      next = VEC_index (token_and_value, token_fifo, next_to_examine);
+      ++next_to_examine;
+
+      if (next->token == NAME && last_was_coloncolon)
 	{
 	  int classification;
 
-	  classification = classify_inner_name (first_was_coloncolon
-						? NULL
-						: expression_context_block,
-						context_type);
+	  yylval = next->value;
+	  classification = classify_inner_name (search_block, context_type);
 	  /* We keep going until we either run out of names, or until
 	     we have a qualified name which is not a type.  */
 	  if (classification != TYPENAME && classification != NAME)
-	    {
-	      /* Push the final component and leave the loop.  */
-	      VEC_safe_push (token_and_value, token_fifo, &next);
-	      break;
-	    }
+	    break;
+
+	  /* Accept up to this token.  */
+	  checkpoint = next_to_examine;
 
 	  /* Update the partial name we are constructing.  */
 	  if (context_type != NULL)
@@ -2976,8 +3009,8 @@ yylex (void)
 	      /* We don't want to put a leading "::" into the name.  */
 	      obstack_grow_str (&name_obstack, "::");
 	    }
-	  obstack_grow (&name_obstack, next.value.sval.ptr,
-			next.value.sval.length);
+	  obstack_grow (&name_obstack, next->value.sval.ptr,
+			next->value.sval.length);
 
 	  yylval.sval.ptr = obstack_base (&name_obstack);
 	  yylval.sval.length = obstack_object_size (&name_obstack);
@@ -2991,38 +3024,32 @@ yylex (void)
 
 	  context_type = yylval.tsym.type;
 	}
-      else if (next.token == COLONCOLON && !last_was_coloncolon)
+      else if (next->token == COLONCOLON && !last_was_coloncolon)
 	last_was_coloncolon = 1;
       else
 	{
 	  /* We've reached the end of the name.  */
-	  VEC_safe_push (token_and_value, token_fifo, &next);
 	  break;
 	}
-
-      first_iter = 0;
     }
 
-  popping = 1;
-
-  /* If we ended with a "::", insert it too.  */
-  if (last_was_coloncolon)
+  /* If we have a replacement token, install it as the first token in
+     the FIFO, and delete the other constituent tokens.  */
+  if (checkpoint > 0)
     {
-      token_and_value cc;
-      memset (&cc, 0, sizeof (token_and_value));
-      if (first_was_coloncolon && first_iter)
-	{
-	  yylval = cc.value;
-	  return COLONCOLON;
-	}
-      cc.token = COLONCOLON;
-      VEC_safe_insert (token_and_value, token_fifo, 0, &cc);
+      current.value.sval.ptr = obstack_copy0 (&expansion_obstack,
+					      current.value.sval.ptr,
+					      current.value.sval.length);
+
+      VEC_replace (token_and_value, token_fifo, 0, &current);
+      if (checkpoint > 1)
+	VEC_block_remove (token_and_value, token_fifo, 1, checkpoint - 1);
     }
 
+ do_pop:
+  current = *VEC_index (token_and_value, token_fifo, 0);
+  VEC_ordered_remove (token_and_value, token_fifo, 0);
   yylval = current.value;
-  yylval.sval.ptr = obstack_copy0 (&expansion_obstack,
-				   yylval.sval.ptr,
-				   yylval.sval.length);
   return current.token;
 }
 

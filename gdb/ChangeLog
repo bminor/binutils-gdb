@@ -1,5 +1,11 @@
 2013-03-21  Tom Tromey  <tromey@redhat.com>
 
+	PR exp/15109:
+	* c-exp.y (yylex): Rewrite to push all tokens onto the FIFO.
+	Handle FILENAME token.
+
+2013-03-21  Tom Tromey  <tromey@redhat.com>
+
 	* c-exp.y (YYPRINT): Define.
 	(c_print_token): New function.
 
