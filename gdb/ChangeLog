@@ -1,3 +1,9 @@
+2013-03-21  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c: Include "gdb_stat.h".
+	[USE_WIN32API]: New macro 'mkdir'.
+	(ctf_start): Use permission bits macros if they are defined.
+
 2013-03-20  Keith Seitz  <keiths@redhat.com>
 
 	* breakpoint.h (struct breakpoint): Add comment to
