@@ -1,5 +1,10 @@
 2013-03-21  Tom Tromey  <tromey@redhat.com>
 
+	* c-exp.y (YYPRINT): Define.
+	(c_print_token): New function.
+
+2013-03-21  Tom Tromey  <tromey@redhat.com>
+
 	* c-exp.y (%union) <sym, ivar, ivec>: Remove.
 
 2013-03-21  Yao Qi  <yao@codesourcery.com>
