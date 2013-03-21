@@ -1476,7 +1476,7 @@ Dwp_output_file::add_contribution(elfcpp::DW_SECT section_id,
 				  int align)
 {
   const char* section_name = get_dwarf_section_name(section_id);
-  gold_assert(section_id < this->section_id_map_.size());
+  gold_assert(static_cast<size_t>(section_id) < this->section_id_map_.size());
   unsigned int shndx = this->section_id_map_[section_id];
 
   // Create the section if necessary.

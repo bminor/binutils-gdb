@@ -1,3 +1,10 @@
+2013-03-21  Alan Modra  <amodra@gmail.com>
+
+	* dwp.cc (Dwp_output_file::add_contribution): Avoid signed/unsigned
+	comparison warning.
+	* layout.cc (Layout::create_dynamic_symtab): Avoid "may be used
+	uninitialized" warning.
+
 2013-03-20  Alan Modra  <amodra@gmail.com>
 
 	* symtab.h (Symbol::clear_version): New function.

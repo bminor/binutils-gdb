@@ -4158,7 +4158,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 						       false,
 						       ORDER_DYNAMIC_LINKER,
 						       false);
-
+  *pdynstr = dynstr;
   if (dynstr != NULL)
     {
       Output_section_data* strdata = new Output_data_strtab(&this->dynpool_);
@@ -4174,8 +4174,6 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 	  odyn->add_section_address(elfcpp::DT_STRTAB, dynstr);
 	  odyn->add_section_size(elfcpp::DT_STRSZ, dynstr);
 	}
-
-      *pdynstr = dynstr;
     }
 
   // Create the hash tables.
