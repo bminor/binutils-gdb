@@ -1,3 +1,14 @@
+2013-03-21  Will Newton  <will.newton@linaro.org>
+
+	* gas/arm/thumb2_relax.d: Strip out invalid pc-relative strs.
+	* gas/arm/thumb2_relax.s: Likewise.
+	* gas/arm/thumb32.d: Likewise.
+	* gas/arm/thumb32.l: Likewise.
+	* gas/arm/thumb32.s: Likewise.
+	* gas/arm/thumb2_str-bad.d: New file.
+	* gas/arm/thumb2_str-bad.l: Likewise.
+	* gas/arm/thumb2_str-bad.s: Likewise.
+
 2013-03-20  Alexis Deruelle  <alexis.deruelle@gmail.com>
 
 	PR gas/15082

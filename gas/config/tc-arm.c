@@ -9471,8 +9471,8 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
       constraint (is_pc && inst.operands[i].writeback, BAD_PC_WRITEBACK);
       constraint (is_t && inst.operands[i].writeback,
 		  _("cannot use writeback with this instruction"));
-      constraint (is_pc && ((inst.instruction & THUMB2_LOAD_BIT) == 0)
-		  && !inst.reloc.pc_rel, BAD_PC_ADDRESSING);
+      constraint (is_pc && ((inst.instruction & THUMB2_LOAD_BIT) == 0),
+		  BAD_PC_ADDRESSING);
 
       if (is_d)
 	{
