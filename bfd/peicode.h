@@ -123,6 +123,9 @@ typedef struct
 }
 pe_ILF_vars;
 #endif /* COFF_IMAGE_WITH_PE */
+
+const bfd_target *coff_real_object_p
+  (bfd *, unsigned, struct internal_filehdr *, struct internal_aouthdr *);
 
 #ifndef NO_COFF_RELOCS
 static void
@@ -158,6 +161,11 @@ coff_swap_reloc_out (bfd * abfd, void * src, void * dst)
   return RELSZ;
 }
 #endif /* not NO_COFF_RELOCS */
+
+#ifdef COFF_IMAGE_WITH_PE
+#undef FILHDR
+#define FILHDR struct external_PEI_IMAGE_hdr
+#endif
 
 static void
 coff_swap_filehdr_in (bfd * abfd, void * src, void * dst)
@@ -1248,6 +1256,9 @@ pe_bfd_object_p (bfd * abfd)
   bfd_byte buffer[4];
   struct external_PEI_DOS_hdr dos_hdr;
   struct external_PEI_IMAGE_hdr image_hdr;
+  struct internal_filehdr internal_f;
+  struct internal_aouthdr internal_a;
+  file_ptr opt_hdr_size;
   file_ptr offset;
 
   /* Detect if this a Microsoft Import Library Format element.  */
@@ -1303,17 +1314,38 @@ pe_bfd_object_p (bfd * abfd)
       return NULL;
     }
 
-  /* Here is the hack.  coff_object_p wants to read filhsz bytes to
-     pick up the COFF header for PE, see "struct external_PEI_filehdr"
-     in include/coff/pe.h.  We adjust so that that will work. */
-  if (bfd_seek (abfd, (file_ptr) (offset - sizeof (dos_hdr)), SEEK_SET) != 0)
+  /* Swap file header, so that we get the location for calling
+     real_object_p.  */
+  bfd_coff_swap_filehdr_in (abfd, (PTR)&image_hdr, &internal_f);
+
+  if (! bfd_coff_bad_format_hook (abfd, &internal_f)
+      || internal_f.f_opthdr > bfd_coff_aoutsz (abfd))
     {
-      if (bfd_get_error () != bfd_error_system_call)
-	bfd_set_error (bfd_error_wrong_format);
+      bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 
-  return coff_object_p (abfd);
+  /* Read the optional header, which has variable size.  */
+  opt_hdr_size = internal_f.f_opthdr;
+
+  if (opt_hdr_size != 0)
+    {
+      PTR opthdr;
+
+      opthdr = bfd_alloc (abfd, opt_hdr_size);
+      if (opthdr == NULL)
+	return NULL;
+      if (bfd_bread (opthdr, opt_hdr_size, abfd)
+	  != (bfd_size_type) opt_hdr_size)
+	return NULL;
+
+      bfd_coff_swap_aouthdr_in (abfd, opthdr, (PTR) & internal_a);
+    }
+
+  return coff_real_object_p (abfd, internal_f.f_nscns, &internal_f,
+                            (opt_hdr_size != 0
+                             ? &internal_a
+                             : (struct internal_aouthdr *) NULL));
 }
 
 #define coff_object_p pe_bfd_object_p

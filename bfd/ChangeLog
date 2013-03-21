@@ -1,3 +1,13 @@
+2013-03-21  Kai Tietz  <ktietz@redhat.com>
+
+	* coffgen.c (coff_real_object_p): Make global.
+	* peicode.h (coff_real_object_p): Add prototype.
+	(FILHDR): Defined for COFF_IMAGE_WITH_PE as
+	external_PEI_IMAGE_hdr structure.
+	(coff_swap_filehdr_in): Handle variable header-size.
+	* peXXigen.c (_bfd_XXi_swap_aouthdr_in): Just handle amount
+	of directory-entiries as specified in pe-header.
+
 2013-03-21  Nick Clifton  <nickc@redhat.com>
 
 	PR sim/15286
