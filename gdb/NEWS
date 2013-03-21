@@ -3,6 +3,13 @@
 
 *** Changes since GDB 7.6
 
+* New commands:
+maint set|show per-command
+maint set|show per-command space
+maint set|show per-command time
+maint set|show per-command symtab
+  Enable display of per-command gdb resource usage.
+
 * The command 'tsave' can now support new option '-ctf' to save trace
   buffer in Common Trace Format.
 

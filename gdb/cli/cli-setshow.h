@@ -19,14 +19,14 @@
 
 struct cmd_list_element;
 
-/* Exported to cli/cli-cmds.c and gdb/top.c */
+/* Parse ARG, an option to a boolean variable.
+   Returns 1 for true, 0 for false, and -1 if invalid.  */
+extern int parse_cli_boolean_value (char *arg);
 
 extern void do_set_command (char *arg, int from_tty,
 			    struct cmd_list_element *c);
 extern void do_show_command (char *arg, int from_tty,
 			     struct cmd_list_element *c);
-
-/* Exported to cli/cli-cmds.c and gdb/top.c, language.c and valprint.c */
 
 extern void cmd_show_list (struct cmd_list_element *list, int from_tty,
 			   char *prefix);

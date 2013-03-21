@@ -42,6 +42,7 @@
 #include "python/python.h"
 #include "objfiles.h"
 #include "auto-load.h"
+#include "maint.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -538,8 +539,8 @@ captured_main (void *data)
 	    break;
 	  case OPT_STATISTICS:
 	    /* Enable the display of both time and space usage.  */
-	    set_display_time (1);
-	    set_display_space (1);
+	    set_per_command_time (1);
+	    set_per_command_space (1);
 	    break;
 	  case OPT_TUI:
 	    /* --tui is equivalent to -i=tui.  */

@@ -1,3 +1,41 @@
+2013-03-21  Doug Evans  <dje@google.com>
+
+	New commands "mt set per-command {space,time,symtab} {on,off}".
+	* NEWS: Add entry.
+	* event-top.c: #include "maint.h".
+	* main.c: #include "maint.h".
+	* maint.c: #include <sys/time.h>, <time.h>, block.h, top.h,
+	timeval-utils.h, maint.h, cli/cli-setshow.h.
+	(per_command_time, per_command_space): New static globals.
+	(per_command_symtab): New static global.
+	(per_command_setlist, per_command_showlist): New static globals.
+	(struct cmd_stats): Move here from utils.c.
+	(set_per_command_time): Renamed from set_display_time in utils.c
+	and moved here.  All callers updated.
+	(set_per_command_space): Renamed from set_display_space in utils.c
+	and moved here.  All callers updated.
+	(count_symtabs_and_blocks): New function.
+	(report_command_stats): Moved here from utils.c.  Add support for
+	printing symtab stats.  Only print data if enabled before command
+	executed.
+	(make_command_stats_cleanup): Ditto.
+	(sert_per_command_cmd, show_per_command_cmd): New functions.
+	(_initialize_maint_cmds): Add new commands
+	mt set per-command {space,time,symtab} {on,off}.
+	* maint.h: New file.
+	* top.c: #include "maint.h".
+	* utils.c (reset_prompt_for_continue_wait_time): New function.
+	(get_prompt_for_continue_wait_time): New function.
+	* utils.h (reset_prompt_for_continue_wait_time): Declare
+	(get_prompt_for_continue_wait_time): Declare.
+	(make_command_stats_cleanup): Moved to maint.h.
+	(set_display_time, set_display_space): Moved to maint.h and renamed
+	to set_per_command_time, set_per_command_space.
+	* cli/cli-setshow.c (parse_cli_boolean_value): Renamed from
+	parse_binary_operation and made non-static.  Don't call error,
+	just return an error marker.  All callers updated.
+	* cli/cli-setshow.h (parse_cli_boolean_value): Declare.
+
 2013-03-21  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (alloc_section_addr_info): Update header.  Don't set

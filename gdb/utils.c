@@ -544,117 +544,6 @@ free_current_contents (void *ptr)
       *location = NULL;
     }
 }
-
-/* If nonzero, display time usage both at startup and for each command.  */
-
-static int display_time;
-
-/* If nonzero, display space usage both at startup and for each command.  */
-
-static int display_space;
-
-/* Records a run time and space usage to be used as a base for
-   reporting elapsed time or change in space.  In addition,
-   the msg_type field indicates whether the saved time is from the
-   beginning of GDB execution (0) or the beginning of an individual 
-   command execution (1).  */
-struct cmd_stats 
-{
-  int msg_type;
-  long start_cpu_time;
-  struct timeval start_wall_time;
-  long start_space;
-};
-
-/* Set whether to display time statistics to NEW_VALUE (non-zero 
-   means true).  */
-void
-set_display_time (int new_value)
-{
-  display_time = new_value;
-}
-
-/* Set whether to display space statistics to NEW_VALUE (non-zero
-   means true).  */
-void
-set_display_space (int new_value)
-{
-  display_space = new_value;
-}
-
-/* As indicated by display_time and display_space, report GDB's elapsed time
-   and space usage from the base time and space provided in ARG, which
-   must be a pointer to a struct cmd_stat.  This function is intended
-   to be called as a cleanup.  */
-static void
-report_command_stats (void *arg)
-{
-  struct cmd_stats *start_stats = (struct cmd_stats *) arg;
-  int msg_type = start_stats->msg_type;
-
-  if (display_time)
-    {
-      long cmd_time = get_run_time () - start_stats->start_cpu_time;
-      struct timeval now_wall_time, delta_wall_time;
-
-      gettimeofday (&now_wall_time, NULL);
-      timeval_sub (&delta_wall_time,
-		   &now_wall_time, &start_stats->start_wall_time);
-
-      /* Subtract time spend in prompt_for_continue from walltime.  */
-      timeval_sub (&delta_wall_time,
-                   &delta_wall_time, &prompt_for_continue_wait_time);
-
-      printf_unfiltered (msg_type == 0
-			 ? _("Startup time: %ld.%06ld (cpu), %ld.%06ld (wall)\n")
-			 : _("Command execution time: %ld.%06ld (cpu), %ld.%06ld (wall)\n"),
-			 cmd_time / 1000000, cmd_time % 1000000,
-			 (long) delta_wall_time.tv_sec,
-			 (long) delta_wall_time.tv_usec);
-    }
-
-  if (display_space)
-    {
-#ifdef HAVE_SBRK
-      char *lim = (char *) sbrk (0);
-
-      long space_now = lim - lim_at_start;
-      long space_diff = space_now - start_stats->start_space;
-
-      printf_unfiltered (msg_type == 0
-			 ? _("Space used: %ld (%s%ld during startup)\n")
-			 : _("Space used: %ld (%s%ld for this command)\n"),
-			 space_now,
-			 (space_diff >= 0 ? "+" : ""),
-			 space_diff);
-#endif
-    }
-}
-
-/* Create a cleanup that reports time and space used since its
-   creation.  Precise messages depend on MSG_TYPE:
-      0:  Initial time/space
-      1:  Individual command time/space.  */
-struct cleanup *
-make_command_stats_cleanup (int msg_type)
-{
-  static const struct timeval zero_timeval = { 0 };
-  struct cmd_stats *new_stat = XMALLOC (struct cmd_stats);
-  
-#ifdef HAVE_SBRK
-  char *lim = (char *) sbrk (0);
-  new_stat->start_space = lim - lim_at_start;
-#endif
-
-  new_stat->msg_type = msg_type;
-  new_stat->start_cpu_time = get_run_time ();
-  gettimeofday (&new_stat->start_wall_time, NULL);
-
-  /* Initalize timer to keep track of how long we waited for the user.  */
-  prompt_for_continue_wait_time = zero_timeval;
-
-  return make_cleanup_dtor (report_command_stats, new_stat, xfree);
-}
 
 
 
@@ -1922,6 +1811,24 @@ prompt_for_continue (void)
   reinitialize_more_filter ();
 
   dont_repeat ();		/* Forget prev cmd -- CR won't repeat it.  */
+}
+
+/* Initalize timer to keep track of how long we waited for the user.  */
+
+void
+reset_prompt_for_continue_wait_time (void)
+{
+  static const struct timeval zero_timeval = { 0 };
+
+  prompt_for_continue_wait_time = zero_timeval;
+}
+
+/* Fetch the cumulative time spent in prompt_for_continue.  */
+
+struct timeval
+get_prompt_for_continue_wait_time (void)
+{
+  return prompt_for_continue_wait_time;
 }
 
 /* Reinitialize filter; ie. tell it to reset to original values.  */

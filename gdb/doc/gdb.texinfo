@@ -35721,30 +35721,64 @@ Control whether to show all non zero areas within a 1k block starting
 at thread local base, when using the @samp{info w32 thread-information-block}
 command.
 
-@kindex maint space
-@cindex memory used by commands
-@item maint space
-Control whether to display memory usage for each command.  If set to a
-nonzero value, @value{GDBN} will display how much memory each command
-took, following the command's own output.  This can also be requested
-by invoking @value{GDBN} with the @option{--statistics} command-line
-switch (@pxref{Mode Options}).
+@kindex maint set per-command
+@kindex maint show per-command
+@item maint set per-command
+@itemx maint show per-command
+@cindex resources used by commands
 
-@kindex maint time
-@cindex time of command execution
-@item maint time
-Control whether to display the execution time of @value{GDBN} for each command.
-If set to a nonzero value, @value{GDBN} will display how much time it
+@value{GDBN} can display the resources used by each command.
+This is useful in debugging performance problems.
+
+@table @code
+@item maint set per-command space [on|off]
+@itemx maint show per-command space
+Enable or disable the printing of the memory used by GDB for each command.
+If enabled, @value{GDBN} will display how much memory each command
+took, following the command's own output.
+This can also be requested by invoking @value{GDBN} with the
+@option{--statistics} command-line switch (@pxref{Mode Options}).
+
+@item maint set per-command time [on|off]
+@itemx maint show per-command time
+Enable or disable the printing of the execution time of @value{GDBN}
+for each command.
+If enabled, @value{GDBN} will display how much time it
 took to execute each command, following the command's own output.
 Both CPU time and wallclock time are printed.
 Printing both is useful when trying to determine whether the cost is
-CPU or, e.g., disk/network, latency.
+CPU or, e.g., disk/network latency.
 Note that the CPU time printed is for @value{GDBN} only, it does not include
 the execution time of the inferior because there's no mechanism currently
 to compute how much time was spent by @value{GDBN} and how much time was
 spent by the program been debugged.
 This can also be requested by invoking @value{GDBN} with the
 @option{--statistics} command-line switch (@pxref{Mode Options}).
+
+@item maint set per-command symtab [on|off]
+@itemx maint show per-command symtab
+Enable or disable the printing of basic symbol table statistics
+for each command.
+If enabled, @value{GDBN} will display the following information:
+
+@table @bullet
+@item number of symbol tables
+@itemx number of primary symbol tables
+@itemx number of blocks in the blockvector
+@end table
+@end table
+
+@kindex maint space
+@cindex memory used by commands
+@item maint space @var{value}
+An alias for @code{maint set per-command space}.
+A non-zero value enables it, zero disables it.
+
+@kindex maint time
+@cindex time of command execution
+@item maint time @var{value}
+An alias for @code{maint set per-command time}.
+A non-zero value enables it, zero disables it.
 
 @kindex maint translate-address
 @item maint translate-address @r{[}@var{section}@r{]} @var{addr}

@@ -1,3 +1,8 @@
+2013-03-21  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Maintenance Commands): Add docs for
+	"mt set per-command {space,time,symtab} {on,off}".
+
 2013-03-14  Hui Zhu  <hui@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 

@@ -29,10 +29,6 @@
 #include "cli/cli-cmds.h"
 #include "cli/cli-setshow.h"
 
-/* Prototypes for local functions.  */
-
-static int parse_binary_operation (char *);
-
 /* Return true if the change of command parameter should be notified.  */
 
 static int
@@ -76,8 +72,10 @@ parse_auto_binary_operation (const char *arg)
   return AUTO_BOOLEAN_AUTO; /* Pacify GCC.  */
 }
 
-static int
-parse_binary_operation (char *arg)
+/* See cli-setshow.h.  */
+
+int
+parse_cli_boolean_value (char *arg)
 {
   int length;
 
@@ -100,10 +98,7 @@ parse_binary_operation (char *arg)
 	   || strncmp (arg, "disable", length) == 0)
     return 0;
   else
-    {
-      error (_("\"on\" or \"off\" expected."));
-      return 0;
-    }
+    return -1;
 }
 
 void
@@ -248,8 +243,10 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
       break;
     case var_boolean:
       {
-	int val = parse_binary_operation (arg);
+	int val = parse_cli_boolean_value (arg);
 
+	if (val < 0)
+	  error (_("\"on\" or \"off\" expected."));
 	if (val != *(int *) c->var)
 	  {
 	    *(int *) c->var = val;

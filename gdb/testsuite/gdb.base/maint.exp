@@ -21,10 +21,8 @@
 
 
 #maintenance check-symtabs -- Check consistency of psymtabs and symtabs
-#maintenance space -- Set the display of space usage
 #maintenance set -- Set GDB internal variables used by the GDB maintainer
 #maintenance show -- Show GDB internal variables used by the GDB maintainer
-#maintenance time -- Set the display of time usage
 #maintenance demangle -- Demangle a C++ mangled name
 #maintenance dump-me -- Get fatal error; make debugger dump its core
 #maintenance print -- Maintenance command for printing GDB internal state
@@ -126,22 +124,10 @@ gdb_expect  {
     timeout         { fail "(timeout) maint check-symtabs" }
 }
 
-gdb_test "maint space" \
-    "\"maintenance space\" takes a numeric argument\\."
+gdb_test_no_output "maint set per-command on"
 
-gdb_test "maint space 1" \
-    "Space used: $decimal \\(\\+$decimal for this command\\)"
-
-gdb_test "maint time" \
-    "\"maintenance time\" takes a numeric argument\\..*Space used: $decimal \\(\\+$decimal for this command\\)" 
-
-gdb_test "maint time 1" \
-    "Command execution time: $decimal.*Space used: $decimal \\(\\+$decimal for this command\\)"
-
-gdb_test "maint time 0" \
-    "Space used: $decimal \\(\\+$decimal for this command\\)"
-
-gdb_test_no_output "maint space 0"
+gdb_test "maint set per-command off" \
+    "Command execution time: \[0-9.\]+ \\(cpu\\), \[0-9.\]+ \\(wall\\)\[\r\n\]+Space used: $decimal \\(\\+$decimal for this command\\)\[\r\n\]+#symtabs: $decimal \\(\\+$decimal\\), #primary symtabs: $decimal \\(\\+$decimal\\), #blocks: $decimal \\(\\+$decimal\\)"
 
 gdb_test "maint demangle" \
     "\"maintenance demangle\" takes an argument to demangle\\."

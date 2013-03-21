@@ -53,6 +53,11 @@ extern char *safe_strerror (int);
    bfd_check_format_matches, and will be freed.  */
 
 extern const char *gdb_bfd_errmsg (bfd_error_type error_tag, char **matching);
+
+/* Reset the prompt_for_continue clock.  */
+void reset_prompt_for_continue_wait_time (void);
+/* Return the time spent in prompt_for_continue.  */
+struct timeval get_prompt_for_continue_wait_time (void);
 
 /* Parsing utilites.  */
 
@@ -110,8 +115,6 @@ extern struct cleanup *make_cleanup_htab_delete (htab_t htab);
 
 extern void free_current_contents (void *);
 
-extern struct cleanup *make_command_stats_cleanup (int);
-
 extern void init_page_info (void);
 
 extern struct cleanup *make_cleanup_restore_page_info (void);
@@ -135,10 +138,6 @@ char *ldirname (const char *filename);
 /* GDB output, ui_file utilities.  */
 
 struct ui_file;
-
-extern void set_display_time (int);
-
-extern void set_display_space (int);
 
 extern int query (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 extern int nquery (const char *, ...) ATTRIBUTE_PRINTF (1, 2);

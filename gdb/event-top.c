@@ -36,6 +36,7 @@
 #include "continuations.h"
 #include "gdbcmd.h"		/* for dont_repeat() */
 #include "annotate.h"
+#include "maint.h"
 
 /* readline include files.  */
 #include "readline/readline.h"

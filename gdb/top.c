@@ -47,6 +47,7 @@
 #include "python/python.h"
 #include "interps.h"
 #include "observer.h"
+#include "maint.h"
 
 /* readline include files.  */
 #include "readline/readline.h"

@@ -1,3 +1,7 @@
+2013-03-21  Doug Evans  <dje@google.com>
+
+	* gdb.base/maint.exp: Update tests for per-command stats.
+
 2013-03-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/cpexprs.exp: Add test for FILENAME:: case.
