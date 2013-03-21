@@ -1,3 +1,8 @@
+2013-03-21  Kai Tietz  <ktietz@redhat.com>
+
+	* pe-dll.c (process_def_file_and_drectve): Don't handle VC
+	generated C++-symbols as stdcall/fastcall.
+
 2013-03-18  Alan Modra  <amodra@gmail.com>
 
 	* ld.texinfo (--as-needed): Update.
