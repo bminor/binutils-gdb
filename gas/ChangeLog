@@ -1,3 +1,10 @@
+2013-03-21  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR gas/15282
+	* tc-avr.c (mcu_has_3_byte_pc): New function.
+	(tc_cfi_frame_initial_instructions): Call it to find return
+	address size.
+
 2013-03-20  Alexis Deruelle  <alexis.deruelle@gmail.com>
 
 	PR gas/15095

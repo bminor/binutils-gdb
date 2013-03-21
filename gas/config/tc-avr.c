@@ -1,7 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2012, 2013  Free Software Foundation, Inc.
+   Copyright 1999-2013 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -1587,11 +1586,21 @@ avr_cons_fix_new (fragS *frag,
   pexp_mod_data = &exp_mod_data[0];
 }
 
+static bfd_boolean
+mcu_has_3_byte_pc (void)
+{
+  int mach = avr_mcu->mach; 
+
+  return mach == bfd_mach_avr6 
+    || mach == bfd_mach_avrxmega6 
+    || mach == bfd_mach_avrxmega7;
+}
+
 void
 tc_cfi_frame_initial_instructions (void)
 {
   /* AVR6 pushes 3 bytes for calls.  */
-  int return_size = (avr_mcu->mach == bfd_mach_avr6 ? 3 : 2);
+  int return_size = (mcu_has_3_byte_pc () ? 3 : 2);
 
   /* The CFA is the caller's stack location before the call insn.  */
   /* Note that the stack pointer is dwarf register number 32.  */
