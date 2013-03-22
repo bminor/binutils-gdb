@@ -1,3 +1,9 @@
+2013-03-22  Pedro Alves  <palves@redhat.com>
+
+	* hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Define INSN macro,
+	use it to rewrite the trampoline buffers with type gdb_byte[], and
+	undefine the macro.  Remove char* cast.
+
 2013-03-21  Doug Evans  <dje@google.com>
 
 	New commands "mt set per-command {space,time,symtab} {on,off}".

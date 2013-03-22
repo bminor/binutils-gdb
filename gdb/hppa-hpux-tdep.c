@@ -1201,17 +1201,18 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
   if (IS_32BIT_TARGET (gdbarch))
     {
-      static unsigned int hppa32_tramp[] = {
-        0x0fdf1291, /* stw r31,-8(,sp) */
-        0x02c010a1, /* ldsid (,r22),r1 */
-        0x00011820, /* mtsp r1,sr0 */
-        0xe6c00000, /* be,l 0(sr0,r22),%sr0,%r31 */
-        0x081f0242, /* copy r31,rp */
-        0x0fd11082, /* ldw -8(,sp),rp */
-        0x004010a1, /* ldsid (,rp),r1 */
-        0x00011820, /* mtsp r1,sr0 */
-        0xe0400000, /* be 0(sr0,rp) */
-        0x08000240  /* nop */
+#define INSN(I1, I2, I3, I4) 0x ## I1, 0x ## I2, 0x ## I3, 0x ## I4
+     static const gdb_byte hppa32_tramp[] = {
+	INSN(0f,df,12,91), /* stw r31,-8(,sp) */
+	INSN(02,c0,10,a1), /* ldsid (,r22),r1 */
+	INSN(00,01,18,20), /* mtsp r1,sr0 */
+	INSN(e6,c0,00,00), /* be,l 0(sr0,r22),%sr0,%r31 */
+	INSN(08,1f,02,42), /* copy r31,rp */
+	INSN(0f,d1,10,82), /* ldw -8(,sp),rp */
+	INSN(00,40,10,a1), /* ldsid (,rp),r1 */
+	INSN(00,01,18,20), /* mtsp r1,sr0 */
+	INSN(e0,40,00,00), /* be 0(sr0,rp) */
+	INSN(08,00,02,40)  /* nop */
       };
 
       /* for hppa32, we must call the function through a stub so that on
@@ -1222,7 +1223,7 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 	       "(no import stub).\n"));
       regcache_cooked_write_unsigned (regcache, 22, stubaddr);
 
-      write_memory (sp, (char *)&hppa32_tramp, sizeof (hppa32_tramp));
+      write_memory (sp, hppa32_tramp, sizeof (hppa32_tramp));
 
       *bp_addr = hppa_hpux_find_dummy_bpaddr (pc);
       regcache_cooked_write_unsigned (regcache, 31, *bp_addr);
@@ -1237,18 +1238,19 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
     }
   else
     {
-      static unsigned int hppa64_tramp[] = {
-        0xeac0f000, /* bve,l (r22),%r2 */
-        0x0fdf12d1, /* std r31,-8(,sp) */
-        0x0fd110c2, /* ldd -8(,sp),rp */
-        0xe840d002, /* bve,n (rp) */
-        0x08000240  /* nop */
+      static const gdb_byte hppa64_tramp[] = {
+	INSN(ea,c0,f0,00), /* bve,l (r22),%r2 */
+	INSN(0f,df,12,d1), /* std r31,-8(,sp) */
+	INSN(0f,d1,10,c2), /* ldd -8(,sp),rp */
+	INSN(e8,40,d0,02), /* bve,n (rp) */
+	INSN(08,00,02,40)  /* nop */
       };
+#undef INSN
 
       /* for hppa64, we don't need to call through a stub; all functions
          return via a bve.  */
       regcache_cooked_write_unsigned (regcache, 22, funcaddr);
-      write_memory (sp, (char *)&hppa64_tramp, sizeof (hppa64_tramp));
+      write_memory (sp, hppa64_tramp, sizeof (hppa64_tramp));
 
       *bp_addr = pc - 4;
       regcache_cooked_write_unsigned (regcache, 31, *bp_addr);
