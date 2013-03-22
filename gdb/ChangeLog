@@ -1,5 +1,12 @@
 2013-03-22  Pedro Alves  <palves@redhat.com>
 
+	* linux-nat.c (linux_child_follow_fork): Don't call
+	linux_enable_event_reporting.
+	(linux_handle_extended_wait): Don't call
+	linux_enable_event_reporting.
+
+2013-03-22  Pedro Alves  <palves@redhat.com>
+
 	* hppa-hpux-tdep.c (hppa_hpux_push_dummy_code): Define INSN macro,
 	use it to rewrite the trampoline buffers with type gdb_byte[], and
 	undefine the macro.  Remove char* cast.

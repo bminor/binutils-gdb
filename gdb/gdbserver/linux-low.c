@@ -468,8 +468,6 @@ handle_extended_wait (struct lwp_info *event_child, int wstat)
 	    warning ("wait returned unexpected status 0x%x", status);
 	}
 
-      linux_enable_event_reporting (new_pid);
-
       ptid = ptid_build (pid_of (event_child), new_pid, 0);
       new_lwp = (struct lwp_info *) add_lwp (ptid);
       add_thread (ptid, new_lwp);

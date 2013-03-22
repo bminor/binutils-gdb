@@ -1,3 +1,8 @@
+2013-03-22  Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (handle_extended_wait): Don't call
+	linux_enable_event_reporting.
+
 2013-03-15  Tony Theodore  <tonyt@logyst.com>
 
 	PR build/9098:

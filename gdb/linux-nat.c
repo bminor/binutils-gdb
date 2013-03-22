@@ -643,9 +643,6 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
     parent_pid = ptid_get_pid (inferior_ptid);
   child_pid = PIDGET (inferior_thread ()->pending_follow.value.related_pid);
 
-  if (!detach_fork)
-    linux_enable_event_reporting (pid_to_ptid (child_pid));
-
   if (has_vforked
       && !non_stop /* Non-stop always resumes both branches.  */
       && (!target_is_async_p () || sync_execution)
@@ -2316,7 +2313,6 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	     this fork.  We're actually doing an infcall in
 	     linux-fork.c.  */
 	  ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
-	  linux_enable_event_reporting (pid_to_ptid (new_pid));
 
 	  /* Report the stop to the core.  */
 	  return 0;
