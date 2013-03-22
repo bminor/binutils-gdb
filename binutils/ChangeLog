@@ -1,3 +1,9 @@
+2013-03-22  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15157
+	* readelf.c (apply_relocations): Catch relocations with negative
+	offsets.
+
 2013-03-15  Nick Clifton  <nickc@redhat.com>
 
 	* addr2line.c (slurp_symtab): If canonicalization reveals that
