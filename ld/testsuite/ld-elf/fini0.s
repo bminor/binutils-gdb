@@ -9,7 +9,7 @@ __start:
 main:
 	.dc.a 0
 
-	.section .fini
+	.section .fini, "a"
 	.p2align 2
 	.global foo
 	.type	foo,%function

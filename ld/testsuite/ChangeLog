@@ -1,3 +1,16 @@
+2013-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/init0.s: Add alloc attribute to .section directive.
+	* ld-elf/fini1.s: Likewise.
+	* ld-elf/fini2.s: Likewise.
+	* ld-elf/fini3.s: Likewise.
+	* ld-elf/finin.s: Likewise.
+	* ld-elf/init0.s: Likewise.
+	* ld-elf/init1.s: Likewise.
+	* ld-elf/init2.s: Likewise.
+	* ld-elf/init3.s: Likewise.
+	* ld-elf/initn.s: Likewise.
+
 2013-02-02  Michael Schewe  <michael.schewe@gmx.net>
 
 	* ld-h8300/h8300.exp: Add new relax-7 test on ELF.
