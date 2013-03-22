@@ -1,5 +1,9 @@
 2013-03-22  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/15201
+	* dwarf.c (display_debug_ranges): Add checks for reading beyond
+	the end of the section.
+
 	PR binutils/15157
 	* readelf.c (apply_relocations): Catch relocations with negative
 	offsets.
