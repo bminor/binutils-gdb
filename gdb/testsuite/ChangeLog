@@ -1,3 +1,9 @@
+2013-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.server/server-kill.c: New file.
+	* gdb.server/server-kill.exp: New file.
+
 2013-03-21  Pedro Alves  <palves@redhat.com>
 
 	* gdb.trace/trace-buffer-size.exp (get default buffer size):
