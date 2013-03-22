@@ -86,6 +86,10 @@ enum errors {
   /* DW_OP_GNU_entry_value resolving failed.  */
   NO_ENTRY_VALUE_ERROR,
 
+  /* Target throwing an error has been closed.  Current command should be
+     aborted as the inferior state is no longer valid.  */
+  TARGET_CLOSE_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };

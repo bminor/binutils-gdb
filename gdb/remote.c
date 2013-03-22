@@ -430,8 +430,6 @@ trace_error (char *buf)
       else
 	error (_("remote.c: error in outgoing packet at field #%ld."),
 	       strtol (buf, NULL, 16));
-    case '2':
-      error (_("trace API error 0x%s."), ++buf);
     default:
       error (_("Target returns error code '%s'."), buf);
     }
@@ -7048,12 +7046,13 @@ readchar (int timeout)
     {
     case SERIAL_EOF:
       remote_unpush_target ();
-      error (_("Remote connection closed"));
+      throw_error (TARGET_CLOSE_ERROR, _("Remote connection closed"));
       /* no return */
     case SERIAL_ERROR:
       remote_unpush_target ();
-      perror_with_name (_("Remote communication error.  "
-			  "Target disconnected."));
+      throw_perror_with_name (TARGET_CLOSE_ERROR,
+			      _("Remote communication error.  "
+				"Target disconnected."));
       /* no return */
     case SERIAL_TIMEOUT:
       break;
@@ -7576,7 +7575,9 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 		{
 		  QUIT;
 		  remote_unpush_target ();
-		  error (_("Watchdog timeout has expired.  Target detached."));
+		  throw_error (TARGET_CLOSE_ERROR,
+			       _("Watchdog timeout has expired.  "
+				 "Target detached."));
 		}
 	      if (remote_debug)
 		fputs_filtered ("Timed out.\n", gdb_stdlog);
@@ -10699,8 +10700,12 @@ remote_get_trace_status (struct trace_status *ts)
     }
   if (ex.reason < 0)
     {
-      exception_fprintf (gdb_stderr, ex, "qTStatus: ");
-      return -1;
+      if (ex.error != TARGET_CLOSE_ERROR)
+	{
+	  exception_fprintf (gdb_stderr, ex, "qTStatus: ");
+	  return -1;
+	}
+      throw_exception (ex);
     }
 
   /* If the remote target doesn't do tracing, flag it.  */

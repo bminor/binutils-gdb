@@ -1,3 +1,19 @@
+2013-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* exceptions.h (enum errors): New entry TARGET_CLOSE_ERROR.
+	* remote.c (trace_error): Remove the special handling of '2'.
+	(readchar) <SERIAL_EOF>
+	(readchar) <SERIAL_ERROR>
+	(getpkt_or_notif_sane_1): Use TARGET_CLOSE_ERROR for them.
+	(remote_get_trace_status): Call throw_exception if EX is
+	TARGET_CLOSE_ERROR.
+	* utils.c (perror_with_name): Rename to ...
+	(throw_perror_with_name): ... here.  New parameter errcode, describe it
+	in the function comment.
+	(perror_with_name): New function wrapper.
+	* utils.h (enum errors): New stub declaration.
+	(throw_perror_with_name): New declaration.
+
 2013-03-22  Pedro Alves  <palves@redhat.com>
 	    Yao Qi  <yao@codesourcery.com>
 	    Mark Kettenis  <kettenis@gnu.org>
