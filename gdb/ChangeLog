@@ -1,5 +1,72 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.h (struct btrace_func_link): New.
+	(enum btrace_function_flag): New.
+	(struct btrace_inst): Rename to ...
+	(struct btrace_insn): ...this. Update all users.
+	(struct btrace_func) <ibegin, iend>: Remove.
+	(struct btrace_func_link): New.
+	(struct btrace_func): Rename to ...
+	(struct btrace_function): ...this. Update all users.
+	(struct btrace_function) <segment, flow, up, insn, insn_offset)
+	(number, level, flags>: New.
+	(struct btrace_insn_iterator): Rename to ...
+	(struct btrace_insn_history): ...this.
+	Update all users.
+	(struct btrace_insn_iterator, btrace_call_iterator): New.
+	(struct btrace_target_info) <btrace, itrace, ftrace>: Remove.
+	(struct btrace_target_info) <begin, end, level>
+	<insn_history, call_history>: New.
+	(btrace_insn_get, btrace_insn_number, btrace_insn_begin)
+	(btrace_insn_end, btrace_insn_prev, btrace_insn_next)
+	(btrace_insn_cmp, btrace_find_insn_by_number, btrace_call_get)
+	(btrace_call_number, btrace_call_begin, btrace_call_end)
+	(btrace_call_prev, btrace_call_next, btrace_call_cmp)
+	(btrace_find_function_by_number, btrace_set_insn_history)
+	(btrace_set_call_history): New.
+	* btrace.c (btrace_init_insn_iterator)
+	(btrace_init_func_iterator, compute_itrace): Remove.
+	(ftrace_print_function_name, ftrace_print_filename)
+	(ftrace_skip_file): Change
+	parameter to const.
+	(ftrace_init_func): Remove.
+	(ftrace_debug): Use new btrace_function fields.
+	(ftrace_function_switched): Also consider gaining and
+	losing symbol information).
+	(ftrace_print_insn_addr, ftrace_new_call, ftrace_new_return)
+	(ftrace_new_switch, ftrace_find_caller, ftrace_new_function)
+	(ftrace_update_caller, ftrace_fixup_caller, ftrace_new_tailcall):
+	New.
+	(ftrace_new_function): Move. Remove debug print.
+	(ftrace_update_lines, ftrace_update_insns): New.
+	(ftrace_update_function): Check for call, ret, and jump.
+	(compute_ftrace): Renamed to ...
+	(btrace_compute_ftrace): ...this. Rewritten to compute call
+	stack.
+	(btrace_fetch, btrace_clear): Updated.
+	(btrace_insn_get, btrace_insn_number, btrace_insn_begin)
+	(btrace_insn_end, btrace_insn_prev, btrace_insn_next)
+	(btrace_insn_cmp, btrace_find_insn_by_number, btrace_call_get)
+	(btrace_call_number, btrace_call_begin, btrace_call_end)
+	(btrace_call_prev, btrace_call_next, btrace_call_cmp)
+	(btrace_find_function_by_number, btrace_set_insn_history)
+	(btrace_set_call_history): New.
+	* record-btrace.c (require_btrace): Use new btrace thread
+	info fields.
+	(record_btrace_info, btrace_insn_history)
+	(record_btrace_insn_history, record_btrace_insn_history_range):
+	Use new btrace thread info fields and new iterator.
+	(btrace_func_history_src_line): Rename to ...
+	(btrace_call_history_src_line): ...this. Use new btrace
+	thread info fields.
+	(btrace_func_history): Rename to ...
+	(btrace_call_history): ...this. Use new btrace thread info
+	fields and new iterator.
+	(record_btrace_call_history, record_btrace_call_history_range):
+	Use new btrace thread info fields and new iterator.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* frame.h (frame_id_build_unavailable_stack_special): New.
 	* frame.c (frame_id_build_unavailable_stack_special): New.
 

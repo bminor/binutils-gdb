@@ -1,5 +1,12 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/function_call_history.exp: Fix expected function
+	trace.
+	* gdb.btrace/instruction_history.exp: Initialize traced.
+	Remove traced_functions.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/function_call_history.exp: Update
 	* gdb.btrace/instruction_history.exp: Update.
 

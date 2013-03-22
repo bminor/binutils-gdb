@@ -74,7 +74,7 @@ require_btrace (void)
 
   btinfo = &tp->btrace;
 
-  if (VEC_empty (btrace_inst_s, btinfo->itrace))
+  if (btinfo->begin == NULL)
     error (_("No trace."));
 
   return btinfo;
@@ -205,7 +205,7 @@ record_btrace_info (void)
 {
   struct btrace_thread_info *btinfo;
   struct thread_info *tp;
-  unsigned int insts, funcs;
+  unsigned int insns, calls;
 
   DEBUG ("info");
 
@@ -215,12 +215,26 @@ record_btrace_info (void)
 
   btrace_fetch (tp);
 
+  insns = 0;
+  calls = 0;
+
   btinfo = &tp->btrace;
-  insts = VEC_length (btrace_inst_s, btinfo->itrace);
-  funcs = VEC_length (btrace_func_s, btinfo->ftrace);
+  if (btinfo->begin != NULL)
+    {
+      struct btrace_call_iterator call;
+      struct btrace_insn_iterator insn;
+
+      btrace_call_end (&call, btinfo);
+      btrace_call_prev (&call, 1);
+      calls = btrace_call_number (&call) + 1;
+
+      btrace_insn_end (&insn, btinfo);
+      btrace_insn_prev (&insn, 1);
+      insns = btrace_insn_number (&insn) + 1;
+    }
 
   printf_unfiltered (_("Recorded %u instructions in %u functions for thread "
-		       "%d (%s).\n"), insts, funcs, tp->num,
+		       "%d (%s).\n"), insns, calls, tp->num,
 		     target_pid_to_str (tp->ptid));
 }
 
@@ -235,27 +249,31 @@ ui_out_field_uint (struct ui_out *uiout, const char *fld, unsigned int val)
 /* Disassemble a section of the recorded instruction trace.  */
 
 static void
-btrace_insn_history (struct btrace_thread_info *btinfo, struct ui_out *uiout,
-		     unsigned int begin, unsigned int end, int flags)
+btrace_insn_history (struct ui_out *uiout,
+		     const struct btrace_insn_iterator *begin,
+		     const struct btrace_insn_iterator *end, int flags)
 {
   struct gdbarch *gdbarch;
-  struct btrace_inst *inst;
-  unsigned int idx;
+  struct btrace_insn_iterator it;
 
-  DEBUG ("itrace (0x%x): [%u; %u[", flags, begin, end);
+  DEBUG ("itrace (0x%x): [%u; %u)", flags, btrace_insn_number (begin),
+	 btrace_insn_number (end));
 
   gdbarch = target_gdbarch ();
 
-  for (idx = begin; VEC_iterate (btrace_inst_s, btinfo->itrace, idx, inst)
-	 && idx < end; ++idx)
+  for (it = *begin; btrace_insn_cmp (&it, end) != 0; btrace_insn_next (&it, 1))
     {
+      const struct btrace_insn *insn;
+
+      insn = btrace_insn_get (&it);
+
       /* Print the instruction index.  */
-      ui_out_field_uint (uiout, "index", idx);
+      ui_out_field_uint (uiout, "index", btrace_insn_number (&it));
       ui_out_text (uiout, "\t");
 
       /* Disassembly with '/m' flag may not produce the expected result.
 	 See PR gdb/11833.  */
-      gdb_disassembly (gdbarch, uiout, NULL, flags, 1, inst->pc, inst->pc + 1);
+      gdb_disassembly (gdbarch, uiout, NULL, flags, 1, insn->pc, insn->pc + 1);
     }
 }
 
@@ -265,72 +283,62 @@ static void
 record_btrace_insn_history (int size, int flags)
 {
   struct btrace_thread_info *btinfo;
+  struct btrace_insn_history *history;
+  struct btrace_insn_iterator begin, end;
   struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
-  unsigned int context, last, begin, end;
+  unsigned int context, covered;
 
   uiout = current_uiout;
   uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
 						       "insn history");
-  btinfo = require_btrace ();
-  last = VEC_length (btrace_inst_s, btinfo->itrace);
-
   context = abs (size);
-  begin = btinfo->insn_iterator.begin;
-  end = btinfo->insn_iterator.end;
-
-  DEBUG ("insn-history (0x%x): %d, prev: [%u; %u[", flags, size, begin, end);
-
   if (context == 0)
     error (_("Bad record instruction-history-size."));
 
-  /* We start at the end.  */
-  if (end < begin)
+  btinfo = require_btrace ();
+  history = btinfo->insn_history;
+  if (history == NULL)
     {
-      /* Truncate the context, if necessary.  */
-      context = min (context, last);
-
-      end = last;
-      begin = end - context;
-    }
-  else if (size < 0)
-    {
-      if (begin == 0)
-	{
-	  printf_unfiltered (_("At the start of the branch trace record.\n"));
-
-	  btinfo->insn_iterator.end = 0;
-	  return;
-	}
-
-      /* Truncate the context, if necessary.  */
-      context = min (context, begin);
-
+      /* No matter the direction, we start with the tail of the trace.  */
+      btrace_insn_end (&begin, btinfo);
       end = begin;
-      begin -= context;
+
+      DEBUG ("insn-history (0x%x): %d", flags, size);
+
+      covered = btrace_insn_prev (&begin, context);
     }
   else
     {
-      if (end == last)
+      begin = history->begin;
+      end = history->end;
+
+      DEBUG ("insn-history (0x%x): %d, prev: [%u; %u)", flags, size,
+	     btrace_insn_number (&begin), btrace_insn_number (&end));
+
+      if (size < 0)
 	{
-	  printf_unfiltered (_("At the end of the branch trace record.\n"));
-
-	  btinfo->insn_iterator.begin = last;
-	  return;
+	  end = begin;
+	  covered = btrace_insn_prev (&begin, context);
 	}
-
-      /* Truncate the context, if necessary.  */
-      context = min (context, last - end);
-
-      begin = end;
-      end += context;
+      else
+	{
+	  begin = end;
+	  covered = btrace_insn_next (&end, context);
+	}
     }
 
-  btrace_insn_history (btinfo, uiout, begin, end, flags);
+  if (covered > 0)
+    btrace_insn_history (uiout, &begin, &end, flags);
+  else
+    {
+      if (size < 0)
+	printf_unfiltered (_("At the start of the branch trace record.\n"));
+      else
+	printf_unfiltered (_("At the end of the branch trace record.\n"));
+    }
 
-  btinfo->insn_iterator.begin = begin;
-  btinfo->insn_iterator.end = end;
-
+  btrace_set_insn_history (btinfo, &begin, &end);
   do_cleanups (uiout_cleanup);
 }
 
@@ -340,39 +348,41 @@ static void
 record_btrace_insn_history_range (ULONGEST from, ULONGEST to, int flags)
 {
   struct btrace_thread_info *btinfo;
+  struct btrace_insn_history *history;
+  struct btrace_insn_iterator begin, end;
   struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
-  unsigned int last, begin, end;
+  unsigned int low, high;
+  int found;
 
   uiout = current_uiout;
   uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
 						       "insn history");
-  btinfo = require_btrace ();
-  last = VEC_length (btrace_inst_s, btinfo->itrace);
+  low = from;
+  high = to;
 
-  begin = (unsigned int) from;
-  end = (unsigned int) to;
-
-  DEBUG ("insn-history (0x%x): [%u; %u[", flags, begin, end);
+  DEBUG ("insn-history (0x%x): [%u; %u)", flags, low, high);
 
   /* Check for wrap-arounds.  */
-  if (begin != from || end != to)
+  if (low != from || high != to)
     error (_("Bad range."));
 
-  if (end <= begin)
+  if (high <= low)
     error (_("Bad range."));
 
-  if (last <= begin)
+  btinfo = require_btrace ();
+
+  found = btrace_find_insn_by_number (&begin, btinfo, low);
+  if (found == 0)
     error (_("Range out of bounds."));
 
-  /* Truncate the range, if necessary.  */
-  if (last < end)
-    end = last;
+  /* Silently truncate the range, if necessary.  */
+  found = btrace_find_insn_by_number (&end, btinfo, high);
+  if (found == 0)
+    btrace_insn_end (&end, btinfo);
 
-  btrace_insn_history (btinfo, uiout, begin, end, flags);
-
-  btinfo->insn_iterator.begin = begin;
-  btinfo->insn_iterator.end = end;
+  btrace_insn_history (uiout, &begin, &end, flags);
+  btrace_set_insn_history (btinfo, &begin, &end);
 
   do_cleanups (uiout_cleanup);
 }
@@ -411,23 +421,27 @@ record_btrace_insn_history_from (ULONGEST from, int size, int flags)
 /* Print the instruction number range for a function call history line.  */
 
 static void
-btrace_func_history_insn_range (struct ui_out *uiout, struct btrace_func *bfun)
+btrace_call_history_insn_range (struct ui_out *uiout,
+				const struct btrace_function *bfun)
 {
-  ui_out_field_uint (uiout, "insn begin", bfun->ibegin);
+  unsigned int begin, end;
 
-  if (bfun->ibegin == bfun->iend)
-    return;
+  begin = bfun->insn_offset;
+  end = begin + VEC_length (btrace_insn_s, bfun->insn);
 
+  ui_out_field_uint (uiout, "insn begin", begin);
   ui_out_text (uiout, "-");
-  ui_out_field_uint (uiout, "insn end", bfun->iend);
+  ui_out_field_uint (uiout, "insn end", end);
 }
 
 /* Print the source line information for a function call history line.  */
 
 static void
-btrace_func_history_src_line (struct ui_out *uiout, struct btrace_func *bfun)
+btrace_call_history_src_line (struct ui_out *uiout,
+			      const struct btrace_function *bfun)
 {
   struct symbol *sym;
+  int begin, end;
 
   sym = bfun->sym;
   if (sym == NULL)
@@ -436,54 +450,66 @@ btrace_func_history_src_line (struct ui_out *uiout, struct btrace_func *bfun)
   ui_out_field_string (uiout, "file",
 		       symtab_to_filename_for_display (sym->symtab));
 
-  if (bfun->lend == 0)
+  begin = bfun->lbegin;
+  end = bfun->lend;
+
+  if (end < begin)
     return;
 
   ui_out_text (uiout, ":");
-  ui_out_field_int (uiout, "min line", bfun->lbegin);
+  ui_out_field_int (uiout, "min line", begin);
 
-  if (bfun->lend == bfun->lbegin)
+  if (end == begin)
     return;
 
   ui_out_text (uiout, "-");
-  ui_out_field_int (uiout, "max line", bfun->lend);
+  ui_out_field_int (uiout, "max line", end);
 }
 
 /* Disassemble a section of the recorded function trace.  */
 
 static void
-btrace_func_history (struct btrace_thread_info *btinfo, struct ui_out *uiout,
-		     unsigned int begin, unsigned int end,
+btrace_call_history (struct ui_out *uiout,
+		     const struct btrace_call_iterator *begin,
+		     const struct btrace_call_iterator *end,
 		     enum record_print_flag flags)
 {
-  struct btrace_func *bfun;
-  unsigned int idx;
+  struct btrace_call_iterator it;
 
-  DEBUG ("ftrace (0x%x): [%u; %u[", flags, begin, end);
+  DEBUG ("ftrace (0x%x): [%u; %u)", flags, btrace_call_number (begin),
+	 btrace_call_number (end));
 
-  for (idx = begin; VEC_iterate (btrace_func_s, btinfo->ftrace, idx, bfun)
-	 && idx < end; ++idx)
+  for (it = *begin; btrace_call_cmp (&it, end) < 0; btrace_call_next (&it, 1))
     {
+      const struct btrace_function *bfun;
+      struct minimal_symbol *msym;
+      struct symbol *sym;
+
+      bfun = btrace_call_get (&it);
+      msym = bfun->msym;
+      sym = bfun->sym;
+
       /* Print the function index.  */
-      ui_out_field_uint (uiout, "index", idx);
+      ui_out_field_uint (uiout, "index", bfun->number);
       ui_out_text (uiout, "\t");
 
       if ((flags & RECORD_PRINT_INSN_RANGE) != 0)
 	{
-	  btrace_func_history_insn_range (uiout, bfun);
+	  btrace_call_history_insn_range (uiout, bfun);
 	  ui_out_text (uiout, "\t");
 	}
 
       if ((flags & RECORD_PRINT_SRC_LINE) != 0)
 	{
-	  btrace_func_history_src_line (uiout, bfun);
+	  btrace_call_history_src_line (uiout, bfun);
 	  ui_out_text (uiout, "\t");
 	}
 
-      if (bfun->sym != NULL)
-	ui_out_field_string (uiout, "function", SYMBOL_PRINT_NAME (bfun->sym));
-      else if (bfun->msym != NULL)
-	ui_out_field_string (uiout, "function", SYMBOL_PRINT_NAME (bfun->msym));
+      if (sym != NULL)
+	ui_out_field_string (uiout, "function", SYMBOL_PRINT_NAME (sym));
+      else if (msym != NULL)
+	ui_out_field_string (uiout, "function", SYMBOL_PRINT_NAME (msym));
+
       ui_out_text (uiout, "\n");
     }
 }
@@ -494,72 +520,62 @@ static void
 record_btrace_call_history (int size, int flags)
 {
   struct btrace_thread_info *btinfo;
+  struct btrace_call_history *history;
+  struct btrace_call_iterator begin, end;
   struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
-  unsigned int context, last, begin, end;
+  unsigned int context, covered;
 
   uiout = current_uiout;
   uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
 						       "insn history");
-  btinfo = require_btrace ();
-  last = VEC_length (btrace_func_s, btinfo->ftrace);
-
   context = abs (size);
-  begin = btinfo->func_iterator.begin;
-  end = btinfo->func_iterator.end;
-
-  DEBUG ("func-history (0x%x): %d, prev: [%u; %u[", flags, size, begin, end);
-
   if (context == 0)
     error (_("Bad record function-call-history-size."));
 
-  /* We start at the end.  */
-  if (end < begin)
+  btinfo = require_btrace ();
+  history = btinfo->call_history;
+  if (history == NULL)
     {
-      /* Truncate the context, if necessary.  */
-      context = min (context, last);
-
-      end = last;
-      begin = end - context;
-    }
-  else if (size < 0)
-    {
-      if (begin == 0)
-	{
-	  printf_unfiltered (_("At the start of the branch trace record.\n"));
-
-	  btinfo->func_iterator.end = 0;
-	  return;
-	}
-
-      /* Truncate the context, if necessary.  */
-      context = min (context, begin);
-
+      /* No matter the direction, we start with the tail of the trace.  */
+      btrace_call_end (&begin, btinfo);
       end = begin;
-      begin -= context;
+
+      DEBUG ("call-history (0x%x): %d", flags, size);
+
+      covered = btrace_call_prev (&begin, context);
     }
   else
     {
-      if (end == last)
+      begin = history->begin;
+      end = history->end;
+
+      DEBUG ("call-history (0x%x): %d, prev: [%u; %u)", flags, size,
+	     btrace_call_number (&begin), btrace_call_number (&end));
+
+      if (size < 0)
 	{
-	  printf_unfiltered (_("At the end of the branch trace record.\n"));
-
-	  btinfo->func_iterator.begin = last;
-	  return;
+	  end = begin;
+	  covered = btrace_call_prev (&begin, context);
 	}
-
-      /* Truncate the context, if necessary.  */
-      context = min (context, last - end);
-
-      begin = end;
-      end += context;
+      else
+	{
+	  begin = end;
+	  covered = btrace_call_next (&end, context);
+	}
     }
 
-  btrace_func_history (btinfo, uiout, begin, end, flags);
+  if (covered > 0)
+    btrace_call_history (uiout, &begin, &end, flags);
+  else
+    {
+      if (size < 0)
+	printf_unfiltered (_("At the start of the branch trace record.\n"));
+      else
+	printf_unfiltered (_("At the end of the branch trace record.\n"));
+    }
 
-  btinfo->func_iterator.begin = begin;
-  btinfo->func_iterator.end = end;
-
+  btrace_set_call_history (btinfo, &begin, &end);
   do_cleanups (uiout_cleanup);
 }
 
@@ -569,39 +585,41 @@ static void
 record_btrace_call_history_range (ULONGEST from, ULONGEST to, int flags)
 {
   struct btrace_thread_info *btinfo;
+  struct btrace_call_history *history;
+  struct btrace_call_iterator begin, end;
   struct cleanup *uiout_cleanup;
   struct ui_out *uiout;
-  unsigned int last, begin, end;
+  unsigned int low, high;
+  int found;
 
   uiout = current_uiout;
   uiout_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout,
 						       "func history");
-  btinfo = require_btrace ();
-  last = VEC_length (btrace_func_s, btinfo->ftrace);
+  low = from;
+  high = to;
 
-  begin = (unsigned int) from;
-  end = (unsigned int) to;
-
-  DEBUG ("func-history (0x%x): [%u; %u[", flags, begin, end);
+  DEBUG ("call-history (0x%x): [%u; %u)", flags, low, high);
 
   /* Check for wrap-arounds.  */
-  if (begin != from || end != to)
+  if (low != from || high != to)
     error (_("Bad range."));
 
-  if (end <= begin)
+  if (high <= low)
     error (_("Bad range."));
 
-  if (last <= begin)
+  btinfo = require_btrace ();
+
+  found = btrace_find_call_by_number (&begin, btinfo, low);
+  if (found == 0)
     error (_("Range out of bounds."));
 
-  /* Truncate the range, if necessary.  */
-  if (last < end)
-    end = last;
+  /* Silently truncate the range, if necessary.  */
+  found = btrace_find_call_by_number (&end, btinfo, high);
+  if (found == 0)
+    btrace_call_end (&end, btinfo);
 
-  btrace_func_history (btinfo, uiout, begin, end, flags);
-
-  btinfo->func_iterator.begin = begin;
-  btinfo->func_iterator.end = end;
+  btrace_call_history (uiout, &begin, &end, flags);
+  btrace_set_call_history (btinfo, &begin, &end);
 
   do_cleanups (uiout_cleanup);
 }

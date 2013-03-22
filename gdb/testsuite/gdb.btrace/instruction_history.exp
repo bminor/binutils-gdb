@@ -47,18 +47,18 @@ gdb_continue_to_breakpoint "cont to $bp_location" ".*$srcfile2:$bp_location.*"
 # it is necessary to count the number of lines that are
 # shown by the "record instruction-history" command.
 
+set traced {}
 set testname "determine number of recorded instructions"
 gdb_test_multiple "info record" $testname {
     -re "Active record target: record-btrace\r\nRecorded \(\[0-9\]*\) instructions in \(\[0-9\]*\) functions for thread 1 .*\\.\r\n$gdb_prompt $" {
         set traced $expect_out(1,string)
-        set traced_functions $expect_out(2,string)
         pass $testname
     }
 }
 
-# we have exactly 7 instructions here
-set message "exactly 7 instructions"
-if { $traced != 7 } {
+# we have exactly 6 instructions here
+set message "exactly 6 instructions"
+if { $traced != 6 } {
     fail $message
 } else {
     pass $message
@@ -147,6 +147,8 @@ if { $lines != $history_size } {
     pass $message
 }
 
+set history_size 2
+gdb_test_no_output "set record instruction-history-size $history_size"
 set message "browse history forward middle"
 set lines [test_lines_length "record instruction-history +" $message]
 if { $lines != $history_size } {
@@ -168,6 +170,8 @@ gdb_test "record instruction-history" "At the end of the branch trace record\\."
 # make sure we cannot move further
 gdb_test "record instruction-history" "At the end of the branch trace record\\." "browse history forward beyond 2"
 
+set history_size 3
+gdb_test_no_output "set record instruction-history-size $history_size"
 set message "browse history backward last"
 set lines [test_lines_length "record instruction-history -" $message]
 if { $lines != $history_size } {
@@ -176,6 +180,8 @@ if { $lines != $history_size } {
     pass $message
 }
 
+set history_size 2
+gdb_test_no_output "set record instruction-history-size $history_size"
 set message "browse history backward middle"
 set lines [test_lines_length "record instruction-history -" $message]
 if { $lines != $history_size } {

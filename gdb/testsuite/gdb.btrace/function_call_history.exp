@@ -187,16 +187,18 @@ set bp_location [gdb_get_line_number "bp.2" $testfile.c]
 gdb_breakpoint $bp_location
 gdb_continue_to_breakpoint "cont to $bp_location" ".*$testfile.c:$bp_location.*"
 
-# at this point we expect to have main, fib, ..., fib, main, where fib occurs 8 times,
-# so we limit the output to only show the latest 10 function calls
-gdb_test_no_output "set record function-call-history-size 10"
-set message "recursive"
-gdb_test_multiple "record function-call-history" $message {
-    -re "13\tmain\r\n14\tfib\r\n15\tfib\r\n16\tfib\r\n17\tfib\r\n18\tfib\r\n19\tfib\r\n20\tfib\r\n21\tfib\r\n22	 main\r\n$gdb_prompt $" {
-        pass $message
-    }
-    -re "13\tinc\r\n14\tmain\r\n15\tinc\r\n16\tmain\r\n17\tinc\r\n18\tmain\r\n19\tinc\r\n20\tmain\r\n21\tfib\r\n22\tmain\r\n$gdb_prompt $" {
-        # recursive function calls appear only as 1 call
-        kfail "gdb/15240" $message
-    }
-}
+# at this point we expect to have main, fib, ..., fib, main, where fib occurs 9 times,
+# so we limit the output to only show the latest 11 function calls
+gdb_test_no_output "set record function-call-history-size 11"
+gdb_test "record function-call-history" [join [list \
+  "20\tmain" \
+  "21\tfib" \
+  "22\tfib" \
+  "23\tfib" \
+  "24\tfib" \
+  "25\tfib" \
+  "26\tfib" \
+  "27\tfib" \
+  "28\tfib" \
+  "29\tfib" \
+  "30\tmain"] "\r\n"] "recursive"
