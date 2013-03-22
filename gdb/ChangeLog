@@ -1,5 +1,23 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* amd64-tdep.c (amd64_classify_insn_at, amd64_insn_is_call)
+	(amd64_insn_is_ret, amd64_insn_is_jump, amd64_jmp_p): New.
+	(amd64_init_abi): Add insn_is_call, insn_is_ret, and insn_is_jump
+	to gdbarch.
+	* i386-tdep.c (i386_insn_is_call, i386_insn_is_ret)
+	(i386_insn_is_jump, i386_jmp_p): New.
+	(i386_gdbarch_init): Add insn_is_call, insn_is_ret, and
+	insn_is_jump to gdbarch.
+	* gdbarch.sh (insn_is_call, insn_is_ret, insn_is_jump): New.
+	* gdbarch.h: Regenerated.
+	* gdbarch.c: Regenerated.
+	* arch-utils.h (default_insn_is_call, default_insn_is_ret)
+	(default_insn_is_jump): New.
+	* arch-utils.c (default_insn_is_call, default_insn_is_ret)
+	(default_insn_is_jump): New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/btrace-common.h (btrace_read_type) <btrace_read_all>:
 	Change to ...
 	(btrace_read_type) <BTRACE_READ_ALL>: ... this.  Update users.
