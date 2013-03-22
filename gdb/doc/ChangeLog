@@ -1,3 +1,9 @@
+2013-03-22  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Embedded Processors): Remove menu item
+	"OpenRISC 1000".
+	(OpenRISC 1000): Remove.
+
 2013-03-21  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Maintenance Commands): Add docs for

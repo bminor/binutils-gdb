@@ -19853,7 +19853,6 @@ acceptable commands.
 * M68K::                        Motorola M68K
 * MicroBlaze::			Xilinx MicroBlaze
 * MIPS Embedded::               MIPS Embedded
-* OpenRISC 1000::               OpenRisc 1000
 * PowerPC Embedded::            PowerPC Embedded
 * PA::                          HP PA Embedded
 * Sparclet::                    Tsqware Sparclet
@@ -20325,120 +20324,6 @@ Show the current setting of printing monitor warnings.
 @cindex send PMON command
 This command allows sending an arbitrary @var{command} string to the
 monitor.  The monitor must be in debug mode for this to work.
-@end table
-
-@node OpenRISC 1000
-@subsection OpenRISC 1000
-@cindex OpenRISC 1000
-
-@cindex or1k boards
-See OR1k Architecture document (@uref{www.opencores.org}) for more information
-about platform and commands.
-
-@table @code
-
-@kindex target jtag
-@item target jtag jtag://@var{host}:@var{port}
-
-Connects to remote JTAG server.
-JTAG remote server can be either an or1ksim or JTAG server,
-connected via parallel port to the board.
-
-Example: @code{target jtag jtag://localhost:9999}
-
-@kindex or1ksim
-@item or1ksim @var{command}
-If connected to @code{or1ksim} OpenRISC 1000 Architectural
-Simulator, proprietary commands can be executed.
-
-@kindex info or1k spr
-@item info or1k spr
-Displays spr groups.
-
-@item info or1k spr @var{group}
-@itemx info or1k spr @var{groupno}
-Displays register names in selected group.
-
-@item info or1k spr @var{group} @var{register}
-@itemx info or1k spr @var{register}
-@itemx info or1k spr @var{groupno} @var{registerno}
-@itemx info or1k spr @var{registerno}
-Shows information about specified spr register.
-
-@kindex spr
-@item spr @var{group} @var{register} @var{value}
-@itemx spr @var{register @var{value}}
-@itemx spr @var{groupno} @var{registerno @var{value}}
-@itemx spr @var{registerno @var{value}}
-Writes @var{value} to specified spr register.
-@end table
-
-Some implementations of OpenRISC 1000 Architecture also have hardware trace.
-It is very similar to @value{GDBN} trace, except it does not interfere with normal
-program execution and is thus much faster.  Hardware breakpoints/watchpoint
-triggers can be set using:
-@table @code
-@item $LEA/$LDATA
-Load effective address/data
-@item $SEA/$SDATA
-Store effective address/data
-@item $AEA/$ADATA
-Access effective address ($SEA or $LEA) or data ($SDATA/$LDATA)
-@item $FETCH
-Fetch data
-@end table
-
-When triggered, it can capture low level data, like: @code{PC}, @code{LSEA},
-@code{LDATA}, @code{SDATA}, @code{READSPR}, @code{WRITESPR}, @code{INSTR}.
-
-@code{htrace} commands:
-@cindex OpenRISC 1000 htrace
-@table @code
-@kindex hwatch
-@item hwatch @var{conditional}
-Set hardware watchpoint on combination of Load/Store Effective Address(es)
-or Data.  For example:
-
-@code{hwatch ($LEA == my_var) && ($LDATA < 50) || ($SEA == my_var) && ($SDATA >= 50)}
-
-@code{hwatch ($LEA == my_var) && ($LDATA < 50) || ($SEA == my_var) && ($SDATA >= 50)}
-
-@kindex htrace
-@item htrace info
-Display information about current HW trace configuration.
-
-@item htrace trigger @var{conditional}
-Set starting criteria for HW trace.
-
-@item htrace qualifier @var{conditional}
-Set acquisition qualifier for HW trace.
-
-@item htrace stop @var{conditional}
-Set HW trace stopping criteria.
-
-@item htrace record [@var{data}]*
-Selects the data to be recorded, when qualifier is met and HW trace was
-triggered.
-
-@item htrace enable
-@itemx htrace disable
-Enables/disables the HW trace.
-
-@item htrace rewind [@var{filename}]
-Clears currently recorded trace data.
-
-If filename is specified, new trace file is made and any newly collected data
-will be written there.
-
-@item htrace print [@var{start} [@var{len}]]
-Prints trace buffer, using current record configuration.
-
-@item htrace mode continuous
-Set continuous trace mode.
-
-@item htrace mode suspend
-Set suspend trace mode.
-
 @end table
 
 @node PowerPC Embedded
