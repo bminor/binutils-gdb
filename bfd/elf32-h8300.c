@@ -1518,7 +1518,7 @@ elf32_h8_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count)
     {
       /* Get the new reloc address.  */
       if ((irel->r_offset > addr
-	   && irel->r_offset < toaddr))
+	   && irel->r_offset <= toaddr))
 	irel->r_offset -= count;
     }
 
@@ -1530,7 +1530,7 @@ elf32_h8_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count)
     {
       if (isym->st_shndx == sec_shndx
 	  && isym->st_value > addr
-	  && isym->st_value < toaddr)
+	  && isym->st_value <= toaddr)
 	isym->st_value -= count;
     }
 
@@ -1542,14 +1542,13 @@ elf32_h8_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count)
   for (; sym_hashes < end_hashes; sym_hashes++)
     {
       struct elf_link_hash_entry *sym_hash = *sym_hashes;
+
       if ((sym_hash->root.type == bfd_link_hash_defined
 	   || sym_hash->root.type == bfd_link_hash_defweak)
 	  && sym_hash->root.u.def.section == sec
 	  && sym_hash->root.u.def.value > addr
-	  && sym_hash->root.u.def.value < toaddr)
-	{
-	  sym_hash->root.u.def.value -= count;
-	}
+	  && sym_hash->root.u.def.value <= toaddr)
+	sym_hash->root.u.def.value -= count;
     }
 
   return TRUE;
