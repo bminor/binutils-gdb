@@ -4188,6 +4188,14 @@ remote_query_supported (void)
       }
 }
 
+/* Remove any of the remote.c targets from target stack.  Upper targets depend
+   on it so remove them first.  */
+
+static void
+remote_unpush_target (void)
+{
+  pop_all_targets_above (process_stratum - 1, 0);
+}
 
 static void
 remote_open_1 (char *name, int from_tty,
@@ -4205,29 +4213,17 @@ remote_open_1 (char *name, int from_tty,
     wait_forever_enabled_p = 1;
 
   /* If we're connected to a running target, target_preopen will kill it.
-     But if we're connected to a target system with no running process,
-     then we will still be connected when it returns.  Ask this question
-     first, before target_preopen has a chance to kill anything.  */
+     Ask this question first, before target_preopen has a chance to kill
+     anything.  */
   if (remote_desc != NULL && !have_inferiors ())
     {
-      if (!from_tty
-	  || query (_("Already connected to a remote target.  Disconnect? ")))
-	pop_target ();
-      else
+      if (from_tty
+	  && !query (_("Already connected to a remote target.  Disconnect? ")))
 	error (_("Still connected."));
     }
 
+  /* Here the possibly existing remote target gets unpushed.  */
   target_preopen (from_tty);
-
-  unpush_target (target);
-
-  /* This time without a query.  If we were connected to an
-     extended-remote target and target_preopen killed the running
-     process, we may still be connected.  If we are starting "target
-     remote" now, the extended-remote target will not have been
-     removed by unpush_target.  */
-  if (remote_desc != NULL && !have_inferiors ())
-    pop_target ();
 
   /* Make sure we send the passed signals list the next time we resume.  */
   xfree (last_pass_packet);
@@ -4348,7 +4344,7 @@ remote_open_1 (char *name, int from_tty,
 	/* Pop the partially set up target - unless something else did
 	   already before throwing the exception.  */
 	if (remote_desc != NULL)
-	  pop_target ();
+	  remote_unpush_target ();
 	if (target_async_permitted)
 	  wait_forever_enabled_p = 1;
 	throw_exception (ex);
@@ -5096,7 +5092,7 @@ interrupt_query (void)
       if (query (_("Interrupted while waiting for the program.\n\
 Give up (and stop debugging it)? ")))
 	{
-	  pop_target ();
+	  remote_unpush_target ();
 	  deprecated_throw_reason (RETURN_QUIT);
 	}
     }
@@ -7051,11 +7047,11 @@ readchar (int timeout)
   switch ((enum serial_rc) ch)
     {
     case SERIAL_EOF:
-      pop_target ();
+      remote_unpush_target ();
       error (_("Remote connection closed"));
       /* no return */
     case SERIAL_ERROR:
-      pop_target ();
+      remote_unpush_target ();
       perror_with_name (_("Remote communication error.  "
 			  "Target disconnected."));
       /* no return */
@@ -7579,7 +7575,7 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	      if (forever)	/* Watchdog went off?  Kill the target.  */
 		{
 		  QUIT;
-		  pop_target ();
+		  remote_unpush_target ();
 		  error (_("Watchdog timeout has expired.  Target detached."));
 		}
 	      if (remote_debug)

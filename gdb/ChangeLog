@@ -1,3 +1,12 @@
+2013-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c (remote_unpush_target): New function.
+	(remote_open_1): Remove two pop_target calls, update one comment, add
+	comment to target_preopen call.  Replace pop_target call by
+	remote_unpush_target call.
+	(interrupt_query, readchar, getpkt_or_notif_sane_1): Replace
+	pop_target calls by remote_unpush_target calls.
+
 2013-03-20  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15289
