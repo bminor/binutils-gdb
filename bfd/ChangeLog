@@ -1,3 +1,12 @@
+2013-03-23  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15270
+	* elflink.c (elf_link_add_object_symbols): Don't set def_regular
+	or ref_regular for BFD_PLUGIN owned syms, or have them affect
+	def_dynamic/ref_dynamic.
+	(_bfd_elf_fix_symbol_flags): Don't set def_regular for BFD_PLUGIN
+	owned syms.
+
 2013-03-22  David S. Miller  <davem@davemloft.net>
 
 	* elfxx-sparc.c (_bfd_sparc_elf_merge_private_bfd_data): Set type of

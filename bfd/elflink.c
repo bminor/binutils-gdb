@@ -2491,7 +2491,7 @@ _bfd_elf_fix_symbol_flags (struct elf_link_hash_entry *h,
       && !h->def_regular
       && h->ref_regular
       && !h->def_dynamic
-      && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+      && (h->root.u.def.section->owner->flags & (DYNAMIC | BFD_PLUGIN)) == 0)
     h->def_regular = 1;
 
   /* If -Bsymbolic was used (which means to bind references to global
@@ -4361,7 +4361,12 @@ error_free_dyn:
 	     is one which is referenced or defined by both a regular
 	     object and a shared object.  */
 	  dynsym = FALSE;
-	  if (! dynamic)
+
+	  /* Plugin symbols aren't normal.  Don't set def_regular or
+	     ref_regular for them, nor make them dynamic.  */
+	  if ((abfd->flags & BFD_PLUGIN) != 0)
+	    ;
+	  else if (! dynamic)
 	    {
 	      if (! definition)
 		{
@@ -4413,10 +4418,6 @@ error_free_dyn:
 
 	  /* We don't want to make debug symbol dynamic.  */
 	  if (definition && (sec->flags & SEC_DEBUGGING) && !info->relocatable)
-	    dynsym = FALSE;
-
-	  /* Nor should we make plugin symbols dynamic.  */
-	  if ((abfd->flags & BFD_PLUGIN) != 0)
 	    dynsym = FALSE;
 
 	  if (definition)
