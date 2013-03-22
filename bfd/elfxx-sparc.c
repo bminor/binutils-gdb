@@ -4905,6 +4905,7 @@ _bfd_sparc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   out_attr = &out_attrs[Tag_GNU_Sparc_HWCAPS];
 
   out_attr->i |= in_attr->i;
+  out_attr->type = 1;
 
   /* Merge Tag_compatibility attributes and any common GNU ones.  */
   _bfd_elf_merge_object_attributes (ibfd, obfd);
