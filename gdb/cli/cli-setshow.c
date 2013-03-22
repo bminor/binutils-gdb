@@ -281,7 +281,12 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 
 	if (c->var_type == var_uinteger && val == 0)
 	  val = UINT_MAX;
-	else if (val > UINT_MAX)
+	else if (val < 0
+		 /* For var_uinteger, don't let the user set the value
+		    to UINT_MAX directly, as that exposes an
+		    implementation detail to the user interface.  */
+		 || (c->var_type == var_uinteger && val >= UINT_MAX)
+		 || (c->var_type == var_zuinteger && val > UINT_MAX))
 	  error (_("integer %s out of range"), plongest (val));
 
 	if (*(unsigned int *) c->var != val)
@@ -303,7 +308,12 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 
 	if (val == 0 && c->var_type == var_integer)
 	  val = INT_MAX;
-	else if (val > INT_MAX || val < INT_MIN)
+	else if (val < INT_MIN
+		 /* For var_integer, don't let the user set the value
+		    to INT_MAX directly, as that exposes an
+		    implementation detail to the user interface.  */
+		 || (c->var_type == var_integer && val >= INT_MAX)
+		 || (c->var_type == var_zinteger && val > INT_MAX))
 	  error (_("integer %s out of range"), plongest (val));
 
 	if (*(int *) c->var != val)
