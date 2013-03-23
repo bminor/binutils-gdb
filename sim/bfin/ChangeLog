@@ -1,3 +1,8 @@
+2013-03-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Use $SIM_DV_SOCKSER_O.
+	* configure: Regenerated.
+
 2012-12-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* aclocal.m4: Revert the previous change changing

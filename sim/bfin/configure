@@ -607,6 +607,7 @@ PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
 BFIN_SIM_EXTRA_OBJS
+SIM_DV_SOCKSER_O
 REPORT_BUGS_TEXI
 REPORT_BUGS_TO
 PKGVERSION
@@ -12294,7 +12295,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12297 "configure"
+#line 12298 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12400,7 +12401,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12403 "configure"
+#line 12404 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13413,7 +13414,7 @@ $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
 
 
-if test x"yes" = x"yes"; then
+if test x"yes" != x"no"; then
   sim_hw_p=yes
 else
   sim_hw_p=no
@@ -13484,6 +13485,19 @@ else
       *) sim_hw="$sim_hw $i" ; sim_hw_objs="$sim_hw_objs dv-$i.o";;
     esac
   done
+  # mingw does not support sockser
+  SIM_DV_SOCKSER_O=""
+  case ${host} in
+    *mingw*) ;;
+    *) SIM_DV_SOCKSER_O="dv-sockser.o"
+
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DV_SOCKSER 1
+_ACEOF
+
+       ;;
+  esac
+
 fi
 if test x"$silent" != x"yes" && test "$sim_hw_p" = "yes"; then
   echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
@@ -13491,6 +13505,10 @@ fi
 else
 
 if test "$sim_hw_p" != yes; then
+  if test "yes" = "always"; then
+    as_fn_error "Sorry, but this simulator requires that hardware support
+be enabled. Please configure without --disable-hw-support." "$LINENO" 5
+  fi
   sim_hw_objs=
   sim_hw_cflags="-DWITH_HW=0"
   sim_hw=
@@ -13584,20 +13602,7 @@ fi
 done
 
 
-BFIN_SIM_EXTRA_OBJS=
-
-case ${host} in
-  *mingw32*) ;;
-  *)
-
-cat >>confdefs.h <<_ACEOF
-#define HAVE_DV_SOCKSER 1
-_ACEOF
-
-    BFIN_SIM_EXTRA_OBJS="${BFIN_SIM_EXTRA_OBJS} dv-sockser.o"
-    ;;
-esac
-
+BFIN_SIM_EXTRA_OBJS="${BFIN_SIM_EXTRA_OBJS} ${SIM_DV_SOCKSER_O}"
 BFIN_SIM_EXTRA_OBJS=${BFIN_SIM_EXTRA_OBJS}
 
 

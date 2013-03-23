@@ -1,3 +1,8 @@
+2013-03-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Use $SIM_DV_SOCKSER_O.
+	* configure: Regenerated.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.
