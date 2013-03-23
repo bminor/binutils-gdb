@@ -56,17 +56,7 @@ AC_CHECK_HEADERS([ \
 	sys/mman.h \
 ])
 
-BFIN_SIM_EXTRA_OBJS=
-
-dnl make sure the dv-sockser code can be supported (i.e. windows)
-case ${host} in
-  *mingw32*) ;;
-  *)
-    AC_DEFINE_UNQUOTED([HAVE_DV_SOCKSER], 1, [Define if dv-sockser is usable.])
-    BFIN_SIM_EXTRA_OBJS="${BFIN_SIM_EXTRA_OBJS} dv-sockser.o"
-    ;;
-esac
-
+BFIN_SIM_EXTRA_OBJS="${BFIN_SIM_EXTRA_OBJS} ${SIM_DV_SOCKSER_O}"
 AC_SUBST([BFIN_SIM_EXTRA_OBJS], ${BFIN_SIM_EXTRA_OBJS})
 
 PKG_PROG_PKG_CONFIG
