@@ -1,3 +1,10 @@
+2013-03-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Address use of dv-sockser.o.
+	* tconfig.in: Conditionalize use of dv_sockser_install.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+
 2012-10-04  Chao-ying Fu  <fu@mips.com>
 	    Steve Ellcey  <sellcey@mips.com>
 
