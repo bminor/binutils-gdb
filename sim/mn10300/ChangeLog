@@ -1,3 +1,11 @@
+2013-03-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* configure.ac: Fail if dv-sockser.o not available.
+	Error when --disable-sim-hardware is specified.
+	* tconfig.in: Conditionalize use of dv_sockser_install.
+	* configure: Regenerated.
+	* config.in: Regenerated.
+
 2012-06-17  Hans-Peter Nilsson  <hp@axis.com>
 
 	* interp.c: Include config.h first.  Do not include sysdep.h.
