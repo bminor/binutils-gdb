@@ -603,12 +603,12 @@ AC_SUBST(sim_default_model)
 
 
 dnl --enable-sim-hardware is for users of the simulator
-dnl arg[1] Enable sim-hw by default? ("yes" or "no")
+dnl arg[1] Enable sim-hw by default? ("yes", "no", or "always")
 dnl arg[2] is a space separated list of devices that override the defaults
 dnl arg[3] is a space separated list of extra target specific devices.
 AC_DEFUN([SIM_AC_OPTION_HARDWARE],
 [
-if test x"[$1]" = x"yes"; then
+if test x"[$1]" != x"no"; then
   sim_hw_p=yes
 else
   sim_hw_p=no
@@ -647,11 +647,25 @@ else
       *) sim_hw="$sim_hw $i" ; sim_hw_objs="$sim_hw_objs dv-$i.o";;
     esac
   done
+  # mingw does not support sockser
+  SIM_DV_SOCKSER_O=""
+  case ${host} in
+    *mingw*) ;;
+    *) SIM_DV_SOCKSER_O="dv-sockser.o"
+       AC_DEFINE_UNQUOTED(
+         [HAVE_DV_SOCKSER], 1, [Define if dv-sockser is usable.])
+       ;;
+  esac
+  AC_SUBST(SIM_DV_SOCKSER_O)
 fi
 if test x"$silent" != x"yes" && test "$sim_hw_p" = "yes"; then
   echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
 fi],[
 if test "$sim_hw_p" != yes; then
+  if test "[$1]" = "always"; then
+    AC_MSG_ERROR([Sorry, but this simulator requires that hardware support
+be enabled. Please configure without --disable-hw-support.])
+  fi
   sim_hw_objs=
   sim_hw_cflags="-DWITH_HW=0"
   sim_hw=

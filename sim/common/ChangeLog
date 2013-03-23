@@ -1,3 +1,10 @@
+2013-03-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
+
+	* acinclude.m4: Add SIM_DV_SOCKSER_O which is empty  on hosts
+	which do not support dv-sockser.o.  Add always as option to
+	first argument to SIM_AC_OPTION_HARDWARE. Fail if hardware
+	is always required to be enabled by simulator.
+
 2012-08-28  Kaushik Phatak  <kaushik.phatak@kpitcummins.com>
 
 	* gennltvals.sh: Use libgloss/syscall.h for cr16.
