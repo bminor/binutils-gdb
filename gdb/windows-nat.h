@@ -28,5 +28,9 @@ typedef int (segment_register_p_ftype) (int regnum);
    whether a given register is a segment register or not.  */
 extern void windows_set_segment_register_p (segment_register_p_ftype *fun);
 
+/* Return argv[0] in absolute form, if possible, or ARGV0 if not.  The
+   return value is in malloc'ed storage.  */
+extern char *windows_get_absolute_argv0 (const char *argv0);
+
 #endif
 
