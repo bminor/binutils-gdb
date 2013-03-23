@@ -28,4 +28,12 @@ if test x"$silent" != x"yes" && test x"$sim_trapdump" != x""; then
 fi],[sim_trapdump=""])dnl
 AC_SUBST(sim_trapdump)
 
+SIM_AC_OPTION_HARDWARE(always,"","")
+
+if test -z "$SIM_DV_SOCKSER_O"; then
+	AC_MSG_ERROR([Sorry, but hardware support in this simulator
+unconditionally relies on dv-sockser.o which is unavailable for your host.
+Please fix this simulator.])
+fi
+
 SIM_AC_OUTPUT
