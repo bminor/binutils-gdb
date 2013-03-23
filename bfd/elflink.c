@@ -907,7 +907,7 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
    change.  We set POLD_ALIGNMENT if an old common symbol in a dynamic
    object is overridden by a regular object.  */
 
-bfd_boolean
+static bfd_boolean
 _bfd_elf_merge_symbol (bfd *abfd,
 		       struct bfd_link_info *info,
 		       const char *name,

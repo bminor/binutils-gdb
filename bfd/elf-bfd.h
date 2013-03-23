@@ -1993,12 +1993,6 @@ extern bfd_boolean _bfd_elf_eh_frame_present
 extern bfd_boolean _bfd_elf_maybe_strip_eh_frame_hdr
   (struct bfd_link_info *);
 
-extern bfd_boolean _bfd_elf_merge_symbol
-  (bfd *, struct bfd_link_info *, const char *, Elf_Internal_Sym *,
-   asection **, bfd_vma *, bfd_boolean *, unsigned int *,
-   struct elf_link_hash_entry **, bfd_boolean *,
-   bfd_boolean *, bfd_boolean *, bfd_boolean *);
-
 extern bfd_boolean _bfd_elf_hash_symbol (struct elf_link_hash_entry *);
 
 extern long _bfd_elf_link_lookup_local_dynindx
