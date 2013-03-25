@@ -938,15 +938,6 @@ _bfd_elf_merge_symbol (bfd *abfd,
   sec = *psec;
   bind = ELF_ST_BIND (sym->st_info);
 
-  /* Silently discard TLS symbols from --just-syms.  There's no way to
-     combine a static TLS block with a new TLS block for this executable.  */
-  if (ELF_ST_TYPE (sym->st_info) == STT_TLS
-      && sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
-    {
-      *skip = TRUE;
-      return TRUE;
-    }
-
   if (! bfd_is_und_section (sec))
     h = elf_link_hash_lookup (elf_hash_table (info), name, TRUE, FALSE, FALSE);
   else
@@ -1145,19 +1136,23 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
       if (tdef && ntdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS definition in %B section %A mismatches non-TLS definition in %B section %A"),
+	  (_("%s: TLS definition in %B section %A "
+	     "mismatches non-TLS definition in %B section %A"),
 	   tbfd, tsec, ntbfd, ntsec, h->root.root.string);
       else if (!tdef && !ntdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS reference in %B mismatches non-TLS reference in %B"),
+	  (_("%s: TLS reference in %B "
+	     "mismatches non-TLS reference in %B"),
 	   tbfd, ntbfd, h->root.root.string);
       else if (tdef)
 	(*_bfd_error_handler)
-	  (_("%s: TLS definition in %B section %A mismatches non-TLS reference in %B"),
+	  (_("%s: TLS definition in %B section %A "
+	     "mismatches non-TLS reference in %B"),
 	   tbfd, tsec, ntbfd, h->root.root.string);
       else
 	(*_bfd_error_handler)
-	  (_("%s: TLS reference in %B mismatches non-TLS definition in %B section %A"),
+	  (_("%s: TLS reference in %B "
+	     "mismatches non-TLS definition in %B section %A"),
 	   tbfd, ntbfd, ntsec, h->root.root.string);
 
       bfd_set_error (bfd_error_bad_value);
@@ -3975,6 +3970,13 @@ error_free_dyn:
 	  bfd_set_error (bfd_error_bad_value);
 	  goto error_free_vers;
 	}
+
+      /* Silently discard TLS symbols from --just-syms.  There's
+	 no way to combine a static TLS block with a new TLS block
+	 for this executable.  */
+      if (ELF_ST_TYPE (isym->st_info) == STT_TLS
+	  && sec->sec_info_type == SEC_INFO_TYPE_JUST_SYMS)
+	continue;
 
       if (bfd_is_und_section (sec)
 	  || bfd_is_com_section (sec))

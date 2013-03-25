@@ -1,5 +1,12 @@
 2013-03-25  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (_bfd_elf_merge_symbol): Don't discard TLS symbols here.
+	Wrap long lines.
+	(elf_link_add_object_symbols): Discard TLS symbols for --just-syms
+	early in symbol loop.
+
+2013-03-25  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (struct elf_backend_data <merge_symbol>): Update proto.
 	(_bfd_elf_init_reloc_shdr): Delete.
 	* elf.c (_bfd_elf_init_reloc_shdr): Make static.
