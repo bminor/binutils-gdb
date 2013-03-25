@@ -1,3 +1,10 @@
+2013-03-25  Tristan Gingold  <gingold@adacore.com>
+	Backport of: 2013-03-08  Yann Sionneau  <yann.sionneau@gmail.com>
+
+	PR binutils/15241
+	* lm32.cpu (Control and status registers): Add CFG2, PSW,
+	TLBVADDR, TLBPADDR and TLBBADVADDR.
+
 2012-02-27  Alan Modra  <amodra@gmail.com>
 
 	* mt.opc (print_dollarhex): Trim values to 32 bits.

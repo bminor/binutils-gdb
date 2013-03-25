@@ -1,3 +1,8 @@
+2013-03-25  Tristan Gingold  <gingold@adacore.com>
+	Backport of: 2013-03-08  Yann Sionneau  <yann.sionneau@gmail.com>
+
+	* lm32-desc.c: Regenerate.
+
 2013-03-08  Christian Groessler  <chris@groessler.org>
 
 	Backport from mainline:
