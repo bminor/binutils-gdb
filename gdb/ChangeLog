@@ -1,5 +1,11 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_resume): New.
+	(record_btrace_wait): New.
+	(init_record_btrace_ops): Initialize to_wait and to_resume.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_xfer_partial)
 	(record_btrace_insert_breakpoint, record_btrace_remove_breakpoint)
 	(record_btrace_allow_memory_access): New.
