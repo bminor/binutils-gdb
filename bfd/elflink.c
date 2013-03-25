@@ -895,17 +895,18 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
     }
 }
 
-/* This function is called when we want to define a new symbol.  It
-   handles the various cases which arise when we find a definition in
-   a dynamic object, or when there is already a definition in a
-   dynamic object.  The new symbol is described by NAME, SYM, PSEC,
-   and PVALUE.  We set SYM_HASH to the hash table entry.  We set
-   OVERRIDE if the old symbol is overriding a new definition.  We set
-   TYPE_CHANGE_OK if it is OK for the type to change.  We set
-   SIZE_CHANGE_OK if it is OK for the size to change.  By OK to
-   change, we mean that we shouldn't warn if the type or size does
-   change.  We set POLD_ALIGNMENT if an old common symbol in a dynamic
-   object is overridden by a regular object.  */
+/* This function is called when we want to merge a new symbol with an
+   existing symbol.  It handles the various cases which arise when we
+   find a definition in a dynamic object, or when there is already a
+   definition in a dynamic object.  The new symbol is described by
+   NAME, SYM, PSEC, and PVALUE.  We set SYM_HASH to the hash table
+   entry.  We set POLDBFD to the old symbol's BFD.  We set POLD_WEAK
+   if the old symbol was weak.  We set POLD_ALIGNMENT to the alignment
+   of an old common symbol.  We set OVERRIDE if the old symbol is
+   overriding a new definition.  We set TYPE_CHANGE_OK if it is OK for
+   the type to change.  We set SIZE_CHANGE_OK if it is OK for the size
+   to change.  By OK to change, we mean that we shouldn't warn if the
+   type or size does change.  */
 
 static bfd_boolean
 _bfd_elf_merge_symbol (bfd *abfd,
@@ -914,9 +915,10 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		       Elf_Internal_Sym *sym,
 		       asection **psec,
 		       bfd_vma *pvalue,
+		       struct elf_link_hash_entry **sym_hash,
+		       bfd **poldbfd,
 		       bfd_boolean *pold_weak,
 		       unsigned int *pold_alignment,
-		       struct elf_link_hash_entry **sym_hash,
 		       bfd_boolean *skip,
 		       bfd_boolean *override,
 		       bfd_boolean *type_change_ok,
@@ -1030,8 +1032,12 @@ _bfd_elf_merge_symbol (bfd *abfd,
     case bfd_link_hash_common:
       oldbfd = h->root.u.c.p->section->owner;
       oldsec = h->root.u.c.p->section;
+      if (pold_alignment)
+	*pold_alignment = h->root.u.c.p->alignment_power;
       break;
     }
+  if (poldbfd && *poldbfd == NULL)
+    *poldbfd = oldbfd;
 
   /* Differentiate strong and weak symbols.  */
   newweak = bind == STB_WEAK;
@@ -1568,7 +1574,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
 /* This function is called to create an indirect symbol from the
    default for the symbol with the default version if needed. The
-   symbol is described by H, NAME, SYM, PSEC, VALUE, and OVERRIDE.  We
+   symbol is described by H, NAME, SYM, SEC, and VALUE.  We
    set DYNSYM if the new indirect symbol is dynamic.  */
 
 static bfd_boolean
@@ -1577,8 +1583,9 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 			     struct elf_link_hash_entry *h,
 			     const char *name,
 			     Elf_Internal_Sym *sym,
-			     asection **psec,
-			     bfd_vma *value,
+			     asection *sec,
+			     bfd_vma value,
+			     bfd **poldbfd,
 			     bfd_boolean *dynsym)
 {
   bfd_boolean type_change_ok;
@@ -1593,7 +1600,6 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   bfd_boolean override;
   char *p;
   size_t len, shortlen;
-  asection *sec;
 
   /* If this symbol has a version, and it is the default version, we
      create an indirect symbol from the default name to the fully
@@ -1620,9 +1626,8 @@ _bfd_elf_add_default_symbol (bfd *abfd,
      actually going to define an indirect symbol.  */
   type_change_ok = FALSE;
   size_change_ok = FALSE;
-  sec = *psec;
-  if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
-			      NULL, NULL, &hi, &skip, &override,
+  if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, &value,
+			      &hi, poldbfd, NULL, NULL, &skip, &override,
 			      &type_change_ok, &size_change_ok))
     return FALSE;
 
@@ -1729,9 +1734,8 @@ nondefault:
   /* Once again, merge with any existing symbol.  */
   type_change_ok = FALSE;
   size_change_ok = FALSE;
-  sec = *psec;
-  if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, value,
-			      NULL, NULL, &hi, &skip, &override,
+  if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, &value,
+			      &hi, NULL, NULL, NULL, &skip, &override,
 			      &type_change_ok, &size_change_ok))
     return FALSE;
 
@@ -3831,7 +3835,6 @@ error_free_dyn:
       bfd_boolean common;
       unsigned int old_alignment;
       bfd *old_bfd;
-      bfd * undef_bfd = NULL;
 
       override = FALSE;
 
@@ -3977,22 +3980,6 @@ error_free_dyn:
 	  unsigned int vernum = 0;
 	  bfd_boolean skip;
 
-	  /* If this is a definition of a symbol which was previously
-	     referenced, then make a note of the bfd that contained the
-	     reference.  This is used if we need to refer to the source
-	     of the reference later on.  */
-	  if (! bfd_is_und_section (sec))
-	    {
-	      h = elf_link_hash_lookup (elf_hash_table (info), name,
-					FALSE, FALSE, FALSE);
-
-	      if (h != NULL
-		  && (h->root.type == bfd_link_hash_undefined
-		      || h->root.type == bfd_link_hash_undefweak)
-		  && h->root.u.undef.abfd)
-		undef_bfd = h->root.u.undef.abfd;
-	    }
-
 	  if (ever == NULL)
 	    {
 	      if (info->default_imported_symver)
@@ -4100,23 +4087,9 @@ error_free_dyn:
 	      name = newname;
 	    }
 
-	  /* If necessary, make a second attempt to locate the bfd
-	     containing an unresolved reference to the current symbol.  */
-	  if (! bfd_is_und_section (sec) && undef_bfd == NULL)
-	    {
-	      h = elf_link_hash_lookup (elf_hash_table (info), name,
-					FALSE, FALSE, FALSE);
-
-	      if (h != NULL
-		  && (h->root.type == bfd_link_hash_undefined
-		      || h->root.type == bfd_link_hash_undefweak)
-		  && h->root.u.undef.abfd)
-		undef_bfd = h->root.u.undef.abfd;
-	    }
-
-	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec,
-				      &value, &old_weak, &old_alignment,
-				      sym_hash, &skip, &override,
+	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
+				      sym_hash, &old_bfd, &old_weak,
+				      &old_alignment, &skip, &override,
 				      &type_change_ok, &size_change_ok))
 	    goto error_free_vers;
 
@@ -4130,28 +4103,6 @@ error_free_dyn:
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-
-	  /* Remember the old alignment if this is a common symbol, so
-	     that we don't reduce the alignment later on.  We can't
-	     check later, because _bfd_generic_link_add_one_symbol
-	     will set a default for the alignment which we want to
-	     override. We also remember the old bfd where the existing
-	     definition comes from.  */
-	  switch (h->root.type)
-	    {
-	    default:
-	      break;
-
-	    case bfd_link_hash_defined:
-	    case bfd_link_hash_defweak:
-	      old_bfd = h->root.u.def.section->owner;
-	      break;
-
-	    case bfd_link_hash_common:
-	      old_bfd = h->root.u.c.p->section->owner;
-	      old_alignment = h->root.u.c.p->alignment_power;
-	      break;
-	    }
 
 	  if (elf_tdata (abfd)->verdef != NULL
 	      && vernum > 1
@@ -4222,127 +4173,14 @@ error_free_dyn:
 
       if (is_elf_hash_table (htab))
 	{
-	  bfd_boolean dynsym;
-
-	  /* Check the alignment when a common symbol is involved. This
-	     can change when a common symbol is overridden by a normal
-	     definition or a common symbol is ignored due to the old
-	     normal definition. We need to make sure the maximum
-	     alignment is maintained.  */
-	  if ((old_alignment || common)
-	      && h->root.type != bfd_link_hash_common)
-	    {
-	      unsigned int common_align;
-	      unsigned int normal_align;
-	      unsigned int symbol_align;
-	      bfd *normal_bfd;
-	      bfd *common_bfd;
-
-	      symbol_align = ffs (h->root.u.def.value) - 1;
-	      if (h->root.u.def.section->owner != NULL
-		  && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
-		{
-		  normal_align = h->root.u.def.section->alignment_power;
-		  if (normal_align > symbol_align)
-		    normal_align = symbol_align;
-		}
-	      else
-		normal_align = symbol_align;
-
-	      if (old_alignment)
-		{
-		  common_align = old_alignment;
-		  common_bfd = old_bfd;
-		  normal_bfd = abfd;
-		}
-	      else
-		{
-		  common_align = bfd_log2 (isym->st_value);
-		  common_bfd = abfd;
-		  normal_bfd = old_bfd;
-		}
-
-	      if (normal_align < common_align)
-		{
-		  /* PR binutils/2735 */
-		  if (normal_bfd == NULL)
-		    (*_bfd_error_handler)
-		      (_("Warning: alignment %u of common symbol `%s' in %B"
-			 " is greater than the alignment (%u) of its section %A"),
-		       common_bfd, h->root.u.def.section,
-		       1 << common_align, name, 1 << normal_align);
-		  else
-		    (*_bfd_error_handler)
-		      (_("Warning: alignment %u of symbol `%s' in %B"
-			 " is smaller than %u in %B"),
-		       normal_bfd, common_bfd,
-		       1 << normal_align, name, 1 << common_align);
-		}
-	    }
-
-	  /* Remember the symbol size if it isn't undefined.  */
-	  if ((isym->st_size != 0 && isym->st_shndx != SHN_UNDEF)
-	      && (definition || h->size == 0))
-	    {
-	      if (h->size != 0
-		  && h->size != isym->st_size
-		  && ! size_change_ok)
-		(*_bfd_error_handler)
-		  (_("Warning: size of symbol `%s' changed"
-		     " from %lu in %B to %lu in %B"),
-		   old_bfd, abfd,
-		   name, (unsigned long) h->size,
-		   (unsigned long) isym->st_size);
-
-	      h->size = isym->st_size;
-	    }
-
-	  /* If this is a common symbol, then we always want H->SIZE
-	     to be the size of the common symbol.  The code just above
-	     won't fix the size if a common symbol becomes larger.  We
-	     don't warn about a size change here, because that is
-	     covered by --warn-common.  Allow changed between different
-	     function types.  */
-	  if (h->root.type == bfd_link_hash_common)
-	    h->size = h->root.u.c.size;
-
-	  if (ELF_ST_TYPE (isym->st_info) != STT_NOTYPE
-	      && ((definition && !new_weak)
-		  || (old_weak && h->root.type == bfd_link_hash_common)
-		  || h->type == STT_NOTYPE))
-	    {
-	      unsigned int type = ELF_ST_TYPE (isym->st_info);
-
-	      /* Turn an IFUNC symbol from a DSO into a normal FUNC
-		 symbol.  */
-	      if (type == STT_GNU_IFUNC
-		  && (abfd->flags & DYNAMIC) != 0)
-		type = STT_FUNC;
-
-	      if (h->type != type)
-		{
-		  if (h->type != STT_NOTYPE && ! type_change_ok)
-		    (*_bfd_error_handler)
-		      (_("Warning: type of symbol `%s' changed"
-			 " from %d to %d in %B"),
-		       abfd, name, h->type, type);
-
-		  h->type = type;
-		}
-	    }
-
-	  /* Merge st_other field.  */
-	  elf_merge_st_other (abfd, h, isym, definition, dynamic);
-
 	  /* Set a flag in the hash table entry indicating the type of
-	     reference or definition we just found.  Keep a count of
-	     the number of dynamic symbols we find.  A dynamic symbol
+	     reference or definition we just found.  A dynamic symbol
 	     is one which is referenced or defined by both a regular
 	     object and a shared object.  */
-	  dynsym = FALSE;
+	  bfd_boolean dynsym = FALSE;
 
 	  /* Plugin symbols aren't normal.  Don't set def_regular or
-	     ref_regular for them, nor make them dynamic.  */
+	     ref_regular for them, or make them dynamic.  */
 	  if ((abfd->flags & BFD_PLUGIN) != 0)
 	    ;
 	  else if (! dynamic)
@@ -4395,8 +4233,130 @@ error_free_dyn:
 		dynsym = TRUE;
 	    }
 
+	  /* Check to see if we need to add an indirect symbol for
+	     the default name.  */
+	  if (definition
+	      || (!override && h->root.type == bfd_link_hash_common))
+	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
+					      sec, value, &old_bfd, &dynsym))
+	      goto error_free_vers;
+
+	  /* Check the alignment when a common symbol is involved. This
+	     can change when a common symbol is overridden by a normal
+	     definition or a common symbol is ignored due to the old
+	     normal definition. We need to make sure the maximum
+	     alignment is maintained.  */
+	  if ((old_alignment || common)
+	      && h->root.type != bfd_link_hash_common)
+	    {
+	      unsigned int common_align;
+	      unsigned int normal_align;
+	      unsigned int symbol_align;
+	      bfd *normal_bfd;
+	      bfd *common_bfd;
+
+	      symbol_align = ffs (h->root.u.def.value) - 1;
+	      if (h->root.u.def.section->owner != NULL
+		  && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
+		{
+		  normal_align = h->root.u.def.section->alignment_power;
+		  if (normal_align > symbol_align)
+		    normal_align = symbol_align;
+		}
+	      else
+		normal_align = symbol_align;
+
+	      if (old_alignment)
+		{
+		  common_align = old_alignment;
+		  common_bfd = old_bfd;
+		  normal_bfd = abfd;
+		}
+	      else
+		{
+		  common_align = bfd_log2 (isym->st_value);
+		  common_bfd = abfd;
+		  normal_bfd = old_bfd;
+		}
+
+	      if (normal_align < common_align)
+		{
+		  /* PR binutils/2735 */
+		  if (normal_bfd == NULL)
+		    (*_bfd_error_handler)
+		      (_("Warning: alignment %u of common symbol `%s' in %B is"
+			 " greater than the alignment (%u) of its section %A"),
+		       common_bfd, h->root.u.def.section,
+		       1 << common_align, name, 1 << normal_align);
+		  else
+		    (*_bfd_error_handler)
+		      (_("Warning: alignment %u of symbol `%s' in %B"
+			 " is smaller than %u in %B"),
+		       normal_bfd, common_bfd,
+		       1 << normal_align, name, 1 << common_align);
+		}
+	    }
+
+	  /* Remember the symbol size if it isn't undefined.  */
+	  if ((isym->st_size != 0 && isym->st_shndx != SHN_UNDEF)
+	      && (definition || h->size == 0))
+	    {
+	      if (h->size != 0
+		  && h->size != isym->st_size
+		  && ! size_change_ok)
+		(*_bfd_error_handler)
+		  (_("Warning: size of symbol `%s' changed"
+		     " from %lu in %B to %lu in %B"),
+		   old_bfd, abfd,
+		   name, (unsigned long) h->size,
+		   (unsigned long) isym->st_size);
+
+	      h->size = isym->st_size;
+	    }
+
+	  /* If this is a common symbol, then we always want H->SIZE
+	     to be the size of the common symbol.  The code just above
+	     won't fix the size if a common symbol becomes larger.  We
+	     don't warn about a size change here, because that is
+	     covered by --warn-common.  Allow changes between different
+	     function types.  */
+	  if (h->root.type == bfd_link_hash_common)
+	    h->size = h->root.u.c.size;
+
+	  if (ELF_ST_TYPE (isym->st_info) != STT_NOTYPE
+	      && ((definition && !new_weak)
+		  || (old_weak && h->root.type == bfd_link_hash_common)
+		  || h->type == STT_NOTYPE))
+	    {
+	      unsigned int type = ELF_ST_TYPE (isym->st_info);
+
+	      /* Turn an IFUNC symbol from a DSO into a normal FUNC
+		 symbol.  */
+	      if (type == STT_GNU_IFUNC
+		  && (abfd->flags & DYNAMIC) != 0)
+		type = STT_FUNC;
+
+	      if (h->type != type)
+		{
+		  if (h->type != STT_NOTYPE && ! type_change_ok)
+		    (*_bfd_error_handler)
+		      (_("Warning: type of symbol `%s' changed"
+			 " from %d to %d in %B"),
+		       abfd, name, h->type, type);
+
+		  h->type = type;
+		}
+	    }
+
+	  /* Merge st_other field.  */
+	  elf_merge_st_other (abfd, h, isym, definition, dynamic);
+
 	  /* We don't want to make debug symbol dynamic.  */
 	  if (definition && (sec->flags & SEC_DEBUGGING) && !info->relocatable)
+	    dynsym = FALSE;
+
+	  /* Nor should we make plugin symbols dynamic.  */
+	  if ((abfd->flags & BFD_PLUGIN) != 0)
 	    dynsym = FALSE;
 
 	  if (definition)
@@ -4404,14 +4364,6 @@ error_free_dyn:
 	      h->target_internal = isym->st_target_internal;
 	      h->unique_global = (flags & BSF_GNU_UNIQUE) != 0;
 	    }
-
-	  /* Check to see if we need to add an indirect symbol for
-	     the default name.  */
-	  if (definition
-	      || (!override && h->root.type == bfd_link_hash_common))
-	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
-					      &sec, &value, &dynsym))
-	      goto error_free_vers;
 
 	  if (definition && !dynamic)
 	    {
@@ -4463,8 +4415,8 @@ error_free_dyn:
 	      && definition
 	      && ((dynsym
 		   && h->ref_regular_nonweak
-		   && (undef_bfd == NULL
-		       || (undef_bfd->flags & BFD_PLUGIN) == 0))
+		   && (old_bfd == NULL
+		       || (old_bfd->flags & BFD_PLUGIN) == 0))
 		  || (h->ref_dynamic_nonweak
 		      && (elf_dyn_lib_class (abfd) & DYN_AS_NEEDED) != 0
 		      && !on_needed_list (elf_dt_name (abfd), htab->needed))))
@@ -4477,15 +4429,16 @@ error_free_dyn:
 		 Add a DT_NEEDED entry for it.  Issue an error if
 		 --no-add-needed is used and the reference was not
 		 a weak one.  */
-	      if (undef_bfd != NULL
+	      if (old_bfd != NULL
 		  && h->ref_regular_nonweak
 		  && (elf_dyn_lib_class (abfd) & DYN_NO_NEEDED) != 0)
 		{
 		  (*_bfd_error_handler)
 		    (_("%B: undefined reference to symbol '%s'"),
-		     undef_bfd, name);
+		     old_bfd, name);
 		  (*_bfd_error_handler)
-		    (_("note: '%s' is defined in DSO %B so try adding it to the linker command line"),
+		    (_("note: '%s' is defined in DSO %B"
+		       " so try adding it to the linker command line"),
 		     abfd, name);
 		  bfd_set_error (bfd_error_invalid_operation);
 		  goto error_free_vers;
