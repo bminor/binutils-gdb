@@ -1579,8 +1579,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 			     Elf_Internal_Sym *sym,
 			     asection **psec,
 			     bfd_vma *value,
-			     bfd_boolean *dynsym,
-			     bfd_boolean override)
+			     bfd_boolean *dynsym)
 {
   bfd_boolean type_change_ok;
   bfd_boolean size_change_ok;
@@ -1591,6 +1590,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   const struct elf_backend_data *bed;
   bfd_boolean collect;
   bfd_boolean dynamic;
+  bfd_boolean override;
   char *p;
   size_t len, shortlen;
   asection *sec;
@@ -1602,24 +1602,6 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   p = strchr (name, ELF_VER_CHR);
   if (p == NULL || p[1] != ELF_VER_CHR)
     return TRUE;
-
-  if (override)
-    {
-      /* We are overridden by an old definition. We need to check if we
-	 need to create the indirect symbol from the default name.  */
-      hi = elf_link_hash_lookup (elf_hash_table (info), name, TRUE,
-				 FALSE, FALSE);
-      BFD_ASSERT (hi != NULL);
-      if (hi == h)
-	return TRUE;
-      while (hi->root.type == bfd_link_hash_indirect
-	     || hi->root.type == bfd_link_hash_warning)
-	{
-	  hi = (struct elf_link_hash_entry *) hi->root.u.i.link;
-	  if (hi == h)
-	    return TRUE;
-	}
-    }
 
   bed = get_elf_backend_data (abfd);
   collect = bed->collect;
@@ -4425,10 +4407,10 @@ error_free_dyn:
 
 	  /* Check to see if we need to add an indirect symbol for
 	     the default name.  */
-	  if (definition || h->root.type == bfd_link_hash_common)
+	  if (definition
+	      || (!override && h->root.type == bfd_link_hash_common))
 	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
-					      &sec, &value, &dynsym,
-					      override))
+					      &sec, &value, &dynsym))
 	      goto error_free_vers;
 
 	  if (definition && !dynamic)
