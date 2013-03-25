@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "OBJCOPY 1"
-.TH OBJCOPY 1 "2012-11-13" "binutils-2.23.1" "GNU Development Tools"
+.TH OBJCOPY 1 "2013-03-25" "binutils-2.23.2" "GNU Development Tools"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -157,6 +157,7 @@ objcopy [\fB\-F\fR \fIbfdname\fR|\fB\-\-target=\fR\fIbfdname\fR]
         [\fB\-R\fR \fIsectionname\fR|\fB\-\-remove\-section=\fR\fIsectionname\fR]
         [\fB\-p\fR|\fB\-\-preserve\-dates\fR]
         [\fB\-D\fR|\fB\-\-enable\-deterministic\-archives\fR]
+        [\fB\-U\fR|\fB\-\-disable\-deterministic\-archives\fR]
         [\fB\-\-debugging\fR]
         [\fB\-\-gap\-fill=\fR\fIval\fR]
         [\fB\-\-pad\-to=\fR\fIaddress\fR]
@@ -484,6 +485,23 @@ as those of the input file.
 Operate in \fIdeterministic\fR mode.  When copying archive members
 and writing the archive index, use zero for UIDs, GIDs, timestamps,
 and use consistent file modes for all files.
+.Sp
+If \fIbinutils\fR was configured with
+\&\fB\-\-enable\-deterministic\-archives\fR, then this mode is on by default.
+It can be disabled with the \fB\-U\fR option, below.
+.IP "\fB\-U\fR" 4
+.IX Item "-U"
+.PD 0
+.IP "\fB\-\-disable\-deterministic\-archives\fR" 4
+.IX Item "--disable-deterministic-archives"
+.PD
+Do \fInot\fR operate in \fIdeterministic\fR mode.  This is the
+inverse of the \fB\-D\fR option, above: when copying archive members
+and writing the archive index, use their actual \s-1UID\s0, \s-1GID\s0, timestamp,
+and file mode values.
+.Sp
+This is the default unless \fIbinutils\fR was configured with
+\&\fB\-\-enable\-deterministic\-archives\fR.
 .IP "\fB\-\-debugging\fR" 4
 .IX Item "--debugging"
 Convert debugging information, if possible.  This is not the default

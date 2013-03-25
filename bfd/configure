@@ -3988,7 +3988,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=bfd
- VERSION=2.23.1
+ VERSION=2.23.2
 
 
 cat >>confdefs.h <<_ACEOF

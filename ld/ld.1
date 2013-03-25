@@ -124,7 +124,7 @@
 .\" ========================================================================
 .\"
 .IX Title "LD 1"
-.TH LD 1 "2012-11-13" "binutils-2.23.1" "GNU Development Tools"
+.TH LD 1 "2013-03-25" "binutils-2.23.2" "GNU Development Tools"
 .\" For nroff, turn off justification.  Always turn off hyphenation; it makes
 .\" way too many mistakes in technical documents.
 .if n .ad l
@@ -284,7 +284,7 @@ Adds \fI\s-1AUDITLIB\s0\fR to the \f(CW\*(C`DT_AUDIT\*(C'\fR entry of the dynami
 specified in the library.  If specified multiple times \f(CW\*(C`DT_AUDIT\*(C'\fR
 will contain a colon separated list of audit interfaces to use. If the linker
 finds an object with an audit entry while searching for shared libraries,
-it will add a corresponding \f(CW\*(C`DT_DEPAUDIT\*(C'\fR entry in the output file.  
+it will add a corresponding \f(CW\*(C`DT_DEPAUDIT\*(C'\fR entry in the output file.
 This option is only meaningful on \s-1ELF\s0 platforms supporting the rtld-audit
 interface.
 .IP "\fB\-A\fR \fIarchitecture\fR" 4
@@ -1114,7 +1114,7 @@ option.
 .IP "\fB\-\-no\-copy\-dt\-needed\-entries\fR" 4
 .IX Item "--no-copy-dt-needed-entries"
 .PD
-This option affects the treatment of dynamic libraries referred to 
+This option affects the treatment of dynamic libraries referred to
 by \s-1DT_NEEDED\s0 tags \fIinside\fR \s-1ELF\s0 dynamic libraries mentioned on the
 command line.  Normally the linker won't add a \s-1DT_NEEDED\s0 tag to the
 output binary for each library mentioned in a \s-1DT_NEEDED\s0 tag in an
@@ -1234,7 +1234,7 @@ the linker recursively marks as used any section referenced by their
 relocations.  See \fB\-\-entry\fR and \fB\-\-undefined\fR.
 .Sp
 This option can be set when doing a partial link (enabled with option
-\&\fB\-r\fR).  In this case the root of symbols kept must be explicitly 
+\&\fB\-r\fR).  In this case the root of symbols kept must be explicitly
 specified either by an \fB\-\-entry\fR or \fB\-\-undefined\fR option or by
 a \f(CW\*(C`ENTRY\*(C'\fR command in the linker script.
 .IP "\fB\-\-print\-gc\-sections\fR" 4
@@ -1614,6 +1614,11 @@ Same as \fB\-\-section\-start\fR, with \f(CW\*(C`.bss\*(C'\fR, \f(CW\*(C`.data\*
 .IX Item "-Ttext-segment=org"
 When creating an \s-1ELF\s0 executable or shared object, it will set the address
 of the first byte of the text segment.
+.IP "\fB\-Trodata\-segment=\fR\fIorg\fR" 4
+.IX Item "-Trodata-segment=org"
+When creating an \s-1ELF\s0 executable or shared object for a target where
+the read-only data is in its own segment separate from the executable
+text, it will set the address of the first byte of the read-only data segment.
 .IP "\fB\-\-unresolved\-symbols=\fR\fImethod\fR" 4
 .IX Item "--unresolved-symbols=method"
 Determine how to handle unresolved symbols.  There are four possible
@@ -1961,8 +1966,8 @@ allow their use in executable images as well, or to (probably pointlessly!)
 disallow it in object files, by using these two options.  Executable images
 generated with these long section names are slightly non-standard, carrying
 as they do a string table, and may generate confusing output when examined
-with non-GNU PE-aware tools, such as file viewers and dumpers.  However, 
-\&\s-1GDB\s0 relies on the use of \s-1PE\s0 long section names to find Dwarf\-2 debug 
+with non-GNU PE-aware tools, such as file viewers and dumpers.  However,
+\&\s-1GDB\s0 relies on the use of \s-1PE\s0 long section names to find Dwarf\-2 debug
 information sections in an executable image at runtime, and so if neither
 option is specified on the command-line, \fBld\fR will enable long
 section names, overriding the default and technically correct behaviour,
