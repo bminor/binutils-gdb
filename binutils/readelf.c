@@ -543,10 +543,12 @@ find_section_in_set (const char * name, unsigned int * set)
 /* Read an unsigned LEB128 encoded value from p.  Set *PLEN to the number of
    bytes read.  */
 
-static unsigned long
-read_uleb128 (unsigned char *data, unsigned int *length_return)
+static inline unsigned long
+read_uleb128 (unsigned char *data,
+	      unsigned int *length_return,
+	      const unsigned char * const end)
 {
-  return read_leb128 (data, length_return, 0);
+  return read_leb128 (data, length_return, FALSE, end);
 }
 
 /* Return true if the current file is for IA-64 machine and OpenVMS ABI.
@@ -6860,7 +6862,7 @@ decode_arm_unwind_bytecode (struct arm_unw_aux_info *aux,
 		break;
 	    }
 	  assert (i < sizeof (buf));
-	  offset = read_uleb128 (buf, &len);
+	  offset = read_uleb128 (buf, &len, buf + i + 1);
 	  assert (len == i + 1);
 	  offset = offset * 4 + 0x204;
 	  printf ("vsp = vsp + %ld", offset);
@@ -7056,7 +7058,7 @@ decode_tic6x_unwind_bytecode (struct arm_unw_aux_info *aux,
 		break;
 	    }
 	  assert (i < sizeof (buf));
-	  offset = read_uleb128 (buf, &len);
+	  offset = read_uleb128 (buf, &len, buf + i + 1);
 	  assert (len == i + 1);
 	  offset = offset * 8 + 0x408;
 	  printf (_("sp = sp + %ld"), offset);
@@ -11095,6 +11097,52 @@ process_mips_fpe_exception (int mask)
     fputs ("0", stdout);
 }
 
+/* Display's the value of TAG at location P.  If TAG is
+   greater than 0 it is assumed to be an unknown tag, and
+   a message is printed to this effect.  Otherwise it is
+   assumed that a message has already been printed.
+
+   If the bottom bit of TAG is set it assumed to have a
+   string value, otherwise it is assumed to have an integer
+   value.
+
+   Returns an updated P pointing to the first unread byte
+   beyond the end of TAG's value.
+
+   Reads at or beyond END will not be made.  */
+
+static unsigned char *
+display_tag_value (int tag,
+		   unsigned char * p,
+		   const unsigned char * const end)
+{
+  unsigned long val;
+
+  if (tag > 0)
+    printf ("  Tag_unknown_%d: ", tag);
+
+  if (p >= end)
+    {
+      warn (_("corrupt tag\n"));
+    }
+  else if (tag & 1)
+    {
+      /* FIXME: we could read beyond END here.  */
+      printf ("\"%s\"\n", p);
+      p += strlen ((char *) p) + 1;
+    }
+  else
+    {
+      unsigned int len;
+
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("%ld (0x%lx)\n", val, val);
+    }
+
+  return p;
+}
+
 /* ARM EABI attributes section.  */
 typedef struct
 {
@@ -11216,7 +11264,8 @@ static arm_attr_public_tag arm_attr_public_tags[] =
 #undef LOOKUP
 
 static unsigned char *
-display_arm_attribute (unsigned char * p)
+display_arm_attribute (unsigned char * p,
+		       const unsigned char * const end)
 {
   int tag;
   unsigned int len;
@@ -11225,7 +11274,7 @@ display_arm_attribute (unsigned char * p)
   unsigned i;
   int type;
 
-  tag = read_uleb128 (p, &len);
+  tag = read_uleb128 (p, &len, end);
   p += len;
   attr = NULL;
   for (i = 0; i < ARRAY_SIZE (arm_attr_public_tags); i++)
@@ -11246,7 +11295,7 @@ display_arm_attribute (unsigned char * p)
 	  switch (tag)
 	    {
 	    case 7: /* Tag_CPU_arch_profile.  */
-	      val = read_uleb128 (p, &len);
+	      val = read_uleb128 (p, &len, end);
 	      p += len;
 	      switch (val)
 		{
@@ -11260,7 +11309,7 @@ display_arm_attribute (unsigned char * p)
 	      break;
 
 	    case 24: /* Tag_align_needed.  */
-	      val = read_uleb128 (p, &len);
+	      val = read_uleb128 (p, &len, end);
 	      p += len;
 	      switch (val)
 		{
@@ -11279,7 +11328,7 @@ display_arm_attribute (unsigned char * p)
 	      break;
 
 	    case 25: /* Tag_align_preserved.  */
-	      val = read_uleb128 (p, &len);
+	      val = read_uleb128 (p, &len, end);
 	      p += len;
 	      switch (val)
 		{
@@ -11298,7 +11347,7 @@ display_arm_attribute (unsigned char * p)
 	      break;
 
 	    case 32: /* Tag_compatibility.  */
-	      val = read_uleb128 (p, &len);
+	      val = read_uleb128 (p, &len, end);
 	      p += len;
 	      printf (_("flag = %d, vendor = %s\n"), val, p);
 	      p += strlen ((char *) p) + 1;
@@ -11310,11 +11359,11 @@ display_arm_attribute (unsigned char * p)
 	      break;
 
 	    case 65: /* Tag_also_compatible_with.  */
-	      val = read_uleb128 (p, &len);
+	      val = read_uleb128 (p, &len, end);
 	      p += len;
 	      if (val == 6 /* Tag_CPU_arch.  */)
 		{
-		  val = read_uleb128 (p, &len);
+		  val = read_uleb128 (p, &len, end);
 		  p += len;
 		  if ((unsigned int)val >= ARRAY_SIZE (arm_attr_tag_CPU_arch))
 		    printf ("??? (%d)\n", val);
@@ -11332,13 +11381,13 @@ display_arm_attribute (unsigned char * p)
 	  return p;
 
 	case 1:
+	  return display_tag_value (-1, p, end);
 	case 2:
-	  type = attr->type;
-	  break;
+	  return display_tag_value (0, p, end);
 
 	default:
 	  assert (attr->type & 0x80);
-	  val = read_uleb128 (p, &len);
+	  val = read_uleb128 (p, &len, end);
 	  p += len;
 	  type = attr->type & 0x7f;
 	  if (val >= type)
@@ -11348,87 +11397,58 @@ display_arm_attribute (unsigned char * p)
 	  return p;
 	}
     }
-  else
-    {
-      if (tag & 1)
-	type = 1; /* String.  */
-      else
-	type = 2; /* uleb128.  */
-      printf ("  Tag_unknown_%d: ", tag);
-    }
 
-  if (type == 1)
-    {
-      printf ("\"%s\"\n", p);
-      p += strlen ((char *) p) + 1;
-    }
-  else
-    {
-      val = read_uleb128 (p, &len);
-      p += len;
-      printf ("%d (0x%x)\n", val, val);
-    }
-
-  return p;
+  return display_tag_value (tag, p, end);
 }
 
 static unsigned char *
 display_gnu_attribute (unsigned char * p,
-		       unsigned char * (* display_proc_gnu_attribute) (unsigned char *, int))
+		       unsigned char * (* display_proc_gnu_attribute) (unsigned char *, int, const unsigned char * const),
+		       const unsigned char * const end)
 {
   int tag;
   unsigned int len;
   int val;
-  int type;
 
-  tag = read_uleb128 (p, &len);
+  tag = read_uleb128 (p, &len, end);
   p += len;
 
   /* Tag_compatibility is the only generic GNU attribute defined at
      present.  */
   if (tag == 32)
     {
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
-      printf (_("flag = %d, vendor = %s\n"), val, p);
-      p += strlen ((char *) p) + 1;
+      if (p == end)
+	{
+	  printf (_("flag = %d, vendor = <corrupt>\n"), val);
+	  warn (_("corrupt vendor attribute\n"));
+	}
+      else
+	{
+	  printf (_("flag = %d, vendor = %s\n"), val, p);
+	  p += strlen ((char *) p) + 1;
+	}
       return p;
     }
 
   if ((tag & 2) == 0 && display_proc_gnu_attribute)
-    return display_proc_gnu_attribute (p, tag);
+    return display_proc_gnu_attribute (p, tag, end);
 
-  if (tag & 1)
-    type = 1; /* String.  */
-  else
-    type = 2; /* uleb128.  */
-  printf ("  Tag_unknown_%d: ", tag);
-
-  if (type == 1)
-    {
-      printf ("\"%s\"\n", p);
-      p += strlen ((char *) p) + 1;
-    }
-  else
-    {
-      val = read_uleb128 (p, &len);
-      p += len;
-      printf ("%d (0x%x)\n", val, val);
-    }
-
-  return p;
+  return display_tag_value (tag, p, end);
 }
 
 static unsigned char *
-display_power_gnu_attribute (unsigned char * p, int tag)
+display_power_gnu_attribute (unsigned char * p,
+			     int tag,
+			     const unsigned char * const end)
 {
-  int type;
   unsigned int len;
   int val;
 
   if (tag == Tag_GNU_Power_ABI_FP)
     {
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Power_ABI_FP: ");
 
@@ -11455,7 +11475,7 @@ display_power_gnu_attribute (unsigned char * p, int tag)
 
   if (tag == Tag_GNU_Power_ABI_Vector)
     {
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Power_ABI_Vector: ");
       switch (val)
@@ -11481,7 +11501,13 @@ display_power_gnu_attribute (unsigned char * p, int tag)
 
   if (tag == Tag_GNU_Power_ABI_Struct_Return)
     {
-      val = read_uleb128 (p, &len);
+      if (p == end)
+	{
+	  warn (_("corrupt Tag_GNU_Power_ABI_Struct_Return"));
+	  return p;
+	}
+		   
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Power_ABI_Struct_Return: ");
       switch (val)
@@ -11502,25 +11528,7 @@ display_power_gnu_attribute (unsigned char * p, int tag)
       return p;
     }
 
-  if (tag & 1)
-    type = 1; /* String.  */
-  else
-    type = 2; /* uleb128.  */
-  printf ("  Tag_unknown_%d: ", tag);
-
-  if (type == 1)
-    {
-      printf ("\"%s\"\n", p);
-      p += strlen ((char *) p) + 1;
-    }
-  else
-    {
-      val = read_uleb128 (p, &len);
-      p += len;
-      printf ("%d (0x%x)\n", val, val);
-    }
-
-  return p;
+  return display_tag_value (tag & 1, p, end);
 }
 
 static void
@@ -11568,53 +11576,36 @@ display_sparc_hwcaps (int mask)
 }
 
 static unsigned char *
-display_sparc_gnu_attribute (unsigned char * p, int tag)
+display_sparc_gnu_attribute (unsigned char * p,
+			     int tag,
+			     const unsigned char * const end)
 {
-  int type;
-  unsigned int len;
-  int val;
-
   if (tag == Tag_GNU_Sparc_HWCAPS)
     {
-      val = read_uleb128 (p, &len);
+      unsigned int len;
+      int val;
+
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Sparc_HWCAPS: ");
-
       display_sparc_hwcaps (val);
       return p;
    }
 
-  if (tag & 1)
-    type = 1; /* String.  */
-  else
-    type = 2; /* uleb128.  */
-  printf ("  Tag_unknown_%d: ", tag);
-
-  if (type == 1)
-    {
-      printf ("\"%s\"\n", p);
-      p += strlen ((char *) p) + 1;
-    }
-  else
-    {
-      val = read_uleb128 (p, &len);
-      p += len;
-      printf ("%d (0x%x)\n", val, val);
-    }
-
-  return p;
+  return display_tag_value (tag, p, end);
 }
 
 static unsigned char *
-display_mips_gnu_attribute (unsigned char * p, int tag)
+display_mips_gnu_attribute (unsigned char * p,
+			    int tag,
+			    const unsigned char * const end)
 {
-  int type;
-  unsigned int len;
-  int val;
-
   if (tag == Tag_GNU_MIPS_ABI_FP)
     {
-      val = read_uleb128 (p, &len);
+      unsigned int len;
+      int val;
+
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_MIPS_ABI_FP: ");
 
@@ -11642,41 +11633,24 @@ display_mips_gnu_attribute (unsigned char * p, int tag)
       return p;
    }
 
-  if (tag & 1)
-    type = 1; /* String.  */
-  else
-    type = 2; /* uleb128.  */
-  printf ("  Tag_unknown_%d: ", tag);
-
-  if (type == 1)
-    {
-      printf ("\"%s\"\n", p);
-      p += strlen ((char *) p) + 1;
-    }
-  else
-    {
-      val = read_uleb128 (p, &len);
-      p += len;
-      printf ("%d (0x%x)\n", val, val);
-    }
-
-  return p;
+  return display_tag_value (tag & 1, p, end);
 }
 
 static unsigned char *
-display_tic6x_attribute (unsigned char * p)
+display_tic6x_attribute (unsigned char * p,
+			 const unsigned char * const end)
 {
   int tag;
   unsigned int len;
   int val;
 
-  tag = read_uleb128 (p, &len);
+  tag = read_uleb128 (p, &len, end);
   p += len;
 
   switch (tag)
     {
     case Tag_ISA:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ISA: ");
 
@@ -11710,7 +11684,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_wchar_t:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_wchar_t: ");
       switch (val)
@@ -11731,7 +11705,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_stack_align_needed:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_stack_align_needed: ");
       switch (val)
@@ -11749,7 +11723,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_stack_align_preserved:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_stack_align_preserved: ");
       switch (val)
@@ -11767,7 +11741,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_DSBT:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_DSBT: ");
       switch (val)
@@ -11785,7 +11759,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_PID:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_PID: ");
       switch (val)
@@ -11806,7 +11780,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_PIC:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_PIC: ");
       switch (val)
@@ -11824,7 +11798,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_array_object_alignment:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_array_object_alignment: ");
       switch (val)
@@ -11845,7 +11819,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_array_object_align_expected:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_array_object_align_expected: ");
       switch (val)
@@ -11866,7 +11840,7 @@ display_tic6x_attribute (unsigned char * p)
       return p;
 
     case Tag_ABI_compatibility:
-      val = read_uleb128 (p, &len);
+      val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_ABI_compatibility: ");
       printf (_("flag = %d, vendor = %s\n"), val, p);
@@ -11880,29 +11854,59 @@ display_tic6x_attribute (unsigned char * p)
       return p;
     }
 
-  printf ("  Tag_unknown_%d: ", tag);
+  return display_tag_value (tag, p, end);
+}
 
-  if (tag & 1)
+static void
+display_raw_attribute (unsigned char * p, unsigned char * end)
+{
+  unsigned long addr = 0;
+  size_t bytes = end - p;
+
+  while (bytes)
     {
-      printf ("\"%s\"\n", p);
-      p += strlen ((char *) p) + 1;
-    }
-  else
-    {
-      val = read_uleb128 (p, &len);
-      p += len;
-      printf ("%d (0x%x)\n", val, val);
+      int j;
+      int k;
+      int lbytes = (bytes > 16 ? 16 : bytes);
+
+      printf ("  0x%8.8lx ", addr);
+
+      for (j = 0; j < 16; j++)
+	{
+	  if (j < lbytes)
+	    printf ("%2.2x", p[j]);
+	  else
+	    printf ("  ");
+
+	  if ((j & 3) == 3)
+	    printf (" ");
+	}
+
+      for (j = 0; j < lbytes; j++)
+	{
+	  k = p[j];
+	  if (k >= ' ' && k < 0x7f)
+	    printf ("%c", k);
+	  else
+	    printf (".");
+	}
+
+      putchar ('\n');
+
+      p  += lbytes;
+      bytes -= lbytes;
+      addr += lbytes;
     }
 
-  return p;
+  putchar ('\n');
 }
 
 static int
 process_attributes (FILE * file,
 		    const char * public_name,
 		    unsigned int proc_type,
-		    unsigned char * (* display_pub_attribute) (unsigned char *),
-		    unsigned char * (* display_proc_gnu_attribute) (unsigned char *, int))
+		    unsigned char * (* display_pub_attribute) (unsigned char *, const unsigned char * const),
+		    unsigned char * (* display_proc_gnu_attribute) (unsigned char *, int, const unsigned char * const))
 {
   Elf_Internal_Shdr * sect;
   unsigned char * contents;
@@ -11997,7 +12001,7 @@ process_attributes (FILE * file,
 			{
 			  unsigned int j;
 
-			  val = read_uleb128 (p, &j);
+			  val = read_uleb128 (p, &j, end);
 			  p += j;
 			  if (val == 0)
 			    break;
@@ -12014,18 +12018,19 @@ process_attributes (FILE * file,
 		  if (public_section)
 		    {
 		      while (p < end)
-			p = display_pub_attribute (p);
+			p = display_pub_attribute (p, end);
 		    }
 		  else if (gnu_section)
 		    {
 		      while (p < end)
 			p = display_gnu_attribute (p,
-						   display_proc_gnu_attribute);
+						   display_proc_gnu_attribute,
+						   end);
 		    }
 		  else
 		    {
-		      /* ??? Do something sensible, like dump hex.  */
 		      printf (_("  Unknown section contexts\n"));
+		      display_raw_attribute (p, end);
 		      p = end;
 		    }
 		}

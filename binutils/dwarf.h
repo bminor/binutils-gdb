@@ -1,6 +1,5 @@
 /* dwarf.h - DWARF support header file
-   Copyright 2005, 2007, 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright 2005-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -248,4 +247,4 @@ void * cmalloc (size_t, size_t);
 void * xcmalloc (size_t, size_t);
 void * xcrealloc (void *, size_t, size_t);
 
-dwarf_vma read_leb128 (unsigned char *, unsigned int *, int);
+extern dwarf_vma read_leb128 (unsigned char *, unsigned int *, bfd_boolean, const unsigned char * const);

@@ -1,3 +1,38 @@
+2013-03-25  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15202
+	* dwarf.c (read_leb128): Add END parameter.  Do not read at or
+	beyond end.
+	(read_sleb128): Add END parameter.
+	(read_uleb128): New function.
+	(process_extended_line_op): Pass END to leb128 functions.
+	(process_abbrev_section): Likewise.
+	(decode_location_expression): Likewise.
+	(read_and_display_attr_value): Likewise.
+	(read_and_display_attr): Likewise.
+	(process_debug_info): Likewise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+	(display_debug_macinfo): Likewise.
+	(get_line_filename_and_dirname): Likewise.
+	(display_debug_macro): Likewise.
+	(display_loc_list_dwo): Likewise.
+	(display_debug_ranges): Likewise.
+	* dwarf.h (read_leb128): Update prototype.
+	* readelf.c (read_uleb128): Add END parameter.
+	(decode_arm_unwind_bytecode): Pass END to read_uleb128.
+	(decode_tic6x_unwind_bytecode): Likewise.
+	(display_tag_value): New function.
+	(display_arm_attribute): Add END parameter. Pass END to
+	read_uleb128.  Use display_tag_value.
+	(display_gnu_attribute): Likewise.
+	(display_power_gnu_attribute): Likewise.
+	(display_sparc_gnu_attribute): Likewise.
+	(display_mips_gnu_attribute): Likewise.
+	(display_tic6x_attribute): Likewise.
+	(process_attributes): Likewise.
+	(display_raw_attribute): New function.
+
 2013-03-22  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15201
