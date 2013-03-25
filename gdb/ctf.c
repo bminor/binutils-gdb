@@ -272,7 +272,8 @@ ctf_target_save (struct trace_file_writer *self,
 }
 
 #ifdef USE_WIN32API
-#define mkdir(pathname, mode) _mkdir (pathname)
+#undef mkdir
+#define mkdir(pathname, mode) mkdir (pathname)
 #endif
 
 /* This is the implementation of trace_file_write_ops method
