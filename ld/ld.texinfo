@@ -2569,7 +2569,7 @@ environment to adjust references to such data in your client code.
 @kindex --disable-runtime-pseudo-reloc
 @item --disable-runtime-pseudo-reloc
 Do not create pseudo relocations for non-zero offset DATA imports from
-DLLs.  This is the default.
+DLLs.
 [This option is specific to the i386 PE targeted port of the linker]
 
 @kindex --enable-extra-pe-debug
