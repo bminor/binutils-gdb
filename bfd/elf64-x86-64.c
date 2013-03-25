@@ -5038,49 +5038,33 @@ elf_x86_64_common_section (asection *sec)
 }
 
 static bfd_boolean
-elf_x86_64_merge_symbol (struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			 struct elf_link_hash_entry **sym_hash ATTRIBUTE_UNUSED,
-			 struct elf_link_hash_entry *h,
-			 Elf_Internal_Sym *sym,
+elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
+			 const Elf_Internal_Sym *sym,
 			 asection **psec,
-			 bfd_vma *pvalue ATTRIBUTE_UNUSED,
-			 unsigned int *pold_alignment ATTRIBUTE_UNUSED,
-			 bfd_boolean *skip ATTRIBUTE_UNUSED,
-			 bfd_boolean *override ATTRIBUTE_UNUSED,
-			 bfd_boolean *type_change_ok ATTRIBUTE_UNUSED,
-			 bfd_boolean *size_change_ok ATTRIBUTE_UNUSED,
-			 bfd_boolean *newdyn ATTRIBUTE_UNUSED,
-			 bfd_boolean *newdef,
-			 bfd_boolean *newdyncommon ATTRIBUTE_UNUSED,
-			 bfd_boolean *newweak ATTRIBUTE_UNUSED,
-			 bfd *abfd ATTRIBUTE_UNUSED,
-			 asection **sec,
-			 bfd_boolean *olddyn ATTRIBUTE_UNUSED,
-			 bfd_boolean *olddef,
-			 bfd_boolean *olddyncommon ATTRIBUTE_UNUSED,
-			 bfd_boolean *oldweak ATTRIBUTE_UNUSED,
+			 bfd_boolean newdef,
+			 bfd_boolean olddef,
 			 bfd *oldbfd,
-			 asection **oldsec)
+			 const asection *oldsec)
 {
   /* A normal common symbol and a large common symbol result in a
      normal common symbol.  We turn the large common symbol into a
      normal one.  */
-  if (!*olddef
+  if (!olddef
       && h->root.type == bfd_link_hash_common
-      && !*newdef
-      && bfd_is_com_section (*sec)
-      && *oldsec != *sec)
+      && !newdef
+      && bfd_is_com_section (*psec)
+      && oldsec != *psec)
     {
       if (sym->st_shndx == SHN_COMMON
-	  && (elf_section_flags (*oldsec) & SHF_X86_64_LARGE) != 0)
+	  && (elf_section_flags (oldsec) & SHF_X86_64_LARGE) != 0)
 	{
 	  h->root.u.c.p->section
 	    = bfd_make_section_old_way (oldbfd, "COMMON");
 	  h->root.u.c.p->section->flags = SEC_ALLOC;
 	}
       else if (sym->st_shndx == SHN_X86_64_LCOMMON
-	       && (elf_section_flags (*oldsec) & SHF_X86_64_LARGE) == 0)
-	*psec = *sec = bfd_com_section_ptr;
+	       && (elf_section_flags (oldsec) & SHF_X86_64_LARGE) == 0)
+	*psec = bfd_com_section_ptr;
     }
 
   return TRUE;

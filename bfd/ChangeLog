@@ -1,3 +1,12 @@
+2013-03-25  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data <merge_symbol>): Update proto.
+	(_bfd_elf_init_reloc_shdr): Delete.
+	* elf.c (_bfd_elf_init_reloc_shdr): Make static.
+	* elf64-x86-64.c (elf_x86_64_merge_symbol): Trim parameters to
+	just what is needed.
+	* elflink.c (_bfd_elf_merge_symbol): Update bed->merge_symbol call.
+
 2013-03-23  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (_bfd_elf_merge_symbol): Delete declaration.

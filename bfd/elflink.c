@@ -1347,15 +1347,12 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   /* We now know everything about the old and new symbols.  We ask the
      backend to check if we can merge them.  */
-  if (bed->merge_symbol
-      && !bed->merge_symbol (info, sym_hash, h, sym, psec, pvalue,
-			     pold_alignment, skip, override,
-			     type_change_ok, size_change_ok,
-			     &newdyn, &newdef, &newdyncommon, &newweak,
-			     abfd, &sec,
-			     &olddyn, &olddef, &olddyncommon, &oldweak,
-			     oldbfd, &oldsec))
-    return FALSE;
+  if (bed->merge_symbol != NULL)
+    {
+      if (!bed->merge_symbol (h, sym, psec, newdef, olddef, oldbfd, oldsec))
+	return FALSE;
+      sec = *psec;
+    }
 
   /* If both the old and the new symbols look like common symbols in a
      dynamic object, set the size of the symbol to the larger of the
