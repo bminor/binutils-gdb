@@ -167,6 +167,7 @@ void yyerror (char *);
 static int parse_number (char *, int, int, YYSTYPE *);
 static struct stoken operator_stoken (const char *);
 static void check_parameter_typelist (VEC (type_ptr) *);
+static void write_destructor_name (struct stoken);
 
 static void c_print_token (FILE *file, int type, YYSTYPE value);
 #define YYPRINT(FILE, TYPE, VALUE) c_print_token (FILE, TYPE, VALUE)
@@ -372,6 +373,19 @@ exp	:	exp ARROW COMPLETE
 			  write_exp_elt_opcode (STRUCTOP_PTR); }
 	;
 
+exp	:	exp ARROW '~' name
+			{ write_exp_elt_opcode (STRUCTOP_PTR);
+			  write_destructor_name ($4);
+			  write_exp_elt_opcode (STRUCTOP_PTR); }
+	;
+
+exp	:	exp ARROW '~' name COMPLETE
+			{ mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_PTR);
+			  write_destructor_name ($4);
+			  write_exp_elt_opcode (STRUCTOP_PTR); }
+	;
+
 exp	:	exp ARROW qualified_name
 			{ /* exp->type::name becomes exp->*(&type::name) */
 			  /* Note: this doesn't work if name is a
@@ -404,6 +418,19 @@ exp	:	exp '.' COMPLETE
 			  s.ptr = "";
 			  s.length = 0;
 			  write_exp_string (s);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+	;
+
+exp	:	exp '.' '~' name
+			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  write_destructor_name ($4);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+	;
+
+exp	:	exp '.' '~' name COMPLETE
+			{ mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  write_destructor_name ($4);
 			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
 	;
 
@@ -1591,6 +1618,22 @@ name_not_typename :	NAME
 	;
 
 %%
+
+/* Like write_exp_string, but prepends a '~'.  */
+
+static void
+write_destructor_name (struct stoken token)
+{
+  char *copy = alloca (token.length + 1);
+
+  copy[0] = '~';
+  memcpy (&copy[1], token.ptr, token.length);
+
+  token.ptr = copy;
+  ++token.length;
+
+  write_exp_string (token);
+}
 
 /* Returns a stoken of the operator name given by OP (which does not
    include the string "operator").  */ 

@@ -1,5 +1,9 @@
 2013-03-25  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/m-static.exp: Add destructor-printing tests.
+
+2013-03-25  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/m-static.exp: Add constructor ptype tests.
 	* gdb.cp/m-static.cc (single_constructor): New class.
 	(main): Make instance of single_constructor.
