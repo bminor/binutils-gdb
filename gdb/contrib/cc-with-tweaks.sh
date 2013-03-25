@@ -180,6 +180,8 @@ if [ "$want_dwp" = true ]; then
     dwo_files=$($READELF -wi "${output_file}" | grep _dwo_name | \
 	sed -e 's/^.*: //' | sort | uniq)
     $DWP -o "${output_file}.dwp" ${dwo_files} > /dev/null
+    rc=$?
+    [ $rc != 0 ] && exit $rc
     rm -f ${dwo_files}
 fi
 

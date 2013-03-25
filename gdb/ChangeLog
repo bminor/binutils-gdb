@@ -1,3 +1,7 @@
+2013-03-25  Doug Evans  <dje@google.com>
+
+	* contrib/cc-with-tweaks.sh: Check exit code of dwp.
+
 2013-03-25  Tom Tromey  <tromey@redhat.com>
 
 	PR symtab/11462:
