@@ -128,7 +128,10 @@ enum noside
 				   type (inaccuracy: anything that is
 				   listed as being in a register in
 				   the function in which it was
-				   declared will be lval_register).  */
+				   declared will be lval_register).
+				   Ideally this would not even read
+				   target memory, but currently it
+				   does in many situations.  */
   };
 
 extern struct value *evaluate_subexp_standard

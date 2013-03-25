@@ -1,3 +1,12 @@
+2013-03-25  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/9197:
+	* opencl-lang.c (evaluate_subexp_opencl) <STRUCTOP_STRUCT>: Use
+	value_struct_elt, not lookup_struct_elt_type.
+	* eval.c (evaluate_subexp_standard) <STRUCTOP_STRUCT,
+	STRUCTOP_PTR>: Use value_struct_elt, not lookup_struct_elt_type.
+	* expression.h (EVAL_AVOID_SIDE_EFFECTS): Update comment.
+
 2013-03-25  Yao Qi  <yao@codesourcery.com>
 
 	* ctf.c [USE_WIN32API]: Undef 'mkdir' and use 'mkdir'
