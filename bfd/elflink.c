@@ -1185,7 +1185,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       /* If the new symbol with non-default visibility comes from a
 	 relocatable file and the old definition comes from a dynamic
 	 object, we remove the old definition.  */
-      if ((*sym_hash)->root.type == bfd_link_hash_indirect)
+      if (hi->root.type == bfd_link_hash_indirect)
 	{
 	  /* Handle the case where the old dynamic definition is
 	     default versioned.  We need to copy the symbol info from
@@ -1193,13 +1193,11 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	     was referenced before.  */
 	  if (h->ref_regular)
 	    {
-	      struct elf_link_hash_entry *vh = *sym_hash;
-
-	      vh->root.type = h->root.type;
+	      hi->root.type = h->root.type;
 	      h->root.type = bfd_link_hash_indirect;
-	      (*bed->elf_backend_copy_indirect_symbol) (info, vh, h);
+	      (*bed->elf_backend_copy_indirect_symbol) (info, hi, h);
 
-	      h->root.u.i.link = (struct bfd_link_hash_entry *) vh;
+	      h->root.u.i.link = (struct bfd_link_hash_entry *) hi;
 	      if (ELF_ST_VISIBILITY (sym->st_other) != STV_PROTECTED)
 		{
 		  /* If the new symbol is hidden or internal, completely undo
@@ -1216,10 +1214,10 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	      h->size = 0;
 	      h->type = 0;
 
-	      h = vh;
+	      h = hi;
 	    }
 	  else
-	    h = *sym_hash;
+	    h = hi;
 	}
 
       /* If the old symbol was undefined before, then it will still be
@@ -1496,8 +1494,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	  *type_change_ok = TRUE;
 	}
 
-      if ((*sym_hash)->root.type == bfd_link_hash_indirect)
-	flip = *sym_hash;
+      if (hi->root.type == bfd_link_hash_indirect)
+	flip = hi;
       else
 	/* This union may have been set to be non-NULL when this symbol
 	   was seen in a dynamic object.  We must force the union to be
@@ -1542,8 +1540,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
       *size_change_ok = TRUE;
       *type_change_ok = TRUE;
 
-      if ((*sym_hash)->root.type == bfd_link_hash_indirect)
-	flip = *sym_hash;
+      if (hi->root.type == bfd_link_hash_indirect)
+	flip = hi;
       else
 	h->verinfo.vertree = NULL;
     }

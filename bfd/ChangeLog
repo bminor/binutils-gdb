@@ -1,5 +1,10 @@
 2013-03-25  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (_bfd_elf_merge_symbol): Use local var holding value
+	of *sym_hash.
+
+2013-03-25  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (_bfd_elf_merge_symbol): Don't discard TLS symbols here.
 	Wrap long lines.
 	(elf_link_add_object_symbols): Discard TLS symbols for --just-syms
