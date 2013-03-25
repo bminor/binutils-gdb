@@ -1,5 +1,13 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_set_replay)
+	(record_btrace_goto_begin, record_btrace_goto_end)
+	(record_btrace_goto): New.
+	(init_record_btrace_ops): Initialize them.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_find_new_threads)
 	(record_btrace_thread_alive): New.
 	(init_record_btrace_ops): Initialize to_find_new_threads and

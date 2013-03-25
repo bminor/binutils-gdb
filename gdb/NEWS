@@ -18,6 +18,8 @@
 * The ranges given as arguments to the 'record function-call-history' and
   'record instruction-history' commands are now inclusive.
 
+* The btrace record target now supports the 'record goto' command.
+
 *** Changes in GDB 7.7
 
 * Improved support for process record-replay and reverse debugging on

@@ -1,0 +1,170 @@
+# This testcase is part of GDB, the GNU debugger.
+#
+# Copyright 2013 Free Software Foundation, Inc.
+#
+# Contributed by Intel Corp. <markus.t.metzger@intel.com>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# check for btrace support
+if { [skip_btrace_tests] } { return -1 }
+
+# start inferior
+standard_testfile x86-record_goto.S
+
+set opts {}
+if [info exists COMPILE] {
+    # make check RUNTESTFLAGS="gdb.btrace/record_goto.exp COMPILE=1"
+    standard_testfile record_goto.c
+    lappend opts debug
+} elseif { ![istarget x86_64-*-* ] || ![is_lp64_target] } {
+    verbose "Skipping ${testfile}."
+    return
+}
+
+if [prepare_for_testing record_goto.exp $testfile $srcfile $opts] {
+    return -1
+}
+if ![runto_main] {
+    return -1
+}
+
+# we want a small context sizes to simplify the test
+gdb_test_no_output "set record instruction-history-size 3"
+gdb_test_no_output "set record function-call-history-size 3"
+
+# trace the call to the test function
+gdb_test_no_output "record btrace"
+gdb_test "next"
+
+# start by listing all functions
+gdb_test "record function-call-history /ci 1, +20" [join [list \
+  "1\tfun4\tinst 1,3" \
+  "2\t  fun1\tinst 4,7" \
+  "3\tfun4\tinst 8,8" \
+  "4\t  fun2\tinst 9,11" \
+  "5\t    fun1\tinst 12,15" \
+  "6\t  fun2\tinst 16,17" \
+  "7\tfun4\tinst 18,18" \
+  "8\t  fun3\tinst 19,21" \
+  "9\t    fun1\tinst 22,25" \
+  "10\t  fun3\tinst 26,26" \
+  "11\t    fun2\tinst 27,29" \
+  "12\t      fun1\tinst 30,33" \
+  "13\t    fun2\tinst 34,35" \
+  "14\t  fun3\tinst 36,37" \
+  "15\tfun4\tinst 38,39" \
+  ] "\r\n"]
+
+# let's see if we can go back in history
+gdb_test "record goto 18" ".*fun4 \\(\\) at record_goto.c:43.*"
+
+# the function call history should start at the new location
+gdb_test "record function-call-history /ci" [join [list \
+  "7\tfun4\tinst 18,18" \
+  "8\t  fun3\tinst 19,21" \
+  "9\t    fun1\tinst 22,25" \
+  ] "\r\n"] "function-call-history from 18 forwards"
+
+# the instruction history should start at the new location
+gdb_test "record instruction-history" [join [list \
+  "18.*" \
+  "19.*" \
+  "20.*" \
+  ] "\r\n"] "instruction-history from 18 forwards"
+
+# let's go to another place in the history
+gdb_test "record goto 26" ".*fun3 \\(\\) at record_goto.c:35.*"
+
+# the function call history should start at the new location
+gdb_test "record function-call-history /ci -" [join [list \
+  "8\t  fun3\tinst 19,21" \
+  "9\t    fun1\tinst 22,25" \
+  "10\t  fun3\tinst 26,26\r" \
+  ] "\r\n"] "function-call-history from 26 backwards"
+
+# the instruction history should start at the new location
+gdb_test "record instruction-history -" [join [list \
+  "24.*" \
+  "25.*" \
+  "26.*\r" \
+  ] "\r\n"] "instruction-history from 26 backwards"
+
+# test that we can go to the begin of the trace
+gdb_test "record goto begin" ".*fun4 \\(\\) at record_goto.c:40.*"
+
+# check that we're filling up the context correctly
+gdb_test "record function-call-history /ci -" [join [list \
+  "1\tfun4\tinst 1,3" \
+  "2\t  fun1\tinst 4,7" \
+  "3\tfun4\tinst 8,8" \
+  ] "\r\n"] "function-call-history from begin backwards"
+
+# check that we're filling up the context correctly
+gdb_test "record instruction-history -" [join [list \
+  "1.*" \
+  "2.*" \
+  "3.*" \
+  ] "\r\n"] "instruction-history from begin backwards"
+
+# we should get the exact same history from the first instruction
+gdb_test "record goto 2" ".*fun4 \\(\\) at record_goto.c:40.*"
+
+# check that we're filling up the context correctly
+gdb_test "record function-call-history /ci -" [join [list \
+  "1\tfun4\tinst 1,3" \
+  "2\t  fun1\tinst 4,7" \
+  "3\tfun4\tinst 8,8" \
+  ] "\r\n"] "function-call-history from 2 backwards"
+
+# check that we're filling up the context correctly
+gdb_test "record instruction-history -" [join [list \
+  "1.*" \
+  "2.*" \
+  "3.*" \
+  ] "\r\n"] "instruction-history from 2 backwards"
+
+# check that we can go to the end of the trace
+gdb_test "record goto end" ".*main \\(\\) at record_goto.c:50.*"
+
+# check that we're filling up the context correctly
+gdb_test "record function-call-history /ci" [join [list \
+  "13\t    fun2\tinst 34,35" \
+  "14\t  fun3\tinst 36,37" \
+  "15\tfun4\tinst 38,39" \
+  ] "\r\n"] "function-call-history from end forwards"
+
+# check that we're filling up the context correctly
+gdb_test "record instruction-history" [join [list \
+  "37.*" \
+  "38.*" \
+  "39.*" \
+  ] "\r\n"] "instruction-history from end forwards"
+
+# we should get the exact same history from the second to last instruction
+gdb_test "record goto 38" ".*fun4 \\(\\) at record_goto.c:44.*"
+
+# check that we're filling up the context correctly
+gdb_test "record function-call-history /ci" [join [list \
+  "13\t    fun2\tinst 34,35" \
+  "14\t  fun3\tinst 36,37" \
+  "15\tfun4\tinst 38,39" \
+  ] "\r\n"] "function-call-history from 38 forwards"
+
+# check that we're filling up the context correctly
+gdb_test "record instruction-history" [join [list \
+  "37.*" \
+  "38.*" \
+  "39.*" \
+  ] "\r\n"] "instruction-history from 38 forwards"

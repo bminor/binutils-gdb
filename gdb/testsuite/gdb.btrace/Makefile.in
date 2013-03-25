@@ -2,7 +2,7 @@ VPATH = @srcdir@
 srcdir = @srcdir@
 
 EXECUTABLES   = enable function_call_history instruction_history tailcall \
-  exception unknown_functions
+  exception unknown_functions record_goto
 
 MISCELLANEOUS =
 

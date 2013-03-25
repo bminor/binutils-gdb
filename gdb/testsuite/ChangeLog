@@ -1,5 +1,12 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add record_goto.
+	* gdb.btrace/record_goto.c: New.
+	* gdb.btrace/record_goto.exp: New.
+	* gdb.btrace/x86-record_goto.S: New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/function_call_history.exp: Update tests.
 	* gdb.btrace/instruction_history.exp: Update tests.
 

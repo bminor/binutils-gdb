@@ -58,13 +58,13 @@ static int record_btrace_allow_memory_access;
 
 
 /* Update the branch trace for the current thread and return a pointer to its
-   branch trace information struct.
+   thread_info.
 
    Throws an error if there is no thread or no trace.  This function never
    returns NULL.  */
 
-static struct btrace_thread_info *
-require_btrace (void)
+static struct thread_info *
+require_btrace_thread (void)
 {
   struct thread_info *tp;
   struct btrace_thread_info *btinfo;
@@ -82,7 +82,23 @@ require_btrace (void)
   if (btinfo->begin == NULL)
     error (_("No trace."));
 
-  return btinfo;
+  return tp;
+}
+
+/* Update the branch trace for the current thread and return a pointer to its
+   branch trace information struct.
+
+   Throws an error if there is no thread or no trace.  This function never
+   returns NULL.  */
+
+static struct btrace_thread_info *
+require_btrace (void)
+{
+  struct thread_info *tp;
+
+  tp = require_btrace_thread ();
+
+  return &tp->btrace;
 }
 
 /* Enable branch tracing for one thread.  Warn on errors.  */
@@ -1085,6 +1101,103 @@ record_btrace_thread_alive (struct target_ops *ops, ptid_t ptid)
   return 0;
 }
 
+/* Set the replay branch trace instruction iterator.  If IT is NULL, replay
+   is stopped.  */
+
+static void
+record_btrace_set_replay (struct thread_info *tp,
+			  const struct btrace_insn_iterator *it)
+{
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+
+  if (it == NULL || it->function == NULL)
+    {
+      if (btinfo->replay == NULL)
+	return;
+
+      xfree (btinfo->replay);
+      btinfo->replay = NULL;
+    }
+  else
+    {
+      if (btinfo->replay == NULL)
+	btinfo->replay = xmalloc (sizeof (*btinfo->replay));
+      else if (btrace_insn_cmp (btinfo->replay, it) == 0)
+	return;
+
+      *btinfo->replay = *it;
+    }
+
+  /* Clear the function call and instruction histories so we start anew
+     from the new replay position.  */
+  xfree (btinfo->insn_history);
+  xfree (btinfo->call_history);
+
+  btinfo->insn_history = NULL;
+  btinfo->call_history = NULL;
+
+  registers_changed_ptid (tp->ptid);
+}
+
+/* The to_goto_record_begin method of target record-btrace.  */
+
+static void
+record_btrace_goto_begin (void)
+{
+  struct thread_info *tp;
+  struct btrace_insn_iterator begin;
+
+  tp = require_btrace_thread ();
+
+  btrace_insn_begin (&begin, &tp->btrace);
+  record_btrace_set_replay (tp, &begin);
+
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
+}
+
+/* The to_goto_record_end method of target record-btrace.  */
+
+static void
+record_btrace_goto_end (void)
+{
+  struct thread_info *tp;
+
+  tp = require_btrace_thread ();
+
+  record_btrace_set_replay (tp, NULL);
+
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
+}
+
+/* The to_goto_record method of target record-btrace.  */
+
+static void
+record_btrace_goto (ULONGEST insn)
+{
+  struct thread_info *tp;
+  struct btrace_insn_iterator it;
+  unsigned int number;
+  int found;
+
+  number = insn;
+
+  /* Check for wrap-arounds.  */
+  if (number != insn)
+    error (_("Instruction number out of range."));
+
+  tp = require_btrace_thread ();
+
+  found = btrace_find_insn_by_number (&it, &tp->btrace, number);
+  if (found == 0)
+    error (_("No such instruction."));
+
+  record_btrace_set_replay (tp, &it);
+
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
+}
+
 /* Initialize the record-btrace target ops.  */
 
 static void
@@ -1123,6 +1236,9 @@ init_record_btrace_ops (void)
   ops->to_wait = record_btrace_wait;
   ops->to_find_new_threads = record_btrace_find_new_threads;
   ops->to_thread_alive = record_btrace_thread_alive;
+  ops->to_goto_record_begin = record_btrace_goto_begin;
+  ops->to_goto_record_end = record_btrace_goto_end;
+  ops->to_goto_record = record_btrace_goto;
   ops->to_stratum = record_stratum;
   ops->to_magic = OPS_MAGIC;
 }
