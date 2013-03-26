@@ -33,7 +33,7 @@ struct frag;
 #define TARGET_ARCH bfd_arch_sparc
 
 #ifdef TE_FreeBSD
-#define ELF_TARGET_FORMAT	"elf32-sparc-freebsd"
+#define ELF_TARGET_FORMAT	"elf32-sparc"
 #define ELF64_TARGET_FORMAT	"elf64-sparc-freebsd"
 #endif
 

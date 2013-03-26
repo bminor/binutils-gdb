@@ -1,3 +1,9 @@
+2013-03-26  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/15178
+	* config/tc-sparc.h (ELF_TARGET_FORMAT): Set to elf32-sparc for
+	FreeBSD targets.
+
 2013-03-26  Douglas B Rupp  <rupp@gnat.com>
 
 	* config/tc-ia64.c (emit_one_bundle): Move last_slot adjustment
