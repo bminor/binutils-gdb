@@ -1,6 +1,6 @@
 2013-03-26  Nick Clifton  <nickc@redhat.com>
 
-	PR binutils/15205
+	PR binutils/15206
 	* dwarf.c (SAFE_BYTE_GET): New macro - checks remaining buffer
 	space before calling byte_get.
 	(SAFE_BYTE_GET_AND_INC): New macro.
