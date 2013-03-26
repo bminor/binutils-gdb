@@ -1,3 +1,8 @@
+2013-03-26  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/actions.c, gdb.trace/circ.c: Add license header.
+	* gdb.trace/collection.c, gdb.trace/tfile.c: Likewise.
+
 2013-03-26  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.btrace/enable.exp: Add regression test.
