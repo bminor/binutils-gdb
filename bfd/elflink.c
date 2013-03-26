@@ -1600,6 +1600,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   bfd_boolean override;
   char *p;
   size_t len, shortlen;
+  asection *tmp_sec;
 
   /* If this symbol has a version, and it is the default version, we
      create an indirect symbol from the default name to the fully
@@ -1626,7 +1627,8 @@ _bfd_elf_add_default_symbol (bfd *abfd,
      actually going to define an indirect symbol.  */
   type_change_ok = FALSE;
   size_change_ok = FALSE;
-  if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, &value,
+  tmp_sec = sec;
+  if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
 			      &hi, poldbfd, NULL, NULL, &skip, &override,
 			      &type_change_ok, &size_change_ok))
     return FALSE;
@@ -1734,7 +1736,8 @@ nondefault:
   /* Once again, merge with any existing symbol.  */
   type_change_ok = FALSE;
   size_change_ok = FALSE;
-  if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &sec, &value,
+  tmp_sec = sec;
+  if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
 			      &hi, NULL, NULL, NULL, &skip, &override,
 			      &type_change_ok, &size_change_ok))
     return FALSE;
