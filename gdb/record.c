@@ -35,8 +35,17 @@ unsigned int record_debug = 0;
 /* The number of instructions to print in "record instruction-history".  */
 static unsigned int record_insn_history_size = 10;
 
+/* The variable registered as control variable in the "record
+   instruction-history" command.  Necessary for extra input
+   validation.  */
+static unsigned int record_insn_history_size_setshow_var;
+
 /* The number of functions to print in "record function-call-history".  */
 static unsigned int record_call_history_size = 10;
+
+/* The variable registered as control variable in the "record
+   call-history" command.  Necessary for extra input validation.  */
+static unsigned int record_call_history_size_setshow_var;
 
 struct cmd_list_element *record_cmdlist = NULL;
 struct cmd_list_element *set_record_cmdlist = NULL;
@@ -428,6 +437,25 @@ get_insn_history_modifiers (char **arg)
   return modifiers;
 }
 
+/* The "set record instruction-history-size / set record
+   function-call-history-size" commands are unsigned, with UINT_MAX
+   meaning unlimited.  The target interfaces works with signed int
+   though, to indicate direction, so map "unlimited" to INT_MAX, which
+   is about the same as unlimited in practice.  If the user does have
+   a log that huge, she can can fetch it in chunks across several
+   requests, but she'll likely have other problems first...  */
+
+static int
+command_size_to_target_size (unsigned int *command)
+{
+  gdb_assert (*command <= INT_MAX || *command == UINT_MAX);
+
+  if (record_call_history_size == UINT_MAX)
+    return INT_MAX;
+  else
+    return *command;
+}
+
 /* The "record instruction-history" command.  */
 
 static void
@@ -439,11 +467,7 @@ cmd_record_insn_history (char *arg, int from_tty)
 
   flags = get_insn_history_modifiers (&arg);
 
-  /* We use a signed size to also indicate the direction.  Make sure that
-     unlimited remains unlimited.  */
-  size = (int) record_insn_history_size;
-  if (size < 0)
-    size = INT_MAX;
+  size = command_size_to_target_size (&record_insn_history_size);
 
   if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
     target_insn_history (size, flags);
@@ -559,11 +583,7 @@ cmd_record_call_history (char *arg, int from_tty)
 
   flags = get_call_history_modifiers (&arg);
 
-  /* We use a signed size to also indicate the direction.  Make sure that
-     unlimited remains unlimited.  */
-  size = (int) record_call_history_size;
-  if (size < 0)
-    size = INT_MAX;
+  size = command_size_to_target_size (&record_call_history_size);
 
   if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
     target_call_history (size, flags);
@@ -617,6 +637,51 @@ cmd_record_call_history (char *arg, int from_tty)
     }
 }
 
+/* Helper for "set record instruction-history-size" and "set record
+   function-call-history-size" input validation.  COMMAND_VAR is the
+   variable registered in the command as control variable.  *SETTING
+   is the real setting the command allows changing.  */
+
+static void
+validate_history_size (unsigned int *command_var, int *setting)
+{
+  if (*command_var != UINT_MAX && *command_var > INT_MAX)
+    {
+      unsigned int new_value = *command_var;
+
+      /* Restore previous value.  */
+      *command_var = *setting;
+      error (_("integer %u out of range"), new_value);
+    }
+
+  /* Commit new value.  */
+  *setting = *command_var;
+}
+
+/* Called by do_setshow_command.  We only want values in the
+   [0..INT_MAX] range, while the command's machinery accepts
+   [0..UINT_MAX].  See command_size_to_target_size.  */
+
+static void
+set_record_insn_history_size (char *args, int from_tty,
+			      struct cmd_list_element *c)
+{
+  validate_history_size (&record_insn_history_size_setshow_var,
+			 &record_insn_history_size);
+}
+
+/* Called by do_setshow_command.  We only want values in the
+   [0..INT_MAX] range, while the command's machinery accepts
+   [0..UINT_MAX].  See command_size_to_target_size.  */
+
+static void
+set_record_call_history_size (char *args, int from_tty,
+			      struct cmd_list_element *c)
+{
+  validate_history_size (&record_call_history_size_setshow_var,
+			 &record_call_history_size);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_record;
 
@@ -634,18 +699,20 @@ _initialize_record (void)
 			     &showdebuglist);
 
   add_setshow_uinteger_cmd ("instruction-history-size", no_class,
-			    &record_insn_history_size, _("\
+			    &record_insn_history_size_setshow_var, _("\
 Set number of instructions to print in \"record instruction-history\"."), _("\
 Show number of instructions to print in \"record instruction-history\"."),
-			    NULL, NULL, NULL, &set_record_cmdlist,
-			    &show_record_cmdlist);
+			    NULL,
+			    set_record_insn_history_size, NULL,
+			    &set_record_cmdlist, &show_record_cmdlist);
 
   add_setshow_uinteger_cmd ("function-call-history-size", no_class,
-			    &record_call_history_size, _("\
+			    &record_call_history_size_setshow_var, _("\
 Set number of function to print in \"record function-call-history\"."), _("\
 Show number of functions to print in \"record function-call-history\"."),
-			    NULL, NULL, NULL, &set_record_cmdlist,
-			    &show_record_cmdlist);
+			    NULL,
+			    set_record_call_history_size, NULL,
+			    &set_record_cmdlist, &show_record_cmdlist);
 
   c = add_prefix_cmd ("record", class_obscure, cmd_record_start,
 		      _("Start recording."),
@@ -727,4 +794,8 @@ from the first argument.\n\
 The number of functions to print can be defined with \"set record \
 function-call-history-size\"."),
            &record_cmdlist);
+
+  /* Sync command control variables.  */
+  record_insn_history_size_setshow_var = record_insn_history_size;
+  record_call_history_size_setshow_var = record_call_history_size;
 }

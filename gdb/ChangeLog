@@ -1,5 +1,19 @@
 2013-03-26  Pedro Alves  <palves@redhat.com>
 
+	* record.c (record_insn_history_size_setshow_var)
+	(record_call_history_size_setshow_var): New globals.
+	(command_size_to_target_size): New function.
+	(cmd_record_insn_history, cmd_record_call_history): Use
+	command_size_to_target_size instead of cast.
+	(validate_history_size, set_record_insn_history_size)
+	(set_record_call_history_size): New functions.
+	(_initialize_record): Install set_record_insn_history_size and
+	set_record_call_history_size as "set" hooks of "set record
+	instruction-history-size" and "set record
+	function-call-history-size".
+
+2013-03-26  Pedro Alves  <palves@redhat.com>
+
 	* top.c (gdb_rl_operate_and_get_next): Replace max_input_history
 	use with history_max_entries use.  Remove FIXME note.
 
