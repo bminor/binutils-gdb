@@ -1,3 +1,32 @@
+2013-03-26  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15205
+	* dwarf.c (SAFE_BYTE_GET): New macro - checks remaining buffer
+	space before calling byte_get.
+	(SAFE_BYTE_GET_AND_INC): New macro.
+	(SAFE_SIGNED_BYTE_GET): New macro.
+	(SAFE_SIGNED_BYTE_GET_AND_INC): New macro.
+	(SAFE_BYTE_GET64): New macro.
+	(process_extened_line_op): Use new macros.  Use strnlen when
+	appropriate.
+	(fetch_indirect_string): Likewise.
+	(get_FORM_name): Likewise.
+	(decode_location_expression): Likewise.
+	(read_and_display_attr_value): Likewise.
+	(process_debug_info): Likewise.
+	(display_debug_lines_raw): Likewise.
+	(display_debug_lines_decoded): Likewise.
+	(display_debug_pubnames): Likewise.
+	(display_debug_macinfo): Likewise.
+	(get_line_filename_and_dirname): Likewise.
+	(display_debug_macro): Likewise.
+	(display_loc_list): Likewise.
+	(display_loc_list_dwo): Likewise.
+	(display_debug_aranges): Likewise.
+	(display_debug_ranges): Likewise.
+	(frame_display_row): Likewise.
+	(display_debug_frames): Likewise.
+
 2013-03-25  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15202
