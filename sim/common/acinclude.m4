@@ -609,30 +609,38 @@ dnl arg[3] is a space separated list of extra target specific devices.
 AC_DEFUN([SIM_AC_OPTION_HARDWARE],
 [
 if test x"[$1]" != x"no"; then
-  sim_hw_p=yes
+  enable_sim_hardware=yes
 else
-  sim_hw_p=no
+  enable_sim_hardware=no
 fi
+
 if test "[$2]"; then
   hardware="[$2]"
 else
   hardware="cfi core pal glue"
 fi
 hardware="$hardware [$3]"
+
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"
 sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([[^ ]][[^ ]]*\)/dv-\1.o/g'`"
+
 AC_ARG_ENABLE(sim-hardware,
-[  --enable-sim-hardware=LIST		Specify the hardware to be included in the build.],
-[
-case "${enableval}" in
-  yes)	sim_hw_p=yes;;
-  no)	sim_hw_p=no;;
+  [AS_HELP_STRING([--enable-sim-hardware=LIST],
+                  [Specify the hardware to be included in the build.])])
+case ${enable_sim_hardware} in
+  yes)  sim_hw_p=yes;;
+  no)   sim_hw_p=no;;
   ,*)   sim_hw_p=yes; hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
   *,)   sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
-  *)	sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
+  *)    sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
 esac
+
 if test "$sim_hw_p" != yes; then
+  if test "[$1]" = "always"; then
+    AC_MSG_ERROR([Sorry, but this simulator requires that hardware support
+be enabled. Please configure without --disable-hw-support.])
+  fi
   sim_hw_objs=
   sim_hw_cflags="-DWITH_HW=0"
   sim_hw=
@@ -657,26 +665,14 @@ else
        ;;
   esac
   AC_SUBST(SIM_DV_SOCKSER_O)
-fi
-if test x"$silent" != x"yes" && test "$sim_hw_p" = "yes"; then
-  echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
-fi],[
-if test "$sim_hw_p" != yes; then
-  if test "[$1]" = "always"; then
-    AC_MSG_ERROR([Sorry, but this simulator requires that hardware support
-be enabled. Please configure without --disable-hw-support.])
+  if test x"$silent" != x"yes"; then
+    echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
   fi
-  sim_hw_objs=
-  sim_hw_cflags="-DWITH_HW=0"
-  sim_hw=
+  dnl Some devices require extra libraries.
+  case " $hardware " in
+    *" cfi "*) AC_CHECK_LIB(m, log2);;
+  esac
 fi
-if test x"$silent" != x"yes"; then
-  echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
-fi])
-dnl Some devices require extra libraries.
-case " $hardware " in
-  *" cfi "*) AC_CHECK_LIB(m, log2);;
-esac
 ])
 AC_SUBST(sim_hw_cflags)
 AC_SUBST(sim_hw_objs)

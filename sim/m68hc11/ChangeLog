@@ -1,3 +1,7 @@
+2013-03-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2013-03-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	* configure.ac: Use $SIM_DV_SOCKSER_O.

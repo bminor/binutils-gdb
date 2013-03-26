@@ -1,3 +1,7 @@
+2013-03-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* configure: Regenerate.
+
 2012-06-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* config.in, configure: Regenerate.

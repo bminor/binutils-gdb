@@ -604,6 +604,7 @@ cgen_breaks
 cgen
 cgendir
 CGEN_MAINT
+SIM_DV_SOCKSER_O
 REPORT_BUGS_TEXI
 REPORT_BUGS_TO
 PKGVERSION
@@ -1420,7 +1421,8 @@ Optional Features:
   --enable-sim-build-warnings
                           enable SIM specific build-time compiler warnings if
                           gcc is used
-  --enable-sim-hardware=LIST		Specify the hardware to be included in the build.
+  --enable-sim-hardware=LIST
+                          Specify the hardware to be included in the build.
   --enable-sim-default-model=model	Specify default model to simulate.
   --enable-sim-environment=environment	Specify mixed, user, virtual or operating environment.
   --enable-sim-inline=inlines		Specify which functions should be inlined.
@@ -12281,7 +12283,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12284 "configure"
+#line 12286 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12387,7 +12389,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 12390 "configure"
+#line 12392 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13312,31 +13314,41 @@ $as_echo "${WARN_CFLAGS} ${WERROR_CFLAGS}" >&6; }
 fi
 
 
-if test x"no" = x"yes"; then
-  sim_hw_p=yes
+if test x"no" != x"no"; then
+  enable_sim_hardware=yes
 else
-  sim_hw_p=no
+  enable_sim_hardware=no
 fi
+
 if test ""; then
   hardware=""
 else
   hardware="cfi core pal glue"
 fi
 hardware="$hardware rv cris"
+
 sim_hw_cflags="-DWITH_HW=1"
 sim_hw="$hardware"
 sim_hw_objs="\$(SIM_COMMON_HW_OBJS) `echo $sim_hw | sed -e 's/\([^ ][^ ]*\)/dv-\1.o/g'`"
+
 # Check whether --enable-sim-hardware was given.
 if test "${enable_sim_hardware+set}" = set; then :
   enableval=$enable_sim_hardware;
-case "${enableval}" in
-  yes)	sim_hw_p=yes;;
-  no)	sim_hw_p=no;;
+fi
+
+case ${enable_sim_hardware} in
+  yes)  sim_hw_p=yes;;
+  no)   sim_hw_p=no;;
   ,*)   sim_hw_p=yes; hardware="${hardware} `echo ${enableval} | sed -e 's/,/ /'`";;
   *,)   sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'` ${hardware}";;
-  *)	sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
+  *)    sim_hw_p=yes; hardware="`echo ${enableval} | sed -e 's/,/ /'`"'';;
 esac
+
 if test "$sim_hw_p" != yes; then
+  if test "no" = "always"; then
+    as_fn_error "Sorry, but this simulator requires that hardware support
+be enabled. Please configure without --disable-hw-support." "$LINENO" 5
+  fi
   sim_hw_objs=
   sim_hw_cflags="-DWITH_HW=0"
   sim_hw=
@@ -13351,24 +13363,24 @@ else
       *) sim_hw="$sim_hw $i" ; sim_hw_objs="$sim_hw_objs dv-$i.o";;
     esac
   done
-fi
-if test x"$silent" != x"yes" && test "$sim_hw_p" = "yes"; then
-  echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
-fi
-else
+  # mingw does not support sockser
+  SIM_DV_SOCKSER_O=""
+  case ${host} in
+    *mingw*) ;;
+    *) SIM_DV_SOCKSER_O="dv-sockser.o"
 
-if test "$sim_hw_p" != yes; then
-  sim_hw_objs=
-  sim_hw_cflags="-DWITH_HW=0"
-  sim_hw=
-fi
-if test x"$silent" != x"yes"; then
-  echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
-fi
-fi
+cat >>confdefs.h <<_ACEOF
+#define HAVE_DV_SOCKSER 1
+_ACEOF
 
-case " $hardware " in
-  *" cfi "*) { $as_echo "$as_me:${as_lineno-$LINENO}: checking for log2 in -lm" >&5
+       ;;
+  esac
+
+  if test x"$silent" != x"yes"; then
+    echo "Setting hardware to $sim_hw_cflags, $sim_hw, $sim_hw_objs"
+  fi
+    case " $hardware " in
+    *" cfi "*) { $as_echo "$as_me:${as_lineno-$LINENO}: checking for log2 in -lm" >&5
 $as_echo_n "checking for log2 in -lm... " >&6; }
 if test "${ac_cv_lib_m_log2+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -13413,7 +13425,8 @@ _ACEOF
 
 fi
 ;;
-esac
+  esac
+fi
 
 
 # The default model shouldn't matter as long as there's a BFD.

@@ -1,3 +1,7 @@
+2013-03-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Regenerate.
+
 2013-03-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	* acinclude.m4: Add SIM_DV_SOCKSER_O which is empty  on hosts
