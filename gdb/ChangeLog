@@ -1,3 +1,8 @@
+2013-03-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (handle_output_debug_string): Add empty line
+	after local block variable definition.
+
 2013-03-26  Pedro Alves  <palves@redhat.com>
 
 	* ser-tcp.c (wait_for_connect): Make 'polls' parameter unsigned.
