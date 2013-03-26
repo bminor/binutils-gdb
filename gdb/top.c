@@ -876,13 +876,8 @@ gdb_rl_operate_and_get_next (int count, int key)
   /* Find the current line, and find the next line to use.  */
   where = where_history();
 
-  /* FIXME: kettenis/20020817: max_input_history is renamed into
-     history_max_entries in readline-4.2.  When we do a new readline
-     import, we should probably change it here too, even though
-     readline maintains backwards compatibility for now by still
-     defining max_input_history.  */
-  if ((history_is_stifled () && (history_length >= max_input_history)) ||
-      (where >= history_length - 1))
+  if ((history_is_stifled () && (history_length >= history_max_entries))
+      || (where >= history_length - 1))
     operate_saved_history = where;
   else
     operate_saved_history = where + 1;
