@@ -1,3 +1,8 @@
+2013-03-27  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/15206
+	* dwarf.c (read_and_display_attr_value): Cast format '*' arg to int.
+
 2013-03-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15206

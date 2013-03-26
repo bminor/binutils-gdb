@@ -1585,7 +1585,7 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_string:
       if (!do_loc)
-	printf (" %.*s", end - data, data);
+	printf (" %.*s", (int) (end - data), data);
       data += strnlen ((char *) data, end - data) + 1;
       break;
 
