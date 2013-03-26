@@ -1,5 +1,10 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (btrace_call_history_insn_range): Print
+	insn range as [begin, end].
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.h (struct btrace_func_link): New.
 	(enum btrace_function_flag): New.
 	(struct btrace_inst): Rename to ...

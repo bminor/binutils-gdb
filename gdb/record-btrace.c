@@ -424,10 +424,13 @@ static void
 btrace_call_history_insn_range (struct ui_out *uiout,
 				const struct btrace_function *bfun)
 {
-  unsigned int begin, end;
+  unsigned int begin, end, size;
+
+  size = VEC_length (btrace_insn_s, bfun->insn);
+  gdb_assert (size > 0);
 
   begin = bfun->insn_offset;
-  end = begin + VEC_length (btrace_insn_s, bfun->insn);
+  end = begin + size - 1;
 
   ui_out_field_uint (uiout, "insn begin", begin);
   ui_out_text (uiout, "-");
