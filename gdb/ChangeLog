@@ -1,5 +1,10 @@
 2013-03-26  Pedro Alves  <palves@redhat.com>
 
+	* ser-tcp.c (wait_for_connect): Make 'polls' parameter unsigned.
+	(net_open): Make 'polls' local unsigned.
+
+2013-03-26  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (_initialize_remote): Make "set remoteaddresssize"
 	a zuinteger command instead of uinteger.
 

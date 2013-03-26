@@ -83,7 +83,7 @@ static unsigned int tcp_retry_limit = 15;
    Returns -1 on timeout or interrupt, otherwise the value of select.  */
 
 static int
-wait_for_connect (struct serial *scb, int *polls)
+wait_for_connect (struct serial *scb, unsigned int *polls)
 {
   struct timeval t;
   int n;
@@ -165,7 +165,7 @@ net_open (struct serial *scb, const char *name)
 #else
   int ioarg;
 #endif
-  int polls = 0;
+  unsigned int polls = 0;
 
   use_udp = 0;
   if (strncmp (name, "udp:", 4) == 0)
