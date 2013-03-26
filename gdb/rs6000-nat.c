@@ -132,8 +132,6 @@ static void vmap_symtab (struct vmap *);
 
 static void exec_one_dummy_insn (struct regcache *);
 
-extern void fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
-
 /* Given REGNO, a gdb register number, return the corresponding
    number suitable for use as a ptrace() parameter.  Return -1 if
    there's no suitable mapping.  Also, set the int pointed to by
