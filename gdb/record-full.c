@@ -199,7 +199,7 @@ static int record_full_stop_at_limit = 1;
 static unsigned int record_full_insn_max_num
 	= DEFAULT_RECORD_FULL_INSN_MAX_NUM;
 /* Actual count of insns presently in execution log.  */
-static int record_full_insn_num = 0;
+static unsigned int record_full_insn_num = 0;
 /* Count of insns logged so far (may be larger
    than count of insns presently in execution log).  */
 static ULONGEST record_full_insn_count;
@@ -557,28 +557,24 @@ record_full_arch_list_add_end (void)
 static void
 record_full_check_insn_num (int set_terminal)
 {
-  if (record_full_insn_max_num)
+  if (record_full_insn_num == record_full_insn_max_num)
     {
-      gdb_assert (record_full_insn_num <= record_full_insn_max_num);
-      if (record_full_insn_num == record_full_insn_max_num)
+      /* Ask user what to do.  */
+      if (record_full_stop_at_limit)
 	{
-	  /* Ask user what to do.  */
-	  if (record_full_stop_at_limit)
-	    {
-	      int q;
+	  int q;
 
-	      if (set_terminal)
-		target_terminal_ours ();
-	      q = yquery (_("Do you want to auto delete previous execution "
-			    "log entries when record/replay buffer becomes "
-			    "full (record full stop-at-limit)?"));
-	      if (set_terminal)
-		target_terminal_inferior ();
-	      if (q)
-		record_full_stop_at_limit = 0;
-	      else
-		error (_("Process record: stopped by user."));
-	    }
+	  if (set_terminal)
+	    target_terminal_ours ();
+	  q = yquery (_("Do you want to auto delete previous execution "
+			"log entries when record/replay buffer becomes "
+			"full (record full stop-at-limit)?"));
+	  if (set_terminal)
+	    target_terminal_inferior ();
+	  if (q)
+	    record_full_stop_at_limit = 0;
+	  else
+	    error (_("Process record: stopped by user."));
 	}
     }
 }
@@ -659,8 +655,7 @@ record_full_message (struct regcache *regcache, enum gdb_signal signal)
   record_full_arch_list_head->prev = record_full_list;
   record_full_list = record_full_arch_list_tail;
 
-  if (record_full_insn_num == record_full_insn_max_num
-      && record_full_insn_max_num)
+  if (record_full_insn_num == record_full_insn_max_num)
     record_full_list_release_first ();
   else
     record_full_insn_num++;
@@ -1573,8 +1568,7 @@ record_full_registers_change (struct regcache *regcache, int regnum)
   record_full_arch_list_head->prev = record_full_list;
   record_full_list = record_full_arch_list_tail;
 
-  if (record_full_insn_num == record_full_insn_max_num
-      && record_full_insn_max_num)
+  if (record_full_insn_num == record_full_insn_max_num)
     record_full_list_release_first ();
   else
     record_full_insn_num++;
@@ -1693,8 +1687,7 @@ record_full_xfer_partial (struct target_ops *ops, enum target_object object,
       record_full_arch_list_head->prev = record_full_list;
       record_full_list = record_full_arch_list_tail;
 
-      if (record_full_insn_num == record_full_insn_max_num
-	  && record_full_insn_max_num)
+      if (record_full_insn_num == record_full_insn_max_num)
 	record_full_list_release_first ();
       else
 	record_full_insn_num++;
@@ -1958,14 +1951,14 @@ record_full_info (void)
 		       pulongest (record_full_insn_count));
 
       /* Display log count.  */
-      printf_filtered (_("Log contains %d instructions.\n"),
+      printf_filtered (_("Log contains %u instructions.\n"),
 		       record_full_insn_num);
     }
   else
     printf_filtered (_("No instructions have been logged.\n"));
 
   /* Display max log size.  */
-  printf_filtered (_("Max logged instructions is %d.\n"),
+  printf_filtered (_("Max logged instructions is %u.\n"),
 		   record_full_insn_max_num);
 }
 
@@ -2586,7 +2579,7 @@ record_full_restore (void)
   if (record_full_insn_num > record_full_insn_max_num)
     {
       record_full_insn_max_num = record_full_insn_num;
-      warning (_("Auto increase record/replay buffer limit to %d."),
+      warning (_("Auto increase record/replay buffer limit to %u."),
                record_full_insn_max_num);
     }
 
@@ -2880,8 +2873,7 @@ static void
 set_record_full_insn_max_num (char *args, int from_tty,
 			      struct cmd_list_element *c)
 {
-  if (record_full_insn_num > record_full_insn_max_num
-      && record_full_insn_max_num)
+  if (record_full_insn_num > record_full_insn_max_num)
     {
       /* Count down record_full_insn_num while releasing records from list.  */
       while (record_full_insn_num > record_full_insn_max_num)
