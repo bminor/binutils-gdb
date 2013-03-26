@@ -1,5 +1,10 @@
 2013-03-26  Pedro Alves  <palves@redhat.com>
 
+	* cris-tdep.c (_initialize_cris_tdep): Make the "set cris-version"
+	command zuinteger instead of uinteger.
+
+2013-03-26  Pedro Alves  <palves@redhat.com>
+
 	* coff-pe-read.c (_initialize_coff_pe_read): Make the command
 	zuinteger instead of uinteger.
 

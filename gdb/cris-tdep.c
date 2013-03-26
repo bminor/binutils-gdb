@@ -3914,17 +3914,17 @@ _initialize_cris_tdep (void)
   gdbarch_register (bfd_arch_cris, cris_gdbarch_init, cris_dump_tdep);
   
   /* CRIS-specific user-commands.  */
-  add_setshow_uinteger_cmd ("cris-version", class_support, 
-			    &usr_cmd_cris_version, 
-			    _("Set the current CRIS version."),
-			    _("Show the current CRIS version."),
-			    _("\
+  add_setshow_zuinteger_cmd ("cris-version", class_support,
+			     &usr_cmd_cris_version,
+			     _("Set the current CRIS version."),
+			     _("Show the current CRIS version."),
+			     _("\
 Set to 10 for CRISv10 or 32 for CRISv32 if autodetection fails.\n\
 Defaults to 10. "),
-			    set_cris_version,
-			    NULL, /* FIXME: i18n: Current CRIS version
-				     is %s.  */
-			    &setlist, &showlist);
+			     set_cris_version,
+			     NULL, /* FIXME: i18n: Current CRIS version
+				      is %s.  */
+			     &setlist, &showlist);
 
   add_setshow_enum_cmd ("cris-mode", class_support, 
 			cris_modes, &usr_cmd_cris_mode, 
