@@ -1,5 +1,10 @@
 2013-03-26  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (_initialize_remote): Make "set remoteaddresssize"
+	a zuinteger command instead of uinteger.
+
+2013-03-26  Pedro Alves  <palves@redhat.com>
+
 	* record-full.c (record_full_insn_num): Make it unsigned.
 	(record_full_check_insn_num, record_full_message)
 	(record_full_registers_change, record_full_xfer_partial): Remove
