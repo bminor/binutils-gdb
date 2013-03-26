@@ -1,3 +1,10 @@
+2013-03-26  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4 (SIM_AC_OPTION_HARDWARE): Rename sim_hw_p setup to
+	enable_sim_hardware.  Move content of 3rd arg to AC_ARG_ENABLE to
+	outside of the macro.  Merge the "always" check with this code.
+	Delete the code in the 4th arg.
+
 2013-03-23  Joel Sherrill  <joel.sherrill@oarcorp.com>
 
 	* acinclude.m4: Add SIM_DV_SOCKSER_O which is empty  on hosts
