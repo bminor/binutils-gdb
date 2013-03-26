@@ -1,3 +1,9 @@
+2013-03-26  Douglas B Rupp  <rupp@adacore.com
+
+	* gas/ia64/ia64.exp: Add new test reloc-mlx
+	* gas/ia64/reloc-mlx.[sd]: New test for X-unit reloc.
+	* gas/ia64/pcrel.d: Fix output for X-unit reloc.
+
 2013-03-21  Will Newton  <will.newton@linaro.org>
 
 	* gas/arm/thumb2_relax.d: Strip out invalid pc-relative strs.

@@ -1,3 +1,8 @@
+2013-03-26  Douglas B Rupp  <rupp@gnat.com>
+
+	* config/tc-ia64.c (emit_one_bundle): Move last_slot adjustment
+	after fixup.
+
 2013-03-21  Will Newton  <will.newton@linaro.org>
 
 	* config/tc-arm.c (encode_thumb32_addr_mode): Emit an error for all

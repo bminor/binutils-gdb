@@ -1,6 +1,6 @@
 /* tc-ia64.c -- Assembler for the HP/Intel IA-64 architecture.
    Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2011, 2012 Free Software Foundation, Inc.
+   2008, 2009, 2011, 2012, 2013 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -6934,15 +6934,6 @@ emit_one_bundle (void)
 	  md.slot[curr].unwind_record = NULL;
 	}
 
-      if (required_unit == IA64_UNIT_L)
-	{
-	  know (i == 1);
-	  /* skip one slot for long/X-unit instructions */
-	  ++i;
-	}
-      --md.num_slots_in_use;
-      last_slot = i;
-
       for (j = 0; j < md.slot[curr].num_fixups; ++j)
 	{
 	  ifix = md.slot[curr].fixup + j;
@@ -6954,6 +6945,17 @@ emit_one_bundle (void)
 	}
 
       end_of_insn_group = md.slot[curr].end_of_insn_group;
+
+      /* This adjustment to "i" must occur after the fix, otherwise the fix
+	 is assigned to the wrong slot, and the VMS linker complains.  */
+      if (required_unit == IA64_UNIT_L)
+	{
+	  know (i == 1);
+	  /* skip one slot for long/X-unit instructions */
+	  ++i;
+	}
+      --md.num_slots_in_use;
+      last_slot = i;
 
       /* clear slot:  */
       ia64_free_opcode (md.slot[curr].idesc);

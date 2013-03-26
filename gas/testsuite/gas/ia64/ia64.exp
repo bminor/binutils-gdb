@@ -65,6 +65,7 @@ if [istarget "ia64-*"] then {
     run_dump_test "dependency-1"
 
     run_dump_test "reloc"
+    run_dump_test "reloc-mlx"
     run_list_test "reloc-bad" ""
     run_dump_test "pcrel"
 
