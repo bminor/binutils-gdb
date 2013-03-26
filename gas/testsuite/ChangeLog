@@ -1,4 +1,4 @@
-2013-03-26  Douglas B Rupp  <rupp@adacore.com
+2013-03-26  Douglas B Rupp  <rupp@adacore.com>
 
 	* gas/ia64/ia64.exp: Add new test reloc-mlx
 	* gas/ia64/reloc-mlx.[sd]: New test for X-unit reloc.
