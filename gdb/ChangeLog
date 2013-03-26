@@ -1,3 +1,8 @@
+2013-03-26  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_close): Call
+	record_btrace_auto_disable.
+
 2013-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* exceptions.h (enum errors): New entry TARGET_CLOSE_ERROR.

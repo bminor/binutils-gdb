@@ -192,6 +192,10 @@ record_btrace_stop_recording (void)
 static void
 record_btrace_close (int quitting)
 {
+  /* Make sure automatic recording gets disabled even if we did not stop
+     recording before closing the record-btrace target.  */
+  record_btrace_auto_disable ();
+
   /* We already stopped recording.  */
 }
 
