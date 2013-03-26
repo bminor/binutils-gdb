@@ -1,3 +1,8 @@
+2013-03-26  Pedro Alves  <palves@redhat.com>
+
+	* lib/gdb.exp (skip_btrace_tests): Delay deleting the source file
+	until after GDB has run.
+
 2013-03-26  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/actions.c, gdb.trace/circ.c: Add license header.

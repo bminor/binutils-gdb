@@ -2129,10 +2129,10 @@ proc skip_btrace_tests {} {
     verbose "$me:  compiling testfile $src" 2
     set compile_flags {debug nowarnings quiet}
     set lines [gdb_compile $src $exe executable $compile_flags]
-    file delete $src
 
     if ![string match "" $lines] then {
         verbose "$me:  testfile compilation failed, returning 1" 2
+	file delete $src
         return [set skip_btrace_tests_saved 1]
     }
 
@@ -2140,8 +2140,10 @@ proc skip_btrace_tests {} {
 
     clean_restart btrace[pid].x
     if ![runto_main] {
+	file delete $src
         return [set skip_btrace_tests_saved 1]
     }
+    file delete $src
     # In case of an unexpected output, we return 2 as a fail value.
     set skip_btrace_tests_saved 2
     gdb_test_multiple "record btrace" "check btrace support" {
