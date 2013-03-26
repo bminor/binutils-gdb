@@ -1,3 +1,8 @@
+2013-03-26  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_add_object_symbols): Add assertion for
+	common override alignment check code.  Formatting.
+
 2013-03-25  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Set old_alignment for

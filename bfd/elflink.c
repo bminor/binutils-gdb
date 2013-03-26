@@ -4255,6 +4255,9 @@ error_free_dyn:
 	      bfd *normal_bfd;
 	      bfd *common_bfd;
 
+	      BFD_ASSERT (h->root.type == bfd_link_hash_defined
+			  || h->root.type == bfd_link_hash_defweak);
+
 	      symbol_align = ffs (h->root.u.def.value) - 1;
 	      if (h->root.u.def.section->owner != NULL
 		  && (h->root.u.def.section->owner->flags & DYNAMIC) == 0)
@@ -4298,7 +4301,8 @@ error_free_dyn:
 	    }
 
 	  /* Remember the symbol size if it isn't undefined.  */
-	  if ((isym->st_size != 0 && isym->st_shndx != SHN_UNDEF)
+	  if (isym->st_size != 0
+	      && isym->st_shndx != SHN_UNDEF
 	      && (definition || h->size == 0))
 	    {
 	      if (h->size != 0
