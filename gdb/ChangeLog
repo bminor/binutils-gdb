@@ -1,5 +1,10 @@
 2013-03-26  Pedro Alves  <palves@redhat.com>
 
+	* dcache.c (_initialize_dcache): Make the "set dcache line-size"
+	and "set dcache size" commands zuinteger instead of uinteger.
+
+2013-03-26  Pedro Alves  <palves@redhat.com>
+
 	* cris-tdep.c (_initialize_cris_tdep): Make the "set cris-version"
 	command zuinteger instead of uinteger.
 

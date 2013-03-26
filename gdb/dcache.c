@@ -727,20 +727,20 @@ Use this command to set number of lines in dcache and line-size."),
 Show dcachesettings."),
 		  &dcache_show_list, "show dcache ", /*allow_unknown*/0, &showlist);
 
-  add_setshow_uinteger_cmd ("line-size", class_obscure,
-			    &dcache_line_size, _("\
+  add_setshow_zuinteger_cmd ("line-size", class_obscure,
+			     &dcache_line_size, _("\
 Set dcache line size in bytes (must be power of 2)."), _("\
 Show dcache line size."),
-			    NULL,
-			    set_dcache_line_size,
-			    NULL,
-			    &dcache_set_list, &dcache_show_list);
-  add_setshow_uinteger_cmd ("size", class_obscure,
-			    &dcache_size, _("\
+			     NULL,
+			     set_dcache_line_size,
+			     NULL,
+			     &dcache_set_list, &dcache_show_list);
+  add_setshow_zuinteger_cmd ("size", class_obscure,
+			     &dcache_size, _("\
 Set number of dcache lines."), _("\
 Show number of dcache lines."),
-			    NULL,
-			    set_dcache_size,
-			    NULL,
-			    &dcache_set_list, &dcache_show_list);
+			     NULL,
+			     set_dcache_size,
+			     NULL,
+			     &dcache_set_list, &dcache_show_list);
 }
