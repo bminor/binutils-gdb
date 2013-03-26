@@ -1,5 +1,9 @@
 2013-03-26  Nick Clifton  <nickc@redhat.com>
 
+	PR gas/15295
+	* listing.c (rebuffer_line): Rewrite to avoid seeking back to the
+	start of the file each time.
+
 	PR gas/15178
 	* config/tc-sparc.h (ELF_TARGET_FORMAT): Set to elf32-sparc for
 	FreeBSD targets.
