@@ -1,5 +1,10 @@
 2013-03-26  Pedro Alves  <palves@redhat.com>
 
+	* coff-pe-read.c (_initialize_coff_pe_read): Make the command
+	zuinteger instead of uinteger.
+
+2013-03-26  Pedro Alves  <palves@redhat.com>
+
 	* record.c (record_insn_history_size_setshow_var)
 	(record_call_history_size_setshow_var): New globals.
 	(command_size_to_target_size): New function.
