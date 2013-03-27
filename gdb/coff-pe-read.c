@@ -707,12 +707,12 @@ void _initialize_coff_pe_read (void);
 void
 _initialize_coff_pe_read (void)
 {
-  add_setshow_uinteger_cmd ("coff_pe_read", class_maintenance,
-			    &debug_coff_pe_read,
-			    _("Set coff PE read debugging."),
-			    _("Show coff PE read debugging."),
-			    _("When set, debugging messages for coff reading "
-			      "of exported symbols are displayed."),
-			    NULL, show_debug_coff_pe_read,
-			    &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("coff_pe_read", class_maintenance,
+			     &debug_coff_pe_read,
+			     _("Set coff PE read debugging."),
+			     _("Show coff PE read debugging."),
+			     _("When set, debugging messages for coff reading "
+			       "of exported symbols are displayed."),
+			     NULL, show_debug_coff_pe_read,
+			     &setdebuglist, &showdebuglist);
 }
