@@ -1,5 +1,17 @@
 2013-03-27  Pedro Alves  <palves@redhat.com>
 
+	* top.c (history_size): Rename to ...
+	(history_size_setshow_var): ... this.  Add comment.
+	(show_commands): Use readline's 'history_length' instead of
+	computing the history length by calling history_get in a loop.
+	(set_history_size_command): Error out for sizes over INT_MAX.
+	Restore previous history size on invalid size.
+	(init_history): If HISTSIZE is negative, leave the history size as
+	zero.  Add comments.
+	(init_main): Adjust.
+
+2013-03-27  Pedro Alves  <palves@redhat.com>
+
 	* coff-pe-read.c (_initialize_coff_pe_read): Rename "set debug
 	coff_pe_read" command to "set debug coff-pe-read".
 

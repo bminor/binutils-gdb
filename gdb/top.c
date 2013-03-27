@@ -708,7 +708,10 @@ show_write_history_p (struct ui_file *file, int from_tty,
 		    value);
 }
 
-static unsigned int history_size;
+/* The variable associated with the "set/show history size"
+   command.  */
+static unsigned int history_size_setshow_var;
+
 static void
 show_history_size (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
@@ -1376,21 +1379,7 @@ show_commands (char *args, int from_tty)
      Relative to history_base.  */
   static int num = 0;
 
-  /* The first command in the history which doesn't exist (i.e. one more
-     than the number of the last command).  Relative to history_base.  */
-  unsigned int hist_len;
-
   /* Print out some of the commands from the command history.  */
-  /* First determine the length of the history list.  */
-  hist_len = history_size;
-  for (offset = 0; offset < history_size; offset++)
-    {
-      if (!history_get (history_base + offset))
-	{
-	  hist_len = offset;
-	  break;
-	}
-    }
 
   if (args)
     {
@@ -1404,7 +1393,7 @@ show_commands (char *args, int from_tty)
   /* "show commands" means print the last Hist_print commands.  */
   else
     {
-      num = hist_len - Hist_print;
+      num = history_length - Hist_print;
     }
 
   if (num < 0)
@@ -1412,14 +1401,16 @@ show_commands (char *args, int from_tty)
 
   /* If there are at least Hist_print commands, we want to display the last
      Hist_print rather than, say, the last 6.  */
-  if (hist_len - num < Hist_print)
+  if (history_length - num < Hist_print)
     {
-      num = hist_len - Hist_print;
+      num = history_length - Hist_print;
       if (num < 0)
 	num = 0;
     }
 
-  for (offset = num; offset < num + Hist_print && offset < hist_len; offset++)
+  for (offset = num;
+       offset < num + Hist_print && offset < history_length;
+       offset++)
     {
       printf_filtered ("%5d  %s\n", history_base + offset,
 		       (history_get (history_base + offset))->line);
@@ -1443,16 +1434,30 @@ show_commands (char *args, int from_tty)
 static void
 set_history_size_command (char *args, int from_tty, struct cmd_list_element *c)
 {
-  /* The type of parameter in stifle_history is int, so values from INT_MAX up
-     mean 'unlimited'.  */
-  if (history_size >= INT_MAX)
+  /* Readline's history interface works with 'int', so it can only
+     handle history sizes up to INT_MAX.  The command itself is
+     uinteger, so UINT_MAX means "unlimited", but we only get that if
+     the user does "set history size 0" -- "set history size <UINT_MAX>"
+     throws out-of-range.  */
+  if (history_size_setshow_var > INT_MAX
+      && history_size_setshow_var != UINT_MAX)
     {
-      /* Ensure that 'show history size' prints 'unlimited'.  */
-      history_size = UINT_MAX;
-      unstifle_history ();
+      unsigned int new_value = history_size_setshow_var;
+
+      /* Restore previous value before throwing.  */
+      if (history_is_stifled ())
+	history_size_setshow_var = history_max_entries;
+      else
+	history_size_setshow_var = UINT_MAX;
+
+      error (_("integer %u out of range"), new_value);
     }
+
+  /* Commit the new value to readline's history.  */
+  if (history_size_setshow_var == UINT_MAX)
+    unstifle_history ();
   else
-    stifle_history (history_size);
+    stifle_history (history_size_setshow_var);
 }
 
 void
@@ -1505,11 +1510,27 @@ init_history (void)
 
   tmpenv = getenv ("HISTSIZE");
   if (tmpenv)
-    history_size = atoi (tmpenv);
-  else if (!history_size)
-    history_size = 256;
+    {
+      int var;
 
-  stifle_history (history_size);
+      var = atoi (tmpenv);
+      if (var < 0)
+	{
+	  /* Prefer ending up with no history rather than overflowing
+	     readline's history interface, which uses signed 'int'
+	     everywhere.  */
+	  var = 0;
+	}
+
+      history_size_setshow_var = var;
+    }
+  /* If the init file hasn't set a size yet, pick the default.  */
+  else if (history_size_setshow_var == 0)
+    history_size_setshow_var = 256;
+
+  /* Note that unlike "set history size 0", "HISTSIZE=0" really sets
+     the history size to 0...  */
+  stifle_history (history_size_setshow_var);
 
   tmpenv = getenv ("GDBHISTFILE");
   if (tmpenv)
@@ -1632,7 +1653,7 @@ Without an argument, saving is enabled."),
 			   show_write_history_p,
 			   &sethistlist, &showhistlist);
 
-  add_setshow_uinteger_cmd ("size", no_class, &history_size, _("\
+  add_setshow_uinteger_cmd ("size", no_class, &history_size_setshow_var, _("\
 Set the size of the command history,"), _("\
 Show the size of the command history,"), _("\
 ie. the number of previous commands to keep a record of."),
