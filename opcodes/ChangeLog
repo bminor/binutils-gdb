@@ -1,3 +1,9 @@
+2013-03-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (get_sib): Add the sizeflag argument.  Properly
+	check address mode.
+	(print_insn): Pass sizeflag to get_sib.
+
 2013-03-27  Alexis Deruelle  <alexis.deruelle@gmail.com>
 
 	PR binutils/15068
