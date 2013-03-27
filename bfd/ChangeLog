@@ -1,3 +1,11 @@
+2013-03-27  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Set PLT_IFUNC in local got
+	masks for all local ifunc syms.
+	(allocate_dynrelocs): Don't use htab->relgot for ifunc.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+
 2013-03-27  Will Newton  <will.newton@linaro.org>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Avoid emitting a

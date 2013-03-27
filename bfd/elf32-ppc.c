@@ -3921,13 +3921,11 @@ ppc_elf_check_relocs (bfd *abfd,
 	  if (isym == NULL)
 	    return FALSE;
 
-	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC
-	      && (!info->shared
-		  || is_branch_reloc (r_type)))
+	  if (ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC)
 	    {
 	      struct plt_entry **ifunc;
-	      bfd_vma addend;
 
+	      /* Set PLT_IFUNC flag for this sym, no GOT entry yet.  */
 	      ifunc = update_local_sym_info (abfd, symtab_hdr, r_symndx,
 					     PLT_IFUNC);
 	      if (ifunc == NULL)
@@ -3936,15 +3934,19 @@ ppc_elf_check_relocs (bfd *abfd,
 	      /* STT_GNU_IFUNC symbols must have a PLT entry;
 		 In a non-pie executable even when there are
 		 no plt calls.  */
-	      addend = 0;
-	      if (r_type == R_PPC_PLTREL24)
+	      if (!info->shared
+		  || is_branch_reloc (r_type))
 		{
-		  ppc_elf_tdata (abfd)->makes_plt_call = 1;
-		  if (info->shared)
-		    addend = rel->r_addend;
+		  bfd_vma addend = 0;
+		  if (r_type == R_PPC_PLTREL24)
+		    {
+		      ppc_elf_tdata (abfd)->makes_plt_call = 1;
+		      if (info->shared)
+			addend = rel->r_addend;
+		    }
+		  if (!update_plt_info (abfd, ifunc, got2, addend))
+		    return FALSE;
 		}
-	      if (!update_plt_info (abfd, ifunc, got2, addend))
-		return FALSE;
 	    }
 	}
 
@@ -5901,6 +5903,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		  || eh->elf.root.type != bfd_link_hash_undefweak))
 	    {
 	      asection *rsec = htab->relgot;
+
+	      if (eh->elf.type == STT_GNU_IFUNC)
+		rsec = htab->reliplt;
 	      /* All the entries we allocated need relocs.
 		 Except LD only needs one.  */
 	      if ((eh->tls_mask & TLS_LD) != 0
@@ -6181,8 +6186,12 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      {
 		*local_got = allocate_got (htab, need);
 		if (info->shared)
-		  htab->relgot->size += (need
-					 * (sizeof (Elf32_External_Rela) / 4));
+		  {
+		    asection *srel = htab->relgot;
+		    if ((*lgot_masks & PLT_IFUNC) != 0)
+		      srel = htab->reliplt;
+		    srel->size += need * (sizeof (Elf32_External_Rela) / 4);
+		  }
 	      }
 	  }
 	else
@@ -7987,6 +7996,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			asection *rsec = htab->relgot;
 			bfd_byte * loc;
 
+			if (ifunc != NULL)
+			  rsec = htab->reliplt;
 			outrel.r_offset = (htab->got->output_section->vma
 					   + htab->got->output_offset
 					   + off);
