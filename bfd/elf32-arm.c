@@ -9139,7 +9139,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    {
 	      Elf_Internal_Rela outrel;
 
-	      if (!SYMBOL_REFERENCES_LOCAL (info, h))
+	      if (h->dynindx != -1 && !SYMBOL_REFERENCES_LOCAL (info, h))
 		{
 		  /* If the symbol doesn't resolve locally in a static
 		     object, we have an undefined reference.  If the
@@ -13274,7 +13274,7 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
 	      if ((tls_type & GOT_TLS_GD) && indx != 0)
 		elf32_arm_allocate_dynrelocs (info, htab->root.srelgot, 1);
 	    }
-	  else if (!SYMBOL_REFERENCES_LOCAL (info, h))
+	  else if (indx != -1 && !SYMBOL_REFERENCES_LOCAL (info, h))
 	    {
 	      if (htab->root.dynamic_sections_created)
 		/* Reserve room for the GOT entry's R_ARM_GLOB_DAT relocation.  */

@@ -1,6 +1,13 @@
 2013-03-27  Will Newton  <will.newton@linaro.org>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Avoid emitting a
+	dynamic reloc for symbols with dynindx == -1.
+	(allocate_dynrelocs_for_symbol): Avoid allocating space for a
+	dynamic reloc for symbols with dynindx == -1.
+
+2013-03-27  Will Newton  <will.newton@linaro.org>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Avoid emitting a
 	dynamic reloc for non-default visibility undefined weaks.
 	(allocate_dynrelocs_for_symbol): Avoid allocating space for a
 	dynamic reloc for non-default visibility undefined weaks.
