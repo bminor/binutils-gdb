@@ -76,7 +76,7 @@ parse_auto_binary_operation (const char *arg)
 /* See cli-setshow.h.  */
 
 int
-parse_cli_boolean_value (char *arg)
+parse_cli_boolean_value (const char *arg)
 {
   int length;
 

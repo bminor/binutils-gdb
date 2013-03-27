@@ -1,5 +1,10 @@
 2014-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-setshow.h (parse_cli_boolean_value): Update.
+	* cli/cli-setshow.c (parse_cli_boolean_value): Make "arg" const.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* probe.c (info_probes_for_ops): Make "arg" const.
 	* probe.h (info_probes_for_ops): Update.
 
