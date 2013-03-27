@@ -82,15 +82,18 @@ SECTIONS
 
     /* For data that needs to reside in the lower 64k of progmem.  */
     *(.progmem.gcc*)
-    *(.progmem*)
-    ${RELOCATING+. = ALIGN(2);}
 
+    /* PR 13812: Placing the trampolines here gives a better chance
+       that they will be in range of the code that uses them.  */
+    ${RELOCATING+. = ALIGN(2);}
     ${CONSTRUCTING+ __trampolines_start = . ; }
     /* The jump trampolines for the 16-bit limited relocs will reside here.  */
     *(.trampolines)
     *(.trampolines*)
     ${CONSTRUCTING+ __trampolines_end = . ; }
 
+    *(.progmem*)
+    
     /* For future tablejump instruction arrays for 3 byte pc devices.
        We don't relax jump/call instructions within these sections.  */
     *(.jumptables) 

@@ -1,3 +1,8 @@
+2013-03-27  Georg-Johann Lay  <gjl@gcc.gnu.org>
+
+	PR ld/13812
+	* scripttempl/avr.sc: Place trampolines before .progmem section.
+
 2013-03-25  Kai Tietz  <ktietz@redhat.com>
 
 	* ld.texinfo (--disable-runtime-pseudo-reloc): Adjust default.
