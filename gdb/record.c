@@ -442,18 +442,18 @@ get_insn_history_modifiers (char **arg)
    meaning unlimited.  The target interfaces works with signed int
    though, to indicate direction, so map "unlimited" to INT_MAX, which
    is about the same as unlimited in practice.  If the user does have
-   a log that huge, she can can fetch it in chunks across several
-   requests, but she'll likely have other problems first...  */
+   a log that huge, she can fetch it in chunks across several requests,
+   but she'll likely have other problems first...  */
 
 static int
-command_size_to_target_size (unsigned int *command)
+command_size_to_target_size (unsigned int size)
 {
-  gdb_assert (*command <= INT_MAX || *command == UINT_MAX);
+  gdb_assert (size <= INT_MAX || size == UINT_MAX);
 
-  if (record_call_history_size == UINT_MAX)
+  if (size == UINT_MAX)
     return INT_MAX;
   else
-    return *command;
+    return size;
 }
 
 /* The "record instruction-history" command.  */
@@ -467,7 +467,7 @@ cmd_record_insn_history (char *arg, int from_tty)
 
   flags = get_insn_history_modifiers (&arg);
 
-  size = command_size_to_target_size (&record_insn_history_size);
+  size = command_size_to_target_size (record_insn_history_size);
 
   if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
     target_insn_history (size, flags);
@@ -583,7 +583,7 @@ cmd_record_call_history (char *arg, int from_tty)
 
   flags = get_call_history_modifiers (&arg);
 
-  size = command_size_to_target_size (&record_call_history_size);
+  size = command_size_to_target_size (record_call_history_size);
 
   if (arg == NULL || *arg == 0 || strcmp (arg, "+") == 0)
     target_call_history (size, flags);
