@@ -707,7 +707,7 @@ void _initialize_coff_pe_read (void);
 void
 _initialize_coff_pe_read (void)
 {
-  add_setshow_zuinteger_cmd ("coff_pe_read", class_maintenance,
+  add_setshow_zuinteger_cmd ("coff-pe-read", class_maintenance,
 			     &debug_coff_pe_read,
 			     _("Set coff PE read debugging."),
 			     _("Show coff PE read debugging."),

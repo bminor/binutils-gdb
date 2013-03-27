@@ -1,5 +1,10 @@
 2013-03-27  Pedro Alves  <palves@redhat.com>
 
+	* coff-pe-read.c (_initialize_coff_pe_read): Rename "set debug
+	coff_pe_read" command to "set debug coff-pe-read".
+
+2013-03-27  Pedro Alves  <palves@redhat.com>
+
 	* coff-pe-read.c (_initialize_coff_pe_read): Make the command
 	zuinteger instead of uinteger.
 
