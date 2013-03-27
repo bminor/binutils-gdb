@@ -19,6 +19,8 @@
   'record instruction-history' commands are now inclusive.
 
 * The btrace record target now supports the 'record goto' command.
+  For locations inside the execution trace, the back trace is computed
+  based on the information stored in the execution trace.
 
 *** Changes in GDB 7.7
 

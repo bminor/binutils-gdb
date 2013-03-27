@@ -87,6 +87,18 @@ gdb_test "record instruction-history" [join [list \
 # let's go to another place in the history
 gdb_test "record goto 26" ".*fun3 \\(\\) at record_goto.c:35.*"
 
+# check the back trace at that location
+gdb_test "backtrace" [join [list \
+  "#0.*fun3.*at record_goto.c:35.*" \
+  "#1.*fun4.*at record_goto.c:43.*" \
+  "#2.*main.*at record_goto.c:49.*" \
+  "Backtrace stopped: not enough registers or memory available to unwind further" \
+  ] "\r\n"]
+
+# walk the backtrace
+gdb_test "up" ".*fun4.*at record_goto.c:43.*" "up to fun4"
+gdb_test "up" ".*main.*at record_goto.c:49.*" "up to main"
+
 # the function call history should start at the new location
 gdb_test "record function-call-history /ci -" [join [list \
   "8\t  fun3\tinst 19,21" \

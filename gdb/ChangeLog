@@ -1,5 +1,31 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record.h (record_btrace_frame_unwind)
+	(record_btrace_tailcall_frame_unwind): New declarations.
+	* dwarf2-frame: Include record.h
+	(dwarf2_frame_cfa): Throw an error for btrace frames.
+	* record-btrace.c: Include hashtab.h.
+	(btrace_get_bfun_name): New.
+	(btrace_call_history): Call btrace_get_bfun_name.
+	(struct btrace_frame_cache): New.
+	(bfcache): New.
+	(bfcache_hash, bfcache_eq, bfcache_new): New.
+	(btrace_get_frame_function): New.
+	(record_btrace_frame_unwind_stop_reason): Allow unwinding.
+	(record_btrace_frame_this_id): Compute own id.
+	(record_btrace_frame_prev_register): Provide PC, throw_error
+	for all other registers.
+	(record_btrace_frame_sniffer): Detect btrace frames.
+	(record_btrace_tailcall_frame_sniffer): New.
+	(record_btrace_frame_dealloc_cache): New.
+	(record_btrace_frame_unwind): Add new functions.
+	(record_btrace_tailcall_frame_unwind): New.
+	(_initialize_record_btrace): Allocate cache.
+	* btrace.c (btrace_clear): Call reinit_frame_cache.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_set_replay)
 	(record_btrace_goto_begin, record_btrace_goto_end)
 	(record_btrace_goto): New.

@@ -765,6 +765,10 @@ btrace_clear (struct thread_info *tp)
 
   DEBUG ("clear thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
 
+  /* Make sure btrace frames that may hold a pointer into the branch
+     trace data are destroyed.  */
+  reinit_frame_cache ();
+
   btinfo = &tp->btrace;
 
   it = btinfo->begin;

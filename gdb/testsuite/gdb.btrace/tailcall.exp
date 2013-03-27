@@ -60,3 +60,18 @@ gdb_test "record function-call-history /c 1" [join [list \
   "2\t    bar" \
   "3\tmain" \
   ] "\r\n"] "indented"
+
+# go into bar
+gdb_test "record goto 3" ".*bar \\(\\) at .*x86-tailcall.c:24\r\n.*"
+
+# check the backtrace
+gdb_test "backtrace" [join [list \
+  "#0.*bar \\(\\) at x86-tailcall.c:24" \
+  "#1.*foo \\(\\) at x86-tailcall.c:29" \
+  "#2.*main \\(\\) at x86-tailcall.c:37" \
+  "Backtrace stopped: not enough registers or memory available to unwind further" \
+  ] "\r\n"]
+
+# walk the backtrace
+gdb_test "up" "#1\[^\r\n\]*foo \\(\\) at x86-tailcall.c:29\r\n.*" "up to foo"
+gdb_test "up" "#2\[^\r\n\]*main \\(\\) at x86-tailcall.c:37\r\n.*" "up to main"

@@ -1,5 +1,10 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/record_goto.exp: Add backtrace test.
+	* gdb.btrace/tailcall.exp: Add backtrace test.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/Makefile.in (EXECUTABLES): Add record_goto.
 	* gdb.btrace/record_goto.c: New.
 	* gdb.btrace/record_goto.exp: New.

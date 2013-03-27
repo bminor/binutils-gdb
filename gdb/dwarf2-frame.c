@@ -31,6 +31,7 @@
 #include "objfiles.h"
 #include "regcache.h"
 #include "value.h"
+#include "record.h"
 
 #include "gdb_assert.h"
 #include <string.h>
@@ -1510,6 +1511,11 @@ dwarf2_frame_base_sniffer (struct frame_info *this_frame)
 CORE_ADDR
 dwarf2_frame_cfa (struct frame_info *this_frame)
 {
+  if (frame_unwinder_is (this_frame, &record_btrace_tailcall_frame_unwind)
+      || frame_unwinder_is (this_frame, &record_btrace_frame_unwind))
+    throw_error (NOT_AVAILABLE_ERROR,
+		 _("cfa not available for record btrace target"));
+
   while (get_frame_type (this_frame) == INLINE_FRAME)
     this_frame = get_prev_frame (this_frame);
   if (get_frame_unwind_stop_reason (this_frame) == UNWIND_UNAVAILABLE)
