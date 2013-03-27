@@ -1,3 +1,27 @@
+2013-03-27  Alexis Deruelle  <alexis.deruelle@gmail.com>
+
+	PR binutils/15068
+	* gas/tic6x/insns16-d-unit.s: New test.
+	* gas/tic6x/insns16-d-unit.d: Expected disassembly.
+	* gas/tic6x/insns16-ddec.s: New test.
+	* gas/tic6x/insns16-ddec.d: Expected disassembly.
+	* gas/tic6x/insns16-dinc.s: New test.
+	* gas/tic6x/insns16-dinc.d: Expected disassembly.
+	* gas/tic6x/insns16-dind.s: New test.
+	* gas/tic6x/insns16-dind.d: Expected disassembly.
+	* gas/tic6x/insns16-doff4.s: New test.
+	* gas/tic6x/insns16-doff4.d: Expected disassembly.
+	* gas/tic6x/insns16-l-unit.s: New test.
+	* gas/tic6x/insns16-l-unit.d: Expected disassembly.
+	* gas/tic6x/insns16-lsd-unit.s: New test.
+	* gas/tic6x/insns16-lsd-unit.d: Expected disassembly.
+	* gas/tic6x/insns16-m-unit.s: New test.
+	* gas/tic6x/insns16-m-unit.d: Expected disassembly.
+	* gas/tic6x/insns16-s-unit-pcrel.s: New test.
+	* gas/tic6x/insns16-s-unit-pcrel.d: Expected disassembly.
+	* gas/tic6x/insns16-s-unit: New test.
+	* gas/tic6x/insns16-s-unit.d: Expected disassembly.
+
 2013-03-26  Douglas B Rupp  <rupp@adacore.com>
 
 	* gas/ia64/ia64.exp: Add new test reloc-mlx

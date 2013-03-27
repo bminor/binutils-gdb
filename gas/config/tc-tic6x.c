@@ -2484,7 +2484,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	  fldd = tic6x_field_from_fmt (fmt, opct->fixed_fields[fld].field_id);
 	  if (fldd == NULL)
 	    abort ();
-	  opcode_value |= opct->fixed_fields[fld].min_val << fldd->low_pos;
+	  opcode_value |= opct->fixed_fields[fld].min_val << fldd->bitfields[0].low_pos;
 	}
     }
 
@@ -2515,7 +2515,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	  ucexp = operands[opno].value.exp;
 	unsigned_constant:
 	  if (ucexp.X_add_number < 0
-	      || ucexp.X_add_number >= (1 << fldd->width))
+	      || ucexp.X_add_number >= (1 << fldd->bitfields[0].width))
 	    {
 	      if (print_errors)
 		as_bad (_("operand %u of '%.*s' out of range"), opno + 1,
@@ -2534,7 +2534,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	      value = 0;
 	      /* Opcode table should not permit non-constants without
 		 a known relocation for them.  */
-	      if (fldd->low_pos != 7 || fldd->width != 16)
+	      if (fldd->bitfields[0].low_pos != 7 || fldd->bitfields[0].width != 16)
 		abort ();
 	      *fix_needed = TRUE;
 	      *fix_exp = &operands[opno].value.exp;
@@ -2545,8 +2545,8 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	    }
 	  sign_value = SEXT (operands[opno].value.exp.X_add_number);
 	signed_constant:
-	  if (sign_value < -(1 << (fldd->width - 1))
-	      || (sign_value >= (1 << (fldd->width - 1))))
+	  if (sign_value < -(1 << (fldd->bitfields[0].width - 1))
+	      || (sign_value >= (1 << (fldd->bitfields[0].width - 1))))
 	    {
 	      if (print_errors)
 		as_bad (_("operand %u of '%.*s' out of range"), opno + 1,
@@ -2554,8 +2554,8 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	      *ok = FALSE;
 	      return 0;
 	    }
-	  value = sign_value + (1 << (fldd->width - 1));
-	  value ^= (1 << (fldd->width - 1));
+	  value = sign_value + (1 << (fldd->bitfields[0].width - 1));
+	  value ^= (1 << (fldd->bitfields[0].width - 1));
 	  break;
 
 	case tic6x_coding_ucst_minus_one:
@@ -2564,7 +2564,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	  if (operands[opno].value.exp.X_op != O_constant)
 	    abort ();
 	  if (operands[opno].value.exp.X_add_number <= 0
-	      || operands[opno].value.exp.X_add_number > (1 << fldd->width))
+	      || operands[opno].value.exp.X_add_number > (1 << fldd->bitfields[0].width))
 	    {
 	      if (print_errors)
 		as_bad (_("operand %u of '%.*s' out of range"), opno + 1,
@@ -2636,7 +2636,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	  value = 0;
 	  /* Opcode table should not use this encoding without a known
 	     relocation.  */
-	  if (fldd->low_pos != 8 || fldd->width != 15)
+	  if (fldd->bitfields[0].low_pos != 8 || fldd->bitfields[0].width != 15)
 	    abort ();
 	  /* We do not check for offset divisibility here; such a
 	     check is not needed at this point to encode the value,
@@ -2663,7 +2663,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	      value = 0;
 	      /* Opcode table should not use this encoding without a
 		 known relocation.  */
-	      if (fldd->low_pos != 7 || fldd->width != 16)
+	      if (fldd->bitfields[0].low_pos != 7 || fldd->bitfields[0].width != 16)
 		abort ();
 	      *fix_needed = TRUE;
 	      *fix_exp = &operands[opno].value.exp;
@@ -2683,7 +2683,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	      value = 0;
 	      /* Opcode table should not use this encoding without a
 		 known relocation.  */
-	      if (fldd->low_pos != 7 || fldd->width != 16)
+	      if (fldd->bitfields[0].low_pos != 7 || fldd->bitfields[0].width != 16)
 		abort ();
 	      *fix_needed = TRUE;
 	      *fix_exp = &operands[opno].value.exp;
@@ -2701,13 +2701,13 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	  *fix_needed = TRUE;
 	  *fix_exp = &operands[opno].value.exp;
 	  *fix_pcrel = 1;
-	  if (fldd->low_pos == 7 && fldd->width == 21)
+	  if (fldd->bitfields[0].low_pos == 7 && fldd->bitfields[0].width == 21)
 	    *fx_r_type = BFD_RELOC_C6000_PCR_S21;
-	  else if (fldd->low_pos == 16 && fldd->width == 12)
+	  else if (fldd->bitfields[0].low_pos == 16 && fldd->bitfields[0].width == 12)
 	    *fx_r_type = BFD_RELOC_C6000_PCR_S12;
-	  else if (fldd->low_pos == 13 && fldd->width == 10)
+	  else if (fldd->bitfields[0].low_pos == 13 && fldd->bitfields[0].width == 10)
 	    *fx_r_type = BFD_RELOC_C6000_PCR_S10;
-	  else if (fldd->low_pos == 16 && fldd->width == 7)
+	  else if (fldd->bitfields[0].low_pos == 16 && fldd->bitfields[0].width == 7)
 	    *fx_r_type = BFD_RELOC_C6000_PCR_S7;
 	  else
 	    /* Opcode table should not use this encoding without a
@@ -2825,7 +2825,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 		  abort ();
 		}
 	      if (mem.offset.exp.X_add_number < 0
-		  || mem.offset.exp.X_add_number >= (1 << fldd->width) * scale)
+		  || mem.offset.exp.X_add_number >= (1 << fldd->bitfields[0].width) * scale)
 		{
 		  if (print_errors)
 		    as_bad (_("offset in operand %u of '%.*s' out of range"),
@@ -2858,7 +2858,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	      if (mem.offset.exp.X_op != O_constant)
 		abort ();
 	      if (mem.offset.exp.X_add_number < 0
-		  || mem.offset.exp.X_add_number >= (1 << fldd->width))
+		  || mem.offset.exp.X_add_number >= (1 << fldd->bitfields[0].width))
 		{
 		  if (print_errors)
 		    as_bad (_("offset in operand %u of '%.*s' out of range"),
@@ -2931,7 +2931,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	case tic6x_coding_spmask:
 	  /* The position of such a field is hardcoded in the handling
 	     of "||^".  */
-	  if (fldd->low_pos != 18)
+	  if (fldd->bitfields[0].low_pos != 18)
 	    abort ();
 	  value = 0;
 	  for (opno = 0; opno < num_operands; opno++)
@@ -2986,7 +2986,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	    fcyc_bits = 4;
 	  else
 	    abort ();
-	  if (fcyc_bits > fldd->width)
+	  if (fcyc_bits > fldd->bitfields[0].width)
 	    abort ();
 
 	  if (opct->variable_fields[fld].coding_method == tic6x_coding_fstg)
@@ -2994,7 +2994,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	      int i, t;
 	      if (operands[opno].value.exp.X_add_number < 0
 		  || (operands[opno].value.exp.X_add_number
-		      >= (1 << (fldd->width - fcyc_bits))))
+		      >= (1 << (fldd->bitfields[0].width - fcyc_bits))))
 		{
 		  if (print_errors)
 		    as_bad (_("operand %u of '%.*s' out of range"), opno + 1,
@@ -3003,7 +3003,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 		  return 0;
 		}
 	      value = operands[opno].value.exp.X_add_number;
-	      for (t = 0, i = fcyc_bits; i < fldd->width; i++)
+	      for (t = 0, i = fcyc_bits; i < fldd->bitfields[0].width; i++)
 		{
 		  t = (t << 1) | (value & 1);
 		  value >>= 1;
@@ -3054,7 +3054,7 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
 	    return 0;
 	  }
 
-      opcode_value |= value << fldd->low_pos;
+      opcode_value |= value << fldd->bitfields[0].low_pos;
     }
 
   if (this_line_creg)
@@ -3077,8 +3077,8 @@ tic6x_try_encode (tic6x_opcode_id id, tic6x_operand *operands,
       if (z == NULL)
 	abort ();
 
-      opcode_value |= this_line_creg << creg->low_pos;
-      opcode_value |= this_line_z << z->low_pos;
+      opcode_value |= this_line_creg << creg->bitfields[0].low_pos;
+      opcode_value |= this_line_z << z->bitfields[0].low_pos;
     }
 
   *ok = TRUE;

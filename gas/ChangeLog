@@ -1,3 +1,8 @@
+2013-03-27  Alexis Deruelle  <alexis.deruelle@gmail.com>
+
+	PR binutils/15068
+	* config/tc-tic6x.c (tic6x_try_encode): Add use of bitfields array.
+
 2013-03-26  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/15295

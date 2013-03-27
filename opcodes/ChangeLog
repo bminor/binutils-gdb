@@ -1,3 +1,8 @@
+2013-03-27  Alexis Deruelle  <alexis.deruelle@gmail.com>
+
+	PR binutils/15068
+	* tic6x-dis.c: Add support for displaying 16-bit insns.
+
 2013-03-20  Alexis Deruelle  <alexis.deruelle@gmail.com>
 
 	PR gas/15095
