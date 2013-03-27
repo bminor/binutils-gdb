@@ -2090,7 +2090,7 @@ clear_memory_write_data (void *arg)
 }
 
 void
-generic_load (char *args, int from_tty)
+generic_load (const char *args, int from_tty)
 {
   bfd *loadfile_bfd;
   struct timeval start_time, end_time;

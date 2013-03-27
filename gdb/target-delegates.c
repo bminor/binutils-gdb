@@ -381,14 +381,14 @@ tdefault_kill (struct target_ops *self)
 }
 
 static void
-delegate_load (struct target_ops *self, char *arg1, int arg2)
+delegate_load (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
   self->to_load (self, arg1, arg2);
 }
 
 static void
-tdefault_load (struct target_ops *self, char *arg1, int arg2)
+tdefault_load (struct target_ops *self, const char *arg1, int arg2)
 {
   tcomplain ();
 }

@@ -169,7 +169,7 @@ static void debug_to_terminal_save_ours (struct target_ops *self);
 
 static void debug_to_terminal_ours (struct target_ops *self);
 
-static void debug_to_load (struct target_ops *self, char *, int);
+static void debug_to_load (struct target_ops *self, const char *, int);
 
 static int debug_to_can_run (struct target_ops *self);
 
@@ -476,7 +476,7 @@ target_kill (void)
 }
 
 void
-target_load (char *arg, int from_tty)
+target_load (const char *arg, int from_tty)
 {
   target_dcache_invalidate ();
   (*current_target.to_load) (&current_target, arg, from_tty);
@@ -3876,7 +3876,7 @@ debug_to_terminal_info (struct target_ops *self,
 }
 
 static void
-debug_to_load (struct target_ops *self, char *args, int from_tty)
+debug_to_load (struct target_ops *self, const char *args, int from_tty)
 {
   debug_target.to_load (&debug_target, args, from_tty);
 
