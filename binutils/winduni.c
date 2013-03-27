@@ -1,6 +1,5 @@
 /* winduni.c -- unicode support for the windres program.
-   Copyright 1997, 1998, 2000, 2001, 2003, 2005, 2007, 2009
-   Free Software Foundation, Inc.
+   Copyright 1997-2013 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
 
@@ -85,7 +84,7 @@ static local_iconv_map codepages[] =
   { 1258, "WINDOWS-1258" },
   { CP_UTF7, "UTF-7" },
   { CP_UTF8, "UTF-8" },
-  { CP_UTF16, "UTF-16" },
+  { CP_UTF16, "UTF-16LE" },
   { (rc_uint_type) -1, NULL }
 };
 
@@ -770,7 +769,7 @@ wind_MultiByteToWideChar (rc_uint_type cp, const char *mb,
 
   if (!mb || !iconv_name)
     return 0;
-  iconv_t cd = iconv_open ("UTF-16", iconv_name);
+  iconv_t cd = iconv_open ("UTF-16LE", iconv_name);
 
   while (1)
     {
@@ -843,7 +842,7 @@ wind_WideCharToMultiByte (rc_uint_type cp, const unichar *u, char *mb, rc_uint_t
 
   if (!u || !iconv_name)
     return 0;
-  iconv_t cd = iconv_open (iconv_name, "UTF-16");
+  iconv_t cd = iconv_open (iconv_name, "UTF-16LE");
 
   while (1)
     {

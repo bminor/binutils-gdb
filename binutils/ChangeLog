@@ -1,3 +1,10 @@
+2013-03-27  Phil Krylov <phil.krylov@gmail.com>
+
+	PR binutils/13409
+	* winduni.c (codepages[]): Use UTF-16LE.
+	(wind_MultiByteToWideChar): Likewise.
+	(wind_WideCharToMultiByte): Likewise.
+
 2013-03-27  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/15206
