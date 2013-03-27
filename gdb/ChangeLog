@@ -1,3 +1,8 @@
+2013-03-27  Pedro Alves  <palves@redhat.com>
+
+	* coff-pe-read.c (_initialize_coff_pe_read): Rename "set debug
+	coff_pe_read" command to "set debug coff-pe-read".
+
 2013-03-27  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record.c (command_size_to_target_size): Fix size comparison.
