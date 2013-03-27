@@ -4370,7 +4370,9 @@ tilegx_elf_plt_sym_val (bfd_vma i, const asection *plt,
 }
 
 enum elf_reloc_type_class
-tilegx_reloc_type_class (const Elf_Internal_Rela *rela)
+tilegx_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			 const asection *rel_sec ATTRIBUTE_UNUSED,
+			 const Elf_Internal_Rela *rela)
 {
   switch ((int) TILEGX_ELF_R_TYPE (rela->r_info))
     {

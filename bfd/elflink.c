@@ -8097,17 +8097,14 @@ elf_link_sort_cmp2 (const void *A, const void *B)
 {
   const struct elf_link_sort_rela *a = (const struct elf_link_sort_rela *) A;
   const struct elf_link_sort_rela *b = (const struct elf_link_sort_rela *) B;
-  int copya, copyb;
 
+  if (a->type < b->type)
+    return -1;
+  if (a->type > b->type)
+    return 1;
   if (a->u.offset < b->u.offset)
     return -1;
   if (a->u.offset > b->u.offset)
-    return 1;
-  copya = (a->type == reloc_class_copy) * 2 + (a->type == reloc_class_plt);
-  copyb = (b->type == reloc_class_copy) * 2 + (b->type == reloc_class_plt);
-  if (copya < copyb)
-    return -1;
-  if (copya > copyb)
     return 1;
   if (a->rela->r_offset < b->rela->r_offset)
     return -1;
@@ -8334,7 +8331,7 @@ elf_link_sort_relocs (bfd *abfd, struct bfd_link_info *info, asection **psec)
 	    struct elf_link_sort_rela *s = (struct elf_link_sort_rela *) p;
 
 	    (*swap_in) (abfd, erel, s->rela);
-	    s->type = (*bed->elf_backend_reloc_type_class) (s->rela);
+	    s->type = (*bed->elf_backend_reloc_type_class) (info, o, s->rela);
 	    s->u.sym_mask = r_sym_mask;
 	    p += sort_elt;
 	    erel += ext_size;

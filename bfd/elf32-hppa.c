@@ -4436,7 +4436,9 @@ elf32_hppa_finish_dynamic_symbol (bfd *output_bfd,
    dynamic linker, before writing them out.  */
 
 static enum elf_reloc_type_class
-elf32_hppa_reloc_type_class (const Elf_Internal_Rela *rela)
+elf32_hppa_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			     const asection *rel_sec ATTRIBUTE_UNUSED,
+			     const Elf_Internal_Rela *rela)
 {
   /* Handle TLS relocs first; we don't want them to be marked
      relative by the "if (ELF32_R_SYM (rela->r_info) == STN_UNDEF)"

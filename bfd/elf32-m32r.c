@@ -3981,7 +3981,9 @@ static const struct bfd_elf_special_section m32r_elf_special_sections[] =
 };
 
 static enum elf_reloc_type_class
-m32r_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+m32r_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			   const asection *rel_sec ATTRIBUTE_UNUSED,
+			   const Elf_Internal_Rela *rela)
 {
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {

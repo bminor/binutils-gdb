@@ -2916,7 +2916,9 @@ error_return:
    properly.  */
 
 static enum elf_reloc_type_class
-_bfd_cr16_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+_bfd_cr16_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				const asection *rel_sec ATTRIBUTE_UNUSED,
+				const Elf_Internal_Rela *rela)
 {
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {

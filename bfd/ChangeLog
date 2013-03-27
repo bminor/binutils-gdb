@@ -1,3 +1,27 @@
+2013-03-28  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (enum elf_reloc_type_class): Add reloc_class_ifunc.
+	(struct elf_backend_data <elf_backed_reloc_type_class>): Add
+	bfd_link_info* and asection* params.
+	(_bfd_elf_reloc_type_class): Likewise.
+	* elf.c (_bfd_elf_reloc_type_class): Likewise.
+	* elflink.c (elf_link_sort_cmp2): Sort first on reloc class.
+	(elf_link_sort_relocs): Update elf_backed_reloc_type_class call.
+	* elf32-ppc.c (ppc_elf_reloc_type_class): Return reloc_class_ifunc
+	for any reliplt reloc.  Don't return reloc_class_plt for
+	R_PPC_REL24 and R_PPC_ADDR24.
+	* elf64-ppc.c (allocate_got): Formatting.
+	(ppc64_elf_reloc_type_class): Return reloc_class_ifunc for any
+	reliplt reloc.
+	* elf-m10300.c, * elf32-arm.c, * elf32-bfin.c, * elf32-cr16.c,
+	* elf32-cris.c, * elf32-hppa.c, * elf32-i386.c, * elf32-lm32.c,
+	* elf32-m32r.c, * elf32-m68k.c, * elf32-metag.c, * elf32-nios2.c,
+	* elf32-s390.c, * elf32-sh.c, * elf32-sparc.c, * elf32-tilepro.c,
+	* elf32-vax.c, * elf32-xtensa.c, * elf64-aarch64.c, * elf64-alpha.c,
+	* elf64-hppa.c, * elf64-ia64-vms.c, * elf64-s390.c, * elf64-sparc.c,
+	* elf64-x86-64.c, * elfnn-ia64.c, * elfxx-tilegx.c, * elfxx-tilegx.h:
+	Add extra params to the various reloc_type_class functions.
+
 2013-03-27  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Set PLT_IFUNC in local got

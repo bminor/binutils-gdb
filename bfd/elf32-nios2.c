@@ -3977,7 +3977,9 @@ nios2_elf32_link_hash_table_create (bfd *abfd)
 
 /* Implement elf_backend_reloc_type_class.  */
 static enum elf_reloc_type_class
-nios2_elf32_reloc_type_class (const Elf_Internal_Rela *rela)
+nios2_elf32_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			      const asection *rel_sec ATTRIBUTE_UNUSED,
+			      const Elf_Internal_Rela *rela)
 {
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {

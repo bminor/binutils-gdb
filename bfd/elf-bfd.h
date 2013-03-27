@@ -641,7 +641,8 @@ enum elf_reloc_type_class {
   reloc_class_normal,
   reloc_class_relative,
   reloc_class_plt,
-  reloc_class_copy
+  reloc_class_copy,
+  reloc_class_ifunc
 };
 
 struct elf_reloc_cookie
@@ -1128,7 +1129,7 @@ struct elf_backend_data
 
   /* This function returns class of a reloc type.  */
   enum elf_reloc_type_class (*elf_backend_reloc_type_class)
-    (const Elf_Internal_Rela *);
+  (const struct bfd_link_info *, const asection *, const Elf_Internal_Rela *);
 
   /* This function, if defined, removes information about discarded functions
      from other sections which mention them.  */
@@ -1777,7 +1778,8 @@ extern bfd_boolean _bfd_elf_can_make_relative
   (bfd *input_bfd, struct bfd_link_info *info, asection *eh_frame_section);
 
 extern enum elf_reloc_type_class _bfd_elf_reloc_type_class
-  (const Elf_Internal_Rela *);
+  (const struct bfd_link_info *, const asection *,
+   const Elf_Internal_Rela *);
 extern bfd_vma _bfd_elf_rela_local_sym
   (bfd *, Elf_Internal_Sym *, asection **, Elf_Internal_Rela *);
 extern bfd_vma _bfd_elf_rel_local_sym

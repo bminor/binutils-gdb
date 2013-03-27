@@ -9362,14 +9362,19 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 }
 
 static enum elf_reloc_type_class
-ppc_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+ppc_elf_reloc_type_class (const struct bfd_link_info *info,
+			  const asection *rel_sec,
+			  const Elf_Internal_Rela *rela)
 {
+  struct ppc_elf_link_hash_table *htab = ppc_elf_hash_table (info);
+
+  if (rel_sec == htab->reliplt)
+    return reloc_class_ifunc;
+
   switch (ELF32_R_TYPE (rela->r_info))
     {
     case R_PPC_RELATIVE:
       return reloc_class_relative;
-    case R_PPC_REL24:
-    case R_PPC_ADDR24:
     case R_PPC_JMP_SLOT:
       return reloc_class_plt;
     case R_PPC_COPY:

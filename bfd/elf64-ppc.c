@@ -8816,8 +8816,8 @@ allocate_got (struct elf_link_hash_entry *h,
   dyn = htab->elf.dynamic_sections_created;
   if ((info->shared
        || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h))
-	    && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		|| h->root.type != bfd_link_hash_undefweak))
+      && (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
+	  || h->root.type != bfd_link_hash_undefweak))
     {
       asection *relgot = ppc64_elf_tdata (gent->owner)->relgot;
       relgot->size += rentsize;
@@ -14062,9 +14062,15 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
    dynamic linker, before writing them out.  */
 
 static enum elf_reloc_type_class
-ppc64_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+ppc64_elf_reloc_type_class (const struct bfd_link_info *info,
+			    const asection *rel_sec,
+			    const Elf_Internal_Rela *rela)
 {
   enum elf_ppc64_reloc_type r_type;
+  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+
+  if (rel_sec == htab->reliplt)
+    return reloc_class_ifunc;
 
   r_type = ELF64_R_TYPE (rela->r_info);
   switch (r_type)

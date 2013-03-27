@@ -4241,7 +4241,9 @@ cris_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 }
 
 static enum elf_reloc_type_class
-elf_cris_reloc_type_class (const Elf_Internal_Rela *rela)
+elf_cris_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			   const asection *rel_sec ATTRIBUTE_UNUSED,
+			   const Elf_Internal_Rela *rela)
 {
   enum elf_cris_reloc_type r_type = ELF32_R_TYPE (rela->r_info);
   switch (r_type)

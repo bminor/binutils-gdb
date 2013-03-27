@@ -1741,7 +1741,9 @@ lm32_elf_finish_dynamic_symbol (bfd *output_bfd,
 }
 
 static enum elf_reloc_type_class
-lm32_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+lm32_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			   const asection *rel_sec ATTRIBUTE_UNUSED,
+			   const Elf_Internal_Rela *rela)
 {
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {
