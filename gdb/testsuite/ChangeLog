@@ -1,3 +1,8 @@
+2013-03-26  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/dprintf.exp: Fix typo preventing "dprintf info 2"
+	from passing.
+
 2013-03-26  Pedro Alves  <palves@redhat.com>
 
 	* lib/gdb.exp (skip_btrace_tests): Delay deleting the source file

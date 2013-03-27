@@ -119,7 +119,7 @@ if $target_can_dprintf {
     gdb_test "continue" "Breakpoint \[0-9\]+, foo .*" "2nd dprintf, agent"
 
     gdb_test_sequence "info breakpoints" "dprintf info 2" {
-	"\[\r\n\]Num     Type           Disp Enb Address    What"
+	"\[\r\n\]Num     Type           Disp Enb Address +What"
 	"\[\r\n\]2       breakpoint"
 	"\[\r\n\]\tbreakpoint already hit 2 times"
 	"\[\r\n\]3       dprintf"
