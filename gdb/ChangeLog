@@ -1,3 +1,8 @@
+2013-03-28  Doug Evans  <dje@google.com>
+
+	* python/python.c (finish_python_initialization): Provide suggestion
+	for how to tell gdb to find its python files.
+
 2013-03-28  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15294
