@@ -46,6 +46,12 @@ if [get_compiler_info] {
     return -1;
 }
 
+# The last line in the file.
+set last_line [gdb_get_line_number "last line" "list0.c"]
+
+# Regex matching the last line in the file.
+set last_line_re "${last_line}\[ \t\]+} /\\* last line \\*/"
+
 #
 # Local utility proc just to set and verify listsize
 # Return 1 if success, 0 if fail.
@@ -79,6 +85,7 @@ proc test_listsize {} {
     global gdb_prompt
     global hp_cc_compiler
     global hp_aCC_compiler
+    global last_line_re
 
     # Show default size
 
@@ -124,9 +131,9 @@ proc test_listsize {} {
     # Try a size larger than the entire file.
 
     if [ set_listsize 100 ] then {
-	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*\r\n4\[23\]\[ \t\]+\}" "list line 1 with listsize 100"
+	gdb_test "list 1" "1\[ \t\]+#include \"list0.h\".*\r\n${last_line_re}" "list line 1 with listsize 100"
 	
-	gdb_test "list 10" "1\[ \t\]+#include \"list0.h\".*\r\n4\[23\]\[ \t\]+\}" "list line 10 with listsize 100"
+	gdb_test "list 10" "1\[ \t\]+#include \"list0.h\".*\r\n${last_line_re}" "list line 10 with listsize 100"
     }
 
     # Try listsize of 0 which suppresses printing.
@@ -138,7 +145,7 @@ proc test_listsize {} {
 
     set_listsize -1
     setup_xfail "*-*-*"
-    gdb_test "list 1" "1\[ \t\]+#include .*\r\n43\[ \t\]+\}" "list line 1 with unlimited listsize"
+    gdb_test "list 1" "1\[ \t\]+#include .*\r\n${last_line_re}" "list line 1 with unlimited listsize"
 }
 
 #
@@ -224,6 +231,7 @@ proc test_list_function {} {
 
 proc test_list_forward {} {
     global gdb_prompt
+    global last_line_re
 
     set testcnt 0
 
@@ -250,7 +258,7 @@ proc test_list_forward {} {
 
     send_gdb "list\n"
     gdb_expect {
-	-re "35\[ \t\]+foo \\(.*\\);.*42\[ \t\]+.*\}\r\n$gdb_prompt $" { incr testcnt }
+	-re "35\[ \t\]+foo \\(.*\\);.*${last_line_re}\r\n$gdb_prompt $" { incr testcnt }
 	-re ".*$gdb_prompt $" { fail "list 35-42" ; gdb_suppress_tests }
 	timeout { fail "list 35-42 (timeout)" ; gdb_suppress_tests }
     }
@@ -266,6 +274,7 @@ proc test_list_forward {} {
 
 proc test_repeat_list_command {} {
     global gdb_prompt
+    global last_line_re
 
     set testcnt 0
 
@@ -292,7 +301,7 @@ proc test_repeat_list_command {} {
 
     send_gdb "\n"
     gdb_expect {
-	-re "35\[ \t\]+foo \\(.*\\);.*42\[ \t\]+.*\}\r\n$gdb_prompt $" { incr testcnt }
+	-re "35\[ \t\]+foo \\(.*\\);.*${last_line_re}\r\n$gdb_prompt $" { incr testcnt }
 	-re ".*$gdb_prompt $" { fail "list 35-42" ; gdb_suppress_tests }
 	timeout { fail "list 35-42 (timeout)" ; gdb_suppress_tests }
     }
@@ -344,6 +353,8 @@ proc test_list_backwards {} {
 
 proc test_list_range {} {
     global gdb_prompt
+    global last_line_re
+    global last_line
 
     gdb_test "list list0.c:2,list0.c:5" "2\[ \t\]+\r\n3\[ \t\]+int main \[)(\]+.*5\[ \t\]+int x;" "list range; filename:line1,filename:line2"
 
@@ -353,9 +364,12 @@ proc test_list_range {} {
 
 #    gdb_test     "list -100,-40" 	"Line number -60 out of range; .*list0.c has 39 lines." "list range; both bounds negative"
 
-    gdb_test "list 30,45" "30\[ \t\]+foo \(.*\);.*43\[ \t\]+\}" "list range; upper bound past EOF"
+    set past_end [expr ${last_line} + 10]
+    set much_past_end [expr ${past_end} + 10]
 
-    gdb_test "list 45,100" "Line number 45 out of range; .*list0.c has 43 lines." "list range; both bounds past EOF"
+    gdb_test "list 30,${past_end}" "30\[ \t\]+foo \(.*\);.*${last_line_re}" "list range; upper bound past EOF"
+
+    gdb_test "list ${past_end},${much_past_end}" "Line number ${past_end} out of range; .*list0.c has ${last_line} lines." "list range; both bounds past EOF"
 
     gdb_test "list list0.c:2,list1.c:17" "Specified start and end are in different files." "list range, must be same files"
 }
@@ -366,6 +380,7 @@ proc test_list_range {} {
 
 proc test_list_filename_and_function {} {
     global gdb_prompt
+    global last_line_re
 
     set testcnt 0
 
@@ -389,7 +404,7 @@ proc test_list_filename_and_function {} {
     setup_xfail "rs6000-*-aix*"
     send_gdb "list list0.c:unused\n"
     gdb_expect {
-	-re "40\[ \t\]+unused.*43\[ \t\]+\}\r\n$gdb_prompt $" {
+	-re "40\[ \t\]+unused.*${last_line_re}\r\n$gdb_prompt $" {
 	    incr testcnt
 	}
 	-re "37.*42\[ \t\]+\}\r\n$gdb_prompt $" {

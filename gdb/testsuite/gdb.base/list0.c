@@ -40,4 +40,4 @@ static void
 unused ()
 {
     /* Not used for anything */
-}
+} /* last line */

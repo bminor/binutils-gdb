@@ -1,5 +1,15 @@
 2013-03-28  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/list.exp (last_line): New global.
+	(last_line_re): New global.
+	(test_listsize, test_list_function, test_list_forward)
+	(test_repeat_list_command, test_list_range)
+	(test_list_filename_and_function): Use them.
+	* gdb.base/list0.c: Comment the last line of the file with "last
+	line".
+
+2013-03-28  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/list.exp (test_listsize): Adjust test to make sure we
 	list the whole file.
 
