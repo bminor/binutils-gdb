@@ -67,7 +67,7 @@ proc set_listsize { arg } {
     if [gdb_test_no_output "set listsize $arg" "setting listsize to $arg #$set_listsize_count"] {
 	return 0;
     }
-    if { $arg < 0 } {
+    if { $arg == 0 } {
 	set arg "unlimited";
     }
 
@@ -136,15 +136,9 @@ proc test_listsize {} {
 	gdb_test "list 10" "1\[ \t\]+#include \"list0.h\".*\r\n${last_line_re}" "list line 10 with listsize 100"
     }
 
-    # Try listsize of 0 which suppresses printing.
+    # Try listsize of 0 which is special, and means unlimited.
 
     set_listsize 0
-    gdb_test "list 1" "" "listsize of 0 suppresses output"
-
-    # Try listsize of -1 which is special, and means unlimited.
-
-    set_listsize -1
-    setup_xfail "*-*-*"
     gdb_test "list 1" "1\[ \t\]+#include .*\r\n${last_line_re}" "list line 1 with unlimited listsize"
 }
 
