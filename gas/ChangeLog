@@ -1,3 +1,8 @@
+2013-03-28  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add support for Cortex-A53 and
+	Cortex-A57.
+
 2013-03-27  Alexis Deruelle  <alexis.deruelle@gmail.com>
 
 	PR binutils/15068
