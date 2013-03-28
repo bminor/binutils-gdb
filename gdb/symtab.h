@@ -1356,8 +1356,8 @@ struct symbol_search
   struct symbol_search *next;
 };
 
-extern void search_symbols (char *, enum search_domain, int, char **,
-			    struct symbol_search **);
+extern void search_symbols (const char *, enum search_domain, int,
+			    const char **, struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
 extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
 							 **);

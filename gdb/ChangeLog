@@ -1,3 +1,15 @@
+2014-06-30  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.c (operator_chars): Make parameters and return type
+	const.
+	(file_matches): Make "files" const.
+	(struct search_symbols_data) <files>: Now const.
+	(search_symbols): Make "regexp" and "files" parameters const.
+	Update.
+	(symtab_symbol_info): Remove cast.
+	(rbreak_command): Update.
+	* symtab.h (search_symbols): Update.
+
 2014-06-27  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (check_longjmp_breakpoint_for_call_dummy):
