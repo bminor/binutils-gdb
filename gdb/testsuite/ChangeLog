@@ -1,3 +1,8 @@
+2013-03-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/list.exp (set_listsize): Use gdb_test_no_output for
+	"set listsize".
+
 2013-03-26  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.base/dprintf.exp: Fix typo preventing "dprintf info 2"
