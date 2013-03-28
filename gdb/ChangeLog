@@ -1,5 +1,8 @@
 2013-03-28  Doug Evans  <dje@google.com>
 
+	* symfile.c (find_separate_debug_file): Add comment.
+	(terminate_after_last_dir_separator): Tweak comment.
+
 	* dwarf2read.c (create_partial_symtab): Add forward decl.
 	(create_partial_symtab): Move to be closer to other psymtab functions.
 	(process_psymtab_comp_unit_reader, process_psymtab_comp_unit): Ditto.

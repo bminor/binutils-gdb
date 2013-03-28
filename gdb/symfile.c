@@ -1408,7 +1408,9 @@ show_debug_file_directory (struct ui_file *file, int from_tty,
 /* Find a separate debuginfo file for OBJFILE, using DIR as the directory
    where the original file resides (may not be the same as
    dirname(objfile->name) due to symlinks), and DEBUGLINK as the file we are
-   looking for.  Returns the name of the debuginfo, of NULL.  */
+   looking for.  CANON_DIR is the "realpath" form of DIR.
+   DIR must contain a trailing '/'.
+   Returns the path of the file with separate debug info, of NULL.  */
 
 static char *
 find_separate_debug_file (const char *dir,
@@ -1491,7 +1493,7 @@ find_separate_debug_file (const char *dir,
   return NULL;
 }
 
-/* Modify PATH to contain only "directory/" part of PATH.
+/* Modify PATH to contain only "[/]directory/" part of PATH.
    If there were no directory separators in PATH, PATH will be empty
    string on return.  */
 
