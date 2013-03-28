@@ -1,6 +1,6 @@
 /* Renesas / SuperH SH specific support for 32-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010, 2011, 2012
+   2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
    Contributed by Ian Lance Taylor, Cygnus Support.
 
@@ -4425,6 +4425,12 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 
 	      check_segment[0] = check_segment[1] = -1;
 	    }
+	    /* We don't want warnings for non-NULL tests on undefined weak
+	       symbols.  */
+	    else if (r_type == R_SH_REL32
+		     && h
+		     && h->root.type == bfd_link_hash_undefweak) 
+	      check_segment[0] = check_segment[1] = -1;
 	  goto final_link_relocate;
 
 	case R_SH_GOTPLT32:
