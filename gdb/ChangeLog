@@ -1,3 +1,10 @@
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record-btrace.c (record_btrace_fetch_registers)
+	(record_btrace_store_registers)
+	(record_btrace_to_prepare_to_store): New.
+	(init_record_btrace_ops): Add the above.
+
 2014-01-16  Tom Tromey  <tromey@redhat.com>
 
 	* windows-nat.c (windows_prepare_to_store): Add 'self' argument.

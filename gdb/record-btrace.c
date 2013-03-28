@@ -32,6 +32,7 @@
 #include "ui-out.h"
 #include "symtab.h"
 #include "filenames.h"
+#include "regcache.h"
 
 /* The target_ops of record-btrace.  */
 static struct target_ops record_btrace_ops;
@@ -750,6 +751,94 @@ record_btrace_is_replaying (void)
   return 0;
 }
 
+/* The to_fetch_registers method of target record-btrace.  */
+
+static void
+record_btrace_fetch_registers (struct target_ops *ops,
+			       struct regcache *regcache, int regno)
+{
+  struct btrace_insn_iterator *replay;
+  struct thread_info *tp;
+
+  tp = find_thread_ptid (inferior_ptid);
+  gdb_assert (tp != NULL);
+
+  replay = tp->btrace.replay;
+  if (replay != NULL)
+    {
+      const struct btrace_insn *insn;
+      struct gdbarch *gdbarch;
+      int pcreg;
+
+      gdbarch = get_regcache_arch (regcache);
+      pcreg = gdbarch_pc_regnum (gdbarch);
+      if (pcreg < 0)
+	return;
+
+      /* We can only provide the PC register.  */
+      if (regno >= 0 && regno != pcreg)
+	return;
+
+      insn = btrace_insn_get (replay);
+      gdb_assert (insn != NULL);
+
+      regcache_raw_supply (regcache, regno, &insn->pc);
+    }
+  else
+    {
+      struct target_ops *t;
+
+      for (t = ops->beneath; t != NULL; t = t->beneath)
+	if (t->to_fetch_registers != NULL)
+	  {
+	    t->to_fetch_registers (t, regcache, regno);
+	    break;
+	  }
+    }
+}
+
+/* The to_store_registers method of target record-btrace.  */
+
+static void
+record_btrace_store_registers (struct target_ops *ops,
+			       struct regcache *regcache, int regno)
+{
+  struct target_ops *t;
+
+  if (record_btrace_is_replaying ())
+    error (_("This record target does not allow writing registers."));
+
+  gdb_assert (may_write_registers != 0);
+
+  for (t = ops->beneath; t != NULL; t = t->beneath)
+    if (t->to_store_registers != NULL)
+      {
+	t->to_store_registers (t, regcache, regno);
+	return;
+      }
+
+  noprocess ();
+}
+
+/* The to_prepare_to_store method of target record-btrace.  */
+
+static void
+record_btrace_prepare_to_store (struct target_ops *ops,
+				struct regcache *regcache)
+{
+  struct target_ops *t;
+
+  if (record_btrace_is_replaying ())
+    return;
+
+  for (t = ops->beneath; t != NULL; t = t->beneath)
+    if (t->to_prepare_to_store != NULL)
+      {
+	t->to_prepare_to_store (t, regcache);
+	return;
+      }
+}
+
 /* Initialize the record-btrace target ops.  */
 
 static void
@@ -777,6 +866,9 @@ init_record_btrace_ops (void)
   ops->to_call_history_from = record_btrace_call_history_from;
   ops->to_call_history_range = record_btrace_call_history_range;
   ops->to_record_is_replaying = record_btrace_is_replaying;
+  ops->to_fetch_registers = record_btrace_fetch_registers;
+  ops->to_store_registers = record_btrace_store_registers;
+  ops->to_prepare_to_store = record_btrace_prepare_to_store;
   ops->to_stratum = record_stratum;
   ops->to_magic = OPS_MAGIC;
 }
