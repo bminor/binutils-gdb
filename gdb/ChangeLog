@@ -1,5 +1,10 @@
 2013-03-28  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_physname): Move declaration to better spot.
+	(compute_symtab_includes): Remove unnecessary forward declaration.
+	(die_needs_namespace): Add comment marking group of functions for
+	dwarf2 name computation.
+
 	* typeprint.c (_initialize_typeprint): Improve type help text.
 
 	* python/python.c (finish_python_initialization): Provide suggestion

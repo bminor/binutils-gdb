@@ -1554,6 +1554,9 @@ static const char *dwarf2_full_name (const char *name,
 				     struct die_info *die,
 				     struct dwarf2_cu *cu);
 
+static const char *dwarf2_physname (const char *name, struct die_info *die,
+				    struct dwarf2_cu *cu);
+
 static struct die_info *dwarf2_extension (struct die_info *die,
 					  struct dwarf2_cu **);
 
@@ -1764,9 +1767,6 @@ byte_swap (offset_type value)
 
 /* The suffix for an index file.  */
 #define INDEX_SUFFIX ".gdb-index"
-
-static const char *dwarf2_physname (const char *name, struct die_info *die,
-				    struct dwarf2_cu *cu);
 
 /* Try to locate the sections we need for DWARF 2 debugging
    information and return true if we have enough to do something.
@@ -6867,8 +6867,6 @@ fixup_go_packaging (struct dwarf2_cu *cu)
     }
 }
 
-static void compute_symtab_includes (struct dwarf2_per_cu_data *per_cu);
-
 /* Return the symtab for PER_CU.  This works properly regardless of
    whether we're using the index or psymtabs.  */
 
@@ -7279,6 +7277,8 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       break;
     }
 }
+
+/* DWARF name computation.  */
 
 /* A helper function for dwarf2_compute_name which determines whether DIE
    needs to have the name of the scope prepended to the name listed in the
