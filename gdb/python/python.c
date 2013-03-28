@@ -1711,9 +1711,13 @@ finish_python_initialization (void)
   if (gdb_python_module == NULL)
     {
       gdbpy_print_stack ();
-      warning (_("Could not load the Python gdb module from `%s'."),
+      /* This is passed in one call to warning so that blank lines aren't
+	 inserted between each line of text.  */
+      warning (_("\n"
+		 "Could not load the Python gdb module from `%s'.\n"
+		 "Limited Python support is available from the _gdb module.\n"
+		 "Suggest passing --data-directory=/path/to/gdb/data-directory.\n"),
 		 gdb_pythondir);
-      warning (_("Limited Python support is available from the _gdb module."));
       do_cleanups (cleanup);
       return;
     }
