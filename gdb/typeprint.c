@@ -684,9 +684,10 @@ _initialize_typeprint (void)
 
   c = add_com ("ptype", class_vars, ptype_command, _("\
 Print definition of type TYPE.\n\
-Usage: ptype[/FLAGS] TYPE-NAME | EXPRESSION\n\
-Argument may be a type name defined by typedef, or \"struct STRUCT-TAG\"\n\
-or \"class CLASS-NAME\" or \"union UNION-TAG\" or \"enum ENUM-TAG\".\n\
+Usage: ptype[/FLAGS] TYPE | EXPRESSION\n\
+Argument may be any type (for example a type name defined by typedef,\n\
+or \"struct STRUCT-TAG\" or \"class CLASS-NAME\" or \"union UNION-TAG\"\n\
+or \"enum ENUM-TAG\") or an expression.\n\
 The selected stack frame's lexical context is used to look up the name.\n\
 Contrary to \"whatis\", \"ptype\" always unrolls any typedefs.\n\
 \n\

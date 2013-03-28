@@ -1,5 +1,7 @@
 2013-03-28  Doug Evans  <dje@google.com>
 
+	* typeprint.c (_initialize_typeprint): Improve type help text.
+
 	* python/python.c (finish_python_initialization): Provide suggestion
 	for how to tell gdb to find its python files.
 
