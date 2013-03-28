@@ -56,16 +56,16 @@ lsdx1:
         .short 0x1866
         .short 0x1867
         .short 0x1866
-        .short 0x1867
-        .short 0x1866
-        .short 0x1867
-        .short 0x1866
-        .short 0x1867
-        .short 0x1866
-        .short 0x1867
-        .short 0x1866
-        .short 0x1867
-        .short 0x1866
-        .short 0x1867
+        .short 0x3867
+        .short 0x3866
+        .short 0x3877
+        .short 0x3876
+        .short 0xb877
+        .short 0xb876
+        .short 0xb86f
+        .short 0xf86e
+        .short 0xf86f
+        .short 0xf86e
+        .short 0xf86f
         .word  0xefe00000 | 0x0000
 

@@ -1,3 +1,10 @@
+2013-03-27  Alexis Deruelle  <alexis.deruelle@gmail.com>
+
+	PR binutils/15068
+	* gas/tic6x/insns16-lsd-unit.s: Correct bit patterns for mvk, add
+	and xor.
+	* gas/tic6x/insns16-lsd-unit.d: Update expected output.
+
 2013-03-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/addr32.s: Add an SIB test.
