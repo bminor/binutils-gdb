@@ -3083,6 +3083,21 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    shared lib.  */
 #define ELIMINATE_COPY_RELOCS 1
 
+/* Used to track dynamic relocations for local symbols.  */
+struct ppc_dyn_relocs
+{
+  struct ppc_dyn_relocs *next;
+
+  /* The input section of the reloc.  */
+  asection *sec;
+
+  /* Total number of relocs copied for the input section.  */
+  unsigned int count : 31;
+
+  /* Whether this entry is for STT_GNU_IFUNC symbols.  */
+  unsigned int ifunc : 1;
+};
+
 /* PPC ELF linker hash entry.  */
 
 struct ppc_elf_link_hash_entry
@@ -4414,9 +4429,6 @@ ppc_elf_check_relocs (bfd *abfd,
 		  && (h->root.type == bfd_link_hash_defweak
 		      || !h->def_regular)))
 	    {
-	      struct elf_dyn_relocs *p;
-	      struct elf_dyn_relocs **rel_head;
-
 #ifdef DEBUG
 	      fprintf (stderr,
 		       "ppc_elf_check_relocs needs to "
@@ -4440,13 +4452,34 @@ ppc_elf_check_relocs (bfd *abfd,
 		 relocations we need for this symbol.  */
 	      if (h != NULL)
 		{
+		  struct elf_dyn_relocs *p;
+		  struct elf_dyn_relocs **rel_head;
+
 		  rel_head = &ppc_elf_hash_entry (h)->dyn_relocs;
+		  p = *rel_head;
+		  if (p == NULL || p->sec != sec)
+		    {
+		      p = bfd_alloc (htab->elf.dynobj, sizeof *p);
+		      if (p == NULL)
+			return FALSE;
+		      p->next = *rel_head;
+		      *rel_head = p;
+		      p->sec = sec;
+		      p->count = 0;
+		      p->pc_count = 0;
+		    }
+		  p->count += 1;
+		  if (!must_be_dyn_reloc (info, r_type))
+		    p->pc_count += 1;
 		}
 	      else
 		{
 		  /* Track dynamic relocs needed for local syms too.
 		     We really need local syms available to do this
 		     easily.  Oh well.  */
+		  struct ppc_dyn_relocs *p;
+		  struct ppc_dyn_relocs **rel_head;
+		  bfd_boolean is_ifunc;
 		  asection *s;
 		  void *vpp;
 		  Elf_Internal_Sym *isym;
@@ -4461,25 +4494,24 @@ ppc_elf_check_relocs (bfd *abfd,
 		    s = sec;
 
 		  vpp = &elf_section_data (s)->local_dynrel;
-		  rel_head = (struct elf_dyn_relocs **) vpp;
+		  rel_head = (struct ppc_dyn_relocs **) vpp;
+		  is_ifunc = ELF_ST_TYPE (isym->st_info) == STT_GNU_IFUNC;
+		  p = *rel_head;
+		  if (p != NULL && p->sec == sec && p->ifunc != is_ifunc)
+		    p = p->next;
+		  if (p == NULL || p->sec != sec || p->ifunc != is_ifunc)
+		    {
+		      p = bfd_alloc (htab->elf.dynobj, sizeof *p);
+		      if (p == NULL)
+			return FALSE;
+		      p->next = *rel_head;
+		      *rel_head = p;
+		      p->sec = sec;
+		      p->ifunc = is_ifunc;
+		      p->count = 0;
+		    }
+		  p->count += 1;
 		}
-
-	      p = *rel_head;
-	      if (p == NULL || p->sec != sec)
-		{
-		  p = bfd_alloc (htab->elf.dynobj, sizeof *p);
-		  if (p == NULL)
-		    return FALSE;
-		  p->next = *rel_head;
-		  *rel_head = p;
-		  p->sec = sec;
-		  p->count = 0;
-		  p->pc_count = 0;
-		}
-
-	      p->count += 1;
-	      if (!must_be_dyn_reloc (info, r_type))
-		p->pc_count += 1;
 	    }
 
 	  break;
@@ -6023,7 +6055,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   for (p = eh->dyn_relocs; p != NULL; p = p->next)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
-      if (!htab->elf.dynamic_sections_created)
+      if (eh->elf.type == STT_GNU_IFUNC)
 	sreloc = htab->reliplt;
       sreloc->size += p->count * sizeof (Elf32_External_Rela);
     }
@@ -6116,9 +6148,9 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
       for (s = ibfd->sections; s != NULL; s = s->next)
 	{
-	  struct elf_dyn_relocs *p;
+	  struct ppc_dyn_relocs *p;
 
-	  for (p = ((struct elf_dyn_relocs *)
+	  for (p = ((struct ppc_dyn_relocs *)
 		    elf_section_data (s)->local_dynrel);
 	       p != NULL;
 	       p = p->next)
@@ -6141,7 +6173,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	      else if (p->count != 0)
 		{
 		  asection *sreloc = elf_section_data (p->sec)->sreloc;
-		  if (!htab->elf.dynamic_sections_created)
+		  if (p->ifunc)
 		    sreloc = htab->reliplt;
 		  sreloc->size += p->count * sizeof (Elf32_External_Rela);
 		  if ((p->sec->output_section->flags
@@ -7390,7 +7422,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   Elf_Internal_Rela outrel;
-  asection *got2, *sreloc = NULL;
+  asection *got2;
   bfd_vma *local_got_offsets;
   bfd_boolean ret = TRUE;
   bfd_vma d_offset = (bfd_big_endian (output_bfd) ? 2 : 0);
@@ -8244,7 +8276,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  && !h->def_regular))
 	    {
 	      int skip;
-	      bfd_byte * loc;
+	      bfd_byte *loc;
+	      asection *sreloc;
 #ifdef DEBUG
 	      fprintf (stderr, "ppc_elf_relocate_section needs to "
 		       "create relocation for %s\n",
@@ -8255,14 +8288,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      /* When generating a shared object, these relocations
 		 are copied into the output file to be resolved at run
 		 time.  */
+	      sreloc = elf_section_data (input_section)->sreloc;
+	      if (ifunc)
+		sreloc = htab->reliplt;
 	      if (sreloc == NULL)
-		{
-		  sreloc = elf_section_data (input_section)->sreloc;
-		  if (!htab->elf.dynamic_sections_created)
-		    sreloc = htab->reliplt;
-		  if (sreloc == NULL)
-		    return FALSE;
-		}
+		return FALSE;
 
 	      skip = 0;
 	      outrel.r_offset = _bfd_elf_section_offset (output_bfd, info,

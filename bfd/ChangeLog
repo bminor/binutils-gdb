@@ -1,5 +1,14 @@
 2013-03-28  Alan Modra  <amodra@gmail.com>
 
+	* elf32-ppc.c (struct ppc_dyn_relocs): New.
+	(ppc_elf_check_relocs): Separate dynrel counts for local syms
+	into ifunc and non-ifunc.
+	(allocate_dynrelocs): Always put ifunc relocs into reliplt.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+
+2013-03-28  Alan Modra  <amodra@gmail.com>
+
 	* elf-bfd.h (enum elf_reloc_type_class): Add reloc_class_ifunc.
 	(struct elf_backend_data <elf_backed_reloc_type_class>): Add
 	bfd_link_info* and asection* params.
