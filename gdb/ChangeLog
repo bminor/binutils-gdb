@@ -1,5 +1,9 @@
 2014-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.c (add_macro_name): Remove unneeded cast.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-setshow.h (parse_cli_boolean_value): Update.
 	* cli/cli-setshow.c (parse_cli_boolean_value): Make "arg" const.
 

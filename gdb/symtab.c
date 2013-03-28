@@ -4284,7 +4284,7 @@ add_macro_name (const char *name, const struct macro_definition *ignore,
 {
   struct add_name_data *datum = (struct add_name_data *) user_data;
 
-  completion_list_add_name ((char *) name,
+  completion_list_add_name (name,
 			    datum->sym_text, datum->sym_text_len,
 			    datum->text, datum->word);
 }
