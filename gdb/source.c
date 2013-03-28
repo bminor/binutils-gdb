@@ -2044,12 +2044,12 @@ The matching line number is also stored as the value of \"$_\"."));
       add_com_alias ("?", "reverse-search", class_files, 0);
     }
 
-  add_setshow_zuinteger_unlimited_cmd ("listsize", class_support,
-				       &lines_to_list, _("\
+  add_setshow_integer_cmd ("listsize", class_support, &lines_to_list, _("\
 Set number of source lines gdb will list by default."), _("\
 Show number of source lines gdb will list by default."), NULL,
-				       NULL, show_lines_to_list,
-				       &setlist, &showlist);
+			    NULL,
+			    show_lines_to_list,
+			    &setlist, &showlist);
 
   add_cmd ("substitute-path", class_files, set_substitute_path_command,
            _("\

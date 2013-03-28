@@ -1,3 +1,10 @@
+2013-03-28  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15294
+
+	* gdb.texinfo (List) <set listsize>: Adjust to document that
+	listsize 0 means no limit, and remove mention of -1.
+
 2013-03-22  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Embedded Processors): Remove menu item

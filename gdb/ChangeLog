@@ -1,3 +1,10 @@
+2013-03-28  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15294
+
+	* source.c (_initialize_source): Change back "set listsize" to an
+	integer command.
+
 2013-03-27  Gareth McMullin  <gareth@blacksphere.co.nz>
 
 	PR gdb/15275

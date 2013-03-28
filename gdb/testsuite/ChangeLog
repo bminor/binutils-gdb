@@ -1,5 +1,14 @@
 2013-03-28  Pedro Alves  <palves@redhat.com>
 
+	PR gdb/15294
+
+	* gdb.base/list.exp (set_listsize): Adjust to accept $arg == 0 to
+	mean unlimited instead of $arg < 0.
+	(test_listsize): Remove "listsize of 0 suppresses output" test.
+	Test that "set listsize 0" ends up with an unlimited listsize.
+
+2013-03-28  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/list.exp (last_line): New global.
 	(last_line_re): New global.
 	(test_listsize, test_list_function, test_list_forward)

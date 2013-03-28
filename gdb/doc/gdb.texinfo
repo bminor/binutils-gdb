@@ -6916,8 +6916,7 @@ the @code{list} command.  You can change this using @code{set listsize}:
 @item set listsize @var{count}
 Make the @code{list} command display @var{count} source lines (unless
 the @code{list} argument explicitly specifies some other number).
-Setting @var{count} to -1 means there's no limit and 0 means suppress
-display of source lines.
+Setting @var{count} to 0 means there's no limit.
 
 @kindex show listsize
 @item show listsize
