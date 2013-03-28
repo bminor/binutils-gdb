@@ -551,7 +551,7 @@ struct dwarf2_per_cu_data
   /* The section this CU/TU lives in.
      If the DIE refers to a DWO file, this is always the original die,
      not the DWO file.  */
-  struct dwarf2_section_info *info_or_types_section;
+  struct dwarf2_section_info *section;
 
   /* Set to non-NULL iff this CU is currently loaded.  When it gets freed out
      of the CU cache it gets reset to NULL again.  */
@@ -645,7 +645,7 @@ struct type_unit_group
      type units using this stmt_list so that the rest of the code still has
      a "per_cu" handle on the symtab.
      This PER_CU is recognized by having no section.  */
-#define IS_TYPE_UNIT_GROUP(per_cu) ((per_cu)->info_or_types_section == NULL)
+#define IS_TYPE_UNIT_GROUP(per_cu) ((per_cu)->section == NULL)
   struct dwarf2_per_cu_data per_cu;
 
   union
@@ -713,7 +713,7 @@ struct dwo_unit
   ULONGEST signature;
 
   /* The section this CU/TU lives in, in the DWO file.  */
-  struct dwarf2_section_info *info_or_types_section;
+  struct dwarf2_section_info *section;
 
   /* Same as dwarf2_per_cu_data:{offset,length} but for the DWO section.  */
   sect_offset offset;
@@ -773,7 +773,7 @@ struct virtual_dwo_sections
   struct dwarf2_section_info macro;
   struct dwarf2_section_info str_offsets;
   /* Each DWP hash table entry records one CU or one TU.
-     That is recorded here, and copied to dwo_unit.info_or_types_section.  */
+     That is recorded here, and copied to dwo_unit.section.  */
   struct dwarf2_section_info info_or_types;
 };
 
@@ -2412,7 +2412,7 @@ create_cus_from_index_list (struct objfile *objfile,
       the_cu->offset.sect_off = offset;
       the_cu->length = length;
       the_cu->objfile = objfile;
-      the_cu->info_or_types_section = section;
+      the_cu->section = section;
       the_cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 					struct dwarf2_per_cu_quick_data);
       the_cu->is_dwz = is_dwz;
@@ -2484,7 +2484,7 @@ create_signatured_type_table_from_index (struct objfile *objfile,
       sig_type->signature = signature;
       sig_type->type_offset_in_tu.cu_off = type_offset_in_tu;
       sig_type->per_cu.is_debug_types = 1;
-      sig_type->per_cu.info_or_types_section = section;
+      sig_type->per_cu.section = section;
       sig_type->per_cu.offset.sect_off = offset;
       sig_type->per_cu.objfile = objfile;
       sig_type->per_cu.v.quick
@@ -4294,7 +4294,7 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	      dwo_tu->dwo_file = dwo_file;
 	      dwo_tu->signature = signature;
 	      dwo_tu->type_offset_in_tu = type_offset_in_tu;
-	      dwo_tu->info_or_types_section = section;
+	      dwo_tu->section = section;
 	      dwo_tu->offset = offset;
 	      dwo_tu->length = length;
 	    }
@@ -4309,7 +4309,7 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	      sig_type->type_offset_in_tu = type_offset_in_tu;
 	      sig_type->per_cu.objfile = objfile;
 	      sig_type->per_cu.is_debug_types = 1;
-	      sig_type->per_cu.info_or_types_section = section;
+	      sig_type->per_cu.section = section;
 	      sig_type->per_cu.offset = offset;
 	      sig_type->per_cu.length = length;
 	    }
@@ -4451,7 +4451,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 			 void *data)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct dwarf2_section_info *section = this_cu->info_or_types_section;
+  struct dwarf2_section_info *section = this_cu->section;
   bfd *abfd = section->asection->owner;
   struct dwarf2_cu *cu;
   gdb_byte *begin_info_ptr, *info_ptr;
@@ -4673,7 +4673,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 
       /* Set up for reading the DWO CU/TU.  */
       cu->dwo_unit = dwo_unit;
-      section = dwo_unit->info_or_types_section;
+      section = dwo_unit->section;
       dwarf2_read_section (objfile, section);
       begin_info_ptr = info_ptr = section->buffer + dwo_unit->offset.sect_off;
       dwo_abbrev_section = &dwo_unit->dwo_file->sections.abbrev;
@@ -4808,7 +4808,7 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
 				   void *data)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  struct dwarf2_section_info *section = this_cu->info_or_types_section;
+  struct dwarf2_section_info *section = this_cu->section;
   bfd *abfd = section->asection->owner;
   struct dwarf2_cu cu;
   gdb_byte *begin_info_ptr, *info_ptr;
@@ -5133,7 +5133,7 @@ build_type_unit_groups (die_reader_func_ftype *func, void *data)
 
       sorted_by_abbrev[i].sig_type = sig_type;
       sorted_by_abbrev[i].abbrev_offset =
-	read_abbrev_offset (sig_type->per_cu.info_or_types_section,
+	read_abbrev_offset (sig_type->per_cu.section,
 			    sig_type->per_cu.offset);
     }
   cleanups = make_cleanup (xfree, sorted_by_abbrev);
@@ -5642,7 +5642,7 @@ read_comp_units_from_section (struct objfile *objfile,
       this_cu->length = length + initial_length_size;
       this_cu->is_dwz = is_dwz;
       this_cu->objfile = objfile;
-      this_cu->info_or_types_section = section;
+      this_cu->section = section;
 
       if (*n_comp_units == *n_allocated)
 	{
@@ -8316,7 +8316,7 @@ create_dwo_debug_info_hash_table_reader (const struct die_reader_specs *reader,
   struct dwarf2_cu *cu = reader->cu;
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   sect_offset offset = cu->per_cu->offset;
-  struct dwarf2_section_info *section = cu->per_cu->info_or_types_section;
+  struct dwarf2_section_info *section = cu->per_cu->section;
   struct create_dwo_info_table_data *data = datap;
   struct dwo_file *dwo_file = data->dwo_file;
   htab_t cu_htab = data->cu_htab;
@@ -8336,7 +8336,7 @@ create_dwo_debug_info_hash_table_reader (const struct die_reader_specs *reader,
   dwo_unit = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_unit);
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = DW_UNSND (attr);
-  dwo_unit->info_or_types_section = section;
+  dwo_unit->section = section;
   dwo_unit->offset = offset;
   dwo_unit->length = cu->per_cu->length;
 
@@ -8405,7 +8405,7 @@ create_dwo_debug_info_hash_table (struct dwo_file *dwo_file)
       per_cu.objfile = objfile;
       per_cu.is_debug_types = 0;
       per_cu.offset.sect_off = info_ptr - section->buffer;
-      per_cu.info_or_types_section = section;
+      per_cu.section = section;
 
       init_cutu_and_read_dies_no_follow (&per_cu,
 					 &dwo_file->sections.abbrev,
@@ -8766,10 +8766,9 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
   dwo_unit = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_unit);
   dwo_unit->dwo_file = dwo_file;
   dwo_unit->signature = signature;
-  dwo_unit->info_or_types_section =
-    obstack_alloc (&objfile->objfile_obstack,
-		   sizeof (struct dwarf2_section_info));
-  *dwo_unit->info_or_types_section = sections.info_or_types;
+  dwo_unit->section = obstack_alloc (&objfile->objfile_obstack,
+				     sizeof (struct dwarf2_section_info));
+  *dwo_unit->section = sections.info_or_types;
   /* offset, length, type_offset_in_tu are set later.  */
 
   return dwo_unit;
@@ -11716,7 +11715,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       sig_type
 	= lookup_signatured_type_at_offset (dwarf2_per_objfile->objfile,
-					    cu->per_cu->info_or_types_section,
+					    cu->per_cu->section,
 					    cu->per_cu->offset);
       gdb_assert (sig_type->type_offset_in_section.sect_off != 0);
       if (sig_type->type_offset_in_section.sect_off != die->offset.sect_off)
@@ -19160,7 +19159,7 @@ per_cu_header_read_in (struct comp_unit_head *cu_headerp,
   if (per_cu->cu)
     return &per_cu->cu->header;
 
-  info_ptr = per_cu->info_or_types_section->buffer + per_cu->offset.sect_off;
+  info_ptr = per_cu->section->buffer + per_cu->offset.sect_off;
 
   memset (cu_headerp, 0, sizeof (*cu_headerp));
   read_comp_unit_head (cu_headerp, info_ptr, per_cu->objfile->obfd);
