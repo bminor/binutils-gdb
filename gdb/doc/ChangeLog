@@ -1,3 +1,8 @@
+2013-03-28  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Maintenance Commands): Use @enumerate, not "@table
+	@bullet", which is invalid (makeinfo 5.1 barfs).
+
 2013-03-28  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15294

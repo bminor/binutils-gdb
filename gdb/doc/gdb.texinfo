@@ -35645,11 +35645,14 @@ Enable or disable the printing of basic symbol table statistics
 for each command.
 If enabled, @value{GDBN} will display the following information:
 
-@table @bullet
-@item number of symbol tables
-@itemx number of primary symbol tables
-@itemx number of blocks in the blockvector
-@end table
+@enumerate a
+@item
+number of symbol tables
+@item
+number of primary symbol tables
+@item
+number of blocks in the blockvector
+@end enumerate
 @end table
 
 @kindex maint space
