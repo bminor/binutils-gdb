@@ -1,5 +1,10 @@
 2013-03-28  Pedro Alves  <palves@redhat.com>
 
+	* gdb.base/list.exp (test_listsize): Adjust test to make sure we
+	list the whole file.
+
+2013-03-28  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/list.exp (set_listsize): Use gdb_test_no_output for
 	"set listsize".
 

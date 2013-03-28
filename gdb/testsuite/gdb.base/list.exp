@@ -138,7 +138,7 @@ proc test_listsize {} {
 
     set_listsize -1
     setup_xfail "*-*-*"
-    gdb_test "list 1" "1\[ \t\]+#include .*\r\n39\[ \t\]+\}" "list line 1 with unlimited listsize"
+    gdb_test "list 1" "1\[ \t\]+#include .*\r\n43\[ \t\]+\}" "list line 1 with unlimited listsize"
 }
 
 #
