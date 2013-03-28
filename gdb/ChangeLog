@@ -1,3 +1,13 @@
+2013-03-28  Pedro Alves  <palves@redhat.com>
+
+	* NEWS (New options): New section.
+	(New options): Mention set/show remote trace-status-packet.
+	* remote.c (PACKET_qTStatus): New enumeration value.
+	(remote_get_trace_status): Skip sending qTStatus if the packet is
+	disabled.  Use packet_ok.
+	(_initialize_remote): Register a configuration command for
+	qTStatus packet.
+
 2013-03-28  Doug Evans  <dje@google.com>
 
 	* symfile.c (find_separate_debug_file): Add comment.

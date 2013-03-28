@@ -10,6 +10,12 @@ maint set|show per-command time
 maint set|show per-command symtab
   Enable display of per-command gdb resource usage.
 
+* New options
+
+set remote trace-status-packet
+show remote trace-status-packet
+  Set/show the use of remote protocol qTStatus packet.
+
 * The command 'tsave' can now support new option '-ctf' to save trace
   buffer in Common Trace Format.
 

@@ -1,3 +1,8 @@
+2013-03-28  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Remote Configuration) <set remote @var{name}-packet
+	table>: Add entry for "trace-status".
+
 2013-03-28  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Maintenance Commands): Use @enumerate, not "@table

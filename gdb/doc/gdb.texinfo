@@ -18445,6 +18445,10 @@ are:
 @tab @code{qAttached}
 @tab Querying remote process attach state.
 
+@item @code{trace-status}
+@tab @code{qTStatus}
+@tab @code{tstatus}
+
 @item @code{traceframe-info}
 @tab @code{qXfer:traceframe-info:read}
 @tab Traceframe info
