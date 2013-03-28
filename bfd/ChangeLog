@@ -1,5 +1,18 @@
 2013-03-28  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc_dyn_relocs): New.
+	(ppc64_elf_check_relocs): Separate dynrel counts for local syms
+	into ifunc and non-ifunc.
+	(dec_dynrel_count): Pass in sym rather than sym_sec.  Handle
+	separate ifunc/non-ifunc dynrel counts.
+	(allocate_got): Always use reliplt for ifunc.
+	(allocate_dynrelocs): Likewise.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc64_elf_layout_multitoc): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2013-03-28  Alan Modra  <amodra@gmail.com>
+
 	* elf32-ppc.c (struct ppc_dyn_relocs): New.
 	(ppc_elf_check_relocs): Separate dynrel counts for local syms
 	into ifunc and non-ifunc.
