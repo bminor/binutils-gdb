@@ -4435,6 +4435,232 @@ init_cu_die_reader (struct die_reader_specs *reader,
   reader->buffer_end = section->buffer + section->size;
 }
 
+/* Subroutine of init_cutu_and_read_dies to simplify it.
+   Read in the rest of a CU/TU top level DIE from DWO_UNIT.
+   There's just a lot of work to do, and init_cutu_and_read_dies is big enough
+   already.
+
+   STUB_COMP_UNIT_DIE is for the stub DIE, we copy over certain attributes
+   from it to the DIE in the DWO.  If NULL we are skipping the stub.
+   *RESULT_READER,*RESULT_INFO_PTR,*RESULT_COMP_UNIT_DIE,*RESULT_HAS_CHILDREN
+   are filled in with the info of the DIE from the DWO file.
+   ABBREV_TABLE_PROVIDED is non-zero if the caller of init_cutu_and_read_dies
+   provided an abbrev table to use.
+   The result is non-zero if a valid (non-dummy) DIE was found.  */
+
+static int
+read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
+			struct dwo_unit *dwo_unit,
+			int abbrev_table_provided,
+			struct die_info *stub_comp_unit_die,
+			struct die_reader_specs *result_reader,
+			gdb_byte **result_info_ptr,
+			struct die_info **result_comp_unit_die,
+			int *result_has_children)
+{
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct dwarf2_cu *cu = this_cu->cu;
+  struct dwarf2_section_info *section;
+  bfd *abfd;
+  gdb_byte *begin_info_ptr, *info_ptr;
+  const char *comp_dir_string;
+  ULONGEST signature; /* Or dwo_id.  */
+  struct attribute *comp_dir, *stmt_list, *low_pc, *high_pc, *ranges;
+  int i,num_extra_attrs;
+  struct dwarf2_section_info *dwo_abbrev_section;
+  struct attribute *attr;
+  struct die_info *comp_unit_die;
+
+  /* These attributes aren't processed until later:
+     DW_AT_stmt_list, DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges.
+     However, the attribute is found in the stub which we won't have later.
+     In order to not impose this complication on the rest of the code,
+     we read them here and copy them to the DWO CU/TU die.  */
+
+  stmt_list = NULL;
+  low_pc = NULL;
+  high_pc = NULL;
+  ranges = NULL;
+  comp_dir = NULL;
+
+  if (stub_comp_unit_die != NULL)
+    {
+      /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
+	 DWO file.  */
+      if (! this_cu->is_debug_types)
+	stmt_list = dwarf2_attr (stub_comp_unit_die, DW_AT_stmt_list, cu);
+      low_pc = dwarf2_attr (stub_comp_unit_die, DW_AT_low_pc, cu);
+      high_pc = dwarf2_attr (stub_comp_unit_die, DW_AT_high_pc, cu);
+      ranges = dwarf2_attr (stub_comp_unit_die, DW_AT_ranges, cu);
+      comp_dir = dwarf2_attr (stub_comp_unit_die, DW_AT_comp_dir, cu);
+
+      /* There should be a DW_AT_addr_base attribute here (if needed).
+	 We need the value before we can process DW_FORM_GNU_addr_index.  */
+      cu->addr_base = 0;
+      attr = dwarf2_attr (stub_comp_unit_die, DW_AT_GNU_addr_base, cu);
+      if (attr)
+	cu->addr_base = DW_UNSND (attr);
+
+      /* There should be a DW_AT_ranges_base attribute here (if needed).
+	 We need the value before we can process DW_AT_ranges.  */
+      cu->ranges_base = 0;
+      attr = dwarf2_attr (stub_comp_unit_die, DW_AT_GNU_ranges_base, cu);
+      if (attr)
+	cu->ranges_base = DW_UNSND (attr);
+    }
+
+  /* Set up for reading the DWO CU/TU.  */
+  cu->dwo_unit = dwo_unit;
+  section = dwo_unit->section;
+  dwarf2_read_section (objfile, section);
+  abfd = section->asection->owner;
+  begin_info_ptr = info_ptr = section->buffer + dwo_unit->offset.sect_off;
+  dwo_abbrev_section = &dwo_unit->dwo_file->sections.abbrev;
+  init_cu_die_reader (result_reader, cu, section, dwo_unit->dwo_file);
+
+  if (this_cu->is_debug_types)
+    {
+      ULONGEST header_signature;
+      cu_offset type_offset_in_tu;
+      struct signatured_type *sig_type = (struct signatured_type *) this_cu;
+
+      info_ptr = read_and_check_type_unit_head (&cu->header, section,
+						dwo_abbrev_section,
+						info_ptr,
+						&header_signature,
+						&type_offset_in_tu);
+      gdb_assert (sig_type->signature == header_signature);
+      gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
+      /* For DWOs coming from DWP files, we don't know the CU length
+	 nor the type's offset in the TU until now.  */
+      dwo_unit->length = get_cu_length (&cu->header);
+      dwo_unit->type_offset_in_tu = type_offset_in_tu;
+
+      /* Establish the type offset that can be used to lookup the type.
+	 For DWO files, we don't know it until now.  */
+      sig_type->type_offset_in_section.sect_off =
+	dwo_unit->offset.sect_off + dwo_unit->type_offset_in_tu.cu_off;
+    }
+  else
+    {
+      info_ptr = read_and_check_comp_unit_head (&cu->header, section,
+						dwo_abbrev_section,
+						info_ptr, 0);
+      gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
+      /* For DWOs coming from DWP files, we don't know the CU length
+	 until now.  */
+      dwo_unit->length = get_cu_length (&cu->header);
+    }
+
+  /* Replace the CU's original abbrev table with the DWO's.  */
+  if (abbrev_table_provided)
+    {
+      /* Don't free the provided abbrev table, the caller of
+	 init_cutu_and_read_dies owns it.  */
+      dwarf2_read_abbrevs (cu, dwo_abbrev_section);
+      make_cleanup (dwarf2_free_abbrev_table, cu);
+    }
+  else
+    {
+      dwarf2_free_abbrev_table (cu);
+      dwarf2_read_abbrevs (cu, dwo_abbrev_section);
+    }
+
+  /* Read in the die, but leave space to copy over the attributes
+     from the stub.  This has the benefit of simplifying the rest of
+     the code - all the work to maintain the illusion of a single
+     DW_TAG_{compile,type}_unit DIE is done here.  */
+  num_extra_attrs = ((stmt_list != NULL)
+		     + (low_pc != NULL)
+		     + (high_pc != NULL)
+		     + (ranges != NULL)
+		     + (comp_dir != NULL));
+  info_ptr = read_full_die_1 (result_reader, result_comp_unit_die, info_ptr,
+			      result_has_children, num_extra_attrs);
+
+  /* Copy over the attributes from the stub to the DIE we just read in.  */
+  comp_unit_die = *result_comp_unit_die;
+  i = comp_unit_die->num_attrs;
+  if (stmt_list != NULL)
+    comp_unit_die->attrs[i++] = *stmt_list;
+  if (low_pc != NULL)
+    comp_unit_die->attrs[i++] = *low_pc;
+  if (high_pc != NULL)
+    comp_unit_die->attrs[i++] = *high_pc;
+  if (ranges != NULL)
+    comp_unit_die->attrs[i++] = *ranges;
+  if (comp_dir != NULL)
+    comp_unit_die->attrs[i++] = *comp_dir;
+  comp_unit_die->num_attrs += num_extra_attrs;
+
+  /* Skip dummy compilation units.  */
+  if (info_ptr >= begin_info_ptr + dwo_unit->length
+      || peek_abbrev_code (abfd, info_ptr) == 0)
+    return 0;
+
+  *result_info_ptr = info_ptr;
+  return 1;
+}
+
+/* Subroutine of init_cutu_and_read_dies to simplify it.
+   Look up the DWO unit specified by COMP_UNIT_DIE of THIS_CU.
+   If the specified DWO unit cannot be found an error is thrown.  */
+
+static struct dwo_unit *
+lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
+		 struct die_info *comp_unit_die)
+{
+  struct dwarf2_cu *cu = this_cu->cu;
+  struct attribute *attr;
+  ULONGEST signature;
+  struct dwo_unit *dwo_unit;
+  const char *comp_dir, *dwo_name;
+
+  /* Yeah, we look dwo_name up again, but it simplifies the code.  */
+  attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
+  gdb_assert (attr != NULL);
+  dwo_name = DW_STRING (attr);
+  comp_dir = NULL;
+  attr = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
+  if (attr)
+    comp_dir = DW_STRING (attr);
+
+  if (this_cu->is_debug_types)
+    {
+      struct signatured_type *sig_type;
+
+      /* Since this_cu is the first member of struct signatured_type,
+	 we can go from a pointer to one to a pointer to the other.  */
+      sig_type = (struct signatured_type *) this_cu;
+      signature = sig_type->signature;
+      dwo_unit = lookup_dwo_type_unit (sig_type, dwo_name, comp_dir);
+    }
+  else
+    {
+      struct attribute *attr;
+
+      attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_id, cu);
+      if (! attr)
+	error (_("Dwarf Error: missing dwo_id for dwo_name %s"
+		 " [in module %s]"),
+	       dwo_name, this_cu->objfile->name);
+      signature = DW_UNSND (attr);
+      dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir,
+				       signature);
+    }
+
+  if (dwo_unit == NULL)
+    {
+      error (_("Dwarf Error: CU at offset 0x%x references unknown DWO"
+	       " with ID %s [in module %s]"),
+	     this_cu->offset.sect_off,
+	     phex (signature, sizeof (signature)),
+	     this_cu->objfile->name);
+    }
+
+  return dwo_unit;
+}
+
 /* Initialize a CU (or TU) and read its DIEs.
    If the CU defers to a DWO file, read the DWO file as well.
 
@@ -4517,6 +4743,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
     }
 
+  /* Get the header.  */
   if (cu->header.first_die_offset.cu_off != 0 && ! rereading_dwo_cu)
     {
       /* We already have the header, there's no need to read it in again.  */
@@ -4596,178 +4823,38 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   init_cu_die_reader (&reader, cu, section, NULL);
   info_ptr = read_full_die (&reader, &comp_unit_die, info_ptr, &has_children);
 
-  /* If we have a DWO stub, process it and then read in the DWO file.
-     Note that if USE_EXISTING_OK != 0, and THIS_CU->cu already contains
-     a DWO CU, that this test will fail.  */
+  /* If we are in a DWO stub, process it and then read in the "real" CU/TU
+     from the DWO file.
+     Note that if USE_EXISTING_OK != 0, and THIS_CU->cu already contains a
+     DWO CU, that this test will fail (the attribute will not be present).  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
   if (attr)
     {
-      const char *dwo_name = DW_STRING (attr);
-      const char *comp_dir_string;
       struct dwo_unit *dwo_unit;
-      ULONGEST signature; /* Or dwo_id.  */
-      struct attribute *comp_dir, *stmt_list, *low_pc, *high_pc, *ranges;
-      int i,num_extra_attrs;
-      struct dwarf2_section_info *dwo_abbrev_section;
+      struct die_info *dwo_comp_unit_die;
 
       if (has_children)
 	error (_("Dwarf Error: compilation unit with DW_AT_GNU_dwo_name"
 		 " has children (offset 0x%x) [in module %s]"),
 	       this_cu->offset.sect_off, bfd_get_filename (abfd));
-
-      /* These attributes aren't processed until later:
-	 DW_AT_stmt_list, DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges.
-	 However, the attribute is found in the stub which we won't have later.
-	 In order to not impose this complication on the rest of the code,
-	 we read them here and copy them to the DWO CU/TU die.  */
-
-      /* For TUs in DWO files, the DW_AT_stmt_list attribute lives in the
-	 DWO file.  */
-      stmt_list = NULL;
-      if (! this_cu->is_debug_types)
-	stmt_list = dwarf2_attr (comp_unit_die, DW_AT_stmt_list, cu);
-      low_pc = dwarf2_attr (comp_unit_die, DW_AT_low_pc, cu);
-      high_pc = dwarf2_attr (comp_unit_die, DW_AT_high_pc, cu);
-      ranges = dwarf2_attr (comp_unit_die, DW_AT_ranges, cu);
-      comp_dir = dwarf2_attr (comp_unit_die, DW_AT_comp_dir, cu);
-
-      /* There should be a DW_AT_addr_base attribute here (if needed).
-	 We need the value before we can process DW_FORM_GNU_addr_index.  */
-      cu->addr_base = 0;
-      attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_addr_base, cu);
-      if (attr)
-	cu->addr_base = DW_UNSND (attr);
-
-      /* There should be a DW_AT_ranges_base attribute here (if needed).
-	 We need the value before we can process DW_AT_ranges.  */
-      cu->ranges_base = 0;
-      attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_ranges_base, cu);
-      if (attr)
-	cu->ranges_base = DW_UNSND (attr);
-
-      if (this_cu->is_debug_types)
+      dwo_unit = lookup_dwo_unit (this_cu, comp_unit_die);
+      if (read_cutu_die_from_dwo (this_cu, dwo_unit,
+				  abbrev_table != NULL,
+				  comp_unit_die,
+				  &reader, &info_ptr,
+				  &dwo_comp_unit_die, &has_children) == 0)
 	{
-	  gdb_assert (sig_type != NULL);
-	  signature = sig_type->signature;
-	}
-      else
-	{
-	  attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_id, cu);
-	  if (! attr)
-	    error (_("Dwarf Error: missing dwo_id [in module %s]"),
-		   dwo_name);
-	  signature = DW_UNSND (attr);
-	}
-
-      /* We may need the comp_dir in order to find the DWO file.  */
-      comp_dir_string = NULL;
-      if (comp_dir)
-	comp_dir_string = DW_STRING (comp_dir);
-
-      if (this_cu->is_debug_types)
-	dwo_unit = lookup_dwo_type_unit (sig_type, dwo_name, comp_dir_string);
-      else
-	dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir_string,
-					 signature);
-
-      if (dwo_unit == NULL)
-	{
-	  error (_("Dwarf Error: CU at offset 0x%x references unknown DWO"
-		   " with ID %s [in module %s]"),
-		 this_cu->offset.sect_off,
-		 phex (signature, sizeof (signature)),
-		 objfile->name);
-	}
-
-      /* Set up for reading the DWO CU/TU.  */
-      cu->dwo_unit = dwo_unit;
-      section = dwo_unit->section;
-      dwarf2_read_section (objfile, section);
-      begin_info_ptr = info_ptr = section->buffer + dwo_unit->offset.sect_off;
-      dwo_abbrev_section = &dwo_unit->dwo_file->sections.abbrev;
-      init_cu_die_reader (&reader, cu, section, dwo_unit->dwo_file);
-
-      if (this_cu->is_debug_types)
-	{
-	  ULONGEST signature;
-	  cu_offset type_offset_in_tu;
-
-	  info_ptr = read_and_check_type_unit_head (&cu->header, section,
-						    dwo_abbrev_section,
-						    info_ptr,
-						    &signature,
-						    &type_offset_in_tu);
-	  gdb_assert (sig_type->signature == signature);
-	  gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
-	  /* For DWOs coming from DWP files, we don't know the CU length
-	     nor the type's offset in the TU until now.  */
-	  dwo_unit->length = get_cu_length (&cu->header);
-	  dwo_unit->type_offset_in_tu = type_offset_in_tu;
-
-	  /* Establish the type offset that can be used to lookup the type.
-	     For DWO files, we don't know it until now.  */
-	  sig_type->type_offset_in_section.sect_off =
-	    dwo_unit->offset.sect_off + dwo_unit->type_offset_in_tu.cu_off;
-	}
-      else
-	{
-	  info_ptr = read_and_check_comp_unit_head (&cu->header, section,
-						    dwo_abbrev_section,
-						    info_ptr, 0);
-	  gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
-	  /* For DWOs coming from DWP files, we don't know the CU length
-	     until now.  */
-	  dwo_unit->length = get_cu_length (&cu->header);
-	}
-
-      /* Discard the original CU's abbrev table, and read the DWO's.  */
-      if (abbrev_table == NULL)
-	{
-	  dwarf2_free_abbrev_table (cu);
-	  dwarf2_read_abbrevs (cu, dwo_abbrev_section);
-	}
-      else
-	{
-	  dwarf2_read_abbrevs (cu, dwo_abbrev_section);
-	  make_cleanup (dwarf2_free_abbrev_table, cu);
-	}
-
-      /* Read in the die, but leave space to copy over the attributes
-	 from the stub.  This has the benefit of simplifying the rest of
-	 the code - all the real work is done here.  */
-      num_extra_attrs = ((stmt_list != NULL)
-			 + (low_pc != NULL)
-			 + (high_pc != NULL)
-			 + (ranges != NULL)
-			 + (comp_dir != NULL));
-      info_ptr = read_full_die_1 (&reader, &comp_unit_die, info_ptr,
-				  &has_children, num_extra_attrs);
-
-      /* Copy over the attributes from the stub to the DWO die.  */
-      i = comp_unit_die->num_attrs;
-      if (stmt_list != NULL)
-	comp_unit_die->attrs[i++] = *stmt_list;
-      if (low_pc != NULL)
-	comp_unit_die->attrs[i++] = *low_pc;
-      if (high_pc != NULL)
-	comp_unit_die->attrs[i++] = *high_pc;
-      if (ranges != NULL)
-	comp_unit_die->attrs[i++] = *ranges;
-      if (comp_dir != NULL)
-	comp_unit_die->attrs[i++] = *comp_dir;
-      comp_unit_die->num_attrs += num_extra_attrs;
-
-      /* Skip dummy compilation units.  */
-      if (info_ptr >= begin_info_ptr + dwo_unit->length
-	  || peek_abbrev_code (abfd, info_ptr) == 0)
-	{
+	  /* Dummy die.  */
 	  do_cleanups (cleanups);
 	  return;
 	}
+      comp_unit_die = dwo_comp_unit_die;
     }
 
+  /* All of the above is setup for this call.  Yikes.  */
   die_reader_func (&reader, info_ptr, comp_unit_die, has_children, data);
 
+  /* Done, clean up.  */
   if (free_cu_cleanup != NULL)
     {
       if (keep)

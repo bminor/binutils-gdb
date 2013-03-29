@@ -1,5 +1,9 @@
 2013-03-29  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (read_cutu_die_from_dwo): New function.
+	(lookup_dwo_unit): New function.
+	(init_cutu_and_read_dies): Move DWO handling to new functions.
+
 	* dwarf2read.c (struct signatured_type): Tweak comment.
 	(struct dwo_unit): Tweak comment.
 	(create_debug_types_hash_table): Tweak comment.  Reformat long line.
