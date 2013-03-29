@@ -4398,7 +4398,8 @@ create_all_type_units (struct objfile *objfile)
 }
 
 /* Lookup a signature based type for DW_FORM_ref_sig8.
-   Returns NULL if signature SIG is not present in the table.  */
+   Returns NULL if signature SIG is not present in the table.
+   It is up to the caller to complain about this.  */
 
 static struct signatured_type *
 lookup_signatured_type (ULONGEST sig)
@@ -4406,12 +4407,7 @@ lookup_signatured_type (ULONGEST sig)
   struct signatured_type find_entry, *entry;
 
   if (dwarf2_per_objfile->signatured_types == NULL)
-    {
-      complaint (&symfile_complaints,
-		 _("missing `.debug_types' section for DW_FORM_ref_sig8 die"));
-      return NULL;
-    }
-
+    return NULL;
   find_entry.signature = sig;
   entry = htab_find (dwarf2_per_objfile->signatured_types, &find_entry);
   return entry;

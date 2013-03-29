@@ -1,3 +1,8 @@
+2013-03-29  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (lookup_signatured_type): Remove complaint about
+	missing .debug_types section.
+
 2013-03-29  Yao Qi  <yao@codesourcery.com>
 
 	* corelow.c: Include "completer.h".
