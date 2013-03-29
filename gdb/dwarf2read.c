@@ -9335,9 +9335,9 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
     }
 
   complaint (&symfile_complaints,
-	     _("Could not find DWO CU referenced by CU at offset 0x%x"
+	     _("Could not find DWO %s referenced by CU at offset 0x%x"
 	       " [in module %s]"),
-	     this_unit->offset.sect_off, objfile->name);
+	     kind, this_unit->offset.sect_off, objfile->name);
   return NULL;
 }
 

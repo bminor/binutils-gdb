@@ -1,5 +1,7 @@
 2013-03-29  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (lookup_dwo_cutu): Improve complaint text.
+
 	* dwarf2read.c (read_cutu_die_from_dwo): New function.
 	(lookup_dwo_unit): New function.
 	(init_cutu_and_read_dies): Move DWO handling to new functions.
