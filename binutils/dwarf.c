@@ -2238,6 +2238,7 @@ process_debug_info (struct dwarf_section *section,
       if (do_types)
         {
 	  SAFE_BYTE_GET64 (hdrptr, &signature_high, &signature_low, end);
+	  hdrptr += 8;
 	  SAFE_BYTE_GET_AND_INC (type_offset, hdrptr, offset_size, end);
         }
 

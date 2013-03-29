@@ -1,3 +1,8 @@
+2013-03-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (process_debug_info): Increment hdrptr by 8 after
+	SAFE_BYTE_GET64.
+
 2013-03-27  Phil Krylov <phil.krylov@gmail.com>
 
 	PR binutils/13409
