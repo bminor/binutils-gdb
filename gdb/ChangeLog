@@ -1,5 +1,12 @@
 2013-03-29  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (open_dwo_file): Renamed from open_dwop_file.
+	Delete arg is_dwp.  All callers updated.
+	(open_dwp_file): New function.
+	(open_and_init_dwp_file): Call it.
+	(get_dwp_file): New function.
+	(lookup_dwo_cutu): Call it.
+
 	* dwarf2read.c (open_and_init_dwp_file): Remove incorrect, and
 	unnecessary, cleanup.
 

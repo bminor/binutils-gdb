@@ -8918,7 +8918,7 @@ lookup_dwo_in_dwp (struct dwp_file *dwp_file,
 	 dwp_file->name);
 }
 
-/* Subroutine of open_dwop_file to simplify it.
+/* Subroutine of open_dwo_file,open_dwp_file to simplify them.
    Open the file specified by FILE_NAME and hand it off to BFD for
    preliminary analysis.  Return a newly initialized bfd *, which
    includes a canonicalized copy of FILE_NAME.
@@ -8959,21 +8959,20 @@ try_open_dwop_file (const char *file_name, int is_dwp)
   return sym_bfd;
 }
 
-/* Try to open DWO/DWP file FILE_NAME.
+/* Try to open DWO file FILE_NAME.
    COMP_DIR is the DW_AT_comp_dir attribute.
-   If IS_DWP is TRUE, we're opening a DWP file, otherwise a DWO file.
    The result is the bfd handle of the file.
    If there is a problem finding or opening the file, return NULL.
    Upon success, the canonicalized path of the file is stored in the bfd,
    same as symfile_bfd_open.  */
 
 static bfd *
-open_dwop_file (const char *file_name, const char *comp_dir, int is_dwp)
+open_dwo_file (const char *file_name, const char *comp_dir)
 {
   bfd *abfd;
 
   if (IS_ABSOLUTE_PATH (file_name))
-    return try_open_dwop_file (file_name, is_dwp);
+    return try_open_dwop_file (file_name, 0 /*is_dwp*/);
 
   /* Before trying the search path, try DWO_NAME in COMP_DIR.  */
 
@@ -8983,7 +8982,7 @@ open_dwop_file (const char *file_name, const char *comp_dir, int is_dwp)
 
       /* NOTE: If comp_dir is a relative path, this will also try the
 	 search path, which seems useful.  */
-      abfd = try_open_dwop_file (path_to_try, is_dwp);
+      abfd = try_open_dwop_file (path_to_try, 0 /*is_dwp*/);
       xfree (path_to_try);
       if (abfd != NULL)
 	return abfd;
@@ -8995,7 +8994,7 @@ open_dwop_file (const char *file_name, const char *comp_dir, int is_dwp)
   if (*debug_file_directory == '\0')
     return NULL;
 
-  return try_open_dwop_file (file_name, is_dwp);
+  return try_open_dwop_file (file_name, 0 /*is_dwp*/);
 }
 
 /* This function is mapped across the sections and remembers the offset and
@@ -9059,7 +9058,8 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
     }
 }
 
-/* Initialize the use of the DWO file specified by DWO_NAME.
+/* Initialize the use of the DWO file specified by DWO_NAME and referenced
+   by PER_CU.
    The result is NULL if DWO_NAME can't be found.  */
 
 static struct dwo_file *
@@ -9070,7 +9070,7 @@ open_and_init_dwo_file (const char *dwo_name, const char *comp_dir)
   bfd *dbfd;
   struct cleanup *cleanups;
 
-  dbfd = open_dwop_file (dwo_name, comp_dir, 0);
+  dbfd = open_dwo_file (dwo_name, comp_dir);
   if (dbfd == NULL)
     {
       if (dwarf2_read_debug)
@@ -9168,12 +9168,24 @@ allocate_dwp_loaded_cutus_table (struct objfile *objfile)
 			       dummy_obstack_deallocate);
 }
 
+/* Try to open DWP file FILE_NAME.
+   The result is the bfd handle of the file.
+   If there is a problem finding or opening the file, return NULL.
+   Upon success, the canonicalized path of the file is stored in the bfd,
+   same as symfile_bfd_open.  */
+
+static bfd *
+open_dwp_file (const char *file_name)
+{
+  return try_open_dwop_file (file_name, 1 /*is_dwp*/);
+}
+
 /* Initialize the use of the DWP file for the current objfile.
    By convention the name of the DWP file is ${objfile}.dwp.
    The result is NULL if it can't be found.  */
 
 static struct dwp_file *
-open_and_init_dwp_file (const char *comp_dir)
+open_and_init_dwp_file (void)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwp_file *dwp_file;
@@ -9184,7 +9196,7 @@ open_and_init_dwp_file (const char *comp_dir)
   dwp_name = xstrprintf ("%s.dwp", dwarf2_per_objfile->objfile->name);
   cleanups = make_cleanup (xfree, dwp_name);
 
-  dbfd = open_dwop_file (dwp_name, comp_dir, 1);
+  dbfd = open_dwp_file (dwp_name);
   if (dbfd == NULL)
     {
       if (dwarf2_read_debug)
@@ -9224,6 +9236,19 @@ open_and_init_dwp_file (const char *comp_dir)
   return dwp_file;
 }
 
+/* Wrapper around open_and_init_dwp_file, only open it once.  */
+
+static struct dwp_file *
+get_dwp_file (void)
+{
+  if (! dwarf2_per_objfile->dwp_checked)
+    {
+      dwarf2_per_objfile->dwp_file = open_and_init_dwp_file ();
+      dwarf2_per_objfile->dwp_checked = 1;
+    }
+  return dwarf2_per_objfile->dwp_file;
+}
+
 /* Subroutine of lookup_dwo_comp_unit, lookup_dwo_type_unit.
    Look up the CU/TU with signature SIGNATURE, either in DWO file DWO_NAME
    or in the DWP file for the objfile, referenced by THIS_UNIT.
@@ -9253,13 +9278,7 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 
   /* Have we already read SIGNATURE from a DWP file?  */
 
-  if (! dwarf2_per_objfile->dwp_checked)
-    {
-      dwarf2_per_objfile->dwp_file = open_and_init_dwp_file (comp_dir);
-      dwarf2_per_objfile->dwp_checked = 1;
-    }
-  dwp_file = dwarf2_per_objfile->dwp_file;
-
+  dwp_file = get_dwp_file ();
   if (dwp_file != NULL)
     {
       const struct dwp_hash_table *dwp_htab =
