@@ -1,5 +1,8 @@
 2013-03-29  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (open_and_init_dwp_file): Remove incorrect, and
+	unnecessary, cleanup.
+
 	* dwarf2read.c (lookup_dwo_cutu): Improve complaint text.
 
 	* dwarf2read.c (read_cutu_die_from_dwo): New function.

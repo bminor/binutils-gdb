@@ -9198,8 +9198,6 @@ open_and_init_dwp_file (const char *comp_dir)
   dwp_file->dbfd = dbfd;
   do_cleanups (cleanups);
 
-  cleanups = make_cleanup (free_dwo_file_cleanup, dwp_file);
-
   /* +1: section 0 is unused */
   dwp_file->num_sections = bfd_count_sections (dbfd) + 1;
   dwp_file->elf_sections =
@@ -9213,8 +9211,6 @@ open_and_init_dwp_file (const char *comp_dir)
   dwp_file->tus = create_dwp_hash_table (dwp_file, 1);
 
   dwp_file->loaded_cutus = allocate_dwp_loaded_cutus_table (objfile);
-
-  discard_cleanups (cleanups);
 
   if (dwarf2_read_debug)
     {
