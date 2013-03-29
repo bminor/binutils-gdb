@@ -1,5 +1,11 @@
 2013-03-29  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (struct signatured_type): Tweak comment.
+	(struct dwo_unit): Tweak comment.
+	(create_debug_types_hash_table): Tweak comment.  Reformat long line.
+	(create_dwo_debug_info_hash_table): Tweak comment.
+	(dwarf2_per_cu_offset_and_type): Tweak comment.
+
 	* dwarf2read.c (lookup_signatured_type): Remove complaint about
 	missing .debug_types section.
 

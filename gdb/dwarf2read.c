@@ -612,7 +612,8 @@ struct signatured_type
   ULONGEST signature;
 
   /* Offset in the TU of the type's DIE, as read from the TU header.
-     If the definition lives in a DWO file, this value is unusable.  */
+     If this TU is a DWO stub and the definition lives in a DWO file
+     (specified by DW_AT_GNU_dwo_name), this value is unusable.  */
   cu_offset type_offset_in_tu;
 
   /* Offset in the section of the type's DIE.
@@ -700,7 +701,7 @@ struct dwo_sections
   VEC (dwarf2_section_info_def) *types;
 };
 
-/* Common bits of DWO CUs/TUs.  */
+/* CUs/TUs in DWP/DWO files.  */
 
 struct dwo_unit
 {
@@ -4199,12 +4200,14 @@ add_signatured_type_cu_to_table (void **slot, void *datum)
   return 1;
 }
 
-/* Create the hash table of all entries in the .debug_types section.
-   DWO_FILE is a pointer to the DWO file for .debug_types.dwo,
-   NULL otherwise.
-   Note: This function processes DWO files only, not DWP files.
-   The result is a pointer to the hash table or NULL if there are
-   no types.  */
+/* Create the hash table of all entries in the .debug_types
+   (or .debug_types.dwo) section(s).
+   If reading a DWO file, then DWO_FILE is a pointer to the DWO file object,
+   otherwise it is NULL.
+
+   The result is a pointer to the hash table or NULL if there are no types.
+
+   Note: This function processes DWO files only, not DWP files.  */
 
 static htab_t
 create_debug_types_hash_table (struct dwo_file *dwo_file,
@@ -4345,8 +4348,8 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 		}
 
 	      complaint (&symfile_complaints,
-			 _("debug type entry at offset 0x%x is duplicate to the "
-			   "entry at offset 0x%x, signature 0x%s"),
+			 _("debug type entry at offset 0x%x is duplicate to"
+			   " the entry at offset 0x%x, signature 0x%s"),
 			 offset.sect_off, dup_offset.sect_off,
 			 phex (signature, sizeof (signature)));
 	    }
@@ -8370,7 +8373,8 @@ create_dwo_debug_info_hash_table_reader (const struct die_reader_specs *reader,
 
 /* Create a hash table to map DWO IDs to their CU entry in
    .debug_info.dwo in DWO_FILE.
-   Note: This function processes DWO files only, not DWP files.  */
+   Note: This function processes DWO files only, not DWP files.
+   Note: A DWO file generally contains one CU, but we don't assume this.  */
 
 static htab_t
 create_dwo_debug_info_hash_table (struct dwo_file *dwo_file)
@@ -19472,11 +19476,13 @@ dwarf2_free_objfile (struct objfile *objfile)
 
    The CU "per_cu" pointer is needed because offset alone is not enough to
    uniquely identify the type.  A file may have multiple .debug_types sections,
-   or the type may come from a DWO file.  We have to use something in
-   dwarf2_per_cu_data (or the pointer to it) because we can enter the lookup
-   routine, get_die_type_at_offset, from outside this file, and thus won't
-   necessarily have PER_CU->cu.  Fortunately, PER_CU is stable for the life
-   of the objfile.  */
+   or the type may come from a DWO file.  Furthermore, while it's more logical
+   to use per_cu->section+offset, with Fission the section with the data is in
+   the DWO file but we don't know that section at the point we need it.
+   We have to use something in dwarf2_per_cu_data (or the pointer to it)
+   because we can enter the lookup routine, get_die_type_at_offset, from
+   outside this file, and thus won't necessarily have PER_CU->cu.
+   Fortunately, PER_CU is stable for the life of the objfile.  */
 
 struct dwarf2_per_cu_offset_and_type
 {
