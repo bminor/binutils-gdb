@@ -1,5 +1,8 @@
 2013-03-28  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (create_debug_types_hash_table): Don't allocate the
+	types hash table until we know we need it.
+
 	* dwarf2read.c (create_addrmap_from_index): Complain about bad CU
 	index numbers.
 

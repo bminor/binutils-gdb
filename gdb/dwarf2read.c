@@ -4251,14 +4251,6 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
       else
 	abbrev_section = &dwarf2_per_objfile->abbrev;
 
-      if (types_htab == NULL)
-	{
-	  if (dwo_file)
-	    types_htab = allocate_dwo_unit_table (objfile);
-	  else
-	    types_htab = allocate_signatured_type_table (objfile);
-	}
-
       /* We don't use init_cutu_and_read_dies_simple, or some such, here
 	 because we don't need to read any dies: the signature is in the
 	 header.  */
@@ -4293,6 +4285,14 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	    {
 	      info_ptr += length;
 	      continue;
+	    }
+
+	  if (types_htab == NULL)
+	    {
+	      if (dwo_file)
+		types_htab = allocate_dwo_unit_table (objfile);
+	      else
+		types_htab = allocate_signatured_type_table (objfile);
 	    }
 
 	  if (dwo_file)
