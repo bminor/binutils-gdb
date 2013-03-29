@@ -1,5 +1,8 @@
 2013-03-28  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (create_addrmap_from_index): Complain about bad CU
+	index numbers.
+
 	* dwarf2read.c (dw2_get_file_names): Delete arg "objfile".
 	All callers updated.
 	(dw2_print_stats): Print #read CUs too.
