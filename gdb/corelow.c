@@ -46,6 +46,7 @@
 #include "progspace.h"
 #include "objfiles.h"
 #include "gdb_bfd.h"
+#include "completer.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -977,5 +978,5 @@ _initialize_corelow (void)
 {
   init_core_ops ();
 
-  add_target (&core_ops);
+  add_target_with_completer (&core_ops, filename_completer);
 }

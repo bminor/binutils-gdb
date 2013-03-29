@@ -54,6 +54,7 @@
 #include "cli/cli-utils.h"
 #include "probe.h"
 #include "ctf.h"
+#include "completer.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -5904,5 +5905,5 @@ Show the notes string to use for future tstop commands"), NULL,
 
   init_tfile_ops ();
 
-  add_target (&tfile_ops);
+  add_target_with_completer (&tfile_ops, filename_completer);
 }

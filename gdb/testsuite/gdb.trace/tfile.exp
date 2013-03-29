@@ -125,3 +125,8 @@ gdb_test \
 gdb_test "interpreter-exec mi \"-trace-status\"" \
     "\\^done,supported=\"file\",trace-file=\".*basic.tf\",running=\"0\",stop-reason=\"request\",frames=\"${decimal}\",frames-created=\"${decimal}\",buffer-size=\"${decimal}\",buffer-free=\"${decimal}\",disconnected=\".*\",circular=\".*\",user-name=\"\",notes=\"\",start-time=\".*\",stop-time=\".*\"" \
     "-trace-status"
+
+# Test completion works well.
+
+gdb_test "target tfile basic\t" "Assuming tracepoint.*" \
+    "complete-command 'target tfile'"

@@ -1,3 +1,10 @@
+2013-03-29  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/completion.exp: Test completion of commands
+	"target core", "target tfile" and "target exec".
+	* gdb.trace/tfile.exp: Test completion of command
+	"target tfile".
+
 2013-03-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/win_fu_syms: New testcase.

@@ -713,6 +713,13 @@ gdb_test "complete set gnutarget aut" "set gnutarget auto"
 
 gdb_test "complete set cp-abi aut" "set cp-abi auto"
 
+# Test that completion of commands 'target FOO' works well.
+
+foreach target_name { "core" "tfile" "exec" } {
+    gdb_test "complete target ${target_name} ./gdb.base/completion" \
+	"target ${target_name} ./gdb.base/completion\\.exp.*"
+}
+
 # Restore globals modified in this test...
 set timeout $oldtimeout1
 

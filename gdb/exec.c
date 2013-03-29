@@ -943,7 +943,7 @@ Show writing into executable and core files."), NULL,
 			   show_write_files,
 			   &setlist, &showlist);
 
-  add_target (&exec_ops);
+  add_target_with_completer (&exec_ops, filename_completer);
 }
 
 static char *

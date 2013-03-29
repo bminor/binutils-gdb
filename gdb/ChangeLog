@@ -1,3 +1,17 @@
+2013-03-29  Yao Qi  <yao@codesourcery.com>
+
+	* corelow.c: Include "completer.h".
+	(_initialize_corelow): Call add_target_with_completer with
+	argument 'filename_completer'.
+	* tracepoint.c: Likewise.
+	* exec.c (_initialize_exec): Likewise.
+	* target.c (add_target): Rename to ...
+	(add_target_with_completer): ... this.  Call set_cmd_completer
+	if parameter completer is not NULL.
+	(add_target): New.
+	* target.h: Include "command.h".
+	(add_target_with_completer): Declare it.
+
 2013-03-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* coffread.c (is_import_fixup_symbol): New function.

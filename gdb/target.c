@@ -384,11 +384,16 @@ target_has_execution_current (void)
   return target_has_execution_1 (inferior_ptid);
 }
 
-/* Add a possible target architecture to the list.  */
+/* Add possible target architecture T to the list and add a new
+   command 'target T->to_shortname'.  Set COMPLETER as the command's
+   completer if not NULL.  */
 
 void
-add_target (struct target_ops *t)
+add_target_with_completer (struct target_ops *t,
+			   completer_ftype *completer)
 {
+  struct cmd_list_element *c;
+
   /* Provide default values for all "must have" methods.  */
   if (t->to_xfer_partial == NULL)
     t->to_xfer_partial = default_xfer_partial;
@@ -431,7 +436,18 @@ Remaining arguments are interpreted by the target protocol.  For more\n\
 information on the arguments for a particular protocol, type\n\
 `help target ' followed by the protocol name."),
 		    &targetlist, "target ", 0, &cmdlist);
-  add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc, &targetlist);
+  c = add_cmd (t->to_shortname, no_class, t->to_open, t->to_doc,
+	       &targetlist);
+  if (completer != NULL)
+    set_cmd_completer (c, completer);
+}
+
+/* Add a possible target architecture to the list.  */
+
+void
+add_target (struct target_ops *t)
+{
+  add_target_with_completer (t, NULL);
 }
 
 /* See target.h.  */
