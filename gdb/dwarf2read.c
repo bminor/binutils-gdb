@@ -2937,8 +2937,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
    table for THIS_CU.  */
 
 static struct quick_file_names *
-dw2_get_file_names (struct objfile *objfile,
-		    struct dwarf2_per_cu_data *this_cu)
+dw2_get_file_names (struct dwarf2_per_cu_data *this_cu)
 {
   /* For TUs this should only be called on the parent group.  */
   if (this_cu->is_debug_types)
@@ -3076,7 +3075,7 @@ dw2_map_symtabs_matching_filename (struct objfile *objfile, const char *name,
       if (per_cu->v.quick->symtab)
 	continue;
 
-      file_data = dw2_get_file_names (objfile, per_cu);
+      file_data = dw2_get_file_names (per_cu);
       if (file_data == NULL)
 	continue;
 
@@ -3294,18 +3293,19 @@ dw2_lookup_symbol (struct objfile *objfile, int block_index,
 static void
 dw2_print_stats (struct objfile *objfile)
 {
-  int i, count;
+  int i, total, count;
 
   dw2_setup (objfile);
+  total = dwarf2_per_objfile->n_comp_units + dwarf2_per_objfile->n_type_units;
   count = 0;
-  for (i = 0; i < (dwarf2_per_objfile->n_comp_units
-		   + dwarf2_per_objfile->n_type_units); ++i)
+  for (i = 0; i < total; ++i)
     {
       struct dwarf2_per_cu_data *per_cu = dw2_get_cu (i);
 
       if (!per_cu->v.quick->symtab)
 	++count;
     }
+  printf_filtered (_("  Number of read CUs: %d\n"), total - count);
   printf_filtered (_("  Number of unread CUs: %d\n"), count);
 }
 
@@ -3386,7 +3386,7 @@ dw2_expand_symtabs_with_fullname (struct objfile *objfile,
       if (per_cu->v.quick->symtab)
 	continue;
 
-      file_data = dw2_get_file_names (objfile, per_cu);
+      file_data = dw2_get_file_names (per_cu);
       if (file_data == NULL)
 	continue;
 
@@ -3539,7 +3539,7 @@ dw2_expand_symtabs_matching
 	  if (per_cu->v.quick->symtab)
 	    continue;
 
-	  file_data = dw2_get_file_names (objfile, per_cu);
+	  file_data = dw2_get_file_names (per_cu);
 	  if (file_data == NULL)
 	    continue;
 
@@ -3743,7 +3743,7 @@ dw2_map_symbol_filenames (struct objfile *objfile, symbol_filename_ftype *fun,
       if (per_cu->v.quick->symtab)
 	continue;
 
-      file_data = dw2_get_file_names (objfile, per_cu);
+      file_data = dw2_get_file_names (per_cu);
       if (file_data == NULL)
 	continue;
 
@@ -17256,10 +17256,16 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 	  break;
 	case DW_FORM_ref_sig8:
 	  if (DW_SIGNATURED_TYPE (&die->attrs[i]) != NULL)
-	    fprintf_unfiltered (f, "signatured type, offset: 0x%x",
-			 DW_SIGNATURED_TYPE (&die->attrs[i])->per_cu.offset.sect_off);
+	    {
+	      struct signatured_type *sig_type =
+		DW_SIGNATURED_TYPE (&die->attrs[i]);
+
+	      fprintf_unfiltered (f, "signatured type: 0x%s, offset 0x%x",
+				  hex_string (sig_type->signature),
+				  sig_type->per_cu.offset.sect_off);
+	    }
 	  else
-	    fprintf_unfiltered (f, "signatured type, offset: unknown");
+	    fprintf_unfiltered (f, "signatured type, unknown");
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:

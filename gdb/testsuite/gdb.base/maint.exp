@@ -146,7 +146,7 @@ if [istarget "*-*-cygwin*"] {
 
 send_gdb "maint print statistics\n"
 gdb_expect  {
-    -re "Statistics for\[^\n\r\]*break\[^\n\r\]*:\r\n  Number of \"minimal\" symbols read: $decimal\r\n(  Number of \"partial\" symbols read: $decimal\r\n)?  Number of \"full\" symbols read: $decimal\r\n  Number of \"types\" defined: $decimal\r\n(  Number of psym tables \\(not yet expanded\\): $decimal\r\n)?(  Number of unread CUs: $decimal\r\n)?  Number of symbol tables: $decimal\r\n  Number of symbol tables with line tables: $decimal\r\n  Number of symbol tables with blockvectors: $decimal\r\n  Total memory used for objfile obstack: $decimal\r\n  Total memory used for BFD obstack: $decimal\r\n  Total memory used for psymbol cache: $decimal\r\n  Total memory used for macro cache: $decimal\r\n  Total memory used for file name cache: $decimal\r\n" {
+    -re "Statistics for\[^\n\r\]*break\[^\n\r\]*:\r\n  Number of \"minimal\" symbols read: $decimal\r\n(  Number of \"partial\" symbols read: $decimal\r\n)?  Number of \"full\" symbols read: $decimal\r\n  Number of \"types\" defined: $decimal\r\n(  Number of psym tables \\(not yet expanded\\): $decimal\r\n)?(  Number of read CUs: $decimal\r\n  Number of unread CUs: $decimal\r\n)?  Number of symbol tables: $decimal\r\n  Number of symbol tables with line tables: $decimal\r\n  Number of symbol tables with blockvectors: $decimal\r\n  Total memory used for objfile obstack: $decimal\r\n  Total memory used for BFD obstack: $decimal\r\n  Total memory used for psymbol cache: $decimal\r\n  Total memory used for macro cache: $decimal\r\n  Total memory used for file name cache: $decimal\r\n" {
 	gdb_expect {
 	    -re "$gdb_prompt $" {
 		pass "maint print statistics"

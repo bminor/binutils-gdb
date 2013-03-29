@@ -1,3 +1,7 @@
+2013-03-28  Doug Evans  <dje@google.com>
+
+	* gdb.base/maint.exp (maint print statistics): Update expected output.
+
 2013-03-28  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15294

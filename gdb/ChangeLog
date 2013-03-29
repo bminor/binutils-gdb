@@ -1,5 +1,10 @@
 2013-03-28  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dw2_get_file_names): Delete arg "objfile".
+	All callers updated.
+	(dw2_print_stats): Print #read CUs too.
+	(dump_die_shallow): Print signatured types better.
+
 	* dwarf2read.c (struct dwarf2_per_cu_data): Rename member
 	info_or_types_section to section.  All uses updated.
 	(struct dwo_unit): Ditto.
