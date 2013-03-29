@@ -1,3 +1,7 @@
+2013-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/win_fu_syms: New testcase.
+
 2013-03-28  Doug Evans  <dje@google.com>
 
 	* gdb.base/maint.exp (maint print statistics): Update expected output.

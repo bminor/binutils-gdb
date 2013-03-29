@@ -1,3 +1,9 @@
+2013-03-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* coffread.c (is_import_fixup_symbol): New function.
+	(record_minimal_symbol): Use is_import_fixup_symbol to
+	detect import fixup symbols, and discard them.
+
 2013-03-28  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (create_debug_types_hash_table): Don't allocate the

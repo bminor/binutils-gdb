@@ -418,6 +418,39 @@ coff_end_symtab (struct objfile *objfile)
   set_last_source_file (NULL);
 }
 
+/* The linker sometimes generates some non-function symbols inside
+   functions referencing variables imported from another DLL.
+   Return nonzero if the given symbol corresponds to one of them.  */
+
+static int
+is_import_fixup_symbol (struct coff_symbol *cs,
+			enum minimal_symbol_type type)
+{
+  /* The following is a bit of a heuristic using the characterictics
+     of these fixup symbols, but should work well in practice...  */
+  int i;
+
+  /* Must be a non-static text symbol.  */
+  if (type != mst_text)
+    return 0;
+
+  /* Must be a non-function symbol.  */
+  if (ISFCN (cs->c_type))
+    return 0;
+
+  /* The name must start with "__fu<digits>__".  */
+  if (strncmp (cs->c_name, "__fu", 4) != 0)
+    return 0;
+  if (! isdigit (cs->c_name[4]))
+    return 0;
+  for (i = 5; cs->c_name[i] != '\0' && isdigit (cs->c_name[i]); i++)
+    /* Nothing, just incrementing index past all digits.  */;
+  if (cs->c_name[i] != '_' || cs->c_name[i + 1] != '_')
+    return 0;
+
+  return 1;
+}
+
 static struct minimal_symbol *
 record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
 		       enum minimal_symbol_type type, int section, 
@@ -428,6 +461,16 @@ record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
   /* We don't want TDESC entry points in the minimal symbol table.  */
   if (cs->c_name[0] == '@')
     return NULL;
+
+  if (is_import_fixup_symbol (cs, type))
+    {
+      /* Because the value of these symbols is within a function code
+	 range, these symbols interfere with the symbol-from-address
+	 reverse lookup; this manifests itselfs in backtraces, or any
+	 other commands that prints symbolic addresses.  Just pretend
+	 these symbols do not exist.  */
+      return NULL;
+    }
 
   bfd_section = cs_to_bfd_section (cs, objfile);
   return prim_record_minimal_symbol_and_info (cs->c_name, address,
