@@ -1,3 +1,9 @@
+2013-03-30  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15323
+	* ld-plugin/lto.exp (pr15323a.c): Compile without -flto rather
+	than using -r to effectively strip out lto info.
+
 2013-03-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15323

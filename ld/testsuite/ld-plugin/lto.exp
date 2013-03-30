@@ -144,8 +144,8 @@ set lto_link_tests {
    "-flto -fuse-linker-plugin -Wl,--as-needed" "-flto"
    {pr13287.cc} {} "pr13287.exe" "c++"}
   {"PR ld/15323"
-   "-O2 -flto -fuse-linker-plugin -r -nostdlib" "-O2 -flto"
-   {pr15323a.c} {} "pr15323a-r.o" "c"}
+   "" "-O2"
+   {pr15323a.c} {} "libdummy.a" "c"}
 }
 
 # Generate input files for complex LTO tests for ELF.
@@ -270,7 +270,7 @@ set lto_run_tests {
    "-O2 -flto -fuse-linker-plugin -Wl,--as-needed tmpdir/pr13201.o -lm" ""
    {dummy.c} "pr13201.exe" "pr13201.out" "" "c"}
   {"PR ld/15323"
-   "-O2 -flto -fuse-linker-plugin -Wl,--as-needed tmpdir/pr15323a-r.o" ""
+   "-O2 -flto -fuse-linker-plugin tmpdir/pr15323a.o" ""
    {pr15323b.c} "pr15323.exe" "pr15323.out" "-flto -O2" "c"}
 }
 
