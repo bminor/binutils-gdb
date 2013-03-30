@@ -1,6 +1,6 @@
 /* X86-64 specific support for ELF
    Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011, 2012
+   2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
    Contributed by Jan Hubicka <jh@suse.cz>.
 
@@ -1519,6 +1519,7 @@ elf_x86_64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	  /* It is referenced by a non-shared object. */
 	  h->ref_regular = 1;
+	  h->root.non_ir_ref = 1;
 	}
 
       if (! elf_x86_64_tls_transition (info, abfd, sec, NULL,

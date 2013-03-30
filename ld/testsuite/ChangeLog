@@ -1,3 +1,13 @@
+2013-03-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15323
+	* ld-plugin/lto.exp (lto_link_tests): Add pr15323a-r.o.
+	(lto_run_tests): Add a test for PR ld/15323.
+
+	* ld-plugin/pr15323.out: New file.
+	* ld-plugin/pr15323a.c: Likewise.
+	* ld-plugin/pr15323b.c: Likewise.
+
 2013-03-22  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/init0.s: Add alloc attribute to .section directive.

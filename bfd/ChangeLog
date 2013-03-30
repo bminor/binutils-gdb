@@ -1,3 +1,10 @@
+2013-03-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15323
+	* elf32-i386.c (elf_i386_check_relocs): Set non_ir_ref if a
+	symbol is referenced by a non-shared object. 
+	* elf64-x86-64.c (elf_x86_64_check_relocs): Likewise.
+
 2013-03-28  Joe Seymour  <jseymour@codesourcery.com>
 
 	* elf32-sh.c (sh_elf_relocate_section): Suppress warnings for

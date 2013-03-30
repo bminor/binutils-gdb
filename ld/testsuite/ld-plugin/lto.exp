@@ -1,5 +1,5 @@
 # Expect script for ld-plugin LTO tests
-#   Copyright 2011
+#   Copyright 2011, 2012, 2013
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -143,6 +143,9 @@ set lto_link_tests {
   {"PR ld/13287"
    "-flto -fuse-linker-plugin -Wl,--as-needed" "-flto"
    {pr13287.cc} {} "pr13287.exe" "c++"}
+  {"PR ld/15323"
+   "-O2 -flto -fuse-linker-plugin -r -nostdlib" "-O2 -flto"
+   {pr15323a.c} {} "pr15323a-r.o" "c"}
 }
 
 # Generate input files for complex LTO tests for ELF.
@@ -266,6 +269,9 @@ set lto_run_tests {
   {"PR ld/13201"
    "-O2 -flto -fuse-linker-plugin -Wl,--as-needed tmpdir/pr13201.o -lm" ""
    {dummy.c} "pr13201.exe" "pr13201.out" "" "c"}
+  {"PR ld/15323"
+   "-O2 -flto -fuse-linker-plugin -Wl,--as-needed tmpdir/pr15323a-r.o" ""
+   {pr15323b.c} "pr15323.exe" "pr15323.out" "-flto -O2" "c"}
 }
 
 # LTO run-time tests for ELF
