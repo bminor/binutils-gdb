@@ -1,3 +1,10 @@
+2013-03-29  Sriraman Tallam  <tmsriram@google.com>
+
+	* archive.cc (Archive::get_elf_object_for_member):  Create the elf
+	object before calling the plugin claim_file handler.  Pass the elf
+	object of the archive to the plugin. Delete the elf object if the
+	plugin claims the file.
+
 2013-03-21  Alan Modra  <amodra@gmail.com>
 
 	* layout.cc (Layout::set_segment_offsets): Accept writable .text
