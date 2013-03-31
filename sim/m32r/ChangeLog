@@ -1,3 +1,12 @@
+2013-03-30  Joel Sherrill  <joel.sherrill@oarcorp.com>
+	    Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Add m32r_extra_objs. Change simulator hardware
+	from always on to defaulting to yes it is enabled.
+	* Makefile.in: Conditionalize reference to dv-sockser.o.
+	* tconfig.in: Delete HAVE_DV_SOCKSER logic that was under "#if 0".
+	* configure: Regenerated.
+
 2013-03-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.
