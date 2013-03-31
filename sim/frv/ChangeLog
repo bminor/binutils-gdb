@@ -1,3 +1,11 @@
+2013-03-30  Joel Sherrill  <joel.sherrill@oarcorp.com>
+	    Mike Frysinger  <vapier@gentoo.org>
+
+	* configure.ac: Add frv_extra_objs. Change simulator hardware
+	from always on to defaulting to yes it is enabled.
+	* Makefile.in: Conditionalize reference to dv-sockser.o.
+	* configure: Regenerated.
+
 2013-03-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure: Regenerate.

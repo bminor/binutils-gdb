@@ -19,9 +19,6 @@
 
 FRV_OBJS = frv.o cpu.o decode.o sem.o model.o mloop.o cgen-par.o
 
-CONFIG_DEVICES = dv-sockser.o
-CONFIG_DEVICES =
-
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
 	sim-cpu.o \
@@ -36,7 +33,7 @@ SIM_OBJS = \
 	traps.o interrupts.o memory.o cache.o pipeline.o \
 	profile.o profile-fr400.o profile-fr450.o profile-fr500.o profile-fr550.o options.o \
 	devices.o reset.o registers.o \
-	$(CONFIG_DEVICES)
+	$(frv_extra_objs)
 
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \
