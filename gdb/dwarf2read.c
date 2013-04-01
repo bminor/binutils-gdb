@@ -542,7 +542,9 @@ struct dwarf2_per_cu_data
      hash table and don't find it.  */
   unsigned int load_all_dies : 1;
 
-  /* Non-zero if this CU is from .debug_types.  */
+  /* Non-zero if this CU is from .debug_types.
+     Struct dwarf2_per_cu_data is contained in struct signatured_type iff
+     this is non-zero.  */
   unsigned int is_debug_types : 1;
 
   /* Non-zero if this CU is from the .dwz file.  */
@@ -592,11 +594,6 @@ struct dwarf2_per_cu_data
      to.  Concurrently with this change gdb was modified to emit version 8
      indices so we only pay a price for gold generated indices.  */
   VEC (dwarf2_per_cu_ptr) *imported_symtabs;
-
-  /* Type units are grouped by their DW_AT_stmt_list entry so that they
-     can share them.  If this is a TU, this points to the containing
-     symtab.  */
-  struct type_unit_group *type_unit_group;
 };
 
 /* Entry in the signatured_types hash table.  */
@@ -622,7 +619,14 @@ struct signatured_type
      The value is zero until the actual value is known.
      Zero is otherwise not a valid section offset.  */
   sect_offset type_offset_in_section;
+
+  /* Type units are grouped by their DW_AT_stmt_list entry so that they
+     can share them.  This points to the containing symtab.  */
+  struct type_unit_group *type_unit_group;
 };
+
+typedef struct signatured_type *sig_type_ptr;
+DEF_VEC_P (sig_type_ptr);
 
 /* A struct that can be used as a hash key for tables based on DW_AT_stmt_list.
    This includes type_unit_group and quick_file_names.  */
@@ -641,7 +645,7 @@ struct stmt_list_hash
 
 struct type_unit_group
 {
-  /* dwarf2read.c's main "handle" on the symtab.
+  /* dwarf2read.c's main "handle" on a TU symtab.
      To simplify things we create an artificial CU that "includes" all the
      type units using this stmt_list so that the rest of the code still has
      a "per_cu" handle on the symtab.
@@ -649,18 +653,10 @@ struct type_unit_group
 #define IS_TYPE_UNIT_GROUP(per_cu) ((per_cu)->section == NULL)
   struct dwarf2_per_cu_data per_cu;
 
-  union
-  {
-    /* The TUs that share this DW_AT_stmt_list entry.
-       This is added to while parsing type units to build partial symtabs,
-       and is deleted afterwards and not used again.  */
-    VEC (dwarf2_per_cu_ptr) *tus;
-
-    /* When reading the line table in "quick" functions, we need a real TU.
-       Any will do, we know they all share the same DW_AT_stmt_list entry.
-       For simplicity's sake, we pick the first one.  */
-    struct dwarf2_per_cu_data *first_tu;
-  } t;
+  /* The TUs that share this DW_AT_stmt_list entry.
+     This is added to while parsing type units to build partial symtabs,
+     and is deleted afterwards and not used again.  */
+  VEC (sig_type_ptr) *tus;
 
   /* The primary symtab.
      Type units in a group needn't all be defined in the same source file,
@@ -2872,6 +2868,8 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
   struct quick_file_names *qfn;
   unsigned int line_offset;
 
+  gdb_assert (! this_cu->is_debug_types);
+
   /* Our callers never want to match partial units -- instead they
      will match the enclosing full CU.  */
   if (comp_unit_die->tag == DW_TAG_partial_unit)
@@ -2880,18 +2878,7 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
       return;
     }
 
-  /* If we're reading the line header for TUs, store it in the "per_cu"
-     for tu_group.  */
-  if (this_cu->is_debug_types)
-    {
-      struct type_unit_group *tu_group = data;
-
-      gdb_assert (tu_group != NULL);
-      lh_cu = &tu_group->per_cu;
-    }
-  else
-    lh_cu = this_cu;
-
+  lh_cu = this_cu;
   lh = NULL;
   slot = NULL;
   line_offset = 0;
@@ -2949,9 +2936,10 @@ dw2_get_file_names_reader (const struct die_reader_specs *reader,
 static struct quick_file_names *
 dw2_get_file_names (struct dwarf2_per_cu_data *this_cu)
 {
-  /* For TUs this should only be called on the parent group.  */
-  if (this_cu->is_debug_types)
-    gdb_assert (IS_TYPE_UNIT_GROUP (this_cu));
+  /* This should never be called for TUs.  */
+  gdb_assert (! this_cu->is_debug_types);
+  /* Nor type unit groups.  */
+  gdb_assert (! IS_TYPE_UNIT_GROUP (this_cu));
 
   if (this_cu->v.quick->file_names != NULL)
     return this_cu->v.quick->file_names;
@@ -2959,19 +2947,7 @@ dw2_get_file_names (struct dwarf2_per_cu_data *this_cu)
   if (this_cu->v.quick->no_file_data)
     return NULL;
 
-  /* If DWO files are in use, we can still find the DW_AT_stmt_list attribute
-     in the stub for CUs, there's is no need to lookup the DWO file.
-     However, that's not the case for TUs where DW_AT_stmt_list lives in the
-     DWO file.  */
-  if (this_cu->is_debug_types)
-    {
-      struct type_unit_group *tu_group = this_cu->type_unit_group;
-
-      init_cutu_and_read_dies (tu_group->t.first_tu, NULL, 0, 0,
-			       dw2_get_file_names_reader, tu_group);
-    }
-  else
-    init_cutu_and_read_dies_simple (this_cu, dw2_get_file_names_reader, NULL);
+  init_cutu_and_read_dies_simple (this_cu, dw2_get_file_names_reader, NULL);
 
   if (this_cu->v.quick->no_file_data)
     return NULL;
@@ -5031,14 +5007,11 @@ create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
 			     struct type_unit_group);
   per_cu = &tu_group->per_cu;
   per_cu->objfile = objfile;
-  per_cu->is_debug_types = 1;
-  per_cu->type_unit_group = tu_group;
 
   if (dwarf2_per_objfile->using_index)
     {
       per_cu->v.quick = OBSTACK_ZALLOC (&objfile->objfile_obstack,
 					struct dwarf2_per_cu_quick_data);
-      tu_group->t.first_tu = cu->per_cu;
     }
   else
     {
@@ -5501,6 +5474,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_cu *cu = reader->cu;
   struct dwarf2_per_cu_data *per_cu = cu->per_cu;
+  struct signatured_type *sig_type;
   struct type_unit_group *tu_group;
   struct attribute *attr;
   struct partial_die_info *first_die;
@@ -5508,6 +5482,8 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   struct partial_symtab *pst;
 
   gdb_assert (data == NULL);
+  gdb_assert (per_cu->is_debug_types);
+  sig_type = (struct signatured_type *) per_cu;
 
   if (! has_children)
     return;
@@ -5515,7 +5491,7 @@ build_type_psymtabs_reader (const struct die_reader_specs *reader,
   attr = dwarf2_attr_no_follow (type_unit_die, DW_AT_stmt_list);
   tu_group = get_type_unit_group (cu, attr);
 
-  VEC_safe_push (dwarf2_per_cu_ptr, tu_group->t.tus, per_cu);
+  VEC_safe_push (sig_type_ptr, tu_group->tus, sig_type);
 
   prepare_one_comp_unit (cu, type_unit_die, language_minimal);
   cu->list_in_scope = &file_symbols;
@@ -5544,24 +5520,26 @@ build_type_psymtab_dependencies (void **slot, void *info)
   struct type_unit_group *tu_group = (struct type_unit_group *) *slot;
   struct dwarf2_per_cu_data *per_cu = &tu_group->per_cu;
   struct partial_symtab *pst = per_cu->v.psymtab;
-  int len = VEC_length (dwarf2_per_cu_ptr, tu_group->t.tus);
-  struct dwarf2_per_cu_data *iter;
+  int len = VEC_length (sig_type_ptr, tu_group->tus);
+  struct signatured_type *iter;
   int i;
 
   gdb_assert (len > 0);
+  gdb_assert (IS_TYPE_UNIT_GROUP (per_cu));
 
   pst->number_of_dependencies = len;
   pst->dependencies = obstack_alloc (&objfile->objfile_obstack,
 				     len * sizeof (struct psymtab *));
   for (i = 0;
-       VEC_iterate (dwarf2_per_cu_ptr, tu_group->t.tus, i, iter);
+       VEC_iterate (sig_type_ptr, tu_group->tus, i, iter);
        ++i)
     {
-      pst->dependencies[i] = iter->v.psymtab;
+      gdb_assert (iter->per_cu.is_debug_types);
+      pst->dependencies[i] = iter->per_cu.v.psymtab;
       iter->type_unit_group = tu_group;
     }
 
-  VEC_free (dwarf2_per_cu_ptr, tu_group->t.tus);
+  VEC_free (sig_type_ptr, tu_group->tus);
 
   return 1;
 }
@@ -7199,6 +7177,10 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
   struct objfile *objfile = per_cu->objfile;
   struct symtab *symtab;
   struct cleanup *back_to, *delayed_list_cleanup;
+  struct signatured_type *sig_type;
+
+  gdb_assert (per_cu->is_debug_types);
+  sig_type = (struct signatured_type *) per_cu;
 
   buildsym_init ();
   back_to = make_cleanup (really_free_pendings, NULL);
@@ -7226,10 +7208,10 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
      If this is the first TU to use this symtab, complete the construction
      of it with end_expandable_symtab.  Otherwise, complete the addition of
      this TU's symbols to the existing symtab.  */
-  if (per_cu->type_unit_group->primary_symtab == NULL)
+  if (sig_type->type_unit_group->primary_symtab == NULL)
     {
       symtab = end_expandable_symtab (0, objfile, SECT_OFF_TEXT (objfile));
-      per_cu->type_unit_group->primary_symtab = symtab;
+      sig_type->type_unit_group->primary_symtab = symtab;
 
       if (symtab != NULL)
 	{
@@ -7244,8 +7226,8 @@ process_full_type_unit (struct dwarf2_per_cu_data *per_cu,
   else
     {
       augment_type_symtab (objfile,
-			   per_cu->type_unit_group->primary_symtab);
-      symtab = per_cu->type_unit_group->primary_symtab;
+			   sig_type->type_unit_group->primary_symtab);
+      symtab = sig_type->type_unit_group->primary_symtab;
     }
 
   if (dwarf2_per_objfile->using_index)
@@ -8171,16 +8153,18 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
   struct line_header *lh;
   struct attribute *attr;
   unsigned int i, line_offset;
+  struct signatured_type *sig_type;
 
   gdb_assert (per_cu->is_debug_types);
+  sig_type = (struct signatured_type *) per_cu;
 
   attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
 
   /* If we're using .gdb_index (includes -readnow) then
      per_cu->s.type_unit_group may not have been set up yet.  */
-  if (per_cu->type_unit_group == NULL)
-    per_cu->type_unit_group = get_type_unit_group (cu, attr);
-  tu_group = per_cu->type_unit_group;
+  if (sig_type->type_unit_group == NULL)
+    sig_type->type_unit_group = get_type_unit_group (cu, attr);
+  tu_group = sig_type->type_unit_group;
 
   /* If we've already processed this stmt_list there's no real need to
      do it again, we could fake it and just recreate the part we need
@@ -20461,8 +20445,7 @@ write_one_signatured_type (void **slot, void *d)
 {
   struct signatured_type_index_data *info = d;
   struct signatured_type *entry = (struct signatured_type *) *slot;
-  struct dwarf2_per_cu_data *per_cu = &entry->per_cu;
-  struct partial_symtab *psymtab = per_cu->v.psymtab;
+  struct partial_symtab *psymtab = entry->per_cu.v.psymtab;
   gdb_byte val[8];
 
   write_psymbols (info->symtab,

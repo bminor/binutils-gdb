@@ -1,5 +1,17 @@
 2013-04-01  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (struct dwarf2_per_cu_data): Move member
+	type_unit_group ...
+	(struct signatured_type): ... to here.
+	(sig_type_ptr): New typedef.
+	(type_unit_group): Delete member 't.first_cu'.  Move member 'tus'
+	out of union 't'.  All uses updated.
+	(dw2_get_file_names_reader): Assert not called for a type unit.
+	(dw2_get_file_names): Assert not called for a type unit or type
+	unit group.
+	(build_type_psymtabs_reader): Assert called for a type unit.
+	(build_type_psymtab_dependencies): Assert called for a type unit group.
+
 	* dwarf2read.c (free_dwo_file): Add comment.
 	(dwarf2_per_objfile_free): Unref dwp bfd.
 
