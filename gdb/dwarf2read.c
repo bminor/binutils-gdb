@@ -9079,8 +9079,6 @@ open_and_init_dwp_file (const char *comp_dir)
   dwp_file->dbfd = dbfd;
   do_cleanups (cleanups);
 
-  cleanups = make_cleanup (free_dwo_file_cleanup, dwp_file);
-
   /* +1: section 0 is unused */
   dwp_file->num_sections = bfd_count_sections (dbfd) + 1;
   dwp_file->elf_sections =
@@ -9094,8 +9092,6 @@ open_and_init_dwp_file (const char *comp_dir)
   dwp_file->tus = create_dwp_hash_table (dwp_file, 1);
 
   dwp_file->loaded_cutus = allocate_dwp_loaded_cutus_table (objfile);
-
-  discard_cleanups (cleanups);
 
   if (dwarf2_read_debug)
     {
@@ -9253,6 +9249,7 @@ free_dwo_file (struct dwo_file *dwo_file, struct objfile *objfile)
   int ix;
   struct dwarf2_section_info *section;
 
+  /* Note: dbfd is NULL for virtual DWO files.  */
   gdb_bfd_unref (dwo_file->dbfd);
 
   VEC_free (dwarf2_section_info_def, dwo_file->sections.types);
@@ -19702,6 +19699,8 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
 
   if (data->dwo_files)
     free_dwo_files (data->dwo_files, objfile);
+  if (data->dwp_file)
+    gdb_bfd_unref (data->dwp_file->dbfd);
 
   if (data->dwz_file && data->dwz_file->dwz_bfd)
     gdb_bfd_unref (data->dwz_file->dwz_bfd);

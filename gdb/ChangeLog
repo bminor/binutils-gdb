@@ -1,3 +1,13 @@
+2013-04-01  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (free_dwo_file): Add comment.
+	(dwarf2_per_objfile_free): Unref dwp bfd.
+
+2013-03-29  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (open_and_init_dwp_file): Remove incorrect, and
+	unnecessary, cleanup.
+
 2013-03-28  Doug Evans  <dje@google.com>
 
 	* python/python.c (finish_python_initialization): Provide suggestion
