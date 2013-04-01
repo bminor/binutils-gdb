@@ -1,3 +1,13 @@
+2013-04-01  Aleksandar Ristovski <aristovski@qnx.com>
+
+	* coff-pe-read.c (add_pe_exported_sym): Remove unused 'dll_name_len'.
+	(add_pe_forwarded_sym): Remove unused 'section', 'dll_name_len'.
+	(read_pe_exported_syms): Remove unused 'exportix'.
+	(pe_text_section_offset): Remove unused 'opthdr_ofs', 'num_entries',
+	'export_rva', 'export_size', 'expptr', 'exp_funcbase', 'expdata',
+	'erva', 'name_rvas', 'ordinals', 'nexp', 'ordbase', 'dll_name'.
+
+
 2013-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* breakpoint.c (parse_cond_to_aexpr): Remove unused 'old_chain'.
