@@ -1,3 +1,8 @@
+2013-04-01  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (free_dwo_file): Add comment.
+	(dwarf2_per_objfile_free): Unref dwp bfd.
+
 2013-04-01  Aleksandar Ristovski <aristovski@qnx.com>
 
 	* coff-pe-read.c (add_pe_exported_sym): Remove unused 'dll_name_len'.
