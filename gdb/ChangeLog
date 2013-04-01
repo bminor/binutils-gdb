@@ -1,5 +1,8 @@
 2013-04-01  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (lookup_signatured_type_at_offset): Delete.
+	(process_enumeration_scope): Simplify.
+
 	* dwarf2read.c (struct dwarf2_per_cu_data): Move member
 	type_unit_group ...
 	(struct signatured_type): ... to here.

@@ -1602,10 +1602,6 @@ static struct die_info *follow_die_sig (struct die_info *,
 					struct attribute *,
 					struct dwarf2_cu **);
 
-static struct signatured_type *lookup_signatured_type_at_offset
-    (struct objfile *objfile,
-     struct dwarf2_section_info *section, sect_offset offset);
-
 static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 
 static void read_signatured_type (struct signatured_type *);
@@ -11809,10 +11805,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
     {
       struct signatured_type *sig_type;
 
-      sig_type
-	= lookup_signatured_type_at_offset (dwarf2_per_objfile->objfile,
-					    cu->per_cu->section,
-					    cu->per_cu->offset);
+      sig_type = (struct signatured_type *) cu->per_cu;
       gdb_assert (sig_type->type_offset_in_section.sect_off != 0);
       if (sig_type->type_offset_in_section.sect_off != die->offset.sect_off)
 	return;
@@ -17761,34 +17754,6 @@ follow_die_sig (struct die_info *src_die, struct attribute *attr,
   error (_("Dwarf Error: Cannot find signatured DIE at 0x%x referenced "
 	 "from DIE at 0x%x [in module %s]"),
 	 temp_die.offset.sect_off, src_die->offset.sect_off, objfile->name);
-}
-
-/* Given an offset of a signatured type, return its signatured_type.  */
-
-static struct signatured_type *
-lookup_signatured_type_at_offset (struct objfile *objfile,
-				  struct dwarf2_section_info *section,
-				  sect_offset offset)
-{
-  gdb_byte *info_ptr = section->buffer + offset.sect_off;
-  unsigned int length, initial_length_size;
-  unsigned int sig_offset;
-  struct signatured_type find_entry, *sig_type;
-
-  length = read_initial_length (objfile->obfd, info_ptr, &initial_length_size);
-  sig_offset = (initial_length_size
-		+ 2 /*version*/
-		+ (initial_length_size == 4 ? 4 : 8) /*debug_abbrev_offset*/
-		+ 1 /*address_size*/);
-  find_entry.signature = bfd_get_64 (objfile->obfd, info_ptr + sig_offset);
-  sig_type = htab_find (dwarf2_per_objfile->signatured_types, &find_entry);
-
-  /* This is only used to lookup previously recorded types.
-     If we didn't find it, it's our bug.  */
-  gdb_assert (sig_type != NULL);
-  gdb_assert (offset.sect_off == sig_type->per_cu.offset.sect_off);
-
-  return sig_type;
 }
 
 /* Load the DIEs associated with type unit PER_CU into memory.  */
