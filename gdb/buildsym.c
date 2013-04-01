@@ -1367,7 +1367,6 @@ void
 augment_type_symtab (struct objfile *objfile, struct symtab *primary_symtab)
 {
   struct blockvector *blockvector = primary_symtab->blockvector;
-  int i;
 
   if (context_stack_depth > 0)
     {

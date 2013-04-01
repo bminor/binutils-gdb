@@ -1,3 +1,13 @@
+2013-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* breakpoint.c (parse_cond_to_aexpr): Remove unused 'old_chain'.
+	(print_it_watchpoint): Remove unused 'bl'.
+	(say_where): Remove unused 'uiout'.
+	(bpstat_remove_breakpoint_callback): Remove unused 'uiout'.
+	(bkpt_breakpoint_hit): Remove unused 'b'.
+	(internal_bkpt_print_it): Remove unused 'uiout'.
+	* buildsym.c (augment_type_symtab): Remove unused 'i'.
+
 2013-03-31  Tiago Stürmer Daitx  <tdaitx@linux.vnet.ibm.com>
 
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_float): New function.

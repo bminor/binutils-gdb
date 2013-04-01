@@ -2047,7 +2047,6 @@ static struct agent_expr *
 parse_cond_to_aexpr (CORE_ADDR scope, struct expression *cond)
 {
   struct agent_expr *aexpr = NULL;
-  struct cleanup *old_chain = NULL;
   volatile struct gdb_exception ex;
 
   if (!cond)
@@ -2185,7 +2184,6 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
   struct cleanup *old_cleanups = 0;
   struct expression *expr, **argvec;
   struct agent_expr *aexpr = NULL;
-  struct cleanup *old_chain = NULL;
   volatile struct gdb_exception ex;
   const char *cmdrest;
   const char *format_start, *format_end;
@@ -10485,7 +10483,6 @@ print_it_watchpoint (bpstat bs)
 {
   struct cleanup *old_chain;
   struct breakpoint *b;
-  const struct bp_location *bl;
   struct ui_file *stb;
   enum print_stop_action result;
   struct watchpoint *w;
@@ -10493,7 +10490,6 @@ print_it_watchpoint (bpstat bs)
 
   gdb_assert (bs->bp_location_at != NULL);
 
-  bl = bs->bp_location_at;
   b = bs->breakpoint_at;
   w = (struct watchpoint *) b;
 
@@ -12719,7 +12715,6 @@ bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
 static void
 say_where (struct breakpoint *b)
 {
-  struct ui_out *uiout = current_uiout;
   struct value_print_options opts;
 
   get_user_print_options (&opts);
@@ -12988,8 +12983,6 @@ bkpt_breakpoint_hit (const struct bp_location *bl,
 		     struct address_space *aspace, CORE_ADDR bp_addr,
 		     const struct target_waitstatus *ws)
 {
-  struct breakpoint *b = bl->owner;
-
   if (ws->kind != TARGET_WAITKIND_STOPPED
       || ws->value.sig != GDB_SIGNAL_TRAP)
     return 0;
@@ -13183,7 +13176,6 @@ internal_bkpt_check_status (bpstat bs)
 static enum print_stop_action
 internal_bkpt_print_it (bpstat bs)
 {
-  struct ui_out *uiout = current_uiout;
   struct breakpoint *b;
 
   b = bs->breakpoint_at;
