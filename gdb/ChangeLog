@@ -1,3 +1,8 @@
+2013-03-31  Tiago Stürmer Daitx  <tdaitx@linux.vnet.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_float): New function.
+	(ppc64_sysv_abi_push_dummy_call): Handle complex arguments.
+
 2013-03-29  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (open_dwo_file): Renamed from open_dwop_file.
