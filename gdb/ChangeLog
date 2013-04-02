@@ -1,3 +1,8 @@
+2013-04-01  Jiong Wang  <jiwang@tilera.com>
+
+	* NEWS: Mention TILE-Gx in "New native configurations" and
+	"New targets" sections. 
+
 2013-04-01  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (free_dwo_file): Add comment.
