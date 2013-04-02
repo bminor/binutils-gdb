@@ -122,6 +122,8 @@ static void remote_send (char **buf, long *sizeof_buf_p);
 
 static int readchar (int timeout);
 
+static void remote_serial_write (const char *str, int len);
+
 static void remote_kill (struct target_ops *ops);
 
 static int tohex (int nib);
@@ -3209,13 +3211,13 @@ static void
 send_interrupt_sequence (void)
 {
   if (interrupt_sequence_mode == interrupt_sequence_control_c)
-    serial_write (remote_desc, "\x03", 1);
+    remote_serial_write ("\x03", 1);
   else if (interrupt_sequence_mode == interrupt_sequence_break)
     serial_send_break (remote_desc);
   else if (interrupt_sequence_mode == interrupt_sequence_break_g)
     {
       serial_send_break (remote_desc);
-      serial_write (remote_desc, "g", 1);
+      remote_serial_write ("g", 1);
     }
   else
     internal_error (__FILE__, __LINE__,
@@ -7060,6 +7062,21 @@ readchar (int timeout)
   return ch;
 }
 
+/* Wrapper for serial_write that closes the target and throws if
+   writing fails.  */
+
+static void
+remote_serial_write (const char *str, int len)
+{
+  if (serial_write (remote_desc, str, len))
+    {
+      remote_unpush_target ();
+      throw_perror_with_name (TARGET_CLOSE_ERROR,
+			      _("Remote communication error.  "
+				"Target disconnected."));
+    }
+}
+
 /* Send the command in *BUF to the remote machine, and read the reply
    into *BUF.  Report an error if we get an error reply.  Resize
    *BUF using xrealloc if necessary to hold the result, and update
@@ -7180,8 +7197,7 @@ putpkt_binary (char *buf, int cnt)
 	  gdb_flush (gdb_stdlog);
 	  do_cleanups (old_chain);
 	}
-      if (serial_write (remote_desc, buf2, p - buf2))
-	perror_with_name (_("putpkt: write failed"));
+      remote_serial_write (buf2, p - buf2);
 
       /* If this is a no acks version of the remote protocol, send the
 	 packet and move on.  */
@@ -7236,7 +7252,7 @@ putpkt_binary (char *buf, int cnt)
 		   doesn't get retransmitted when we resend this
 		   packet.  */
 		skip_frame ();
-		serial_write (remote_desc, "+", 1);
+		remote_serial_write ("+", 1);
 		continue;	/* Now, go look for +.  */
 	      }
 
@@ -7591,7 +7607,7 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 		break;
 	    }
 
-	  serial_write (remote_desc, "-", 1);
+	  remote_serial_write ("-", 1);
 	}
 
       if (tries > MAX_TRIES)
@@ -7602,7 +7618,7 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 
 	  /* Skip the ack char if we're in no-ack mode.  */
 	  if (!rs->noack_mode)
-	    serial_write (remote_desc, "+", 1);
+	    remote_serial_write ("+", 1);
 	  return -1;
 	}
 
@@ -7622,7 +7638,7 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 
 	  /* Skip the ack char if we're in no-ack mode.  */
 	  if (!rs->noack_mode)
-	    serial_write (remote_desc, "+", 1);
+	    remote_serial_write ("+", 1);
 	  if (is_notif != NULL)
 	    *is_notif = 0;
 	  return val;
