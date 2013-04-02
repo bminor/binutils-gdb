@@ -1,5 +1,10 @@
 2013-04-02  Pedro Alves  <palves@redhat.com>
 
+	* NEWS: Mention "set/show debug aarch64", "set/show debug
+	coff-pe-read" and "set/show debug mach-o".
+
+2013-04-02  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention "set/show remote trace-buffer-size-packet".
 
 2013-04-02  Eli Zaretskii  <eliz@gnu.org>

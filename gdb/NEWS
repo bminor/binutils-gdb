@@ -141,10 +141,6 @@ disable type-printer [name]...
 
 * New options
 
-set debug notification
-show debug notification
-  Control display of debugging info for async remote notification.
-
 set print type methods (on|off)
 show print type methods
   Control whether method declarations are displayed by "ptype".
@@ -167,6 +163,25 @@ show trace-buffer-size
 set remote trace-buffer-size-packet auto|on|off
 show remote trace-buffer-size-packet
   Control the use of the remote protocol `QTBuffer:size' packet.
+
+set debug aarch64
+show debug aarch64
+  Control display of debugging messages related to ARM AArch64.
+  The default is off.
+
+set debug coff-pe-read
+show debug coff-pe-read
+  Control display of debugging messages related to reading of COFF/PE
+  exported symbols.
+
+set debug mach-o
+show debug mach-o
+  Control display of debugging messages related to Mach-O symbols
+  processing.
+
+set debug notification
+show debug notification
+  Control display of debugging info for async remote notification.
 
 * MI changes
 

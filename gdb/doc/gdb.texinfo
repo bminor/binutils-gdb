@@ -22128,11 +22128,18 @@ asynchronous command finishes its execution.  The default is off.
 Displays the current setting of asynchronous command completion
 notification.
 @kindex set debug
+@cindex ARM AArch64
+@item set debug aarch64
+Turns on or off display of debugging messages related to ARM AArch64.
+The default is off.
+@kindex show debug
+@item show debug aarch64
+Displays the current state of displaying debugging messages related to
+ARM AArch64.
 @cindex gdbarch debugging info
 @cindex architecture debugging info
 @item set debug arch
 Turns on or off display of gdbarch debugging info.  The default is off
-@kindex show debug
 @item show debug arch
 Displays the current state of displaying gdbarch debugging info.
 @item set debug aix-thread
@@ -22151,6 +22158,13 @@ When enabled, this setting causes @value{GDBN} to compute the names
 both ways and display any discrepancies.
 @item show debug check-physname
 Show the current state of ``physname'' checking.
+@item set debug coff-pe-read
+@cindex COFF/PE exported symbols
+Control display of debugging messages related to reading of COFF/PE
+exported symbols.  The default is off.
+@item show debug coff-pe-read
+Displays the current state of displaying debugging messages related to
+reading of COFF/PE exported symbols.
 @item set debug dwarf2-die
 @cindex DWARF2 DIEs
 Dump DWARF2 DIEs after they are read in.
@@ -22215,6 +22229,13 @@ Displays the current state of @value{GDBN} JIT debugging.
 Turns on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
+@item set debug mach-o
+@cindex Mach-O symbols processing
+Control display of debugging messages related to Mach-O symbols
+processing.  The default is off.
+@item show debug mach-o
+Displays the current state of displaying debugging messages related to
+reading of COFF/PE exported symbols.
 @item set debug notification
 @cindex remote async notification debugging info
 Turns on or off debugging messages about remote async notification.
