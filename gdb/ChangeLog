@@ -1,3 +1,8 @@
+2013-04-01  Jiong Wang  <jiwang@tilera.com>
+
+	* NEWS: Mention TILE-Gx in "New native configurations" and
+	"New targets" sections. 
+
 2013-04-01  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (lookup_signatured_type_at_offset): Delete.
