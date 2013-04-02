@@ -1,3 +1,9 @@
+2013-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Revert this patch:
+	PR gdb/15275
+	* remote.c (remote_get_trace_status): Include putpkt in TRY_CATCH.
+
 2013-04-02  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15275

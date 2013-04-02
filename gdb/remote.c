@@ -10708,9 +10708,10 @@ remote_get_trace_status (struct trace_status *ts)
 
   trace_regblock_size = get_remote_arch_state ()->sizeof_g_packet;
 
+  putpkt ("qTStatus");
+
   TRY_CATCH (ex, RETURN_MASK_ERROR)
     {
-      putpkt ("qTStatus");
       p = remote_get_noisy_reply (&target_buf, &target_buf_size);
     }
   if (ex.reason < 0)
