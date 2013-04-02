@@ -133,14 +133,6 @@ enable type-printer [name]...
 disable type-printer [name]...
   Enable or disable type printers.
 
-set debug notification
-show debug notification
-  Control display of debugging info for async remote notification.
-
-set trace-buffer-size
-show trace-buffer-size
-  Request target to change the size of trace buffer.
-
 * Removed commands
 
   ** For the Renesas Super-H architecture, the "regs" command has been removed
@@ -148,6 +140,10 @@ show trace-buffer-size
      instead.
 
 * New options
+
+set debug notification
+show debug notification
+  Control display of debugging info for async remote notification.
 
 set print type methods (on|off)
 show print type methods
@@ -163,6 +159,10 @@ set filename-display basename|relative|absolute
 show filename-display
   Control the way in which filenames is displayed.
   The default is "relative", which preserves previous behavior.
+
+set trace-buffer-size
+show trace-buffer-size
+  Request target to change the size of trace buffer.
 
 * MI changes
 

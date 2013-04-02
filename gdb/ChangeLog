@@ -1,3 +1,8 @@
+2013-04-02  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Move "set debug notification" and "set trace-buffer-size"
+	under "New options".
+
 2013-04-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Revert this patch:
