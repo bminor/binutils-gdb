@@ -1,3 +1,9 @@
+2013-04-02  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (GET_RELOC): Assert that there are relocs to get.
+	(rl78_elf_relax_section): Only fetch the next reloc if there is
+	one expected.
+
 2013-03-30  Alan Modra  <amodra@gmail.com>
 
 	PR ld/15323
