@@ -1,3 +1,11 @@
+2013-04-02  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15275
+
+	* remote.c (send_interrupt_sequence): Use remote_serial_write.
+	(remote_serial_write): New function.
+	(putpkt_binary, getpkt_or_notif_sane_1): Use remote_serial_write.
+
 2013-04-01  Jiong Wang  <jiwang@tilera.com>
 
 	* NEWS: Mention TILE-Gx in "New native configurations" and
