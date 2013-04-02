@@ -18439,6 +18439,10 @@ are:
 @tab @code{qAttached}
 @tab Querying remote process attach state.
 
+@item @code{trace-buffer-size}
+@tab @code{QTBuffer:size}
+@tab @code{set trace-buffer-size}
+
 @item @code{traceframe-info}
 @tab @code{qXfer:traceframe-info:read}
 @tab Traceframe info

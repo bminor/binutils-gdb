@@ -164,6 +164,10 @@ set trace-buffer-size
 show trace-buffer-size
   Request target to change the size of trace buffer.
 
+set remote trace-buffer-size-packet auto|on|off
+show remote trace-buffer-size-packet
+  Control the use of the remote protocol `QTBuffer:size' packet.
+
 * MI changes
 
   ** Command parameter changes are now notified using new async record
