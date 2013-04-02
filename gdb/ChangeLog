@@ -1,3 +1,8 @@
+2013-04-02  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove call-cmds.h.
+	gdb_string.h is now in common/.
+
 2013-04-02  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Move "set debug notification" and "set trace-buffer-size"
