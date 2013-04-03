@@ -92,7 +92,7 @@ write_basic_trace_file (void)
   int fd, int_x;
   short short_x;
 
-  fd = start_trace_file ("basic.tf");
+  fd = start_trace_file ("tfile-basic.tf");
 
   /* The next part of the file consists of newline-separated lines
      defining status, tracepoints, etc.  The section is terminated by
@@ -177,7 +177,7 @@ write_error_trace_file (void)
   int len = sizeof (made_up) - 1;
   char *hex = alloca (len * 2 + 1);
 
-  fd = start_trace_file ("error.tf");
+  fd = start_trace_file ("tfile-error.tf");
 
   /* The next part of the file consists of newline-separated lines
      defining status, tracepoints, etc.  The section is terminated by

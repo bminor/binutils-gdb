@@ -1,3 +1,12 @@
+2013-04-03  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.c (write_basic_trace_file): Pass argument
+	"tfile-basic.tf" instead of "basic.tf".
+	(write_error_trace_file): Pass argument "tfile-error.tf"
+	instead of "error.tf".
+	* gdb.trace/tfile.exp: Update tfile names to
+	"tfile-basic.tf" and "tfile-error.tf".
+
 2013-04-02  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.cp/ovsrch.exp (test_class): Correct regexp to allow
