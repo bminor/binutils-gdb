@@ -295,7 +295,7 @@ if { [is_elf_format]
     run_cc_link_tests $lto_link_elf_tests
     set testname "PR ld/15146 (2)"
     set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin -Wl,-rpath-link,. -Wl,--no-copy-dt-needed-entries -Wl,--no-as-needed tmpdir/pr15146d.o tmpdir/pr15146c.so"]
-    if { [ regexp "ltrans.o: undefined reference to symbol 'xxx'" $exec_output ] } {
+    if { [ regexp "undefined reference to symbol 'xxx'" $exec_output ] } {
 	pass $testname
     } {
 	fail $testname
@@ -314,7 +314,7 @@ if {![string match "" $catch_output]} {
 # Check expected LTO linker errors.
 set testname "PR ld/12942 (3)"
 set exec_output [run_host_cmd "$CXX" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
-if { [ regexp "pr12942a.h:7: undefined reference to `link_error\\(\\)'" $exec_output ] } {
+if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
     pass $testname
 } {
     fail $testname

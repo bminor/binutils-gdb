@@ -1,3 +1,11 @@
+2013-04-03  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15227
+	* ld-plugin/lto.exp (PR ld/12942 (3)): Remove file name and
+	line number from regexp.
+	(PR ld/15146 (2)): Similarly.
+	* ld-plugin/pr12942a.cc (main): Use __builtin_abort.
+
 2013-03-30  Alan Modra  <amodra@gmail.com>
 
 	PR ld/15323
