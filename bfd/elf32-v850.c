@@ -1920,6 +1920,12 @@ v850_elf_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED, const char *name)
   return (   (name[0] == '.' && (name[1] == 'L' || name[1] == '.'))
 	  || (name[0] == '_' &&  name[1] == '.' && name[2] == 'L' && name[3] == '_'));
 }
+
+static bfd_boolean
+v850_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
+{
+  return v850_elf_is_local_label_name (abfd, sym->name);
+}
 
 /* We overload some of the bfd_reloc error codes for own purposes.  */
 #define bfd_reloc_gp_not_found		bfd_reloc_other
@@ -3791,6 +3797,8 @@ static const struct bfd_elf_special_section v850_elf_special_sections[] =
 #define elf_backend_rela_normal 1
 
 #define bfd_elf32_bfd_is_local_label_name	v850_elf_is_local_label_name
+#define bfd_elf32_bfd_is_target_special_symbol	v850_elf_is_target_special_symbol
+
 #define bfd_elf32_bfd_reloc_type_lookup		v850_elf_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	        v850_elf_reloc_name_lookup
 #define bfd_elf32_bfd_merge_private_bfd_data 	v850_elf_merge_private_bfd_data

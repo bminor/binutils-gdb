@@ -94,6 +94,9 @@ print_value (int flags,
   if (flags & V850_PCREL)
     {
       bfd_vma addr = value + memaddr;
+
+      if (flags & V850_INVERSE_PCREL)
+	addr = memaddr - value;
       info->print_address_func (addr, info);
     }
   else if (flags & V850_OPERAND_DISP)

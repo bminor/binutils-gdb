@@ -1,3 +1,25 @@
+2013-04-03  Nick Clifton  <nickc@redhat.com>
+
+	* v850-dis.c (print_value): With V850_INVERSE_PCREL compute the
+	destination address by subtracting the operand from the current
+	address.
+	* v850-opc.c (insert_u16_loop): Disallow negative offsets.  Store
+	a positive value in the insn.
+	(extract_u16_loop): Do not negate the returned value.
+	(D16_LOOP): Add V850_INVERSE_PCREL flag.
+
+	(ceilf.sw): Remove duplicate entry.
+	(cvtf.hs): New entry.
+	(cvtf.sh): Likewise.
+	(fmaf.s): Likewise.
+	(fmsf.s): Likewise.
+	(fnmaf.s): Likewise.
+	(fnmsf.s): Likewise.
+	(maddf.s): Restrict to E3V5 architectures.
+	(msubf.s): Likewise.
+	(nmaddf.s): Likewise.
+	(nmsubf.s): Likewise.
+
 2013-03-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (get_sib): Add the sizeflag argument.  Properly

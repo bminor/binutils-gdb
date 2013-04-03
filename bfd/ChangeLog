@@ -1,3 +1,8 @@
+2013-04-03  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-v850.c (v850_elf_is_target_special_symbol): New function.
+	(bfd_elf32_bfd_is_target_special_symbol): Define.
+
 2013-04-03   Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
          * elf64-aarch64.c (elf64_aarch64_gc_sweep_hook): Use
