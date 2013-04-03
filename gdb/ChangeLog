@@ -1,5 +1,12 @@
 2013-04-03  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (struct dwo_file): New member comp_dir.
+	Rename member name to dwo_name.  All uses updated.
+	(hash_dwo_file): Include comp_dir in computation.
+	(eq_dwo_file): Ditto.
+	(lookup_dwo_file_slot): New arg comp_dir.  All callers updated.
+	(create_dwo_in_dwp, lookup_dwo_in_dwp, open_and_init_dwo_file): Ditto.
+
 	* psymtab.c (read_psymtabs_with_fullname): Don't call
 	psymtab_to_fullname if the basenames are different.
 

@@ -726,11 +726,14 @@ struct dwo_unit
 
 struct dwo_file
 {
-  /* The DW_AT_GNU_dwo_name attribute.  This is the hash key.
+  /* The DW_AT_GNU_dwo_name attribute.
      For virtual DWO files the name is constructed from the section offsets
      of abbrev,line,loc,str_offsets so that we combine virtual DWO files
      from related CU+TUs.  */
-  const char *name;
+  const char *dwo_name;
+
+  /* The DW_AT_comp_dir attribute.  */
+  const char *comp_dir;
 
   /* The bfd, when the file is open.  Otherwise this is NULL.
      This is unused(NULL) for virtual DWO files where we use dwp_file.dbfd.  */
@@ -8286,7 +8289,8 @@ hash_dwo_file (const void *item)
 {
   const struct dwo_file *dwo_file = item;
 
-  return htab_hash_string (dwo_file->name);
+  return (htab_hash_string (dwo_file->dwo_name)
+	  + htab_hash_string (dwo_file->comp_dir));
 }
 
 static int
@@ -8295,7 +8299,8 @@ eq_dwo_file (const void *item_lhs, const void *item_rhs)
   const struct dwo_file *lhs = item_lhs;
   const struct dwo_file *rhs = item_rhs;
 
-  return strcmp (lhs->name, rhs->name) == 0;
+  return (strcmp (lhs->dwo_name, rhs->dwo_name) == 0
+	  && strcmp (lhs->comp_dir, rhs->comp_dir) == 0);
 }
 
 /* Allocate a hash table for DWO files.  */
@@ -8317,7 +8322,7 @@ allocate_dwo_file_hash_table (void)
 /* Lookup DWO file DWO_NAME.  */
 
 static void **
-lookup_dwo_file_slot (const char *dwo_name)
+lookup_dwo_file_slot (const char *dwo_name, const char *comp_dir)
 {
   struct dwo_file find_entry;
   void **slot;
@@ -8326,7 +8331,8 @@ lookup_dwo_file_slot (const char *dwo_name)
     dwarf2_per_objfile->dwo_files = allocate_dwo_file_hash_table ();
 
   memset (&find_entry, 0, sizeof (find_entry));
-  find_entry.name = dwo_name;
+  find_entry.dwo_name = dwo_name;
+  find_entry.comp_dir = comp_dir;
   slot = htab_find_slot (dwarf2_per_objfile->dwo_files, &find_entry, INSERT);
 
   return slot;
@@ -8404,7 +8410,7 @@ create_dwo_debug_info_hash_table_reader (const struct die_reader_specs *reader,
     {
       error (_("Dwarf Error: debug entry at offset 0x%x is missing"
 	       " its dwo_id [in module %s]"),
-	     offset.sect_off, dwo_file->name);
+	     offset.sect_off, dwo_file->dwo_name);
       return;
     }
 
@@ -8426,7 +8432,7 @@ create_dwo_debug_info_hash_table_reader (const struct die_reader_specs *reader,
 		   " offset 0x%x, dwo_id 0x%s [in module %s]"),
 		 offset.sect_off, dup_dwo_unit->offset.sect_off,
 		 phex (dwo_unit->signature, sizeof (dwo_unit->signature)),
-		 dwo_file->name);
+		 dwo_file->dwo_name);
     }
   else
     *slot = dwo_unit;
@@ -8694,12 +8700,14 @@ locate_virtual_dwo_sections (asection *sectp,
 
 /* Create a dwo_unit object for the DWO with signature SIGNATURE.
    HTAB is the hash table from the DWP file.
-   SECTION_INDEX is the index of the DWO in HTAB.  */
+   SECTION_INDEX is the index of the DWO in HTAB.
+   COMP_DIR is the DW_AT_comp_dir attribute of the referencing CU.  */
 
 static struct dwo_unit *
 create_dwo_in_dwp (struct dwp_file *dwp_file,
 		   const struct dwp_hash_table *htab,
 		   uint32_t section_index,
+		   const char *comp_dir,
 		   ULONGEST signature, int is_debug_types)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
@@ -8799,7 +8807,7 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
 		: 0));
   make_cleanup (xfree, virtual_dwo_name);
   /* Can we use an existing virtual DWO file?  */
-  dwo_file_slot = lookup_dwo_file_slot (virtual_dwo_name);
+  dwo_file_slot = lookup_dwo_file_slot (virtual_dwo_name, comp_dir);
   /* Create one if necessary.  */
   if (*dwo_file_slot == NULL)
     {
@@ -8809,9 +8817,10 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
 			      virtual_dwo_name);
 	}
       dwo_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_file);
-      dwo_file->name = obstack_copy0 (&objfile->objfile_obstack,
-				      virtual_dwo_name,
-				      strlen (virtual_dwo_name));
+      dwo_file->dwo_name = obstack_copy0 (&objfile->objfile_obstack,
+					  virtual_dwo_name,
+					  strlen (virtual_dwo_name));
+      dwo_file->comp_dir = comp_dir;
       dwo_file->sections.abbrev = sections.abbrev;
       dwo_file->sections.line = sections.line;
       dwo_file->sections.loc = sections.loc;
@@ -8855,6 +8864,7 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
 static struct dwo_unit *
 lookup_dwo_in_dwp (struct dwp_file *dwp_file,
 		   const struct dwp_hash_table *htab,
+		   const char *comp_dir,
 		   ULONGEST signature, int is_debug_types)
 {
   bfd *dbfd = dwp_file->dbfd;
@@ -8885,7 +8895,7 @@ lookup_dwo_in_dwp (struct dwp_file *dwp_file,
 	    read_4_bytes (dbfd, htab->unit_table + hash * sizeof (uint32_t));
 
 	  *slot = create_dwo_in_dwp (dwp_file, htab, section_index,
-				     signature, is_debug_types);
+				     comp_dir, signature, is_debug_types);
 	  return *slot;
 	}
       if (signature_in_table == 0)
@@ -9043,7 +9053,8 @@ dwarf2_locate_dwo_sections (bfd *abfd, asection *sectp, void *dwo_sections_ptr)
    The result is NULL if DWO_NAME can't be found.  */
 
 static struct dwo_file *
-open_and_init_dwo_file (const char *dwo_name, const char *comp_dir)
+open_and_init_dwo_file (struct dwarf2_per_cu_data *per_cu,
+			const char *dwo_name, const char *comp_dir)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwo_file *dwo_file;
@@ -9058,8 +9069,8 @@ open_and_init_dwo_file (const char *dwo_name, const char *comp_dir)
       return NULL;
     }
   dwo_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwo_file);
-  dwo_file->name = obstack_copy0 (&objfile->objfile_obstack,
-				  dwo_name, strlen (dwo_name));
+  dwo_file->dwo_name = dwo_name;
+  dwo_file->comp_dir = comp_dir;
   dwo_file->dbfd = dbfd;
 
   cleanups = make_cleanup (free_dwo_file_cleanup, dwo_file);
@@ -9267,7 +9278,8 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
       if (dwp_htab != NULL)
 	{
 	  struct dwo_unit *dwo_cutu =
-	    lookup_dwo_in_dwp (dwp_file, dwp_htab, signature, is_debug_types);
+	    lookup_dwo_in_dwp (dwp_file, dwp_htab, comp_dir,
+			       signature, is_debug_types);
 
 	  if (dwo_cutu != NULL)
 	    {
@@ -9285,11 +9297,11 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 
   /* Have we already seen DWO_NAME?  */
 
-  dwo_file_slot = lookup_dwo_file_slot (dwo_name);
+  dwo_file_slot = lookup_dwo_file_slot (dwo_name, comp_dir);
   if (*dwo_file_slot == NULL)
     {
       /* Read in the file and build a table of the DWOs it contains.  */
-      *dwo_file_slot = open_and_init_dwo_file (dwo_name, comp_dir);
+      *dwo_file_slot = open_and_init_dwo_file (this_unit, dwo_name, comp_dir);
     }
   /* NOTE: This will be NULL if unable to open the file.  */
   dwo_file = *dwo_file_slot;
