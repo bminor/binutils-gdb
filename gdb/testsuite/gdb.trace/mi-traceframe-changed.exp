@@ -27,12 +27,13 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 }
 
 # Make sure we are starting fresh.
-remote_file host delete basic.tf
-remote_file target delete basic.tf
+remote_file host delete tfile-basic.tf
+remote_file target delete tfile-basic.tf
 
 remote_exec target "$binfile"
 # Copy tracefile from target to host.
-remote_download host [remote_upload target basic.tf] basic.tf
+remote_download host [remote_upload target tfile-basic.tf] \
+    tfile-basic.tf
 
 proc test_tfind_tfile { } {
     with_test_prefix "tfile" {
@@ -44,7 +45,7 @@ proc test_tfind_tfile { } {
 	}
 	mi_gdb_load ${binfile}
 
-	mi_gdb_test "-target-select tfile basic.tf" \
+	mi_gdb_test "-target-select tfile tfile-basic.tf" \
 	    ".*=breakpoint-created,bkpt=\{number=\"${decimal}\",type=\"tracepoint\",disp=\"keep\",enabled=\"y\",.*,func=\"write_basic_trace_file\".*\\^connected" \
 	    "select trace file"
 
