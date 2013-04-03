@@ -1,3 +1,7 @@
+2013-04-03  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention x86_64/Cygwin as new native configuration.
+
 2013-04-02  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_structure_type): Fix typo in comment.

@@ -60,6 +60,7 @@ record function-call-history    prints the execution history at
 
 ARM AArch64 GNU/Linux		aarch64*-*-linux-gnu
 FreeBSD/powerpc			powerpc*-*-freebsd
+x86_64/Cygwin			x86_64-*-cygwin*
 Tilera TILE-Gx GNU/Linux	tilegx*-*-linux-gnu
 
 * New targets
