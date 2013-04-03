@@ -1,3 +1,7 @@
+2013-04-03  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention x86_64/Cygwin as new native configuration.
+
 2013-04-02  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention "set/show debug aarch64", "set/show debug
