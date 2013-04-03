@@ -221,8 +221,7 @@ show debug notification
   ** Memory changes are now notified using new async record
      "=memory-changed".
   ** The data-disassemble command response will include a "fullname" field
-     containing the absolute file name when GDB can determine it and source
-     has been requested.
+     containing the absolute file name when source has been requested.
   ** New optional parameter COUNT added to the "-data-write-memory-bytes" 
      command, to allow pattern filling of memory areas.
   ** New commands "-catch-load"/"-catch-unload" added for intercepting
@@ -233,6 +232,8 @@ show debug notification
   ** Output of the "-trace-status" command includes a "trace-file" field 
      containing the name of the trace file being examined.  This field is
      optional, and only present when examining a trace file.
+  ** The "fullname" field is now always present along with the "file" field,
+     even if the file cannot be found by GDB.
 
 * GDB now supports the "mini debuginfo" section, .gnu_debugdata.
   You must have the LZMA library available when configuring GDB for this

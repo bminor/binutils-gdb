@@ -1,3 +1,8 @@
+2013-04-03  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes in GDB 7.6): Update the data-disassemble for "fullname".
+	New entry about "fullname" presence.
+
 2013-04-03  Pedro Alves  <palves@redhat.com>
 
 	* NEWS: Mention x86_64/Cygwin as new native configuration.
