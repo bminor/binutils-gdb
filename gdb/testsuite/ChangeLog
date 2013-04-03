@@ -1,3 +1,8 @@
+2013-04-02  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.cp/ovsrch.exp (test_class): Correct regexp to allow
+	empty directory in file for breakpoint hit.
+
 2013-03-29  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/completion.exp: Test completion of commands
