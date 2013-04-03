@@ -1114,7 +1114,11 @@ read_psymtabs_with_fullname (struct objfile *objfile, const char *fullname)
       if (p->anonymous)
 	continue;
 
-      if (filename_cmp (fullname, psymtab_to_fullname (p)) == 0)
+      /* psymtab_to_fullname tries to open the file which is slow.
+	 Don't call it if we know the basenames don't match.  */
+      if ((basenames_may_differ
+	   || filename_cmp (lbasename (fullname), lbasename (p->filename)) == 0)
+	  && filename_cmp (fullname, psymtab_to_fullname (p)) == 0)
 	psymtab_to_symtab (objfile, p);
     }
 }
