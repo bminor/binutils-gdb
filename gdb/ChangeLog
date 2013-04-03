@@ -99,6 +99,10 @@
 	* record-btrace.c (record_btrace_close): Call
 	record_btrace_auto_disable.
 
+2013-03-25  Doug Evans  <dje@google.com>
+
+	* contrib/cc-with-tweaks.sh: Check exit code of dwp.
+
 2013-03-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* exceptions.h (enum errors): New entry TARGET_CLOSE_ERROR.
