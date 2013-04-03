@@ -4869,16 +4869,15 @@ elf64_aarch64_print_private_bfd_data (bfd *abfd, void *ptr)
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
-elf64_aarch64_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
-			     struct bfd_link_info *info ATTRIBUTE_UNUSED,
-			     asection *sec ATTRIBUTE_UNUSED,
-			     const Elf_Internal_Rela *
-			     relocs ATTRIBUTE_UNUSED)
+elf64_aarch64_gc_sweep_hook (bfd *abfd,
+			     struct bfd_link_info *info,
+			     asection *sec,
+			     const Elf_Internal_Rela * relocs)
 {
   struct elf64_aarch64_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
-  bfd_signed_vma *local_got_refcounts;
+  struct elf_aarch64_local_symbol *locals;
   const Elf_Internal_Rela *rel, *relend;
 
   if (info->relocatable)
@@ -4894,7 +4893,7 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
 
-  local_got_refcounts = elf_local_got_refcounts (abfd);
+  locals = elf64_aarch64_locals (abfd);
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
@@ -4965,10 +4964,10 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 	      if (h->got.refcount > 0)
 		h->got.refcount -= 1;
 	    }
-	  else if (local_got_refcounts != NULL)
+	  else if (locals != NULL)
 	    {
-	      if (local_got_refcounts[r_symndx] > 0)
-		local_got_refcounts[r_symndx] -= 1;
+	      if (locals[r_symndx].got_refcount > 0)
+		locals[r_symndx].got_refcount -= 1;
 	    }
 	  break;
 

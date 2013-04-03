@@ -1,3 +1,8 @@
+2013-04-03   Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
+
+         * elf64-aarch64.c (elf64_aarch64_gc_sweep_hook): Use
+        elf64_aarch64_locals to get local GOT reference counts.
+
 2013-04-02  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rl78.c (GET_RELOC): Assert that there are relocs to get.
