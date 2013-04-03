@@ -25,11 +25,13 @@
 The Renesas H8/300 version of @code{@value{AS}} has one
 machine-dependent option:
 
-@table @code
+@c man begin OPTIONS
+@table @gcctabopt
 @item -h-tick-hex
 Support H'00 style hex constants in addition to 0x00 style.
 
 @end table
+@c man end
 
 @node H8/300 Syntax
 @section Syntax

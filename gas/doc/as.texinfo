@@ -909,6 +909,25 @@ an Epiphany processor.
 
 @end ifset
 
+@ifset H8300
+
+@ifclear man
+@xref{H8/300 Options}, for the options available when @value{AS} is configured
+for an H8/300 processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for an H8/300
+processor.
+@c man end
+@c man begin INCLUDE
+@include c-h8300.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
 @ifset I80386
 
 @ifclear man
