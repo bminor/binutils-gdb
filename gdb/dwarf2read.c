@@ -1530,10 +1530,9 @@ static CORE_ADDR decode_locdesc (struct dwarf_block *, struct dwarf2_cu *);
 static enum dwarf_array_dim_ordering read_array_order (struct die_info *,
 						       struct dwarf2_cu *);
 
-static struct die_info *read_die_and_children (const struct die_reader_specs *,
-					       gdb_byte *info_ptr,
-					       gdb_byte **new_info_ptr,
-					       struct die_info *parent);
+static struct die_info *read_die_and_siblings_1
+  (const struct die_reader_specs *, gdb_byte *, gdb_byte **,
+   struct die_info *);
 
 static struct die_info *read_die_and_siblings (const struct die_reader_specs *,
 					       gdb_byte *info_ptr,
@@ -4568,6 +4567,16 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
     comp_unit_die->attrs[i++] = *comp_dir;
   comp_unit_die->num_attrs += num_extra_attrs;
 
+  if (dwarf2_die_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Read die from %s@0x%x of %s:\n",
+			  bfd_section_name (abfd, section->asection),
+			  (unsigned) (begin_info_ptr - section->buffer),
+			  bfd_get_filename (abfd));
+      dump_die (comp_unit_die, dwarf2_die_debug);
+    }
+
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + dwo_unit->length
       || peek_abbrev_code (abfd, info_ptr) == 0)
@@ -5689,6 +5698,10 @@ read_comp_units_from_section (struct objfile *objfile,
 {
   gdb_byte *info_ptr;
   bfd *abfd = section->asection->owner;
+
+  if (dwarf2_read_debug)
+    fprintf_unfiltered (gdb_stdlog, "Reading %s for %s\n",
+			section->asection->name, bfd_get_filename (abfd));
 
   dwarf2_read_section (objfile, section);
 
@@ -13059,7 +13072,7 @@ read_die_and_children (const struct die_reader_specs *reader,
   gdb_byte *cur_ptr;
   int has_children;
 
-  cur_ptr = read_full_die (reader, &die, info_ptr, &has_children);
+  cur_ptr = read_full_die_1 (reader, &die, info_ptr, &has_children, 0);
   if (die == NULL)
     {
       *new_info_ptr = cur_ptr;
@@ -13068,7 +13081,7 @@ read_die_and_children (const struct die_reader_specs *reader,
   store_in_ref_table (die, reader->cu);
 
   if (has_children)
-    die->child = read_die_and_siblings (reader, cur_ptr, new_info_ptr, die);
+    die->child = read_die_and_siblings_1 (reader, cur_ptr, new_info_ptr, die);
   else
     {
       die->child = NULL;
@@ -13085,10 +13098,10 @@ read_die_and_children (const struct die_reader_specs *reader,
    in read_die_and_children.  */
 
 static struct die_info *
-read_die_and_siblings (const struct die_reader_specs *reader,
-		       gdb_byte *info_ptr,
-		       gdb_byte **new_info_ptr,
-		       struct die_info *parent)
+read_die_and_siblings_1 (const struct die_reader_specs *reader,
+			 gdb_byte *info_ptr,
+			 gdb_byte **new_info_ptr,
+			 struct die_info *parent)
 {
   struct die_info *first_die, *last_sibling;
   gdb_byte *cur_ptr;
@@ -13114,6 +13127,34 @@ read_die_and_siblings (const struct die_reader_specs *reader,
 
       last_sibling = die;
     }
+}
+
+/* Read a die, all of its descendents, and all of its siblings; set
+   all of the fields of all of the dies correctly.  Arguments are as
+   in read_die_and_children.
+   This the main entry point for reading a DIE and all its children.  */
+
+static struct die_info *
+read_die_and_siblings (const struct die_reader_specs *reader,
+		       gdb_byte *info_ptr,
+		       gdb_byte **new_info_ptr,
+		       struct die_info *parent)
+{
+  struct die_info *die = read_die_and_siblings_1 (reader, info_ptr,
+						  new_info_ptr, parent);
+
+  if (dwarf2_die_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Read die from %s@0x%x of %s:\n",
+			  bfd_section_name (reader->abfd,
+					    reader->die_section->asection),
+			  (unsigned) (info_ptr - reader->die_section->buffer),
+			  bfd_get_filename (reader->abfd));
+      dump_die (die, dwarf2_die_debug);
+    }
+
+  return die;
 }
 
 /* Read a die and all its attributes, leave space for NUM_EXTRA_ATTRS
@@ -13181,7 +13222,22 @@ read_full_die (const struct die_reader_specs *reader,
 	       struct die_info **diep, gdb_byte *info_ptr,
 	       int *has_children)
 {
-  return read_full_die_1 (reader, diep, info_ptr, has_children, 0);
+  gdb_byte *result;
+
+  result = read_full_die_1 (reader, diep, info_ptr, has_children, 0);
+
+  if (dwarf2_die_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Read die from %s@0x%x of %s:\n",
+			  bfd_section_name (reader->abfd,
+					    reader->die_section->asection),
+			  (unsigned) (info_ptr - reader->die_section->buffer),
+			  bfd_get_filename (reader->abfd));
+      dump_die (*diep, dwarf2_die_debug);
+    }
+
+  return result;
 }
 
 /* Abbreviation tables.

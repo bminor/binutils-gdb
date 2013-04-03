@@ -1,5 +1,15 @@
 2013-04-03  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (read_die_and_siblings_1): Renamed from
+	read_die_and_siblings.
+	(read_die_and_siblings): New function.
+	(read_cutu_die_from_dwo): Dump die if requested.
+	(read_die_and_children): Call read_full_die_1 and
+	read_die_and_siblings_1.
+	(read_full_die): Dump die if requested.
+
+	* dwarf2read.c (read_comp_units_from_section): Add debugging printf.
+
 	* dwarf2read.c (struct dwo_file): New member comp_dir.
 	Rename member name to dwo_name.  All uses updated.
 	(hash_dwo_file): Include comp_dir in computation.
