@@ -2781,7 +2781,7 @@ load_symbols (lang_input_statement_type *entry,
 		 substitute BFD for us.  */
 	      if (!bfd_link_add_symbols (subsbfd, &link_info))
 		{
-		  einfo (_("%F%B: could not read symbols: %E\n"), member);
+		  einfo (_("%F%B: error adding symbols: %E\n"), member);
 		  loaded = FALSE;
 		}
 	    }
@@ -2795,7 +2795,7 @@ load_symbols (lang_input_statement_type *entry,
   if (bfd_link_add_symbols (entry->the_bfd, &link_info))
     entry->flags.loaded = TRUE;
   else
-    einfo (_("%F%B: could not read symbols: %E\n"), entry->the_bfd);
+    einfo (_("%F%B: error adding symbols: %E\n"), entry->the_bfd);
 
   return entry->flags.loaded;
 }

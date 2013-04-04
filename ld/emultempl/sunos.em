@@ -429,7 +429,7 @@ gld${EMULATION_NAME}_after_open (void)
 	    {
 	      /* We've found the needed dynamic object.  */
 	      if (! bfd_link_add_symbols (abfd, &link_info))
-		einfo ("%F%B: could not read symbols: %E\n", abfd);
+		einfo ("%F%B: error adding symbols: %E\n", abfd);
 	    }
 	  else
 	    {
@@ -576,7 +576,7 @@ gld${EMULATION_NAME}_try_needed (const char *dir, const char *name)
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
-    einfo ("%F%B: could not read symbols: %E\n", abfd);
+    einfo ("%F%B: error adding symbols: %E\n", abfd);
 
   return TRUE;
 }

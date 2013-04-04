@@ -447,7 +447,7 @@ fragment <<EOF
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
-    einfo ("%F%B: could not read symbols: %E\n", abfd);
+    einfo ("%F%B: error adding symbols: %E\n", abfd);
 
   return TRUE;
 }
