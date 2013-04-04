@@ -1142,12 +1142,25 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 {
   if (is_tracepoint (b))
     {
-      /* We need to verify that each top-level element of commands is
-	 valid for tracepoints, that there's at most one
-	 while-stepping element, and that while-stepping's body has
-	 valid tracing commands excluding nested while-stepping.  */
+      struct tracepoint *t = (struct tracepoint *) b;
       struct command_line *c;
       struct command_line *while_stepping = 0;
+
+      /* Reset the while-stepping step count.  The previous commands
+         might have included a while-stepping action, while the new
+         ones might not.  */
+      t->step_count = 0;
+
+      /* We need to verify that each top-level element of commands is
+	 valid for tracepoints, that there's at most one
+	 while-stepping element, and that the while-stepping's body
+	 has valid tracing commands excluding nested while-stepping.
+	 We also need to validate the tracepoint action line in the
+	 context of the tracepoint --- validate_actionline actually
+	 has side effects, like setting the tracepoint's
+	 while-stepping STEP_COUNT, in addition to checking if the
+	 collect/teval actions parse and make sense in the
+	 tracepoint's context.  */
       for (c = commands; c; c = c->next)
 	{
 	  if (c->control_type == while_stepping_control)
@@ -1165,6 +1178,8 @@ validate_commands_for_breakpoint (struct breakpoint *b,
 	      else
 		while_stepping = c;
 	    }
+
+	  validate_actionline (c->line, b);
 	}
       if (while_stepping)
 	{

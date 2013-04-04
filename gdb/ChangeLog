@@ -1,3 +1,9 @@
+2013-04-04  Pedro Alves  <palves@redhat.com>
+	    Hui Zhu  <hui@codesourcery.com>
+
+	* breakpoint.c (validate_commands_for_breakpoint): If validating a
+	tracepoint, reset its STEP_COUNT and call validate_actionline.
+
 2013-04-03  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (read_die_and_siblings_1): Renamed from
