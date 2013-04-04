@@ -35,6 +35,6 @@ foreach m $methods {
     foreach l $labels {
 	set line [gdb_get_line_number "$m:$l"]
 	gdb_test "break foo::$m:$l" \
-	    "Breakpoint $decimal at $hex: file .*/$srcfile, line $line\."
+	    "Breakpoint $decimal at $hex: file .*$srcfile, line $line\."
     }
 }

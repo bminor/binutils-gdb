@@ -1,5 +1,10 @@
 2013-04-04  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gdb.cp/cplabel.exp: Allow empty directory in file reported
+	for breakpoint location.
+
+2013-04-04  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gdb.linespec/linespec.exp: Make dir/file:line tests
 	conditional for non-remote hosts only.
 
