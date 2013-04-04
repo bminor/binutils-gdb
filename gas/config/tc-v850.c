@@ -3459,6 +3459,11 @@ md_apply_fix (fixS *fixP, valueT *valueP, segT seg ATTRIBUTE_UNUSED)
       else
 	insn = bfd_getl16 ((unsigned char *) where);
 
+      /* When inserting loop offets a backwards displacement
+	 is encoded as a positive value.  */
+      if (operand->flags & V850_INVERSE_PCREL)
+	value = - value;
+
       insn = v850_insert_operand (insn, operand, (offsetT) value,
 				  &errmsg);
       if (errmsg)
