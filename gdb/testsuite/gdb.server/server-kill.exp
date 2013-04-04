@@ -40,4 +40,6 @@ delete_breakpoints
 set server_pid [exp_pid -i [board_info target fileid]]
 remote_exec target "kill -9 $server_pid"
 
-gdb_test "step" "Remote connection closed"
+# Force GDB to talk with GDBserver, so that we can get the
+# "connection closed" error.
+gdb_test "tstatus" "Remote connection closed"

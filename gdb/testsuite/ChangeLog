@@ -1,3 +1,8 @@
+2013-04-04  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.server/server-kill.exp: Use command 'tstatus' instead of
+	'step'.
+
 2013-04-03  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/mi-traceframe-changed.exp: Update tfile name to
