@@ -1,3 +1,14 @@
+2013-04-04  Stan Shebs  <stan@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/Makefile.in (PROGS): Add actions-changed.
+	* gdb.trace/actions-changed.c: New file.
+	* gdb.trace/actions-changed.exp: New file.
+	* lib/trace-support.exp (gdb_trace_setactions): Rename to ...
+	(gdb_trace_setactions_command): ... this.  Add "actions_command"
+	parameter, and handle it.
+	(gdb_trace_setactions, gdb_trace_setcommands): New procedures.
+
 2013-04-04  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.server/server-kill.exp: Use command 'tstatus' instead of
