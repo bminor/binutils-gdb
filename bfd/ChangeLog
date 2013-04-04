@@ -1,3 +1,9 @@
+2013-04-04  Alan Modra  <amodra@gmail.com>
+
+	* bfd.c (bfd_error_type, bfd_errmsgs): Add bfd_error_missing_dso.
+	* bfd-in2.h: Regenerate.
+	* elflink.c (elf_link_add_object_symbols): Use new error.
+
 2013-04-03  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-v850.c (v850_elf_is_target_special_symbol): New function.

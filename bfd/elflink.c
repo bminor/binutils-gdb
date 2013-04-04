@@ -4443,11 +4443,7 @@ error_free_dyn:
 		  (*_bfd_error_handler)
 		    (_("%B: undefined reference to symbol '%s'"),
 		     old_bfd, name);
-		  (*_bfd_error_handler)
-		    (_("note: '%s' is defined in DSO %B"
-		       " so try adding it to the linker command line"),
-		     abfd, name);
-		  bfd_set_error (bfd_error_invalid_operation);
+		  bfd_set_error (bfd_error_missing_dso);
 		  goto error_free_vers;
 		}
 
