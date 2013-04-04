@@ -361,14 +361,14 @@ run_ld_link_exec_tests [list "*-*-netbsdelf*"] $run_tests
 # Check --no-add-needed and --no-copy-dt-needed-entries
 set testname "--no-add-needed"
 set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag tmpdir/libneeded1c.o -Wl,--no-add-needed,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
-if { [ regexp "'bar' is defined in DSO tmpdir/libneeded1b.so" $exec_output ] } {
+if { [ regexp "tmpdir/libneeded1b.so: .*: DSO missing" $exec_output ] } {
     pass $testname
 } {
     fail $testname
 }
 set testname "--no-copy-dt-needed-entries"
 set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag tmpdir/libneeded1c.o -Wl,--no-copy-dt-needed-entries,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
-if { [ regexp "'bar' is defined in DSO tmpdir/libneeded1b.so" $exec_output ] } {
+if { [ regexp "tmpdir/libneeded1b.so: .*: DSO missing" $exec_output ] } {
     pass $testname
 } {
     fail $testname
