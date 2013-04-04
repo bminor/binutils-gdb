@@ -1815,19 +1815,21 @@ Sized_relobj_file<size, big_endian>::do_layout_deferred_sections(Layout* layout)
        ++deferred)
     {
       typename This::Shdr shdr(deferred->shdr_data_);
-      // If the section is not included, it is because the garbage collector
-      // decided it is not needed.  Avoid reverting that decision.
-      if (!this->is_section_included(deferred->shndx_))
-	continue;
 
-      if (parameters->options().relocatable()
-	  || deferred->name_ != ".eh_frame"
-	  || !this->check_eh_frame_flags(&shdr))
-	this->layout_section(layout, deferred->shndx_, deferred->name_.c_str(),
-			     shdr, deferred->reloc_shndx_,
-			     deferred->reloc_type_);
-      else
+      if (!parameters->options().relocatable()
+	  && deferred->name_ == ".eh_frame"
+	  && this->check_eh_frame_flags(&shdr))
 	{
+	  // Checking is_section_included is not reliable for
+	  // .eh_frame sections, because they do not have an output
+	  // section.  This is not a problem normally because we call
+	  // layout_eh_frame_section unconditionally, but when
+	  // deferring sections that is not true.  We don't want to
+	  // keep all .eh_frame sections because that will cause us to
+	  // keep all sections that they refer to, which is the wrong
+	  // way around.  Instead, the eh_frame code will discard
+	  // .eh_frame sections that refer to discarded sections.
+
 	  // Reading the symbols again here may be slow.
 	  Read_symbols_data sd;
 	  this->read_symbols(&sd);
@@ -1840,7 +1842,17 @@ Sized_relobj_file<size, big_endian>::do_layout_deferred_sections(Layout* layout)
 					shdr,
 					deferred->reloc_shndx_,
 					deferred->reloc_type_);
+	  continue;
 	}
+
+      // If the section is not included, it is because the garbage collector
+      // decided it is not needed.  Avoid reverting that decision.
+      if (!this->is_section_included(deferred->shndx_))
+	continue;
+
+      this->layout_section(layout, deferred->shndx_, deferred->name_.c_str(),
+			   shdr, deferred->reloc_shndx_,
+			   deferred->reloc_type_);
     }
 
   this->deferred_layout_.clear();

@@ -1,3 +1,9 @@
+2013-04-04  Ian Lance Taylor  <iant@google.com>
+
+	GCC PR c++/56840
+	* object.cc (do_layout_deferred_sections): Handle .eh_frame
+	sections before checking whether they are included in the link.
+
 2013-03-29  Sriraman Tallam  <tmsriram@google.com>
 
 	* archive.cc (Archive::get_elf_object_for_member):  Create the elf
