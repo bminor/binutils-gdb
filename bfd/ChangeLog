@@ -1,3 +1,7 @@
+2013-04-05  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (elf_link_add_object_symbols): Revert accidental commit.
+
 2013-04-04  Alan Modra  <amodra@gmail.com>
 
 	* bfd.c (bfd_error_type, bfd_errmsgs): Add bfd_error_missing_dso.
