@@ -720,20 +720,30 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 	       line = strtok (NULL, "\n"))
 	    {
 	      char keyword[64 + 1];
-	      unsigned long number;
 
-	      if (sscanf (line, "%64s%lu kB\n", keyword, &number) != 2)
+	      if (sscanf (line, "%64s", keyword) != 1)
 		{
 		  warning (_("Error parsing {s,}maps file '%s'"), mapsfilename);
 		  break;
 		}
 	      if (strcmp (keyword, "Anonymous:") == 0)
 		has_anonymous = 1;
-	      if (number != 0 && (strcmp (keyword, "Shared_Dirty:") == 0
-				  || strcmp (keyword, "Private_Dirty:") == 0
-				  || strcmp (keyword, "Swap:") == 0
-				  || strcmp (keyword, "Anonymous:") == 0))
-		modified = 1;
+	      if (strcmp (keyword, "Shared_Dirty:") == 0
+		  || strcmp (keyword, "Private_Dirty:") == 0
+		  || strcmp (keyword, "Swap:") == 0
+		  || strcmp (keyword, "Anonymous:") == 0)
+		{
+		  unsigned long number;
+
+		  if (sscanf (line, "%*s%lu", &number) != 1)
+		    {
+		      warning (_("Error parsing {s,}maps file '%s' number"),
+			       mapsfilename);
+		      break;
+		    }
+		  if (number != 0)
+		    modified = 1;
+		}
 	    }
 
 	  /* Older Linux kernels did not support the "Anonymous:" counter.
