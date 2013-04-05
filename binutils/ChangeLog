@@ -1,3 +1,11 @@
+2013-04-05  Alan Modra  <amodra@gmail.com>
+
+	PR binutils/15324
+	* configure.in: Add strnlen to AC_CHECK_DECLS, sort.
+	* dwarf.c (strnlen): Provide fallback decl.
+	* config.in: Regnerate.
+	* configure: Regenerate.
+
 2013-03-29  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (process_debug_info): Increment hdrptr by 8 after
