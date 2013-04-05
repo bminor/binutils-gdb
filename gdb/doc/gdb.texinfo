@@ -16718,8 +16718,9 @@ section name and base address for that section.  You can specify any
 The symbol table of the file @var{filename} is added to the symbol table
 originally read with the @code{symbol-file} command.  You can use the
 @code{add-symbol-file} command any number of times; the new symbol data
-thus read keeps adding to the old.  To discard all old symbol data
-instead, use the @code{symbol-file} command without any arguments.
+thus read is kept in addition to the old.
+
+Changes can be reverted using the command @code{remove-symbol-file}.
 
 @cindex relocatable object files, reading symbols from
 @cindex object files, relocatable, reading symbols from
@@ -16756,6 +16757,27 @@ as linking the relocatable object file into the program in the normal
 way.
 
 @code{add-symbol-file} does not repeat if you press @key{RET} after using it.
+
+@kindex remove-symbol-file
+@item remove-symbol-file @var{filename}
+@item remove-symbol-file -a @var{address}
+Remove a symbol file added via the @code{add-symbol-file} command.  The
+file to remove can be identified by its @var{filename} or by an @var{address}
+that lies within the boundaries of this symbol file in memory.  Example:
+
+@smallexample
+(gdb) add-symbol-file /home/user/gdb/mylib.so 0x7ffff7ff9480
+add symbol table from file "/home/user/gdb/mylib.so" at
+    .text_addr = 0x7ffff7ff9480
+(y or n) y
+Reading symbols from /home/user/gdb/mylib.so...done.
+(gdb) remove-symbol-file -a 0x7ffff7ff9480
+Remove symbol table from file "/home/user/gdb/mylib.so"? (y or n) y
+(gdb)
+@end smallexample
+
+
+@code{remove-symbol-file} does not repeat if you press @key{RET} after using it.
 
 @kindex add-symbol-file-from-memory
 @cindex @code{syscall DSO}

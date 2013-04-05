@@ -74,6 +74,12 @@ maint set|show per-command time
 maint set|show per-command symtab
   Enable display of per-command gdb resource usage.
 
+remove-symbol-file FILENAME
+remove-symbol-file -a ADDRESS
+  Remove a symbol file added via add-symbol-file.  The file to remove
+  can be identified by its filename or by an address that lies within
+  the boundaries of this symbol file in memory.
+
 * New options
 
 set debug symfile off|on
