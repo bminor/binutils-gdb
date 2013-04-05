@@ -1,3 +1,10 @@
+2013-04-05  Eli Zaretskii  <eliz@gnu.org>
+
+	* Makefile.in (TAGS): Avoid warning from etags when $GDB_NM_FILE is
+	empty.  See http://sourceware.org/ml/gdb-patches/2012-08/msg00504.html
+	and http://sourceware.org/ml/gdb-patches/2013-04/msg00055.html for
+	details of the problem.
+
 2013-04-04  Pedro Alves  <palves@redhat.com>
 	    Hui Zhu  <hui@codesourcery.com>
 

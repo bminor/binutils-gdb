@@ -1208,7 +1208,7 @@ gdb1$(EXEEXT): gdb$(EXEEXT)
 GDB_NM_FILE = @GDB_NM_FILE@
 TAGS: $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 	@echo Making TAGS
-	@etags $(srcdir)/$(GDB_NM_FILE) \
+	etags `(test -n "$(GDB_NM_FILE)" && echo "$(srcdir)/$(GDB_NM_FILE)")` \
 	`(for i in $(DEPFILES) $(TAGFILES_NO_SRCDIR); do \
 		echo $(srcdir)/$$i ; \
 	done ; for i in $(TAGFILES_WITH_SRCDIR); do \
