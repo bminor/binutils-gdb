@@ -1,5 +1,10 @@
 2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.texinfo (gdb man): Mention option -p.  Include Fortran to
+	the list of supported languages.
+
+2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Convert man pages to texinfo, new gdbinit.5 texinfo page.
 	* Makefile.in (mandir, man1dir, man5dir, SYSTEM_GDBINIT, MANCONF,
 	(TEXI2POD, POD2MAN1, POD2MAN5, MAN1S, MAN5S, MANS, man): New.

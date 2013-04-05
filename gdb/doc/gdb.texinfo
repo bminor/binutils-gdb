@@ -41623,8 +41623,9 @@ gdb [@option{-help}] [@option{-nh}] [@option{-nx}] [@option{-q}]
 [@option{-b}@w{ }@var{bps}]
     [@option{-tty=}@var{dev}] [@option{-s} @var{symfile}]
 [@option{-e}@w{ }@var{prog}] [@option{-se}@w{ }@var{prog}]
-[@option{-c}@w{ }@var{core}] [@option{-x}@w{ }@var{cmds}]
-    [@option{-d}@w{ }@var{dir}] [@var{prog}|@var{core}|@var{procID}]
+[@option{-c}@w{ }@var{core}] [@option{-p}@w{ }@var{procID}]
+    [@option{-x}@w{ }@var{cmds}] [@option{-d}@w{ }@var{dir}]
+[@var{prog}|@var{prog} @var{procID}|@var{prog} @var{core}]
 @c man end
 
 @c man begin DESCRIPTION gdb
@@ -41650,8 +41651,8 @@ Change things in your program, so you can experiment with correcting the
 effects of one bug and go on to learn about another.
 @end itemize
 
-You can use @value{GDBN} to debug programs written in C, C@t{++}, and Modula-2.
-Fortran support will be added when a GNU Fortran compiler is ready.
+You can use @value{GDBN} to debug programs written in C, C@t{++}, Fortran and
+Modula-2.
 
 @value{GDBN} is invoked with the shell command @code{gdb}.  Once started, it reads
 commands from the terminal until you tell it to exit with the @value{GDBN}
@@ -41677,11 +41678,13 @@ to debug a running process:
 
 @smallexample
 gdb program 1234
+gdb -p 1234
 @end smallexample
 
 @noindent
 would attach @value{GDBN} to process @code{1234} (unless you also have a file
 named @file{1234}; @value{GDBN} does check for a core file first).
+With option @option{-p} you can omit the @var{program} filename.
 
 Here are some of the most frequently needed @value{GDBN} commands:
 
