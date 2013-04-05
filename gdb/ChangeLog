@@ -1,5 +1,12 @@
 2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Fix compatibility with Linux kernel 3.8.3.
+	* linux-tdep.c (linux_find_memory_regions_full): Move variable number
+	to more inner block.  Remove parsing of NUMBER from outer block.
+	Parse NUMBER only if KEYWORD has been identified.
+
+2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix variable name shadowing.
 	* linux-tdep.c (linux_find_memory_regions_full): Rename outer variable
 	filename to mapsfilename and update its uses.
