@@ -6,7 +6,9 @@
 @c of @set vars.  However, you can override filename with makeinfo -o.
 @setfilename gdb.info
 @c
+@c man begin INCLUDE
 @include gdb-cfg.texi
+@c man end
 @c
 @settitle Debugging with @value{GDBN}
 @setchapternewpage odd
@@ -46,6 +48,7 @@
 @end direntry
 
 @copying
+@c man begin COPYRIGHT
 Copyright @copyright{} 1988-2013 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
@@ -58,6 +61,7 @@ and with the Back-Cover Texts as in (a) below.
 (a) The FSF's Back-Cover Text is: ``You are free to copy and modify
 this GNU Manual.  Buying copies from GNU Press supports the FSF in
 developing GNU and promoting software freedom.''
+@c man end
 @end copying
 
 @ifnottex
@@ -179,6 +183,7 @@ software in general.  We will miss him.
                                  the operating system
 * Trace File Format::		GDB trace file format
 * Index Section Format::        .gdb_index section format
+* Man Pages::			Manual pages
 * Copying::			GNU General Public License says
                                 how you can copy and share GDB
 * GNU Free Documentation License::  The license for this documentation
@@ -41596,6 +41601,497 @@ switch (die->tag)
     assert (0);
   @}
 @end smallexample
+
+@node Man Pages
+@appendix Manual pages
+@cindex Man pages
+
+@menu
+* gdb man::                     The GNU Debugger man page
+* gdbserver man::               Remote Server for the GNU Debugger man page
+* gdbinit man::                 gdbinit scripts
+@end menu
+
+@node gdb man
+@heading gdb man
+
+@c man title gdb The GNU Debugger
+
+@c man begin SYNOPSIS gdb
+gdb [@option{-help}] [@option{-nh}] [@option{-nx}] [@option{-q}]
+[@option{-batch}] [@option{-cd=}@var{dir}] [@option{-f}]
+[@option{-b}@w{ }@var{bps}]
+    [@option{-tty=}@var{dev}] [@option{-s} @var{symfile}]
+[@option{-e}@w{ }@var{prog}] [@option{-se}@w{ }@var{prog}]
+[@option{-c}@w{ }@var{core}] [@option{-x}@w{ }@var{cmds}]
+    [@option{-d}@w{ }@var{dir}] [@var{prog}|@var{core}|@var{procID}]
+@c man end
+
+@c man begin DESCRIPTION gdb
+The purpose of a debugger such as @value{GDBN} is to allow you to see what is
+going on ``inside'' another program while it executes -- or what another
+program was doing at the moment it crashed.
+
+@value{GDBN} can do four main kinds of things (plus other things in support of
+these) to help you catch bugs in the act:
+
+@itemize @bullet
+@item
+Start your program, specifying anything that might affect its behavior.
+
+@item
+Make your program stop on specified conditions.
+
+@item
+Examine what has happened, when your program has stopped.
+
+@item
+Change things in your program, so you can experiment with correcting the
+effects of one bug and go on to learn about another.
+@end itemize
+
+You can use @value{GDBN} to debug programs written in C, C@t{++}, and Modula-2.
+Fortran support will be added when a GNU Fortran compiler is ready.
+
+@value{GDBN} is invoked with the shell command @code{gdb}.  Once started, it reads
+commands from the terminal until you tell it to exit with the @value{GDBN}
+command @code{quit}.  You can get online help from @value{GDBN} itself
+by using the command @code{help}.
+
+You can run @code{gdb} with no arguments or options; but the most
+usual way to start @value{GDBN} is with one argument or two, specifying an
+executable program as the argument:
+
+@smallexample
+gdb program
+@end smallexample
+
+You can also start with both an executable program and a core file specified:
+
+@smallexample
+gdb program core
+@end smallexample
+
+You can, instead, specify a process ID as a second argument, if you want
+to debug a running process:
+
+@smallexample
+gdb program 1234
+@end smallexample
+
+@noindent
+would attach @value{GDBN} to process @code{1234} (unless you also have a file
+named @file{1234}; @value{GDBN} does check for a core file first).
+
+Here are some of the most frequently needed @value{GDBN} commands:
+
+@c pod2man highlights the right hand side of the @item lines.
+@table @env
+@item break [@var{file}:]@var{functiop}
+Set a breakpoint at @var{function} (in @var{file}).
+
+@item run [@var{arglist}]
+Start your program (with @var{arglist}, if specified).
+
+@item bt
+Backtrace: display the program stack.
+
+@item print @var{expr}
+Display the value of an expression.
+
+@item c
+Continue running your program (after stopping, e.g. at a breakpoint).
+
+@item next
+Execute next program line (after stopping); step @emph{over} any
+function calls in the line.
+
+@item edit [@var{file}:]@var{function}
+look at the program line where it is presently stopped.
+
+@item list [@var{file}:]@var{function}
+type the text of the program in the vicinity of where it is presently stopped.
+
+@item step
+Execute next program line (after stopping); step @emph{into} any
+function calls in the line.
+
+@item help [@var{name}]
+Show information about @value{GDBN} command @var{name}, or general information
+about using @value{GDBN}.
+
+@item quit
+Exit from @value{GDBN}.
+@end table
+
+@ifset man
+For full details on @value{GDBN},
+see @cite{Using GDB: A Guide to the GNU Source-Level Debugger},
+by Richard M. Stallman and Roland H. Pesch.  The same text is available online
+as the @code{gdb} entry in the @code{info} program.
+@end ifset
+@c man end
+
+@c man begin OPTIONS gdb
+Any arguments other than options specify an executable
+file and core file (or process ID); that is, the first argument
+encountered with no
+associated option flag is equivalent to a @option{-se} option, and the second,
+if any, is equivalent to a @option{-c} option if it's the name of a file.
+Many options have
+both long and short forms; both are shown here.  The long forms are also
+recognized if you truncate them, so long as enough of the option is
+present to be unambiguous.  (If you prefer, you can flag option
+arguments with @option{+} rather than @option{-}, though we illustrate the
+more usual convention.)
+
+All the options and command line arguments you give are processed
+in sequential order.  The order makes a difference when the @option{-x}
+option is used.
+
+@table @env
+@item -help
+@itemx -h
+List all options, with brief explanations.
+
+@item -symbols=@var{file}
+@itemx -s @var{file}
+Read symbol table from file @var{file}.
+
+@item -write
+Enable writing into executable and core files.
+
+@item -exec=@var{file}
+@itemx -e @var{file}
+Use file @var{file} as the executable file to execute when
+appropriate, and for examining pure data in conjunction with a core
+dump.
+
+@item -se=@var{file}
+Read symbol table from file @var{file} and use it as the executable
+file.
+
+@item -core=@var{file}
+@itemx -c @var{file}
+Use file @var{file} as a core dump to examine.
+
+@item -command=@var{file}
+@itemx -x @var{file}
+Execute @value{GDBN} commands from file @var{file}.
+
+@item -ex @var{command}
+Execute given @value{GDBN} @var{command}.
+
+@item -directory=@var{directory}
+@itemx -d @var{directory}
+Add @var{directory} to the path to search for source files.
+
+@item -nh
+Do not execute commands from @file{~/.gdbinit}.
+
+@item -nx
+@itemx -n
+Do not execute commands from any @file{.gdbinit} initialization files.
+
+@item -quiet
+@itemx -q
+``Quiet''.  Do not print the introductory and copyright messages.  These
+messages are also suppressed in batch mode.
+
+@item -batch
+Run in batch mode.  Exit with status @code{0} after processing all the command
+files specified with @option{-x} (and @file{.gdbinit}, if not inhibited).
+Exit with nonzero status if an error occurs in executing the @value{GDBN}
+commands in the command files.
+
+Batch mode may be useful for running @value{GDBN} as a filter, for example to
+download and run a program on another computer; in order to make this
+more useful, the message
+
+@smallexample
+Program exited normally.
+@end smallexample
+
+@noindent
+(which is ordinarily issued whenever a program running under @value{GDBN} control
+terminates) is not issued when running in batch mode.
+
+@item -cd=@var{directory}
+Run @value{GDBN} using @var{directory} as its working directory,
+instead of the current directory.
+
+@item -fullname
+@itemx -f
+Emacs sets this option when it runs @value{GDBN} as a subprocess.  It tells
+@value{GDBN} to output the full file name and line number in a standard,
+recognizable fashion each time a stack frame is displayed (which
+includes each time the program stops).  This recognizable format looks
+like two @samp{\032} characters, followed by the file name, line number
+and character position separated by colons, and a newline.  The
+Emacs-to-@value{GDBN} interface program uses the two @samp{\032}
+characters as a signal to display the source code for the frame.
+
+@item -b @var{bps}
+Set the line speed (baud rate or bits per second) of any serial
+interface used by @value{GDBN} for remote debugging.
+
+@item -tty=@var{device}
+Run using @var{device} for your program's standard input and output.
+@end table
+@c man end
+
+@c man begin SEEALSO gdb
+@ifset man
+The full documentation for @value{GDBN} is maintained as a Texinfo manual.
+If the @code{info} and @code{gdb} programs and @value{GDBN}'s Texinfo
+documentation are properly installed at your site, the command
+
+@smallexample
+info gdb
+@end smallexample
+
+@noindent
+should give you access to the complete manual.
+
+@cite{Using GDB: A Guide to the GNU Source-Level Debugger},
+Richard M. Stallman and Roland H. Pesch, July 1991.
+@end ifset
+@c man end
+
+@node gdbserver man
+@heading gdbserver man
+
+@c man title gdbserver Remote Server for the GNU Debugger
+@format
+@c man begin SYNOPSIS gdbserver
+gdbserver @var{tty} @var{prog} [@var{args}@dots{}]
+
+gdbserver @var{tty} --attach @var{PID}
+@c man end
+@end format
+
+@c man begin DESCRIPTION gdbserver
+@command{gdbserver} is a program that allows you to run @value{GDBN} on a different machine
+than the one which is running the program being debugged.
+
+@ifclear man
+@subheading Usage (server (target) side)
+@end ifclear
+@ifset man
+Usage (server (target) side):
+@end ifset
+
+First, you need to have a copy of the program you want to debug put onto
+the target system.  The program can be stripped to save space if needed, as
+@command{gdbserver} doesn't care about symbols.  All symbol handling is taken care of by
+the @value{GDBN} running on the host system.
+
+To use the server, you log on to the target system, and run the @command{gdbserver}
+program.  You must tell it (a) how to communicate with @value{GDBN}, (b) the name of
+your program, and (c) its arguments.  The general syntax is:
+
+@smallexample
+target> gdbserver @var{comm} @var{program} [@var{args} ...]
+@end smallexample
+
+For example, using a serial port, you might say:
+
+@smallexample
+@ifset man
+@c @file would wrap it as F</dev/com1>.
+target> gdbserver /dev/com1 emacs foo.txt
+@end ifset
+@ifclear man
+target> gdbserver @file{/dev/com1} emacs foo.txt
+@end ifclear
+@end smallexample
+
+This tells @command{gdbserver} to debug emacs with an argument of foo.txt, and
+to communicate with @value{GDBN} via @file{/dev/com1}.  @command{gdbserver} now
+waits patiently for the host @value{GDBN} to communicate with it.
+
+To use a TCP connection, you could say:
+
+@smallexample
+target> gdbserver host:2345 emacs foo.txt
+@end smallexample
+
+This says pretty much the same thing as the last example, except that we are
+going to communicate with the @code{host} @value{GDBN} via TCP.  The @code{host:2345} argument means
+that we are expecting to see a TCP connection from @code{host} to local TCP port
+2345.  (Currently, the @code{host} part is ignored.)  You can choose any number you
+want for the port number as long as it does not conflict with any existing TCP
+ports on the target system.  This same port number must be used in the host
+@value{GDBN}s @code{target remote} command, which will be described shortly.  Note that if
+you chose a port number that conflicts with another service, @command{gdbserver} will
+print an error message and exit.
+
+On some targets, @command{gdbserver} can also attach to running programs.
+This is accomplished via the @option{--attach} argument.  The syntax is:
+
+@smallexample
+target> gdbserver @var{comm} --attach @var{pid}
+@end smallexample
+
+@var{pid} is the process ID of a currently running process.  It isn't
+necessary to point @command{gdbserver} at a binary for the running process.
+
+@ifclear man
+@subheading Usage (host side)
+@end ifclear
+@ifset man
+Usage (host side):
+@end ifset
+
+You need an unstripped copy of the target program on your host system, since
+@value{GDBN} needs to examine it's symbol tables and such.  Start up @value{GDBN} as you normally
+would, with the target program as the first argument.  (You may need to use the
+@option{--baud} option if the serial line is running at anything except 9600 baud.)
+That is @code{gdb TARGET-PROG}, or @code{gdb --baud BAUD TARGET-PROG}.  After that, the only
+new command you need to know about is @code{target remote}.  It's argument is either
+a device name (usually a serial device, like @file{/dev/ttyb}), or a @code{HOST:PORT}
+descriptor.  For example:
+
+@smallexample
+@ifset man
+@c @file would wrap it as F</dev/ttyb>.
+(gdb) target remote /dev/ttyb
+@end ifset
+@ifclear man
+(gdb) target remote @file{/dev/ttyb}
+@end ifclear
+@end smallexample
+
+@noindent
+communicates with the server via serial line @file{/dev/ttyb}, and:
+
+@smallexample
+(gdb) target remote the-target:2345
+@end smallexample
+
+@noindent
+communicates via a TCP connection to port 2345 on host `the-target', where
+you previously started up @command{gdbserver} with the same port number.  Note that for
+TCP connections, you must start up @command{gdbserver} prior to using the `target remote'
+command, otherwise you may get an error that looks something like
+`Connection refused'.
+@c man end
+
+@c man begin OPTIONS gdbserver
+You have to supply the name of the program to debug
+and the tty to communicate on; the remote @value{GDBN} will do everything else.
+Any remaining arguments will be passed to the program verbatim.
+@c man end
+
+@c man begin SEEALSO gdbserver
+@ifset man
+The full documentation for @value{GDBN} is maintained as a Texinfo manual.
+If the @code{info} and @code{gdb} programs and @value{GDBN}'s Texinfo
+documentation are properly installed at your site, the command
+
+@smallexample
+info gdb
+@end smallexample
+
+should give you access to the complete manual.
+
+@cite{Using GDB: A Guide to the GNU Source-Level Debugger},
+Richard M. Stallman and Roland H. Pesch, July 1991.
+@end ifset
+@c man end
+
+@node gdbinit man
+@heading gdbinit
+
+@c man title gdbinit GDB initialization scripts
+
+@format
+@c man begin SYNOPSIS gdbinit
+@ifset SYSTEM_GDBINIT
+@value{SYSTEM_GDBINIT}
+@end ifset
+
+~/.gdbinit
+
+./.gdbinit
+@c man end
+@end format
+
+@c man begin DESCRIPTION gdbinit
+These files contain @value{GDBN} commands to automatically execute during
+@value{GDBN} startup.  The lines of contents are canned sequences of commands,
+described in
+@ifset man
+the @value{GDBN} manual in node @code{Sequences}
+-- shell command @code{info -f gdb -n Sequences}.
+@end ifset
+@ifclear man
+@ref{Sequences}.
+@end ifclear
+
+Please read more in
+@ifset man
+the @value{GDBN} manual in node @code{Startup}
+-- shell command @code{info -f gdb -n Startup}.
+@end ifset
+@ifclear man
+@ref{Startup}.
+@end ifclear
+
+@table @env
+@ifset SYSTEM_GDBINIT
+@item @value{SYSTEM_GDBINIT}
+@end ifset
+@ifclear SYSTEM_GDBINIT
+@item (not enabled with @code{--with-system-gdbinit} during compilation)
+@end ifclear
+System-wide initialization file.  It is executed unless user specified
+@value{GDBN} option @code{-nx} or @code{-n}.
+See more in
+@ifset man
+the @value{GDBN} manual in node @code{System-wide configuration}
+-- shell command @code{info -f gdb -n 'System-wide configuration'}.
+@end ifset
+@ifclear man
+@ref{System-wide configuration}.
+@end ifclear
+
+@item ~/.gdbinit
+User initialization file.  It is executed unless user specified
+@value{GDBN} options @code{-nx}, @code{-n} or @code{-nh}.
+
+@item ./.gdbinit
+Initialization file for current directory.  It may need to be enabled with
+@value{GDBN} security command @code{set auto-load local-gdbinit}.
+See more in
+@ifset man
+the @value{GDBN} manual in node @code{Init File in the Current Directory}
+-- shell command @code{info -f gdb -n 'Init File in the Current Directory'}.
+@end ifset
+@ifclear man
+@ref{Init File in the Current Directory}.
+@end ifclear
+@end table
+@c man end
+
+@c man begin SEEALSO gdbinit
+@ifset man
+gdb(1), @code{info -f gdb -n Startup}
+
+The full documentation for @value{GDBN} is maintained as a Texinfo manual.
+If the @code{info} and @code{gdb} programs and @value{GDBN}'s Texinfo
+documentation are properly installed at your site, the command
+
+@smallexample
+info gdb
+@end smallexample
+
+should give you access to the complete manual.
+
+@cite{Using GDB: A Guide to the GNU Source-Level Debugger},
+Richard M. Stallman and Roland H. Pesch, July 1991.
+@end ifset
+@c man end
 
 @include gpl.texi
 

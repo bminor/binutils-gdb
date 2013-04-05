@@ -1,5 +1,12 @@
 2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Convert man pages to texinfo, new gdbinit.5 texinfo page.
+	* Makefile.in (gdb.z): Remove.
+	(install-only): Remove $(man1dir) and gdb.1 installation.
+	* gdb.1: Remove.
+
+2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix compatibility with Linux kernel 3.8.3.
 	* linux-tdep.c (linux_find_memory_regions_full): Move variable number
 	to more inner block.  Remove parsing of NUMBER from outer block.

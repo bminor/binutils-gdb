@@ -1,3 +1,10 @@
+2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Convert man pages to texinfo, new gdbinit.5 texinfo page.
+	* Makefile.in (install-only): Remove $(man1dir) and gdbserver.1
+	installation.
+	* gdbserver.1: Remove.
+
 2013-03-22  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (handle_extended_wait): Don't call

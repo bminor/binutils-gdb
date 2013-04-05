@@ -1,3 +1,22 @@
+2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Convert man pages to texinfo, new gdbinit.5 texinfo page.
+	* Makefile.in (mandir, man1dir, man5dir, SYSTEM_GDBINIT, MANCONF,
+	(TEXI2POD, POD2MAN1, POD2MAN5, MAN1S, MAN5S, MANS, man): New.
+	(diststuff): Add man.
+	(install-man, install-man1, install-man5, uninstall-man, uninstall-man1)
+	(uninstall-man5): New.
+	(STAGESTUFF): Add *.1 and *.5.
+	(GDBvn.texi): Add SYSTEM_GDBINIT.
+	(gdb.1, gdbserver.1, gdbinit.5): New.
+	(maintainer-clean realclean): Add $(MANS).
+	(install): Add install-man.
+	(uninstall): Add uninstall-man.
+	* gdb.texinfo (@include gdb-cfg.texi): Wrap it by @c man begin INCLUDE.
+	(@copying): Wrap it by @c man begin COPYRIGHT.
+	(Top): Add Man Pages.
+	(Man Pages, gdb man, gdbserver man, gdbinit man): New.
+
 2013-04-02  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Debugging Output): Document "set/show debug
