@@ -1,3 +1,9 @@
+2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix variable name shadowing.
+	* linux-tdep.c (linux_find_memory_regions_full): Rename outer variable
+	filename to mapsfilename and update its uses.
+
 2013-04-05  Eli Zaretskii  <eliz@gnu.org>
 
 	* Makefile.in (TAGS): Avoid warning from etags when $GDB_NM_FILE is

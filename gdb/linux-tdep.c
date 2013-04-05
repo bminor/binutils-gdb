@@ -675,22 +675,22 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 				linux_find_memory_region_ftype *func,
 				void *obfd)
 {
-  char filename[100];
+  char mapsfilename[100];
   gdb_byte *data;
 
   /* We need to know the real target PID to access /proc.  */
   if (current_inferior ()->fake_pid_p)
     return 1;
 
-  xsnprintf (filename, sizeof filename,
+  xsnprintf (mapsfilename, sizeof mapsfilename,
 	     "/proc/%d/smaps", current_inferior ()->pid);
-  data = target_fileio_read_stralloc (filename);
+  data = target_fileio_read_stralloc (mapsfilename);
   if (data == NULL)
     {
       /* Older Linux kernels did not support /proc/PID/smaps.  */
-      xsnprintf (filename, sizeof filename,
+      xsnprintf (mapsfilename, sizeof mapsfilename,
 		 "/proc/%d/maps", current_inferior ()->pid);
-      data = target_fileio_read_stralloc (filename);
+      data = target_fileio_read_stralloc (mapsfilename);
     }
   if (data)
     {
@@ -724,7 +724,7 @@ linux_find_memory_regions_full (struct gdbarch *gdbarch,
 
 	      if (sscanf (line, "%64s%lu kB\n", keyword, &number) != 2)
 		{
-		  warning (_("Error parsing {s,}maps file '%s'"), filename);
+		  warning (_("Error parsing {s,}maps file '%s'"), mapsfilename);
 		  break;
 		}
 	      if (strcmp (keyword, "Anonymous:") == 0)
