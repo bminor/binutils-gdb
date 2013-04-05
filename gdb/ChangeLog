@@ -1,3 +1,11 @@
+2013-04-05  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (struct dwarf2_per_objfile): Tweak comment.
+	(read_cutu_die_from_dwo): Add comments.
+	(read_structure_type): Update comment.
+	(read_enumeration_type, read_namespace_type): Update comment.
+	(read_die_type, get_die_type_at_offset, get_die_type): Update comment.
+
 2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Convert man pages to texinfo, new gdbinit.5 texinfo page.

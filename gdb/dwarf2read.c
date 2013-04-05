@@ -273,7 +273,7 @@ struct dwarf2_per_objfile
 
   /* Table mapping type DIEs to their struct type *.
      This is NULL if not allocated yet.
-     The mapping is done via (CU/TU signature + DIE offset) -> type.  */
+     The mapping is done via (CU/TU + DIE offset) -> type.  */
   htab_t die_type_hash;
 
   /* The CUs we recently read.  */
@@ -4526,18 +4526,21 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
       dwo_unit->length = get_cu_length (&cu->header);
     }
 
-  /* Replace the CU's original abbrev table with the DWO's.  */
+  /* Replace the CU's original abbrev table with the DWO's.
+     Reminder: We can't read the abbrev table until we've read the header.  */
   if (abbrev_table_provided)
     {
       /* Don't free the provided abbrev table, the caller of
 	 init_cutu_and_read_dies owns it.  */
       dwarf2_read_abbrevs (cu, dwo_abbrev_section);
+      /* Ensure the DWO abbrev table gets freed.  */
       make_cleanup (dwarf2_free_abbrev_table, cu);
     }
   else
     {
       dwarf2_free_abbrev_table (cu);
       dwarf2_read_abbrevs (cu, dwo_abbrev_section);
+      /* Leave any existing abbrev table cleanup as is.  */
     }
 
   /* Read in the die, but leave space to copy over the attributes
@@ -11378,7 +11381,7 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
       type = read_type_die (type_die, type_cu);
 
       /* TYPE_CU may not be the same as CU.
-	 Ensure TYPE is recorded in CU's type_hash table.  */
+	 Ensure TYPE is recorded with CU in die_type_hash.  */
       return set_die_type (die, type, cu);
     }
 
@@ -11701,7 +11704,7 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
       type = read_type_die (type_die, type_cu);
 
       /* TYPE_CU may not be the same as CU.
-	 Ensure TYPE is recorded in CU's type_hash table.  */
+	 Ensure TYPE is recorded with CU in die_type_hash.  */
       return set_die_type (die, type, cu);
     }
 
@@ -12203,7 +12206,7 @@ read_namespace_type (struct die_info *die, struct dwarf2_cu *cu)
       type = read_type_die (ext_die, ext_cu);
 
       /* EXT_CU may not be the same as CU.
-	 Ensure TYPE is recorded in CU's type_hash table.  */
+	 Ensure TYPE is recorded with CU in die_type_hash.  */
       return set_die_type (die, type, cu);
     }
 
@@ -16686,7 +16689,7 @@ lookup_die_type (struct die_info *die, struct attribute *attr,
 /* Return the type in DIE, CU.
    Returns NULL for invalid types.
 
-   This first does a lookup in the appropriate type_hash table,
+   This first does a lookup in die_type_hash,
    and only reads the die in if necessary.
 
    NOTE: This can be called when reading in partial or full symbols.  */
@@ -19696,8 +19699,8 @@ set_die_type (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
   return type;
 }
 
-/* Look up the type for the die at OFFSET in the appropriate type_hash
-   table, or return NULL if the die does not have a saved type.  */
+/* Look up the type for the die at OFFSET in PER_CU in die_type_hash,
+   or return NULL if the die does not have a saved type.  */
 
 static struct type *
 get_die_type_at_offset (sect_offset offset,
@@ -19717,7 +19720,7 @@ get_die_type_at_offset (sect_offset offset,
     return NULL;
 }
 
-/* Look up the type for DIE in the appropriate type_hash table,
+/* Look up the type for DIE in CU in die_type_hash,
    or return NULL if DIE does not have a saved type.  */
 
 static struct type *
