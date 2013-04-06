@@ -41867,9 +41867,11 @@ Richard M. Stallman and Roland H. Pesch, July 1991.
 @c man title gdbserver Remote Server for the GNU Debugger
 @format
 @c man begin SYNOPSIS gdbserver
-gdbserver @var{tty} @var{prog} [@var{args}@dots{}]
+gdbserver @var{comm} @var{prog} [@var{args}@dots{}]
 
-gdbserver @var{tty} --attach @var{PID}
+gdbserver --attach @var{comm} @var{pid}
+
+gdbserver --multi @var{comm}
 @c man end
 @end format
 
@@ -41929,15 +41931,24 @@ ports on the target system.  This same port number must be used in the host
 you chose a port number that conflicts with another service, @command{gdbserver} will
 print an error message and exit.
 
-On some targets, @command{gdbserver} can also attach to running programs.
+@command{gdbserver} can also attach to running programs.
 This is accomplished via the @option{--attach} argument.  The syntax is:
 
 @smallexample
-target> gdbserver @var{comm} --attach @var{pid}
+target> gdbserver --attach @var{comm} @var{pid}
 @end smallexample
 
 @var{pid} is the process ID of a currently running process.  It isn't
 necessary to point @command{gdbserver} at a binary for the running process.
+
+To start @code{gdbserver} without supplying an initial command to run
+or process ID to attach, use the @option{--multi} command line option.
+In such case you should connect using @kbd{target extended-remote} to start
+the program you want to debug.
+
+@smallexample
+target> gdbserver --multi @var{comm}
+@end smallexample
 
 @ifclear man
 @subheading Usage (host side)
@@ -41951,7 +41962,8 @@ You need an unstripped copy of the target program on your host system, since
 would, with the target program as the first argument.  (You may need to use the
 @option{--baud} option if the serial line is running at anything except 9600 baud.)
 That is @code{gdb TARGET-PROG}, or @code{gdb --baud BAUD TARGET-PROG}.  After that, the only
-new command you need to know about is @code{target remote}.  It's argument is either
+new command you need to know about is @code{target remote}
+(or @code{target extended-remote}).  Its argument is either
 a device name (usually a serial device, like @file{/dev/ttyb}), or a @code{HOST:PORT}
 descriptor.  For example:
 
@@ -41978,12 +41990,131 @@ you previously started up @command{gdbserver} with the same port number.  Note t
 TCP connections, you must start up @command{gdbserver} prior to using the `target remote'
 command, otherwise you may get an error that looks something like
 `Connection refused'.
+
+@command{gdbserver} can also debug multiple inferiors at once,
+described in
+@ifset man
+the @value{GDBN} manual in node @code{Inferiors and Programs}
+-- shell command @code{info -f gdb -n 'Inferiors and Programs'}.
+@end ifset
+@ifclear man
+@ref{Inferiors and Programs}.
+@end ifclear
+In such case use the @code{extended-remote} @value{GDBN} command variant:
+
+@smallexample
+(gdb) target extended-remote the-target:2345
+@end smallexample
+
+The @command{gdbserver} option @option{--multi} may or may not be used in such
+case.
 @c man end
 
 @c man begin OPTIONS gdbserver
-You have to supply the name of the program to debug
-and the tty to communicate on; the remote @value{GDBN} will do everything else.
-Any remaining arguments will be passed to the program verbatim.
+There are three different modes for invoking @command{gdbserver}:
+
+@itemize @bullet
+
+@item
+Debug a specific program specified by its program name:
+
+@smallexample
+gdbserver @var{comm} @var{prog} [@var{args}@dots{}]
+@end smallexample
+
+The @var{comm} parameter specifies how should the server communicate
+with @value{GDBN}; it is either a device name (to use a serial line),
+a TCP port number (@code{:1234}), or @code{-} or @code{stdio} to use
+stdin/stdout of @code{gdbserver}.  Specify the name of the program to
+debug in @var{prog}.  Any remaining arguments will be passed to the
+program verbatim.  When the program exits, @value{GDBN} will close the
+connection, and @code{gdbserver} will exit.
+
+@item
+Debug a specific program by specifying the process ID of a running
+program:
+
+@smallexample
+gdbserver --attach @var{comm} @var{pid}
+@end smallexample
+
+The @var{comm} parameter is as described above.  Supply the process ID
+of a running program in @var{pid}; @value{GDBN} will do everything
+else.  Like with the previous mode, when the process @var{pid} exits,
+@value{GDBN} will close the connection, and @code{gdbserver} will exit.
+
+@item
+Multi-process mode -- debug more than one program/process:
+
+@smallexample
+gdbserver --multi @var{comm}
+@end smallexample
+
+In this mode, @value{GDBN} can instruct @command{gdbserver} which
+command(s) to run.  Unlike the other 2 modes, @value{GDBN} will not
+close the connection when a process being debugged exits, so you can
+debug several processes in the same session.
+@end itemize
+
+In each of the modes you may specify these options:
+
+@table @env
+
+@item --help
+List all options, with brief explanations.
+
+@item --version
+This option causes @command{gdbserver} to print its version number and exit.
+
+@item --attach
+@command{gdbserver} will attach to a running program.  The syntax is:
+
+@smallexample
+target> gdbserver --attach @var{comm} @var{pid}
+@end smallexample
+
+@var{pid} is the process ID of a currently running process.  It isn't
+necessary to point @command{gdbserver} at a binary for the running process.
+
+@item --multi
+To start @code{gdbserver} without supplying an initial command to run
+or process ID to attach, use this command line option.
+Then you can connect using @kbd{target extended-remote} and start
+the program you want to debug.  The syntax is:
+
+@smallexample
+target> gdbserver --multi @var{comm}
+@end smallexample
+
+@item --debug
+Instruct @code{gdbserver} to display extra status information about the debugging
+process.
+This option is intended for @code{gdbserver} development and for bug reports to
+the developers.
+
+@item --remote-debug
+Instruct @code{gdbserver} to display remote protocol debug output.
+This option is intended for @code{gdbserver} development and for bug reports to
+the developers.
+
+@item --wrapper
+Specify a wrapper to launch programs
+for debugging.  The option should be followed by the name of the
+wrapper, then any command-line arguments to pass to the wrapper, then
+@kbd{--} indicating the end of the wrapper arguments.
+
+@item --once
+By default, @command{gdbserver} keeps the listening TCP port open, so that
+additional connections are possible.  However, if you start @code{gdbserver}
+with the @option{--once} option, it will stop listening for any further
+connection attempts after connecting to the first @value{GDBN} session.
+
+@c --disable-packet is not documented for users.
+
+@c --disable-randomization and --no-disable-randomization are superseded by
+@c QDisableRandomization.
+
+@end table
 @c man end
 
 @c man begin SEEALSO gdbserver

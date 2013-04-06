@@ -1,3 +1,11 @@
+2013-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (gdbserver man): Rename tty to comm.  Swap --attach
+	parameters order.  Remove "On some targets" for --attach.  Document the
+	--multi parameter and extended-remote command.  Document all the
+	options.
+
 2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.texinfo (gdb man): Mention option -p.  Include Fortran to
