@@ -1,3 +1,16 @@
+2013-03-23  Eli Zaretskii  <eliz@gnu.org>
+
+	* mingw-hdep.c (windows_get_absolute_argv0): New function.
+	Include main.h.
+
+	* main.h (windows_get_absolute_argv0): Add prototype.
+
+	* main.c (get_init_files): Use filename_ncmp instead of strncmp.
+	Use IS_DIR_SEPARATOR instead of looking for a character inside
+	SLASH_STRING.  Include filenames.h.
+	(captured_main) [__MINGW32__]: Make argv[0] absolute, so that
+	relocate_gdb_directory works when passed gdb_program_name.
+
 2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix compatibility with Linux kernel 3.8.3.
