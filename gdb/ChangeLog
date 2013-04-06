@@ -1,4 +1,4 @@
-2013-03-23  Eli Zaretskii  <eliz@gnu.org>
+2013-04-06  Eli Zaretskii  <eliz@gnu.org>
 
 	* mingw-hdep.c (windows_get_absolute_argv0): New function.
 	Include main.h.
