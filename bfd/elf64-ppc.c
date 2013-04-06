@@ -5456,7 +5456,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if ((info->shared
 	       && (must_be_dyn_reloc (info, r_type)
 		   || (h != NULL
-		       && (! info->symbolic
+		       && (!SYMBOLIC_BIND (info, h)
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS
@@ -7064,7 +7064,7 @@ dec_dynrel_count (bfd_vma r_info,
   if ((info->shared
        && (must_be_dyn_reloc (info, r_type)
 	   || (h != NULL
-	       && (!info->symbolic
+	       && (!SYMBOLIC_BIND (info, h)
 		   || h->root.type == bfd_link_hash_defweak
 		   || !h->def_regular))))
       || (ELIMINATE_COPY_RELOCS

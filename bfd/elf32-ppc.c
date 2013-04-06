@@ -4424,7 +4424,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	  if ((info->shared
 	       && (must_be_dyn_reloc (info, r_type)
 		   || (h != NULL
-		       && (! info->symbolic
+		       && (!SYMBOLIC_BIND (info, h)
 			   || h->root.type == bfd_link_hash_defweak
 			   || !h->def_regular))))
 	      || (ELIMINATE_COPY_RELOCS

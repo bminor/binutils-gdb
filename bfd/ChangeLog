@@ -1,3 +1,8 @@
+2013-04-06  Alan Modra  <amodra@gmail.com>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Use SYMBOLIC_BIND.
+	* elf64-ppc.c (ppc64_elf_check_relocs, dec_dynrel_count): Likewise.
+
 2013-04-05  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (elf_link_add_object_symbols): Revert accidental commit.
