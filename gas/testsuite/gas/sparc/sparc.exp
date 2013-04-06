@@ -83,6 +83,10 @@ if [istarget sparc*-*-*] {
     run_dump_test "cbcond"
     run_dump_test "pause"
     run_dump_test "cfr"
+    run_dump_test "ldtw_sttw"
+    run_dump_test "ldd_std"
+    run_dump_test "edge"
+    run_dump_test "flush"
 
     run_list_test "pr4587" ""
 }

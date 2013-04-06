@@ -338,8 +338,17 @@ compare_opcodes (const void * a, const void * b)
   i = strcmp (op0->name, op1->name);
   if (i)
     {
-      if (op0->flags & F_ALIAS) /* If they're both aliases, be arbitrary.  */
-	return i;
+      if (op0->flags & F_ALIAS)
+	{
+	  if (op0->flags & F_PREFERRED)
+	    return -1;
+	  if (op1->flags & F_PREFERRED)
+	    return 1;
+
+	  /* If they're both aliases, and neither is marked as preferred,
+	     be arbitrary.  */
+	  return i;
+	}
       else
 	fprintf (stderr,
 		 /* xgettext:c-format */
