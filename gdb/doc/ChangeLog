@@ -1,4 +1,8 @@
 2013-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (POD2MAN1, POD2MAN5): Replace $(VERSION) by ../version.in.
+
+2013-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (gdbserver man): Rename tty to comm.  Swap --attach
