@@ -1,3 +1,13 @@
+2013-04-06  Eli Zaretskii  <eliz@gnu.org>
+
+	* windows-nat.c (windows_get_absolute_argv0): Move from here...
+	* mingw-hdep.c (windows_get_absolute_argv0): ...to here.
+	Include main.h.
+
+	* windows-nat.h (windows_get_absolute_argv0): Move prototype from
+	here...
+	* main.h (windows_get_absolute_argv0): ...to here.
+
 2013-04-05  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct dwarf2_per_objfile): Tweak comment.

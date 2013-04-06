@@ -597,18 +597,6 @@ failed:
   return 0;		/* failure */
 }
 
-/* Return an absolute file name of the running GDB, if possible, or
-   ARGV0 if not.  The return value is in malloc'ed storage.  */
-char *
-windows_get_absolute_argv0 (const char *argv0)
-{
-  char full_name[PATH_MAX];
-
-  if (GetModuleFileName (NULL, full_name, PATH_MAX))
-    return xstrdup (full_name);
-  return xstrdup (argv0);
-}
-
 /* Encapsulate the information required in a call to
    symbol_file_add_args.  */
 struct safe_symbol_file_add_args

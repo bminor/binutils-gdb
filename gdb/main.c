@@ -45,9 +45,6 @@
 #include "maint.h"
 
 #include "filenames.h"
-#ifdef __MINGW32__
-# include "windows-nat.h"
-#endif
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
