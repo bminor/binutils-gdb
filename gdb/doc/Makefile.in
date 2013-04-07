@@ -593,21 +593,21 @@ annotate/index.html: $(ANNOTATE_DOC_FILES)
 # Man pages
 gdb.1: $(GDB_DOC_FILES)
 	touch $@
-	-$(TEXI2POD) $(MANCONF) -Dgdb < gdb.texinfo > gdb.pod
+	-$(TEXI2POD) $(MANCONF) -Dgdb < $(srcdir)/gdb.texinfo > gdb.pod
 	-($(POD2MAN1) gdb.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f gdb.pod
 
 gdbserver.1: $(GDB_DOC_FILES)
 	touch $@
-	-$(TEXI2POD) $(MANCONF) -Dgdbserver < gdb.texinfo > gdbserver.pod
+	-$(TEXI2POD) $(MANCONF) -Dgdbserver < $(srcdir)/gdb.texinfo > gdbserver.pod
 	-($(POD2MAN1) gdbserver.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f gdbserver.pod
 
 gdbinit.5: $(GDB_DOC_FILES)
 	touch $@
-	-$(TEXI2POD) $(MANCONF) -Dgdbinit < gdb.texinfo > gdbinit.pod
+	-$(TEXI2POD) $(MANCONF) -Dgdbinit < $(srcdir)/gdb.texinfo > gdbinit.pod
 	-($(POD2MAN5) gdbinit.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f gdbinit.pod

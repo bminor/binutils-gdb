@@ -5,6 +5,8 @@
 	* Makefile.in (install-man1, install-man5, uninstall-man1)
 	(uninstall-man5): Replace $(MANS) by $(MAN1S) and $(MAN5S) respectively.
 
+	* Makefile.in (gdb.1, gdbserver.1, gdbinit.5): Use $(srcdir).
+
 2013-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
