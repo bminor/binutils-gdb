@@ -2,6 +2,9 @@
 
 	* Makefile.in (POD2MAN1, POD2MAN5): Replace $(VERSION) by ../version.in.
 
+	* Makefile.in (install-man1, install-man5, uninstall-man1)
+	(uninstall-man5): Replace $(MANS) by $(MAN1S) and $(MAN5S) respectively.
+
 2013-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 

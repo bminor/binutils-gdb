@@ -268,7 +268,7 @@ install-man: install-man1 install-man5
 
 install-man1: $(MAN1S)
 	test -z "$(man1dir)" || $(mkinstalldirs) "$(DESTDIR)$(man1dir)"
-	@list='$(MANS)'; for p in $$list; do \
+	@list='$(MAN1S)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=`echo $$p | sed -e 's|^.*/||'`; \
 	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(man1dir)/$$f'"; \
@@ -277,7 +277,7 @@ install-man1: $(MAN1S)
 
 install-man5: $(MAN5S)
 	test -z "$(man5dir)" || $(mkinstalldirs) "$(DESTDIR)$(man5dir)"
-	@list='$(MANS)'; for p in $$list; do \
+	@list='$(MAN5S)'; for p in $$list; do \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=`echo $$p | sed -e 's|^.*/||'`; \
 	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(man5dir)/$$f'"; \
@@ -288,7 +288,7 @@ uninstall-man: uninstall-man1 uninstall-man5
 
 uninstall-man1:
 	@test -n "$(man1dir)" || exit 0; \
-	files=`{ l2='$(MANS)'; for i in $$l2; do echo "$$i"; done | \
+	files=`{ l2='$(MAN1S)'; for i in $$l2; do echo "$$i"; done | \
 	  sed -n '/\.1[a-z]*$$/p'; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
@@ -298,7 +298,7 @@ uninstall-man1:
 
 uninstall-man5:
 	@test -n "$(man5dir)" || exit 0; \
-	files=`{ l2='$(MANS)'; for i in $$l2; do echo "$$i"; done | \
+	files=`{ l2='$(MAN5S)'; for i in $$l2; do echo "$$i"; done | \
 	  sed -n '/\.5[a-z]*$$/p'; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^5][0-9a-z]*$$,5,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
