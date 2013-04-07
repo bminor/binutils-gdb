@@ -10808,7 +10808,7 @@ remote_trace_stop (void)
 
 static int
 remote_trace_find (enum trace_find_type type, int num,
-		   ULONGEST addr1, ULONGEST addr2,
+		   CORE_ADDR addr1, CORE_ADDR addr2,
 		   int *tpp)
 {
   struct remote_state *rs = get_remote_state ();

@@ -784,7 +784,7 @@ struct target_ops
       TPP.  If no trace frame matches, return -1.  May throw if the
       operation fails.  */
     int (*to_trace_find) (enum trace_find_type type, int num,
-			  ULONGEST addr1, ULONGEST addr2, int *tpp);
+			  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp);
 
     /* Get the value of the trace state variable number TSV, returning
        1 if the value is known and writing the value itself into the

@@ -1,3 +1,17 @@
+2013-04-07  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (remote_trace_find): Change type of parameters 'addr1'
+	and 'addr2' to CORE_ADDR.
+	* target.c (update_current_target): Update.
+	* target.h (struct target_ops) <to_trace_find>: Change parameter
+	type to CORE_ADDR.
+	* tracepoint.c (tfind_1): Change type of parameters 'addr1' and
+	'addr2' to CORE_ADDR.
+	(tfile_trace_find): Likewise.
+	(tfile_get_traceframe_address): Change return type to CORE_ADDR.
+	Change local variable 'addr' to type CORE_ADDR.
+	* tracepoint.h (tfind_1): Update declaration.
+
 2013-04-06  Eli Zaretskii  <eliz@gnu.org>
 
 	* windows-nat.c (windows_get_absolute_argv0): Move from here...

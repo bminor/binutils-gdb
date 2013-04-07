@@ -383,7 +383,7 @@ extern void tvariables_info_1 (void);
 extern void save_trace_state_variables (struct ui_file *fp);
 
 extern void tfind_1 (enum trace_find_type type, int num,
-		     ULONGEST addr1, ULONGEST addr2,
+		     CORE_ADDR addr1, CORE_ADDR addr2,
 		     int from_tty);
 
 extern void trace_save_tfile (const char *filename,

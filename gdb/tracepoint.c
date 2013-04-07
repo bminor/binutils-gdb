@@ -2260,7 +2260,7 @@ disconnect_tracing (int from_tty)
 /* Worker function for the various flavors of the tfind command.  */
 void
 tfind_1 (enum trace_find_type type, int num,
-	 ULONGEST addr1, ULONGEST addr2,
+	 CORE_ADDR addr1, CORE_ADDR addr2,
 	 int from_tty)
 {
   int target_frameno = -1, target_tracept = -1;
@@ -4692,10 +4692,10 @@ tfile_get_tracepoint_status (struct breakpoint *tp, struct uploaded_tp *utp)
    value of a collected PC register, but if not available, we
    improvise.  */
 
-static ULONGEST
+static CORE_ADDR
 tfile_get_traceframe_address (off_t tframe_offset)
 {
-  ULONGEST addr = 0;
+  CORE_ADDR addr = 0;
   short tpnum;
   struct tracepoint *tp;
   off_t saved_offset = cur_offset;
@@ -4727,14 +4727,14 @@ tfile_get_traceframe_address (off_t tframe_offset)
 
 static int
 tfile_trace_find (enum trace_find_type type, int num,
-		  ULONGEST addr1, ULONGEST addr2, int *tpp)
+		  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp)
 {
   short tpnum;
   int tfnum = 0, found = 0;
   unsigned int data_size;
   struct tracepoint *tp;
   off_t offset, tframe_offset;
-  ULONGEST tfaddr;
+  CORE_ADDR tfaddr;
 
   if (num == -1)
     {
