@@ -1,3 +1,7 @@
+2013-04-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (install-only): Fix make install regression.
+
 2013-04-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Convert man pages to texinfo, new gdbinit.5 texinfo page.
