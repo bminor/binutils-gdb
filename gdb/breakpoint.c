@@ -9510,20 +9510,20 @@ decode_static_tracepoint_spec (char **arg_p)
 
 /* Set a breakpoint.  This function is shared between CLI and MI
    functions for setting a breakpoint.  This function has two major
-   modes of operations, selected by the PARSE_CONDITION_AND_THREAD
-   parameter.  If non-zero, the function will parse arg, extracting
-   breakpoint location, address and thread.  Otherwise, ARG is just
-   the location of breakpoint, with condition and thread specified by
-   the COND_STRING and THREAD parameters.  If INTERNAL is non-zero,
-   the breakpoint number will be allocated from the internal
-   breakpoint count.  Returns true if any breakpoint was created;
-   false otherwise.  */
+   modes of operations, selected by the PARSE_ARG parameter.  If
+   non-zero, the function will parse ARG, extracting location,
+   condition, thread and extra string.  Otherwise, ARG is just the
+   breakpoint's location, with condition, thread, and extra string
+   specified by the COND_STRING, THREAD and EXTRA_STRING parameters.
+   If INTERNAL is non-zero, the breakpoint number will be allocated
+   from the internal breakpoint count.  Returns true if any breakpoint
+   was created; false otherwise.  */
 
 int
 create_breakpoint (struct gdbarch *gdbarch,
 		   char *arg, char *cond_string,
 		   int thread, char *extra_string,
-		   int parse_condition_and_thread,
+		   int parse_arg,
 		   int tempflag, enum bptype type_wanted,
 		   int ignore_count,
 		   enum auto_boolean pending_break_support,
@@ -9641,7 +9641,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 
       lsal = VEC_index (linespec_sals, canonical.sals, 0);
 
-      if (parse_condition_and_thread)
+      if (parse_arg)
         {
 	    char *rest;
             /* Here we only parse 'arg' to separate condition
@@ -9660,6 +9660,9 @@ create_breakpoint (struct gdbarch *gdbarch,
         }
       else
         {
+	    if (*arg != '\0')
+	      error (_("Garbage '%s' at end of location"), arg);
+
             /* Create a private copy of condition string.  */
             if (cond_string)
             {
@@ -9699,7 +9702,7 @@ create_breakpoint (struct gdbarch *gdbarch,
       init_raw_breakpoint_without_location (b, gdbarch, type_wanted, ops);
 
       b->addr_string = copy_arg;
-      if (parse_condition_and_thread)
+      if (parse_arg)
 	b->cond_string = NULL;
       else
 	{

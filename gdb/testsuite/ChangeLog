@@ -1,3 +1,8 @@
+2013-04-08  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-break.exp (test_error): Add tests with garbage after
+	the location.
+
 2013-04-04  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.cp/cplabel.exp: Allow empty directory in file reported

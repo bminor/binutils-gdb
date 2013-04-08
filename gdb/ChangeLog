@@ -1,3 +1,13 @@
+2013-04-08  Pedro Alves  <palves@redhat.com>
+	    Keith Seitz  <keiths@redhat.com>
+
+	* breakpoint.c (create_breakpoint): Rename
+	"parse_condition_and_thread" parameter to "parse_arg".  Update
+	describing comment.  If !PARSE_ARG, then error out if ARG is not
+	the empty string after extracting the location.
+	* breakpoint.h (create_breakpoint): Rename
+	"parse_condition_and_thread" parameter to "parse_arg".
+
 2013-04-08  Aleksandar Ristovski  <aristovski@qnx.com
 
 	* solib-svr4.c (lm_addr_check): Add const qualifier to 'so' arg.
