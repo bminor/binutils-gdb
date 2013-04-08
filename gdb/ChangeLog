@@ -1,3 +1,7 @@
+2013-04-08  Aleksandar Ristovski  <aristovski@qnx.com
+
+	* solib-svr4.c (lm_addr_check): Add const qualifier to 'so' arg.
+
 2013-04-07  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (remote_trace_find): Change type of parameters 'addr1'

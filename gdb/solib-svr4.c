@@ -189,7 +189,7 @@ has_lm_dynamic_from_link_map (void)
 }
 
 static CORE_ADDR
-lm_addr_check (struct so_list *so, bfd *abfd)
+lm_addr_check (const struct so_list *so, bfd *abfd)
 {
   if (!so->lm_info->l_addr_p)
     {
