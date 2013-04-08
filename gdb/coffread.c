@@ -1586,7 +1586,8 @@ process_coff_symbol (struct coff_symbol *cs,
 
   name = cs->c_name;
   name = EXTERNAL_NAME (name, objfile->obfd);
-  SYMBOL_SET_LANGUAGE (sym, current_subfile->language);
+  SYMBOL_SET_LANGUAGE (sym, current_subfile->language,
+		       &objfile->objfile_obstack);
   SYMBOL_SET_NAMES (sym, name, strlen (name), 1, objfile);
 
   /* default assumptions */

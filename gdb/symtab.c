@@ -448,6 +448,19 @@ symbol_set_demangled_name (struct general_symbol_info *gsymbol,
 
       gsymbol->language_specific.cplus_specific->demangled_name = name;
     }
+  else if (gsymbol->language == language_ada)
+    {
+      if (name == NULL)
+	{
+	  gsymbol->ada_mangled = 0;
+	  gsymbol->language_specific.obstack = obstack;
+	}
+      else
+	{
+	  gsymbol->ada_mangled = 1;
+	  gsymbol->language_specific.mangled_lang.demangled_name = name;
+	}
+    }
   else
     gsymbol->language_specific.mangled_lang.demangled_name = name;
 }
@@ -464,8 +477,14 @@ symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
       else
 	return NULL;
     }
-  else
-    return gsymbol->language_specific.mangled_lang.demangled_name;
+  else if (gsymbol->language == language_ada)
+    {
+      if (!gsymbol->ada_mangled)
+	return NULL;
+      /* Fall through.  */
+    }
+
+  return gsymbol->language_specific.mangled_lang.demangled_name;
 }
 
 
@@ -474,7 +493,8 @@ symbol_get_demangled_name (const struct general_symbol_info *gsymbol)
 
 void
 symbol_set_language (struct general_symbol_info *gsymbol,
-                     enum language language)
+                     enum language language,
+		     struct obstack *obstack)
 {
   gsymbol->language = language;
   if (gsymbol->language == language_d
@@ -483,7 +503,12 @@ symbol_set_language (struct general_symbol_info *gsymbol,
       || gsymbol->language == language_objc
       || gsymbol->language == language_fortran)
     {
-      symbol_set_demangled_name (gsymbol, NULL, NULL);
+      symbol_set_demangled_name (gsymbol, NULL, obstack);
+    }
+  else if (gsymbol->language == language_ada)
+    {
+      gdb_assert (gsymbol->ada_mangled == 0);
+      gsymbol->language_specific.obstack = obstack;
     }
   else if (gsymbol->language == language_cplus)
     gsymbol->language_specific.cplus_specific = NULL;
@@ -688,7 +713,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	  name[len] = '\0';
 	  gsymbol->name = name;
 	}
-      symbol_set_demangled_name (gsymbol, NULL, NULL);
+      symbol_set_demangled_name (gsymbol, NULL, &objfile->objfile_obstack);
 
       return;
     }
@@ -815,11 +840,7 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
 	return symbol_get_demangled_name (gsymbol);
       break;
     case language_ada:
-      if (symbol_get_demangled_name (gsymbol) != NULL)
-	return symbol_get_demangled_name (gsymbol);
-      else
-	return ada_decode_symbol (gsymbol);
-      break;
+      return ada_decode_symbol (gsymbol);
     default:
       break;
     }
@@ -845,9 +866,7 @@ symbol_demangled_name (const struct general_symbol_info *gsymbol)
       dem_name = symbol_get_demangled_name (gsymbol);
       break;
     case language_ada:
-      dem_name = symbol_get_demangled_name (gsymbol);
-      if (dem_name == NULL)
-	dem_name = ada_decode_symbol (gsymbol);
+      dem_name = ada_decode_symbol (gsymbol);
       break;
     default:
       break;

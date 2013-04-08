@@ -135,6 +135,11 @@ struct general_symbol_info
 
   union
   {
+    /* A pointer to an obstack that can be used for storage associated
+       with this symbol.  This is only used by Ada, and only when the
+       'ada_mangled' field is zero.  */
+    struct obstack *obstack;
+
     /* This is used by languages which wish to store a demangled name.
        currently used by Ada, Java, and Objective C.  */
     struct mangled_lang
@@ -152,6 +157,11 @@ struct general_symbol_info
      union above.  */
 
   ENUM_BITFIELD(language) language : 8;
+
+  /* This is only used by Ada.  If set, then the 'mangled_lang' field
+     of language_specific is valid.  Otherwise, the 'obstack' field is
+     valid.  */
+  unsigned int ada_mangled : 1;
 
   /* Which section is this symbol in?  This is an index into
      section_offsets for this objfile.  Negative means that the symbol
@@ -196,10 +206,11 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Initializes the language dependent portion of a symbol
    depending upon the language for the symbol.  */
-#define SYMBOL_SET_LANGUAGE(symbol,language) \
-  (symbol_set_language (&(symbol)->ginfo, (language)))
+#define SYMBOL_SET_LANGUAGE(symbol,language,obstack)	\
+  (symbol_set_language (&(symbol)->ginfo, (language), (obstack)))
 extern void symbol_set_language (struct general_symbol_info *symbol,
-                                 enum language language);
+                                 enum language language,
+				 struct obstack *obstack);
 
 /* Set just the linkage name of a symbol; do not try to demangle
    it.  Used for constructs which do not have a mangled name,

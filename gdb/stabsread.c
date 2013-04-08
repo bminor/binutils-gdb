@@ -709,7 +709,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
   else
     {
     normal:
-      SYMBOL_SET_LANGUAGE (sym, current_subfile->language);
+      SYMBOL_SET_LANGUAGE (sym, current_subfile->language,
+			   &objfile->objfile_obstack);
       if (SYMBOL_LANGUAGE (sym) == language_cplus)
 	{
 	  char *name = alloca (p - string + 1);
@@ -3675,7 +3676,8 @@ read_enum_type (char **pp, struct type *type,
 
       sym = allocate_symbol (objfile);
       SYMBOL_SET_LINKAGE_NAME (sym, name);
-      SYMBOL_SET_LANGUAGE (sym, current_subfile->language);
+      SYMBOL_SET_LANGUAGE (sym, current_subfile->language,
+			   &objfile->objfile_obstack);
       SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       SYMBOL_VALUE (sym) = n;

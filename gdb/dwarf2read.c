@@ -6953,7 +6953,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
       sym = allocate_symbol (objfile);
-      SYMBOL_SET_LANGUAGE (sym, language_go);
+      SYMBOL_SET_LANGUAGE (sym, language_go, &objfile->objfile_obstack);
       SYMBOL_SET_NAMES (sym, saved_package_name,
 			strlen (saved_package_name), 0, objfile);
       /* This is not VAR_DOMAIN because we want a way to ensure a lookup of,
@@ -15975,7 +15975,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       OBJSTAT (objfile, n_syms++);
 
       /* Cache this symbol's name and the name's demangled form (if any).  */
-      SYMBOL_SET_LANGUAGE (sym, cu->language);
+      SYMBOL_SET_LANGUAGE (sym, cu->language, &objfile->objfile_obstack);
       linkagename = dwarf2_physname (name, die, cu);
       SYMBOL_SET_NAMES (sym, linkagename, strlen (linkagename), 0, objfile);
 

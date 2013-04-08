@@ -1589,10 +1589,10 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
 {
   struct partial_symbol psymbol;
 
-  /* We must ensure that the entire 'value' field has been zeroed
-     before assigning to it, because an assignment may not write the
-     entire field.  */
-  memset (&psymbol.ginfo.value, 0, sizeof (psymbol.ginfo.value));
+  /* We must ensure that the entire struct has been zeroed before
+     assigning to it, because an assignment may not touch some of the
+     holes.  */
+  memset (&psymbol, 0, sizeof (psymbol));
 
   /* val and coreaddr are mutually exclusive, one of them *will* be zero.  */
   if (val != 0)
@@ -1605,7 +1605,7 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
     }
   SYMBOL_SECTION (&psymbol) = 0;
   SYMBOL_OBJ_SECTION (&psymbol) = NULL;
-  SYMBOL_SET_LANGUAGE (&psymbol, language);
+  SYMBOL_SET_LANGUAGE (&psymbol, language, &objfile->objfile_obstack);
   PSYMBOL_DOMAIN (&psymbol) = domain;
   PSYMBOL_CLASS (&psymbol) = class;
 

@@ -186,7 +186,7 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
   struct objfile *objfile = get_dynamics_objfile (get_type_arch (type));
 
   sym = allocate_symbol (objfile);
-  SYMBOL_SET_LANGUAGE (sym, language_java);
+  SYMBOL_SET_LANGUAGE (sym, language_java, &objfile->objfile_obstack);
   SYMBOL_SET_LINKAGE_NAME (sym, TYPE_TAG_NAME (type));
   SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
   /*  SYMBOL_VALUE (sym) = valu; */

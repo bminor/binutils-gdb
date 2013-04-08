@@ -1,5 +1,29 @@
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
+	* ada-lang.c (ada_decode_symbol): Check and set 'ada_mangled'.
+	Use symbol's obstack, not an objfile.
+	* coffread.c (process_coff_symbol): Update.
+	* dwarf2read.c (fixup_go_packaging, new_symbol_full): Update.
+	* jv-lang.c (add_class_symbol): Update.
+	* mdebugread.c (new_symbol): Update.
+	* minsyms.c (prim_record_minimal_symbol_full)
+	(terminate_minimal_symbol_table): Update.
+	* psymtab.c (add_psymbol_to_bcache): Clear entire symbol.  Update.
+	* stabsread.c (define_symbol, read_enum_type): Update.
+	* symtab.c (symbol_set_demangled_name, symbol_get_demangled_name):
+	Handle Ada specially.
+	(symbol_set_language): Add 'obstack' argument.
+	(symbol_set_names): Update.
+	(symbol_natural_name, symbol_demangled_name): Always use
+	ada_decode_symbol.
+	* symtab.h (struct general_symbol_info)
+	<language_specific::obstack>: New field.
+	<ada_mangled>: New field.
+	(SYMBOL_SET_LANGUAGE): Add 'obstack' argument.
+	(symbol_set_language): Update.
+
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (symbol_init_cplus_specific, symbol_set_demangled_name):
 	Take an obstack, not an objfile.
 	(symbol_set_names): Update.

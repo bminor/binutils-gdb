@@ -4878,7 +4878,8 @@ new_symbol (char *name)
 {
   struct symbol *s = allocate_symbol (mdebugread_objfile);
 
-  SYMBOL_SET_LANGUAGE (s, psymtab_language);
+  SYMBOL_SET_LANGUAGE (s, psymtab_language,
+		       &mdebugread_objfile->objfile_obstack);
   SYMBOL_SET_NAMES (s, name, strlen (name), 1, mdebugread_objfile);
   return s;
 }
