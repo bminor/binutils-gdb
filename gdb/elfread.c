@@ -752,8 +752,8 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   if (SYMBOL_VALUE_ADDRESS (msym.minsym) != addr)
     return 0;
   /* minimal symbols have always SYMBOL_OBJ_SECTION non-NULL.  */
-  sect = SYMBOL_OBJ_SECTION (msym.minsym)->the_bfd_section;
-  objfile = SYMBOL_OBJ_SECTION (msym.minsym)->objfile;
+  sect = SYMBOL_OBJ_SECTION (msym.objfile, msym.minsym)->the_bfd_section;
+  objfile = msym.objfile;
 
   /* If .plt jumps back to .plt the symbol is still deferred for later
      resolution and it has no use for GDB.  Besides ".text" this symbol can

@@ -1920,7 +1920,7 @@ spu_catch_start (struct objfile *objfile)
   /* If we have debugging information, try to use it -- this
      will allow us to properly skip the prologue.  */
   pc = SYMBOL_VALUE_ADDRESS (minsym);
-  symtab = find_pc_sect_symtab (pc, SYMBOL_OBJ_SECTION (minsym));
+  symtab = find_pc_sect_symtab (pc, SYMBOL_OBJ_SECTION (objfile, minsym));
   if (symtab != NULL)
     {
       struct blockvector *bv = BLOCKVECTOR (symtab);

@@ -1018,10 +1018,7 @@ fixup_section (struct general_symbol_info *ginfo,
      point to the actual function code.  */
   msym = lookup_minimal_symbol_by_pc_name (addr, ginfo->name, objfile);
   if (msym)
-    {
-      ginfo->obj_section = SYMBOL_OBJ_SECTION (msym);
-      ginfo->section = SYMBOL_SECTION (msym);
-    }
+    ginfo->section = SYMBOL_SECTION (msym);
   else
     {
       /* Static, function-local variables do appear in the linker
@@ -1061,20 +1058,31 @@ fixup_section (struct general_symbol_info *ginfo,
 	 a search of the section table.  */
 
       struct obj_section *s;
+      int fallback = -1;
 
       ALL_OBJFILE_OSECTIONS (objfile, s)
 	{
 	  int idx = s - objfile->sections;
 	  CORE_ADDR offset = ANOFFSET (objfile->section_offsets, idx);
 
+	  if (fallback == -1)
+	    fallback = idx;
+
 	  if (obj_section_addr (s) - offset <= addr
 	      && addr < obj_section_endaddr (s) - offset)
 	    {
-	      ginfo->obj_section = s;
 	      ginfo->section = idx;
 	      return;
 	    }
 	}
+
+      /* If we didn't find the section, assume it is in the first
+	 section.  If there is no allocated section, then it hardly
+	 matters what we pick, so just pick zero.  */
+      if (fallback == -1)
+	ginfo->section = 0;
+      else
+	ginfo->section = fallback;
     }
 }
 
@@ -1086,15 +1094,15 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
   if (!sym)
     return NULL;
 
-  if (SYMBOL_OBJ_SECTION (sym))
-    return sym;
-
   /* We either have an OBJFILE, or we can get at it from the sym's
      symtab.  Anything else is a bug.  */
   gdb_assert (objfile || SYMBOL_SYMTAB (sym));
 
   if (objfile == NULL)
     objfile = SYMBOL_SYMTAB (sym)->objfile;
+
+  if (SYMBOL_OBJ_SECTION (objfile, sym))
+    return sym;
 
   /* We should have an objfile by now.  */
   gdb_assert (objfile);
@@ -2131,7 +2139,8 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
 	    ALL_BLOCK_SYMBOLS (b, iter, sym)
 	      {
 		fixup_symbol_section (sym, objfile);
-		if (matching_obj_sections (SYMBOL_OBJ_SECTION (sym), section))
+		if (matching_obj_sections (SYMBOL_OBJ_SECTION (objfile, sym),
+					   section))
 		  break;
 	      }
 	    if (sym == NULL)
@@ -2763,7 +2772,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
 
   fixup_symbol_section (sym, NULL);
   sal = find_pc_sect_line (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)),
-			   SYMBOL_OBJ_SECTION (sym), 0);
+			   SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym), 0);
 
   /* We always should have a line for the function start address.
      If we don't, something is odd.  Create a plain SAL refering
@@ -2774,7 +2783,7 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       init_sal (&sal);
       sal.pspace = current_program_space;
       sal.pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      sal.section = SYMBOL_OBJ_SECTION (sym);
+      sal.section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
     }
 
   if (funfirstline)
@@ -2815,7 +2824,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
       fixup_symbol_section (sym, NULL);
 
       pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-      section = SYMBOL_OBJ_SECTION (sym);
+      section = SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sym), sym);
       name = SYMBOL_LINKAGE_NAME (sym);
       objfile = SYMBOL_SYMTAB (sym)->objfile;
     }
@@ -2830,10 +2839,10 @@ skip_prologue_sal (struct symtab_and_line *sal)
 	  return;
 	}
 
-      pc = SYMBOL_VALUE_ADDRESS (msymbol);
-      section = SYMBOL_OBJ_SECTION (msymbol);
-      name = SYMBOL_LINKAGE_NAME (msymbol);
       objfile = msymbol_objfile (msymbol);
+      pc = SYMBOL_VALUE_ADDRESS (msymbol);
+      section = SYMBOL_OBJ_SECTION (objfile, msymbol);
+      name = SYMBOL_LINKAGE_NAME (msymbol);
     }
 
   gdbarch = get_objfile_arch (objfile);
@@ -5146,6 +5155,7 @@ void
 initialize_symbol (struct symbol *sym)
 {
   memset (sym, 0, sizeof (*sym));
+  SYMBOL_SECTION (sym) = -1;
 }
 
 /* Allocate and initialize a new 'struct symbol' on OBJFILE's
@@ -5157,6 +5167,7 @@ allocate_symbol (struct objfile *objfile)
   struct symbol *result;
 
   result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
+  SYMBOL_SECTION (result) = -1;
 
   return result;
 }
@@ -5170,6 +5181,7 @@ allocate_template_symbol (struct objfile *objfile)
   struct template_symbol *result;
 
   result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct template_symbol);
+  SYMBOL_SECTION (&result->base) = -1;
 
   return result;
 }

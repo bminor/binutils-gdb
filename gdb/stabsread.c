@@ -650,19 +650,6 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
   current_symbol = sym = allocate_symbol (objfile);
 
-  switch (type & N_TYPE)
-    {
-    case N_TEXT:
-      SYMBOL_SECTION (sym) = SECT_OFF_TEXT (objfile);
-      break;
-    case N_DATA:
-      SYMBOL_SECTION (sym) = SECT_OFF_DATA (objfile);
-      break;
-    case N_BSS:
-      SYMBOL_SECTION (sym) = SECT_OFF_BSS (objfile);
-      break;
-    }
-
   if (processing_gcc_compilation)
     {
       /* GCC 2.x puts the line number in desc.  SunOS apparently puts in the

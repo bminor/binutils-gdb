@@ -593,9 +593,10 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 		      /* Some types of debug info, such as COFF,
 			 don't fill the bfd_section member, so don't
 			 throw away symbols on those platforms.  */
-		      && SYMBOL_OBJ_SECTION (&msymbol[hi]) != NULL
+		      && SYMBOL_OBJ_SECTION (objfile, &msymbol[hi]) != NULL
 		      && (!matching_obj_sections
-			  (SYMBOL_OBJ_SECTION (&msymbol[hi]), section)))
+			  (SYMBOL_OBJ_SECTION (objfile, &msymbol[hi]),
+			   section)))
 		    {
 		      hi--;
 		      continue;
@@ -612,8 +613,8 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
 		      && (SYMBOL_VALUE_ADDRESS (&msymbol[hi])
 			  == SYMBOL_VALUE_ADDRESS (&msymbol[hi - 1]))
-		      && (SYMBOL_OBJ_SECTION (&msymbol[hi])
-			  == SYMBOL_OBJ_SECTION (&msymbol[hi - 1])))
+		      && (SYMBOL_OBJ_SECTION (objfile, &msymbol[hi])
+			  == SYMBOL_OBJ_SECTION (objfile, &msymbol[hi - 1])))
 		    {
 		      hi--;
 		      continue;
@@ -942,7 +943,6 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
 
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
   SYMBOL_SECTION (msymbol) = section;
-  SYMBOL_OBJ_SECTION (msymbol) = NULL;
 
   MSYMBOL_TYPE (msymbol) = ms_type;
   MSYMBOL_TARGET_FLAG_1 (msymbol) = 0;

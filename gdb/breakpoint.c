@@ -9814,7 +9814,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 	  if (sym != NULL)
 	    {
 	      fixup_symbol_section (sym, sal->symtab->objfile);
-	      sal->section = SYMBOL_OBJ_SECTION (sym);
+	      sal->section = SYMBOL_OBJ_SECTION (sal->symtab->objfile, sym);
 	    }
 	  else
 	    {
@@ -9830,7 +9830,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 
 	      msym = lookup_minimal_symbol_by_pc (sal->pc);
 	      if (msym.minsym)
-		sal->section = SYMBOL_OBJ_SECTION (msym.minsym);
+		sal->section = SYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
 
 	      do_cleanups (old_chain);
 	    }

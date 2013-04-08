@@ -502,7 +502,7 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
   CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (msymbol);
-  struct obj_section *section = SYMBOL_OBJ_SECTION (msymbol);
+  struct obj_section *section = SYMBOL_OBJ_SECTION (objfile, msymbol);
   enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
   CORE_ADDR pc;
 

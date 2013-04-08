@@ -429,7 +429,8 @@ find_pc_sect_psymbol (struct objfile *objfile,
 	  if (section)		/* Match on a specific section.  */
 	    {
 	      fixup_psymbol_section (p, objfile);
-	      if (!matching_obj_sections (SYMBOL_OBJ_SECTION (p), section))
+	      if (!matching_obj_sections (SYMBOL_OBJ_SECTION (objfile, p),
+					  section))
 		continue;
 	    }
 	  best_pc = SYMBOL_VALUE_ADDRESS (p);
@@ -453,7 +454,8 @@ find_pc_sect_psymbol (struct objfile *objfile,
 	  if (section)		/* Match on a specific section.  */
 	    {
 	      fixup_psymbol_section (p, objfile);
-	      if (!matching_obj_sections (SYMBOL_OBJ_SECTION (p), section))
+	      if (!matching_obj_sections (SYMBOL_OBJ_SECTION (objfile, p),
+					  section))
 		continue;
 	    }
 	  best_pc = SYMBOL_VALUE_ADDRESS (p);
@@ -469,7 +471,10 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 {
   CORE_ADDR addr;
 
-  if (psym == NULL || SYMBOL_OBJ_SECTION (psym) != NULL)
+  if (!psym)
+    return;
+
+  if (SYMBOL_SECTION (psym) >= 0)
     return;
 
   gdb_assert (objfile);
@@ -1603,8 +1608,7 @@ add_psymbol_to_bcache (const char *name, int namelength, int copy_name,
     {
       SYMBOL_VALUE_ADDRESS (&psymbol) = coreaddr;
     }
-  SYMBOL_SECTION (&psymbol) = 0;
-  SYMBOL_OBJ_SECTION (&psymbol) = NULL;
+  SYMBOL_SECTION (&psymbol) = -1;
   SYMBOL_SET_LANGUAGE (&psymbol, language, &objfile->objfile_obstack);
   PSYMBOL_DOMAIN (&psymbol) = domain;
   PSYMBOL_CLASS (&psymbol) = class;

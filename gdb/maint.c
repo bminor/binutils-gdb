@@ -493,7 +493,7 @@ maintenance_translate_address (char *arg, int from_tty)
       const char *symbol_offset
 	= pulongest (address - SYMBOL_VALUE_ADDRESS (sym.minsym));
 
-      sect = SYMBOL_OBJ_SECTION(sym.minsym);
+      sect = SYMBOL_OBJ_SECTION(sym.objfile, sym.minsym);
       if (sect != NULL)
 	{
 	  const char *section_name;

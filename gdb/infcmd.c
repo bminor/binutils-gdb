@@ -1170,8 +1170,8 @@ jump_command (char *arg, int from_tty)
   if (sfn != NULL)
     {
       fixup_symbol_section (sfn, 0);
-      if (section_is_overlay (SYMBOL_OBJ_SECTION (sfn)) &&
-	  !section_is_mapped (SYMBOL_OBJ_SECTION (sfn)))
+      if (section_is_overlay (SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sfn), sfn)) &&
+	  !section_is_mapped (SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (sfn), sfn)))
 	{
 	  if (!query (_("WARNING!!!  Destination is in "
 			"unmapped overlay!  Jump anyway? ")))

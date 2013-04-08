@@ -184,7 +184,7 @@ hppa64_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch,
   if (! minsym.minsym)
     return 0;
 
-  sec = SYMBOL_OBJ_SECTION (minsym.minsym)->the_bfd_section;
+  sec = SYMBOL_OBJ_SECTION (minsym.objfile, minsym.minsym)->the_bfd_section;
 
   if (bfd_get_section_vma (sec->owner, sec) <= pc
       && pc < (bfd_get_section_vma (sec->owner, sec)

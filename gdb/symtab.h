@@ -165,16 +165,9 @@ struct general_symbol_info
 
   /* Which section is this symbol in?  This is an index into
      section_offsets for this objfile.  Negative means that the symbol
-     does not get relocated relative to a section.
-     Disclaimer: currently this is just used for xcoff, so don't
-     expect all symbol-reading code to set it correctly (the ELF code
-     also tries to set it correctly).  */
+     does not get relocated relative to a section.  */
 
   short section;
-
-  /* The section associated with this symbol.  It can be NULL.  */
-
-  struct obj_section *obj_section;
 };
 
 extern void symbol_set_demangled_name (struct general_symbol_info *,
@@ -202,7 +195,10 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->ginfo.value.chain
 #define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.language
 #define SYMBOL_SECTION(symbol)		(symbol)->ginfo.section
-#define SYMBOL_OBJ_SECTION(symbol)	(symbol)->ginfo.obj_section
+#define SYMBOL_OBJ_SECTION(objfile, symbol)			\
+  (((symbol)->ginfo.section >= 0)				\
+   ? (&(((objfile)->sections)[(symbol)->ginfo.section]))	\
+   : NULL)
 
 /* Initializes the language dependent portion of a symbol
    depending upon the language for the symbol.  */
@@ -731,6 +727,7 @@ extern const struct symbol_impl *symbol_impls;
 #define SYMBOL_BLOCK_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_block)
 #define SYMBOL_REGISTER_OPS(symbol)	(SYMBOL_IMPL (symbol).ops_register)
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
+#define SYMBOL_OBJFILE(symbol) 		(SYMBOL_SYMTAB (symbol)->objfile)
 
 extern int register_symbol_computed_impl (enum address_class,
 					  const struct symbol_computed_ops *);
