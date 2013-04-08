@@ -2379,7 +2379,9 @@ process_debug_info (struct dwarf_section *section,
 		    break;
 		}
 
-	      if (!do_loc && die_offset >= dwarf_start_die)
+	      if (!do_loc && die_offset >= dwarf_start_die
+		  && (dwarf_cutoff_level == -1
+		      || level < dwarf_cutoff_level))
 		printf (_(" <%d><%lx>: Abbrev Number: 0\n"),
 			level, die_offset);
 

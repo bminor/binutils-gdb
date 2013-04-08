@@ -1,5 +1,9 @@
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf.c (process_debug_info): Check dwarf_cutoff_level.
+
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf-mode.el: Bump version number.
 	(dwarf-mode): Remove autoload.
 	(dwarf-die-reference): Relax regexp.
