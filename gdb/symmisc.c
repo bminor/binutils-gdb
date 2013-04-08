@@ -261,9 +261,15 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 		      outfile);
       fprintf_filtered (outfile, " %s", SYMBOL_LINKAGE_NAME (msymbol));
       if (section)
-	fprintf_filtered (outfile, " section %s",
-			  bfd_section_name (objfile->obfd,
-					    section->the_bfd_section));
+	{
+	  if (section->the_bfd_section != NULL)
+	    fprintf_filtered (outfile, " section %s",
+			      bfd_section_name (objfile->obfd,
+						section->the_bfd_section));
+	  else
+	    fprintf_filtered (outfile, " spurious section %ld",
+			      section - objfile->sections);
+	}
       if (SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
 	{
 	  fprintf_filtered (outfile, "  %s", SYMBOL_DEMANGLED_NAME (msymbol));

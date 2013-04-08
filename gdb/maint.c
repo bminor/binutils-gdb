@@ -329,6 +329,7 @@ print_bfd_section_info (bfd *abfd,
 
       addr = bfd_section_vma (abfd, asect);
       endaddr = addr + bfd_section_size (abfd, asect);
+      printf_filtered (" [%d] ", gdb_bfd_section_index (abfd, asect));
       maint_print_section_info (name, flags, addr, endaddr,
 				asect->filepos, addr_size);
     }

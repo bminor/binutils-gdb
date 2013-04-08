@@ -1,5 +1,10 @@
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
+	* maint.c (print_bfd_section_info): Print the section index.
+	* symmisc.c (dump_msymbols): Print the section index.
+
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
 	PR symtab/8424:
 	* blockframe.c (find_pc_partial_function_gnu_ifunc): Check
 	SYMBOL_SECTION, not SYMBOL_OBJ_SECTION.
