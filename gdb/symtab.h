@@ -169,7 +169,7 @@ struct general_symbol_info
 
 extern void symbol_set_demangled_name (struct general_symbol_info *,
 				       const char *,
-                                       struct objfile *);
+                                       struct obstack *);
 
 extern const char *symbol_get_demangled_name
   (const struct general_symbol_info *);

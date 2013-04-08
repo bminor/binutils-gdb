@@ -1,5 +1,12 @@
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.c (symbol_init_cplus_specific, symbol_set_demangled_name):
+	Take an obstack, not an objfile.
+	(symbol_set_names): Update.
+	* symtab.h (symbol_set_demangled_name): Update.
+
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
 	* coffread.c (process_coff_symbol, coff_read_enum_type): Call
 	allocate_symbol.
 	* dwarf2read.c (fixup_go_packaging): Call allocate_symbol.

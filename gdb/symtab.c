@@ -420,15 +420,15 @@ gdb_mangle_name (struct type *type, int method_id, int signature_id)
 
 static void
 symbol_init_cplus_specific (struct general_symbol_info *gsymbol,
-                           struct objfile *objfile)
+			    struct obstack *obstack)
 {
   /* A language_specific structure should not have been previously
      initialized.  */
   gdb_assert (gsymbol->language_specific.cplus_specific == NULL);
-  gdb_assert (objfile != NULL);
+  gdb_assert (obstack != NULL);
 
   gsymbol->language_specific.cplus_specific =
-      OBSTACK_ZALLOC (&objfile->objfile_obstack, struct cplus_specific);
+    OBSTACK_ZALLOC (obstack, struct cplus_specific);
 }
 
 /* Set the demangled name of GSYMBOL to NAME.  NAME must be already
@@ -439,12 +439,12 @@ symbol_init_cplus_specific (struct general_symbol_info *gsymbol,
 void
 symbol_set_demangled_name (struct general_symbol_info *gsymbol,
                            const char *name,
-                           struct objfile *objfile)
+                           struct obstack *obstack)
 {
   if (gsymbol->language == language_cplus)
     {
       if (gsymbol->language_specific.cplus_specific == NULL)
-	symbol_init_cplus_specific (gsymbol, objfile);
+	symbol_init_cplus_specific (gsymbol, obstack);
 
       gsymbol->language_specific.cplus_specific->demangled_name = name;
     }
@@ -791,9 +791,10 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 
   gsymbol->name = (*slot)->mangled + lookup_len - len;
   if ((*slot)->demangled[0] != '\0')
-    symbol_set_demangled_name (gsymbol, (*slot)->demangled, objfile);
+    symbol_set_demangled_name (gsymbol, (*slot)->demangled,
+			       &objfile->objfile_obstack);
   else
-    symbol_set_demangled_name (gsymbol, NULL, objfile);
+    symbol_set_demangled_name (gsymbol, NULL, &objfile->objfile_obstack);
 }
 
 /* Return the source code name of a symbol.  In languages where
