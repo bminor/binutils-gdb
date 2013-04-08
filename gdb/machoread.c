@@ -116,7 +116,8 @@ macho_symtab_add_minsym (struct objfile *objfile, const asymbol *sym)
       CORE_ADDR offset;
       enum minimal_symbol_type ms_type;
 
-      offset = ANOFFSET (objfile->section_offsets, sym->section->index);
+      offset = ANOFFSET (objfile->section_offsets,
+			 gdb_bfd_section_index (objfile->obfd, sym->section));
 
       /* Bfd symbols are section relative.  */
       symaddr = sym->value + sym->section->vma;
@@ -164,8 +165,9 @@ macho_symtab_add_minsym (struct objfile *objfile, const asymbol *sym)
         return;	/* Skip this symbol.  */
 
       prim_record_minimal_symbol_and_info
-        (sym->name, symaddr, ms_type, sym->section->index,
-         sym->section, objfile);
+        (sym->name, symaddr, ms_type,
+	 gdb_bfd_section_index (objfile->obfd, sym->section),
+	 sym->section, objfile);
     }
 }
 
@@ -1008,7 +1010,7 @@ macho_symfile_offsets (struct objfile *objfile,
   ALL_OBJFILE_OSECTIONS (objfile, osect)
     {
       const char *bfd_sect_name = osect->the_bfd_section->name;
-      int sect_index = osect->the_bfd_section->index;
+      int sect_index = osect - objfile->sections;;
 
       if (strncmp (bfd_sect_name, "LC_SEGMENT.", 11) == 0)
 	bfd_sect_name += 11;

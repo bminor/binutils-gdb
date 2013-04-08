@@ -182,50 +182,55 @@ set_objfile_per_bfd (struct objfile *objfile)
    the end of the table (objfile->sections_end).  */
 
 static void
+add_to_objfile_sections_full (struct bfd *abfd, struct bfd_section *asect,
+			      struct objfile *objfile, int force)
+{
+  struct obj_section *section;
+
+  if (!force)
+    {
+      flagword aflag;
+
+      aflag = bfd_get_section_flags (abfd, asect);
+      if (!(aflag & SEC_ALLOC))
+	return;
+    }
+
+  section = &objfile->sections[gdb_bfd_section_index (abfd, asect)];
+  section->objfile = objfile;
+  section->the_bfd_section = asect;
+  section->ovly_mapped = 0;
+}
+
+static void
 add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
 			 void *objfilep)
 {
-  struct objfile *objfile = (struct objfile *) objfilep;
-  struct obj_section section;
-  flagword aflag;
-
-  aflag = bfd_get_section_flags (abfd, asect);
-  if (!(aflag & SEC_ALLOC))
-    return;
-  if (bfd_section_size (abfd, asect) == 0)
-    return;
-
-  section.objfile = objfile;
-  section.the_bfd_section = asect;
-  section.ovly_mapped = 0;
-  obstack_grow (&objfile->objfile_obstack,
-		(char *) &section, sizeof (section));
-  objfile->sections_end
-    = (struct obj_section *) (((size_t) objfile->sections_end) + 1);
+  add_to_objfile_sections_full (abfd, asect, objfilep, 0);
 }
 
 /* Builds a section table for OBJFILE.
 
-   Note that while we are building the table, which goes into the
-   objfile obstack, we hijack the sections_end pointer to instead hold
-   a count of the number of sections.  When bfd_map_over_sections
-   returns, this count is used to compute the pointer to the end of
-   the sections table, which then overwrites the count.
-
-   Also note that the OFFSET and OVLY_MAPPED in each table entry
-   are initialized to zero.
-
-   Also note that if anything else writes to the objfile obstack while
-   we are building the table, we're pretty much hosed.  */
+   Note that the OFFSET and OVLY_MAPPED in each table entry are
+   initialized to zero.  */
 
 void
 build_objfile_section_table (struct objfile *objfile)
 {
-  objfile->sections_end = 0;
+  int count = gdb_bfd_count_sections (objfile->obfd);
+
+  objfile->sections = OBSTACK_CALLOC (&objfile->objfile_obstack,
+				      count,
+				      struct obj_section);
+  objfile->sections_end = (objfile->sections + count);
   bfd_map_over_sections (objfile->obfd,
 			 add_to_objfile_sections, (void *) objfile);
-  objfile->sections = obstack_finish (&objfile->objfile_obstack);
-  objfile->sections_end = objfile->sections + (size_t) objfile->sections_end;
+
+  /* See gdb_bfd_section_index.  */
+  add_to_objfile_sections_full (objfile->obfd, bfd_com_section_ptr, objfile, 1);
+  add_to_objfile_sections_full (objfile->obfd, bfd_und_section_ptr, objfile, 1);
+  add_to_objfile_sections_full (objfile->obfd, bfd_abs_section_ptr, objfile, 1);
+  add_to_objfile_sections_full (objfile->obfd, bfd_ind_section_ptr, objfile, 1);
 }
 
 /* Given a pointer to an initialized bfd (ABFD) and some flag bits
@@ -804,7 +809,11 @@ objfile_relocate1 (struct objfile *objfile,
       struct obj_section *s;
       s = find_pc_section (objfile->ei.entry_point);
       if (s)
-        objfile->ei.entry_point += ANOFFSET (delta, s->the_bfd_section->index);
+	{
+	  int idx = gdb_bfd_section_index (objfile->obfd, s->the_bfd_section);
+
+	  objfile->ei.entry_point += ANOFFSET (delta, idx);
+	}
       else
         objfile->ei.entry_point += ANOFFSET (delta, SECT_OFF_TEXT (objfile));
     }
@@ -822,7 +831,7 @@ objfile_relocate1 (struct objfile *objfile,
   /* Update the table in exec_ops, used to read memory.  */
   ALL_OBJFILE_OSECTIONS (objfile, s)
     {
-      int idx = s->the_bfd_section->index;
+      int idx = s - objfile->sections;
 
       exec_set_section_address (bfd_get_filename (objfile->obfd), idx,
 				obj_section_addr (s));

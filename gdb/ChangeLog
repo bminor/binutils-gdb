@@ -1,5 +1,35 @@
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
+	* coffread.c (cs_to_section): Use gdb_bfd_section_index.
+	* elfread.c (record_minimal_symbol, elf_symtab_read): Use
+	gdb_bfd_section_index.
+	* gdb_bfd.c (gdb_bfd_section_index, gdb_bfd_count_sections):
+	New functions.
+	* gdb_bfd.h (gdb_bfd_section_index, gdb_bfd_count_sections):
+	Declare.
+	* machoread.c (macho_symtab_add_minsym, macho_symfile_offsets):
+	Update.
+	* objfiles.c (add_to_objfile_sections_full): New function.
+	(add_to_objfile_sections): Use it.
+	(build_section_table): Rewrite.
+	(objfile_relocate1): Use gdb_bfd_section_index.  Update.
+	* objfiles.h (obj_section_offset): Use gdb_bfd_section_index.
+	(struct objfile) <sections>: Update comment.
+	(ALL_OBJFILE_OSECTIONS): Skip sections where the_bfd_section
+	is NULL.
+	(ALL_OBJSECTIONS): Use it.
+	* solib-dsbt.c (dsbt_relocate_main_executable): Update.
+	* solib-frv.c (frv_relocate_main_executable): Update.
+	* solib-target.c (solib_target_relocate_section_addresses):
+	Use gdb_bfd_section_index.
+	* symfile.c (build_section_addr_info_from_section_table):
+	Use gdb_bfd_section_index.
+	(build_section_addr_info_from_bfd, place_section): Likewise.
+	* symtab.c (fixup_section): Update.
+	* xcoffread.c (find_targ_sec): Use gdb_bfd_section_index.
+
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
 	* minsyms.h (struct bound_minimal_symbol): New.
 	(lookup_minimal_symbol_and_objfile): Return bound_minimal_symbol.
 	Remove objfile argument.

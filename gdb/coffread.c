@@ -297,7 +297,7 @@ cs_to_section (struct coff_symbol *cs, struct objfile *objfile)
 
   if (sect == NULL)
     return SECT_OFF_TEXT (objfile);
-  return sect->index;
+  return gdb_bfd_section_index (objfile->obfd, sect);
 }
 
 /* Return the address of the section of a COFF symbol.  */

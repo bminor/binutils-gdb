@@ -208,7 +208,9 @@ record_minimal_symbol (const char *name, int name_len, int copy_name,
     address = gdbarch_addr_bits_remove (gdbarch, address);
 
   return prim_record_minimal_symbol_full (name, name_len, copy_name, address,
-					  ms_type, bfd_section->index,
+					  ms_type,
+					  gdb_bfd_section_index (objfile->obfd,
+								 bfd_section),
 					  bfd_section, objfile);
 }
 
@@ -271,7 +273,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 	  continue;
 	}
 
-      offset = ANOFFSET (objfile->section_offsets, sym->section->index);
+      offset = ANOFFSET (objfile->section_offsets,
+			 gdb_bfd_section_index (objfile->obfd, sym->section));
       if (type == ST_DYNAMIC
 	  && sym->section == bfd_und_section_ptr
 	  && (sym->flags & BSF_FUNCTION))
@@ -326,7 +329,8 @@ elf_symtab_read (struct objfile *objfile, int type,
 	      && bfd_get_section_by_name (abfd, ".plt") != NULL)
 	    continue;
 
-	  symaddr += ANOFFSET (objfile->section_offsets, sect->index);
+	  symaddr += ANOFFSET (objfile->section_offsets,
+			       gdb_bfd_section_index (objfile->obfd, sect));
 
 	  msym = record_minimal_symbol
 	    (sym->name, strlen (sym->name), copy_names,

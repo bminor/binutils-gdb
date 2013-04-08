@@ -237,7 +237,8 @@ build_section_addr_info_from_section_table (const struct target_section *start,
 	  sap->other[oidx].addr = stp->addr;
 	  sap->other[oidx].name
 	    = xstrdup (bfd_section_name (stp->bfd, stp->the_bfd_section));
-	  sap->other[oidx].sectindex = stp->the_bfd_section->index;
+	  sap->other[oidx].sectindex
+	    = gdb_bfd_section_index (stp->bfd, stp->the_bfd_section);
 	  oidx++;
 	}
     }
@@ -262,7 +263,7 @@ build_section_addr_info_from_bfd (bfd *abfd)
       {
 	sap->other[i].addr = bfd_get_section_vma (abfd, sec);
 	sap->other[i].name = xstrdup (bfd_get_section_name (abfd, sec));
-	sap->other[i].sectindex = sec->index;
+	sap->other[i].sectindex = gdb_bfd_section_index (abfd, sec);
 	i++;
       }
 
@@ -389,7 +390,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
     return;
 
   /* If the user specified an offset, honor it.  */
-  if (offsets[sect->index] != 0)
+  if (offsets[gdb_bfd_section_index (abfd, sect)] != 0)
     return;
 
   /* Otherwise, let's try to find a place for the section.  */
@@ -433,7 +434,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
     }
   while (!done);
 
-  offsets[sect->index] = start_addr;
+  offsets[gdb_bfd_section_index (abfd, sect)] = start_addr;
   arg->lowest = start_addr + bfd_get_section_size (sect);
 }
 

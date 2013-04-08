@@ -278,7 +278,7 @@ find_targ_sec (bfd *abfd, asection *sect, void *obj)
       else if (bfd_get_section_flags (abfd, sect) & SEC_LOAD)
 	*args->resultp = SECT_OFF_DATA (objfile);
       else
-	*args->resultp = sect->index;
+	*args->resultp = gdb_bfd_section_index (abfd, sect);
       *args->bfd_sect = sect;
     }
 }

@@ -121,4 +121,18 @@ bfd *gdb_bfd_openr_next_archived_file (bfd *archive, bfd *previous);
 
 bfd *gdb_bfd_fdopenr (const char *filename, const char *target, int fd);
 
+
+
+/* Return the index of the BFD section SECTION.  Ordinarily this is
+   just the section's index, but for some special sections, like
+   bfd_com_section_ptr, it will be a synthesized value.  */
+
+int gdb_bfd_section_index (bfd *abfd, asection *section);
+
+
+/* Like bfd_count_sections, but include any possible global sections,
+   like bfd_com_section_ptr.  */
+
+int gdb_bfd_count_sections (bfd *abfd);
+
 #endif /* GDB_BFD_H */

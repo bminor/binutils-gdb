@@ -1064,7 +1064,7 @@ fixup_section (struct general_symbol_info *ginfo,
 
       ALL_OBJFILE_OSECTIONS (objfile, s)
 	{
-	  int idx = s->the_bfd_section->index;
+	  int idx = s - objfile->sections;
 	  CORE_ADDR offset = ANOFFSET (objfile->section_offsets, idx);
 
 	  if (obj_section_addr (s) - offset <= addr

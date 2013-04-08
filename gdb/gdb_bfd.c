@@ -605,6 +605,36 @@ gdb_bfd_fdopenr (const char *filename, const char *target, int fd)
 
 
 
+gdb_static_assert (ARRAY_SIZE (_bfd_std_section) == 4);
+
+/* See gdb_bfd.h.  */
+
+int
+gdb_bfd_section_index (bfd *abfd, asection *section)
+{
+  if (section == NULL)
+    return -1;
+  else if (section == bfd_com_section_ptr)
+    return bfd_count_sections (abfd) + 1;
+  else if (section == bfd_und_section_ptr)
+    return bfd_count_sections (abfd) + 2;
+  else if (section == bfd_abs_section_ptr)
+    return bfd_count_sections (abfd) + 3;
+  else if (section == bfd_ind_section_ptr)
+    return bfd_count_sections (abfd) + 4;
+  return section->index;
+}
+
+/* See gdb_bfd.h.  */
+
+int
+gdb_bfd_count_sections (bfd *abfd)
+{
+  return bfd_count_sections (abfd) + 4;
+}
+
+
+
 /* A callback for htab_traverse that prints a single BFD.  */
 
 static int
