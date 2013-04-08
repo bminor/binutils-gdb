@@ -10,7 +10,7 @@
 # After gc-section removal we are cheking that symbols does not exit
 # got section is empty and text section contains only start function.
 
-.*:     file format elf64-littleaarch64
+.*:     file format elf64-(little|big)aarch64
 
 SYMBOL TABLE:
 0+8000 l    d  \.text	0+ \.text

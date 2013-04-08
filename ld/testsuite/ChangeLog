@@ -1,3 +1,8 @@
+2013-04-08  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* ld-aarch64/gc-tls-relocs.d: Handle big endian format.
+	* ld-aarch64/gc-got-relocs.d: Likewise.
+
 2013-04-04  Alan Modra  <amodra@gmail.com>
 
 	* ld-elf/shared.exp: Update regexp on --no-add-needed and
