@@ -1,3 +1,8 @@
+2013-04-08  Jan Beulich <jbeulich@suse.com>
+
+	* i386-opc.tbl: Fold 64-bit and non-64-bit jecxz entries.
+	* i386-tbl.h: Re-generate.
+
 2013-04-06  David S. Miller  <davem@davemloft.net>
 
 	* sparc-dis.c (compare_opcodes): When encountering multiple aliases
