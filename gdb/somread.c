@@ -314,7 +314,6 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
       prim_record_minimal_symbol_and_info (symname, symbol_value, ms_type,
 					   gdb_bfd_section_index (objfile->obfd,
 								  section),
-					   section,
 					   objfile);
     }
 }

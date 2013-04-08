@@ -892,7 +892,7 @@ prim_record_minimal_symbol (const char *name, CORE_ADDR address,
     }
 
   prim_record_minimal_symbol_and_info (name, address, ms_type,
-				       section, NULL, objfile);
+				       section, objfile);
 }
 
 /* See minsyms.h.  */
@@ -902,7 +902,6 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
 				 CORE_ADDR address,
 				 enum minimal_symbol_type ms_type,
 				 int section,
-				 asection *bfd_section,
 				 struct objfile *objfile)
 {
   struct obj_section *obj_section;
@@ -945,17 +944,6 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
   SYMBOL_SECTION (msymbol) = section;
   SYMBOL_OBJ_SECTION (msymbol) = NULL;
 
-  /* Find obj_section corresponding to bfd_section.  */
-  if (bfd_section)
-    ALL_OBJFILE_OSECTIONS (objfile, obj_section)
-      {
-	if (obj_section->the_bfd_section == bfd_section)
-	  {
-	    SYMBOL_OBJ_SECTION (msymbol) = obj_section;
-	    break;
-	  }
-      }
-
   MSYMBOL_TYPE (msymbol) = ms_type;
   MSYMBOL_TARGET_FLAG_1 (msymbol) = 0;
   MSYMBOL_TARGET_FLAG_2 (msymbol) = 0;
@@ -980,12 +968,11 @@ struct minimal_symbol *
 prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 				     enum minimal_symbol_type ms_type,
 				     int section,
-				     asection *bfd_section,
 				     struct objfile *objfile)
 {
   return prim_record_minimal_symbol_full (name, strlen (name), 1,
-					  address, ms_type, section,
-					  bfd_section, objfile);
+					  address, ms_type,
+					  section, objfile);
 }
 
 /* Compare two minimal symbols by address and return a signed result based

@@ -88,7 +88,6 @@ struct cleanup *make_cleanup_discard_minimal_symbols (void);
    ADDRESS - the address of the symbol
    MS_TYPE - the type of the symbol
    SECTION - the symbol's section
-   BFD_SECTION - the symbol's BFD section; used to find the
    appropriate obj_section for the minimal symbol.  This can be NULL.
    OBJFILE - the objfile associated with the minimal symbol.  */
 
@@ -99,14 +98,12 @@ struct minimal_symbol *prim_record_minimal_symbol_full
      CORE_ADDR address,
      enum minimal_symbol_type ms_type,
      int section,
-     asection *bfd_section,
      struct objfile *objfile);
 
 /* Like prim_record_minimal_symbol_full, but:
    - uses strlen to compute NAME_LEN,
    - passes COPY_NAME = 0,
-   - passes SECTION = 0,
-   - and passes BFD_SECTION = NULL.
+   - and passes a default SECTION, depending on the type
    
    This variant does not return the new symbol.  */
 
@@ -123,7 +120,6 @@ struct minimal_symbol *prim_record_minimal_symbol_and_info
      CORE_ADDR,
      enum minimal_symbol_type,
      int section,
-     asection *bfd_section,
      struct objfile *);
 
 /* Install the minimal symbols that have been collected into the given

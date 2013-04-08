@@ -456,8 +456,6 @@ record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
 		       enum minimal_symbol_type type, int section, 
 		       struct objfile *objfile)
 {
-  struct bfd_section *bfd_section;
-
   /* We don't want TDESC entry points in the minimal symbol table.  */
   if (cs->c_name[0] == '@')
     return NULL;
@@ -472,10 +470,8 @@ record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
       return NULL;
     }
 
-  bfd_section = cs_to_bfd_section (cs, objfile);
   return prim_record_minimal_symbol_and_info (cs->c_name, address,
-					      type, section,
-					      bfd_section, objfile);
+					      type, section, objfile);
 }
 
 /* coff_symfile_init ()

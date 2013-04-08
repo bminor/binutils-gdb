@@ -211,7 +211,7 @@ record_minimal_symbol (const char *name, int name_len, int copy_name,
 					  ms_type,
 					  gdb_bfd_section_index (objfile->obfd,
 								 bfd_section),
-					  bfd_section, objfile);
+					  objfile);
 }
 
 /* Read the symbol table of an ELF file.

@@ -167,7 +167,7 @@ macho_symtab_add_minsym (struct objfile *objfile, const asymbol *sym)
       prim_record_minimal_symbol_and_info
         (sym->name, symaddr, ms_type,
 	 gdb_bfd_section_index (objfile->obfd, sym->section),
-	 sym->section, objfile);
+	 objfile);
     }
 }
 

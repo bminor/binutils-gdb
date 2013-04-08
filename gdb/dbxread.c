@@ -440,35 +440,29 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
 {
   enum minimal_symbol_type ms_type;
   int section;
-  asection *bfd_section;
 
   switch (type)
     {
     case N_TEXT | N_EXT:
       ms_type = mst_text;
       section = SECT_OFF_TEXT (objfile);
-      bfd_section = DBX_TEXT_SECTION (objfile);
       break;
     case N_DATA | N_EXT:
       ms_type = mst_data;
       section = SECT_OFF_DATA (objfile);
-      bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_BSS | N_EXT:
       ms_type = mst_bss;
       section = SECT_OFF_BSS (objfile);
-      bfd_section = DBX_BSS_SECTION (objfile);
       break;
     case N_ABS | N_EXT:
       ms_type = mst_abs;
       section = -1;
-      bfd_section = NULL;
       break;
 #ifdef N_SETV
     case N_SETV | N_EXT:
       ms_type = mst_data;
       section = SECT_OFF_DATA (objfile);
-      bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_SETV:
       /* I don't think this type actually exists; since a N_SETV is the result
@@ -476,7 +470,6 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
          file local.  */
       ms_type = mst_file_data;
       section = SECT_OFF_DATA (objfile);
-      bfd_section = DBX_DATA_SECTION (objfile);
       break;
 #endif
     case N_TEXT:
@@ -485,7 +478,6 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
     case N_FN_SEQ:
       ms_type = mst_file_text;
       section = SECT_OFF_TEXT (objfile);
-      bfd_section = DBX_TEXT_SECTION (objfile);
       break;
     case N_DATA:
       ms_type = mst_file_data;
@@ -507,17 +499,14 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
 	  ms_type = mst_data;
       }
       section = SECT_OFF_DATA (objfile);
-      bfd_section = DBX_DATA_SECTION (objfile);
       break;
     case N_BSS:
       ms_type = mst_file_bss;
       section = SECT_OFF_BSS (objfile);
-      bfd_section = DBX_BSS_SECTION (objfile);
       break;
     default:
       ms_type = mst_unknown;
       section = -1;
-      bfd_section = NULL;
       break;
     }
 
@@ -526,7 +515,7 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
     lowest_text_address = address;
 
   prim_record_minimal_symbol_and_info
-    (name, address, ms_type, section, bfd_section, objfile);
+    (name, address, ms_type, section, objfile);
 }
 
 /* Scan and build partial symbols for a symbol file.

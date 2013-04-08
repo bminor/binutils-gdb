@@ -922,15 +922,12 @@ record_minimal_symbol (const char *name, CORE_ADDR address,
 		       int n_scnum,
 		       struct objfile *objfile)
 {
-  int secnum;
-  asection *bfd_sect;
-
   if (name[0] == '.')
     ++name;
 
-  xcoff_secnum_to_sections (n_scnum, objfile, &bfd_sect, &secnum);
   prim_record_minimal_symbol_and_info (name, address, ms_type,
-				       secnum, bfd_sect, objfile);
+				       secnum_to_section (n_scnum, objfile),
+				       objfile);
 }
 
 /* xcoff has static blocks marked in `.bs', `.es' pairs.  They cannot be
@@ -2346,7 +2343,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
 			 secnum_to_section (symbol.n_scnum, objfile),
-			 secnum_to_bfd_section (symbol.n_scnum, objfile),
 			 objfile);
 		    break;
 
@@ -2424,7 +2420,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
 			 secnum_to_section (symbol.n_scnum, objfile),
-			 secnum_to_bfd_section (symbol.n_scnum, objfile),
 			 objfile);
 		    break;
 		  }
@@ -2442,7 +2437,6 @@ scan_xcoff_symtab (struct objfile *objfile)
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_bss : mst_bss,
 			 secnum_to_section (symbol.n_scnum, objfile),
-			 secnum_to_bfd_section (symbol.n_scnum, objfile),
 			 objfile);
 		    break;
 		  }

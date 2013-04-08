@@ -1,5 +1,24 @@
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
+	* coffread.c (record_minimal_symbol): Update.
+	* dbxread.c (record_minimal_symbol): Update.
+	* elfread.c (record_minimal_symbol): Update.
+	* machoread.c (macho_symtab_add_minsym): Update.
+	* mdebugread.c (record_minimal_symbol, parse_partial_symbols):
+	Update.
+	* minsyms.c (prim_record_minimal_symbol): Update.
+	(prim_record_minimal_symbol_full): Remove 'bfd_section'
+	argument.
+	(prim_record_minimal_symbol_and_info): Likewise.
+	* minsyms.h (prim_record_minimal_symbol_full)
+	(prim_record_minimal_symbol_and_info): Update.
+	* symtab.c (allocate_symbol, initialize_symbol)
+	(allocate_template_symbol): Initialize SYMBOL_SECTION.
+	* xcoffread.c (record_minimal_symbol, scan_xcoff_symtab):
+	Update.
+
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
 	PR symtab/8423:
 	* solib-som.c (som_solib_section_offsets): Use BFD section
 	indices.  Set offsets for all sections.

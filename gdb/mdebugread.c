@@ -2256,74 +2256,59 @@ record_minimal_symbol (const char *name, const CORE_ADDR address,
                        struct objfile *objfile)
 {
   int section;
-  asection *bfd_section;
 
   switch (storage_class)
     {
       case scText:
         section = SECT_OFF_TEXT (objfile);
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".text");
         break;
       case scData:
         section = SECT_OFF_DATA (objfile);
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".data");
         break;
       case scBss:
         section = SECT_OFF_BSS (objfile);
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".bss");
         break;
       case scSData:
         section = get_section_index (objfile, ".sdata");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".sdata");
         break;
       case scSBss:
         section = get_section_index (objfile, ".sbss");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".sbss");
         break;
       case scRData:
         section = get_section_index (objfile, ".rdata");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".rdata");
         break;
       case scInit:
         section = get_section_index (objfile, ".init");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".init");
         break;
       case scXData:
         section = get_section_index (objfile, ".xdata");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".xdata");
         break;
       case scPData:
         section = get_section_index (objfile, ".pdata");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".pdata");
         break;
       case scFini:
         section = get_section_index (objfile, ".fini");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".fini");
         break;
       case scRConst:
         section = get_section_index (objfile, ".rconst");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".rconst");
         break;
 #ifdef scTlsData
       case scTlsData:
         section = get_section_index (objfile, ".tlsdata");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".tlsdata");
         break;
 #endif
 #ifdef scTlsBss
       case scTlsBss:
         section = get_section_index (objfile, ".tlsbss");
-        bfd_section = bfd_get_section_by_name (cur_bfd, ".tlsbss");
         break;
 #endif
       default:
         /* This kind of symbol is not associated to a section.  */
         section = -1;
-        bfd_section = NULL;
     }
 
   prim_record_minimal_symbol_and_info (name, address, ms_type,
-                                       section, bfd_section, objfile);
+                                       section, objfile);
 }
 
 /* Master parsing procedure for first-pass reading of file symbols
@@ -3510,7 +3495,7 @@ parse_partial_symbols (struct objfile *objfile)
 		  prim_record_minimal_symbol_and_info (name, sh.value,
 						       mst_file_text,
 						       SECT_OFF_TEXT (objfile),
-						       NULL, objfile);
+						       objfile);
 
 		  /* FALLTHROUGH */
 
@@ -3596,13 +3581,11 @@ parse_partial_symbols (struct objfile *objfile)
 		    prim_record_minimal_symbol_and_info (name, sh.value,
 							 mst_file_data,
 							 SECT_OFF_DATA (objfile),
-							 NULL,
 							 objfile);
 		  else
 		    prim_record_minimal_symbol_and_info (name, sh.value,
 							 mst_file_bss,
 							 SECT_OFF_BSS (objfile),
-							 NULL,
 							 objfile);
 		  class = LOC_STATIC;
 		  break;
