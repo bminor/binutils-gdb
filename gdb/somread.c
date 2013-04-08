@@ -54,11 +54,10 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
   struct som_external_symbol_dictionary_record *buf, *bufp, *endbufp;
   char *symname;
   CONST int symsize = sizeof (struct som_external_symbol_dictionary_record);
-  CORE_ADDR text_offset, data_offset;
 
 
-  text_offset = ANOFFSET (section_offsets, 0);
-  data_offset = ANOFFSET (section_offsets, 1);
+#define text_offset ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile))
+#define data_offset ANOFFSET (section_offsets, SECT_OFF_DATA (objfile))
 
   number_of_symbols = bfd_get_symcount (abfd);
 
@@ -106,8 +105,35 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
       unsigned int symbol_scope
 	= (flags >> SOM_SYMBOL_SCOPE_SH) & SOM_SYMBOL_SCOPE_MASK;
       CORE_ADDR symbol_value = bfd_getb32 (bufp->symbol_value);
+      asection *section = NULL;
 
       QUIT;
+
+      /* Compute the section.  */
+      switch (symbol_scope)
+	{
+	case SS_EXTERNAL:
+	  if (symbol_type != ST_STORAGE)
+	    section = bfd_und_section_ptr;
+	  else
+	    section = bfd_com_section_ptr;
+	  break;
+
+	case SS_UNSAT:
+	  if (symbol_type != ST_STORAGE)
+	    section = bfd_und_section_ptr;
+	  else
+	    section = bfd_com_section_ptr;
+	  break;
+
+	case SS_UNIVERSAL:
+	  section = bfd_section_from_som_symbol (abfd, bufp);
+	  break;
+
+	case SS_LOCAL:
+	  section = bfd_section_from_som_symbol (abfd, bufp);
+	  break;
+	}
 
       switch (symbol_scope)
 	{
@@ -267,7 +293,29 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	error (_("Invalid symbol data; bad HP string table offset: %s"),
 	       plongest (bfd_getb32 (bufp->name)));
 
-      prim_record_minimal_symbol (symname, symbol_value, ms_type, objfile);
+      if (bfd_is_const_section (section))
+	{
+	  struct obj_section *iter;
+
+	  ALL_OBJFILE_OSECTIONS (objfile, iter)
+	    {
+	      if (bfd_is_const_section (iter->the_bfd_section))
+		continue;
+
+	      if (obj_section_addr (iter) <= symbol_value
+		  && symbol_value < obj_section_endaddr (iter))
+		{
+		  section = iter->the_bfd_section;
+		  break;
+		}
+	    }
+	}
+
+      prim_record_minimal_symbol_and_info (symname, symbol_value, ms_type,
+					   gdb_bfd_section_index (objfile->obfd,
+								  section),
+					   section,
+					   objfile);
     }
 }
 
@@ -287,7 +335,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
    for real.
 
    We look for sections with specific names, to tell us what debug
-   format to look for:  FIXME!!!
+   format to look for.
 
    somstab_build_psymtabs() handles STABS symbols.
 
@@ -361,6 +409,80 @@ som_symfile_init (struct objfile *objfile)
   objfile->flags |= OBJF_REORDERED;
 }
 
+/* An object of this type is passed to find_section_offset.  */
+
+struct find_section_offset_arg
+{
+  /* The objfile.  */
+
+  struct objfile *objfile;
+
+  /* Flags to invert.  */
+
+  flagword invert;
+
+  /* Flags to look for.  */
+
+  flagword flags;
+
+  /* A text section with non-zero size, if any.  */
+
+  asection *best_section;
+
+  /* An empty text section, if any.  */
+
+  asection *empty_section;
+};
+
+/* A callback for bfd_map_over_sections that tries to find a section
+   with particular flags in an objfile.  */
+
+static void
+find_section_offset (bfd *abfd, asection *sect, void *arg)
+{
+  struct find_section_offset_arg *info = arg;
+  flagword aflag;
+
+  aflag = bfd_get_section_flags (abfd, sect);
+
+  aflag ^= info->invert;
+
+  if ((aflag & info->flags) == info->flags)
+    {
+      if (bfd_section_size (abfd, sect) > 0)
+	{
+	  if (info->best_section == NULL)
+	    info->best_section = sect;
+	}
+      else
+	{
+	  if (info->empty_section == NULL)
+	    info->empty_section = sect;
+	}
+    }
+}
+
+/* Set a section index from a BFD.  */
+
+static void
+set_section_index (struct objfile *objfile, flagword invert, flagword flags,
+		   int *index_ptr)
+{
+  struct find_section_offset_arg info;
+
+  info.objfile = objfile;
+  info.best_section = NULL;
+  info.empty_section = NULL;
+  info.invert = invert;
+  info.flags = flags;
+  bfd_map_over_sections (objfile->obfd, find_section_offset, &info);
+
+  if (info.best_section)
+    *index_ptr = info.best_section->index;
+  else if (info.empty_section)
+    *index_ptr = info.empty_section->index;
+}
+
 /* SOM specific parsing routine for section offsets.
 
    Plain and simple for now.  */
@@ -370,22 +492,21 @@ som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
 {
   int i;
   CORE_ADDR text_addr;
+  asection *sect;
 
   objfile->num_sections = bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->objfile_obstack, 
 		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
 
-  /* FIXME: ezannoni 2000-04-20 The section names in SOM are not
-     .text, .data, etc, but $TEXT$, $DATA$,...  We should initialize
-     SET_OFF_* from bfd.  (See default_symfile_offsets()).  But I don't
-     know the correspondence between SOM sections and GDB's idea of
-     section names.  So for now we default to what is was before these
-     changes.  */
-  objfile->sect_index_text = 0;
-  objfile->sect_index_data = 1;
-  objfile->sect_index_bss = 2;
-  objfile->sect_index_rodata = 3;
+  set_section_index (objfile, 0, SEC_ALLOC | SEC_CODE,
+		     &objfile->sect_index_text);
+  set_section_index (objfile, 0, SEC_ALLOC | SEC_DATA,
+		     &objfile->sect_index_data);
+  set_section_index (objfile, SEC_LOAD, SEC_ALLOC | SEC_LOAD,
+		     &objfile->sect_index_bss);
+  set_section_index (objfile, 0, SEC_ALLOC | SEC_READONLY,
+		     &objfile->sect_index_rodata);
 
   /* First see if we're a shared library.  If so, get the section
      offsets from the library, else get them from addrs.  */

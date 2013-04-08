@@ -1,3 +1,8 @@
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
+	* som.c (bfd_section_from_som_symbol): No longer static.
+	* som.h (bfd_section_from_som_symbol): Declare.
+
 2013-04-06  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Use SYMBOLIC_BIND.
