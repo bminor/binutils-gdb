@@ -1,3 +1,9 @@
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf-mode.el: Bump version number.
+	(dwarf-mode): Remove autoload.
+	(dwarf-die-reference): Relax regexp.
+
 2013-04-05  Alan Modra  <amodra@gmail.com>
 
 	PR binutils/15324
