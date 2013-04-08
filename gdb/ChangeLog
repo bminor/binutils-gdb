@@ -1,5 +1,29 @@
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
+	* minsyms.h (struct bound_minimal_symbol): New.
+	(lookup_minimal_symbol_and_objfile): Return bound_minimal_symbol.
+	Remove objfile argument.
+	(lookup_minimal_symbol_by_pc_section, lookup_minimal_symbol_by_pc):
+	Return bound_minimal_symbol.
+	* minsyms.c (lookup_minimal_symbol_by_pc_1)
+	(lookup_minimal_symbol_by_pc_section, lookup_minimal_symbol_by_pc):
+	Return bound_minimal_symbol.
+	(in_gnu_ifunc_stub): Update.
+	(lookup_minimal_symbol_and_objfile): Return bound_minimal_symbol.
+	Remove 'objfile_p' argument.
+	(lookup_solib_trampoline_symbol_by_pc): Update.
+	* ada-tasks.c, amd64-windows-tdep.c, arm-tdep.c,
+	arm-wince-tdep.c, block.c, blockframe.c, breakpoint.c, btrace.c,
+	c-valprint.c, dwarf2loc.c, elfread.c, frame.c, frv-tdep.c,
+	glibc-tdep.c, gnu-v2-abi.c, gnu-v3-abi.c, hppa-hpux-tdep.c,
+	i386-tdep.c, ia64-tdep.c, infcall.c, infcmd.c, jit.c,
+	linux-fork.c, m32c-tdep.c, m68hc11-tdep.c, maint.c,
+	mips-tdep.c, p-valprint.c, parse.c, ppc-linux-tdep.c,
+	ppc-sysv-tdep.c, printcmd.c, rs6000-tdep.c, sh64-tdep.c,
+	stack.c, symtab.c, tui/tui-disasm.c: Update.
+
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
 	* ada-lang.c (ada_decode_symbol): Check and set 'ada_mangled'.
 	Use symbol's obstack, not an objfile.
 	* coffread.c (process_coff_symbol): Update.

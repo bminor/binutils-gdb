@@ -381,7 +381,7 @@ arm_find_mapping_symbol (CORE_ADDR memaddr, CORE_ADDR *start)
 int
 arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
   char type;
   struct displaced_step_closure* dsc
     = get_displaced_step_closure_by_addr(memaddr);
@@ -423,8 +423,8 @@ arm_pc_is_thumb (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 
   /* Thumb functions have a "special" bit set in minimal symbols.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
-  if (sym)
-    return (MSYMBOL_IS_SPECIAL (sym));
+  if (sym.minsym)
+    return (MSYMBOL_IS_SPECIAL (sym.minsym));
 
   /* If the user wants to override the fallback mode, let them.  */
   if (strcmp (arm_fallback_mode_string, "arm") == 0)
@@ -468,14 +468,14 @@ static int
 skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol_by_pc (pc);
-  if (msym != NULL
-      && SYMBOL_VALUE_ADDRESS (msym) == pc
-      && SYMBOL_LINKAGE_NAME (msym) != NULL)
+  if (msym.minsym != NULL
+      && SYMBOL_VALUE_ADDRESS (msym.minsym) == pc
+      && SYMBOL_LINKAGE_NAME (msym.minsym) != NULL)
     {
-      const char *name = SYMBOL_LINKAGE_NAME (msym);
+      const char *name = SYMBOL_LINKAGE_NAME (msym.minsym);
 
       /* The GNU linker's Thumb call stub to foo is named
 	 __foo_from_thumb.  */
@@ -1284,7 +1284,7 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
 {
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   unsigned int basereg;
-  struct minimal_symbol *stack_chk_guard;
+  struct bound_minimal_symbol stack_chk_guard;
   int offset;
   int is_thumb = arm_pc_is_thumb (gdbarch, pc);
   CORE_ADDR addr;
@@ -1299,8 +1299,9 @@ arm_skip_stack_protector(CORE_ADDR pc, struct gdbarch *gdbarch)
   /* If name of symbol doesn't start with '__stack_chk_guard', this
      instruction sequence is not for stack protector.  If symbol is
      removed, we conservatively think this sequence is for stack protector.  */
-  if (stack_chk_guard
-      && strncmp (SYMBOL_LINKAGE_NAME (stack_chk_guard), "__stack_chk_guard",
+  if (stack_chk_guard.minsym
+      && strncmp (SYMBOL_LINKAGE_NAME (stack_chk_guard.minsym),
+		  "__stack_chk_guard",
 		  strlen ("__stack_chk_guard")) != 0)
    return pc;
 

@@ -1687,15 +1687,15 @@ i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
  	{
 	  /* Make sure address is computed correctly as a 32bit
 	     integer even if CORE_ADDR is 64 bit wide.  */
- 	  struct minimal_symbol *s;
+ 	  struct bound_minimal_symbol s;
  	  CORE_ADDR call_dest;
 
 	  call_dest = pc + 5 + extract_signed_integer (buf, 4, byte_order);
 	  call_dest = call_dest & 0xffffffffU;
  	  s = lookup_minimal_symbol_by_pc (call_dest);
- 	  if (s != NULL
- 	      && SYMBOL_LINKAGE_NAME (s) != NULL
- 	      && strcmp (SYMBOL_LINKAGE_NAME (s), "__main") == 0)
+ 	  if (s.minsym != NULL
+ 	      && SYMBOL_LINKAGE_NAME (s.minsym) != NULL
+ 	      && strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "__main") == 0)
  	    pc += 5;
  	}
     }
@@ -3352,7 +3352,7 @@ i386_pe_skip_trampoline_code (struct frame_info *frame,
       unsigned long indirect =
 	read_memory_unsigned_integer (pc + 2, 4, byte_order);
       struct minimal_symbol *indsym =
-	indirect ? lookup_minimal_symbol_by_pc (indirect) : 0;
+	indirect ? lookup_minimal_symbol_by_pc (indirect).minsym : 0;
       const char *symname = indsym ? SYMBOL_LINKAGE_NAME (indsym) : 0;
 
       if (symname)

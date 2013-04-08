@@ -43,7 +43,7 @@ arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST indirect;
-  struct minimal_symbol *indsym;
+  struct bound_minimal_symbol indsym;
   const char *symname;
   CORE_ADDR next_pc;
 
@@ -62,10 +62,10 @@ arm_pe_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
     return 0;
 
   indsym = lookup_minimal_symbol_by_pc (indirect);
-  if (indsym == NULL)
+  if (indsym.minsym == NULL)
     return 0;
 
-  symname = SYMBOL_LINKAGE_NAME (indsym);
+  symname = SYMBOL_LINKAGE_NAME (indsym.minsym);
   if (symname == NULL || strncmp (symname, "__imp_", 6) != 0)
     return 0;
 
@@ -100,11 +100,11 @@ arm_wince_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
       long offset = sign_extend (this_instr & 0x000fffff, 23) << 2;
       CORE_ADDR call_dest = (pc + 8 + offset) & 0xffffffffU;
-      struct minimal_symbol *s = lookup_minimal_symbol_by_pc (call_dest);
+      struct bound_minimal_symbol s = lookup_minimal_symbol_by_pc (call_dest);
 
-      if (s != NULL
-	  && SYMBOL_LINKAGE_NAME (s) != NULL
-	  && strcmp (SYMBOL_LINKAGE_NAME (s), "__gccmain") == 0)
+      if (s.minsym != NULL
+	  && SYMBOL_LINKAGE_NAME (s.minsym) != NULL
+	  && strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "__gccmain") == 0)
 	pc += 4;
     }
 

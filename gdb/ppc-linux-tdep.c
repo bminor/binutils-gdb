@@ -332,7 +332,7 @@ static struct ppc_insn_pattern powerpc32_plt_stub_so[] =
 static int
 powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 {
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
 
   /* Check whether PC is in the dynamic linker.  This also checks
      whether it is in the .plt section, used by non-PIC executables.  */
@@ -341,9 +341,10 @@ powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 
   /* Check if we are in the resolver.  */
   sym = lookup_minimal_symbol_by_pc (pc);
-  if (sym != NULL
-      && (strcmp (SYMBOL_LINKAGE_NAME (sym), "__glink") == 0
-	  || strcmp (SYMBOL_LINKAGE_NAME (sym), "__glink_PLTresolve") == 0))
+  if (sym.minsym != NULL
+      && (strcmp (SYMBOL_LINKAGE_NAME (sym.minsym), "__glink") == 0
+	  || strcmp (SYMBOL_LINKAGE_NAME (sym.minsym),
+		     "__glink_PLTresolve") == 0))
     return 1;
 
   return 0;

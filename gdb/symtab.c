@@ -979,7 +979,7 @@ find_pc_sect_symtab_via_partial (CORE_ADDR pc, struct obj_section *section)
   /* If we know that this is not a text address, return failure.  This is
      necessary because we loop based on texthigh and textlow, which do
      not include the data ranges.  */
-  msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
+  msymbol = lookup_minimal_symbol_by_pc_section (pc, section).minsym;
   if (msymbol
       && (MSYMBOL_TYPE (msymbol) == mst_data
 	  || MSYMBOL_TYPE (msymbol) == mst_bss
@@ -2071,7 +2071,7 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
      addresses, which do not include the data ranges, and because
      we call find_pc_sect_psymtab which has a similar restriction based
      on the partial_symtab's texthigh and textlow.  */
-  msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
+  msymbol = lookup_minimal_symbol_by_pc_section (pc, section).minsym;
   if (msymbol
       && (MSYMBOL_TYPE (msymbol) == mst_data
 	  || MSYMBOL_TYPE (msymbol) == mst_bss
@@ -2202,7 +2202,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
   struct linetable_entry *item;
   struct symtab_and_line val;
   struct blockvector *bv;
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
   struct minimal_symbol *mfunsym;
   struct objfile *objfile;
 
@@ -2288,11 +2288,12 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
    *      infinite recursion.
    */
   msymbol = lookup_minimal_symbol_by_pc (pc);
-  if (msymbol != NULL)
-    if (MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
+  if (msymbol.minsym != NULL)
+    if (MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
       {
-	mfunsym = lookup_minimal_symbol_text (SYMBOL_LINKAGE_NAME (msymbol),
-					      NULL);
+	mfunsym
+	  = lookup_minimal_symbol_text (SYMBOL_LINKAGE_NAME (msymbol.minsym),
+					NULL);
 	if (mfunsym == NULL)
 	  /* I eliminated this warning since it is coming out
 	   * in the following situation:
@@ -2308,7 +2309,7 @@ find_pc_sect_line (CORE_ADDR pc, struct obj_section *section, int notcurrent)
 	  ;
 	/* fall through */
 	else if (SYMBOL_VALUE_ADDRESS (mfunsym)
-		 == SYMBOL_VALUE_ADDRESS (msymbol))
+		 == SYMBOL_VALUE_ADDRESS (msymbol.minsym))
 	  /* Avoid infinite recursion */
 	  /* See above comment about why warning is commented out.  */
 	  /* warning ("In stub for %s; unable to find real function/line info",
@@ -2821,7 +2822,7 @@ skip_prologue_sal (struct symtab_and_line *sal)
   else
     {
       struct minimal_symbol *msymbol
-        = lookup_minimal_symbol_by_pc_section (sal->pc, sal->section);
+        = lookup_minimal_symbol_by_pc_section (sal->pc, sal->section).minsym;
 
       if (msymbol == NULL)
 	{
@@ -2877,8 +2878,8 @@ skip_prologue_sal (struct symtab_and_line *sal)
       if (skip && start_sal.pc != pc
 	  && (sym ? (BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) <= start_sal.end
 		     && start_sal.end < BLOCK_END (SYMBOL_BLOCK_VALUE (sym)))
-	      : (lookup_minimal_symbol_by_pc_section (start_sal.end, section)
-		 == lookup_minimal_symbol_by_pc_section (pc, section))))
+	      : (lookup_minimal_symbol_by_pc_section (start_sal.end, section).minsym
+		 == lookup_minimal_symbol_by_pc_section (pc, section).minsym)))
 	{
 	  /* First pc of next line */
 	  pc = start_sal.end;

@@ -9823,14 +9823,14 @@ resolve_sal_pc (struct symtab_and_line *sal)
 	         if we have line numbers but no functions (as can
 	         happen in assembly source).  */
 
-	      struct minimal_symbol *msym;
+	      struct bound_minimal_symbol msym;
 	      struct cleanup *old_chain = save_current_space_and_thread ();
 
 	      switch_to_program_space_and_thread (sal->pspace);
 
 	      msym = lookup_minimal_symbol_by_pc (sal->pc);
-	      if (msym)
-		sal->section = SYMBOL_OBJ_SECTION (msym);
+	      if (msym.minsym)
+		sal->section = SYMBOL_OBJ_SECTION (msym.minsym);
 
 	      do_cleanups (old_chain);
 	    }

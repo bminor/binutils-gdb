@@ -635,12 +635,12 @@ read_atcb (CORE_ADDR task_id, struct ada_task_info *task_info)
                                sizeof (task_info->name) - 1);
       else
 	{
-	  struct minimal_symbol *msym;
+	  struct bound_minimal_symbol msym;
 
 	  msym = lookup_minimal_symbol_by_pc (task_id);
-	  if (msym)
+	  if (msym.minsym)
 	    {
-	      const char *full_name = SYMBOL_LINKAGE_NAME (msym);
+	      const char *full_name = SYMBOL_LINKAGE_NAME (msym.minsym);
 	      const char *task_name = full_name;
 	      const char *p;
 

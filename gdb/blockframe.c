@@ -88,7 +88,7 @@ CORE_ADDR
 get_pc_function_start (CORE_ADDR pc)
 {
   struct block *bl;
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
 
   bl = block_for_pc (pc);
   if (bl)
@@ -103,9 +103,9 @@ get_pc_function_start (CORE_ADDR pc)
     }
 
   msymbol = lookup_minimal_symbol_by_pc (pc);
-  if (msymbol)
+  if (msymbol.minsym)
     {
-      CORE_ADDR fstart = SYMBOL_VALUE_ADDRESS (msymbol);
+      CORE_ADDR fstart = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
 
       if (find_pc_section (fstart))
 	return fstart;
@@ -218,7 +218,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
       && section == cache_pc_function_section)
     goto return_cached_value;
 
-  msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
+  msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section).minsym;
   ALL_OBJFILES (objfile)
   {
     if (objfile->sf)

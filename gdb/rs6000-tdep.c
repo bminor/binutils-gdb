@@ -2152,15 +2152,15 @@ rs6000_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       CORE_ADDR displ = op & BL_DISPLACEMENT_MASK;
       CORE_ADDR call_dest = pc + 4 + displ;
-      struct minimal_symbol *s = lookup_minimal_symbol_by_pc (call_dest);
+      struct bound_minimal_symbol s = lookup_minimal_symbol_by_pc (call_dest);
 
       /* We check for ___eabi (three leading underscores) in addition
          to __eabi in case the GCC option "-fleading-underscore" was
 	 used to compile the program.  */
-      if (s != NULL
-          && SYMBOL_LINKAGE_NAME (s) != NULL
-	  && (strcmp (SYMBOL_LINKAGE_NAME (s), "__eabi") == 0
-	      || strcmp (SYMBOL_LINKAGE_NAME (s), "___eabi") == 0))
+      if (s.minsym != NULL
+          && SYMBOL_LINKAGE_NAME (s.minsym) != NULL
+	  && (strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "__eabi") == 0
+	      || strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "___eabi") == 0))
 	pc += 4;
     }
   return pc;
@@ -2226,7 +2226,7 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   unsigned int ii, op;
   int rel;
   CORE_ADDR solib_target_pc;
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
 
   static unsigned trampoline_code[] =
   {
@@ -2242,9 +2242,9 @@ rs6000_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
   /* Check for bigtoc fixup code.  */
   msymbol = lookup_minimal_symbol_by_pc (pc);
-  if (msymbol 
+  if (msymbol.minsym
       && rs6000_in_solib_return_trampoline (gdbarch, pc,
-					    SYMBOL_LINKAGE_NAME (msymbol)))
+					    SYMBOL_LINKAGE_NAME (msymbol.minsym)))
     {
       /* Double-check that the third instruction from PC is relative "b".  */
       op = read_memory_integer (pc + 8, 4, byte_order);

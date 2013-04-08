@@ -306,7 +306,7 @@ gnuv3_rtti_type (struct value *value,
   /* Find the linker symbol for this vtable.  */
   vtable_symbol
     = lookup_minimal_symbol_by_pc (value_address (vtable)
-                                   + value_embedded_offset (vtable));
+                                   + value_embedded_offset (vtable)).minsym;
   if (! vtable_symbol)
     return NULL;
   
@@ -988,7 +988,7 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
     real_stop_pc = stop_pc;
 
   /* Find the linker symbol for this potential thunk.  */
-  thunk_sym = lookup_minimal_symbol_by_pc (real_stop_pc);
+  thunk_sym = lookup_minimal_symbol_by_pc (real_stop_pc).minsym;
   section = find_pc_section (real_stop_pc);
   if (thunk_sym == NULL || section == NULL)
     return 0;

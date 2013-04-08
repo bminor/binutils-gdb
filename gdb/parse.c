@@ -511,13 +511,14 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
   pc = gdbarch_convert_from_func_ptr_addr (gdbarch, addr, &current_target);
   if (pc != addr)
     {
-      struct minimal_symbol *ifunc_msym = lookup_minimal_symbol_by_pc (pc);
+      struct bound_minimal_symbol ifunc_msym = lookup_minimal_symbol_by_pc (pc);
 
       /* In this case, assume we have a code symbol instead of
 	 a data symbol.  */
 
-      if (ifunc_msym != NULL && MSYMBOL_TYPE (ifunc_msym) == mst_text_gnu_ifunc
-	  && SYMBOL_VALUE_ADDRESS (ifunc_msym) == pc)
+      if (ifunc_msym.minsym != NULL
+	  && MSYMBOL_TYPE (ifunc_msym.minsym) == mst_text_gnu_ifunc
+	  && SYMBOL_VALUE_ADDRESS (ifunc_msym.minsym) == pc)
 	{
 	  /* A function descriptor has been resolved but PC is still in the
 	     STT_GNU_IFUNC resolver body (such as because inferior does not

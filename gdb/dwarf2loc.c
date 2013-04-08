@@ -527,19 +527,20 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	dwarf_block = FIELD_DWARF_BLOCK (call_site->target);
 	if (dwarf_block == NULL)
 	  {
-	    struct minimal_symbol *msym;
+	    struct bound_minimal_symbol msym;
 	    
 	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
 	    throw_error (NO_ENTRY_VALUE_ERROR,
 			 _("DW_AT_GNU_call_site_target is not specified "
 			   "at %s in %s"),
 			 paddress (call_site_gdbarch, call_site->pc),
-			 msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+			 (msym.minsym == NULL ? "???"
+			  : SYMBOL_PRINT_NAME (msym.minsym)));
 			
 	  }
 	if (caller_frame == NULL)
 	  {
-	    struct minimal_symbol *msym;
+	    struct bound_minimal_symbol msym;
 	    
 	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
 	    throw_error (NO_ENTRY_VALUE_ERROR,
@@ -547,7 +548,8 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 			   "requires known frame which is currently not "
 			   "available at %s in %s"),
 			 paddress (call_site_gdbarch, call_site->pc),
-			 msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+			 (msym.minsym == NULL ? "???"
+			  : SYMBOL_PRINT_NAME (msym.minsym)));
 			
 	  }
 	caller_arch = get_frame_arch (caller_frame);
@@ -574,7 +576,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 	msym = lookup_minimal_symbol (physname, NULL, NULL);
 	if (msym == NULL)
 	  {
-	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
+	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1).minsym;
 	    throw_error (NO_ENTRY_VALUE_ERROR,
 			 _("Cannot find function \"%s\" for a call site target "
 			   "at %s in %s"),
@@ -670,14 +672,15 @@ func_verify_no_selftailcall (struct gdbarch *gdbarch, CORE_ADDR verify_addr)
 
 	  if (target_addr == verify_addr)
 	    {
-	      struct minimal_symbol *msym;
+	      struct bound_minimal_symbol msym;
 	      
 	      msym = lookup_minimal_symbol_by_pc (verify_addr);
 	      throw_error (NO_ENTRY_VALUE_ERROR,
 			   _("DW_OP_GNU_entry_value resolving has found "
 			     "function \"%s\" at %s can call itself via tail "
 			     "calls"),
-			   msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym),
+			   (msym.minsym == NULL ? "???"
+			    : SYMBOL_PRINT_NAME (msym.minsym)),
 			   paddress (gdbarch, verify_addr));
 	    }
 
@@ -701,10 +704,11 @@ static void
 tailcall_dump (struct gdbarch *gdbarch, const struct call_site *call_site)
 {
   CORE_ADDR addr = call_site->pc;
-  struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (addr - 1);
+  struct bound_minimal_symbol msym = lookup_minimal_symbol_by_pc (addr - 1);
 
   fprintf_unfiltered (gdb_stdlog, " %s(%s)", paddress (gdbarch, addr),
-		      msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+		      (msym.minsym == NULL ? "???"
+		       : SYMBOL_PRINT_NAME (msym.minsym)));
 
 }
 
@@ -934,7 +938,7 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 
   if (retval == NULL)
     {
-      struct minimal_symbol *msym_caller, *msym_callee;
+      struct bound_minimal_symbol msym_caller, msym_callee;
       
       msym_caller = lookup_minimal_symbol_by_pc (caller_pc);
       msym_callee = lookup_minimal_symbol_by_pc (callee_pc);
@@ -942,11 +946,11 @@ call_site_find_chain_1 (struct gdbarch *gdbarch, CORE_ADDR caller_pc,
 		   _("There are no unambiguously determinable intermediate "
 		     "callers or callees between caller function \"%s\" at %s "
 		     "and callee function \"%s\" at %s"),
-		   (msym_caller == NULL
-		    ? "???" : SYMBOL_PRINT_NAME (msym_caller)),
+		   (msym_caller.minsym == NULL
+		    ? "???" : SYMBOL_PRINT_NAME (msym_caller.minsym)),
 		   paddress (gdbarch, caller_pc),
-		   (msym_callee == NULL
-		    ? "???" : SYMBOL_PRINT_NAME (msym_callee)),
+		   (msym_callee.minsym == NULL
+		    ? "???" : SYMBOL_PRINT_NAME (msym_callee.minsym)),
 		   paddress (gdbarch, callee_pc));
     }
 
@@ -1038,7 +1042,8 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
   caller_frame = get_prev_frame (frame);
   if (gdbarch != frame_unwind_arch (frame))
     {
-      struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (func_addr);
+      struct bound_minimal_symbol msym
+	= lookup_minimal_symbol_by_pc (func_addr);
       struct gdbarch *caller_gdbarch = frame_unwind_arch (frame);
 
       throw_error (NO_ENTRY_VALUE_ERROR,
@@ -1046,18 +1051,21 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
 		     "(of %s (%s)) does not match caller gdbarch %s"),
 		   gdbarch_bfd_arch_info (gdbarch)->printable_name,
 		   paddress (gdbarch, func_addr),
-		   msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym),
+		   (msym.minsym == NULL ? "???"
+		    : SYMBOL_PRINT_NAME (msym.minsym)),
 		   gdbarch_bfd_arch_info (caller_gdbarch)->printable_name);
     }
 
   if (caller_frame == NULL)
     {
-      struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (func_addr);
+      struct bound_minimal_symbol msym
+	= lookup_minimal_symbol_by_pc (func_addr);
 
       throw_error (NO_ENTRY_VALUE_ERROR, _("DW_OP_GNU_entry_value resolving "
 					   "requires caller of %s (%s)"),
 		   paddress (gdbarch, func_addr),
-		   msym == NULL ? "???" : SYMBOL_PRINT_NAME (msym));
+		   (msym.minsym == NULL ? "???"
+		    : SYMBOL_PRINT_NAME (msym.minsym)));
     }
   caller_pc = get_frame_pc (caller_frame);
   call_site = call_site_for_pc (gdbarch, caller_pc);
@@ -1067,8 +1075,8 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
     {
       struct minimal_symbol *target_msym, *func_msym;
 
-      target_msym = lookup_minimal_symbol_by_pc (target_addr);
-      func_msym = lookup_minimal_symbol_by_pc (func_addr);
+      target_msym = lookup_minimal_symbol_by_pc (target_addr).minsym;
+      func_msym = lookup_minimal_symbol_by_pc (func_addr).minsym;
       throw_error (NO_ENTRY_VALUE_ERROR,
 		   _("DW_OP_GNU_entry_value resolving expects callee %s at %s "
 		     "but the called frame is for %s at %s"),
@@ -1091,7 +1099,8 @@ dwarf_expr_reg_to_entry_parameter (struct frame_info *frame,
     }
   if (iparams == call_site->parameter_count)
     {
-      struct minimal_symbol *msym = lookup_minimal_symbol_by_pc (caller_pc);
+      struct minimal_symbol *msym
+	= lookup_minimal_symbol_by_pc (caller_pc).minsym;
 
       /* DW_TAG_GNU_call_site_parameter will be missing just if GCC could not
 	 determine its value.  */

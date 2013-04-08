@@ -1115,15 +1115,15 @@ show_mask_address (struct ui_file *file, int from_tty,
 int
 mips_pc_is_mips (CORE_ADDR memaddr)
 {
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
 
   /* Flags indicating that this is a MIPS16 or microMIPS function is
      stored by elfread.c in the high bit of the info field.  Use this
      to decide if the function is standard MIPS.  Otherwise if bit 0
      of the address is clear, then this is a standard MIPS function.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
-  if (sym)
-    return msymbol_is_mips (sym);
+  if (sym.minsym)
+    return msymbol_is_mips (sym.minsym);
   else
     return is_mips_addr (memaddr);
 }
@@ -1133,15 +1133,15 @@ mips_pc_is_mips (CORE_ADDR memaddr)
 int
 mips_pc_is_mips16 (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
 
   /* A flag indicating that this is a MIPS16 function is stored by
      elfread.c in the high bit of the info field.  Use this to decide
      if the function is MIPS16.  Otherwise if bit 0 of the address is
      set, then ELF file flags will tell if this is a MIPS16 function.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
-  if (sym)
-    return msymbol_is_mips16 (sym);
+  if (sym.minsym)
+    return msymbol_is_mips16 (sym.minsym);
   else
     return is_mips16_addr (gdbarch, memaddr);
 }
@@ -1151,7 +1151,7 @@ mips_pc_is_mips16 (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 int
 mips_pc_is_micromips (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
 
   /* A flag indicating that this is a microMIPS function is stored by
      elfread.c in the high bit of the info field.  Use this to decide
@@ -1159,8 +1159,8 @@ mips_pc_is_micromips (struct gdbarch *gdbarch, CORE_ADDR memaddr)
      is set, then ELF file flags will tell if this is a microMIPS
      function.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
-  if (sym)
-    return msymbol_is_micromips (sym);
+  if (sym.minsym)
+    return msymbol_is_micromips (sym.minsym);
   else
     return is_micromips_addr (gdbarch, memaddr);
 }
@@ -1171,7 +1171,7 @@ mips_pc_is_micromips (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 static enum mips_isa
 mips_pc_isa (struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
 
   /* A flag indicating that this is a MIPS16 or a microMIPS function
      is stored by elfread.c in the high bit of the info field.  Use
@@ -1179,11 +1179,11 @@ mips_pc_isa (struct gdbarch *gdbarch, CORE_ADDR memaddr)
      MIPS.  Otherwise if bit 0 of the address is set, then ELF file
      flags will tell if this is a MIPS16 or a microMIPS function.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
-  if (sym)
+  if (sym.minsym)
     {
-      if (msymbol_is_micromips (sym))
+      if (msymbol_is_micromips (sym.minsym))
 	return ISA_MICROMIPS;
-      else if (msymbol_is_mips16 (sym))
+      else if (msymbol_is_mips16 (sym.minsym))
 	return ISA_MIPS16;
       else
 	return ISA_MIPS;
@@ -3582,7 +3582,7 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
   gdb_byte dummy[4];
   struct obj_section *s;
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
 
   /* Use the stub unwinder for unreadable code.  */
   if (target_read_memory (get_frame_pc (this_frame), dummy, 4) != 0)
@@ -3602,9 +3602,9 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
   /* Calling a PIC function from a non-PIC function passes through a
      stub.  The stub for foo is named ".pic.foo".  */
   msym = lookup_minimal_symbol_by_pc (pc);
-  if (msym != NULL
-      && SYMBOL_LINKAGE_NAME (msym) != NULL
-      && strncmp (SYMBOL_LINKAGE_NAME (msym), ".pic.", 5) == 0)
+  if (msym.minsym != NULL
+      && SYMBOL_LINKAGE_NAME (msym.minsym) != NULL
+      && strncmp (SYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) == 0)
     return 1;
 
   return 0;
@@ -7626,7 +7626,7 @@ mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   int i;
   gdb_byte stub_code[16];
   int32_t stub_words[4];
@@ -7635,18 +7635,18 @@ mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
      instructions inserted before foo or a three instruction sequence
      which jumps to foo.  */
   msym = lookup_minimal_symbol_by_pc (pc);
-  if (msym == NULL
-      || SYMBOL_VALUE_ADDRESS (msym) != pc
-      || SYMBOL_LINKAGE_NAME (msym) == NULL
-      || strncmp (SYMBOL_LINKAGE_NAME (msym), ".pic.", 5) != 0)
+  if (msym.minsym == NULL
+      || SYMBOL_VALUE_ADDRESS (msym.minsym) != pc
+      || SYMBOL_LINKAGE_NAME (msym.minsym) == NULL
+      || strncmp (SYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) != 0)
     return 0;
 
   /* A two-instruction header.  */
-  if (MSYMBOL_SIZE (msym) == 8)
+  if (MSYMBOL_SIZE (msym.minsym) == 8)
     return pc + 8;
 
   /* A three-instruction (plus delay slot) trampoline.  */
-  if (MSYMBOL_SIZE (msym) == 16)
+  if (MSYMBOL_SIZE (msym.minsym) == 16)
     {
       if (target_read_memory (pc, stub_code, 16) != 0)
 	return 0;

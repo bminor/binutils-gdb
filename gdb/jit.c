@@ -1013,8 +1013,8 @@ static int
 jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
 				struct jit_program_space_data *ps_data)
 {
-  struct minimal_symbol *reg_symbol, *desc_symbol;
-  struct objfile *objf;
+  struct bound_minimal_symbol reg_symbol;
+  struct minimal_symbol *desc_symbol;
   struct jit_objfile_data *objf_data;
   CORE_ADDR addr;
 
@@ -1022,19 +1022,21 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
     {
       /* Lookup the registration symbol.  If it is missing, then we
 	 assume we are not attached to a JIT.  */
-      reg_symbol = lookup_minimal_symbol_and_objfile (jit_break_name, &objf);
-      if (reg_symbol == NULL || SYMBOL_VALUE_ADDRESS (reg_symbol) == 0)
+      reg_symbol = lookup_minimal_symbol_and_objfile (jit_break_name);
+      if (reg_symbol.minsym == NULL
+	  || SYMBOL_VALUE_ADDRESS (reg_symbol.minsym) == 0)
 	return 1;
 
-      desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL, objf);
+      desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL,
+					   reg_symbol.objfile);
       if (desc_symbol == NULL || SYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
 	return 1;
 
-      objf_data = get_jit_objfile_data (objf);
-      objf_data->register_code = reg_symbol;
+      objf_data = get_jit_objfile_data (reg_symbol.objfile);
+      objf_data->register_code = reg_symbol.minsym;
       objf_data->descriptor = desc_symbol;
 
-      ps_data->objfile = objf;
+      ps_data->objfile = reg_symbol.objfile;
     }
   else
     objf_data = get_jit_objfile_data (ps_data->objfile);

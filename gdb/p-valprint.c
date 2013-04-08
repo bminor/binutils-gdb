@@ -221,18 +221,18 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  /* Print vtbl's nicely.  */
 	  CORE_ADDR vt_address = unpack_pointer (type,
 						 valaddr + embedded_offset);
-	  struct minimal_symbol *msymbol =
+	  struct bound_minimal_symbol msymbol =
 	    lookup_minimal_symbol_by_pc (vt_address);
 
 	  /* If 'symbol_print' is set, we did the work above.  */
 	  if (!options->symbol_print
-	      && (msymbol != NULL)
-	      && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
+	      && (msymbol.minsym != NULL)
+	      && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol.minsym)))
 	    {
 	      if (want_space)
 		fputs_filtered (" ", stream);
 	      fputs_filtered ("<", stream);
-	      fputs_filtered (SYMBOL_PRINT_NAME (msymbol), stream);
+	      fputs_filtered (SYMBOL_PRINT_NAME (msymbol.minsym), stream);
 	      fputs_filtered (">", stream);
 	      want_space = 1;
 	    }
@@ -247,8 +247,9 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      if (want_space)
 		fputs_filtered (" ", stream);
 
-	      if (msymbol != NULL)
-		wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol), block,
+	      if (msymbol.minsym != NULL)
+		wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol.minsym),
+				      block,
 				      VAR_DOMAIN, &is_this_fld);
 
 	      if (wsym)

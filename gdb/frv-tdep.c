@@ -1072,7 +1072,7 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
     {
       LONGEST displ;
       CORE_ADDR call_dest;
-      struct minimal_symbol *s;
+      struct bound_minimal_symbol s;
 
       displ = ((op & 0xfe000000) >> 7) | (op & 0x0003ffff);
       if ((displ & 0x00800000) != 0)
@@ -1081,9 +1081,9 @@ frv_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       call_dest = pc + 4 * displ;
       s = lookup_minimal_symbol_by_pc (call_dest);
 
-      if (s != NULL
-          && SYMBOL_LINKAGE_NAME (s) != NULL
-	  && strcmp (SYMBOL_LINKAGE_NAME (s), "__main") == 0)
+      if (s.minsym != NULL
+          && SYMBOL_LINKAGE_NAME (s.minsym) != NULL
+	  && strcmp (SYMBOL_LINKAGE_NAME (s.minsym), "__main") == 0)
 	{
 	  pc += 4;
 	  return pc;

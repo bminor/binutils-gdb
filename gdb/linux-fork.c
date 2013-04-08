@@ -592,11 +592,11 @@ info_checkpoints_command (char *arg, int from_tty)
 	printf_filtered (_(", line %d"), sal.line);
       if (!sal.symtab && !sal.line)
 	{
-	  struct minimal_symbol *msym;
+	  struct bound_minimal_symbol msym;
 
 	  msym = lookup_minimal_symbol_by_pc (pc);
-	  if (msym)
-	    printf_filtered (", <%s>", SYMBOL_LINKAGE_NAME (msym));
+	  if (msym.minsym)
+	    printf_filtered (", <%s>", SYMBOL_LINKAGE_NAME (msym.minsym));
 	}
 
       putchar_filtered ('\n');

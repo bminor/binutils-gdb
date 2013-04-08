@@ -20,6 +20,23 @@
 #ifndef MINSYMS_H
 #define MINSYMS_H
 
+/* Several lookup functions return both a minimal symbol and the
+   objfile in which it is found.  This structure is used in these
+   cases.  */
+
+struct bound_minimal_symbol
+{
+  /* The minimal symbol that was found, or NULL if no minimal symbol
+     was found.  */
+
+  struct minimal_symbol *minsym;
+
+  /* If MINSYM is not NULL, then this is the objfile in which the
+     symbol is defined.  */
+
+  struct objfile *objfile;
+};
+
 /* This header declares most of the API for dealing with minimal
    symbols and minimal symbol tables.  A few things are declared
    elsewhere; see below.
@@ -169,12 +186,9 @@ struct minimal_symbol *lookup_minimal_symbol (const char *,
 					      struct objfile *);
 
 /* Find the minimal symbol named NAME, and return both the minsym
-   struct and its objfile.  This only checks the linkage name.  Sets
-   *OBJFILE_P and returns the minimal symbol, if it is found.  If it
-   is not found, returns NULL.  */
+   struct and its objfile.  This only checks the linkage name.  */
 
-struct minimal_symbol *lookup_minimal_symbol_and_objfile (const char *,
-							  struct objfile **);
+struct bound_minimal_symbol lookup_minimal_symbol_and_objfile (const char *);
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and has text type.  If OBJF
@@ -213,10 +227,10 @@ struct minimal_symbol *lookup_minimal_symbol_by_pc_name
    If SECTION is NULL, this uses the result of find_pc_section
    instead.
 
-   Returns a pointer to the minimal symbol if such a symbol is found,
-   or NULL if PC is not in a suitable range.  */
+   The result has a non-NULL 'minsym' member if such a symbol is
+   found, or NULL if PC is not in a suitable range.  */
 
-struct minimal_symbol *lookup_minimal_symbol_by_pc_section
+struct bound_minimal_symbol lookup_minimal_symbol_by_pc_section
     (CORE_ADDR,
      struct obj_section *);
 
@@ -226,7 +240,7 @@ struct minimal_symbol *lookup_minimal_symbol_by_pc_section
    This is a wrapper that calls lookup_minimal_symbol_by_pc_section
    with a NULL section argument.  */
 
-struct minimal_symbol *lookup_minimal_symbol_by_pc (CORE_ADDR);
+struct bound_minimal_symbol lookup_minimal_symbol_by_pc (CORE_ADDR);
 
 /* Iterate over all the minimal symbols in the objfile OBJF which
    match NAME.  Both the ordinary and demangled names of each symbol

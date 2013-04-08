@@ -474,7 +474,7 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
    there are text and trampoline symbols at the same address.
    Otherwise prefer mst_text symbols.  */
 
-static struct minimal_symbol *
+static struct bound_minimal_symbol
 lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 				       struct obj_section *section,
 				       int want_trampoline)
@@ -485,6 +485,8 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   struct minimal_symbol *best_symbol = NULL;
+  struct objfile *best_objfile = NULL;
+  struct bound_minimal_symbol result;
   enum minimal_symbol_type want_type, other_type;
 
   want_type = want_trampoline ? mst_solib_trampoline : mst_text;
@@ -690,14 +692,18 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 		       SYMBOL_VALUE_ADDRESS (&msymbol[hi]))))
 		{
 		  best_symbol = &msymbol[hi];
+		  best_objfile = objfile;
 		}
 	    }
 	}
     }
-  return (best_symbol);
+
+  result.minsym = best_symbol;
+  result.objfile = best_objfile;
+  return result;
 }
 
-struct minimal_symbol *
+struct bound_minimal_symbol
 lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, struct obj_section *section)
 {
   if (section == NULL)
@@ -707,17 +713,31 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, struct obj_section *section)
 	 debugging) always returns NULL making the call somewhat useless.  */
       section = find_pc_section (pc);
       if (section == NULL)
-	return NULL;
+	{
+	  struct bound_minimal_symbol result;
+
+	  memset (&result, 0, sizeof (result));
+	  return result;
+	}
     }
   return lookup_minimal_symbol_by_pc_section_1 (pc, section, 0);
 }
 
 /* See minsyms.h.  */
 
-struct minimal_symbol *
+struct bound_minimal_symbol
 lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 {
-  return lookup_minimal_symbol_by_pc_section (pc, NULL);
+  struct obj_section *section = find_pc_section (pc);
+
+  if (section == NULL)
+    {
+      struct bound_minimal_symbol result;
+
+      memset (&result, 0, sizeof (result));
+      return result;
+    }
+  return lookup_minimal_symbol_by_pc_section_1 (pc, section, 0);
 }
 
 /* Return non-zero iff PC is in an STT_GNU_IFUNC function resolver.  */
@@ -725,9 +745,9 @@ lookup_minimal_symbol_by_pc (CORE_ADDR pc)
 int
 in_gnu_ifunc_stub (CORE_ADDR pc)
 {
-  struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (pc);
+  struct bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
 
-  return msymbol && MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc;
+  return msymbol.minsym && MSYMBOL_TYPE (msymbol.minsym) == mst_text_gnu_ifunc;
 }
 
 /* See elf_gnu_ifunc_resolve_addr for its real implementation.  */
@@ -785,10 +805,10 @@ const struct gnu_ifunc_fns *gnu_ifunc_fns_p = &stub_gnu_ifunc_fns;
 
 /* See minsyms.h.  */
 
-struct minimal_symbol *
-lookup_minimal_symbol_and_objfile (const char *name,
-				   struct objfile **objfile_p)
+struct bound_minimal_symbol
+lookup_minimal_symbol_and_objfile (const char *name)
 {
+  struct bound_minimal_symbol result;
   struct objfile *objfile;
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
@@ -802,13 +822,15 @@ lookup_minimal_symbol_and_objfile (const char *name,
 	{
 	  if (strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
 	    {
-	      *objfile_p = objfile;
-	      return msym;
+	      result.minsym = msym;
+	      result.objfile = objfile;
+	      return result;
 	    }
 	}
     }
 
-  return 0;
+  memset (&result, 0, sizeof (result));
+  return result;
 }
 
 
@@ -1287,14 +1309,15 @@ static struct minimal_symbol *
 lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 {
   struct obj_section *section = find_pc_section (pc);
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
 
   if (section == NULL)
     return NULL;
   msymbol = lookup_minimal_symbol_by_pc_section_1 (pc, section, 1);
 
-  if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
-    return msymbol;
+  if (msymbol.minsym != NULL
+      && MSYMBOL_TYPE (msymbol.minsym) == mst_solib_trampoline)
+    return msymbol.minsym;
   return NULL;
 }
 

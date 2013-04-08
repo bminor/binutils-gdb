@@ -1332,12 +1332,12 @@ until_next_command (int from_tty)
 
   if (!func)
     {
-      struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (pc);
+      struct bound_minimal_symbol msymbol = lookup_minimal_symbol_by_pc (pc);
 
-      if (msymbol == NULL)
+      if (msymbol.minsym == NULL)
 	error (_("Execution is not within a known function."));
 
-      tp->control.step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
+      tp->control.step_range_start = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
       tp->control.step_range_end = pc;
     }
   else
