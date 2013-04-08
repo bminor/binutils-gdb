@@ -5119,6 +5119,42 @@ initialize_ordinary_address_classes (void)
 
 
 
+/* Initialize the symbol SYM.  */
+
+void
+initialize_symbol (struct symbol *sym)
+{
+  memset (sym, 0, sizeof (*sym));
+}
+
+/* Allocate and initialize a new 'struct symbol' on OBJFILE's
+   obstack.  */
+
+struct symbol *
+allocate_symbol (struct objfile *objfile)
+{
+  struct symbol *result;
+
+  result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
+
+  return result;
+}
+
+/* Allocate and initialize a new 'struct template_symbol' on OBJFILE's
+   obstack.  */
+
+struct template_symbol *
+allocate_template_symbol (struct objfile *objfile)
+{
+  struct template_symbol *result;
+
+  result = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct template_symbol);
+
+  return result;
+}
+
+
+
 void
 _initialize_symtab (void)
 {

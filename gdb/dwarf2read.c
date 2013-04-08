@@ -6952,7 +6952,7 @@ fixup_go_packaging (struct dwarf2_cu *cu)
 
       TYPE_TAG_NAME (type) = TYPE_NAME (type);
 
-      sym = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
+      sym = allocate_symbol (objfile);
       SYMBOL_SET_LANGUAGE (sym, language_go);
       SYMBOL_SET_NAMES (sym, saved_package_name,
 			strlen (saved_package_name), 0, objfile);
@@ -9639,8 +9639,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
       if (child_die->tag == DW_TAG_template_type_param
 	  || child_die->tag == DW_TAG_template_value_param)
 	{
-	  templ_func = OBSTACK_ZALLOC (&objfile->objfile_obstack,
-				       struct template_symbol);
+	  templ_func = allocate_template_symbol (objfile);
 	  templ_func->base.is_cplus_template_function = 1;
 	  break;
 	}
@@ -15972,7 +15971,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
       if (space)
 	sym = space;
       else
-	sym = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct symbol);
+	sym = allocate_symbol (objfile);
       OBJSTAT (objfile, n_syms++);
 
       /* Cache this symbol's name and the name's demangled form (if any).  */

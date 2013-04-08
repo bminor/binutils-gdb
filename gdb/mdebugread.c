@@ -1048,10 +1048,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
 		FIELD_BITSIZE (*f) = 0;
 
-		enum_sym = ((struct symbol *)
-			    obstack_alloc (&mdebugread_objfile->objfile_obstack,
-					   sizeof (struct symbol)));
-		memset (enum_sym, 0, sizeof (struct symbol));
+		enum_sym = allocate_symbol (mdebugread_objfile);
 		SYMBOL_SET_LINKAGE_NAME
 		  (enum_sym,
 		   obstack_copy0 (&mdebugread_objfile->objfile_obstack,
@@ -4879,11 +4876,8 @@ new_block (enum block_type type)
 static struct symbol *
 new_symbol (char *name)
 {
-  struct symbol *s = ((struct symbol *)
-		      obstack_alloc (&mdebugread_objfile->objfile_obstack,
-				     sizeof (struct symbol)));
+  struct symbol *s = allocate_symbol (mdebugread_objfile);
 
-  memset (s, 0, sizeof (*s));
   SYMBOL_SET_LANGUAGE (s, psymtab_language);
   SYMBOL_SET_NAMES (s, name, strlen (name), 1, mdebugread_objfile);
   return s;

@@ -1363,4 +1363,10 @@ void iterate_over_symbols (const struct block *block, const char *name,
 struct cleanup *demangle_for_lookup (const char *name, enum language lang,
 				     const char **result_name);
 
+struct symbol *allocate_symbol (struct objfile *);
+
+void initialize_symbol (struct symbol *);
+
+struct template_symbol *allocate_template_symbol (struct objfile *);
+
 #endif /* !defined(SYMTAB_H) */

@@ -1581,12 +1581,9 @@ process_coff_symbol (struct coff_symbol *cs,
 		     union internal_auxent *aux,
 		     struct objfile *objfile)
 {
-  struct symbol *sym
-    = (struct symbol *) obstack_alloc (&objfile->objfile_obstack,
-				       sizeof (struct symbol));
+  struct symbol *sym = allocate_symbol (objfile);
   char *name;
 
-  memset (sym, 0, sizeof (struct symbol));
   name = cs->c_name;
   name = EXTERNAL_NAME (name, objfile->obfd);
   SYMBOL_SET_LANGUAGE (sym, current_subfile->language);
@@ -2142,9 +2139,7 @@ coff_read_enum_type (int index, int length, int lastsym,
       switch (ms->c_sclass)
 	{
 	case C_MOE:
-	  sym = (struct symbol *) obstack_alloc
-	    (&objfile->objfile_obstack, sizeof (struct symbol));
-	  memset (sym, 0, sizeof (struct symbol));
+	  sym = allocate_symbol (objfile);
 
 	  SYMBOL_SET_LINKAGE_NAME (sym,
 				   obstack_copy0 (&objfile->objfile_obstack,

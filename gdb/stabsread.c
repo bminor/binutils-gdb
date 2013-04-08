@@ -379,11 +379,7 @@ patch_block_stabs (struct pending *symbols, struct pending_stabs *stabs,
 	      /* On xcoff, if a global is defined and never referenced,
 	         ld will remove it from the executable.  There is then
 	         a N_GSYM stab for it, but no regular (C_EXT) symbol.  */
-	      sym = (struct symbol *)
-		obstack_alloc (&objfile->objfile_obstack,
-			       sizeof (struct symbol));
-
-	      memset (sym, 0, sizeof (struct symbol));
+	      sym = allocate_symbol (objfile);
 	      SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	      SYMBOL_ACLASS_INDEX (sym) = LOC_OPTIMIZED_OUT;
 	      SYMBOL_SET_LINKAGE_NAME
@@ -652,9 +648,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
      e.g. ":t10=*2" or a nameless enum like " :T16=ered:0,green:1,blue:2,;" */
   nameless = (p == string || ((string[0] == ' ') && (string[1] == ':')));
 
-  current_symbol = sym = (struct symbol *)
-    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
-  memset (sym, 0, sizeof (struct symbol));
+  current_symbol = sym = allocate_symbol (objfile);
 
   switch (type & N_TYPE)
     {
@@ -1292,8 +1286,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       if (synonym)
         {
           /* Create the STRUCT_DOMAIN clone.  */
-          struct symbol *struct_sym = (struct symbol *)
-            obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
+          struct symbol *struct_sym = allocate_symbol (objfile);
 
           *struct_sym = *sym;
           SYMBOL_ACLASS_INDEX (struct_sym) = LOC_TYPEDEF;
@@ -1337,8 +1330,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       if (synonym)
 	{
 	  /* Clone the sym and then modify it.  */
-	  struct symbol *typedef_sym = (struct symbol *)
-	    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
+	  struct symbol *typedef_sym = allocate_symbol (objfile);
 
 	  *typedef_sym = *sym;
 	  SYMBOL_ACLASS_INDEX (typedef_sym) = LOC_TYPEDEF;
@@ -3681,9 +3673,7 @@ read_enum_type (char **pp, struct type *type,
       if (nbits != 0)
 	return error_type (pp, objfile);
 
-      sym = (struct symbol *)
-	obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
-      memset (sym, 0, sizeof (struct symbol));
+      sym = allocate_symbol (objfile);
       SYMBOL_SET_LINKAGE_NAME (sym, name);
       SYMBOL_SET_LANGUAGE (sym, current_subfile->language);
       SYMBOL_ACLASS_INDEX (sym) = LOC_CONST;
@@ -4355,9 +4345,7 @@ common_block_end (struct objfile *objfile)
       return;
     }
 
-  sym = (struct symbol *)
-    obstack_alloc (&objfile->objfile_obstack, sizeof (struct symbol));
-  memset (sym, 0, sizeof (struct symbol));
+  sym = allocate_symbol (objfile);
   /* Note: common_block_name already saved on objfile_obstack.  */
   SYMBOL_SET_LINKAGE_NAME (sym, common_block_name);
   SYMBOL_ACLASS_INDEX (sym) = LOC_BLOCK;

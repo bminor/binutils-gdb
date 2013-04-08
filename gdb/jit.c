@@ -677,8 +677,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
        i--, gdb_block_iter = gdb_block_iter->next)
     {
       struct block *new_block = allocate_block (&objfile->objfile_obstack);
-      struct symbol *block_name = obstack_alloc (&objfile->objfile_obstack,
-                                                 sizeof (struct symbol));
+      struct symbol *block_name = allocate_symbol (objfile);
       struct type *block_type = arch_type (get_objfile_arch (objfile),
 					   TYPE_CODE_VOID,
 					   1,
@@ -691,7 +690,6 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
       BLOCK_END (new_block) = (CORE_ADDR) gdb_block_iter->end;
 
       /* The name.  */
-      memset (block_name, 0, sizeof (struct symbol));
       SYMBOL_DOMAIN (block_name) = VAR_DOMAIN;
       SYMBOL_ACLASS_INDEX (block_name) = LOC_BLOCK;
       SYMBOL_SYMTAB (block_name) = symtab;

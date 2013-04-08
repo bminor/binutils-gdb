@@ -1,3 +1,21 @@
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
+	* coffread.c (process_coff_symbol, coff_read_enum_type): Call
+	allocate_symbol.
+	* dwarf2read.c (fixup_go_packaging): Call allocate_symbol.
+	(read_func_scope): Call allocate_template_symbol.
+	(new_symbol_full): Call allocate_symbol.
+	* jit.c (finalize_symtab): Call allocate_symbol.
+	* jv-lang.c (add_class_symbol): Call allocate_symbol.
+	* mdebugread.c (parse_symbol, new_block): Call allocate_symbol.
+	* stabsread.c (patch_block_stabs, define_symbol, read_enum_type)
+	(common_block_end): Call allocate_symbol.
+	* symtab.c (allocate_symbol, initialize_symbol)
+	(allocate_template_symbol): New functions.
+	* symtab.c (allocate_symbol, initialize_symbol)
+	(allocate_template_symbol): Declare.
+	* xcoffread.c (process_xcoff_symbol): Call initialize_symbol.
+
 2013-04-08  Pedro Alves  <palves@redhat.com>
 	    Keith Seitz  <keiths@redhat.com>
 
