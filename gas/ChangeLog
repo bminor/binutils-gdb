@@ -1,3 +1,8 @@
+2013-04-08  Jan Beulich <jbeulich@suse.com>
+
+	* gas/config/tc-arm.c (reg_names): Convert duplicate SP_fiq
+	entry to sp_fiq.
+
 2013-04-03  Alan Modra  <amodra@gmail.com>
 
 	* doc/as.texinfo: Add support to generate man options for h8300.

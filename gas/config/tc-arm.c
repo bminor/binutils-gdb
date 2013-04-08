@@ -17538,7 +17538,7 @@ static const struct reg_entry reg_names[] =
   REGDEF(R10_fiq,512|(10<<16),RNB), REGDEF(r10_fiq,512|(10<<16),RNB),
   REGDEF(R11_fiq,512|(11<<16),RNB), REGDEF(r11_fiq,512|(11<<16),RNB),
   REGDEF(R12_fiq,512|(12<<16),RNB), REGDEF(r12_fiq,512|(12<<16),RNB),
-  REGDEF(SP_fiq,512|(13<<16),RNB), REGDEF(SP_fiq,512|(13<<16),RNB),
+  REGDEF(SP_fiq,512|(13<<16),RNB), REGDEF(sp_fiq,512|(13<<16),RNB),
   REGDEF(LR_fiq,512|(14<<16),RNB), REGDEF(lr_fiq,512|(14<<16),RNB),
   REGDEF(SPSR_fiq,512|(14<<16)|SPSR_BIT,RNB), REGDEF(spsr_fiq,512|(14<<16)|SPSR_BIT,RNB),
 
