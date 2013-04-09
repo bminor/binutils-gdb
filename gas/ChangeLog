@@ -1,3 +1,10 @@
+2013-04-09 Joerg Wunsch <joerg.wunsch@atmel.com>
+
+	* gas/config/tc-avr.c (mcu_types): Add ATmega64RFR2,
+	ATmega644RFR2, ATmega128RFR2, ATmega1284RFR2, ATmega256RFR2,
+	ATmega2564RFR2
+	* gas/doc/c-avr.texi (-mmcu documentation): Likewise.
+
 2013-04-09  Jan Beulich <jbeulich@suse.com>
 
 	* gas/config/tc-arm.c (do_vmrs): Accept all control registers.
