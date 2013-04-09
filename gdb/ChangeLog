@@ -1,3 +1,8 @@
+2013-04-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* varobj.c (update_dynamic_varobj_children) [!HAVE_PYTHON]:
+	Use gdb_assert_not_reached instead of invalid boolean expression.
+
 2013-04-09  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (unpush_and_perror): New function.

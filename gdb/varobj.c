@@ -1252,7 +1252,7 @@ update_dynamic_varobj_children (struct varobj *var,
 
   return 1;
 #else
-  gdb_assert (0 && "should never be called if Python is not enabled");
+  gdb_assert_not_reached ("should never be called if Python is not enabled");
 #endif
 }
 
