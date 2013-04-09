@@ -1,3 +1,9 @@
+2013-04-09  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	PR ld/12494
+	* bfd/elf32-avr.c: Consider all sections to determine if linker
+	relaxation can safely delete a ret after a call/jmp
+
 2013-04-09  Mingjie Xing  <mingjie.xing@gmail.com>
 
 	* bfd.c (typedef bfd, Error reporting, Miscellaneous): Add
