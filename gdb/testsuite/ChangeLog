@@ -1,3 +1,8 @@
+2013-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.server/server-kill.exp (tstatus): Permit also ECONNRESET
+	response.
+
 2013-04-04  Stan Shebs  <stan@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 

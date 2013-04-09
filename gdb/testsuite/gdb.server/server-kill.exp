@@ -42,4 +42,4 @@ remote_exec target "kill -9 $server_pid"
 
 # Force GDB to talk with GDBserver, so that we can get the
 # "connection closed" error.
-gdb_test "tstatus" "Remote connection closed"
+gdb_test "tstatus" {Remote connection closed|Remote communication error\.  Target disconnected\.: Connection reset by peer\.}
