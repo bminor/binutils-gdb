@@ -1,3 +1,8 @@
+2013-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.server/server-kill.exp (tstatus): Permit also ECONNRESET
+	response.
+
 2013-04-08  Pedro Alves  <palves@redhat.com>
 
 	* gdb.mi/mi-break.exp (test_error): Add tests with garbage after
