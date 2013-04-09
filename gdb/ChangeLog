@@ -1,3 +1,8 @@
+2013-04-09  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (unpush_and_perror): New function.
+	(readchar, remote_serial_write): Use it.
+
 2013-04-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* NEWS: Mention new btrace RSP packets.

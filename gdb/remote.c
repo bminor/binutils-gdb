@@ -7033,6 +7033,23 @@ remote_files_info (struct target_ops *ignore)
 /* Stuff for dealing with the packets which are part of this protocol.
    See comment at top of file for details.  */
 
+/* Close/unpush the remote target, and throw a TARGET_CLOSE_ERROR
+   error to higher layers.  Called when a serial error is detected.
+   The exception message is STRING, followed by a colon and a blank,
+   then the system error message for errno at function entry.  */
+
+static void
+unpush_and_perror (const char *string)
+{
+  char *errstr;
+
+  errstr = xstrprintf ("%s: %s", string, safe_strerror (errno));
+  make_cleanup (xfree, errstr);
+
+  remote_unpush_target ();
+  throw_error (TARGET_CLOSE_ERROR, "%s", errstr);
+}
+
 /* Read a single character from the remote end.  */
 
 static int
@@ -7052,10 +7069,8 @@ readchar (int timeout)
       throw_error (TARGET_CLOSE_ERROR, _("Remote connection closed"));
       /* no return */
     case SERIAL_ERROR:
-      remote_unpush_target ();
-      throw_perror_with_name (TARGET_CLOSE_ERROR,
-			      _("Remote communication error.  "
-				"Target disconnected."));
+      unpush_and_perror (_("Remote communication error.  "
+			   "Target disconnected."));
       /* no return */
     case SERIAL_TIMEOUT:
       break;
@@ -7071,10 +7086,8 @@ remote_serial_write (const char *str, int len)
 {
   if (serial_write (remote_desc, str, len))
     {
-      remote_unpush_target ();
-      throw_perror_with_name (TARGET_CLOSE_ERROR,
-			      _("Remote communication error.  "
-				"Target disconnected."));
+      unpush_and_perror (_("Remote communication error.  "
+			   "Target disconnected."));
     }
 }
 
