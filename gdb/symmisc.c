@@ -268,7 +268,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 						section->the_bfd_section));
 	  else
 	    fprintf_filtered (outfile, " spurious section %ld",
-			      section - objfile->sections);
+			      (long) (section - objfile->sections));
 	}
       if (SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
 	{

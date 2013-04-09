@@ -1,5 +1,10 @@
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
+	* symmisc.c (dump_msymbols): Cast fprintf_filtered argument to
+	long.
+
+2013-04-08  Tom Tromey  <tromey@redhat.com>
+
 	* maint.c (print_bfd_section_info): Print the section index.
 	* symmisc.c (dump_msymbols): Print the section index.
 
