@@ -1,5 +1,10 @@
 2013-04-09  Jan Beulich <jbeulich@suse.com>
 
+	* gas/arm/neon-omit.s: Add tests for suffix less VMOV.
+	* gas/arm/neon-omit.d: Update accordingly.
+
+2013-04-09  Jan Beulich <jbeulich@suse.com>
+
 	* gas/arm/neon-addressing-bad.s: Add test for further invalid VST
 	operands.
 	* gas/arm/neon-addressing-bad.l: Update accordingly. 

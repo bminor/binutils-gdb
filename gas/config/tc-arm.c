@@ -15360,6 +15360,16 @@ do_neon_mov (void)
         unsigned dn = NEON_SCALAR_REG (inst.operands[0].reg);
         unsigned x = NEON_SCALAR_INDEX (inst.operands[0].reg);
 
+	/* .<size> is optional here, defaulting to .32. */
+	if (inst.vectype.elems == 0
+	    && inst.operands[0].vectype.type == NT_invtype
+	    && inst.operands[1].vectype.type == NT_invtype)
+	  {
+	    inst.vectype.el[0].type = NT_untyped;
+	    inst.vectype.el[0].size = 32;
+	    inst.vectype.elems = 1;
+	  }
+
         et = neon_check_type (2, NS_NULL, N_8 | N_16 | N_32 | N_KEY, N_EQK);
         logsize = neon_logbits (et.size);
 
@@ -15408,6 +15418,16 @@ do_neon_mov (void)
         unsigned dn = NEON_SCALAR_REG (inst.operands[1].reg);
         unsigned x = NEON_SCALAR_INDEX (inst.operands[1].reg);
         unsigned abcdebits = 0;
+
+	/* .<dt> is optional here, defaulting to .32. */
+	if (inst.vectype.elems == 0
+	    && inst.operands[0].vectype.type == NT_invtype
+	    && inst.operands[1].vectype.type == NT_invtype)
+	  {
+	    inst.vectype.el[0].type = NT_untyped;
+	    inst.vectype.el[0].size = 32;
+	    inst.vectype.elems = 1;
+	  }
 
 	et = neon_check_type (2, NS_NULL,
 			      N_EQK, N_S8 | N_S16 | N_U8 | N_U16 | N_32 | N_KEY);
