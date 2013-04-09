@@ -1,3 +1,9 @@
+2013-04-09  Jan Beulich <jbeulich@suse.com>
+
+	* gas/arm/neon-addressing-bad.s: Add test for further invalid VST
+	operands.
+	* gas/arm/neon-addressing-bad.l: Update accordingly. 
+
 2013-04-08  Jan Beulich <jbeulich@suse.com>
 
 	* gas/i386/x86-64-opcode.s: Flesh out LOOP and J*CXZ sections.

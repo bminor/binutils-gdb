@@ -15999,6 +15999,11 @@ do_neon_ldx_stx (void)
 
     case NEON_ALL_LANES:
       NEON_ENCODE (DUP, inst);
+      if (inst.instruction == N_INV)
+	{
+	  first_error ("only loads support such operands");
+	  break;
+	}
       do_neon_ld_dup ();
       break;
 

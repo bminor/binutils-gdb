@@ -1,3 +1,8 @@
+2013-04-09  Jan Beulich <jbeulich@suse.com>
+
+	* gas/config/tc-arm.c (do_neon_ldx_stx): Reject VSTn in the
+	NEON_ALL_LANES case.
+
 2013-04-08  Jan Beulich <jbeulich@suse.com>
 
 	* gas/config/tc-arm.c (do_neon_ldr_str): Correct disgnostics for
