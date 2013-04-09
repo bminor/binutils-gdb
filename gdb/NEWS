@@ -246,6 +246,19 @@ QTBuffer:size
    Set the size of trace buffer.  The remote stub reports support for this
    packet to gdb's qSupported query.
 
+Qbtrace:bts
+  Enable Branch Trace Store (BTS)-based branch tracing for the current
+  thread.  The remote stub reports support for this packet to gdb's
+  qSupported query.
+
+Qbtrace:off
+  Disable branch tracing for the current thread.  The remote stub reports
+  support for this packet to gdb's qSupported query.
+
+qXfer:btrace:read
+  Read the traced branches for the current thread.  The remote stub
+  reports support for this packet to gdb's qSupported query.
+
 *** Changes in GDB 7.5
 
 * GDB now supports x32 ABI.  Visit <http://sites.google.com/site/x32abi/>

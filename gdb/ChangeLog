@@ -1,3 +1,7 @@
+2013-04-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* NEWS: Mention new btrace RSP packets.
+
 2013-04-08  Tom Tromey  <tromey@redhat.com>
 
 	* symmisc.c (dump_msymbols): Cast fprintf_filtered argument to
