@@ -1,5 +1,11 @@
 2013-04-09  Jan Beulich <jbeulich@suse.com>
 
+	* gas/config/tc-arm.c (do_vmrs): Accept all control registers.
+	Use local variable Rt in more places.
+	(do_vmsr): Accept all control registers.
+
+2013-04-09  Jan Beulich <jbeulich@suse.com>
+
 	* gas/config/tc-arm.c (do_neon_mov): Fake an instruction suffix
 	if there was none specified for moves between scalar and core
 	register.

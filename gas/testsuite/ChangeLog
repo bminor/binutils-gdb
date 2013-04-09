@@ -1,5 +1,11 @@
 2013-04-09  Jan Beulich <jbeulich@suse.com>
 
+	* gas/arm/vfp1xD.s: Add VMRS/VMSR tests with FPINST, FPINST2,
+	and C15.
+	* gas/arm/vfp1xD.d: Update accordingly.
+
+2013-04-09  Jan Beulich <jbeulich@suse.com>
+
 	* gas/arm/neon-omit.s: Add tests for suffix less VMOV.
 	* gas/arm/neon-omit.d: Update accordingly.
 

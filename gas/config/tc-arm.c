@@ -8256,32 +8256,22 @@ do_vmrs (void)
 {
   unsigned Rt = inst.operands[0].reg;
 
-  if (thumb_mode && inst.operands[0].reg == REG_SP)
+  if (thumb_mode && Rt == REG_SP)
     {
       inst.error = BAD_SP;
       return;
     }
 
   /* APSR_ sets isvec. All other refs to PC are illegal.  */
-  if (!inst.operands[0].isvec && inst.operands[0].reg == REG_PC)
+  if (!inst.operands[0].isvec && Rt == REG_PC)
     {
       inst.error = BAD_PC;
       return;
     }
 
-  switch (inst.operands[1].reg)
-    {
-    case 0: /* FPSID */
-    case 1: /* FPSCR */
-    case 6: /* MVFR1 */
-    case 7: /* MVFR0 */
-    case 8: /* FPEXC */
-      inst.instruction |= (inst.operands[1].reg << 16);
-      break;
-    default:
-      first_error (_("operand 1 must be a VFP extension System Register"));
-    }
-
+  /* If we get through parsing the register name, we just insert the number
+     generated into the instruction without further validation.  */
+  inst.instruction |= (inst.operands[1].reg << 16);
   inst.instruction |= (Rt << 12);
 }
 
@@ -8298,17 +8288,9 @@ do_vmsr (void)
       return;
     }
 
-  switch (inst.operands[0].reg)
-    {
-    case 0: /* FPSID  */
-    case 1: /* FPSCR  */
-    case 8: /* FPEXC */
-      inst.instruction |= (inst.operands[0].reg << 16);
-      break;
-    default:
-      first_error (_("operand 0 must be FPSID or FPSCR pr FPEXC"));
-    }
-
+  /* If we get through parsing the register name, we just insert the number
+     generated into the instruction without further validation.  */
+  inst.instruction |= (inst.operands[0].reg << 16);
   inst.instruction |= (Rt << 12);
 }
 
