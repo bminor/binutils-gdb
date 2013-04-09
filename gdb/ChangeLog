@@ -1,3 +1,7 @@
+2013-04-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* NEWS: Mention new btrace RSP packets.
+
 2013-04-06  Eli Zaretskii  <eliz@gnu.org>
 
 	* mingw-hdep.c (windows_get_absolute_argv0): New function.
