@@ -1,3 +1,7 @@
+2013-04-10  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Trace Files): Add "target ctf".
+
 2013-04-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (POD2MAN1, POD2MAN5): Replace $(VERSION) by ../version.in.

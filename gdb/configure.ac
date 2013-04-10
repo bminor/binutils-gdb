@@ -2321,6 +2321,47 @@ if test "$enable_gdbserver" = "yes" -a "$gdbserver_build_enabled" != "yes"; then
   AC_MSG_ERROR(Automatic gdbserver build is not supported for this configuration)
 fi
 
+# Check for babeltrace and babeltrace-ctf
+AC_ARG_WITH(babeltrace,
+  AC_HELP_STRING([--with-babeltrace], [include babeltrace support (auto/yes/no)]),
+  [], [with_babeltrace=auto])
+AC_MSG_CHECKING([whether to use babeltrace])
+AC_MSG_RESULT([$with_babeltrace])
+
+if test "x$with_babeltrace" = "xno"; then
+  AC_MSG_WARN([babletrace support disabled; GDB is unable to read CTF data.])
+else
+  # Append -Werror to CFLAGS so that configure can catch the warning
+  # "assignment from incompatible pointer type", which is related to
+  # the babeltrace change from 1.0.3 to 1.1.0.  Babeltrace 1.1.0 works
+  # in GDB, while babeltrace 1.0.3 is broken.
+  # AC_LIB_HAVE_LINKFLAGS may modify CPPFLAGS in it, so it should be
+  # safe to save and restore CFLAGS here.
+  saved_CFLAGS=$CFLAGS
+  CFLAGS="$CFLAGS -Werror"
+  AC_LIB_HAVE_LINKFLAGS([babeltrace], [babeltrace-ctf],
+			[#include <babeltrace/babeltrace.h>
+			 #include <babeltrace/ctf/events.h>
+			 #include <babeltrace/ctf/iterator.h>],
+			[struct bt_iter_pos *pos = bt_iter_get_pos (bt_ctf_get_iter (NULL));
+			struct bt_ctf_event *event = NULL;
+			const struct bt_definition *scope;
+
+			scope = bt_ctf_get_top_level_scope (event, 
+			      				   BT_STREAM_EVENT_HEADER);
+		        bt_ctf_get_uint64 (bt_ctf_get_field (event, scope, "id"));
+			])
+  CFLAGS=$saved_CFLAGS
+
+  if test "$HAVE_LIBBABELTRACE" != yes; then
+     if test "$with_babeltrace" = yes; then
+       AC_MSG_ERROR([babeltrace is missing or unusable])
+     else
+       AC_MSG_WARN([babeltrace is missing or unusable; GDB is unable to read CTF data.])
+     fi
+  fi
+fi
+
 # If nativefile (NAT_FILE) is not set in config/*/*.m[ht] files, we link
 # to an empty version.
 

@@ -127,14 +127,6 @@ extern void (*deprecated_readline_end_hook) (void);
 typedef struct trace_state_variable tsv_s;
 DEF_VEC_O(tsv_s);
 
-/* An object describing the contents of a traceframe.  */
-
-struct traceframe_info
-{
-  /* Collected memory.  */
-  VEC(mem_range_s) *memory;
-};
-
 static VEC(tsv_s) *tvariables;
 
 /* The next integer to assign to a variable.  */
@@ -3303,8 +3295,6 @@ static const struct trace_file_write_ops tfile_write_ops =
 #define TRACE_WRITE_V_BLOCK(writer, num, val)	\
   writer->ops->frame_ops->write_v_block ((writer), (num), (val))
 
-extern int trace_regblock_size;
-
 /* Save tracepoint data to file named FILENAME through WRITER.  WRITER
    determines the trace file format.  If TARGET_DOES_SAVE is non-zero,
    the save is performed on the target, otherwise GDB obtains all trace
@@ -3741,6 +3731,12 @@ get_traceframe_number (void)
   return traceframe_number;
 }
 
+int
+get_tracepoint_number (void)
+{
+  return tracepoint_number;
+}
+
 /* Make the traceframe NUM be the current trace frame.  Does nothing
    if NUM is already current.  */
 
@@ -3859,7 +3855,7 @@ free_uploaded_tps (struct uploaded_tp **utpp)
 /* Given a number and address, return an uploaded tracepoint with that
    number, creating if necessary.  */
 
-static struct uploaded_tsv *
+struct uploaded_tsv *
 get_uploaded_tsv (int num, struct uploaded_tsv **utsvp)
 {
   struct uploaded_tsv *utsv;

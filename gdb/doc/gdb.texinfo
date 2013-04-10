@@ -12307,13 +12307,33 @@ that can be shared by multiple debugging and tracing tools.  Please go to
 
 @kindex target tfile
 @kindex tfile
+@kindex target ctf
+@kindex ctf
 @item target tfile @var{filename}
-Use the file named @var{filename} as a source of trace data.  Commands
-that examine data work as they do with a live target, but it is not
-possible to run any new trace experiments.  @code{tstatus} will report
-the state of the trace run at the moment the data was saved, as well
-as the current trace frame you are examining.  @var{filename} must be
-on a filesystem accessible to the host.
+@itemx target ctf @var{dirname}
+Use the file named @var{filename} or directory named @var{dirname} as
+a source of trace data.  Commands that examine data work as they do with
+a live target, but it is not possible to run any new trace experiments.
+@code{tstatus} will report the state of the trace run at the moment
+the data was saved, as well as the current trace frame you are examining.
+@var{filename} or @var{dirname} must be on a filesystem accessible to
+the host.
+
+@smallexample
+(@value{GDBP}) target ctf ctf.ctf
+(@value{GDBP}) tfind
+Found trace frame 0, tracepoint 2
+39            ++a;  /* set tracepoint 1 here */
+(@value{GDBP}) tdump
+Data collected at tracepoint 2, trace frame 0:
+i = 0
+a = 0
+b = 1 '\001'
+c = @{"123", "456", "789", "123", "456", "789"@}
+d = @{@{@{a = 1, b = 2@}, @{a = 3, b = 4@}@}, @{@{a = 5, b = 6@}, @{a = 7, b = 8@}@}@}
+(@value{GDBP}) p b
+$1 = 1
+@end smallexample
 
 @end table
 

@@ -24,6 +24,14 @@
 #include "memrange.h"
 #include "gdb_vecs.h"
 
+/* An object describing the contents of a traceframe.  */
+
+struct traceframe_info
+{
+  /* Collected memory.  */
+  VEC(mem_range_s) *memory;
+};
+
 /* A trace state variable is a value managed by a target being
    traced.  A trace state variable (or tsv for short) can be accessed
    and assigned to by tracepoint actions and conditionals, but is not
@@ -141,6 +149,8 @@ struct trace_status
 struct trace_status *current_trace_status (void);
 
 extern char *default_collect;
+
+extern int trace_regblock_size;
 
 /* Struct to collect random info about tracepoints on the target.  */
 
@@ -324,6 +334,9 @@ extern void (*deprecated_trace_start_stop_hook) (int start, int from_tty);
 /* Returns the current traceframe number.  */
 extern int get_traceframe_number (void);
 
+/* Returns the tracepoint number for current traceframe.  */
+extern int get_tracepoint_number (void);
+
 /* Make the traceframe NUM be the current GDB trace frame number, and
    do nothing more.  In particular, this does not flush the
    register/frame caches or notify the target about the trace frame
@@ -368,6 +381,8 @@ extern void parse_tsv_definition (char *line, struct uploaded_tsv **utsvp);
 
 extern struct uploaded_tp *get_uploaded_tp (int num, ULONGEST addr,
 					    struct uploaded_tp **utpp);
+extern struct uploaded_tsv *get_uploaded_tsv (int num,
+					      struct uploaded_tsv **utsvp);
 extern struct tracepoint *create_tracepoint_from_upload (struct uploaded_tp *utp);
 extern void merge_uploaded_tracepoints (struct uploaded_tp **utpp);
 extern void merge_uploaded_trace_state_variables (struct uploaded_tsv **utsvp);

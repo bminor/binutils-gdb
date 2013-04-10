@@ -1,5 +1,19 @@
 2013-04-10  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/actions.exp: Save trace data to CTF.
+	Change to ctf target if GDB supports, read CTF data in ctf
+	target, and check the actions of tracepoints.
+	* gdb.trace/while-stepping.exp: Likewise.
+	* gdb.trace/report.exp: Test GDB saves trace data to CTF
+	format and read CTF trace file if GDB supports.
+	* gdb.trace/tstatus.exp: Save trace data to CTF.  If ctf
+	target is supported, change to ctf target, read trace data and
+	check output of command "tstatus".
+	* gdb.trace/tsv.exp: Save trace frame to CTF.  If GDB supports,
+	read CTF data by target ctf and call check_tsv.
+
+2013-04-10  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.trace/actions.exp (check_tracepoint): New.
 	(top level): Start the tracing and check the actions of
 	tracepoints.  Save trace data to tfile format.  Restart GDB

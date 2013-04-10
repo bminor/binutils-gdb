@@ -310,6 +310,9 @@ gdb_test_no_output "tstop" ""
 set tracefile [standard_output_file ${testfile}]
 gdb_test "tsave ${tracefile}.tf" \
     "Trace data saved to file '${tracefile}.tf'\.\\r"
+gdb_test "tsave -ctf ${tracefile}.ctf" \
+    "Trace data saved to directory '${tracefile}.ctf'\.\\r" \
+    "save ctf trace file"
 
 # Restart GDB and read the trace data in tfile target.
 gdb_exit
@@ -319,3 +322,24 @@ gdb_file_cmd $binfile
 gdb_test "target tfile ${tracefile}.tf" ".*" \
     "change to tfile target"
 check_tracepoint "tfile"
+
+# Try to read ctf data if GDB supports.
+set gdb_can_read_ctf_data 0
+gdb_test_multiple "target ctf" "" {
+    -re "Undefined target command: \"ctf\"\.  Try \"help target\"\.\r\n$gdb_prompt $" {
+	set gdb_can_read_ctf_data 0
+    }
+    -re "No CTF directory specified.*\r\n$gdb_prompt $" {
+	set gdb_can_read_ctf_data 1
+    }
+}
+
+if { $gdb_can_read_ctf_data } {
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_file_cmd $binfile
+    gdb_test "target ctf ${tracefile}.ctf" ".*" \
+	"change to ctf target"
+    check_tracepoint "ctf"
+}

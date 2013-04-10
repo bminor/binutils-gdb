@@ -1,3 +1,46 @@
+2013-04-10  Hui Zhu  <hui@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* configure.ac: Check libbabeltrace is installed.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* Makefile.in (LIBBABELTRACE): New.
+	(CLIBS): Add LIBBABELTRACE.
+	* ctf.c: Include "exec.h".
+	(CTF_EVENT_ID_STATUS, CTF_EVENT_ID_TSV_DEF): New macros.
+	(CTF_EVENT_ID_TP_DEF, ctf_save_write_int32): New macros.
+	(ctf_save_metadata_header): Define new type aliases in
+	metadata.
+	(ctf_write_header): Define event type "tsv_def" and "tp_def"
+	in metadata.  Start a new faked packet for trace status.
+	(ctf_write_status): Write trace status to CTF.
+	(ctf_write_uploaded_tsv): Write TSV to CTF.
+	(ctf_write_uploaded_tp): Write tracepoint definition to CTF.
+	(ctf_write_definition_end): End the faked packet.
+
+	(ctx, ctf_iter, trace_dirname): New.
+	(start_pos): New variable.
+	(ctf_destroy, ctf_open_dir, ctf_open): New.
+	(SET_INT32_FIELD, SET_ARRAY_FIELD, SET_STRING_FIELD): New
+	macros.
+	(ctf_read_tsv, ctf_read_tp, ctf_close, ctf_files_info): New.
+	(ctf_fetch_registers, ctf_xfer_partial): New.
+	(ctf_get_trace_state_variable_value): New.
+	(ctf_get_tpnum_from_frame_event): New.
+	(ctf_get_traceframe_address): New.
+	(ctf_trace_find, ctf_has_stack): New.
+	(ctf_has_registers, ctf_traceframe_info, init_ctf_ops): New.
+	(ctf_get_trace_status, ctf_read_status): New.
+	(_initialize_ctf): New.
+	* tracepoint.c (get_tracepoint_number): New
+	(get_uploaded_tsv): Remove 'static'.
+ 	(struct traceframe_info, trace_regblock_size): Move it to ...
+	* tracepoint.h: ... here.
+	(get_tracepoint_number): Declare it.
+	(get_uploaded_tsv): Declare it.
+
+	* NEWS: Mention new configure option.
+
 2013-04-10  Pedro Alves  <palves@redhat.com>
 	    Hui Zhu  <hui@codesourcery.com>
 

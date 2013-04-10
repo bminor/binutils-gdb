@@ -142,6 +142,10 @@ set tracefile [standard_output_file ${testfile}]
 gdb_test "tsave ${tracefile}.tf" \
     "Trace data saved to file '${tracefile}.tf'.*" \
     "save tfile trace file"
+# Save trace frames to CTF.
+gdb_test "tsave -ctf ${tracefile}.ctf" \
+    "Trace data saved to directory '${tracefile}.ctf'.*" \
+    "save ctf trace file"
 
 # Change target to tfile.
 set test "change to tfile target"
@@ -162,3 +166,13 @@ set tstatus_output [string map {\) \\)} $tstatus_output]
 # The status should be identical to the status of live inferior.
 gdb_test "tstatus" "Using a trace file\.\r\n${tstatus_output}.*" \
     "tstatus on tfile target"
+
+# Change target to ctf if GDB supports.
+gdb_test_multiple "target ctf ${tracefile}.ctf" "" {
+    -re "Undefined target command: \"ctf ${tracefile}.ctf\"\.  Try \"help target\"\.\r\n$gdb_prompt $" {
+    }
+    -re ".*\r\n$gdb_prompt $" {
+	gdb_test "tstatus" "Using a trace file\.\r\n${tstatus_output}.*" \
+	    "tstatus on ctf target"
+    }
+}
