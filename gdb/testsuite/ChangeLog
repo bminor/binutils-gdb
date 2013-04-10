@@ -1,3 +1,8 @@
+2013-04-10  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/report.exp: Use standard_output_file for saved
+	trace file.
+
 2013-04-10  Hui Zhu  <hui@codesourcery.com>
 
 	* gdb.base/Makefile.in (EXECUTABLES): Add dprintf-pending.

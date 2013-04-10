@@ -407,11 +407,14 @@ gdb_tfind_test "finished: make sure not debugging any trace frame" \
     "none" "-1"
 
 # Save trace frames to tfile.
-gdb_test "tsave report.tf" "Trace data saved to file 'report.tf'.*"
+set tracefile [standard_output_file ${testfile}]
+gdb_test "tsave ${tracefile}.tf" \
+    "Trace data saved to file '${tracefile}.tf'.*" \
+    "save tfile trace file"
 
 # Change target to tfile.
 set test "change to tfile target"
-gdb_test_multiple "target tfile report.tf" "$test" {
+gdb_test_multiple "target tfile ${tracefile}.tf" "$test" {
     -re "A program is being debugged already.  Kill it. .y or n. " {
 	send_gdb "y\n"
 	exp_continue
