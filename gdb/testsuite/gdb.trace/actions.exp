@@ -235,3 +235,87 @@ gdb_test "info tracepoints" \
 \[\t \]+not installed on target." \
 		"5.10a: verify teval actions set for two tracepoints"
 
+gdb_test "break main"
+gdb_run_cmd
+gdb_test "" "Breakpoint .*"
+if ![gdb_target_supports_trace] {
+    unsupported "target does not support trace"
+    return -1
+}
+
+gdb_trace_setactions "set actions for first tracepoint" \
+    "$trcpt1" \
+    "collect \$regs" "^$" \
+    "end" ""
+
+# Check the definition of tracepoints.  These tracepoints may have
+# different number in different runs.
+
+proc check_tracepoint { data_source } {
+    with_test_prefix "$data_source" {
+	global gdb_prompt
+	global srcfile
+
+	set tp_on_gdb_c_test 0
+	set tp_on_gdb_asm_test 0
+	set tp_on_gdb_recursion_test 0
+
+	# Since the three tracepoints may appear in different orders, so
+	# we can't do 'info tracepoints' to match the output.  Instead, we
+	# show each tracepoint one by one and record the number of each
+	# tracepoint shown up the output.  Check the number finally.
+	for {set i 1} {$i < 4} {incr i 1} {
+	    set test "info tracepoints $i"
+	    gdb_test_multiple "info tracepoints $i" $test {
+		-re "\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+\\r\\n\[\t \]+collect \\\$regs\\r\\n\[\t \]+installed on target" {
+		    incr tp_on_gdb_c_test
+		    exp_continue
+		}
+		-re "\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_asm_test at .*$srcfile:\[0-9\]+\\r\\n\[\t \]+teval \\\$tsv \\+= 1\\r\\n\[\t \]+installed on target" {
+		    incr tp_on_gdb_asm_test
+		    exp_continue
+		}
+		-re "\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_recursion_test at .*$srcfile:\[0-9\]+\\r\\n\[\t \]+collect gdb_long_test\\r\\n\[\t \]+installed on target" {
+		    incr tp_on_gdb_recursion_test
+		    exp_continue
+		}
+		-re "${gdb_prompt} $" {
+		}
+	    }
+	}
+
+	if {$tp_on_gdb_c_test == 1} {
+	    pass "tracepoint on gdb_c_test"
+	} else {
+	    fail "tracepoint on gdb_c_test"
+	}
+	if {$tp_on_gdb_asm_test == 1} {
+	    pass "tracepoint on gdb_asm_test"
+	} else {
+	    fail "tracepoint on gdb_asm_test"
+	}
+	if {$tp_on_gdb_recursion_test == 1} {
+	    pass "tracepoint on gdb_recursion_test"
+	} else {
+	    fail "tracepoint on gdb_recursion_test $tp_on_gdb_recursion_test"
+	}
+    }
+}
+
+# Start and stop the tracing, so that we can save tracepoints
+# definitions to trace file.
+gdb_test_no_output "tstart" ""
+check_tracepoint "live"
+gdb_test_no_output "tstop" ""
+set tracefile [standard_output_file ${testfile}]
+gdb_test "tsave ${tracefile}.tf" \
+    "Trace data saved to file '${tracefile}.tf'\.\\r"
+
+# Restart GDB and read the trace data in tfile target.
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_file_cmd $binfile
+gdb_test "target tfile ${tracefile}.tf" ".*" \
+    "change to tfile target"
+check_tracepoint "tfile"

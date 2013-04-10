@@ -99,3 +99,49 @@ gdb_test "info tracepoints" \
 .*end.*" \
 	"5.16: confirm actions, step without collecting anything"
 
+gdb_test "break main"
+gdb_run_cmd
+gdb_test "" "Breakpoint .*"
+if ![gdb_target_supports_trace] {
+    unsupported "target does not support trace"
+    return -1
+}
+
+gdb_trace_setactions "set stepcount to $stepcount" \
+	"" \
+	"while-stepping $stepcount" "" \
+	"collect \$regs " "^$" \
+	"collect \$locals " "^$" \
+	"end" ""
+
+proc check_tracepoint { data_source } {
+    with_test_prefix "$data_source" {
+	global srcfile
+	global stepcount
+
+	gdb_test "info tracepoints" \
+	    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+tracepoint     keep y.* in gdb_c_test at .*$srcfile:\[0-9\]+.
+\[\t \]+while-stepping $stepcount.*
+\[\t \]+collect \\\$regs.*
+\[\t \]+collect \\\$locals.*
+\[\t \]+end.*"
+    }
+}
+
+gdb_test_no_output "tstart"
+check_tracepoint "live"
+gdb_test_no_output "tstop"
+set tracefile [standard_output_file ${testfile}]
+gdb_test "tsave ${tracefile}.tf" \
+    "Trace data saved to file '${tracefile}.tf'\.\\r" \
+    "save tfile trace file"
+
+# Restart GDB and read the trace data in tfile target.
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_file_cmd $binfile
+gdb_test "target tfile ${tracefile}.tf" ".*" \
+    "change to tfile target"
+check_tracepoint "tfile"

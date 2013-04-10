@@ -1,5 +1,14 @@
 2013-04-10  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/actions.exp (check_tracepoint): New.
+	(top level): Start the tracing and check the actions of
+	tracepoints.  Save trace data to tfile format.  Restart GDB
+	and read trace file in tfile target.  Check the actions of
+	tracepoints again.
+	* gdb.trace/while-stepping.exp: Likewise.
+
+2013-04-10  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.trace/report.exp: Use standard_output_file for saved
 	trace file.
 
