@@ -1,5 +1,9 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* common/linux-btrace.c (linux_enable_btrace): Enlarge buffer.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c (ftrace_new_function): Start counting at one.
 	* record-btrace.c (record_btrace_info): Adjust number of calls
 	and insns.

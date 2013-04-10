@@ -423,7 +423,7 @@ struct btrace_target_info *
 linux_enable_btrace (ptid_t ptid)
 {
   struct btrace_target_info *tinfo;
-  int pid;
+  int pid, pg;
 
   tinfo = xzalloc (sizeof (*tinfo));
   tinfo->ptid = ptid;
@@ -451,17 +451,22 @@ linux_enable_btrace (ptid_t ptid)
   if (tinfo->file < 0)
     goto err;
 
-  /* We hard-code the trace buffer size.
-     At some later time, we should make this configurable.  */
-  tinfo->size = 1;
-  tinfo->buffer = mmap (NULL, perf_event_mmap_size (tinfo),
-			PROT_READ, MAP_SHARED, tinfo->file, 0);
-  if (tinfo->buffer == MAP_FAILED)
-    goto err_file;
+  /* We try to allocate as much buffer as we can get.
+     We could allow the user to specify the size of the buffer, but then
+     we'd leave this search for the maximum buffer size to him.  */
+  for (pg = 4; pg >= 0; --pg)
+    {
+      /* The number of pages we request needs to be a power of two.  */
+      tinfo->size = 1 << pg;
+      tinfo->buffer = mmap (NULL, perf_event_mmap_size (tinfo),
+			    PROT_READ, MAP_SHARED, tinfo->file, 0);
+      if (tinfo->buffer == MAP_FAILED)
+	continue;
 
-  return tinfo;
+      return tinfo;
+    }
 
- err_file:
+  /* We were not able to allocate any buffer.  */
   close (tinfo->file);
 
  err:
