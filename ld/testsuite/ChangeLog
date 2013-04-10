@@ -1,3 +1,15 @@
+2013-04-10  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
+
+	* ld-aarch64/gc-plt1.s: New file.
+	* ld-aarch64/gc-plt2.s: Likewise.
+	* ld-aarch64/gc-plt-hidden.s: Likewise.
+	* ld-aarch64/gc-plt-main.s: Likewise.
+	* ld-aarch64/gc-relocs-257.s: Likewise.
+	* ld-aarch64/gc-plt-relocs.d: Update expected objdump.
+	* ld-aarch64/gc-relocs-257.d: Likewise.
+	* ld-aarch64/gc-relocs-257-dyn.d: Likewise.
+	* ld-aarch64/aarch64-elf.exp: Add test.
+
 2013-04-08  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* ld-aarch64/gc-tls-relocs.d: Handle big endian format.
