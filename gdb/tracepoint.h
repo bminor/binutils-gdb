@@ -387,7 +387,8 @@ extern struct tracepoint *create_tracepoint_from_upload (struct uploaded_tp *utp
 extern void merge_uploaded_tracepoints (struct uploaded_tp **utpp);
 extern void merge_uploaded_trace_state_variables (struct uploaded_tsv **utsvp);
 
-extern void disconnect_tracing (int from_tty);
+extern void query_if_trace_running (int from_tty);
+extern void disconnect_tracing (void);
 
 extern void start_tracing (char *notes);
 extern void stop_tracing (char *notes);

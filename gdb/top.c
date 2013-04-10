@@ -64,6 +64,7 @@
 #include <ctype.h>
 #include "ui-out.h"
 #include "cli-out.h"
+#include "tracepoint.h"
 
 extern void initialize_all_files (void);
 
@@ -1282,29 +1283,6 @@ quit_confirm (void)
   return qr;
 }
 
-/* Helper routine for quit_force that requires error handling.  */
-
-static int
-quit_target (void *arg)
-{
-  struct qt_args *qt = (struct qt_args *)arg;
-
-  /* Kill or detach all inferiors.  */
-  iterate_over_inferiors (kill_or_detach, qt);
-
-  /* Give all pushed targets a chance to do minimal cleanup, and pop
-     them all out.  */
-  pop_all_targets ();
-
-  /* Save the history information if it is appropriate to do so.  */
-  if (write_history_p && history_filename)
-    write_history (history_filename);
-
-  do_final_cleanups (all_cleanups ());    /* Do any final cleanups before
-					     exiting.  */
-  return 0;
-}
-
 /* Quit without asking for confirmation.  */
 
 void
@@ -1312,6 +1290,7 @@ quit_force (char *args, int from_tty)
 {
   int exit_code = 0;
   struct qt_args qt;
+  volatile struct gdb_exception ex;
 
   /* An optional expression may be used to cause gdb to terminate with the 
      value of that expression.  */
@@ -1327,9 +1306,46 @@ quit_force (char *args, int from_tty)
   qt.args = args;
   qt.from_tty = from_tty;
 
+  /* Wrappers to make the code below a bit more readable.  */
+#define DO_TRY \
+  TRY_CATCH (ex, RETURN_MASK_ALL)
+
+#define DO_PRINT_EX \
+  if (ex.reason < 0) \
+    exception_print (gdb_stderr, ex)
+
   /* We want to handle any quit errors and exit regardless.  */
-  catch_errors (quit_target, &qt,
-	        "Quitting: ", RETURN_MASK_ALL);
+
+  /* Get out of tfind mode, and kill or detach all inferiors.  */
+  DO_TRY
+    {
+      disconnect_tracing ();
+      iterate_over_inferiors (kill_or_detach, &qt);
+    }
+  DO_PRINT_EX;
+
+  /* Give all pushed targets a chance to do minimal cleanup, and pop
+     them all out.  */
+  DO_TRY
+    {
+      pop_all_targets ();
+    }
+  DO_PRINT_EX;
+
+  /* Save the history information if it is appropriate to do so.  */
+  DO_TRY
+    {
+      if (write_history_p && history_filename)
+	write_history (history_filename);
+    }
+  DO_PRINT_EX;
+
+  /* Do any final cleanups before exiting.  */
+  DO_TRY
+    {
+      do_final_cleanups (all_cleanups ());
+    }
+  DO_PRINT_EX;
 
   exit (exit_code);
 }

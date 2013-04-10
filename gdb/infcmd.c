@@ -2721,7 +2721,9 @@ detach_command (char *args, int from_tty)
   if (ptid_equal (inferior_ptid, null_ptid))
     error (_("The program is not being run."));
 
-  disconnect_tracing (from_tty);
+  query_if_trace_running (from_tty);
+
+  disconnect_tracing ();
 
   target_detach (args, from_tty);
 
@@ -2751,7 +2753,8 @@ static void
 disconnect_command (char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
-  disconnect_tracing (from_tty);
+  query_if_trace_running (from_tty);
+  disconnect_tracing ();
   target_disconnect (args, from_tty);
   no_shared_libraries (NULL, from_tty);
   init_thread_list ();

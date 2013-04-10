@@ -2204,12 +2204,15 @@ trace_status_mi (int on_stop)
   }
 }
 
-/* This function handles the details of what to do about an ongoing
-   tracing run if the user has asked to detach or otherwise disconnect
-   from the target.  */
+/* Check if a trace run is ongoing.  If so, and FROM_TTY, query the
+   user if she really wants to detach.  */
+
 void
-disconnect_tracing (int from_tty)
+query_if_trace_running (int from_tty)
 {
+  if (!from_tty)
+    return;
+
   /* It can happen that the target that was tracing went away on its
      own, and we didn't notice.  Get a status update, and if the
      current target doesn't even do tracing, then assume it's not
@@ -2222,7 +2225,7 @@ disconnect_tracing (int from_tty)
      just going to disconnect and let the target deal with it,
      according to how it's been instructed previously via
      disconnected-tracing.  */
-  if (current_trace_status ()->running && from_tty)
+  if (current_trace_status ()->running)
     {
       process_tracepoint_on_disconnect ();
 
@@ -2239,7 +2242,15 @@ disconnect_tracing (int from_tty)
 	    error (_("Not confirmed."));
 	}
     }
+}
 
+/* This function handles the details of what to do about an ongoing
+   tracing run if the user has asked to detach or otherwise disconnect
+   from the target.  */
+
+void
+disconnect_tracing (void)
+{
   /* Also we want to be out of tfind mode, otherwise things can get
      confusing upon reconnection.  Just use these calls instead of
      full tfind_1 behavior because we're in the middle of detaching,
