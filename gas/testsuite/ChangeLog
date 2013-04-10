@@ -1,3 +1,17 @@
+2013-04-10  Jan Beulich <jbeulich@suse.com>
+
+	* gas/arm/barrier-bad.d: Change title.
+	* gas/arm/barrier-bad.s: Add immediate form of ISB and DSB as
+	well as one symbolic form of DSB.
+	* gas/arm/barrier-bad.l: Update accordingly.
+	* gas/arm/barrier-bad-thumb.d: Adjust title. Use barrier-bad.s as
+	source. Pass -mthumb to gas.
+	* gas/arm/barrier-bad-thumb.l: Remove.
+	* gas/arm/barrier-bad-thumb.s: Remove.
+	* gas/arm/barrier-thumb.d: Adjust title. Use barrier.s as source.
+	Pass -mthumb to gas.
+	* gas/arm/barrier-thumb.s: Remove.
+
 2013-04-09  Jan Beulich <jbeulich@suse.com>
 
 	* gas/arm/vfp1xD.s: Add VMRS/VMSR tests with FPINST, FPINST2,

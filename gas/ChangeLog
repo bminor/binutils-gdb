@@ -1,3 +1,10 @@
+2013-04-10  Jan Beulich <jbeulich@suse.com>
+
+	* gas/config/tc-arm.c (parse_operands): Re-write
+	po_barrier_or_imm().
+	(do_barrier): Remove bogus constraint().
+	(do_t_barrier): Remove.
+
 2013-04-09 Joerg Wunsch <joerg.wunsch@atmel.com>
 
 	* gas/config/tc-avr.c (mcu_types): Add ATmega64RFR2,

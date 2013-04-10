@@ -6338,22 +6338,16 @@ parse_operands (char *str, const unsigned int *pattern, bfd_boolean thumb)
   do							   \
     {						 	   \
       val = parse_barrier (&str);			   \
-      if (val == FAIL)					   \
+      if (val == FAIL && ! ISALPHA (*str))		   \
+	goto immediate;					   \
+      if (val == FAIL					   \
+	  /* ISB can only take SY as an option.  */	   \
+	  || ((inst.instruction & 0xf0) == 0x60		   \
+	       && val != 0xf))				   \
 	{						   \
-	  if (ISALPHA (*str))				   \
-	      goto failure;				   \
-	  else						   \
-	      goto immediate;				   \
-	}						   \
-      else						   \
-	{						   \
-	  if ((inst.instruction & 0xf0) == 0x60		   \
-	      && val != 0xf)				   \
-	    {						   \
-	       /* ISB can only take SY as an option.  */   \
-	       inst.error = _("invalid barrier type");	   \
-	       goto failure;				   \
-	    }						   \
+	   inst.error = _("invalid barrier type");	   \
+	   backtrack_pos = 0;				   \
+	   goto failure;				   \
 	}						   \
     }							   \
   while (0)
@@ -7541,13 +7535,7 @@ static void
 do_barrier (void)
 {
   if (inst.operands[0].present)
-    {
-      constraint ((inst.instruction & 0xf0) != 0x40
-		  && inst.operands[0].imm > 0xf
-		  && inst.operands[0].imm < 0x0,
-		  _("bad barrier type"));
-      inst.instruction |= inst.operands[0].imm;
-    }
+    inst.instruction |= inst.operands[0].imm;
   else
     inst.instruction |= 0xf;
 }
@@ -10048,21 +10036,6 @@ do_t_arit3c (void)
       else
 	constraint (1, _("dest must overlap one source register"));
     }
-}
-
-static void
-do_t_barrier (void)
-{
-  if (inst.operands[0].present)
-    {
-      constraint ((inst.instruction & 0xf0) != 0x40
-		  && inst.operands[0].imm > 0xf
-		  && inst.operands[0].imm < 0x0,
-		  _("bad barrier type"));
-      inst.instruction |= inst.operands[0].imm;
-    }
-  else
-    inst.instruction |= 0xf;
 }
 
 static void
@@ -18510,9 +18483,9 @@ static const struct asm_opcode insns[] =
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_barrier
 
- TUF("dmb",	57ff050, f3bf8f50, 1, (oBARRIER_I15), barrier,  t_barrier),
- TUF("dsb",	57ff040, f3bf8f40, 1, (oBARRIER_I15), barrier,  t_barrier),
- TUF("isb",	57ff060, f3bf8f60, 1, (oBARRIER_I15), barrier,  t_barrier),
+ TUF("dmb",	57ff050, f3bf8f50, 1, (oBARRIER_I15), barrier, barrier),
+ TUF("dsb",	57ff040, f3bf8f40, 1, (oBARRIER_I15), barrier, barrier),
+ TUF("isb",	57ff060, f3bf8f60, 1, (oBARRIER_I15), barrier, barrier),
 
  /* ARM V7 instructions.  */
 #undef  ARM_VARIANT
