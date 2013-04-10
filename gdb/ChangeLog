@@ -1,3 +1,10 @@
+2013-04-10  Pedro Alves  <palves@redhat.com>
+	    Hui Zhu  <hui@codesourcery.com>
+
+	* breakpoint.c (dprintf_re_set): New.
+	(initialize_breakpoint_ops): Set dprintf_breakpoint_ops re_set
+	to dprintf_re_set.
+
 2013-04-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.tgt (gdb_target_obs) <powerpc-*-aix* | rs6000-*-*>:

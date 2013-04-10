@@ -1,3 +1,9 @@
+2013-04-10  Hui Zhu  <hui@codesourcery.com>
+
+	* gdb.base/Makefile.in (EXECUTABLES): Add dprintf-pending.
+	(MISCELLANEOUS): Add dprintf-pendshr.sl.
+	* gdb.base/dprintf-pending.c, gdb.base/dprintf-pending.exp: New.
+
 2013-04-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.server/server-kill.exp (tstatus): Permit also ECONNRESET

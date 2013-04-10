@@ -13512,6 +13512,35 @@ tracepoint_probe_decode_linespec (struct breakpoint *b, char **s,
 
 static struct breakpoint_ops tracepoint_probe_breakpoint_ops;
 
+/* Dprintf breakpoint_ops methods.  */
+
+static void
+dprintf_re_set (struct breakpoint *b)
+{
+  breakpoint_re_set_default (b);
+
+  /* This breakpoint could have been pending, and be resolved now, and
+     if so, we should now have the extra string.  If we don't, the
+     dprintf was malformed when created, but we couldn't tell because
+     we can't extract the extra string until the location is
+     resolved.  */
+  if (b->loc != NULL && b->extra_string == NULL)
+    error (_("Format string required"));
+
+  /* 1 - connect to target 1, that can run breakpoint commands.
+     2 - create a dprintf, which resolves fine.
+     3 - disconnect from target 1
+     4 - connect to target 2, that can NOT run breakpoint commands.
+
+     After steps #3/#4, you'll want the dprintf command list to
+     be updated, because target 1 and 2 may well return different
+     answers for target_can_run_breakpoint_commands().
+     Given absence of finer grained resetting, we get to do
+     it all the time.  */
+  if (b->extra_string != NULL)
+    update_dprintf_command_list (b);
+}
+
 /* The breakpoint_ops structure to be used on static tracepoints with
    markers (`-m').  */
 
@@ -16011,7 +16040,7 @@ initialize_breakpoint_ops (void)
 
   ops = &dprintf_breakpoint_ops;
   *ops = bkpt_base_breakpoint_ops;
-  ops->re_set = bkpt_re_set;
+  ops->re_set = dprintf_re_set;
   ops->resources_needed = bkpt_resources_needed;
   ops->print_it = bkpt_print_it;
   ops->print_mention = bkpt_print_mention;
