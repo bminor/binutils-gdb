@@ -418,7 +418,7 @@ powerpc-*-openbsd*)
 powerpc-*-aix* | rs6000-*-*)
 	# Target: PowerPC running AIX
 	gdb_target_obs="rs6000-tdep.o rs6000-aix-tdep.o xcoffread.o \
-			ppc-sysv-tdep.o solib-svr4.o \
+			ppc-sysv-tdep.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
 	;;
 powerpc-*-linux* | powerpc64-*-linux*)

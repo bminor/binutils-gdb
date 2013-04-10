@@ -1,5 +1,10 @@
 2013-04-09  Joel Brobecker  <brobecker@adacore.com>
 
+	* configure.tgt (gdb_target_obs) <powerpc-*-aix* | rs6000-*-*>:
+	Remove solib-svr4.o from the list.
+
+2013-04-09  Joel Brobecker  <brobecker@adacore.com>
+
 	* varobj.c (update_dynamic_varobj_children) [!HAVE_PYTHON]:
 	Use gdb_assert_not_reached instead of invalid boolean expression.
 
