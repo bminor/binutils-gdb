@@ -1,5 +1,11 @@
 2013-04-10  Jan Beulich <jbeulich@suse.com>
 
+	* gas/config/tc-arm.c (encode_arm_addr_mode_3): Only reject base
+	register being PC when is_t or writeback, and use distinct
+	diagnostic for the latter case.
+
+2013-04-10  Jan Beulich <jbeulich@suse.com>
+
 	* gas/config/tc-arm.c (parse_operands): Re-write
 	po_barrier_or_imm().
 	(do_barrier): Remove bogus constraint().

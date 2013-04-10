@@ -7196,8 +7196,10 @@ encode_arm_addr_mode_3 (int i, bfd_boolean is_t)
   if (inst.operands[i].immisreg)
     {
       constraint ((inst.operands[i].imm == REG_PC
-		   || inst.operands[i].reg == REG_PC),
+		   || (is_t && inst.operands[i].reg == REG_PC)),
 		  BAD_PC_ADDRESSING);
+      constraint (inst.operands[i].reg == REG_PC && inst.operands[i].writeback,
+		  BAD_PC_WRITEBACK);
       inst.instruction |= inst.operands[i].imm;
       if (!inst.operands[i].negative)
 	inst.instruction |= INDEX_UP;

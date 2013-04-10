@@ -1,5 +1,11 @@
 2013-04-10  Jan Beulich <jbeulich@suse.com>
 
+	* gas/testsuite/gas/arm/ldst-pc.s: Add index, non-writeback
+	forms of various loads and stores with PC as base.
+	* gas/testsuite/gas/arm/ldst-pc.d: Update accordingly.
+
+2013-04-10  Jan Beulich <jbeulich@suse.com>
+
 	* gas/arm/barrier-bad.d: Change title.
 	* gas/arm/barrier-bad.s: Add immediate form of ISB and DSB as
 	well as one symbolic form of DSB.
