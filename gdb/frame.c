@@ -2495,7 +2495,7 @@ the rest of the stack trace."),
 Set an upper bound on the number of backtrace levels."), _("\
 Show the upper bound on the number of backtrace levels."), _("\
 No more than the specified number of frames can be displayed or examined.\n\
-Zero is unlimited."),
+Literal \"unlimited\" or zero means no limit."),
 			    NULL,
 			    show_backtrace_limit,
 			    &set_backtrace_cmdlist,

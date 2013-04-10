@@ -2971,7 +2971,8 @@ delete the oldest recorded instruction to make room for each new one."),
 			    _("Set record/replay buffer limit."),
 			    _("Show record/replay buffer limit."), _("\
 Set the maximum number of instructions to be stored in the\n\
-record/replay buffer.  Zero means unlimited.  Default is 200000."),
+record/replay buffer.  A value of either \"unlimited\" or zero means no\n\
+limit.  Default is 200000."),
 			    set_record_full_insn_max_num,
 			    NULL, &set_record_full_cmdlist,
 			    &show_record_full_cmdlist);

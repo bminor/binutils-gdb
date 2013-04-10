@@ -2046,7 +2046,10 @@ The matching line number is also stored as the value of \"$_\"."));
 
   add_setshow_integer_cmd ("listsize", class_support, &lines_to_list, _("\
 Set number of source lines gdb will list by default."), _("\
-Show number of source lines gdb will list by default."), NULL,
+Show number of source lines gdb will list by default."), _("\
+Use this to choose how many source lines the \"list\" displays (unless\n\
+the \"list\" argument explicitly specifies some other number).\n\
+A value of \"unlimited\", or zero, means there's no limit."),
 			    NULL,
 			    show_lines_to_list,
 			    &setlist, &showlist);

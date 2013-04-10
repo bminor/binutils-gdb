@@ -5884,8 +5884,8 @@ up and stopping the trace run."),
 Set requested size of trace buffer."), _("\
 Show requested size of trace buffer."), _("\
 Use this to choose a size for the trace buffer.  Some targets\n\
-may have fixed or limited buffer sizes.  A value of -1 disables\n\
-any attempt to set the buffer size and lets the target choose."),
+may have fixed or limited buffer sizes.  Specifying \"unlimited\" or -1\n\
+disables any attempt to set the buffer size and lets the target choose."),
 				       set_trace_buffer_size, NULL,
 				       &setlist, &showlist);
 

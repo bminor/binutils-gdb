@@ -638,6 +638,22 @@ add_setshow_optional_filename_cmd (const char *name, enum command_class class,
 
 }
 
+/* Completes on literal "unlimited".  Used by integer commands that
+   support a special "unlimited" value.  */
+
+static VEC (char_ptr) *
+integer_unlimited_completer (struct cmd_list_element *ignore,
+			     const char *text, const char *word)
+{
+  static const char * const keywords[] =
+    {
+      "unlimited",
+      NULL,
+    };
+
+  return complete_on_enum (keywords, text, word);
+}
+
 /* Add element named NAME to both the set and show command LISTs (the
    list for set/show or some sublist thereof).  CLASS is as in
    add_cmd.  VAR is address of the variable which will contain the
@@ -653,11 +669,15 @@ add_setshow_integer_cmd (const char *name, enum command_class class,
 			 struct cmd_list_element **set_list,
 			 struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *set;
+
   add_setshow_cmd_full (name, class, var_integer, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&set, NULL);
+
+  set_cmd_completer (set, integer_unlimited_completer);
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
@@ -674,11 +694,15 @@ add_setshow_uinteger_cmd (const char *name, enum command_class class,
 			  struct cmd_list_element **set_list,
 			  struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *set;
+
   add_setshow_cmd_full (name, class, var_uinteger, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&set, NULL);
+
+  set_cmd_completer (set, integer_unlimited_completer);
 }
 
 /* Add element named NAME to both the set and show command LISTs (the
@@ -714,11 +738,15 @@ add_setshow_zuinteger_unlimited_cmd (const char *name,
 				     struct cmd_list_element **set_list,
 				     struct cmd_list_element **show_list)
 {
+  struct cmd_list_element *set;
+
   add_setshow_cmd_full (name, class, var_zuinteger_unlimited, var,
 			set_doc, show_doc, help_doc,
 			set_func, show_func,
 			set_list, show_list,
-			NULL, NULL);
+			&set, NULL);
+
+  set_cmd_completer (set, integer_unlimited_completer);
 }
 
 /* Add element named NAME to both the set and show command LISTs (the

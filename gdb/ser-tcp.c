@@ -424,8 +424,11 @@ Show auto-retry on socket connect"),
 
   add_setshow_uinteger_cmd ("connect-timeout", class_obscure,
 			    &tcp_retry_limit, _("\
-Set timeout limit for socket connection"), _("\
-Show timeout limit for socket connection"),
-			   NULL, NULL, NULL,
-			   &tcp_set_cmdlist, &tcp_show_cmdlist);
+Set timeout limit in seconds for socket connection"), _("\
+Show timeout limit in seconds for socket connection"), _("\
+If set to \"unlimited\", GDB will keep attempting to establish a\n\
+connection forever, unless interrupted with Ctrl-c.\n\
+The default is 15 seconds."),
+			    NULL, NULL,
+			    &tcp_set_cmdlist, &tcp_show_cmdlist);
 }

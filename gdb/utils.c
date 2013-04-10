@@ -2651,7 +2651,7 @@ initialize_utils (void)
 Set number of characters where GDB should wrap lines of its output."), _("\
 Show number of characters where GDB should wrap lines of its output."), _("\
 This affects where GDB wraps its output to fit the screen width.\n\
-Setting this to zero prevents GDB from wrapping its output."),
+Setting this to \"unlimited\" or zero prevents GDB from wrapping its output."),
 			    set_width_command,
 			    show_chars_per_line,
 			    &setlist, &showlist);
@@ -2661,7 +2661,7 @@ Set number of lines in a page for GDB output pagination."), _("\
 Show number of lines in a page for GDB output pagination."), _("\
 This affects the number of lines after which GDB will pause\n\
 its output and ask you whether to continue.\n\
-Setting this to zero causes GDB never pause during output."),
+Setting this to \"unlimited\" or zero causes GDB never pause during output."),
 			    set_height_command,
 			    show_lines_per_page,
 			    &setlist, &showlist);
@@ -2674,7 +2674,7 @@ Set state of GDB output pagination."), _("\
 Show state of GDB output pagination."), _("\
 When pagination is ON, GDB pauses at end of each screenful of\n\
 its output and asks you whether to continue.\n\
-Turning pagination off is an alternative to \"set height 0\"."),
+Turning pagination off is an alternative to \"set height unlimited\"."),
 			   NULL,
 			   show_pagination_enabled,
 			   &setlist, &showlist);

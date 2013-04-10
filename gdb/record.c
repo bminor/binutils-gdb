@@ -701,16 +701,16 @@ _initialize_record (void)
   add_setshow_uinteger_cmd ("instruction-history-size", no_class,
 			    &record_insn_history_size_setshow_var, _("\
 Set number of instructions to print in \"record instruction-history\"."), _("\
-Show number of instructions to print in \"record instruction-history\"."),
-			    NULL,
+Show number of instructions to print in \"record instruction-history\"."), _("\
+A size of \"unlimited\" means unlimited instructions.  The default is 10."),
 			    set_record_insn_history_size, NULL,
 			    &set_record_cmdlist, &show_record_cmdlist);
 
   add_setshow_uinteger_cmd ("function-call-history-size", no_class,
 			    &record_call_history_size_setshow_var, _("\
 Set number of function to print in \"record function-call-history\"."), _("\
-Show number of functions to print in \"record function-call-history\"."),
-			    NULL,
+Show number of functions to print in \"record function-call-history\"."), _("\
+A size of \"unlimited\" means unlimited lines.  The default is 10."),
 			    set_record_call_history_size, NULL,
 			    &set_record_cmdlist, &show_record_cmdlist);
 

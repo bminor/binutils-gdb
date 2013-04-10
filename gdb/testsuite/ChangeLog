@@ -1,3 +1,11 @@
+2013-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/completion.exp: Test "set height", "set listsize" and
+	"set trace-buffer-size" completion.
+	* gdb.base/setshow.exp: Test "set height unlimited".
+	* gdb.trace/trace-buffer-size.exp: Test "set trace-buffer-size
+	unlimited".
+
 2013-04-10  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/actions.exp: Save trace data to CTF.

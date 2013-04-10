@@ -28,6 +28,7 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-setshow.h"
+#include "cli/cli-utils.h"
 
 /* Return true if the change of command parameter should be notified.  */
 
@@ -126,6 +127,20 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
       break;
     }
 }
+
+/* Returns true if ARG is "unlimited".  */
+
+static int
+is_unlimited_literal (const char *arg)
+{
+  size_t len = sizeof ("unlimited") - 1;
+
+  arg = skip_spaces_const (arg);
+
+  return (strncmp (arg, "unlimited", len) == 0
+	  && (isspace (arg[len]) || arg[len] == '\0'));
+}
+
 
 /* Do a "set" command.  ARG is NULL if no argument, or the
    text of the argument, and FROM_TTY is nonzero if this command is
@@ -273,8 +288,17 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 	LONGEST val;
 
 	if (arg == NULL)
-	  error_no_arg (_("integer to set it to."));
-	val = parse_and_eval_long (arg);
+	  {
+	    if (c->var_type == var_uinteger)
+	      error_no_arg (_("integer to set it to, or \"unlimited\"."));
+	    else
+	      error_no_arg (_("integer to set it to."));
+	  }
+
+	if (c->var_type == var_uinteger && is_unlimited_literal (arg))
+	  val = 0;
+	else
+	  val = parse_and_eval_long (arg);
 
 	if (c->var_type == var_uinteger && val == 0)
 	  val = UINT_MAX;
@@ -300,8 +324,17 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 	LONGEST val;
 
 	if (arg == NULL)
-	  error_no_arg (_("integer to set it to."));
-	val = parse_and_eval_long (arg);
+	  {
+	    if (c->var_type == var_integer)
+	      error_no_arg (_("integer to set it to, or \"unlimited\"."));
+	    else
+	      error_no_arg (_("integer to set it to."));
+	  }
+
+	if (c->var_type == var_integer && is_unlimited_literal (arg))
+	  val = 0;
+	else
+	  val = parse_and_eval_long (arg);
 
 	if (val == 0 && c->var_type == var_integer)
 	  val = INT_MAX;
@@ -396,8 +429,12 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 	LONGEST val;
 
 	if (arg == NULL)
-	  error_no_arg (_("integer to set it to."));
-	val = parse_and_eval_long (arg);
+	  error_no_arg (_("integer to set it to, or \"unlimited\"."));
+
+	if (is_unlimited_literal (arg))
+	  val = -1;
+	else
+	  val = parse_and_eval_long (arg);
 
 	if (val > INT_MAX)
 	  error (_("integer %s out of range"), plongest (val));

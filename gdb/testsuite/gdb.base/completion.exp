@@ -720,6 +720,22 @@ foreach target_name { "core" "tfile" "exec" } {
 	"target ${target_name} ./gdb.base/completion\\.exp.*"
 }
 
+#
+# "set foo unlimited" completion.
+#
+
+# A var_uinteger command.
+gdb_test "complete set height " "set height unlimited"
+gdb_test "complete set height u" "set height unlimited"
+
+# A var_integer command.
+gdb_test "complete set listsize " "set listsize unlimited"
+gdb_test "complete set listsize unl" "set listsize unlimited"
+
+# A var_zuinteger_unlimited command.
+gdb_test "complete set trace-buffer-size " "set trace-buffer-size unlimited"
+gdb_test "complete set trace-buffer-size unl" "set trace-buffer-size unlimited"
+
 # Restore globals modified in this test...
 set timeout $oldtimeout1
 

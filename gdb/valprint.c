@@ -2707,7 +2707,7 @@ _initialize_valprint (void)
 			    &user_print_options.print_max, _("\
 Set limit on string chars or array elements to print."), _("\
 Show limit on string chars or array elements to print."), _("\
-\"set print elements 0\" causes there to be no limit."),
+\"set print elements unlimited\" causes there to be no limit."),
 			    NULL,
 			    show_print_max,
 			    &setprintlist, &showprintlist);
@@ -2724,7 +2724,7 @@ Show printing of char arrays to stop at first null char."), NULL,
 			    &user_print_options.repeat_count_threshold, _("\
 Set threshold for repeated print elements."), _("\
 Show threshold for repeated print elements."), _("\
-\"set print repeats 0\" causes all elements to be individually printed."),
+\"set print repeats unlimited\" causes all elements to be individually printed."),
 			    NULL,
 			    show_repeat_count_threshold,
 			    &setprintlist, &showprintlist);

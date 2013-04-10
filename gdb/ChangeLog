@@ -1,5 +1,33 @@
 2013-04-10  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-decode.c (integer_unlimited_completer): New function.
+	(add_setshow_integer_cmd, add_setshow_uinteger_cmd)
+	(add_setshow_zuinteger_unlimited_cmd): Install the "unlimited"
+	completer.
+	* cli/cli-setshow.c: Include "cli/cli-utils.h".
+	(is_unlimited_literal): New function.
+	(do_set_command): Handle literal "unlimited" arguments.
+	* frame.c (_initialize_frame) <set backtrace limit>: Document
+	"unlimited".
+	* printcmd.c (_initialize_printcmd) <set print
+	max-symbolic-offset>: Add help text.
+	* record-full.c (_initialize_record_full) <set record full
+	insn-number-max>: Likewise.
+	* record.c (_initialize_record) <set record
+	instruction-history-size, set record function-call-history-size>:
+	Add help text.
+	* ser-tcp.c (_initialize_ser_tcp) <set tcp connect-timeout>: Add
+	help text.
+	* tracepoint.c (_initialize_tracepoint) <set trace-buffer-size>:
+	Likewise.
+	* source.c (_initialize_source) <set listsize>: Add help text.
+	* utils.c (initialize_utils) <set height, set width>: Likewise.
+	<set pagination>: Mention "set height unlimited".
+	* valprint.c (_initialize_valprint) <set print elements, set print
+	repeats>: Document "unlimited".
+
+2013-04-10  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-cmds.c (quit_command): Call query_if_trace_running
 	instead of disconnect_tracing.
 	* infcmd.c (detach_command, disconnect_command): Call

@@ -2615,7 +2615,12 @@ but no count or size letter (see \"x\" command)."));
   add_setshow_uinteger_cmd ("max-symbolic-offset", no_class,
 			    &max_symbolic_offset, _("\
 Set the largest offset that will be printed in <symbol+1234> form."), _("\
-Show the largest offset that will be printed in <symbol+1234> form."), NULL,
+Show the largest offset that will be printed in <symbol+1234> form."), _("\
+Tell GDB to only display the symbolic form of an address if the\n\
+offset between the closest earlier symbol and the address is less than\n\
+the specified maximum offset.  The default is \"unlimited\", which tells GDB\n\
+to always print the symbolic form of an address if any symbol precedes\n\
+it.  Zero is equivalent to \"unlimited\"."),
 			    NULL,
 			    show_max_symbolic_offset,
 			    &setprintlist, &showprintlist);

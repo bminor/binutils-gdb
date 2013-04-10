@@ -6207,6 +6207,7 @@ File must have been created with @code{record save}.
 
 @kindex set record full
 @item set record full insn-number-max @var{limit}
+@itemx set record full insn-number-max unlimited
 Set the limit of instructions to be recorded for the @code{full}
 recording method.  Default value is 200000.
 
@@ -6219,9 +6220,9 @@ instruction to keep the number of recorded instructions at the limit.
 lets you control what happens when the limit is reached, by means of
 the @code{stop-at-limit} option, described below.)
 
-If @var{limit} is zero, @value{GDBN} will never delete recorded
-instructions from the execution log.  The number of recorded
-instructions is unlimited in this case.
+If @var{limit} is @code{unlimited} or zero, @value{GDBN} will never
+delete recorded instructions from the execution log.  The number of
+recorded instructions is limited only by the available memory.
 
 @kindex show record full
 @item show record full insn-number-max
@@ -6333,9 +6334,11 @@ number @var{end} is not included.
 This command may not be available for all recording methods.
 
 @kindex set record
-@item set record instruction-history-size
+@item set record instruction-history-size @var{size}
+@itemx set record instruction-history-size unlimited
 Define how many instructions to disassemble in the @code{record
 instruction-history} command.  The default value is 10.
+A @var{size} of @code{unlimited} means unlimited instructions.
 
 @kindex show record
 @item show record instruction-history-size
@@ -6399,9 +6402,11 @@ included.
 
 This command may not be available for all recording methods.
 
-@item set record function-call-history-size
+@item set record function-call-history-size @var{size}
+@itemx set record function-call-history-size unlimited
 Define how many lines to print in the
 @code{record function-call-history} command.  The default value is 10.
+A size of @code{unlimited} means unlimited lines.
 
 @item show record function-call-history-size
 Show how many lines to print in the
@@ -6678,9 +6683,10 @@ Display the current internal entry point backtrace policy.
 
 @item set backtrace limit @var{n}
 @itemx set backtrace limit 0
+@itemx set backtrace limit unlimited
 @cindex backtrace limit
-Limit the backtrace to @var{n} levels.  A value of zero means
-unlimited.
+Limit the backtrace to @var{n} levels.  A value of @code{unlimited}
+or zero means unlimited levels.
 
 @item show backtrace limit
 Display the current limit on backtrace levels.
@@ -6919,9 +6925,10 @@ the @code{list} command.  You can change this using @code{set listsize}:
 @table @code
 @kindex set listsize
 @item set listsize @var{count}
+@itemx set listsize unlimited
 Make the @code{list} command display @var{count} source lines (unless
 the @code{list} argument explicitly specifies some other number).
-Setting @var{count} to 0 means there's no limit.
+Setting @var{count} to @code{unlimited} or 0 means there's no limit.
 
 @kindex show listsize
 @item show listsize
@@ -8652,11 +8659,13 @@ printed is reasonably close to the closest earlier symbol:
 
 @table @code
 @item set print max-symbolic-offset @var{max-offset}
+@itemx set print max-symbolic-offset unlimited
 @cindex maximum value for offset of closest symbol
 Tell @value{GDBN} to only display the symbolic form of an address if the
 offset between the closest earlier symbol and the address is less than
-@var{max-offset}.  The default is 0, which tells @value{GDBN}
-to always print the symbolic form of an address if any symbol precedes it.
+@var{max-offset}.  The default is @code{unlimited}, which tells @value{GDBN}
+to always print the symbolic form of an address if any symbol precedes
+it.  Zero is equivalent to @code{unlimited}.
 
 @item show print max-symbolic-offset
 Ask how large the maximum offset is that @value{GDBN} prints in a
@@ -8733,6 +8742,7 @@ Show whether the index of each element is printed when displaying
 arrays.
 
 @item set print elements @var{number-of-elements}
+@itemx set print elements unlimited
 @cindex number of array elements to print
 @cindex limit on number of printed array elements
 Set a limit on how many elements of an array @value{GDBN} will print.
@@ -8740,7 +8750,8 @@ If @value{GDBN} is printing a large array, it stops printing after it has
 printed the number of elements set by the @code{set print elements} command.
 This limit also applies to the display of strings.
 When @value{GDBN} starts, this limit is set to 200.
-Setting  @var{number-of-elements} to zero means that the printing is unlimited.
+Setting @var{number-of-elements} to @code{unlimited} or zero means
+that the number of elements to print is unlimited.
 
 @item show print elements
 Display the number of elements of a large array that @value{GDBN} will print.
@@ -8910,15 +8921,17 @@ entry resolution see @ref{set debug entry-values}.
 Show the method being used for printing of frame argument values at function
 entry.
 
-@item set print repeats
+@item set print repeats @var{number-of-repeats}
+@itemx set print repeats unlimited
 @cindex repeated array elements
 Set the threshold for suppressing display of repeated array
 elements.  When the number of consecutive identical elements of an
 array exceeds the threshold, @value{GDBN} prints the string
 @code{"<repeats @var{n} times>"}, where @var{n} is the number of
 identical repetitions, instead of displaying the identical elements
-themselves.  Setting the threshold to zero will cause all elements to
-be individually printed.  The default threshold is 10.
+themselves.  Setting the threshold to @code{unlimited} or zero will
+cause all elements to be individually printed.  The default threshold
+is 10.
 
 @item show print repeats
 Display the current threshold for printing repeated identical
@@ -11880,12 +11893,13 @@ for instance if you are looking at frames from a trace file.
 
 @table @code
 @item set trace-buffer-size @var{n}
+@itemx set trace-buffer-size unlimited
 @kindex set trace-buffer-size
 Request that the target use a trace buffer of @var{n} bytes.  Not all
 targets will honor the request; they may have a compiled-in size for
 the trace buffer, or some other limitation.  Set to a value of
-@code{-1} to let the target use whatever size it likes.  This is also
-the default.
+@code{unlimited} or @code{-1} to let the target use whatever size it
+likes.  This is also the default.
 
 @item show trace-buffer-size
 @kindex show trace-buffer-size
@@ -18286,13 +18300,16 @@ Do not auto-retry failed TCP connections.
 Show the current auto-retry setting.
 
 @item set tcp connect-timeout @var{seconds}
+@itemx set tcp connect-timeout unlimited
 @cindex connection timeout, for remote TCP target
 @cindex timeout, for remote target connection
 Set the timeout for establishing a TCP connection to the remote target to
 @var{seconds}.  The timeout affects both polling to retry failed connections 
 (enabled by @code{set tcp auto-retry on}) and waiting for connections
 that are merely slow to complete, and represents an approximate cumulative
-value.
+value.  If @var{seconds} is @code{unlimited}, there is no timeout and
+@value{GDBN} will keep attempting to establish a connection forever,
+unless interrupted with @kbd{Ctrl-c}.  The default is 15 seconds.
 
 @item show tcp connect-timeout
 Show the current connection timeout setting.
@@ -21256,9 +21273,12 @@ Stop recording command history in a file.
 @kindex set history size
 @cindex @env{HISTSIZE}, environment variable
 @item set history size @var{size}
+@itemx set history size unlimited
 Set the number of commands which @value{GDBN} keeps in its history list.
 This defaults to the value of the environment variable
-@code{HISTSIZE}, or to 256 if this variable is not set.
+@code{HISTSIZE}, or to 256 if this variable is not set.  If @var{size}
+is @code{unlimited}, the number of commands @value{GDBN} keeps in the
+history list is unlimited.
 @end table
 
 History expansion assigns special meaning to the character @kbd{!}.
@@ -21343,25 +21363,28 @@ width} commands:
 @kindex show width
 @kindex show height
 @item set height @var{lpp}
+@itemx set height unlimited
 @itemx show height
 @itemx set width @var{cpl}
+@itemx set width unlimited
 @itemx show width
 These @code{set} commands specify a screen height of @var{lpp} lines and
 a screen width of @var{cpl} characters.  The associated @code{show}
 commands display the current settings.
 
-If you specify a height of zero lines, @value{GDBN} does not pause during
-output no matter how long the output is.  This is useful if output is to a
-file or to an editor buffer.
+If you specify a height of either @code{unlimited} or zero lines,
+@value{GDBN} does not pause during output no matter how long the
+output is.  This is useful if output is to a file or to an editor
+buffer.
 
-Likewise, you can specify @samp{set width 0} to prevent @value{GDBN}
-from wrapping its output.
+Likewise, you can specify @samp{set width unlimited} or @samp{set
+width 0} to prevent @value{GDBN} from wrapping its output.
 
 @item set pagination on
 @itemx set pagination off
 @kindex set pagination
 Turn the output pagination on or off; the default is on.  Turning
-pagination off is the alternative to @code{set height 0}.  Note that
+pagination off is the alternative to @code{set height unlimited}.  Note that
 running @value{GDBN} with the @option{--batch} option (@pxref{Mode
 Options, -batch}) also automatically disables pagination.
 

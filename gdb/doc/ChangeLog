@@ -1,3 +1,24 @@
+2013-04-10  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Process Record and Replay): Document that "set
+	record full insn-number-max", "set record
+	instruction-history-size" and "set record
+	function-call-history-size" accept "unlimited".
+	(Backtrace): Document that "set backtrace limit" accepts
+	"unlimited".
+	(List): Document that "set listsize" accepts "unlimited".
+	(Print Settings)" Document that "set print max-symbolic-offset",
+	"set print elements" and "set print repeats" accept "unlimited".
+	(Starting and Stopping Trace Experiments): Document that "set
+	trace-buffer-size" accepts "unlimited".
+	(Remote Configuration): Document that "set tcp connect-timeout"
+	accepts "unlimited".
+	(Command History): Document that "set history size" accepts
+	"unlimited".
+	(Screen Size): Document that "set height" and "set width" accepts
+	"unlimited".  Adjust "set pagination"'s description to suggest
+	"set height unlimited" instead of "set height 0".
+
 2013-04-10  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Trace Files): Add "target ctf".
