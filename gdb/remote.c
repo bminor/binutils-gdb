@@ -7036,18 +7036,17 @@ remote_files_info (struct target_ops *ignore)
 /* Close/unpush the remote target, and throw a TARGET_CLOSE_ERROR
    error to higher layers.  Called when a serial error is detected.
    The exception message is STRING, followed by a colon and a blank,
-   then the system error message for errno at function entry.  */
+   the system error message for errno at function entry and final dot
+   for output compatibility with throw_perror_with_name.  */
 
 static void
 unpush_and_perror (const char *string)
 {
-  char *errstr;
-
-  errstr = xstrprintf ("%s: %s", string, safe_strerror (errno));
-  make_cleanup (xfree, errstr);
+  int saved_errno = errno;
 
   remote_unpush_target ();
-  throw_error (TARGET_CLOSE_ERROR, "%s", errstr);
+  throw_error (TARGET_CLOSE_ERROR, "%s: %s.", string,
+	       safe_strerror (saved_errno));
 }
 
 /* Read a single character from the remote end.  */

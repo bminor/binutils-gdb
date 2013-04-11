@@ -1,3 +1,7 @@
+2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* remote.c (unpush_and_perror): Add output message final dot.
+
 2013-04-11  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (tfile_interp_line): Fit parameters line and
