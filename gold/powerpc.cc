@@ -2588,8 +2588,8 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	  else
 	    off += i->data_size();
 	}
-      // If .brlt is part of this output section, then we have just
-      // done the offset adjustment.
+      // If .branch_lt is part of this output section, then we have
+      // just done the offset adjustment.
       os->clear_section_offsets_need_adjustment();
     }
 
@@ -3044,8 +3044,8 @@ Target_powerpc<size, big_endian>::make_brlt_section(Layout* layout)
       bool is_pic = parameters->options().output_is_position_independent();
       if (is_pic)
 	{
-	  // When PIC we can't fill in .brlt (like .plt it can be a
-	  // bss style section) but must initialise at runtime via
+	  // When PIC we can't fill in .branch_lt (like .plt it can be
+	  // a bss style section) but must initialise at runtime via
 	  // dynamic relocats.
 	  this->rela_dyn_section(layout);
 	  brlt_rel = new Reloc_section(false);
@@ -3057,7 +3057,7 @@ Target_powerpc<size, big_endian>::make_brlt_section(Layout* layout)
 	this->plt_->output_section()
 	  ->add_output_section_data(this->brlt_section_);
       else
-	layout->add_output_section_data(".brlt",
+	layout->add_output_section_data(".branch_lt",
 					(is_pic ? elfcpp::SHT_NOBITS
 					 : elfcpp::SHT_PROGBITS),
 					elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
@@ -3068,7 +3068,7 @@ Target_powerpc<size, big_endian>::make_brlt_section(Layout* layout)
     }
 }
 
-// Write out .brlt when non-PIC.
+// Write out .branch_lt when non-PIC.
 
 template<int size, bool big_endian>
 void

@@ -1,3 +1,9 @@
+2013-04-11  Alan Modra  <amodra@gmail.com>
+
+	PR gold/15354
+	* powerpc.cc (Target_powerpc::make_brlt_section): Name section
+	.branch_lt to match bfd ld.  Adjust comments throughout file.
+
 2013-04-04  Ian Lance Taylor  <iant@google.com>
 
 	GCC PR c++/56840
