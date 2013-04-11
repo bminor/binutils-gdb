@@ -1,3 +1,8 @@
+2013-04-11  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (tfile_interp_line): Fit parameters line and
+	utpp in one line.
+
 2013-04-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib.c (solib_map_sections): Remove code overwriting

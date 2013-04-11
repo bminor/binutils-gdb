@@ -4294,8 +4294,8 @@ tfile_open (char *filename, int from_tty)
    file.  */
 
 static void
-tfile_interp_line (char *line,
-		   struct uploaded_tp **utpp, struct uploaded_tsv **utsvp)
+tfile_interp_line (char *line, struct uploaded_tp **utpp,
+		   struct uploaded_tsv **utsvp)
 {
   char *p = line;
 
