@@ -1,3 +1,18 @@
+2013-04-10  Julian Brown  <julian@codesourcery.com>
+
+	* gas/all/sleb128-2.s: New test.
+	* gas/all/sleb128-3.s: Likewise.
+	* gas/all/sleb128-4.s: Likewise.
+	* gas/all/sleb128-5.s: Likewise.
+	* gas/all/sleb128-7.s: Likewise.
+	* gas/all/sleb128-2.d: New.
+	* gas/all/sleb128-3.d: New.
+	* gas/all/sleb123-4.d: New.
+	* gas/all/sleb123-5.d: New.
+	* gas/all/sleb123-7.d: New.
+	* gas/all/gas.exp (sleb128-2, sleb128-3, sleb128-4, sleb128-5)
+	(sleb128-7): Run new tests.
+
 2013-04-10  Jan Beulich <jbeulich@suse.com>
 
 	* gas/testsuite/gas/arm/ldst-pc.s: Add index, non-writeback

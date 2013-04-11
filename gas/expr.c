@@ -90,6 +90,7 @@ make_expr_symbol (expressionS *expressionP)
       zero.X_op = O_constant;
       zero.X_add_number = 0;
       zero.X_unsigned = 0;
+      zero.X_extrabit = 0;
       clean_up_expression (&zero);
       expressionP = &zero;
     }
@@ -161,6 +162,7 @@ expr_build_uconstant (offsetT value)
   e.X_op = O_constant;
   e.X_add_number = value;
   e.X_unsigned = 1;
+  e.X_extrabit = 0;
   return make_expr_symbol (&e);
 }
 
@@ -732,6 +734,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
      something like ``.quad 0x80000000'' is not sign extended even
      though it appears negative if valueT is 32 bits.  */
   expressionP->X_unsigned = 1;
+  expressionP->X_extrabit = 0;
 
   /* Digits, assume it is a bignum.  */
 
@@ -1026,6 +1029,8 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		   This is compatible with other people's
 		   assemblers.  Sigh.  */
 		expressionP->X_unsigned = 0;
+		if (expressionP->X_add_number)
+		  expressionP->X_extrabit ^= 1;
 	      }
 	    else if (c == '~' || c == '"')
 	      expressionP->X_add_number = ~ expressionP->X_add_number;
@@ -1078,6 +1083,7 @@ operand (expressionS *expressionP, enum expr_mode mode)
 		expressionP->X_add_number = i >= expressionP->X_add_number;
 		expressionP->X_op = O_constant;
 		expressionP->X_unsigned = 1;
+		expressionP->X_extrabit = 0;
 	      }
 	  }
 	else if (expressionP->X_op != O_illegal
@@ -1717,6 +1723,42 @@ operatorf (int *num_chars)
   /* NOTREACHED  */
 }
 
+/* Implement "word-size + 1 bit" addition for
+   {resultP->X_extrabit:resultP->X_add_number} + {rhs_highbit:amount}.  This
+   is used so that the full range of unsigned word values and the full range of
+   signed word values can be represented in an O_constant expression, which is
+   useful e.g. for .sleb128 directives.  */
+
+static void
+add_to_result (expressionS *resultP, offsetT amount, int rhs_highbit)
+{
+  valueT ures = resultP->X_add_number;
+  valueT uamount = amount;
+
+  resultP->X_add_number += amount;
+
+  resultP->X_extrabit ^= rhs_highbit;
+
+  if (ures + uamount < ures)
+    resultP->X_extrabit ^= 1;
+}
+
+/* Similarly, for subtraction.  */
+
+static void
+subtract_from_result (expressionS *resultP, offsetT amount, int rhs_highbit)
+{
+  valueT ures = resultP->X_add_number;
+  valueT uamount = amount;
+
+  resultP->X_add_number -= amount;
+
+  resultP->X_extrabit ^= rhs_highbit;
+
+  if (ures < uamount)
+    resultP->X_extrabit ^= 1;
+}
+
 /* Parse an expression.  */
 
 segT
@@ -1832,7 +1874,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  && (md_register_arithmetic || resultP->X_op != O_register))
 	{
 	  /* X + constant.  */
-	  resultP->X_add_number += right.X_add_number;
+	  add_to_result (resultP, right.X_add_number, right.X_extrabit);
 	}
       /* This case comes up in PIC code.  */
       else if (op_left == O_subtract
@@ -1850,10 +1892,11 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 				       symbol_get_frag (right.X_add_symbol),
 				       &frag_off))
 	{
-	  resultP->X_add_number -= right.X_add_number;
-	  resultP->X_add_number -= frag_off / OCTETS_PER_BYTE;
-	  resultP->X_add_number += (S_GET_VALUE (resultP->X_add_symbol)
-				    - S_GET_VALUE (right.X_add_symbol));
+	  offsetT symval_diff = S_GET_VALUE (resultP->X_add_symbol)
+				- S_GET_VALUE (right.X_add_symbol);
+	  subtract_from_result (resultP, right.X_add_number, right.X_extrabit);
+	  subtract_from_result (resultP, frag_off / OCTETS_PER_BYTE, 0);
+	  add_to_result (resultP, symval_diff, symval_diff < 0);
 	  resultP->X_op = O_constant;
 	  resultP->X_add_symbol = 0;
 	}
@@ -1861,7 +1904,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	       && (md_register_arithmetic || resultP->X_op != O_register))
 	{
 	  /* X - constant.  */
-	  resultP->X_add_number -= right.X_add_number;
+	  subtract_from_result (resultP, right.X_add_number, right.X_extrabit);
 	}
       else if (op_left == O_add && resultP->X_op == O_constant
 	       && (md_register_arithmetic || right.X_op != O_register))
@@ -1870,7 +1913,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  resultP->X_op = right.X_op;
 	  resultP->X_add_symbol = right.X_add_symbol;
 	  resultP->X_op_symbol = right.X_op_symbol;
-	  resultP->X_add_number += right.X_add_number;
+	  add_to_result (resultP, right.X_add_number, right.X_extrabit);
 	  retval = rightseg;
 	}
       else if (resultP->X_op == O_constant && right.X_op == O_constant)
@@ -1910,7 +1953,9 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	      /* Constant + constant (O_add) is handled by the
 		 previous if statement for constant + X, so is omitted
 		 here.  */
-	    case O_subtract:		resultP->X_add_number -= v; break;
+	    case O_subtract:
+	      subtract_from_result (resultP, v, 0);
+	      break;
 	    case O_eq:
 	      resultP->X_add_number =
 		resultP->X_add_number == v ? ~ (offsetT) 0 : 0;
@@ -1954,10 +1999,11 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  resultP->X_op = op_left;
 	  resultP->X_op_symbol = right.X_add_symbol;
 	  if (op_left == O_add)
-	    resultP->X_add_number += right.X_add_number;
+	    add_to_result (resultP, right.X_add_number, right.X_extrabit);
 	  else if (op_left == O_subtract)
 	    {
-	      resultP->X_add_number -= right.X_add_number;
+	      subtract_from_result (resultP, right.X_add_number,
+				    right.X_extrabit);
 	      if (retval == rightseg
 		  && SEG_NORMAL (retval)
 		  && !S_FORCE_RELOC (resultP->X_add_symbol, 0)
@@ -1977,6 +2023,7 @@ expr (int rankarg,		/* Larger # is higher rank.  */
 	  resultP->X_op = op_left;
 	  resultP->X_add_number = 0;
 	  resultP->X_unsigned = 1;
+	  resultP->X_extrabit = 0;
 	}
 
       if (retval != rightseg)

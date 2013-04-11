@@ -136,6 +136,11 @@ typedef struct expressionS {
      when performing arithmetic on these values).
      FIXME: This field is not set very reliably.  */
   unsigned int X_unsigned : 1;
+  /* This is used to implement "word size + 1 bit" arithmetic, so that e.g.
+     expressions used with .sleb128 directives can use the full range available
+     for an unsigned word, but can also properly represent all values of a
+     signed word.  */
+  unsigned int X_extrabit : 1;
 
   /* 7 additional bits can be defined if needed.  */
 

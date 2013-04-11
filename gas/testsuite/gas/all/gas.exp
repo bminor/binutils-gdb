@@ -369,6 +369,11 @@ if { ![istarget "bfin-*-*"] } then {
     run_dump_test assign
 }
 run_dump_test sleb128
+run_dump_test sleb128-2
+run_dump_test sleb128-3
+run_dump_test sleb128-4
+run_dump_test sleb128-5
+run_dump_test sleb128-7
 
 # .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x
 # .space is different on hppa*-hpux.

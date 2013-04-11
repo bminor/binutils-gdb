@@ -1306,10 +1306,10 @@ read_a_source_file (char *name)
 }
 
 /* Convert O_constant expression EXP into the equivalent O_big representation.
-   Take the sign of the number from X_unsigned rather than X_add_number.  */
+   Take the sign of the number from SIGN rather than X_add_number.  */
 
 static void
-convert_to_bignum (expressionS *exp)
+convert_to_bignum (expressionS *exp, int sign)
 {
   valueT value;
   unsigned int i;
@@ -1322,8 +1322,8 @@ convert_to_bignum (expressionS *exp)
     }
   /* Add a sequence of sign bits if the top bit of X_add_number is not
      the sign of the original value.  */
-  if ((exp->X_add_number < 0) != !exp->X_unsigned)
-    generic_bignum[i++] = exp->X_unsigned ? 0 : LITTLENUM_MASK;
+  if ((exp->X_add_number < 0) == !sign)
+    generic_bignum[i++] = sign ? LITTLENUM_MASK : 0;
   exp->X_op = O_big;
   exp->X_add_number = i;
 }
@@ -4250,7 +4250,7 @@ emit_expr (expressionS *exp, unsigned int nbytes)
   if (op == O_constant && nbytes > sizeof (valueT))
     {
       extra_digit = exp->X_unsigned ? 0 : -1;
-      convert_to_bignum (exp);
+      convert_to_bignum (exp, !exp->X_unsigned);
       op = O_big;
     }
 
@@ -4544,6 +4544,7 @@ parse_bitfield_cons (exp, nbytes)
       exp->X_add_number = value;
       exp->X_op = O_constant;
       exp->X_unsigned = 1;
+      exp->X_extrabit = 0;
     }
 }
 
@@ -5103,12 +5104,12 @@ emit_leb128_expr (expressionS *exp, int sign)
     }
   else if (op == O_constant
 	   && sign
-	   && (exp->X_add_number < 0) != !exp->X_unsigned)
+	   && (exp->X_add_number < 0) == !exp->X_extrabit)
     {
       /* We're outputting a signed leb128 and the sign of X_add_number
 	 doesn't reflect the sign of the original value.  Convert EXP
 	 to a correctly-extended bignum instead.  */
-      convert_to_bignum (exp);
+      convert_to_bignum (exp, exp->X_extrabit);
       op = O_big;
     }
 

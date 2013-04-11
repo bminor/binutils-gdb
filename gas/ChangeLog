@@ -1,3 +1,18 @@
+2013-04-10  Julian Brown  <julian@codesourcery.com>
+
+	* read.c (convert_to_bignum): Add sign parameter. Use it
+	instead of X_unsigned to determine sign of resulting bignum.
+	(emit_expr): Pass extra argument to convert_to_bignum.
+	(emit_leb128_expr): Use X_extrabit instead of X_unsigned. Pass
+	X_extrabit to convert_to_bignum.
+	(parse_bitfield_cons): Set X_extrabit.
+	* expr.c (make_expr_symbol, expr_build_uconstant, operand):
+	Initialise X_extrabit field as appropriate.
+	(add_to_result): New.
+	(subtract_from_result): New.
+	(expr): Use above.
+	* expr.h (expressionS): Add X_extrabit field.
+
 2013-04-10  Jan Beulich <jbeulich@suse.com>
 
 	* gas/config/tc-arm.c (encode_arm_addr_mode_3): Only reject base
