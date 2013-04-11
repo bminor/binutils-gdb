@@ -465,12 +465,6 @@ solib_map_sections (struct so_list *so)
   /* Leave bfd open, core_xfer_memory and "info files" need it.  */
   so->abfd = abfd;
 
-  /* copy full path name into so_name, so that later symbol_file_add
-     can find it.  */
-  if (strlen (bfd_get_filename (abfd)) >= SO_NAME_MAX_PATH_SIZE)
-    error (_("Shared library file name is too long."));
-  strcpy (so->so_name, bfd_get_filename (abfd));
-
   if (build_section_table (abfd, &so->sections, &so->sections_end))
     {
       error (_("Can't find the file sections in `%s': %s"),
