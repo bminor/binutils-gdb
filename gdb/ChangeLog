@@ -1,3 +1,8 @@
+2013-04-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-darwin.c (darwin_bfd_open): Set the filename of the
+	returned bfd to a copy of PATHNAME.
+
 2013-04-09  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* NEWS: Mention new btrace RSP packets.
