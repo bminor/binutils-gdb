@@ -22,6 +22,9 @@
 	* gcore.in: ... here.  Remove gcore.sh comment.  Use GDB_TRANSFORM_NAME
 	and GCORE_TRANSFORM_NAME substitutions.
 
+	Fix parsing tabs in ${gdb_target_obs}.
+	* configure.tgt (gdb_have_gcore): Replace case with for and if.
+
 2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* remote.c (unpush_and_perror): Add output message final dot.

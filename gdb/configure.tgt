@@ -707,11 +707,9 @@ esac
 
 # Check whether this target supports gcore.
 # Such target has to call set_gdbarch_find_memory_regions.
-case " ${gdb_target_obs} " in
-  *" linux-tdep.o "*)
+gdb_have_gcore=false
+for t in x ${gdb_target_obs}; do
+  if test "$t" = linux-tdep.o; then
     gdb_have_gcore=true
-    ;;
-  *)
-    gdb_have_gcore=false
-    ;;
-esac
+  fi
+done
