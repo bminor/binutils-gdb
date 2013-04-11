@@ -203,6 +203,7 @@ fi
 
 TARGET_OBS=
 all_targets=
+HAVE_NATIVE_GCORE_TARGET=
 
 for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
@@ -236,6 +237,12 @@ do
     if test x${want64} = xfalse; then
       . ${srcdir}/../bfd/config.bfd
     fi
+
+    # Check whether this target is native and supports gcore.
+    if test $gdb_native = yes -a "$targ_alias" = "$target_alias" \
+       && $gdb_have_gcore; then
+      HAVE_NATIVE_GCORE_TARGET=1
+    fi
   fi
 done
 
@@ -264,6 +271,7 @@ if test x${all_targets} = xtrue; then
 fi
 
 AC_SUBST(TARGET_OBS)
+AC_SUBST(HAVE_NATIVE_GCORE_TARGET)
 
 # For other settings, only the main target counts.
 gdb_sim=
@@ -2389,6 +2397,20 @@ dnl  Detect the character set used by this host.
 dnl  At the moment, we just assume it's UTF-8.
 AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "UTF-8",
           [Define to be a string naming the default host character set.])
+
+# Undo the $ec_script escaping suitable for Makefile.
+transform=`echo "$program_transform_name" | sed -e 's/[\\$][\\$]/\\$/g'`
+GDB_TRANSFORM_NAME=`echo gdb | sed -e "$transform"`
+if test "x$GDB_TRANSFORM_NAME" = x; then
+  GDB_TRANSFORM_NAME=gdb
+fi
+AC_SUBST(GDB_TRANSFORM_NAME)
+GCORE_TRANSFORM_NAME=`echo gcore | sed -e "$transform"`
+if test "x$GCORE_TRANSFORM_NAME" = x; then
+  GCORE_TRANSFORM_NAME=gcore
+fi
+AC_SUBST(GCORE_TRANSFORM_NAME)
+AC_CONFIG_FILES([gcore], [chmod +x gcore])
 
 AC_OUTPUT(Makefile gdb-gdb.gdb doc/Makefile data-directory/Makefile,
 [

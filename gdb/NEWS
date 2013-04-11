@@ -19,6 +19,9 @@ show remote trace-status-packet
 * The command 'tsave' can now support new option '-ctf' to save trace
   buffer in Common Trace Format.
 
+* Newly installed $prefix/bin/gcore acts as a shell interface for the
+  GDB command gcore.
+
 * MI changes
 
   ** The -trace-save MI command can optionally save trace buffer in Common

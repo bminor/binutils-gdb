@@ -1,3 +1,13 @@
+2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in (MAN1S): Add gcore.1.
+	Remove "Host, target, and site specific Makefile fragments" comment.
+	(@host_makefile_frag@, HAVE_NATIVE_GCORE_TARGET): New.
+	(install-man1, uninstall-man1): Conditionalize gcore.1.
+	(gcore.1): New.
+	* gdb.texinfo (Man Pages): Add gcore man.
+	(gcore man): New node.
+
 2013-04-10  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Process Record and Replay): Document that "set

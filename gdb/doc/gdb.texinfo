@@ -41652,6 +41652,7 @@ switch (die->tag)
 @menu
 * gdb man::                     The GNU Debugger man page
 * gdbserver man::               Remote Server for the GNU Debugger man page
+* gcore man::                   Generate a core file of a running program
 * gdbinit man::                 gdbinit scripts
 @end menu
 
@@ -42170,6 +42171,53 @@ documentation are properly installed at your site, the command
 info gdb
 @end smallexample
 
+should give you access to the complete manual.
+
+@cite{Using GDB: A Guide to the GNU Source-Level Debugger},
+Richard M. Stallman and Roland H. Pesch, July 1991.
+@end ifset
+@c man end
+
+@node gcore man
+@heading gcore
+
+@c man title gcore Generate a core file of a running program
+
+@format
+@c man begin SYNOPSIS gcore
+gcore [-o @var{filename}] @var{pid}
+@c man end
+@end format
+
+@c man begin DESCRIPTION gcore
+Generate a core dump of a running program with process ID @var{pid}.
+Produced file is equivalent to a kernel produced core file as if the process
+crashed (and if @kbd{ulimit -c} were used to set up an appropriate core dump
+limit).  Unlike after a crash, after @command{gcore} the program remains
+running without any change.
+@c man end
+
+@c man begin OPTIONS gcore
+@table @env
+@item -o @var{filename}
+The optional argument
+@var{filename} specifies the file name where to put the core dump.
+If not specified, the file name defaults to @file{core.@var{pid}},
+where @var{pid} is the running program process ID.
+@end table
+@c man end
+
+@c man begin SEEALSO gcore
+@ifset man
+The full documentation for @value{GDBN} is maintained as a Texinfo manual.
+If the @code{info} and @code{gdb} programs and @value{GDBN}'s Texinfo
+documentation are properly installed at your site, the command
+
+@smallexample
+info gdb
+@end smallexample
+
+@noindent
 should give you access to the complete manual.
 
 @cite{Using GDB: A Guide to the GNU Source-Level Debugger},

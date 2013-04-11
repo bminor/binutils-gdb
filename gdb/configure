@@ -591,6 +591,8 @@ ac_includes_default="\
 enable_option_checking=no
 ac_subst_vars='LTLIBOBJS
 LIBOBJS
+GCORE_TRANSFORM_NAME
+GDB_TRANSFORM_NAME
 GDB_NM_FILE
 LTLIBBABELTRACE
 LIBBABELTRACE
@@ -684,6 +686,7 @@ AWK
 REPORT_BUGS_TEXI
 REPORT_BUGS_TO
 PKGVERSION
+HAVE_NATIVE_GCORE_TARGET
 TARGET_OBS
 subdirs
 GDB_DATADIR
@@ -5083,6 +5086,7 @@ fi
 
 TARGET_OBS=
 all_targets=
+HAVE_NATIVE_GCORE_TARGET=
 
 for targ_alias in `echo $target_alias $enable_targets | sed 's/,/ /g'`
 do
@@ -5116,6 +5120,12 @@ fi
     # Check whether this target needs 64-bit CORE_ADDR
     if test x${want64} = xfalse; then
       . ${srcdir}/../bfd/config.bfd
+    fi
+
+    # Check whether this target is native and supports gcore.
+    if test $gdb_native = yes -a "$targ_alias" = "$target_alias" \
+       && $gdb_have_gcore; then
+      HAVE_NATIVE_GCORE_TARGET=1
     fi
   fi
 done
@@ -5176,6 +5186,7 @@ _ACEOF
     TARGET_OBS='$(ALL_TARGET_OBS)'
   fi
 fi
+
 
 
 
@@ -14648,6 +14659,21 @@ ac_config_links="$ac_config_links $ac_config_links_1"
 $as_echo "#define GDB_DEFAULT_HOST_CHARSET \"UTF-8\"" >>confdefs.h
 
 
+# Undo the $ec_script escaping suitable for Makefile.
+transform=`echo "$program_transform_name" | sed -e 's/\\$\\$/\\$/g'`
+GDB_TRANSFORM_NAME=`echo gdb | sed -e "$transform"`
+if test "x$GDB_TRANSFORM_NAME" = x; then
+  GDB_TRANSFORM_NAME=gdb
+fi
+
+GCORE_TRANSFORM_NAME=`echo gcore | sed -e "$transform"`
+if test "x$GCORE_TRANSFORM_NAME" = x; then
+  GCORE_TRANSFORM_NAME=gcore
+fi
+
+ac_config_files="$ac_config_files gcore"
+
+
 ac_config_files="$ac_config_files Makefile gdb-gdb.gdb doc/Makefile data-directory/Makefile"
 
 ac_config_commands="$ac_config_commands default"
@@ -15358,6 +15384,7 @@ do
     "depdir") CONFIG_COMMANDS="$CONFIG_COMMANDS depdir" ;;
     "jit-reader.h") CONFIG_FILES="$CONFIG_FILES jit-reader.h:jit-reader.in" ;;
     "$ac_config_links_1") CONFIG_LINKS="$CONFIG_LINKS $ac_config_links_1" ;;
+    "gcore") CONFIG_FILES="$CONFIG_FILES gcore" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "gdb-gdb.gdb") CONFIG_FILES="$CONFIG_FILES gdb-gdb.gdb" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
@@ -15979,6 +16006,7 @@ $as_echo "$as_me: executing $ac_file commands" >&6;}
 
   case $ac_file$ac_mode in
     "depdir":C) $SHELL $ac_aux_dir/mkinstalldirs $DEPDIR ;;
+    "gcore":F) chmod +x gcore ;;
     "default":C)
 case x$CONFIG_HEADERS in
 xconfig.h:config.in)

@@ -418,6 +418,7 @@ CONFIG_ALL= @CONFIG_ALL@
 CONFIG_CLEAN= @CONFIG_CLEAN@
 CONFIG_INSTALL = @CONFIG_INSTALL@
 CONFIG_UNINSTALL = @CONFIG_UNINSTALL@
+HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 
 # -I. for config files.
 # -I$(srcdir) for gdb internal headers.
@@ -968,7 +969,7 @@ DISTSTUFF = $(YYFILES)
 
 # All generated files which can be included by another file.
 generated_files = config.h observer.h observer.inc ada-lex.c jit-reader.h \
-	$(GNULIB_H) $(NAT_GENERATED_FILES)
+	$(GNULIB_H) $(NAT_GENERATED_FILES) gcore
 
 .c.o:
 	$(COMPILE) $<
@@ -1044,6 +1045,19 @@ install-only: $(CONFIG_INSTALL)
 			$(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) ; \
 		$(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(includedir)/gdb ; \
 		$(INSTALL_DATA) jit-reader.h $(DESTDIR)$(includedir)/gdb/jit-reader.h
+	if test "x$(HAVE_NATIVE_GCORE_TARGET)$(HAVE_NATIVE_GCORE_HOST)" != x; \
+	then \
+	  transformed_name=`t='$(program_transform_name)'; \
+			    echo gcore | sed -e "$$t"` ; \
+		  if test "x$$transformed_name" = x; then \
+		    transformed_name=gcore ; \
+		  else \
+		    true ; \
+		  fi ; \
+		  $(SHELL) $(srcdir)/../mkinstalldirs $(DESTDIR)$(bindir) ; \
+		  $(INSTALL_PROGRAM) gcore \
+			  $(DESTDIR)$(bindir)/$$transformed_name; \
+	fi
 	@$(MAKE) DO=install "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
 install-python:
@@ -1059,6 +1073,17 @@ uninstall: force $(CONFIG_UNINSTALL)
 		fi ; \
 		rm -f $(DESTDIR)$(bindir)/$$transformed_name$(EXEEXT) \
 		      $(DESTDIR)$(man1dir)/$$transformed_name.1
+	if test "x$(HAVE_NATIVE_GCORE_TARGET)$(HAVE_NATIVE_GCORE_HOST)" != x; \
+	then \
+	  transformed_name=`t='$(program_transform_name)'; \
+			    echo gcore | sed -e "$$t"` ; \
+		  if test "x$$transformed_name" = x; then \
+		    transformed_name=gcore ; \
+		  else \
+		    true ; \
+		  fi ; \
+		  rm -f $(DESTDIR)$(bindir)/$$transformed_name; \
+	fi
 	@$(MAKE) DO=uninstall "DODIRS=$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do
 
 # The C++ name parser can be built standalone for testing.
@@ -1301,6 +1326,9 @@ data-directory/Makefile: data-directory/Makefile.in config.status @frags@
 	  $(SHELL) config.status
 
 jit-reader.h: $(srcdir)/jit-reader.in
+	$(SHELL) config.status $@
+
+gcore: $(srcdir)/gcore.in
 	$(SHELL) config.status $@
 
 config.h: stamp-h ; @true

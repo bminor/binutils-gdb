@@ -1,4 +1,28 @@
 2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (HAVE_NATIVE_GCORE_TARGET): New.
+	(generated_files): Add gcore.
+	(install-only, uninstall): Add gcore if HAVE_NATIVE_GCORE_TARGET or
+	HAVE_NATIVE_GCORE_HOST.
+	(gcore): New.
+	* NEWS (Changes since GDB 7.6): Mention newly installed gcore.
+	* config/alpha/alpha-osf3.mh, config/i386/fbsd.mh,
+	config/i386/fbsd64.mh, config/i386/i386gnu.mh, config/i386/i386sol2.mh,
+	config/i386/sol2-64.mh, config/mips/irix5.mh, config/mips/irix6.mh,
+	config/powerpc/fbsd.mh, config/sparc/fbsd.mh, config/sparc/sol2.mh:
+	Add HAVE_NATIVE_GCORE_HOST.
+	* configure: Regenerate.
+	* configure.ac (HAVE_NATIVE_GCORE_TARGET): New, set it, AC_SUBST it.
+	New AC_SUBST fir GDB_TRANSFORM_NAME and GCORE_TRANSFORM_NAME.  New
+	AC_CONFIG_FILES for gcore.
+	* configure.tgt: Add gdb_have_gcore to the initial comment.  Set
+	gdb_have_gcore.
+	* gdb_gcore.sh: Rename to ...
+	* gcore.in: ... here.  Remove gcore.sh comment.  Use GDB_TRANSFORM_NAME
+	and GCORE_TRANSFORM_NAME substitutions.
+
+2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* remote.c (unpush_and_perror): Add output message final dot.
 

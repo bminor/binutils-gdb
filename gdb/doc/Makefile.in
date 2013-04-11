@@ -177,11 +177,15 @@ POD2MAN5 = pod2man --center="GNU Development Tools" \
 		   --release="gdb-`sed q $(srcdir)/../version.in`" --section=5
 
 # List of man pages generated from gdb.texi
-MAN1S = gdb.1 gdbserver.1
+MAN1S = gdb.1 gdbserver.1 gcore.1
 MAN5S = gdbinit.5
 MANS = $(MAN1S) $(MAN5S)
 
-#### Host, target, and site specific Makefile fragments come in here.
+# Host-dependent makefile fragment comes in here.
+@host_makefile_frag@
+# End of host-dependent makefile fragment
+HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
+
 ###
 
 all:
@@ -269,6 +273,10 @@ install-man: install-man1 install-man5
 install-man1: $(MAN1S)
 	test -z "$(man1dir)" || $(mkinstalldirs) "$(DESTDIR)$(man1dir)"
 	@list='$(MAN1S)'; for p in $$list; do \
+	  if test "x$(HAVE_NATIVE_GCORE_TARGET)$(HAVE_NATIVE_GCORE_HOST)" = x \
+		  -a "$$p" = gcore.1; then \
+	    continue; \
+	  fi; \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  f=`echo $$p | sed -e 's|^.*/||'`; \
 	  echo " $(INSTALL_DATA) '$$d$$p' '$(DESTDIR)$(man1dir)/$$f'"; \
@@ -288,7 +296,13 @@ uninstall-man: uninstall-man1 uninstall-man5
 
 uninstall-man1:
 	@test -n "$(man1dir)" || exit 0; \
-	files=`{ l2='$(MAN1S)'; for i in $$l2; do echo "$$i"; done | \
+	files=`{ l2='$(MAN1S)'; for i in $$l2; do \
+	  if test "x$(HAVE_NATIVE_GCORE_TARGET)$(HAVE_NATIVE_GCORE_HOST)" = x \
+		  -a "$$i" = gcore.1; then \
+	    continue; \
+	  fi; \
+	  echo "$$i"; \
+	done | \
 	  sed -n '/\.1[a-z]*$$/p'; \
 	} | sed -e 's,.*/,,;h;s,.*\.,,;s,^[^1][0-9a-z]*$$,1,;x' \
 	      -e 's,\.[0-9a-z]*$$,,;$(transform);G;s,\n,.,'`; \
@@ -604,6 +618,13 @@ gdbserver.1: $(GDB_DOC_FILES)
 	-($(POD2MAN1) gdbserver.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
 		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
 	rm -f gdbserver.pod
+
+gcore.1: $(GDB_DOC_FILES)
+	touch $@
+	-$(TEXI2POD) $(MANCONF) -Dgcore < $(srcdir)/gdb.texinfo > gcore.pod
+	-($(POD2MAN1) gcore.pod | sed -e '/^.if n .na/d' > $@.T$$$$ && \
+		mv -f $@.T$$$$ $@) || (rm -f $@.T$$$$ && exit 1)
+	rm -f gcore.pod
 
 gdbinit.5: $(GDB_DOC_FILES)
 	touch $@
