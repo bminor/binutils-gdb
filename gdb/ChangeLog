@@ -1,3 +1,7 @@
+2013-04-12  Tom Tromey  <tromey@redhat.com>
+
+	* symtab.h (struct general_symbol_info) <value.bytes>: Make const.
+
 2013-04-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* top.c (print_gdb_configuration): New function, displays the
