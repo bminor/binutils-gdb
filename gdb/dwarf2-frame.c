@@ -141,7 +141,7 @@ struct comp_unit
   struct objfile *objfile;
 
   /* Pointer to the .debug_frame section loaded into memory.  */
-  gdb_byte *dwarf_frame_buffer;
+  const gdb_byte *dwarf_frame_buffer;
 
   /* Length of the loaded .debug_frame section.  */
   bfd_size_type dwarf_frame_size;

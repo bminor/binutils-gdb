@@ -1,5 +1,79 @@
 2013-04-12  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2-frame.c (struct comp_unit) <dwarf_frame_buffer>: Now
+	const.
+	* dwarf2read.c (struct dwarf2_section_info) <buffer>: Now const.
+	(struct die_reader_specs) <buffer>: Likewise.
+	(die_reader_func_ftype): Make 'info_ptr' const.
+	(struct line_header) <include_dirs, statement_program_start,
+	statement_program_end>: Now const.
+	(struct file_entry) <name>: Likewise.
+	(struct partial_die_info) <sibling>: Likewise.
+	(struct dwarf_block) <data>: Likewise.
+	(dwarf2_read_section): Remove cast.
+	(dwarf2_get_section_info): Make 'bufp' const.
+	(read_index_from_section): Constify.
+	(dw2_get_file_names_reader): Make 'info_ptr' const.
+	(dw2_get_primary_filename_reader): Likewise.
+	(read_comp_unit_head): Make 'info_ptr' and return type const.
+	(read_and_check_comp_unit_head, read_and_check_type_unit_head):
+	Likewise.
+	(read_abbrev_offset): Constify.
+	(dwarf2_create_include_psymtab): Make 'name' const.
+	(create_debug_types_hash_table): Update.
+	(read_cutu_die_from_dwo): Make 'result_info_ptr' const.
+	(init_cutu_and_read_dies, init_cutu_and_read_dies_no_follow):
+	Constify.
+	(process_psymtab_comp_unit_reader, build_type_psymtabs_reader)
+	(load_partial_comp_unit_reader): Make 'info_ptr' const.
+	(read_comp_units_from_section): Constify.
+	(peek_abbrev_code, peek_die_abbrev, skip_children, skip_one_die)
+	(locate_pdi_sibling, load_full_comp_unit_reader): Make 'info_ptr'
+	const.
+	(dwarf2_compute_name, setup_type_unit_groups): Constify.
+	(create_dwo_debug_info_hash_table): Make 'info_ptr' const.
+	(create_dwp_hash_table, dwarf2_ranges_read)
+	(dwarf2_record_block_ranges): Constify.
+	(read_die_and_children, read_die_and_siblings_1)
+	(read_die_and_siblings): Make 'info_ptr' and 'new_info_ptr'
+	const.
+	(read_full_die_1, read_full_die): Make 'info_ptr' const.
+	(abbrev_table_read_table): Constify.
+	(load_partial_dies): Make 'info_ptr' const.
+	(read_partial_die, read_attribute_value, read_attribute): Make
+	'info_ptr' and return type const.
+	(read_address, read_initial_length)
+	(read_checked_initial_length_and_offset, read_offset)
+	(read_offset_1, read_n_bytes, read_direct_string): Make 'buf'
+	const.
+	(read_direct_string): Make 'buf' and return type const.
+	(read_indirect_string_at_offset, read_indirect_string_from_dwz)
+	(read_indirect_string): Make return type const.
+	(read_unsigned_leb128, read_signed_leb128): Make 'buf' const.
+	(read_addr_index_from_leb128, dwarf2_read_addr_index_reader): Make
+	'info_ptr' const.
+	(read_str_index): Make return type const.
+	(add_include_dir): Make 'include_dir' const.
+	(add_file_name): Make 'name' const.
+	(dwarf_decode_line_header): Constify.
+	(psymtab_include_file_name): Make return type const.
+	(dwarf_decode_lines_1, dwarf_decode_lines): Constify.
+	(dwarf2_start_subfile): Make 'filename' const.
+	(dwarf2_const_value_attr): Make 'bytes' const.
+	(read_signatured_type_reader): Make 'info_ptr' const.
+	(decode_locdesc): Constify.
+	(skip_form_bytes): Make 'bytes', 'buffer_end', and return type
+	const.
+	(skip_unknown_opcode): Make 'opcode_definitions', 'mac_ptr',
+	'mac_end', and return type const.
+	(dwarf_parse_macro_header): Make 'mac_ptr' and return type const.
+	(dwarf_decode_macro_bytes): Make 'mac_ptr', 'mac_end', and return
+	type const.
+	(per_cu_header_read_in): Constify.
+	* symfile.h (dwarf2_get_section_info): Update.
+
+2013-04-12  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.h (struct general_symbol_info) <value.bytes>: Make const.
 
 2013-04-12  Eli Zaretskii  <eliz@gnu.org>
