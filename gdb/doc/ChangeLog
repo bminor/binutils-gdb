@@ -1,3 +1,9 @@
+2013-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Auto-loading safe path): Add quick -iex using command
+	line below the sample output.
+
 2013-04-12  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Mode Options): Document '-configuration'.
