@@ -90,7 +90,9 @@ static int
 mem_bfd_iovec_close (struct bfd *abfd, void *stream)
 {
   xfree (stream);
-  return 1;
+
+  /* Zero means success.  */
+  return 0;
 }
 
 /* For reading the file, we just need to pass through to target_read_memory and

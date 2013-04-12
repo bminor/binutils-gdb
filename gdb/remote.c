@@ -9937,7 +9937,8 @@ remote_bfd_iovec_close (struct bfd *abfd, void *stream)
      connection was already torn down.  */
   remote_hostio_close (fd, &remote_errno);
 
-  return 1;
+  /* Zero means success.  */
+  return 0;
 }
 
 static file_ptr

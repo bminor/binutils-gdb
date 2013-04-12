@@ -1,4 +1,13 @@
-2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+2013-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix GDB regression related to PR binutils/14813.
+	* jit.c (mem_bfd_iovec_close): Return 0 for success.
+	* minidebug.c (lzma_close): Add return value comment.
+	* remote.c (remote_bfd_iovec_close): Return 0 for success.
+	* solib-spu.c (spu_bfd_iovec_close): Likewise.
+	* spu-linux-nat.c (spu_bfd_iovec_close): Likewise.
+
+2013-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* config.in: Regenerate.
 

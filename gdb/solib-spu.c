@@ -286,7 +286,9 @@ static int
 spu_bfd_iovec_close (bfd *nbfd, void *stream)
 {
   xfree (stream);
-  return 1;
+
+  /* Zero means success.  */
+  return 0;
 }
 
 static file_ptr

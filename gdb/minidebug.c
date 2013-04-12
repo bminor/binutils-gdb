@@ -226,6 +226,8 @@ lzma_close (struct bfd *nbfd,
   lzma_index_end (lstream->index, &gdb_lzma_allocator);
   xfree (lstream->data);
   xfree (lstream);
+
+  /* Zero means success.  */
   return 0;
 }
 
