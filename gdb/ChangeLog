@@ -1,3 +1,7 @@
+2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* config.in: Regenerate.
+
 2013-04-12  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2-frame.c (struct comp_unit) <dwarf_frame_buffer>: Now

@@ -180,7 +180,7 @@
 /* Define if your <locale.h> file defines LC_MESSAGES. */
 #undef HAVE_LC_MESSAGES
 
-/* Define if libbabeltrace is available */
+/* Define if you have the babeltrace library. */
 #undef HAVE_LIBBABELTRACE
 
 /* Define to 1 if you have the `dl' library (-ldl). */
