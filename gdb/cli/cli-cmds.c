@@ -314,6 +314,12 @@ show_version (char *args, int from_tty)
   printf_filtered ("\n");
 }
 
+static void
+show_configuration (char *args, int from_tty)
+{
+  print_gdb_configuration (gdb_stdout);
+}
+
 /* Handle the quit command.  */
 
 void
@@ -1755,6 +1761,9 @@ the previous command number shown."),
 
   add_cmd ("version", no_set_class, show_version,
 	   _("Show what version of GDB this is."), &showlist);
+
+  add_cmd ("configuration", no_set_class, show_configuration,
+	   _("Show how GDB was configured at build time."), &showlist);
 
   /* If target is open when baud changes, it doesn't take effect until
      the next open (I think, not sure).  */

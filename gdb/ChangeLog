@@ -1,3 +1,16 @@
+2013-04-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* top.c (print_gdb_configuration): New function, displays the
+	details about GDB configure-time parameters.
+	(print_gdb_version): Mention "show configuration".
+
+	* cli/cli-cmds.c (show_configuration): New function.
+	(_initialize_cli_cmds): Add the "show configuration" command.
+
+	* main.c (captured_main) <print_configuration>: New static var.
+	<long_options>: Use it.
+	If --configuration was given, call print_gdb_configuration.
+
 2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 

@@ -31,6 +31,7 @@ extern int inhibit_gdbinit;
 extern char gdbinit[];
 
 extern void print_gdb_version (struct ui_file *);
+extern void print_gdb_configuration (struct ui_file *);
 
 extern void read_command_file (FILE *);
 extern void init_history (void);

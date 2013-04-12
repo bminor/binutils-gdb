@@ -1,3 +1,10 @@
+2013-04-12  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Mode Options): Document '-configuration'.
+	(Help): Document "show configuration".
+	(Bug Reporting): Add requirements to include the configuration
+	details in bug reports.
+
 2013-04-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (MAN1S): Add gcore.1.

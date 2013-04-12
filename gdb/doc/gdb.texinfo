@@ -1268,6 +1268,12 @@ memory usage after it completes each command and returns to the prompt.
 This option causes @value{GDBN} to print its version number and
 no-warranty blurb, and exit.
 
+@item -configuration
+@cindex @code{--configuration}
+This option causes @value{GDBN} to print details about its build-time
+configuration parameters, and then exit.  These details can be
+important when reporting @value{GDBN} bugs (@pxref{GDB Bugs}).
+
 @end table
 
 @node Startup
@@ -1841,7 +1847,7 @@ values, you can use @code{show} with no arguments; you may also use
 @end table
 @c @end group
 
-Here are three miscellaneous @code{show} subcommands, all of which are
+Here are several miscellaneous @code{show} subcommands, all of which are
 exceptional in lacking corresponding @code{set} commands:
 
 @table @code
@@ -1871,6 +1877,15 @@ Display information about permission for copying @value{GDBN}.
 @itemx info warranty
 Display the @sc{gnu} ``NO WARRANTY'' statement, or a warranty,
 if your version of @value{GDBN} comes with one.
+
+@kindex show configuration
+@item show configuration
+Display detailed information about the way @value{GDBN} was configured
+when it was built.  This displays the optional arguments passed to the
+@file{configure} script and also configuration parameters detected
+automatically by @command{configure}.  When reporting a @value{GDBN}
+bug (@pxref{GDB Bugs}), it is important to include this information in
+your report.
 
 @end table
 
@@ -34615,6 +34630,12 @@ the bug in the current version of @value{GDBN}.
 @item
 The type of machine you are using, and the operating system name and
 version number.
+
+@item
+The details of the @value{GDBN} build-time configuration.
+@value{GDBN} shows these details if you invoke it with the
+@option{--configuration} command-line option, or if you type
+@code{show configuration} at @value{GDBN}'s prompt.
 
 @item
 What compiler (and its version) was used to compile @value{GDBN}---e.g.@:

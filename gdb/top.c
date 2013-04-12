@@ -1148,14 +1148,100 @@ and \"show warranty\" for details.\n");
     {
       fprintf_filtered (stream, "%s", host_name);
     }
-  fprintf_filtered (stream, "\".");
+  fprintf_filtered (stream, "\".\n\
+Type \"show configuration\" for configuration details.");
 
   if (REPORT_BUGS_TO[0])
     {
-      fprintf_filtered (stream, 
+      fprintf_filtered (stream,
 			_("\nFor bug reporting instructions, please see:\n"));
       fprintf_filtered (stream, "%s.", REPORT_BUGS_TO);
     }
+}
+
+/* Print the details of GDB build-time configuration.  */
+void
+print_gdb_configuration (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("\
+This GDB was configured as follows:\n\
+   configure --host=%s --target=%s\n\
+"), host_name, target_name);
+  fprintf_filtered (stream, _("\
+             --with-auto-load-dir=%s\n\
+             --with-auto-load-safe-path=%s\n\
+"), AUTO_LOAD_DIR, AUTO_LOAD_SAFE_PATH);
+#if HAVE_LIBEXPAT
+  fprintf_filtered (stream, _("\
+             --with-expat\n\
+"));
+#else
+  fprintf_filtered (stream, _("\
+             --without-expat\n\
+"));
+#endif
+  if (GDB_DATADIR[0])
+    fprintf_filtered (stream, _("\
+             --with-gdb-datadir=%s%s\n\
+"), GDB_DATADIR, GDB_DATADIR_RELOCATABLE ? " (relocatable)" : "");
+#ifdef ICONV_BIN
+  fprintf_filtered (stream, _("\
+             --with-iconv-bin=%s%s\n\
+"), ICONV_BIN, ICONV_BIN_RELOCATABLE ? " (relocatable)" : "");
+#endif
+  if (JIT_READER_DIR[0])
+    fprintf_filtered (stream, _("\
+             --with-jit-reader-dir=%s%s\n\
+"), JIT_READER_DIR, JIT_READER_DIR_RELOCATABLE ? " (relocatable)" : "");
+#if HAVE_LIBUNWIND_IA64_H
+  fprintf_filtered (stream, _("\
+             --with-libunwind-ia64\n\
+"));
+#else
+  fprintf_filtered (stream, _("\
+             --without-libunwind-ia64\n\
+"));
+#endif
+#if HAVE_LIBLZMA
+  fprintf_filtered (stream, _("\
+             --with-lzma\n\
+"));
+#else
+  fprintf_filtered (stream, _("\
+             --without-lzma\n\
+"));
+#endif
+#ifdef WITH_PYTHON_PATH
+  fprintf_filtered (stream, _("\
+             --with-python=%s%s\n\
+"), WITH_PYTHON_PATH, PYTHON_PATH_RELOCATABLE ? " (relocatable)" : "");
+#endif
+#ifdef RELOC_SRCDIR
+  fprintf_filtered (stream, _("\
+             --with-relocated-sources=%s\n\
+"), RELOC_SRCDIR);
+#endif
+  if (DEBUGDIR[0])
+    fprintf_filtered (stream, _("\
+             --with-separate-debug-dir=%s%s\n\
+"), DEBUGDIR, DEBUGDIR_RELOCATABLE ? " (relocatable)" : "");
+  if (TARGET_SYSTEM_ROOT[0])
+    fprintf_filtered (stream, _("\
+             --with-sysroot=%s%s\n\
+"), TARGET_SYSTEM_ROOT, TARGET_SYSTEM_ROOT_RELOCATABLE ? " (relocatable)" : "");
+  if (SYSTEM_GDBINIT[0])
+    fprintf_filtered (stream, _("\
+             --with-system-gdbinit=%s%s\n\
+"), SYSTEM_GDBINIT, SYSTEM_GDBINIT_RELOCATABLE ? " (relocatable)" : "");
+#if HAVE_ZLIB_H
+  fprintf_filtered (stream, _("\
+             --with-zlib\n\
+"));
+#else
+  fprintf_filtered (stream, _("\
+             --without-zlib\n\
+"));
+#endif
 }
 
 
