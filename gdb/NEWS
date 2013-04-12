@@ -4,6 +4,9 @@
 *** Changes since GDB 7.6
 
 * New commands:
+show configuration
+  Display the details of GDB configure-time options.
+
 maint set|show per-command
 maint set|show per-command space
 maint set|show per-command time
@@ -15,6 +18,10 @@ maint set|show per-command symtab
 set remote trace-status-packet
 show remote trace-status-packet
   Set/show the use of remote protocol qTStatus packet.
+
+* New command-line options
+--configuration
+  Display the details of GDB configure-time options.
 
 * The command 'tsave' can now support new option '-ctf' to save trace
   buffer in Common Trace Format.
