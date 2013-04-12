@@ -10,7 +10,8 @@ EXECUTABLES = a2-run advance all-types annota1 annota1-watch_thread_num \
 	call-strs callexit callfuncs callfwmall charset checkpoint \
 	chng-syms code_elim1 code_elim2 commands compiler complex \
 	condbreak consecutive constvars coremaker cursal cvexpr \
-	dbx-test del disasm-end-cu display dump dup-sect dup-sect.debug \
+	dbx-test del disasm-end-cu display dprintf-pending dump dup-sect \
+	dup-sect.debug \
 	dup-sect.stripped ending-run execd-prog expand-psymtabs exprs \
 	fileio find finish fixsection float foll-exec foll-fork foll-vfork \
 	frame-args freebpcmd fullname funcargs gcore \
@@ -44,7 +45,7 @@ EXECUTABLES = a2-run advance all-types annota1 annota1-watch_thread_num \
 	wchar whatis whatis-exp catch-syscall \
 	pr10179 gnu_vector
 
-MISCELLANEOUS = coremmap.data ../foobar.baz fixsectshr.sl \
+MISCELLANEOUS = coremmap.data dprintf-pendshr.sl ../foobar.baz fixsectshr.sl \
 	pendshr.sl shreloc1.sl shreloc2.sl twice-tmp.c \
 	shr1.sl shr2.sl solib_sl.sl solib1.sl solib2.sl \
 	unloadshr.sl unloadshr2.sl watchpoint-solib-shr.sl \
