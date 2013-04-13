@@ -1085,7 +1085,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
 				  reloc, this->rela_dyn_section(layout));
   }
 
-  // Look over all the input sections, deciding where to place stub.
+  // Look over all the input sections, deciding where to place stubs.
   void
   group_sections(Layout*, const Task*);
 
@@ -2226,7 +2226,7 @@ class Stub_control
   Output_section* output_section_;
 };
 
-// Return true iff input section can be handled by current stub/
+// Return true iff input section can be handled by current stub
 // group.
 
 bool
@@ -2258,7 +2258,9 @@ Stub_control::can_add_to_stub_group(Output_section* o,
 		 i->relobj()->section_name(i->shndx()).c_str());
 
   if (this->state_ != HAS_STUB_SECTION
-      && (!whole_sec || this->output_section_ != o))
+      && (!whole_sec || this->output_section_ != o)
+      && (this->state_ == NO_GROUP
+	  || this->group_end_addr_ - end_addr < group_size))
     {
       this->owner_ = i;
       this->output_section_ = o;
@@ -2331,7 +2333,25 @@ Target_powerpc<size, big_endian>::group_sections(Layout* layout,
 	}
     }
   if (stub_table != NULL)
-    stub_table->init(stub_control.owner(), stub_control.output_section());
+    {
+      const Output_section::Input_section* i = stub_control.owner();
+      if (!i->is_input_section())
+	{
+	  // Corner case.  A new stub group was made for the first
+	  // section (last one looked at here) for some reason, but
+	  // the first section is already being used as the owner for
+	  // a stub table for following sections.  Force it into that
+	  // stub group.
+	  gold_assert(this->stub_tables_.size() >= 2);
+	  this->stub_tables_.pop_back();
+	  delete stub_table;
+	  Powerpc_relobj<size, big_endian>* ppcobj = static_cast
+	    <Powerpc_relobj<size, big_endian>*>(i->relobj());
+	  ppcobj->set_stub_table(i->shndx(), this->stub_tables_.back());
+	}
+      else
+	stub_table->init(i, stub_control.output_section());
+    }
 }
 
 // If this branch needs a plt call stub, or a long branch stub, make one.
@@ -2429,17 +2449,26 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
       to += this->addend_;
       if (stub_table == NULL)
 	stub_table = this->object_->stub_table(this->shndx_);
-      gold_assert(stub_table != NULL);
       if (size == 64 && is_branch_reloc(this->r_type_))
 	{
 	  unsigned int dest_shndx;
-	  to = stub_table->targ()->symval_for_branch(symtab, to, gsym,
-						     this->object_,
-						     &dest_shndx);
+	  Target_powerpc<size, big_endian>* target =
+	    static_cast<Target_powerpc<size, big_endian>*>(
+		parameters->sized_target<size, big_endian>());
+	  to = target->symval_for_branch(symtab, to, gsym,
+					 this->object_, &dest_shndx);
 	}
       Address delta = to - from;
       if (delta + max_branch_offset >= 2 * max_branch_offset)
 	{
+	  if (stub_table == NULL)
+	    {
+	      gold_warning(_("%s:%s: branch in non-executable section,"
+			     " no long branch stub for you"),
+			   this->object_->name().c_str(),
+			   this->object_->section_name(this->shndx_).c_str());
+	      return;
+	    }
 	  stub_table->add_long_branch_entry(this->object_, to);
 	}
     }
@@ -6590,10 +6619,13 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	{
 	  Stub_table<size, big_endian>* stub_table
 	    = object->stub_table(relinfo->data_shndx);
-	  gold_assert(stub_table != NULL);
-	  Address off = stub_table->find_long_branch_entry(object, value);
-	  if (off != invalid_address)
-	    value = stub_table->stub_address() + stub_table->plt_size() + off;
+	  if (stub_table != NULL)
+	    {
+	      Address off = stub_table->find_long_branch_entry(object, value);
+	      if (off != invalid_address)
+		value = (stub_table->stub_address() + stub_table->plt_size()
+			 + off);
+	    }
 	}
     }
 

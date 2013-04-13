@@ -1,3 +1,12 @@
+2013-04-13  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Stub_control::can_add_to_stub_group): Don't set
+	owner when sections are not adjacent and exceed group size.
+	(Target_powerpc::group_sections): Handle corner case.
+	(Target_powerpc::Branch_info::make_stub): Handle case where
+	stub table doesn't exist due to branches in non-exec sections.
+	(Target_powerpc::Relocate::relocate): Likewise.
+
 2013-04-11  Alan Modra  <amodra@gmail.com>
 
 	PR gold/15354
