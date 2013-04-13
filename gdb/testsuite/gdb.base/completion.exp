@@ -714,8 +714,19 @@ gdb_test "complete set gnutarget aut" "set gnutarget auto"
 gdb_test "complete set cp-abi aut" "set cp-abi auto"
 
 # Test that completion of commands 'target FOO' works well.
+set targets [list "core" "tfile" "exec"]
 
-foreach target_name { "core" "tfile" "exec" } {
+# Test that completion of command 'target ctf' if GDB supports ctf
+# target.
+gdb_test_multiple "target ctf" "" {
+    -re "Undefined target command: \"ctf\"\.  Try \"help target\"\.\r\n$gdb_prompt $" {
+    }
+    -re "No CTF directory specified.*\r\n$gdb_prompt $" {
+	lappend targets "ctf"
+    }
+}
+
+foreach target_name ${targets} {
     gdb_test "complete target ${target_name} ./gdb.base/completion" \
 	"target ${target_name} ./gdb.base/completion\\.exp.*"
 }

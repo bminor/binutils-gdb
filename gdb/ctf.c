@@ -25,6 +25,7 @@
 #include "regcache.h"
 #include "gdb_stat.h"
 #include "exec.h"
+#include "completer.h"
 
 #include <ctype.h>
 
@@ -1843,6 +1844,6 @@ _initialize_ctf (void)
 #if HAVE_LIBBABELTRACE
   init_ctf_ops ();
 
-  add_target (&ctf_ops);
+  add_target_with_completer (&ctf_ops, filename_completer);
 #endif
 }

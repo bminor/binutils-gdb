@@ -1,3 +1,8 @@
+2013-04-13  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (_initialize_ctf): Include "completer.h".
+	Call add_target_with_completer instead of add_target.
+
 2013-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix GDB regression related to PR binutils/14813.
