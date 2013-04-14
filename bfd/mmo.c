@@ -787,21 +787,21 @@ static INLINE bfd_boolean
 mmo_write_chunk (bfd *abfd, const bfd_byte *loc, unsigned int len)
 {
   bfd_boolean retval = TRUE;
+  struct mmo_data_struct *mmop = abfd->tdata.mmo_data;
 
   /* Fill up a tetra from bytes remaining from a previous chunk.  */
-  if (abfd->tdata.mmo_data->byte_no != 0)
+  if (mmop->byte_no != 0)
     {
-      while (abfd->tdata.mmo_data->byte_no < 4 && len != 0)
+      while (mmop->byte_no < 4 && len != 0)
 	{
-	  abfd->tdata.mmo_data->buf[abfd->tdata.mmo_data->byte_no++] = *loc++;
+	  mmop->buf[mmop->byte_no++] = *loc++;
 	  len--;
 	}
 
-      if (abfd->tdata.mmo_data->byte_no == 4)
+      if (mmop->byte_no == 4)
 	{
-	  mmo_write_tetra (abfd,
-			   bfd_get_32 (abfd, abfd->tdata.mmo_data->buf));
-	  abfd->tdata.mmo_data->byte_no = 0;
+	  mmo_write_tetra (abfd, bfd_get_32 (abfd, mmop->buf));
+	  mmop->byte_no = 0;
 	}
     }
 
@@ -811,7 +811,7 @@ mmo_write_chunk (bfd *abfd, const bfd_byte *loc, unsigned int len)
 	mmo_write_tetra_raw (abfd, LOP_QUOTE_NEXT);
 
       retval = (retval
-		&& ! abfd->tdata.mmo_data->have_error
+		&& ! mmop->have_error
 		&& 4 == bfd_bwrite (loc, 4, abfd));
 
       loc += 4;
@@ -820,12 +820,12 @@ mmo_write_chunk (bfd *abfd, const bfd_byte *loc, unsigned int len)
 
   if (len)
     {
-      memcpy (abfd->tdata.mmo_data->buf, loc, len);
-      abfd->tdata.mmo_data->byte_no = len;
+      memcpy (mmop->buf, loc, len);
+      mmop->byte_no = len;
     }
 
   if (! retval)
-    abfd->tdata.mmo_data->have_error = TRUE;
+    mmop->have_error = TRUE;
   return retval;
 }
 

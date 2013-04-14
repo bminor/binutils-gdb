@@ -1,3 +1,8 @@
+2013-04-14  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* mmo.c (mmo_write_chunk): Break out abfd->tdata.mmo_data to new
+	local variable mmop.
+
 2013-04-09  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/12494
