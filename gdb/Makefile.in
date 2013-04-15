@@ -708,7 +708,9 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	agent.c \
 	bcache.c \
 	bfd-target.c \
-	block.c blockframe.c breakpoint.c break-catch-sig.c buildsym.c \
+	block.c blockframe.c \
+	breakpoint.c break-catch-sig.c break-catch-throw.c \
+	buildsym.c \
 	c-exp.y c-lang.c c-typeprint.c c-valprint.c \
 	charset.c cleanups.c cli-out.c coffread.c coff-pe-read.c \
 	complaints.c completer.c continuations.c corefile.c corelow.c \
@@ -878,7 +880,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	auto-load.o auxv.o \
 	agent.o \
 	bfd-target.o \
-	blockframe.o breakpoint.o break-catch-sig.o \
+	blockframe.o breakpoint.o break-catch-sig.o break-catch-throw.o \
 	findvar.o regcache.o cleanups.o \
 	charset.o continuations.o corelow.o disasm.o dummy-frame.o dfp.o \
 	source.o value.o eval.o valops.o valarith.o valprint.o printcmd.o \

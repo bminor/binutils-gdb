@@ -1,5 +1,14 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* Makefile.in (SFILES): Add break-catch-throw.c
+	(COMMON_OBS): Add break-catch-throw.o.
+	* break-catch-throw.c: New file.
+	* breakpoint.c: Move exception-catching code to new file.
+	(ep_parse_optional_if_clause): No longer static.
+	* breakpoint.h (ep_parse_optional_if_clause): Declare.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/9065:
 	* NEWS: Update.
 	* breakpoint.c (watchpoint_exp_is_const): Add OP_TYPEID.

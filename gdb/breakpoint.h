@@ -1557,4 +1557,6 @@ extern void handle_solib_event (void);
 
 extern void breakpoint_free_objfile (struct objfile *objfile);
 
+extern char *ep_parse_optional_if_clause (char **arg);
+
 #endif /* !defined (BREAKPOINT_H) */
