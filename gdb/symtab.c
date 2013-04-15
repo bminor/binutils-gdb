@@ -596,7 +596,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
       || gsymbol->language == language_auto)
     {
       demangled =
-        cplus_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
+        gdb_demangle (mangled, DMGL_PARAMS | DMGL_ANSI);
       if (demangled != NULL)
 	{
 	  gsymbol->language = language_cplus;
@@ -606,8 +606,8 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
   if (gsymbol->language == language_java)
     {
       demangled =
-        cplus_demangle (mangled,
-                        DMGL_PARAMS | DMGL_ANSI | DMGL_JAVA);
+        gdb_demangle (mangled,
+		      DMGL_PARAMS | DMGL_ANSI | DMGL_JAVA);
       if (demangled != NULL)
 	{
 	  gsymbol->language = language_java;
@@ -1160,7 +1160,7 @@ demangle_for_lookup (const char *name, enum language lang,
      lookup, so we can always binary search.  */
   if (lang == language_cplus)
     {
-      demangled_name = cplus_demangle (name, DMGL_ANSI | DMGL_PARAMS);
+      demangled_name = gdb_demangle (name, DMGL_ANSI | DMGL_PARAMS);
       if (demangled_name)
 	{
 	  modified_name = demangled_name;
@@ -1180,8 +1180,8 @@ demangle_for_lookup (const char *name, enum language lang,
     }
   else if (lang == language_java)
     {
-      demangled_name = cplus_demangle (name,
-		      		       DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
+      demangled_name = gdb_demangle (name,
+				     DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
       if (demangled_name)
 	{
 	  modified_name = demangled_name;

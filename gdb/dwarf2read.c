@@ -7763,11 +7763,11 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 	}
       else
 	{
-	  demangled = cplus_demangle (mangled,
-				      (DMGL_PARAMS | DMGL_ANSI
-				       | (cu->language == language_java
-					  ? DMGL_JAVA | DMGL_RET_POSTFIX
-					  : DMGL_RET_DROP)));
+	  demangled = gdb_demangle (mangled,
+				    (DMGL_PARAMS | DMGL_ANSI
+				     | (cu->language == language_java
+					? DMGL_JAVA | DMGL_RET_POSTFIX
+					: DMGL_RET_DROP)));
 	}
       if (demangled)
 	{
@@ -14154,7 +14154,7 @@ fixup_partial_die (struct partial_die_info *part_die,
     {
       char *demangled;
 
-      demangled = cplus_demangle (part_die->linkage_name, DMGL_TYPES);
+      demangled = gdb_demangle (part_die->linkage_name, DMGL_TYPES);
       if (demangled)
 	{
 	  const char *base;
@@ -17214,7 +17214,7 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 	  /* Avoid demangling DW_STRING (attr) the second time on a second
 	     call for the same DIE.  */
 	  if (!DW_STRING_IS_CANONICAL (attr))
-	    demangled = cplus_demangle (DW_STRING (attr), DMGL_TYPES);
+	    demangled = gdb_demangle (DW_STRING (attr), DMGL_TYPES);
 
 	  if (demangled)
 	    {

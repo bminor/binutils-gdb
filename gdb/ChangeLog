@@ -1,5 +1,25 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	PR c++/11990:
+	* c-lang.c (cplus_language_defn): Use gdb_demangle.
+	* c-typeprint.c (c_type_print_base): Use gdb_demangle.
+	* cp-support.c (mangled_name_to_comp): Use gdb_demangle.
+	(gdb_demangle): New function.
+	* cp-support.h (gdb_demangle): Declare.
+	* dwarf2read.c (dwarf2_physname, fixup_partial_die)
+	(dwarf2_name): Use gdb_demangle.
+	* gdbtypes.c (check_stub_method): Use gdb_demangle.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Strip @plt and version
+	suffixes from name.
+	(gnuv3_print_method_ptr): Use gdb_demangle.
+	* jv-lang.c (java_demangle): Use gdb_demangle.
+	* jv-typeprint.c (java_type_print_base): Use gdb_demangle.
+	* language.c (unk_lang_demangle): Use gdb_demangle.
+	* symtab.c (symbol_find_demangled_name)
+	(demangle_for_lookup): Use gdb_demangle.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/12824:
 	* NEWS: Update.
 	* breakpoint.c (enum exception_event_kind) <EX_EVENT_RETHROW>:

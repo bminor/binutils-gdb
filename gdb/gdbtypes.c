@@ -37,6 +37,7 @@
 #include "gdb_assert.h"
 #include "hashtab.h"
 #include "exceptions.h"
+#include "cp-support.h"
 
 /* Initialize BADNESS constants.  */
 
@@ -1764,8 +1765,8 @@ check_stub_method (struct type *type, int method_id, int signature_id)
   struct gdbarch *gdbarch = get_type_arch (type);
   struct fn_field *f;
   char *mangled_name = gdb_mangle_name (type, method_id, signature_id);
-  char *demangled_name = cplus_demangle (mangled_name,
-					 DMGL_PARAMS | DMGL_ANSI);
+  char *demangled_name = gdb_demangle (mangled_name,
+				       DMGL_PARAMS | DMGL_ANSI);
   char *argtypetext, *p;
   int depth = 0, argcount = 1;
   struct field *argtypes;

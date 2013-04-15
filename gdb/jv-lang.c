@@ -39,6 +39,7 @@
 #include "gdb_assert.h"
 #include "charset.h"
 #include "valprint.h"
+#include "cp-support.h"
 
 /* Local functions */
 
@@ -1010,7 +1011,7 @@ nosideret:
 
 static char *java_demangle (const char *mangled, int options)
 {
-  return cplus_demangle (mangled, options | DMGL_JAVA);
+  return gdb_demangle (mangled, options | DMGL_JAVA);
 }
 
 /* Find the member function name of the demangled name NAME.  NAME

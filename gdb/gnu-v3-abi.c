@@ -283,6 +283,7 @@ gnuv3_rtti_type (struct value *value,
   const char *class_name;
   struct type *run_time_type;
   LONGEST offset_to_top;
+  char *atsign;
 
   /* We only have RTTI for class objects.  */
   if (TYPE_CODE (values_type) != TYPE_CODE_CLASS)
@@ -326,6 +327,18 @@ gnuv3_rtti_type (struct value *value,
       return NULL;
     }
   class_name = vtable_symbol_name + 11;
+
+  /* Strip off @plt and version suffixes.  */
+  atsign = strchr (class_name, '@');
+  if (atsign != NULL)
+    {
+      char *copy;
+
+      copy = alloca (atsign - class_name + 1);
+      memcpy (copy, class_name, atsign - class_name);
+      copy[atsign - class_name] = '\0';
+      class_name = copy;
+    }
 
   /* Try to look up the class name as a type name.  */
   /* FIXME: chastain/2003-11-26: block=NULL is bogus.  See pr gdb/1465.  */
@@ -593,8 +606,8 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
 	 possible paths to the method based on the adjustment.  */
       if (physname)
 	{
-	  char *demangled_name = cplus_demangle (physname,
-						 DMGL_ANSI | DMGL_PARAMS);
+	  char *demangled_name = gdb_demangle (physname,
+					       DMGL_ANSI | DMGL_PARAMS);
 
 	  fprintf_filtered (stream, "&virtual ");
 	  if (demangled_name == NULL)
