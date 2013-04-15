@@ -110,7 +110,7 @@
 
 /* This module defines the GDB target vector and its methods.  */
 
-static void procfs_attach (struct target_ops *, char *, int);
+static void procfs_attach (struct target_ops *, const char *, int);
 static void procfs_detach (struct target_ops *, const char *, int);
 static void procfs_resume (struct target_ops *,
 			   ptid_t, int, enum gdb_signal);
@@ -3039,7 +3039,7 @@ procfs_debug_inferior (procinfo *pi)
 }
 
 static void
-procfs_attach (struct target_ops *ops, char *args, int from_tty)
+procfs_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   char *exec_file;
   int   pid;

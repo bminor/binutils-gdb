@@ -340,7 +340,7 @@ static struct {
 };
 
 static void
-go32_attach (struct target_ops *ops, char *args, int from_tty)
+go32_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   error (_("\
 You cannot attach to a running program on this platform.\n\

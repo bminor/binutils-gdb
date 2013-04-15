@@ -4365,7 +4365,8 @@ remote_disconnect (struct target_ops *target, char *args, int from_tty)
    be chatty about it.  */
 
 static void
-extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
+extended_remote_attach_1 (struct target_ops *target, const char *args,
+			  int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
   int pid;
@@ -4478,7 +4479,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 }
 
 static void
-extended_remote_attach (struct target_ops *ops, char *args, int from_tty)
+extended_remote_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   extended_remote_attach_1 (ops, args, from_tty);
 }

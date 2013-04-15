@@ -3255,7 +3255,7 @@ gdb_bfd_errmsg (bfd_error_type error_tag, char **matching)
 /* Return ARGS parsed as a valid pid, or throw an error.  */
 
 int
-parse_pid_to_attach (char *args)
+parse_pid_to_attach (const char *args)
 {
   unsigned long pid;
   char *dummy;
@@ -3263,7 +3263,7 @@ parse_pid_to_attach (char *args)
   if (!args)
     error_no_arg (_("process-id to attach"));
 
-  dummy = args;
+  dummy = (char *) args;
   pid = strtoul (args, &dummy, 0);
   /* Some targets don't set errno on errors, grrr!  */
   if ((pid == 0 && dummy == args) || dummy != &args[strlen (args)])

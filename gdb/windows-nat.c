@@ -1834,7 +1834,7 @@ out:
 
 /* Attach to process PID, then initialize for debugging it.  */
 static void
-windows_attach (struct target_ops *ops, char *args, int from_tty)
+windows_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   BOOL ok;
   DWORD pid;

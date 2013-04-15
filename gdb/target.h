@@ -409,7 +409,7 @@ struct target_ops
        for normal operations, and should be ready to deliver the
        status of the process immediately (without waiting) to an
        upcoming target_wait call.  */
-    void (*to_attach) (struct target_ops *ops, char *, int);
+    void (*to_attach) (struct target_ops *ops, const char *, int);
     void (*to_post_attach) (struct target_ops *, int)
       TARGET_DEFAULT_IGNORE ();
     void (*to_detach) (struct target_ops *ops, const char *, int)
@@ -2140,7 +2140,7 @@ extern void noprocess (void) ATTRIBUTE_NORETURN;
 
 extern void target_require_runnable (void);
 
-extern void find_default_attach (struct target_ops *, char *, int);
+extern void find_default_attach (struct target_ops *, const char *, int);
 
 extern void find_default_create_inferior (struct target_ops *,
 					  char *, char *, char **, int);

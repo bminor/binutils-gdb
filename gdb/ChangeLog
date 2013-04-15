@@ -1,5 +1,23 @@
 2014-06-04  Tom Tromey  <tromey@redhat.com>
 
+	* procfs.c (procfs_attach): Make "args" const.
+	* windows-nat.c (windows_attach): Make "args" const.
+	* nto-procfs.c (procfs_attach): Make "args" const.
+	* inf-ttrace.c (inf_ttrace_attach): Make "args" const.
+	* go32-nat.c (go32_attach): Make "args" const.
+	* gnu-nat.c (gnu_attach): Make "args" const.
+	* darwin-nat.c (darwin_attach): Make "args" const.
+	* inf-ptrace.c (inf_ptrace_attach): Make "args" const.
+	* linux-nat.c (linux_nat_attach): Make "args" const.
+	* remote.c (extended_remote_attach_1, extended_remote_attach):
+	Make "args" const.
+	* target.h (struct target_ops) <to_attach>: Make "args" const.
+	(find_default_attach): Likewise.
+	* utils.c (parse_pid_to_attach): Make "args" const.
+	* utils.h (parse_pid_to_attach): Update.
+
+2014-06-04  Tom Tromey  <tromey@redhat.com>
+
 	* target-delegates.c: Rebuild.
 	* target.c (default_thread_address_space): New function.
 	(target_thread_address_space): Simplify.

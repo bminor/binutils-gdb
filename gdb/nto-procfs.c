@@ -602,7 +602,7 @@ procfs_files_info (struct target_ops *ignore)
 
 /* Attach to process PID, then initialize for debugging it.  */
 static void
-procfs_attach (struct target_ops *ops, char *args, int from_tty)
+procfs_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   char *exec_file;
   int pid;

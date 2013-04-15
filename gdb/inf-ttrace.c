@@ -747,7 +747,7 @@ inf_ttrace_create_threads_after_attach (int pid)
 }
 
 static void
-inf_ttrace_attach (struct target_ops *ops, char *args, int from_tty)
+inf_ttrace_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   char *exec_file;
   pid_t pid;

@@ -2165,7 +2165,7 @@ gnu_create_inferior (struct target_ops *ops,
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
 static void
-gnu_attach (struct target_ops *ops, char *args, int from_tty)
+gnu_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   int pid;
   char *exec_file;

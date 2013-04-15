@@ -181,7 +181,7 @@ inf_ptrace_mourn_inferior (struct target_ops *ops)
    be chatty about it.  */
 
 static void
-inf_ptrace_attach (struct target_ops *ops, char *args, int from_tty)
+inf_ptrace_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   char *exec_file;
   pid_t pid;

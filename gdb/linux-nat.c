@@ -1301,7 +1301,7 @@ linux_nat_create_inferior (struct target_ops *ops,
 }
 
 static void
-linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
+linux_nat_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   struct lwp_info *lp;
   int status;

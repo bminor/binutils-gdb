@@ -1672,7 +1672,7 @@ darwin_setup_fake_stop_event (struct inferior *inf)
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
 static void
-darwin_attach (struct target_ops *ops, char *args, int from_tty)
+darwin_attach (struct target_ops *ops, const char *args, int from_tty)
 {
   pid_t pid;
   pid_t pid2;

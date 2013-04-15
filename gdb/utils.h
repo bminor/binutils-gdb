@@ -63,7 +63,7 @@ struct timeval get_prompt_for_continue_wait_time (void);
 
 /* Parsing utilites.  */
 
-extern int parse_pid_to_attach (char *args);
+extern int parse_pid_to_attach (const char *args);
 
 extern int parse_escape (struct gdbarch *, const char **);
 
