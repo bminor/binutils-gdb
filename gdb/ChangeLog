@@ -1,5 +1,10 @@
 2014-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* completer.c (complete_line): Make "line_buffer" const.
+	* completer.h (complete_line): Update.
+
+2014-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (add_macro_name): Remove unneeded cast.
 
 2014-06-18  Tom Tromey  <tromey@redhat.com>

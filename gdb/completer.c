@@ -772,7 +772,7 @@ complete_line_internal (const char *text,
    should pretend that the line ends at POINT.  */
 
 VEC (char_ptr) *
-complete_line (const char *text, char *line_buffer, int point)
+complete_line (const char *text, const char *line_buffer, int point)
 {
   return complete_line_internal (text, line_buffer, 
 				 point, handle_completions);
