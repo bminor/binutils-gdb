@@ -4,6 +4,9 @@
 *** Changes since GDB 7.6
 
 * New commands:
+catch rethrow
+  Like "catch throw", but catches a re-thrown exception.
+
 show configuration
   Display the details of GDB configure-time options.
 
@@ -30,6 +33,12 @@ show remote trace-status-packet
   GDB command gcore.
 
 * GDB now implements the the C++ 'typeid' operator.
+
+* The new convenience variable $_exception holds the exception being
+  thrown or caught at an exception-related catchpoint.
+
+* The exception-related catchpoints, like "catch throw", now accept a
+  regular expression which can be used to filter exceptions by type.
 
 * MI changes
 
@@ -105,12 +114,6 @@ Tilera TILE-Gx GNU/Linux	tilegx*-*-linux
 
 * 'info proc' now works on some core files.
 
-* The new convenience variable $_exception holds the exception being
-  thrown or caught at an exception-related catchpoint.
-
-* The exception-related catchpoints, like "catch throw", now accept a
-  regular expression which can be used to filter exceptions by type.
-
 * Python scripting
 
   ** Vectors can be created with gdb.Type.vector.
@@ -158,9 +161,6 @@ Tilera TILE-Gx GNU/Linux	tilegx*-*-linux
   libbabeltrace using which GDB can read Common Trace Format data.
 
 * New commands (for set/show, see "New options" below)
-
-catch rethrow
-  Like "catch throw", but catches a re-thrown exception.
 
 catch signal 
   Catch signals.  This is similar to "handle", but allows commands and

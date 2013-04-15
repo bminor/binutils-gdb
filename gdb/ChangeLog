@@ -1,5 +1,9 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* NEWS: Move recent entries into "since 7.6" section.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/13588:
 	* NEWS: Update.
 	* break-catch-throw.c (struct exception_catchpoint)
