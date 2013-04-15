@@ -1,3 +1,8 @@
+2013-04-15  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am ($(MKDOC)): Append $(EXEEXT_FOR_BUILD) to temp file.
+	* Makefile.in: Regenerate.
+
 2013-04-09  Mingjie Xing  <mingjie.xing@gmail.com>
 
 	* bfd.texinfo (typedef bfd, Error reporting, Miscellaneous):
