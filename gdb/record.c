@@ -311,13 +311,10 @@ cmd_record_save (char *args, int from_tty)
   target_save_record (recfilename);
 }
 
-/* "record goto" command.  Argument is an instruction number,
-   as given by "info record".
-
-   Rewinds the recording (forward or backward) to the given instruction.  */
+/* See record.h.  */
 
 void
-cmd_record_goto (char *arg, int from_tty)
+record_goto (const char *arg)
 {
   ULONGEST insn;
 
@@ -328,6 +325,17 @@ cmd_record_goto (char *arg, int from_tty)
 
   require_record_target ();
   target_goto_record (insn);
+}
+
+/* "record goto" command.  Argument is an instruction number,
+   as given by "info record".
+
+   Rewinds the recording (forward or backward) to the given instruction.  */
+
+static void
+cmd_record_goto (char *arg, int from_tty)
+{
+  record_goto (arg);
 }
 
 /* The "record goto begin" command.  */

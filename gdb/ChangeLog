@@ -1,5 +1,17 @@
 2014-06-26  Tom Tromey  <tromey@redhat.com>
 
+	* record-full.c (record_full_get_bookmark): Make "args" const.
+	(record_full_goto_bookmark): Make "raw_bookmark" const.
+	* record.c (record_goto): New function.
+	(cmd_record_goto): Use it.  Now static.
+	* record.h (record_goto): Declare.
+	(cmd_record_goto): Remove declaration.
+	* target-delegates.c: Rebuild.
+	* target.h (struct target_ops) <to_get_bookmark,
+	to_goto_bookmark>: Make parameter const.
+
+2014-06-26  Tom Tromey  <tromey@redhat.com>
+
 	* defs.h (generic_load): Update.
 	* m32r-rom.c (m32r_load_gen): Make "filename" const.
 	* monitor.c (monitor_load): Make "args" const.

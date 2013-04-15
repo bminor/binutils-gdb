@@ -742,27 +742,27 @@ delegate_make_corefile_notes (struct target_ops *self, bfd *arg1, int *arg2)
 }
 
 static gdb_byte * 
-delegate_get_bookmark (struct target_ops *self, char *arg1, int arg2)
+delegate_get_bookmark (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
   return self->to_get_bookmark (self, arg1, arg2);
 }
 
 static gdb_byte * 
-tdefault_get_bookmark (struct target_ops *self, char *arg1, int arg2)
+tdefault_get_bookmark (struct target_ops *self, const char *arg1, int arg2)
 {
   tcomplain ();
 }
 
 static void
-delegate_goto_bookmark (struct target_ops *self, gdb_byte *arg1, int arg2)
+delegate_goto_bookmark (struct target_ops *self, const gdb_byte *arg1, int arg2)
 {
   self = self->beneath;
   self->to_goto_bookmark (self, arg1, arg2);
 }
 
 static void
-tdefault_goto_bookmark (struct target_ops *self, gdb_byte *arg1, int arg2)
+tdefault_goto_bookmark (struct target_ops *self, const gdb_byte *arg1, int arg2)
 {
   tcomplain ();
 }
