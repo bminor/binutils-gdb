@@ -1,3 +1,10 @@
+2013-04-15  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (create_debug_types_hash_table): Use hex_string
+	instead of phex.
+	(lookup_dwo_unit, create_dwo_debug_info_hash_table_reader): Ditto.
+	(create_dwo_in_dwp): Ditto.
+
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Move recent entries into "since 7.6" section.

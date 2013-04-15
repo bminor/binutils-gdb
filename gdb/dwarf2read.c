@@ -4317,16 +4317,16 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 
 	      complaint (&symfile_complaints,
 			 _("debug type entry at offset 0x%x is duplicate to"
-			   " the entry at offset 0x%x, signature 0x%s"),
+			   " the entry at offset 0x%x, signature %s"),
 			 offset.sect_off, dup_offset.sect_off,
-			 phex (signature, sizeof (signature)));
+			 hex_string (signature));
 	    }
 	  *slot = dwo_file ? (void *) dwo_tu : (void *) sig_type;
 
 	  if (dwarf2_read_debug)
-	    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature 0x%s\n",
+	    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature %s\n",
 				offset.sect_off,
-				phex (signature, sizeof (signature)));
+				hex_string (signature));
 
 	  info_ptr += length;
 	}
@@ -4634,8 +4634,7 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
     {
       error (_("Dwarf Error: CU at offset 0x%x references unknown DWO"
 	       " with ID %s [in module %s]"),
-	     this_cu->offset.sect_off,
-	     phex (signature, sizeof (signature)),
+	     this_cu->offset.sect_off, hex_string (signature),
 	     this_cu->objfile->name);
     }
 
@@ -8439,19 +8438,16 @@ create_dwo_debug_info_hash_table_reader (const struct die_reader_specs *reader,
 
       complaint (&symfile_complaints,
 		 _("debug entry at offset 0x%x is duplicate to the entry at"
-		   " offset 0x%x, dwo_id 0x%s [in module %s]"),
+		   " offset 0x%x, dwo_id %s [in module %s]"),
 		 offset.sect_off, dup_dwo_unit->offset.sect_off,
-		 phex (dwo_unit->signature, sizeof (dwo_unit->signature)),
-		 dwo_file->dwo_name);
+		 hex_string (dwo_unit->signature), dwo_file->dwo_name);
     }
   else
     *slot = dwo_unit;
 
   if (dwarf2_read_debug)
-    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, dwo_id 0x%s\n",
-			offset.sect_off,
-			phex (dwo_unit->signature,
-			      sizeof (dwo_unit->signature)));
+    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, dwo_id %s\n",
+			offset.sect_off, hex_string (dwo_unit->signature));
 }
 
 /* Create a hash table to map DWO IDs to their CU entry in
@@ -8734,9 +8730,9 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
 
   if (dwarf2_read_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Reading %s %u/0x%s in DWP file: %s\n",
+      fprintf_unfiltered (gdb_stdlog, "Reading %s %u/%s in DWP file: %s\n",
 			  kind,
-			  section_index, phex (signature, sizeof (signature)),
+			  section_index, hex_string (signature),
 			  dwp_file->name);
     }
 
