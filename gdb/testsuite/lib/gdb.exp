@@ -3995,7 +3995,8 @@ proc test_prefix_command_help { command_list expected_initial_lines args } {
 # different options to be passed to different sub-compilations.
 # TESTNAME is the name of the test; this is passed to 'untested' if
 # something fails.
-# OPTIONS is passed to the final link, using gdb_compile.
+# OPTIONS is passed to the final link, using gdb_compile.  If OPTIONS
+# contains the option "pthreads", then gdb_compile_pthreads is used.
 # ARGS is a flat list of source specifications, of the form:
 #    { SOURCE1 OPTIONS1 [ SOURCE2 OPTIONS2 ]... }
 # Each SOURCE is compiled to an object file using its OPTIONS,
@@ -4017,10 +4018,19 @@ proc build_executable_from_specs {testname executable options args} {
         lappend objects "${binfile}${i}.o"
 	incr i
     }
-    
-    if  { [gdb_compile $objects "${binfile}" executable $options] != "" } {
-        untested $testname
-        return -1
+
+    set pthreads [lsearch -exact $options "pthreads"]
+    if { $pthreads >= 0 } {
+        set options [lreplace $options $pthreads $pthreads]
+        if  { [gdb_compile_pthreads $objects "${binfile}" executable $options] != "" } {
+            untested $testname
+            return -1
+        }
+    } else {
+        if  { [gdb_compile $objects "${binfile}" executable $options] != "" } {
+            untested $testname
+            return -1
+        }
     }
 
     set info_options ""

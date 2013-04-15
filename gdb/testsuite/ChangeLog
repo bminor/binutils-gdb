@@ -1,3 +1,12 @@
+2013-04-15  Siva Chandra Reddy  <sivachandra@google.com>
+
+	Add option to link testcases with Pthreads library when
+	using 'prepare_for_testing' in tests.
+
+	* lib/gdb.exp (build_executable_from_specs): Use
+	gdb_compile_pthreads to compile if option "pthreads" is
+	specified.
+
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/exceptprint.exp: Add regexp catchpoint tests.
