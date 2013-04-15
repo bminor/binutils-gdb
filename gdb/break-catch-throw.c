@@ -31,6 +31,7 @@
 #include "mi/mi-common.h"
 #include "exceptions.h"
 #include "linespec.h"
+#include "probe.h"
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind
@@ -40,13 +41,29 @@ enum exception_event_kind
   EX_EVENT_CATCH
 };
 
-/* Names of the ordinary functions on which to break.  This is indexed
-   by exception_event_kind.  */
-static const char * const exception_functions[] =
+/* Each spot where we may place an exception-related catchpoint has
+   two names: the SDT probe point and the function name.  This
+   structure holds both.  */
+
+struct exception_names
 {
-  "__cxa_throw",
-  "__cxa_rethrow",
-  "__cxa_begin_catch"
+  /* The name of the probe point to try, in the form accepted by
+     'parse_probes'.  */
+
+  const char *probe;
+
+  /* The name of the corresponding function.  */
+
+  const char *function;
+};
+
+/* Names of the probe points and functions on which to break.  This is
+   indexed by exception_event_kind.  */
+static const struct exception_names exception_functions[] =
+{
+  { "-probe-stap libstdcxx:throw", "__cxa_throw" },
+  { "-probe-stap libstdcxx:rethrow", "__cxa_rethrow" },
+  { "-probe-stap libstdcxx:catch", "__cxa_begin_catch" }
 };
 
 static struct breakpoint_ops gnu_v3_exception_catchpoint_ops;
@@ -85,17 +102,30 @@ re_set_exception_catchpoint (struct breakpoint *self)
   volatile struct gdb_exception e;
   struct cleanup *cleanup;
   enum exception_event_kind kind = classify_exception_breakpoint (self);
+  int pass;
 
-  TRY_CATCH (e, RETURN_MASK_ERROR)
+  for (pass = 0; sals.sals == NULL && pass < 2; ++pass)
     {
-      char *spec = ASTRDUP (exception_functions[kind]);
+      TRY_CATCH (e, RETURN_MASK_ERROR)
+	{
+	  char *spec;
 
-      self->ops->decode_linespec (self, &spec, &sals);
+	  if (pass == 0)
+	    {
+	      spec = ASTRDUP (exception_functions[kind].probe);
+	      sals = parse_probes (&spec, NULL);
+	    }
+	  else
+	    {
+	      spec = ASTRDUP (exception_functions[kind].function);
+	      self->ops->decode_linespec (self, &spec, &sals);
+	    }
+	}
+      /* NOT_FOUND_ERROR just means the breakpoint will be pending, so
+	 let it through.  */
+      if (e.reason < 0 && e.error != NOT_FOUND_ERROR)
+	throw_exception (e);
     }
-  /* NOT_FOUND_ERROR just means the breakpoint will be pending, so let
-     it through.  */
-  if (e.reason < 0 && e.error != NOT_FOUND_ERROR)
-    throw_exception (e);
 
   cleanup = make_cleanup (xfree, sals.sals);
   update_breakpoint_locations (self, sals, sals_end);

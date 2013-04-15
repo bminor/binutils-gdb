@@ -1,5 +1,11 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* break-catch-throw.c (struct exception_names): New.
+	(exception_functions): Change type.
+	(re_set_exception_catchpoint): Look for SDT probes.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/10119:
 	* break-catch-throw.c (exception_functions): New global.
 	(gnu_v3_exception_catchpoint_ops): Move earlier.
