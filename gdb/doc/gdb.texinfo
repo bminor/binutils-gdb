@@ -4072,13 +4072,46 @@ shared library.  Use the @code{catch} command to set a catchpoint.
 @kindex catch
 @item catch @var{event}
 Stop when @var{event} occurs.  @var{event} can be any of the following:
+
 @table @code
 @item throw
+@itemx rethrow
+@itemx catch
 @cindex stop on C@t{++} exceptions
-The throwing of a C@t{++} exception.
+The throwing, re-throwing, or catching of a C@t{++} exception.
 
-@item catch
-The catching of a C@t{++} exception.
+There are currently some limitations to C@t{++} exception handling in
+@value{GDBN}:
+
+@itemize @bullet
+@item
+The support for these commands is system-dependent.  Currently, only
+systems using the @samp{gnu-v3} C@t{++} ABI (@pxref{ABI}) are
+supported.
+
+@item
+When an exception-related catchpoint is hit, @value{GDBN} stops at a
+location in the system library which implements runtime exception
+support for C@t{++}, usually @code{libstdc++}.  You can use @code{up}
+(@pxref{Selection}) to get to your code.
+
+@item
+If you call a function interactively, @value{GDBN} normally returns
+control to you when the function has finished executing.  If the call
+raises an exception, however, the call may bypass the mechanism that
+returns control to you and cause your program either to abort or to
+simply continue running until it hits a breakpoint, catches a signal
+that @value{GDBN} is listening for, or exits.  This is the case even if
+you set a catchpoint for the exception; catchpoints on exceptions are
+disabled within interactive calls.  @xref{Calling}, for information on
+controlling this with @code{set unwind-on-terminating-exception}.
+
+@item
+You cannot raise an exception interactively.
+
+@item
+You cannot install an exception handler interactively.
+@end itemize
 
 @item exception
 @cindex Ada exception catching
@@ -4287,27 +4320,6 @@ automatically deleted after the first time the event is caught.
 @end table
 
 Use the @code{info break} command to list the current catchpoints.
-
-There are currently some limitations to C@t{++} exception handling
-(@code{catch throw} and @code{catch catch}) in @value{GDBN}:
-
-@itemize @bullet
-@item
-If you call a function interactively, @value{GDBN} normally returns
-control to you when the function has finished executing.  If the call
-raises an exception, however, the call may bypass the mechanism that
-returns control to you and cause your program either to abort or to
-simply continue running until it hits a breakpoint, catches a signal
-that @value{GDBN} is listening for, or exits.  This is the case even if
-you set a catchpoint for the exception; catchpoints on exceptions are
-disabled within interactive calls.
-
-@item
-You cannot raise an exception interactively.
-
-@item
-You cannot install an exception handler interactively.
-@end itemize
 
 
 @node Delete Breaks
@@ -13508,6 +13520,7 @@ classes.
 
 @cindex C@t{++} exception handling
 @item catch throw
+@itemx catch rethrow
 @itemx catch catch
 Debug C@t{++} exception handling using these commands.  @xref{Set
 Catchpoints, , Setting Catchpoints}.

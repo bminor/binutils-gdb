@@ -151,6 +151,9 @@ Tilera TILE-Gx GNU/Linux	tilegx*-*-linux
 
 * New commands (for set/show, see "New options" below)
 
+catch rethrow
+  Like "catch throw", but catches a re-thrown exception.
+
 catch signal 
   Catch signals.  This is similar to "handle", but allows commands and
   conditions to be attached.

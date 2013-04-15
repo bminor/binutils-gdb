@@ -1,5 +1,11 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Set Catchpoints): Reorganize exception
+	catchpoints.  Document "catch rethrow".
+	(Debugging C Plus Plus): Mention "catch rethrow".
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (Set Catchpoints): Remove obsolete text.
 
 2013-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>

@@ -1,3 +1,17 @@
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/12824:
+	* NEWS: Update.
+	* breakpoint.c (enum exception_event_kind) <EX_EVENT_RETHROW>:
+	New constant.
+	(classify_exception_breakpoint): New function.
+	(print_it_exception_catchpoint, print_one_exception_catchpoint)
+	(print_mention_exception_catchpoint)
+	(print_recreate_exception_catchpoint, handle_gnu_v3_exceptions)
+	(catch_exception_command_1): Handle "rethrow" catchpoint.
+	(catch_rethrow_command): New function.
+	(_initialize_breakpoint): Add "catch rethrow" command.
+
 2013-04-15  Pierre Muller  <muller@sourceware.org>
 
 	* contrib/ari/gdb_ari.sh (write_pc rule): Do not consider
