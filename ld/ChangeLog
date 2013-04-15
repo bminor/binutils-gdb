@@ -1,3 +1,36 @@
+2013-04-15  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/armbpabi.sc: Replace DWARF sections with an
+	inclusion of DWARF.sc.
+	* scripttempl/avr.sc: Likewise.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf32cr16.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/elf32msp430.sc: Likewise.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfd30v.sc: Likewise.
+	* scripttempl/elfi370.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/elfxgate.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/epiphany_4x4.sc: Likewise.
+	* scripttempl/i386beos.sc: Likewise.
+	* scripttempl/i386go32.sc: Likewise.
+	* scripttempl/ia64vms.sc: Likewise.
+	* scripttempl/ip2k.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/mmo.sc: Likewise.
+	* scripttempl/v850.sc: Likewise.
+	* scripttempl/v850_rh850.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+	* scripttempl/DWARF.sc: New.
+
 2013-04-04  Alan Modra  <amodra@gmail.com>
 
 	* ldlang.c (load_symbols): Report "error adding symbols" on
