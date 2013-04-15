@@ -4309,36 +4309,6 @@ You cannot raise an exception interactively.
 You cannot install an exception handler interactively.
 @end itemize
 
-@cindex raise exceptions
-Sometimes @code{catch} is not the best way to debug exception handling:
-if you need to know exactly where an exception is raised, it is better to
-stop @emph{before} the exception handler is called, since that way you
-can see the stack before any unwinding takes place.  If you set a
-breakpoint in an exception handler instead, it may not be easy to find
-out where the exception was raised.
-
-To stop just before an exception handler is called, you need some
-knowledge of the implementation.  In the case of @sc{gnu} C@t{++}, exceptions are
-raised by calling a library function named @code{__raise_exception}
-which has the following ANSI C interface:
-
-@smallexample
-    /* @var{addr} is where the exception identifier is stored.
-       @var{id} is the exception identifier.  */
-    void __raise_exception (void **addr, void *id);
-@end smallexample
-
-@noindent
-To make the debugger catch all exceptions before any stack
-unwinding takes place, set a breakpoint on @code{__raise_exception}
-(@pxref{Breakpoints, ,Breakpoints; Watchpoints; and Exceptions}).
-
-With a conditional breakpoint (@pxref{Conditions, ,Break Conditions})
-that depends on the value of @var{id}, you can stop your program when
-a specific exception is raised.  You can use multiple conditional
-breakpoints to stop your program when any of a number of exceptions are
-raised.
-
 
 @node Delete Breaks
 @subsection Deleting Breakpoints
