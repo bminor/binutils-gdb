@@ -1,3 +1,10 @@
+2013-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15371
+	* ld-ifunc/ifunc-20-i386.d: New file.
+	* ld-ifunc/ifunc-20-x86-64.d: Likewise.
+	* ld-ifunc/ifunc-20.s: Likewise.
+
 2013-04-10  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
 	* ld-aarch64/gc-plt1.s: New file.

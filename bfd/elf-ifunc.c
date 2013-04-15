@@ -187,23 +187,20 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
 
   htab = elf_hash_table (info);
 
+  /* When building shared library, we need to handle the case where it is
+     marked with regular reference, but not non-GOT reference since the
+     non-GOT reference bit may not be set here.  */
+  if (info->shared && !h->non_got_ref && h->ref_regular)
+    for (p = *head; p != NULL; p = p->next)
+      if (p->count)
+	{
+	  h->non_got_ref = 1;
+	  goto keep;
+	}
+
   /* Support garbage collection against STT_GNU_IFUNC symbols.  */
   if (h->plt.refcount <= 0 && h->got.refcount <= 0)
     {
-      /* When building shared library, we need to handle the case
-         where it is marked with regular reference, but not non-GOT
-	 reference.  It may happen if we didn't see STT_GNU_IFUNC
-	 symbol at the time when checking relocations.  */
-      if (info->shared
-	  && !h->non_got_ref
-	  && h->ref_regular)
-	for (p = *head; p != NULL; p = p->next)
-	  if (p->count)
-	    {
-	      h->non_got_ref = 1;
-	      goto keep;
-	    }
-
       h->got = htab->init_got_offset;
       h->plt = htab->init_plt_offset;
       *head = NULL;

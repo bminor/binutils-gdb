@@ -1,3 +1,10 @@
+2013-04-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15371
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Check
+	regular reference without non-GOT reference when building
+	shared library.
+
 2013-04-15  Alan Modra  <amodra@gmail.com>
 
 	* archive.c (_bfd_archive_close_and_cleanup): Clear parent
