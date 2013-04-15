@@ -1398,7 +1398,6 @@ script_test_8: basic_test.o gcctestdir/ld $(srcdir)/script_test_7.t
 script_test_8.stdout: script_test_8
 	$(TEST_READELF) -SlW script_test_8 > script_test_8.stdout
 
-
 check_SCRIPTS += script_test_9.sh
 check_DATA += script_test_9.stdout
 MOSTLYCLEANFILES += script_test_9
@@ -1409,6 +1408,16 @@ script_test_9: gcctestdir/ld $(srcdir)/script_test_9.t script_test_9.o
 script_test_9.stdout: script_test_9
 	$(TEST_READELF) -lW script_test_9 > script_test_9.stdout
 
+# Test scripts with a relocatable link.
+# The -g option is necessary to trigger a bug where a section
+# declared in a script file is assigned a non-zero starting address.
+check_PROGRAMS += script_test_11
+script_test_11: gcctestdir/ld script_test_11_r.o
+	$(LINK) -Bgcctestdir/ script_test_11_r.o
+script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
+	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
+script_test_11.o: script_test_11.c
+	$(COMPILE) -c -g -o $@ $<
 
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
 # and --dynamic-list-cpp-typeinfo

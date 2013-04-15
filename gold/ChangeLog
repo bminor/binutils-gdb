@@ -1,3 +1,12 @@
+2013-04-15  Cary Coutant  <ccoutant@google.com>
+
+    	* symtab.cc (Symbol_table::sized_write_globals): Subtract
+    	section starting address for relocatable link.
+    	* testsuite/Makefile.am (script_test_11): New test.
+    	* testsuite/Makefile.in: Regenerate.
+    	* testsuite/script_test_11.c: New source file.
+    	* testsuite/script_test_11.t: New linker script.
+
 2013-04-13  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Stub_control::can_add_to_stub_group): Don't set

@@ -2940,15 +2940,24 @@ Symbol_table::sized_write_globals(const Stringpool* sympool,
 	  break;
 
 	case Symbol::IN_OUTPUT_DATA:
-	  shndx = sym->output_data()->out_shndx();
-	  if (shndx >= elfcpp::SHN_LORESERVE)
-	    {
-	      if (sym_index != -1U)
-		symtab_xindex->add(sym_index, shndx);
-	      if (dynsym_index != -1U)
-		dynsym_xindex->add(dynsym_index, shndx);
-	      shndx = elfcpp::SHN_XINDEX;
-	    }
+	  {
+	    Output_data* od = sym->output_data();
+
+	    shndx = od->out_shndx();
+	    if (shndx >= elfcpp::SHN_LORESERVE)
+	      {
+		if (sym_index != -1U)
+		  symtab_xindex->add(sym_index, shndx);
+		if (dynsym_index != -1U)
+		  dynsym_xindex->add(dynsym_index, shndx);
+		shndx = elfcpp::SHN_XINDEX;
+	      }
+
+	    // In object files symbol values are section
+	    // relative.
+	    if (parameters->options().relocatable())
+	      sym_value -= od->address();
+	  }
 	  break;
 
 	case Symbol::IN_OUTPUT_SEGMENT:

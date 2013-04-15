@@ -288,6 +288,10 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 # Test -TText and -Tdata.
 
 # Test symbol versioning.
+
+# Test scripts with a relocatable link.
+# The -g option is necessary to trigger a bug where a section
+# declared in a script file is assigned a non-zero starting address.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_32 = flagstest_o_ttext_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test ver_test_2 ver_test_6 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_8 ver_test_9 \
@@ -300,7 +304,7 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_exec binary_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_phdrs_script_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test script_test_11 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2
 @GCC_FALSE@script_test_1_DEPENDENCIES =
@@ -800,6 +804,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_phdrs_script_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	tls_script_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_11$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	thin_archive_test_2$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@PLUGINS_TRUE@am__EXEEXT_23 = plugin_test_1$(EXEEXT) \
@@ -1398,6 +1403,12 @@ relro_test_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 script_test_1_OBJECTS = $(am_script_test_1_OBJECTS)
 script_test_1_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(script_test_1_LDFLAGS) $(LDFLAGS) -o $@
+script_test_11_SOURCES = script_test_11.c
+script_test_11_OBJECTS = script_test_11.$(OBJEXT)
+script_test_11_LDADD = $(LDADD)
+script_test_11_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_script_test_2_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2a.$(OBJEXT) \
@@ -1764,8 +1775,9 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	plugin_test_8.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
 	$(relro_now_test_SOURCES) $(relro_script_test_SOURCES) \
 	$(relro_strip_test_SOURCES) $(relro_test_SOURCES) \
-	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
-	script_test_3.c $(searched_file_test_SOURCES) start_lib_test.c \
+	$(script_test_1_SOURCES) script_test_11.c \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(searched_file_test_SOURCES) start_lib_test.c \
 	$(thin_archive_test_1_SOURCES) $(thin_archive_test_2_SOURCES) \
 	$(tls_phdrs_script_test_SOURCES) $(tls_pic_test_SOURCES) \
 	tls_pie_pic_test.c tls_pie_test.c $(tls_script_test_SOURCES) \
@@ -3149,6 +3161,12 @@ relro_test$(EXEEXT): $(relro_test_OBJECTS) $(relro_test_DEPENDENCIES)
 script_test_1$(EXEEXT): $(script_test_1_OBJECTS) $(script_test_1_DEPENDENCIES) 
 	@rm -f script_test_1$(EXEEXT)
 	$(script_test_1_LINK) $(script_test_1_OBJECTS) $(script_test_1_LDADD) $(LIBS)
+@GCC_FALSE@script_test_11$(EXEEXT): $(script_test_11_OBJECTS) $(script_test_11_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f script_test_11$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(script_test_11_OBJECTS) $(script_test_11_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@script_test_11$(EXEEXT): $(script_test_11_OBJECTS) $(script_test_11_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f script_test_11$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(script_test_11_OBJECTS) $(script_test_11_LDADD) $(LIBS)
 script_test_2$(EXEEXT): $(script_test_2_OBJECTS) $(script_test_2_DEPENDENCIES) 
 	@rm -f script_test_2$(EXEEXT)
 	$(script_test_2_LINK) $(script_test_2_OBJECTS) $(script_test_2_LDADD) $(LIBS)
@@ -3432,6 +3450,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relro_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_11.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2a.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2b.Po@am__quote@
@@ -4032,6 +4051,8 @@ tls_phdrs_script_test.log: tls_phdrs_script_test$(EXEEXT)
 	@p='tls_phdrs_script_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 tls_script_test.log: tls_script_test$(EXEEXT)
 	@p='tls_script_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+script_test_11.log: script_test_11$(EXEEXT)
+	@p='script_test_11$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 thin_archive_test_1.log: thin_archive_test_1$(EXEEXT)
 	@p='thin_archive_test_1$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 thin_archive_test_2.log: thin_archive_test_2$(EXEEXT)
@@ -4833,6 +4854,12 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ script_test_9.o -T $(srcdir)/script_test_9.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_9.stdout: script_test_9
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -lW script_test_9 > script_test_9.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11: gcctestdir/ld script_test_11_r.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ script_test_11_r.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11.o: script_test_11.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list $(srcdir)/dynamic_list.t \
