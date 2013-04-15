@@ -1040,7 +1040,6 @@ a DECR_PC_AFTER_BREAK"
     category["write_pc"] = ari_deprecate
 }
 /(^|[^_[:alnum:]])write_pc[[:space:]]*\(/ || \
-/(^|[^_[:alnum:]])set_gdbarch_write_pc[[:space:]]*\(/ || \
 /(^|[^_[:alnum:]])TARGET_WRITE_PC[[:space:]]*\(/ {
     fail("write_pc")
 }

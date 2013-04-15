@@ -1,3 +1,8 @@
+2013-04-15  Pierre Muller  <muller@sourceware.org>
+
+	* contrib/ari/gdb_ari.sh (write_pc rule): Do not consider
+	set_gdbarch_write_pc as deprecated anymore.
+
 2013-04-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* spu-tdep.c (spu_write_pc): Add empty line after local variable
