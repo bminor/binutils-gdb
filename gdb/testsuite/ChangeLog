@@ -1,5 +1,10 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/typeid.cc: New file.
+	* gdb.cp/typeid.exp: New file.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/exception.exp: Add "catch rethrow" tests.
 
 2013-04-13  Yao Qi  <yao@codesourcery.com>

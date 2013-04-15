@@ -316,3 +316,6 @@ OP (OP_TYPEOF)
    evaluated solely for its type.  This is similar to typeof, but has
    slight different semantics.  */
 OP (OP_DECLTYPE)
+
+/* The typeid operator.  This has one expression argument.  */
+OP (OP_TYPEID)

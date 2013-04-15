@@ -34,6 +34,12 @@
 
 static struct cp_abi_ops gnu_v3_abi_ops;
 
+/* A gdbarch key for std::type_info, in the event that it can't be
+   found in the debug info.  */
+
+static struct gdbarch_data *std_type_info_gdbarch_data;
+
+
 static int
 gnuv3_is_vtable_name (const char *name)
 {
@@ -984,6 +990,154 @@ gnuv3_print_vtable (struct value *value)
   do_cleanups (cleanup);
 }
 
+/* Return a GDB type representing `struct std::type_info', laid out
+   appropriately for ARCH.
+
+   We use this function as the gdbarch per-architecture data
+   initialization function.  */
+
+static void *
+build_std_type_info_type (struct gdbarch *arch)
+{
+  struct type *t;
+  struct field *field_list, *field;
+  int offset;
+  struct type *void_ptr_type
+    = builtin_type (arch)->builtin_data_ptr;
+  struct type *char_type
+    = builtin_type (arch)->builtin_char;
+  struct type *char_ptr_type
+    = make_pointer_type (make_cv_type (1, 0, char_type, NULL), NULL);
+
+  field_list = xmalloc (sizeof (struct field [2]));
+  memset (field_list, 0, sizeof (struct field [2]));
+  field = &field_list[0];
+  offset = 0;
+
+  /* The vtable.  */
+  FIELD_NAME (*field) = "_vptr.type_info";
+  FIELD_TYPE (*field) = void_ptr_type;
+  SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
+  offset += TYPE_LENGTH (FIELD_TYPE (*field));
+  field++;
+
+  /* The name.  */
+  FIELD_NAME (*field) = "__name";
+  FIELD_TYPE (*field) = char_ptr_type;
+  SET_FIELD_BITPOS (*field, offset * TARGET_CHAR_BIT);
+  offset += TYPE_LENGTH (FIELD_TYPE (*field));
+  field++;
+
+  gdb_assert (field == (field_list + 2));
+
+  t = arch_type (arch, TYPE_CODE_STRUCT, offset, NULL);
+  TYPE_NFIELDS (t) = field - field_list;
+  TYPE_FIELDS (t) = field_list;
+  TYPE_TAG_NAME (t) = "gdb_gnu_v3_type_info";
+  INIT_CPLUS_SPECIFIC (t);
+
+  return t;
+}
+
+/* Implement the 'get_typeid_type' method.  */
+
+static struct type *
+gnuv3_get_typeid_type (struct gdbarch *gdbarch)
+{
+  struct symbol *typeinfo;
+  struct type *typeinfo_type;
+
+  typeinfo = lookup_symbol ("std::type_info", NULL, STRUCT_DOMAIN, NULL);
+  if (typeinfo == NULL)
+    typeinfo_type = gdbarch_data (gdbarch, std_type_info_gdbarch_data);
+  else
+    typeinfo_type = SYMBOL_TYPE (typeinfo);
+
+  return typeinfo_type;
+}
+
+/* Implement the 'get_typeid' method.  */
+
+static struct value *
+gnuv3_get_typeid (struct value *value)
+{
+  struct type *typeinfo_type;
+  struct type *type;
+  struct gdbarch *gdbarch;
+  struct cleanup *cleanup;
+  struct value *result;
+  char *typename, *canonical;
+
+  /* We have to handle values a bit trickily here, to allow this code
+     to work properly with non_lvalue values that are really just
+     disguised types.  */
+  if (value_lval_const (value) == lval_memory)
+    value = coerce_ref (value);
+
+  type = check_typedef (value_type (value));
+
+  /* In the non_lvalue case, a reference might have slipped through
+     here.  */
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    type = check_typedef (TYPE_TARGET_TYPE (type));
+
+  /* Ignore top-level cv-qualifiers.  */
+  type = make_cv_type (0, 0, type, NULL);
+  gdbarch = get_type_arch (type);
+
+  typename = type_to_string (type);
+  if (typename == NULL)
+    error (_("cannot find typeinfo for unnamed type"));
+  cleanup = make_cleanup (xfree, typename);
+
+  /* We need to canonicalize the type name here, because we do lookups
+     using the demangled name, and so we must match the format it
+     uses.  E.g., GDB tends to use "const char *" as a type name, but
+     the demangler uses "char const *".  */
+  canonical = cp_canonicalize_string (typename);
+  if (canonical != NULL)
+    {
+      make_cleanup (xfree, canonical);
+      typename = canonical;
+    }
+
+  typeinfo_type = gnuv3_get_typeid_type (gdbarch);
+
+  /* We check for lval_memory because in the "typeid (type-id)" case,
+     the type is passed via a not_lval value object.  */
+  if (TYPE_CODE (type) == TYPE_CODE_CLASS
+      && value_lval_const (value) == lval_memory
+      && gnuv3_dynamic_class (type))
+    {
+      struct value *vtable, *typeinfo_value;
+      CORE_ADDR address = value_address (value) + value_embedded_offset (value);
+
+      vtable = gnuv3_get_vtable (gdbarch, type, address);
+      if (vtable == NULL)
+	error (_("cannot find typeinfo for object of type '%s'"), typename);
+      typeinfo_value = value_field (vtable, vtable_field_type_info);
+      result = value_ind (value_cast (make_pointer_type (typeinfo_type, NULL),
+				      typeinfo_value));
+    }
+  else
+    {
+      char *sym_name;
+      struct minimal_symbol *minsym;
+
+      sym_name = concat ("typeinfo for ", typename, (char *) NULL);
+      make_cleanup (xfree, sym_name);
+      minsym = lookup_minimal_symbol (sym_name, NULL, NULL);
+
+      if (minsym == NULL)
+	error (_("could not find typeinfo symbol for '%s'"), typename);
+
+      result = value_at_lazy (typeinfo_type, SYMBOL_VALUE_ADDRESS (minsym));
+    }
+
+  do_cleanups (cleanup);
+  return result;
+}
+
 /* Determine if we are currently in a C++ thunk.  If so, get the address
    of the routine we are thunking to and continue to there instead.  */
 
@@ -1116,6 +1270,8 @@ init_gnuv3_ops (void)
 {
   vtable_type_gdbarch_data
     = gdbarch_data_register_post_init (build_gdb_vtable_type);
+  std_type_info_gdbarch_data
+    = gdbarch_data_register_post_init (build_std_type_info_type);
 
   gnu_v3_abi_ops.shortname = "gnu-v3";
   gnu_v3_abi_ops.longname = "GNU G++ Version 3 ABI";
@@ -1134,6 +1290,8 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.make_method_ptr = gnuv3_make_method_ptr;
   gnu_v3_abi_ops.method_ptr_to_value = gnuv3_method_ptr_to_value;
   gnu_v3_abi_ops.print_vtable = gnuv3_print_vtable;
+  gnu_v3_abi_ops.get_typeid = gnuv3_get_typeid;
+  gnu_v3_abi_ops.get_typeid_type = gnuv3_get_typeid_type;
   gnu_v3_abi_ops.skip_trampoline = gnuv3_skip_trampoline;
   gnu_v3_abi_ops.pass_by_reference = gnuv3_pass_by_reference;
 }

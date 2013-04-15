@@ -2798,6 +2798,23 @@ evaluate_subexp_standard (struct type *expect_type,
       else
         error (_("Attempt to use a type as an expression"));
 
+    case OP_TYPEID:
+      {
+	struct value *result;
+	enum exp_opcode sub_op = exp->elts[*pos].opcode;
+
+	if (sub_op == OP_TYPE || sub_op == OP_DECLTYPE || sub_op == OP_TYPEOF)
+	  result = evaluate_subexp (NULL_TYPE, exp, pos,
+				    EVAL_AVOID_SIDE_EFFECTS);
+	else
+	  result = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+
+	if (noside != EVAL_NORMAL)
+	  return allocate_value (cplus_typeid_type (exp->gdbarch));
+
+	return cplus_typeid (result);
+      }
+
     default:
       /* Removing this case and compiling with gcc -Wall reveals that
          a lot of cases are hitting this case.  Some of these should

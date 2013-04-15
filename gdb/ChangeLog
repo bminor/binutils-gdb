@@ -1,5 +1,27 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	PR c++/9065:
+	* NEWS: Update.
+	* breakpoint.c (watchpoint_exp_is_const): Add OP_TYPEID.
+	* c-exp.y (TYPEID): New token.
+	(exp): Add new TYPEID productions.
+	(ident_tokens): Add "typeid".
+	* cp-abi.c (cplus_typeid, cplus_typeid_type): New functions.
+	* cp-abi.h (cplus_typeid, cplus_typeid_type): Declare.
+	(struct cp_abi_ops) <get_typeid, get_typeid_type>: New fields.
+	* eval.c (evaluate_subexp_standard) <OP_TYPEID>: New case.
+	* expprint.c (dump_subexp_body_standard) <OP_TYPEID>: New
+	case.
+	* gnu-v3-abi.c (std_type_info_gdbarch_data): New global.
+	(build_std_type_info_type, gnuv3_get_typeid_type)
+	(gnuv3_get_typeid): New functions.
+	(init_gnuv3_ops): Initialize std_type_info_gdbarch_data.  Set
+	new fields on ABI object.
+	* parse.c (operator_length_standard) <OP_TYPEID>: New case.
+	* std-operator.def (OP_TYPEID): New.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	* elfread.c (elf_symtab_read): Install versioned symbol under
 	unversioned name as well.
 

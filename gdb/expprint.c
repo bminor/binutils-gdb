@@ -953,6 +953,11 @@ dump_subexp_body_standard (struct expression *exp,
       elt = dump_subexp (exp, stream, elt);
       fprintf_filtered (stream, ")");
       break;
+    case OP_TYPEID:
+      fprintf_filtered (stream, "typeid (");
+      elt = dump_subexp (exp, stream, elt);
+      fprintf_filtered (stream, ")");
+      break;
     case STRUCTOP_STRUCT:
     case STRUCTOP_PTR:
       {

@@ -972,6 +972,7 @@ operator_length_standard (const struct expression *expr, int endpos,
     case UNOP_TRUNC:
     case OP_TYPEOF:
     case OP_DECLTYPE:
+    case OP_TYPEID:
       oplen = 1;
       args = 1;
       break;

@@ -234,6 +234,7 @@ static void c_print_token (FILE *file, int type, YYSTYPE value);
 %token ENTRY
 %token TYPEOF
 %token DECLTYPE
+%token TYPEID
 
 /* Special type cases, put in to allow the parser to distinguish different
    legal basetypes.  */
@@ -344,6 +345,14 @@ exp	:	exp INCREMENT    %prec UNARY
 
 exp	:	exp DECREMENT    %prec UNARY
 			{ write_exp_elt_opcode (UNOP_POSTDECREMENT); }
+	;
+
+exp	:	TYPEID '(' exp ')' %prec UNARY
+			{ write_exp_elt_opcode (OP_TYPEID); }
+	;
+
+exp	:	TYPEID '(' type_exp ')' %prec UNARY
+			{ write_exp_elt_opcode (OP_TYPEID); }
 	;
 
 exp	:	SIZEOF exp       %prec UNARY
@@ -2290,7 +2299,9 @@ static const struct token ident_tokens[] =
     {"__typeof", TYPEOF, OP_TYPEOF, 0 },
     {"typeof", TYPEOF, OP_TYPEOF, FLAG_SHADOW },
     {"__decltype", DECLTYPE, OP_DECLTYPE, FLAG_CXX },
-    {"decltype", DECLTYPE, OP_DECLTYPE, FLAG_CXX | FLAG_SHADOW }
+    {"decltype", DECLTYPE, OP_DECLTYPE, FLAG_CXX | FLAG_SHADOW },
+
+    {"typeid", TYPEID, OP_TYPEID, FLAG_CXX}
   };
 
 /* When we find that lexptr (the global var defined in parse.c) is

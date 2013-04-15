@@ -178,6 +178,16 @@ void cplus_make_method_ptr (struct type *type, gdb_byte *CONTENTS,
 
 void cplus_print_vtable (struct value *value);
 
+/* Implement 'typeid': find the type info for VALUE, if possible.  If
+   the type info cannot be found, throw an exception.  */
+
+extern struct value *cplus_typeid (struct value *value);
+
+/* Return the type of 'typeid' for the current C++ ABI on the given
+   architecture.  */
+
+extern struct type *cplus_typeid_type (struct gdbarch *gdbarch);
+
 /* Determine if we are currently in a C++ thunk.  If so, get the
    address of the routine we are thunking to and continue to there
    instead.  */
@@ -219,6 +229,8 @@ struct cp_abi_ops
   struct value * (*method_ptr_to_value) (struct value **,
 					 struct value *);
   void (*print_vtable) (struct value *);
+  struct value *(*get_typeid) (struct value *value);
+  struct type *(*get_typeid_type) (struct gdbarch *gdbarch);
   CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
   int (*pass_by_reference) (struct type *type);
 };

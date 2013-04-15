@@ -29,6 +29,8 @@ show remote trace-status-packet
 * Newly installed $prefix/bin/gcore acts as a shell interface for the
   GDB command gcore.
 
+* GDB now implements the the C++ 'typeid' operator.
+
 * MI changes
 
   ** The -trace-save MI command can optionally save trace buffer in Common
