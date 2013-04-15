@@ -1,5 +1,18 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	PR c++/10119:
+	* break-catch-throw.c (exception_functions): New global.
+	(gnu_v3_exception_catchpoint_ops): Move earlier.
+	(struct exception_catchpoint): New.
+	(classify_exception_breakpoint): Rewrite.
+	(re_set_exception_catchpoint): New function.
+	(handle_gnu_v3_exceptions): Return void.  Use init_catchpoint.
+	Allocate a struct exception_catchpoint.
+	(catch_exception_command_1): Update.
+	(initialize_throw_catchpoint_ops): Set 're_set' method.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	* Makefile.in (SFILES): Add break-catch-throw.c
 	(COMMON_OBS): Add break-catch-throw.o.
 	* break-catch-throw.c: New file.

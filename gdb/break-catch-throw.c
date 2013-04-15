@@ -29,6 +29,8 @@
 #include "completer.h"
 #include "gdb_obstack.h"
 #include "mi/mi-common.h"
+#include "exceptions.h"
+#include "linespec.h"
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind
@@ -38,18 +40,66 @@ enum exception_event_kind
   EX_EVENT_CATCH
 };
 
+/* Names of the ordinary functions on which to break.  This is indexed
+   by exception_event_kind.  */
+static const char * const exception_functions[] =
+{
+  "__cxa_throw",
+  "__cxa_rethrow",
+  "__cxa_begin_catch"
+};
+
+static struct breakpoint_ops gnu_v3_exception_catchpoint_ops;
+
+/* The type of an exception catchpoint.  */
+
+struct exception_catchpoint
+{
+  /* The base class.  */
+
+  struct breakpoint base;
+
+  /* The kind of exception catchpoint.  */
+
+  enum exception_event_kind kind;
+};
+
 /* A helper function that returns a value indicating the kind of the
    exception catchpoint B.  */
 
 static enum exception_event_kind
 classify_exception_breakpoint (struct breakpoint *b)
 {
-  if (strstr (b->addr_string, "catch") != NULL)
-    return EX_EVENT_CATCH;
-  else if (strstr (b->addr_string, "rethrow") != NULL)
-    return EX_EVENT_RETHROW;
-  else
-    return EX_EVENT_THROW;
+  struct exception_catchpoint *cp = (struct exception_catchpoint *) b;
+
+  return cp->kind;
+}
+
+/* Implement the 're_set' method.  */
+
+static void
+re_set_exception_catchpoint (struct breakpoint *self)
+{
+  struct symtabs_and_lines sals = {0};
+  struct symtabs_and_lines sals_end = {0};
+  volatile struct gdb_exception e;
+  struct cleanup *cleanup;
+  enum exception_event_kind kind = classify_exception_breakpoint (self);
+
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      char *spec = ASTRDUP (exception_functions[kind]);
+
+      self->ops->decode_linespec (self, &spec, &sals);
+    }
+  /* NOT_FOUND_ERROR just means the breakpoint will be pending, so let
+     it through.  */
+  if (e.reason < 0 && e.error != NOT_FOUND_ERROR)
+    throw_exception (e);
+
+  cleanup = make_cleanup (xfree, sals.sals);
+  update_breakpoint_locations (self, sals, sals_end);
+  do_cleanups (cleanup);
 }
 
 static enum print_stop_action
@@ -169,36 +219,23 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
   print_recreate_thread (b, fp);
 }
 
-static struct breakpoint_ops gnu_v3_exception_catchpoint_ops;
-
-static int
+static void
 handle_gnu_v3_exceptions (int tempflag, char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  char *trigger_func_name;
- 
-  if (ex_event == EX_EVENT_CATCH)
-    trigger_func_name = "__cxa_begin_catch";
-  else if (ex_event == EX_EVENT_RETHROW)
-    trigger_func_name = "__cxa_rethrow";
-  else
-    {
-      gdb_assert (ex_event == EX_EVENT_THROW);
-      trigger_func_name = "__cxa_throw";
-    }
+  struct exception_catchpoint *cp;
 
-  create_breakpoint (get_current_arch (),
-		     trigger_func_name, cond_string, -1, NULL,
-		     0 /* condition and thread are valid.  */,
-		     tempflag, bp_breakpoint,
-		     0,
-		     AUTO_BOOLEAN_TRUE /* pending */,
-		     &gnu_v3_exception_catchpoint_ops, from_tty,
-		     1 /* enabled */,
-		     0 /* internal */,
-		     0);
+  cp = XCNEW (struct exception_catchpoint);
+  init_catchpoint (&cp->base, get_current_arch (), tempflag, cond_string,
+		   &gnu_v3_exception_catchpoint_ops);
+  /* We need to reset 'type' in order for code in breakpoint.c to do
+     the right thing.  */
+  cp->base.type = bp_breakpoint;
+  cp->kind = ex_event;
 
-  return 1;
+  re_set_exception_catchpoint (&cp->base);
+
+  install_breakpoint (0, &cp->base, 1);
 }
 
 /* Deal with "catch catch", "catch throw", and "catch rethrow"
@@ -224,10 +261,7 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
       && ex_event != EX_EVENT_RETHROW)
     error (_("Unsupported or unknown exception event; cannot catch it"));
 
-  if (handle_gnu_v3_exceptions (tempflag, cond_string, ex_event, from_tty))
-    return;
-
-  warning (_("Unsupported with this platform/compiler combination."));
+  handle_gnu_v3_exceptions (tempflag, cond_string, ex_event, from_tty);
 }
 
 /* Implementation of "catch catch" command.  */
@@ -273,6 +307,7 @@ initialize_throw_catchpoint_ops (void)
   /* GNU v3 exception catchpoints.  */
   ops = &gnu_v3_exception_catchpoint_ops;
   *ops = bkpt_breakpoint_ops;
+  ops->re_set = re_set_exception_catchpoint;
   ops->print_it = print_it_exception_catchpoint;
   ops->print_one = print_one_exception_catchpoint;
   ops->print_mention = print_mention_exception_catchpoint;
