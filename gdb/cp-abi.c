@@ -209,6 +209,17 @@ cplus_type_from_type_info (struct value *value)
   return (*current_cp_abi.get_type_from_type_info) (value);
 }
 
+/* See cp-abi.h.  */
+
+char *
+cplus_typename_from_type_info (struct value *value)
+{
+  if (current_cp_abi.get_typename_from_type_info == NULL)
+    error (_("GDB cannot find the type name "
+	     "from a std::type_info on this target"));
+  return (*current_cp_abi.get_typename_from_type_info) (value);
+}
+
 int
 cp_pass_by_reference (struct type *type)
 {

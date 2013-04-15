@@ -1124,6 +1124,30 @@ get_regcomp_error (int code, regex_t *rx)
   return result;
 }
 
+/* Compile a regexp and throw an exception on error.  This returns a
+   cleanup to free the resulting pattern on success.  If RX is NULL,
+   this does nothing and returns NULL.  */
+
+struct cleanup *
+compile_rx_or_error (regex_t *pattern, const char *rx, const char *message)
+{
+  int code;
+
+  if (!rx)
+    return NULL;
+
+  code = regcomp (pattern, rx, REG_NOSUB);
+  if (code != 0)
+    {
+      char *err = get_regcomp_error (code, pattern);
+
+      make_cleanup (xfree, err);
+      error (("%s: %s"), message, err);
+    }
+
+  return make_regfree_cleanup (pattern);
+}
+
 
 
 /* This function supports the query, nquery, and yquery functions.

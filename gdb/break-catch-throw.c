@@ -34,6 +34,8 @@
 #include "probe.h"
 #include "objfiles.h"
 #include "cp-abi.h"
+#include "gdb_regex.h"
+#include "cp-support.h"
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind
@@ -81,7 +83,59 @@ struct exception_catchpoint
   /* The kind of exception catchpoint.  */
 
   enum exception_event_kind kind;
+
+  /* If non-NULL, an xmalloc'd string holding the source form of the
+     regular expression to match against.  */
+
+  char *exception_rx;
+
+  /* If non-NULL, an xmalloc'd, compiled regular expression which is
+     used to determine which exceptions to stop on.  */
+
+  regex_t *pattern;
 };
+
+
+
+/* A helper function that fetches exception probe arguments.  This
+   fills in *ARG0 (if non-NULL) and *ARG1 (which must be non-NULL).
+   It will throw an exception on any kind of failure.  */
+
+static void
+fetch_probe_arguments (struct value **arg0, struct value **arg1)
+{
+  struct frame_info *frame = get_selected_frame (_("No frame selected"));
+  CORE_ADDR pc = get_frame_pc (frame);
+  struct probe *pc_probe;
+  const struct sym_probe_fns *pc_probe_fns;
+  unsigned n_args;
+
+  pc_probe = find_probe_by_pc (pc);
+  if (pc_probe == NULL
+      || strcmp (pc_probe->provider, "libstdcxx") != 0
+      || (strcmp (pc_probe->name, "catch") != 0
+	  && strcmp (pc_probe->name, "throw") != 0
+	  && strcmp (pc_probe->name, "rethrow") != 0))
+    error (_("not stopped at a C++ exception catchpoint"));
+
+  gdb_assert (pc_probe->objfile != NULL);
+  gdb_assert (pc_probe->objfile->sf != NULL);
+  gdb_assert (pc_probe->objfile->sf->sym_probe_fns != NULL);
+
+  pc_probe_fns = pc_probe->objfile->sf->sym_probe_fns;
+  n_args = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
+  if (n_args < 2)
+    error (_("C++ exception catchpoint has too few arguments"));
+
+  if (arg0 != NULL)
+    *arg0 = pc_probe_fns->sym_evaluate_probe_argument (pc_probe, 0);
+  *arg1 = pc_probe_fns->sym_evaluate_probe_argument (pc_probe, 1);
+
+  if ((arg0 != NULL && *arg0 == NULL) || *arg1 == NULL)
+    error (_("error computing probe argument at c++ exception catchpoint"));
+}
+
+
 
 /* A helper function that returns a value indicating the kind of the
    exception catchpoint B.  */
@@ -92,6 +146,60 @@ classify_exception_breakpoint (struct breakpoint *b)
   struct exception_catchpoint *cp = (struct exception_catchpoint *) b;
 
   return cp->kind;
+}
+
+/* Implement the 'dtor' method.  */
+
+static void
+dtor_exception_catchpoint (struct breakpoint *self)
+{
+  struct exception_catchpoint *cp = (struct exception_catchpoint *) self;
+
+  xfree (cp->exception_rx);
+  if (cp->pattern != NULL)
+    regfree (cp->pattern);
+  bkpt_breakpoint_ops.dtor (self);
+}
+
+/* Implement the 'check_status' method.  */
+
+static void
+check_status_exception_catchpoint (struct bpstats *bs)
+{
+  struct exception_catchpoint *self
+    = (struct exception_catchpoint *) bs->breakpoint_at;
+  char *typename = NULL;
+  volatile struct gdb_exception e;
+
+  bkpt_breakpoint_ops.check_status (bs);
+  if (bs->stop == 0)
+    return;
+
+  if (self->pattern == NULL)
+    return;
+
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      struct value *typeinfo_arg;
+      char *canon;
+
+      fetch_probe_arguments (NULL, &typeinfo_arg);
+      typename = cplus_typename_from_type_info (typeinfo_arg);
+
+      canon = cp_canonicalize_string (typename);
+      if (canon != NULL)
+	{
+	  xfree (typename);
+	  typename = canon;
+	}
+    }
+
+  if (e.reason < 0)
+    exception_print (gdb_stderr, e);
+  else if (regexec (self->pattern, typename, 0, NULL, 0) != 0)
+    bs->stop = 0;
+
+  xfree (typename);
 }
 
 /* Implement the 're_set' method.  */
@@ -208,6 +316,23 @@ print_one_exception_catchpoint (struct breakpoint *b,
     }
 }
 
+/* Implement the 'print_one_detail' method.  */
+
+static void
+print_one_detail_exception_catchpoint (const struct breakpoint *b,
+				       struct ui_out *uiout)
+{
+  const struct exception_catchpoint *cp
+    = (const struct exception_catchpoint *) b;
+
+  if (cp->exception_rx != NULL)
+    {
+      ui_out_text (uiout, _("\tmatching: "));
+      ui_out_field_string (uiout, "regexp", cp->exception_rx);
+      ui_out_text (uiout, "\n");
+    }
+}
+
 static void
 print_mention_exception_catchpoint (struct breakpoint *b)
 {
@@ -252,22 +377,77 @@ print_recreate_exception_catchpoint (struct breakpoint *b,
 }
 
 static void
-handle_gnu_v3_exceptions (int tempflag, char *cond_string,
+handle_gnu_v3_exceptions (int tempflag, char *except_rx, char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
   struct exception_catchpoint *cp;
+  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+  regex_t *pattern = NULL;
+
+  if (except_rx != NULL)
+    {
+      pattern = XNEW (regex_t);
+      make_cleanup (xfree, pattern);
+
+      compile_rx_or_error (pattern, except_rx,
+			   _("invalid type-matching regexp"));
+    }
 
   cp = XCNEW (struct exception_catchpoint);
+  make_cleanup (xfree, cp);
+
   init_catchpoint (&cp->base, get_current_arch (), tempflag, cond_string,
 		   &gnu_v3_exception_catchpoint_ops);
   /* We need to reset 'type' in order for code in breakpoint.c to do
      the right thing.  */
   cp->base.type = bp_breakpoint;
   cp->kind = ex_event;
+  cp->exception_rx = except_rx;
+  cp->pattern = pattern;
 
   re_set_exception_catchpoint (&cp->base);
 
   install_breakpoint (0, &cp->base, 1);
+  discard_cleanups (cleanup);
+}
+
+/* Look for an "if" token in *STRING.  The "if" token must be preceded
+   by whitespace.
+   
+   If there is any non-whitespace text between *STRING and the "if"
+   token, then it is returned in a newly-xmalloc'd string.  Otherwise,
+   this returns NULL.
+   
+   STRING is updated to point to the "if" token, if it exists, or to
+   the end of the string.  */
+
+static char *
+extract_exception_regexp (char **string)
+{
+  char *start;
+  char *last, *last_space;
+
+  start = skip_spaces (*string);
+
+  last = start;
+  last_space = start;
+  while (*last != '\0')
+    {
+      char *if_token = last;
+
+      /* Check for the "if".  */
+      if (check_for_argument (&if_token, "if", 2))
+	break;
+
+      /* No "if" token here.  Skip to the next word start.  */
+      last_space = skip_to_space (last);
+      last = skip_spaces (last_space);
+    }
+
+  *string = last;
+  if (last_space > start)
+    return savestring (start, last_space - start);
+  return NULL;
 }
 
 /* Deal with "catch catch", "catch throw", and "catch rethrow"
@@ -277,11 +457,16 @@ static void
 catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
 			   int tempflag, int from_tty)
 {
+  char *except_rx;
   char *cond_string = NULL;
+  struct cleanup *cleanup;
 
   if (!arg)
     arg = "";
   arg = skip_spaces (arg);
+
+  except_rx = extract_exception_regexp (&arg);
+  cleanup = make_cleanup (xfree, except_rx);
 
   cond_string = ep_parse_optional_if_clause (&arg);
 
@@ -293,7 +478,10 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
       && ex_event != EX_EVENT_RETHROW)
     error (_("Unsupported or unknown exception event; cannot catch it"));
 
-  handle_gnu_v3_exceptions (tempflag, cond_string, ex_event, from_tty);
+  handle_gnu_v3_exceptions (tempflag, except_rx, cond_string,
+			    ex_event, from_tty);
+
+  discard_cleanups (cleanup);
 }
 
 /* Implementation of "catch catch" command.  */
@@ -335,36 +523,10 @@ catch_rethrow_command (char *arg, int from_tty,
 static struct value *
 compute_exception (struct gdbarch *argc, struct internalvar *var, void *ignore)
 {
-  struct frame_info *frame = get_selected_frame (_("No frame selected"));
-  CORE_ADDR pc = get_frame_pc (frame);
-  struct probe *pc_probe;
-  const struct sym_probe_fns *pc_probe_fns;
-  unsigned n_args;
   struct value *arg0, *arg1;
   struct type *obj_type;
 
-  pc_probe = find_probe_by_pc (pc);
-  if (pc_probe == NULL
-      || strcmp (pc_probe->provider, "libstdcxx") != 0
-      || (strcmp (pc_probe->name, "catch") != 0
-	  && strcmp (pc_probe->name, "throw") != 0
-	  && strcmp (pc_probe->name, "rethrow") != 0))
-    error (_("not stopped at a C++ exception catchpoint"));
-
-  gdb_assert (pc_probe->objfile != NULL);
-  gdb_assert (pc_probe->objfile->sf != NULL);
-  gdb_assert (pc_probe->objfile->sf->sym_probe_fns != NULL);
-
-  pc_probe_fns = pc_probe->objfile->sf->sym_probe_fns;
-  n_args = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
-  if (n_args < 2)
-    error (_("C++ exception catchpoint has too few arguments"));
-
-  arg0 = pc_probe_fns->sym_evaluate_probe_argument (pc_probe, 0);
-  arg1 = pc_probe_fns->sym_evaluate_probe_argument (pc_probe, 1);
-
-  if (arg0 == NULL || arg1 == NULL)
-    error (_("error computing probe argument at c++ exception catchpoint"));
+  fetch_probe_arguments (&arg0, &arg1);
 
   /* ARG0 is a pointer to the exception object.  ARG1 is a pointer to
      the std::type_info for the exception.  Now we find the type from
@@ -394,11 +556,14 @@ initialize_throw_catchpoint_ops (void)
   /* GNU v3 exception catchpoints.  */
   ops = &gnu_v3_exception_catchpoint_ops;
   *ops = bkpt_breakpoint_ops;
+  ops->dtor = dtor_exception_catchpoint;
   ops->re_set = re_set_exception_catchpoint;
   ops->print_it = print_it_exception_catchpoint;
   ops->print_one = print_one_exception_catchpoint;
   ops->print_mention = print_mention_exception_catchpoint;
   ops->print_recreate = print_recreate_exception_catchpoint;
+  ops->print_one_detail = print_one_detail_exception_catchpoint;
+  ops->check_status = check_status_exception_catchpoint;
 }
 
 initialize_file_ftype _initialize_break_catch_throw;

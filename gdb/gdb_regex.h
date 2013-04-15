@@ -30,5 +30,7 @@
 /* From utils.c.  */
 struct cleanup *make_regfree_cleanup (regex_t *);
 char *get_regcomp_error (int, regex_t *);
+struct cleanup *compile_rx_or_error (regex_t *pattern, const char *rx,
+				     const char *message);
 
 #endif /* not GDB_REGEX_H */

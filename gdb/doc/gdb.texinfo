@@ -4074,11 +4074,14 @@ shared library.  Use the @code{catch} command to set a catchpoint.
 Stop when @var{event} occurs.  @var{event} can be any of the following:
 
 @table @code
-@item throw
-@itemx rethrow
-@itemx catch
+@item throw @r{[}@var{regexp}@r{]}
+@itemx rethrow @r{[}@var{regexp}@r{]}
+@itemx catch @r{[}@var{regexp}@r{]}
 @cindex stop on C@t{++} exceptions
 The throwing, re-throwing, or catching of a C@t{++} exception.
+
+If @var{regexp} is given, then only exceptions whose type matches the
+regular expression will be caught.
 
 @vindex $_exception@r{, convenience variable}
 The convenience variable @code{$_exception} is available at an
@@ -4095,9 +4098,9 @@ systems using the @samp{gnu-v3} C@t{++} ABI (@pxref{ABI}) are
 supported.
 
 @item
-The @code{$_exception} convenience variable relies on the presence of
-some SDT probes in @code{libstdc++}.  If these probes are not present,
-then this variable cannot be used.
+The regular expression feature and the @code{$_exception} convenience
+variable rely on the presence of some SDT probes in @code{libstdc++}.
+If these probes are not present, then these features cannot be used.
 
 @item
 The @code{$_exception} convenience variable is only valid at the

@@ -1,5 +1,31 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	PR c++/13588:
+	* NEWS: Update.
+	* break-catch-throw.c (struct exception_catchpoint)
+	<exception_rx, pattern>: New fields.
+	(fetch_probe_arguments, dtor_exception_catchpoint)
+	(check_status_exception_catchpoint)
+	(print_one_detail_exception_catchpoint): New functions.
+	(handle_gnu_v3_exceptions): Add "except_rx" argument.
+	Compile regular expression if needed.
+	(extract_exception_regexp): New function.
+	(catch_exception_command_1): Use extract_exception_regexp.
+	(compute_exception): Use fetch_probe_arguments.
+	(initialize_throw_catchpoint_ops): Set dtor, print_one_detail,
+	and check_status fields.
+	* cp-abi.c (cplus_typename_from_type_info): New function.
+	* cp-abi.h (cplus_typename_from_type_info): Declare.
+	(struct cp_abi_ops) <get_typename_from_type_info>: New field.
+	* gdb_regex.h (compile_rx_or_error): Declare.
+	* gnu-v3-abi.c (gnuv3_get_typename_from_type_info): Update
+	comment.
+	(init_gnuv3_ops): Set get_type_from_type_info field.
+	* probe.c (compile_rx_or_error): Move...
+	* utils.c (compile_rx_or_error): ... here.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/15176:
 	* NEWS: Update.
 	* break-catch-throw.c (compute_exception): New function.

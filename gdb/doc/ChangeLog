@@ -1,5 +1,10 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Set Catchpoints): Document regexp syntax for
+	exception catchpoints.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (Set Catchpoints): Document $_exception.
 	(Convenience Vars): Mention $_exception.
 

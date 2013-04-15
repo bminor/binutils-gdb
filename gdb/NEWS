@@ -108,6 +108,9 @@ Tilera TILE-Gx GNU/Linux	tilegx*-*-linux
 * The new convenience variable $_exception holds the exception being
   thrown or caught at an exception-related catchpoint.
 
+* The exception-related catchpoints, like "catch throw", now accept a
+  regular expression which can be used to filter exceptions by type.
+
 * Python scripting
 
   ** Vectors can be created with gdb.Type.vector.

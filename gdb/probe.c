@@ -229,30 +229,6 @@ find_probe_by_pc (CORE_ADDR pc)
 
 
 
-/* A helper function for collect_probes that compiles a regexp and
-   throws an exception on error.  This installs a cleanup to free the
-   resulting pattern on success.  If RX is NULL, this does nothing.  */
-
-static void
-compile_rx_or_error (regex_t *pattern, const char *rx, const char *message)
-{
-  int code;
-
-  if (!rx)
-    return;
-
-  code = regcomp (pattern, rx, REG_NOSUB);
-  if (code == 0)
-    make_regfree_cleanup (pattern);
-  else
-    {
-      char *err = get_regcomp_error (code, pattern);
-
-      make_cleanup (xfree, err);
-      error (("%s: %s"), message, err);
-    }
-}
-
 /* Make a vector of probes matching OBJNAME, PROVIDER, and PROBE_NAME.
    If POPS is not NULL, only probes of this certain probe_ops will match.
    Each argument is a regexp, or NULL, which matches anything.  */

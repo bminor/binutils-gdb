@@ -1,5 +1,9 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.cp/exceptprint.exp: Add regexp catchpoint tests.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/default.exp: Update for $_exception.
 	* gdb.cp/exceptprint.cc: New file.
 	* gdb.cp/exceptprint.exp: New file.

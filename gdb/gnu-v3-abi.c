@@ -1138,7 +1138,7 @@ gnuv3_get_typeid (struct value *value)
   return result;
 }
 
-/* Get the type name given a type_info object.  */
+/* Implement the 'get_typename_from_type_info' method.  */
 
 static char *
 gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
@@ -1356,6 +1356,8 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.get_typeid = gnuv3_get_typeid;
   gnu_v3_abi_ops.get_typeid_type = gnuv3_get_typeid_type;
   gnu_v3_abi_ops.get_type_from_type_info = gnuv3_get_type_from_type_info;
+  gnu_v3_abi_ops.get_typename_from_type_info
+    = gnuv3_get_typename_from_type_info;
   gnu_v3_abi_ops.skip_trampoline = gnuv3_skip_trampoline;
   gnu_v3_abi_ops.pass_by_reference = gnuv3_pass_by_reference;
 }
