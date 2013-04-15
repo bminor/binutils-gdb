@@ -931,10 +931,11 @@ sh_optimize_expr (expressionS *l, operatorT op, expressionS *r)
 					 symbol_get_frag (r->X_add_symbol),
 					 &frag_off))
     {
-      l->X_add_number -= r->X_add_number;
-      l->X_add_number -= frag_off / OCTETS_PER_BYTE;
-      l->X_add_number += (S_GET_VALUE (l->X_add_symbol)
-			  - S_GET_VALUE (r->X_add_symbol));
+      offsetT symval_diff = S_GET_VALUE (l->X_add_symbol)
+			    - S_GET_VALUE (r->X_add_symbol);
+      subtract_from_result (l, r->X_add_number, r->X_extrabit);
+      subtract_from_result (l, frag_off / OCTETS_PER_BYTE, 0);
+      add_to_result (l, symval_diff, symval_diff < 0);
       l->X_op = O_constant;
       l->X_add_symbol = 0;
       return 1;

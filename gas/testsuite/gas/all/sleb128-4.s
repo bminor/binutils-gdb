@@ -1,13 +1,10 @@
-.text
-.globl foo
-foo:
-.L1:
-.byte 0
-.byte 0
-.byte 0
-.L2:
+	.text
+_L1:
+	.byte 0
+	.byte 0
+	.byte 0
+_L2:
 
-.data
-bar:
-.sleb128 .L2 - .L1 + (1 << 31)
-.byte 42
+	.data
+	.sleb128 _L2 - _L1 + (1 << 31)
+	.byte 42

@@ -1729,7 +1729,7 @@ operatorf (int *num_chars)
    signed word values can be represented in an O_constant expression, which is
    useful e.g. for .sleb128 directives.  */
 
-static void
+void
 add_to_result (expressionS *resultP, offsetT amount, int rhs_highbit)
 {
   valueT ures = resultP->X_add_number;
@@ -1745,7 +1745,7 @@ add_to_result (expressionS *resultP, offsetT amount, int rhs_highbit)
 
 /* Similarly, for subtraction.  */
 
-static void
+void
 subtract_from_result (expressionS *resultP, offsetT amount, int rhs_highbit)
 {
   valueT ures = resultP->X_add_number;

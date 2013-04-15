@@ -175,6 +175,8 @@ extern char get_symbol_end (void);
 extern void expr_begin (void);
 extern void expr_set_precedence (void);
 extern void expr_set_rank (operatorT, operator_rankT);
+extern void add_to_result (expressionS *, offsetT, int);
+extern void subtract_from_result (expressionS *, offsetT, int);
 extern segT expr (int, expressionS *, enum expr_mode);
 extern unsigned int get_single_number (void);
 extern symbolS *make_expr_symbol (expressionS * expressionP);

@@ -1,4 +1,3 @@
-.data
-bar:
-.sleb128 100 - 200
-.byte 42
+	.data
+	.sleb128 100 - 200
+	.byte 42

@@ -1,3 +1,18 @@
+2013-04-15  Julian Brown  <julian@codesourcery.com>
+
+	* gas/all/gas.exp (sleb128-7): Don't run for tic4x, tic54x.
+	* gas/all/sleb128-2.s: Reformat, use _ at start of labels, remove
+	cruft.
+	* gas/all/sleb128-3.s: Likewise.
+	* gas/all/sleb128-4.s: Likewise.
+	* gas/all/sleb128-5.s: Likewise.
+	* gas/all/sleb128-7.s: Likewise.
+	* gas/all/sleb128-2.d: Handle data sections named $DATA$.
+	* gas/all/sleb128-3.d: Likewise.
+	* gas/all/sleb128-4.d: Likewise.
+	* gas/all/sleb128-5.d: Likewise.
+	* gas/all/sleb128-7.d: Likewise.
+
 2013-04-10  Julian Brown  <julian@codesourcery.com>
 
 	* gas/all/sleb128-2.s: New test.

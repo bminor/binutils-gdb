@@ -1,3 +1,11 @@
+2013-04-15  Julian Brown  <julian@codesourcery.com>
+
+	* expr.c (add_to_result, subtract_from_result): Make global.
+	* expr.h (add_to_result, subtract_from_result): Add prototypes.
+	* config/tc-sh.c (sh_optimize_expr): Use add_to_result,
+	subtract_from_result to handle extra bit of precision for .sleb128
+	directive operands.
+
 2013-04-10  Julian Brown  <julian@codesourcery.com>
 
 	* read.c (convert_to_bignum): Add sign parameter. Use it
