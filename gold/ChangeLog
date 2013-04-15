@@ -1,5 +1,10 @@
 2013-04-15  Cary Coutant  <ccoutant@google.com>
 
+	* script-sections.cc (Orphan_output_section): Reset address
+	to zero after each orphaned section for relocatable links.
+
+2013-04-15  Cary Coutant  <ccoutant@google.com>
+
     	* symtab.cc (Symbol_table::sized_write_globals): Subtract
     	section starting address for relocatable link.
     	* testsuite/Makefile.am (script_test_11): New test.

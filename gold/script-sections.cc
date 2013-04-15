@@ -2918,11 +2918,17 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
       address += size;
     }
 
-  // An SHF_TLS/SHT_NOBITS section does not take up any address space.
-  if (this->os_ == NULL
-      || (this->os_->flags() & elfcpp::SHF_TLS) == 0
-      || this->os_->type() != elfcpp::SHT_NOBITS)
+  if (parameters->options().relocatable())
     {
+      // For a relocatable link, reset DOT_VALUE to 0.
+      *dot_value = 0;
+      *load_address = 0;
+    }
+  else if (this->os_ == NULL
+	   || (this->os_->flags() & elfcpp::SHF_TLS) == 0
+	   || this->os_->type() != elfcpp::SHT_NOBITS)
+    {
+      // An SHF_TLS/SHT_NOBITS section does not take up any address space.
       if (!have_load_address)
 	*load_address = address;
       else
