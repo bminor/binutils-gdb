@@ -3594,7 +3594,8 @@ Layout::set_relocatable_section_offsets(Output_data* file_header,
 	(*p)->set_address(0);
       (*p)->set_file_offset(off);
       (*p)->finalize_data_size();
-      off += (*p)->data_size();
+      if ((*p)->type() != elfcpp::SHT_NOBITS)
+	off += (*p)->data_size();
 
       (*p)->set_out_shndx(*pshndx);
       ++*pshndx;

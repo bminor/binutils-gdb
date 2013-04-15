@@ -1,5 +1,10 @@
 2013-04-15  Cary Coutant  <ccoutant@google.com>
 
+	* layout.cc (Layout::set_relocatable_section_offsets): Don't
+	allocate space in file for BSS sections.
+
+2013-04-15  Cary Coutant  <ccoutant@google.com>
+
 	* script-sections.cc (Orphan_output_section): Reset address
 	to zero after each orphaned section for relocatable links.
 
