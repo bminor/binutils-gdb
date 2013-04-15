@@ -1,5 +1,10 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* elfread.c (elf_symtab_read): Install versioned symbol under
+	unversioned name as well.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	PR c++/11990:
 	* c-lang.c (cplus_language_defn): Use gdb_demangle.
 	* c-typeprint.c (c_type_print_base): Use gdb_demangle.

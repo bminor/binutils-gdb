@@ -574,6 +574,21 @@ elf_symtab_read (struct objfile *objfile, int type,
 	      gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
 	    }
 
+	  /* If we see a default versioned symbol, install it under
+	     its version-less name.  */
+	  if (msym != NULL)
+	    {
+	      const char *atsign = strchr (sym->name, '@');
+
+	      if (atsign != NULL && atsign[1] == '@' && atsign > sym->name)
+		{
+		  int len = atsign - sym->name;
+
+		  record_minimal_symbol (sym->name, len, 1, symaddr,
+					 ms_type, sym->section, objfile);
+		}
+	    }
+
 	  /* For @plt symbols, also record a trampoline to the
 	     destination symbol.  The @plt symbol will be used in
 	     disassembly, and the trampoline will be used when we are
