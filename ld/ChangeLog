@@ -1,5 +1,10 @@
 2013-04-15  Nick Clifton  <nickc@redhat.com>
 
+	* Makefile.am (ELF_DEPS): Add a dependency upon
+	scripttempl/DWARF.sc.
+	(ELF_GEN_DEPS): Likewise.
+	* Makefile.in: Regenerate.
+
 	* scripttempl/armbpabi.sc: Replace DWARF sections with an
 	inclusion of DWARF.sc.
 	* scripttempl/avr.sc: Likewise.
