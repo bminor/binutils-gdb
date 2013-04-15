@@ -1,5 +1,13 @@
 2013-04-15  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (struct dwo_file): Replace member "cus" with "cu".
+	(struct create_dwo_cu_data): Renamed from create_dwo_info_table_data.
+	(create_dwo_cu_reader): Renamed from
+	create_dwo_debug_info_hash_table_reader.
+	(create_dwo_cu): Renamed from create_dwo_debug_info_hash_table.
+	Remove support for multiple CUs in a DWO file.
+	(open_and_init_dwo_file, lookup_dwo_cutu): Update.
+
 	* dwarf2read.c (create_debug_types_hash_table): Use hex_string
 	instead of phex.
 	(lookup_dwo_unit, create_dwo_debug_info_hash_table_reader): Ditto.
