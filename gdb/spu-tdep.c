@@ -1135,6 +1135,7 @@ spu_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   /* Keep interrupt enabled state unchanged.  */
   ULONGEST old_pc;
+
   regcache_cooked_read_unsigned (regcache, SPU_PC_REGNUM, &old_pc);
   regcache_cooked_write_unsigned (regcache, SPU_PC_REGNUM,
 				  (SPUADDR_ADDR (pc) & -4) | (old_pc & 3));
