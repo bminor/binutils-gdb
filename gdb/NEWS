@@ -105,6 +105,9 @@ Tilera TILE-Gx GNU/Linux	tilegx*-*-linux
 
 * 'info proc' now works on some core files.
 
+* The new convenience variable $_exception holds the exception being
+  thrown or caught at an exception-related catchpoint.
+
 * Python scripting
 
   ** Vectors can be created with gdb.Type.vector.

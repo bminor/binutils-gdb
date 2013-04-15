@@ -188,6 +188,12 @@ extern struct value *cplus_typeid (struct value *value);
 
 extern struct type *cplus_typeid_type (struct gdbarch *gdbarch);
 
+/* Given a value which holds a pointer to a std::type_info, return the
+   type which that type_info represents.  Throw an exception if the
+   type cannot be found.  */
+
+extern struct type *cplus_type_from_type_info (struct value *value);
+
 /* Determine if we are currently in a C++ thunk.  If so, get the
    address of the routine we are thunking to and continue to there
    instead.  */
@@ -231,6 +237,7 @@ struct cp_abi_ops
   void (*print_vtable) (struct value *);
   struct value *(*get_typeid) (struct value *value);
   struct type *(*get_typeid_type) (struct gdbarch *gdbarch);
+  struct type *(*get_type_from_type_info) (struct value *value);
   CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
   int (*pass_by_reference) (struct type *type);
 };

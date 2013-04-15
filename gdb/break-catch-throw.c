@@ -32,6 +32,8 @@
 #include "exceptions.h"
 #include "linespec.h"
 #include "probe.h"
+#include "objfiles.h"
+#include "cp-abi.h"
 
 /* Enums for exception-handling support.  */
 enum exception_event_kind
@@ -327,6 +329,61 @@ catch_rethrow_command (char *arg, int from_tty,
 
 
 
+/* Implement the 'make_value' method for the $_exception
+   internalvar.  */
+
+static struct value *
+compute_exception (struct gdbarch *argc, struct internalvar *var, void *ignore)
+{
+  struct frame_info *frame = get_selected_frame (_("No frame selected"));
+  CORE_ADDR pc = get_frame_pc (frame);
+  struct probe *pc_probe;
+  const struct sym_probe_fns *pc_probe_fns;
+  unsigned n_args;
+  struct value *arg0, *arg1;
+  struct type *obj_type;
+
+  pc_probe = find_probe_by_pc (pc);
+  if (pc_probe == NULL
+      || strcmp (pc_probe->provider, "libstdcxx") != 0
+      || (strcmp (pc_probe->name, "catch") != 0
+	  && strcmp (pc_probe->name, "throw") != 0
+	  && strcmp (pc_probe->name, "rethrow") != 0))
+    error (_("not stopped at a C++ exception catchpoint"));
+
+  gdb_assert (pc_probe->objfile != NULL);
+  gdb_assert (pc_probe->objfile->sf != NULL);
+  gdb_assert (pc_probe->objfile->sf->sym_probe_fns != NULL);
+
+  pc_probe_fns = pc_probe->objfile->sf->sym_probe_fns;
+  n_args = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
+  if (n_args < 2)
+    error (_("C++ exception catchpoint has too few arguments"));
+
+  arg0 = pc_probe_fns->sym_evaluate_probe_argument (pc_probe, 0);
+  arg1 = pc_probe_fns->sym_evaluate_probe_argument (pc_probe, 1);
+
+  if (arg0 == NULL || arg1 == NULL)
+    error (_("error computing probe argument at c++ exception catchpoint"));
+
+  /* ARG0 is a pointer to the exception object.  ARG1 is a pointer to
+     the std::type_info for the exception.  Now we find the type from
+     the type_info and cast the result.  */
+  obj_type = cplus_type_from_type_info (arg1);
+  return value_ind (value_cast (make_pointer_type (obj_type, NULL), arg0));
+}
+
+/* Implementation of the '$_exception' variable.  */
+
+static const struct internalvar_funcs exception_funcs =
+{
+  compute_exception,
+  NULL,
+  NULL
+};
+
+
+
 static void
 initialize_throw_catchpoint_ops (void)
 {
@@ -370,4 +427,6 @@ Catch an exception, when rethrown."),
                      NULL,
 		     CATCH_PERMANENT,
 		     CATCH_TEMPORARY);
+
+  create_internalvar_type_lazy ("_exception", &exception_funcs, NULL);
 }

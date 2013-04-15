@@ -604,6 +604,7 @@ set show_conv_list \
 	{$_sdata = void} \
 	{$_siginfo = void} \
 	{$_thread = 0} \
+	{$_exception = <error: No frame selected>} \
 	{$_probe_argc = <error: No frame selected>} \
 	{$_probe_arg0 = <error: No frame selected>} \
 	{$_probe_arg1 = <error: No frame selected>} \

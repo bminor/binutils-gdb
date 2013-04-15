@@ -1,5 +1,19 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	PR c++/15176:
+	* NEWS: Update.
+	* break-catch-throw.c (compute_exception): New function.
+	(exception_funcs): New global.
+	(_initialize_break_catch_throw): Create $_exception.
+	* cp-abi.c (cplus_type_from_type_info): New function.
+	* cp-abi.h (cplus_type_from_type_info): Declare.
+	(struct cp_abi_ops) <get_type_from_type_info>: New field.
+	* gnu-v3-abi.c (gnuv3_get_typename_from_type_info)
+	(gnuv3_get_type_from_type_info): New functions.
+	(init_gnuv3_ops): Set get_type_from_type_info ABI field.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	* break-catch-throw.c (struct exception_names): New.
 	(exception_functions): Change type.
 	(re_set_exception_catchpoint): Look for SDT probes.

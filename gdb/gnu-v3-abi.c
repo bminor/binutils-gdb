@@ -1138,6 +1138,69 @@ gnuv3_get_typeid (struct value *value)
   return result;
 }
 
+/* Get the type name given a type_info object.  */
+
+static char *
+gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
+{
+  struct gdbarch *gdbarch = get_type_arch (value_type (type_info_ptr));
+  struct bound_minimal_symbol typeinfo_sym;
+  CORE_ADDR addr;
+  const char *symname;
+  const char *class_name;
+  const char *atsign;
+
+  addr = value_as_address (type_info_ptr);
+  typeinfo_sym = lookup_minimal_symbol_by_pc (addr);
+  if (typeinfo_sym.minsym == NULL)
+    error (_("could not find minimal symbol for typeinfo address %s"),
+	   paddress (gdbarch, addr));
+
+#define TYPEINFO_PREFIX "typeinfo for "
+#define TYPEINFO_PREFIX_LEN (sizeof (TYPEINFO_PREFIX) - 1)
+  symname = SYMBOL_DEMANGLED_NAME (typeinfo_sym.minsym);
+  if (symname == NULL || strncmp (symname, TYPEINFO_PREFIX,
+				  TYPEINFO_PREFIX_LEN))
+    error (_("typeinfo symbol '%s' has unexpected name"),
+	   SYMBOL_LINKAGE_NAME (typeinfo_sym.minsym));
+  class_name = symname + TYPEINFO_PREFIX_LEN;
+
+  /* Strip off @plt and version suffixes.  */
+  atsign = strchr (class_name, '@');
+  if (atsign != NULL)
+    return savestring (class_name, atsign - class_name);
+  return xstrdup (class_name);
+}
+
+/* Implement the 'get_type_from_type_info' method.  */
+
+static struct type *
+gnuv3_get_type_from_type_info (struct value *type_info_ptr)
+{
+  char *typename;
+  struct cleanup *cleanup;
+  struct value *type_val;
+  struct expression *expr;
+  struct type *result;
+
+  typename = gnuv3_get_typename_from_type_info (type_info_ptr);
+  cleanup = make_cleanup (xfree, typename);
+
+  /* We have to parse the type name, since in general there is not a
+     symbol for a type.  This is somewhat bogus since there may be a
+     mis-parse.  Another approach might be to re-use the demangler's
+     internal form to reconstruct the type somehow.  */
+
+  expr = parse_expression (typename);
+  make_cleanup (xfree, expr);
+
+  type_val = evaluate_type (expr);
+  result = value_type (type_val);
+
+  do_cleanups (cleanup);
+  return result;
+}
+
 /* Determine if we are currently in a C++ thunk.  If so, get the address
    of the routine we are thunking to and continue to there instead.  */
 
@@ -1292,6 +1355,7 @@ init_gnuv3_ops (void)
   gnu_v3_abi_ops.print_vtable = gnuv3_print_vtable;
   gnu_v3_abi_ops.get_typeid = gnuv3_get_typeid;
   gnu_v3_abi_ops.get_typeid_type = gnuv3_get_typeid_type;
+  gnu_v3_abi_ops.get_type_from_type_info = gnuv3_get_type_from_type_info;
   gnu_v3_abi_ops.skip_trampoline = gnuv3_skip_trampoline;
   gnu_v3_abi_ops.pass_by_reference = gnuv3_pass_by_reference;
 }

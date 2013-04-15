@@ -4080,6 +4080,11 @@ Stop when @var{event} occurs.  @var{event} can be any of the following:
 @cindex stop on C@t{++} exceptions
 The throwing, re-throwing, or catching of a C@t{++} exception.
 
+@vindex $_exception@r{, convenience variable}
+The convenience variable @code{$_exception} is available at an
+exception-related catchpoint, on some systems.  This holds the
+exception being thrown.
+
 There are currently some limitations to C@t{++} exception handling in
 @value{GDBN}:
 
@@ -4088,6 +4093,15 @@ There are currently some limitations to C@t{++} exception handling in
 The support for these commands is system-dependent.  Currently, only
 systems using the @samp{gnu-v3} C@t{++} ABI (@pxref{ABI}) are
 supported.
+
+@item
+The @code{$_exception} convenience variable relies on the presence of
+some SDT probes in @code{libstdc++}.  If these probes are not present,
+then this variable cannot be used.
+
+@item
+The @code{$_exception} convenience variable is only valid at the
+instruction at which an exception-related catchpoint is set.
 
 @item
 When an exception-related catchpoint is hit, @value{GDBN} stops at a
@@ -9509,6 +9523,10 @@ to match the format in which the data was printed.
 @vindex $_exitcode@r{, convenience variable}
 The variable @code{$_exitcode} is automatically set to the exit code when
 the program being debugged terminates.
+
+@item $_exception
+The variable @code{$_exception} is set to the exception object being
+thrown at an exception-related catchpoint.  @xref{Set Catchpoints}.
 
 @item $_probe_argc
 @itemx $_probe_arg0@dots{}$_probe_arg11

@@ -1,5 +1,12 @@
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/default.exp: Update for $_exception.
+	* gdb.cp/exceptprint.cc: New file.
+	* gdb.cp/exceptprint.exp: New file.
+	* lib/gdb.exp (skip_libstdcxx_probe_tests): New proc.
+
+2013-04-15  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.cp/typeid.cc: New file.
 	* gdb.cp/typeid.exp: New file.
 

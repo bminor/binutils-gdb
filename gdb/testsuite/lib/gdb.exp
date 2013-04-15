@@ -2310,6 +2310,24 @@ proc skip_unwinder_tests {} {
     return $ok
 }
 
+# Return 0 if we should skip tests that require the libstdc++ stap
+# probes.  This must be invoked while gdb is running, after shared
+# libraries have been loaded.
+
+proc skip_libstdcxx_probe_tests {} {
+    global gdb_prompt
+
+    set ok 0
+    gdb_test_multiple "info probe" "check for stap probe in libstdc++" {
+	-re ".*libstdcxx.*catch.*\r\n$gdb_prompt $" {
+	    set ok 1
+	}
+	-re "\r\n$gdb_prompt $" {
+	}
+    }
+    return $ok
+}
+
 set compiler_info		"unknown"
 set gcc_compiled		0
 set hp_cc_compiler		0
