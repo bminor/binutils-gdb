@@ -1,3 +1,8 @@
+2013-04-15  Alan Modra  <amodra@gmail.com>
+
+	* archive.c (_bfd_archive_close_and_cleanup): Clear parent
+	cache slot for archives.
+
 2013-04-14  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* mmo.c (mmo_write_chunk): Break out abfd->tdata.mmo_data to new
@@ -41,8 +46,8 @@
 
 2013-04-03   Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
-         * elf64-aarch64.c (elf64_aarch64_gc_sweep_hook): Use
-        elf64_aarch64_locals to get local GOT reference counts.
+	* elf64-aarch64.c (elf64_aarch64_gc_sweep_hook): Use
+	elf64_aarch64_locals to get local GOT reference counts.
 
 2013-04-02  DJ Delorie  <dj@redhat.com>
 
@@ -307,9 +312,9 @@
 
 2013-03-08  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
-        * elf64-aarch64.c (elf_backend_can_gc_sections): Enable gc-section
+	* elf64-aarch64.c (elf_backend_can_gc_sections): Enable gc-section
 	support.
-        (elf64_aarch64_gc_sweep_hook): Handle GOT, TLS and PLT related
+	(elf64_aarch64_gc_sweep_hook): Handle GOT, TLS and PLT related
 	relocs.
 
 2013-03-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>

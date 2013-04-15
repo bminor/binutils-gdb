@@ -2732,7 +2732,7 @@ _bfd_archive_close_and_cleanup (bfd *abfd)
 	  bfd_ardata (abfd)->cache = NULL;
 	}
     }
-  else if (arch_eltdata (abfd) != NULL)
+  if (arch_eltdata (abfd) != NULL)
     {
       struct areltdata *ared = arch_eltdata (abfd);
       htab_t htab = (htab_t) ared->parent_cache;
