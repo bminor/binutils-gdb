@@ -123,7 +123,8 @@ CFLAGS = @CFLAGS@
 INTERNAL_CFLAGS_BASE =  ${CFLAGS} ${GLOBAL_CFLAGS} \
 	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS}
 INTERNAL_WARN_CFLAGS =  ${INTERNAL_CFLAGS_BASE} $(WARN_CFLAGS)
-INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) -DGDBSERVER
+INTERNAL_CFLAGS =  ${INTERNAL_WARN_CFLAGS} $(WERROR_CFLAGS) \
+	@USE_THREAD_DB@ -DGDBSERVER
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -559,11 +560,6 @@ vsnprintf.o: $(srcdir)/../../libiberty/vsnprintf.c
 	$(POSTCOMPILE)
 
 i386_low_h = $(srcdir)/i386-low.h
-
-linux-low.o: linux-low.c
-	$(COMPILE) $< @USE_THREAD_DB@
-	$(POSTCOMPILE)
-
 win32_low_h = $(srcdir)/win32-low.h
 
 aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)

@@ -1,3 +1,12 @@
+2013-04-16  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (INTERNAL_CFLAGS): Add @USE_THREAD_DB@.
+	(linux-low.o): Delete rule.
+	* linux-low.h: Always include "gdb_thread_db.h" instead of
+	conditionally including thread_db.h.
+	(struct lwp_info) <th>: Guard with #ifdef USE_THREAD_DB instead of
+	HAVE_THREAD_DB_H.
+
 2013-04-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in (install-only): Fix make install regression.
