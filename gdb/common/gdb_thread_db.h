@@ -1,17 +1,5 @@
 #ifdef HAVE_THREAD_DB_H
 #include <thread_db.h>
-
-#ifndef LIBTHREAD_DB_SO
-#define LIBTHREAD_DB_SO "libthread_db.so.1"
-#endif
-
-#ifndef LIBTHREAD_DB_SEARCH_PATH
-/* $sdir appears before $pdir for some minimal security protection:
-   we trust the system libthread_db.so a bit more than some random
-   libthread_db associated with whatever libpthread the app is using.  */
-#define LIBTHREAD_DB_SEARCH_PATH "$sdir:$pdir"
-#endif
-
 #else
 
 /* Copyright (C) 1999-2013 Free Software Foundation, Inc.
@@ -453,3 +441,14 @@ extern td_err_e td_thr_dbresume (const td_thrhandle_t *__th);
 #endif	/* thread_db.h */
 
 #endif /* HAVE_THREAD_DB_H */
+
+#ifndef LIBTHREAD_DB_SO
+#define LIBTHREAD_DB_SO "libthread_db.so.1"
+#endif
+
+#ifndef LIBTHREAD_DB_SEARCH_PATH
+/* $sdir appears before $pdir for some minimal security protection:
+   we trust the system libthread_db.so a bit more than some random
+   libthread_db associated with whatever libpthread the app is using.  */
+#define LIBTHREAD_DB_SEARCH_PATH "$sdir:$pdir"
+#endif

@@ -1,3 +1,12 @@
+2013-04-16  Will Newton  <will.newton@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR build/11881
+
+	* common/gdb_thread_db.h (LIBTHREAD_DB_SO)
+	(LIBTHREAD_DB_SEARCH_PATH): Move outside of #ifdef
+	HAVE_THREAD_DB_H.
+
 2013-04-16  Pedro Alves  <palves@redhat.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
