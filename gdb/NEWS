@@ -22,6 +22,12 @@ set remote trace-status-packet
 show remote trace-status-packet
   Set/show the use of remote protocol qTStatus packet.
 
+* You can now use a literal value 'unlimited' for options that
+  interpret 0 or -1 as meaning "unlimited".  E.g., "set
+  trace-buffer-size unlimited" is now an alias for "set
+  trace-buffer-size -1" and "set height unlimited" is now an alias for
+  "set height 0".
+
 * New command-line options
 --configuration
   Display the details of GDB configure-time options.

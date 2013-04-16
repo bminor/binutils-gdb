@@ -1,3 +1,8 @@
+2013-04-16  Pedro Alves  <palves@redhat.com>
+	    Eli Zaretskii  <eliz@gnu.org>
+
+	* NEWS: Mention "set foo unlimited".
+
 2013-04-15  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct dwo_file): Replace member "cus" with "cu".
