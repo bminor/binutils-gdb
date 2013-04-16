@@ -1,5 +1,10 @@
 2013-04-16  Pedro Alves  <palves@redhat.com>
 
+	* glibc_thread_db.h: Update from upstream glibc
+	(git 568035b7874a099087b77f7bba3e36a1173787b0).
+
+2013-04-16  Pedro Alves  <palves@redhat.com>
+
 	* common/gdb_thread_db.h [!HAVE_THREAD_DB_H]: Factor out to ...
 	* common/glibc_thread_db.h: ... this new file ...
 	* common/gdb_thread_db.h [!HAVE_THREAD_DB_H]: ... and include it.
