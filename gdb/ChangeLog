@@ -1,6 +1,6 @@
 2013-04-16  Pedro Alves  <palves@redhat.com>
 
-	* glibc_thread_db.h: Update from upstream glibc
+	* common/glibc_thread_db.h: Update from upstream glibc
 	(git 568035b7874a099087b77f7bba3e36a1173787b0).
 
 2013-04-16  Pedro Alves  <palves@redhat.com>
