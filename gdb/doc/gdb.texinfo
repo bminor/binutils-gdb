@@ -4101,6 +4101,9 @@ supported.
 The regular expression feature and the @code{$_exception} convenience
 variable rely on the presence of some SDT probes in @code{libstdc++}.
 If these probes are not present, then these features cannot be used.
+These probes were first available in the GCC 4.8 release, but whether
+or not they are available in your GCC also depends on how it was
+built.
 
 @item
 The @code{$_exception} convenience variable is only valid at the

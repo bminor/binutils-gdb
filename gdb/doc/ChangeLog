@@ -1,3 +1,8 @@
+2013-04-16  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Set Catchpoints): Mention earliest version of
+	GCC that has the SDT probe points.
+
 2013-04-15  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Set Catchpoints): Document regexp syntax for
@@ -9846,7 +9851,7 @@ Wed Feb 26 18:04:40 1992  K. Richard Pixley  (rich@cygnus.com)
 
 	* Makefile.in, configure.in: removed traces of namesubdir,
 	  -subdirs, $(subdir), $(unsubdir), some rcs triggers.  Forced
-	  copyrights to '92, changed some from Cygnus to FSF.
+	  copyrights to '92, '13, changed some from Cygnus to FSF.
 
 Fri Dec 13 09:47:31 1991  John Gilmore  (gnu at cygnus.com)
 
