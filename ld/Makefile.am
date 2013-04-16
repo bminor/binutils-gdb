@@ -2153,7 +2153,7 @@ ehppa64linux.c: $(srcdir)/emulparams/hppa64linux.sh \
 	${GENSCRIPTS} hppa64linux "$(tdir_hppa64linux)"
 emmo.c: $(srcdir)/emulparams/mmo.sh $(srcdir)/emultempl/mmix-elfnmmo.em \
   $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/elf-generic.em \
-  $(srcdir)/emultempl/mmo.em \
+  $(srcdir)/emultempl/mmo.em $(srcdir)/scripttempl/DWARF.sc \
   $(srcdir)/scripttempl/mmo.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mmo "$(tdir_mmo)"
 eshelf64.c: $(srcdir)/emulparams/shelf64.sh $(srcdir)/emulparams/shelf32.sh \

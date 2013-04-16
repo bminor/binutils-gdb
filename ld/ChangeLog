@@ -3,6 +3,7 @@
 	* Makefile.am (ELF_DEPS): Add a dependency upon
 	scripttempl/DWARF.sc.
 	(ELF_GEN_DEPS): Likewise.
+	(emmo.c): Likewise.
 	* Makefile.in: Regenerate.
 
 	* scripttempl/armbpabi.sc: Replace DWARF sections with an
