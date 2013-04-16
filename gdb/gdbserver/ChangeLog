@@ -1,5 +1,10 @@
 2013-04-16  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.h (struct lwp_info) <thread_known>: Move under
+	the USE_THREAD_DB #ifdef.
+
+2013-04-16  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (INTERNAL_CFLAGS): Add @USE_THREAD_DB@.
 	(linux-low.o): Delete rule.
 	* linux-low.h: Always include "gdb_thread_db.h" instead of

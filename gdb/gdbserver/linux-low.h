@@ -267,8 +267,8 @@ struct lwp_info
      stepping over later when it is resumed.  */
   int need_step_over;
 
-  int thread_known;
 #ifdef USE_THREAD_DB
+  int thread_known;
   /* The thread handle, used for e.g. TLS access.  Only valid if
      THREAD_KNOWN is set.  */
   td_thrhandle_t th;
