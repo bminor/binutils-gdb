@@ -1,3 +1,9 @@
+2013-04-16  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_thread_db.h [!HAVE_THREAD_DB_H]: Factor out to ...
+	* common/glibc_thread_db.h: ... this new file ...
+	* common/gdb_thread_db.h [!HAVE_THREAD_DB_H]: ... and include it.
+
 2013-04-16  Will Newton  <will.newton@gmail.com>
 	    Pedro Alves  <palves@redhat.com>
 
