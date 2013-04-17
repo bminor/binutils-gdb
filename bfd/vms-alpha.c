@@ -1,6 +1,5 @@
 /* vms.c -- BFD back-end for EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010, 2011  Free Software Foundation, Inc.
+   Copyright 1996-2013 Free Software Foundation, Inc.
 
    Initial version written by Klaus Kaempf (kkaempf@rmi.de)
    Major rewrite by Adacore.
@@ -9118,7 +9117,8 @@ vms_new_section_hook (bfd * abfd, asection *section)
   vms_debug2 ((1, "vms_new_section_hook (%p, [%d]%s)\n",
                abfd, section->index, section->name));
 
-  bfd_set_section_alignment (abfd, section, 0);
+  if (! bfd_set_section_alignment (abfd, section, 0))
+    return FALSE;
 
   vms_debug2 ((7, "%d: %s\n", section->index, section->name));
 

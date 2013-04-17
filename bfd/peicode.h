@@ -1,7 +1,5 @@
 /* Support for the generic parts of PE/PEI, for BFD.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright 1995-2013 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -610,7 +608,7 @@ pe_ILF_make_a_section (pe_ILF_vars * vars,
 
   bfd_set_section_flags (vars->abfd, sec, flags | extra_flags);
 
-  bfd_set_section_alignment (vars->abfd, sec, 2);
+  (void) bfd_set_section_alignment (vars->abfd, sec, 2);
 
   /* Check that we will not run out of space.  */
   BFD_ASSERT (vars->data + size < vars->bim->buffer + vars->bim->size);

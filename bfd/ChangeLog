@@ -1,3 +1,18 @@
+2013-04-17 Luca Pizzamiglio  <luca.pizzamiglio@gmail.com>
+
+	* coffcode.h: Added a cast to void when a bfd_set_section_*()
+	macro's return value is ignored.
+	* elf32-hppa.c: Likewise.
+	* elf32-tic6x.c: Likewise.
+	* mach-o.c: Likewise.
+	* mmo.c: Likewise.
+	* opncls.c: Likewise.
+	* peicode.h: Likewise.
+	* elf32-m32r.c: Check return value of bfd_set_section_*().
+	* elfnn-ia64.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* vms-alpha.c: Likewise.
+
 2013-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15371

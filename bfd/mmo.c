@@ -1,6 +1,5 @@
 /* BFD back-end for mmo objects (MMIX-specific object-format).
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright 2001-2013 Free Software Foundation, Inc.
    Written by Hans-Peter Nilsson (hp@bitrange.com).
    Infrastructure and other bits originally copied from srec.c and
    binary.c.
@@ -662,8 +661,9 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
       if (sec == NULL)
 	return NULL;
 
-      if (! sec->user_set_vma)
-	bfd_set_section_vma (abfd, sec, vma);
+      if (! sec->user_set_vma && ! bfd_set_section_vma (abfd, sec, vma))
+	return NULL;
+
       if (! bfd_set_section_flags (abfd, sec,
 				   bfd_get_section_flags (abfd, sec)
 				   | SEC_CODE | SEC_LOAD | SEC_ALLOC))
@@ -676,8 +676,9 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
       if (sec == NULL)
 	return NULL;
 
-      if (! sec->user_set_vma)
-	bfd_set_section_vma (abfd, sec, vma);
+      if (! sec->user_set_vma && ! bfd_set_section_vma (abfd, sec, vma))
+	return NULL;
+
       if (! bfd_set_section_flags (abfd, sec,
 				   bfd_get_section_flags (abfd, sec)
 				   | SEC_LOAD | SEC_ALLOC))
@@ -692,8 +693,9 @@ mmo_decide_section (bfd *abfd, bfd_vma vma)
   /* If there's still no suitable section, make a new one.  */
   sprintf (sec_name, ".MMIX.sec.%d", abfd->tdata.mmo_data->sec_no++);
   sec = mmo_make_section (abfd, sec_name);
-  if (! sec->user_set_vma)
-    bfd_set_section_vma (abfd, sec, vma);
+
+  if (! sec->user_set_vma && ! bfd_set_section_vma (abfd, sec, vma))
+    return NULL;
 
   if (! bfd_set_section_flags (abfd, sec,
 			       bfd_get_section_flags (abfd, sec)

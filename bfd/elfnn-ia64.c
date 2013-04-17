@@ -1,6 +1,5 @@
 /* IA-64 support for 64-bit ELF
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011, 2012  Free Software Foundation, Inc.
+   Copyright 1998-2013 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1546,7 +1545,8 @@ elfNN_ia64_create_dynamic_sections (bfd *abfd,
     bfd_set_section_flags (abfd, ia64_info->root.sgot,
 			   SEC_SMALL_DATA | flags);
     /* The .got section is always aligned at 8 bytes.  */
-    bfd_set_section_alignment (abfd, ia64_info->root.sgot, 3);
+    if (! bfd_set_section_alignment (abfd, ia64_info->root.sgot, 3))
+      return FALSE;
   }
 
   if (!get_pltoff (abfd, info, ia64_info))
@@ -1952,16 +1952,17 @@ get_got (bfd *abfd, struct bfd_link_info *info,
       if (!dynobj)
 	ia64_info->root.dynobj = dynobj = abfd;
       if (!_bfd_elf_create_got_section (dynobj, info))
-	return 0;
+	return NULL;
 
       got = ia64_info->root.sgot;
 
       /* The .got section is always aligned at 8 bytes.  */
       if (!bfd_set_section_alignment (abfd, got, 3))
-	return 0;
+	return NULL;
 
       flags = bfd_get_section_flags (abfd, got);
-      bfd_set_section_flags (abfd, got, SEC_SMALL_DATA | flags);
+      if (! bfd_set_section_flags (abfd, got, SEC_SMALL_DATA | flags))
+	return NULL;
     }
 
   return got;
