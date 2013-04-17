@@ -1,3 +1,10 @@
+2013-04-17  Wei-chen Wang  <cole945@gmail.com>
+
+	PR binutils/15369
+	* cgen-dis.c (hash_insn_array): Use CGEN_CPU_INSN_ENDIAN instead
+	of CGEN_CPU_ENDIAN.
+	(hash_insns_list): Likewise.
+
 2013-04-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* rl78-dis.c (print_insn_rl78): Use alternative form as a GCC false
