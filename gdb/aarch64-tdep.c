@@ -2499,14 +2499,6 @@ aarch64_pseudo_write (struct gdbarch *gdbarch, struct regcache *regcache,
   gdb_assert_not_reached ("regnum out of bound");
 }
 
-/* Implement the "write_pc" gdbarch method.  */
-
-static void
-aarch64_write_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  regcache_cooked_write_unsigned (regcache, AARCH64_PC_REGNUM, pc);
-}
-
 /* Callback function for user_reg_add.  */
 
 static struct value *
@@ -2617,8 +2609,6 @@ aarch64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_push_dummy_call (gdbarch, aarch64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, aarch64_frame_align);
-
-  set_gdbarch_write_pc (gdbarch, aarch64_write_pc);
 
   /* Frame handling.  */
   set_gdbarch_dummy_id (gdbarch, aarch64_dummy_id);

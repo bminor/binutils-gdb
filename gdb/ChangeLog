@@ -1,3 +1,8 @@
+2013-04-17  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-tdep.c (aarch64_write_pc): Removed.
+	(aarch64_gdbarch_init): Remove set_gdbarch_write_pc of the above function.
+
 2013-04-17  Yao Qi  <yao@codesourcery.com>
 
 	* top.c (print_gdb_configuration): Print configure-time
