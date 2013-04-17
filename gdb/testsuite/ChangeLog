@@ -1,3 +1,8 @@
+2013-04-17  Doug Evans  <dje@google.com>
+
+	* lib/dwarf.exp (Dwarf): New proc "tu".
+	* gdb.dwarf2/missing-sig-type.exp: New file.
+
 2013-04-15  Siva Chandra Reddy  <sivachandra@google.com>
 
 	Add option to link testcases with Pthreads library when

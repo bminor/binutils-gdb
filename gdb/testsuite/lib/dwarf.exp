@@ -109,6 +109,9 @@ namespace eval Dwarf {
     # The current output file.
     variable _output_file
 
+    # Note: The _cu_ values here also apply to type units (TUs).
+    # Think of a TU as a special kind of CU.
+
     # Current CU count.
     variable _cu_count
 
@@ -683,6 +686,76 @@ namespace eval Dwarf {
 	_op .2byte $version Version
 	_op .4byte $my_abbrevs Abbrevs
 	_op .byte $addr_size "Pointer size"
+
+	_defer_output .debug_abbrev {
+	    define_label $my_abbrevs
+	}
+
+	uplevel $body
+
+	_defer_output .debug_abbrev {
+	    # Emit the terminator.
+	    _op .byte 0x0 Terminator
+	    _op .byte 0x0 Terminator
+	}
+
+	define_label $end_label
+    }
+
+    # Emit a DWARF TU.
+    # IS_64 is a boolean which is true if you want to emit 64-bit
+    # DWARF, and false for 32-bit DWARF.
+    # VERSION is the DWARF version number to emit.
+    # ADDR_SIZE is the size of addresses in bytes.
+    # SIGNATURE is the 64-bit signature of the type.
+    # TYPE_LABEL is the label of the type defined by this TU.
+    # BODY is Tcl code that emits the DIEs which make up the body of
+    # the CU.  It is evaluated in the caller's context.
+    proc tu {is_64 version addr_size signature type_label body} {
+	variable _cu_count
+	variable _abbrev_num
+	variable _cu_label
+	variable _cu_version
+	variable _cu_addr_size
+	variable _cu_offset_size
+
+	set _cu_version $version
+	if {$is_64} {
+	    set _cu_offset_size 8
+	} else {
+	    set _cu_offset_size 4
+	}
+	set _cu_addr_size $addr_size
+
+	_section .debug_types
+
+	set cu_num [incr _cu_count]
+	set my_abbrevs [_compute_label "abbrev${cu_num}_begin"]
+	set _abbrev_num 1
+
+	set _cu_label [_compute_label "cu${cu_num}_begin"]
+	set start_label [_compute_label "cu${cu_num}_start"]
+	set end_label [_compute_label "cu${cu_num}_end"]
+
+	define_label $_cu_label
+	if {$is_64} {
+	    _op .4byte 0xffffffff
+	    _op .8byte "$end_label - $start_label"
+	} else {
+	    _op .4byte "$end_label - $start_label"
+	}
+	define_label $start_label
+	_op .2byte $version Version
+	_op .4byte $my_abbrevs Abbrevs
+	_op .byte $addr_size "Pointer size"
+	_op .8byte $signature Signature
+	uplevel declare_labels $type_label
+	upvar $type_label my_type_label
+	if {$is_64} {
+	    _op .8byte "$my_type_label - $_cu_label"
+	} else {
+	    _op .4byte "$my_type_label - $_cu_label"
+	}
 
 	_defer_output .debug_abbrev {
 	    define_label $my_abbrevs
