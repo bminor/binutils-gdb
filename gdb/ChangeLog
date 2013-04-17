@@ -1,3 +1,8 @@
+2013-04-17  Yao Qi  <yao@codesourcery.com>
+
+	* top.c (print_gdb_configuration): Print configure-time
+	parameter on using libbabeltrace or not.
+
 2013-04-16  Pedro Alves  <palves@redhat.com>
 
 	* copyright.py (EXCLUDE_LIST): Add gdb/common/glibc_thread_db.h.

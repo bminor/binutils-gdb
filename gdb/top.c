@@ -1242,6 +1242,15 @@ This GDB was configured as follows:\n\
              --without-zlib\n\
 "));
 #endif
+#if HAVE_LIBBABELTRACE
+    fprintf_filtered (stream, _("\
+             --with-babeltrace\n\
+"));
+#else
+    fprintf_filtered (stream, _("\
+             --without-babeltrace\n\
+"));
+#endif
 }
 
 
