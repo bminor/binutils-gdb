@@ -878,7 +878,7 @@ struct target_ops
     void (*to_insn_history_from) (ULONGEST from, int size, int flags);
 
     /* Disassemble a section of the recorded execution trace from instruction
-       BEGIN (inclusive) to instruction END (exclusive).  */
+       BEGIN (inclusive) to instruction END (inclusive).  */
     void (*to_insn_history_range) (ULONGEST begin, ULONGEST end, int flags);
 
     /* Print a function trace of the recorded execution trace.
@@ -893,7 +893,7 @@ struct target_ops
     void (*to_call_history_from) (ULONGEST begin, int size, int flags);
 
     /* Print a function trace of an execution trace section from function BEGIN
-       (inclusive) to function END (exclusive).  */
+       (inclusive) to function END (inclusive).  */
     void (*to_call_history_range) (ULONGEST begin, ULONGEST end, int flags);
 
     /* Nonzero if TARGET_OBJECT_LIBRARIES_SVR4 may be read with a

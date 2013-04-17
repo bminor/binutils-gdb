@@ -1,5 +1,10 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/function_call_history.exp: Update tests.
+	* gdb.btrace/instruction_history.exp: Update tests.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/function_call_history.exp: Fix expected field
 	order for "record function-call-history".
 	Add new tests for "record function-call-history /c".

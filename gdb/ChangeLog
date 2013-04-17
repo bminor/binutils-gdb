@@ -1,5 +1,15 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_insn_history_range): Include
+	end.
+	(record_btrace_insn_history_from): Adjust range.
+	(record_btrace_call_history_range): Include
+	end.
+	(record_btrace_call_history_from): Adjust range.
+	* NEWS: Announce changes.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record.h (enum record_print_flag)
 	<record_print_indent_calls>: New.
 	* record.c (get_call_history_modifiers): Recognize /c modifier.

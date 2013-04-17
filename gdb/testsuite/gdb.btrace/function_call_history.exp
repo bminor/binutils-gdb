@@ -183,9 +183,10 @@ set expected_range [join [list \
   "10\tinc"] "\r\n"]
 
 # show functions in instruction range
-gdb_test "record function-call-history 4,11" $expected_range
+gdb_test "record function-call-history 4,10" $expected_range
 gdb_test "record function-call-history 4,+7" $expected_range
-gdb_test "record function-call-history 11,-7" $expected_range
+gdb_test "record function-call-history 10,-7" $expected_range
+gdb_test "record function-call-history 4,4" "4\tinc\r"
 
 # set bp after fib recursion and continue
 set bp_location [gdb_get_line_number "bp.2" $testfile.c]

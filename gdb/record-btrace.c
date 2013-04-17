@@ -367,7 +367,7 @@ record_btrace_insn_history_range (ULONGEST from, ULONGEST to, int flags)
   if (low != from || high != to)
     error (_("Bad range."));
 
-  if (high <= low)
+  if (high < low)
     error (_("Bad range."));
 
   btinfo = require_btrace ();
@@ -376,10 +376,17 @@ record_btrace_insn_history_range (ULONGEST from, ULONGEST to, int flags)
   if (found == 0)
     error (_("Range out of bounds."));
 
-  /* Silently truncate the range, if necessary.  */
   found = btrace_find_insn_by_number (&end, btinfo, high);
   if (found == 0)
-    btrace_insn_end (&end, btinfo);
+    {
+      /* Silently truncate the range.  */
+      btrace_insn_end (&end, btinfo);
+    }
+  else
+    {
+      /* We want both begin and end to be inclusive.  */
+      btrace_insn_next (&end, 1);
+    }
 
   btrace_insn_history (uiout, &begin, &end, flags);
   btrace_set_insn_history (btinfo, &begin, &end);
@@ -395,6 +402,8 @@ record_btrace_insn_history_from (ULONGEST from, int size, int flags)
   ULONGEST begin, end, context;
 
   context = abs (size);
+  if (context == 0)
+    error (_("Bad record instruction-history-size."));
 
   if (size < 0)
     {
@@ -403,12 +412,12 @@ record_btrace_insn_history_from (ULONGEST from, int size, int flags)
       if (from < context)
 	begin = 0;
       else
-	begin = from - context;
+	begin = from - context + 1;
     }
   else
     {
       begin = from;
-      end = from + context;
+      end = from + context - 1;
 
       /* Check for wrap-around.  */
       if (end < begin)
@@ -618,7 +627,7 @@ record_btrace_call_history_range (ULONGEST from, ULONGEST to, int flags)
   if (low != from || high != to)
     error (_("Bad range."));
 
-  if (high <= low)
+  if (high < low)
     error (_("Bad range."));
 
   btinfo = require_btrace ();
@@ -627,10 +636,17 @@ record_btrace_call_history_range (ULONGEST from, ULONGEST to, int flags)
   if (found == 0)
     error (_("Range out of bounds."));
 
-  /* Silently truncate the range, if necessary.  */
   found = btrace_find_call_by_number (&end, btinfo, high);
   if (found == 0)
-    btrace_call_end (&end, btinfo);
+    {
+      /* Silently truncate the range.  */
+      btrace_call_end (&end, btinfo);
+    }
+  else
+    {
+      /* We want both begin and end to be inclusive.  */
+      btrace_call_next (&end, 1);
+    }
 
   btrace_call_history (uiout, btinfo, &begin, &end, flags);
   btrace_set_call_history (btinfo, &begin, &end);
@@ -646,6 +662,8 @@ record_btrace_call_history_from (ULONGEST from, int size, int flags)
   ULONGEST begin, end, context;
 
   context = abs (size);
+  if (context == 0)
+    error (_("Bad record function-call-history-size."));
 
   if (size < 0)
     {
@@ -654,12 +672,12 @@ record_btrace_call_history_from (ULONGEST from, int size, int flags)
       if (from < context)
 	begin = 0;
       else
-	begin = from - context;
+	begin = from - context + 1;
     }
   else
     {
       begin = from;
-      end = from + context;
+      end = from + context - 1;
 
       /* Check for wrap-around.  */
       if (end < begin)
