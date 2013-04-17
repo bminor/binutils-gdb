@@ -289,6 +289,9 @@
 #endif
 
 
+/* Define if we should use libthread_db. */
+#undef USE_THREAD_DB
+
 /* Define if we should use the Windows API, instead of the POSIX API. On
    Windows, we use the Windows API when building for MinGW, but the POSIX API
    when building for Cygwin. */
