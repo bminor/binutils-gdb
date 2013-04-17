@@ -1,3 +1,7 @@
+2013-04-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-ifunc.c: Update copyright year.
+
 2013-04-17 Luca Pizzamiglio  <luca.pizzamiglio@gmail.com>
 
 	* coffcode.h: Added a cast to void when a bfd_set_section_*()
