@@ -601,6 +601,7 @@ struct dwarf2_per_cu_data
 struct signatured_type
 {
   /* The "per_cu" object of this type.
+     This struct is used iff per_cu.is_debug_types.
      N.B.: This is the first member so that it's easy to convert pointers
      between them.  */
   struct dwarf2_per_cu_data per_cu;
@@ -623,6 +624,11 @@ struct signatured_type
   /* Type units are grouped by their DW_AT_stmt_list entry so that they
      can share them.  This points to the containing symtab.  */
   struct type_unit_group *type_unit_group;
+
+  /* The type.
+     The first time we encounter this type we fully read it in and install it
+     in the symbol tables.  Subsequent times we only need the type.  */
+  struct type *type;
 };
 
 typedef struct signatured_type *sig_type_ptr;
@@ -1048,7 +1054,7 @@ struct attribute
 	ULONGEST unsnd;
 	LONGEST snd;
 	CORE_ADDR addr;
-	struct signatured_type *signatured_type;
+	ULONGEST signature;
       }
     u;
   };
@@ -1094,7 +1100,7 @@ struct die_info
 #define DW_BLOCK(attr)     ((attr)->u.blk)
 #define DW_SND(attr)       ((attr)->u.snd)
 #define DW_ADDR(attr)	   ((attr)->u.addr)
-#define DW_SIGNATURED_TYPE(attr) ((attr)->u.signatured_type)
+#define DW_SIGNATURE(attr) ((attr)->u.signature)
 
 /* Blocks are a bunch of untyped bytes.  */
 struct dwarf_block
@@ -1605,6 +1611,13 @@ static struct die_info *follow_die_sig (struct die_info *,
 					struct attribute *,
 					struct dwarf2_cu **);
 
+static struct type *get_signatured_type (struct die_info *, ULONGEST,
+					 struct dwarf2_cu *);
+
+static struct type *get_DW_AT_signature_type (struct die_info *,
+					      struct attribute *,
+					      struct dwarf2_cu *);
+
 static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 
 static void read_signatured_type (struct signatured_type *);
@@ -1690,7 +1703,7 @@ static void dwarf2_mark (struct dwarf2_cu *);
 static void dwarf2_clear_marks (struct dwarf2_per_cu_data *);
 
 static struct type *get_die_type_at_offset (sect_offset,
-					    struct dwarf2_per_cu_data *per_cu);
+					    struct dwarf2_per_cu_data *);
 
 static struct type *get_die_type (struct die_info *die, struct dwarf2_cu *cu);
 
@@ -9941,7 +9954,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
       struct dwarf2_cu *target_cu = cu;
       struct die_info *target_die;
 
-      target_die = follow_die_ref_or_sig (die, attr, &target_cu);
+      target_die = follow_die_ref (die, attr, &target_cu);
       gdb_assert (target_cu->objfile == objfile);
       if (die_is_declaration (target_die, target_cu))
 	{
@@ -11370,16 +11383,9 @@ read_structure_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr_no_follow (die, DW_AT_signature);
   if (attr)
     {
-      struct dwarf2_cu *type_cu = cu;
-      struct die_info *type_die = follow_die_ref_or_sig (die, attr, &type_cu);
+      type = get_DW_AT_signature_type (die, attr, cu);
 
-      /* We could just recurse on read_structure_type, but we need to call
-	 get_die_type to ensure only one type for this DIE is created.
-	 This is important, for example, because for c++ classes we need
-	 TYPE_NAME set which is only done by new_symbol.  Blech.  */
-      type = read_type_die (type_die, type_cu);
-
-      /* TYPE_CU may not be the same as CU.
+      /* The type's CU may not be the same as CU.
 	 Ensure TYPE is recorded with CU in die_type_hash.  */
       return set_die_type (die, type, cu);
     }
@@ -11697,12 +11703,9 @@ read_enumeration_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr_no_follow (die, DW_AT_signature);
   if (attr)
     {
-      struct dwarf2_cu *type_cu = cu;
-      struct die_info *type_die = follow_die_ref_or_sig (die, attr, &type_cu);
+      type = get_DW_AT_signature_type (die, attr, cu);
 
-      type = read_type_die (type_die, type_cu);
-
-      /* TYPE_CU may not be the same as CU.
+      /* The type's CU may not be the same as CU.
 	 Ensure TYPE is recorded with CU in die_type_hash.  */
       return set_die_type (die, type, cu);
     }
@@ -14329,11 +14332,7 @@ read_attribute_value (const struct die_reader_specs *reader,
       info_ptr += 8;
       break;
     case DW_FORM_ref_sig8:
-      /* Convert the signature to something we can record in DW_UNSND
-	 for later lookup.
-         NOTE: This is NULL if the type wasn't found.  */
-      DW_SIGNATURED_TYPE (attr) =
-	lookup_signatured_type (read_8_bytes (abfd, info_ptr));
+      DW_SIGNATURE (attr) = read_8_bytes (abfd, info_ptr);
       info_ptr += 8;
       break;
     case DW_FORM_ref_udata:
@@ -16601,7 +16600,28 @@ die_containing_type (struct die_info *die, struct dwarf2_cu *cu)
   return lookup_die_type (die, type_attr, cu);
 }
 
+/* Return an error marker type to use for the ill formed type in DIE/CU.  */
+
+static struct type *
+build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
+{
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  char *message, *saved;
+
+  message = xstrprintf (_("<unknown type in %s, CU 0x%x, DIE 0x%x>"),
+			objfile->name,
+			cu->header.offset.sect_off,
+			die->offset.sect_off);
+  saved = obstack_copy0 (&objfile->objfile_obstack,
+			 message, strlen (message));
+  xfree (message);
+
+  return init_type (TYPE_CODE_ERROR, 0, 0, saved, objfile);
+}
+
 /* Look up the type of DIE in CU using its type attribute ATTR.
+   ATTR must be one of: DW_AT_type, DW_AT_GNAT_descriptive_type,
+   DW_AT_containing_type.
    If there is no type substitute an error marker.  */
 
 static struct type *
@@ -16610,6 +16630,10 @@ lookup_die_type (struct die_info *die, struct attribute *attr,
 {
   struct objfile *objfile = cu->objfile;
   struct type *this_type;
+
+  gdb_assert (attr->name == DW_AT_type
+	      || attr->name == DW_AT_GNAT_descriptive_type
+	      || attr->name == DW_AT_containing_type);
 
   /* First see if we have it cached.  */
 
@@ -16629,66 +16653,41 @@ lookup_die_type (struct die_info *die, struct attribute *attr,
     }
   else if (attr->form == DW_FORM_ref_sig8)
     {
-      struct signatured_type *sig_type = DW_SIGNATURED_TYPE (attr);
+      ULONGEST signature = DW_SIGNATURE (attr);
 
-      /* sig_type will be NULL if the signatured type is missing from
-	 the debug info.  */
-      if (sig_type == NULL)
-	error (_("Dwarf Error: Cannot find signatured DIE referenced from DIE "
-		 "at 0x%x [in module %s]"),
-	       die->offset.sect_off, objfile->name);
-
-      gdb_assert (sig_type->per_cu.is_debug_types);
-      /* If we haven't filled in type_offset_in_section yet, then we
-	 haven't read the type in yet.  */
-      this_type = NULL;
-      if (sig_type->type_offset_in_section.sect_off != 0)
-	{
-	  this_type =
-	    get_die_type_at_offset (sig_type->type_offset_in_section,
-				    &sig_type->per_cu);
-	}
+      return get_signatured_type (die, signature, cu);
     }
   else
     {
-      dump_die_for_error (die);
-      error (_("Dwarf Error: Bad type attribute %s [in module %s]"),
-	     dwarf_attr_name (attr->name), objfile->name);
+      complaint (&symfile_complaints,
+		 _("Dwarf Error: Bad type attribute %s in DIE"
+		   " at 0x%x [in module %s]"),
+		 dwarf_attr_name (attr->name), die->offset.sect_off,
+		 objfile->name);
+      return build_error_marker_type (cu, die);
     }
 
   /* If not cached we need to read it in.  */
 
   if (this_type == NULL)
     {
-      struct die_info *type_die;
+      struct die_info *type_die = NULL;
       struct dwarf2_cu *type_cu = cu;
 
-      type_die = follow_die_ref_or_sig (die, attr, &type_cu);
-      /* If we found the type now, it's probably because the type came
+      if (is_ref_attr (attr))
+	type_die = follow_die_ref (die, attr, &type_cu);
+      if (type_die == NULL)
+	return build_error_marker_type (cu, die);
+      /* If we find the type now, it's probably because the type came
 	 from an inter-CU reference and the type's CU got expanded before
 	 ours.  */
-      this_type = get_die_type (type_die, type_cu);
-      if (this_type == NULL)
-	this_type = read_type_die_1 (type_die, type_cu);
+      this_type = read_type_die (type_die, type_cu);
     }
 
   /* If we still don't have a type use an error marker.  */
 
   if (this_type == NULL)
-    {
-      char *message, *saved;
-
-      /* read_type_die already issued a complaint.  */
-      message = xstrprintf (_("<unknown type in %s, CU 0x%x, DIE 0x%x>"),
-			    objfile->name,
-			    cu->header.offset.sect_off,
-			    die->offset.sect_off);
-      saved = obstack_copy0 (&objfile->objfile_obstack,
-			     message, strlen (message));
-      xfree (message);
-
-      this_type = init_type (TYPE_CODE_ERROR, 0, 0, saved, objfile);
-    }
+    return build_error_marker_type (cu, die);
 
   return this_type;
 }
@@ -17422,17 +17421,8 @@ dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 			      pulongest (DW_UNSND (&die->attrs[i])));
 	  break;
 	case DW_FORM_ref_sig8:
-	  if (DW_SIGNATURED_TYPE (&die->attrs[i]) != NULL)
-	    {
-	      struct signatured_type *sig_type =
-		DW_SIGNATURED_TYPE (&die->attrs[i]);
-
-	      fprintf_unfiltered (f, "signatured type: 0x%s, offset 0x%x",
-				  hex_string (sig_type->signature),
-				  sig_type->per_cu.offset.sect_off);
-	    }
-	  else
-	    fprintf_unfiltered (f, "signatured type, unknown");
+	  fprintf_unfiltered (f, "signature: %s",
+			      hex_string (DW_SIGNATURE (&die->attrs[i])));
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
@@ -17780,26 +17770,23 @@ dwarf2_get_die_type (cu_offset die_offset,
   return get_die_type_at_offset (die_offset_sect, per_cu);
 }
 
-/* Follow the signature attribute ATTR in SRC_DIE.
+/* Follow type unit SIG_TYPE referenced by SRC_DIE.
    On entry *REF_CU is the CU of SRC_DIE.
-   On exit *REF_CU is the CU of the result.  */
+   On exit *REF_CU is the CU of the result.
+   Returns NULL if the referenced DIE isn't found.  */
 
 static struct die_info *
-follow_die_sig (struct die_info *src_die, struct attribute *attr,
-		struct dwarf2_cu **ref_cu)
+follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
+		  struct dwarf2_cu **ref_cu)
 {
   struct objfile *objfile = (*ref_cu)->objfile;
   struct die_info temp_die;
-  struct signatured_type *sig_type = DW_SIGNATURED_TYPE (attr);
   struct dwarf2_cu *sig_cu;
   struct die_info *die;
 
-  /* sig_type will be NULL if the signatured type is missing from
-     the debug info.  */
-  if (sig_type == NULL)
-    error (_("Dwarf Error: Cannot find signatured DIE referenced from DIE "
-	     "at 0x%x [in module %s]"),
-	   src_die->offset.sect_off, objfile->name);
+  /* While it might be nice to assert sig_type->type == NULL here,
+     we can get here for DW_AT_imported_declaration where we need
+     the DIE not the type.  */
 
   /* If necessary, add it to the queue and load its DIEs.  */
 
@@ -17829,9 +17816,138 @@ follow_die_sig (struct die_info *src_die, struct attribute *attr,
       return die;
     }
 
-  error (_("Dwarf Error: Cannot find signatured DIE at 0x%x referenced "
-	 "from DIE at 0x%x [in module %s]"),
-	 temp_die.offset.sect_off, src_die->offset.sect_off, objfile->name);
+  return NULL;
+}
+
+/* Follow signatured type referenced by ATTR in SRC_DIE.
+   On entry *REF_CU is the CU of SRC_DIE.
+   On exit *REF_CU is the CU of the result.
+   The result is the DIE of the type.
+   If the referenced type cannot be found an error is thrown.  */
+
+static struct die_info *
+follow_die_sig (struct die_info *src_die, struct attribute *attr,
+		struct dwarf2_cu **ref_cu)
+{
+  ULONGEST signature = DW_SIGNATURE (attr);
+  struct signatured_type *sig_type;
+  struct die_info *die;
+
+  gdb_assert (attr->form == DW_FORM_ref_sig8);
+
+  sig_type = lookup_signatured_type (signature);
+  /* sig_type will be NULL if the signatured type is missing from
+     the debug info.  */
+  if (sig_type == NULL)
+    {
+      error (_("Dwarf Error: Cannot find signatured DIE %s referenced"
+               " from DIE at 0x%x [in module %s]"),
+             hex_string (signature), src_die->offset.sect_off,
+	     (*ref_cu)->objfile->name);
+    }
+
+  die = follow_die_sig_1 (src_die, sig_type, ref_cu);
+  if (die == NULL)
+    {
+      dump_die_for_error (src_die);
+      error (_("Dwarf Error: Problem reading signatured DIE %s referenced"
+	       " from DIE at 0x%x [in module %s]"),
+	     hex_string (signature), src_die->offset.sect_off,
+	     (*ref_cu)->objfile->name);
+    }
+
+  return die;
+}
+
+/* Get the type specified by SIGNATURE referenced in DIE/CU,
+   reading in and processing the type unit if necessary.  */
+
+static struct type *
+get_signatured_type (struct die_info *die, ULONGEST signature,
+		     struct dwarf2_cu *cu)
+{
+  struct signatured_type *sig_type;
+  struct dwarf2_cu *type_cu;
+  struct die_info *type_die;
+  struct type *type;
+
+  sig_type = lookup_signatured_type (signature);
+  /* sig_type will be NULL if the signatured type is missing from
+     the debug info.  */
+  if (sig_type == NULL)
+    {
+      complaint (&symfile_complaints,
+		 _("Dwarf Error: Cannot find signatured DIE %s referenced"
+		   " from DIE at 0x%x [in module %s]"),
+		 hex_string (signature), die->offset.sect_off,
+		 dwarf2_per_objfile->objfile->name);
+      return build_error_marker_type (cu, die);
+    }
+
+  /* If we already know the type we're done.  */
+  if (sig_type->type != NULL)
+    return sig_type->type;
+
+  type_cu = cu;
+  type_die = follow_die_sig_1 (die, sig_type, &type_cu);
+  if (type_die != NULL)
+    {
+      /* N.B. We need to call get_die_type to ensure only one type for this DIE
+	 is created.  This is important, for example, because for c++ classes
+	 we need TYPE_NAME set which is only done by new_symbol.  Blech.  */
+      type = read_type_die (type_die, type_cu);
+      if (type == NULL)
+	{
+	  complaint (&symfile_complaints,
+		     _("Dwarf Error: Cannot build signatured type %s"
+		       " referenced from DIE at 0x%x [in module %s]"),
+		     hex_string (signature), die->offset.sect_off,
+		     dwarf2_per_objfile->objfile->name);
+	  type = build_error_marker_type (cu, die);
+	}
+    }
+  else
+    {
+      complaint (&symfile_complaints,
+		 _("Dwarf Error: Problem reading signatured DIE %s referenced"
+		   " from DIE at 0x%x [in module %s]"),
+		 hex_string (signature), die->offset.sect_off,
+		 dwarf2_per_objfile->objfile->name);
+      type = build_error_marker_type (cu, die);
+    }
+  sig_type->type = type;
+
+  return type;
+}
+
+/* Get the type specified by the DW_AT_signature ATTR in DIE/CU,
+   reading in and processing the type unit if necessary.  */
+
+static struct type *
+get_DW_AT_signature_type (struct die_info *die, struct attribute *attr,
+			  struct dwarf2_cu *cu)
+{
+  /* Yes, DW_AT_signature can use a non-ref_sig8 reference.  */
+  if (is_ref_attr (attr))
+    {
+      struct dwarf2_cu *type_cu = cu;
+      struct die_info *type_die = follow_die_ref (die, attr, &type_cu);
+
+      return read_type_die (type_die, type_cu);
+    }
+  else if (attr->form == DW_FORM_ref_sig8)
+    {
+      return get_signatured_type (die, DW_SIGNATURE (attr), cu);
+    }
+  else
+    {
+      complaint (&symfile_complaints,
+		 _("Dwarf Error: DW_AT_signature has bad form %s in DIE"
+		   " at 0x%x [in module %s]"),
+		 dwarf_form_name (attr->form), die->offset.sect_off,
+		 dwarf2_per_objfile->objfile->name);
+      return build_error_marker_type (cu, die);
+    }
 }
 
 /* Load the DIEs associated with type unit PER_CU into memory.  */

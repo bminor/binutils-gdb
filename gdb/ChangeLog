@@ -1,3 +1,22 @@
+2013-04-17  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (struct signatured_type): New member type.
+	(struct attribute): Replace member signatured_type with signature.
+	(DW_SIGNATURE): Replaces DW_SIGNATURE_TYPE.
+	(read_call_site_scope): Call follow_die_ref instead of
+	follow_die_ref_or_sig.
+	(read_structure_type): Rewrite handling of signatured types.
+	(read_enumeration_type): Ditto.
+	(read_attribute_value): Update.
+	(build_error_marker_type): New function.
+	(lookup_die_type): Add assert.  Rewrite handling of signatured types.
+	Don't call error for bad types, just build an error marker type.
+	(dump_die_shallow): Update.
+	(follow_die_sig_1): Renamed from follow_die_sig.
+	Don't call error for bad types, instead return NULL.
+	(follow_die_sig): New function.
+	(get_signatured_type, get_DW_AT_signature_type): New functions.
+
 2013-04-17  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-tdep.c (aarch64_write_pc): Removed.
