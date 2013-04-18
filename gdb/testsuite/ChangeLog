@@ -1,3 +1,8 @@
+2013-04-18  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.mi/mi-var-create-rtti.exp: Create a variable of
+	type void *.
+
 2013-04-17  Doug Evans  <dje@google.com>
 
 	* lib/dwarf.exp (Dwarf): New proc "tu".
