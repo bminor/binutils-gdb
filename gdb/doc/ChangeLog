@@ -1,3 +1,9 @@
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Document new /c
+	modifier accepted by "record function-call-history".
+	Add /i modifier to "record function-call-history" example.
+
 2014-01-15  Yuanhui Zhang  <asmwarrior@gmail.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

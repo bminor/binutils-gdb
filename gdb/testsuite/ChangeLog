@@ -1,5 +1,19 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/function_call_history.exp: Fix expected field
+	order for "record function-call-history".
+	Add new tests for "record function-call-history /c".
+	* gdb.btrace/exception.cc: New.
+	* gdb.btrace/exception.exp: New.
+	* gdb.btrace/tailcall.exp: New.
+	* gdb.btrace/x86-tailcall.S: New.
+	* gdb.btrace/x86-tailcall.c: New.
+	* gdb.btrace/unknown_functions.c: New.
+	* gdb.btrace/unknown_functions.exp: New.
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add new.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/instruction_history.exp: Update.
 	* gdb.btrace/function_call_history.exp: Update.
 

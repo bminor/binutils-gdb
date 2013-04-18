@@ -7,6 +7,14 @@
   at one.  This also affects the instruction ranges reported by the
   'record function-call-history' command when given the /i modifier.
 
+* The command 'record function-call-history' supports a new modifier '/c' to
+  indent the function names based on their call stack depth.
+  The fields for the '/i' and '/l' modifier have been reordered.
+  The source line range is now prefixed with 'at'.
+  The instruction range is now prefixed with 'inst'.
+  Both ranges are now printed as '<from>, <to>' to allow copy&paste to the
+  "record instruction-history" and "list" commands.
+
 *** Changes in GDB 7.7
 
 * Improved support for process record-replay and reverse debugging on

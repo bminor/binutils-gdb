@@ -1,5 +1,16 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record.h (enum record_print_flag)
+	<record_print_indent_calls>: New.
+	* record.c (get_call_history_modifiers): Recognize /c modifier.
+	(_initialize_record): Document /c modifier.
+	* record-btrace.c (btrace_call_history): Add btinfo parameter.
+	Reorder fields.  Optionally indent the function name.  Update
+	all users.
+	* NEWS: Announce changes.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/linux-btrace.c (linux_enable_btrace): Enlarge buffer.
 
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>

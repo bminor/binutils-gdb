@@ -137,32 +137,37 @@ gdb_test "record function-call-history -" "At the start of the branch trace reco
 # make sure we cannot move any further back
 gdb_test "record function-call-history -" "At the start of the branch trace record\\." "backward - 4"
 
+# don't mess around with path names
+gdb_test_no_output "set filename-display basename"
+
 # moving forward again, but this time with file and line number, expected to see the first 15 entries
 gdb_test "record function-call-history /l +" [join [list \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain"] "\r\n"] "forward /l - 1"
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  ] "\r\n"] "forward /l - 1"
 
 # moving forward and expect to see the latest 6 entries
 gdb_test "record function-call-history /l +" [join [list \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-41\tmain" \
-  ".*$srcfile:22-24\tinc" \
-  ".*$srcfile:40-43\tmain"] "\r\n"] "forward /l - 2"
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,41" \
+  "\[0-9\]*\tinc\tat $srcfile:22,24" \
+  "\[0-9\]*\tmain\tat $srcfile:40,43" \
+  ] "\r\n"] "forward /l - 2"
 
 # moving further forward shouldn't work
 gdb_test "record function-call-history /l +" "At the end of the branch trace record\\." "forward /l - 3"
@@ -202,3 +207,48 @@ gdb_test "record function-call-history" [join [list \
   "29\tfib" \
   "30\tfib" \
   "31\tmain"] "\r\n"] "recursive"
+
+# show indented function call history for fib
+gdb_test "record function-call-history /c 21, +11" [join [list \
+  "21\tmain" \
+  "22\t  fib" \
+  "23\t    fib" \
+  "24\t  fib" \
+  "25\t    fib" \
+  "26\t      fib" \
+  "27\t    fib" \
+  "28\t      fib" \
+  "29\t    fib" \
+  "30\t  fib" \
+  "31\tmain" \
+  ] "\r\n"] "indented"
+
+# make sure we can handle incomplete trace with respect to indentation
+if ![runto_main] {
+    return -1
+}
+# navigate to the fib in line 24 above
+gdb_breakpoint fib
+gdb_continue_to_breakpoint "cont to fib.1"
+gdb_continue_to_breakpoint "cont to fib.2"
+gdb_continue_to_breakpoint "cont to fib.3"
+gdb_continue_to_breakpoint "cont to fib.4"
+
+# start tracing
+gdb_test_no_output "record btrace"
+
+# continue until line 30 above
+delete_breakpoints
+set bp_location [gdb_get_line_number "bp.2" $testfile.c]
+gdb_breakpoint $bp_location
+gdb_continue_to_breakpoint "cont to bp.2" ".*$testfile.c:$bp_location\r\n.*"
+
+# let's look at the trace. we expect to see the tail of the above listing.
+gdb_test "record function-call-history /c" [join [list \
+  "1\t      fib" \
+  "2\t    fib" \
+  "3\t      fib" \
+  "4\t    fib" \
+  "5\t  fib" \
+  "6\tmain" \
+  ] "\r\n"] "indented tail"

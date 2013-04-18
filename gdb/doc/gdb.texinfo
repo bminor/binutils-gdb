@@ -6490,7 +6490,10 @@ line for each sequence of instructions that belong to the same
 function giving the name of that function, the source lines
 for this instruction sequence (if the @code{/l} modifier is
 specified), and the instructions numbers that form the sequence (if
-the @code{/i} modifier is specified).
+the @code{/i} modifier is specified).  The function names are indented
+to reflect the call stack depth if the @code{/c} modifier is
+specified.  The @code{/l}, @code{/i}, and @code{/c} modifiers can be
+given together.
 
 @smallexample
 (@value{GDBP}) @b{list 1, 10}
@@ -6504,10 +6507,10 @@ the @code{/i} modifier is specified).
 8     foo ();
 9     ...
 10  @}
-(@value{GDBP}) @b{record function-call-history /l}
-1  foo.c:6-8   bar
-2  foo.c:2-3   foo
-3  foo.c:9-10  bar
+(@value{GDBP}) @b{record function-call-history /ilc}
+1  bar     inst 1,4     at foo.c:6,8
+2    foo   inst 5,10    at foo.c:2,3
+3  bar     inst 11,13   at foo.c:9,10
 @end smallexample
 
 By default, ten lines are printed.  This can be changed using the

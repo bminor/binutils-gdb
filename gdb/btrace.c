@@ -630,8 +630,10 @@ btrace_compute_ftrace (struct btrace_thread_info *btinfo,
 	  if (begin == NULL)
 	    begin = end;
 
-	  /* Maintain the function level offset.  */
-	  level = min (level, end->level);
+	  /* Maintain the function level offset.
+	     For all but the last block, we do it here.  */
+	  if (blk != 0)
+	    level = min (level, end->level);
 
 	  ftrace_update_insns (end, pc);
 	  ftrace_update_lines (end, pc);
@@ -651,6 +653,15 @@ btrace_compute_ftrace (struct btrace_thread_info *btinfo,
 	    }
 
 	  pc += size;
+
+	  /* Maintain the function level offset.
+	     For the last block, we do it here to not consider the last
+	     instruction.
+	     Since the last instruction corresponds to the current instruction
+	     and is not really part of the execution history, it shouldn't
+	     affect the level.  */
+	  if (blk == 0)
+	    level = min (level, end->level);
 	}
     }
 
