@@ -2103,7 +2103,7 @@ dwarf2_get_dwz_file (void)
 	   bfd_errmsg (bfd_get_error ()));
   cleanup = make_cleanup (xfree, data);
 
-  filename = data;
+  filename = (const char *) data;
   if (!IS_ABSOLUTE_PATH (filename))
     {
       char *abs = gdb_realpath (dwarf2_per_objfile->objfile->name);
@@ -2764,7 +2764,7 @@ to use the section anyway."),
 			     / (2 * sizeof (offset_type)));
   ++i;
 
-  map->constant_pool = addr + MAYBE_SWAP (metadata[i]);
+  map->constant_pool = (char *) (addr + MAYBE_SWAP (metadata[i]));
 
   return 1;
 }

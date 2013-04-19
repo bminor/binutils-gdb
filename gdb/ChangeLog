@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (dwarf2_get_dwz_file): Add cast to const char *.
+	(read_index_from_section): Add cast to 'char *'.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* xcoffread.c (xcoff_initial_scan): Add cast to 'char *'.
 
 2013-04-19  Pedro Alves  <palves@redhat.com>
