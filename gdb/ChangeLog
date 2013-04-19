@@ -1,5 +1,9 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* common/agent.c (agent_run_command): Add cast to gdb_byte *.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (remote_write_bytes_aux, compare_sections_command)
 	(remote_read_qxfer)
 	(remote_search_memory, remote_hostio_pwrite, remote_hostio_pread)

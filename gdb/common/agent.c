@@ -218,7 +218,8 @@ agent_run_command (int pid, const char *cmd, int len)
   int ret = write_inferior_memory (ipa_sym_addrs.addr_cmd_buf,
 				   (const unsigned char *) cmd, len);
 #else
-  int ret = target_write_memory (ipa_sym_addrs.addr_cmd_buf, cmd, len);
+  int ret = target_write_memory (ipa_sym_addrs.addr_cmd_buf,
+				 (gdb_byte *) cmd, len);
 #endif
 
   if (ret != 0)
