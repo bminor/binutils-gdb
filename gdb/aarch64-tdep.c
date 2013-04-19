@@ -683,7 +683,7 @@ aarch64_analyze_prologue (struct gdbarch *gdbarch,
       int op_is_sub;
       int32_t imm;
       unsigned cond;
-      unsigned is64;
+      int is64;
       unsigned is_link;
       unsigned op;
       unsigned bit;

@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* aarch64-tdep.c (aarch64_analyze_prologue): Change type of local
+	'is64' to signed 'int'.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* s390-tdep.c (is_rs, is_rsy, is_rx, is_rxy): Change type of 'd2'
 	parameter to int *.
 
