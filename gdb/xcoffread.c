@@ -2979,7 +2979,7 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
 		  }
 	      }
 	  }
-	info->debugsec = debugsec;
+	info->debugsec = (char *) debugsec;
       }
     }
 

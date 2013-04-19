@@ -1,5 +1,9 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* xcoffread.c (xcoff_initial_scan): Add cast to 'char *'.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* coff-pe-read.c (read_pe_exported_syms): Handle strings as char.
 
 2013-04-19  Pedro Alves  <palves@redhat.com>
