@@ -1,5 +1,16 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* remote-mips.c (mips_cksum): Rename 'data' parameter to 'datastr'
+	and change its type to 'const char *'.  Adjust.
+	(mips_send_packet): Add cast to 'char *', and remove cast to
+	'unsigned char *'.
+	(mips_receive_packet): Remove cast to 'unsigned char *'.
+	(mips_load_srec): Use bfd_byte.
+	(pmon_makeb64, pmon_zeroset): Make 'chksum' parameter unsigned.
+	(pmon_checkset): Make 'value' parameter unsigned.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* common/agent.c (agent_run_command): Add cast to gdb_byte *.
 
 2013-04-19  Pedro Alves  <palves@redhat.com>

@@ -63,7 +63,7 @@ static int mips_receive_trailer (unsigned char *trlr, int *pgarbage,
 				 int *pch, int timeout);
 
 static int mips_cksum (const unsigned char *hdr,
-		       const unsigned char *data, int len);
+		       const char *data, int len);
 
 static void mips_send_packet (const char *s, int get_ack);
 
@@ -108,12 +108,12 @@ static void mips_files_info (struct target_ops *ignore);
 
 static void mips_mourn_inferior (struct target_ops *ops);
 
-static int pmon_makeb64 (unsigned long v, char *p, int n, int *chksum);
+static int pmon_makeb64 (unsigned long v, char *p, int n, unsigned int *chksum);
 
-static int pmon_zeroset (int recsize, char **buff, int *amount,
+static int pmon_zeroset (int recsize, char **buff, unsigned int *amount,
 			 unsigned int *chksum);
 
-static int pmon_checkset (int recsize, char **buff, int *value);
+static int pmon_checkset (int recsize, char **buff, unsigned int *value);
 
 static void pmon_make_fastrec (char **outbuf, unsigned char *inbuf,
 			       int *inptr, int inamount, int *recsize,
@@ -824,12 +824,13 @@ mips_receive_trailer (unsigned char *trlr, int *pgarbage,
 }
 
 /* Get the checksum of a packet.  HDR points to the packet header.
-   DATA points to the packet data.  LEN is the length of DATA.  */
+   DATASTR points to the packet data.  LEN is the length of DATASTR.  */
 
 static int
-mips_cksum (const unsigned char *hdr, const unsigned char *data, int len)
+mips_cksum (const unsigned char *hdr, const char *datastr, int len)
 {
   const unsigned char *p;
+  const unsigned char *data = (const unsigned char *) datastr;
   int c;
   int cksum;
 
@@ -872,7 +873,7 @@ mips_send_packet (const char *s, int get_ack)
 
   memcpy (packet + HDR_LENGTH, s, len);
 
-  cksum = mips_cksum (packet, packet + HDR_LENGTH, len);
+  cksum = mips_cksum (packet, (char *) packet + HDR_LENGTH, len);
   packet[HDR_LENGTH + len + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
   packet[HDR_LENGTH + len + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
   packet[HDR_LENGTH + len + TRLR_INDX_CSUM3] = TRLR_SET_CSUM3 (cksum);
@@ -976,8 +977,7 @@ mips_send_packet (const char *s, int get_ack)
 
 	  /* If the checksum does not match the trailer checksum, this
 	     is a bad packet; ignore it.  */
-	  if (mips_cksum (hdr, (unsigned char *) NULL, 0)
-	      != TRLR_GET_CKSUM (trlr))
+	  if (mips_cksum (hdr, NULL, 0) != TRLR_GET_CKSUM (trlr))
 	    continue;
 
 	  if (remote_debug > 0)
@@ -1142,7 +1142,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
       ack[HDR_INDX_LEN1] = HDR_SET_LEN1 (0, 0, mips_receive_seq);
       ack[HDR_INDX_SEQ] = HDR_SET_SEQ (0, 0, mips_receive_seq);
 
-      cksum = mips_cksum (ack, (unsigned char *) NULL, 0);
+      cksum = mips_cksum (ack, NULL, 0);
 
       ack[HDR_LENGTH + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
       ack[HDR_LENGTH + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
@@ -1183,7 +1183,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
   ack[HDR_INDX_LEN1] = HDR_SET_LEN1 (0, 0, mips_receive_seq);
   ack[HDR_INDX_SEQ] = HDR_SET_SEQ (0, 0, mips_receive_seq);
 
-  cksum = mips_cksum (ack, (unsigned char *) NULL, 0);
+  cksum = mips_cksum (ack, NULL, 0);
 
   ack[HDR_LENGTH + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
   ack[HDR_LENGTH + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
@@ -2781,7 +2781,8 @@ mips_load_srec (char *args)
 {
   bfd *abfd;
   asection *s;
-  char *buffer, srec[1024];
+  char srec[1024];
+  bfd_byte *buffer;
   unsigned int i;
   unsigned int srec_frame = 200;
   int reclen;
@@ -2974,7 +2975,7 @@ static char encoding[] =
    characters written into the buffer.  */
 
 static int
-pmon_makeb64 (unsigned long v, char *p, int n, int *chksum)
+pmon_makeb64 (unsigned long v, char *p, int n, unsigned int *chksum)
 {
   int count = (n / 6);
 
@@ -3022,7 +3023,8 @@ pmon_makeb64 (unsigned long v, char *p, int n, int *chksum)
    escape sequence into the data stream.  */
 
 static int
-pmon_zeroset (int recsize, char **buff, int *amount, unsigned int *chksum)
+pmon_zeroset (int recsize, char **buff,
+	      unsigned int *amount, unsigned int *chksum)
 {
   int count;
 
@@ -3048,7 +3050,7 @@ pmon_zeroset (int recsize, char **buff, int *amount, unsigned int *chksum)
    the record elements added by this call.  */
 
 static int
-pmon_checkset (int recsize, char **buff, int *value)
+pmon_checkset (int recsize, char **buff, unsigned int *value)
 {
   int count;
 
