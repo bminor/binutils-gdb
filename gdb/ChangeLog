@@ -1,5 +1,13 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* alpha-tdep.c (heuristic_fence_post): Change type to int.
+	(alpha_heuristic_proc_start): Adjust to check -1 instead of
+	UINT_MAX.
+	* mips-tdep.c (heuristic_fence_post): Change type to int.
+	(heuristic_proc_start): Adjust to check -1 instead of UINT_MAX.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* cris-tdep.c (usr_cmd_cris_version): Make unsigned.
 	(struct gdbarch_tdep) <cris_version>: Make unsigned.
 	(cris_spec_reg_applicable, cris_gdbarch_init): Adjust locals.

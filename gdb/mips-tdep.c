@@ -787,7 +787,7 @@ static const signed char mips_reg3_to_reg[8] = { 16, 17, 2, 3, 4, 5, 6, 7 };
    time across a 2400 baud serial line.  Allows the user to limit this
    search.  */
 
-static unsigned int heuristic_fence_post = 0;
+static int heuristic_fence_post = 0;
 
 /* Number of bytes of storage in the actual machine representation for
    register N.  NOTE: This defines the pseudo register type so need to
@@ -4021,7 +4021,7 @@ heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (start_pc == 0)
     return 0;
 
-  if (heuristic_fence_post == UINT_MAX || fence < VM_MIN_ADDRESS)
+  if (heuristic_fence_post == -1 || fence < VM_MIN_ADDRESS)
     fence = VM_MIN_ADDRESS;
 
   instlen = mips_pc_is_mips (pc) ? MIPS_INSN32_SIZE : MIPS_INSN16_SIZE;

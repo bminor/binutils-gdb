@@ -1032,7 +1032,7 @@ static const struct frame_unwind alpha_sigtramp_frame_unwind = {
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
    search.  */
-static unsigned int heuristic_fence_post = 0;
+static int heuristic_fence_post = 0;
 
 /* Attempt to locate the start of the function containing PC.  We assume that
    the previous function ends with an about_to_return insn.  Not foolproof by
@@ -1059,7 +1059,7 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (func)
     return func;
 
-  if (heuristic_fence_post == UINT_MAX
+  if (heuristic_fence_post == -1
       || fence < tdep->vm_min_address)
     fence = tdep->vm_min_address;
 
