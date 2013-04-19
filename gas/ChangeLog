@@ -1,3 +1,7 @@
+2013-04-19  Kai Tietz  <ktietz@redhat.com>
+
+	* configure.tgt (i386-*-cygwin): Handle x86_64 cygwin.
+
 2013-04-15  Julian Brown  <julian@codesourcery.com>
 
 	* expr.c (add_to_result, subtract_from_result): Make global.
