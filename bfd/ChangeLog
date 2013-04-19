@@ -1,3 +1,9 @@
+2013-04-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15356
+	* compress.c (decompress_contents): Always call inflateEnd, even
+	when another inflation operation fails.
+
 2013-04-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf-ifunc.c: Update copyright year.
