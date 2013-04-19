@@ -1,5 +1,11 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* c-lang.c (evaluate_subexp_c): Cast result of obstack_base to
+	gdb_byte *.
+	* linux-tdep.c (linux_make_mappings_corefile_notes): Likewise.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* alpha-tdep.c (alpha_extract_return_value): Use
 	regcache_cooked_read_unsigned to read 'v0'.
 
