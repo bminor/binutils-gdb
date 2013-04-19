@@ -1,3 +1,9 @@
+2013-04-19  Vladimir Kargov  <kargov@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.arch/i386-float.S: New file.
+	* gdb.arch/i386-float.exp: New file.
+
 2013-04-18  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.mi/mi-var-create-rtti.exp: Create a variable of

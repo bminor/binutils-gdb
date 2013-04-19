@@ -1,3 +1,9 @@
+2013-04-19  Vladimir Kargov <kargov@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* i387-tdep.c (i387_print_float_info): Use gdb_byte for pointer to
+	value contents.
+
 2013-04-17  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct signatured_type): New member type.
