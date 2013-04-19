@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* cp-valprint.c (cp_print_class_member): Change type of 'fieldno'
+	local to int.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* ada-lang.c (print_it_exception): Add cast to gdb_byte *.
 	* ada-tasks.c (read_fat_string_value): Likewise.
 

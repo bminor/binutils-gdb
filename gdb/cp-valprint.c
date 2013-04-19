@@ -768,7 +768,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
      print it.  */
   struct type *domain = TYPE_DOMAIN_TYPE (type);
   LONGEST val;
-  unsigned int fieldno;
+  int fieldno;
 
   val = extract_signed_integer (valaddr,
 				TYPE_LENGTH (type),
