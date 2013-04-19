@@ -1245,7 +1245,7 @@ static CORE_ADDR
 mips_read_pc (struct regcache *regcache)
 {
   int regnum = gdbarch_pc_regnum (get_regcache_arch (regcache));
-  ULONGEST pc;
+  LONGEST pc;
 
   regcache_cooked_read_signed (regcache, regnum, &pc);
   if (is_compact_addr (pc))

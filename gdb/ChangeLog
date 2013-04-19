@@ -1,5 +1,9 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* mips-tdep.c (mips_read_pc): Change local 'pc' type to LONGEST.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* mep-tdep.c (mep_get_insn): Change 'insn' parameter type to
 	unsigned long *.
 
