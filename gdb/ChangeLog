@@ -1,5 +1,11 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* cris-tdep.c (usr_cmd_cris_version): Make unsigned.
+	(struct gdbarch_tdep) <cris_version>: Make unsigned.
+	(cris_spec_reg_applicable, cris_gdbarch_init): Adjust locals.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* avr-tdep.c (avr_io_reg_read_command): New local 'bufstr'.  Use
 	it to get a string view of the byte buffer.
 	* i386-cygwin-tdep.c (core_process_module_section): Change local 'buf'

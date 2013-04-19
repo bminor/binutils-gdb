@@ -144,7 +144,7 @@ extern const struct cris_spec_reg cris_spec_regs[];
 
 /* CRIS version, set via the user command 'set cris-version'.  Affects
    register names and sizes.  */
-static int usr_cmd_cris_version;
+static unsigned int usr_cmd_cris_version;
 
 /* Indicates whether to trust the above variable.  */
 static int usr_cmd_cris_version_valid = 0;
@@ -167,7 +167,7 @@ static int usr_cmd_cris_dwarf2_cfi = 1;
 /* CRIS architecture specific information.  */
 struct gdbarch_tdep
 {
-  int cris_version;
+  unsigned int cris_version;
   const char *cris_mode;
   int cris_dwarf2_cfi;
 };
@@ -1439,7 +1439,7 @@ cris_spec_reg_applicable (struct gdbarch *gdbarch,
 			  struct cris_spec_reg spec_reg)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int version = tdep->cris_version;
+  unsigned int version = tdep->cris_version;
   
   switch (spec_reg.applicable_version)
     {
@@ -4013,7 +4013,7 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 {
   struct gdbarch *gdbarch;
   struct gdbarch_tdep *tdep;
-  int cris_version;
+  unsigned int cris_version;
 
   if (usr_cmd_cris_version_valid)
     {
