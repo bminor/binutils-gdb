@@ -1,3 +1,10 @@
+gdb/
+2013-04-19  Vladimir Kargov <kargov@gmail.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* i387-tdep.c (i387_print_float_info): Use gdb_byte for pointer to
+	value contents.
+
 2013-04-12  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix GDB regression related to PR binutils/14813.
