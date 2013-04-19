@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* xtensa-tdep.c (execute_l32e, execute_s32e): Change type of
+	parameters 'at', 'as' and 'offset' to uint32_t.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* aarch64-tdep.c (aarch64_analyze_prologue): Change type of local
 	'is64' to signed 'int'.
 

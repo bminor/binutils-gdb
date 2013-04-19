@@ -2814,7 +2814,7 @@ execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)
   int fail = 0;
   void (*func) (struct gdbarch *, int, int, int, CORE_ADDR);
 
-  int at, as, offset;
+  uint32_t at, as, offset;
 
   /* WindowUnderflow12 = true, when inside _WindowUnderflow12.  */ 
   int WindowUnderflow12 = (current_pc & 0x1ff) >= 0x140; 
