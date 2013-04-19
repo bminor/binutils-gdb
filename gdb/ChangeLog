@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* record.c (validate_history_size): Make parameter 'setting'
+	unsigned.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* ctf.c (ctf_write_uploaded_tsv, ctf_write_uploaded_tp): Add casts
 	to 'gdb_byte *'.
 

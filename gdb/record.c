@@ -643,7 +643,7 @@ cmd_record_call_history (char *arg, int from_tty)
    is the real setting the command allows changing.  */
 
 static void
-validate_history_size (unsigned int *command_var, int *setting)
+validate_history_size (unsigned int *command_var, unsigned int *setting)
 {
   if (*command_var != UINT_MAX && *command_var > INT_MAX)
     {
