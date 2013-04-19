@@ -1925,7 +1925,7 @@ fi
 # NOTE: If you change this list, remember to update
 # gdb/doc/gdbint.texinfo.
 build_warnings="-Wall -Wdeclaration-after-statement -Wpointer-arith \
--Wformat-nonliteral -Wno-pointer-sign \
+-Wformat-nonliteral -Wpointer-sign \
 -Wno-unused -Wunused-value -Wunused-function \
 -Wno-switch -Wno-char-subscripts -Wmissing-prototypes \
 -Wdeclaration-after-statement -Wempty-body"

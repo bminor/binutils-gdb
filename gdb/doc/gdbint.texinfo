@@ -6339,13 +6339,12 @@ Since @value{GDBN} uses the @code{format printf} attribute on all
 @code{printf} like functions this checks not just @code{printf} calls
 but also calls to functions such as @code{fprintf_unfiltered}.
 
-@item -Wno-pointer-sign
-In version 4.0, GCC began warning about pointer argument passing or
-assignment even when the source and destination differed only in
-signedness.  However, most @value{GDBN} code doesn't distinguish
-carefully between @code{char} and @code{unsigned char}.  In early 2006
-the @value{GDBN} developers decided correcting these warnings wasn't
-worth the time it would take.
+@item -Wpointer-sign
+This helps make sure @value{GDBN} code uses @code{gdb_byte} which is
+really @code{unsigned char} for raw bytes instead of @code{char},
+whose signness is host-dependent.  @sc{gcc} enables this with
+@code{-Wall} since version 4.0.  We enable it explicitly too to be
+decoupled from future @sc{gcc} (or other compiler)'s defaults.
 
 @item -Wno-unused-parameter
 Due to the way that @value{GDBN} is implemented many functions have

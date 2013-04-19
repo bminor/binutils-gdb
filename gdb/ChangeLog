@@ -1,5 +1,11 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac (build_warnings): Replace -Wno-pointer-sign with
+	-Wpointer-sign.
+	* configure: Regenerate.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* ser-tcp.c (net_read_prim): Cast second argument to recv to
 	'void *'.
 
