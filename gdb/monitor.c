@@ -1439,7 +1439,7 @@ monitor_files_info (struct target_ops *ops)
 }
 
 static int
-monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
+monitor_write_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   unsigned int val, hostval;
@@ -1542,7 +1542,7 @@ monitor_write_memory (CORE_ADDR memaddr, char *myaddr, int len)
 
 
 static int
-monitor_write_memory_bytes (CORE_ADDR memaddr, char *myaddr, int len)
+monitor_write_memory_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   unsigned char val;
   int written = 0;
@@ -1638,7 +1638,7 @@ longlong_hexchars (unsigned long long value,
    Which possably entails endian conversions.  */
 
 static int
-monitor_write_memory_longlongs (CORE_ADDR memaddr, char *myaddr, int len)
+monitor_write_memory_longlongs (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   static char hexstage[20];	/* At least 16 digits required, plus null.  */
   char *endstring;
@@ -1646,7 +1646,7 @@ monitor_write_memory_longlongs (CORE_ADDR memaddr, char *myaddr, int len)
   long long value;
   int written = 0;
 
-  llptr = (unsigned long long *) myaddr;
+  llptr = (long long *) myaddr;
   if (len == 0)
     return 0;
   monitor_printf (current_monitor->setmem.cmdll, memaddr);
@@ -1686,7 +1686,7 @@ monitor_write_memory_longlongs (CORE_ADDR memaddr, char *myaddr, int len)
    monitor variations.  */
 
 static int
-monitor_write_memory_block (CORE_ADDR memaddr, char *myaddr, int len)
+monitor_write_memory_block (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   int written;
 
@@ -1706,7 +1706,7 @@ monitor_write_memory_block (CORE_ADDR memaddr, char *myaddr, int len)
    which can only read a single byte/word/etc. at a time.  */
 
 static int
-monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
+monitor_read_memory_single (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   unsigned int val;
@@ -1837,7 +1837,7 @@ monitor_read_memory_single (CORE_ADDR memaddr, char *myaddr, int len)
    than 16 bytes at a time.  */
 
 static int
-monitor_read_memory (CORE_ADDR memaddr, char *myaddr, int len)
+monitor_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   unsigned int val;
   char buf[512];

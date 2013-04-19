@@ -1,5 +1,15 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* monitor.c (monitor_write_memory, monitor_write_memory_bytes):
+	Change type of 'myaddr' parameter to gdb_byte pointer.
+	(monitor_write_memory_longlongs): Likewise.  Cast 'myaddr' pointer
+	to 'long long' pointer instead of to 'unsigned long long'.
+	(monitor_write_memory_block, monitor_read_memory_single)
+	(monitor_read_memory): Change type of 'myaddr' parameter to
+	gdb_byte pointer.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* record.c (validate_history_size): Make parameter 'setting'
 	unsigned.
 
