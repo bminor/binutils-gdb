@@ -440,17 +440,18 @@ ser_base_readchar (struct serial *scb, int timeout)
 }
 
 int
-ser_base_write (struct serial *scb, const char *str, int len)
+ser_base_write (struct serial *scb, const void *buf, size_t count)
 {
+  const char *str = buf;
   int cc;
 
-  while (len > 0)
+  while (count > 0)
     {
-      cc = scb->ops->write_prim (scb, str, len); 
+      cc = scb->ops->write_prim (scb, str, count);
 
       if (cc < 0)
 	return 1;
-      len -= cc;
+      count -= cc;
       str += cc;
     }
   return 0;

@@ -104,10 +104,10 @@ enum serial_rc {
 
 extern int serial_readchar (struct serial *scb, int timeout);
 
-/* Write LEN chars from STRING to the port SCB.  Returns 0 for
+/* Write COUNT bytes from BUF to the port SCB.  Returns 0 for
    success, non-zero for failure.  */
 
-extern int serial_write (struct serial *scb, const char *str, int len);
+extern int serial_write (struct serial *scb, const void *buf, size_t count);
 
 /* Write a printf style string onto the serial port.  */
 
@@ -256,7 +256,7 @@ struct serial_ops
     void (*close) (struct serial *);
     int (*fdopen) (struct serial *, int fd);
     int (*readchar) (struct serial *, int timeout);
-    int (*write) (struct serial *, const char *str, int len);
+    int (*write) (struct serial *, const void *buf, size_t count);
     /* Discard pending output */
     int (*flush_output) (struct serial *);
     /* Discard pending input */

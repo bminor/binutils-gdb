@@ -1,5 +1,19 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* ser-base.c (ser_base_write): Change prototype -- take 'void *'
+	buffer and size_t size.  Adjust.
+	* ser-base.h (ser_base_write): Adjust.
+	* ser-go32.c (cnts): Change type to size_t.
+	(dos_write): Change prototype -- take 'void *'
+	buffer and size_t size.  Adjust.
+	(dos_info): Print elements of 'cnts' as unsigned long.
+	* serial.c (serial_write): Likewise.
+	* serial.h (serial_write): Adjust.
+	(struct serial_ops) <write>: Change prototype -- take 'void *'
+	buffer and size_t size.  Adjust.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* c-lang.c (evaluate_subexp_c): Cast result of obstack_base to
 	gdb_byte *.
 	* linux-tdep.c (linux_make_mappings_corefile_notes): Likewise.

@@ -398,14 +398,15 @@ serial_readchar (struct serial *scb, int timeout)
 }
 
 int
-serial_write (struct serial *scb, const char *str, int len)
+serial_write (struct serial *scb, const void *buf, size_t count)
 {
   if (serial_logfp != NULL)
     {
-      int count;
+      const char *str = buf;
+      size_t c;
 
-      for (count = 0; count < len; count++)
-	serial_logchar (serial_logfp, 'w', str[count] & 0xff, 0);
+      for (c = 0; c < count; c++)
+	serial_logchar (serial_logfp, 'w', str[c] & 0xff, 0);
 
       /* Make sure that the log file is as up-to-date as possible,
          in case we are getting ready to dump core or something.  */
@@ -413,9 +414,10 @@ serial_write (struct serial *scb, const char *str, int len)
     }
   if (serial_debug_p (scb))
     {
-      int count;
+      const char *str = buf;
+      size_t c;
 
-      for (count = 0; count < len; count++)
+      for (c = 0; c < count; c++)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "[");
 	  serial_logchar (gdb_stdlog, 'w', str[count] & 0xff, 0);
@@ -424,7 +426,7 @@ serial_write (struct serial *scb, const char *str, int len)
       gdb_flush (gdb_stdlog);
     }
 
-  return (scb->ops->write (scb, str, len));
+  return (scb->ops->write (scb, buf, count));
 }
 
 void
