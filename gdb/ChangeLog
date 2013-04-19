@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* ctf.c (ctf_write_uploaded_tsv, ctf_write_uploaded_tp): Add casts
+	to 'gdb_byte *'.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* cp-valprint.c (cp_print_class_member): Change type of 'fieldno'
 	local to int.
 

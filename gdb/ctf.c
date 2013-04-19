@@ -529,7 +529,8 @@ ctf_write_uploaded_tsv (struct trace_file_writer *self,
 
   /* name */
   if (tsv->name != NULL)
-    ctf_save_write (&writer->tcs, tsv->name, strlen (tsv->name));
+    ctf_save_write (&writer->tcs, (gdb_byte *) tsv->name,
+		    strlen (tsv->name));
   ctf_save_write (&writer->tcs, &zero, 1);
 }
 
@@ -581,30 +582,30 @@ ctf_write_uploaded_tp (struct trace_file_writer *self,
 
   /* condition  */
   if (tp->cond != NULL)
-    ctf_save_write (&writer->tcs, tp->cond, strlen (tp->cond));
+    ctf_save_write (&writer->tcs, (gdb_byte *) tp->cond, strlen (tp->cond));
   ctf_save_write (&writer->tcs, &zero, 1);
 
   /* actions */
   u32 = VEC_length (char_ptr, tp->actions);
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
   for (a = 0; VEC_iterate (char_ptr, tp->actions, a, act); ++a)
-    ctf_save_write (&writer->tcs, act, strlen (act) + 1);
+    ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
 
   /* step_actions */
   u32 = VEC_length (char_ptr, tp->step_actions);
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
   for (a = 0; VEC_iterate (char_ptr, tp->step_actions, a, act); ++a)
-    ctf_save_write (&writer->tcs, act, strlen (act) + 1);
+    ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
 
   /* at_string */
   if (tp->at_string != NULL)
-    ctf_save_write (&writer->tcs, tp->at_string,
+    ctf_save_write (&writer->tcs, (gdb_byte *) tp->at_string,
 		    strlen (tp->at_string));
   ctf_save_write (&writer->tcs, &zero, 1);
 
   /* cond_string */
   if (tp->cond_string != NULL)
-    ctf_save_write (&writer->tcs, tp->cond_string,
+    ctf_save_write (&writer->tcs, (gdb_byte *) tp->cond_string,
 		    strlen (tp->cond_string));
   ctf_save_write (&writer->tcs, &zero, 1);
 
@@ -612,7 +613,7 @@ ctf_write_uploaded_tp (struct trace_file_writer *self,
   u32 = VEC_length (char_ptr, tp->cmd_strings);
   ctf_save_align_write (&writer->tcs, (gdb_byte *) &u32, 4, 4);
   for (a = 0; VEC_iterate (char_ptr, tp->cmd_strings, a, act); ++a)
-    ctf_save_write (&writer->tcs, act, strlen (act) + 1);
+    ctf_save_write (&writer->tcs, (gdb_byte *) act, strlen (act) + 1);
 
 }
 
