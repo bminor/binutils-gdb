@@ -1,5 +1,11 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2-frame.c (execute_cfa_program): Make 'bytes_read' local
+	unsigned.  Pass 'tmp' to safe_read_uleb128 instead of the signed
+	'offset', and adjust.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2read.c (dwarf2_get_dwz_file): Add cast to const char *.
 	(read_index_from_section): Add cast to 'char *'.
 

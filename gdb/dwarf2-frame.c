@@ -410,7 +410,7 @@ execute_cfa_program (struct dwarf2_fde *fde, const gdb_byte *insn_ptr,
 		     CORE_ADDR pc, struct dwarf2_frame_state *fs)
 {
   int eh_frame_p = fde->eh_frame_p;
-  int bytes_read;
+  unsigned int bytes_read;
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
   while (insn_ptr < insn_end && fs->pc <= pc)
@@ -672,8 +672,8 @@ bad CFI data; mismatched DW_CFA_restore_state at %s"),
 	    case DW_CFA_GNU_negative_offset_extended:
 	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &reg);
 	      reg = dwarf2_frame_adjust_regnum (gdbarch, reg, eh_frame_p);
-	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &offset);
-	      offset *= fs->data_align;
+	      insn_ptr = safe_read_uleb128 (insn_ptr, insn_end, &utmp);
+	      offset = utmp * fs->data_align;
 	      dwarf2_frame_state_alloc_regs (&fs->regs, reg + 1);
 	      fs->regs.reg[reg].how = DWARF2_FRAME_REG_SAVED_OFFSET;
 	      fs->regs.reg[reg].loc.offset = -offset;
