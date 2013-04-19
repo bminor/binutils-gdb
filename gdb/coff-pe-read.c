@@ -505,7 +505,7 @@ read_pe_exported_syms (struct objfile *objfile)
   exp_funcbase = pe_as32 (expdata + 28);
 
   /* Use internal dll name instead of full pathname.  */
-  dll_name = pe_as32 (expdata + 12) + erva;
+  dll_name = (char *) (pe_as32 (expdata + 12) + erva);
 
   pe_sections_info.nb_sections = otherix;
   pe_sections_info.sections = section_data;
@@ -579,9 +579,10 @@ read_pe_exported_syms (struct objfile *objfile)
 	  if ((func_rva >= section_data[sectix].rva_start)
 	      && (func_rva < section_data[sectix].rva_end))
 	    {
+	      char *sym_name = (char *) (erva + name_rva);
+
 	      section_found = 1;
-	      add_pe_exported_sym (erva + name_rva,
-				   func_rva, ordinal,
+	      add_pe_exported_sym (sym_name, func_rva, ordinal,
 				   section_data + sectix, dll_name, objfile);
 	      ++nbnormal;
 	      break;

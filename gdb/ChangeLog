@@ -1,5 +1,9 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* coff-pe-read.c (read_pe_exported_syms): Handle strings as char.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* record-full.c (record_full_get_bookmark): Change local 'ret'
 	type to char * and add cast to gdb_byte *.
 	(record_full_goto_bookmark): Handle 'bookmark' argument as a
