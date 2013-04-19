@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* alpha-tdep.c (alpha_extract_return_value): Use
+	regcache_cooked_read_unsigned to read 'v0'.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* xtensa-tdep.c (execute_l32e, execute_s32e): Change type of
 	parameters 'at', 'as' and 'offset' to uint32_t.
 

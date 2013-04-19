@@ -517,7 +517,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	case 32:
-	  regcache_cooked_read_signed (regcache, ALPHA_V0_REGNUM, &l);
+	  regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
 	  read_memory (l, valbuf, 32);
 	  break;
 
