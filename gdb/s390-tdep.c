@@ -964,7 +964,7 @@ is_rre (bfd_byte *insn, int op, unsigned int *r1, unsigned int *r2)
 
 static int
 is_rs (bfd_byte *insn, int op,
-       unsigned int *r1, unsigned int *r3, unsigned int *d2, unsigned int *b2)
+       unsigned int *r1, unsigned int *r3, int *d2, unsigned int *b2)
 {
   if (insn[0] == op)
     {
@@ -981,7 +981,7 @@ is_rs (bfd_byte *insn, int op,
 
 static int
 is_rsy (bfd_byte *insn, int op1, int op2,
-        unsigned int *r1, unsigned int *r3, unsigned int *d2, unsigned int *b2)
+        unsigned int *r1, unsigned int *r3, int *d2, unsigned int *b2)
 {
   if (insn[0] == op1
       && insn[5] == op2)
@@ -1036,7 +1036,7 @@ is_rie (bfd_byte *insn, int op1, int op2,
 
 static int
 is_rx (bfd_byte *insn, int op,
-       unsigned int *r1, unsigned int *d2, unsigned int *x2, unsigned int *b2)
+       unsigned int *r1, int *d2, unsigned int *x2, unsigned int *b2)
 {
   if (insn[0] == op)
     {
@@ -1053,7 +1053,7 @@ is_rx (bfd_byte *insn, int op,
 
 static int
 is_rxy (bfd_byte *insn, int op1, int op2,
-        unsigned int *r1, unsigned int *d2, unsigned int *x2, unsigned int *b2)
+        unsigned int *r1, int *d2, unsigned int *x2, unsigned int *b2)
 {
   if (insn[0] == op1
       && insn[5] == op2)
