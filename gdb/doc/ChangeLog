@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* gdbint.texinfo (Misc Guidelines) <Compiler Warnings>: Write
+	"signedness" instead of "signness".
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* gdbint.texinfo (Misc Guidelines) <Compiler Warnings>: Replace
 	-Wno-pointer-sign text with text on -Wpointer-sign.
 

@@ -6342,7 +6342,7 @@ but also calls to functions such as @code{fprintf_unfiltered}.
 @item -Wpointer-sign
 This helps make sure @value{GDBN} code uses @code{gdb_byte} which is
 really @code{unsigned char} for raw bytes instead of @code{char},
-whose signness is host-dependent.  @sc{gcc} enables this with
+whose signedness is host-dependent.  @sc{gcc} enables this with
 @code{-Wall} since version 4.0.  We enable it explicitly too to be
 decoupled from future @sc{gcc} (or other compiler)'s defaults.
 
