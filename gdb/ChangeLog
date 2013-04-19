@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* mep-tdep.c (mep_get_insn): Change 'insn' parameter type to
+	unsigned long *.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* alpha-tdep.c (heuristic_fence_post): Change type to int.
 	(alpha_heuristic_proc_start): Adjust to check -1 instead of
 	UINT_MAX.

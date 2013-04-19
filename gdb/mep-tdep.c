@@ -1424,7 +1424,7 @@ mep_pc_in_vliw_section (CORE_ADDR pc)
    anyway.  */
 
 static CORE_ADDR 
-mep_get_insn (struct gdbarch *gdbarch, CORE_ADDR pc, long *insn)
+mep_get_insn (struct gdbarch *gdbarch, CORE_ADDR pc, unsigned long *insn)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int pc_in_vliw_section;
