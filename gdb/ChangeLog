@@ -1,5 +1,17 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_write_bytes_aux, compare_sections_command)
+	(remote_read_qxfer)
+	(remote_search_memory, remote_hostio_pwrite, remote_hostio_pread)
+	(remote_hostio_readlink, remote_bfd_iovec_pread)
+	(remote_set_trace_notes): Use gdb_byte when RSP buffer is used as
+	binary buffer, and char when buffer is used as string.
+	* tracepoint.c (encode_source_string, tfile_write_uploaded_tp)
+	(trace_save, tfile_open, traceframe_walk_blocks)
+	(tfile_fetch_registers): Likewise.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* ser-base.c (ser_base_write): Change prototype -- take 'void *'
 	buffer and size_t size.  Adjust.
 	* ser-base.h (ser_base_write): Adjust.

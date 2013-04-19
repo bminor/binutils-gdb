@@ -3000,7 +3000,7 @@ encode_source_string (int tpnum, ULONGEST addr,
 	   srctype, 0, (int) strlen (src));
   if (strlen (buf) + strlen (src) * 2 >= buf_size)
     error (_("Source string too long for buffer"));
-  bin2hex (src, buf + strlen (buf), 0);
+  bin2hex ((gdb_byte *) src, buf + strlen (buf), 0);
   return -1;
 }
 
@@ -3190,7 +3190,7 @@ tfile_write_uploaded_tp (struct trace_file_writer *self,
     = (struct tfile_trace_file_writer *) self;
   int a;
   char *act;
-  gdb_byte buf[MAX_TRACE_UPLOAD];
+  char buf[MAX_TRACE_UPLOAD];
 
   fprintf (writer->fp, "tp T%x:%s:%c:%x:%x",
 	   utp->number, phex_nz (utp->addr, sizeof (utp->addr)),
@@ -3322,6 +3322,7 @@ trace_save (const char *filename, struct trace_file_writer *writer,
 
   ULONGEST offset = 0;
   gdb_byte buf[MAX_TRACE_UPLOAD];
+#define MAX_TRACE_UPLOAD 2000
   int written;
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
@@ -4175,7 +4176,7 @@ tfile_open (char *filename, int from_tty)
   int scratch_chan;
   char header[TRACE_HEADER_SIZE];
   char linebuf[1000]; /* Should be max remote packet size or so.  */
-  char byte;
+  gdb_byte byte;
   int bytes, i;
   struct trace_status *ts;
   struct uploaded_tp *uploaded_tps = NULL;
@@ -4387,7 +4388,7 @@ Status line: '%s'\n"), p, line);
 	  else if (p2 != p1)
 	    {
 	      ts->stop_desc = xmalloc (strlen (line));
-	      end = hex2bin (p1, ts->stop_desc, (p2 - p1) / 2);
+	      end = hex2bin (p1, (gdb_byte *) ts->stop_desc, (p2 - p1) / 2);
 	      ts->stop_desc[end] = '\0';
 	    }
 	  else
@@ -4407,7 +4408,7 @@ Status line: '%s'\n"), p, line);
 	  if (p2 != p1)
 	    {
 	      ts->stop_desc = xmalloc ((p2 - p1) / 2 + 1);
-	      end = hex2bin (p1, ts->stop_desc, (p2 - p1) / 2);
+	      end = hex2bin (p1, (gdb_byte *) ts->stop_desc, (p2 - p1) / 2);
 	      ts->stop_desc[end] = '\0';
 	    }
 	  else
@@ -4461,7 +4462,7 @@ Status line: '%s'\n"), p, line);
 	{
 	  ++p1;
 	  ts->user_name = xmalloc (strlen (p) / 2);
-	  end = hex2bin (p1, ts->user_name, (p3 - p1)  / 2);
+	  end = hex2bin (p1, (gdb_byte *) ts->user_name, (p3 - p1)  / 2);
 	  ts->user_name[end] = '\0';
 	  p = p3;
 	}
@@ -4469,7 +4470,7 @@ Status line: '%s'\n"), p, line);
 	{
 	  ++p1;
 	  ts->notes = xmalloc (strlen (p) / 2);
-	  end = hex2bin (p1, ts->notes, (p3 - p1) / 2);
+	  end = hex2bin (p1, (gdb_byte *) ts->notes, (p3 - p1) / 2);
 	  ts->notes[end] = '\0';
 	  p = p3;
 	}
@@ -4865,7 +4866,7 @@ traceframe_walk_blocks (walk_blocks_callback_func callback,
       unsigned short mlen;
       char block_type;
 
-      tfile_read (&block_type, 1);
+      tfile_read ((gdb_byte *) &block_type, 1);
 
       ++pos;
 
