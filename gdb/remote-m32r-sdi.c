@@ -933,7 +933,7 @@ m32r_fetch_register (struct target_ops *ops,
     }
   else
     {
-      char buffer[MAX_REGISTER_SIZE];
+      gdb_byte buffer[MAX_REGISTER_SIZE];
 
       regid = get_reg_id (regno);
       send_one_arg_cmd (SDI_READ_CPU_REG, regid);

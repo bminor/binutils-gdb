@@ -588,7 +588,7 @@ som_current_sos (void)
       struct cleanup *old_chain;
       int errcode;
       struct dld_list dbuf;
-      char tsdbuf[4];
+      gdb_byte tsdbuf[4];
 
       new = (struct so_list *) xmalloc (sizeof (struct so_list));
       old_chain = make_cleanup (xfree, new);

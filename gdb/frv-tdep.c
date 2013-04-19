@@ -456,7 +456,7 @@ frv_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr)
      an instruction word whose packing bit is set to one.  */
   while (count-- > 0 && addr >= func_start)
     {
-      char instr[frv_instr_size];
+      gdb_byte instr[frv_instr_size];
       int status;
 
       status = target_read_memory (addr, instr, sizeof instr);
@@ -1154,7 +1154,7 @@ find_func_descr (struct gdbarch *gdbarch, CORE_ADDR entry_point)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR descr;
-  char valbuf[4];
+  gdb_byte valbuf[4];
   CORE_ADDR start_addr;
 
   /* If we can't find the function in the symbol table, then we assume
@@ -1206,8 +1206,8 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   int argreg;
   int argnum;
-  char *val;
-  char valbuf[4];
+  const gdb_byte *val;
+  gdb_byte valbuf[4];
   struct value *arg;
   struct type *arg_type;
   int len;
@@ -1274,7 +1274,7 @@ frv_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	}
       else
 	{
-	  val = (char *) value_contents (arg);
+	  val = value_contents (arg);
 	}
 
       while (len > 0)

@@ -2151,7 +2151,7 @@ mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
   int i;
   CORE_ADDR addr;
   int count;
-  char *buffer;
+  gdb_byte *buffer;
   int status;
 
   /* PMON targets do not cope well with 64 bit addresses.  Mask the

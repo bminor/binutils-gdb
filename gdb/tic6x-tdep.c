@@ -323,7 +323,7 @@ tic6x_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
 /* This is the implementation of gdbarch method breakpiont_from_pc.  */
 
-static const unsigned char*
+static const gdb_byte *
 tic6x_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
 			  int *bp_size)
 {

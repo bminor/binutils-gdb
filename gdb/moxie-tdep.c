@@ -498,7 +498,7 @@ moxie_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 /* Read an unsigned integer from the inferior, and adjust
    endianess.  */
 static ULONGEST
-moxie_process_readu (CORE_ADDR addr, char *buf, 
+moxie_process_readu (CORE_ADDR addr, gdb_byte *buf,
 		     int length, enum bfd_endian byte_order)
 {
   if (target_read_memory (addr, buf, length))
@@ -766,8 +766,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  break;
 	case 0x1f: /* sta.b */
 	  {
-	    tmpu32 = moxie_process_readu (addr+2, (char *) buf, 
-					  4, byte_order);
+	    tmpu32 = moxie_process_readu (addr+2, buf, 4, byte_order);
 	    if (record_full_arch_list_add_mem (tmpu32, 1))
 	      return -1;
 	  }
@@ -793,8 +792,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	  break;
 	case 0x24: /* sta.s */
 	  {
-	    tmpu32 = moxie_process_readu (addr+2, (char *) buf, 
-					  4, byte_order);
+	    tmpu32 = moxie_process_readu (addr+2, buf, 4, byte_order);
 	    if (record_full_arch_list_add_mem (tmpu32, 2))
 	      return -1;
 	  }
@@ -825,8 +823,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 	    /* We currently implement support for libgloss' 
 	       system calls.  */
 
-	    int inum = moxie_process_readu (addr+2, (char *) buf, 
-					    4, byte_order);
+	    int inum = moxie_process_readu (addr+2, buf, 4, byte_order);
 
 	    switch (inum)
 	      {
@@ -855,8 +852,7 @@ moxie_process_record (struct gdbarch *gdbarch, struct regcache *regcache,
 				     MOXIE_FP_REGNUM, (gdb_byte *) & tmpu32);
 		  tmpu32 = extract_unsigned_integer ((gdb_byte *) & tmpu32, 
 						     4, byte_order);
-		  length = moxie_process_readu (tmpu32+20, (char *) buf, 
-						4, byte_order);
+		  length = moxie_process_readu (tmpu32+20, buf, 4, byte_order);
 
 		  if (record_full_arch_list_add_mem (ptr, length))
 		    return -1;

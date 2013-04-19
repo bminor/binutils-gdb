@@ -1154,7 +1154,7 @@ xtensa_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR current_pc)
   CORE_ADDR start_addr;
   xtensa_isa isa;
   xtensa_insnbuf ins, slot;
-  char ibuf[XTENSA_ISA_BSZ];
+  gdb_byte ibuf[XTENSA_ISA_BSZ];
   CORE_ADDR ia, bt, ba;
   xtensa_format ifmt;
   int ilen, islots, is;
@@ -2032,7 +2032,7 @@ call0_ret (CORE_ADDR start_pc, CORE_ADDR finish_pc)
 #define RETURN_RET goto done
   xtensa_isa isa;
   xtensa_insnbuf ins, slot;
-  char ibuf[XTENSA_ISA_BSZ];
+  gdb_byte ibuf[XTENSA_ISA_BSZ];
   CORE_ADDR ia, bt, ba;
   xtensa_format ifmt;
   int ilen, islots, is;
@@ -2390,7 +2390,7 @@ call0_analyze_prologue (struct gdbarch *gdbarch,
   CORE_ADDR ia;		    /* Current insn address in prologue.  */
   CORE_ADDR ba = 0;	    /* Current address at base of insn buffer.  */
   CORE_ADDR bt;		    /* Current address at top+1 of insn buffer.  */
-  char ibuf[XTENSA_ISA_BSZ];/* Instruction buffer for decoding prologue.  */
+  gdb_byte ibuf[XTENSA_ISA_BSZ];/* Instruction buffer for decoding prologue.  */
   xtensa_isa isa;	    /* libisa ISA handle.  */
   xtensa_insnbuf ins, slot; /* libisa handle to decoded insn, slot.  */
   xtensa_format ifmt;	    /* libisa instruction format.  */
@@ -2805,7 +2805,7 @@ execute_code (struct gdbarch *gdbarch, CORE_ADDR current_pc, CORE_ADDR wb)
 {
   xtensa_isa isa;
   xtensa_insnbuf ins, slot;
-  char ibuf[XTENSA_ISA_BSZ];
+  gdb_byte ibuf[XTENSA_ISA_BSZ];
   CORE_ADDR ia, bt, ba;
   xtensa_format ifmt;
   int ilen, islots, is;

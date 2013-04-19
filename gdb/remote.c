@@ -8490,7 +8490,7 @@ compare_sections_command (char *args, int from_tty)
 {
   asection *s;
   struct cleanup *old_chain;
-  char *sectdata;
+  gdb_byte *sectdata;
   const char *sectname;
   bfd_size_type size;
   bfd_vma lma;

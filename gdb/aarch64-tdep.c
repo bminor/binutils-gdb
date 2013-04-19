@@ -1897,11 +1897,11 @@ aarch64_gdb_print_insn (bfd_vma memaddr, disassemble_info *info)
 /* AArch64 BRK software debug mode instruction.
    Note that AArch64 code is always little-endian.
    1101.0100.0010.0000.0000.0000.0000.0000 = 0xd4200000.  */
-static const char aarch64_default_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
+static const gdb_byte aarch64_default_breakpoint[] = {0x00, 0x00, 0x20, 0xd4};
 
 /* Implement the "breakpoint_from_pc" gdbarch method.  */
 
-static const unsigned char *
+static const gdb_byte *
 aarch64_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 			    int *lenptr)
 {

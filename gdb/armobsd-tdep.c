@@ -71,8 +71,8 @@ static const struct tramp_frame armobsd_sigframe =
 
 
 /* Override default thumb breakpoints.  */
-static const char arm_obsd_thumb_le_breakpoint[] = {0xfe, 0xdf};
-static const char arm_obsd_thumb_be_breakpoint[] = {0xdf, 0xfe};
+static const gdb_byte arm_obsd_thumb_le_breakpoint[] = {0xfe, 0xdf};
+static const gdb_byte arm_obsd_thumb_be_breakpoint[] = {0xdf, 0xfe};
 
 static void
 armobsd_init_abi (struct gdbarch_info info,

@@ -725,7 +725,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	  struct type *type = check_typedef (value_type (arg));
 	  /* The corresponding parameter that is pushed onto the
 	     stack, and [possibly] passed in a register.  */
-	  char param_val[8];
+	  gdb_byte param_val[8];
 	  int param_len;
 	  memset (param_val, 0, sizeof param_val);
 	  if (TYPE_LENGTH (type) > 8)
@@ -928,7 +928,7 @@ hppa64_convert_code_addr_to_fptr (struct gdbarch *gdbarch, CORE_ADDR code)
 	   addr += 2 * 8)
 	{
 	  ULONGEST opdaddr;
-	  char tmp[8];
+	  gdb_byte tmp[8];
 
 	  if (target_read_memory (addr, tmp, sizeof (tmp)))
 	      break;

@@ -2518,7 +2518,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
       int len = (value_bitpos (toval)
 		 + bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
       int from_size;
-      char *buffer = (char *) alloca (len);
+      gdb_byte *buffer = alloca (len);
       struct value *val;
       CORE_ADDR to_addr = value_address (toval);
 

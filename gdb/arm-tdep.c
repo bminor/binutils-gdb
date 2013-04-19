@@ -2904,7 +2904,7 @@ arm_stub_unwind_sniffer (const struct frame_unwind *self,
 			 void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;
-  char dummy[4];
+  gdb_byte dummy[4];
 
   addr_in_block = get_frame_address_in_block (this_frame);
   if (in_plt_section (addr_in_block, NULL)
@@ -8616,7 +8616,7 @@ arm_displaced_init_closure (struct gdbarch *gdbarch, CORE_ADDR from,
   unsigned int i, len, offset;
   enum bfd_endian byte_order_for_code = gdbarch_byte_order_for_code (gdbarch);
   int size = dsc->is_thumb? 2 : 4;
-  const unsigned char *bkp_insn;
+  const gdb_byte *bkp_insn;
 
   offset = 0;
   /* Poke modified instruction(s).  */
@@ -8775,10 +8775,10 @@ gdb_print_insn_arm (bfd_vma memaddr, disassemble_info *info)
 #define THUMB_LE_BREAKPOINT {0xbe,0xbe}
 #define THUMB_BE_BREAKPOINT {0xbe,0xbe}
 
-static const char arm_default_arm_le_breakpoint[] = ARM_LE_BREAKPOINT;
-static const char arm_default_arm_be_breakpoint[] = ARM_BE_BREAKPOINT;
-static const char arm_default_thumb_le_breakpoint[] = THUMB_LE_BREAKPOINT;
-static const char arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
+static const gdb_byte arm_default_arm_le_breakpoint[] = ARM_LE_BREAKPOINT;
+static const gdb_byte arm_default_arm_be_breakpoint[] = ARM_BE_BREAKPOINT;
+static const gdb_byte arm_default_thumb_le_breakpoint[] = THUMB_LE_BREAKPOINT;
+static const gdb_byte arm_default_thumb_be_breakpoint[] = THUMB_BE_BREAKPOINT;
 
 /* Determine the type and size of breakpoint to insert at PCPTR.  Uses
    the program counter value to determine whether a 16-bit or 32-bit

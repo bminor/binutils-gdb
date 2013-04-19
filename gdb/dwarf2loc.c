@@ -1594,7 +1594,7 @@ read_pieced_value (struct value *v)
   struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (v));
   size_t type_len;
   size_t buffer_size = 0;
-  char *buffer = NULL;
+  gdb_byte *buffer = NULL;
   struct cleanup *cleanup;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (v)));
@@ -1777,7 +1777,7 @@ write_pieced_value (struct value *to, struct value *from)
   struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (to));
   size_t type_len;
   size_t buffer_size = 0;
-  char *buffer = NULL;
+  gdb_byte *buffer = NULL;
   struct cleanup *cleanup;
   int bits_big_endian
     = gdbarch_bits_big_endian (get_type_arch (value_type (to)));

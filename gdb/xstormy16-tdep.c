@@ -160,13 +160,13 @@ xstormy16_use_struct_convention (struct type *type)
 
 static void
 xstormy16_extract_return_value (struct type *type, struct regcache *regcache,
-				void *valbuf)
+				gdb_byte *valbuf)
 {
   int len = TYPE_LENGTH (type);
   int i, regnum = E_1ST_ARG_REGNUM;
 
   for (i = 0; i < len; i += xstormy16_reg_size)
-    regcache_raw_read (regcache, regnum++, (char *) valbuf + i);
+    regcache_raw_read (regcache, regnum++, valbuf + i);
 }
 
 /* Function: xstormy16_store_return_value
@@ -176,7 +176,7 @@ xstormy16_extract_return_value (struct type *type, struct regcache *regcache,
 
 static void 
 xstormy16_store_return_value (struct type *type, struct regcache *regcache,
-			      const void *valbuf)
+			      const gdb_byte *valbuf)
 {
   if (TYPE_LENGTH (type) == 1)
     {    
@@ -192,7 +192,7 @@ xstormy16_store_return_value (struct type *type, struct regcache *regcache,
       int i, regnum = E_1ST_ARG_REGNUM;
 
       for (i = 0; i < len; i += xstormy16_reg_size)
-        regcache_raw_write (regcache, regnum++, (char *) valbuf + i);
+        regcache_raw_write (regcache, regnum++, valbuf + i);
     }
 }
 
@@ -278,7 +278,7 @@ xstormy16_push_dummy_call (struct gdbarch *gdbarch,
      wordaligned.  */
   for (j = nargs - 1; j >= i; j--)
     {
-      char *val;
+      gdb_byte *val;
       struct cleanup *back_to;
       const gdb_byte *bytes = value_contents (args[j]);
 

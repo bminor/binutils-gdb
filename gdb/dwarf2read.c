@@ -2671,7 +2671,7 @@ read_index_from_section (struct objfile *objfile,
 			 const gdb_byte **types_list,
 			 offset_type *types_list_elements)
 {
-  const char *addr;
+  const gdb_byte *addr;
   offset_type version;
   offset_type *metadata;
   int i;
@@ -8595,7 +8595,7 @@ create_dwp_hash_table (struct dwp_file *dwp_file, int is_debug_types)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   bfd *dbfd = dwp_file->dbfd;
-  const char *index_ptr, *index_end;
+  const gdb_byte *index_ptr, *index_end;
   struct dwarf2_section_info *index;
   uint32_t version, nr_units, nr_slots;
   struct dwp_hash_table *htab;
@@ -20421,7 +20421,7 @@ add_address_entry (struct objfile *objfile, struct obstack *obstack,
 		   CORE_ADDR start, CORE_ADDR end, unsigned int cu_index)
 {
   offset_type cu_index_to_write;
-  char addr[8];
+  gdb_byte addr[8];
   CORE_ADDR baseaddr;
 
   baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));

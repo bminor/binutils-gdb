@@ -288,7 +288,7 @@ darwin_current_sos (void)
       path_addr = extract_typed_address (buf + ptr_len, ptr_type);
 
       /* Read Mach-O header from memory.  */
-      if (target_read_memory (load_addr, (char *) &hdr, sizeof (hdr) - 4))
+      if (target_read_memory (load_addr, (gdb_byte *) &hdr, sizeof (hdr) - 4))
 	break;
       /* Discard wrong magic numbers.  Shouldn't happen.  */
       hdr_val = extract_unsigned_integer
@@ -359,7 +359,7 @@ darwin_read_exec_load_addr (struct darwin_info *info)
       load_addr = extract_typed_address (buf, ptr_type);
 
       /* Read Mach-O header from memory.  */
-      if (target_read_memory (load_addr, (char *) &hdr, sizeof (hdr) - 4))
+      if (target_read_memory (load_addr, (gdb_byte *) &hdr, sizeof (hdr) - 4))
 	break;
       /* Discard wrong magic numbers.  Shouldn't happen.  */
       hdr_val = extract_unsigned_integer

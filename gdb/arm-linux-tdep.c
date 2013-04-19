@@ -62,9 +62,9 @@ extern int arm_apcs_32;
    of the software interrupt the kernel stops the inferior with a
    SIGTRAP, and wakes the debugger.  */
 
-static const char arm_linux_arm_le_breakpoint[] = { 0x01, 0x00, 0x9f, 0xef };
+static const gdb_byte arm_linux_arm_le_breakpoint[] = { 0x01, 0x00, 0x9f, 0xef };
 
-static const char arm_linux_arm_be_breakpoint[] = { 0xef, 0x9f, 0x00, 0x01 };
+static const gdb_byte arm_linux_arm_be_breakpoint[] = { 0xef, 0x9f, 0x00, 0x01 };
 
 /* However, the EABI syscall interface (new in Nov. 2005) does not look at
    the operand of the swi if old-ABI compatibility is disabled.  Therefore,
@@ -72,24 +72,24 @@ static const char arm_linux_arm_be_breakpoint[] = { 0xef, 0x9f, 0x00, 0x01 };
    version 2.5.70 (May 2003), so should be a safe assumption for EABI
    binaries.  */
 
-static const char eabi_linux_arm_le_breakpoint[] = { 0xf0, 0x01, 0xf0, 0xe7 };
+static const gdb_byte eabi_linux_arm_le_breakpoint[] = { 0xf0, 0x01, 0xf0, 0xe7 };
 
-static const char eabi_linux_arm_be_breakpoint[] = { 0xe7, 0xf0, 0x01, 0xf0 };
+static const gdb_byte eabi_linux_arm_be_breakpoint[] = { 0xe7, 0xf0, 0x01, 0xf0 };
 
 /* All the kernels which support Thumb support using a specific undefined
    instruction for the Thumb breakpoint.  */
 
-static const char arm_linux_thumb_be_breakpoint[] = {0xde, 0x01};
+static const gdb_byte arm_linux_thumb_be_breakpoint[] = {0xde, 0x01};
 
-static const char arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
+static const gdb_byte arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
 
 /* Because the 16-bit Thumb breakpoint is affected by Thumb-2 IT blocks,
    we must use a length-appropriate breakpoint for 32-bit Thumb
    instructions.  See also thumb_get_next_pc.  */
 
-static const char arm_linux_thumb2_be_breakpoint[] = { 0xf7, 0xf0, 0xa0, 0x00 };
+static const gdb_byte arm_linux_thumb2_be_breakpoint[] = { 0xf7, 0xf0, 0xa0, 0x00 };
 
-static const char arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
+static const gdb_byte arm_linux_thumb2_le_breakpoint[] = { 0xf0, 0xf7, 0x00, 0xa0 };
 
 /* Description of the longjmp buffer.  The buffer is treated as an array of 
    elements of size ARM_LINUX_JB_ELEMENT_SIZE.

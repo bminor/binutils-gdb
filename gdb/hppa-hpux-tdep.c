@@ -1278,9 +1278,9 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
 static void
 hppa_hpux_supply_ss_narrow (struct regcache *regcache,
-			    int regnum, const char *save_state)
+			    int regnum, const gdb_byte *save_state)
 {
-  const char *ss_narrow = save_state + HPPA_HPUX_SS_NARROW_OFFSET;
+  const gdb_byte *ss_narrow = save_state + HPPA_HPUX_SS_NARROW_OFFSET;
   int i, offset = 0;
 
   for (i = HPPA_R1_REGNUM; i < HPPA_FP0_REGNUM; i++)
@@ -1294,9 +1294,9 @@ hppa_hpux_supply_ss_narrow (struct regcache *regcache,
 
 static void
 hppa_hpux_supply_ss_fpblock (struct regcache *regcache,
-			     int regnum, const char *save_state)
+			     int regnum, const gdb_byte *save_state)
 {
-  const char *ss_fpblock = save_state + HPPA_HPUX_SS_FPBLOCK_OFFSET;
+  const gdb_byte *ss_fpblock = save_state + HPPA_HPUX_SS_FPBLOCK_OFFSET;
   int i, offset = 0;
 
   /* FIXME: We view the floating-point state as 64 single-precision
@@ -1329,9 +1329,9 @@ hppa_hpux_supply_ss_fpblock (struct regcache *regcache,
 
 static void
 hppa_hpux_supply_ss_wide (struct regcache *regcache,
-			  int regnum, const char *save_state)
+			  int regnum, const gdb_byte *save_state)
 {
-  const char *ss_wide = save_state + HPPA_HPUX_SS_WIDE_OFFSET;
+  const gdb_byte *ss_wide = save_state + HPPA_HPUX_SS_WIDE_OFFSET;
   int i, offset = 8;
 
   if (register_size (get_regcache_arch (regcache), HPPA_R1_REGNUM) == 4)
@@ -1353,8 +1353,8 @@ hppa_hpux_supply_save_state (const struct regset *regset,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  const char *proc_info = regs;
-  const char *save_state = proc_info + 8;
+  const gdb_byte *proc_info = regs;
+  const gdb_byte *save_state = proc_info + 8;
   ULONGEST flags;
 
   flags = extract_unsigned_integer (save_state + HPPA_HPUX_SS_FLAGS_OFFSET,

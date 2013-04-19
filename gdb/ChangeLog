@@ -1,3 +1,105 @@
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
+	* aarch64-tdep.c (aarch64_default_breakpoint): Change type to
+	gdb_byte[].
+	(aarch64_breakpoint_from_pc): Change return type to gdb_byte *.
+	* ada-lang.c (ada_value_assign): Use gdb_byte.
+	* alphanbsd-tdep.c (sigtramp_retcode): Change type to gdb_byte[].
+	(alphanbsd_sigtramp_offset): Use gdb_byte.
+	* arm-linux-tdep.c (arm_linux_arm_le_breakpoint)
+	(arm_linux_arm_be_breakpoint, eabi_linux_arm_le_breakpoint)
+	(eabi_linux_arm_be_breakpoint, arm_linux_thumb_be_breakpoint)
+	(arm_linux_thumb_le_breakpoint, arm_linux_thumb2_be_breakpoint)
+	(arm_linux_thumb2_le_breakpoint): Change type to gdb_byte[].
+	* arm-tdep.c (arm_stub_unwind_sniffer)
+	(arm_displaced_init_closure): Use gdb_byte.
+	(arm_default_arm_le_breakpoint, arm_default_arm_be_breakpoint)
+	(arm_default_thumb_le_breakpoint)
+	(arm_default_thumb_be_breakpoint): Change type to gdb_byte[].
+	* arm-tdep.h (struct gdbarch_tdep) <arm_breakpoint,
+	thumb_breakpoint, thumb2_breakpoint>: Change type to gdb_byte *.
+	* arm-wince-tdep.c (arm_wince_le_breakpoint)
+	(arm_wince_thumb_le_breakpoint): Change type to gdb_byte[].
+	* armnbsd-tdep.c (arm_nbsd_arm_le_breakpoint)
+	(arm_nbsd_arm_be_breakpoint, arm_nbsd_thumb_le_breakpoint)
+	(arm_nbsd_thumb_be_breakpoint): Change type to gdb_byte[].
+	* armobsd-tdep.c (arm_obsd_thumb_le_breakpoint)
+	(arm_obsd_thumb_be_breakpoint): Change type to gdb_byte[].
+	* cris-tdep.c (push_stack_item, cris_push_dummy_call)
+	(cris_store_return_value, cris_extract_return_value): Use
+	gdb_byte.
+	(constraint): Change type of parameter to char * from signed
+	char*.  Use gdb_byte.
+	* dwarf2loc.c (read_pieced_value, write_pieced_value): Change type
+	of local buffer to gdb_byte *.
+	* dwarf2read.c (read_index_from_section): Use gdb_byte.
+	(create_dwp_hash_table): Change type of locals to gdb_byte *.
+	(add_address_entry): Change type of local buffer to gdb_byte[].
+	* frv-tdep.c (frv_adjust_breakpoint_address, find_func_descr)
+	(frv_push_dummy_call): Use gdb_byte.
+	* hppa-hpux-tdep.c (hppa_hpux_push_dummy_code)
+	(hppa_hpux_supply_ss_fpblock, hppa_hpux_supply_ss_wide)
+	(hppa_hpux_supply_save_state): Use gdb_byte.
+	* hppa-tdep.c (hppa32_push_dummy_call)
+	(hppa64_convert_code_addr_to_fptr): Use gdb_byte.
+	* ia64-tdep.c (extract_bit_field, replace_bit_field)
+	(slotN_contents, replace_slotN_contents): Change type of parameter
+	to gdb_byte *.
+	(fetch_instruction, ia64_pseudo_register_write)
+	(ia64_register_to_value, ia64_value_to_register)
+	(ia64_extract_return_value, ia64_store_return_value)
+	(ia64_push_dummy_call): Use gdb_byte.
+	* m32c-tdep.c (m32c_return_value): Remove cast.
+	* m68hc11-tdep.c (m68hc11_pseudo_register_write)
+	(m68hc11_push_dummy_call, m68hc11_store_return_value): Use
+	gdb_byte.
+	* mipsnbsd-tdep.c (mipsnbsd_get_longjmp_target): Use gdb_byte.
+	* mn10300-tdep.c (mn10300_store_return_value)
+	(mn10300_breakpoint_from_pc, mn10300_push_dummy_call): Use
+	gdb_byte.
+	* moxie-tdep.c (moxie_process_readu): Use gdb_byte.
+	(moxie_process_record): Remove casts.
+	* ppc-ravenscar-thread.c (supply_register_at_address)
+	(ppc_ravenscar_generic_store_registers): Use gdb_byte.
+	* ravenscar-thread.c (get_running_thread_id): Use gdb_byte.
+	* remote-m32r-sdi.c (m32r_fetch_register): Use gdb_byte.
+	* remote-mips.c (mips_xfer_memory): Use gdb_byte.
+	* remote.c (compare_sections_command): Use gdb_byte.
+	* score-tdep.c (score7_free_memblock): Change type of parameter to
+	gdb_byte *.
+	* sh-tdep.c (sh_justify_value_in_reg): Change return type to
+	gdb_byte *.  Use gdb_byte.
+	(sh_push_dummy_call_fpu): Use gdb_byte.
+	(sh_extract_return_value_nofpu, sh_extract_return_value_fpu)
+	(sh_store_return_value_nofpu, sh_store_return_value_fpu)
+	(sh_register_convert_to_virtual, sh_register_convert_to_raw):
+	Change parameter type to 'gdb_byte *'.  Use gdb_byte.
+	(sh_pseudo_register_read, sh_pseudo_register_write): Use gdb_byte.
+	* sh64-tdep.c (sh64_push_dummy_call): Use gdb_byte.
+	(sh64_store_return_value, sh64_register_convert_to_virtual):
+	Change parameter type to 'gdb_byte *'.  Use gdb_byte.
+	(sh64_pseudo_register_write): Use gdb_byte.
+	* solib-darwin.c (darwin_current_sos): Add casts to 'gdb_byte *'.
+	* solib-irix.c (fetch_lm_info): Likewise.  Use gdb_byte for byte
+	buffer.
+	(irix_current_sos): Use gdb_byte.
+	* solib-som.c (som_current_sos): Use gdb_byte.
+	* sparc-ravenscar-thread.c (supply_register_at_address)
+	(sparc_ravenscar_generic_store_registers): Use gdb_byte.
+	* spu-multiarch.c (spu_xfer_partial): Add cast to 'char *'.
+	* spu-tdep.c (spu_get_overlay_table): Use gdb_byte.
+	* tic6x-tdep.c (tic6x_breakpoint_from_pc): Change return type to
+	'gdb_byte *'.
+	* tic6x-tdep.h (struct gdbarch_tdep) <breakpoint>: Change type to
+	'gdb_byte *'.
+	* tracepoint.c (tfile_fetch_registers): Use gdb_byte.
+	* xstormy16-tdep.c (xstormy16_extract_return_value)
+	(xstormy16_store_return_value): Change parameter type to
+	'gdb_byte *'.  Adjust.
+	(xstormy16_push_dummy_call): Use gdb_byte.
+	* xtensa-tdep.c (xtensa_scan_prologue, call0_ret)
+	(call0_analyze_prologue, execute_code): Use gdb_byte.
+
 2013-04-19  Vladimir Kargov <kargov@gmail.com>
 	    Pedro Alves  <palves@redhat.com>
 

@@ -4921,7 +4921,7 @@ tfile_fetch_registers (struct target_ops *ops,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int offset, regn, regsize, pc_regno;
-  char *regs;
+  gdb_byte *regs;
 
   /* An uninitialized reg size says we're not going to be
      successful at getting register blocks.  */

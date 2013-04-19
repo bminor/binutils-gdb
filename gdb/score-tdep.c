@@ -835,7 +835,7 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
 }
 
 static void
-score7_free_memblock (char *memblock)
+score7_free_memblock (gdb_byte *memblock)
 {
   xfree (memblock);
 }

@@ -676,7 +676,7 @@ struct stack_item
 };
 
 static struct stack_item *
-push_stack_item (struct stack_item *prev, void *contents, int len)
+push_stack_item (struct stack_item *prev, const gdb_byte *contents, int len)
 {
   struct stack_item *si;
   si = xmalloc (sizeof (struct stack_item));
@@ -850,12 +850,12 @@ cris_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   for (argnum = 0; argnum < nargs; argnum++)
     {
       int len;
-      char *val;
+      const gdb_byte *val;
       int reg_demand;
       int i;
       
       len = TYPE_LENGTH (value_type (args[argnum]));
-      val = (char *) value_contents (args[argnum]);
+      val = value_contents (args[argnum]);
       
       /* How may registers worth of storage do we need for this argument?  */
       reg_demand = (len / 4) + (len % 4 != 0 ? 1 : 0);
@@ -1657,7 +1657,7 @@ crisv32_register_type (struct gdbarch *gdbarch, int regno)
 
 static void
 cris_store_return_value (struct type *type, struct regcache *regcache,
-			 const void *valbuf)
+			 const gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1675,7 +1675,7 @@ cris_store_return_value (struct type *type, struct regcache *regcache,
       /* Put the return value in R10 and R11.  */
       val = extract_unsigned_integer (valbuf, 4, byte_order);
       regcache_cooked_write_unsigned (regcache, ARG1_REGNUM, val);
-      val = extract_unsigned_integer ((char *)valbuf + 4, len - 4, byte_order);
+      val = extract_unsigned_integer (valbuf + 4, len - 4, byte_order);
       regcache_cooked_write_unsigned (regcache, ARG2_REGNUM, val);
     }
   else
@@ -1828,7 +1828,7 @@ cris_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 
 static void
 cris_extract_return_value (struct type *type, struct regcache *regcache,
-			   void *valbuf)
+			   gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -1847,7 +1847,7 @@ cris_extract_return_value (struct type *type, struct regcache *regcache,
       regcache_cooked_read_unsigned (regcache, ARG1_REGNUM, &val);
       store_unsigned_integer (valbuf, 4, byte_order, val);
       regcache_cooked_read_unsigned (regcache, ARG2_REGNUM, &val);
-      store_unsigned_integer ((char *)valbuf + 4, len - 4, byte_order, val);
+      store_unsigned_integer (valbuf + 4, len - 4, byte_order, val);
     }
   else
     error (_("cris_extract_return_value: type length too large"));
@@ -1879,13 +1879,13 @@ cris_return_value (struct gdbarch *gdbarch, struct value *function,
    instruction.  It stems from cris_constraint, found in cris-dis.c.  */
 
 static int
-constraint (unsigned int insn, const signed char *inst_args, 
+constraint (unsigned int insn, const char *inst_args,
             inst_env_type *inst_env)
 {
   int retval = 0;
   int tmp, i;
 
-  const char *s = inst_args;
+  const gdb_byte *s = (const gdb_byte *) inst_args;
 
   for (; *s; s++)
     switch (*s) 

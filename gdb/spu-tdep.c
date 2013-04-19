@@ -1749,7 +1749,7 @@ spu_get_overlay_table (struct objfile *objfile)
   unsigned ovly_table_size, ovly_buf_table_size;
   struct spu_overlay_table *tbl;
   struct obj_section *osect;
-  char *ovly_table;
+  gdb_byte *ovly_table;
   int i;
 
   tbl = objfile_data (objfile, spu_overlay_data);

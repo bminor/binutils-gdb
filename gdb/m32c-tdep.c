@@ -2282,8 +2282,7 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     " its address."));
-	  write_memory (SYMBOL_VALUE_ADDRESS (mem0),
-                        (char *) writebuf, valtype_len);
+	  write_memory (SYMBOL_VALUE_ADDRESS (mem0), writebuf, valtype_len);
 	}
     }
 

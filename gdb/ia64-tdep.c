@@ -370,7 +370,7 @@ ia64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
    bit ``from''.  */
 
 static long long
-extract_bit_field (const char *bundle, int from, int len)
+extract_bit_field (const gdb_byte *bundle, int from, int len)
 {
   long long result = 0LL;
   int to = from + len;
@@ -406,7 +406,7 @@ extract_bit_field (const char *bundle, int from, int len)
 /* Replace the specified bits in an instruction bundle.  */
 
 static void
-replace_bit_field (char *bundle, long long val, int from, int len)
+replace_bit_field (gdb_byte *bundle, long long val, int from, int len)
 {
   int to = from + len;
   int from_byte = from / 8;
@@ -456,7 +456,7 @@ replace_bit_field (char *bundle, long long val, int from, int len)
    and instruction bundle.  */
 
 static long long
-slotN_contents (char *bundle, int slotnum)
+slotN_contents (gdb_byte *bundle, int slotnum)
 {
   return extract_bit_field (bundle, 5+41*slotnum, 41);
 }
@@ -464,7 +464,7 @@ slotN_contents (char *bundle, int slotnum)
 /* Store an instruction in an instruction bundle.  */
 
 static void
-replace_slotN_contents (char *bundle, long long instr, int slotnum)
+replace_slotN_contents (gdb_byte *bundle, long long instr, int slotnum)
 {
   replace_bit_field (bundle, instr, 5+41*slotnum, 41);
 }
@@ -511,7 +511,7 @@ static const enum instruction_type template_encoding_table[32][3] =
 static CORE_ADDR
 fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
 {
-  char bundle[BUNDLE_LEN];
+  gdb_byte bundle[BUNDLE_LEN];
   int slotnum = (int) (addr & 0x0f) / SLOT_MULTIPLIER;
   long long template;
   int val;
@@ -1165,7 +1165,7 @@ ia64_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
 	    }
 	  else
 	    {
-	      char nat_buf[8];
+	      gdb_byte nat_buf[8];
 	      nat_collection = read_memory_integer (nat_addr, 8, byte_order);
 	      if (natN_val)
 		nat_collection |= natN_mask;
@@ -1224,7 +1224,7 @@ ia64_register_to_value (struct frame_info *frame, int regnum,
 			int *optimizedp, int *unavailablep)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  char in[MAX_REGISTER_SIZE];
+  gdb_byte in[MAX_REGISTER_SIZE];
 
   /* Convert to TYPE.  */
   if (!get_frame_register_bytes (frame, regnum, 0,
@@ -1242,7 +1242,7 @@ ia64_value_to_register (struct frame_info *frame, int regnum,
                          struct type *valtype, const gdb_byte *in)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  char out[MAX_REGISTER_SIZE];
+  gdb_byte out[MAX_REGISTER_SIZE];
   convert_typed_floating (in, valtype, out, ia64_ext_type (gdbarch));
   put_frame_register (frame, regnum, out);
 }
@@ -3228,7 +3228,7 @@ ia64_extract_return_value (struct type *type, struct regcache *regcache,
   float_elt_type = is_float_or_hfa_type (type);
   if (float_elt_type != NULL)
     {
-      char from[MAX_REGISTER_SIZE];
+      gdb_byte from[MAX_REGISTER_SIZE];
       int offset = 0;
       int regnum = IA64_FR8_REGNUM;
       int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
@@ -3293,7 +3293,7 @@ ia64_store_return_value (struct type *type, struct regcache *regcache,
   float_elt_type = is_float_or_hfa_type (type);
   if (float_elt_type != NULL)
     {
-      char to[MAX_REGISTER_SIZE];
+      gdb_byte to[MAX_REGISTER_SIZE];
       int offset = 0;
       int regnum = IA64_FR8_REGNUM;
       int n = TYPE_LENGTH (type) / TYPE_LENGTH (float_elt_type);
@@ -3783,7 +3783,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
           && TYPE_CODE (type) == TYPE_CODE_PTR 
 	  && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
 	{
-	  char val_buf[8];
+	  gdb_byte val_buf[8];
 	  ULONGEST faddr = extract_unsigned_integer (value_contents (arg),
 						     8, byte_order);
 	  store_unsigned_integer (val_buf, 8, byte_order,
@@ -3807,7 +3807,7 @@ ia64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       argoffset = 0;
       while (len > 0)
 	{
-	  char val_buf[8];
+	  gdb_byte val_buf[8];
 
 	  memset (val_buf, 0, 8);
           if (!ia64_struct_type_p (type) && len < 8)
