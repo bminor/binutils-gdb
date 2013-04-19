@@ -496,7 +496,7 @@ read_program_header (int type, int *p_sect_size, int *p_arch_size)
 
 
 /* Return program interpreter string.  */
-static gdb_byte *
+static char *
 find_program_interpreter (void)
 {
   gdb_byte *buf = NULL;
@@ -521,7 +521,7 @@ find_program_interpreter (void)
   if (!buf)
     buf = read_program_header (PT_INTERP, NULL, NULL);
 
-  return buf;
+  return (char *) buf;
 }
 
 
@@ -1446,7 +1446,7 @@ enable_break (struct svr4_info *info, int from_tty)
   struct minimal_symbol *msymbol;
   const char * const *bkpt_namep;
   asection *interp_sect;
-  gdb_byte *interp_name;
+  char *interp_name;
   CORE_ADDR sym_addr;
 
   info->interp_text_sect_low = info->interp_text_sect_high = 0;

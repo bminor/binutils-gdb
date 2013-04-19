@@ -840,7 +840,7 @@ enable_break2 (void)
   if (interp_sect)
     {
       unsigned int interp_sect_size;
-      gdb_byte *buf;
+      char *buf;
       bfd *tmp_bfd = NULL;
       CORE_ADDR addr;
       gdb_byte addr_buf[TIC6X_PTR_SIZE];

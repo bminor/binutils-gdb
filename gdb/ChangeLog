@@ -1,5 +1,29 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* avr-tdep.c (avr_io_reg_read_command): New local 'bufstr'.  Use
+	it to get a string view of the byte buffer.
+	* i386-cygwin-tdep.c (core_process_module_section): Change local 'buf'
+	type to gdb_byte *.  Adjust.
+	* linux-tdep.c (linux_info_proc, linux_find_memory_regions_full):
+	Change local to char *.
+	* solib-darwin.c (find_program_interpreter): Change return type to
+	char *.  Adjust.
+	(darwin_solib_get_all_image_info_addr_at_init): Adjust.
+	* solib-dsbt.c (enable_break2): Change local 'buf' to char *.
+	* solib-frv.c (enable_break2): Change local 'buf' to char *.
+	* solib-spu.c (spu_current_sos): Add gdb_byte * cast.
+	* solib-svr4.c (find_program_interpreter): Change return type to
+	char *.  Adjust.
+	(enable_break): Change local 'interp_name' to char *.
+	* spu-multiarch.c (spu_xfer_partial): Add cast to 'char *'.
+	* spu-tdep.c (spu_pseudo_register_read_spu): Add cast to 'char *'.
+	(spu_pseudo_register_write_spu): Use char for string buffer.
+	Adjust.
+	(info_spu_event_command, info_spu_signal_command): Add casts to
+	'char *'.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* aarch64-tdep.c (aarch64_default_breakpoint): Change type to
 	gdb_byte[].
 	(aarch64_breakpoint_from_pc): Change return type to gdb_byte *.

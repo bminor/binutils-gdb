@@ -285,7 +285,7 @@ spu_xfer_partial (struct target_ops *ops, enum target_object object,
 					    0, sizeof buf) <= 0)
 	    return ret;
 
-	  lslr = strtoulst (buf, NULL, 16);
+	  lslr = strtoulst ((char *) buf, NULL, 16);
 	  return ops_beneath->to_xfer_partial (ops_beneath, TARGET_OBJECT_SPU,
 					       mem_annex, readbuf, writebuf,
 					       addr & lslr, len);

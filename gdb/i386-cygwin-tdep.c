@@ -129,7 +129,7 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   size_t module_name_size;
   CORE_ADDR base_addr;
 
-  char *buf = NULL;
+  gdb_byte *buf = NULL;
 
   if (strncmp (sect->name, ".module", 7) != 0)
     return;
@@ -154,9 +154,9 @@ core_process_module_section (bfd *abfd, asection *sect, void *obj)
   module_name_size =
     extract_unsigned_integer (buf + 8, 4, byte_order);
 
-  module_name = buf + 12;
-  if (module_name - buf + module_name_size > bfd_get_section_size (sect))
+  if (12 + module_name_size > bfd_get_section_size (sect))
     goto out;
+  module_name = (char *) buf + 12;
 
   /* The first module is the .exe itself.  */
   if (data->module_count != 0)

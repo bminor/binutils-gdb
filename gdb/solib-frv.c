@@ -535,7 +535,7 @@ enable_break2 (void)
   if (interp_sect)
     {
       unsigned int interp_sect_size;
-      gdb_byte *buf;
+      char *buf;
       bfd *tmp_bfd = NULL;
       int status;
       CORE_ADDR addr, interp_loadmap_addr;

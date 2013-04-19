@@ -192,6 +192,7 @@ spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
   gdb_byte reg[32];
   char annex[32];
   ULONGEST id;
+  ULONGEST ul;
 
   status = regcache_raw_read_unsigned (regcache, SPU_ID_REGNUM, &id);
   if (status != REG_VALID)
@@ -201,7 +202,8 @@ spu_pseudo_register_read_spu (struct regcache *regcache, const char *regname,
   target_read (&current_target, TARGET_OBJECT_SPU, annex,
 	       reg, 0, sizeof reg);
 
-  store_unsigned_integer (buf, 4, byte_order, strtoulst (reg, NULL, 16));
+  ul = strtoulst ((char *) reg, NULL, 16);
+  store_unsigned_integer (buf, 4, byte_order, ul);
   return REG_VALID;
 }
 
@@ -254,7 +256,7 @@ spu_pseudo_register_write_spu (struct regcache *regcache, const char *regname,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  gdb_byte reg[32];
+  char reg[32];
   char annex[32];
   ULONGEST id;
 
@@ -263,7 +265,7 @@ spu_pseudo_register_write_spu (struct regcache *regcache, const char *regname,
   xsnprintf (reg, sizeof reg, "0x%s",
 	     phex_nz (extract_unsigned_integer (buf, 4, byte_order), 4));
   target_write (&current_target, TARGET_OBJECT_SPU, annex,
-		reg, 0, strlen (reg));
+		(gdb_byte *) reg, 0, strlen (reg));
 }
 
 static void
@@ -2045,7 +2047,7 @@ info_spu_event_command (char *args, int from_tty)
   if (len <= 0)
     error (_("Could not read event_status."));
   buf[len] = '\0';
-  event_status = strtoulst (buf, NULL, 16);
+  event_status = strtoulst ((char *) buf, NULL, 16);
  
   xsnprintf (annex, sizeof annex, "%d/event_mask", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
@@ -2053,7 +2055,7 @@ info_spu_event_command (char *args, int from_tty)
   if (len <= 0)
     error (_("Could not read event_mask."));
   buf[len] = '\0';
-  event_mask = strtoulst (buf, NULL, 16);
+  event_mask = strtoulst ((char *) buf, NULL, 16);
  
   chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoEvent");
 
@@ -2112,7 +2114,7 @@ info_spu_signal_command (char *args, int from_tty)
   if (len <= 0)
     error (_("Could not read signal1_type."));
   buf[len] = '\0';
-  signal1_type = strtoulst (buf, NULL, 16);
+  signal1_type = strtoulst ((char *) buf, NULL, 16);
 
   xsnprintf (annex, sizeof annex, "%d/signal2", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex, buf, 0, 4);
@@ -2130,7 +2132,7 @@ info_spu_signal_command (char *args, int from_tty)
   if (len <= 0)
     error (_("Could not read signal2_type."));
   buf[len] = '\0';
-  signal2_type = strtoulst (buf, NULL, 16);
+  signal2_type = strtoulst ((char *) buf, NULL, 16);
 
   chain = make_cleanup_ui_out_tuple_begin_end (current_uiout, "SPUInfoSignal");
 

@@ -210,10 +210,10 @@ lookup_symbol_from_bfd (bfd *abfd, char *symname)
 
 /* Return program interpreter string.  */
 
-static gdb_byte *
+static char *
 find_program_interpreter (void)
 {
-  gdb_byte *buf = NULL;
+  char *buf = NULL;
 
   /* If we have an exec_bfd, get the interpreter from the load commands.  */
   if (exec_bfd)
@@ -420,7 +420,7 @@ gdb_bfd_mach_o_fat_extract (bfd *abfd, bfd_format format,
 static void
 darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
 {
-  gdb_byte *interp_name;
+  char *interp_name;
   CORE_ADDR load_addr = 0;
   bfd *dyld_bfd = NULL;
   struct cleanup *cleanup;
