@@ -259,7 +259,7 @@ goto_bookmark_command (char *args, int from_tty)
       || strncmp (args, "end",   strlen ("end")) == 0)
     {
       /* Special case.  Give target opportunity to handle.  */
-      target_goto_bookmark (args, from_tty);
+      target_goto_bookmark ((gdb_byte *) args, from_tty);
       return;
     }
 
@@ -268,7 +268,7 @@ goto_bookmark_command (char *args, int from_tty)
       /* Special case -- quoted string.  Pass on to target.  */
       if (args[strlen (args) - 1] != args[0])
 	error (_("Unbalanced quotes: %s"), args);
-      target_goto_bookmark (args, from_tty);
+      target_goto_bookmark ((gdb_byte *) args, from_tty);
       return;
     }
 

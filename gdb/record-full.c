@@ -1844,7 +1844,7 @@ record_full_can_execute_reverse (void)
 static gdb_byte *
 record_full_get_bookmark (char *args, int from_tty)
 {
-  gdb_byte *ret = NULL;
+  char *ret = NULL;
 
   /* Return stringified form of instruction count.  */
   if (record_full_list && record_full_list->type == record_full_end)
@@ -1859,14 +1859,16 @@ record_full_get_bookmark (char *args, int from_tty)
 	fprintf_unfiltered (gdb_stdlog,
 			    "record_full_get_bookmark returns NULL\n");
     }
-  return ret;
+  return (gdb_byte *) ret;
 }
 
 /* "to_goto_bookmark" method for process record and prec over core.  */
 
 static void
-record_full_goto_bookmark (gdb_byte *bookmark, int from_tty)
+record_full_goto_bookmark (gdb_byte *raw_bookmark, int from_tty)
 {
+  char *bookmark = (char *) raw_bookmark;
+
   if (record_debug)
     fprintf_unfiltered (gdb_stdlog,
 			"record_full_goto_bookmark receives %s\n", bookmark);
@@ -1883,7 +1885,7 @@ record_full_goto_bookmark (gdb_byte *bookmark, int from_tty)
       /* Pass along to cmd_record_full_goto.  */
     }
 
-  cmd_record_goto ((char *) bookmark, from_tty);
+  cmd_record_goto (bookmark, from_tty);
   return;
 }
 

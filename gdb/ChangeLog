@@ -1,5 +1,13 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* record-full.c (record_full_get_bookmark): Change local 'ret'
+	type to char * and add cast to gdb_byte *.
+	(record_full_goto_bookmark): Handle 'bookmark' argument as a
+	string.
+	* reverse.c (goto_bookmark_command): Add casts to gdb_byte *.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* python/py-inferior.c (infpy_write_memory): Add cast to gdb_byte
 	* python/py-prettyprint.c (print_string_repr): Change type of
 	'output' local to char *.  Add cast to gdb_byte * in
