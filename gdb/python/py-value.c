@@ -421,7 +421,8 @@ valpy_string (PyObject *self, PyObject *args, PyObject *kw)
   GDB_PY_HANDLE_EXCEPTION (except);
 
   encoding = (user_encoding && *user_encoding) ? user_encoding : la_encoding;
-  unicode = PyUnicode_Decode (buffer, length * TYPE_LENGTH (char_type),
+  unicode = PyUnicode_Decode ((const char *) buffer,
+			      length * TYPE_LENGTH (char_type),
 			      encoding, errors);
   xfree (buffer);
 

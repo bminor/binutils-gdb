@@ -343,13 +343,13 @@ print_string_repr (PyObject *printer, const char *hint,
 	  string = python_string_to_target_python_string (py_str);
 	  if (string)
 	    {
-	      gdb_byte *output;
+	      char *output;
 	      long length;
 	      struct type *type;
 
 	      make_cleanup_py_decref (string);
 #ifdef IS_PY3K
-	      output = (gdb_byte *) PyBytes_AS_STRING (string);
+	      output = PyBytes_AS_STRING (string);
 	      length = PyBytes_GET_SIZE (string);
 #else
 	      output = PyString_AsString (string);
@@ -358,8 +358,8 @@ print_string_repr (PyObject *printer, const char *hint,
 	      type = builtin_type (gdbarch)->builtin_char;
 
 	      if (hint && !strcmp (hint, "string"))
-		LA_PRINT_STRING (stream, type, output, length, NULL,
-				 0, options);
+		LA_PRINT_STRING (stream, type, (gdb_byte *) output,
+				 length, NULL, 0, options);
 	      else
 		fputs_filtered (output, stream);
 	    }
@@ -634,7 +634,7 @@ print_children (PyObject *printer, const char *hint,
 	}
       else if (gdbpy_is_string (py_v))
 	{
-	  gdb_byte *output;
+	  char *output;
 
 	  output = python_string_to_host_string (py_v);
 	  if (!output)

@@ -1,5 +1,15 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* python/py-inferior.c (infpy_write_memory): Add cast to gdb_byte
+	* python/py-prettyprint.c (print_string_repr): Change type of
+	'output' local to char *.  Add cast to gdb_byte * in
+	LA_PRINT_STRING call.
+	(print_children): Change type of 'output' local to char *.
+	* python/py-value.c (valpy_string): Add cast to const char * in
+	PyUnicode_Decode call.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* remote-mips.c (mips_cksum): Rename 'data' parameter to 'datastr'
 	and change its type to 'const char *'.  Adjust.
 	(mips_send_packet): Add cast to 'char *', and remove cast to
