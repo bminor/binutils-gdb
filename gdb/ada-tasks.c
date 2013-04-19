@@ -433,7 +433,7 @@ read_fat_string_value (char *dest, struct value *val, int max_len)
 
   /* Extract LEN characters from the fat string.  */
   array_val = value_ind (value_field (val, array_fieldno));
-  read_memory (value_address (array_val), dest, len);
+  read_memory (value_address (array_val), (gdb_byte *) dest, len);
 
   /* Add the NUL character to close the string.  */
   dest[len] = '\0';

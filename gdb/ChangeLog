@@ -1,5 +1,10 @@
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
+	* ada-lang.c (print_it_exception): Add cast to gdb_byte *.
+	* ada-tasks.c (read_fat_string_value): Likewise.
+
+2013-04-19  Pedro Alves  <palves@redhat.com>
+
 	* dwarf2-frame.c (execute_cfa_program): Make 'bytes_read' local
 	unsigned.  Pass 'tmp' to safe_read_uleb128 instead of the signed
 	'offset', and adjust.

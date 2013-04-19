@@ -11532,7 +11532,8 @@ print_it_exception (enum exception_catchpoint_kind ex, bpstat bs)
 
 	  if (addr != 0)
 	    {
-	      read_memory (addr, exception_name, sizeof (exception_name) - 1);
+	      read_memory (addr, (gdb_byte *) exception_name,
+			   sizeof (exception_name) - 1);
 	      exception_name [sizeof (exception_name) - 1] = '\0';
 	    }
 	  else
