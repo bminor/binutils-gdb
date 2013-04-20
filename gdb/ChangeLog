@@ -1,3 +1,9 @@
+2013-04-20  Yao Qi  <yao@codesourcery.com>
+
+	* ctf.c (ctf_fetch_registers): Change the type of 'regs' from
+	'char *' to 'gdb_byte *'.  Cast the return value of
+	'bt_ctf_get_char_array' to 'gdb_byte *'.
+
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac (build_warnings): Replace -Wno-pointer-sign with

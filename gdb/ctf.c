@@ -1234,7 +1234,7 @@ ctf_fetch_registers (struct target_ops *ops,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   int offset, regn, regsize, pc_regno;
-  char *regs = NULL;
+  gdb_byte *regs = NULL;
   struct bt_ctf_event *event = NULL;
   struct bt_iter_pos *pos;
 
@@ -1280,7 +1280,7 @@ ctf_fetch_registers (struct target_ops *ops,
       const struct bt_definition *array
 	= bt_ctf_get_field (event, scope, "contents");
 
-      regs = bt_ctf_get_char_array (array);
+      regs = (gdb_byte *) bt_ctf_get_char_array (array);
       /* Assume the block is laid out in GDB register number order,
 	 each register with the size that it has in GDB.  */
       offset = 0;
