@@ -3175,12 +3175,14 @@ Layout::segment_precedes(const Output_segment* seg1,
 
   // The order of non-PT_LOAD segments is unimportant.  We simply sort
   // by the numeric segment type and flags values.  There should not
-  // be more than one segment with the same type and flags.
+  // be more than one segment with the same type and flags, except
+  // when a linker script specifies such.
   if (type1 != elfcpp::PT_LOAD)
     {
       if (type1 != type2)
 	return type1 < type2;
-      gold_assert(flags1 != flags2);
+      gold_assert(flags1 != flags2
+		  || this->script_options_->saw_phdrs_clause());
       return flags1 < flags2;
     }
 
