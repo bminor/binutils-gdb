@@ -1,3 +1,8 @@
+2013-04-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.gdb/selftest.exp (do_steps_and_nexts): Check for
+	notice_open_fds.
+
 2013-04-22  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.arch/arm-bl-branch-dest.exp: Replace additional_flags by
