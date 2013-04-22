@@ -46,7 +46,7 @@
 
 extern void _initialize_remote_sim (void);
 
-static void dump_mem (char *buf, int len);
+static void dump_mem (gdb_byte *buf, int len);
 
 static void init_callbacks (void);
 
@@ -271,7 +271,7 @@ sim_inferior_data_cleanup (struct inferior *inf, void *data)
 }
 
 static void
-dump_mem (char *buf, int len)
+dump_mem (gdb_byte *buf, int len)
 {
   printf_filtered ("\t");
 
@@ -514,7 +514,7 @@ gdbsim_store_register (struct target_ops *ops,
     }
   else if (gdbarch_register_sim_regno (gdbarch, regno) >= 0)
     {
-      char tmp[MAX_REGISTER_SIZE];
+      gdb_byte tmp[MAX_REGISTER_SIZE];
       int nr_bytes;
 
       regcache_cooked_read (regcache, regno, tmp);

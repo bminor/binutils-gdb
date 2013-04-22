@@ -1,3 +1,10 @@
+2013-04-22  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* remote-sim.c (dump_mem): Change the type of 'buf' parameter from
+	'char *' to 'gdb_byte *'.
+	(gdbsim_store_register): Change the type of 'tmp' from 'char' to
+	'gdb_byte'.
+
 2013-04-22  Yao Qi  <yao@codesourcery.com>
 
 	* infrun.c: Fix typo in comment.
