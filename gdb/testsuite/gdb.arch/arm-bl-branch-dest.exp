@@ -26,7 +26,7 @@ standard_testfile
 # the "-Wl,-Ttext-segment" option compile the binary.
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} \
-    [list debug additional_flags=-Wl,-Ttext-segment=0xb0000000]] } {
+    [list debug ldflags=-Wl,-Ttext-segment=0xb0000000]] } {
     return -1
 }
 
