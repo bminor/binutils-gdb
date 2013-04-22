@@ -55,6 +55,7 @@
 #include "probe.h"
 #include "ctf.h"
 #include "completer.h"
+#include "filestuff.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -3066,7 +3067,7 @@ tfile_start (struct trace_file_writer *self, const char *filename)
     = (struct tfile_trace_file_writer *) self;
 
   writer->pathname = tilde_expand (filename);
-  writer->fp = fopen (writer->pathname, "wb");
+  writer->fp = gdb_fopen_cloexec (writer->pathname, "wb");
   if (writer->fp == NULL)
     error (_("Unable to open file '%s' for saving trace data (%s)"),
 	   filename, safe_strerror (errno));
@@ -3339,8 +3340,6 @@ trace_save (const char *filename, struct trace_file_writer *writer,
   /* Get the trace status first before opening the file, so if the
      target is losing, we can get out without touching files.  */
   status = target_get_trace_status (ts);
-
-  writer->ops->start (writer, filename);
 
   writer->ops->write_header (writer);
 
@@ -4198,7 +4197,7 @@ tfile_open (char *filename, int from_tty)
 
   flags = O_BINARY | O_LARGEFILE;
   flags |= O_RDONLY;
-  scratch_chan = open (filename, flags, 0);
+  scratch_chan = gdb_open_cloexec (filename, flags, 0);
   if (scratch_chan < 0)
     perror_with_name (filename);
 

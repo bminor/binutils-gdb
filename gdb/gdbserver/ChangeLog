@@ -1,3 +1,11 @@
+2013-04-22  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (SFILES): Add filestuff.c.
+	(OBS): Add filestuff.o.
+	(filestuff.o): New target.
+	* config.in, configure: Rebuild.
+	* configure.ac: Check for fdwalk, pipe2.
+
 2013-04-17  Pedro Alves  <palves@redhat.com>
 
 	* configure.ac (USE_THREAD_DB): Delete variable.

@@ -67,6 +67,7 @@
 #include "linux-ptrace.h"
 #include "buffer.h"
 #include "target-descriptions.h"
+#include "filestuff.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -4271,7 +4272,7 @@ linux_nat_thread_name (struct thread_info *thr)
   char *result = NULL;
 
   snprintf (buf, sizeof (buf), FORMAT, pid, lwp);
-  comm_file = fopen (buf, "r");
+  comm_file = gdb_fopen_cloexec (buf, "r");
   if (comm_file)
     {
       /* Not exported by the kernel, so we define it here.  */
@@ -4398,7 +4399,7 @@ linux_proc_xfer_partial (struct target_ops *ops, enum target_object object,
   /* We could keep this file open and cache it - possibly one per
      thread.  That requires some juggling, but is even faster.  */
   sprintf (filename, "/proc/%d/mem", PIDGET (inferior_ptid));
-  fd = open (filename, O_RDONLY | O_LARGEFILE);
+  fd = gdb_open_cloexec (filename, O_RDONLY | O_LARGEFILE, 0);
   if (fd == -1)
     return 0;
 
@@ -4492,7 +4493,7 @@ linux_proc_xfer_spu (struct target_ops *ops, enum target_object object,
     }
 
   xsnprintf (buf, sizeof buf, "/proc/%d/fd/%s", pid, annex);
-  fd = open (buf, writebuf? O_WRONLY : O_RDONLY);
+  fd = gdb_open_cloexec (buf, writebuf? O_WRONLY : O_RDONLY, 0);
   if (fd <= 0)
     return -1;
 
@@ -4568,7 +4569,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending,
   sigemptyset (blocked);
   sigemptyset (ignored);
   sprintf (fname, "/proc/%d/status", pid);
-  procfile = fopen (fname, "r");
+  procfile = gdb_fopen_cloexec (fname, "r");
   if (procfile == NULL)
     error (_("Could not open %s"), fname);
   cleanup = make_cleanup_fclose (procfile);
@@ -4911,7 +4912,7 @@ linux_async_pipe (int enable)
 
       if (enable)
 	{
-	  if (pipe (linux_nat_event_pipe) == -1)
+	  if (gdb_pipe_cloexec (linux_nat_event_pipe) == -1)
 	    internal_error (__FILE__, __LINE__,
 			    "creating event pipe failed.");
 

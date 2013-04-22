@@ -67,6 +67,9 @@
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
+/* Define to 1 if you have the `fdwalk' function. */
+#undef HAVE_FDWALK
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -111,6 +114,9 @@
 
 /* Define if you support the personality syscall. */
 #undef HAVE_PERSONALITY
+
+/* Define to 1 if you have the `pipe2' function. */
+#undef HAVE_PIPE2
 
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD

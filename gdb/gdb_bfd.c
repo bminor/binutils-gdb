@@ -24,6 +24,7 @@
 #include "ui-out.h"
 #include "gdbcmd.h"
 #include "hashtab.h"
+#include "filestuff.h"
 #ifdef HAVE_ZLIB_H
 #include <zlib.h>
 #endif
@@ -158,7 +159,7 @@ gdb_bfd_open (const char *name, const char *target, int fd)
 
   if (fd == -1)
     {
-      fd = open (name, O_RDONLY | O_BINARY);
+      fd = gdb_open_cloexec (name, O_RDONLY | O_BINARY, 0);
       if (fd == -1)
 	{
 	  bfd_set_error (bfd_error_system_call);

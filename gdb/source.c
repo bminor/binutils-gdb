@@ -27,6 +27,7 @@
 #include "frame.h"
 #include "value.h"
 #include "gdb_assert.h"
+#include "filestuff.h"
 
 #include <sys/types.h>
 #include "gdb_string.h"
@@ -737,7 +738,7 @@ openp (const char *path, int opts, const char *string,
 	{
 	  filename = alloca (strlen (string) + 1);
 	  strcpy (filename, string);
-	  fd = open (filename, mode);
+	  fd = gdb_open_cloexec (filename, mode, 0);
 	  if (fd >= 0)
 	    goto done;
 	}
@@ -835,7 +836,7 @@ openp (const char *path, int opts, const char *string,
 
       if (is_regular_file (filename))
 	{
-	  fd = open (filename, mode);
+	  fd = gdb_open_cloexec (filename, mode, 0);
 	  if (fd >= 0)
 	    break;
 	}
@@ -1000,7 +1001,7 @@ find_and_open_source (const char *filename,
           *fullname = rewritten_fullname;
         }
 
-      result = open (*fullname, OPEN_MODE);
+      result = gdb_open_cloexec (*fullname, OPEN_MODE, 0);
       if (result >= 0)
 	{
 	  char *lpath = gdb_realpath (*fullname);

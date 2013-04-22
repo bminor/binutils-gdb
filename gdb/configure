@@ -8912,7 +8912,7 @@ for ac_header in nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
 		  sys/types.h sys/wait.h wait.h termios.h termio.h \
 		  sgtty.h unistd.h elf_hp.h locale.h \
-		  dlfcn.h sys/socket.h sys/un.h linux/perf_event.h
+		  dlfcn.h sys/un.h linux/perf_event.h
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
 ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
@@ -10170,7 +10170,8 @@ for ac_func in canonicalize_file_name realpath getrusage getuid getgid \
 		sbrk setpgid setpgrp setsid \
 		sigaction sigprocmask sigsetmask socketpair syscall \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
-		setrlimit getrlimit posix_madvise waitpid lstat
+		setrlimit getrlimit posix_madvise waitpid lstat \
+		fdwalk pipe2
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"

@@ -31,6 +31,7 @@
 #include "event-loop.h"
 #include "target.h"
 #include "filenames.h"
+#include "filestuff.h"
 
 #include <fcntl.h>
 #include <sys/time.h>
@@ -639,7 +640,7 @@ remote_fileio_func_open (char *buf)
     }
 
   remote_fio_no_longjmp = 1;
-  fd = open (pathname, flags, mode);
+  fd = gdb_open_cloexec (pathname, flags, mode);
   if (fd < 0)
     {
       remote_fileio_return_errno (-1);

@@ -767,7 +767,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	regset.c sol-thread.c windows-termcap.c \
 	common/gdb_vecs.c common/common-utils.c common/xml-utils.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
-	common/format.c btrace.c record-btrace.c ctf.c
+	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -890,6 +890,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	expprint.o environ.o stack.o thread.o \
 	exceptions.o \
 	filesystem.o \
+	filestuff.o \
 	inf-child.o \
 	interps.o \
 	minidebug.o \
@@ -1967,6 +1968,10 @@ ptid.o: ${srcdir}/common/ptid.c
 
 buffer.o: ${srcdir}/common/buffer.c
 	$(COMPILE) $(srcdir)/common/buffer.c
+	$(POSTCOMPILE)
+
+filestuff.o: $(srcdir)/common/filestuff.c
+	$(COMPILE) $(srcdir)/common/filestuff.c
 	$(POSTCOMPILE)
 
 format.o: ${srcdir}/common/format.c

@@ -26,6 +26,7 @@
 #include "gdb_assert.h"
 #include "gdbcore.h"
 #include "observer.h"
+#include "filestuff.h"
 
 #include "auxv.h"
 #include "elf/common.h"
@@ -48,7 +49,7 @@ procfs_xfer_auxv (gdb_byte *readbuf,
   LONGEST n;
 
   pathname = xstrprintf ("/proc/%d/auxv", PIDGET (inferior_ptid));
-  fd = open (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY);
+  fd = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
   xfree (pathname);
   if (fd < 0)
     return -1;

@@ -45,6 +45,7 @@
 #include "maint.h"
 
 #include "filenames.h"
+#include "filestuff.h"
 
 /* The selected interpreter.  This will be used as a set command
    variable, so it should always be malloc'ed - since
@@ -362,6 +363,7 @@ captured_main (void *data)
   textdomain (PACKAGE);
 
   bfd_init ();
+  notice_open_fds ();
 
   make_cleanup (VEC_cleanup (cmdarg_s), &cmdarg_vec);
   dirsize = 1;

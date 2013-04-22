@@ -21,6 +21,7 @@
 #include "gdbcmd.h"
 #include "exceptions.h"
 #include "xml-support.h"
+#include "filestuff.h"
 
 #include "gdb_string.h"
 #include "safe-ctype.h"
@@ -1044,11 +1045,11 @@ xml_fetch_content_from_file (const char *filename, void *baton)
 
       if (fullname == NULL)
 	malloc_failure (0);
-      file = fopen (fullname, FOPEN_RT);
+      file = gdb_fopen_cloexec (fullname, FOPEN_RT);
       xfree (fullname);
     }
   else
-    file = fopen (filename, FOPEN_RT);
+    file = gdb_fopen_cloexec (filename, FOPEN_RT);
 
   if (file == NULL)
     return NULL;

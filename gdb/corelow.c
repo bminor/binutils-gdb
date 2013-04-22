@@ -47,6 +47,7 @@
 #include "objfiles.h"
 #include "gdb_bfd.h"
 #include "completer.h"
+#include "filestuff.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -312,7 +313,7 @@ core_open (char *filename, int from_tty)
     flags |= O_RDWR;
   else
     flags |= O_RDONLY;
-  scratch_chan = open (filename, flags, 0);
+  scratch_chan = gdb_open_cloexec (filename, flags, 0);
   if (scratch_chan < 0)
     perror_with_name (filename);
 

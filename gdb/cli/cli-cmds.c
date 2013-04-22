@@ -39,6 +39,7 @@
 #include "source.h"
 #include "disasm.h"
 #include "tracepoint.h"
+#include "filestuff.h"
 
 #include "ui-out.h"
 
@@ -726,6 +727,8 @@ shell_escape (char *arg, int from_tty)
   if ((pid = vfork ()) == 0)
     {
       const char *p, *user_shell;
+
+      close_most_fds ();
 
       if ((user_shell = (char *) getenv ("SHELL")) == NULL)
 	user_shell = "/bin/sh";

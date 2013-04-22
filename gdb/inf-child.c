@@ -30,6 +30,7 @@
 #include "gdb/fileio.h"
 #include "agent.h"
 #include "gdb_wait.h"
+#include "filestuff.h"
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>		/* for MAXPATHLEN */
@@ -245,7 +246,7 @@ inf_child_fileio_open (const char *filename, int flags, int mode,
 
   /* We do not need to convert MODE, since the fileio protocol uses
      the standard values.  */
-  fd = open (filename, nat_flags, mode);
+  fd = gdb_open_cloexec (filename, nat_flags, mode);
   if (fd == -1)
     *target_errno = inf_child_errno_to_fileio_error (errno);
 

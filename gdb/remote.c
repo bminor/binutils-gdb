@@ -44,6 +44,7 @@
 #include "cli/cli-setshow.h"
 #include "target-descriptions.h"
 #include "gdb_bfd.h"
+#include "filestuff.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -10011,7 +10012,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   if (!remote_desc)
     error (_("command can only be used with remote target"));
 
-  file = fopen (local_file, "rb");
+  file = gdb_fopen_cloexec (local_file, "rb");
   if (file == NULL)
     perror_with_name (local_file);
   back_to = make_cleanup_fclose (file);
@@ -10103,7 +10104,7 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   if (fd == -1)
     remote_hostio_error (remote_errno);
 
-  file = fopen (local_file, "wb");
+  file = gdb_fopen_cloexec (local_file, "wb");
   if (file == NULL)
     perror_with_name (local_file);
   back_to = make_cleanup_fclose (file);

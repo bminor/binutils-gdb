@@ -47,6 +47,7 @@
 #include "interps.h"
 #include "filesystem.h"
 #include "gdb_bfd.h"
+#include "filestuff.h"
 
 /* Architecture-specific operations.  */
 
@@ -246,7 +247,7 @@ solib_find (char *in_pathname, int *fd)
     }
 
   /* Now see if we can open it.  */
-  found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
+  found_file = gdb_open_cloexec (temp_pathname, O_RDONLY | O_BINARY, 0);
   if (found_file < 0)
     xfree (temp_pathname);
 
@@ -269,7 +270,7 @@ solib_find (char *in_pathname, int *fd)
 			      in_pathname + 2, (char *) NULL);
       xfree (drive);
 
-      found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
+      found_file = gdb_open_cloexec (temp_pathname, O_RDONLY | O_BINARY, 0);
       if (found_file < 0)
 	{
 	  xfree (temp_pathname);
@@ -284,7 +285,7 @@ solib_find (char *in_pathname, int *fd)
 				  need_dir_separator ? SLASH_STRING : "",
 				  in_pathname + 2, (char *) NULL);
 
-	  found_file = open (temp_pathname, O_RDONLY | O_BINARY, 0);
+	  found_file = gdb_open_cloexec (temp_pathname, O_RDONLY | O_BINARY, 0);
 	  if (found_file < 0)
 	    xfree (temp_pathname);
 	}

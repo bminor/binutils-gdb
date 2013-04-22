@@ -44,6 +44,7 @@
 #include "gdb_assert.h"
 #include "gdb_dirent.h"
 #include "gdb_stat.h"
+#include "filestuff.h"
 
 /* Define PID_T to be a fixed size that is at least as large as pid_t,
    so that reading pid values embedded in /proc works
@@ -76,7 +77,7 @@ linux_common_core_of_thread (ptid_t ptid)
 
   sprintf (filename, "/proc/%lld/task/%lld/stat",
 	   (PID_T) ptid_get_pid (ptid), (PID_T) ptid_get_lwp (ptid));
-  f = fopen (filename, "r");
+  f = gdb_fopen_cloexec (filename, "r");
   if (!f)
     return -1;
 
@@ -125,7 +126,7 @@ static void
 command_from_pid (char *command, int maxlen, PID_T pid)
 {
   char *stat_path = xstrprintf ("/proc/%lld/stat", pid); 
-  FILE *fp = fopen (stat_path, "r");
+  FILE *fp = gdb_fopen_cloexec (stat_path, "r");
   
   command[0] = '\0';
  
@@ -165,7 +166,7 @@ commandline_from_pid (PID_T pid)
 {
   char *pathname = xstrprintf ("/proc/%lld/cmdline", pid);
   char *commandline = NULL;
-  FILE *f = fopen (pathname, "r");
+  FILE *f = gdb_fopen_cloexec (pathname, "r");
 
   if (f)
     {
@@ -860,7 +861,7 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
   else
     return;
 
-  fp = fopen (proc_file, "r");
+  fp = gdb_fopen_cloexec (proc_file, "r");
   if (fp)
     {
       char buf[8192];
@@ -1088,7 +1089,7 @@ linux_xfer_osdata_shm (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"shared memory\">\n");
 
-      fp = fopen ("/proc/sysvipc/shm", "r");
+      fp = gdb_fopen_cloexec ("/proc/sysvipc/shm", "r");
       if (fp)
 	{
 	  char buf[8192];
@@ -1216,7 +1217,7 @@ linux_xfer_osdata_sem (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"semaphores\">\n");
 
-      fp = fopen ("/proc/sysvipc/sem", "r");
+      fp = gdb_fopen_cloexec ("/proc/sysvipc/sem", "r");
       if (fp)
 	{
 	  char buf[8192];
@@ -1328,7 +1329,7 @@ linux_xfer_osdata_msg (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"message queues\">\n");
       
-      fp = fopen ("/proc/sysvipc/msg", "r");
+      fp = gdb_fopen_cloexec ("/proc/sysvipc/msg", "r");
       if (fp)
 	{
 	  char buf[8192];
@@ -1454,7 +1455,7 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
       buffer_init (&buffer);
       buffer_grow_str (&buffer, "<osdata type=\"modules\">\n");
 
-      fp = fopen ("/proc/modules", "r");
+      fp = gdb_fopen_cloexec ("/proc/modules", "r");
       if (fp)
 	{
 	  char buf[8192];

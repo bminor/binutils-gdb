@@ -68,6 +68,7 @@
 #include "gdb_bfd.h"
 #include "f-lang.h"
 #include "source.h"
+#include "filestuff.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -20698,7 +20699,7 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
 		     INDEX_SUFFIX, (char *) NULL);
   cleanup = make_cleanup (xfree, filename);
 
-  out_file = fopen (filename, "wb");
+  out_file = gdb_fopen_cloexec (filename, "wb");
   if (!out_file)
     error (_("Can't open `%s' for writing"), filename);
 

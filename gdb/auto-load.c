@@ -38,6 +38,7 @@
 #include "observer.h"
 #include "fnmatch.h"
 #include "top.h"
+#include "filestuff.h"
 
 /* The suffix of per-objfile scripts to auto-load as non-Python command files.
    E.g. When the program loads libfoo.so, look for libfoo-gdb.gdb.  */
@@ -738,7 +739,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 
   cleanups = make_cleanup (xfree, filename);
 
-  input = fopen (filename, "r");
+  input = gdb_fopen_cloexec (filename, "r");
   debugfile = filename;
   if (debug_auto_load)
     fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file \"%s\" %s.\n"),
@@ -770,7 +771,7 @@ auto_load_objfile_script_1 (struct objfile *objfile, const char *realname,
 	  strcat (debugfile, filename);
 
 	  make_cleanup (xfree, debugfile);
-	  input = fopen (debugfile, "r");
+	  input = gdb_fopen_cloexec (debugfile, "r");
 	  if (debug_auto_load)
 	    fprintf_unfiltered (gdb_stdlog, _("auto-load: Attempted file "
 					      "\"%s\" %s.\n"),

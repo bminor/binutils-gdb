@@ -33,6 +33,7 @@
 #include "gdbcore.h"
 #include "cli/cli-utils.h"
 #include "gdb_bfd.h"
+#include "filestuff.h"
 
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
@@ -99,7 +100,7 @@ scan_filename_with_cleanup (char **cmd, const char *defname)
 FILE *
 fopen_with_cleanup (const char *filename, const char *mode)
 {
-  FILE *file = fopen (filename, mode);
+  FILE *file = gdb_fopen_cloexec (filename, mode);
 
   if (file == NULL)
     perror_with_name (filename);

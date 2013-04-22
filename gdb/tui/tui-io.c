@@ -37,6 +37,7 @@
 #include <fcntl.h>
 #include <signal.h>
 #include <stdio.h>
+#include "filestuff.h"
 
 #include "gdb_curses.h"
 
@@ -616,7 +617,7 @@ tui_initialize_io (void)
   /* Temporary solution for readline writing to stdout: redirect
      readline output in a pipe, read that pipe and output the content
      in the curses command window.  */
-  if (pipe (tui_readline_pipe) != 0)
+  if (gdb_pipe_cloexec (tui_readline_pipe) != 0)
     {
       fprintf_unfiltered (gdb_stderr, "Cannot create pipe for readline");
       exit (1);

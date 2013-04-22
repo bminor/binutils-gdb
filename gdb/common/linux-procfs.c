@@ -24,6 +24,7 @@
 #endif
 
 #include "linux-procfs.h"
+#include "filestuff.h"
 
 /* Return the TGID of LWPID from /proc/pid/status.  Returns -1 if not
    found.  */
@@ -37,7 +38,7 @@ linux_proc_get_int (pid_t lwpid, const char *field)
   int retval = -1;
 
   snprintf (buf, sizeof (buf), "/proc/%d/status", (int) lwpid);
-  status_file = fopen (buf, "r");
+  status_file = gdb_fopen_cloexec (buf, "r");
   if (status_file == NULL)
     {
       warning (_("unable to open /proc file '%s'"), buf);
@@ -83,7 +84,7 @@ linux_proc_pid_has_state (pid_t pid, const char *state)
   int have_state;
 
   xsnprintf (buffer, sizeof (buffer), "/proc/%d/status", (int) pid);
-  procfile = fopen (buffer, "r");
+  procfile = gdb_fopen_cloexec (buffer, "r");
   if (procfile == NULL)
     {
       warning (_("unable to open /proc file '%s'"), buffer);

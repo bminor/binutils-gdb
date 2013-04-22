@@ -31,6 +31,7 @@
 #include "gdb_select.h"
 #include "gdb_string.h"
 #include "gdbcmd.h"
+#include "filestuff.h"
 
 #ifdef HAVE_TERMIOS
 
@@ -107,7 +108,7 @@ void _initialize_ser_hardwire (void);
 static int
 hardwire_open (struct serial *scb, const char *name)
 {
-  scb->fd = open (name, O_RDWR);
+  scb->fd = gdb_open_cloexec (name, O_RDWR, 0);
   if (scb->fd < 0)
     return -1;
 

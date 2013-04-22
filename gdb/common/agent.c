@@ -28,6 +28,7 @@
 #include <string.h>
 #include <unistd.h>
 #include "agent.h"
+#include "filestuff.h"
 
 int debug_agent = 0;
 
@@ -168,7 +169,7 @@ gdb_connect_sync_socket (int pid)
   if (res >= UNIX_PATH_MAX)
     return -1;
 
-  res = fd = socket (PF_UNIX, SOCK_STREAM, 0);
+  res = fd = gdb_socket_cloexec (PF_UNIX, SOCK_STREAM, 0);
   if (res == -1)
     {
       warning (_("error opening sync socket: %s"), strerror (errno));

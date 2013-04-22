@@ -30,6 +30,7 @@
 #include <sys/time.h>
 #include <fcntl.h>
 #include "gdb_string.h"
+#include "filestuff.h"
 
 #include <signal.h>
 
@@ -63,9 +64,9 @@ pipe_open (struct serial *scb, const char *name)
   int err_pdes[2];
   int pid;
 
-  if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
+  if (gdb_socketpair_cloexec (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
-  if (socketpair (AF_UNIX, SOCK_STREAM, 0, err_pdes) < 0)
+  if (gdb_socketpair_cloexec (AF_UNIX, SOCK_STREAM, 0, err_pdes) < 0)
     {
       close (pdes[0]);
       close (pdes[1]);
@@ -122,14 +123,8 @@ pipe_open (struct serial *scb, const char *name)
 	  dup2 (err_pdes[1], STDERR_FILENO);
 	  close (err_pdes[1]);
 	}
-#if 0
-      /* close any stray FD's - FIXME - how?  */
-      /* POSIX.2 B.3.2.2 "popen() shall ensure that any streams
-         from previous popen() calls that remain open in the 
-         parent process are closed in the new child process.  */
-      for (old = pidlist; old; old = old->next)
-	close (fileno (old->fp));	/* Don't allow a flush.  */
-#endif
+
+      close_most_fds ();
       execl ("/bin/sh", "sh", "-c", name, (char *) 0);
       _exit (127);
     }
@@ -201,7 +196,7 @@ gdb_pipe (int pdes[2])
   return -1;
 #else
 
-  if (socketpair (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
+  if (gdb_socketpair_cloexec (AF_UNIX, SOCK_STREAM, 0, pdes) < 0)
     return -1;
 
   /* If we don't do this, GDB simply exits when the remote side

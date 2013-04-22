@@ -141,6 +141,9 @@
 /* Define to 1 if your system has the etext variable. */
 #undef HAVE_ETEXT
 
+/* Define to 1 if you have the `fdwalk' function. */
+#undef HAVE_FDWALK
+
 /* Define to 1 if you have the `fork' function. */
 #undef HAVE_FORK
 
@@ -269,6 +272,9 @@
 
 /* Define to 1 if you have the `pipe' function. */
 #undef HAVE_PIPE
+
+/* Define to 1 if you have the `pipe2' function. */
+#undef HAVE_PIPE2
 
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL
@@ -502,9 +508,6 @@
 
 /* Define to 1 if you have the <sys/select.h> header file. */
 #undef HAVE_SYS_SELECT_H
-
-/* Define to 1 if you have the <sys/socket.h> header file. */
-#undef HAVE_SYS_SOCKET_H
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H

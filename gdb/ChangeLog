@@ -1,3 +1,56 @@
+2013-04-22  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/7912:
+	* Makefile.in (SFILES): Add filestuff.c
+	(COMMON_OBS): Add filestuff.o.
+	(filestuff.o): New target.
+	* auto-load.c (auto_load_objfile_script_1): Use
+	gdb_fopen_cloexec.
+	* auxv.c (procfs_xfer_auxv): Use gdb_open_cloexec.
+	* cli/cli-cmds.c (shell_escape): Call close_most_fds.
+	* cli/cli-dump.c (fopen_with_cleanup): Use gdb_fopen_cloexec.
+	* common/agent.c (gdb_connect_sync_socket): Use
+	gdb_socket_cloexec.
+	* common/filestuff.c: New file.
+	* common/filestuff.h: New file.
+	* common/linux-osdata.c (linux_common_core_of_thread)
+	(command_from_pid, commandline_from_pid, print_source_lines)
+	(linux_xfer_osdata_shm, linux_xfer_osdata_sem)
+	(linux_xfer_osdata_msg, linux_xfer_osdata_modules): Use
+	gdb_fopen_cloexec.
+	* common/linux-procfs.c (linux_proc_get_int)
+	(linux_proc_pid_has_state): Use gdb_fopen_cloexec.
+	* config.in, configure: Rebuild.
+	* configure.ac: Don't check for sys/socket.h.  Check for
+	fdwalk, pipe2.
+	* corelow.c (core_open): Use gdb_open_cloexec.
+	* dwarf2read.c (write_psymtabs_to_index): Use gdb_fopen_cloexec.
+	* fork-child.c (fork_inferior): Call close_most_fds.
+	* gdb_bfd.c (gdb_bfd_open): Use gdb_open_cloexec.
+	* inf-child.c (inf_child_fileio_readlink): Use gdb_open_cloexec.
+	* linux-nat.c (linux_nat_thread_name, linux_proc_pending_signals):
+	Use gdb_fopen_cloexec.
+	(linux_proc_xfer_partial, linux_proc_xfer_spu): Use
+	gdb_open_cloexec.
+	(linux_async_pipe): Use gdb_pipe_cloexec.
+	* remote-fileio.c (remote_fileio_func_open): Use
+	gdb_open_cloexec.
+	* remote.c (remote_file_put, remote_file_get): Use
+	gdb_fopen_cloexec.
+	* ser-pipe.c (pipe_open): Use gdb_socketpair_cloexec,
+	close_most_fds.
+	* ser-tcp.c (net_open): Use gdb_socket_cloexec.
+	* ser-unix.c (hardwire_open): Use gdb_open_cloexec.
+	* solib.c (solib_find): Use gdb_open_cloexec.
+	* source.c (openp, find_and_open_source): Use gdb_open_cloexec.
+	* tracepoint.c (tfile_start): Use gdb_fopen_cloexec.
+	(tfile_open): Use gdb_open_cloexec.
+	* tui/tui-io.c (tui_initialize_io): Use gdb_pipe_cloexec.
+	* ui-file.c (gdb_fopen): Use gdb_fopen_cloexec.
+	* xml-support.c (xml_fetch_content_from_file): Use
+	gdb_fopen_cloexec.
+	* main.c (captured_main): Call notice_open_fds.
+
 2013-04-22  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* remote-sim.c (dump_mem): Change the type of 'buf' parameter from

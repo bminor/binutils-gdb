@@ -32,6 +32,7 @@
 #include "command.h" /* for dont_repeat () */
 #include "gdbcmd.h"
 #include "solib.h"
+#include "filestuff.h"
 
 #include <signal.h>
 
@@ -313,6 +314,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   if (pid == 0)
     {
+      close_most_fds ();
+
       if (debug_fork)
 	sleep (debug_fork);
 
