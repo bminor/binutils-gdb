@@ -806,7 +806,7 @@ handle_vfork_child_exec_or_exit (int exec)
     }
 }
 
-/* Enum strings for "set|show displaced-stepping".  */
+/* Enum strings for "set|show follow-exec-mode".  */
 
 static const char follow_exec_mode_new[] = "new";
 static const char follow_exec_mode_same[] = "same";

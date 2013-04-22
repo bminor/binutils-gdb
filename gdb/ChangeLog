@@ -1,3 +1,7 @@
+2013-04-22  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c: Fix typo in comment.
+
 2013-04-22  Andrew Haley  <aph@redhat.com>
 
 	* arm-tdep.c (BranchDest): Cast result as "unsigned long",
