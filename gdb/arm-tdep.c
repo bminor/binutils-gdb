@@ -521,7 +521,7 @@ skip_prologue_function (struct gdbarch *gdbarch, CORE_ADDR pc, int is_thumb)
 #define sbits(obj,st,fn) \
   ((long) (bits(obj,st,fn) | ((long) bit(obj,fn) * ~ submask (fn - st))))
 #define BranchDest(addr,instr) \
-  ((CORE_ADDR) (((long) (addr)) + 8 + (sbits (instr, 0, 23) << 2)))
+  ((CORE_ADDR) (((unsigned long) (addr)) + 8 + (sbits (instr, 0, 23) << 2)))
 
 /* Extract the immediate from instruction movw/movt of encoding T.  INSN1 is
    the first 16-bit of instruction, and INSN2 is the second 16-bit of
