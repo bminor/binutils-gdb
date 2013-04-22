@@ -1,3 +1,12 @@
+2013-04-22  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_check_relocs): Don't call
+	create_linkage_sections here..
+	(ppc64_elf_init_stub_bfd): ..do so here.  Return status.
+	(create_linkage_sections): Move earlier in file.
+	(ppc64_elf_setup_section_lists): Remove now useless htab->brlt test.
+	* elf64-ppc.h (ppc64_elf_init_stub_bfd): Update proto.
+
 2013-04-19  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15356

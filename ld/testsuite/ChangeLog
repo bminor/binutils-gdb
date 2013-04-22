@@ -1,3 +1,14 @@
+2013-04-22  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tlsexe.d: Adjust for section id changes.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.d: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.d: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstocso.d: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+
 2013-04-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15371
@@ -88,7 +99,7 @@
 
 2013-03-20  Will Newton  <will.newton@linaro.org>
 
-        * ld-elfvers/vers.exp (objdump_symstuff): Sort objdump output
+	* ld-elfvers/vers.exp (objdump_symstuff): Sort objdump output
 	based on the symbol name rather than address.
 	* ld-elfvers/vers1.sym: Reorder contents to match changes to vers.exp.
 	* ld-elfvers/vers15.sym: Likewise.
@@ -122,7 +133,7 @@
 
 2013-03-08  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
-        * lib/ld-lib.exp (check_gc_sections_available): Remove aarch64
+	* lib/ld-lib.exp (check_gc_sections_available): Remove aarch64
 	from list of targets that don't support gc-section.
 
 2013-03-05  Alan Modra  <amodra@gmail.com>
@@ -191,9 +202,9 @@
 
 2013-02-18  Maciej W. Rozycki  <macro@codesourcery.com>
 
-        * ld-mips-elf/jalx-2.ld: Include .rel.plt in output, give .plt a
+	* ld-mips-elf/jalx-2.ld: Include .rel.plt in output, give .plt a
 	mapping.
-        * ld-mips-elf/jalx-2.dd: Adjust disassembly accordingly.
+	* ld-mips-elf/jalx-2.dd: Adjust disassembly accordingly.
 
 2013-02-18  Alan Modra  <amodra@gmail.com>
 

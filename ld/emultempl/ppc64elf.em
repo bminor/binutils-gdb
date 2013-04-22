@@ -107,7 +107,8 @@ ppc_create_output_section_statements (void)
 
   stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
   ldlang_add_file (stub_file);
-  ppc64_elf_init_stub_bfd (stub_file->the_bfd, &link_info);
+  if (!ppc64_elf_init_stub_bfd (stub_file->the_bfd, &link_info))
+    einfo ("%F%P: can not init BFD: %E\n");
 }
 
 /* Move the input section statement at *U which happens to be on LIST
