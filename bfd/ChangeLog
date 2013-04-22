@@ -1,5 +1,11 @@
 2013-04-22  Alan Modra  <amodra@gmail.com>
 
+	PR ld/15382
+	* elf-bfd.h (RELOC_AGAINST_DISCARDED_SECTION): Don't multiply
+	sh_size or reloc_count adjustment by count.
+
+2013-04-22  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_check_relocs): Don't call
 	create_linkage_sections here..
 	(ppc64_elf_init_stub_bfd): ..do so here.  Return status.
