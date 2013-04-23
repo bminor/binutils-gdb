@@ -1,3 +1,11 @@
+2013-04-23  Hui Zhu  <hui@codesourcery.com>
+
+	PR gdb/15165
+
+	* breakpoint.c (dprintf_print_recreate): New.
+	(save_breakpoints): Let it not save dprintf commands.
+	(initialize_breakpoint_ops): Set dprintf_print_recreate.
+
 2013-04-22  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/7912:

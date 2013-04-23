@@ -13364,6 +13364,16 @@ dprintf_re_set (struct breakpoint *b)
     update_dprintf_command_list (b);
 }
 
+/* Implement the "print_recreate" breakpoint_ops method for dprintf.  */
+
+static void
+dprintf_print_recreate (struct breakpoint *tp, struct ui_file *fp)
+{
+  fprintf_unfiltered (fp, "dprintf %s%s", tp->addr_string,
+		      tp->extra_string);
+  print_recreate_thread (tp, fp);
+}
+
 /* The breakpoint_ops structure to be used on static tracepoints with
    markers (`-m').  */
 
@@ -15453,7 +15463,7 @@ save_breakpoints (char *filename, int from_tty,
     if (tp->ignore_count)
       fprintf_unfiltered (fp, "  ignore $bpnum %d\n", tp->ignore_count);
 
-    if (tp->commands)
+    if (tp->type != bp_dprintf && tp->commands)
       {
 	volatile struct gdb_exception ex;	
 
@@ -15859,7 +15869,7 @@ initialize_breakpoint_ops (void)
   ops->resources_needed = bkpt_resources_needed;
   ops->print_it = bkpt_print_it;
   ops->print_mention = bkpt_print_mention;
-  ops->print_recreate = bkpt_print_recreate;
+  ops->print_recreate = dprintf_print_recreate;
 }
 
 /* Chain containing all defined "enable breakpoint" subcommands.  */
