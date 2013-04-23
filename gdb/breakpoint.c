@@ -5529,7 +5529,10 @@ bpstat_what (bpstat bs_head)
 	  break;
 
 	case bp_dprintf:
-	  this_action = BPSTAT_WHAT_STOP_SILENT;
+	  if (bs->stop)
+	    this_action = BPSTAT_WHAT_STOP_SILENT;
+	  else
+	    this_action = BPSTAT_WHAT_SINGLE;
 	  break;
 
 	default:
