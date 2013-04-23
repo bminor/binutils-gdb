@@ -28,9 +28,17 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+
+#ifdef USE_WIN32API
+#include <winsock2.h>
+#include <windows.h>
+#else
+#include <sys/socket.h>
+/* Define HAVE_F_GETFD if we plan to use F_GETFD.  */
+#define HAVE_F_GETFD F_GETFD
+#endif
 
 #ifdef HAVE_SYS_RESOURCE_H
 #include <sys/resource.h>
@@ -215,6 +223,7 @@ static int trust_o_cloexec;
 static void
 mark_cloexec (int fd)
 {
+#ifdef HAVE_F_GETFD
   int old = fcntl (fd, F_GETFD, 0);
 
   if (old != -1)
@@ -229,6 +238,7 @@ mark_cloexec (int fd)
 	    trust_o_cloexec = -1;
 	}
     }
+#endif /* HAVE_F_GETFD */
 }
 
 /* Depending on TRUST_O_CLOEXEC, mark FD as close-on-exec.  */
@@ -254,7 +264,7 @@ socket_mark_cloexec (int fd)
 /* See filestuff.h.  */
 
 int
-gdb_open_cloexec (const char *filename, int flags, mode_t mode)
+gdb_open_cloexec (const char *filename, int flags, unsigned long mode)
 {
   int fd = open (filename, flags | O_CLOEXEC, mode);
 
@@ -303,6 +313,7 @@ gdb_fopen_cloexec (const char *filename, const char *opentype)
 int
 gdb_socketpair_cloexec (int namespace, int style, int protocol, int filedes[2])
 {
+#ifdef HAVE_SOCKETPAIR
   int result = socketpair (namespace, style | SOCK_CLOEXEC, protocol, filedes);
 
   if (result != -1)
@@ -312,6 +323,9 @@ gdb_socketpair_cloexec (int namespace, int style, int protocol, int filedes[2])
     }
 
   return result;
+#else
+  gdb_assert_not_reached (_("socketpair not available on this host"));
+#endif
 }
 
 /* See filestuff.h.  */
@@ -342,13 +356,17 @@ gdb_pipe_cloexec (int filedes[2])
       maybe_mark_cloexec (filedes[1]);
     }
 #else
+#ifdef HAVE_PIPE
   result = pipe (filedes);
   if (result != -1)
     {
       mark_cloexec (filedes[0]);
       mark_cloexec (filedes[1]);
     }
-#endif
+#else /* HAVE_PIPE */
+  gdb_assert_not_reached (_("pipe not available on this host"));
+#endif /* HAVE_PIPE */
+#endif /* HAVE_PIPE2 */
 
   return result;
 }

@@ -33,7 +33,8 @@ extern void close_most_fds (void);
 /* Like 'open', but ensures that the returned file descriptor has the
    close-on-exec flag set.  */
 
-extern int gdb_open_cloexec (const char *filename, int flags, mode_t mode);
+extern int gdb_open_cloexec (const char *filename, int flags,
+			     /* mode_t */ unsigned long mode);
 
 /* Like 'fopen', but ensures that the returned file descriptor has the
    close-on-exec flag set.  */

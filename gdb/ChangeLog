@@ -1,3 +1,15 @@
+2013-04-23  Tom Tromey  <tromey@redhat.com>
+
+	* common/filestuff.c: Check USE_WIN32API before including
+	sys/socket.h.
+	(HAVE_F_GETFD): New define.
+	(mark_cloexec): Check HAVE_F_GETFD.
+	(gdb_open_cloexec): Change 'mode' to unsigned long.
+	(gdb_socketpair_cloexec): Check HAVE_SOCKETPAIR.
+	(gdb_pipe_cloexec): Check HAVE_PIPE.
+	* common/filestuff.h (gdb_open_cloexec): Change 'mode' to unsigned
+	long.
+
 2013-04-23  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15293
