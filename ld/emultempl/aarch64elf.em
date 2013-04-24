@@ -53,7 +53,7 @@ aarch64_elf_before_allocation (void)
       LANG_FOR_EACH_INPUT_STATEMENT (is)
 	{
           /* Initialise mapping tables for code/data.  */
-          bfd_elf64_aarch64_init_maps (is->the_bfd);
+          bfd_elf${ELFSIZE}_aarch64_init_maps (is->the_bfd);
 	}
     }
 
@@ -147,13 +147,13 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 }
 
 
-/* Call-back for elf64_aarch64_size_stubs.  */
+/* Call-back for elf${ELFSIZE}_aarch64_size_stubs.  */
 
 /* Create a new stub section, and arrange for it to be linked
    immediately after INPUT_SECTION.  */
 
 static asection *
-elf64_aarch64_add_stub_section (const char *stub_sec_name,
+elf${ELFSIZE}_aarch64_add_stub_section (const char *stub_sec_name,
 				asection *input_section)
 {
   asection *stub_sec;
@@ -191,7 +191,7 @@ elf64_aarch64_add_stub_section (const char *stub_sec_name,
   return NULL;
 }
 
-/* Another call-back for elf_arm_size_stubs.  */
+/* Another call-back for elf${ELFSIZE}_aarch64_size_stubs.  */
 
 static void
 gldaarch64_layout_sections_again (void)
@@ -214,7 +214,7 @@ build_section_lists (lang_statement_union_type *statement)
 	  && (i->flags & SEC_EXCLUDE) == 0
 	  && i->output_section != NULL
 	  && i->output_section->owner == link_info.output_bfd)
-	elf64_aarch64_next_input_section (& link_info, i);
+	elf${ELFSIZE}_aarch64_next_input_section (& link_info, i);
     }
 }
 
@@ -232,7 +232,7 @@ gld${EMULATION_NAME}_after_allocation (void)
      have to examine the relocs.  */
   if (stub_file != NULL && !link_info.relocatable)
     {
-      int ret = elf64_aarch64_setup_section_lists (link_info.output_bfd,
+      int ret = elf${ELFSIZE}_aarch64_setup_section_lists (link_info.output_bfd,
 						   & link_info);
 
       if (ret != 0)
@@ -246,11 +246,11 @@ gld${EMULATION_NAME}_after_allocation (void)
 	  lang_for_each_statement (build_section_lists);
 
 	  /* Call into the BFD backend to do the real work.  */
-	  if (! elf64_aarch64_size_stubs (link_info.output_bfd,
+	  if (! elf${ELFSIZE}_aarch64_size_stubs (link_info.output_bfd,
 					  stub_file->the_bfd,
 					  & link_info,
 					  group_size,
-					  & elf64_aarch64_add_stub_section,
+					  & elf${ELFSIZE}_aarch64_add_stub_section,
 					  & gldaarch64_layout_sections_again))
 	    {
 	      einfo ("%X%P: cannot size stub section: %E\n");
@@ -271,7 +271,7 @@ gld${EMULATION_NAME}_finish (void)
       /* Now build the linker stubs.  */
       if (stub_file->the_bfd->sections != NULL)
 	{
-	  if (! elf64_aarch64_build_stubs (& link_info))
+	  if (! elf${ELFSIZE}_aarch64_build_stubs (& link_info))
 	    einfo ("%X%P: can not build stubs: %E\n");
 	}
     }
@@ -294,7 +294,7 @@ aarch64_elf_create_output_section_statements (void)
       return;
     }
 
-  bfd_elf64_aarch64_set_options (link_info.output_bfd, &link_info,
+  bfd_elf${ELFSIZE}_aarch64_set_options (link_info.output_bfd, &link_info,
 				 no_enum_size_warning,
 				 no_wchar_size_warning,
 				 pic_veneer);

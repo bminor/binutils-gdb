@@ -1,3 +1,15 @@
+2013-04-24  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* emulparams/aarch64elf.sh: Define ELFSIZE=64.
+	* emulparams/aarch64linux.sh: Ditto.
+	* emultempl/aarch64elf.em (aarch64_elf_before_allocation):
+	Replace elf64 with elf${ELFSIZE}.
+	(elf64_aarch64_add_stub_section): Likewise.
+	(build_section_lists): Likewise.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+	(gld${EMULATION_NAME}_finish): Likewise.
+	(aarch64_elf_create_output_section_statements): Likewise.
+
 2013-04-24  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/15389
