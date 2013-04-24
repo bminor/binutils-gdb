@@ -3341,6 +3341,8 @@ trace_save (const char *filename, struct trace_file_writer *writer,
      target is losing, we can get out without touching files.  */
   status = target_get_trace_status (ts);
 
+  writer->ops->start (writer, filename);
+
   writer->ops->write_header (writer);
 
   /* Write descriptive info.  */

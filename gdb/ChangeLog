@@ -1,3 +1,7 @@
+2013-04-22  Keith Seitz  <keiths@redhat.com>
+
+	* tracepoint.c (trace_save):  Call the writer's start method.
+
 2013-04-24  Muhammad Bilal  <mbilal@codesourcery.com>
 
 	PR gdb/10462
