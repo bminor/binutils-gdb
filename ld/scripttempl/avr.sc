@@ -232,6 +232,7 @@ SECTIONS
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment 0 : { *(.comment) } 
+  .note.gnu.build-id : { *(.note.gnu.build-id) }
 EOF
 
 source $srcdir/scripttempl/DWARF.sc
