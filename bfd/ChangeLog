@@ -1,9 +1,12 @@
 2013-04-19  Luca Pizzamiglio  <luca.pizzamiglio@gmail.com>
 
-	* ecoff.c: casting the return value of BFD_ALIGN to int
-	* elf32-tic6x.c: removing unused variables
-	* elf32-v850.c: redefine the type of a variable (int -> bfd_vma)
-	* vms-alpha.c: initialize a variable
+	* ecoff.c (_bfd_ecoff_sizeof_headers): Cast the return value of
+	BFD_ALIGN to int.
+	* elf32-tic6x.c (elf32_tic6x_size_dynamic_sections): Remove unused
+	variables.
+	* elf32-v850.c (v850_elf_relax_section): Redefine the type of 'i'
+	to bfd_vma.
+	* vms-alpha.c (evax_bfd_print_etir): Initialize sec_len.
 
 2013-04-22  Alan Modra  <amodra@gmail.com>
 
