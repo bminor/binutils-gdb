@@ -259,3 +259,10 @@ gdb_test "show verbose" "Verbose printing of informational messages is on..*" "s
 gdb_test_no_output "set verbose off" "set verbose off" 
 #test show verbose off
 gdb_test "show verbose" "Verbosity is off..*" "show verbose (off)" 
+#test argument must be preceded by space
+foreach x {"history file" "solib-search-path" "data-directory"} {
+    foreach y {"/home/" "." "~/home" "=home"} {
+        gdb_test "set $x$y" "Argument must be preceded by space." \
+            "$x is not set to $y"
+    }
+}

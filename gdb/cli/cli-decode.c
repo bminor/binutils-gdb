@@ -1556,6 +1556,9 @@ lookup_cmd (const char **line, struct cmd_list_element *list, char *cmdtype,
     }
   else
     {
+      if (c->type == set_cmd && **line != '\0' && !isspace (**line))
+        error (_("Argument must be preceded by space."));
+
       /* We've got something.  It may still not be what the caller
          wants (if this command *needs* a subcommand).  */
       while (**line == ' ' || **line == '\t')

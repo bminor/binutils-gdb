@@ -1,3 +1,9 @@
+2013-04-24  Muhammad Bilal  <mbilal@codesourcery.com>
+
+	PR gdb/10462
+	* cli/cli-decode.c (lookup_command): Show an error if there is no space
+	before argument.
+
 2013-04-23  Tom Tromey  <tromey@redhat.com>
 
 	* common/filestuff.c: Check USE_WIN32API before including
