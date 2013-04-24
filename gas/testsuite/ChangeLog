@@ -1,3 +1,8 @@
+2013-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/rex.d: Skip x86_64-*-elf*.
+	* gas/i386/ilp32/rex.d: Likewise.
+
 2013-04-15  Julian Brown  <julian@codesourcery.com>
 
 	* gas/all/gas.exp (sleb128-7): Don't run for tic4x, tic54x.

@@ -1,3 +1,10 @@
+2013-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* configure.tgt (targ_extra_emuls): Adds elf32_x86_64 for
+	x86_64-*-elf*.
+	(targ_extra_libpath): Likewise.
+	(tdir_elf_i386): Replace x86_64 with i386 for x86_64-*-elf*.
+
 2013-04-24  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* emulparams/aarch64elf.sh: Define ELFSIZE=64.

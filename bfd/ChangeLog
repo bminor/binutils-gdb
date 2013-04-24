@@ -1,3 +1,8 @@
+2013-04-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config.bfd (targ_selvecs): Add bfd_elf32_x86_64_vec for
+	x86_64-*-elf*.
+
 2013-04-24  Roland McGrath  <mcgrathr@google.com>
 
 	* elf32-arm.c (elf32_arm_allocate_plt_entry): If HTAB->nacl_p,
