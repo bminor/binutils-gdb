@@ -1,3 +1,13 @@
+2013-04-24  Roland McGrath  <mcgrathr@google.com>
+
+	* elf32-arm.c (elf32_arm_allocate_plt_entry): If HTAB->nacl_p,
+	allocate space for PLT header even if IS_IPLT_ENTRY.
+	(arm_nacl_put_plt0): New function, broken out of ...
+	(elf32_arm_finish_dynamic_sections): ... here.  Call it.
+	If HTAB->nacl_p, set up the PLT header in .iplt too.
+	(elf32_arm_output_arch_local_syms): If HTAB->nacl_p, write
+	a mapping symbol for the start of .iplt too.
+
 2013-03-25  Tristan Gingold  <gingold@adacore.com>
 
 	* Makefile.am (RELEASE): Unset.
