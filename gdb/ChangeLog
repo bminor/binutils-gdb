@@ -1,3 +1,7 @@
+2013-04-24  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (setup_type_unit_groups): Fix comment.
+
 2013-04-22  Keith Seitz  <keiths@redhat.com>
 
 	* tracepoint.c (trace_save):  Call the writer's start method.

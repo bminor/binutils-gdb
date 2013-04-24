@@ -8186,7 +8186,7 @@ setup_type_unit_groups (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_stmt_list, cu);
 
   /* If we're using .gdb_index (includes -readnow) then
-     per_cu->s.type_unit_group may not have been set up yet.  */
+     per_cu->type_unit_group may not have been set up yet.  */
   if (sig_type->type_unit_group == NULL)
     sig_type->type_unit_group = get_type_unit_group (cu, attr);
   tu_group = sig_type->type_unit_group;
