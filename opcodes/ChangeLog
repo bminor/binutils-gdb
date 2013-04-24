@@ -1,3 +1,8 @@
+2013-04-24  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-opc.c (nios2_builtin_reg): Rename "fstatus" control register
+	to "eccinj".
+
 2013-04-17  Wei-chen Wang  <cole945@gmail.com>
 
 	PR binutils/15369

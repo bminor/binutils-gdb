@@ -86,7 +86,7 @@ const struct nios2_reg nios2_builtin_regs[] = {
   {"pteaddr", 8},
   {"tlbacc", 9},
   {"tlbmisc", 10},
-  {"fstatus", 11},
+  {"eccinj", 11},
   {"badaddr", 12},
   {"config", 13},
   {"mpubase", 14},
