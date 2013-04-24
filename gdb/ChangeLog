@@ -1,3 +1,10 @@
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* acinclude.m4: Include common.m4.
+	* common/common.m4: New file.
+	* configure, config.in: Rebuild.
+	* configure.ac: Use GDB_AC_COMMON.
+
 2013-11-08  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention that "set debug symtab-create" now accepts a

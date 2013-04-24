@@ -70,8 +70,14 @@
 /* Define to 1 if you have the `fdwalk' function. */
 #undef HAVE_FDWALK
 
+/* Define to 1 if you have the `getrlimit' function. */
+#undef HAVE_GETRLIMIT
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
+
+/* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
+#undef HAVE_LANGINFO_CODESET
 
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
@@ -93,6 +99,9 @@
 
 /* Define if the target supports PTRACE_PEEKUSR for register access. */
 #undef HAVE_LINUX_USRREGS
+
+/* Define to 1 if you have the <locale.h> header file. */
+#undef HAVE_LOCALE_H
 
 /* Define if <thread_db.h> has lwpid_t. */
 #undef HAVE_LWPID_T
@@ -117,6 +126,9 @@
 
 /* Define if you support the personality syscall. */
 #undef HAVE_PERSONALITY
+
+/* Define to 1 if you have the `pipe' function. */
+#undef HAVE_PIPE
 
 /* Define to 1 if you have the `pipe2' function. */
 #undef HAVE_PIPE2
@@ -155,6 +167,9 @@
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
 
+/* Define to 1 if you have the `socketpair' function. */
+#undef HAVE_SOCKETPAIR
+
 /* Define to 1 if the system has the type `socklen_t'. */
 #undef HAVE_SOCKLEN_T
 
@@ -192,6 +207,9 @@
 
 /* Define to 1 if you have the <sys/reg.h> header file. */
 #undef HAVE_SYS_REG_H
+
+/* Define to 1 if you have the <sys/resource.h> header file. */
+#undef HAVE_SYS_RESOURCE_H
 
 /* Define to 1 if you have the <sys/socket.h> header file. */
 #undef HAVE_SYS_SOCKET_H

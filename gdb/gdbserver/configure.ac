@@ -88,6 +88,8 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 AC_CHECK_FUNCS(pread pwrite pread64 readlink fdwalk pipe2)
 AC_REPLACE_FUNCS(vasprintf vsnprintf)
 
+GDB_AC_COMMON
+
 # Check for UST
 ustlibs=""
 ustinc=""

@@ -52,6 +52,8 @@ sinclude([../config/codeset.m4])
 
 sinclude([../config/zlib.m4])
 
+m4_include([common/common.m4])
+
 ## ----------------------------------------- ##
 ## ANSIfy the C compiler whenever possible.  ##
 ## From Franc,ois Pinard                     ##

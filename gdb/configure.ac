@@ -1168,6 +1168,7 @@ AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid getgid \
 		setrlimit getrlimit posix_madvise waitpid lstat \
 		fdwalk pipe2 ptrace64])
 AM_LANGINFO_CODESET
+GDB_AC_COMMON
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
