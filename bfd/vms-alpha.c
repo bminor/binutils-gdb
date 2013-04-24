@@ -6043,7 +6043,7 @@ evax_bfd_print_etir (FILE *file, const char *name,
                      unsigned char *rec, unsigned int rec_len)
 {
   unsigned int off = sizeof (struct vms_egsd);
-  unsigned int sec_len;
+  unsigned int sec_len = 0;
 
   fprintf (file, _("  %s (len=%u+%u):\n"), name,
            (unsigned)(rec_len - sizeof (struct vms_eobjrec)),

@@ -3141,7 +3141,7 @@ v850_elf_relax_section (bfd *abfd,
 
 	  if (alignmoveto < alignto)
 	    {
-	      unsigned int i;
+	      bfd_vma i;
 
 	      align_pad_size = alignto - alignmoveto;
 #ifdef DEBUG_RELAX

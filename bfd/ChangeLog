@@ -1,3 +1,10 @@
+2013-04-19  Luca Pizzamiglio  <luca.pizzamiglio@gmail.com>
+
+	* ecoff.c: casting the return value of BFD_ALIGN to int
+	* elf32-tic6x.c: removing unused variables
+	* elf32-v850.c: redefine the type of a variable (int -> bfd_vma)
+	* vms-alpha.c: initialize a variable
+
 2013-04-22  Alan Modra  <amodra@gmail.com>
 
 	PR ld/15382
