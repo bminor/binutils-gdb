@@ -1406,6 +1406,10 @@ raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
       if (res > 0)
 	break;
 
+      /* Stop if the target reports that the memory is not available.  */
+      if (res == TARGET_XFER_E_UNAVAILABLE)
+	break;
+
       /* We want to continue past core files to executables, but not
 	 past a running target's memory.  */
       if (ops->to_has_all_memory (ops))

@@ -41,6 +41,9 @@ static struct target_ops record_btrace_ops;
 /* A new thread observer enabling branch tracing for the new thread.  */
 static struct observer *record_btrace_thread_observer;
 
+/* Temporarily allow memory accesses.  */
+static int record_btrace_allow_memory_access;
+
 /* Print a record-btrace debug message.  Use do ... while (0) to avoid
    ambiguities when used in if statements.  */
 
@@ -752,6 +755,112 @@ record_btrace_is_replaying (void)
   return 0;
 }
 
+/* The to_xfer_partial method of target record-btrace.  */
+
+static LONGEST
+record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
+			    const char *annex, gdb_byte *readbuf,
+			    const gdb_byte *writebuf, ULONGEST offset,
+			    ULONGEST len)
+{
+  struct target_ops *t;
+
+  /* Filter out requests that don't make sense during replay.  */
+  if (!record_btrace_allow_memory_access && record_btrace_is_replaying ())
+    {
+      switch (object)
+	{
+	case TARGET_OBJECT_MEMORY:
+	  {
+	    struct target_section *section;
+
+	    /* We do not allow writing memory in general.  */
+	    if (writebuf != NULL)
+	      return TARGET_XFER_E_UNAVAILABLE;
+
+	    /* We allow reading readonly memory.  */
+	    section = target_section_by_addr (ops, offset);
+	    if (section != NULL)
+	      {
+		/* Check if the section we found is readonly.  */
+		if ((bfd_get_section_flags (section->the_bfd_section->owner,
+					    section->the_bfd_section)
+		     & SEC_READONLY) != 0)
+		  {
+		    /* Truncate the request to fit into this section.  */
+		    len = min (len, section->endaddr - offset);
+		    break;
+		  }
+	      }
+
+	    return TARGET_XFER_E_UNAVAILABLE;
+	  }
+	}
+    }
+
+  /* Forward the request.  */
+  for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
+    if (ops->to_xfer_partial != NULL)
+      return ops->to_xfer_partial (ops, object, annex, readbuf, writebuf,
+				   offset, len);
+
+  return TARGET_XFER_E_UNAVAILABLE;
+}
+
+/* The to_insert_breakpoint method of target record-btrace.  */
+
+static int
+record_btrace_insert_breakpoint (struct target_ops *ops,
+				 struct gdbarch *gdbarch,
+				 struct bp_target_info *bp_tgt)
+{
+  volatile struct gdb_exception except;
+  int old, ret;
+
+  /* Inserting breakpoints requires accessing memory.  Allow it for the
+     duration of this function.  */
+  old = record_btrace_allow_memory_access;
+  record_btrace_allow_memory_access = 1;
+
+  ret = 0;
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    ret = forward_target_insert_breakpoint (ops->beneath, gdbarch, bp_tgt);
+
+  record_btrace_allow_memory_access = old;
+
+  if (except.reason < 0)
+    throw_exception (except);
+
+  return ret;
+}
+
+/* The to_remove_breakpoint method of target record-btrace.  */
+
+static int
+record_btrace_remove_breakpoint (struct target_ops *ops,
+				 struct gdbarch *gdbarch,
+				 struct bp_target_info *bp_tgt)
+{
+  volatile struct gdb_exception except;
+  int old, ret;
+
+  /* Removing breakpoints requires accessing memory.  Allow it for the
+     duration of this function.  */
+  old = record_btrace_allow_memory_access;
+  record_btrace_allow_memory_access = 1;
+
+  ret = 0;
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    ret = forward_target_remove_breakpoint (ops->beneath, gdbarch, bp_tgt);
+
+  record_btrace_allow_memory_access = old;
+
+  if (except.reason < 0)
+    throw_exception (except);
+
+  return ret;
+}
+
 /* The to_fetch_registers method of target record-btrace.  */
 
 static void
@@ -929,6 +1038,9 @@ init_record_btrace_ops (void)
   ops->to_call_history_from = record_btrace_call_history_from;
   ops->to_call_history_range = record_btrace_call_history_range;
   ops->to_record_is_replaying = record_btrace_is_replaying;
+  ops->to_xfer_partial = record_btrace_xfer_partial;
+  ops->to_remove_breakpoint = record_btrace_remove_breakpoint;
+  ops->to_insert_breakpoint = record_btrace_insert_breakpoint;
   ops->to_fetch_registers = record_btrace_fetch_registers;
   ops->to_store_registers = record_btrace_store_registers;
   ops->to_prepare_to_store = record_btrace_prepare_to_store;
