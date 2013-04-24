@@ -1,3 +1,8 @@
+2013-04-25  Hui Zhu  <hui@codesourcery.com>
+
+	* breakpoint.c (build_target_command_list): Change loc->cond_bytecode
+	to loc->cmd_bytecode.
+
 2013-04-24  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (setup_type_unit_groups): Fix comment.
