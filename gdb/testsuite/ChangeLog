@@ -1,13 +1,11 @@
 2013-04-25  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15293
-
 	* gdb.base/dprintf.exp: Add ignore command.
 
 2013-04-24  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15165
-
 	* gdb.base/save-bp.exp: Add test for dprintf.
 
 2013-04-19  Vladimir Kargov  <kargov@gmail.com>
