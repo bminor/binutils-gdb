@@ -1,3 +1,8 @@
+2013-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.arch/arm-bl-branch-dest.c: New file.
+	* gdb.arch/arm-bl-branch-dest.exp: Likewise.
+
 2013-04-25  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15293
