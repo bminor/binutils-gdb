@@ -1,3 +1,8 @@
+2013-04-25  Alan Modra  <amodra@gmail.com>
+
+	* configure.in: Allow little-endian linux.
+	* configure: Regenerate.
+
 2013-04-24  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* config/tc-nios2.c (nios2_control_register_arg_p): Rename

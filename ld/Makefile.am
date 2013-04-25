@@ -247,6 +247,7 @@ ALL_EMULATION_SOURCES = \
 	eelf32lm32fd.c \
 	eelf32lmip.c \
 	eelf32lppc.c \
+	eelf32lppclinux.c \
 	eelf32lppcnto.c \
 	eelf32lppcsim.c \
 	eelf32lsmip.c \
@@ -1106,6 +1107,12 @@ eelf32lppc.c: $(srcdir)/emulparams/elf32lppc.sh \
   ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32lppc "$(tdir_elf32lppc)"
+eelf32lppclinux.c: $(srcdir)/emulparams/elf32lppclinux.sh \
+  $(srcdir)/emulparams/elf32lppc.sh $(srcdir)/emulparams/elf32ppc.sh \
+  $(srcdir)/emulparams/elf32ppccommon.sh $(srcdir)/emultempl/ppc32elf.em \
+  ldemul-list.h \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} elf32lppclinux "$(tdir_elf32lppclinux)"
 eelf32lppcnto.c: $(srcdir)/emulparams/elf32lppcnto.sh \
   $(srcdir)/emulparams/elf32ppc.sh $(srcdir)/emulparams/elf32ppccommon.sh \
   $(srcdir)/emultempl/ppc32elf.em $(ELF_DEPS) \

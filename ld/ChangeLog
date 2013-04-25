@@ -1,3 +1,13 @@
+2013-04-25  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32lppclinux.c.
+	(eelf32lppclinux.c): New rule.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Merge powerpc-linux and other powerpc-elf targets
+	with corresponding little-endian targets.
+	* emulparams/elf32lppc.sh: Update comment.
+	* emulparams/elf32lppclinux.sh: New.
+
 2013-04-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.tgt (targ_extra_emuls): Adds elf32_x86_64 for

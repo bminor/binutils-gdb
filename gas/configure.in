@@ -176,12 +176,6 @@ changequote([,])dnl
 	AC_DEFINE(AIX_WEAK_SUPPORT, 1,
 		  [Define if using AIX 5.2 value for C_WEAKEXT.])
 	;;
-      ppc-*-linux-*)
-	case "$endian" in
-	  big)  ;;
-	  *)    AC_MSG_ERROR(GNU/Linux must be configured big endian) ;;
-	esac
-	;;
       ppc-*-solaris*)
 	if test ${this_target} = $target; then
 	  AC_DEFINE(TARGET_SOLARIS_COMMENT, 1,

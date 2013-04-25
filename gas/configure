@@ -11987,12 +11987,6 @@ $as_echo "$as_me: WARNING: GAS support for ${generic_target} is preliminary and 
 $as_echo "#define AIX_WEAK_SUPPORT 1" >>confdefs.h
 
 	;;
-      ppc-*-linux-*)
-	case "$endian" in
-	  big)  ;;
-	  *)    as_fn_error "GNU/Linux must be configured big endian" "$LINENO" 5 ;;
-	esac
-	;;
       ppc-*-solaris*)
 	if test ${this_target} = $target; then
 
