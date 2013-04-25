@@ -905,6 +905,7 @@ ax_printf (CORE_ADDR fn, CORE_ADDR chan, const char *format,
     }
 
   free_format_pieces (fpieces);
+  fflush (stdout);
 }
 
 /* The agent expression evaluator, as specified by the GDB docs. It
