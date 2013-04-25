@@ -1,7 +1,6 @@
 2013-04-25  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15186
-
 	* ax.c (ax_printf): Add fflush.
 
 2013-04-22  Tom Tromey  <tromey@redhat.com>
