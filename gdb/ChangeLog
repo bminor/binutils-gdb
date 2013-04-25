@@ -1,3 +1,9 @@
+2013-04-25  Hui Zhu  <hui@codesourcery.com>
+
+	PR gdb/15293
+
+	* breakpoint.c (bpstat_what): Add BPSTAT_WHAT_SINGLE to bp_dprintf.
+
 2013-04-24  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15165

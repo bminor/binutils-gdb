@@ -40,6 +40,8 @@ gdb_breakpoint "main"
 gdb_test "dprintf foo,\"At foo entry\\n\"" \
   "Dprintf .*"
 
+gdb_test "ignore \$bpnum 1" ".*Will ignore next crossing of breakpoint.*"
+
 gdb_test "dprintf $dp_location1,\"arg=%d, g=%d\\n\", arg, g" \
   "Dprintf .*"
 
@@ -61,7 +63,7 @@ gdb_run_cmd
 
 gdb_test "" "Breakpoint"
 
-gdb_test "continue" "At foo entry.*arg=1234, g=1234.*" "1st dprintf, gdb"
+gdb_test "continue" "arg=1234, g=1234.*" "1st dprintf, gdb"
 
 gdb_test "continue" "At foo entry.*arg=1235, g=2222.*" "2nd dprintf, gdb"
 
