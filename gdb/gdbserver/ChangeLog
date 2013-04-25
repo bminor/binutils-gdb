@@ -1,3 +1,8 @@
+2013-04-25  Hui Zhu  <hui@codesourcery.com>
+
+	PR gdb/15186
+	* ax.c (ax_printf): Add fflush.
+
 2013-03-15  Tony Theodore  <tonyt@logyst.com>
 
 	PR build/9098:
