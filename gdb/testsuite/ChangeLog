@@ -1,3 +1,7 @@
+2013-04-25  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/nostaticblock.exp: New file.
+
 2013-04-24  Muhammad Bilal  <mbilal@codesourcery.com>
 
 	PR gdb/10462

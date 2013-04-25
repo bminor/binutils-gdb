@@ -1,3 +1,9 @@
+2013-04-25  Andreas Kaufmann  <Andreas.Kaufmann@synopsys.com>
+
+	PR corefiles/14983:
+	* dwarf2read.c (process_full_comp_unit): Always create a static
+	block.
+
 2013-04-25  Hui Zhu  <hui@codesourcery.com>
 
 	* breakpoint.c (build_target_command_list): Change loc->cond_bytecode

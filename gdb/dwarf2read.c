@@ -7132,8 +7132,7 @@ process_full_comp_unit (struct dwarf2_per_cu_data *per_cu,
   get_scope_pc_bounds (cu->dies, &lowpc, &highpc, cu);
 
   static_block
-    = end_symtab_get_static_block (highpc + baseaddr, objfile, 0,
-				   per_cu->imported_symtabs != NULL);
+    = end_symtab_get_static_block (highpc + baseaddr, objfile, 0, 1);
 
   /* If the comp unit has DW_AT_ranges, it may have discontiguous ranges.
      Also, DW_AT_ranges may record ranges not belonging to any child DIEs
