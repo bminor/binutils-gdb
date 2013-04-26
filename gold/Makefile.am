@@ -269,7 +269,7 @@ ld2_LDFLAGS = -Bgcctestdir2/
 bootstrap-test: ld2
 	rm -f $@
 	echo "#!/bin/sh" > $@
-	echo "cmp ld1 ld2" > $@
+	echo "cmp ld1 ld2" >> $@
 	chmod +x $@
 
 libgold-1-r.o: gcctestdir1/ld libgold.a
@@ -296,11 +296,68 @@ ld2_r_LDFLAGS = -Bgcctestdir2-r/
 bootstrap-test-r: ld2-r
 	rm -f $@
 	echo "#!/bin/sh" > $@
-	echo "cmp ld1-r ld2-r" > $@
+	echo "cmp ld1-r ld2-r" >> $@
 	chmod +x $@
 
 check_PROGRAMS = ld1 ld2 ld1-r ld2-r
 TESTS = bootstrap-test bootstrap-test-r
+
+# Verify that changing the number of threads doesn't change the
+# treehash computation, by building ld1 and ld3 the same way except
+# for the number of threads.  However, the build ID should change if
+# we change the chunk size for --build-id=tree, so ld4 should be
+# different.  We run the latter test even if multithreading is unavailable,
+# because the treehash can still operate in that mode.
+check_PROGRAMS += ld4
+TESTS += bootstrap-test-treehash-chunksize
+
+gcctestdir3/ld: ld-new
+	test -d gcctestdir3 || mkdir -p gcctestdir3
+	rm -f gcctestdir3/ld
+	(cd gcctestdir3 && $(LN_S) ../ld-new ld)
+
+ld3_SOURCES = $(sources_var)
+ld3_DEPENDENCIES = $(deps_var) gcctestdir3/ld
+ld3_LDADD = $(ldadd_var)
+ld3_LDFLAGS = -Bgcctestdir3/
+
+gcctestdir4/ld: ld-new
+	test -d gcctestdir4 || mkdir -p gcctestdir4
+	rm -f gcctestdir4/ld
+	(cd gcctestdir4 && $(LN_S) ../ld-new ld)
+
+ld4_SOURCES = $(sources_var)
+ld4_DEPENDENCIES = $(deps_var) gcctestdir4/ld
+ld4_LDADD = $(ldadd_var)
+ld4_LDFLAGS = -Bgcctestdir4/
+
+ld1_LDFLAGS += -Wl,--build-id=tree -Wl,--build-id-chunk-size-for-treehash=12345 -Wl,--build-id-min-file-size-for-treehash=0
+ld2_LDFLAGS += -Wl,--build-id=tree -Wl,--build-id-chunk-size-for-treehash=12345 -Wl,--build-id-min-file-size-for-treehash=0
+ld3_LDFLAGS += -Wl,--build-id=tree -Wl,--build-id-chunk-size-for-treehash=12345 -Wl,--build-id-min-file-size-for-treehash=0
+ld4_LDFLAGS += -Wl,--build-id=tree -Wl,--build-id-chunk-size-for-treehash=12346 -Wl,--build-id-min-file-size-for-treehash=0
+
+if THREADS
+
+ld1_LDFLAGS += -Wl,--thread-count=3
+ld2_LDFLAGS += -Wl,--thread-count=3
+ld3_LDFLAGS += -Wl,--thread-count=13
+ld4_LDFLAGS += -Wl,--thread-count=3
+check_PROGRAMS += ld3
+TESTS += bootstrap-test-treehash-chunksize
+
+bootstrap-test-treehash: ld1 ld3
+	rm -f $@
+	echo "#!/bin/sh" > $@
+	echo "cmp ld1 ld3" >> $@
+	chmod +x $@
+
+endif
+
+bootstrap-test-treehash-chunksize: ld1 ld4
+	rm -f $@
+	echo "#!/bin/sh" > $@
+	echo "cmp ld1 ld4 | grep ." >> $@
+	chmod +x $@
 
 endif
 endif

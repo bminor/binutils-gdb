@@ -678,9 +678,18 @@ class General_options
   DEFINE_bool(Bsymbolic_functions, options::ONE_DASH, '\0', false,
 	      N_("Bind defined function symbols locally"), NULL);
 
-  DEFINE_optional_string(build_id, options::TWO_DASHES, '\0', "sha1",
+  DEFINE_optional_string(build_id, options::TWO_DASHES, '\0', "tree",
 			 N_("Generate build ID note"),
 			 N_("[=STYLE]"));
+
+  DEFINE_uint64(build_id_chunk_size_for_treehash,
+                options::TWO_DASHES, '\0', 2 << 20,
+                N_("Chunk size for '--build-id=tree'"), N_("SIZE"));
+
+  DEFINE_uint64(build_id_min_file_size_for_treehash, options::TWO_DASHES,
+                '\0', 40 << 20,
+                N_("Minimum output file size for '--build-id=tree' to work"
+                   " differently than '--build-id=sha1'"), N_("SIZE"));
 
   DEFINE_bool(check_sections, options::TWO_DASHES, '\0', true,
 	      N_("Check segment addresses for overlaps (default)"),

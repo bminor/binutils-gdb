@@ -874,6 +874,9 @@ queue_final_tasks(const General_options& options,
       final_blocker = new_final_blocker;
     }
 
+  // Create tasks for tree-style build ID computation, if necessary.
+  final_blocker = layout->queue_build_id_tasks(workqueue, final_blocker, of);
+
   // Queue a task to close the output file.  This will be blocked by
   // FINAL_BLOCKER.
   workqueue->queue(new Task_function(new Close_task_runner(&options, layout,

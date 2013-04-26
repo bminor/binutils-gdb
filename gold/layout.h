@@ -892,6 +892,13 @@ class Layout
 			  const Output_data_reloc_generic* dyn_rel,
 			  bool add_debug, bool dynrel_includes_plt);
 
+  // If a treehash is necessary to compute the build ID, then queue
+  // the necessary tasks and return a blocker that will unblock when
+  // they finish.  Otherwise return BUILD_ID_BLOCKER.
+  Task_token*
+  queue_build_id_tasks(Workqueue* workqueue, Task_token* build_id_blocker,
+                       Output_file* of);
+
   // Compute and write out the build ID if needed.
   void
   write_build_id(Output_file*) const;
@@ -1354,6 +1361,12 @@ class Layout
   Gdb_index* gdb_index_data_;
   // The space for the build ID checksum if there is one.
   Output_section_data* build_id_note_;
+  // Temporary storage for tree hash of build ID.
+  unsigned char* array_of_hashes_;
+  // Size of array_of_hashes_ (in bytes).
+  size_t size_of_array_of_hashes_;
+  // Input view for computing tree hash of build ID.  Freed in write_build_id().
+  const unsigned char* input_view_;
   // The output section containing dwarf abbreviations
   Output_reduced_debug_abbrev_section* debug_abbrev_;
   // The output section containing the dwarf debug info tree

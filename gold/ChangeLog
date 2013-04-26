@@ -1,3 +1,21 @@
+2013-04-26  Geoff Pike  <gpike@chromium.org>
+
+	* gold.cc (queue_final_tasks): invoke layout->queue_build_id_tasks().
+	* layout.cc (Hash_task): New class.
+	(Layout::queue_build_id_tasks): New function.
+	(Layout::write_build_id): Handle single-thread portion of build ID
+	computation.  (In some cases, all of it is single-threaded.)  Replace
+	{sha1,md5}_process_bytes with {sha1,md5}_buffer to get the same
+	functionality in fewer lines of code.
+	* layout.h (Layout::queue_build_id_tasks): New function declaration.
+	* options.h (General_options): make "--build-id" default to tree
+	rather than sha1.  Add two new options related to --build-id=tree:
+	--build-id-chunk-size-for-treehash and
+	--build-id-min-file-size-for-treehash.
+	* Makefile.am: add testing of --build-id=tree and related new options
+	(these tests will be invoked by "make check").
+	* Makefile.in: Regenerate.
+
 2013-04-25  Alan Modra  <amodra@gmail.com>
 
 	* configure.tgt: Add powerpcle and powerpc64le.

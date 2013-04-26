@@ -236,6 +236,54 @@ Free_list::print_stats()
 	  program_name, Free_list::num_allocate_visits);
 }
 
+// A Hash_task computes the MD5 checksum of an array of char.
+// It has a blocker on either side (i.e., the task cannot run until
+// the first is unblocked, and it unblocks the second after running).
+
+class Hash_task : public Task
+{
+ public:
+  Hash_task(const unsigned char* src,
+            size_t size,
+            unsigned char* dst,
+            Task_token* build_id_blocker,
+            Task_token* final_blocker)
+    : src_(src), size_(size), dst_(dst), build_id_blocker_(build_id_blocker),
+      final_blocker_(final_blocker)
+  { }
+
+  void
+  run(Workqueue*)
+  { md5_buffer(reinterpret_cast<const char*>(src_), size_, dst_); }
+
+  Task_token*
+  is_runnable();
+
+  // Unblock FINAL_BLOCKER_ when done.
+  void
+  locks(Task_locker* tl)
+  { tl->add(this, this->final_blocker_); }
+
+  std::string
+  get_name() const
+  { return "Hash_task"; }
+
+ private:
+  const unsigned char* const src_;
+  const size_t size_;
+  unsigned char* const dst_;
+  Task_token* const build_id_blocker_;
+  Task_token* const final_blocker_;
+};
+
+Task_token*
+Hash_task::is_runnable()
+{
+  if (this->build_id_blocker_->is_blocked())
+    return this->build_id_blocker_;
+  return NULL;
+}
+
 // Layout::Relaxation_debug_check methods.
 
 // Check that sections and special data are in reset states.
@@ -398,6 +446,9 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     eh_frame_hdr_section_(NULL),
     gdb_index_data_(NULL),
     build_id_note_(NULL),
+    array_of_hashes_(NULL),
+    size_of_array_of_hashes_(0),
+    input_view_(NULL),
     debug_abbrev_(NULL),
     debug_info_(NULL),
     group_signatures_(),
@@ -2924,7 +2975,7 @@ Layout::create_build_id()
   std::string desc;
   if (strcmp(style, "md5") == 0)
     descsz = 128 / 8;
-  else if (strcmp(style, "sha1") == 0)
+  else if ((strcmp(style, "sha1") == 0) || (strcmp(style, "tree") == 0))
     descsz = 160 / 8;
   else if (strcmp(style, "uuid") == 0)
     {
@@ -5212,9 +5263,53 @@ Layout::write_sections_after_input_sections(Output_file* of)
   this->section_headers_->write(of);
 }
 
-// If the build ID requires computing a checksum, do so here, and
-// write it out.  We compute a checksum over the entire file because
-// that is simplest.
+// Build IDs can be computed as a "flat" sha1 or md5 of a string of bytes,
+// or as a "tree" where each chunk of the string is hashed and then those
+// hashes are put into a (much smaller) string which is hashed with sha1.
+// We compute a checksum over the entire file because that is simplest.
+
+Task_token*
+Layout::queue_build_id_tasks(Workqueue* workqueue, Task_token* build_id_blocker,
+                             Output_file* of)
+{
+  const size_t filesize = (this->output_file_size() <= 0 ? 0
+                           : static_cast<size_t>(this->output_file_size()));
+  if (this->build_id_note_ != NULL
+      && strcmp(parameters->options().build_id(), "tree") == 0
+      && parameters->options().build_id_chunk_size_for_treehash() > 0
+      && filesize > 0
+      && (filesize >=
+          parameters->options().build_id_min_file_size_for_treehash()))
+    {
+      static const size_t MD5_OUTPUT_SIZE_IN_BYTES = 16;
+      const size_t chunk_size =
+          parameters->options().build_id_chunk_size_for_treehash();
+      const size_t num_hashes = ((filesize - 1) / chunk_size) + 1;
+      Task_token* post_hash_tasks_blocker = new Task_token(true);
+      post_hash_tasks_blocker->add_blockers(num_hashes);
+      this->size_of_array_of_hashes_ = num_hashes * MD5_OUTPUT_SIZE_IN_BYTES;
+      const unsigned char* src = of->get_input_view(0, filesize);
+      this->input_view_ = src;
+      unsigned char *dst = new unsigned char[this->size_of_array_of_hashes_];
+      this->array_of_hashes_ = dst;
+      for (size_t i = 0, src_offset = 0; i < num_hashes;
+           i++, dst += MD5_OUTPUT_SIZE_IN_BYTES, src_offset += chunk_size)
+        {
+          size_t size = std::min(chunk_size, filesize - src_offset);
+          workqueue->queue(new Hash_task(src + src_offset,
+                                         size,
+                                         dst,
+                                         build_id_blocker,
+                                         post_hash_tasks_blocker));
+        }
+      return post_hash_tasks_blocker;
+    }
+  return build_id_blocker;
+}
+
+// If a tree-style build ID was requested, the parallel part of that computation
+// is already done, and the final hash-of-hashes is computed here.  For other
+// types of build IDs, all the work is done here.
 
 void
 Layout::write_build_id(Output_file* of) const
@@ -5222,34 +5317,39 @@ Layout::write_build_id(Output_file* of) const
   if (this->build_id_note_ == NULL)
     return;
 
-  const unsigned char* iv = of->get_input_view(0, this->output_file_size_);
-
   unsigned char* ov = of->get_output_view(this->build_id_note_->offset(),
-					  this->build_id_note_->data_size());
+                                          this->build_id_note_->data_size());
 
-  const char* style = parameters->options().build_id();
-  if (strcmp(style, "sha1") == 0)
+  if (this->array_of_hashes_ == NULL)
     {
-      sha1_ctx ctx;
-      sha1_init_ctx(&ctx);
-      sha1_process_bytes(iv, this->output_file_size_, &ctx);
-      sha1_finish_ctx(&ctx, ov);
-    }
-  else if (strcmp(style, "md5") == 0)
-    {
-      md5_ctx ctx;
-      md5_init_ctx(&ctx);
-      md5_process_bytes(iv, this->output_file_size_, &ctx);
-      md5_finish_ctx(&ctx, ov);
+      const size_t output_file_size = this->output_file_size();
+      const unsigned char* iv = of->get_input_view(0, output_file_size);
+      const char* style = parameters->options().build_id();
+
+      // If we get here with style == "tree" then the output must be
+      // too small for chunking, and we use SHA-1 in that case.
+      if ((strcmp(style, "sha1") == 0) || (strcmp(style, "tree") == 0))
+        sha1_buffer(reinterpret_cast<const char*>(iv), output_file_size, ov);
+      else if (strcmp(style, "md5") == 0)
+        md5_buffer(reinterpret_cast<const char*>(iv), output_file_size, ov);
+      else
+        gold_unreachable();
+
+      of->free_input_view(0, output_file_size, iv);
     }
   else
-    gold_unreachable();
+    {
+      // Non-overlapping substrings of the output file have been hashed.
+      // Compute SHA-1 hash of the hashes.
+      sha1_buffer(reinterpret_cast<const char*>(this->array_of_hashes_),
+                  this->size_of_array_of_hashes_, ov);
+      delete[] this->array_of_hashes_;
+      of->free_input_view(0, this->output_file_size(), this->input_view_);
+    }
 
   of->write_output_view(this->build_id_note_->offset(),
 			this->build_id_note_->data_size(),
 			ov);
-
-  of->free_input_view(0, this->output_file_size_, iv);
 }
 
 // Write out a binary file.  This is called after the link is
@@ -5439,12 +5539,14 @@ Write_after_input_sections_task::run(Workqueue*)
 
 // Close_task_runner methods.
 
-// Run the task--close the file.
+// Finish up the build ID computation, if necessary, and write a binary file,
+// if necessary.  Then close the output file.
 
 void
 Close_task_runner::run(Workqueue*, const Task*)
 {
-  // If we need to compute a checksum for the BUILD if, we do so here.
+  // At this point the multi-threaded part of the build ID computation,
+  // if any, is done.  See queue_build_id_tasks().
   this->layout_->write_build_id(this->of_);
 
   // If we've been asked to create a binary file, we do so here.
