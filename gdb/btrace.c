@@ -781,9 +781,11 @@ btrace_clear (struct thread_info *tp)
 
   xfree (btinfo->insn_history);
   xfree (btinfo->call_history);
+  xfree (btinfo->replay);
 
   btinfo->insn_history = NULL;
   btinfo->call_history = NULL;
+  btinfo->replay = NULL;
 }
 
 /* See btrace.h.  */
@@ -1338,4 +1340,12 @@ btrace_set_call_history (struct btrace_thread_info *btinfo,
 
   btinfo->call_history->begin = *begin;
   btinfo->call_history->end = *end;
+}
+
+/* See btrace.h.  */
+
+int
+btrace_is_replaying (struct thread_info *tp)
+{
+  return tp->btrace.replay != NULL;
 }

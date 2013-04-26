@@ -1,5 +1,17 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.h (replay) <replay>: New.
+	(btrace_is_replaying): New.
+	* btrace.c (btrace_clear): Free replay iterator.
+	(btrace_is_replaying): New.
+	* record-btrace.c (record_btrace_is_replaying): New.
+	(record_btrace_info): Print insn number if replaying.
+	(record_btrace_insn_history): Start at replay position.
+	(record_btrace_call_history): Start at replay position.
+	(init_record_btrace_ops): Init to_record_is_replaying.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_insn_history_range): Include
 	end.
 	(record_btrace_insn_history_from): Adjust range.

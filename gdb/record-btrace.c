@@ -236,6 +236,10 @@ record_btrace_info (void)
   printf_unfiltered (_("Recorded %u instructions in %u functions for thread "
 		       "%d (%s).\n"), insns, calls, tp->num,
 		     target_pid_to_str (tp->ptid));
+
+  if (btrace_is_replaying (tp))
+    printf_unfiltered (_("Replay in progress.  At instruction %u.\n"),
+		       btrace_insn_number (btinfo->replay));
 }
 
 /* Print an unsigned int.  */
@@ -300,13 +304,34 @@ record_btrace_insn_history (int size, int flags)
   history = btinfo->insn_history;
   if (history == NULL)
     {
-      /* No matter the direction, we start with the tail of the trace.  */
-      btrace_insn_end (&begin, btinfo);
-      end = begin;
+      struct btrace_insn_iterator *replay;
 
       DEBUG ("insn-history (0x%x): %d", flags, size);
 
-      covered = btrace_insn_prev (&begin, context);
+      /* If we're replaying, we start at the replay position.  Otherwise, we
+	 start at the tail of the trace.  */
+      replay = btinfo->replay;
+      if (replay != NULL)
+	begin = *replay;
+      else
+	btrace_insn_end (&begin, btinfo);
+
+      /* We start from here and expand in the requested direction.  Then we
+	 expand in the other direction, as well, to fill up any remaining
+	 context.  */
+      end = begin;
+      if (size < 0)
+	{
+	  /* We want the current position covered, as well.  */
+	  covered = btrace_insn_next (&end, 1);
+	  covered += btrace_insn_prev (&begin, context - covered);
+	  covered += btrace_insn_next (&end, context - covered);
+	}
+      else
+	{
+	  covered = btrace_insn_next (&end, context);
+	  covered += btrace_insn_prev (&begin, context - covered);
+	}
     }
   else
     {
@@ -560,13 +585,37 @@ record_btrace_call_history (int size, int flags)
   history = btinfo->call_history;
   if (history == NULL)
     {
-      /* No matter the direction, we start with the tail of the trace.  */
-      btrace_call_end (&begin, btinfo);
-      end = begin;
+      struct btrace_insn_iterator *replay;
 
       DEBUG ("call-history (0x%x): %d", flags, size);
 
-      covered = btrace_call_prev (&begin, context);
+      /* If we're replaying, we start at the replay position.  Otherwise, we
+	 start at the tail of the trace.  */
+      replay = btinfo->replay;
+      if (replay != NULL)
+	{
+	  begin.function = replay->function;
+	  begin.btinfo = btinfo;
+	}
+      else
+	btrace_call_end (&begin, btinfo);
+
+      /* We start from here and expand in the requested direction.  Then we
+	 expand in the other direction, as well, to fill up any remaining
+	 context.  */
+      end = begin;
+      if (size < 0)
+	{
+	  /* We want the current position covered, as well.  */
+	  covered = btrace_call_next (&end, 1);
+	  covered += btrace_call_prev (&begin, context - covered);
+	  covered += btrace_call_next (&end, context - covered);
+	}
+      else
+	{
+	  covered = btrace_call_next (&end, context);
+	  covered += btrace_call_prev (&begin, context- covered);
+	}
     }
   else
     {
@@ -687,6 +736,20 @@ record_btrace_call_history_from (ULONGEST from, int size, int flags)
   record_btrace_call_history_range (begin, end, flags);
 }
 
+/* The to_record_is_replaying method of target record-btrace.  */
+
+static int
+record_btrace_is_replaying (void)
+{
+  struct thread_info *tp;
+
+  ALL_THREADS (tp)
+    if (btrace_is_replaying (tp))
+      return 1;
+
+  return 0;
+}
+
 /* Initialize the record-btrace target ops.  */
 
 static void
@@ -713,6 +776,7 @@ init_record_btrace_ops (void)
   ops->to_call_history = record_btrace_call_history;
   ops->to_call_history_from = record_btrace_call_history_from;
   ops->to_call_history_range = record_btrace_call_history_range;
+  ops->to_record_is_replaying = record_btrace_is_replaying;
   ops->to_stratum = record_stratum;
   ops->to_magic = OPS_MAGIC;
 }
