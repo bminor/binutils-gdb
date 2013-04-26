@@ -4,6 +4,10 @@
 
 2013-04-26  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.6 released.
+
+2013-04-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Change "since GDB 7.5" into "in GDB 7.6".
 
 2013-04-26  Joel Brobecker  <brobecker@adacore.com>
