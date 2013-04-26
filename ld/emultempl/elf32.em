@@ -1178,13 +1178,16 @@ gld${EMULATION_NAME}_after_open (void)
       int force;
 
       /* If the lib that needs this one was --as-needed and wasn't
-	 found to be needed, then this lib isn't needed either.  Skip
-	 the lib when creating a shared object unless we are copying
-	 DT_NEEDED entres.  */
+	 found to be needed, then this lib isn't needed either.  */
       if (l->by != NULL
-	  && ((bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0
-	      || (!link_info.executable
-		  && bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0))
+	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0)
+	continue;
+
+      /* Skip the lib if --no-copy-dt-needed-entries and
+	 --allow-shlib-undefined is in effect.  */
+      if (l->by != NULL
+	  && link_info.unresolved_syms_in_shared_libs == RM_IGNORE
+	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0)
 	continue;
 
       /* If we've already seen this file, skip it.  */

@@ -1,3 +1,9 @@
+2013-04-26  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_after_open): Test
+	unresolved_syms_in_shared_libs rather than !executable to
+	determine whether to load DT_NEEDED libraries.
+
 2013-04-25  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (ALL_EMULATION_SOURCES): Add eelf32lppclinux.c.
