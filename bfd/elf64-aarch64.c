@@ -5141,8 +5141,6 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   struct elf64_aarch64_link_hash_table *htab;
 
-  unsigned long nsyms;
-
   if (info->relocatable)
     return TRUE;
 
@@ -5153,7 +5151,6 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
-  nsyms = NUM_SHDR_ENTRIES (symtab_hdr);
 
   rel_end = relocs + sec->reloc_count;
   for (rel = relocs; rel < rel_end; rel++)
@@ -5172,18 +5169,7 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  return FALSE;
 	}
 
-      if (r_symndx >= nsyms
-	  /* PR 9934: It is possible to have relocations that do not
-	     refer to symbols, thus it is also possible to have an
-	     object file containing relocations but no symbol table.  */
-	  && (r_symndx > 0 || nsyms > 0))
-	{
-	  (*_bfd_error_handler) (_("%B: bad symbol index: %d"), abfd,
-				 r_symndx);
-	  return FALSE;
-	}
-
-      if (nsyms == 0 || r_symndx < symtab_hdr->sh_info)
+      if (r_symndx < symtab_hdr->sh_info)
 	h = NULL;
       else
 	{
