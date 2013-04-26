@@ -1,5 +1,9 @@
 2013-04-26  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Change "since GDB 7.5" into "in GDB 7.6".
+
+2013-04-26  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Update GDB version number to 7.6.
 
 2013-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
