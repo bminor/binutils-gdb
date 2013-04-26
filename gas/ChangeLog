@@ -1,3 +1,12 @@
+2014-04-26  Christian Groessler  <chris@groessler.org>
+
+	* config/tc-z8k.c (md_parse_option): Set z8k_target_from_cmdline
+	according to the target parameter.  Don't call s_segm since s_segm
+	calls bfd_set_arch_mach using stdoutput, but stdoutput isn't
+	initialized yet.
+	(md_begin): Call s_segm according to target parameter from command
+	line.
+
 2013-04-25  Alan Modra  <amodra@gmail.com>
 
 	* configure.in: Allow little-endian linux.
