@@ -94,6 +94,8 @@ SECTIONS
 
     *(.progmem*)
     
+    ${RELOCATING+. = ALIGN(2);}
+
     /* For future tablejump instruction arrays for 3 byte pc devices.
        We don't relax jump/call instructions within these sections.  */
     *(.jumptables) 
