@@ -1,4 +1,4 @@
-2014-04-26  Christian Groessler  <chris@groessler.org>
+2013-04-26  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (md_parse_option): Set z8k_target_from_cmdline
 	according to the target parameter.  Don't call s_segm since s_segm
