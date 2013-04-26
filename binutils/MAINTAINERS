@@ -79,6 +79,8 @@ responsibility among the other maintainers.
   FR30		   Dave Brolley <brolley@redhat.com>
   FRV		   Dave Brolley <brolley@redhat.com>
   FRV		   Alexandre Oliva <aoliva@redhat.com>
+  GOLD		   Ian Lance Taylor <iant@google.com>
+  GOLD		   Cary Coutant <ccoutant@google.com>
   H8300		   Prafulla Thakare <prafulla.thakare@kpitcummins.com>
   HPPA		   Dave Anglin <dave.anglin@nrc.ca>
   HPPA elf32	   Alan Modra <amodra@gmail.com>
