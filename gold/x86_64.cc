@@ -1,6 +1,6 @@
 // x86_64.cc -- x86_64 target support for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -3229,6 +3229,9 @@ Target_x86_64<size>::Relocate::relocate(
 	  return false;
 	}
     }
+
+  if (view == NULL)
+    return true;
 
   const Sized_relobj_file<size, false>* object = relinfo->object;
 

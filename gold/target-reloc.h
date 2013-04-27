@@ -1,6 +1,6 @@
 // target-reloc.h -- target specific relocation support  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -389,12 +389,20 @@ relocate_section(
 	  psymval = &symval2;
 	}
 
+      // If OFFSET is out of range, still let the target decide to
+      // ignore the relocation.  Pass in NULL as the VIEW argument so
+      // that it can return quickly without trashing an invalid memory
+      // address.
+      unsigned char *v = view + offset;
+      if (offset < 0 || static_cast<section_size_type>(offset) >= view_size)
+	v = NULL;
+
       if (!relocate.relocate(relinfo, target, output_section, i, reloc,
-			     r_type, sym, psymval, view + offset,
-			     view_address + offset, view_size))
+			     r_type, sym, psymval, v, view_address + offset,
+			     view_size))
 	continue;
 
-      if (offset < 0 || static_cast<section_size_type>(offset) >= view_size)
+      if (v == NULL)
 	{
 	  gold_error_at_location(relinfo, i, offset,
 				 _("reloc has bad offset %zu"),

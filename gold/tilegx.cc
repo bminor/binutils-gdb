@@ -1,6 +1,6 @@
 // tilegx.cc -- tilegx target support for gold.
 
-// Copyright 2012 Free Software Foundation, Inc.
+// Copyright 2012, 2013 Free Software Foundation, Inc.
 // Written by Jiong Wang (jiwang@tilera.com)
 
 // This file is part of gold.
@@ -4327,6 +4327,9 @@ Target_tilegx<size, big_endian>::Relocate::relocate(
     typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type)
 {
+  if (view == NULL)
+    return true;
+
   typedef Tilegx_relocate_functions<size, big_endian> TilegxReloc;
   typename TilegxReloc::Tilegx_howto r_howto;
 

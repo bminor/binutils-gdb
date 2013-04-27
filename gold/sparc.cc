@@ -1,6 +1,6 @@
 // sparc.cc -- sparc target support for gold.
 
-// Copyright 2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010, 2011, 2012, 2013 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>.
 
 // This file is part of gold.
@@ -3189,6 +3189,10 @@ Target_sparc<size, big_endian>::Relocate::relocate(
 	  return false;
 	}
     }
+
+  if (view == NULL)
+    return true;
+
   if (this->reloc_adjust_addr_ == view)
     view -= 4;
 

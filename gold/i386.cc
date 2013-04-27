@@ -1,6 +1,6 @@
 // i386.cc -- i386 target support for gold.
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -2660,6 +2660,9 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 	  return false;
 	}
     }
+
+  if (view == NULL)
+    return true;
 
   const Sized_relobj_file<32, false>* object = relinfo->object;
 

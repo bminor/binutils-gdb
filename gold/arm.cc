@@ -8844,6 +8844,9 @@ Target_arm<big_endian>::Relocate::relocate(
     Arm_address address,
     section_size_type view_size)
 {
+  if (view == NULL)
+    return true;
+
   typedef Arm_relocate_functions<big_endian> Arm_relocate_functions;
 
   r_type = get_real_reloc_type(r_type);

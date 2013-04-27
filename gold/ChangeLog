@@ -1,3 +1,14 @@
+2013-04-26  Ian Lance Taylor  <iant@google.com>
+
+	* target-reloc.h (relocate_section): If the reloc offset is out of
+	range, pass VIEW as NULL to relocate.relocate.
+	* arm.cc (Target_arm:Relocate::relocate): Check for a NULL view.
+	* i386.cc (Target_i386::Relocate::relocate): Likewise.
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Likewise.
+	* sparc.cc (Target_sparc::Relocate::relocate): Likewise.
+	* tilegx.cc (Target_tilegx::Relocate::relocate): Likewise.
+	* x86_64.cc (Target_x86_64::Relocate::relocate): Likewise.
+
 2013-04-26  Geoff Pike  <gpike@chromium.org>
 
 	* gold.cc (queue_final_tasks): invoke layout->queue_build_id_tasks().

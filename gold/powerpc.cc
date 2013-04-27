@@ -1,6 +1,6 @@
 // powerpc.cc -- powerpc target support for gold.
 
-// Copyright 2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010, 2011, 2012, 2013 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>
 //        and David Edelsohn <edelsohn@gnu.org>
 
@@ -6221,6 +6221,9 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     Address address,
     section_size_type view_size)
 {
+  if (view == NULL)
+    return true;
+
   switch (this->maybe_skip_tls_get_addr_call(r_type, gsym))
     {
     case Track_tls::NOT_EXPECTED:
