@@ -217,7 +217,7 @@ SECTIONS
  
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   PROVIDE (__stack = ${STACK}) ;

@@ -327,7 +327,7 @@ cat <<EOF
   .comment       0 : { *(.comment) }
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   ${STACK_ADDR+${STACK}}

@@ -114,7 +114,7 @@ SECTIONS
   .stab.indexstr 0 : { *(.stab.indexstr) }
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   .MMIX.reg_contents :

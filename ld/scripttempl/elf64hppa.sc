@@ -531,7 +531,7 @@ cat <<EOF
 
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   ${TINY_DATA_SECTION}

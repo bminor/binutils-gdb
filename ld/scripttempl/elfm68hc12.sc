@@ -437,7 +437,7 @@ SECTIONS
      symbols are found.  */
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
 }

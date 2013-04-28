@@ -213,7 +213,7 @@ SECTIONS
 
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   /* User stack.  */

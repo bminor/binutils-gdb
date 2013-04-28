@@ -67,7 +67,7 @@ SECTIONS
   .stabstr 0 : { *(.stabstr) }
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
 }

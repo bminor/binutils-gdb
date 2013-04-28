@@ -204,7 +204,7 @@ SECTIONS
 
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   ${RELOCATING+${OTHER_RELOCATING_SECTIONS}}

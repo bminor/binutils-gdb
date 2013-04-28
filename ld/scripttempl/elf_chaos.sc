@@ -321,7 +321,7 @@ cat <<EOF
 
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
   ${STACK_ADDR+${STACK}}

@@ -237,7 +237,7 @@ SECTIONS
   .note.gnu.build-id : { *(.note.gnu.build-id) }
 EOF
 
-source $srcdir/scripttempl/DWARF.sc
+. $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
 }
