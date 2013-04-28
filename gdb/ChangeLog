@@ -1,3 +1,9 @@
+2013-04-28  Yao Qi  <yao@codesourcery.com>
+
+	* solib-dsbt.c (fetch_loadmap): Re-indent.
+	(displacement_from_map, enable_break2): Likewise.
+	(dsbt_relocate_section_addresses): Likewise.
+
 2013-04-26  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.6 released.

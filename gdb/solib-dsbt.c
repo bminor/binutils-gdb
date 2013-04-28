@@ -336,7 +336,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Fetch initial portion of the loadmap.  */
   if (target_read_memory (ldmaddr, (gdb_byte *) &ext_ldmbuf_partial,
-                          sizeof ext_ldmbuf_partial))
+			  sizeof ext_ldmbuf_partial))
     {
       /* Problem reading the target's memory.  */
       return NULL;
@@ -344,7 +344,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 
   /* Extract the version.  */
   version = extract_unsigned_integer (ext_ldmbuf_partial.version,
-                                      sizeof ext_ldmbuf_partial.version,
+				      sizeof ext_ldmbuf_partial.version,
 				      byte_order);
   if (version != 0)
     {
@@ -529,7 +529,7 @@ open_symbol_file_object (void *from_ttyp)
 
 static CORE_ADDR
 displacement_from_map (struct int_elf32_dsbt_loadmap *map,
-                       CORE_ADDR addr)
+		       CORE_ADDR addr)
 {
   int seg;
 
@@ -779,8 +779,8 @@ static void
 enable_break_failure_warning (void)
 {
   warning (_("Unable to find dynamic linker breakpoint function.\n"
-           "GDB will be unable to debug shared library initializers\n"
-	   "and track explicitly loaded dynamic code."));
+	     "GDB will be unable to debug shared library initializers\n"
+	     "and track explicitly loaded dynamic code."));
 }
 
 /* Helper function for gdb_bfd_lookup_symbol.  */
@@ -848,20 +848,20 @@ enable_break2 (void)
       volatile struct gdb_exception ex;
 
       /* Read the contents of the .interp section into a local buffer;
-         the contents specify the dynamic linker this program uses.  */
+	 the contents specify the dynamic linker this program uses.  */
       interp_sect_size = bfd_section_size (exec_bfd, interp_sect);
       buf = alloca (interp_sect_size);
       bfd_get_section_contents (exec_bfd, interp_sect,
 				buf, 0, interp_sect_size);
 
       /* Now we need to figure out where the dynamic linker was
-         loaded so that we can load its symbols and place a breakpoint
-         in the dynamic linker itself.  */
+	 loaded so that we can load its symbols and place a breakpoint
+	 in the dynamic linker itself.  */
 
       TRY_CATCH (ex, RETURN_MASK_ALL)
-        {
-          tmp_bfd = solib_bfd_open (buf);
-        }
+	{
+	  tmp_bfd = solib_bfd_open (buf);
+	}
       if (tmp_bfd == NULL)
 	{
 	  enable_break_failure_warning ();
@@ -872,7 +872,7 @@ enable_break2 (void)
       ldm = info->interp_loadmap;
 
       /* Record the relocated start and end address of the dynamic linker
-         text and plt section for dsbt_in_dynsym_resolve_code.  */
+	 text and plt section for dsbt_in_dynsym_resolve_code.  */
       interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
       if (interp_sect)
 	{
@@ -906,14 +906,14 @@ enable_break2 (void)
 
       if (solib_dsbt_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "enable_break: _dl_debug_addr (prior to relocation) = %s\n",
+			    "enable_break: _dl_debug_addr (prior to relocation) = %s\n",
 			    hex_string_custom (addr, 8));
 
       addr += displacement_from_map (ldm, addr);
 
       if (solib_dsbt_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "enable_break: _dl_debug_addr (after relocation) = %s\n",
+			    "enable_break: _dl_debug_addr (after relocation) = %s\n",
 			    hex_string_custom (addr, 8));
 
       /* Fetch the address of the r_debug struct.  */
@@ -921,33 +921,33 @@ enable_break2 (void)
 	{
 	  warning (_("Unable to fetch contents of _dl_debug_addr "
 		     "(at address %s) from dynamic linker"),
-	           hex_string_custom (addr, 8));
+		   hex_string_custom (addr, 8));
 	}
       addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
 
       if (solib_dsbt_debug)
 	fprintf_unfiltered (gdb_stdlog,
-	                    "enable_break: _dl_debug_addr[0..3] = %s\n",
-	                    hex_string_custom (addr, 8));
+			    "enable_break: _dl_debug_addr[0..3] = %s\n",
+			    hex_string_custom (addr, 8));
 
       /* If it's zero, then the ldso hasn't initialized yet, and so
-         there are no shared libs yet loaded.  */
+	 there are no shared libs yet loaded.  */
       if (addr == 0)
 	{
 	  if (solib_dsbt_debug)
 	    fprintf_unfiltered (gdb_stdlog,
-	                        "enable_break: ldso not yet initialized\n");
+				"enable_break: ldso not yet initialized\n");
 	  /* Do not warn, but mark to run again.  */
 	  return 0;
 	}
 
       /* Fetch the r_brk field.  It's 8 bytes from the start of
-         _dl_debug_addr.  */
+	 _dl_debug_addr.  */
       if (target_read_memory (addr + 8, addr_buf, sizeof addr_buf) != 0)
 	{
 	  warning (_("Unable to fetch _dl_debug_addr->r_brk "
 		     "(at address %s) from dynamic linker"),
-	           hex_string_custom (addr + 8, 8));
+		   hex_string_custom (addr + 8, 8));
 	  enable_break_failure_warning ();
 	  gdb_bfd_unref (tmp_bfd);
 	  return 0;
@@ -961,7 +961,7 @@ enable_break2 (void)
       xfree (ldm);
 
       /* Remove all the solib event breakpoints.  Their addresses
-         may have changed since the last time we ran the program.  */
+	 may have changed since the last time we ran the program.  */
       remove_solib_event_breakpoints ();
 
       /* Now (finally!) create the solib breakpoint.  */
@@ -1135,7 +1135,7 @@ dsbt_free_so (struct so_list *so)
 
 static void
 dsbt_relocate_section_addresses (struct so_list *so,
-                                 struct target_section *sec)
+				 struct target_section *sec)
 {
   int seg;
   struct int_elf32_dsbt_loadmap *map;
@@ -1145,7 +1145,7 @@ dsbt_relocate_section_addresses (struct so_list *so,
   for (seg = 0; seg < map->nsegs; seg++)
     {
       if (map->segs[seg].p_vaddr <= sec->addr
-          && sec->addr < map->segs[seg].p_vaddr + map->segs[seg].p_memsz)
+	  && sec->addr < map->segs[seg].p_vaddr + map->segs[seg].p_memsz)
 	{
 	  CORE_ADDR displ = map->segs[seg].addr - map->segs[seg].p_vaddr;
 
