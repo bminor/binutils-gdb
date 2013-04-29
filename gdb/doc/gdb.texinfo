@@ -22984,13 +22984,13 @@ and thus is always available.
 @cindex python api
 @cindex programming in python
 
-@cindex python stdout
-@cindex python pagination
-At startup, @value{GDBN} overrides Python's @code{sys.stdout} and
-@code{sys.stderr} to print using @value{GDBN}'s output-paging streams.
-A Python program which outputs to one of these streams may have its
-output interrupted by the user (@pxref{Screen Size}).  In this
-situation, a Python @code{KeyboardInterrupt} exception is thrown.
+You can get quick online help for @value{GDBN}'s Python API by issuing
+the command @w{@kbd{python help (gdb)}}.
+
+Functions and methods which have two or more optional arguments allow
+them to be specified using keyword syntax.  This allows passing some
+optional arguments while skipping others.  Example:
+@w{@code{gdb.some_function ('foo', bar = 1, baz = 2)}}.
 
 @menu
 * Basic Python::                Basic Python Functions.
@@ -23022,6 +23022,35 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 
 @node Basic Python
 @subsubsection Basic Python
+
+@cindex python stdout
+@cindex python pagination
+At startup, @value{GDBN} overrides Python's @code{sys.stdout} and
+@code{sys.stderr} to print using @value{GDBN}'s output-paging streams.
+A Python program which outputs to one of these streams may have its
+output interrupted by the user (@pxref{Screen Size}).  In this
+situation, a Python @code{KeyboardInterrupt} exception is thrown.
+
+Some care must be taken when writing Python code to run in
+@value{GDBN}.  Two things worth noting in particular:
+
+@itemize @bullet
+@item
+@value{GDBN} install handlers for @code{SIGCHLD} and @code{SIGINT}.
+Python code must not override these, or even change the options using
+@code{sigaction}.  If your program changes the handling of these
+signals, @value{GDBN} will most likely stop working correctly.  Note
+that it is unfortunately common for GUI toolkits to install a
+@code{SIGCHLD} handler.
+
+@item
+@value{GDBN} takes care to mark its internal file descriptors as
+close-on-exec.  However, this cannot be done in a thread-safe way on
+all platforms.  Your Python programs should be aware of this and
+should both create new file descriptors with the close-on-exec flag
+set and arrange to close unneeded file descriptors before starting a
+child process.
+@end itemize
 
 @cindex python functions
 @cindex python module

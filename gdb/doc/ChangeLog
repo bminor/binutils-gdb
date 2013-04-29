@@ -1,3 +1,10 @@
+2013-04-29  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Python API): Mention Python help and keyword
+	arguments.  Move pagination text to Basic Python.
+	(Basic Python): Put pagination text here.  Document
+	close-on-exec, SIGCHLD, and SIGINT.
+
 2013-04-19  Pedro Alves  <palves@redhat.com>
 
 	* gdbint.texinfo (Misc Guidelines) <Compiler Warnings>: Write
