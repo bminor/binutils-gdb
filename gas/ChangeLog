@@ -1,3 +1,16 @@
+2013-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* as.c (Options): Add -gdwarf-sections.
+	(parse_args): Likewise.
+	* as.h (flag_dwarf_sections): Declare.
+	* dwarf2dbg.c (emit_fixed_inc_line_addr): Skip section changes.
+	(process_entries): When -gdwarf-sections is enabled generate
+	fragmentary .debug_line sections.
+	(out_debug_line): Set the section for the .debug_line section end
+	symbol.
+	* doc/as.texinfo: Document -gdwarf-sections.
+	* NEWS: Mention -gdwarf-sections.
+
 2013-04-26  Christian Groessler  <chris@groessler.org>
 
 	* config/tc-z8k.c (md_parse_option): Set z8k_target_from_cmdline

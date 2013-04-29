@@ -1,6 +1,5 @@
 /* dwarf2dbg.c - DWARF2 debug support
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright 1999-2013 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
    This file is part of GAS, the GNU Assembler.
@@ -1109,12 +1108,14 @@ emit_fixed_inc_line_addr (int line_delta, addressT addr_delta, fragS *frag,
 			  char *p, int len)
 {
   expressionS *pexp;
-  segT line_seg;
   char *end = p + len;
 
   /* Line number sequences cannot go backward in addresses.  This means
      we've incorrectly ordered the statements in the sequence.  */
   gas_assert ((offsetT) addr_delta >= 0);
+
+  /* Verify that we have kept in sync with size_fixed_inc_line_addr.  */
+  gas_assert (len == size_fixed_inc_line_addr (line_delta, addr_delta));
 
   /* INT_MAX is a signal that this is actually a DW_LNE_end_sequence.  */
   if (line_delta != INT_MAX)
@@ -1124,7 +1125,6 @@ emit_fixed_inc_line_addr (int line_delta, addressT addr_delta, fragS *frag,
     }
 
   pexp = symbol_get_value_expression (frag->fr_symbol);
-  line_seg = subseg_get (".debug_line", 0);
 
   /* The DW_LNS_fixed_advance_pc opcode has a 2-byte operand so it can
      advance the address by at most 64K.  Linker relaxation (without
@@ -1145,14 +1145,12 @@ emit_fixed_inc_line_addr (int line_delta, addressT addr_delta, fragS *frag,
       exp.X_op = O_symbol;
       exp.X_add_symbol = to_sym;
       exp.X_add_number = 0;
-      subseg_change (line_seg, 0);
       emit_expr_fix (&exp, sizeof_address, frag, p);
       p += sizeof_address;
     }
   else
     {
       *p++ = DW_LNS_fixed_advance_pc;
-      subseg_change (line_seg, 0);
       emit_expr_fix (pexp, 2, frag, p);
       p += 2;
     }
@@ -1293,6 +1291,40 @@ process_entries (segT seg, struct line_entry *e)
   addressT last_frag_ofs = 0, frag_ofs;
   symbolS *last_lab = NULL, *lab;
   struct line_entry *next;
+
+  if (flag_dwarf_sections)
+    {
+      char * name;
+      const char * sec_name;
+
+      /* Switch to the relevent sub-section before we start to emit
+	 the line number table.
+
+	 FIXME: These sub-sections do not have a normal Line Number
+	 Program Header, thus strictly speaking they are not valid
+	 DWARF sections.  Unfortunately the DWARF standard assumes
+	 a one-to-one relationship between compilation units and
+	 line number tables.  Thus we have to have a .debug_line
+	 section, as well as our sub-sections, and we have to ensure
+	 that all of the sub-sections are merged into a proper
+	 .debug_line section before a debugger sees them.  */
+	 
+      sec_name = bfd_get_section_name (stdoutput, seg);
+      if (strcmp (sec_name, ".text") != 0)
+	{
+	  unsigned int len;
+
+	  len = strlen (sec_name);
+	  name = xmalloc (len + 11 + 2);
+	  sprintf (name, ".debug_line%s", sec_name);
+	  subseg_set (subseg_get (name, FALSE), 0);
+	}
+      else
+	/* Don't create a .debug_line.text section -
+	   that is redundant.  Instead just switch back to the
+	   normal .debug_line section.  */
+	subseg_set (subseg_get (".debug_line", FALSE), 0);
+    }
 
   do
     {
@@ -1533,6 +1565,16 @@ out_debug_line (segT line_seg)
     else
       as_warn ("dwarf line number information for %s ignored",
 	       segment_name (s->seg));
+
+  if (flag_dwarf_sections)
+    /* We have to switch to the special .debug_line_end section
+       before emitting the end-of-debug_line symbol.  The linker
+       script arranges for this section to be placed after all the
+       (potentially garbage collected) .debug_line.<foo> sections.
+       This section contains the line_end symbol which is used to
+       compute the size of the linked .debug_line section, as seen
+       in the DWARF Line Number header.  */
+    subseg_set (subseg_get (".debug_line_end", FALSE), 0);
 
   symbol_set_value_now (line_end);
 }

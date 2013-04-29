@@ -1,8 +1,5 @@
 /* as.c - GAS main program.
-   Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011, 2012, 2013
-   Free Software Foundation, Inc.
+   Copyright 1987-2013 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -302,6 +299,8 @@ Options:\n\
   fprintf (stream, _("\
   --gdwarf-2              generate DWARF2 debugging information\n"));
   fprintf (stream, _("\
+  --gdwarf-sections       generate per-function section names for DWARF line information\n"));
+  fprintf (stream, _("\
   --hash-size=<value>     set the hash table size close to <value>\n"));
   fprintf (stream, _("\
   --help                  show this message and exit\n"));
@@ -443,6 +442,7 @@ parse_args (int * pargc, char *** pargv)
       OPTION_GSTABS,
       OPTION_GSTABS_PLUS,
       OPTION_GDWARF2,
+      OPTION_GDWARF_SECTIONS,
       OPTION_STRIP_LOCAL_ABSOLUTE,
       OPTION_TRADITIONAL_FORMAT,
       OPTION_WARN,
@@ -490,6 +490,7 @@ parse_args (int * pargc, char *** pargv)
     /* GCC uses --gdwarf-2 but GAS uses to use --gdwarf2,
        so we keep it here for backwards compatibility.  */
     ,{"gdwarf2", no_argument, NULL, OPTION_GDWARF2}
+    ,{"gdwarf-sections", no_argument, NULL, OPTION_GDWARF_SECTIONS}
     ,{"gen-debug", no_argument, NULL, 'g'}
     ,{"gstabs", no_argument, NULL, OPTION_GSTABS}
     ,{"gstabs+", no_argument, NULL, OPTION_GSTABS_PLUS}
@@ -751,6 +752,10 @@ This program has absolutely no warranty.\n"));
 
 	case OPTION_GDWARF2:
 	  debug_type = DEBUG_DWARF2;
+	  break;
+
+	case OPTION_GDWARF_SECTIONS:
+	  flag_dwarf_sections = TRUE;
 	  break;
 
 	case 'J':

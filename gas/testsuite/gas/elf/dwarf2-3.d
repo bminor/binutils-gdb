@@ -34,5 +34,5 @@ Raw dump of debug contents of section \.z?debug_line:
   Entry	Dir	Time	Size	Name
   1	0	0	0	/beginwarn.c
 
- Line Number Statements:
+ No Line Number Statements.
 

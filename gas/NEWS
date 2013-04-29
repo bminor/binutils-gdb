@@ -1,5 +1,8 @@
 -*- text -*-
 
+* Add -gdwarf-sections command line option to enable per-code-section
+  generation of DWARF .debug_line sections.
+
 * Add support for Altera Nios II.
 
 * Add support for the Imagination Technologies Meta processor.

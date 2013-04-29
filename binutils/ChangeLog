@@ -1,3 +1,14 @@
+2013-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (read_debug_line_header): New function.  Reads in a
+	header in a .debug_line section.
+	(display_debug_lines_raw): Use new function.  Handle fragmentary
+	.debug_line sections.
+	(display_debug_lines_decoded): Likewise.
+	* readelf.c (process_section_headers): Handle fragmenatry
+	.debug_line sections.
+	(display_debug_section): Likewise.
+
 2013-04-26  Ian Lance Taylor  <iant@google.com>
 
 	* MAINTAINERS: Add myself and Cary as gold maintainers.

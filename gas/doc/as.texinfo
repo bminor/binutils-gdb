@@ -1,7 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-@c  Free Software Foundation, Inc.
+@c  Copyright 1991-2013 Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -102,9 +100,7 @@
 This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
-Inc.
+Copyright @copyright{} 1991-2013 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -153,9 +149,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
-Inc.
+Copyright @copyright{} 1991-2013 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -236,7 +230,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--compress-debug-sections}]  [@b{--nocompress-debug-sections}]
  [@b{--debug-prefix-map} @var{old}=@var{new}]
  [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
- [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
+ [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--gdwarf-sections}]
+ [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
  [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
  [@b{--listing-lhs-width2}=@var{NUM}] [@b{--listing-rhs-width}=@var{NUM}]
  [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}] [@b{-o}
@@ -647,6 +642,15 @@ the location of the current working directory at assembling time.
 Generate DWARF2 debugging information for each assembler line.  This
 may help debugging assembler code, if the debugger can handle it.  Note---this
 option is only supported by some targets, not all of them.
+
+@item --gdwarf-sections
+Instead of creating a .debug_line section, create a series of
+.debug_line.@var{foo} sections where @var{foo} is the name of the
+corresponding code section.  For example a code section called @var{.text.func}
+will have its dwarf line number information placed into a section called
+@var{.debug_line.text.func}.  If the code section is just called @var{.text}
+then debug line section will still be called just @var{.debug_line} without any
+suffix.
 
 @item --size-check=error
 @itemx --size-check=warning

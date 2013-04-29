@@ -1,3 +1,9 @@
+2013-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* elflink.c (_bfd_elf_gc_mark_extra_sections): Remove mark from
+	fragmented .debug_line sections associated with unmarked code
+	sections.
+
 2013-04-29  Will Newton  <will.newton@linaro.org>
 
 	* elf32-arm.c (elf32_arm_populate_plt_entry): Call

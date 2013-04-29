@@ -1,7 +1,5 @@
 /* as.h - global header file
-   Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2012
-   Free Software Foundation, Inc.
+   Copyright 1987-2013 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -417,6 +415,7 @@ enum debug_info_type
 
 extern enum debug_info_type debug_type;
 extern int use_gnu_debug_info_extensions;
+COMMON bfd_boolean flag_dwarf_sections;
 
 /* Maximum level of macro nesting.  */
 extern int max_macro_nest;

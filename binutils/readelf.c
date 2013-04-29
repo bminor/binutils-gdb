@@ -4838,7 +4838,8 @@ process_section_headers (FILE * file)
 	      || (do_debug_info     && const_strneq (name, "info"))
 	      || (do_debug_info     && const_strneq (name, "types"))
 	      || (do_debug_abbrevs  && const_strneq (name, "abbrev"))
-	      || (do_debug_lines    && const_strneq (name, "line"))
+	      || (do_debug_lines    && strcmp (name, "line") == 0)
+	      || (do_debug_lines    && const_strneq (name, "line."))
 	      || (do_debug_pubnames && const_strneq (name, "pubnames"))
 	      || (do_debug_pubtypes && const_strneq (name, "pubtypes"))
 	      || (do_debug_aranges  && const_strneq (name, "aranges"))
@@ -10972,6 +10973,7 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, FILE * file)
   /* See if we know how to display the contents of this section.  */
   for (i = 0; i < max; i++)
     if (streq (debug_displays[i].section.uncompressed_name, name)
+	|| (i == line && const_strneq (name, ".debug_line."))
         || streq (debug_displays[i].section.compressed_name, name))
       {
 	struct dwarf_section * sec = &debug_displays [i].section;
@@ -10980,7 +10982,9 @@ display_debug_section (int shndx, Elf_Internal_Shdr * section, FILE * file)
 	if (secondary)
 	  free_debug_section ((enum dwarf_section_display_enum) i);
 
-	if (streq (sec->uncompressed_name, name))
+	if (i == line && const_strneq (name, ".debug_line."))
+	  sec->name = name;
+	else if (streq (sec->uncompressed_name, name))
 	  sec->name = sec->uncompressed_name;
 	else
 	  sec->name = sec->compressed_name;

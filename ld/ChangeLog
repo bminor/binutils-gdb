@@ -1,3 +1,8 @@
+2013-04-29  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/DWARF.sc: Add support for .debug_line.* and
+	.debug_line_end.
+
 2013-04-29  Yaakov Selkowitz  <yselkowitz@users.sourceforge.net>
 
 	* emultempl/pe.em [cygwin]: Do not merge rdata with v2
