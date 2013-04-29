@@ -1,0 +1,25 @@
+
+.*
+
+
+Disassembly of section \.iplt:
+
+00008084 <.iplt>:
+#------------------------------------------------------------------------------
+#------ appfunc1's .iplt entry
+#------------------------------------------------------------------------------
+    8084:	e28fc600 	add	ip, pc, #0, 12
+    8088:	e28cca08 	add	ip, ip, #8, 20	; 0x8000
+    808c:	e5bcf01c 	ldr	pc, \[ip, #28\]!
+
+Disassembly of section \.text:
+
+00008090 <appfunc1>:
+    8090:	46f7      	mov	pc, lr
+
+00008092 <appfunc2>:
+    8092:	46f7      	mov	pc, lr
+
+00008094 <_start>:
+    8094:	f7ff eff6 	blx	8084 <appfunc1-0xc>
+    8098:	00000010 	\.word	0x00000010

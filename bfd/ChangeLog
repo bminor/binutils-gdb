@@ -1,5 +1,10 @@
 2013-04-29  Will Newton  <will.newton@linaro.org>
 
+	* elf32-arm.c (elf32_arm_populate_plt_entry): Call
+	elf32_arm_add_dynreloc when emitting R_ARM_IRELATIVE relocs.
+
+2013-04-29  Will Newton  <will.newton@linaro.org>
+
 	* elf64-aarch64.c (elf64_aarch64_check_relocs): Move relocation
 	error check up and add error message.
 

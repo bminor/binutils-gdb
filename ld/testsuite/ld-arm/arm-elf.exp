@@ -451,6 +451,11 @@ set armelftests_nonacl {
       {objdump {-s -j.data -j.got} ifunc-16.gd}
       {readelf -r ifunc-16.rd}}
      "ifunc-16"}
+    {"IFUNC test 17" "" "" "" {ifunc-17.s}
+     {{objdump -d ifunc-17.dd}
+      {objdump {-s -j.data -j.got} ifunc-17.gd}
+      {readelf -r ifunc-17.rd}}
+     "ifunc-17"}
 }
 
 run_ld_link_tests $armelftests_common

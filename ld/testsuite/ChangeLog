@@ -1,5 +1,17 @@
 2013-04-29  Will Newton  <will.newton@linaro.org>
 
+	* ld-arm/arm-elf.exp: Add IFUNC test 17.
+	* ld-arm/ifunc-17.dd: New file.
+	* ld-arm/ifunc-17.gd: Likewise.
+	* ld-arm/ifunc-17.rd: Likewise.
+	* ld-arm/ifunc-17.s: Likweise.
+	* ld-arm/ifunc-1.rd: Reorder relocs to match linker output.
+	* ld-arm/ifunc-2.rd: Likewise.
+	* ld-arm/ifunc-5.rd: Likewise.
+	* ld-arm/ifunc-6.rd: Likewise.
+
+2013-04-29  Will Newton  <will.newton@linaro.org>
+
 	* ld-plugin/lto.exp: Disable ld/12942 test for gcc < 4.7.0.
 
 2013-04-22  Alan Modra  <amodra@gmail.com>
