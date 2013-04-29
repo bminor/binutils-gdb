@@ -1,3 +1,7 @@
+2013-04-29  Will Newton  <will.newton@linaro.org>
+
+	* ld-plugin/lto.exp: Disable ld/12942 test for gcc < 4.7.0.
+
 2013-04-22  Alan Modra  <amodra@gmail.com>
 
 	* ld-powerpc/tlsexe.d: Adjust for section id changes.
