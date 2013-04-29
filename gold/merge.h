@@ -461,10 +461,9 @@ class Output_merge_string : public Output_merge_base
 {
  public:
   Output_merge_string(uint64_t addralign)
-    : Output_merge_base(sizeof(Char_type), addralign), stringpool_(),
+    : Output_merge_base(sizeof(Char_type), addralign), stringpool_(addralign),
       merged_strings_lists_(), input_count_(0), input_size_(0)
   {
-    gold_assert(addralign <= sizeof(Char_type));
     this->stringpool_.set_no_zero_null();
   }
 

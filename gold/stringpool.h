@@ -180,7 +180,7 @@ class Stringpool_template
   typedef size_t Key;
 
   // Create a Stringpool.
-  Stringpool_template();
+  Stringpool_template(uint64_t addralign = 1);
 
   ~Stringpool_template();
 
@@ -409,6 +409,8 @@ class Stringpool_template
   bool optimize_;
   // offset of the next string.
   section_offset_type offset_;
+  // The alignment of strings in the stringpool.
+  uint64_t addralign_;
 };
 
 // The most common type of Stringpool.

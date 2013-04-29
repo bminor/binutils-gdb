@@ -1,3 +1,26 @@
+2013-04-29  Alexander Ivchenko  <alexander.ivchenko@intel.com>
+
+	* output.cc (Output_section::add_merge_input_section): Allow
+	to merge sections if the alignment is more than character size.
+	* merge.h (Output_merge_string::Output_merge_string): Remove
+	assert.
+	* merge.cc (Output_merge_string<Char_type>::do_add_input_section): Count
+	only not-null strings. Check the alignment of strings.
+	* stringpool.h
+	(Stringpool_template<Stringpool_char>::Stringpool_template): Add
+	alignment as the argument.
+	(Stringpool_template<Stringpool_char>::addralign_): New class member.
+	* stringpool.cc (Stringpool_template<Stringpool_char>::new_key_offset):
+	Align non-zero length strings according to the addralign_.
+	(Stringpool_template<Stringpool_char>::set_string_offsets):
+	Updating offsets according to the given alignment.
+	* testsuite/Makefile.am (text_section_grouping): Test if string
+	literals are getting merged.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/merge_string_literals_1.c: New file.
+	* testsuite/merge_string_literals_2.c: Ditto.
+	* testsuite/merge_string_literals.sh: Ditto.
+
 2013-04-26  Ian Lance Taylor  <iant@google.com>
 
 	* target-reloc.h (relocate_section): If the reloc offset is out of

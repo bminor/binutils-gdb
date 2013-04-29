@@ -2635,11 +2635,6 @@ Output_section::add_merge_input_section(Relobj* object, unsigned int shndx,
 {
   bool is_string = (flags & elfcpp::SHF_STRINGS) != 0;
 
-  // We only merge strings if the alignment is not more than the
-  // character size.  This could be handled, but it's unusual.
-  if (is_string && addralign > entsize)
-    return false;
-
   // We cannot restore merged input section states.
   gold_assert(this->checkpoint_ == NULL);
 
