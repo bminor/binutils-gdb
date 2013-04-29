@@ -1,3 +1,7 @@
+2013-04-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (get_DW_AT_signature_type): Add ARI marker.
+
 2013-04-28  Yao Qi  <yao@codesourcery.com>
 
 	* solib-dsbt.c (fetch_loadmap): Re-indent.
