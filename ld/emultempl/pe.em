@@ -8,9 +8,7 @@ fi
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
-/* Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+/* Copyright 1995-2013 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -171,10 +169,13 @@ EOF
 
 # Cygwin no longer wants these noisy warnings.  Other PE
 # targets might like to consider adding themselves here.
+# See also the mail thread starting here for the reason why
+# merge_rdata defaults to 0 for cygwin:
+#  http://cygwin.com/ml/cygwin-apps/2013-04/msg00187.html
 case ${target} in
   *-*-cygwin*)
     default_auto_import=1
-    default_merge_rdata=1
+    default_merge_rdata=0
     ;;
   i[3-7]86-*-mingw* | x86_64-*-mingw*)
     default_auto_import=1
@@ -276,8 +277,9 @@ gld${EMULATION_NAME}_add_options
    int nrl ATTRIBUTE_UNUSED,
    struct option **really_longopts ATTRIBUTE_UNUSED)
 {
-  static const struct option xtra_long[] = {
-    /* PE options */
+  static const struct option xtra_long[] =
+  {
+    /* PE options.  */
     {"base-file", required_argument, NULL, OPTION_BASE_FILE},
     {"dll", no_argument, NULL, OPTION_DLL},
     {"file-alignment", required_argument, NULL, OPTION_FILE_ALIGNMENT},
