@@ -8053,7 +8053,7 @@ find_file_and_directory (struct die_info *die, struct dwarf2_cu *cu,
 
 static void
 handle_DW_AT_stmt_list (struct die_info *die, struct dwarf2_cu *cu,
-			const char *comp_dir)
+			const char *comp_dir) /* ARI: editCase function */
 {
   struct attribute *attr;
 
@@ -17924,8 +17924,8 @@ get_signatured_type (struct die_info *die, ULONGEST signature,
    reading in and processing the type unit if necessary.  */
 
 static struct type *
-get_DW_AT_signature_type /* ARI: editCase */
-  (struct die_info *die, struct attribute *attr, struct dwarf2_cu *cu)
+get_DW_AT_signature_type (struct die_info *die, struct attribute *attr,
+			  struct dwarf2_cu *cu) /* ARI: editCase function */
 {
   /* Yes, DW_AT_signature can use a non-ref_sig8 reference.  */
   if (is_ref_attr (attr))
