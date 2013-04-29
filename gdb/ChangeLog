@@ -1,3 +1,7 @@
+2013-04-29  Pierre Muller  <muller@sourceware.org>
+
+	* ./contrib/ari/gdb_ari.sh (editCase rule): Fix spelling error.
+
 2013-04-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (get_DW_AT_signature_type): Add ARI marker.

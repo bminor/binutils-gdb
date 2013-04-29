@@ -543,7 +543,7 @@ Function name starts lower case but has uppercased letters."
     editCase_full_line = ""
 }
 (possible_editCase) {
-    if (ARI_OK == "ediCase function") {
+    if (ARI_OK == "editCase function") {
 	possible_editCase = 0
     }
     # Closing brace found?
