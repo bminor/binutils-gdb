@@ -1,5 +1,13 @@
 2013-04-29  Tom Tromey  <tromey@redhat.com>
 
+	PR python/14204:
+	* gdb.texinfo (Python API): Fix menu entry.
+	(Blocks In Python): Fix subsubsection text.  Rewrite intro.
+	Define global and static block.  Add example.  Clarify
+	block relationship for inline functions.
+
+2013-04-29  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (Python API): Mention Python help and keyword
 	arguments.  Move pagination text to Basic Python.
 	(Basic Python): Put pagination text here.  Document

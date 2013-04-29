@@ -23010,7 +23010,7 @@ optional arguments while skipping others.  Example:
 * Progspaces In Python::        Program spaces.
 * Objfiles In Python::          Object files.
 * Frames In Python::            Accessing inferior stack frames from Python.
-* Blocks In Python::            Accessing frame blocks from Python.
+* Blocks In Python::            Accessing blocks from Python.
 * Symbols In Python::           Python representation of symbols.
 * Symbol Tables In Python::     Python representation of symbol tables.
 * Breakpoints In Python::       Manipulating breakpoints using Python.
@@ -25449,18 +25449,61 @@ Stack}.
 @end defun
 
 @node Blocks In Python
-@subsubsection Accessing frame blocks from Python.
+@subsubsection Accessing blocks from Python.
 
 @cindex blocks in python
 @tindex gdb.Block
 
-Within each frame, @value{GDBN} maintains information on each block
-stored in that frame.  These blocks are organized hierarchically, and
-are represented individually in Python as a @code{gdb.Block}.
-Please see @ref{Frames In Python}, for a more in-depth discussion on
-frames.  Furthermore, see @ref{Stack, ,Examining the Stack}, for more
-detailed technical information on @value{GDBN}'s book-keeping of the
-stack.
+In @value{GDBN}, symbols are stored in blocks.  A block corresponds
+roughly to a scope in the source code.  Blocks are organized
+hierarchically, and are represented individually in Python as a
+@code{gdb.Block}.  Blocks rely on debugging information being
+available.
+
+A frame has a block.  Please see @ref{Frames In Python}, for a more
+in-depth discussion of frames.
+
+The outermost block is known as the @dfn{global block}.  The global
+block typically holds public global variables and functions.
+
+The block nested just inside the global block is the @dfn{static
+block}.  The static block typically holds file-scoped variables and
+functions.
+
+@value{GDBN} provides a method to get a block's superblock, but there
+is currently no way to examine the sub-blocks of a block, or to
+iterate over all the blocks in a symbol table (@pxref{Symbol Tables In
+Python}).
+
+Here is a short example that should help explain blocks:
+
+@smallexample
+/* This is in the global block.  */
+int global;
+
+/* This is in the static block.  */
+static int file_scope;
+
+/* 'function' is in the global block, and 'argument' is
+   in a block nested inside of 'function'.  */
+int function (int argument)
+@{
+  /* 'local' is in a block inside 'function'.  It may or may
+     not be in the same block as 'argument'.  */
+  int local;
+
+  @{
+     /* 'inner' is in a block whose superblock is the one holding
+        'local'.  */
+     int inner;
+
+     /* If this call is expanded by the compiler, you may see
+        a nested block here whose function is 'inline_function'
+        and whose superblock is the one holding 'inner'.  */
+     inline_function ();
+  @}
+@}
+@end smallexample
 
 A @code{gdb.Block} is iterable.  The iterator returns the symbols
 (@pxref{Symbols In Python}) local to the block.  Python programs
@@ -25474,9 +25517,9 @@ module:
 
 @findex gdb.block_for_pc
 @defun gdb.block_for_pc (pc)
-Return the @code{gdb.Block} containing the given @var{pc} value.  If the
-block cannot be found for the @var{pc} value specified, the function
-will return @code{None}.
+Return the innermost @code{gdb.Block} containing the given @var{pc}
+value.  If the block cannot be found for the @var{pc} value specified,
+the function will return @code{None}.
 @end defun
 
 A @code{gdb.Block} object has the following methods:
@@ -25504,6 +25547,11 @@ The end address of the block.  This attribute is not writable.
 The name of the block represented as a @code{gdb.Symbol}.  If the
 block is not named, then this attribute holds @code{None}.  This
 attribute is not writable.
+
+For ordinary function blocks, the superblock is the static block.
+However, you should note that it is possible for a function block to
+have a superblock that is not the static block -- for instance this
+happens for an inlined function.
 @end defvar
 
 @defvar Block.superblock
