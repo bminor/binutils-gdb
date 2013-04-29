@@ -4306,6 +4306,14 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
       bfd_reloc.howto = elf64_aarch64_howto_from_type (r_type);
       howto = bfd_reloc.howto;
 
+      if (howto == NULL)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: unrecognized relocation (0x%x) in section `%A'"),
+	     input_bfd, input_section, r_type);
+	  return FALSE;
+	}
+
       h = NULL;
       sym = NULL;
       sec = NULL;
@@ -4328,12 +4336,6 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 		   (input_bfd, symtab_hdr->sh_link, sym->st_name),
 		   input_bfd, input_section, rel->r_offset, TRUE))
 		return FALSE;
-	    }
-
-	  if (r_type >= R_AARCH64_dyn_max)
-	    {
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
 	    }
 
 	  relocation = _bfd_elf_rela_local_sym (output_bfd, sym, &sec, rel);
