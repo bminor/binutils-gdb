@@ -2,6 +2,13 @@
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.
 
+2013-04-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* sol-thread.c (info_cb) [ti.ti_startfunc != 0]: Change type
+	of local variable msym to const struct bound_minimal_symbol.
+	Adjust use accordingly.
+	[ti.ti_state == TD_THR_SLEEP]: Likewise.
+
 2013-04-30  Samuel Thibault  <samuel.thibault@gnu.org>
 
 	* i386gnu-nat.c (CREG_OFFSET): New macro.

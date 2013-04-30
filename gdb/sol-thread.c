@@ -1115,11 +1115,12 @@ info_cb (const td_thrhandle_t *th, void *s)
       /* Print thr_create start function.  */
       if (ti.ti_startfunc != 0)
 	{
-	  struct minimal_symbol *msym;
-	  msym = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
-	  if (msym)
+	  const struct bound_minimal_symbol msym
+	    = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
+
+	  if (msym.minsym)
 	    printf_filtered ("   startfunc: %s\n",
-			     SYMBOL_PRINT_NAME (msym));
+			     SYMBOL_PRINT_NAME (msym.minsym));
 	  else
 	    printf_filtered ("   startfunc: %s\n",
 			     paddress (target_gdbarch (), ti.ti_startfunc));
@@ -1128,11 +1129,12 @@ info_cb (const td_thrhandle_t *th, void *s)
       /* If thread is asleep, print function that went to sleep.  */
       if (ti.ti_state == TD_THR_SLEEP)
 	{
-	  struct minimal_symbol *msym;
-	  msym = lookup_minimal_symbol_by_pc (ti.ti_pc);
-	  if (msym)
+	  const struct bound_minimal_symbol msym
+	    = lookup_minimal_symbol_by_pc (ti.ti_pc);
+
+	  if (msym.minsym)
 	    printf_filtered (" - Sleep func: %s\n",
-			     SYMBOL_PRINT_NAME (msym));
+			     SYMBOL_PRINT_NAME (msym.minsym));
 	  else
 	    printf_filtered (" - Sleep func: %s\n",
 			     paddress (target_gdbarch (), ti.ti_startfunc));
