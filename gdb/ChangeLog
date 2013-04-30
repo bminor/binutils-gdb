@@ -22,18 +22,18 @@
 	(creg_offset): New array.
 	(CREG_ADDR): Use creg_offset instead of reg_offset.
 
-2013-04-29  Joel Brobecker  <brobecker@adacore.com>
+2013-04-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* mep-tdep.c (mep_write_pc): Delete.
 	(mep_gdbarch_init): Remove call to set_gdbarch_write_pc.
 	Add call to set_gdbarch_pc_regnum.
 
-2013-04-29  Joel Brobecker  <brobecker@adacore.com>
+2013-04-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* common/filestuff.c: Replace #include <dirent.h> by
 	#include "gdb_dirent.h".
 
-2013-04-29  Joel Brobecker  <brobecker@adacore.com>
+2013-04-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* common/filestuff.c: Replace #include <sys/stat.h> by
 	#include "gdb_stat.h".
