@@ -16,12 +16,6 @@
 
 2013-04-29  Joel Brobecker  <brobecker@adacore.com>
 
-	* mep-tdep.c (mep_write_pc): Delete.
-	(mep_gdbarch_init): Remove call to set_gdbarch_write_pc.
-	Add call to set_gdbarch_pc_regnum.
-
-2013-04-29  Joel Brobecker  <brobecker@adacore.com>
-
 	* m32r-tdep.c (m32r_write_pc): Delete.
 	(m32r_gdbarch_init): Remove call to set_gdbarch_write_pc.
 	Add call to set_gdbarch_pc_regnum.
