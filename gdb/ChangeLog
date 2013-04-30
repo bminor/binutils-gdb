@@ -1,3 +1,9 @@
+2013-03-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* target-descriptions.c (maint_print_c_tdesc_cmd):
+	Add case to parse structures as register types and
+	bitfields.
+
 2013-04-30  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.
