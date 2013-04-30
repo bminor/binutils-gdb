@@ -782,7 +782,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
 
 static ps_err_e
 rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
-	   char *buf, int size)
+	   gdb_byte *buf, int size)
 {
   int ret;
   struct cleanup *old_chain;
@@ -831,7 +831,7 @@ ps_err_e
 ps_pdwrite (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
-  return rw_common (1, ph, addr, (char *) buf, size);
+  return rw_common (1, ph, addr, (gdb_byte *) buf, size);
 }
 
 /* Copies SIZE bytes from target process .text segment to debugger memory.  */
@@ -849,7 +849,7 @@ ps_err_e
 ps_ptwrite (gdb_ps_prochandle_t ph, gdb_ps_addr_t addr,
 	    gdb_ps_write_buf_t buf, gdb_ps_size_t size)
 {
-  return rw_common (1, ph, addr, (char *) buf, size);
+  return rw_common (1, ph, addr, (gdb_byte *) buf, size);
 }
 
 /* Get general-purpose registers for LWP.  */

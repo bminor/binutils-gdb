@@ -4,6 +4,13 @@
 
 2013-04-30  Joel Brobecker  <brobecker@adacore.com>
 
+	* sol-thread.c (rw_common): Change type of parameter "buf"
+	to "gdb_byte *".
+	(ps_pdwrite, ps_ptwrite): Cast parameter "buf" in call to
+	rw_common to "gdb_byte *" instead of "char *".
+
+2013-04-30  Joel Brobecker  <brobecker@adacore.com>
+
 	* sol-thread.c (info_cb) [ti.ti_startfunc != 0]: Change type
 	of local variable msym to const struct bound_minimal_symbol.
 	Adjust use accordingly.
