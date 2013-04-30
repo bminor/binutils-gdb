@@ -1,3 +1,8 @@
+2013-04-30  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (bfd_elf_record_link_assignment): Dont make
+	STV_INTERNAL symbols STV_HIDDEN.
+
 2013-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* elflink.c (_bfd_elf_gc_mark_extra_sections): Remove mark from

@@ -573,7 +573,8 @@ bfd_elf_record_link_assignment (bfd *output_bfd,
   if (hidden)
     {
       bed = get_elf_backend_data (output_bfd);
-      h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+      if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+	h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
       (*bed->elf_backend_hide_symbol) (info, h, TRUE);
     }
 
