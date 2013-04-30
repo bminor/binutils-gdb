@@ -1,3 +1,7 @@
+2013-04-30  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2013-04-30  Samuel Thibault  <samuel.thibault@gnu.org>
 
 	* i386gnu-nat.c (CREG_OFFSET): New macro.
