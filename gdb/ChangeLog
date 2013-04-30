@@ -1,3 +1,8 @@
+2013-04-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/filestuff.c: Replace #include <sys/stat.h> by
+	#include "gdb_stat.h".
+
 2013-04-29  Pierre Muller  <muller@sourceware.org>
 
 	* dwarf2read.c (handle_DW_AT_stmt_list): Avoid ARI warning for
