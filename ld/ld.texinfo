@@ -4031,7 +4031,7 @@ into ascending order by name before placing them in the output file.
 @cindex SORT_BY_ALIGNMENT
 @code{SORT_BY_ALIGNMENT} is very similar to @code{SORT_BY_NAME}. The
 difference is @code{SORT_BY_ALIGNMENT} will sort sections into
-ascending order by alignment before placing them in the output file.
+descending order by alignment before placing them in the output file.
 
 @cindex SORT_BY_INIT_PRIORITY
 @code{SORT_BY_INIT_PRIORITY} is very similar to @code{SORT_BY_NAME}. The
@@ -4048,11 +4048,11 @@ can be at most 1 level of nesting for section sorting commands.
 @enumerate
 @item
 @code{SORT_BY_NAME} (@code{SORT_BY_ALIGNMENT} (wildcard section pattern)).
-It will sort the input sections by name first, then by alignment if 2
+It will sort the input sections by name first, then by alignment if two
 sections have the same name.
 @item
 @code{SORT_BY_ALIGNMENT} (@code{SORT_BY_NAME} (wildcard section pattern)).
-It will sort the input sections by alignment first, then by name if 2
+It will sort the input sections by alignment first, then by name if two
 sections have the same alignment.
 @item
 @code{SORT_BY_NAME} (@code{SORT_BY_NAME} (wildcard section pattern)) is

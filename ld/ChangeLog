@@ -1,3 +1,8 @@
+2013-04-30  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (SORT_BY_ALIGNMENT): Fix and clarify typo - sections
+	are sorted by descending order of alignment.
+
 2013-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/DWARF.sc: Add support for .debug_line.* and
