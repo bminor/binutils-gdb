@@ -1565,7 +1565,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget arm*-*-elf]
 	 && ![istarget avr-*-*]
 	 && ![istarget cr16-*-*]
-	 && ![istarget cris*-*-*]
+	 && ![istarget cris*-*-elf]
 	 && ![istarget crx-*-*]
 	 && ![istarget d10v-*-*]
 	 && ![istarget d30v-*-*]
