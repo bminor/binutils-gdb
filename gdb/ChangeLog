@@ -1,5 +1,10 @@
 2013-04-30  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (lookup_dwo_unit): Return NULL if DWO not found.
+	(init_cutu_and_read_dies): Flag a complaint, not error, for bad
+	DWO stub.  If DWO isn't found, just use stub.
+	(lookup_dwo_cutu): Don't try DWO if there's a DWP file.
+
 	* dwarf2read.c (dw2_find_symbol_file): Initialize filename before
 	calling init_cutu_and_read_dies.
 

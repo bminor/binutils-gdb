@@ -4605,7 +4605,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 
 /* Subroutine of init_cutu_and_read_dies to simplify it.
    Look up the DWO unit specified by COMP_UNIT_DIE of THIS_CU.
-   If the specified DWO unit cannot be found an error is thrown.  */
+   Returns NULL if the specified DWO unit cannot be found.  */
 
 static struct dwo_unit *
 lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
@@ -4648,14 +4648,6 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
       signature = DW_UNSND (attr);
       dwo_unit = lookup_dwo_comp_unit (this_cu, dwo_name, comp_dir,
 				       signature);
-    }
-
-  if (dwo_unit == NULL)
-    {
-      error (_("Dwarf Error: CU at offset 0x%x references unknown DWO"
-	       " with ID %s [in module %s]"),
-	     this_cu->offset.sect_off, hex_string (signature),
-	     this_cu->objfile->name);
     }
 
   return dwo_unit;
@@ -4834,21 +4826,35 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       struct die_info *dwo_comp_unit_die;
 
       if (has_children)
-	error (_("Dwarf Error: compilation unit with DW_AT_GNU_dwo_name"
-		 " has children (offset 0x%x) [in module %s]"),
-	       this_cu->offset.sect_off, bfd_get_filename (abfd));
-      dwo_unit = lookup_dwo_unit (this_cu, comp_unit_die);
-      if (read_cutu_die_from_dwo (this_cu, dwo_unit,
-				  abbrev_table != NULL,
-				  comp_unit_die,
-				  &reader, &info_ptr,
-				  &dwo_comp_unit_die, &has_children) == 0)
 	{
-	  /* Dummy die.  */
-	  do_cleanups (cleanups);
-	  return;
+	  complaint (&symfile_complaints,
+		     _("compilation unit with DW_AT_GNU_dwo_name"
+		       " has children (offset 0x%x) [in module %s]"),
+		     this_cu->offset.sect_off, bfd_get_filename (abfd));
 	}
-      comp_unit_die = dwo_comp_unit_die;
+      dwo_unit = lookup_dwo_unit (this_cu, comp_unit_die);
+      if (dwo_unit != NULL)
+	{
+	  if (read_cutu_die_from_dwo (this_cu, dwo_unit,
+				      abbrev_table != NULL,
+				      comp_unit_die,
+				      &reader, &info_ptr,
+				      &dwo_comp_unit_die, &has_children) == 0)
+	    {
+	      /* Dummy die.  */
+	      do_cleanups (cleanups);
+	      return;
+	    }
+	  comp_unit_die = dwo_comp_unit_die;
+	}
+      else
+	{
+	  /* Yikes, we couldn't find the rest of the DIE, we only have
+	     the stub.  A complaint has already been logged.  There's
+	     not much more we can do except pass on the stub DIE to
+	     die_reader_func.  We don't want to throw an error on bad
+	     debug info.  */
+	}
     }
 
   /* All of the above is setup for this call.  Yikes.  */
@@ -9294,7 +9300,10 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
   struct dwo_file *dwo_file;
   struct dwp_file *dwp_file;
 
-  /* Have we already read SIGNATURE from a DWP file?  */
+  /* First see if there's a DWP file.
+     If we have a DWP file but didn't find the DWO inside it, don't
+     look for the original DWO file.  It makes gdb behave differently
+     depending on whether one is debugging in the build tree.  */
 
   dwp_file = get_dwp_file ();
   if (dwp_file != NULL)
@@ -9321,45 +9330,47 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 	    }
 	}
     }
-
-  /* Have we already seen DWO_NAME?  */
-
-  dwo_file_slot = lookup_dwo_file_slot (dwo_name, comp_dir);
-  if (*dwo_file_slot == NULL)
+  else
     {
-      /* Read in the file and build a table of the DWOs it contains.  */
-      *dwo_file_slot = open_and_init_dwo_file (this_unit, dwo_name, comp_dir);
-    }
-  /* NOTE: This will be NULL if unable to open the file.  */
-  dwo_file = *dwo_file_slot;
+      /* No DWP file, look for the DWO file.  */
 
-  if (dwo_file != NULL)
-    {
-      struct dwo_unit *dwo_cutu = NULL;
-
-      if (is_debug_types && dwo_file->tus)
+      dwo_file_slot = lookup_dwo_file_slot (dwo_name, comp_dir);
+      if (*dwo_file_slot == NULL)
 	{
-	  struct dwo_unit find_dwo_cutu;
-
-	  memset (&find_dwo_cutu, 0, sizeof (find_dwo_cutu));
-	  find_dwo_cutu.signature = signature;
-	  dwo_cutu = htab_find (dwo_file->tus, &find_dwo_cutu);
+	  /* Read in the file and build a table of the CUs/TUs it contains.  */
+	  *dwo_file_slot = open_and_init_dwo_file (this_unit, dwo_name, comp_dir);
 	}
-      else if (!is_debug_types && dwo_file->cu)
-	{
-	  if (signature == dwo_file->cu->signature)
-	    dwo_cutu = dwo_file->cu;
-	}
+      /* NOTE: This will be NULL if unable to open the file.  */
+      dwo_file = *dwo_file_slot;
 
-      if (dwo_cutu != NULL)
+      if (dwo_file != NULL)
 	{
-	  if (dwarf2_read_debug)
+	  struct dwo_unit *dwo_cutu = NULL;
+
+	  if (is_debug_types && dwo_file->tus)
 	    {
-	      fprintf_unfiltered (gdb_stdlog, "DWO %s %s(%s) found: @%s\n",
-				  kind, dwo_name, hex_string (signature),
-				  host_address_to_string (dwo_cutu));
+	      struct dwo_unit find_dwo_cutu;
+
+	      memset (&find_dwo_cutu, 0, sizeof (find_dwo_cutu));
+	      find_dwo_cutu.signature = signature;
+	      dwo_cutu = htab_find (dwo_file->tus, &find_dwo_cutu);
 	    }
-	  return dwo_cutu;
+	  else if (!is_debug_types && dwo_file->cu)
+	    {
+	      if (signature == dwo_file->cu->signature)
+		dwo_cutu = dwo_file->cu;
+	    }
+
+	  if (dwo_cutu != NULL)
+	    {
+	      if (dwarf2_read_debug)
+		{
+		  fprintf_unfiltered (gdb_stdlog, "DWO %s %s(%s) found: @%s\n",
+				      kind, dwo_name, hex_string (signature),
+				      host_address_to_string (dwo_cutu));
+		}
+	      return dwo_cutu;
+	    }
 	}
     }
 
@@ -9374,9 +9385,10 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
     }
 
   complaint (&symfile_complaints,
-	     _("Could not find DWO %s referenced by CU at offset 0x%x"
+	     _("Could not find DWO %s %s(%s) referenced by CU at offset 0x%x"
 	       " [in module %s]"),
-	     kind, this_unit->offset.sect_off, objfile->name);
+	     kind, dwo_name, hex_string (signature),
+	     this_unit->offset.sect_off, objfile->name);
   return NULL;
 }
 
