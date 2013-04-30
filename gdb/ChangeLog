@@ -1,3 +1,9 @@
+2013-04-30  Samuel Thibault  <samuel.thibault@gnu.org>
+
+	* i386gnu-nat.c (CREG_OFFSET): New macro.
+	(creg_offset): New array.
+	(CREG_ADDR): Use creg_offset instead of reg_offset.
+
 2013-04-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* mep-tdep.c (mep_write_pc): Delete.
