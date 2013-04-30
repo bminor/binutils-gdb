@@ -1,5 +1,5 @@
 
-Relocation section '\.rel\.dyn' at offset 0x74 contains 2 entries:
+Relocation section '\.rel\.dyn' at offset 0x8000 contains 2 entries:
  Offset     Info    Type            Sym\.Value  Sym\. Name
-000100a8  ......a0 R_ARM_IRELATIVE  
-000100ac  ......a0 R_ARM_IRELATIVE  
+0001100c  ......a0 R_ARM_IRELATIVE  
+00011010  ......a0 R_ARM_IRELATIVE  

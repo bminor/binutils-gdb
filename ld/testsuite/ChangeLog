@@ -1,3 +1,10 @@
+2013-04-30  Will Newton  <will.newton@linaro.org>
+
+	* ld-arm/arm-elf.exp: Use linker script for IFUNC test 17.
+	* ld-arm/ifunc-17.dd: Update offsets for linker script.
+	* ld-arm/ifunc-17.gd: Likewise.
+	* ld-arm/ifunc-17.rd: Likewise.
+
 2013-04-29  Will Newton  <will.newton@linaro.org>
 
 	* ld-arm/arm-elf.exp: Add IFUNC test 17.
