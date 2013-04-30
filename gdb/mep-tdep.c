@@ -1125,13 +1125,6 @@ mep_read_pc (struct regcache *regcache)
   return pc;
 }
 
-static void
-mep_write_pc (struct regcache *regcache, CORE_ADDR pc)
-{
-  regcache_cooked_write_unsigned (regcache, MEP_PC_REGNUM, pc);
-}
-
-
 static enum register_status
 mep_pseudo_cr32_read (struct gdbarch *gdbarch,
                       struct regcache *regcache,
@@ -2470,8 +2463,8 @@ mep_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Register set.  */
   set_gdbarch_read_pc (gdbarch, mep_read_pc);
-  set_gdbarch_write_pc (gdbarch, mep_write_pc);
   set_gdbarch_num_regs (gdbarch, MEP_NUM_RAW_REGS);
+  set_gdbarch_pc_regnum (gdbarch, MEP_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, MEP_SP_REGNUM);
   set_gdbarch_register_name (gdbarch, mep_register_name);
   set_gdbarch_register_type (gdbarch, mep_register_type);
