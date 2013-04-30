@@ -4032,6 +4032,8 @@ into ascending order by name before placing them in the output file.
 @code{SORT_BY_ALIGNMENT} is very similar to @code{SORT_BY_NAME}. The
 difference is @code{SORT_BY_ALIGNMENT} will sort sections into
 descending order by alignment before placing them in the output file.
+Larger alignments are placed before smaller alignments in order to
+reduce the amount of padding necessary.
 
 @cindex SORT_BY_INIT_PRIORITY
 @code{SORT_BY_INIT_PRIORITY} is very similar to @code{SORT_BY_NAME}. The
