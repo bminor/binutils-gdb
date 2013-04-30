@@ -1,5 +1,10 @@
 2013-04-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* common/filestuff.c: Replace #include <dirent.h> by
+	#include "gdb_dirent.h".
+
+2013-04-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* common/filestuff.c: Replace #include <sys/stat.h> by
 	#include "gdb_stat.h".
 

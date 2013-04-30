@@ -56,7 +56,7 @@
 
 #ifndef HAVE_FDWALK
 
-#include <dirent.h>
+#include "gdb_dirent.h"
 
 /* Replacement for fdwalk, if the system doesn't define it.  Walks all
    open file descriptors (though this implementation may walk closed
