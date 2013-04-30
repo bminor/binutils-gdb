@@ -1,3 +1,9 @@
+2013-04-30  Olaf Flebbe  <o.flebbe@science-computing.de>
+
+	PR binutils/15417
+	* elflink.c (elf_link_add_object_symbols): Initialise 'idx' to
+	zero.
+
 2013-04-30  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (bfd_elf_record_link_assignment): Dont make
