@@ -1,3 +1,8 @@
+2013-04-30  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_find_symbol_file): Initialize filename before
+	calling init_cutu_and_read_dies.
+
 2013-03-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* target-descriptions.c (maint_print_c_tdesc_cmd):

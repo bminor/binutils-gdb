@@ -3465,6 +3465,9 @@ dw2_find_symbol_file (struct objfile *objfile, const char *name)
       return per_cu->v.quick->symtab->filename;
     }
 
+  /* Initialize filename in case there's a problem reading the DWARF,
+     dw2_get_primary_filename_reader may not get called.  */
+  filename = NULL;
   init_cutu_and_read_dies (per_cu, NULL, 0, 0,
 			   dw2_get_primary_filename_reader, &filename);
 
