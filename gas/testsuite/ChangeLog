@@ -1,3 +1,9 @@
+2013-04-30  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* gas/mips/ext-ill.s: New file.
+	* gas/mips/ext-ill.l: New file.
+	* gas/mips/mips.exp: Run new tests.
+
 2013-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* gas/elf/dwarf2-3.d: Fix expected readelf output.
