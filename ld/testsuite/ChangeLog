@@ -1,3 +1,8 @@
+2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/ld-lib.exp (check_shared_lib_support): Also exclude
+	mips*-*-elf.
+
 2013-04-30  Hans-Peter Nilsson  <hp@axis.com>
 
 	* lib/ld-lib.exp (check_shared_lib_support): Match cris*-*-elf as
