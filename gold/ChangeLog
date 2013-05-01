@@ -1,3 +1,8 @@
+2013-05-01  Cary Coutant  <ccoutant@google.com>
+
+	* stringpool.cc (Stringpool_template::new_key_offset): Fix
+	uninitialized warning.
+
 2013-04-29  Alexander Ivchenko  <alexander.ivchenko@intel.com>
 
 	* output.cc (Output_section::add_merge_input_section): Allow

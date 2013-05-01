@@ -222,9 +222,10 @@ Stringpool_template<Stringpool_char>::new_key_offset(size_t length)
     offset = 0;
   else
     {
+      offset = this->offset_;
       // Align non-zero length strings.
       if (length != 0)
-	offset = align_address(this->offset_, this->addralign_);
+	offset = align_address(offset, this->addralign_);
       this->offset_ = offset + (length + 1) * sizeof(Stringpool_char);
     }
   this->key_to_offset_.push_back(offset);
