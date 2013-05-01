@@ -1688,14 +1688,15 @@ darwin_thread_alive (struct target_ops *ops, ptid_t ptid)
    Return 0 on failure; number of bytes read / writen otherwise.  */
 static int
 darwin_read_write_inferior (task_t task, CORE_ADDR addr,
-			    char *rdaddr, const char *wraddr, int length)
+			    gdb_byte *rdaddr, const gdb_byte *wraddr,
+			    int length)
 {
   kern_return_t kret;
   mach_vm_address_t offset = addr & (mach_page_size - 1);
   mach_vm_address_t low_address = (mach_vm_address_t) (addr - offset);
   mach_vm_size_t aligned_length = (mach_vm_size_t) PAGE_ROUND (offset + length);
   pointer_t copied;
-  int copy_count;
+  mach_msg_type_number_t copy_count;
   mach_vm_size_t remaining_length;
   mach_vm_address_t region_address;
   mach_vm_size_t region_length;
@@ -1821,7 +1822,8 @@ out:
 #ifdef TASK_DYLD_INFO_COUNT
 /* This is not available in Darwin 9.  */
 static int
-darwin_read_dyld_info (task_t task, CORE_ADDR addr, char *rdaddr, int length)
+darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
+		       int length)
 {
   struct task_dyld_info task_dyld_info;
   mach_msg_type_number_t count = TASK_DYLD_INFO_COUNT;

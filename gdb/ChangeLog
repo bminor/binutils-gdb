@@ -1,5 +1,13 @@
 2013-05-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* darwin-nat.c (darwin_read_write_inferior): Change types
+	of parameters rdaddr and wraddr to "gdb_byte *". Change type
+	of copy_count to "mach_msg_type_number_t".
+	(darwin_read_dyld_info): Change type of parameter
+	rdaddr to "gdb_byte *".
+
+2013-05-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* solib-ia64-hpux.c (ia64_hpux_read_dynamic_info): Change cast
 	of &info->load_map from "char *" to "gdb_byte *".
 
