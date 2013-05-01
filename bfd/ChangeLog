@@ -1,3 +1,8 @@
+2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config.bfd: Replace alpha*-*-linuxecoff* pattern with
+	alpha*-*-linux*ecoff*.
+
 2013-04-30  Olaf Flebbe  <o.flebbe@science-computing.de>
 
 	PR binutils/15417

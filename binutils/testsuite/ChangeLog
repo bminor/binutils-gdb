@@ -1,3 +1,8 @@
+2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/binutils-common.exp (is_elf_format): Also exclude
+	*-*-linux*ecoff*.
+
 2013-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15191

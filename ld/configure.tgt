@@ -57,10 +57,10 @@ alpha*-*-freebsd* | alpha*-*-kfreebsd*-gnu)
 		        targ_emul=elf64alpha_fbsd
 			targ_extra_emuls="elf64alpha alpha"
 			tdir_alpha=`echo ${targ_alias} | sed -e 's/freebsd/freebsdecoff/'` ;;
-alpha*-*-linuxecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
+alpha*-*-linux*ecoff*)	targ_emul=alpha targ_extra_emuls=elf64alpha
 			tdir_elf64alpha=`echo ${targ_alias} | sed -e 's/ecoff//'` ;;
 alpha*-*-linux-*)	targ_emul=elf64alpha targ_extra_emuls=alpha
-			tdir_alpha=`echo ${targ_alias} | sed -e 's/linux/linuxecoff/'` ;;
+			tdir_alpha=`echo ${targ_alias} | sed -e 's/linux\(-gnu\)*/linux\1ecoff/'` ;;
 alpha*-*-osf*)		targ_emul=alpha ;;
 alpha*-*-gnu*)		targ_emul=elf64alpha ;;
 alpha*-*-netware*)	targ_emul=alpha ;;

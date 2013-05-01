@@ -202,7 +202,7 @@ case "${targ}" in
     targ_selvecs=nlm32_alpha_vec
     want64=true
     ;;
-  alpha*-*-linuxecoff*)
+  alpha*-*-linux*ecoff*)
     targ_defvec=ecoffalpha_little_vec
     targ_selvecs=bfd_elf64_alpha_vec
     want64=true

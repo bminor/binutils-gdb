@@ -121,7 +121,7 @@ case ${generic_target} in
 
   alpha-*-*vms*)			fmt=evax ;;
   alpha-*-osf*)				fmt=ecoff ;;
-  alpha-*-linuxecoff*)			fmt=ecoff ;;
+  alpha-*-linux*ecoff*)			fmt=ecoff ;;
   alpha-*-linux-*)			fmt=elf em=linux ;;
   alpha-*-netbsd*)			fmt=elf em=nbsd ;;
   alpha-*-openbsd*)			fmt=elf em=obsd ;;

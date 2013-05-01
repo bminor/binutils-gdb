@@ -1,3 +1,8 @@
+2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* configure.tgt: Replace alpha*-*-linuxecoff* pattern with
+	alpha*-*-linux*ecoff*.
+
 2013-04-30  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* config/tc-mips.c (mips_ip): Add sizelo.

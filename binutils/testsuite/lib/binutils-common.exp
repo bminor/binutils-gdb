@@ -44,6 +44,7 @@ proc is_elf_format {} {
     }
 
     if { [istarget *-*-linux*aout*]
+	 || [istarget *-*-linux*ecoff*]
 	 || [istarget *-*-linux*oldld*]
 	 || [istarget h8500-*-rtems*]
 	 || [istarget i960-*-rtems*]
