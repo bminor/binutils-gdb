@@ -1483,7 +1483,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   asection *sinterp;
   bfd *abfd;
 
-  if (link_info.hash->type == bfd_link_elf_hash_table)
+  if (is_elf_hash_table (link_info.hash))
     _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
 
   /* If we are going to make any variable assignments, we need to let

@@ -1,3 +1,8 @@
+2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Use is_elf_hash_table rather than a handcoded condition.
+
 2013-04-30  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (SORT_BY_ALIGNMENT): Fix and clarify typo - sections
