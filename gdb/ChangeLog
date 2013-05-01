@@ -1,3 +1,9 @@
+2013-05-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-tdep.c (ia64_access_fpreg): Change cast of val
+	from "char *" to "gdb_byte *".
+	(ia64_access_rse_fpreg, ia64_access_mem): Likewise.
+
 2013-04-30  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (lookup_dwo_unit): Return NULL if DWO not found.

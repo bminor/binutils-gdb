@@ -2558,7 +2558,7 @@ ia64_access_fpreg (unw_addr_space_t as, unw_regnum_t uw_regnum,
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
 
-  get_frame_register (this_frame, regnum, (char *) val);
+  get_frame_register (this_frame, regnum, (gdb_byte *) val);
 
   return 0;
 }
@@ -2639,7 +2639,7 @@ ia64_access_rse_fpreg (unw_addr_space_t as, unw_regnum_t uw_regnum,
   /* We never call any libunwind routines that need to write registers.  */
   gdb_assert (!write);
 
-  regcache_cooked_read (regcache, regnum, (char *) val);
+  regcache_cooked_read (regcache, regnum, (gdb_byte *) val);
 
   return 0;
 }
@@ -2664,9 +2664,9 @@ ia64_access_mem (unw_addr_space_t as,
 
   /* XXX do we need to normalize byte-order here?  */
   if (write)
-    return target_write_memory (addr, (char *) val, sizeof (unw_word_t));
+    return target_write_memory (addr, (gdb_byte *) val, sizeof (unw_word_t));
   else
-    return target_read_memory (addr, (char *) val, sizeof (unw_word_t));
+    return target_read_memory (addr, (gdb_byte *) val, sizeof (unw_word_t));
 }
 
 /* Call low-level function to access the kernel unwind table.  */
