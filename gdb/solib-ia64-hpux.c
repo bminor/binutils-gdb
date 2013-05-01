@@ -459,7 +459,8 @@ ia64_hpux_read_dynamic_info (struct gdbarch *gdbarch, bfd *abfd,
             {
               CORE_ADDR load_map_addr = bfd_h_get_64 (abfd, &dynp->d_un.d_ptr);
 
-              if (target_read_memory (load_map_addr, (char *) &info->load_map,
+              if (target_read_memory (load_map_addr,
+				      (gdb_byte *) &info->load_map,
                                       sizeof (info->load_map)) != 0)
 		error (_("failed to read load map at %s"),
 		       paddress (gdbarch, load_map_addr));

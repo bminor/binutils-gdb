@@ -1,5 +1,10 @@
 2013-05-01  Joel Brobecker  <brobecker@adacore.com>
 
+	* solib-ia64-hpux.c (ia64_hpux_read_dynamic_info): Change cast
+	of &info->load_map from "char *" to "gdb_byte *".
+
+2013-05-01  Joel Brobecker  <brobecker@adacore.com>
+
 	* ia64-tdep.c (ia64_access_fpreg): Change cast of val
 	from "char *" to "gdb_byte *".
 	(ia64_access_rse_fpreg, ia64_access_mem): Likewise.
