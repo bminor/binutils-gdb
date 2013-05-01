@@ -1,3 +1,8 @@
+2013-05-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* merge.cc (Output_merge_string<Char_type>::do_add_input_section):
+	Restore empty string handling.
+
 2013-05-01  Cary Coutant  <ccoutant@google.com>
 
 	* stringpool.cc (Stringpool_template::new_key_offset): Fix
