@@ -10790,6 +10790,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   unsigned int destregno = 0;
   unsigned int lastpos = 0;
   unsigned int limlo, limhi;
+  int sizelo;
   char *s_reset;
   offsetT min_range, max_range;
   long opend;
@@ -11374,23 +11375,25 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		case 'C':		/* ext size, becomes MSBD.  */
 		  limlo = 1;
 		  limhi = 32;
+		  sizelo = 1;
 		  goto do_msbd;
 		case 'G':
 		  limlo = 33;
 		  limhi = 64;
+		  sizelo = 33;
 		  goto do_msbd;
 		case 'H':
 		  limlo = 33;
 		  limhi = 64;
+		  sizelo = 1;
 		  goto do_msbd;
 		do_msbd:
 		  my_getExpression (&imm_expr, s);
 		  check_absolute_expr (ip, &imm_expr);
-		  /* Check for negative input so that small negative numbers
-		     will not succeed incorrectly.  The checks against
-		     (pos+size) transitively check "size" itself,
-		     assuming that "pos" is reasonable.  */
-		  if ((long) imm_expr.X_add_number < 0
+		  /* The checks against (pos+size) don't transitively check
+		     "size" itself, assuming that "pos" is reasonable.
+		     We also need to check the lower bound of "size".  */
+		  if ((long) imm_expr.X_add_number < sizelo
 		      || ((unsigned long) imm_expr.X_add_number
 			  + lastpos) < limlo
 		      || ((unsigned long) imm_expr.X_add_number

@@ -1,3 +1,8 @@
+2013-04-30  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* config/tc-mips.c (mips_ip): Add sizelo.
+	For "+C", "+G", and "+H", set sizelo and compare against it.
+
 2013-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* as.c (Options): Add -gdwarf-sections.
