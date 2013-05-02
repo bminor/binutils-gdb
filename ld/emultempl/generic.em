@@ -57,6 +57,18 @@ gld${EMULATION_NAME}_before_parse (void)
 #ifndef TARGET_			/* I.e., if not generic.  */
   ldfile_set_output_arch ("`echo ${ARCH}`", bfd_arch_unknown);
 #endif /* not TARGET_ */
+EOF
+  # The MSP430 port *needs* linker relaxtion in order to cope with large
+  # functions where conditional branches do not fit into a +/- 1024 byte range.
+  case ${target} in
+    msp430-*-* )
+fragment <<EOF
+  if (! link_info.relocatable)
+    TARGET_ENABLE_RELAXATION;
+EOF
+    ;;
+  esac
+fragment <<EOF
 }
 
 EOF

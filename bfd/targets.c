@@ -1,7 +1,5 @@
 /* Generic target-file-type support for the BFD library.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright 1990-2013 Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -668,6 +666,7 @@ extern const bfd_target bfd_elf32_mn10200_vec;
 extern const bfd_target bfd_elf32_mn10300_vec;
 extern const bfd_target bfd_elf32_mt_vec;
 extern const bfd_target bfd_elf32_msp430_vec;
+extern const bfd_target bfd_elf32_msp430_ti_vec;
 extern const bfd_target bfd_elf32_nbigmips_vec;
 extern const bfd_target bfd_elf32_nlittlemips_vec;
 extern const bfd_target bfd_elf32_ntradbigmips_vec;
@@ -1047,6 +1046,7 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf32_mn10300_vec,
 	&bfd_elf32_mt_vec,
 	&bfd_elf32_msp430_vec,
+	&bfd_elf32_msp430_ti_vec,
 #ifdef BFD64
 	&bfd_elf32_nbigmips_vec,
 	&bfd_elf32_nlittlemips_vec,

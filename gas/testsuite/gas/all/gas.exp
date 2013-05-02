@@ -61,6 +61,7 @@ if { ![istarget hppa*-*-*]
      && ![istarget alpha*-*-*vms*]
      && ![istarget rx-*-*]
      && ![istarget mn10300-*-*]
+     && ![istarget msp430*-*-*]
      && ![istarget am3*-*-*] } then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
 }
@@ -99,7 +100,7 @@ case $target_triplet in {
     default {
 	# Some targets don't manage to resolve BFD_RELOC_8 for constants.
 	setup_xfail "alpha*-*-*" "*c30*-*-*" "*c4x*-*-*" \
-	    "d\[13\]0v*-*-*" "i860-*-*" "mips*-*-*" "msp430-*-*" \
+	    "d\[13\]0v*-*-*" "i860-*-*" "mips*-*-*" \
 	    "pdp11-*-*" "xtensa*-*-*"
 	run_dump_test forward
     }
@@ -139,6 +140,7 @@ case $target_triplet in {
     { mips*-*-* } { }
     { mn10200-*-* } { }
     { mn10300-*-* } { }
+    { msp430*-*-* } { }
     { pdp11-*-* } { }
     { tic30*-*-* } { }
     { tic4x*-*-* } { }
@@ -266,8 +268,8 @@ if { ![istarget hppa*-*-*] &&
      ![istarget *c54x*-*-*] } then {
     # the vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
-    # mn10300 emits two relocs to handle the difference of two symbols.
-    setup_xfail "mn10300*-*-*" "vax*-*-vms*"
+    # msp430 and mn10300 emit two relocs to handle the difference of two symbols.
+    setup_xfail "mn10300*-*-*" "msp430*-*-*" "vax*-*-vms*"
     do_930509a
 }
 

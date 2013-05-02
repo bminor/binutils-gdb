@@ -1,3 +1,21 @@
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* archures.c: Add some more MSP430 machine numbers.
+	* config.bfd (msp430): Define targ_selvecs.
+	* configure.in: Add bfd_elf32_msp430_ti_vec.
+	* cpu-msp430.c: Add some more MSP430 machine numbers.
+	* elf32-msp430.c Add support for MSP430X relocations.
+	Add support for TI compiler generated relocations.
+	Add support for sym_diff relocations.
+	Add support for relaxing out of range short branches into long
+	branches.
+	Add support for MSP430 attribute section.
+	* reloc.c: Add MSP430X relocations.
+	* targets.c: Add bfd_elf32_msp430_ti_vec.
+	* bfd-in2.h: Regenerate.
+	* configure: Regenerate.
+	* libbfd.h: Regenerate.
+
 2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config.bfd: Replace alpha*-*-linuxecoff* pattern with

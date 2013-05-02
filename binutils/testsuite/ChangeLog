@@ -1,3 +1,7 @@
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.exp: Expect -wi test to fail for the MSP430.
+
 2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* lib/binutils-common.exp (is_elf_format): Also exclude

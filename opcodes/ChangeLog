@@ -1,3 +1,7 @@
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-dis.c: Add support for MSP430X instructions.
+
 2013-04-24  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-opc.c (nios2_builtin_reg): Rename "fstatus" control register

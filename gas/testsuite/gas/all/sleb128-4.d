@@ -1,5 +1,6 @@
 #objdump : -s -j .data -j "\$DATA\$"
 #name : .sleb128 tests (4)
+#skip: msp430*-*-*
 
 .*: .*
 

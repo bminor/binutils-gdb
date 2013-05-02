@@ -1,7 +1,5 @@
 /* Main program of GNU linker.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright 1991-2013 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -953,10 +951,10 @@ multiple_definition (struct bfd_link_info *info,
   if (obfd != NULL)
     einfo (_("%D: first defined here\n"), obfd, osec, oval);
 
-  if (RELAXATION_ENABLED)
+  if (RELAXATION_ENABLED_BY_USER)
     {
       einfo (_("%P: Disabling relaxation: it will not work with multiple definitions\n"));
-      link_info.disable_target_specific_optimizations = -1;
+      DISABLE_RELAXATION;
     }
 
   return TRUE;

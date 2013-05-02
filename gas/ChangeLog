@@ -1,3 +1,15 @@
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c: Add support for the MSP430X architecture.
+	Add code to insert a NOP instruction after any instruction that
+	might change the interrupt state.
+	Add support for the LARGE memory model.
+	Add code to initialise the .MSP430.attributes section.
+	* config/tc-msp430.h: Add support for the MSP430X architecture.
+	* doc/c-msp430.texi: Document the new -mL and -mN command line
+	options.
+	* NEWS: Mention support for the MSP430X architecture.
+
 2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* configure.tgt: Replace alpha*-*-linuxecoff* pattern with

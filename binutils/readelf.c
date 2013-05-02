@@ -131,6 +131,7 @@
 #include "elf/moxie.h"
 #include "elf/mt.h"
 #include "elf/msp430.h"
+#include "elf/nios2.h"
 #include "elf/or32.h"
 #include "elf/pj.h"
 #include "elf/ppc.h"
@@ -152,8 +153,6 @@
 #include "elf/xgate.h"
 #include "elf/xstormy16.h"
 #include "elf/xtensa.h"
-
-#include "elf/nios2.h"
 
 #include "getopt.h"
 #include "libiberty.h"
@@ -903,6 +902,17 @@ get_reloc_symindex (bfd_vma reloc_info)
   return is_32bit_elf ? ELF32_R_SYM (reloc_info) : ELF64_R_SYM (reloc_info);
 }
 
+static inline bfd_boolean
+uses_msp430x_relocs (void)
+{
+  return
+    elf_header.e_machine == EM_MSP430 /* Paranoia.  */
+    /* GCC uses osabi == ELFOSBI_STANDALONE.  */
+    && (((elf_header.e_flags & EF_MSP430_MACH) == E_MSP430_MACH_MSP430X)
+	/* TI compiler uses ELFOSABI_NONE.  */
+	|| (elf_header.e_ident[EI_OSABI] == ELFOSABI_NONE));
+}
+
 /* Display the contents of the relocation data found at the specified
    offset.  */
 
@@ -1125,6 +1135,11 @@ dump_relocations (FILE * file,
 	  break;
 
 	case EM_MSP430:
+	  if (uses_msp430x_relocs ())
+	    {
+	      rtype = elf_msp430x_reloc_type (type);
+	      break;
+	    }
 	case EM_MSP430_OLD:
 	  rtype = elf_msp430_reloc_type (type);
 	  break;
@@ -2781,6 +2796,32 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if ((e_flags & EF_C6000_REL))
 	    strcat (buf, ", relocatable module");
 	  break;
+
+	case EM_MSP430:
+	  strcat (buf, _(": architecture variant: "));
+	  switch (e_flags & EF_MSP430_MACH)
+	    {
+	    case E_MSP430_MACH_MSP430x11: strcat (buf, "MSP430x11"); break;
+	    case E_MSP430_MACH_MSP430x11x1 : strcat (buf, "MSP430x11x1 "); break;
+	    case E_MSP430_MACH_MSP430x12: strcat (buf, "MSP430x12"); break;
+	    case E_MSP430_MACH_MSP430x13: strcat (buf, "MSP430x13"); break;
+	    case E_MSP430_MACH_MSP430x14: strcat (buf, "MSP430x14"); break;
+	    case E_MSP430_MACH_MSP430x15: strcat (buf, "MSP430x15"); break;
+	    case E_MSP430_MACH_MSP430x16: strcat (buf, "MSP430x16"); break;
+	    case E_MSP430_MACH_MSP430x31: strcat (buf, "MSP430x31"); break;
+	    case E_MSP430_MACH_MSP430x32: strcat (buf, "MSP430x32"); break;
+	    case E_MSP430_MACH_MSP430x33: strcat (buf, "MSP430x33"); break;
+	    case E_MSP430_MACH_MSP430x41: strcat (buf, "MSP430x41"); break;
+	    case E_MSP430_MACH_MSP430x42: strcat (buf, "MSP430x42"); break;
+	    case E_MSP430_MACH_MSP430x43: strcat (buf, "MSP430x43"); break;
+	    case E_MSP430_MACH_MSP430x44: strcat (buf, "MSP430x44"); break;
+	    case E_MSP430_MACH_MSP430X  : strcat (buf, "MSP430X"); break;
+	    default:
+	      strcat (buf, _(": unknown")); break;
+	    }
+
+	  if (e_flags & ~ EF_MSP430_MACH)
+	    strcat (buf, _(": unknown extra flag bits also present"));
 	}
     }
 
@@ -3206,6 +3247,18 @@ get_tic6x_section_type_name (unsigned int sh_type)
 }
 
 static const char *
+get_msp430x_section_type_name (unsigned int sh_type)
+{
+  switch (sh_type)
+    {
+    case SHT_MSP430_SEC_FLAGS:   return "MSP430_SEC_FLAGS";
+    case SHT_MSP430_SYM_ALIASES: return "MSP430_SYM_ALIASES";
+    case SHT_MSP430_ATTRIBUTES:  return "MSP430_ATTRIBUTES";
+    default: return NULL;
+    }
+}
+
+static const char *
 get_section_type_name (unsigned int sh_type)
 {
   static char buff[32];
@@ -3269,6 +3322,9 @@ get_section_type_name (unsigned int sh_type)
 	      break;
 	    case EM_TI_C6000:
 	      result = get_tic6x_section_type_name (sh_type);
+	      break;
+	    case EM_MSP430:
+	      result = get_msp430x_section_type_name (sh_type);
 	      break;
 	    default:
 	      result = NULL;
@@ -8994,8 +9050,13 @@ get_symbol_type (unsigned int type)
     default:
       if (type >= STT_LOPROC && type <= STT_HIPROC)
 	{
-	  if (elf_header.e_machine == EM_ARM && type == STT_ARM_TFUNC)
-	    return "THUMB_FUNC";
+	  if (elf_header.e_machine == EM_ARM)
+	    {
+	      if (type == STT_ARM_TFUNC)
+		return "THUMB_FUNC";
+	      if (type == STT_ARM_16BIT)
+		return "THUMB_LABEL";
+	    }
 
 	  if (elf_header.e_machine == EM_SPARCV9 && type == STT_REGISTER)
 	    return "REGISTER";
@@ -9961,6 +10022,60 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 
   switch (elf_header.e_machine)
     {
+    case EM_MSP430:
+    case EM_MSP430_OLD:
+      {
+	static Elf_Internal_Sym * saved_sym = NULL;
+
+	switch (reloc_type)
+	  {
+	  case 10: /* R_MSP430_SYM_DIFF */
+	    if (uses_msp430x_relocs ())
+	      break;
+	  case 21: /* R_MSP430X_SYM_DIFF */
+	    saved_sym = symtab + get_reloc_symindex (reloc->r_info);
+	    return TRUE;
+
+	  case 1: /* R_MSP430_32 or R_MSP430_ABS32 */
+	  case 3: /* R_MSP430_16 or R_MSP430_ABS8 */
+	    goto handle_sym_diff;
+	    
+	  case 5: /* R_MSP430_16_BYTE */
+	  case 9: /* R_MSP430_8 */
+	    if (uses_msp430x_relocs ())
+	      break;
+	    goto handle_sym_diff;
+
+	  case 2: /* R_MSP430_ABS16 */
+	  case 15: /* R_MSP430X_ABS16 */
+	    if (! uses_msp430x_relocs ())
+	      break;
+	    goto handle_sym_diff;
+	    
+	  handle_sym_diff:
+	    if (saved_sym != NULL)
+	      {
+		bfd_vma value;
+
+		value = reloc->r_addend
+		  + (symtab[get_reloc_symindex (reloc->r_info)].st_value
+		     - saved_sym->st_value);
+
+		byte_put (start + reloc->r_offset, value, reloc_type == 1 ? 4 : 2);
+
+		saved_sym = NULL;
+		return TRUE;
+	      }
+	    break;
+
+	  default:
+	    if (saved_sym != NULL)
+	      error (_("Unhandled MSP430 reloc type found after SYM_DIFF reloc"));
+	    break;
+	  }
+	break;
+      }
+
     case EM_MN10300:
     case EM_CYGNUS_MN10300:
       {
@@ -10100,7 +10215,7 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_MOXIE_32.  */
     case EM_MSP430_OLD:
     case EM_MSP430:
-      return reloc_type == 1; /* R_MSP43_32.  */
+      return reloc_type == 1; /* R_MSP430_32 or R_MSP320_ABS32.  */
     case EM_MT:
       return reloc_type == 2; /* R_MT_32.  */
     case EM_ALTERA_NIOS2:
@@ -10352,6 +10467,8 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_M32C:
       return reloc_type == 1; /* R_M32C_16 */
     case EM_MSP430:
+      if (uses_msp430x_relocs ())
+	return reloc_type == 2; /* R_MSP430_ABS16.  */
     case EM_MSP430_OLD:
       return reloc_type == 5; /* R_MSP430_16_BYTE.  */
     case EM_ALTERA_NIOS2:
@@ -11905,6 +12022,79 @@ display_raw_attribute (unsigned char * p, unsigned char * end)
   putchar ('\n');
 }
 
+static unsigned char *
+display_msp430x_attribute (unsigned char * p,
+			   const unsigned char * const end)
+{
+  unsigned int len;
+  int val;
+  int tag;
+
+  tag = read_uleb128 (p, & len, end);
+  p += len;
+  
+  switch (tag)
+    {
+    case OFBA_MSPABI_Tag_ISA:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_ISA: ");
+      switch (val)
+	{
+	case 0: printf (_("None\n")); break;
+	case 1: printf (_("MSP430\n")); break;
+	case 2: printf (_("MSP430X\n")); break;
+	default: printf ("??? (%d)\n", val); break;
+	}
+      break;
+
+    case OFBA_MSPABI_Tag_Code_Model:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_Code_Model: ");
+      switch (val)
+	{
+	case 0: printf (_("None\n")); break;
+	case 1: printf (_("Small\n")); break;
+	case 2: printf (_("Large\n")); break;
+	default: printf ("??? (%d)\n", val); break;
+	}
+      break;
+
+    case OFBA_MSPABI_Tag_Data_Model:
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_Data_Model: ");
+      switch (val)
+	{
+	case 0: printf (_("None\n")); break;
+	case 1: printf (_("Small\n")); break;
+	case 2: printf (_("Large\n")); break;
+	case 3: printf (_("Restricted Large\n")); break;
+	default: printf ("??? (%d)\n", val); break;
+	}
+      break;
+
+    default:
+      printf (_("  <unknown tag %d>: "), tag);
+
+      if (tag & 1)
+	{
+	  printf ("\"%s\"\n", p);
+	  p += strlen ((char *) p) + 1;
+	}
+      else
+	{
+	  val = read_uleb128 (p, &len, end);
+	  p += len;
+	  printf ("%d (0x%x)\n", val, val);
+	}
+      break;
+   }
+
+  return p;
+}
+
 static int
 process_attributes (FILE * file,
 		    const char * public_name,
@@ -12074,6 +12264,13 @@ process_tic6x_specific (FILE * file)
 {
   return process_attributes (file, "c6xabi", SHT_C6000_ATTRIBUTES,
 			     display_tic6x_attribute, NULL);
+}
+
+static int
+process_msp430x_specific (FILE * file)
+{
+  return process_attributes (file, "mspabi", SHT_MSP430_ATTRIBUTES,
+			     display_msp430x_attribute, NULL);
 }
 
 /* DATA points to the contents of a MIPS GOT that starts at VMA PLTGOT.
@@ -13554,6 +13751,8 @@ process_arch_specific (FILE * file)
     case EM_TI_C6000:
       return process_tic6x_specific (file);
       break;
+    case EM_MSP430:
+      return process_msp430x_specific (file);
     default:
       break;
     }

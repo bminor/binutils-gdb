@@ -38,6 +38,7 @@ if {
 	 || [istarget am3*-*-*]
 	 || [istarget cr16-*-*]
 	 || [istarget crx-*-*]
+	 || [istarget msp430-*-*]
 	 || [istarget mn10*-*-*] } {
       run_dump_test "lns-common-1-alt"
       run_dump_test "lns-big-delta"

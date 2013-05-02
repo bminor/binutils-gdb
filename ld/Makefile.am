@@ -424,6 +424,7 @@ ALL_EMULATION_SOURCES = \
 	emsp430xW423.c \
 	emsp430xW425.c \
 	emsp430xW427.c \
+	emsp430X.c \
 	enews.c \
 	ens32knbsd.c \
 	eor32.c \
@@ -1773,6 +1774,10 @@ emsp430xW427.c: $(srcdir)/emulparams/msp430all.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} msp430xW427 "$(tdir_msp430xW427)" msp430all
+emsp430X.c: $(srcdir)/emulparams/msp430all.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} msp430X "$(tdir_msp430X)" msp430all
 enews.c: $(srcdir)/emulparams/news.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} news "$(tdir_news)"

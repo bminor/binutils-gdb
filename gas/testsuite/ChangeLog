@@ -1,3 +1,22 @@
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/gas.exp: Skip the DIFF1 test for the MSP430.
+	Expect the FORWARD test to pass for the MSP430.
+	Skip the REDEF tests for the MSP430.
+	Expect the 930509A test to fail for the MSP430.
+	* gas/all/sleb128-4.d: Skip for the MSP430.
+	* gas/elf/elf.exp: Set target_machine to msp430 for the MSP430.
+	Skip the EHOPT0 test for the MSP430.
+	Skip the REDEF and EQU-RELOC tests for the MSP430.
+	* gas/elf/section2.e-msp430: New file.
+	* gas/lns/lns-big-delta.d: Remove expectation of 20-bit
+	addresses.
+	* gas/lns/lns.exp: Use alternate LNS COMMON test for the MSP430.
+	* gas/msp430/msp430x.s: New test.
+	* gas/msp430/msp430x.d: Expected disassembly.
+	* gas/msp430/msp430.exp: Run new test.
+	* gas/msp430/opcode.d: Update expected disassembly.
+
 2013-04-30  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* gas/mips/ext-ill.s: New file.

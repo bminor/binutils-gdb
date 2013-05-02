@@ -35,6 +35,31 @@ MEMORY
 
 SECTIONS
 {
+  /* Bootloader.  */
+  .bootloader ${RELOCATING-0} :
+  {
+    ${RELOCATING+ PROVIDE (__boot_start = .) ; }
+    *(.bootloader)
+    ${RELOCATING+. = ALIGN(2);}
+    *(.bootloader.*)
+  } ${RELOCATING+ > bootloader}
+  
+  /* Information memory.  */
+  .infomem ${RELOCATING-0} :
+  {
+    *(.infomem)
+    ${RELOCATING+. = ALIGN(2);}
+    *(.infomem.*)
+  } ${RELOCATING+ > infomem}
+
+  /* Information memory (not loaded into MPU).  */
+  .infomemnobits ${RELOCATING-0} :
+  {
+    *(.infomemnobits)
+    ${RELOCATING+. = ALIGN(2);}
+    *(.infomemnobits.*)
+  } ${RELOCATING+ > infomemnobits}
+
   /* Read-only sections, merged into text segment.  */
   ${TEXT_DYNAMIC+${DYNAMIC}}
   .hash        ${RELOCATING-0} : { *(.hash)             }
@@ -122,6 +147,8 @@ SECTIONS
     *(.text)
     ${RELOCATING+. = ALIGN(2);}
     *(.text.*)
+    ${RELOCATING+. = ALIGN(2);}
+    *(.text:*)
 
     ${RELOCATING+. = ALIGN(2);}
     *(SORT_NONE(.fini9))
@@ -139,42 +166,84 @@ SECTIONS
     _etext = .;
   } ${RELOCATING+ > text}
 
-  .data ${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text))}
+  .rodata :
+  {
+    . = ALIGN(2);
+    *(.plt)
+    *(.rodata .rodata.* .gnu.linkonce.r.* .const .const:*)
+    *(.rodata1)
+
+    *(.eh_frame_hdr)
+    KEEP (*(.eh_frame))
+
+    KEEP (*(.gcc_except_table)) *(.gcc_except_table.*)
+
+    PROVIDE (__preinit_array_start = .);
+    KEEP (*(.preinit_array))
+    PROVIDE (__preinit_array_end = .);
+
+    PROVIDE (__init_array_start = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array))
+    PROVIDE (__init_array_end = .);
+
+    PROVIDE (__fini_array_start = .);
+    KEEP (*(.fini_array))
+    KEEP (*(SORT(.fini_array.*)))
+    PROVIDE (__fini_array_end = .);
+    LONG(0); /* Sentinel.  */
+
+    /* gcc uses crtbegin.o to find the start of the constructors, so
+       we make sure it is first.  Because this is a wildcard, it
+       doesn't matter if the user does not actually link against
+       crtbegin.o; the linker won't look for a file to match a
+       wildcard.  The wildcard also means that it doesn't matter which
+       directory crtbegin.o is in.  */
+    KEEP (*crtbegin*.o(.ctors))
+
+    /* We don't want to include the .ctor section from from the
+       crtend.o file until after the sorted ctors.  The .ctor section
+       from the crtend file contains the end of ctors marker and it
+       must be last */
+    KEEP (*(EXCLUDE_FILE (*crtend*.o ) .ctors))
+    KEEP (*(SORT(.ctors.*)))
+    KEEP (*(.ctors))
+
+    KEEP (*crtbegin*.o(.dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend*.o ) .dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*(.dtors))
+  } ${RELOCATING+ > text}
+
+  .vectors ${RELOCATING-0}:
+  {
+    ${RELOCATING+ PROVIDE (__vectors_start = .) ; }
+    *(.vectors*)
+    ${RELOCATING+ _vectors_end = . ; }
+  } ${RELOCATING+ > vectors}
+
+  .data ${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text) + SIZEOF (.rodata))}
   {  
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
+    ${RELOCATING+ PROVIDE (__datastart = .) ; }
     ${RELOCATING+. = ALIGN(2);}
+
+    KEEP (*(.jcr))
+    *(.data.rel.ro.local) *(.data.rel.ro*)
+    *(.dynamic)
+
     *(.data)
     *(.data.*)
     *(.gnu.linkonce.d*)
+    KEEP (*(.gnu.linkonce.d.*personality*))
+    *(.data1)
+    *(.got.plt) *(.got)
+    ${RELOCATING+. = ALIGN(2);}
+    *(.sdata .sdata.* .gnu.linkonce.s.*)
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
   } ${RELOCATING+ > data}
   
-  /* Bootloader.  */
-  .bootloader ${RELOCATING-0} :
-  {
-    ${RELOCATING+ PROVIDE (__boot_start = .) ; }
-    *(.bootloader)
-    ${RELOCATING+. = ALIGN(2);}
-    *(.bootloader.*)
-  } ${RELOCATING+ > bootloader}
-  
-  /* Information memory.  */
-  .infomem ${RELOCATING-0} :
-  {
-    *(.infomem)
-    ${RELOCATING+. = ALIGN(2);}
-    *(.infomem.*)
-  } ${RELOCATING+ > infomem}
-
-  /* Information memory (not loaded into MPU).  */
-  .infomemnobits ${RELOCATING-0} :
-  {
-    *(.infomemnobits)
-    ${RELOCATING+. = ALIGN(2);}
-    *(.infomemnobits.*)
-  } ${RELOCATING+ > infomemnobits}
-
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
     ${RELOCATING+. = ALIGN(2);}
@@ -194,13 +263,6 @@ SECTIONS
     ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > data}
 
-  .vectors ${RELOCATING-0}:
-  {
-    ${RELOCATING+ PROVIDE (__vectors_start = .) ; }
-    *(.vectors*)
-    ${RELOCATING+ _vectors_end = . ; }
-  } ${RELOCATING+ > vectors}
-
   ${HEAP_SECTION_MSP430}
 
   /* Stabs for profiling information*/
@@ -214,12 +276,18 @@ SECTIONS
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment 0 : { *(.comment) }
- 
 EOF
 
-. $srcdir/scripttempl/DWARF.sc
+source $srcdir/scripttempl/DWARF.sc
 
 cat <<EOF
+  .MP430.attributes 0 :
+  {
+    KEEP (*(.MSP430.attributes))
+    KEEP (*(.gnu.attributes))
+    KEEP (*(__TI_build_attributes))
+  }
+
   PROVIDE (__stack = ${STACK}) ;
   PROVIDE (__data_start_rom = _etext) ;
   PROVIDE (__data_end_rom   = _etext + SIZEOF (.data)) ;

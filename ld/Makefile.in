@@ -732,6 +732,7 @@ ALL_EMULATION_SOURCES = \
 	emsp430xW423.c \
 	emsp430xW425.c \
 	emsp430xW427.c \
+	emsp430X.c \
 	enews.c \
 	ens32knbsd.c \
 	eor32.c \
@@ -1343,6 +1344,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emmo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emn10200.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emn10300.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emsp430X.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emsp430x110.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emsp430x1101.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emsp430x1111.Po@am__quote@
@@ -3259,6 +3261,10 @@ emsp430xW427.c: $(srcdir)/emulparams/msp430all.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} msp430xW427 "$(tdir_msp430xW427)" msp430all
+emsp430X.c: $(srcdir)/emulparams/msp430all.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} msp430X "$(tdir_msp430X)" msp430all
 enews.c: $(srcdir)/emulparams/news.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} news "$(tdir_news)"

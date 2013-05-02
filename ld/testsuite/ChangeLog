@@ -1,3 +1,15 @@
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/flags1.d: Expect this test to pass on the MSP430.
+	* ld-elf/init-fini-arrays.d: Expect this test to fail on the
+	MSP430.
+	* ld-elf/merge.d: Expect this test to pass on the MSP430.
+	* ld-elf/sec64k.exp: Skip these tests for the MSP430.
+	* ld-gc/pr13683.d: Expect this test to fail on the MSP430.
+	* ld-srec/srec.exp: Expect these tests to fail on the MSP430.
+	* ld-undefined/undefined.exp: Expect the UNDEFINED LINE test to
+	fail on the MSP430.
+
 2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* lib/ld-lib.exp (check_shared_lib_support): Also exclude

@@ -98,6 +98,8 @@ SECTIONS
     *(.text)
     ${RELOCATING+. = ALIGN(2);}
     *(.text.*)
+    ${RELOCATING+. = ALIGN(2);}
+    *(.text:*)
 
     ${RELOCATING+. = ALIGN(2);}
     *(SORT_NONE(.fini9))
@@ -113,6 +115,13 @@ SECTIONS
     *(SORT_NONE(.fini))
 
     ${RELOCATING+ _etext = . ; }
+  } ${RELOCATING+ > text}
+
+  .rodata :
+  {
+    *(.rodata .rodata.* .gnu.linkonce.r.*)
+    *(.const)
+    *(.const:*)
   } ${RELOCATING+ > text}
 
   .data ${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text))}
@@ -151,6 +160,13 @@ SECTIONS
     *(.vectors*)
     ${RELOCATING+ _vectors_end = . ; }
   } ${RELOCATING+ > vectors}
+
+  .MP430.attributes 0 :
+  {
+    KEEP (*(.MSP430.attributes))
+    KEEP (*(.gnu.attributes))
+    KEEP (*(__TI_build_attributes))
+  }
 
   /* Stabs debugging sections.  */
   .stab 0 : { *(.stab) } 

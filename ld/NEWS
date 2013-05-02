@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Texas Instruments MSP430X processor.
+
 * Add support for Altera Nios II.
 
 * Add support for the V850E3V5 architecture.

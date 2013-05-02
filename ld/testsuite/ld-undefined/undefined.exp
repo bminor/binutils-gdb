@@ -128,6 +128,11 @@ setup_xfail mcore-*-elf
 setup_xfail mep-*-*
 setup_xfail mips-sgi-irix6*
 setup_xfail "sh64-*-*"
+# Fails for the MSP430 because it uses SYM_DIFF relocs but it does
+# not provide a special_function for handling them.  If optimization
+# is enabled then this test passes because function()'s prologue is
+# eliminated.
+setup_xfail "msp430-*-*"
 
 # The undefined test fails on 31 bit s/390 because the address of the 
 # function `this_function_is_not_defined' is stored in the literal pool of

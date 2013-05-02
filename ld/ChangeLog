@@ -1,3 +1,19 @@
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am: Add emsp430X.c
+	* Makefine.in: Regenerate.
+	* configure.tgt (msp430): Add msp430X emulation.
+	* ldmain.c (multiple_definition): Only disable relaxation if it
+	was enabled by the user.
+	* ldmain.h (RELAXATION_ENABLED_BY_USER): New macro.
+	* emulparams/msp430all.sh: Add support for MSP430X.
+	* emultempl/generic.em: (before_parse): Enable relaxation for the
+	MSP430.
+	* scripttempl/msp430.sc: Reorganize sections.  Add .rodata
+	section.
+	* scripttempl/msp430_3.sc: Likewise.
+	* NEWS: Mention support for MSP430X.
+
 2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* configure.tgt: Replace alpha*-*-linuxecoff* pattern with

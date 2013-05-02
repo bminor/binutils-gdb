@@ -1,7 +1,6 @@
 # Test linking directly to S-records.
 # By Ian Lance Taylor, Cygnus Support.
-#   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2009, 2011, 2012
-#   Free Software Foundation, Inc.
+#   Copyright 1999-2013 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -267,6 +266,11 @@ proc run_srec_test { test objs } {
     # Xtensa ELF targets relax by default; S-Record linker does not
     if [istarget xtensa*-*-*] {
 	set flags "$flags -no-relax"
+    }
+
+    # MSP430 targets always relax.
+    if [istarget msp430*-*-*] {
+	setup_xfail "msp430*-*-*"
     }
 
     # Epiphany needs some help too

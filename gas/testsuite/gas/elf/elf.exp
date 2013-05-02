@@ -1,5 +1,4 @@
-# Copyright 2012
-# Free Software Foundation, Inc.
+# Copyright 2012-2013 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -62,6 +61,9 @@ if { [is_elf_format] } then {
     if {[istarget m32r*-*-*]} then {
 	set target_machine -m32r
     }
+    if {[istarget "msp430-*-*"]} then {
+	set target_machine -msp430
+    }
     if {[istarget "score-*-*"]} then {
 	set target_machine -score
     }
@@ -91,6 +93,7 @@ if { [is_elf_format] } then {
     # function prologues.
     if {![istarget "mn10300-*-*"]
 	&& ![istarget "xtensa*-*-*"]
+	&& ![istarget "msp430*-*-*"]
 	&& ![istarget "am3*-*-*"]} then {
       run_dump_test "ehopt0"
     }
@@ -136,6 +139,7 @@ if { [is_elf_format] } then {
 	{ mips*-*-* } { }
 	{ mn10200-*-* } { }
 	{ mn10300-*-* } { }
+	{ msp43*-*-* } { }
 	{ *c54x*-*-* } { }
 	{ rx-*-* } { }
 	default {

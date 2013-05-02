@@ -1134,6 +1134,7 @@ case "${targ}" in
 
   msp430-*-*)
     targ_defvec=bfd_elf32_msp430_vec
+    targ_selvecs=bfd_elf32_msp430_ti_vec
     ;;
 
   ns32k-pc532-mach* | ns32k-pc532-ux*)
