@@ -2659,7 +2659,10 @@ display_debug_lines_raw (struct dwarf_section *section,
       unsigned char *end_of_sequence;
        int i;
 
-      if (const_strneq (section->name, ".debug_line."))
+      if (const_strneq (section->name, ".debug_line.")
+	  /* Note: the following does not apply to .debug_line.dwo sections.
+	     These are full debug_line sections.  */
+	  && strcmp (section->name, ".debug_line.dwo") != 0)
 	{
 	  /* Sections named .debug_line.<foo> are fragments of a .debug_line
 	     section containing just the Line Number Statements.  They are
@@ -2668,9 +2671,9 @@ display_debug_lines_raw (struct dwarf_section *section,
 	     garbage collection decides to discard a .text.<foo> section it
 	     can then also discard the line number information in .debug_line.<foo>.
 
-	     Since the section is a fragmnent it does not have the details
+	     Since the section is a fragment it does not have the details
 	     needed to fill out a LineInfo structure, so instead we use the
-	     details from the last one we processed.  */
+	     details from the last full debug_line section that we processed.  */
 	  end_of_sequence = end;
 	  standard_opcodes = NULL;
 	  linfo = saved_linfo;
@@ -2994,18 +2997,12 @@ display_debug_lines_decoded (struct dwarf_section *section,
       unsigned char **directory_table = NULL;
       unsigned int n_directories = 0;
 
-      if (const_strneq (section->name, ".debug_line."))
+      if (const_strneq (section->name, ".debug_line.")
+	  /* Note: the following does not apply to .debug_line.dwo sections.
+	     These are full debug_line sections.  */
+	  && strcmp (section->name, ".debug_line.dwo") != 0)
         {
-	  /* Sections named .debug_line.<foo> are fragments of a .debug_line
-	     section containing just the Line Number Statements.  They are
-	     created by the assembler and intended to be used alongside gcc's
-	     -ffunction-sections command line option.  When the linker's
-	     garbage collection decides to discard a .text.<foo> section it
-	     can then also discard the line number information in .debug_line.<foo>.
-
-	     Since the section is a fragmnent it does not have the details
-	     needed to fill out a LineInfo structure, so instead we use the
-	     details from the last one we processed.  */
+	  /* See comment in display_debug_lines_raw().  */
 	  end_of_sequence = end;
 	  standard_opcodes = NULL;
 	  linfo = saved_linfo;

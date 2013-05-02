@@ -1,3 +1,9 @@
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_lines_raw): Do not treat .debug_line.dwo
+	sections as if they were fragmentary .debug_line sections.
+	(display_debug_lines_decoded): Likewise.
+
 2013-04-29  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (read_debug_line_header): New function.  Reads in a
