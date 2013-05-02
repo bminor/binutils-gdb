@@ -1472,7 +1472,9 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"section", s_change_section, 0},
   {"short", s_cons, 1},
   {"single", s_float_cons, 'f'},
+  {"stabd", s_mips_stab, 'd'},
   {"stabn", s_mips_stab, 'n'},
+  {"stabs", s_mips_stab, 's'},
   {"text", s_change_sec, 't'},
   {"word", s_cons, 2},
 
@@ -17088,18 +17090,24 @@ s_insn (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* Handle a .stabn directive.  We need these in order to mark a label
-   as being a mips16 text label correctly.  Sometimes the compiler
-   will emit a label, followed by a .stabn, and then switch sections.
-   If the label and .stabn are in mips16 mode, then the label is
-   really a mips16 text label.  */
+/* Handle a .stab[snd] directive.  Ideally these directives would be
+   implemented in a transparent way, so that removing them would not
+   have any effect on the generated instructions.  However, s_stab
+   internally changes the section, so in practice we need to decide
+   now whether the preceding label marks compressed code.  We do not
+   support changing the compression mode of a label after a .stab*
+   directive, such as in:
+
+   foo:
+   	.stabs ...
+	.set mips16
+
+   so the current mode wins.  */
 
 static void
 s_mips_stab (int type)
 {
-  if (type == 'n')
-    mips_mark_labels ();
-
+  mips_mark_labels ();
   s_stab (type);
 }
 

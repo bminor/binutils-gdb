@@ -1086,6 +1086,7 @@ if { [istarget mips*-*-vxworks*] } {
 	if $has_newabi {
 	    run_dump_test "mips16-dwarf2-n32"
 	}
+	run_dump_test "mips16-stabs"
     }
     if { !$no_mips16 } { 
         run_dump_test "mips16e-jrc"
