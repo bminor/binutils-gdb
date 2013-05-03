@@ -42,5 +42,7 @@ main ()
   raise (SIGHUP);		/* third HUP */
 
   raise (SIGHUP);		/* fourth HUP */
+
+  raise (SIGINT);		/* first INT */
 }
 

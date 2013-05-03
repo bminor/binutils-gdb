@@ -1,3 +1,9 @@
+2013-05-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* break-catch-sig.c (signal_catchpoint_breakpoint_hit): Do not
+	ignore SIGINT and SIGTRAP in case these internal signals are
+	caught explicitely.
+
 2013-05-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* darwin-nat.c (darwin_read_write_inferior): Change types

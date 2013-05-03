@@ -1,3 +1,8 @@
+2013-05-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/catch-sig.c (main): Raise SIGINT.
+	* gdb.base/catch-sig.exp: Test "catch signal SIGINT".
+
 2013-05-03  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* status-stop.exp (test_tstart_tstart): Check for error

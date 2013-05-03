@@ -199,13 +199,13 @@ signal_catchpoint_breakpoint_hit (const struct bp_location *bl,
            VEC_iterate (gdb_signal_type, c->signals_to_be_caught, i, iter);
            i++)
 	if (signal_number == iter)
-	  break;
+	  return 1;
       /* Not the same.  */
-      if (!iter)
-	return 0;
+      gdb_assert (!iter);
+      return 0;
     }
-
-  return c->catch_all || !INTERNAL_SIGNAL (signal_number);
+  else
+    return c->catch_all || !INTERNAL_SIGNAL (signal_number);
 }
 
 /* Implement the "print_it" breakpoint_ops method for signal
