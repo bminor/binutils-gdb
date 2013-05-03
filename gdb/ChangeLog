@@ -1,5 +1,12 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* record-btrace.c (record_btrace_find_new_threads)
+	(record_btrace_thread_alive): New.
+	(init_record_btrace_ops): Initialize to_find_new_threads and
+	to_thread_alive.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (record_btrace_resume): New.
 	(record_btrace_wait): New.
 	(init_record_btrace_ops): Initialize to_wait and to_resume.

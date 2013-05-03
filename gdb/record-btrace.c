@@ -1050,6 +1050,41 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   error (_("You can't do this from here.  Do 'record goto end', first."));
 }
 
+/* The to_find_new_threads method of target record-btrace.  */
+
+static void
+record_btrace_find_new_threads (struct target_ops *ops)
+{
+  /* Don't expect new threads if we're replaying.  */
+  if (record_btrace_is_replaying ())
+    return;
+
+  /* Forward the request.  */
+  for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
+    if (ops->to_find_new_threads != NULL)
+      {
+	ops->to_find_new_threads (ops);
+	break;
+      }
+}
+
+/* The to_thread_alive method of target record-btrace.  */
+
+static int
+record_btrace_thread_alive (struct target_ops *ops, ptid_t ptid)
+{
+  /* We don't add or remove threads during replay.  */
+  if (record_btrace_is_replaying ())
+    return find_thread_ptid (ptid) != NULL;
+
+  /* Forward the request.  */
+  for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
+    if (ops->to_thread_alive != NULL)
+      return ops->to_thread_alive (ops, ptid);
+
+  return 0;
+}
+
 /* Initialize the record-btrace target ops.  */
 
 static void
@@ -1086,6 +1121,8 @@ init_record_btrace_ops (void)
   ops->to_get_unwinder = &record_btrace_frame_unwind;
   ops->to_resume = record_btrace_resume;
   ops->to_wait = record_btrace_wait;
+  ops->to_find_new_threads = record_btrace_find_new_threads;
+  ops->to_thread_alive = record_btrace_thread_alive;
   ops->to_stratum = record_stratum;
   ops->to_magic = OPS_MAGIC;
 }
