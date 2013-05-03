@@ -1484,12 +1484,14 @@ gld${EMULATION_NAME}_before_allocation (void)
   bfd *abfd;
 
   if (is_elf_hash_table (link_info.hash))
-    _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
+    {
+      _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
 
-  /* If we are going to make any variable assignments, we need to let
-     the ELF backend know about them in case the variables are
-     referred to by dynamic objects.  */
-  lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
+      /* If we are going to make any variable assignments, we need to
+	 let the ELF backend know about them in case the variables are
+	 referred to by dynamic objects.  */
+      lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
+    }
 
   /* Let the ELF backend work out the sizes of any sections required
      by dynamic linking.  */

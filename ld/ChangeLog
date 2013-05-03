@@ -1,3 +1,8 @@
+2013-05-03  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Only call lang_for_each_statement if an ELF hash table is used.
+
 2013-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* Makefile.am: Add emsp430X.c
