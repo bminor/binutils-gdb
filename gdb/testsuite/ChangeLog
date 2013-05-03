@@ -1,3 +1,8 @@
+2013-05-03  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* status-stop.exp (test_tstart_tstart): Check for error
+	returned by the second 'tstart' command.
+
 2013-04-25  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.arch/arm-bl-branch-dest.c: New file.
