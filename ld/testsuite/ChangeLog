@@ -1,3 +1,21 @@
+2013-05-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-elf/provide-hidden-s.nd: New test.
+	* ld-elf/provide-hidden-abs.nd: New test.
+	* ld-elf/provide-hidden-def.nd: New test.
+	* ld-elf/provide-hidden-dyn.nd: New test.
+	* ld-elf/provide-hidden-sec.nd: New test.
+	* ld-elf/provide-hidden-dynabs.nd: New test.
+	* ld-elf/provide-hidden-dynsec.nd: New test.
+	* ld-elf/provide-hidden-s.ld: New test linker script.
+	* ld-elf/provide-hidden-1.ld: New test linker script.
+	* ld-elf/provide-hidden-2.ld: New test linker script.
+	* ld-elf/provide-hidden-1.s: New test source.
+	* ld-elf/provide-hidden-2.s: New test source.
+	* ld-elf/provide-hidden-3.s: New test source.
+	* ld-elf/provide-hidden-4.s: New test source.
+	* ld-elf/provide-hidden.exp: New test script.
+
 2013-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/flags1.d: Expect this test to pass on the MSP430.
