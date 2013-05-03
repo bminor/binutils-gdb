@@ -1,5 +1,11 @@
 2013-05-03  Alan Modra  <amodra@gmail.com>
 
+	PR ld/15365
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Restrict __ehdr_start's export class to no less than STV_HIDDEN.
+
+2013-05-03  Alan Modra  <amodra@gmail.com>
+
 	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
 	Only call lang_for_each_statement if an ELF hash table is used.
 

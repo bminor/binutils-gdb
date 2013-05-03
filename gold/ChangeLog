@@ -1,3 +1,8 @@
+2013-05-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	PR ld/15365
+	* layout.cc (Layout::finalize): Make __ehdr_start STV_HIDDEN.
+
 2013-05-03  Alan Modra  <amodra@gmail.com>
 
 	* merge.cc (Output_merge_string::do_add_input_section): Correct

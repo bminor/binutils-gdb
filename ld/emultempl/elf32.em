@@ -1487,6 +1487,13 @@ gld${EMULATION_NAME}_before_allocation (void)
     {
       _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
 
+      /* Make __ehdr_start hidden if it has been referenced, to
+	 prevent the symbol from being dynamic.  */
+      if (!bfd_elf_record_link_assignment (link_info.output_bfd, &link_info,
+					   "__ehdr_start", TRUE, TRUE))
+	einfo ("%P%F: failed to record assignment to %s: %E\n",
+	       "__ehdr_start");
+
       /* If we are going to make any variable assignments, we need to
 	 let the ELF backend know about them in case the variables are
 	 referred to by dynamic objects.  */

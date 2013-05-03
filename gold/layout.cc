@@ -2713,7 +2713,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
     symtab->define_in_output_segment("__ehdr_start", NULL,
 				     Symbol_table::PREDEFINED, load_seg, 0, 0,
 				     elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
-				     elfcpp::STV_DEFAULT, 0,
+				     elfcpp::STV_HIDDEN, 0,
 				     Symbol::SEGMENT_START, true);
 
   // Set the file offsets of all the non-data sections we've seen so

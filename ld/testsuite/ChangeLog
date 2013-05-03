@@ -1,5 +1,17 @@
 2013-05-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	PR ld/15365
+	* ld-elf/ehdr_start.d: Expect __ehdr_start to be STB_LOCAL.
+	* ld-mips-elf/ehdr_start-1.nd: New test.
+	* ld-mips-elf/ehdr_start-2.nd: New test.
+	* ld-mips-elf/ehdr_start-1.ld: New test linker script.
+	* ld-mips-elf/ehdr_start-2.ld: New test linker script.
+	* ld-mips-elf/ehdr_start-new.s: New test source.
+	* ld-mips-elf/ehdr_start-o32.s: New test source.
+	* ld-mips-elf/mips-elf.exp: Run the new tests.
+
+2013-05-03  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* ld-elf/provide-hidden-s.nd: New test.
 	* ld-elf/provide-hidden-abs.nd: New test.
 	* ld-elf/provide-hidden-def.nd: New test.

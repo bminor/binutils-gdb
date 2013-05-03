@@ -709,3 +709,28 @@ foreach { abi } $abis {
 		"readelf -A export-class-call16-${abi}.gd"] \
 	    "export-class-call16-${abi}.so"]]
 }
+
+# Magic __ehdr_start symbol tests.
+set abis [concat o32 [expr {$has_newabi ? "n32 n64" : ""}]]
+foreach { abi } $abis {
+    set suff [string map {o32 o32 n32 new n64 new} $abi]
+    run_ld_link_tests [list \
+        [list \
+            "MIPS magic __ehdr_start symbol test 1 ($abi)" \
+            "$abi_ldflags($abi) -T ehdr_start-1.ld" "" \
+            "$abi_asflags($abi)" \
+            [list ehdr_start-${suff}.s] \
+            [list "readelf -s ehdr_start-1.nd"] \
+            "ehdr_start-1-${abi}"]]
+    if [regexp "(?:n32|n64)" "$abi"] {
+	setup_kfail "mips*-*-*" "ld/15428"
+    }
+    run_ld_link_tests [list \
+        [list \
+            "MIPS magic __ehdr_start symbol test 2 ($abi)" \
+            "$abi_ldflags($abi) -T ehdr_start-2.ld" "" \
+            "$abi_asflags($abi)" \
+            [list ehdr_start-${suff}.s] \
+            [list "readelf -s ehdr_start-2.nd"] \
+            "ehdr_start-2-${abi}"]]
+}
