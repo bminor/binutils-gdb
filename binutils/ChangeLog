@@ -1,5 +1,9 @@
 2013-05-02  Nick Clifton  <nickc@redhat.com>
 
+	* readelf.c: Add support for MSP430X architecture.
+
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
 	* dwarf.c (display_debug_lines_raw): Do not treat .debug_line.dwo
 	sections as if they were fragmentary .debug_line sections.
 	(display_debug_lines_decoded): Likewise.
