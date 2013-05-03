@@ -79,9 +79,13 @@ proc test_tstart_tstart { } {
 	gdb_test "trace func1" "Tracepoint \[0-9\] at $hex: file.*"
 	gdb_test_no_output "tstart"
 
-	gdb_test "tstart" "" "tstart again" \
-	    "A trace is running already.  Start a new run\\? \\(y or n\\) " \
-	    "y"
+	set test "tstart again"
+	gdb_test_multiple "tstart" $test {
+	    -re "A trace is running already.  Start a new run.*y or n.*" {
+		# Send 'y' and make sure that we don't get any error.
+		gdb_test_no_output "y" $test
+	    }
+	}
     }
 }
 

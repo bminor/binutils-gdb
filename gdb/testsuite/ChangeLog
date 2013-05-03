@@ -1,3 +1,8 @@
+2013-05-03  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* status-stop.exp (test_tstart_tstart): Check for error
+	returned by the second 'tstart' command.
+
 2013-03-27  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.xml/maint_print_struct.exp: New file.

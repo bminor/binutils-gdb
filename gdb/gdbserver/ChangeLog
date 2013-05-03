@@ -1,3 +1,7 @@
+2013-05-03  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* tracepoint.c (cmd_qtinit): Call 'stop_tracing'.
+
 2013-04-25  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15186
