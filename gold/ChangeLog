@@ -1,3 +1,9 @@
+2013-05-03  Alan Modra  <amodra@gmail.com>
+
+	* merge.cc (Output_merge_string::do_add_input_section): Correct
+	scan for number of strings.  Rename vars to avoid shadowing.
+	Include missing terminator in input_size_.
+
 2013-05-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* merge.cc (Output_merge_string<Char_type>::do_add_input_section):

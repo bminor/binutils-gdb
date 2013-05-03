@@ -505,17 +505,17 @@ bool
 Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 						     unsigned int shndx)
 {
-  section_size_type len;
+  section_size_type sec_len;
   bool is_new;
   const unsigned char* pdata = object->decompressed_section_contents(shndx,
-								     &len,
+								     &sec_len,
 								     &is_new);
 
   const Char_type* p = reinterpret_cast<const Char_type*>(pdata);
-  const Char_type* pend = p + len / sizeof(Char_type);
+  const Char_type* pend = p + sec_len / sizeof(Char_type);
   const Char_type* pend0 = pend;
 
-  if (len % sizeof(Char_type) != 0)
+  if (sec_len % sizeof(Char_type) != 0)
     {
       object->error(_("mergeable string section length not multiple of "
 		      "character size"));
@@ -542,11 +542,14 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
 
   // Count the number of non-null strings in the section and size the list.
   size_t count = 0;
-  for (const Char_type* pt = p, len = string_length(pt);
-       pt < pend0;
-       pt += len + 1)
-    if (len != 0)
-      ++count;
+  const Char_type* pt = p;
+  while (pt < pend0)
+    {
+      size_t len = string_length(pt);
+      if (len != 0)
+	++count;
+      pt += len + 1;
+    }
   if (pend0 < pend)
     ++count;
   merged_strings.reserve(count + 1);
@@ -595,7 +598,7 @@ Output_merge_string<Char_type>::do_add_input_section(Relobj* object,
   merged_strings.push_back(Merged_string(i, 0));
 
   this->input_count_ += count;
-  this->input_size_ += len;
+  this->input_size_ += i;
 
   if (has_misaligned_strings)
     gold_warning(_("%s: section %s contains incorrectly aligned strings;"
