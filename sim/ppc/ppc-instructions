@@ -3455,19 +3455,6 @@ void::function::invalid_zero_divide_operation:cpu *processor, unsigned_word cia,
 	PPC_INSN_MFCR(RT_BITMASK);
 
 #
-# I.3.3.15 Fixed-Point Select
-#
-
-0.31,6.RT,11.RA,16.RB,21.BF,26.15,31./:A::isel:Integer Select
-	unsigned_word a;
-	if (RA_is_0) a = 0;
-	else         a = *rA;
-	if (CR & (1 << (31 - BF)))
-	  *rT = a;
-	else
-	  *rT = *rB;
-
-#
 # I.4.6.2 Floating-Point Load Instructions
 #
 
