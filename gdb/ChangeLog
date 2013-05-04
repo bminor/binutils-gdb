@@ -1,3 +1,12 @@
+2013-05-03  Doug Evans  <dje@google.com>
+
+	* objfiles.c (objfile_relocate): Use gdb_bfd_count_sections instead
+	of bfd_count_sections.
+	* solib-target.c (solib_target_relocate_section_addresses): Ditto.
+	* symfile.c (default_symfile_offsets): Ditto.
+	(syms_from_objfile_1): Ditto.  Make dummy addrs list an array of
+	one entry, not bfd_count_sections entries.
+
 2013-05-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* rl78-tdep.c (rl78_register_reggroup_p): Include SP in the

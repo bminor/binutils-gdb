@@ -339,7 +339,7 @@ solib_target_relocate_section_addresses (struct so_list *so,
      it any earlier, since we need to open the file first.  */
   if (so->lm_info->offsets == NULL)
     {
-      int num_sections = bfd_count_sections (so->abfd);
+      int num_sections = gdb_bfd_count_sections (so->abfd);
 
       so->lm_info->offsets = xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections));
 

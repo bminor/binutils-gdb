@@ -880,7 +880,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
       addr_info_make_relative (objfile_addrs, debug_objfile->obfd);
 
       gdb_assert (debug_objfile->num_sections
-		  == bfd_count_sections (debug_objfile->obfd));
+		  == gdb_bfd_count_sections (debug_objfile->obfd));
       new_debug_offsets = 
 	xmalloc (SIZEOF_N_SECTION_OFFSETS (debug_objfile->num_sections));
       make_cleanup (xfree, new_debug_offsets);

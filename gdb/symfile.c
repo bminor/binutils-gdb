@@ -678,7 +678,7 @@ void
 default_symfile_offsets (struct objfile *objfile,
 			 struct section_addr_info *addrs)
 {
-  objfile->num_sections = bfd_count_sections (objfile->obfd);
+  objfile->num_sections = gdb_bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
     obstack_alloc (&objfile->objfile_obstack,
 		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
@@ -948,7 +948,7 @@ syms_from_objfile_1 (struct objfile *objfile,
     {
       /* No symbols to load, but we still need to make sure
 	 that the section_offsets table is allocated.  */
-      int num_sections = bfd_count_sections (objfile->obfd);
+      int num_sections = gdb_bfd_count_sections (objfile->obfd);
       size_t size = SIZEOF_N_SECTION_OFFSETS (num_offsets);
 
       objfile->num_sections = num_sections;
@@ -967,8 +967,7 @@ syms_from_objfile_1 (struct objfile *objfile,
      no load address was specified.  */
   if (! addrs && ! offsets)
     {
-      local_addr
-	= alloc_section_addr_info (bfd_count_sections (objfile->obfd));
+      local_addr = alloc_section_addr_info (1);
       make_cleanup (xfree, local_addr);
       addrs = local_addr;
     }
