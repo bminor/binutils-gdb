@@ -1,3 +1,14 @@
+2013-05-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (rl78_register_reggroup_p): Include SP in the
+	`save' and `restore' register groups.  Don't include SPL
+	or SPH in these groups.
+	(rl78_dwarf_reg_to_regnum):  Adjust mapping for
+	RL78_PC_REGNUM.  Add mappings for RL78_PSW_REGNUM,
+	RL78_ES_REGNUM, and RL78_CS_REGNUM.
+	(rl78_gdbarch_init): Set `dwarf2_addr_size' to 4.  Invoke
+	dwarf2_append_unwinders().
+
 2013-05-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* break-catch-sig.c (signal_catchpoint_breakpoint_hit): Do not

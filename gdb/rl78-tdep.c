@@ -393,7 +393,10 @@ rl78_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   /* All other registers are saved and restored.  */
   if (group == save_reggroup || group == restore_reggroup)
     {
-      if (regnum < RL78_NUM_REGS)
+      if ((regnum < RL78_NUM_REGS
+           && regnum != RL78_SPL_REGNUM
+	   && regnum != RL78_SPH_REGNUM)
+          || regnum == RL78_SP_REGNUM)
 	return 1;
       else
 	return 0;
@@ -910,6 +913,14 @@ rl78_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   else if (reg == 32)
     return RL78_SP_REGNUM;
   else if (reg == 33)
+    return -1;			/* ap */
+  else if (reg == 34)
+    return RL78_PSW_REGNUM;
+  else if (reg == 35)
+    return RL78_ES_REGNUM;
+  else if (reg == 36)
+    return RL78_CS_REGNUM;
+  else if (reg == 37)
     return RL78_PC_REGNUM;
   else
     internal_error (__FILE__, __LINE__,
@@ -1125,6 +1136,7 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 16);
   set_gdbarch_addr_bit (gdbarch, 32);
+  set_gdbarch_dwarf2_addr_size (gdbarch, 4);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_bit (gdbarch, 32);
@@ -1148,6 +1160,8 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_pc (gdbarch, rl78_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, rl78_unwind_sp);
   set_gdbarch_frame_align (gdbarch, rl78_frame_align);
+
+  dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &rl78_unwind);
 
   /* Dummy frames, return values.  */
