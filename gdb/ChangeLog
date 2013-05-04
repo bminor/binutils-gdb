@@ -1,3 +1,12 @@
+2013-05-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* windows-nat.c (windows_delete_thread): Accept an additional
+	argument, the thread's exit code, and announce thread death when
+	print_thread_events is non-zero and we are deleting a thread that
+	is not the main thread.
+	(get_windows_debug_event): Pass thread exit code to
+	windows_delete_thread.
+
 2013-05-03  Kevin Buettner  <kevinb@redhat.com>
 
 	* v850-tdep.c (elf-bfd.h, elf/v850.h): Include.
