@@ -1,3 +1,31 @@
+2013-05-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* v850-tdep.c (elf-bfd.h, elf/v850.h): Include.
+	(R_149_REGNUM, E_NUM_OF_V850E2_REGS, E_SELID_1_R0_REGNUM)
+	(E_SELID_1_R31_REGNUM, E_SELID_2_R0_REGNUM, E_SELID_2_R31_REGNUM)
+	(E_SELID_3_R0_REGNUM, E_SELID_3_R31_REGNUM, E_SELID_4_R0_REGNUM)
+	(E_SELID_4_R31_REGNUM, E_SELID_5_R0_REGNUM, E_SELID_5_R31_REGNUM)
+	(E_SELID_6_R0_REGNUM, E_SELID_6_R31_REGNUM, E_SELID_7_R0_REGNUM, E_SELID_7_R31_REGNUM)
+	(E_VR0_REGNUM, E_VR31_REGNUM, E_NUM_OF_V850E3V5_REGS): Define.
+	(v850_abi, V850_ABI_GCC, V850_ABI_RH850): New enum and constants.
+	(gdbarch_tdep): New struct.
+	(v850e2_register_name): Use E_NUM_OF_V850E2_REGS instead of
+	E_NUM_REGS.
+	(v850e3v5_register_name): New function.
+	(v850_register_type): v850e3v5 vector registers are 64-bits wide.
+	(v850_use_struct_convention): Add `gdbarch' parameter.  Add new
+	code handling the struct return conventions for the RH850 ABI.
+	Update all callers.
+	(v850_eight_byte_align_p): New function.
+	(v850_push_call_dummy): Push structs by value, not by reference
+	for the RH850 ABI.  Add support for eight byte alignment.
+	(v850_dbtrap_breakpoint_from_pc): New function.
+	(v850_gdbarch_init): Add ABI detection code.  Register
+	v850e3v5_register_name for the v850e3v5 architecture.  Set the
+	number of registers for v850e3v5.  Register
+	v850_dbtrap_breakpoint_from_pc as appropriate.
+	(_initialize_gdbarch_init): Registration bfd_arch_v850_rh850.
+
 2013-05-03  Doug Evans  <dje@google.com>
 
 	* objfiles.c (objfile_relocate): Use gdb_bfd_count_sections instead
