@@ -2632,7 +2632,7 @@ static reloc_howto_type elf_mips_copy_howto =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
 	 "R_MIPS_COPY",		/* name */
 	 FALSE,			/* partial_inplace */
 	 0x0,         		/* src_mask */
@@ -2648,7 +2648,7 @@ static reloc_howto_type elf_mips_jump_slot_howto =
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
 	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
 	 "R_MIPS_JUMP_SLOT",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0x0,         		/* src_mask */

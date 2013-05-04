@@ -1,3 +1,10 @@
+2013-05-04  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elf32-mips.c (elf_mips_copy_howto, elf_mips_jump_slot_howto):
+	Use _bfd_mips_elf_generic_reloc instead of bfd_elf_generic_reloc.
+	* elfn32-mips.c: Likewise.
+	* elf64-mips.c: Likewise.
+
 2013-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* archures.c: Add some more MSP430 machine numbers.
