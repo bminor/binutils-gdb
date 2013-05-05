@@ -1452,7 +1452,7 @@ get_return_value (struct value *function, struct type *value_type)
   if (!stop_regs)
     {
       stop_regs = regcache_dup (get_current_regcache ());
-      cleanup = make_cleanup_regcache_xfree (stop_regs);
+      make_cleanup_regcache_xfree (stop_regs);
     }
 
   gdbarch = get_regcache_arch (stop_regs);

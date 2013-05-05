@@ -269,6 +269,7 @@ display_gdb_prompt (char *new_prompt)
 	     rl_callback_handler_remove(), does the job.  */
 
 	  rl_callback_handler_remove ();
+	  do_cleanups (old_chain);
 	  return;
 	}
       else

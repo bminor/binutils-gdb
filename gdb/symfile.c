@@ -1698,6 +1698,7 @@ symfile_bfd_open (char *name)
   bfd *sym_bfd;
   int desc;
   char *absolute_name;
+  struct cleanup *back_to;
 
   if (remote_filename_p (name))
     {
@@ -1739,15 +1740,12 @@ symfile_bfd_open (char *name)
 
   xfree (name);
   name = absolute_name;
-  make_cleanup (xfree, name);
+  back_to = make_cleanup (xfree, name);
 
   sym_bfd = gdb_bfd_open (name, gnutarget, desc);
   if (!sym_bfd)
-    {
-      make_cleanup (xfree, name);
-      error (_("`%s': can't open to read symbols: %s."), name,
-	     bfd_errmsg (bfd_get_error ()));
-    }
+    error (_("`%s': can't open to read symbols: %s."), name,
+	   bfd_errmsg (bfd_get_error ()));
   bfd_set_cacheable (sym_bfd, 1);
 
   if (!bfd_check_format (sym_bfd, bfd_object))
@@ -1756,6 +1754,8 @@ symfile_bfd_open (char *name)
       error (_("`%s': can't read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
+
+  do_cleanups (back_to);
 
   return sym_bfd;
 }

@@ -1,3 +1,10 @@
+2013-05-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* event-top.c (display_gdb_prompt): Call missing do_cleanups.
+	* infcmd.c (get_return_value) <!stop_regs>: Do not overwrite CLEANUP.
+	* symfile.c (symfile_bfd_open): New variable back_to.  Do not leave
+	a stale cleanup.  Fix double free of NAME.
+
 2013-05-04  Eli Zaretskii  <eliz@gnu.org>
 
 	* windows-nat.c (windows_delete_thread): Accept an additional
