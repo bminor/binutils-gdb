@@ -1,5 +1,9 @@
 2013-05-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* cleanups.c (restore_my_cleanups): New gdb_assert for SENTINEL_CLEANUP.
+
+2013-05-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* event-top.c (display_gdb_prompt): Call missing do_cleanups.
 	* infcmd.c (get_return_value) <!stop_regs>: Do not overwrite CLEANUP.
 	* symfile.c (symfile_bfd_open): New variable back_to.  Do not leave

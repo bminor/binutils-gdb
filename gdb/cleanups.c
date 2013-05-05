@@ -261,6 +261,7 @@ save_final_cleanups (void)
 static void
 restore_my_cleanups (struct cleanup **pmy_chain, struct cleanup *chain)
 {
+  gdb_assert (*pmy_chain == SENTINEL_CLEANUP);
   *pmy_chain = chain;
 }
 
