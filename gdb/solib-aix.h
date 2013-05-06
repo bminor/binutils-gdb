@@ -1,4 +1,4 @@
-/* Copyright (C) 2006-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -15,6 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-/* Minimum possible text address in AIX.  */
-#define AIX_TEXT_SEGMENT_BASE 0x10000000
+#ifndef SOLIB_AIX_H
+#define SOLIB_AIX_H
 
+struct target_so_ops;
+extern struct target_so_ops solib_aix_so_ops;
+
+extern CORE_ADDR solib_aix_get_toc_value (CORE_ADDR pc);
+
+#endif

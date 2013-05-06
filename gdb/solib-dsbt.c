@@ -647,11 +647,11 @@ dsbt_current_sos (void)
      for details.)
 
      Note that the relocation of the main executable is also performed
-     by SOLIB_CREATE_INFERIOR_HOOK, however, in the case of core
+     by solib_create_inferior_hook, however, in the case of core
      files, this hook is called too late in order to be of benefit to
-     SOLIB_ADD.  SOLIB_ADD eventually calls this function,
+     solib_add.  solib_add eventually calls this function,
      dsbt_current_sos, and also precedes the call to
-     SOLIB_CREATE_INFERIOR_HOOK.   (See post_create_inferior in
+     solib_create_inferior_hook.   (See post_create_inferior in
      infcmd.c.)  */
   if (info->main_executable_lm_info == 0 && core_bfd != NULL)
     dsbt_relocate_main_executable ();
@@ -1089,12 +1089,10 @@ dsbt_relocate_main_executable (void)
 
 /* When gdb starts up the inferior, it nurses it along (through the
    shell) until it is ready to execute it's first instruction.  At this
-   point, this function gets called via expansion of the macro
-   SOLIB_CREATE_INFERIOR_HOOK.
+   point, this function gets called via solib_create_inferior_hook.
 
    For the DSBT shared library, the main executable needs to be relocated.
-   The shared library breakpoints also need to be enabled.
- */
+   The shared library breakpoints also need to be enabled.  */
 
 static void
 dsbt_solib_create_inferior_hook (int from_tty)

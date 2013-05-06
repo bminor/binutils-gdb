@@ -907,11 +907,16 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset,
 
 /* Create a new minimal symbol (using prim_record_minimal_symbol_and_info).
 
+   Creation of all new minimal symbols should go through this function
+   rather than calling the various prim_record_[...] functions in order
+   to make sure that all symbol addresses get properly relocated.
+
    Arguments are:
 
    NAME - the symbol's name (but if NAME starts with a period, that
    leading period is discarded).
-   ADDRESS - the symbol's address.
+   ADDRESS - the symbol's address, prior to relocation.  This function
+      relocates the address before recording the minimal symbol.
    MS_TYPE - the symbol's type.
    N_SCNUM - the symbol's XCOFF section number.
    OBJFILE - the objfile associated with the minimal symbol.  */
@@ -922,9 +927,12 @@ record_minimal_symbol (const char *name, CORE_ADDR address,
 		       int n_scnum,
 		       struct objfile *objfile)
 {
+  int section = secnum_to_section (n_scnum, objfile);
+
   if (name[0] == '.')
     ++name;
 
+  address += ANOFFSET (objfile->section_offsets, section);
   prim_record_minimal_symbol_and_info (name, address, ms_type,
 				       secnum_to_section (n_scnum, objfile),
 				       objfile);
@@ -2339,11 +2347,10 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    /* Data variables are recorded in the minimal symbol
 		       table, except for section symbols.  */
 		    if (*namestring != '.')
-		      prim_record_minimal_symbol_and_info
+		      record_minimal_symbol
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
-			 secnum_to_section (symbol.n_scnum, objfile),
-			 objfile);
+			 symbol.n_scnum, objfile);
 		    break;
 
 		  case XMC_TC0:
@@ -2416,11 +2423,10 @@ scan_xcoff_symtab (struct objfile *objfile)
 		       typically be XMC_RW; I suspect XMC_RO and
 		       XMC_BS might be possible too.  */
 		    if (*namestring != '.')
-		      prim_record_minimal_symbol_and_info
+		      record_minimal_symbol
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
-			 secnum_to_section (symbol.n_scnum, objfile),
-			 objfile);
+			 symbol.n_scnum, objfile);
 		    break;
 		  }
 		break;
@@ -2433,11 +2439,10 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    /* Common variables are recorded in the minimal symbol
 		       table, except for section symbols.  */
 		    if (*namestring != '.')
-		      prim_record_minimal_symbol_and_info
+		      record_minimal_symbol
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_bss : mst_bss,
-			 secnum_to_section (symbol.n_scnum, objfile),
-			 objfile);
+			 symbol.n_scnum, objfile);
 		    break;
 		  }
 		break;
@@ -3035,44 +3040,38 @@ static void
 xcoff_symfile_offsets (struct objfile *objfile,
 		       struct section_addr_info *addrs)
 {
-  asection *sect = NULL;
-  int i;
+  const char *first_section_name;
 
-  objfile->num_sections = bfd_count_sections (objfile->obfd);
-  objfile->section_offsets = (struct section_offsets *)
-    obstack_alloc (&objfile->objfile_obstack, 
-		   SIZEOF_N_SECTION_OFFSETS (objfile->num_sections));
+  default_symfile_offsets (objfile, addrs);
 
-  /* Initialize the section indexes for future use.  */
-  sect = bfd_get_section_by_name (objfile->obfd, ".text");
-  if (sect) 
-    objfile->sect_index_text = sect->index;
+  /* Oneof the weird side-effects of default_symfile_offsets is that
+     it sometimes sets some section indices to zero for sections that,
+     in fact do not exist. See the body of default_symfile_offsets
+     for more info on when that happens. Undo that, as this then allows
+     us to test whether the associated section exists or not, and then
+     access it quickly (without searching it again).  */
 
-  sect = bfd_get_section_by_name (objfile->obfd, ".data");
-  if (sect) 
-    objfile->sect_index_data = sect->index;
+  if (objfile->num_sections == 0)
+    return; /* Is that even possible?  Better safe than sorry.  */
 
-  sect = bfd_get_section_by_name (objfile->obfd, ".bss");
-  if (sect) 
-    objfile->sect_index_bss = sect->index;
+  first_section_name
+    = bfd_section_name (objfile->obfd, objfile->sections[0].the_bfd_section);
 
-  sect = bfd_get_section_by_name (objfile->obfd, ".rodata");
-  if (sect) 
-    objfile->sect_index_rodata = sect->index;
+  if (objfile->sect_index_text == 0
+      && strcmp (first_section_name, ".text") != 0)
+    objfile->sect_index_text = -1;
 
-  for (i = 0; i < objfile->num_sections; ++i)
-    {
-      /* syms_from_objfile kindly subtracts from addr the
-	 bfd_section_vma of the .text section.  This strikes me as
-	 wrong--whether the offset to be applied to symbol reading is
-	 relative to the start address of the section depends on the
-	 symbol format.  In any event, this whole "addr" concept is
-	 pretty broken (it doesn't handle any section but .text
-	 sensibly), so just ignore the addr parameter and use 0.
-	 rs6000-nat.c will set the correct section offsets via
-	 objfile_relocate.  */
-	(objfile->section_offsets)->offsets[i] = 0;
-    }
+  if (objfile->sect_index_data == 0
+      && strcmp (first_section_name, ".data") != 0)
+    objfile->sect_index_data = -1;
+
+  if (objfile->sect_index_bss == 0
+      && strcmp (first_section_name, ".bss") != 0)
+    objfile->sect_index_bss = -1;
+
+  if (objfile->sect_index_rodata == 0
+      && strcmp (first_section_name, ".rodata") != 0)
+    objfile->sect_index_rodata = -1;
 }
 
 /* Register our ability to parse symbols for xcoff BFD files.  */

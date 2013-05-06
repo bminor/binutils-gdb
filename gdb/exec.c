@@ -44,10 +44,6 @@
 #include <ctype.h>
 #include "gdb_stat.h"
 
-#include "xcoffsolib.h"
-
-struct vmap *map_vmap (bfd *, bfd *);
-
 void (*deprecated_file_changed_hook) (char *);
 
 /* Prototypes for local functions */
@@ -80,8 +76,6 @@ show_write_files (struct ui_file *file, int from_tty,
 		    value);
 }
 
-
-struct vmap *vmap;
 
 static void
 exec_open (char *args, int from_tty)
@@ -117,24 +111,7 @@ exec_close (void)
 static void
 exec_close_1 (void)
 {
-  struct vmap *vp, *nxt;
-
   using_exec_ops = 0;
-
-  for (nxt = vmap; nxt != NULL;)
-    {
-      vp = nxt;
-      nxt = vp->nxt;
-
-      if (vp->objfile)
-	free_objfile (vp->objfile);
-
-      gdb_bfd_unref (vp->bfd);
-
-      xfree (vp);
-    }
-
-  vmap = NULL;
 
   {
     struct program_space *ss;
@@ -247,22 +224,6 @@ exec_file_attach (char *filename, int from_tty)
 		 scratch_pathname,
 		 gdb_bfd_errmsg (bfd_get_error (), matching));
 	}
-
-      /* FIXME - This should only be run for RS6000, but the ifdef is a poor
-         way to accomplish.  */
-#ifdef DEPRECATED_IBM6000_TARGET
-      /* Setup initial vmap.  */
-
-      map_vmap (exec_bfd, 0);
-      if (vmap == NULL)
-	{
-	  /* Make sure to close exec_bfd, or else "run" might try to use
-	     it.  */
-	  exec_close ();
-	  error (_("\"%s\": can't find the file sections: %s"),
-		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
-	}
-#endif /* DEPRECATED_IBM6000_TARGET */
 
       if (build_section_table (exec_bfd, &sections, &sections_end))
 	{
@@ -507,62 +468,6 @@ remove_target_sections (void *key, bfd *abfd)
 }
 
 
-static void
-bfdsec_to_vmap (struct bfd *abfd, struct bfd_section *sect, void *arg3)
-{
-  struct vmap_and_bfd *vmap_bfd = (struct vmap_and_bfd *) arg3;
-  struct vmap *vp;
-
-  vp = vmap_bfd->pvmap;
-
-  if ((bfd_get_section_flags (abfd, sect) & SEC_LOAD) == 0)
-    return;
-
-  if (strcmp (bfd_section_name (abfd, sect), ".text") == 0)
-    {
-      vp->tstart = bfd_section_vma (abfd, sect);
-      vp->tend = vp->tstart + bfd_section_size (abfd, sect);
-      vp->tvma = bfd_section_vma (abfd, sect);
-      vp->toffs = sect->filepos;
-    }
-  else if (strcmp (bfd_section_name (abfd, sect), ".data") == 0)
-    {
-      vp->dstart = bfd_section_vma (abfd, sect);
-      vp->dend = vp->dstart + bfd_section_size (abfd, sect);
-      vp->dvma = bfd_section_vma (abfd, sect);
-    }
-  /* Silently ignore other types of sections.  (FIXME?)  */
-}
-
-/* Make a vmap for ABFD which might be a member of the archive ARCH.
-   Return the new vmap.  */
-
-struct vmap *
-map_vmap (bfd *abfd, bfd *arch)
-{
-  struct vmap_and_bfd vmap_bfd;
-  struct vmap *vp, **vpp;
-
-  vp = (struct vmap *) xmalloc (sizeof (*vp));
-  memset ((char *) vp, '\0', sizeof (*vp));
-  vp->nxt = 0;
-  vp->bfd = abfd;
-  gdb_bfd_ref (abfd);
-  vp->name = bfd_get_filename (arch ? arch : abfd);
-  vp->member = arch ? bfd_get_filename (abfd) : "";
-
-  vmap_bfd.pbfd = arch;
-  vmap_bfd.pvmap = vp;
-  bfd_map_over_sections (abfd, bfdsec_to_vmap, &vmap_bfd);
-
-  /* Find the end of the list and append.  */
-  for (vpp = &vmap; *vpp; vpp = &(*vpp)->nxt)
-    ;
-  *vpp = vp;
-
-  return vp;
-}
-
 
 VEC(mem_range_s) *
 section_table_available_memory (VEC(mem_range_s) *memory,
@@ -758,31 +663,6 @@ exec_files_info (struct target_ops *t)
     print_section_info (current_target_sections, exec_bfd);
   else
     puts_filtered (_("\t<no file loaded>\n"));
-
-  if (vmap)
-    {
-      int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
-      struct vmap *vp;
-
-      printf_unfiltered (_("\tMapping info for file `%s'.\n"), vmap->name);
-      printf_unfiltered ("\t  %*s   %*s   %*s   %*s %8.8s %s\n",
-			 addr_size * 2, "tstart",
-			 addr_size * 2, "tend",
-			 addr_size * 2, "dstart",
-			 addr_size * 2, "dend",
-			 "section",
-			 "file(member)");
-
-      for (vp = vmap; vp; vp = vp->nxt)
-	printf_unfiltered ("\t0x%s 0x%s 0x%s 0x%s %s%s%s%s\n",
-			   phex (vp->tstart, addr_size),
-			   phex (vp->tend, addr_size),
-			   phex (vp->dstart, addr_size),
-			   phex (vp->dend, addr_size),
-			   vp->name,
-			   *vp->member ? "(" : "", vp->member,
-			   *vp->member ? ")" : "");
-    }
 }
 
 static void

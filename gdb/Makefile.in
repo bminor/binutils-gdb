@@ -501,6 +501,7 @@ RUNTESTFLAGS=
 # XML files to build in to GDB.
 XMLFILES = $(srcdir)/features/gdb-target.dtd $(srcdir)/features/xinclude.dtd \
 	$(srcdir)/features/library-list.dtd \
+	$(srcdir)/features/library-list-aix.dtd \
 	$(srcdir)/features/library-list-svr4.dtd $(srcdir)/features/osdata.dtd \
 	$(srcdir)/features/threads.dtd $(srcdir)/features/traceframe-info.dtd \
 	$(srcdir)/features/btrace.dtd
@@ -573,7 +574,7 @@ ALL_TARGET_OBS = \
 	nto-tdep.o \
 	ppc-linux-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o ppc-sysv-tdep.o \
 	ppc64-tdep.o rl78-tdep.o \
-	rs6000-aix-tdep.o rs6000-tdep.o ppc-ravenscar-thread.o \
+	rs6000-aix-tdep.o rs6000-tdep.o solib-aix.o ppc-ravenscar-thread.o \
 	rs6000-lynx178-tdep.o \
 	rx-tdep.o \
 	s390-tdep.o \
@@ -805,7 +806,7 @@ target.h prologue-value.h cp-abi.h tui/tui-hooks.h tui/tui.h \
 tui/tui-file.h tui/tui-command.h tui/tui-disasm.h tui/tui-wingeneral.h \
 tui/tui-windata.h tui/tui-data.h tui/tui-win.h tui/tui-stack.h \
 tui/tui-winsource.h tui/tui-regs.h tui/tui-io.h tui/tui-layout.h \
-tui/tui-source.h xcoffsolib.h sol2-tdep.h gregset.h sh-tdep.h sh64-tdep.h \
+tui/tui-source.h sol2-tdep.h gregset.h sh-tdep.h sh64-tdep.h \
 expression.h score-tdep.h gdb_select.h ser-tcp.h buildsym.h valprint.h \
 typeprint.h mi/mi-getopt.h mi/mi-parse.h mi/mi-console.h \
 mi/mi-out.h mi/mi-main.h mi/mi-common.h mi/mi-cmds.h linux-nat.h \
@@ -824,7 +825,7 @@ inf-child.h p-lang.h event-top.h gdbtypes.h user-regs.h \
 regformats/regdef.h config/alpha/nm-osf3.h  config/i386/nm-i386gnu.h \
 config/i386/nm-fbsd.h \
 config/nm-nto.h config/sparc/nm-sol2.h config/nm-linux.h \
-config/rs6000/nm-rs6000.h top.h bsd-kvm.h gdb-stabs.h reggroups.h \
+top.h bsd-kvm.h gdb-stabs.h reggroups.h \
 annotate.h sim-regno.h dictionary.h dfp.h main.h frame-unwind.h	\
 remote-fileio.h i386-linux-tdep.h vax-tdep.h objc-lang.h \
 sentinel-frame.h bcache.h symfile.h windows-tdep.h linux-tdep.h \
@@ -836,7 +837,7 @@ dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
 i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h \
 osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
-record-full.h \
+record-full.h solib-aix.h \
 solib-darwin.h solib-ia64-hpux.h solib-spu.h windows-nat.h xcoffread.h \
 gnulib/import/extra/snippet/arg-nonnull.h gnulib/import/extra/snippet/c++defs.h \
 gnulib/import/extra/snippet/warn-on-use.h \
@@ -1528,7 +1529,7 @@ ALLDEPFILES = \
 	remote-sim.c \
 	dcache.c \
 	rl78-tdep.c \
-	rs6000-nat.c rs6000-tdep.c ppc-ravenscar-thread.c \
+	rs6000-nat.c rs6000-tdep.c solib-aix.c ppc-ravenscar-thread.c \
 	rs6000-lynx178-tdep.c \
 	rx-tdep.c \
 	s390-tdep.c s390-nat.c \
@@ -1549,7 +1550,7 @@ ALLDEPFILES = \
 	v850-tdep.c \
 	vax-nat.c vax-tdep.c vaxbsd-nat.c vaxnbsd-tdep.c \
 	windows-nat.c windows-tdep.c \
-	xcoffread.c xcoffsolib.c \
+	xcoffread.c \
 	xstormy16-tdep.c \
 	xtensa-tdep.c xtensa-config.c \
 	xtensa-linux-tdep.c xtensa-linux-nat.c xtensa-xtregs.c

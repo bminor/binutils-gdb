@@ -467,24 +467,6 @@ core_detach (struct target_ops *ops, char *args, int from_tty)
     printf_filtered (_("No core file now.\n"));
 }
 
-#ifdef DEPRECATED_IBM6000_TARGET
-
-/* Resize the core memory's section table, by NUM_ADDED.  Returns a
-   pointer into the first new slot.  This will not be necessary when
-   the rs6000 target is converted to use the standard solib
-   framework.  */
-
-struct target_section *
-deprecated_core_resize_section_table (int num_added)
-{
-  int old_count;
-
-  old_count = resize_section_table (core_data, num_added);
-  return core_data->sections + old_count;
-}
-
-#endif
-
 /* Try to retrieve registers from a section in core_bfd, and supply
    them to core_vec->core_read_registers, as the register set numbered
    WHICH.

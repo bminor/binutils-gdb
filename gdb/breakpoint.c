@@ -5367,11 +5367,7 @@ handle_solib_event (void)
      be adding them automatically.  Switch terminal for any messages
      produced by breakpoint_re_set.  */
   target_terminal_ours_for_output ();
-#ifdef SOLIB_ADD
-  SOLIB_ADD (NULL, 0, &current_target, auto_solib_add);
-#else
   solib_add (NULL, 0, &current_target, auto_solib_add);
-#endif
   target_terminal_inferior ();
 }
 
@@ -7417,11 +7413,7 @@ disable_breakpoints_in_shlibs (void)
 	 || (is_tracepoint (b)))
 	&& loc->pspace == current_program_space
 	&& !loc->shlib_disabled
-#ifdef PC_SOLIB
-	&& PC_SOLIB (loc->address)
-#else
 	&& solib_name_from_address (loc->pspace, loc->address)
-#endif
 	)
       {
 	loc->shlib_disabled = 1;
@@ -13077,7 +13069,7 @@ static void
 momentary_bkpt_re_set (struct breakpoint *b)
 {
   /* Keep temporary breakpoints, which can be encountered when we step
-     over a dlopen call and SOLIB_ADD is resetting the breakpoints.
+     over a dlopen call and solib_add is resetting the breakpoints.
      Otherwise these should have been blown away via the cleanup chain
      or by breakpoint_init_inferior when we rerun the executable.  */
 }

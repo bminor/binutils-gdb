@@ -328,11 +328,11 @@ frv_current_sos (void)
      for details.)
 
      Note that the relocation of the main executable is also performed
-     by SOLIB_CREATE_INFERIOR_HOOK(), however, in the case of core
+     by solib_create_inferior_hook(), however, in the case of core
      files, this hook is called too late in order to be of benefit to
-     SOLIB_ADD.  SOLIB_ADD eventually calls this this function,
+     solib_add.  solib_add eventually calls this this function,
      frv_current_sos, and also precedes the call to
-     SOLIB_CREATE_INFERIOR_HOOK().   (See post_create_inferior() in
+     solib_create_inferior_hook().   (See post_create_inferior() in
      infcmd.c.)  */
   if (main_executable_lm_info == 0 && core_bfd != NULL)
     frv_relocate_main_executable ();

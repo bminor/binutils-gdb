@@ -1,3 +1,9 @@
+2013-05-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbint.texinfo (Algorithms): Remove entries documenting
+	DEPRECATED_IBM6000_TARGET, SOLIB_ADD, and
+	SOLIB_CREATE_INFERIOR_HOOK.
+
 2013-04-29  Tom Tromey  <tromey@redhat.com>
 
 	PR python/14204:

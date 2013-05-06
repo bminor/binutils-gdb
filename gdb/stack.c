@@ -1205,12 +1205,9 @@ print_frame (struct frame_info *frame, int print_level,
 
   if (pc_p && (funname == NULL || sal.symtab == NULL))
     {
-#ifdef PC_SOLIB
-      char *lib = PC_SOLIB (get_frame_pc (frame));
-#else
       char *lib = solib_name_from_address (get_frame_program_space (frame),
 					   get_frame_pc (frame));
-#endif
+
       if (lib)
 	{
 	  annotate_frame_where ();

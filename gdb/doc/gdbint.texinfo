@@ -4666,13 +4666,6 @@ offset into the @code{jmp_buf}.  (While we might like to get the offset
 from the target's @file{jmpbuf.h}, that header file cannot be assumed
 to be available when building a cross-debugger.)
 
-@item DEPRECATED_IBM6000_TARGET
-@findex DEPRECATED_IBM6000_TARGET
-Shows that we are configured for an IBM RS/6000 system.  This
-conditional should be eliminated (FIXME) and replaced by
-feature-specific macros.  It was introduced in haste and we are
-repenting at leisure.
-
 @item I386_USE_GENERIC_WATCHPOINTS
 An x86-based target can define this to use the generic x86 watchpoint
 support; see @ref{Algorithms, I386_USE_GENERIC_WATCHPOINTS}.
@@ -5411,18 +5404,6 @@ undefined) in @file{nm-@var{system}.h}.
 @item I386_USE_GENERIC_WATCHPOINTS
 An x86-based machine can define this to use the generic x86 watchpoint
 support; see @ref{Algorithms, I386_USE_GENERIC_WATCHPOINTS}.
-
-@item SOLIB_ADD (@var{filename}, @var{from_tty}, @var{targ}, @var{readsyms})
-@findex SOLIB_ADD
-Define this to expand into an expression that will cause the symbols in
-@var{filename} to be added to @value{GDBN}'s symbol table.  If
-@var{readsyms} is zero symbols are not read but any necessary low level
-processing for @var{filename} is still done.
-
-@item SOLIB_CREATE_INFERIOR_HOOK
-@findex SOLIB_CREATE_INFERIOR_HOOK
-Define this to expand into any shared-library-relocation code that you
-want to be run just after the child process has been forked.
 
 @item START_INFERIOR_TRAPS_EXPECTED
 @findex START_INFERIOR_TRAPS_EXPECTED

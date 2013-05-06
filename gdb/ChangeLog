@@ -1,5 +1,71 @@
 2013-05-06  Joel Brobecker  <brobecker@adacore.com>
 
+	Reimplement shared library support on ppc-aix...
+	* target.h (TARGET_OBJECT_AIX_LIBRARIES): New target_object enum.
+	* features/library-list-aix.dtd: New file.
+	* solib-aix.h, solib-aix.c: New file.
+	* rs6000-aix-tdep.c: #include "solib.h" and "solib-aix.h".
+	(rs6000_find_toc_address_hook): Delete.
+	(rs6000_push_dummy_call): Rewrite code setting the TOC value.
+	(rs6000_aix_init_osabi): Register solib_aix_so_ops.
+	* rs6000-nat.c: Remove "xcoffsolib.h" include.  Include
+	"xml-utils.h".
+	(map_vmap, vmap_exec, vmap_ldinfo, add_vmap, objfile_symbol_add)
+	(vmap_symtab, fixup_breakpoints): Delete.
+	(rs6000_xfer_shared_libraries): New function.
+	(rs6000_xfer_partial): Add TARGET_OBJECT_AIX_LIBRARIES handling.
+	(vmap_secs, bss_data_overlap, vmap_add_symbols): Delete.
+	(xcoff_relocate_symtab, xcoff_relocate_core): Delete.
+	(rs6000_ptrace_ldinfo, rs6000_core_ldinfo)
+	(rs6000_xfer_shared_library): New function.
+	(find_toc_address): Delete.
+	(_initialize_rs6000_nat): Do not set rs6000_find_toc_address_hook.
+	* rs6000-tdep.h (rs6000_find_toc_address_hook): Remove.
+	* xcoffread.c (record_minimal_symbol): Reloate symbol address
+	before creating minimal symbol.  Adjust function description
+	accordingly.
+	(scan_xcoff_symtab): Replace call to
+	prim_record_minimal_symbol_and_info by call to
+	record_minimal_symbol.
+	(xcoff_symfile_offsets): Reimplement mostly as a wrapper
+	around default_symfile_offsets.
+	* configure.tgt: Add solib-aix.o to gdb_target_obs for
+	powerpc-aix targets.
+	* config/rs6000/nm-rs6000.h: Delete.
+	* config/powerpc/aix.mh (NAT_FILE): Delete.
+	(NATDEPFILES): Remove xcoffsolib.o.
+	* Makefile.in (XMLFILES): Add library-list-aix.dtd.
+	(ALL_TARGET_OBS): Add solib-aix.o.
+	(HFILES_NO_SRCDIR): Remove xcoffsolib.h and
+	config/rs6000/nm-rs6000.h.  Add solib-aix.h.
+	(ALLDEPFILES): Add solib-aix.c.  Remove xcoffsolib.c.
+	* xcoffsolib.h, xcoffsolib.c: Delete.
+
+	* solib.c (reload_shared_libraries): Remove reference to
+	SOLIB_CREATE_INFERIOR_HOOK.
+	* breakpoint.c (handle_solib_event): Remove reference to SOLIB_ADD.
+	(disable_breakpoints_in_shlibs): Remove reference to PC_SOLIB.
+	(momentary_bkpt_re_set): Replace SOLIB_ADD by solib_add in
+	comment.
+	* corelow.c (deprecated_core_resize_section_table): Delete.
+	* exec.c: Remove include of xcoffsolib.h".
+	(map_vmap, vmap): Delete.
+	(exec_close_1): Remove references to vmap.
+	(exec_file_attach): Remove vmap handling code, and reference
+	to DEPRECATED_IBM6000_TARGET.
+	(bfdsec_to_vmap): Delete.
+	(exec_files_info): Remove block of code handling VMAP.
+	* infcmd.c (post_create_inferior): Remove reference to
+	SOLIB_CREATE_INFERIOR_HOOK and SOLIB_ADD.
+	* infrun.c (follow_exec): Remove reference to
+	SOLIB_CREATE_INFERIOR_HOOK.
+	* stack.c (print_frame): Remove reference to PC_SOLIB.
+	* solib-dsbt.c (dsbt_current_sos): Adjust comment.
+	(dsbt_relocate_main_executable): Likewise.
+	* solib-frv.c (frv_current_sos): Likewise.
+
+2013-05-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* sol-thread.c (rw_common): Cast BUF to "gdb_byte *" in calls
 	to target_write_memory and target_read_memory.
 

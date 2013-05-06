@@ -958,11 +958,7 @@ follow_exec (ptid_t pid, char *execd_pathname)
      registers.  */
   target_find_description ();
 
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-  SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-#else
   solib_create_inferior_hook (0);
-#endif
 
   jit_inferior_created_hook ();
 

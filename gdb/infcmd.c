@@ -432,11 +432,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 
       /* Create the hooks to handle shared library load and unload
 	 events.  */
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-#else
       solib_create_inferior_hook (from_tty);
-#endif
 
       if (current_program_space->solib_add_generation == solib_add_generation)
 	{
@@ -452,13 +448,7 @@ post_create_inferior (struct target_ops *target, int from_tty)
 	  /* If the solist is global across processes, there's no need to
 	     refetch it here.  */
 	  if (!gdbarch_has_global_solist (target_gdbarch ()))
-	    {
-#ifdef SOLIB_ADD
-	      SOLIB_ADD (NULL, 0, target, auto_solib_add);
-#else
-	      solib_add (NULL, 0, target, auto_solib_add);
-#endif
-	    }
+	    solib_add (NULL, 0, target, auto_solib_add);
 	}
     }
 

@@ -1294,11 +1294,7 @@ reload_shared_libraries (char *ignored, int from_tty,
 	 we're not really starting up the inferior here.  */
       remove_solib_event_breakpoints ();
 
-#ifdef SOLIB_CREATE_INFERIOR_HOOK
-      SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
-#else
       solib_create_inferior_hook (from_tty);
-#endif
     }
 
   /* Sometimes the platform-specific hook loads initial shared

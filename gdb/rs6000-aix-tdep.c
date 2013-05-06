@@ -36,12 +36,8 @@
 #include "ppc-tdep.h"
 #include "exceptions.h"
 #include "xcoffread.h"
-
-/* Hook for determining the TOC address when calling functions in the
-   inferior under AIX.  The initialization code in rs6000-nat.c sets
-   this hook to point to find_toc_address.  */
-
-CORE_ADDR (*rs6000_find_toc_address_hook) (CORE_ADDR) = NULL;
+#include "solib.h"
+#include "solib-aix.h"
 
 /* If the kernel has to deliver a signal, it pushes a sigcontext
    structure on the stack and then calls the signal handler, passing
@@ -412,13 +408,9 @@ ran_out_of_registers_for_arguments:
      breakpoint.  */
   regcache_raw_write_signed (regcache, tdep->ppc_lr_regnum, bp_addr);
 
-  /* Set the TOC register, get the value from the objfile reader
-     which, in turn, gets it from the VMAP table.  */
-  if (rs6000_find_toc_address_hook != NULL)
-    {
-      CORE_ADDR tocvalue = (*rs6000_find_toc_address_hook) (func_addr);
-      regcache_raw_write_signed (regcache, tdep->ppc_toc_regnum, tocvalue);
-    }
+  /* Set the TOC register value.  */
+  regcache_raw_write_signed (regcache, tdep->ppc_toc_regnum,
+			     solib_aix_get_toc_value (func_addr));
 
   target_store_registers (regcache, -1);
   return sp;
@@ -793,6 +785,8 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
     set_gdbarch_frame_red_zone_size (gdbarch, 0);
 
   set_gdbarch_auto_wide_charset (gdbarch, rs6000_aix_auto_wide_charset);
+
+  set_solib_ops (gdbarch, &solib_aix_so_ops);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

@@ -261,6 +261,8 @@ enum target_object
   TARGET_OBJECT_LIBRARIES,
   /* Currently loaded libraries specific for SVR4 systems, in XML format.  */
   TARGET_OBJECT_LIBRARIES_SVR4,
+  /* Currently loaded libraries specific to AIX systems, in XML format.  */
+  TARGET_OBJECT_AIX_LIBRARIES,
   /* Get OS specific data.  The ANNEX specifies the type (running
      processes, etc.).  The data being transfered is expected to follow
      the DTD specified in features/osdata.dtd.  */
