@@ -16424,13 +16424,12 @@ dwarf2_const_value_attr (struct attribute *attr, struct type *type,
 	/* Symbols of this form are reasonably rare, so we just
 	   piggyback on the existing location code rather than writing
 	   a new implementation of symbol_computed_ops.  */
-	*baton = obstack_alloc (&objfile->objfile_obstack,
-				sizeof (struct dwarf2_locexpr_baton));
+	*baton = obstack_alloc (obstack, sizeof (struct dwarf2_locexpr_baton));
 	(*baton)->per_cu = cu->per_cu;
 	gdb_assert ((*baton)->per_cu);
 
 	(*baton)->size = 2 + cu_header->addr_size;
-	data = obstack_alloc (&objfile->objfile_obstack, (*baton)->size);
+	data = obstack_alloc (obstack, (*baton)->size);
 	(*baton)->data = data;
 
 	data[0] = DW_OP_addr;

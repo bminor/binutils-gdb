@@ -1,3 +1,8 @@
+2013-05-06  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_const_value_attr): Use 'obstack', not
+	objfile's obstack.
+
 2013-05-06  Doug Evans  <dje@google.com>
 
 	* dbxread.c (process_one_symbol): Constify section_offsets parameter.
