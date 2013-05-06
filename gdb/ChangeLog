@@ -1,3 +1,7 @@
+2013-05-06  Mike Frysinger  <vapier@gentoo.org>
+
+	* common/linux-btrace.c (intel_supports_btrace): Fix indentation.
+
 2013-05-06  Doug Evans  <dje@google.com>
 
 	* psympriv.h (struct partial_symtab): Augment comment for member
@@ -1148,7 +1152,7 @@
 	(_initialize_ctf): New.
 	* tracepoint.c (get_tracepoint_number): New
 	(get_uploaded_tsv): Remove 'static'.
- 	(struct traceframe_info, trace_regblock_size): Move it to ...
+	(struct traceframe_info, trace_regblock_size): Move it to ...
 	* tracepoint.h: ... here.
 	(get_tracepoint_number): Declare it.
 	(get_uploaded_tsv): Declare it.
@@ -2550,11 +2554,11 @@
 
 2013-03-12  Paul Hilfinger  <hilfingr@adacore.com>
 
-        * ada-lex.l (rules): Only recognize 'thread' as a
-        delimiter when followed by numerals, as for c-exp.y.
-        Use new rewind_to_char function to rewind the input for
-        expression-delimiting tokens.
-        (rewind_to_char): New function.
+	* ada-lex.l (rules): Only recognize 'thread' as a
+	delimiter when followed by numerals, as for c-exp.y.
+	Use new rewind_to_char function to rewind the input for
+	expression-delimiting tokens.
+	(rewind_to_char): New function.
 
 2013-03-11  Pedro Alves  <palves@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
@@ -3544,8 +3548,8 @@
 	    Pedro Alves  <palves@redhat.com>
 
 	* tracepoint.c (tfile_trace_find): For tfind
-    	pc/tp/range/outside, look for the next trace frame instead of
-    	always starting from frame 0.
+	pc/tp/range/outside, look for the next trace frame instead of
+	always starting from frame 0.
 
 2013-02-26  Anthony Green  <green@moxielogic.com>
 

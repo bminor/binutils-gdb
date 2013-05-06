@@ -340,40 +340,40 @@ static int
 intel_supports_btrace (void)
 {
 #if defined __i386__ || defined __x86_64__
-    unsigned int cpuid, model, family;
+  unsigned int cpuid, model, family;
 
-    __asm__ __volatile__ ("movl   $1, %%eax;"
-			  "cpuid;"
-			  : "=a" (cpuid)
-			  :: "%ebx", "%ecx", "%edx");
+  __asm__ __volatile__ ("movl   $1, %%eax;"
+			"cpuid;"
+			: "=a" (cpuid)
+			:: "%ebx", "%ecx", "%edx");
 
-    family = (cpuid >> 8) & 0xf;
-    model = (cpuid >> 4) & 0xf;
+  family = (cpuid >> 8) & 0xf;
+  model = (cpuid >> 4) & 0xf;
 
-    switch (family)
-      {
-      case 0x6:
-	model += (cpuid >> 12) & 0xf0;
+  switch (family)
+    {
+    case 0x6:
+      model += (cpuid >> 12) & 0xf0;
 
-	switch (model)
-	  {
-	  case 0x1a: /* Nehalem */
-	  case 0x1f:
-	  case 0x1e:
-	  case 0x2e:
-	  case 0x25: /* Westmere */
-	  case 0x2c:
-	  case 0x2f:
-	  case 0x2a: /* Sandy Bridge */
-	  case 0x2d:
-	  case 0x3a: /* Ivy Bridge */
+      switch (model)
+	{
+	case 0x1a: /* Nehalem */
+	case 0x1f:
+	case 0x1e:
+	case 0x2e:
+	case 0x25: /* Westmere */
+	case 0x2c:
+	case 0x2f:
+	case 0x2a: /* Sandy Bridge */
+	case 0x2d:
+	case 0x3a: /* Ivy Bridge */
 
-	    /* AAJ122: LBR, BTM, or BTS records may have incorrect branch
-	       "from" information afer an EIST transition, T-states, C1E, or
-	       Adaptive Thermal Throttling.  */
-	    return 0;
-	  }
-      }
+	  /* AAJ122: LBR, BTM, or BTS records may have incorrect branch
+	     "from" information afer an EIST transition, T-states, C1E, or
+	     Adaptive Thermal Throttling.  */
+	  return 0;
+	}
+    }
 
   return 1;
 
