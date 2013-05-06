@@ -1667,8 +1667,8 @@ elf_compile_to_ax (struct probe *probe,
 
 static void
 elf_symfile_relocate_probe (struct objfile *objfile,
-			    struct section_offsets *new_offsets,
-			    struct section_offsets *delta)
+			    const struct section_offsets *new_offsets,
+			    const struct section_offsets *delta)
 {
   int ix;
   VEC (probe_p) *probes = objfile_data (objfile, probe_key);

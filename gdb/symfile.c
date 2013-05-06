@@ -445,7 +445,7 @@ place_section (bfd *abfd, asection *sect, void *obj)
 void
 relative_addr_info_to_section_offsets (struct section_offsets *section_offsets,
 				       int num_sections,
-				       struct section_addr_info *addrs)
+				       const struct section_addr_info *addrs)
 {
   int i;
 
@@ -454,7 +454,7 @@ relative_addr_info_to_section_offsets (struct section_offsets *section_offsets,
   /* Now calculate offsets for section that were specified by the caller.  */
   for (i = 0; i < addrs->num_sections; i++)
     {
-      struct other_sections *osp;
+      const struct other_sections *osp;
 
       osp = &addrs->other[i];
       if (osp->sectindex == -1)
@@ -676,7 +676,7 @@ addr_info_make_relative (struct section_addr_info *addrs, bfd *abfd)
 
 void
 default_symfile_offsets (struct objfile *objfile,
-			 struct section_addr_info *addrs)
+			 const struct section_addr_info *addrs)
 {
   objfile->num_sections = gdb_bfd_count_sections (objfile->obfd);
   objfile->section_offsets = (struct section_offsets *)
@@ -932,7 +932,7 @@ init_entry_point_info (struct objfile *objfile)
 static void
 syms_from_objfile_1 (struct objfile *objfile,
 		     struct section_addr_info *addrs,
-		     struct section_offsets *offsets,
+		     const struct section_offsets *offsets,
 		     int num_offsets,
 		     int add_flags)
 {
@@ -1042,7 +1042,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 void
 syms_from_objfile (struct objfile *objfile,
 		   struct section_addr_info *addrs,
-		   struct section_offsets *offsets,
+		   const struct section_offsets *offsets,
 		   int num_offsets,
 		   int add_flags)
 {
@@ -1099,7 +1099,7 @@ static struct objfile *
 symbol_file_add_with_addrs_or_offsets (bfd *abfd,
                                        int add_flags,
                                        struct section_addr_info *addrs,
-                                       struct section_offsets *offsets,
+                                       const struct section_offsets *offsets,
                                        int num_offsets,
                                        int flags, struct objfile *parent)
 {
@@ -3672,7 +3672,8 @@ free_symfile_segment_data (struct symfile_segment_data *data)
    not be able to distinguish between an empty data segment and a
    missing data segment; a missing text segment is less plausible.  */
 int
-symfile_map_offsets_to_segments (bfd *abfd, struct symfile_segment_data *data,
+symfile_map_offsets_to_segments (bfd *abfd,
+				 const struct symfile_segment_data *data,
 				 struct section_offsets *offsets,
 				 int num_segment_bases,
 				 const CORE_ADDR *segment_bases)

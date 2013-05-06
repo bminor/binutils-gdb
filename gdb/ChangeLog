@@ -1,5 +1,31 @@
 2013-05-06  Doug Evans  <dje@google.com>
 
+	* dbxread.c (process_one_symbol): Constify section_offsets parameter.
+	* stabsread.h (process_one_symbol): Update declaration.
+	* dwarf2read.c (dw2_relocate): Constify new_offsets, delta parameters.
+	* elfread.c (elf_symfile_relocate_probe): Ditto.
+	* psymtab.c (relocate_psymtabs): Ditto.
+	* objfiles.c (objfile_relocate1): Constify new_offsets parameter.
+	(objfile_relocate): Ditto.
+	* objfiles.h (objfile_relocate): Update declaration.
+	* symfile.c (relative_addr_info_to_section_offsets): Constify
+	addrs parameter.
+	(default_symfile_offsets): Ditto.
+	(syms_from_objfile_1): Constify offsets parameter.
+	(syms_from_objfile): Ditto.
+	(symbol_file_add_with_addrs_or_offsets): Ditto.
+	(symfile_map_offsets_to_segments): Constify data parameter.
+	* symfile.h (struct quick_symbol_functions): Constify new_offsets,
+	delta parameters of member relocate.
+	(struct sym_probe_fns): Constify new_offsets,
+	delta parameters of member sym_relocate_probe.
+	(struct sym_fns): Constify section_addr_info parameter of member
+	sym_offsets.
+	(relative_addr_info_to_section_offsets): Update declaration.
+	(default_symfile_offsets): Ditto.
+	(syms_from_objfile): Ditto.
+	(symfile_map_offsets_to_segments): Ditto.
+
 	* symfile.c (syms_from_objfile_1): Use correct section count when
 	objfile->sf == NULL.
 

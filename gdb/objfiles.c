@@ -709,7 +709,7 @@ relocate_one_symbol (struct symbol *sym, struct objfile *objfile,
 
 static int
 objfile_relocate1 (struct objfile *objfile, 
-		   struct section_offsets *new_offsets)
+		   const struct section_offsets *new_offsets)
 {
   struct obj_section *s;
   struct section_offsets *delta =
@@ -856,7 +856,8 @@ objfile_relocate1 (struct objfile *objfile,
    files.  */
 
 void
-objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
+objfile_relocate (struct objfile *objfile,
+		  const struct section_offsets *new_offsets)
 {
   struct objfile *debug_objfile;
   int changed = 0;

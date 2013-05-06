@@ -201,8 +201,8 @@ struct quick_symbol_functions
   /* This is called by objfile_relocate to relocate any indices loaded
      for OBJFILE.  */
   void (*relocate) (struct objfile *objfile,
-		    struct section_offsets *new_offsets,
-		    struct section_offsets *delta);
+		    const struct section_offsets *new_offsets,
+		    const struct section_offsets *delta);
 
   /* Find all the symbols in OBJFILE named FUNC_NAME, and ensure that
      the corresponding symbol tables are loaded.  */
@@ -337,8 +337,8 @@ struct sym_probe_fns
 
   /* Relocate the probe section of OBJFILE.  */
   void (*sym_relocate_probe) (struct objfile *objfile,
-			      struct section_offsets *new_offsets,
-			      struct section_offsets *delta);
+			      const struct section_offsets *new_offsets,
+			      const struct section_offsets *delta);
 };
 
 /* Structure to keep track of symbol reading functions for various
@@ -391,7 +391,7 @@ struct sym_fns
      probably be changed to a string, where NULL means the default,
      and others are parsed in a file dependent way.  */
 
-  void (*sym_offsets) (struct objfile *, struct section_addr_info *);
+  void (*sym_offsets) (struct objfile *, const struct section_addr_info *);
 
   /* This function produces a format-independent description of
      the segments of ABFD.  Each segment is a unit of the file
@@ -425,7 +425,7 @@ extern struct section_addr_info *
 
 extern void relative_addr_info_to_section_offsets
   (struct section_offsets *section_offsets, int num_sections,
-   struct section_addr_info *addrs);
+   const struct section_addr_info *addrs);
 
 extern void addr_info_make_relative (struct section_addr_info *addrs,
 				     bfd *abfd);
@@ -434,7 +434,7 @@ extern void addr_info_make_relative (struct section_addr_info *addrs,
    do anything special.  */
 
 extern void default_symfile_offsets (struct objfile *objfile,
-				     struct section_addr_info *);
+				     const struct section_addr_info *);
 
 /* The default version of sym_fns.sym_segments for readers that don't
    do anything special.  */
@@ -474,7 +474,7 @@ enum symfile_add_flags
 
 extern void syms_from_objfile (struct objfile *,
 			       struct section_addr_info *,
-			       struct section_offsets *, int, int);
+			       const struct section_offsets *, int, int);
 
 extern void new_symfile_objfile (struct objfile *, int);
 
@@ -585,7 +585,7 @@ extern bfd_byte *symfile_relocate_debug_section (struct objfile *, asection *,
 						 bfd_byte *);
 
 extern int symfile_map_offsets_to_segments (bfd *,
-					    struct symfile_segment_data *,
+					    const struct symfile_segment_data *,
 					    struct section_offsets *,
 					    int, const CORE_ADDR *);
 struct symfile_segment_data *get_symfile_segment_data (bfd *abfd);

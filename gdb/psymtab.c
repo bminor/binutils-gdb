@@ -785,8 +785,8 @@ psymtab_to_symtab (struct objfile *objfile, struct partial_symtab *pst)
 
 static void
 relocate_psymtabs (struct objfile *objfile,
-		   struct section_offsets *new_offsets,
-		   struct section_offsets *delta)
+		   const struct section_offsets *new_offsets,
+		   const struct section_offsets *delta)
 {
   struct partial_symbol **psym;
   struct partial_symtab *p;

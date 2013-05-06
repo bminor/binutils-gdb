@@ -2717,7 +2717,7 @@ cp_set_block_scope (const struct symbol *symbol,
 
 void
 process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
-		    struct section_offsets *section_offsets,
+		    const struct section_offsets *section_offsets,
 		    struct objfile *objfile)
 {
   struct gdbarch *gdbarch = get_objfile_arch (objfile);

@@ -3311,8 +3311,9 @@ dw2_dump (struct objfile *objfile)
 }
 
 static void
-dw2_relocate (struct objfile *objfile, struct section_offsets *new_offsets,
-	      struct section_offsets *delta)
+dw2_relocate (struct objfile *objfile,
+	      const struct section_offsets *new_offsets,
+	      const struct section_offsets *delta)
 {
   /* There's nothing to relocate here.  */
 }
