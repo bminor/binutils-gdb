@@ -1,5 +1,10 @@
 2013-05-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* sol-thread.c (rw_common): Cast BUF to "gdb_byte *" in calls
+	to target_write_memory and target_read_memory.
+
+2013-05-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* darwin-nat.c (darwin_setup_fake_stop_event): New function.
 	(darwin_attach): Adjust using darwin_setup_fake_stop_event.
 

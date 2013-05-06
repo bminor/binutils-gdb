@@ -807,9 +807,9 @@ rw_common (int dowrite, const struct ps_prochandle *ph, gdb_ps_addr_t addr,
 #endif
 
   if (dowrite)
-    ret = target_write_memory (addr, buf, size);
+    ret = target_write_memory (addr, (gdb_byte *) buf, size);
   else
-    ret = target_read_memory (addr, buf, size);
+    ret = target_read_memory (addr, (gdb_byte *) buf, size);
 
   do_cleanups (old_chain);
 
