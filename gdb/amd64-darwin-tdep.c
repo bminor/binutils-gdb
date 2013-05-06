@@ -35,7 +35,6 @@
 #include "ui-out.h"
 #include "symtab.h"
 #include "frame.h"
-#include "gdb_assert.h"
 #include "amd64-darwin-tdep.h"
 #include "i386-darwin-tdep.h"
 #include "solib.h"
