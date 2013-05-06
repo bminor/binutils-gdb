@@ -968,7 +968,7 @@ macho_symfile_finish (struct objfile *objfile)
 
 static void
 macho_symfile_offsets (struct objfile *objfile,
-                       struct section_addr_info *addrs)
+                       const struct section_addr_info *addrs)
 {
   unsigned int i;
   unsigned int num_sections;

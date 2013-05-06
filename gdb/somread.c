@@ -487,7 +487,8 @@ set_section_index (struct objfile *objfile, flagword invert, flagword flags,
    Plain and simple for now.  */
 
 static void
-som_symfile_offsets (struct objfile *objfile, struct section_addr_info *addrs)
+som_symfile_offsets (struct objfile *objfile,
+		     const struct section_addr_info *addrs)
 {
   int i;
   CORE_ADDR text_addr;

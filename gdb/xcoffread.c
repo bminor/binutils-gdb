@@ -220,9 +220,6 @@ static void xcoff_new_init (struct objfile *);
 
 static void xcoff_symfile_finish (struct objfile *);
 
-static void xcoff_symfile_offsets (struct objfile *,
-				   struct section_addr_info *addrs);
-
 static char *coff_getfilename (union internal_auxent *, struct objfile *);
 
 static void read_symbol (struct internal_syment *, int);
@@ -3038,7 +3035,7 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
 
 static void
 xcoff_symfile_offsets (struct objfile *objfile,
-		       struct section_addr_info *addrs)
+		       const struct section_addr_info *addrs)
 {
   const char *first_section_name;
 
