@@ -1,5 +1,10 @@
 2013-05-06  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (opd_entry_value): Handle case where symbol
+	hashes are not available.
+
+2013-05-06  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (elf_link_add_object_symbols): Don't save symbol
 	hashes around loading as-needed library.  Zero them on allocation,
 	and restore to initial all-zero state if library not needed.

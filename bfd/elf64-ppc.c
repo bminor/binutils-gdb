@@ -5665,11 +5665,30 @@ opd_entry_value (asection *opd_sec,
 
 		  sym_hashes = elf_sym_hashes (opd_bfd);
 		  rh = sym_hashes[symndx - symtab_hdr->sh_info];
-		  rh = elf_follow_link (rh);
-		  BFD_ASSERT (rh->root.type == bfd_link_hash_defined
-			      || rh->root.type == bfd_link_hash_defweak);
-		  val = rh->root.u.def.value;
-		  sec = rh->root.u.def.section;
+		  if (rh != NULL)
+		    {
+		      rh = elf_follow_link (rh);
+		      BFD_ASSERT (rh->root.type == bfd_link_hash_defined
+				  || rh->root.type == bfd_link_hash_defweak);
+		      val = rh->root.u.def.value;
+		      sec = rh->root.u.def.section;
+		    }
+		  else
+		    {
+		      /* Handle the odd case where we can be called
+			 during bfd_elf_link_add_symbols before the
+			 symbol hashes have been fully populated.  */
+		      Elf_Internal_Sym *sym;
+
+		      sym = bfd_elf_get_elf_syms (opd_bfd, symtab_hdr, 1,
+						  symndx, NULL, NULL, NULL);
+		      if (sym == NULL)
+			break;
+
+		      val = sym->st_value;
+		      sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
+		      free (sym);
+		    }
 		}
 	      val += look->r_addend;
 	      if (code_off != NULL)
