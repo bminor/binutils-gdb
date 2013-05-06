@@ -1,5 +1,13 @@
 2013-05-06  Tom Tromey  <tromey@redhat.com>
 
+	* ada-lang.c (ada_value_primitive_packed_val): Don't
+	call value_incref.
+	* value.c (set_value_parent): Incref the new parent and decref
+	the old parent.
+	(value_copy, value_primitive_field): Use set_value_parent.
+
+2013-05-06  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2loc.c (invalid_synthetic_pointer): Move earlier.
 	(indirect_pieced_value): Call dwarf2_fetch_constant_bytes
 	if needed.

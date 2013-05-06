@@ -811,7 +811,12 @@ value_parent (struct value *value)
 void
 set_value_parent (struct value *value, struct value *parent)
 {
+  struct value *old = value->parent;
+
   value->parent = parent;
+  if (parent != NULL)
+    value_incref (parent);
+  value_free (old);
 }
 
 gdb_byte *
@@ -1398,9 +1403,7 @@ value_copy (struct value *arg)
 
     }
   val->unavailable = VEC_copy (range_s, arg->unavailable);
-  val->parent = arg->parent;
-  if (val->parent)
-    value_incref (val->parent);
+  set_value_parent (val, arg->parent);
   if (VALUE_LVAL (val) == lval_computed)
     {
       const struct lval_funcs *funcs = val->location.computed.funcs;
@@ -2652,8 +2655,7 @@ value_primitive_field (struct value *arg1, int offset,
       v->offset = (value_embedded_offset (arg1)
 		   + offset
 		   + (bitpos - v->bitpos) / 8);
-      v->parent = arg1;
-      value_incref (v->parent);
+      set_value_parent (v, arg1);
       if (!value_lazy (arg1))
 	value_fetch_lazy (v);
     }
