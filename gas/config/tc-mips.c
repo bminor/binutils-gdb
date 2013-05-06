@@ -2744,6 +2744,24 @@ jalr_reloc_p (bfd_reloc_code_real_type reloc)
   return reloc == BFD_RELOC_MIPS_JALR || reloc == BFD_RELOC_MICROMIPS_JALR;
 }
 
+/* Return true if RELOC is a PC-relative relocation that does not have
+   full address range.  */
+
+static inline bfd_boolean
+limited_pcrel_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  switch (reloc)
+    {
+    case BFD_RELOC_16_PCREL_S2:
+    case BFD_RELOC_MICROMIPS_7_PCREL_S1:
+    case BFD_RELOC_MICROMIPS_10_PCREL_S1:
+    case BFD_RELOC_MICROMIPS_16_PCREL_S1:
+      return TRUE;
+
+    default:
+      return FALSE;
+    }
+}
 /* Return true if the given relocation might need a matching %lo().
    This is only "might" because SVR4 R_MIPS_GOT16 relocations only
    need a matching %lo() when applied to local symbols.  */
@@ -17814,11 +17832,12 @@ mips_fix_adjustable (fixS *fixp)
     return 0;
 
   /* There is no place to store an in-place offset for JALR relocations.
-     Likewise an in-range offset of PC-relative relocations may overflow
-     the in-place relocatable field if recalculated against the start
-     address of the symbol's containing section.  */
+     Likewise an in-range offset of limited PC-relative relocations may
+     overflow the in-place relocatable field if recalculated against the
+     start address of the symbol's containing section.  */
   if (HAVE_IN_PLACE_ADDENDS
-      && (fixp->fx_pcrel || jalr_reloc_p (fixp->fx_r_type)))
+      && (limited_pcrel_reloc_p (fixp->fx_r_type)
+	  || jalr_reloc_p (fixp->fx_r_type)))
     return 0;
 
 #ifdef OBJ_ELF

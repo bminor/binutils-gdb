@@ -1,3 +1,9 @@
+2013-05-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (limited_pcrel_reloc_p): New function.
+	(mips_fix_adjustable): Adjust pc-relative check to use
+	limited_pc_reloc_p.
+
 2013-05-02  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (mips_pseudo_table): Add stabd and stabs entries.
