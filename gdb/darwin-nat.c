@@ -323,7 +323,7 @@ darwin_check_new_threads (struct inferior *inf)
       thread_t old_id = old ? old->gdb_port : THREAD_NULL;
 
       inferior_debug
-	(12, _(" new_ix:%d/%d, old_ix:%d/%d, new_id:%x old_id:%x\n"),
+	(12, _(" new_ix:%d/%d, old_ix:%d/%d, new_id:0x%x old_id:0x%x\n"),
 	 new_ix, new_nbr, old_ix, old_nbr, new_id, old_id);
 
       if (old_id == new_id)
@@ -708,7 +708,7 @@ darwin_resume_thread (struct inferior *inf, darwin_thread_t *thread,
       /* Set or reset single step.  */
       if (step != thread->single_step)
 	{
-	  inferior_debug (4, _("darwin_set_sstep (thread=%x, enable=%d)\n"),
+	  inferior_debug (4, _("darwin_set_sstep (thread=0x%x, enable=%d)\n"),
 			  thread->gdb_port, step);
 	  darwin_set_sstep (thread->gdb_port, step);
 	  thread->single_step = step;
@@ -878,8 +878,8 @@ darwin_decode_message (mach_msg_header_t *hdr,
       if (res < 0)
 	{
 	  /* Should not happen...  */
-	  printf_unfiltered (_("darwin_wait: ill-formatted message (id=%x)\n"),
-			     hdr->msgh_id);
+	  printf_unfiltered
+	    (_("darwin_wait: ill-formatted message (id=0x%x)\n"), hdr->msgh_id);
 	  /* FIXME: send a failure reply?  */
 	  status->kind = TARGET_WAITKIND_SPURIOUS;
 	  return minus_one_ptid;
@@ -891,7 +891,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
       status->kind = TARGET_WAITKIND_STOPPED;
       thread->msg_state = DARWIN_MESSAGE;
 
-      inferior_debug (4, _("darwin_wait: thread=%x, got %s\n"),
+      inferior_debug (4, _("darwin_wait: thread=0x%x, got %s\n"),
 		      thread->gdb_port,
 		      unparse_exception_type (thread->event.ex_type));
 
@@ -975,7 +975,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	      status->value.sig = WTERMSIG (wstatus);
 	    }
 
-	  inferior_debug (4, _("darwin_wait: pid=%d exit, status=%x\n"),
+	  inferior_debug (4, _("darwin_wait: pid=%d exit, status=0x%x\n"),
 			  res, wstatus);
 
 	  /* Looks necessary on Leopard and harmless...  */
@@ -992,7 +992,7 @@ darwin_decode_message (mach_msg_header_t *hdr,
 	}
     }
 
-  printf_unfiltered (_("Bad local-port: %x\n"), hdr->msgh_local_port);
+  printf_unfiltered (_("Bad local-port: 0x%x\n"), hdr->msgh_local_port);
   status->kind = TARGET_WAITKIND_SPURIOUS;
   return minus_one_ptid;
 }
@@ -1015,7 +1015,7 @@ cancel_breakpoint (ptid_t ptid)
   pc = regcache_read_pc (regcache) - gdbarch_decr_pc_after_break (gdbarch);
   if (breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
     {
-      inferior_debug (4, "cancel_breakpoint for thread %x\n",
+      inferior_debug (4, "cancel_breakpoint for thread 0x%x\n",
 		      ptid_get_tid (ptid));
 
       /* Back up the PC if necessary.  */
@@ -1076,7 +1076,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 
       if (kret != MACH_MSG_SUCCESS)
 	{
-	  inferior_debug (5, _("mach_msg: ret=%x\n"), kret);
+	  inferior_debug (5, _("mach_msg: ret=0x%x\n"), kret);
 	  status->kind = TARGET_WAITKIND_SPURIOUS;
 	  return minus_one_ptid;
 	}
@@ -1110,7 +1110,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
       if (kret != MACH_MSG_SUCCESS)
 	{
 	  inferior_debug
-	    (5, _("darwin_wait: mach_msg(pending) ret=%x\n"), kret);
+	    (5, _("darwin_wait: mach_msg(pending) ret=0x%x\n"), kret);
 	  break;
 	}
 
@@ -1128,7 +1128,7 @@ darwin_wait (ptid_t ptid, struct target_waitstatus *status)
 	    }
 	  else
 	    inferior_debug
-	      (3, _("darwin_wait: thread %x hit a non-gdb breakpoint\n"),
+	      (3, _("darwin_wait: thread 0x%x hit a non-gdb breakpoint\n"),
 	       thread->gdb_port);
 	}
       else
@@ -1190,7 +1190,7 @@ darwin_mourn_inferior (struct target_ops *ops)
 					 MACH_MSG_TYPE_MAKE_SEND_ONCE,
 					 &prev);
   /* This can fail if the task is dead.  */
-  inferior_debug (4, "task=%x, prev=%x, notify_port=%x\n",
+  inferior_debug (4, "task=0x%x, prev=0x%x, notify_port=0x%x\n",
 		  inf->private->task, prev, inf->private->notify_port);
 
   if (kret == KERN_SUCCESS)
@@ -1741,7 +1741,7 @@ darwin_read_write_inferior (task_t task, CORE_ADDR addr,
   mach_vm_address_t region_address;
   mach_vm_size_t region_length;
 
-  inferior_debug (8, _("darwin_read_write_inferior(task=%x, %s, len=%d)\n"),
+  inferior_debug (8, _("darwin_read_write_inferior(task=0x%x, %s, len=%d)\n"),
 		  task, core_addr_to_string (addr), length);
 
   /* Get memory from inferior with page aligned addresses.  */

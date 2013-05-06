@@ -1,5 +1,10 @@
 2013-05-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* darwin-nat.c: Replace all "%x" instances in format strings
+	into "0x%x" throughout.
+
+2013-05-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* darwin-nat.c (darwin_mourn_inferior): Replace call to
 	gdb_assert by call to MACH_CHECK_ERROR.
 	(darwin_attach_pid): Raise an error rather than a failed
