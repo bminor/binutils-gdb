@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2009-2013 Free Software Foundation, Inc.
+   Copyright 2013 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,20 +17,8 @@
 
 #include "shr.h"
 
-#ifdef PROTOTYPES
-int shr2(int x)
-#else
-int shr2(x) int x;
-#endif
+void
+shr1 (const char *s)
 {
-  return 2*x;
-}
-
-#ifdef PROTOTYPES
-int shr2_local(int x)
-#else
-int shr2_local(x) int x;
-#endif
-{
-  return 2*x;
+  /* nothing to do */
 }

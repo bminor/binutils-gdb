@@ -1,3 +1,14 @@
+2013-05-06  Doug Evans  <dje@google.com>
+
+	* gdb.reverse/shr.h: New file.
+	* gdb.reverse/shr1.c: New file.
+	* gdb.reverse/shr2.c: #include "shr.h".
+	* gdb.reverse/solib-reverse.c: Remove #include <stdio.h>.
+	#include "shr.h".  Replace calls to printf,sleep to call shr1 instead.
+	* gdb.reverse/solib-precsave.exp: Build shr2.sl.
+	Update tests using sleep/printf to use shr2.sl instead.
+	* gdb.reverse/solib-reverse.exp: Ditto.
+
 2013-05-06  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/implptrconst.c: New file.

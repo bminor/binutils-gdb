@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2009-2013 Free Software Foundation, Inc.
+   Copyright 2013 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,22 +15,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "shr.h"
+#ifndef GDB_REVERSE_SHR_H
+#define GDB_REVERSE_SHR_H
 
-#ifdef PROTOTYPES
-int shr2(int x)
-#else
-int shr2(x) int x;
-#endif
-{
-  return 2*x;
-}
+extern void shr1 (const char *);
+extern int shr2 (int);
 
-#ifdef PROTOTYPES
-int shr2_local(int x)
-#else
-int shr2_local(x) int x;
-#endif
-{
-  return 2*x;
-}
+#endif /* GDB_REVERSE_SHR_H */
