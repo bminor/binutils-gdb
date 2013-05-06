@@ -66,3 +66,18 @@ with_test_prefix "once" {
 with_test_prefix "twice" {
   check_trace
 }
+
+# check that we can reverse-stepi that instruction
+gdb_test "reverse-stepi"
+gdb_test "info record" [join [list \
+  "Active record target: record-btrace" \
+  "Recorded 1 instructions in 1 functions for .*" \
+  "Replay in progress\.  At instruction 1\." \
+  ] "\r\n"] "reverse-stepi"
+
+# and back
+gdb_test "stepi"
+gdb_test "info record" [join [list \
+  "Active record target: record-btrace" \
+  "Recorded 1 instructions in 1 functions for .*" \
+  ] "\r\n"] "and back"

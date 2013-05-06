@@ -6263,8 +6263,10 @@ replay implementation.  This method allows replaying and reverse
 execution.
 
 @item btrace
-Hardware-supported instruction recording.  This method does not allow
-replaying and reverse execution.
+Hardware-supported instruction recording.  This method does not record
+data.  Further, the data is collected in a ring buffer so old data will
+be overwritten when the buffer is full.  It allows limited replay and
+reverse execution.
 
 This recording method may not be available on all processors.
 @end table

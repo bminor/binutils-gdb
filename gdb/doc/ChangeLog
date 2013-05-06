@@ -1,5 +1,10 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.texinfo: Document limited reverse/replay support
+	for target record-btrace.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.texinfo (Process Record and Replay): Update documentation.
 
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>

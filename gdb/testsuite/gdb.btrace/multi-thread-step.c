@@ -17,35 +17,37 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-void
-fun1 (void)
-{		/* fun1.1 */
-}		/* fun1.2 */
+#include <pthread.h>
 
-void
-fun2 (void)
-{		/* fun2.1 */
-  fun1 ();	/* fun2.2 */
-}		/* fun2.3 */
+static pthread_barrier_t barrier;
+static int global;
 
-void
-fun3 (void)
-{		/* fun3.1 */
-  fun1 ();	/* fun3.2 */
-  fun2 ();	/* fun3.3 */
-}		/* fun3.4 */
+static void *
+test (void *arg)
+{
+  pthread_barrier_wait (&barrier);
 
-void
-fun4 (void)
-{		/* fun4.1 */
-  fun1 ();	/* fun4.2 */
-  fun2 ();	/* fun4.3 */
-  fun3 ();	/* fun4.4 */
-}		/* fun4.5 */
+  global = 42; /* bp.1 */
+
+  pthread_barrier_wait (&barrier);
+
+  global = 42; /* bp.2 */
+
+  return arg;
+}
 
 int
 main (void)
-{		/* main.1 */
-  fun4 ();	/* main.2 */
-  return 0;	/* main.3 */
-}		/* main.4 */
+{
+  pthread_t th;
+
+  pthread_barrier_init (&barrier, NULL, 2);
+  pthread_create (&th, NULL, test, NULL);
+
+  test (NULL);
+
+  pthread_join (th, NULL);
+  pthread_barrier_destroy (&barrier);
+
+  return 0; /* bp.3 */
+}

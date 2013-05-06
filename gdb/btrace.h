@@ -153,6 +153,25 @@ struct btrace_call_history
   struct btrace_call_iterator end;
 };
 
+/* Branch trace thread flags.  */
+enum btrace_thread_flag
+{
+  /* The thread is to be stepped forwards.  */
+  BTHR_STEP = (1 << 0),
+
+  /* The thread is to be stepped backwards.  */
+  BTHR_RSTEP = (1 << 1),
+
+  /* The thread is to be continued forwards.  */
+  BTHR_CONT = (1 << 2),
+
+  /* The thread is to be continued backwards.  */
+  BTHR_RCONT = (1 << 3),
+
+  /* The thread is to be moved.  */
+  BTHR_MOVE = (BTHR_STEP | BTHR_RSTEP | BTHR_CONT | BTHR_RCONT)
+};
+
 /* Branch trace information per thread.
 
    This represents the branch trace configuration as well as the entry point
@@ -181,6 +200,9 @@ struct btrace_thread_info
      this normalizes the function levels such that the smallest level
      becomes zero.  */
   int level;
+
+  /* A bit-vector of btrace_thread_flag.  */
+  enum btrace_thread_flag flags;
 
   /* The instruction history iterator.  */
   struct btrace_insn_history *insn_history;

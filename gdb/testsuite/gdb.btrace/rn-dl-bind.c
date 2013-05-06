@@ -17,35 +17,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-void
-fun1 (void)
-{		/* fun1.1 */
-}		/* fun1.2 */
+#include <stdlib.h>
 
-void
-fun2 (void)
-{		/* fun2.1 */
-  fun1 ();	/* fun2.2 */
-}		/* fun2.3 */
+int test (void)
+{
+  int ret;
 
-void
-fun3 (void)
-{		/* fun3.1 */
-  fun1 ();	/* fun3.2 */
-  fun2 ();	/* fun3.3 */
-}		/* fun3.4 */
-
-void
-fun4 (void)
-{		/* fun4.1 */
-  fun1 ();	/* fun4.2 */
-  fun2 ();	/* fun4.3 */
-  fun3 ();	/* fun4.4 */
-}		/* fun4.5 */
+  ret = strtoul ("42", NULL, 10);	/* test.1 */
+  return ret;				/* test.2 */
+}					/* test.3 */
 
 int
 main (void)
-{		/* main.1 */
-  fun4 ();	/* main.2 */
-  return 0;	/* main.3 */
-}		/* main.4 */
+{
+  int ret;
+
+  ret = test ();			/* main.1 */
+  return ret;				/* main.2 */
+}					/* main.3 */

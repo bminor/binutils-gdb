@@ -17,35 +17,20 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-void
-fun1 (void)
-{		/* fun1.1 */
-}		/* fun1.2 */
+volatile static int glob;
 
 void
-fun2 (void)
-{		/* fun2.1 */
-  fun1 ();	/* fun2.2 */
-}		/* fun2.3 */
+test (void)
+{		/* test.1 */
+  volatile static int loc;
 
-void
-fun3 (void)
-{		/* fun3.1 */
-  fun1 ();	/* fun3.2 */
-  fun2 ();	/* fun3.3 */
-}		/* fun3.4 */
-
-void
-fun4 (void)
-{		/* fun4.1 */
-  fun1 ();	/* fun4.2 */
-  fun2 ();	/* fun4.3 */
-  fun3 ();	/* fun4.4 */
-}		/* fun4.5 */
+  loc += 1;	/* test.2 */
+  glob += loc;	/* test.3 */
+}		/* test.4 */
 
 int
 main (void)
 {		/* main.1 */
-  fun4 ();	/* main.2 */
+  test ();	/* main.2 */
   return 0;	/* main.3 */
 }		/* main.4 */

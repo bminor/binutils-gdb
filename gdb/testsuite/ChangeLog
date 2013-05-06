@@ -1,5 +1,23 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/delta.exp: Check reverse stepi.
+	* gdb.btrace/tailcall.exp: Update.  Add stepping tests.
+	* gdb.btrace/finish.exp: New.
+	* gdb.btrace/next.exp: New.
+	* gdb.btrace/nexti.exp: New.
+	* gdb.btrace/record_goto.c: Add comments.
+	* gdb.btrace/step.exp: New.
+	* gdb.btrace/stepi.exp: New.
+	* gdb.btrace/multi-thread-step.c: New.
+	* gdb.btrace/multi-thread-step.exp: New.
+	* gdb.btrace/rn-dl-bind.c: New.
+	* gdb.btrace/rn-dl-bind.exp: New.
+	* gdb.btrace/data.c: New.
+	* gdb.btrace/data.exp: New.
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add new.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/Makefile.in (EXECUTABLES): Add delta.
 	* gdb.btrace/exception.exp: Update.
 	* gdb.btrace/instruction_history.exp: Update.

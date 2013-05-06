@@ -22,6 +22,10 @@
   For locations inside the execution trace, the back trace is computed
   based on the information stored in the execution trace.
 
+* The btrace record target supports limited reverse execution and replay.
+  The target does not record data and therefore does not allow reading
+  memory or registers.
+
 * New remote packets
 
 qXfer:btrace:read's annex

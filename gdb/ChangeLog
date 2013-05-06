@@ -1,5 +1,23 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.h (btrace_thread_flag): New.
+	(struct btrace_thread_info) <flags>: New.
+	* record-btrace.c (record_btrace_resume_thread)
+	(record_btrace_find_thread_to_move, btrace_step_no_history)
+	(btrace_step_stopped, record_btrace_start_replaying)
+	(record_btrace_step_thread, record_btrace_decr_pc_after_break)
+	(record_btrace_find_resume_thread): New.
+	(record_btrace_resume, record_btrace_wait): Extend.
+	(record_btrace_can_execute_reverse): New.
+	(record_btrace_open): Fail in non-stop mode.
+	(record_btrace_set_replay): Split into this, ...
+	(record_btrace_stop_replaying): ... this, ...
+	(record_btrace_clear_histories): ... and this.
+	(init_record_btrace_ops): Init to_can_execute_reverse.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* target.h (struct target_ops) <to_decr_pc_after_break>: New.
 	(forward_target_decr_pc_after_break)
 	(target_decr_pc_after_break): New.
