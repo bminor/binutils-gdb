@@ -499,17 +499,20 @@ solib_map_sections (struct so_list *so)
   return 1;
 }
 
-/* Free symbol-file related contents of SO.  If we have opened a BFD
-   for SO, close it.  If we have placed SO's sections in some target's
-   section table, the caller is responsible for removing them.
+/* Free symbol-file related contents of SO and reset for possible reloading
+   of SO.  If we have opened a BFD for SO, close it.  If we have placed SO's
+   sections in some target's section table, the caller is responsible for
+   removing them.
 
    This function doesn't mess with objfiles at all.  If there is an
    objfile associated with SO that needs to be removed, the caller is
    responsible for taking care of that.  */
 
 static void
-free_so_symbols (struct so_list *so)
+clear_so (struct so_list *so)
 {
+  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+
   if (so->sections)
     {
       xfree (so->sections);
@@ -528,6 +531,10 @@ free_so_symbols (struct so_list *so)
   /* Restore the target-supplied file name.  SO_NAME may be the path
      of the symbol file.  */
   strcpy (so->so_name, so->so_original_name);
+
+  /* Do the same for target-specific data.  */
+  if (ops->clear_so != NULL)
+    ops->clear_so (so);
 }
 
 /* Free the storage associated with the `struct so_list' object SO.
@@ -546,7 +553,7 @@ free_so (struct so_list *so)
 {
   struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
-  free_so_symbols (so);
+  clear_so (so);
   ops->free_so (so);
 
   xfree (so);
@@ -1238,7 +1245,7 @@ reload_shared_libraries_1 (int from_tty)
 	      && !solib_used (so))
 	    free_objfile (so->objfile);
 	  remove_target_sections (so, so->abfd);
-	  free_so_symbols (so);
+	  clear_so (so);
 	}
 
       /* If this shared library is now associated with a new symbol

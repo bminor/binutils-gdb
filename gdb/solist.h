@@ -88,6 +88,11 @@ struct target_so_ops
        associated with a so_list entry.  */
     void (*free_so) (struct so_list *so);
 
+    /* Reset private data structures associated with SO.
+       This is called when SO is about to be reloaded.
+       It is also called before free_so when SO is about to be freed.  */
+    void (*clear_so) (struct so_list *so);
+
     /* Reset or free private data structures not associated with
        so_list entries.  */
     void (*clear_solib) (void);

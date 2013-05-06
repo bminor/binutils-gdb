@@ -966,6 +966,14 @@ svr4_free_so (struct so_list *so)
   xfree (so->lm_info);
 }
 
+/* Implement target_so_ops.clear_so.  */
+
+static void
+svr4_clear_so (struct so_list *so)
+{
+  so->lm_info->l_addr_p = 0;
+}
+
 /* Free so_list built so far (called via cleanup).  */
 
 static void
@@ -2448,6 +2456,7 @@ _initialize_svr4_solib (void)
 
   svr4_so_ops.relocate_section_addresses = svr4_relocate_section_addresses;
   svr4_so_ops.free_so = svr4_free_so;
+  svr4_so_ops.clear_so = svr4_clear_so;
   svr4_so_ops.clear_solib = svr4_clear_solib;
   svr4_so_ops.solib_create_inferior_hook = svr4_solib_create_inferior_hook;
   svr4_so_ops.special_symbol_handling = svr4_special_symbol_handling;

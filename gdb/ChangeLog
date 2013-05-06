@@ -1,3 +1,11 @@
+2013-05-06  Doug Evans  <dje@google.com>
+
+	* solist.h (struct target_so_ops): New member clear_so.
+	* solib-svr4.c (svr4_clear_so): New function.
+	(_initialize_svr4_solib): Set svr4_so_ops.clear_so.
+	* solib.c (clear_so): Renamed from free_so_symbols.
+	All callers updated.  Call target clear_so if it exists.
+
 2013-05-06  Tom Tromey  <tromey@redhat.com>
 
 	* ada-lang.c (ada_value_primitive_packed_val): Don't
