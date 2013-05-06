@@ -1,3 +1,8 @@
+2013-05-06  Doug Evans  <dje@google.com>
+
+	* psympriv.h (struct partial_symtab): Augment comment for member
+	section_offsets.
+
 2013-05-06  Joel Brobecker  <brobecker@adacore.com>
 
 	Reimplement shared library support on ppc-aix...

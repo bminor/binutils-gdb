@@ -98,7 +98,9 @@ struct partial_symtab
 
   const char *dirname;
 
-  /* Set of relocation offsets to apply to each section.  */
+  /* Set of relocation offsets to apply to each section.
+     This is typically objfile->section_offsets, but in some cases
+     it's different.  See, e.g., elfstab_offset_sections.  */
 
   struct section_offsets *section_offsets;
 
