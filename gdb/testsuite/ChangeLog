@@ -1,5 +1,11 @@
 2013-05-06  Doug Evans  <dje@google.com>
 
+	* gdb.base/solib-search-lib1.c: New file.
+	* gdb.base/solib-search-lib2.c: New file.
+	* gdb.base/solib-search.c: New file.
+	* gdb.base/solib-search.h: New file.
+	* gdb.base/solib-search.exp: New file.
+
 	* lib/gdb.exp (gdb_core_cmd): New function.
 	* gdb.arch/system-gcore.exp: Use it.
 	* gdb.arch/vsx-regs.exp: Ditto.
