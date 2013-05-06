@@ -3338,14 +3338,12 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   unsigned int old_size = 0;
   unsigned int old_count = 0;
   void *old_tab = NULL;
-  void *old_hash;
   void *old_ent;
   struct bfd_link_hash_entry *old_undefs = NULL;
   struct bfd_link_hash_entry *old_undefs_tail = NULL;
   long old_dynsymcount = 0;
   bfd_size_type old_dynstr_size = 0;
   size_t tabsize = 0;
-  size_t hashsize = 0;
 
   htab = elf_hash_table (info);
   bed = get_elf_backend_data (abfd);
@@ -3700,8 +3698,8 @@ error_free_dyn:
       extsymoff = hdr->sh_info;
     }
 
-  sym_hash = NULL;
-  if (extsymcount != 0)
+  sym_hash = elf_sym_hashes (abfd);
+  if (sym_hash == NULL && extsymcount != 0)
     {
       isymbuf = bfd_elf_get_elf_syms (abfd, hdr, extsymcount, extsymoff,
 				      NULL, NULL, NULL);
@@ -3711,7 +3709,7 @@ error_free_dyn:
       /* We store a pointer to the hash table entry for each external
 	 symbol.  */
       amt = extsymcount * sizeof (struct elf_link_hash_entry *);
-      sym_hash = (struct elf_link_hash_entry **) bfd_alloc (abfd, amt);
+      sym_hash = (struct elf_link_hash_entry **) bfd_zalloc (abfd, amt);
       if (sym_hash == NULL)
 	goto error_free_sym;
       elf_sym_hashes (abfd) = sym_hash;
@@ -3764,8 +3762,7 @@ error_free_dyn:
 	}
 
       tabsize = htab->root.table.size * sizeof (struct bfd_hash_entry *);
-      hashsize = extsymcount * sizeof (struct elf_link_hash_entry *);
-      old_tab = bfd_malloc (tabsize + entsize + hashsize);
+      old_tab = bfd_malloc (tabsize + entsize);
       if (old_tab == NULL)
 	goto error_free_vers;
 
@@ -3781,12 +3778,10 @@ error_free_dyn:
 				       notice_as_needed, 0, NULL))
 	goto error_free_vers;
 
-      /* Clone the symbol table and sym hashes.  Remember some
-	 pointers into the symbol table, and dynamic symbol count.  */
-      old_hash = (char *) old_tab + tabsize;
-      old_ent = (char *) old_hash + hashsize;
+      /* Clone the symbol table.  Remember some pointers into the
+	 symbol table, and dynamic symbol count.  */
+      old_ent = (char *) old_tab + tabsize;
       memcpy (old_tab, htab->root.table.table, tabsize);
-      memcpy (old_hash, sym_hash, hashsize);
       old_undefs = htab->root.undefs;
       old_undefs_tail = htab->root.undefs_tail;
       old_table = htab->root.table.table;
@@ -3843,7 +3838,6 @@ error_free_dyn:
       flags = BSF_NO_FLAGS;
       sec = NULL;
       value = isym->st_value;
-      *sym_hash = NULL;
       common = bed->common_definition (isym);
 
       bind = ELF_ST_BIND (isym->st_info);
@@ -4477,14 +4471,13 @@ error_free_dyn:
       /* Restore the symbol table.  */
       if (bed->as_needed_cleanup)
 	(*bed->as_needed_cleanup) (abfd, info);
-      old_hash = (char *) old_tab + tabsize;
-      old_ent = (char *) old_hash + hashsize;
-      sym_hash = elf_sym_hashes (abfd);
+      old_ent = (char *) old_tab + tabsize;
+      memset (elf_sym_hashes (abfd), 0,
+	      extsymcount * sizeof (struct elf_link_hash_entry *));
       htab->root.table.table = old_table;
       htab->root.table.size = old_size;
       htab->root.table.count = old_count;
       memcpy (htab->root.table.table, old_tab, tabsize);
-      memcpy (sym_hash, old_hash, hashsize);
       htab->root.undefs = old_undefs;
       htab->root.undefs_tail = old_undefs_tail;
       _bfd_elf_strtab_restore_size (htab->dynstr, old_dynstr_size);
