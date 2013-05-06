@@ -1,5 +1,11 @@
 2013-05-06  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (dwarf2_const_value_data): Remove unused
+	parameters.
+	(dwarf2_const_value_attr): Update.
+
+2013-05-06  Tom Tromey  <tromey@redhat.com>
+
 	* somread.c (som_symfile_offsets): Add 'const' to addrs.
 	* machoread.c (macho_symfile_offsets): Add 'const' to addrs.
 	* xcoffread.c (xcoff_symfile_offsets): Add 'const' to addrs.

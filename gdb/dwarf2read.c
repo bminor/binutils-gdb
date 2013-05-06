@@ -16361,8 +16361,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
    because that is the interpretation long in use by GCC.  */
 
 static gdb_byte *
-dwarf2_const_value_data (struct attribute *attr, struct type *type,
-			 const char *name, struct obstack *obstack,
+dwarf2_const_value_data (struct attribute *attr, struct obstack *obstack,
 			 struct dwarf2_cu *cu, LONGEST *value, int bits)
 {
   struct objfile *objfile = cu->objfile;
@@ -16464,20 +16463,16 @@ dwarf2_const_value_attr (struct attribute *attr, struct type *type,
 	 converted to host endianness, so we just need to sign- or
 	 zero-extend it as appropriate.  */
     case DW_FORM_data1:
-      *bytes = dwarf2_const_value_data (attr, type, name,
-					obstack, cu, value, 8);
+      *bytes = dwarf2_const_value_data (attr, obstack, cu, value, 8);
       break;
     case DW_FORM_data2:
-      *bytes = dwarf2_const_value_data (attr, type, name,
-					obstack, cu, value, 16);
+      *bytes = dwarf2_const_value_data (attr, obstack, cu, value, 16);
       break;
     case DW_FORM_data4:
-      *bytes = dwarf2_const_value_data (attr, type, name,
-					obstack, cu, value, 32);
+      *bytes = dwarf2_const_value_data (attr, obstack, cu, value, 32);
       break;
     case DW_FORM_data8:
-      *bytes = dwarf2_const_value_data (attr, type, name,
-					obstack, cu, value, 64);
+      *bytes = dwarf2_const_value_data (attr, obstack, cu, value, 64);
       break;
 
     case DW_FORM_sdata:
