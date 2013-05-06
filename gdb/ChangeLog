@@ -1,3 +1,8 @@
+2013-05-06  Doug Evans  <dje@google.com>
+
+	* symfile.c (syms_from_objfile_1): Use correct section count when
+	objfile->sf == NULL.
+
 2013-05-06  Mike Frysinger  <vapier@gentoo.org>
 
 	* common/linux-btrace.c (intel_supports_btrace): Fix indentation.

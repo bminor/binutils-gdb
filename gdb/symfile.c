@@ -949,7 +949,7 @@ syms_from_objfile_1 (struct objfile *objfile,
       /* No symbols to load, but we still need to make sure
 	 that the section_offsets table is allocated.  */
       int num_sections = gdb_bfd_count_sections (objfile->obfd);
-      size_t size = SIZEOF_N_SECTION_OFFSETS (num_offsets);
+      size_t size = SIZEOF_N_SECTION_OFFSETS (num_sections);
 
       objfile->num_sections = num_sections;
       objfile->section_offsets
