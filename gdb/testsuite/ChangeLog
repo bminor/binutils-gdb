@@ -1,3 +1,11 @@
+2013-05-06  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/implptrconst.c: New file.
+	* gdb.dwarf2/implptrconst.exp: New file.
+	* lib/dwarf.exp (Dwarf::_nz_quote): New proc.
+	(Dwarf::_handle_DW_FORM): Handle DW_FORM_block1.
+	(Dwarf::_location): Handle DW_OP_GNU_implicit_pointer.
+
 2013-05-03  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/catch-sig.c (main): Raise SIGINT.

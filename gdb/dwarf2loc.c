@@ -90,6 +90,16 @@ enum debug_loc_kind
   DEBUG_LOC_INVALID_ENTRY = -2
 };
 
+/* Helper function which throws an error if a synthetic pointer is
+   invalid.  */
+
+static void
+invalid_synthetic_pointer (void)
+{
+  error (_("access outside bounds of object "
+	   "referenced via synthetic pointer"));
+}
+
 /* Decode the addresses in a non-dwo .debug_loc entry.
    A pointer to the next byte to examine is returned in *NEW_PTR.
    The encoded low,high addresses are return in *LOW,*HIGH.
@@ -2086,9 +2096,37 @@ indirect_pieced_value (struct value *value)
 				     get_frame_address_in_block_wrapper,
 				     frame);
 
-  return dwarf2_evaluate_loc_desc_full (TYPE_TARGET_TYPE (type), frame,
-					baton.data, baton.size, baton.per_cu,
-					piece->v.ptr.offset + byte_offset);
+  if (baton.data != NULL)
+    return dwarf2_evaluate_loc_desc_full (TYPE_TARGET_TYPE (type), frame,
+					  baton.data, baton.size, baton.per_cu,
+					  piece->v.ptr.offset + byte_offset);
+
+  {
+    struct obstack temp_obstack;
+    struct cleanup *cleanup;
+    const gdb_byte *bytes;
+    LONGEST len;
+    struct value *result;
+
+    obstack_init (&temp_obstack);
+    cleanup = make_cleanup_obstack_free (&temp_obstack);
+
+    bytes = dwarf2_fetch_constant_bytes (piece->v.ptr.die, c->per_cu,
+					 &temp_obstack, &len);
+    if (bytes == NULL)
+      result = allocate_optimized_out_value (TYPE_TARGET_TYPE (type));
+    else
+      {
+	if (byte_offset < 0
+	    || byte_offset + TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > len)
+	  invalid_synthetic_pointer ();
+	bytes += byte_offset;
+	result = value_from_contents (TYPE_TARGET_TYPE (type), bytes);
+      }
+
+    do_cleanups (cleanup);
+    return result;
+  }
 }
 
 static void *
@@ -2133,16 +2171,6 @@ static const struct lval_funcs pieced_value_funcs = {
   copy_pieced_value_closure,
   free_pieced_value_closure
 };
-
-/* Helper function which throws an error if a synthetic pointer is
-   invalid.  */
-
-static void
-invalid_synthetic_pointer (void)
-{
-  error (_("access outside bounds of object "
-	   "referenced via synthetic pointer"));
-}
 
 /* Virtual method table for dwarf2_evaluate_loc_desc_full below.  */
 

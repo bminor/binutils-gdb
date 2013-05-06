@@ -72,6 +72,11 @@ struct dwarf2_locexpr_baton dwarf2_fetch_die_loc_cu_off
    CORE_ADDR (*get_frame_pc) (void *baton),
    void *baton);
 
+extern const gdb_byte *dwarf2_fetch_constant_bytes (sect_offset,
+						    struct dwarf2_per_cu_data *,
+						    struct obstack *,
+						    LONGEST *);
+
 struct type *dwarf2_get_die_type (cu_offset die_offset,
 				  struct dwarf2_per_cu_data *per_cu);
 

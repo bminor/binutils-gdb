@@ -241,6 +241,11 @@ namespace eval Dwarf {
 	return "\"${string}\\0\""
     }
 
+    proc _nz_quote {string} {
+	# For now, no quoting is done.
+	return "\"${string}\""
+    }
+
     proc _handle_DW_FORM {form value} {
 	switch -exact -- $form {
 	    DW_FORM_string  {
@@ -326,11 +331,19 @@ namespace eval Dwarf {
 		define_label $l2
 	    }
 
+	    DW_FORM_block1 {
+		set len [string length $value]
+		if {$len > 255} {
+		    error "DW_FORM_block1 length too long"
+		}
+		_op .byte $len
+		_op .ascii [_nz_quote $value]
+	    }
+
 	    DW_FORM_block2 -
 	    DW_FORM_block4 -
 
 	    DW_FORM_block -
-	    DW_FORM_block1 -
 
 	    DW_FORM_ref2 -
 	    DW_FORM_indirect -
@@ -591,6 +604,8 @@ namespace eval Dwarf {
     # FIXME move docs
     proc _location {body} {
 	variable _constants
+	variable _cu_label
+	variable _cu_addr_size
 
 	foreach line [split $body \n] {
 	    if {[lindex $line 0] == ""} {
@@ -601,8 +616,6 @@ namespace eval Dwarf {
 
 	    switch -exact -- $opcode {
 		DW_OP_addr {
-		    variable _cu_addr_size
-
 		    _op .${_cu_addr_size}byte [lindex $line 1]
 		}
 
@@ -631,6 +644,17 @@ namespace eval Dwarf {
 		}
 		DW_OP_consts {
 		    _op .sleb128 [lindex $line 1]
+		}
+
+		DW_OP_GNU_implicit_pointer {
+		    if {[llength $line] != 3} {
+			error "usage: DW_OP_GNU_implicit_pointer LABEL OFFSET"
+		    }
+
+		    # Here label is a section offset.
+		    set label [lindex $line 1]
+		    _op .${_cu_addr_size}byte $label
+		    _op .sleb128 [lindex $line 2]
 		}
 
 		default {

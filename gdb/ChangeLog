@@ -1,5 +1,14 @@
 2013-05-06  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2loc.c (invalid_synthetic_pointer): Move earlier.
+	(indirect_pieced_value): Call dwarf2_fetch_constant_bytes
+	if needed.
+	* dwarf2loc.h (dwarf2_fetch_constant_bytes): Declare.
+	* dwarf2read.c (write_constant_as_bytes)
+	(dwarf2_fetch_constant_bytes): New functions.
+
+2013-05-06  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dwarf2_const_value_data): Remove unused
 	parameters.
 	(dwarf2_const_value_attr): Update.

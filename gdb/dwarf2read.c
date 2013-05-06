@@ -17765,6 +17765,150 @@ dwarf2_fetch_die_loc_cu_off (cu_offset offset_in_cu,
   return dwarf2_fetch_die_loc_sect_off (offset, per_cu, get_frame_pc, baton);
 }
 
+/* Write a constant of a given type as target-ordered bytes into
+   OBSTACK.  */
+
+static const gdb_byte *
+write_constant_as_bytes (struct obstack *obstack,
+			 enum bfd_endian byte_order,
+			 struct type *type,
+			 ULONGEST value,
+			 LONGEST *len)
+{
+  gdb_byte *result;
+
+  *len = TYPE_LENGTH (type);
+  result = obstack_alloc (obstack, *len);
+  store_unsigned_integer (result, *len, byte_order, value);
+
+  return result;
+}
+
+/* If the DIE at OFFSET in PER_CU has a DW_AT_const_value, return a
+   pointer to the constant bytes and set LEN to the length of the
+   data.  If memory is needed, allocate it on OBSTACK.  If the DIE
+   does not have a DW_AT_const_value, return NULL.  */
+
+const gdb_byte *
+dwarf2_fetch_constant_bytes (sect_offset offset,
+			     struct dwarf2_per_cu_data *per_cu,
+			     struct obstack *obstack,
+			     LONGEST *len)
+{
+  struct dwarf2_cu *cu;
+  struct die_info *die;
+  struct attribute *attr;
+  const gdb_byte *result = NULL;
+  struct type *type;
+  LONGEST value;
+  enum bfd_endian byte_order;
+
+  dw2_setup (per_cu->objfile);
+
+  if (per_cu->cu == NULL)
+    load_cu (per_cu);
+  cu = per_cu->cu;
+
+  die = follow_die_offset (offset, per_cu->is_dwz, &cu);
+  if (!die)
+    error (_("Dwarf Error: Cannot find DIE at 0x%x referenced in module %s"),
+	   offset.sect_off, per_cu->objfile->name);
+
+
+  attr = dwarf2_attr (die, DW_AT_const_value, cu);
+  if (attr == NULL)
+    return NULL;
+
+  byte_order = (bfd_big_endian (per_cu->objfile->obfd)
+		? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE);
+
+  switch (attr->form)
+    {
+    case DW_FORM_addr:
+    case DW_FORM_GNU_addr_index:
+      {
+	gdb_byte *tem;
+
+	*len = cu->header.addr_size;
+	tem = obstack_alloc (obstack, *len);
+	store_unsigned_integer (tem, *len, byte_order, DW_ADDR (attr));
+	result = tem;
+      }
+      break;
+    case DW_FORM_string:
+    case DW_FORM_strp:
+    case DW_FORM_GNU_str_index:
+    case DW_FORM_GNU_strp_alt:
+      /* DW_STRING is already allocated on the objfile obstack, point
+	 directly to it.  */
+      result = (const gdb_byte *) DW_STRING (attr);
+      *len = strlen (DW_STRING (attr));
+      break;
+    case DW_FORM_block1:
+    case DW_FORM_block2:
+    case DW_FORM_block4:
+    case DW_FORM_block:
+    case DW_FORM_exprloc:
+      result = DW_BLOCK (attr)->data;
+      *len = DW_BLOCK (attr)->size;
+      break;
+
+      /* The DW_AT_const_value attributes are supposed to carry the
+	 symbol's value "represented as it would be on the target
+	 architecture."  By the time we get here, it's already been
+	 converted to host endianness, so we just need to sign- or
+	 zero-extend it as appropriate.  */
+    case DW_FORM_data1:
+      type = die_type (die, cu);
+      result = dwarf2_const_value_data (attr, obstack, cu, &value, 8);
+      if (result == NULL)
+	result = write_constant_as_bytes (obstack, byte_order,
+					  type, value, len);
+      break;
+    case DW_FORM_data2:
+      type = die_type (die, cu);
+      result = dwarf2_const_value_data (attr, obstack, cu, &value, 16);
+      if (result == NULL)
+	result = write_constant_as_bytes (obstack, byte_order,
+					  type, value, len);
+      break;
+    case DW_FORM_data4:
+      type = die_type (die, cu);
+      result = dwarf2_const_value_data (attr, obstack, cu, &value, 32);
+      if (result == NULL)
+	result = write_constant_as_bytes (obstack, byte_order,
+					  type, value, len);
+      break;
+    case DW_FORM_data8:
+      type = die_type (die, cu);
+      result = dwarf2_const_value_data (attr, obstack, cu, &value, 64);
+      if (result == NULL)
+	result = write_constant_as_bytes (obstack, byte_order,
+					  type, value, len);
+      break;
+
+    case DW_FORM_sdata:
+      type = die_type (die, cu);
+      result = write_constant_as_bytes (obstack, byte_order,
+					type, DW_SND (attr), len);
+      break;
+
+    case DW_FORM_udata:
+      type = die_type (die, cu);
+      result = write_constant_as_bytes (obstack, byte_order,
+					type, DW_UNSND (attr), len);
+      break;
+
+    default:
+      complaint (&symfile_complaints,
+		 _("unsupported const value attribute form: '%s'"),
+		 dwarf_form_name (attr->form));
+      break;
+    }
+
+  return result;
+}
+
 /* Return the type of the DIE at DIE_OFFSET in the CU named by
    PER_CU.  */
 
