@@ -1586,6 +1586,32 @@ darwin_create_inferior (struct target_ops *ops, char *exec_file,
 }
 
 
+/* Set things up such that the next call to darwin_wait will immediately
+   return a fake stop event for inferior INF.
+
+   This assumes that the inferior's thread list has been initialized,
+   as it will suspend the inferior's first thread.  */
+
+static void
+darwin_setup_fake_stop_event (struct inferior *inf)
+{
+  darwin_thread_t *thread;
+  kern_return_t kret;
+
+  gdb_assert (darwin_inf_fake_stop == NULL);
+  darwin_inf_fake_stop = inf;
+
+  /* When detecting a fake pending stop event, darwin_wait returns
+     an event saying that the first thread is in a DARWIN_STOPPED
+     state.  To make that accurate, we need to suspend that thread
+     as well.  Otherwise, we'll try resuming it when resuming the
+     inferior, and get a warning because the thread's suspend count
+     is already zero, making the resume request useless.  */
+  thread = VEC_index (darwin_thread_t, inf->private->threads, 0);
+  kret = thread_suspend (thread->gdb_port);
+  MACH_CHECK_ERROR (kret);
+}
+
 /* Attach to process PID, then initialize for debugging it
    and wait for the trace-trap that results from attaching.  */
 static void
@@ -1637,8 +1663,8 @@ darwin_attach (struct target_ops *ops, char *args, int from_tty)
 
   darwin_check_osabi (inf->private, ptid_get_tid (inferior_ptid));
 
-  gdb_assert (darwin_inf_fake_stop == NULL);
-  darwin_inf_fake_stop = inf;
+  darwin_setup_fake_stop_event (inf);
+
   inf->private->no_ptrace = 1;
 }
 

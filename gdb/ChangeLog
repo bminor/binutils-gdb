@@ -1,5 +1,10 @@
 2013-05-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* darwin-nat.c (darwin_setup_fake_stop_event): New function.
+	(darwin_attach): Adjust using darwin_setup_fake_stop_event.
+
+2013-05-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* darwin-nat.c: Replace all "%x" instances in format strings
 	into "0x%x" throughout.
 
