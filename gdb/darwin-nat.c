@@ -1182,7 +1182,7 @@ darwin_mourn_inferior (struct target_ops *ops)
 
   kret = mach_port_move_member (gdb_task,
 				inf->private->notify_port, MACH_PORT_NULL);
-  gdb_assert (kret == KERN_SUCCESS);
+  MACH_CHECK_ERROR (kret);
 
   kret = mach_port_request_notification (gdb_task, inf->private->task,
 					 MACH_NOTIFY_DEAD_NAME, 0,
@@ -1371,40 +1371,76 @@ darwin_attach_pid (struct inferior *inf)
       /* Create a port to get exceptions.  */
       kret = mach_port_allocate (gdb_task, MACH_PORT_RIGHT_RECEIVE,
 				 &darwin_ex_port);
-      gdb_assert (kret == KERN_SUCCESS);
+      if (kret != KERN_SUCCESS)
+	error (_("Unable to create exception port, mach_port_allocate "
+		 "returned: %d"),
+	       kret);
 
       kret = mach_port_insert_right (gdb_task, darwin_ex_port, darwin_ex_port,
 				     MACH_MSG_TYPE_MAKE_SEND);
-      gdb_assert (kret == KERN_SUCCESS);
+      if (kret != KERN_SUCCESS)
+	error (_("Unable to create exception port, mach_port_insert_right "
+		 "returned: %d"),
+	       kret);
 
       /* Create a port set and put ex_port in it.  */
       kret = mach_port_allocate (gdb_task, MACH_PORT_RIGHT_PORT_SET,
 				 &darwin_port_set);
-      gdb_assert (kret == KERN_SUCCESS);
+      if (kret != KERN_SUCCESS)
+	error (_("Unable to create port set, mach_port_allocate "
+		 "returned: %d"),
+	       kret);
 
       kret = mach_port_move_member (gdb_task, darwin_ex_port, darwin_port_set);
-      gdb_assert (kret == KERN_SUCCESS);
+      if (kret != KERN_SUCCESS)
+	error (_("Unable to move exception port into new port set, "
+		 "mach_port_move_member\n"
+		 "returned: %d"),
+	       kret);
     }
 
   /* Create a port to be notified when the child task terminates.  */
   kret = mach_port_allocate (gdb_task, MACH_PORT_RIGHT_RECEIVE,
 			     &inf->private->notify_port);
-  gdb_assert (kret == KERN_SUCCESS);
+  if (kret != KERN_SUCCESS)
+    error (_("Unable to create notification port, mach_port_allocate "
+	     "returned: %d"),
+	   kret);
 
   kret = mach_port_move_member (gdb_task,
 				inf->private->notify_port, darwin_port_set);
-  gdb_assert (kret == KERN_SUCCESS);
+  if (kret != KERN_SUCCESS)
+    error (_("Unable to move notification port into new port set, "
+	     "mach_port_move_member\n"
+	     "returned: %d"),
+	   kret);
 
   kret = mach_port_request_notification (gdb_task, inf->private->task,
 					 MACH_NOTIFY_DEAD_NAME, 0,
 					 inf->private->notify_port,
 					 MACH_MSG_TYPE_MAKE_SEND_ONCE,
 					 &prev_not);
-  gdb_assert (kret == KERN_SUCCESS);
-  gdb_assert (prev_not == MACH_PORT_NULL);
+  if (kret != KERN_SUCCESS)
+    error (_("Termination notification request failed, "
+	     "mach_port_request_notification\n"
+	     "returned: %d"),
+	   kret);
+  if (prev_not != MACH_PORT_NULL)
+    {
+      /* This is unexpected, as there should not be any previously
+	 registered notification request.  But this is not a fatal
+	 issue, so just emit a warning.  */
+      warning (_("\
+A task termination request was registered before the debugger registered\n\
+its own.  This is unexpected, but should otherwise not have any actual\n\
+impact on the debugging session."));
+    }
 
   kret = darwin_save_exception_ports (inf->private);
-  gdb_assert (kret == KERN_SUCCESS);
+  if (kret != KERN_SUCCESS)
+    error (_("Unable to save exception ports, task_get_exception_ports"
+	     "returned: %d"),
+	   kret);
 
   /* Set exception port.  */
   if (enable_mach_exceptions)
@@ -1413,7 +1449,10 @@ darwin_attach_pid (struct inferior *inf)
     mask = EXC_MASK_SOFTWARE | EXC_MASK_BREAKPOINT;
   kret = task_set_exception_ports (inf->private->task, mask, darwin_ex_port,
 				   EXCEPTION_DEFAULT, THREAD_STATE_NONE);
-  gdb_assert (kret == KERN_SUCCESS);
+  if (kret != KERN_SUCCESS)
+    error (_("Unable to set exception ports, task_set_exception_ports"
+	     "returned: %d"),
+	   kret);
 
   push_target (darwin_ops);
 }
@@ -1453,7 +1492,8 @@ darwin_ptrace_me (void)
 
   /* Wait until gdb is ready.  */
   res = read (ptrace_fds[0], &c, 1);
-  gdb_assert (res == 0);
+  if (res != 0)
+    error (_("unable to read from pipe, read returned: %d"), res);
   close (ptrace_fds[0]);
 
   /* Get rid of privileges.  */

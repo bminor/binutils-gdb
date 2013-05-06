@@ -1,5 +1,16 @@
 2013-05-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* darwin-nat.c (darwin_mourn_inferior): Replace call to
+	gdb_assert by call to MACH_CHECK_ERROR.
+	(darwin_attach_pid): Raise an error rather than a failed
+	assertion when various system calls failed.  Report a warning
+	instead of raising a failed assertion when PREV_NOT is not NULL
+	after call to mach_port_request_notification.
+	(darwin_ptrace_me): Raise an error rather than a failed
+	assertion when read returns nonzero.
+
+2013-05-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* amd64-darwin-tdep.c: Remove #include "gdb_assert.h".
 
 2013-05-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
