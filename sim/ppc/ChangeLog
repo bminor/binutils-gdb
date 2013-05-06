@@ -4,6 +4,10 @@
 	2013-04-19  Nathan Froyd  <froydnj@codesourcery.com>
 	* ppc-instructions (isel): New instruction.
 
+2013-04-19  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* ppc-instructions (isel): New instruction.
+
 2012-12-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* COPYING: Update to GPL version 3.

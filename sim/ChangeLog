@@ -1,7 +1,3 @@
-2013-04-19  Nathan Froyd  <froydnj@codesourcery.com>
-
-	* ppc-instructions (isel): New instruction.
-
 2013-03-15  Steve Ellcey  <sellcey@mips.com>
 
 	* arm/wrapper.c (sim_complete_command): Make char arguments const.
