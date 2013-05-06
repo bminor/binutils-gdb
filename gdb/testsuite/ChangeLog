@@ -1,5 +1,11 @@
 2013-05-06  Doug Evans  <dje@google.com>
 
+	* lib/gdb.exp (gdb_core_cmd): New function.
+	* gdb.arch/system-gcore.exp: Use it.
+	* gdb.arch/vsx-regs.exp: Ditto.
+	* gdb.base/gcore.exp: Ditto.
+	* gdb.threads/gcore-thread.exp: Ditto.
+
 	* gdb.reverse/shr.h: New file.
 	* gdb.reverse/shr1.c: New file.
 	* gdb.reverse/shr2.c: #include "shr.h".
