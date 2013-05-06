@@ -1,3 +1,8 @@
+2014-05-02  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* config/tc-xtensa.c (md_apply_fix): mark BFD_RELOC_XTENSA_DIFF*
+	fixups as signed.
+
 2014-05-07  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* tc-mips.c (ISA_SUPPORTS_MIPS16E): Add mips32r3, mips32r5, mips64r3

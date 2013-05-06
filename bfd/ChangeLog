@@ -1,3 +1,10 @@
+2014-05-02  Volodymyr Arbatov  <arbatov@cadence.com>
+	    David Weatherford  <weath@cadence.com>
+	    Max Filippov  <jcmvbkbc@gmail.com>
+
+	* elf32-xtensa.c (relax_section): treat R_XTENSA_DIFF* relocations as
+	signed.
+
 2014-05-07  Andreas Tobler  <andreast@fgznet.ch>
 
 	* config.bfd: Add proper arm config for *-*-freebsd*.

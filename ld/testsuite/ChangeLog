@@ -1,3 +1,9 @@
+2014-05-02  Max Filippov  <jcmvbkbc@gmail.com>
+
+	* ld-xtensa/diff_overflow.exp, * ld-xtensa/diff_overflow1.s,
+	* ld-xtensa/diff_overflow2.s: Add test for DIFF* relocation
+	signedness and overflow checking.
+
 2014-05-01  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* ld-mmix/sec-11.d, ld-mmix/sec-11.ld, ld-mmix/sec-10.s,
