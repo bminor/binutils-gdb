@@ -1,9 +1,18 @@
+2013-05-07  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (PPC_VLE_SPLIT16A): Delete unused macro.
+	(PPC_VLE_SPLIT16D, PPC_VLE_LO16A, PPC_VLE_LO16D): Likewise.
+	(PPC_VLE_HI16A, PPC_VLE_HI16D): Likewise.
+	(PPC_VLE_HA16A, PPC_VLE_HA16D): Likewise.
+	(md_apply_fix): Set fx_no_overflow for assorted relocations.
+	Shift and sign-extend fieldval for use by some VLE reloc
+	operand->insert functions.
+
 2013-05-06  Paul Brook  <paul@codesourcery.com>
 	    Catherine Moore  <clm@codesourcery.com>
 
-        gas/
-        * config/tc-mips.c (md_pcrel_from): Handle BFD_RELOC_32_PCREL.
-        (limited_pcrel_reloc_p): Likewise.
+	* config/tc-mips.c (md_pcrel_from): Handle BFD_RELOC_32_PCREL.
+	(limited_pcrel_reloc_p): Likewise.
 	(md_apply_fix): Likewise.
 	(tc_gen_reloc): Likewise.
 

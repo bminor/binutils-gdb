@@ -64,39 +64,13 @@ static int set_target_endian = 0;
 /* #lo(value) denotes the least significant 16 bits of the indicated.  */
 #define PPC_LO(v) ((v) & 0xffff)
 
-/* Split the indicated value with the msbs in bits 11-15
-   and the lsbs in bits 21-31.  */
-#define PPC_VLE_SPLIT16A(v) ((v & 0xf800) << 11) | (v & 0x7ff)
-
-/* Split the indicated value with the msbs in bits 6-10
-   and the lsbs in bits 21-31.  */
-#define PPC_VLE_SPLIT16D(v) ((v & 0xf800) << 5) | (v & 0x7ff)
-
-/* #lo(value) denotes the lsb 16 bits in split16a format.  */
-#define PPC_VLE_LO16A(v) PPC_VLE_SPLIT16A(PPC_LO(v))
-
-/* #lo(value) denotes the lsb 16 bits in split16d format.  */
-#define PPC_VLE_LO16D(v) PPC_VLE_SPLIT16D(PPC_LO(v))
-
 /* #hi(value) denotes bits 16 through 31 of the indicated value.  */
 #define PPC_HI(v) (((v) >> 16) & 0xffff)
-
-/* #lo(value) denotes the msb 16 bits in split16a format.  */
-#define PPC_VLE_HI16A(v) PPC_VLE_SPLIT16A(PPC_HI(v))
-
-/* #lo(value) denotes the msb 16 bits in split16d format.  */
-#define PPC_VLE_HI16D(v) PPC_VLE_SPLIT16D(PPC_HI(v))
 
 /* #ha(value) denotes the high adjusted value: bits 16 through 31 of
   the indicated value, compensating for #lo() being treated as a
   signed number.  */
 #define PPC_HA(v) PPC_HI ((v) + 0x8000)
-
-/* #ha(value) denotes the high adjusted value in split16a format.  */
-#define PPC_VLE_HA16A(v) PPC_VLE_SPLIT16A(PPC_HA(v))
-
-/* #ha(value) denotes the high adjusted value in split16d format.  */
-#define PPC_VLE_HA16D(v) PPC_VLE_SPLIT16D(PPC_HA(v))
 
 /* #higher(value) denotes bits 32 through 47 of the indicated value.  */
 #define PPC_HIGHER(v) (((v) >> 16 >> 16) & 0xffff)
@@ -6393,7 +6367,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    fixP->fx_r_type = BFD_RELOC_LO16_PCREL;
 	  /* fall through */
 	case BFD_RELOC_LO16_PCREL:
+	case BFD_RELOC_PPC_VLE_LO16A:
+	case BFD_RELOC_PPC_VLE_LO16D:
 	  fieldval = SEX16 (value);
+	  fixP->fx_no_overflow = 1;
 	  break;
 
 	case BFD_RELOC_HI16:
@@ -6401,7 +6378,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    fixP->fx_r_type = BFD_RELOC_HI16_PCREL;
 	  /* fall through */
 	case BFD_RELOC_HI16_PCREL:
+	case BFD_RELOC_PPC_VLE_HI16A:
+	case BFD_RELOC_PPC_VLE_HI16D:
 	  fieldval = SEX16 (PPC_HI (value));
+	  fixP->fx_no_overflow = 1;
 	  break;
 
 	case BFD_RELOC_HI16_S:
@@ -6409,7 +6389,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    fixP->fx_r_type = BFD_RELOC_HI16_S_PCREL;
 	  /* fall through */
 	case BFD_RELOC_HI16_S_PCREL:
+	case BFD_RELOC_PPC_VLE_HA16A:
+	case BFD_RELOC_PPC_VLE_HA16D:
 	  fieldval = SEX16 (PPC_HA (value));
+	  fixP->fx_no_overflow = 1;
 	  break;
 
 #ifdef OBJ_ELF
@@ -6417,24 +6400,28 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
 	  fieldval = SEX16 (PPC_HIGHER (value));
+	  fixP->fx_no_overflow = 1;
 	  break;
 
 	case BFD_RELOC_PPC64_HIGHER_S:
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
 	  fieldval = SEX16 (PPC_HIGHERA (value));
+	  fixP->fx_no_overflow = 1;
 	  break;
 
 	case BFD_RELOC_PPC64_HIGHEST:
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
 	  fieldval = SEX16 (PPC_HIGHEST (value));
+	  fixP->fx_no_overflow = 1;
 	  break;
 
 	case BFD_RELOC_PPC64_HIGHEST_S:
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
 	  fieldval = SEX16 (PPC_HIGHESTA (value));
+	  fixP->fx_no_overflow = 1;
 	  break;
 
 	  /* The following relocs can't be calculated by the assembler.
