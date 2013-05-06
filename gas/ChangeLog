@@ -1,3 +1,12 @@
+2013-05-06  Paul Brook  <paul@codesourcery.com>
+	    Catherine Moore  <clm@codesourcery.com>
+
+        gas/
+        * config/tc-mips.c (md_pcrel_from): Handle BFD_RELOC_32_PCREL.
+        (limited_pcrel_reloc_p): Likewise.
+	(md_apply_fix): Likewise.
+	(tc_gen_reloc): Likewise.
+
 2013-05-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (limited_pcrel_reloc_p): New function.

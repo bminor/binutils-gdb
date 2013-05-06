@@ -2758,10 +2758,14 @@ limited_pcrel_reloc_p (bfd_reloc_code_real_type reloc)
     case BFD_RELOC_MICROMIPS_16_PCREL_S1:
       return TRUE;
 
+    case BFD_RELOC_32_PCREL:
+      return HAVE_64BIT_ADDRESSES;
+
     default:
       return FALSE;
     }
 }
+
 /* Return true if the given relocation might need a matching %lo().
    This is only "might" because SVR4 R_MIPS_GOT16 relocations only
    need a matching %lo() when applied to local symbols.  */
@@ -15415,6 +15419,9 @@ md_pcrel_from (fixS *fixP)
       /* Return the address of the delay slot.  */
       return addr + 4;
 
+    case BFD_RELOC_32_PCREL:
+      return addr;
+
     default:
       /* We have no relocation type for PC relative MIPS16 instructions.  */
       if (fixP->fx_addsy && S_GET_SEGMENT (fixP->fx_addsy) != now_seg)
@@ -15637,7 +15644,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
   gas_assert (!fixP->fx_pcrel || fixP->fx_r_type == BFD_RELOC_16_PCREL_S2
 	      || fixP->fx_r_type == BFD_RELOC_MICROMIPS_7_PCREL_S1
 	      || fixP->fx_r_type == BFD_RELOC_MICROMIPS_10_PCREL_S1
-	      || fixP->fx_r_type == BFD_RELOC_MICROMIPS_16_PCREL_S1);
+	      || fixP->fx_r_type == BFD_RELOC_MICROMIPS_16_PCREL_S1
+	      || fixP->fx_r_type == BFD_RELOC_32_PCREL);
 
   /* Don't treat parts of a composite relocation as done.  There are two
      reasons for this:
@@ -15785,6 +15793,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 
     case BFD_RELOC_RVA:
     case BFD_RELOC_32:
+    case BFD_RELOC_32_PCREL:
     case BFD_RELOC_16:
       /* If we are deleting this reloc entry, we must fill in the
 	 value now.  This can happen if we have a .word which is not
@@ -17917,7 +17926,8 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       gas_assert (fixp->fx_r_type == BFD_RELOC_16_PCREL_S2
 		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_7_PCREL_S1
 		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_10_PCREL_S1
-		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_16_PCREL_S1);
+		  || fixp->fx_r_type == BFD_RELOC_MICROMIPS_16_PCREL_S1
+		  || fixp->fx_r_type == BFD_RELOC_32_PCREL);
 
       /* At this point, fx_addnumber is "symbol offset - pcrel address".
 	 Relocations want only the symbol offset.  */
