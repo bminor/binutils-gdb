@@ -2178,7 +2178,18 @@ ppc_linux_new_thread (struct lwp_info *lp)
       /* Copy that thread's breakpoints and watchpoints to the new thread.  */
       for (i = 0; i < max_slots_number; i++)
 	if (hw_breaks[i].hw_break)
-	  booke_insert_point (hw_breaks[i].hw_break, tid);
+	  {
+	    /* Older kernels did not make new threads inherit their parent
+	       thread's debug state, so we always clear the slot and replicate
+	       the debug state ourselves, ensuring compatibility with all
+	       kernels.  */
+
+	    /* The ppc debug resource accounting is done through "slots".
+	       Ask the kernel the deallocate this specific *point's slot.  */
+	    ptrace (PPC_PTRACE_DELHWDEBUG, tid, 0, hw_breaks[i].slot);
+
+	    booke_insert_point (hw_breaks[i].hw_break, tid);
+	  }
     }
   else
     ptrace (PTRACE_SET_DEBUGREG, tid, 0, saved_dabr_value);

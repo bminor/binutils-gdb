@@ -1,3 +1,9 @@
+2013-05-07  Luis Machado  <lgustavo@codesourcery.com>
+
+	* ppc-linux-nat.c (ppc_linux_new_thread): Clear the new thread's
+	debug state prior to replicating existing hardware watchpoints or
+	breakpoints.
+
 2013-05-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gcore.c (gcore_create_callback): Ignore sections with

@@ -1,3 +1,8 @@
+2013-05-07  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.threads/wp-replication.c: New file.
+	* gdb.threads/wp-replication.exp: New file.
+
 2013-05-06  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.xml/tdesc-regs.exp: Add case for nios2.
