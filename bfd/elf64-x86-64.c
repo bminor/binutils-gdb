@@ -2260,6 +2260,7 @@ elf_x86_64_allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h,
 					       &eh->dyn_relocs,
 					       plt_entry_size,
+					       plt_entry_size,
 					       GOT_ENTRY_SIZE);
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)

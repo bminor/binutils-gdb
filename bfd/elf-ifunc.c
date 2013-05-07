@@ -112,6 +112,7 @@ _bfd_elf_allocate_ifunc_dyn_relocs (struct bfd_link_info *info,
 				    struct elf_link_hash_entry *h,
 				    struct elf_dyn_relocs **head,
 				    unsigned int plt_entry_size,
+				    unsigned int plt_header_size,
 				    unsigned int got_entry_size)
 {
   asection *plt, *gotplt, *relplt;
@@ -193,7 +194,7 @@ keep:
       /* If this is the first .plt entry, make room for the special
 	 first entry.  */
       if (plt->size == 0)
-	plt->size += plt_entry_size;
+	plt->size += plt_header_size;
     }
   else
     {

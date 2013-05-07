@@ -1,5 +1,15 @@
 2013-05-07  Will Newton  <will.newton@linaro.org>
 
+	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Add a
+	plt_header_size argument for ports where it differs from
+	plt_entry_size.
+	* elf-bfd.h: Likewise.
+	* elf32-i386.c: Pass plt_header_size to
+	_bfd_elf_allocate_ifunc_dyn_relocs.
+	* elf64-x86-64.c: Likewise.
+
+2013-05-07  Will Newton  <will.newton@linaro.org>
+
         * elf-ifunc.c (_bfd_elf_create_ifunc_dyn_reloc): Remove unused
 	function.
 	* elf-bfd.h: Likewise.

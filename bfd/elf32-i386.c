@@ -2197,7 +2197,8 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (h->type == STT_GNU_IFUNC
       && h->def_regular)
     return _bfd_elf_allocate_ifunc_dyn_relocs (info, h, &eh->dyn_relocs,
-                                               plt_entry_size, 4);
+                                               plt_entry_size,
+					       plt_entry_size, 4);
   else if (htab->elf.dynamic_sections_created
 	   && h->plt.refcount > 0)
     {
