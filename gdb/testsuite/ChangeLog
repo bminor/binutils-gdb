@@ -1,3 +1,20 @@
+2013-05-07  Tom Tromey  <tromey@redhat.com>
+
+	* lib/selftest-support.exp: New file.
+	* gdb.gdb/complaints.exp: Load selftest-support.exp.  Use
+	do_self_tests.
+	(setup_test, find_gdb): Remove.
+	* gdb.gdb/observer.exp: Load selftest-support.exp.  Use
+	do_self_tests.
+	(setup_test, find_gdb): Remove.
+	(test_observer): Don't call setup_test.  Remove argument.
+	* gdb.gdb/selftest.exp: Load selftest-support.exp.
+	(find_gdb): Remove.
+	* gdb.gdb/complaints.exp: Load selftest-support.exp.  Use
+	do_self_tests.
+	(setup_test, find_gdb): Remove.
+	(test_with_self): Don't call setup_test.  Remove argument.
+
 2013-05-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/system-gcore.exp: Remove.

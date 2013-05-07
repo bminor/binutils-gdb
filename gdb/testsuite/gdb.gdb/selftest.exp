@@ -15,6 +15,7 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
+load_lib selftest-support.exp
 
 # are we on a target board
 if { [is_remote target] || ![isnative] } then {
@@ -470,29 +471,6 @@ proc test_with_self { executable } {
 
     # Restart gdb in case next test expects it to be started already.
     return 0
-}
-
-# Find a pathname to a file that we would execute if the shell was asked
-# to run $arg using the current PATH.
-
-proc find_gdb { arg } {
-
-    # If the arg directly specifies an existing executable file, then
-    # simply use it.
-
-    if [file executable $arg] then {
-	return $arg
-    }
-
-    set result [which $arg]
-    if [string match "/" [ string range $result 0 0 ]] then {
-	return $result
-    }
-
-    # If everything fails, just return the unqualified pathname as default
-    # and hope for best.
-
-    return $arg
 }
 
 # Run the test with self.
