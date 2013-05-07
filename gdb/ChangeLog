@@ -1,3 +1,8 @@
+2013-05-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gcore.c (gcore_create_callback): Ignore sections with
+	separate_debug_objfile_backlink != NULL.
+
 2013-05-06  Sandra Loosemore  <sandra@codesourcery.com>
 	    Andrew Jenner  <andrew@codesourcery.com>
 	    Chung-Lin Tang  <cltang@codesourcery.com>

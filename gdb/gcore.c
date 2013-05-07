@@ -428,8 +428,9 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size, int read,
 
 	     This BFD was synthesized from reading target memory,
 	     we don't want to omit that.  */
-	  if (((vaddr >= start && vaddr + size <= end)
-	       || (start >= vaddr && end <= vaddr + size))
+	  if (objfile->separate_debug_objfile_backlink == NULL
+	      && ((vaddr >= start && vaddr + size <= end)
+	          || (start >= vaddr && end <= vaddr + size))
 	      && !(bfd_get_file_flags (abfd) & BFD_IN_MEMORY))
 	    {
 	      flags &= ~(SEC_LOAD | SEC_HAS_CONTENTS);
