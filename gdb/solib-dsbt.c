@@ -408,7 +408,7 @@ fetch_loadmap (CORE_ADDR ldmaddr)
 }
 
 static void dsbt_relocate_main_executable (void);
-static int enable_break2 (void);
+static int enable_break (void);
 
 /* Scan for DYNTAG in .dynamic section of ABFD. If DYNTAG is found 1 is
    returned and the corresponding PTR is set.  */
@@ -754,8 +754,6 @@ dsbt_current_sos (void)
 					  sizeof (lm_buf.l_next), byte_order);
     }
 
-  enable_break2 ();
-
   return sos_head;
 }
 
@@ -795,36 +793,24 @@ cmp_name (asymbol *sym, void *data)
    for arranging for the inferior to hit a breakpoint after mapping in
    the shared libraries.  This function enables that breakpoint.
 
-   On the TIC6X, using the shared library (DSBT), the symbol
-   _dl_debug_addr points to the r_debug struct which contains
-   a field called r_brk.  r_brk is the address of the function
-   descriptor upon which a breakpoint must be placed.  Being a
-   function descriptor, we must extract the entry point in order
-   to set the breakpoint.
-
-   Our strategy will be to get the .interp section from the
-   executable.  This section will provide us with the name of the
-   interpreter.  We'll open the interpreter and then look up
-   the address of _dl_debug_addr.  We then relocate this address
-   using the interpreter's loadmap.  Once the relocated address
-   is known, we fetch the value (address) corresponding to r_brk
-   and then use that value to fetch the entry point of the function
-   we're interested in.  */
+   On the TIC6X, using the shared library (DSBT), GDB can try to place
+   a breakpoint on '_dl_debug_state' to monitor the shared library
+   event.  */
 
 static int
-enable_break2 (void)
+enable_break (void)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
-  int success = 0;
-  char **bkpt_namep;
   asection *interp_sect;
-  struct dsbt_info *info = get_dsbt_info ();
+  struct dsbt_info *info;
 
   if (exec_bfd == NULL)
     return 0;
 
   if (!target_has_execution)
     return 0;
+
+  info = get_dsbt_info ();
 
   if (info->enable_break2_done)
     return 1;
@@ -846,6 +832,7 @@ enable_break2 (void)
       gdb_byte addr_buf[TIC6X_PTR_SIZE];
       struct int_elf32_dsbt_loadmap *ldm;
       volatile struct gdb_exception ex;
+      int ret;
 
       /* Read the contents of the .interp section into a local buffer;
 	 the contents specify the dynamic linker this program uses.  */
@@ -895,64 +882,33 @@ enable_break2 (void)
 	    info->interp_plt_sect_low + bfd_section_size (tmp_bfd, interp_sect);
 	}
 
-      addr = gdb_bfd_lookup_symbol (tmp_bfd, cmp_name, "_dl_debug_addr");
-      if (addr == 0)
-	{
-	  warning (_("Could not find symbol _dl_debug_addr in dynamic linker"));
-	  enable_break_failure_warning ();
-	  gdb_bfd_unref (tmp_bfd);
-	  return 0;
-	}
-
-      if (solib_dsbt_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: _dl_debug_addr (prior to relocation) = %s\n",
-			    hex_string_custom (addr, 8));
-
-      addr += displacement_from_map (ldm, addr);
-
-      if (solib_dsbt_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: _dl_debug_addr (after relocation) = %s\n",
-			    hex_string_custom (addr, 8));
-
-      /* Fetch the address of the r_debug struct.  */
-      if (target_read_memory (addr, addr_buf, sizeof addr_buf) != 0)
-	{
-	  warning (_("Unable to fetch contents of _dl_debug_addr "
-		     "(at address %s) from dynamic linker"),
-		   hex_string_custom (addr, 8));
-	}
-      addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
-
-      if (solib_dsbt_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: _dl_debug_addr[0..3] = %s\n",
-			    hex_string_custom (addr, 8));
-
-      /* If it's zero, then the ldso hasn't initialized yet, and so
-	 there are no shared libs yet loaded.  */
-      if (addr == 0)
+      addr = gdb_bfd_lookup_symbol (tmp_bfd, cmp_name, "_dl_debug_state");
+      if (addr != 0)
 	{
 	  if (solib_dsbt_debug)
 	    fprintf_unfiltered (gdb_stdlog,
-				"enable_break: ldso not yet initialized\n");
-	  /* Do not warn, but mark to run again.  */
-	  return 0;
-	}
+				"enable_break: _dl_debug_state (prior to relocation) = %s\n",
+				hex_string_custom (addr, 8));
+	  addr += displacement_from_map (ldm, addr);
 
-      /* Fetch the r_brk field.  It's 8 bytes from the start of
-	 _dl_debug_addr.  */
-      if (target_read_memory (addr + 8, addr_buf, sizeof addr_buf) != 0)
-	{
-	  warning (_("Unable to fetch _dl_debug_addr->r_brk "
-		     "(at address %s) from dynamic linker"),
-		   hex_string_custom (addr + 8, 8));
-	  enable_break_failure_warning ();
-	  gdb_bfd_unref (tmp_bfd);
-	  return 0;
+	  if (solib_dsbt_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"enable_break: _dl_debug_state (after relocation) = %s\n",
+				hex_string_custom (addr, 8));
+
+	  /* Now (finally!) create the solib breakpoint.  */
+	  create_solib_event_breakpoint (target_gdbarch (), addr);
+
+	  info->enable_break2_done = 1;
+	  ret = 1;
 	}
-      addr = extract_unsigned_integer (addr_buf, sizeof addr_buf, byte_order);
+      else
+	{
+	  if (solib_dsbt_debug)
+	    fprintf_unfiltered (gdb_stdlog,
+				"enable_break: _dl_debug_state is not found\n");
+	  ret = 0;
+	}
 
       /* We're done with the temporary bfd.  */
       gdb_bfd_unref (tmp_bfd);
@@ -960,16 +916,7 @@ enable_break2 (void)
       /* We're also done with the loadmap.  */
       xfree (ldm);
 
-      /* Remove all the solib event breakpoints.  Their addresses
-	 may have changed since the last time we ran the program.  */
-      remove_solib_event_breakpoints ();
-
-      /* Now (finally!) create the solib breakpoint.  */
-      create_solib_event_breakpoint (target_gdbarch (), addr);
-
-      info->enable_break2_done = 1;
-
-      return 1;
+      return ret;
     }
 
   /* Tell the user we couldn't set a dynamic linker breakpoint.  */
@@ -977,44 +924,6 @@ enable_break2 (void)
 
   /* Failure return.  */
   return 0;
-}
-
-static int
-enable_break (void)
-{
-  asection *interp_sect;
-  struct minimal_symbol *start;
-
-  /* Check for the presence of a .interp section.  If there is no
-     such section, the executable is statically linked.  */
-
-  interp_sect = bfd_get_section_by_name (exec_bfd, ".interp");
-
-  if (interp_sect == NULL)
-    {
-      if (solib_dsbt_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: No .interp section found.\n");
-      return 0;
-    }
-
-  start = lookup_minimal_symbol ("_start", NULL, symfile_objfile);
-  if (start == NULL)
-    {
-      if (solib_dsbt_debug)
-	fprintf_unfiltered (gdb_stdlog,
-			    "enable_break: symbol _start is not found.\n");
-      return 0;
-    }
-
-  create_solib_event_breakpoint (target_gdbarch (),
-				 SYMBOL_VALUE_ADDRESS (start));
-
-  if (solib_dsbt_debug)
-    fprintf_unfiltered (gdb_stdlog,
-			"enable_break: solib event breakpoint placed at : %s\n",
-			hex_string_custom (SYMBOL_VALUE_ADDRESS (start), 8));
-  return 1;
 }
 
 /* Once the symbols from a shared object have been loaded in the usual

@@ -1,3 +1,11 @@
+2013-05-07  Yao Qi  <yao@codesourcery.com>
+
+	* solib-dsbt.c (enable_break): Declare.
+	(dsbt_current_sos): Remove call to enable_break2.
+	(enable_break2): Rename to enable_break.  Set solib breakpoint
+	on '_dl_debug_state'.
+	(enable_break): Remove.
+
 2013-05-07  Luis Machado  <lgustavo@codesourcery.com>
 
 	* ppc-linux-nat.c (ppc_linux_new_thread): Clear the new thread's
