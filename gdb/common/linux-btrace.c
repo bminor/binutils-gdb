@@ -30,6 +30,7 @@
 #include "gdb_assert.h"
 #include "regcache.h"
 #include "gdbthread.h"
+#include "gdb_wait.h"
 
 #if HAVE_LINUX_PERF_EVENT_H
 
@@ -42,7 +43,6 @@
 #include <sys/user.h>
 #include <sys/ptrace.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <signal.h>
 
 /* A branch trace record in perf_event.  */
