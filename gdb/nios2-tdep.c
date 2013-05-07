@@ -150,7 +150,7 @@ nios2_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dw_reg)
 {
   if (dw_reg < 0 || dw_reg > NIOS2_NUM_REGS)
     {
-      warning (_("Dwarf-2 uses unmapped register #%d\n"), dw_reg);
+      warning (_("Dwarf-2 uses unmapped register #%d"), dw_reg);
       return dw_reg;
     }
 

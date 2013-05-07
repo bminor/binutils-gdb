@@ -1,5 +1,10 @@
 2013-05-07  Pierre Muller  <muller@sourceware.org>
 
+	* nios2-tdep.c (nios2_dwarf_reg_to_regnum): ARI fix: remove
+	trailing new line from warning message.
+
+2013-05-07  Pierre Muller  <muller@sourceware.org>
+
 	* contrib/ari/gdb_ari.sh (SOLIB_ADD, SOLIB_CREATE_INFERIOR_HOOK)
 	(PC_SOLIB): Change type from ari_deprecate to ari_regression.
 
