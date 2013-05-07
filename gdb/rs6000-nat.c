@@ -728,7 +728,7 @@ rs6000_core_ldinfo (bfd *abfd)
 
   ldinfo_sec = bfd_get_section_by_name (abfd, ".ldinfo");
   if (ldinfo_sec == NULL)
-    error (_("cannot find .ldinfo section from core file: %s\n"),
+    error (_("cannot find .ldinfo section from core file: %s"),
 	   bfd_errmsg (bfd_get_error ()));
   ldinfo_size = bfd_get_section_size (ldinfo_sec);
 
@@ -737,7 +737,7 @@ rs6000_core_ldinfo (bfd *abfd)
 
   if (! bfd_get_section_contents (abfd, ldinfo_sec,
 				  ldinfo_buf, 0, ldinfo_size))
-    error (_("unable to read .ldinfo section from core file: %s\n"),
+    error (_("unable to read .ldinfo section from core file: %s"),
 	   bfd_errmsg (bfd_get_error ()));
 
   discard_cleanups (cleanup);
