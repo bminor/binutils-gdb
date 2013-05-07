@@ -1,3 +1,12 @@
+2013-05-06  Sandra Loosemore  <sandra@codesourcery.com>
+	    Andrew Jenner  <andrew@codesourcery.com>
+
+	* Makefile.in (SFILES): Add linux-nios2-low.c.
+	(clean): Add action to delete nios2-linux.c.
+	(nios2-linux.c): New rule.
+	* configure.srv: Add nios2*-*-linux*.
+	* linux-nios2-low.c: New.
+
 2013-05-03  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* tracepoint.c (cmd_qtinit): Call 'stop_tracing'.
