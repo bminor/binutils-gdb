@@ -74,6 +74,7 @@ set print_prefix ".\[0123456789\]* = "
 set pre_corefile_backtrace [capture_command_output "backtrace" ""]
 set pre_corefile_regs [capture_command_output "info registers" ""]
 set pre_corefile_allregs [capture_command_output "info all-reg" ""]
+set pre_corefile_sysregs [capture_command_output "info reg system" ""]
 set pre_corefile_static_array \
 	[capture_command_output "print static_array" "$print_prefix"]
 set pre_corefile_uninit_array \
@@ -127,6 +128,13 @@ if ![string compare $pre_corefile_allregs $post_corefile_allregs] then {
     pass "corefile restored all registers"
 } else {
     fail "corefile restored all registers"
+}
+
+set post_corefile_sysregs [capture_command_output "info reg system" ""]
+if ![string compare $pre_corefile_sysregs $post_corefile_sysregs] then {
+    pass "corefile restored system registers"
+} else {
+    fail "corefile restored system registers"
 }
 
 set post_corefile_extern_array \

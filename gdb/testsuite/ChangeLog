@@ -1,3 +1,9 @@
+2013-05-07  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/system-gcore.exp: Remove.
+	* gdb.arch/gcore.c: Remove.
+	* gdb.base/gcore.exp: Add "info reg system".
+
 2013-05-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/15413:
