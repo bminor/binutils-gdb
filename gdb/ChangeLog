@@ -1,3 +1,24 @@
+2013-05-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* rs6000-nat.c (rs6000_core_ldinfo): Remove '\n' at end of
+	error message (ARI fix).
+
+2013-05-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* features/library-list-aix.dtd: Replace library-list by
+	library-list-aix.
+	* rs6000-nat.c: Replace library-list by library-list-aix
+	throughout.
+	* solib-aix.c: Likewise.
+
+2013-05-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.h (enum target_object) [TARGET_OBJECT_LIBRARIES_AIX]:
+	Renames TARGET_OBJECT_AIX_LIBRARIES.
+	* rs6000-nat.c: Replace TARGET_OBJECT_AIX_LIBRARIES with
+	TARGET_OBJECT_LIBRARIES_AIX throughout.
+	* solib-aix.c: Likwise.
+
 2013-05-07  Yao Qi  <yao@codesourcery.com>
 
 	* solib-dsbt.c (struct dsbt_info) <enable_break2_done>: Remove.
