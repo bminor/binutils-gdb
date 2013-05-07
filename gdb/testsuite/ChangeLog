@@ -1,3 +1,7 @@
+2013-05-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.xml/tdesc-regs.exp: Add case for nios2.
+
 2013-05-06  Doug Evans  <dje@google.com>
 
 	* gdb.base/solib-search-lib1.c: New file.
