@@ -424,7 +424,7 @@ rs6000_xfer_partial (struct target_ops *ops, enum target_object object,
 
   switch (object)
     {
-    case TARGET_OBJECT_AIX_LIBRARIES:
+    case TARGET_OBJECT_LIBRARIES_AIX:
       return rs6000_xfer_shared_libraries (ops, object, annex,
 					   readbuf, writebuf,
 					   offset, len);
@@ -745,7 +745,7 @@ rs6000_core_ldinfo (bfd *abfd)
 }
 
 /* Append to OBJSTACK an XML string description of the shared library
-   corresponding to LDI, following the TARGET_OBJECT_AIX_LIBRARIES
+   corresponding to LDI, following the TARGET_OBJECT_LIBRARIES_AIX
    format.  */
 
 static void
@@ -811,7 +811,7 @@ rs6000_xfer_shared_library (LdInfo *ldi, struct obstack *obstack)
 }
 
 /* Implement the to_xfer_partial target_ops method for
-   TARGET_OBJECT_AIX_LIBRARIES objects.  */
+   TARGET_OBJECT_LIBRARIES_AIX objects.  */
 
 static LONGEST
 rs6000_xfer_shared_libraries

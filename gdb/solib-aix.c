@@ -296,11 +296,11 @@ solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
     return data->library_list;
 
   library_document = target_read_stralloc (&current_target,
-                                           TARGET_OBJECT_AIX_LIBRARIES,
+                                           TARGET_OBJECT_LIBRARIES_AIX,
                                            NULL);
   if (library_document == NULL && warning_msg != NULL)
     {
-      warning (_("%s (failed to read TARGET_OBJECT_AIX_LIBRARIES)"),
+      warning (_("%s (failed to read TARGET_OBJECT_LIBRARIES_AIX)"),
 	       warning_msg);
       return NULL;
     }
@@ -308,7 +308,7 @@ solib_aix_get_library_list (struct inferior *inf, const char *warning_msg)
 
   if (solib_aix_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"DEBUG: TARGET_OBJECT_AIX_LIBRARIES = \n%s\n",
+			"DEBUG: TARGET_OBJECT_LIBRARIES_AIX = \n%s\n",
 			library_document);
 
   data->library_list = solib_aix_parse_libraries (library_document);
