@@ -164,6 +164,7 @@ decrement_reading_symtab (void *dummy)
 
 /* Increment currently_reading_symtab and return a cleanup that can be
    used to decrement it.  */
+
 struct cleanup *
 increment_reading_symtab (void)
 {
@@ -305,8 +306,8 @@ free_section_addr_info (struct section_addr_info *sap)
   xfree (sap);
 }
 
-
 /* Initialize OBJFILE's sect_index_* members.  */
+
 static void
 init_objfile_sect_indices (struct objfile *objfile)
 {
@@ -757,7 +758,6 @@ default_symfile_offsets (struct objfile *objfile,
      .rodata sections.  */
   init_objfile_sect_indices (objfile);
 }
-
 
 /* Divide the file into segments, which are individual relocatable units.
    This is the default version of the sym_fns.sym_segments function for
@@ -1230,6 +1230,7 @@ symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
 
    See symbol_file_add_with_addrs_or_offsets's comments for
    details.  */
+
 struct objfile *
 symbol_file_add_from_bfd (bfd *abfd, int add_flags,
                           struct section_addr_info *addrs,
@@ -1239,10 +1240,10 @@ symbol_file_add_from_bfd (bfd *abfd, int add_flags,
                                                 flags, parent);
 }
 
-
 /* Process a symbol file, as either the main file or as a dynamically
    loaded file.  See symbol_file_add_with_addrs_or_offsets's comments
    for details.  */
+
 struct objfile *
 symbol_file_add (char *name, int add_flags, struct section_addr_info *addrs,
 		 int flags)
@@ -1255,7 +1256,6 @@ symbol_file_add (char *name, int add_flags, struct section_addr_info *addrs,
   do_cleanups (cleanup);
   return objf;
 }
-
 
 /* Call symbol_file_add() with default values and update whatever is
    affected by the loading of a new main().
@@ -1578,7 +1578,6 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
   return debugfile;
 }
 
-
 /* This is the symbol-file command.  Read the file, analyze its
    symbols, and add a struct symtab to a symtab list.  The syntax of
    the command is rather bizarre:
@@ -1685,7 +1684,6 @@ gdb_bfd_open_maybe_remote (const char *name)
 
   return result;
 }
-
 
 /* Open the file specified by NAME and hand it off to BFD for
    preliminary analysis.  Return a newly initialized bfd *, which
@@ -2368,6 +2366,7 @@ typedef struct objfile *objfilep;
 DEF_VEC_P (objfilep);
 
 /* Re-read symbols if a symbol-file has changed.  */
+
 void
 reread_symbols (void)
 {
@@ -2617,7 +2616,6 @@ reread_symbols (void)
   do_cleanups (all_cleanups);
 }
 
-
 
 typedef struct
 {
@@ -3055,9 +3053,9 @@ pc_in_mapped_range (CORE_ADDR pc, struct obj_section *section)
   return 0;
 }
 
-
 /* Return true if the mapped ranges of sections A and B overlap, false
    otherwise.  */
+
 static int
 sections_overlap (struct obj_section *a, struct obj_section *b)
 {
@@ -3106,7 +3104,6 @@ overlay_mapped_address (CORE_ADDR pc, struct obj_section *section)
 
   return pc;
 }
-
 
 /* Function: symbol_overlayed_address
    Return one of two addresses (relative to the VMA or to the LMA),
@@ -3361,7 +3358,6 @@ overlay_command (char *args, int from_tty)
   help_list (overlaylist, "overlay ", -1, gdb_stdout);
 }
 
-
 /* Target Overlays for the "Simplest" overlay manager:
 
    This is GDB's default target overlay layer.  It works with the
@@ -3405,6 +3401,7 @@ enum ovly_index
   };
 
 /* Throw away the cached copy of _ovly_table.  */
+
 static void
 simple_free_overlay_table (void)
 {
@@ -3417,6 +3414,7 @@ simple_free_overlay_table (void)
 
 /* Read an array of ints of size SIZE from the target into a local buffer.
    Convert to host order.  int LEN is number of ints.  */
+
 static void
 read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr,
 			int len, int size, enum bfd_endian byte_order)
@@ -3432,6 +3430,7 @@ read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr,
 
 /* Find and grab a copy of the target _ovly_table
    (and _novlys, which is needed for the table's size).  */
+
 static int
 simple_read_overlay_table (void)
 {
@@ -3592,7 +3591,6 @@ symfile_dummy_outputs (bfd *abfd, asection *sectp, void *dummy)
 
 /* Default implementation for sym_relocate.  */
 
-
 bfd_byte *
 default_symfile_relocate (struct objfile *objfile, asection *sectp,
                           bfd_byte *buf)
@@ -3656,7 +3654,6 @@ free_symfile_segment_data (struct symfile_segment_data *data)
   xfree (data);
 }
 
-
 /* Given:
    - DATA, containing segment addresses from the object file ABFD, and
      the mapping from ABFD's sections onto the segments that own them,
@@ -3671,6 +3668,7 @@ free_symfile_segment_data (struct symfile_segment_data *data)
    If there are more entries, then ignore the extra.  The target may
    not be able to distinguish between an empty data segment and a
    missing data segment; a missing text segment is less plausible.  */
+
 int
 symfile_map_offsets_to_segments (bfd *abfd,
 				 const struct symfile_segment_data *data,

@@ -1,5 +1,7 @@
 2013-05-06  Doug Evans  <dje@google.com>
 
+	* symfile.c: Whitespace cleanup.
+
 	* solist.h (struct target_so_ops): New member clear_so.
 	* solib-svr4.c (svr4_clear_so): New function.
 	(_initialize_svr4_solib): Set svr4_so_ops.clear_so.
