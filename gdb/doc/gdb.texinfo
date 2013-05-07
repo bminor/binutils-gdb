@@ -20832,6 +20832,7 @@ all uses of @value{GDBN} with the architecture, both native and cross.
 * HPPA::               HP PA architecture
 * SPU::                Cell Broadband Engine SPU architecture
 * PowerPC::
+* Nios II::
 @end menu
 
 @node AArch64
@@ -21115,6 +21116,24 @@ by joining the even/odd register pairs @code{f0} and @code{f1} for @code{$dl0},
 For POWER7 processors, @value{GDBN} provides a set of pseudo-registers, the 64-bit
 wide Extended Floating Point Registers (@samp{f32} through @samp{f63}).
 
+@node Nios II
+@subsection Nios II
+@cindex Nios II architecture
+
+When @value{GDBN} is debugging the Nios II architecture,
+it provides the following special commands:
+
+@table @code
+
+@item set debug nios2
+@kindex set debug nios2
+This command turns on and off debugging messages for the Nios II
+target code in @value{GDBN}.
+
+@item show debug nios2
+@kindex show debug nios2
+Show the current setting of Nios II debugging messages.
+@end table
 
 @node Controlling GDB
 @chapter Controlling @value{GDBN}
@@ -41225,6 +41244,7 @@ registers using the capitalization used in the description.
 * i386 Features::
 * MIPS Features::
 * M68K Features::
+* Nios II Features::
 * PowerPC Features::
 * TIC6x Features::
 @end menu
@@ -41373,6 +41393,16 @@ This feature is optional.  If present, it should contain registers
 @samp{fp0} through @samp{fp7}, @samp{fpcontrol}, @samp{fpstatus} and
 @samp{fpiaddr}.
 @end table
+
+@node Nios II Features
+@subsection Nios II Features
+@cindex target descriptions, Nios II features
+
+The @samp{org.gnu.gdb.nios2.cpu} feature is required for Nios II
+targets.  It should contain the 32 core registers (@samp{zero},
+@samp{at}, @samp{r2} through @samp{r23}, @samp{et} through @samp{ra}),
+@samp{pc}, and the 16 control registers (@samp{status} through
+@samp{mpuacc}).
 
 @node PowerPC Features
 @subsection PowerPC Features

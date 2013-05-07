@@ -1,3 +1,8 @@
+2013-05-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.texinfo (Nios II): New section.
+	(Nios II Features): New section.
+
 2013-05-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbint.texinfo (Algorithms): Remove entries documenting

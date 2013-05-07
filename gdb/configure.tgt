@@ -396,6 +396,17 @@ mt-*-*)
 	gdb_target_obs="mt-tdep.o"
 	;;
 
+nios2*-*-linux*)
+	# Target: Altera Nios II running Linux
+	gdb_target_obs="nios2-tdep.o nios2-linux-tdep.o solib-svr4.o \
+			symfile-mem.o glibc-tdep.o linux-tdep.o"
+	;;
+
+nios2*-*-*)
+	# Target: Altera Nios II bare-metal
+	gdb_target_obs="nios2-tdep.o"
+	;;
+
 powerpc*-*-freebsd*)
 	# Target: FreeBSD/powerpc
 	gdb_target_obs="rs6000-tdep.o ppc-sysv-tdep.o ppc64-tdep.o \

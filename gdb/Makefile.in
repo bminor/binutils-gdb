@@ -571,6 +571,7 @@ ALL_TARGET_OBS = \
 	mn10300-linux-tdep.o mn10300-tdep.o \
 	moxie-tdep.o \
 	mt-tdep.o \
+	nios2-tdep.o nios2-linux-tdep.o \
 	nto-tdep.o \
 	ppc-linux-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o ppc-sysv-tdep.o \
 	ppc64-tdep.o rl78-tdep.o \
@@ -834,7 +835,7 @@ psymtab.h psympriv.h progspace.h bfin-tdep.h ia64-hpux-tdep.h \
 amd64-darwin-tdep.h charset-list.h \
 config/djgpp/langinfo.h config/djgpp/nl_types.h darwin-nat.h \
 dicos-tdep.h filesystem.h gcore.h gdb_wchar.h hppabsd-tdep.h \
-i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h \
+i386-darwin-tdep.h i386-nat.h linux-record.h moxie-tdep.h nios2-tdep.h \
 osdata.h procfs.h python/py-event.h python/py-events.h python/py-stopevent.h \
 python/python-internal.h python/python.h ravenscar-thread.h record.h \
 record-full.h solib-aix.h \
@@ -1516,6 +1517,7 @@ ALLDEPFILES = \
 	mips-tdep.c \
 	mipsnbsd-nat.c mipsnbsd-tdep.c \
 	mips64obsd-nat.c mips64obsd-tdep.c \
+	nios2-tdep.c nios2-linux-tdep.c \
 	nbsd-nat.c nbsd-tdep.c obsd-tdep.c \
 	solib-osf.c \
 	somread.c solib-som.c \
