@@ -1,3 +1,9 @@
+2013-05-07  Will Newton  <will.newton@linaro.org>
+
+        * elf-ifunc.c (_bfd_elf_create_ifunc_dyn_reloc): Remove unused
+	function.
+	* elf-bfd.h: Likewise.
+
 2013-05-06  Paul Brook  <paul@codesourcery.com>
 
         * elf64-mips.c (elf_mips_gnu_pcrel32): New.

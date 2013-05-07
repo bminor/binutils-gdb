@@ -104,51 +104,6 @@ _bfd_elf_create_ifunc_sections (bfd *abfd, struct bfd_link_info *info)
   return TRUE;
 }
 
-/* For a STT_GNU_IFUNC symbol, create a dynamic reloc section, SRELOC,
-   for the input section, SEC, and append this reloc to HEAD.  */
-
-asection *
-_bfd_elf_create_ifunc_dyn_reloc (bfd *abfd, struct bfd_link_info *info,
-				 asection *sec, asection *sreloc,
-				 struct elf_dyn_relocs **head)
-{
-  struct elf_dyn_relocs *p;
-  struct elf_link_hash_table *htab = elf_hash_table (info);
-
-  if (sreloc == NULL)
-    {
-      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-
-      if (htab->dynobj == NULL)
-	htab->dynobj = abfd;
-
-      sreloc = _bfd_elf_make_dynamic_reloc_section (sec, htab->dynobj,
-						    bed->s->log_file_align,
-						    abfd,
-						    bed->rela_plts_and_copies_p);
-      if (sreloc == NULL)
-	return NULL;
-    }
-
-  p = *head;
-  if (p == NULL || p->sec != sec)
-    {
-      bfd_size_type amt = sizeof *p;
-
-      p = ((struct elf_dyn_relocs *) bfd_alloc (htab->dynobj, amt));
-      if (p == NULL)
-	return NULL;
-      p->next = *head;
-      *head = p;
-      p->sec = sec;
-      p->count = 0;
-      p->pc_count = 0;
-    }
-  p->count += 1;
-
-  return sreloc;
-}
-
 /* Allocate space in .plt, .got and associated reloc sections for
    dynamic relocs against a STT_GNU_IFUNC symbol definition.  */
 

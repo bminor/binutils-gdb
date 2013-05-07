@@ -2378,9 +2378,6 @@ struct elf_dyn_relocs
 
 extern bfd_boolean _bfd_elf_create_ifunc_sections
   (bfd *, struct bfd_link_info *);
-extern asection * _bfd_elf_create_ifunc_dyn_reloc
-  (bfd *, struct bfd_link_info *, asection *sec, asection *sreloc,
-   struct elf_dyn_relocs **);
 extern bfd_boolean _bfd_elf_allocate_ifunc_dyn_relocs
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_dyn_relocs **, unsigned int, unsigned int);
