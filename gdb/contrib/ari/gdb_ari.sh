@@ -756,7 +756,7 @@ Replace ADD_SHARED_SYMBOL_FILES with nothing, not needed?"
 
 BEGIN { doc["SOLIB_ADD"] = "\
 Replace SOLIB_ADD with nothing, not needed?"
-    category["SOLIB_ADD"] = ari_deprecate
+    category["SOLIB_ADD"] = ari_regression
 }
 /(^|[^_[:alnum:]])SOLIB_ADD([^_[:alnum:]]|$)/ {
     fail("SOLIB_ADD")
@@ -764,7 +764,7 @@ Replace SOLIB_ADD with nothing, not needed?"
 
 BEGIN { doc["SOLIB_CREATE_INFERIOR_HOOK"] = "\
 Replace SOLIB_CREATE_INFERIOR_HOOK with nothing, not needed?"
-    category["SOLIB_CREATE_INFERIOR_HOOK"] = ari_deprecate
+    category["SOLIB_CREATE_INFERIOR_HOOK"] = ari_regression
 }
 /(^|[^_[:alnum:]])SOLIB_CREATE_INFERIOR_HOOK([^_[:alnum:]]|$)/ {
     fail("SOLIB_CREATE_INFERIOR_HOOK")
@@ -796,7 +796,7 @@ Replace PROCESS_LINENUMBER_HOOK with nothing, not needed?"
 
 BEGIN { doc["PC_SOLIB"] = "\
 Replace PC_SOLIB with nothing, not needed?"
-    category["PC_SOLIB"] = ari_deprecate
+    category["PC_SOLIB"] = ari_regression
 }
 /(^|[^_[:alnum:]])PC_SOLIB([^_[:alnum:]]|$)/ {
     fail("PC_SOLIB")

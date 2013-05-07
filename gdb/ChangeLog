@@ -1,3 +1,8 @@
+2013-05-07  Pierre Muller  <muller@sourceware.org>
+
+	* contrib/ari/gdb_ari.sh (SOLIB_ADD, SOLIB_CREATE_INFERIOR_HOOK)
+	(PC_SOLIB): Change type from ari_deprecate to ari_regression.
+
 2013-05-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* rs6000-nat.c (rs6000_core_ldinfo): Remove '\n' at end of
