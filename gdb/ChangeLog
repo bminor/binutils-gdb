@@ -1,3 +1,10 @@
+2013-05-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/15413:
+	* breakpoint.c (condition_completer): Simplify the code to
+	disconsider multiple locations of breakpoints when completing the
+	"condition" command.
+
 2013-05-07  Pierre Muller  <muller@sourceware.org>
 
 	* common/linux-btrace.c: ARI fix: Include "gdb_wait.h"

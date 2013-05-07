@@ -69,6 +69,10 @@ gdb_test "break dupname:label" \
     "Breakpoint $decimal at $hex: dupname:label. \[(\]2 locations\[)\]" \
     "multi-location break using duplicate function name and label"
 
+# Testing if the "condition" command completes only the breakpoints,
+# not the locations.
+gdb_test "complete condition " "condition $decimal\r\ncondition $decimal\r\ncondition $decimal"
+
 gdb_test_no_output "set breakpoint pending off" \
     "disable pending breakpoints for linespec tests"
 

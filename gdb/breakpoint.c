@@ -1012,27 +1012,14 @@ condition_completer (struct cmd_list_element *cmd,
       len = strlen (text);
 
       ALL_BREAKPOINTS (b)
-      {
-	int single = b->loc->next == NULL;
-	struct bp_location *loc;
-	int count = 1;
+	{
+	  char number[50];
 
-	for (loc = b->loc; loc; loc = loc->next)
-	  {
-	    char location[50];
+	  xsnprintf (number, sizeof (number), "%d", b->number);
 
-	    if (single)
-	      xsnprintf (location, sizeof (location), "%d", b->number);
-	    else
-	      xsnprintf (location, sizeof (location),  "%d.%d", b->number,
-			 count);
-
-	    if (strncmp (location, text, len) == 0)
-	      VEC_safe_push (char_ptr, result, xstrdup (location));
-
-	    ++count;
-	  }
-      }
+	  if (strncmp (number, text, len) == 0)
+	    VEC_safe_push (char_ptr, result, xstrdup (number));
+	}
 
       return result;
     }

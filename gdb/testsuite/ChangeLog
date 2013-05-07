@@ -1,3 +1,11 @@
+2013-05-07  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR breakpoints/15413:
+	* gdb.base/pending.exp: Add test for completion of the "condition"
+	command for pending breakpoints.
+	* gdb.linespec/linespec.ex: Add test for completion of the
+	"condition" command when dealing with multiple locations.
+
 2013-05-07  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.threads/wp-replication.c: New file.
