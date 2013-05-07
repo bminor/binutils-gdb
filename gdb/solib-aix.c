@@ -179,7 +179,7 @@ library_list_start_library (struct gdb_xml_parser *parser,
   VEC_safe_push (lm_info_p, *list, item);
 }
 
-/* Handle the start of a <library-list> element.  */
+/* Handle the start of a <library-list-aix> element.  */
 
 static void
 library_list_start_list (struct gdb_xml_parser *parser,
@@ -213,7 +213,7 @@ solib_aix_free_library_list (void *p)
 }
 
 /* The allowed elements and attributes for an AIX library list
-   described in XML format.  The root element is a <library-list>.  */
+   described in XML format.  The root element is a <library-list-aix>.  */
 
 static const struct gdb_xml_attribute library_attributes[] =
 {
@@ -242,7 +242,7 @@ static const struct gdb_xml_attribute library_list_attributes[] =
 
 static const struct gdb_xml_element library_list_elements[] =
 {
-  { "library-list", library_list_attributes, library_list_children,
+  { "library-list-aix", library_list_attributes, library_list_children,
     GDB_XML_EF_NONE, library_list_start_list, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };

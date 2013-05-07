@@ -841,7 +841,7 @@ rs6000_xfer_shared_libraries
   /* Convert the raw data into an XML representation.  */
 
   obstack_init (&obstack);
-  obstack_grow_str (&obstack, "<library-list version=\"1.0\">\n");
+  obstack_grow_str (&obstack, "<library-list-aix version=\"1.0\">\n");
 
   ldi = ldi_data;
   while (1)
@@ -860,7 +860,7 @@ rs6000_xfer_shared_libraries
 
   xfree (ldi_data);
 
-  obstack_grow_str0 (&obstack, "</library-list>\n");
+  obstack_grow_str0 (&obstack, "</library-list-aix>\n");
 
   buf = obstack_finish (&obstack);
   len_avail = strlen (buf);
