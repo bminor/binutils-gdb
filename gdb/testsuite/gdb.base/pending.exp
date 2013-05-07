@@ -55,6 +55,9 @@ gdb_test_multiple "break pendfunc1" "set pending breakpoint" {
      }
 }
 
+# Complete the condition (PR 15413).
+gdb_test "complete condition " "condition 1"
+
 gdb_test "info break" \
     "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendfunc1.*" \
