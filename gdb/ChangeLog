@@ -1,5 +1,10 @@
 2013-05-07  Yao Qi  <yao@codesourcery.com>
 
+	* solib-dsbt.c (struct dsbt_info) <enable_break2_done>: Remove.
+	(get_dsbt_info, enable_break, dsbt_clear_solib): Update.
+
+2013-05-07  Yao Qi  <yao@codesourcery.com>
+
 	* solib-dsbt.c (enable_break): Declare.
 	(dsbt_current_sos): Remove call to enable_break2.
 	(enable_break2): Rename to enable_break.  Set solib breakpoint

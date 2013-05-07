@@ -154,8 +154,6 @@ struct dsbt_info
   /* Link map address for main module.  */
   CORE_ADDR main_lm_addr;
 
-  int enable_break2_done;
-
   CORE_ADDR interp_text_sect_low;
   CORE_ADDR interp_text_sect_high;
   CORE_ADDR interp_plt_sect_low;
@@ -189,7 +187,6 @@ get_dsbt_info (void)
   info = XZALLOC (struct dsbt_info);
   set_program_space_data (current_program_space, solib_dsbt_pspace_data, info);
 
-  info->enable_break2_done = 0;
   info->lm_base_cache = 0;
   info->main_lm_addr = 0;
 
@@ -812,9 +809,6 @@ enable_break (void)
 
   info = get_dsbt_info ();
 
-  if (info->enable_break2_done)
-    return 1;
-
   info->interp_text_sect_low = 0;
   info->interp_text_sect_high = 0;
   info->interp_plt_sect_low = 0;
@@ -899,7 +893,6 @@ enable_break (void)
 	  /* Now (finally!) create the solib breakpoint.  */
 	  create_solib_event_breakpoint (target_gdbarch (), addr);
 
-	  info->enable_break2_done = 1;
 	  ret = 1;
 	}
       else
@@ -1023,7 +1016,6 @@ dsbt_clear_solib (void)
   struct dsbt_info *info = get_dsbt_info ();
 
   info->lm_base_cache = 0;
-  info->enable_break2_done = 0;
   info->main_lm_addr = 0;
   if (info->main_executable_lm_info != 0)
     {
