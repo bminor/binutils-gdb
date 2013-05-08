@@ -1137,7 +1137,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 			     SYMBOL_PRINT_NAME (msym.minsym));
 	  else
 	    printf_filtered (" - Sleep func: %s\n",
-			     paddress (target_gdbarch (), ti.ti_startfunc));
+			     paddress (target_gdbarch (), ti.ti_pc));
 	}
 
       /* Wrap up line, if necessary.  */

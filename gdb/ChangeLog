@@ -1,5 +1,10 @@
 2013-05-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* sol-thread.c (info_cb) [ti.ti_state == TD_THR_SLEEP]:
+	Replace ti.ti_startfunc by ti.ti_pc.
+
+2013-05-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* solib-aix.c (solib_aix_free_library_list): New function
 	for the case where HAVE_LIBEXPAT is not defined.
 
