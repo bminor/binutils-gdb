@@ -1400,15 +1400,21 @@ expand_symtabs_matching_via_partial
 
       if (file_matcher)
 	{
+	  int match;
+
 	  if (ps->anonymous)
 	    continue;
 
-	  /* Before we invoke realpath, which can get expensive when many
-	     files are involved, do a quick comparison of the basenames.  */
-	  if (!(*file_matcher) (ps->filename, data, 0)
-	      && (basenames_may_differ
+	  match = (*file_matcher) (ps->filename, data, 0);
+	  if (!match)
+	    {
+	      /* Before we invoke realpath, which can get expensive when many
+		 files are involved, do a quick comparison of the basenames.  */
+	      if (basenames_may_differ
 		  || (*file_matcher) (lbasename (ps->filename), data, 1))
-	      && !(*file_matcher) (psymtab_to_fullname (ps), data, 0))
+		match = (*file_matcher) (psymtab_to_fullname (ps), data, 0);
+	    }
+	  if (!match)
 	    continue;
 	}
 

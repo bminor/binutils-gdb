@@ -1,3 +1,8 @@
+2013-05-08  Doug Evans  <dje@google.com>
+
+	* psymtab.c (expand_symtabs_matching_via_partial): Fix file name
+	matching test.
+
 2013-05-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* sol-thread.c (info_cb): Factorize the code a little.
