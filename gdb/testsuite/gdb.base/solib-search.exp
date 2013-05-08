@@ -175,7 +175,9 @@ test_backtrace 1
 remote_exec build "rm -f ${binfile1_lib}"
 remote_exec build "rm -f ${binfile2_lib}"
 # Set solib-search-path to use the correct copies of libraries.
-gdb_test "set solib-search-path ${objdir}/${subdir}/${right_lib_subdir}"
+gdb_test "set solib-search-path ${objdir}/${subdir}/${right_lib_subdir}" \
+    "" \
+    "set solib-search-path"
 
 # Verify gdb has properly updated the location of the libraries.
 test_backtrace 0

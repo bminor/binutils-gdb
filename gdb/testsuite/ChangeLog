@@ -1,3 +1,8 @@
+2013-05-08  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/solib-search.exp: Set test name for "set
+	solib-search-path" test.
+
 2013-05-08  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* gdb.trace/circ.exp: Remove unnecessary 'if then' checks.
