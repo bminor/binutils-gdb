@@ -22134,6 +22134,12 @@ ARM AArch64.
 Turns on or off display of gdbarch debugging info.  The default is off
 @item show debug arch
 Displays the current state of displaying gdbarch debugging info.
+@item set debug aix-solib
+@cindex AIX shared library debugging
+Control display of debugging messages from the AIX shared library
+support module.  The default is off.
+@item show debug aix-thread
+Show the current state of displaying AIX shared library debugging messages.
 @item set debug aix-thread
 @cindex AIX threads
 Display debugging messages about inner workings of the AIX thread
