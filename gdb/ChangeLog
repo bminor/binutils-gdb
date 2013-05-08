@@ -1,3 +1,8 @@
+2013-05-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-aix.c (solib_aix_free_library_list): New function
+	for the case where HAVE_LIBEXPAT is not defined.
+
 2013-05-07  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR breakpoints/15413:

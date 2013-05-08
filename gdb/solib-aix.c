@@ -141,6 +141,13 @@ solib_aix_parse_libraries (const char *library)
   return NULL;
 }
 
+/* Dummy implementation if XML support is not compiled in.  */
+
+static void
+solib_aix_free_library_list (void *p)
+{
+}
+
 #else /* HAVE_LIBEXPAT */
 
 #include "xml-support.h"
