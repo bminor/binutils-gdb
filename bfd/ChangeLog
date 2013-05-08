@@ -1,3 +1,8 @@
+2013-05-09  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (elf_link_add_object_symbols): Don't omit reading
+	of symbols when hashes already exist.
+
 2013-05-07  Will Newton  <will.newton@linaro.org>
 
 	* elf-ifunc.c (_bfd_elf_allocate_ifunc_dyn_relocs): Add a
@@ -10,18 +15,18 @@
 
 2013-05-07  Will Newton  <will.newton@linaro.org>
 
-        * elf-ifunc.c (_bfd_elf_create_ifunc_dyn_reloc): Remove unused
+	* elf-ifunc.c (_bfd_elf_create_ifunc_dyn_reloc): Remove unused
 	function.
 	* elf-bfd.h: Likewise.
 
 2013-05-06  Paul Brook  <paul@codesourcery.com>
 
-        * elf64-mips.c (elf_mips_gnu_pcrel32): New.
-        (bfd_elf64_bfd_reloc_type_lookup, bfd_elf64_bfd_reloc_name_lookup,
-        mips_elf64_rtype_to_howto): Handle R_MIPS_PC32.
-        * elfn32-mips.c (elf_mips_gnu_pcrel32): New.
-        (bfd_elfn32_bfd_reloc_type_lookup, bfd_elfn32_bfd_reloc_name_lookup,
-        mips_elfn32_rtype_to_howto): Handle R_MIPS_PC32.
+	* elf64-mips.c (elf_mips_gnu_pcrel32): New.
+	(bfd_elf64_bfd_reloc_type_lookup, bfd_elf64_bfd_reloc_name_lookup,
+	mips_elf64_rtype_to_howto): Handle R_MIPS_PC32.
+	* elfn32-mips.c (elf_mips_gnu_pcrel32): New.
+	(bfd_elfn32_bfd_reloc_type_lookup, bfd_elfn32_bfd_reloc_name_lookup,
+	mips_elfn32_rtype_to_howto): Handle R_MIPS_PC32.
 
 2013-05-06  Alan Modra  <amodra@gmail.com>
 
