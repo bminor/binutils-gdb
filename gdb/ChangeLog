@@ -1,5 +1,10 @@
 2013-05-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* sol-thread.c (info_cb): Rework the output of the "maintenance
+	info sol-threads" command a bit.
+
+2013-05-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* sol-thread.c (info_cb) [ti.ti_state == TD_THR_SLEEP]:
 	Replace ti.ti_startfunc by ti.ti_pc.
 

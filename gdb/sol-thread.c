@@ -1119,10 +1119,10 @@ info_cb (const td_thrhandle_t *th, void *s)
 	    = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
 
 	  if (msym.minsym)
-	    printf_filtered ("   startfunc: %s\n",
+	    printf_filtered ("   startfunc=%s",
 			     SYMBOL_PRINT_NAME (msym.minsym));
 	  else
-	    printf_filtered ("   startfunc: %s\n",
+	    printf_filtered ("   startfunc=%s",
 			     paddress (target_gdbarch (), ti.ti_startfunc));
 	}
 
@@ -1133,16 +1133,14 @@ info_cb (const td_thrhandle_t *th, void *s)
 	    = lookup_minimal_symbol_by_pc (ti.ti_pc);
 
 	  if (msym.minsym)
-	    printf_filtered (" - Sleep func: %s\n",
+	    printf_filtered ("   sleepfunc=%s",
 			     SYMBOL_PRINT_NAME (msym.minsym));
 	  else
-	    printf_filtered (" - Sleep func: %s\n",
+	    printf_filtered ("   sleepfunc=%s",
 			     paddress (target_gdbarch (), ti.ti_pc));
 	}
 
-      /* Wrap up line, if necessary.  */
-      if (ti.ti_state != TD_THR_SLEEP && ti.ti_startfunc == 0)
-	printf_filtered ("\n");	/* don't you hate counting newlines?  */
+      printf_filtered ("\n");
     }
   else
     warning (_("info sol-thread: failed to get info for thread."));
