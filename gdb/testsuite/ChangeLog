@@ -1,3 +1,18 @@
+2013-05-08  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* gdb.trace/circ.exp: Remove unnecessary 'if then' checks.
+	(set_a_tracepoint): Set tracepoint before prologue.
+	(run_trace_experiment): Test setup_tracepoints and 'break end'
+	in it.
+	(trace_buffer_normal): Remove.
+	(gdb_trace_circular_tests): Remove.  Move tests to...
+	(top level): ...here.  Call 'runto_main' before checking for
+	trace support.  Use commands to check the support for circular
+	trace buffer and changing of trace buffer size.  Add test
+	to calculate size of single frame.  Use this size to
+	calculate the size of trace buffer.  Use 'tfind pc func9'
+	instead of 'tfind 9'.  Use 'with_test_prefix'.
+
 2013-05-07  Tom Tromey  <tromey@redhat.com>
 
 	* lib/selftest-support.exp: New file.
