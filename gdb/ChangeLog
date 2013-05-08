@@ -1,5 +1,9 @@
 2013-05-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* sol-thread.c (info_cb): Factorize the code a little.
+
+2013-05-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* sol-thread.c (info_cb): Rework the output of the "maintenance
 	info sol-threads" command a bit.
 
