@@ -5391,6 +5391,77 @@ the Unix @code{ptrace} call in a vanilla way.
 
 @section shared libraries
 
+@subsection AIX Shared Library Support
+
+Shared library support on AIX is based on reading some data provided
+by the loader.  With a live process, this information is accessed
+via a @code{ptrace} call (@code{PT_LDINFO}), while it is obtained
+by reading the @samp{.ldinfo} section when debugging from a core file.
+In both cases, the data has the same format, provided by the
+@file{sys/ldr.h} system header file.
+
+Internally, the relevant portions of the loader information is
+transformed into an XML representation, which lists all objects
+currently mapped in memory.  The associated DTD can be found in
+@file{gdb/features/library-list-aix.dtd}.  For each library element,
+the following parameters are reported:
+
+@itemize @minus
+
+@item
+@code{name}, the path name of an object.  This is usually the name
+of an archive, or the name of the main executable.
+
+@item
+If the @code{name} parameter refers to an archive, @code{member} provides
+the name of the object inside the archive on which the program depends.
+Otherwise, this field should be omitted.
+
+@item
+@code{text_addr}, the address where the @code{.text} section was mapped
+in memory.
+
+@item
+@code{text_size}, the size of the @code{.text} section.
+
+@item
+@code{data_addr}, the address where the @code{.data} section was mapped
+in memory.
+
+@item
+@code{data_size}, the size of the @code{.data} section.
+
+@end itemize
+
+By convention, the library list always has at least one element, and
+the first entry always refers to the main executable.
+
+Below is an example of such XML representation for a small program:
+
+@smallexample
+<library-list-aix version="1.0">
+  <library name="simple"
+           text_addr="0x0000000010000000"
+           text_size="128720"
+           data_addr="0x0000000020000f00"
+           data_size="31148">
+  </library>
+  <library name="/lib/libc.a"
+           member="shr.o"
+           text_addr="0x00000000d0100700"
+           text_size="4152684"
+           data_addr="0x00000000f0633e50"
+           data_size="875944">
+  </library>
+</library-list-aix>
+@end smallexample
+
+In that example, the list shows that the main executable is named
+@file{simple}, and its text section was loaded at 0x10000000.
+This program depends on member @file{shr.o} from the @file{/lib/libc.a}
+archive, whose text and data sections were loaded at (resp.)
+0xd0100700 and 0xf0633e50.
+
 @section Native Conditionals
 @cindex native conditionals
 

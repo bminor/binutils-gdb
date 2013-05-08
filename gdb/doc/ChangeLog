@@ -1,5 +1,11 @@
 2013-05-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdbint.texinfo (Native Debugging): Add "AIX Shared Library
+	Support" subsection documenting the XML format used to transfer
+	shared library info on AIX.
+
+2013-05-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo (Debugging Output): Add documentation of
 	"set debug aix-solib" and "show debug aix-solib" commands.
 
