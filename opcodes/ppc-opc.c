@@ -2022,11 +2022,8 @@ extract_vlesi (unsigned long insn,
              ppc_cpu_t dialect ATTRIBUTE_UNUSED,
              int *invalid ATTRIBUTE_UNUSED)
 {
-  /* RWRW Because I don't know how to make int be 16 and long be 32 */
-  /* I can't rely on casting an int to long to get sign extension. */
   long value = ((insn >> 10) & 0xf800) | (insn & 0x7ff);
-  if (value & 0x8000)
-    value |= 0xffff0000;
+  value = (value ^ 0x8000) - 0x8000;
   return value;
 }
 
@@ -2045,8 +2042,8 @@ extract_vlensi (unsigned long insn,
              int *invalid ATTRIBUTE_UNUSED)
 {
   long value = ((insn >> 10) & 0xf800) | (insn & 0x7ff);
-  if (value & 0x8000)
-    value |= 0xffff0000;
+  value = (value ^ 0x8000) - 0x8000;
+  /* Don't use for disassembly.  */
   *invalid = 1;
   return -value;
 }

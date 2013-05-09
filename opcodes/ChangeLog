@@ -1,3 +1,8 @@
+2013-05-09  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (extract_vlesi): Properly sign extend.
+	(extract_vlensi): Likewise.  Comment reason for setting invalid.
+
 2013-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* msp430-dis.c: Add support for MSP430X instructions.
