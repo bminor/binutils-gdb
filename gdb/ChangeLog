@@ -1,3 +1,9 @@
+2013-05-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* source.c (forward_search_command): Replace call to getc
+	by call to fgetc.
+	(reverse_search_command): Likewise.
+
 2013-05-08  Doug Evans  <dje@google.com>
 
 	* psymtab.c (expand_symtabs_matching_via_partial): Fix file name
