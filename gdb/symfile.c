@@ -160,6 +160,7 @@ static void
 decrement_reading_symtab (void *dummy)
 {
   currently_reading_symtab--;
+  gdb_assert (currently_reading_symtab >= 0);
 }
 
 /* Increment currently_reading_symtab and return a cleanup that can be
@@ -169,6 +170,7 @@ struct cleanup *
 increment_reading_symtab (void)
 {
   ++currently_reading_symtab;
+  gdb_assert (currently_reading_symtab > 0);
   return make_cleanup (decrement_reading_symtab, NULL);
 }
 
