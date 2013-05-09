@@ -1,5 +1,13 @@
 2013-05-09  Doug Evans  <dje@google.com>
 
+	* symfile.c (syms_from_objfile_1): Delete args offsets, num_offsets.
+	All callers updated.
+	(syms_from_objfile): Ditto.  Make static.
+	(symbol_file_add_with_addrs): Renamed from
+	symbol_file_add_with_addrs_or_offsets.  Delete args offsets,
+	num_offsets.  All callers updated.
+	* symfile.h (syms_from_objfile): Delete.
+
 	* symfile.c (decrement_reading_symtab): Add assert.
 	(increment_reading_symtab): Ditto.
 

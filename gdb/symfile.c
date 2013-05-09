@@ -915,17 +915,6 @@ init_entry_point_info (struct objfile *objfile)
    into an offset from the section VMA's as it appears in the object
    file, and then call the file's sym_offsets function to convert this
    into a format-specific offset table --- a `struct section_offsets'.
-   If ADDRS is non-zero, OFFSETS must be zero.
-
-   OFFSETS is a table of section offsets already in the right
-   format-specific representation.  NUM_OFFSETS is the number of
-   elements present in OFFSETS->offsets.  If OFFSETS is non-zero, we
-   assume this is the proper table the call to sym_offsets described
-   above would produce.  Instead of calling sym_offsets, we just dump
-   it right into objfile->section_offsets.  (When we're re-reading
-   symbols from an objfile, we don't have the original load address
-   list any more; all we have is the section offset table.)  If
-   OFFSETS is non-zero, ADDRS must be zero.
 
    ADD_FLAGS encodes verbosity level, whether this is main symbol or
    an extra symbol file such as dynamically loaded code, and wether
@@ -934,15 +923,11 @@ init_entry_point_info (struct objfile *objfile)
 static void
 syms_from_objfile_1 (struct objfile *objfile,
 		     struct section_addr_info *addrs,
-		     const struct section_offsets *offsets,
-		     int num_offsets,
 		     int add_flags)
 {
   struct section_addr_info *local_addr = NULL;
   struct cleanup *old_chain;
   const int mainline = add_flags & SYMFILE_MAINLINE;
-
-  gdb_assert (! (addrs && offsets));
 
   objfile->sf = find_sym_fns (objfile->obfd);
 
@@ -964,17 +949,15 @@ syms_from_objfile_1 (struct objfile *objfile,
      if an error occurs during symbol reading.  */
   old_chain = make_cleanup_free_objfile (objfile);
 
-  /* If ADDRS and OFFSETS are both NULL, put together a dummy address
-     list.  We now establish the convention that an addr of zero means
+  /* If ADDRS is NULL, put together a dummy address list.
+     We now establish the convention that an addr of zero means
      no load address was specified.  */
-  if (! addrs && ! offsets)
+  if (! addrs)
     {
       local_addr = alloc_section_addr_info (1);
       make_cleanup (xfree, local_addr);
       addrs = local_addr;
     }
-
-  /* Now either addrs or offsets is non-zero.  */
 
   if (mainline)
     {
@@ -1004,7 +987,7 @@ syms_from_objfile_1 (struct objfile *objfile,
 
      We no longer warn if the lowest section is not a text segment (as
      happens for the PA64 port.  */
-  if (addrs && addrs->num_sections > 0)
+  if (addrs->num_sections > 0)
     addr_info_make_relative (addrs, objfile->obfd);
 
   /* Initialize symbol reading routines for this objfile, allow complaints to
@@ -1014,21 +997,7 @@ syms_from_objfile_1 (struct objfile *objfile,
   (*objfile->sf->sym_init) (objfile);
   clear_complaints (&symfile_complaints, 1, add_flags & SYMFILE_VERBOSE);
 
-  if (addrs)
-    (*objfile->sf->sym_offsets) (objfile, addrs);
-  else
-    {
-      size_t size = SIZEOF_N_SECTION_OFFSETS (num_offsets);
-
-      /* Just copy in the offset table directly as given to us.  */
-      objfile->num_sections = num_offsets;
-      objfile->section_offsets
-        = ((struct section_offsets *)
-           obstack_alloc (&objfile->objfile_obstack, size));
-      memcpy (objfile->section_offsets, offsets, size);
-
-      init_objfile_sect_indices (objfile);
-    }
+  (*objfile->sf->sym_offsets) (objfile, addrs);
 
   read_symbols (objfile, add_flags);
 
@@ -1041,14 +1010,12 @@ syms_from_objfile_1 (struct objfile *objfile,
 /* Same as syms_from_objfile_1, but also initializes the objfile
    entry-point info.  */
 
-void
+static void
 syms_from_objfile (struct objfile *objfile,
 		   struct section_addr_info *addrs,
-		   const struct section_offsets *offsets,
-		   int num_offsets,
 		   int add_flags)
 {
-  syms_from_objfile_1 (objfile, addrs, offsets, num_offsets, add_flags);
+  syms_from_objfile_1 (objfile, addrs, add_flags);
   init_entry_point_info (objfile);
 }
 
@@ -1087,8 +1054,7 @@ new_symfile_objfile (struct objfile *objfile, int add_flags)
    ADD_FLAGS encodes verbosity, whether this is main symbol file or
    extra, such as dynamically loaded code, and what to do with breakpoins.
 
-   ADDRS, OFFSETS, and NUM_OFFSETS are as described for
-   syms_from_objfile, above.
+   ADDRS is as described for syms_from_objfile_1, above.
    ADDRS is ignored when SYMFILE_MAINLINE bit is set in ADD_FLAGS.
 
    PARENT is the original objfile if ABFD is a separate debug info file.
@@ -1098,12 +1064,9 @@ new_symfile_objfile (struct objfile *objfile, int add_flags)
    Upon failure, jumps back to command level (never returns).  */
 
 static struct objfile *
-symbol_file_add_with_addrs_or_offsets (bfd *abfd,
-                                       int add_flags,
-                                       struct section_addr_info *addrs,
-                                       const struct section_offsets *offsets,
-                                       int num_offsets,
-                                       int flags, struct objfile *parent)
+symbol_file_add_with_addrs (bfd *abfd, int add_flags,
+			    struct section_addr_info *addrs,
+			    int flags, struct objfile *parent)
 {
   struct objfile *objfile;
   const char *name = bfd_get_filename (abfd);
@@ -1147,8 +1110,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd,
 	  gdb_flush (gdb_stdout);
 	}
     }
-  syms_from_objfile (objfile, addrs, offsets, num_offsets,
-		     add_flags);
+  syms_from_objfile (objfile, addrs, add_flags);
 
   /* We now have at least a partial symbol table.  Check to see if the
      user requested that all symbols be read on initial access via either
@@ -1217,9 +1179,8 @@ symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
   sap = build_section_addr_info_from_objfile (objfile);
   my_cleanup = make_cleanup_free_section_addr_info (sap);
 
-  new_objfile = symbol_file_add_with_addrs_or_offsets
-    (bfd, symfile_flags,
-     sap, NULL, 0,
+  new_objfile = symbol_file_add_with_addrs
+    (bfd, symfile_flags, sap,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
 		       | OBJF_USERLOADED),
      objfile);
@@ -1229,22 +1190,18 @@ symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
 
 /* Process the symbol file ABFD, as either the main file or as a
    dynamically loaded file.
-
-   See symbol_file_add_with_addrs_or_offsets's comments for
-   details.  */
+   See symbol_file_add_with_addrs's comments for details.  */
 
 struct objfile *
 symbol_file_add_from_bfd (bfd *abfd, int add_flags,
                           struct section_addr_info *addrs,
                           int flags, struct objfile *parent)
 {
-  return symbol_file_add_with_addrs_or_offsets (abfd, add_flags, addrs, 0, 0,
-                                                flags, parent);
+  return symbol_file_add_with_addrs (abfd, add_flags, addrs, flags, parent);
 }
 
 /* Process a symbol file, as either the main file or as a dynamically
-   loaded file.  See symbol_file_add_with_addrs_or_offsets's comments
-   for details.  */
+   loaded file.  See symbol_file_add_with_addrs's comments for details.  */
 
 struct objfile *
 symbol_file_add (char *name, int add_flags, struct section_addr_info *addrs,

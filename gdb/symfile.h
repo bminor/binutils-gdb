@@ -453,7 +453,7 @@ extern struct symtab *allocate_symtab (const char *, struct objfile *)
 extern void add_symtab_fns (const struct sym_fns *);
 
 /* This enum encodes bit-flags passed as ADD_FLAGS parameter to
-   syms_from_objfile, symbol_file_add, etc.  */
+   symbol_file_add, etc.  */
 
 enum symfile_add_flags
   {
@@ -471,10 +471,6 @@ enum symfile_add_flags
        symbols are read when the objfile is created.  */
     SYMFILE_NO_READ = 1 << 4
   };
-
-extern void syms_from_objfile (struct objfile *,
-			       struct section_addr_info *,
-			       const struct section_offsets *, int, int);
 
 extern void new_symfile_objfile (struct objfile *, int);
 
