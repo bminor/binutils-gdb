@@ -733,7 +733,9 @@ _bfd_default_error_handler (const char *fmt, ...)
   vfprintf (stderr, new_fmt, ap);
   va_end (ap);
 
-  putc ('\n', stderr);
+  /* On AIX, putc is implemented as a macro that triggers a -Wunused-value
+     warning, so use the fputc function to avoid it.  */
+  fputc ('\n', stderr);
   fflush (stderr);
 }
 

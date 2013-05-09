@@ -1,3 +1,8 @@
+2013-05-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* bfd.c (_bfd_default_error_handler): Replace use of putc
+	by fputc.  Add comment explaining why.
+
 2013-05-09  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (elf_link_add_object_symbols): Don't omit reading
