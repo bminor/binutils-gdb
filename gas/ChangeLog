@@ -1,3 +1,8 @@
+2013-05-09  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_apply_fix): Sign extend fieldval under
+	control of operand flag bits.
+
 2013-05-07  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (PPC_VLE_SPLIT16A): Delete unused macro.

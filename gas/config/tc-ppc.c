@@ -6369,7 +6369,10 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_LO16_PCREL:
 	case BFD_RELOC_PPC_VLE_LO16A:
 	case BFD_RELOC_PPC_VLE_LO16D:
-	  fieldval = SEX16 (value);
+	  fieldval = value & 0xffff;
+	sign_extend_16:
+	  if ((operand->flags & PPC_OPERAND_SIGNED) != 0)
+	    fieldval = (fieldval ^ 0x8000) - 0x8000;
 	  fixP->fx_no_overflow = 1;
 	  break;
 
@@ -6380,9 +6383,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_HI16_PCREL:
 	case BFD_RELOC_PPC_VLE_HI16A:
 	case BFD_RELOC_PPC_VLE_HI16D:
-	  fieldval = SEX16 (PPC_HI (value));
-	  fixP->fx_no_overflow = 1;
-	  break;
+	  fieldval = PPC_HI (value);
+	  goto sign_extend_16;
 
 	case BFD_RELOC_HI16_S:
 	  if (fixP->fx_pcrel)
@@ -6391,38 +6393,33 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_HI16_S_PCREL:
 	case BFD_RELOC_PPC_VLE_HA16A:
 	case BFD_RELOC_PPC_VLE_HA16D:
-	  fieldval = SEX16 (PPC_HA (value));
-	  fixP->fx_no_overflow = 1;
-	  break;
+	  fieldval = PPC_HA (value);
+	  goto sign_extend_16;
 
 #ifdef OBJ_ELF
 	case BFD_RELOC_PPC64_HIGHER:
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
-	  fieldval = SEX16 (PPC_HIGHER (value));
-	  fixP->fx_no_overflow = 1;
-	  break;
+	  fieldval = PPC_HIGHER (value);
+	  goto sign_extend_16;
 
 	case BFD_RELOC_PPC64_HIGHER_S:
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
-	  fieldval = SEX16 (PPC_HIGHERA (value));
-	  fixP->fx_no_overflow = 1;
-	  break;
+	  fieldval = PPC_HIGHERA (value);
+	  goto sign_extend_16;
 
 	case BFD_RELOC_PPC64_HIGHEST:
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
-	  fieldval = SEX16 (PPC_HIGHEST (value));
-	  fixP->fx_no_overflow = 1;
-	  break;
+	  fieldval = PPC_HIGHEST (value);
+	  goto sign_extend_16;
 
 	case BFD_RELOC_PPC64_HIGHEST_S:
 	  if (fixP->fx_pcrel)
 	    goto bad_pcrel;
-	  fieldval = SEX16 (PPC_HIGHESTA (value));
-	  fixP->fx_no_overflow = 1;
-	  break;
+	  fieldval = PPC_HIGHESTA (value);
+	  goto sign_extend_16;
 
 	  /* The following relocs can't be calculated by the assembler.
 	     Leave the field zero.  */
