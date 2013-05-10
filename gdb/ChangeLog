@@ -1,5 +1,11 @@
 2013-05-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* solib-aix.c (solib_aix_relocate_section_addresses):
+	For the .bss section action, apply the same offset as
+	the .data section.
+
+2013-05-10  Joel Brobecker  <brobecker@adacore.com>
+
 	PR tdep/15420:
 	* sol-thread.c (ps_lgetxregsize, ps_lgetxregs, ps_lsetxregs):
 	New functions, directly copied from sparc-sol-thread.c.

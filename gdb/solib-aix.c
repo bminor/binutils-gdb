@@ -411,7 +411,21 @@ solib_aix_relocate_section_addresses (struct so_list *so,
     }
   else if (strcmp (section_name, ".bss") == 0)
     {
-      sec->addr = bfd_section_vma (abfd, bfd_sect) + info->data_addr;
+      /* The information provided by the loader does not include
+	 the address of the .bss section, but we know that it gets
+	 relocated by the same offset as the .data section.  So,
+	 compute the relocation offset for the .data section, and
+	 apply it to the .bss section as well.  If the .data section
+	 is not defined (which seems highly unlikely), do our best
+	 by assuming no relocation.  */
+      struct bfd_section *data_sect
+	= bfd_get_section_by_name (abfd, ".data");
+      CORE_ADDR data_offset = 0;
+
+      if (data_sect != NULL)
+	data_offset = info->data_addr - bfd_section_vma (abfd, data_sect);
+
+      sec->addr = bfd_section_vma (abfd, bfd_sect) + data_offset;
       sec->addr += solib_aix_bss_data_overlap (abfd);
       sec->endaddr = sec->addr + bfd_section_size (abfd, bfd_sect);
     }
