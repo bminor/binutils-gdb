@@ -1,3 +1,8 @@
+2013-05-10  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (_initialize_remote): Fix spelling of
+	qXfer:traceframe-info:read packet in packet config command.
+
 2013-05-10  David Taylor  <dtaylor@emc.com>
 
 	PR remote/15455

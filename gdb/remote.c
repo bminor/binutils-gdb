@@ -11891,7 +11891,7 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd
     (&remote_protocol_packets[PACKET_qXfer_traceframe_info],
-     "qXfer:trace-frame-info:read", "traceframe-info", 0);
+     "qXfer:traceframe-info:read", "traceframe-info", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_uib],
 			 "qXfer:uib:read", "unwind-info-block", 0);
