@@ -24,6 +24,16 @@
 
 extern void notice_open_fds (void);
 
+/* Mark a file descriptor as inheritable across an exec.  */
+
+extern void mark_fd_no_cloexec (int fd);
+
+/* Mark a file descriptor as no longer being inheritable across an
+   exec.  This is only meaningful when FD was previously passed to
+   mark_fd_no_cloexec.  */
+
+extern void unmark_fd_no_cloexec (int fd);
+
 /* Close all open file descriptors other than those marked by
    'notice_open_fds', and stdin, stdout, and stderr.  Errors that
    occur while closing are ignored.  */

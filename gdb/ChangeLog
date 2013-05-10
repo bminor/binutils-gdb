@@ -1,3 +1,15 @@
+2013-05-10  Joel Brobecker  <brobecker@adacore.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* common/filestuff.c (mark_fd_no_cloexec, unmark_fd_no_cloexec):
+	New functions.
+	* common/filestuff.c (mark_fd_no_cloexec, unmark_fd_no_cloexec):
+	Declare.
+	* darwin-nat.c (darwin_pre_ptrace): Use mark_fd_no_cloexec.
+	(darwin_ptrace_him): Use unmark_fd_no_cloexec.
+	* inf-ttrace.c (do_cleanup_pfds): Use unmark_fd_no_cloexec.
+	(inf_ttrace_prepare): Use mark_fd_no_cloexec.
+
 2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
 	    Tom Tromey  <tromey@redhat.com>
 

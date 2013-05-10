@@ -66,6 +66,7 @@
 #include <mach/port.h>
 
 #include "darwin-nat.h"
+#include "common/filestuff.h"
 
 /* Quick overview.
    Darwin kernel is Mach + BSD derived kernel.  Note that they share the
@@ -1516,6 +1517,9 @@ darwin_pre_ptrace (void)
       ptrace_fds[1] = -1;
       error (_("unable to create a pipe: %s"), safe_strerror (errno));
     }
+
+  mark_fd_no_cloexec (ptrace_fds[0]);
+  mark_fd_no_cloexec (ptrace_fds[1]);
 }
 
 static void
@@ -1532,6 +1536,9 @@ darwin_ptrace_him (int pid)
   /* Let's the child run.  */
   close (ptrace_fds[0]);
   close (ptrace_fds[1]);
+
+  unmark_fd_no_cloexec (ptrace_fds[0]);
+  unmark_fd_no_cloexec (ptrace_fds[1]);
 
   darwin_init_thread_list (inf);
 

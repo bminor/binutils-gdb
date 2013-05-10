@@ -177,6 +177,33 @@ notice_open_fds (void)
   fdwalk (do_mark_open_fd, NULL);
 }
 
+/* See filestuff.h.  */
+
+void
+mark_fd_no_cloexec (int fd)
+{
+  do_mark_open_fd (NULL, fd);
+}
+
+/* See filestuff.h.  */
+
+void
+unmark_fd_no_cloexec (int fd)
+{
+  int i, val;
+
+  for (i = 0; VEC_iterate (int, open_fds, i, val); ++i)
+    {
+      if (fd == val)
+	{
+	  VEC_unordered_remove (int, open_fds, i);
+	  return;
+	}
+    }
+
+  gdb_assert_not_reached (_("fd not found in open_fds"));
+}
+
 /* Helper function for close_most_fds that closes the file descriptor
    if appropriate.  */
 

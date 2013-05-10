@@ -38,6 +38,7 @@
 
 #include "inf-child.h"
 #include "inf-ttrace.h"
+#include "common/filestuff.h"
 
 
 
@@ -558,6 +559,11 @@ do_cleanup_pfds (void *dummy)
   close (inf_ttrace_pfd1[1]);
   close (inf_ttrace_pfd2[0]);
   close (inf_ttrace_pfd2[1]);
+
+  unmark_fd_no_cloexec (inf_ttrace_pfd1[0]);
+  unmark_fd_no_cloexec (inf_ttrace_pfd1[1]);
+  unmark_fd_no_cloexec (inf_ttrace_pfd2[0]);
+  unmark_fd_no_cloexec (inf_ttrace_pfd2[1]);
 }
 
 static void
@@ -572,6 +578,11 @@ inf_ttrace_prepare (void)
       close (inf_ttrace_pfd2[0]);
       perror_with_name (("pipe"));
     }
+
+  mark_fd_no_cloexec (inf_ttrace_pfd1[0]);
+  mark_fd_no_cloexec (inf_ttrace_pfd1[1]);
+  mark_fd_no_cloexec (inf_ttrace_pfd2[0]);
+  mark_fd_no_cloexec (inf_ttrace_pfd2[1]);
 }
 
 /* Prepare to be traced.  */
