@@ -1,3 +1,7 @@
+2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
+
+	* configure: Rebuild.
+
 2012-06-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* interp.c: #include "config.h" instead of "sysdep.h".

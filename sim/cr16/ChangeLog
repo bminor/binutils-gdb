@@ -1,3 +1,7 @@
+2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
+
+	* configure: Rebuild.
+
 2012-08-28  Kaushik Phatak  <kaushik.phatak@kpitcummins.com>
 
 	* cr16_sim.h: Add defines for TRAP handling.

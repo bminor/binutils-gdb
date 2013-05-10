@@ -1,3 +1,9 @@
+2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
+
+	PR build/15414:
+	* acinclude.m4 (SIM_AC_OPTION_WARNINGS): Do not use
+	-Wformat-nonliteral with -Wno-format.
+
 2013-03-26  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Regenerate.

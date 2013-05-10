@@ -1,3 +1,11 @@
+2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
+	    Tom Tromey  <tromey@redhat.com>
+
+	PR build/15414:
+	* configure: Rebuild.
+	* configure.ac (build_warnings): Do not use -Wformat-nonliteral
+	with -Wno-format.
+
 2013-05-10  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (_initialize_remote): Fix spelling of

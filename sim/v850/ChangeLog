@@ -1,3 +1,7 @@
+2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
+
+	* configure: Rebuild.
+
 2013-01-28  Nick Clifton  <nickc@redhat.com>
 
 	* simops.c (v850_rotl): New function.
