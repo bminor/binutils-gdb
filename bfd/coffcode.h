@@ -795,6 +795,12 @@ styp_to_sec_flags (bfd *abfd ATTRIBUTE_UNUSED,
   else if (styp_flags & STYP_PAD)
     sec_flags = 0;
 #ifdef RS6000COFF_C
+  else if (styp_flags & STYP_EXCEPT)
+    sec_flags |= SEC_LOAD;
+  else if (styp_flags & STYP_LOADER)
+    sec_flags |= SEC_LOAD;
+  else if (styp_flags & STYP_TYPCHK)
+    sec_flags |= SEC_LOAD;
   else if (styp_flags & STYP_DWARF)
     sec_flags |= SEC_DEBUGGING;
 #endif

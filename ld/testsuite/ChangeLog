@@ -1,3 +1,9 @@
+2013-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ld-powerpc/aix-core-sec-1.hd, ld-powerpc/aix-core-sec-2.hd,
+	ld-powerpc/aix-core-sec-3.hd: Adjust expected section flags
+	for section .loader.
+
 2013-05-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	PR ld/15365

@@ -1,3 +1,8 @@
+2013-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* coffcode.h (styp_to_sec_flags) [RS6000COFF_C]: Add handling
+	of STYP_EXCEPT, STYP_LOADER and STYP_TYPCHK sections.
+
 2013-05-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* bfd.c (_bfd_default_error_handler): Replace use of putc
