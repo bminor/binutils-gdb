@@ -11949,13 +11949,6 @@ $as_echo "#define HAVE_THREAD_DB_LIB 1" >>confdefs.h
 
          CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
          CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
-         # On SPARC CPUs, we also need to build sparc-sol-thread.
-         case ${host_cpu} in
-           sparc*)
-             CONFIG_OBS="${CONFIG_OBS} sparc-sol-thread.o"
-             CONFIG_SRCS="${CONFIG_SRCS} sparc-sol-thread.c"
-             ;;
-         esac
          { $as_echo "$as_me:${as_lineno-$LINENO}: checking for dlopen in -ldl" >&5
 $as_echo_n "checking for dlopen in -ldl... " >&6; }
 if test "${ac_cv_lib_dl_dlopen+set}" = set; then :

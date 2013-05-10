@@ -1733,13 +1733,6 @@ if test ${build} = ${host} -a ${host} = ${target} ; then
          [Define if using Solaris thread debugging.])
          CONFIG_OBS="${CONFIG_OBS} sol-thread.o"
          CONFIG_SRCS="${CONFIG_SRCS} sol-thread.c"
-         # On SPARC CPUs, we also need to build sparc-sol-thread.
-         case ${host_cpu} in
-           sparc*)
-             CONFIG_OBS="${CONFIG_OBS} sparc-sol-thread.o"
-             CONFIG_SRCS="${CONFIG_SRCS} sparc-sol-thread.c"
-             ;;
-         esac
          AC_CHECK_LIB(dl, dlopen)
 	 CONFIG_LDFLAGS="${CONFIG_LDFLAGS} $RDYNAMIC"
 	 # Sun randomly tweaked the prototypes in <proc_service.h>
