@@ -288,6 +288,7 @@ SUBDIR_PYTHON_OBS = \
 	py-exitedevent.o \
 	py-finishbreakpoint.o \
 	py-frame.o \
+	py-framefilter.o \
 	py-function.o \
 	py-gdb-readline.o \
 	py-inferior.o \
@@ -322,6 +323,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-exitedevent.c \
 	python/py-finishbreakpoint.c \
 	python/py-frame.c \
+	python/py-framefilter.c \
 	python/py-function.c \
 	python/py-gdb-readline.c \
 	python/py-inferior.c \
@@ -2142,6 +2144,10 @@ py-finishbreakpoint.o: $(srcdir)/python/py-finishbreakpoint.c
 
 py-frame.o: $(srcdir)/python/py-frame.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-frame.c
+	$(POSTCOMPILE)
+
+py-framefilter.o: $(srcdir)/python/py-framefilter.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-framefilter.c
 	$(POSTCOMPILE)
 
 py-function.o: $(srcdir)/python/py-function.c

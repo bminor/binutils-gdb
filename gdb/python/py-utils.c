@@ -48,6 +48,28 @@ make_cleanup_py_decref (PyObject *py)
   return make_cleanup (py_decref, (void *) py);
 }
 
+/* This is a cleanup function which decrements the refcount on a
+   Python object.  This function accounts appropriately for NULL
+   references.  */
+
+static void
+py_xdecref (void *p)
+{
+  PyObject *py = p;
+
+  Py_XDECREF (py);
+}
+
+/* Return a new cleanup which will decrement the Python object's
+   refcount when run.  Account for and operate on NULL references
+   correctly.  */
+
+struct cleanup *
+make_cleanup_py_xdecref (PyObject *py)
+{
+  return make_cleanup (py_xdecref, py);
+}
+
 /* Converts a Python 8-bit string to a unicode string object.  Assumes the
    8-bit string is in the host charset.  If an error occurs during conversion,
    returns NULL with a python exception set.

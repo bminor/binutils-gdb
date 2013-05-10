@@ -251,9 +251,11 @@ PyObject *frame_info_to_frame_object (struct frame_info *frame);
 
 PyObject *pspace_to_pspace_object (struct program_space *);
 PyObject *pspy_get_printers (PyObject *, void *);
+PyObject *pspy_get_frame_filters (PyObject *, void *);
 
 PyObject *objfile_to_objfile_object (struct objfile *);
 PyObject *objfpy_get_printers (PyObject *, void *);
+PyObject *objfpy_get_frame_filters (PyObject *, void *);
 
 PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
 
@@ -304,6 +306,7 @@ void gdbpy_initialize_new_objfile_event (void);
 void gdbpy_initialize_arch (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
+struct cleanup *make_cleanup_py_xdecref (PyObject *py);
 
 struct cleanup *ensure_python_env (struct gdbarch *gdbarch,
 				   const struct language_defn *language);

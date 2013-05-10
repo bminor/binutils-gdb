@@ -1393,6 +1393,15 @@ free_type_printers (void *arg)
 {
 }
 
+enum py_bt_status
+apply_frame_filter (struct frame_info *frame, int flags,
+		    enum py_frame_args args_type,
+		    struct ui_out *out, int frame_low,
+		    int frame_high)
+{
+  return PY_BT_NO_FILTERS;
+}
+
 #endif /* HAVE_PYTHON */
 
 

@@ -1,3 +1,20 @@
+2013-05-10 Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Backtrace): Add "no-filter" argument.
+	(Python API): Add Frame	Filters API, Frame Wrapper API,
+	Writing a Frame Filter/Wrapper,	Managing Management of Frame
+	Filters chapter entries.
+	(Frame Filters API): New Node.
+	(Frame Wrapper API): New Node.
+	(Writing a Frame Filter): New Node.
+	(Managing Frame Filters): New Node.
+	(Progspaces In Python): Add note about frame_filters attribute.
+	(Objfiles in Python): Ditto.
+	(GDB/MI Stack Manipulation): Add -enable-frame-filters command,
+	@anchors and --no-frame-filters option to -stack-list-variables,
+	-stack-list-frames, -stack-list-locals and -stack-list-arguments
+	commands.
+
 2013-05-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbint.texinfo (Native Debugging): Add "AIX Shared Library

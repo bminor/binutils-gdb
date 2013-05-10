@@ -1,3 +1,12 @@
+2013-05-10  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-framefilter.py: New File.
+	* gdb.python/py-framefilter-mi.exp: Ditto.
+	* gdb.python/py-framefilter.c: Ditto.
+	* gdb.python/py-framefilter-mi.exp: Ditto.
+	* gdb.python/py-framefilter-mi.c: Ditto,
+	* gdb.python/py-framefilter-gdb.py.in: Ditto.
+
 2013-05-08  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/solib-search.exp: Set test name for "set

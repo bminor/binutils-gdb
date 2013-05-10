@@ -54,6 +54,7 @@
 
 #include "psymtab.h"
 #include "symfile.h"
+#include "python/python.h"
 
 void (*deprecated_selected_frame_level_changed_hook) (int);
 
@@ -1651,13 +1652,15 @@ frame_info (char *addr_exp, int from_tty)
    frames.  */
 
 static void
-backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
+backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
+		     int from_tty)
 {
   struct frame_info *fi;
   int count;
   int i;
   struct frame_info *trailing;
-  int trailing_level;
+  int trailing_level, py_start = 0, py_end = 0;
+  enum py_bt_status result = PY_BT_ERROR;
 
   if (!target_has_stack)
     error (_("No stack."));
@@ -1676,6 +1679,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 	{
 	  struct frame_info *current;
 
+	  py_start = count;
 	  count = -count;
 
 	  current = trailing;
@@ -1697,9 +1701,17 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 
 	  count = -1;
 	}
+      else
+	{
+	  py_start = 0;
+	  py_end = count;
+	}
     }
   else
-    count = -1;
+    {
+      py_end = -1;
+      count = -1;
+    }
 
   if (info_verbose)
     {
@@ -1719,16 +1731,40 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 	}
     }
 
-  for (i = 0, fi = trailing; fi && count--; i++, fi = get_prev_frame (fi))
+  if (! no_filters)
     {
-      QUIT;
+      int flags = PRINT_LEVEL | PRINT_FRAME_INFO | PRINT_ARGS;
+      enum py_frame_args arg_type;
 
-      /* Don't use print_stack_frame; if an error() occurs it probably
-         means further attempts to backtrace would fail (on the other
-         hand, perhaps the code does or could be fixed to make sure
-         the frame->prev field gets set to NULL in that case).  */
-      print_frame_info (fi, 1, LOCATION, 1);
       if (show_locals)
+	flags |= PRINT_LOCALS;
+
+      if (!strcmp (print_frame_arguments, "scalars"))
+	arg_type = CLI_SCALAR_VALUES;
+      else if (!strcmp (print_frame_arguments, "all"))
+	arg_type = CLI_ALL_VALUES;
+      else
+	arg_type = NO_VALUES;
+
+      result = apply_frame_filter (get_current_frame (), flags, arg_type,
+				   current_uiout, py_start, py_end);
+
+    }
+  /* Run the inbuilt backtrace if there are no filters registered, or
+     "no-filters" has been specified from the command.  */
+  if (no_filters ||  result == PY_BT_NO_FILTERS)
+    {
+      for (i = 0, fi = trailing; fi && count--; i++, fi = get_prev_frame (fi))
+	{
+	  QUIT;
+
+	  /* Don't use print_stack_frame; if an error() occurs it probably
+	     means further attempts to backtrace would fail (on the other
+	     hand, perhaps the code does or could be fixed to make sure
+	     the frame->prev field gets set to NULL in that case).  */
+
+	  print_frame_info (fi, 1, LOCATION, 1);
+	  if (show_locals)
 	{
 	  struct frame_id frame_id = get_frame_id (fi);
 
@@ -1744,24 +1780,25 @@ backtrace_command_1 (char *count_exp, int show_locals, int from_tty)
 	    }
 	}
 
-      /* Save the last frame to check for error conditions.  */
-      trailing = fi;
-    }
+	  /* Save the last frame to check for error conditions.  */
+	  trailing = fi;
+	}
 
-  /* If we've stopped before the end, mention that.  */
-  if (fi && from_tty)
-    printf_filtered (_("(More stack frames follow...)\n"));
+      /* If we've stopped before the end, mention that.  */
+      if (fi && from_tty)
+	printf_filtered (_("(More stack frames follow...)\n"));
 
-  /* If we've run out of frames, and the reason appears to be an error
-     condition, print it.  */
-  if (fi == NULL && trailing != NULL)
-    {
-      enum unwind_stop_reason reason;
+      /* If we've run out of frames, and the reason appears to be an error
+	 condition, print it.  */
+      if (fi == NULL && trailing != NULL)
+	{
+	  enum unwind_stop_reason reason;
 
-      reason = get_frame_unwind_stop_reason (trailing);
-      if (reason >= UNWIND_FIRST_ERROR)
-	printf_filtered (_("Backtrace stopped: %s\n"),
-			 frame_stop_reason_string (reason));
+	  reason = get_frame_unwind_stop_reason (trailing);
+	  if (reason >= UNWIND_FIRST_ERROR)
+	    printf_filtered (_("Backtrace stopped: %s\n"),
+			     frame_stop_reason_string (reason));
+	}
     }
 }
 
@@ -1769,7 +1806,8 @@ static void
 backtrace_command (char *arg, int from_tty)
 {
   struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
-  int fulltrace_arg = -1, arglen = 0, argc = 0;
+  int fulltrace_arg = -1, arglen = 0, argc = 0, no_filters  = -1;
+  int user_arg = 0;
 
   if (arg)
     {
@@ -1786,25 +1824,31 @@ backtrace_command (char *arg, int from_tty)
 	  for (j = 0; j < strlen (argv[i]); j++)
 	    argv[i][j] = tolower (argv[i][j]);
 
-	  if (fulltrace_arg < 0 && subset_compare (argv[i], "full"))
-	    fulltrace_arg = argc;
+	  if (no_filters < 0 && subset_compare (argv[i], "no-filters"))
+	    no_filters = argc;
 	  else
 	    {
-	      arglen += strlen (argv[i]);
-	      argc++;
+	      if (fulltrace_arg < 0 && subset_compare (argv[i], "full"))
+		fulltrace_arg = argc;
+	      else
+		{
+		  user_arg++;
+		  arglen += strlen (argv[i]);
+		}
 	    }
+	  argc++;
 	}
-      arglen += argc;
-      if (fulltrace_arg >= 0)
+      arglen += user_arg;
+      if (fulltrace_arg >= 0 || no_filters >= 0)
 	{
 	  if (arglen > 0)
 	    {
 	      arg = xmalloc (arglen + 1);
 	      make_cleanup (xfree, arg);
 	      arg[0] = 0;
-	      for (i = 0; i < (argc + 1); i++)
+	      for (i = 0; i < argc; i++)
 		{
-		  if (i != fulltrace_arg)
+		  if (i != fulltrace_arg && i != no_filters)
 		    {
 		      strcat (arg, argv[i]);
 		      strcat (arg, " ");
@@ -1816,7 +1860,8 @@ backtrace_command (char *arg, int from_tty)
 	}
     }
 
-  backtrace_command_1 (arg, fulltrace_arg >= 0 /* show_locals */, from_tty);
+  backtrace_command_1 (arg, fulltrace_arg >= 0 /* show_locals */,
+		       no_filters >= 0 /* no frame-filters */, from_tty);
 
   do_cleanups (old_chain);
 }
@@ -1824,7 +1869,7 @@ backtrace_command (char *arg, int from_tty)
 static void
 backtrace_full_command (char *arg, int from_tty)
 {
-  backtrace_command_1 (arg, 1 /* show_locals */, from_tty);
+  backtrace_command_1 (arg, 1 /* show_locals */, 0, from_tty);
 }
 
 
@@ -2558,7 +2603,9 @@ It can be a stack frame number or the address of the frame.\n"));
   add_com ("backtrace", class_stack, backtrace_command, _("\
 Print backtrace of all stack frames, or innermost COUNT frames.\n\
 With a negative argument, print outermost -COUNT frames.\nUse of the \
-'full' qualifier also prints the values of the local variables.\n"));
+'full' qualifier also prints the values of the local variables.\n\
+Use of the 'no-filters' qualifier prohibits frame filters from executing\n\
+on this backtrace.\n"));
   add_com_alias ("bt", "backtrace", class_stack, 0);
   if (xdb_commands)
     {

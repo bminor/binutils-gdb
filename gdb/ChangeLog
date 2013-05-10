@@ -1,3 +1,52 @@
+2013-05-10  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* stack.c (backtrace_command_1): Add "no-filters", and Python frame
+	filter logic.
+	(backtrace_command): Add "no-filters" option parsing.
+	(_initialize_stack): Alter help to reflect "no-filters" option.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-framefilter.o
+	(SUBDIR_PYTHON_SRCS): Add py-framefilter.c
+	(py-frame.o): Add target
+	* data-directory/Makefile.in (PYTHON_DIR): Add Python frame
+	filter files.
+	* python/python.h: Add new frame filter constants, and flag enum.
+	(apply_frame_filter): Add definition.
+	* python/python.c (apply_frame_filter): New non-Python
+	enabled function.
+	* python/py-utils.c (py_xdecref): New function.
+	(make_cleanup_py_xdecref): Ditto.
+	* python/py-objfile.c: Declare frame_filters dictionary.
+	(objfpy_dealloc): Add frame_filters dealloc.
+	(objfpy_new): Initialize frame_filters attribute.
+	(objfile_to_objfile_object): Ditto.
+	(objfpy_get_frame_filters): New function.
+	(objfpy_set_frame_filters): New function.
+	* python/py-progspace.c: Declare frame_filters dictionary.
+	(pspy_dealloc): Add frame_filters dealloc.
+	(pspy_new): Initialize frame_filters attribute.
+	(pspacee_to_pspace_object): Ditto.
+	(pspy_get_frame_filters): New function.
+	(pspy_set_frame_filters): New function.
+	* python/py-framefilter.c: New file.
+	* python/lib/gdb/command/frame_filters.py: New file.
+	* python/lib/gdb/frames.py: New file.
+	* python/lib/gdb/__init__.py: Initialize global frame_filters
+	dictionary
+	* python/lib/gdb/FrameDecorator.py: New file.
+	* python/lib/gdb/FrameIterator.py: New file.
+	* mi/mi-cmds.c (mi_cmds): Add frame filters command.
+	* mi/mi-cmds.h: Declare.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames): Add
+	--no-frame-filter logic, and Python frame filter logic.
+	(stack_enable_frame_filters): New function.
+	(parse_no_frame_option): Ditto.
+	(mi_cmd_stack_list_frames): Add --no-frame-filter and Python frame
+	filter logic.
+	(mi_cmd_stack_list_locals): Ditto.
+	(mi_cmd_stack_list_args): Ditto.
+	(mi_cmd_stack_list_variables): Ditto.
+	* NEWS: Add frame filter note.
+
 2013-05-09  Doug Evans  <dje@google.com>
 
 	* symfile.c (syms_from_objfile_1): Delete args offsets, num_offsets.

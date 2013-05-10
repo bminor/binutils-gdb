@@ -118,6 +118,7 @@ extern mi_cmd_argv_ftype mi_cmd_var_show_attributes;
 extern mi_cmd_argv_ftype mi_cmd_var_show_format;
 extern mi_cmd_argv_ftype mi_cmd_var_update;
 extern mi_cmd_argv_ftype mi_cmd_enable_pretty_printing;
+extern mi_cmd_argv_ftype mi_cmd_enable_frame_filters;
 extern mi_cmd_argv_ftype mi_cmd_var_set_update_range;
 
 /* Description of a single command.  */

@@ -86,6 +86,7 @@ static struct mi_cmd mi_cmds[] =
 		 mi_cmd_data_write_register_values),
   DEF_MI_CMD_MI ("enable-timings", mi_cmd_enable_timings),
   DEF_MI_CMD_MI ("enable-pretty-printing", mi_cmd_enable_pretty_printing),
+  DEF_MI_CMD_MI ("enable-frame-filters", mi_cmd_enable_frame_filters),
   DEF_MI_CMD_MI ("environment-cd", mi_cmd_env_cd),
   DEF_MI_CMD_MI ("environment-directory", mi_cmd_env_dir),
   DEF_MI_CMD_MI ("environment-path", mi_cmd_env_path),

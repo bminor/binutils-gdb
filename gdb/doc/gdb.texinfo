@@ -6465,6 +6465,7 @@ currently executing frame and describes it briefly, similar to the
 @menu
 * Frames::                      Stack frames
 * Backtrace::                   Backtraces
+* Frame Filter Management::     Managing frame filters
 * Selection::                   Selecting a frame
 * Frame Info::                  Information on a frame
 
@@ -6552,6 +6553,7 @@ line per frame, for many frames, starting with the currently executing
 frame (frame zero), followed by its caller (frame one), and on up the
 stack.
 
+@anchor{backtrace-command}
 @table @code
 @kindex backtrace
 @kindex bt @r{(@code{backtrace})}
@@ -6577,6 +6579,19 @@ Similar, but print only the outermost @var{n} frames.
 @itemx bt full -@var{n}
 Print the values of the local variables also.  @var{n} specifies the
 number of frames to print, as described above.
+
+@item backtrace no-filters
+@itemx bt no-filters
+@itemx bt no-filters @var{n}
+@itemx bt no-filters -@var{n}
+@itemx bt no-filters full
+@itemx bt no-filters full @var{n}
+@itemx bt no-filters full -@var{n}
+Do not run Python frame filters on this backtrace.  @xref{Frame
+Filter API}, for more information.  Additionally use @ref{disable
+frame-filter all} to turn off all frame filters.  This is only
+relevant when @value{GDBN} has been configured with @code{Python}
+support.
 @end table
 
 @kindex where
@@ -6725,6 +6740,149 @@ Display an absolute filename.
 
 @item show filename-display
 Show the current way to display filenames.
+@end table
+
+@node Frame Filter Management
+@section Management of Frame Filters.
+@cindex managing frame filters
+
+Frame filters are Python based utilities to manage and decorate the
+output of frames.  @xref{Frame Filter API}, for further information.
+
+Managing frame filters is performed by several commands available
+within @value{GDBN}, detailed here.
+
+@table @code
+@kindex info frame-filter
+@item info frame-filter
+Print a list of installed frame filters from all dictionaries, showing
+their name, priority and enabled status.
+
+@kindex disable frame-filter
+@anchor{disable frame-filter all}
+@item disable frame-filter @var{filter-dictionary} @var{filter-name}
+Disable a frame filter in the dictionary matching
+@var{filter-dictionary}, or @code{all}, and @var{filter-name}.
+@var{filter-dictionary} may be @code{all}, @code{global},
+@code{progspace} or the name of the object file where the frame filter
+dictionary resides.  When @code{all} is specified, all frame filters
+across all dictionaries are disabled.  @var{filter-name} is the name
+of the frame filter and is used when @code{all} is not the option for
+@var{filter-dictionary}.  A disabled frame-filter is not deleted, it
+may be enabled again later.
+
+@kindex enable frame-filter
+@item enable frame-filter @var{filter-dictionary} @var{filter-name}
+Enable a frame filter in the dictionary matching
+@var{filter-dictionary}, or @code{all}, and @var{filter-name}.
+@var{filter-dictionary} may be @code{all}, @code{global},
+@code{progspace} or the name of the object file where the frame filter
+dictionary resides.  When @code{all} is specified, all frame filters across
+all dictionaries are enabled.  @var{filter-name} is the name of the frame
+filter and is used when @code{all} is not the option for
+@var{filter-dictionary}.
+
+Example:
+
+@smallexample
+(gdb) info frame-filter
+
+global frame-filters:
+  Priority  Enabled  Name
+  1000      No       PrimaryFunctionFilter
+  100       Yes      Reverse
+
+progspace /build/test frame-filters:
+  Priority  Enabled  Name
+  100       Yes      ProgspaceFilter
+
+objfile /build/test frame-filters:
+  Priority  Enabled  Name
+  999       Yes      BuildProgra Filter
+
+(gdb) disable frame-filter /build/test BuildProgramFilter
+(gdb) info frame-filter
+
+global frame-filters:
+  Priority  Enabled  Name
+  1000      No       PrimaryFunctionFilter
+  100       Yes      Reverse
+
+progspace /build/test frame-filters:
+  Priority  Enabled  Name
+  100       Yes      ProgspaceFilter
+
+objfile /build/test frame-filters:
+  Priority  Enabled  Name
+  999       No       BuildProgramFilter
+
+(gdb) enable frame-filter global PrimaryFunctionFilter
+(gdb) info frame-filter
+
+global frame-filters:
+  Priority  Enabled  Name
+  1000      Yes      PrimaryFunctionFilter
+  100       Yes      Reverse
+
+progspace /build/test frame-filters:
+  Priority  Enabled  Name
+  100       Yes      ProgspaceFilter
+
+objfile /build/test frame-filters:
+  Priority  Enabled  Name
+  999       No       BuildProgramFilter
+@end smallexample
+
+@kindex set frame-filter priority
+@item set frame-filter priority @var{filter-dictionary} @var{filter-name} @var{priority}
+Set the @var{priority} of a frame filter in the dictionary matching
+@var{filter-dictionary}, and the frame filter name matching
+@var{filter-name}.  @var{filter-dictionary} may be @code{global},
+@code{progspace} or the name of the object file where the frame filter
+dictionary resides.  @var{priority} is an integer.
+
+@kindex show frame-filter priority
+@item show frame-filter priority @var{filter-dictionary} @var{filter-name}
+Show the @var{priority} of a frame filter in the dictionary matching
+@var{filter-dictionary}, and the frame filter name matching
+@var{filter-name}.  @var{filter-dictionary} may be @code{global},
+@code{progspace} or the name of the object file where the frame filter
+dictionary resides.
+
+Example:
+
+@smallexample
+(gdb) info frame-filter
+
+global frame-filters:
+  Priority  Enabled  Name
+  1000      Yes      PrimaryFunctionFilter
+  100       Yes      Reverse
+
+progspace /build/test frame-filters:
+  Priority  Enabled  Name
+  100       Yes      ProgspaceFilter
+
+objfile /build/test frame-filters:
+  Priority  Enabled  Name
+  999       No       BuildProgramFilter
+
+(gdb) set frame-filter priority global Reverse 50
+(gdb) info frame-filter
+
+global frame-filters:
+  Priority  Enabled  Name
+  1000      Yes      PrimaryFunctionFilter
+  50        Yes      Reverse
+
+progspace /build/test frame-filters:
+  Priority  Enabled  Name
+  100       Yes      ProgspaceFilter
+
+objfile /build/test frame-filters:
+  Priority  Enabled  Name
+  999       No       BuildProgramFilter
+@end smallexample
 @end table
 
 @node Selection
@@ -23026,6 +23184,9 @@ optional arguments while skipping others.  Example:
 * Selecting Pretty-Printers::   How GDB chooses a pretty-printer.
 * Writing a Pretty-Printer::    Writing a Pretty-Printer.
 * Type Printing API::		Pretty-printing types.
+* Frame Filter API::            Filtering Frames.
+* Frame Decorator API::         Decorating Frames.
+* Writing a Frame Filter::      Writing a Frame Filter.
 * Inferiors In Python::         Python representation of inferiors (processes)
 * Events In Python::            Listening for events from @value{GDBN}.
 * Threads In Python::           Accessing inferior threads from Python.
@@ -24405,6 +24566,636 @@ done then type printers would have to make use of the event system in
 order to avoid holding information that could become stale as the
 inferior changed.
 
+@node Frame Filter API
+@subsubsection Filtering Frames.
+@cindex frame filters api
+
+Frame filters are Python objects that manipulate the visibility of a
+frame or frames when a backtrace (@pxref{Backtrace}) is printed by
+@value{GDBN}.
+
+Only commands that print a backtrace, or, in the case of @sc{gdb/mi}
+commands (@pxref{GDB/MI}), those that return a collection of frames
+are affected.  The commands that work with frame filters are:
+
+@code{backtrace} (@pxref{backtrace-command,, The backtrace command}),
+@code{-stack-list-frames}
+(@pxref{-stack-list-frames,, The -stack-list-frames command}),
+@code{-stack-list-variables} (@pxref{-stack-list-variables,, The
+-stack-list-variables command}), @code{-stack-list-arguments}
+@pxref{-stack-list-arguments,, The -stack-list-arguments command}) and
+@code{-stack-list-locals} (@pxref{-stack-list-locals,, The
+-stack-list-locals command}).
+
+A frame filter works by taking an iterator as an argument, applying
+actions to the contents of that iterator, and returning another
+iterator (or, possibly, the same iterator it was provided in the case
+where the filter does not perform any operations).  Typically, frame
+filters utilize tools such as the Python's @code{itertools} module to
+work with and create new iterators from the source iterator.
+Regardless of how a filter chooses to apply actions, it must not alter
+the underlying @value{GDBN} frame or frames, or attempt to alter the
+call-stack within @value{GDBN}.  This preserves data integrity within
+@value{GDBN}.  Frame filters are executed on a priority basis and care
+should be taken that some frame filters may have been executed before,
+and that some frame filters will be executed after.
+
+An important consideration when designing frame filters, and well
+worth reflecting upon, is that frame filters should avoid unwinding
+the call stack if possible.  Some stacks can run very deep, into the
+tens of thousands in some cases.  To search every frame when a frame
+filter executes may be too expensive at that step.  The frame filter
+cannot know how many frames it has to iterate over, and it may have to
+iterate through them all.  This ends up duplicating effort as
+@value{GDBN} performs this iteration when it prints the frames.  If
+the filter can defer unwinding frames until frame decorators are
+executed, after the last filter has executed, it should.  @xref{Frame
+Decorator API}, for more information on decorators.  Also, there are
+examples for both frame decorators and filters in later chapters.
+@xref{Writing a Frame Filter}, for more information.
+
+The Python dictionary @code{gdb.frame_filters} contains key/object
+pairings that comprise a frame filter.  Frame filters in this
+dictionary are called @code{global} frame filters, and they are
+available when debugging all inferiors.  These frame filters must
+register with the dictionary directly.  In addition to the
+@code{global} dictionary, there are other dictionaries that are loaded
+with different inferiors via auto-loading (@pxref{Python
+Auto-loading}).  The two other areas where frame filter dictionaries
+can be found are: @code{gdb.Progspace} which contains a
+@code{frame_filters} dictionary attribute, and each @code{gdb.Objfile}
+object which also contains a @code{frame_filters} dictionary
+attribute.
+
+When a command is executed from @value{GDBN} that is compatible with
+frame filters, @value{GDBN} combines the @code{global},
+@code{gdb.Progspace} and all @code{gdb.Objfile} dictionaries currently
+loaded.  All of the @code{gdb.Objfile} dictionaries are combined, as
+several frames, and thus several object files, might be in use.
+@value{GDBN} then prunes any frame filter whose @code{enabled}
+attribute is @code{False}.  This pruned list is then sorted according
+to the @code{priority} attribute in each filter.
+
+Once the dictionaries are combined, pruned and sorted, @value{GDBN}
+creates an iterator which wraps each frame in the call stack in a
+@code{FrameDecorator} object, and calls each filter in order.  The
+output from the previous filter will always be the input to the next
+filter, and so on.
+
+Frame filters have a mandatory interface which each frame filter must
+implement, defined here:
+
+@defun FrameFilter.filter (iterator)
+@value{GDBN} will call this method on a frame filter when it has
+reached the order in the priority list for that filter.
+
+For example, if there are four frame filters:
+
+@smallexample
+Name         Priority
+
+Filter1      5
+Filter2      10
+Filter3      100
+Filter4      1
+@end smallexample
+
+The order that the frame filters will be called is:
+
+@smallexample
+Filter3 -> Filter2 -> Filter1 -> Filter4
+@end smallexample
+
+Note that the output from @code{Filter3} is passed to the input of
+@code{Filter2}, and so on.
+
+This @code{filter} method is passed a Python iterator.  This iterator
+contains a sequence of frame decorators that wrap each
+@code{gdb.Frame}, or a frame decorator that wraps another frame
+decorator.  The first filter that is executed in the sequence of frame
+filters will receive an iterator entirely comprised of default
+@code{FrameDecorator} objects.  However, after each frame filter is
+executed, the previous frame filter may have wrapped some or all of
+the frame decorators with their own frame decorator.  As frame
+decorators must also conform to a mandatory interface, these
+decorators can be assumed to act in a uniform manner (@pxref{Frame
+Decorator API}).
+
+This method must return an object conforming to the Python iterator
+protocol.  Each item in the iterator must be an object conforming to
+the frame decorator interface.  If a frame filter does not wish to
+perform any operations on this iterator, it should return that
+iterator untouched.
+
+This method is not optional.  If it does not exist, @value{GDBN} will
+raise and print an error.
+@end defun
+
+@defvar FrameFilter.name
+The @code{name} attribute must be Python string which contains the
+name of the filter displayed by @value{GDBN} (@pxref{Frame Filter
+Management}).  This attribute may contain any combination of letters
+or numbers.  Care should be taken to ensure that it is unique.  This
+attribute is mandatory.
+@end defvar
+
+@defvar FrameFilter.enabled
+The @code{enabled} attribute must be Python boolean.  This attribute
+indicates to @value{GDBN} whether the frame filter is enabled, and
+should be considered when frame filters are executed.  If
+@code{enabled} is @code{True}, then the frame filter will be executed
+when any of the backtrace commands detailed earlier in this chapter
+are executed.  If @code{enabled} is @code{False}, then the frame
+filter will not be executed.  This attribute is mandatory.
+@end defvar
+
+@defvar FrameFilter.priority
+The @code{priority} attribute must be Python integer.  This attribute
+controls the order of execution in relation to other frame filters.
+There are no imposed limits on the range of @code{priority} other than
+it must be a valid integer.  The higher the @code{priority} attribute,
+the sooner the frame filter will be executed in relation to other
+frame filters.  Although @code{priority} can be negative, it is
+recommended practice to assume zero is the lowest priority that a
+frame filter can be assigned.  Frame filters that have the same
+priority are executed in unsorted order in that priority slot.  This
+attribute is mandatory.
+@end defvar
+
+@node Frame Decorator API
+@subsubsection Decorating Frames.
+@cindex frame decorator api
+
+Frame decorators are sister objects to frame filters (@pxref{Frame
+Filter API}).  Frame decorators are applied by a frame filter and can
+only be used in conjunction with frame filters.
+
+The purpose of a frame decorator is to customize the printed content
+of each @code{gdb.Frame} in commands where frame filters are executed.
+This concept is called decorating a frame.  Frame decorators decorate
+a @code{gdb.Frame} with Python code contained within each API call.
+This separates the actual data contained in a @code{gdb.Frame} from
+the decorated data produced by a frame decorator.  This abstraction is
+necessary to maintain integrity of the data contained in each
+@code{gdb.Frame}.
+
+Frame decorators have a mandatory interface, defined below.
+
+@value{GDBN} already contains a frame decorator called
+@code{FrameDecorator}.  This contains substantial amounts of
+boilerplate code to decorate the content of a @code{gdb.Frame}.  It is
+recommended that other frame decorators inherit and extend this
+object, and only to override the methods needed.
+
+@defun FrameDecorator.elided (self)
+
+The @code{elided} method groups frames together in a hierarchical
+system.  An example would be an interpreter, where multiple low-level
+frames make up a single call in the interpreted language.  In this
+example, the frame filter would elide the low-level frames and present
+a single high-level frame, representing the call in the interpreted
+language, to the user.
+
+The @code{elided} function must return an iterable and this iterable
+must contain the frames that are being elided wrapped in a suitable
+frame decorator.  If no frames are being elided this function may
+return an empty iterable, or @code{None}.  Elided frames are indented
+from normal frames in a @code{CLI} backtrace, or in the case of
+@code{GDB/MI}, are placed in the @code{children} field of the eliding
+frame.
+
+It is the frame filter's task to also filter out the elided frames from
+the source iterator.  This will avoid printing the frame twice.
+@end defun
+
+@defun FrameDecorator.function (self)
+
+This method returns the name of the function in the frame that is to
+be printed.
+
+This method must return a Python string describing the function, or
+@code{None}.
+
+If this function returns @code{None}, @value{GDBN} will not print any
+data for this field.
+@end defun
+
+@defun FrameDecorator.address (self)
+
+This method returns the address of the frame that is to be printed.
+
+This method must return a Python numeric integer type of sufficient
+size to describe the address of the frame, or @code{None}.
+
+If this function returns a @code{None}, @value{GDBN} will not print
+any data for this field.
+@end defun
+
+@defun FrameDecorator.filename (self)
+
+This method returns the filename and path associated with this frame.
+
+This method must return a Python string containing the filename and
+the path to the object file backing the frame, or @code{None}.
+
+If this function returns a @code{None}, @value{GDBN} will not print
+any data for this field.
+@end defun
+
+@defun FrameDecorator.line (self):
+
+This method returns the line number associated with the current
+position within the function addressed by this frame.
+
+This method must return a Python integer type, or @code{None}.
+
+If this function returns a @code{None}, @value{GDBN} will not print
+any data for this field.
+@end defun
+
+@defun FrameDecorator.frame_args (self)
+@anchor{frame_args}
+
+This method must return an iterable, or @code{None}.  Returning an
+empty iterable, or @code{None} means frame arguments will not be
+printed for this frame.  This iterable must contain objects that
+implement two methods, described here.
+
+This object must implement a @code{argument} method which takes a
+single @code{self} parameter and must return a @code{gdb.Symbol}
+(@pxref{Symbols In Python}), or a Python string.  The object must also
+implement a @code{value} method which takes a single @code{self}
+parameter and must return a @code{gdb.Value} (@pxref{Values From
+Inferior}), a Python value, or @code{None}.  If the @code{value}
+method returns @code{None}, and the @code{argument} method returns a
+@code{gdb.Symbol}, @value{GDBN} will look-up and print the value of
+the @code{gdb.Symbol} automatically.
+
+A brief example:
+
+@smallexample
+class SymValueWrapper():
+
+    def __init__(self, symbol, value):
+        self.sym = symbol
+        self.val = value
+
+    def value(self):
+        return self.val
+
+    def symbol(self):
+        return self.sym
+
+class SomeFrameDecorator()
+...
+...
+    def frame_args(self):
+        args = []
+        try:
+            block = self.inferior_frame.block()
+        except:
+            return None
+
+        # Iterate over all symbols in a block.  Only add
+        # symbols that are arguments.
+        for sym in block:
+            if not sym.is_argument:
+                continue
+            args.append(SymValueWrapper(sym,None))
+
+        # Add example synthetic argument.
+        args.append(SymValueWrapper(``foo'', 42))
+
+        return args
+@end smallexample
+@end defun
+
+@defun FrameDecorator.frame_locals (self)
+
+This method must return an iterable or @code{None}.  Returning an
+empty iterable, or @code{None} means frame local arguments will not be
+printed for this frame.
+
+The object interface, the description of the various strategies for
+reading frame locals, and the example are largely similar to those
+described in the @code{frame_args} function, (@pxref{frame_args,,The
+frame filter frame_args function}).  Below is a modified example:
+
+@smallexample
+class SomeFrameDecorator()
+...
+...
+    def frame_locals(self):
+        vars = []
+        try:
+            block = self.inferior_frame.block()
+        except:
+            return None
+
+        # Iterate over all symbols in a block.  Add all
+        # symbols, except arguments.
+        for sym in block:
+            if sym.is_argument:
+                continue
+            vars.append(SymValueWrapper(sym,None))
+
+        # Add an example of a synthetic local variable.
+        vars.append(SymValueWrapper(``bar'', 99))
+
+        return vars
+@end smallexample
+@end defun
+
+@defun FrameDecorator.inferior_frame (self):
+
+This method must return the underlying @code{gdb.Frame} that this
+frame decorator is decorating.  @value{GDBN} requires the underlying
+frame for internal frame information to determine how to print certain
+values when printing a frame.
+@end defun
+
+@node Writing a Frame Filter
+@subsubsection Writing a Frame Filter
+@cindex writing a frame filter
+
+There are three basic elements that a frame filter must implement: it
+must correctly implement the documented interface (@pxref{Frame Filter
+API}), it must register itself with @value{GDBN}, and finally, it must
+decide if it is to work on the data provided by @value{GDBN}.  In all
+cases, whether it works on the iterator or not, each frame filter must
+return an iterator.  A bare-bones frame filter follows the pattern in
+the following example.
+
+@smallexample
+import gdb
+
+class FrameFilter():
+
+    def __init__(self):
+        # Frame filter attribute creation.
+        #
+        # 'name' is the name of the filter that GDB will display.
+        #
+        # 'priority' is the priority of the filter relative to other
+        # filters.
+        #
+        # 'enabled' is a boolean that indicates whether this filter is
+        # enabled and should be executed.
+
+        self.name = "Foo"
+        self.priority = 100
+        self.enabled = True
+
+        # Register this frame filter with the global frame_filters
+        # dictionary.
+        gdb.frame_filters[self.name] = self
+
+    def filter(self, frame_iter):
+        # Just return the iterator.
+        return frame_iter
+@end smallexample
+
+The frame filter in the example above implements the three
+requirements for all frame filters.  It implements the API, self
+registers, and makes a decision on the iterator (in this case, it just
+returns the iterator untouched).
+
+The first step is attribute creation and assignment, and as shown in
+the comments the filter assigns the following attributes:  @code{name},
+@code{priority} and whether the filter should be enabled with the
+@code{enabled} attribute.
+
+The second step is registering the frame filter with the dictionary or
+dictionaries that the frame filter has interest in.  As shown in the
+comments, this filter just registers itself with the global dictionary
+@code{gdb.frame_filters}.  As noted earlier, @code{gdb.frame_filters}
+is a dictionary that is initialized in the @code{gdb} module when
+@value{GDBN} starts.  What dictionary a filter registers with is an
+important consideration.  Generally, if a filter is specific to a set
+of code, it should be registered either in the @code{objfile} or
+@code{progspace} dictionaries as they are specific to the program
+currently loaded in @value{GDBN}.  The global dictionary is always
+present in @value{GDBN} and is never unloaded.  Any filters registered
+with the global dictionary will exist until @value{GDBN} exits.  To
+avoid filters that may conflict, it is generally better to register
+frame filters against the dictionaries that more closely align with
+the usage of the filter currently in question.  @xref{Python
+Auto-loading}, for further information on auto-loading Python scripts.
+
+@value{GDBN} takes a hands-off approach to frame filter registration,
+therefore it is the frame filter's responsibility to ensure
+registration has occurred, and that any exceptions are handled
+appropriately.  In particular, you may wish to handle exceptions
+relating to Python dictionary key uniqueness.  It is mandatory that
+the dictionary key is the same as frame filter's @code{name}
+attribute.  When a user manages frame filters (@pxref{Frame Filter
+Management}), the names @value{GDBN} will display are those contained
+in the @code{name} attribute.
+
+The final step of this example is the implementation of the
+@code{filter} method.  As shown in the example comments, we define the
+@code{filter} method and note that the method must take an iterator,
+and also must return an iterator.  In this bare-bones example, the
+frame filter is not very useful as it just returns the iterator
+untouched.  However this is a valid operation for frame filters that
+have the @code{enabled} attribute set, but decide not to operate on
+any frames.
+
+In the next example, the frame filter operates on all frames and
+utilizes a frame decorator to perform some work on the frames.
+@xref{Frame Decorator API}, for further information on the frame
+decorator interface.
+
+This example works on inlined frames.  It highlights frames which are
+inlined by tagging them with an ``[inlined]'' tag.  By applying a
+frame decorator to all frames with the Python @code{itertools imap}
+method, the example defers actions to the frame decorator.  Frame
+decorators are only processed when @value{GDBN} prints the backtrace.
+
+This introduces a new decision making topic: whether to perform
+decision making operations at the filtering step, or at the printing
+step.  In this example's approach, it does not perform any filtering
+decisions at the filtering step beyond mapping a frame decorator to
+each frame.  This allows the actual decision making to be performed
+when each frame is printed.  This is an important consideration, and
+well worth reflecting upon when designing a frame filter.  An issue
+that frame filters should avoid is unwinding the stack if possible.
+Some stacks can run very deep, into the tens of thousands in some
+cases.  To search every frame to determine if it is inlined ahead of
+time may be too expensive at the filtering step.  The frame filter
+cannot know how many frames it has to iterate over, and it would have
+to iterate through them all.  This ends up duplicating effort as
+@value{GDBN} performs this iteration when it prints the frames.
+
+In this example decision making can be deferred to the printing step.
+As each frame is printed, the frame decorator can examine each frame
+in turn when @value{GDBN} iterates.  From a performance viewpoint,
+this is the most appropriate decision to make as it avoids duplicating
+the effort that the printing step would undertake anyway.  Also, if
+there are many frame filters unwinding the stack during filtering, it
+can substantially delay the printing of the backtrace which will
+result in large memory usage, and a poor user experience.
+
+@smallexample
+class InlineFilter():
+
+    def __init__(self):
+        self.name = "InlinedFrameFilter"
+        self.priority = 100
+        self.enabled = True
+        gdb.frame_filters[self.name] = self
+
+    def filter(self, frame_iter):
+        frame_iter = itertools.imap(InlinedFrameDecorator,
+                                    frame_iter)
+        return frame_iter
+@end smallexample
+
+This frame filter is somewhat similar to the earlier example, except
+that the @code{filter} method applies a frame decorator object called
+@code{InlinedFrameDecorator} to each element in the iterator.  The
+@code{imap} Python method is light-weight.  It does not proactively
+iterate over the iterator, but rather creates a new iterator which
+wraps the existing one.
+
+Below is the frame decorator for this example.
+
+@smallexample
+class InlinedFrameDecorator(FrameDecorator):
+
+    def __init__(self, fobj):
+        super(InlinedFrameDecorator, self).__init__(fobj)
+
+    def function(self):
+        frame = fobj.inferior_frame()
+        name = str(frame.name())
+
+        if frame.type() == gdb.INLINE_FRAME:
+            name = name + " [inlined]"
+
+        return name
+@end smallexample
+
+This frame decorator only defines and overrides the @code{function}
+method.  It lets the supplied @code{FrameDecorator}, which is shipped
+with @value{GDBN}, perform the other work associated with printing
+this frame.
+
+The combination of these two objects create this output from a
+backtrace:
+
+@smallexample
+#0  0x004004e0 in bar () at inline.c:11
+#1  0x00400566 in max [inlined] (b=6, a=12) at inline.c:21
+#2  0x00400566 in main () at inline.c:31
+@end smallexample
+
+So in the case of this example, a frame decorator is applied to all
+frames, regardless of whether they may be inlined or not.  As
+@value{GDBN} iterates over the iterator produced by the frame filters,
+@value{GDBN} executes each frame decorator which then makes a decision
+on what to print in the @code{function} callback.  Using a strategy
+like this is a way to defer decisions on the frame content to printing
+time.
+
+@subheading Eliding Frames
+
+It might be that the above example is not desirable for representing
+inlined frames, and a hierarchical approach may be preferred.  If we
+want to hierarchically represent frames, the @code{elided} frame
+decorator interface might be preferable.
+
+This example approaches the issue with the @code{elided} method.  This
+example is quite long, but very simplistic.  It is out-of-scope for
+this section to write a complete example that comprehensively covers
+all approaches of finding and printing inlined frames.  However, this
+example illustrates the approach an author might use.
+
+This example comprises of three sections.
+
+@smallexample
+class InlineFrameFilter():
+
+    def __init__(self):
+        self.name = "InlinedFrameFilter"
+        self.priority = 100
+        self.enabled = True
+        gdb.frame_filters[self.name] = self
+
+    def filter(self, frame_iter):
+        return ElidingInlineIterator(frame_iter)
+@end smallexample
+
+This frame filter is very similar to the other examples.  The only
+difference is this frame filter is wrapping the iterator provided to
+it (@code{frame_iter}) with a custom iterator called
+@code{ElidingInlineIterator}.  This again defers actions to when
+@value{GDBN} prints the backtrace, as the iterator is not traversed
+until printing.
+
+The iterator for this example is as follows.  It is in this section of
+the example where decisions are made on the content of the backtrace.
+
+@smallexample
+class ElidingInlineIterator:
+    def __init__(self, ii):
+        self.input_iterator = ii
+
+    def __iter__(self):
+        return self
+
+    def next(self):
+        frame = next(self.input_iterator)
+
+        if frame.inferior_frame().type() != gdb.INLINE_FRAME:
+            return frame
+
+        try:
+            eliding_frame = next(self.input_iterator)
+        except StopIteration:
+            return frame
+        return ElidingFrameDecorator(eliding_frame, [frame])
+@end smallexample
+
+This iterator implements the Python iterator protocol.  When the
+@code{next} function is called (when @value{GDBN} prints each frame),
+the iterator checks if this frame decorator, @code{frame}, is wrapping
+an inlined frame.  If it is not, it returns the existing frame decorator
+untouched.  If it is wrapping an inlined frame, it assumes that the
+inlined frame was contained within the next oldest frame,
+@code{eliding_frame}, which it fetches.  It then creates and returns a
+frame decorator, @code{ElidingFrameDecorator}, which contains both the
+elided frame, and the eliding frame.
+
+@smallexample
+class ElidingInlineDecorator(FrameDecorator):
+
+    def __init__(self, frame, elided_frames):
+        super(ElidingInlineDecorator, self).__init__(frame)
+        self.frame = frame
+        self.elided_frames = elided_frames
+
+    def elided(self):
+        return iter(self.elided_frames)
+@end smallexample
+
+This frame decorator overrides one function and returns the inlined
+frame in the @code{elided} method.  As before it lets
+@code{FrameDecorator} do the rest of the work involved in printing
+this frame.  This produces the following output.
+
+@smallexample
+#0  0x004004e0 in bar () at inline.c:11
+#2  0x00400529 in main () at inline.c:25
+    #1  0x00400529 in max (b=6, a=12) at inline.c:15
+@end smallexample
+
+In that output, @code{max} which has been inlined into @code{main} is
+printed hierarchically.  Another approach would be to combine the
+@code{function} method, and the @code{elided} method to both print a
+marker in the inlined frame, and also show the hierarchical
+relationship.
+
 @node Inferiors In Python
 @subsubsection Inferiors In Python
 @cindex inferiors in Python
@@ -25235,6 +26026,11 @@ The @code{type_printers} attribute is a list of type printer objects.
 @xref{Type Printing API}, for more information.
 @end defvar
 
+@defvar Progspace.frame_filters
+The @code{frame_filters} attribute is a dictionary of frame filter
+objects.  @xref{Frame Filter API}, for more information.
+@end defvar
+
 @node Objfiles In Python
 @subsubsection Objfiles In Python
 
@@ -25283,6 +26079,11 @@ information.
 @defvar Objfile.type_printers
 The @code{type_printers} attribute is a list of type printer objects.
 @xref{Type Printing API}, for more information.
+@end defvar
+
+@defvar Objfile.frame_filters
+The @code{frame_filters} attribute is a dictionary of frame filter
+objects.  @xref{Frame Filter API}, for more information.
 @end defvar
 
 A @code{gdb.Objfile} object has the following methods:
@@ -26351,7 +27152,7 @@ No     my-foo-pretty-printers.py
 When reading an auto-loaded file, @value{GDBN} sets the
 @dfn{current objfile}.  This is available via the @code{gdb.current_objfile}
 function (@pxref{Objfiles In Python}).  This can be useful for
-registering objfile-specific pretty-printers.
+registering objfile-specific pretty-printers and frame-filters.
 
 @menu
 * objfile-gdb.py file::          The @file{@var{objfile}-gdb.py} file
@@ -30222,6 +31023,22 @@ Is this going away????
 @node GDB/MI Stack Manipulation
 @section @sc{gdb/mi} Stack Manipulation Commands
 
+@subheading The @code{-enable-frame-filters} Command
+@findex -enable-frame-filters
+
+@smallexample
+-enable-frame-filters
+@end smallexample
+
+@value{GDBN} allows Python-based frame filters to affect the output of
+the MI commands relating to stack traces.  As there is no way to
+implement this in a fully backward-compatible way, a front end must
+request that this functionality be enabled.
+
+Once enabled, this feature cannot be disabled.
+
+Note that if Python support has not been compiled into @value{GDBN},
+this command will still succeed (and do nothing).
 
 @subheading The @code{-stack-info-frame} Command
 @findex -stack-info-frame
@@ -30289,13 +31106,14 @@ For a stack with frame levels 0 through 11:
 (gdb)
 @end smallexample
 
+@anchor{-stack-list-arguments}
 @subheading The @code{-stack-list-arguments} Command
 @findex -stack-list-arguments
 
 @subsubheading Synopsis
 
 @smallexample
- -stack-list-arguments @var{print-values}
+ -stack-list-arguments [ --no-frame-filters ] @var{print-values}
     [ @var{low-frame} @var{high-frame} ]
 @end smallexample
 
@@ -30312,7 +31130,9 @@ If @var{print-values} is 0 or @code{--no-values}, print only the names of
 the variables; if it is 1 or @code{--all-values}, print also their
 values; and if it is 2 or @code{--simple-values}, print the name,
 type and value for simple data types, and the name and type for arrays,
-structures and unions.
+structures and unions.  If the option @code{--no-frame-filters} is
+supplied, then Python frame filters will not be executed.
+
 
 Use of this command to obtain arguments in a single frame is
 deprecated in favor of the @samp{-stack-list-variables} command.
@@ -30383,13 +31203,14 @@ args=[@{name="intarg",value="2"@},
 @c @subheading -stack-list-exception-handlers
 
 
+@anchor{-stack-list-frames}
 @subheading The @code{-stack-list-frames} Command
 @findex -stack-list-frames
 
 @subsubheading Synopsis
 
 @smallexample
- -stack-list-frames [ @var{low-frame} @var{high-frame} ]
+ -stack-list-frames [ --no-frame-filters @var{low-frame} @var{high-frame} ]
 @end smallexample
 
 List the frames currently on the stack.  For each frame it displays the
@@ -30419,7 +31240,9 @@ levels are between the two arguments (inclusive).  If the two arguments
 are equal, it shows the single frame at the corresponding level.  It is
 an error if @var{low-frame} is larger than the actual number of
 frames.  On the other hand, @var{high-frame} may be larger than the
-actual number of frames, in which case only existing frames will be returned.
+actual number of frames, in which case only existing frames will be
+returned.  If the option @code{--no-frame-filters} is supplied, then
+Python frame filters will not be executed.
 
 @subsubheading @value{GDBN} Command
 
@@ -30489,11 +31312,12 @@ Show a single frame:
 
 @subheading The @code{-stack-list-locals} Command
 @findex -stack-list-locals
+@anchor{-stack-list-locals}
 
 @subsubheading Synopsis
 
 @smallexample
- -stack-list-locals @var{print-values}
+ -stack-list-locals [ --no-frame-filters ] @var{print-values}
 @end smallexample
 
 Display the local variable names for the selected frame.  If
@@ -30504,7 +31328,8 @@ type and value for simple data types, and the name and type for arrays,
 structures and unions.  In this last case, a frontend can immediately
 display the value of simple data types and create variable objects for
 other data types when the user wishes to explore their values in
-more detail.
+more detail.  If the option @code{--no-frame-filters} is supplied, then
+Python frame filters will not be executed.
 
 This command is deprecated in favor of the
 @samp{-stack-list-variables} command.
@@ -30529,13 +31354,14 @@ This command is deprecated in favor of the
 (gdb)
 @end smallexample
 
+@anchor{-stack-list-variables}
 @subheading The @code{-stack-list-variables} Command
 @findex -stack-list-variables
 
 @subsubheading Synopsis
 
 @smallexample
- -stack-list-variables @var{print-values}
+ -stack-list-variables [ --no-frame-filters ] @var{print-values}
 @end smallexample
 
 Display the names of local variables and function arguments for the selected frame.  If
@@ -30543,7 +31369,8 @@ Display the names of local variables and function arguments for the selected fra
 the variables; if it is 1 or @code{--all-values}, print also their
 values; and if it is 2 or @code{--simple-values}, print the name,
 type and value for simple data types, and the name and type for arrays,
-structures and unions.  
+structures and unions.  If the option @code{--no-frame-filters} is
+supplied, then Python frame filters will not be executed.
 
 @subsubheading Example
 
