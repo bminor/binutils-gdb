@@ -1,3 +1,10 @@
+2013-05-10  David Taylor  <dtaylor@emc.com>
+
+	PR remote/15455
+
+	* remote.c (remote_trace_set_readonly_regions): Do not overwrite
+	"QTro" at start of packet.
+
 2013-05-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib-aix.c (solib_aix_relocate_section_addresses):

@@ -1,3 +1,10 @@
+2013-05-10  Pedro Alves  <palves@redhat.com>
+
+	PR remote/15455
+
+	* gdb.trace/qtro.c: New file.
+	* gdb.trace/qtro.exp: New file.
+
 2013-05-10  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-framefilter.py: New File.
