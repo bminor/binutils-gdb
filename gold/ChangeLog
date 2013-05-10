@@ -1,3 +1,8 @@
+2013-05-10  Roland McGrath  <mcgrathr@google.com>
+
+	* options.h (General_options): Remove leading space from help
+	messages for -nostdlib and --rosegment.
+
 2013-05-03  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	PR ld/15365
@@ -14802,7 +14807,7 @@
 
 	* Added source code to GNU binutils.
 
-Copyright (C) 2008-2012 Free Software Foundation, Inc.
+Copyright (C) 2008-2013 Free Software Foundation, Inc.
 
 Copying and distribution of this file, with or without modification,
 are permitted in any medium without royalty provided the copyright
