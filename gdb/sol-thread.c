@@ -907,6 +907,30 @@ ps_plog (const char *fmt, ...)
   vfprintf_filtered (gdb_stderr, fmt, args);
 }
 
+/* Get size of extra register set.  Currently a noop.  */
+
+ps_err_e
+ps_lgetxregsize (gdb_ps_prochandle_t ph, lwpid_t lwpid, int *xregsize)
+{
+  return PS_OK;
+}
+
+/* Get extra register set.  Currently a noop.  */
+
+ps_err_e
+ps_lgetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
+{
+  return PS_OK;
+}
+
+/* Set extra register set.  Currently a noop.  */
+
+ps_err_e
+ps_lsetxregs (gdb_ps_prochandle_t ph, lwpid_t lwpid, caddr_t xregset)
+{
+  return PS_OK;
+}
+
 /* Get floating-point registers for LWP.  */
 
 ps_err_e

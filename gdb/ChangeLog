@@ -1,3 +1,12 @@
+2013-05-10  Joel Brobecker  <brobecker@adacore.com>
+
+	PR tdep/15420:
+	* sol-thread.c (ps_lgetxregsize, ps_lgetxregs, ps_lsetxregs):
+	New functions, directly copied from sparc-sol-thread.c.
+	* sparc-sol-thread.c: Delete.
+	* configure.ac: Remove code handling sparc-solaris-thread.c.
+	* configure: Regenerate.
+
 2013-05-10  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* stack.c (backtrace_command_1): Add "no-filters", and Python frame
