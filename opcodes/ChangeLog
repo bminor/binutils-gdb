@@ -1,3 +1,16 @@
+2013-05-09  Andrew Pinski  <apinski@cavium.com>
+
+	* mips-dis.c (mips_arch_choices): Add INSN_VIRT to mips32r2.
+	Add INSN_VIRT and INSN_VIRT64 to mips64r2.
+	(parse_mips_dis_option): Handle the virt option.
+	(print_insn_args): Handle "+J".
+	(print_mips_disassembler_options): Print out message about virt64.
+	* mips-opc.c (IVIRT): New define.
+	(IVIRT64): New define.
+	(mips_builtin_opcodes): Add dmfgc0, dmtgc0, hypcall, mfgc0, mtgc0,
+	tlbgr, tlbgwi, tlbginv, tlbginvf, tlbgwr, tlbgp VIRT instructions.
+	Move rfe to the bottom as it conflicts with tlbgp.
+
 2013-05-09  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (extract_vlesi): Properly sign extend.

@@ -1,3 +1,7 @@
+2013-05-09  Andrew Pinski  <apinski@cavium.com>
+
+	* doc/binutils.texi: Document -Mvirt disassembler option.
+
 2013-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c: Add support for MSP430X architecture.

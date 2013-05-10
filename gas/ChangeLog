@@ -1,3 +1,26 @@
+2013-05-09  Andrew Pinski  <apinski@cavium.com>
+
+	* config/tc-mips.c (struct mips_set_options): New ase_virt field.
+	(mips_opts): Update for the new field.
+	(file_ase_virt): New variable.
+	(ISA_SUPPORTS_VIRT_ASE): New macro.
+	(ISA_SUPPORTS_VIRT64_ASE): New macro.
+	(MIPS_CPU_ASE_VIRT): New define.
+	(is_opcode_valid): Handle ase_virt.
+	(macro_build): Handle "+J".
+	(validate_mips_insn): Likewise.
+	(mips_ip): Likewise.
+	(enum options): Add OPTION_VIRT and OPTION_NO_VIRT.
+	(md_longopts): Add mvirt and mnovirt
+	(md_parse_option): Handle OPTION_VIRT and OPTION_NO_VIRT.
+	(mips_after_parse_args): Handle ase_virt field.
+	(s_mipsset): Handle "virt" and "novirt".
+	(mips_elf_final_processing): Add a comment about virt ASE might need
+	a new flag.
+	(md_show_usage): Print out the usage of -mvirt and mno-virt options.
+	* doc/c-mips.texi: Document -mvirt and -mno-virt.
+	Document ".set virt" and ".set novirt".
+
 2013-05-09  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_apply_fix): Sign extend fieldval under

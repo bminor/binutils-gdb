@@ -181,6 +181,12 @@ Generate code for the MCU Application Specific Extension.
 This tells the assembler to accept MCU instructions.
 @samp{-mno-mcu} turns off this option.
 
+@item -mvirt
+@itemx -mno-virt
+Generate code for the Virtualization Application Specific Extension.
+This tells the assembler to accept Virtualization instructions.
+@samp{-mno-virt} turns off this option.
+
 @item -mfix7000
 @itemx -mno-fix7000
 Cause nops to be inserted if the read of the destination register
@@ -682,6 +688,14 @@ instructions from being accepted.
 The directive @code{.set mcu} makes the assembler accept instructions
 from the MCU Application Specific Extension from that point on
 in the assembly.  The @code{.set nomcu} directive prevents MCU
+instructions from being accepted.
+
+@cindex Virtualization instruction generation override
+@kindex @code{.set virt}
+@kindex @code{.set novirt}
+The directive @code{.set virt} makes the assembler accept instructions
+from the Virtualization Application Specific Extension from that point
+on in the assembly.  The @code{.set novirt} directive prevents Virtualization
 instructions from being accepted.
 
 Traditional @sc{mips} assemblers do not support these directives.

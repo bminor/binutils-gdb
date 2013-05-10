@@ -218,6 +218,7 @@ struct mips_set_options
   int ase_dspr2;
   int ase_mt;
   int ase_mcu;
+  int ase_virt;
   /* Whether we are assembling for the mips16 processor.  0 if we are
      not, 1 if we are, and -1 if the value has not been initialized.
      Changed by `.set mips16' and `.set nomips16', and the -mips16 and
@@ -292,10 +293,11 @@ static struct mips_set_options mips_opts =
 {
   /* isa */ ISA_UNKNOWN, /* ase_mips3d */ -1, /* ase_mdmx */ -1,
   /* ase_smartmips */ 0, /* ase_dsp */ -1, /* ase_dspr2 */ -1, /* ase_mt */ -1,
-  /* ase_mcu */ -1, /* mips16 */ -1, /* micromips */ -1, /* noreorder */ 0,
-  /* at */ ATREG, /* warn_about_macros */ 0, /* nomove */ 0, /* nobopt */ 0,
-  /* noautoextend */ 0, /* gp32 */ 0, /* fp32 */ 0, /* arch */ CPU_UNKNOWN,
-  /* sym32 */ FALSE, /* soft_float */ FALSE, /* single_float */ FALSE
+  /* ase_mcu */ -1, /* ase_virt */ -1, /* mips16 */ -1,/* micromips */ -1,
+  /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
+  /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* gp32 */ 0,
+  /* fp32 */ 0, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
+  /* soft_float */ FALSE, /* single_float */ FALSE
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -373,6 +375,15 @@ static int file_ase_mt;
 #define ISA_SUPPORTS_MCU_ASE (mips_opts.isa == ISA_MIPS32R2		\
 			      || mips_opts.isa == ISA_MIPS64R2		\
 			      || mips_opts.micromips)
+
+/* True if -mvirt was passed or implied by arguments passed on the
+   command line (e.g., by -march). */
+static int file_ase_virt;
+
+#define ISA_SUPPORTS_VIRT_ASE (mips_opts.isa == ISA_MIPS32R2		\
+			       || mips_opts.isa == ISA_MIPS64R2)
+
+#define ISA_SUPPORTS_VIRT64_ASE (mips_opts.isa == ISA_MIPS64R2)
 
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int file_mips_arch = CPU_UNKNOWN;
@@ -1395,6 +1406,7 @@ struct mips_cpu_info
 #define MIPS_CPU_ASE_MDMX	0x0020	/* CPU implements MDMX ASE */
 #define MIPS_CPU_ASE_DSPR2	0x0040	/* CPU implements DSP R2 ASE */
 #define MIPS_CPU_ASE_MCU	0x0080	/* CPU implements MCU ASE */
+#define MIPS_CPU_ASE_VIRT	0x0100  /* CPU implements Virtualization ASE */
 
 static const struct mips_cpu_info *mips_parse_cpu (const char *, const char *);
 static const struct mips_cpu_info *mips_cpu_info_from_isa (int);
@@ -2258,6 +2270,10 @@ is_opcode_valid (const struct mips_opcode *mo)
     isa |= INSN_SMARTMIPS;
   if (mips_opts.ase_mcu)
     isa |= INSN_MCU;
+  if (mips_opts.ase_virt)
+    isa |= INSN_VIRT;
+  if (mips_opts.ase_virt && ISA_SUPPORTS_VIRT64_ASE)
+    isa |= INSN_VIRT64;
 
   if (!opcode_is_member (mo, isa, mips_opts.arch))
     return FALSE;
@@ -5034,6 +5050,11 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 		 MSB values must be calculated.)  */
 	      INSERT_OPERAND (mips_opts.micromips,
 			      INSMSB, insn, va_arg (args, int));
+	      continue;
+
+	    case 'J':
+	      gas_assert (!mips_opts.micromips);
+	      INSERT_OPERAND (0, CODE10, insn, va_arg (args, int));
 	      continue;
 
 	    case 'C':
@@ -10416,6 +10437,7 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'G': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
 	  case 'H': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
 	  case 'I': break;
+	  case 'J': USE_BITS (OP_MASK_CODE10,	OP_SH_CODE10);	break;
 	  case 't': USE_BITS (OP_MASK_RT,	OP_SH_RT);	break;
 	  case 'T': USE_BITS (OP_MASK_RT,	OP_SH_RT);
 		    USE_BITS (OP_MASK_SEL,	OP_SH_SEL);	break;
@@ -11334,6 +11356,23 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		      }
 		    ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
 					<< imm->shift);
+		    imm_expr.X_op = O_absent;
+		    s = expr_end;
+		  }
+		  continue;
+
+		case 'J':		/* 10-bit hypcall code.  */
+		  gas_assert (!mips_opts.micromips);
+		  {
+		    unsigned long mask = OP_MASK_CODE10;
+
+		    my_getExpression (&imm_expr, s);
+		    check_absolute_expr (ip, &imm_expr);
+		    if ((unsigned long) imm_expr.X_add_number > mask)
+		      as_warn (_("Code for %s not in range 0..%lu (%lu)"),
+			       ip->insn_mo->name,
+			       mask, (unsigned long) imm_expr.X_add_number);
+		    INSERT_OPERAND (0, CODE10, *ip, imm_expr.X_add_number);
 		    imm_expr.X_op = O_absent;
 		    s = expr_end;
 		  }
@@ -14496,6 +14535,8 @@ enum options
     OPTION_NO_DSP,
     OPTION_MT,
     OPTION_NO_MT,
+    OPTION_VIRT,
+    OPTION_NO_VIRT,
     OPTION_SMARTMIPS,
     OPTION_NO_SMARTMIPS,
     OPTION_DSPR2,
@@ -14600,6 +14641,8 @@ struct option md_longopts[] =
   {"mno-micromips", no_argument, NULL, OPTION_NO_MICROMIPS},
   {"mmcu", no_argument, NULL, OPTION_MCU},
   {"mno-mcu", no_argument, NULL, OPTION_NO_MCU},
+  {"mvirt", no_argument, NULL, OPTION_VIRT},
+  {"mno-virt", no_argument, NULL, OPTION_NO_VIRT},
 
   /* Old-style architecture options.  Don't add more of these.  */
   {"m4650", no_argument, NULL, OPTION_M4650},
@@ -14875,6 +14918,14 @@ md_parse_option (int c, char *arg)
     case OPTION_NO_MICROMIPS:
       mips_opts.micromips = 0;
       mips_no_prev_insn ();
+      break;
+
+    case OPTION_VIRT:
+      mips_opts.ase_virt = 1;
+      break;
+
+    case OPTION_NO_VIRT:
+      mips_opts.ase_virt = 0;
       break;
 
     case OPTION_MIPS16:
@@ -15370,6 +15421,12 @@ mips_after_parse_args (void)
       as_warn (_("%s ISA does not support MCU ASE"),
 	       mips_cpu_info_from_isa (mips_opts.isa)->name);
 
+  if (mips_opts.ase_virt == -1)
+    mips_opts.ase_virt = (arch_info->flags & MIPS_CPU_ASE_VIRT) ? 1 : 0;
+  if (mips_opts.ase_virt && !ISA_SUPPORTS_VIRT_ASE)
+    as_warn (_("%s ISA does not support Virtualization ASE"),
+	     mips_cpu_info_from_isa (mips_opts.isa)->name);
+
   file_mips_isa = mips_opts.isa;
   file_ase_mips3d = mips_opts.ase_mips3d;
   file_ase_mdmx = mips_opts.ase_mdmx;
@@ -15377,6 +15434,7 @@ mips_after_parse_args (void)
   file_ase_dsp = mips_opts.ase_dsp;
   file_ase_dspr2 = mips_opts.ase_dspr2;
   file_ase_mt = mips_opts.ase_mt;
+  file_ase_virt = mips_opts.ase_virt;
   mips_opts.gp32 = file_mips_gp32;
   mips_opts.fp32 = file_mips_fp32;
   mips_opts.soft_float = file_mips_soft_float;
@@ -16446,6 +16504,15 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     mips_opts.ase_mcu = 1;
   else if (strcmp (name, "nomcu") == 0)
     mips_opts.ase_mcu = 0;
+  else if (strcmp (name, "virt") == 0)
+    {
+      if (!ISA_SUPPORTS_VIRT_ASE)
+	as_warn (_("%s ISA does not support Virtualization ASE"), 
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+      mips_opts.ase_virt = 1;
+    }
+  else if (strcmp (name, "novirt") == 0)
+    mips_opts.ase_virt = 0;
   else if (strncmp (name, "mips", 4) == 0 || strncmp (name, "arch=", 5) == 0)
     {
       int reset = 0;
@@ -18718,12 +18785,8 @@ mips_elf_final_processing (void)
   if (mips_abicalls)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_CPIC;
 
-  /* Set MIPS ELF flags for ASEs.  */
-  /* We may need to define a new flag for DSP ASE, and set this flag when
-     file_ase_dsp is true.  */
-  /* Same for DSP R2.  */
-  /* We may need to define a new flag for MT ASE, and set this flag when
-     file_ase_mt is true.  */
+  /* Set MIPS ELF flags for ASEs.  Note that not all ASEs have flags
+     defined at present; this might need to change in future.  */
   if (file_ase_mips16)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_ARCH_ASE_M16;
   if (file_ase_micromips)
@@ -19593,6 +19656,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mmcu			generate MCU instructions\n\
 -mno-mcu		do not generate MCU instructions\n"));
+  fprintf (stream, _("\
+-mvirt			generate Virtualization instructions\n\
+-mno-virt		do not generate Virtualization instructions\n"));
   fprintf (stream, _("\
 -mfix-loongson2f-jump	work around Loongson2F JUMP instructions\n\
 -mfix-loongson2f-nop	work around Loongson2F NOP errata\n\

@@ -2113,6 +2113,9 @@ Print the 'raw' instruction mnemonic instead of some pseudo
 instruction mnemonic.  I.e., print 'daddu' or 'or' instead of 'move',
 'sll' instead of 'nop', etc.
 
+@item virt
+Disassemble the virtualization ASE instructions.
+
 @item gpr-names=@var{ABI}
 Print GPR (general-purpose register) names as appropriate
 for the specified ABI.  By default, GPR names are selected according to

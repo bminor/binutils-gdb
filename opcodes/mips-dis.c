@@ -590,7 +590,7 @@ const struct mips_arch_choice mips_arch_choices[] =
 
   { "mips32r2",	1, bfd_mach_mipsisa32r2, CPU_MIPS32R2,
     (ISA_MIPS32R2 | INSN_SMARTMIPS | INSN_DSP | INSN_DSPR2
-     | INSN_MIPS3D | INSN_MT | INSN_MCU),
+     | INSN_MIPS3D | INSN_MT | INSN_MCU | INSN_VIRT),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -604,7 +604,7 @@ const struct mips_arch_choice mips_arch_choices[] =
 
   { "mips64r2",	1, bfd_mach_mipsisa64r2, CPU_MIPS64R2,
     (ISA_MIPS64R2 | INSN_MIPS3D | INSN_DSP | INSN_DSPR2
-     | INSN_DSP64 | INSN_MT | INSN_MDMX | INSN_MCU),
+     | INSN_DSP64 | INSN_MT | INSN_MDMX | INSN_MCU | INSN_VIRT | INSN_VIRT64),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -822,6 +822,14 @@ parse_mips_dis_option (const char *option, unsigned int len)
   if (CONST_STRNEQ (option, "no-aliases"))
     {
       no_aliases = 1;
+      return;
+    }
+
+  if (CONST_STRNEQ (option, "virt"))
+    {
+      mips_isa |= INSN_VIRT;
+      if (mips_isa & ISA_MIPS64R2)
+	mips_isa |= INSN_VIRT64;
       return;
     }
   
@@ -1064,6 +1072,10 @@ print_insn_args (const char *d,
 	    case 'G':
 	      msbd = GET_OP (l, EXTMSBD) + 32;
 	      infprintf (is, "0x%x", msbd + 1);
+	      break;
+
+	    case 'J':		/* hypcall operand */
+	      infprintf (is, "0x%x", GET_OP (l, CODE10));
 	      break;
 
 	    case 't': /* Coprocessor 0 reg name */
@@ -3032,6 +3044,9 @@ print_mips_disassembler_options (FILE *stream)
   fprintf (stream, _("\n\
 The following MIPS specific disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
+
+  fprintf (stream, _("\n\
+  virt            Recognize the virtualization ASE instructions.\n"));
 
   fprintf (stream, _("\n\
   gpr-names=ABI            Print GPR names according to  specified ABI.\n\
