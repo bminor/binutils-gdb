@@ -1,5 +1,12 @@
 2013-05-10  Roland McGrath  <mcgrathr@google.com>
 
+	* options.h (General_options): Add --rosegment-gap option.
+	* options.cc (finalize): --rosegment-gap implies --rosegment.
+	* layout.cc (set_segment_offsets): Let user option override
+	target->rosegment_gap().
+
+2013-05-10  Roland McGrath  <mcgrathr@google.com>
+
 	* options.h (General_options): Remove leading space from help
 	messages for -nostdlib and --rosegment.
 

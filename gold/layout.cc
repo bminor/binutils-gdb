@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -244,10 +244,10 @@ class Hash_task : public Task
 {
  public:
   Hash_task(const unsigned char* src,
-            size_t size,
-            unsigned char* dst,
-            Task_token* build_id_blocker,
-            Task_token* final_blocker)
+	    size_t size,
+	    unsigned char* dst,
+	    Task_token* build_id_blocker,
+	    Task_token* final_blocker)
     : src_(src), size_(size), dst_(dst), build_id_blocker_(build_id_blocker),
       final_blocker_(final_blocker)
   { }
@@ -1098,7 +1098,7 @@ Layout::special_ordering_of_input_section(const char* name)
   // wind up in the .text section.  Sections that start with these
   // prefixes must appear first, and must appear in the order listed
   // here.
-  static const char* const text_section_sort[] = 
+  static const char* const text_section_sort[] =
   {
     ".text.unlikely",
     ".text.exit",
@@ -1158,7 +1158,7 @@ Layout::layout(Sized_relobj_file<size, big_endian>* object, unsigned int shndx,
 	  = this->section_segment_map_.find(Const_section_id(object, shndx));
       if (it == this->section_segment_map_.end())
 	{
-          os = this->choose_output_section(object, name, sh_type,
+	  os = this->choose_output_section(object, name, sh_type,
 					   shdr.get_sh_flags(), true,
 					   ORDER_INVALID, false);
 	}
@@ -1254,7 +1254,7 @@ void
 Layout::insert_section_segment_map(Const_section_id secn,
 				   Unique_segment_info *s)
 {
-  gold_assert(this->unique_segment_for_sections_specified_); 
+  gold_assert(this->unique_segment_for_sections_specified_);
   this->section_segment_map_[secn] = s;
 }
 
@@ -1890,44 +1890,44 @@ Layout::attach_allocated_section_to_segment(const Target* target,
   if (!os->is_unique_segment())
     {
       for (p = this->segment_list_.begin();
- 	   p != this->segment_list_.end();
+	   p != this->segment_list_.end();
 	   ++p)
 	{
-	  if ((*p)->type() != elfcpp::PT_LOAD)                        
-	    continue;                        
-	  if ((*p)->is_unique_segment())                        
-	    continue;                        
-	  if (!parameters->options().omagic()                        
-	      && ((*p)->flags() & elfcpp::PF_W) != (seg_flags & elfcpp::PF_W))                        
-	    continue;                        
-	  if ((target->isolate_execinstr() || parameters->options().rosegment())                        
-	      && ((*p)->flags() & elfcpp::PF_X) != (seg_flags & elfcpp::PF_X))                        
-	    continue;                        
-	  // If -Tbss was specified, we need to separate the data and BSS                        
-	  // segments.                        
-	  if (parameters->options().user_set_Tbss())                        
-	    {                        
-	      if ((os->type() == elfcpp::SHT_NOBITS)                        
-	          == (*p)->has_any_data_sections())                        
-	        continue;                        
-	    }                        
-	  if (os->is_large_data_section() && !(*p)->is_large_data_segment())                        
-	    continue;                        
-	                    
-	  if (is_address_set)                        
-	    {                        
-	      if ((*p)->are_addresses_set())                        
-	        continue;                        
-	                    
-	      (*p)->add_initial_output_data(os);                        
-	      (*p)->update_flags_for_output_section(seg_flags);                        
-	      (*p)->set_addresses(addr, addr);                        
-	      break;                        
-	    }                        
-	                    
-	  (*p)->add_output_section_to_load(this, os, seg_flags);                        
-	  break;                        
-	}                        
+	  if ((*p)->type() != elfcpp::PT_LOAD)
+	    continue;
+	  if ((*p)->is_unique_segment())
+	    continue;
+	  if (!parameters->options().omagic()
+	      && ((*p)->flags() & elfcpp::PF_W) != (seg_flags & elfcpp::PF_W))
+	    continue;
+	  if ((target->isolate_execinstr() || parameters->options().rosegment())
+	      && ((*p)->flags() & elfcpp::PF_X) != (seg_flags & elfcpp::PF_X))
+	    continue;
+	  // If -Tbss was specified, we need to separate the data and BSS
+	  // segments.
+	  if (parameters->options().user_set_Tbss())
+	    {
+	      if ((os->type() == elfcpp::SHT_NOBITS)
+		  == (*p)->has_any_data_sections())
+		continue;
+	    }
+	  if (os->is_large_data_section() && !(*p)->is_large_data_segment())
+	    continue;
+
+	  if (is_address_set)
+	    {
+	      if ((*p)->are_addresses_set())
+		continue;
+
+	      (*p)->add_initial_output_data(os);
+	      (*p)->update_flags_for_output_section(seg_flags);
+	      (*p)->set_addresses(addr, addr);
+	      break;
+	    }
+
+	  (*p)->add_output_section_to_load(this, os, seg_flags);
+	  break;
+	}
     }
 
   if (p == this->segment_list_.end()
@@ -3457,7 +3457,10 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 		  // If the target wants a fixed minimum distance from the
 		  // text segment to the read-only segment, move up now.
-		  uint64_t min_addr = start_addr + target->rosegment_gap();
+		  uint64_t min_addr =
+		    start_addr + (parameters->options().user_set_rosegment_gap()
+				  ? parameters->options().rosegment_gap()
+				  : target->rosegment_gap());
 		  if (addr < min_addr)
 		    addr = min_addr;
 
@@ -5270,20 +5273,20 @@ Layout::write_sections_after_input_sections(Output_file* of)
 
 Task_token*
 Layout::queue_build_id_tasks(Workqueue* workqueue, Task_token* build_id_blocker,
-                             Output_file* of)
+			     Output_file* of)
 {
   const size_t filesize = (this->output_file_size() <= 0 ? 0
-                           : static_cast<size_t>(this->output_file_size()));
+			   : static_cast<size_t>(this->output_file_size()));
   if (this->build_id_note_ != NULL
       && strcmp(parameters->options().build_id(), "tree") == 0
       && parameters->options().build_id_chunk_size_for_treehash() > 0
       && filesize > 0
       && (filesize >=
-          parameters->options().build_id_min_file_size_for_treehash()))
+	  parameters->options().build_id_min_file_size_for_treehash()))
     {
       static const size_t MD5_OUTPUT_SIZE_IN_BYTES = 16;
       const size_t chunk_size =
-          parameters->options().build_id_chunk_size_for_treehash();
+	  parameters->options().build_id_chunk_size_for_treehash();
       const size_t num_hashes = ((filesize - 1) / chunk_size) + 1;
       Task_token* post_hash_tasks_blocker = new Task_token(true);
       post_hash_tasks_blocker->add_blockers(num_hashes);
@@ -5293,15 +5296,15 @@ Layout::queue_build_id_tasks(Workqueue* workqueue, Task_token* build_id_blocker,
       unsigned char *dst = new unsigned char[this->size_of_array_of_hashes_];
       this->array_of_hashes_ = dst;
       for (size_t i = 0, src_offset = 0; i < num_hashes;
-           i++, dst += MD5_OUTPUT_SIZE_IN_BYTES, src_offset += chunk_size)
-        {
-          size_t size = std::min(chunk_size, filesize - src_offset);
-          workqueue->queue(new Hash_task(src + src_offset,
-                                         size,
-                                         dst,
-                                         build_id_blocker,
-                                         post_hash_tasks_blocker));
-        }
+	   i++, dst += MD5_OUTPUT_SIZE_IN_BYTES, src_offset += chunk_size)
+	{
+	  size_t size = std::min(chunk_size, filesize - src_offset);
+	  workqueue->queue(new Hash_task(src + src_offset,
+					 size,
+					 dst,
+					 build_id_blocker,
+					 post_hash_tasks_blocker));
+	}
       return post_hash_tasks_blocker;
     }
   return build_id_blocker;
@@ -5318,7 +5321,7 @@ Layout::write_build_id(Output_file* of) const
     return;
 
   unsigned char* ov = of->get_output_view(this->build_id_note_->offset(),
-                                          this->build_id_note_->data_size());
+					  this->build_id_note_->data_size());
 
   if (this->array_of_hashes_ == NULL)
     {
@@ -5329,11 +5332,11 @@ Layout::write_build_id(Output_file* of) const
       // If we get here with style == "tree" then the output must be
       // too small for chunking, and we use SHA-1 in that case.
       if ((strcmp(style, "sha1") == 0) || (strcmp(style, "tree") == 0))
-        sha1_buffer(reinterpret_cast<const char*>(iv), output_file_size, ov);
+	sha1_buffer(reinterpret_cast<const char*>(iv), output_file_size, ov);
       else if (strcmp(style, "md5") == 0)
-        md5_buffer(reinterpret_cast<const char*>(iv), output_file_size, ov);
+	md5_buffer(reinterpret_cast<const char*>(iv), output_file_size, ov);
       else
-        gold_unreachable();
+	gold_unreachable();
 
       of->free_input_view(0, output_file_size, iv);
     }
@@ -5342,7 +5345,7 @@ Layout::write_build_id(Output_file* of) const
       // Non-overlapping substrings of the output file have been hashed.
       // Compute SHA-1 hash of the hashes.
       sha1_buffer(reinterpret_cast<const char*>(this->array_of_hashes_),
-                  this->size_of_array_of_hashes_, ov);
+		  this->size_of_array_of_hashes_, ov);
       delete[] this->array_of_hashes_;
       of->free_input_view(0, this->output_file_size(), this->input_view_);
     }

@@ -927,6 +927,10 @@ class General_options
 	      N_("Put read-only non-executable sections in their own segment"),
 	      NULL);
 
+  DEFINE_uint64(rosegment_gap, options::TWO_DASHES, '\0', -1U,
+		N_("Set offset between executable and read-only segments"),
+		N_("OFFSET"));
+
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
 		N_("Set GNU linker emulation; obsolete"), N_("EMULATION"));
 
