@@ -10652,6 +10652,7 @@ remote_trace_set_readonly_regions (void)
     return;			/* No information to give.  */
 
   strcpy (target_buf, "QTro");
+  offset = strlen (target_buf);
   for (s = exec_bfd->sections; s; s = s->next)
     {
       char tmp1[40], tmp2[40];
