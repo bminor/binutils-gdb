@@ -1,6 +1,6 @@
 // layout.cc -- lay out output file sections for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -3255,7 +3255,10 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 		  // If the target wants a fixed minimum distance from the
 		  // text segment to the read-only segment, move up now.
-		  uint64_t min_addr = start_addr + target->rosegment_gap();
+		  uint64_t min_addr =
+		    start_addr + (parameters->options().user_set_rosegment_gap()
+				  ? parameters->options().rosegment_gap()
+				  : target->rosegment_gap());
 		  if (addr < min_addr)
 		    addr = min_addr;
 
