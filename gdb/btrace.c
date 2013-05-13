@@ -208,7 +208,13 @@ ftrace_new_function (struct btrace_function *prev,
   bfun->lbegin = INT_MAX;
   bfun->lend = INT_MIN;
 
-  if (prev != NULL)
+  if (prev == NULL)
+    {
+      /* Start counting at one.  */
+      bfun->number = 1;
+      bfun->insn_offset = 1;
+    }
+  else
     {
       gdb_assert (prev->flow.next == NULL);
       prev->flow.next = bfun;

@@ -226,11 +226,11 @@ record_btrace_info (void)
 
       btrace_call_end (&call, btinfo);
       btrace_call_prev (&call, 1);
-      calls = btrace_call_number (&call) + 1;
+      calls = btrace_call_number (&call);
 
       btrace_insn_end (&insn, btinfo);
       btrace_insn_prev (&insn, 1);
-      insns = btrace_insn_number (&insn) + 1;
+      insns = btrace_insn_number (&insn);
     }
 
   printf_unfiltered (_("Recorded %u instructions in %u functions for thread "

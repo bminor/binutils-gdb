@@ -38,28 +38,28 @@ gdb_breakpoint $bp_location
 gdb_continue_to_breakpoint "cont to $bp_location" ".*$testfile.c:$bp_location.*"
 
 proc rec_fun_all {} {
-  gdb_test "record function-call-history 0" [join [list \
-    "0\tmain" \
-    "1\tinc" \
-    "2\tmain" \
-    "3\tinc" \
-    "4\tmain" \
-    "5\tinc" \
-    "6\tmain" \
-    "7\tinc" \
-    "8\tmain" \
-    "9\tinc" \
-    "10\tmain" \
-    "11\tinc" \
-    "12\tmain" \
-    "13\tinc" \
-    "14\tmain" \
-    "15\tinc" \
-    "16\tmain" \
-    "17\tinc" \
-    "18\tmain" \
-    "19\tinc" \
-    "20\tmain"] "\r\n"]
+  gdb_test "record function-call-history 1" [join [list \
+    "1\tmain" \
+    "2\tinc" \
+    "3\tmain" \
+    "4\tinc" \
+    "5\tmain" \
+    "6\tinc" \
+    "7\tmain" \
+    "8\tinc" \
+    "9\tmain" \
+    "10\tinc" \
+    "11\tmain" \
+    "12\tinc" \
+    "13\tmain" \
+    "14\tinc" \
+    "15\tmain" \
+    "16\tinc" \
+    "17\tmain" \
+    "18\tinc" \
+    "19\tmain" \
+    "20\tinc" \
+    "21\tmain"] "\r\n"]
 }
 
 # show function call history with unlimited size, we expect to see all 21 entries
@@ -72,31 +72,31 @@ with_test_prefix "size 21" rec_fun_all
 
 # show first 15 entries
 gdb_test_no_output "set record function-call-history-size 15"
-gdb_test "record function-call-history 0" [join [list \
-  "0\tmain" \
-  "1\tinc" \
-  "2\tmain" \
-  "3\tinc" \
-  "4\tmain" \
-  "5\tinc" \
-  "6\tmain" \
-  "7\tinc" \
-  "8\tmain" \
-  "9\tinc" \
-  "10\tmain" \
-  "11\tinc" \
-  "12\tmain" \
-  "13\tinc" \
-  "14\tmain"] "\r\n"] "forward - 1"
+gdb_test "record function-call-history 1" [join [list \
+  "1\tmain" \
+  "2\tinc" \
+  "3\tmain" \
+  "4\tinc" \
+  "5\tmain" \
+  "6\tinc" \
+  "7\tmain" \
+  "8\tinc" \
+  "9\tmain" \
+  "10\tinc" \
+  "11\tmain" \
+  "12\tinc" \
+  "13\tmain" \
+  "14\tinc" \
+  "15\tmain"] "\r\n"] "forward - 1"
 
 # show last 6 entries
 gdb_test "record function-call-history +" [join [list \
-  "15\tinc" \
-  "16\tmain" \
-  "17\tinc" \
-  "18\tmain" \
-  "19\tinc" \
-  "20\tmain"] "\r\n"] "forward - 2"
+  "16\tinc" \
+  "17\tmain" \
+  "18\tinc" \
+  "19\tmain" \
+  "20\tinc" \
+  "21\tmain"] "\r\n"] "forward - 2"
 
 # moving further should not work
 gdb_test "record function-call-history +" "At the end of the branch trace record\\." "forward - 3"
@@ -106,30 +106,30 @@ gdb_test "record function-call-history +" "At the end of the branch trace record
 
 # moving back showing the latest 15 function calls
 gdb_test "record function-call-history -" [join [list \
-  "6\tmain" \
-  "7\tinc" \
-  "8\tmain" \
-  "9\tinc" \
-  "10\tmain" \
-  "11\tinc" \
-  "12\tmain" \
-  "13\tinc" \
-  "14\tmain" \
-  "15\tinc" \
-  "16\tmain" \
-  "17\tinc" \
-  "18\tmain" \
-  "19\tinc" \
-  "20\tmain"] "\r\n"] "backward - 1"
+  "7\tmain" \
+  "8\tinc" \
+  "9\tmain" \
+  "10\tinc" \
+  "11\tmain" \
+  "12\tinc" \
+  "13\tmain" \
+  "14\tinc" \
+  "15\tmain" \
+  "16\tinc" \
+  "17\tmain" \
+  "18\tinc" \
+  "19\tmain" \
+  "20\tinc" \
+  "21\tmain"] "\r\n"] "backward - 1"
 
 # moving further back shows the 6 first function calls
 gdb_test "record function-call-history -" [join [list \
-  "0\tmain" \
-  "1\tinc" \
-  "2\tmain" \
-  "3\tinc" \
-  "4\tmain" \
-  "5\tinc"] "\r\n"] "backward - 2"
+  "1\tmain" \
+  "2\tinc" \
+  "3\tmain" \
+  "4\tinc" \
+  "5\tmain" \
+  "6\tinc"] "\r\n"] "backward - 2"
 
 # moving further back shouldn't work
 gdb_test "record function-call-history -" "At the start of the branch trace record\\." "backward - 3"
@@ -169,18 +169,18 @@ gdb_test "record function-call-history /l +" "At the end of the branch trace rec
 gdb_test "record function-call-history /l" "At the end of the branch trace record\\." "forward /l - 4"
 
 set expected_range [join [list \
-  "3\tinc" \
-  "4\tmain" \
-  "5\tinc" \
-  "6\tmain" \
-  "7\tinc" \
-  "8\tmain" \
-  "9\tinc"] "\r\n"]
+  "4\tinc" \
+  "5\tmain" \
+  "6\tinc" \
+  "7\tmain" \
+  "8\tinc" \
+  "9\tmain" \
+  "10\tinc"] "\r\n"]
 
 # show functions in instruction range
-gdb_test "record function-call-history 3,10" $expected_range
-gdb_test "record function-call-history 3,+7" $expected_range
-gdb_test "record function-call-history 10,-7" $expected_range
+gdb_test "record function-call-history 4,11" $expected_range
+gdb_test "record function-call-history 4,+7" $expected_range
+gdb_test "record function-call-history 11,-7" $expected_range
 
 # set bp after fib recursion and continue
 set bp_location [gdb_get_line_number "bp.2" $testfile.c]
@@ -191,8 +191,7 @@ gdb_continue_to_breakpoint "cont to $bp_location" ".*$testfile.c:$bp_location.*"
 # so we limit the output to only show the latest 11 function calls
 gdb_test_no_output "set record function-call-history-size 11"
 gdb_test "record function-call-history" [join [list \
-  "20\tmain" \
-  "21\tfib" \
+  "21\tmain" \
   "22\tfib" \
   "23\tfib" \
   "24\tfib" \
@@ -201,4 +200,5 @@ gdb_test "record function-call-history" [join [list \
   "27\tfib" \
   "28\tfib" \
   "29\tfib" \
-  "30\tmain"] "\r\n"] "recursive"
+  "30\tfib" \
+  "31\tmain"] "\r\n"] "recursive"

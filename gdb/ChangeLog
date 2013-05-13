@@ -1,5 +1,12 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (ftrace_new_function): Start counting at one.
+	* record-btrace.c (record_btrace_info): Adjust number of calls
+	and insns.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record-btrace.c (btrace_call_history_insn_range): Print
 	insn range as [begin, end].
 
