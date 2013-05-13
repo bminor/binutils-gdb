@@ -1,3 +1,7 @@
+2013-05-13  Nick Clifton  <nickc@redhat.com>
+
+	* v850.igen (LDSR): Accept but ignore a selID parameter.
+
 2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
 
 	* configure: Rebuild.
