@@ -1,3 +1,8 @@
+2013-05-13  Muhammad Bilal  <mbilal@codesourcery.com>
+
+       * gdb.base/default.exp: Disable history saving.
+       * gdb.base/setshow.exp: Likewise.
+
 2013-05-10  Pedro Alves  <palves@redhat.com>
 
 	PR remote/15455

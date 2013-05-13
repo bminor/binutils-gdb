@@ -178,6 +178,8 @@ gdb_test "show history filename" "The filename in which to record the command hi
 gdb_test_no_output "set history save on" "set history save on" 
 #test show history save on
 gdb_test "show history save" "Saving of the history record on exit is on..*"  "show history save (on)" 
+#history saving should stay disabled
+gdb_test_no_output "set history save off" "set history save off" 
 #test set history size 100
 gdb_test_no_output "set history size 100" "set history size 100" 
 #test show history size 100

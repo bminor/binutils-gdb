@@ -725,6 +725,8 @@ gdb_test_multiple "show" "show" {
 	}
     }
 }
+#history saving should stay disabled
+gdb_test_no_output "set history save off" "set history save off"
 #test stepi "si" abbreviation
 gdb_test  "si" "The program is not being run." "stepi \"si\" abbreviation"
 #test stepi
