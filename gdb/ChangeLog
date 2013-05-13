@@ -1,6 +1,6 @@
 2013-05-13  Tom Tromey  <tromey@redhat.com>
 
-    	PR gdb/15538:
+    	PR gdb/15338:
 	* dwarf2read.c (dwarf2_record_block_ranges): Ensure that the
 	ranges section has been read.
 
