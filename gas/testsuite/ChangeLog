@@ -1,3 +1,10 @@
+2013-05-13  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/diagnostic.s: Update.
+	* gas/aarch64/diagnostic.l: Ditto.
+	* gas/aarch64/movi.s: Add new tests.
+	* gas/aarch64/movi.d: Update.
+
 2013-05-09  Andrew Pinski  <apinski@cavium.com>
 
 	* gas/mips/mips.exp: Run virt and virt64 testcases.

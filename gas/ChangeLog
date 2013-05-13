@@ -1,10 +1,3 @@
-2013-05-13  Yufeng Zhang  <yufeng.zhang@arm.com>
-
-	* testsuite/gas/aarch64/diagnostic.s: Update.
-	* testsuite/gas/aarch64/diagnostic.l: Ditto.
-	* testsuite/gas/aarch64/movi.s: Add new tests.
-	* testsuite/gas/aarch64/movi.d: Update.
-
 2013-05-09  Andrew Pinski  <apinski@cavium.com>
 
 	* config/tc-mips.c (struct mips_set_options): New ase_virt field.
