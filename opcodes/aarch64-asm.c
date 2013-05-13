@@ -369,7 +369,6 @@ aarch64_ins_advsimd_imm_modified (const aarch64_operand *self ATTRIBUTE_UNUSED,
       imm = aarch64_shrink_expanded_imm8 (imm);
       assert ((int)imm >= 0);
     }
-  assert (imm <= 255);
   insert_fields (code, imm, 0, 2, FLD_defgh, FLD_abc);
 
   if (kind == AARCH64_MOD_NONE)

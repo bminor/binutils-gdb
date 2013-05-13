@@ -1,3 +1,12 @@
+2013-05-13  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Backport from mainline:
+
+	2013-05-13  Yufeng Zhang  <yufeng.zhang@arm.com>
+	* aarch64-asm.c (aarch64_ins_advsimd_imm_modified): Remove assertion.
+	* aarch64-opc.c (operand_general_constraint_met_p): Relax the range
+	check from [0, 255] to [-128, 255].
+
 2013-03-25  Tristan Gingold  <gingold@adacore.com>
 	Backport of: 2013-03-08  Yann Sionneau  <yann.sionneau@gmail.com>
 

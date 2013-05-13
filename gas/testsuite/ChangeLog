@@ -1,3 +1,13 @@
+2013-05-13  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Backport from mainline:
+
+	2013-05-13  Yufeng Zhang  <yufeng.zhang@arm.com>
+	* gas/aarch64/diagnostic.s: Update.
+	* gas/aarch64/diagnostic.l: Ditto.
+	* gas/aarch64/movi.s: Add new tests.
+	* gas/aarch64/movi.d: Update.
+
 2013-05-13 Yufeng Zhang <yufeng.zhang@arm.com>
 
 	Backport from mainline:

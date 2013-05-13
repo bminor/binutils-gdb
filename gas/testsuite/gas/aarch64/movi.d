@@ -8201,3 +8201,6 @@ Disassembly of section \.text:
     8004:	6f07e7e0 	movi	v0.2d, #0xffffffffffffffff
     8008:	6f07e7e0 	movi	v0.2d, #0xffffffffffffffff
     800c:	2f07e7ff 	movi	d31, #0xffffffffffffffff
+    8010:	0f04e403 	movi	v3.8b, #0x80
+    8014:	0f04e423 	movi	v3.8b, #0x81
+    8018:	0f07e7e3 	movi	v3.8b, #0xff
