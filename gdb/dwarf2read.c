@@ -10493,7 +10493,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
          address range list in the .debug_ranges section.  */
       unsigned long offset = (DW_UNSND (attr)
 			      + (need_ranges_base ? cu->ranges_base : 0));
-      const gdb_byte *buffer = dwarf2_per_objfile->ranges.buffer + offset;
+      const gdb_byte *buffer;
 
       /* For some target architectures, but not others, the
          read_address function sign-extends the addresses it returns.
@@ -10512,7 +10512,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
       CORE_ADDR base = cu->base_address;
       int base_known = cu->base_known;
 
-      gdb_assert (dwarf2_per_objfile->ranges.readin);
+      dwarf2_read_section (objfile, &dwarf2_per_objfile->ranges);
       if (offset >= dwarf2_per_objfile->ranges.size)
         {
           complaint (&symfile_complaints,
@@ -10520,6 +10520,7 @@ dwarf2_record_block_ranges (struct die_info *die, struct block *block,
                      offset);
           return;
         }
+      buffer = dwarf2_per_objfile->ranges.buffer + offset;
 
       for (;;)
         {

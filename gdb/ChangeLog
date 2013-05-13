@@ -1,5 +1,11 @@
 2013-05-13  Tom Tromey  <tromey@redhat.com>
 
+    	PR gdb/15538:
+	* dwarf2read.c (dwarf2_record_block_ranges): Ensure that the
+	ranges section has been read.
+
+2013-05-13  Tom Tromey  <tromey@redhat.com>
+
 	PR exp/15364:
 	* eval.c (evaluate_subexp_standard) <STRUCTOP_STRUCT,
 	STRUCTOP_PTR>: Return a not_lval value for
