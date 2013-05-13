@@ -3243,10 +3243,14 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
 	  unsigned int op0, op1, cn, cm, op2;
 	  if (sscanf (buf, "s%u_%u_c%u_c%u_%u", &op0, &op1, &cn, &cm, &op2) != 5)
 	    return PARSE_FAIL;
-	  /* Register access is encoded as follows:
+	  /* The architecture specifies the encoding space for implementation
+	     defined registers as:
 	     op0  op1  CRn   CRm   op2
-	     11   xxx  1x11  xxxx  xxx.  */
-	  if (op0 != 3 || op1 > 7 || (cn | 0x4) != 0xf || cm > 15 || op2 > 7)
+	     11   xxx  1x11  xxxx  xxx
+	     For convenience GAS accepts a wider encoding space, as follows:
+	     op0  op1  CRn   CRm   op2
+	     11   xxx  xxxx  xxxx  xxx  */
+	  if (op0 != 3 || op1 > 7 || cn > 15 || cm > 15 || op2 > 7)
 	    return PARSE_FAIL;
 	  value = (op0 << 14) | (op1 << 11) | (cn << 7) | (cm << 3) | op2;
 	}

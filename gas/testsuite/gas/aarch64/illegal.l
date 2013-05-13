@@ -520,7 +520,6 @@
 [^:]*:496: Error: .*`str x1,page_table_count'
 [^:]*:498: Error: .*`prfm PLDL3KEEP,\[x9,x15,sxtx#2\]'
 [^:]*:500: Error: .*`mrs x5,S1_0_C13_C8_0'
-[^:]*:501: Error: .*`msr S3_1_C13_C15_1,x7'
 [^:]*:502: Error: .*`msr S3_1_C11_C15_-1,x7'
 [^:]*:503: Error: .*`msr S3_1_11_15_1,x7'
 [^:]*:506: Error: .*`movi w1,#15'
