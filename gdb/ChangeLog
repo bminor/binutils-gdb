@@ -1,3 +1,11 @@
+2013-05-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* rs6000-aix-tdep.c (rs6000_push_dummy_call): Convert
+	floating point registers to register type before storing
+	value.
+	* rs6000-lynx178-tdep.c (rs6000_lynx178_push_dummy_call):
+	Likewise.
+
 2013-05-10  Joel Brobecker  <brobecker@adacore.com>
 	    Tom Tromey  <tromey@redhat.com>
 
