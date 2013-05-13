@@ -880,11 +880,11 @@ class General_options
 		 N_("Add directory to search path"), N_("DIR"));
 
   DEFINE_bool(nostdlib, options::ONE_DASH, '\0', false,
-	      N_(" Only search directories specified on the command line."),
+	      N_("Only search directories specified on the command line."),
 	      NULL);
 
   DEFINE_bool(rosegment, options::TWO_DASHES, '\0', false,
-	      N_(" Put read-only non-executable sections in their own segment"),
+	      N_("Put read-only non-executable sections in their own segment"),
 	      NULL);
 
   DEFINE_uint64(rosegment_gap, options::TWO_DASHES, '\0', -1U,
