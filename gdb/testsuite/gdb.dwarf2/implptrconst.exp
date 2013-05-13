@@ -27,7 +27,9 @@ standard_testfile .c implptrconst-dw.S
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
-    cu 0 2 8 {
+    # Creating a CU with 4-byte addresses lets this test link on both
+    # 32- and 64-bit machines.
+    cu 0 2 4 {
  	compile_unit {} {
 	    declare_labels byte_label size_type_label array_label
 	    declare_labels var_label ptr_label
@@ -41,7 +43,7 @@ Dwarf::assemble $asm_file {
 	    size_type_label: base_type {
 		{name sizetype}
 		{encoding @DW_ATE_unsigned}
-		{byte_size 8 DW_FORM_sdata}
+		{byte_size 4 DW_FORM_sdata}
 	    }
 
 	    array_label: array_type {
@@ -60,7 +62,7 @@ Dwarf::assemble $asm_file {
 	    }
 
 	    ptr_label: pointer_type {
-		{byte_size 8 DW_FORM_sdata}
+		{byte_size 4 DW_FORM_sdata}
 		{type :$byte_label}
 	    }
 

@@ -1,5 +1,10 @@
 2013-05-13  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/implptrconst.exp: Create a CU with 4 byte address
+	size and change type sizes to 4 bytes.
+
+2013-05-13  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/exprs.exp (test_expr): Add regression test.
 	* gdb.base/exprs.c (null_t_struct): New global.
 
