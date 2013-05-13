@@ -1,3 +1,14 @@
+2013-05-13  Cary Coutant  <ccoutant@google.com>
+
+    	* configure.ac: Export DEFAULT_TARGET.
+    	* configure: Regenerate.
+    	* Makefile.in: Regenerate.
+    	* testsuite/Makefile.am: Add .EXPORT_ALL_VARIABLES.
+    	* testsuite/Makefile.in: Regenerate.
+    	* testsuite/debug_msg.sh: Delete duplicate tests.
+    	Don't check undef_int error message match for powerpc where the
+    	source file and line number aren't available.
+
 2013-05-10  Roland McGrath  <mcgrathr@google.com>
 
 	* options.h (General_options): Add --rosegment-gap option.

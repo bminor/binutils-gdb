@@ -206,6 +206,8 @@ for targ in $target $canon_targets; do
 	AM_CONDITIONAL(DEFAULT_TARGET_SPARC, test "$targ_obj" = "sparc")
 	AM_CONDITIONAL(DEFAULT_TARGET_X86_64, test "$targ_obj" = "x86_64")
 	AM_CONDITIONAL(DEFAULT_TARGET_TILEGX, test "$targ_obj" = "tilegx")
+	DEFAULT_TARGET=${targ_obj}
+	AC_SUBST(DEFAULT_TARGET)
       fi
     fi
   fi

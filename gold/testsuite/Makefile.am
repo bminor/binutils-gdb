@@ -53,26 +53,6 @@ TEST_AR = $(top_builddir)/../binutils/ar
 TEST_NM = $(top_builddir)/../binutils/nm-new
 TEST_AS = $(top_builddir)/../gas/as-new
 
-# Make the default target available to scripts as $DEFAULT_TARGET.
-if DEFAULT_TARGET_ARM
-export DEFAULT_TARGET = arm
-endif
-if DEFAULT_TARGET_I386
-export DEFAULT_TARGET = i386
-endif
-if DEFAULT_TARGET_POWERPC
-export DEFAULT_TARGET = powerpc
-endif
-if DEFAULT_TARGET_SPARC
-export DEFAULT_TARGET = sparc
-endif
-if DEFAULT_TARGET_X86_64
-export DEFAULT_TARGET = x86_64
-endif
-if DEFAULT_TARGET_TILEGX
-export DEFAULT_TARGET = tilegx
-endif
-
 if PLUGINS
 LIBDL = -ldl
 endif
@@ -91,7 +71,10 @@ endif
 # the right choice for files 'make' builds that people rebuild.
 MOSTLYCLEANFILES = *.so *.syms *.stdout
 
-
+# Export make variables to the shell scripts so that they can see
+# (for example) DEFAULT_TARGET.
+.EXPORT_ALL_VARIABLES:
+ 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.

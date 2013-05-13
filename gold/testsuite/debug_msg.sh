@@ -66,10 +66,10 @@ check debug_msg.err ".*/debug_msg.cc:50: error: undefined reference to 'undef_fn
 check debug_msg.err ".*/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
 check debug_msg.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
 check debug_msg.err ".*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
-check debug_msg.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
-check debug_msg.err ".*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
+if test "$DEFAULT_TARGET" != "powerpc"
+then
+  check debug_msg.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
+fi
 
 # Check we detected the ODR (One Definition Rule) violation.
 check debug_msg.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"
@@ -100,10 +100,10 @@ then
   check debug_msg_cdebug.err ".*/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
   check debug_msg_cdebug.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
   check debug_msg_cdebug.err ".*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-  check debug_msg_cdebug.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
-  check debug_msg_cdebug.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
-  check debug_msg_cdebug.err ".*/debug_msg.cc:44: error: undefined reference to 'undef_fn2()'"
-  check debug_msg_cdebug.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
+  if test "$DEFAULT_TARGET" != "powerpc"
+  then
+    check debug_msg_cdebug.err ".*/debug_msg.cc:.*: error: undefined reference to 'undef_int'"
+  fi
   check debug_msg_cdebug.err ": symbol 'Ordering::operator()(int, int)' defined in multiple places (possible ODR violation):"
   check debug_msg_cdebug.err "odr_violation1.cc:6"
   check debug_msg_cdebug.err "odr_violation2.cc:12"

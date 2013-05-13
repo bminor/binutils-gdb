@@ -1907,6 +1907,7 @@ CXXDEPMODE = @CXXDEPMODE@
 CXXFLAGS = @CXXFLAGS@
 CYGPATH_W = @CYGPATH_W@
 DATADIRNAME = @DATADIRNAME@
+DEFAULT_TARGET = @DEFAULT_TARGET@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLOPEN_LIBS = @DLOPEN_LIBS@
@@ -4301,13 +4302,9 @@ uninstall-am:
 	recheck recheck-html tags uninstall uninstall-am
 
 
-# Make the default target available to scripts as $DEFAULT_TARGET.
-@DEFAULT_TARGET_ARM_TRUE@export DEFAULT_TARGET = arm
-@DEFAULT_TARGET_I386_TRUE@export DEFAULT_TARGET = i386
-@DEFAULT_TARGET_POWERPC_TRUE@export DEFAULT_TARGET = powerpc
-@DEFAULT_TARGET_SPARC_TRUE@export DEFAULT_TARGET = sparc
-@DEFAULT_TARGET_X86_64_TRUE@export DEFAULT_TARGET = x86_64
-@DEFAULT_TARGET_TILEGX_TRUE@export DEFAULT_TARGET = tilegx
+# Export make variables to the shell scripts so that they can see
+# (for example) DEFAULT_TARGET.
+.EXPORT_ALL_VARIABLES:
 
 # The unittests themselves
 
