@@ -8713,3 +8713,6 @@ Disassembly of section \.text:
     8804:	6f07e7e0 	movi	v0.2d, #0xffffffffffffffff
     8808:	6f07e7e0 	movi	v0.2d, #0xffffffffffffffff
     880c:	2f07e7ff 	movi	d31, #0xffffffffffffffff
+    8810:	0f04e403 	movi	v3.8b, #0x80
+    8814:	0f04e423 	movi	v3.8b, #0x81
+    8818:	0f07e7e3 	movi	v3.8b, #0xff

@@ -41,7 +41,7 @@
 	shl	v1.2s, v2.2s, 32
 	sqshrn2	v2.16b, v3.8h, #17
 	movi	v1.4h, 256
-	movi	v1.4h, -1
+	movi	v1.4h, -129
 	movi	v1.4h, 255, msl #8
 	movi	d0, 256
 	movi	v1.4h, 255, lsl #7

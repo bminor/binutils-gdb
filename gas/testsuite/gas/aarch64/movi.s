@@ -113,3 +113,8 @@
 	movi	v0.2d, bignum
 	movi	d31, 18446744073709551615
 .set    bignum, 0xffffffffffffffff
+
+	// Allow -128 to 255 in #<imm8>
+	movi	v3.8b, -128
+	movi	v3.8b, -127
+	movi	v3.8b, -1
