@@ -1,3 +1,8 @@
+2013-05-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/exprs.exp (test_expr): Add regression test.
+	* gdb.base/exprs.c (null_t_struct): New global.
+
 2013-05-13  Muhammad Bilal  <mbilal@codesourcery.com>
 
        * gdb.base/default.exp: Disable history saving.

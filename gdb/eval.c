@@ -1847,9 +1847,11 @@ evaluate_subexp_standard (struct type *expect_type,
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      /* Also handle EVAL_AVOID_SIDE_EFFECTS.  */
-      return value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
+      arg3 = value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
 			       NULL, "structure");
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	arg3 = value_zero (value_type (arg3), not_lval);
+      return arg3;
 
     case STRUCTOP_PTR:
       tem = longest_to_int (exp->elts[pc + 1].longconst);
@@ -1899,9 +1901,11 @@ evaluate_subexp_standard (struct type *expect_type,
           }
       }
 
-      /* Also handle EVAL_AVOID_SIDE_EFFECTS.  */
-      return value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
+      arg3 = value_struct_elt (&arg1, NULL, &exp->elts[pc + 2].string,
 			       NULL, "structure pointer");
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	arg3 = value_zero (value_type (arg3), not_lval);
+      return arg3;
 
     case STRUCTOP_MEMBER:
     case STRUCTOP_MPTR:

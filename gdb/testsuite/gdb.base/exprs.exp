@@ -273,3 +273,7 @@ gdb_test "print {short} v_short_array" "$decimal = 42"
 # Regression tests for cast to void.
 gdb_test "print (void) v_int_pointer" " = void"
 gdb_test "print & (void) v_char" "value not located in memory."
+
+# Regression test for "&&".
+gdb_test "print null_t_struct && null_t_struct->v_int_member == 0" \
+    " = 0"

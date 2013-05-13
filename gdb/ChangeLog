@@ -1,3 +1,12 @@
+2013-05-13  Tom Tromey  <tromey@redhat.com>
+
+	PR exp/15364:
+	* eval.c (evaluate_subexp_standard) <STRUCTOP_STRUCT,
+	STRUCTOP_PTR>: Return a not_lval value for
+	EVAL_AVOID_SIDE_EFFECTS.
+	* opencl-lang.c (evaluate_subexp_opencl): Return a not_lval value
+	for EVAL_AVOID_SIDE_EFFECTS.
+
 2013-05-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* rs6000-aix-tdep.c (rs6000_push_dummy_call): Convert
