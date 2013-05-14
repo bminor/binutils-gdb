@@ -1,5 +1,20 @@
 2013-11-14  Cary Coutant  <ccoutant@google.com>
 
+	* dwp.cc (Dwo_file_entry): New type.
+	(File_list): Use Dwo_file_entry.
+	(Dwo_file::verify): New function.
+	(Dwo_file::verify_dwo_list): New function.
+	(Dwo_file::sized_verify_dwo_list): New function.
+	(Dwo_name_info_reader::visit_compilation_unit): Add dwo_id to file
+	list.
+	(Dwp_options): New enum type.
+	(dwp_options): Add --verify-only.
+	(usage): Likewise.
+	(main): Likewise.
+	* dwp.h (gold_info): Add declaration.
+
+2013-11-14  Cary Coutant  <ccoutant@google.com>
+
 	PR gold/14860
 	* ehframe.cc (Eh_frame_hdr::Eh_frame_hdr): Initialize lock_.
 	(Ehframe_hdr::set_final_data_size): Allocate a Lock.
