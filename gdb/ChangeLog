@@ -1,3 +1,8 @@
+2013-05-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* cleanups.c (restore_my_cleanups): Replace gdb_assert by
+	internal_warning.
+
 2013-05-14  Tom Tromey  <tromey@redhat.com>
 
 	* eval.c (parse_and_eval_long): Make 'exp' const.
