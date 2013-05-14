@@ -1,5 +1,15 @@
 2013-05-13  Tom Tromey  <tromey@redhat.com>
 
+	* gcore.c (create_gcore_bfd): Make 'filename' const.
+	* gcore.h (create_gcore_bfd): Make 'filename' const.
+	* record-full.c (record_full_save): Make 'recfilename' const.
+	* target.c (target_save_record): Make 'filename' const.
+	* target.h (struct target_ops) <to_save_record>: Make 'filename'
+	const.
+	(target_save_record): Likewise.
+
+2013-05-13  Tom Tromey  <tromey@redhat.com>
+
     	PR gdb/15338:
 	* dwarf2read.c (dwarf2_record_block_ranges): Ensure that the
 	ranges section has been read.

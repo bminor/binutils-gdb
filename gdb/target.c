@@ -4296,7 +4296,7 @@ target_info_record (void)
 /* See target.h.  */
 
 void
-target_save_record (char *filename)
+target_save_record (const char *filename)
 {
   struct target_ops *t;
 

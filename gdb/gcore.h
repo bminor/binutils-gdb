@@ -20,7 +20,7 @@
 #if !defined (GCORE_H)
 #define GCORE_H 1
 
-extern bfd *create_gcore_bfd (char *filename);
+extern bfd *create_gcore_bfd (const char *filename);
 extern void write_gcore_file (bfd *obfd);
 extern bfd *load_corefile (char *filename, int from_tty);
 

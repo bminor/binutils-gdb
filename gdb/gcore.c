@@ -49,7 +49,7 @@ static int gcore_memory_sections (bfd *);
    Open a new bfd core file for output, and return the handle.  */
 
 bfd *
-create_gcore_bfd (char *filename)
+create_gcore_bfd (const char *filename)
 {
   bfd *obfd = gdb_bfd_openw (filename, default_gcore_target ());
 

@@ -251,7 +251,7 @@ static void
 
 static void record_full_goto_insn (struct record_full_entry *entry,
 				   enum exec_direction_kind dir);
-static void record_full_save (char *recfilename);
+static void record_full_save (const char *recfilename);
 
 /* Alloc and free functions for record_full_reg, record_full_mem, and
    record_full_end entries.  */
@@ -2632,7 +2632,7 @@ record_full_save_cleanups (void *data)
    format, with an extra section for our data.  */
 
 static void
-record_full_save (char *recfilename)
+record_full_save (const char *recfilename)
 {
   struct record_full_entry *cur_record_full_list;
   uint32_t magic;

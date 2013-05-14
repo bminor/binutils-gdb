@@ -892,7 +892,7 @@ struct target_ops
     void (*to_info_record) (void);
 
     /* Save the recorded execution trace into a file.  */
-    void (*to_save_record) (char *filename);
+    void (*to_save_record) (const char *filename);
 
     /* Delete the recorded execution trace from the current position onwards.  */
     void (*to_delete_record) (void);
@@ -2008,7 +2008,7 @@ extern void target_stop_recording (void);
 extern void target_info_record (void);
 
 /* See to_save_record in struct target_ops.  */
-extern void target_save_record (char *filename);
+extern void target_save_record (const char *filename);
 
 /* Query if the target supports deleting the execution log.  */
 extern int target_supports_delete_record (void);
