@@ -1,5 +1,10 @@
 2013-05-14  Tom Tromey  <tromey@redhat.com>
 
+	* ui-file.c (gdb_fopen): Make arguments const.
+	* ui-file.h (gdb_fopen): Make arguments const.
+
+2013-05-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (remote_set_trace_notes): Make arguments const.
 	* target.c (update_current_target): Update cast.
 	* target.h (to_set_trace_notes): Make arguments const.
