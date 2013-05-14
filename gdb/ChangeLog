@@ -1,3 +1,13 @@
+2013-05-14  Tom Tromey  <tromey@redhat.com>
+
+	* go32-nat.c (go32_terminal_info): Make 'args' const.
+	* inferior.h (child_terminal_info): Update.
+	* inflow.c (child_terminal_info): Make 'args' const.
+	* target.c (default_terminal_info): Make 'args' const.
+	(debug_to_terminal_save_ours): Likewise.
+	* target.h (struct target_ops) <to_terminal_info>: Make argument
+	const.
+
 2013-05-13  Tom Tromey  <tromey@redhat.com>
 
 	* gcore.c (create_gcore_bfd): Make 'filename' const.

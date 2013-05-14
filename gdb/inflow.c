@@ -563,7 +563,7 @@ term_info (char *arg, int from_tty)
 }
 
 void
-child_terminal_info (char *args, int from_tty)
+child_terminal_info (const char *args, int from_tty)
 {
   struct inferior *inf;
   struct terminal_info *tinfo;

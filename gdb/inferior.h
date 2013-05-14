@@ -175,7 +175,7 @@ extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct frame_info *frame,
 					  int regnum, int all);
 
-extern void child_terminal_info (char *, int);
+extern void child_terminal_info (const char *, int);
 
 extern void term_info (char *, int);
 

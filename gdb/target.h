@@ -499,7 +499,7 @@ struct target_ops
     void (*to_terminal_ours_for_output) (void);
     void (*to_terminal_ours) (void);
     void (*to_terminal_save_ours) (void);
-    void (*to_terminal_info) (char *, int);
+    void (*to_terminal_info) (const char *, int);
     void (*to_kill) (struct target_ops *);
     void (*to_load) (char *, int);
     void (*to_create_inferior) (struct target_ops *, 

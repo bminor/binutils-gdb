@@ -46,7 +46,7 @@
 
 static void target_info (char *, int);
 
-static void default_terminal_info (char *, int);
+static void default_terminal_info (const char *, int);
 
 static int default_watchpoint_addr_within_range (struct target_ops *,
 						 CORE_ADDR, CORE_ADDR, int);
@@ -141,8 +141,6 @@ static void debug_to_terminal_ours_for_output (void);
 static void debug_to_terminal_save_ours (void);
 
 static void debug_to_terminal_ours (void);
-
-static void debug_to_terminal_info (char *, int);
 
 static void debug_to_load (char *, int);
 
@@ -557,7 +555,7 @@ noprocess (void)
 }
 
 static void
-default_terminal_info (char *args, int from_tty)
+default_terminal_info (const char *args, int from_tty)
 {
   printf_unfiltered (_("No saved terminal information.\n"));
 }
@@ -4787,7 +4785,7 @@ debug_to_terminal_save_ours (void)
 }
 
 static void
-debug_to_terminal_info (char *arg, int from_tty)
+debug_to_terminal_info (const char *arg, int from_tty)
 {
   debug_target.to_terminal_info (arg, from_tty);
 
