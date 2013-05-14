@@ -91,7 +91,7 @@ parse_and_eval_address (const char *exp)
 /* Like parse_and_eval_address, but treats the value of the expression
    as an integer, not an address, returns a LONGEST, not a CORE_ADDR.  */
 LONGEST
-parse_and_eval_long (char *exp)
+parse_and_eval_long (const char *exp)
 {
   struct expression *expr = parse_expression (exp);
   LONGEST retval;

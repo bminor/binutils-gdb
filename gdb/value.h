@@ -732,7 +732,7 @@ extern struct type *parse_and_eval_type (char *p, int length);
 
 extern CORE_ADDR parse_and_eval_address (const char *exp);
 
-extern LONGEST parse_and_eval_long (char *exp);
+extern LONGEST parse_and_eval_long (const char *exp);
 
 extern void unop_promote (const struct language_defn *language,
 			  struct gdbarch *gdbarch,
