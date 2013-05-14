@@ -2059,6 +2059,10 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 	  {
 	    const char *fullname = symtab_to_fullname (state->default_symtab);
 
+	    /* It may be more appropriate to keep DEFAULT_SYMTAB in its symtab
+	       form so that displaying SOURCE_FILENAME can follow the current
+	       FILENAME_DISPLAY_STRING setting.  But as it is used only rarely
+	       it has been kept for code simplicity only in absolute form.  */
 	    ls->source_filename = xstrdup (fullname);
 	  }
     }

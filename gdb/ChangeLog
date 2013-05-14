@@ -1,5 +1,10 @@
 2013-05-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* linespec.c (convert_linespec_to_sals): New comment for
+	SOURCE_FILENAME assignment.
+
+2013-05-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* cleanups.c (restore_my_cleanups): Replace gdb_assert by
 	internal_warning.
 
