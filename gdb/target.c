@@ -946,7 +946,7 @@ update_current_target (void)
 	    (void (*) (LONGEST))
 	    target_ignore);
   de_fault (to_set_trace_notes,
-	    (int (*) (char *, char *, char *))
+	    (int (*) (const char *, const char *, const char *))
 	    return_zero);
   de_fault (to_get_tib_address,
 	    (int (*) (ptid_t, CORE_ADDR *))

@@ -817,7 +817,8 @@ struct target_ops
 
     /* Add/change textual notes about the trace run, returning 1 if
        successful, 0 otherwise.  */
-    int (*to_set_trace_notes) (char *user, char *notes, char* stopnotes);
+    int (*to_set_trace_notes) (const char *user, const char *notes,
+			       const char *stopnotes);
 
     /* Return the processor core that thread PTID was last seen on.
        This information is updated only when:

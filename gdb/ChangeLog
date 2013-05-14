@@ -1,5 +1,11 @@
 2013-05-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (remote_set_trace_notes): Make arguments const.
+	* target.c (update_current_target): Update cast.
+	* target.h (to_set_trace_notes): Make arguments const.
+
+2013-05-14  Tom Tromey  <tromey@redhat.com>
+
 	* go32-nat.c (go32_terminal_info): Make 'args' const.
 	* inferior.h (child_terminal_info): Update.
 	* inflow.c (child_terminal_info): Make 'args' const.
