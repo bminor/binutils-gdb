@@ -1,3 +1,8 @@
+2013-05-15  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/fixsection.c: Remove attribution.
+	* gdb.base/watch-read.exp: Ditto.
+
 2013-05-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/implptrconst.exp: Create a CU with 4 byte address
