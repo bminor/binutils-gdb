@@ -6209,6 +6209,23 @@ usual ``live'' debugging of the process from that state.
 When the inferior process exits, or @value{GDBN} detaches from it,
 process record and replay target will automatically stop itself.
 
+@kindex record goto
+@item record goto
+Go to a specific location in the execution log.  There are several
+ways to specify the location to go to:
+
+@table @code
+@item record goto begin
+@itemx record goto start
+Go to the beginning of the execution log.
+
+@item record goto end
+Go to the end of the execution log.
+
+@item record goto @var{n}
+Go to instruction number @var{n} in the execution log.
+@end table
+
 @kindex record save
 @item record save @var{filename}
 Save the execution log to a file @file{@var{filename}}.

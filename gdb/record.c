@@ -48,6 +48,7 @@ static unsigned int record_call_history_size = 10;
 static unsigned int record_call_history_size_setshow_var;
 
 struct cmd_list_element *record_cmdlist = NULL;
+struct cmd_list_element *record_goto_cmdlist = NULL;
 struct cmd_list_element *set_record_cmdlist = NULL;
 struct cmd_list_element *show_record_cmdlist = NULL;
 struct cmd_list_element *info_record_cmdlist = NULL;
@@ -314,23 +315,39 @@ cmd_record_save (char *args, int from_tty)
 void
 cmd_record_goto (char *arg, int from_tty)
 {
-  require_record_target ();
+  ULONGEST insn;
 
   if (arg == NULL || *arg == '\0')
     error (_("Command requires an argument (insn number to go to)."));
 
-  if (strncmp (arg, "start", strlen ("start")) == 0
-      || strncmp (arg, "begin", strlen ("begin")) == 0)
-    target_goto_record_begin ();
-  else if (strncmp (arg, "end", strlen ("end")) == 0)
-    target_goto_record_end ();
-  else
-    {
-      ULONGEST insn;
+  insn = parse_and_eval_long (arg);
 
-      insn = parse_and_eval_long (arg);
-      target_goto_record (insn);
-    }
+  require_record_target ();
+  target_goto_record (insn);
+}
+
+/* The "record goto begin" command.  */
+
+static void
+cmd_record_goto_begin (char *arg, int from_tty)
+{
+  if (arg != NULL && *arg != '\0')
+    error (_("Junk after argument: %s."), arg);
+
+  require_record_target ();
+  target_goto_record_begin ();
+}
+
+/* The "record goto end" command.  */
+
+static void
+cmd_record_goto_end (char *arg, int from_tty)
+{
+  if (arg != NULL && *arg != '\0')
+    error (_("Junk after argument: %s."), arg);
+
+  require_record_target ();
+  target_goto_record_end ();
 }
 
 /* Read an instruction number from an argument string.  */
@@ -751,10 +768,19 @@ Default filename is 'gdb_record.<process_id>'."),
            &record_cmdlist);
   add_alias_cmd ("s", "stop", class_obscure, 1, &record_cmdlist);
 
-  add_cmd ("goto", class_obscure, cmd_record_goto, _("\
+  add_prefix_cmd ("goto", class_obscure, cmd_record_goto, _("\
 Restore the program to its state at instruction number N.\n\
 Argument is instruction number, as shown by 'info record'."),
-	   &record_cmdlist);
+		  &record_goto_cmdlist, "record goto ", 1, &record_cmdlist);
+
+  add_cmd ("begin", class_obscure, cmd_record_goto_begin,
+	   _("Go to the beginning of the execution log."),
+	   &record_goto_cmdlist);
+  add_alias_cmd ("start", "begin", class_obscure, 1, &record_goto_cmdlist);
+
+  add_cmd ("end", class_obscure, cmd_record_goto_end,
+	   _("Go to the end of the execution log."),
+	   &record_goto_cmdlist);
 
   add_cmd ("instruction-history", class_obscure, cmd_record_insn_history, _("\
 Print disassembled instructions stored in the execution log.\n\

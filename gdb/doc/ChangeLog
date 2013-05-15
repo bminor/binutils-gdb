@@ -1,3 +1,8 @@
+2013-05-15  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Document the
+	"record goto" command and its sub-commands.
+
 2013-05-10 Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.texinfo (Backtrace): Add "no-filter" argument.

@@ -1,3 +1,13 @@
+2013-05-15  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* record.c (record_goto_cmdlist): New.
+	(cmd_record_goto): Split into this ...
+	(cmd_record_goto_begin): ... this
+	(cmd_record_goto_end): ... and this.
+	(_initialize_record): Change "record goto" to prefix command.
+	Add commands for "record goto begin" and "record goto end".
+	Add an alias for "record goto start" to "record goto begin".
+
 2013-05-14  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* linespec.c (convert_linespec_to_sals): New comment for
