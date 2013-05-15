@@ -756,6 +756,18 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
 	}
       /* FALL THROUGH */
 
+    case TARGET_OBJECT_LIBRARIES_AIX:
+      if (core_gdbarch
+	  && gdbarch_core_xfer_shared_libraries_aix_p (core_gdbarch))
+	{
+	  if (writebuf)
+	    return -1;
+	  return
+	    gdbarch_core_xfer_shared_libraries_aix (core_gdbarch,
+						    readbuf, offset, len);
+	}
+      /* FALL THROUGH */
+
     case TARGET_OBJECT_SPU:
       if (readbuf && annex)
 	{

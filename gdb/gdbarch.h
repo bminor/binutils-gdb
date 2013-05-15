@@ -766,6 +766,15 @@ typedef LONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdba
 extern LONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries);
 
+/* Read offset OFFSET of TARGET_OBJECT_LIBRARIES_AIX formatted shared
+   libraries list from core file into buffer READBUF with length LEN. */
+
+extern int gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch);
+
+typedef LONGEST (gdbarch_core_xfer_shared_libraries_aix_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
+extern LONGEST gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
+extern void set_gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix);
+
 /* How the core target converts a PTID from a core file to a string. */
 
 extern int gdbarch_core_pid_to_str_p (struct gdbarch *gdbarch);

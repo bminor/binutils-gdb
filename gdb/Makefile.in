@@ -820,7 +820,8 @@ amd64-linux-tdep.h linespec.h i387-tdep.h mn10300-tdep.h \
 sparc64-tdep.h monitor.h ppcobsd-tdep.h srec.h solib-pa64.h \
 coff-pe-read.h parser-defs.h gdb_ptrace.h mips-linux-tdep.h \
 m68k-tdep.h spu-tdep.h jv-lang.h environ.h solib-irix.h amd64-tdep.h \
-doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h rs6000-tdep.h \
+doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h \
+rs6000-tdep.h rs6000-aix-tdep.h \
 common/gdb_locale.h common/gdb_dirent.h arch-utils.h trad-frame.h gnu-nat.h \
 language.h nbsd-tdep.h solib-svr4.h \
 macroexp.h ui-file.h regcache.h tracepoint.h i386-tdep.h \

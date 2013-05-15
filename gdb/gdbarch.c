@@ -241,6 +241,7 @@ struct gdbarch
   gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo;
   gdbarch_find_memory_regions_ftype *find_memory_regions;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
+  gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix;
   gdbarch_core_pid_to_str_ftype *core_pid_to_str;
   const char * gcore_bfd_target;
   int vtable_function_descriptors;
@@ -412,6 +413,7 @@ struct gdbarch startup_gdbarch =
   0,  /* elfcore_write_linux_prpsinfo */
   0,  /* find_memory_regions */
   0,  /* core_xfer_shared_libraries */
+  0,  /* core_xfer_shared_libraries_aix */
   0,  /* core_pid_to_str */
   0,  /* gcore_bfd_target */
   0,  /* vtable_function_descriptors */
@@ -714,6 +716,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of elfcore_write_linux_prpsinfo, has predicate.  */
   /* Skip verify of find_memory_regions, has predicate.  */
   /* Skip verify of core_xfer_shared_libraries, has predicate.  */
+  /* Skip verify of core_xfer_shared_libraries_aix, has predicate.  */
   /* Skip verify of core_pid_to_str, has predicate.  */
   /* Skip verify of gcore_bfd_target, has predicate.  */
   /* Skip verify of vtable_function_descriptors, invalid_p == 0 */
@@ -903,6 +906,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: core_xfer_shared_libraries = <%s>\n",
                       host_address_to_string (gdbarch->core_xfer_shared_libraries));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_core_xfer_shared_libraries_aix_p() = %d\n",
+                      gdbarch_core_xfer_shared_libraries_aix_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: core_xfer_shared_libraries_aix = <%s>\n",
+                      host_address_to_string (gdbarch->core_xfer_shared_libraries_aix));
   fprintf_unfiltered (file,
                       "gdbarch_dump: decr_pc_after_break = %s\n",
                       core_addr_to_string_nz (gdbarch->decr_pc_after_break));
@@ -3446,6 +3455,30 @@ set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch,
                                         gdbarch_core_xfer_shared_libraries_ftype core_xfer_shared_libraries)
 {
   gdbarch->core_xfer_shared_libraries = core_xfer_shared_libraries;
+}
+
+int
+gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->core_xfer_shared_libraries_aix != NULL;
+}
+
+LONGEST
+gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->core_xfer_shared_libraries_aix != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_xfer_shared_libraries_aix called\n");
+  return gdbarch->core_xfer_shared_libraries_aix (gdbarch, readbuf, offset, len);
+}
+
+void
+set_gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch,
+                                            gdbarch_core_xfer_shared_libraries_aix_ftype core_xfer_shared_libraries_aix)
+{
+  gdbarch->core_xfer_shared_libraries_aix = core_xfer_shared_libraries_aix;
 }
 
 int

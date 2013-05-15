@@ -33,6 +33,7 @@
 #include "inf-ptrace.h"
 #include "ppc-tdep.h"
 #include "rs6000-tdep.h"
+#include "rs6000-aix-tdep.h"
 #include "exec.h"
 #include "observer.h"
 #include "xcoffread.h"
@@ -57,7 +58,6 @@
 #define __LDINFO_PTRACE64__	/* for __ld_info64 */
 #include <sys/ldr.h>
 #include <sys/systemcfg.h>
-#include "xml-utils.h"
 
 /* On AIX4.3+, sys/ldr.h provides different versions of struct ld_info for
    debugging 32-bit and 64-bit processes.  Define a typedef and macros for
@@ -77,46 +77,6 @@
 #else
 # define ARCH64() (register_size (target_gdbarch (), 0) == 8)
 #endif
-
-/* Union of 32-bit and 64-bit versions of ld_info.  */
-
-typedef union {
-#ifndef ARCH3264
-  struct ld_info l32;
-  struct ld_info l64;
-#else
-  struct __ld_info32 l32;
-  struct __ld_info64 l64;
-#endif
-} LdInfo;
-
-/* If compiling with 32-bit and 64-bit debugging capability (e.g. AIX 4.x),
-   declare and initialize a variable named VAR suitable for use as the arch64
-   parameter to the various LDI_*() macros.  */
-
-#ifndef ARCH3264
-# define ARCH64_DECL(var)
-#else
-# define ARCH64_DECL(var) int var = ARCH64 ()
-#endif
-
-/* Return LDI's FIELD for a 64-bit process if ARCH64 and for a 32-bit process
-   otherwise.  This technique only works for FIELDs with the same data type in
-   32-bit and 64-bit versions of ld_info.  */
-
-#ifndef ARCH3264
-# define LDI_FIELD(ldi, arch64, field) (ldi)->l32.ldinfo_##field
-#else
-# define LDI_FIELD(ldi, arch64, field) \
-  (arch64 ? (ldi)->l64.ldinfo_##field : (ldi)->l32.ldinfo_##field)
-#endif
-
-/* Return various LDI fields for a 64-bit process if ARCH64 and for a 32-bit
-   process otherwise.  */
-
-#define LDI_NEXT(ldi, arch64)		LDI_FIELD(ldi, arch64, next)
-#define LDI_FD(ldi, arch64)		LDI_FIELD(ldi, arch64, fd)
-#define LDI_FILENAME(ldi, arch64)	LDI_FIELD(ldi, arch64, filename)
 
 static void exec_one_dummy_insn (struct regcache *);
 
@@ -682,12 +642,12 @@ rs6000_create_inferior (struct target_ops * ops, char *exec_file,
 
    The returned value must be deallocated after use.  */
 
-static LdInfo *
+static gdb_byte *
 rs6000_ptrace_ldinfo (ptid_t ptid)
 {
   const int pid = ptid_get_pid (ptid);
   int ldi_size = 1024;
-  LdInfo *ldi = xmalloc (ldi_size);
+  gdb_byte *ldi = xmalloc (ldi_size);
   int rc = -1;
 
   while (1)
@@ -712,104 +672,6 @@ rs6000_ptrace_ldinfo (ptid_t ptid)
   return ldi;
 }
 
-/* Assuming ABFD refers to a core file, return the LdInfo data
-   stored in that core file.  Raises an error if the data could
-   not be read or extracted.
-
-   The returned value much be deallocated after use.  */
-
-static LdInfo *
-rs6000_core_ldinfo (bfd *abfd)
-{
-  struct bfd_section *ldinfo_sec;
-  int ldinfo_size;
-  gdb_byte *ldinfo_buf;
-  struct cleanup *cleanup;
-
-  ldinfo_sec = bfd_get_section_by_name (abfd, ".ldinfo");
-  if (ldinfo_sec == NULL)
-    error (_("cannot find .ldinfo section from core file: %s"),
-	   bfd_errmsg (bfd_get_error ()));
-  ldinfo_size = bfd_get_section_size (ldinfo_sec);
-
-  ldinfo_buf = xmalloc (ldinfo_size);
-  cleanup = make_cleanup (xfree, ldinfo_buf);
-
-  if (! bfd_get_section_contents (abfd, ldinfo_sec,
-				  ldinfo_buf, 0, ldinfo_size))
-    error (_("unable to read .ldinfo section from core file: %s"),
-	   bfd_errmsg (bfd_get_error ()));
-
-  discard_cleanups (cleanup);
-  return (LdInfo *) ldinfo_buf;
-}
-
-/* Append to OBJSTACK an XML string description of the shared library
-   corresponding to LDI, following the TARGET_OBJECT_LIBRARIES_AIX
-   format.  */
-
-static void
-rs6000_xfer_shared_library (LdInfo *ldi, struct obstack *obstack)
-{
-  const int arch64 = ARCH64 ();
-  const char *archive_name = LDI_FILENAME (ldi, arch64);
-  const char *member_name = archive_name + strlen (archive_name) + 1;
-  CORE_ADDR text_addr, data_addr;
-  ULONGEST text_size, data_size;
-  char *p;
-
-  if (arch64)
-    {
-      text_addr = ldi->l64.ldinfo_textorg;
-      text_size = ldi->l64.ldinfo_textsize;
-      data_addr = ldi->l64.ldinfo_dataorg;
-      data_size = ldi->l64.ldinfo_datasize;
-    }
-  else
-    {
-      /* The text and data addresses are defined as pointers.
-	 To avoid sign-extending their value in the assignments
-	 below, we cast their value to unsigned long first.  */
-      text_addr = (unsigned long) ldi->l32.ldinfo_textorg;
-      text_size = ldi->l32.ldinfo_textsize;
-      data_addr = (unsigned long) ldi->l32.ldinfo_dataorg;
-      data_size = ldi->l32.ldinfo_datasize;
-    }
-
-  obstack_grow_str (obstack, "<library name=\"");
-  p = xml_escape_text (archive_name);
-  obstack_grow_str (obstack, p);
-  xfree (p);
-  obstack_grow_str (obstack, "\"");
-
-  if (member_name[0] != '\0')
-    {
-      obstack_grow_str (obstack, " member=\"");
-      p = xml_escape_text (member_name);
-      obstack_grow_str (obstack, p);
-      xfree (p);
-      obstack_grow_str (obstack, "\"");
-    }
-
-  obstack_grow_str (obstack, " text_addr=\"");
-  obstack_grow_str (obstack, core_addr_to_string (text_addr));
-  obstack_grow_str (obstack, "\"");
-
-  obstack_grow_str (obstack, " text_size=\"");
-  obstack_grow_str (obstack, pulongest (text_size));
-  obstack_grow_str (obstack, "\"");
-
-  obstack_grow_str (obstack, " data_addr=\"");
-  obstack_grow_str (obstack, core_addr_to_string (data_addr));
-  obstack_grow_str (obstack, "\"");
-
-  obstack_grow_str (obstack, " data_size=\"");
-  obstack_grow_str (obstack, pulongest (data_size));
-  obstack_grow_str (obstack, "\"");
-
-  obstack_grow_str (obstack, "></library>");
-}
-
 /* Implement the to_xfer_partial target_ops method for
    TARGET_OBJECT_LIBRARIES_AIX objects.  */
 
@@ -819,62 +681,26 @@ rs6000_xfer_shared_libraries
    const char *annex, gdb_byte *readbuf, const gdb_byte *writebuf,
    ULONGEST offset, LONGEST len)
 {
-  const int arch64 = ARCH64 ();
-  LdInfo *ldi_data;
-  LdInfo *ldi;
-  struct obstack obstack;
-  const char *buf;
-  LONGEST len_avail;
+  gdb_byte *ldi_buf;
+  ULONGEST result;
+  struct cleanup *cleanup;
+
+  /* This function assumes that it is being run with a live process.
+     Core files are handled via gdbarch.  */
+  gdb_assert (target_has_execution);
 
   if (writebuf)
     return -1;
 
-  /* Get the ldinfo raw data: If debugging a live process, we get it
-     using ptrace.  Otherwise, the info is stored in the .ldinfo
-     section of the core file.  */
+  ldi_buf = rs6000_ptrace_ldinfo (inferior_ptid);
+  gdb_assert (ldi_buf != NULL);
+  cleanup = make_cleanup (xfree, ldi_buf);
+  result = rs6000_aix_ld_info_to_xml (target_gdbarch (), ldi_buf,
+				      readbuf, offset, len, 1);
+  xfree (ldi_buf);
 
-  if (target_has_execution)
-    ldi_data = rs6000_ptrace_ldinfo (inferior_ptid);
-  else
-    ldi_data = rs6000_core_ldinfo (core_bfd);
-
-  /* Convert the raw data into an XML representation.  */
-
-  obstack_init (&obstack);
-  obstack_grow_str (&obstack, "<library-list-aix version=\"1.0\">\n");
-
-  ldi = ldi_data;
-  while (1)
-    {
-      /* Close the fd.  We cannot use it, because we cannot assume
-	 that the user of this descriptor will be in the same
-	 process.  */
-      close (LDI_FD (ldi, arch64));
-
-      rs6000_xfer_shared_library (ldi, &obstack);
-
-      if (!LDI_NEXT (ldi, arch64))
-	break;
-      ldi = (LdInfo *) ((char *) ldi + LDI_NEXT (ldi, arch64));
-    }
-
-  xfree (ldi_data);
-
-  obstack_grow_str0 (&obstack, "</library-list-aix>\n");
-
-  buf = obstack_finish (&obstack);
-  len_avail = strlen (buf);
-  if (offset >= len_avail)
-    len= 0;
-  else
-    {
-      if (len > len_avail - offset)
-        len = len_avail - offset;
-      memcpy (readbuf, buf + offset, len);
-    }
-
-  obstack_free (&obstack, NULL);
-  return len;
+  do_cleanups (cleanup);
+  return result;
 }
 
 void _initialize_rs6000_nat (void);

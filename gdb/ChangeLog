@@ -1,3 +1,35 @@
+2013-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbarch.sh (core_xfer_shared_libraries_aix): New method.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* corelow.c (core_xfer_partial): Add TARGET_OBJECT_LIBRARIES_AIX
+	handling.
+
+	* rs6000-aix-tdep.h: New file.
+	* Makefile.in (HFILES_NO_SRCDIR): Add rs6000-aix-tdep.h.
+	* rs6000-aix-tdep.c: Include "rs6000-aix-tdep.h" and
+	"xml-utils.h".
+	(struct field_info, struct ld_info_desc): New types.
+	(ld_info32_desc, ld_info64_desc): New static constants.
+	(struct ld_info): New type.
+	(rs6000_aix_extract_ld_info): New function.
+	(rs6000_aix_shared_library_to_xml): Likewise.
+	(rs6000_aix_ld_info_to_xml): Likewise.
+	(rs6000_aix_core_xfer_shared_libraries_aix): Likewise.
+	(rs6000_aix_init_osabi): Add call to
+	set_gdbarch_core_xfer_shared_libraries_aix.
+	* rs6000-nat.c: Add "rs6000-aix-tdep.h" include.
+	Remove "xml-utils.h" include.
+	(LdInfo): Delete typedef.
+	(ARCH64_DECL, LDI_FIELD, LDI_NEXT, LDI_FD, LDI_FILENAME):
+	Delete macros.
+	(rs6000_ptrace_ldinfo): Change return type to gdb_byte *.
+	Adjust code accordingly.
+	(rs6000_core_ldinfo): Delete, folded into
+	rs6000_aix_core_xfer_shared_libraries_aix.
+	(rs6000_xfer_shared_library): Delete.
+	(rs6000_xfer_shared_libraries): Reimplement.
+
 2013-05-15  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record.c (record_goto_cmdlist): New.
