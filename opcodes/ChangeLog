@@ -1,3 +1,8 @@
+2013-05-15  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
+
+	* i386-gen.c (cpu_flag_init): Add CpuFSGSBase in CPU_BDVER3_FLAGS.
+	* i386-init.h: Regenerated.
+
 2013-05-13  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-asm.c (aarch64_ins_advsimd_imm_modified): Remove assertion.
