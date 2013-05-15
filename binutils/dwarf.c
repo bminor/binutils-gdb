@@ -337,13 +337,12 @@ read_uleb128 (unsigned char * data,
 #define SAFE_BYTE_GET64(PTR, HIGH, LOW, END)		\
   do							\
     {							\
-      if (((PTR) + 8) < (END))				\
+      if (((PTR) + 8) <= (END))				\
 	{						\
 	  byte_get_64 ((PTR), (HIGH), (LOW));		\
 	}						\
       else						\
 	{						\
-	  PTR = END;					\
 	  * (LOW) = * (HIGH) = 0;			\
 	}						\
     }							\
@@ -883,7 +882,7 @@ decode_location_expression (unsigned char * data,
 	  printf ("DW_OP_const1s: %ld", (long) svalue);
 	  break;
 	case DW_OP_const2u:
-	  SAFE_BYTE_GET_AND_INC (uvalue, data, 1, end);
+	  SAFE_BYTE_GET_AND_INC (uvalue, data, 2, end);
 	  printf ("DW_OP_const2u: %lu", (unsigned long) uvalue);
 	  break;
 	case DW_OP_const2s:
@@ -3184,7 +3183,8 @@ display_debug_lines_decoded (struct dwarf_section *section,
 			 break;
 		       case DW_LNE_set_address:
 			 SAFE_BYTE_GET_AND_INC (state_machine_regs.address,
-						op_code_data, ext_op_code_len - bytes_read - 1,
+						op_code_data,
+						ext_op_code_len - bytes_read - 1,
 						end);
 			 state_machine_regs.op_index = 0;
 			 break;

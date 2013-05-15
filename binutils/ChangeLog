@@ -1,3 +1,14 @@
+2013-05-15  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (SAFE_BYTE_GET64): Correct end-of-buffer check;
+	don't increment PTR.
+	(decode_location_expression): DW_OP_const2u should read 2 bytes.
+	(display_debug_lines_decoded): Adjust formatting.
+	* elfcomm.c (byte_get_little_endian): Add cases for 5-, 6-, and
+	7-byte reads.
+	(byte_get_big_endian): Likewise.
+	(byte_get_signed): Likewise.
+
 2013-05-09  Andrew Pinski  <apinski@cavium.com>
 
 	* doc/binutils.texi: Document -Mvirt disassembler option.
