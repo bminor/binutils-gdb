@@ -1,5 +1,10 @@
 2013-05-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* utils.h: #include "exceptions.h".
+	(enum errors): Remove partial declaration.
+
+2013-05-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbarch.sh (core_xfer_shared_libraries_aix): New method.
 	* gdbarch.h, gdbarch.c: Regenerate.
 	* corelow.c (core_xfer_partial): Add TARGET_OBJECT_LIBRARIES_AIX

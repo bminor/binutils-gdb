@@ -22,6 +22,7 @@
 #define UTILS_H
 
 #include "cleanups.h"
+#include "exceptions.h"
 
 extern void initialize_utils (void);
 
@@ -278,7 +279,6 @@ extern char *hex_string_custom (LONGEST, int);
 extern void fprintf_symbol_filtered (struct ui_file *, const char *,
 				     enum language, int);
 
-enum errors;
 extern void throw_perror_with_name (enum errors errcode, const char *string)
   ATTRIBUTE_NORETURN;
 extern void perror_with_name (const char *) ATTRIBUTE_NORETURN;
