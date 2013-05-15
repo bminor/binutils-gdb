@@ -1,3 +1,7 @@
+2013-05-15  Andreas Schwab  <schwab@suse.de>
+
+	* elf64-aarch64.c (elf_backend_default_execstack): Define to 0.
+
 2013-05-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* coffcode.h (styp_to_sec_flags) [RS6000COFF_C]: Add handling
