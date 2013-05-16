@@ -1,3 +1,8 @@
+2013-05-16  Pedro Alves  <palves@redhat.com>
+
+	* gdb.ada/complete.exp (test_gdb_no_completion): Fix typo in
+	comment.  Use gdb_test_no_output.
+
 2013-05-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/complete.exp: Add test verifying completion using

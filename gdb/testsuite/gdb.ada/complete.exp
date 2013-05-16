@@ -38,13 +38,10 @@ proc test_gdb_complete { expr expected_output } {
 }
 
 # A convenience function that verifies that the "complete EXPR" command
-# does not genearte any output.
+# does not generate any output.
 
 proc test_gdb_no_completion { expr } {
-    # FIXME: brobecker/2007-12-27: How do you verify that the command
-    # output is actually really empty???  For now, the following does
-    # not verify this at all:
-    test_gdb_complete "$expr" ""
+    gdb_test_no_output "complete p $expr"
 }
 
 # A convenience function that joins all the arguments together,
