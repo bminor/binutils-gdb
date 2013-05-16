@@ -84,6 +84,30 @@
 #endif
 #endif
 
+/* Some targets did not define these ptrace constants from the start,
+   so gdbserver defines them locally here.  In the future, these may
+   be removed after they are added to asm/ptrace.h.  */
+#if !(defined(PT_TEXT_ADDR) \
+      || defined(PT_DATA_ADDR) \
+      || defined(PT_TEXT_END_ADDR))
+#if defined(__mcoldfire__)
+/* These are still undefined in 3.10 kernels.  */
+#define PT_TEXT_ADDR 49*4
+#define PT_DATA_ADDR 50*4
+#define PT_TEXT_END_ADDR  51*4
+/* BFIN already defines these since at least 2.6.32 kernels.  */
+#elif defined(BFIN)
+#define PT_TEXT_ADDR 220
+#define PT_TEXT_END_ADDR 224
+#define PT_DATA_ADDR 228
+/* These are still undefined in 3.10 kernels.  */
+#elif defined(__TMS320C6X__)
+#define PT_TEXT_ADDR     (0x10000*4)
+#define PT_DATA_ADDR     (0x10004*4)
+#define PT_TEXT_END_ADDR (0x10008*4)
+#endif
+#endif
+
 #ifdef HAVE_LINUX_BTRACE
 # include "linux-btrace.h"
 #endif
@@ -4833,25 +4857,14 @@ linux_stopped_data_address (void)
   return lwp->stopped_data_address;
 }
 
-#if defined(__UCLIBC__) && defined(HAS_NOMMU)
-#if ! (defined(PT_TEXT_ADDR) \
-       || defined(PT_DATA_ADDR) \
-       || defined(PT_TEXT_END_ADDR))
-#if defined(__mcoldfire__)
-/* These should really be defined in the kernel's ptrace.h header.  */
-#define PT_TEXT_ADDR 49*4
-#define PT_DATA_ADDR 50*4
-#define PT_TEXT_END_ADDR  51*4
-#elif defined(BFIN)
-#define PT_TEXT_ADDR 220
-#define PT_TEXT_END_ADDR 224
-#define PT_DATA_ADDR 228
-#elif defined(__TMS320C6X__)
-#define PT_TEXT_ADDR     (0x10000*4)
-#define PT_DATA_ADDR     (0x10004*4)
-#define PT_TEXT_END_ADDR (0x10008*4)
-#endif
-#endif
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)	      \
+    && defined(PT_TEXT_ADDR) && defined(PT_DATA_ADDR) \
+    && defined(PT_TEXT_END_ADDR)
+
+/* This is only used for targets that define PT_TEXT_ADDR,
+   PT_DATA_ADDR and PT_TEXT_END_ADDR.  If those are not defined, supposedly
+   the target has different ways of acquiring this information, like
+   loadmaps.  */
 
 /* Under uClinux, programs are loaded at non-zero offsets, which we need
    to tell gdb about.  */
@@ -4859,7 +4872,6 @@ linux_stopped_data_address (void)
 static int
 linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 {
-#if defined(PT_TEXT_ADDR) && defined(PT_DATA_ADDR) && defined(PT_TEXT_END_ADDR)
   unsigned long text, text_end, data;
   int pid = lwpid_of (get_thread_lwp (current_inferior));
 
@@ -4888,7 +4900,6 @@ linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 
       return 1;
     }
-#endif
  return 0;
 }
 #endif
@@ -5887,7 +5898,9 @@ static struct target_ops linux_target_ops = {
   linux_remove_point,
   linux_stopped_by_watchpoint,
   linux_stopped_data_address,
-#if defined(__UCLIBC__) && defined(HAS_NOMMU)
+#if defined(__UCLIBC__) && defined(HAS_NOMMU)	      \
+    && defined(PT_TEXT_ADDR) && defined(PT_DATA_ADDR) \
+    && defined(PT_TEXT_END_ADDR)
   linux_read_offsets,
 #else
   NULL,
