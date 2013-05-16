@@ -1,3 +1,7 @@
+2013-05-16  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* doc/c-msp430.texi: Fix typo.
+
 2013-05-16  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ppc.c (ppc_is_toc_sym): Symbols of class XMC_TC
@@ -7,7 +11,7 @@
 
 	* config/tc-msp430.c: Make -mmcu recognise more part numbers.
 	Add -mcpu command to specify core type.
-	* doc/c-msp430.c: Update documentation.
+	* doc/c-msp430.texi: Update documentation.
 
 2013-05-09  Andrew Pinski  <apinski@cavium.com>
 

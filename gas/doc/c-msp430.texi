@@ -32,7 +32,7 @@
 selects the mpu arch.  If the architecture is 430Xv2 then this also
 enables NOP generation unless the @option{-mN} is also specified.
 
-@ietm -mcpu
+@item -mcpu
 selects the cpu architecture.  If the architecture is 430Xv2 then this
 also enables NOP generation unless the @option{-mN} is also
 specified.
