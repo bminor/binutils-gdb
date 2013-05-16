@@ -1,3 +1,8 @@
+2013-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.h: #include "exceptions.h".
+	(enum errors): Remove partial declaration.
+
 2013-05-10  David Taylor  <dtaylor@emc.com>
 
 	PR remote/15455
