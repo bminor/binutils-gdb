@@ -1,3 +1,8 @@
+2013-05-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_make_symbol_completion_list): Make sure
+	all cleanups are done before returning from this function.
+
 2013-05-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* utils.h: #include "exceptions.h".

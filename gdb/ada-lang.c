@@ -5841,6 +5841,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   struct block *b, *surrounding_static_block = 0;
   int i;
   struct block_iterator iter;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
 
   gdb_assert (code == TYPE_CODE_UNDEF);
 
@@ -5941,6 +5942,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
     }
   }
 
+  do_cleanups (old_chain);
   return completions;
 }
 

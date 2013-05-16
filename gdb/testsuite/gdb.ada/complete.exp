@@ -175,4 +175,19 @@ test_gdb_complete "pck." \
 test_gdb_complete "<pck__my" \
                   "p <pck__my_global_variable>"
 
-
+# Very simple completion, but using the interactive form, this time.
+# The verification we are trying to make involves the event loop,
+# and using the "complete" command is not sufficient to reproduce
+# the original problem.
+set test "interactive complete 'print some'"
+send_gdb "print some\t"
+gdb_test_multiple "" "$test" {
+    -re "^print some_local_variable $" {
+        send_gdb "\n"
+        gdb_test_multiple "" "$test" {
+            -re " = 1$eol$gdb_prompt $" {
+                pass "$test"
+            }
+        }
+    }
+}
