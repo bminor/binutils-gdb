@@ -1,3 +1,9 @@
+2013-05-16  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c: Make -mmcu recognise more part numbers.
+	Add -mcpu command to specify core type.
+	* doc/c-msp430.c: Update documentation.
+
 2013-05-09  Andrew Pinski  <apinski@cavium.com>
 
 	* config/tc-mips.c (struct mips_set_options): New ase_virt field.

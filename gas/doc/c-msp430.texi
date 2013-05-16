@@ -28,8 +28,15 @@
 @cindex options for MSP430 (none)
 @table @code
 
-@item -m
-select the mpu arch. Currently has no effect.
+@item -mmcu
+selects the mpu arch.  If the architecture is 430Xv2 then this also
+enables NOP generation unless the @option{-mN} is also specified.
+
+@ietm -mcpu
+selects the cpu architecture.  If the architecture is 430Xv2 then this
+also enables NOP generation unless the @option{-mN} is also
+specified.
+
 @item -mP
 enables polymorph instructions handler.
 
@@ -42,13 +49,13 @@ indicates that the input uses the large code model.
 @item -mN
 disables the generation of a NOP instruction following any instruction
 that might change the interrupts enabled/disabled state.  For the
-MSP430x5xx series the instructions: @code{EINT}, @code{DINT}, @code{BIC
-#8, SR}, @code{BIS #8, SR} and @code{MOV.W <>, SR} must be followed by
-a NOP instruction in order to ensure the correct processing of
-interrupts.  By default generation of the NOP instruction happens
-automatically, but this command line option disables this behaviour.
-It is then up to the programmer to ensure that interrupts are enabled
-and disabled correctly.
+430Xv2 architecture the instructions: @code{EINT}, @code{DINT},
+@code{BIC #8, SR}, @code{BIS #8, SR} and @code{MOV.W <>, SR} must be
+followed by a NOP instruction in order to ensure the correct
+processing of interrupts.  By default generation of the NOP
+instruction happens automatically, but this command line option
+disables this behaviour.  It is then up to the programmer to ensure
+that interrupts are enabled and disabled correctly.
 
 @end table
 
@@ -229,10 +236,15 @@ used for the directive called @code{.app-file} in the MSP 430 support.
 This directive is ignored; it is accepted for compatibility with other
 MSP 430 assemblers.
 
-@cindex @code{sect} directive, MSP 430
+@cindex @code{arch} directive, MSP 430
 @item .arch
-Currently this directive is ignored; it is accepted for compatibility with other
-MSP 430 assemblers.
+Sets the target microcontroller in the same way as the @option{-mmcu}
+command line option.
+
+@cindex @code{cpu} directive, MSP 430
+@item .cpu
+Sets the target architecture in the same way as the @option{-mcpu}
+command line option.
 
 @cindex @code{profiler} directive, MSP 430
 @item .profiler

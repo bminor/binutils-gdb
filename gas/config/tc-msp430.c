@@ -257,37 +257,482 @@ relax_typeS md_relax_table[] =
 
 #define MAX_OP_LEN	256
 
+typedef enum msp_isa
+{
+  MSP_ISA_430,
+  MSP_ISA_430X,
+  MSP_ISA_430Xv2
+} msp_isa;
+
 struct mcu_type_s
 {
-  char * name;
-  int isa;
-  int mach;
+  char *  name;
+  msp_isa isa;
 };
 
-#define MSP430_ISA_11   11
-#define MSP430_ISA_110	110
-#define MSP430_ISA_12   12
-#define MSP430_ISA_13   13
-#define MSP430_ISA_14   14
-#define MSP430_ISA_15   15
-#define MSP430_ISA_16   16
-#define MSP430_ISA_20   20
-#define MSP430_ISA_21   21
-#define MSP430_ISA_22   22
-#define MSP430_ISA_23   23
-#define MSP430_ISA_24   24
-#define MSP430_ISA_26   26
-#define MSP430_ISA_31   31
-#define MSP430_ISA_32   32
-#define MSP430_ISA_33   33
-#define MSP430_ISA_41   41
-#define MSP430_ISA_42   42
-#define MSP430_ISA_43   43
-#define MSP430_ISA_44   44
-#define MSP430X_ISA     45
-#define MSP430_ISA_46   46
-#define MSP430_ISA_47   47
-#define MSP430_ISA_54   54
+static struct mcu_type_s mcu_types[] =
+{
+  {"msp430afe221", MSP_ISA_430},
+  {"msp430afe222", MSP_ISA_430},
+  {"msp430afe223", MSP_ISA_430},
+  {"msp430afe231", MSP_ISA_430},
+  {"msp430afe232", MSP_ISA_430},
+  {"msp430afe233", MSP_ISA_430},
+  {"msp430afe251", MSP_ISA_430},
+  {"msp430afe252", MSP_ISA_430},
+  {"msp430afe253", MSP_ISA_430},
+  {"msp430c091",   MSP_ISA_430},
+  {"msp430c092",   MSP_ISA_430},
+  {"msp430c111",   MSP_ISA_430},
+  {"msp430c1111",  MSP_ISA_430},
+  {"msp430c112",   MSP_ISA_430},
+  {"msp430c1121",  MSP_ISA_430},
+  {"msp430e112",   MSP_ISA_430},
+  {"msp430c1331", MSP_ISA_430},
+  {"msp430c1351", MSP_ISA_430},
+  {"msp430c311s", MSP_ISA_430},
+  {"msp430c312",  MSP_ISA_430},
+  {"msp430c313",  MSP_ISA_430},
+  {"msp430c314",  MSP_ISA_430},
+  {"msp430c315", MSP_ISA_430},
+  {"msp430c323", MSP_ISA_430},
+  {"msp430c325", MSP_ISA_430},
+  {"msp430c336", MSP_ISA_430},
+  {"msp430c337", MSP_ISA_430},
+  {"msp430c412", MSP_ISA_430},
+  {"msp430c413", MSP_ISA_430},
+  {"msp430e313", MSP_ISA_430},
+  {"msp430e315", MSP_ISA_430},
+  {"msp430e325", MSP_ISA_430},
+  {"msp430e337", MSP_ISA_430},
+  {"msp430f110", MSP_ISA_430},
+  {"msp430f1101", MSP_ISA_430},
+  {"msp430f1101a", MSP_ISA_430},
+  {"msp430f1111", MSP_ISA_430},
+  {"msp430f1111a", MSP_ISA_430},
+  {"msp430f112", MSP_ISA_430},
+  {"msp430f1121", MSP_ISA_430},
+  {"msp430f1121a", MSP_ISA_430},
+  {"msp430f1122", MSP_ISA_430},
+  {"msp430f1132", MSP_ISA_430},
+  {"msp430f122", MSP_ISA_430},
+  {"msp430f1222", MSP_ISA_430},
+  {"msp430f123", MSP_ISA_430},
+  {"msp430f1232", MSP_ISA_430},
+  {"msp430f133", MSP_ISA_430},
+  {"msp430f135", MSP_ISA_430},
+  {"msp430f147", MSP_ISA_430},
+  {"msp430f1471", MSP_ISA_430},
+  {"msp430f148", MSP_ISA_430},
+  {"msp430f1481", MSP_ISA_430},
+  {"msp430f149", MSP_ISA_430},
+  {"msp430f1491", MSP_ISA_430},
+  {"msp430f155", MSP_ISA_430},
+  {"msp430f156", MSP_ISA_430},
+  {"msp430f157", MSP_ISA_430},
+  {"msp430f1610", MSP_ISA_430},
+  {"msp430f1611", MSP_ISA_430},
+  {"msp430f1612", MSP_ISA_430},
+  {"msp430f167", MSP_ISA_430},
+  {"msp430f168", MSP_ISA_430},
+  {"msp430f169", MSP_ISA_430},
+  {"msp430f2001", MSP_ISA_430},
+  {"msp430f2002", MSP_ISA_430},
+  {"msp430f2003", MSP_ISA_430},
+  {"msp430f2011", MSP_ISA_430},
+  {"msp430f2012", MSP_ISA_430},
+  {"msp430f2013", MSP_ISA_430},
+  {"msp430f2101", MSP_ISA_430},
+  {"msp430f2111", MSP_ISA_430},
+  {"msp430f2112", MSP_ISA_430},
+  {"msp430f2121", MSP_ISA_430},
+  {"msp430f2122", MSP_ISA_430},
+  {"msp430f2131", MSP_ISA_430},
+  {"msp430f2132", MSP_ISA_430},
+  {"msp430f2232", MSP_ISA_430},
+  {"msp430f2234", MSP_ISA_430},
+  {"msp430f2252", MSP_ISA_430},
+  {"msp430f2254", MSP_ISA_430},
+  {"msp430f2272", MSP_ISA_430},
+  {"msp430f2274", MSP_ISA_430},
+  {"msp430f233", MSP_ISA_430},
+  {"msp430f2330", MSP_ISA_430},
+  {"msp430f235", MSP_ISA_430},
+  {"msp430f2350", MSP_ISA_430},
+  {"msp430f2370", MSP_ISA_430},
+  {"msp430f2410", MSP_ISA_430},
+  {"msp430f247", MSP_ISA_430},
+  {"msp430f2471", MSP_ISA_430},
+  {"msp430f248", MSP_ISA_430},
+  {"msp430f2481", MSP_ISA_430},
+  {"msp430f249", MSP_ISA_430},
+  {"msp430f2491", MSP_ISA_430},
+  {"msp430f412", MSP_ISA_430},
+  {"msp430f413", MSP_ISA_430},
+  {"msp430f4132", MSP_ISA_430},
+  {"msp430f415", MSP_ISA_430},
+  {"msp430f4152", MSP_ISA_430},
+  {"msp430f417", MSP_ISA_430},
+  {"msp430f423", MSP_ISA_430},
+  {"msp430f423a", MSP_ISA_430},
+  {"msp430f425",  MSP_ISA_430},
+  {"msp430f4250", MSP_ISA_430},
+  {"msp430f425a", MSP_ISA_430},
+  {"msp430f4260", MSP_ISA_430},
+  {"msp430f427",  MSP_ISA_430},
+  {"msp430f4270", MSP_ISA_430},
+  {"msp430f427a", MSP_ISA_430},
+  {"msp430f435", MSP_ISA_430},
+  {"msp430f4351", MSP_ISA_430},
+  {"msp430f436", MSP_ISA_430},
+  {"msp430f4361", MSP_ISA_430},
+  {"msp430f437", MSP_ISA_430},
+  {"msp430f4371", MSP_ISA_430},
+  {"msp430f438", MSP_ISA_430},
+  {"msp430f439", MSP_ISA_430},
+  {"msp430f447", MSP_ISA_430},
+  {"msp430f448", MSP_ISA_430},
+  {"msp430f4481", MSP_ISA_430},
+  {"msp430f449", MSP_ISA_430},
+  {"msp430f4491", MSP_ISA_430},
+  {"msp430f477", MSP_ISA_430},
+  {"msp430f478", MSP_ISA_430},
+  {"msp430f4783", MSP_ISA_430},
+  {"msp430f4784", MSP_ISA_430},
+  {"msp430f479", MSP_ISA_430},
+  {"msp430f4793", MSP_ISA_430},
+  {"msp430f4794", MSP_ISA_430},
+  {"msp430fe423", MSP_ISA_430},
+  {"msp430fe4232", MSP_ISA_430},
+  {"msp430fe423a", MSP_ISA_430},
+  {"msp430fe4242", MSP_ISA_430},
+  {"msp430fe425", MSP_ISA_430},
+  {"msp430fe4252", MSP_ISA_430},
+  {"msp430fe425a", MSP_ISA_430},
+  {"msp430fe427", MSP_ISA_430},
+  {"msp430fe4272", MSP_ISA_430},
+  {"msp430fe427a", MSP_ISA_430},
+  {"msp430fg4250", MSP_ISA_430},
+  {"msp430fg4260", MSP_ISA_430},
+  {"msp430fg4270", MSP_ISA_430},
+  {"msp430fg437", MSP_ISA_430},
+  {"msp430fg438", MSP_ISA_430},
+  {"msp430fg439", MSP_ISA_430},
+  {"msp430fg477", MSP_ISA_430},
+  {"msp430fg478", MSP_ISA_430},
+  {"msp430fg479", MSP_ISA_430},
+  {"msp430fw423", MSP_ISA_430},
+  {"msp430fw425", MSP_ISA_430},
+  {"msp430fw427", MSP_ISA_430},
+  {"msp430fw428", MSP_ISA_430},
+  {"msp430fw429", MSP_ISA_430},
+  {"msp430g2001", MSP_ISA_430},
+  {"msp430g2101", MSP_ISA_430},
+  {"msp430g2102", MSP_ISA_430},
+  {"msp430g2111", MSP_ISA_430},
+  {"msp430g2112", MSP_ISA_430},
+  {"msp430g2113", MSP_ISA_430},
+  {"msp430g2121", MSP_ISA_430},
+  {"msp430g2131", MSP_ISA_430},
+  {"msp430g2132", MSP_ISA_430},
+  {"msp430g2152", MSP_ISA_430},
+  {"msp430g2153", MSP_ISA_430},
+  {"msp430g2201", MSP_ISA_430},
+  {"msp430g2202", MSP_ISA_430},
+  {"msp430g2203", MSP_ISA_430},
+  {"msp430g2210", MSP_ISA_430},
+  {"msp430g2211", MSP_ISA_430},
+  {"msp430g2212", MSP_ISA_430},
+  {"msp430g2213", MSP_ISA_430},
+  {"msp430g2221", MSP_ISA_430},
+  {"msp430g2230", MSP_ISA_430},
+  {"msp430g2231", MSP_ISA_430},
+  {"msp430g2232", MSP_ISA_430},
+  {"msp430g2233", MSP_ISA_430},
+  {"msp430g2252", MSP_ISA_430},
+  {"msp430g2253", MSP_ISA_430},
+  {"msp430g2302", MSP_ISA_430},
+  {"msp430g2303", MSP_ISA_430},
+  {"msp430g2312", MSP_ISA_430},
+  {"msp430g2313", MSP_ISA_430},
+  {"msp430g2332", MSP_ISA_430},
+  {"msp430g2333", MSP_ISA_430},
+  {"msp430g2352", MSP_ISA_430},
+  {"msp430g2353", MSP_ISA_430},
+  {"msp430g2402", MSP_ISA_430},
+  {"msp430g2403", MSP_ISA_430},
+  {"msp430g2412", MSP_ISA_430},
+  {"msp430g2413", MSP_ISA_430},
+  {"msp430g2432", MSP_ISA_430},
+  {"msp430g2433", MSP_ISA_430},
+  {"msp430g2444", MSP_ISA_430},
+  {"msp430g2452", MSP_ISA_430},
+  {"msp430g2453", MSP_ISA_430},
+  {"msp430g2513", MSP_ISA_430},
+  {"msp430g2533", MSP_ISA_430},
+  {"msp430g2544", MSP_ISA_430},
+  {"msp430g2553", MSP_ISA_430},
+  {"msp430g2744", MSP_ISA_430},
+  {"msp430g2755", MSP_ISA_430},
+  {"msp430g2855", MSP_ISA_430},
+  {"msp430g2955", MSP_ISA_430},
+  {"msp430l092",  MSP_ISA_430},
+  {"msp430p112",  MSP_ISA_430},
+  {"msp430p313",  MSP_ISA_430},
+  {"msp430p315",  MSP_ISA_430},
+  {"msp430p315s", MSP_ISA_430},
+  {"msp430p325",  MSP_ISA_430},
+  {"msp430p337",  MSP_ISA_430},
+  {"msp430tch5e", MSP_ISA_430},
+
+  {"msp430cg4616", MSP_ISA_430X},
+  {"msp430cg4617", MSP_ISA_430X},
+  {"msp430cg4618", MSP_ISA_430X},
+  {"msp430cg4619", MSP_ISA_430X},
+  {"msp430f2416", MSP_ISA_430X},
+  {"msp430f2417", MSP_ISA_430X},
+  {"msp430f2418", MSP_ISA_430X},
+  {"msp430f2419", MSP_ISA_430X},
+  {"msp430f2616", MSP_ISA_430X},
+  {"msp430f2617", MSP_ISA_430X},
+  {"msp430f2618", MSP_ISA_430X},
+  {"msp430f2619", MSP_ISA_430X},
+  {"msp430f47126", MSP_ISA_430X},
+  {"msp430f47127", MSP_ISA_430X},
+  {"msp430f47163", MSP_ISA_430X},
+  {"msp430f47173", MSP_ISA_430X},
+  {"msp430f47183", MSP_ISA_430X},
+  {"msp430f47193", MSP_ISA_430X},
+  {"msp430f47166", MSP_ISA_430X},
+  {"msp430f47176", MSP_ISA_430X},
+  {"msp430f47186", MSP_ISA_430X},
+  {"msp430f47196", MSP_ISA_430X},
+  {"msp430f47167", MSP_ISA_430X},
+  {"msp430f47177", MSP_ISA_430X},
+  {"msp430f47187", MSP_ISA_430X},
+  {"msp430f47197", MSP_ISA_430X},
+  {"msp430f46161", MSP_ISA_430X},
+  {"msp430f46171", MSP_ISA_430X},
+  {"msp430f46181", MSP_ISA_430X},
+  {"msp430f46191", MSP_ISA_430X},
+  {"msp430f4616", MSP_ISA_430X},
+  {"msp430f4617", MSP_ISA_430X},
+  {"msp430f4618", MSP_ISA_430X},
+  {"msp430f4619", MSP_ISA_430X},
+  {"msp430fg4616", MSP_ISA_430X},
+  {"msp430fg4617", MSP_ISA_430X},
+  {"msp430fg4618", MSP_ISA_430X},
+  {"msp430fg4619", MSP_ISA_430X},
+
+  {"msp430f5418", MSP_ISA_430Xv2},
+  {"msp430f5419", MSP_ISA_430Xv2},
+  {"msp430f5435", MSP_ISA_430Xv2},
+  {"msp430f5436", MSP_ISA_430Xv2},
+  {"msp430f5437", MSP_ISA_430Xv2},
+  {"msp430f5438", MSP_ISA_430Xv2},
+  {"msp430f5418a", MSP_ISA_430Xv2},
+  {"msp430f5419a", MSP_ISA_430Xv2},
+  {"msp430f5435a", MSP_ISA_430Xv2},
+  {"msp430f5436a", MSP_ISA_430Xv2},
+  {"msp430f5437a", MSP_ISA_430Xv2},
+  {"msp430f5438a", MSP_ISA_430Xv2},
+  {"msp430f5212", MSP_ISA_430Xv2},
+  {"msp430f5213", MSP_ISA_430Xv2},
+  {"msp430f5214", MSP_ISA_430Xv2},
+  {"msp430f5217", MSP_ISA_430Xv2},
+  {"msp430f5218", MSP_ISA_430Xv2},
+  {"msp430f5219", MSP_ISA_430Xv2},
+  {"msp430f5222", MSP_ISA_430Xv2},
+  {"msp430f5223", MSP_ISA_430Xv2},
+  {"msp430f5224", MSP_ISA_430Xv2},
+  {"msp430f5227", MSP_ISA_430Xv2},
+  {"msp430f5228", MSP_ISA_430Xv2},
+  {"msp430f5229", MSP_ISA_430Xv2},
+  {"msp430f5304", MSP_ISA_430Xv2},
+  {"msp430f5308", MSP_ISA_430Xv2},
+  {"msp430f5309", MSP_ISA_430Xv2},
+  {"msp430f5310", MSP_ISA_430Xv2},
+  {"msp430f5340", MSP_ISA_430Xv2},
+  {"msp430f5341", MSP_ISA_430Xv2},
+  {"msp430f5342", MSP_ISA_430Xv2},
+  {"msp430f5324", MSP_ISA_430Xv2},
+  {"msp430f5325", MSP_ISA_430Xv2},
+  {"msp430f5326", MSP_ISA_430Xv2},
+  {"msp430f5327", MSP_ISA_430Xv2},
+  {"msp430f5328", MSP_ISA_430Xv2},
+  {"msp430f5329", MSP_ISA_430Xv2},
+  {"msp430f5500", MSP_ISA_430Xv2},
+  {"msp430f5501", MSP_ISA_430Xv2},
+  {"msp430f5502", MSP_ISA_430Xv2},
+  {"msp430f5503", MSP_ISA_430Xv2},
+  {"msp430f5504", MSP_ISA_430Xv2},
+  {"msp430f5505", MSP_ISA_430Xv2},
+  {"msp430f5506", MSP_ISA_430Xv2},
+  {"msp430f5507", MSP_ISA_430Xv2},
+  {"msp430f5508", MSP_ISA_430Xv2},
+  {"msp430f5509", MSP_ISA_430Xv2},
+  {"msp430f5510", MSP_ISA_430Xv2},
+  {"msp430f5513", MSP_ISA_430Xv2},
+  {"msp430f5514", MSP_ISA_430Xv2},
+  {"msp430f5515", MSP_ISA_430Xv2},
+  {"msp430f5517", MSP_ISA_430Xv2},
+  {"msp430f5519", MSP_ISA_430Xv2},
+  {"msp430f5521", MSP_ISA_430Xv2},
+  {"msp430f5522", MSP_ISA_430Xv2},
+  {"msp430f5524", MSP_ISA_430Xv2},
+  {"msp430f5525", MSP_ISA_430Xv2},
+  {"msp430f5526", MSP_ISA_430Xv2},
+  {"msp430f5527", MSP_ISA_430Xv2},
+  {"msp430f5528", MSP_ISA_430Xv2},
+  {"msp430f5529", MSP_ISA_430Xv2},
+  {"cc430f5133", MSP_ISA_430Xv2},
+  {"cc430f5135", MSP_ISA_430Xv2},
+  {"cc430f5137", MSP_ISA_430Xv2},
+  {"cc430f6125", MSP_ISA_430Xv2},
+  {"cc430f6126", MSP_ISA_430Xv2},
+  {"cc430f6127", MSP_ISA_430Xv2},
+  {"cc430f6135", MSP_ISA_430Xv2},
+  {"cc430f6137", MSP_ISA_430Xv2},
+  {"cc430f5123", MSP_ISA_430Xv2},
+  {"cc430f5125", MSP_ISA_430Xv2},
+  {"cc430f5143", MSP_ISA_430Xv2},
+  {"cc430f5145", MSP_ISA_430Xv2},
+  {"cc430f5147", MSP_ISA_430Xv2},
+  {"cc430f6143", MSP_ISA_430Xv2},
+  {"cc430f6145", MSP_ISA_430Xv2},
+  {"cc430f6147", MSP_ISA_430Xv2},
+  {"msp430f5333", MSP_ISA_430Xv2},
+  {"msp430f5335", MSP_ISA_430Xv2},
+  {"msp430f5336", MSP_ISA_430Xv2},
+  {"msp430f5338", MSP_ISA_430Xv2},
+  {"msp430f5630", MSP_ISA_430Xv2},
+  {"msp430f5631", MSP_ISA_430Xv2},
+  {"msp430f5632", MSP_ISA_430Xv2},
+  {"msp430f5633", MSP_ISA_430Xv2},
+  {"msp430f5634", MSP_ISA_430Xv2},
+  {"msp430f5635", MSP_ISA_430Xv2},
+  {"msp430f5636", MSP_ISA_430Xv2},
+  {"msp430f5637", MSP_ISA_430Xv2},
+  {"msp430f5638", MSP_ISA_430Xv2},
+  {"msp430f6433", MSP_ISA_430Xv2},
+  {"msp430f6435", MSP_ISA_430Xv2},
+  {"msp430f6436", MSP_ISA_430Xv2},
+  {"msp430f6438", MSP_ISA_430Xv2},
+  {"msp430f6630", MSP_ISA_430Xv2},
+  {"msp430f6631", MSP_ISA_430Xv2},
+  {"msp430f6632", MSP_ISA_430Xv2},
+  {"msp430f6633", MSP_ISA_430Xv2},
+  {"msp430f6634", MSP_ISA_430Xv2},
+  {"msp430f6635", MSP_ISA_430Xv2},
+  {"msp430f6636", MSP_ISA_430Xv2},
+  {"msp430f6637", MSP_ISA_430Xv2},
+  {"msp430f6638", MSP_ISA_430Xv2},
+  {"msp430f5358", MSP_ISA_430Xv2},
+  {"msp430f5359", MSP_ISA_430Xv2},
+  {"msp430f5658", MSP_ISA_430Xv2},
+  {"msp430f5659", MSP_ISA_430Xv2},
+  {"msp430f6458", MSP_ISA_430Xv2},
+  {"msp430f6459", MSP_ISA_430Xv2},
+  {"msp430f6658", MSP_ISA_430Xv2},
+  {"msp430f6659", MSP_ISA_430Xv2},
+  {"msp430f5131", MSP_ISA_430Xv2},
+  {"msp430f5151", MSP_ISA_430Xv2},
+  {"msp430f5171", MSP_ISA_430Xv2},
+  {"msp430f5132", MSP_ISA_430Xv2},
+  {"msp430f5152", MSP_ISA_430Xv2},
+  {"msp430f5172", MSP_ISA_430Xv2},
+  {"msp430f6720", MSP_ISA_430Xv2},
+  {"msp430f6721", MSP_ISA_430Xv2},
+  {"msp430f6723", MSP_ISA_430Xv2},
+  {"msp430f6724", MSP_ISA_430Xv2},
+  {"msp430f6725", MSP_ISA_430Xv2},
+  {"msp430f6726", MSP_ISA_430Xv2},
+  {"msp430f6730", MSP_ISA_430Xv2},
+  {"msp430f6731", MSP_ISA_430Xv2},
+  {"msp430f6733", MSP_ISA_430Xv2},
+  {"msp430f6734", MSP_ISA_430Xv2},
+  {"msp430f6735", MSP_ISA_430Xv2},
+  {"msp430f6736", MSP_ISA_430Xv2},
+  {"msp430f67451", MSP_ISA_430Xv2},
+  {"msp430f67651", MSP_ISA_430Xv2},
+  {"msp430f67751", MSP_ISA_430Xv2},
+  {"msp430f67461", MSP_ISA_430Xv2},
+  {"msp430f67661", MSP_ISA_430Xv2},
+  {"msp430f67761", MSP_ISA_430Xv2},
+  {"msp430f67471", MSP_ISA_430Xv2},
+  {"msp430f67671", MSP_ISA_430Xv2},
+  {"msp430f67771", MSP_ISA_430Xv2},
+  {"msp430f67481", MSP_ISA_430Xv2},
+  {"msp430f67681", MSP_ISA_430Xv2},
+  {"msp430f67781", MSP_ISA_430Xv2},
+  {"msp430f67491", MSP_ISA_430Xv2},
+  {"msp430f67691", MSP_ISA_430Xv2},
+  {"msp430f67791", MSP_ISA_430Xv2},
+  {"msp430f6745", MSP_ISA_430Xv2},
+  {"msp430f6765", MSP_ISA_430Xv2},
+  {"msp430f6775", MSP_ISA_430Xv2},
+  {"msp430f6746", MSP_ISA_430Xv2},
+  {"msp430f6766", MSP_ISA_430Xv2},
+  {"msp430f6776", MSP_ISA_430Xv2},
+  {"msp430f6747", MSP_ISA_430Xv2},
+  {"msp430f6767", MSP_ISA_430Xv2},
+  {"msp430f6777", MSP_ISA_430Xv2},
+  {"msp430f6748", MSP_ISA_430Xv2},
+  {"msp430f6768", MSP_ISA_430Xv2},
+  {"msp430f6778", MSP_ISA_430Xv2},
+  {"msp430f6749", MSP_ISA_430Xv2},
+  {"msp430f6769", MSP_ISA_430Xv2},
+  {"msp430f6779", MSP_ISA_430Xv2},
+  {"msp430fr5720", MSP_ISA_430Xv2},
+  {"msp430fr5721", MSP_ISA_430Xv2},
+  {"msp430fr5722", MSP_ISA_430Xv2},
+  {"msp430fr5723", MSP_ISA_430Xv2},
+  {"msp430fr5724", MSP_ISA_430Xv2},
+  {"msp430fr5725", MSP_ISA_430Xv2},
+  {"msp430fr5726", MSP_ISA_430Xv2},
+  {"msp430fr5727", MSP_ISA_430Xv2},
+  {"msp430fr5728", MSP_ISA_430Xv2},
+  {"msp430fr5729", MSP_ISA_430Xv2},
+  {"msp430fr5730", MSP_ISA_430Xv2},
+  {"msp430fr5731", MSP_ISA_430Xv2},
+  {"msp430fr5732", MSP_ISA_430Xv2},
+  {"msp430fr5733", MSP_ISA_430Xv2},
+  {"msp430fr5734", MSP_ISA_430Xv2},
+  {"msp430fr5735", MSP_ISA_430Xv2},
+  {"msp430fr5736", MSP_ISA_430Xv2},
+  {"msp430fr5737", MSP_ISA_430Xv2},
+  {"msp430fr5738", MSP_ISA_430Xv2},
+  {"msp430fr5739", MSP_ISA_430Xv2},
+  {"msp430bt5190", MSP_ISA_430Xv2},
+  {"msp430fr5949", MSP_ISA_430Xv2},
+  {"msp430fr5969", MSP_ISA_430Xv2},
+  {"msp430sl5438a", MSP_ISA_430Xv2},
+
+  /* Generic names.  */
+  {"msp430",    MSP_ISA_430},
+  {"msp430X",   MSP_ISA_430X},
+  {"msp430Xv2", MSP_ISA_430Xv2},
+    
+  {NULL, 0}
+};
+
+static struct mcu_type_s default_mcu   = { "msp430x11", MSP_ISA_430 };
+static struct mcu_type_s msp430x_mcu   = { "msp430x",   MSP_ISA_430X };
+static struct mcu_type_s msp430xv2_mcu = { "msp430xv2", MSP_ISA_430Xv2 };
+
+static struct mcu_type_s * msp430_mcu = & default_mcu;
+
+static inline bfd_boolean
+target_is_430x (void)
+{
+  return msp430_mcu->isa >= MSP_ISA_430X;
+}
+
+static inline bfd_boolean
+target_is_430xv2 (void)
+{
+  return msp430_mcu->isa == MSP_ISA_430Xv2;
+}
 
 /* Generate a 16-bit relocation.
    For the 430X we generate a relocation without linkwer range checking
@@ -296,7 +741,7 @@ struct mcu_type_s
    if we are handling an immediate value or a byte-width instruction.  */
 #undef  CHECK_RELOC_MSP430
 #define CHECK_RELOC_MSP430				     \
-  (msp430_mcu->isa == MSP430X_ISA			     \
+  (target_is_430x ()					     \
    ? (extended_op ? BFD_RELOC_16 : BFD_RELOC_MSP430X_ABS16)  \
    : ((imm_op || byte_op)				     \
       ? BFD_RELOC_MSP430_16_BYTE : BFD_RELOC_MSP430_16))
@@ -307,185 +752,10 @@ struct mcu_type_s
    if we are handling an immediate value or a byte-width instruction.  */
 #undef  CHECK_RELOC_MSP430_PCREL
 #define CHECK_RELOC_MSP430_PCREL			     \
-  (msp430_mcu->isa == MSP430X_ISA			     \
+  (target_is_430x ()					     \
    ? BFD_RELOC_MSP430X_PCR16				     \
    : (imm_op || byte_op)				     \
    ? BFD_RELOC_MSP430_16_PCREL_BYTE : BFD_RELOC_MSP430_16_PCREL)
-
-static struct mcu_type_s mcu_types[] =
-{
-  {"msp1",        MSP430_ISA_11, bfd_mach_msp11},
-  {"msp2",        MSP430_ISA_14, bfd_mach_msp14},
-  {"msp3",        MSP430_ISA_20, bfd_mach_msp20},
-  {"msp4",        MSP430_ISA_24, bfd_mach_msp24},
-  {"msp5",        MSP430_ISA_31, bfd_mach_msp31},
-  {"msp6",        MSP430_ISA_42, bfd_mach_msp42},
-
-  {"msp430x110",  MSP430_ISA_11, bfd_mach_msp11},
-  {"msp430x112",  MSP430_ISA_11, bfd_mach_msp11},
-  {"msp430x1101", MSP430_ISA_110, bfd_mach_msp110},
-  {"msp430x1111", MSP430_ISA_110, bfd_mach_msp110},
-  {"msp430x1121", MSP430_ISA_110, bfd_mach_msp110},
-  {"msp430x1122", MSP430_ISA_11, bfd_mach_msp110},
-  {"msp430x1132", MSP430_ISA_11, bfd_mach_msp110},
-
-  {"msp430x122",  MSP430_ISA_12, bfd_mach_msp12},
-  {"msp430x123",  MSP430_ISA_12, bfd_mach_msp12},
-  {"msp430x1222", MSP430_ISA_12, bfd_mach_msp12},
-  {"msp430x1232", MSP430_ISA_12, bfd_mach_msp12},
-
-  {"msp430x133",  MSP430_ISA_13, bfd_mach_msp13},
-  {"msp430x135",  MSP430_ISA_13, bfd_mach_msp13},
-  {"msp430x1331", MSP430_ISA_13, bfd_mach_msp13},
-  {"msp430x1351", MSP430_ISA_13, bfd_mach_msp13},
-  {"msp430x147",  MSP430_ISA_14, bfd_mach_msp14},
-  {"msp430x148",  MSP430_ISA_14, bfd_mach_msp14},
-  {"msp430x149",  MSP430_ISA_14, bfd_mach_msp14},
-  {"msp430x1471", MSP430_ISA_14, bfd_mach_msp14},
-  {"msp430x1481", MSP430_ISA_14, bfd_mach_msp14},
-  {"msp430x1491", MSP430_ISA_14, bfd_mach_msp14},
-
-  {"msp430x155",  MSP430_ISA_15, bfd_mach_msp15},
-  {"msp430x156",  MSP430_ISA_15, bfd_mach_msp15},
-  {"msp430x157",  MSP430_ISA_15, bfd_mach_msp15},
-  {"msp430x167",  MSP430_ISA_16, bfd_mach_msp16},
-  {"msp430x168",  MSP430_ISA_16, bfd_mach_msp16},
-  {"msp430x169",  MSP430_ISA_16, bfd_mach_msp16},
-  {"msp430x1610", MSP430_ISA_16, bfd_mach_msp16},
-  {"msp430x1611", MSP430_ISA_16, bfd_mach_msp16},
-  {"msp430x1612", MSP430_ISA_16, bfd_mach_msp16},
-
-  {"msp430x2001", MSP430_ISA_20, bfd_mach_msp20},
-  {"msp430x2011", MSP430_ISA_20, bfd_mach_msp20},
-  {"msp430x2002", MSP430_ISA_20, bfd_mach_msp20},
-  {"msp430x2012", MSP430_ISA_20, bfd_mach_msp20},
-  {"msp430x2003", MSP430_ISA_20, bfd_mach_msp20},
-  {"msp430x2013", MSP430_ISA_20, bfd_mach_msp20 },
-
-  {"msp430x2101", MSP430_ISA_21, bfd_mach_msp21},
-  {"msp430x2111", MSP430_ISA_21, bfd_mach_msp21},
-  {"msp430x2112", MSP430_ISA_21, bfd_mach_msp21},
-  {"msp430x2121", MSP430_ISA_21, bfd_mach_msp21},
-  {"msp430x2131", MSP430_ISA_21, bfd_mach_msp21},
-  {"msp430x2132", MSP430_ISA_21, bfd_mach_msp21},
-
-  {"msp430x2232", MSP430_ISA_22, bfd_mach_msp22},
-  {"msp430x2234", MSP430_ISA_22, bfd_mach_msp22},
-  {"msp430x2252", MSP430_ISA_22, bfd_mach_msp22},
-  {"msp430x2254", MSP430_ISA_22, bfd_mach_msp22},
-  {"msp430x2272", MSP430_ISA_22, bfd_mach_msp22},
-  {"msp430x2274", MSP430_ISA_22, bfd_mach_msp22},
-
-  {"msp430x233",  MSP430_ISA_23, bfd_mach_msp23},
-  {"msp430x235",  MSP430_ISA_23, bfd_mach_msp23},
-  {"msp430x2330", MSP430_ISA_23, bfd_mach_msp23},
-  {"msp430x2350", MSP430_ISA_23, bfd_mach_msp23},
-  {"msp430x2370", MSP430_ISA_23, bfd_mach_msp23},
-
-  {"msp430x247",  MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x2471", MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x248",  MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x2481", MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x249",  MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x2491", MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x2410", MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x2416", MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x2417", MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x2418", MSP430_ISA_24, bfd_mach_msp24},
-  {"msp430x2419", MSP430_ISA_24, bfd_mach_msp24},
-
-  {"msp430x2616", MSP430_ISA_26, bfd_mach_msp26},
-  {"msp430x2617", MSP430_ISA_26, bfd_mach_msp26},
-  {"msp430x2618", MSP430_ISA_26, bfd_mach_msp26},
-  {"msp430x2619", MSP430_ISA_26, bfd_mach_msp26},
-
-  {"msp430x311",  MSP430_ISA_31, bfd_mach_msp31},
-  {"msp430x312",  MSP430_ISA_31, bfd_mach_msp31},
-  {"msp430x313",  MSP430_ISA_31, bfd_mach_msp31},
-  {"msp430x314",  MSP430_ISA_31, bfd_mach_msp31},
-  {"msp430x315",  MSP430_ISA_31, bfd_mach_msp31},
-  {"msp430x323",  MSP430_ISA_32, bfd_mach_msp32},
-  {"msp430x325",  MSP430_ISA_32, bfd_mach_msp32},
-  {"msp430x336",  MSP430_ISA_33, bfd_mach_msp33},
-  {"msp430x337",  MSP430_ISA_33, bfd_mach_msp33},
-
-  {"msp430x412",  MSP430_ISA_41, bfd_mach_msp41},
-  {"msp430x413",  MSP430_ISA_41, bfd_mach_msp41},
-  {"msp430x415",  MSP430_ISA_41, bfd_mach_msp41},
-  {"msp430x417",  MSP430_ISA_41, bfd_mach_msp41},
-
-  {"msp430x423",  MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430x425",  MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430x427",  MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430x4250", MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430x4260", MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430x4270", MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xG4250",MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xG4260",MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xG4270",MSP430_ISA_42, bfd_mach_msp42},
-
-  {"msp430xE423", MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xE4232",MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xE4242",MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xE4252",MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xE425", MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xE427", MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xE4272",MSP430_ISA_42, bfd_mach_msp42},
-
-  {"msp430xW423", MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xW425", MSP430_ISA_42, bfd_mach_msp42},
-  {"msp430xW427", MSP430_ISA_42, bfd_mach_msp42},
-
-  {"msp430xG437", MSP430_ISA_43, bfd_mach_msp43},
-  {"msp430xG438", MSP430_ISA_43, bfd_mach_msp43},
-  {"msp430xG439", MSP430_ISA_43, bfd_mach_msp43},
-
-  {"msp430x435",  MSP430_ISA_43, bfd_mach_msp43},
-  {"msp430x4351", MSP430_ISA_43, bfd_mach_msp43},
-  {"msp430x436",  MSP430_ISA_43, bfd_mach_msp43},
-  {"msp430x4361", MSP430_ISA_43, bfd_mach_msp43},
-  {"msp430x437",  MSP430_ISA_43, bfd_mach_msp43},
-  {"msp430x4371", MSP430_ISA_43, bfd_mach_msp43},
-
-  {"msp430x447",  MSP430_ISA_44, bfd_mach_msp44},
-  {"msp430x448",  MSP430_ISA_44, bfd_mach_msp44},
-  {"msp430x449",  MSP430_ISA_44, bfd_mach_msp44},
-
-  {"msp430xG4616",MSP430_ISA_46, bfd_mach_msp46},
-  {"msp430xG4617",MSP430_ISA_46, bfd_mach_msp46},
-  {"msp430xG4618",MSP430_ISA_46, bfd_mach_msp46},
-  {"msp430xG4619",MSP430_ISA_46, bfd_mach_msp46},
-
-  {"msp430x4783", MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x4784", MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x4793", MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x4794", MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x47166",MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x47176",MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x47186",MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x47196",MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x47167",MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x47177",MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x47187",MSP430_ISA_47, bfd_mach_msp47},
-  {"msp430x47197",MSP430_ISA_47, bfd_mach_msp47},
-
-  {"msp430x5418", MSP430_ISA_54, bfd_mach_msp54},
-  {"msp430x5419", MSP430_ISA_54, bfd_mach_msp54},
-  {"msp430x5435", MSP430_ISA_54, bfd_mach_msp54},
-  {"msp430x5436", MSP430_ISA_54, bfd_mach_msp54},
-  {"msp430x5437", MSP430_ISA_54, bfd_mach_msp54},
-  {"msp430x5438", MSP430_ISA_54, bfd_mach_msp54},
-
-  {"msp430X",     MSP430X_ISA,   bfd_mach_msp430x},
-
-  {NULL, 0, 0}
-};
-
-
-static struct mcu_type_s default_mcu =
-    { "msp430x11", MSP430_ISA_11, bfd_mach_msp11 };
-
-static struct mcu_type_s * msp430_mcu = & default_mcu;
 
 /* Profiling capability:
    It is a performance hit to use gcc's profiling approach for this tiny target.
@@ -852,16 +1122,18 @@ extract_word (char * from, char * to, int limit)
 static bfd_boolean large_model = FALSE;
 #define OPTION_NO_INTR_NOPS 'N'
 static bfd_boolean gen_interrupt_nops = TRUE;
+#define OPTION_MCPU 'c'
 
 static void
-msp430_set_arch (int dummy ATTRIBUTE_UNUSED)
+msp430_set_arch (int option)
 {
   char *str = (char *) alloca (32);	/* 32 for good measure.  */
 
   input_line_pointer = extract_word (input_line_pointer, str, 32);
 
-  md_parse_option (OPTION_MMCU, str);
-  bfd_set_arch_mach (stdoutput, TARGET_ARCH, msp430_mcu->mach);
+  md_parse_option (option, str);
+  bfd_set_arch_mach (stdoutput, TARGET_ARCH,
+		     target_is_430x () ? bfd_mach_msp430x : bfd_mach_msp11);
 }
 
 static void
@@ -873,7 +1145,7 @@ show_mcu_list (FILE * stream)
 
   for (i = 0; mcu_types[i].name; i++)
     {
-      fprintf (stream, "%13.13s", mcu_types[i].name);
+      fprintf (stream, "%14.14s", mcu_types[i].name);
       if ((i % 6) == 5)
 	fprintf (stream, "\n");
     }
@@ -889,26 +1161,40 @@ md_parse_option (int c, char * arg)
   switch (c)
     {
     case OPTION_MMCU:
+      if (arg == NULL)
+	as_fatal (_("MCU option requires a name\n"));
+
       for (i = 0; mcu_types[i].name; ++i)
-	if (strcmp (mcu_types[i].name, arg) == 0)
+	if (strcasecmp (mcu_types[i].name, arg) == 0)
 	  break;
 
-      if (!mcu_types[i].name)
+      if (mcu_types[i].name == NULL)
 	{
 	  show_mcu_list (stderr);
 	  as_fatal (_("unknown MCU: %s\n"), arg);
 	}
 
-      if (msp430_mcu == &default_mcu || msp430_mcu->mach == mcu_types[i].mach)
-	msp430_mcu = &mcu_types[i];
-      else if (msp430_mcu->mach == bfd_mach_msp430x)
-	/* Allow switching to a lesser architecture.  */
+      /* Allow switching to the same or a lesser architecture.  */
+      if (msp430_mcu == &default_mcu || msp430_mcu->isa >= mcu_types[i].isa)
 	msp430_mcu = mcu_types + i;
       else
-	as_fatal (_("redefinition of mcu type %s' to %s'"),
+	as_fatal (_("redefinition of mcu type '%s' to '%s'"),
 		  msp430_mcu->name, mcu_types[i].name);
       return 1;
 
+    case OPTION_MCPU:
+      if (strcmp (arg, "430") == 0)
+	msp430_mcu = & default_mcu;
+      else if (strcmp (arg, "430x") == 0
+	       || strcmp (arg, "430X") == 0)
+	msp430_mcu = & msp430x_mcu;
+      else if (strcasecmp (arg, "430xv2") == 0)
+	msp430_mcu = & msp430xv2_mcu;
+      else
+	as_fatal (_("unrecognised argument to -mcpu option '%s'"), arg);
+
+      return 1;
+      
     case OPTION_RELAX:
       msp430_enable_relax = 1;
       return 1;
@@ -932,16 +1218,18 @@ md_parse_option (int c, char * arg)
 
 const pseudo_typeS md_pseudo_table[] =
 {
-  {"arch", msp430_set_arch, 0},
+  {"arch", msp430_set_arch, OPTION_MMCU},
+  {"cpu", msp430_set_arch, OPTION_MCPU},
   {"profiler", msp430_profiler, 0},
   {NULL, NULL, 0}
 };
 
-const char *md_shortopts = "m:";
+const char *md_shortopts = "mm:,mP,mQ,ml,mN";
 
 struct option md_longopts[] =
 {
   {"mmcu", required_argument, NULL, OPTION_MMCU},
+  {"mcpu", required_argument, NULL, OPTION_MCPU},
   {"mP", no_argument, NULL, OPTION_POLYMORPHS},
   {"mQ", no_argument, NULL, OPTION_RELAX},
   {"ml", no_argument, NULL, OPTION_LARGE},
@@ -956,7 +1244,8 @@ md_show_usage (FILE * stream)
 {
   fprintf (stream,
 	   _("MSP430 options:\n"
-	     "  -mmcu=<msp430-name> select microcontroller type\n"));
+	     "  -mmcu=<msp430-name>     - select microcontroller type\n"
+             "  -mcpu={430|430x|430xv2} - select microcontroller architecture\n"));
   fprintf (stream,
 	   _("  -mQ - enable relaxation at assembly time. DANGEROUS!\n"
 	     "  -mP - enable polymorph instructions\n"));
@@ -1006,7 +1295,8 @@ md_begin (void)
   for (opcode = msp430_opcodes; opcode->name; opcode++)
     hash_insert (msp430_hash, opcode->name, (char *) opcode);
 
-  bfd_set_arch_mach (stdoutput, TARGET_ARCH, msp430_mcu->mach);
+  bfd_set_arch_mach (stdoutput, TARGET_ARCH,
+		     target_is_430x () ? bfd_mach_msp430x : bfd_mach_msp11);
 }
 
 /* Returns the register number equivalent to the string T.
@@ -1777,6 +2067,8 @@ try_encode_mova (bfd_boolean imm_op,
   return 0;
 }
 
+#define is_opcode(NAME) (strcmp (opcode->name, NAME) == 0)
+
 /* Parse instruction operands.
    Return binary opcode.  */
 
@@ -1847,13 +2139,13 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
   if ((fmt = opcode->fmt) < 0)
     {
-      if (msp430_mcu->isa != MSP430X_ISA)
+      if (! target_is_430x ())
 	{
 	  as_bad (_("instruction %s requires MSP430X mcu"),
 		  opcode->name);
 	  return 0;
 	}
-
+	
       fmt = (-fmt) - 1;
       extended_op = TRUE;
     }
@@ -1891,14 +2183,14 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      frag = frag_more (insn_length);
 	      bfd_putl16 (extended, frag);
 	    }
+
 	  insn_length += 2;
 	  frag = frag_more (insn_length);
 	  bfd_putl16 ((bfd_vma) bin, frag);
 
 	  if (gen_interrupt_nops
-	      && msp430_mcu->isa == MSP430_ISA_54
-	      && (strcmp (opcode->name, "eint") == 0
-		  || strcmp (opcode->name, "dint") == 0))
+	      && target_is_430xv2 ()
+	      && (is_opcode ("eint") || is_opcode ("dint")))
 	    {
 	      /* Emit a NOP following interrupt enable/disable.
 		 See 1.3.4.1 of the MSP430x5xx User Guide.  */
@@ -1906,7 +2198,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      frag = frag_more (2);
 	      bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
 	    }
-
 	  dwarf2_emit_insn (insn_length);
 	  break;
 
@@ -1921,7 +2212,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  insn_length = (extended_op ? 2 : 0) + 2 + (op1.ol * 2);
 	  frag = frag_more (insn_length);
 	  where = frag - frag_now->fr_literal;
-
+	  
 	  if (extended_op)
 	    {
 	      if (!addr_op)
@@ -1932,7 +2223,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  as_bad (_("repeat instruction used with non-register mode instruction"));
 		  extended &= ~ 0xf;
 		}
-
+	      
 	      if (op1.mode == OP_EXP)
 		{
 		  if (op1.exp.X_op == O_constant)
@@ -1945,7 +2236,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		    fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 				 BFD_RELOC_MSP430X_PCR20_EXT_SRC);
 		}
-
+	  
 	      /* Emit the extension word.  */
 	      bfd_putl16 (extended, frag);
 	      frag += 2;
@@ -1980,8 +2271,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    }
 
 	  if (gen_interrupt_nops
-	      && msp430_mcu->isa == MSP430_ISA_54
-	      && strcmp (opcode->name, "clr") == 0
+	      && target_is_430xv2 ()
+	      && is_opcode ("clr")
 	      && bin == 0x4302 /* CLR R2*/)
 	    {
 	      /* Emit a NOP following interrupt enable/disable.
@@ -2009,6 +2300,18 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  frag = frag_more (insn_length);
 	  where = frag - frag_now->fr_literal;
 
+	  /* Issue 3831743.  */
+	  if (op1.mode == OP_REG
+	      && op1.reg == 0 
+	      && (is_opcode ("rlax")
+		  || is_opcode ("rlcx")
+		  || is_opcode ("rla")
+		  || is_opcode ("rlc")))
+	    {
+	      as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
+	      return 0;
+	    }
+	  
 	  if (extended_op)
 	    {
 	      if (!addr_op)
@@ -2019,7 +2322,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  as_bad (_("repeat instruction used with non-register mode instruction"));
 		  extended &= ~ 0xf;
 		}
-
+	      
 	      if (op1.mode == OP_EXP)
 		{
 		  if (op1.exp.X_op == O_constant)
@@ -2138,7 +2441,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      else
 		{
 		  where += 2;
-
+	      
 		  bfd_putl16 ((bfd_vma) ZEROS, frag + 2);
 
 		  if (op1.reg || (op1.reg == 0 && op1.am == 3))
@@ -2209,7 +2512,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    bin |= 0x60 | op1.reg;
 	  else if (op1.am == 3)
 	    bin |= 0x70 | op1.reg;
-
+	  
 	  bfd_putl16 ((bfd_vma) bin, frag);
 
 	  if (op1.mode == OP_EXP)
@@ -2241,7 +2544,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	    if (*l1 != '#')
 	      {
-		as_bad (_("expected #n as first argument of POPM"));
+		as_bad (_("expected #n as first argument of %s"), opcode->name);
 		return 0;
 	      }
 	    parse_exp (l1 + 1, &(op1.exp));
@@ -2267,7 +2570,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      bin |= 0x100;
 	    n = op1.exp.X_add_number;
 	    bin |= (n - 1) << 4;
-	    if (strcmp (opcode->name, "pushm") == 0)
+	    if (is_opcode ("pushm"))
 	      bin |= reg;
 	    else
 	      {
@@ -2276,6 +2579,17 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		    as_bad (_("Too many registers popped"));
 		    return 0;
 		  }
+
+		/* Issue 3831713:  CPU21 parts cannot use POPM to restore the SR register.  */
+		if (target_is_430x ()
+		    && (reg - n + 1 < 3)
+		    && reg >= 2
+		    && is_opcode ("popm"))
+		  {
+		    as_bad (_("Cannot use POPM to restore the SR register"));
+		    return 0;
+		  }
+
 		bin |= (reg - n + 1);
 	      }
 
@@ -2326,6 +2640,13 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		return 0;
 	      }
 
+	    /* Issue 3831743.  */
+	    if (reg == 0)
+	      {
+		as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
+		return 0;
+	      }
+
 	    op_length = 2;
 	    frag = frag_more (op_length);
 	    where = frag - frag_now->fr_literal;
@@ -2360,6 +2681,13 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		return 0;
 	      }
 
+	    /* Issue 3831743.  */
+	    if (reg == 0)
+	      {
+		as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
+		return 0;
+	      }
+
 	    if (byte_op)
 	      {
 		/* Tricky - there is no single instruction that will do this.
@@ -2388,7 +2716,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		where = frag - frag_now->fr_literal;
 		bfd_putl16 ((bfd_vma) bin, frag);
 		dwarf2_emit_insn (op_length);
-	      }
+	      }	    
 	    break;
 	  }
 
@@ -2467,12 +2795,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    dwarf2_emit_insn (op_length);
 	    break;
 	  }
-
+	  
 	case 9: /* MOVA, BRA, RETA.  */
 	  imm_op = 0;
 	  bin = opcode->bin_opcode;
 
-	  if (strcmp (opcode->name, "reta") == 0)
+	  if (is_opcode ("reta"))
 	    {
 	      /* The RETA instruction does not take any arguments.
 		 The implicit first argument is @SP+.
@@ -2490,7 +2818,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      res = msp430_srcoperand (&op1, l1, opcode->bin_opcode,
 				       &imm_op, extended_op, FALSE);
 
-	      if (strcmp (opcode->name, "bra") == 0)
+	      if (is_opcode ("bra"))
 		{
 		  /* This is the BRA synthetic instruction.
 		     The second argument is always PC.  */
@@ -2503,7 +2831,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  res += msp430_dstoperand (&op2, l2, opcode->bin_opcode,
 					    extended_op, TRUE);
 		}
-
+	  
 	      if (res)
 		break;	/* Error occurred.  All warnings were done before.  */
 	    }
@@ -2576,7 +2904,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	break;			/* Error occurred.  All warnings were done before.  */
 
       if (extended_op
-	  && strcmp (opcode->name, "movx") == 0
+	  && is_opcode ("movx")
 	  && addr_op
 	  && msp430_enable_relax)
 	{
@@ -2599,7 +2927,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
       frag = frag_more (insn_length);
       where = frag - frag_now->fr_literal;
-
+      
       if (extended_op)
 	{
 	  if (!addr_op)
@@ -2624,7 +2952,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_PCR20_EXT_SRC);
 	    }
-
+	  
 	  if (op2.mode == OP_EXP)
 	    {
 	      if (op2.exp.X_op == O_constant)
@@ -2634,7 +2962,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		fix_new_exp (frag_now, where, 8, &(op2.exp), FALSE,
 			     op2.reg ? BFD_RELOC_MSP430X_ABS20_EXT_ODST
 			     : BFD_RELOC_MSP430X_PCR20_EXT_ODST);
-
+	    
 	      else
 		fix_new_exp (frag_now, where, 6, &(op2.exp), FALSE,
 			     op2.reg ? BFD_RELOC_MSP430X_ABS20_EXT_DST
@@ -2700,10 +3028,10 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	}
 
       if (gen_interrupt_nops
-	  && msp430_mcu->isa == MSP430_ISA_54
-	  && (   (strcmp (opcode->name, "bic") == 0 && bin == 0xc232)
-	      || (strcmp (opcode->name, "bis") == 0 && bin == 0xd232)
-	      || (strcmp (opcode->name, "mov") == 0 && op2.mode == OP_REG && op2.reg == 2)))
+	  && target_is_430xv2 ()
+	  && (   (is_opcode ("bic") && bin == 0xc232)
+	      || (is_opcode ("bis") && bin == 0xd232)
+	      || (is_opcode ("mov") && op2.mode == OP_REG && op2.reg == 2)))
 	{
 	  /* Emit a NOP following interrupt enable/disable.
 	     See 1.3.4.1 of the MSP430x5xx User Guide.  */
@@ -2732,14 +3060,25 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       if (res)
 	break;		/* Error in operand.  */
 
+      /* Issue 3831743.  */
+      if (op1.mode == OP_REG
+	  && op1.reg == 0 
+	  && (is_opcode ("rrax")
+	      || is_opcode ("rrcx")
+	      || is_opcode ("rra")
+	      || is_opcode ("rrc")))
+	{
+	  as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
+	  return 0;
+	}
+      
       insn_length = (extended_op ? 2 : 0) + 2 + (op1.ol * 2);
       frag = frag_more (insn_length);
       where = frag - frag_now->fr_literal;
-
+      
       if (extended_op)
 	{
-	  if (strcmp (opcode->name, "swpbx") == 0
-	      || strcmp (opcode->name, "sxtx") == 0)
+	  if (is_opcode ("swpbx") || is_opcode ("sxtx"))
 	    {
 	      /* These two instructions use a special
 		 encoding of the A/L and B/W bits.  */
@@ -2767,7 +3106,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    {
 	      if (op1.exp.X_op == O_constant)
 		extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
-
+	  
 	      else if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_ABS20_EXT_SRC);
@@ -2775,7 +3114,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_PCR20_EXT_SRC);
 	    }
-
+	  
 	  /* Emit the extension word.  */
 	  bfd_putl16 (extended, frag);
 	  frag += 2;
@@ -2906,7 +3245,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  as_bad (_("polymorphs are not enabled. Use -mP option to enable."));
 	  break;
 	}
-
+	
       line = extract_operand (line, l1, sizeof (l1));
       if (l1[0])
 	{
@@ -2923,7 +3262,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      /* Relaxation required.  */
 	      struct rcodes_s rc = msp430_rcodes[opcode->insn_opnumb];
 
-	      if (msp430_mcu->isa == MSP430X_ISA)
+	      if (target_is_430x ())
 		rc = msp430x_rcodes[opcode->insn_opnumb];
 
 	      /* The parameter to dwarf2_emit_insn is actually the offset to
@@ -2969,7 +3308,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      /* Relaxation required.  */
 	      struct hcodes_s hc = msp430_hcodes[opcode->insn_opnumb];
 
-	      if (msp430_mcu->isa == MSP430X_ISA)
+	      if (target_is_430x ())
 		hc = msp430x_hcodes[opcode->insn_opnumb];
 
 	      insn_length += 8;
@@ -3073,10 +3412,8 @@ msp430_force_relocation_local (fixS *fixp)
 {
   if (fixp->fx_r_type == BFD_RELOC_MSP430_10_PCREL)
     return 1;
-
   if (fixp->fx_pcrel)
     return 1;
-
   if (msp430_enable_polys
         && !msp430_enable_relax)
     return 1;
@@ -3140,12 +3477,12 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 
   fixp->fx_no_overflow = 1;
 
-  /* If polymorphs are enabled and relax disabled.
+  /* If polymorphs are enabled and relax disabled. 
      do not kill any relocs and pass them to linker.  */
-  if (msp430_enable_polys
+  if (msp430_enable_polys 
       && !msp430_enable_relax)
     {
-      if (!fixp->fx_addsy || (fixp->fx_addsy
+      if (!fixp->fx_addsy || (fixp->fx_addsy 
 	  && S_GET_SEGMENT (fixp->fx_addsy) == absolute_section))
 	fixp->fx_done = 1;	/* It is ok to kill 'abs' reloc.  */
       else
@@ -3214,13 +3551,13 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 	case BFD_RELOC_MSP430X_ABS20_EXT_SRC:
 	case BFD_RELOC_MSP430X_PCR20_EXT_SRC:
 	  bfd_putl16 ((bfd_vma) (value & 0xffff), where + 4);
-	  value >>= 16;
+	  value >>= 16;	  
 	  bfd_putl16 ((bfd_vma) (((value & 0xf) << 7) | insn), where);
 	  break;
 
 	case BFD_RELOC_MSP430X_ABS20_ADR_SRC:
 	  bfd_putl16 ((bfd_vma) (value & 0xffff), where + 2);
-	  value >>= 16;
+	  value >>= 16;	  
 	  bfd_putl16 ((bfd_vma) (((value & 0xf) << 8) | insn), where);
 	  break;
 
@@ -3254,7 +3591,7 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 	  value >>= 16;
 	  bfd_putl16 ((bfd_vma) ((value & 0xf) | insn), where);
 	  break;
-
+	  
 	default:
 	  as_fatal (_("line %d: unknown relocation type: 0x%x"),
 		    fixp->fx_line, fixp->fx_r_type);
@@ -3277,7 +3614,7 @@ S_IS_GAS_LOCAL (symbolS * s)
     return FALSE;
   name = S_GET_NAME (s);
   len = strlen (name) - 1;
-
+  
   return name[len] == 1 || name[len] == 2;
 }
 
@@ -3366,7 +3703,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	      *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 	    }
 
-	  reloc->addend = fixp->fx_offset;
+	  reloc->addend = fixp->fx_offset; 
 	  if (asec == absolute_section)
 	    {
 	      reloc->addend += S_GET_VALUE (fixp->fx_addsy);
@@ -3499,9 +3836,10 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
     case ENCODE_RELAX (STATE_UNCOND_BRANCH, STATE_WORD):
     case ENCODE_RELAX (STATE_UNCOND_BRANCH, STATE_UNDEF):
       /* Convert uncond branch jmp lab -> br lab.  */
-      cc = & msp430_rcodes[7];
-      if (msp430_mcu->isa == MSP430X_ISA)
+      if (target_is_430x ())
 	cc = msp430x_rcodes + 7;
+      else
+	cc = msp430_rcodes + 7;
       where = fragP->fr_literal + fragP->fr_fix;
       bfd_putl16 (cc->lop0, where);
       rela = BFD_RELOC_MSP430_RL_PCREL;
@@ -3516,7 +3854,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
 
 	insn &= 0xffff;
 	/* Find actual instruction.  */
-	if (msp430_mcu->isa == MSP430X_ISA)
+	if (target_is_430x ())
 	  {
 	    for (i = 0; i < 7 && !cc; i++)
 	      if (msp430x_rcodes[i].sop == insn)
@@ -3542,11 +3880,10 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
 
     case ENCODE_RELAX (STATE_NOOV_BRANCH, STATE_WORD):
     case ENCODE_RELAX (STATE_NOOV_BRANCH, STATE_UNDEF):
-      cc = & msp430_rcodes[6];
-
-      if (msp430_mcu->isa == MSP430X_ISA)
+      if (target_is_430x ())
 	cc = msp430x_rcodes + 6;
-
+      else
+	cc = msp430_rcodes + 6;
       where = fragP->fr_literal + fragP->fr_fix;
       bfd_putl16 (cc->lop0, where);
       bfd_putl16 (cc->lop1, where + 2);
@@ -3560,7 +3897,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
 	int insn = bfd_getl16 (fragP->fr_opcode + 2);
 
 	insn &= 0xffff;
-	if (msp430_mcu->isa == MSP430X_ISA)
+	if (target_is_430x ())
 	  {
 	    for (i = 0; i < 4 && !hc; i++)
 	      if (msp430x_hcodes[i].op1 == insn)
@@ -3572,7 +3909,6 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
 	      if (msp430_hcodes[i].op1 == insn)
 		hc = &msp430_hcodes[i];
 	  }
-
 	if (!hc || !hc->name)
 	  as_fatal (_("internal inconsistency problem in %s: ext. insn %04lx"),
 	      __FUNCTION__, (long) insn);
@@ -3593,7 +3929,7 @@ md_convert_frag (bfd * abfd ATTRIBUTE_UNUSED,
 	int insn = bfd_getl16 (fragP->fr_opcode + 2);
 
 	insn &= 0xffff;
-	if (msp430_mcu->isa == MSP430X_ISA)
+	if (target_is_430x ())
 	  {
 	    for (i = 0; i < 4 && !hc; i++)
 	      if (msp430x_hcodes[i].op1 == insn)
@@ -3667,7 +4003,7 @@ msp430_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS * fragP,
          by setting 'aim' to quite high value.  */
       aim = 0x7fff;
     }
-
+  
   this_state = fragP->fr_subtype;
   start_type = this_type = table + this_state;
 
@@ -3717,7 +4053,7 @@ msp430_fix_adjustable (struct fix *fixp ATTRIBUTE_UNUSED)
   if (fixp->fx_addsy
       && ((S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_CODE) == 0))
     return TRUE;
-
+	   
   return FALSE;
 }
 
@@ -3727,7 +4063,7 @@ void
 msp430_md_end (void)
 {
   bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_ISA,
-			     msp430_mcu->isa == MSP430X_ISA ? 2 : 1);
+			     target_is_430x () ? 2 : 1);
 
   bfd_elf_add_proc_attr_int (stdoutput, OFBA_MSPABI_Tag_Code_Model,
 			     large_model ? 2 : 1);

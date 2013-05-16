@@ -1,6 +1,6 @@
 #objdump: -d --prefix-addresses --show-raw-insn
 #name: MSP430X instructions
-#as: -mmsp430X
+#as: -mcpu=430X
 
 .*: +file format .*msp.*
 
