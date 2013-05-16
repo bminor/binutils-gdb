@@ -6136,8 +6136,10 @@ else
 fi
 
 
-# Needed for GNU/Hurd.
-if test -n "$ac_tool_prefix"; then
+case $host_os in
+  gnu*)
+    # Needed for GNU Hurd hosts.
+    if test -n "$ac_tool_prefix"; then
   # Extract the first word of "${ac_tool_prefix}mig", so it can be a program name with args.
 set dummy ${ac_tool_prefix}mig; ac_word=$2
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
@@ -6229,6 +6231,11 @@ else
   MIG="$ac_cv_prog_MIG"
 fi
 
+    if test x"$MIG" = x; then
+      as_fn_error "MIG not found but required for $host hosts" "$LINENO" 5
+    fi
+    ;;
+esac
 
 # ---------------------- #
 # Checks for libraries.  #

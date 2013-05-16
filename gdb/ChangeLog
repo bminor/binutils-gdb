@@ -1,3 +1,9 @@
+2013-05-16  Yue Lu  <hacklu.newborn@gmail.com>
+
+	* configure.ac: Ensure MIG is available when building for GNU Hurd
+	hosts.
+	* configure: Regenerate.
+
 2013-05-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (set_cu_language): Add DW_LANG_UPC handling.

@@ -486,8 +486,15 @@ AC_CHECK_TOOL(AR, ar)
 AC_CHECK_TOOL(DLLTOOL, dlltool)
 AC_CHECK_TOOL(WINDRES, windres)
 
-# Needed for GNU/Hurd.
-AC_CHECK_TOOL(MIG, mig)
+case $host_os in
+  gnu*)
+    # Needed for GNU Hurd hosts.
+    AC_CHECK_TOOL(MIG, mig)
+    if test x"$MIG" = x; then
+      AC_MSG_ERROR([MIG not found but required for $host hosts])
+    fi
+    ;;
+esac
 
 # ---------------------- #
 # Checks for libraries.  #
