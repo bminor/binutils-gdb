@@ -1098,7 +1098,6 @@ reloc_howto_type xcoff_howto_table[] =
 	 0xffff,		/* src_mask */
 	 0xffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
-
 };
 
 void
@@ -1146,6 +1145,9 @@ _bfd_xcoff_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &xcoff_howto_table[8];
     case BFD_RELOC_PPC_TOC16:
       return &xcoff_howto_table[3];
+    case BFD_RELOC_16:
+      /* Note that this relocation is only internally used by gas.  */
+      return &xcoff_howto_table[0xc];
     case BFD_RELOC_32:
     case BFD_RELOC_CTOR:
       return &xcoff_howto_table[0];

@@ -1,3 +1,8 @@
+2013-05-16  Tristan Gingold  <gingold@adacore.com>
+
+	* coff-rs6000.c (_bfd_xcoff_reloc_type_lookup): Handle BFD_RELOC_16.
+	* coff64-rs6000.c (xcoff64_reloc_type_lookup): Likewise.
+
 2013-05-15  Andreas Schwab  <schwab@suse.de>
 
 	* elf64-aarch64.c (elf_backend_default_execstack): Define to 0.
