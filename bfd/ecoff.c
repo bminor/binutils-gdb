@@ -3561,9 +3561,9 @@ ecoff_link_check_archive_element (bfd *abfd,
   void (* const swap_ext_in) (bfd *, void *, EXTR *)
     = backend->debug_swap.swap_ext_in;
   HDRR *symhdr;
-  bfd_size_type external_ext_size;
+  bfd_size_type external_ext_size = 0;
   void * external_ext = NULL;
-  bfd_size_type esize;
+  bfd_size_type esize = 0;
   char *ssext = NULL;
   char *ext_ptr;
   char *ext_end;

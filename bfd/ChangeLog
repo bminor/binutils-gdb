@@ -1,3 +1,8 @@
+2013-05-16  Cary Coutant  <ccoutant@google.com>
+
+	* ecoff.c (ecoff_link_check_archive_element): Add initializers for
+	external_ext_size and esize.
+
 2013-05-16  Tristan Gingold  <gingold@adacore.com>
 
 	* coff-rs6000.c (_bfd_xcoff_reloc_type_lookup): Handle BFD_RELOC_16.
