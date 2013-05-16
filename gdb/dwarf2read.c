@@ -14983,6 +14983,7 @@ set_cu_language (unsigned int lang, struct dwarf2_cu *cu)
     case DW_LANG_C89:
     case DW_LANG_C99:
     case DW_LANG_C:
+    case DW_LANG_UPC:
       cu->language = language_c;
       break;
     case DW_LANG_C_plus_plus:
