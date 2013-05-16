@@ -1,5 +1,6 @@
 2013-05-15  Joel Brobecker  <brobecker@adacore.com>
 
+	PR build/15476:
 	* utils.h: #include "exceptions.h".
 	(enum errors): Remove partial declaration.
 
