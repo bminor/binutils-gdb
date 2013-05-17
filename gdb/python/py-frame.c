@@ -304,11 +304,7 @@ frame_info_to_frame_object (struct frame_info *frame)
 
   frame_obj = PyObject_New (frame_object, &frame_object_type);
   if (frame_obj == NULL)
-    {
-      PyErr_SetString (PyExc_MemoryError, 
-		       _("Could not allocate frame object."));
-      return NULL;
-    }
+    return NULL;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {

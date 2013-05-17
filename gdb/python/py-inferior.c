@@ -445,8 +445,6 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
   if (membuf_obj == NULL)
     {
       xfree (buffer);
-      PyErr_SetString (PyExc_MemoryError,
-		       _("Could not allocate memory buffer object."));
       return NULL;
     }
 

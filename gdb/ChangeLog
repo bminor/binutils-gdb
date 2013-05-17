@@ -1,3 +1,10 @@
+2013-05-17  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-inferior.c (infpy_read_memory): Don't call
+	PyErr_SetString if PyObject_New fails.
+	* python/py-frame.c (frame_info_to_frame_object): Don't call
+	PyErr_SetString if PyObject_New fails.
+
 2013-05-17  Pavel Chupin  <pavel.v.chupin@intel.com>
 
 	* acinclude.m4: Add check for dlopen in libdl.
