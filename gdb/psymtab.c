@@ -2007,10 +2007,10 @@ maintenance_info_psymtabs (char *regexp, int from_tty)
     }
 }
 
-/* Check consistency of psymtabs and symtabs.  */
+/* Check consistency of currently expanded psymtabs vs symtabs.  */
 
 static void
-maintenance_check_symtabs (char *ignore, int from_tty)
+maintenance_check_psymtabs (char *ignore, int from_tty)
 {
   struct symbol *sym;
   struct partial_symbol **psym;
@@ -2025,7 +2025,25 @@ maintenance_check_symtabs (char *ignore, int from_tty)
   {
     struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
-    s = psymtab_to_symtab (objfile, ps);
+    /* We don't call psymtab_to_symtab here because that may cause symtab
+       expansion.  When debugging a problem it helps if checkers leave
+       things unchanged.  */
+    s = ps->symtab;
+
+    /* First do some checks that don't require the associated symtab.  */
+    if (ps->texthigh < ps->textlow)
+      {
+	printf_filtered ("Psymtab ");
+	puts_filtered (ps->filename);
+	printf_filtered (" covers bad range ");
+	fputs_filtered (paddress (gdbarch, ps->textlow), gdb_stdout);
+	printf_filtered (" - ");
+	fputs_filtered (paddress (gdbarch, ps->texthigh), gdb_stdout);
+	printf_filtered ("\n");
+	continue;
+      }
+
+    /* Now do checks requiring the associated symtab.  */
     if (s == NULL)
       continue;
     bv = BLOCKVECTOR (s);
@@ -2063,20 +2081,8 @@ maintenance_check_symtabs (char *ignore, int from_tty)
 	  }
 	psym++;
       }
-    if (ps->texthigh < ps->textlow)
-      {
-	printf_filtered ("Psymtab ");
-	puts_filtered (ps->filename);
-	printf_filtered (" covers bad range ");
-	fputs_filtered (paddress (gdbarch, ps->textlow), gdb_stdout);
-	printf_filtered (" - ");
-	fputs_filtered (paddress (gdbarch, ps->texthigh), gdb_stdout);
-	printf_filtered ("\n");
-	continue;
-      }
-    if (ps->texthigh == 0)
-      continue;
-    if (ps->textlow < BLOCK_START (b) || ps->texthigh > BLOCK_END (b))
+    if (ps->texthigh != 0
+	&& (ps->textlow < BLOCK_START (b) || ps->texthigh > BLOCK_END (b)))
       {
 	printf_filtered ("Psymtab ");
 	puts_filtered (ps->filename);
@@ -2140,7 +2146,8 @@ This does not include information about individual partial symbols,\n\
 just the symbol table structures themselves."),
 	   &maintenanceinfolist);
 
-  add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
-	   _("Check consistency of psymtabs and symtabs."),
+  add_cmd ("check-psymtabs", class_maintenance, maintenance_check_psymtabs,
+	   _("\
+Check consistency of currently expanded psymtabs versus symtabs."),
 	   &maintenancelist);
 }

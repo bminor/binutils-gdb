@@ -1,3 +1,18 @@
+2013-05-17  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention new maintenance commands check-symtabs, and
+	expand-symtabs, and renamed check-psymtabs.
+	* psymtab.c (maintenance_check_psymtabs): Renamed from
+	maintenance_check_symtabs.  Only process already-expanded symbol
+	tables.
+	(_initialize_psymtab): Update.
+	* symmisc.c (maintenance_check_symtabs): New function.
+	(maintenance_expand_name_matcher): New function
+	(maintenance_expand_file_matcher): New function
+	(maintenance_expand_symtabs): New function.
+	(_initialize_symmisc): Add "mt check-symtabs" and "mt expand-symtabs"
+	commands.
+
 2013-05-17  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-inferior.c (infpy_read_memory): Don't call

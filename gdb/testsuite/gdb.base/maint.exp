@@ -20,7 +20,9 @@
 # source file used is break.c
 
 
-#maintenance check-symtabs -- Check consistency of psymtabs and symtabs
+#maintenance check-psymtabs -- Check consistency of psymtabs vs symtabs
+#maintenance check-symtabs -- Check consistency of symtabs
+#maintenance expand-symtabs -- Expand symtabs matching a file regexp
 #maintenance set -- Set GDB internal variables used by the GDB maintainer
 #maintenance show -- Show GDB internal variables used by the GDB maintainer
 #maintenance demangle -- Demangle a C++ mangled name
@@ -82,6 +84,18 @@ gdb_file_cmd ${binfile}
 # program wasn't running.
 gdb_test "maint print registers" "Name.*Nr.*Rel.*Offset.*Size.*Type.*"
 
+# Test "mt expand-symtabs" here as it's easier to verify before we
+# run the program.
+gdb_test_no_output "mt set per on" "mt set per on for expand-symtabs"
+gdb_test_multiple "mt expand-symtabs $subdir/break\[.\]c$" \
+    "mt expand-symtabs" {
+	-re "#primary symtabs: 1 \\(\[+\]1\\),.*$gdb_prompt $" {
+	    # This should expand exactly one (primary) symtab.
+	    pass "mt expand-symtabs"
+	}
+    }
+gdb_test "mt set per off" ".*" "mt set per off for expand-symtabs"
+
 # Tests that can or should be done with a running program
 
 gdb_load ${binfile}
@@ -110,19 +124,24 @@ gdb_test_multiple "maint info sections .gdb_index" "check for .gdb_index" {
 # guo: on linux this command output is huge.  for some reason splitting up
 # the regexp checks works.
 #
-send_gdb "maint check-symtabs\n"
+send_gdb "maint check-psymtabs\n"
 gdb_expect  {
-    -re "^maint check-symtabs" {
+    -re "^maint check-psymtabs" {
 	gdb_expect {
 	    -re "$gdb_prompt $" {
-		pass "maint check-symtabs"
+		pass "maint check-psymtabs"
 	    }
-	    timeout { fail "(timeout) maint check-symtabs" }
+	    timeout { fail "(timeout) maint check-psymtabs" }
 	}
     }
-    -re ".*$gdb_prompt $"     { fail "maint check-symtabs" }
-    timeout         { fail "(timeout) maint check-symtabs" }
+    -re ".*$gdb_prompt $"     { fail "maint check-psymtabs" }
+    timeout         { fail "(timeout) maint check-psymtabs" }
 }
+
+# This command does not produce any output unless there is some problem
+# with the symtabs, so that branch will really never be covered in the
+# tests here!!
+gdb_test_no_output "maint check-symtabs"
 
 gdb_test_no_output "maint set per-command on"
 

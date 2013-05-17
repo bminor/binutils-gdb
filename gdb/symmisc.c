@@ -771,6 +771,134 @@ maintenance_info_symtabs (char *regexp, int from_tty)
         printf_filtered ("}\n");
     }
 }
+
+/* Check consistency of symtabs.
+   An example of what this checks for is NULL blockvectors.
+   They can happen if there's a bug during debug info reading.
+   GDB assumes they are always non-NULL.
+
+   Note: This does not check for psymtab vs symtab consistency.
+   Use "maint check-psymtabs" for that.  */
+
+static void
+maintenance_check_symtabs (char *ignore, int from_tty)
+{
+  struct program_space *pspace;
+  struct objfile *objfile;
+
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
+    {
+      struct symtab *symtab;
+
+      /* We don't want to print anything for this objfile until we
+         actually find something worth printing.  */
+      int printed_objfile_start = 0;
+
+      ALL_OBJFILE_SYMTABS (objfile, symtab)
+	{
+	  int found_something = 0;
+
+	  QUIT;
+
+	  if (symtab->blockvector == NULL)
+	    found_something = 1;
+	  /* Add more checks here.  */
+
+	  if (found_something)
+	    {
+	      if (! printed_objfile_start)
+		{
+		  printf_filtered ("{ objfile %s ", objfile->name);
+		  wrap_here ("  ");
+		  printf_filtered ("((struct objfile *) %s)\n", 
+				   host_address_to_string (objfile));
+		  printed_objfile_start = 1;
+		}
+	      printf_filtered ("  { symtab %s\n",
+			       symtab_to_filename_for_display (symtab));
+	      if (symtab->blockvector == NULL)
+		printf_filtered ("    NULL blockvector\n");
+	      printf_filtered ("  }\n");
+	    }
+	}
+
+      if (printed_objfile_start)
+        printf_filtered ("}\n");
+    }
+}
+
+/* Helper function for maintenance_expand_symtabs.
+   This is the name_matcher function for expand_symtabs_matching.  */
+
+static int
+maintenance_expand_name_matcher (const char *symname, void *data)
+{
+  /* Since we're not searching on symbols, just return TRUE.  */
+  return 1;
+}
+
+/* Helper function for maintenance_expand_symtabs.
+   This is the file_matcher function for expand_symtabs_matching.  */
+
+static int
+maintenance_expand_file_matcher (const char *filename, void *data,
+				 int basenames)
+{
+  const char *regexp = data;
+
+  QUIT;
+
+  /* KISS: Only apply the regexp to the complete file name.  */
+  if (basenames)
+    return 0;
+
+  if (regexp == NULL || re_exec (filename))
+    return 1;
+
+  return 0;
+}
+
+/* Expand all symbol tables whose name matches an optional regexp.  */
+
+static void
+maintenance_expand_symtabs (char *args, int from_tty)
+{
+  struct program_space *pspace;
+  struct objfile *objfile;
+  struct cleanup *cleanups;
+  char **argv;
+  char *regexp = NULL;
+
+  /* We use buildargv here so that we handle spaces in the regexp
+     in a way that allows adding more arguments later.  */
+  argv = gdb_buildargv (args);
+  cleanups = make_cleanup_freeargv (argv);
+
+  if (argv != NULL)
+    {
+      if (argv[0] != NULL)
+	{
+	  regexp = argv[0];
+	  if (argv[1] != NULL)
+	    error (_("Extra arguments after regexp."));
+	}
+    }
+
+  if (regexp)
+    re_comp (regexp);
+
+  ALL_PSPACES (pspace)
+    ALL_PSPACE_OBJFILES (pspace, objfile)
+    {
+      if (objfile->sf)
+	{
+	  objfile->sf->qf->expand_symtabs_matching
+	    (objfile, maintenance_expand_file_matcher,
+	     maintenance_expand_name_matcher, ALL_DOMAIN, regexp);
+	}
+    }
+}
 
 
 /* Return the nexting depth of a block within other blocks in its symtab.  */
@@ -819,4 +947,14 @@ This does not include information about individual symbols, blocks, or\n\
 linetables --- just the symbol table structures themselves.\n\
 With an argument REGEXP, list the symbol tables whose names that match that."),
 	   &maintenanceinfolist);
+
+  add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
+	   _("\
+Check consistency of currently expanded symtabs."),
+	   &maintenancelist);
+
+  add_cmd ("expand-symtabs", class_maintenance, maintenance_expand_symtabs,
+	   _("Expand symbol tables.\n\
+With an argument REGEXP, only expand the symbol tables with matching names."),
+	   &maintenancelist);
 }

@@ -1,5 +1,8 @@
 2013-05-17  Doug Evans  <dje@google.com>
 
+	* gdb.base/maint.exp: Update test for "maint check-psymtabs".
+	Add tests for "maint check-symtabs", "maint expand-symtabs".
+
 	* gdb.base/maint.exp: Remove testing of individual maint command
 	help output.
 

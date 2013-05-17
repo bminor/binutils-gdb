@@ -36356,9 +36356,20 @@ only if non-stop mode is active (@pxref{Non-Stop Mode}) and the target
 architecture supports displaced stepping.
 @end table
 
+@kindex maint check-psymtabs
+@item maint check-psymtabs
+Check the consistency of currently expanded psymtabs versus symtabs.
+Use this to check, for example, whether a symbol is in one but not the other.
+
 @kindex maint check-symtabs
 @item maint check-symtabs
-Check the consistency of psymtabs and symtabs.
+Check the consistency of currently expanded symtabs.
+
+@kindex maint expand-symtabs
+@item maint expand-symtabs [@var{regexp}]
+Expand symbol tables.
+If @var{regexp} is specified, only expand symbol tables for file
+names matching @var{regexp}.
 
 @kindex maint cplus first_component
 @item maint cplus first_component @var{name}

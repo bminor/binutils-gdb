@@ -15,6 +15,12 @@ Nios II GNU/Linux		nios2*-*-linux
 * New commands:
 catch rethrow
   Like "catch throw", but catches a re-thrown exception.
+maint check-psymtabs
+  Renamed from old "maint check-symtabs".
+maint check-symtabs
+  Perform consistency checks on symtabs.
+maint expand-symtabs
+  Expand symtabs matching an optional regexp.
 
 show configuration
   Display the details of GDB configure-time options.

@@ -1,3 +1,9 @@
+2013-05-17  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Maintenance Commands): Update doc for
+	"maint check-psymtabs".  Add doc for "maint check-symtabs",
+	"maint expand-symtabs".
+
 2013-05-15  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* gdb.texinfo (Process Record and Replay): Document the
