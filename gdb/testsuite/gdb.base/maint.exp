@@ -461,69 +461,7 @@ set timeout $oldtimeout
 #============test help on maint commands
 
 gdb_test "help maint" \
-    "Commands for use by GDB maintainers\\..*Includes commands to dump specific internal GDB structures in.*a human readable form, to cause GDB to deliberately dump core,.*to test internal functions such as the C../ObjC demangler, etc\\..*List of maintenance subcommands:.*maintenance check-symtabs.*maintenance demangle.*(maintenance dump-me.*)?maintenance info.*maintenance internal-error.*maintenance print.*maintenance set.*maintenance show.*maintenance space.*maintenance time.*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\..*Command name abbreviations are allowed if unambiguous\\..*" 
-
-gdb_test "help maint check-symtabs" \
-    "Check consistency of psymtabs and symtabs\\..*"
-
-gdb_test "help maint space" \
-    "Set the display of space usage\\.\r\nIf nonzero, will cause the execution space for each command to be\r\ndisplayed, following the command's output\\..*"
-
-gdb_test "help maint time" \
-    "Set the display of time usage\\.\r\nIf nonzero, will cause the execution time for each command to be\r\ndisplayed, following the command's output\\..*"
-
-gdb_test "help maint demangle" \
-    "Demangle a C\\+\\+/ObjC mangled name\\.\r\nCall internal GDB demangler routine to demangle a C\\+\\+ link name\r\nand prints the result\\..*"
-
-gdb_test "help maint dump-me" \
-    "Get fatal error; make debugger dump its core\\.\r\nGDB sets its handling of SIGQUIT back to SIG_DFL and then sends\r\nitself a SIGQUIT signal\\..*"
-
-gdb_test "help maint internal-error" \
-    "Give GDB an internal error\\.\r\nCause GDB to behave as if an internal error was detected\\..*"
-
-gdb_test "help maint internal-warning" \
-    "Give GDB an internal warning\\.\r\nCause GDB to behave as if an internal warning was reported\\..*"
-
-gdb_test "help maint print statistics" \
-    "Print statistics about internal gdb state\\..*"
-
-gdb_test "help maint print dummy-frames" \
-	"Print the contents of the internal dummy-frame stack."
-
-gdb_test "help maint print objfiles" \
-    "Print dump of current object file definitions\\..*"
-
-gdb_test "help maint print psymbols" \
-    "Print dump of current partial symbol definitions\\.\r\nEntries in the partial symbol table are dumped to file OUTFILE\\.\r\nIf a SOURCE file is specified, dump only that file's partial symbols\\..*"
-
-gdb_test "help maint print msymbols" \
-    "Print dump of current minimal symbol definitions\\.\r\nEntries in the minimal symbol table are dumped to file OUTFILE\\.\r\nIf a SOURCE file is specified, dump only that file's minimal symbols\\..*"
-
-gdb_test "help maint print symbols" \
-    "Print dump of current symbol definitions\\.\r\nEntries in the full symbol table are dumped to file OUTFILE\\.\r\nIf a SOURCE file is specified, dump only that file's symbols\\..*"
-
-gdb_test "help maint print type" \
-    "Print a type chain for a given symbol\\.\r\nFor each node in a type chain, print the raw data for each member of\r\nthe type structure, and the interpretation of the data\\..*"
-
-if [istarget "hppa*-*-*"] {
-    gdb_test "help maint print unwind" \
-	"Print unwind table entry at given address\\..*"
-}
-
-gdb_test "help maint info sections" \
-    "List the BFD sections of the exec and core files\\..*"
-
-gdb_test "help maint info breakpoints" \
-    "Status of all breakpoints, or breakpoint number NUMBER.*"
-
-
-#send_gdb "help maint info breakpoints\n"
-#expect  {
-#        -re "Status of all breakpoints, or breakpoint number NUMBER\\.\[ \r\n\t\]+The \"Type\" column indicates one of:\[ \r\n\t\]+breakpoint\[ \t\]+- normal breakpoint\[ \r\n\t\]+watchpoint\[ \t\]+- watchpoint\[ \r\n\t\]+longjmp\[ \t\]+- internal breakpoint used to step through longjmp\\(\\)\[ \r\n\t\]+longjmp resume - internal breakpoint at the target of longjmp\\(\\)\[ \r\n\t\]+until\[ \t\]+- internal breakpoint used by the \"until\" command\[ \r\n\t\]+finish\[ \t\]+- internal breakpoint used by the \"finish\" command\[ \r\n\t\]+The \"Disp\" column contains one of \"keep\", \"del\", or \"dis\" to indicate\[ \r\n\t\]+the disposition of the breakpoint after it gets hit\\.  \"dis\" means that the\[ \r\n\t\]+breakpoint will be disabled\\.  The \"Address\" and \"What\" columns indicate the\[ \r\n\t\]+address and file.line number respectively\\.\[ \r\n\t\]+Convenience variable \".*\" and default examine address for \"x\"\[ \r\n\t\]+are set to the address of the last breakpoint listed\\.\[ \r\n\t\]+Convenience variable \".bpnum\" contains the number of the last\[ \r\n\t\]+breakpoint set\\..*$gdb_prompt $"\
-#                        { pass "help maint info breakpoints" }
-#        -re ".*$gdb_prompt $"       { fail "help maint info breakpoints" }
-#        timeout         { fail "(timeout) help maint info breakpoints" }
-#        }
+    "Commands for use by GDB maintainers\\..*Includes commands to dump specific internal GDB structures in.*a human readable form, to cause GDB to deliberately dump core,.*to test internal functions such as the C../ObjC demangler, etc\\..*List of maintenance subcommands:.*maintenance info.*maintenance internal-error.*maintenance print.*maintenance set.*maintenance show.*Type.*help maintenance.*followed by maintenance subcommand name for full documentation\\..*Command name abbreviations are allowed if unambiguous\\..*" 
 
 gdb_test "help maint info" \
     "Commands for showing internal info about the program being debugged.*unambiguous\\..*"
