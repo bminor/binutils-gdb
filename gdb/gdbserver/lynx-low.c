@@ -284,7 +284,7 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
                        ? PTRACE_SINGLESTEP : PTRACE_CONT);
   const int signal = resume_info[0].sig;
 
-  /* If given a null_ptid, then try using the current_process'
+  /* If given a minus_one_ptid, then try using the current_process'
      private->last_wait_event_ptid.  On most LynxOS versions,
      using any of the process' thread works well enough, but
      LynxOS 178 is a little more sensitive, and triggers some
@@ -293,10 +293,10 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
   if (ptid_equal (ptid, minus_one_ptid))
     ptid = current_process()->private->last_wait_event_ptid;
 
-  /* The ptid might still be NULL; this can happen between the moment
-     we create the inferior or attach to a process, and the moment
-     we resume its execution for the first time.  It is fine to
-     use the current_inferior's ptid in those cases.  */
+  /* The ptid might still be minus_one_ptid; this can happen between
+     the moment we create the inferior or attach to a process, and
+     the moment we resume its execution for the first time.  It is
+     fine to use the current_inferior's ptid in those cases.  */
   if (ptid_equal (ptid, minus_one_ptid))
     ptid = thread_to_gdb_id (current_inferior);
 

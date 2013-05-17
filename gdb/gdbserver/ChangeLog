@@ -1,5 +1,10 @@
 2013-05-17  Joel Brobecker  <brobecker@adacore.com>
 
+	* lynx-low.c (lynx_resume): Fix null_ptid/minus_one_ptid
+	confusion in comment.
+
+2013-05-17  Joel Brobecker  <brobecker@adacore.com>
+
 	* lynx-low.c (struct process_info_private): New type.
 	(lynx_add_process): New function.
 	(lynx_create_inferior, lynx_attach): Replace calls to
