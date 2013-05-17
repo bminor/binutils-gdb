@@ -30,6 +30,15 @@
 
 int using_threads = 1;
 
+/* Per-process private data.  */
+
+struct process_info_private
+{
+  /* The PTID obtained from the last wait performed on this process.
+     Initialized to null_ptid until the first wait is performed.  */
+  ptid_t last_wait_event_ptid;
+};
+
 /* Print a debug trace on standard output if debug_threads is set.  */
 
 static void
@@ -196,6 +205,21 @@ lynx_ptrace (int request, ptid_t ptid, int addr, int data, int addr2)
   return result;
 }
 
+/* Call add_process with the given parameters, and initializes
+   the process' private data.  */
+
+static struct process_info *
+lynx_add_process (int pid, int attached)
+{
+  struct process_info *proc;
+
+  proc = add_process (pid, attached);
+  proc->private = xcalloc (1, sizeof (*proc->private));
+  proc->private->last_wait_event_ptid = null_ptid;
+
+  return proc;
+}
+
 /* Implement the create_inferior method of the target_ops vector.  */
 
 static int
@@ -225,7 +249,7 @@ lynx_create_inferior (char *program, char **allargs)
       _exit (0177);
     }
 
-  add_process (pid, 0);
+  lynx_add_process (pid, 0);
   /* Do not add the process thread just yet, as we do not know its tid.
      We will add it later, during the wait for the STOP event corresponding
      to the lynx_ptrace (PTRACE_TRACEME) call above.  */
@@ -243,7 +267,7 @@ lynx_attach (unsigned long pid)
     error ("Cannot attach to process %lu: %s (%d)\n", pid,
 	   strerror (errno), errno);
 
-  add_process (pid, 1);
+  lynx_add_process (pid, 1);
   add_thread (ptid, NULL);
 
   return 0;
@@ -260,6 +284,19 @@ lynx_resume (struct thread_resume *resume_info, size_t n)
                        ? PTRACE_SINGLESTEP : PTRACE_CONT);
   const int signal = resume_info[0].sig;
 
+  /* If given a null_ptid, then try using the current_process'
+     private->last_wait_event_ptid.  On most LynxOS versions,
+     using any of the process' thread works well enough, but
+     LynxOS 178 is a little more sensitive, and triggers some
+     unexpected signals (Eg SIG61) when we resume the inferior
+     using a different thread.  */
+  if (ptid_equal (ptid, minus_one_ptid))
+    ptid = current_process()->private->last_wait_event_ptid;
+
+  /* The ptid might still be NULL; this can happen between the moment
+     we create the inferior or attach to a process, and the moment
+     we resume its execution for the first time.  It is fine to
+     use the current_inferior's ptid in those cases.  */
   if (ptid_equal (ptid, minus_one_ptid))
     ptid = thread_to_gdb_id (current_inferior);
 
@@ -283,16 +320,6 @@ lynx_continue (ptid_t ptid)
   resume_info.sig = 0;
 
   lynx_resume (&resume_info, 1);
-}
-
-/* Remove all inferiors and associated threads.  */
-
-static void
-lynx_clear_inferiors (void)
-{
-  /* We do not use private data, so nothing much to do except calling
-     clear_inferiors.  */
-  clear_inferiors ();
 }
 
 /* A wrapper around waitpid that handles the various idiosyncrasies
@@ -352,6 +379,7 @@ retry:
 
   ret = lynx_waitpid (pid, &wstat);
   new_ptid = lynx_ptid_build (ret, ((union wait *) &wstat)->w_tid);
+  find_process_pid (ret)->private->last_wait_event_ptid = new_ptid;
 
   /* If this is a new thread, then add it now.  The reason why we do
      this here instead of when handling new-thread events is because
@@ -480,7 +508,11 @@ lynx_detach (int pid)
 static void
 lynx_mourn (struct process_info *proc)
 {
-  lynx_clear_inferiors ();
+  /* Free our private data.  */
+  free (proc->private);
+  proc->private = NULL;
+
+  clear_inferiors ();
 }
 
 /* Implement the join target_ops method.  */

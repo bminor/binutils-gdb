@@ -1,3 +1,18 @@
+2013-05-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* lynx-low.c (struct process_info_private): New type.
+	(lynx_add_process): New function.
+	(lynx_create_inferior, lynx_attach): Replace calls to
+	add_process by calls to lynx_add_process.
+	(lynx_resume): If PTID is null, then try using
+	current_process()->private->last_wait_event_ptid.
+	Add comments.
+	(lynx_clear_inferiors): Delete.  The contents of that function
+	has been inlined in lynx_mourn;
+	(lynx_wait_1): Save the ptid in the process's private data.
+	(lynx_mourn): Free the process' private data.  Replace call
+	to lynx_clear_inferiors by call to clear_inferiors.
+
 2013-05-17  Yao Qi  <yao@codesourcery.com>
 
 	* i386-low.c (i386_length_and_rw_bits): Move the comment to
