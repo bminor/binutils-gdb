@@ -1,3 +1,9 @@
+2013-05-17  Alan Modra  <amodra@gmail.com>
+
+	* ia64-raw.tbl: Replace non-ASCII char.
+	* ia64-waw.tbl: Likewise.
+	* ia64-asmtab.c: Regenerate.
+
 2013-05-15  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
 
 	* i386-gen.c (cpu_flag_init): Add CpuFSGSBase in CPU_BDVER3_FLAGS.
