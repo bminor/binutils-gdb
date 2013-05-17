@@ -1503,16 +1503,19 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
      to determine the hardcoded watchable region for watchpoints.  */
   if (have_ptrace_booke_interface ())
     {
-      /* DAC-based processors (i.e., embedded processors), like the PowerPC 440
-	 have ranged watchpoints and can watch any access within an arbitrary
-	 memory region.  This is useful to watch arrays and structs, for
-	 instance.  It takes two hardware watchpoints though.  */
+      /* Embedded DAC-based processors, like the PowerPC 440 have ranged
+	 watchpoints and can watch any access within an arbitrary memory
+	 region. This is useful to watch arrays and structs, for instance.  It
+         takes two hardware watchpoints though.  */
       if (len > 1
-	  && booke_debug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE)
+	  && booke_debug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE
+	  && ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
 	return 2;
-      else if (booke_debug_info.data_bp_alignment
-	       && (addr + len > (addr & ~(booke_debug_info.data_bp_alignment - 1))
-		   + booke_debug_info.data_bp_alignment))
+      /* Server processors provide one hardware watchpoint and addr+len should
+         fall in the watchable region provided by the ptrace interface.  */
+      if (booke_debug_info.data_bp_alignment
+	  && (addr + len > (addr & ~(booke_debug_info.data_bp_alignment - 1))
+	      + booke_debug_info.data_bp_alignment))
 	return 0;
     }
   /* addr+len must fall in the 8 byte watchable region for DABR-based

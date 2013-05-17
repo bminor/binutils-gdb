@@ -1,3 +1,9 @@
+2013-05-17  Edjunior Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_region_ok_for_hw_watchpoint): Check if the
+	region is ok for a hardware watchpoint using the new ptrace interface
+	on Power servers.
+
 2013-05-17  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention new maintenance commands check-symtabs, and
