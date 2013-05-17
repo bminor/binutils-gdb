@@ -43,6 +43,7 @@
 #include "block.h"
 #include "inline-frame.h"
 #include "tracepoint.h"
+#include "hashtab.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
@@ -128,38 +129,107 @@ struct frame_info
   enum unwind_stop_reason stop_reason;
 };
 
-/* A frame stash used to speed up frame lookups.  */
+/* A frame stash used to speed up frame lookups.  Create a hash table
+   to stash frames previously accessed from the frame cache for
+   quicker subsequent retrieval.  The hash table is emptied whenever
+   the frame cache is invalidated.  */
 
-/* We currently only stash one frame at a time, as this seems to be
-   sufficient for now.  */
-static struct frame_info *frame_stash = NULL;
+static htab_t frame_stash;
 
-/* Add the following FRAME to the frame stash.  */
+/* Internal function to calculate a hash from the frame_id addresses,
+   using as many valid addresses as possible.  Frames below level 0
+   are not stored in the hash table.  */
+
+static hashval_t
+frame_addr_hash (const void *ap)
+{
+  const struct frame_info *frame = ap;
+  const struct frame_id f_id = frame->this_id.value;
+  hashval_t hash = 0;
+
+  gdb_assert (f_id.stack_addr_p || f_id.code_addr_p
+	      || f_id.special_addr_p);
+
+  if (f_id.stack_addr_p)
+    hash = iterative_hash (&f_id.stack_addr,
+			   sizeof (f_id.stack_addr), hash);
+  if (f_id.code_addr_p)
+    hash = iterative_hash (&f_id.code_addr,
+			   sizeof (f_id.code_addr), hash);
+  if (f_id.special_addr_p)
+    hash = iterative_hash (&f_id.special_addr,
+			   sizeof (f_id.special_addr), hash);
+
+  return hash;
+}
+
+/* Internal equality function for the hash table.  This function
+   defers equality operations to frame_id_eq.  */
+
+static int
+frame_addr_hash_eq (const void *a, const void *b)
+{
+  const struct frame_info *f_entry = a;
+  const struct frame_info *f_element = b;
+
+  return frame_id_eq (f_entry->this_id.value,
+		      f_element->this_id.value);
+}
+
+/* Internal function to create the frame_stash hash table.  100 seems
+   to be a good compromise to start the hash table at.  */
+
+static void
+frame_stash_create (void)
+{
+  frame_stash = htab_create (100,
+			     frame_addr_hash,
+			     frame_addr_hash_eq,
+			     NULL);
+}
+
+/* Internal function to add a frame to the frame_stash hash table.  Do
+   not store frames below 0 as they may not have any addresses to
+   calculate a hash.  */
 
 static void
 frame_stash_add (struct frame_info *frame)
 {
-  frame_stash = frame;
+  /* Do not stash frames below level 0.  */
+  if (frame->level >= 0)
+    {
+      struct frame_info **slot;
+
+      slot = (struct frame_info **) htab_find_slot (frame_stash,
+						    frame,
+						    INSERT);
+      *slot = frame;
+    }
 }
 
-/* Search the frame stash for an entry with the given frame ID.
-   If found, return that frame.  Otherwise return NULL.  */
+/* Internal function to search the frame stash for an entry with the
+   given frame ID.  If found, return that frame.  Otherwise return
+   NULL.  */
 
 static struct frame_info *
 frame_stash_find (struct frame_id id)
 {
-  if (frame_stash && frame_id_eq (frame_stash->this_id.value, id))
-    return frame_stash;
+  struct frame_info dummy;
+  struct frame_info *frame;
 
-  return NULL;
+  dummy.this_id.value = id;
+  frame = htab_find (frame_stash, &dummy);
+  return frame;
 }
 
-/* Invalidate the frame stash by removing all entries in it.  */
+/* Internal function to invalidate the frame stash by removing all
+   entries in it.  This only occurs when the frame cache is
+   invalidated.  */
 
 static void
 frame_stash_invalidate (void)
 {
-  frame_stash = NULL;
+  htab_empty (frame_stash);
 }
 
 /* Flag to control debugging.  */
@@ -345,9 +415,8 @@ get_frame_id (struct frame_info *fi)
 	  fprint_frame_id (gdb_stdlog, fi->this_id.value);
 	  fprintf_unfiltered (gdb_stdlog, " }\n");
 	}
+      frame_stash_add (fi);
     }
-
-  frame_stash_add (fi);
 
   return fi->this_id.value;
 }
@@ -2450,6 +2519,8 @@ void
 _initialize_frame (void)
 {
   obstack_init (&frame_cache_obstack);
+
+  frame_stash_create ();
 
   observer_attach_target_changed (frame_observer_target_changed);
 
