@@ -1,3 +1,9 @@
+2013-05-17  Pavel Chupin  <pavel.v.chupin@intel.com>
+
+	* acinclude.m4: Add check for dlopen in libdl.
+	* configure.ac: Ditto.
+	* configure: Regenerate.
+
 2013-05-17  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* frame.c (frame_stash): Convert to htab.

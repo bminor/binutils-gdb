@@ -455,7 +455,7 @@ AC_DEFUN([GDB_AC_CHECK_BFD], [
   intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
   # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
   if test "$plugins" = "yes"; then
-    LIBS="-ldl $LIBS"
+    AC_SEARCH_LIBS(dlopen, dl)
   fi
   LIBS="-lbfd -liberty $intl $LIBS"
   AC_CACHE_CHECK([$1], [$2],

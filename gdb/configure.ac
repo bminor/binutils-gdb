@@ -2036,7 +2036,7 @@ if test $gdb_cv_var_elf = yes; then
 	    [Define if ELF support should be included.])
   # -ldl is provided by bfd/Makfile.am (LIBDL) <PLUGINS>.
   if test "$plugins" = "yes"; then
-    LIBS="-ldl $LIBS"
+    AC_SEARCH_LIBS(dlopen, dl)
   fi
 fi
 
