@@ -914,9 +914,8 @@ elf_vax_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info, asection *sec,
    understand.  */
 
 static bfd_boolean
-elf_vax_adjust_dynamic_symbol (info, h)
-     struct bfd_link_info *info;
-     struct elf_link_hash_entry *h;
+elf_vax_adjust_dynamic_symbol (struct bfd_link_info *info,
+			       struct elf_link_hash_entry *h)
 {
   bfd *dynobj;
   asection *s;
