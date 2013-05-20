@@ -1,5 +1,14 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-threadevent.c (get_event_thread): Use
+	CPYCHECKER_RETURNS_BORROWED_REF.
+	* python/python-internal.h (CPYCHECKER_RETURNS_BORROWED_REF):
+	New define.
+	(pspace_to_pspace_object, objfile_to_objfile_object)
+	(find_thread_object): Use it.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-arch.c (arch_object_type): Use
 	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
 	* python/py-block.c (block_syms_iterator_object_type):

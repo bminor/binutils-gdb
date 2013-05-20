@@ -26,6 +26,13 @@
    The checker defines a WITH_ macro for each attribute it
    exposes.  */
 
+#ifdef WITH_CPYCHECKER_RETURNS_BORROWED_REF_ATTRIBUTE
+#define CPYCHECKER_RETURNS_BORROWED_REF			\
+  __attribute__ ((cpychecker_returns_borrowed_ref))
+#else
+#define CPYCHECKER_RETURNS_BORROWED_REF
+#endif
+
 #ifdef WITH_CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF_ATTRIBUTE
 #define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)		\
   __attribute__ ((cpychecker_type_object_for_typedef (ARG)))
@@ -269,18 +276,21 @@ PyObject *value_to_value_object (struct value *v);
 PyObject *type_to_type_object (struct type *);
 PyObject *frame_info_to_frame_object (struct frame_info *frame);
 
-PyObject *pspace_to_pspace_object (struct program_space *);
+PyObject *pspace_to_pspace_object (struct program_space *)
+    CPYCHECKER_RETURNS_BORROWED_REF;
 PyObject *pspy_get_printers (PyObject *, void *);
 PyObject *pspy_get_frame_filters (PyObject *, void *);
 
-PyObject *objfile_to_objfile_object (struct objfile *);
+PyObject *objfile_to_objfile_object (struct objfile *)
+    CPYCHECKER_RETURNS_BORROWED_REF;
 PyObject *objfpy_get_printers (PyObject *, void *);
 PyObject *objfpy_get_frame_filters (PyObject *, void *);
 
 PyObject *gdbarch_to_arch_object (struct gdbarch *gdbarch);
 
 thread_object *create_thread_object (struct thread_info *tp);
-thread_object *find_thread_object (ptid_t ptid);
+thread_object *find_thread_object (ptid_t ptid)
+    CPYCHECKER_RETURNS_BORROWED_REF;
 PyObject *find_inferior_object (int pid);
 PyObject *inferior_to_inferior_object (struct inferior *inferior);
 
