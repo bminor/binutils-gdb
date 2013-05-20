@@ -611,12 +611,14 @@ compute_enum_values (parmpy_object *self, PyObject *enum_values)
 	}
       if (! gdbpy_is_string (item))
 	{
+	  Py_DECREF (item);
 	  do_cleanups (back_to);
 	  PyErr_SetString (PyExc_RuntimeError, 
 			   _("The enumeration item not a string."));
 	  return 0;
 	}
       self->enumeration[i] = python_string_to_host_string (item);
+      Py_DECREF (item);
       if (self->enumeration[i] == NULL)
 	{
 	  do_cleanups (back_to);

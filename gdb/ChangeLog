@@ -1,5 +1,9 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-param.c (compute_enum_values): Decref 'item'.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* mi/mi-main.c: Include python-internal.h.
 	(mi_cmd_list_features): Check gdb_python_initialized.
 	* python/py-inferior.c (python_on_normal_stop, python_on_resume)
