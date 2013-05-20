@@ -1,5 +1,10 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-cmd.c (cmdpy_completer): Use iterator protocol.
+	Correctly decref.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-cmd.c (cmdpy_init): Decref 'ds_obj'.
 
 2013-05-20  Tom Tromey  <tromey@redhat.com>

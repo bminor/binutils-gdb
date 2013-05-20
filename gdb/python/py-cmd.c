@@ -247,36 +247,7 @@ cmdpy_completer (struct cmd_list_element *command,
   make_cleanup_py_decref (resultobj);
 
   result = NULL;
-  if (PySequence_Check (resultobj))
-    {
-      Py_ssize_t i, len = PySequence_Size (resultobj);
-      Py_ssize_t out;
-
-      if (len < 0)
-	goto done;
-
-      for (i = out = 0; i < len; ++i)
-	{
-	  PyObject *elt = PySequence_GetItem (resultobj, i);
-	  char *item;
-
-	  if (elt == NULL || ! gdbpy_is_string (elt))
-	    {
-	      /* Skip problem elements.  */
-	      PyErr_Clear ();
-	      continue;
-	    }
-	  item = python_string_to_host_string (elt);
-	  if (item == NULL)
-	    {
-	      /* Skip problem elements.  */
-	      PyErr_Clear ();
-	      continue;
-	    }
-	  VEC_safe_push (char_ptr, result, item);
-	}
-    }
-  else if (PyInt_Check (resultobj))
+  if (PyInt_Check (resultobj))
     {
       /* User code may also return one of the completion constants,
 	 thus requesting that sort of completion.  */
@@ -289,6 +260,42 @@ cmdpy_completer (struct cmd_list_element *command,
 	}
       else if (value >= 0 && value < (long) N_COMPLETERS)
 	result = completers[value].completer (command, text, word);
+    }
+  else
+    {
+      PyObject *iter = PyObject_GetIter (resultobj);
+      PyObject *elt;
+
+      if (iter == NULL)
+	goto done;
+
+      while ((elt = PyIter_Next (iter)) != NULL)
+	{
+	  char *item;
+
+	  if (! gdbpy_is_string (elt))
+	    {
+	      /* Skip problem elements.  */
+	      Py_DECREF (elt);
+	      continue;
+	    }
+	  item = python_string_to_host_string (elt);
+	  Py_DECREF (elt);
+	  if (item == NULL)
+	    {
+	      /* Skip problem elements.  */
+	      PyErr_Clear ();
+	      continue;
+	    }
+	  VEC_safe_push (char_ptr, result, item);
+	}
+
+      Py_DECREF (iter);
+
+      /* If we got some results, ignore problems.  Otherwise, report
+	 the problem.  */
+      if (result != NULL && PyErr_Occurred ())
+	PyErr_Clear ();
     }
 
  done:
