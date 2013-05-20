@@ -76,7 +76,7 @@ gdbpy_initialize_event_generic (PyTypeObject *type,
                                 char *name)
 {
   if (PyType_Ready (type) < 0)
-    goto fail;
+    return -1;
 
   Py_INCREF (type);
   if (PyModule_AddObject (gdb_module, name, (PyObject *) type) < 0)
