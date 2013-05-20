@@ -1,5 +1,12 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+        * python/py-event.h (evpy_emit_event): Use
+        CPYCHECKER_STEALS_REFERENCE_TO_ARG.
+        * python/python-internal.h (CPYCHECKER_STEALS_REFERENCE_TO_ARG):
+        New macro.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* py-evtregistry.c (create_event_object): Decref
 	eventregistry_object if PyList_New fails.
 

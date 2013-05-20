@@ -106,7 +106,8 @@ extern int emit_continue_event (ptid_t ptid);
 extern int emit_exited_event (const LONGEST *exit_code, struct inferior *inf);
 
 extern int evpy_emit_event (PyObject *event,
-                            eventregistry_object *registry);
+                            eventregistry_object *registry)
+  CPYCHECKER_STEALS_REFERENCE_TO_ARG (1);
 
 extern PyObject *create_event_object (PyTypeObject *py_type);
 extern PyObject *create_thread_event_object (PyTypeObject *py_type);

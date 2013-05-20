@@ -40,6 +40,13 @@
 #define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)
 #endif
 
+#ifdef WITH_CPYCHECKER_STEALS_REFERENCE_TO_ARG_ATTRIBUTE
+#define CPYCHECKER_STEALS_REFERENCE_TO_ARG(n) \
+   __attribute__ ((cpychecker_steals_reference_to_arg (n)))
+#else
+#define CPYCHECKER_STEALS_REFERENCE_TO_ARG(n)
+#endif
+
 #include <stdio.h>
 
 /* Python 2.4 doesn't include stdint.h soon enough to get {u,}intptr_t
