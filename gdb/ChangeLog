@@ -1,3 +1,8 @@
+2013-05-20  Andreas Tobler  <andreas@fgznet.ch>
+
+	* Makefile.in (ALL_TARGET_OBS): Add ppcfbsd-tdep.o.
+	(ALLDEPFILES): Add ppcfbsd-nat.c and ppcfbsd-tdep.c.
+
 2013-05-20  Doug Evans  <dje@google.com>
 
 	When reading CU, stay in DWO.  Be more tolerent of bad debug info.

@@ -575,8 +575,8 @@ ALL_TARGET_OBS = \
 	mt-tdep.o \
 	nios2-tdep.o nios2-linux-tdep.o \
 	nto-tdep.o \
-	ppc-linux-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o ppc-sysv-tdep.o \
-	ppc64-tdep.o rl78-tdep.o \
+	ppc-linux-tdep.o ppcfbsd-tdep.o ppcnbsd-tdep.o ppcobsd-tdep.o  \
+	ppc-sysv-tdep.o ppc64-tdep.o rl78-tdep.o \
 	rs6000-aix-tdep.o rs6000-tdep.o solib-aix.o ppc-ravenscar-thread.o \
 	rs6000-lynx178-tdep.o \
 	rx-tdep.o \
@@ -1526,6 +1526,7 @@ ALLDEPFILES = \
 	somread.c solib-som.c \
 	posix-hdep.c \
 	ppc-sysv-tdep.c ppc-linux-nat.c ppc-linux-tdep.c ppc64-tdep.c \
+	ppcfbsd-nat.c ppcfbsd-tdep.c \
 	ppcnbsd-nat.c ppcnbsd-tdep.c \
 	ppcobsd-nat.c ppcobsd-tdep.c \
 	procfs.c \
