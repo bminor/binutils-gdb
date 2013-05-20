@@ -379,10 +379,7 @@ typy_fields (PyObject *self, PyObject *args)
     return NULL;
   
   rl = Py_BuildValue ("[O]", r);
-  if (rl == NULL)
-    {
-      Py_DECREF (r);
-    }
+  Py_DECREF (r);
 
   return rl;
 }

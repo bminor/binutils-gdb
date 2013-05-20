@@ -1,5 +1,9 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-type.c (typy_fields): Unconditionally decref 'r'.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-frame.c (frapy_older, frapy_newer, gdbpy_newest_frame)
 	(gdbpy_selected_frame): Move object-construction code
 	out of TRY_CATCH.
