@@ -1,3 +1,10 @@
+2013-05-20  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (md_apply_fix): Hoist code common to insn
+	and data fixups performing shift/high adjust/sign extension on
+	fieldval.  Sink fx_pcrel handling and checks.  Use fixP->fx_size
+	when writing data fixups rather than recalculating size.
+
 2013-05-16  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* doc/c-msp430.texi: Fix typo.
