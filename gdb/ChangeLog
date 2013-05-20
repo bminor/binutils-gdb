@@ -1,5 +1,10 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/python.c (gdbpy_run_events): Decref the result
+	of PyObject_CallObject.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-symtab.c (set_sal): Use
 	CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION.  Return -1 on error.
 	(symtab_and_line_to_sal_object): Update.

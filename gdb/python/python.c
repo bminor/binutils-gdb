@@ -819,6 +819,8 @@ gdbpy_run_events (struct serial *scb, void *context)
 
   while (gdbpy_event_list)
     {
+      PyObject *call_result;
+
       /* Dispatching the event might push a new element onto the event
 	 loop, so we update here "atomically enough".  */
       struct gdbpy_event *item = gdbpy_event_list;
@@ -827,9 +829,11 @@ gdbpy_run_events (struct serial *scb, void *context)
 	gdbpy_event_list_end = &gdbpy_event_list;
 
       /* Ignore errors.  */
-      if (PyObject_CallObject (item->event, NULL) == NULL)
+      call_result = PyObject_CallObject (item->event, NULL);
+      if (call_result == NULL)
 	PyErr_Clear ();
 
+      Py_XDECREF (call_result);
       Py_DECREF (item->event);
       xfree (item);
     }
