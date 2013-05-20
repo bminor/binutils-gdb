@@ -900,6 +900,8 @@ before_prompt_hook (const char *current_gdb_prompt)
       if (hook == NULL)
 	goto fail;
 
+      make_cleanup_py_decref (hook);
+
       if (PyCallable_Check (hook))
 	{
 	  PyObject *result;

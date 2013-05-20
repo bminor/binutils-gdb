@@ -1,5 +1,10 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/python.c (before_prompt_hook): Add cleanup to
+	decref 'hook'.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-function.c (fnpy_init): Decref result of
 	PyObject_GetAttrString.
 
