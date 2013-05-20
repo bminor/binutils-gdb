@@ -150,6 +150,10 @@ ensure_python_env (struct gdbarch *gdbarch,
 {
   struct python_env *env = xmalloc (sizeof *env);
 
+  /* We should not ever enter Python unless initialized.  */
+  if (!gdb_python_initialized)
+    error (_("Python not initialized"));
+
   env->state = PyGILState_Ensure ();
   env->gdbarch = python_gdbarch;
   env->language = python_language;
@@ -896,6 +900,9 @@ before_prompt_hook (const char *current_gdb_prompt)
   struct cleanup *cleanup;
   char *prompt = NULL;
 
+  if (!gdb_python_initialized)
+    return;
+
   cleanup = ensure_python_env (get_current_arch (), current_language);
 
   if (gdb_python_module
@@ -1159,6 +1166,9 @@ source_python_script_for_objfile (struct objfile *objfile, FILE *file,
 {
   struct cleanup *cleanups;
 
+  if (!gdb_python_initialized)
+    return;
+
   cleanups = ensure_python_env (get_objfile_arch (objfile), current_language);
   gdbpy_current_objfile = objfile;
 
@@ -1220,6 +1230,9 @@ start_type_printers (void)
   struct cleanup *cleanups;
   PyObject *type_module, *func, *result_obj = NULL;
 
+  if (!gdb_python_initialized)
+    return NULL;
+
   cleanups = ensure_python_env (get_current_arch (), current_language);
 
   type_module = PyImport_ImportModule ("gdb.types");
@@ -1264,6 +1277,9 @@ apply_type_printers (void *printers, struct type *type)
   char *result = NULL;
 
   if (printers_obj == NULL)
+    return NULL;
+
+  if (!gdb_python_initialized)
     return NULL;
 
   cleanups = ensure_python_env (get_current_arch (), current_language);
@@ -1322,6 +1338,9 @@ free_type_printers (void *arg)
   PyObject *printers = arg;
 
   if (printers == NULL)
+    return;
+
+  if (!gdb_python_initialized)
     return;
 
   cleanups = ensure_python_env (get_current_arch (), current_language);

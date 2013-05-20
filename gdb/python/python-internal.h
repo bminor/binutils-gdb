@@ -189,6 +189,8 @@ struct program_space;
 struct bpstats;
 struct inferior;
 
+extern int gdb_python_initialized;
+
 extern PyObject *gdb_module;
 extern PyObject *gdb_python_module;
 extern PyTypeObject value_object_type

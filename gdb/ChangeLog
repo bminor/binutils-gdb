@@ -1,5 +1,28 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* mi/mi-main.c: Include python-internal.h.
+	(mi_cmd_list_features): Check gdb_python_initialized.
+	* python/py-inferior.c (python_on_normal_stop, python_on_resume)
+	(python_inferior_exit, python_new_objfile, add_thread_object)
+	(delete_thread_object, py_free_inferior): Check
+	gdb_python_initialized.
+	* python/py-prettyprint.c (apply_val_pretty_printer): Check
+	gdb_python_initialized.
+	* python/py-type.c (save_objfile_types): Check
+	gdb_python_initialized.
+	* python/python-internal.h (gdb_python_initialized): Declare.
+	* python/python.c (ensure_python_env): Throw exception if
+	Python not initialized.
+	(before_prompt_hook, source_python_script_for_objfile)
+	(start_type_printers, apply_type_printers,
+	free_type_printers): Check gdb_python_initialized.
+	* varobj.c (varobj_get_display_hint)
+	(dynamic_varobj_has_child_method, update_dynamic_varobj_children)
+	(install_new_value_visualizer, varobj_set_visualizer)
+	(value_get_print_value): Check gdb_python_initialized.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-arch.c (gdbpy_initialize_arch): Return 'int'.
 	Check errors.
 	* python/py-auto-load.c (gdbpy_initialize_auto_load): Return 'int'.

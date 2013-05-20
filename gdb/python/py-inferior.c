@@ -85,6 +85,9 @@ python_on_normal_stop (struct bpstats *bs, int print_frame)
   struct cleanup *cleanup;
   enum gdb_signal stop_signal;
 
+  if (!gdb_python_initialized)
+    return;
+
   if (!find_thread_ptid (inferior_ptid))
       return;
 
@@ -103,6 +106,9 @@ python_on_resume (ptid_t ptid)
 {
   struct cleanup *cleanup;
 
+  if (!gdb_python_initialized)
+    return;
+
   cleanup = ensure_python_env (target_gdbarch (), current_language);
 
   if (emit_continue_event (ptid) < 0)
@@ -116,6 +122,9 @@ python_inferior_exit (struct inferior *inf)
 {
   struct cleanup *cleanup;
   const LONGEST *exit_code = NULL;
+
+  if (!gdb_python_initialized)
+    return;
 
   cleanup = ensure_python_env (target_gdbarch (), current_language);
 
@@ -137,6 +146,9 @@ python_new_objfile (struct objfile *objfile)
   struct cleanup *cleanup;
 
   if (objfile == NULL)
+    return;
+
+  if (!gdb_python_initialized)
     return;
 
   cleanup = ensure_python_env (get_objfile_arch (objfile), current_language);
@@ -231,6 +243,9 @@ add_thread_object (struct thread_info *tp)
   inferior_object *inf_obj;
   struct threadlist_entry *entry;
 
+  if (!gdb_python_initialized)
+    return;
+
   cleanup = ensure_python_env (python_gdbarch, python_language);
 
   thread_obj = create_thread_object (tp);
@@ -260,6 +275,9 @@ delete_thread_object (struct thread_info *tp, int ignore)
   inferior_object *inf_obj;
   struct threadlist_entry **entry, *tmp;
   
+  if (!gdb_python_initialized)
+    return;
+
   cleanup = ensure_python_env (python_gdbarch, python_language);
 
   inf_obj = (inferior_object *) find_inferior_object (PIDGET(tp->ptid));
@@ -725,6 +743,9 @@ py_free_inferior (struct inferior *inf, void *datum)
   struct cleanup *cleanup;
   inferior_object *inf_obj = datum;
   struct threadlist_entry *th_entry, *th_tmp;
+
+  if (!gdb_python_initialized)
+    return;
 
   cleanup = ensure_python_env (python_gdbarch, python_language);
 

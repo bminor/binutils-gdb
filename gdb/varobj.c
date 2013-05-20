@@ -935,7 +935,12 @@ varobj_get_display_hint (struct varobj *var)
   char *result = NULL;
 
 #if HAVE_PYTHON
-  struct cleanup *back_to = varobj_ensure_python_env (var);
+  struct cleanup *back_to;
+
+  if (!gdb_python_initialized)
+    return NULL;
+
+  back_to = varobj_ensure_python_env (var);
 
   if (var->pretty_printer)
     result = gdbpy_get_display_hint (var->pretty_printer);
@@ -1067,6 +1072,9 @@ dynamic_varobj_has_child_method (struct varobj *var)
   PyObject *printer = var->pretty_printer;
   int result;
 
+  if (!gdb_python_initialized)
+    return 0;
+
   back_to = varobj_ensure_python_env (var);
   result = PyObject_HasAttr (printer, gdbpy_children_cst);
   do_cleanups (back_to);
@@ -1091,6 +1099,9 @@ update_dynamic_varobj_children (struct varobj *var,
   PyObject *children;
   int i;
   PyObject *printer = var->pretty_printer;
+
+  if (!gdb_python_initialized)
+    return 0;
 
   back_to = varobj_ensure_python_env (var);
 
@@ -1623,6 +1634,9 @@ install_new_value_visualizer (struct varobj *var)
 #if HAVE_PYTHON
   /* If the constructor is None, then we want the raw value.  If VAR
      does not have a value, just skip this.  */
+  if (!gdb_python_initialized)
+    return;
+
   if (var->constructor != Py_None && var->value)
     {
       struct cleanup *cleanup;
@@ -1898,6 +1912,9 @@ varobj_set_visualizer (struct varobj *var, const char *visualizer)
 #if HAVE_PYTHON
   PyObject *mainmod, *globals, *constructor;
   struct cleanup *back_to;
+
+  if (!gdb_python_initialized)
+    return;
 
   back_to = varobj_ensure_python_env (var);
 
@@ -2862,92 +2879,93 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 
   gdbarch = get_type_arch (value_type (value));
 #if HAVE_PYTHON
-  {
-    PyObject *value_formatter = var->pretty_printer;
+  if (gdb_python_initialized)
+    {
+      PyObject *value_formatter = var->pretty_printer;
 
-    varobj_ensure_python_env (var);
+      varobj_ensure_python_env (var);
 
-    if (value_formatter)
-      {
-	/* First check to see if we have any children at all.  If so,
-	   we simply return {...}.  */
-	if (dynamic_varobj_has_child_method (var))
-	  {
-	    do_cleanups (old_chain);
-	    return xstrdup ("{...}");
-	  }
+      if (value_formatter)
+	{
+	  /* First check to see if we have any children at all.  If so,
+	     we simply return {...}.  */
+	  if (dynamic_varobj_has_child_method (var))
+	    {
+	      do_cleanups (old_chain);
+	      return xstrdup ("{...}");
+	    }
 
-	if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
-	  {
-	    struct value *replacement;
-	    PyObject *output = NULL;
+	  if (PyObject_HasAttr (value_formatter, gdbpy_to_string_cst))
+	    {
+	      struct value *replacement;
+	      PyObject *output = NULL;
 
-	    output = apply_varobj_pretty_printer (value_formatter,
-						  &replacement,
-						  stb);
+	      output = apply_varobj_pretty_printer (value_formatter,
+						    &replacement,
+						    stb);
 
-	    /* If we have string like output ...  */
-	    if (output)
-	      {
-		make_cleanup_py_decref (output);
+	      /* If we have string like output ...  */
+	      if (output)
+		{
+		  make_cleanup_py_decref (output);
 
-		/* If this is a lazy string, extract it.  For lazy
-		   strings we always print as a string, so set
-		   string_print.  */
-		if (gdbpy_is_lazy_string (output))
-		  {
-		    gdbpy_extract_lazy_string (output, &str_addr, &type,
-					       &len, &encoding);
-		    make_cleanup (free_current_contents, &encoding);
-		    string_print = 1;
-		  }
-		else
-		  {
-		    /* If it is a regular (non-lazy) string, extract
-		       it and copy the contents into THEVALUE.  If the
-		       hint says to print it as a string, set
-		       string_print.  Otherwise just return the extracted
-		       string as a value.  */
+		  /* If this is a lazy string, extract it.  For lazy
+		     strings we always print as a string, so set
+		     string_print.  */
+		  if (gdbpy_is_lazy_string (output))
+		    {
+		      gdbpy_extract_lazy_string (output, &str_addr, &type,
+						 &len, &encoding);
+		      make_cleanup (free_current_contents, &encoding);
+		      string_print = 1;
+		    }
+		  else
+		    {
+		      /* If it is a regular (non-lazy) string, extract
+			 it and copy the contents into THEVALUE.  If the
+			 hint says to print it as a string, set
+			 string_print.  Otherwise just return the extracted
+			 string as a value.  */
 
-		    char *s = python_string_to_target_string (output);
+		      char *s = python_string_to_target_string (output);
 
-		    if (s)
-		      {
-			char *hint;
+		      if (s)
+			{
+			  char *hint;
 
-			hint = gdbpy_get_display_hint (value_formatter);
-			if (hint)
-			  {
-			    if (!strcmp (hint, "string"))
-			      string_print = 1;
-			    xfree (hint);
-			  }
+			  hint = gdbpy_get_display_hint (value_formatter);
+			  if (hint)
+			    {
+			      if (!strcmp (hint, "string"))
+				string_print = 1;
+			      xfree (hint);
+			    }
 
-			len = strlen (s);
-			thevalue = xmemdup (s, len + 1, len + 1);
-			type = builtin_type (gdbarch)->builtin_char;
-			xfree (s);
+			  len = strlen (s);
+			  thevalue = xmemdup (s, len + 1, len + 1);
+			  type = builtin_type (gdbarch)->builtin_char;
+			  xfree (s);
 
-			if (!string_print)
-			  {
-			    do_cleanups (old_chain);
-			    return thevalue;
-			  }
+			  if (!string_print)
+			    {
+			      do_cleanups (old_chain);
+			      return thevalue;
+			    }
 
-			make_cleanup (xfree, thevalue);
-		      }
-		    else
-		      gdbpy_print_stack ();
-		  }
-	      }
-	    /* If the printer returned a replacement value, set VALUE
-	       to REPLACEMENT.  If there is not a replacement value,
-	       just use the value passed to this function.  */
-	    if (replacement)
-	      value = replacement;
-	  }
-      }
-  }
+			  make_cleanup (xfree, thevalue);
+			}
+		      else
+			gdbpy_print_stack ();
+		    }
+		}
+	      /* If the printer returned a replacement value, set VALUE
+		 to REPLACEMENT.  If there is not a replacement value,
+		 just use the value passed to this function.  */
+	      if (replacement)
+		value = replacement;
+	    }
+	}
+    }
 #endif
 
   get_formatted_print_options (&opts, format_code[(int) format]);

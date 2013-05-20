@@ -52,6 +52,9 @@
 #include "ctf.h"
 #include "ada-lang.h"
 #include "linespec.h"
+#ifdef HAVE_PYTHON
+#include "python/python-internal.h"
+#endif
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -1757,7 +1760,8 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "ada-task-info");
       
 #if HAVE_PYTHON
-      ui_out_field_string (uiout, NULL, "python");
+      if (gdb_python_initialized)
+	ui_out_field_string (uiout, NULL, "python");
 #endif
       
       do_cleanups (cleanup);

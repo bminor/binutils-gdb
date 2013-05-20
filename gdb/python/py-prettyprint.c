@@ -708,6 +708,9 @@ apply_val_pretty_printer (struct type *type, const gdb_byte *valaddr,
   if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
     return 0;
 
+  if (!gdb_python_initialized)
+    return 0;
+
   cleanups = ensure_python_env (gdbarch, language);
 
   /* Instantiate the printer.  */

@@ -1192,6 +1192,9 @@ save_objfile_types (struct objfile *objfile, void *datum)
   htab_t copied_types;
   struct cleanup *cleanup;
 
+  if (!gdb_python_initialized)
+    return;
+
   /* This prevents another thread from freeing the objects we're
      operating on.  */
   cleanup = ensure_python_env (get_objfile_arch (objfile), current_language);
