@@ -334,18 +334,11 @@ valpy_get_dynamic_type (PyObject *self, void *closure)
   GDB_PY_HANDLE_EXCEPTION (except);
 
   if (type == NULL)
-    {
-      /* Ensure that the TYPE field is ready.  */
-      if (!valpy_get_type (self, NULL))
-	return NULL;
-      /* We don't need to incref here, because valpy_get_type already
-	 did it for us.  */
-      obj->dynamic_type = obj->type;
-    }
+    obj->dynamic_type = valpy_get_type (self, NULL);
   else
     obj->dynamic_type = type_to_type_object (type);
 
-  Py_INCREF (obj->dynamic_type);
+  Py_XINCREF (obj->dynamic_type);
   return obj->dynamic_type;
 }
 
