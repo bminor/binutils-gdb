@@ -1730,26 +1730,6 @@ elf64_aarch64_mkobject (bfd *abfd)
 				  AARCH64_ELF_DATA);
 }
 
-/* The AArch64 linker needs to keep track of the number of relocs that it
-   decides to copy in check_relocs for each symbol.  This is so that
-   it can discard PC relative relocs if it doesn't need them when
-   linking with -Bsymbolic.  We store the information in a field
-   extending the regular ELF linker hash table.  */
-
-/* This structure keeps track of the number of relocs we have copied
-   for a given symbol.  */
-struct elf64_aarch64_relocs_copied
-{
-  /* Next section.  */
-  struct elf64_aarch64_relocs_copied *next;
-  /* A section in dynobj.  */
-  asection *section;
-  /* Number of relocs copied in this section.  */
-  bfd_size_type count;
-  /* Number of PC-relative relocs copied in this section.  */
-  bfd_size_type pc_count;
-};
-
 #define elf64_aarch64_hash_entry(ent) \
   ((struct elf64_aarch64_link_hash_entry *)(ent))
 
@@ -1768,9 +1748,6 @@ struct elf64_aarch64_link_hash_entry
 
   /* Track dynamic relocs copied for this symbol.  */
   struct elf_dyn_relocs *dyn_relocs;
-
-  /* Number of PC relative relocs copied for this symbol.  */
-  struct elf64_aarch64_relocs_copied *relocs_copied;
 
   /* Since PLT entries have variable size, we need to record the
      index into .got.plt instead of recomputing it from the PLT
@@ -1950,7 +1927,6 @@ elf64_aarch64_link_hash_newfunc (struct bfd_hash_entry *entry,
   if (ret != NULL)
     {
       ret->dyn_relocs = NULL;
-      ret->relocs_copied = NULL;
       ret->got_type = GOT_UNKNOWN;
       ret->plt_got_offset = (bfd_vma) - 1;
       ret->stub_cache = NULL;
@@ -2039,37 +2015,6 @@ elf64_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 
       edir->dyn_relocs = eind->dyn_relocs;
       eind->dyn_relocs = NULL;
-    }
-
-  if (eind->relocs_copied != NULL)
-    {
-      if (edir->relocs_copied != NULL)
-	{
-	  struct elf64_aarch64_relocs_copied **pp;
-	  struct elf64_aarch64_relocs_copied *p;
-
-	  /* Add reloc counts against the indirect sym to the direct sym
-	     list.  Merge any entries against the same section.  */
-	  for (pp = &eind->relocs_copied; (p = *pp) != NULL;)
-	    {
-	      struct elf64_aarch64_relocs_copied *q;
-
-	      for (q = edir->relocs_copied; q != NULL; q = q->next)
-		if (q->section == p->section)
-		  {
-		    q->pc_count += p->pc_count;
-		    q->count += p->count;
-		    *pp = p->next;
-		    break;
-		  }
-	      if (q == NULL)
-		pp = &p->next;
-	    }
-	  *pp = edir->relocs_copied;
-	}
-
-      edir->relocs_copied = eind->relocs_copied;
-      eind->relocs_copied = NULL;
     }
 
   if (ind->root.type == bfd_link_hash_indirect)

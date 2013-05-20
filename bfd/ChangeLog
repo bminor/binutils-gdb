@@ -1,3 +1,12 @@
+2013-05-20  Will Newton  <will.newton@linaro.org>
+
+	* elf64-aarch64.c (elf64_aarch64_link_hash_entry): Remove
+	relocs_copied member.
+	(elf64_aarch64_link_hash_newfunc): Remove initialization of
+	relocs_copied member.
+	(elf64_aarch64_copy_indirect_symbol): Remove code to copy
+	relocs_copied member.
+
 2013-05-19  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elf32-vax.c (elf_vax_adjust_dynamic_symbol): Convert K&R
