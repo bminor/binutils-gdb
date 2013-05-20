@@ -884,6 +884,7 @@ handle_unload_dll (void *dummy)
     if (so->next->lm_info->load_addr == lpBaseOfDll)
       {
 	struct so_list *sodel = so->next;
+
 	so->next = sodel->next;
 	if (!so->next)
 	  solib_end = so;

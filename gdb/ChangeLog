@@ -1,5 +1,9 @@
 2013-05-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (handle_unload_dll): Add missing empty line.
+
+2013-05-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (prototyped_function_p): New function.
 	(read_subroutine_type): Use it.
 
