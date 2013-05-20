@@ -1,5 +1,10 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-finishbreakpoint.c (bpfinishpy_out_of_scope):
+	Decref the reslut of PyObject_CallMethod.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-event.c (gdbpy_initialize_event_generic): Return
 	early if PyType_Ready fails.
 
