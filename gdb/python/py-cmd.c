@@ -244,7 +244,6 @@ cmdpy_completer (struct cmd_list_element *command,
       PyErr_Clear ();
       goto done;
     }
-  make_cleanup_py_decref (resultobj);
 
   result = NULL;
   if (PyInt_Check (resultobj))
@@ -300,6 +299,7 @@ cmdpy_completer (struct cmd_list_element *command,
 
  done:
 
+  Py_XDECREF (resultobj);
   do_cleanups (cleanup);
 
   return result;

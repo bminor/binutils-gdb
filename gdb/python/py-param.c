@@ -374,8 +374,6 @@ get_set_value (char *args, int from_tty,
   if (! set_doc_func)
     goto error;
 
-  make_cleanup_py_decref (set_doc_func);
-
   if (PyObject_HasAttr (obj, set_doc_func))
     {
       set_doc_string = call_doc_function (obj, set_doc_func, NULL);
@@ -393,10 +391,12 @@ get_set_value (char *args, int from_tty,
   make_cleanup (xfree, set_doc_string);
   fprintf_filtered (gdb_stdout, "%s\n", set_doc_string);
 
+  Py_XDECREF (set_doc_func);
   do_cleanups (cleanup);
   return;
 
  error:
+  Py_XDECREF (set_doc_func);
   gdbpy_print_stack ();
   do_cleanups (cleanup);
   return;
@@ -422,8 +422,6 @@ get_show_value (struct ui_file *file, int from_tty,
   if (! show_doc_func)
     goto error;
 
-  make_cleanup_py_decref (show_doc_func);
-
   if (PyObject_HasAttr (obj, show_doc_func))
     {
       PyObject *val_obj = PyString_FromString (value);
@@ -431,9 +429,8 @@ get_show_value (struct ui_file *file, int from_tty,
       if (! val_obj)
 	goto error;
 
-      make_cleanup_py_decref (val_obj);
-
       show_doc_string = call_doc_function (obj, show_doc_func, val_obj);
+      Py_DECREF (val_obj);
       if (! show_doc_string)
 	goto error;
 
@@ -451,10 +448,12 @@ get_show_value (struct ui_file *file, int from_tty,
       fprintf_filtered (file, "%s %s\n", show_doc_string, value);
     }
 
+  Py_XDECREF (show_doc_func);
   do_cleanups (cleanup);
   return;
 
  error:
+  Py_XDECREF (show_doc_func);
   gdbpy_print_stack ();
   do_cleanups (cleanup);
   return;

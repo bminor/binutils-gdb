@@ -1232,7 +1232,7 @@ void *
 start_type_printers (void)
 {
   struct cleanup *cleanups;
-  PyObject *type_module, *func, *result_obj = NULL;
+  PyObject *type_module, *func = NULL, *result_obj = NULL;
 
   if (!gdb_python_initialized)
     return NULL;
@@ -1245,7 +1245,6 @@ start_type_printers (void)
       gdbpy_print_stack ();
       goto done;
     }
-  make_cleanup_py_decref (type_module);
 
   func = PyObject_GetAttrString (type_module, "get_type_recognizers");
   if (func == NULL)
@@ -1253,13 +1252,14 @@ start_type_printers (void)
       gdbpy_print_stack ();
       goto done;
     }
-  make_cleanup_py_decref (func);
 
   result_obj = PyObject_CallFunctionObjArgs (func, (char *) NULL);
   if (result_obj == NULL)
     gdbpy_print_stack ();
 
  done:
+  Py_XDECREF (type_module);
+  Py_XDECREF (func);
   do_cleanups (cleanups);
   return result_obj;
 }
@@ -1276,7 +1276,8 @@ char *
 apply_type_printers (void *printers, struct type *type)
 {
   struct cleanup *cleanups;
-  PyObject *type_obj, *type_module, *func, *result_obj;
+  PyObject *type_obj, *type_module = NULL, *func = NULL;
+  PyObject *result_obj = NULL;
   PyObject *printers_obj = printers;
   char *result = NULL;
 
@@ -1294,7 +1295,6 @@ apply_type_printers (void *printers, struct type *type)
       gdbpy_print_stack ();
       goto done;
     }
-  make_cleanup_py_decref (type_obj);
 
   type_module = PyImport_ImportModule ("gdb.types");
   if (type_module == NULL)
@@ -1302,7 +1302,6 @@ apply_type_printers (void *printers, struct type *type)
       gdbpy_print_stack ();
       goto done;
     }
-  make_cleanup_py_decref (type_module);
 
   func = PyObject_GetAttrString (type_module, "apply_type_recognizers");
   if (func == NULL)
@@ -1310,7 +1309,6 @@ apply_type_printers (void *printers, struct type *type)
       gdbpy_print_stack ();
       goto done;
     }
-  make_cleanup_py_decref (func);
 
   result_obj = PyObject_CallFunctionObjArgs (func, printers_obj,
 					     type_obj, (char *) NULL);
@@ -1319,7 +1317,6 @@ apply_type_printers (void *printers, struct type *type)
       gdbpy_print_stack ();
       goto done;
     }
-  make_cleanup_py_decref (result_obj);
 
   if (result_obj != Py_None)
     {
@@ -1329,6 +1326,10 @@ apply_type_printers (void *printers, struct type *type)
     }
 
  done:
+  Py_XDECREF (type_obj);
+  Py_XDECREF (type_module);
+  Py_XDECREF (func);
+  Py_XDECREF (result_obj);
   do_cleanups (cleanups);
   return result;
 }

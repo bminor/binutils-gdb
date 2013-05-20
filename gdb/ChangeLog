@@ -1,5 +1,13 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-cmd.c (cmdpy_completer): Use explicit decref.
+	* python/py-param.c (get_set_value, get_show_value): Use
+	explicit decrefs.
+	* python/python.c (start_type_printers, apply_type_printers):
+	Use explicit decrefs.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-evts.c (gdbpy_initialize_py_events): Don't
 	incref the module.
 
