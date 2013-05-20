@@ -1,5 +1,10 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-type.c (make_fielditem): Add gdb_assert_not_reached
+	as 'default' in the switch.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-inferior.c (gdbpy_inferiors): Update.  Hoist
 	get_addr_from_python calls out of TRY_CATCH.
 	(infpy_write_memory, infpy_search_memory): Likewise.

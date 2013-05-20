@@ -301,6 +301,8 @@ make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
     case iter_values:
       item =  convert_field (type, i);
       break;
+    default:
+      gdb_assert_not_reached ("invalid gdbpy_iter_kind");
     }
   return item;
   
