@@ -1,5 +1,10 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* py-evtregistry.c (create_event_object): Decref
+	eventregistry_object if PyList_New fails.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* py-cmd.c (gdbpy_string_to_argv): Check result of
 	PyList_New.
 

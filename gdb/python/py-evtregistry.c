@@ -89,7 +89,10 @@ create_eventregistry_object (void)
 
   eventregistry_obj->callbacks = PyList_New (0);
   if (!eventregistry_obj->callbacks)
-    return NULL;
+    {
+      Py_DECREF (eventregistry_obj);
+      return NULL;
+    }
 
   return eventregistry_obj;
 }
