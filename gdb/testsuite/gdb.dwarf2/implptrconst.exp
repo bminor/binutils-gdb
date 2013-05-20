@@ -29,7 +29,7 @@ set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
     # Creating a CU with 4-byte addresses lets this test link on both
     # 32- and 64-bit machines.
-    cu 0 2 4 {
+    cu { addr_size 4 } {
  	compile_unit {} {
 	    declare_labels byte_label size_type_label array_label
 	    declare_labels var_label ptr_label

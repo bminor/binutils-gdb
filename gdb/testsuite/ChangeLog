@@ -1,3 +1,15 @@
+2013-05-20  Doug Evans  <dje@google.com>
+
+	* lib/dwarf.exp (Dwarf): New variable _abbrev_section.
+	(_handle_DW_TAG): Use it.
+	(cu, tu): Replace parameters is_64, version, addr_size with options.
+	All callers updated.  Add Fission support.
+	* gdb.dwarf2/implptrconst.exp: Update callers of "cu".
+	* gdb.dwarf2/method-ptr.exp: Ditto.
+	* gdb.dwarf2/nostaticblock.exp: Ditto.
+	* gdb.dwarf2/subrange.exp: Ditto.
+	* gdb.dwarf2/missing-sig-type.exp: Update callers of "cu", "tu".
+
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.gdb/python-selftest.exp: New file.

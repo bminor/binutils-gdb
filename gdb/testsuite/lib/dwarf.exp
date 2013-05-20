@@ -137,6 +137,10 @@ namespace eval Dwarf {
     # Otherwise, this is the name of a section to write to.
     variable _defer
 
+    # The abbrev section.  Typically .debug_abbrev but can be .debug_abbrev.dwo
+    # for Fission.
+    variable _abbrev_section
+
     # The next available abbrev number in the current CU's abbrev
     # table.
     variable _abbrev_num
@@ -401,6 +405,7 @@ namespace eval Dwarf {
     }
 
     proc _handle_DW_TAG {tag_name {attrs {}} {children {}}} {
+	variable _abbrev_section
 	variable _abbrev_num
 	variable _constants
 
@@ -409,7 +414,7 @@ namespace eval Dwarf {
 
 	# We somewhat wastefully emit a new abbrev entry for each tag.
 	# There's no reason for this other than laziness.
-	_defer_output .debug_abbrev {
+	_defer_output $_abbrev_section {
 	    _op .uleb128 $my_abbrev "Abbrev start"
 	    _op .uleb128 $_constants($tag_name) $tag_name
 	    _op .byte $has_children "has_children"
@@ -429,13 +434,13 @@ namespace eval Dwarf {
 
 	    _handle_DW_FORM $attr_form $attr_value
 
-	    _defer_output .debug_abbrev {
+	    _defer_output $_abbrev_section {
 		_op .uleb128 $_constants($attr_name) $attr_name
 		_op .uleb128 $_constants($attr_form) $attr_form
 	    }
 	}
 
-	_defer_output .debug_abbrev {
+	_defer_output $_abbrev_section {
 	    # Terminator.
 	    _op .byte 0x0 Terminator
 	    _op .byte 0x0 Terminator
@@ -667,29 +672,52 @@ namespace eval Dwarf {
     }
 
     # Emit a DWARF CU.
-    # IS_64 is a boolean which is true if you want to emit 64-bit
-    # DWARF, and false for 32-bit DWARF.
-    # VERSION is the DWARF version number to emit.
-    # ADDR_SIZE is the size of addresses in bytes.
+    # OPTIONS is a list with an even number of elements containing
+    # option-name and option-value pairs.
+    # Current options are:
+    # is_64 0|1    - boolean indicating if you want to emit 64-bit DWARF
+    #                default = 0 (32-bit)
+    # version n    - DWARF version number to emit
+    #                default = 4
+    # addr_size n  - the size of addresses, 32 or 64
+    #                default = 64
+    # fission 0|1  - boolean indicating if generating Fission debug info
+    #                default = 0
     # BODY is Tcl code that emits the DIEs which make up the body of
     # the CU.  It is evaluated in the caller's context.
-    proc cu {is_64 version addr_size body} {
+    proc cu {options body} {
 	variable _cu_count
+	variable _abbrev_section
 	variable _abbrev_num
 	variable _cu_label
 	variable _cu_version
 	variable _cu_addr_size
 	variable _cu_offset_size
 
-	set _cu_version $version
-	if {$is_64} {
-	    set _cu_offset_size 8
-	} else {
-	    set _cu_offset_size 4
-	}
-	set _cu_addr_size $addr_size
+	# Establish the defaults.
+	set is_64 0
+	set _cu_version 4
+	set _cu_addr_size 8
+	set fission 0
+	set section ".debug_info"
+	set _abbrev_section ".debug_abbrev"
 
-	_section .debug_info
+	foreach { name value } $options {
+	    switch -exact -- $name {
+		is_64 { set is_64 $value }
+		version { set _cu_version $value }
+		addr_size { set _cu_addr_size $value }
+		fission { set fission $value }
+		default { error "unknown option $name" }
+	    }
+	}
+	set _cu_offset_size [expr { $is_64 ? 8 : 4 }]
+	if { $fission } {
+	    set section ".debug_info.dwo"
+	    set _abbrev_section ".debug_abbrev.dwo"
+	}
+
+	_section $section
 
 	set cu_num [incr _cu_count]
 	set my_abbrevs [_compute_label "abbrev${cu_num}_begin"]
@@ -707,17 +735,17 @@ namespace eval Dwarf {
 	    _op .4byte "$end_label - $start_label"
 	}
 	define_label $start_label
-	_op .2byte $version Version
+	_op .2byte $_cu_version Version
 	_op .4byte $my_abbrevs Abbrevs
-	_op .byte $addr_size "Pointer size"
+	_op .byte $_cu_addr_size "Pointer size"
 
-	_defer_output .debug_abbrev {
+	_defer_output $_abbrev_section {
 	    define_label $my_abbrevs
 	}
 
 	uplevel $body
 
-	_defer_output .debug_abbrev {
+	_defer_output $_abbrev_section {
 	    # Emit the terminator.
 	    _op .byte 0x0 Terminator
 	    _op .byte 0x0 Terminator
@@ -727,31 +755,55 @@ namespace eval Dwarf {
     }
 
     # Emit a DWARF TU.
-    # IS_64 is a boolean which is true if you want to emit 64-bit
-    # DWARF, and false for 32-bit DWARF.
-    # VERSION is the DWARF version number to emit.
-    # ADDR_SIZE is the size of addresses in bytes.
+    # OPTIONS is a list with an even number of elements containing
+    # option-name and option-value pairs.
+    # Current options are:
+    # is_64 0|1    - boolean indicating if you want to emit 64-bit DWARF
+    #                default = 0 (32-bit)
+    # version n    - DWARF version number to emit
+    #                default = 4
+    # addr_size n  - the size of addresses, 32 or 64
+    #                default = 64
+    # fission 0|1  - boolean indicating if generating Fission debug info
+    #                default = 0
     # SIGNATURE is the 64-bit signature of the type.
-    # TYPE_LABEL is the label of the type defined by this TU.
+    # TYPE_LABEL is the label of the type defined by this TU,
+    # or "" if there is no type (i.e., type stubs in Fission).
     # BODY is Tcl code that emits the DIEs which make up the body of
-    # the CU.  It is evaluated in the caller's context.
-    proc tu {is_64 version addr_size signature type_label body} {
+    # the TU.  It is evaluated in the caller's context.
+    proc tu {options signature type_label body} {
 	variable _cu_count
+	variable _abbrev_section
 	variable _abbrev_num
 	variable _cu_label
 	variable _cu_version
 	variable _cu_addr_size
 	variable _cu_offset_size
 
-	set _cu_version $version
-	if {$is_64} {
-	    set _cu_offset_size 8
-	} else {
-	    set _cu_offset_size 4
-	}
-	set _cu_addr_size $addr_size
+	# Establish the defaults.
+	set is_64 0
+	set _cu_version 4
+	set _cu_addr_size 8
+	set fission 0
+	set section ".debug_types"
+	set _abbrev_section ".debug_abbrev"
 
-	_section .debug_types
+	foreach { name value } $options {
+	    switch -exact -- $name {
+		is_64 { set is_64 $value }
+		version { set _cu_version $value }
+		addr_size { set _cu_addr_size $value }
+		fission { set fission $value }
+		default { error "unknown option $name" }
+	    }
+	}
+	set _cu_offset_size [expr { $is_64 ? 8 : 4 }]
+	if { $fission } {
+	    set section ".debug_types.dwo"
+	    set _abbrev_section ".debug_abbrev.dwo"
+	}
+
+	_section $section
 
 	set cu_num [incr _cu_count]
 	set my_abbrevs [_compute_label "abbrev${cu_num}_begin"]
@@ -769,25 +821,33 @@ namespace eval Dwarf {
 	    _op .4byte "$end_label - $start_label"
 	}
 	define_label $start_label
-	_op .2byte $version Version
+	_op .2byte $_cu_version Version
 	_op .4byte $my_abbrevs Abbrevs
-	_op .byte $addr_size "Pointer size"
+	_op .byte $_cu_addr_size "Pointer size"
 	_op .8byte $signature Signature
-	uplevel declare_labels $type_label
-	upvar $type_label my_type_label
-	if {$is_64} {
-	    _op .8byte "$my_type_label - $_cu_label"
+	if { $type_label != "" } {
+	    uplevel declare_labels $type_label
+	    upvar $type_label my_type_label
+	    if {$is_64} {
+		_op .8byte "$my_type_label - $_cu_label"
+	    } else {
+		_op .4byte "$my_type_label - $_cu_label"
+	    }
 	} else {
-	    _op .4byte "$my_type_label - $_cu_label"
+	    if {$is_64} {
+		_op .8byte 0
+	    } else {
+		_op .4byte 0
+	    }
 	}
 
-	_defer_output .debug_abbrev {
+	_defer_output $_abbrev_section {
 	    define_label $my_abbrevs
 	}
 
 	uplevel $body
 
-	_defer_output .debug_abbrev {
+	_defer_output $_abbrev_section {
 	    # Emit the terminator.
 	    _op .byte 0x0 Terminator
 	    _op .byte 0x0 Terminator

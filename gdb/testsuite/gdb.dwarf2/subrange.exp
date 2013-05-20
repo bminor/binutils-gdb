@@ -26,7 +26,7 @@ standard_testfile method-ptr.cc subrange-dw.S
 # Make some DWARF for the test.
 set asm_file [standard_output_file $srcfile2]
 Dwarf::assemble $asm_file {
-    cu 0 2 8 {
+    cu {} {
  	compile_unit {{language @DW_LANG_Pascal83}} {
 	    declare_labels byte_label typedef_label array_label
 
