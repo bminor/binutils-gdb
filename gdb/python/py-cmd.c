@@ -564,14 +564,14 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 
 /* Initialize the 'commands' code.  */
 
-void
+int
 gdbpy_initialize_commands (void)
 {
   int i;
 
   cmdpy_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&cmdpy_object_type) < 0)
-    return;
+    return -1;
 
   /* Note: alias and user are special; pseudo appears to be unused,
      and there is no reason to expose tui or xdb, I think.  */
@@ -592,20 +592,27 @@ gdbpy_initialize_commands (void)
       || PyModule_AddIntConstant (gdb_module, "COMMAND_MAINTENANCE",
 				  class_maintenance) < 0
       || PyModule_AddIntConstant (gdb_module, "COMMAND_USER", class_user) < 0)
-    return;
+    return -1;
 
   for (i = 0; i < N_COMPLETERS; ++i)
     {
       if (PyModule_AddIntConstant (gdb_module, completers[i].name, i) < 0)
-	return;
+	return -1;
     }
 
   Py_INCREF (&cmdpy_object_type);
-  PyModule_AddObject (gdb_module, "Command",
-		      (PyObject *) &cmdpy_object_type);
+  if (PyModule_AddObject (gdb_module, "Command",
+			  (PyObject *) &cmdpy_object_type) < 0)
+    return -1;
 
   invoke_cst = PyString_FromString ("invoke");
+  if (invoke_cst == NULL)
+    return -1;
   complete_cst = PyString_FromString ("complete");
+  if (complete_cst == NULL)
+    return -1;
+
+  return 0;
 }
 
 

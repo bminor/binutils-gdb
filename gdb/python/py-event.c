@@ -60,11 +60,11 @@ evpy_add_attribute (PyObject *event, char *name, PyObject *attr)
 
 /* Initialize the Python event code.  */
 
-void
+int
 gdbpy_initialize_event (void)
 {
-  gdbpy_initialize_event_generic (&event_object_type,
-                                  "Event");
+  return gdbpy_initialize_event_generic (&event_object_type,
+					 "Event");
 }
 
 /* Initialize the given event type.  If BASE is not NULL it will

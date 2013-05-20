@@ -200,15 +200,16 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 
 /* Initialize internal function support.  */
 
-void
+int
 gdbpy_initialize_functions (void)
 {
   fnpy_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&fnpy_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&fnpy_object_type);
-  PyModule_AddObject (gdb_module, "Function", (PyObject *) &fnpy_object_type);
+  return PyModule_AddObject (gdb_module, "Function",
+			     (PyObject *) &fnpy_object_type);
 }
 
 

@@ -255,15 +255,15 @@ gdbpy_selected_thread (PyObject *self, PyObject *args)
 
 
 
-void
+int
 gdbpy_initialize_thread (void)
 {
   if (PyType_Ready (&thread_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&thread_object_type);
-  PyModule_AddObject (gdb_module, "InferiorThread",
-		      (PyObject *) &thread_object_type);
+  return PyModule_AddObject (gdb_module, "InferiorThread",
+			     (PyObject *) &thread_object_type);
 }
 
 

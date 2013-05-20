@@ -760,15 +760,16 @@ gdbpy_selected_inferior (PyObject *self, PyObject *args)
   return inf_obj;
 }
 
-void
+int
 gdbpy_initialize_inferior (void)
 {
   if (PyType_Ready (&inferior_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&inferior_object_type);
-  PyModule_AddObject (gdb_module, "Inferior",
-		      (PyObject *) &inferior_object_type);
+  if (PyModule_AddObject (gdb_module, "Inferior",
+			  (PyObject *) &inferior_object_type) < 0)
+    return -1;
 
   infpy_inf_data_key =
     register_inferior_data_with_cleanup (NULL, py_free_inferior);
@@ -782,11 +783,11 @@ gdbpy_initialize_inferior (void)
 
   membuf_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&membuf_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&membuf_object_type);
-  PyModule_AddObject (gdb_module, "Membuf", (PyObject *)
-		      &membuf_object_type);
+  return PyModule_AddObject (gdb_module, "Membuf", (PyObject *)
+			     &membuf_object_type);
 }
 
 static PyGetSetDef inferior_object_getset[] =

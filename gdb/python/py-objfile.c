@@ -298,18 +298,18 @@ objfile_to_objfile_object (struct objfile *objfile)
   return (PyObject *) object;
 }
 
-void
+int
 gdbpy_initialize_objfile (void)
 {
   objfpy_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, py_free_objfile);
 
   if (PyType_Ready (&objfile_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&objfile_object_type);
-  PyModule_AddObject (gdb_module, "Objfile",
-		      (PyObject *) &objfile_object_type);
+  return PyModule_AddObject (gdb_module, "Objfile",
+			     (PyObject *) &objfile_object_type);
 }
 
 

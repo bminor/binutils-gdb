@@ -238,7 +238,7 @@ info_auto_load_python_scripts (char *pattern, int from_tty)
   auto_load_info_scripts (pattern, from_tty, &script_language_python);
 }
 
-void
+int
 gdbpy_initialize_auto_load (void)
 {
   struct cmd_list_element *cmd;
@@ -281,6 +281,8 @@ Usage: info auto-load python-scripts [REGEXP]"),
   cmd = add_info ("auto-load-scripts", info_auto_load_python_scripts, _("\
 Print the list of automatically loaded Python scripts, deprecated."));
   deprecate_cmd (cmd, "info auto-load python-scripts");
+
+  return 0;
 }
 
 #else /* ! HAVE_PYTHON */

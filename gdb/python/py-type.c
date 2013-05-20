@@ -1521,7 +1521,7 @@ gdbpy_lookup_type (PyObject *self, PyObject *args, PyObject *kw)
   return (PyObject *) type_to_type_object (type);
 }
 
-void
+int
 gdbpy_initialize_types (void)
 {
   int i;
@@ -1530,11 +1530,11 @@ gdbpy_initialize_types (void)
     = register_objfile_data_with_cleanup (save_objfile_types, NULL);
 
   if (PyType_Ready (&type_object_type) < 0)
-    return;
+    return -1;
   if (PyType_Ready (&field_object_type) < 0)
-    return;
+    return -1;
   if (PyType_Ready (&type_iterator_object_type) < 0)
-    return;
+    return -1;
 
   for (i = 0; pyty_codes[i].name; ++i)
     {
@@ -1542,18 +1542,22 @@ gdbpy_initialize_types (void)
 				   /* Cast needed for Python 2.4.  */
 				   (char *) pyty_codes[i].name,
 				   pyty_codes[i].code) < 0)
-	return;
+	return -1;
     }
 
   Py_INCREF (&type_object_type);
-  PyModule_AddObject (gdb_module, "Type", (PyObject *) &type_object_type);
+  if (PyModule_AddObject (gdb_module, "Type",
+			  (PyObject *) &type_object_type) < 0)
+    return -1;
 
   Py_INCREF (&type_iterator_object_type);
-  PyModule_AddObject (gdb_module, "TypeIterator",
-		      (PyObject *) &type_iterator_object_type);
+  if (PyModule_AddObject (gdb_module, "TypeIterator",
+			  (PyObject *) &type_iterator_object_type) < 0)
+    return -1;
 
   Py_INCREF (&field_object_type);
-  PyModule_AddObject (gdb_module, "Field", (PyObject *) &field_object_type);
+  return PyModule_AddObject (gdb_module, "Field",
+			     (PyObject *) &field_object_type);
 }
 
 

@@ -859,18 +859,19 @@ gdbpy_breakpoint_deleted (struct breakpoint *b)
 
 
 /* Initialize the Python breakpoint code.  */
-void
+int
 gdbpy_initialize_breakpoints (void)
 {
   int i;
 
   breakpoint_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&breakpoint_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&breakpoint_object_type);
-  PyModule_AddObject (gdb_module, "Breakpoint",
-		      (PyObject *) &breakpoint_object_type);
+  if (PyModule_AddObject (gdb_module, "Breakpoint",
+			  (PyObject *) &breakpoint_object_type) < 0)
+    return -1;
 
   observer_attach_breakpoint_created (gdbpy_breakpoint_created);
   observer_attach_breakpoint_deleted (gdbpy_breakpoint_deleted);
@@ -882,7 +883,7 @@ gdbpy_initialize_breakpoints (void)
 				   /* Cast needed for Python 2.4.  */
 				   (char *) pybp_codes[i].name,
 				   pybp_codes[i].code) < 0)
-	return;
+	return -1;
     }
 
   /* Add watchpoint types constants.  */
@@ -892,9 +893,10 @@ gdbpy_initialize_breakpoints (void)
 				   /* Cast needed for Python 2.4.  */
 				   (char *) pybp_watch_types[i].name,
 				   pybp_watch_types[i].code) < 0)
-	return;
+	return -1;
     }
 
+  return 0;
 }
 
 

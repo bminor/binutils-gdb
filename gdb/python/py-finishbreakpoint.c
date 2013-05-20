@@ -407,18 +407,21 @@ bpfinishpy_handle_exit (struct inferior *inf)
 
 /* Initialize the Python finish breakpoint code.  */
 
-void
+int
 gdbpy_initialize_finishbreakpoints (void)
 {
   if (PyType_Ready (&finish_breakpoint_object_type) < 0)
-      return;
+    return -1;
   
   Py_INCREF (&finish_breakpoint_object_type);
-  PyModule_AddObject (gdb_module, "FinishBreakpoint",
-                      (PyObject *) &finish_breakpoint_object_type);
+  if (PyModule_AddObject (gdb_module, "FinishBreakpoint",
+			  (PyObject *) &finish_breakpoint_object_type) < 0)
+    return -1;
     
   observer_attach_normal_stop (bpfinishpy_handle_stop);
   observer_attach_inferior_exit (bpfinishpy_handle_exit);
+
+  return 0;
 }
 
 static PyGetSetDef finish_breakpoint_object_getset[] = {

@@ -57,7 +57,7 @@ add_new_registry (eventregistry_object **registryp, char *name)
    return -1;
 }
 
-void
+int
 gdbpy_initialize_py_events (void)
 {
 #ifdef IS_PY3K
@@ -67,19 +67,19 @@ gdbpy_initialize_py_events (void)
 #endif
 
   if (!gdb_py_events.module)
-    goto fail;
+    return -1;
 
   if (add_new_registry (&gdb_py_events.stop, "stop") < 0)
-    goto fail;
+    return -1;
 
   if (add_new_registry (&gdb_py_events.cont, "cont") < 0)
-    goto fail;
+    return -1;
 
   if (add_new_registry (&gdb_py_events.exited, "exited") < 0)
-    goto fail;
+    return -1;
 
   if (add_new_registry (&gdb_py_events.new_objfile, "new_objfile") < 0)
-    goto fail;
+    return -1;
 
 #ifndef IS_PY3K
   Py_INCREF (gdb_py_events.module);
@@ -87,10 +87,7 @@ gdbpy_initialize_py_events (void)
   if (PyModule_AddObject (gdb_module,
                           "events",
                           (PyObject *) gdb_py_events.module) < 0)
-    goto fail;
+    return -1;
 
-  return;
-
-  fail:
-   gdbpy_print_stack ();
+  return 0;
 }

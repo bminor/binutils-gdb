@@ -106,15 +106,15 @@ evregpy_dealloc (PyObject *self)
 
 /* Initialize the Python event registry code.  */
 
-void
+int
 gdbpy_initialize_eventregistry (void)
 {
   if (PyType_Ready (&eventregistry_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&eventregistry_object_type);
-  PyModule_AddObject (gdb_module, "EventRegistry",
-                      (PyObject *) &eventregistry_object_type);
+  return PyModule_AddObject (gdb_module, "EventRegistry",
+			     (PyObject *) &eventregistry_object_type);
 }
 
 /* Retern the number of listeners currently connected to this

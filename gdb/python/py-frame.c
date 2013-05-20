@@ -606,33 +606,41 @@ frapy_richcompare (PyObject *self, PyObject *other, int op)
 
 /* Sets up the Frame API in the gdb module.  */
 
-void
+int
 gdbpy_initialize_frames (void)
 {
   frame_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&frame_object_type) < 0)
-    return;
+    return -1;
 
   /* Note: These would probably be best exposed as class attributes of
      Frame, but I don't know how to do it except by messing with the
      type's dictionary.  That seems too messy.  */
-  PyModule_AddIntConstant (gdb_module, "NORMAL_FRAME", NORMAL_FRAME);
-  PyModule_AddIntConstant (gdb_module, "DUMMY_FRAME", DUMMY_FRAME);
-  PyModule_AddIntConstant (gdb_module, "INLINE_FRAME", INLINE_FRAME);
-  PyModule_AddIntConstant (gdb_module, "TAILCALL_FRAME", TAILCALL_FRAME);
-  PyModule_AddIntConstant (gdb_module, "SIGTRAMP_FRAME", SIGTRAMP_FRAME);
-  PyModule_AddIntConstant (gdb_module, "ARCH_FRAME", ARCH_FRAME);
-  PyModule_AddIntConstant (gdb_module, "SENTINEL_FRAME", SENTINEL_FRAME);
+  if (PyModule_AddIntConstant (gdb_module, "NORMAL_FRAME", NORMAL_FRAME) < 0
+      || PyModule_AddIntConstant (gdb_module, "DUMMY_FRAME", DUMMY_FRAME) < 0
+      || PyModule_AddIntConstant (gdb_module, "INLINE_FRAME", INLINE_FRAME) < 0
+      || PyModule_AddIntConstant (gdb_module, "TAILCALL_FRAME",
+				  TAILCALL_FRAME) < 0
+      || PyModule_AddIntConstant (gdb_module, "SIGTRAMP_FRAME",
+				  SIGTRAMP_FRAME) < 0
+      || PyModule_AddIntConstant (gdb_module, "ARCH_FRAME", ARCH_FRAME) < 0
+      || PyModule_AddIntConstant (gdb_module, "SENTINEL_FRAME",
+				  SENTINEL_FRAME) < 0)
+    return -1;
 
 #define SET(name, description) \
-  PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name);
+  if (PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name) < 0) \
+    return -1;
 #define FIRST_ERROR(name) \
-  PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name);
+  if (PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name) < 0) \
+    return -1;
 #include "unwind_stop_reasons.def"
 #undef SET
+#undef FIRST_ERROR
 
   Py_INCREF (&frame_object_type);
-  PyModule_AddObject (gdb_module, "Frame", (PyObject *) &frame_object_type);
+  return PyModule_AddObject (gdb_module, "Frame",
+			     (PyObject *) &frame_object_type);
 }
 
 

@@ -231,17 +231,17 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
 
 /* Initializes the Architecture class in the gdb module.  */
 
-void
+int
 gdbpy_initialize_arch (void)
 {
   arch_object_data = gdbarch_data_register_post_init (arch_object_data_init);
   arch_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&arch_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&arch_object_type);
-  PyModule_AddObject (gdb_module, "Architecture",
-                      (PyObject *) &arch_object_type);
+  return PyModule_AddObject (gdb_module, "Architecture",
+			     (PyObject *) &arch_object_type);
 }
 
 static PyMethodDef arch_object_methods [] = {

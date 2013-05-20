@@ -294,18 +294,18 @@ pspace_to_pspace_object (struct program_space *pspace)
   return (PyObject *) object;
 }
 
-void
+int
 gdbpy_initialize_pspace (void)
 {
   pspy_pspace_data_key
     = register_program_space_data_with_cleanup (NULL, py_free_pspace);
 
   if (PyType_Ready (&pspace_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&pspace_object_type);
-  PyModule_AddObject (gdb_module, "Progspace",
-		      (PyObject *) &pspace_object_type);
+  return PyModule_AddObject (gdb_module, "Progspace",
+			     (PyObject *) &pspace_object_type);
 }
 
 

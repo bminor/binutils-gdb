@@ -160,13 +160,14 @@ gdbpy_create_lazy_string_object (CORE_ADDR address, long length,
   return (PyObject *) str_obj;
 }
 
-void
+int
 gdbpy_initialize_lazy_string (void)
 {
   if (PyType_Ready (&lazy_string_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&lazy_string_object_type);
+  return 0;
 }
 
 /* Determine whether the printer object pointed to by OBJ is a

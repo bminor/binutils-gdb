@@ -88,11 +88,11 @@
       0                                           /* tp_alloc */ \
     }; \
 \
-void \
+int \
 gdbpy_initialize_##name##_event (void) \
 { \
-  gdbpy_initialize_event_generic (&name##_event_object_type, \
-                                  py_name); \
+  return gdbpy_initialize_event_generic (&name##_event_object_type, \
+					 py_name);		    \
 }
 
 typedef struct

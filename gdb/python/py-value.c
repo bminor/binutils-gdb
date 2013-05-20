@@ -1386,16 +1386,15 @@ gdbpy_is_value_object (PyObject *obj)
   return PyObject_TypeCheck (obj, &value_object_type);
 }
 
-void
+int
 gdbpy_initialize_values (void)
 {
   if (PyType_Ready (&value_object_type) < 0)
-    return;
+    return -1;
 
   Py_INCREF (&value_object_type);
-  PyModule_AddObject (gdb_module, "Value", (PyObject *) &value_object_type);
-
-  values_in_python = NULL;
+  return PyModule_AddObject (gdb_module, "Value",
+			     (PyObject *) &value_object_type);
 }
 
 

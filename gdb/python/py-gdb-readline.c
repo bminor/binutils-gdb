@@ -93,7 +93,7 @@ gdbpy_initialize_gdb_readline (void)
      and prevent conflicts.  For now, this file implements a
      sys.meta_path finder that simply fails to import the readline
      module.  */
-  PyRun_SimpleString ("\
+  if (PyRun_SimpleString ("\
 import sys\n\
 \n\
 class GdbRemoveReadlineFinder:\n\
@@ -106,8 +106,7 @@ class GdbRemoveReadlineFinder:\n\
     raise ImportError('readline module disabled under GDB')\n\
 \n\
 sys.meta_path.append(GdbRemoveReadlineFinder())\n\
-");
-
-  PyOS_ReadlineFunctionPointer = gdbpy_readline_wrapper;
+") == 0)
+    PyOS_ReadlineFunctionPointer = gdbpy_readline_wrapper;
 }
 

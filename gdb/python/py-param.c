@@ -749,33 +749,33 @@ parmpy_init (PyObject *self, PyObject *args, PyObject *kwds)
 
 
 /* Initialize the 'parameters' module.  */
-void
+int
 gdbpy_initialize_parameters (void)
 {
   int i;
 
   parmpy_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&parmpy_object_type) < 0)
-    return;
+    return -1;
 
   set_doc_cst = PyString_FromString ("set_doc");
   if (! set_doc_cst)
-    return;
+    return -1;
   show_doc_cst = PyString_FromString ("show_doc");
   if (! show_doc_cst)
-    return;
+    return -1;
 
   for (i = 0; parm_constants[i].name; ++i)
     {
       if (PyModule_AddIntConstant (gdb_module,
 				   parm_constants[i].name,
 				   parm_constants[i].value) < 0)
-	return;
+	return -1;
     }
 
   Py_INCREF (&parmpy_object_type);
-  PyModule_AddObject (gdb_module, "Parameter",
-		      (PyObject *) &parmpy_object_type);
+  return PyModule_AddObject (gdb_module, "Parameter",
+			     (PyObject *) &parmpy_object_type);
 }
 
 

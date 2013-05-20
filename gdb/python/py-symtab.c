@@ -484,16 +484,16 @@ del_objfile_sal (struct objfile *objfile, void *datum)
     }
 }
 
-void
+int
 gdbpy_initialize_symtabs (void)
 {
   symtab_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&symtab_object_type) < 0)
-    return;
+    return -1;
 
   sal_object_type.tp_new = PyType_GenericNew;
   if (PyType_Ready (&sal_object_type) < 0)
-    return;
+    return -1;
 
   /* Register an objfile "free" callback so we can properly
      invalidate symbol tables, and symbol table and line data
@@ -505,12 +505,13 @@ gdbpy_initialize_symtabs (void)
     = register_objfile_data_with_cleanup (NULL, del_objfile_sal);
 
   Py_INCREF (&symtab_object_type);
-  PyModule_AddObject (gdb_module, "Symtab",
-		      (PyObject *) &symtab_object_type);
+  if (PyModule_AddObject (gdb_module, "Symtab",
+			  (PyObject *) &symtab_object_type) < 0)
+    return -1;
 
   Py_INCREF (&sal_object_type);
-  PyModule_AddObject (gdb_module, "Symtab_and_line",
-		      (PyObject *) &sal_object_type);
+  return PyModule_AddObject (gdb_module, "Symtab_and_line",
+			     (PyObject *) &sal_object_type);
 }
 
 

@@ -324,35 +324,64 @@ struct frame_info *frame_object_to_frame_info (PyObject *frame_obj);
 struct gdbarch *arch_object_to_gdbarch (PyObject *obj);
 
 void gdbpy_initialize_gdb_readline (void);
-void gdbpy_initialize_auto_load (void);
-void gdbpy_initialize_values (void);
-void gdbpy_initialize_frames (void);
-void gdbpy_initialize_symtabs (void);
-void gdbpy_initialize_commands (void);
-void gdbpy_initialize_symbols (void);
-void gdbpy_initialize_symtabs (void);
-void gdbpy_initialize_blocks (void);
-void gdbpy_initialize_types (void);
-void gdbpy_initialize_functions (void);
-void gdbpy_initialize_pspace (void);
-void gdbpy_initialize_objfile (void);
-void gdbpy_initialize_breakpoints (void);
-void gdbpy_initialize_finishbreakpoints (void);
-void gdbpy_initialize_lazy_string (void);
-void gdbpy_initialize_parameters (void);
-void gdbpy_initialize_thread (void);
-void gdbpy_initialize_inferior (void);
-void gdbpy_initialize_eventregistry (void);
-void gdbpy_initialize_event (void);
-void gdbpy_initialize_py_events (void);
-void gdbpy_initialize_stop_event (void);
-void gdbpy_initialize_signal_event (void);
-void gdbpy_initialize_breakpoint_event (void);
-void gdbpy_initialize_continue_event (void);
-void gdbpy_initialize_exited_event (void);
-void gdbpy_initialize_thread_event (void);
-void gdbpy_initialize_new_objfile_event (void);
-void gdbpy_initialize_arch (void);
+int gdbpy_initialize_auto_load (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_values (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_frames (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_symtabs (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_commands (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_symbols (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_symtabs (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_blocks (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_types (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_functions (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_pspace (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_objfile (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_breakpoints (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_finishbreakpoints (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_lazy_string (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_parameters (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_thread (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_inferior (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_eventregistry (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_py_events (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_stop_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_signal_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_breakpoint_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_continue_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_exited_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_thread_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_new_objfile_event (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_arch (void)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 struct cleanup *make_cleanup_py_xdecref (PyObject *py);
