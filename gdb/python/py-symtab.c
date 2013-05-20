@@ -315,9 +315,8 @@ salpy_dealloc (PyObject *self)
    and initialized, populate the sal_object with the struct sal data.
    Also, register the sal_object life-cycle with the life-cycle of the
    object file associated with this sal, if needed.  If a failure
-   occurs during the sal population, this function will return
-   NULL.  */
-static int
+   occurs during the sal population, this function will return -1.  */
+static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 set_sal (sal_object *sal_obj, struct symtab_and_line sal)
 {
   symtab_object *symtab_obj;
@@ -328,7 +327,7 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
       /* If a symtab existed in the sal, but it cannot be duplicated,
 	 we exit.  */
       if (symtab_obj == NULL)
-	return 0;
+	return -1;
     }
   else
     {
@@ -356,7 +355,7 @@ set_sal (sal_object *sal_obj, struct symtab_and_line sal)
   else
     sal_obj->next = NULL;
 
-  return 1;
+  return 0;
 }
 
 /* Given a symtab, and a symtab_object that has previously been
@@ -398,7 +397,6 @@ symtab_to_symtab_object (struct symtab *symtab)
    that encapsulates the symtab_and_line structure from GDB.  */
 PyObject *
 symtab_and_line_to_sal_object (struct symtab_and_line sal)
-
 {
   sal_object *sal_obj;
   int success = 0;
@@ -406,8 +404,7 @@ symtab_and_line_to_sal_object (struct symtab_and_line sal)
   sal_obj = PyObject_New (sal_object, &sal_object_type);
   if (sal_obj)
     {
-      success = set_sal (sal_obj, sal);
-      if (!success)
+      if (set_sal (sal_obj, sal) < 0)
 	{
 	  Py_DECREF (sal_obj);
 	  return NULL;
