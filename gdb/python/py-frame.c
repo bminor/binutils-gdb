@@ -338,7 +338,7 @@ frame_info_to_frame_object (struct frame_info *frame)
 static PyObject *
 frapy_older (PyObject *self, PyObject *args)
 {
-  struct frame_info *frame, *prev;
+  struct frame_info *frame, *prev = NULL;
   volatile struct gdb_exception except;
   PyObject *prev_obj = NULL;   /* Initialize to appease gcc warning.  */
 
@@ -347,15 +347,16 @@ frapy_older (PyObject *self, PyObject *args)
       FRAPY_REQUIRE_VALID (self, frame);
 
       prev = get_prev_frame (frame);
-      if (prev)
-	prev_obj = (PyObject *) frame_info_to_frame_object (prev);
-      else
-	{
-	  Py_INCREF (Py_None);
-	  prev_obj = Py_None;
-	}
     }
   GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (prev)
+    prev_obj = (PyObject *) frame_info_to_frame_object (prev);
+  else
+    {
+      Py_INCREF (Py_None);
+      prev_obj = Py_None;
+    }
 
   return prev_obj;
 }
@@ -367,7 +368,7 @@ frapy_older (PyObject *self, PyObject *args)
 static PyObject *
 frapy_newer (PyObject *self, PyObject *args)
 {
-  struct frame_info *frame, *next;
+  struct frame_info *frame, *next = NULL;
   volatile struct gdb_exception except;
   PyObject *next_obj = NULL;   /* Initialize to appease gcc warning.  */
 
@@ -376,15 +377,16 @@ frapy_newer (PyObject *self, PyObject *args)
       FRAPY_REQUIRE_VALID (self, frame);
 
       next = get_next_frame (frame);
-      if (next)
-	next_obj = (PyObject *) frame_info_to_frame_object (next);
-      else
-	{
-	  Py_INCREF (Py_None);
-	  next_obj = Py_None;
-	}
     }
   GDB_PY_HANDLE_EXCEPTION (except);
+
+  if (next)
+    next_obj = (PyObject *) frame_info_to_frame_object (next);
+  else
+    {
+      Py_INCREF (Py_None);
+      next_obj = Py_None;
+    }
 
   return next_obj;
 }
@@ -520,18 +522,16 @@ frapy_select (PyObject *self, PyObject *args)
 PyObject *
 gdbpy_newest_frame (PyObject *self, PyObject *args)
 {
-  struct frame_info *frame;
-  PyObject *frame_obj = NULL;   /* Initialize to appease gcc warning.  */
+  struct frame_info *frame = NULL;
   volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       frame = get_current_frame ();
-      frame_obj = frame_info_to_frame_object (frame);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  return frame_obj;
+  return frame_info_to_frame_object (frame);
 }
 
 /* Implementation of gdb.selected_frame () -> gdb.Frame.
@@ -540,18 +540,16 @@ gdbpy_newest_frame (PyObject *self, PyObject *args)
 PyObject *
 gdbpy_selected_frame (PyObject *self, PyObject *args)
 {
-  struct frame_info *frame;
-  PyObject *frame_obj = NULL;   /* Initialize to appease gcc warning.  */
+  struct frame_info *frame = NULL;
   volatile struct gdb_exception except;
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       frame = get_selected_frame ("No frame is currently selected.");
-      frame_obj = frame_info_to_frame_object (frame);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  return frame_obj;
+  return frame_info_to_frame_object (frame);
 }
 
 /* Implementation of gdb.stop_reason_string (Integer) -> String.

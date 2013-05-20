@@ -1,5 +1,11 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-frame.c (frapy_older, frapy_newer, gdbpy_newest_frame)
+	(gdbpy_selected_frame): Move object-construction code
+	out of TRY_CATCH.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-arch.c (gdbpy_initialize_arch): Use
 	gdb_pymodule_addobject.
 	* python/py-block.c (gdbpy_initialize_blocks): Use
