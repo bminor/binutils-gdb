@@ -53,6 +53,13 @@
 #define CPYCHECKER_SETS_EXCEPTION
 #endif
 
+#ifdef WITH_CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION_ATTRIBUTE
+#define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION		\
+  __attribute__ ((cpychecker_negative_result_sets_exception))
+#else
+#define CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
+#endif
+
 #include <stdio.h>
 
 /* Python 2.4 doesn't include stdint.h soon enough to get {u,}intptr_t

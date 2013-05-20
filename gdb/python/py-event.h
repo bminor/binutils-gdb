@@ -115,8 +115,9 @@ extern int emit_new_objfile_event (struct objfile *objfile);
 
 extern void evpy_dealloc (PyObject *self);
 extern int evpy_add_attribute (PyObject *event,
-                               char *name, PyObject *attr);
-int gdbpy_initialize_event_generic (PyTypeObject *type, char *name);
-
+                               char *name, PyObject *attr)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+int gdbpy_initialize_event_generic (PyTypeObject *type, char *name)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 #endif /* GDB_PY_EVENT_H */
