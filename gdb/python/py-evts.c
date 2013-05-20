@@ -81,9 +81,6 @@ gdbpy_initialize_py_events (void)
   if (add_new_registry (&gdb_py_events.new_objfile, "new_objfile") < 0)
     return -1;
 
-#ifndef IS_PY3K
-  Py_INCREF (gdb_py_events.module);
-#endif
   if (PyModule_AddObject (gdb_module,
                           "events",
                           (PyObject *) gdb_py_events.module) < 0)

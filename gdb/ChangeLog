@@ -1,5 +1,10 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-evts.c (gdbpy_initialize_py_events): Don't
+	incref the module.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/python.c (gdbpy_run_events): Decref the result
 	of PyObject_CallObject.
 
