@@ -69,6 +69,7 @@ search_pp_list (PyObject *list, PyObject *value)
 	  if (!attr)
 	    return NULL;
 	  cmp = PyObject_IsTrue (attr);
+	  Py_DECREF (attr);
 	  if (cmp == -1)
 	    return NULL;
 

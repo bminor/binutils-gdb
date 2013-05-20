@@ -1,5 +1,9 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-prettyprint.c (search_pp_list): Decref 'attr'.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-value.c (valpy_get_dynamic_type): Simplify
 	dynamic_type assignment.  Use Py_XINCREF.
 
