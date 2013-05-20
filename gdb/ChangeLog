@@ -1,5 +1,10 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-function.c (fnpy_init): Decref result of
+	PyObject_GetAttrString.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-threadevent.c (get_event_thread): Use
 	CPYCHECKER_RETURNS_BORROWED_REF.
 	* python/python-internal.h (CPYCHECKER_RETURNS_BORROWED_REF):

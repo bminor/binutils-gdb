@@ -175,14 +175,20 @@ fnpy_init (PyObject *self, PyObject *args, PyObject *kwds)
   if (PyObject_HasAttrString (self, "__doc__"))
     {
       PyObject *ds_obj = PyObject_GetAttrString (self, "__doc__");
-      if (ds_obj && gdbpy_is_string (ds_obj))
+      if (ds_obj != NULL)
 	{
-	  docstring = python_string_to_host_string (ds_obj);
-	  if (docstring == NULL)
+	  if (gdbpy_is_string (ds_obj))
 	    {
-	      Py_DECREF (self);
-	      return -1;
+	      docstring = python_string_to_host_string (ds_obj);
+	      if (docstring == NULL)
+		{
+		  Py_DECREF (self);
+		  Py_DECREF (ds_obj);
+		  return -1;
+		}
 	    }
+
+	  Py_DECREF (ds_obj);
 	}
     }
   if (! docstring)
