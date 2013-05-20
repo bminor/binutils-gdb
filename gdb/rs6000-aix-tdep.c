@@ -777,50 +777,50 @@ struct ld_info_desc
    the following program on AIX 5.3.  */
 
 #if 0
-    #include <stddef.h>
-    #include <stdio.h>
-    #define __LDINFO_PTRACE32__
-    #define __LDINFO_PTRACE64__
-    #include <sys/ldr.h>
+#include <stddef.h>
+#include <stdio.h>
+#define __LDINFO_PTRACE32__
+#define __LDINFO_PTRACE64__
+#include <sys/ldr.h>
 
-    #define pinfo(type,member)              \
-      {                                         \
-        struct type ldi = {0};                  \
-                                                \
-        printf ("  {%d, %d},\t/* %s */\n",      \
-                offsetof (struct type, member), \
-                sizeof (ldi.member),            \
-                #member);                       \
-      }                                         \
-      while (0)
+#define pinfo(type,member)                  \
+  {                                         \
+    struct type ldi = {0};                  \
+                                            \
+    printf ("  {%d, %d},\t/* %s */\n",      \
+            offsetof (struct type, member), \
+            sizeof (ldi.member),            \
+            #member);                       \
+  }                                         \
+  while (0)
 
-    int
-    main (void)
-    {
-      printf ("static const struct ld_info_desc ld_info32_desc =\n{\n");
-      pinfo (__ld_info32, ldinfo_next);
-      pinfo (__ld_info32, ldinfo_fd);
-      pinfo (__ld_info32, ldinfo_textorg);
-      pinfo (__ld_info32, ldinfo_textsize);
-      pinfo (__ld_info32, ldinfo_dataorg);
-      pinfo (__ld_info32, ldinfo_datasize);
-      pinfo (__ld_info32, ldinfo_filename);
-      printf ("};\n");
+int
+main (void)
+{
+  printf ("static const struct ld_info_desc ld_info32_desc =\n{\n");
+  pinfo (__ld_info32, ldinfo_next);
+  pinfo (__ld_info32, ldinfo_fd);
+  pinfo (__ld_info32, ldinfo_textorg);
+  pinfo (__ld_info32, ldinfo_textsize);
+  pinfo (__ld_info32, ldinfo_dataorg);
+  pinfo (__ld_info32, ldinfo_datasize);
+  pinfo (__ld_info32, ldinfo_filename);
+  printf ("};\n");
 
-      printf ("\n");
+  printf ("\n");
 
-      printf ("static const struct ld_info_desc ld_info64_desc =\n{\n");
-      pinfo (__ld_info64, ldinfo_next);
-      pinfo (__ld_info64, ldinfo_fd);
-      pinfo (__ld_info64, ldinfo_textorg);
-      pinfo (__ld_info64, ldinfo_textsize);
-      pinfo (__ld_info64, ldinfo_dataorg);
-      pinfo (__ld_info64, ldinfo_datasize);
-      pinfo (__ld_info64, ldinfo_filename);
-      printf ("};\n");
+  printf ("static const struct ld_info_desc ld_info64_desc =\n{\n");
+  pinfo (__ld_info64, ldinfo_next);
+  pinfo (__ld_info64, ldinfo_fd);
+  pinfo (__ld_info64, ldinfo_textorg);
+  pinfo (__ld_info64, ldinfo_textsize);
+  pinfo (__ld_info64, ldinfo_dataorg);
+  pinfo (__ld_info64, ldinfo_datasize);
+  pinfo (__ld_info64, ldinfo_filename);
+  printf ("};\n");
 
-      return 0;
-    }
+  return 0;
+}
 #endif /* 0 */
 
 /* Layout of the 32bit version of struct ld_info.  */

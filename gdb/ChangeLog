@@ -1,3 +1,8 @@
+2013-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* rs6000-aix-tdep.c: De-indent some example code provided
+	as a comment.
+
 2013-05-17  Edjunior Machado  <emachado@linux.vnet.ibm.com>
 
 	* ppc-linux-nat.c (ppc_linux_region_ok_for_hw_watchpoint): Check if the
