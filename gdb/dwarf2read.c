@@ -12600,6 +12600,38 @@ read_tag_string_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
+/* Assuming that DIE corresponds to a function, returns nonzero
+   if the function is prototyped.  */
+
+static int
+prototyped_function_p (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+
+  attr = dwarf2_attr (die, DW_AT_prototyped, cu);
+  if (attr && (DW_UNSND (attr) != 0))
+    return 1;
+
+  /* The DWARF standard implies that the DW_AT_prototyped attribute
+     is only meaninful for C, but the concept also extends to other
+     languages that allow unprototyped functions (Eg: Objective C).
+     For all other languages, assume that functions are always
+     prototyped.  */
+  if (cu->language != language_c
+      && cu->language != language_objc
+      && cu->language != language_opencl)
+    return 1;
+
+  /* RealView does not emit DW_AT_prototyped.  We can not distinguish
+     prototyped and unprototyped functions; default to prototyped,
+     since that is more common in modern code (and RealView warns
+     about unprototyped functions).  */
+  if (producer_is_realview (cu->producer))
+    return 1;
+
+  return 0;
+}
+
 /* Handle DIES due to C code like:
 
    struct foo
@@ -12627,18 +12659,7 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
 
   ftype = lookup_function_type (type);
 
-  /* All functions in C++, Pascal and Java have prototypes.  */
-  attr = dwarf2_attr (die, DW_AT_prototyped, cu);
-  if ((attr && (DW_UNSND (attr) != 0))
-      || cu->language == language_cplus
-      || cu->language == language_java
-      || cu->language == language_pascal)
-    TYPE_PROTOTYPED (ftype) = 1;
-  else if (producer_is_realview (cu->producer))
-    /* RealView does not emit DW_AT_prototyped.  We can not
-       distinguish prototyped and unprototyped functions; default to
-       prototyped, since that is more common in modern code (and
-       RealView warns about unprototyped functions).  */
+  if (prototyped_function_p (die, cu))
     TYPE_PROTOTYPED (ftype) = 1;
 
   /* Store the calling convention in the type if it's available in

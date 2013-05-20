@@ -1,3 +1,7 @@
+2013-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/float_param: New testcase.
+
 2013-05-17  Doug Evans  <dje@google.com>
 
 	* gdb.base/maint.exp: Update test for "maint check-psymtabs".

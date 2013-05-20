@@ -1,5 +1,10 @@
 2013-05-20  Joel Brobecker  <brobecker@adacore.com>
 
+	* dwarf2read.c (prototyped_function_p): New function.
+	(read_subroutine_type): Use it.
+
+2013-05-20  Joel Brobecker  <brobecker@adacore.com>
+
 	* rs6000-aix-tdep.c: De-indent some example code provided
 	as a comment.
 
