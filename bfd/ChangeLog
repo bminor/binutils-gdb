@@ -1,3 +1,9 @@
+2013-05-20  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elf32-vax.c (elf_vax_instantiate_got_entries): Only set the
+	refcount member of the gotplt_union when resetting the reference
+	count.  Adjust comment.
+
 2013-05-20  Will Newton  <will.newton@linaro.org>
 
 	* elf64-aarch64.c (elf64_aarch64_link_hash_entry): Remove

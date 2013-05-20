@@ -1262,10 +1262,10 @@ elf_vax_discard_copies (struct elf_vax_link_hash_entry *h,
 
 /* This function is called via elf_link_hash_traverse.  It looks for entries
    that have GOT or PLT (.GOT) references.  If creating a static object or a
-   shared object with -Bsymbolic, it resets the reference count back to 0
-   and sets the offset to -1 so normal PC32 relocation will be done.  If
-   creating a shared object or executable, space in the .got and .rela.got
-   will be reserved for the symbol.  */
+   shared object with -Bsymbolic, or the symbol has been forced local, then
+   it resets the reference count back to -1 so normal PC32 relocation will
+   be done.  Otherwise space in the .got and .rela.got will be reserved for
+   the symbol.  */
 
 static bfd_boolean
 elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, void * infoptr)
@@ -1290,10 +1290,8 @@ elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, void * infoptr)
       || (info->shared && info->symbolic)
       || h->forced_local)
     {
-      h->got.refcount = 0;
-      h->got.offset = (bfd_vma) -1;
-      h->plt.refcount = 0;
-      h->plt.offset = (bfd_vma) -1;
+      h->got.refcount = -1;
+      h->plt.refcount = -1;
     }
   else if (h->got.refcount > 0)
     {
