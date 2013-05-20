@@ -1,3 +1,8 @@
+2013-05-20  Doug Evans  <dje@google.com>
+
+	* gdb.base/maint.exp: Fix test for "mt expand-symtabs" to account for
+	-fdebug-types-section.
+
 2013-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/float_param: New testcase.
