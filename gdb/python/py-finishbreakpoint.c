@@ -31,8 +31,6 @@
 #include "inferior.h"
 #include "block.h"
 
-static PyTypeObject finish_breakpoint_object_type;
-
 /* Function that is called when a Python finish bp is found out of scope.  */
 static char * const outofscope_func = "out_of_scope";
 
@@ -54,6 +52,9 @@ struct finish_breakpoint_object
      not stopped at a FinishBreakpoint.  */
   PyObject *return_value;
 };
+
+static PyTypeObject finish_breakpoint_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("finish_breakpoint_object");
 
 /* Python function to get the 'return_value' attribute of
    FinishBreakpoint.  */

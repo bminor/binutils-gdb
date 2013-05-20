@@ -46,8 +46,9 @@
 
 #define GDBPY_NEW_EVENT_TYPE(name, py_path, py_name, doc, base, qual) \
 \
-    qual PyTypeObject name##_event_object_type = \
-    { \
+    qual PyTypeObject name##_event_object_type \
+        CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object") \
+    = { \
       PyVarObject_HEAD_INIT (NULL, 0)				\
       py_path,                                    /* tp_name */ \
       sizeof (event_object),                      /* tp_basicsize */ \

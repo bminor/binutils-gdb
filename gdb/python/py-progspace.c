@@ -41,7 +41,8 @@ typedef struct
   PyObject *type_printers;
 } pspace_object;
 
-static PyTypeObject pspace_object_type;
+static PyTypeObject pspace_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("pspace_object");
 
 static const struct program_space_data *pspy_pspace_data_key;
 

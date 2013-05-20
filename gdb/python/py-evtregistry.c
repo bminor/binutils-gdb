@@ -23,7 +23,8 @@
 
 events_object gdb_py_events;
 
-static PyTypeObject eventregistry_object_type;
+static PyTypeObject eventregistry_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("eventregistry_object");
 
 /* Implementation of EventRegistry.connect () -> NULL.
    Add FUNCTION to the list of listeners.  */

@@ -20,7 +20,8 @@
 #include "defs.h"
 #include "py-event.h"
 
-static PyTypeObject exited_event_object_type;
+static PyTypeObject exited_event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 
 static PyObject *
 create_exited_event_object (const LONGEST *exit_code, struct inferior *inf)

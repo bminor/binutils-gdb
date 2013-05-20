@@ -23,7 +23,8 @@
 #include "inferior.h"
 #include "python-internal.h"
 
-static PyTypeObject thread_object_type;
+static PyTypeObject thread_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("thread_object");
 
 /* Require that INFERIOR be a valid inferior ID.  */
 #define THPY_REQUIRE_VALID(Thread)				\

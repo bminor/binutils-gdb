@@ -20,7 +20,8 @@
 #include "defs.h"
 #include "py-stopevent.h"
 
-static PyTypeObject breakpoint_event_object_type;
+static PyTypeObject breakpoint_event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 
 /* Create and initialize a BreakpointEvent object.  This acquires new
    references to BREAKPOINT_LIST and FIRST_BP.  */

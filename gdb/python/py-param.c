@@ -89,7 +89,8 @@ struct parmpy_object
 
 typedef struct parmpy_object parmpy_object;
 
-static PyTypeObject parmpy_object_type;
+static PyTypeObject parmpy_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("parmpy_object");
 
 /* Some handy string constants.  */
 static PyObject *set_doc_cst;

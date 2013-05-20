@@ -39,7 +39,8 @@ typedef struct
   PyObject *type_printers;
 } objfile_object;
 
-static PyTypeObject objfile_object_type;
+static PyTypeObject objfile_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("objfile_object");
 
 static const struct objfile_data *objfpy_objfile_data_key;
 

@@ -20,7 +20,8 @@
 #include "defs.h"
 #include "py-event.h"
 
-static PyTypeObject new_objfile_event_object_type;
+static PyTypeObject new_objfile_event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 
 static PyObject *
 create_new_objfile_event_object (struct objfile *objfile)

@@ -29,7 +29,9 @@ typedef struct arch_object_type_object {
 } arch_object;
 
 static struct gdbarch_data *arch_object_data = NULL;
-static PyTypeObject arch_object_type;
+
+static PyTypeObject arch_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("arch_object");
 
 /* Associates an arch_object with GDBARCH as gdbarch_data via the gdbarch
    post init registration mechanism (gdbarch_data_register_post_init).  */

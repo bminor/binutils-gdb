@@ -20,6 +20,19 @@
 #ifndef GDB_PYTHON_INTERNAL_H
 #define GDB_PYTHON_INTERNAL_H
 
+/* These WITH_* macros are defined by the CPython API checker that
+   comes with the Python plugin for GCC.  See:
+   https://gcc-python-plugin.readthedocs.org/en/latest/cpychecker.html
+   The checker defines a WITH_ macro for each attribute it
+   exposes.  */
+
+#ifdef WITH_CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF_ATTRIBUTE
+#define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)		\
+  __attribute__ ((cpychecker_type_object_for_typedef (ARG)))
+#else
+#define CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF(ARG)
+#endif
+
 #include <stdio.h>
 
 /* Python 2.4 doesn't include stdint.h soon enough to get {u,}intptr_t
@@ -151,14 +164,21 @@ struct inferior;
 
 extern PyObject *gdb_module;
 extern PyObject *gdb_python_module;
-extern PyTypeObject value_object_type;
-extern PyTypeObject block_object_type;
-extern PyTypeObject symbol_object_type;
-extern PyTypeObject event_object_type;
+extern PyTypeObject value_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("value_object");
+extern PyTypeObject block_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF("block_object");
+extern PyTypeObject symbol_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symbol_object");
+extern PyTypeObject event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 extern PyTypeObject events_object_type;
-extern PyTypeObject stop_event_object_type;
-extern PyTypeObject breakpoint_object_type;
-extern PyTypeObject frame_object_type;
+extern PyTypeObject stop_event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
+extern PyTypeObject breakpoint_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("breakpoint_object");
+extern PyTypeObject frame_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("frame_object");
 
 typedef struct breakpoint_object
 {

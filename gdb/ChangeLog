@@ -1,3 +1,53 @@
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-arch.c (arch_object_type): Use
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-block.c (block_syms_iterator_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-bpevent.c (breakpoint_event_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-cmd.c (cmdpy_object_type): Use
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-continueevent.c (continue_event_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-event.h (GDBPY_NEW_EVENT_TYPE):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-events.h (thread_event_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-evtregistry.c (eventregistry_object_type): Use
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-exitedevent.c (exited_event_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-finishbreakpoint.c (finish_breakpoint_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-function.c (fnpy_object_type): Use
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-inferior.c (inferior_object_type, membuf_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-infthread.c (thread_object_type): Use
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-lazy-string.c (lazy_string_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-newobjfileevent.c (new_objfile_event_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-objfile.c (objfile_object_type): Use
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-param.c (parmpy_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-progspace.c (pspace_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-signalevent.c (signal_event_object_type):
+	Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-symtab.c (symtab_object_type, sal_object_type): Use
+	CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-type.c (type_object_type, field_object_type)
+	(type_iterator_object_type): Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+	* python/py-internal.h (CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF): New
+	define.
+	(value_object_type, block_object_type, symbol_object_type)
+	(event_object_type, stop_event_object_type, breakpoint_object_type)
+	(frame_object_type): Use CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF.
+
 2013-05-20  Andreas Tobler  <andreas@fgznet.ch>
 
 	* Makefile.in (ALL_TARGET_OBS): Add ppcfbsd-tdep.o.

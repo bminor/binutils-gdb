@@ -68,7 +68,8 @@ struct cmdpy_object
 
 typedef struct cmdpy_object cmdpy_object;
 
-static PyTypeObject cmdpy_object_type;
+static PyTypeObject cmdpy_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("cmdpy_object");
 
 /* Constants used by this module.  */
 static PyObject *invoke_cst;

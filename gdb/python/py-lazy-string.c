@@ -47,7 +47,8 @@ typedef struct {
   struct type *type;
 } lazy_string_object;
 
-static PyTypeObject lazy_string_object_type;
+static PyTypeObject lazy_string_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("lazy_string_object");
 
 static PyObject *
 stpy_get_address (PyObject *self, void *closure)

@@ -37,7 +37,8 @@ typedef struct stpy_symtab_object {
   struct stpy_symtab_object *next;
 } symtab_object;
 
-static PyTypeObject symtab_object_type;
+static PyTypeObject symtab_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("symtab_object");
 static const struct objfile_data *stpy_objfile_data_key;
 
 /* Require a valid symbol table.  All access to symtab_object->symtab
@@ -67,7 +68,8 @@ typedef struct salpy_sal_object {
   struct salpy_sal_object *next;
 } sal_object;
 
-static PyTypeObject sal_object_type;
+static PyTypeObject sal_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("sal_object");
 static const struct objfile_data *salpy_objfile_data_key;
 
 /* Require a valid symbol table and line object.  All access to

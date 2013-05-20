@@ -29,7 +29,8 @@
 #include "expression.h"
 #include "language.h"
 
-static PyTypeObject fnpy_object_type;
+static PyTypeObject fnpy_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("PyObject");
 
 
 

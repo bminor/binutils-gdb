@@ -20,7 +20,8 @@
 #include "defs.h"
 #include "py-stopevent.h"
 
-static PyTypeObject signal_event_object_type;
+static PyTypeObject signal_event_object_type
+    CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("event_object");
 
 PyObject *
 create_signal_event_object (enum gdb_signal stop_signal)
