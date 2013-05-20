@@ -1,3 +1,31 @@
+2013-05-20  Doug Evans  <dje@google.com>
+
+	When reading CU, stay in DWO.  Be more tolerent of bad debug info.
+	For Fission.
+	* dwarf2read.c (struct dwarf2_per_cu_data): New member
+	reading_dwo_directly.
+	(struct signatured_type): New member dwo_unit.
+	(struct die_reader_specs): New member comp_dir.
+	(create_signatured_type_table_from_index): Use malloc for
+	all_type_units instead of objfile's obstack.
+	(create_all_type_units): Ditto.
+	(fill_in_sig_entry_from_dwo_entry): New function.
+	(add_type_unit): New function.
+	(lookup_dwo_signatured_type): New function.
+	(lookup_dwp_signatured_type): New function.
+	(lookup_signatured_type): New arg cu.  All callers updated.
+	(init_cu_die_reader): Initialize comp_dir.
+	(read_cutu_die_from_dwo): New arg stub_comp_dir.  All callers updated.
+	Change assert of matching type signatures to call error on mismatch.
+	(lookup_dwo_unit): Add assert.
+	(init_tu_and_read_dwo_dies): New function.
+	(init_cutu_and_read_dies): Call it.
+	(build_type_unit_groups): Handle case of no type unit groups created.
+	(hash_dwo_file, eq_dwo_file): Handle missing comp_dir.
+	(lookup_dwo_cutu): Tweak complaint.
+	(dwarf2_free_abbrev_table): Check for NULL abbrev_table.
+	(dwarf2_per_objfile_free): Free all_type_units.
+
 2013-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-nat.c (handle_unload_dll): Add missing empty line.

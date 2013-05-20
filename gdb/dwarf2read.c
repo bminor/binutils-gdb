@@ -202,7 +202,8 @@ struct dwarf2_per_objfile
   /* The number of .debug_types-related CUs.  */
   int n_type_units;
 
-  /* The .debug_types-related CUs (TUs).  */
+  /* The .debug_types-related CUs (TUs).
+     This is stored in malloc space because we may realloc it.  */
   struct signatured_type **all_type_units;
 
   /* The number of entries in all_type_unit_groups.  */
@@ -551,6 +552,12 @@ struct dwarf2_per_cu_data
   /* Non-zero if this CU is from the .dwz file.  */
   unsigned int is_dwz : 1;
 
+  /* Non-zero if reading a TU directly from a DWO file, bypassing the stub.
+     This flag is only valid if is_debug_types is true.
+     We can't read a CU directly from a DWO file: There are required
+     attributes in the stub.  */
+  unsigned int reading_dwo_directly : 1;
+
   /* The section this CU/TU lives in.
      If the DIE refers to a DWO file, this is always the original die,
      not the DWO file.  */
@@ -630,6 +637,10 @@ struct signatured_type
      The first time we encounter this type we fully read it in and install it
      in the symbol tables.  Subsequent times we only need the type.  */
   struct type *type;
+
+  /* Containing DWO unit.
+     This field is valid iff per_cu.reading_dwo_directly.  */
+  struct dwo_unit *dwo_unit;
 };
 
 typedef struct signatured_type *sig_type_ptr;
@@ -863,6 +874,9 @@ struct die_reader_specs
 
   /* The end of the buffer.  */
   const gdb_byte *buffer_end;
+
+  /* The value of the DW_AT_comp_dir attribute.  */
+  const char *comp_dir;
 };
 
 /* Type of function passed to init_cutu_and_read_dies, et.al.  */
@@ -1745,6 +1759,12 @@ static htab_t allocate_signatured_type_table (struct objfile *objfile);
 
 static htab_t allocate_dwo_unit_table (struct objfile *objfile);
 
+static struct dwo_unit *lookup_dwo_in_dwp
+  (struct dwp_file *dwp_file, const struct dwp_hash_table *htab,
+   const char *comp_dir, ULONGEST signature, int is_debug_types);
+
+static struct dwp_file *get_dwp_file (void);
+
 static struct dwo_unit *lookup_dwo_comp_unit
   (struct dwarf2_per_cu_data *, const char *, const char *, ULONGEST);
 
@@ -2466,9 +2486,8 @@ create_signatured_type_table_from_index (struct objfile *objfile,
 
   dwarf2_per_objfile->n_type_units = elements / 3;
   dwarf2_per_objfile->all_type_units
-    = obstack_alloc (&objfile->objfile_obstack,
-		     dwarf2_per_objfile->n_type_units
-		     * sizeof (struct signatured_type *));
+    = xmalloc (dwarf2_per_objfile->n_type_units
+	       * sizeof (struct signatured_type *));
 
   sig_types_hash = allocate_signatured_type_table (objfile);
 
@@ -4378,9 +4397,8 @@ create_all_type_units (struct objfile *objfile)
 
   dwarf2_per_objfile->n_type_units = htab_elements (types_htab);
   dwarf2_per_objfile->all_type_units
-    = obstack_alloc (&objfile->objfile_obstack,
-		     dwarf2_per_objfile->n_type_units
-		     * sizeof (struct signatured_type *));
+    = xmalloc (dwarf2_per_objfile->n_type_units
+	       * sizeof (struct signatured_type *));
   iter = &dwarf2_per_objfile->all_type_units[0];
   htab_traverse_noresize (types_htab, add_signatured_type_cu_to_table, &iter);
   gdb_assert (iter - &dwarf2_per_objfile->all_type_units[0]
@@ -4389,20 +4407,196 @@ create_all_type_units (struct objfile *objfile)
   return 1;
 }
 
+/* Subroutine of lookup_dwo_signatured_type and lookup_dwp_signatured_type.
+   Fill in SIG_ENTRY with DWO_ENTRY.  */
+
+static void
+fill_in_sig_entry_from_dwo_entry (struct objfile *objfile,
+				  struct signatured_type *sig_entry,
+				  struct dwo_unit *dwo_entry)
+{
+  sig_entry->per_cu.section = dwo_entry->section;
+  sig_entry->per_cu.offset = dwo_entry->offset;
+  sig_entry->per_cu.length = dwo_entry->length;
+  sig_entry->per_cu.reading_dwo_directly = 1;
+  sig_entry->per_cu.objfile = objfile;
+  gdb_assert (! sig_entry->per_cu.queued);
+  gdb_assert (sig_entry->per_cu.cu == NULL);
+  gdb_assert (sig_entry->per_cu.v.quick != NULL);
+  gdb_assert (sig_entry->per_cu.v.quick->symtab == NULL);
+  gdb_assert (sig_entry->signature == dwo_entry->signature);
+  gdb_assert (sig_entry->type_offset_in_section.sect_off == 0);
+  gdb_assert (sig_entry->type_unit_group == NULL);
+  sig_entry->type_offset_in_tu = dwo_entry->type_offset_in_tu;
+  sig_entry->dwo_unit = dwo_entry;
+}
+
+/* Subroutine of lookup_signatured_type.
+   Create the signatured_type data structure for a TU to be read in
+   directly from a DWO file, bypassing the stub.
+   We do this for the case where there is no DWP file and we're using
+   .gdb_index: When reading a CU we want to stay in the DWO file containing
+   that CU.  Otherwise we could end up reading several other DWO files (due
+   to comdat folding) to process the transitive closure of all the mentioned
+   TUs, and that can be slow.  The current DWO file will have every type
+   signature that it needs.
+   We only do this for .gdb_index because in the psymtab case we already have
+   to read all the DWOs to build the type unit groups.  */
+
+static struct signatured_type *
+lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
+{
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct dwo_file *dwo_file;
+  struct dwo_unit find_dwo_entry, *dwo_entry;
+  struct signatured_type find_sig_entry, *sig_entry;
+
+  gdb_assert (cu->dwo_unit && dwarf2_per_objfile->using_index);
+
+  /* Note: cu->dwo_unit is the dwo_unit that references this TU, not the
+     dwo_unit of the TU itself.  */
+  dwo_file = cu->dwo_unit->dwo_file;
+
+  /* We only ever need to read in one copy of a signatured type.
+     Just use the global signatured_types array.  If this is the first time
+     we're reading this type, replace the recorded data from .gdb_index with
+     this TU.  */
+
+  if (dwarf2_per_objfile->signatured_types == NULL)
+    return NULL;
+  find_sig_entry.signature = sig;
+  sig_entry = htab_find (dwarf2_per_objfile->signatured_types, &find_sig_entry);
+  if (sig_entry == NULL)
+    return NULL;
+  /* Have we already tried to read this TU?  */
+  if (sig_entry->dwo_unit != NULL)
+    return sig_entry;
+
+  /* Ok, this is the first time we're reading this TU.  */
+  if (dwo_file->tus == NULL)
+    return NULL;
+  find_dwo_entry.signature = sig;
+  dwo_entry = htab_find (dwo_file->tus, &find_dwo_entry);
+  if (dwo_entry == NULL)
+    return NULL;
+
+  fill_in_sig_entry_from_dwo_entry (objfile, sig_entry, dwo_entry);
+  return sig_entry;
+}
+
+/* Subroutine of lookup_dwp_signatured_type.
+   Add an entry for signature SIG to dwarf2_per_objfile->signatured_types.  */
+
+static struct signatured_type *
+add_type_unit (ULONGEST sig)
+{
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  int n_type_units = dwarf2_per_objfile->n_type_units;
+  struct signatured_type *sig_type;
+  void **slot;
+
+  ++n_type_units;
+  dwarf2_per_objfile->all_type_units =
+    xrealloc (dwarf2_per_objfile->all_type_units,
+	      n_type_units * sizeof (struct signatured_type *));
+  dwarf2_per_objfile->n_type_units = n_type_units;
+  sig_type = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+			     struct signatured_type);
+  dwarf2_per_objfile->all_type_units[n_type_units - 1] = sig_type;
+  sig_type->signature = sig;
+  sig_type->per_cu.is_debug_types = 1;
+  sig_type->per_cu.v.quick =
+    OBSTACK_ZALLOC (&objfile->objfile_obstack,
+		    struct dwarf2_per_cu_quick_data);
+  slot = htab_find_slot (dwarf2_per_objfile->signatured_types,
+			 sig_type, INSERT);
+  gdb_assert (*slot == NULL);
+  *slot = sig_type;
+  /* The rest of sig_type must be filled in by the caller.  */
+  return sig_type;
+}
+
+/* Subroutine of lookup_signatured_type.
+   Look up the type for signature SIG, and if we can't find SIG in .gdb_index
+   then try the DWP file.
+   Normally this "can't happen", but if there's a bug in signature
+   generation and/or the DWP file is built incorrectly, it can happen.
+   Using the type directly from the DWP file means we don't have the stub
+   which has some useful attributes (e.g., DW_AT_comp_dir), but they're
+   not critical.  [Eventually the stub may go away for type units anyway.]  */
+
+static struct signatured_type *
+lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
+{
+  struct objfile *objfile = dwarf2_per_objfile->objfile;
+  struct dwp_file *dwp_file = get_dwp_file ();
+  struct dwo_unit *dwo_entry;
+  struct signatured_type find_sig_entry, *sig_entry;
+
+  gdb_assert (cu->dwo_unit && dwarf2_per_objfile->using_index);
+  gdb_assert (dwp_file != NULL);
+
+  if (dwarf2_per_objfile->signatured_types != NULL)
+    {
+      find_sig_entry.signature = sig;
+      sig_entry = htab_find (dwarf2_per_objfile->signatured_types,
+			     &find_sig_entry);
+      if (sig_entry != NULL)
+	return sig_entry;
+    }
+
+  /* This is the "shouldn't happen" case.
+     Try the DWP file and hope for the best.  */
+  if (dwp_file->tus == NULL)
+    return NULL;
+  dwo_entry = lookup_dwo_in_dwp (dwp_file, dwp_file->tus, NULL,
+				 sig, 1 /* is_debug_types */);
+  if (dwo_entry == NULL)
+    return NULL;
+
+  sig_entry = add_type_unit (sig);
+  fill_in_sig_entry_from_dwo_entry (objfile, sig_entry, dwo_entry);
+
+  /* The caller will signal a complaint if we return NULL.
+     Here we don't return NULL but we still want to complain.  */
+  complaint (&symfile_complaints,
+	     _("Bad type signature %s referenced by %s at 0x%x,"
+	       " coping by using copy in DWP [in module %s]"),
+	     hex_string (sig),
+	     cu->per_cu->is_debug_types ? "TU" : "CU",
+	     cu->per_cu->offset.sect_off,
+	     objfile->name);
+
+  return sig_entry;
+}
+
 /* Lookup a signature based type for DW_FORM_ref_sig8.
    Returns NULL if signature SIG is not present in the table.
    It is up to the caller to complain about this.  */
 
 static struct signatured_type *
-lookup_signatured_type (ULONGEST sig)
+lookup_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
 {
-  struct signatured_type find_entry, *entry;
+  if (cu->dwo_unit
+      && dwarf2_per_objfile->using_index)
+    {
+      /* We're in a DWO/DWP file, and we're using .gdb_index.
+	 These cases require special processing.  */
+      if (get_dwp_file () == NULL)
+	return lookup_dwo_signatured_type (cu, sig);
+      else
+	return lookup_dwp_signatured_type (cu, sig);
+    }
+  else
+    {
+      struct signatured_type find_entry, *entry;
 
-  if (dwarf2_per_objfile->signatured_types == NULL)
-    return NULL;
-  find_entry.signature = sig;
-  entry = htab_find (dwarf2_per_objfile->signatured_types, &find_entry);
-  return entry;
+      if (dwarf2_per_objfile->signatured_types == NULL)
+	return NULL;
+      find_entry.signature = sig;
+      entry = htab_find (dwarf2_per_objfile->signatured_types, &find_entry);
+      return entry;
+    }
 }
 
 /* Low level DIE reading support.  */
@@ -4422,6 +4616,7 @@ init_cu_die_reader (struct die_reader_specs *reader,
   reader->die_section = section;
   reader->buffer = section->buffer;
   reader->buffer_end = section->buffer + section->size;
+  reader->comp_dir = NULL;
 }
 
 /* Subroutine of init_cutu_and_read_dies to simplify it.
@@ -4431,6 +4626,10 @@ init_cu_die_reader (struct die_reader_specs *reader,
 
    STUB_COMP_UNIT_DIE is for the stub DIE, we copy over certain attributes
    from it to the DIE in the DWO.  If NULL we are skipping the stub.
+   STUB_COMP_DIR is similar to STUB_COMP_UNIT_DIE: When reading a TU directly
+   from the DWO file, bypassing the stub, it contains the DW_AT_comp_dir
+   attribute of the referencing CU.  Exactly one of STUB_COMP_UNIT_DIE and
+   COMP_DIR must be non-NULL.
    *RESULT_READER,*RESULT_INFO_PTR,*RESULT_COMP_UNIT_DIE,*RESULT_HAS_CHILDREN
    are filled in with the info of the DIE from the DWO file.
    ABBREV_TABLE_PROVIDED is non-zero if the caller of init_cutu_and_read_dies
@@ -4442,6 +4641,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 			struct dwo_unit *dwo_unit,
 			int abbrev_table_provided,
 			struct die_info *stub_comp_unit_die,
+			const char *stub_comp_dir,
 			struct die_reader_specs *result_reader,
 			const gdb_byte **result_info_ptr,
 			struct die_info **result_comp_unit_die,
@@ -4458,7 +4658,11 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
   int i,num_extra_attrs;
   struct dwarf2_section_info *dwo_abbrev_section;
   struct attribute *attr;
+  struct attribute comp_dir_attr;
   struct die_info *comp_unit_die;
+
+  /* Both can't be provided.  */
+  gdb_assert (! (stub_comp_unit_die && stub_comp_dir));
 
   /* These attributes aren't processed until later:
      DW_AT_stmt_list, DW_AT_low_pc, DW_AT_high_pc, DW_AT_ranges.
@@ -4497,6 +4701,16 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
       if (attr)
 	cu->ranges_base = DW_UNSND (attr);
     }
+  else if (stub_comp_dir != NULL)
+    {
+      /* Reconstruct the comp_dir attribute to simplify the code below.  */
+      comp_dir = (struct attribute *)
+	obstack_alloc (&cu->comp_unit_obstack, sizeof (*comp_dir));
+      comp_dir->name = DW_AT_comp_dir;
+      comp_dir->form = DW_FORM_string;
+      DW_STRING_IS_CANONICAL (comp_dir) = 0;
+      DW_STRING (comp_dir) = stub_comp_dir;
+    }
 
   /* Set up for reading the DWO CU/TU.  */
   cu->dwo_unit = dwo_unit;
@@ -4518,7 +4732,16 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
 						info_ptr,
 						&header_signature,
 						&type_offset_in_tu);
-      gdb_assert (sig_type->signature == header_signature);
+      /* This is not an assert because it can be caused by bad debug info.  */
+      if (sig_type->signature != header_signature)
+	{
+	  error (_("Dwarf Error: signature mismatch %s vs %s while reading"
+		   " TU at offset 0x%x [in module %s]"),
+		 hex_string (sig_type->signature),
+		 hex_string (header_signature),
+		 dwo_unit->offset.sect_off,
+		 bfd_get_filename (abfd));
+	}
       gdb_assert (dwo_unit->offset.sect_off == cu->header.offset.sect_off);
       /* For DWOs coming from DWP files, we don't know the CU length
 	 nor the type's offset in the TU until now.  */
@@ -4595,6 +4818,13 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
       dump_die (comp_unit_die, dwarf2_die_debug);
     }
 
+  /* Save the comp_dir attribute.  If there is no DWP file then we'll read
+     TUs by skipping the stub and going directly to the entry in the DWO file.
+     However, skipping the stub means we won't get DW_AT_comp_dir, so we have
+     to get it via circuitous means.  Blech.  */
+  if (comp_dir != NULL)
+    result_reader->comp_dir = DW_STRING (comp_dir);
+
   /* Skip dummy compilation units.  */
   if (info_ptr >= begin_info_ptr + dwo_unit->length
       || peek_abbrev_code (abfd, info_ptr) == 0)
@@ -4617,6 +4847,8 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
   ULONGEST signature;
   struct dwo_unit *dwo_unit;
   const char *comp_dir, *dwo_name;
+
+  gdb_assert (cu != NULL);
 
   /* Yeah, we look dwo_name up again, but it simplifies the code.  */
   attr = dwarf2_attr (comp_unit_die, DW_AT_GNU_dwo_name, cu);
@@ -4652,6 +4884,75 @@ lookup_dwo_unit (struct dwarf2_per_cu_data *this_cu,
     }
 
   return dwo_unit;
+}
+
+/* Subroutine of init_cutu_and_read_dies to simplify it.
+   Read a TU directly from a DWO file, bypassing the stub.  */
+
+static void
+init_tu_and_read_dwo_dies (struct dwarf2_per_cu_data *this_cu, int keep,
+			   die_reader_func_ftype *die_reader_func,
+			   void *data)
+{
+  struct dwarf2_cu *cu;
+  struct signatured_type *sig_type;
+  struct cleanup *cleanups, *free_cu_cleanup;
+  struct die_reader_specs reader;
+  const gdb_byte *info_ptr;
+  struct die_info *comp_unit_die;
+  int has_children;
+
+  /* Verify we can do the following downcast, and that we have the
+     data we need.  */
+  gdb_assert (this_cu->is_debug_types && this_cu->reading_dwo_directly);
+  sig_type = (struct signatured_type *) this_cu;
+  gdb_assert (sig_type->dwo_unit != NULL);
+
+  cleanups = make_cleanup (null_cleanup, NULL);
+
+  gdb_assert (this_cu->cu == NULL);
+  cu = xmalloc (sizeof (*cu));
+  init_one_comp_unit (cu, this_cu);
+  /* If an error occurs while loading, release our storage.  */
+  free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
+
+  if (read_cutu_die_from_dwo (this_cu, sig_type->dwo_unit,
+			      0 /* abbrev_table_provided */,
+			      NULL /* stub_comp_unit_die */,
+			      sig_type->dwo_unit->dwo_file->comp_dir,
+			      &reader, &info_ptr,
+			      &comp_unit_die, &has_children) == 0)
+    {
+      /* Dummy die.  */
+      do_cleanups (cleanups);
+      return;
+    }
+
+  /* All the "real" work is done here.  */
+  die_reader_func (&reader, info_ptr, comp_unit_die, has_children, data);
+
+  /* This duplicates some code in init_cutu_and_read_dies,
+     but the alternative is making the latter more complex.
+     This function is only for the special case of using DWO files directly:
+     no point in overly complicating the general case just to handle this.  */
+  if (keep)
+    {
+      /* We've successfully allocated this compilation unit.  Let our
+	 caller clean it up when finished with it.  */
+      discard_cleanups (free_cu_cleanup);
+
+      /* We can only discard free_cu_cleanup and all subsequent cleanups.
+	 So we have to manually free the abbrev table.  */
+      dwarf2_free_abbrev_table (cu);
+
+      /* Link this CU into read_in_chain.  */
+      this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+      dwarf2_per_objfile->read_in_chain = this_cu;
+    }
+  else
+    do_cleanups (free_cu_cleanup);
+
+  do_cleanups (cleanups);
 }
 
 /* Initialize a CU (or TU) and read its DIEs.
@@ -4691,7 +4992,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   struct dwarf2_section_info *abbrev_section;
   /* Non-zero if CU currently points to a DWO file and we need to
      reread it.  When this happens we need to reread the skeleton die
-     before we can reread the DWO file.  */
+     before we can reread the DWO file (this only applies to CUs, not TUs).  */
   int rereading_dwo_cu = 0;
 
   if (dwarf2_die_debug)
@@ -4701,6 +5002,18 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 
   if (use_existing_cu)
     gdb_assert (keep);
+
+  /* If we're reading a TU directly from a DWO file, including a virtual DWO
+     file (instead of going through the stub), short-circuit all of this.  */
+  if (this_cu->reading_dwo_directly)
+    {
+      /* Narrow down the scope of possibilities to have to understand.  */
+      gdb_assert (this_cu->is_debug_types);
+      gdb_assert (abbrev_table == NULL);
+      gdb_assert (!use_existing_cu);
+      init_tu_and_read_dwo_dies (this_cu, keep, die_reader_func, data);
+      return;
+    }
 
   cleanups = make_cleanup (null_cleanup, NULL);
 
@@ -4838,7 +5151,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 	{
 	  if (read_cutu_die_from_dwo (this_cu, dwo_unit,
 				      abbrev_table != NULL,
-				      comp_unit_die,
+				      comp_unit_die, NULL,
 				      &reader, &info_ptr,
 				      &dwo_comp_unit_die, &has_children) == 0)
 	    {
@@ -5270,6 +5583,16 @@ build_type_unit_groups (die_reader_func_ftype *func, void *data)
 
       init_cutu_and_read_dies (&tu->sig_type->per_cu, abbrev_table, 0, 0,
 			       func, data);
+    }
+
+  /* type_unit_groups can be NULL if there is an error in the debug info.
+     Just create an empty table so the rest of gdb doesn't have to watch
+     for this error case.  */
+  if (dwarf2_per_objfile->type_unit_groups == NULL)
+    {
+      dwarf2_per_objfile->type_unit_groups =
+	allocate_type_unit_groups_table ();
+      dwarf2_per_objfile->n_type_unit_groups = 0;
     }
 
   /* Create a vector of pointers to primary type units to make it easy to
@@ -8323,9 +8646,12 @@ static hashval_t
 hash_dwo_file (const void *item)
 {
   const struct dwo_file *dwo_file = item;
+  hashval_t hash;
 
-  return (htab_hash_string (dwo_file->dwo_name)
-	  + htab_hash_string (dwo_file->comp_dir));
+  hash = htab_hash_string (dwo_file->dwo_name);
+  if (dwo_file->comp_dir != NULL)
+    hash += htab_hash_string (dwo_file->comp_dir);
+  return hash;
 }
 
 static int
@@ -8334,8 +8660,11 @@ eq_dwo_file (const void *item_lhs, const void *item_rhs)
   const struct dwo_file *lhs = item_lhs;
   const struct dwo_file *rhs = item_rhs;
 
-  return (strcmp (lhs->dwo_name, rhs->dwo_name) == 0
-	  && strcmp (lhs->comp_dir, rhs->comp_dir) == 0);
+  if (strcmp (lhs->dwo_name, rhs->dwo_name) != 0)
+    return 0;
+  if (lhs->comp_dir == NULL || rhs->comp_dir == NULL)
+    return lhs->comp_dir == rhs->comp_dir;
+  return strcmp (lhs->comp_dir, rhs->comp_dir) == 0;
 }
 
 /* Allocate a hash table for DWO files.  */
@@ -9386,9 +9715,10 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
     }
 
   complaint (&symfile_complaints,
-	     _("Could not find DWO %s %s(%s) referenced by CU at offset 0x%x"
+	     _("Could not find DWO %s %s(%s) referenced by %s at offset 0x%x"
 	       " [in module %s]"),
 	     kind, dwo_name, hex_string (signature),
+	     this_unit->is_debug_types ? "TU" : "CU",
 	     this_unit->offset.sect_off, objfile->name);
   return NULL;
 }
@@ -13475,7 +13805,8 @@ dwarf2_free_abbrev_table (void *ptr_to_cu)
 {
   struct dwarf2_cu *cu = ptr_to_cu;
 
-  abbrev_table_free (cu->abbrev_table);
+  if (cu->abbrev_table != NULL)
+    abbrev_table_free (cu->abbrev_table);
   /* Set this to NULL so that we SEGV if we try to read it later,
      and also because free_comp_unit verifies this is NULL.  */
   cu->abbrev_table = NULL;
@@ -18012,7 +18343,7 @@ follow_die_sig (struct die_info *src_die, struct attribute *attr,
 
   gdb_assert (attr->form == DW_FORM_ref_sig8);
 
-  sig_type = lookup_signatured_type (signature);
+  sig_type = lookup_signatured_type (*ref_cu, signature);
   /* sig_type will be NULL if the signatured type is missing from
      the debug info.  */
   if (sig_type == NULL)
@@ -18048,7 +18379,7 @@ get_signatured_type (struct die_info *die, ULONGEST signature,
   struct die_info *type_die;
   struct type *type;
 
-  sig_type = lookup_signatured_type (signature);
+  sig_type = lookup_signatured_type (cu, signature);
   /* sig_type will be NULL if the signatured type is missing from
      the debug info.  */
   if (sig_type == NULL)
@@ -20153,6 +20484,7 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
   for (ix = 0; ix < dwarf2_per_objfile->n_type_units; ++ix)
     VEC_free (dwarf2_per_cu_ptr,
 	      dwarf2_per_objfile->all_type_units[ix]->per_cu.imported_symtabs);
+  xfree (dwarf2_per_objfile->all_type_units);
 
   VEC_free (dwarf2_section_info_def, data->types);
 
