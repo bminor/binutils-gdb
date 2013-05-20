@@ -294,9 +294,9 @@ gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue)
 
 /* Convert a GDB exception to the appropriate Python exception.
    
-   This sets the Python error indicator, and returns NULL.  */
+   This sets the Python error indicator.  */
 
-PyObject *
+void
 gdbpy_convert_exception (struct gdb_exception exception)
 {
   PyObject *exc_class;
@@ -308,7 +308,7 @@ gdbpy_convert_exception (struct gdb_exception exception)
   else
     exc_class = gdbpy_gdb_error;
 
-  return PyErr_Format (exc_class, "%s", exception.message);
+  PyErr_Format (exc_class, "%s", exception.message);
 }
 
 /* Converts OBJ to a CORE_ADDR value.

@@ -1,5 +1,16 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-arch.c (archpy_disassemble): Update.
+	* python/py-type.c (typy_get_composite, typy_lookup_typename)
+	(typy_lookup_type): Use GDB_PY_HANDLE_EXCEPTION.
+	* python/py-utils.c (gdbpy_convert_exception): Return 'void'.
+	* python/python-internal.h (CPYCHECKER_SETS_EXCEPTION): New
+	macro.
+	(GDB_PY_HANDLE_EXCEPTION): Update.
+	(gdbpy_convert_exception): Update.  Use CPYCHECKER_SETS_EXCEPTION.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/python-internal.h (events_object_type): Remove.
 
 2013-05-20  Tom Tromey  <tromey@redhat.com>

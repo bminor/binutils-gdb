@@ -47,6 +47,12 @@
 #define CPYCHECKER_STEALS_REFERENCE_TO_ARG(n)
 #endif
 
+#ifdef WITH_CPYCHECKER_SETS_EXCEPTION_ATTRIBUTE
+#define CPYCHECKER_SETS_EXCEPTION __attribute__ ((cpychecker_sets_exception))
+#else
+#define CPYCHECKER_SETS_EXCEPTION
+#endif
+
 #include <stdio.h>
 
 /* Python 2.4 doesn't include stdint.h soon enough to get {u,}intptr_t
@@ -352,11 +358,14 @@ extern const struct language_defn *python_language;
 
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  */
-#define GDB_PY_HANDLE_EXCEPTION(Exception)				\
-    do {								\
-      if (Exception.reason < 0)						\
-	return gdbpy_convert_exception (Exception);			\
-    } while (0)
+#define GDB_PY_HANDLE_EXCEPTION(Exception)	\
+  do {						\
+    if (Exception.reason < 0)			\
+      {						\
+	gdbpy_convert_exception (Exception);	\
+        return NULL;				\
+      }						\
+  } while (0)
 
 /* Use this after a TRY_EXCEPT to throw the appropriate Python
    exception.  This macro is for use inside setter functions.  */
@@ -414,7 +423,8 @@ extern PyObject *gdbpy_gdb_error;
 extern PyObject *gdbpy_gdb_memory_error;
 extern PyObject *gdbpy_gdberror_exc;
 
-extern PyObject *gdbpy_convert_exception (struct gdb_exception);
+extern void gdbpy_convert_exception (struct gdb_exception)
+    CPYCHECKER_SETS_EXCEPTION;
 
 int get_addr_from_python (PyObject *obj, CORE_ADDR *addr);
 

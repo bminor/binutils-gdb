@@ -200,7 +200,8 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
           Py_DECREF (result_list);
           ui_file_delete (memfile);
 
-          return gdbpy_convert_exception (except);
+	  gdbpy_convert_exception (except);
+	  return NULL;
         }
 
       as = ui_file_xstrdup (memfile, NULL);

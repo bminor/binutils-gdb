@@ -443,13 +443,7 @@ typy_get_composite (struct type *type)
 	{
 	  CHECK_TYPEDEF (type);
 	}
-      /* Don't use GDB_PY_HANDLE_EXCEPTION here because that returns
-	 a (NULL) pointer of the wrong type.  */
-      if (except.reason < 0)
-	{
-	  gdbpy_convert_exception (except);
-	  return NULL;
-	}
+      GDB_PY_HANDLE_EXCEPTION (except);
 
       if (TYPE_CODE (type) != TYPE_CODE_PTR
 	  && TYPE_CODE (type) != TYPE_CODE_REF)
@@ -732,11 +726,7 @@ typy_lookup_typename (const char *type_name, const struct block *block)
 	type = lookup_typename (python_language, python_gdbarch,
 				type_name, block, 0);
     }
-  if (except.reason < 0)
-    {
-      gdbpy_convert_exception (except);
-      return NULL;
-    }
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   return type;
 }
@@ -785,11 +775,7 @@ typy_lookup_type (struct demangle_component *demangled,
 	      break;
 	    }
 	}
-      if (except.reason < 0)
-	{
-	  gdbpy_convert_exception (except);
-	  return NULL;
-	}
+      GDB_PY_HANDLE_EXCEPTION (except);
     }
   
   /* If we have a type from the switch statement above, just return
