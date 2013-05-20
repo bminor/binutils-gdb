@@ -111,15 +111,22 @@ evpy_emit_event (PyObject *event,
   for (i = 0; i < PyList_Size (callback_list_copy); i++)
     {
       PyObject *func = PyList_GetItem (callback_list_copy, i);
+      PyObject *func_result;
 
       if (func == NULL)
 	goto fail;
 
-      if (!PyObject_CallFunctionObjArgs (func, event, NULL))
+      func_result = PyObject_CallFunctionObjArgs (func, event, NULL);
+
+      if (func_result == NULL)
 	{
 	  /* Print the trace here, but keep going -- we want to try to
 	     call all of the callbacks even if one is broken.  */
 	  gdbpy_print_stack ();
+	}
+      else
+	{
+	  Py_DECREF (func_result);
 	}
     }
 
