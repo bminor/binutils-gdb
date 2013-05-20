@@ -668,6 +668,8 @@ gdbpy_string_to_argv (PyObject *self, PyObject *args)
     return NULL;
 
   py_argv = PyList_New (0);
+  if (py_argv == NULL)
+    return NULL;
 
   /* buildargv uses NULL to represent an empty argument list, but we can't use
      that in Python.  Instead, if ARGS is "" then return an empty list.
