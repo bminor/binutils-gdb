@@ -261,9 +261,8 @@ gdbpy_initialize_thread (void)
   if (PyType_Ready (&thread_object_type) < 0)
     return -1;
 
-  Py_INCREF (&thread_object_type);
-  return PyModule_AddObject (gdb_module, "InferiorThread",
-			     (PyObject *) &thread_object_type);
+  return gdb_pymodule_addobject (gdb_module, "InferiorThread",
+				 (PyObject *) &thread_object_type);
 }
 
 

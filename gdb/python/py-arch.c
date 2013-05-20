@@ -239,9 +239,8 @@ gdbpy_initialize_arch (void)
   if (PyType_Ready (&arch_object_type) < 0)
     return -1;
 
-  Py_INCREF (&arch_object_type);
-  return PyModule_AddObject (gdb_module, "Architecture",
-			     (PyObject *) &arch_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Architecture",
+				 (PyObject *) &arch_object_type);
 }
 
 static PyMethodDef arch_object_methods [] = {

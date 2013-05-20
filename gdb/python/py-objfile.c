@@ -307,9 +307,8 @@ gdbpy_initialize_objfile (void)
   if (PyType_Ready (&objfile_object_type) < 0)
     return -1;
 
-  Py_INCREF (&objfile_object_type);
-  return PyModule_AddObject (gdb_module, "Objfile",
-			     (PyObject *) &objfile_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Objfile",
+				 (PyObject *) &objfile_object_type);
 }
 
 

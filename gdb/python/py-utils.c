@@ -431,3 +431,18 @@ gdb_py_generic_dict (PyObject *self, void *closure)
   Py_INCREF (result);
   return result;
 }
+
+/* Like PyModule_AddObject, but does not steal a reference to
+   OBJECT.  */
+
+int
+gdb_pymodule_addobject (PyObject *module, const char *name, PyObject *object)
+{
+  int result;
+
+  Py_INCREF (object);
+  result = PyModule_AddObject (module, name, object);
+  if (result < 0)
+    Py_DECREF (object);
+  return result;
+}

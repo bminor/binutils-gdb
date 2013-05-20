@@ -787,9 +787,8 @@ gdbpy_initialize_inferior (void)
   if (PyType_Ready (&inferior_object_type) < 0)
     return -1;
 
-  Py_INCREF (&inferior_object_type);
-  if (PyModule_AddObject (gdb_module, "Inferior",
-			  (PyObject *) &inferior_object_type) < 0)
+  if (gdb_pymodule_addobject (gdb_module, "Inferior",
+			      (PyObject *) &inferior_object_type) < 0)
     return -1;
 
   infpy_inf_data_key =
@@ -806,9 +805,8 @@ gdbpy_initialize_inferior (void)
   if (PyType_Ready (&membuf_object_type) < 0)
     return -1;
 
-  Py_INCREF (&membuf_object_type);
-  return PyModule_AddObject (gdb_module, "Membuf", (PyObject *)
-			     &membuf_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Membuf", (PyObject *)
+				 &membuf_object_type);
 }
 
 static PyGetSetDef inferior_object_getset[] =

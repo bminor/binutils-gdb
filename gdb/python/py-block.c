@@ -442,14 +442,12 @@ gdbpy_initialize_blocks (void)
   blpy_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, del_objfile_blocks);
 
-  Py_INCREF (&block_object_type);
-  if (PyModule_AddObject (gdb_module, "Block",
-			  (PyObject *) &block_object_type) < 0)
+  if (gdb_pymodule_addobject (gdb_module, "Block",
+			      (PyObject *) &block_object_type) < 0)
     return -1;
 
-  Py_INCREF (&block_syms_iterator_object_type);
-  return PyModule_AddObject (gdb_module, "BlockIterator",
-			     (PyObject *) &block_syms_iterator_object_type);
+  return gdb_pymodule_addobject (gdb_module, "BlockIterator",
+				 (PyObject *) &block_syms_iterator_object_type);
 }
 
 

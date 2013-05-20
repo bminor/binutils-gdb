@@ -78,15 +78,7 @@ gdbpy_initialize_event_generic (PyTypeObject *type,
   if (PyType_Ready (type) < 0)
     return -1;
 
-  Py_INCREF (type);
-  if (PyModule_AddObject (gdb_module, name, (PyObject *) type) < 0)
-    goto fail;
-
-  return 0;
-
-  fail:
-    Py_XDECREF (type);
-    return -1;
+  return gdb_pymodule_addobject (gdb_module, name, (PyObject *) type);
 }
 
 

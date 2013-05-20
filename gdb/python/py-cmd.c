@@ -600,9 +600,8 @@ gdbpy_initialize_commands (void)
 	return -1;
     }
 
-  Py_INCREF (&cmdpy_object_type);
-  if (PyModule_AddObject (gdb_module, "Command",
-			  (PyObject *) &cmdpy_object_type) < 0)
+  if (gdb_pymodule_addobject (gdb_module, "Command",
+			      (PyObject *) &cmdpy_object_type) < 0)
     return -1;
 
   invoke_cst = PyString_FromString ("invoke");

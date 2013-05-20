@@ -501,14 +501,12 @@ gdbpy_initialize_symtabs (void)
   salpy_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, del_objfile_sal);
 
-  Py_INCREF (&symtab_object_type);
-  if (PyModule_AddObject (gdb_module, "Symtab",
-			  (PyObject *) &symtab_object_type) < 0)
+  if (gdb_pymodule_addobject (gdb_module, "Symtab",
+			      (PyObject *) &symtab_object_type) < 0)
     return -1;
 
-  Py_INCREF (&sal_object_type);
-  return PyModule_AddObject (gdb_module, "Symtab_and_line",
-			     (PyObject *) &sal_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Symtab_and_line",
+				 (PyObject *) &sal_object_type);
 }
 
 

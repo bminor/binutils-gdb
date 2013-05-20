@@ -1392,9 +1392,8 @@ gdbpy_initialize_values (void)
   if (PyType_Ready (&value_object_type) < 0)
     return -1;
 
-  Py_INCREF (&value_object_type);
-  return PyModule_AddObject (gdb_module, "Value",
-			     (PyObject *) &value_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Value",
+				 (PyObject *) &value_object_type);
 }
 
 

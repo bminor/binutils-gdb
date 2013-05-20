@@ -112,9 +112,8 @@ gdbpy_initialize_eventregistry (void)
   if (PyType_Ready (&eventregistry_object_type) < 0)
     return -1;
 
-  Py_INCREF (&eventregistry_object_type);
-  return PyModule_AddObject (gdb_module, "EventRegistry",
-			     (PyObject *) &eventregistry_object_type);
+  return gdb_pymodule_addobject (gdb_module, "EventRegistry",
+				 (PyObject *) &eventregistry_object_type);
 }
 
 /* Retern the number of listeners currently connected to this

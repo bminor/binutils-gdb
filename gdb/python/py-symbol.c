@@ -531,9 +531,8 @@ gdbpy_initialize_symbols (void)
 				  TYPES_DOMAIN) < 0)
     return -1;
 
-  Py_INCREF (&symbol_object_type);
-  return PyModule_AddObject (gdb_module, "Symbol",
-			     (PyObject *) &symbol_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Symbol",
+				 (PyObject *) &symbol_object_type);
 }
 
 

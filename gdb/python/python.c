@@ -1639,19 +1639,20 @@ message == an error message without a stack will be printed."),
 
   gdbpy_gdb_error = PyErr_NewException ("gdb.error", PyExc_RuntimeError, NULL);
   if (gdbpy_gdb_error == NULL
-      || PyModule_AddObject (gdb_module, "error", gdbpy_gdb_error) < 0)
+      || gdb_pymodule_addobject (gdb_module, "error", gdbpy_gdb_error) < 0)
     goto fail;
 
   gdbpy_gdb_memory_error = PyErr_NewException ("gdb.MemoryError",
 					       gdbpy_gdb_error, NULL);
   if (gdbpy_gdb_memory_error == NULL
-      || PyModule_AddObject (gdb_module, "MemoryError",
-			     gdbpy_gdb_memory_error) < 0)
+      || gdb_pymodule_addobject (gdb_module, "MemoryError",
+				 gdbpy_gdb_memory_error) < 0)
     goto fail;
 
   gdbpy_gdberror_exc = PyErr_NewException ("gdb.GdbError", NULL, NULL);
   if (gdbpy_gdberror_exc == NULL
-      || PyModule_AddObject (gdb_module, "GdbError", gdbpy_gdberror_exc) < 0)
+      || gdb_pymodule_addobject (gdb_module, "GdbError",
+				 gdbpy_gdberror_exc) < 0)
     goto fail;
 
   gdbpy_initialize_gdb_readline ();
@@ -1798,7 +1799,7 @@ finish_python_initialization (void)
       return;
     }
 
-  if (PyModule_AddObject (m, "gdb", gdb_python_module))
+  if (gdb_pymodule_addobject (m, "gdb", gdb_python_module) < 0)
     goto fail;
 
   /* Keep the reference to gdb_python_module since it is in a global

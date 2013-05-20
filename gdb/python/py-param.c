@@ -774,9 +774,8 @@ gdbpy_initialize_parameters (void)
 	return -1;
     }
 
-  Py_INCREF (&parmpy_object_type);
-  return PyModule_AddObject (gdb_module, "Parameter",
-			     (PyObject *) &parmpy_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Parameter",
+				 (PyObject *) &parmpy_object_type);
 }
 
 

@@ -473,4 +473,8 @@ int gdb_py_int_as_long (PyObject *, long *);
 
 PyObject *gdb_py_generic_dict (PyObject *self, void *closure);
 
+int gdb_pymodule_addobject (PyObject *module, const char *name,
+			    PyObject *object)
+  CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
+
 #endif /* GDB_PYTHON_INTERNAL_H */

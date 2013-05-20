@@ -1548,19 +1548,16 @@ gdbpy_initialize_types (void)
 	return -1;
     }
 
-  Py_INCREF (&type_object_type);
-  if (PyModule_AddObject (gdb_module, "Type",
-			  (PyObject *) &type_object_type) < 0)
+  if (gdb_pymodule_addobject (gdb_module, "Type",
+			      (PyObject *) &type_object_type) < 0)
     return -1;
 
-  Py_INCREF (&type_iterator_object_type);
-  if (PyModule_AddObject (gdb_module, "TypeIterator",
-			  (PyObject *) &type_iterator_object_type) < 0)
+  if (gdb_pymodule_addobject (gdb_module, "TypeIterator",
+			      (PyObject *) &type_iterator_object_type) < 0)
     return -1;
 
-  Py_INCREF (&field_object_type);
-  return PyModule_AddObject (gdb_module, "Field",
-			     (PyObject *) &field_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Field",
+				 (PyObject *) &field_object_type);
 }
 
 

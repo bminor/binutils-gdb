@@ -1,5 +1,52 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-arch.c (gdbpy_initialize_arch): Use
+	gdb_pymodule_addobject.
+	* python/py-block.c (gdbpy_initialize_blocks): Use
+	gdb_pymodule_addobject.
+	* python/py-breakpoint.c (gdbpy_initialize_breakpoints): Use
+	gdb_pymodule_addobject.
+	* python/py-cmd.c (gdbpy_initialize_breakpoints): Use
+	gdb_pymodule_addobject.
+	* python/py-event.c (gdbpy_initialize_event_generic): Use
+	gdb_pymodule_addobject.
+	* python/py-evtregistry.c (gdbpy_initialize_eventregistry): Use
+	gdb_pymodule_addobject.
+	* python/py-evts.c (add_new_registry): Use
+	gdb_pymodule_addobject.
+	(gdbpy_initialize_py_events): Likewise.
+	* python/py-finishbreakpoint.c
+	(gdbpy_initialize_finishbreakpoints): Use
+	gdb_pymodule_addobject.
+	* python/py-frame.c (gdbpy_initialize_frames): Use
+	gdb_pymodule_addobject.
+	* python/py-function.c (gdbpy_initialize_functions): Use
+	gdb_pymodule_addobject.
+	* python/py-inferior.c (gdbpy_initialize_inferior): Use
+	gdb_pymodule_addobject.
+	* python/py-infthread.c (gdbpy_initialize_thread): Use
+	gdb_pymodule_addobject.
+	* python/py-objfile.c (gdbpy_initialize_objfile): Use
+	gdb_pymodule_addobject.
+	* python/py-param.c (gdbpy_initialize_parameters): Use
+	gdb_pymodule_addobject.
+	* python/py-progspace.c (gdbpy_initialize_pspace): Use
+	gdb_pymodule_addobject.
+	* python/py-symbol.c (gdbpy_initialize_symbols): Use
+	gdb_pymodule_addobject.
+	* python/py-symtab.c (gdbpy_initialize_symtabs): Use
+	gdb_pymodule_addobject.
+	* python/py-type.c (gdbpy_initialize_types): Use
+	gdb_pymodule_addobject.
+	* python/py-utils.c (gdb_pymodule_addobject): New function.
+	* python/py-value.c (gdbpy_initialize_values): Use
+	gdb_pymodule_addobject.
+	* python/python-internal.h (gdb_pymodule_addobject): Declare.
+	* python/python.c (_initialize_python): Use
+	gdb_pymodule_addobject.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-cmd.c (cmdpy_completer): Use explicit decref.
 	* python/py-param.c (get_set_value, get_show_value): Use
 	explicit decrefs.

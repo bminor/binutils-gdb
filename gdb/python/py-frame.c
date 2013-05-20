@@ -638,9 +638,8 @@ gdbpy_initialize_frames (void)
 #undef SET
 #undef FIRST_ERROR
 
-  Py_INCREF (&frame_object_type);
-  return PyModule_AddObject (gdb_module, "Frame",
-			     (PyObject *) &frame_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Frame",
+				 (PyObject *) &frame_object_type);
 }
 
 

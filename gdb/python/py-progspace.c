@@ -303,9 +303,8 @@ gdbpy_initialize_pspace (void)
   if (PyType_Ready (&pspace_object_type) < 0)
     return -1;
 
-  Py_INCREF (&pspace_object_type);
-  return PyModule_AddObject (gdb_module, "Progspace",
-			     (PyObject *) &pspace_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Progspace",
+				 (PyObject *) &pspace_object_type);
 }
 
 

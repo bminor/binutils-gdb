@@ -868,9 +868,8 @@ gdbpy_initialize_breakpoints (void)
   if (PyType_Ready (&breakpoint_object_type) < 0)
     return -1;
 
-  Py_INCREF (&breakpoint_object_type);
-  if (PyModule_AddObject (gdb_module, "Breakpoint",
-			  (PyObject *) &breakpoint_object_type) < 0)
+  if (gdb_pymodule_addobject (gdb_module, "Breakpoint",
+			      (PyObject *) &breakpoint_object_type) < 0)
     return -1;
 
   observer_attach_breakpoint_created (gdbpy_breakpoint_created);

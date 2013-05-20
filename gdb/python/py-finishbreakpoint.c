@@ -413,9 +413,8 @@ gdbpy_initialize_finishbreakpoints (void)
   if (PyType_Ready (&finish_breakpoint_object_type) < 0)
     return -1;
   
-  Py_INCREF (&finish_breakpoint_object_type);
-  if (PyModule_AddObject (gdb_module, "FinishBreakpoint",
-			  (PyObject *) &finish_breakpoint_object_type) < 0)
+  if (gdb_pymodule_addobject (gdb_module, "FinishBreakpoint",
+			      (PyObject *) &finish_breakpoint_object_type) < 0)
     return -1;
     
   observer_attach_normal_stop (bpfinishpy_handle_stop);

@@ -40,21 +40,16 @@ static struct PyModuleDef EventModuleDef =
 static int CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION
 add_new_registry (eventregistry_object **registryp, char *name)
 {
+  int result;
+
   *registryp = create_eventregistry_object ();
 
   if (*registryp == NULL)
-    goto fail;
+    return -1;
 
-  if (PyModule_AddObject (gdb_py_events.module,
-                             name,
-                             (PyObject *)(*registryp)) < 0)
-    goto fail;
-
-  return 0;
-
-  fail:
-   Py_XDECREF (*registryp);
-   return -1;
+  return gdb_pymodule_addobject (gdb_py_events.module,
+				 name,
+				 (PyObject *)(*registryp));
 }
 
 int
@@ -81,9 +76,9 @@ gdbpy_initialize_py_events (void)
   if (add_new_registry (&gdb_py_events.new_objfile, "new_objfile") < 0)
     return -1;
 
-  if (PyModule_AddObject (gdb_module,
-                          "events",
-                          (PyObject *) gdb_py_events.module) < 0)
+  if (gdb_pymodule_addobject (gdb_module,
+			      "events",
+			      (PyObject *) gdb_py_events.module) < 0)
     return -1;
 
   return 0;
