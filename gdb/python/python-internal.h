@@ -433,7 +433,8 @@ extern PyObject *gdbpy_gdberror_exc;
 extern void gdbpy_convert_exception (struct gdb_exception)
     CPYCHECKER_SETS_EXCEPTION;
 
-int get_addr_from_python (PyObject *obj, CORE_ADDR *addr);
+int get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
+    CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
 PyObject *gdb_py_object_from_longest (LONGEST l);
 PyObject *gdb_py_object_from_ulongest (ULONGEST l);

@@ -1,5 +1,15 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-inferior.c (gdbpy_inferiors): Update.  Hoist
+	get_addr_from_python calls out of TRY_CATCH.
+	(infpy_write_memory, infpy_search_memory): Likewise.
+	* python/py-utils.c (get_addr_from_python): Return negative
+	value on error.  Use TRY_CATCH.
+	* python/python-internal.h (get_addr_from_python): Use
+	CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-event.c (evpy_emit_event): Decref the
 	result of PyObject_CallFunctionObjArgs.
 

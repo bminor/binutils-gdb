@@ -406,7 +406,6 @@ gdbpy_inferiors (PyObject *unused, PyObject *unused2)
 static PyObject *
 infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
-  int error = 0;
   CORE_ADDR addr, length;
   void *buffer = NULL;
   membuf_object *membuf_obj;
@@ -418,15 +417,12 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
 				     &addr_obj, &length_obj))
     return NULL;
 
+  if (get_addr_from_python (addr_obj, &addr) < 0
+      || get_addr_from_python (length_obj, &length) < 0)
+    return NULL;
+
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      if (!get_addr_from_python (addr_obj, &addr)
-	  || !get_addr_from_python (length_obj, &length))
-	{
-	  error = 1;
-	  break;
-	}
-
       buffer = xmalloc (length);
 
       read_memory (addr, buffer, length);
@@ -435,12 +431,6 @@ infpy_read_memory (PyObject *self, PyObject *args, PyObject *kw)
     {
       xfree (buffer);
       GDB_PY_HANDLE_EXCEPTION (except);
-    }
-
-  if (error)
-    {
-      xfree (buffer);
-      return NULL;
     }
 
   membuf_obj = PyObject_New (membuf_object, &membuf_object_type);
@@ -475,7 +465,6 @@ static PyObject *
 infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 {
   Py_ssize_t buf_len;
-  int error = 0;
   const char *buffer;
   CORE_ADDR addr, length;
   PyObject *addr_obj, *length_obj = NULL;
@@ -498,21 +487,16 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
     return NULL;
 #endif
 
+  if (get_addr_from_python (addr_obj, &addr) < 0)
+    goto fail;
+
+  if (!length_obj)
+    length = buf_len;
+  else if (get_addr_from_python (length_obj, &length) < 0)
+    goto fail;
+
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      if (!get_addr_from_python (addr_obj, &addr))
-	{
-	  error = 1;
-	  break;
-	}
-
-      if (!length_obj)
-	length = buf_len;
-      else if (!get_addr_from_python (length_obj, &length))
-	{
-	  error = 1;
-	  break;
-	}
       write_memory_with_notification (addr, (gdb_byte *) buffer, length);
     }
 #ifdef IS_PY3K
@@ -520,11 +504,13 @@ infpy_write_memory (PyObject *self, PyObject *args, PyObject *kw)
 #endif
   GDB_PY_HANDLE_EXCEPTION (except);
 
-
-  if (error)
-    return NULL;
-
   Py_RETURN_NONE;
+
+ fail:
+#ifdef IS_PY3K
+  PyBuffer_Release (&pybuf);
+#endif
+  return NULL;
 }
 
 /* Destructor of Membuf objects.  */
@@ -660,34 +646,26 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
     return NULL;
 #endif
 
-  if (get_addr_from_python (start_addr_obj, &start_addr)
-      && get_addr_from_python (length_obj, &length))
+  if (get_addr_from_python (start_addr_obj, &start_addr) < 0)
+    goto fail;
+ 
+  if (get_addr_from_python (length_obj, &length) < 0)
+    goto fail;
+
+  if (!length)
     {
-      if (!length)
-	{
-	  PyErr_SetString (PyExc_ValueError,
-			   _("Search range is empty."));
-
-#ifdef IS_PY3K
-	  PyBuffer_Release (&pybuf);
-#endif
-	  return NULL;
-	}
-      /* Watch for overflows.  */
-      else if (length > CORE_ADDR_MAX
-	       || (start_addr + length - 1) < start_addr)
-	{
-	  PyErr_SetString (PyExc_ValueError,
-			   _("The search range is too large."));
-
-#ifdef IS_PY3K
-	  PyBuffer_Release (&pybuf);
-#endif
-	  return NULL;
-	}
+      PyErr_SetString (PyExc_ValueError,
+		       _("Search range is empty."));
+      goto fail;
     }
-  else
-    return NULL;
+  /* Watch for overflows.  */
+  else if (length > CORE_ADDR_MAX
+	   || (start_addr + length - 1) < start_addr)
+    {
+      PyErr_SetString (PyExc_ValueError,
+		       _("The search range is too large."));
+      goto fail;
+    }
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
@@ -695,16 +673,21 @@ infpy_search_memory (PyObject *self, PyObject *args, PyObject *kw)
 				    buffer, pattern_size,
 				    &found_addr);
     }
-  GDB_PY_HANDLE_EXCEPTION (except);
-
 #ifdef IS_PY3K
   PyBuffer_Release (&pybuf);
 #endif
+  GDB_PY_HANDLE_EXCEPTION (except);
 
   if (found)
     return PyLong_FromLong (found_addr);
   else
     Py_RETURN_NONE;
+
+ fail:
+#ifdef IS_PY3K
+  PyBuffer_Release (&pybuf);
+#endif
+  return NULL;
 }
 
 /* Implementation of gdb.Inferior.is_valid (self) -> Boolean.

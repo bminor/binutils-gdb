@@ -313,39 +313,46 @@ gdbpy_convert_exception (struct gdb_exception exception)
 
 /* Converts OBJ to a CORE_ADDR value.
 
-   Returns 1 on success or 0 on failure, with a Python exception set.  This
-   function can also throw GDB exceptions.
+   Returns 0 on success or -1 on failure, with a Python exception set.
 */
 
 int
 get_addr_from_python (PyObject *obj, CORE_ADDR *addr)
 {
   if (gdbpy_is_value_object (obj))
-    *addr = value_as_address (value_object_to_value (obj));
+    {
+      volatile struct gdb_exception except;
+
+      TRY_CATCH (except, RETURN_MASK_ALL)
+	{
+	  *addr = value_as_address (value_object_to_value (obj));
+	}
+      GDB_PY_SET_HANDLE_EXCEPTION (except);
+    }
   else
     {
       PyObject *num = PyNumber_Long (obj);
       gdb_py_ulongest val;
 
       if (num == NULL)
-	return 0;
+	return -1;
 
       val = gdb_py_long_as_ulongest (num);
       Py_XDECREF (num);
       if (PyErr_Occurred ())
-	return 0;
+	return -1;
 
       if (sizeof (val) > sizeof (CORE_ADDR) && ((CORE_ADDR) val) != val)
 	{
 	  PyErr_SetString (PyExc_ValueError,
 			   _("Overflow converting to address."));
-	  return 0;
+	  return -1;
 	}
 
       *addr = val;
     }
 
-  return 1;
+  return 0;
 }
 
 /* Convert a LONGEST to the appropriate Python object -- either an
