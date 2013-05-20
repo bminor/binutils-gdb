@@ -1,5 +1,9 @@
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-cmd.c (cmdpy_init): Decref 'ds_obj'.
+
+2013-05-20  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-event.h (gdbpy_initialize_event_generic): Use
 	CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION.
 	* python/py-evts.c (add_new_registry): Use

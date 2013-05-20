@@ -499,9 +499,12 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
 	    {
 	      xfree (cmd_name);
 	      xfree (pfx_name);
+	      Py_DECREF (ds_obj);
 	      return -1;
 	    }
 	}
+
+      Py_XDECREF (ds_obj);
     }
   if (! docstring)
     docstring = xstrdup (_("This command is not documented."));
