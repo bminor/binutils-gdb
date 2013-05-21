@@ -411,7 +411,13 @@ relocate_section(
 	}
 
       if (issue_undefined_symbol_error(sym))
-	gold_undefined_symbol_at_location(sym, relinfo, i, offset);
+	{
+	  gold_undefined_symbol_at_location(sym, relinfo, i, offset);
+	  if (sym->is_cxx_vtable())
+	    gold_info(_("%s: the vtable symbol may be undefined because "
+			"the class is missing its key function"),
+		      program_name);
+	}
       else if (sym != NULL
 	       && sym->visibility() != elfcpp::STV_DEFAULT
 	       && (sym->is_undefined() || sym->is_from_dynobj()))

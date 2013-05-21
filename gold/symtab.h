@@ -817,6 +817,11 @@ class Symbol
   is_predefined() const
   { return this->is_predefined_; }
 
+  // Return true if this is a C++ vtable symbol.
+  bool
+  is_cxx_vtable() const
+  { return is_prefix_of("_ZTV", this->name_); }
+
  protected:
   // Instances of this class should always be created at a specific
   // size.

@@ -69,6 +69,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 
 # Test --detect-odr-violations
 
+# Test error message when a vtable is undefined.
+
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
 
 # Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
@@ -87,11 +89,11 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.sh weak_plt.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.sh undef_symbol.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_1.sh ver_test_2.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_10.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.sh missing_key_func.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_1.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2.sh ver_test_4.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_5.sh ver_test_7.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_10.sh relro_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh \
@@ -122,7 +124,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	icf_sht_rel_addend_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	merge_string_literals.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so debug_msg.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt_shared.so debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	missing_key_func.err
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = incremental_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	incremental_test.cmdline \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gc_comdat_test gc_tls_test \
@@ -225,7 +228,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_26 = many_sections_define.h \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	missing_key_func.err
 @GCC_FALSE@initpri1_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@initpri1_DEPENDENCIES =
 @GCC_FALSE@initpri2_DEPENDENCIES =
@@ -3767,6 +3771,8 @@ weak_plt.sh.log: weak_plt.sh
 	@p='weak_plt.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 debug_msg.sh.log: debug_msg.sh
 	@p='debug_msg.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+missing_key_func.sh.log: missing_key_func.sh
+	@p='missing_key_func.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 undef_symbol.sh.log: undef_symbol.sh
 	@p='undef_symbol.sh'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 ver_test_1.sh.log: ver_test_1.sh
@@ -4660,6 +4666,16 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -Wl,--detect-odr-violations -o debug_msg debug_msg.o odr_violation1.o odr_violation2.o 2>$@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of debug_msg should have failed"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
+@GCC_TRUE@@NATIVE_LINKER_TRUE@missing_key_func.o: missing_key_func.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -o $@ $(srcdir)/missing_key_func.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@missing_key_func.err: missing_key_func.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@echo $(CXXLINK) -Bgcctestdir/ -o missing_key_func missing_key_func.o "2>$@"
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@if $(CXXLINK) -Bgcctestdir/ -o missing_key_func missing_key_func.o 2>$@; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	then \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  echo 1>&2 "Link of missing_key_func should have failed"; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi

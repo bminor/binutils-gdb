@@ -974,6 +974,20 @@ debug_msg.err: debug_msg.o odr_violation1.o odr_violation2.o gcctestdir/ld
 	  exit 1; \
 	fi
 
+# Test error message when a vtable is undefined.
+check_SCRIPTS += missing_key_func.sh
+check_DATA += missing_key_func.err
+MOSTLYCLEANFILES += missing_key_func.err
+missing_key_func.o: missing_key_func.cc
+	$(CXXCOMPILE) -O0 -g -c -o $@ $(srcdir)/missing_key_func.cc
+missing_key_func.err: missing_key_func.o gcctestdir/ld
+	@echo $(CXXLINK) -Bgcctestdir/ -o missing_key_func missing_key_func.o "2>$@"
+	@if $(CXXLINK) -Bgcctestdir/ -o missing_key_func missing_key_func.o 2>$@; \
+	then \
+	  echo 1>&2 "Link of missing_key_func should have failed"; \
+	  rm -f $@; \
+	  exit 1; \
+	fi
 
 if HAVE_ZLIB
 
