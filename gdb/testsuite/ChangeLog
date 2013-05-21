@@ -1,3 +1,8 @@
+2013-05-21  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* gdb.base/catch-signal-fork.exp: New file.
+	* gdb.base/catch-signal-fork.c: New file.
+
 2013-05-21  Sterling Augustine  <saugustine@google.com>
 
 	* boards/remote-stdio-gdbserver.exp: New file.

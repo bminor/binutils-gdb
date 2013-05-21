@@ -3537,6 +3537,15 @@ detach_breakpoints (ptid_t ptid)
     if (bl->pspace != inf->pspace)
       continue;
 
+    /* This function must physically remove breakpoints locations
+       from the specified ptid, without modifying the breakpoint
+       package's state.  Locations of type bp_loc_other are only
+       maintained at GDB side.  So, there is no need to remove
+       these bp_loc_other locations.  Moreover, removing these
+       would modify the breakpoint package's state.  */
+    if (bl->loc_type == bp_loc_other)
+      continue;
+
     if (bl->inserted)
       val |= remove_breakpoint_1 (bl, mark_inserted);
   }

@@ -1,3 +1,8 @@
+2013-05-21  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
+
+	* breakpoints.c (detach_breakpoints): Do not
+	detach breakpoints locations with loc_type bp_loc_other.
+
 2013-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Workaround Python 2.6.
