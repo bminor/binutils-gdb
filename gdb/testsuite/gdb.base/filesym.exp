@@ -26,25 +26,26 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
 # complete to "filesym"; completing again, we expect the symbol name and the
 # filename (in that order).
 
+set tst "complete on \"filesy\""
 send_gdb "break filesy\t"
-gdb_expect {
-     -re "m\$" {
-	pass "complete on \"filesy\""
+gdb_test_multiple "" $tst {
+    -re "break filesy\\\x07m\$" {
+	pass $tst
 
 	# Now ask for the completion list
+	set tst "completion list for \"filesym\""
 	send_gdb "\t\t"
-	gdb_expect {
-	    -re ".*filesym\[ \t\]+filesym.c.*$gdb_prompt break filesym\$" {
-		pass "completion list for \"filesym\""
-	    }
+	gdb_test_multiple "" $tst {
+	    -re "\\\x07\r\nfilesym\[ \t\]+filesym.c\[ \t\]+\r\n$gdb_prompt " {
+		pass $tst
 
-	    default {
-		fail "completion list for \"filesym\""
+		# Flush the rest of the output by creating the breakpoint.
+		# This ensures this file passes testsuite/12649.
+		send_gdb "\n"
+		gdb_test "" "Breakpoint 1.*" "set breakpoint at filesym"
 	    }
 	}
     }
-
-    default {
-	fail "complete on \"filesy\""
-    }
 }
+
+unset -nocomplain tst

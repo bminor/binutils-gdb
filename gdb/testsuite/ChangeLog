@@ -1,3 +1,11 @@
+2013-05-21  Keith Seitz  <keiths@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/filesym.exp: Use gdb_test_multiple instead of
+	gdb_expect.
+	Add test to flush the remaining input buffer so that this
+	file passes testsuite/12649.
+
 2013-05-21  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* gdb.base/catch-signal-fork.exp: New file.
@@ -65,6 +73,11 @@
 
 	* gdb.ada/complete.exp: Add test verifying completion using
 	the "tab" key.
+
+2013-05-15  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.base/filesym.exp: New completer test.
+	* gdb.base/filesym.c: New file.
 
 2013-05-15  Pedro Alves  <palves@redhat.com>
 
