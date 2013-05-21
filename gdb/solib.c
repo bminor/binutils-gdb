@@ -64,10 +64,10 @@ solib_init (struct obstack *obstack)
   return ops;
 }
 
-static struct target_so_ops *
+static const struct target_so_ops *
 solib_ops (struct gdbarch *gdbarch)
 {
-  struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
+  const struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
 
   return *ops;
 }
@@ -75,9 +75,9 @@ solib_ops (struct gdbarch *gdbarch)
 /* Set the solib operations for GDBARCH to NEW_OPS.  */
 
 void
-set_solib_ops (struct gdbarch *gdbarch, struct target_so_ops *new_ops)
+set_solib_ops (struct gdbarch *gdbarch, const struct target_so_ops *new_ops)
 {
-  struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
+  const struct target_so_ops **ops = gdbarch_data (gdbarch, solib_data);
 
   *ops = new_ops;
 }
@@ -144,7 +144,7 @@ show_solib_search_path (struct ui_file *file, int from_tty,
 char *
 solib_find (char *in_pathname, int *fd)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   int found_file = -1;
   char *temp_pathname = NULL;
   int gdb_sysroot_is_empty;
@@ -449,7 +449,7 @@ solib_bfd_open (char *pathname)
 static int
 solib_map_sections (struct so_list *so)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   char *filename;
   struct target_section *p;
   struct cleanup *old_chain;
@@ -511,7 +511,7 @@ solib_map_sections (struct so_list *so)
 static void
 clear_so (struct so_list *so)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
   if (so->sections)
     {
@@ -551,7 +551,7 @@ clear_so (struct so_list *so)
 void
 free_so (struct so_list *so)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
   clear_so (so);
   ops->free_so (so);
@@ -670,7 +670,7 @@ solib_used (const struct so_list *const known)
 static void
 update_solib_list (int from_tty, struct target_ops *target)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
   struct so_list *inferior = ops->current_sos();
   struct so_list *gdb, **gdb_link;
 
@@ -932,7 +932,7 @@ solib_add (char *pattern, int from_tty,
 
     if (loaded_any_symbols)
       {
-	struct target_so_ops *ops = solib_ops (target_gdbarch ());
+	const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
 	/* Getting new symbols may change our opinion about what is
 	   frameless.  */
@@ -1105,7 +1105,7 @@ solib_name_from_address (struct program_space *pspace, CORE_ADDR address)
 int
 solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
   if (ops->keep_data_in_core)
     return ops->keep_data_in_core (vaddr, size);
@@ -1118,7 +1118,7 @@ solib_keep_data_in_core (CORE_ADDR vaddr, unsigned long size)
 void
 clear_solib (void)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
   /* This function is expected to handle ELF shared libraries.  It is
      also used on Solaris, which can run either ELF or a.out binaries
@@ -1166,7 +1166,7 @@ clear_solib (void)
 void
 solib_create_inferior_hook (int from_tty)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
   ops->solib_create_inferior_hook (from_tty);
 }
@@ -1177,7 +1177,7 @@ solib_create_inferior_hook (int from_tty)
 int
 in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
   return ops->in_dynsym_resolve_code (pc);
 }
@@ -1275,7 +1275,7 @@ static void
 reload_shared_libraries (char *ignored, int from_tty,
 			 struct cmd_list_element *e)
 {
-  struct target_so_ops *ops;
+  const struct target_so_ops *ops;
 
   reload_shared_libraries_1 (from_tty);
 
@@ -1342,7 +1342,7 @@ solib_global_lookup (const struct objfile *objfile,
 		     const char *name,
 		     const domain_enum domain)
 {
-  struct target_so_ops *ops = solib_ops (target_gdbarch ());
+  const struct target_so_ops *ops = solib_ops (target_gdbarch ());
 
   if (ops->lookup_lib_global_symbol != NULL)
     return ops->lookup_lib_global_symbol (objfile, name, domain);

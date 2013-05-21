@@ -71,7 +71,7 @@ extern void no_shared_libraries (char *ignored, int from_tty);
 /* Set the solib operations for GDBARCH to NEW_OPS.  */
 
 extern void set_solib_ops (struct gdbarch *gdbarch,
-			   struct target_so_ops *new_ops);
+			   const struct target_so_ops *new_ops);
 
 /* Return non-zero if NAME is the libpthread shared library.  */
 

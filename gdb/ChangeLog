@@ -1,3 +1,15 @@
+2013-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup: constification.
+	* solib.c (solib_ops): Make return type and ops variable type const.
+	(set_solib_ops): Make the new_ops parameter and ops variable const.
+	(solib_find, solib_map_sections, clear_so, free_so, update_solib_list)
+	(solib_add, solib_keep_data_in_core, clear_solib)
+	(solib_create_inferior_hook, in_solib_dynsym_resolve_code)
+	(reload_shared_libraries, solib_global_lookup): Make the ops variable
+	const.
+	* solib.h (set_solib_ops): Make the new_ops parameter const.
+
 2013-05-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* data-directory/Makefile.in (SYSTEM_GDBINIT_SRCDIR): New
