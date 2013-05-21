@@ -61,6 +61,8 @@ static struct mi_cmd mi_cmds[] =
   DEF_MI_CMD_CLI ("break-info", "info break", 1),
   DEF_MI_CMD_MI_1 ("break-insert", mi_cmd_break_insert,
 		   &mi_suppress_notification.breakpoint),
+  DEF_MI_CMD_MI_1 ("dprintf-insert", mi_cmd_dprintf_insert,
+		   &mi_suppress_notification.breakpoint),
   DEF_MI_CMD_CLI ("break-list", "info break", 0),
   DEF_MI_CMD_MI_1 ("break-passcount", mi_cmd_break_passcount,
 		   &mi_suppress_notification.breakpoint),

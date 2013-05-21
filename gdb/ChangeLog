@@ -1,3 +1,15 @@
+2013-05-21  Hui Zhu  <hui@codesourcery.com>
+
+	* breakpoint.c (dprintf_breakpoint_ops): Remove its static.
+	* breakpoint.h (dprintf_breakpoint_ops): Add extern.
+	* mi/mi-cmd-break.c (ctype.h): New include.
+	(gdb_obstack.h): New include.
+	(mi_argv_to_format, mi_cmd_break_insert_1): New.
+	(mi_cmd_break_insert): Call mi_cmd_break_insert_1.
+	(mi_cmd_dprintf_insert): New.
+	* mi/mi-cmds.c (mi_cmds): Add "dprintf-insert".
+	* mi/mi-cmds.h (mi_cmd_dprintf_insert): New extern.
+
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-prettyprint.c (search_pp_list): Decref 'attr'.

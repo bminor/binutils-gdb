@@ -29789,6 +29789,84 @@ times="0"@}]@}
 @c (gdb)
 @end smallexample
 
+@subheading The @code{-dprintf-insert} Command
+@findex -dprintf-insert
+
+@subsubheading Synopsis
+
+@smallexample
+ -dprintf-insert [ -t ] [ -f ] [ -d ]
+    [ -c @var{condition} ] [ -i @var{ignore-count} ]
+    [ -p @var{thread-id} ] [ @var{location} ] [ @var{format} ]
+    [ @var{argument} ]
+@end smallexample
+
+@noindent
+If specified, @var{location}, can be one of:
+
+@itemize @bullet
+@item @var{function}
+@c @item +offset
+@c @item -offset
+@c @item @var{linenum}
+@item @var{filename}:@var{linenum}
+@item @var{filename}:function
+@item *@var{address}
+@end itemize
+
+The possible optional parameters of this command are:
+
+@table @samp
+@item -t
+Insert a temporary breakpoint.
+@item -f
+If @var{location} cannot be parsed (for example, if it
+refers to unknown files or functions), create a pending
+breakpoint.  Without this flag, @value{GDBN} will report
+an error, and won't create a breakpoint, if @var{location}
+cannot be parsed.
+@item -d
+Create a disabled breakpoint.
+@item -c @var{condition}
+Make the breakpoint conditional on @var{condition}.
+@item -i @var{ignore-count}
+Set the ignore count of the breakpoint (@pxref{Conditions, ignore count})
+to @var{ignore-count}.
+@item -p @var{thread-id}
+Restrict the breakpoint to the specified @var{thread-id}.
+@end table
+
+@subsubheading Result
+
+@xref{GDB/MI Breakpoint Information}, for details on the format of the
+resulting breakpoint.
+
+@c An out-of-band breakpoint instead of part of the result?
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{dprintf}.
+
+@subsubheading Example
+
+@smallexample
+(gdb)
+4-dprintf-insert foo "At foo entry\n"
+4^done,bkpt=@{number="1",type="dprintf",disp="keep",enabled="y",
+addr="0x000000000040061b",func="foo",file="mi-dprintf.c",
+fullname="mi-dprintf.c",line="25",thread-groups=["i1"],
+times="0",script=@{"printf \"At foo entry\\n\"","continue"@},
+original-location="foo"@}
+(gdb)
+5-dprintf-insert 26 "arg=%d, g=%d\n" arg g
+5^done,bkpt=@{number="2",type="dprintf",disp="keep",enabled="y",
+addr="0x000000000040062a",func="foo",file="mi-dprintf.c",
+fullname="mi-dprintf.c",line="26",thread-groups=["i1"],
+times="0",script=@{"printf \"arg=%d, g=%d\\n\", arg, g","continue"@},
+original-location="mi-dprintf.c:26"@}
+(gdb)
+@end smallexample
+
 @subheading The @code{-break-list} Command
 @findex -break-list
 

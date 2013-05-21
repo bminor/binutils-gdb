@@ -70,6 +70,8 @@ show debug nios2
   ** The -trace-save MI command can optionally save trace buffer in Common
      Trace Format now.
 
+  ** The new command -dprintf-insert sets a dynamic printf breakpoint.
+
 *** Changes in GDB 7.6
 
 * Target record has been renamed to record-full.

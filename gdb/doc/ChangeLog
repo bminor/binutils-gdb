@@ -1,3 +1,8 @@
+2013-05-21  Hui Zhu  <hui@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Breakpoint Commands): Describe the
+	"-dprintf-insert" command.
+
 2013-05-17  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Maintenance Commands): Update doc for

@@ -1,3 +1,8 @@
+2013-05-21  Hui Zhu  <hui@codesourcery.com>
+
+	* gdb.mi/Makefile.in (PROGS): Add "mi-dprintf".
+	* gdb.mi/mi-dprintf.exp, gdb.mi/mi-dprintf.c: New.
+
 2013-05-20  Doug Evans  <dje@google.com>
 
 	* lib/dwarf.exp (Dwarf): New variable _abbrev_section.
