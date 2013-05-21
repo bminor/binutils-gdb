@@ -68,7 +68,7 @@ proc mi_continue_dprintf {args} {
 	mi_run_cmd
 	set msg "mi 1st dprintf"
 	gdb_expect {
-            -re ".*At foo entry.*arg=1234, g=1234.*" {
+            -re ".*At foo entry.*arg=1234, g=1234" {
 		pass $msg
 	    }
 	    -re ".*$mi_gdb_prompt$" {
@@ -83,7 +83,7 @@ proc mi_continue_dprintf {args} {
 	set msg "mi 2nd dprintf"
 	mi_send_resuming_command "exec-continue" "$msg continue"
 	gdb_expect {
-            -re ".*At foo entry.*arg=1235, g=2222.*" {
+            -re ".*At foo entry.*arg=1235, g=2222.*$mi_gdb_prompt$" {
 		pass $msg
 	    }
 	    -re ".*$mi_gdb_prompt$" {

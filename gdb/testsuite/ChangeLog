@@ -1,3 +1,9 @@
+2013-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR testsuite/12649
+	* gdb.mi/mi-dprintf.exp (mi_continue_dprintf): Fix expect strings for
+	racy matches.
+
 2013-05-21  Christian Groessler  <chris@groessler.org>
 
 	* gdb.dwarf2/dw2-dir-file-name.exp: Don't use brace expansion,
