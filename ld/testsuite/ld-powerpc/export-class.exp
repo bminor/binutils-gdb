@@ -30,22 +30,11 @@ if { ![istarget powerpc*-*-linux*] } {
     return
 }
 
-proc supports_ppc64 { } {
-    global ld
+proc powerpc_export_class_test { abi endian emul } {
 
-    catch "exec $ld --help | grep emulations" tmp
-    if [string match "*elf64ppc*" $tmp] then {
-	return 1
-    } else {
-	return 0
-    }
-}
+    set testname "PowerPC $abi $endian symbol export class test"
 
-proc powerpc_export_class_test { abi emul } {
-
-    set testname "PowerPC $abi symbol export class test"
-
-    set AFLAGS "-a$abi -be"
+    set AFLAGS "-a$abi -$endian"
     set LDFLAGS "-m$emul"
 
     # Build an auxiliary shared object with conflicting versioned symbol
@@ -96,11 +85,13 @@ proc powerpc_export_class_test { abi emul } {
     ]
 }
 
-if { [supports_ppc64] } {
-    set abis { 32 elf32ppclinux 64 elf64ppc }
-} else {
-    set abis { 32 elf32ppclinux }
-}
-foreach { abi emul } $abis {
-    powerpc_export_class_test $abi $emul
+set abis { 32 be elf32ppclinux 32 le elf32lppclinux 64 be elf64ppc 64 le elf64lppc }
+
+global ld
+catch "exec $ld --help | grep emulations" ldemul
+
+foreach { abi endian emul } $abis {
+    if { [string first $emul $ldemul] != -1 } then {
+	powerpc_export_class_test $abi $endian $emul
+    }
 }

@@ -1,3 +1,10 @@
+2013-05-21  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/export-class.exp (supports_ppc64): Delete.
+	(powerpc_export_class_test): Add "endian" param.
+	(abis): Add little-endian targets and test.
+	* ld-powerpc/powerpc-64-export-class.xd: Update for little-endian.
+
 2013-05-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* ld-powerpc/aix-core-sec-1.hd, ld-powerpc/aix-core-sec-2.hd,
