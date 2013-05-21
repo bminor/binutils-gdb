@@ -1,5 +1,11 @@
 2013-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Workaround Python 2.6.
+	* python/py-utils.c (gdb_pymodule_addobject): Wrap Py_DECREF into
+	a block.
+
+2013-05-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup: constification.
 	* solib.c (solib_ops): Make return type and ops variable type const.
 	(set_solib_ops): Make the new_ops parameter and ops variable const.

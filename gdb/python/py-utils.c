@@ -443,6 +443,9 @@ gdb_pymodule_addobject (PyObject *module, const char *name, PyObject *object)
   Py_INCREF (object);
   result = PyModule_AddObject (module, name, object);
   if (result < 0)
-    Py_DECREF (object);
+    {
+      /* Python 2.6 did not wrap Py_DECREF in do { } while (0);.  */
+      Py_DECREF (object);
+    }
   return result;
 }
