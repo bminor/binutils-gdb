@@ -169,6 +169,18 @@ typedef unsigned long gdb_py_ulongest;
 
 #endif /* HAVE_LONG_LONG */
 
+/* Python 2.6 did not wrap Py_DECREF in 'do {...} while (0)', leading
+   to 'suggest explicit braces to avoid ambiguous ‘else’' gcc errors.
+   Wrap it ourselves, so that callers don't need to care.  */
+
+static inline void
+gdb_Py_DECREF (void *op)
+{
+  Py_DECREF (op);
+}
+
+#undef Py_DECREF
+#define Py_DECREF(op) gdb_Py_DECREF (op)
 
 /* In order to be able to parse symtab_and_line_to_sal_object function 
    a real symtab_and_line structure is needed.  */

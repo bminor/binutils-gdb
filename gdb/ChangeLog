@@ -1,3 +1,10 @@
+2013-05-21  Pedro Alves  <palves@redhat.com>
+
+	* python/py-utils.c (py_decref): Remove extra braces.
+	(gdb_pymodule_addobject): Remove extra braces.
+	* python-internal.h (gdb_Py_DECREF): New static inline function.
+	(Py_DECREF): Redefine as calling gdb_Py_DECREF.
+
 2013-05-21  Philippe Waroquiers  <philippe.waroquiers@skynet.be>
 
 	* breakpoints.c (detach_breakpoints): Do not

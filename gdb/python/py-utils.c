@@ -31,12 +31,8 @@ py_decref (void *p)
 {
   PyObject *py = p;
 
-  /* Note that we need the extra braces in this 'if' to avoid a
-     warning from gcc.  */
   if (py)
-    {
-      Py_DECREF (py);
-    }
+    Py_DECREF (py);
 }
 
 /* Return a new cleanup which will decrement the Python object's
@@ -443,9 +439,6 @@ gdb_pymodule_addobject (PyObject *module, const char *name, PyObject *object)
   Py_INCREF (object);
   result = PyModule_AddObject (module, name, object);
   if (result < 0)
-    {
-      /* Python 2.6 did not wrap Py_DECREF in do { } while (0);.  */
-      Py_DECREF (object);
-    }
+    Py_DECREF (object);
   return result;
 }
