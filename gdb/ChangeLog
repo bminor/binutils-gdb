@@ -1,5 +1,22 @@
 2013-05-21  Joel Brobecker  <brobecker@adacore.com>
 
+	* data-directory/Makefile.in (SYSTEM_GDBINIT_SRCDIR): New
+	variable.
+	(VPATH): Add SYSTEM_GDBINIT_SRCDIR.
+	(SYSTEM_GDBINIT_DIR, SYSTEM_GDBINIT_INSTALL_DIR)
+	(SYSTEM_GDBINIT_FILES): New variables.
+	(all): Add stamp-system-gdbinit.
+	(stamp-system-gdbinit): New rule.
+	(clean-system-gdbinit, install-system-gdbinit)
+	(uninstall-system-gdbinit): New rules.  Make them .PHONY.
+	(install-only): Add dependency on install-system-gdbinit.
+	(uninstall): Add dependency on uninstall-system-gdbinit.
+	(clean): Add dependency on clean-system-gdbinit.
+	* system-gdbinit/elinos.py: New file.
+	* system-gdbinit/wrs-linux.py: New file.
+
+2013-05-21  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (old_renaming_is_invisible): Fix cleanup leak.
 
 2013-05-21  Hui Zhu  <hui@codesourcery.com>
