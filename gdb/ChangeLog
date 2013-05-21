@@ -1,3 +1,7 @@
+2013-05-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (old_renaming_is_invisible): Fix cleanup leak.
+
 2013-05-21  Hui Zhu  <hui@codesourcery.com>
 
 	* breakpoint.c (dprintf_breakpoint_ops): Remove its static.
