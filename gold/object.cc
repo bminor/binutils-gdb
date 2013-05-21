@@ -1,6 +1,6 @@
 // object.cc -- support for an object file for linking in gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -2687,6 +2687,7 @@ Sized_relobj_file<size, big_endian>::get_symbol_location_info(
 	  && (static_cast<off_t>(sym.get_st_value() + sym.get_st_size())
 	      > offset))
 	{
+	  info->enclosing_symbol_type = sym.get_st_type();
 	  if (sym.get_st_name() > names_size)
 	    info->enclosing_symbol_name = "(invalid)";
 	  else
@@ -2996,12 +2997,10 @@ Relocate_info<size, big_endian>::location(size_t, off_t offset) const
 	  ret += ":";
 	  ret += info.source_file;
 	}
-      size_t len = info.enclosing_symbol_name.length() + 100;
-      char* buf = new char[len];
-      snprintf(buf, len, _(":function %s"),
-	       info.enclosing_symbol_name.c_str());
-      ret += buf;
-      delete[] buf;
+      ret += ":";
+      if (info.enclosing_symbol_type == elfcpp::STT_FUNC)
+	ret += _("function ");
+      ret += info.enclosing_symbol_name;
       return ret;
     }
 

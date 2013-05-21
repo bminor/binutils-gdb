@@ -1,3 +1,12 @@
+2013-05-21  Cary Coutant  <ccoutant@google.com>
+
+    	* object.cc (Sized_relobj_file::get_symbol_location_info): Set
+    	type of enclosing symbol.
+    	(Relocate_info::location): Check symbol type when describing symbol.
+    	* object.h (Symbol_location_info): Remove unused line_number;
+    	add enclosing_symbol_type.
+    	* testsuite/debug_msg.sh: Adjust expected output.
+
 2013-05-13  Cary Coutant  <ccoutant@google.com>
 
     	* configure.ac: Export DEFAULT_TARGET.

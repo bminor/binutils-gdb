@@ -1,6 +1,6 @@
 // object.h -- support for an object file for linking in gold  -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -103,7 +103,7 @@ struct Symbol_location_info
 {
   std::string source_file;
   std::string enclosing_symbol_name;
-  int line_number;
+  elfcpp::STT enclosing_symbol_type;
 };
 
 // Data about a single relocation section.  This is read in

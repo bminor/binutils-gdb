@@ -2,7 +2,8 @@
 
 # debug_msg.sh -- a test case for printing debug info for missing symbols.
 
-# Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+# Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2013
+# Free Software Foundation, Inc.
 # Written by Ian Lance Taylor <iant@google.com>.
 
 # This file is part of gold.
@@ -55,9 +56,9 @@ check_missing()
 
 # We don't know how the compiler might order these variables, so we
 # can't test for the actual offset from .data, hence the regexp.
-check debug_msg.err "debug_msg.o:debug_msg.cc:function fn_array: error: undefined reference to 'undef_fn1()'"
-check debug_msg.err "debug_msg.o:debug_msg.cc:function fn_array: error: undefined reference to 'undef_fn2()'"
-check debug_msg.err "debug_msg.o:debug_msg.cc:function badref1: error: undefined reference to 'undef_int'"
+check debug_msg.err "debug_msg.o:debug_msg.cc:fn_array: error: undefined reference to 'undef_fn1()'"
+check debug_msg.err "debug_msg.o:debug_msg.cc:fn_array: error: undefined reference to 'undef_fn2()'"
+check debug_msg.err "debug_msg.o:debug_msg.cc:badref1: error: undefined reference to 'undef_int'"
 
 # These tests check only for the source file's file name (not the complete
 # path) because use of -fdebug-prefix-map may change the path to the source
@@ -93,9 +94,9 @@ check debug_msg.err "odr_violation2.cc:27"
 # Check for the same error messages when using --compressed-debug-sections.
 if test -r debug_msg_cdebug.err
 then
-  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:function fn_array: error: undefined reference to 'undef_fn1()'"
-  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:function fn_array: error: undefined reference to 'undef_fn2()'"
-  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:function badref1: error: undefined reference to 'undef_int'"
+  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:fn_array: error: undefined reference to 'undef_fn1()'"
+  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:fn_array: error: undefined reference to 'undef_fn2()'"
+  check debug_msg_cdebug.err "debug_msg_cdebug.o:debug_msg.cc:badref1: error: undefined reference to 'undef_int'"
   check debug_msg_cdebug.err ".*/debug_msg.cc:50: error: undefined reference to 'undef_fn1()'"
   check debug_msg_cdebug.err ".*/debug_msg.cc:55: error: undefined reference to 'undef_fn2()'"
   check debug_msg_cdebug.err ".*/debug_msg.cc:43: error: undefined reference to 'undef_fn1()'"
