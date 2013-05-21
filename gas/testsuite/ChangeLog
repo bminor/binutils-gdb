@@ -1,3 +1,7 @@
+2013-05-21  Alan Modra  <amodra@gmail.com>
+
+	* gas/ppc/vsx2.d: Ignore trailing padding.
+
 2013-05-20  Peter Bergner <bergner@vnet.ibm.com>
 
 	* gas/ppc/altivec2.d <bcdadd., bcdadd., vaddcuq, vaddecuq, vaddeuqm,
