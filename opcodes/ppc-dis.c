@@ -315,10 +315,7 @@ powerpc_init_dialect (struct disassemble_info *info)
       dialect = (PPC_OPCODE_PPC | PPC_OPCODE_ISEL | PPC_OPCODE_VLE);
       break;
     default:
-      dialect = (PPC_OPCODE_PPC | PPC_OPCODE_ISEL | PPC_OPCODE_64
-		 | PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
-		 | PPC_OPCODE_POWER7 | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX
-		 | PPC_OPCODE_ANY);
+      dialect = ppc_parse_cpu (dialect, &sticky, "power8") | PPC_OPCODE_ANY;
     }
 
   arg = info->disassembler_options;

@@ -1,3 +1,8 @@
+2013-05-20  Peter Bergner <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (ppc_setup_opcodes): Use new_seg to fix error
+	and clean up warning when using PRINT_OPCODE_TABLE.
+
 2013-05-20  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (md_apply_fix): Hoist code common to insn

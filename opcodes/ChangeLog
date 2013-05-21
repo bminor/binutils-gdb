@@ -1,3 +1,28 @@
+2013-05-20  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Set default dialect to power8.
+	* ppc-opc.c (BHRBE, ST, SIX, PS, SXL, VXPS_MASK, XX1RB_MASK,
+	XLS_MASK, PPCVSX2): New defines.
+	(powerpc_opcodes) <bcdadd., bcdsub., bctar, bctar, bctarl, clrbhrb,
+	fmrgew, fmrgow, lqarx, lxsiwax, lxsiwzx, lxsspx, mfbhrbe,
+	mffprd, mffprwz, mfvrd, mfvrwz, mfvsrd, mfvsrwz, msgclrp, msgsndp,
+	mtfprd, mtfprwa, mtfprwz, mtsle, mtvrd, mtvrwa, mtvrwz, mtvsrd,
+	mtvsrwa, mtvsrwz, pbt., rfebb, stqcx., stxsiwx, stxsspx,
+	vaddcuq, vaddecuq, vaddeuqm, vaddudm, vadduqm, vbpermq, vcipher,
+	vcipherlast, vclzb, vclzd, vclzh, vclzw, vcmpequd, vcmpequd.,
+	vcmpgtsd, vcmpgtsd., vcmpgtud, vcmpgtud., veqv, vgbbd, vmaxsd,
+	vmaxud, vminsd, vminud, vmrgew, vmrgow, vmulesw, vmuleuw, vmulosw,
+	vmulouw, vmuluwm, vnand, vncipher, vncipherlast, vorc, vpermxor,
+	vpksdss, vpksdus, vpkudum, vpkudus, vpmsumb, vpmsumd, vpmsumh,
+	vpmsumw, vpopcntb, vpopcntd, vpopcnth, vpopcntw, vrld, vsbox,
+	vshasigmad, vshasigmaw, vsld, vsrad, vsrd, vsubcuq, vsubecuq,
+	vsubeuqm, vsubudm, vsubuqm, vupkhsw, vupklsw, waitasec, xsaddsp,
+	xscvdpspn, xscvspdpn, xscvsxdsp, xscvuxdsp, xsdivsp, xsmaddasp,
+	xsmaddmsp, xsmsubasp, xsmsubmsp, xsmulsp, xsnmaddasp, xsnmaddmsp,
+	xsnmsubasp, xsnmsubmsp, xsresp, xsrsp, xsrsqrtesp, xssqrtsp,
+	xssubsp, xxleqv, xxlnand, xxlorc>: New instructions.
+	<lxvx, stxvx>: New extended mnemonics.
+
 2013-05-17  Alan Modra  <amodra@gmail.com>
 
 	* ia64-raw.tbl: Replace non-ASCII char.
