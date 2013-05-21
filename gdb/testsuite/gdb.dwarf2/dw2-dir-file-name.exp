@@ -322,10 +322,35 @@ if { [gdb_compile "${asmsrcfile} ${srcdir}/${subdir}/$srcfile" "${binfile}" exec
     return -1
 }
 
-remote_exec host "sh -c \"rm -f ${srcabsdir}{/rdir,}{/xdir,}{/compdir,}{/ldir,}{/fdir,}/${srctmpfile}\""
-remote_exec host "sh -c \"rmdir ${srcabsdir}{/rdir,}{/xdir,}{/compdir,}{/ldir,}{/fdir,}\""
-remote_exec host "sh -c \"mkdir ${srcabsdir}{,/rdir}{,/xdir}{,/compdir}{,/ldir}{,/fdir}\""
-remote_exec host "sh -c \"for d in ${srcabsdir}{,/rdir}{,/xdir}{,/compdir}{,/ldir}{,/fdir};do cp ${srcdir}/${subdir}/${srcfile} \\\$d/${srctmpfile}; done\""
+set dirs {}
+foreach r {"" /rdir} {
+  foreach x {"" /xdir} {
+      foreach comp {"" /compdir} {
+	  foreach l {"" /ldir} {
+	      foreach f {"" /fdir} {
+		  lappend dirs $r$x$comp$l$f
+	      }
+	  }
+      }
+  }
+}
+
+proc pathexpand {prefix dirlst suffix} {
+    set retlst {}
+    foreach dir $dirlst {
+	lappend retlst "$prefix$dir$suffix"
+    }
+    return $retlst
+}
+
+set filelist [pathexpand $srcabsdir $dirs "/$srctmpfile"]
+set dircreatelist [pathexpand $srcabsdir $dirs ""]
+set dirremovelist [pathexpand $srcabsdir [lreverse $dirs] ""]
+
+remote_exec host "sh -c \"rm -f $filelist\""
+remote_exec host "sh -c \"rmdir $dirremovelist\""
+remote_exec host "sh -c \"mkdir $dircreatelist\""
+remote_exec host "sh -c \"for d in $dircreatelist; do cp ${srcdir}/${subdir}/${srcfile} \\\$d/${srctmpfile}; done\""
 
 clean_restart ${testfile}
 
