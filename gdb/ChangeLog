@@ -1,3 +1,7 @@
+2013-05-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* solib-svr4.c (svr4_free_so): Protect against NULL dereference.
+
 2013-05-21  Pedro Alves  <palves@redhat.com>
 
 	* python/py-prettyprint.c (apply_val_pretty_printer): Check

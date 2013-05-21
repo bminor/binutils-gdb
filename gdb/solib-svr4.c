@@ -971,7 +971,8 @@ svr4_free_so (struct so_list *so)
 static void
 svr4_clear_so (struct so_list *so)
 {
-  so->lm_info->l_addr_p = 0;
+  if (so->lm_info != NULL)
+    so->lm_info->l_addr_p = 0;
 }
 
 /* Free so_list built so far (called via cleanup).  */
