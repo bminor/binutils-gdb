@@ -31,8 +31,7 @@ py_decref (void *p)
 {
   PyObject *py = p;
 
-  if (py)
-    Py_DECREF (py);
+  Py_DECREF (py);
 }
 
 /* Return a new cleanup which will decrement the Python object's

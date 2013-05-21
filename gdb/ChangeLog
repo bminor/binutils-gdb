@@ -1,5 +1,12 @@
 2013-05-21  Pedro Alves  <palves@redhat.com>
 
+	* python/py-prettyprint.c (apply_val_pretty_printer): Check
+	whether PRINTER is NULL before installing a Py_DECREF cleanup.
+	* python/py-utils.c (py_decref): Don't check for NULL before
+	calling Py_DECREF.
+
+2013-05-21  Pedro Alves  <palves@redhat.com>
+
 	* python/py-utils.c (py_decref): Remove extra braces.
 	(gdb_pymodule_addobject): Remove extra braces.
 	* python-internal.h (gdb_Py_DECREF): New static inline function.
