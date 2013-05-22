@@ -1,3 +1,19 @@
+2013-05-22  Keith Seitz  <keiths@redhat.com>
+
+	* ada-lang.c (is_known_support_routine): Add explicit free of
+	'func_name' from find_frame_funname.
+	(ada_unhandled_exception_name_addr_from_raise): Add cleanups
+	for func_name from find_frame_funname.
+	* python/py-frame.c (frapy_name): Add explicit free of
+	'name' from find_frame_funname.
+	* stack.c (find_frame_funname): Add comment explaining that
+	funcp must be freed by the caller.
+	Return copy of symbol names instead of pointers.
+	(print_frame): Add a cleanup for 'funname' from
+	find_frame_funname.
+	* stack.h (find_frame_funname): Remove "const" from
+	'funname' parameter.
+
 2013-05-22  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/15401:

@@ -1004,10 +1004,10 @@ get_last_displayed_sal (struct symtab_and_line *sal)
 
 
 /* Attempt to obtain the FUNNAME, FUNLANG and optionally FUNCP of the function
-   corresponding to FRAME.  */
+   corresponding to FRAME.  FUNNAME needs to be freed by the caller.  */
 
 void
-find_frame_funname (struct frame_info *frame, const char **funname,
+find_frame_funname (struct frame_info *frame, char **funname,
 		    enum language *funlang, struct symbol **funcp)
 {
   struct symbol *func;
@@ -1055,12 +1055,12 @@ find_frame_funname (struct frame_info *frame, const char **funname,
 	  /* We also don't know anything about the function besides
 	     its address and name.  */
 	  func = 0;
-	  *funname = SYMBOL_PRINT_NAME (msymbol.minsym);
+	  *funname = xstrdup (SYMBOL_PRINT_NAME (msymbol.minsym));
 	  *funlang = SYMBOL_LANGUAGE (msymbol.minsym);
 	}
       else
 	{
-	  *funname = SYMBOL_PRINT_NAME (func);
+	  *funname = xstrdup (SYMBOL_PRINT_NAME (func));
 	  *funlang = SYMBOL_LANGUAGE (func);
 	  if (funcp)
 	    *funcp = func;
@@ -1075,8 +1075,8 @@ find_frame_funname (struct frame_info *frame, const char **funname,
 
 	      if (func_only)
 		{
+		  xfree (*funname);
 		  *funname = func_only;
-		  make_cleanup (xfree, func_only);
 		}
 	    }
 	}
@@ -1092,7 +1092,7 @@ find_frame_funname (struct frame_info *frame, const char **funname,
       msymbol = lookup_minimal_symbol_by_pc (pc);
       if (msymbol.minsym != NULL)
 	{
-	  *funname = SYMBOL_PRINT_NAME (msymbol.minsym);
+	  *funname = xstrdup (SYMBOL_PRINT_NAME (msymbol.minsym));
 	  *funlang = SYMBOL_LANGUAGE (msymbol.minsym);
 	}
     }
@@ -1105,7 +1105,7 @@ print_frame (struct frame_info *frame, int print_level,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct ui_out *uiout = current_uiout;
-  const char *funname = NULL;
+  char *funname = NULL;
   enum language funlang = language_unknown;
   struct ui_file *stb;
   struct cleanup *old_chain, *list_chain;
@@ -1120,6 +1120,7 @@ print_frame (struct frame_info *frame, int print_level,
   old_chain = make_cleanup_ui_file_delete (stb);
 
   find_frame_funname (frame, &funname, &funlang, &func);
+  make_cleanup (xfree, funname);
 
   annotate_frame_begin (print_level ? frame_relative_level (frame) : 0,
 			gdbarch, pc);
