@@ -497,18 +497,11 @@ c_value_print (struct value *val, struct ui_file *stream,
       else if (options->objectprint
 	       && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
 	{
+	  int is_ref = TYPE_CODE (type) == TYPE_CODE_REF;
 
-	  if (TYPE_CODE(type) == TYPE_CODE_REF)
-	    {
-	      /* Copy value, change to pointer, so we don't get an
-	         error about a non-pointer type in
-	         value_rtti_target_type.  */
-	      struct value *temparg;
-	      temparg=value_copy(val);
-	      deprecated_set_value_type
-		(temparg, lookup_pointer_type (TYPE_TARGET_TYPE (type)));
-	      val = temparg;
-	    }
+	  if (is_ref)
+	    val = value_addr (val);
+
 	  /* Pointer to class, check real type of object.  */
 	  fprintf_filtered (stream, "(");
 
@@ -522,7 +515,14 @@ c_value_print (struct value *val, struct ui_file *stream,
 		  type = real_type;
 
 		  /* Need to adjust pointer value.  */
-		  val = value_from_pointer (type, value_as_address (val) - top);
+		  val = value_from_pointer (real_type,
+					    value_as_address (val) - top);
+
+		  if (is_ref)
+		    {
+		      val = value_ref (value_ind (val));
+		      type = value_type (val);
+		    }
 
 		  /* Note: When we look up RTTI entries, we don't get
 		     any information on const or volatile

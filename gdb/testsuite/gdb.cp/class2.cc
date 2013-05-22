@@ -67,6 +67,7 @@ int main (void)
   B beta, *bbp;
   C gamma;
   empty e;
+  A &aref (alpha);
 
   alpha.a1 = 100;
   beta.a1 = 200; beta.b1 = 201; beta.b2 = 202;

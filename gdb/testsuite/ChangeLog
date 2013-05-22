@@ -1,3 +1,8 @@
+2013-05-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/class2.cc (main): New local 'aref'.
+	* gdb.cp/class2.exp: Check printing of 'aref'.
+
 2013-05-22  Doug Evans  <dje@google.com>
 
 	* gdb.threads/wp-replication.c (main): Insert some code at the start

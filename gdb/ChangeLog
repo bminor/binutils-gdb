@@ -1,3 +1,9 @@
+2013-05-22  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/15401:
+	* c-valprint.c (c_value_print): Use value_addr for
+	references.  Convert back to reference type with value_ref.
+
 2013-05-22  Eli Zaretskii  <eliz@gnu.org>
 
 	* windows-nat.c (handle_unload_dll): Don't call solib_add for the
