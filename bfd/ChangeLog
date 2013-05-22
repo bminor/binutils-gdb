@@ -1,3 +1,9 @@
+2013-05-22  Ralf Dreesen  <gamma@dreesen.net>
+
+	PR binutils/15474
+	* srec.c (srec_set_section_contents): Properly convert size
+	and offset to address when octets_per_byte is not unity.
+
 2013-05-20  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elf32-vax.c (elf_vax_instantiate_got_entries): Only set the
