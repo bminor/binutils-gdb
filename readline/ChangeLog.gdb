@@ -1,3 +1,9 @@
+2013-05-22  Yao Qi  <yao@codesourcery.com>
+
+	* configure.in: Invoke AC_CANONICAL_BUILD.
+	Change $host_os to $build_os.
+	* configure: Regenerated.
+
 2012-10-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* terminal.c: Remove duplicate includes of windows.h and
