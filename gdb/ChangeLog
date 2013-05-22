@@ -1,3 +1,15 @@
+2013-05-22  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* ui-out.c: Create typedef ui_out_level_p and define vector
+	operations for that type.
+	(struct ui_out): Use a vector instead of an array.
+	(current_level): Return level from a vector.
+	(push_level): Create a level in a vector.
+	(pop_level): Delete a level in a vector.
+	(ui_out_new): Create initial level zero level, and store in a
+	vector.
+	(ui_out_destroy): Add vector cleanup.
+
 2013-05-22  Pedro Alves  <palves@redhat.com>
 
 	* python/python-internal.h (gdb_Py_DECREF): Tag with
