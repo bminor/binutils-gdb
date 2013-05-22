@@ -54,6 +54,7 @@ extern void vax_find_call   (Sym *, bfd_vma, bfd_vma);
 extern void tahoe_find_call (Sym *, bfd_vma, bfd_vma);
 extern void sparc_find_call (Sym *, bfd_vma, bfd_vma);
 extern void mips_find_call  (Sym *, bfd_vma, bfd_vma);
+extern void aarch64_find_call (Sym *, bfd_vma, bfd_vma);
 
 static void
 parse_error (const char *filename)
@@ -318,6 +319,10 @@ find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 
     case bfd_arch_mips:
       mips_find_call (parent, p_lowpc, p_highpc);
+      break;
+
+    case bfd_arch_aarch64:
+      aarch64_find_call (parent, p_lowpc, p_highpc);
       break;
 
     default:

@@ -1,3 +1,10 @@
+2013-05-22  Venkataramanan Kumar  <Venkataramanan.kumar@linaro.org>
+
+	* aarch64.c: New file.
+	* corefile.c (find_call): Call aarch64_find_call for bfd_arch_aarch64.
+	* Makefile.am (sources): Add aarch64.c.
+	* Makefile.in: Regenerate.
+
 For older changes see ChangeLog-2012
 
 Copyright (C) 2013 Free Software Foundation, Inc.

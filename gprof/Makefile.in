@@ -92,7 +92,8 @@ am__objects_1 = basic_blocks.$(OBJEXT) call_graph.$(OBJEXT) \
 	hertz.$(OBJEXT) hist.$(OBJEXT) source.$(OBJEXT) \
 	search_list.$(OBJEXT) symtab.$(OBJEXT) sym_ids.$(OBJEXT) \
 	utils.$(OBJEXT) i386.$(OBJEXT) alpha.$(OBJEXT) vax.$(OBJEXT) \
-	tahoe.$(OBJEXT) sparc.$(OBJEXT) mips.$(OBJEXT)
+	tahoe.$(OBJEXT) sparc.$(OBJEXT) mips.$(OBJEXT) \
+	aarch64.$(OBJEXT)
 am_gprof_OBJECTS = $(am__objects_1) flat_bl.$(OBJEXT) \
 	bsd_callg_bl.$(OBJEXT) fsf_callg_bl.$(OBJEXT)
 gprof_OBJECTS = $(am_gprof_OBJECTS)
@@ -309,7 +310,7 @@ AM_CPPFLAGS = -DDEBUG -I../bfd -I$(srcdir)/../include \
 sources = basic_blocks.c call_graph.c cg_arcs.c cg_dfn.c \
 	cg_print.c corefile.c gmon_io.c gprof.c hertz.c hist.c source.c \
 	search_list.c symtab.c sym_ids.c utils.c \
-	i386.c alpha.c vax.c tahoe.c sparc.c mips.c
+	i386.c alpha.c vax.c tahoe.c sparc.c mips.c aarch64.c
 
 gprof_SOURCES = $(sources) flat_bl.c bsd_callg_bl.c fsf_callg_bl.c
 gprof_DEPENDENCIES = ../bfd/libbfd.la ../libiberty/libiberty.a $(LIBINTL_DEP)
@@ -451,6 +452,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/aarch64.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/alpha.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_blocks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bsd_callg_bl.Po@am__quote@
