@@ -75,10 +75,14 @@ main ()
   pthread_t threads[NR_THREADS];
   int i;
 
+  /* Something to ensure that the breakpoint used to run to main
+     is only hit once.  */
+  empty_cycle ();
+
   while (watch_count_done == 0)
     {
-      /* GDB will modify the value of "i" at runtime and we will
-	 get past this point.  */
+      /* GDB will modify the value of "watch_count_done" at runtime and we
+	 will get past this point.  */
       empty_cycle ();
     }
 
