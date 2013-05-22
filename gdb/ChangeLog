@@ -1,3 +1,10 @@
+2013-05-22  Eli Zaretskii  <eliz@gnu.org>
+
+	* windows-nat.c (handle_unload_dll): Don't call solib_add for the
+	unloaded DLL, it will be done by handle_solib_event.  See
+	http://sourceware.org/ml/gdb-patches/2013-05/msg00713.html for the
+	details.
+
 2013-05-22  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* ui-out.c: Create typedef ui_out_level_p and define vector
