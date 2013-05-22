@@ -9354,7 +9354,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
       const char *name;
       bfd_vma value = 0;
       reloc_howto_type *howto;
-      bfd_boolean cross_mode_jump_p;
+      bfd_boolean cross_mode_jump_p = FALSE;
       /* TRUE if the relocation is a RELA relocation, rather than a
          REL relocation.  */
       bfd_boolean rela_relocation_p = TRUE;

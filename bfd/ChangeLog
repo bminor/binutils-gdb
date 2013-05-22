@@ -1,3 +1,8 @@
+2013-05-22  Eric Herman  <eric@freesa.org>
+
+	PR binutils/15462
+	* elfxx-mips.c (_bfd_mips_elf_relocate_section): Warning fix.
+
 2013-05-22  Ralf Dreesen  <gamma@dreesen.net>
 
 	PR binutils/15474
