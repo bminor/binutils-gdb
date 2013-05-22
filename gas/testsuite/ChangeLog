@@ -1,3 +1,10 @@
+2013-05-22  Jürgen Urban  <JuergenUrban@gmx.de>
+
+	* gas/mips/r5900-full.s, gas/mips/r5900-full.d: Add tests for LQ
+	and SQ macros.
+	* gas/mips/r5900-vu0.s, gas/mips/r5900-vu0.d: New test.
+	* gas/mips/mips.exp: Run it.
+
 2013-05-21  Alan Modra  <amodra@gmail.com>
 
 	* gas/ppc/vsx2.d: Ignore trailing padding.

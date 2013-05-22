@@ -1,3 +1,7 @@
+2013-05-22  Jürgen Urban  <JuergenUrban@gmx.de>
+
+	* mips-opc.c (mips_builtin_opcodes): Add R5900 VU0 instructions.
+
 2013-05-20  Peter Bergner <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (powerpc_init_dialect): Set default dialect to power8.

@@ -1,3 +1,7 @@
+2013-05-22  Jürgen Urban  <JuergenUrban@gmx.de>
+
+	* config/tc-mips.c (macro): Handle M_LQC2_AB and M_SQC2_AB.
+
 2013-05-20  Peter Bergner <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (ppc_setup_opcodes): Use new_seg to fix error

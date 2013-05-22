@@ -53,7 +53,7 @@ stuff:
 	trunc.w.s $f0, $f31
 	trunc.w.s $f31, $f0
 
-	# Test ei/di, but not the R5900 has a bug. ei/di should not be used.
+	# Test ei/di, but the R5900 has a bug. ei/di should not be used.
 	di
 	ei
 
@@ -68,12 +68,20 @@ stuff:
 	sq $1, 0x7fff($1)
 	sq $8, -0x8000($8)
 	sq $31, -1($31)
+	.set at
+	sq $0, 0x8000($2)
+	sq $8, -0x8001($31)
+	sq $31, 0xF1234567($4)
+	.set noat
 
 	# 128 bit load instruction.
 	lq $0, 0($0)
 	lq $1, 0x7fff($1)
 	lq $8, -0x8000($8)
 	lq $31, -1($31)
+	lq $3, 0x8000($2)
+	lq $8, -0x8001($31)
+	lq $31, 0xF1234567($4)
 
 	# Prefetch cache
 	pref 0, 0($0)
@@ -210,7 +218,7 @@ stuff:
 	rsqrt.s $f0, $f31, $f0
 	rsqrt.s $f31, $f0, $f31
 
-	# FLoating point subtract to accumulator
+	# Floating point subtract to accumulator
 	suba.s $f0, $f31
 	suba.s $f31, $f0
 

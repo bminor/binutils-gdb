@@ -8201,6 +8201,13 @@ macro (struct mips_cl_insn *ip)
       /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld_st;
+    case M_LQC2_AB:
+      ab = 1;
+      s = "lqc2";
+      fmt = "E,o(b)";
+      /* Itbl support may require additional care here.  */
+      coproc = 1;
+      goto ld_st;
     case M_LDC3_AB:
       ab = 1;
       s = "ldc3";
@@ -8387,6 +8394,13 @@ macro (struct mips_cl_insn *ip)
       s = "sdc2";
       fmt = COP12_FMT;
       off12 = mips_opts.micromips;
+      /* Itbl support may require additional care here.  */
+      coproc = 1;
+      goto ld_st;
+    case M_SQC2_AB:
+      ab = 1;
+      s = "sqc2";
+      fmt = "E,o(b)";
       /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld_st;

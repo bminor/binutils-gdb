@@ -1173,6 +1173,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "r5900"
     run_dump_test "r5900-full"
     if $elf { run_list_test "r5900-nollsc" "-mabi=o64 -march=r5900" }
+    run_dump_test "r5900-vu0"
 
     run_list_test_arches "ext-ill"	[mips_arch_list_matching mips64r2]
 }
