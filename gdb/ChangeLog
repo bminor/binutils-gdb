@@ -1,3 +1,8 @@
+2013-05-22  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h (gdb_Py_DECREF): Tag with
+	"ARI: editCase function".
+
 2013-05-21  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* solib-svr4.c (svr4_free_so): Protect against NULL dereference.

@@ -174,7 +174,7 @@ typedef unsigned long gdb_py_ulongest;
    Wrap it ourselves, so that callers don't need to care.  */
 
 static inline void
-gdb_Py_DECREF (void *op)
+gdb_Py_DECREF (void *op) /* ARI: editCase function */
 {
   Py_DECREF (op);
 }
