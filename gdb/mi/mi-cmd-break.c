@@ -135,7 +135,8 @@ mi_argv_to_format (char **argv, int argc)
 	    {
 	      char tmp[5];
 
-	      sprintf (tmp, "\\%o", (unsigned char) argv[0][i]);
+	      xsnprintf (tmp, sizeof (tmp), "\\%o",
+			 (unsigned char) argv[0][i]);
 	      obstack_grow (&obstack, tmp, strlen (tmp));
 	    }
 	  break;

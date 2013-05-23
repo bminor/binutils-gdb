@@ -1,3 +1,8 @@
+2013-05-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-cmd-break.c (mi_argv_to_format): Use xsnprintf instead
+	of sprintf.
+
 2013-05-22  Keith Seitz  <keiths@redhat.com>
 
 	* ada-lang.c (is_known_support_routine): Add explicit free of
