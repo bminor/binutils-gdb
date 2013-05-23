@@ -1,3 +1,9 @@
+2013-05-23  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/s390/zarch-zEC12.d: Adjust length operands for cdzt, cxzt,
+	czdt, and czxt.
+	* gas/s390/zarch-zEC12.d: Likewise.
+
 2013-05-22  Jürgen Urban  <JuergenUrban@gmx.de>
 
 	* gas/mips/r5900-full.s, gas/mips/r5900-full.d: Add tests for LQ

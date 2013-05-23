@@ -47,10 +47,10 @@ Disassembly of section .text:
 .*:	eb 6c 7a 4d fe 2b [	 ]*clgtnh	%r6,-5555\(%r7\)
 .*:	eb 6c 7a 4d fe 2b [	 ]*clgtnh	%r6,-5555\(%r7\)
 .*:	ec 67 0c 0d 0e 59 [	 ]*risbgn	%r6,%r7,12,13,14
-.*:	ed 90 8f a0 6d aa [	 ]*cdzt	%f6,4000\(10,%r8\),13
-.*:	ed 90 8f a0 4d ab [	 ]*cxzt	%f4,4000\(10,%r8\),13
-.*:	ed 90 8f a0 6d a8 [	 ]*czdt	%f6,4000\(10,%r8\),13
-.*:	ed 90 8f a0 4d a9 [	 ]*czxt	%f4,4000\(10,%r8\),13
+.*:	ed 0f 8f a0 6d aa [	 ]*cdzt	%f6,4000\(16,%r8\),13
+.*:	ed 21 8f a0 4d ab [	 ]*cxzt	%f4,4000\(34,%r8\),13
+.*:	ed 0f 8f a0 6d a8 [	 ]*czdt	%f6,4000\(16,%r8\),13
+.*:	ed 21 8f a0 4d a9 [	 ]*czxt	%f4,4000\(34,%r8\),13
 .*:	b2 e8 c0 56 [	 ]*ppa	%r5,%r6,12
 .*:	b9 8f 60 59 [	 ]*crdte	%r5,%r6,%r9,0
 .*:	b9 8f 61 59 [	 ]*crdte	%r5,%r6,%r9,1

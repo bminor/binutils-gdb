@@ -1,3 +1,8 @@
+2013-05-23  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.c: Fix length operand in RSL_LRDFU and RSL_LRDFEU
+	instruction format.
+
 2013-05-22  Jürgen Urban  <JuergenUrban@gmx.de>
 
 	* mips-opc.c (mips_builtin_opcodes): Add R5900 VU0 instructions.
