@@ -1311,6 +1311,7 @@ static int
 displaced_step_prepare (ptid_t ptid)
 {
   struct cleanup *old_cleanups, *ignore_cleanups;
+  struct thread_info *tp = find_thread_ptid (ptid);
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR original, copy;
@@ -1322,6 +1323,12 @@ displaced_step_prepare (ptid_t ptid)
   /* We should never reach this function if the architecture does not
      support displaced stepping.  */
   gdb_assert (gdbarch_displaced_step_copy_insn_p (gdbarch));
+
+  /* Disable range stepping while executing in the scratch pad.  We
+     want a single-step even if executing the displaced instruction in
+     the scratch buffer lands within the stepping range (e.g., a
+     jump/branch).  */
+  tp->control.may_range_step = 0;
 
   /* We have to displaced step one thread at a time, as we only have
      access to a single scratch space per inferior.  */
@@ -1778,6 +1785,11 @@ how to step past a permanent breakpoint on this architecture.  Try using\n\
 a command like `return' or `jump' to continue execution."));
     }
 
+  /* If we have a breakpoint to step over, make sure to do a single
+     step only.  Same if we have software watchpoints.  */
+  if (tp->control.trap_expected || bpstat_should_step ())
+    tp->control.may_range_step = 0;
+
   /* If enabled, step over breakpoints by executing a copy of the
      instruction at a different address.
 
@@ -1939,6 +1951,16 @@ a command like `return' or `jump' to continue execution."));
           displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
         }
 
+      if (tp->control.may_range_step)
+	{
+	  /* If we're resuming a thread with the PC out of the step
+	     range, then we're doing some nested/finer run control
+	     operation, like stepping the thread out of the dynamic
+	     linker or the displaced stepping scratch pad.  We
+	     shouldn't have allowed a range step then.  */
+	  gdb_assert (pc_in_thread_step_range (pc, tp));
+	}
+
       /* Install inferior's terminal modes.  */
       target_terminal_inferior ();
 
@@ -1980,6 +2002,7 @@ clear_proceed_status_thread (struct thread_info *tp)
   tp->control.trap_expected = 0;
   tp->control.step_range_start = 0;
   tp->control.step_range_end = 0;
+  tp->control.may_range_step = 0;
   tp->control.step_frame_id = null_frame_id;
   tp->control.step_stack_frame_id = null_frame_id;
   tp->control.step_over_calls = STEP_OVER_UNDEBUGGABLE;
@@ -3223,6 +3246,10 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* If it's a new thread, add it to the thread database.  */
       if (ecs->event_thread == NULL)
 	ecs->event_thread = add_thread (ecs->ptid);
+
+      /* Disable range stepping.  If the next step request could use a
+	 range, this will be end up re-enabled then.  */
+      ecs->event_thread->control.may_range_step = 0;
     }
 
   /* Dependent on valid ECS->EVENT_THREAD.  */
@@ -4717,6 +4744,11 @@ process_event_stop_test:
 	   paddress (gdbarch, ecs->event_thread->control.step_range_start),
 	   paddress (gdbarch, ecs->event_thread->control.step_range_end));
 
+      /* Tentatively re-enable range stepping; `resume' disables it if
+	 necessary (e.g., if we're stepping over a breakpoint or we
+	 have software watchpoints).  */
+      ecs->event_thread->control.may_range_step = 1;
+
       /* When stepping backward, stop at beginning of line range
 	 (unless it's the function entry point, in which case
 	 keep going back to the call point).  */
@@ -5233,6 +5265,7 @@ process_event_stop_test:
 
   ecs->event_thread->control.step_range_start = stop_pc_sal.pc;
   ecs->event_thread->control.step_range_end = stop_pc_sal.end;
+  ecs->event_thread->control.may_range_step = 1;
   set_step_info (frame, stop_pc_sal);
 
   if (debug_infrun)

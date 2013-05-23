@@ -1,3 +1,11 @@
+2013-05-23  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Packets): Document 'vCont;r'.
+	(Continuing and Stepping): Document target-assisted range
+	stepping, and the 'set range-stepping' and 'show range-stepping'
+	commands.
+
 2013-05-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Installed System-wide Configuration Scripts):

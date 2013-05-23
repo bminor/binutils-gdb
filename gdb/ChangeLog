@@ -1,6 +1,32 @@
 2013-05-23  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* gdbthread.h (struct thread_control_state) <may_range_step>: New
+	field.
+	* infcmd.c (step_once, until_next_command): Enable range stepping.
+	* infrun.c (displaced_step_prepare): Disable range stepping.
+	(resume): Disable range stepping if stepping over a breakpoint or
+	we have software watchpoints.  If range stepping is enabled,
+	assert the thread is in the stepping range.
+	(clear_proceed_status_thread): Clear may_range_step.
+	(handle_inferior_event): Disable range stepping as soon as we know
+	the thread that hit the event.  Re-enable it whenever we're going
+	to step with a step range.
+	* remote.c (struct vCont_action_support) <r>: New field.
+	(use_range_stepping): New global.
+	(remote_vcont_probe): Handle 'r' action.
+	(append_resumption): Append an 'r' action if the thread may range
+	step.
+	(show_range_stepping): New function.
+	(set_range_stepping): New function.
+	(_initialize_remote): Call add_setshow_boolean_cmd to register the
+	'set range-stepping' and 'show range-stepping' commands.
+	* NEWS: Mention range stepping, the new vCont;r action, and the
+	new "set/show range-stepping" commands.
+
+2013-05-23  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* remote.c (struct vCont_action_support): New struct.
 	(struct remote_state) <support_vCont_t>: Remove field.
 	<vCont_actions_support>: New field.

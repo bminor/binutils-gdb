@@ -260,7 +260,14 @@ struct vCont_action_support
 {
   /* vCont;t */
   int t;
+
+  /* vCont;r */
+  int r;
 };
+
+/* Controls whether GDB is willing to use range stepping.  */
+
+static int use_range_stepping = 1;
 
 /* Description of the remote protocol state for the currently
    connected target.  This is per-target state, and independent of the
@@ -4653,6 +4660,7 @@ remote_vcont_probe (struct remote_state *rs)
       support_c = 0;
       support_C = 0;
       rs->supports_vCont.t = 0;
+      rs->supports_vCont.r = 0;
       while (p && *p == ';')
 	{
 	  p++;
@@ -4666,6 +4674,8 @@ remote_vcont_probe (struct remote_state *rs)
 	    support_C = 1;
 	  else if (*p == 't' && (*(p + 1) == ';' || *(p + 1) == 0))
 	    rs->supports_vCont.t = 1;
+	  else if (*p == 'r' && (*(p + 1) == ';' || *(p + 1) == 0))
+	    rs->supports_vCont.r = 1;
 
 	  p = strchr (p, ';');
 	}
@@ -4697,6 +4707,42 @@ append_resumption (char *p, char *endp,
 
   if (step && siggnal != GDB_SIGNAL_0)
     p += xsnprintf (p, endp - p, ";S%02x", siggnal);
+  else if (step
+	   /* GDB is willing to range step.  */
+	   && use_range_stepping
+	   /* Target supports range stepping.  */
+	   && rs->supports_vCont.r
+	   /* We don't currently support range stepping multiple
+	      threads with a wildcard (though the protocol allows it,
+	      so stubs shouldn't make an active effort to forbid
+	      it).  */
+	   && !(remote_multi_process_p (rs) && ptid_is_pid (ptid)))
+    {
+      struct thread_info *tp;
+
+      if (ptid_equal (ptid, minus_one_ptid))
+	{
+	  /* If we don't know about the target thread's tid, then
+	     we're resuming magic_null_ptid (see caller).  */
+	  tp = find_thread_ptid (magic_null_ptid);
+	}
+      else
+	tp = find_thread_ptid (ptid);
+      gdb_assert (tp != NULL);
+
+      if (tp->control.may_range_step)
+	{
+	  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
+
+	  p += xsnprintf (p, endp - p, ";r%s,%s",
+			  phex_nz (tp->control.step_range_start,
+				   addr_size),
+			  phex_nz (tp->control.step_range_end,
+				   addr_size));
+	}
+      else
+	p += xsnprintf (p, endp - p, ";s");
+    }
   else if (step)
     p += xsnprintf (p, endp - p, ";s");
   else if (siggnal != GDB_SIGNAL_0)
@@ -11659,6 +11705,44 @@ remote_upload_trace_state_variables (struct uploaded_tsv **utsvp)
   return 0;
 }
 
+/* The "set/show range-stepping" show hook.  */
+
+static void
+show_range_stepping (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c,
+		     const char *value)
+{
+  fprintf_filtered (file,
+		    _("Debugger's willingness to use range stepping "
+		      "is %s.\n"), value);
+}
+
+/* The "set/show range-stepping" set hook.  */
+
+static void
+set_range_stepping (char *ignore_args, int from_tty,
+		    struct cmd_list_element *c)
+{
+  /* Whene enabling, check whether range stepping is actually
+     supported by the target, and warn if not.  */
+  if (use_range_stepping)
+    {
+      if (remote_desc != NULL)
+	{
+	  struct remote_state *rs = get_remote_state ();
+
+	  if (remote_protocol_packets[PACKET_vCont].support == PACKET_SUPPORT_UNKNOWN)
+	    remote_vcont_probe (rs);
+
+	  if (remote_protocol_packets[PACKET_vCont].support == PACKET_ENABLE
+	      && rs->supports_vCont.r)
+	    return;
+	}
+
+      warning (_("Range stepping is not supported by the current target"));
+    }
+}
+
 void
 _initialize_remote (void)
 {
@@ -12055,6 +12139,20 @@ Transfer files to and from the remote target system."),
 Set the remote pathname for \"run\""), _("\
 Show the remote pathname for \"run\""), NULL, NULL, NULL,
 				   &remote_set_cmdlist, &remote_show_cmdlist);
+
+  add_setshow_boolean_cmd ("range-stepping", class_run,
+			   &use_range_stepping, _("\
+Enable or disable range stepping."), _("\
+Show whether target-assisted range stepping is enabled."), _("\
+If on, and the target supports it, when stepping a source line, GDB\n\
+tells the target to step the corresponding range of addresses itself instead\n\
+of issuing multiple single-steps.  This speeds up source level\n\
+stepping.  If off, GDB always issues single-steps, even if range\n\
+stepping is supported by the target.  The default is on."),
+			   set_range_stepping,
+			   show_range_stepping,
+			   &setlist,
+			   &showlist);
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);

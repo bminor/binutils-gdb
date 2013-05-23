@@ -5219,6 +5219,38 @@ Execute one machine instruction, but if it is a function call,
 proceed until the function returns.
 
 An argument is a repeat count, as in @code{next}.
+
+@end table
+
+@anchor{range stepping}
+@cindex range stepping
+@cindex target-assisted range stepping
+By default, and if available, @value{GDBN} makes use of
+target-assisted @dfn{range stepping}.  In other words, whenever you
+use a stepping command (e.g., @code{step}, @code{next}), @value{GDBN}
+tells the target to step the corresponding range of instruction
+addresses instead of issuing multiple single-steps.  This speeds up
+line stepping, particularly for remote targets.  Ideally, there should
+be no reason you would want to turn range stepping off.  However, it's
+possible that a bug in the debug info, a bug in the remote stub (for
+remote targets), or even a bug in @value{GDBN} could make line
+stepping behave incorrectly when target-assisted range stepping is
+enabled.  You can use the following command to turn off range stepping
+if necessary:
+
+@table @code
+@kindex set range-stepping
+@kindex show range-stepping
+@item set range-stepping
+@itemx show range-stepping
+Control whether range stepping is enabled.
+
+If @code{on}, and the target supports it, @value{GDBN} tells the
+target to step a range of addresses itself, instead of issuing
+multiple single-steps.  If @code{off}, @value{GDBN} always issues
+single-steps, even if range stepping is supported by the target.  The
+default is @code{on}.
+
 @end table
 
 @node Skipping Over Functions and Files
@@ -37511,6 +37543,22 @@ Step.
 Step with signal @var{sig}.  The signal @var{sig} should be two hex digits.
 @item t
 Stop.
+@item r @var{start},@var{end}
+Step once, and then keep stepping as long as the thread stops at
+addresses between @var{start} (inclusive) and @var{end} (exclusive).
+The remote stub reports a stop reply when either the thread goes out
+of the range or is stopped due to an unrelated reason, such as hitting
+a breakpoint.  @xref{range stepping}.
+
+If the range is empty (@var{start} == @var{end}), then the action
+becomes equivalent to the @samp{s} action.  In other words,
+single-step once, and report the stop (even if the stepped instruction
+jumps to @var{start}).
+
+(A stop reply may be sent at any point even if the PC is still within
+the stepping range; for example, it is valid to implement this packet
+in a degenerate way as a single instruction step operation.)
+
 @end table
 
 The optional argument @var{addr} normally associated with the 

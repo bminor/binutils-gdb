@@ -65,6 +65,14 @@ struct thread_control_state
   CORE_ADDR step_range_start;	/* Inclusive */
   CORE_ADDR step_range_end;	/* Exclusive */
 
+  /* If GDB issues a target step request, and this is nonzero, the
+     target should single-step this thread once, and then continue
+     single-stepping it without GDB core involvement as long as the
+     thread stops in the step range above.  If this is zero, the
+     target should ignore the step range, and only issue one single
+     step.  */
+  int may_range_step;
+
   /* Stack frame address as of when stepping command was issued.
      This is how we know when we step into a subroutine call, and how
      to set the frame for the breakpoint used to step out.  */

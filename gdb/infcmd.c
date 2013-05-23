@@ -1046,9 +1046,14 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 				 &tp->control.step_range_start,
 				 &tp->control.step_range_end);
 
+	  tp->control.may_range_step = 1;
+
 	  /* If we have no line info, switch to stepi mode.  */
 	  if (tp->control.step_range_end == 0 && step_stop_if_no_debug)
-	    tp->control.step_range_start = tp->control.step_range_end = 1;
+	    {
+	      tp->control.step_range_start = tp->control.step_range_end = 1;
+	      tp->control.may_range_step = 0;
+	    }
 	  else if (tp->control.step_range_end == 0)
 	    {
 	      const char *name;
@@ -1337,6 +1342,7 @@ until_next_command (int from_tty)
       tp->control.step_range_start = BLOCK_START (SYMBOL_BLOCK_VALUE (func));
       tp->control.step_range_end = sal.end;
     }
+  tp->control.may_range_step = 1;
 
   tp->control.step_over_calls = STEP_OVER_ALL;
 
