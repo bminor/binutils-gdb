@@ -1,3 +1,12 @@
+2013-05-23  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/range-stepping.c: New file.
+	* gdb.base/range-stepping.exp: New file.
+	* gdb.trace/range-stepping.c: New file.
+	* gdb.trace/range-stepping.exp: New file.
+	* lib/range-stepping-support.exp: New file.
+
 2013-05-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.cp/class2.cc (main): New local 'aref'.
