@@ -251,6 +251,17 @@ static struct cmd_list_element *remote_cmdlist;
 static struct cmd_list_element *remote_set_cmdlist;
 static struct cmd_list_element *remote_show_cmdlist;
 
+/* Stub vCont actions support.
+
+   Each field is a boolean flag indicating whether the stub reports
+   support for the corresponding action.  */
+
+struct vCont_action_support
+{
+  /* vCont;t */
+  int t;
+};
+
 /* Description of the remote protocol state for the currently
    connected target.  This is per-target state, and independent of the
    selected architecture.  */
@@ -308,8 +319,8 @@ struct remote_state
   /* True if the stub reports support for non-stop mode.  */
   int non_stop_aware;
 
-  /* True if the stub reports support for vCont;t.  */
-  int support_vCont_t;
+  /* The status of the stub support for the various vCont actions.  */
+  struct vCont_action_support supports_vCont;
 
   /* True if the stub reports support for conditional tracepoints.  */
   int cond_tracepoints;
@@ -4641,7 +4652,7 @@ remote_vcont_probe (struct remote_state *rs)
       support_S = 0;
       support_c = 0;
       support_C = 0;
-      rs->support_vCont_t = 0;
+      rs->supports_vCont.t = 0;
       while (p && *p == ';')
 	{
 	  p++;
@@ -4654,7 +4665,7 @@ remote_vcont_probe (struct remote_state *rs)
 	  else if (*p == 'C' && (*(p + 1) == ';' || *(p + 1) == 0))
 	    support_C = 1;
 	  else if (*p == 't' && (*(p + 1) == ';' || *(p + 1) == 0))
-	    rs->support_vCont_t = 1;
+	    rs->supports_vCont.t = 1;
 
 	  p = strchr (p, ';');
 	}
@@ -5003,7 +5014,7 @@ remote_stop_ns (ptid_t ptid)
   if (remote_protocol_packets[PACKET_vCont].support == PACKET_SUPPORT_UNKNOWN)
     remote_vcont_probe (rs);
 
-  if (!rs->support_vCont_t)
+  if (!rs->supports_vCont.t)
     error (_("Remote server does not support stopping threads"));
 
   if (ptid_equal (ptid, minus_one_ptid)

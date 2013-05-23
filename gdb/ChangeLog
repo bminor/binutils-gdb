@@ -1,6 +1,14 @@
 2013-05-23  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
+	* remote.c (struct vCont_action_support): New struct.
+	(struct remote_state) <support_vCont_t>: Remove field.
+	<vCont_actions_support>: New field.
+	(remote_vcont_probe, remote_stop_ns): Update.
+
+2013-05-23  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
 	* gdbthread.h (pc_in_thread_step_range): New declaration.
 	* thread.c (pc_in_thread_step_range): New function.
 	* infrun.c (handle_inferior_event): Use it.
