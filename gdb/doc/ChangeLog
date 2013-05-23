@@ -1,3 +1,11 @@
+2013-05-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Installed System-wide Configuration Scripts):
+	Add subsection describing the scripts now available under
+	the data-dir's system-gdbbinit subdirectory.
+	* NEWS: Add entry announcing the availability of system-wide
+	configuration scripts for ElinOS and Wind River Linux.
+
 2013-05-21  Hui Zhu  <hui@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Breakpoint Commands): Describe the

@@ -72,6 +72,12 @@ show debug nios2
 
   ** The new command -dprintf-insert sets a dynamic printf breakpoint.
 
+* New system-wide configuration scripts
+  A GDB installation now provides scripts suitable for use as system-wide
+  configuration scripts for the following systems:
+    ** ElinOS
+    ** Wind River Linux
+
 *** Changes in GDB 7.6
 
 * Target record has been renamed to record-full.

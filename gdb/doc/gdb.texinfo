@@ -36332,6 +36332,38 @@ initialization.  If the data-directory is changed after @value{GDBN} has
 started with the @code{set data-directory} command, the file will not be
 reread.
 
+@node Installed System-wide Configuration Scripts
+@subsection Installed System-wide Configuration Scripts
+@cindex system-wide configuration scripts
+
+The @file{system-gdbinit} directory, located inside the data-directory
+(as specified by @option{--with-gdb-datadir} at configure time) contains
+a number of scripts which can be used as system-wide init files.  To
+automatically source those scripts at startup, @value{GDBN} should be
+configured with @option{--with-system-gdbinit}.  Otherwise, any user
+should be able to source them by hand as needed.
+
+The following scripts are currently available:
+@itemize @bullet
+
+@item @file{elinos.py}
+@pindex elinos.py
+@cindex ELinOS system-wide configuration script
+This script is useful when debugging a program on an ELinOS target.
+It takes advantage of the environment variables defined in a standard
+ELinOS environment in order to determine the location of the system
+shared libraries, and then sets the @samp{solib-absolute-prefix}
+and @samp{solib-search-path} variables appropriately.
+
+@item @file{wrs-linux.py}
+@pindex wrs-linux.py
+@cindex Wind River Linux system-wide configuration script
+This script is useful when debugging a program on a target running
+Wind River Linux.  It expects the @env{ENV_PREFIX} to be set to
+the host-side sysroot used by the target system.
+
+@end itemize
+
 @node Maintenance Commands
 @appendix Maintenance Commands
 @cindex maintenance commands
