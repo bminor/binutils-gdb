@@ -1,3 +1,10 @@
+2013-05-23  Alan Modra  <amodra@gmail.com>
+
+	* format.c (bfd_check_format_matches): Don't match a target in
+	targ_selvecs if some other target is a better match.  If
+	targets implement match priority, fall back to the first of
+	the best matches.
+
 2013-05-22  Eric Herman  <eric@freesa.org>
 
 	PR binutils/15462
