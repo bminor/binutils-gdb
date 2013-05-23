@@ -276,6 +276,16 @@ supports_fast_tracepoints (void)
   return the_low_target.install_fast_tracepoint_jump_pad != NULL;
 }
 
+/* True if LWP is stopped in its stepping range.  */
+
+static int
+lwp_in_step_range (struct lwp_info *lwp)
+{
+  CORE_ADDR pc = lwp->stop_pc;
+
+  return (pc >= lwp->step_range_start && pc < lwp->step_range_end);
+}
+
 struct pending_signals
 {
   int signal;
@@ -2337,6 +2347,7 @@ linux_wait_1 (ptid_t ptid,
   int maybe_internal_trap;
   int report_to_gdb;
   int trace_event;
+  int in_step_range;
 
   /* Translate generic target options into linux options.  */
   options = __WALL;
@@ -2346,6 +2357,7 @@ linux_wait_1 (ptid_t ptid,
 retry:
   bp_explains_trap = 0;
   trace_event = 0;
+  in_step_range = 0;
   ourstatus->kind = TARGET_WAITKIND_IGNORE;
 
   /* If we were only supposed to resume one thread, only wait for
@@ -2639,18 +2651,24 @@ Check if we're already there.\n",
       goto retry;
     }
 
-  /* If GDB wanted this thread to single step, we always want to
-     report the SIGTRAP, and let GDB handle it.  Watchpoints should
-     always be reported.  So should signals we can't explain.  A
-     SIGTRAP we can't explain could be a GDB breakpoint --- we may or
-     not support Z0 breakpoints.  If we do, we're be able to handle
-     GDB breakpoints on top of internal breakpoints, by handling the
-     internal breakpoint and still reporting the event to GDB.  If we
-     don't, we're out of luck, GDB won't see the breakpoint hit.  */
+  /* Note that all addresses are always "out of the step range" when
+     there's no range to begin with.  */
+  in_step_range = lwp_in_step_range (event_child);
+
+  /* If GDB wanted this thread to single step, and the thread is out
+     of the step range, we always want to report the SIGTRAP, and let
+     GDB handle it.  Watchpoints should always be reported.  So should
+     signals we can't explain.  A SIGTRAP we can't explain could be a
+     GDB breakpoint --- we may or not support Z0 breakpoints.  If we
+     do, we're be able to handle GDB breakpoints on top of internal
+     breakpoints, by handling the internal breakpoint and still
+     reporting the event to GDB.  If we don't, we're out of luck, GDB
+     won't see the breakpoint hit.  */
   report_to_gdb = (!maybe_internal_trap
-		   || current_inferior->last_resume_kind == resume_step
+		   || (current_inferior->last_resume_kind == resume_step
+		       && !in_step_range)
 		   || event_child->stopped_by_watchpoint
-		   || (!step_over_finished
+		   || (!step_over_finished && !in_step_range
 		       && !bp_explains_trap && !trace_event)
 		   || (gdb_breakpoint_here (event_child->stop_pc)
 		       && gdb_condition_true_at_breakpoint (event_child->stop_pc)
@@ -2671,6 +2689,11 @@ Check if we're already there.\n",
 	    fprintf (stderr, "Step-over finished.\n");
 	  if (trace_event)
 	    fprintf (stderr, "Tracepoint event.\n");
+	  if (lwp_in_step_range (event_child))
+	    fprintf (stderr, "Range stepping pc 0x%s [0x%s, 0x%s).\n",
+		     paddress (event_child->stop_pc),
+		     paddress (event_child->step_range_start),
+		     paddress (event_child->step_range_end));
 	}
 
       /* We're not reporting this breakpoint to GDB, so apply the
@@ -2702,7 +2725,12 @@ Check if we're already there.\n",
   if (debug_threads)
     {
       if (current_inferior->last_resume_kind == resume_step)
-	fprintf (stderr, "GDB wanted to single-step, reporting event.\n");
+	{
+	  if (event_child->step_range_start == event_child->step_range_end)
+	    fprintf (stderr, "GDB wanted to single-step, reporting event.\n");
+	  else if (!lwp_in_step_range (event_child))
+	    fprintf (stderr, "Out of step range, reporting event.\n");
+	}
       if (event_child->stopped_by_watchpoint)
 	fprintf (stderr, "Stopped by watchpoint.\n");
       if (gdb_breakpoint_here (event_child->stop_pc))
@@ -3400,6 +3428,9 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
 
 	  lwp->resume = &r->resume[ndx];
 	  thread->last_resume_kind = lwp->resume->kind;
+
+	  lwp->step_range_start = lwp->resume->step_range_start;
+	  lwp->step_range_end = lwp->resume->step_range_end;
 
 	  /* If we had a deferred signal to report, dequeue one now.
 	     This can happen if LWP gets more than one signal while
@@ -5094,6 +5125,15 @@ linux_supports_agent (void)
   return 1;
 }
 
+static int
+linux_supports_range_stepping (void)
+{
+  if (*the_low_target.supports_range_stepping == NULL)
+    return 0;
+
+  return (*the_low_target.supports_range_stepping) ();
+}
+
 /* Enumerate spufs IDs for process PID.  */
 static int
 spu_enumerate_spu_ids (long pid, unsigned char *buf, CORE_ADDR offset, int len)
@@ -5952,6 +5992,7 @@ static struct target_ops linux_target_ops = {
   NULL,
   NULL,
 #endif
+  linux_supports_range_stepping,
 };
 
 static void

@@ -166,6 +166,8 @@ struct linux_target_ops
      for use as a fast tracepoint.  */
   int (*get_min_fast_tracepoint_insn_len) (void);
 
+  /* Returns true if the low target supports range stepping.  */
+  int (*supports_range_stepping) (void);
 };
 
 extern struct linux_target_ops the_low_target;
@@ -234,6 +236,12 @@ struct lwp_info
   /* If this flag is set, the last continue operation at the ptrace
      level on this process was a single-step.  */
   int stepping;
+
+  /* Range to single step within.  This is a copy of the step range
+     passed along the last resume request.  See 'struct
+     thread_resume'.  */
+  CORE_ADDR step_range_start;	/* Inclusive */
+  CORE_ADDR step_range_end;	/* Exclusive */
 
   /* If this flag is set, we need to set the event request flags the
      next time we see this LWP stop.  */

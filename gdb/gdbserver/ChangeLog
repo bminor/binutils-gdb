@@ -1,3 +1,30 @@
+2013-05-23  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* linux-low.c (lwp_in_step_range): New function.
+	(linux_wait_1): If the thread was range stepping and stopped
+	outside the stepping range, report the stop to GDB.  Otherwise,
+	continue stepping.  Add range stepping debug output.
+	(linux_set_resume_request): Copy the step range from the resume
+	request to the lwp.
+	(linux_supports_range_stepping): New.
+	(linux_target_ops) <supports_range_stepping>: Set to
+	linux_supports_range_stepping.
+	* linux-low.h (struct linux_target_ops)
+	<supports_range_stepping>: New field.
+	(struct lwp_info) <step_range_start, step_range_end>: New fields.
+	* linux-x86-low.c (x86_supports_range_stepping): New.
+	(the_low_target) <supports_range_stepping>: Set to
+	x86_supports_range_stepping.
+	* server.c (handle_v_cont): Handle 'r' action.
+	(handle_v_requests): Append ";r" if the target supports range
+	stepping.
+	* target.h (struct thread_resume) <step_range_start,
+	step_range_end>: New fields.
+	(struct target_ops) <supports_range_stepping>:
+	New field.
+	(target_supports_range_stepping): New macro.
+
 2013-05-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* lynx-low.c (lynx_resume): Fix null_ptid/minus_one_ptid

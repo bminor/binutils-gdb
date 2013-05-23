@@ -95,6 +95,11 @@ vCont;r
   stub to step through an address range itself, without GDB
   involvemement at each single-step.
 
+* New features in the GDB remote stub, GDBserver
+
+  ** GDBserver now supports target-assisted range stepping.  Currently
+     enabled on x86/x86_64 GNU/Linux targets.
+
 *** Changes in GDB 7.6
 
 * Target record has been renamed to record-full.

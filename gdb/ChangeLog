@@ -1,3 +1,7 @@
+2013-05-23  Pedro Alves  <palves@redhat.com>
+
+	* NEWS: Mention GDBserver range stepping support.
+
 2013-05-23  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
