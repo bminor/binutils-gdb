@@ -8960,15 +8960,15 @@ create_dwp_hash_table (struct dwp_file *dwp_file, int is_debug_types)
 
   if (version != 1)
     {
-      error (_("Dwarf Error: unsupported DWP file version (%u)"
+      error (_("Dwarf Error: unsupported DWP file version (%s)"
 	       " [in module %s]"),
-	     version, dwp_file->name);
+	     pulongest (version), dwp_file->name);
     }
   if (nr_slots != (nr_slots & -nr_slots))
     {
-      error (_("Dwarf Error: number of slots in DWP hash table (%u)"
+      error (_("Dwarf Error: number of slots in DWP hash table (%s)"
 	       " is not power of 2 [in module %s]"),
-	     nr_slots, dwp_file->name);
+	     pulongest (nr_slots), dwp_file->name);
     }
 
   htab = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwp_hash_table);
@@ -9087,9 +9087,9 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
 
   if (dwarf2_read_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Reading %s %u/%s in DWP file: %s\n",
+      fprintf_unfiltered (gdb_stdlog, "Reading %s %s/%s in DWP file: %s\n",
 			  kind,
-			  section_index, hex_string (signature),
+			  pulongest (section_index), hex_string (signature),
 			  dwp_file->name);
     }
 
@@ -9582,9 +9582,9 @@ open_and_init_dwp_file (void)
     {
       fprintf_unfiltered (gdb_stdlog, "DWP file found: %s\n", dwp_file->name);
       fprintf_unfiltered (gdb_stdlog,
-			  "    %u CUs, %u TUs\n",
-			  dwp_file->cus ? dwp_file->cus->nr_units : 0,
-			  dwp_file->tus ? dwp_file->tus->nr_units : 0);
+			  "    %s CUs, %s TUs\n",
+			  pulongest (dwp_file->cus ? dwp_file->cus->nr_units : 0),
+			  pulongest (dwp_file->tus ? dwp_file->tus->nr_units : 0));
     }
 
   return dwp_file;

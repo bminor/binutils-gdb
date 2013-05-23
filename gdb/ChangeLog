@@ -1,5 +1,11 @@
 2013-05-23  Pedro Alves  <palves@redhat.com>
 
+	* dwarf2read.c (create_dwp_hash_table, create_dwo_in_dwp)
+	(open_and_init_dwp_file): Use %s/pulongest instead of %u for
+	printing uint32_t variables.
+
+2013-05-23  Pedro Alves  <palves@redhat.com>
+
 	* NEWS: Mention GDBserver range stepping support.
 
 2013-05-23  Yao Qi  <yao@codesourcery.com>
