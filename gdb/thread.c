@@ -750,6 +750,13 @@ finish_thread_state_cleanup (void *arg)
   finish_thread_state (*ptid_p);
 }
 
+int
+pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread)
+{
+  return (pc >= thread->control.step_range_start
+	  && pc < thread->control.step_range_end);
+}
+
 /* Prints the list of threads and their details on UIOUT.
    This is a version of 'info_threads_command' suitable for
    use from MI.

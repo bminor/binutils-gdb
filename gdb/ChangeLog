@@ -1,3 +1,10 @@
+2013-05-23  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdbthread.h (pc_in_thread_step_range): New declaration.
+	* thread.c (pc_in_thread_step_range): New function.
+	* infrun.c (handle_inferior_event): Use it.
+
 2013-05-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-cmd-break.c (mi_argv_to_format): Use xsnprintf instead

@@ -4337,8 +4337,7 @@ process_event_stop_test:
 
       if (ecs->event_thread->control.step_range_end != 0
 	  && ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_0
-	  && (ecs->event_thread->control.step_range_start <= stop_pc
-	      && stop_pc < ecs->event_thread->control.step_range_end)
+	  && pc_in_thread_step_range (stop_pc, ecs->event_thread)
 	  && frame_id_eq (get_stack_frame_id (frame),
 			  ecs->event_thread->control.step_stack_frame_id)
 	  && ecs->event_thread->control.step_resume_breakpoint == NULL)
@@ -4707,8 +4706,7 @@ process_event_stop_test:
      through a function epilogue and therefore must detect when
      the current-frame changes in the middle of a line.  */
 
-  if (stop_pc >= ecs->event_thread->control.step_range_start
-      && stop_pc < ecs->event_thread->control.step_range_end
+  if (pc_in_thread_step_range (stop_pc, ecs->event_thread)
       && (execution_direction != EXEC_REVERSE
 	  || frame_id_eq (get_frame_id (frame),
 			  ecs->event_thread->control.step_frame_id)))

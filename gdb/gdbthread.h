@@ -399,6 +399,10 @@ extern struct thread_info* inferior_thread (void);
 
 extern void update_thread_list (void);
 
+/* Return true if PC is in the stepping range of THREAD.  */
+
+int pc_in_thread_step_range (CORE_ADDR pc, struct thread_info *thread);
+
 extern struct thread_info *thread_list;
 
 #endif /* GDBTHREAD_H */
