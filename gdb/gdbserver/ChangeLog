@@ -1,3 +1,9 @@
+2013-05-24  Pedro Alves  <palves@redhat.com>
+
+	* server.c (handle_v_cont) <vCont;r>: Use unpack_varlen_hex
+	instead of strchr/decode_address.  Error if the range isn't split
+	with a ','.  Don't assume there's be a ':' in the action.
+
 2013-05-23  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 

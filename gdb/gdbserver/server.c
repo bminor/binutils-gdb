@@ -2069,17 +2069,16 @@ handle_v_cont (char *own_buf)
 	}
       else if (p[0] == 'r')
 	{
-	  char *p1;
+	  ULONGEST addr;
 
-	  p = p + 1;
-	  p1 = strchr (p, ',');
-	  decode_address (&resume_info[i].step_range_start, p, p1 - p);
+	  p = unpack_varlen_hex (p + 1, &addr);
+	  resume_info[i].step_range_start = addr;
 
-	  p = p1 + 1;
-	  p1 = strchr (p, ':');
-	  decode_address (&resume_info[i].step_range_end, p, p1 - p);
+	  if (*p != ',')
+	    goto err;
 
-	  p = p1;
+	  p = unpack_varlen_hex (p + 1, &addr);
+	  resume_info[i].step_range_end = addr;
 	}
       else
 	{
