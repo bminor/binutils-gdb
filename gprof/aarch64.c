@@ -68,7 +68,7 @@ aarch64_find_call (Sym *parent, bfd_vma p_lowpc, bfd_vma p_highpc)
 
 	  /* Regular pc relative addressing check that this is the
 	     address of a function.  */
-	  offset = (((insn & 0x3ffffff) ^ 0x2000000) - 0x2000000) << 2;
+	  offset = ((((bfd_vma) insn & 0x3ffffff) ^ 0x2000000) - 0x2000000) << 2;
 
 	  dest_pc = pc + offset;
 

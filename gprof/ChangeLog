@@ -1,3 +1,8 @@
+2013-05-24  Alan Modra  <amodra@gmail.com>
+
+	* aarch64.c (aarch64_find_call): Promote to bfd_vma before sign
+	extending.
+
 2013-05-22  Venkataramanan Kumar  <Venkataramanan.kumar@linaro.org>
 
 	* aarch64.c: New file.
