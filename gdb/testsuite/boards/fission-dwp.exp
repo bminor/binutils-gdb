@@ -1,4 +1,4 @@
-# Copyright 2012-2013 Free Software Foundation, Inc.
+# Copyright 2013 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,17 +21,10 @@
 # Example usage:
 # bash$ make check RUNTESTFLAGS='--target_board=fission-dwp'
 
-# This is copied from baseboards/unix.exp.
-# At the moment this only supports things that unix.exp supports.
-load_generic_config "unix"
-process_multilib_options ""
+load_board_description "fission"
+
 set found_gcc [find_gcc]
 set found_gxx [find_g++]
-set_board_info compiler "$found_gcc"
-
-# This requires a relatively recent version of gcc (>4.7) and gold
-# for the linker.
-set_board_info debug_flags "-gdwarf-4 -gsplit-dwarf -Wl,--gdb-index"
 
 set contrib_dir [file normalize $srcdir/../contrib]
 if ![info exists CC_FOR_TARGET] {
@@ -54,8 +47,3 @@ if ![info exists DWP_FOR_TARGET] {
 }
 # cc-with-tweaks.sh uses DWP, not DWP_FOR_TARGET.  Blech.
 set env(DWP) "$DWP_FOR_TARGET"
-
-# This is needed otherwise dejagnu tries to rsh to host "fission".  Blech.
-# Double blech: set_board_info only sets the value if not already set.
-unset_board_info isremote
-set_board_info isremote 0
