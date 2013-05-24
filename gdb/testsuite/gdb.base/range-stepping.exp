@@ -76,7 +76,15 @@ with_test_prefix "multi insns" {
     # <-- T05
     # --> vCont;rSTART,END  (range step)
     # <-- T05
-    exec_cmd_expect_vCont_count "next" 1 1
+    set result [exec_cmd_expect_vCont_count "next" 1 1]
+    if { $result } {
+	# This is the first range-stepping test, and the simplest
+	# one.  If it fails, probably the rest of the tests would
+	# fail too, and the huge number of rsp packets in the test
+	# with the time-consuming loop would blow up the gdb.log file.
+	# Skip the rest of the tests.
+	return
+    }
 
     set pc_after_stepping ""
     set msg "pc after stepping"

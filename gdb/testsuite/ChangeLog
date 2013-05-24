@@ -1,3 +1,11 @@
+2013-05-24  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/range-stepping.exp: Skip the rest of tests if the
+	test fails.
+	* lib/range-stepping-support.exp (exec_cmd_expect_vCont_count):
+	Return 0 if the test passes, otherwise return 1.
+
 2013-05-23  Doug Evans  <dje@google.com>
 
 	* boards/fission-dwp.exp: New file.
