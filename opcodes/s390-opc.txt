@@ -736,7 +736,7 @@ c007 xilf RIL_RU "exclusive or immediate low" z9-109 zarch
 c008 iihf RIL_RU "insert immediate high" z9-109 zarch
 c009 iilf RIL_RU "insert immediate low" z9-109 zarch
 # z9-109 misc instruction
-b983 flogr RRE_RR "find leftmost one" z9-109 zarch
+b983 flogr RRE_RER "find leftmost one" z9-109 zarch
 e30000000012 lt RXY_RRRD "load and test 32" z9-109 zarch
 e30000000002 ltg RXY_RRRD "load and test 64" z9-109 zarch
 b926 lbr RRE_RR "load byte 32" z9-109 zarch
