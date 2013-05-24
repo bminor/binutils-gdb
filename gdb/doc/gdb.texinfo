@@ -36364,7 +36364,11 @@ initialization.  If the data-directory is changed after @value{GDBN} has
 started with the @code{set data-directory} command, the file will not be
 reread.
 
-@node Installed System-wide Configuration Scripts
+@menu
+* System-wide Configuration Scripts::  Installed System-wide Configuration Scripts
+@end menu
+
+@node System-wide Configuration Scripts
 @subsection Installed System-wide Configuration Scripts
 @cindex system-wide configuration scripts
 
