@@ -1,3 +1,12 @@
+2013-05-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR testsuite/12649
+	* gdb.mi/mi-dprintf.exp (mi_continue_dprintf) (mi 2nd dprintf): Replace
+	$mi_gdb_prompt expectation by mi_expect_stop.
+	(mi 1st dprintf, agent, mi 2nd dprintf, agent)
+	(mi info dprintf second time): Replace them by mi_send_resuming_command
+	and mi_expect_stop.
+
 2013-05-24  Gary Benson  <gbenson@redhat.com>
 
 	* gdb.base/solib-disc.exp (exec_opts): Remove unnecesary

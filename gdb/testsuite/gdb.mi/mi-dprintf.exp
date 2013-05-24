@@ -83,7 +83,7 @@ proc mi_continue_dprintf {args} {
 	set msg "mi 2nd dprintf"
 	mi_send_resuming_command "exec-continue" "$msg continue"
 	gdb_expect {
-            -re ".*At foo entry.*arg=1235, g=2222.*$mi_gdb_prompt$" {
+            -re ".*At foo entry.*arg=1235, g=2222" {
 		pass $msg
 	    }
 	    -re ".*$mi_gdb_prompt$" {
@@ -93,6 +93,7 @@ proc mi_continue_dprintf {args} {
 		fail $msg
             }
 	}
+	mi_expect_stop ".*" ".*" ".*" ".*" ".*" "" "$msg 2nd stop"
     }
 }
 
@@ -135,11 +136,28 @@ gdb_expect {
 if $target_can_dprintf {
     mi_run_cmd
 
-    mi_gdb_test "continue" ".*breakpoint-hit.*func=\"foo\".*" "mi 1st dprintf, agent"
+    mi_expect_stop ".*" ".*" ".*" ".*" ".*" "" "mi expect stop"
 
-    mi_gdb_test "continue" ".*breakpoint-hit.*func=\"foo\".*" "mi 2nd dprintf, agent"
+    mi_send_resuming_command "exec-continue" "mi 1st dprintf continue, agent"
+    mi_expect_stop ".*" "foo" ".*" ".*" ".*" "" "mi 1st dprintf, agent"
 
-    mi_gdb_test "6-break-info" ".*modified.*" "mi info dprintf second time"
+    mi_send_resuming_command "exec-continue" "mi 2nd dprintf continue, agent"
+
+    # The =breakpoint-modified text is a part of the "-exec-continue" output.
+    set msg "mi info dprintf second time"
+    gdb_expect {
+	-re "=breakpoint-modified," {
+	    pass $msg
+	}
+	-re ".*$mi_gdb_prompt$" {
+	    fail "$msg"
+	}
+	timeout {
+	    fail "$msg"
+	}
+    }
+
+    mi_expect_stop ".*" "foo" ".*" ".*" ".*" "" "mi 2nd dprintf, agent"
 }
 
 mi_gdb_test "set dprintf-style foobar" ".*error.*" "mi set dprintf style to an unrecognized type"
