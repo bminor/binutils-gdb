@@ -47,7 +47,7 @@ if [get_compiler_info] {
 }
 
 set lib_opts debug
-set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME\=\"${lib_dlopen}\" additional_flags=-DSHLIB_NAME2\=\"${lib_dlopen2}\"]
+set exec_opts [list debug shlib_load additional_flags=-DSHLIB_NAME=\"${lib_dlopen}\" additional_flags=-DSHLIB_NAME2=\"${lib_dlopen2}\"]
 
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
      || [gdb_compile_shlib $libsrc2 $lib_sl2 $lib_opts] != ""
