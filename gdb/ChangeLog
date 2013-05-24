@@ -1,3 +1,7 @@
+2013-05-23  Doug Evans  <dje@google.com>
+
+	* contrib/cc-with-tweaks.sh (-p): Handle no dwo files.
+
 2013-05-23  Pedro Alves  <palves@redhat.com>
 
 	* common/filestuff.c [USE_WIN32API]: Define HAVE_SOCKETS.
