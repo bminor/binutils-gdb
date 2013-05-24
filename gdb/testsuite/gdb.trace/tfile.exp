@@ -119,6 +119,9 @@ Trace buffer has 256 bytes of 4096 bytes free \\(93% full\\).*
 Not looking at any trace frame.*" \
     "tstatus on error trace file"
 
+gdb_test "info threads" "No threads\..*"
+gdb_test "info inferiors" "\\* 1    <null>\[ \t\]+${binfile}.*"
+
 # Make sure we can reopen without error.
 gdb_test \
     "interpreter-exec mi \"-target-select tfile tfile-basic.tf\"" \

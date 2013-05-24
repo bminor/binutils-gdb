@@ -1,4 +1,8 @@
 2013-05-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/tfile.exp: Test inferior and thread.
+
+2013-05-24  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/range-stepping.exp: Skip the rest of tests if the

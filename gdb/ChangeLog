@@ -1,3 +1,13 @@
+2013-05-24  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (TFILE_PID): Remove.
+	(tfile_open): Don't add thread and inferior.
+	(tfile_close): Don't set 'inferior_ptid'.  Don't call
+	exit_inferior_silent.
+	(tfile_thread_alive): Remove.
+	(init_tfile_ops): Don't set field 'to_thread_alive' of
+	tfile_ops.
+
 2013-05-23  Doug Evans  <dje@google.com>
 
 	* contrib/cc-with-tweaks.sh (-p): Handle no dwo files.
