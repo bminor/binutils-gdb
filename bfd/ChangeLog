@@ -1,3 +1,17 @@
+2013-05-26  Mark Wielaard  <mjw@redhat.com>
+
+	* cache.c (BFD_CACHE_MAX_OPEN): Remove define.
+	(max_open_files): New static int initialized to zero.
+	(bfd_cache_max_open): New static function to set and return
+	max_open_files.
+	(bfd_cache_init): Use bfd_cache_max_open.
+	(bfd_open_file): Likewise.
+	* configure.in (AC_CHECK_HEADERS): Add sys/resource.h.
+	(AC_CHECK_FUNCS): Add getrlimit.
+	* configure: Regenerated.
+	* config.in: Likewise.
+	* sysdep.h: Check and include sys/resource.h for getrlimit.
+
 2013-05-23  Alan Modra  <amodra@gmail.com>
 
 	* format.c (bfd_check_format_matches): Don't match a target in
