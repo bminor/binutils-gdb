@@ -17090,7 +17090,7 @@ it_fsm_post_encode (void)
     {
       if (inst.instruction >= 0x10000)
 	{
-	  as_warn (_("it blocks containing wide Thumb instructions are "
+	  as_warn (_("IT blocks containing 32-bit Thumb instructions are "
 		     "deprecated in ARMv8"));
 	  now_it.warn_deprecated = TRUE;
 	}
@@ -17102,7 +17102,7 @@ it_fsm_post_encode (void)
 	    {
 	      if ((inst.instruction & p->mask) == p->pattern)
 		{
-		  as_warn (_("it blocks containing 16-bit Thumb intsructions "
+		  as_warn (_("IT blocks containing 16-bit Thumb instructions "
 			     "of the following class are deprecated in ARMv8: "
 			     "%s"), p->description);
 		  now_it.warn_deprecated = TRUE;
@@ -17115,8 +17115,8 @@ it_fsm_post_encode (void)
 
       if (now_it.block_length > 1)
 	{
-	  as_warn (_("it blocks of more than one conditional instruction are "
-		     "deprecated in ARMv8"));
+	  as_warn (_("IT blocks containing more than one conditional "
+		     "instruction are deprecated in ARMv8"));
 	  now_it.warn_deprecated = TRUE;
 	}
     }

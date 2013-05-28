@@ -1,3 +1,8 @@
+2013-05-28  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/tc-arm.c (it_fsm_post_encode): Improve
+	warning messages about deprecated IT block formats.
+
 2013-05-28  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* config/tc-aarch64.c (md_apply_fix): Move value range checking

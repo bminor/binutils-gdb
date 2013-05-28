@@ -10,7 +10,7 @@
 .*:24: Error: immediate value out of range -- `hlt 0x10000'
 .*:25: Error: instruction cannot be conditional -- `hltne 0x1'
 .*:29: Error: immediate value out of range -- `hlt 64'
-.*:31: Warning: it blocks containing 16-bit Thumb intsructions of the following class are deprecated in ARMv8: Miscellaneous 16-bit instructions
+.*:31: Warning: IT blocks containing 16-bit Thumb instructions of the following class are deprecated in ARMv8: Miscellaneous 16-bit instructions
 .*:31: Error: instruction is always unconditional -- `hltne 0'
 .*:35: Error: r15 not allowed here -- `stlb pc,\[r0\]'
 .*:36: Error: r15 not allowed here -- `stlb r0,\[pc\]'

@@ -1,3 +1,8 @@
+2013-05-28  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* gas/arm/armv8-a-bad.l: Update expected warning message.
+	* gas/arm/armv8-a-it-bad.l: Likewise.
+
 2013-05-28  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* gas/aarch64/adr_1.d: New file.
