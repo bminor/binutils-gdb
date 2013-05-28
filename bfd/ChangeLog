@@ -1,3 +1,8 @@
+2013-05-28  Will Newton  <will.newton@linaro.org>
+
+	* elf32-arm.c (elf32_arm_populate_plt_entry): Call
+	elf32_arm_add_dynreloc when emitting R_ARM_IRELATIVE relocs.
+
 2013-04-24  Roland McGrath  <mcgrathr@google.com>
 
 	* elf32-arm.c (elf32_arm_allocate_plt_entry): If HTAB->nacl_p,

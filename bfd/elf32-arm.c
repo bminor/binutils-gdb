@@ -7734,8 +7734,13 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 		  sgot->contents + got_offset);
     }
 
-  loc = srel->contents + plt_index * RELOC_SIZE (htab);
-  SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
+  if (dynindx == -1)
+    elf32_arm_add_dynreloc (output_bfd, info, srel, &rel);
+  else
+    {
+      loc = srel->contents + plt_index * RELOC_SIZE (htab);
+      SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
+    }
 }
 
 /* Some relocations map to different relocations depending on the
