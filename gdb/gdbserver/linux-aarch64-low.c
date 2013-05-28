@@ -33,9 +33,6 @@
 /* Defined in auto-generated files.  */
 void init_registers_aarch64 (void);
 
-/* Defined in auto-generated files.  */
-void init_registers_aarch64_without_fpu (void);
-
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif

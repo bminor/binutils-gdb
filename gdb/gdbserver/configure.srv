@@ -43,7 +43,7 @@ srv_amd64_linux_xmlfiles="i386/amd64-linux.xml i386/amd64-avx-linux.xml i386/64b
 
 case "${target}" in
   aarch64*-*-linux*)
-			srv_regobj="aarch64.o aarch64-without-fpu.o"
+			srv_regobj="aarch64.o"
 			srv_tgtobj="linux-aarch64-low.o"
 			srv_tgtobj="${srv_tgtobj} linux-low.o"
 			srv_tgtobj="${srv_tgtobj} linux-osdata.o"
@@ -52,7 +52,6 @@ case "${target}" in
 			srv_xmlfiles="aarch64.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-core.xml"
 			srv_xmlfiles="${srv_xmlfiles} aarch64-fpu.xml"
-			srv_xmlfiles="${srv_xmlfiles} aarch64-without-fpu.xml"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes

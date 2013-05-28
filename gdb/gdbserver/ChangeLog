@@ -1,3 +1,12 @@
+2013-05-28  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (clean): Remove reference to aarch64-without-fpu.c.
+	(aarch64-without-fpu.c): Delete rule.
+	* configure.srv (aarch64*-*-linux*): Remove references to
+	aarch64-without-fpu.o and aarch64-without-fpu.xml.
+	* linux-aarch64-low.c (init_registers_aarch64_without_fpu): Remove
+	declaration.
+
 2013-05-24  Pedro Alves  <palves@redhat.com>
 
 	* server.c (handle_v_cont) <vCont;r>: Use unpack_varlen_hex
