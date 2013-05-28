@@ -1,3 +1,25 @@
+2013-05-28  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* reloc.c (BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE): Rename to ...
+	(BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21): ... this.
+	(BFD_RELOC_AARCH64_TLSDESC_LD64_PREL19): Rename to ...
+	(BFD_RELOC_AARCH64_TLSDESC_LD_PREL19): ...  this.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+	* elf64-aarch64.c (IS_AARCH64_TLSDESC_RELOC): Update to use
+	the correct names.
+	(elf64_aarch64_tlsdesc_howto_table): Likewise.
+	(elf64_aarch64_reloc_map): Likewise.
+	(aarch64_resolve_relocation): Likewise.
+	(bfd_elf_aarch64_put_addend): Likewise.
+	(aarch64_tls_transition_without_check): Likewise.
+	(aarch64_reloc_got_type): Likewise.
+	(elf64_aarch64_final_link_relocate): Likewise.
+	(elf64_aarch64_tls_relax): Likewise.
+	(elf64_aarch64_relocate_section): Likewise.
+	(elf64_aarch64_gc_sweep_hook): Likewise.
+	(elf64_aarch64_check_relocs): Likewise.
+
 2013-05-26  Mark Wielaard  <mjw@redhat.com>
 
 	* cache.c (BFD_CACHE_MAX_OPEN): Remove define.

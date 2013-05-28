@@ -21,7 +21,7 @@
 
 func:
 
-	// R_AARCH64_TLSDESC_ADR_PAGE  var
+	// R_AARCH64_TLSDESC_ADR_PAGE21  var
 	adrp  x0, :tlsdesc:var
 	// R_AARCH64_TLSDESC_LD64_LO12 var
 	ldr   x1, [x0, #:tlsdesc_lo12:var]

@@ -1,3 +1,8 @@
+2013-05-28  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/tls.d: Update.
+	* gas/aarch64/tls.s: Update.
+
 2013-05-28  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/armv8-a-bad.l: Update expected warning message.

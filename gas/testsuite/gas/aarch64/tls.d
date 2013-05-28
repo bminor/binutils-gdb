@@ -6,7 +6,7 @@ Disassembly of section \.text:
 
 0000000000000000 <.*>:
    0:	90000000 	adrp	x0, 0 <var>
-			0: R_AARCH64_TLSDESC_ADR_PAGE	var
+			0: R_AARCH64_TLSDESC_ADR_PAGE21	var
    4:	f9400001 	ldr	x1, \[x0\]
 			4: R_AARCH64_TLSDESC_LD64_LO12_NC	var
    8:	91000000 	add	x0, x0, #0x0

@@ -40,7 +40,7 @@
   For TLS descriptors the assembler will present us with code
   fragments of the form:
 
-  adrp  x0, :tlsdesc:foo                      R_AARCH64_TLSDESC_ADR_PAGE(foo)
+  adrp  x0, :tlsdesc:foo                      R_AARCH64_TLSDESC_ADR_PAGE21(foo)
   ldr   x1, [x0, #:tlsdesc_lo12:foo]          R_AARCH64_TLSDESC_LD64_LO12(foo)
   add   x0, x0, #:tlsdesc_lo12:foo            R_AARCH64_TLSDESC_ADD_LO12(foo)
   .tlsdesccall foo
@@ -171,9 +171,9 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
    || IS_AARCH64_TLSDESC_RELOC ((R_TYPE)))
 
 #define IS_AARCH64_TLSDESC_RELOC(R_TYPE)		\
-  ((R_TYPE) == R_AARCH64_TLSDESC_LD64_PREL19		\
+  ((R_TYPE) == R_AARCH64_TLSDESC_LD_PREL19		\
    || (R_TYPE) == R_AARCH64_TLSDESC_ADR_PREL21		\
-   || (R_TYPE) == R_AARCH64_TLSDESC_ADR_PAGE		\
+   || (R_TYPE) == R_AARCH64_TLSDESC_ADR_PAGE21		\
    || (R_TYPE) == R_AARCH64_TLSDESC_ADD_LO12_NC		\
    || (R_TYPE) == R_AARCH64_TLSDESC_LD64_LO12_NC	\
    || (R_TYPE) == R_AARCH64_TLSDESC_OFF_G1		\
@@ -1204,7 +1204,7 @@ static reloc_howto_type elf64_aarch64_tls_howto_table[] =
 
 static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] =
 {
-  HOWTO (R_AARCH64_TLSDESC_LD64_PREL19,	/* type */
+  HOWTO (R_AARCH64_TLSDESC_LD_PREL19,	/* type */
 	 2,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
@@ -1212,7 +1212,7 @@ static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_AARCH64_TLSDESC_LD64_PREL19",	/* name */
+	 "R_AARCH64_TLSDESC_LD_PREL19",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0x1ffffc,		/* src_mask */
 	 0x1ffffc,		/* dst_mask */
@@ -1234,7 +1234,7 @@ static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] =
 
   /* Get to the page for the GOT entry for the symbol
      (G(S) - P) using an ADRP instruction.  */
-  HOWTO (R_AARCH64_TLSDESC_ADR_PAGE,	/* type */
+  HOWTO (R_AARCH64_TLSDESC_ADR_PAGE21,	/* type */
 	 12,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 21,			/* bitsize */
@@ -1242,7 +1242,7 @@ static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_AARCH64_TLSDESC_ADR_PAGE",	/* name */
+	 "R_AARCH64_TLSDESC_ADR_PAGE21",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0x1fffff,		/* src_mask */
 	 0x1fffff,		/* dst_mask */
@@ -1471,9 +1471,9 @@ static const struct elf64_aarch64_reloc_map elf64_aarch64_reloc_map[] =
   {BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12, R_AARCH64_TLSLE_ADD_TPREL_HI12},
   {BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC,
    R_AARCH64_TLSLE_ADD_TPREL_LO12_NC},
-  {BFD_RELOC_AARCH64_TLSDESC_LD64_PREL19, R_AARCH64_TLSDESC_LD64_PREL19},
+  {BFD_RELOC_AARCH64_TLSDESC_LD_PREL19, R_AARCH64_TLSDESC_LD_PREL19},
   {BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21, R_AARCH64_TLSDESC_ADR_PREL21},
-  {BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE, R_AARCH64_TLSDESC_ADR_PAGE},
+  {BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21, R_AARCH64_TLSDESC_ADR_PAGE21},
   {BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC, R_AARCH64_TLSDESC_ADD_LO12_NC},
   {BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC, R_AARCH64_TLSDESC_LD64_LO12_NC},
   {BFD_RELOC_AARCH64_TLSDESC_OFF_G1, R_AARCH64_TLSDESC_OFF_G1},
@@ -2132,7 +2132,7 @@ aarch64_resolve_relocation (unsigned int r_type, bfd_vma place, bfd_vma value,
       break;
 
     case R_AARCH64_ADR_GOT_PAGE:
-    case R_AARCH64_TLSDESC_ADR_PAGE:
+    case R_AARCH64_TLSDESC_ADR_PAGE21:
     case R_AARCH64_TLSGD_ADR_PAGE21:
     case R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
       value = PG (value + addend) - PG (place);
@@ -3361,7 +3361,7 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
 
     case R_AARCH64_TLSGD_ADR_PAGE21:
     case R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
-    case R_AARCH64_TLSDESC_ADR_PAGE:
+    case R_AARCH64_TLSDESC_ADR_PAGE21:
     case R_AARCH64_ADR_GOT_PAGE:
     case R_AARCH64_ADR_PREL_LO21:
     case R_AARCH64_ADR_PREL_PG_HI21:
@@ -3527,7 +3527,7 @@ aarch64_tls_transition_without_check (unsigned int r_type,
   switch (r_type)
     {
     case R_AARCH64_TLSGD_ADR_PAGE21:
-    case R_AARCH64_TLSDESC_ADR_PAGE:
+    case R_AARCH64_TLSDESC_ADR_PAGE21:
       return is_local
 	? R_AARCH64_TLSLE_MOVW_TPREL_G1 : R_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21;
 
@@ -3567,7 +3567,7 @@ aarch64_reloc_got_type (unsigned int r_type)
       return GOT_TLS_GD;
 
     case R_AARCH64_TLSDESC_ADD_LO12_NC:
-    case R_AARCH64_TLSDESC_ADR_PAGE:
+    case R_AARCH64_TLSDESC_ADR_PAGE21:
     case R_AARCH64_TLSDESC_CALL:
     case R_AARCH64_TLSDESC_LD64_LO12_NC:
       return GOT_TLSDESC_GD;
@@ -4025,7 +4025,7 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
       *unresolved_reloc_p = FALSE;
       break;
 
-    case R_AARCH64_TLSDESC_ADR_PAGE:
+    case R_AARCH64_TLSDESC_ADR_PAGE21:
     case R_AARCH64_TLSDESC_LD64_LO12_NC:
     case R_AARCH64_TLSDESC_ADD_LO12_NC:
     case R_AARCH64_TLSDESC_ADD:
@@ -4079,7 +4079,7 @@ elf64_aarch64_tls_relax (struct elf64_aarch64_link_hash_table *globals,
   switch (r_type)
     {
     case R_AARCH64_TLSGD_ADR_PAGE21:
-    case R_AARCH64_TLSDESC_ADR_PAGE:
+    case R_AARCH64_TLSDESC_ADR_PAGE21:
       if (is_local)
 	{
 	  /* GD->LE relaxation:
@@ -4515,7 +4515,7 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 	case R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
 	  break;
 
-	case R_AARCH64_TLSDESC_ADR_PAGE:
+	case R_AARCH64_TLSDESC_ADR_PAGE21:
 	case R_AARCH64_TLSDESC_LD64_LO12_NC:
 	case R_AARCH64_TLSDESC_ADD_LO12_NC:
 	  if (! symbol_tlsdesc_got_offset_mark_p (input_bfd, h, r_symndx))
@@ -4903,7 +4903,7 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd,
 	case R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
 	case R_AARCH64_TLSLE_MOVW_TPREL_G0:
 	case R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
-	case R_AARCH64_TLSDESC_ADR_PAGE:
+	case R_AARCH64_TLSDESC_ADR_PAGE21:
 	case R_AARCH64_TLSDESC_ADD_LO12_NC:
 	case R_AARCH64_TLSDESC_LD64_LO12_NC:
           if (h != NULL)
@@ -5243,7 +5243,7 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_AARCH64_TLSLE_MOVW_TPREL_G1_NC:
 	case R_AARCH64_TLSLE_MOVW_TPREL_G0:
 	case R_AARCH64_TLSLE_MOVW_TPREL_G0_NC:
-	case R_AARCH64_TLSDESC_ADR_PAGE:
+	case R_AARCH64_TLSDESC_ADR_PAGE21:
 	case R_AARCH64_TLSDESC_ADD_LO12_NC:
 	case R_AARCH64_TLSDESC_LD64_LO12_NC:
 	  {

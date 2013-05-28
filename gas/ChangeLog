@@ -1,3 +1,11 @@
+2013-05-28  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (reloc_table): Update to use
+	BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21 instead of 
+	BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE.
+	(md_apply_fix): Likewise.
+	(aarch64_force_relocation): Likewise.
+
 2013-05-28  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (it_fsm_post_encode): Improve
