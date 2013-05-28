@@ -8286,7 +8286,8 @@ macro (struct mips_cl_insn *ip)
       goto ld_st;
 
     ld:
-      if (breg == treg + lp)
+      /* We don't want to use $0 as tempreg.  */
+      if (breg == treg + lp || treg + lp == ZERO)
 	goto ld_st;
       else
 	tempreg = treg + lp;

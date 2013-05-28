@@ -1,3 +1,8 @@
+2013-05-28  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* config/tc-mips.c (macro) <ld>: Don't use $zero for address
+	calculation.
+
 2013-05-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): Update to use

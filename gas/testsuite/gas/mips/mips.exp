@@ -698,6 +698,11 @@ if { [istarget mips*-*-vxworks*] } {
 					[mips_arch_list_matching mips3 !singlefloat]
 	}
     }
+    run_dump_test_arches "ld-zero"	[mips_arch_list_matching mips1]
+    run_dump_test_arches "ld-zero-2"	[mips_arch_list_matching mips2 !nollsc]
+    run_dump_test_arches "ld-zero-3"	[mips_arch_list_matching mips3 !nollsc]
+    run_dump_test_arches "ld-zero-u"	[mips_arch_list_matching micromips]
+    run_dump_test_arches "ld-zero-q"	[mips_arch_list_matching r5900]
     if $elf { run_dump_test "ld-svr4pic" }
     if $elf { run_dump_test "ld-xgot" }
     run_dump_test_arches "li"		[mips_arch_list_matching mips1]

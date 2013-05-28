@@ -1,3 +1,20 @@
+2013-05-28  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/ld-zero.d: New test.
+	* gas/mips/ld-zero-2.d: New test.
+	* gas/mips/ld-zero-3.d: New test.
+	* gas/mips/ld-zero-q.d: New test.
+	* gas/mips/ld-zero-u.d: New test.
+	* gas/mips/ecoff@ld-zero-3.d: New test.
+	* gas/mips/micromips@ld-zero-2.d: New test.
+	* gas/mips/micromips@ld-zero-3.d: New test.
+	* gas/mips/ld-zero.s: New test source.
+	* gas/mips/ld-zero-2.s: New test source.
+	* gas/mips/ld-zero-3.s: New test source.
+	* gas/mips/ld-zero-q.s: New test source.
+	* gas/mips/ld-zero-u.s: New test source.
+	* gas/mips/mips.exp: Run the new tests.
+
 2013-05-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/tls.d: Update.
