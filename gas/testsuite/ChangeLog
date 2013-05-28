@@ -1,3 +1,16 @@
+2013-05-28  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* gas/aarch64/adr_1.d: New file.
+	* gas/aarch64/adr_1.s: New file.
+	* gas/aarch64/b_1.d: New file.
+	* gas/aarch64/b_1.s: New file.
+	* gas/aarch64/beq_1.d: New file.
+	* gas/aarch64/beq_1.s: New file.
+	* gas/aarch64/ldr_1.d: New file.
+	* gas/aarch64/ldr_1.s: New file.
+	* gas/aarch64/tbz_1.d: New file.
+	* gas/aarch64/tbz_1.s: New file.
+
 2013-05-24  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
 
 	* gas/s390/zarch-z9-109-err.s, gas/s390/zarch-z9-109-err.l: New test.
