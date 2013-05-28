@@ -1241,7 +1241,7 @@ clear_collection_list (struct collection_list *list)
 
 /* Reduce a collection list to string form (for gdb protocol).  */
 static char **
-stringify_collection_list (struct collection_list *list, char *string)
+stringify_collection_list (struct collection_list *list)
 {
   char temp_buf[2048];
   char tmp2[40];
@@ -1611,7 +1611,6 @@ void
 encode_actions (struct breakpoint *t, struct bp_location *tloc,
 		char ***tdp_actions, char ***stepping_actions)
 {
-  static char tdp_buff[2048], step_buff[2048];
   char *default_collect_line = NULL;
   struct command_line *actions;
   struct command_line *default_collect_action = NULL;
@@ -1656,10 +1655,8 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
   memrange_sortmerge (&tracepoint_list);
   memrange_sortmerge (&stepping_list);
 
-  *tdp_actions = stringify_collection_list (&tracepoint_list,
-					    tdp_buff);
-  *stepping_actions = stringify_collection_list (&stepping_list,
-						 step_buff);
+  *tdp_actions = stringify_collection_list (&tracepoint_list);
+  *stepping_actions = stringify_collection_list (&stepping_list);
 
   do_cleanups (back_to);
 }
