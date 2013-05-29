@@ -1,5 +1,14 @@
 2013-05-29  Pedro Alves  <palves@redhat.com>
 
+	* remote.c (remote_insert_breakpoint, remote_remove_breakpoint)
+	(remote_insert_watchpoint, remote_remove_watchpoint)
+	(remote_insert_hw_breakpoint, remote_remove_hw_breakpoint)
+	(remote_verify_memory, compare_sections_command)
+	(remote_search_memory): Set the general process/thread on the
+	remote side.
+
+2013-05-29  Pedro Alves  <palves@redhat.com>
+
 	* aarch64-tdep.c: Don't include "features/aarch64-without-fpu.c".
 	(_initialize_aarch64_tdep): Don't call
 	initialize_tdesc_aarch64_without_fpu.

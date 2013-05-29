@@ -8153,6 +8153,11 @@ remote_insert_breakpoint (struct gdbarch *gdbarch,
       int bpsize;
       struct condition_list *cond = NULL;
 
+      /* Make sure the remote is pointing at the right process, if
+	 necessary.  */
+      if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+	set_general_process ();
+
       gdbarch_remote_breakpoint_from_pc (gdbarch, &addr, &bpsize);
 
       rs = get_remote_state ();
@@ -8203,6 +8208,11 @@ remote_remove_breakpoint (struct gdbarch *gdbarch,
       char *p = rs->buf;
       char *endbuf = rs->buf + get_remote_packet_size ();
 
+      /* Make sure the remote is pointing at the right process, if
+	 necessary.  */
+      if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+	set_general_process ();
+
       *(p++) = 'z';
       *(p++) = '0';
       *(p++) = ',';
@@ -8252,6 +8262,11 @@ remote_insert_watchpoint (CORE_ADDR addr, int len, int type,
   if (remote_protocol_packets[PACKET_Z0 + packet].support == PACKET_DISABLE)
     return 1;
 
+  /* Make sure the remote is pointing at the right process, if
+     necessary.  */
+  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+    set_general_process ();
+
   xsnprintf (rs->buf, endbuf - rs->buf, "Z%x,", packet);
   p = strchr (rs->buf, '\0');
   addr = remote_address_masked (addr);
@@ -8295,6 +8310,11 @@ remote_remove_watchpoint (CORE_ADDR addr, int len, int type,
 
   if (remote_protocol_packets[PACKET_Z0 + packet].support == PACKET_DISABLE)
     return -1;
+
+  /* Make sure the remote is pointing at the right process, if
+     necessary.  */
+  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+    set_general_process ();
 
   xsnprintf (rs->buf, endbuf - rs->buf, "z%x,", packet);
   p = strchr (rs->buf, '\0');
@@ -8399,6 +8419,11 @@ remote_insert_hw_breakpoint (struct gdbarch *gdbarch,
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     return -1;
 
+  /* Make sure the remote is pointing at the right process, if
+     necessary.  */
+  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+    set_general_process ();
+
   rs = get_remote_state ();
   p = rs->buf;
   endbuf = rs->buf + get_remote_packet_size ();
@@ -8451,6 +8476,11 @@ remote_remove_hw_breakpoint (struct gdbarch *gdbarch,
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     return -1;
+
+  /* Make sure the remote is pointing at the right process, if
+     necessary.  */
+  if (!gdbarch_has_global_breakpoints (target_gdbarch ()))
+    set_general_process ();
 
   *(p++) = 'z';
   *(p++) = '1';
@@ -8515,6 +8545,9 @@ remote_verify_memory (struct target_ops *ops,
   unsigned long host_crc, target_crc;
   char *tmp;
 
+  /* Make sure the remote is pointing at the right process.  */
+  set_general_process ();
+
   /* FIXME: assumes lma can fit into long.  */
   xsnprintf (rs->buf, get_remote_packet_size (), "qCRC:%lx,%lx",
 	     (long) lma, (long) size);
@@ -8558,6 +8591,9 @@ compare_sections_command (char *args, int from_tty)
 
   if (!exec_bfd)
     error (_("command cannot be used without an exec file"));
+
+  /* Make sure the remote is pointing at the right process.  */
+  set_general_process ();
 
   for (s = exec_bfd->sections; s; s = s->next)
     {
@@ -8984,6 +9020,9 @@ remote_search_memory (struct target_ops* ops,
       return simple_search_memory (ops, start_addr, search_space_len,
 				   pattern, pattern_len, found_addrp);
     }
+
+  /* Make sure the remote is pointing at the right process.  */
+  set_general_process ();
 
   /* Insert header.  */
   i = snprintf (rs->buf, max_size, 
