@@ -1,3 +1,28 @@
+2013-05-29  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2.c (struct dwarf2_debug): Add fields for handling
+	alternate debug info source.
+	(dwarf_debug_sections): Add entries for alternate .debug_str and
+	.debug_info sections.
+	(dwarf_debug_section_enum): Likewise.
+	(read_alt_indirect_string): New function.  Handles a
+	DW_FORM_GNU_strp_alt attribute.
+	(read_alt_indirect_ref): New function.  Handles a
+	DW_FORM_GNU_ref_alt attribute.
+	(read_attribute_value): Process DW_FORM_GNU_ref_alt and
+	DW_FORM_GNU_strp_alt.
+	(find_abstract_instance_name): Handle DW_FORM_GNU_ref_alt
+	attributes.
+	(_bfd_dwarf2_cleanup_debug_info): Free alternate debug info
+	sources.
+	* opncls.c (GNU_DEBUGALTLINK): Define.
+	(bfd_get_alt_debug_link_info): New function.
+	(separate_alt_debug_file_exists): New function.
+	(find_separate_debug_file): Add parameters for fetch and check
+	functions.
+	(bfd_follow_gnu_debugaltlink): New function.
+	* bfd-in2.h: Regenerate.
+
 2013-05-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* reloc.c (BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE): Rename to ...
