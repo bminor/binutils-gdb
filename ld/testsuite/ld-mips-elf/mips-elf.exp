@@ -734,3 +734,16 @@ foreach { abi } $abis {
             [list "readelf -s ehdr_start-2.nd"] \
             "ehdr_start-2-${abi}"]]
 }
+
+# R_MIPS_JALR reloc tests.
+set abis [concat o32 [expr {$has_newabi ? "n32 n64" : ""}]]
+foreach { abi } $abis {
+    run_ld_link_tests [list \
+	[list \
+	    "MIPS JALR reloc test ($abi)" \
+	    "$abi_ldflags($abi) -T jalr3.ld" "" \
+	    "$abi_asflags($abi)" \
+	    [list ../../../gas/testsuite/gas/mips/jalr3.s] \
+	    [list "objdump -d jalr3.dd"] \
+	    "jalr3-${abi}"]]
+}

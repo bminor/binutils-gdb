@@ -1,3 +1,9 @@
+2013-05-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-mips-elf/jalr3.dd: New test.
+	* ld-mips-elf/jalr3.ld: New test linker script.
+	* ld-mips-elf/mips-elf.exp: Run the new test.
+
 2013-05-21  Alan Modra  <amodra@gmail.com>
 
 	PR ld/12982

@@ -1,3 +1,11 @@
+2013-05-29  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/jalr3.d: New test.
+	* gas/mips/jalr3-n32.d: New test.
+	* gas/mips/jalr3-n64.d: New test.
+	* gas/mips/jalr3.s: New test source.
+	* gas/mips/mips.exp: Run the new tests.
+
 2013-05-28  Cary Coutant  <ccoutant@google.com>
 
 	* gas/cris/rd-dw2-1.d: Adjust expected output.

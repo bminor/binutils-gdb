@@ -722,9 +722,10 @@ resolve_reloc_expr_symbols (void)
 	         unless it has enough bits to cover the whole address
 	         space.  */
 	      if (S_IS_LOCAL (sym) && !symbol_section_p (sym)
-		  && !(howto->partial_inplace
-		       && howto->pc_relative
-		       && howto->src_mask != addr_mask))
+		  && (sec->use_rela_p
+		      || (howto->partial_inplace
+			  && (!howto->pc_relative
+			      || howto->src_mask == addr_mask))))
 		{
 		  asection *symsec = S_GET_SEGMENT (sym);
 		  if (!(((symsec->flags & SEC_MERGE) != 0
