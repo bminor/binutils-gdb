@@ -1,3 +1,13 @@
+2013-05-29  Pedro Alves  <palves@redhat.com>
+
+	* aarch64-tdep.c: Don't include "features/aarch64-without-fpu.c".
+	(_initialize_aarch64_tdep): Don't call
+	initialize_tdesc_aarch64_without_fpu.
+	* features/Makefile (WHICH): Remove reference to
+	aarch64-without-fpu.
+	* features/aarch64-without-fpu.c: Delete file.
+	* regformats/aarch64-without-fpu.dat: Delete file.
+
 2013-05-28  Yao Qi  <yao@codesourcery.com>
 
 	* tracepoint.c (stringify_collection_list): Remove parameter

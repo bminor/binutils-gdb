@@ -53,7 +53,6 @@
 #include "vec.h"
 
 #include "features/aarch64.c"
-#include "features/aarch64-without-fpu.c"
 
 /* Pseudo register base numbers.  */
 #define AARCH64_Q0_REGNUM 0
@@ -2718,7 +2717,6 @@ _initialize_aarch64_tdep (void)
 		    aarch64_dump_tdep);
 
   initialize_tdesc_aarch64 ();
-  initialize_tdesc_aarch64_without_fpu ();
 
   /* Debug this file's internals.  */
   add_setshow_boolean_cmd ("aarch64", class_maintenance, &aarch64_debug, _("\
