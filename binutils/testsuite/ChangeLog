@@ -1,3 +1,10 @@
+2013-05-28  Cary Coutant  <ccoutant@google.com>
+
+	* binutils-all/dw2-1.W: Adjust expected output.
+	* binutils-all/objdump.W: Likewise.
+	* binutils-all/i386/compressed-1a.d: Likewise.
+	* binutils-all/x86-64/compressed-1a.d: Likewise.
+
 2013-05-02  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.exp: Expect -wi test to fail for the MSP430.

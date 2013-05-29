@@ -1,3 +1,7 @@
+2013-05-28  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf.c (display_debug_lines_raw): Print section offsets.
+
 2013-05-15  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.c (SAFE_BYTE_GET64): Correct end-of-buffer check;

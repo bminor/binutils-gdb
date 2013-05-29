@@ -61,17 +61,17 @@ Raw dump of debug contents of section .debug_line:
 
  The Directory Table is empty.
 
- The File Name Table:
+ The File Name Table \(offset 0x.*\):
   Entry	Dir	Time	Size	Name
   1	0	0	0	file1.txt
 
  Line Number Statements:
-  Extended opcode 2: set Address to .*
-  Advance Line by 3 to 4
-  Copy
-  Copy
-  Extended opcode 2: set Address to .*
-  Extended opcode 1: End of Sequence
+  \[0x.*\]  Extended opcode 2: set Address to 0x4
+  \[0x.*\]  Advance Line by 3 to 4
+  \[0x.*\]  Copy
+  \[0x.*\]  Copy
+  \[0x.*\]  Extended opcode 2: set Address to 0x8
+  \[0x.*\]  Extended opcode 1: End of Sequence
 
 
 Contents of the .debug_abbrev section:

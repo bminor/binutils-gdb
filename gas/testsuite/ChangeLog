@@ -1,3 +1,41 @@
+2013-05-28  Cary Coutant  <ccoutant@google.com>
+
+	* gas/cris/rd-dw2-1.d: Adjust expected output.
+	* gas/cris/rd-dw2-10.d: Likewise.
+	* gas/cris/rd-dw2-11.d: Likewise.
+	* gas/cris/rd-dw2-12.d: Likewise.
+	* gas/cris/rd-dw2-13.d: Likewise.
+	* gas/cris/rd-dw2-14.d: Likewise.
+	* gas/cris/rd-dw2-15.d: Likewise.
+	* gas/cris/rd-dw2-2.d: Likewise.
+	* gas/cris/rd-dw2-3.d: Likewise.
+	* gas/cris/rd-dw2-4.d: Likewise.
+	* gas/cris/rd-dw2-5.d: Likewise.
+	* gas/cris/rd-dw2-6.d: Likewise.
+	* gas/cris/rd-dw2-7.d: Likewise.
+	* gas/cris/rd-dw2-8.d: Likewise.
+	* gas/cris/rd-dw2-9.d: Likewise.
+	* gas/elf/dwarf2-1.d: Likewise.
+	* gas/elf/dwarf2-2.d: Likewise.
+	* gas/elf/dwarf2-3.d: Likewise.
+	* gas/i386/debug1.d: Likewise.
+	* gas/i386/dw2-compress-1.d: Likewise.
+	* gas/i386/ilp32/lns/lns-common-1.d: Likewise.
+	* gas/i386/ilp32/lns/lns-duplicate.d: Likewise.
+	* gas/ia64/pr13167.d: Likewise.
+	* gas/lns/lns-big-delta.d: Likewise.
+	* gas/lns/lns-common-1-alt.d: Likewise.
+	* gas/lns/lns-common-1.d: Likewise.
+	* gas/lns/lns-duplicate.d: Likewise.
+	* gas/mips/loc-swap-2.d: Likewise.
+	* gas/mips/loc-swap.d: Likewise.
+	* gas/mips/micromips@loc-swap-2.d: Likewise.
+	* gas/mips/micromips@loc-swap.d: Likewise.
+	* gas/mips/mips16-dwarf2-n32.d: Likewise.
+	* gas/mips/mips16-dwarf2.d: Likewise.
+	* gas/mips/mips16@loc-swap-2.d: Likewise.
+	* gas/mips/mips16@loc-swap.d: Likewise.
+
 2013-05-28  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/ld-zero.d: New test.

@@ -2656,7 +2656,8 @@ display_debug_lines_raw (struct dwarf_section *section,
       DWARF2_Internal_LineInfo linfo;
       unsigned char *standard_opcodes;
       unsigned char *end_of_sequence;
-       int i;
+      unsigned int last_dir_entry = 0;
+      int i;
 
       if (const_strneq (section->name, ".debug_line.")
 	  /* Note: the following does not apply to .debug_line.dwo sections.
@@ -2715,11 +2716,12 @@ display_debug_lines_raw (struct dwarf_section *section,
 	    printf (_("\n The Directory Table is empty.\n"));
 	  else
 	    {
-	      printf (_("\n The Directory Table:\n"));
+	      printf (_("\n The Directory Table (offset 0x%lx):\n"),
+		      (long)(data - start));
 
 	      while (*data != 0)
 		{
-		  printf ("  %s\n", data);
+		  printf ("  %d\t%s\n", ++last_dir_entry, data);
 
 		  data += strnlen ((char *) data, end - data) + 1;
 		}
@@ -2733,7 +2735,8 @@ display_debug_lines_raw (struct dwarf_section *section,
 	    printf (_("\n The File Name Table is empty.\n"));
 	  else
 	    {
-	      printf (_("\n The File Name Table:\n"));
+	      printf (_("\n The File Name Table (offset 0x%lx):\n"),
+		      (long)(data - start));
 	      printf (_("  Entry\tDir\tTime\tSize\tName\n"));
 
 	      while (*data != 0)
@@ -2783,6 +2786,8 @@ display_debug_lines_raw (struct dwarf_section *section,
 	      dwarf_signed_vma adv;
 	      dwarf_vma uladv;
 	      unsigned int bytes_read;
+
+	      printf ("  [0x%08lx]", (long)(data - start));
 
 	      op_code = *data++;
 

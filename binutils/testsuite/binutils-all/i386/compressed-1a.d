@@ -88,21 +88,21 @@ Raw dump of debug contents of section .[z]?debug_line:
 
  The Directory Table is empty.
 
- The File Name Table:
+ The File Name Table \(offset 0x.*\):
   Entry	Dir	Time	Size	Name
   1	0	0	0	compressed-1.c
 
  Line Number Statements:
-  Extended opcode 2: set Address to 0x0
-  Advance Line by 10 to 11
-  Copy
-  Special opcode 6: advance Address by 0 to 0x0 and Line by 1 to 12
-  Advance Line by -7 to 5
-  Special opcode 229: advance Address by 16 to 0x10 and Line by 0 to 5
-  Special opcode 49: advance Address by 3 to 0x13 and Line by 2 to 7
-  Special opcode 46: advance Address by 3 to 0x16 and Line by -1 to 6
-  Advance PC by 5 to 0x1b
-  Extended opcode 1: End of Sequence
+  \[0x.*\]  Extended opcode 2: set Address to 0x0
+  \[0x.*\]  Advance Line by 10 to 11
+  \[0x.*\]  Copy
+  \[0x.*\]  Special opcode 6: advance Address by 0 to 0x0 and Line by 1 to 12
+  \[0x.*\]  Advance Line by -7 to 5
+  \[0x.*\]  Special opcode 229: advance Address by 16 to 0x10 and Line by 0 to 5
+  \[0x.*\]  Special opcode 49: advance Address by 3 to 0x13 and Line by 2 to 7
+  \[0x.*\]  Special opcode 46: advance Address by 3 to 0x16 and Line by -1 to 6
+  \[0x.*\]  Advance PC by 5 to 0x1b
+  \[0x.*\]  Extended opcode 1: End of Sequence
 
 
 Contents of the .[z]?debug_pubnames section:
