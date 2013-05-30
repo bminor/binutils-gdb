@@ -647,7 +647,7 @@ solib_aix_bfd_open (char *pathname)
   int filename_len;
   char *member_name;
   bfd *archive_bfd, *object_bfd;
-  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
+  struct cleanup *cleanup;
 
   if (pathname[path_len - 1] != ')')
     return solib_bfd_open (pathname);
@@ -665,7 +665,7 @@ solib_aix_bfd_open (char *pathname)
   filename_len = sep - pathname;
 
   filename = xstrprintf ("%.*s", filename_len, pathname);
-  make_cleanup (xfree, filename);
+  cleanup = make_cleanup (xfree, filename);
   member_name = xstrprintf ("%.*s", path_len - filename_len - 2, sep + 1);
   make_cleanup (xfree, member_name);
 

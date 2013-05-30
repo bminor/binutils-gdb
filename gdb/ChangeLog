@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* solib-aix.c (solib_aix_bfd_open): Don't use a null cleanup
+	for 'cleanup'; instead use a later one.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-breakpoint.c (bppy_get_commands): Use
 	explicit, unconditional return.
 	* python/py-frame.c (frapy_read_var): Likewise.
