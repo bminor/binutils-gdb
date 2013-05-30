@@ -245,9 +245,12 @@ collect_probes (char *objname, char *provider, char *probe_name,
   cleanup = make_cleanup (VEC_cleanup (probe_p), &result);
 
   cleanup_temps = make_cleanup (null_cleanup, NULL);
-  compile_rx_or_error (&prov_pat, provider, _("Invalid provider regexp"));
-  compile_rx_or_error (&probe_pat, probe_name, _("Invalid probe regexp"));
-  compile_rx_or_error (&obj_pat, objname, _("Invalid object file regexp"));
+  if (provider != NULL)
+    compile_rx_or_error (&prov_pat, provider, _("Invalid provider regexp"));
+  if (probe_name != NULL)
+    compile_rx_or_error (&probe_pat, probe_name, _("Invalid probe regexp"));
+  if (objname != NULL)
+    compile_rx_or_error (&obj_pat, objname, _("Invalid object file regexp"));
 
   ALL_OBJFILES (objfile)
     {

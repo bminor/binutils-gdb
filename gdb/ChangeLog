@@ -1,5 +1,12 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* probe.c (collect_probes): Check arguments for NULL before
+	calling compile_rx_or_error.
+	* utils.c (compile_rx_or_error): Require 'rx' to be non-NULL.
+	Remove NULL return.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* infrun.c (adjust_pc_after_break): Introduce an outer null
 	cleanup.
 
