@@ -461,6 +461,7 @@ frapy_read_var (PyObject *self, PyObject *args)
 	    {
 	      PyErr_SetString (PyExc_RuntimeError,
 			       _("Second argument must be block."));
+	      do_cleanups (cleanup);
 	      return NULL;
 	    }
 	}
@@ -473,7 +474,11 @@ frapy_read_var (PyObject *self, PyObject *args)
 	    block = get_frame_block (frame, NULL);
 	  var = lookup_symbol (var_name, block, VAR_DOMAIN, NULL);
 	}
-      GDB_PY_HANDLE_EXCEPTION (except);
+      if (except.reason < 0)
+	{
+	  do_cleanups (cleanup);
+	  GDB_PY_HANDLE_EXCEPTION (except);
+	}
 
       if (!var)
 	{

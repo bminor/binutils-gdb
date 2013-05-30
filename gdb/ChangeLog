@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-frame.c (frapy_read_var): Call do_cleanups along
+	all return paths.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-breakpoint.c (bppy_get_commands): Call do_cleanups
 	along all return paths.
 
