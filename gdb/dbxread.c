@@ -2449,7 +2449,6 @@ static void
 dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 {
   bfd *sym_bfd;
-  struct cleanup *back_to = NULL;
 
   if (self->readin)
     {
@@ -2461,6 +2460,8 @@ dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 
   if (LDSYMLEN (self) || self->number_of_dependencies)
     {
+      struct cleanup *back_to;
+
       /* Print the message now, before reading the string table,
          to avoid disconcerting pauses.  */
       if (info_verbose)
@@ -2473,6 +2474,8 @@ dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 
       next_symbol_text_func = dbx_next_symbol_text;
 
+      back_to = make_cleanup (null_cleanup, NULL);
+
       if (DBX_STAB_SECTION (objfile))
 	{
 	  stabs_data
@@ -2481,14 +2484,12 @@ dbx_read_symtab (struct partial_symtab *self, struct objfile *objfile)
 					      NULL);
 
 	  if (stabs_data)
-	    back_to = make_cleanup (free_current_contents,
-				    (void *) &stabs_data);
+	    make_cleanup (free_current_contents, (void *) &stabs_data);
 	}
 
       dbx_psymtab_to_symtab_1 (objfile, self);
 
-      if (back_to)
-	do_cleanups (back_to);
+      do_cleanups (back_to);
 
       /* Match with global symbols.  This only needs to be done once,
          after all of the symtabs and dependencies have been read in.   */

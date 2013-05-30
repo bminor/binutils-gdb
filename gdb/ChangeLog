@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* dbxread.c (dbx_read_symtab): Declare 'back_to' in a more
+	inner scope.  Unconditionally call do_cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* source.c (find_and_open_source): Call do_cleanups.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>
