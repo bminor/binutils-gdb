@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* mi/mi-cmd-stack.c (list_arg_or_local): Remove
+	"cleanup_tuple".
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* dbxread.c (dbx_read_symtab): Declare 'back_to' in a more
 	inner scope.  Unconditionally call do_cleanups.
 

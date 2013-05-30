@@ -397,7 +397,6 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 		   enum print_values values)
 {
   struct cleanup *old_chain;
-  struct cleanup *cleanup_tuple = NULL;
   struct ui_out *uiout = current_uiout;
   struct ui_file *stb;
 
@@ -415,7 +414,7 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
 	          && (arg->val || arg->error)));
 
   if (values != PRINT_NO_VALUES || what == all)
-    cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 
   fputs_filtered (SYMBOL_PRINT_NAME (arg->sym), stb);
   if (arg->entry_kind == print_entry_values_only)
@@ -458,8 +457,6 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
       ui_out_field_stream (uiout, "value", stb);
     }
 
-  if (values != PRINT_NO_VALUES || what == all)
-    do_cleanups (cleanup_tuple);
   do_cleanups (old_chain);
 }
 
