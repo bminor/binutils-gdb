@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* top.c (execute_command): Discard 'cleanup_if_error' cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* stabsread.c (read_struct_type): Call do_cleanups along
 	all return paths.
 

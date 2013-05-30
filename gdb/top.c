@@ -425,6 +425,7 @@ execute_command (char *p, int from_tty)
   if (p == NULL)
     {
       do_cleanups (cleanup);
+      discard_cleanups (cleanup_if_error);
       return;
     }
 
