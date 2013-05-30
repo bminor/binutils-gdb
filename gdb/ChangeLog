@@ -1,3 +1,9 @@
+2013-05-30  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-cmds.c (mi_cmds): Define MI command
+	'-exec-arguments' by macro DEF_MI_CMD_CLI_1 instead of
+	DEF_MI_CMD_CLI.
+
 2013-05-29  Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_insert_breakpoint, remote_remove_breakpoint)

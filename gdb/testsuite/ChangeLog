@@ -1,3 +1,9 @@
+2013-05-30  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-cmd-param-changed.exp (test_command_param_changed):
+	Add a test that no MI notification is emitted when executing
+	-exec-arguments.
+
 2013-05-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR testsuite/12649
