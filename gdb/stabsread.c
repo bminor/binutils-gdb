@@ -3515,7 +3515,10 @@ read_struct_type (char **pp, struct type *type, enum type_code type_code,
 
     TYPE_LENGTH (type) = read_huge_number (pp, 0, &nbits, 0);
     if (nbits != 0)
-      return error_type (pp, objfile);
+      {
+	do_cleanups (back_to);
+	return error_type (pp, objfile);
+      }
     set_length_in_type_chain (type);
   }
 
