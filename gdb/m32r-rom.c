@@ -167,6 +167,7 @@ m32r_load (char *filename, int from_tty)
   if (!(catch_errors (m32r_load_1, abfd, "Load aborted!\n", RETURN_MASK_ALL)))
     {
       monitor_printf ("q\n");
+      do_cleanups (cleanup);
       return;
     }
 #endif

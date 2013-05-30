@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* m32r-rom.c (m32r_load): Call do_cleanups at all returns.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* mi/mi-main.c (list_available_thread_groups): Call do_cleanups.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>
