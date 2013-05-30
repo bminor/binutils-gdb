@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* tracepoint.c (trace_dump_command): Unconditionally call
+	do_cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* breakpoint.c (output_thread_groups, parse_cmd_to_aexpr): Call
 	do_cleanups earlier.
 

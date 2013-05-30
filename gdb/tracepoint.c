@@ -2923,7 +2923,7 @@ trace_dump_command (char *args, int from_tty)
   struct bp_location *loc;
   char *default_collect_line = NULL;
   struct command_line *actions, *default_collect_action = NULL;
-  struct cleanup *old_chain = NULL;
+  struct cleanup *old_chain;
 
   if (tracepoint_number == -1)
     {
@@ -2931,6 +2931,7 @@ trace_dump_command (char *args, int from_tty)
       return;
     }
 
+  old_chain = make_cleanup (null_cleanup, NULL);
   t = get_tracepoint (tracepoint_number);
 
   if (t == NULL)
@@ -2964,7 +2965,7 @@ trace_dump_command (char *args, int from_tty)
   if (*default_collect)
     {
       default_collect_line = xstrprintf ("collect %s", default_collect);
-      old_chain = make_cleanup (xfree, default_collect_line);
+      make_cleanup (xfree, default_collect_line);
       validate_actionline (default_collect_line, &t->base);
       default_collect_action = xmalloc (sizeof (struct command_line));
       make_cleanup (xfree, default_collect_action);
@@ -2975,8 +2976,7 @@ trace_dump_command (char *args, int from_tty)
 
   trace_dump_actions (actions, 0, stepping_frame, from_tty);
 
-  if (*default_collect)
-    do_cleanups (old_chain);
+  do_cleanups (old_chain);
 }
 
 /* Encode a piece of a tracepoint's source-level definition in a form
