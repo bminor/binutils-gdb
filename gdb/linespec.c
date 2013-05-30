@@ -3097,7 +3097,7 @@ find_linespec_symbols (struct linespec_state *state,
   if (canon != NULL)
     {
       lookup_name = canon;
-      cleanup = make_cleanup (xfree, canon);
+      make_cleanup (xfree, canon);
     }
 
   /* It's important to not call expand_symtabs_matching unnecessarily

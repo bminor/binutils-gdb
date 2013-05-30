@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* linespec.c (find_linespec_symbols): Don't reassign to 'cleanup'.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-script.c (setup_user_args): Don't return after error.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>
