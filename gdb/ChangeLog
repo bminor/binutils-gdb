@@ -1,3 +1,8 @@
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
+	* contrib/cleanup_check.py: New file.
+	* contrib/gcc-with-excheck: Add option parsing.
+
 2013-05-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* windows-nat.c (windows_delete_thread): Add missing space
