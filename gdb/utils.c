@@ -713,6 +713,7 @@ internal_vproblem (struct internal_problem *problem,
   int quit_p;
   int dump_core_p;
   char *reason;
+  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
   /* Don't allow infinite error/warning recursion.  */
   {
@@ -821,6 +822,7 @@ internal_vproblem (struct internal_problem *problem,
     }
 
   dejavu = 0;
+  do_cleanups (cleanup);
 }
 
 static struct internal_problem internal_error_problem = {
