@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* mi/mi-main.c (list_available_thread_groups): Call do_cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* inf-ptrace.c (inf_ptrace_create_inferior): Unconditionally
 	call discard_cleanups.
 	(inf_ptrace_attach): Likewise.

@@ -681,6 +681,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
   struct osdata_item *item;
   int ix_items;
   struct ui_out *uiout = current_uiout;
+  struct cleanup *cleanup;
 
   /* This keeps a map from integer (pid) to VEC (struct osdata_item *)*
      The vector contains information about all threads for the given pid.
@@ -690,7 +691,7 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 
   /* get_osdata will throw if it cannot return data.  */
   data = get_osdata ("processes");
-  make_cleanup_osdata_free (data);
+  cleanup = make_cleanup_osdata_free (data);
 
   if (recurse)
     {
@@ -793,6 +794,8 @@ list_available_thread_groups (VEC (int) *ids, int recurse)
 
       do_cleanups (back_to);
     }
+
+  do_cleanups (cleanup);
 }
 
 void
