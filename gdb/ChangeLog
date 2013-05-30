@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-script.c (setup_user_args): Don't return after error.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* somread.c (som_symtab_read): Call do_cleanups.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>

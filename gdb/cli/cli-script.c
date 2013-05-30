@@ -689,11 +689,8 @@ setup_user_args (char *p)
       int bsquote = 0;
 
       if (arg_count >= MAXUSERARGS)
-	{
-	  error (_("user defined function may only have %d arguments."),
-		 MAXUSERARGS);
-	  return old_chain;
-	}
+	error (_("user defined function may only have %d arguments."),
+	       MAXUSERARGS);
 
       /* Strip whitespace.  */
       while (*p == ' ' || *p == '\t')
