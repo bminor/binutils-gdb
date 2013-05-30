@@ -2248,6 +2248,8 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 			  fpieces, nargs, argvec);
     }
 
+  do_cleanups (old_cleanups);
+
   if (ex.reason < 0)
     {
       /* If we got here, it means the command could not be parsed to a valid
@@ -2255,8 +2257,6 @@ parse_cmd_to_aexpr (CORE_ADDR scope, char *cmd)
 	 It's no use iterating through the other commands.  */
       return NULL;
     }
-
-  do_cleanups (old_cleanups);
 
   /* We have a valid agent expression, return it.  */
   return aexpr;
@@ -5814,8 +5814,7 @@ output_thread_groups (struct ui_out *uiout,
 		      VEC(int) *inf_num,
 		      int mi_only)
 {
-  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end (uiout,
-								field_name);
+  struct cleanup *back_to;
   int is_mi = ui_out_is_mi_like_p (uiout);
   int inf;
   int i;
@@ -5824,6 +5823,8 @@ output_thread_groups (struct ui_out *uiout,
      there are several.  Always display them for MI. */
   if (!is_mi && mi_only)
     return;
+
+  back_to = make_cleanup_ui_out_list_begin_end (uiout, field_name);
 
   for (i = 0; VEC_iterate (int, inf_num, i, inf); ++i)
     {
