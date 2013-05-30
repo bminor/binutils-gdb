@@ -219,7 +219,7 @@ static int remote_upload_trace_state_variables (struct uploaded_tsv **utsvp);
   
 static void remote_query_supported (void);
 
-static void remote_check_symbols (struct objfile *objfile);
+static void remote_check_symbols (void);
 
 void _initialize_remote (void);
 
@@ -3577,7 +3577,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   if (target_has_execution)
     {
       if (exec_bfd) 	/* No use without an exec file.  */
-	remote_check_symbols (symfile_objfile);
+	remote_check_symbols ();
     }
 
   /* Possibly the target has been engaged in a trace run started
@@ -3646,7 +3646,7 @@ init_all_packet_configs (void)
 /* Symbol look-up.  */
 
 static void
-remote_check_symbols (struct objfile *objfile)
+remote_check_symbols (void)
 {
   struct remote_state *rs = get_remote_state ();
   char *msg, *reply, *tmp;
@@ -11694,7 +11694,7 @@ static void
 remote_new_objfile (struct objfile *objfile)
 {
   if (remote_desc != 0)		/* Have a remote connection.  */
-    remote_check_symbols (objfile);
+    remote_check_symbols ();
 }
 
 /* Pull all the tracepoints defined on the target and create local

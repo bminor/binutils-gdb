@@ -1,5 +1,12 @@
 2013-05-30  Yao Qi  <yao@codesourcery.com>
 
+	* remote.c (remote_check_symbols): Remove unused parameter
+	'objfile'.
+	Declaration update.
+	(remote_start_remote, remote_new_objfile): Caller update.
+
+2013-05-30  Yao Qi  <yao@codesourcery.com>
+
 	* mi/mi-cmds.c (mi_cmds): Define MI command
 	'-exec-arguments' by macro DEF_MI_CMD_CLI_1 instead of
 	DEF_MI_CMD_CLI.
