@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* machoread.c (macho_symfile_read): Assign first cleanup to
+	'back_to'.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* m32r-rom.c (m32r_load): Call do_cleanups at all returns.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>
