@@ -1386,13 +1386,19 @@ mips_exit_debug (void)
       mips_request ('x', 0, 0, NULL, mips_receive_wait, NULL);
       mips_need_reply = 0;
       if (!mips_expect (" break!"))
-	return -1;
+	{
+	  do_cleanups (old_cleanups);
+	  return -1;
+	}
     }
   else
     mips_request ('x', 0, 0, &err, mips_receive_wait, NULL);
 
   if (!mips_expect (mips_monitor_prompt))
-    return -1;
+    {
+      do_cleanups (old_cleanups);
+      return -1;
+    }
 
   do_cleanups (old_cleanups);
 
@@ -1406,7 +1412,7 @@ static void
 mips_initialize (void)
 {
   int err;
-  struct cleanup *old_cleanups = make_cleanup (mips_initialize_cleanups, NULL);
+  struct cleanup *old_cleanups;
   int j;
 
   /* What is this code doing here?  I don't see any way it can happen, and
@@ -1418,6 +1424,8 @@ mips_initialize (void)
       warning (_("internal error: mips_initialize called twice"));
       return;
     }
+
+  old_cleanups = make_cleanup (mips_initialize_cleanups, NULL);
 
   mips_wait_flag = 0;
   mips_initializing = 1;
@@ -1543,6 +1551,7 @@ common_open (struct target_ops *ops, char *name, int from_tty,
   char *remote_name = 0;
   char *local_name = 0;
   char **argv;
+  struct cleanup *cleanup;
 
   if (name == 0)
     error (_("\
@@ -1558,7 +1567,7 @@ seen from the board via TFTP, specify that name as the third parameter.\n"));
   /* Parse the serial port name, the optional TFTP name, and the
      optional local TFTP name.  */
   argv = gdb_buildargv (name);
-  make_cleanup_freeargv (argv);
+  cleanup = make_cleanup_freeargv (argv);
 
   serial_port_name = xstrdup (argv[0]);
   if (argv[1])			/* Remote TFTP name specified?  */
@@ -1655,6 +1664,8 @@ seen from the board via TFTP, specify that name as the third parameter.\n"));
   stop_pc = regcache_read_pc (get_current_regcache ());
   print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
   xfree (serial_port_name);
+
+  do_cleanups (cleanup);
 }
 
 /* Open a connection to an IDT board.  */

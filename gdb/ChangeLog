@@ -1,5 +1,12 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* remote-mips.c (mips_exit_debug): Call do_cleanups on all
+	return paths.
+	(mips_initialize): Likewise.
+	(common_open): Call do_cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* utils.c (internal_vproblem): Call do_cleanups.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>
