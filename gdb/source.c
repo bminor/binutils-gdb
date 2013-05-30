@@ -1840,9 +1840,10 @@ show_substitute_path_command (char *args, int from_tty)
   struct substitute_path_rule *rule = substitute_path_rules;
   char **argv;
   char *from = NULL;
+  struct cleanup *cleanup;
   
   argv = gdb_buildargv (args);
-  make_cleanup_freeargv (argv);
+  cleanup = make_cleanup_freeargv (argv);
 
   /* We expect zero or one argument.  */
 
@@ -1866,6 +1867,8 @@ show_substitute_path_command (char *args, int from_tty)
         printf_filtered ("  `%s' -> `%s'.\n", rule->from, rule->to);
       rule = rule->next;
     }
+
+  do_cleanups (cleanup);
 }
 
 /* Implement the "unset substitute-path" command.  */
@@ -1877,10 +1880,11 @@ unset_substitute_path_command (char *args, int from_tty)
   char **argv = gdb_buildargv (args);
   char *from = NULL;
   int rule_found = 0;
+  struct cleanup *cleanup;
 
   /* This function takes either 0 or 1 argument.  */
 
-  make_cleanup_freeargv (argv);
+  cleanup = make_cleanup_freeargv (argv);
   if (argv != NULL && argv[0] != NULL && argv[1] != NULL)
     error (_("Incorrect usage, too many arguments in command"));
 
@@ -1918,6 +1922,8 @@ unset_substitute_path_command (char *args, int from_tty)
     error (_("No substitution rule defined for `%s'"), from);
 
   forget_cached_source_info ();
+
+  do_cleanups (cleanup);
 }
 
 /* Add a new source path substitution rule.  */
@@ -1927,9 +1933,10 @@ set_substitute_path_command (char *args, int from_tty)
 {
   char **argv;
   struct substitute_path_rule *rule;
+  struct cleanup *cleanup;
   
   argv = gdb_buildargv (args);
-  make_cleanup_freeargv (argv);
+  cleanup = make_cleanup_freeargv (argv);
 
   if (argv == NULL || argv[0] == NULL || argv [1] == NULL)
     error (_("Incorrect usage, too few arguments in command"));
@@ -1956,6 +1963,8 @@ set_substitute_path_command (char *args, int from_tty)
 
   add_substitute_path_rule (argv[0], argv[1]);
   forget_cached_source_info ();
+
+  do_cleanups (cleanup);
 }
 
 

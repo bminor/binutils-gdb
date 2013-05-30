@@ -508,6 +508,7 @@ restore_section_callback (bfd *ibfd, asection *isec, void *args)
 static void
 restore_binary_file (char *filename, struct callback_data *data)
 {
+  struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
   FILE *file = fopen_with_cleanup (filename, FOPEN_RB);
   gdb_byte *buf;
   long len;
@@ -553,7 +554,7 @@ restore_binary_file (char *filename, struct callback_data *data)
   len = target_write_memory (data->load_start + data->load_offset, buf, len);
   if (len != 0)
     warning (_("restore: memory write failed (%s)."), safe_strerror (len));
-  return;
+  do_cleanups (cleanup);
 }
 
 static void

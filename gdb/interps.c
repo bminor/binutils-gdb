@@ -409,12 +409,13 @@ interpreter_exec_cmd (char *args, int from_tty)
   unsigned int nrules;
   unsigned int i;
   int old_quiet, use_quiet;
+  struct cleanup *cleanup;
 
   if (args == NULL)
     error_no_arg (_("interpreter-exec command"));
 
   prules = gdb_buildargv (args);
-  make_cleanup_freeargv (prules);
+  cleanup = make_cleanup_freeargv (prules);
 
   nrules = 0;
   for (trule = prules; *trule != NULL; trule++)
@@ -452,6 +453,8 @@ interpreter_exec_cmd (char *args, int from_tty)
   interp_set (old_interp, 0);
   interp_set_quiet (interp_to_use, use_quiet);
   interp_set_quiet (old_interp, old_quiet);
+
+  do_cleanups (cleanup);
 }
 
 /* List the possible interpreters which could complete the given text.  */

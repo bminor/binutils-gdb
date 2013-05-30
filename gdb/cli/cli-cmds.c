@@ -357,6 +357,7 @@ cd_command (char *dir, int from_tty)
   /* Found something other than leading repetitions of "/..".  */
   int found_real_path;
   char *p;
+  struct cleanup *cleanup;
 
   /* If the new directory is absolute, repeat is a no-op; if relative,
      repeat might be useful but is more likely to be a mistake.  */
@@ -366,7 +367,7 @@ cd_command (char *dir, int from_tty)
     dir = "~";
 
   dir = tilde_expand (dir);
-  make_cleanup (xfree, dir);
+  cleanup = make_cleanup (xfree, dir);
 
   if (chdir (dir) < 0)
     perror_with_name (dir);
@@ -450,6 +451,8 @@ cd_command (char *dir, int from_tty)
 
   if (from_tty)
     pwd_command ((char *) 0, 1);
+
+  do_cleanups (cleanup);
 }
 
 /* Show the current value of the 'script-extension' option.  */
@@ -1327,13 +1330,14 @@ alias_command (char *args, int from_tty)
   char *args2, *equals, *alias, *command;
   char **alias_argv, **command_argv;
   dyn_string_t alias_dyn_string, command_dyn_string;
+  struct cleanup *cleanup;
   static const char usage[] = N_("Usage: alias [-a] [--] ALIAS = COMMAND");
 
   if (args == NULL || strchr (args, '=') == NULL)
     error (_(usage));
 
   args2 = xstrdup (args);
-  make_cleanup (xfree, args2);
+  cleanup = make_cleanup (xfree, args2);
   equals = strchr (args2, '=');
   *equals = '\0';
   alias_argv = gdb_buildargv (args2);
@@ -1440,6 +1444,8 @@ alias_command (char *args, int from_tty)
 		     command_argv[command_argc - 1],
 		     class_alias, abbrev_flag, c_command->prefixlist);
     }
+
+  do_cleanups (cleanup);
 }
 
 /* Print a list of files and line numbers which a user may choose from
