@@ -489,7 +489,11 @@ bppy_get_commands (PyObject *self, void *closure)
       print_command_lines (current_uiout, breakpoint_commands (bp), 0);
     }
   ui_out_redirect (current_uiout, NULL);
-  GDB_PY_HANDLE_EXCEPTION (except);
+  if (except.reason < 0)
+    {
+      do_cleanups (chain);
+      GDB_PY_HANDLE_EXCEPTION (except);
+    }
 
   cmdstr = ui_file_xstrdup (string_file, &length);
   make_cleanup (xfree, cmdstr);
