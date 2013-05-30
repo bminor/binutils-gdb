@@ -630,8 +630,6 @@ print_children (PyObject *printer, const char *hint,
 	  local_opts.addressprint = 0;
 	  val_print_string (type, encoding, addr, (int) length, stream,
 			    &local_opts);
-
-	  do_cleanups (inner_cleanup);
 	}
       else if (gdbpy_is_string (py_v))
 	{
