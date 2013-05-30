@@ -399,7 +399,7 @@ windows_delete_thread (ptid_t ptid, DWORD exit_code)
     printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (ptid));
   else if (print_thread_events && id != main_thread_id)
     printf_unfiltered (_("[%s exited with code %u]\n"),
-		       target_pid_to_str (ptid), (unsigned)exit_code);
+		       target_pid_to_str (ptid), (unsigned) exit_code);
   delete_thread (ptid);
 
   for (th = &thread_head;

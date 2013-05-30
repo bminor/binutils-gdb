@@ -1,3 +1,8 @@
+2013-05-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (windows_delete_thread): Add missing space
+	in cast expression.
+
 2013-05-30  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* inferior.c (top level): Include tilde.h.
