@@ -3493,8 +3493,9 @@ Output_section::Input_section_sort_section_order_index_compare::operator()(
 // Return true if S1 should come before S2.  This is the sort comparison
 // function for .text to sort sections with prefixes
 // .text.{unlikely,exit,startup,hot} before other sections.
+
 bool
-Output_section::Input_section_sort_section_name_special_ordering_compare
+Output_section::Input_section_sort_section_prefix_special_ordering_compare
   ::operator()(
     const Output_section::Input_section_sort_entry& s1,
     const Output_section::Input_section_sort_entry& s2) const
@@ -3508,7 +3509,7 @@ Output_section::Input_section_sort_section_name_special_ordering_compare
 	return false;
       return s1.index() < s2.index();
     }
- 
+
   // Some input section names have special ordering requirements.
   int o1 = Layout::special_ordering_of_input_section(s1.section_name().c_str());
   int o2 = Layout::special_ordering_of_input_section(s2.section_name().c_str());
@@ -3523,7 +3524,35 @@ Output_section::Input_section_sort_section_name_special_ordering_compare
     }
 
   // Keep input order otherwise.
-  return s1.index() < s2.index();  
+  return s1.index() < s2.index();
+}
+
+// Return true if S1 should come before S2.  This is the sort comparison
+// function for sections to sort them by name.
+
+bool
+Output_section::Input_section_sort_section_name_compare
+  ::operator()(
+    const Output_section::Input_section_sort_entry& s1,
+    const Output_section::Input_section_sort_entry& s2) const
+{
+  // We sort all the sections with no names to the end.
+  if (!s1.section_has_name() || !s2.section_has_name())
+    {
+      if (s1.section_has_name())
+	return true;
+      if (s2.section_has_name())
+	return false;
+      return s1.index() < s2.index();
+    }
+
+  // We sort by name.
+  int compare = s1.section_name().compare(s2.section_name());
+  if (compare != 0)
+    return compare < 0;
+
+  // Keep input order otherwise.
+  return s1.index() < s2.index();
 }
 
 // This updates the section order index of input sections according to the
@@ -3594,9 +3623,12 @@ Output_section::sort_attached_input_sections()
           || this->type() == elfcpp::SHT_FINI_ARRAY)
         std::sort(sort_list.begin(), sort_list.end(),
 	          Input_section_sort_init_fini_compare());
+      else if (strcmp(parameters->options().sort_section(), "name") == 0)
+	std::sort(sort_list.begin(), sort_list.end(),
+		  Input_section_sort_section_name_compare());
       else if (strcmp(this->name(), ".text") == 0)
-        std::sort(sort_list.begin(), sort_list.end(),
-	          Input_section_sort_section_name_special_ordering_compare());
+	std::sort(sort_list.begin(), sort_list.end(),
+		  Input_section_sort_section_prefix_special_ordering_compare());
       else
         std::sort(sort_list.begin(), sort_list.end(),
 	          Input_section_sort_compare());

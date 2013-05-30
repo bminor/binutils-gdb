@@ -1,3 +1,22 @@
+2013-05-30  Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Sriraman Tallam  <tmsriram@google.com>
+
+	* options.h (sort_section): New option.
+	* output.h (Input_section_sort_section_prefix_special_ordering_compare):
+	Rename from Input_section_sort_section_name_special_ordering_compare.
+	(Input_section_sort_section_name_compare): New struct.
+	* output.cc (Output_section::Input_section_sort_section_name_compare::
+	operator()): New function.
+	(Output_section::sort_attached_input_sections): Use new sort function
+	for .text if --sort-section=name is specified.
+	* layout.cc (Layout::make_output_section):
+	Add sorting by name when --sort-section=name is specified.
+	* testsuite/Makefile.am (text_section_grouping): Test option
+	--sort-section=name.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/section_sorting_name.cc: New file.
+	* testsuite/section_sorting_name.sh: New file.
+
 2013-05-21  Cary Coutant  <ccoutant@google.com>
 
 	* symtab.h (Symbol::is_cxx_vtable): New function.

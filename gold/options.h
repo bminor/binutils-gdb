@@ -1056,6 +1056,12 @@ class General_options
 			 N_("Sort common symbols by alignment"),
 			 N_("[={ascending,descending}]"));
 
+  DEFINE_enum(sort_section, options::TWO_DASHES, '\0', "none",
+	      N_("Sort sections by name.  \'--no-text-reorder\'"
+		 " will override \'--sort-section=name\' for .text"),
+	      N_("[none,name]"),
+	      {"none", "name"});
+
   DEFINE_uint(spare_dynamic_tags, options::TWO_DASHES, '\0', 5,
 	      N_("Dynamic tag slots to reserve (default 5)"),
 	      N_("COUNT"));

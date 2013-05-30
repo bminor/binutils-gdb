@@ -4202,7 +4202,15 @@ class Output_section : public Output_data
 
   // This is the sort comparison function for .text to sort sections with
   // prefixes .text.{unlikely,exit,startup,hot} before other sections.
-  struct Input_section_sort_section_name_special_ordering_compare
+  struct Input_section_sort_section_prefix_special_ordering_compare
+  {
+    bool
+    operator()(const Input_section_sort_entry&,
+	       const Input_section_sort_entry&) const;
+  };
+
+  // This is the sort comparison function for sorting sections by name.
+  struct Input_section_sort_section_name_compare
   {
     bool
     operator()(const Input_section_sort_entry&,

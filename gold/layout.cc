@@ -1709,6 +1709,10 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
       && strcmp(name, ".text") == 0)
     os->set_may_sort_attached_input_sections();
 
+  // GNU linker sorts section by name with --sort-section=name.
+  if (strcmp(parameters->options().sort_section(), "name") == 0)
+      os->set_must_sort_attached_input_sections();
+
   // Check for .stab*str sections, as .stab* sections need to link to
   // them.
   if (type == elfcpp::SHT_STRTAB

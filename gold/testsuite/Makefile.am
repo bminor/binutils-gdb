@@ -273,6 +273,16 @@ text_section_grouping.stdout: text_section_grouping
 text_section_no_grouping.stdout: text_section_no_grouping
 	$(TEST_NM) -n --synthetic text_section_no_grouping > text_section_no_grouping.stdout 
 
+check_SCRIPTS += section_sorting_name.sh
+check_DATA += section_sorting_name.stdout
+MOSTLYCLEANFILES += section_sorting_name
+section_sorting_name.o: section_sorting_name.cc
+	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
+section_sorting_name: section_sorting_name.o gcctestdir/ld
+	$(CXXLINK)  -Bgcctestdir/ -Wl,--sort-section=name section_sorting_name.o
+section_sorting_name.stdout: section_sorting_name
+	$(TEST_NM) -n --synthetic section_sorting_name > section_sorting_name.stdout
+
 check_PROGRAMS += icf_virtual_function_folding_test
 MOSTLYCLEANFILES += icf_virtual_function_folding_test icf_virtual_function_folding_test.map
 icf_virtual_function_folding_test.o: icf_virtual_function_folding_test.cc
