@@ -1364,7 +1364,6 @@ stringify_collection_list (struct collection_list *list)
 
 static void
 encode_actions_1 (struct command_line *action,
-		  struct breakpoint *t,
 		  struct bp_location *tloc,
 		  int frame_reg,
 		  LONGEST frame_offset,
@@ -1597,7 +1596,7 @@ encode_actions_1 (struct command_line *action,
 	     here.  */
 	  gdb_assert (stepping_list);
 
-	  encode_actions_1 (action->body_list[0], t, tloc, frame_reg,
+	  encode_actions_1 (action->body_list[0], tloc, frame_reg,
 			    frame_offset, stepping_list, NULL);
 	}
       else
@@ -1608,8 +1607,8 @@ encode_actions_1 (struct command_line *action,
 /* Render all actions into gdb protocol.  */
 
 void
-encode_actions (struct breakpoint *t, struct bp_location *tloc,
-		char ***tdp_actions, char ***stepping_actions)
+encode_actions (struct bp_location *tloc, char ***tdp_actions,
+		char ***stepping_actions)
 {
   char *default_collect_line = NULL;
   struct command_line *actions;
@@ -1629,7 +1628,7 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
   gdbarch_virtual_frame_pointer (tloc->gdbarch,
 				 tloc->address, &frame_reg, &frame_offset);
 
-  actions = breakpoint_commands (t);
+  actions = breakpoint_commands (tloc->owner);
 
   /* If there are default expressions to collect, make up a collect
      action and prepend to the action list to encode.  Note that since
@@ -1641,7 +1640,7 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
       default_collect_line =  xstrprintf ("collect %s", default_collect);
       make_cleanup (xfree, default_collect_line);
 
-      validate_actionline (default_collect_line, t);
+      validate_actionline (default_collect_line, tloc->owner);
 
       default_collect_action = xmalloc (sizeof (struct command_line));
       make_cleanup (xfree, default_collect_action);
@@ -1649,7 +1648,7 @@ encode_actions (struct breakpoint *t, struct bp_location *tloc,
       default_collect_action->line = default_collect_line;
       actions = default_collect_action;
     }
-  encode_actions_1 (actions, t, tloc, frame_reg, frame_offset,
+  encode_actions_1 (actions, tloc, frame_reg, frame_offset,
 		    &tracepoint_list, &stepping_list);
 
   memrange_sortmerge (&tracepoint_list);

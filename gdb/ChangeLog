@@ -1,3 +1,12 @@
+2013-05-30  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (encode_actions_1): Remove parameter 't'.
+	Caller update.
+	(encode_actions): Likewise.
+	* remote.c (remote_download_tracepoint): Caller update.
+	* tracepoint.h (encode_actions): Update declaration.
+
 2013-05-30  Pedro Alves  <palves@redhat.com>
 
 	* python/python-internal.h (gdb_Py_DECREF): Cast OP to PyObject

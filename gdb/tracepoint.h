@@ -357,7 +357,7 @@ void free_actions (struct breakpoint *);
 
 extern const char *decode_agent_options (const char *exp, int *trace_string);
 
-extern void encode_actions (struct breakpoint *t, struct bp_location *tloc,
+extern void encode_actions (struct bp_location *tloc,
 			    char ***tdp_actions, char ***stepping_actions);
 
 extern void validate_actionline (const char *, struct breakpoint *);
