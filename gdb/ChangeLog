@@ -1,5 +1,16 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* xml-support.c (gdb_xml_create_parser_and_cleanup): Rename from
+	gdb_xml_create_parser_and_cleanup_1.  Return a cleanup.  Remove
+	'old_chain' argument.  Add 'parser_result' argument.
+	(gdb_xml_create_parser_and_cleanup): Remove old version.
+	(gdb_xml_parse_quick): Update.
+	(xml_process_xincludes): Update.
+	* xml-support.h (gdb_xml_create_parser_and_cleanup): Don't
+	declare.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* probe.c (collect_probes): Check arguments for NULL before
 	calling compile_rx_or_error.
 	* utils.c (compile_rx_or_error): Require 'rx' to be non-NULL.
