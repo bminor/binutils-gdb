@@ -492,7 +492,8 @@ bppy_get_commands (PyObject *self, void *closure)
   if (except.reason < 0)
     {
       do_cleanups (chain);
-      GDB_PY_HANDLE_EXCEPTION (except);
+      gdbpy_convert_exception (except);
+      return NULL;
     }
 
   cmdstr = ui_file_xstrdup (string_file, &length);

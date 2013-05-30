@@ -653,7 +653,8 @@ gdbpy_decode_line (PyObject *self, PyObject *args)
     {
       do_cleanups (cleanups);
       /* We know this will always throw.  */
-      GDB_PY_HANDLE_EXCEPTION (except);
+      gdbpy_convert_exception (except);
+      return NULL;
     }
 
   if (sals.nelts)

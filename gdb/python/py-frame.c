@@ -477,7 +477,8 @@ frapy_read_var (PyObject *self, PyObject *args)
       if (except.reason < 0)
 	{
 	  do_cleanups (cleanup);
-	  GDB_PY_HANDLE_EXCEPTION (except);
+	  gdbpy_convert_exception (except);
+	  return NULL;
 	}
 
       if (!var)
