@@ -1187,6 +1187,7 @@ static const char *const bfd_reloc_code_real_names[] = { "@@uninitialized@@",
   "BFD_RELOC_MICROMIPS_TLS_TPREL_HI16",
   "BFD_RELOC_MIPS_TLS_TPREL_LO16",
   "BFD_RELOC_MICROMIPS_TLS_TPREL_LO16",
+  "BFD_RELOC_MIPS_EH",
 
   "BFD_RELOC_MIPS_COPY",
   "BFD_RELOC_MIPS_JUMP_SLOT",

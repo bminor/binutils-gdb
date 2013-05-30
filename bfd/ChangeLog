@@ -1,3 +1,17 @@
+2013-05-30  Paul Brook  <paul@codesourcery.com>
+
+	* bfd-in2.h: Regenerate.
+	* elf32-mips.c (elf_mips_eh_howto): New.
+	(bfd_elf32_bfd_reloc_type_lookup ): Support BFD_RELOC_MIPS_EH.
+	(bfd_elf32_bfd_reloc_name_lookup): Likewise.
+	(mips_elf32_rtype_to_howto): Support R_MIPS_EH.
+	* elf64-mips.c (elf_mips_eh_howto): New.
+	(bfd_elf64_bfd_reloc_type_lookup): Support BFD_RELOC_MIPS_EH.
+	(bfd_elf64_bfd_reloc_name_lookup): Likewise.
+	(mips_elf64_rtype_to_howto): Support R_MIPS_EH.
+	* libbfd.h: Regenerate.
+	* reloc.c (BFD_RELOC_MIPS_EH): New.
+
 2013-05-29  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf2.c (struct dwarf2_debug): Add fields for handling

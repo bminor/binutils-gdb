@@ -15824,6 +15824,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MICROMIPS_GOT_LO16:
     case BFD_RELOC_MICROMIPS_CALL_HI16:
     case BFD_RELOC_MICROMIPS_CALL_LO16:
+    case BFD_RELOC_MIPS_EH:
       if (fixP->fx_done)
 	{
 	  offsetT value;

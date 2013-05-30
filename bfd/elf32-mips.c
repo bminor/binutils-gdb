@@ -1538,6 +1538,22 @@ static reloc_howto_type elf_mips_jump_slot_howto =
 	 0x0,		        /* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
+/* Used in EH tables.  */
+static reloc_howto_type elf_mips_eh_howto =
+  HOWTO (R_MIPS_EH,		/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_signed, /* complain_on_overflow */
+	 _bfd_mips_elf_generic_reloc, /* special_function */
+	 "R_MIPS_EH",		/* name */
+	 TRUE,			/* partial_inplace */
+	 0xffffffff,		/* src_mask */
+	 0xffffffff,	        /* dst_mask */
+	 FALSE);		/* pcrel_offset */
+
 /* Set the GP value for OUTPUT_BFD.  Returns FALSE if this is a
    dangerous relocation.  */
 
@@ -2010,6 +2026,8 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
       return &elf_mips_copy_howto;
     case BFD_RELOC_MIPS_JUMP_SLOT:
       return &elf_mips_jump_slot_howto;
+    case BFD_RELOC_MIPS_EH:
+      return &elf_mips_eh_howto;
     }
 }
 
@@ -2055,6 +2073,8 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     return &elf_mips_copy_howto;
   if (strcasecmp (elf_mips_jump_slot_howto.name, r_name) == 0)
     return &elf_mips_jump_slot_howto;
+  if (strcasecmp (elf_mips_eh_howto.name, r_name) == 0)
+    return &elf_mips_eh_howto;
 
   return NULL;
 }
@@ -2079,6 +2099,8 @@ mips_elf32_rtype_to_howto (unsigned int r_type,
       return &elf_mips_copy_howto;
     case R_MIPS_JUMP_SLOT:
       return &elf_mips_jump_slot_howto;
+    case R_MIPS_EH:
+      return &elf_mips_eh_howto;
     default:
       if (r_type >= R_MICROMIPS_min && r_type < R_MICROMIPS_max)
 	return &elf_micromips_howto_table_rel[r_type - R_MICROMIPS_min];

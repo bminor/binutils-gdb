@@ -1,3 +1,7 @@
+2013-05-30  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-mips.c (md_apply_fix): Support BFD_RELOC_MIPS_EH.
+
 2013-05-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* write.c (resolve_reloc_expr_symbols): On REL targets don't
