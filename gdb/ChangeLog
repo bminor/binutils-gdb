@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (find_separate_debug_file): Call do_cleanups
+	along all return paths.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (search_symbols): Introduce a null cleanup for
 	'retval_chain'.
 

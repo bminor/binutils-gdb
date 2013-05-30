@@ -1428,7 +1428,10 @@ find_separate_debug_file (const char *dir,
       strcat (debugfile, debuglink);
 
       if (separate_debug_file_exists (debugfile, crc32, objfile))
-	return debugfile;
+	{
+	  do_cleanups (back_to);
+	  return debugfile;
+	}
 
       /* If the file is in the sysroot, try using its base path in the
 	 global debugfile directory.  */
@@ -1443,7 +1446,10 @@ find_separate_debug_file (const char *dir,
 	  strcat (debugfile, debuglink);
 
 	  if (separate_debug_file_exists (debugfile, crc32, objfile))
-	    return debugfile;
+	    {
+	      do_cleanups (back_to);
+	      return debugfile;
+	    }
 	}
     }
 
