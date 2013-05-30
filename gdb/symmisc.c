@@ -898,6 +898,8 @@ maintenance_expand_symtabs (char *args, int from_tty)
 	     maintenance_expand_name_matcher, ALL_DOMAIN, regexp);
 	}
     }
+
+  do_cleanups (cleanups);
 }
 
 

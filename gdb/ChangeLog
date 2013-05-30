@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* symmisc.c (maintenance_expand_symtabs): Call do_cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* xml-support.c (gdb_xml_create_parser_and_cleanup): Rename from
 	gdb_xml_create_parser_and_cleanup_1.  Return a cleanup.  Remove
 	'old_chain' argument.  Add 'parser_result' argument.
