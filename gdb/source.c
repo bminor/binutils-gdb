@@ -985,6 +985,7 @@ find_and_open_source (const char *filename,
   char *path = source_path;
   const char *p;
   int result;
+  struct cleanup *cleanup;
 
   /* Quick way out if we already know its full name.  */
 
@@ -1015,6 +1016,8 @@ find_and_open_source (const char *filename,
       xfree (*fullname);
       *fullname = NULL;
     }
+
+  cleanup = make_cleanup (null_cleanup, NULL);
 
   if (dirname != NULL)
     {
@@ -1072,6 +1075,7 @@ find_and_open_source (const char *filename,
 	result = openp (path, OPF_SEARCH_IN_PATH, p, OPEN_MODE, fullname);
     }
 
+  do_cleanups (cleanup);
   return result;
 }
 

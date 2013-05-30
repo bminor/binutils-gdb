@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* source.c (find_and_open_source): Call do_cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* linux-thread-db.c (thread_db_load_search): Unconditionally
 	call do_cleanups.
 
