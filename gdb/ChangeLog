@@ -1,5 +1,11 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* inf-ptrace.c (inf_ptrace_create_inferior): Unconditionally
+	call discard_cleanups.
+	(inf_ptrace_attach): Likewise.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* remote-mips.c (mips_exit_debug): Call do_cleanups on all
 	return paths.
 	(mips_initialize): Likewise.
