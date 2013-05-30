@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Call
+	do_cleanups on all return paths.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* top.c (execute_command): Discard 'cleanup_if_error' cleanups.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>

@@ -499,7 +499,10 @@ cp_lookup_symbol_imports_or_template (const char *scope,
 				      TYPE_N_TEMPLATE_ARGUMENTS (context),
 				      TYPE_TEMPLATE_ARGUMENTS (context));
 	      if (result != NULL)
-		return result;
+		{
+		  do_cleanups (cleanups);
+		  return result;
+		}
 	    }
 
 	  do_cleanups (cleanups);
