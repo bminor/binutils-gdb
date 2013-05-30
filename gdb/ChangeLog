@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* somread.c (som_symtab_read): Call do_cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* printcmd.c (print_command_1): Unconditionally call do_cleanups.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>

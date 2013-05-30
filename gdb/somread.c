@@ -46,6 +46,7 @@ static void
 som_symtab_read (bfd *abfd, struct objfile *objfile,
 		 struct section_offsets *section_offsets)
 {
+  struct cleanup *cleanup;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
   unsigned int number_of_symbols;
   int val, dynamic;
@@ -65,7 +66,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
      We avoid using alloca because the memory size could be so large
      that we could hit the stack size limit.  */
   buf = xmalloc (symsize * number_of_symbols);
-  make_cleanup (xfree, buf);
+  cleanup = make_cleanup (xfree, buf);
   bfd_seek (abfd, obj_som_sym_filepos (abfd), SEEK_SET);
   val = bfd_bread (buf, symsize * number_of_symbols, abfd);
   if (val != symsize * number_of_symbols)
@@ -316,6 +317,8 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 								  section),
 					   objfile);
     }
+
+  do_cleanups (cleanup);
 }
 
 /* Scan and build partial symbols for a symbol file.
