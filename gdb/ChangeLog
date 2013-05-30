@@ -1,3 +1,9 @@
+2013-05-30  Hafiz Abid Qadeer  <abidh@codesourcery.com>
+
+	* inferior.c (top level): Include tilde.h.
+	(add_inferior_command): Call tilde_expand on the value of 'exec'
+	argument.
+
 2013-05-30  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 

@@ -35,6 +35,7 @@
 #include "continuations.h"
 #include "arch-utils.h"
 #include "target-descriptions.h"
+#include "readline/tilde.h"
 
 void _initialize_inferiors (void);
 
@@ -850,7 +851,8 @@ add_inferior_command (char *args, int from_tty)
 		  ++argv;
 		  if (!*argv)
 		    error (_("No argument to -exec"));
-		  exec = *argv;
+		  exec = tilde_expand (*argv);
+		  make_cleanup (xfree, exec);
 		}
 	    }
 	  else
