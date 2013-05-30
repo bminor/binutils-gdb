@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* infrun.c (adjust_pc_after_break): Introduce an outer null
+	cleanup.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* mi/mi-cmd-var.c (varobj_update_one): Add an outer null cleanup.
 
 2013-05-30  Tom Tromey  <tromey@redhat.com>

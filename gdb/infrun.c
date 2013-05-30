@@ -3027,10 +3027,10 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   if (software_breakpoint_inserted_here_p (aspace, breakpoint_pc)
       || (non_stop && moribund_breakpoint_here_p (aspace, breakpoint_pc)))
     {
-      struct cleanup *old_cleanups = NULL;
+      struct cleanup *old_cleanups = make_cleanup (null_cleanup, NULL);
 
       if (RECORD_IS_USED)
-	old_cleanups = record_full_gdb_operation_disable_set ();
+	record_full_gdb_operation_disable_set ();
 
       /* When using hardware single-step, a SIGTRAP is reported for both
 	 a completed single-step and a software breakpoint.  Need to
@@ -3056,8 +3056,7 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 	  || ecs->event_thread->prev_pc == breakpoint_pc)
 	regcache_write_pc (regcache, breakpoint_pc);
 
-      if (RECORD_IS_USED)
-	do_cleanups (old_cleanups);
+      do_cleanups (old_cleanups);
     }
 }
 
