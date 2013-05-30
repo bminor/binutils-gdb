@@ -1,5 +1,11 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-script.c (read_command_lines_1): Use a null cleanup
+	for 'old_chain'.  Do not check 'head' before processing
+	cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* mi/mi-cmd-stack.c (list_arg_or_local): Remove
 	"cleanup_tuple".
 

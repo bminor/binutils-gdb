@@ -1246,13 +1246,12 @@ read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands,
 		      void (*validator)(char *, void *), void *closure)
 {
   struct command_line *head, *tail, *next;
-  struct cleanup *old_chain;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   enum command_control_type ret;
   enum misc_command_type val;
 
   control_level = 0;
   head = tail = NULL;
-  old_chain = NULL;
 
   while (1)
     {
@@ -1298,22 +1297,17 @@ read_command_lines_1 (char * (*read_next_line_func) (void), int parse_commands,
       else
 	{
 	  head = next;
-	  old_chain = make_cleanup_free_command_lines (&head);
+	  make_cleanup_free_command_lines (&head);
 	}
       tail = next;
     }
 
   dont_repeat ();
 
-  if (head)
-    {
-      if (ret != invalid_control)
-	{
-	  discard_cleanups (old_chain);
-	}
-      else
-	do_cleanups (old_chain);
-    }
+  if (ret != invalid_control)
+    discard_cleanups (old_chain);
+  else
+    do_cleanups (old_chain);
 
   return head;
 }
