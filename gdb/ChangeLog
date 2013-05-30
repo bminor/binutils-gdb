@@ -1,3 +1,7 @@
+2013-05-30  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-linux-tdep.c: Adjust formatting throughout.
+
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
 	* mipsread.c (read_alphacoff_dynamic_symtab): Call do_cleanups
