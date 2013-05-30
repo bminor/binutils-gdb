@@ -176,7 +176,10 @@ typedef unsigned long gdb_py_ulongest;
 static inline void
 gdb_Py_DECREF (void *op) /* ARI: editCase function */
 {
-  Py_DECREF (op);
+  /* ... and Python 2.4 didn't cast OP to PyObject pointer on the
+     '(op)->ob_refcnt' references within the macro.  Cast it ourselves
+     too.  */
+  Py_DECREF ((PyObject *) op);
 }
 
 #undef Py_DECREF

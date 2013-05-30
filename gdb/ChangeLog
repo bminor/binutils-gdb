@@ -1,3 +1,8 @@
+2013-05-30  Pedro Alves  <palves@redhat.com>
+
+	* python/python-internal.h (gdb_Py_DECREF): Cast OP to PyObject
+	pointer.
+
 2013-05-30  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (remote_check_symbols): Remove unused parameter
