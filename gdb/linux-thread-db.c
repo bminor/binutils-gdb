@@ -1029,17 +1029,17 @@ thread_db_load_search (void)
 	      || this_dir[pdir_len] == '/'))
 	{
 	  char *subdir = NULL;
-	  struct cleanup *free_subdir_cleanup = NULL;
+	  struct cleanup *free_subdir_cleanup
+	    = make_cleanup (null_cleanup, NULL);
 
 	  if (this_dir[pdir_len] == '/')
 	    {
 	      subdir = xmalloc (strlen (this_dir));
-	      free_subdir_cleanup = make_cleanup (xfree, subdir);
+	      make_cleanup (xfree, subdir);
 	      strcpy (subdir, this_dir + pdir_len + 1);
 	    }
 	  rc = try_thread_db_load_from_pdir (subdir);
-	  if (free_subdir_cleanup != NULL)
-	    do_cleanups (free_subdir_cleanup);
+	  do_cleanups (free_subdir_cleanup);
 	  if (rc)
 	    break;
 	}
