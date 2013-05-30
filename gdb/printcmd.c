@@ -936,11 +936,10 @@ static void
 print_command_1 (const char *exp, int voidprint)
 {
   struct expression *expr;
-  struct cleanup *old_chain = 0;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
   char format = 0;
   struct value *val;
   struct format_data fmt;
-  int cleanup = 0;
 
   if (exp && *exp == '/')
     {
@@ -960,8 +959,7 @@ print_command_1 (const char *exp, int voidprint)
   if (exp && *exp)
     {
       expr = parse_expression (exp);
-      old_chain = make_cleanup (free_current_contents, &expr);
-      cleanup = 1;
+      make_cleanup (free_current_contents, &expr);
       val = evaluate_expression (expr);
     }
   else
@@ -996,8 +994,7 @@ print_command_1 (const char *exp, int voidprint)
 	annotate_value_end ();
     }
 
-  if (cleanup)
-    do_cleanups (old_chain);
+  do_cleanups (old_chain);
 }
 
 static void

@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* printcmd.c (print_command_1): Unconditionally call do_cleanups.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-cmds.c (cd_command, alias_command): Call do_cleanups.
 	* cli/cli-dump.c (restore_binary_file): Call do_cleanups.
 	* interps.c (interpreter_exec_cmd): Call do_cleanups.
