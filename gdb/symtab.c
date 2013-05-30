@@ -3529,7 +3529,7 @@ search_symbols (char *regexp, enum search_domain kind,
 						&datum);
   }
 
-  retval_chain = old_chain;
+  retval_chain = make_cleanup (null_cleanup, NULL);
 
   /* Here, we search through the minimal symbol tables for functions
      and variables that match, and force their symbols to be read.
