@@ -741,7 +741,6 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 		   int explicit)
 {
   struct ui_out *uiout = current_uiout;
-  struct cleanup *cleanup = NULL;
   VEC (varobj_update_result) *changes;
   varobj_update_result *r;
   int i;
@@ -752,9 +751,10 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
     {
       char *display_hint;
       int from, to;
+      struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
 
       if (mi_version (uiout) > 1)
-        cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+	make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "name", varobj_get_objname (r->varobj));
 
       switch (r->status)
@@ -828,8 +828,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	  r->new = NULL;	/* Paranoia.  */
 	}
 
-      if (mi_version (uiout) > 1)
-	do_cleanups (cleanup);
+      do_cleanups (cleanup);
     }
   VEC_free (varobj_update_result, changes);
 }

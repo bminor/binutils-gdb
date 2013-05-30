@@ -1,5 +1,9 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* mi/mi-cmd-var.c (varobj_update_one): Add an outer null cleanup.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-script.c (read_command_lines_1): Use a null cleanup
 	for 'old_chain'.  Do not check 'head' before processing
 	cleanups.
