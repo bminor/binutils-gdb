@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* varobj.c (c_value_of_root): Call do_cleanups along all
+	return paths.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c (trace_dump_command): Unconditionally call
 	do_cleanups.
 

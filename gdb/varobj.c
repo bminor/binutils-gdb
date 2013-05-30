@@ -3474,13 +3474,11 @@ c_value_of_root (struct varobj **var_handle)
 	{
 	  new_val = evaluate_expression (var->root->exp);
 	}
-
-      return new_val;
     }
 
   do_cleanups (back_to);
 
-  return NULL;
+  return new_val;
 }
 
 static struct value *
