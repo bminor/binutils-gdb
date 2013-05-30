@@ -1,5 +1,10 @@
 2013-05-30  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-value.c (valpy_binop): Call do_cleanups before
+	exiting loop.
+
+2013-05-30  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-prettyprint.c (print_children): Remove extra
 	do_cleanups call.
 
