@@ -196,7 +196,8 @@ ps_get_thread_area (const struct ps_prochandle *ph,
 		(void *) (intptr_t) idx, (unsigned long) &desc) < 0)
       return PS_ERR;
 
-    *(int *)base = desc[1];
+    /* Ensure we properly extend the value to 64-bits for x86_64.  */
+    *base = (void *) (uintptr_t) desc[1];
     return PS_OK;
   }
 }
