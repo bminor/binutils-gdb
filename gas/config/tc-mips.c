@@ -1368,6 +1368,7 @@ static void s_tpreldword (int);
 static void s_gpvalue (int);
 static void s_gpword (int);
 static void s_gpdword (int);
+static void s_ehword (int);
 static void s_cpadd (int);
 static void s_insn (int);
 static void md_obj_begin (void);
@@ -1450,6 +1451,7 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"gpvalue", s_gpvalue, 0},
   {"gpword", s_gpword, 0},
   {"gpdword", s_gpdword, 0},
+  {"ehword", s_ehword, 0},
   {"cpadd", s_cpadd, 0},
   {"insn", s_insn, 0},
 
@@ -17151,6 +17153,34 @@ s_gpdword (int ignore ATTRIBUTE_UNUSED)
   /* GPREL32 composed with 64 gives a 64-bit GP offset.  */
   fix_new (frag_now, p - frag_now->fr_literal, 8, NULL, 0,
 	   FALSE, BFD_RELOC_64)->fx_tcbit = 1;
+
+  demand_empty_rest_of_line ();
+}
+
+/* Handle the .ehword pseudo-op.  This is used when generating unwinding
+   tables.  It generates a R_MIPS_EH reloc.  */
+
+static void
+s_ehword (int ignore ATTRIBUTE_UNUSED)
+{
+  expressionS ex;
+  char *p;
+
+  mips_emit_delays ();
+
+  expression (&ex);
+  mips_clear_insn_labels ();
+
+  if (ex.X_op != O_symbol || ex.X_add_number != 0)
+    {
+      as_bad (_("Unsupported use of .ehword"));
+      ignore_rest_of_line ();
+    }
+
+  p = frag_more (4);
+  md_number_to_chars (p, 0, 4);
+  fix_new_exp (frag_now, p - frag_now->fr_literal, 4, &ex, FALSE,
+	       BFD_RELOC_MIPS_EH);
 
   demand_empty_rest_of_line ();
 }

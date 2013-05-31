@@ -1,3 +1,10 @@
+2013-05-31  Catherine Moore  <clm@codesourcery.com>
+
+	gas/testsuite/
+	* gas/mips/ehword.d: New.
+	* gas/mips/ehword.s: New.
+	* gas/mips/mips.exp: Run ehword test.
+
 2013-05-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/jalr3.d: New test.

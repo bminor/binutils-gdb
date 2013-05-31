@@ -1124,6 +1124,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "align2-el"
     run_dump_test "align3"
     run_dump_test "odd-float"
+    run_dump_test "ehword"
 
     run_list_test_arches "mips-macro-ill-sfp" "-32 -msingle-float" \
 					[mips_arch_list_matching mips2]
