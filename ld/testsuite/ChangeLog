@@ -1,3 +1,23 @@
+2013-05-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/pr12718.d: Updated for text/data/bss section alignment
+	change.
+	* ld-i386/tlsbindesc.dd: Likewise.
+	* ld-i386/tlsbindesc.rd: Likewise.
+	* ld-i386/tlsnopic.dd: Likewise.
+	* ld-i386/tlspic.dd: Likewise.
+	* ld-x86-64/ilp32-4.d: Likewise.
+	* ld-x86-64/pr12718.d: Likewise.
+	* ld-x86-64/split-by-file.rd: Likewise.
+	* ld-x86-64/tlsbin.dd: Likewise.
+	* ld-x86-64/tlsbin.rd: Likewise.
+	* ld-x86-64/tlsbindesc.dd: Likewise.
+	* ld-x86-64/tlsbindesc.rd: Likewise.
+	* ld-x86-64/tlsdesc.dd: Likewise.
+	* ld-x86-64/tlsdesc.rd: Likewise.
+	* ld-x86-64/tlspic.dd: Likewise.
+	* ld-x86-64/tlspic.rd: Likewise.
+
 2013-05-29  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* ld-mips-elf/jalr3.dd: New test.

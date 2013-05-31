@@ -2454,15 +2454,6 @@ md_begin (void)
       operand_chars[(unsigned char) *p] = *p;
   }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-  if (IS_ELF)
-    {
-      record_alignment (text_section, 2);
-      record_alignment (data_section, 2);
-      record_alignment (bss_section, 2);
-    }
-#endif
-
   if (flag_code == CODE_64BIT)
     {
 #if defined (OBJ_COFF) && defined (TE_PE)

@@ -1,3 +1,11 @@
+2013-05-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/i386/compressed-1b.d: Updated for text/data/bss
+	section alignment change.
+	* binutils-all/i386/compressed-1c.d: Likewise.
+	* binutils-all/x86-64/compressed-1b.d: Likewise.
+	* binutils-all/x86-64/compressed-1c.d: Likewise.
+
 2013-05-28  Cary Coutant  <ccoutant@google.com>
 
 	* binutils-all/dw2-1.W: Adjust expected output.

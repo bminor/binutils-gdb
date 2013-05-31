@@ -16,9 +16,9 @@ Section Headers:
  +\[[ 0-9]+\] .rela.dyn +.*
  +\[[ 0-9]+\] .rela.plt +.*
  +\[[ 0-9]+\] .plt +PROGBITS +0+450 0+450 0+20 10 +AX +0 +0 +(4|16)
- +\[[ 0-9]+\] .text +PROGBITS +0+1000 0+1000 0+154 00 +AX +0 +0 4096
- +\[[ 0-9]+\] .tdata +PROGBITS +0+201154 0+1154 0+60 00 WAT +0 +0 +1
- +\[[ 0-9]+\] .tbss +NOBITS +0+2011b4 0+11b4 0+20 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .text +PROGBITS +0+1000 0+1000 0+153 00 +AX +0 +0 4096
+ +\[[ 0-9]+\] .tdata +PROGBITS +0+201153 0+1153 0+60 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .tbss +NOBITS +0+2011b3 0+11b3 0+20 00 WAT +0 +0 +1
  +\[[ 0-9]+\] .dynamic +DYNAMIC +0+2011b8 0+11b8 0+150 10 +WA +3 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +0+201308 0+1308 0+48 08 +WA +0 +0 +8
  +\[[ 0-9]+\] .got.plt +PROGBITS +0+201350 0+1350 0+68 08 +WA +0 +0 +8
@@ -37,9 +37,9 @@ There are [0-9]+ program headers, starting at offset [0-9]+
 Program Headers:
  +Type +Offset +VirtAddr +PhysAddr +FileSiz +MemSiz +Flg Align
  +LOAD +0x0+ 0x0+ 0x0+ 0x[0-9a-f]+ 0x[0-9a-f]+ R E 0x200000
- +LOAD +0x0+1154 0x0+201154 0x0+201154 0x0+264 0x0+264 RW +0x200000
+ +LOAD +0x0+1153 0x0+201153 0x0+201153 0x0+265 0x0+265 RW +0x200000
  +DYNAMIC +0x0+11b8 0x0+2011b8 0x0+2011b8 0x0+150 0x0+150 RW +0x8
- +TLS +0x0+1154 0x0+201154 0x0+201154 0x0+60 0x0+80 R +0x1
+ +TLS +0x0+1153 0x0+201153 0x0+201153 0x0+60 0x0+80 R +0x1
 
  Section to Segment mapping:
  +Segment Sections...

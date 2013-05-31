@@ -1,3 +1,8 @@
+2013-05-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_begin): Don't align text/data/bss sections
+	for ELF.
+
 2013-05-31  Paul Brook  <paul@codesourcery.com>
 
 	gas/

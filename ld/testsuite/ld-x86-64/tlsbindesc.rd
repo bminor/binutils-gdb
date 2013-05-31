@@ -15,9 +15,9 @@ Section Headers:
  +\[[ 0-9]+\] .dynsym +.*
  +\[[ 0-9]+\] .dynstr +.*
  +\[[ 0-9]+\] .rela.dyn +.*
- +\[[ 0-9]+\] .text +PROGBITS +0+401000 0+1000 0+200 00 +AX +0 +0 +4096
- +\[[ 0-9]+\] .tdata +PROGBITS +0+601200 0+1200 0+60 00 WAT +0 +0 +1
- +\[[ 0-9]+\] .tbss +NOBITS +0+601260 0+1260 0+40 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .text +PROGBITS +0+401000 0+1000 0+1fd 00 +AX +0 +0 +4096
+ +\[[ 0-9]+\] .tdata +PROGBITS +0+6011fd 0+11fd 0+60 00 WAT +0 +0 +1
+ +\[[ 0-9]+\] .tbss +NOBITS +0+60125d 0+125d 0+40 00 WAT +0 +0 +1
  +\[[ 0-9]+\] .dynamic +DYNAMIC +0+601260 0+1260 0+100 10 +WA +4 +0 +8
  +\[[ 0-9]+\] .got +PROGBITS +0+601360 0+1360 0+20 08 +WA +0 +0 +8
  +\[[ 0-9]+\] .got.plt +PROGBITS +0+601380 0+1380 0+18 08 +WA +0 +0 +8
@@ -30,7 +30,7 @@ Key to Flags:
 .*
 
 Elf file type is EXEC \(Executable file\)
-Entry point 0x401108
+Entry point 0x401105
 There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
@@ -38,10 +38,10 @@ Program Headers:
  +PHDR.*
  +INTERP.*
 .*Requesting program interpreter.*
- +LOAD +0x0+ 0x0+400000 0x0+400000 0x0+1200 0x0+1200 R E 0x200000
- +LOAD +0x0+1200 0x0+601200 0x0+601200 0x0+198 0x0+198 RW +0x200000
+ +LOAD +0x0+ 0x0+400000 0x0+400000 0x0+11fd 0x0+11fd R E 0x200000
+ +LOAD +0x0+11fd 0x0+6011fd 0x0+6011fd 0x0+19b 0x0+19b RW +0x200000
  +DYNAMIC +0x0+1260 0x0+601260 0x0+601260 0x0+100 0x0+100 RW +0x8
- +TLS +0x0+1200 0x0+601200 0x0+601200 0x0+60 0x0+a0 R +0x1
+ +TLS +0x0+11fd 0x0+6011fd 0x0+6011fd 0x0+60 0x0+a0 R +0x1
 
  Section to Segment mapping:
  +Segment Sections...
@@ -120,7 +120,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+58 +0 +TLS +GLOBAL +HIDDEN +7 sh7
  +[0-9]+: 0+5c +0 +TLS +GLOBAL +HIDDEN +7 sh8
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +7 sg1
- +[0-9]+: 0+401108 +0 +FUNC +GLOBAL +DEFAULT +6 _start
+ +[0-9]+: 0+401105 +0 +FUNC +GLOBAL +DEFAULT +6 _start
  +[0-9]+: 0+4c +0 +TLS +GLOBAL +HIDDEN +7 sh4
  +[0-9]+: 0+78 +0 +TLS +GLOBAL +DEFAULT +8 bg7
  +[0-9]+: 0+50 +0 +TLS +GLOBAL +HIDDEN +7 sh5
