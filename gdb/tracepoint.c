@@ -204,6 +204,8 @@ static void add_register (struct collection_list *collection,
 static void free_uploaded_tps (struct uploaded_tp **utpp);
 static void free_uploaded_tsvs (struct uploaded_tsv **utsvp);
 
+static struct command_line *
+  all_tracepoint_actions_and_cleanup (struct breakpoint *t);
 
 extern void _initialize_tracepoint (void);
 
@@ -1628,26 +1630,8 @@ encode_actions (struct bp_location *tloc, char ***tdp_actions,
   gdbarch_virtual_frame_pointer (tloc->gdbarch,
 				 tloc->address, &frame_reg, &frame_offset);
 
-  actions = breakpoint_commands (tloc->owner);
+  actions = all_tracepoint_actions_and_cleanup (tloc->owner);
 
-  /* If there are default expressions to collect, make up a collect
-     action and prepend to the action list to encode.  Note that since
-     validation is per-tracepoint (local var "xyz" might be valid for
-     one tracepoint and not another, etc), we make up the action on
-     the fly, and don't cache it.  */
-  if (*default_collect)
-    {
-      default_collect_line =  xstrprintf ("collect %s", default_collect);
-      make_cleanup (xfree, default_collect_line);
-
-      validate_actionline (default_collect_line, tloc->owner);
-
-      default_collect_action = xmalloc (sizeof (struct command_line));
-      make_cleanup (xfree, default_collect_action);
-      default_collect_action->next = actions;
-      default_collect_action->line = default_collect_line;
-      actions = default_collect_action;
-    }
   encode_actions_1 (actions, tloc, frame_reg, frame_offset,
 		    &tracepoint_list, &stepping_list);
 
@@ -2912,6 +2896,41 @@ trace_dump_actions (struct command_line *action,
     }
 }
 
+/* Return all the actions, including default collect, of a tracepoint
+   T.  It constructs cleanups into the chain, and leaves the caller to
+   handle them (call do_cleanups).  */
+
+static struct command_line *
+all_tracepoint_actions_and_cleanup (struct breakpoint *t)
+{
+  struct command_line *actions;
+
+  actions = breakpoint_commands (t);
+
+  /* If there are default expressions to collect, make up a collect
+     action and prepend to the action list to encode.  Note that since
+     validation is per-tracepoint (local var "xyz" might be valid for
+     one tracepoint and not another, etc), we make up the action on
+     the fly, and don't cache it.  */
+  if (*default_collect)
+    {
+      struct command_line *default_collect_action;
+      char *default_collect_line;
+
+      default_collect_line = xstrprintf ("collect %s", default_collect);
+      make_cleanup (xfree, default_collect_line);
+
+      validate_actionline (default_collect_line, t);
+      default_collect_action = xmalloc (sizeof (struct command_line));
+      make_cleanup (xfree, default_collect_action);
+      default_collect_action->next = actions;
+      default_collect_action->line = default_collect_line;
+      actions = default_collect_action;
+    }
+
+  return actions;
+}
+
 /* The tdump command.  */
 
 static void
@@ -2956,23 +2975,7 @@ trace_dump_command (char *args, int from_tty)
     if (loc->address == regcache_read_pc (regcache))
       stepping_frame = 0;
 
-  actions = breakpoint_commands (&t->base);
-
-  /* If there is a default-collect list, make up a collect command,
-     prepend to the tracepoint's commands, and pass the whole mess to
-     the trace dump scanner.  We need to validate because
-     default-collect might have been junked since the trace run.  */
-  if (*default_collect)
-    {
-      default_collect_line = xstrprintf ("collect %s", default_collect);
-      make_cleanup (xfree, default_collect_line);
-      validate_actionline (default_collect_line, &t->base);
-      default_collect_action = xmalloc (sizeof (struct command_line));
-      make_cleanup (xfree, default_collect_action);
-      default_collect_action->next = actions;
-      default_collect_action->line = default_collect_line;
-      actions = default_collect_action;
-    }
+  actions = all_tracepoint_actions_and_cleanup (&t->base);
 
   trace_dump_actions (actions, 0, stepping_frame, from_tty);
 
