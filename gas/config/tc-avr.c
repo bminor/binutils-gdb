@@ -268,18 +268,18 @@ static struct mcu_type_s mcu_types[] =
   {"atxmega64a3", AVR_ISA_XMEGA,  bfd_mach_avrxmega4},
   {"atxmega64d3", AVR_ISA_XMEGA,  bfd_mach_avrxmega4},
   {"atxmega64a1", AVR_ISA_XMEGA,  bfd_mach_avrxmega5},
-  {"atxmega64a1u",AVR_ISA_XMEGA,  bfd_mach_avrxmega5},
+  {"atxmega64a1u",AVR_ISA_XMEGAU, bfd_mach_avrxmega5},
   {"atxmega128a3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
-  {"atxmega128b1", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
+  {"atxmega128b1", AVR_ISA_XMEGAU, bfd_mach_avrxmega6},
   {"atxmega128d3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega192a3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega192d3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega256a3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega256a3b",AVR_ISA_XMEGA, bfd_mach_avrxmega6},
-  {"atxmega256a3bu",AVR_ISA_XMEGA,bfd_mach_avrxmega6},
+  {"atxmega256a3bu",AVR_ISA_XMEGAU, bfd_mach_avrxmega6},
   {"atxmega256d3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega128a1", AVR_ISA_XMEGA, bfd_mach_avrxmega7},
-  {"atxmega128a1u", AVR_ISA_XMEGA, bfd_mach_avrxmega7},
+  {"atxmega128a1u", AVR_ISA_XMEGAU, bfd_mach_avrxmega7},
   {NULL, 0, 0}
 };
 
