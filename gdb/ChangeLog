@@ -1,5 +1,32 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* common/linux-btrace.c (perf_event_read_bts, linux_read_btrace):
+	Support delta reads.
+	(linux_disable_btrace): Change return type.
+	* common/linux-btrace.h (linux_read_btrace): Change parameters
+	and return type to allow error reporting.  Update users.
+	(linux_disable_btrace): Change return type.  Update users.
+	* common/btrace-common.h (btrace_read_type) <BTRACE_READ_DELTA>:
+	New.
+	(btrace_error): New.
+	(btrace_block) <begin>: Comment on BEGIN == 0.
+	* btrace.c (btrace_compute_ftrace): Start from the end of
+	the current trace.
+	(btrace_stitch_trace, btrace_clear_history): New.
+	(btrace_fetch): Read delta trace, return if replaying.
+	(btrace_clear): Move clear history code to btrace_clear_history.
+	(parse_xml_btrace): Throw an error if parsing failed.
+	* target.h (struct target_ops) <to_read_btrace>: Change parameters
+	and return type to allow error reporting.
+	(target_read_btrace): Change parameters and return type to allow
+	error reporting.
+	* target.c (target_read_btrace): Update.
+	* remote.c (remote_read_btrace): Support delta reads.  Pass
+	errors on.
+	* NEWS: Announce it.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* record.h (record_btrace_frame_unwind)
 	(record_btrace_tailcall_frame_unwind): New declarations.
 	* dwarf2-frame: Include record.h

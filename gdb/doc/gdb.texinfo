@@ -39978,6 +39978,14 @@ Returns all available branch trace.
 @item new
 Returns all available branch trace if the branch trace changed since
 the last read request.
+
+@item delta
+Returns the new branch trace since the last read request.  Adds a new
+block to the end of the trace that begins at zero and ends at the source
+location of the first branch in the trace buffer.  This extra block is
+used to stitch traces together.
+
+If the trace buffer overflowed, returns an error indicating the overflow.
 @end table
 
 This packet is not probed by default; the remote stub must request it

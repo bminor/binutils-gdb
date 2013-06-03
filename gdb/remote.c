@@ -11489,13 +11489,14 @@ remote_teardown_btrace (struct btrace_target_info *tinfo)
 
 /* Read the branch trace.  */
 
-static VEC (btrace_block_s) *
-remote_read_btrace (struct btrace_target_info *tinfo,
+static enum btrace_error
+remote_read_btrace (VEC (btrace_block_s) **btrace,
+		    struct btrace_target_info *tinfo,
 		    enum btrace_read_type type)
 {
   struct packet_config *packet = &remote_protocol_packets[PACKET_qXfer_btrace];
   struct remote_state *rs = get_remote_state ();
-  VEC (btrace_block_s) *btrace = NULL;
+  struct cleanup *cleanup;
   const char *annex;
   char *xml;
 
@@ -11514,6 +11515,9 @@ remote_read_btrace (struct btrace_target_info *tinfo,
     case BTRACE_READ_NEW:
       annex = "new";
       break;
+    case BTRACE_READ_DELTA:
+      annex = "delta";
+      break;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Bad branch tracing read type: %u."),
@@ -11522,15 +11526,14 @@ remote_read_btrace (struct btrace_target_info *tinfo,
 
   xml = target_read_stralloc (&current_target,
                               TARGET_OBJECT_BTRACE, annex);
-  if (xml != NULL)
-    {
-      struct cleanup *cleanup = make_cleanup (xfree, xml);
+  if (xml == NULL)
+    return BTRACE_ERR_UNKNOWN;
 
-      btrace = parse_xml_btrace (xml);
-      do_cleanups (cleanup);
-    }
+  cleanup = make_cleanup (xfree, xml);
+  *btrace = parse_xml_btrace (xml);
+  do_cleanups (cleanup);
 
-  return btrace;
+  return BTRACE_ERR_NONE;
 }
 
 static int

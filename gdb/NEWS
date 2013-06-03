@@ -22,6 +22,12 @@
   For locations inside the execution trace, the back trace is computed
   based on the information stored in the execution trace.
 
+* New remote packets
+
+qXfer:btrace:read's annex
+  The qXfer:btrace:read packet supports a new annex 'delta' to read
+  branch trace incrementally.
+
 *** Changes in GDB 7.7
 
 * Improved support for process record-replay and reverse debugging on

@@ -599,9 +599,9 @@ btrace_compute_ftrace (struct btrace_thread_info *btinfo,
   DEBUG ("compute ftrace");
 
   gdbarch = target_gdbarch ();
-  begin = NULL;
-  end = NULL;
-  level = INT_MAX;
+  begin = btinfo->begin;
+  end = btinfo->end;
+  level = begin != NULL ? -btinfo->level : INT_MAX;
   blk = VEC_length (btrace_block_s, btrace);
 
   while (blk != 0)
@@ -728,27 +728,158 @@ btrace_teardown (struct thread_info *tp)
   btrace_clear (tp);
 }
 
+/* Adjust the block trace in order to stitch old and new trace together.
+   BTRACE is the new delta trace between the last and the current stop.
+   BTINFO is the old branch trace until the last stop.
+   May modify BTRACE as well as the existing trace in BTINFO.
+   Return 0 on success, -1 otherwise.  */
+
+static int
+btrace_stitch_trace (VEC (btrace_block_s) **btrace,
+		     const struct btrace_thread_info *btinfo)
+{
+  struct btrace_function *last_bfun;
+  struct btrace_insn *last_insn;
+  btrace_block_s *first_new_block;
+
+  /* If we don't have trace, there's nothing to do.  */
+  if (VEC_empty (btrace_block_s, *btrace))
+    return 0;
+
+  last_bfun = btinfo->end;
+  gdb_assert (last_bfun != NULL);
+
+  /* Beware that block trace starts with the most recent block, so the
+     chronologically first block in the new trace is the last block in
+     the new trace's block vector.  */
+  first_new_block = VEC_last (btrace_block_s, *btrace);
+  last_insn = VEC_last (btrace_insn_s, last_bfun->insn);
+
+  /* If the current PC at the end of the block is the same as in our current
+     trace, there are two explanations:
+       1. we executed the instruction and some branch brought us back.
+       2. we have not made any progress.
+     In the first case, the delta trace vector should contain at least two
+     entries.
+     In the second case, the delta trace vector should contain exactly one
+     entry for the partial block containing the current PC.  Remove it.  */
+  if (first_new_block->end == last_insn->pc
+      && VEC_length (btrace_block_s, *btrace) == 1)
+    {
+      VEC_pop (btrace_block_s, *btrace);
+      return 0;
+    }
+
+  DEBUG ("stitching %s to %s", ftrace_print_insn_addr (last_insn),
+	 core_addr_to_string_nz (first_new_block->end));
+
+  /* Do a simple sanity check to make sure we don't accidentally end up
+     with a bad block.  This should not occur in practice.  */
+  if (first_new_block->end < last_insn->pc)
+    {
+      warning (_("Error while trying to read delta trace.  Falling back to "
+		 "a full read."));
+      return -1;
+    }
+
+  /* We adjust the last block to start at the end of our current trace.  */
+  gdb_assert (first_new_block->begin == 0);
+  first_new_block->begin = last_insn->pc;
+
+  /* We simply pop the last insn so we can insert it again as part of
+     the normal branch trace computation.
+     Since instruction iterators are based on indices in the instructions
+     vector, we don't leave any pointers dangling.  */
+  DEBUG ("pruning insn at %s for stitching",
+	 ftrace_print_insn_addr (last_insn));
+
+  VEC_pop (btrace_insn_s, last_bfun->insn);
+
+  /* The instructions vector may become empty temporarily if this has
+     been the only instruction in this function segment.
+     This violates the invariant but will be remedied shortly by
+     btrace_compute_ftrace when we add the new trace.  */
+  return 0;
+}
+
+/* Clear the branch trace histories in BTINFO.  */
+
+static void
+btrace_clear_history (struct btrace_thread_info *btinfo)
+{
+  xfree (btinfo->insn_history);
+  xfree (btinfo->call_history);
+  xfree (btinfo->replay);
+
+  btinfo->insn_history = NULL;
+  btinfo->call_history = NULL;
+  btinfo->replay = NULL;
+}
+
 /* See btrace.h.  */
 
 void
 btrace_fetch (struct thread_info *tp)
 {
   struct btrace_thread_info *btinfo;
+  struct btrace_target_info *tinfo;
   VEC (btrace_block_s) *btrace;
   struct cleanup *cleanup;
+  int errcode;
 
   DEBUG ("fetch thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
 
+  btrace = NULL;
   btinfo = &tp->btrace;
-  if (btinfo->target == NULL)
+  tinfo = btinfo->target;
+  if (tinfo == NULL)
     return;
 
-  btrace = target_read_btrace (btinfo->target, BTRACE_READ_NEW);
+  /* There's no way we could get new trace while replaying.
+     On the other hand, delta trace would return a partial record with the
+     current PC, which is the replay PC, not the last PC, as expected.  */
+  if (btinfo->replay != NULL)
+    return;
+
   cleanup = make_cleanup (VEC_cleanup (btrace_block_s), &btrace);
 
+  /* Let's first try to extend the trace we already have.  */
+  if (btinfo->end != NULL)
+    {
+      errcode = target_read_btrace (&btrace, tinfo, BTRACE_READ_DELTA);
+      if (errcode == 0)
+	{
+	  /* Success.  Let's try to stitch the traces together.  */
+	  errcode = btrace_stitch_trace (&btrace, btinfo);
+	}
+      else
+	{
+	  /* We failed to read delta trace.  Let's try to read new trace.  */
+	  errcode = target_read_btrace (&btrace, tinfo, BTRACE_READ_NEW);
+
+	  /* If we got any new trace, discard what we have.  */
+	  if (errcode == 0 && !VEC_empty (btrace_block_s, btrace))
+	    btrace_clear (tp);
+	}
+
+      /* If we were not able to read the trace, we start over.  */
+      if (errcode != 0)
+	{
+	  btrace_clear (tp);
+	  errcode = target_read_btrace (&btrace, tinfo, BTRACE_READ_ALL);
+	}
+    }
+  else
+    errcode = target_read_btrace (&btrace, tinfo, BTRACE_READ_ALL);
+
+  /* If we were not able to read the branch trace, signal an error.  */
+  if (errcode != 0)
+    error (_("Failed to read branch trace."));
+
+  /* Compute the trace, provided we have any.  */
   if (!VEC_empty (btrace_block_s, btrace))
     {
-      btrace_clear (tp);
+      btrace_clear_history (btinfo);
       btrace_compute_ftrace (btinfo, btrace);
     }
 
@@ -783,13 +914,7 @@ btrace_clear (struct thread_info *tp)
   btinfo->begin = NULL;
   btinfo->end = NULL;
 
-  xfree (btinfo->insn_history);
-  xfree (btinfo->call_history);
-  xfree (btinfo->replay);
-
-  btinfo->insn_history = NULL;
-  btinfo->call_history = NULL;
-  btinfo->replay = NULL;
+  btrace_clear_history (btinfo);
 }
 
 /* See btrace.h.  */
@@ -881,10 +1006,7 @@ parse_xml_btrace (const char *buffer)
   errcode = gdb_xml_parse_quick (_("btrace"), "btrace.dtd", btrace_elements,
 				 buffer, &btrace);
   if (errcode != 0)
-    {
-      do_cleanups (cleanup);
-      return NULL;
-    }
+    error (_("Error parsing branch trace."));
 
   /* Keep parse results.  */
   discard_cleanups (cleanup);

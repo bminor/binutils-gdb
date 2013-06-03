@@ -4232,18 +4232,19 @@ target_teardown_btrace (struct btrace_target_info *btinfo)
 
 /* See target.h.  */
 
-VEC (btrace_block_s) *
-target_read_btrace (struct btrace_target_info *btinfo,
+enum btrace_error
+target_read_btrace (VEC (btrace_block_s) **btrace,
+		    struct btrace_target_info *btinfo,
 		    enum btrace_read_type type)
 {
   struct target_ops *t;
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_read_btrace != NULL)
-      return t->to_read_btrace (btinfo, type);
+      return t->to_read_btrace (btrace, btinfo, type);
 
   tcomplain ();
-  return NULL;
+  return BTRACE_ERR_NOT_SUPPORTED;
 }
 
 /* See target.h.  */

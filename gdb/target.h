@@ -839,9 +839,13 @@ struct target_ops
        be attempting to talk to a remote target.  */
     void (*to_teardown_btrace) (struct btrace_target_info *tinfo);
 
-    /* Read branch trace data.  */
-    VEC (btrace_block_s) *(*to_read_btrace) (struct btrace_target_info *,
-					     enum btrace_read_type);
+    /* Read branch trace data for the thread indicated by BTINFO into DATA.
+       DATA is cleared before new trace is added.
+       The branch trace will start with the most recent block and continue
+       towards older blocks.  */
+    enum btrace_error (*to_read_btrace) (VEC (btrace_block_s) **data,
+					 struct btrace_target_info *btinfo,
+					 enum btrace_read_type type);
 
     /* Stop trace recording.  */
     void (*to_stop_recording) (void);
@@ -1998,8 +2002,9 @@ extern void target_disable_btrace (struct btrace_target_info *btinfo);
 extern void target_teardown_btrace (struct btrace_target_info *btinfo);
 
 /* See to_read_btrace in struct target_ops.  */
-extern VEC (btrace_block_s) *target_read_btrace (struct btrace_target_info *,
-						 enum btrace_read_type);
+extern enum btrace_error target_read_btrace (VEC (btrace_block_s) **,
+					     struct btrace_target_info *,
+					     enum btrace_read_type);
 
 /* See to_stop_recording in struct target_ops.  */
 extern void target_stop_recording (void);
