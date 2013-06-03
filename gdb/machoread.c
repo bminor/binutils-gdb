@@ -871,10 +871,10 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
           struct cleanup *back_to;
 
 	  symbol_table = (asymbol **) xmalloc (storage_needed);
-	  back_to = make_cleanup (xfree, symbol_table);
+	  make_cleanup (xfree, symbol_table);
 
           init_minimal_symbol_collection ();
-          make_cleanup_discard_minimal_symbols ();
+          back_to = make_cleanup_discard_minimal_symbols ();
 
 	  symcount = bfd_canonicalize_symtab (objfile->obfd, symbol_table);
 

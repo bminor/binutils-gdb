@@ -1,3 +1,9 @@
+2013-06-03  Joel Brobecker  <brobecker@adacore.com>
+
+	Revert (indirectly causes a SIGSEGV):
+	* machoread.c (macho_symfile_read): Assign first cleanup to
+	'back_to'.
+
 2013-06-03  Yao Qi  <yao@codesourcery.com>
 
 	* mi/mi-cmd-var.c (mi_no_values, mi_simple_values): Move to
