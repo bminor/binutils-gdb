@@ -28,10 +28,6 @@ enum print_values {
    PRINT_SIMPLE_VALUES
 };
 
-extern const char mi_no_values[];
-extern const char mi_simple_values[];
-extern const char mi_all_values[];
-
 typedef void (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
 
 /* Declarations of the functions implementing each command.  */

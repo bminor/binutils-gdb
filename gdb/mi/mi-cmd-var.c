@@ -29,10 +29,7 @@
 #include "gdb_string.h"
 #include "mi-getopt.h"
 #include "gdbthread.h"
-
-const char mi_no_values[] = "--no-values";
-const char mi_simple_values[] = "--simple-values";
-const char mi_all_values[] = "--all-values";
+#include "mi-parse.h"
 
 extern unsigned int varobjdebug;		/* defined in varobj.c.  */
 
@@ -340,26 +337,6 @@ mi_cmd_var_info_num_children (char *command, char **argv, int argc)
   ui_out_field_int (uiout, "numchild", varobj_get_num_children (var));
 }
 
-/* Parse a string argument into a print_values value.  */
-
-static enum print_values
-mi_parse_values_option (const char *arg)
-{
-  if (strcmp (arg, "0") == 0
-      || strcmp (arg, mi_no_values) == 0)
-    return PRINT_NO_VALUES;
-  else if (strcmp (arg, "1") == 0
-	   || strcmp (arg, mi_all_values) == 0)
-    return PRINT_ALL_VALUES;
-  else if (strcmp (arg, "2") == 0
-	   || strcmp (arg, mi_simple_values) == 0)
-    return PRINT_SIMPLE_VALUES;
-  else
-    error (_("Unknown value for PRINT_VALUES\n\
-Must be: 0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
-	   mi_no_values, mi_simple_values, mi_all_values);
-}
-
 /* Return 1 if given the argument PRINT_VALUES we should display
    the varobj VAR.  */
 
@@ -428,7 +405,7 @@ mi_cmd_var_list_children (char *command, char **argv, int argc)
   children = varobj_list_children (var, &from, &to);
   ui_out_field_int (uiout, "numchild", to - from);
   if (argc == 2 || argc == 4)
-    print_values = mi_parse_values_option (argv[0]);
+    print_values = mi_parse_print_values (argv[0]);
   else
     print_values = PRINT_NO_VALUES;
 
@@ -698,7 +675,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
     name = argv[1];
 
   if (argc == 2)
-    print_values = mi_parse_values_option (argv[0]);
+    print_values = mi_parse_print_values (argv[0]);
   else
     print_values = PRINT_NO_VALUES;
 

@@ -28,6 +28,10 @@
 #include "gdb_string.h"
 #include "cli/cli-utils.h"
 
+const static char mi_no_values[] = "--no-values";
+const static char mi_simple_values[] = "--simple-values";
+const static char mi_all_values[] = "--all-values";
+
 /* Like parse_escape, but leave the results as a host char, not a
    target char.  */
 
@@ -372,4 +376,22 @@ mi_parse (const char *cmd, char **token)
   /* Fully parsed, flag as an MI command.  */
   parse->op = MI_COMMAND;
   return parse;
+}
+
+enum print_values
+mi_parse_print_values (const char *name)
+{
+   if (strcmp (name, "0") == 0
+       || strcmp (name, mi_no_values) == 0)
+     return PRINT_NO_VALUES;
+   else if (strcmp (name, "1") == 0
+	    || strcmp (name, mi_all_values) == 0)
+     return PRINT_ALL_VALUES;
+   else if (strcmp (name, "2") == 0
+	    || strcmp (name, mi_simple_values) == 0)
+     return PRINT_SIMPLE_VALUES;
+   else
+     error (_("Unknown value for PRINT_VALUES: must be: \
+0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
+	    mi_no_values, mi_all_values, mi_simple_values);
 }

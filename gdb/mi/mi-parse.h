@@ -66,4 +66,8 @@ extern struct mi_parse *mi_parse (const char *cmd, char **token);
 
 extern void mi_parse_free (struct mi_parse *cmd);
 
+/* Parse a string argument into a print_values value.  */
+
+enum print_values mi_parse_print_values (const char *name);
+
 #endif

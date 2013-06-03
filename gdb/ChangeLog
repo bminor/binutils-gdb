@@ -1,3 +1,20 @@
+2013-06-03  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-cmd-var.c (mi_no_values, mi_simple_values): Move to
+	mi-parse.c.  Make them static.
+	(mi_all_values): Likewise.
+	(mi_parse_values_option): Move to mi-parse.c.  Rename it to
+	mi_parse_print_values.  Make it external.
+	* mi/mi-cmds.h (mi_no_values, mi_simple_values, mi_all_values):
+	Remove the declarations.
+	* mi/mi-parse.c (mi_parse_print_values): Moved from mi-cmd-var.c.
+	* mi/mi-parse.h (mi_parse_print_values): Declare.
+	* mi/mi-cmd-stack.c: Include mi-parse.h.
+	(parse_print_values): Remove
+	(mi_cmd_stack_list_locals): Call mi_parse_print_values instead
+	of parse_print_values.
+	(mi_cmd_stack_list_args, mi_cmd_stack_list_variables): Likewise.
+
 2013-05-31  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 

@@ -35,6 +35,7 @@
 #include "mi-getopt.h"
 #include "python/python.h"
 #include <ctype.h>
+#include "mi-parse.h"
 
 enum what_to_list { locals, arguments, all };
 
@@ -200,24 +201,6 @@ mi_cmd_stack_info_depth (char *command, char **argv, int argc)
   ui_out_field_int (current_uiout, "depth", i);
 }
 
-static enum print_values
-parse_print_values (char *name)
-{
-   if (strcmp (name, "0") == 0
-       || strcmp (name, mi_no_values) == 0)
-     return PRINT_NO_VALUES;
-   else if (strcmp (name, "1") == 0
-	    || strcmp (name, mi_all_values) == 0)
-     return PRINT_ALL_VALUES;
-   else if (strcmp (name, "2") == 0
-	    || strcmp (name, mi_simple_values) == 0)
-     return PRINT_SIMPLE_VALUES;
-   else
-     error (_("Unknown value for PRINT_VALUES: must be: \
-0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
-	    mi_no_values, mi_all_values, mi_simple_values);
-}
-
 /* Print a list of the locals for the current frame.  With argument of
    0, print only the names, with argument of 1 print also the
    values.  */
@@ -238,7 +221,7 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
     error (_("-stack-list-locals: Usage: [--no-frame-filters] PRINT_VALUES"));
 
   frame = get_selected_frame (NULL);
-  print_value = parse_print_values (argv[raw_arg]);
+  print_value = mi_parse_print_values (argv[raw_arg]);
 
    if (! raw_arg && frame_filters)
      {
@@ -293,7 +276,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
       frame_high = -1;
     }
 
-  print_values = parse_print_values (argv[raw_arg]);
+  print_values = mi_parse_print_values (argv[raw_arg]);
 
   /* Let's position fi on the frame at which to start the
      display. Could be the innermost frame if the whole stack needs
@@ -368,7 +351,7 @@ mi_cmd_stack_list_variables (char *command, char **argv, int argc)
 	     "[--no-frame-filters] PRINT_VALUES"));
 
    frame = get_selected_frame (NULL);
-   print_value = parse_print_values (argv[raw_arg]);
+   print_value = mi_parse_print_values (argv[raw_arg]);
 
    if (! raw_arg && frame_filters)
      {
