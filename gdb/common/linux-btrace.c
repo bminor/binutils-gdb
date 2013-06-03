@@ -520,6 +520,9 @@ linux_read_btrace (struct btrace_target_info *tinfo,
     {
       data_head = header->data_head;
 
+      /* Delete any leftover trace from the previous iteration.  */
+      VEC_free (btrace_block_s, btrace);
+
       /* If there's new trace, let's read it.  */
       if (data_head != tinfo->data_head)
 	{
