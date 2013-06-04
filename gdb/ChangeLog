@@ -1,5 +1,9 @@
 2013-06-04  Gary Benson  <gbenson@redhat.com>
 
+	* NEWS: Update.
+
+2013-06-04  Gary Benson  <gbenson@redhat.com>
+
 	* objfiles.h (inhibit_section_map_updates): New function
 	declaration.
 	(resume_section_map_updates): Likewise.

@@ -95,6 +95,14 @@ vCont;r
   stub to step through an address range itself, without GDB
   involvemement at each single-step.
 
+qXfer:libraries-svr4:read's annex
+  The previously unused annex of the qXfer:libraries-svr4:read packet
+  is now used to support passing an argument list.  The remote stub
+  reports support for this argument list to GDB's qSupported query.
+  The defined arguments are "start" and "prev", used to reduce work
+  necessary for library list updating, resulting in significant
+  speedup.
+
 * New features in the GDB remote stub, GDBserver
 
   ** GDBserver now supports target-assisted range stepping.  Currently
