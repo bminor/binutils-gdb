@@ -1115,8 +1115,7 @@ handle_qxfer_libraries_svr4 (const char *annex,
   if (writebuf != NULL)
     return -2;
 
-  if (annex[0] != '\0' || !target_running ()
-      || the_target->qxfer_libraries_svr4 == NULL)
+  if (!target_running () || the_target->qxfer_libraries_svr4 == NULL)
     return -1;
 
   return the_target->qxfer_libraries_svr4 (annex, readbuf, writebuf, offset, len);
@@ -1743,7 +1742,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	       PBUFSIZ - 1);
 
       if (the_target->qxfer_libraries_svr4 != NULL)
-	strcat (own_buf, ";qXfer:libraries-svr4:read+");
+	strcat (own_buf, ";qXfer:libraries-svr4:read+"
+		";augmented-libraries-svr4-read+");
       else
 	{
 	  /* We do not have any hook to indicate whether the non-SVR4 target

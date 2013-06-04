@@ -1,3 +1,12 @@
+2013-06-04  Gary Benson  <gbenson@redhat.com>
+
+	* server.c (handle_query): Add "augmented-libraries-svr4-read+"
+	to qSupported response when appropriate.
+	(handle_qxfer_libraries_svr4): Allow qXfer:libraries-svr4:read
+	with nonzero-length annex.
+	* linux-low.c (linux_qxfer_libraries_svr4): Parse and handle
+	arguments supplied in annex.
+
 2013-05-31  Doug Evans  <dje@google.com>
 
 	* linux-x86-low.c (ps_get_thread_area): Properly extend address to

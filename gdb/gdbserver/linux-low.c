@@ -5728,6 +5728,12 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
     };
   const struct link_map_offsets *lmo;
   unsigned int machine;
+  int ptr_size;
+  CORE_ADDR lm_addr = 0, lm_prev = 0;
+  int allocated = 1024;
+  char *p;
+  CORE_ADDR l_name, l_addr, l_ld, l_next, l_prev;
+  int header_done = 0;
 
   if (writebuf != NULL)
     return -2;
@@ -5738,127 +5744,143 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
   xsnprintf (filename, sizeof filename, "/proc/%d/exe", pid);
   is_elf64 = elf_64_file_p (filename, &machine);
   lmo = is_elf64 ? &lmo_64bit_offsets : &lmo_32bit_offsets;
+  ptr_size = is_elf64 ? 8 : 4;
 
-  if (priv->r_debug == 0)
-    priv->r_debug = get_r_debug (pid, is_elf64);
-
-  /* We failed to find DT_DEBUG.  Such situation will not change for this
-     inferior - do not retry it.  Report it to GDB as E01, see for the reasons
-     at the GDB solib-svr4.c side.  */
-  if (priv->r_debug == (CORE_ADDR) -1)
-    return -1;
-
-  if (priv->r_debug == 0)
+  while (annex[0] != '\0')
     {
-      document = xstrdup ("<library-list-svr4 version=\"1.0\"/>\n");
+      const char *sep;
+      CORE_ADDR *addrp;
+      int len;
+
+      sep = strchr (annex, '=');
+      if (sep == NULL)
+	break;
+
+      len = sep - annex;
+      if (len == 5 && strncmp (annex, "start", 5) == 0)
+	addrp = &lm_addr;
+      else if (len == 4 && strncmp (annex, "prev", 4) == 0)
+	addrp = &lm_prev;
+      else
+	{
+	  annex = strchr (sep, ';');
+	  if (annex == NULL)
+	    break;
+	  annex++;
+	  continue;
+	}
+
+      annex = decode_address_to_semicolon (addrp, sep + 1);
+    }
+
+  if (lm_addr == 0)
+    {
+      int r_version = 0;
+
+      if (priv->r_debug == 0)
+	priv->r_debug = get_r_debug (pid, is_elf64);
+
+      /* We failed to find DT_DEBUG.  Such situation will not change
+	 for this inferior - do not retry it.  Report it to GDB as
+	 E01, see for the reasons at the GDB solib-svr4.c side.  */
+      if (priv->r_debug == (CORE_ADDR) -1)
+	return -1;
+
+      if (priv->r_debug != 0)
+	{
+	  if (linux_read_memory (priv->r_debug + lmo->r_version_offset,
+				 (unsigned char *) &r_version,
+				 sizeof (r_version)) != 0
+	      || r_version != 1)
+	    {
+	      warning ("unexpected r_debug version %d", r_version);
+	    }
+	  else if (read_one_ptr (priv->r_debug + lmo->r_map_offset,
+				 &lm_addr, ptr_size) != 0)
+	    {
+	      warning ("unable to read r_map from 0x%lx",
+		       (long) priv->r_debug + lmo->r_map_offset);
+	    }
+	}
+    }
+
+  document = xmalloc (allocated);
+  strcpy (document, "<library-list-svr4 version=\"1.0\"");
+  p = document + strlen (document);
+
+  while (lm_addr
+	 && read_one_ptr (lm_addr + lmo->l_name_offset,
+			  &l_name, ptr_size) == 0
+	 && read_one_ptr (lm_addr + lmo->l_addr_offset,
+			  &l_addr, ptr_size) == 0
+	 && read_one_ptr (lm_addr + lmo->l_ld_offset,
+			  &l_ld, ptr_size) == 0
+	 && read_one_ptr (lm_addr + lmo->l_prev_offset,
+			  &l_prev, ptr_size) == 0
+	 && read_one_ptr (lm_addr + lmo->l_next_offset,
+			  &l_next, ptr_size) == 0)
+    {
+      unsigned char libname[PATH_MAX];
+
+      if (lm_prev != l_prev)
+	{
+	  warning ("Corrupted shared library list: 0x%lx != 0x%lx",
+		   (long) lm_prev, (long) l_prev);
+	  break;
+	}
+
+      /* Not checking for error because reading may stop before
+	 we've got PATH_MAX worth of characters.  */
+      libname[0] = '\0';
+      linux_read_memory (l_name, libname, sizeof (libname) - 1);
+      libname[sizeof (libname) - 1] = '\0';
+      if (libname[0] != '\0')
+	{
+	  /* 6x the size for xml_escape_text below.  */
+	  size_t len = 6 * strlen ((char *) libname);
+	  char *name;
+
+	  if (!header_done)
+	    {
+	      /* Terminate `<library-list-svr4'.  */
+	      *p++ = '>';
+	      header_done = 1;
+	    }
+
+	  while (allocated < p - document + len + 200)
+	    {
+	      /* Expand to guarantee sufficient storage.  */
+	      uintptr_t document_len = p - document;
+
+	      document = xrealloc (document, 2 * allocated);
+	      allocated *= 2;
+	      p = document + document_len;
+	    }
+
+	  name = xml_escape_text ((char *) libname);
+	  p += sprintf (p, "<library name=\"%s\" lm=\"0x%lx\" "
+			"l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
+			name, (unsigned long) lm_addr,
+			(unsigned long) l_addr, (unsigned long) l_ld);
+	  free (name);
+	}
+      else if (lm_prev == 0)
+	{
+	  sprintf (p, " main-lm=\"0x%lx\"", (unsigned long) lm_addr);
+	  p = p + strlen (p);
+	}
+
+      lm_prev = lm_addr;
+      lm_addr = l_next;
+    }
+
+  if (!header_done)
+    {
+      /* Empty list; terminate `<library-list-svr4'.  */
+      strcpy (p, "/>");
     }
   else
-    {
-      int allocated = 1024;
-      char *p;
-      const int ptr_size = is_elf64 ? 8 : 4;
-      CORE_ADDR lm_addr, lm_prev, l_name, l_addr, l_ld, l_next, l_prev;
-      int r_version, header_done = 0;
-
-      document = xmalloc (allocated);
-      strcpy (document, "<library-list-svr4 version=\"1.0\"");
-      p = document + strlen (document);
-
-      r_version = 0;
-      if (linux_read_memory (priv->r_debug + lmo->r_version_offset,
-			     (unsigned char *) &r_version,
-			     sizeof (r_version)) != 0
-	  || r_version != 1)
-	{
-	  warning ("unexpected r_debug version %d", r_version);
-	  goto done;
-	}
-
-      if (read_one_ptr (priv->r_debug + lmo->r_map_offset,
-			&lm_addr, ptr_size) != 0)
-	{
-	  warning ("unable to read r_map from 0x%lx",
-		   (long) priv->r_debug + lmo->r_map_offset);
-	  goto done;
-	}
-
-      lm_prev = 0;
-      while (read_one_ptr (lm_addr + lmo->l_name_offset,
-			   &l_name, ptr_size) == 0
-	     && read_one_ptr (lm_addr + lmo->l_addr_offset,
-			      &l_addr, ptr_size) == 0
-	     && read_one_ptr (lm_addr + lmo->l_ld_offset,
-			      &l_ld, ptr_size) == 0
-	     && read_one_ptr (lm_addr + lmo->l_prev_offset,
-			      &l_prev, ptr_size) == 0
-	     && read_one_ptr (lm_addr + lmo->l_next_offset,
-			      &l_next, ptr_size) == 0)
-	{
-	  unsigned char libname[PATH_MAX];
-
-	  if (lm_prev != l_prev)
-	    {
-	      warning ("Corrupted shared library list: 0x%lx != 0x%lx",
-		       (long) lm_prev, (long) l_prev);
-	      break;
-	    }
-
-	  /* Not checking for error because reading may stop before
-	     we've got PATH_MAX worth of characters.  */
-	  libname[0] = '\0';
-	  linux_read_memory (l_name, libname, sizeof (libname) - 1);
-	  libname[sizeof (libname) - 1] = '\0';
-	  if (libname[0] != '\0')
-	    {
-	      /* 6x the size for xml_escape_text below.  */
-	      size_t len = 6 * strlen ((char *) libname);
-	      char *name;
-
-	      if (!header_done)
-		{
-		  /* Terminate `<library-list-svr4'.  */
-		  *p++ = '>';
-		  header_done = 1;
-		}
-
-	      while (allocated < p - document + len + 200)
-		{
-		  /* Expand to guarantee sufficient storage.  */
-		  uintptr_t document_len = p - document;
-
-		  document = xrealloc (document, 2 * allocated);
-		  allocated *= 2;
-		  p = document + document_len;
-		}
-
-	      name = xml_escape_text ((char *) libname);
-	      p += sprintf (p, "<library name=\"%s\" lm=\"0x%lx\" "
-			       "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
-			    name, (unsigned long) lm_addr,
-			    (unsigned long) l_addr, (unsigned long) l_ld);
-	      free (name);
-	    }
-	  else if (lm_prev == 0)
-	    {
-	      sprintf (p, " main-lm=\"0x%lx\"", (unsigned long) lm_addr);
-	      p = p + strlen (p);
-	    }
-
-	  if (l_next == 0)
-	    break;
-
-	  lm_prev = lm_addr;
-	  lm_addr = l_next;
-	}
-    done:
-      if (!header_done)
-	{
-	  /* Empty list; terminate `<library-list-svr4'.  */
-	  strcpy (p, "/>");
-	}
-      else
-	strcpy (p, "</library-list-svr4>");
-    }
+    strcpy (p, "</library-list-svr4>");
 
   document_len = strlen (document);
   if (offset < document_len)
