@@ -8,13 +8,13 @@
 
 DYNAMIC RELOCATION RECORDS
 OFFSET   TYPE              VALUE 
-0+200278 R_X86_64_SIZE32   xxx
-0+20027c R_X86_64_SIZE32   yyy
-0+200280 R_X86_64_SIZE32   zzz
-0+200284 R_X86_64_SIZE32   zzz-0x0000001e
-0+200288 R_X86_64_SIZE32   zzz\+0x0000001e
+[[:xdigit:]]+ R_X86_64_SIZE32   xxx
+[[:xdigit:]]+ R_X86_64_SIZE32   yyy
+[[:xdigit:]]+ R_X86_64_SIZE32   zzz
+[[:xdigit:]]+ R_X86_64_SIZE32   zzz-0x0000001e
+[[:xdigit:]]+ R_X86_64_SIZE32   zzz\+0x0000001e
 
 
 Contents of section .data:
- 200278 00000000 00000000 00000000 00000000  ................
- 200288 00000000                             ....            
+ [[:xdigit:]]+ 00000000 00000000 00000000 00000000  ................
+ [[:xdigit:]]+ 00000000                             ....            
