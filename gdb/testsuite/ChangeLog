@@ -1,3 +1,13 @@
+2013-06-04  Gary Benson  <gbenson@redhat.com>
+
+	* gdb.base/break-probes.exp: New file.
+	* gdb.base/break-probes.c: Likewise.
+	* gdb.base/break-probes-solib.c: Likewise.
+	* gdb.base/info-shared.exp: New file.
+	* gdb.base/info-shared.c: Likewise.
+	* gdb.base/info-shared-solib1.c: Likewise.
+	* gdb.base/info-shared-solib2.c: Likewise.
+
 2013-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Gary Benson  <gbenson@redhat.com>
 
