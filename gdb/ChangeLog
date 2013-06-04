@@ -1,5 +1,58 @@
 2013-06-04  Gary Benson  <gbenson@redhat.com>
 
+	* breakpoint.h (handle_solib_event): Moved function declaration
+	to solib.h.
+	* breakpoint.c (handle_solib_event): Moved function to solib.c.
+	(bpstat_stop_status): Pass new argument to handle_solib_event.
+	* solib.h (update_solib_breakpoints): New function declaration.
+	(handle_solib_event): Moved function declaration from
+	breakpoint.h.
+	* solib.c (update_solib_breakpoints): New function.
+	(handle_solib_event): Moved function from breakpoint.c.
+	Updated to call solib_ops->handle_event if not NULL.
+	* solist.h (target_so_ops): New fields "update_breakpoints" and
+	"handle_event".
+	* infrun.c (set_stop_on_solib_events): New function.
+	(_initialize_infrun): Use the above for "set
+	stop-on-solib-events".
+	(handle_inferior_event): Pass new argument to handle_solib_event.
+	* solib-svr4.c (probe.h): New include.
+	(svr4_free_library_list): New forward declaration.
+	(probe_action): New enum.
+	(probe_info): New struct.
+	(probe_info): New static variable.
+	(NUM_PROBES): New definition.
+	(svr4_info): New fields "using_xfer", "probes_table" and
+	"solib_list".
+	(free_probes_table): New function.
+	(free_solib_list): New function.
+	(svr4_pspace_data_cleanup): Free probes table and solib list.
+	(svr4_copy_library_list): New function.
+	(svr4_current_sos_via_xfer_libraries): New parameter "annex".
+	(svr4_read_so_list): New parameter "prev_lm".
+	(svr4_current_sos_direct): Renamed from "svr4_current_sos".
+	(svr4_current_sos): New function.
+	(probe_and_action): New struct.
+	(hash_probe_and_action): New function.
+	(equal_probe_and_action): Likewise.
+	(register_solib_event_probe): Likewise.
+	(solib_event_probe_at): Likewise.
+	(solib_event_probe_action): Likewise.
+	(solist_update_full): Likewise.
+	(solist_update_incremental): Likewise.
+	(disable_probes_interface_cleanup): Likewise.
+	(svr4_handle_solib_event): Likewise.
+	(svr4_update_solib_event_breakpoint): Likewise.
+	(svr4_update_solib_event_breakpoints): Likewise.
+	(svr4_create_solib_event_breakpoints): Likewise.
+	(enable_break): Free probes table before creating breakpoints.
+	Use svr4_create_solib_event_breakpoints to create breakpoints.
+	(svr4_solib_create_inferior_hook): Free the solib list.
+	(_initialize_svr4_solib): Initialise
+	svr4_so_ops.handle_solib_event and svr4_so_ops.update_breakpoints.
+
+2013-06-04  Gary Benson  <gbenson@redhat.com>
+
 	* target.h (target_ops): New field
 	"to_augmented_libraries_svr4_read".
 	(target_augmented_libraries_svr4_read): New macro.

@@ -90,4 +90,12 @@ extern CORE_ADDR gdb_bfd_lookup_symbol_from_symtab (bfd *abfd,
 								      void *),
 						    void *data);
 
+/* Enable or disable optional solib event breakpoints as appropriate.  */
+
+extern void update_solib_breakpoints (void);
+
+/* Handle an solib event by calling solib_add.  */
+
+extern void handle_solib_event (void);
+
 #endif /* SOLIB_H */

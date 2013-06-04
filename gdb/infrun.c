@@ -370,6 +370,16 @@ static struct symbol *step_start_function;
 /* Nonzero if we want to give control to the user when we're notified
    of shared library events by the dynamic linker.  */
 int stop_on_solib_events;
+
+/* Enable or disable optional shared library event breakpoints
+   as appropriate when the above flag is changed.  */
+
+static void
+set_stop_on_solib_events (char *args, int from_tty, struct cmd_list_element *c)
+{
+  update_solib_breakpoints ();
+}
+
 static void
 show_stop_on_solib_events (struct ui_file *file, int from_tty,
 			   struct cmd_list_element *c, const char *value)
@@ -7333,7 +7343,7 @@ Show stopping for shared library events."), _("\
 If nonzero, gdb will give control to the user when the dynamic linker\n\
 notifies gdb of shared library events.  The most common event of interest\n\
 to the user would be loading/unloading of a new library."),
-			    NULL,
+			    set_stop_on_solib_events,
 			    show_stop_on_solib_events,
 			    &setlist, &showlist);
 

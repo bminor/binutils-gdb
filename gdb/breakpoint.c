@@ -5352,21 +5352,6 @@ handle_jit_event (void)
   target_terminal_inferior ();
 }
 
-/* Handle an solib event by calling solib_add.  */
-
-void
-handle_solib_event (void)
-{
-  clear_program_space_solib_cache (current_inferior ()->pspace);
-
-  /* Check for any newly added shared libraries if we're supposed to
-     be adding them automatically.  Switch terminal for any messages
-     produced by breakpoint_re_set.  */
-  target_terminal_ours_for_output ();
-  solib_add (NULL, 0, &current_target, auto_solib_add);
-  target_terminal_inferior ();
-}
-
 /* Prepare WHAT final decision for infrun.  */
 
 /* Decide what infrun needs to do with this bpstat.  */

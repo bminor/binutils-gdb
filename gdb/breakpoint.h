@@ -1554,8 +1554,6 @@ extern int user_breakpoint_p (struct breakpoint *);
 /* Attempt to determine architecture of location identified by SAL.  */
 extern struct gdbarch *get_sal_arch (struct symtab_and_line sal);
 
-extern void handle_solib_event (void);
-
 extern void breakpoint_free_objfile (struct objfile *objfile);
 
 extern char *ep_parse_optional_if_clause (char **arg);

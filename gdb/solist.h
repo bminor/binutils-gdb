@@ -153,6 +153,19 @@ struct target_so_ops
        core file (in particular, for readonly sections).  */
     int (*keep_data_in_core) (CORE_ADDR vaddr,
 			      unsigned long size);
+
+    /* Enable or disable optional solib event breakpoints as
+       appropriate.  This should be called whenever
+       stop_on_solib_events is changed.  This pointer can be
+       NULL, in which case no enabling or disabling is necessary
+       for this target.  */
+    void (*update_breakpoints) (void);
+
+    /* Target-specific processing of solib events that will be
+       performed before solib_add is called.  This pointer can be
+       NULL, in which case no specific preprocessing is necessary
+       for this target.  */
+    void (*handle_event) (void);
   };
 
 /* Free the memory associated with a (so_list *).  */
