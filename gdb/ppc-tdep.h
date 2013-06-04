@@ -300,9 +300,9 @@ struct ppc_insn_pattern
   int optional;                 /* If non-zero, this insn may be absent.  */
 };
 
-extern int ppc_insns_match_pattern (CORE_ADDR pc,
+extern int ppc_insns_match_pattern (struct frame_info *frame, CORE_ADDR pc,
 				    struct ppc_insn_pattern *pattern,
-				    unsigned int *insn);
+				    unsigned int *insns);
 extern CORE_ADDR ppc_insn_d_field (unsigned int insn);
 
 extern CORE_ADDR ppc_insn_ds_field (unsigned int insn);

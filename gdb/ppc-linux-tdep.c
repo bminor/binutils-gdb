@@ -361,7 +361,7 @@ ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   CORE_ADDR target = 0;
 
-  if (ppc_insns_match_pattern (pc, powerpc32_plt_stub, insnbuf))
+  if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub, insnbuf))
     {
       /* Insn pattern is
 		lis   r11, xxxx
@@ -373,7 +373,7 @@ ppc_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
       target = read_memory_unsigned_integer (target, 4, byte_order);
     }
 
-  if (ppc_insns_match_pattern (pc, powerpc32_plt_stub_so, insnbuf))
+  if (ppc_insns_match_pattern (frame, pc, powerpc32_plt_stub_so, insnbuf))
     {
       /* Insn pattern is
 		lwz   r11, xxxx(r30)

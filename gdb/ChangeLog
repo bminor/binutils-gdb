@@ -1,3 +1,21 @@
+2013-06-04  Alan Modra  <amodra@gmail.com>
+
+	* ppc-tdep.h (ppc_insns_match_pattern): Update prototype.
+	* rs6000-tdep.c (read_insn): Add frame param, don't assume big-endian.
+	(ppc_insns_match_pattern): Add frame param.  Avoid multiple
+	target mem reads on optional insns.
+	* ppc-linux-tdep.c (ppc_skip_trampoline_code): Update
+	ppc_insns_match_pattern calls.
+	* ppc64-tdep.c (ppc64_standard_linkage2, ppc64_standard_linkage3):
+	Add match for power7 thread safety insns, and new order of
+	std 2,40(1) insn.  Correct code shown for _dl_runtime_resolve
+	invocation in comment, and update rest of comment.
+	(PPC64_STANDARD_LINKAGE1_LEN, PPC64_STANDARD_LINKAGE2_LEN,
+	PPC64_STANDARD_LINKAGE3_LEN): Delete.
+	(ppc64_standard_linkage2_target): Update insn offsets.
+	(ppc64_skip_trampoline_code): Use a single insn buffer.  Match newer
+	stubs first.  Update calls.
+
 2013-06-04  Yao Qi  <yao@codesourcery.com>
 
 	* solib.c (solib_find): Don't need dir separator if path has

@@ -4238,14 +4238,15 @@ show_powerpc_exact_watchpoints (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Use of exact watchpoints is %s.\n"), value);
 }
 
-/* Read a PPC instruction from memory.  PPC instructions are always
-   big-endian, no matter what endianness the program is running in, so
-   we can hardcode BFD_ENDIAN_BIG for read_memory_unsigned_integer.  */
+/* Read a PPC instruction from memory.  */
 
 static unsigned int
-read_insn (CORE_ADDR pc)
+read_insn (struct frame_info *frame, CORE_ADDR pc)
 {
-  return read_memory_unsigned_integer (pc, 4, BFD_ENDIAN_BIG);
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+
+  return read_memory_unsigned_integer (pc, 4, byte_order);
 }
 
 /* Return non-zero if the instructions at PC match the series
@@ -4262,19 +4263,25 @@ read_insn (CORE_ADDR pc)
    i'th instruction in memory.  */
 
 int
-ppc_insns_match_pattern (CORE_ADDR pc, struct ppc_insn_pattern *pattern,
-			 unsigned int *insn)
+ppc_insns_match_pattern (struct frame_info *frame, CORE_ADDR pc,
+			 struct ppc_insn_pattern *pattern,
+			 unsigned int *insns)
 {
   int i;
+  unsigned int insn;
 
-  for (i = 0; pattern[i].mask; i++)
+  for (i = 0, insn = 0; pattern[i].mask; i++)
     {
-      insn[i] = read_insn (pc);
-      if ((insn[i] & pattern[i].mask) == pattern[i].data)
-	pc += 4;
-      else if (pattern[i].optional)
-	insn[i] = 0;
-      else
+      if (insn == 0)
+	insn = read_insn (frame, pc);
+      insns[i] = 0;
+      if ((insn & pattern[i].mask) == pattern[i].data)
+	{
+	  insns[i] = insn;
+	  pc += 4;
+	  insn = 0;
+	}
+      else if (!pattern[i].optional)
 	return 0;
     }
 
