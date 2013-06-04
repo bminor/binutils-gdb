@@ -1,3 +1,11 @@
+2013-06-04  Gary Benson  <gbenson@redhat.com>
+
+	* probe.h (get_probe_argument_count): New declaration.
+	(evaluate_probe_argument): Likewise.
+	* probe.c (get_probe_argument_count): New function.
+	(evaluate_probe_argument): Likewise.
+	(probe_safe_evaluate_at_pc): Use the above new functions.
+
 2013-06-04  Alan Modra  <amodra@gmail.com>
 
 	* ppc-tdep.h (ppc_insns_match_pattern): Update prototype.
