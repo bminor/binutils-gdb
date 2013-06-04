@@ -1,3 +1,9 @@
+2013-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-i386/tlsbindesc-nacl.rd: Updated for text/data/bss section
+	alignment change.
+	* ld-x86-64/split-by-file-nacl.rd: Likewise.
+
 2013-05-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-i386/pr12718.d: Updated for text/data/bss section alignment
