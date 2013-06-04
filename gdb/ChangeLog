@@ -1,4 +1,5 @@
 2013-06-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
 
 	* remote.c (remote_wait_as): Restore signal handler before returning
 	when GDB gets a notification.
