@@ -1,3 +1,8 @@
+2013-06-04  Yao Qi  <yao@codesourcery.com>
+
+	* solib.c (solib_find): Don't need dir separator if path has
+	drive spec.
+
 2013-06-03  Joel Brobecker  <brobecker@adacore.com>
 
 	Revert (indirectly causes a SIGSEGV):

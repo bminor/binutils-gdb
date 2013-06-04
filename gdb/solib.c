@@ -230,7 +230,8 @@ solib_find (char *in_pathname, int *fd)
     {
       int need_dir_separator;
 
-      need_dir_separator = !IS_DIR_SEPARATOR (in_pathname[0]);
+      need_dir_separator = (!IS_DIR_SEPARATOR (in_pathname[0])
+			    && !HAS_TARGET_DRIVE_SPEC (fskind, in_pathname));
 
       /* Cat the prefixed pathname together.  */
       temp_pathname = concat (sysroot,
