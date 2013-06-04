@@ -38594,6 +38594,16 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:libraries-svr4:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
+@item @samp{augmented-libraries-svr4-read}
+@tab No
+@tab @samp{-}
+@tab No
+
 @item @samp{qXfer:memory-map:read}
 @tab No
 @tab @samp{-}
@@ -38768,6 +38778,11 @@ The remote stub understands the @samp{qXfer:libraries:read} packet
 
 @item qXfer:libraries-svr4:read
 The remote stub understands the @samp{qXfer:libraries-svr4:read} packet
+(@pxref{qXfer svr4 library list read}).
+
+@item augmented-libraries-svr4-read
+The remote stub understands the augmented form of the
+@samp{qXfer:libraries-svr4:read} packet
 (@pxref{qXfer svr4 library list read}).
 
 @item qXfer:memory-map:read
@@ -39065,13 +39080,40 @@ by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
 @anchor{qXfer svr4 library list read}
 Access the target's list of loaded libraries when the target is an SVR4
 platform.  @xref{Library List Format for SVR4 Targets}.  The annex part
-of the generic @samp{qXfer} packet must be empty (@pxref{qXfer read}).
+of the generic @samp{qXfer} packet must be empty unless the remote
+stub indicated it supports the augmented form of this packet
+by supplying an appropriate @samp{qSupported} response
+(@pxref{qXfer read}, @ref{qSupported}).
 
 This packet is optional for better performance on SVR4 targets.  
 @value{GDBN} uses memory read packets to read the SVR4 library list otherwise.
 
 This packet is not probed by default; the remote stub must request it,
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+If the remote stub indicates it supports the augmented form of this
+packet then the annex part of the generic @samp{qXfer} packet may
+contain a semicolon-separated list of @samp{@var{name}=@var{value}}
+arguments.  The currently supported arguments are:
+
+@table @code
+@item start=@var{address}
+A hexadecimal number specifying the address of the @samp{struct
+link_map} to start reading the library list from.  If unset or zero
+then the first @samp{struct link_map} in the library list will be
+chosen as the starting point.
+
+@item prev=@var{address}
+A hexadecimal number specifying the address of the @samp{struct
+link_map} immediately preceding the @samp{struct link_map}
+specified by the @samp{start} argument.  If unset or zero then
+the remote stub will expect that no @samp{struct link_map}
+exists prior to the starting point.
+
+@end table
+
+Arguments that are not understood by the remote stub will be silently
+ignored.
 
 @item qXfer:memory-map:read::@var{offset},@var{length}
 @anchor{qXfer memory map read}

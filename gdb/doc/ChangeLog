@@ -1,3 +1,12 @@
+2013-06-04 Gary Benson  <gbenson@redhat.com>
+
+	* gdb.texinfo (General Query Packets/qSupported): Added
+	"qXfer:libraries-svr4:read" and "augmented-libraries-svr4-read".
+	to the table of currently defined stub features.
+	Added a more detailed entry for "augmented-libraries-svr4-read".
+	(General Query Packets/qXfer:libraries-svr4:read): Documented
+	the augmented form of this packet.
+
 2013-05-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (System-wide Configuration Scripts): Renames
