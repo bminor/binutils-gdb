@@ -731,6 +731,7 @@ update_current_target (void)
       INHERIT (to_traceframe_info, t);
       INHERIT (to_use_agent, t);
       INHERIT (to_can_use_agent, t);
+      INHERIT (to_augmented_libraries_svr4_read, t);
       INHERIT (to_magic, t);
       INHERIT (to_supports_evaluation_of_breakpoint_conditions, t);
       INHERIT (to_can_run_breakpoint_commands, t);
@@ -973,6 +974,9 @@ update_current_target (void)
 	    (int (*) (int))
 	    tcomplain);
   de_fault (to_can_use_agent,
+	    (int (*) (void))
+	    return_zero);
+  de_fault (to_augmented_libraries_svr4_read,
 	    (int (*) (void))
 	    return_zero);
   de_fault (to_execution_direction, default_execution_direction);

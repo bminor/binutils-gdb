@@ -1,5 +1,21 @@
 2013-06-04  Gary Benson  <gbenson@redhat.com>
 
+	* target.h (target_ops): New field
+	"to_augmented_libraries_svr4_read".
+	(target_augmented_libraries_svr4_read): New macro.
+	* target.c (update_current_target): Handle
+	to_augmented_libraries_svr4_read.
+	* remote.c (remote_state): New field
+	"augmented_libraries_svr4_read".
+	(remote_augmented_libraries_svr4_read_feature): New function.
+	(remote_protocol_features): Add entry for
+	"augmented-libraries-svr4-read".
+	(remote_augmented_libraries_svr4_read): New function.
+	(init_remote_ops): Initialize
+	remote_ops.to_augmented_libraries_svr4_read.
+
+2013-06-04  Gary Benson  <gbenson@redhat.com>
+
 	* NEWS: Update.
 
 2013-06-04  Gary Benson  <gbenson@redhat.com>
