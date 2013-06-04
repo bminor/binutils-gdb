@@ -36,6 +36,33 @@ if ![runto_main] {
     return
 }
 
+# With probes interface GDB no longer scans the inferior library list so its
+# corruption cannot be tested.  There is no way to disable the probes
+# interface.
+
+set probes { init_start init_complete map_start reloc_complete unmap_start
+	     unmap_complete }
+set test "info probes"
+gdb_test_multiple $test $test {
+    -re "^rtld\[ \t\]+(?:rtld_)?(\[a-z_\]+)\[ \t\]" {
+	set idx [lsearch -exact $probes $expect_out(1,string)]
+	if { $idx >= 0 } {
+	    set probes [lreplace $probes $idx $idx]
+	}
+	exp_continue
+    }
+    -re "^\[^\r\n\]*\r\n" {
+	exp_continue
+    }
+    -re "^$gdb_prompt $" {
+    }
+}
+if { [llength $probes] == 0 } {
+    xfail $test
+    untested "GDB is using probes"
+    return
+}
+
 gdb_test "info sharedlibrary" "From * To .*" "normal list"
 
 # GDB checks there for matching L_PREV.

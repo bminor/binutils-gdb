@@ -109,12 +109,19 @@ proc strip_debug {dest} {
     }
 }
 
+# The marker function for the standard runtime linker interface is
+# _dl_debug_state.  The probes-based interface has no specific marker
+# function; the probe we will stop on (init_start) is in dl_main so we
+# check for that.
+
+set solib_bp {(_dl_debug_state|dl_main)}
+
 # Implementation of reach.
 
 proc reach_1 {func command displacement} {
-    global gdb_prompt expect_out
+    global gdb_prompt expect_out solib_bp
 
-    if {$func == "_dl_debug_state"} {
+    if {$func == $solib_bp} {
 	# Breakpoint on _dl_debug_state can have problems due to its overlap
 	# with the existing internal breakpoint from GDB.
 	gdb_test_no_output "set stop-on-solib-events 1"
@@ -142,21 +149,21 @@ proc reach_1 {func command displacement} {
 	    exp_continue
 	}
 	-re "Breakpoint \[0-9\]+, \\.?(__GI_)?$func \\(.*\\) at .*:\[0-9\]+\r\n.*$gdb_prompt $" {
-	    if {$func == "_dl_debug_state"} {
+	    if {$func == $solib_bp} {
 		fail $test
 	    } else {
 		pass $test
 	    }
 	}
 	-re "Breakpoint \[0-9\]+, \[0-9xa-f\]+ in \\.?(__GI_)?$func \\(\\).*\r\n$gdb_prompt $" {
-	    if {$func == "_dl_debug_state"} {
+	    if {$func == $solib_bp} {
 		fail $test
 	    } else {
 		pass $test
 	    }
 	}
 	-re "Stopped due to (spurious )?shared library event.*\r\n$gdb_prompt $" {
-	    if {$func == "_dl_debug_state"} {
+	    if {$func == $solib_bp} {
 		if {$debug_state_count == 0} {
 		    # First stop does not yet relocate the _start function
 		    # descriptor on ppc64.
@@ -175,7 +182,7 @@ proc reach_1 {func command displacement} {
 	fail $test_displacement
     }
 
-    if {$func == "_dl_debug_state"} {
+    if {$func == $solib_bp} {
 	gdb_test_no_output "set stop-on-solib-events 0"
     }
 }
@@ -361,7 +368,7 @@ proc test_attach {file displacement {relink_args ""}} {
 }
 
 proc test_ld {file ifmain trynosym displacement} {
-    global srcdir subdir gdb_prompt expect_out inferior_exited_re
+    global srcdir subdir gdb_prompt expect_out inferior_exited_re solib_bp
 
     # First test normal `file'-command loaded $FILE with symbols.
 
@@ -389,9 +396,9 @@ proc test_ld {file ifmain trynosym displacement} {
 	gdb_test_no_output "set args ${objdir}/${subdir}/$binfile_test" "set args OBJDIR/${subdir}/$binfile_test"
     }
 
-    reach "_dl_debug_state" "run" $displacement
+    reach $solib_bp "run" $displacement
 
-    gdb_test "bt" "#0 +\[^\r\n\]*\\m(__GI_)?_dl_debug_state\\M.*" "dl bt"
+    gdb_test "bt" "#0 +\[^\r\n\]*\\m(__GI_)?$solib_bp\\M.*" "dl bt"
 
     if $ifmain {
 	reach "main" continue "NONE"
@@ -403,7 +410,7 @@ proc test_ld {file ifmain trynosym displacement} {
 
     # Try re-run if the new PIE displacement takes effect.
     gdb_test "kill" "" "kill" {Kill the program being debugged\? \(y or n\) } "y"
-    reach "_dl_debug_state" "run" $displacement
+    reach $solib_bp "run" $displacement
 
     if $ifmain {
 	test_core $file $displacement
@@ -435,7 +442,7 @@ proc test_ld {file ifmain trynosym displacement} {
 	gdb_test "exec-file $file" "exec-file $escapedfile" "load"
 
 	if $ifmain {
-	    reach "_dl_debug_state" run $displacement
+	    reach $solib_bp run $displacement
 
 	    # Use two separate gdb_test_multiple statements to avoid timeouts due
 	    # to slow processing of wildcard capturing long output

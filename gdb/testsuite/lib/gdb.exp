@@ -4051,31 +4051,6 @@ proc build_executable_from_specs {testname executable options args} {
 
     set binfile [standard_output_file $executable]
 
-    set objects {}
-    set i 0
-    foreach {s local_options} $args {
-        if  { [gdb_compile "${srcdir}/${subdir}/${s}" "${binfile}${i}.o" object $local_options] != "" } {
-            untested $testname
-            return -1
-        }
-        lappend objects "${binfile}${i}.o"
-	incr i
-    }
-
-    set pthreads [lsearch -exact $options "pthreads"]
-    if { $pthreads >= 0 } {
-        set options [lreplace $options $pthreads $pthreads]
-        if  { [gdb_compile_pthreads $objects "${binfile}" executable $options] != "" } {
-            untested $testname
-            return -1
-        }
-    } else {
-        if  { [gdb_compile $objects "${binfile}" executable $options] != "" } {
-            untested $testname
-            return -1
-        }
-    }
-
     set info_options ""
     if { [lsearch -exact $options "c++"] >= 0 } {
 	set info_options "c++"
@@ -4083,6 +4058,42 @@ proc build_executable_from_specs {testname executable options args} {
     if [get_compiler_info ${info_options}] {
         return -1
     }
+
+    set binfile [standard_output_file $executable]
+
+    set func gdb_compile
+    set func_index [lsearch -regexp $options {^(pthreads|shlib|shlib_pthreads)$}]
+    if {$func_index != -1} {
+	set func "${func}_[lindex $options $func_index]"
+    }
+
+    # gdb_compile_shlib and gdb_compile_shlib_pthreads do not use the 3rd
+    # parameter.  They also requires $sources while gdb_compile and
+    # gdb_compile_pthreads require $objects.  Moreover they ignore any options.
+    if [string match gdb_compile_shlib* $func] {
+	set sources_path {}
+	foreach {s local_options} $args {
+	    lappend sources_path "${srcdir}/${subdir}/${s}"
+	}
+	set ret [$func $sources_path "${binfile}" $options]
+    } else {
+	set objects {}
+	set i 0
+	foreach {s local_options} $args {
+	    if  { [gdb_compile "${srcdir}/${subdir}/${s}" "${binfile}${i}.o" object $local_options] != "" } {
+		untested $testname
+		return -1
+	    }
+	    lappend objects "${binfile}${i}.o"
+	    incr i
+	}
+	set ret [$func $objects "${binfile}" executable $options]
+    }
+    if  { $ret != "" } {
+        untested $testname
+        return -1
+    }
+
     return 0
 }
 

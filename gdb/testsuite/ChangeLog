@@ -1,3 +1,19 @@
+2013-06-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Gary Benson  <gbenson@redhat.com>
+
+	* lib/gdb.exp (build_executable_from_specs): Use gdb_compile_pthread,
+	gdb_compile_shlib or gdb_compile_shlib_pthreads where appropriate.
+	* lib/prelink-support.exp (build_executable_own_libs): Allow INTERP
+	to be set to "no" to indicate that no ld.so copy should be made.
+	* gdb.base/break-interp.exp (solib_bp): New constant.
+	(reach_1): Use the above instead of "_dl_debug_state".
+	(test_attach): Likewise.
+	(test_ld): Likewise.
+	* gdb.threads/dlopen-libpthread.exp: New file.
+	* gdb.threads/dlopen-libpthread.c: Likewise.
+	* gdb.threads/dlopen-libpthread-lib.c: Likewise.
+	* gdb.base/solib-corrupted.exp: Disable test if GDB is using probes.
+
 2013-05-30  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-cmd-param-changed.exp (test_command_param_changed):
