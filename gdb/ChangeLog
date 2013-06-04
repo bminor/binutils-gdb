@@ -1,5 +1,24 @@
 2013-06-04  Gary Benson  <gbenson@redhat.com>
 
+	* objfiles.h (inhibit_section_map_updates): New function
+	declaration.
+	(resume_section_map_updates): Likewise.
+	(resume_section_map_updates_cleanup): Likewise.
+	* objfiles.c (objfile_pspace_info): Removed field
+	"objfiles_changed_p".  New fields "new_objfiles_available",
+	"section_map_dirty" and "inhibit_updates".
+	(allocate_objfile): Set new_objfiles_available.
+	(free_objfile): Set section_map_dirty.
+	(objfile_relocate1): Likewise.
+	(in_plt_section): Likewise.
+	(find_pc_section): Update the conditions under which the
+	section map will be updated.
+	(inhibit_section_map_updates): New function.
+	(resume_section_map_updates): Likewise.
+	(resume_section_map_updates_cleanup): Likewise.
+
+2013-06-04  Gary Benson  <gbenson@redhat.com>
+
 	* probe.h (get_probe_argument_count): New declaration.
 	(evaluate_probe_argument): Likewise.
 	* probe.c (get_probe_argument_count): New function.
