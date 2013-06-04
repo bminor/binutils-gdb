@@ -5951,13 +5951,13 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
       ret = getpkt_or_notif_sane (&rs->buf, &rs->buf_size,
 				  wait_forever_enabled_p, &is_notif);
 
+      if (!target_is_async_p ())
+	signal (SIGINT, ofunc);
+
       /* GDB gets a notification.  Return to core as this event is
 	 not interesting.  */
       if (ret != -1 && is_notif)
 	return minus_one_ptid;
-
-      if (!target_is_async_p ())
-	signal (SIGINT, ofunc);
     }
 
   buf = rs->buf;

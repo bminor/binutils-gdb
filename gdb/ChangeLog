@@ -1,3 +1,8 @@
+2013-06-04  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* remote.c (remote_wait_as): Restore signal handler before returning
+	when GDB gets a notification.
+
 2013-06-04  Gary Benson  <gbenson@redhat.com>
 
 	* breakpoint.h (handle_solib_event): Moved function declaration
