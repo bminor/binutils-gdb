@@ -152,7 +152,18 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared.dbg \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	alt/weak_undef_lib.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = icf_virtual_function_folding_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	large_symbol_alignment \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test basic_pic_test
+@GCC_FALSE@large_symbol_alignment_DEPENDENCIES = libgoldtest.a \
+@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@large_symbol_alignment_DEPENDENCIES =  \
+@NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
+@NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = basic_static_test \
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = basic_pie_test \
@@ -722,6 +733,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @NATIVE_OR_CROSS_LINKER_TRUE@	binary_unittest$(EXEEXT) \
 @NATIVE_OR_CROSS_LINKER_TRUE@	leb128_unittest$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_2 = icf_virtual_function_folding_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	large_symbol_alignment$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_pic_test$(EXEEXT)
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 = basic_static_test$(EXEEXT) \
@@ -1290,6 +1302,11 @@ justsyms_exec_LINK = $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 large_OBJECTS = $(am_large_OBJECTS)
 large_LINK = $(CCLD) $(large_CFLAGS) $(CFLAGS) $(large_LDFLAGS) \
 	$(LDFLAGS) -o $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_large_symbol_alignment_OBJECTS = large_symbol_alignment.$(OBJEXT)
+large_symbol_alignment_OBJECTS = $(am_large_symbol_alignment_OBJECTS)
+large_symbol_alignment_LDADD = $(LDADD)
+large_symbol_alignment_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(large_symbol_alignment_LDFLAGS) $(LDFLAGS) -o $@
 @NATIVE_OR_CROSS_LINKER_TRUE@am_leb128_unittest_OBJECTS =  \
 @NATIVE_OR_CROSS_LINKER_TRUE@	leb128_unittest.$(OBJEXT)
 leb128_unittest_OBJECTS = $(am_leb128_unittest_OBJECTS)
@@ -1777,12 +1794,13 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c basic_pie_test.c \
 	incremental_test_6.c $(initpri1_SOURCES) $(initpri2_SOURCES) \
 	$(initpri3a_SOURCES) $(justsyms_SOURCES) \
 	$(justsyms_exec_SOURCES) $(large_SOURCES) \
-	$(leb128_unittest_SOURCES) local_labels_test.c \
-	many_sections_r_test.c $(many_sections_test_SOURCES) \
-	$(object_unittest_SOURCES) permission_test.c plugin_test_1.c \
-	plugin_test_2.c plugin_test_3.c plugin_test_4.c \
-	plugin_test_5.c plugin_test_6.c plugin_test_7.c \
-	plugin_test_8.c $(protected_1_SOURCES) $(protected_2_SOURCES) \
+	$(large_symbol_alignment_SOURCES) $(leb128_unittest_SOURCES) \
+	local_labels_test.c many_sections_r_test.c \
+	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
+	permission_test.c plugin_test_1.c plugin_test_2.c \
+	plugin_test_3.c plugin_test_4.c plugin_test_5.c \
+	plugin_test_6.c plugin_test_7.c plugin_test_8.c \
+	$(protected_1_SOURCES) $(protected_2_SOURCES) \
 	$(relro_now_test_SOURCES) $(relro_script_test_SOURCES) \
 	$(relro_strip_test_SOURCES) $(relro_test_SOURCES) \
 	$(script_test_1_SOURCES) script_test_11.c \
@@ -2127,6 +2145,9 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @NATIVE_OR_CROSS_LINKER_TRUE@object_unittest_SOURCES = object_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@binary_unittest_SOURCES = binary_unittest.cc
 @NATIVE_OR_CROSS_LINKER_TRUE@leb128_unittest_SOURCES = leb128_unittest.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_SOURCES = large_symbol_alignment.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_LDFLAGS = -Bgcctestdir/
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_SOURCES = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_LDFLAGS = -Bgcctestdir/
@@ -3052,6 +3073,9 @@ justsyms_exec$(EXEEXT): $(justsyms_exec_OBJECTS) $(justsyms_exec_DEPENDENCIES)
 large$(EXEEXT): $(large_OBJECTS) $(large_DEPENDENCIES) 
 	@rm -f large$(EXEEXT)
 	$(large_LINK) $(large_OBJECTS) $(large_LDADD) $(LIBS)
+large_symbol_alignment$(EXEEXT): $(large_symbol_alignment_OBJECTS) $(large_symbol_alignment_DEPENDENCIES) 
+	@rm -f large_symbol_alignment$(EXEEXT)
+	$(large_symbol_alignment_LINK) $(large_symbol_alignment_OBJECTS) $(large_symbol_alignment_LDADD) $(LIBS)
 leb128_unittest$(EXEEXT): $(leb128_unittest_OBJECTS) $(leb128_unittest_DEPENDENCIES) 
 	@rm -f leb128_unittest$(EXEEXT)
 	$(CXXLINK) $(leb128_unittest_OBJECTS) $(leb128_unittest_LDADD) $(LIBS)
@@ -3441,6 +3465,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_exec.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/large-large.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/large_symbol_alignment.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/leb128_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/local_labels_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
@@ -3896,6 +3921,8 @@ leb128_unittest.log: leb128_unittest$(EXEEXT)
 	@p='leb128_unittest$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 icf_virtual_function_folding_test.log: icf_virtual_function_folding_test$(EXEEXT)
 	@p='icf_virtual_function_folding_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
+large_symbol_alignment.log: large_symbol_alignment$(EXEEXT)
+	@p='large_symbol_alignment$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 basic_test.log: basic_test$(EXEEXT)
 	@p='basic_test$(EXEEXT)'; $(am__check_pre) $(LOG_COMPILE) "$$tst" $(am__check_post)
 basic_pic_test.log: basic_pic_test$(EXEEXT)

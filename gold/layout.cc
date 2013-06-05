@@ -3485,7 +3485,13 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 	  if (!parameters->options().nmagic()
 	      && !parameters->options().omagic())
-	    off = align_file_offset(off, addr, abi_pagesize);
+	    {
+	      // Here we are also taking care of the case when
+	      // the maximum segment alignment is larger than the page size.
+	      off = align_file_offset(off, addr,
+				      std::max(abi_pagesize,
+					       (*p)->maximum_alignment()));
+	    }
 	  else
 	    {
 	      // This is -N or -n with a section script which prevents

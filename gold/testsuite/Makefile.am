@@ -322,6 +322,11 @@ icf_sht_rel_addend_test: icf_sht_rel_addend_test_1.o icf_sht_rel_addend_test_2.o
 icf_sht_rel_addend_test.stdout: icf_sht_rel_addend_test
 	$(TEST_NM) icf_sht_rel_addend_test > icf_sht_rel_addend_test.stdout
 
+check_PROGRAMS += large_symbol_alignment
+large_symbol_alignment_SOURCES = large_symbol_alignment.cc
+large_symbol_alignment_DEPENDENCIES = gcctestdir/ld
+large_symbol_alignment_LDFLAGS = -Bgcctestdir/
+
 check_SCRIPTS += merge_string_literals.sh
 check_DATA += merge_string_literals.stdout
 MOSTLYCLEANFILES += merge_string_literals
