@@ -1,3 +1,8 @@
+2013-05-31  Doug Evans  <dje@google.com>
+
+	* linux-x86-low.c (ps_get_thread_area): Properly extend address to
+	64 bits in 64-cross-32 environment.
+
 2013-05-03  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	* tracepoint.c (cmd_qtinit): Call 'stop_tracing'.
