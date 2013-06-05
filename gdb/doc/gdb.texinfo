@@ -34642,7 +34642,7 @@ Creates a new inferior (@pxref{Inferiors and Programs}).  The created
 inferior is not associated with any executable.  Such association may
 be established with the @samp{-file-exec-and-symbols} command
 (@pxref{GDB/MI File Commands}).  The command response has a single
-field, @samp{thread-group}, whose value is the identifier of the
+field, @samp{inferior}, whose value is the identifier of the
 thread group corresponding to the new inferior.
 
 @subheading Example
@@ -34650,7 +34650,7 @@ thread group corresponding to the new inferior.
 @smallexample
 @value{GDBP}
 -add-inferior
-^done,thread-group="i3"
+^done,inferior="i3"
 @end smallexample
 
 @subheading The @code{-interpreter-exec} Command
