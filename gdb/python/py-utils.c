@@ -436,7 +436,8 @@ gdb_pymodule_addobject (PyObject *module, const char *name, PyObject *object)
   int result;
 
   Py_INCREF (object);
-  result = PyModule_AddObject (module, name, object);
+  /* Python 2.4 did not have a 'const' here.  */
+  result = PyModule_AddObject (module, (char *) name, object);
   if (result < 0)
     Py_DECREF (object);
   return result;
