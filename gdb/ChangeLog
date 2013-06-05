@@ -1,3 +1,8 @@
+2013-06-05  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gnu-v3-abi.c (gnuv3_skip_trampoline): Handle thunk
+	minimal symbols pointing to function descriptors.
+
 2013-06-05  Tom Tromey  <tromey@redhat.com>
 
 	* python/py-utils.c (gdb_pymodule_addobject): Cast away const.

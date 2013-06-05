@@ -1207,7 +1207,7 @@ gnuv3_get_type_from_type_info (struct value *type_info_ptr)
 static CORE_ADDR 
 gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
 {
-  CORE_ADDR real_stop_pc, method_stop_pc;
+  CORE_ADDR real_stop_pc, method_stop_pc, func_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct minimal_symbol *thunk_sym, *fn_sym;
   struct obj_section *section;
@@ -1236,6 +1236,16 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
     return 0;
 
   method_stop_pc = SYMBOL_VALUE_ADDRESS (fn_sym);
+
+  /* Some targets have minimal symbols pointing to function descriptors
+     (powerpc 64 for example).  Make sure to retrieve the address
+     of the real function from the function descriptor before passing on
+     the address to other layers of GDB.  */
+  func_addr = gdbarch_convert_from_func_ptr_addr (gdbarch, method_stop_pc,
+                                                  &current_target);
+  if (func_addr != 0)
+    method_stop_pc = func_addr;
+
   real_stop_pc = gdbarch_skip_trampoline_code
 		   (gdbarch, frame, method_stop_pc);
   if (real_stop_pc == 0)
