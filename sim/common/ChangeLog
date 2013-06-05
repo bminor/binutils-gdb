@@ -1,3 +1,8 @@
+2013-06-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Replace maintainer-mode code with AM_MAINTAINER_MODE.
+	* aclocal.m4, configure: Regenerate.
+
 2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
 
 	PR build/15414:

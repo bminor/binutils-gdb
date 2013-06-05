@@ -1,3 +1,7 @@
+2013-06-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
 2013-03-14  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* Makefile.in: Include build directory in search path to find

@@ -1,3 +1,7 @@
+2013-06-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* aclocal.m4, configure: Regenerate.
+
 2013-03-30  Joel Sherrill  <joel.sherrill@oarcorp.com>
 	    Mike Frysinger  <vapier@gentoo.org>
 
