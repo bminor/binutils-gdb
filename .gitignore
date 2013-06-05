@@ -7,9 +7,12 @@
 .#*
 *#
 
+*.a
 *.flt
+*.gdb
 *.gmo
 *.info
+*.info-?
 *.la
 *.lo
 *.o
@@ -27,8 +30,11 @@ config.intl
 config.log
 config.status
 libtool
+Makefile
+stamp-*
 POTFILES
 *-POTFILES
+*/po/Makefile.in
 
 TAGS
 TAGS.sub
