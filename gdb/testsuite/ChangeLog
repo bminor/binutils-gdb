@@ -1,3 +1,9 @@
+2013-06-05  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.cp/virtfunc.exp (make_one_vtable_result): Handle extra output
+	from targets that use function descriptors in the virtual tables.
+	Handle presence of dot symbols.
+
 2013-06-04  Gary Benson  <gbenson@redhat.com>
 
 	* gdb.base/break-probes.exp: New file.
