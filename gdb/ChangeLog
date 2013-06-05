@@ -1,3 +1,14 @@
+2013-06-05  Doug Evans  <dje@google.com>
+	    Keith Seitz  <keiths@redhat.com>
+
+	PR 15519
+	* cp-namespace.c (find_symbol_in_baseclass): Call
+	cp_lookup_symbol_in_namespace instead of cp_lookup_symbol_namespace.
+	Check result of call to lookup_symbol_static.
+	Call lookup_static_symbol_aux unconditionally.
+	Call check_typedef on base types before accessing them.
+	(cp_lookup_nested_symbol): Fix comment.
+
 2013-06-05  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gnu-v3-abi.c (gnuv3_skip_trampoline): Handle thunk
