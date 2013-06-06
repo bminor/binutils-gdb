@@ -9,6 +9,7 @@
 
 2013-05-31  Doug Evans  <dje@google.com>
 
+	PR server/15594
 	* linux-x86-low.c (ps_get_thread_area): Properly extend address to
 	64 bits in 64-cross-32 environment.
 
