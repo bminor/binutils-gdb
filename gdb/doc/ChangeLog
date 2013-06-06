@@ -1,4 +1,4 @@
-2013-06-05  Simon Marchi  <simon.marchi@ericsson.com>
+2013-06-05  Simon Marchi  <simon.marchi@ericsson.com>  (tiny patch)
 
 	* gdb.texinfo (Miscellaneous gdb/mi Commands): Fix -add-inferior
 	response field name (thread-group to inferior).
