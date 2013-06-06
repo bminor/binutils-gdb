@@ -1,3 +1,8 @@
+2013-06-06  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c: Whitespace fixes for DWP file format documentation,
+	and fix header docs.
+
 2013-06-05  Doug Evans  <dje@google.com>
 	    Keith Seitz  <keiths@redhat.com>
 

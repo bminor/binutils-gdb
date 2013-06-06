@@ -8867,62 +8867,67 @@ create_dwo_cu (struct dwo_file *dwo_file)
 /* DWP file .debug_{cu,tu}_index section format:
    [ref: http://gcc.gnu.org/wiki/DebugFissionDWP]
 
+   DWP Version 1:
+
    Both index sections have the same format, and serve to map a 64-bit
    signature to a set of section numbers.  Each section begins with a header,
    followed by a hash table of 64-bit signatures, a parallel table of 32-bit
    indexes, and a pool of 32-bit section numbers.  The index sections will be
    aligned at 8-byte boundaries in the file.
 
-   The index section header contains two unsigned 32-bit values (using the
-   byte order of the application binary):
+   The index section header consists of:
 
-    N, the number of compilation units or type units in the index
-    M, the number of slots in the hash table
+    V, 32 bit version number
+    -, 32 bits unused
+    N, 32 bit number of compilation units or type units in the index
+    M, 32 bit number of slots in the hash table
 
-  (We assume that N and M will not exceed 2^32 - 1.)
+   Numbers are recorded using the byte order of the application binary.
 
-  The size of the hash table, M, must be 2^k such that 2^k > 3*N/2.
+   We assume that N and M will not exceed 2^32 - 1.
 
-  The hash table begins at offset 8 in the section, and consists of an array
-  of M 64-bit slots.  Each slot contains a 64-bit signature (using the byte
-  order of the application binary).  Unused slots in the hash table are 0.
-  (We rely on the extreme unlikeliness of a signature being exactly 0.)
+   The size of the hash table, M, must be 2^k such that 2^k > 3*N/2.
 
-  The parallel table begins immediately after the hash table
-  (at offset 8 + 8 * M from the beginning of the section), and consists of an
-  array of 32-bit indexes (using the byte order of the application binary),
-  corresponding 1-1 with slots in the hash table.  Each entry in the parallel
-  table contains a 32-bit index into the pool of section numbers.  For unused
-  hash table slots, the corresponding entry in the parallel table will be 0.
+   The hash table begins at offset 16 in the section, and consists of an array
+   of M 64-bit slots.  Each slot contains a 64-bit signature (using the byte
+   order of the application binary).  Unused slots in the hash table are 0.
+   (We rely on the extreme unlikeliness of a signature being exactly 0.)
 
-  Given a 64-bit compilation unit signature or a type signature S, an entry
-  in the hash table is located as follows:
+   The parallel table begins immediately after the hash table
+   (at offset 16 + 8 * M from the beginning of the section), and consists of an
+   array of 32-bit indexes (using the byte order of the application binary),
+   corresponding 1-1 with slots in the hash table.  Each entry in the parallel
+   table contains a 32-bit index into the pool of section numbers.  For unused
+   hash table slots, the corresponding entry in the parallel table will be 0.
 
-  1) Calculate a primary hash H = S & MASK(k), where MASK(k) is a mask with
-     the low-order k bits all set to 1.
+   Given a 64-bit compilation unit signature or a type signature S, an entry
+   in the hash table is located as follows:
 
-  2) Calculate a secondary hash H' = (((S >> 32) & MASK(k)) | 1).
+   1) Calculate a primary hash H = S & MASK(k), where MASK(k) is a mask with
+      the low-order k bits all set to 1.
 
-  3) If the hash table entry at index H matches the signature, use that
-     entry.  If the hash table entry at index H is unused (all zeroes),
-     terminate the search: the signature is not present in the table.
+   2) Calculate a secondary hash H' = (((S >> 32) & MASK(k)) | 1).
 
-  4) Let H = (H + H') modulo M. Repeat at Step 3.
+   3) If the hash table entry at index H matches the signature, use that
+      entry.  If the hash table entry at index H is unused (all zeroes),
+      terminate the search: the signature is not present in the table.
 
-  Because M > N and H' and M are relatively prime, the search is guaranteed
-  to stop at an unused slot or find the match.
+   4) Let H = (H + H') modulo M. Repeat at Step 3.
 
-  The pool of section numbers begins immediately following the hash table
-  (at offset 8 + 12 * M from the beginning of the section).  The pool of
-  section numbers consists of an array of 32-bit words (using the byte order
-  of the application binary).  Each item in the array is indexed starting
-  from 0.  The hash table entry provides the index of the first section
-  number in the set.  Additional section numbers in the set follow, and the
-  set is terminated by a 0 entry (section number 0 is not used in ELF).
+   Because M > N and H' and M are relatively prime, the search is guaranteed
+   to stop at an unused slot or find the match.
 
-  In each set of section numbers, the .debug_info.dwo or .debug_types.dwo
-  section must be the first entry in the set, and the .debug_abbrev.dwo must
-  be the second entry. Other members of the set may follow in any order.  */
+   The pool of section numbers begins immediately following the hash table
+   (at offset 16 + 12 * M from the beginning of the section).  The pool of
+   section numbers consists of an array of 32-bit words (using the byte order
+   of the application binary).  Each item in the array is indexed starting
+   from 0.  The hash table entry provides the index of the first section
+   number in the set.  Additional section numbers in the set follow, and the
+   set is terminated by a 0 entry (section number 0 is not used in ELF).
+
+   In each set of section numbers, the .debug_info.dwo or .debug_types.dwo
+   section must be the first entry in the set, and the .debug_abbrev.dwo must
+   be the second entry. Other members of the set may follow in any order.  */
 
 /* Create a hash table to map DWO IDs to their CU/TU entry in
    .debug_{info,types}.dwo in DWP_FILE.
