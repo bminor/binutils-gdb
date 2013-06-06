@@ -1,3 +1,7 @@
+2013-06-06  Doug Evans  <dje@google.com>
+
+	* gdb.cp/derivation.exp: Make tests have unique names.
+
 2013-06-06  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/dump.exp (capture_value): Don't put expression into

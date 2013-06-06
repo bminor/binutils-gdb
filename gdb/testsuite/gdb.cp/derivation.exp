@@ -40,15 +40,17 @@ if {[prepare_for_testing $testfile.exp $testfile \
 }
 
 # Check inheritance of typedefs.
-foreach klass {"A" "D" "E" "F" "A2" "D2"} {
-    gdb_test "ptype ${klass}::value_type" "type = int"
-    gdb_test "whatis ${klass}::value_type" "type = int"
-    gdb_test "p (${klass}::value_type) 0" " = 0"
-}
-foreach klass {"Z" "ZZ"} {
-    gdb_test "ptype ${klass}::value_type" "type = float"
-    gdb_test "whatis ${klass}::value_type" "type = float"
-    gdb_test "p (${klass}::value_type) 0" " = 0"
+with_test_prefix "before run" {
+    foreach klass {"A" "D" "E" "F" "A2" "D2"} {
+	gdb_test "ptype ${klass}::value_type" "type = int"
+	gdb_test "whatis ${klass}::value_type" "type = int"
+	gdb_test "p (${klass}::value_type) 0" " = 0"
+    }
+    foreach klass {"Z" "ZZ"} {
+	gdb_test "ptype ${klass}::value_type" "type = float"
+	gdb_test "whatis ${klass}::value_type" "type = float"
+	gdb_test "p (${klass}::value_type) 0" " = 0"
+    }
 }
 
 # Set it up at a breakpoint so we can play with the variable values.
@@ -59,10 +61,12 @@ if ![runto 'marker1'] then {
 }
 
 # Check inheritance of typedefs again, but this time with an active block.
-foreach klass {"A" "D" "A2" "D2"} {
-    gdb_test "ptype ${klass}::value_type" "type = int"
-    gdb_test "whatis ${klass}::value_type" "type = int"
-    gdb_test "p (${klass}::value_type) 0" " = 0"
+with_test_prefix "at marker1" {
+    foreach klass {"A" "D" "A2" "D2"} {
+	gdb_test "ptype ${klass}::value_type" "type = int"
+	gdb_test "whatis ${klass}::value_type" "type = int"
+	gdb_test "p (${klass}::value_type) 0" " = 0"
+    }
 }
 
 gdb_test "up" ".*main.*" "up from marker1"
