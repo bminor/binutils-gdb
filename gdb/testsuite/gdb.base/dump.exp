@@ -129,8 +129,9 @@ proc capture_value { expression args } {
 
     set output_string ""
     if {[llength $args] > 0} {
-	# Convert $args into a simple string.
-	set test "[join $args]; capture $expression"
+	# Convert $args into a simple string and don't use EXPRESSION
+	# in the test name.
+	set test "[join $args]; capture"
     } {
 	set test "capture $expression"
     }
@@ -440,14 +441,14 @@ gdb_test_multiple "set endian $endian" "set endianness" {
 # Reload saved values one by one, and compare.
 
 if { ![string compare $array_val \
-	   [capture_value "intarray" "file binfile"]] } then {
+	   [capture_value "intarray" "file binfile; intarray"]] } then {
     fail "start with intarray un-initialized"
 } else {
     pass "start with intarray un-initialized"
 }
 
 if { ![string compare $struct_val \
-	   [capture_value "intstruct" "file binfile"]] } then {
+	   [capture_value "intstruct" "file binfile; intstruct"]] } then {
     fail "start with intstruct un-initialized"
 } else {
     pass "start with intstruct un-initialized"

@@ -1,5 +1,11 @@
 2013-06-06  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/dump.exp (capture_value): Don't put expression into
+	test name if arguments passed in.
+	Rename a couple more tests to make them unique.
+
+2013-06-06  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/break-always.exp: Explicitly specify test name.
 
 2013-06-05  Doug Evans  <dje@google.com>
