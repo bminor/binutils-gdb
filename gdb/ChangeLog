@@ -26,6 +26,7 @@
 
 2013-06-04  Gary Benson  <gbenson@redhat.com>
 
+	PR 2328
 	* breakpoint.h (handle_solib_event): Moved function declaration
 	to solib.h.
 	* breakpoint.c (handle_solib_event): Moved function to solib.c.
