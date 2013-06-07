@@ -1,3 +1,8 @@
+2013-06-07  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Symbols): Add kindex and cindex for
+	'maint print msymbols'.
+
 2013-06-05  Simon Marchi  <simon.marchi@ericsson.com>  (tiny change)
 
 	* gdb.texinfo (Miscellaneous gdb/mi Commands): Fix -add-inferior

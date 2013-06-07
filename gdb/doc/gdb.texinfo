@@ -15856,6 +15856,8 @@ Show whether opaque types are resolved or not.
 @cindex symbol dump
 @kindex maint print psymbols
 @cindex partial symbol dump
+@kindex maint print msymbols
+@cindex minimal symbol dump
 @item maint print symbols @var{filename}
 @itemx maint print psymbols @var{filename}
 @itemx maint print msymbols @var{filename}
