@@ -1,5 +1,6 @@
 2013-06-07  Pedro Alves  <palves@redhat.com>
 
+	PR server/14823
 	* regformats/regdat.sh: Output #include tdesc.h.  Make globals
 	static.  Output a global target description pointer.
 	(init_registers_${name}): Adjust to initialize a
