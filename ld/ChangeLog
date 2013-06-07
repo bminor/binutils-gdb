@@ -1,3 +1,9 @@
+2013-06-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (SEGMENT_START): Rephrase to indicate that a -T
+	option must appear before the SEGMENT_START is encountered in
+	order for the default value to be overridden.
+
 2013-05-03  Alan Modra  <amodra@gmail.com>
 
 	PR ld/15365
