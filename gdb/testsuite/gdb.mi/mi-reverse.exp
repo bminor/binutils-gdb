@@ -53,7 +53,7 @@ if [supports_process_record] {
     if [mi_gdb_test "-interpreter-exec console record" \
 	    "=record-started,thread-group=\"i1\"\r\n\\^done" \
 	    "Turn on process record"] {
-	warning "Fail to activate process record/replay, tests in this group will not be performed.\n";
+	warning "Fail to activate process record/replay, tests in this group will not be performed.\n"
 	return -1
     }
 }

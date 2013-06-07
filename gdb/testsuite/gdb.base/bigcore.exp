@@ -66,7 +66,7 @@ gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set width 0"
 
 if { ![runto_main] } then {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 set print_core_line [gdb_get_line_number "Dump core"]
 gdb_test "tbreak $print_core_line"

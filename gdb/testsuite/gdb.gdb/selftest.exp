@@ -484,9 +484,9 @@ remote_file host delete x$tool
 
 gdb_start
 set file [remote_download host $GDB_FULLPATH x$tool]
-set result [test_with_self $file];
-gdb_exit;
-catch "remote_file host delete $file";
+set result [test_with_self $file]
+gdb_exit
+catch "remote_file host delete $file"
 
 if {$result <0} then {
     warning "Couldn't test self"

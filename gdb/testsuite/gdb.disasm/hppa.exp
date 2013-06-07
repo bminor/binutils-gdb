@@ -26,7 +26,7 @@ if ![istarget "hppa*-*-*"] {
 set testfile "hppa"
 set srcfile ${srcdir}/${subdir}/${testfile}.s
 set binfile ${objdir}/${subdir}/${testfile}
-set comp_output [gdb_compile "${srcfile}" "${binfile}" executable ""];
+set comp_output [gdb_compile "${srcfile}" "${binfile}" executable ""]
 if  { $comp_output != "" } {
     if [ regexp "Opcode not defined - DIAG" $comp_output] {
 	warning "HP assembler in use--skipping disasm tests"

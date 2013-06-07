@@ -134,7 +134,7 @@ for {set i 0} {$i < 30} {incr i} {
 
   # If we fail above, don't bother continuing loop
   if { $test_flag == 0 } {
-    set i 30;
+    set i 30
   }
 }
 

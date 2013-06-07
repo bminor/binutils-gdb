@@ -344,7 +344,7 @@ proc test_watchpoint_triggered_in_syscall {} {
 
     # These tests won't work without printf support.
     if [gdb_skip_stdio_test "watchpoints triggered in syscall"] {
-	return;
+	return
     }
     # Run until we get to the first marker function.
     set x 0
@@ -364,13 +364,13 @@ proc test_watchpoint_triggered_in_syscall {} {
 	# to gdb, not the inferior, and we lose.  So that is why we have
 	# watchpoint.c prompt us, so we can wait for that prompt.
 
-	send_gdb "continue\n";
+	send_gdb "continue\n"
 	gdb_expect {
 	    -re "Continuing\\.\r\ntype stuff for buf now:" {
 		pass "continue to read"
 	    }
 	    default {
-		fail "continue to read";
+		fail "continue to read"
 		return
 	    }
 	}

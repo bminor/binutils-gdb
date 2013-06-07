@@ -157,7 +157,7 @@ proc do_function_calls {} {
     global gdb_prompt
 
     # We need to up this because this can be really slow on some boards.
-    set timeout 60;
+    set timeout 60
 
     gdb_test "p t_char_values(0,0)" " = 0"
     gdb_test "p t_char_values('a','b')" " = 1"
@@ -314,16 +314,16 @@ if { $hp_aCC_compiler } {
     # the language be set to the default.
 
     if { ![runto_main] } {
-	gdb_suppress_tests;
+	gdb_suppress_tests
     }
 
     gdb_test "set overload-resolution 0" ".*"
 } else {
     if { ![set_lang_c] } {
-	gdb_suppress_tests;
+	gdb_suppress_tests
     } else {
 	if { ![runto_main] } {
-	    gdb_suppress_tests;
+	    gdb_suppress_tests
 	}
     }
 }

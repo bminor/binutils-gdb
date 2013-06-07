@@ -209,7 +209,7 @@ set program_not_exited 0
 set program_in_exit 0
 if {!$use_gdb_stub
     && (! [target_info exists use_cygmon] || ! [target_info use_cygmon])} {
-    global program_exited;
+    global program_exited
     if {[eval expr $program_exited == 0]} {
 	gdb_test_multiple "n" "step to end of run" {
 	    -re "$inferior_exited_re normally.*$gdb_prompt $" {

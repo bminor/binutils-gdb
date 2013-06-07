@@ -15,7 +15,7 @@
 
 # This file was written by Michael Snyder (msnyder@cygnus.com)
 
-load_lib "trace-support.exp";
+load_lib "trace-support.exp"
 
 
 gdb_exit
@@ -42,7 +42,7 @@ gdb_delete_tracepoints
 set trcpt1 [gdb_gettpnum gdb_c_test]
 if { $trcpt1 <= 0 } then {
     fail "Could not find gdb_c_test function"
-    return;
+    return
 }
 
 # 5.12 basic while-stepping command (collect regs)
@@ -71,7 +71,7 @@ gdb_test "info tracepoints" \
 #      [deferred to dynamic test section]
 
 proc while_stepping_bogus_arg { bogus msgstring } {
-    global gdb_prompt;
+    global gdb_prompt
 
     gdb_trace_setactions "$msgstring" \
 	    "" \

@@ -20,9 +20,9 @@ set binfile ${objdir}/${subdir}/${testfile}
 set options debug
 lappend options "additional_flags=-I."
 
-set fileid [open ${objdir}/${subdir}/${srcfile} w];
-puts $fileid "#include \"twice.c\"";
-close $fileid;
+set fileid [open ${objdir}/${subdir}/${srcfile} w]
+puts $fileid "#include \"twice.c\""
+close $fileid
 
 remote_download host ${srcdir}/${subdir}/twice.c twice.c
 

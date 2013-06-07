@@ -272,7 +272,7 @@ if [runto_main] then {
     if [test_startup] then {
 	if [check_control_c] then {
 	    warning "Could not stop child with ^C; skipping rest of tests.\n"
-	    return;
+	    return
 	}
 	check_backtraces
     }

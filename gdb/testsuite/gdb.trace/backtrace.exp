@@ -15,7 +15,7 @@
 
 # This file was written by Michael Snyder (msnyder@cygnus.com)
 
-load_lib "trace-support.exp";
+load_lib "trace-support.exp"
 
 
 gdb_exit
@@ -57,10 +57,10 @@ set arg4 4
 set arg5 5
 set arg6 6
 
-set baseline [gdb_find_recursion_test_baseline $srcfile];
+set baseline [gdb_find_recursion_test_baseline $srcfile]
 if { $baseline == -1 } {
     fail "Could not find gdb_recursion_test function"
-    return;
+    return
 }
 
 set return_me 0
@@ -125,7 +125,7 @@ set tdp6 [gdb_gettpnum $testline6]
 if {    $tdp2 <= 0 || $tdp3 <= 0 || \
 	$tdp4 <= 0 || $tdp5 <= 0 || $tdp6 <= 0 } then {
     fail "setting tracepoints failed"
-    return;
+    return
 }
 
 #gdb_trace_setactions "setup TP to collect FP" \

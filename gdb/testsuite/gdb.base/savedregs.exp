@@ -46,7 +46,7 @@ gdb_load ${binfile}
 
 # Advance to main
 if { ![runto_main] } {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 
 proc process_saved_regs { current inner outer } {

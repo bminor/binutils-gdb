@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-load_lib "trace-support.exp";
+load_lib "trace-support.exp"
 
 
 gdb_exit
@@ -111,11 +111,11 @@ if { ![gdb_target_supports_trace] } then {
 }
 
 gdb_delete_tracepoints
-set trcpt1 [gdb_gettpnum gdb_c_test];
+set trcpt1 [gdb_gettpnum gdb_c_test]
 
 if { $trcpt1 <= 0 } then {
     fail "setting tracepoints"
-    return;
+    return
 }
 
 gdb_test "tvariable \$tvar5 = 15" \

@@ -23,11 +23,11 @@
 set data_overlays 1
 
 if [istarget "d10v-*-*"] then {
-    set linker_script "${srcdir}/${subdir}/d10v.ld";
+    set linker_script "${srcdir}/${subdir}/d10v.ld"
 } elseif [istarget "m32r-*-*"] then {
-    set linker_script "${srcdir}/${subdir}/m32r.ld";
+    set linker_script "${srcdir}/${subdir}/m32r.ld"
 } elseif [istarget "spu-*-*"] then {
-    set linker_script "${srcdir}/${subdir}/spu.ld";
+    set linker_script "${srcdir}/${subdir}/spu.ld"
     set data_overlays 0
 } else {
     verbose "Skipping overlay test -- not implemented for this target."
@@ -85,7 +85,7 @@ gdb_load ${binfile}
 #
 
 if ![runto_main] then {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 
 # couple of convenience variables

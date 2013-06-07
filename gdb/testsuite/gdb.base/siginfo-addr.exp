@@ -49,7 +49,7 @@ gdb_test "display/i \$pc"
 
 # Advance to main
 if { ![runto_main] } then {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 
 # Run to the signal.

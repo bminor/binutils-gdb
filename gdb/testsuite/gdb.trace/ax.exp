@@ -18,7 +18,7 @@
 # The tests that use the maintenance command do not need tracepoint
 # support on the target, but they do want a live program.
 
-load_lib "trace-support.exp";
+load_lib "trace-support.exp"
 
 
 gdb_exit

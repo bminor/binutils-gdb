@@ -30,9 +30,9 @@ proc default_prompt_gdb_start { } {
     global gdb_prompt
     global gdb_prompt_fail
     global timeout
-    global gdb_spawn_id;
+    global gdb_spawn_id
 
-    gdb_stop_suppressing_tests;
+    gdb_stop_suppressing_tests
 
     verbose "Spawning $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
 
@@ -46,7 +46,7 @@ proc default_prompt_gdb_start { } {
 	    exit 1
 	}
     }
-    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts]"];
+    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS [host_info gdb_opts]"]
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
 	return 1
@@ -74,11 +74,11 @@ proc default_prompt_gdb_start { } {
 	}
 	timeout	{
 	    perror "(timeout) GDB never initialized after 10 seconds."
-	    remote_close host;
+	    remote_close host
 	    return -1
 	}
     }
-    set gdb_spawn_id -1;
+    set gdb_spawn_id -1
     return 0
 }
 

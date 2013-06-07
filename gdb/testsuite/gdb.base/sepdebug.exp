@@ -578,8 +578,8 @@ proc test_next_with_recursion {} {
     gdb_expect {
 	-re "Break.* factorial .value=6. .*$gdb_prompt $" {}
 	-re ".*$gdb_prompt $" {
-	    fail "run to factorial(6)";
-	    gdb_suppress_tests;
+	    fail "run to factorial(6)"
+	    gdb_suppress_tests
 	}
 	timeout { fail "run to factorial(6) (timeout)" ; gdb_suppress_tests }
     }
@@ -640,7 +640,7 @@ proc test_next_with_recursion {} {
 
     if [target_info exists gdb,noresults] { gdb_suppress_tests }
   gdb_continue_to_end "recursive next test"
-   gdb_stop_suppressing_tests;
+   gdb_stop_suppressing_tests
 }
 
 test_next_with_recursion

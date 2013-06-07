@@ -36,7 +36,7 @@ if { [prepare_for_testing ${testfile}.exp ${binfile} ${srcfile}] } {
 
 # make sure $pc is sane, in case we're talking to a board.
 if { ![runto_main] } {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 
 set bp_line [gdb_get_line_number "set breakpoint here"]
@@ -95,7 +95,7 @@ clean_restart $binfile
 
 # make sure $pc is sane, in case we're talking to a board.
 if { ![runto_main] } {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 
 set bp_line [gdb_get_line_number "set breakpoint here"]

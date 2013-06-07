@@ -20,7 +20,7 @@
 # ability to generate synthetic trace files directly, and the tfile
 # target is available to all GDB configs.
 
-load_lib "trace-support.exp";
+load_lib "trace-support.exp"
 
 gdb_exit
 gdb_start

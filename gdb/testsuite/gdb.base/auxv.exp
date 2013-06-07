@@ -61,7 +61,7 @@ if {$core_works} {
 }
 
 if { ![runto_main] } then {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 set print_core_line [gdb_get_line_number "ABORT;"]
 gdb_test "tbreak $print_core_line"

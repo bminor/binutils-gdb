@@ -49,17 +49,17 @@ proc test_expr { args } {
     if { [llength $args] % 2 } {
 	warning "an even # of arguments should be passed to test_expr"
     }
-    set last_ent [expr [llength $args] - 1];
-    set testname [lindex $args $last_ent];
+    set last_ent [expr [llength $args] - 1]
+    set testname [lindex $args $last_ent]
     if [gdb_test_no_output [lindex $args 0] "$testname (setup)"] {
-	gdb_suppress_tests;
+	gdb_suppress_tests
     }
     for {set x 1} {$x < $last_ent} {set x [expr $x + 2]} {
 	if [gdb_test [lindex $args $x] [lindex $args [expr $x + 1]] "$testname ([lindex $args $x])"] {
-	    gdb_suppress_tests;
+	    gdb_suppress_tests
 	}
     }
-    gdb_stop_suppressing_tests;
+    gdb_stop_suppressing_tests
 }
 
 proc do_tests {} {

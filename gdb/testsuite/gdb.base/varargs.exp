@@ -67,7 +67,7 @@ gdb_test_no_output "set width 0"
 
 if [gdb_skip_stdio_test "varargs.exp"] {
     # Nothing in this module is testable without printf.
-    return;
+    return
 }
 
 if ![runto_main] then {

@@ -181,7 +181,7 @@ proc gdb_file_cmd {arg} {
     set last_loaded_file $arg
 
     if [is_remote host] {
-        set arg [remote_download host $arg];
+        set arg [remote_download host $arg]
         if { $arg == "" } {
             error "download failed"
             return -1

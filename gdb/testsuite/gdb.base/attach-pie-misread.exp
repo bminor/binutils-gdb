@@ -128,7 +128,7 @@ if {$first_offset == 0} {
 set test "start inferior"
 gdb_exit
 
-set res [remote_spawn host $binfile];
+set res [remote_spawn host $binfile]
 if { $res < 0 || $res == "" } {
     perror "Spawning $binfile failed."
     fail $test

@@ -63,7 +63,7 @@ proc do_function_calls {} {
     global gdb_prompt
 
     # We need to up this because this can be really slow on some boards.
-    set timeout 60;
+    set timeout 60
 
     # If any of these calls segv we don't want to affect subsequent tests.
     # E.g., we want to ensure register values are restored.
@@ -329,7 +329,7 @@ proc rerun_and_prepare {} {
 	# the language be set to the default.
 
 	if { ![runto_main] } {
-	    gdb_suppress_tests;
+	    gdb_suppress_tests
 	}
 
 	# However, turn off overload-resolution for aCC.  Having it on causes
@@ -338,7 +338,7 @@ proc rerun_and_prepare {} {
 	gdb_test_no_output "set overload-resolution 0"
     } else {
 	if { ![runto_main] } {
-	    gdb_suppress_tests;
+	    gdb_suppress_tests
 	}
 	gdb_test_no_output "set language c"
     }

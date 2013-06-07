@@ -52,8 +52,8 @@ proc gdb_test_thread_start {messages_enabled command pattern message} {
 
   return [gdb_test_multiple $command $message {
     -re "\\\[New Thread \[^\]\]*\\\]\r\n" {
-      incr events_seen;
-      exp_continue;
+      incr events_seen
+      exp_continue
     }
     -re "\[\r\n\]*($pattern)\[\r\n\]+$gdb_prompt $" {
       if { $events_seen != $events_expected } {
@@ -78,7 +78,7 @@ proc gdb_test_thread_exit {messages_enabled command pattern message} {
   return [gdb_test_multiple $command $message {
     -re "\\\[Thread \[^\]\]* exited\\\]\r\n" {
       incr events_seen
-      exp_continue;
+      exp_continue
     }
     -re "\[\r\n\]*($pattern)\[\r\n\]+$gdb_prompt $" {
       if { $events_seen != $events_expected } {

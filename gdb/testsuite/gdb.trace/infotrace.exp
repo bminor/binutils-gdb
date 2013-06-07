@@ -15,7 +15,7 @@
 
 # This file was written by Michael Snyder (msnyder@cygnus.com)
 
-load_lib "trace-support.exp";
+load_lib "trace-support.exp"
 
 
 gdb_exit
@@ -39,11 +39,11 @@ gdb_file_cmd $binfile
 #
 
 gdb_delete_tracepoints
-set c_test_num [gdb_gettpnum gdb_c_test];
-set asm_test_num [gdb_gettpnum gdb_asm_test];
+set c_test_num [gdb_gettpnum gdb_c_test]
+set asm_test_num [gdb_gettpnum gdb_asm_test]
 if { $c_test_num <= 0 || $asm_test_num <= 0 } then {
     fail "setting tracepoints"
-    return;
+    return
 }
 
 # 2.1 info tracepoints (all)

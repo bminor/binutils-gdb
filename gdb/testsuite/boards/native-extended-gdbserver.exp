@@ -53,7 +53,7 @@ set_board_info gdb_protocol "extended-remote"
 # Test the copy of gdbserver in the build directory.
 set_board_info gdb_server_prog "../gdbserver/gdbserver"
 
-send_user "configuring for gdbserver local testing (extended-remote)\n";
+send_user "configuring for gdbserver local testing (extended-remote)\n"
 
 # We must load this explicitly here, and rename the procedures we want
 # to override.  If we didn't do this, given that mi-support.exp is

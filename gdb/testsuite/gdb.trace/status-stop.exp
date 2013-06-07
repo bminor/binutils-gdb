@@ -12,7 +12,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-load_lib "trace-support.exp";
+load_lib "trace-support.exp"
 
 standard_testfile
 set executable $testfile
@@ -32,7 +32,7 @@ if ![runto_main] {
 
 if ![gdb_target_supports_trace] {
     unsupported "target does not support trace"
-    return -1 
+    return -1
 }
 
 # Verify that the sequence of commands "tstart tstop tstart" works well.

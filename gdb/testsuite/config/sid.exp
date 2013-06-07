@@ -96,7 +96,7 @@ proc sid_start {} {
     sleep 4
 
     if ![target_info exists gdb,no_push_conn] {
-        remote_push_conn host;
+        remote_push_conn host
     }
 }
 
@@ -111,8 +111,8 @@ proc gdb_start {} {
 
 proc sid_exit {} {
     if ![target_info exists gdb,no_push_conn] {
-	remote_close host;
-	remote_pop_conn host;
+	remote_close host
+	remote_pop_conn host
     }
 }
 
@@ -190,25 +190,25 @@ proc gdb_load { arg } {
 	    if $verbose>1 then {
 		perror "Error during download."
 	    }
-	    set retval -1;
+	    set retval -1
 	}
 	-re ".*$gdb_prompt $" {
 	    if $verbose>1 then {
 		send_user "Loaded $arg into $GDB\n"
 	    }
-	    set retval 0;
+	    set retval 0
 	}
 	-re "$gdb_prompt $"     {
 	    if $verbose>1 then {
 		perror "GDB couldn't load."
 	    }
-	    set retval -1;
+	    set retval -1
 	}
 	timeout {
 	    if $verbose>1 then {
 		perror "Timed out trying to load $arg."
 	    }
-	    set retval -1;
+	    set retval -1
 	}
     }
     set timeout $prev_timeout

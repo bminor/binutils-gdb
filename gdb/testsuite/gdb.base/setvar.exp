@@ -70,31 +70,31 @@ gdb_test_multiple "print sizeof (unsigned long)" "sizeof ulong" {
 proc test_set { args } {
     global gdb_prompt
 
-    set length [expr [llength $args] - 1];
-    set message "[lindex $args $length]";
-    set final [expr $length - 2];
-    set count 1;
+    set length [expr [llength $args] - 1]
+    set message "[lindex $args $length]"
+    set final [expr $length - 2]
+    set count 1
 
     # Set up the variables.
     for {set x 0} {$x < $length} {incr x} {
 	if { "[lindex $args $x]" != "" } {
-	    set arg [lindex $args $x];
+	    set arg [lindex $args $x]
 	    if { ($x == $final) || ([string first ".*" [lindex $args [expr $x + 1]]] >= 0) } {
-		set match [lindex $args [expr $x + 1]];
+		set match [lindex $args [expr $x + 1]]
 		if { $count == 1 } {
 		    set mess "$message"
 		} else {
-		    set mess "$message (#$count)";
+		    set mess "$message (#$count)"
 		}
-		incr count;
-		incr x;
+		incr count
+		incr x
 	    } else {
-		set mess "";
+		set mess ""
 		set match ""
 	    }
 	    verbose "doing $arg $match"
 	    if [gdb_test "$arg" "$match" "$mess"] {
-		fail "$message -- $match";
+		fail "$message -- $match"
 		return 1
 	    }
 	}

@@ -20,7 +20,7 @@
 # (could be very time-consuming on remote targets with slow connection).
 #
 if [target_info exists gdb,skip_huge_test] {
-    return;
+    return
 }
 
 set testfile "huge"

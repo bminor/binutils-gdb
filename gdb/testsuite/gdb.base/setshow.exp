@@ -33,7 +33,7 @@ gdb_load ${binfile}
 
 # make sure $pc is sane, in case we're talking to a board.
 if { ![runto_main] } {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 
 #

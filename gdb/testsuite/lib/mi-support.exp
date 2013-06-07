@@ -45,33 +45,33 @@ proc mi_uncatched_gdb_exit {} {
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global verbose
-    global gdb_spawn_id;
+    global gdb_spawn_id
     global gdb_prompt
     global mi_gdb_prompt
     global MIFLAGS
 
-    gdb_stop_suppressing_tests;
+    gdb_stop_suppressing_tests
 
     if { [info procs sid_exit] != "" } {
 	sid_exit
     }
 
     if ![info exists gdb_spawn_id] {
-	return;
+	return
     }
 
     verbose "Quitting $GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS"
 
     if { [is_remote host] && [board_info host exists fileid] } {
-	send_gdb "999-gdb-exit\n";
+	send_gdb "999-gdb-exit\n"
 	gdb_expect 10 {
 	    -re "y or n" {
-		send_gdb "y\n";
-		exp_continue;
+		send_gdb "y\n"
+		exp_continue
 	    }
             -re "Undefined command.*$gdb_prompt $" {
                 send_gdb "quit\n"
-		exp_continue;
+		exp_continue
             }
 	    -re "DOSEXIT code" { }
 	    default { }
@@ -79,7 +79,7 @@ proc mi_uncatched_gdb_exit {} {
     }
 
     if ![is_remote host] {
-	remote_close host;
+	remote_close host
     }
     unset gdb_spawn_id
 }
@@ -102,10 +102,10 @@ proc default_mi_gdb_start { args } {
     global gdb_prompt
     global mi_gdb_prompt
     global timeout
-    global gdb_spawn_id;
+    global gdb_spawn_id
     global MIFLAGS
 
-    gdb_stop_suppressing_tests;
+    gdb_stop_suppressing_tests
     set inferior_pty no-tty
 
     # Set the default value, it may be overriden later by specific testfile.
@@ -145,7 +145,7 @@ proc default_mi_gdb_start { args } {
 	set mi_inferior_tty_name $spawn_out(slave,name)
     }
 
-    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS [host_info gdb_opts]"];
+    set res [remote_spawn host "$GDB $INTERNAL_GDBFLAGS $GDBFLAGS $MIFLAGS [host_info gdb_opts]"]
     if { $res < 0 || $res == "" } {
 	perror "Spawning $GDB failed."
 	return 1
@@ -157,7 +157,7 @@ proc default_mi_gdb_start { args } {
 	    # using the old-style prompt.
 	    if { $MIFLAGS == "-i=mi1" } {
 	        perror "(mi startup) Got unexpected new mi prompt."
-	        remote_close host;
+	        remote_close host
 	        return -1
 	    }
 	    verbose "GDB initialized."
@@ -168,28 +168,28 @@ proc default_mi_gdb_start { args } {
 	    # using the new-style prompt.
 	    if { $MIFLAGS != "-i=mi1" } {
 	        perror "(mi startup) Got unexpected old mi prompt."
-	        remote_close host;
+	        remote_close host
 	        return -1
 	    }
 	    verbose "GDB initialized."
 	}
 	-re ".*unrecognized option.*for a complete list of options." {
 	    untested "Skip mi tests (not compiled with mi support)."
-	    remote_close host;
+	    remote_close host
 	    return -1
 	}
 	-re ".*Interpreter `mi' unrecognized." {
 	    untested "Skip mi tests (not compiled with mi support)."
-	    remote_close host;
+	    remote_close host
 	    return -1
 	}
 	timeout {
 	    perror "(timeout) GDB never initialized after 10 seconds."
-	    remote_close host;
+	    remote_close host
 	    return -1
 	}
     }
-    set gdb_spawn_id -1;
+    set gdb_spawn_id -1
 
     # FIXME: mi output does not go through pagers, so these can be removed.
     # force the height to "unlimited", so no pagers get used
@@ -252,7 +252,7 @@ proc mi_delete_breakpoints {} {
     send_gdb "102-break-delete\n"
     gdb_expect 30 {
 	 -re "Delete all breakpoints.*y or n.*$" {
-	    send_gdb "y\n";
+	    send_gdb "y\n"
 	    exp_continue
          }
 	 -re "102-break-delete\r\n102\\\^done\r\n$mi_gdb_prompt$" {
@@ -270,8 +270,8 @@ proc mi_delete_breakpoints {} {
 	 -re "103-break-list\r\n103\\\^doneNo breakpoints or watchpoints.\r\n\r\n$mi_gdb_prompt$" {warning "Unexpected console text received"}
 	 -re "$mi_gdb_prompt$" { perror "Breakpoints not deleted" ; return }
 	 -re "Delete all breakpoints.*or n.*$" {
-	    warning "Unexpected prompt for breakpoints deletion";
-	    send_gdb "y\n";
+	    warning "Unexpected prompt for breakpoints deletion"
+	    send_gdb "y\n"
 	    exp_continue
 	}
 	 timeout { perror "-break-list (timeout)" ; return }
@@ -338,29 +338,29 @@ proc mi_gdb_target_cmd { targetname serialport } {
 	send_gdb "47-target-select $targetname $serialport\n"
 	gdb_expect 60 {
 	    -re "47\\^connected.*$mi_gdb_prompt" {
-		verbose "Set target to $targetname";
+		verbose "Set target to $targetname"
 		return 0
 	    }
 	    -re "unknown host.*$mi_gdb_prompt" {
 	        verbose "Couldn't look up $serialport"
 	    }
 	    -re "Couldn't establish connection to remote.*$mi_gdb_prompt$" {
-		verbose "Connection failed";
+		verbose "Connection failed"
 	    }
 	    -re "Remote MIPS debugging.*$mi_gdb_prompt$" {
-		verbose "Set target to $targetname";
+		verbose "Set target to $targetname"
 		return 0
 	    }
 	    -re "Remote debugging using .*$serialport_re.*$mi_gdb_prompt$" {
-		verbose "Set target to $targetname";
+		verbose "Set target to $targetname"
 		return 0
 	    }
 	    -re "Remote target $targetname connected to.*$mi_gdb_prompt$" {
-		verbose "Set target to $targetname";
+		verbose "Set target to $targetname"
 		return 0
 	    }
 	    -re "Connected to.*$mi_gdb_prompt$" { 
-		verbose "Set target to $targetname";
+		verbose "Set target to $targetname"
 		return 0
 	    }
 	    -re "Ending remote.*$mi_gdb_prompt$" { }
@@ -374,10 +374,10 @@ proc mi_gdb_target_cmd { targetname serialport } {
 		return 1
 	    }
 	    -re "Timeout reading from remote system.*$mi_gdb_prompt$" {
-		verbose "Got timeout error from gdb.";
+		verbose "Got timeout error from gdb."
 	    }
 	    timeout {
-		send_gdb "";
+		send_gdb ""
 		break
 	    }
 	}
@@ -401,7 +401,7 @@ proc mi_gdb_file_cmd { arg } {
     set last_loaded_file $arg
 
     if [is_remote host] {
-	set arg [remote_download host $arg];
+	set arg [remote_download host $arg]
 	if { $arg == "" } {
 	    error "download failed"
 	    return -1
@@ -591,8 +591,8 @@ proc mi_gdb_test { args } {
     }
 
     if [llength $args]==5 {
-	set question_string [lindex $args 3];
-	set response_string [lindex $args 4];
+	set question_string [lindex $args 3]
+	set response_string [lindex $args 4]
     } else {
 	set question_string "^FOOBAR$"
     }
@@ -604,54 +604,54 @@ proc mi_gdb_test { args } {
     }
 
     set result -1
-    set string "${command}\n";
+    set string "${command}\n"
     set string_regex [string_to_regexp $command]
 
     if { $command != "" } {
 	while { "$string" != "" } {
-	    set foo [string first "\n" "$string"];
-	    set len [string length "$string"];
+	    set foo [string first "\n" "$string"]
+	    set len [string length "$string"]
 	    if { $foo < [expr $len - 1] } {
-		set str [string range "$string" 0 $foo];
+		set str [string range "$string" 0 $foo]
 		if { [send_gdb "$str"] != "" } {
-		    global suppress_flag;
+		    global suppress_flag
 
 		    if { ! $suppress_flag } {
-			perror "Couldn't send $command to GDB.";
+			perror "Couldn't send $command to GDB."
 		    }
-		    fail "$message";
+		    fail "$message"
 		    return $result
 		}
 		gdb_expect 2 {
 		    -re "\[\r\n\]" { }
 		    timeout { }
 		}
-		set string [string range "$string" [expr $foo + 1] end];
+		set string [string range "$string" [expr $foo + 1] end]
 	    } else {
-		break;
+		break
 	    }
 	}
 	if { "$string" != "" } {
 	    if { [send_gdb "$string"] != "" } {
-		global suppress_flag;
+		global suppress_flag
 
 		if { ! $suppress_flag } {
-		    perror "Couldn't send $command to GDB.";
+		    perror "Couldn't send $command to GDB."
 		}
-		fail "$message";
+		fail "$message"
 		return $result
 	    }
 	}
     }
 
     if [info exists timeout] {
-	set tmt $timeout;
+	set tmt $timeout
     } else {
-	global timeout;
+	global timeout
 	if [info exists timeout] {
-	    set tmt $timeout;
+	    set tmt $timeout
 	} else {
-	    set tmt 60;
+	    set tmt 60
 	}
     }
     if {$async} {
@@ -663,9 +663,9 @@ proc mi_gdb_test { args } {
     gdb_expect $tmt {
 	 -re "\\*\\*\\* DOSEXIT code.*" {
 	     if { $message != "" } {
-		 fail "$message";
+		 fail "$message"
 	     }
-	     gdb_suppress_entire_file "GDB died";
+	     gdb_suppress_entire_file "GDB died"
 	     return -1
 	 }
 	 -re "Ending remote debugging.*$mi_gdb_prompt\[ \]*$" {
@@ -695,8 +695,8 @@ proc mi_gdb_test { args } {
 	    set result 0
 	}
 	 -re "(${question_string})$" {
-	    send_gdb "$response_string\n";
-	    exp_continue;
+	    send_gdb "$response_string\n"
+	    exp_continue
 	}
 	 -re "Undefined.* command:.*$mi_gdb_prompt\[ \]*$" {
 	    perror "Undefined command \"$command\"."
@@ -809,11 +809,11 @@ proc mi_run_cmd_full {use_mi_command args} {
     }
 
     if [target_info exists gdb_init_command] {
-	send_gdb "[target_info gdb_init_command]\n";
+	send_gdb "[target_info gdb_init_command]\n"
 	gdb_expect 30 {
 	    -re "$mi_gdb_prompt$" { }
 	    default {
-		perror "gdb_init_command for target failed";
+		perror "gdb_init_command for target failed"
 		return -1
 	    }
 	}
@@ -825,7 +825,7 @@ proc mi_run_cmd_full {use_mi_command args} {
 
     if $use_gdb_stub {
 	if [target_info exists gdb,do_reload_on_run] {
-	    send_gdb "${run_prefix}continue\n";
+	    send_gdb "${run_prefix}continue\n"
 	    gdb_expect 60 {
 		-re "${run_match}\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt" {}
 		default {}
@@ -834,9 +834,9 @@ proc mi_run_cmd_full {use_mi_command args} {
 	}
 
 	if [target_info exists gdb,start_symbol] {
-	    set start [target_info gdb,start_symbol];
+	    set start [target_info gdb,start_symbol]
 	} else {
-	    set start "start";
+	    set start "start"
 	}
 
 	# HACK: Should either use 000-jump or fix the target code

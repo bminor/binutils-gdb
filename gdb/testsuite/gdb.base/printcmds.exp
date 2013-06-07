@@ -426,45 +426,45 @@ proc test_print_repeats_10 {} {
     for { set x 1 } { $x <= 16 } { incr x } {
 	gdb_test_no_output "set print elements $x"
 	for { set e 1 } { $e <= 16 } {incr e } {
-	    set v [expr $e - 1];
+	    set v [expr $e - 1]
 	    set command "p &ctable2\[${v}*16\]"
 	    if { $x < $e } {
-		set aval $x;
+		set aval $x
 	    } else {
-		set aval $e;
+		set aval $e
 	    }
-	    set xval [expr $x - $e];
+	    set xval [expr $x - $e]
 	    if { $xval < 0 } {
-		set xval 0;
+		set xval 0
 	    }
 	    if { $aval > 10 } {
-		set a "'a' <repeats $aval times>";
+		set a "'a' <repeats $aval times>"
 		if { $xval > 0 } {
-		    set a "${a}, \\\"";
+		    set a "${a}, \\\""
 		}
 	    } else {
-		set a "\\\"[string range "aaaaaaaaaaaaaaaa" 1 $aval]";
+		set a "\\\"[string range "aaaaaaaaaaaaaaaa" 1 $aval]"
 		if { $xval > 10 } {
-		    set a "$a\\\", ";
+		    set a "$a\\\", "
 		}
 	    }
-	    set xstr "";
+	    set xstr ""
 	    if { $xval > 10 } {
-		set xstr "'X' <repeats $xval times>";
+		set xstr "'X' <repeats $xval times>"
 	    } else {
 		if { $xval > 0 } {
-		    set xstr "[string range "XXXXXXXXXXXXXXXX" 1 $xval]\\\"";
+		    set xstr "[string range "XXXXXXXXXXXXXXXX" 1 $xval]\\\""
 		} else {
 		    if { $aval <= 10 } {
-			set xstr "\\\"";
+			set xstr "\\\""
 		    }
 		}
 	    }
 	    if { $aval < 16 } {
 		set xstr "${xstr}\[.\]\[.\]\[.\]"
 	    }
-	    set string " = \[(\]unsigned char \[*\]\[)\] <ctable2(\\+$decimal)?> ${a}${xstr}";
-	    gdb_test "$command" "$string" "$command with print elements set to $x";
+	    set string " = \[(\]unsigned char \[*\]\[)\] <ctable2(\\+$decimal)?> ${a}${xstr}"
+	    gdb_test "$command" "$string" "$command with print elements set to $x"
 	}
     }
 }
@@ -659,7 +659,7 @@ proc test_print_string_constants {} {
 
     # We need to up this because this can be really slow on some boards.
     # (Test may involve inferior malloc() calls).
-    set timeout 60;
+    set timeout 60
 
     gdb_test "p \"a string\""		" = \"a string\""
     gdb_test "p \"embedded \\000 null\"" " = \"embedded \\\\000 null\""
@@ -683,7 +683,7 @@ proc test_print_array_constants {} {
 
     # We need to up this because this can be really slow on some boards.
     # (Test may involve inferior malloc() calls).
-    set timeout 60;
+    set timeout 60
 
     gdb_test "print {'a','b','c'}"	" = \"abc\""
     gdb_test_escape_braces "print {0,1,2}"    " = {0, 1, 2}"

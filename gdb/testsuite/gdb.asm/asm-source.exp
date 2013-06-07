@@ -194,7 +194,7 @@ if [board_info $dest exists multilib_flags] {
 	if { "${multilib_flags}" != "" } {
 	   untested asm-source.exp
 	   return -1
-	   return;
+	   return
 	 }
 }
 

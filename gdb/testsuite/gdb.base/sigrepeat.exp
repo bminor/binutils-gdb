@@ -41,7 +41,7 @@ gdb_load ${binfile}
 
 # Advance to main
 if { ![runto_main] } then {
-    gdb_suppress_tests;
+    gdb_suppress_tests
 }
 
 # Run to the signal handler wait loop.

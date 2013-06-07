@@ -36,7 +36,7 @@ regsub -all " " $db_command "\\ " db_command
 
 set test "spawn valgrind"
 set cmd "valgrind --db-attach=yes $db_command $binfile"
-set res [remote_spawn host $cmd];
+set res [remote_spawn host $cmd]
 if { $res < 0 || $res == "" } {
     verbose -log "Spawning $cmd failed."
     unsupported $test

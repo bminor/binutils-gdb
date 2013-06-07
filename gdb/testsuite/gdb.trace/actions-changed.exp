@@ -166,7 +166,7 @@ if ![runto_main] {
 
 if ![gdb_target_supports_trace] {
     unsupported "Current target does not support trace"
-    return -1;
+    return -1
 }
 
 test_actions_changed

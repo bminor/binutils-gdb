@@ -23,7 +23,7 @@ load_lib gdb.exp
 proc gdb_target_sim { } {
     global gdb_prompt
     
-    set target_sim_options "[board_info target gdb,target_sim_options]";
+    set target_sim_options "[board_info target gdb,target_sim_options]"
 
     send_gdb "target sim $target_sim_options\n"
     set timeout 60

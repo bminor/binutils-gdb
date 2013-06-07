@@ -176,7 +176,7 @@ gdb_test "py print (gdb.inferiors()\[0\].search_memory (start_addr, 100, pattern
 # targets, test the search spanning multiple chunks.
 # Remote targets may implement the search differently.
 
-set CHUNK_SIZE 16000 ;
+set CHUNK_SIZE 16000
 
 gdb_test_no_output "set *(int32_t*) &search_buf\[0*${CHUNK_SIZE}+100\] = 0x12345678"
 gdb_test_no_output "set *(int32_t*) &search_buf\[1*${CHUNK_SIZE}+100\] = 0x12345678"

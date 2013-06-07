@@ -66,7 +66,7 @@ proc gdb_start { } {
 	    set timeout 10
 	    verbose "Timeout is now $timeout seconds" 2
 
-	    set state [spawn_vxgdb];
+	    set state [spawn_vxgdb]
 	    if { $state == "pass" } {
 		return 0
 	    }
@@ -74,7 +74,7 @@ proc gdb_start { } {
 		return -1
 	    }
 	}
-	remote_reboot target;
+	remote_reboot target
     }
 }
 
@@ -96,7 +96,7 @@ proc spawn_vxgdb { } {
     gdb_expect {
 	-re "Done\..*$gdb_prompt $"	{
 	    verbose "Set target to [target_info hostname]" 1
-	    set timeout 10;
+	    set timeout 10
 	    return "pass"
 	}
 	-re "net_connect: RPC: (Program not registered|.*Timed out).*$" {
@@ -110,7 +110,7 @@ proc spawn_vxgdb { } {
 }
 
 proc gdb_exit { } {
-    remote_close target;
+    remote_close target
     catch default_gdb_exit
 }
 

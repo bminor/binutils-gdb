@@ -308,7 +308,7 @@ proc test_attach {file displacement {relink_args ""}} {
     set test "sleep function started"
 
     set command "${file} sleep"
-    set res [remote_spawn host $command];
+    set res [remote_spawn host $command]
     if { $res < 0 || $res == "" } {
 	perror "Spawning $command failed."
 	fail $test
@@ -628,7 +628,7 @@ foreach ldprelink {NO YES} {
 			    set dir ${exec}.d
 			    set relink_args [build_executable_own_libs ${test}.exp [file tail $exec] $srcfile $opts $interp $dir]
 			    if {$relink_args == ""} {
-				continue;
+				continue
 			    }
 
 			    if {$binsepdebug == "SEP"} {
