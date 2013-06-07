@@ -1212,6 +1212,8 @@ ctf_close (void)
   ctf_destroy ();
   xfree (trace_dirname);
   trace_dirname = NULL;
+
+  trace_reset_local_state ();
 }
 
 /* This is the implementation of target_ops method to_files_info.

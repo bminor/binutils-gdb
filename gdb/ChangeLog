@@ -1,3 +1,15 @@
+2013-06-07  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (start_tracing): Move code to ...
+	(trace_reset_local_state): ... here.  New.
+	(disconnect_tracing): Don't call set_current_traceframe,
+	set_tracepoint_num, and set_traceframe_context. Call
+	trace_reset_local_state instead.
+	(tfile_close): Call trace_reset_local_state.
+	* ctf.c (ctf_close): Likewise.
+	* remote.c (remote_close): Likewise.
+	* tracepoint.h (trace_reset_local_state): Declare.
+
 2013-06-06  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c: Whitespace fixes for DWP file format documentation,

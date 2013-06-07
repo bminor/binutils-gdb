@@ -3054,6 +3054,8 @@ remote_close (void)
     delete_async_event_handler (&remote_async_inferior_event_token);
 
   remote_notif_unregister_async_event_handler ();
+
+  trace_reset_local_state ();
 }
 
 /* Query the remote side for the text, data and bss offsets.  */

@@ -1700,6 +1700,16 @@ process_tracepoint_on_disconnect (void)
 	       " GDB is disconnected\n"));
 }
 
+/* Reset local state of tracing.  */
+
+void
+trace_reset_local_state (void)
+{
+  set_traceframe_num (-1);
+  set_tracepoint_num (-1);
+  set_traceframe_context (NULL);
+  clear_traceframe_info ();
+}
 
 void
 start_tracing (char *notes)
@@ -1822,11 +1832,8 @@ start_tracing (char *notes)
   target_trace_start ();
 
   /* Reset our local state.  */
-  set_traceframe_num (-1);
-  set_tracepoint_num (-1);
-  set_traceframe_context (NULL);
+  trace_reset_local_state ();
   current_trace_status()->running = 1;
-  clear_traceframe_info ();
 }
 
 /* The tstart command requests the target to start a new trace run.
@@ -2234,9 +2241,7 @@ disconnect_tracing (void)
      confusing upon reconnection.  Just use these calls instead of
      full tfind_1 behavior because we're in the middle of detaching,
      and there's no point to updating current stack frame etc.  */
-  set_current_traceframe (-1);
-  set_tracepoint_num (-1);
-  set_traceframe_context (NULL);
+  trace_reset_local_state ();
 }
 
 /* Worker function for the various flavors of the tfind command.  */
@@ -4657,6 +4662,8 @@ tfile_close (void)
   trace_fd = -1;
   xfree (trace_filename);
   trace_filename = NULL;
+
+  trace_reset_local_state ();
 }
 
 static void
