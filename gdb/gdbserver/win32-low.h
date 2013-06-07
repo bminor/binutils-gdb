@@ -18,6 +18,12 @@
 
 #include <windows.h>
 
+struct target_desc;
+
+/* The inferior's target description.  This is a global because the
+   Windows ports support neither bi-arch nor multi-process.  */
+extern const struct target_desc *win32_tdesc;
+
 /* Thread information structure used to track extra information about
    each thread.  */
 typedef struct win32_thread_info

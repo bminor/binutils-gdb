@@ -40,6 +40,7 @@
 /* Defined in auto-generated file nios2-linux.c.  */
 
 void init_registers_nios2_linux (void);
+extern const struct target_desc *tdesc_nios2_linux;
 
 /* This union is used to convert between int and byte buffer
    representations of register contents.  */
@@ -68,7 +69,7 @@ static int nios2_regmap[] = {
 static void
 nios2_arch_setup (void)
 {
-  init_registers_nios2_linux ();
+  current_process ()->tdesc = tdesc_nios2_linux;
 }
 
 /* Implement the cannot_fetch_register linux_target_ops method.  */
@@ -206,7 +207,7 @@ nios2_store_gregset (struct regcache *regcache, const void *buf)
 }
 #endif /* HAVE_PTRACE_GETREGS */
 
-struct regset_info target_regsets[] =
+static struct regset_info nios2_regsets[] =
 {
 #ifdef HAVE_PTRACE_GETREGS
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, nios2_num_regs * 4, GENERAL_REGS,
@@ -215,12 +216,36 @@ struct regset_info target_regsets[] =
   { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
+static struct regsets_info nios2_regsets_info =
+  {
+    nios2_regsets, /* regsets */
+    0, /* num_regsets */
+    NULL, /* disabled_regsets */
+  };
+
+static struct usrregs_info nios2_usrregs_info =
+  {
+    nios2_num_regs,
+    nios2_regmap,
+  };
+
+static struct regs_info regs_info =
+  {
+    NULL, /* regset_bitmap */
+    &nios2_usrregs_info,
+    &nios2_regsets_info
+  };
+
+static const struct regs_info *
+nios2_regs_info (void)
+{
+  return &regs_info;
+}
+
 struct linux_target_ops the_low_target =
 {
   nios2_arch_setup,
-  nios2_num_regs,
-  nios2_regmap,
-  NULL,
+  nios2_regs_info,
   nios2_cannot_fetch_register,
   nios2_cannot_store_register,
   NULL,
@@ -232,3 +257,11 @@ struct linux_target_ops the_low_target =
   0,
   nios2_breakpoint_at,
 };
+
+void
+initialize_low_arch (void)
+{
+  init_registers_nios2_linux ();
+
+  initialize_regsets_info (&nios2_regsets_info);
+}

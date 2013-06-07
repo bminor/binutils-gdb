@@ -170,7 +170,7 @@ OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o targ
 	utils.o version.o vec.o gdb_vecs.o \
 	mem-break.o hostio.o event-loop.o tracepoint.o \
 	xml-utils.o common-utils.o ptid.o buffer.o format.o filestuff.o \
-	dll.o notif.o \
+	dll.o notif.o tdesc.o \
 	$(XML_BUILTIN) \
 	$(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
@@ -287,7 +287,7 @@ gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS)
 
-IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o ${IPA_DEPFILES}
+IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o tdesc-ipa.o ${IPA_DEPFILES}
 
 IPA_LIB=libinproctrace.so
 
@@ -503,6 +503,9 @@ linux-amd64-ipa.o: linux-amd64-ipa.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 amd64-linux-ipa.o: amd64-linux.c
+	$(IPAGENT_COMPILE) $<
+	$(POSTCOMPILE)
+tdesc-ipa.o: tdesc.c
 	$(IPAGENT_COMPILE) $<
 	$(POSTCOMPILE)
 

@@ -19,6 +19,8 @@
 #ifndef NTO_LOW_H
 #define NTO_LOW_H
 
+struct target_desc;
+
 enum regset_type
 {
   NTO_REG_GENERAL,
@@ -39,6 +41,10 @@ struct nto_target_ops
 };
 
 extern struct nto_target_ops the_low_target;
+
+/* The inferior's target description.  This is a global because the
+   LynxOS ports support neither bi-arch nor multi-process.  */
+extern const struct target_desc *nto_tdesc;
 
 #endif
 

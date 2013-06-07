@@ -20,6 +20,7 @@
 #include "gdbthread.h"
 #include "agent.h"
 #include "notif.h"
+#include "tdesc.h"
 
 #if HAVE_UNISTD_H
 #include <unistd.h>
@@ -75,8 +76,6 @@ int program_signals[GDB_SIGNAL_LAST];
 int program_signals_p;
 
 jmp_buf toplevel;
-
-const char *gdbserver_xmltarget;
 
 /* The PID of the originally created or attached inferior.  Used to
    send signals to the process when GDB sends us an asynchronous interrupt
@@ -646,21 +645,22 @@ handle_general_set (char *own_buf)
 static const char *
 get_features_xml (const char *annex)
 {
-  /* gdbserver_xmltarget defines what to return when looking
-     for the "target.xml" file.  Its contents can either be
-     verbatim XML code (prefixed with a '@') or else the name
-     of the actual XML file to be used in place of "target.xml".
+  const struct target_desc *desc = current_target_desc ();
+
+  /* `desc->xmltarget' defines what to return when looking for the
+     "target.xml" file.  Its contents can either be verbatim XML code
+     (prefixed with a '@') or else the name of the actual XML file to
+     be used in place of "target.xml".
 
      This variable is set up from the auto-generated
      init_registers_... routine for the current target.  */
 
-  if (gdbserver_xmltarget
-      && strcmp (annex, "target.xml") == 0)
+  if (desc->xmltarget != NULL && strcmp (annex, "target.xml") == 0)
     {
-      if (*gdbserver_xmltarget == '@')
-	return gdbserver_xmltarget + 1;
+      if (*desc->xmltarget == '@')
+	return desc->xmltarget + 1;
       else
-	annex = gdbserver_xmltarget;
+	annex = desc->xmltarget;
     }
 
 #ifdef USE_XML
@@ -3294,7 +3294,8 @@ process_serial_event (void)
       require_running (own_buf);
       if (current_traceframe >= 0)
 	{
-	  struct regcache *regcache = new_register_cache ();
+	  struct regcache *regcache
+	    = new_register_cache (current_target_desc ());
 
 	  if (fetch_traceframe_registers (current_traceframe,
 					  regcache, -1) == 0)

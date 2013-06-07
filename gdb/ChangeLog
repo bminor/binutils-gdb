@@ -1,3 +1,10 @@
+2013-06-07  Pedro Alves  <palves@redhat.com>
+
+	* regformats/regdat.sh: Output #include tdesc.h.  Make globals
+	static.  Output a global target description pointer.
+	(init_registers_${name}): Adjust to initialize a
+	target description structure.
+
 2013-06-07  Will Newton  <will.newton@linaro.org>
 
 	* printcmd.c (build_address_symbolic): Call

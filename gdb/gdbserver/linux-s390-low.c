@@ -42,22 +42,39 @@
 
 /* Defined in auto-generated file s390-linux32.c.  */
 void init_registers_s390_linux32 (void);
+extern const struct target_desc *tdesc_s390_linux32;
+
 /* Defined in auto-generated file s390-linux32v1.c.  */
 void init_registers_s390_linux32v1 (void);
+extern const struct target_desc *tdesc_s390_linux32v1;
+
 /* Defined in auto-generated file s390-linux32v2.c.  */
 void init_registers_s390_linux32v2 (void);
+extern const struct target_desc *tdesc_s390_linux32v2;
+
 /* Defined in auto-generated file s390-linux64.c.  */
 void init_registers_s390_linux64 (void);
+extern const struct target_desc *tdesc_s390_linux64;
+
 /* Defined in auto-generated file s390-linux64v1.c.  */
 void init_registers_s390_linux64v1 (void);
+extern const struct target_desc *tdesc_s390_linux64v1;
+
 /* Defined in auto-generated file s390-linux64v2.c.  */
 void init_registers_s390_linux64v2 (void);
+extern const struct target_desc *tdesc_s390_linux64v2;
+
 /* Defined in auto-generated file s390x-linux64.c.  */
 void init_registers_s390x_linux64 (void);
+extern const struct target_desc *tdesc_s390x_linux64;
+
 /* Defined in auto-generated file s390x-linux64v1.c.  */
 void init_registers_s390x_linux64v1 (void);
+extern const struct target_desc *tdesc_s390x_linux64v1;
+
 /* Defined in auto-generated file s390x-linux64v2.c.  */
 void init_registers_s390x_linux64v2 (void);
+extern const struct target_desc *tdesc_s390x_linux64v2;
 
 #define s390_num_regs 52
 
@@ -138,15 +155,17 @@ s390_cannot_store_register (int regno)
 static void
 s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 {
-  int size = register_size (regno);
+  int size = register_size (regcache->tdesc, regno);
   if (size < sizeof (long))
     {
-      int regaddr = the_low_target.regmap[regno];
+      const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+      struct usrregs_info *usr = regs_info->usrregs;
+      int regaddr = usr->regmap[regno];
 
       memset (buf, 0, sizeof (long));
 
-      if ((regno ^ 1) < the_low_target.num_regs
-	  && the_low_target.regmap[regno ^ 1] == regaddr)
+      if ((regno ^ 1) < usr->num_regs
+	  && usr->regmap[regno ^ 1] == regaddr)
 	{
 	  collect_register (regcache, regno & ~1, buf);
 	  collect_register (regcache, (regno & ~1) + 1,
@@ -156,7 +175,7 @@ s390_collect_ptrace_register (struct regcache *regcache, int regno, char *buf)
 	{
 	  /* Convert 4-byte PSW mask to 8 bytes by clearing bit 12 and copying
 	     the basic addressing mode bit from the PSW address.  */
-	  char *addr = alloca (register_size (regno ^ 1));
+	  char *addr = alloca (register_size (regcache->tdesc, regno ^ 1));
 	  collect_register (regcache, regno, buf);
 	  collect_register (regcache, regno ^ 1, addr);
 	  buf[1] &= ~0x8;
@@ -183,13 +202,15 @@ static void
 s390_supply_ptrace_register (struct regcache *regcache,
 			     int regno, const char *buf)
 {
-  int size = register_size (regno);
+  int size = register_size (regcache->tdesc, regno);
   if (size < sizeof (long))
     {
-      int regaddr = the_low_target.regmap[regno];
+      const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+      struct usrregs_info *usr = regs_info->usrregs;
+      int regaddr = usr->regmap[regno];
 
-      if ((regno ^ 1) < the_low_target.num_regs
-	  && the_low_target.regmap[regno ^ 1] == regaddr)
+      if ((regno ^ 1) < usr->num_regs
+	  && usr->regmap[regno ^ 1] == regaddr)
 	{
 	  supply_register (regcache, regno & ~1, buf);
 	  supply_register (regcache, (regno & ~1) + 1,
@@ -200,7 +221,7 @@ s390_supply_ptrace_register (struct regcache *regcache,
 	  /* Convert 8-byte PSW mask to 4 bytes by setting bit 12 and copying
 	     the basic addressing mode into the PSW address.  */
 	  char *mask = alloca (size);
-	  char *addr = alloca (register_size (regno ^ 1));
+	  char *addr = alloca (register_size (regcache->tdesc, regno ^ 1));
 	  memcpy (mask, buf, size);
 	  mask[1] |= 0x8;
 	  supply_register (regcache, regno, mask);
@@ -236,18 +257,21 @@ s390_supply_ptrace_register (struct regcache *regcache,
 /* Provide only a fill function for the general register set.  ps_lgetregs
    will use this for NPTL support.  */
 
-static void s390_fill_gregset (struct regcache *regcache, void *buf)
+static void
+s390_fill_gregset (struct regcache *regcache, void *buf)
 {
   int i;
+  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
+  struct usrregs_info *usr = regs_info->usrregs;
 
-  for (i = 0; i < the_low_target.num_regs; i++)
+  for (i = 0; i < usr->num_regs; i++)
     {
-      if (the_low_target.regmap[i] < PT_PSWMASK
-	  || the_low_target.regmap[i] > PT_ACR15)
+      if (usr->regmap[i] < PT_PSWMASK
+	  || usr->regmap[i] > PT_ACR15)
 	continue;
 
-      s390_collect_ptrace_register (regcache, i, (char *) buf
-				       + the_low_target.regmap[i]);
+      s390_collect_ptrace_register (regcache, i,
+				    (char *) buf + usr->regmap[i]);
     }
 }
 
@@ -262,8 +286,10 @@ s390_fill_last_break (struct regcache *regcache, void *buf)
 static void
 s390_store_last_break (struct regcache *regcache, const void *buf)
 {
-  supply_register_by_name (regcache, "last_break",
-			   (const char *)buf + 8 - register_size (0));
+  const char *p;
+
+  p = (const char *) buf + 8 - register_size (regcache->tdesc, 0);
+  supply_register_by_name (regcache, "last_break", p);
 }
 
 static void
@@ -278,7 +304,7 @@ s390_store_system_call (struct regcache *regcache, const void *buf)
   supply_register_by_name (regcache, "system_call", buf);
 }
 
-struct regset_info target_regsets[] = {
+static struct regset_info s390_regsets[] = {
   { 0, 0, 0, 0, GENERAL_REGS, s390_fill_gregset, NULL },
   /* Last break address is read-only; do not attempt PTRACE_SETREGSET.  */
   { PTRACE_GETREGSET, PTRACE_GETREGSET, NT_S390_LAST_BREAK, 0,
@@ -295,7 +321,7 @@ static const unsigned char s390_breakpoint[] = { 0, 1 };
 static CORE_ADDR
 s390_get_pc (struct regcache *regcache)
 {
-  if (register_size (0) == 4)
+  if (register_size (regcache->tdesc, 0) == 4)
     {
       unsigned int pswa;
       collect_register_by_name (regcache, "pswa", &pswa);
@@ -312,7 +338,7 @@ s390_get_pc (struct regcache *regcache)
 static void
 s390_set_pc (struct regcache *regcache, CORE_ADDR newpc)
 {
-  if (register_size (0) == 4)
+  if (register_size (regcache->tdesc, 0) == 4)
     {
       unsigned int pswa;
       collect_register_by_name (regcache, "pswa", &pswa);
@@ -328,9 +354,9 @@ s390_set_pc (struct regcache *regcache, CORE_ADDR newpc)
 
 #ifdef __s390x__
 static unsigned long
-s390_get_hwcap (void)
+s390_get_hwcap (const struct target_desc *tdesc)
 {
-  int wordsize = register_size (0);
+  int wordsize = register_size (tdesc, 0);
   unsigned char *data = alloca (2 * wordsize);
   int offset = 0;
 
@@ -371,9 +397,16 @@ s390_check_regset (int pid, int regset, int regsize)
     return 1;
 }
 
+#ifdef __s390x__
+/* For a 31-bit inferior, whether the kernel supports using the full
+   64-bit GPRs.  */
+static int have_hwcap_s390_high_gprs = 0;
+#endif
+
 static void
 s390_arch_setup (void)
 {
+  const struct target_desc *tdesc;
   struct regset_info *regset;
 
   /* Check whether the kernel supports extra register sets.  */
@@ -384,7 +417,7 @@ s390_arch_setup (void)
     = s390_check_regset (pid, NT_S390_SYSTEM_CALL, 4);
 
   /* Update target_regsets according to available register sets.  */
-  for (regset = target_regsets; regset->fill_function != NULL; regset++)
+  for (regset = s390_regsets; regset->fill_function != NULL; regset++)
     if (regset->get_request == PTRACE_GETREGSET)
       switch (regset->nt_type)
 	{
@@ -400,51 +433,48 @@ s390_arch_setup (void)
 
   /* Assume 31-bit inferior process.  */
   if (have_regset_system_call)
-    init_registers_s390_linux32v2 ();
+    tdesc = tdesc_s390_linux32v2;
   else if (have_regset_last_break)
-    init_registers_s390_linux32v1 ();
+    tdesc = tdesc_s390_linux32v1;
   else
-    init_registers_s390_linux32 ();
-
-  the_low_target.num_regs = s390_num_regs;
-  the_low_target.regmap = s390_regmap;
+    tdesc = tdesc_s390_linux32;
 
   /* On a 64-bit host, check the low bit of the (31-bit) PSWM
      -- if this is one, we actually have a 64-bit inferior.  */
 #ifdef __s390x__
   {
     unsigned int pswm;
-    struct regcache *regcache = new_register_cache ();
-    fetch_inferior_registers (regcache, find_regno ("pswm"));
+    struct regcache *regcache = new_register_cache (tdesc);
+    fetch_inferior_registers (regcache, find_regno (tdesc, "pswm"));
     collect_register_by_name (regcache, "pswm", &pswm);
     free_register_cache (regcache);
 
     if (pswm & 1)
       {
 	if (have_regset_system_call)
-	  init_registers_s390x_linux64v2 ();
+	  tdesc = tdesc_s390x_linux64v2;
 	else if (have_regset_last_break)
-	  init_registers_s390x_linux64v1 ();
+	  tdesc = tdesc_s390x_linux64v1;
 	else
-	  init_registers_s390x_linux64 ();
+	  tdesc = tdesc_s390x_linux64;
       }
 
     /* For a 31-bit inferior, check whether the kernel supports
        using the full 64-bit GPRs.  */
-    else if (s390_get_hwcap () & HWCAP_S390_HIGH_GPRS)
+    else if (s390_get_hwcap (tdesc) & HWCAP_S390_HIGH_GPRS)
       {
-	if (have_regset_system_call)
-	  init_registers_s390_linux64v2 ();
-	else if (have_regset_last_break)
-	  init_registers_s390_linux64v1 ();
-	else
-	  init_registers_s390_linux64 ();
+	have_hwcap_s390_high_gprs = 1;
 
-	the_low_target.num_regs = s390_num_regs_3264;
-	the_low_target.regmap = s390_regmap_3264;
+	if (have_regset_system_call)
+	  tdesc = tdesc_s390_linux64v2;
+	else if (have_regset_last_break)
+	  tdesc = tdesc_s390_linux64v1;
+	else
+	  tdesc = tdesc_s390_linux64;
       }
   }
 #endif
+  current_process ()->tdesc = tdesc;
 }
 
 
@@ -456,12 +486,66 @@ s390_breakpoint_at (CORE_ADDR pc)
   return memcmp (c, s390_breakpoint, s390_breakpoint_len) == 0;
 }
 
+static struct usrregs_info s390_usrregs_info =
+  {
+    s390_num_regs,
+    s390_regmap,
+  };
+
+static struct regsets_info s390_regsets_info =
+  {
+    s390_regsets, /* regsets */
+    0, /* num_regsets */
+    NULL, /* disabled_regsets */
+  };
+
+static struct regs_info regs_info =
+  {
+    NULL, /* regset_bitmap */
+    &s390_usrregs_info,
+    &s390_regsets_info
+  };
+
+#ifdef __s390x__
+static struct usrregs_info s390_usrregs_info_3264 =
+  {
+    s390_num_regs_3264,
+    s390_regmap_3264
+  };
+
+static struct regsets_info s390_regsets_info_3264 =
+  {
+    s390_regsets, /* regsets */
+    0, /* num_regsets */
+    NULL, /* disabled_regsets */
+  };
+
+static struct regs_info regs_info_3264 =
+  {
+    NULL, /* regset_bitmap */
+    &s390_usrregs_info_3264,
+    &s390_regsets_info_3264
+  };
+#endif
+
+static const struct regs_info *
+s390_regs_info (void)
+{
+#ifdef __s390x__
+  if (have_hwcap_s390_high_gprs)
+    {
+      const struct target_desc *tdesc = current_process ()->tdesc;
+
+      if (register_size (tdesc, 0) == 4)
+	return &regs_info_3264;
+    }
+#endif
+  return &regs_info;
+}
 
 struct linux_target_ops the_low_target = {
   s390_arch_setup,
-  s390_num_regs,
-  s390_regmap,
-  NULL,
+  s390_regs_info,
   s390_cannot_fetch_register,
   s390_cannot_store_register,
   NULL, /* fetch_register */
@@ -479,3 +563,24 @@ struct linux_target_ops the_low_target = {
   s390_collect_ptrace_register,
   s390_supply_ptrace_register,
 };
+
+void
+initialize_low_arch (void)
+{
+  /* Initialize the Linux target descriptions.  */
+
+  init_registers_s390_linux32 ();
+  init_registers_s390_linux32v1 ();
+  init_registers_s390_linux32v2 ();
+  init_registers_s390_linux64 ();
+  init_registers_s390_linux64v1 ();
+  init_registers_s390_linux64v2 ();
+  init_registers_s390x_linux64 ();
+  init_registers_s390x_linux64v1 ();
+  init_registers_s390x_linux64v2 ();
+
+  initialize_regsets_info (&s390_regsets_info);
+#ifdef __s390x__
+  initialize_regsets_info (&s390_regsets_info_3264);
+#endif
+}

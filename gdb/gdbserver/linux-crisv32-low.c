@@ -22,6 +22,7 @@
 
 /* Defined in auto-generated file reg-crisv32.c.  */
 void init_registers_crisv32 (void);
+extern const struct target_desc *tdesc_crisv32;
 
 /* CRISv32 */
 #define cris_num_regs 49
@@ -362,17 +363,50 @@ cris_store_gregset (struct regcache *regcache, const void *buf)
     }
 }
 
-struct regset_info target_regsets[] = {
+static void
+cris_arch_setup (void)
+{
+  current_process ()->tdesc = tdesc_crisv32;
+}
+
+typedef unsigned long elf_gregset_t[cris_num_regs];
+
+static struct regset_info cris_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, cris_num_regs * 4,
     GENERAL_REGS, cris_fill_gregset, cris_store_gregset },
   { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
+
+static struct regsets_info cris_regsets_info =
+  {
+    cris_regsets, /* regsets */
+    0, /* num_regsets */
+    NULL, /* disabled_regsets */
+  };
+
+static struct usrregs_info cris_usrregs_info =
+  {
+    cris_num_regs,
+    cris_regmap,
+  };
+
+static struct regs_info regs_info =
+  {
+    NULL, /* regset_bitmap */
+    &cris_usrregs_info,
+    &cris_regsets_info
+  };
+
+static const struct regs_info *
+cris_regs_info (void)
+{
+  return &regs_info;
+}
+
 struct linux_target_ops the_low_target = {
-  init_registers_crisv32,
-  -1,
-  NULL,
-  NULL,
+  cris_arch_setup,
+  cris_regs_info,
   NULL,
   NULL,
   NULL, /* fetch_register */
@@ -388,3 +422,11 @@ struct linux_target_ops the_low_target = {
   cris_stopped_by_watchpoint,
   cris_stopped_data_address,
 };
+
+void
+initialize_low_arch (void)
+{
+  init_register_crisv32 ();
+
+  initialize_regsets_info (&cris_regsets_info);
+}

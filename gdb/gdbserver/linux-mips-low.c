@@ -26,16 +26,23 @@
 
 /* Defined in auto-generated file mips-linux.c.  */
 void init_registers_mips_linux (void);
+extern const struct target_desc *tdesc_mips_linux;
+
 /* Defined in auto-generated file mips-dsp-linux.c.  */
 void init_registers_mips_dsp_linux (void);
+extern const struct target_desc *tdesc_mips_dsp_linux;
+
 /* Defined in auto-generated file mips64-linux.c.  */
 void init_registers_mips64_linux (void);
+extern const struct target_desc *tdesc_mips64_linux;
+
 /* Defined in auto-generated file mips64-dsp-linux.c.  */
 void init_registers_mips64_dsp_linux (void);
+extern const struct target_desc *tdesc_mips64_dsp_linux;
 
 #ifdef __mips64
-#define init_registers_mips_linux init_registers_mips64_linux
-#define init_registers_mips_dsp_linux init_registers_mips64_dsp_linux
+#define tdesc_mips_linux tdesc_mips64_linux
+#define tdesc_mips_dsp_linux tdesc_mips64_dsp_linux
 #endif
 
 #ifndef PTRACE_GET_THREAD_AREA
@@ -108,17 +115,15 @@ static unsigned char mips_dsp_regset_bitmap[(mips_dsp_num_regs + 7) / 8] = {
   0xfe, 0xff, 0xff, 0xff, 0xfe, 0xff, 0xff, 0xff, 0xff, 0x80
 };
 
+static int have_dsp = -1;
+
 /* Try peeking at an arbitrarily chosen DSP register and pick the available
    user register set accordingly.  */
 
-static void
-mips_arch_setup (void)
+static const struct target_desc *
+mips_read_description (void)
 {
-  static void (*init_registers) (void);
-
-  gdb_assert (current_inferior);
-
-  if (init_registers == NULL)
+  if (have_dsp < 0)
     {
       int pid = lwpid_of (get_thread_lwp (current_inferior));
 
@@ -126,23 +131,32 @@ mips_arch_setup (void)
       switch (errno)
 	{
 	case 0:
-	  the_low_target.num_regs = mips_dsp_num_regs;
-	  the_low_target.regmap = mips_dsp_regmap;
-	  the_low_target.regset_bitmap = mips_dsp_regset_bitmap;
-	  init_registers = init_registers_mips_dsp_linux;
+	  have_dsp = 1;
 	  break;
 	case EIO:
-	  the_low_target.num_regs = mips_num_regs;
-	  the_low_target.regmap = mips_regmap;
-	  the_low_target.regset_bitmap = NULL;
-	  init_registers = init_registers_mips_linux;
+	  have_dsp = 0;
 	  break;
 	default:
 	  perror_with_name ("ptrace");
 	  break;
 	}
     }
-  init_registers ();
+
+  return have_dsp ? tdesc_mips_dsp_linux : tdesc_mips_linux;
+}
+
+static void
+mips_arch_setup (void)
+{
+  current_process ()->tdesc = mips_read_description ();
+}
+
+static struct usrregs_info *
+get_usrregs_info (void)
+{
+  const struct regs_info *regs_info = the_low_target.regs_info ();
+
+  return regs_info->usrregs;
 }
 
 /* From mips-linux-nat.c.  */
@@ -155,10 +169,14 @@ mips_arch_setup (void)
 static int
 mips_cannot_fetch_register (int regno)
 {
-  if (the_low_target.regmap[regno] == -1)
+  const struct target_desc *tdesc;
+
+  if (get_usrregs_info ()->regmap[regno] == -1)
     return 1;
 
-  if (find_regno ("r0") == regno)
+  tdesc = current_process ()->tdesc;
+
+  if (find_regno (tdesc, "r0") == regno)
     return 1;
 
   return 0;
@@ -167,19 +185,23 @@ mips_cannot_fetch_register (int regno)
 static int
 mips_cannot_store_register (int regno)
 {
-  if (the_low_target.regmap[regno] == -1)
+  const struct target_desc *tdesc;
+
+  if (get_usrregs_info ()->regmap[regno] == -1)
     return 1;
 
-  if (find_regno ("r0") == regno)
+  tdesc = current_process ()->tdesc;
+
+  if (find_regno (tdesc, "r0") == regno)
     return 1;
 
-  if (find_regno ("cause") == regno)
+  if (find_regno (tdesc, "cause") == regno)
     return 1;
 
-  if (find_regno ("badvaddr") == regno)
+  if (find_regno (tdesc, "badvaddr") == regno)
     return 1;
 
-  if (find_regno ("fir") == regno)
+  if (find_regno (tdesc, "fir") == regno)
     return 1;
 
   return 0;
@@ -190,14 +212,14 @@ mips_get_pc (struct regcache *regcache)
 {
   union mips_register pc;
   collect_register_by_name (regcache, "pc", pc.buf);
-  return register_size (0) == 4 ? pc.reg32 : pc.reg64;
+  return register_size (regcache->tdesc, 0) == 4 ? pc.reg32 : pc.reg64;
 }
 
 static void
 mips_set_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   union mips_register newpc;
-  if (register_size (0) == 4)
+  if (register_size (regcache->tdesc, 0) == 4)
     newpc.reg32 = pc;
   else
     newpc.reg64 = pc;
@@ -218,7 +240,7 @@ mips_reinsert_addr (void)
   struct regcache *regcache = get_thread_regcache (current_inferior, 1);
   union mips_register ra;
   collect_register_by_name (regcache, "r31", ra.buf);
-  return register_size (0) == 4 ? ra.reg32 : ra.reg64;
+  return register_size (regcache->tdesc, 0) == 4 ? ra.reg32 : ra.reg64;
 }
 
 static int
@@ -315,27 +337,28 @@ mips_fill_gregset (struct regcache *regcache, void *buf)
 {
   union mips_register *regset = buf;
   int i, use_64bit;
+  const struct target_desc *tdesc = regcache->tdesc;
 
-  use_64bit = (register_size (0) == 8);
+  use_64bit = (register_size (tdesc, 0) == 8);
 
   for (i = 1; i < 32; i++)
     mips_collect_register (regcache, use_64bit, i, regset + i);
 
   mips_collect_register (regcache, use_64bit,
-			 find_regno ("lo"), regset + 32);
+			 find_regno (tdesc, "lo"), regset + 32);
   mips_collect_register (regcache, use_64bit,
-			 find_regno ("hi"), regset + 33);
+			 find_regno (tdesc, "hi"), regset + 33);
   mips_collect_register (regcache, use_64bit,
-			 find_regno ("pc"), regset + 34);
+			 find_regno (tdesc, "pc"), regset + 34);
   mips_collect_register (regcache, use_64bit,
-			 find_regno ("badvaddr"), regset + 35);
+			 find_regno (tdesc, "badvaddr"), regset + 35);
   mips_collect_register (regcache, use_64bit,
-			 find_regno ("status"), regset + 36);
+			 find_regno (tdesc, "status"), regset + 36);
   mips_collect_register (regcache, use_64bit,
-			 find_regno ("cause"), regset + 37);
+			 find_regno (tdesc, "cause"), regset + 37);
 
   mips_collect_register (regcache, use_64bit,
-			 find_regno ("restart"), regset + 0);
+			 find_regno (tdesc, "restart"), regset + 0);
 }
 
 static void
@@ -344,23 +367,26 @@ mips_store_gregset (struct regcache *regcache, const void *buf)
   const union mips_register *regset = buf;
   int i, use_64bit;
 
-  use_64bit = (register_size (0) == 8);
+  use_64bit = (register_size (regcache->tdesc, 0) == 8);
 
   for (i = 0; i < 32; i++)
     mips_supply_register (regcache, use_64bit, i, regset + i);
 
-  mips_supply_register (regcache, use_64bit, find_regno ("lo"), regset + 32);
-  mips_supply_register (regcache, use_64bit, find_regno ("hi"), regset + 33);
-  mips_supply_register (regcache, use_64bit, find_regno ("pc"), regset + 34);
   mips_supply_register (regcache, use_64bit,
-			find_regno ("badvaddr"), regset + 35);
+			find_regno (regcache->tdesc, "lo"), regset + 32);
   mips_supply_register (regcache, use_64bit,
-			find_regno ("status"), regset + 36);
+			find_regno (regcache->tdesc, "hi"), regset + 33);
   mips_supply_register (regcache, use_64bit,
-			find_regno ("cause"), regset + 37);
+			find_regno (regcache->tdesc, "pc"), regset + 34);
+  mips_supply_register (regcache, use_64bit,
+			find_regno (regcache->tdesc, "badvaddr"), regset + 35);
+  mips_supply_register (regcache, use_64bit,
+			find_regno (regcache->tdesc, "status"), regset + 36);
+  mips_supply_register (regcache, use_64bit,
+			find_regno (regcache->tdesc, "cause"), regset + 37);
 
   mips_supply_register (regcache, use_64bit,
-			find_regno ("restart"), regset + 0);
+			find_regno (regcache->tdesc, "restart"), regset + 0);
 }
 
 static void
@@ -369,8 +395,8 @@ mips_fill_fpregset (struct regcache *regcache, void *buf)
   union mips_register *regset = buf;
   int i, use_64bit, first_fp, big_endian;
 
-  use_64bit = (register_size (0) == 8);
-  first_fp = find_regno ("f0");
+  use_64bit = (register_size (regcache->tdesc, 0) == 8);
+  first_fp = find_regno (regcache->tdesc, "f0");
   big_endian = (__BYTE_ORDER == __BIG_ENDIAN);
 
   /* See GDB for a discussion of this peculiar layout.  */
@@ -382,8 +408,9 @@ mips_fill_fpregset (struct regcache *regcache, void *buf)
 			regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
 
   mips_collect_register_32bit (regcache, use_64bit,
-			       find_regno ("fcsr"), regset[32].buf);
-  mips_collect_register_32bit (regcache, use_64bit, find_regno ("fir"),
+			       find_regno (regcache->tdesc, "fcsr"), regset[32].buf);
+  mips_collect_register_32bit (regcache, use_64bit,
+			       find_regno (regcache->tdesc, "fir"),
 			       regset[32].buf + 4);
 }
 
@@ -393,8 +420,8 @@ mips_store_fpregset (struct regcache *regcache, const void *buf)
   const union mips_register *regset = buf;
   int i, use_64bit, first_fp, big_endian;
 
-  use_64bit = (register_size (0) == 8);
-  first_fp = find_regno ("f0");
+  use_64bit = (register_size (regcache->tdesc, 0) == 8);
+  first_fp = find_regno (regcache->tdesc, "f0");
   big_endian = (__BYTE_ORDER == __BIG_ENDIAN);
 
   /* See GDB for a discussion of this peculiar layout.  */
@@ -406,13 +433,15 @@ mips_store_fpregset (struct regcache *regcache, const void *buf)
 		       regset[i & ~1].buf + 4 * (big_endian != (i & 1)));
 
   mips_supply_register_32bit (regcache, use_64bit,
-			      find_regno ("fcsr"), regset[32].buf);
-  mips_supply_register_32bit (regcache, use_64bit, find_regno ("fir"),
+			      find_regno (regcache->tdesc, "fcsr"),
+			      regset[32].buf);
+  mips_supply_register_32bit (regcache, use_64bit,
+			      find_regno (regcache->tdesc, "fir"),
 			      regset[32].buf + 4);
 }
 #endif /* HAVE_PTRACE_GETREGS */
 
-struct regset_info target_regsets[] = {
+static struct regset_info mips_regsets[] = {
 #ifdef HAVE_PTRACE_GETREGS
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, 38 * 8, GENERAL_REGS,
     mips_fill_gregset, mips_store_gregset },
@@ -422,11 +451,51 @@ struct regset_info target_regsets[] = {
   { 0, 0, 0, -1, -1, NULL, NULL }
 };
 
+static struct regsets_info mips_regsets_info =
+  {
+    mips_regsets, /* regsets */
+    0, /* num_regsets */
+    NULL, /* disabled_regsets */
+  };
+
+static struct usrregs_info mips_dsp_usrregs_info =
+  {
+    mips_dsp_num_regs,
+    mips_dsp_regmap,
+  };
+
+static struct usrregs_info mips_usrregs_info =
+  {
+    mips_num_regs,
+    mips_regmap,
+  };
+
+static struct regs_info dsp_regs_info =
+  {
+    mips_dsp_regset_bitmap,
+    &mips_dsp_usrregs_info,
+    &mips_regsets_info
+  };
+
+static struct regs_info regs_info =
+  {
+    NULL, /* regset_bitmap */
+    &mips_usrregs_info,
+    &mips_regsets_info
+  };
+
+static const struct regs_info *
+mips_regs_info (void)
+{
+  if (have_dsp)
+    return &dsp_regs_info;
+  else
+    return &regs_info;
+}
+
 struct linux_target_ops the_low_target = {
   mips_arch_setup,
-  -1,
-  NULL,
-  NULL,
+  mips_regs_info,
   mips_cannot_fetch_register,
   mips_cannot_store_register,
   NULL, /* fetch_register */
@@ -438,3 +507,15 @@ struct linux_target_ops the_low_target = {
   0,
   mips_breakpoint_at,
 };
+
+void
+initialize_low_arch (void)
+{
+  /* Initialize the Linux target descriptions.  */
+  init_registers_mips_linux ();
+  init_registers_mips_dsp_linux ();
+  init_registers_mips64_linux ();
+  init_registers_mips64_dsp_linux ();
+
+  initialize_regsets_info (&mips_regsets_info);
+}

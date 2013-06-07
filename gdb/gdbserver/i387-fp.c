@@ -20,8 +20,6 @@
 #include "i387-fp.h"
 #include "i386-xstate.h"
 
-int num_xmm_registers = 8;
-
 /* Note: These functions preserve the reserved bits in control registers.
    However, gdbserver promptly throws away that information.  */
 
@@ -117,7 +115,7 @@ i387_cache_to_fsave (struct regcache *regcache, void *buf)
 {
   struct i387_fsave *fp = (struct i387_fsave *) buf;
   int i;
-  int st0_regnum = find_regno ("st0");
+  int st0_regnum = find_regno (regcache->tdesc, "st0");
   unsigned long val, val2;
 
   for (i = 0; i < 8; i++)
@@ -157,7 +155,7 @@ i387_fsave_to_cache (struct regcache *regcache, const void *buf)
 {
   struct i387_fsave *fp = (struct i387_fsave *) buf;
   int i;
-  int st0_regnum = find_regno ("st0");
+  int st0_regnum = find_regno (regcache->tdesc, "st0");
   unsigned long val;
 
   for (i = 0; i < 8; i++)
@@ -193,9 +191,11 @@ i387_cache_to_fxsave (struct regcache *regcache, void *buf)
 {
   struct i387_fxsave *fp = (struct i387_fxsave *) buf;
   int i;
-  int st0_regnum = find_regno ("st0");
-  int xmm0_regnum = find_regno ("xmm0");
+  int st0_regnum = find_regno (regcache->tdesc, "st0");
+  int xmm0_regnum = find_regno (regcache->tdesc, "xmm0");
   unsigned long val, val2;
+  /* Amd64 has 16 xmm regs; I386 has 8 xmm regs.  */
+  int num_xmm_registers = register_size (regcache->tdesc, 0) == 8 ? 16 : 8;
 
   for (i = 0; i < 8; i++)
     collect_register (regcache, i + st0_regnum,
@@ -249,6 +249,8 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
   unsigned long long xstate_bv = 0;
   char raw[16];
   char *p;
+  /* Amd64 has 16 xmm regs; I386 has 8 xmm regs.  */
+  int num_xmm_registers = register_size (regcache->tdesc, 0) == 8 ? 16 : 8;
 
   /* The supported bits in `xstat_bv' are 1 byte.  Clear part in
      vector registers if its bit in xstat_bv is zero.  */
@@ -274,7 +276,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
   /* Check if any x87 registers are changed.  */
   if ((x86_xcr0 & I386_XSTATE_X87))
     {
-      int st0_regnum = find_regno ("st0");
+      int st0_regnum = find_regno (regcache->tdesc, "st0");
 
       for (i = 0; i < 8; i++)
 	{
@@ -291,7 +293,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
   /* Check if any SSE registers are changed.  */
   if ((x86_xcr0 & I386_XSTATE_SSE))
     {
-      int xmm0_regnum = find_regno ("xmm0");
+      int xmm0_regnum = find_regno (regcache->tdesc, "xmm0");
 
       for (i = 0; i < num_xmm_registers; i++) 
 	{
@@ -308,7 +310,7 @@ i387_cache_to_xsave (struct regcache *regcache, void *buf)
   /* Check if any AVX registers are changed.  */
   if ((x86_xcr0 & I386_XSTATE_AVX))
     {
-      int ymm0h_regnum = find_regno ("ymm0h");
+      int ymm0h_regnum = find_regno (regcache->tdesc, "ymm0h");
 
       for (i = 0; i < num_xmm_registers; i++) 
 	{
@@ -413,9 +415,11 @@ i387_fxsave_to_cache (struct regcache *regcache, const void *buf)
 {
   struct i387_fxsave *fp = (struct i387_fxsave *) buf;
   int i, top;
-  int st0_regnum = find_regno ("st0");
-  int xmm0_regnum = find_regno ("xmm0");
+  int st0_regnum = find_regno (regcache->tdesc, "st0");
+  int xmm0_regnum = find_regno (regcache->tdesc, "xmm0");
   unsigned long val;
+  /* Amd64 has 16 xmm regs; I386 has 8 xmm regs.  */
+  int num_xmm_registers = register_size (regcache->tdesc, 0) == 8 ? 16 : 8;
 
   for (i = 0; i < 8; i++)
     supply_register (regcache, i + st0_regnum,
@@ -468,6 +472,8 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
   unsigned long val;
   unsigned int clear_bv;
   gdb_byte *p;
+  /* Amd64 has 16 xmm regs; I386 has 8 xmm regs.  */
+  int num_xmm_registers = register_size (regcache->tdesc, 0) == 8 ? 16 : 8;
 
   /* The supported bits in `xstat_bv' are 1 byte.  Clear part in
      vector registers if its bit in xstat_bv is zero.  */
@@ -476,7 +482,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
   /* Check if any x87 registers are changed.  */
   if ((x86_xcr0 & I386_XSTATE_X87) != 0)
     {
-      int st0_regnum = find_regno ("st0");
+      int st0_regnum = find_regno (regcache->tdesc, "st0");
 
       if ((clear_bv & I386_XSTATE_X87) != 0)
 	{
@@ -493,7 +499,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 
   if ((x86_xcr0 & I386_XSTATE_SSE) != 0)
     {
-      int xmm0_regnum = find_regno ("xmm0");
+      int xmm0_regnum = find_regno (regcache->tdesc, "xmm0");
 
       if ((clear_bv & I386_XSTATE_SSE))
 	{
@@ -510,7 +516,7 @@ i387_xsave_to_cache (struct regcache *regcache, const void *buf)
 
   if ((x86_xcr0 & I386_XSTATE_AVX) != 0)
     {
-      int ymm0h_regnum = find_regno ("ymm0h");
+      int ymm0h_regnum = find_regno (regcache->tdesc, "ymm0h");
 
       if ((clear_bv & I386_XSTATE_AVX) != 0)
 	{

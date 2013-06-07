@@ -87,6 +87,8 @@ static int soft_interrupt_requested = 0;
    by suspending all the threads.  */
 static int faked_breakpoint = 0;
 
+const struct target_desc *win32_tdesc;
+
 #define NUM_REGS (the_low_target.num_regs)
 
 typedef BOOL WINAPI (*winapi_DebugActiveProcessStop) (DWORD dwProcessId);
@@ -193,9 +195,6 @@ child_add_thread (DWORD pid, DWORD tid, HANDLE h, void *tlb)
   th->thread_local_base = (CORE_ADDR) (uintptr_t) tlb;
 
   add_thread (ptid, th);
-  set_inferior_regcache_data ((struct thread_info *)
-			      find_inferior_id (&all_threads, ptid),
-			      new_register_cache ());
 
   if (the_low_target.thread_added != NULL)
     (*the_low_target.thread_added) (th);
@@ -308,6 +307,8 @@ child_init_thread_list (void)
 static void
 do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 {
+  struct process_info *proc;
+
   last_sig = GDB_SIGNAL_0;
 
   current_process_handle = proch;
@@ -319,7 +320,8 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 
   memset (&current_event, 0, sizeof (current_event));
 
-  add_process (pid, attached);
+  proc = add_process (pid, attached);
+  proc->tdesc = win32_tdesc;
   child_init_thread_list ();
 
   if (the_low_target.initial_stuff != NULL)

@@ -112,6 +112,7 @@ struct inferior_list_entry
 struct thread_info;
 struct process_info;
 struct regcache;
+struct target_desc;
 
 #include "regcache.h"
 #include "gdb/signals.h"
@@ -156,6 +157,8 @@ struct process_info
 
   /* The list of installed fast tracepoints.  */
   struct fast_tracepoint_jump *fast_tracepoint_jumps;
+
+  const struct target_desc *tdesc;
 
   /* Private target data.  */
   struct process_info_private *private;
@@ -431,6 +434,9 @@ void supply_static_tracepoint_registers (struct regcache *regcache,
 					 CORE_ADDR pc);
 void set_trampoline_buffer_space (CORE_ADDR begin, CORE_ADDR end,
 				  char *errmsg);
+
+extern const struct target_desc *ipa_tdesc;
+
 #else
 void stop_tracing (void);
 

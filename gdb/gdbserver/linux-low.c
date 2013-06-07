@@ -224,15 +224,6 @@ int using_threads = 1;
    jump pads).  */
 static int stabilizing_threads;
 
-/* This flag is true iff we've just created or attached to our first
-   inferior but it has not stopped yet.  As soon as it does, we need
-   to call the low target's arch_setup callback.  Doing this only on
-   the first inferior avoids reinializing the architecture on every
-   inferior, and avoids messing with the register caches of the
-   already running inferiors.  NOTE: this assumes all inferiors under
-   control of gdbserver have the same architecture.  */
-static int new_inferior;
-
 static void linux_resume_one_lwp (struct lwp_info *lwp,
 				  int step, int signal, siginfo_t *info);
 static void linux_resume (struct thread_resume *resume_info, size_t n);
@@ -292,11 +283,6 @@ struct pending_signals
   siginfo_t info;
   struct pending_signals *prev;
 };
-
-#ifdef HAVE_LINUX_REGSETS
-static char *disabled_regsets;
-static int num_regsets;
-#endif
 
 /* The read/write ends of the pipe registered as waitable file in the
    event loop.  */
@@ -379,12 +365,11 @@ linux_add_process (int pid, int attached)
 {
   struct process_info *proc;
 
-  /* Is this the first process?  If so, then set the arch.  */
-  if (all_processes.head == NULL)
-    new_inferior = 1;
-
   proc = add_process (pid, attached);
   proc->private = xcalloc (1, sizeof (*proc->private));
+
+  /* Set the arch when the first LWP stops.  */
+  proc->private->new_inferior = 1;
 
   if (the_low_target.new_process != NULL)
     proc->private->arch_private = the_low_target.new_process ();
@@ -1203,8 +1188,7 @@ linux_detach_one_lwp (struct inferior_list_entry *entry, void *args)
     }
 
   /* Flush any pending changes to the process's registers.  */
-  regcache_invalidate_one ((struct inferior_list_entry *)
-			   get_lwp_thread (lwp));
+  regcache_invalidate_thread (get_lwp_thread (lwp));
 
   /* Pass on any pending signal for this thread.  */
   sig = get_detach_signal (thread);
@@ -1412,17 +1396,28 @@ retry:
 
   child->last_status = *wstatp;
 
-  /* Architecture-specific setup after inferior is running.
-     This needs to happen after we have attached to the inferior
-     and it is stopped for the first time, but before we access
-     any inferior registers.  */
-  if (new_inferior)
+  if (WIFSTOPPED (*wstatp))
     {
-      the_low_target.arch_setup ();
-#ifdef HAVE_LINUX_REGSETS
-      memset (disabled_regsets, 0, num_regsets);
-#endif
-      new_inferior = 0;
+      struct process_info *proc;
+
+      /* Architecture-specific setup after inferior is running.  This
+	 needs to happen after we have attached to the inferior and it
+	 is stopped for the first time, but before we access any
+	 inferior registers.  */
+      proc = find_process_pid (pid_of (child));
+      if (proc->private->new_inferior)
+	{
+	  struct thread_info *saved_inferior;
+
+	  saved_inferior = current_inferior;
+	  current_inferior = get_lwp_thread (child);
+
+	  the_low_target.arch_setup ();
+
+	  current_inferior = saved_inferior;
+
+	  proc->private->new_inferior = 0;
+	}
     }
 
   /* Fetch the possibly triggered data watchpoint info and store it in
@@ -3348,8 +3343,7 @@ lwp %ld wants to get out of fast tracepoint jump pad single-stepping\n",
   if (the_low_target.prepare_to_resume != NULL)
     the_low_target.prepare_to_resume (lwp);
 
-  regcache_invalidate_one ((struct inferior_list_entry *)
-			   get_lwp_thread (lwp));
+  regcache_invalidate_thread (get_lwp_thread (lwp));
   errno = 0;
   lwp->stopped = 0;
   lwp->stopped_by_watchpoint = 0;
@@ -4058,14 +4052,15 @@ unstop_all_lwps (int unsuspend, struct lwp_info *except)
 #define use_linux_regsets 1
 
 static int
-regsets_fetch_inferior_registers (struct regcache *regcache)
+regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
+				  struct regcache *regcache)
 {
   struct regset_info *regset;
   int saw_general_regs = 0;
   int pid;
   struct iovec iov;
 
-  regset = target_regsets;
+  regset = regsets_info->regsets;
 
   pid = lwpid_of (get_thread_lwp (current_inferior));
   while (regset->size >= 0)
@@ -4073,7 +4068,8 @@ regsets_fetch_inferior_registers (struct regcache *regcache)
       void *buf, *data;
       int nt_type, res;
 
-      if (regset->size == 0 || disabled_regsets[regset - target_regsets])
+      if (regset->size == 0
+	  || regsets_info->disabled_regsets[regset - regsets_info->regsets])
 	{
 	  regset ++;
 	  continue;
@@ -4101,9 +4097,12 @@ regsets_fetch_inferior_registers (struct regcache *regcache)
 	{
 	  if (errno == EIO)
 	    {
+	      int dr_offset;
+
 	      /* If we get EIO on a regset, do not try it again for
-		 this process.  */
-	      disabled_regsets[regset - target_regsets] = 1;
+		 this process mode.  */
+	      dr_offset = regset - regsets_info->regsets;
+	      regsets_info->disabled_regsets[dr_offset] = 1;
 	      free (buf);
 	      continue;
 	    }
@@ -4128,14 +4127,15 @@ regsets_fetch_inferior_registers (struct regcache *regcache)
 }
 
 static int
-regsets_store_inferior_registers (struct regcache *regcache)
+regsets_store_inferior_registers (struct regsets_info *regsets_info,
+				  struct regcache *regcache)
 {
   struct regset_info *regset;
   int saw_general_regs = 0;
   int pid;
   struct iovec iov;
 
-  regset = target_regsets;
+  regset = regsets_info->regsets;
 
   pid = lwpid_of (get_thread_lwp (current_inferior));
   while (regset->size >= 0)
@@ -4143,7 +4143,8 @@ regsets_store_inferior_registers (struct regcache *regcache)
       void *buf, *data;
       int nt_type, res;
 
-      if (regset->size == 0 || disabled_regsets[regset - target_regsets])
+      if (regset->size == 0
+	  || regsets_info->disabled_regsets[regset - regsets_info->regsets])
 	{
 	  regset ++;
 	  continue;
@@ -4190,9 +4191,12 @@ regsets_store_inferior_registers (struct regcache *regcache)
 	{
 	  if (errno == EIO)
 	    {
+	      int dr_offset;
+
 	      /* If we get EIO on a regset, do not try it again for
-		 this process.  */
-	      disabled_regsets[regset - target_regsets] = 1;
+		 this process mode.  */
+	      dr_offset = regset - regsets_info->regsets;
+	      regsets_info->disabled_regsets[dr_offset] = 1;
 	      free (buf);
 	      continue;
 	    }
@@ -4224,8 +4228,8 @@ regsets_store_inferior_registers (struct regcache *regcache)
 #else /* !HAVE_LINUX_REGSETS */
 
 #define use_linux_regsets 0
-#define regsets_fetch_inferior_registers(regcache) 1
-#define regsets_store_inferior_registers(regcache) 1
+#define regsets_fetch_inferior_registers(regsets_info, regcache) 1
+#define regsets_store_inferior_registers(regsets_info, regcache) 1
 
 #endif
 
@@ -4233,50 +4237,52 @@ regsets_store_inferior_registers (struct regcache *regcache)
    calls or 0 if it has to be transferred individually.  */
 
 static int
-linux_register_in_regsets (int regno)
+linux_register_in_regsets (const struct regs_info *regs_info, int regno)
 {
   unsigned char mask = 1 << (regno % 8);
   size_t index = regno / 8;
 
   return (use_linux_regsets
-	  && (the_low_target.regset_bitmap == NULL
-	      || (the_low_target.regset_bitmap[index] & mask) != 0));
+	  && (regs_info->regset_bitmap == NULL
+	      || (regs_info->regset_bitmap[index] & mask) != 0));
 }
 
 #ifdef HAVE_LINUX_USRREGS
 
 int
-register_addr (int regnum)
+register_addr (const struct usrregs_info *usrregs, int regnum)
 {
   int addr;
 
-  if (regnum < 0 || regnum >= the_low_target.num_regs)
+  if (regnum < 0 || regnum >= usrregs->num_regs)
     error ("Invalid register number %d.", regnum);
 
-  addr = the_low_target.regmap[regnum];
+  addr = usrregs->regmap[regnum];
 
   return addr;
 }
 
 /* Fetch one register.  */
 static void
-fetch_register (struct regcache *regcache, int regno)
+fetch_register (const struct usrregs_info *usrregs,
+		struct regcache *regcache, int regno)
 {
   CORE_ADDR regaddr;
   int i, size;
   char *buf;
   int pid;
 
-  if (regno >= the_low_target.num_regs)
+  if (regno >= usrregs->num_regs)
     return;
   if ((*the_low_target.cannot_fetch_register) (regno))
     return;
 
-  regaddr = register_addr (regno);
+  regaddr = register_addr (usrregs, regno);
   if (regaddr == -1)
     return;
 
-  size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+  size = ((register_size (regcache->tdesc, regno)
+	   + sizeof (PTRACE_XFER_TYPE) - 1)
 	  & -sizeof (PTRACE_XFER_TYPE));
   buf = alloca (size);
 
@@ -4302,23 +4308,25 @@ fetch_register (struct regcache *regcache, int regno)
 
 /* Store one register.  */
 static void
-store_register (struct regcache *regcache, int regno)
+store_register (const struct usrregs_info *usrregs,
+		struct regcache *regcache, int regno)
 {
   CORE_ADDR regaddr;
   int i, size;
   char *buf;
   int pid;
 
-  if (regno >= the_low_target.num_regs)
+  if (regno >= usrregs->num_regs)
     return;
   if ((*the_low_target.cannot_store_register) (regno))
     return;
 
-  regaddr = register_addr (regno);
+  regaddr = register_addr (usrregs, regno);
   if (regaddr == -1)
     return;
 
-  size = ((register_size (regno) + sizeof (PTRACE_XFER_TYPE) - 1)
+  size = ((register_size (regcache->tdesc, regno)
+	   + sizeof (PTRACE_XFER_TYPE) - 1)
 	  & -sizeof (PTRACE_XFER_TYPE));
   buf = alloca (size);
   memset (buf, 0, size);
@@ -4359,16 +4367,19 @@ store_register (struct regcache *regcache, int regno)
    unless ALL is non-zero.
    Otherwise, REGNO specifies which register (so we can save time).  */
 static void
-usr_fetch_inferior_registers (struct regcache *regcache, int regno, int all)
+usr_fetch_inferior_registers (const struct regs_info *regs_info,
+			      struct regcache *regcache, int regno, int all)
 {
+  struct usrregs_info *usr = regs_info->usrregs;
+
   if (regno == -1)
     {
-      for (regno = 0; regno < the_low_target.num_regs; regno++)
-	if (all || !linux_register_in_regsets (regno))
-	  fetch_register (regcache, regno);
+      for (regno = 0; regno < usr->num_regs; regno++)
+	if (all || !linux_register_in_regsets (regs_info, regno))
+	  fetch_register (usr, regcache, regno);
     }
   else
-    fetch_register (regcache, regno);
+    fetch_register (usr, regcache, regno);
 }
 
 /* Store our register values back into the inferior.
@@ -4377,22 +4388,25 @@ usr_fetch_inferior_registers (struct regcache *regcache, int regno, int all)
    unless ALL is non-zero.
    Otherwise, REGNO specifies which register (so we can save time).  */
 static void
-usr_store_inferior_registers (struct regcache *regcache, int regno, int all)
+usr_store_inferior_registers (const struct regs_info *regs_info,
+			      struct regcache *regcache, int regno, int all)
 {
+  struct usrregs_info *usr = regs_info->usrregs;
+
   if (regno == -1)
     {
-      for (regno = 0; regno < the_low_target.num_regs; regno++)
-	if (all || !linux_register_in_regsets (regno))
-	  store_register (regcache, regno);
+      for (regno = 0; regno < usr->num_regs; regno++)
+	if (all || !linux_register_in_regsets (regs_info, regno))
+	  store_register (usr, regcache, regno);
     }
   else
-    store_register (regcache, regno);
+    store_register (usr, regcache, regno);
 }
 
 #else /* !HAVE_LINUX_USRREGS */
 
-#define usr_fetch_inferior_registers(regcache, regno, all) do {} while (0)
-#define usr_store_inferior_registers(regcache, regno, all) do {} while (0)
+#define usr_fetch_inferior_registers(regs_info, regcache, regno, all) do {} while (0)
+#define usr_store_inferior_registers(regs_info, regcache, regno, all) do {} while (0)
 
 #endif
 
@@ -4402,15 +4416,18 @@ linux_fetch_registers (struct regcache *regcache, int regno)
 {
   int use_regsets;
   int all = 0;
+  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
 
   if (regno == -1)
     {
-      if (the_low_target.fetch_register != NULL)
-	for (regno = 0; regno < the_low_target.num_regs; regno++)
+      if (the_low_target.fetch_register != NULL
+	  && regs_info->usrregs != NULL)
+	for (regno = 0; regno < regs_info->usrregs->num_regs; regno++)
 	  (*the_low_target.fetch_register) (regcache, regno);
 
-      all = regsets_fetch_inferior_registers (regcache);
-      usr_fetch_inferior_registers (regcache, -1, all);
+      all = regsets_fetch_inferior_registers (regs_info->regsets_info, regcache);
+      if (regs_info->usrregs != NULL)
+	usr_fetch_inferior_registers (regs_info, regcache, -1, all);
     }
   else
     {
@@ -4418,11 +4435,12 @@ linux_fetch_registers (struct regcache *regcache, int regno)
 	  && (*the_low_target.fetch_register) (regcache, regno))
 	return;
 
-      use_regsets = linux_register_in_regsets (regno);
+      use_regsets = linux_register_in_regsets (regs_info, regno);
       if (use_regsets)
-	all = regsets_fetch_inferior_registers (regcache);
-      if (!use_regsets || all)
-	usr_fetch_inferior_registers (regcache, regno, 1);
+	all = regsets_fetch_inferior_registers (regs_info->regsets_info,
+						regcache);
+      if ((!use_regsets || all) && regs_info->usrregs != NULL)
+	usr_fetch_inferior_registers (regs_info, regcache, regno, 1);
     }
 }
 
@@ -4431,19 +4449,23 @@ linux_store_registers (struct regcache *regcache, int regno)
 {
   int use_regsets;
   int all = 0;
+  const struct regs_info *regs_info = (*the_low_target.regs_info) ();
 
   if (regno == -1)
     {
-      all = regsets_store_inferior_registers (regcache);
-      usr_store_inferior_registers (regcache, regno, all);
+      all = regsets_store_inferior_registers (regs_info->regsets_info,
+					      regcache);
+      if (regs_info->usrregs != NULL)
+	usr_store_inferior_registers (regs_info, regcache, regno, all);
     }
   else
     {
-      use_regsets = linux_register_in_regsets (regno);
+      use_regsets = linux_register_in_regsets (regs_info, regno);
       if (use_regsets)
-	all = regsets_store_inferior_registers (regcache);
-      if (!use_regsets || all)
-	usr_store_inferior_registers (regcache, regno, 1);
+	all = regsets_store_inferior_registers (regs_info->regsets_info,
+						regcache);
+      if ((!use_regsets || all) && regs_info->usrregs != NULL)
+	usr_store_inferior_registers (regs_info, regcache, regno, 1);
     }
 }
 
@@ -5906,8 +5928,14 @@ linux_low_enable_btrace (ptid_t ptid)
   struct btrace_target_info *tinfo;
 
   tinfo = linux_enable_btrace (ptid);
+
   if (tinfo != NULL)
-    tinfo->ptr_bits = register_size (0) * 8;
+    {
+      struct thread_info *thread = find_thread_ptid (ptid);
+      struct regcache *regcache = get_thread_regcache (thread, 0);
+
+      tinfo->ptr_bits = register_size (regcache->tdesc, 0) * 8;
+    }
 
   return tinfo;
 }
@@ -6027,6 +6055,18 @@ linux_init_signals ()
 #endif
 }
 
+#ifdef HAVE_LINUX_REGSETS
+void
+initialize_regsets_info (struct regsets_info *info)
+{
+  for (info->num_regsets = 0;
+       info->regsets[info->num_regsets].size >= 0;
+       info->num_regsets++)
+    ;
+  info->disabled_regsets = xmalloc (info->num_regsets);
+}
+#endif
+
 void
 initialize_low (void)
 {
@@ -6038,14 +6078,11 @@ initialize_low (void)
   linux_init_signals ();
   linux_test_for_tracefork ();
   linux_ptrace_init_warnings ();
-#ifdef HAVE_LINUX_REGSETS
-  for (num_regsets = 0; target_regsets[num_regsets].size >= 0; num_regsets++)
-    ;
-  disabled_regsets = xmalloc (num_regsets);
-#endif
 
   sigchld_action.sa_handler = sigchld_handler;
   sigemptyset (&sigchld_action.sa_mask);
   sigchld_action.sa_flags = SA_RESTART;
   sigaction (SIGCHLD, &sigchld_action, NULL);
+
+  initialize_low_arch ();
 }

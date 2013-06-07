@@ -102,7 +102,6 @@ add_thread (ptid_t thread_id, void *target_data)
     current_inferior = new_thread;
 
   new_thread->target_data = target_data;
-  set_inferior_regcache_data (new_thread, new_register_cache ());
 }
 
 ptid_t

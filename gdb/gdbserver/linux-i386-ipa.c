@@ -49,6 +49,7 @@ enum i386_gdb_regnum
 
 /* Defined in auto-generated file i386-linux.c.  */
 void init_registers_i386_linux (void);
+extern const struct target_desc *tdesc_i386_linux;
 
 #define FT_CR_EAX 15
 #define FT_CR_ECX 14
@@ -250,5 +251,6 @@ void
 initialize_low_tracepoint (void)
 {
   init_registers_i386_linux ();
+  ipa_tdesc = tdesc_i386_linux;
   initialize_fast_tracepoint_trampoline_buffer ();
 }

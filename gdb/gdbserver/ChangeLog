@@ -1,3 +1,355 @@
+2013-06-07  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (OBS): Add tdesc.o.
+	(IPA_OBJS): Add tdesc-ipa.o.
+	(tdesc-ipa.o): New rule.
+	* ax.c (gdb_eval_agent_expr): Adjust register_size call to new
+	interface.
+	* linux-low.c (new_inferior): Delete.
+	(disabled_regsets, num_regsets): Delete.
+	(linux_add_process): Adjust to set the new per-process
+	new_inferior flag.
+	(linux_detach_one_lwp): Adjust to call regcache_invalidate_thread.
+	(linux_wait_for_lwp): Adjust.  Only call arch_setup if the event
+	was a stop.  When calling arch_setup, switch the current inferior
+	to the thread that got an event.
+	(linux_resume_one_lwp): Adjust to call regcache_invalidate_thread.
+	(regsets_fetch_inferior_registers)
+	(regsets_store_inferior_registers): New regsets_info parameter.
+	Adjust to use it.
+	(linux_register_in_regsets): New regs_info parameter.  Adjust to
+	use it.
+	(register_addr, fetch_register, store_register): New usrregs_info
+	parameter.  Adjust to use it.
+	(usr_fetch_inferior_registers, usr_store_inferior_registers): New
+	parameter regs_info.  Adjust to use it.
+	(linux_fetch_registers): Get the current inferior's regs_info, and
+	adjust to use it.
+	(linux_store_registers): Ditto.
+	[HAVE_LINUX_REGSETS] (initialize_regsets_info): New.
+	(initialize_low): Don't initialize the target_regsets here.  Call
+	initialize_low_arch.
+	* linux-low.h (target_regsets): Delete declaration.
+	(struct regsets_info): New.
+	(struct usrregs_info): New.
+	(struct regs_info): New.
+	(struct process_info_private) <new_inferior>: New field.
+	(struct linux_target_ops): Delete the num_regs, regmap, and
+	regset_bitmap fields.  New field regs_info.
+	[HAVE_LINUX_REGSETS] (initialize_regsets_info): Declare.
+	* i387-fp.c (num_xmm_registers): Delete.
+	(i387_cache_to_fsave, i387_fsave_to_cache): Adjust find_regno
+	calls to new interface.
+	(i387_cache_to_fxsave, i387_cache_to_xsave, i387_fxsave_to_cache)
+	(i387_xsave_to_cache): Adjust find_regno calls to new interface.
+	Infer the number of xmm registers from the regcache's target
+	description.
+	* i387-fp.h (num_xmm_registers): Delete.
+	* inferiors.c (add_thread): Don't install the thread's regcache
+	here.
+	* proc-service.c (gregset_info): Fetch the current inferior's
+	regs_info.  Adjust to use it.
+	* regcache.c: Include tdesc.h.
+	(register_bytes, reg_defs, num_registers)
+	(gdbserver_expedite_regs): Delete.
+	(get_thread_regcache): If the thread doesn't have a regcache yet,
+	create one, instead of aborting gdbserver.
+	(regcache_invalidate_one): Rename to ...
+	(regcache_invalidate_thread): ... this.
+	(regcache_invalidate_one): New.
+	(regcache_invalidate): Only invalidate registers of the current
+	process.
+	(init_register_cache): Add target_desc parameter, and use it.
+	(new_register_cache): Ditto.  Assert the target description has a
+	non zero registers_size.
+	(regcache_cpy): Add assertions.  Adjust.
+	(realloc_register_cache, set_register_cache): Delete.
+	(registers_to_string, registers_from_string): Adjust.
+	(find_register_by_name, find_regno, find_register_by_number)
+	(register_cache_size): Add target_desc parameter, and use it.
+	(free_register_cache_thread, free_register_cache_thread_one)
+	(regcache_release, register_cache_size): New.
+	(register_size): Add target_desc parameter, and use it.
+	(register_data, supply_register, supply_register_zeroed)
+	(supply_regblock, supply_register_by_name, collect_register)
+	(collect_register_as_string, collect_register_by_name): Adjust.
+	* regcache.h (struct target_desc): Forward declare.
+	(struct regcache) <tdesc>: New field.
+	(init_register_cache, new_register_cache): Add target_desc
+	parameter.
+	(regcache_invalidate_thread): Declare.
+	(regcache_invalidate_one): Delete declaration.
+	(regcache_release): Declare.
+	(find_register_by_number, register_cache_size, register_size)
+	(find_regno): Add target_desc parameter.
+	(gdbserver_expedite_regs, gdbserver_xmltarget): Delete
+	declarations.
+	* remote-utils.c: Include tdesc.h.
+	(outreg, prepare_resume_reply): Adjust.
+	* server.c: Include tdesc.h.
+	(gdbserver_xmltarget): Delete declaration.
+	(get_features_xml, process_serial_event): Adjust.
+	* server.h [IN_PROCESS_AGENT] (struct target_desc): Forward
+	declare.
+	(struct process_info) <tdesc>: New field.
+	(ipa_tdesc): Declare.
+	* tdesc.c: New file.
+	* tdesc.h: New file.
+	* tracepoint.c: Include tdesc.h.
+	[IN_PROCESS_AGENT] (ipa_tdesc): Define.
+	(get_context_regcache): Adjust to pass ipa_tdesc down.
+	(do_action_at_tracepoint): Adjust to get the register cache size
+	from the context regcache's description.
+	(traceframe_walk_blocks): Adjust to get the register cache size
+	from the current trace frame's description.
+	(traceframe_get_pc): Adjust to get current trace frame's
+	description and pass it down.
+	(gdb_collect): Adjust to get the register cache size from the
+	IPA's description.
+	* linux-amd64-ipa.c (tdesc_amd64_linux): Declare.
+	(gdbserver_xmltarget): Delete.
+	(initialize_low_tracepoint): Set the ipa's target description.
+	* linux-i386-ipa.c (tdesc_i386_linux): Declare.
+	(initialize_low_tracepoint): Set the ipa's target description.
+	* linux-x86-low.c: Include tdesc.h.
+	[__x86_64__] (is_64bit_tdesc): New.
+	(ps_get_thread_area, x86_get_thread_area): Use it.
+	(i386_cannot_store_register): Rename to ...
+	(x86_cannot_store_register): ... this.  Use is_64bit_tdesc.
+	(i386_cannot_fetch_register): Rename to ...
+	(x86_cannot_fetch_register): ... this.  Use is_64bit_tdesc.
+	(x86_fill_gregset, x86_store_gregset): Adjust register_size calls
+	to new interface.
+	(target_regsets): Rename to ...
+	(x86_regsets): ... this.
+	(x86_get_pc, x86_set_pc): Adjust register_size calls to new
+	interface.
+	(x86_siginfo_fixup): Use is_64bit_tdesc.
+	[__x86_64__] (tdesc_amd64_linux, tdesc_amd64_avx_linux)
+	(tdesc_x32_avx_linux, tdesc_x32_linux)
+	(tdesc_i386_linux, tdesc_i386_mmx_linux, tdesc_i386_avx_linux):
+	Declare.
+	(x86_linux_update_xmltarget): Delete.
+	(I386_LINUX_XSAVE_XCR0_OFFSET): Define.
+	(have_ptrace_getfpxregs, have_ptrace_getregset): New.
+	(AMD64_LINUX_USER64_CS): New.
+	(x86_linux_read_description): New, based on
+	x86_linux_update_xmltarget.
+	(same_process_callback): New.
+	(x86_arch_setup_process_callback): New.
+	(x86_linux_update_xmltarget): New.
+	(x86_regsets_info): New.
+	(amd64_linux_regs_info): New.
+	(i386_linux_usrregs_info): New.
+	(i386_linux_regs_info): New.
+	(x86_linux_regs_info): New.
+	(x86_arch_setup): Reimplement.
+	(x86_install_fast_tracepoint_jump_pad): Use is_64bit_tdesc.
+	(x86_emit_ops): Ditto.
+	(the_low_target): Adjust.  Install x86_linux_regs_info,
+	x86_cannot_fetch_register, and x86_cannot_store_register.
+	(initialize_low_arch): New.
+	* linux-ia64-low.c (tdesc_ia64): Declare.
+	(ia64_fetch_register): Adjust.
+	(ia64_usrregs_info, regs_info): New globals.
+	(ia64_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-sparc-low.c (tdesc_sparc64): Declare.
+	(sparc_fill_gregset_to_stack, sparc_store_gregset_from_stack):
+	Adjust.
+	(sparc_arch_setup): New function.
+	(sparc_regsets_info, sparc_usrregs_info, regs_info): New globals.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-ppc-low.c (tdesc_powerpc_32l, tdesc_powerpc_altivec32l)
+	(tdesc_powerpc_cell32l, tdesc_powerpc_vsx32l)
+	(tdesc_powerpc_isa205_32l, tdesc_powerpc_isa205_altivec32l)
+	(tdesc_powerpc_isa205_vsx32l, tdesc_powerpc_e500l)
+	(tdesc_powerpc_64l, tdesc_powerpc_altivec64l)
+	(tdesc_powerpc_cell64l, tdesc_powerpc_vsx64l)
+	(tdesc_powerpc_isa205_64l, tdesc_powerpc_isa205_altivec64l)
+	(tdesc_powerpc_isa205_vsx64l): Declare.
+	(ppc_cannot_store_register, ppc_collect_ptrace_register)
+	(ppc_supply_ptrace_register, parse_spufs_run, ppc_get_pc)
+	(ppc_set_pc, ppc_get_hwcap): Adjust.
+	(ppc_usrregs_info): Forward declare.
+	(!__powerpc64__) ppc_regmap_adjusted: New global.
+	(ppc_arch_setup): Adjust to the current process'es target
+	description.
+	(ppc_fill_vsxregset, ppc_store_vsxregset, ppc_fill_vrregset)
+	(ppc_store_vrregset, ppc_fill_evrregset, ppc_store_evrregse)
+	(ppc_store_evrregset): Adjust.
+	(target_regsets): Rename to ...
+	(ppc_regsets): ... this, and make static.
+	(ppc_usrregs_info, ppc_regsets_info, regs_info): New globals.
+	(ppc_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-s390-low.c (tdesc_s390_linux32, tdesc_s390_linux32v1)
+	(tdesc_s390_linux32v2, tdesc_s390_linux64, tdesc_s390_linux64v1)
+	(tdesc_s390_linux64v2, tdesc_s390x_linux64, tdesc_s390x_linux64v1)
+	(tdesc_s390x_linux64v2): Declare.
+	(s390_collect_ptrace_register, s390_supply_ptrace_register)
+	(s390_fill_gregset, s390_store_last_break): Adjust.
+	(target_regsets): Rename to ...
+	(s390_regsets): ... this, and make static.
+	(s390_get_pc, s390_set_pc): Adjust.
+	(s390_get_hwcap): New target_desc parameter, and use it.
+	[__s390x__] (have_hwcap_s390_high_gprs): New global.
+	(s390_arch_setup): Adjust to set the current process'es target
+	description.  Don't adjust the regmap.
+	(s390_usrregs_info, s390_regsets_info, regs_info): New globals.
+	[__s390x__] (s390_usrregs_info_3264, s390_regsets_info_3264)
+	(regs_info_3264): New globals.
+	(s390_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-mips-low.c (tdesc_mips_linux, tdesc_mips_dsp_linux)
+	(tdesc_mips64_linux, tdesc_mips64_dsp_linux): Declare.
+	[__mips64] (init_registers_mips_linux)
+	(init_registers_mips_dsp_linux): Delete defines.
+	[__mips64] (tdesc_mips_linux, tdesc_mips_dsp_linux): New defines.
+	(have_dsp): New global.
+	(mips_read_description): New, based on mips_arch_setup.
+	(mips_arch_setup): Reimplement.
+	(get_usrregs_info): New function.
+	(mips_cannot_fetch_register, mips_cannot_store_register)
+	(mips_get_pc, mips_set_pc, mips_fill_gregset, mips_store_gregset)
+	(mips_fill_fpregset, mips_store_fpregset): Adjust.
+	(target_regsets): Rename to ...
+	(mips_regsets): ... this, and make static.
+	(mips_regsets_info, mips_dsp_usrregs_info, mips_usrregs_info)
+	(dsp_regs_info, regs_info): New globals.
+	(mips_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-arm-low.c (tdesc_arm, tdesc_arm_with_iwmmxt)
+	(tdesc_arm_with_vfpv2, tdesc_arm_with_vfpv3, tdesc_arm_with_neon):
+	Declare.
+	(arm_fill_vfpregset, arm_store_vfpregset): Adjust.
+	(arm_read_description): New, with bits factored from
+	arm_arch_setup.
+	(arm_arch_setup): Reimplement.
+	(target_regsets): Rename to ...
+	(arm_regsets): ... this, and make static.
+	(arm_regsets_info, arm_usrregs_info, regs_info): New globals.
+	(arm_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-m68k-low.c (tdesc_m68k): Declare.
+	(target_regsets): Rename to ...
+	(m68k_regsets): ... this, and make static.
+	(m68k_regsets_info, m68k_usrregs_info, regs_info): New globals.
+	(m68k_regs_info): New function.
+	(m68k_arch_setup): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-sh-low.c (tdesc_sharch): Declare.
+	(target_regsets): Rename to ...
+	(sh_regsets): ... this, and make static.
+	(sh_regsets_info, sh_usrregs_info, regs_info): New globals.
+	(sh_regs_info, sh_arch_setup): New functions.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-bfin-low.c (tdesc_bfin): Declare.
+	(bfin_arch_setup): New function.
+	(bfin_usrregs_info, regs_info): New globals.
+	(bfin_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-cris-low.c (tdesc_cris): Declare.
+	(cris_arch_setup): New function.
+	(cris_usrregs_info, regs_info): New globals.
+	(cris_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-cris-low.c (tdesc_crisv32): Declare.
+	(cris_arch_setup): New function.
+	(cris_regsets_info, cris_usrregs_info, regs_info): New globals.
+	(cris_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-m32r-low.c (tdesc_m32r): Declare.
+	(m32r_arch_setup): New function.
+	(m32r_usrregs_info, regs_info): New globals.
+	(m32r_regs_info): Adjust.
+	(initialize_low_arch): New function.
+	* linux-tic6x-low.c (tdesc_tic6x_c64xp_linux)
+	(tdesc_tic6x_c64x_linux, tdesc_tic6x_c62x_linux): Declare.
+	(tic6x_usrregs_info): Forward declare.
+	(tic6x_read_description): New function, based on ...
+	(tic6x_arch_setup): ... this.  Reimplement.
+	(target_regsets): Rename to ...
+	(tic6x_regsets): ... this, and make static.
+	(tic6x_regsets_info, tic6x_usrregs_info, regs_info): New globals.
+	(tic6x_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-xtensa-low.c (tdesc_xtensa): Declare.
+	(xtensa_fill_gregset, xtensa_store_gregset): Adjust.
+	(target_regsets): Rename to ...
+	(xtensa_regsets): ... this, and make static.
+	(xtensa_regsets_info, xtensa_usrregs_info, regs_info): New
+	globals.
+	(xtensa_arch_setup, xtensa_regs_info): New functions.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* linux-nios2-low.c (tdesc_nios2_linux): Declare.
+	(nios2_arch_setup): Set the current process'es tdesc.
+	(target_regsets): Rename to ...
+	(nios2_regsets): ... this.
+	(nios2_regsets_info, nios2_usrregs_info, regs_info): New globals.
+	(nios2_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+        * linux-aarch64-low.c (tdesc_aarch64): Declare.
+        (aarch64_arch_setup): Set the current process'es tdesc.
+        (target_regsets): Rename to ...
+        (aarch64_regsets): ... this.
+        (aarch64_regsets_info, aarch64_usrregs_info, regs_info): New globals.
+        (aarch64_regs_info): New function.
+        (the_low_target): Adjust.
+        (initialize_low_arch): New function.
+	* linux-tile-low.c (tdesc_tilegx, tdesc_tilegx32): Declare
+	globals.
+	(target_regsets): Rename to ...
+	(tile_regsets): ... this.
+	(tile_regsets_info, tile_usrregs_info, regs_info): New globals.
+	(tile_regs_info): New function.
+	(tile_arch_setup): Set the current process'es tdesc.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
+	* spu-low.c (tdesc_spu): Declare.
+	(spu_create_inferior, spu_attach): Set the new process'es tdesc.
+	* win32-arm-low.c (tdesc_arm): Declare.
+	(arm_arch_setup): New function.
+	(the_low_target): Install arm_arch_setup instead of
+	init_registers_arm.
+	* win32-i386-low.c (tdesc_i386, tdesc_amd64): Declare.
+	(init_windows_x86): Rename to ...
+	(i386_arch_setup): ... this.  Set `win32_tdesc'.
+	(the_low_target): Adjust.
+	* win32-low.c (win32_tdesc): New global.
+	(child_add_thread): Don't create the thread cache here.
+	(do_initial_child_stuff): Set the new process'es tdesc.
+	* win32-low.h (struct target_desc): Forward declare.
+	(win32_tdesc): Declare.
+	* lynx-i386-low.c (tdesc_i386): Declare global.
+	(lynx_i386_arch_setup): Set `lynx_tdesc'.
+	* lynx-low.c (lynx_tdesc): New global.
+	(lynx_add_process): Set the new process'es tdesc.
+	* lynx-low.h (struct target_desc): Forward declare.
+	(lynx_tdesc): Declare global.
+	* lynx-ppc-low.c (tdesc_powerpc_32): Declare global.
+	(lynx_ppc_arch_setup): Set `lynx_tdesc'.
+	* nto-low.c (nto_tdesc): New global.
+	(do_attach): Set the new process'es tdesc.
+	* nto-low.h (struct target_desc): Forward declare.
+	(nto_tdesc): Declare.
+	* nto-x86-low.c (tdesc_i386): Declare.
+	(nto_x86_arch_setup): Set `nto_tdesc'.
+
 2013-06-04  Gary Benson  <gbenson@redhat.com>
 
 	* server.c (handle_query): Add "augmented-libraries-svr4-read+"

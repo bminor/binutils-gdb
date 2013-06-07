@@ -22,6 +22,7 @@
 
 /* Defined in auto-generated file amd64-linux.c.  */
 void init_registers_amd64_linux (void);
+extern const struct target_desc *tdesc_amd64_linux;
 
 /* fast tracepoints collect registers.  */
 
@@ -164,12 +165,9 @@ supply_static_tracepoint_registers (struct regcache *regcache,
 
 #endif /* HAVE_UST */
 
-/* This is only needed because reg-i386-linux-lib.o references it.  We
-   may use it proper at some point.  */
-const char *gdbserver_xmltarget;
-
 void
 initialize_low_tracepoint (void)
 {
   init_registers_amd64_linux ();
+  ipa_tdesc = tdesc_amd64_linux;
 }

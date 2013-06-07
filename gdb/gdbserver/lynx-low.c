@@ -30,6 +30,8 @@
 
 int using_threads = 1;
 
+const struct target_desc *lynx_tdesc;
+
 /* Per-process private data.  */
 
 struct process_info_private
@@ -214,6 +216,7 @@ lynx_add_process (int pid, int attached)
   struct process_info *proc;
 
   proc = add_process (pid, attached);
+  proc->tdesc = lynx_tdesc;
   proc->private = xcalloc (1, sizeof (*proc->private));
   proc->private->last_wait_event_ptid = null_ptid;
 
