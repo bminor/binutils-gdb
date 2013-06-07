@@ -1,5 +1,9 @@
 2013-06-07  Will Newton  <will.newton@linaro.org>
 
+	* gdb.base/long_long.exp: Fix ARM EABI target glob.
+
+2013-06-07  Will Newton  <will.newton@linaro.org>
+
 	* gdb.cp/annota2.exp: Add empty line between "post-prompt"
 	and "starting".
 
