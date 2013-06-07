@@ -1,5 +1,10 @@
 2013-06-07  Will Newton  <will.newton@linaro.org>
 
+	* gdb.cp/annota2.exp: Add empty line between "post-prompt"
+	and "starting".
+
+2013-06-07  Will Newton  <will.newton@linaro.org>
+
 	* gdb.cp/anon-struct.exp: Conditionalize constructor and
 	destructor prototypes for ARM ABI.
 	* gdb.cp/m-static.exp: Likewise.
