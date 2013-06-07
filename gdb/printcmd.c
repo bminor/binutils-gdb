@@ -689,6 +689,17 @@ build_address_symbolic (struct gdbarch *gdbarch,
     {
       if (SYMBOL_VALUE_ADDRESS (msymbol) > name_location || symbol == NULL)
 	{
+	  /* If this is a function (i.e. a code address), strip out any
+	     non-address bits.  For instance, display a pointer to the
+	     first instruction of a Thumb function as <function>; the
+	     second instruction will be <function+2>, even though the
+	     pointer is <function+3>.  This matches the ISA behavior.  */
+	  if (MSYMBOL_TYPE (msymbol) == mst_text
+	      || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc
+	      || MSYMBOL_TYPE (msymbol) == mst_file_text
+	      || MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
+	    addr = gdbarch_addr_bits_remove (gdbarch, addr);
+
 	  /* The msymbol is closer to the address than the symbol;
 	     use the msymbol instead.  */
 	  symbol = 0;

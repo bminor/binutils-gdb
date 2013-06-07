@@ -1,5 +1,10 @@
 2013-06-07  Will Newton  <will.newton@linaro.org>
 
+	* printcmd.c (build_address_symbolic): Call
+	gdbarch_addr_bits_remove for text minimal symbols.
+
+2013-06-07  Will Newton  <will.newton@linaro.org>
+
 	* MAINTAINERS: Add myself to Write After Approval.
 
 2013-06-07  Yao Qi  <yao@codesourcery.com>
