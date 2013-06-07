@@ -1,5 +1,12 @@
 2013-06-07  Pedro Alves  <palves@redhat.com>
 
+	* darwin-nat.c: Fix formating in copyright header.
+	* darwin-nat.h: Likewise.
+	* gnu-nat.c: Likewise.
+	* machoread.c: Likewise.
+
+2013-06-07  Pedro Alves  <palves@redhat.com>
+
 	PR server/14823
 	* regformats/regdat.sh: Output #include tdesc.h.  Make globals
 	static.  Output a global target description pointer.

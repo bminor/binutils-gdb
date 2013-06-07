@@ -12,8 +12,7 @@
    GNU General Public License for more details.
    
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
+   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Despite the sections below will be adjacent the assembler has to produce
    DW_AT_ranges as the linker could place both sections at arbitrary locations.
