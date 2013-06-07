@@ -1,3 +1,8 @@
+2013-06-07  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/mi-trace-unavailable.exp: New.
+	* gdb.trace/trace-unavailable.c: New.
+
 2013-06-06  Doug Evans  <dje@google.com>
 
 	* gdb.cp/derivation.exp: Make tests have unique names.
