@@ -1,3 +1,14 @@
+2013-06-08  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-main.c (get_register): Remove declaration.
+	(output_register): Declare.
+	(mi_cmd_data_list_register_values): Remove local variable
+	'tuple_cleanup'.  Move some code into output_register.
+	(get_register): Renamed to ...
+	(output_register): ... this.  Output the register's
+	"number" ui_out tuple here.
+
 2013-06-07  Pedro Alves  <palves@redhat.com>
 
 	* darwin-nat.c: Fix formating in copyright header.
