@@ -2247,37 +2247,38 @@ reglist_lookup (char **s, unsigned int types, unsigned int *reglistp)
   return ok && reglist != 0;
 }
 
-/* Return TRUE if opcode MO is valid on the currently selected ISA and
-   architecture.  Use is_opcode_valid_16 for MIPS16 opcodes.  */
+/* Return TRUE if opcode MO is valid on the currently selected ISA, ASE
+   and architecture.  Use is_opcode_valid_16 for MIPS16 opcodes.  */
 
 static bfd_boolean
 is_opcode_valid (const struct mips_opcode *mo)
 {
   int isa = mips_opts.isa;
+  int ase = 0;
   int fp_s, fp_d;
 
   if (mips_opts.ase_mdmx)
-    isa |= INSN_MDMX;
+    ase |= ASE_MDMX;
   if (mips_opts.ase_dsp)
-    isa |= INSN_DSP;
+    ase |= ASE_DSP;
   if (mips_opts.ase_dsp && ISA_SUPPORTS_DSP64_ASE)
-    isa |= INSN_DSP64;
+    ase |= ASE_DSP64;
   if (mips_opts.ase_dspr2)
-    isa |= INSN_DSPR2;
+    ase |= ASE_DSPR2;
   if (mips_opts.ase_mt)
-    isa |= INSN_MT;
+    ase |= ASE_MT;
   if (mips_opts.ase_mips3d)
-    isa |= INSN_MIPS3D;
+    ase |= ASE_MIPS3D;
   if (mips_opts.ase_smartmips)
-    isa |= INSN_SMARTMIPS;
+    ase |= ASE_SMARTMIPS;
   if (mips_opts.ase_mcu)
-    isa |= INSN_MCU;
+    ase |= ASE_MCU;
   if (mips_opts.ase_virt)
-    isa |= INSN_VIRT;
+    ase |= ASE_VIRT;
   if (mips_opts.ase_virt && ISA_SUPPORTS_VIRT64_ASE)
-    isa |= INSN_VIRT64;
+    ase |= ASE_VIRT64;
 
-  if (!opcode_is_member (mo, isa, mips_opts.arch))
+  if (!opcode_is_member (mo, isa, ase, mips_opts.arch))
     return FALSE;
 
   /* Check whether the instruction or macro requires single-precision or
@@ -2309,7 +2310,7 @@ is_opcode_valid (const struct mips_opcode *mo)
 static bfd_boolean
 is_opcode_valid_16 (const struct mips_opcode *mo)
 {
-  return opcode_is_member (mo, mips_opts.isa, mips_opts.arch);
+  return opcode_is_member (mo, mips_opts.isa, 0, mips_opts.arch);
 }
 
 /* Return TRUE if the size of the microMIPS opcode MO matches one
@@ -4395,7 +4396,7 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	     && (mips_opts.at || mips_pic == NO_PIC)
 	     /* Don't relax BPOSGE32/64 as they have no complementing
 	        branches.  */
-	     && !(ip->insn_mo->membership & (INSN_DSP64 | INSN_DSP)));
+	     && !(ip->insn_mo->ase & (ASE_DSP64 | ASE_DSP)));
 
   if (!HAVE_CODE_COMPRESSION
       && address_expr

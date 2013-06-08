@@ -1,3 +1,9 @@
+2013-06-08  Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-mips.c (is_opcode_valid):  Build ASE mask.
+	(is_opcode_valid_16): Pass ase value to opcode_is_member.
+	(append_insn): Change INSN_xxxx to ASE_xxxx.
+
 2013-06-01  George Thomas <george.thomas@atmel.com>
 
         * gas/config/tc-avr.c: Change ISA for devices with USB support to

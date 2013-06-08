@@ -1,3 +1,15 @@
+2013-06-08  Catherine Moore  <clm@codesourcery.com>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* micromips-opc.c (D32, D33, MC): Update definitions.
+ 	(micromips_opcodes):  Initialize ase field.
+	* mips-dis.c (mips_arch_choice): Add ase field.
+	(mips_arch_choices): Initialize ase field.
+	(set_default_mips_dis_options): Declare and setup mips_ase.
+	* mips-opc.c (M3D, SMT, MX, IVIRT, IVIRT64, D32, D33, D64,
+	MT32, MC): Update definitions.
+	(mips_builtin_opcodes): Initialize ase field.
+
 2013-05-24  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
 
 	* s390-opc.txt (flogr): Require a register pair destination.
