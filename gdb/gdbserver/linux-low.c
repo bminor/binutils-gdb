@@ -5851,45 +5851,54 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 	  break;
 	}
 
-      /* Not checking for error because reading may stop before
-	 we've got PATH_MAX worth of characters.  */
-      libname[0] = '\0';
-      linux_read_memory (l_name, libname, sizeof (libname) - 1);
-      libname[sizeof (libname) - 1] = '\0';
-      if (libname[0] != '\0')
-	{
-	  /* 6x the size for xml_escape_text below.  */
-	  size_t len = 6 * strlen ((char *) libname);
-	  char *name;
-
-	  if (!header_done)
-	    {
-	      /* Terminate `<library-list-svr4'.  */
-	      *p++ = '>';
-	      header_done = 1;
-	    }
-
-	  while (allocated < p - document + len + 200)
-	    {
-	      /* Expand to guarantee sufficient storage.  */
-	      uintptr_t document_len = p - document;
-
-	      document = xrealloc (document, 2 * allocated);
-	      allocated *= 2;
-	      p = document + document_len;
-	    }
-
-	  name = xml_escape_text ((char *) libname);
-	  p += sprintf (p, "<library name=\"%s\" lm=\"0x%lx\" "
-			"l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
-			name, (unsigned long) lm_addr,
-			(unsigned long) l_addr, (unsigned long) l_ld);
-	  free (name);
-	}
-      else if (lm_prev == 0)
+      /* Ignore the first entry even if it has valid name as the first entry
+	 corresponds to the main executable.  The first entry should not be
+	 skipped if the dynamic loader was loaded late by a static executable
+	 (see solib-svr4.c parameter ignore_first).  But in such case the main
+	 executable does not have PT_DYNAMIC present and this function already
+	 exited above due to failed get_r_debug.  */
+      if (lm_prev == 0)
 	{
 	  sprintf (p, " main-lm=\"0x%lx\"", (unsigned long) lm_addr);
 	  p = p + strlen (p);
+	}
+      else
+	{
+	  /* Not checking for error because reading may stop before
+	     we've got PATH_MAX worth of characters.  */
+	  libname[0] = '\0';
+	  linux_read_memory (l_name, libname, sizeof (libname) - 1);
+	  libname[sizeof (libname) - 1] = '\0';
+	  if (libname[0] != '\0')
+	    {
+	      /* 6x the size for xml_escape_text below.  */
+	      size_t len = 6 * strlen ((char *) libname);
+	      char *name;
+
+	      if (!header_done)
+		{
+		  /* Terminate `<library-list-svr4'.  */
+		  *p++ = '>';
+		  header_done = 1;
+		}
+
+	      while (allocated < p - document + len + 200)
+		{
+		  /* Expand to guarantee sufficient storage.  */
+		  uintptr_t document_len = p - document;
+
+		  document = xrealloc (document, 2 * allocated);
+		  allocated *= 2;
+		  p = document + document_len;
+		}
+
+	      name = xml_escape_text ((char *) libname);
+	      p += sprintf (p, "<library name=\"%s\" lm=\"0x%lx\" "
+			    "l_addr=\"0x%lx\" l_ld=\"0x%lx\"/>",
+			    name, (unsigned long) lm_addr,
+			    (unsigned long) l_addr, (unsigned long) l_ld);
+	      free (name);
+	    }
 	}
 
       lm_prev = lm_addr;

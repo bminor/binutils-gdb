@@ -1,3 +1,9 @@
+2013-06-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix compatibility with Android Bionic.
+	* linux-low.c (linux_qxfer_libraries_svr4): Ignore first entry even if
+	it is not empty.
+
 2013-06-07  Pedro Alves  <palves@redhat.com>
 
 	PR server/14823
