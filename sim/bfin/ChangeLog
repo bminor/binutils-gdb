@@ -1,3 +1,8 @@
+2013-06-09  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in ($(srcdir)/linux-fixed-code.h): Add
+	@MAINTAINER_MODE_TRUE@ as the first item in the dependency list.
+
 2013-06-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.
