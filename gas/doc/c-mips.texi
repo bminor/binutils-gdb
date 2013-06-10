@@ -388,6 +388,27 @@ width register by the single width registers.
 By default @code{--construct-floats} is selected, allowing construction
 of these floating point constants.
 
+@item --relax-branch
+@itemx --no-relax-branch
+The @samp{--relax-branch} option enables the relaxation of out-of-range
+branches.  Any branches whose target cannot be reached directly are
+converted to a small instruction sequence including an inverse-condition
+branch to the physically next instruction, and a jump to the original
+target is inserted between the two instructions.  In PIC code the jump
+will involve further instructions for address calculation.
+
+The @code{BC1ANY2F}, @code{BC1ANY2T}, @code{BC1ANY4F}, @code{BC1ANY4T},
+@code{BPOSGE32} and @code{BPOSGE64} instructions are excluded from
+relaxation, because they have no complementing counterparts.  They could
+be relaxed with the use of a longer sequence involving another branch,
+however this has not been implemented and if their target turns out of
+reach, they produce an error even if branch relaxation is enabled.
+
+Also no @sc{mips16} branches are ever relaxed.
+
+By default @samp{--no-relax-branch} is selected, causing any out-of-range
+branches to produce an error.
+
 @item --trap
 @itemx --no-break
 @c FIXME!  (1) reflect these options (next item too) in option summaries;

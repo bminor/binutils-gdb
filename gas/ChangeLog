@@ -1,3 +1,16 @@
+2013-06-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (append_insn): Don't do branch relaxation for
+	MIPS-3D instructions either.
+	(md_convert_frag): Update the COPx branch mask accordingly.
+
+	* config/tc-mips.c (md_show_usage): Document --[no-]relax-branch
+	option.
+	* doc/as.texinfo (Overview): Add --relax-branch and
+	--no-relax-branch.
+	* doc/c-mips.texi (MIPS Opts): Document --relax-branch and
+	--no-relax-branch.
+
 2013-06-09  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* config/tc-nios2.c (nios2_parse_args):  Allow trap argument to

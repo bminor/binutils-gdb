@@ -1349,6 +1349,12 @@ value into the two single width floating point registers that make up
 the double width register.  By default @samp{--construct-floats} is
 selected, allowing construction of these floating point constants.
 
+@item --relax-branch
+@itemx --no-relax-branch
+The @samp{--relax-branch} option enables the relaxation of out-of-range
+branches.  By default @samp{--no-relax-branch} is selected, causing any
+out-of-range branches to produce an error.
+
 @cindex emulation
 @item --emulation=@var{name}
 This option causes @command{@value{AS}} to emulate @command{@value{AS}} configured

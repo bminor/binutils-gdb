@@ -1,3 +1,9 @@
+2013-06-10  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/relax-bc1any.l: New test.
+	* gas/mips/relax-bc1any.s: New test source.
+	* gas/mips/mips.exp: Run the new test.
+
 2013-06-09  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gas/nios2/trap.s: Add additional test cases for optional

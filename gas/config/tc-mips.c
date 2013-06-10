@@ -4394,9 +4394,9 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	        out that the branch was out-of-range, we'll get an error.  */
 	     && !mips_opts.warn_about_macros
 	     && (mips_opts.at || mips_pic == NO_PIC)
-	     /* Don't relax BPOSGE32/64 as they have no complementing
-	        branches.  */
-	     && !(ip->insn_mo->ase & (ASE_DSP64 | ASE_DSP)));
+	     /* Don't relax BPOSGE32/64 or BC1ANY2T/F and BC1ANY4T/F
+	        as they have no complementing branches.  */
+	     && !(ip->insn_mo->ase & (ASE_MIPS3D | ASE_DSP64 | ASE_DSP)));
 
   if (!HAVE_CODE_COMPRESSION
       && address_expr
@@ -18177,10 +18177,10 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	      switch ((insn >> 28) & 0xf)
 		{
 		case 4:
-		  /* bc[0-3][tf]l? and bc1any[24][ft] instructions can
-		     have the condition reversed by tweaking a single
-		     bit, and their opcodes all have 0x4???????.  */
-		  gas_assert ((insn & 0xf1000000) == 0x41000000);
+		  /* bc[0-3][tf]l? instructions can have the condition
+		     reversed by tweaking a single TF bit, and their
+		     opcodes all have 0x4???????.  */
+		  gas_assert ((insn & 0xf3e00000) == 0x41000000);
 		  insn ^= 0x00010000;
 		  break;
 
@@ -19725,7 +19725,8 @@ MIPS options:\n\
 -msoft-float		do not allow floating-point instructions\n\
 -msingle-float		only allow 32-bit floating-point operations\n\
 -mdouble-float		allow 32-bit and 64-bit floating-point operations\n\
---[no-]construct-floats [dis]allow floating point values to be constructed\n"
+--[no-]construct-floats	[dis]allow floating point values to be constructed\n\
+--[no-]relax-branch	[dis]allow out-of-range branches to be relaxed\n"
 		     ));
 #ifdef OBJ_ELF
   fprintf (stream, _("\
