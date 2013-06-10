@@ -1,3 +1,8 @@
+2013-06-10  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
+
+	PR ld/15598
+	* ld.texinfo (Source Code Reference): Fix typos.
+
 2013-06-07  Will Newton  <will.newton@linaro.org>
 
 	* emulparams/aarch64elf.sh: Add IREL_IN_PLT.

@@ -3601,7 +3601,7 @@ value.  So for example the following C declaration, at file scope:
   int foo = 1000;
 @end smallexample
 
-creates a entry called @samp{foo} in the symbol table.  This entry
+creates an entry called @samp{foo} in the symbol table.  This entry
 holds the address of an @samp{int} sized block of memory where the
 number 1000 is initially stored.
 
@@ -3622,7 +3622,7 @@ address.  Whereas:
   int * a = & foo;
 @end smallexample
 
-looks up the symbol @samp{foo} in the symbol table, gets it address
+looks up the symbol @samp{foo} in the symbol table, gets its address
 and then copies this address into the block of memory associated with
 the variable @samp{a}.
 
