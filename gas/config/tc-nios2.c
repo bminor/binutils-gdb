@@ -2078,7 +2078,11 @@ nios2_parse_args (nios2_insn_infoS *insn, char *argstr,
 
   parsed_args[i] = NULL;
 
-  if (*parsestr != '\0' && insn->insn_nios2_opcode->match != OP_MATCH_BREAK)
+  /* The argument to break and trap instructions is optional; complain
+     for other cases of missing arguments.  */
+  if (*parsestr != '\0'
+      && insn->insn_nios2_opcode->match != OP_MATCH_BREAK
+      && insn->insn_nios2_opcode->match != OP_MATCH_TRAP)
     as_bad (_("missing argument"));
 }
 

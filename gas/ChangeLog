@@ -1,3 +1,8 @@
+2013-06-09  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* config/tc-nios2.c (nios2_parse_args):  Allow trap argument to
+	omitted.
+
 2013-06-08  Catherine Moore  <clm@codesourcery.com>
 
 	* config/tc-mips.c (is_opcode_valid):  Build ASE mask.

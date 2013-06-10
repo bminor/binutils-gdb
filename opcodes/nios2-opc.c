@@ -385,7 +385,7 @@ const struct nios2_opcode nios2_builtin_opcodes[] =
    OP_MATCH_SUB, OP_MASK_ROPX | OP_MASK_ROP, 0, no_overflow},
   {"sync", "", "E", 0,
    OP_MATCH_SYNC, OP_MASK_SYNC, 0, no_overflow},
-  {"trap", "", "E", 0,
+  {"trap", "b", "b,E", 1,
    OP_MATCH_TRAP, OP_MASK_TRAP, 0, no_overflow},
   {"eret", "", "E", 0,
    OP_MATCH_ERET, OP_MASK, 0, no_overflow},

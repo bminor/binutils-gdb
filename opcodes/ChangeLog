@@ -1,3 +1,8 @@
+2013-06-09  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-opc.c (nios2_builtin_opcodes): Give "trap" a type-"b"
+	argument.
+
 2013-06-08  Catherine Moore  <clm@codesourcery.com>
 	    Richard Sandiford  <rdsandiford@googlemail.com>
 

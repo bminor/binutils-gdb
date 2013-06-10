@@ -1,3 +1,9 @@
+2013-06-09  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gas/nios2/trap.s: Add additional test cases for optional
+	argument.
+	* gas/nios2/trap.d: Likewise.
+
 2013-05-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/size-3.d: Updated for text/data/bss section alignment
