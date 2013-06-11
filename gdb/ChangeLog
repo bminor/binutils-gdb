@@ -1,5 +1,10 @@
 2013-06-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (thread_rec): Revert format used to print
+	error code returned by SuspendThread from %d back to %u.
+
+2013-06-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.c (windows_continue): Add "0x" prefix for thread
 	ID in debug trace.
 	(get_windows_debug_event): Likewise, for all debug traces.
