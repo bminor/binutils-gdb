@@ -2033,11 +2033,11 @@ elf_aarch64_get_local_sym_hash (struct elf64_aarch64_link_hash_table *htab,
   struct elf64_aarch64_link_hash_entry e, *ret;
   asection *sec = abfd->sections;
   hashval_t h = ELF_LOCAL_SYMBOL_HASH (sec->id,
-				       ELF32_R_SYM (rel->r_info));
+				       ELF64_R_SYM (rel->r_info));
   void **slot;
 
   e.root.indx = sec->id;
-  e.root.dynstr_index = ELF32_R_SYM (rel->r_info);
+  e.root.dynstr_index = ELF64_R_SYM (rel->r_info);
   slot = htab_find_slot_with_hash (htab->loc_hash_table, &e, h,
 				   create ? INSERT : NO_INSERT);
 
@@ -2057,7 +2057,7 @@ elf_aarch64_get_local_sym_hash (struct elf64_aarch64_link_hash_table *htab,
     {
       memset (ret, 0, sizeof (*ret));
       ret->root.indx = sec->id;
-      ret->root.dynstr_index = ELF32_R_SYM (rel->r_info);
+      ret->root.dynstr_index = ELF64_R_SYM (rel->r_info);
       ret->root.dynindx = -1;
       *slot = ret;
     }

@@ -1,3 +1,8 @@
+2013-06-11  Will Newton  <will.newton@linaro.org>
+
+	* elf64-aarch64.c (elf_aarch64_get_local_sym_hash): Use
+	ELF64_R_SYM instead of ELF32_R_SYM.
+
 2013-06-11  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-rl78.c (rl78_elf_finish_dynamic_sections): Onlly run
