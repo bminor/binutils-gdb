@@ -1256,7 +1256,7 @@ windows_continue (DWORD continue_status, int id)
   thread_info *th;
   BOOL res;
 
-  DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=%x, %s);\n",
+  DEBUG_EVENTS (("ContinueDebugEvent (cpid=%d, ctid=0x%x, %s);\n",
 		  (unsigned) current_event.dwProcessId,
 		  (unsigned) current_event.dwThreadId,
 		  continue_status == DBG_CONTINUE ?
@@ -1465,7 +1465,7 @@ get_windows_debug_event (struct target_ops *ops,
   switch (event_code)
     {
     case CREATE_THREAD_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=%x code=%s)\n",
+      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "CREATE_THREAD_DEBUG_EVENT"));
@@ -1494,7 +1494,7 @@ get_windows_debug_event (struct target_ops *ops,
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=%x code=%s)\n",
+      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXIT_THREAD_DEBUG_EVENT"));
@@ -1509,7 +1509,7 @@ get_windows_debug_event (struct target_ops *ops,
       break;
 
     case CREATE_PROCESS_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=%x code=%s)\n",
+      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "CREATE_PROCESS_DEBUG_EVENT"));
@@ -1532,7 +1532,7 @@ get_windows_debug_event (struct target_ops *ops,
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=%x code=%s)\n",
+      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXIT_PROCESS_DEBUG_EVENT"));
@@ -1552,7 +1552,7 @@ get_windows_debug_event (struct target_ops *ops,
       break;
 
     case LOAD_DLL_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=%x code=%s)\n",
+      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "LOAD_DLL_DEBUG_EVENT"));
@@ -1566,7 +1566,7 @@ get_windows_debug_event (struct target_ops *ops,
       break;
 
     case UNLOAD_DLL_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=%x code=%s)\n",
+      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "UNLOAD_DLL_DEBUG_EVENT"));
@@ -1579,7 +1579,7 @@ get_windows_debug_event (struct target_ops *ops,
       break;
 
     case EXCEPTION_DEBUG_EVENT:
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=%x code=%s)\n",
+      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "EXCEPTION_DEBUG_EVENT"));
@@ -1601,7 +1601,7 @@ get_windows_debug_event (struct target_ops *ops,
       break;
 
     case OUTPUT_DEBUG_STRING_EVENT:	/* Message from the kernel.  */
-      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=%x code=%s)\n",
+      DEBUG_EVENTS (("gdb: kernel event for pid=%u tid=0x%x code=%s)\n",
 		     (unsigned) current_event.dwProcessId,
 		     (unsigned) current_event.dwThreadId,
 		     "OUTPUT_DEBUG_STRING_EVENT"));
@@ -1613,7 +1613,7 @@ get_windows_debug_event (struct target_ops *ops,
     default:
       if (saw_create != 1)
 	break;
-      printf_unfiltered ("gdb: kernel event for pid=%u tid=%x\n",
+      printf_unfiltered ("gdb: kernel event for pid=%u tid=0x%x\n",
 			 (unsigned) current_event.dwProcessId,
 			 (unsigned) current_event.dwThreadId);
       printf_unfiltered ("                 unknown event code %u\n",

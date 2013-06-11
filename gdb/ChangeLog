@@ -1,5 +1,11 @@
 2013-06-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* windows-nat.c (windows_continue): Add "0x" prefix for thread
+	ID in debug trace.
+	(get_windows_debug_event): Likewise, for all debug traces.
+
+2013-06-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* window-nat.c (thread_rec): Add thread ID in SuspendThread
 	warning message.
 
