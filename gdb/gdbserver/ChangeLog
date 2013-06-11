@@ -1,5 +1,10 @@
 2013-06-11  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (initialize_regsets_info): Use xcalloc instead of
+	xmalloc.
+
+2013-06-11  Pedro Alves  <palves@redhat.com>
+
 	* linux-x86-low.c (initialize_low_arch): Call
 	init_registers_x32_avx_linux.
 

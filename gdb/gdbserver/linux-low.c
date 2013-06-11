@@ -6072,7 +6072,7 @@ initialize_regsets_info (struct regsets_info *info)
        info->regsets[info->num_regsets].size >= 0;
        info->num_regsets++)
     ;
-  info->disabled_regsets = xmalloc (info->num_regsets);
+  info->disabled_regsets = xcalloc (1, info->num_regsets);
 }
 #endif
 
