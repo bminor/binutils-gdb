@@ -1,5 +1,10 @@
 2013-06-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* window-nat.c (thread_rec): Add missing empty line after
+	local variable declaration.
+
+2013-06-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* windows-nat.c (thread_rec): Revert format used to print
 	error code returned by SuspendThread from %d back to %u.
 

@@ -311,6 +311,7 @@ thread_rec (DWORD id, int get_context)
 		if (SuspendThread (th->h) == (DWORD) -1)
 		  {
 		    DWORD err = GetLastError ();
+
 		    warning (_("SuspendThread (tid=0x%x) failed."
 			       " (winerr %u)"),
 			     (unsigned) id, (unsigned) err);
