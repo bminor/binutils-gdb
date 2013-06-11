@@ -3335,6 +3335,7 @@ initialize_low_arch (void)
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();
   init_registers_x32_linux ();
+  init_registers_x32_avx_linux ();
 
   tdesc_amd64_linux_no_xml = xmalloc (sizeof (struct target_desc));
   copy_target_description (tdesc_amd64_linux_no_xml, tdesc_amd64_linux);
