@@ -1,3 +1,9 @@
+2013-06-11  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rl78.c (rl78_elf_finish_dynamic_sections): Onlly run
+	checks if the dynamic sections have been created and relaxation
+	has not been performed.
+
 2013-06-07  Will Newton  <will.newton@linaro.org>
 
 	* configure: Regenerate.

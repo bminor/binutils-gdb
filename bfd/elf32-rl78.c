@@ -1270,24 +1270,28 @@ rl78_elf_finish_dynamic_sections (bfd *abfd ATTRIBUTE_UNUSED,
   bfd *dynobj;
   asection *splt;
 
+  if (!elf_hash_table (info)->dynamic_sections_created)
+    return TRUE;
+
   /* As an extra sanity check, verify that all plt entries have been
      filled in.  However, relaxing might have changed the relocs so
      that some plt entries don't get filled in, so we have to skip
      this check if we're relaxing.  Unfortunately, check_relocs is
      called before relaxation.  */
 
-  if (info->relax_trip > 0)
+  if (info->relax_trip > 0) 
+    return TRUE;
+
+  if ((dynobj = elf_hash_table (info)->dynobj) != NULL
+      && (splt = bfd_get_linker_section (dynobj, ".plt")) != NULL)
     {
-      if ((dynobj = elf_hash_table (info)->dynobj) != NULL
-	  && (splt = bfd_get_linker_section (dynobj, ".plt")) != NULL)
+      bfd_byte *contents = splt->contents;
+      unsigned int i, size = splt->size;
+
+      for (i = 0; i < size; i += 4)
 	{
-	  bfd_byte *contents = splt->contents;
-	  unsigned int i, size = splt->size;
-	  for (i = 0; i < size; i += 4)
-	    {
-	      unsigned int x = bfd_get_32 (dynobj, contents + i);
-	      BFD_ASSERT (x != 0);
-	    }
+	  unsigned int x = bfd_get_32 (dynobj, contents + i);
+	  BFD_ASSERT (x != 0);
 	}
     }
 
