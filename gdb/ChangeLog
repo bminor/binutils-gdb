@@ -1,3 +1,8 @@
+2013-06-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* window-nat.c (thread_rec): Add thread ID in SuspendThread
+	warning message.
+
 2013-06-08  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
