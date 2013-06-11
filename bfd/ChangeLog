@@ -1,3 +1,7 @@
+2013-06-11  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (rl78_elf_relocate_section): Fix OPsub math.
+
 2013-06-11  Will Newton  <will.newton@linaro.org>
 
 	* elf64-aarch64.c (elf_aarch64_get_local_sym_hash): Use

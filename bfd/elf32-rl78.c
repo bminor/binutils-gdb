@@ -810,10 +810,13 @@ rl78_elf_relocate_section
 	  {
 	    int32_t tmp1, tmp2;
 
-	    RL78_STACK_POP (tmp2);
-	    RL78_STACK_POP (tmp1);
-	    tmp2 -= tmp1;
-	    RL78_STACK_PUSH (tmp2);
+	    /* For the expression "A - B", the assembler pushes A,
+	       then B, then OPSUB.  So the first op we pop is B, not
+	       A.  */
+	    RL78_STACK_POP (tmp2);	/* B */
+	    RL78_STACK_POP (tmp1);	/* A */
+	    tmp1 -= tmp2;		/* A - B */
+	    RL78_STACK_PUSH (tmp1);
 	  }
 	  break;
 
