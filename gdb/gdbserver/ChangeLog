@@ -1,5 +1,15 @@
 2013-06-11  Pedro Alves  <palves@redhat.com>
 
+	* linux-low.c (regset_disabled, disable_regset): New functions.
+	(regsets_fetch_inferior_registers)
+	(regsets_store_inferior_registers): Use them.
+	(initialize_regsets_info); Don't allocate the disabled_regsets
+	array here.
+	* linux-low.h (struct regsets_info) <disabled_regsets>: Extend
+	comment.
+
+2013-06-11  Pedro Alves  <palves@redhat.com>
+
 	* linux-low.c (initialize_regsets_info): Use xcalloc instead of
 	xmalloc.
 

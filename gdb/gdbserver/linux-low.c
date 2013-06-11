@@ -4051,6 +4051,28 @@ unstop_all_lwps (int unsuspend, struct lwp_info *except)
 
 #define use_linux_regsets 1
 
+/* Returns true if REGSET has been disabled.  */
+
+static int
+regset_disabled (struct regsets_info *info, struct regset_info *regset)
+{
+  return (info->disabled_regsets != NULL
+	  && info->disabled_regsets[regset - info->regsets]);
+}
+
+/* Disable REGSET.  */
+
+static void
+disable_regset (struct regsets_info *info, struct regset_info *regset)
+{
+  int dr_offset;
+
+  dr_offset = regset - info->regsets;
+  if (info->disabled_regsets == NULL)
+    info->disabled_regsets = xcalloc (1, info->num_regsets);
+  info->disabled_regsets[dr_offset] = 1;
+}
+
 static int
 regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 				  struct regcache *regcache)
@@ -4068,8 +4090,7 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
       void *buf, *data;
       int nt_type, res;
 
-      if (regset->size == 0
-	  || regsets_info->disabled_regsets[regset - regsets_info->regsets])
+      if (regset->size == 0 || regset_disabled (regsets_info, regset))
 	{
 	  regset ++;
 	  continue;
@@ -4097,12 +4118,9 @@ regsets_fetch_inferior_registers (struct regsets_info *regsets_info,
 	{
 	  if (errno == EIO)
 	    {
-	      int dr_offset;
-
 	      /* If we get EIO on a regset, do not try it again for
 		 this process mode.  */
-	      dr_offset = regset - regsets_info->regsets;
-	      regsets_info->disabled_regsets[dr_offset] = 1;
+	      disable_regset (regsets_info, regset);
 	      free (buf);
 	      continue;
 	    }
@@ -4143,8 +4161,7 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
       void *buf, *data;
       int nt_type, res;
 
-      if (regset->size == 0
-	  || regsets_info->disabled_regsets[regset - regsets_info->regsets])
+      if (regset->size == 0 || regset_disabled (regsets_info, regset))
 	{
 	  regset ++;
 	  continue;
@@ -4191,12 +4208,9 @@ regsets_store_inferior_registers (struct regsets_info *regsets_info,
 	{
 	  if (errno == EIO)
 	    {
-	      int dr_offset;
-
 	      /* If we get EIO on a regset, do not try it again for
 		 this process mode.  */
-	      dr_offset = regset - regsets_info->regsets;
-	      regsets_info->disabled_regsets[dr_offset] = 1;
+	      disable_regset (regsets_info, regset);
 	      free (buf);
 	      continue;
 	    }
@@ -6072,7 +6086,6 @@ initialize_regsets_info (struct regsets_info *info)
        info->regsets[info->num_regsets].size >= 0;
        info->num_regsets++)
     ;
-  info->disabled_regsets = xcalloc (1, info->num_regsets);
 }
 #endif
 

@@ -60,7 +60,9 @@ struct regsets_info
 
   /* If we get EIO on a regset, do not try it again.  Note the set of
      supported regsets may depend on processor mode on biarch
-     machines.  */
+     machines.  This is a (lazily allocated) array holding one boolean
+     byte (0/1) per regset, with each element corresponding to the
+     regset in the REGSETS array above at the same offset.  */
   char *disabled_regsets;
 };
 
