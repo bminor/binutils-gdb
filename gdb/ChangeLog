@@ -1,3 +1,7 @@
+2013-06-12  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* stack.c (backtrace_command_1): Fix indentation.
+
 2013-06-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* window-nat.c (thread_rec): Add missing empty line after

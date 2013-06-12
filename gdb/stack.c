@@ -1766,20 +1766,20 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
 
 	  print_frame_info (fi, 1, LOCATION, 1);
 	  if (show_locals)
-	{
-	  struct frame_id frame_id = get_frame_id (fi);
-
-	  print_frame_local_vars (fi, 1, gdb_stdout);
-
-	  /* print_frame_local_vars invalidates FI.  */
-	  fi = frame_find_by_id (frame_id);
-	  if (fi == NULL)
 	    {
-	      trailing = NULL;
-	      warning (_("Unable to restore previously selected frame."));
-	      break;
+	      struct frame_id frame_id = get_frame_id (fi);
+
+	      print_frame_local_vars (fi, 1, gdb_stdout);
+
+	      /* print_frame_local_vars invalidates FI.  */
+	      fi = frame_find_by_id (frame_id);
+	      if (fi == NULL)
+		{
+		  trailing = NULL;
+		  warning (_("Unable to restore previously selected frame."));
+		  break;
+		}
 	    }
-	}
 
 	  /* Save the last frame to check for error conditions.  */
 	  trailing = fi;
