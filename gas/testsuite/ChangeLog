@@ -1,5 +1,11 @@
 2013-06-12  Sandra Loosemore  <sandra@codesourcery.com>
 
+	* gas/nios2/movia.s: Add additional test case with negative
+	constant value.
+	* gas/nios2/movia.d: Likewise.
+
+2013-06-12  Sandra Loosemore  <sandra@codesourcery.com>
+
 	* gas/nios2/tret.d: Correct eret encoding.
 
 2013-06-10  Maciej W. Rozycki  <macro@codesourcery.com>

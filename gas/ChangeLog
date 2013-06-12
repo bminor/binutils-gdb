@@ -1,3 +1,8 @@
+2013-06-12  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* config/tc-nios2.c (md_apply_fix):  Mask constant
+	BFD_RELOC_NIOS2_HIADJ16 value to 16 bits.
+
 2013-06-10  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* config/tc-mips.c (append_insn): Don't do branch relaxation for

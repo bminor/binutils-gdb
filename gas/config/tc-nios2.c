@@ -1258,7 +1258,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      fixup = fixup & 0xFFFF;
 	      break;
 	    case BFD_RELOC_NIOS2_HIADJ16:
-	      fixup = ((fixup >> 16) & 0xFFFF) + ((fixup >> 15) & 0x01);
+	      fixup = ((((fixup >> 16) & 0xFFFF) + ((fixup >> 15) & 0x01))
+		       & 0xFFFF);
 	      break;
 	    default:
 	      {

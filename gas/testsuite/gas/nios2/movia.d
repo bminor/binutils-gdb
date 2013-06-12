@@ -16,3 +16,5 @@ Disassembly of section .text:
 			10: R_NIOS2_HIADJ16	sym-0x7fffffff
 0+0014 <[^>]*> 21000004 	addi	r4,r4,0
 			14: R_NIOS2_LO16	sym-0x7fffffff
+0+0018 <[^>]*> 00800034 	movhi	r2,0
+0+001c <[^>]*> 10bffc04 	addi	r2,r2,-16
