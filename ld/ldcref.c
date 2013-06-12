@@ -1,6 +1,5 @@
 /* ldcref.c -- output a cross reference table
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-   2007, 2008  Free Software Foundation, Inc.
+   Copyright 1996-2013 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -446,7 +445,21 @@ output_one_cref (FILE *fp, struct cref_hash_entry *h)
 
   for (r = h->refs; r != NULL; r = r->next)
     {
-      if (! r->def)
+      if (r->common)
+	{
+	  while (len < FILECOL)
+	    {
+	      putc (' ', fp);
+	      ++len;
+	    }
+	  lfinfo (fp, "%B\n", r->abfd);
+	  len = 0;
+	}
+    }
+
+  for (r = h->refs; r != NULL; r = r->next)
+    {
+      if (! r->def && ! r->common)
 	{
 	  while (len < FILECOL)
 	    {

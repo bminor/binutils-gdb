@@ -1,3 +1,8 @@
+2013-06-12  Nick Clifton  <nickc@redhat.com>
+
+	* ldcref.c (output_one_cref): Place common definitions after
+	ordinary definitions but before references.
+
 2013-06-10  Dilyan Palauzov  <dilyan.palauzov@aegee.org>
 
 	PR ld/15598
