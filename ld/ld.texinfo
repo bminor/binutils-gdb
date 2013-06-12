@@ -1293,7 +1293,9 @@ The format of the table is intentionally simple, so that it may be
 easily processed by a script if necessary.  The symbols are printed out,
 sorted by name.  For each symbol, a list of file names is given.  If the
 symbol is defined, the first file listed is the location of the
-definition.  The remaining files contain references to the symbol.
+definition.  If the symbol is defined as a common value then any files
+where this happens appear next.  Finally any files that reference the
+symbol are listed.
 
 @cindex common allocation
 @kindex --no-define-common
