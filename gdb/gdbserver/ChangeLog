@@ -1,3 +1,9 @@
+2013-06-12  Pedro Alves  <palves@redhat.com>
+
+	* linux-x86-low.c (linux_is_elf64): Delete global.
+	(x86_siginfo_fixup): Replace reference to `linux_is_elf64' global
+	with local linux_pid_exe_is_elf_64_file use.
+
 2013-06-11  Pedro Alves  <palves@redhat.com>
 
 	* linux-low.c (regset_disabled, disable_regset): New functions.

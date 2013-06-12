@@ -1138,8 +1138,6 @@ siginfo_from_compat_x32_siginfo (siginfo_t *to,
     }
 }
 
-/* Is this process 64-bit?  */
-static int linux_is_elf64;
 #endif /* __x86_64__ */
 
 /* Convert a native/host siginfo object, into/from the siginfo in the
@@ -1152,6 +1150,10 @@ static int
 x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
 {
 #ifdef __x86_64__
+  unsigned int machine;
+  int tid = lwpid_of (get_thread_lwp (current_inferior));
+  int is_elf64 = linux_pid_exe_is_elf_64_file (tid, &machine);
+
   /* Is the inferior 32-bit?  If so, then fixup the siginfo object.  */
   if (!is_64bit_tdesc ())
     {
@@ -1166,7 +1168,7 @@ x86_siginfo_fixup (siginfo_t *native, void *inf, int direction)
       return 1;
     }
   /* No fixup for native x32 GDB.  */
-  else if (!linux_is_elf64 && sizeof (void *) == 8)
+  else if (!is_elf64 && sizeof (void *) == 8)
     {
       if (sizeof (siginfo_t) != sizeof (compat_x32_siginfo_t))
 	fatal ("unexpected difference in siginfo");
