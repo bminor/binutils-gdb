@@ -4,5 +4,4 @@
 .*: +file format elf32-littlenios2
 
 Disassembly of section .text:
-0+0000 <[^>]*> e800083a 	eret
-
+0+0000 <[^>]*> ef80083a 	eret
