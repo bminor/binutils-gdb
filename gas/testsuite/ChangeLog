@@ -1,3 +1,9 @@
+2013-06-13  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* gas/mips/micromips@virt.d: New file.
+	* gas/mips/micromips@virt64.d: New file.
+	* gas/mips/mips.exp: Enable virt and virt64 tests for micromips.
+
 2013-06-12  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gas/nios2/movia.s: Add additional test case with negative
