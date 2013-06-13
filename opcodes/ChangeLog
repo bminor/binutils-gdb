@@ -1,3 +1,13 @@
+2013-06-13  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* micromips-opc.c (IVIRT): New define.
+	(IVIRT64): New define.
+	(micromips_opcodes): Add dmfgc0, dmtgc0, hypcall, mfgc0, mtgc0,
+ 	tlbginv, tlbginvf, tlbgp, tlbgr, tlbgwi, tlbgwr VIRT instructions.
+
+	* mips-dis.c (print_insn_micromips): Handle mfgc0, mtgc0, dmfgc0,
+	dmtgc0 to print cp0 names.
+
 2013-06-09  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-opc.c (nios2_builtin_opcodes): Give "trap" a type-"b"

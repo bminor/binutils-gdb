@@ -110,6 +110,10 @@
 /* MIPS MCU (MicroController) ASE support.  */
 #define MC	ASE_MCU
 
+/* MIPS Virtualization ASE.  */
+#define IVIRT	ASE_VIRT
+#define IVIRT64	ASE_VIRT64
+
 const struct mips_opcode micromips_opcodes[] =
 {
 /* These instructions appear first so that the disassembler will find
@@ -455,9 +459,15 @@ const struct mips_opcode micromips_opcodes[] =
 {"dmfc0",   "t,G",	0x580000fc, 0xfc00ffff,	WR_t|RD_C0,		0,		I3	},
 {"dmfc0",   "t,+D",	0x580000fc, 0xfc00c7ff,	WR_t|RD_C0,		0,		I3	},
 {"dmfc0",   "t,G,H",	0x580000fc, 0xfc00c7ff,	WR_t|RD_C0,		0,		I3	},
+{"dmfgc0",  "t,G",	0x580000e7, 0xfc00ffff,	WR_t|RD_C0,		0,		0,	IVIRT64	},
+{"dmfgc0",  "t,+D",	0x580000e7, 0xfc00c7ff,	WR_t|RD_C0,		0,		0,	IVIRT64	},
+{"dmfgc0",  "t,G,H",	0x580000e7, 0xfc00c7ff,	WR_t|RD_C0,		0,		0,	IVIRT64	},
 {"dmtc0",   "t,G",	0x580002fc, 0xfc00ffff,	RD_t|WR_C0|WR_CC,	0,		I3	},
 {"dmtc0",   "t,+D",	0x580002fc, 0xfc00c7ff,	RD_t|WR_C0|WR_CC,	0,		I3	},
 {"dmtc0",   "t,G,H",	0x580002fc, 0xfc00c7ff,	RD_t|WR_C0|WR_CC,	0,		I3	},
+{"dmtgc0",  "t,G",	0x580002e7, 0xfc00ffff,	RD_t|WR_C0|WR_CC,	0,		0,	IVIRT64	},
+{"dmtgc0",  "t,+D",	0x580002e7, 0xfc00c7ff,	RD_t|WR_C0|WR_CC,	0,		0,	IVIRT64	},
+{"dmtgc0",  "t,G,H",	0x580002e7, 0xfc00c7ff,	RD_t|WR_C0|WR_CC,	0,		0,	IVIRT64	},
 {"dmfc1",   "t,S",	0x5400243b, 0xfc00ffff,	WR_t|RD_S|FP_S,		0,		I3	},
 {"dmfc1",   "t,G",	0x5400243b, 0xfc00ffff,	WR_t|RD_S|FP_S,		0,		I3	},
 {"dmtc1",   "t,G",	0x54002c3b, 0xfc00ffff,	RD_t|WR_S|FP_S,		0,		I3	},
@@ -524,6 +534,8 @@ const struct mips_opcode micromips_opcodes[] =
 {"floor.l.s", "T,V",	0x5400033b, 0xfc00ffff,	WR_T|RD_S|FP_S|FP_D,	0,		I1	},
 {"floor.w.d", "T,V",	0x54004b3b, 0xfc00ffff,	WR_T|RD_S|FP_S|FP_D,	0,		I1	},
 {"floor.w.s", "T,V",	0x54000b3b, 0xfc00ffff,	WR_T|RD_S|FP_S,		0,		I1	},
+{"hypcall",   "",	0x0000c37c, 0xffffffff,	TRAP,			0,		0,	IVIRT	},
+{"hypcall",   "B",	0x0000c37c, 0xfc00ffff,	TRAP,			0,		0,	IVIRT	},
 {"ins",     "t,r,+A,+B", 0x0000000c, 0xfc00003f, WR_t|RD_s,		0,		I1	},
 {"iret",    "",		0x0000d37c, 0xffffffff,	NODS,			0,		0,	MC	},
 {"jr",      "mj",	    0x4580,     0xffe0,	UBD,			RD_mj,		I1	},
@@ -670,6 +682,9 @@ const struct mips_opcode micromips_opcodes[] =
 {"mfc1",    "t,S",	0x5400203b, 0xfc00ffff,	WR_t|RD_S|FP_S,		0,		I1	},
 {"mfc1",    "t,G",	0x5400203b, 0xfc00ffff,	WR_t|RD_S|FP_S,		0,		I1	},
 {"mfc2",    "t,G",	0x00004d3c, 0xfc00ffff,	WR_t|RD_C2,		0,		I1	},
+{"mfgc0",   "t,G",	0x000004fc, 0xfc00ffff,	WR_t|RD_C0,		0,		0,	IVIRT	},
+{"mfgc0",   "t,+D",	0x000004fc, 0xfc00c7ff,	WR_t|RD_C0,		0,		0,	IVIRT	},
+{"mfgc0",   "t,G,H",	0x000004fc, 0xfc00c7ff,	WR_t|RD_C0,		0,		0,	IVIRT	},
 {"mfhc1",   "t,S",	0x5400303b, 0xfc00ffff,	WR_t|RD_S|FP_D,		0,		I1	},
 {"mfhc1",   "t,G",	0x5400303b, 0xfc00ffff,	WR_t|RD_S|FP_D,		0,		I1	},
 {"mfhc2",   "t,G",	0x00008d3c, 0xfc00ffff,	WR_t|RD_C2,		0,		I1	},
@@ -712,6 +727,9 @@ const struct mips_opcode micromips_opcodes[] =
 {"mtc1",    "t,S",	0x5400283b, 0xfc00ffff,	RD_t|WR_S|FP_S,		0,		I1	},
 {"mtc1",    "t,G",	0x5400283b, 0xfc00ffff,	RD_t|WR_S|FP_S,		0,		I1	},
 {"mtc2",    "t,G",	0x00005d3c, 0xfc00ffff,	RD_t|WR_C2|WR_CC,	0,		I1	},
+{"mtgc0",   "t,G",	0x000006fc, 0xfc00ffff,	RD_t|WR_C0|WR_CC,	0,		0,	IVIRT	},
+{"mtgc0",   "t,+D",	0x000006fc, 0xfc00c7ff,	RD_t|WR_C0|WR_CC,	0,		0,	IVIRT	},
+{"mtgc0",   "t,G,H",	0x000006fc, 0xfc00c7ff,	RD_t|WR_C0|WR_CC,	0,		0,	IVIRT	},
 {"mthc1",   "t,S",	0x5400383b, 0xfc00ffff,	RD_t|WR_S|FP_D,		0,		I1	},
 {"mthc1",   "t,G",	0x5400383b, 0xfc00ffff,	RD_t|WR_S|FP_D,		0,		I1	},
 {"mthc2",   "t,G",	0x00009d3c, 0xfc00ffff,	RD_t|WR_C2|WR_CC,	0,		I1	},
@@ -937,6 +955,12 @@ const struct mips_opcode micromips_opcodes[] =
 {"tgeu",    "s,t,|",	0x0000043c, 0xfc000fff,	RD_s|RD_t|TRAP,		0,		I1	},
 {"tgeu",    "s,j",	0x41600000, 0xffe00000,	RD_s|TRAP,		0,		I1	}, /* tgeiu */
 {"tgeu",    "s,I",	0,    (int) M_TGEU_I,	INSN_MACRO,		0,		I1	},
+{"tlbginv", "",		0x0000417c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
+{"tlbginvf","",		0x0000517c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
+{"tlbgp",   "",		0x0000017c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
+{"tlbgr",   "",		0x0000117c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
+{"tlbgwi",  "",		0x0000217c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
+{"tlbgwr",  "",		0x0000317c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
 {"tlbp",    "",		0x0000037c, 0xffffffff,	INSN_TLB,		0,		I1	},
 {"tlbr",    "",		0x0000137c, 0xffffffff,	INSN_TLB,		0,		I1	},
 {"tlbwi",   "",		0x0000237c, 0xffffffff,	INSN_TLB,		0,		I1	},

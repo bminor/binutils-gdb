@@ -2554,8 +2554,12 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		    {
 		    case 0x000000fc:				/* mfc0  */
 		    case 0x000002fc:				/* mtc0  */
+		    case 0x000004fc:				/* mfgc0  */
+		    case 0x000006fc:				/* mtgc0  */
 		    case 0x580000fc:				/* dmfc0 */
 		    case 0x580002fc:				/* dmtc0 */
+		    case 0x580000e7:				/* dmfgc0 */
+		    case 0x580002e7:				/* dmtgc0 */
 		      infprintf (is, "%s", mips_cp0_names[GET_OP (insn, RS)]);
 		      break;
 		    default:
