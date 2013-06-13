@@ -1,3 +1,8 @@
+2013-06-13  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (try_open_dwop_file): Work around behaviour of
+	OPF_TRY_CWD_FIRST to not search path if the file contains a '/'.
+
 2013-06-12  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* stack.c (backtrace_command_1): Fix indentation.

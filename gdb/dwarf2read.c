@@ -9290,22 +9290,31 @@ try_open_dwop_file (const char *file_name, int is_dwp)
   bfd *sym_bfd;
   int desc, flags;
   char *absolute_name;
+  /* Blech.  OPF_TRY_CWD_FIRST also disables searching the path list if
+     FILE_NAME contains a '/'.  So we can't use it.  Instead prepend "."
+     to debug_file_directory.  */
+  char *search_path;
+  static const char dirname_separator_string[] = { DIRNAME_SEPARATOR, '\0' };
 
-  flags = OPF_TRY_CWD_FIRST;
+  if (*debug_file_directory != '\0')
+    search_path = concat (".", dirname_separator_string, debug_file_directory,
+			  NULL);
+  else
+    search_path = xstrdup (".");
+
+  flags = 0;
   if (is_dwp)
     flags |= OPF_SEARCH_IN_PATH;
-  desc = openp (debug_file_directory, flags, file_name,
+  desc = openp (search_path, flags, file_name,
 		O_RDONLY | O_BINARY, &absolute_name);
+  xfree (search_path);
   if (desc < 0)
     return NULL;
 
   sym_bfd = gdb_bfd_open (absolute_name, gnutarget, desc);
-  if (!sym_bfd)
-    {
-      xfree (absolute_name);
-      return NULL;
-    }
   xfree (absolute_name);
+  if (sym_bfd == NULL)
+    return NULL;
   bfd_set_cacheable (sym_bfd, 1);
 
   if (!bfd_check_format (sym_bfd, bfd_object))
