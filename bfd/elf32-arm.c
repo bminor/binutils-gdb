@@ -1,6 +1,5 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011, 2012, 2013 Free Software Foundation, Inc.
+   Copyright 1998-2013 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -13340,6 +13339,12 @@ allocate_dynrelocs_for_symbol (struct elf_link_hash_entry *h, void * inf)
       h->root.u.def.section = th->root.u.def.section;
       h->root.u.def.value = th->root.u.def.value & ~1;
     }
+
+  /* Make sure we are not applying ST_BRANCH_TO_ARM to symbols
+     for thumb-only targets.  */
+  if (using_thumb_only (htab)
+      && h->target_internal == ST_BRANCH_TO_ARM)
+    h->target_internal = ST_BRANCH_TO_THUMB;
 
   if (eh->dyn_relocs == NULL)
     return TRUE;

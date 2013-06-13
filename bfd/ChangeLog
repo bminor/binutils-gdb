@@ -1,3 +1,10 @@
+2013-06-13  Terry Guo  <terry.guo@arm.com>
+
+	PR ld/15302
+	* elf32-arm.c (allocate_dynrelocs_for_symbol): Transform
+	ST_BRANCH_TO_ARM into ST_BRANCH_TO_THUMB if the target only
+	supports thumb instructions.
+
 2013-06-11  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rl78.c (rl78_elf_relocate_section): Fix OPsub math.
