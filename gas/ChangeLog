@@ -1,3 +1,11 @@
+2013-06-13  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/15602
+	* config/tc-m68k.h (TC_CHECK_ADJUSTED_BROKEN_DOT_WORD): Define.
+	* config/tc-m68k.c (tc_m68k_check_adjusted_broken_word): New
+	function.  Generates an error if the adjusted offset is out of a
+	16-bit range.
+
 2013-06-12  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* config/tc-nios2.c (md_apply_fix):  Mask constant

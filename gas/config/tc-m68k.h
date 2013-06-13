@@ -188,3 +188,9 @@ extern void tc_m68k_frame_initial_instructions (void);
 /* However, follow compiler's guidance when it specifies encoding for LSDA.  */
 # define CFI_DIFF_LSDA_OK 1
 #endif
+
+struct broken_word;
+#define TC_CHECK_ADJUSTED_BROKEN_DOT_WORD(new_offset, brokw) \
+  tc_m68k_check_adjusted_broken_word ((offsetT) (new_offset), (brokw))
+extern void tc_m68k_check_adjusted_broken_word (offsetT,
+						struct broken_word *);

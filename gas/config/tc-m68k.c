@@ -8133,3 +8133,17 @@ tc_m68k_frame_initial_instructions (void)
   cfi_add_CFA_def_cfa (sp_regno, -DWARF2_CIE_DATA_ALIGNMENT);
   cfi_add_CFA_offset (DWARF2_DEFAULT_RETURN_COLUMN, DWARF2_CIE_DATA_ALIGNMENT);
 }
+
+/* Check and emit error if broken-word handling has failed to fix up a
+   case-table.	This is called from write.c, after doing everything it
+   knows about how to handle broken words.  */
+
+void
+tc_m68k_check_adjusted_broken_word (offsetT new_offset, struct broken_word *brokwP)
+{
+  if (new_offset > 32767 || new_offset < -32768)
+    as_bad_where (brokwP->frag->fr_file, brokwP->frag->fr_line,
+		  _("Adjusted signed .word (%#lx) overflows: `switch'-statement too large."),
+		  (long) new_offset);
+}
+
