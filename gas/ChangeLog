@@ -1,3 +1,8 @@
+2013-06-13  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* config/tc-mips.c (ISA_SUPPORTS_VIRT_ASE): Support micromips.
+	(ISA_SUPPORTS_VIRT64_ASE): Support 64-bit micromips.
+
 2013-06-13  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/15602

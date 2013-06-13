@@ -381,9 +381,12 @@ static int file_ase_mt;
 static int file_ase_virt;
 
 #define ISA_SUPPORTS_VIRT_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			       || mips_opts.isa == ISA_MIPS64R2)
+			       || mips_opts.isa == ISA_MIPS64R2		\
+			       || mips_opts.micromips)
 
-#define ISA_SUPPORTS_VIRT64_ASE (mips_opts.isa == ISA_MIPS64R2)
+#define ISA_SUPPORTS_VIRT64_ASE (mips_opts.isa == ISA_MIPS64R2		\
+				 || (mips_opts.micromips		\
+				     && ISA_HAS_64BIT_REGS (mips_opts.isa)))
 
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int file_mips_arch = CPU_UNKNOWN;
