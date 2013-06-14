@@ -1,3 +1,18 @@
+2013-06-14  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
+
+	Revert:
+
+	2011-09-05  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	PR gas/13024
+	* dwarf2dbg.c (pending_lines, pending_lines_tail): New variables.
+	(dwarf2_gen_line_info_1): Delete.
+	(dwarf2_push_line, dwarf2_flush_pending_lines): New functions.
+	(dwarf2_gen_line_info, dwarf2_emit_label): Use them.
+	(dwarf2_consume_line_info): Call dwarf2_flush_pending_lines.
+	(dwarf2_directive_loc): Push previous .locs instead of generating
+	them immediately.
+
 2013-06-13  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* config/tc-mips.c (ISA_SUPPORTS_VIRT_ASE): Support micromips.
