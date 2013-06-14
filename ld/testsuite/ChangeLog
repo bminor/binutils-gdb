@@ -1,3 +1,14 @@
+2013-06-14  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* ld-aarch64/ifunc-1-local.d: Replace hard-coded immediate offset
+	with regexp.
+	* ld-aarch64/ifunc-1.d: Likewise.
+	* ld-aarch64/ifunc-2-local.d: Likewise.
+	* ld-aarch64/ifunc-2.d: Likewise. 
+	* ld-aarch64/ifunc-3a.d: Likewise.
+	* ld-aarch64/ifunc-2-local.s: Change not to declare __GI_foo and foo
+	global.
+
 2013-06-13  Terry Guo  <terry.guo@arm.com>
 
 	PR ld/15302

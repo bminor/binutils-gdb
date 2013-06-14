@@ -4,5 +4,5 @@
 #target: aarch64-*-*
 
 #...
-[ \t0-9a-f]+:[ \t0-9a-f]+bl[ \t0-9a-f]+<\*ABS\*\+0x2e0@plt>
+[ \t0-9a-f]+:[ \t0-9a-f]+bl[ \t0-9a-f]+<\*ABS\*\+0x[0-9a-f]+@plt>
 #pass

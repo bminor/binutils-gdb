@@ -1,3 +1,7 @@
+2013-06-14  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* emulparams/aarch64elf.sh: Add IREL_IN_PLT.
+
 2013-06-12  Nick Clifton  <nickc@redhat.com>
 
 	* ldcref.c (output_one_cref): Place common definitions after
