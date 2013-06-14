@@ -4010,12 +4010,16 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
 		 internal symbol, we have updated addend.  */
 	      return bfd_reloc_ok;
 	    }
-	  /* FALLTHROUGH */
-	case R_AARCH64_JUMP26:
-	case R_AARCH64_CALL26:
 	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
 					   contents, rel->r_offset, value,
 					   signed_addend);
+
+	case R_AARCH64_JUMP26:
+	case R_AARCH64_CALL26:
+	  value = aarch64_resolve_relocation (r_type, place, value,
+					      signed_addend, weak_undef_p);
+	  return bfd_elf_aarch64_put_addend (input_bfd, hit_data, howto, value);
+
 	case R_AARCH64_LD64_GOT_LO12_NC:
 	case R_AARCH64_ADR_GOT_PAGE:
 	case R_AARCH64_GOT_LD_PREL19:
@@ -4079,9 +4083,8 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
 						     unresolved_reloc_p);
 	  value = aarch64_resolve_relocation (r_type, place, value,
 					      0, weak_undef_p);
-	  return _bfd_final_link_relocate (howto, input_bfd, input_section,
-					   contents, rel->r_offset, value,
-					   signed_addend);
+	  return bfd_elf_aarch64_put_addend (input_bfd, hit_data, howto, value);
+
 	case R_AARCH64_ADR_PREL_PG_HI21:
 	case R_AARCH64_ADD_ABS_LO12_NC:
 	  break;

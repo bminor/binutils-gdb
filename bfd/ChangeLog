@@ -1,3 +1,11 @@
+2013-06-14  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* elf64-aarch64.c (elf64_aarch64_final_link_relocate): Call
+	aarch64_resolve_relocation and bfd_elf_aarch64_put_addend to
+	handle the relocations of R_AARCH64_JUMP26, R_AARCH64_CALL26,
+	R_AARCH64_LD64_GOT_LO12_NC, R_AARCH64_ADR_GOT_PAGE and
+	R_AARCH64_GOT_LD_PREL19.
+
 2013-06-13  Terry Guo  <terry.guo@arm.com>
 
 	PR ld/15302

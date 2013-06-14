@@ -1,5 +1,10 @@
 2013-06-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* ld-aarch64/aarch64-elf.exp: Add 'ifunc-7c'.
+	* ld-aarch64/ifunc-7c.d: New test.
+
+2013-06-14  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* ld-aarch64/ifunc-1-local.d: Replace hard-coded immediate offset
 	with regexp.
 	* ld-aarch64/ifunc-1.d: Likewise.
