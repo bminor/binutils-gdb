@@ -1,3 +1,16 @@
+2013-06-14  Cary Coutant  <ccoutant@google.com>
+
+	* resolve.cc (Symbol::override_base): Don't override st_type
+	from plugin placeholder symbols.
+	(Symbol_table::resolve): Likewise.
+	(Symbol_table::should_override): Don't complain about TLS mismatch
+	if the TO symbol is a plugin placeholder.
+	* testsuite/Makefile.am (plugin_test_tls): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_test_tls.sh: New test script.
+	* testsuite/two_file_test_2_tls.cc: New test source.
+	* testsuite/two_file_test_tls.cc: New test source.
+
 2013-06-05  Alexander Ivchenko  <alexander.ivchenko@intel.com>
 
 	* layout.cc (Layout::set_segment_offsets): Taking care of the case when

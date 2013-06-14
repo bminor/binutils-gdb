@@ -1617,6 +1617,22 @@ empty.syms:
 	@echo "" >$@
 	@echo "Symbol table" >>$@
 
+if TLS
+
+check_PROGRAMS += plugin_test_tls
+check_SCRIPTS += plugin_test_tls.sh
+check_DATA += plugin_test_tls.err
+MOSTLYCLEANFILES += plugin_test_tls.err
+plugin_test_tls: two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms gcctestdir/ld plugin_test.so
+	$(CXXLINK) -Bgcctestdir/ -Wl,--no-demangle,--plugin,"./plugin_test.so",--plugin-opt,"_Z4f13iv" two_file_test_tls.o two_file_test_1.syms two_file_test_1b.syms two_file_test_2_tls.syms 2>plugin_test_tls.err
+plugin_test_tls.err: plugin_test_tls
+	@touch plugin_test_tls.err
+
+two_file_test_2_tls.syms: two_file_test_2_tls.o
+	$(TEST_READELF) -sW $< >$@ 2>/dev/null
+
+endif TLS
+
 MOSTLYCLEANFILES += unused.c
 unused.syms: unused.o
 	$(TEST_READELF) -sW $< >$@ 2>/dev/null

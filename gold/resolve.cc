@@ -96,7 +96,9 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
   this->override_version(version);
   this->u_.from_object.shndx = st_shndx;
   this->is_ordinary_shndx_ = is_ordinary;
-  this->type_ = sym.get_st_type();
+  // Don't override st_type from plugin placeholder symbols.
+  if (object->pluginobj() == NULL)
+    this->type_ = sym.get_st_type();
   this->binding_ = sym.get_st_bind();
   this->override_visibility(sym.get_st_visibility());
   this->nonvis_ = sym.get_st_nonvis();
@@ -343,15 +345,20 @@ Symbol_table::resolve(Sized_symbol<size>* to,
       this->candidate_odr_violations_[to->name()].insert(toloc);
     }
 
+  // Plugins don't provide a symbol type, so adopt the existing type
+  // if the FROM symbol is from a plugin.
+  elfcpp::STT fromtype = (object->pluginobj() != NULL
+			  ? to->type()
+			  : sym.get_st_type());
   unsigned int frombits = symbol_to_bits(sym.get_st_bind(),
                                          object->is_dynamic(),
 					 st_shndx, is_ordinary,
-                                         sym.get_st_type());
+                                         fromtype);
 
   bool adjust_common_sizes;
   bool adjust_dyndef;
   typename Sized_symbol<size>::Size_type tosize = to->symsize();
-  if (Symbol_table::should_override(to, frombits, sym.get_st_type(), OBJECT,
+  if (Symbol_table::should_override(to, frombits, fromtype, OBJECT,
 				    object, &adjust_common_sizes,
 				    &adjust_dyndef))
     {
@@ -445,9 +452,8 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
 			      to->type());
     }
 
-  if (to->type() == elfcpp::STT_TLS
-      ? fromtype != elfcpp::STT_TLS
-      : fromtype == elfcpp::STT_TLS)
+  if ((to->type() == elfcpp::STT_TLS) ^ (fromtype == elfcpp::STT_TLS)
+      && !to->is_placeholder())
     Symbol_table::report_resolve_problem(true,
 					 _("symbol '%s' used as both __thread "
 					   "and non-__thread"),
