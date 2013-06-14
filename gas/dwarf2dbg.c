@@ -169,6 +169,7 @@ struct line_subseg {
   subsegT subseg;
   struct line_entry *head;
   struct line_entry **ptail;
+  struct line_entry **pmove_tail;
 };
 
 struct line_seg {
@@ -238,10 +239,10 @@ generic_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
 }
 #endif
 
-/* Find or create an entry for SEG+SUBSEG in ALL_SEGS.  */
+/* Find or create (if CREATE_P) an entry for SEG+SUBSEG in ALL_SEGS.  */
 
 static struct line_subseg *
-get_line_subseg (segT seg, subsegT subseg)
+get_line_subseg (segT seg, subsegT subseg, bfd_boolean create_p)
 {
   static segT last_seg;
   static subsegT last_subseg;
@@ -256,6 +257,9 @@ get_line_subseg (segT seg, subsegT subseg)
   s = (struct line_seg *) hash_find (all_segs_hash, seg->name);
   if (s == NULL)
     {
+      if (!create_p)
+	return NULL;
+
       s = (struct line_seg *) xmalloc (sizeof (*s));
       s->next = NULL;
       s->seg = seg;
@@ -279,6 +283,7 @@ get_line_subseg (segT seg, subsegT subseg)
   lss->subseg = subseg;
   lss->head = NULL;
   lss->ptail = &lss->head;
+  lss->pmove_tail = &lss->head;
   *pss = lss;
 
  found_subseg:
@@ -302,7 +307,7 @@ dwarf2_gen_line_info_1 (symbolS *label, struct dwarf2_line_info *loc)
   e->label = label;
   e->loc = *loc;
 
-  lss = get_line_subseg (now_seg, now_subseg);
+  lss = get_line_subseg (now_seg, now_subseg, TRUE);
   *lss->ptail = e;
   lss->ptail = &e->next;
 }
@@ -394,6 +399,33 @@ dwarf2_emit_insn (int size)
 
   dwarf2_gen_line_info (frag_now_fix () - size, &loc);
   dwarf2_consume_line_info ();
+}
+
+/* Move all previously-emitted line entries for the current position by
+   DELTA bytes.  This function cannot be used to move the same entries
+   twice.  */
+
+void
+dwarf2_move_insn (int delta)
+{
+  struct line_subseg *lss;
+  struct line_entry *e;
+  valueT now;
+
+  if (delta == 0)
+    return;
+
+  lss = get_line_subseg (now_seg, now_subseg, FALSE);
+  if (!lss)
+    return;
+
+  now = frag_now_fix ();
+  while ((e = *lss->pmove_tail))
+    {
+      if (S_GET_VALUE (e->label) == now)
+	S_SET_VALUE (e->label, now + delta);
+      lss->pmove_tail = &e->next;
+    }
 }
 
 /* Called after the current line information has been either used with

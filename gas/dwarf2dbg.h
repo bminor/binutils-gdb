@@ -74,6 +74,8 @@ extern void dwarf2_gen_line_info (addressT addr, struct dwarf2_line_info *l);
 /* Must be called for each generated instruction.  */
 extern void dwarf2_emit_insn (int);
 
+void dwarf2_move_insn (int);
+
 /* Reset the state of the line number information to reflect that
    it has been used.  */
 extern void dwarf2_consume_line_info (void);

@@ -1,3 +1,8 @@
+2013-06-14  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
+
+	* gas/mips/loc-swap-3.d, gas/mips/loc-swap-3.s: New test.
+	* gas/mips/mips.exp: Run it.
+
 2013-06-13  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* gas/mips/micromips@virt.d: New file.

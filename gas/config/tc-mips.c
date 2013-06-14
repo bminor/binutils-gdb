@@ -4373,22 +4373,19 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   branch_disp = method == APPEND_SWAP ? insn_length (history) : 0;
 
 #ifdef OBJ_ELF
-  /* The value passed to dwarf2_emit_insn is the distance between
-     the beginning of the current instruction and the address that
-     should be recorded in the debug tables.  This is normally the
-     current address.
+  dwarf2_emit_insn (0);
+  /* We want MIPS16 and microMIPS debug info to use ISA-encoded addresses,
+     so "move" the instruction address accordingly.
 
-     For MIPS16/microMIPS debug info we want to use ISA-encoded
-     addresses, so we use -1 for an address higher by one than the
-     current one.
-
-     If the instruction produced is a branch that we will swap with
-     the preceding instruction, then we add the displacement by which
-     the branch will be moved backwards.  This is more appropriate
-     and for MIPS16/microMIPS code also prevents a debugger from
-     placing a breakpoint in the middle of the branch (and corrupting
-     code if software breakpoints are used).  */
-  dwarf2_emit_insn ((HAVE_CODE_COMPRESSION ? -1 : 0) + branch_disp);
+     Also, it doesn't seem appropriate for the assembler to reorder .loc
+     entries.  If this instruction is a branch that we are going to swap
+     with the previous instruction, the two instructions should be
+     treated as a unit, and the debug information for both instructions
+     should refer to the start of the branch sequence.  Using the
+     current position is certainly wrong when swapping a 32-bit branch
+     and a 16-bit delay slot, since the current position would then be
+     in the middle of a branch.  */
+  dwarf2_move_insn ((HAVE_CODE_COMPRESSION ? 1 : 0) - branch_disp);
 #endif
 
   relax32 = (mips_relax_branch
