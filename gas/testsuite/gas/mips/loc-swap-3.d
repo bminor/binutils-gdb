@@ -1,5 +1,6 @@
 #PROG: readelf
 #readelf: -wl
+#as: -32
 #name: MIPS DWARF-2 location information with branch swapping (3)
 #...
  Line Number Statements:

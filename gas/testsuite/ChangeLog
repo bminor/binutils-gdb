@@ -1,3 +1,7 @@
+2013-06-15  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/loc-swap-3.d: Require -32.
+
 2013-06-14  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
 
 	* gas/mips/loc-swap-3.d, gas/mips/loc-swap-3.s: New test.
