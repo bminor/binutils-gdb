@@ -1,3 +1,7 @@
+2013-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* se_allopcodes.h: Do not clear RETN/RETE/RETI.
+
 2012-04-09  Robin Getz  <robin.getz@analog.com>
 
 	* random_0017.S, random_0018.S, random_0025.S: New ASTAT shift tests.

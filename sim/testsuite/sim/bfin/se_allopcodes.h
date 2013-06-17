@@ -158,9 +158,6 @@ _next_instruction:
 	/* set up pointers to valid data (32Meg), to reduce address violations */
 	reset_dags
 	RETS = r0;
-	RETN = r0;
-	RETE = r0;
-	RETI = r0;
 
 	RTX;
 
