@@ -1,6 +1,6 @@
 #ld: -s
 #readelf: -r --wide
-#target: aarch64-*-*
+#target: aarch64*-*-*
 #source: ifunc-4.s
 
 #...

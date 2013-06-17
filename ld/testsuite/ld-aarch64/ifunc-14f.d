@@ -3,7 +3,7 @@
 #source: ifunc-14c.s
 #ld: -shared -z nocombreloc
 #readelf: -r --wide
-#target: aarch64-*-*
+#target: aarch64*-*-*
 
 #failif
 #...

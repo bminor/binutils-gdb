@@ -28,7 +28,7 @@
 if {!(([istarget "i?86-*-*"]
        || [istarget "x86_64-*-*"]
        || [istarget "powerpc*-*-*"]
-       || [istarget "aarch64-*-*"]
+       || [istarget "aarch64*-*-*"]
        || [istarget "sparc*-*-*"])
       && ([istarget "*-*-elf*"]
 	  || [istarget "*-*-nacl*"]

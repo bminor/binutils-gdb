@@ -1,7 +1,7 @@
 #source: ifunc-20.s
 #ld: -shared -z nocombreloc
 #readelf: -r --wide
-#target: aarch64-*-*
+#target: aarch64*-*-*
 
 Relocation section '.rela.ifunc' at offset 0x[0-9a-f]+ contains 1 entries:
 [ ]+Offset[ ]+Info[ ]+Type[ ]+.*

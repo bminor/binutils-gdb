@@ -1,7 +1,7 @@
 #source: ifunc-5-local.s
 #ld: -r
 #readelf: -r --wide
-#target: aarch64-*-*
+#target: aarch64*-*-*
 
 Relocation section '.rela.text' at .*
 [ ]+Offset[ ]+Info[ ]+Type[ ]+.*

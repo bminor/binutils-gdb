@@ -1,7 +1,7 @@
 #source: ifunc-7.s
 #ld: 
 #readelf: -r --wide
-#target: aarch64-*-*
+#target: aarch64*-*-*
 
 Relocation section '.rela.plt' at .*
 [ ]+Offset[ ]+Info[ ]+Type[ ]+.*
