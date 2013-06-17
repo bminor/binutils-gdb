@@ -1,3 +1,7 @@
+2013-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* .gitignore: Add /gcore.
+
 2013-06-13  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (try_open_dwop_file): Work around behaviour of
