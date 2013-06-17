@@ -1,3 +1,7 @@
+2013-06-17  Mike Frysinger  <vapier@gentoo.org>
+
+	* TODO: Add more notes.
+
 2013-06-09  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in ($(srcdir)/linux-fixed-code.h): Add
