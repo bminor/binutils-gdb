@@ -1,3 +1,10 @@
+2013-06-17  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (mips-opc.lo): Add rules to create automatic
+	dependency files.  Pass archdefs.
+	(micromips-opc.lo, mips16-opc.lo): Likewise.
+	* Makefile.in: Regenerate.
+
 2013-06-14  DJ Delorie  <dj@redhat.com>
 
 	* rx-decode.opc (rx_decode_opcode): Bit operations on
