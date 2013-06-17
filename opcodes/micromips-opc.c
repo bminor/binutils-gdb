@@ -110,6 +110,12 @@
 /* MIPS MCU (MicroController) ASE support.  */
 #define MC	ASE_MCU
 
+/* MIPS Enhanced VA Scheme.  */
+#define EVA	ASE_EVA
+
+/* TLB invalidate instruction support.  */
+#define TLBINV	ASE_EVA
+
 /* MIPS Virtualization ASE.  */
 #define IVIRT	ASE_VIRT
 #define IVIRT64	ASE_VIRT64
@@ -955,6 +961,8 @@ const struct mips_opcode micromips_opcodes[] =
 {"tgeu",    "s,t,|",	0x0000043c, 0xfc000fff,	RD_s|RD_t|TRAP,		0,		I1	},
 {"tgeu",    "s,j",	0x41600000, 0xffe00000,	RD_s|TRAP,		0,		I1	}, /* tgeiu */
 {"tgeu",    "s,I",	0,    (int) M_TGEU_I,	INSN_MACRO,		0,		I1	},
+{"tlbinv",  "",		0x0000437c, 0xffffffff,	INSN_TLB,		0,		0,	TLBINV	},
+{"tlbinvf", "",		0x0000537c, 0xffffffff,	INSN_TLB,		0,		0,	TLBINV	},
 {"tlbginv", "",		0x0000417c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
 {"tlbginvf","",		0x0000517c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
 {"tlbgp",   "",		0x0000017c, 0xffffffff,	INSN_TLB,		0,		0,	IVIRT	},
@@ -1007,6 +1015,55 @@ const struct mips_opcode micromips_opcodes[] =
 {"xor",     "d,v,t",	0x00000310, 0xfc0007ff,	WR_d|RD_s|RD_t,		0,		I1	},
 {"xor",     "t,r,I",	0,    (int) M_XOR_I,	INSN_MACRO,		0,		I1	},
 {"xori",    "t,r,i",	0x70000000, 0xfc000000,	WR_t|RD_s,		0,		I1	},
+/* microMIPS Enhanced VA Scheme */
+{"lbue",   "t,+j(b)",	0x60006000, 0xfc00fe00, RD_b|WR_t,	0,      0,	EVA	},
+{"lbue",   "t,o(b)",	0,    (int) M_LBUE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lbue",   "t,A(b)",	0,    (int) M_LBUE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lhue",   "t,+j(b)",	0x60006200, 0xfc00fe00, RD_b|WR_t,	0,      0,	EVA	},
+{"lhue",   "t,o(b)",	0,    (int) M_LHUE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lhue",   "t,A(b)",	0,    (int) M_LHUE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lbe",    "t,+j(b)",	0x60006800, 0xfc00fe00, RD_b|WR_t,	0,      0,	EVA	},
+{"lbe",    "t,o(b)",	0,    (int) M_LBE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lbe",    "t,A(b)",	0,    (int) M_LBE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lhe",    "t,+j(b)",	0x60006a00, 0xfc00fe00, RD_b|WR_t,	0,      0,	EVA	},
+{"lhe",    "t,o(b)",	0,    (int) M_LHE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lhe",    "t,A(b)",	0,    (int) M_LHE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lle",    "t,+j(b)",	0x60006c00, 0xfc00fe00, RD_b|WR_t,	0,      0,	EVA	},
+{"lle",    "t,o(b)",	0,    (int) M_LLE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lle",    "t,A(b)",	0,    (int) M_LLE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwe",    "t,+j(b)",	0x60006e00, 0xfc00fe00, RD_b|WR_t,	0,      0,	EVA	},
+{"lwe",    "t,o(b)",	0,    (int) M_LWE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwe",    "t,A(b)",	0,    (int) M_LWE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwle",   "t,+j(b)",	0x60006400, 0xfc00fe00, RD_b|WR_t,	0,      0,	EVA	},
+{"lwle",   "t,o(b)",	0,    (int) M_LWLE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwle",   "t,A(b)",	0,    (int) M_LWLE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwre",   "t,+j(b)",	0x60006600, 0xfc00fe00, RD_b|WR_t,	0,      0,	EVA	},
+{"lwre",   "t,o(b)",	0,    (int) M_LWRE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwre",   "t,A(b)",	0,    (int) M_LWRE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"sbe",    "t,+j(b)",	0x6000a800, 0xfc00fe00, SM|RD_b|WR_t,	0,      0,	EVA	},
+{"sbe",    "t,o(b)",	0,    (int) M_SBE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"sbe",    "t,A(b)",	0,    (int) M_SBE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"sce",    "t,+j(b)",	0x6000ac00, 0xfc00fe00, SM|RD_t|WR_t|RD_b,	0,      0,	EVA	},
+{"sce",    "t,o(b)",	0,    (int) M_SCE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"sce",    "t,A(b)",	0,    (int) M_SCE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"she",    "t,+j(b)",	0x6000aa00, 0xfc00fe00, SM|RD_b|WR_t,	0,      0,	EVA	},
+{"she",    "t,o(b)",	0,    (int) M_SHE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"she",    "t,A(b)",	0,    (int) M_SHE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"swe",    "t,+j(b)",	0x6000ae00, 0xfc00fe00, SM|RD_b|WR_t,	0,      0,	EVA	},
+{"swe",    "t,o(b)",	0,    (int) M_SWE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"swe",    "t,A(b)",	0,    (int) M_SWE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"swle",   "t,+j(b)",	0x6000a000, 0xfc00fe00, SM|RD_b|WR_t,	0,      0,	EVA	},
+{"swle",   "t,o(b)",	0,    (int) M_SWLE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"swle",   "t,A(b)",	0,    (int) M_SWLE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"swre",   "t,+j(b)",	0x6000a200, 0xfc00fe00, SM|RD_b|WR_t,	0,      0,	EVA	},
+{"swre",   "t,o(b)",	0,    (int) M_SWRE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"swre",   "t,A(b)",	0,    (int) M_SWRE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"cachee", "k,+j(b)",	0x6000a600, 0xfc00fe00, RD_b,		0,      0,	EVA	},
+{"cachee", "k,o(b)",	0,    (int) M_CACHEE_OB,INSN_MACRO,	0,      0,	EVA	},
+{"cachee", "k,A(b)",	0,    (int) M_CACHEE_AB,INSN_MACRO,	0,      0,	EVA	},
+{"prefe",  "k,+j(b)",	0x6000a400, 0xfc00fe00, RD_b,		0,      0,	EVA	},
+{"prefe",  "k,o(b)",	0,    (int) M_PREFE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"prefe",  "k,A(b)",	0,    (int) M_PREFE_AB,	INSN_MACRO,	0,      0,	EVA	},
 /* MIPS DSP ASE.  */
 {"absq_s.ph", "t,s",	0x0000113c, 0xfc00ffff,	WR_t|RD_s,		0,		0,	D32	},
 {"absq_s.w", "t,s",	0x0000213c, 0xfc00ffff,	WR_t|RD_s,		0,		0,	D32	},

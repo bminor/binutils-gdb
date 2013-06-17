@@ -194,6 +194,12 @@
 /* MIPS MCU (MicroController) ASE support.  */
 #define MC	ASE_MCU
 
+/* MIPS Enhanced VA Scheme.  */
+#define EVA	ASE_EVA
+
+/* TLB invalidate instruction support.  */
+#define TLBINV	ASE_EVA
+
 /* The order of overloaded instructions matters.  Label arguments and
    register arguments look the same. Instructions that can have either
    for arguments must apear in the correct order in this table for the
@@ -1640,6 +1646,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"tgeu",    "s,t,q",	0x00000031, 0xfc00003f, RD_s|RD_t|TRAP,		0,		I2	},
 {"tgeu",    "s,j",	0x04090000, 0xfc1f0000, RD_s|TRAP,		0,		I2	}, /* tgeiu */
 {"tgeu",    "s,I",	0,    (int) M_TGEU_I,	INSN_MACRO,		0,		I2	},
+{"tlbinv",  "",         0x42000003, 0xffffffff, INSN_TLB,       	0,		0,	TLBINV  },
+{"tlbinvf", "",         0x42000004, 0xffffffff, INSN_TLB,       	0,		0,	TLBINV	},
 {"tlbp",    "",         0x42000008, 0xffffffff, INSN_TLB,       	0,		I1   	},
 {"tlbr",    "",         0x42000001, 0xffffffff, INSN_TLB,       	0,		I1   	},
 {"tlbwi",   "",         0x42000002, 0xffffffff, INSN_TLB,       	0,		I1   	},
@@ -2296,6 +2304,55 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"punpcklwd",	"D,S,T",	0x4b80000b,	0xffe0003f,	RD_S|RD_T|WR_D|FP_D,	0,	IL2F|IL3A	},
 {"sequ",	"S,T",		0x46800032,	0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	0,	IL2E	},
 {"sequ",	"S,T",		0x4b80000c,	0xffe007ff,	RD_S|RD_T|WR_CC|FP_D,	0,	IL2F|IL3A	},
+/* MIPS Enhanced VA Scheme */
+{"lbue",   "t,+j(b)",	0x7c000028, 0xfc00007f, LDD|RD_b|WR_t,	0,      0,	EVA	},
+{"lbue",   "t,o(b)",	0,    (int) M_LBUE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lbue",   "t,A(b)",	0,    (int) M_LBUE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lhue",   "t,+j(b)",	0x7c000029, 0xfc00007f, LDD|RD_b|WR_t,	0,      0,	EVA	},
+{"lhue",   "t,o(b)",	0,    (int) M_LHUE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lhue",   "t,A(b)",	0,    (int) M_LHUE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lbe",    "t,+j(b)",	0x7c00002c, 0xfc00007f, LDD|RD_b|WR_t,	0,      0,	EVA	},
+{"lbe",    "t,o(b)",	0,    (int) M_LBE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lbe",    "t,A(b)",	0,    (int) M_LBE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lhe",    "t,+j(b)",	0x7c00002d, 0xfc00007f, LDD|RD_b|WR_t,	0,      0,	EVA	},
+{"lhe",    "t,o(b)",	0,    (int) M_LHE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lhe",    "t,A(b)",	0,    (int) M_LHE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lle",    "t,+j(b)",	0x7c00002e, 0xfc00007f, LDD|RD_b|WR_t,	0,      0,	EVA	},
+{"lle",    "t,o(b)",	0,    (int) M_LLE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lle",    "t,A(b)",	0,    (int) M_LLE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwe",    "t,+j(b)",	0x7c00002f, 0xfc00007f, LDD|RD_b|WR_t,	0,      0,	EVA	},
+{"lwe",    "t,o(b)",	0,    (int) M_LWE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwe",    "t,A(b)",	0,    (int) M_LWE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwle",   "t,+j(b)",	0x7c000019, 0xfc00007f, LDD|RD_b|WR_t,	0,      0,	EVA	},
+{"lwle",   "t,o(b)",	0,    (int) M_LWLE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwle",   "t,A(b)",	0,    (int) M_LWLE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwre",   "t,+j(b)",	0x7c00001a, 0xfc00007f, LDD|RD_b|WR_t,	0,      0,	EVA	},
+{"lwre",   "t,o(b)",	0,    (int) M_LWRE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"lwre",   "t,A(b)",	0,    (int) M_LWRE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"sbe",    "t,+j(b)",	0x7c00001c, 0xfc00007f, SM|RD_t|RD_b,	0,      0,	EVA	},
+{"sbe",    "t,o(b)",	0,    (int) M_SBE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"sbe",    "t,A(b)",	0,    (int) M_SBE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"sce",    "t,+j(b)",	0x7c00001e, 0xfc00007f, SM|RD_t|WR_t|RD_b,	0,      0,	EVA	},
+{"sce",    "t,o(b)",	0,    (int) M_SCE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"sce",    "t,A(b)",	0,    (int) M_SCE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"she",    "t,+j(b)",	0x7c00001d, 0xfc00007f, SM|RD_t|RD_b,	0,      0,	EVA	},
+{"she",    "t,o(b)",	0,    (int) M_SHE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"she",    "t,A(b)",	0,    (int) M_SHE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"swe",    "t,+j(b)",	0x7c00001f, 0xfc00007f, SM|RD_t|RD_b,	0,      0,	EVA	},
+{"swe",    "t,o(b)",	0,    (int) M_SWE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"swe",    "t,A(b)",	0,    (int) M_SWE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"swle",   "t,+j(b)",	0x7c000021, 0xfc00007f, SM|RD_t|RD_b,	0,      0,	EVA	},
+{"swle",   "t,o(b)",	0,    (int) M_SWLE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"swle",   "t,A(b)",	0,    (int) M_SWLE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"swre",   "t,+j(b)",	0x7c000022, 0xfc00007f, SM|RD_t|RD_b,	0,      0,	EVA	},
+{"swre",   "t,o(b)",	0,    (int) M_SWRE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"swre",   "t,A(b)",	0,    (int) M_SWRE_AB,	INSN_MACRO,	0,      0,	EVA	},
+{"cachee", "k,+j(b)",	0x7c00001b, 0xfc00007f, RD_b,		0,      0,	EVA	},
+{"cachee", "k,o(b)",	0,    (int) M_CACHEE_OB,INSN_MACRO,	0,      0,	EVA	},
+{"cachee", "k,A(b)",	0,    (int) M_CACHEE_AB,INSN_MACRO,	0,      0,	EVA	},
+{"prefe",  "k,+j(b)",	0x7c000023, 0xfc00007f, RD_b,		0,      0,	EVA	},
+{"prefe",  "k,o(b)",	0,    (int) M_PREFE_OB,	INSN_MACRO,	0,      0,	EVA	},
+{"prefe",  "k,A(b)",	0,    (int) M_PREFE_AB,	INSN_MACRO,	0,      0,	EVA	},
 /* No hazard protection on coprocessor instructions--they shouldn't
    change the state of the processor and if they do it's up to the
    user to put in nops as necessary.  These are at the end so that the

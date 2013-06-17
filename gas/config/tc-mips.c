@@ -216,6 +216,7 @@ struct mips_set_options
   int ase_smartmips;
   int ase_dsp;
   int ase_dspr2;
+  int ase_eva;
   int ase_mt;
   int ase_mcu;
   int ase_virt;
@@ -292,8 +293,9 @@ static int file_mips_single_float = 0;
 static struct mips_set_options mips_opts =
 {
   /* isa */ ISA_UNKNOWN, /* ase_mips3d */ -1, /* ase_mdmx */ -1,
-  /* ase_smartmips */ 0, /* ase_dsp */ -1, /* ase_dspr2 */ -1, /* ase_mt */ -1,
-  /* ase_mcu */ -1, /* ase_virt */ -1, /* mips16 */ -1,/* micromips */ -1,
+  /* ase_smartmips */ 0, /* ase_dsp */ -1, /* ase_dspr2 */ -1,
+  /* ase_eva */ -1, /* ase_mt */ -1, /* ase_mcu */ -1,
+  /* ase_virt */ -1, /* mips16 */ -1, /* micromips */ -1,
   /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
   /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* gp32 */ 0,
   /* fp32 */ 0, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
@@ -364,6 +366,14 @@ static int file_ase_dspr2;
 #define ISA_SUPPORTS_DSPR2_ASE (mips_opts.isa == ISA_MIPS32R2		\
 			        || mips_opts.isa == ISA_MIPS64R2	\
 				|| mips_opts.micromips)
+
+/* True if -meva was passed or implied by arguments passed on the
+   command line (e.g., by -march).  */
+static int file_ase_eva;
+
+#define ISA_SUPPORTS_EVA_ASE (mips_opts.isa == ISA_MIPS32R2		\
+			      || mips_opts.isa == ISA_MIPS64R2		\
+			      || mips_opts.micromips)
 
 /* True if -mmt was passed or implied by arguments passed on the
    command line (e.g., by -march).  */
@@ -1217,6 +1227,10 @@ static int mips_relax_branch;
 #define IS_SEXT_12BIT_NUM(x)						\
   (((((x) & 0xfff) ^ 0x800LL) - 0x800LL) == (x))
 
+/* Is the given value a sign-extended 9-bit value?  */
+#define IS_SEXT_9BIT_NUM(x)						\
+  (((((x) & 0x1ff) ^ 0x100LL) - 0x100LL) == (x))
+
 /* Is the given value a zero-extended 32-bit value?  Or a negated one?  */
 #define IS_ZEXT_32BIT_NUM(x)						\
   (((x) &~ (offsetT) 0xffffffff) == 0					\
@@ -1411,6 +1425,7 @@ struct mips_cpu_info
 #define MIPS_CPU_ASE_DSPR2	0x0040	/* CPU implements DSP R2 ASE */
 #define MIPS_CPU_ASE_MCU	0x0080	/* CPU implements MCU ASE */
 #define MIPS_CPU_ASE_VIRT	0x0100  /* CPU implements Virtualization ASE */
+#define MIPS_CPU_ASE_EVA	0x0200  /* CPU implements EVA ASE */
 
 static const struct mips_cpu_info *mips_parse_cpu (const char *, const char *);
 static const struct mips_cpu_info *mips_cpu_info_from_isa (int);
@@ -2268,6 +2283,8 @@ is_opcode_valid (const struct mips_opcode *mo)
     ase |= ASE_DSP64;
   if (mips_opts.ase_dspr2)
     ase |= ASE_DSPR2;
+  if (mips_opts.ase_eva)
+    ase |= ASE_EVA;
   if (mips_opts.ase_mt)
     ase |= ASE_MT;
   if (mips_opts.ase_mips3d)
@@ -5076,6 +5093,10 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	      INSERT_OPERAND (0, SEQI, insn, va_arg (args, int));
 	      continue;
 
+	    case 'j':
+	      INSERT_OPERAND (mips_opts.micromips, EVAOFFSET, insn, va_arg (args, int));
+	      continue;
+
 	    default:
 	      abort ();
 	    }
@@ -6453,7 +6474,7 @@ macro (struct mips_cl_insn *ip)
   const char *fmt;
   int likely = 0;
   int coproc = 0;
-  int off12 = 0;
+  int offbits = 16;
   int call = 0;
   int jals = 0;
   int dbl = 0;
@@ -6461,7 +6482,6 @@ macro (struct mips_cl_insn *ip)
   int ust = 0;
   int lp = 0;
   int ab = 0;
-  int off0 = 0;
   int off;
   offsetT maxnum;
   bfd_reloc_code_real_type r;
@@ -8101,13 +8121,111 @@ macro (struct mips_cl_insn *ip)
 
       break;
 
+    case M_LBUE_AB:
+      ab = 1;
+    case M_LBUE_OB:
+      s = "lbue";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_LHUE_AB:
+      ab = 1;
+    case M_LHUE_OB:
+      s = "lhue";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_LBE_AB:
+      ab = 1;
+    case M_LBE_OB:
+      s = "lbe";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_LHE_AB:
+      ab = 1;
+    case M_LHE_OB:
+      s = "lhe";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_LLE_AB:
+      ab = 1;
+    case M_LLE_OB:
+      s = "lle";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_LWE_AB:
+      ab = 1;
+    case M_LWE_OB:
+      s = "lwe";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_LWLE_AB:
+      ab = 1;
+    case M_LWLE_OB:
+      s = "lwle";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_LWRE_AB:
+      ab = 1;
+    case M_LWRE_OB:
+      s = "lwre";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_SBE_AB:
+      ab = 1;
+    case M_SBE_OB:
+      s = "sbe";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_SCE_AB:
+      ab = 1;
+    case M_SCE_OB:
+      s = "sce";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_SHE_AB:
+      ab = 1;
+    case M_SHE_OB:
+      s = "she";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_SWE_AB:
+      ab = 1;
+    case M_SWE_OB:
+      s = "swe";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_SWLE_AB:
+      ab = 1;
+    case M_SWLE_OB:
+      s = "swle";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
+    case M_SWRE_AB:
+      ab = 1;
+    case M_SWRE_OB:
+      s = "swre";
+      fmt = "t,+j(b)";
+      offbits = 9;
+      goto ld_st;
     case M_ACLR_AB:
       ab = 1;
     case M_ACLR_OB:
       s = "aclr";
       treg = EXTRACT_OPERAND (mips_opts.micromips, 3BITPOS, *ip);
       fmt = "\\,~(b)";
-      off12 = 1;
+      offbits = 12;
       goto ld_st;
     case M_ASET_AB:
       ab = 1;
@@ -8115,7 +8233,7 @@ macro (struct mips_cl_insn *ip)
       s = "aset";
       treg = EXTRACT_OPERAND (mips_opts.micromips, 3BITPOS, *ip);
       fmt = "\\,~(b)";
-      off12 = 1;
+      offbits = 12;
       goto ld_st;
     case M_LB_AB:
       ab = 1;
@@ -8162,7 +8280,7 @@ macro (struct mips_cl_insn *ip)
     case M_LWC2_OB:
       s = "lwc2";
       fmt = COP12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld_st;
@@ -8179,14 +8297,14 @@ macro (struct mips_cl_insn *ip)
     case M_LWL_OB:
       s = "lwl";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_LWR_AB:
       ab = 1;
     case M_LWR_OB:
       s = "lwr";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_LDC1_AB:
       ab = 1;
@@ -8200,7 +8318,7 @@ macro (struct mips_cl_insn *ip)
     case M_LDC2_OB:
       s = "ldc2";
       fmt = COP12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld_st;
@@ -8223,35 +8341,35 @@ macro (struct mips_cl_insn *ip)
     case M_LDL_OB:
       s = "ldl";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_LDR_AB:
       ab = 1;
     case M_LDR_OB:
       s = "ldr";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_LL_AB:
       ab = 1;
     case M_LL_OB:
       s = "ll";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld;
     case M_LLD_AB:
       ab = 1;
     case M_LLD_OB:
       s = "lld";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld;
     case M_LWU_AB:
       ab = 1;
     case M_LWU_OB:
       s = "lwu";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld;
     case M_LWP_AB:
       ab = 1;
@@ -8259,7 +8377,7 @@ macro (struct mips_cl_insn *ip)
       gas_assert (mips_opts.micromips);
       s = "lwp";
       fmt = "t,~(b)";
-      off12 = 1;
+      offbits = 12;
       lp = 1;
       goto ld;
     case M_LDP_AB:
@@ -8268,7 +8386,7 @@ macro (struct mips_cl_insn *ip)
       gas_assert (mips_opts.micromips);
       s = "ldp";
       fmt = "t,~(b)";
-      off12 = 1;
+      offbits = 12;
       lp = 1;
       goto ld;
     case M_LWM_AB:
@@ -8277,7 +8395,7 @@ macro (struct mips_cl_insn *ip)
       gas_assert (mips_opts.micromips);
       s = "lwm";
       fmt = "n,~(b)";
-      off12 = 1;
+      offbits = 12;
       goto ld_st;
     case M_LDM_AB:
       ab = 1;
@@ -8285,7 +8403,7 @@ macro (struct mips_cl_insn *ip)
       gas_assert (mips_opts.micromips);
       s = "ldm";
       fmt = "n,~(b)";
-      off12 = 1;
+      offbits = 12;
       goto ld_st;
 
     ld:
@@ -8331,7 +8449,7 @@ macro (struct mips_cl_insn *ip)
     case M_SWC2_OB:
       s = "swc2";
       fmt = COP12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld_st;
@@ -8348,42 +8466,56 @@ macro (struct mips_cl_insn *ip)
     case M_SWL_OB:
       s = "swl";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_SWR_AB:
       ab = 1;
     case M_SWR_OB:
       s = "swr";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_SC_AB:
       ab = 1;
     case M_SC_OB:
       s = "sc";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_SCD_AB:
       ab = 1;
     case M_SCD_OB:
       s = "scd";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_CACHE_AB:
       ab = 1;
     case M_CACHE_OB:
       s = "cache";
       fmt = mips_opts.micromips ? "k,~(b)" : "k,o(b)";
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
+      goto ld_st;
+    case M_CACHEE_AB:
+      ab = 1;
+    case M_CACHEE_OB:
+      s = "cachee";
+      fmt = "k,+j(b)";
+      offbits = 9;
       goto ld_st;
     case M_PREF_AB:
       ab = 1;
     case M_PREF_OB:
       s = "pref";
       fmt = !mips_opts.micromips ? "k,o(b)" : "k,~(b)";
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
+      goto ld_st;
+    case M_PREFE_AB:
+      ab = 1;
+    case M_PREFE_OB:
+      s = "prefe";
+      fmt = "k,+j(b)";
+      offbits = 9;
       goto ld_st;
     case M_SDC1_AB:
       ab = 1;
@@ -8397,7 +8529,7 @@ macro (struct mips_cl_insn *ip)
     case M_SDC2_OB:
       s = "sdc2";
       fmt = COP12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld_st;
@@ -8421,14 +8553,14 @@ macro (struct mips_cl_insn *ip)
     case M_SDL_OB:
       s = "sdl";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_SDR_AB:
       ab = 1;
     case M_SDR_OB:
       s = "sdr";
       fmt = MEM12_FMT;
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       goto ld_st;
     case M_SWP_AB:
       ab = 1;
@@ -8436,7 +8568,7 @@ macro (struct mips_cl_insn *ip)
       gas_assert (mips_opts.micromips);
       s = "swp";
       fmt = "t,~(b)";
-      off12 = 1;
+      offbits = 12;
       goto ld_st;
     case M_SDP_AB:
       ab = 1;
@@ -8444,7 +8576,7 @@ macro (struct mips_cl_insn *ip)
       gas_assert (mips_opts.micromips);
       s = "sdp";
       fmt = "t,~(b)";
-      off12 = 1;
+      offbits = 12;
       goto ld_st;
     case M_SWM_AB:
       ab = 1;
@@ -8452,7 +8584,7 @@ macro (struct mips_cl_insn *ip)
       gas_assert (mips_opts.micromips);
       s = "swm";
       fmt = "n,~(b)";
-      off12 = 1;
+      offbits = 12;
       goto ld_st;
     case M_SDM_AB:
       ab = 1;
@@ -8460,7 +8592,7 @@ macro (struct mips_cl_insn *ip)
       gas_assert (mips_opts.micromips);
       s = "sdm";
       fmt = "n,~(b)";
-      off12 = 1;
+      offbits = 12;
 
     ld_st:
       tempreg = AT;
@@ -8490,16 +8622,23 @@ macro (struct mips_cl_insn *ip)
 
 	  expr1.X_add_number = offset_expr.X_add_number;
 	  normalize_address_expr (&expr1);
-	  if (!off12 && !IS_SEXT_16BIT_NUM (expr1.X_add_number))
+	  if ((offbits == 0 || offbits == 16)
+	      && !IS_SEXT_16BIT_NUM (expr1.X_add_number))
 	    {
 	      expr1.X_add_number = ((expr1.X_add_number + 0x8000)
 				    & ~(bfd_vma) 0xffff);
 	      hipart = 1;
 	    }
-	  else if (off12 && !IS_SEXT_12BIT_NUM (expr1.X_add_number))
+	  else if (offbits == 12 && !IS_SEXT_12BIT_NUM (expr1.X_add_number))
 	    {
 	      expr1.X_add_number = ((expr1.X_add_number + 0x800)
 				    & ~(bfd_vma) 0xfff);
+	      hipart = 1;
+	    }
+	  else if (offbits == 9 && !IS_SEXT_9BIT_NUM (expr1.X_add_number))
+	    {
+	      expr1.X_add_number = ((expr1.X_add_number + 0x100)
+				    & ~(bfd_vma) 0x1ff);
 	      hipart = 1;
 	    }
 	  if (hipart)
@@ -8510,7 +8649,7 @@ macro (struct mips_cl_insn *ip)
 			     tempreg, tempreg, breg);
 	      breg = tempreg;
 	    }
-	  if (off0)
+	  if (offbits == 0)
 	    {
 	      if (offset_expr.X_add_number == 0)
 		tempreg = breg;
@@ -8519,20 +8658,20 @@ macro (struct mips_cl_insn *ip)
 			     "t,r,j", tempreg, breg, BFD_RELOC_LO16);
 	      macro_build (NULL, s, fmt, treg, tempreg);
 	    }
-	  else if (!off12)
+	  else if (offbits == 16)
 	    macro_build (&offset_expr, s, fmt, treg, BFD_RELOC_LO16, breg);
 	  else
 	    macro_build (NULL, s, fmt,
 			 treg, (unsigned long) offset_expr.X_add_number, breg);
 	}
-      else if (off12 || off0)
+      else if (offbits != 16)
 	{
-	  /* A 12-bit or 0-bit offset field is too narrow to be used
-	     for a low-part relocation, so load the whole address into
-	     the auxillary register.  In the case of "A(b)" addresses,
-	     we first load absolute address "A" into the register and
-	     then add base register "b".  In the case of "o(b)" addresses,
-	     we simply need to add 16-bit offset "o" to base register "b", and
+	  /* The offset field is too narrow to be used for a low-part
+	     relocation, so load the whole address into the auxillary
+	     register.  In the case of "A(b)" addresses, we first load
+	     absolute address "A" into the register and then add base
+	     register "b".  In the case of "o(b)" addresses, we simply
+	     need to add 16-bit offset "o" to base register "b", and
 	     offset_reloc already contains the relocations associated
 	     with "o".  */
 	  if (ab)
@@ -8547,7 +8686,7 @@ macro (struct mips_cl_insn *ip)
 			 tempreg, breg, -1,
 			 offset_reloc[0], offset_reloc[1], offset_reloc[2]);
 	  expr1.X_add_number = 0;
-	  if (off0)
+	  if (offbits == 0)
 	    macro_build (NULL, s, fmt, treg, tempreg);
 	  else
 	    macro_build (NULL, s, fmt,
@@ -9360,14 +9499,14 @@ macro (struct mips_cl_insn *ip)
       ab = 1;
     case M_SAA_OB:
       s = "saa";
-      off0 = 1;
+      offbits = 0;
       fmt = "t,(b)";
       goto ld_st;
     case M_SAAD_AB:
       ab = 1;
     case M_SAAD_OB:
       s = "saad";
-      off0 = 1;
+      offbits = 0;
       fmt = "t,(b)";
       goto ld_st;
 
@@ -10029,7 +10168,7 @@ macro (struct mips_cl_insn *ip)
     case M_ULW:
       s = "lwl";
       s2 = "lwr";
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       off = 3;
       goto uld_st;
     case M_ULD_A:
@@ -10037,7 +10176,7 @@ macro (struct mips_cl_insn *ip)
     case M_ULD:
       s = "ldl";
       s2 = "ldr";
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       off = 7;
       goto uld_st;
     case M_USH_A:
@@ -10053,7 +10192,7 @@ macro (struct mips_cl_insn *ip)
     case M_USW:
       s = "swl";
       s2 = "swr";
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       off = 3;
       ust = 1;
       goto uld_st;
@@ -10062,7 +10201,7 @@ macro (struct mips_cl_insn *ip)
     case M_USD:
       s = "sdl";
       s2 = "sdr";
-      off12 = mips_opts.micromips;
+      offbits = (mips_opts.micromips ? 12 : 16);
       off = 7;
       ust = 1;
 
@@ -10084,7 +10223,7 @@ macro (struct mips_cl_insn *ip)
 	  tempreg = treg;
 	  ep = &expr1;
 	}
-      else if (off12
+      else if (offbits == 12
 	       && (offset_expr.X_op != O_constant
 		   || !IS_SEXT_12BIT_NUM (offset_expr.X_add_number)
 		   || !IS_SEXT_12BIT_NUM (offset_expr.X_add_number + off)))
@@ -10110,7 +10249,7 @@ macro (struct mips_cl_insn *ip)
 
       if (!target_big_endian)
 	ep->X_add_number += off;
-      if (!off12)
+      if (offbits != 12)
 	macro_build (ep, s, "t,o(b)", tempreg, BFD_RELOC_LO16, breg);
       else
 	macro_build (NULL, s, "t,~(b)",
@@ -10120,7 +10259,7 @@ macro (struct mips_cl_insn *ip)
 	ep->X_add_number -= off;
       else
 	ep->X_add_number += off;
-      if (!off12)
+      if (offbits != 12)
 	macro_build (ep, s2, "t,o(b)", tempreg, BFD_RELOC_LO16, breg);
       else
 	macro_build (NULL, s2, "t,~(b)",
@@ -10471,6 +10610,7 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'a': USE_BITS (OP_MASK_OFFSET_A,	OP_SH_OFFSET_A); break;
 	  case 'b': USE_BITS (OP_MASK_OFFSET_B,	OP_SH_OFFSET_B); break;
 	  case 'c': USE_BITS (OP_MASK_OFFSET_C,	OP_SH_OFFSET_C); break;
+	  case 'j': USE_BITS (OP_MASK_EVAOFFSET, OP_SH_EVAOFFSET); break;
 
 	  default:
 	    as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
@@ -10632,6 +10772,7 @@ validate_micromips_insn (const struct mips_opcode *opc)
 	  case 'F': USE_BITS (INSMSB);	break;
 	  case 'G': USE_BITS (EXTMSBD);	break;
 	  case 'H': USE_BITS (EXTMSBD);	break;
+	  case 'j': USE_BITS (EVAOFFSET);	break;
 	  default:
 	    as_bad (_("Internal error: bad mips opcode "
 		      "(unknown extension operand type `%c%c'): %s %s"),
@@ -11737,6 +11878,35 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  if (!reg_lookup (&s, RTYPE_FPU, &regno))
 		    break;
 		  INSERT_OPERAND (0, FZ, *ip, regno);
+		  continue;
+
+		case 'j':
+		  {
+		    int shift = 8;
+		    size_t i;
+		    /* Check whether there is only a single bracketed expression
+		       left.  If so, it must be the base register and the
+		       constant must be zero.  */
+		    if (*s == '(' && strchr (s + 1, '(') == 0)
+		      continue;
+
+		    /* If this value won't fit into the offset, then go find
+		       a macro that will generate a 16- or 32-bit offset code
+		       pattern.  */
+		    i = my_getSmallExpression (&imm_expr, imm_reloc, s);
+		    if ((i == 0 && (imm_expr.X_op != O_constant
+				    || imm_expr.X_add_number >= 1 << shift
+				    || imm_expr.X_add_number < -1 << shift))
+			|| i > 0)
+		      {
+			imm_expr.X_op = O_absent;
+			break;
+		      }
+		    INSERT_OPERAND (mips_opts.micromips, EVAOFFSET, *ip,
+				    imm_expr.X_add_number);
+		    imm_expr.X_op = O_absent;
+		    s = expr_end;
+		  }
 		  continue;
 
 		default:
@@ -14559,6 +14729,8 @@ enum options
     OPTION_NO_SMARTMIPS,
     OPTION_DSPR2,
     OPTION_NO_DSPR2,
+    OPTION_EVA,
+    OPTION_NO_EVA,
     OPTION_MICROMIPS,
     OPTION_NO_MICROMIPS,
     OPTION_MCU,
@@ -14655,6 +14827,8 @@ struct option md_longopts[] =
   {"mno-smartmips", no_argument, NULL, OPTION_NO_SMARTMIPS},
   {"mdspr2", no_argument, NULL, OPTION_DSPR2},
   {"mno-dspr2", no_argument, NULL, OPTION_NO_DSPR2},
+  {"meva", no_argument, NULL, OPTION_EVA},
+  {"mno-eva", no_argument, NULL, OPTION_NO_EVA},
   {"mmicromips", no_argument, NULL, OPTION_MICROMIPS},
   {"mno-micromips", no_argument, NULL, OPTION_NO_MICROMIPS},
   {"mmcu", no_argument, NULL, OPTION_MCU},
@@ -14905,6 +15079,14 @@ md_parse_option (int c, char *arg)
     case OPTION_NO_DSPR2:
       mips_opts.ase_dspr2 = 0;
       mips_opts.ase_dsp = 0;
+      break;
+
+    case OPTION_EVA:
+      mips_opts.ase_eva = 1;
+      break;
+
+    case OPTION_NO_EVA:
+      mips_opts.ase_eva = 0;
       break;
 
     case OPTION_MT:
@@ -15427,6 +15609,12 @@ mips_after_parse_args (void)
     as_warn (_("%s ISA does not support DSP R2 ASE"),
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
+  if (mips_opts.ase_eva == -1)
+    mips_opts.ase_eva = (arch_info->flags & MIPS_CPU_ASE_EVA) ? 1 : 0;
+  if (mips_opts.ase_eva && !ISA_SUPPORTS_EVA_ASE)
+    as_warn (_("%s ISA does not support EVA ASE"),
+	     mips_cpu_info_from_isa (mips_opts.isa)->name);
+
   if (mips_opts.ase_mt == -1)
     mips_opts.ase_mt = (arch_info->flags & MIPS_CPU_ASE_MT) ? 1 : 0;
   if (mips_opts.ase_mt && !ISA_SUPPORTS_MT_ASE)
@@ -15451,6 +15639,7 @@ mips_after_parse_args (void)
   file_ase_smartmips = mips_opts.ase_smartmips;
   file_ase_dsp = mips_opts.ase_dsp;
   file_ase_dspr2 = mips_opts.ase_dspr2;
+  file_ase_eva = mips_opts.ase_eva;
   file_ase_mt = mips_opts.ase_mt;
   file_ase_virt = mips_opts.ase_virt;
   mips_opts.gp32 = file_mips_gp32;
@@ -16510,6 +16699,15 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
       mips_opts.ase_dspr2 = 0;
       mips_opts.ase_dsp = 0;
     }
+  else if (strcmp (name, "eva") == 0)
+    {
+      if (!ISA_SUPPORTS_EVA_ASE)
+	as_warn (_("%s ISA does not support EVA ASE"),
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+      mips_opts.ase_eva = 1;
+    }
+  else if (strcmp (name, "noeva") == 0)
+    mips_opts.ase_eva = 0;
   else if (strcmp (name, "mt") == 0)
     {
       if (!ISA_SUPPORTS_MT_ASE)

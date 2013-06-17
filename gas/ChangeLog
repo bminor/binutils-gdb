@@ -1,3 +1,25 @@
+2013-06-17  Catherine Moore  <clm@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Chao-Ying Fu  <fu@mips.com>
+
+	* config/tc-mips.c (mips_set_options): Add ase_eva.
+	(mips_set_options mips_opts): Add ase_eva.
+	(file_ase_eva): Declare.
+	(ISA_SUPPORTS_EVA_ASE): Define.
+	(IS_SEXT_9BIT_NUM): Define.
+	(MIPS_CPU_ASE_EVA): Define.
+	(is_opcode_valid): Add support for ase_eva.
+	(macro_build): Likewise.
+	(macro): Likewise.
+	(validate_mips_insn): Likewise.
+	(validate_micromips_insn): Likewise.
+	(mips_ip): Likewise.
+	(options): Add OPTION_EVA and OPTION_NO_EVA.
+	(md_longopts): Add -meva and -mno-eva.
+	(md_parse_option): Process new options.
+	(mips_after_parse_args): Check for valid EVA combinations.
+	(s_mipsset): Likewise.
+
 2013-06-14  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
 
 	* dwarf2dbg.h (dwarf2_move_insn): Declare.

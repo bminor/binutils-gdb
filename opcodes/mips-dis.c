@@ -591,8 +591,8 @@ const struct mips_arch_choice mips_arch_choices[] =
 
   { "mips32r2",	1, bfd_mach_mipsisa32r2, CPU_MIPS32R2,
     ISA_MIPS32R2,
-    (ASE_SMARTMIPS | ASE_DSP | ASE_DSPR2 | ASE_MIPS3D | ASE_MT
-     | ASE_MCU | ASE_VIRT),
+    (ASE_SMARTMIPS | ASE_DSP | ASE_DSPR2 | ASE_EVA | ASE_MIPS3D
+     | ASE_MT | ASE_MCU | ASE_VIRT),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -606,8 +606,8 @@ const struct mips_arch_choice mips_arch_choices[] =
 
   { "mips64r2",	1, bfd_mach_mipsisa64r2, CPU_MIPS64R2,
     ISA_MIPS64R2,
-    (ASE_MIPS3D | ASE_DSP | ASE_DSPR2 | ASE_DSP64 | ASE_MT | ASE_MDMX
-     | ASE_MCU | ASE_VIRT | ASE_VIRT64),
+    (ASE_MIPS3D | ASE_DSP | ASE_DSPR2 | ASE_DSP64 | ASE_EVA | ASE_MT
+     | ASE_MDMX | ASE_MCU | ASE_VIRT | ASE_VIRT64),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -1150,6 +1150,10 @@ print_insn_args (const char *d,
 
 	    case 'Z':
 	      infprintf (is, "%s", mips_fpr_names[GET_OP (l, FZ)]);
+	      break;
+
+	    case 'j':	/* 9-bit signed offset in bit 7.  */
+	      infprintf (is, "%d", GET_OP_S (l, EVAOFFSET));
 	      break;
 
 	    default:
@@ -2657,6 +2661,11 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		    case 'G':
 		      msbd = GET_OP (insn, EXTMSBD) + 32;
 		      infprintf (is, "0x%x", msbd + 1);
+		      break;
+
+		    case 'j':   /* 9-bit signed offset in bit 0. */
+		      delta = GET_OP_S (insn, EVAOFFSET);
+		      infprintf (is, "%d", delta);
 		      break;
 
 		    default:

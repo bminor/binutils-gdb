@@ -1,3 +1,17 @@
+2013-06-17  Catherine Moore  <clm@codesourcery.com>
+	    Maciej W. Rozycki  <macro@codesourcery.com>
+	    Chao-Ying Fu  <fu@mips.com>
+
+	* micromips-opc.c (EVA): Define.
+	(TLBINV): Define.
+	(micromips_opcodes): Add EVA opcodes.
+	* mips-dis.c (mips_arch_choices): Update for ASE_EVA.
+	(print_insn_args): Handle EVA offsets.
+	(print_insn_micromips): Likewise.
+	* mips-opc.c (EVA): Define.
+	(TLBINV): Define.
+	(mips_builtin_opcodes): Add EVA opcodes.
+
 2013-06-17  Alan Modra  <amodra@gmail.com>
 
 	* Makefile.am (mips-opc.lo): Add rules to create automatic
