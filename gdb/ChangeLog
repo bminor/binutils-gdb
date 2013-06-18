@@ -1,5 +1,16 @@
 2013-06-18  Joel Brobecker  <brobecker@adacore.com>
 
+	* machoread.c (oso_vector): Delete this global.
+	(macho_register_oso): Add new parameter "oso_vector_ptr".
+	Use it instead of the "oso_vector" global.
+	(macho_symtab_read, macho_symfile_read_all_oso): Likewise.
+	(macho_symfile_read): Use a local oso_vector, to be free'ed
+	at the end of this function, in place of the old "oso_vector"
+	global.  Update various function calls accordingly.  Use one
+	single cleanup chain for the entire function.
+
+2013-06-18  Joel Brobecker  <brobecker@adacore.com>
+
 	* dwarf2read.c (dwarf2_per_objfile): Replace uses of
 	DWARF2_PER_OBJFILE by uses of DATA instead.
 
