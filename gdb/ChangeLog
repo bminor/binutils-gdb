@@ -1,5 +1,10 @@
 2013-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* python/python.c (finish_python_initialization): Decref
+	'pythondir' on failure path as well.
+
+2013-06-18  Tom Tromey  <tromey@redhat.com>
+
 	PR symtab/15391:
 	* dwarf2loc.c (read_pieced_value): Truncate this_size_bits
 	after taking bits_to_skip into account.  Sign extend byte_offset.

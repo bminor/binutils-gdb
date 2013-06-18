@@ -1771,10 +1771,9 @@ finish_python_initialization (void)
 	goto fail;
 
       err = PyList_Insert (sys_path, 0, pythondir);
+      Py_DECREF (pythondir);
       if (err)
 	goto fail;
-
-      Py_DECREF (pythondir);
     }
   else
     goto fail;
