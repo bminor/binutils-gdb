@@ -21270,6 +21270,12 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
       struct psymtab_cu_index_map *map;
       void **slot;
 
+      /* CU of a shared file from 'dwz -m' may be unused by this main file.
+	 It may be referenced from a local scope but in such case it does not
+	 need to be present in .gdb_index.  */
+      if (psymtab == NULL)
+	continue;
+
       if (psymtab->user == NULL)
 	recursively_write_psymbols (objfile, psymtab, symtab, psyms_seen, i);
 

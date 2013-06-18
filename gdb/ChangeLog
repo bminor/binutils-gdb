@@ -1,3 +1,7 @@
+2013-06-18  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2read.c (write_psymtabs_to_index): Ignore NULL PSYMTAB.
+
 2013-06-17  Pierre Muller  <muller@sourceware.org>
 
 	* corelow.c (core_open): Print GDB signal name instead of target
