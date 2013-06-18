@@ -1,5 +1,12 @@
 2013-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/implptrpiece.exp: New file.
+	* gdb.dwarf2/implptrconst.exp (d): New variable.
+	Print d.
+	* lib/dwarf2.exp (Dwarf::_location): Handle DW_OP_piece.
+
+2013-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* lib/selftest-support.exp (do_self_tests): Reject remote or
 	non-native targets.
 	* gdb.gdb/complaints.exp: Remove check.

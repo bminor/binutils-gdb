@@ -1641,8 +1641,6 @@ read_pieced_value (struct value *v)
 	  bits_to_skip -= this_size_bits;
 	  continue;
 	}
-      if (this_size_bits > type_len - offset)
-	this_size_bits = type_len - offset;
       if (bits_to_skip > 0)
 	{
 	  dest_offset_bits = 0;
@@ -1655,6 +1653,8 @@ read_pieced_value (struct value *v)
 	  dest_offset_bits = offset;
 	  source_offset_bits = 0;
 	}
+      if (this_size_bits > type_len - offset)
+	this_size_bits = type_len - offset;
 
       this_size = (this_size_bits + source_offset_bits % 8 + 7) / 8;
       source_offset = source_offset_bits / 8;
@@ -2087,8 +2087,15 @@ indirect_pieced_value (struct value *value)
 
   frame = get_selected_frame (_("No frame selected."));
 
-  /* This is an offset requested by GDB, such as value subcripts.  */
+  /* This is an offset requested by GDB, such as value subscripts.
+     However, due to how synthetic pointers are implemented, this is
+     always presented to us as a pointer type.  This means we have to
+     sign-extend it manually as appropriate.  */
   byte_offset = value_as_address (value);
+  if (TYPE_LENGTH (value_type (value)) < sizeof (LONGEST))
+    byte_offset = gdb_sign_extend (byte_offset,
+				   8 * TYPE_LENGTH (value_type (value)));
+  byte_offset += piece->v.ptr.offset;
 
   gdb_assert (piece);
   baton
@@ -2099,7 +2106,7 @@ indirect_pieced_value (struct value *value)
   if (baton.data != NULL)
     return dwarf2_evaluate_loc_desc_full (TYPE_TARGET_TYPE (type), frame,
 					  baton.data, baton.size, baton.per_cu,
-					  piece->v.ptr.offset + byte_offset);
+					  byte_offset);
 
   {
     struct obstack temp_obstack;

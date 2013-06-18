@@ -611,6 +611,7 @@ namespace eval Dwarf {
 	variable _constants
 	variable _cu_label
 	variable _cu_addr_size
+	variable _cu_offset_size
 
 	foreach line [split $body \n] {
 	    if {[lindex $line 0] == ""} {
@@ -651,6 +652,10 @@ namespace eval Dwarf {
 		    _op .sleb128 [lindex $line 1]
 		}
 
+		DW_OP_piece {
+		    _op .uleb128 [lindex $line 1]
+		}
+
 		DW_OP_GNU_implicit_pointer {
 		    if {[llength $line] != 3} {
 			error "usage: DW_OP_GNU_implicit_pointer LABEL OFFSET"
@@ -658,7 +663,7 @@ namespace eval Dwarf {
 
 		    # Here label is a section offset.
 		    set label [lindex $line 1]
-		    _op .${_cu_addr_size}byte $label
+		    _op .${_cu_offset_size}byte $label
 		    _op .sleb128 [lindex $line 2]
 		}
 

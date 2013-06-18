@@ -3234,6 +3234,23 @@ align_down (ULONGEST v, int n)
   return (v & -n);
 }
 
+/* See utils.h.  */
+
+LONGEST
+gdb_sign_extend (LONGEST value, int bit)
+{
+  gdb_assert (bit >= 1 && bit <= 8 * sizeof (LONGEST));
+
+  if (((value >> (bit - 1)) & 1) != 0)
+    {
+      LONGEST signbit = ((LONGEST) 1) << (bit - 1);
+
+      value = (value ^ signbit) - signbit;
+    }
+
+  return value;
+}
+
 /* Allocation function for the libiberty hash table which uses an
    obstack.  The obstack is passed as DATA.  */
 

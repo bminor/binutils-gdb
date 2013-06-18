@@ -377,4 +377,9 @@ extern int myread (int, char *, int);
 extern ULONGEST align_up (ULONGEST v, int n);
 extern ULONGEST align_down (ULONGEST v, int n);
 
+/* Sign extend VALUE.  BIT is the (1-based) index of the bit in VALUE
+   to sign-extend.  */
+
+extern LONGEST gdb_sign_extend (LONGEST value, int bit);
+
 #endif /* UTILS_H */
