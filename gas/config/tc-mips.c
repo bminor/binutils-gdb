@@ -1411,21 +1411,13 @@ static int relaxed_micromips_32bit_branch_length (fragS *, asection *, int);
 struct mips_cpu_info
 {
   const char *name;           /* CPU or ISA name.  */
-  int flags;                  /* ASEs available, or ISA flag.  */
+  int flags;                  /* MIPS_CPU_* flags.  */
+  int ase;                    /* Set of ASEs implemented by the CPU.  */
   int isa;                    /* ISA level.  */
   int cpu;                    /* CPU number (default CPU if ISA).  */
 };
 
 #define MIPS_CPU_IS_ISA		0x0001	/* Is this an ISA?  (If 0, a CPU.) */
-#define MIPS_CPU_ASE_SMARTMIPS	0x0002	/* CPU implements SmartMIPS ASE */
-#define MIPS_CPU_ASE_DSP	0x0004	/* CPU implements DSP ASE */
-#define MIPS_CPU_ASE_MT		0x0008	/* CPU implements MT ASE */
-#define MIPS_CPU_ASE_MIPS3D	0x0010	/* CPU implements MIPS-3D ASE */
-#define MIPS_CPU_ASE_MDMX	0x0020	/* CPU implements MDMX ASE */
-#define MIPS_CPU_ASE_DSPR2	0x0040	/* CPU implements DSP R2 ASE */
-#define MIPS_CPU_ASE_MCU	0x0080	/* CPU implements MCU ASE */
-#define MIPS_CPU_ASE_VIRT	0x0100  /* CPU implements Virtualization ASE */
-#define MIPS_CPU_ASE_EVA	0x0200  /* CPU implements EVA ASE */
 
 static const struct mips_cpu_info *mips_parse_cpu (const char *, const char *);
 static const struct mips_cpu_info *mips_cpu_info_from_isa (int);
@@ -15577,58 +15569,58 @@ mips_after_parse_args (void)
   if (mips_opts.micromips == -1)
     mips_opts.micromips = (CPU_HAS_MICROMIPS (file_mips_arch)) ? 1 : 0;
   if (mips_opts.ase_mips3d == -1)
-    mips_opts.ase_mips3d = ((arch_info->flags & MIPS_CPU_ASE_MIPS3D)
+    mips_opts.ase_mips3d = ((arch_info->ase & ASE_MIPS3D)
 			    && file_mips_fp32 == 0) ? 1 : 0;
   if (mips_opts.ase_mips3d && file_mips_fp32 == 1)
     as_bad (_("-mfp32 used with -mips3d"));
 
   if (mips_opts.ase_mdmx == -1)
-    mips_opts.ase_mdmx = ((arch_info->flags & MIPS_CPU_ASE_MDMX)
+    mips_opts.ase_mdmx = ((arch_info->ase & ASE_MDMX)
 			  && file_mips_fp32 == 0) ? 1 : 0;
   if (mips_opts.ase_mdmx && file_mips_fp32 == 1)
     as_bad (_("-mfp32 used with -mdmx"));
 
   if (mips_opts.ase_smartmips == -1)
-    mips_opts.ase_smartmips = (arch_info->flags & MIPS_CPU_ASE_SMARTMIPS) ? 1 : 0;
+    mips_opts.ase_smartmips = (arch_info->ase & ASE_SMARTMIPS) ? 1 : 0;
   if (mips_opts.ase_smartmips && !ISA_SUPPORTS_SMARTMIPS)
     as_warn (_("%s ISA does not support SmartMIPS"), 
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_dsp == -1)
-    mips_opts.ase_dsp = (arch_info->flags & MIPS_CPU_ASE_DSP) ? 1 : 0;
+    mips_opts.ase_dsp = (arch_info->ase & ASE_DSP) ? 1 : 0;
   if (mips_opts.ase_dsp && !ISA_SUPPORTS_DSP_ASE)
     as_warn (_("%s ISA does not support DSP ASE"), 
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_dspr2 == -1)
     {
-      mips_opts.ase_dspr2 = (arch_info->flags & MIPS_CPU_ASE_DSPR2) ? 1 : 0;
-      mips_opts.ase_dsp = (arch_info->flags & MIPS_CPU_ASE_DSP) ? 1 : 0;
+      mips_opts.ase_dspr2 = (arch_info->ase & ASE_DSPR2) ? 1 : 0;
+      mips_opts.ase_dsp = (arch_info->ase & ASE_DSP) ? 1 : 0;
     }
   if (mips_opts.ase_dspr2 && !ISA_SUPPORTS_DSPR2_ASE)
     as_warn (_("%s ISA does not support DSP R2 ASE"),
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_eva == -1)
-    mips_opts.ase_eva = (arch_info->flags & MIPS_CPU_ASE_EVA) ? 1 : 0;
+     mips_opts.ase_eva = (arch_info->ase & ASE_EVA) ? 1 : 0;
   if (mips_opts.ase_eva && !ISA_SUPPORTS_EVA_ASE)
     as_warn (_("%s ISA does not support EVA ASE"),
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_mt == -1)
-    mips_opts.ase_mt = (arch_info->flags & MIPS_CPU_ASE_MT) ? 1 : 0;
+    mips_opts.ase_mt = (arch_info->ase & ASE_MT) ? 1 : 0;
   if (mips_opts.ase_mt && !ISA_SUPPORTS_MT_ASE)
     as_warn (_("%s ISA does not support MT ASE"),
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_mcu == -1)
-    mips_opts.ase_mcu = (arch_info->flags & MIPS_CPU_ASE_MCU) ? 1 : 0;
+    mips_opts.ase_mcu = (arch_info->ase & ASE_MCU) ? 1 : 0;
   if (mips_opts.ase_mcu && !ISA_SUPPORTS_MCU_ASE)
       as_warn (_("%s ISA does not support MCU ASE"),
 	       mips_cpu_info_from_isa (mips_opts.isa)->name);
 
   if (mips_opts.ase_virt == -1)
-    mips_opts.ase_virt = (arch_info->flags & MIPS_CPU_ASE_VIRT) ? 1 : 0;
+    mips_opts.ase_virt = (arch_info->ase & ASE_VIRT) ? 1 : 0;
   if (mips_opts.ase_virt && !ISA_SUPPORTS_VIRT_ASE)
     as_warn (_("%s ISA does not support Virtualization ASE"),
 	     mips_cpu_info_from_isa (mips_opts.isa)->name);
@@ -19518,167 +19510,148 @@ s_mips_mask (int reg_type)
 static const struct mips_cpu_info mips_cpu_info_table[] =
 {
   /* Entries for generic ISAs */
-  { "mips1",          MIPS_CPU_IS_ISA,		ISA_MIPS1,      CPU_R3000 },
-  { "mips2",          MIPS_CPU_IS_ISA,		ISA_MIPS2,      CPU_R6000 },
-  { "mips3",          MIPS_CPU_IS_ISA,		ISA_MIPS3,      CPU_R4000 },
-  { "mips4",          MIPS_CPU_IS_ISA,		ISA_MIPS4,      CPU_R8000 },
-  { "mips5",          MIPS_CPU_IS_ISA,		ISA_MIPS5,      CPU_MIPS5 },
-  { "mips32",         MIPS_CPU_IS_ISA,		ISA_MIPS32,     CPU_MIPS32 },
-  { "mips32r2",       MIPS_CPU_IS_ISA,		ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "mips64",         MIPS_CPU_IS_ISA,		ISA_MIPS64,     CPU_MIPS64 },
-  { "mips64r2",       MIPS_CPU_IS_ISA,		ISA_MIPS64R2,   CPU_MIPS64R2 },
+  { "mips1",          MIPS_CPU_IS_ISA, 0,	ISA_MIPS1,    CPU_R3000 },
+  { "mips2",          MIPS_CPU_IS_ISA, 0,	ISA_MIPS2,    CPU_R6000 },
+  { "mips3",          MIPS_CPU_IS_ISA, 0,	ISA_MIPS3,    CPU_R4000 },
+  { "mips4",          MIPS_CPU_IS_ISA, 0,	ISA_MIPS4,    CPU_R8000 },
+  { "mips5",          MIPS_CPU_IS_ISA, 0,	ISA_MIPS5,    CPU_MIPS5 },
+  { "mips32",         MIPS_CPU_IS_ISA, 0,	ISA_MIPS32,   CPU_MIPS32 },
+  { "mips32r2",       MIPS_CPU_IS_ISA, 0,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "mips64",         MIPS_CPU_IS_ISA, 0,	ISA_MIPS64,   CPU_MIPS64 },
+  { "mips64r2",       MIPS_CPU_IS_ISA, 0,	ISA_MIPS64R2, CPU_MIPS64R2 },
 
   /* MIPS I */
-  { "r3000",          0,			ISA_MIPS1,      CPU_R3000 },
-  { "r2000",          0,			ISA_MIPS1,      CPU_R3000 },
-  { "r3900",          0,			ISA_MIPS1,      CPU_R3900 },
+  { "r3000",          0, 0,			ISA_MIPS1,    CPU_R3000 },
+  { "r2000",          0, 0,			ISA_MIPS1,    CPU_R3000 },
+  { "r3900",          0, 0,			ISA_MIPS1,    CPU_R3900 },
 
   /* MIPS II */
-  { "r6000",          0,			ISA_MIPS2,      CPU_R6000 },
+  { "r6000",          0, 0,			ISA_MIPS2,    CPU_R6000 },
 
   /* MIPS III */
-  { "r4000",          0,			ISA_MIPS3,      CPU_R4000 },
-  { "r4010",          0,			ISA_MIPS2,      CPU_R4010 },
-  { "vr4100",         0,			ISA_MIPS3,      CPU_VR4100 },
-  { "vr4111",         0,			ISA_MIPS3,      CPU_R4111 },
-  { "vr4120",         0,			ISA_MIPS3,      CPU_VR4120 },
-  { "vr4130",         0,			ISA_MIPS3,      CPU_VR4120 },
-  { "vr4181",         0,			ISA_MIPS3,      CPU_R4111 },
-  { "vr4300",         0,			ISA_MIPS3,      CPU_R4300 },
-  { "r4400",          0,			ISA_MIPS3,      CPU_R4400 },
-  { "r4600",          0,			ISA_MIPS3,      CPU_R4600 },
-  { "orion",          0,			ISA_MIPS3,      CPU_R4600 },
-  { "r4650",          0,			ISA_MIPS3,      CPU_R4650 },
-  { "r5900",          0,			ISA_MIPS3,      CPU_R5900 },
+  { "r4000",          0, 0,			ISA_MIPS3,    CPU_R4000 },
+  { "r4010",          0, 0,			ISA_MIPS2,    CPU_R4010 },
+  { "vr4100",         0, 0,			ISA_MIPS3,    CPU_VR4100 },
+  { "vr4111",         0, 0,			ISA_MIPS3,    CPU_R4111 },
+  { "vr4120",         0, 0,			ISA_MIPS3,    CPU_VR4120 },
+  { "vr4130",         0, 0,			ISA_MIPS3,    CPU_VR4120 },
+  { "vr4181",         0, 0,			ISA_MIPS3,    CPU_R4111 },
+  { "vr4300",         0, 0,			ISA_MIPS3,    CPU_R4300 },
+  { "r4400",          0, 0,			ISA_MIPS3,    CPU_R4400 },
+  { "r4600",          0, 0,			ISA_MIPS3,    CPU_R4600 },
+  { "orion",          0, 0,			ISA_MIPS3,    CPU_R4600 },
+  { "r4650",          0, 0,			ISA_MIPS3,    CPU_R4650 },
+  { "r5900",          0, 0,			ISA_MIPS3,    CPU_R5900 },
   /* ST Microelectronics Loongson 2E and 2F cores */
-  { "loongson2e",     0,			ISA_MIPS3,   CPU_LOONGSON_2E },
-  { "loongson2f",     0,			ISA_MIPS3,   CPU_LOONGSON_2F },
+  { "loongson2e",     0, 0,			ISA_MIPS3,    CPU_LOONGSON_2E },
+  { "loongson2f",     0, 0,			ISA_MIPS3,    CPU_LOONGSON_2F },
 
   /* MIPS IV */
-  { "r8000",          0,			ISA_MIPS4,      CPU_R8000 },
-  { "r10000",         0,			ISA_MIPS4,      CPU_R10000 },
-  { "r12000",         0,			ISA_MIPS4,      CPU_R12000 },
-  { "r14000",         0,			ISA_MIPS4,      CPU_R14000 },
-  { "r16000",         0,			ISA_MIPS4,      CPU_R16000 },
-  { "vr5000",         0,			ISA_MIPS4,      CPU_R5000 },
-  { "vr5400",         0,			ISA_MIPS4,      CPU_VR5400 },
-  { "vr5500",         0,			ISA_MIPS4,      CPU_VR5500 },
-  { "rm5200",         0,			ISA_MIPS4,      CPU_R5000 },
-  { "rm5230",         0,			ISA_MIPS4,      CPU_R5000 },
-  { "rm5231",         0,			ISA_MIPS4,      CPU_R5000 },
-  { "rm5261",         0,			ISA_MIPS4,      CPU_R5000 },
-  { "rm5721",         0,			ISA_MIPS4,      CPU_R5000 },
-  { "rm7000",         0,			ISA_MIPS4,      CPU_RM7000 },
-  { "rm9000",         0,			ISA_MIPS4,      CPU_RM9000 },
+  { "r8000",          0, 0,			ISA_MIPS4,    CPU_R8000 },
+  { "r10000",         0, 0,			ISA_MIPS4,    CPU_R10000 },
+  { "r12000",         0, 0,			ISA_MIPS4,    CPU_R12000 },
+  { "r14000",         0, 0,			ISA_MIPS4,    CPU_R14000 },
+  { "r16000",         0, 0,			ISA_MIPS4,    CPU_R16000 },
+  { "vr5000",         0, 0,			ISA_MIPS4,    CPU_R5000 },
+  { "vr5400",         0, 0,			ISA_MIPS4,    CPU_VR5400 },
+  { "vr5500",         0, 0,			ISA_MIPS4,    CPU_VR5500 },
+  { "rm5200",         0, 0,			ISA_MIPS4,    CPU_R5000 },
+  { "rm5230",         0, 0,			ISA_MIPS4,    CPU_R5000 },
+  { "rm5231",         0, 0,			ISA_MIPS4,    CPU_R5000 },
+  { "rm5261",         0, 0,			ISA_MIPS4,    CPU_R5000 },
+  { "rm5721",         0, 0,			ISA_MIPS4,    CPU_R5000 },
+  { "rm7000",         0, 0,			ISA_MIPS4,    CPU_RM7000 },
+  { "rm9000",         0, 0,			ISA_MIPS4,    CPU_RM9000 },
 
   /* MIPS 32 */
-  { "4kc",            0,			ISA_MIPS32,	CPU_MIPS32 },
-  { "4km",            0,			ISA_MIPS32,	CPU_MIPS32 },
-  { "4kp",            0,			ISA_MIPS32,	CPU_MIPS32 },
-  { "4ksc",           MIPS_CPU_ASE_SMARTMIPS,	ISA_MIPS32,	CPU_MIPS32 },
+  { "4kc",            0, 0,			ISA_MIPS32,   CPU_MIPS32 },
+  { "4km",            0, 0,			ISA_MIPS32,   CPU_MIPS32 },
+  { "4kp",            0, 0,			ISA_MIPS32,   CPU_MIPS32 },
+  { "4ksc",           0, ASE_SMARTMIPS,		ISA_MIPS32,   CPU_MIPS32 },
 
   /* MIPS 32 Release 2 */
-  { "4kec",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "4kem",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "4kep",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "4ksd",           MIPS_CPU_ASE_SMARTMIPS,	ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "m4k",            0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "m4kp",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "m14k",           MIPS_CPU_ASE_MCU,		ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "m14kc",          MIPS_CPU_ASE_MCU,		ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "m14ke",          MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2 | MIPS_CPU_ASE_MCU,
-						ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "m14kec",         MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2 | MIPS_CPU_ASE_MCU,
-						ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24kc",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24kf2_1",        0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24kf",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24kf1_1",        0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "4kec",           0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "4kem",           0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "4kep",           0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "4ksd",           0, ASE_SMARTMIPS,		ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "m4k",            0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "m4kp",           0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "m14k",           0, ASE_MCU,		ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "m14kc",          0, ASE_MCU,		ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "m14ke",          0, ASE_DSP | ASE_DSPR2 | ASE_MCU,
+						ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "m14kec",         0, ASE_DSP | ASE_DSPR2 | ASE_MCU,
+						ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kc",           0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kf2_1",        0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kf",           0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kf1_1",        0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
   /* Deprecated forms of the above.  */
-  { "24kfx",          0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
-  { "24kx",           0,			ISA_MIPS32R2,   CPU_MIPS32R2 },
+  { "24kfx",          0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kx",           0, 0,			ISA_MIPS32R2, CPU_MIPS32R2 },
   /* 24KE is a 24K with DSP ASE, other ASEs are optional.  */
-  { "24kec",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "24kef2_1",       MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "24kef",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "24kef1_1",       MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "24kec",          0, ASE_DSP,		ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kef2_1",       0, ASE_DSP,		ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kef",          0, ASE_DSP,		ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kef1_1",       0, ASE_DSP,		ISA_MIPS32R2, CPU_MIPS32R2 },
   /* Deprecated forms of the above.  */
-  { "24kefx",         MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "24kex",          MIPS_CPU_ASE_DSP,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "24kefx",         0, ASE_DSP,		ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "24kex",          0, ASE_DSP,		ISA_MIPS32R2, CPU_MIPS32R2 },
   /* 34K is a 24K with DSP and MT ASE, other ASEs are optional.  */
-  { "34kc",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "34kf2_1",        MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "34kf",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "34kf1_1",        MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "34kc",           0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "34kf2_1",        0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "34kf",           0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "34kf1_1",        0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   /* Deprecated forms of the above.  */
-  { "34kfx",          MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "34kx",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "34kfx",          0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "34kx",           0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
   /* 34Kn is a 34kc without DSP.  */
-  { "34kn",           MIPS_CPU_ASE_MT,		ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "34kn",           0, ASE_MT,		ISA_MIPS32R2, CPU_MIPS32R2 },
   /* 74K with DSP and DSPR2 ASE, other ASEs are optional.  */
-  { "74kc",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "74kf2_1",        MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "74kf",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "74kf1_1",        MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "74kf3_2",        MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "74kc",           0, ASE_DSP | ASE_DSPR2,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "74kf2_1",        0, ASE_DSP | ASE_DSPR2,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "74kf",           0, ASE_DSP | ASE_DSPR2,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "74kf1_1",        0, ASE_DSP | ASE_DSPR2,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "74kf3_2",        0, ASE_DSP | ASE_DSPR2,	ISA_MIPS32R2, CPU_MIPS32R2 },
   /* Deprecated forms of the above.  */
-  { "74kfx",          MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "74kx",           MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_DSPR2,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "74kfx",          0, ASE_DSP | ASE_DSPR2,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "74kx",           0, ASE_DSP | ASE_DSPR2,	ISA_MIPS32R2, CPU_MIPS32R2 },
   /* 1004K cores are multiprocessor versions of the 34K.  */
-  { "1004kc",         MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "1004kf2_1",      MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "1004kf",         MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
-  { "1004kf1_1",      MIPS_CPU_ASE_DSP | MIPS_CPU_ASE_MT,
-						ISA_MIPS32R2,	CPU_MIPS32R2 },
+  { "1004kc",         0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "1004kf2_1",      0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "1004kf",         0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
+  { "1004kf1_1",      0, ASE_DSP | ASE_MT,	ISA_MIPS32R2, CPU_MIPS32R2 },
 
   /* MIPS 64 */
-  { "5kc",            0,			ISA_MIPS64,	CPU_MIPS64 },
-  { "5kf",            0,			ISA_MIPS64,	CPU_MIPS64 },
-  { "20kc",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,	CPU_MIPS64 },
-  { "25kf",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,     CPU_MIPS64 },
+  { "5kc",            0, 0,			ISA_MIPS64,   CPU_MIPS64 },
+  { "5kf",            0, 0,			ISA_MIPS64,   CPU_MIPS64 },
+  { "20kc",           0, ASE_MIPS3D,		ISA_MIPS64,   CPU_MIPS64 },
+  { "25kf",           0, ASE_MIPS3D,		ISA_MIPS64,   CPU_MIPS64 },
 
   /* Broadcom SB-1 CPU core */
-  { "sb1",            MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
-						ISA_MIPS64,	CPU_SB1 },
+  { "sb1",            0, ASE_MIPS3D | ASE_MDMX,	ISA_MIPS64,   CPU_SB1 },
   /* Broadcom SB-1A CPU core */
-  { "sb1a",           MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
-						ISA_MIPS64,	CPU_SB1 },
+  { "sb1a",           0, ASE_MIPS3D | ASE_MDMX,	ISA_MIPS64,   CPU_SB1 },
   
-  { "loongson3a",     0,			ISA_MIPS64,	CPU_LOONGSON_3A },
+  { "loongson3a",     0, 0,			ISA_MIPS64,   CPU_LOONGSON_3A },
 
   /* MIPS 64 Release 2 */
 
   /* Cavium Networks Octeon CPU core */
-  { "octeon",	      0,      ISA_MIPS64R2,   CPU_OCTEON },
-  { "octeon+",	      0,      ISA_MIPS64R2,   CPU_OCTEONP },
-  { "octeon2",	      0,      ISA_MIPS64R2,   CPU_OCTEON2 },
+  { "octeon",	      0, 0,			ISA_MIPS64R2, CPU_OCTEON },
+  { "octeon+",	      0, 0,			ISA_MIPS64R2, CPU_OCTEONP },
+  { "octeon2",	      0, 0,			ISA_MIPS64R2, CPU_OCTEON2 },
 
   /* RMI Xlr */
-  { "xlr",	      0,      ISA_MIPS64,     CPU_XLR },
+  { "xlr",	      0, 0,			ISA_MIPS64,   CPU_XLR },
 
   /* Broadcom XLP.
      XLP is mostly like XLR, with the prominent exception that it is
      MIPS64R2 rather than MIPS64.  */
-  { "xlp",	      0,      ISA_MIPS64R2,     CPU_XLR },
+  { "xlp",	      0, 0,			ISA_MIPS64R2, CPU_XLR },
 
   /* End marker */
-  { NULL, 0, 0, 0 }
+  { NULL, 0, 0, 0, 0 }
 };
 
 

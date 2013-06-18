@@ -1,3 +1,14 @@
+2013-06-18  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (mips_cpu_info): Add an "ase" field.
+	(MIPS_CPU_ASE_SMARTMIPS, MIPS_CPU_ASE_DSP, MIPS_CPU_ASE_MT)
+	(MIPS_CPU_ASE_MIPS3D, MIPS_CPU_ASE_MDMX, MIPS_CPU_ASE_DSPR2)
+	(MIPS_CPU_ASE_MCU, MIPS_CPU_ASE_VIRT, MIPS_CPU_ASE_EVA): Delete.
+	(mips_after_parse_args): Use the new "ase" field to choose
+	the default ASEs.
+	(mips_cpu_info_table): Move ASEs from the "flags" field to the
+	"ase" field.
+
 2013-06-18  Richard Earnshaw  <rearnsha@arm.com>
 
 	* config/tc-arm.c (symbol_preemptible): New function.
