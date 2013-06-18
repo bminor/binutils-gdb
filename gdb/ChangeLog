@@ -1,5 +1,9 @@
 2013-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* python/py-inferior.c (gdbpy_selected_inferior): Don't incref.
+
+2013-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* python/python.c (finish_python_initialization): Decref
 	'pythondir' on failure path as well.
 

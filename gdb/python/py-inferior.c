@@ -773,12 +773,7 @@ py_free_inferior (struct inferior *inf, void *datum)
 PyObject *
 gdbpy_selected_inferior (PyObject *self, PyObject *args)
 {
-  PyObject *inf_obj;
-
-  inf_obj = inferior_to_inferior_object (current_inferior ());
-  Py_INCREF (inf_obj);
-
-  return inf_obj;
+  return inferior_to_inferior_object (current_inferior ());
 }
 
 int
