@@ -19,11 +19,6 @@
 
 load_lib selftest-support.exp
 
-# are we on a target board
-if { [is_remote target] || ![isnative] } then {
-    return
-}
-
 if [target_info exists gdb,noinferiorio] {
     verbose "Skipping because of no inferiorio capabilities."
     return

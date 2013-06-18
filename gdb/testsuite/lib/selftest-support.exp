@@ -119,6 +119,11 @@ proc selftest_setup { executable function } {
 proc do_self_tests {function body} {
     global GDB tool
 
+    # Are we on a target board.
+    if { [is_remote target] || ![isnative] } then {
+	return
+    }
+
     # Run the test with self.  Copy the file executable file in case
     # this OS doesn't like to edit its own text space.
 

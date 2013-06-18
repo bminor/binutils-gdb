@@ -18,11 +18,6 @@
 
 load_lib selftest-support.exp
 
-# are we on a target board
-if { [is_remote target] || ![isnative] } then {
-    return
-}
-
 proc attach_first_observer { message } {
     gdb_test_no_output "set \$first_obs = observer_attach_test_notification (&observer_test_first_notification_function)" \
 	"$message; attach first observer"

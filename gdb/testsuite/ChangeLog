@@ -1,3 +1,12 @@
+2013-06-18  Tom Tromey  <tromey@redhat.com>
+
+	* lib/selftest-support.exp (do_self_tests): Reject remote or
+	non-native targets.
+	* gdb.gdb/complaints.exp: Remove check.
+	* gdb.gdb/observer.exp: Remove check.
+	* gdb.gdb/xfullpath.exp: Remove check.
+	* gdb.gdb/complaints.exp: Remove check.
+
 2013-06-07  Pedro Alves  <palves@redhat.com>
 
 	* boards/native-extended-gdbserver.exp: Remove semicolon.
