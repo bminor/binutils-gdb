@@ -1,5 +1,24 @@
 2013-06-18  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (mips_set_options): Replace separate "ase_*" fields
+	with a single "ase" bitmask.
+	(mips_opts): Update accordingly.
+	(file_ase, file_ase_explicit): New variables.
+	(file_ase_mips3d, file_ase_mdmx, file_ase_smartmips, file_ase_dsp)
+	(file_ase_dspr2, file_ase_eva, file_ase_mt, file_ase_virt): Delete.
+	(ISA_HAS_ROR): Adjust for mips_set_options change.
+	(is_opcode_valid): Take the base ase mask directly from mips_opts.
+	(mips_ip): Adjust for mips_set_options change.
+	(md_parse_option): Likewise.  Update file_ase_explicit.
+	(mips_after_parse_args): Adjust for mips_set_options change.
+	Use bitmask operations to select the default ASEs.  Set file_ase
+	rather than individual per-ASE variables.
+	(s_mipsset): Adjust for mips_set_options change.
+	(mips_elf_final_processing): Test file_ase rather than
+	file_ase_mdmx.  Remove commented-out code.
+
+2013-06-18  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips_cpu_info): Add an "ase" field.
 	(MIPS_CPU_ASE_SMARTMIPS, MIPS_CPU_ASE_DSP, MIPS_CPU_ASE_MT)
 	(MIPS_CPU_ASE_MIPS3D, MIPS_CPU_ASE_MDMX, MIPS_CPU_ASE_DSPR2)
