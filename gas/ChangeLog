@@ -1,5 +1,10 @@
 2013-06-18  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (md_shortopts, options, md_longopts)
+	(md_longopts_size): Move earlier in file.
+
+2013-06-18  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips_set_options): Replace separate "ase_*" fields
 	with a single "ase" bitmask.
 	(mips_opts): Update accordingly.
