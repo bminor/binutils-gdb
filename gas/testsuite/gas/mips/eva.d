@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn
 #name: MIPS EVA 
-#as: -meva
+#as: -meva -32
 
 # Test the EVA instructions
 
