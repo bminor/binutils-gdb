@@ -20491,14 +20491,13 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
   struct dwarf2_per_objfile *data = d;
   int ix;
 
-  for (ix = 0; ix < dwarf2_per_objfile->n_comp_units; ++ix)
-    VEC_free (dwarf2_per_cu_ptr,
-	      dwarf2_per_objfile->all_comp_units[ix]->imported_symtabs);
+  for (ix = 0; ix < data->n_comp_units; ++ix)
+   VEC_free (dwarf2_per_cu_ptr, data->all_comp_units[ix]->imported_symtabs);
 
-  for (ix = 0; ix < dwarf2_per_objfile->n_type_units; ++ix)
+  for (ix = 0; ix < data->n_type_units; ++ix)
     VEC_free (dwarf2_per_cu_ptr,
-	      dwarf2_per_objfile->all_type_units[ix]->per_cu.imported_symtabs);
-  xfree (dwarf2_per_objfile->all_type_units);
+	      data->all_type_units[ix]->per_cu.imported_symtabs);
+  xfree (data->all_type_units);
 
   VEC_free (dwarf2_section_info_def, data->types);
 
