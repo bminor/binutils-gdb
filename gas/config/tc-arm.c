@@ -20215,6 +20215,30 @@ relax_addsub (fragS *fragp, asection *sec)
     return relax_immediate (fragp, 3, 0);
 }
 
+/* Return TRUE iff the definition of symbol S could be pre-empted
+   (overridden) at link or load time.  */
+static bfd_boolean
+symbol_preemptible (symbolS *s)
+{
+  /* Weak symbols can always be pre-empted.  */
+  if (S_IS_WEAK (s))
+    return TRUE;
+
+  /* Non-global symbols cannot be pre-empted. */
+  if (! S_IS_EXTERNAL (s))
+    return FALSE;
+
+#ifdef OBJ_ELF
+  /* In ELF, a global symbol can be marked protected, or private.  In that
+     case it can't be pre-empted (other definitions in the same link unit
+     would violate the ODR).  */
+  if (ELF_ST_VISIBILITY (S_GET_OTHER (s)) > STV_DEFAULT)
+    return FALSE;
+#endif
+
+  /* Other global symbols might be pre-empted.  */
+  return TRUE;
+}
 
 /* Return the size of a relaxable branch instruction.  BITS is the
    size of the offset field in the narrow instruction.  */
@@ -20233,16 +20257,14 @@ relax_branch (fragS *fragp, asection *sec, int bits, long stretch)
     return 4;
 
 #ifdef OBJ_ELF
+  /* A branch to a function in ARM state will require interworking.  */
   if (S_IS_DEFINED (fragp->fr_symbol)
       && ARM_IS_FUNC (fragp->fr_symbol))
       return 4;
-
-  /* PR 12532.  Global symbols with default visibility might
-     be preempted, so do not relax relocations to them.  */
-  if ((ELF_ST_VISIBILITY (S_GET_OTHER (fragp->fr_symbol)) == STV_DEFAULT)
-      && (! S_IS_LOCAL (fragp->fr_symbol)))
-    return 4;
 #endif
+
+  if (symbol_preemptible (fragp->fr_symbol))
+    return 4;
 
   val = relaxed_symbol_addr (fragp, stretch);
   addr = fragp->fr_address + fragp->fr_fix + 4;

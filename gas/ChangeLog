@@ -1,3 +1,8 @@
+2013-06-18  Richard Earnshaw  <rearnsha@arm.com>
+
+	* config/tc-arm.c (symbol_preemptible): New function.
+	(relax_branch): Use it.
+
 2013-06-17  Catherine Moore  <clm@codesourcery.com>
 	    Maciej W. Rozycki  <macro@codesourcery.com>
 	    Chao-Ying Fu  <fu@mips.com>
