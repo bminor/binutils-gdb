@@ -1,5 +1,20 @@
 2013-06-18  Tom Tromey  <tromey@redhat.com>
 
+	* break-catch-sig.c (signal_catchpoint_explains_signal): Add 'sig'
+	argument.
+	* breakpoint.c (bpstat_explains_signal): Add 'sig' argument.
+	Special case signals other than GDB_SIGNAL_TRAP.
+	(explains_signal_watchpoint): New function.
+	(base_breakpoint_explains_signal): Add 'sig' argument.
+	(initialize_breakpoint_ops): Set 'explains_signal' method for
+	watchpoints.
+	* breakpoint.h (struct breakpoint_ops) <explains_signal>: Add
+	signal argument.
+	(bpstat_explains_signal): Likewise.
+	* infrun.c (handle_syscall_event, handle_inferior_event): Update.
+
+2013-06-18  Tom Tromey  <tromey@redhat.com>
+
 	* python/py-inferior.c (gdbpy_selected_inferior): Don't incref.
 
 2013-06-18  Tom Tromey  <tromey@redhat.com>

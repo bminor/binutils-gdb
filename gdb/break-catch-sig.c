@@ -351,7 +351,7 @@ signal_catchpoint_print_recreate (struct breakpoint *b, struct ui_file *fp)
    catchpoints.  */
 
 static enum bpstat_signal_value
-signal_catchpoint_explains_signal (struct breakpoint *b)
+signal_catchpoint_explains_signal (struct breakpoint *b, enum gdb_signal sig)
 {
   return BPSTAT_SIGNAL_PASS;
 }
