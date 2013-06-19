@@ -1,3 +1,7 @@
+2013-06-19  Will Newton  <will.newton@linaro.org>
+
+	* emulparams/aarch64elf.sh: Remove IREL_IN_PLT.
+
 2013-06-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* emulparams/aarch64elf.sh: Add IREL_IN_PLT.

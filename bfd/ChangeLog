@@ -1,3 +1,37 @@
+2013-06-19  Will Newton  <will.newton@linaro.org>
+
+	* configure: Regenerated.
+	* configure.in: Remove aarch64 dependency on elf-ifunc.c.
+	* elf64-aarch64.c: Remove objalloc.h include.
+	(elf64_aarch64_howto_dynrelocs): Remove R_AARCH64_IRELATIVE howto.
+	(struct elf64_aarch64_link_hash_table): Remove ifunc related
+	members. (elf_aarch64_local_htab_hash): Remove function.
+	(elf_aarch64_local_htab_eq): Remove function.
+	(elf_aarch64_get_local_sym_hash): Remove function.
+	(elf64_aarch64_link_hash_table_create): Remove local hash
+	table initialization.
+	(elf64_aarch64_final_link_relocate): Remove sym argument and
+	handling of ifunc symbols.
+	(elf64_aarch64_relocate_section): Don't pass sym argument to
+	elf64_aarch64_final_link_relocate.
+	(elf64_aarch64_gc_sweep_hook): Remove handling of ifunc symbols.
+	(elf64_aarch64_adjust_dynamic_symbol): Likewise.
+	(elf64_aarch64_check_relocs): Likewise.
+	(elf64_aarch64_post_process_headers): Remove call to
+	_bfd_elf_set_osabi.
+	(elf64_aarch64_is_function_type): New function.
+	(elf64_aarch64_allocate_dynrelocs): Remove handling of ifunc
+	symbols. (elf_aarch64_allocate_local_dynrelocs): Remove function.
+	(elf64_aarch64_size_dynamic_sections): Remove call to
+	elf_aarch64_allocate_local_dynrelocs.
+	(elf64_aarch64_create_small_pltn_entry): Remove info argument.
+	Remove creation of R_AARCH64_IRELATIVE dynamic relocs.
+	(elf64_aarch64_finish_dynamic_symbol): Remove handling of ifunc
+	symbols. (elf_aarch64_finish_local_dynamic_symbol): Remove
+	function. (elf64_aarch64_finish_dynamic_sections): Remove call to
+	elf_aarch64_finish_local_dynamic_symbol.
+	(elf64_aarch64_add_symbol_hook): Remove function.
+
 2013-06-14  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* elf64-aarch64.c (elf64_aarch64_final_link_relocate): Call

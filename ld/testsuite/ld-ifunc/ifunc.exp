@@ -24,11 +24,10 @@
 
 
 # IFUNC support has only been implemented for the ix86, x86_64, powerpc,
-# aarch64 and sparc so far.
+# and sparc so far.
 if {!(([istarget "i?86-*-*"]
        || [istarget "x86_64-*-*"]
        || [istarget "powerpc*-*-*"]
-       || [istarget "aarch64*-*-*"]
        || [istarget "sparc*-*-*"])
       && ([istarget "*-*-elf*"]
 	  || [istarget "*-*-nacl*"]
