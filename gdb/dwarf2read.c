@@ -3199,7 +3199,7 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
       offset_type cu_index_and_attrs =
 	MAYBE_SWAP (iter->vec[iter->next + 1]);
       offset_type cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
-      struct dwarf2_per_cu_data *per_cu = dw2_get_cu (cu_index);
+      struct dwarf2_per_cu_data *per_cu;
       int want_static = iter->block_index != GLOBAL_BLOCK;
       /* This value is only valid for index versions >= 7.  */
       int is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (cu_index_and_attrs);
@@ -3212,6 +3212,18 @@ dw2_symtab_iter_next (struct dw2_symtab_iterator *iter)
       int attrs_valid =
 	(iter->index->version >= 7
 	 && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
+
+      /* Don't crash on bad data.  */
+      if (cu_index >= (dwarf2_per_objfile->n_comp_units
+		       + dwarf2_per_objfile->n_type_units))
+	{
+	  complaint (&symfile_complaints,
+		     _(".gdb_index entry has bad CU index"
+		       " [in module %s]"), dwarf2_per_objfile->objfile->name);
+	  continue;
+	}
+
+      per_cu = dw2_get_cu (cu_index);
 
       /* Skip if already read in.  */
       if (per_cu->v.quick->symtab)
@@ -3630,15 +3642,16 @@ dw2_expand_symtabs_matching
 	  gdb_index_symbol_kind symbol_kind =
 	    GDB_INDEX_SYMBOL_KIND_VALUE (cu_index_and_attrs);
 	  int cu_index = GDB_INDEX_CU_VALUE (cu_index_and_attrs);
+	  /* Only check the symbol attributes if they're present.
+	     Indices prior to version 7 don't record them,
+	     and indices >= 7 may elide them for certain symbols
+	     (gold does this).  */
+	  int attrs_valid =
+	    (index->version >= 7
+	     && symbol_kind != GDB_INDEX_SYMBOL_KIND_NONE);
 
-	  /* Don't crash on bad data.  */
-	  if (cu_index >= (dwarf2_per_objfile->n_comp_units
-			   + dwarf2_per_objfile->n_type_units))
-	    continue;
-
-	  /* Only check the symbol's kind if it has one.
-	     Indices prior to version 7 don't record it.  */
-	  if (index->version >= 7)
+	  /* Only check the symbol's kind if it has one.  */
+	  if (attrs_valid)
 	    {
 	      switch (kind)
 		{
@@ -3657,6 +3670,16 @@ dw2_expand_symtabs_matching
 		default:
 		  break;
 		}
+	    }
+
+	  /* Don't crash on bad data.  */
+	  if (cu_index >= (dwarf2_per_objfile->n_comp_units
+			   + dwarf2_per_objfile->n_type_units))
+	    {
+	      complaint (&symfile_complaints,
+			 _(".gdb_index entry has bad CU index"
+			   " [in module %s]"), objfile->name);
+	      continue;
 	    }
 
 	  per_cu = dw2_get_cu (cu_index);

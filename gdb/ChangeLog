@@ -1,3 +1,11 @@
+2013-06-18  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dw2_symtab_iter_next): Check value of cu_index
+	before using it.
+	(dw2_expand_symtabs_matching): Fix symbol kind validity check.
+	Move test of cu_index closer to use.  Print complaint if cu_index
+	is bad.
+
 2013-06-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* machoread.c (oso_vector): Delete this global.
