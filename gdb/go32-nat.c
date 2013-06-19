@@ -96,6 +96,7 @@
 #include "buildsym.h"
 #include "i387-tdep.h"
 #include "i386-tdep.h"
+#include "i386-cpuid.h"
 #include "value.h"
 #include "regcache.h"
 #include "gdb_string.h"
@@ -1141,6 +1142,21 @@ go32_sysinfo (char *arg, int from_tty)
   else if (u.machine[0] == 'i' && u.machine[1] > 4)
     {
       /* CPUID with EAX = 0 returns the Vendor ID.  */
+#if 0
+      /* Ideally we would use i386_cpuid(), but it needs someone to run
+         native tests first to make sure things actually work.  They should.
+         http://sourceware.org/ml/gdb-patches/2013-05/msg00164.html  */
+      unsigned int eax, ebx, ecx, edx;
+
+      if (i386_cpuid (0, &eax, &ebx, &ecx, &edx))
+	{
+	  cpuid_max = eax;
+	  memcpy (&vendor[0], &ebx, 4);
+	  memcpy (&vendor[4], &ecx, 4);
+	  memcpy (&vendor[8], &edx, 4);
+	  cpuid_vendor[12] = '\0';
+	}
+#else
       __asm__ __volatile__ ("xorl   %%ebx, %%ebx;"
 			    "xorl   %%ecx, %%ecx;"
 			    "xorl   %%edx, %%edx;"
@@ -1157,6 +1173,7 @@ go32_sysinfo (char *arg, int from_tty)
 			    :
 			    : "%eax", "%ebx", "%ecx", "%edx");
       cpuid_vendor[12] = '\0';
+#endif
     }
 
   printf_filtered ("CPU Type.......................%s", u.machine);
@@ -1182,6 +1199,10 @@ go32_sysinfo (char *arg, int from_tty)
       int amd_p = strcmp (cpuid_vendor, "AuthenticAMD") == 0;
       unsigned cpu_family, cpu_model;
 
+#if 0
+      /* See comment above about cpuid usage.  */
+      i386_cpuid (1, &cpuid_eax, &cpuid_ebx, NULL, &cpuid_edx);
+#else
       __asm__ __volatile__ ("movl   $1, %%eax;"
 			    "cpuid;"
 			    : "=a" (cpuid_eax),
@@ -1189,6 +1210,7 @@ go32_sysinfo (char *arg, int from_tty)
 			      "=d" (cpuid_edx)
 			    :
 			    : "%ecx");
+#endif
       brand_idx = cpuid_ebx & 0xff;
       cpu_family = (cpuid_eax >> 8) & 0xf;
       cpu_model  = (cpuid_eax >> 4) & 0xf;

@@ -850,7 +850,7 @@ common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/format.h common/host-defs.h utils.h common/queue.h common/gdb_string.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h common/linux-btrace.h \
-ctf.h
+ctf.h common/i386-cpuid.h common/i386-gcc-cpuid.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 

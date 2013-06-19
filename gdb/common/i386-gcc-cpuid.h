@@ -1,6 +1,8 @@
-/* Helper file for i386 platform.  Runtime check for MMX/SSE/SSE2/AVX
- * support. Copied from gcc 4.4.
- *
+/*
+ * Helper cpuid.h file copied from gcc-4.8.0.  Code in gdb should not
+ * include this directly, but pull in i386-cpuid.h and use that func.
+ */
+/*
  * Copyright (C) 2007-2013 Free Software Foundation, Inc.
  *
  * This file is free software; you can redistribute it and/or modify it
@@ -26,6 +28,7 @@
 /* %ecx */
 #define bit_SSE3	(1 << 0)
 #define bit_PCLMUL	(1 << 1)
+#define bit_LZCNT	(1 << 5)
 #define bit_SSSE3	(1 << 9)
 #define bit_FMA		(1 << 12)
 #define bit_CMPXCHG16B	(1 << 13)
@@ -37,6 +40,8 @@
 #define bit_XSAVE	(1 << 26)
 #define bit_OSXSAVE	(1 << 27)
 #define bit_AVX		(1 << 28)
+#define bit_F16C	(1 << 29)
+#define bit_RDRND	(1 << 30)
 
 /* %edx */
 #define bit_CMPXCHG8B	(1 << 8)
@@ -51,49 +56,133 @@
 #define bit_LAHF_LM	(1 << 0)
 #define bit_ABM		(1 << 5)
 #define bit_SSE4a	(1 << 6)
+#define bit_PRFCHW	(1 << 8)
 #define bit_XOP         (1 << 11)
 #define bit_LWP 	(1 << 15)
 #define bit_FMA4        (1 << 16)
+#define bit_TBM         (1 << 21)
 
 /* %edx */
+#define bit_MMXEXT	(1 << 22)
 #define bit_LM		(1 << 29)
 #define bit_3DNOWP	(1 << 30)
 #define bit_3DNOW	(1 << 31)
 
+/* Extended Features (%eax == 7) */
+#define bit_FSGSBASE	(1 << 0)
+#define bit_BMI	(1 << 3)
+#define bit_HLE	(1 << 4)
+#define bit_AVX2	(1 << 5)
+#define bit_BMI2	(1 << 8)
+#define bit_RTM	(1 << 11)
+#define bit_RDSEED	(1 << 18)
+#define bit_ADX	(1 << 19)
+
+/* Extended State Enumeration Sub-leaf (%eax == 13, %ecx == 1) */
+#define bit_XSAVEOPT	(1 << 0)
+
+/* Signatures for different CPU implementations as returned in uses
+   of cpuid with level 0.  */
+#define signature_AMD_ebx	0x68747541
+#define signature_AMD_ecx	0x444d4163
+#define signature_AMD_edx	0x69746e65
+
+#define signature_CENTAUR_ebx	0x746e6543
+#define signature_CENTAUR_ecx	0x736c7561
+#define signature_CENTAUR_edx	0x48727561
+
+#define signature_CYRIX_ebx	0x69727943
+#define signature_CYRIX_ecx	0x64616574
+#define signature_CYRIX_edx	0x736e4978
+
+#define signature_INTEL_ebx	0x756e6547
+#define signature_INTEL_ecx	0x6c65746e
+#define signature_INTEL_edx	0x49656e69
+
+#define signature_TM1_ebx	0x6e617254
+#define signature_TM1_ecx	0x55504361
+#define signature_TM1_edx	0x74656d73
+
+#define signature_TM2_ebx	0x756e6547
+#define signature_TM2_ecx	0x3638784d
+#define signature_TM2_edx	0x54656e69
+
+#define signature_NSC_ebx	0x646f6547
+#define signature_NSC_ecx	0x43534e20
+#define signature_NSC_edx	0x79622065
+
+#define signature_NEXGEN_ebx	0x4778654e
+#define signature_NEXGEN_ecx	0x6e657669
+#define signature_NEXGEN_edx	0x72446e65
+
+#define signature_RISE_ebx	0x65736952
+#define signature_RISE_ecx	0x65736952
+#define signature_RISE_edx	0x65736952
+
+#define signature_SIS_ebx	0x20536953
+#define signature_SIS_ecx	0x20536953
+#define signature_SIS_edx	0x20536953
+
+#define signature_UMC_ebx	0x20434d55
+#define signature_UMC_ecx	0x20434d55
+#define signature_UMC_edx	0x20434d55
+
+#define signature_VIA_ebx	0x20414956
+#define signature_VIA_ecx	0x20414956
+#define signature_VIA_edx	0x20414956
+
+#define signature_VORTEX_ebx	0x74726f56
+#define signature_VORTEX_ecx	0x436f5320
+#define signature_VORTEX_edx	0x36387865
 
 #if defined(__i386__) && defined(__PIC__)
 /* %ebx may be the PIC register.  */
 #if __GNUC__ >= 3
 #define __cpuid(level, a, b, c, d)			\
-  __asm__ ("xchg{l}\t{%%}ebx, %1\n\t"			\
+  __asm__ ("xchg{l}\t{%%}ebx, %k1\n\t"			\
 	   "cpuid\n\t"					\
-	   "xchg{l}\t{%%}ebx, %1\n\t"			\
-	   : "=a" (a), "=r" (b), "=c" (c), "=d" (d)	\
+	   "xchg{l}\t{%%}ebx, %k1\n\t"			\
+	   : "=a" (a), "=&r" (b), "=c" (c), "=d" (d)	\
 	   : "0" (level))
 
 #define __cpuid_count(level, count, a, b, c, d)		\
-  __asm__ ("xchg{l}\t{%%}ebx, %1\n\t"			\
+  __asm__ ("xchg{l}\t{%%}ebx, %k1\n\t"			\
 	   "cpuid\n\t"					\
-	   "xchg{l}\t{%%}ebx, %1\n\t"			\
-	   : "=a" (a), "=r" (b), "=c" (c), "=d" (d)	\
+	   "xchg{l}\t{%%}ebx, %k1\n\t"			\
+	   : "=a" (a), "=&r" (b), "=c" (c), "=d" (d)	\
 	   : "0" (level), "2" (count))
 #else
 /* Host GCCs older than 3.0 weren't supporting Intel asm syntax
    nor alternatives in i386 code.  */
 #define __cpuid(level, a, b, c, d)			\
-  __asm__ ("xchgl\t%%ebx, %1\n\t"			\
+  __asm__ ("xchgl\t%%ebx, %k1\n\t"			\
 	   "cpuid\n\t"					\
-	   "xchgl\t%%ebx, %1\n\t"			\
-	   : "=a" (a), "=r" (b), "=c" (c), "=d" (d)	\
+	   "xchgl\t%%ebx, %k1\n\t"			\
+	   : "=a" (a), "=&r" (b), "=c" (c), "=d" (d)	\
 	   : "0" (level))
 
 #define __cpuid_count(level, count, a, b, c, d)		\
-  __asm__ ("xchgl\t%%ebx, %1\n\t"			\
+  __asm__ ("xchgl\t%%ebx, %k1\n\t"			\
 	   "cpuid\n\t"					\
-	   "xchgl\t%%ebx, %1\n\t"			\
-	   : "=a" (a), "=r" (b), "=c" (c), "=d" (d)	\
+	   "xchgl\t%%ebx, %k1\n\t"			\
+	   : "=a" (a), "=&r" (b), "=c" (c), "=d" (d)	\
 	   : "0" (level), "2" (count))
 #endif
+#elif defined(__x86_64__) && (defined(__code_model_medium__) || defined(__code_model_large__)) && defined(__PIC__)
+/* %rbx may be the PIC register.  */
+#define __cpuid(level, a, b, c, d)			\
+  __asm__ ("xchg{q}\t{%%}rbx, %q1\n\t"			\
+	   "cpuid\n\t"					\
+	   "xchg{q}\t{%%}rbx, %q1\n\t"			\
+	   : "=a" (a), "=&r" (b), "=c" (c), "=d" (d)	\
+	   : "0" (level))
+
+#define __cpuid_count(level, count, a, b, c, d)		\
+  __asm__ ("xchg{q}\t{%%}rbx, %q1\n\t"			\
+	   "cpuid\n\t"					\
+	   "xchg{q}\t{%%}rbx, %q1\n\t"			\
+	   : "=a" (a), "=&r" (b), "=c" (c), "=d" (d)	\
+	   : "0" (level), "2" (count))
 #else
 #define __cpuid(level, a, b, c, d)			\
   __asm__ ("cpuid\n\t"					\
@@ -118,9 +207,9 @@ __get_cpuid_max (unsigned int __ext, unsigned int *__sig)
 {
   unsigned int __eax, __ebx, __ecx, __edx;
 
-#ifndef __x86_64__
-#if __GNUC__ >= 3
+#ifdef __i386__
   /* See if we can use cpuid.  On AMD64 we always can.  */
+#if __GNUC__ >= 3
   __asm__ ("pushf{l|d}\n\t"
 	   "pushf{l|d}\n\t"
 	   "pop{l}\t%0\n\t"
@@ -180,21 +269,4 @@ __get_cpuid (unsigned int __level,
 
   __cpuid (__level, *__eax, *__ebx, *__ecx, *__edx);
   return 1;
-}
-
-#ifndef NOINLINE
-#define NOINLINE __attribute__ ((noinline))
-#endif
-
-unsigned int i386_cpuid (void) NOINLINE;
-
-unsigned int NOINLINE
-i386_cpuid (void)
-{
-  unsigned int eax, ebx, ecx, edx;
-
-  if (!__get_cpuid (1, &eax, &ebx, &ecx, &edx))
-    return 0;
-
-  return edx;
 }

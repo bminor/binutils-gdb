@@ -1,3 +1,11 @@
+2013-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb.arch/i386-avx.c (have_avx): Change __get_cpuid call to i386_cpuid.
+	* gdb.arch/i386-avx.exp (additional_flags): Add -I${srcdir}/../common.
+	* gdb.arch/i386-cpuid.h: Moved to ../common/i386-gcc-cpuid.h.
+	* gdb.arch/i386-sse.c: Call new i386_cpuid function.
+	* gdb.arch/i386-see.exp (additional_flags): Add -I${srcdir}/../common.
+
 2013-06-19  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/subst.exp: Delete default rules before further

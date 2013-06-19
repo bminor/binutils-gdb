@@ -51,7 +51,10 @@ v4sf_t data[] =
 int
 have_sse (void)
 {
-  int edx = i386_cpuid ();
+  int edx;
+
+  if (!i386_cpuid (1, NULL, NULL, NULL, &edx))
+    return 0;
 
   if (edx & bit_SSE)
     return 1;

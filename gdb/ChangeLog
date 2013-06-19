@@ -1,3 +1,17 @@
+2013-06-19  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add common/i386-cpuid.h and
+	common/i386-gcc-cpuid.h.
+	* common/i386-cpuid.h: New wrapper header around i386-gcc-cpuid.h.
+	* common/i386-gcc-cpuid.h: Rename from testsuite/gdb.arch/i386-cpuid.h.
+	Copy the latest version from upstream gcc.
+	* common/linux-btrace.c: Include i386-cpuid.h.
+	(intel_supports_btrace): Delete x86 ifdefs and replace inline asm with
+	call to i386_cpuid.
+	(cpu_supports_btrace): Likewise.
+	* go32-nat.c: Include i386-cpuid.h.
+	(go32_sysinfo): Add (disabled) calls to i386_cpuid with comments.
+
 2013-06-19  Doug Evans  <dje@google.com>
 
 	* symfile.c (symfile_bfd_open): Delete unnecessary declaration.
