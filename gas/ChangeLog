@@ -1,3 +1,7 @@
+2013-06-19  Greta Yorsh  <Greta.Yorsh@arm.com>
+
+	* config/tc-arm.c (arm_cpus): Add support for Cortex-A12.
+
 2013-06-18  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (md_shortopts, options, md_longopts)

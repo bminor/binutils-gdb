@@ -23967,6 +23967,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
 						 ARM_FEATURE (0, FPU_VFP_V3
                                                         | FPU_NEON_EXT_V1),
 								  "Cortex-A9"),
+  ARM_CPU_OPT ("cortex-a12",	ARM_ARCH_V7A_IDIV_MP_SEC_VIRT,
+						 FPU_ARCH_NEON_VFP_V4,
+								  "Cortex-A12"),
   ARM_CPU_OPT ("cortex-a15",	ARM_ARCH_V7A_IDIV_MP_SEC_VIRT,
 						 FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A15"),
