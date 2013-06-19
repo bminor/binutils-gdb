@@ -16453,8 +16453,7 @@ Set a dynamic printf at specified line or function.\n\
 dprintf location,format string,arg1,arg2,...\n\
 location may be a line number, function name, or \"*\" and an address.\n\
 If a line number is specified, break at start of code for that line.\n\
-If a function is specified, break at start of code for that function.\n\
-"));
+If a function is specified, break at start of code for that function."));
   set_cmd_completer (c, location_completer);
 
   add_setshow_enum_cmd ("dprintf-style", class_support,

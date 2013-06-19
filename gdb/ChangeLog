@@ -1,3 +1,8 @@
+2013-06-19  Tom Tromey  <tromey@redhat.com>
+
+	* breakpoint.c (_initialize_breakpoint): Remove trailing \n from
+	"dprintf" help.
+
 2013-06-18  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dw2_symtab_iter_next): Check value of cu_index
