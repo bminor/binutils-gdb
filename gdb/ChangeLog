@@ -1,3 +1,8 @@
+2013-06-19  Doug Evans  <dje@google.com>
+
+	* symfile.c (symfile_bfd_open): Delete unnecessary declaration.
+	(get_section_index): Ditto.
+
 2013-06-19  Tom Tromey  <tromey@redhat.com>
 
 	* breakpoint.c (_initialize_breakpoint): Remove trailing \n from

@@ -91,10 +91,6 @@ static void symbol_file_add_main_1 (char *args, int from_tty, int flags);
 
 static void add_symbol_file_command (char *, int);
 
-bfd *symfile_bfd_open (char *);
-
-int get_section_index (struct objfile *, char *);
-
 static const struct sym_fns *find_sym_fns (bfd *);
 
 static void decrement_reading_symtab (void *);
