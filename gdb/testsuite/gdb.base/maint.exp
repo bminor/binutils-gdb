@@ -506,6 +506,10 @@ gdb_test_multiple "maint dump-me" "maint dump-me" {
     -re "Should GDB dump core.*\\(y or n\\) $" {
 	gdb_test "n" ".*" "maint dump-me"
     }
+    -re "Undefined maintenance command: .*$gdb_prompt $" {
+	# Command 'maint dump-me' is registered on non-win32 host.
+	unsupported "maint dump-me"
+    }
 }
 
 send_gdb "maint internal-error\n"

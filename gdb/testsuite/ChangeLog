@@ -1,3 +1,8 @@
+2013-06-19  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/maint.exp: Make the test to command 'maint dump-me'
+	unsupported if it is not registered.
+
 2013-06-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/random-signal.c: New file.
