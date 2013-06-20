@@ -24,12 +24,7 @@
 #include "libiberty.h"
 #include "opintl.h"
 #include "aarch64-dis.h"
-
-#if !defined(EMBEDDED_ENV)
-#define SYMTAB_AVAILABLE 1
 #include "elf-bfd.h"
-#include "elf/aarch64.h"
-#endif
 
 #define ERR_OK   0
 #define ERR_UND -1

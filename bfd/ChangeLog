@@ -1,3 +1,14 @@
+2013-06-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* bfd-in.h (bfd_elf64_aarch64_set_options): Add 'extern'.
+	* bfd-in2.h: Re-generated.
+	* elf64-aarch64.c (RELOC_SECTION): Removed.
+	(SWAP_RELOC_IN, SWAP_RELOC_OUT): Ditto.
+	(AARCH64_ELF_OS_ABI_VERSION): Ditto.
+	(elf64_aarch64_link_hash_traverse): Ditto.
+	(elf64_aarch64_size_stubs): Change 'Aarch64' to 'AArch64' in the
+	comment.
+
 2013-06-19  Will Newton  <will.newton@linaro.org>
 
 	* configure: Regenerated.

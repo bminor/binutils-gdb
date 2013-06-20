@@ -185,22 +185,9 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
 
 #define ELIMINATE_COPY_RELOCS 0
 
-/* Return the relocation section associated with NAME.  HTAB is the
-   bfd's elf64_aarch64_link_hash_entry.  */
-#define RELOC_SECTION(HTAB, NAME) \
-  ((HTAB)->use_rel ? ".rel" NAME : ".rela" NAME)
-
 /* Return size of a relocation entry.  HTAB is the bfd's
    elf64_aarch64_link_hash_entry.  */
 #define RELOC_SIZE(HTAB) (sizeof (Elf64_External_Rela))
-
-/* Return function to swap relocations in.  HTAB is the bfd's
-   elf64_aarch64_link_hash_entry.  */
-#define SWAP_RELOC_IN(HTAB) (bfd_elf64_swap_reloca_in)
-
-/* Return function to swap relocations out.  HTAB is the bfd's
-   elf64_aarch64_link_hash_entry.  */
-#define SWAP_RELOC_OUT(HTAB) (bfd_elf64_swap_reloca_out)
 
 /* GOT Entry size - 8 bytes.  */
 #define GOT_ENTRY_SIZE                  (8)
@@ -264,7 +251,6 @@ elf64_aarch64_tlsdesc_small_plt_entry[PLT_TLSDESC_ENTRY_SIZE] =
 #define elf_info_to_howto_rel           elf64_aarch64_info_to_howto
 
 #define AARCH64_ELF_ABI_VERSION		0
-#define AARCH64_ELF_OS_ABI_VERSION	0
 
 /* In case we're on a 32-bit machine, construct a 64-bit "-1" value.  */
 #define ALL_ONES (~ (bfd_vma) 0)
@@ -1784,13 +1770,6 @@ elf64_aarch64_symbol_got_type (struct elf_link_hash_entry *h,
   return elf64_aarch64_locals (abfd)[r_symndx].got_type;
 }
 
-/* Traverse an AArch64 ELF linker hash table.  */
-#define elf64_aarch64_link_hash_traverse(table, func, info)		\
-  (elf_link_hash_traverse						\
-   (&(table)->root,							\
-    (bfd_boolean (*) (struct elf_link_hash_entry *, void *)) (func),	\
-    (info)))
-
 /* Get the AArch64 elf linker hash table from a link_info structure.  */
 #define elf64_aarch64_hash_table(info)					\
   ((struct elf64_aarch64_link_hash_table *) ((info)->hash))
@@ -2735,7 +2714,7 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
   if (stub_group_size == 1)
     {
       /* Default values.  */
-      /* Aarch64 branch range is +-128MB. The value used is 1MB less.  */
+      /* AArch64 branch range is +-128MB. The value used is 1MB less.  */
       stub_group_size = 127 * 1024 * 1024;
     }
 

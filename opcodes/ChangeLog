@@ -1,3 +1,9 @@
+2013-06-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-dis.c (EMBEDDED_ENV): Remove the check on it.
+	(SYMTAB_AVAILABLE): Removed.
+	(#include "elf/aarch64.h): Ditto.
+
 2013-06-17  Catherine Moore  <clm@codesourcery.com>
 	    Maciej W. Rozycki  <macro@codesourcery.com>
 	    Chao-Ying Fu  <fu@mips.com>

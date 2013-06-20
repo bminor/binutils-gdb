@@ -940,7 +940,7 @@ extern unsigned int _bfd_elf_ppc_at_tprel_transform
 extern void bfd_elf64_aarch64_init_maps
   (bfd *);
 
-void bfd_elf64_aarch64_set_options
+extern void bfd_elf64_aarch64_set_options
   (bfd *, struct bfd_link_info *, int, int, int);
 
 /* ELF AArch64 mapping symbol support.  */
