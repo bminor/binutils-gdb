@@ -9304,11 +9304,13 @@ lookup_dwo_in_dwp (struct dwp_file *dwp_file,
    preliminary analysis.  Return a newly initialized bfd *, which
    includes a canonicalized copy of FILE_NAME.
    If IS_DWP is TRUE, we're opening a DWP file, otherwise a DWO file.
-   In case of trouble, return NULL.
+   SEARCH_CWD is true if the current directory is to be searched.
+   It will be searched before debug-file-directory.
+   If unable to find/open the file, return NULL.
    NOTE: This function is derived from symfile_bfd_open.  */
 
 static bfd *
-try_open_dwop_file (const char *file_name, int is_dwp)
+try_open_dwop_file (const char *file_name, int is_dwp, int search_cwd)
 {
   bfd *sym_bfd;
   int desc, flags;
@@ -9319,11 +9321,16 @@ try_open_dwop_file (const char *file_name, int is_dwp)
   char *search_path;
   static const char dirname_separator_string[] = { DIRNAME_SEPARATOR, '\0' };
 
-  if (*debug_file_directory != '\0')
-    search_path = concat (".", dirname_separator_string, debug_file_directory,
-			  NULL);
+  if (search_cwd)
+    {
+      if (*debug_file_directory != '\0')
+	search_path = concat (".", dirname_separator_string,
+			      debug_file_directory, NULL);
+      else
+	search_path = xstrdup (".");
+    }
   else
-    search_path = xstrdup (".");
+    search_path = xstrdup (debug_file_directory);
 
   flags = 0;
   if (is_dwp)
@@ -9362,7 +9369,7 @@ open_dwo_file (const char *file_name, const char *comp_dir)
   bfd *abfd;
 
   if (IS_ABSOLUTE_PATH (file_name))
-    return try_open_dwop_file (file_name, 0 /*is_dwp*/);
+    return try_open_dwop_file (file_name, 0 /*is_dwp*/, 0 /*search_cwd*/);
 
   /* Before trying the search path, try DWO_NAME in COMP_DIR.  */
 
@@ -9372,7 +9379,7 @@ open_dwo_file (const char *file_name, const char *comp_dir)
 
       /* NOTE: If comp_dir is a relative path, this will also try the
 	 search path, which seems useful.  */
-      abfd = try_open_dwop_file (path_to_try, 0 /*is_dwp*/);
+      abfd = try_open_dwop_file (path_to_try, 0 /*is_dwp*/, 1 /*search_cwd*/);
       xfree (path_to_try);
       if (abfd != NULL)
 	return abfd;
@@ -9384,7 +9391,7 @@ open_dwo_file (const char *file_name, const char *comp_dir)
   if (*debug_file_directory == '\0')
     return NULL;
 
-  return try_open_dwop_file (file_name, 0 /*is_dwp*/);
+  return try_open_dwop_file (file_name, 0 /*is_dwp*/, 1 /*search_cwd*/);
 }
 
 /* This function is mapped across the sections and remembers the offset and
@@ -9568,7 +9575,30 @@ allocate_dwp_loaded_cutus_table (struct objfile *objfile)
 static bfd *
 open_dwp_file (const char *file_name)
 {
-  return try_open_dwop_file (file_name, 1 /*is_dwp*/);
+  bfd *abfd;
+
+  abfd = try_open_dwop_file (file_name, 1 /*is_dwp*/, 1 /*search_cwd*/);
+  if (abfd != NULL)
+    return abfd;
+
+  /* Work around upstream bug 15652.
+     http://sourceware.org/bugzilla/show_bug.cgi?id=15652
+     [Whether that's a "bug" is debatable, but it is getting in our way.]
+     We have no real idea where the dwp file is, because gdb's realpath-ing
+     of the executable's path may have discarded the needed info.
+     [IWBN if the dwp file name was recorded in the executable, akin to
+     .gnu_debuglink, but that doesn't exist yet.]
+     Strip the directory from FILE_NAME and search again.  */
+  if (*debug_file_directory != '\0')
+    {
+      /* Don't implicitly search the current directory here.
+	 If the user wants to search "." to handle this case,
+	 it must be added to debug-file-directory.  */
+      return try_open_dwop_file (lbasename (file_name), 1 /*is_dwp*/,
+				 0 /*search_cwd*/);
+    }
+
+  return NULL;
 }
 
 /* Initialize the use of the DWP file for the current objfile.

@@ -1,5 +1,11 @@
 2013-06-20  Doug Evans  <dje@google.com>
 
+	symtab/15652
+	* dwarf2read.c (try_open_dwop_file): New arg search_cwd.
+	All callers updated.
+	(open_dwp_file): If we can't find the dwp file, search the basename
+	in debug-file-directory.
+
 	* dwarf2read.c (struct dwp_file): Fix comment.
 	(open_and_init_dwp_file): Set dwp_file->name to bfd's file name.
 
