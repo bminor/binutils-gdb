@@ -52,6 +52,14 @@ mi_gdb_test "-break-insert -a bar" \
 mi_gdb_test "-break-commands 3 \"collect array\" \"collect j\" \"end\" " \
     {\^done} "set action"
 
+mi_gdb_test "-break-insert -a foo" \
+    "\\^done,bkpt=\{number=\"${decimal}\",type=\"tracepoint\".*\"\}" \
+    "insert tracepoint on foo"
+
+# Collect 'main' to make sure no registers are collected except PC.
+mi_gdb_test "-break-commands 4 \"collect main\" \"end\" " \
+    {\^done} "set action on tracepoint 4"
+
 mi_gdb_test "-trace-start" {.*\^done} "trace start"
 mi_send_resuming_command "exec-continue" "continuing to marker"
 mi_expect_stop \
@@ -95,6 +103,34 @@ proc test_trace_unavailable { data_source } {
 	mi_gdb_test "-stack-list-variables --simple-values" \
 	    ".*\\^done,variables=\\\[\{name=\"j\",arg=\"1\",type=\"int\",value=\"4\"\},\{name=\"s\",arg=\"1\",type=\"char \\\*\",value=\"<unavailable>\"\},\{name=\"array\",type=\"unsigned char \\\[2\\\]\"\},\{name=\"i\",type=\"int\",value=\"<unavailable>\"\}\\\]" \
 	    "-stack-list-variables --simple-values"
+
+	mi_gdb_test "-trace-find frame-number 1" \
+	    ".*\\^done,found=\"1\",tracepoint=\"${decimal}\",traceframe=\"1\",frame=\{.*" \
+	    "-trace-find frame-number 1"
+
+	set pcnum 0
+	if [is_amd64_regs_target] {
+	    set pcnum 16
+	} elseif [is_x86_like_target] {
+	    set pcnum 8
+	} else {
+	    # Other ports support tracepoint should define the number
+	    # of its own pc register.
+	}
+
+	if { $pcnum != 0 } {
+	    global hex
+	    # Test that register 0 and PC are displayed, and register
+	    # 0 is unavailable.
+	    mi_gdb_test "-data-list-register-values x 0 ${pcnum}" \
+		".*\\^done,register-values=\\\[\{number=\"0\",value=\"<unavailable>\"\},\{number=\"${pcnum}\",value=\"${hex}\"\}\\\]" \
+		"-data-list-register-values x"
+
+	    # Test that only available register PC is displayed.
+	    mi_gdb_test "-data-list-register-values --skip-unavailable x 0 ${pcnum}" \
+		".*\\^done,register-values=\\\[\{number=\"${pcnum}\",value=\"${hex}\"\}\\\]" \
+		"-data-list-register-values --skip-unavailable x"
+	}
 
 	# Don't issue command '-trace-find none' to return from
 	# tfind mode (examining trace frames) on purpose, in order

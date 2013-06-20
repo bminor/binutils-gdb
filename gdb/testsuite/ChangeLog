@@ -1,3 +1,13 @@
+2013-06-20  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/mi-trace-unavailable.exp: Set tracepoint on 'foo'
+	and set an action.
+	(test_trace_unavailable): Test command -data-list-register-values
+	in the context of traceframe and with option --skip-unavailable.
+	* gdb.trace/trace-unavailable.c (foo): New.
+	(main): Call it.
+	* gdb.mi/gdb2549.exp: Update matching pattern.
+
 2013-06-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* gdb.arch/i386-avx.c (have_avx): Change __get_cpuid call to i386_cpuid.

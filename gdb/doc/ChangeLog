@@ -1,3 +1,9 @@
+2013-06-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Data Manipulation)
+	<-data-list-register-values>: Document the --skip-unavailable
+	option.
+
 2013-06-07  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Symbols): Add kindex and cindex for

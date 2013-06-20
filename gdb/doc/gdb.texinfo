@@ -32726,13 +32726,16 @@ For the PPC MBX board:
 @subsubheading Synopsis
 
 @smallexample
- -data-list-register-values @var{fmt} [ ( @var{regno} )*]
+ -data-list-register-values
+    [ @code{--skip-unavailable} ] @var{fmt} [ ( @var{regno} )*]
 @end smallexample
 
 Display the registers' contents.  @var{fmt} is the format according to
 which the registers' contents are to be returned, followed by an optional
 list of numbers specifying the registers to display.  A missing list of
-numbers indicates that the contents of all the registers must be returned.
+numbers indicates that the contents of all the registers must be
+returned.  The @code{--skip-unavailable} option indicates that only
+the available registers are to be returned.
 
 Allowed formats for @var{fmt} are:
 

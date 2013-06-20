@@ -1,3 +1,13 @@
+2013-06-20  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* NEWS: Mention the new option '--skip-unavailable' of command
+	-data-list-register-values.
+	* mi/mi-main.c (mi_cmd_data_list_register_values): Accept the
+	--skip-unavailable option.  Adjust to use output_register.
+	(output_register): Add new 'skip_unavailable' parameter.
+	Handle it.
+
 2013-06-19  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Add common/i386-cpuid.h and

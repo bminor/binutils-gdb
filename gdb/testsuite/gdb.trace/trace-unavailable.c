@@ -26,6 +26,10 @@ bar (int j, char *s)
 }
 
 static void
+foo (void)
+{}
+
+static void
 marker (void)
 {}
 
@@ -35,6 +39,7 @@ main (void)
   char s[4];
 
   bar (4, s);
+  foo ();
   marker ();
   return 0;
 }

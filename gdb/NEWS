@@ -76,6 +76,10 @@ show range-stepping
 
   ** The new command -dprintf-insert sets a dynamic printf breakpoint.
 
+  ** The command -data-list-register-values now accepts an optional
+     "--skip-unavailable" option.  When used, only the available registers
+     are displayed.
+
 * New system-wide configuration scripts
   A GDB installation now provides scripts suitable for use as system-wide
   configuration scripts for the following systems:

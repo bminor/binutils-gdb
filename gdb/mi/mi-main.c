@@ -103,7 +103,8 @@ static void mi_execute_async_cli_command (char *cli_command,
 					  char **argv, int argc);
 static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
-static void output_register (struct frame_info *, int regnum, int format);
+static void output_register (struct frame_info *, int regnum, int format,
+			     int skip_unavailable);
 
 /* Command implementations.  FIXME: Is this libgdb?  No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
@@ -1073,6 +1074,17 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
   int regnum, numregs, format;
   int i;
   struct cleanup *list_cleanup;
+  int skip_unavailable = 0;
+  int oind = 0;
+  enum opt
+  {
+    SKIP_UNAVAILABLE,
+  };
+  static const struct mi_opt opts[] =
+    {
+      {"-skip-unavailable", SKIP_UNAVAILABLE, 0},
+      { 0, 0, 0 }
+    };
 
   /* Note that the test for a valid register must include checking the
      gdbarch_register_name because gdbarch_num_regs may be allocated
@@ -1081,11 +1093,28 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
      will change depending upon the particular processor being
      debugged.  */
 
-  if (argc == 0)
-    error (_("-data-list-register-values: Usage: "
-	     "-data-list-register-values <format> [<regnum1>...<regnumN>]"));
+  while (1)
+    {
+      char *oarg;
+      int opt = mi_getopt ("-data-list-register-values", argc, argv,
+			   opts, &oind, &oarg);
 
-  format = (int) argv[0][0];
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+	{
+	case SKIP_UNAVAILABLE:
+	  skip_unavailable = 1;
+	  break;
+	}
+    }
+
+  if (argc - oind < 1)
+    error (_("-data-list-register-values: Usage: "
+	     "-data-list-register-values [--skip-unavailable] <format>"
+	     " [<regnum1>...<regnumN>]"));
+
+  format = (int) argv[oind][0];
 
   frame = get_selected_frame (NULL);
   gdbarch = get_frame_arch (frame);
@@ -1093,7 +1122,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 
   list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "register-values");
 
-  if (argc == 1)
+  if (argc - oind == 1)
     {
       /* No args, beside the format: do all the regs.  */
       for (regnum = 0;
@@ -1104,12 +1133,12 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	      || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
 	    continue;
 
-	  output_register (frame, regnum, format);
+	  output_register (frame, regnum, format, skip_unavailable);
 	}
     }
 
   /* Else, list of register #s, just do listed regs.  */
-  for (i = 1; i < argc; i++)
+  for (i = 1 + oind; i < argc; i++)
     {
       regnum = atoi (argv[i]);
 
@@ -1117,30 +1146,34 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	  && regnum < numregs
 	  && gdbarch_register_name (gdbarch, regnum) != NULL
 	  && *gdbarch_register_name (gdbarch, regnum) != '\000')
-	output_register (frame, regnum, format);
+	output_register (frame, regnum, format, skip_unavailable);
       else
 	error (_("bad register number"));
     }
   do_cleanups (list_cleanup);
 }
 
-/* Output register REGNUM's contents in the desired FORMAT.  */
+/* Output one register REGNUM's contents in the desired FORMAT.  If
+   SKIP_UNAVAILABLE is true, skip the register if it is
+   unavailable.  */
 
 static void
-output_register (struct frame_info *frame, int regnum, int format)
+output_register (struct frame_info *frame, int regnum, int format,
+		 int skip_unavailable)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct ui_out *uiout = current_uiout;
-  struct value *val;
+  struct value *val = get_frame_register_value (frame, regnum);
   struct cleanup *tuple_cleanup;
+
+  if (skip_unavailable && !value_entirely_available (val))
+    return;
 
   tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
   ui_out_field_int (uiout, "number", regnum);
 
   if (format == 'N')
     format = 0;
-
-  val = get_frame_register_value (frame, regnum);
 
   if (value_optimized_out (val))
     error (_("Optimized out"));
