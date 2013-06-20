@@ -119,7 +119,6 @@ static void create_sals_from_address_default (char **,
 
 static void create_breakpoints_sal_default (struct gdbarch *,
 					    struct linespec_result *,
-					    struct linespec_sals *,
 					    char *, char *, enum bptype,
 					    enum bpdisp, int, int,
 					    int,
@@ -12957,7 +12956,7 @@ bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
 			     int from_tty, int enabled,
 			     int internal, unsigned flags)
 {
-  create_breakpoints_sal_default (gdbarch, canonical, lsal,
+  create_breakpoints_sal_default (gdbarch, canonical,
 				  cond_string, extra_string,
 				  type_wanted,
 				  disposition, thread, task,
@@ -13295,7 +13294,7 @@ tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 				   int from_tty, int enabled,
 				   int internal, unsigned flags)
 {
-  create_breakpoints_sal_default (gdbarch, canonical, lsal,
+  create_breakpoints_sal_default (gdbarch, canonical,
 				  cond_string, extra_string,
 				  type_wanted,
 				  disposition, thread, task,
@@ -14131,7 +14130,6 @@ create_sals_from_address_default (char **arg,
 static void
 create_breakpoints_sal_default (struct gdbarch *gdbarch,
 				struct linespec_result *canonical,
-				struct linespec_sals *lsal,
 				char *cond_string,
 				char *extra_string,
 				enum bptype type_wanted,
