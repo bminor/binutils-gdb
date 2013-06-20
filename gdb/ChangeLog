@@ -1,5 +1,9 @@
 2013-06-20  Yao Qi  <yao@codesourcery.com>
 
+	* breakpoint.c (create_breakpoint): Fix code indentation.
+
+2013-06-20  Yao Qi  <yao@codesourcery.com>
+
 	* breakpoint.c (create_breakpoints_sal_default): Remove
 	parameter 'lsal'.  Update declaration.
 	(bkpt_create_breakpoints_sal): Caller update.

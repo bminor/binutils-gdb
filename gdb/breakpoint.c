@@ -9625,38 +9625,38 @@ create_breakpoint (struct gdbarch *gdbarch,
 
       if (parse_arg)
         {
-	    char *rest;
-            /* Here we only parse 'arg' to separate condition
-               from thread number, so parsing in context of first
-               sal is OK.  When setting the breakpoint we'll 
-               re-parse it in context of each sal.  */
+	  char *rest;
+	  /* Here we only parse 'arg' to separate condition
+	     from thread number, so parsing in context of first
+	     sal is OK.  When setting the breakpoint we'll
+	     re-parse it in context of each sal.  */
 
-            find_condition_and_thread (arg, lsal->sals.sals[0].pc, &cond_string,
-                                       &thread, &task, &rest);
-            if (cond_string)
-                make_cleanup (xfree, cond_string);
-	    if (rest)
-	      make_cleanup (xfree, rest);
-	    if (rest)
-	      extra_string = rest;
+	  find_condition_and_thread (arg, lsal->sals.sals[0].pc, &cond_string,
+				     &thread, &task, &rest);
+	  if (cond_string)
+	    make_cleanup (xfree, cond_string);
+	  if (rest)
+	    make_cleanup (xfree, rest);
+	  if (rest)
+	    extra_string = rest;
         }
       else
         {
-	    if (*arg != '\0')
-	      error (_("Garbage '%s' at end of location"), arg);
+	  if (*arg != '\0')
+	    error (_("Garbage '%s' at end of location"), arg);
 
-            /* Create a private copy of condition string.  */
-            if (cond_string)
-            {
-                cond_string = xstrdup (cond_string);
-                make_cleanup (xfree, cond_string);
-            }
-            /* Create a private copy of any extra string.  */
-            if (extra_string)
-	      {
-                extra_string = xstrdup (extra_string);
-                make_cleanup (xfree, extra_string);
-	      }
+	  /* Create a private copy of condition string.  */
+	  if (cond_string)
+	    {
+	      cond_string = xstrdup (cond_string);
+	      make_cleanup (xfree, cond_string);
+	    }
+	  /* Create a private copy of any extra string.  */
+	  if (extra_string)
+	    {
+	      extra_string = xstrdup (extra_string);
+	      make_cleanup (xfree, extra_string);
+	    }
         }
 
       ops->create_breakpoints_sal (gdbarch, &canonical, lsal,
