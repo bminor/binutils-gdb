@@ -813,7 +813,7 @@ struct dwp_file
   /* Name of the file.  */
   const char *name;
 
-  /* The bfd, when the file is open.  Otherwise this is NULL.  */
+  /* The bfd.  */
   bfd *dbfd;
 
   /* Section info for this file.  */
@@ -9596,8 +9596,7 @@ open_and_init_dwp_file (void)
       return NULL;
     }
   dwp_file = OBSTACK_ZALLOC (&objfile->objfile_obstack, struct dwp_file);
-  dwp_file->name = obstack_copy0 (&objfile->objfile_obstack,
-				  dwp_name, strlen (dwp_name));
+  dwp_file->name = bfd_get_filename (dbfd);
   dwp_file->dbfd = dbfd;
   do_cleanups (cleanups);
 

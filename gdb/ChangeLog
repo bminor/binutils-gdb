@@ -1,5 +1,8 @@
 2013-06-20  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (struct dwp_file): Fix comment.
+	(open_and_init_dwp_file): Set dwp_file->name to bfd's file name.
+
 	* source.c (openp): Document OPF_TRY_CWD_FIRST+OPF_SEARCH_IN_PATH
 	better.
 
