@@ -677,9 +677,10 @@ is_regular_file (const char *name)
 
    If OPF_TRY_CWD_FIRST, try to open ./STRING before searching PATH.
    (ie pretend the first element of PATH is ".").  This also indicates
-   that a slash in STRING disables searching of the path (this is
-   so that "exec-file ./foo" or "symbol-file ./foo" insures that you
-   get that particular version of foo or an error message).
+   that, unless OPF_SEARCH_IN_PATH is also specified, a slash in STRING
+   disables searching of the path (this is so that "exec-file ./foo" or
+   "symbol-file ./foo" insures that you get that particular version of
+   foo or an error message).
 
    If OPTS has OPF_SEARCH_IN_PATH set, absolute names will also be
    searched in path (we usually want this for source files but not for

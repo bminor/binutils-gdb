@@ -1,3 +1,8 @@
+2013-06-20  Doug Evans  <dje@google.com>
+
+	* source.c (openp): Document OPF_TRY_CWD_FIRST+OPF_SEARCH_IN_PATH
+	better.
+
 2013-06-20  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.c (create_breakpoint): Fix code indentation.
