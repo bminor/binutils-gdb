@@ -330,38 +330,6 @@ static int file_ase_micromips;
    || ((EXPR)->X_op == O_symbol && (EXPR)->X_add_number == 0))
 #endif
 
-#define ISA_SUPPORTS_SMARTMIPS (mips_opts.isa == ISA_MIPS32		\
-				|| mips_opts.isa == ISA_MIPS32R2)
-
-#define ISA_SUPPORTS_DSP_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			      || mips_opts.isa == ISA_MIPS64R2		\
-			      || mips_opts.micromips)
-
-#define ISA_SUPPORTS_DSP64_ASE (mips_opts.isa == ISA_MIPS64R2)
-
-#define ISA_SUPPORTS_DSPR2_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			        || mips_opts.isa == ISA_MIPS64R2	\
-				|| mips_opts.micromips)
-
-#define ISA_SUPPORTS_EVA_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			      || mips_opts.isa == ISA_MIPS64R2		\
-			      || mips_opts.micromips)
-
-#define ISA_SUPPORTS_MT_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			     || mips_opts.isa == ISA_MIPS64R2)
-
-#define ISA_SUPPORTS_MCU_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			      || mips_opts.isa == ISA_MIPS64R2		\
-			      || mips_opts.micromips)
-
-#define ISA_SUPPORTS_VIRT_ASE (mips_opts.isa == ISA_MIPS32R2		\
-			       || mips_opts.isa == ISA_MIPS64R2		\
-			       || mips_opts.micromips)
-
-#define ISA_SUPPORTS_VIRT64_ASE (mips_opts.isa == ISA_MIPS64R2		\
-				 || (mips_opts.micromips		\
-				     && ISA_HAS_64BIT_REGS (mips_opts.isa)))
-
 /* The argument of the -march= flag.  The architecture we are assembling.  */
 static int file_mips_arch = CPU_UNKNOWN;
 static const char *mips_arch_string;
@@ -1603,6 +1571,84 @@ struct option md_longopts[] =
 };
 size_t md_longopts_size = sizeof (md_longopts);
 
+/* Information about either an Application Specific Extension or an
+   optional architecture feature that, for simplicity, we treat in the
+   same way as an ASE.  */
+struct mips_ase
+{
+  /* The name of the ASE, used in both the command-line and .set options.  */
+  const char *name;
+
+  /* The associated ASE_* flags.  If the ASE is available on both 32-bit
+     and 64-bit architectures, the flags here refer to the subset that
+     is available on both.  */
+  unsigned int flags;
+
+  /* The ASE_* flag used for instructions that are available on 64-bit
+     architectures but that are not included in FLAGS.  */
+  unsigned int flags64;
+
+  /* The command-line options that turn the ASE on and off.  */
+  int option_on;
+  int option_off;
+
+  /* The minimum required architecture revisions for MIPS32, MIPS64,
+     microMIPS32 and microMIPS64, or -1 if the extension isn't supported.  */
+  int mips32_rev;
+  int mips64_rev;
+  int micromips32_rev;
+  int micromips64_rev;
+};
+
+/* A table of all supported ASEs.  */
+static const struct mips_ase mips_ases[] = {
+  { "dsp", ASE_DSP, ASE_DSP64,
+    OPTION_DSP, OPTION_NO_DSP,
+    2, 2, 2, 2 },
+
+  { "dspr2", ASE_DSP | ASE_DSPR2, 0,
+    OPTION_DSPR2, OPTION_NO_DSPR2,
+    2, 2, 2, 2 },
+
+  { "eva", ASE_EVA, 0,
+    OPTION_EVA, OPTION_NO_EVA,
+    2, 2, 2, 2 },
+
+  { "mcu", ASE_MCU, 0,
+    OPTION_MCU, OPTION_NO_MCU,
+    2, 2, 2, 2 },
+
+  /* Deprecated in MIPS64r5, but we don't implement that yet.  */
+  { "mdmx", ASE_MDMX, 0,
+    OPTION_MDMX, OPTION_NO_MDMX,
+    -1, 1, -1, -1 },
+
+  /* Requires 64-bit FPRs, so the minimum MIPS32 revision is 2.  */
+  { "mips3d", ASE_MIPS3D, 0,
+    OPTION_MIPS3D, OPTION_NO_MIPS3D,
+    2, 1, -1, -1 },
+
+  { "mt", ASE_MT, 0,
+    OPTION_MT, OPTION_NO_MT,
+    2, 2, -1, -1 },
+
+  { "smartmips", ASE_SMARTMIPS, 0,
+    OPTION_SMARTMIPS, OPTION_NO_SMARTMIPS,
+    1, -1, -1, -1 },
+
+  { "virt", ASE_VIRT, ASE_VIRT64,
+    OPTION_VIRT, OPTION_NO_VIRT,
+    2, 2, 2, 2 }
+};
+
+/* The set of ASEs that require -mfp64.  */
+#define FP64_ASES (ASE_MIPS3D | ASE_MDMX)
+
+/* Groups of ASE_* flags that represent different revisions of an ASE.  */
+static const unsigned int mips_ase_groups[] = {
+  ASE_DSP | ASE_DSPR2
+};
+
 /* Pseudo-op table.
 
    The following pseudo-ops from the Kane and Heinrich MIPS book
@@ -1840,6 +1886,119 @@ mips_target_format (void)
       abort ();
       return NULL;
     }
+}
+
+/* Return the ISA revision that is currently in use, or 0 if we are
+   generating code for MIPS V or below.  */
+
+static int
+mips_isa_rev (void)
+{
+  if (mips_opts.isa == ISA_MIPS32R2 || mips_opts.isa == ISA_MIPS64R2)
+    return 2;
+
+  /* microMIPS implies revision 2 or above.  */
+  if (mips_opts.micromips)
+    return 2;
+
+  if (mips_opts.isa == ISA_MIPS32 || mips_opts.isa == ISA_MIPS64)
+    return 1;
+
+  return 0;
+}
+
+/* Return the mask of all ASEs that are revisions of those in FLAGS.  */
+
+static unsigned int
+mips_ase_mask (unsigned int flags)
+{
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (mips_ase_groups); i++)
+    if (flags & mips_ase_groups[i])
+      flags |= mips_ase_groups[i];
+  return flags;
+}
+
+/* Check whether the current ISA supports ASE.  Issue a warning if
+   appropriate.  */
+
+static void
+mips_check_isa_supports_ase (const struct mips_ase *ase)
+{
+  const char *base;
+  int min_rev, size;
+  static unsigned int warned_isa;
+  static unsigned int warned_fp32;
+
+  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
+    min_rev = mips_opts.micromips ? ase->micromips64_rev : ase->mips64_rev;
+  else
+    min_rev = mips_opts.micromips ? ase->micromips32_rev : ase->mips32_rev;
+  if ((min_rev < 0 || mips_isa_rev () < min_rev)
+      && (warned_isa & ase->flags) != ase->flags)
+    {
+      warned_isa |= ase->flags;
+      base = mips_opts.micromips ? "microMIPS" : "MIPS";
+      size = ISA_HAS_64BIT_REGS (mips_opts.isa) ? 64 : 32;
+      if (min_rev < 0)
+	as_warn (_("The %d-bit %s architecture does not support the"
+		   " `%s' extension"), size, base, ase->name);
+      else
+	as_warn (_("The `%s' extension requires %s%d revision %d or greater"),
+		 ase->name, base, size, min_rev);
+    }
+  if ((ase->flags & FP64_ASES)
+      && mips_opts.fp32
+      && (warned_fp32 & ase->flags) != ase->flags)
+    {
+      warned_fp32 |= ase->flags;
+      as_warn (_("The `%s' extension requires 64-bit FPRs"), ase->name);
+    }
+}
+
+/* Check all enabled ASEs to see whether they are supported by the
+   chosen architecture.  */
+
+static void
+mips_check_isa_supports_ases (void)
+{
+  unsigned int i, mask;
+
+  for (i = 0; i < ARRAY_SIZE (mips_ases); i++)
+    {
+      mask = mips_ase_mask (mips_ases[i].flags);
+      if ((mips_opts.ase & mask) == mips_ases[i].flags)
+	mips_check_isa_supports_ase (&mips_ases[i]);
+    }
+}
+
+/* Set the state of ASE to ENABLED_P.  Return the mask of ASE_* flags
+   that were affected.  */
+
+static unsigned int
+mips_set_ase (const struct mips_ase *ase, bfd_boolean enabled_p)
+{
+  unsigned int mask;
+
+  mask = mips_ase_mask (ase->flags);
+  mips_opts.ase &= ~mask;
+  if (enabled_p)
+    mips_opts.ase |= ase->flags;
+  return mask;
+}
+
+/* Return the ASE called NAME, or null if none.  */
+
+static const struct mips_ase *
+mips_lookup_ase (const char *name)
+{
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (mips_ases); i++)
+    if (strcmp (name, mips_ases[i].name) == 0)
+      return &mips_ases[i];
+  return NULL;
 }
 
 /* Return the length of a microMIPS instruction in bytes.  If bits of
@@ -2446,11 +2605,12 @@ is_opcode_valid (const struct mips_opcode *mo)
   int isa = mips_opts.isa;
   int ase = mips_opts.ase;
   int fp_s, fp_d;
+  unsigned int i;
 
-  if ((ase & ASE_DSP) && ISA_SUPPORTS_DSP64_ASE)
-    ase |= ASE_DSP64;
-  if ((ase & ASE_VIRT) && ISA_SUPPORTS_VIRT64_ASE)
-    ase |= ASE_VIRT64;
+  if (ISA_HAS_64BIT_REGS (mips_opts.isa))
+    for (i = 0; i < ARRAY_SIZE (mips_ases); i++)
+      if ((ase & mips_ases[i].flags) == mips_ases[i].flags)
+	ase |= mips_ases[i].flags64;
 
   if (!opcode_is_member (mo, isa, ase, mips_opts.arch))
     return FALSE;
@@ -14872,6 +15032,16 @@ mips_set_option_string (const char **string_ptr, const char *new_value)
 int
 md_parse_option (int c, char *arg)
 {
+  unsigned int i;
+
+  for (i = 0; i < ARRAY_SIZE (mips_ases); i++)
+    if (c == mips_ases[i].option_on || c == mips_ases[i].option_off)
+      {
+	file_ase_explicit |= mips_set_ase (&mips_ases[i],
+					   c == mips_ases[i].option_on);
+	return 1;
+      }
+
   switch (c)
     {
     case OPTION_CONSTRUCT_FLOATS:
@@ -14992,63 +15162,6 @@ md_parse_option (int c, char *arg)
     case OPTION_NO_M3900:
       break;
 
-    case OPTION_MDMX:
-      mips_opts.ase |= ASE_MDMX;
-      file_ase_explicit |= ASE_MDMX;
-      break;
-
-    case OPTION_NO_MDMX:
-      mips_opts.ase &= ~ASE_MDMX;
-      file_ase_explicit |= ASE_MDMX;
-      break;
-
-    case OPTION_DSP:
-      mips_opts.ase |= ASE_DSP;
-      mips_opts.ase &= ~ASE_DSPR2;
-      file_ase_explicit |= ASE_DSP | ASE_DSPR2;
-      break;
-
-    case OPTION_DSPR2:
-      mips_opts.ase |= ASE_DSP | ASE_DSPR2;
-      file_ase_explicit |= ASE_DSP | ASE_DSPR2;
-      break;
-
-    case OPTION_NO_DSP:
-    case OPTION_NO_DSPR2:
-      mips_opts.ase &= ~(ASE_DSP | ASE_DSPR2);
-      file_ase_explicit |= ASE_DSP | ASE_DSPR2;
-      break;
-
-    case OPTION_EVA:
-      mips_opts.ase |= ASE_EVA;
-      file_ase_explicit |= ASE_EVA;
-      break;
-
-    case OPTION_NO_EVA:
-      mips_opts.ase &= ~ASE_EVA;
-      file_ase_explicit |= ASE_EVA;
-      break;
-
-    case OPTION_MT:
-      mips_opts.ase |= ASE_MT;
-      file_ase_explicit |= ASE_MT;
-      break;
-
-    case OPTION_NO_MT:
-      mips_opts.ase &= ~ASE_MT;
-      file_ase_explicit |= ASE_MT;
-      break;
-
-    case OPTION_MCU:
-      mips_opts.ase |= ASE_MCU;
-      file_ase_explicit |= ASE_MCU;
-      break;
-
-    case OPTION_NO_MCU:
-      mips_opts.ase &= ~ASE_MCU;
-      file_ase_explicit |= ASE_MCU;
-      break;
-
     case OPTION_MICROMIPS:
       if (mips_opts.mips16 == 1)
 	{
@@ -15064,16 +15177,6 @@ md_parse_option (int c, char *arg)
       mips_no_prev_insn ();
       break;
 
-    case OPTION_VIRT:
-      mips_opts.ase |= ASE_VIRT;
-      file_ase_explicit |= ASE_VIRT;
-      break;
-
-    case OPTION_NO_VIRT:
-      mips_opts.ase &= ~ASE_VIRT;
-      file_ase_explicit |= ASE_VIRT;
-      break;
-
     case OPTION_MIPS16:
       if (mips_opts.micromips == 1)
 	{
@@ -15087,26 +15190,6 @@ md_parse_option (int c, char *arg)
     case OPTION_NO_MIPS16:
       mips_opts.mips16 = 0;
       mips_no_prev_insn ();
-      break;
-
-    case OPTION_MIPS3D:
-      mips_opts.ase |= ASE_MIPS3D;
-      file_ase_explicit |= ASE_MIPS3D;
-      break;
-
-    case OPTION_NO_MIPS3D:
-      mips_opts.ase &= ~ASE_MIPS3D;
-      file_ase_explicit |= ASE_MIPS3D;
-      break;
-
-    case OPTION_SMARTMIPS:
-      mips_opts.ase |= ASE_SMARTMIPS;
-      file_ase_explicit |= ASE_SMARTMIPS;
-      break;
-
-    case OPTION_NO_SMARTMIPS:
-      mips_opts.ase &= ~ASE_SMARTMIPS;
-      file_ase_explicit |= ASE_SMARTMIPS;
       break;
 
     case OPTION_FIX_24K:
@@ -15484,7 +15567,7 @@ mips_after_parse_args (void)
       if (file_mips_gp32 == 0)
 	/* 64-bit integer registers implies 64-bit float registers.  */
 	file_mips_fp32 = 0;
-      else if ((mips_opts.ase & (ASE_MIPS3D | ASE_MDMX))
+      else if ((mips_opts.ase & FP64_ASES)
 	       && ISA_HAS_64BIT_FPRS (mips_opts.isa))
 	/* -mips3d and -mdmx imply 64-bit float registers, if possible.  */
 	file_mips_fp32 = 0;
@@ -15536,46 +15619,14 @@ mips_after_parse_args (void)
      use the default setting for the CPU.  */
   mips_opts.ase |= (arch_info->ase & ~file_ase_explicit);
 
-  if ((mips_opts.ase & ASE_MIPS3D) && file_mips_fp32 == 1)
-    as_bad (_("-mfp32 used with -mips3d"));
-
-  if ((mips_opts.ase & ASE_MDMX) && file_mips_fp32 == 1)
-    as_bad (_("-mfp32 used with -mdmx"));
-
-  if ((mips_opts.ase & ASE_SMARTMIPS) && !ISA_SUPPORTS_SMARTMIPS)
-    as_warn (_("%s ISA does not support SmartMIPS"), 
-	     mips_cpu_info_from_isa (mips_opts.isa)->name);
-
-  if ((mips_opts.ase & ASE_DSP) && !ISA_SUPPORTS_DSP_ASE)
-    as_warn (_("%s ISA does not support DSP ASE"), 
-	     mips_cpu_info_from_isa (mips_opts.isa)->name);
-
-  if ((mips_opts.ase & ASE_DSPR2) && !ISA_SUPPORTS_DSPR2_ASE)
-    as_warn (_("%s ISA does not support DSP R2 ASE"),
-	     mips_cpu_info_from_isa (mips_opts.isa)->name);
-
-  if ((mips_opts.ase & ASE_EVA) && !ISA_SUPPORTS_EVA_ASE)
-    as_warn (_("%s ISA does not support EVA ASE"),
-	     mips_cpu_info_from_isa (mips_opts.isa)->name);
-
-  if ((mips_opts.ase & ASE_MT) && !ISA_SUPPORTS_MT_ASE)
-    as_warn (_("%s ISA does not support MT ASE"),
-	     mips_cpu_info_from_isa (mips_opts.isa)->name);
-
-  if ((mips_opts.ase & ASE_MCU) && !ISA_SUPPORTS_MCU_ASE)
-    as_warn (_("%s ISA does not support MCU ASE"),
-	     mips_cpu_info_from_isa (mips_opts.isa)->name);
-
-  if ((mips_opts.ase & ASE_VIRT) && !ISA_SUPPORTS_VIRT_ASE)
-    as_warn (_("%s ISA does not support Virtualization ASE"),
-	     mips_cpu_info_from_isa (mips_opts.isa)->name);
-
   file_mips_isa = mips_opts.isa;
   file_ase = mips_opts.ase;
   mips_opts.gp32 = file_mips_gp32;
   mips_opts.fp32 = file_mips_fp32;
   mips_opts.soft_float = file_mips_soft_float;
   mips_opts.single_float = file_mips_single_float;
+
+  mips_check_isa_supports_ases ();
 
   if (mips_flag_mdebug < 0)
     {
@@ -16481,6 +16532,7 @@ static void
 s_mipsset (int x ATTRIBUTE_UNUSED)
 {
   char *name = input_line_pointer, ch;
+  const struct mips_ase *ase;
 
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
     ++input_line_pointer;
@@ -16586,72 +16638,12 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     }
   else if (strcmp (name, "nomicromips") == 0)
     mips_opts.micromips = 0;
-  else if (strcmp (name, "smartmips") == 0)
-    {
-      if (!ISA_SUPPORTS_SMARTMIPS)
-	as_warn (_("%s ISA does not support SmartMIPS ASE"), 
-		 mips_cpu_info_from_isa (mips_opts.isa)->name);
-      mips_opts.ase |= ASE_SMARTMIPS;
-    }
-  else if (strcmp (name, "nosmartmips") == 0)
-    mips_opts.ase &= ~ASE_SMARTMIPS;
-  else if (strcmp (name, "mips3d") == 0)
-    mips_opts.ase |= ASE_MIPS3D;
-  else if (strcmp (name, "nomips3d") == 0)
-    mips_opts.ase &= ~ASE_MIPS3D;
-  else if (strcmp (name, "mdmx") == 0)
-    mips_opts.ase |= ASE_MDMX;
-  else if (strcmp (name, "nomdmx") == 0)
-    mips_opts.ase &= ~ASE_MDMX;
-  else if (strcmp (name, "dsp") == 0)
-    {
-      if (!ISA_SUPPORTS_DSP_ASE)
-	as_warn (_("%s ISA does not support DSP ASE"), 
-		 mips_cpu_info_from_isa (mips_opts.isa)->name);
-      mips_opts.ase |= ASE_DSP;
-      mips_opts.ase &= ~ASE_DSPR2;
-    }
-  else if (strcmp (name, "dspr2") == 0)
-    {
-      if (!ISA_SUPPORTS_DSPR2_ASE)
-	as_warn (_("%s ISA does not support DSP R2 ASE"),
-		 mips_cpu_info_from_isa (mips_opts.isa)->name);
-      mips_opts.ase |= ASE_DSP | ASE_DSPR2;
-    }
-  else if (strcmp (name, "nodsp") == 0
-	   || strcmp (name, "nodspr2") == 0)
-    mips_opts.ase &= ~(ASE_DSP | ASE_DSPR2);
-  else if (strcmp (name, "eva") == 0)
-    {
-      if (!ISA_SUPPORTS_EVA_ASE)
-	as_warn (_("%s ISA does not support EVA ASE"),
-		 mips_cpu_info_from_isa (mips_opts.isa)->name);
-      mips_opts.ase |= ASE_EVA;
-    }
-  else if (strcmp (name, "noeva") == 0)
-    mips_opts.ase &= ~ASE_EVA;
-  else if (strcmp (name, "mt") == 0)
-    {
-      if (!ISA_SUPPORTS_MT_ASE)
-	as_warn (_("%s ISA does not support MT ASE"), 
-		 mips_cpu_info_from_isa (mips_opts.isa)->name);
-      mips_opts.ase |= ASE_MT;
-    }
-  else if (strcmp (name, "nomt") == 0)
-    mips_opts.ase &= ~ASE_MT;
-  else if (strcmp (name, "mcu") == 0)
-    mips_opts.ase |= ASE_MCU;
-  else if (strcmp (name, "nomcu") == 0)
-    mips_opts.ase &= ~ASE_MCU;
-  else if (strcmp (name, "virt") == 0)
-    {
-      if (!ISA_SUPPORTS_VIRT_ASE)
-	as_warn (_("%s ISA does not support Virtualization ASE"), 
-		 mips_cpu_info_from_isa (mips_opts.isa)->name);
-      mips_opts.ase |= ASE_VIRT;
-    }
-  else if (strcmp (name, "novirt") == 0)
-    mips_opts.ase &= ~ASE_VIRT;
+  else if (name[0] == 'n'
+	   && name[1] == 'o'
+	   && (ase = mips_lookup_ase (name + 2)))
+    mips_set_ase (ase, FALSE);
+  else if ((ase = mips_lookup_ase (name)))
+    mips_set_ase (ase, TRUE);
   else if (strncmp (name, "mips", 4) == 0 || strncmp (name, "arch=", 5) == 0)
     {
       int reset = 0;
@@ -16779,6 +16771,7 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     {
       as_warn (_("Tried to set unrecognized symbol: %s\n"), name);
     }
+  mips_check_isa_supports_ases ();
   *input_line_pointer = ch;
   demand_empty_rest_of_line ();
 }

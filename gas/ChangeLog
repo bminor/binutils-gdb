@@ -1,3 +1,27 @@
+2013-06-20  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (ISA_SUPPORTS_SMARTMIPS, ISA_SUPPORTS_DSP_ASE)
+	(ISA_SUPPORTS_DSP64_ASE, ISA_SUPPORTS_DSPR2_ASE, ISA_SUPPORTS_EVA_ASE)
+	(ISA_SUPPORTS_MT_ASE, ISA_SUPPORTS_MCU_ASE, ISA_SUPPORTS_VIRT_ASE)
+	(ISA_SUPPORTS_VIRT64_ASE): Delete.
+	(mips_ase): New structure.
+	(mips_ases): New table.
+	(FP64_ASES): New macro.
+	(mips_ase_groups): New array.
+	(mips_isa_rev, mips_ase_mask, mips_check_isa_supports_ase)
+	(mips_check_isa_supports_ases, mips_set_ase, mips_lookup_ase): New
+	functions.
+	(is_opcode_valid): Use mips_ases to get the 64-bit ASE flags.
+	(md_parse_option): Use mips_ases and mips_set_ase instead of
+	separate case statements for each ASE option.
+	(mips_after_parse_args): Use FP64_ASES.  Use
+	mips_check_isa_supports_ases to check the ASEs against
+	other options.
+	(s_mipsset): Use mips_ases and mips_set_ase instead of
+	separate if statements for each ASE option.  Use
+	mips_check_isa_supports_ases, even when a non-ASE option
+	is specified.
+
 2013-06-19  Greta Yorsh  <Greta.Yorsh@arm.com>
 
 	* config/tc-arm.c (arm_cpus): Add support for Cortex-A12.
