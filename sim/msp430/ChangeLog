@@ -1,0 +1,12 @@
+2013-06-21  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: New.
+	* aclocal.m4: Generate.
+	* config.in: Generate.
+	* configure.ac: New.
+	* configure: Generate.
+	* msp430-sim.c: New.
+	* msp430-sim.h: New.
+	* sim-main.h: New.
+	* trace.c: New.
+	* trace.h: New.

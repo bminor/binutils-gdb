@@ -1,3 +1,9 @@
+2013-06-21  Nick Clifton  <nickc@redhat.com>
+
+	* msp430: New Directory.
+	* configure.tgt: Add it.
+	* configure: Regenerate.
+
 2013-03-15  Steve Ellcey  <sellcey@mips.com>
 
 	* arm/wrapper.c (sim_complete_command): Make char arguments const.

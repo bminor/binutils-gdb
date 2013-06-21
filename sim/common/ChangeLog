@@ -1,3 +1,8 @@
+2013-06-21  Nick Clifton  <nickc@redhat.com>
+
+	* gennltvals.sh: Add msp430 support.
+	* nltvals.def: Regenerate.
+
 2013-06-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* acinclude.m4: Replace maintainer-mode code with AM_MAINTAINER_MODE.
