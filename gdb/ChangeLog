@@ -1,3 +1,9 @@
+2013-06-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* common/linux-btrace.c (cpu_supports_btrace): Remove variable vendor,
+	replace strcmp with signature_INTEL_ebx, signature_INTEL_ecx and
+	signature_INTEL_edx comparisons.
+
 2013-06-20  Doug Evans  <dje@google.com>
 
 	symtab/15652

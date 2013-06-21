@@ -382,17 +382,12 @@ static int
 cpu_supports_btrace (void)
 {
   unsigned int ebx, ecx, edx;
-  char vendor[13];
 
   if (!i386_cpuid (0, NULL, &ebx, &ecx, &edx))
     return 0;
 
-  memcpy (&vendor[0], &ebx, 4);
-  memcpy (&vendor[4], &ecx, 4);
-  memcpy (&vendor[8], &edx, 4);
-  vendor[12] = '\0';
-
-  if (strcmp (vendor, "GenuineIntel") == 0)
+  if (ebx == signature_INTEL_ebx && ecx == signature_INTEL_ecx
+      && edx == signature_INTEL_edx)
     return intel_supports_btrace ();
 
   /* Don't know about others.  Let's assume they do.  */
