@@ -1,3 +1,8 @@
+2013-06-21  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.trace/actions.exp (check_tracepoint): Don't use a full file
+	name in a test name.
+
 2013-06-20  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/mi-trace-unavailable.exp: Set tracepoint on 'foo'
