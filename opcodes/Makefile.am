@@ -199,6 +199,7 @@ TARGET_LIBOPCODES_CFILES = \
 	mmix-opc.c \
 	moxie-dis.c \
 	moxie-opc.c \
+	msp430-decode.c \
 	msp430-dis.c \
 	mt-asm.c \
 	mt-desc.c \
@@ -516,6 +517,7 @@ MOSTLYCLEANFILES = aarch64-gen$(EXEEXT_FOR_BUILD) i386-gen$(EXEEXT_FOR_BUILD) \
 MAINTAINERCLEANFILES = $(srcdir)/aarch64-asm-2.c $(srcdir)/aarch64-dis-2.c \
 	$(srcdir)/aarch64-opc-2.c $(srcdir)/i386-tbl.h $(srcdir)/i386-init.h \
 	$(srcdir)/ia64-asmtab.c $(srcdir)/z8k-opc.h \
+	$(srcdir)/msp430-decode.c \
 	$(srcdir)/rl78-decode.c \
 	$(srcdir)/rx-decode.c
 
@@ -568,6 +570,9 @@ $(srcdir)/ia64-asmtab.c: @MAINT@ $(ia64_asmtab_deps)
 	./ia64-gen$(EXEEXT_FOR_BUILD) --srcdir $(srcdir) > $@
 
 ia64-opc.lo: $(srcdir)/ia64-asmtab.c
+
+$(srcdir)/msp430-decode.c: @MAINT@ $(srcdir)/msp430-decode.opc opc2c$(EXEEXT_FOR_BUILD)
+	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/msp430-decode.opc > $(srcdir)/msp430-decode.c
 
 $(srcdir)/rl78-decode.c: @MAINT@ $(srcdir)/rl78-decode.opc opc2c$(EXEEXT_FOR_BUILD)
 	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rl78-decode.opc > $(srcdir)/rl78-decode.c

@@ -1,3 +1,15 @@
+2013-06-21  DJ Delorie  <dj@redhat.com>
+
+	* msp430-decode.opc: New.
+	* msp430-decode.c: New/generated.
+	* Makefile.am (TARGET_LIBOPCODES_CFILES): Add msp430-decode.c.
+	(MAINTAINER_CLEANFILES): Likewise.
+	Add rule to build msp430-decode.c frommsp430decode.opc
+        using the opc2c program.
+	* Makefile.in: Regenerate.
+	* configure.in: Add msp430-decode.lo to msp430 architecture files.
+	* configure: Regenerate.
+
 2013-06-20  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-dis.c (EMBEDDED_ENV): Remove the check on it.
