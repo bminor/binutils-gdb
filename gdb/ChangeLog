@@ -1,5 +1,11 @@
 2013-06-21  Will Newton  <will.newton@linaro.org>
 
+	* doublest.c (ldfrexp): Remove function.
+	(convert_doublest_to_floatformat): Call frexpl instead of
+	ldfrexp.
+
+2013-06-21  Will Newton  <will.newton@linaro.org>
+
 	* gnulib/update-gnulib.sh(IMPORTED_GNULIB_MODULES): Add frexpl.
 	* gnulib/aclocal.m4: Regenerate.
 	* gnulib/config.in: Regenerate.

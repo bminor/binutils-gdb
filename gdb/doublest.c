@@ -336,53 +336,6 @@ put_field (unsigned char *data, enum floatformat_byteorders order,
     }
 }
 
-#ifdef HAVE_LONG_DOUBLE
-/* Return the fractional part of VALUE, and put the exponent of VALUE in *EPTR.
-   The range of the returned value is >= 0.5 and < 1.0.  This is equivalent to
-   frexp, but operates on the long double data type.  */
-
-static long double ldfrexp (long double value, int *eptr);
-
-static long double
-ldfrexp (long double value, int *eptr)
-{
-  long double tmp;
-  int exp;
-
-  /* Unfortunately, there are no portable functions for extracting the
-     exponent of a long double, so we have to do it iteratively by
-     multiplying or dividing by two until the fraction is between 0.5
-     and 1.0.  */
-
-  if (value < 0.0l)
-    value = -value;
-
-  tmp = 1.0l;
-  exp = 0;
-
-  if (value >= tmp)		/* Value >= 1.0 */
-    while (value >= tmp)
-      {
-	tmp *= 2.0l;
-	exp++;
-      }
-  else if (value != 0.0l)	/* Value < 1.0  and > 0.0 */
-    {
-      while (value < tmp)
-	{
-	  tmp /= 2.0l;
-	  exp--;
-	}
-      tmp *= 2.0l;
-      exp++;
-    }
-
-  *eptr = exp;
-  return value / tmp;
-}
-#endif /* HAVE_LONG_DOUBLE */
-
-
 /* The converse: convert the DOUBLEST *FROM to an extended float and
    store where TO points.  Neither FROM nor TO have any alignment
    restrictions.  */
@@ -466,7 +419,7 @@ convert_doublest_to_floatformat (CONST struct floatformat *fmt,
     }
 
 #ifdef HAVE_LONG_DOUBLE
-  mant = ldfrexp (dfrom, &exponent);
+  mant = frexpl (dfrom, &exponent);
 #else
   mant = frexp (dfrom, &exponent);
 #endif
