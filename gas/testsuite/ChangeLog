@@ -1,5 +1,23 @@
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/mips.exp: Remove "LOSE" comments.
+	(run_dump_test_arch): Remove format selector support.
+	(run_dump_test_arches): Remove associated upvars.
+	(elf, ecoff, aout, no_mips16, no_micromips): Remove variables.
+	Remove all conditions based on them, on the assumption that $elf
+	is true and the others are false.  Rename "elf-jal" to "jal".
+	(tmips): Set to "t" for *bsd targets.
+	* gas/mips/elf-jal.d: Rename to...
+	* gas/mips/jal.d: ...this, replacing the old file.
+	* gas/mips/micromips@elf-jal.d: Rename to...
+	* gas/mips/micromips@jal.d: ...this.
+	* gas/mips/at-1.d, gas/mips/ld.d, gas/mips/l_d.d, gas/mips/lui.d,
+	gas/mips/mips1@l_d.d, gas/mips/mips1@ld-forward.d, gas/mips/mips1@ld.d,
+	gas/mips/mips1@s_d.d, gas/mips/s_d.d, gas/mips/sd.d: Remove ECOFF
+	relocation names.  Do not allow any offset on the symbol.
+
+2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/lineno.d: Remove ellipsis.
 
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
