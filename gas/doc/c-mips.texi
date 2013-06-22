@@ -23,9 +23,9 @@ Assembly Language Programming'' in the same work.
 
 @menu
 * MIPS Opts::   	Assembler options
+* MIPS Symbol Sizes::	Directives to override the size of symbols
 * MIPS Object:: 	ECOFF object code
 * MIPS ISA::    	Directives to override the ISA level
-* MIPS symbol sizes::   Directives to override the size of symbols
 * MIPS autoextend::	Directives for extending MIPS 16 bit instructions
 * MIPS insn::		Directive to mark data as an instruction
 * MIPS option stack::	Directives to save and restore options
@@ -352,7 +352,7 @@ are: @samp{32}, @samp{n32}, @samp{o64}, @samp{64} and @samp{eabi}.
 @cindex -msym32
 @cindex -mno-sym32
 Equivalent to adding @code{.set sym32} or @code{.set nosym32} to
-the beginning of the assembler input.  @xref{MIPS symbol sizes}.
+the beginning of the assembler input.  @xref{MIPS Symbol Sizes}.
 
 @cindex @code{-nocpp} ignored (MIPS)
 @item -nocpp
@@ -439,44 +439,11 @@ efficient.  This option only affects the handling of the
 @samp{.cpload} and @samp{.cpsetup} pseudo-ops.
 @end table
 
-@node MIPS Object
-@section MIPS ECOFF object code
-
-@cindex ECOFF sections
-@cindex MIPS ECOFF sections
-Assembling for a @sc{mips} @sc{ecoff} target supports some additional sections
-besides the usual @code{.text}, @code{.data} and @code{.bss}.  The
-additional sections are @code{.rdata}, used for read-only data,
-@code{.sdata}, used for small data, and @code{.sbss}, used for small
-common objects.
-
-@cindex small objects, MIPS ECOFF
-@cindex @code{gp} register, MIPS
-When assembling for @sc{ecoff}, the assembler uses the @code{$gp} (@code{$28})
-register to form the address of a ``small object''.  Any object in the
-@code{.sdata} or @code{.sbss} sections is considered ``small'' in this sense.
-For external objects, or for objects in the @code{.bss} section, you can use
-the @code{@value{GCC}} @samp{-G} option to control the size of objects addressed via
-@code{$gp}; the default value is 8, meaning that a reference to any object
-eight bytes or smaller uses @code{$gp}.  Passing @samp{-G 0} to
-@code{@value{AS}} prevents it from using the @code{$gp} register on the basis
-of object size (but the assembler uses @code{$gp} for objects in @code{.sdata}
-or @code{sbss} in any case).  The size of an object in the @code{.bss} section
-is set by the @code{.comm} or @code{.lcomm} directive that defines it.  The
-size of an external object may be set with the @code{.extern} directive.  For
-example, @samp{.extern sym,4} declares that the object at @code{sym} is 4 bytes
-in length, whie leaving @code{sym} otherwise undefined.
-
-Using small @sc{ecoff} objects requires linker support, and assumes that the
-@code{$gp} register is correctly initialized (normally done automatically by
-the startup code).  @sc{mips} @sc{ecoff} assembly code must not modify the
-@code{$gp} register.
-
-@node MIPS symbol sizes
+@node MIPS Symbol Sizes
 @section Directives to override the size of symbols
 
-@cindex @code{.set sym32}
-@cindex @code{.set nosym32}
+@kindex @code{.set sym32}
+@kindex @code{.set nosym32}
 The n64 ABI allows symbols to have any 64-bit value.  Although this
 provides a great deal of flexibility, it means that some macros have
 much longer expansions than their 32-bit counterparts.  For example,
@@ -526,6 +493,39 @@ symbol size using the command-line options @option{-msym32} and
 
 These options and directives are always accepted, but at present,
 they have no effect for anything other than n64.
+
+@node MIPS Object
+@section MIPS ECOFF object code
+
+@cindex ECOFF sections
+@cindex MIPS ECOFF sections
+Assembling for a @sc{mips} @sc{ecoff} target supports some additional sections
+besides the usual @code{.text}, @code{.data} and @code{.bss}.  The
+additional sections are @code{.rdata}, used for read-only data,
+@code{.sdata}, used for small data, and @code{.sbss}, used for small
+common objects.
+
+@cindex small objects, MIPS ECOFF
+@cindex @code{gp} register, MIPS
+When assembling for @sc{ecoff}, the assembler uses the @code{$gp} (@code{$28})
+register to form the address of a ``small object''.  Any object in the
+@code{.sdata} or @code{.sbss} sections is considered ``small'' in this sense.
+For external objects, or for objects in the @code{.bss} section, you can use
+the @code{@value{GCC}} @samp{-G} option to control the size of objects addressed via
+@code{$gp}; the default value is 8, meaning that a reference to any object
+eight bytes or smaller uses @code{$gp}.  Passing @samp{-G 0} to
+@code{@value{AS}} prevents it from using the @code{$gp} register on the basis
+of object size (but the assembler uses @code{$gp} for objects in @code{.sdata}
+or @code{sbss} in any case).  The size of an object in the @code{.bss} section
+is set by the @code{.comm} or @code{.lcomm} directive that defines it.  The
+size of an external object may be set with the @code{.extern} directive.  For
+example, @samp{.extern sym,4} declares that the object at @code{sym} is 4 bytes
+in length, whie leaving @code{sym} otherwise undefined.
+
+Using small @sc{ecoff} objects requires linker support, and assumes that the
+@code{$gp} register is correctly initialized (normally done automatically by
+the startup code).  @sc{mips} @sc{ecoff} assembly code must not modify the
+@code{$gp} register.
 
 @node MIPS ISA
 @section Directives to override the ISA level

@@ -1,5 +1,10 @@
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* doc/c-mips.texi (MIPS symbol sizes): Move section further up file.
+	Capitalize name.  Use @kindex instead of @cindex for .set entries.
+
+2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* doc/c-mips.texi (MIPS Stabs): Remove section.
 
 2013-06-20  Richard Sandiford  <rdsandiford@googlemail.com>
