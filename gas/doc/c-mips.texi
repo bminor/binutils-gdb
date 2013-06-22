@@ -23,8 +23,9 @@ Assembly Language Programming'' in the same work.
 
 @menu
 * MIPS Opts::   	Assembler options
+* MIPS Macros:: 	High-level assembly macros
 * MIPS Symbol Sizes::	Directives to override the size of symbols
-* MIPS Object:: 	ECOFF object code
+* MIPS Small Data:: 	Controlling the use of small data accesses
 * MIPS ISA::    	Directives to override the ISA level
 * MIPS autoextend::	Directives for extending MIPS 16 bit instructions
 * MIPS insn::		Directive to mark data as an instruction
@@ -44,9 +45,8 @@ special options:
 @table @code
 @cindex @code{-G} option (MIPS)
 @item -G @var{num}
-This option sets the largest size of an object that can be referenced
-implicitly with the @code{gp} register.  It is only accepted for targets
-that use @sc{ecoff} format.  The default value is 8.
+Set the ``small data'' limit to @var{n} bytes.  The default limit is 8 bytes.
+@xref{MIPS Small Data,, Controlling the use of small data accesses}.
 
 @cindex @code{-EB} option (MIPS)
 @cindex @code{-EL} option (MIPS)
@@ -439,6 +439,66 @@ efficient.  This option only affects the handling of the
 @samp{.cpload} and @samp{.cpsetup} pseudo-ops.
 @end table
 
+@node MIPS Macros
+@section High-level assembly macros
+
+MIPS assemblers have traditionally provided a wider range of
+instructions than the MIPS architecture itself.  These extra
+instructions are usually referred to as ``macro'' instructions
+@footnote{The term ``macro'' is somewhat overloaded here, since
+these macros have no relation to those defined by @code{.macro},
+@pxref{Macro,, @code{.macro}}.}.
+
+Some MIPS macro instructions extend an underlying architectural instruction
+while others are entirely new.  An example of the former type is @code{and},
+which allows the third operand to be either a register or an arbitrary
+immediate value.  Examples of the latter type include @code{bgt}, which
+branches to the third operand when the first operand is greater than
+the second operand, and @code{ulh}, which implements an unaligned
+2-byte load.
+
+One of the most common extensions provided by macros is to expand
+memory offsets to the full address range (32 or 64 bits) and to allow
+symbolic offsets such as @samp{my_data + 4} to be used in place of
+integer constants.  For example, the architectural instruction
+@code{lbu} allows only a signed 16-bit offset, whereas the macro
+@code{lbu} allows code such as @samp{lbu $4,array+32769($5)}.
+The implementation of these symbolic offsets depends on several factors,
+such as whether the assembler is generating SVR4-style PIC (selected
+by @option{-KPIC}, @pxref{MIPS Opts,, Assembler options}), the size of symbols
+(@pxref{MIPS Symbol Sizes,, Directives to override the size of symbols}),
+and the small data limit (@pxref{MIPS Small Data,, Controlling the use
+of small data accesses}).
+
+@kindex @code{.set macro}
+@kindex @code{.set nomacro}
+Sometimes it is undesirable to have one assembly instruction expand
+to several machine instructions.  The directive @code{.set nomacro}
+tells the assembler to warn when this happens.  @code{.set macro}
+restores the default behavior.
+
+@cindex @code{at} register, MIPS
+@kindex @code{.set at=@var{reg}}
+Some macro instructions need a temporary register to store intermediate
+results.  This register is usually @code{$1}, also known as @code{$at},
+but it can be changed to any core register @var{reg} using
+@code{.set at=@var{reg}}.  Note that @code{$at} always refers
+to @code{$1} regardless of which register is being used as the
+temporary register.
+
+@kindex @code{.set at}
+@kindex @code{.set noat}
+Implicit uses of the temporary register in macros could interfere with
+explicit uses in the assembly code.  The assembler therefore warns
+whenever it sees an explicit use of the temporary register.  The directive
+@code{.set noat} silences this warning while @code{.set at} restores
+the default behavior.  It is safe to use @code{.set noat} while
+@code{.set nomacro} is in effect since single-instruction macros
+never need a temporary register.
+
+Note that while the @sc{gnu} assembler provides these macros for compatibility,
+it does not make any attempt to optimize them with the surrounding code.
+
 @node MIPS Symbol Sizes
 @section Directives to override the size of symbols
 
@@ -494,38 +554,61 @@ symbol size using the command-line options @option{-msym32} and
 These options and directives are always accepted, but at present,
 they have no effect for anything other than n64.
 
-@node MIPS Object
-@section MIPS ECOFF object code
+@node MIPS Small Data
+@section Controlling the use of small data accesses
 
-@cindex ECOFF sections
-@cindex MIPS ECOFF sections
-Assembling for a @sc{mips} @sc{ecoff} target supports some additional sections
-besides the usual @code{.text}, @code{.data} and @code{.bss}.  The
-additional sections are @code{.rdata}, used for read-only data,
-@code{.sdata}, used for small data, and @code{.sbss}, used for small
-common objects.
-
-@cindex small objects, MIPS ECOFF
+@c This section deliberately glosses over the possibility of using -G
+@c in SVR4-style PIC, as could be done on IRIX.  We don't support that.
+@cindex small data, MIPS
 @cindex @code{gp} register, MIPS
-When assembling for @sc{ecoff}, the assembler uses the @code{$gp} (@code{$28})
-register to form the address of a ``small object''.  Any object in the
-@code{.sdata} or @code{.sbss} sections is considered ``small'' in this sense.
-For external objects, or for objects in the @code{.bss} section, you can use
-the @code{@value{GCC}} @samp{-G} option to control the size of objects addressed via
-@code{$gp}; the default value is 8, meaning that a reference to any object
-eight bytes or smaller uses @code{$gp}.  Passing @samp{-G 0} to
-@code{@value{AS}} prevents it from using the @code{$gp} register on the basis
-of object size (but the assembler uses @code{$gp} for objects in @code{.sdata}
-or @code{sbss} in any case).  The size of an object in the @code{.bss} section
-is set by the @code{.comm} or @code{.lcomm} directive that defines it.  The
-size of an external object may be set with the @code{.extern} directive.  For
-example, @samp{.extern sym,4} declares that the object at @code{sym} is 4 bytes
-in length, whie leaving @code{sym} otherwise undefined.
+It often takes several instructions to load the address of a symbol.
+For example, when @samp{addr} is a 32-bit symbol, the non-PIC expansion
+of @samp{dla $4,addr} is usually:
 
-Using small @sc{ecoff} objects requires linker support, and assumes that the
-@code{$gp} register is correctly initialized (normally done automatically by
-the startup code).  @sc{mips} @sc{ecoff} assembly code must not modify the
-@code{$gp} register.
+@smallexample
+lui     $4,%hi(addr)
+daddiu  $4,$4,%lo(addr)
+@end smallexample
+
+The sequence is much longer when @samp{addr} is a 64-bit symbol.
+@xref{MIPS Symbol Sizes,, Directives to override the size of symbols}.
+
+In order to cut down on this overhead, most embedded MIPS systems
+set aside a 64-kilobyte ``small data'' area and guarantee that all
+data of size @var{n} and smaller will be placed in that area.
+The limit @var{n} is passed to both the assembler and the linker
+using the command-line option @option{-G @var{n}}, @pxref{MIPS Opts,,
+Assembler options}.  Note that the same value of @var{n} must be used
+when linking and when assembling all input files to the link; any
+inconsistency could cause a relocation overflow error.
+
+The size of an object in the @code{.bss} section is set by the
+@code{.comm} or @code{.lcomm} directive that defines it.  The size of
+an external object may be set with the @code{.extern} directive.  For
+example, @samp{.extern sym,4} declares that the object at @code{sym}
+is 4 bytes in length, while leaving @code{sym} otherwise undefined.
+
+When no @option{-G} option is given, the default limit is 8 bytes.
+The option @option{-G 0} prevents any data from being automatically
+classified as small.
+
+It is also possible to mark specific objects as small by putting them
+in the special sections @code{.sdata} and @code{.sbss}, which are
+``small'' counterparts of @code{.data} and @code{.bss} respectively.
+The toolchain will treat such data as small regardless of the
+@option{-G} setting.
+
+On startup, systems that support a small data area are expected to
+initialize register @code{$28}, also known as @code{$gp}, in such a
+way that small data can be accessed using a 16-bit offset from that
+register.  For example, when @samp{addr} is small data,
+the @samp{dla $4,addr} instruction above is equivalent to:
+
+@smallexample
+daddiu  $4,$28,%gp_rel(addr)
+@end smallexample
+
+Small data is not supported for SVR4-style PIC.
 
 @node MIPS ISA
 @section Directives to override the ISA level
