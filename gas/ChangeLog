@@ -1,5 +1,11 @@
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c: Remove OBJ_ELF, OBJ_MAYBE_ELF and IS_ELF
+	conditions.  Remove any code deselected by them.
+	(s_mips_frame, s_mips_mask): Handle ECOFF_DEBUGGING case first.
+
+2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* NEWS: Note removal of ECOFF support.
 	* doc/as.texinfo (--emulation): Update for the removal of MIPS ECOFF.
 	* Makefile.am (TARG_ENV_HFILES): Remove config/te-lnews.h.

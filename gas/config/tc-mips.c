@@ -40,7 +40,6 @@
 #define DBG(x)
 #endif
 
-#ifdef OBJ_MAYBE_ELF
 /* Clean up namespace so we can include obj-elf.h too.  */
 static int mips_output_flavor (void);
 static int mips_output_flavor (void) { return OUTPUT_FLAVOR; }
@@ -61,11 +60,8 @@ static int mips_output_flavor (void) { return OUTPUT_FLAVOR; }
 /* Fix any of them that we actually care about.  */
 #undef OUTPUT_FLAVOR
 #define OUTPUT_FLAVOR mips_output_flavor()
-#endif
 
-#if defined (OBJ_ELF)
 #include "elf/mips.h"
-#endif
 
 #ifndef ECOFF_DEBUGGING
 #define NO_ECOFF_DEBUGGING
@@ -85,9 +81,7 @@ int mips_flag_pdr = TRUE;
 
 #include "ecoff.h"
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
 static char *mips_regmask_frag;
-#endif
 
 #define ZERO 0
 #define ATREG 1
@@ -1425,7 +1419,6 @@ enum options
     OPTION_SINGLE_FLOAT,
     OPTION_DOUBLE_FLOAT,
     OPTION_32,
-#ifdef OBJ_ELF
     OPTION_CALL_SHARED,
     OPTION_CALL_NONPIC,
     OPTION_NON_SHARED,
@@ -1438,7 +1431,6 @@ enum options
     OPTION_PDR,
     OPTION_NO_PDR,
     OPTION_MVXWORKS_PIC,
-#endif /* OBJ_ELF */
     OPTION_END_OF_ENUM
   };
 
@@ -1539,7 +1531,6 @@ struct option md_longopts[] =
   {"32", no_argument, NULL, OPTION_32},
 
   /* ELF-specific options.  */
-#ifdef OBJ_ELF
   {"KPIC", no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
   {"call_nonpic", no_argument, NULL, OPTION_CALL_NONPIC},
@@ -1553,7 +1544,6 @@ struct option md_longopts[] =
   {"mpdr", no_argument, NULL, OPTION_PDR},
   {"mno-pdr", no_argument, NULL, OPTION_NO_PDR},
   {"mvxworks-pic", no_argument, NULL, OPTION_MVXWORKS_PIC},
-#endif /* OBJ_ELF */
 
   {NULL, no_argument, NULL, 0}
 };
@@ -1826,12 +1816,10 @@ static unsigned int forced_insn_length;
 
 static bfd_boolean mips_assembling_insn;
 
-#ifdef OBJ_ELF
 /* The pdr segment for per procedure frame/regmask info.  Not used for
    ECOFF debugging.  */
 
 static segT pdr_seg;
-#endif
 
 /* The default target format to use.  */
 
@@ -2835,93 +2823,88 @@ md_begin (void)
 
   bfd_set_gp_size (stdoutput, g_switch_value);
 
-#ifdef OBJ_ELF
-  if (IS_ELF)
+  /* On a native system other than VxWorks, sections must be aligned
+     to 16 byte boundaries.  When configured for an embedded ELF
+     target, we don't bother.  */
+  if (strncmp (TARGET_OS, "elf", 3) != 0
+      && strncmp (TARGET_OS, "vxworks", 7) != 0)
     {
-      /* On a native system other than VxWorks, sections must be aligned
-	 to 16 byte boundaries.  When configured for an embedded ELF
-	 target, we don't bother.  */
-      if (strncmp (TARGET_OS, "elf", 3) != 0
-	  && strncmp (TARGET_OS, "vxworks", 7) != 0)
-	{
-	  (void) bfd_set_section_alignment (stdoutput, text_section, 4);
-	  (void) bfd_set_section_alignment (stdoutput, data_section, 4);
-	  (void) bfd_set_section_alignment (stdoutput, bss_section, 4);
-	}
-
-      /* Create a .reginfo section for register masks and a .mdebug
-	 section for debugging information.  */
-      {
-	segT seg;
-	subsegT subseg;
-	flagword flags;
-	segT sec;
-
-	seg = now_seg;
-	subseg = now_subseg;
-
-	/* The ABI says this section should be loaded so that the
-	   running program can access it.  However, we don't load it
-	   if we are configured for an embedded target */
-	flags = SEC_READONLY | SEC_DATA;
-	if (strncmp (TARGET_OS, "elf", 3) != 0)
-	  flags |= SEC_ALLOC | SEC_LOAD;
-
-	if (mips_abi != N64_ABI)
-	  {
-	    sec = subseg_new (".reginfo", (subsegT) 0);
-
-	    bfd_set_section_flags (stdoutput, sec, flags);
-	    bfd_set_section_alignment (stdoutput, sec, HAVE_NEWABI ? 3 : 2);
-
-	    mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
-	  }
-	else
-	  {
-	    /* The 64-bit ABI uses a .MIPS.options section rather than
-               .reginfo section.  */
-	    sec = subseg_new (".MIPS.options", (subsegT) 0);
-	    bfd_set_section_flags (stdoutput, sec, flags);
-	    bfd_set_section_alignment (stdoutput, sec, 3);
-
-	    /* Set up the option header.  */
-	    {
-	      Elf_Internal_Options opthdr;
-	      char *f;
-
-	      opthdr.kind = ODK_REGINFO;
-	      opthdr.size = (sizeof (Elf_External_Options)
-			     + sizeof (Elf64_External_RegInfo));
-	      opthdr.section = 0;
-	      opthdr.info = 0;
-	      f = frag_more (sizeof (Elf_External_Options));
-	      bfd_mips_elf_swap_options_out (stdoutput, &opthdr,
-					     (Elf_External_Options *) f);
-
-	      mips_regmask_frag = frag_more (sizeof (Elf64_External_RegInfo));
-	    }
-	  }
-
-	if (ECOFF_DEBUGGING)
-	  {
-	    sec = subseg_new (".mdebug", (subsegT) 0);
-	    (void) bfd_set_section_flags (stdoutput, sec,
-					  SEC_HAS_CONTENTS | SEC_READONLY);
-	    (void) bfd_set_section_alignment (stdoutput, sec, 2);
-	  }
-	else if (mips_flag_pdr)
-	  {
-	    pdr_seg = subseg_new (".pdr", (subsegT) 0);
-	    (void) bfd_set_section_flags (stdoutput, pdr_seg,
-					  SEC_READONLY | SEC_RELOC
-					  | SEC_DEBUGGING);
-	    (void) bfd_set_section_alignment (stdoutput, pdr_seg, 2);
-	  }
-
-	subseg_set (seg, subseg);
-      }
+      (void) bfd_set_section_alignment (stdoutput, text_section, 4);
+      (void) bfd_set_section_alignment (stdoutput, data_section, 4);
+      (void) bfd_set_section_alignment (stdoutput, bss_section, 4);
     }
-#endif /* OBJ_ELF */
+
+  /* Create a .reginfo section for register masks and a .mdebug
+     section for debugging information.  */
+  {
+    segT seg;
+    subsegT subseg;
+    flagword flags;
+    segT sec;
+
+    seg = now_seg;
+    subseg = now_subseg;
+
+    /* The ABI says this section should be loaded so that the
+       running program can access it.  However, we don't load it
+       if we are configured for an embedded target */
+    flags = SEC_READONLY | SEC_DATA;
+    if (strncmp (TARGET_OS, "elf", 3) != 0)
+      flags |= SEC_ALLOC | SEC_LOAD;
+
+    if (mips_abi != N64_ABI)
+      {
+	sec = subseg_new (".reginfo", (subsegT) 0);
+
+	bfd_set_section_flags (stdoutput, sec, flags);
+	bfd_set_section_alignment (stdoutput, sec, HAVE_NEWABI ? 3 : 2);
+
+	mips_regmask_frag = frag_more (sizeof (Elf32_External_RegInfo));
+      }
+    else
+      {
+	/* The 64-bit ABI uses a .MIPS.options section rather than
+	   .reginfo section.  */
+	sec = subseg_new (".MIPS.options", (subsegT) 0);
+	bfd_set_section_flags (stdoutput, sec, flags);
+	bfd_set_section_alignment (stdoutput, sec, 3);
+
+	/* Set up the option header.  */
+	{
+	  Elf_Internal_Options opthdr;
+	  char *f;
+
+	  opthdr.kind = ODK_REGINFO;
+	  opthdr.size = (sizeof (Elf_External_Options)
+			 + sizeof (Elf64_External_RegInfo));
+	  opthdr.section = 0;
+	  opthdr.info = 0;
+	  f = frag_more (sizeof (Elf_External_Options));
+	  bfd_mips_elf_swap_options_out (stdoutput, &opthdr,
+					 (Elf_External_Options *) f);
+
+	  mips_regmask_frag = frag_more (sizeof (Elf64_External_RegInfo));
+	}
+      }
+
+    if (ECOFF_DEBUGGING)
+      {
+	sec = subseg_new (".mdebug", (subsegT) 0);
+	(void) bfd_set_section_flags (stdoutput, sec,
+				      SEC_HAS_CONTENTS | SEC_READONLY);
+	(void) bfd_set_section_alignment (stdoutput, sec, 2);
+      }
+    else if (mips_flag_pdr)
+      {
+	pdr_seg = subseg_new (".pdr", (subsegT) 0);
+	(void) bfd_set_section_flags (stdoutput, pdr_seg,
+				      SEC_READONLY | SEC_RELOC
+				      | SEC_DEBUGGING);
+	(void) bfd_set_section_alignment (stdoutput, pdr_seg, 2);
+      }
+
+    subseg_set (seg, subseg);
+  }
 
   if (! ECOFF_DEBUGGING)
     md_obj_begin ();
@@ -3206,14 +3189,12 @@ s_is_linkonce (symbolS *sym, segT from_seg)
     {
       if ((bfd_get_section_flags (stdoutput, symseg) & SEC_LINK_ONCE))
 	linkonce = TRUE;
-#ifdef OBJ_ELF
       /* The GNU toolchain uses an extension for ELF: a section
 	 beginning with the magic string .gnu.linkonce is a
 	 linkonce section.  */
       if (strncmp (segment_name (symseg), ".gnu.linkonce",
 		   sizeof ".gnu.linkonce" - 1) == 0)
 	linkonce = TRUE;
-#endif
     }
   return linkonce;
 }
@@ -3231,15 +3212,10 @@ mips_compressed_mark_label (symbolS *label)
 {
   gas_assert (HAVE_CODE_COMPRESSION);
 
-#if defined(OBJ_ELF) || defined(OBJ_MAYBE_ELF)
-  if (IS_ELF)
-    {
-      if (mips_opts.mips16)
-	S_SET_OTHER (label, ELF_ST_SET_MIPS16 (S_GET_OTHER (label)));
-      else
-	S_SET_OTHER (label, ELF_ST_SET_MICROMIPS (S_GET_OTHER (label)));
-    }
-#endif
+  if (mips_opts.mips16)
+    S_SET_OTHER (label, ELF_ST_SET_MIPS16 (S_GET_OTHER (label)));
+  else
+    S_SET_OTHER (label, ELF_ST_SET_MICROMIPS (S_GET_OTHER (label)));
   if ((S_GET_VALUE (label) & 1) == 0
       /* Don't adjust the address if the label is global or weak, or
 	 in a link-once section, since we'll be emitting symbol reloc
@@ -4395,12 +4371,7 @@ micromips_add_label (void)
 
   s = colon (micromips_label_name ());
   micromips_label_inc ();
-#if defined(OBJ_ELF) || defined(OBJ_MAYBE_ELF)
-  if (IS_ELF)
-    S_SET_OTHER (s, ELF_ST_SET_MICROMIPS (S_GET_OTHER (s)));
-#else
-  (void) s;
-#endif
+  S_SET_OTHER (s, ELF_ST_SET_MICROMIPS (S_GET_OTHER (s)));
 }
 
 /* If assembling microMIPS code, then return the microMIPS reloc
@@ -4687,7 +4658,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
   method = get_append_method (ip, address_expr, reloc_type);
   branch_disp = method == APPEND_SWAP ? insn_length (history) : 0;
 
-#ifdef OBJ_ELF
   dwarf2_emit_insn (0);
   /* We want MIPS16 and microMIPS debug info to use ISA-encoded addresses,
      so "move" the instruction address accordingly.
@@ -4701,7 +4671,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
      and a 16-bit delay slot, since the current position would then be
      in the middle of a branch.  */
   dwarf2_move_insn ((HAVE_CODE_COMPRESSION ? 1 : 0) - branch_disp);
-#endif
 
   relax32 = (mips_relax_branch
 	     /* Don't try branch relaxation within .set nomacro, or within
@@ -12938,14 +12907,13 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			break;
 		      }
 		    new_seg = subseg_new (newname, (subsegT) 0);
-		    if (IS_ELF)
-		      bfd_set_section_flags (stdoutput, new_seg,
-					     (SEC_ALLOC
-					      | SEC_LOAD
-					      | SEC_READONLY
-					      | SEC_DATA));
+		    bfd_set_section_flags (stdoutput, new_seg,
+					   (SEC_ALLOC
+					    | SEC_LOAD
+					    | SEC_READONLY
+					    | SEC_DATA));
 		    frag_align (*args == 'l' ? 2 : 3, 0, 0);
-		    if (IS_ELF && strncmp (TARGET_OS, "elf", 3) != 0)
+		    if (strncmp (TARGET_OS, "elf", 3) != 0)
 		      record_alignment (new_seg, 4);
 		    else
 		      record_alignment (new_seg, *args == 'l' ? 2 : 3);
@@ -14795,7 +14763,6 @@ struct percent_op_match
 static const struct percent_op_match mips_percent_op[] =
 {
   {"%lo", BFD_RELOC_LO16},
-#ifdef OBJ_ELF
   {"%call_hi", BFD_RELOC_MIPS_CALL_HI16},
   {"%call_lo", BFD_RELOC_MIPS_CALL_LO16},
   {"%call16", BFD_RELOC_MIPS_CALL16},
@@ -14817,7 +14784,6 @@ static const struct percent_op_match mips_percent_op[] =
   {"%tprel_hi", BFD_RELOC_MIPS_TLS_TPREL_HI16},
   {"%tprel_lo", BFD_RELOC_MIPS_TLS_TPREL_LO16},
   {"%gottprel", BFD_RELOC_MIPS_TLS_GOTTPREL},
-#endif
   {"%hi", BFD_RELOC_HI16_S}
 };
 
@@ -14971,7 +14937,6 @@ md_number_to_chars (char *buf, valueT val, int n)
     number_to_chars_littleendian (buf, val, n);
 }
 
-#ifdef OBJ_ELF
 static int support_64bit_objects(void)
 {
   const char **list, **l;
@@ -14986,7 +14951,6 @@ static int support_64bit_objects(void)
   free (list);
   return yes;
 }
-#endif /* OBJ_ELF */
 
 /* Set STRING_PTR (either &mips_arch_string or &mips_tune_string) to
    NEW_VALUE.  Warn if another value was already specified.  Note:
@@ -15240,36 +15204,20 @@ md_parse_option (int c, char *arg)
       mips_opts.sym32 = FALSE;
       break;
 
-#ifdef OBJ_ELF
       /* When generating ELF code, we permit -KPIC and -call_shared to
 	 select SVR4_PIC, and -non_shared to select no PIC.  This is
 	 intended to be compatible with Irix 5.  */
     case OPTION_CALL_SHARED:
-      if (!IS_ELF)
-	{
-	  as_bad (_("-call_shared is supported only for ELF format"));
-	  return 0;
-	}
       mips_pic = SVR4_PIC;
       mips_abicalls = TRUE;
       break;
 
     case OPTION_CALL_NONPIC:
-      if (!IS_ELF)
-	{
-	  as_bad (_("-call_nonpic is supported only for ELF format"));
-	  return 0;
-	}
       mips_pic = NO_PIC;
       mips_abicalls = TRUE;
       break;
 
     case OPTION_NON_SHARED:
-      if (!IS_ELF)
-	{
-	  as_bad (_("-non_shared is supported only for ELF format"));
-	  return 0;
-	}
       mips_pic = NO_PIC;
       mips_abicalls = FALSE;
       break;
@@ -15280,7 +15228,6 @@ md_parse_option (int c, char *arg)
     case OPTION_XGOT:
       mips_big_got = 1;
       break;
-#endif /* OBJ_ELF */
 
     case 'G':
       g_switch_value = atoi (arg);
@@ -15290,33 +15237,18 @@ md_parse_option (int c, char *arg)
       /* The -32, -n32 and -64 options are shortcuts for -mabi=32, -mabi=n32
 	 and -mabi=64.  */
     case OPTION_32:
-      if (IS_ELF)
-	mips_abi = O32_ABI;
-      /* We silently ignore -32 for non-ELF targets.  This greatly
-	 simplifies the construction of the MIPS GAS test cases.  */
+      mips_abi = O32_ABI;
       break;
 
-#ifdef OBJ_ELF
     case OPTION_N32:
-      if (!IS_ELF)
-	{
-	  as_bad (_("-n32 is supported for ELF format only"));
-	  return 0;
-	}
       mips_abi = N32_ABI;
       break;
 
     case OPTION_64:
-      if (!IS_ELF)
-	{
-	  as_bad (_("-64 is supported for ELF format only"));
-	  return 0;
-	}
       mips_abi = N64_ABI;
       if (!support_64bit_objects())
 	as_fatal (_("No compiled in support for 64 bit object file format"));
       break;
-#endif /* OBJ_ELF */
 
     case OPTION_GP32:
       file_mips_gp32 = 1;
@@ -15350,13 +15282,7 @@ md_parse_option (int c, char *arg)
       file_mips_soft_float = 0;
       break;
 
-#ifdef OBJ_ELF
     case OPTION_MABI:
-      if (!IS_ELF)
-	{
-	  as_bad (_("-mabi is supported for ELF format only"));
-	  return 0;
-	}
       if (strcmp (arg, "32") == 0)
 	mips_abi = O32_ABI;
       else if (strcmp (arg, "o64") == 0)
@@ -15378,7 +15304,6 @@ md_parse_option (int c, char *arg)
 	  return 0;
 	}
       break;
-#endif /* OBJ_ELF */
 
     case OPTION_M7000_HILO_FIX:
       mips_7000_hilo_fix = TRUE;
@@ -15388,7 +15313,6 @@ md_parse_option (int c, char *arg)
       mips_7000_hilo_fix = FALSE;
       break;
 
-#ifdef OBJ_ELF
     case OPTION_MDEBUG:
       mips_flag_mdebug = TRUE;
       break;
@@ -15408,7 +15332,6 @@ md_parse_option (int c, char *arg)
     case OPTION_MVXWORKS_PIC:
       mips_pic = VXWORKS_PIC;
       break;
-#endif /* OBJ_ELF */
 
     default:
       return 0;
@@ -16198,16 +16121,13 @@ s_change_sec (int sec)
 {
   segT seg;
 
-#ifdef OBJ_ELF
   /* The ELF backend needs to know that we are changing sections, so
      that .previous works correctly.  We could do something like check
      for an obj_section_change_hook macro, but that might be confusing
      as it would not be appropriate to use it in the section changing
      functions in read.c, since obj-elf.c intercepts those.  FIXME:
      This should be cleaner, somehow.  */
-  if (IS_ELF)
-    obj_elf_section_change_hook ();
-#endif
+  obj_elf_section_change_hook ();
 
   mips_emit_delays ();
 
@@ -16227,37 +16147,28 @@ s_change_sec (int sec)
     case 'r':
       seg = subseg_new (RDATA_SECTION_NAME,
 			(subsegT) get_absolute_expression ());
-      if (IS_ELF)
-	{
-	  bfd_set_section_flags (stdoutput, seg, (SEC_ALLOC | SEC_LOAD
-						  | SEC_READONLY | SEC_RELOC
-						  | SEC_DATA));
-	  if (strncmp (TARGET_OS, "elf", 3) != 0)
-	    record_alignment (seg, 4);
-	}
+      bfd_set_section_flags (stdoutput, seg, (SEC_ALLOC | SEC_LOAD
+					      | SEC_READONLY | SEC_RELOC
+					      | SEC_DATA));
+      if (strncmp (TARGET_OS, "elf", 3) != 0)
+	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
       break;
 
     case 's':
       seg = subseg_new (".sdata", (subsegT) get_absolute_expression ());
-      if (IS_ELF)
-	{
-	  bfd_set_section_flags (stdoutput, seg,
-				 SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
-	  if (strncmp (TARGET_OS, "elf", 3) != 0)
-	    record_alignment (seg, 4);
-	}
+      bfd_set_section_flags (stdoutput, seg,
+			     SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
+      if (strncmp (TARGET_OS, "elf", 3) != 0)
+	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
       break;
 
     case 'B':
       seg = subseg_new (".sbss", (subsegT) get_absolute_expression ());
-      if (IS_ELF)
-	{
-	  bfd_set_section_flags (stdoutput, seg, SEC_ALLOC);
-	  if (strncmp (TARGET_OS, "elf", 3) != 0)
-	    record_alignment (seg, 4);
-	}
+      bfd_set_section_flags (stdoutput, seg, SEC_ALLOC);
+      if (strncmp (TARGET_OS, "elf", 3) != 0)
+	record_alignment (seg, 4);
       demand_empty_rest_of_line ();
       break;
     }
@@ -16268,7 +16179,6 @@ s_change_sec (int sec)
 void
 s_change_section (int ignore ATTRIBUTE_UNUSED)
 {
-#ifdef OBJ_ELF
   char *section_name;
   char c;
   char next_c = 0;
@@ -16276,9 +16186,6 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
   int section_flag;
   int section_entry_size;
   int section_alignment;
-
-  if (!IS_ELF)
-    return;
 
   section_name = input_line_pointer;
   c = get_symbol_end ();
@@ -16339,7 +16246,6 @@ s_change_section (int ignore ATTRIBUTE_UNUSED)
 
   if (now_seg->name != section_name)
     free (section_name);
-#endif /* OBJ_ELF */
 }
 
 void
@@ -17407,17 +17313,14 @@ md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
 
-  if (IS_ELF)
-    {
-      /* We don't need to align ELF sections to the full alignment.
-	 However, Irix 5 may prefer that we align them at least to a 16
-	 byte boundary.  We don't bother to align the sections if we
-	 are targeted for an embedded system.  */
-      if (strncmp (TARGET_OS, "elf", 3) == 0)
-        return addr;
-      if (align > 4)
-        align = 4;
-    }
+  /* We don't need to align ELF sections to the full alignment.
+     However, Irix 5 may prefer that we align them at least to a 16
+     byte boundary.  We don't bother to align the sections if we
+     are targeted for an embedded system.  */
+  if (strncmp (TARGET_OS, "elf", 3) == 0)
+    return addr;
+  if (align > 4)
+    align = 4;
 
   return ((addr + (1 << align) - 1) & (-1 << align));
 }
@@ -17524,11 +17427,8 @@ pic_need_relax (symbolS *sym, asection *segtype)
 	  && !bfd_is_abs_section (symsec)
 	  && !bfd_is_com_section (symsec)
 	  && !s_is_linkonce (sym, segtype)
-#ifdef OBJ_ELF
 	  /* A global or weak symbol is treated as external.  */
-	  && (!IS_ELF || (! S_IS_WEAK (sym) && ! S_IS_EXTERNAL (sym)))
-#endif
-	  );
+	  && (!S_IS_WEAK (sym) && !S_IS_EXTERNAL (sym)));
 }
 
 
@@ -18045,7 +17945,6 @@ mips_fix_adjustable (fixS *fixp)
 	  || jalr_reloc_p (fixp->fx_r_type)))
     return 0;
 
-#ifdef OBJ_ELF
   /* R_MIPS16_26 relocations against non-MIPS16 functions might resolve
      to a floating-point stub.  The same is true for non-R_MIPS16_26
      relocations against MIPS16 functions; in this case, the stub becomes
@@ -18088,15 +17987,13 @@ mips_fix_adjustable (fixS *fixp)
      targets.)  This approach is a little simpler than trying to detect
      stub sections, and gives the "all or nothing" per-symbol consistency
      that we have for MIPS16 symbols.  */
-  if (IS_ELF
-      && fixp->fx_subsy == NULL
+  if (fixp->fx_subsy == NULL
       && (ELF_ST_IS_MIPS16 (S_GET_OTHER (fixp->fx_addsy))
 	  || *symbol_get_tc (fixp->fx_addsy)
 	  || (HAVE_IN_PLACE_ADDENDS
 	      && ELF_ST_IS_MICROMIPS (S_GET_OTHER (fixp->fx_addsy))
 	      && jmp_reloc_p (fixp->fx_r_type))))
     return 0;
-#endif
 
   return 1;
 }
@@ -18128,14 +18025,6 @@ tc_gen_reloc (asection *section ATTRIBUTE_UNUSED, fixS *fixp)
       /* At this point, fx_addnumber is "symbol offset - pcrel address".
 	 Relocations want only the symbol offset.  */
       reloc->addend = fixp->fx_addnumber + reloc->address;
-      if (!IS_ELF)
-	{
-	  /* A gruesome hack which is a result of the gruesome gas
-	     reloc handling.  What's worse, for COFF (as opposed to
-	     ECOFF), we might need yet another copy of reloc->address.
-	     See bfd_install_relocation.  */
-	  reloc->addend += reloc->address;
-	}
     }
   else
     reloc->addend = fixp->fx_addnumber;
@@ -18546,10 +18435,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
 	  /* Make a label at the end for use with the branch.  */
 	  l = symbol_new (micromips_label_name (), asec, fragp->fr_fix, fragp);
 	  micromips_label_inc ();
-#if defined(OBJ_ELF) || defined(OBJ_MAYBE_ELF)
-	  if (IS_ELF)
-	    S_SET_OTHER (l, ELF_ST_SET_MICROMIPS (S_GET_OTHER (l)));
-#endif
+	  S_SET_OTHER (l, ELF_ST_SET_MICROMIPS (S_GET_OTHER (l)));
 
 	  /* Refer to it.  */
 	  fixp = fix_new (fragp, buf - fragp->fr_literal, 4, l, 0, TRUE,
@@ -18783,8 +18669,6 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
     }
 }
 
-#ifdef OBJ_ELF
-
 /* This function is called after the relocs have been generated.
    We've been storing mips16 text labels as odd.  Here we convert them
    back to even for the convenience of the debugger.  */
@@ -18794,9 +18678,6 @@ mips_frob_file_after_relocs (void)
 {
   asymbol **syms;
   unsigned int count, i;
-
-  if (!IS_ELF)
-    return;
 
   syms = bfd_get_outsymbols (stdoutput);
   count = bfd_get_symcount (stdoutput);
@@ -18811,8 +18692,6 @@ mips_frob_file_after_relocs (void)
 	  ++elf_symbol (*syms)->internal_elf_sym.st_size;
       }
 }
-
-#endif
 
 /* This function is called whenever a label is defined, including fake
    labels instantiated off the dot special symbol.  It is used when
@@ -18846,9 +18725,7 @@ void
 mips_define_label (symbolS *sym)
 {
   mips_record_label (sym);
-#ifdef OBJ_ELF
   dwarf2_emit_label (sym);
-#endif
 }
 
 /* This function is called by tc_new_dot_label whenever a new dot symbol
@@ -18862,8 +18739,6 @@ mips_add_dot_label (symbolS *sym)
     mips_compressed_mark_label (sym);
 }
 
-#if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
-
 /* Some special processing for a MIPS ELF file.  */
 
 void
@@ -18949,8 +18824,6 @@ mips_elf_final_processing (void)
     elf_elfheader (stdoutput)->e_flags |= ???;
 #endif
 }
-
-#endif /* OBJ_ELF || OBJ_MAYBE_ELF */
 
 typedef struct proc {
   symbolS *func_sym;
@@ -19200,7 +19073,6 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
   else
     as_warn (_(".end directive missing or unknown symbol"));
 
-#ifdef OBJ_ELF
   /* Create an expression to calculate the size of the function.  */
   if (p && cur_proc_ptr)
     {
@@ -19217,7 +19089,7 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
     }
 
   /* Generate a .pdr section.  */
-  if (IS_ELF && !ECOFF_DEBUGGING && mips_flag_pdr)
+  if (!ECOFF_DEBUGGING && mips_flag_pdr)
     {
       segT saved_seg = now_seg;
       subsegT saved_subseg = now_subseg;
@@ -19249,7 +19121,6 @@ s_mips_end (int x ATTRIBUTE_UNUSED)
 
       subseg_set (saved_seg, saved_subseg);
     }
-#endif /* OBJ_ELF */
 
   cur_proc_ptr = NULL;
 }
@@ -19307,8 +19178,9 @@ s_mips_ent (int aent)
 static void
 s_mips_frame (int ignore ATTRIBUTE_UNUSED)
 {
-#ifdef OBJ_ELF
-  if (IS_ELF && !ECOFF_DEBUGGING)
+  if (ECOFF_DEBUGGING)
+    s_ignore (ignore);
+  else
     {
       long val;
 
@@ -19336,9 +19208,6 @@ s_mips_frame (int ignore ATTRIBUTE_UNUSED)
 
       demand_empty_rest_of_line ();
     }
-  else
-#endif /* OBJ_ELF */
-    s_ignore (ignore);
 }
 
 /* The .fmask and .mask directives. If the mdebug section is present
@@ -19350,8 +19219,9 @@ s_mips_frame (int ignore ATTRIBUTE_UNUSED)
 static void
 s_mips_mask (int reg_type)
 {
-#ifdef OBJ_ELF
-  if (IS_ELF && !ECOFF_DEBUGGING)
+  if (ECOFF_DEBUGGING)
+    s_ignore (reg_type);
+  else
     {
       long mask, off;
 
@@ -19385,9 +19255,6 @@ s_mips_mask (int reg_type)
 
       demand_empty_rest_of_line ();
     }
-  else
-#endif /* OBJ_ELF */
-    s_ignore (reg_type);
 }
 
 /* A table describing all the processors gas knows about.  Names are
@@ -19787,7 +19654,6 @@ MIPS options:\n\
 --[no-]construct-floats	[dis]allow floating point values to be constructed\n\
 --[no-]relax-branch	[dis]allow out-of-range branches to be relaxed\n"
 		     ));
-#ifdef OBJ_ELF
   fprintf (stream, _("\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
 -call_nonpic		generate non-PIC code that can operate with DSOs\n\
@@ -19813,7 +19679,6 @@ MIPS options:\n\
 -32			create o32 ABI object file (default)\n\
 -n32			create n32 ABI object file\n\
 -64			create 64 ABI object file\n"));
-#endif
 }
 
 #ifdef TE_IRIX
