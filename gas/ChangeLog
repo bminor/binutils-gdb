@@ -1,5 +1,16 @@
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* doc/as.texinfo: Use MIPS rather than @sc{mips} throughout.
+	Use "CPU" instead of "cpu".
+	* doc/c-mips.texi: Likewise.
+	(MIPS Opts): Rename to MIPS Options.
+	(MIPS option stack): Rename to MIPS Option Stack.
+	(MIPS ASE instruction generation overrides): Rename to
+	MIPS ASE Instruction Generation Overrides (for now).
+	(MIPS floating-point): Rename to MIPS Floating-Point.
+
+2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* doc/c-mips.texi (MIPS Macros): New section.
 	(MIPS Object): Replace with...
 	(MIPS Small Data): ...this new section.

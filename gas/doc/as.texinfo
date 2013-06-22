@@ -1219,7 +1219,7 @@ behaviour in the shell.
 
 @ifset MIPS
 The following options are available when @value{AS} is configured for
-a @sc{mips} processor.
+a MIPS processor.
 
 @table @gcctabopt
 @item -G @var{num}
@@ -1247,7 +1247,7 @@ Generate ``little endian'' format output.
 @itemx -mips32r2
 @itemx -mips64
 @itemx -mips64r2
-Generate code for a particular @sc{mips} Instruction Set Architecture level.
+Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} is an alias for @samp{-march=r3000}, @samp{-mips2} is an
 alias for @samp{-march=r6000}, @samp{-mips3} is an alias for
 @samp{-march=r4000} and @samp{-mips4} is an alias for @samp{-march=r8000}.
@@ -1258,11 +1258,11 @@ correspond to generic
 and @samp{MIPS64 Release 2}
 ISA processors, respectively.
 
-@item -march=@var{CPU}
-Generate code for a particular @sc{mips} cpu.
+@item -march=@var{cpu}
+Generate code for a particular MIPS CPU.
 
 @item -mtune=@var{cpu}
-Schedule and tune for a particular @sc{mips} cpu.
+Schedule and tune for a particular MIPS CPU.
 
 @item -mfix7000
 @itemx -mno-fix7000
@@ -1370,7 +1370,7 @@ in the name.  Using @samp{-EB} or @samp{-EL} will override the endianness
 selection in any case.
 
 This option is currently supported only when the primary target
-@command{@value{AS}} is configured for is a @sc{mips} ELF or ECOFF target.
+@command{@value{AS}} is configured for is a MIPS ELF or ECOFF target.
 Furthermore, the primary target or others specified with
 @samp{--enable-targets=@dots{}} at configuration time must include support for
 the other format, if both are to be available.  For example, the Irix 5
