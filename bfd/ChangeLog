@@ -1,3 +1,8 @@
+2013-06-22  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Don't
+	set sh_entsize for PLT section.
+
 2013-06-20  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* bfd-in.h (bfd_elf64_aarch64_set_options): Add 'extern'.

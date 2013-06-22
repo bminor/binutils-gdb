@@ -3264,9 +3264,6 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 	      nios2_elf32_install_imm16 (splt, 4, hiadj (corrected));
 	      nios2_elf32_install_imm16 (splt, 12, (corrected & 0xffff) + 4);
 	      nios2_elf32_install_imm16 (splt, 16, (corrected & 0xffff) + 8);
-
-	      elf_section_data (splt->output_section)->this_hdr.sh_entsize
-		= 24;
 	    }
 	  else
 	    {
@@ -3292,9 +3289,6 @@ nios2_elf32_finish_dynamic_sections (bfd *output_bfd,
 					 (got_address & 0xffff) + 4);
 	      nios2_elf32_install_imm16 (splt, res_size + 20,
 					 (got_address & 0xffff) + 8);
-
-	      elf_section_data (splt->output_section)->this_hdr.sh_entsize
-		= 28 + res_size;
 	    }
 	}
     }
