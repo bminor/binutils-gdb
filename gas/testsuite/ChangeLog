@@ -1,5 +1,9 @@
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/lineno.d: Remove ellipsis.
+
+2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/all/gas.exp: Remove reference to mips-ecoff.
 	* gas/mips/branch-misc-1.d, gas/mips/branch-misc-2.d,
 	gas/mips/branch-misc-2-64.d, gas/mips/branch-misc-2pic.d,
