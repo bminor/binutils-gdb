@@ -11976,12 +11976,6 @@ $as_echo "$as_me: WARNING: GAS support for ${generic_target} is preliminary and 
       microblaze*)
         ;;
 
-      mips-sony-bsd*)
-	;;
-      mips-*-bsd*)
-	as_fn_error "Unknown vendor for mips-bsd configuration." "$LINENO" 5
-	;;
-
       ppc-*-aix[5-9].*)
 
 $as_echo "#define AIX_WEAK_SUPPORT 1" >>confdefs.h
@@ -12063,7 +12057,6 @@ _ACEOF
 	esac
 	# See whether it's appropriate to set E_MIPS_ABI_O32 for o32
 	# binaries.  It's a GNU extension that some OSes don't understand.
-	# The value only matters on ELF targets.
 	case ${target} in
 	  *-*-irix*)
 	    use_e_mips_abi_o32=0
@@ -12257,22 +12250,10 @@ _ACEOF
 # From target name and format, produce a list of supported emulations.
 
     case ${generic_target}-${fmt} in
-      mips-*-irix5*-*)	emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
-      mips*-*-linux*-* | mips*-*-freebsd* | mips*-*-kfreebsd*-gnu)
-			case "$endian" in
+      mips-*-*-*)	case "$endian" in
 			big)	emulation="mipsbelf mipslelf mipself" ;;
 			*)	emulation="mipslelf mipsbelf mipself" ;;
 			esac ;;
-      mips-*-lnews*-ecoff) ;;
-      mips-*-*-ecoff)	case "$endian" in
-			big)	emulation="mipsbecoff mipslecoff mipsecoff" ;;
-			*)	emulation="mipslecoff mipsbecoff mipsecoff" ;;
-			esac ;;
-      mips-*-*-elf)	case "$endian" in
-			big)	emulation="mipsbelf mipslelf mipself" ;;
-			*)	emulation="mipslelf mipsbelf mipself" ;;
-			esac ;;
-      mips-*-sysv4*MP*-*) emulation="mipsbelf mipslelf mipself mipsbecoff mipslecoff mipsecoff" ;;
       # i386-pc-pe-coff != i386-pc-coff.
       i386-*-pe-coff)	;;
       # Uncommenting the next line will turn on support for i386 AOUT
@@ -12392,7 +12373,7 @@ esac
 #
 # And then there's "--enable-targets=all"....
 #
-# For now, just always do it for MIPS ELF or ECOFF configurations.  Sigh.
+# For now, just always do it for MIPS ELF configurations.  Sigh.
 
 formats="${obj_format}"
 emfiles=""
@@ -12415,8 +12396,6 @@ for em in . $emulations ; do
     .)	continue ;;
     mipsbelf | mipslelf | mipself)
 	fmt=elf   file=mipself ;;
-    mipsbecoff | mipslecoff | mipsecoff)
-	fmt=ecoff file=mipsecoff ;;
     *coff)
 	fmt=coff  file=$em ;;
     *aout)
@@ -12485,11 +12464,11 @@ $as_echo "#define OBJ_MAYBE_SOM 1" >>confdefs.h
 fi
 if test `set . $emfiles ; shift ; echo $#` -gt 0 ; then
   DEFAULT_EMULATION=`set . $emulations ; echo $2`
-  # e-mips* has more than one emulation per file, e-i386* has just one at the
+  # e-mipself has more than one emulation per file, e-i386* has just one at the
   # moment.  If only one emulation is specified, then don't define
   # USE_EMULATIONS or include any of the e-files as they will only be bloat.
   case "${obj_format}${emfiles}" in
-    multi* | *mips*)
+    multi* | *mipself*)
       extra_objects="$extra_objects $emfiles"
 
 $as_echo "#define USE_EMULATIONS 1" >>confdefs.h

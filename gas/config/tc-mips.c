@@ -106,22 +106,10 @@ static char *mips_regmask_frag;
 
 #define AT  mips_opts.at
 
-/* Allow override of standard little-endian ECOFF format.  */
-
-#ifndef ECOFF_LITTLE_FORMAT
-#define ECOFF_LITTLE_FORMAT "ecoff-littlemips"
-#endif
-
 extern int target_big_endian;
 
 /* The name of the readonly data section.  */
-#define RDATA_SECTION_NAME (OUTPUT_FLAVOR == bfd_target_ecoff_flavour \
-			    ? ".rdata" \
-			    : OUTPUT_FLAVOR == bfd_target_coff_flavour \
-			    ? ".rdata" \
-			    : OUTPUT_FLAVOR == bfd_target_elf_flavour \
-			    ? ".rodata" \
-			    : (abort (), ""))
+#define RDATA_SECTION_NAME ".rodata"
 
 /* Ways in which an instruction can be "appended" to the output.  */
 enum append_method {
@@ -718,12 +706,12 @@ static int prev_nop_frag_required;
 /* The number of instructions we've seen since prev_nop_frag.  */
 static int prev_nop_frag_since;
 
-/* For ECOFF and ELF, relocations against symbols are done in two
-   parts, with a HI relocation and a LO relocation.  Each relocation
-   has only 16 bits of space to store an addend.  This means that in
-   order for the linker to handle carries correctly, it must be able
-   to locate both the HI and the LO relocation.  This means that the
-   relocations must appear in order in the relocation table.
+/* Relocations against symbols are sometimes done in two parts, with a HI
+   relocation and a LO relocation.  Each relocation has only 16 bits of
+   space to store an addend.  This means that in order for the linker to
+   handle carries correctly, it must be able to locate both the HI and
+   the LO relocation.  This means that the relocations must appear in
+   order in the relocation table.
 
    In order to implement this, we keep track of each unmatched HI
    relocation.  We then sort them so that they immediately precede the
@@ -1860,10 +1848,6 @@ mips_target_format (void)
 {
   switch (OUTPUT_FLAVOR)
     {
-    case bfd_target_ecoff_flavour:
-      return target_big_endian ? "ecoff-bigmips" : ECOFF_LITTLE_FORMAT;
-    case bfd_target_coff_flavour:
-      return "pe-mips";
     case bfd_target_elf_flavour:
 #ifdef TE_VXWORKS
       if (!HAVE_64BIT_OBJECTS && !HAVE_NEWABI)
@@ -4854,16 +4838,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
       /* In a compound relocation, it is the final (outermost)
 	 operator that determines the relocated field.  */
       howto = howto0 = bfd_reloc_type_lookup (stdoutput, final_type[i - 1]);
-
-      if (howto == NULL)
-	{
-	  /* To reproduce this failure try assembling gas/testsuites/
-	     gas/mips/mips16-intermix.s with a mips-ecoff targeted
-	     assembler.  */
-	  as_bad (_("Unsupported MIPS relocation number %d"),
-		  final_type[i - 1]);
-	  howto = bfd_reloc_type_lookup (stdoutput, BFD_RELOC_16);
-	}
+      if (!howto)
+	abort ();
 
       if (i > 1)
 	howto0 = bfd_reloc_type_lookup (stdoutput, final_type[0]);
@@ -15629,14 +15605,7 @@ mips_after_parse_args (void)
   mips_check_isa_supports_ases ();
 
   if (mips_flag_mdebug < 0)
-    {
-#ifdef OBJ_MAYBE_ECOFF
-      if (OUTPUT_FLAVOR == bfd_target_ecoff_flavour)
-	mips_flag_mdebug = 1;
-      else
-#endif /* OBJ_MAYBE_ECOFF */
-	mips_flag_mdebug = 0;
-    }
+    mips_flag_mdebug = 0;
 }
 
 void

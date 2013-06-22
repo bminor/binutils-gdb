@@ -11,6 +11,8 @@
 
 * Add support for the v850e3v5.
 
+* Remove assembler support for MIPS ECOFF targets.
+
 Changes in 2.23:
 
 * Add support for the 64-bit ARM architecture: AArch64.

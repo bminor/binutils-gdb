@@ -1,3 +1,11 @@
+2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/all/gas.exp: Remove reference to mips-ecoff.
+	* gas/mips/branch-misc-1.d, gas/mips/branch-misc-2.d,
+	gas/mips/branch-misc-2-64.d, gas/mips/branch-misc-2pic.d,
+	gas/mips/branch-misc-2pic-64.d, gas/mips/branch-swap.d: Remove
+	skips for mips-*-ecoff.
+
 2013-06-20  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/ase-errors-1.s, gas/mips/ase-errors-1.l,

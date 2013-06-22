@@ -80,7 +80,7 @@ const char *ld_sysroot;
 char * ld_canon_sysroot;
 int ld_canon_sysroot_len;
 
-/* Set by -G argument, for MIPS ECOFF target.  */
+/* Set by -G argument, for targets like MIPS ELF.  */
 int g_switch_value = 8;
 
 /* Nonzero means print names of input files as processed.  */

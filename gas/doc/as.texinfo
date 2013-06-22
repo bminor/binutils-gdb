@@ -1357,28 +1357,16 @@ out-of-range branches to produce an error.
 
 @cindex emulation
 @item --emulation=@var{name}
-This option causes @command{@value{AS}} to emulate @command{@value{AS}} configured
-for some other target, in all respects, including output format (choosing
-between ELF and ECOFF only), handling of pseudo-opcodes which may generate
-debugging information or store symbol table information, and default
-endianness.  The available configuration names are: @samp{mipsecoff},
-@samp{mipself}, @samp{mipslecoff}, @samp{mipsbecoff}, @samp{mipslelf},
-@samp{mipsbelf}.  The first two do not alter the default endianness from that
-of the primary target for which the assembler was configured; the others change
-the default to little- or big-endian as indicated by the @samp{b} or @samp{l}
-in the name.  Using @samp{-EB} or @samp{-EL} will override the endianness
-selection in any case.
+This option was formerly used to switch between ELF and ECOFF output
+on targets like IRIX 5 that supported both.  MIPS ECOFF support was
+removed in GAS 2.24, so the option now serves little purpose.
+It is retained for backwards compatibility.
 
-This option is currently supported only when the primary target
-@command{@value{AS}} is configured for is a MIPS ELF or ECOFF target.
-Furthermore, the primary target or others specified with
-@samp{--enable-targets=@dots{}} at configuration time must include support for
-the other format, if both are to be available.  For example, the Irix 5
-configuration includes support for both.
-
-Eventually, this option will support more configurations, with more
-fine-grained control over the assembler's behavior, and will be supported for
-more processors.
+The available configuration names are: @samp{mipself}, @samp{mipslelf} and
+@samp{mipsbelf}.  Choosing @samp{mipself} now has no effect, since the output
+is always ELF.  @samp{mipslelf} and @samp{mipsbelf} select little- and
+big-endian output respectively, but @samp{-EL} and @samp{-EB} are now the
+preferred options instead.
 
 @item -nocpp
 @command{@value{AS}} ignores this option.  It is accepted for compatibility with

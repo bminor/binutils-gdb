@@ -434,24 +434,16 @@ microblazeel*)		targ_emul=elf32microblazeel
 microblaze*)		targ_emul=elf32microblaze
 			targ_extra_emuls=elf32microblazeel
 			;;
-mips*-*-pe)		targ_emul=mipspe ;
-			targ_extra_ofiles="deffilep.o pe-dll.o" ;;
-mips*-dec-ultrix*)	targ_emul=mipslit ;;
-mips*-dec-osf*)		targ_emul=mipslit ;;
 mips*-sgi-irix5*)	targ_emul=elf32bsmip ;;
 mips*-sgi-irix6*)	targ_emul=elf32bmipn32
 	                targ_extra_emuls="elf32bsmip elf64bmip"
 			targ_extra_libpath=$targ_extra_emuls ;;
-mips*-sgi-irix*)	targ_emul=mipsbig ;;
-mips*el-*-ecoff*)	targ_emul=mipsidtl ;;
-mips*-*-ecoff*)		targ_emul=mipsidt ;;
 mips*el-*-netbsd*)	targ_emul=elf32ltsmip
 			targ_extra_emuls="elf32btsmip elf64ltsmip elf64btsmip"
 			;;
 mips*-*-netbsd*)	targ_emul=elf32btsmip
 			targ_extra_emuls="elf32ltsmip elf64btsmip elf64ltsmip"
   			;;
-mips*-*-bsd*)		targ_emul=mipsbig ;;
 mips*vr4300el-*-elf*)	targ_emul=elf32l4300 ;;
 mips*vr4300-*-elf*)	targ_emul=elf32b4300 ;;
 mips*vr4100el-*-elf*)	targ_emul=elf32l4300 ;;
@@ -505,7 +497,6 @@ mips*-*-freebsd* | mips*-*-kfreebsd*-gnu)
 			targ_emul=elf32btsmip_fbsd
 			targ_extra_emuls="elf32ltsmip elf32btsmip elf32ltsmipn32 elf32btsmipn32 elf64ltsmip elf64btsmip elf32ltsmip_fbsd elf32btsmipn32_fbsd elf32ltsmipn32_fbsd elf64ltsmip_fbsd elf64btsmip_fbsd"
 			targ_extra_libpath=$targ_extra_emuls ;;
-mips*-*-lnews*)		targ_emul=mipslnews ;;
 mips*-*-sysv4*)         targ_emul=elf32btsmip
 			;;
 mmix-*-*)		targ_emul=mmo

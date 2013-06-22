@@ -10,6 +10,8 @@
 
 * --enable-new-dtags no longer generates old dtags in addition to new dtags.
 
+* Remove linker support for MIPS ECOFF targets.
+
 Changes in 2.23:
 
 * Enable compressed debug section feature for x86/x86_64 pe-coff.

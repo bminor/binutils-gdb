@@ -27,8 +27,7 @@
 #include "as.h"
 
 /* This file is compiled conditionally for those targets which use
-   ECOFF debugging information (e.g., MIPS ECOFF, MIPS ELF, Alpha
-   ECOFF).  */
+   ECOFF debugging information (e.g., MIPS ELF, Alpha ECOFF).  */
 
 #include "ecoff.h"
 

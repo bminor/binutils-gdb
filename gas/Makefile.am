@@ -309,7 +309,6 @@ TARG_ENV_HFILES = \
 	config/te-i386aix.h \
 	config/te-ia64aix.h \
 	config/te-interix.h \
-	config/te-lnews.h \
 	config/te-lynx.h \
 	config/te-mach.h \
 	config/te-macos.h \
@@ -340,7 +339,6 @@ MULTI_CFILES = \
 	config/e-i386aout.c \
 	config/e-i386coff.c \
 	config/e-i386elf.c \
-	config/e-mipsecoff.c \
 	config/e-mipself.c
 
 CONFIG_ATOF_CFILES = \

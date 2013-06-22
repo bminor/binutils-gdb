@@ -92,7 +92,6 @@ fragment <<EOF
 
 #if defined(TARGET_IS_i386pe) \
     || defined(TARGET_IS_shpe) \
-    || defined(TARGET_IS_mipspe) \
     || defined(TARGET_IS_armpe) \
     || defined(TARGET_IS_arm_epoc_pe) \
     || defined(TARGET_IS_arm_wince_pe)
@@ -1759,9 +1758,6 @@ gld_${EMULATION_NAME}_recognized_file (lang_input_statement_type *entry ATTRIBUT
 #ifdef TARGET_IS_shpe
   pe_dll_id_target ("pei-shl");
 #endif
-#ifdef TARGET_IS_mipspe
-  pe_dll_id_target ("pei-mips");
-#endif
 #ifdef TARGET_IS_armpe
   pe_dll_id_target ("pei-arm-little");
 #endif
@@ -1826,7 +1822,7 @@ gld_${EMULATION_NAME}_finish (void)
 
 #ifdef DLL_SUPPORT
   if (link_info.shared
-#if !defined(TARGET_IS_shpe) && !defined(TARGET_IS_mipspe)
+#if !defined(TARGET_IS_shpe)
       || (!link_info.relocatable && pe_def_file->num_exports != 0)
 #endif
     )
@@ -1835,7 +1831,7 @@ gld_${EMULATION_NAME}_finish (void)
       if (pe_implib_filename)
 	pe_dll_generate_implib (pe_def_file, pe_implib_filename, &link_info);
     }
-#if defined(TARGET_IS_shpe) || defined(TARGET_IS_mipspe)
+#if defined(TARGET_IS_shpe)
   /* ARM doesn't need relocs.  */
   else
     {

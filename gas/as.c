@@ -132,7 +132,6 @@ static int flag_macro_alternate;
 #define EMULATION_ENVIRON "AS_EMULATION"
 
 extern struct emulation mipsbelf, mipslelf, mipself;
-extern struct emulation mipsbecoff, mipslecoff, mipsecoff;
 extern struct emulation i386coff, i386elf, i386aout;
 extern struct emulation crisaout, criself;
 

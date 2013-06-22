@@ -356,13 +356,6 @@ ALL_EMULATION_SOURCES = \
 	em68kpsos.c \
 	em88kbcs.c \
 	emcorepe.c \
-	emipsbig.c \
-	emipsbsd.c \
-	emipsidt.c \
-	emipsidtl.c \
-	emipslit.c \
-	emipslnews.c \
-	emipspe.c \
 	emn10200.c \
 	emn10300.c \
 	emsp430x110.c \
@@ -1508,29 +1501,6 @@ em88kbcs.c: $(srcdir)/emulparams/m88kbcs.sh \
 emcorepe.c: $(srcdir)/emulparams/mcorepe.sh \
   $(srcdir)/emultempl/pe.em $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mcorepe "$(tdir_mcorepe)"
-emipsbig.c: $(srcdir)/emulparams/mipsbig.sh $(srcdir)/emultempl/generic.em \
-  $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipsbig "$(tdir_mipsbig)"
-emipsbsd.c: $(srcdir)/emulparams/mipsbsd.sh $(srcdir)/emultempl/generic.em \
-  $(srcdir)/scripttempl/mipsbsd.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipsbsd "$(tdir_mipsbsd)"
-emipsidt.c: $(srcdir)/emulparams/mipsidt.sh $(srcdir)/emultempl/generic.em \
-  $(srcdir)/emultempl/mipsecoff.em $(srcdir)/scripttempl/mips.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} mipsidt "$(tdir_mipsidt)"
-emipsidtl.c: $(srcdir)/emulparams/mipsidtl.sh $(srcdir)/emultempl/generic.em \
-  $(srcdir)/emultempl/mipsecoff.em $(srcdir)/scripttempl/mips.sc \
-  ${GEN_DEPENDS}
-	${GENSCRIPTS} mipsidtl "$(tdir_mipsidtl)"
-emipslit.c: $(srcdir)/emulparams/mipslit.sh $(srcdir)/emultempl/generic.em \
-  $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipslit "$(tdir_mipslit)"
-emipslnews.c: $(srcdir)/emulparams/mipslnews.sh \
-  $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/mips.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipslnews "$(tdir_mipslnews)"
-emipspe.c: $(srcdir)/emulparams/mipspe.sh $(srcdir)/emultempl/pe.em \
-  $(srcdir)/scripttempl/pe.sc ${GEN_DEPENDS}
-	${GENSCRIPTS} mipspe "$(tdir_mipspe)"
 emn10200.c: $(srcdir)/emulparams/mn10200.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mn10200 "$(tdir_mn10200)"

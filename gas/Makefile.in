@@ -578,7 +578,6 @@ TARG_ENV_HFILES = \
 	config/te-i386aix.h \
 	config/te-ia64aix.h \
 	config/te-interix.h \
-	config/te-lnews.h \
 	config/te-lynx.h \
 	config/te-mach.h \
 	config/te-macos.h \
@@ -609,7 +608,6 @@ MULTI_CFILES = \
 	config/e-i386aout.c \
 	config/e-i386coff.c \
 	config/e-i386elf.c \
-	config/e-mipsecoff.c \
 	config/e-mipself.c
 
 CONFIG_ATOF_CFILES = \
@@ -781,7 +779,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/e-i386aout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/e-i386coff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/e-i386elf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/e-mipsecoff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/e-mipself.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ecoff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ehopt.Po@am__quote@
@@ -2128,20 +2125,6 @@ e-i386elf.obj: config/e-i386elf.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/e-i386elf.c' object='e-i386elf.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o e-i386elf.obj `if test -f 'config/e-i386elf.c'; then $(CYGPATH_W) 'config/e-i386elf.c'; else $(CYGPATH_W) '$(srcdir)/config/e-i386elf.c'; fi`
-
-e-mipsecoff.o: config/e-mipsecoff.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT e-mipsecoff.o -MD -MP -MF $(DEPDIR)/e-mipsecoff.Tpo -c -o e-mipsecoff.o `test -f 'config/e-mipsecoff.c' || echo '$(srcdir)/'`config/e-mipsecoff.c
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/e-mipsecoff.Tpo $(DEPDIR)/e-mipsecoff.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/e-mipsecoff.c' object='e-mipsecoff.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o e-mipsecoff.o `test -f 'config/e-mipsecoff.c' || echo '$(srcdir)/'`config/e-mipsecoff.c
-
-e-mipsecoff.obj: config/e-mipsecoff.c
-@am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT e-mipsecoff.obj -MD -MP -MF $(DEPDIR)/e-mipsecoff.Tpo -c -o e-mipsecoff.obj `if test -f 'config/e-mipsecoff.c'; then $(CYGPATH_W) 'config/e-mipsecoff.c'; else $(CYGPATH_W) '$(srcdir)/config/e-mipsecoff.c'; fi`
-@am__fastdepCC_TRUE@	$(am__mv) $(DEPDIR)/e-mipsecoff.Tpo $(DEPDIR)/e-mipsecoff.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	source='config/e-mipsecoff.c' object='e-mipsecoff.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -c -o e-mipsecoff.obj `if test -f 'config/e-mipsecoff.c'; then $(CYGPATH_W) 'config/e-mipsecoff.c'; else $(CYGPATH_W) '$(srcdir)/config/e-mipsecoff.c'; fi`
 
 e-mipself.o: config/e-mipself.c
 @am__fastdepCC_TRUE@	$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS) -MT e-mipself.o -MD -MP -MF $(DEPDIR)/e-mipself.Tpo -c -o e-mipself.o `test -f 'config/e-mipself.c' || echo '$(srcdir)/'`config/e-mipself.c

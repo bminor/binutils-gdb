@@ -619,7 +619,7 @@ Ignored.  Provided for compatibility with other tools.
 @itemx --gpsize=@var{value}
 Set the maximum size of objects to be optimized using the GP register to
 @var{size}.  This is only meaningful for object file formats such as
-MIPS ECOFF which supports putting large and small objects into different
+MIPS ELF that support putting large and small objects into different
 sections.  This is ignored for other object file formats.
 
 @cindex runtime library name

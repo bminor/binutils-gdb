@@ -318,23 +318,13 @@ case ${generic_target} in
 
   microblaze-*-*)			fmt=elf ;;
 
-  # don't change em like *-*-bsd does
-  mips-sony-bsd*)			fmt=ecoff ;;
-  mips-*-ultrix*)			fmt=ecoff endian=little ;;
-  mips-*-osf*)				fmt=ecoff endian=little ;;
-  mips-*-ecoff*)			fmt=ecoff ;;
-  mips-*-pe*)				fmt=coff endian=little em=pe ;;
   mips-*-irix6*)			fmt=elf em=irix ;;
   mips-*-irix5*)			fmt=elf em=irix ;;
-  mips-*-irix*)				fmt=ecoff em=irix ;;
-  mips-*-lnews*)			fmt=ecoff em=lnews ;;
-  mips-*-riscos*)			fmt=ecoff ;;
   mips*-*-linux*)			fmt=elf em=tmips ;;
   mips*-*-freebsd* | mips*-*-kfreebsd*-gnu)
 					fmt=elf em=freebsd ;;
   mips-*-sysv4*MP* | mips-*-gnu*)	fmt=elf em=tmips ;;
   mips*-sde-elf* | mips*-mti-elf*)	fmt=elf em=tmips ;;
-  mips-*-sysv*)				fmt=ecoff ;;
   mips-*-elf* | mips-*-rtems*)		fmt=elf ;;
   mips-*-netbsd*)			fmt=elf em=tmips ;;
   mips-*-openbsd*)			fmt=elf em=tmips ;;

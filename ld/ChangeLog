@@ -1,3 +1,24 @@
+2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* NEWS: Document the removal of MIPS ECOFF targets.
+	* ld.texinfo (--gpsize=@var{value}): Use MIPS ELF rather than
+	MIPS ECOFF as an example of a target that supports small data.
+	* ldmain.c (g_switch_value): Likewise.
+	* configure.tgt (mips*-*-pe, mips*-dec-ultrix*, mips*-dec-osf*)
+	(mips*-sgi-irix* [v4 and earlier], mips*el-*-ecoff*, mips*-*-ecoff*)
+	(mips*-*-bsd*, mips*-*-lnews*): Remove cases.
+	* Makefile.am (ALL_EMULATION_SOURCES): Remove emipsbig.c, emipsbsd.c,
+	emipsidt.c, emipsidtl.c, emipslit.c, emipslnews.c and emipspe.c.
+	(emipsbig.c, emipsbsd.c, emipsidt.c, emipsidtl.c, emipslit.c)
+	(emipslnews.c, emipspe.c): Delete rules.
+	* Makefile.in: Regenerate.
+	* emulparams/mipsbig.sh, emulparams/mipsbsd.sh, emulparams/mipsidt.sh,
+	emulparams/mipsidtl.sh, emulparams/mipslit.sh, emulparams/mipslnews.sh,
+	emulparams/mipspe.sh, emultempl/mipsecoff.em: Delete.
+	* emultempl/m68kcoff.em: Update comment to say that MIPS ECOFF support
+	has now been removed.
+	* emultempl/pe.em: Remove TARGET_IS_mipspe checks.
+
 2013-06-19  Will Newton  <will.newton@linaro.org>
 
 	* emulparams/aarch64elf.sh: Remove IREL_IN_PLT.

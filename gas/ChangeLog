@@ -1,5 +1,33 @@
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* NEWS: Note removal of ECOFF support.
+	* doc/as.texinfo (--emulation): Update for the removal of MIPS ECOFF.
+	* Makefile.am (TARG_ENV_HFILES): Remove config/te-lnews.h.
+	(MULTI_CFILES): Remove config/e-mipsecoff.c.
+	* Makefile.in: Regenerate.
+	* configure.in: Remove MIPS ECOFF references.
+	(mips-sony-bsd*, mips-*-bsd*, mips-*-lnews*-ecoff, mips-*-*-ecoff):
+	Delete cases.
+	(mips-*-irix5*-*, mips*-*-linux*-*, mips*-*-freebsd*)
+	(mips*-*-kfreebsd*-gnu, mips-*-*-elf): Fold into...
+	(mips-*-*): ...this single case.
+	(mipsbecoff, mipslecoff, mipsecoff): Remove emulations.  Expect
+	MIPS emulations to be e-mipself*.
+	* configure: Regenerate.
+	* configure.tgt (mips-sony-bsd*, mips-*-ultrix*, mips-*-osf*)
+	(mips-*-ecoff*, mips-*-pe*, mips-*-irix*, ips-*-lnews*, mips-*-riscos*)
+	(mips-*-sysv*): Remove coff and ecoff cases.
+	* as.c (mipsbecoff, mipslecoff, mipsecoff): Remove.
+	* ecoff.c: Remove reference to MIPS ECOFF.
+	* config/e-mipsecoff.c, config/te-lnews.h: Delete files.
+	* config/tc-mips.c (ECOFF_LITTLE_FORMAT): Delete.
+	(RDATA_SECTION_NAME, mips_target_form): Remove COFF and ECOFF cases.
+	(mips_hi_fixup): Tweak comment.
+	(append_insn): Require a howto.
+	(mips_after_parse_args): Remove OBJ_MAYBE_ECOFF code.
+
+2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* doc/as.texinfo: Use MIPS rather than @sc{mips} throughout.
 	Use "CPU" instead of "cpu".
 	* doc/c-mips.texi: Likewise.
