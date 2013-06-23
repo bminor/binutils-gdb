@@ -1,3 +1,10 @@
+2013-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c: Assert that offsetT and valueT are at least
+	8 bytes in size.
+	(GPR_SMIN, GPR_SMAX): New macros.
+	(macro, mips_ip): Remove code for 4-byte valueT and offsetT.
+
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c: Remove OBJ_ELF, OBJ_MAYBE_ELF and IS_ELF

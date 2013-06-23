@@ -982,8 +982,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf32_bigarm_vec,
 	&bfd_elf32_bigarm_symbian_vec,
 	&bfd_elf32_bigarm_vxworks_vec,
+#ifdef BFD64
 	&bfd_elf32_bigmips_vec,
 	&bfd_elf32_bigmips_vxworks_vec,
+#endif
  	&bfd_elf32_bigmoxie_vec,
  	&bfd_elf32_bignios2_vec,
 	&bfd_elf32_cr16_vec,
@@ -1024,8 +1026,10 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf32_littlearm_vec,
 	&bfd_elf32_littlearm_symbian_vec,
 	&bfd_elf32_littlearm_vxworks_vec,
+#ifdef BFD64
 	&bfd_elf32_littlemips_vec,
 	&bfd_elf32_littlemips_vxworks_vec,
+#endif
  	&bfd_elf32_littlemoxie_vec,
  	&bfd_elf32_littlenios2_vec,
 	&bfd_elf32_m32c_vec,
@@ -1100,10 +1104,12 @@ static const bfd_target * const _bfd_target_vector[] =
 	&bfd_elf32_tilegx_be_vec,
 	&bfd_elf32_tilegx_le_vec,
 	&bfd_elf32_tilepro_vec,
+#ifdef BFD64
 	&bfd_elf32_tradbigmips_vec,
 	&bfd_elf32_tradlittlemips_vec,
 	&bfd_elf32_tradbigmips_freebsd_vec,
 	&bfd_elf32_tradlittlemips_freebsd_vec,
+#endif
 	&bfd_elf32_us_cris_vec,
 	&bfd_elf32_v850_vec,
 	&bfd_elf32_v850_rh850_vec,

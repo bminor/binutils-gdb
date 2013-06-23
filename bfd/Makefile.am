@@ -346,7 +346,6 @@ BFD32_BACKENDS = \
 	elf32-mep.lo \
 	elf32-metag.lo \
 	elf32-microblaze.lo \
-	elf32-mips.lo \
 	elf32-moxie.lo \
 	elf32-msp430.lo \
 	elf32-mt.lo \
@@ -375,7 +374,6 @@ BFD32_BACKENDS = \
 	elf32-xtensa.lo \
 	elf32.lo \
 	elflink.lo \
-	elfxx-mips.lo \
 	elfxx-sparc.lo \
 	elfxx-tilegx.lo \
 	epoc-pe-arm.lo \
@@ -536,7 +534,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-mep.c \
 	elf32-metag.c \
 	elf32-microblaze.c \
-	elf32-mips.c \
 	elf32-moxie.c \
 	elf32-msp430.c \
 	elf32-mt.c \
@@ -565,7 +562,6 @@ BFD32_BACKENDS_CFILES = \
 	elf32-xtensa.c \
 	elf32.c \
 	elflink.c \
-	elfxx-mips.c \
 	elfxx-sparc.c \
 	elfxx-tilegx.c \
 	epoc-pe-arm.c \
@@ -650,6 +646,7 @@ BFD64_BACKENDS = \
 	coff64-rs6000.lo \
 	demo64.lo \
 	elf32-ia64.lo \
+	elf32-mips.lo \
 	elf32-score.lo \
 	elf32-score7.lo \
 	elf64-alpha.lo \
@@ -668,6 +665,7 @@ BFD64_BACKENDS = \
 	elf64.lo \
 	elfn32-mips.lo \
 	elfxx-ia64.lo \
+	elfxx-mips.lo \
 	mach-o-x86-64.lo \
 	mmo.lo \
 	nlm32-alpha.lo \
@@ -687,6 +685,7 @@ BFD64_BACKENDS_CFILES = \
 	coff-x86_64.c \
 	coff64-rs6000.c \
 	demo64.c \
+	elf32-mips.c \
 	elf32-score.c \
 	elf32-score7.c \
 	elf64-alpha.c \
@@ -704,6 +703,7 @@ BFD64_BACKENDS_CFILES = \
 	elf64.c \
 	elfn32-mips.c \
 	elfxx-ia64.c \
+	elfxx-mips.c \
 	mach-o-x86-64.c \
 	mmo.c \
 	nlm32-alpha.c \

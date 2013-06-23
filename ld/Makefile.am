@@ -214,25 +214,11 @@ ALL_EMULATION_SOURCES = \
 	eelf32_tic6x_elf_be.c \
 	eelf32_tic6x_elf_le.c \
 	eelf32am33lin.c \
-	eelf32b4300.c \
 	eelf32bfin.c \
 	eelf32bfinfd.c \
-	eelf32bmip.c \
-	eelf32bmipn32.c \
-	eelf32bsmip.c \
-	eelf32btsmip.c \
-	eelf32btsmip_fbsd.c \
-	eelf32btsmipn32.c \
-	eelf32btsmipn32_fbsd.c \
 	eelf32cr16.c \
 	eelf32cr16c.c \
 	eelf32crx.c \
-	eelf32ebmip.c \
-	eelf32ebmipvxworks.c \
-	eelf32elmip.c \
-	eelf32elmipvxworks.c \
-	eelf32lr5900.c \
-	eelf32lr5900n32.c \
 	eelf32epiphany.c \
 	eelf32epiphany_4x4.c \
 	eelf32fr30.c \
@@ -242,19 +228,12 @@ ALL_EMULATION_SOURCES = \
 	eelf32ip2k.c \
 	eelf32iq10.c \
 	eelf32iq2000.c \
-	eelf32l4300.c \
 	eelf32lm32.c \
 	eelf32lm32fd.c \
-	eelf32lmip.c \
 	eelf32lppc.c \
 	eelf32lppclinux.c \
 	eelf32lppcnto.c \
 	eelf32lppcsim.c \
-	eelf32lsmip.c \
-	eelf32ltsmip.c \
-	eelf32ltsmip_fbsd.c \
-	eelf32ltsmipn32.c \
-	eelf32ltsmipn32_fbsd.c \
 	eelf32m32c.c \
 	eelf32mb_linux.c \
 	eelf32mcore.c \
@@ -262,7 +241,6 @@ ALL_EMULATION_SOURCES = \
 	eelf32metag.c \
 	eelf32microblazeel.c \
 	eelf32microblaze.c \
-	eelf32mipswindiss.c \
 	eelf32moxie.c \
 	eelf32mt.c \
 	eelf32openrisc.c \
@@ -490,6 +468,28 @@ ALL_64_EMULATION_SOURCES = \
 	eaarch64linuxb.c \
 	eelf32_x86_64.c \
 	eelf32_x86_64_nacl.c \
+	eelf32b4300.c \
+	eelf32bmip.c \
+	eelf32bmipn32.c \
+	eelf32bsmip.c \
+	eelf32btsmip.c \
+	eelf32btsmip_fbsd.c \
+	eelf32btsmipn32.c \
+	eelf32btsmipn32_fbsd.c \
+	eelf32ebmip.c \
+	eelf32ebmipvxworks.c \
+	eelf32elmip.c \
+	eelf32elmipvxworks.c \
+	eelf32l4300.c \
+	eelf32lmip.c \
+	eelf32lr5900.c \
+	eelf32lr5900n32.c \
+	eelf32lsmip.c \
+	eelf32ltsmip.c \
+	eelf32ltsmip_fbsd.c \
+	eelf32ltsmipn32.c \
+	eelf32ltsmipn32_fbsd.c \
+	eelf32mipswindiss.c \
 	eelf64_aix.c \
 	eelf64_ia64.c \
 	eelf64_ia64_fbsd.c \

@@ -1,3 +1,9 @@
+2013-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Move MIPS ELF emulations to...
+	(ALL_64_EMULATION_SOURCES): ...here.
+	* Makefile.in: Regenerate.
+
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* NEWS: Document the removal of MIPS ECOFF targets.

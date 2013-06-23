@@ -1,3 +1,14 @@
+2013-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* Makefile.am (BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Move MIPS ELF
+	files to...
+	(BFD64_BACKENDS, BFD64_BACKENDS_CFILES): ...here.
+	* Makefile.in: Regenerate.
+	* config.bfd: Enclose all MIPS ELF targets in #ifdef BFD64.
+	Set want64 to true for them at the end.
+	* targets.c (_bfd_target_vector): Protect MIPS ELF targets with
+	#ifdef BFD64.
+
 2013-06-22  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* elf32-nios2.c (nios2_elf32_finish_dynamic_sections): Don't

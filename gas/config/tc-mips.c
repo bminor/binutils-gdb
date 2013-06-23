@@ -34,6 +34,10 @@
 #include "dwarf2dbg.h"
 #include "dw2gencfi.h"
 
+/* Check assumptions made in this file.  */
+typedef char static_assert1[sizeof (offsetT) < 8 ? -1 : 1];
+typedef char static_assert2[sizeof (valueT) < 8 ? -1 : 1];
+
 #ifdef DEBUG
 #define DBG(x) printf x
 #else
@@ -523,6 +527,10 @@ static int mips_32bitmode = 0;
    labels have their LSB set.  */
 #define HAVE_CODE_COMPRESSION						\
   ((mips_opts.mips16 | mips_opts.micromips) != 0)
+
+/* The minimum and maximum signed values that can be stored in a GPR.  */
+#define GPR_SMAX ((offsetT) (((valueT) 1 << (HAVE_64BIT_GPRS ? 63 : 31)) - 1))
+#define GPR_SMIN (-GPR_SMAX - 1)
 
 /* MIPS PIC level.  */
 
@@ -6742,7 +6750,6 @@ macro (struct mips_cl_insn *ip)
   int lp = 0;
   int ab = 0;
   int off;
-  offsetT maxnum;
   bfd_reloc_code_real_type r;
   int hold_mips_optimize;
 
@@ -6945,17 +6952,7 @@ macro (struct mips_cl_insn *ip)
       likely = 1;
     case M_BGT_I:
       /* Check for > max integer.  */
-      maxnum = 0x7fffffff;
-      if (HAVE_64BIT_GPRS && sizeof (maxnum) > 4)
-	{
-	  maxnum <<= 16;
-	  maxnum |= 0xffff;
-	  maxnum <<= 16;
-	  maxnum |= 0xffff;
-	}
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= maxnum
-	  && (HAVE_32BIT_GPRS || sizeof (maxnum) > 4))
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number >= GPR_SMAX)
 	{
 	do_false:
 	  /* Result is always false.  */
@@ -6985,18 +6982,7 @@ macro (struct mips_cl_insn *ip)
 				 &offset_expr, sreg);
 	  break;
 	}
-      maxnum = 0x7fffffff;
-      if (HAVE_64BIT_GPRS && sizeof (maxnum) > 4)
-	{
-	  maxnum <<= 16;
-	  maxnum |= 0xffff;
-	  maxnum <<= 16;
-	  maxnum |= 0xffff;
-	}
-      maxnum = - maxnum - 1;
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number <= maxnum
-	  && (HAVE_32BIT_GPRS || sizeof (maxnum) > 4))
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number <= GPR_SMIN)
 	{
 	do_true:
 	  /* result is always true */
@@ -7109,17 +7095,7 @@ macro (struct mips_cl_insn *ip)
     case M_BLEL_I:
       likely = 1;
     case M_BLE_I:
-      maxnum = 0x7fffffff;
-      if (HAVE_64BIT_GPRS && sizeof (maxnum) > 4)
-	{
-	  maxnum <<= 16;
-	  maxnum |= 0xffff;
-	  maxnum <<= 16;
-	  maxnum |= 0xffff;
-	}
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= maxnum
-	  && (HAVE_32BIT_GPRS || sizeof (maxnum) > 4))
+      if (imm_expr.X_op == O_constant && imm_expr.X_add_number >= GPR_SMAX)
 	goto do_true;
       if (imm_expr.X_op != O_constant)
 	as_bad (_("Unsupported large constant"));
@@ -12854,32 +12830,13 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			if (offset_expr.X_add_number == 0)
 			  offset_expr.X_op = O_absent;
 		      }
-		    else if (sizeof (imm_expr.X_add_number) > 4)
+		    else
 		      {
 			imm_expr.X_op = O_constant;
 			if (!target_big_endian)
 			  imm_expr.X_add_number = bfd_getl64 (temp);
 			else
 			  imm_expr.X_add_number = bfd_getb64 (temp);
-		      }
-		    else
-		      {
-			imm_expr.X_op = O_big;
-			imm_expr.X_add_number = 4;
-			if (!target_big_endian)
-			  {
-			    generic_bignum[0] = bfd_getl16 (temp);
-			    generic_bignum[1] = bfd_getl16 (temp + 2);
-			    generic_bignum[2] = bfd_getl16 (temp + 4);
-			    generic_bignum[3] = bfd_getl16 (temp + 6);
-			  }
-			else
-			  {
-			    generic_bignum[0] = bfd_getb16 (temp + 6);
-			    generic_bignum[1] = bfd_getb16 (temp + 4);
-			    generic_bignum[2] = bfd_getb16 (temp + 2);
-			    generic_bignum[3] = bfd_getb16 (temp);
-			  }
 		      }
 		  }
 		else
@@ -12946,18 +12903,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
 		  more = (insn + 1 < past
 			  && strcmp (insn->name, insn[1].name) == 0);
-
-		  /* If the expression was written as an unsigned number,
-		     only treat it as signed if there are no more
-		     alternatives.  */
-		  if (more
-		      && *args == 'j'
-		      && sizeof (imm_expr.X_add_number) <= 4
-		      && imm_expr.X_op == O_constant
-		      && imm_expr.X_add_number < 0
-		      && imm_expr.X_unsigned
-		      && HAVE_64BIT_GPRS)
-		    break;
 
 		  /* For compatibility with older assemblers, we accept
 		     0x8000-0xffff as signed 16-bit numbers when only
