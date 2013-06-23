@@ -11386,8 +11386,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case '3':
-	      /* DSP 3-bit unsigned immediate in bit 13 (for standard MIPS
-	         code) or 21 (for microMIPS code).  */
+	      /* DSP 3-bit unsigned immediate in bit 21 (for standard MIPS
+	         code) or 13 (for microMIPS code).  */
 	      {
 		unsigned long mask = (mips_opts.micromips
 				      ? MICROMIPSOP_MASK_SA3 : OP_MASK_SA3);
@@ -11405,8 +11405,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case '4':
-	      /* DSP 4-bit unsigned immediate in bit 12 (for standard MIPS
-	         code) or 21 (for microMIPS code).  */
+	      /* DSP 4-bit unsigned immediate in bit 21 (for standard MIPS
+	         code) or 12 (for microMIPS code).  */
 	      {
 		unsigned long mask = (mips_opts.micromips
 				      ? MICROMIPSOP_MASK_SA4 : OP_MASK_SA4);
@@ -11424,8 +11424,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case '5':
-	      /* DSP 8-bit unsigned immediate in bit 13 (for standard MIPS
-	         code) or 16 (for microMIPS code).  */
+	      /* DSP 8-bit unsigned immediate in bit 16 (for standard MIPS
+	         code) or 13 (for microMIPS code).  */
 	      {
 		unsigned long mask = (mips_opts.micromips
 				      ? MICROMIPSOP_MASK_IMM8 : OP_MASK_IMM8);
@@ -11443,8 +11443,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case '6':
-	      /* DSP 5-bit unsigned immediate in bit 16 (for standard MIPS
-	         code) or 21 (for microMIPS code).  */
+	      /* DSP 5-bit unsigned immediate in bit 21 (for standard MIPS
+	         code) or 16 (for microMIPS code).  */
 	      {
 		unsigned long mask = (mips_opts.micromips
 				      ? MICROMIPSOP_MASK_RS : OP_MASK_RS);
@@ -11461,7 +11461,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      }
 	      continue;
 
-	    case '7': /* Four DSP accumulators in bits 11,12.  */
+	    case '7':
+	      /* Four DSP accumulators in bit 11 (for standard MIPS code)
+		 or 14 (for microMIPS code).  */
 	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c'
 		  && s[3] >= '0' && s[3] <= '3')
 		{
@@ -11509,8 +11511,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      break;
 
 	    case '0':
-	      /* DSP 6-bit signed immediate in bit 16 (for standard MIPS
-	         code) or 20 (for microMIPS code).  */
+	      /* DSP 6-bit signed immediate in bit 20 (for standard MIPS
+	         code) or 16 (for microMIPS code).  */
 	      {
 		long mask = (mips_opts.micromips
 			     ? MICROMIPSOP_MASK_DSPSFT : OP_MASK_DSPSFT);

@@ -1,5 +1,9 @@
 2013-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (mips_ip): Fix swapped bit numbers in comments.
+
+2013-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c: Assert that offsetT and valueT are at least
 	8 bytes in size.
 	(GPR_SMIN, GPR_SMAX): New macros.
