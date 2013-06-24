@@ -5148,6 +5148,19 @@ decode_dsp32alu_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       TRACE_INSN (cpu, "(R%i, R%i) = SEARCH R%i (%s);",
 		  dst1, dst0, src0, searchmodes[aop]);
 
+      /* XXX: The parallel version is a bit weird in its limits:
+
+         This instruction can be issued in parallel with the combination of one
+         16-bit length load instruction to the P0 register and one 16-bit NOP.
+         No other instructions can be issued in parallel with the Vector Search
+         instruction. Note the following legal and illegal forms.
+         (r1, r0) = search r2 (LT) || r2 = [p0++p3]; // ILLEGAL
+         (r1, r0) = search r2 (LT) || r2 = [p0++];   // LEGAL
+         (r1, r0) = search r2 (LT) || r2 = [p0++];   // LEGAL
+
+         Unfortunately, our parallel insn state doesn't (currently) track enough
+         details to be able to check this.  */
+
       if (dst0 == dst1)
 	illegal_instruction_combination (cpu);
 

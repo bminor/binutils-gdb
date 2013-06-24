@@ -1,5 +1,10 @@
 2013-06-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* bfin-sim.c (decode_dsp32alu_0): Add note about broken handling of
+	SEARCH with parallel insns.
+
+2013-06-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* bfin-sim.c (decode_dsp32shift_0): Make sure HLs is 0 after last
 	insn that uses it.
 	(decode_dsp32shiftimm_0): Likewise.
