@@ -1,5 +1,9 @@
 2013-06-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* se_all32bitopcodes.S (se_all_next_insn): Skip debug insn opcodes.
+
+2013-06-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* se_allopcodes.h (_match): Simplify register test to one less insn.
 	Omit the SSYNC insn when compiling for the sim.
 
