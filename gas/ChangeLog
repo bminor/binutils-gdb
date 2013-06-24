@@ -1,3 +1,9 @@
+2013-06-24  Roland McGrath  <mcgrathr@google.com>
+
+	* config/tc-arm.c (parse_reg_list): Use skip_past_char for '}',
+	so it skips whitespace before it.
+	(s_arm_unwind_save_mmxwr, s_arm_unwind_save_mmxwcg): Likewise.
+
 2013-01-07  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/14887

@@ -1640,7 +1640,7 @@ parse_reg_list (char ** strp)
 		 || (in_range = 1, *str++ == '-'));
 	  str--;
 
-	  if (*str++ != '}')
+	  if (skip_past_char (&str, '}') == FAIL)
 	    {
 	      first_error (_("missing `}'"));
 	      return FAIL;
@@ -3934,8 +3934,7 @@ s_arm_unwind_save_mmxwr (void)
     }
   while (skip_past_comma (&input_line_pointer) != FAIL);
 
-  if (*input_line_pointer == '}')
-    input_line_pointer++;
+  skip_past_char (&input_line_pointer, '}');
 
   demand_empty_rest_of_line ();
 
@@ -4069,8 +4068,7 @@ s_arm_unwind_save_mmxwcg (void)
     }
   while (skip_past_comma (&input_line_pointer) != FAIL);
 
-  if (*input_line_pointer == '}')
-    input_line_pointer++;
+  skip_past_char (&input_line_pointer, '}');
 
   demand_empty_rest_of_line ();
 

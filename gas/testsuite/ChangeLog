@@ -1,3 +1,8 @@
+2013-06-24  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/arm/macro-vld1.s: Add a case with whitespace before '}'.
+	* gas/arm/macro-vld1.d: Update.
+
 2013-01-07  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/14887
