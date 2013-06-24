@@ -1,3 +1,11 @@
+2013-01-07  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/14887
+	* config/tc-arm.c (skip_past_char): Skip whitespace before the
+	anticipated character.
+	* config/tc-arm.c (parse_address_main): Delete skip of whitespace
+	here as it is no longer needed.
+
 2013-01-02  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/14987

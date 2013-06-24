@@ -886,6 +886,9 @@ const char FLT_CHARS[] = "rRsSfFdDxXeEpP";
 static inline int
 skip_past_char (char ** str, char c)
 {
+  /* PR gas/14987: Allow for whitespace before the expected character.  */
+  skip_whitespace (*str);
+  
   if (**str == c)
     {
       (*str)++;
@@ -5173,6 +5176,9 @@ parse_address_main (char **str, int i, int group_relocations,
       return PARSE_OPERAND_SUCCESS;
     }
 
+  /* PR gas/14887: Allow for whitespace after the opening bracket.  */
+  skip_whitespace (p);
+
   if ((reg = arm_reg_parse (&p, REG_TYPE_RN)) == FAIL)
     {
       inst.error = _(reg_expected_msgs[REG_TYPE_RN]);
@@ -5295,9 +5301,6 @@ parse_address_main (char **str, int i, int group_relocations,
       if (result != PARSE_OPERAND_SUCCESS)
 	return result;
     }
-
-  /* PR gas/14987: Allow for whitespace before the closing bracket.  */
-  skip_whitespace (p);
 
   if (skip_past_char (&p, ']') == FAIL)
     {
