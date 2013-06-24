@@ -1,3 +1,9 @@
+2013-01-02  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/14987
+	* gas/arm/neon-ldst-es.s: Add whitespace test.
+	* gas/arm/neon-ldst-es.d: Update expected disassembly.
+
 2013-06-24  Roland McGrath  <mcgrathr@google.com>
 
 	* gas/arm/macro-pld.s: Add a 'push {r0}' case.
