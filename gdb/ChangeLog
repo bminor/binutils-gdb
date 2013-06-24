@@ -1,3 +1,9 @@
+2013-06-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/create-version.sh: Fix expansion of $host_alias
+	and $target_alias in generation of HOST_NAME and TARGET_NAME
+	(resp.).
+
 2013-06-24  Tom Tromey  <tromey@redhat.com>
 
 	* common/create-version.sh: New file.
