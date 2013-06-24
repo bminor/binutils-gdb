@@ -323,8 +323,9 @@ static bfd_boolean unified_syntax = FALSE;
 
 /* An immediate operand can start with #, and ld*, st*, pld operands
    can contain [ and ].  We need to tell APP not to elide whitespace
-   before a [, which can appear as the first operand for pld.  */
-const char arm_symbol_chars[] = "#[]";
+   before a [, which can appear as the first operand for pld.
+   Likewise, a { can appear as the first operand for push, pop, vld*, etc.  */
+const char arm_symbol_chars[] = "#[]{}";
 
 enum neon_el_type
 {
@@ -1154,6 +1155,8 @@ arm_reg_parse_multi (char **ccp)
   char *p;
   struct reg_entry *reg;
 
+  skip_whitespace (start);
+
 #ifdef REGISTER_PREFIX
   if (*start != REGISTER_PREFIX)
     return NULL;
@@ -1579,6 +1582,8 @@ parse_reg_list (char ** strp)
   /* We come back here if we get ranges concatenated by '+' or '|'.  */
   do
     {
+      skip_whitespace (str);
+
       another_range = 0;
 
       if (*str == '{')
@@ -1730,13 +1735,11 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
   unsigned long mask = 0;
   int i;
 
-  if (*str != '{')
+  if (skip_past_char (&str, '{') == FAIL)
     {
       inst.error = _("expecting {");
       return FAIL;
     }
-
-  str++;
 
   switch (etype)
     {
@@ -4025,6 +4028,8 @@ s_arm_unwind_save_mmxwcg (void)
 
   if (*input_line_pointer == '{')
     input_line_pointer++;
+
+  skip_whitespace (input_line_pointer);
 
   do
     {
