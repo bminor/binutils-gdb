@@ -1,3 +1,9 @@
+2013-06-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (srccom): New variable.
+	(version.c): Update rule dependencies, and re-implement using
+	sim/common/create-version.sh.
+
 2013-05-03  Hafiz Abid Qadeer  <abidh@codesourcery.com>
 
 	revert:

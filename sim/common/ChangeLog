@@ -1,3 +1,10 @@
+2013-06-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* create-version.sh: New script. Adapted from
+	gdb/commong/create-version.sh.
+	* Make-common.in (version.c): Update rule dependencies,
+	and re-implement using create-version.sh.
+
 2013-06-21  Nick Clifton  <nickc@redhat.com>
 
 	* gennltvals.sh: Add msp430 support.
