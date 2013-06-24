@@ -12,7 +12,7 @@ usage() {
 	  -rh <ip>     Run on board ip
 	  -j <num>     Num jobs to run
 	EOF
-	exit ${0:-1}
+	exit ${1:-1}
 }
 
 : ${MAKE:=make}
