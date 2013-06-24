@@ -1,3 +1,8 @@
+2013-06-24  Wawa  <caojinyu@msn.com>
+
+	PR 15657
+	* hash.c (_bfd_stringtab_add): Copy the string if COPY is true.
+
 2013-06-23  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* Makefile.am (BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Move MIPS ELF
