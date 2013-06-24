@@ -1,5 +1,9 @@
 2013-06-24  Roland McGrath  <mcgrathr@google.com>
 
+	* config/tc-arm.c (parse_reg_list): Use skip_past_char for '}',
+	so it skips whitespace before it.
+	(s_arm_unwind_save_mmxwr, s_arm_unwind_save_mmxwcg): Likewise.
+
 	* config/tc-arm.c (arm_symbol_chars): Include '{' and '}'.
 	(arm_reg_parse_multi): Skip whitespace first.
 	(parse_reg_list): Likewise.

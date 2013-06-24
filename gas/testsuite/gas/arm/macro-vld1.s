@@ -7,3 +7,4 @@
                 .purgem _sfi_breg_doit
         .endm
 	sfi_breg r0, vld1.8 {d0}, [\B]
+	sfi_breg r0, vld1.8 { d0 }, [\B]

@@ -1,5 +1,8 @@
 2013-06-24  Roland McGrath  <mcgrathr@google.com>
 
+	* gas/arm/macro-vld1.s: Add a case with whitespace before '}'.
+	* gas/arm/macro-vld1.d: Update.
+
 	* gas/arm/macro-pld.s: Add a 'push {r0}' case.
 	* gas/arm/macro-pld.d: Update expected output.
 	* gas/arm/macro-vld1.s: New file.
