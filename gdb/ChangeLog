@@ -1,5 +1,10 @@
 2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips_elf_make_msymbol_special): Handle MIPS16 and
+	microMIPS synthetic symbols.
+
+2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* objfiles.h (pc_in_section): New prototype.
 	(in_plt_section): Remove name argument, replace prototype with
 	static inline function.

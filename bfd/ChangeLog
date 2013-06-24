@@ -1,3 +1,66 @@
+2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.h (_bfd_mips_elf_get_synthetic_symtab): New
+	prototype.
+	* elf32-mips.c (elf_backend_plt_sym_val): Remove macro.
+	(bfd_elf32_get_synthetic_symtab): New macro.
+	* elfxx-mips.c (plt_entry): New structure.
+	(mips_elf_link_hash_entry): Add use_plt_entry member.
+	(mips_elf_link_hash_table): Rename plt_entry_size member to
+	plt_mips_entry_size.  Add plt_comp_entry_size, plt_mips_offset,
+	plt_comp_offset, plt_got_index entries and plt_header_is_comp
+	members.
+	(STUB_LW_MICROMIPS, STUB_MOVE_MICROMIPS): New macros.
+	(STUB_LUI_MICROMIPS, STUB_JALR_MICROMIPS): Likewise.
+	(STUB_ORI_MICROMIPS, STUB_LI16U_MICROMIPS): Likewise.
+	(STUB_LI16S_MICROMIPS): Likewise.
+	(MICROMIPS_FUNCTION_STUB_NORMAL_SIZE): Likewise.
+	(MICROMIPS_FUNCTION_STUB_BIG_SIZE): Likewise.
+	(micromips_o32_exec_plt0_entry): New variable.
+	(mips16_o32_exec_plt_entry): Likewise.
+	(micromips_o32_exec_plt_entry): Likewise.
+	(mips_elf_link_hash_newfunc): Initialize use_plt_entry.
+	(mips_elf_output_extsym): Update to use gotplt_union's plist
+	member rather than offset.
+	(mips_elf_gotplt_index): Likewise.  Remove the VxWorks
+	restriction.  Use MIPS_ELF_GOT_SIZE to calculate GOT address.
+	(mips_elf_count_got_symbols): Update to use gotplt_union's plist
+	member rather than offset.
+	(mips_elf_calculate_relocation): Handle MIPS16/microMIPS PLT
+	entries.
+	(_bfd_mips_elf_create_dynamic_sections): Don't set PLT sizes
+	here.
+	(mips_elf_make_plt_record): New function.
+	(_bfd_mips_elf_check_relocs): Update comment.  Record occurences
+	of JAL relocations that might need a PLT entry.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Update to use
+	gotplt_union's plist member rather than offset.  Set individual
+	PLT entry sizes here.  Handle MIPS16/microMIPS PLT entries.
+	Don't set the symbol's value in the symbol table for PLT
+	references here.  Don't set the PLT or PLT GOT section sizes
+	here.
+	(mips_elf_estimate_stub_size): Handle microMIPS stubs.
+	(mips_elf_allocate_lazy_stub): Likewise.
+	(mips_elf_lay_out_lazy_stubs): Likewise.  Define a _MIPS_STUBS_
+	magic symbol.
+	(mips_elf_set_plt_sym_value): New function.
+	(_bfd_mips_elf_size_dynamic_sections): Set PLT header size and
+	PLT and PLT GOT section sizes here.  Set the symbol values in
+	the symbol table for PLT references here.  Handle microMIPS
+	annotation of the _PROCEDURE_LINKAGE_TABLE_ magic symbol.
+	(_bfd_mips_elf_finish_dynamic_symbol): Update to use
+	gotplt_union's plist member rather than offset.  Handle
+	MIPS16/microMIPS PLT entries.  Handle microMIPS stubs.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Update to use
+	gotplt_union's plist member rather than offset.  Use
+	MIPS_ELF_GOT_SIZE to calculate GOT address.
+	(mips_finish_exec_plt): Handle microMIPS PLT.  Return status.
+	(_bfd_mips_elf_finish_dynamic_sections): Handle result from
+	mips_finish_exec_plt.
+	(_bfd_mips_elf_link_hash_table_create): Update to use
+	gotplt_union's plist member rather than offset.
+	(_bfd_mips_elf_get_synthetic_symtab): New function.
+
 2013-06-24  Wawa  <caojinyu@msn.com>
 
 	PR 15657

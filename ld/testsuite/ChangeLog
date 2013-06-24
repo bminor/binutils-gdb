@@ -1,3 +1,19 @@
+2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* ld-mips-elf/jalx-2.dd: Update for microMIPS PLT support.
+	* ld-mips-elf/pic-and-nonpic-3a.dd: Update for the _MIPS_STUBS_
+	magic symbol.
+	* ld-mips-elf/pic-and-nonpic-3b.dd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n32.dd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-n64.dd: Likewise.
+	* ld-mips-elf/pic-and-nonpic-6-o32.dd: Likewise.
+	* ld-mips-elf/stub-dynsym-1-10000.d: Likewise.
+	* ld-mips-elf/stub-dynsym-1-2fe80.d: Likewise.
+	* ld-mips-elf/stub-dynsym-1-7fff.d: Likewise.
+	* ld-mips-elf/stub-dynsym-1-8000.d: Likewise.
+	* ld-mips-elf/stub-dynsym-1-fff0.d: Likewise.
+	* ld-mips-elf/tlslib-o32.d: Likewise.
+
 2013-06-19  Will Newton  <will.newton@linaro.org>
 
 	* ld-aarch64/aarch64-elf.exp: Remove ifunc tests.
