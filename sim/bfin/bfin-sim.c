@@ -5333,6 +5333,9 @@ decode_dsp32shift_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       STORE (AWREG (HLs), (val & 0xffffffff));
       STORE (ASTATREG (av[HLs]), 0);
     }
+  else if (HLs != 0)
+    /* All the insns after this point don't use HLs.  */
+    illegal_instruction (cpu);
   else if ((sop == 0 || sop == 1) && sopcde == 1 && HLs == 0)
     {
       bs32 shft = (bs8)(DREG (src0) << 2) >> 2;
@@ -5917,12 +5920,11 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       if (shift)
 	SET_CCREG (cc);
     }
-  else if (sop == 0 && sopcde == 3 && bit8 == 1)
+  else if (sop == 0 && sopcde == 3 && bit8 == 1 && HLs < 2)
     {
       /* Arithmetic shift, so shift in sign bit copies.  */
       bu64 acc, val;
       int shift = uimm5 (newimmag);
-      HLs = !!HLs;
 
       TRACE_INSN (cpu, "A%i = A%i >>> %i;", HLs, HLs, shift);
 
@@ -5938,13 +5940,12 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       STORE (ASTATREG (az), !val);
       STORE (ASTATREG (av[HLs]), 0);
     }
-  else if ((sop == 0 && sopcde == 3 && bit8 == 0)
-	   || (sop == 1 && sopcde == 3))
+  else if (((sop == 0 && sopcde == 3 && bit8 == 0)
+	   || (sop == 1 && sopcde == 3)) && HLs < 2)
     {
       bu64 acc;
       int shiftup = uimm5 (immag);
       int shiftdn = uimm5 (newimmag);
-      HLs = !!HLs;
 
       TRACE_INSN (cpu, "A%i = A%i %s %i;", HLs, HLs,
 		  sop == 0 ? "<<" : ">>",
@@ -5971,6 +5972,9 @@ decode_dsp32shiftimm_0 (SIM_CPU *cpu, bu16 iw0, bu16 iw1)
       SET_ASTATREG (an, !!(acc & 0x8000000000ull));
       SET_ASTATREG (az, (acc & 0xFFFFFFFFFF) == 0);
     }
+  else if (HLs != 0)
+    /* All the insns after this point don't use HLs.  */
+    illegal_instruction (cpu);
   else if (sop == 1 && sopcde == 1 && bit8 == 0)
     {
       int count = imm5 (immag);
