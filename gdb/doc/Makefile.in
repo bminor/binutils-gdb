@@ -172,9 +172,9 @@ TEXI2POD = perl $(srcdir)/../../etc/texi2pod.pl \
 		$(MAKEINFOFLAGS) $(MAKEINFO_EXTRA_FLAGS)
 
 POD2MAN1 = pod2man --center="GNU Development Tools" \
-		   --release="gdb-`sed q $(srcdir)/../version.in`" --section=1
+		   --release="gdb-`sed q version.subst`" --section=1
 POD2MAN5 = pod2man --center="GNU Development Tools" \
-		   --release="gdb-`sed q $(srcdir)/../version.in`" --section=5
+		   --release="gdb-`sed q version.subst`" --section=5
 
 # List of man pages generated from gdb.texi
 MAN1S = gdb.1 gdbserver.1 gcore.1
@@ -378,9 +378,9 @@ refcard.pdf : refcard.tex $(REFEDITS)
 	mv sedref.pdf refcard.pdf
 	rm -f sedref.log sedref.tex tmp.sed
 
-# File to record current GDB version number (copied from main dir version.in)
-GDBvn.texi : ${gdbdir}/version.in
-	echo "@set GDBVN `sed q $(srcdir)/../version.in`" > ./GDBvn.new
+# File to record current GDB version number.
+GDBvn.texi : version.subst
+	echo "@set GDBVN `sed q version.subst`" > ./GDBvn.new
 	if [ -n "$(PKGVERSION)" ]; then \
 	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> ./GDBvn.new; \
 	fi
@@ -395,6 +395,10 @@ GDBvn.texi : ${gdbdir}/version.in
 	  echo "@set SYSTEM_GDBINIT $(SYSTEM_GDBINIT)" >> ./GDBvn.new; \
 	fi
 	mv GDBvn.new GDBvn.texi
+
+version.subst: $(gdbdir)/common/version.in $(gdbdir)/../bfd/version.h
+	date=`sed -n -e 's/^.* BFD_VERSION_DATE \(.*\)$$/\1/p' $(gdbdir)/../bfd/version.h`; \
+	sed -e "s/DATE/$$date/" < $(gdbdir)/common/version.in > version.subst
 
 # Updated atomically
 .PRECIOUS: GDBvn.texi
@@ -649,6 +653,7 @@ mostlyclean:
 	rm -f $(STABS_TEX_TMPS)
 	rm -f $(ANNOTATE_TEX_TMPS)
 	rm -f sedref.dvi sedref.tex tmp.sed
+	rm -f version.subst
 
 clean: mostlyclean
 	rm -f gdb-cfg.texi GDBvn.texi

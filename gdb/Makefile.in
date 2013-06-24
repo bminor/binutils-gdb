@@ -791,7 +791,7 @@ i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
 ia64-tdep.h ada-lang.h ada-varobj.h varobj.h frv-tdep.h nto-tdep.h serial.h \
 c-lang.h d-lang.h go-lang.h frame.h event-loop.h block.h cli/cli-setshow.h \
 cli/cli-decode.h cli/cli-cmds.h cli/cli-dump.h cli/cli-utils.h \
-cli/cli-script.h macrotab.h symtab.h version.h \
+cli/cli-script.h macrotab.h symtab.h common/version.h \
 gnulib/import/string.in.h gnulib/import/str-two-way.h \
 gnulib/import/stdint.in.h remote.h remote-notif.h gdb.h sparc-nat.h \
 gdbthread.h dwarf2-frame.h dwarf2-frame-tailcall.h nbsd-nat.h dcache.h \
@@ -1420,13 +1420,9 @@ $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ $(srcdir)/../COPYING3 $(srcdir)/copy
 		< $(srcdir)/../COPYING3 > $(srcdir)/copying.tmp
 	mv $(srcdir)/copying.tmp $(srcdir)/copying.c
 
-version.c: Makefile version.in
-	rm -f version.c-tmp version.c
-	echo '#include "version.h"' >> version.c-tmp
-	echo 'const char version[] = "'"`sed q ${srcdir}/version.in`"'";' >> version.c-tmp
-	echo 'const char host_name[] = "$(host_alias)";' >> version.c-tmp
-	echo 'const char target_name[] = "$(target_alias)";' >> version.c-tmp
-	mv version.c-tmp version.c
+version.c: Makefile common/version.in $(srcdir)/../bfd/version.h $(srcdir)/common/create-version.sh
+	$(SHELL) $(srcdir)/common/create-version.sh $(srcdir) \
+	    $(host_alias) $(target_alias) version.c
 
 observer.h: observer.sh doc/observer.texi
 	${srcdir}/observer.sh h ${srcdir}/doc/observer.texi observer.h

@@ -1,3 +1,14 @@
+2013-06-24  Tom Tromey  <tromey@redhat.com>
+
+	* common/create-version.sh: New file.
+	* Makefile.in (version.c): Use bfd/version.h, common/version.in,
+	create-version.sh.
+	(HFILES_NO_SRCDIR): Use common/version.h.
+	* version.in: Move to ...
+	* common/version.in: ... here.  Replace date with "DATE".
+	* version.h: Move to ...
+	* common/version.h: ... here.
+
 2013-06-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb/gnulib/Makefile.in: Update date in copyright header.

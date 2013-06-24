@@ -28,6 +28,7 @@
 
 #include "libiberty.h"
 #include "ansidecl.h"
+#include "version.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -530,9 +531,5 @@ CORE_ADDR get_set_tsv_func_addr (void);
 
 extern CORE_ADDR current_insn_ptr;
 extern int emit_error;
-
-/* Version information, from version.c.  */
-extern const char version[];
-extern const char host_name[];
 
 #endif /* SERVER_H */

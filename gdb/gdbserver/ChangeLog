@@ -1,3 +1,13 @@
+2013-06-24  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (version.c): Use bfd/version.h, common/version.in,
+	create-version.sh.
+	(version.o): Remove.
+	* gdbreplay.c: Include version.h.
+	(version, host_name): Don't declare.
+	* server.h: Include version.h.
+	(version, host_name): Don't declare.
+
 2013-06-12  Pedro Alves  <palves@redhat.com>
 
 	* linux-x86-low.c (linux_is_elf64): Delete global.

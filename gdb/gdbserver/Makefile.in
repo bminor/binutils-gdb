@@ -389,13 +389,9 @@ am--refresh:
 
 force:
 
-version.c: Makefile $(srcdir)/../version.in
-	rm -f version.c-tmp version.c
-	echo '#include "server.h"' >> version.c-tmp
-	echo 'const char version[] = "'"`sed q ${srcdir}/../version.in`"'";' >> version.c-tmp
-	echo 'const char host_name[] = "$(host_alias)";' >> version.c-tmp
-	mv version.c-tmp version.c
-version.o: version.c $(server_h)
+version.c: Makefile $(srcdir)/../common/version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
+	$(SHELL) $(srcdir)/../common/create-version.sh $(srcdir)/.. \
+	    $(host_alias) $(target_alias) version.c
 
 xml-builtin.c: stamp-xml; @true
 stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
