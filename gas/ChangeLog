@@ -1,3 +1,11 @@
+2013-06-24  Roland McGrath  <mcgrathr@google.com>
+
+	* config/tc-arm.c (arm_symbol_chars): Include '{' and '}'.
+	(arm_reg_parse_multi): Skip whitespace first.
+	(parse_reg_list): Likewise.
+	(parse_vfp_reg_list): Likewise.
+	(s_arm_unwind_save_mmxwcg): Likewise.
+
 2013-06-24  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/15623
@@ -264,7 +272,7 @@
 2013-05-28  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): Update to use
-	BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21 instead of 
+	BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21 instead of
 	BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE.
 	(md_apply_fix): Likewise.
 	(aarch64_force_relocation): Likewise.

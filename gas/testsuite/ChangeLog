@@ -1,3 +1,10 @@
+2013-06-24  Roland McGrath  <mcgrathr@google.com>
+
+	* gas/arm/macro-pld.s: Add a 'push {r0}' case.
+	* gas/arm/macro-pld.d: Update expected output.
+	* gas/arm/macro-vld1.s: New file.
+	* gas/arm/macro-vld1.d: New file.
+
 2013-06-22  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/mips.exp: Remove "LOSE" comments.
@@ -378,7 +385,7 @@
 
 	* gas/arm/neon-addressing-bad.s: Add test for further invalid VST
 	operands.
-	* gas/arm/neon-addressing-bad.l: Update accordingly. 
+	* gas/arm/neon-addressing-bad.l: Update accordingly.
 
 2013-04-08  Jan Beulich <jbeulich@suse.com>
 
