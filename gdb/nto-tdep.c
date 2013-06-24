@@ -318,7 +318,7 @@ nto_relocate_section_addresses (struct so_list *so, struct target_section *sec)
 int
 nto_in_dynsym_resolve_code (CORE_ADDR pc)
 {
-  if (in_plt_section (pc, NULL))
+  if (in_plt_section (pc))
     return 1;
   return 0;
 }

@@ -2116,7 +2116,7 @@ s390_stub_frame_sniffer (const struct frame_unwind *self,
      have trapped due to an invalid function pointer call.  We handle
      the non-existing current function like a PLT stub.  */
   addr_in_block = get_frame_address_in_block (this_frame);
-  if (in_plt_section (addr_in_block, NULL)
+  if (in_plt_section (addr_in_block)
       || s390_readinstruction (insn, get_frame_pc (this_frame)) < 0)
     return 1;
   return 0;

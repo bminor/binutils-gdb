@@ -855,7 +855,7 @@ sparc_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
      dynamic linker patches up the first PLT with some code that
      starts with a SAVE instruction.  Patch up PC such that it points
      at the start of our PLT entry.  */
-  if (tdep->plt_entry_size > 0 && in_plt_section (current_pc, NULL))
+  if (tdep->plt_entry_size > 0 && in_plt_section (current_pc))
     pc = current_pc - ((current_pc - pc) % tdep->plt_entry_size);
 
   insn = sparc_fetch_instruction (pc);

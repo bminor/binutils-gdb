@@ -90,11 +90,9 @@ struct gdbarch_tdep
   CORE_ADDR (*find_global_pointer) (struct gdbarch *, struct value *);
 
   /* For shared libraries, each call goes through a small piece of
-     trampoline code in the ".plt", or equivalent, section.
-     IN_SOLIB_CALL_TRAMPOLINE evaluates to nonzero if we are currently
-     stopped in one of these.  */
-  int (*in_solib_call_trampoline) (struct gdbarch *gdbarch,
-				   CORE_ADDR pc, char *name);
+     trampoline code in the ".plt" section.  IN_SOLIB_CALL_TRAMPOLINE
+     evaluates to nonzero if we are currently stopped in one of these.  */
+  int (*in_solib_call_trampoline) (struct gdbarch *gdbarch, CORE_ADDR pc);
 
   /* For targets that support multiple spaces, we may have additional stubs
      in the return path.  These stubs are internal to the ABI, and users are
@@ -242,7 +240,7 @@ extern struct minimal_symbol *
 extern struct hppa_objfile_private *hppa_init_objfile_priv_data (struct objfile *objfile);
 
 extern int hppa_in_solib_call_trampoline (struct gdbarch *gdbarch,
-					  CORE_ADDR pc, char *name);
+					  CORE_ADDR pc);
 extern CORE_ADDR hppa_skip_trampoline_code (struct frame_info *, CORE_ADDR pc);
 
 #endif  /* hppa-tdep.h */

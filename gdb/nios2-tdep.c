@@ -1324,7 +1324,7 @@ nios2_stub_frame_sniffer (const struct frame_unwind *self,
   if (target_read_memory (get_frame_pc (this_frame), dummy, 4) != 0)
     return 1;
 
-  if (in_plt_section (pc, NULL))
+  if (in_plt_section (pc))
     return 1;
 
   return 0;

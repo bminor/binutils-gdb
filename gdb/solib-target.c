@@ -476,7 +476,7 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
   /* We don't have a range of addresses for the dynamic linker; there
      may not be one in the program's address space.  So only report
      PLT entries (which may be import stubs).  */
-  return in_plt_section (pc, NULL);
+  return in_plt_section (pc);
 }
 
 struct target_so_ops solib_target_so_ops;

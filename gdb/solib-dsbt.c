@@ -764,7 +764,7 @@ dsbt_in_dynsym_resolve_code (CORE_ADDR pc)
 
   return ((pc >= info->interp_text_sect_low && pc < info->interp_text_sect_high)
 	  || (pc >= info->interp_plt_sect_low && pc < info->interp_plt_sect_high)
-	  || in_plt_section (pc, NULL));
+	  || in_plt_section (pc));
 }
 
 /* Print a warning about being unable to set the dynamic linker

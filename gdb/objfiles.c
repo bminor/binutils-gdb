@@ -1410,12 +1410,10 @@ find_pc_section (CORE_ADDR pc)
 }
 
 
-/* In SVR4, we recognize a trampoline by it's section name. 
-   That is, if the pc is in a section named ".plt" then we are in
-   a trampoline.  */
+/* Return non-zero if PC is in a section called NAME.  */
 
 int
-in_plt_section (CORE_ADDR pc, char *name)
+pc_in_section (CORE_ADDR pc, char *name)
 {
   struct obj_section *s;
   int retval = 0;
@@ -1424,7 +1422,7 @@ in_plt_section (CORE_ADDR pc, char *name)
 
   retval = (s != NULL
 	    && s->the_bfd_section->name != NULL
-	    && strcmp (s->the_bfd_section->name, ".plt") == 0);
+	    && strcmp (s->the_bfd_section->name, name) == 0);
   return (retval);
 }
 

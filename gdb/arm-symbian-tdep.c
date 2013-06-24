@@ -38,7 +38,7 @@ arm_symbian_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
   CORE_ADDR dest;
   gdb_byte buf[4];
 
-  if (!in_plt_section (pc, NULL))
+  if (!in_plt_section (pc))
     return 0;
 
   if (target_read_memory (pc, buf, 4) != 0)

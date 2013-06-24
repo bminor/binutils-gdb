@@ -1,3 +1,51 @@
+2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* objfiles.h (pc_in_section): New prototype.
+	(in_plt_section): Remove name argument, replace prototype with
+	static inline function.
+	* mips-tdep.h: Include "objfiles.h".
+	(in_mips_stubs_section): New function.
+	* hppa-tdep.h (gdbarch_tdep): Remove name argument of
+	in_solib_call_trampoline member.
+	(hppa_in_solib_call_trampoline): Remove name argument.
+	* objfiles.c (pc_in_section): New function.
+	(in_plt_section): Remove function.
+	* mips-linux-tdep.c: Include "objfiles.h".
+	(mips_linux_in_dynsym_stub): Call in_mips_stubs_section.  Remove
+	name argument.  Return 1 rather than the low 16-bit halfword of
+	any instruction examined.
+	(mips_linux_in_dynsym_resolve_code): Update
+	mips_linux_in_dynsym_stub call accordingly.
+	* mips-tdep.c (mips_stub_frame_sniffer): Use in_mips_stubs_section
+	rather than an equivalent hand-coded sequence.
+	* hppa-hpux-tdep.c (in_opd_section): Remove function.
+	(hppa32_hpux_in_solib_call_trampoline): Remove name argument.
+	(hppa64_hpux_in_solib_call_trampoline): Likewise.
+	(hppa64_hpux_find_global_pointer): Use pc_in_section rather than
+	in_opd_section.
+	* hppa-tdep.c (hppa_stub_unwind_sniffer): Remove name argument
+	on call to tdep->in_solib_call_trampoline.
+	(hppa_in_solib_call_trampoline): Remove name argument, update
+	according to in_plt_section change.
+	(hppa_skip_trampoline_code): Update according to in_plt_section
+	change.
+	* aarch64-tdep.c (aarch64_stub_unwind_sniffer): Likewise.
+	* arm-symbian-tdep.c (arm_symbian_skip_trampoline_code):
+	Likewise.
+	* arm-tdep.c (arm_stub_unwind_sniffer): Likewise.
+	* hppa-linux-tdep.c (hppa_linux_find_global_pointer): Likewise.
+	* hppabsd-tdep.c (hppabsd_find_global_pointer): Likewise.
+	* nios2-tdep.c (nios2_stub_frame_sniffer): Likewise.
+	* nto-tdep.c (nto_relocate_section_addresses): Likewise.
+	* s390-tdep.c (s390_stub_frame_sniffer): Likewise.
+	* sh-tdep.c (sh_stub_unwind_sniffer): Likewise.
+	* solib-dsbt.c (dsbt_in_dynsym_resolve_code): Likewise.
+	* solib-frv.c (frv_in_dynsym_resolve_code): Likewise.
+	* solib-svr4.c (svr4_in_dynsym_resolve_code): Likewise.
+	* solib-target.c (solib_target_in_dynsym_resolve_code): Likewise.
+	* sparc-tdep.c (sparc_analyze_prologue): Likewise.
+	* tic6x-tdep.c (tic6x_stub_unwind_sniffer): Likewise.
+
 2013-06-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* common/create-version.sh: Fix expansion of $host_alias

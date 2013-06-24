@@ -530,7 +530,7 @@ tic6x_stub_unwind_sniffer (const struct frame_unwind *self,
   CORE_ADDR addr_in_block;
 
   addr_in_block = get_frame_address_in_block (this_frame);
-  if (in_plt_section (addr_in_block, NULL))
+  if (in_plt_section (addr_in_block))
     return 1;
 
   return 0;

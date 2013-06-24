@@ -356,7 +356,7 @@ hppa_linux_find_global_pointer (struct gdbarch *gdbarch,
   /* If the address is in the plt section, then the real function hasn't 
      yet been fixed up by the linker so we cannot determine the gp of 
      that function.  */
-  if (in_plt_section (faddr, NULL))
+  if (in_plt_section (faddr))
     return 0;
 
   faddr_sect = find_pc_section (faddr);

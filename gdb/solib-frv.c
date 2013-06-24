@@ -448,7 +448,7 @@ frv_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   return ((pc >= interp_text_sect_low && pc < interp_text_sect_high)
 	  || (pc >= interp_plt_sect_low && pc < interp_plt_sect_high)
-	  || in_plt_section (pc, NULL));
+	  || in_plt_section (pc));
 }
 
 /* Given a loadmap and an address, return the displacement needed

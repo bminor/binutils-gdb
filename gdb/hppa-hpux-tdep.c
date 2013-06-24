@@ -65,28 +65,13 @@
 extern void _initialize_hppa_hpux_tdep (void);
 extern initialize_file_ftype _initialize_hppa_hpux_tdep;
 
-static int
-in_opd_section (CORE_ADDR pc)
-{
-  struct obj_section *s;
-  int retval = 0;
-
-  s = find_pc_section (pc);
-
-  retval = (s != NULL
-	    && s->the_bfd_section->name != NULL
-	    && strcmp (s->the_bfd_section->name, ".opd") == 0);
-  return (retval);
-}
-
 /* Return one if PC is in the call path of a trampoline, else return zero.
 
    Note we return one for *any* call trampoline (long-call, arg-reloc), not
    just shared library trampolines (import, export).  */
 
 static int
-hppa32_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch,
-				      CORE_ADDR pc, char *name)
+hppa32_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   struct bound_minimal_symbol minsym;
@@ -156,8 +141,7 @@ hppa32_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch,
 }
 
 static int
-hppa64_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch,
-				      CORE_ADDR pc, char *name)
+hppa64_hpux_in_solib_call_trampoline (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
 
@@ -798,7 +782,7 @@ hppa64_hpux_find_global_pointer (struct gdbarch *gdbarch,
 
   faddr = value_as_address (function);
 
-  if (in_opd_section (faddr))
+  if (pc_in_section (faddr, ".opd"))
     {
       target_read_memory (faddr, buf, sizeof (buf));
       return extract_unsigned_integer (&buf[24], 8, byte_order);

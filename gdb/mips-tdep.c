@@ -3588,15 +3588,7 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
   if (target_read_memory (get_frame_pc (this_frame), dummy, 4) != 0)
     return 1;
 
-  if (in_plt_section (pc, NULL))
-    return 1;
-
-  /* Binutils for MIPS puts lazy resolution stubs into .MIPS.stubs.  */
-  s = find_pc_section (pc);
-
-  if (s != NULL
-      && strcmp (bfd_get_section_name (s->objfile->obfd, s->the_bfd_section),
-		 ".MIPS.stubs") == 0)
+  if (in_plt_section (pc) || in_mips_stubs_section (pc))
     return 1;
 
   /* Calling a PIC function from a non-PIC function passes through a

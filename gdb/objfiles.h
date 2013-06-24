@@ -495,7 +495,17 @@ extern int have_minimal_symbols (void);
 
 extern struct obj_section *find_pc_section (CORE_ADDR pc);
 
-extern int in_plt_section (CORE_ADDR, char *);
+/* Return non-zero if PC is in a section called NAME.  */
+extern int pc_in_section (CORE_ADDR, char *);
+
+/* Return non-zero if PC is in a SVR4-style procedure linkage table
+   section.  */
+
+static inline int
+in_plt_section (CORE_ADDR pc)
+{
+  return pc_in_section (pc, ".plt");
+}
 
 /* Keep a registry of per-objfile data-pointers required by other GDB
    modules.  */
