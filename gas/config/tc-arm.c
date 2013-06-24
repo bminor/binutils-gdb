@@ -12013,6 +12013,8 @@ do_t_smc (void)
   inst.instruction |= (value & 0xf000) >> 12;
   inst.instruction |= (value & 0x0ff0);
   inst.instruction |= (value & 0x000f) << 16;
+  /* PR gas/15623: SMC instructions must be last in an IT block.  */
+  set_it_insn_type_last ();
 }
 
 static void
