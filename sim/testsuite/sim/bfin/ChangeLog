@@ -1,5 +1,10 @@
 2013-06-23  Mike Frysinger  <vapier@gentoo.org>
 
+	* se_allopcodes.h (_match): Simplify register test to one less insn.
+	Omit the SSYNC insn when compiling for the sim.
+
+2013-06-23  Mike Frysinger  <vapier@gentoo.org>
+
 	* testutils.inc: Trim trailing whitespace.
 
 2013-06-17  Mike Frysinger  <vapier@gentoo.org>

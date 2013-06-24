@@ -102,8 +102,7 @@ _match:
 	se_all_load_table
 
 	/* is this the end of the table? */
-	R4 = 0;
-	CC = R4 == R7;
+	CC = R7 == 0;
 	IF CC jump _new_instruction;
 
 	/* is the opcode (R0) greater than the 2nd entry in the table (R6) */
@@ -168,8 +167,10 @@ _legal_instruction:
 _next_instruction:
 	se_all_next_insn
 
+.ifdef BFIN_JTAG
 	/* Make sure the opcode isn't in a write buffer */
 	SSYNC;
+.endif
 
 	R1 = P5;
 	RETX = R1;
