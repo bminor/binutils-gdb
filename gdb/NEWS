@@ -11,6 +11,7 @@
 
 Nios II ELF 			nios2*-*-elf
 Nios II GNU/Linux		nios2*-*-linux
+Texas Instruments MSP430	msp430*-*-elf
 
 * New commands:
 catch rethrow

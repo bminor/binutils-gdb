@@ -1,3 +1,7 @@
+2013-06-25  Kevin Buettner  <kevinb@redhat.com>
+
+	* NEWS (New targets): Add entry for TI MSP430.
+
 2013-06-25  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (remote_start_remote): Move code to upload tsv
