@@ -27,6 +27,7 @@ Assembly Language Programming'' in the same work.
 * MIPS Symbol Sizes::	Directives to override the size of symbols
 * MIPS Small Data:: 	Controlling the use of small data accesses
 * MIPS ISA::    	Directives to override the ISA level
+* MIPS assembly options:: Directives to control code generation
 * MIPS autoextend::	Directives for extending MIPS 16 bit instructions
 * MIPS insn::		Directive to mark data as an instruction
 * MIPS Option Stack::	Directives to save and restore options
@@ -185,6 +186,16 @@ This tells the assembler to accept MCU instructions.
 Generate code for the Virtualization Application Specific Extension.
 This tells the assembler to accept Virtualization instructions.
 @samp{-mno-virt} turns off this option.
+
+@item -minsn32
+@itemx -mno-insn32
+Only use 32-bit instruction encodings when generating code for the
+microMIPS processor.  This option inhibits the use of any 16-bit
+instructions.  This is equivalent to putting @code{.set insn32} at
+the start of the assembly file.  @samp{-mno-insn32} turns off this
+option.  This is equivalent to putting @code{.set noinsn32} at the
+start of the assembly file.  By default @samp{-mno-insn32} is
+selected, allowing all instructions to be used.
 
 @item -mfix7000
 @itemx -mno-fix7000
@@ -646,6 +657,20 @@ Traditional MIPS assemblers do not support this directive.
 The directive @code{.set micromips} puts the assembler into microMIPS mode,
 in which it will assemble instructions for the microMIPS processor.  Use
 @code{.set nomicromips} to return to normal 32 bit mode.
+
+Traditional MIPS assemblers do not support this directive.
+
+@node MIPS assembly options
+@section Directives to control code generation
+
+@cindex MIPS 32-bit microMIPS instruction generation override
+@kindex @code{.set insn32}
+@kindex @code{.set noinsn32}
+The directive @code{.set insn32} makes the assembler only use 32-bit
+instruction encodings when generating code for the microMIPS processor.
+This directive inhibits the use of any 16-bit instructions from that
+point on in the assembly.  The @code{.set noinsn32} directive allows
+16-bit instructions to be accepted.
 
 Traditional MIPS assemblers do not support this directive.
 

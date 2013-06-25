@@ -1,6 +1,6 @@
 #objdump: -dr --show-raw-insn
-#name: microMIPS for MIPS32r2
-#as: -mips32r2 -32 -mfp64 -EB
+#name: microMIPS for MIPS32r2 (instructions valid in insn32 mode)
+#as: -mips32r2 -32 -mfp64 -EB --defsym insn32=1
 #stderr: micromips-warn.l
 #source: micromips.s
 
@@ -51,7 +51,6 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3020 8000 	li	at,-32768
 [ 0-9a-f]+:	0041 0950 	addu	at,at,v0
 [ 0-9a-f]+:	6061 2000 	pref	0x3,0\(at\)
-[ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0000 0800 	ssnop
@@ -105,20 +104,12 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0c1e      	move	zero,s8
 [ 0-9a-f]+:	0c1f      	move	zero,ra
 [ 0-9a-f]+:	0ec2      	move	s6,v0
-[ 0-9a-f]+:	0c56      	move	v0,s6
-[ 0-9a-f]+:	0ec2      	move	s6,v0
 [ 0-9a-f]+:	0016 1150 	move	v0,s6
 [ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	test
 [ 0-9a-f]+:	0002 b150 	move	s6,v0
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	test
-[ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	.*
 [ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	.*
@@ -129,9 +120,6 @@ Disassembly of section \.text:
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <.*>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	.*
 [ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
@@ -300,7 +288,6 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	4493      	and	v0,v0,v1
 [ 0-9a-f]+:	4493      	and	v0,v0,v1
 [ 0-9a-f]+:	4493      	and	v0,v0,v1
-[ 0-9a-f]+:	4493      	and	v0,v0,v1
 [ 0-9a-f]+:	0062 1250 	and	v0,v0,v1
 [ 0-9a-f]+:	2d21      	andi	v0,v0,0x1
 [ 0-9a-f]+:	2d22      	andi	v0,v0,0x2
@@ -332,7 +319,6 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	2f9f      	andi	a3,s1,0xffff
 [ 0-9a-f]+:	2c1f      	andi	s0,s1,0xffff
 [ 0-9a-f]+:	2c9f      	andi	s1,s1,0xffff
-[ 0-9a-f]+:	2fff      	andi	a3,a3,0xffff
 [ 0-9a-f]+:	2fff      	andi	a3,a3,0xffff
 [ 0-9a-f]+:	2fff      	andi	a3,a3,0xffff
 [ 0-9a-f]+:	d0e7 ffff 	andi	a3,a3,0xffff
@@ -495,9 +481,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
 [ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	8cff      	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8c7f      	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
 [ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	9410 fffe 	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
@@ -774,9 +757,6 @@ Disassembly of section \.text:
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
 [ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	acff      	bnez	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ac7f      	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
 [ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	b410 fffe 	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
@@ -4712,65 +4692,6 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	05d8      	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	6d01      	addiu	v0,sp,0
-[ 0-9a-f]+:	6d03      	addiu	v0,sp,4
-[ 0-9a-f]+:	6d05      	addiu	v0,sp,8
-[ 0-9a-f]+:	6d07      	addiu	v0,sp,12
-[ 0-9a-f]+:	6d09      	addiu	v0,sp,16
-[ 0-9a-f]+:	6d7f      	addiu	v0,sp,252
-[ 0-9a-f]+:	6dff      	addiu	v1,sp,252
-[ 0-9a-f]+:	6e7f      	addiu	a0,sp,252
-[ 0-9a-f]+:	6eff      	addiu	a1,sp,252
-[ 0-9a-f]+:	6f7f      	addiu	a2,sp,252
-[ 0-9a-f]+:	6fff      	addiu	a3,sp,252
-[ 0-9a-f]+:	6c7f      	addiu	s0,sp,252
-[ 0-9a-f]+:	6cff      	addiu	s1,sp,252
-[ 0-9a-f]+:	6d2e      	addiu	v0,v0,-1
-[ 0-9a-f]+:	6d3e      	addiu	v0,v1,-1
-[ 0-9a-f]+:	6d4e      	addiu	v0,a0,-1
-[ 0-9a-f]+:	6d5e      	addiu	v0,a1,-1
-[ 0-9a-f]+:	6d6e      	addiu	v0,a2,-1
-[ 0-9a-f]+:	6d7e      	addiu	v0,a3,-1
-[ 0-9a-f]+:	6d0e      	addiu	v0,s0,-1
-[ 0-9a-f]+:	6d1e      	addiu	v0,s1,-1
-[ 0-9a-f]+:	6d9e      	addiu	v1,s1,-1
-[ 0-9a-f]+:	6e1e      	addiu	a0,s1,-1
-[ 0-9a-f]+:	6e9e      	addiu	a1,s1,-1
-[ 0-9a-f]+:	6f1e      	addiu	a2,s1,-1
-[ 0-9a-f]+:	6f9e      	addiu	a3,s1,-1
-[ 0-9a-f]+:	6c1e      	addiu	s0,s1,-1
-[ 0-9a-f]+:	6c9e      	addiu	s1,s1,-1
-[ 0-9a-f]+:	6c90      	addiu	s1,s1,1
-[ 0-9a-f]+:	6c92      	addiu	s1,s1,4
-[ 0-9a-f]+:	6c94      	addiu	s1,s1,8
-[ 0-9a-f]+:	6c96      	addiu	s1,s1,12
-[ 0-9a-f]+:	6c98      	addiu	s1,s1,16
-[ 0-9a-f]+:	6c9a      	addiu	s1,s1,20
-[ 0-9a-f]+:	6c9c      	addiu	s1,s1,24
-[ 0-9a-f]+:	4c05      	addiu	sp,sp,8
-[ 0-9a-f]+:	4c07      	addiu	sp,sp,12
-[ 0-9a-f]+:	4dfd      	addiu	sp,sp,1016
-[ 0-9a-f]+:	4dff      	addiu	sp,sp,1020
-[ 0-9a-f]+:	4c01      	addiu	sp,sp,1024
-[ 0-9a-f]+:	4c03      	addiu	sp,sp,1028
-[ 0-9a-f]+:	4ffb      	addiu	sp,sp,-12
-[ 0-9a-f]+:	4ff9      	addiu	sp,sp,-16
-[ 0-9a-f]+:	4e03      	addiu	sp,sp,-1020
-[ 0-9a-f]+:	4e01      	addiu	sp,sp,-1024
-[ 0-9a-f]+:	4fff      	addiu	sp,sp,-1028
-[ 0-9a-f]+:	4ffd      	addiu	sp,sp,-1032
-[ 0-9a-f]+:	4c00      	addiu	zero,zero,0
-[ 0-9a-f]+:	4c40      	addiu	v0,v0,0
-[ 0-9a-f]+:	4c60      	addiu	v1,v1,0
-[ 0-9a-f]+:	4fc0      	addiu	s8,s8,0
-[ 0-9a-f]+:	4fe0      	addiu	ra,ra,0
-[ 0-9a-f]+:	4fe2      	addiu	ra,ra,1
-[ 0-9a-f]+:	4fe4      	addiu	ra,ra,2
-[ 0-9a-f]+:	4fe6      	addiu	ra,ra,3
-[ 0-9a-f]+:	4fee      	addiu	ra,ra,7
-[ 0-9a-f]+:	4ff4      	addiu	ra,ra,-6
-[ 0-9a-f]+:	4ff2      	addiu	ra,ra,-7
-[ 0-9a-f]+:	4ff0      	addiu	ra,ra,-8
 [ 0-9a-f]+:	f860 0004 	sw	v1,4\(zero\)
 [ 0-9a-f]+:	f880 0008 	sw	a0,8\(zero\)
 [ 0-9a-f]+:	f860 0004 	sw	v1,4\(zero\)
@@ -5252,7 +5173,6 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	03ff 8b7c 	syscall	0x3ff
 [ 0-9a-f]+:	03ff fffa 	cop2	0x7fffff
 [ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	0000 0000 	nop
 
 [0-9a-f]+ <fp_test>:
 [ 0-9a-f]+:	5400 01a0 	prefx	0x0,zero\(zero\)
@@ -7831,31 +7751,14 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	f000 0000 	jalx	[0-9a-f]+ <test>
 [ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c2      	jalr	v0
-[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03e2 0f3c 	jalr	v0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	4582      	jr	v0
-[ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	0002 0f3c 	jr	v0
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03e2 1f3c 	jalr\.hb	v0
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0002 1f3c 	jr\.hb	v0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	7400 0000 	jals	[0-9a-f]+ <test>
-[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	45e2      	jalrs	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	03e2 4f3c 	jalrs	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	0002 4f3c 	jrs	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	03e2 5f3c 	jalrs\.hb	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	0002 5f3c 	jrs\.hb	v0
-[ 0-9a-f]+:	0c00      	nop
 
 [0-9a-f]+ <test_spec102>:
 [ 0-9a-f]+:	6540      	lw	v0,-256\(gp\)
@@ -7925,15 +7828,6 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	87de      	movep	a0,a3,s4,s2
 [ 0-9a-f]+:	87ee      	movep	a0,a3,s4,s3
 [ 0-9a-f]+:	87fe      	movep	a0,a3,s4,s4
-[ 0-9a-f]+:	4260 fffe 	bals	[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_spec107
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4262 fffe 	bgezals	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_spec107
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4222 fffe 	bltzals	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_spec107
-[ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	4060 fffe 	bal	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_spec107
 [ 0-9a-f]+:	0000 0000 	nop

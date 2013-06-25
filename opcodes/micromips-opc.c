@@ -548,7 +548,13 @@ const struct mips_opcode micromips_opcodes[] =
 {"jr",      "s",	0x00000f3c, 0xffe0ffff,	UBD|RD_s,		BD32,		I1	}, /* jalr */
 {"jrs",     "s",	0x00004f3c, 0xffe0ffff,	UBD|RD_s,		BD16,		I1	}, /* jalrs */
 {"jraddiusp", "mP",	    0x4700,     0xffe0,	NODS,			UBR|RD_31|WR_sp|RD_sp,	I1	},
+/* This macro is after the real instruction so that it only matches with
+   -minsn32.  */
+{"jraddiusp", "mP",	0,   (int) M_JRADDIUSP,	INSN_MACRO,		0,		I1	},
 {"jrc",     "mj",	    0x45a0,     0xffe0,	NODS,			UBR|RD_mj,		I1	},
+/* This macro is after the real instruction so that it only matches with
+   -minsn32.  */
+{"jrc",     "s",	0,    (int) M_JRC,	INSN_MACRO,		0,		I1	},
 {"jr.hb",   "s",	0x00001f3c, 0xffe0ffff,	UBD|RD_s,		BD32,		I1	}, /* jalr.hb */
 {"jrs.hb",  "s",	0x00005f3c, 0xffe0ffff,	UBD|RD_s,		BD16,		I1	}, /* jalrs.hb */
 {"j",       "mj",	    0x4580,     0xffe0,	UBD,			RD_mj,		I1	}, /* jr */
@@ -704,6 +710,9 @@ const struct mips_opcode micromips_opcodes[] =
 {"mov.s",   "T,S",	0x5400007b, 0xfc00ffff,	WR_T|RD_S|FP_S,		0,		I1	},
 {"mov.ps",  "T,S",	0x5400407b, 0xfc00ffff,	WR_T|RD_S|FP_D,		0,		I1	},
 {"movep",   "mh,mi,mm,mn",  0x8400,     0xfc01,	NODS,			WR_mhi|RD_mmn,	I1	},
+/* This macro is after the real instruction so that it only matches with
+   -minsn32.  */
+{"movep",   "mh,mi,mm,mn", 0, (int) M_MOVEP,	INSN_MACRO,		0,		I1	},
 {"movf",    "t,s,M",	0x5400017b, 0xfc001fff,	WR_t|RD_s|RD_CC|FP_S|FP_D, 0,		I1	},
 {"movf.d",  "T,S,M",	0x54000220, 0xfc001fff,	WR_T|RD_S|RD_CC|FP_D,	0,		I1	},
 {"movf.s",  "T,S,M",	0x54000020, 0xfc001fff,	WR_T|RD_S|RD_CC|FP_S,	0,		I1	},

@@ -1,3 +1,17 @@
+2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* emultempl/mipself.em (insn32): New variable.
+	(mips_create_output_section_statements): Handle insn32 mode.
+	(PARSE_AND_LIST_PROLOGUE): New macro.
+	(PARSE_AND_LIST_LONGOPTS): Likewise.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+
+	* gen-doc.texi: Set MIPS.
+	* ld.texinfo: Likewise.
+	(Options specific to MIPS targets): New section.
+	(ld and MIPS family): New node.
+	(Top, Machine Dependent): List the new node.
+
 2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* emulparams/elf32btsmip.sh: Arrange for .got.plt to be placed

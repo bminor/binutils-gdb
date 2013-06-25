@@ -231,6 +231,10 @@ struct mips_set_options
   /* Non-zero if we should not autoextend mips16 instructions.
      Changed by `.set autoextend' and `.set noautoextend'.  */
   int noautoextend;
+  /* True if we should only emit 32-bit microMIPS instructions.
+     Changed by `.set insn32' and `.set noinsn32', and the -minsn32
+     and -mno-insn32 command line options.  */
+  bfd_boolean insn32;
   /* Restrict general purpose registers and floating point registers
      to 32 bit.  This is initially determined when -mgp32 or -mfp32
      is passed but can changed if the assembler code uses .set mipsN.  */
@@ -272,8 +276,8 @@ static struct mips_set_options mips_opts =
 {
   /* isa */ ISA_UNKNOWN, /* ase */ 0, /* mips16 */ -1, /* micromips */ -1,
   /* noreorder */ 0,  /* at */ ATREG, /* warn_about_macros */ 0,
-  /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* gp32 */ 0,
-  /* fp32 */ 0, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
+  /* nomove */ 0, /* nobopt */ 0, /* noautoextend */ 0, /* insn32 */ FALSE,
+  /* gp32 */ 0, /* fp32 */ 0, /* arch */ CPU_UNKNOWN, /* sym32 */ FALSE,
   /* soft_float */ FALSE, /* single_float */ FALSE
 };
 
@@ -686,11 +690,18 @@ static struct mips_cl_insn micromips_nop16_insn;
 static struct mips_cl_insn micromips_nop32_insn;
 
 /* The appropriate nop for the current mode.  */
-#define NOP_INSN (mips_opts.mips16 ? &mips16_nop_insn \
-		  : (mips_opts.micromips ? &micromips_nop16_insn : &nop_insn))
+#define NOP_INSN (mips_opts.mips16					\
+		  ? &mips16_nop_insn					\
+		  : (mips_opts.micromips				\
+		     ? (mips_opts.insn32				\
+			? &micromips_nop32_insn				\
+			: &micromips_nop16_insn)			\
+		     : &nop_insn))
 
 /* The size of NOP_INSN in bytes.  */
-#define NOP_INSN_SIZE (HAVE_CODE_COMPRESSION ? 2 : 4)
+#define NOP_INSN_SIZE ((mips_opts.mips16				\
+			|| (mips_opts.micromips && !mips_opts.insn32))	\
+		       ? 2 : 4)
 
 /* If this is set, it points to a frag holding nop instructions which
    were inserted before the start of a noreorder section.  If those
@@ -1276,7 +1287,7 @@ static void mips16_macro_build
 static void load_register (int, expressionS *, int);
 static void macro_start (void);
 static void macro_end (void);
-static void macro (struct mips_cl_insn * ip);
+static void macro (struct mips_cl_insn *ip, char *str);
 static void mips16_macro (struct mips_cl_insn * ip);
 static void mips_ip (char *str, struct mips_cl_insn * ip);
 static void mips16_ip (char *str, struct mips_cl_insn * ip);
@@ -1418,6 +1429,8 @@ enum options
     OPTION_GP64,
     OPTION_RELAX_BRANCH,
     OPTION_NO_RELAX_BRANCH,
+    OPTION_INSN32,
+    OPTION_NO_INSN32,
     OPTION_MSHARED,
     OPTION_MNO_SHARED,
     OPTION_MSYM32,
@@ -1524,6 +1537,8 @@ struct option md_longopts[] =
   {"mgp64", no_argument, NULL, OPTION_GP64},
   {"relax-branch", no_argument, NULL, OPTION_RELAX_BRANCH},
   {"no-relax-branch", no_argument, NULL, OPTION_NO_RELAX_BRANCH},
+  {"minsn32", no_argument, NULL, OPTION_INSN32},
+  {"mno-insn32", no_argument, NULL, OPTION_NO_INSN32},
   {"mshared", no_argument, NULL, OPTION_MSHARED},
   {"mno-shared", no_argument, NULL, OPTION_MNO_SHARED},
   {"msym32", no_argument, NULL, OPTION_MSYM32},
@@ -2636,6 +2651,13 @@ is_size_valid (const struct mips_opcode *mo)
   if (!mips_opts.micromips)
     return TRUE;
 
+  if (mips_opts.insn32)
+    {
+      if (mo->pinfo != INSN_MACRO && micromips_insn_length (mo) != 4)
+	return FALSE;
+      if ((mo->pinfo2 & INSN2_BRANCH_DELAY_16BIT) != 0)
+	return FALSE;
+    }
   if (!forced_insn_length)
     return TRUE;
   if (mo->pinfo == INSN_MACRO)
@@ -2966,7 +2988,7 @@ md_assemble (char *str)
       if (mips_opts.mips16)
 	mips16_macro (&insn);
       else
-	macro (&insn);
+	macro (&insn, str);
       macro_end ();
     }
   else
@@ -5209,21 +5231,21 @@ macro_end (void)
 /* Instruction operand formats used in macros that vary between
    standard MIPS and microMIPS code.  */
 
-static const char * const brk_fmt[2] = { "c", "mF" };
+static const char * const brk_fmt[2][2] = { { "c", "c" }, { "mF", "c" } };
 static const char * const cop12_fmt[2] = { "E,o(b)", "E,~(b)" };
 static const char * const jalr_fmt[2] = { "d,s", "t,s" };
 static const char * const lui_fmt[2] = { "t,u", "s,u" };
 static const char * const mem12_fmt[2] = { "t,o(b)", "t,~(b)" };
-static const char * const mfhl_fmt[2] = { "d", "mj" };
+static const char * const mfhl_fmt[2][2] = { { "d", "d" }, { "mj", "s" } };
 static const char * const shft_fmt[2] = { "d,w,<", "t,r,<" };
 static const char * const trap_fmt[2] = { "s,t,q", "s,t,|" };
 
-#define BRK_FMT (brk_fmt[mips_opts.micromips])
+#define BRK_FMT (brk_fmt[mips_opts.micromips][mips_opts.insn32])
 #define COP12_FMT (cop12_fmt[mips_opts.micromips])
 #define JALR_FMT (jalr_fmt[mips_opts.micromips])
 #define LUI_FMT (lui_fmt[mips_opts.micromips])
 #define MEM12_FMT (mem12_fmt[mips_opts.micromips])
-#define MFHL_FMT (mfhl_fmt[mips_opts.micromips])
+#define MFHL_FMT (mfhl_fmt[mips_opts.micromips][mips_opts.insn32])
 #define SHFT_FMT (shft_fmt[mips_opts.micromips])
 #define TRAP_FMT (trap_fmt[mips_opts.micromips])
 
@@ -5382,8 +5404,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	  continue;
 
 	case 'c':
-	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, CODE, insn, va_arg (args, int));
+	  INSERT_OPERAND (mips_opts.micromips, CODE, insn, va_arg (args, int));
 	  continue;
 
 	case 'W':
@@ -5750,8 +5771,10 @@ macro_build_jalr (expressionS *ep, int cprestore)
     }
   if (mips_opts.micromips)
     {
-      jalr = mips_opts.noreorder && !cprestore ? "jalr" : "jalrs";
+      jalr = ((mips_opts.noreorder && !cprestore) || mips_opts.insn32
+	      ? "jalr" : "jalrs");
       if (MIPS_JALR_HINT_P (ep)
+	  || mips_opts.insn32
 	  || (history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
 	macro_build (NULL, jalr, "t,s", RA, PIC_CALL_REG);
       else
@@ -6432,6 +6455,7 @@ move_register (int dest, int source)
   /* Prefer to use a 16-bit microMIPS instruction unless the previous
      instruction specifically requires a 32-bit one.  */
   if (mips_opts.micromips
+      && !mips_opts.insn32
       && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
     macro_build (NULL, "move", "mp,mj", dest, source);
   else
@@ -6628,7 +6652,7 @@ macro_build_branch_rs (int type, expressionS *ep, unsigned int sreg)
       break;
     case M_BGEZALL:
       gas_assert (mips_opts.micromips);
-      br = "bgezals";
+      br = mips_opts.insn32 ? "bgezal" : "bgezals";
       brneg = "bltz";
       call = 1;
       break;
@@ -6655,7 +6679,7 @@ macro_build_branch_rs (int type, expressionS *ep, unsigned int sreg)
       break;
     case M_BLTZALL:
       gas_assert (mips_opts.micromips);
-      br = "bltzals";
+      br = mips_opts.insn32 ? "bltzal" : "bltzals";
       brneg = "bgez";
       call = 1;
       break;
@@ -6727,7 +6751,7 @@ macro_build_branch_rsrt (int type, expressionS *ep,
  * we're missing.
  */
 static void
-macro (struct mips_cl_insn *ip)
+macro (struct mips_cl_insn *ip, char *str)
 {
   unsigned int treg, sreg, dreg, breg;
   unsigned int tempreg;
@@ -8149,6 +8173,11 @@ macro (struct mips_cl_insn *ip)
       /* Fall through.  */
     case M_JALS_2:
       gas_assert (mips_opts.micromips);
+      if (mips_opts.insn32)
+	{
+	  as_bad (_("Opcode not supported in the `insn32' mode `%s'"), str);
+	  break;
+	}
       jals = 1;
       goto jal;
     case M_JAL_1:
@@ -8160,6 +8189,7 @@ macro (struct mips_cl_insn *ip)
 	{
 	  s = jals ? "jalrs" : "jalr";
 	  if (mips_opts.micromips
+	      && !mips_opts.insn32
 	      && dreg == RA
 	      && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
 	    macro_build (NULL, s, "mj", sreg);
@@ -8174,9 +8204,12 @@ macro (struct mips_cl_insn *ip)
 	  if (sreg != PIC_CALL_REG)
 	    as_warn (_("MIPS PIC call to register other than $25"));
 
-	  s = (mips_opts.micromips && (!mips_opts.noreorder || cprestore)
+	  s = ((mips_opts.micromips
+		&& !mips_opts.insn32
+		&& (!mips_opts.noreorder || cprestore))
 	       ? "jalrs" : "jalr");
 	  if (mips_opts.micromips
+	      && !mips_opts.insn32
 	      && dreg == RA
 	      && !(history[0].insn_mo->pinfo2 & INSN2_BRANCH_DELAY_32BIT))
 	    macro_build (NULL, s, "mj", sreg);
@@ -8215,6 +8248,11 @@ macro (struct mips_cl_insn *ip)
 
     case M_JALS_A:
       gas_assert (mips_opts.micromips);
+      if (mips_opts.insn32)
+	{
+	  as_bad (_("Opcode not supported in the `insn32' mode `%s'"), str);
+	  break;
+	}
       jals = 1;
       /* Fall through.  */
     case M_JAL_A:
@@ -9227,6 +9265,24 @@ macro (struct mips_cl_insn *ip)
 
       break;
 
+    case M_JRADDIUSP:
+      gas_assert (mips_opts.micromips);
+      gas_assert (mips_opts.insn32);
+      start_noreorder ();
+      macro_build (NULL, "jr", "s", RA);
+      expr1.X_add_number = EXTRACT_OPERAND (1, IMMP, *ip) << 2;
+      macro_build (&expr1, "addiu", "t,r,j", SP, SP, BFD_RELOC_LO16);
+      end_noreorder ();
+      break;
+
+    case M_JRC:
+      gas_assert (mips_opts.micromips);
+      gas_assert (mips_opts.insn32);
+      macro_build (NULL, "jr", "s", sreg);
+      if (mips_opts.noreorder)
+	macro_build (NULL, "nop", "");
+      break;
+
     case M_LI:
     case M_LI_S:
       load_register (treg, &imm_expr, 0);
@@ -9782,6 +9838,17 @@ macro (struct mips_cl_insn *ip)
 
     case M_MOVE:
       move_register (dreg, sreg);
+      break;
+
+    case M_MOVEP:
+      gas_assert (mips_opts.micromips);
+      gas_assert (mips_opts.insn32);
+      dreg = micromips_to_32_reg_h_map[EXTRACT_OPERAND (1, MH, *ip)];
+      breg = micromips_to_32_reg_i_map[EXTRACT_OPERAND (1, MI, *ip)];
+      sreg = micromips_to_32_reg_m_map[EXTRACT_OPERAND (1, MM, *ip)];
+      treg = micromips_to_32_reg_n_map[EXTRACT_OPERAND (1, MN, *ip)];
+      move_register (dreg, sreg);
+      move_register (breg, treg);
       break;
 
     case M_DMUL:
@@ -11343,6 +11410,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	    sprintf (buf, _("Opcode not supported on this processor: %s (%s)"),
 		     mips_cpu_info_from_arch (mips_opts.arch)->name,
 		     mips_cpu_info_from_isa (mips_opts.isa)->name);
+	  else if (mips_opts.insn32)
+	    sprintf (buf, _("Opcode not supported in the `insn32' mode"));
 	  else
 	    sprintf (buf, _("Unrecognized %u-bit version of microMIPS opcode"),
 		     8 * forced_insn_length);
@@ -15135,6 +15204,14 @@ md_parse_option (int c, char *arg)
       mips_relax_branch = 0;
       break;
 
+    case OPTION_INSN32:
+      mips_opts.insn32 = TRUE;
+      break;
+
+    case OPTION_NO_INSN32:
+      mips_opts.insn32 = FALSE;
+      break;
+
     case OPTION_MSHARED:
       mips_in_shared = TRUE;
       break;
@@ -16547,6 +16624,10 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
     mips_opts.noautoextend = 0;
   else if (strcmp (name, "noautoextend") == 0)
     mips_opts.noautoextend = 1;
+  else if (strcmp (name, "insn32") == 0)
+    mips_opts.insn32 = TRUE;
+  else if (strcmp (name, "noinsn32") == 0)
+    mips_opts.insn32 = FALSE;
   else if (strcmp (name, "push") == 0)
     {
       struct mips_option_stack *s;
@@ -18854,7 +18935,7 @@ mips_handle_align (fragS *fragp)
       *p++ = '\0';
       /* Fall through.  */
     case 2:
-      if (nop_opcode == NOP_OPCODE_MICROMIPS)
+      if (nop_opcode == NOP_OPCODE_MICROMIPS && !mips_opts.insn32)
 	{
 	  p = write_compressed_insn (p, micromips_nop16_insn.insn_opcode, 2);
 	  break;
@@ -19579,6 +19660,9 @@ MIPS options:\n\
   fprintf (stream, _("\
 -mvirt			generate Virtualization instructions\n\
 -mno-virt		do not generate Virtualization instructions\n"));
+  fprintf (stream, _("\
+-minsn32		only generate 32-bit microMIPS instructions\n\
+-mno-insn32		generate all microMIPS instructions\n"));
   fprintf (stream, _("\
 -mfix-loongson2f-jump	work around Loongson2F JUMP instructions\n\
 -mfix-loongson2f-nop	work around Loongson2F NOP errata\n\

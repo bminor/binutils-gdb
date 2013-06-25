@@ -1,3 +1,15 @@
+2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/micromips-insn32.d: New test.
+	* gas/mips/micromips-noinsn32.d: Likewise.
+	* gas/mips/micromips.l: Rename to...
+	* gas/mips/micromips-warn.l: ... this.
+	* gas/mips/micromips.d: Update accordingly.
+	* gas/mips/micromips-trap.d: Likewise.
+	* gas/mips/micromips.l: New list test.
+	* gas/mips/micromips.s: Add conditionals.
+	* gas/mips/mips.exp: Run the new tests.
+
 2013-06-24  Roland McGrath  <mcgrathr@google.com>
 
 	* gas/arm/macro-vld1.s: Add a case with whitespace before '}'.

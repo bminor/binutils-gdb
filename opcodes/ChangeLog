@@ -1,3 +1,8 @@
+2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* micromips-opc.c (micromips_opcodes): Add "jraddiusp", "jrc"
+	and "movep" macros.
+
 2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-dis.c (is_mips16_plt_tail): New function.

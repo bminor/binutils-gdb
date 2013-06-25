@@ -1,3 +1,22 @@
+2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
+            Paul Brook  <paul@codesourcery.com>
+
+	* elfxx-mips.h (_bfd_mips_elf_insn32): New prototype.
+	* elfxx-mips.c (mips_elf_link_hash_table): Add insn32 member.
+	(STUB_MOVE32_MICROMIPS, STUB_JALR32_MICROMIPS): New macros.
+	(MICROMIPS_INSN32_FUNCTION_STUB_NORMAL_SIZE): Likewise.
+	(MICROMIPS_INSN32_FUNCTION_STUB_BIG_SIZE): Likewise.
+	(micromips_insn32_o32_exec_plt0_entry): New variable.
+	(micromips_insn32_o32_exec_plt_entry): Likewise.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Handle insn32 mode.
+	(mips_elf_estimate_stub_size): Likewise.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	(mips_finish_exec_plt): Likewise.
+	(_bfd_mips_elf_relax_section): Likewise.
+	(_bfd_mips_elf_insn32): New function.
+	(_bfd_mips_elf_get_synthetic_symtab): Handle insn32 PLT.
+
 2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.h (_bfd_mips_elf_get_synthetic_symtab): New

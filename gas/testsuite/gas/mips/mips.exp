@@ -1074,6 +1074,10 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "micromips"
     run_dump_test "micromips-trap"
+    run_dump_test "micromips-insn32"
+    run_dump_test "micromips-noinsn32"
+    run_list_test "micromips" "-mips32r2 -32 -mfp64 -minsn32" \
+	"microMIPS for MIPS32r2 (instructions invalid in insn32 mode)"
     run_list_test "micromips-size-0" \
 	"-32 -march=mips64 -mmicromips" "microMIPS instruction size 0"
     run_dump_test "micromips-size-1"

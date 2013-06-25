@@ -437,6 +437,9 @@ struct mips_elf_link_hash_table
   /* True if we can generate copy relocs and PLTs.  */
   bfd_boolean use_plts_and_copy_relocs;
 
+  /* True if we can only use 32-bit microMIPS instructions.  */
+  bfd_boolean insn32;
+
   /* True if we're generating code for VxWorks.  */
   bfd_boolean is_vxworks;
 
@@ -904,9 +907,14 @@ static bfd *reldyn_sorting_bfd;
    ? 0xdf3c8010					/* ld t9,0x8010(gp) */	\
    : 0xff3c8010)				/* lw t9,0x8010(gp) */
 #define STUB_MOVE_MICROMIPS 0x0dff		/* move t7,ra */
+#define STUB_MOVE32_MICROMIPS(abfd)					\
+   (ABI_64_P (abfd)							\
+    ? 0x581f7950				/* daddu t7,ra,zero */	\
+    : 0x001f7950)				/* addu t7,ra,zero */
 #define STUB_LUI_MICROMIPS(VAL)						\
    (0x41b80000 + (VAL))				/* lui t8,VAL */
 #define STUB_JALR_MICROMIPS 0x45d9		/* jalr t9 */
+#define STUB_JALR32_MICROMIPS 0x03f90f3c	/* jalr ra,t9 */
 #define STUB_ORI_MICROMIPS(VAL)						\
   (0x53180000 + (VAL))				/* ori t8,t8,VAL */
 #define STUB_LI16U_MICROMIPS(VAL)					\
@@ -920,6 +928,8 @@ static bfd *reldyn_sorting_bfd;
 #define MIPS_FUNCTION_STUB_BIG_SIZE 20
 #define MICROMIPS_FUNCTION_STUB_NORMAL_SIZE 12
 #define MICROMIPS_FUNCTION_STUB_BIG_SIZE 16
+#define MICROMIPS_INSN32_FUNCTION_STUB_NORMAL_SIZE 16
+#define MICROMIPS_INSN32_FUNCTION_STUB_BIG_SIZE 20
 
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
@@ -1050,6 +1060,20 @@ static const bfd_vma micromips_o32_exec_plt0_entry[] =
   0x0c00		/* nop						*/
 };
 
+/* The format of the microMIPS first PLT entry in an O32 executable
+   in the insn32 mode.  */
+static const bfd_vma micromips_insn32_o32_exec_plt0_entry[] =
+{
+  0x41bc, 0x0000,	/* lui $28, %hi(&GOTPLT[0])			*/
+  0xff3c, 0x0000,	/* lw $25, %lo(&GOTPLT[0])($28)			*/
+  0x339c, 0x0000,	/* addiu $28, $28, %lo(&GOTPLT[0])		*/
+  0x0398, 0xc1d0,	/* subu $24, $24, $28				*/
+  0x001f, 0x7950,	/* move $15, $31				*/
+  0x0318, 0x1040,	/* srl $24, $24, 2				*/
+  0x03f9, 0x0f3c,	/* jalr $25					*/
+  0x3318, 0xfffe	/* subu $24, $24, 2				*/
+};
+
 /* The format of subsequent standard PLT entries.  */
 static const bfd_vma mips_exec_plt_entry[] =
 {
@@ -1081,6 +1105,15 @@ static const bfd_vma micromips_o32_exec_plt_entry[] =
   0xff22, 0x0000,	/* lw $25, 0($2)			*/
   0x4599,		/* jr $25				*/
   0x0f02		/* move $24, $2				*/
+};
+
+/* The format of subsequent microMIPS o32 PLT entries in the insn32 mode.  */
+static const bfd_vma micromips_insn32_o32_exec_plt_entry[] =
+{
+  0x41af, 0x0000,	/* lui $15, %hi(.got.plt entry)		*/
+  0xff2f, 0x0000,	/* lw $25, %lo(.got.plt entry)($15)	*/
+  0x0019, 0x0f3c,	/* jr $25				*/
+  0x330f, 0x0000	/* addiu $24, $15, %lo(.got.plt entry)	*/
 };
 
 /* The format of the first PLT entry in a VxWorks executable.  */
@@ -8802,19 +8835,26 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  else if (newabi_p)
 	    htab->plt_mips_entry_size
 	      = 4 * ARRAY_SIZE (mips_exec_plt_entry);
-	  else if (micromips_p)
+	  else if (!micromips_p)
 	    {
 	      htab->plt_mips_entry_size
 		= 4 * ARRAY_SIZE (mips_exec_plt_entry);
 	      htab->plt_comp_entry_size
-		= 2 * ARRAY_SIZE (micromips_o32_exec_plt_entry);
+		= 2 * ARRAY_SIZE (mips16_o32_exec_plt_entry);
+	    }
+	  else if (htab->insn32)
+	    {
+	      htab->plt_mips_entry_size
+		= 4 * ARRAY_SIZE (mips_exec_plt_entry);
+	      htab->plt_comp_entry_size
+		= 2 * ARRAY_SIZE (micromips_insn32_o32_exec_plt_entry);
 	    }
 	  else
 	    {
 	      htab->plt_mips_entry_size
 		= 4 * ARRAY_SIZE (mips_exec_plt_entry);
 	      htab->plt_comp_entry_size
-		= 2 * ARRAY_SIZE (mips16_o32_exec_plt_entry);
+		= 2 * ARRAY_SIZE (micromips_o32_exec_plt_entry);
 	    }
 	}
 
@@ -9128,15 +9168,19 @@ mips_elf_estimate_stub_size (bfd *output_bfd, struct bfd_link_info *info)
      from using microMIPS code here, so for the sake of pure-microMIPS
      binaries we prefer it whenever there's any microMIPS code in
      output produced at all.  This has a benefit of stubs being
-     shorter by 4 bytes each too.  */
-  if (MICROMIPS_P (output_bfd))
-    htab->function_stub_size = (dynsymcount > 0x10000
-				? MICROMIPS_FUNCTION_STUB_BIG_SIZE
-				: MICROMIPS_FUNCTION_STUB_NORMAL_SIZE);
-  else
+     shorter by 4 bytes each too, unless in the insn32 mode.  */
+  if (!MICROMIPS_P (output_bfd))
     htab->function_stub_size = (dynsymcount > 0x10000
 				? MIPS_FUNCTION_STUB_BIG_SIZE
 				: MIPS_FUNCTION_STUB_NORMAL_SIZE);
+  else if (htab->insn32)
+    htab->function_stub_size = (dynsymcount > 0x10000
+				? MICROMIPS_INSN32_FUNCTION_STUB_BIG_SIZE
+				: MICROMIPS_INSN32_FUNCTION_STUB_NORMAL_SIZE);
+  else
+    htab->function_stub_size = (dynsymcount > 0x10000
+				? MICROMIPS_FUNCTION_STUB_BIG_SIZE
+				: MICROMIPS_FUNCTION_STUB_NORMAL_SIZE);
 
   htab->sstubs->size = htab->lazy_stub_count * htab->function_stub_size;
 }
@@ -9341,6 +9385,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	    size = 4 * ARRAY_SIZE (mips_n32_exec_plt0_entry);
 	  else if (!micromips_p)
 	    size = 4 * ARRAY_SIZE (mips_o32_exec_plt0_entry);
+	  else if (htab->insn32)
+	    size = 2 * ARRAY_SIZE (micromips_insn32_o32_exec_plt0_entry);
 	  else
 	    size = 2 * ARRAY_SIZE (micromips_o32_exec_plt0_entry);
 
@@ -10293,7 +10339,32 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  loc = htab->splt->contents + plt_offset;
 
 	  /* Fill in the PLT entry itself.  */
-	  if (MICROMIPS_P (output_bfd))
+	  if (!MICROMIPS_P (output_bfd))
+	    {
+	      const bfd_vma *plt_entry = mips16_o32_exec_plt_entry;
+
+	      bfd_put_16 (output_bfd, plt_entry[0], loc);
+	      bfd_put_16 (output_bfd, plt_entry[1], loc + 2);
+	      bfd_put_16 (output_bfd, plt_entry[2], loc + 4);
+	      bfd_put_16 (output_bfd, plt_entry[3], loc + 6);
+	      bfd_put_16 (output_bfd, plt_entry[4], loc + 8);
+	      bfd_put_16 (output_bfd, plt_entry[5], loc + 10);
+	      bfd_put_32 (output_bfd, got_address, loc + 12);
+	    }
+	  else if (htab->insn32)
+	    {
+	      const bfd_vma *plt_entry = micromips_insn32_o32_exec_plt_entry;
+
+	      bfd_put_16 (output_bfd, plt_entry[0], loc);
+	      bfd_put_16 (output_bfd, got_address_high, loc + 2);
+	      bfd_put_16 (output_bfd, plt_entry[2], loc + 4);
+	      bfd_put_16 (output_bfd, got_address_low, loc + 6);
+	      bfd_put_16 (output_bfd, plt_entry[4], loc + 8);
+	      bfd_put_16 (output_bfd, plt_entry[5], loc + 10);
+	      bfd_put_16 (output_bfd, plt_entry[6], loc + 12);
+	      bfd_put_16 (output_bfd, got_address_low, loc + 14);
+	    }
+	  else
 	    {
 	      const bfd_vma *plt_entry = micromips_o32_exec_plt_entry;
 	      bfd_signed_vma gotpc_offset;
@@ -10326,18 +10397,6 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	      bfd_put_16 (output_bfd, plt_entry[4], loc + 8);
 	      bfd_put_16 (output_bfd, plt_entry[5], loc + 10);
 	    }
-	  else
-	    {
-	      const bfd_vma *plt_entry = mips16_o32_exec_plt_entry;
-
-	      bfd_put_16 (output_bfd, plt_entry[0], loc);
-	      bfd_put_16 (output_bfd, plt_entry[1], loc + 2);
-	      bfd_put_16 (output_bfd, plt_entry[2], loc + 4);
-	      bfd_put_16 (output_bfd, plt_entry[3], loc + 6);
-	      bfd_put_16 (output_bfd, plt_entry[4], loc + 8);
-	      bfd_put_16 (output_bfd, plt_entry[5], loc + 10);
-	      bfd_put_32 (output_bfd, got_address, loc + 12);
-	    }
 	}
 
       /* Emit an R_MIPS_JUMP_SLOT relocation against the .got.plt entry.  */
@@ -10369,10 +10428,12 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
       bfd_vma isa_bit = micromips_p;
       bfd_vma stub_big_size;
 
-      if (micromips_p)
-	stub_big_size = MICROMIPS_FUNCTION_STUB_BIG_SIZE;
-      else
+      if (!micromips_p)
 	stub_big_size = MIPS_FUNCTION_STUB_BIG_SIZE;
+      else if (htab->insn32)
+	stub_big_size = MICROMIPS_INSN32_FUNCTION_STUB_BIG_SIZE;
+      else
+	stub_big_size = MICROMIPS_FUNCTION_STUB_BIG_SIZE;
 
       /* This symbol has a stub.  Set it up.  */
 
@@ -10393,8 +10454,18 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	  bfd_put_micromips_32 (output_bfd, STUB_LW_MICROMIPS (output_bfd),
 				stub + idx);
 	  idx += 4;
-	  bfd_put_16 (output_bfd, STUB_MOVE_MICROMIPS, stub + idx);
-	  idx += 2;
+	  if (htab->insn32)
+	    {
+	      bfd_put_micromips_32 (output_bfd,
+				    STUB_MOVE32_MICROMIPS (output_bfd),
+				    stub + idx);
+	      idx += 4;
+	    }
+	  else
+	    {
+	      bfd_put_16 (output_bfd, STUB_MOVE_MICROMIPS, stub + idx);
+	      idx += 2;
+	    }
 	  if (stub_size == stub_big_size)
 	    {
 	      long dynindx_hi = (h->dynindx >> 16) & 0x7fff;
@@ -10404,8 +10475,17 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 				    stub + idx);
 	      idx += 4;
 	    }
-	  bfd_put_16 (output_bfd, STUB_JALR_MICROMIPS, stub + idx);
-	  idx += 2;
+	  if (htab->insn32)
+	    {
+	      bfd_put_micromips_32 (output_bfd, STUB_JALR32_MICROMIPS,
+				    stub + idx);
+	      idx += 4;
+	    }
+	  else
+	    {
+	      bfd_put_16 (output_bfd, STUB_JALR_MICROMIPS, stub + idx);
+	      idx += 2;
+	    }
 
 	  /* If a large stub is not required and sign extension is not a
 	     problem, then use legacy code in the stub.  */
@@ -10828,10 +10908,12 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
     plt_entry = mips_n64_exec_plt0_entry;
   else if (ABI_N32_P (output_bfd))
     plt_entry = mips_n32_exec_plt0_entry;
-  else if (htab->plt_header_is_comp)
-    plt_entry = micromips_o32_exec_plt0_entry;
-  else
+  else if (!htab->plt_header_is_comp)
     plt_entry = mips_o32_exec_plt0_entry;
+  else if (htab->insn32)
+    plt_entry = micromips_insn32_o32_exec_plt0_entry;
+  else
+    plt_entry = micromips_o32_exec_plt0_entry;
 
   /* Calculate the value of .got.plt.  */
   gotplt_value = (htab->sgotplt->output_section->vma
@@ -10874,6 +10956,19 @@ mips_finish_exec_plt (bfd *output_bfd, struct bfd_link_info *info)
 		  plt_entry[0] | ((gotpc_offset >> 18) & 0x7f), loc);
       bfd_put_16 (output_bfd, (gotpc_offset >> 2) & 0xffff, loc + 2);
       for (i = 2; i < ARRAY_SIZE (micromips_o32_exec_plt0_entry); i++)
+	bfd_put_16 (output_bfd, plt_entry[i], loc + (i * 2));
+    }
+  else if (plt_entry == micromips_insn32_o32_exec_plt0_entry)
+    {
+      size_t i;
+
+      bfd_put_16 (output_bfd, plt_entry[0], loc);
+      bfd_put_16 (output_bfd, gotplt_value_high, loc + 2);
+      bfd_put_16 (output_bfd, plt_entry[2], loc + 4);
+      bfd_put_16 (output_bfd, gotplt_value_low, loc + 6);
+      bfd_put_16 (output_bfd, plt_entry[4], loc + 8);
+      bfd_put_16 (output_bfd, gotplt_value_low, loc + 10);
+      for (i = 6; i < ARRAY_SIZE (micromips_insn32_o32_exec_plt0_entry); i++)
 	bfd_put_16 (output_bfd, plt_entry[i], loc + (i * 2));
     }
   else
@@ -12929,6 +13024,7 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 			     struct bfd_link_info *link_info,
 			     bfd_boolean *again)
 {
+  bfd_boolean insn32 = mips_elf_hash_table (link_info)->insn32;
   Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Rela *internal_relocs;
   Elf_Internal_Rela *irel, *irelend;
@@ -13211,7 +13307,13 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 	       && irel->r_offset + 5 < sec->size
 	       && ((fndopc = find_match (opcode, bz_rs_insns_32)) >= 0
 		   || (fndopc = find_match (opcode, bz_rt_insns_32)) >= 0)
-	       && MATCH (bfd_get_16 (abfd, ptr + 4), nop_insn_16))
+	       && ((!insn32
+		    && (delcnt = MATCH (bfd_get_16 (abfd, ptr + 4),
+					nop_insn_16) ? 2 : 0))
+		   || (irel->r_offset + 7 < sec->size
+		       && (delcnt = MATCH (bfd_get_micromips_32 (abfd,
+								 ptr + 4),
+					   nop_insn_32) ? 4 : 0))))
 	{
 	  unsigned long reg;
 
@@ -13224,15 +13326,15 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 
 	  bfd_put_micromips_32 (abfd, opcode, ptr);
 
-	  /* Delete the 16-bit delay slot NOP: two bytes from
-	     irel->offset + 4.  */
-	  delcnt = 2;
+	  /* Delete the delay slot NOP: two or four bytes from
+	     irel->offset + 4; delcnt has already been set above.  */
 	  deloff = 4;
 	}
 
       /* R_MICROMIPS_PC16_S1 relaxation to R_MICROMIPS_PC10_S1.  We need
          to check the distance from the next instruction, so subtract 2.  */
-      else if (r_type == R_MICROMIPS_PC16_S1
+      else if (!insn32
+	       && r_type == R_MICROMIPS_PC16_S1
 	       && IS_BITSIZE (pcrval - 2, 11)
 	       && find_match (opcode, b_insns_32) >= 0)
 	{
@@ -13252,7 +13354,8 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 
       /* R_MICROMIPS_PC16_S1 relaxation to R_MICROMIPS_PC7_S1.  We need
          to check the distance from the next instruction, so subtract 2.  */
-      else if (r_type == R_MICROMIPS_PC16_S1
+      else if (!insn32
+	       && r_type == R_MICROMIPS_PC16_S1
 	       && IS_BITSIZE (pcrval - 2, 8)
 	       && (((fndopc = find_match (opcode, bz_rs_insns_32)) >= 0
 		    && OP16_VALID_REG (OP32_SREG (opcode)))
@@ -13279,7 +13382,8 @@ _bfd_mips_elf_relax_section (bfd *abfd, asection *sec,
 	}
 
       /* R_MICROMIPS_26_S1 -- JAL to JALS relaxation for microMIPS targets.  */
-      else if (r_type == R_MICROMIPS_26_S1
+      else if (!insn32
+	       && r_type == R_MICROMIPS_26_S1
 	       && target_is_micromips_code_p
 	       && irel->r_offset + 7 < sec->size
 	       && MATCH (opcode, jal_insn_32_bd32))
@@ -13436,6 +13540,15 @@ void
 _bfd_mips_elf_use_plts_and_copy_relocs (struct bfd_link_info *info)
 {
   mips_elf_hash_table (info)->use_plts_and_copy_relocs = TRUE;
+}
+
+/* A function that the linker calls to select between all or only
+   32-bit microMIPS instructions.  */
+
+void
+_bfd_mips_elf_insn32 (struct bfd_link_info *info, bfd_boolean on)
+{
+  mips_elf_hash_table (info)->insn32 = on;
 }
 
 /* We need to use a special link routine to handle the .reginfo and
@@ -14999,6 +15112,13 @@ _bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
       plt0_size = 2 * ARRAY_SIZE (micromips_o32_exec_plt0_entry);
       other = STO_MICROMIPS;
     }
+  else if (opcode == 0x0398c1d0)
+    {
+      if (!micromips_p)
+	return -1;
+      plt0_size = 2 * ARRAY_SIZE (micromips_insn32_o32_exec_plt0_entry);
+      other = STO_MICROMIPS;
+    }
   else
     {
       plt0_size = 4 * ARRAY_SIZE (mips_o32_exec_plt0_entry);
@@ -15042,7 +15162,7 @@ _bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
 	  suffix = m16suffix;
 	  other = STO_MIPS16;
 	}
-      /* Likewise the expected microMIPS instruction.  */
+      /* Likewise the expected microMIPS instruction (no insn32 mode).  */
       else if (opcode == 0xff220000)
 	{
 	  if (!micromips_p)
@@ -15054,6 +15174,19 @@ _bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
 	  gotplt_addr = gotplt_hi + gotplt_lo;
 	  gotplt_addr += ((plt->vma + plt_offset) | 3) ^ 3;
 	  entry_size = 2 * ARRAY_SIZE (micromips_o32_exec_plt_entry);
+	  suffixlen = sizeof (microsuffix);
+	  suffix = microsuffix;
+	  other = STO_MICROMIPS;
+	}
+      /* Likewise the expected microMIPS instruction (insn32 mode).  */
+      else if ((opcode & 0xffff0000) == 0xff2f0000)
+	{
+	  gotplt_hi = bfd_get_16 (abfd, plt_data + plt_offset + 2) & 0xffff;
+	  gotplt_lo = bfd_get_16 (abfd, plt_data + plt_offset + 6) & 0xffff;
+	  gotplt_hi = ((gotplt_hi ^ 0x8000) - 0x8000) << 16;
+	  gotplt_lo = (gotplt_lo ^ 0x8000) - 0x8000;
+	  gotplt_addr = gotplt_hi + gotplt_lo;
+	  entry_size = 2 * ARRAY_SIZE (micromips_insn32_o32_exec_plt_entry);
 	  suffixlen = sizeof (microsuffix);
 	  suffix = microsuffix;
 	  other = STO_MICROMIPS;

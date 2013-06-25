@@ -1,3 +1,35 @@
+2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (mips_set_options): Add insn32 member.
+	(mips_opts): Initialize it.
+	(NOP_INSN, NOP_INSN_SIZE): Handle insn32 mode.
+	(options): Add OPTION_INSN32 and OPTION_NO_INSN32 enum values.
+	(md_longopts): Add "minsn32" and "mno-insn32" options.
+	(is_size_valid): Handle insn32 mode.
+	(md_assemble): Pass instruction string down to macro.
+	(brk_fmt): Add second dimension and insn32 mode initializers.
+	(mfhl_fmt): Likewise.
+	(BRK_FMT, MFHL_FMT): Handle insn32 mode.
+	(macro_build) <'c'>: Handle microMIPS 32-bit BREAK encoding.
+	(macro_build_jalr, move_register): Handle insn32 mode.
+	(macro_build_branch_rs): Likewise.
+	(macro): Handle insn32 mode.
+	<M_JRADDIUSP>, <M_JRC>, <M_MOVEP>: New cases.
+	(mips_ip): Handle insn32 mode.
+	(md_parse_option): Handle OPTION_INSN32 and OPTION_NO_INSN32.
+	(s_mipsset): Handle "insn32" and "noinsn32" pseudo-ops.
+	(mips_handle_align): Handle insn32 mode.
+	(md_show_usage): Add -minsn32 and -mno-insn32.
+
+	* doc/as.texinfo (Target MIPS options): Add -minsn32 and
+	-mno-insn32 options.
+	(-minsn32, -mno-insn32): New options.
+	* doc/c-mips.texi (MIPS Opts): Add -minsn32 and -mno-insn32
+	options.
+	(MIPS assembly options): New node.  Document .set insn32 and
+	.set noinsn32.
+	(MIPS-Dependent): List the new node.
+
 2013-06-25  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (msp430_srcoperand): Do not allow the use of

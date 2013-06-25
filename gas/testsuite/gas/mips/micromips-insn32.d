@@ -1,6 +1,6 @@
-#objdump: -dr --show-raw-insn
-#name: microMIPS for MIPS32r2
-#as: -mips32r2 -32 -mfp64 -EB
+#objdump: -drz --show-raw-insn
+#name: microMIPS for MIPS32r2 (insn32 mode)
+#as: -mips32r2 -32 -mfp64 -minsn32 -EB --defsym insn32=1
 #stderr: micromips-warn.l
 #source: micromips.s
 
@@ -51,23 +51,22 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3020 8000 	li	at,-32768
 [ 0-9a-f]+:	0041 0950 	addu	at,at,v0
 [ 0-9a-f]+:	6061 2000 	pref	0x3,0\(at\)
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0000 0800 	ssnop
 [ 0-9a-f]+:	0000 1800 	ehb
 [ 0-9a-f]+:	0000 2800 	pause
-[ 0-9a-f]+:	ed7f      	li	v0,-1
-[ 0-9a-f]+:	edff      	li	v1,-1
-[ 0-9a-f]+:	ee7f      	li	a0,-1
-[ 0-9a-f]+:	eeff      	li	a1,-1
-[ 0-9a-f]+:	ef7f      	li	a2,-1
-[ 0-9a-f]+:	efff      	li	a3,-1
-[ 0-9a-f]+:	ec7f      	li	s0,-1
-[ 0-9a-f]+:	ecff      	li	s1,-1
-[ 0-9a-f]+:	ec80      	li	s1,0
-[ 0-9a-f]+:	ecfd      	li	s1,125
-[ 0-9a-f]+:	ecfe      	li	s1,126
+[ 0-9a-f]+:	3040 ffff 	li	v0,-1
+[ 0-9a-f]+:	3060 ffff 	li	v1,-1
+[ 0-9a-f]+:	3080 ffff 	li	a0,-1
+[ 0-9a-f]+:	30a0 ffff 	li	a1,-1
+[ 0-9a-f]+:	30c0 ffff 	li	a2,-1
+[ 0-9a-f]+:	30e0 ffff 	li	a3,-1
+[ 0-9a-f]+:	3200 ffff 	li	s0,-1
+[ 0-9a-f]+:	3220 ffff 	li	s1,-1
+[ 0-9a-f]+:	3220 0000 	li	s1,0
+[ 0-9a-f]+:	3220 007d 	li	s1,125
+[ 0-9a-f]+:	3220 007e 	li	s1,126
 [ 0-9a-f]+:	3220 007f 	li	s1,127
 [ 0-9a-f]+:	3040 0000 	li	v0,0
 [ 0-9a-f]+:	3040 0001 	li	v0,1
@@ -80,84 +79,73 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3040 ffff 	li	v0,-1
 [ 0-9a-f]+:	41a2 1234 	lui	v0,0x1234
 [ 0-9a-f]+:	5042 5678 	ori	v0,v0,0x5678
-[ 0-9a-f]+:	0c16      	move	zero,s6
-[ 0-9a-f]+:	0c56      	move	v0,s6
-[ 0-9a-f]+:	0c76      	move	v1,s6
-[ 0-9a-f]+:	0c96      	move	a0,s6
-[ 0-9a-f]+:	0cb6      	move	a1,s6
-[ 0-9a-f]+:	0cd6      	move	a2,s6
-[ 0-9a-f]+:	0cf6      	move	a3,s6
-[ 0-9a-f]+:	0d16      	move	t0,s6
-[ 0-9a-f]+:	0d36      	move	t1,s6
-[ 0-9a-f]+:	0d56      	move	t2,s6
-[ 0-9a-f]+:	0fd6      	move	s8,s6
-[ 0-9a-f]+:	0ff6      	move	ra,s6
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	0c02      	move	zero,v0
-[ 0-9a-f]+:	0c03      	move	zero,v1
-[ 0-9a-f]+:	0c04      	move	zero,a0
-[ 0-9a-f]+:	0c05      	move	zero,a1
-[ 0-9a-f]+:	0c06      	move	zero,a2
-[ 0-9a-f]+:	0c07      	move	zero,a3
-[ 0-9a-f]+:	0c08      	move	zero,t0
-[ 0-9a-f]+:	0c09      	move	zero,t1
-[ 0-9a-f]+:	0c0a      	move	zero,t2
-[ 0-9a-f]+:	0c1e      	move	zero,s8
-[ 0-9a-f]+:	0c1f      	move	zero,ra
-[ 0-9a-f]+:	0ec2      	move	s6,v0
-[ 0-9a-f]+:	0c56      	move	v0,s6
-[ 0-9a-f]+:	0ec2      	move	s6,v0
+[ 0-9a-f]+:	0016 0150 	move	zero,s6
 [ 0-9a-f]+:	0016 1150 	move	v0,s6
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	test
+[ 0-9a-f]+:	0016 1950 	move	v1,s6
+[ 0-9a-f]+:	0016 2150 	move	a0,s6
+[ 0-9a-f]+:	0016 2950 	move	a1,s6
+[ 0-9a-f]+:	0016 3150 	move	a2,s6
+[ 0-9a-f]+:	0016 3950 	move	a3,s6
+[ 0-9a-f]+:	0016 4150 	move	t0,s6
+[ 0-9a-f]+:	0016 4950 	move	t1,s6
+[ 0-9a-f]+:	0016 5150 	move	t2,s6
+[ 0-9a-f]+:	0016 f150 	move	s8,s6
+[ 0-9a-f]+:	0016 f950 	move	ra,s6
+[ 0-9a-f]+:	0000 0150 	move	zero,zero
+[ 0-9a-f]+:	0002 0150 	move	zero,v0
+[ 0-9a-f]+:	0003 0150 	move	zero,v1
+[ 0-9a-f]+:	0004 0150 	move	zero,a0
+[ 0-9a-f]+:	0005 0150 	move	zero,a1
+[ 0-9a-f]+:	0006 0150 	move	zero,a2
+[ 0-9a-f]+:	0007 0150 	move	zero,a3
+[ 0-9a-f]+:	0008 0150 	move	zero,t0
+[ 0-9a-f]+:	0009 0150 	move	zero,t1
+[ 0-9a-f]+:	000a 0150 	move	zero,t2
+[ 0-9a-f]+:	001e 0150 	move	zero,s8
+[ 0-9a-f]+:	001f 0150 	move	zero,ra
 [ 0-9a-f]+:	0002 b150 	move	s6,v0
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0016 1150 	move	v0,s6
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0002 b150 	move	s6,v0
+[ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <test\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
+[ 0-9a-f]+:	0000 0000 	nop
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <.*>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	cfff      	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC10_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4043 fffe 	bgez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c43      	move	v0,v1
+[ 0-9a-f]+:	0003 1150 	move	v0,v1
 [ 0-9a-f]+:	0060 1190 	neg	v0,v1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4044 fffe 	bgez	a0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c44      	move	v0,a0
+[ 0-9a-f]+:	0004 1150 	move	v0,a0
 [ 0-9a-f]+:	0080 1190 	neg	v0,a0
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4042 fffe 	bgez	v0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0040 1190 	neg	v0,v0
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4042 fffe 	bgez	v0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0040 1190 	neg	v0,v0
 
 [0-9a-f]+ <.*>:
@@ -177,104 +165,104 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	1064 ffff 	addi	v1,a0,-1
 [ 0-9a-f]+:	1063 ffff 	addi	v1,v1,-1
 [ 0-9a-f]+:	1063 ffff 	addi	v1,v1,-1
-[ 0-9a-f]+:	4c10      	addiu	zero,zero,-8
-[ 0-9a-f]+:	4c50      	addiu	v0,v0,-8
-[ 0-9a-f]+:	4c70      	addiu	v1,v1,-8
-[ 0-9a-f]+:	4c90      	addiu	a0,a0,-8
-[ 0-9a-f]+:	4cb0      	addiu	a1,a1,-8
-[ 0-9a-f]+:	4cd0      	addiu	a2,a2,-8
-[ 0-9a-f]+:	4cf0      	addiu	a3,a3,-8
-[ 0-9a-f]+:	4d10      	addiu	t0,t0,-8
-[ 0-9a-f]+:	4d30      	addiu	t1,t1,-8
-[ 0-9a-f]+:	4d50      	addiu	t2,t2,-8
-[ 0-9a-f]+:	4fd0      	addiu	s8,s8,-8
-[ 0-9a-f]+:	4ff0      	addiu	ra,ra,-8
-[ 0-9a-f]+:	4ff2      	addiu	ra,ra,-7
-[ 0-9a-f]+:	4fe0      	addiu	ra,ra,0
-[ 0-9a-f]+:	4fe2      	addiu	ra,ra,1
-[ 0-9a-f]+:	4fec      	addiu	ra,ra,6
-[ 0-9a-f]+:	4fee      	addiu	ra,ra,7
+[ 0-9a-f]+:	3000 fff8 	li	zero,-8
+[ 0-9a-f]+:	3042 fff8 	addiu	v0,v0,-8
+[ 0-9a-f]+:	3063 fff8 	addiu	v1,v1,-8
+[ 0-9a-f]+:	3084 fff8 	addiu	a0,a0,-8
+[ 0-9a-f]+:	30a5 fff8 	addiu	a1,a1,-8
+[ 0-9a-f]+:	30c6 fff8 	addiu	a2,a2,-8
+[ 0-9a-f]+:	30e7 fff8 	addiu	a3,a3,-8
+[ 0-9a-f]+:	3108 fff8 	addiu	t0,t0,-8
+[ 0-9a-f]+:	3129 fff8 	addiu	t1,t1,-8
+[ 0-9a-f]+:	314a fff8 	addiu	t2,t2,-8
+[ 0-9a-f]+:	33de fff8 	addiu	s8,s8,-8
+[ 0-9a-f]+:	33ff fff8 	addiu	ra,ra,-8
+[ 0-9a-f]+:	33ff fff9 	addiu	ra,ra,-7
+[ 0-9a-f]+:	33ff 0000 	addiu	ra,ra,0
+[ 0-9a-f]+:	33ff 0001 	addiu	ra,ra,1
+[ 0-9a-f]+:	33ff 0006 	addiu	ra,ra,6
+[ 0-9a-f]+:	33ff 0007 	addiu	ra,ra,7
 [ 0-9a-f]+:	33ff 0008 	addiu	ra,ra,8
-[ 0-9a-f]+:	4ffd      	addiu	sp,sp,-1032
-[ 0-9a-f]+:	4fff      	addiu	sp,sp,-1028
-[ 0-9a-f]+:	4e01      	addiu	sp,sp,-1024
-[ 0-9a-f]+:	4dff      	addiu	sp,sp,1020
-[ 0-9a-f]+:	4c01      	addiu	sp,sp,1024
-[ 0-9a-f]+:	4c03      	addiu	sp,sp,1028
-[ 0-9a-f]+:	4c03      	addiu	sp,sp,1028
+[ 0-9a-f]+:	33bd fbf8 	addiu	sp,sp,-1032
+[ 0-9a-f]+:	33bd fbfc 	addiu	sp,sp,-1028
+[ 0-9a-f]+:	33bd fc00 	addiu	sp,sp,-1024
+[ 0-9a-f]+:	33bd 03fc 	addiu	sp,sp,1020
+[ 0-9a-f]+:	33bd 0400 	addiu	sp,sp,1024
+[ 0-9a-f]+:	33bd 0404 	addiu	sp,sp,1028
+[ 0-9a-f]+:	33bd 0404 	addiu	sp,sp,1028
 [ 0-9a-f]+:	33bd 0408 	addiu	sp,sp,1032
-[ 0-9a-f]+:	6d2e      	addiu	v0,v0,-1
-[ 0-9a-f]+:	6d3e      	addiu	v0,v1,-1
-[ 0-9a-f]+:	6d4e      	addiu	v0,a0,-1
-[ 0-9a-f]+:	6d5e      	addiu	v0,a1,-1
-[ 0-9a-f]+:	6d6e      	addiu	v0,a2,-1
-[ 0-9a-f]+:	6d7e      	addiu	v0,a3,-1
-[ 0-9a-f]+:	6d0e      	addiu	v0,s0,-1
-[ 0-9a-f]+:	6d1e      	addiu	v0,s1,-1
-[ 0-9a-f]+:	6d10      	addiu	v0,s1,1
-[ 0-9a-f]+:	6d12      	addiu	v0,s1,4
-[ 0-9a-f]+:	6d14      	addiu	v0,s1,8
-[ 0-9a-f]+:	6d16      	addiu	v0,s1,12
-[ 0-9a-f]+:	6d18      	addiu	v0,s1,16
-[ 0-9a-f]+:	6d1a      	addiu	v0,s1,20
-[ 0-9a-f]+:	6d1c      	addiu	v0,s1,24
-[ 0-9a-f]+:	6d9c      	addiu	v1,s1,24
-[ 0-9a-f]+:	6e1c      	addiu	a0,s1,24
-[ 0-9a-f]+:	6e9c      	addiu	a1,s1,24
-[ 0-9a-f]+:	6f1c      	addiu	a2,s1,24
-[ 0-9a-f]+:	6f9c      	addiu	a3,s1,24
-[ 0-9a-f]+:	6c1c      	addiu	s0,s1,24
-[ 0-9a-f]+:	6c9c      	addiu	s1,s1,24
-[ 0-9a-f]+:	0c5d      	move	v0,sp
-[ 0-9a-f]+:	6d03      	addiu	v0,sp,4
-[ 0-9a-f]+:	6d7d      	addiu	v0,sp,248
-[ 0-9a-f]+:	6d7f      	addiu	v0,sp,252
+[ 0-9a-f]+:	3042 ffff 	addiu	v0,v0,-1
+[ 0-9a-f]+:	3043 ffff 	addiu	v0,v1,-1
+[ 0-9a-f]+:	3044 ffff 	addiu	v0,a0,-1
+[ 0-9a-f]+:	3045 ffff 	addiu	v0,a1,-1
+[ 0-9a-f]+:	3046 ffff 	addiu	v0,a2,-1
+[ 0-9a-f]+:	3047 ffff 	addiu	v0,a3,-1
+[ 0-9a-f]+:	3050 ffff 	addiu	v0,s0,-1
+[ 0-9a-f]+:	3051 ffff 	addiu	v0,s1,-1
+[ 0-9a-f]+:	3051 0001 	addiu	v0,s1,1
+[ 0-9a-f]+:	3051 0004 	addiu	v0,s1,4
+[ 0-9a-f]+:	3051 0008 	addiu	v0,s1,8
+[ 0-9a-f]+:	3051 000c 	addiu	v0,s1,12
+[ 0-9a-f]+:	3051 0010 	addiu	v0,s1,16
+[ 0-9a-f]+:	3051 0014 	addiu	v0,s1,20
+[ 0-9a-f]+:	3051 0018 	addiu	v0,s1,24
+[ 0-9a-f]+:	3071 0018 	addiu	v1,s1,24
+[ 0-9a-f]+:	3091 0018 	addiu	a0,s1,24
+[ 0-9a-f]+:	30b1 0018 	addiu	a1,s1,24
+[ 0-9a-f]+:	30d1 0018 	addiu	a2,s1,24
+[ 0-9a-f]+:	30f1 0018 	addiu	a3,s1,24
+[ 0-9a-f]+:	3211 0018 	addiu	s0,s1,24
+[ 0-9a-f]+:	3231 0018 	addiu	s1,s1,24
+[ 0-9a-f]+:	305d 0000 	addiu	v0,sp,0
+[ 0-9a-f]+:	305d 0004 	addiu	v0,sp,4
+[ 0-9a-f]+:	305d 00f8 	addiu	v0,sp,248
+[ 0-9a-f]+:	305d 00fc 	addiu	v0,sp,252
 [ 0-9a-f]+:	305d 0100 	addiu	v0,sp,256
-[ 0-9a-f]+:	6d7f      	addiu	v0,sp,252
-[ 0-9a-f]+:	6dff      	addiu	v1,sp,252
-[ 0-9a-f]+:	6e7f      	addiu	a0,sp,252
-[ 0-9a-f]+:	6eff      	addiu	a1,sp,252
-[ 0-9a-f]+:	6f7f      	addiu	a2,sp,252
-[ 0-9a-f]+:	6fff      	addiu	a3,sp,252
-[ 0-9a-f]+:	6c7f      	addiu	s0,sp,252
-[ 0-9a-f]+:	6cff      	addiu	s1,sp,252
+[ 0-9a-f]+:	305d 00fc 	addiu	v0,sp,252
+[ 0-9a-f]+:	307d 00fc 	addiu	v1,sp,252
+[ 0-9a-f]+:	309d 00fc 	addiu	a0,sp,252
+[ 0-9a-f]+:	30bd 00fc 	addiu	a1,sp,252
+[ 0-9a-f]+:	30dd 00fc 	addiu	a2,sp,252
+[ 0-9a-f]+:	30fd 00fc 	addiu	a3,sp,252
+[ 0-9a-f]+:	321d 00fc 	addiu	s0,sp,252
+[ 0-9a-f]+:	323d 00fc 	addiu	s1,sp,252
 [ 0-9a-f]+:	3064 8000 	addiu	v1,a0,-32768
-[ 0-9a-f]+:	0c64      	move	v1,a0
+[ 0-9a-f]+:	3064 0000 	addiu	v1,a0,0
 [ 0-9a-f]+:	3064 7fff 	addiu	v1,a0,32767
 [ 0-9a-f]+:	3064 ffff 	addiu	v1,a0,-1
 [ 0-9a-f]+:	3063 ffff 	addiu	v1,v1,-1
 [ 0-9a-f]+:	3063 ffff 	addiu	v1,v1,-1
-[ 0-9a-f]+:	0c56      	move	v0,s6
-[ 0-9a-f]+:	0ec2      	move	s6,v0
-[ 0-9a-f]+:	0c56      	move	v0,s6
-[ 0-9a-f]+:	0ec2      	move	s6,v0
-[ 0-9a-f]+:	0526      	addu	v0,v1,v0
-[ 0-9a-f]+:	0536      	addu	v0,v1,v1
-[ 0-9a-f]+:	0546      	addu	v0,v1,a0
-[ 0-9a-f]+:	0556      	addu	v0,v1,a1
-[ 0-9a-f]+:	0566      	addu	v0,v1,a2
-[ 0-9a-f]+:	0576      	addu	v0,v1,a3
-[ 0-9a-f]+:	0506      	addu	v0,v1,s0
-[ 0-9a-f]+:	0516      	addu	v0,v1,s1
-[ 0-9a-f]+:	0514      	addu	v0,v0,s1
-[ 0-9a-f]+:	0516      	addu	v0,v1,s1
-[ 0-9a-f]+:	0518      	addu	v0,a0,s1
-[ 0-9a-f]+:	051a      	addu	v0,a1,s1
-[ 0-9a-f]+:	051c      	addu	v0,a2,s1
-[ 0-9a-f]+:	051e      	addu	v0,a3,s1
-[ 0-9a-f]+:	0510      	addu	v0,s0,s1
-[ 0-9a-f]+:	0512      	addu	v0,s1,s1
-[ 0-9a-f]+:	0514      	addu	v0,v0,s1
-[ 0-9a-f]+:	0594      	addu	v1,v0,s1
-[ 0-9a-f]+:	0614      	addu	a0,v0,s1
-[ 0-9a-f]+:	0694      	addu	a1,v0,s1
-[ 0-9a-f]+:	0714      	addu	a2,v0,s1
-[ 0-9a-f]+:	0794      	addu	a3,v0,s1
-[ 0-9a-f]+:	0414      	addu	s0,v0,s1
-[ 0-9a-f]+:	0494      	addu	s1,v0,s1
-[ 0-9a-f]+:	07ae      	addu	a3,a3,v0
-[ 0-9a-f]+:	07ae      	addu	a3,a3,v0
-[ 0-9a-f]+:	07f4      	addu	a3,v0,a3
+[ 0-9a-f]+:	0016 1150 	move	v0,s6
+[ 0-9a-f]+:	0002 b150 	move	s6,v0
+[ 0-9a-f]+:	02c0 1150 	addu	v0,zero,s6
+[ 0-9a-f]+:	0040 b150 	addu	s6,zero,v0
+[ 0-9a-f]+:	0043 1150 	addu	v0,v1,v0
+[ 0-9a-f]+:	0063 1150 	addu	v0,v1,v1
+[ 0-9a-f]+:	0083 1150 	addu	v0,v1,a0
+[ 0-9a-f]+:	00a3 1150 	addu	v0,v1,a1
+[ 0-9a-f]+:	00c3 1150 	addu	v0,v1,a2
+[ 0-9a-f]+:	00e3 1150 	addu	v0,v1,a3
+[ 0-9a-f]+:	0203 1150 	addu	v0,v1,s0
+[ 0-9a-f]+:	0223 1150 	addu	v0,v1,s1
+[ 0-9a-f]+:	0222 1150 	addu	v0,v0,s1
+[ 0-9a-f]+:	0223 1150 	addu	v0,v1,s1
+[ 0-9a-f]+:	0224 1150 	addu	v0,a0,s1
+[ 0-9a-f]+:	0225 1150 	addu	v0,a1,s1
+[ 0-9a-f]+:	0226 1150 	addu	v0,a2,s1
+[ 0-9a-f]+:	0227 1150 	addu	v0,a3,s1
+[ 0-9a-f]+:	0230 1150 	addu	v0,s0,s1
+[ 0-9a-f]+:	0231 1150 	addu	v0,s1,s1
+[ 0-9a-f]+:	0222 1150 	addu	v0,v0,s1
+[ 0-9a-f]+:	0222 1950 	addu	v1,v0,s1
+[ 0-9a-f]+:	0222 2150 	addu	a0,v0,s1
+[ 0-9a-f]+:	0222 2950 	addu	a1,v0,s1
+[ 0-9a-f]+:	0222 3150 	addu	a2,v0,s1
+[ 0-9a-f]+:	0222 3950 	addu	a3,v0,s1
+[ 0-9a-f]+:	0222 8150 	addu	s0,v0,s1
+[ 0-9a-f]+:	0222 8950 	addu	s1,v0,s1
+[ 0-9a-f]+:	0047 3950 	addu	a3,a3,v0
+[ 0-9a-f]+:	0047 3950 	addu	a3,a3,v0
+[ 0-9a-f]+:	00e2 3950 	addu	a3,v0,a3
 [ 0-9a-f]+:	03fe e950 	addu	sp,s8,ra
 [ 0-9a-f]+:	3042 0000 	addiu	v0,v0,0
 [ 0-9a-f]+:	3042 0001 	addiu	v0,v0,1
@@ -282,59 +270,57 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3042 8000 	addiu	v0,v0,-32768
 [ 0-9a-f]+:	5020 ffff 	li	at,0xffff
 [ 0-9a-f]+:	0022 1150 	addu	v0,v0,at
-[ 0-9a-f]+:	4492      	and	v0,v0,v0
-[ 0-9a-f]+:	4493      	and	v0,v0,v1
-[ 0-9a-f]+:	4494      	and	v0,v0,a0
-[ 0-9a-f]+:	4495      	and	v0,v0,a1
-[ 0-9a-f]+:	4496      	and	v0,v0,a2
-[ 0-9a-f]+:	4497      	and	v0,v0,a3
-[ 0-9a-f]+:	4490      	and	v0,v0,s0
-[ 0-9a-f]+:	4491      	and	v0,v0,s1
-[ 0-9a-f]+:	449a      	and	v1,v1,v0
-[ 0-9a-f]+:	44a2      	and	a0,a0,v0
-[ 0-9a-f]+:	44aa      	and	a1,a1,v0
-[ 0-9a-f]+:	44b2      	and	a2,a2,v0
-[ 0-9a-f]+:	44ba      	and	a3,a3,v0
-[ 0-9a-f]+:	4482      	and	s0,s0,v0
-[ 0-9a-f]+:	448a      	and	s1,s1,v0
-[ 0-9a-f]+:	4493      	and	v0,v0,v1
-[ 0-9a-f]+:	4493      	and	v0,v0,v1
-[ 0-9a-f]+:	4493      	and	v0,v0,v1
-[ 0-9a-f]+:	4493      	and	v0,v0,v1
+[ 0-9a-f]+:	0042 1250 	and	v0,v0,v0
 [ 0-9a-f]+:	0062 1250 	and	v0,v0,v1
-[ 0-9a-f]+:	2d21      	andi	v0,v0,0x1
-[ 0-9a-f]+:	2d22      	andi	v0,v0,0x2
-[ 0-9a-f]+:	2d23      	andi	v0,v0,0x3
-[ 0-9a-f]+:	2d24      	andi	v0,v0,0x4
-[ 0-9a-f]+:	2d25      	andi	v0,v0,0x7
-[ 0-9a-f]+:	2d26      	andi	v0,v0,0x8
-[ 0-9a-f]+:	2d27      	andi	v0,v0,0xf
-[ 0-9a-f]+:	2d28      	andi	v0,v0,0x10
-[ 0-9a-f]+:	2d29      	andi	v0,v0,0x1f
-[ 0-9a-f]+:	2d2a      	andi	v0,v0,0x20
-[ 0-9a-f]+:	2d2b      	andi	v0,v0,0x3f
-[ 0-9a-f]+:	2d2c      	andi	v0,v0,0x40
-[ 0-9a-f]+:	2d20      	andi	v0,v0,0x80
-[ 0-9a-f]+:	2d2d      	andi	v0,v0,0xff
-[ 0-9a-f]+:	2d2e      	andi	v0,v0,0x8000
-[ 0-9a-f]+:	2d2f      	andi	v0,v0,0xffff
-[ 0-9a-f]+:	2d3f      	andi	v0,v1,0xffff
-[ 0-9a-f]+:	2d4f      	andi	v0,a0,0xffff
-[ 0-9a-f]+:	2d5f      	andi	v0,a1,0xffff
-[ 0-9a-f]+:	2d6f      	andi	v0,a2,0xffff
-[ 0-9a-f]+:	2d7f      	andi	v0,a3,0xffff
-[ 0-9a-f]+:	2d0f      	andi	v0,s0,0xffff
-[ 0-9a-f]+:	2d1f      	andi	v0,s1,0xffff
-[ 0-9a-f]+:	2d9f      	andi	v1,s1,0xffff
-[ 0-9a-f]+:	2e1f      	andi	a0,s1,0xffff
-[ 0-9a-f]+:	2e9f      	andi	a1,s1,0xffff
-[ 0-9a-f]+:	2f1f      	andi	a2,s1,0xffff
-[ 0-9a-f]+:	2f9f      	andi	a3,s1,0xffff
-[ 0-9a-f]+:	2c1f      	andi	s0,s1,0xffff
-[ 0-9a-f]+:	2c9f      	andi	s1,s1,0xffff
-[ 0-9a-f]+:	2fff      	andi	a3,a3,0xffff
-[ 0-9a-f]+:	2fff      	andi	a3,a3,0xffff
-[ 0-9a-f]+:	2fff      	andi	a3,a3,0xffff
+[ 0-9a-f]+:	0082 1250 	and	v0,v0,a0
+[ 0-9a-f]+:	00a2 1250 	and	v0,v0,a1
+[ 0-9a-f]+:	00c2 1250 	and	v0,v0,a2
+[ 0-9a-f]+:	00e2 1250 	and	v0,v0,a3
+[ 0-9a-f]+:	0202 1250 	and	v0,v0,s0
+[ 0-9a-f]+:	0222 1250 	and	v0,v0,s1
+[ 0-9a-f]+:	0043 1a50 	and	v1,v1,v0
+[ 0-9a-f]+:	0044 2250 	and	a0,a0,v0
+[ 0-9a-f]+:	0045 2a50 	and	a1,a1,v0
+[ 0-9a-f]+:	0046 3250 	and	a2,a2,v0
+[ 0-9a-f]+:	0047 3a50 	and	a3,a3,v0
+[ 0-9a-f]+:	0050 8250 	and	s0,s0,v0
+[ 0-9a-f]+:	0051 8a50 	and	s1,s1,v0
+[ 0-9a-f]+:	0062 1250 	and	v0,v0,v1
+[ 0-9a-f]+:	0062 1250 	and	v0,v0,v1
+[ 0-9a-f]+:	0043 1250 	and	v0,v1,v0
+[ 0-9a-f]+:	0062 1250 	and	v0,v0,v1
+[ 0-9a-f]+:	d042 0001 	andi	v0,v0,0x1
+[ 0-9a-f]+:	d042 0002 	andi	v0,v0,0x2
+[ 0-9a-f]+:	d042 0003 	andi	v0,v0,0x3
+[ 0-9a-f]+:	d042 0004 	andi	v0,v0,0x4
+[ 0-9a-f]+:	d042 0007 	andi	v0,v0,0x7
+[ 0-9a-f]+:	d042 0008 	andi	v0,v0,0x8
+[ 0-9a-f]+:	d042 000f 	andi	v0,v0,0xf
+[ 0-9a-f]+:	d042 0010 	andi	v0,v0,0x10
+[ 0-9a-f]+:	d042 001f 	andi	v0,v0,0x1f
+[ 0-9a-f]+:	d042 0020 	andi	v0,v0,0x20
+[ 0-9a-f]+:	d042 003f 	andi	v0,v0,0x3f
+[ 0-9a-f]+:	d042 0040 	andi	v0,v0,0x40
+[ 0-9a-f]+:	d042 0080 	andi	v0,v0,0x80
+[ 0-9a-f]+:	d042 00ff 	andi	v0,v0,0xff
+[ 0-9a-f]+:	d042 8000 	andi	v0,v0,0x8000
+[ 0-9a-f]+:	d042 ffff 	andi	v0,v0,0xffff
+[ 0-9a-f]+:	d043 ffff 	andi	v0,v1,0xffff
+[ 0-9a-f]+:	d044 ffff 	andi	v0,a0,0xffff
+[ 0-9a-f]+:	d045 ffff 	andi	v0,a1,0xffff
+[ 0-9a-f]+:	d046 ffff 	andi	v0,a2,0xffff
+[ 0-9a-f]+:	d047 ffff 	andi	v0,a3,0xffff
+[ 0-9a-f]+:	d050 ffff 	andi	v0,s0,0xffff
+[ 0-9a-f]+:	d051 ffff 	andi	v0,s1,0xffff
+[ 0-9a-f]+:	d071 ffff 	andi	v1,s1,0xffff
+[ 0-9a-f]+:	d091 ffff 	andi	a0,s1,0xffff
+[ 0-9a-f]+:	d0b1 ffff 	andi	a1,s1,0xffff
+[ 0-9a-f]+:	d0d1 ffff 	andi	a2,s1,0xffff
+[ 0-9a-f]+:	d0f1 ffff 	andi	a3,s1,0xffff
+[ 0-9a-f]+:	d211 ffff 	andi	s0,s1,0xffff
+[ 0-9a-f]+:	d231 ffff 	andi	s1,s1,0xffff
+[ 0-9a-f]+:	d0e7 ffff 	andi	a3,a3,0xffff
+[ 0-9a-f]+:	d0e7 ffff 	andi	a3,a3,0xffff
 [ 0-9a-f]+:	d0e7 ffff 	andi	a3,a3,0xffff
 [ 0-9a-f]+:	0083 1250 	and	v0,v1,a0
 [ 0-9a-f]+:	0082 1250 	and	v0,v0,a0
@@ -350,66 +336,66 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0023 1250 	and	v0,v1,at
 [ 0-9a-f]+:	4280 fffe 	bc2f	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4284 fffe 	bc2f	\$cc1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4288 fffe 	bc2f	\$cc2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	428c fffe 	bc2f	\$cc3,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4290 fffe 	bc2f	\$cc4,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4294 fffe 	bc2f	\$cc5,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4298 fffe 	bc2f	\$cc6,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	429c fffe 	bc2f	\$cc7,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42a0 fffe 	bc2t	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42a0 fffe 	bc2t	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42a4 fffe 	bc2t	\$cc1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42a8 fffe 	bc2t	\$cc2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42ac fffe 	bc2t	\$cc3,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42b0 fffe 	bc2t	\$cc4,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42b4 fffe 	bc2t	\$cc5,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42b8 fffe 	bc2t	\$cc6,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42bc fffe 	bc2t	\$cc7,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	42a4 fffe 	bc2t	\$cc1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4288 fffe 	bc2f	\$cc2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
 [ 0-9a-f]+:	0107 3150 	addu	a2,a3,t0
@@ -417,204 +403,201 @@ Disassembly of section \.text:
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	428c fffe 	bc2f	\$cc3,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	42b0 fffe 	bc2t	\$cc4,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0107 3150 	addu	a2,a3,t0
 
 [0-9a-f]+ <test2>:
-[ 0-9a-f]+:	8d7f      	beqz	v0,[0-9a-f]+ <test2>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8dff      	beqz	v1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8e7f      	beqz	a0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8eff      	beqz	a1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8f7f      	beqz	a2,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8fff      	beqz	a3,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8c7f      	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8cff      	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8d7f      	beqz	v0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8dff      	beqz	v1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8e7f      	beqz	a0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8eff      	beqz	a1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8f7f      	beqz	a2,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8fff      	beqz	a3,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8c7f      	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8cff      	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8d7f      	beqz	v0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8dff      	beqz	v1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8e7f      	beqz	a0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8eff      	beqz	a1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8f7f      	beqz	a2,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8fff      	beqz	a3,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8c7f      	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8cff      	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8c7f      	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	9402 fffe 	beqz	v0,[0-9a-f]+ <test2>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9403 fffe 	beqz	v1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9404 fffe 	beqz	a0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9405 fffe 	beqz	a1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9406 fffe 	beqz	a2,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9407 fffe 	beqz	a3,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9410 fffe 	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	8cff      	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9411 fffe 	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9402 fffe 	beqz	v0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9403 fffe 	beqz	v1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9404 fffe 	beqz	a0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9405 fffe 	beqz	a1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9406 fffe 	beqz	a2,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9407 fffe 	beqz	a3,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9410 fffe 	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9411 fffe 	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9440 fffe 	beq	zero,v0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9460 fffe 	beq	zero,v1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9480 fffe 	beq	zero,a0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	94a0 fffe 	beq	zero,a1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	94c0 fffe 	beq	zero,a2,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	94e0 fffe 	beq	zero,a3,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9600 fffe 	beq	zero,s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9620 fffe 	beq	zero,s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9410 fffe 	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9411 fffe 	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	9411 fffe 	beqz	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	40f1 fffe 	beqzc	s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
 [ 0-9a-f]+:	9410 fffe 	beqz	s0,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	3020 000a 	li	at,10
 [ 0-9a-f]+:	9430 fffe 	beq	s0,at,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	3020 7fff 	li	at,32767
 [ 0-9a-f]+:	9430 fffe 	beq	s0,at,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	41a1 0001 	lui	at,0x1
 [ 0-9a-f]+:	9430 fffe 	beq	s0,at,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	b630 fffe 	bne	s0,s1,[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <test2\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b630 fffe 	bne	s0,s1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b410 fffe 	bnez	s0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b410 fffe 	bnez	s0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 000a 	li	at,10
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 000a 	li	at,10
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 7fff 	li	at,32767
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 7fff 	li	at,32767
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	5020 ffff 	li	at,0xffff
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	5020 ffff 	li	at,0xffff
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b630 fffe 	bne	s0,s1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -622,7 +605,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b630 fffe 	bne	s0,s1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -630,7 +613,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b410 fffe 	bnez	s0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -638,7 +621,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b410 fffe 	bnez	s0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -647,7 +630,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3020 000a 	li	at,10
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -656,7 +639,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3020 000a 	li	at,10
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -665,7 +648,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3020 7fff 	li	at,32767
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -674,7 +657,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3020 7fff 	li	at,32767
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -683,7 +666,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5020 ffff 	li	at,0xffff
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -692,7 +675,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5020 ffff 	li	at,0xffff
 [ 0-9a-f]+:	b430 fffe 	bne	s0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	03a4 1950 	addu	v1,a0,sp
@@ -700,115 +683,112 @@ Disassembly of section \.text:
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9630 fffe 	beq	s0,s1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9411 fffe 	beqz	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ad7f      	bnez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	adff      	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ae7f      	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	aeff      	bnez	a1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	af7f      	bnez	a2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	afff      	bnez	a3,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ac7f      	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	acff      	bnez	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ad7f      	bnez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	adff      	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ae7f      	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	aeff      	bnez	a1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	af7f      	bnez	a2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	afff      	bnez	a3,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ac7f      	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	acff      	bnez	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ad7f      	bnez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	adff      	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ae7f      	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	aeff      	bnez	a1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	af7f      	bnez	a2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	afff      	bnez	a3,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ac7f      	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	acff      	bnez	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	ac7f      	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC7_S1	test3
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b402 fffe 	bnez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b403 fffe 	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b404 fffe 	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b405 fffe 	bnez	a1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b406 fffe 	bnez	a2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b407 fffe 	bnez	a3,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	b410 fffe 	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b411 fffe 	bnez	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b402 fffe 	bnez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b403 fffe 	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b404 fffe 	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b405 fffe 	bnez	a1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b406 fffe 	bnez	a2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b407 fffe 	bnez	a3,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b410 fffe 	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b411 fffe 	bnez	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b440 fffe 	bne	zero,v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b460 fffe 	bne	zero,v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b480 fffe 	bne	zero,a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b4a0 fffe 	bne	zero,a1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b4c0 fffe 	bne	zero,a2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b4e0 fffe 	bne	zero,a3,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b600 fffe 	bne	zero,s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b620 fffe 	bne	zero,s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	b410 fffe 	bnez	s0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
+[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test3
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	b411 fffe 	bnez	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	b411 fffe 	bnez	s1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 
 [0-9a-f]+ <test3>:
 [ 0-9a-f]+:	40b1 fffe 	bnezc	s1,[0-9a-f]+ <test3>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test2
-[ 0-9a-f]+:	4680      	break
-[ 0-9a-f]+:	4680      	break
-[ 0-9a-f]+:	4681      	break	0x1
-[ 0-9a-f]+:	4682      	break	0x2
-[ 0-9a-f]+:	4683      	break	0x3
-[ 0-9a-f]+:	4684      	break	0x4
-[ 0-9a-f]+:	4685      	break	0x5
-[ 0-9a-f]+:	4686      	break	0x6
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	4688      	break	0x8
-[ 0-9a-f]+:	4689      	break	0x9
-[ 0-9a-f]+:	468a      	break	0xa
-[ 0-9a-f]+:	468b      	break	0xb
-[ 0-9a-f]+:	468c      	break	0xc
-[ 0-9a-f]+:	468d      	break	0xd
-[ 0-9a-f]+:	468e      	break	0xe
-[ 0-9a-f]+:	468f      	break	0xf
+[ 0-9a-f]+:	0000 0007 	break
+[ 0-9a-f]+:	0000 0007 	break
+[ 0-9a-f]+:	0001 0007 	break	0x1
+[ 0-9a-f]+:	0002 0007 	break	0x2
+[ 0-9a-f]+:	0003 0007 	break	0x3
+[ 0-9a-f]+:	0004 0007 	break	0x4
+[ 0-9a-f]+:	0005 0007 	break	0x5
+[ 0-9a-f]+:	0006 0007 	break	0x6
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	0008 0007 	break	0x8
+[ 0-9a-f]+:	0009 0007 	break	0x9
+[ 0-9a-f]+:	000a 0007 	break	0xa
+[ 0-9a-f]+:	000b 0007 	break	0xb
+[ 0-9a-f]+:	000c 0007 	break	0xc
+[ 0-9a-f]+:	000d 0007 	break	0xd
+[ 0-9a-f]+:	000e 0007 	break	0xe
+[ 0-9a-f]+:	000f 0007 	break	0xf
 [ 0-9a-f]+:	003f 0007 	break	0x3f
 [ 0-9a-f]+:	0040 0007 	break	0x40
 [ 0-9a-f]+:	03ff 0007 	break	0x3ff
@@ -903,11 +883,11 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	03fe ab3c 	div	zero,s8,ra
 [ 0-9a-f]+:	0060 ab3c 	div	zero,zero,v1
 [ 0-9a-f]+:	03e0 ab3c 	div	zero,zero,ra
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 [ 0-9a-f]+:	b404 fffe 	bnez	a0,[0-9a-f]+ <test3\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	0083 ab3c 	div	zero,v1,a0
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
@@ -916,17 +896,17 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a1 8000 	lui	at,0x8000
 [ 0-9a-f]+:	b423 fffe 	bne	v1,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c64      	move	v1,a0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	0004 1950 	move	v1,a0
 [ 0-9a-f]+:	0080 1990 	neg	v1,a0
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	0024 ab3c 	div	zero,a0,at
-[ 0-9a-f]+:	4643      	mflo	v1
+[ 0-9a-f]+:	0003 1d7c 	mflo	v1
 [ 0-9a-f]+:	0062 bb3c 	divu	zero,v0,v1
 [ 0-9a-f]+:	03fe bb3c 	divu	zero,s8,ra
 [ 0-9a-f]+:	0060 bb3c 	divu	zero,zero,v1
@@ -934,25 +914,25 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	b400 fffe 	bnez	zero,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	0003 bb3c 	divu	zero,v1,zero
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	b404 fffe 	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	0083 bb3c 	divu	zero,v1,a0
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c64      	move	v1,a0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	0004 1950 	move	v1,a0
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
 [ 0-9a-f]+:	0024 bb3c 	divu	zero,a0,at
-[ 0-9a-f]+:	4643      	mflo	v1
+[ 0-9a-f]+:	0003 1d7c 	mflo	v1
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	0024 bb3c 	divu	zero,a0,at
-[ 0-9a-f]+:	4643      	mflo	v1
+[ 0-9a-f]+:	0003 1d7c 	mflo	v1
 [ 0-9a-f]+:	0000 577c 	ei
 [ 0-9a-f]+:	0000 577c 	ei
 [ 0-9a-f]+:	0002 577c 	ei	v0
@@ -967,26 +947,26 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0043 994c 	ins	v0,v1,0x5,0xf
 [ 0-9a-f]+:	0043 f80c 	ins	v0,v1,0x0,0x20
 [ 0-9a-f]+:	0043 ffcc 	ins	v0,v1,0x1f,0x1
-[ 0-9a-f]+:	4580      	jr	zero
+[ 0-9a-f]+:	0000 0f3c 	jr	zero
 [ 0-9a-f]+:	03fe ffcc 	ins	ra,s8,0x1f,0x1
-[ 0-9a-f]+:	4582      	jr	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4583      	jr	v1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4584      	jr	a0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4585      	jr	a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4586      	jr	a2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4587      	jr	a3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4588      	jr	t0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	459e      	jr	s8
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	459f      	jr	ra
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0002 0f3c 	jr	v0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0003 0f3c 	jr	v1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0004 0f3c 	jr	a0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0005 0f3c 	jr	a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0f3c 	jr	a2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0007 0f3c 	jr	a3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0008 0f3c 	jr	t0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	001e 0f3c 	jr	s8
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0000 0f3c 	jr	zero
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0002 0f3c 	jr	v0
@@ -1007,16 +987,26 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	001f 0f3c 	jr	ra
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45a0      	jrc	zero
-[ 0-9a-f]+:	45a2      	jrc	v0
-[ 0-9a-f]+:	45a3      	jrc	v1
-[ 0-9a-f]+:	45a4      	jrc	a0
-[ 0-9a-f]+:	45a5      	jrc	a1
-[ 0-9a-f]+:	45a6      	jrc	a2
-[ 0-9a-f]+:	45a7      	jrc	a3
-[ 0-9a-f]+:	45a8      	jrc	t0
-[ 0-9a-f]+:	45be      	jrc	s8
-[ 0-9a-f]+:	45bf      	jrc	ra
+[ 0-9a-f]+:	0000 0f3c 	jr	zero
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0002 0f3c 	jr	v0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0003 0f3c 	jr	v1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0004 0f3c 	jr	a0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0005 0f3c 	jr	a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0f3c 	jr	a2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0007 0f3c 	jr	a3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0008 0f3c 	jr	t0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	001e 0f3c 	jr	s8
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0000 1f3c 	jr\.hb	zero
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0002 1f3c 	jr\.hb	v0
@@ -1037,43 +1027,25 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	001f 1f3c 	jr\.hb	ra
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	4580      	jr	zero
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4582      	jr	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4583      	jr	v1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4584      	jr	a0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4585      	jr	a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4586      	jr	a2
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4587      	jr	a3
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4588      	jr	t0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	459e      	jr	s8
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	459f      	jr	ra
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	45c0      	jalr	zero
+[ 0-9a-f]+:	0000 0f3c 	jr	zero
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c2      	jalr	v0
+[ 0-9a-f]+:	0002 0f3c 	jr	v0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c3      	jalr	v1
+[ 0-9a-f]+:	0003 0f3c 	jr	v1
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c4      	jalr	a0
+[ 0-9a-f]+:	0004 0f3c 	jr	a0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c5      	jalr	a1
+[ 0-9a-f]+:	0005 0f3c 	jr	a1
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c6      	jalr	a2
+[ 0-9a-f]+:	0006 0f3c 	jr	a2
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c7      	jalr	a3
+[ 0-9a-f]+:	0007 0f3c 	jr	a3
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c8      	jalr	t0
+[ 0-9a-f]+:	0008 0f3c 	jr	t0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45de      	jalr	s8
+[ 0-9a-f]+:	001e 0f3c 	jr	s8
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03e0 0f3c 	jalr	zero
 [ 0-9a-f]+:	0000 0000 	nop
@@ -1093,23 +1065,41 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03fe 0f3c 	jalr	s8
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c0      	jalr	zero
+[ 0-9a-f]+:	03e0 0f3c 	jalr	zero
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c2      	jalr	v0
+[ 0-9a-f]+:	03e2 0f3c 	jalr	v0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c3      	jalr	v1
+[ 0-9a-f]+:	03e3 0f3c 	jalr	v1
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c4      	jalr	a0
+[ 0-9a-f]+:	03e4 0f3c 	jalr	a0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c5      	jalr	a1
+[ 0-9a-f]+:	03e5 0f3c 	jalr	a1
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c6      	jalr	a2
+[ 0-9a-f]+:	03e6 0f3c 	jalr	a2
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c7      	jalr	a3
+[ 0-9a-f]+:	03e7 0f3c 	jalr	a3
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c8      	jalr	t0
+[ 0-9a-f]+:	03e8 0f3c 	jalr	t0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45de      	jalr	s8
+[ 0-9a-f]+:	03fe 0f3c 	jalr	s8
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03e0 0f3c 	jalr	zero
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03e2 0f3c 	jalr	v0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03e3 0f3c 	jalr	v1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03e4 0f3c 	jalr	a0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03e5 0f3c 	jalr	a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03e6 0f3c 	jalr	a2
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03e7 0f3c 	jalr	a3
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03e8 0f3c 	jalr	t0
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	03fe 0f3c 	jalr	s8
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03df 0f3c 	jalr	s8,ra
 [ 0-9a-f]+:	0000 0000 	nop
@@ -1195,9 +1185,9 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03df 0f3c 	jalr	s8,ra
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c3      	jalr	v1
+[ 0-9a-f]+:	03e3 0f3c 	jalr	v1
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45df      	jalr	ra
+[ 0-9a-f]+:	03ff 0f3c 	jalr	ra
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	f400 0000 	jal	[0-9a-f]+ <test>
 [ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test
@@ -1261,37 +1251,37 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a3 1234 	lui	v1,0x1234
 [ 0-9a-f]+:	0083 1950 	addu	v1,v1,a0
 [ 0-9a-f]+:	1c63 5678 	lb	v1,22136\(v1\)
-[ 0-9a-f]+:	093f      	lbu	v0,-1\(v1\)
-[ 0-9a-f]+:	0930      	lbu	v0,0\(v1\)
-[ 0-9a-f]+:	0930      	lbu	v0,0\(v1\)
-[ 0-9a-f]+:	0931      	lbu	v0,1\(v1\)
-[ 0-9a-f]+:	0932      	lbu	v0,2\(v1\)
-[ 0-9a-f]+:	0933      	lbu	v0,3\(v1\)
-[ 0-9a-f]+:	0934      	lbu	v0,4\(v1\)
-[ 0-9a-f]+:	0935      	lbu	v0,5\(v1\)
-[ 0-9a-f]+:	0936      	lbu	v0,6\(v1\)
-[ 0-9a-f]+:	0937      	lbu	v0,7\(v1\)
-[ 0-9a-f]+:	0938      	lbu	v0,8\(v1\)
-[ 0-9a-f]+:	0939      	lbu	v0,9\(v1\)
-[ 0-9a-f]+:	093a      	lbu	v0,10\(v1\)
-[ 0-9a-f]+:	093b      	lbu	v0,11\(v1\)
-[ 0-9a-f]+:	093c      	lbu	v0,12\(v1\)
-[ 0-9a-f]+:	093d      	lbu	v0,13\(v1\)
-[ 0-9a-f]+:	093e      	lbu	v0,14\(v1\)
-[ 0-9a-f]+:	092e      	lbu	v0,14\(v0\)
-[ 0-9a-f]+:	094e      	lbu	v0,14\(a0\)
-[ 0-9a-f]+:	095e      	lbu	v0,14\(a1\)
-[ 0-9a-f]+:	096e      	lbu	v0,14\(a2\)
-[ 0-9a-f]+:	097e      	lbu	v0,14\(a3\)
-[ 0-9a-f]+:	090e      	lbu	v0,14\(s0\)
-[ 0-9a-f]+:	091e      	lbu	v0,14\(s1\)
-[ 0-9a-f]+:	099e      	lbu	v1,14\(s1\)
-[ 0-9a-f]+:	0a1e      	lbu	a0,14\(s1\)
-[ 0-9a-f]+:	0a9e      	lbu	a1,14\(s1\)
-[ 0-9a-f]+:	0b1e      	lbu	a2,14\(s1\)
-[ 0-9a-f]+:	0b9e      	lbu	a3,14\(s1\)
-[ 0-9a-f]+:	081e      	lbu	s0,14\(s1\)
-[ 0-9a-f]+:	089e      	lbu	s1,14\(s1\)
+[ 0-9a-f]+:	1443 ffff 	lbu	v0,-1\(v1\)
+[ 0-9a-f]+:	1443 0000 	lbu	v0,0\(v1\)
+[ 0-9a-f]+:	1443 0000 	lbu	v0,0\(v1\)
+[ 0-9a-f]+:	1443 0001 	lbu	v0,1\(v1\)
+[ 0-9a-f]+:	1443 0002 	lbu	v0,2\(v1\)
+[ 0-9a-f]+:	1443 0003 	lbu	v0,3\(v1\)
+[ 0-9a-f]+:	1443 0004 	lbu	v0,4\(v1\)
+[ 0-9a-f]+:	1443 0005 	lbu	v0,5\(v1\)
+[ 0-9a-f]+:	1443 0006 	lbu	v0,6\(v1\)
+[ 0-9a-f]+:	1443 0007 	lbu	v0,7\(v1\)
+[ 0-9a-f]+:	1443 0008 	lbu	v0,8\(v1\)
+[ 0-9a-f]+:	1443 0009 	lbu	v0,9\(v1\)
+[ 0-9a-f]+:	1443 000a 	lbu	v0,10\(v1\)
+[ 0-9a-f]+:	1443 000b 	lbu	v0,11\(v1\)
+[ 0-9a-f]+:	1443 000c 	lbu	v0,12\(v1\)
+[ 0-9a-f]+:	1443 000d 	lbu	v0,13\(v1\)
+[ 0-9a-f]+:	1443 000e 	lbu	v0,14\(v1\)
+[ 0-9a-f]+:	1442 000e 	lbu	v0,14\(v0\)
+[ 0-9a-f]+:	1444 000e 	lbu	v0,14\(a0\)
+[ 0-9a-f]+:	1445 000e 	lbu	v0,14\(a1\)
+[ 0-9a-f]+:	1446 000e 	lbu	v0,14\(a2\)
+[ 0-9a-f]+:	1447 000e 	lbu	v0,14\(a3\)
+[ 0-9a-f]+:	1450 000e 	lbu	v0,14\(s0\)
+[ 0-9a-f]+:	1451 000e 	lbu	v0,14\(s1\)
+[ 0-9a-f]+:	1471 000e 	lbu	v1,14\(s1\)
+[ 0-9a-f]+:	1491 000e 	lbu	a0,14\(s1\)
+[ 0-9a-f]+:	14b1 000e 	lbu	a1,14\(s1\)
+[ 0-9a-f]+:	14d1 000e 	lbu	a2,14\(s1\)
+[ 0-9a-f]+:	14f1 000e 	lbu	a3,14\(s1\)
+[ 0-9a-f]+:	1611 000e 	lbu	s0,14\(s1\)
+[ 0-9a-f]+:	1631 000e 	lbu	s1,14\(s1\)
 [ 0-9a-f]+:	1460 0000 	lbu	v1,0\(zero\)
 [ 0-9a-f]+:	1460 0004 	lbu	v1,4\(zero\)
 [ 0-9a-f]+:	1460 0000 	lbu	v1,0\(zero\)
@@ -1311,9 +1301,9 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	1460 ffff 	lbu	v1,-1\(zero\)
 [ 0-9a-f]+:	41a3 1234 	lui	v1,0x1234
 [ 0-9a-f]+:	1463 5678 	lbu	v1,22136\(v1\)
-[ 0-9a-f]+:	09c0      	lbu	v1,0\(a0\)
-[ 0-9a-f]+:	09c0      	lbu	v1,0\(a0\)
-[ 0-9a-f]+:	09c4      	lbu	v1,4\(a0\)
+[ 0-9a-f]+:	1464 0000 	lbu	v1,0\(a0\)
+[ 0-9a-f]+:	1464 0000 	lbu	v1,0\(a0\)
+[ 0-9a-f]+:	1464 0004 	lbu	v1,4\(a0\)
 [ 0-9a-f]+:	1464 7fff 	lbu	v1,32767\(a0\)
 [ 0-9a-f]+:	1464 8000 	lbu	v1,-32768\(a0\)
 [ 0-9a-f]+:	41a3 0001 	lui	v1,0x1
@@ -1376,37 +1366,37 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a3 1234 	lui	v1,0x1234
 [ 0-9a-f]+:	0083 1950 	addu	v1,v1,a0
 [ 0-9a-f]+:	3c63 5678 	lh	v1,22136\(v1\)
-[ 0-9a-f]+:	2930      	lhu	v0,0\(v1\)
-[ 0-9a-f]+:	2930      	lhu	v0,0\(v1\)
-[ 0-9a-f]+:	2931      	lhu	v0,2\(v1\)
-[ 0-9a-f]+:	2932      	lhu	v0,4\(v1\)
-[ 0-9a-f]+:	2933      	lhu	v0,6\(v1\)
-[ 0-9a-f]+:	2934      	lhu	v0,8\(v1\)
-[ 0-9a-f]+:	2935      	lhu	v0,10\(v1\)
-[ 0-9a-f]+:	2936      	lhu	v0,12\(v1\)
-[ 0-9a-f]+:	2937      	lhu	v0,14\(v1\)
-[ 0-9a-f]+:	2938      	lhu	v0,16\(v1\)
-[ 0-9a-f]+:	2939      	lhu	v0,18\(v1\)
-[ 0-9a-f]+:	293a      	lhu	v0,20\(v1\)
-[ 0-9a-f]+:	293b      	lhu	v0,22\(v1\)
-[ 0-9a-f]+:	293c      	lhu	v0,24\(v1\)
-[ 0-9a-f]+:	293d      	lhu	v0,26\(v1\)
-[ 0-9a-f]+:	293e      	lhu	v0,28\(v1\)
-[ 0-9a-f]+:	293f      	lhu	v0,30\(v1\)
-[ 0-9a-f]+:	294f      	lhu	v0,30\(a0\)
-[ 0-9a-f]+:	295f      	lhu	v0,30\(a1\)
-[ 0-9a-f]+:	296f      	lhu	v0,30\(a2\)
-[ 0-9a-f]+:	297f      	lhu	v0,30\(a3\)
-[ 0-9a-f]+:	292f      	lhu	v0,30\(v0\)
-[ 0-9a-f]+:	290f      	lhu	v0,30\(s0\)
-[ 0-9a-f]+:	291f      	lhu	v0,30\(s1\)
-[ 0-9a-f]+:	299f      	lhu	v1,30\(s1\)
-[ 0-9a-f]+:	2a1f      	lhu	a0,30\(s1\)
-[ 0-9a-f]+:	2a9f      	lhu	a1,30\(s1\)
-[ 0-9a-f]+:	2b1f      	lhu	a2,30\(s1\)
-[ 0-9a-f]+:	2b9f      	lhu	a3,30\(s1\)
-[ 0-9a-f]+:	281f      	lhu	s0,30\(s1\)
-[ 0-9a-f]+:	289f      	lhu	s1,30\(s1\)
+[ 0-9a-f]+:	3443 0000 	lhu	v0,0\(v1\)
+[ 0-9a-f]+:	3443 0000 	lhu	v0,0\(v1\)
+[ 0-9a-f]+:	3443 0002 	lhu	v0,2\(v1\)
+[ 0-9a-f]+:	3443 0004 	lhu	v0,4\(v1\)
+[ 0-9a-f]+:	3443 0006 	lhu	v0,6\(v1\)
+[ 0-9a-f]+:	3443 0008 	lhu	v0,8\(v1\)
+[ 0-9a-f]+:	3443 000a 	lhu	v0,10\(v1\)
+[ 0-9a-f]+:	3443 000c 	lhu	v0,12\(v1\)
+[ 0-9a-f]+:	3443 000e 	lhu	v0,14\(v1\)
+[ 0-9a-f]+:	3443 0010 	lhu	v0,16\(v1\)
+[ 0-9a-f]+:	3443 0012 	lhu	v0,18\(v1\)
+[ 0-9a-f]+:	3443 0014 	lhu	v0,20\(v1\)
+[ 0-9a-f]+:	3443 0016 	lhu	v0,22\(v1\)
+[ 0-9a-f]+:	3443 0018 	lhu	v0,24\(v1\)
+[ 0-9a-f]+:	3443 001a 	lhu	v0,26\(v1\)
+[ 0-9a-f]+:	3443 001c 	lhu	v0,28\(v1\)
+[ 0-9a-f]+:	3443 001e 	lhu	v0,30\(v1\)
+[ 0-9a-f]+:	3444 001e 	lhu	v0,30\(a0\)
+[ 0-9a-f]+:	3445 001e 	lhu	v0,30\(a1\)
+[ 0-9a-f]+:	3446 001e 	lhu	v0,30\(a2\)
+[ 0-9a-f]+:	3447 001e 	lhu	v0,30\(a3\)
+[ 0-9a-f]+:	3442 001e 	lhu	v0,30\(v0\)
+[ 0-9a-f]+:	3450 001e 	lhu	v0,30\(s0\)
+[ 0-9a-f]+:	3451 001e 	lhu	v0,30\(s1\)
+[ 0-9a-f]+:	3471 001e 	lhu	v1,30\(s1\)
+[ 0-9a-f]+:	3491 001e 	lhu	a0,30\(s1\)
+[ 0-9a-f]+:	34b1 001e 	lhu	a1,30\(s1\)
+[ 0-9a-f]+:	34d1 001e 	lhu	a2,30\(s1\)
+[ 0-9a-f]+:	34f1 001e 	lhu	a3,30\(s1\)
+[ 0-9a-f]+:	3611 001e 	lhu	s0,30\(s1\)
+[ 0-9a-f]+:	3631 001e 	lhu	s1,30\(s1\)
 [ 0-9a-f]+:	3460 0000 	lhu	v1,0\(zero\)
 [ 0-9a-f]+:	3460 0004 	lhu	v1,4\(zero\)
 [ 0-9a-f]+:	3460 0000 	lhu	v1,0\(zero\)
@@ -1426,9 +1416,9 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	3460 ffff 	lhu	v1,-1\(zero\)
 [ 0-9a-f]+:	41a3 1234 	lui	v1,0x1234
 [ 0-9a-f]+:	3463 5678 	lhu	v1,22136\(v1\)
-[ 0-9a-f]+:	29c0      	lhu	v1,0\(a0\)
-[ 0-9a-f]+:	29c0      	lhu	v1,0\(a0\)
-[ 0-9a-f]+:	29c2      	lhu	v1,4\(a0\)
+[ 0-9a-f]+:	3464 0000 	lhu	v1,0\(a0\)
+[ 0-9a-f]+:	3464 0000 	lhu	v1,0\(a0\)
+[ 0-9a-f]+:	3464 0004 	lhu	v1,4\(a0\)
 [ 0-9a-f]+:	3464 7fff 	lhu	v1,32767\(a0\)
 [ 0-9a-f]+:	3464 8000 	lhu	v1,-32768\(a0\)
 [ 0-9a-f]+:	41a3 0001 	lui	v1,0x1
@@ -1508,57 +1498,57 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a3 0000 	lui	v1,0x0
 [ 0-9a-f]+:	41a3 7fff 	lui	v1,0x7fff
 [ 0-9a-f]+:	41a3 ffff 	lui	v1,0xffff
-[ 0-9a-f]+:	6940      	lw	v0,0\(a0\)
-[ 0-9a-f]+:	6940      	lw	v0,0\(a0\)
-[ 0-9a-f]+:	6941      	lw	v0,4\(a0\)
-[ 0-9a-f]+:	6942      	lw	v0,8\(a0\)
-[ 0-9a-f]+:	6943      	lw	v0,12\(a0\)
-[ 0-9a-f]+:	6944      	lw	v0,16\(a0\)
-[ 0-9a-f]+:	6945      	lw	v0,20\(a0\)
-[ 0-9a-f]+:	6946      	lw	v0,24\(a0\)
-[ 0-9a-f]+:	6947      	lw	v0,28\(a0\)
-[ 0-9a-f]+:	6948      	lw	v0,32\(a0\)
-[ 0-9a-f]+:	6949      	lw	v0,36\(a0\)
-[ 0-9a-f]+:	694a      	lw	v0,40\(a0\)
-[ 0-9a-f]+:	694b      	lw	v0,44\(a0\)
-[ 0-9a-f]+:	694c      	lw	v0,48\(a0\)
-[ 0-9a-f]+:	694d      	lw	v0,52\(a0\)
-[ 0-9a-f]+:	694e      	lw	v0,56\(a0\)
-[ 0-9a-f]+:	694f      	lw	v0,60\(a0\)
-[ 0-9a-f]+:	695f      	lw	v0,60\(a1\)
-[ 0-9a-f]+:	696f      	lw	v0,60\(a2\)
-[ 0-9a-f]+:	697f      	lw	v0,60\(a3\)
-[ 0-9a-f]+:	692f      	lw	v0,60\(v0\)
-[ 0-9a-f]+:	693f      	lw	v0,60\(v1\)
-[ 0-9a-f]+:	690f      	lw	v0,60\(s0\)
-[ 0-9a-f]+:	691f      	lw	v0,60\(s1\)
-[ 0-9a-f]+:	699f      	lw	v1,60\(s1\)
-[ 0-9a-f]+:	6a1f      	lw	a0,60\(s1\)
-[ 0-9a-f]+:	6a9f      	lw	a1,60\(s1\)
-[ 0-9a-f]+:	6b1f      	lw	a2,60\(s1\)
-[ 0-9a-f]+:	6b9f      	lw	a3,60\(s1\)
-[ 0-9a-f]+:	681f      	lw	s0,60\(s1\)
-[ 0-9a-f]+:	689f      	lw	s1,60\(s1\)
-[ 0-9a-f]+:	4880      	lw	a0,0\(sp\)
-[ 0-9a-f]+:	4880      	lw	a0,0\(sp\)
-[ 0-9a-f]+:	4881      	lw	a0,4\(sp\)
-[ 0-9a-f]+:	4882      	lw	a0,8\(sp\)
-[ 0-9a-f]+:	4883      	lw	a0,12\(sp\)
-[ 0-9a-f]+:	4884      	lw	a0,16\(sp\)
-[ 0-9a-f]+:	4885      	lw	a0,20\(sp\)
-[ 0-9a-f]+:	489f      	lw	a0,124\(sp\)
-[ 0-9a-f]+:	485f      	lw	v0,124\(sp\)
-[ 0-9a-f]+:	485f      	lw	v0,124\(sp\)
-[ 0-9a-f]+:	487f      	lw	v1,124\(sp\)
-[ 0-9a-f]+:	489f      	lw	a0,124\(sp\)
-[ 0-9a-f]+:	48bf      	lw	a1,124\(sp\)
-[ 0-9a-f]+:	48df      	lw	a2,124\(sp\)
-[ 0-9a-f]+:	48ff      	lw	a3,124\(sp\)
-[ 0-9a-f]+:	491f      	lw	t0,124\(sp\)
-[ 0-9a-f]+:	493f      	lw	t1,124\(sp\)
-[ 0-9a-f]+:	495f      	lw	t2,124\(sp\)
-[ 0-9a-f]+:	4bdf      	lw	s8,124\(sp\)
-[ 0-9a-f]+:	4bff      	lw	ra,124\(sp\)
+[ 0-9a-f]+:	fc44 0000 	lw	v0,0\(a0\)
+[ 0-9a-f]+:	fc44 0000 	lw	v0,0\(a0\)
+[ 0-9a-f]+:	fc44 0004 	lw	v0,4\(a0\)
+[ 0-9a-f]+:	fc44 0008 	lw	v0,8\(a0\)
+[ 0-9a-f]+:	fc44 000c 	lw	v0,12\(a0\)
+[ 0-9a-f]+:	fc44 0010 	lw	v0,16\(a0\)
+[ 0-9a-f]+:	fc44 0014 	lw	v0,20\(a0\)
+[ 0-9a-f]+:	fc44 0018 	lw	v0,24\(a0\)
+[ 0-9a-f]+:	fc44 001c 	lw	v0,28\(a0\)
+[ 0-9a-f]+:	fc44 0020 	lw	v0,32\(a0\)
+[ 0-9a-f]+:	fc44 0024 	lw	v0,36\(a0\)
+[ 0-9a-f]+:	fc44 0028 	lw	v0,40\(a0\)
+[ 0-9a-f]+:	fc44 002c 	lw	v0,44\(a0\)
+[ 0-9a-f]+:	fc44 0030 	lw	v0,48\(a0\)
+[ 0-9a-f]+:	fc44 0034 	lw	v0,52\(a0\)
+[ 0-9a-f]+:	fc44 0038 	lw	v0,56\(a0\)
+[ 0-9a-f]+:	fc44 003c 	lw	v0,60\(a0\)
+[ 0-9a-f]+:	fc45 003c 	lw	v0,60\(a1\)
+[ 0-9a-f]+:	fc46 003c 	lw	v0,60\(a2\)
+[ 0-9a-f]+:	fc47 003c 	lw	v0,60\(a3\)
+[ 0-9a-f]+:	fc42 003c 	lw	v0,60\(v0\)
+[ 0-9a-f]+:	fc43 003c 	lw	v0,60\(v1\)
+[ 0-9a-f]+:	fc50 003c 	lw	v0,60\(s0\)
+[ 0-9a-f]+:	fc51 003c 	lw	v0,60\(s1\)
+[ 0-9a-f]+:	fc71 003c 	lw	v1,60\(s1\)
+[ 0-9a-f]+:	fc91 003c 	lw	a0,60\(s1\)
+[ 0-9a-f]+:	fcb1 003c 	lw	a1,60\(s1\)
+[ 0-9a-f]+:	fcd1 003c 	lw	a2,60\(s1\)
+[ 0-9a-f]+:	fcf1 003c 	lw	a3,60\(s1\)
+[ 0-9a-f]+:	fe11 003c 	lw	s0,60\(s1\)
+[ 0-9a-f]+:	fe31 003c 	lw	s1,60\(s1\)
+[ 0-9a-f]+:	fc9d 0000 	lw	a0,0\(sp\)
+[ 0-9a-f]+:	fc9d 0000 	lw	a0,0\(sp\)
+[ 0-9a-f]+:	fc9d 0004 	lw	a0,4\(sp\)
+[ 0-9a-f]+:	fc9d 0008 	lw	a0,8\(sp\)
+[ 0-9a-f]+:	fc9d 000c 	lw	a0,12\(sp\)
+[ 0-9a-f]+:	fc9d 0010 	lw	a0,16\(sp\)
+[ 0-9a-f]+:	fc9d 0014 	lw	a0,20\(sp\)
+[ 0-9a-f]+:	fc9d 007c 	lw	a0,124\(sp\)
+[ 0-9a-f]+:	fc5d 007c 	lw	v0,124\(sp\)
+[ 0-9a-f]+:	fc5d 007c 	lw	v0,124\(sp\)
+[ 0-9a-f]+:	fc7d 007c 	lw	v1,124\(sp\)
+[ 0-9a-f]+:	fc9d 007c 	lw	a0,124\(sp\)
+[ 0-9a-f]+:	fcbd 007c 	lw	a1,124\(sp\)
+[ 0-9a-f]+:	fcdd 007c 	lw	a2,124\(sp\)
+[ 0-9a-f]+:	fcfd 007c 	lw	a3,124\(sp\)
+[ 0-9a-f]+:	fd1d 007c 	lw	t0,124\(sp\)
+[ 0-9a-f]+:	fd3d 007c 	lw	t1,124\(sp\)
+[ 0-9a-f]+:	fd5d 007c 	lw	t2,124\(sp\)
+[ 0-9a-f]+:	ffdd 007c 	lw	s8,124\(sp\)
+[ 0-9a-f]+:	fffd 007c 	lw	ra,124\(sp\)
 [ 0-9a-f]+:	fc9d 01f8 	lw	a0,504\(sp\)
 [ 0-9a-f]+:	fc9d 01fc 	lw	a0,508\(sp\)
 [ 0-9a-f]+:	fe1d 01fc 	lw	s0,508\(sp\)
@@ -1589,9 +1579,9 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	fc60 ffff 	lw	v1,-1\(zero\)
 [ 0-9a-f]+:	41a3 1234 	lui	v1,0x1234
 [ 0-9a-f]+:	fc63 5678 	lw	v1,22136\(v1\)
-[ 0-9a-f]+:	69c0      	lw	v1,0\(a0\)
-[ 0-9a-f]+:	69c0      	lw	v1,0\(a0\)
-[ 0-9a-f]+:	69c1      	lw	v1,4\(a0\)
+[ 0-9a-f]+:	fc64 0000 	lw	v1,0\(a0\)
+[ 0-9a-f]+:	fc64 0000 	lw	v1,0\(a0\)
+[ 0-9a-f]+:	fc64 0004 	lw	v1,4\(a0\)
 [ 0-9a-f]+:	fc64 7fff 	lw	v1,32767\(a0\)
 [ 0-9a-f]+:	fc64 8000 	lw	v1,-32768\(a0\)
 [ 0-9a-f]+:	41a3 0001 	lui	v1,0x1
@@ -1612,30 +1602,30 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a3 1234 	lui	v1,0x1234
 [ 0-9a-f]+:	0083 1950 	addu	v1,v1,a0
 [ 0-9a-f]+:	fc63 5678 	lw	v1,22136\(v1\)
-[ 0-9a-f]+:	450c      	lwm	s0,ra,48\(sp\)
-[ 0-9a-f]+:	451c      	lwm	s0-s1,ra,48\(sp\)
-[ 0-9a-f]+:	451c      	lwm	s0-s1,ra,48\(sp\)
-[ 0-9a-f]+:	452c      	lwm	s0-s2,ra,48\(sp\)
-[ 0-9a-f]+:	452c      	lwm	s0-s2,ra,48\(sp\)
-[ 0-9a-f]+:	453c      	lwm	s0-s3,ra,48\(sp\)
-[ 0-9a-f]+:	453c      	lwm	s0-s3,ra,48\(sp\)
-[ 0-9a-f]+:	4500      	lwm	s0,ra,0\(sp\)
-[ 0-9a-f]+:	4500      	lwm	s0,ra,0\(sp\)
-[ 0-9a-f]+:	4501      	lwm	s0,ra,4\(sp\)
-[ 0-9a-f]+:	4502      	lwm	s0,ra,8\(sp\)
-[ 0-9a-f]+:	4503      	lwm	s0,ra,12\(sp\)
-[ 0-9a-f]+:	4504      	lwm	s0,ra,16\(sp\)
-[ 0-9a-f]+:	4505      	lwm	s0,ra,20\(sp\)
-[ 0-9a-f]+:	4506      	lwm	s0,ra,24\(sp\)
-[ 0-9a-f]+:	4507      	lwm	s0,ra,28\(sp\)
-[ 0-9a-f]+:	4508      	lwm	s0,ra,32\(sp\)
-[ 0-9a-f]+:	4509      	lwm	s0,ra,36\(sp\)
-[ 0-9a-f]+:	450a      	lwm	s0,ra,40\(sp\)
-[ 0-9a-f]+:	450b      	lwm	s0,ra,44\(sp\)
-[ 0-9a-f]+:	450c      	lwm	s0,ra,48\(sp\)
-[ 0-9a-f]+:	450d      	lwm	s0,ra,52\(sp\)
-[ 0-9a-f]+:	450e      	lwm	s0,ra,56\(sp\)
-[ 0-9a-f]+:	450f      	lwm	s0,ra,60\(sp\)
+[ 0-9a-f]+:	223d 5030 	lwm	s0,ra,48\(sp\)
+[ 0-9a-f]+:	225d 5030 	lwm	s0-s1,ra,48\(sp\)
+[ 0-9a-f]+:	225d 5030 	lwm	s0-s1,ra,48\(sp\)
+[ 0-9a-f]+:	227d 5030 	lwm	s0-s2,ra,48\(sp\)
+[ 0-9a-f]+:	227d 5030 	lwm	s0-s2,ra,48\(sp\)
+[ 0-9a-f]+:	229d 5030 	lwm	s0-s3,ra,48\(sp\)
+[ 0-9a-f]+:	229d 5030 	lwm	s0-s3,ra,48\(sp\)
+[ 0-9a-f]+:	223d 5000 	lwm	s0,ra,0\(sp\)
+[ 0-9a-f]+:	223d 5000 	lwm	s0,ra,0\(sp\)
+[ 0-9a-f]+:	223d 5004 	lwm	s0,ra,4\(sp\)
+[ 0-9a-f]+:	223d 5008 	lwm	s0,ra,8\(sp\)
+[ 0-9a-f]+:	223d 500c 	lwm	s0,ra,12\(sp\)
+[ 0-9a-f]+:	223d 5010 	lwm	s0,ra,16\(sp\)
+[ 0-9a-f]+:	223d 5014 	lwm	s0,ra,20\(sp\)
+[ 0-9a-f]+:	223d 5018 	lwm	s0,ra,24\(sp\)
+[ 0-9a-f]+:	223d 501c 	lwm	s0,ra,28\(sp\)
+[ 0-9a-f]+:	223d 5020 	lwm	s0,ra,32\(sp\)
+[ 0-9a-f]+:	223d 5024 	lwm	s0,ra,36\(sp\)
+[ 0-9a-f]+:	223d 5028 	lwm	s0,ra,40\(sp\)
+[ 0-9a-f]+:	223d 502c 	lwm	s0,ra,44\(sp\)
+[ 0-9a-f]+:	223d 5030 	lwm	s0,ra,48\(sp\)
+[ 0-9a-f]+:	223d 5034 	lwm	s0,ra,52\(sp\)
+[ 0-9a-f]+:	223d 5038 	lwm	s0,ra,56\(sp\)
+[ 0-9a-f]+:	223d 503c 	lwm	s0,ra,60\(sp\)
 [ 0-9a-f]+:	2020 5000 	lwm	s0,0\(zero\)
 [ 0-9a-f]+:	2020 5004 	lwm	s0,4\(zero\)
 [ 0-9a-f]+:	2025 5000 	lwm	s0,0\(a1\)
@@ -1992,13 +1982,6 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0042 28fc 	mfc0	v0,c0_tccontext
 [ 0-9a-f]+:	0042 30fc 	mfc0	v0,c0_tcschedule
 [ 0-9a-f]+:	0042 38fc 	mfc0	v0,c0_tcschefback
-[ 0-9a-f]+:	4600      	mfhi	zero
-[ 0-9a-f]+:	4602      	mfhi	v0
-[ 0-9a-f]+:	4603      	mfhi	v1
-[ 0-9a-f]+:	4604      	mfhi	a0
-[ 0-9a-f]+:	461d      	mfhi	sp
-[ 0-9a-f]+:	461e      	mfhi	s8
-[ 0-9a-f]+:	461f      	mfhi	ra
 [ 0-9a-f]+:	0000 0d7c 	mfhi	zero
 [ 0-9a-f]+:	0002 0d7c 	mfhi	v0
 [ 0-9a-f]+:	0003 0d7c 	mfhi	v1
@@ -2006,13 +1989,20 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	001d 0d7c 	mfhi	sp
 [ 0-9a-f]+:	001e 0d7c 	mfhi	s8
 [ 0-9a-f]+:	001f 0d7c 	mfhi	ra
-[ 0-9a-f]+:	4640      	mflo	zero
-[ 0-9a-f]+:	4642      	mflo	v0
-[ 0-9a-f]+:	4643      	mflo	v1
-[ 0-9a-f]+:	4644      	mflo	a0
-[ 0-9a-f]+:	465d      	mflo	sp
-[ 0-9a-f]+:	465e      	mflo	s8
-[ 0-9a-f]+:	465f      	mflo	ra
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
+[ 0-9a-f]+:	0002 0d7c 	mfhi	v0
+[ 0-9a-f]+:	0003 0d7c 	mfhi	v1
+[ 0-9a-f]+:	0004 0d7c 	mfhi	a0
+[ 0-9a-f]+:	001d 0d7c 	mfhi	sp
+[ 0-9a-f]+:	001e 0d7c 	mfhi	s8
+[ 0-9a-f]+:	001f 0d7c 	mfhi	ra
+[ 0-9a-f]+:	0000 1d7c 	mflo	zero
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
+[ 0-9a-f]+:	0003 1d7c 	mflo	v1
+[ 0-9a-f]+:	0004 1d7c 	mflo	a0
+[ 0-9a-f]+:	001d 1d7c 	mflo	sp
+[ 0-9a-f]+:	001e 1d7c 	mflo	s8
+[ 0-9a-f]+:	001f 1d7c 	mflo	ra
 [ 0-9a-f]+:	0000 1d7c 	mflo	zero
 [ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	0003 1d7c 	mflo	v1
@@ -2104,59 +2094,59 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0082 1210 	mul	v0,v0,a0
 [ 0-9a-f]+:	3020 0000 	li	at,0
 [ 0-9a-f]+:	0022 8b3c 	mult	v0,at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	3020 0001 	li	at,1
 [ 0-9a-f]+:	0022 8b3c 	mult	v0,at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	3020 7fff 	li	at,32767
 [ 0-9a-f]+:	0022 8b3c 	mult	v0,at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	3020 8000 	li	at,-32768
 [ 0-9a-f]+:	0022 8b3c 	mult	v0,at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	5020 ffff 	li	at,0xffff
 [ 0-9a-f]+:	0022 8b3c 	mult	v0,at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	0083 8b3c 	mult	v1,a0
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	0042 f880 	sra	v0,v0,0x1f
-[ 0-9a-f]+:	4601      	mfhi	at
+[ 0-9a-f]+:	0001 0d7c 	mfhi	at
 [ 0-9a-f]+:	9422 fffe 	beq	v0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	3020 0004 	li	at,4
 [ 0-9a-f]+:	0023 8b3c 	mult	v1,at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	0042 f880 	sra	v0,v0,0x1f
-[ 0-9a-f]+:	4601      	mfhi	at
+[ 0-9a-f]+:	0001 0d7c 	mfhi	at
 [ 0-9a-f]+:	9422 fffe 	beq	v0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	0083 9b3c 	multu	v1,a0
-[ 0-9a-f]+:	4601      	mfhi	at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0001 0d7c 	mfhi	at
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 0004 	li	at,4
 [ 0-9a-f]+:	0023 9b3c 	multu	v1,at
-[ 0-9a-f]+:	4601      	mfhi	at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0001 0d7c 	mfhi	at
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	0062 8b3c 	mult	v0,v1
@@ -2170,24 +2160,24 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0060 11d0 	negu	v0,v1
 [ 0-9a-f]+:	0040 11d0 	negu	v0,v0
 [ 0-9a-f]+:	0040 11d0 	negu	v0,v0
-[ 0-9a-f]+:	4412      	not	v0,v0
-[ 0-9a-f]+:	4412      	not	v0,v0
-[ 0-9a-f]+:	4413      	not	v0,v1
-[ 0-9a-f]+:	4414      	not	v0,a0
-[ 0-9a-f]+:	4415      	not	v0,a1
-[ 0-9a-f]+:	4416      	not	v0,a2
-[ 0-9a-f]+:	4417      	not	v0,a3
-[ 0-9a-f]+:	4410      	not	v0,s0
-[ 0-9a-f]+:	4411      	not	v0,s1
-[ 0-9a-f]+:	4419      	not	v1,s1
-[ 0-9a-f]+:	4421      	not	a0,s1
-[ 0-9a-f]+:	4429      	not	a1,s1
-[ 0-9a-f]+:	4431      	not	a2,s1
-[ 0-9a-f]+:	4439      	not	a3,s1
-[ 0-9a-f]+:	4401      	not	s0,s1
-[ 0-9a-f]+:	4409      	not	s1,s1
-[ 0-9a-f]+:	4417      	not	v0,a3
-[ 0-9a-f]+:	4417      	not	v0,a3
+[ 0-9a-f]+:	0002 12d0 	not	v0,v0
+[ 0-9a-f]+:	0002 12d0 	not	v0,v0
+[ 0-9a-f]+:	0003 12d0 	not	v0,v1
+[ 0-9a-f]+:	0004 12d0 	not	v0,a0
+[ 0-9a-f]+:	0005 12d0 	not	v0,a1
+[ 0-9a-f]+:	0006 12d0 	not	v0,a2
+[ 0-9a-f]+:	0007 12d0 	not	v0,a3
+[ 0-9a-f]+:	0010 12d0 	not	v0,s0
+[ 0-9a-f]+:	0011 12d0 	not	v0,s1
+[ 0-9a-f]+:	0011 1ad0 	not	v1,s1
+[ 0-9a-f]+:	0011 22d0 	not	a0,s1
+[ 0-9a-f]+:	0011 2ad0 	not	a1,s1
+[ 0-9a-f]+:	0011 32d0 	not	a2,s1
+[ 0-9a-f]+:	0011 3ad0 	not	a3,s1
+[ 0-9a-f]+:	0011 82d0 	not	s0,s1
+[ 0-9a-f]+:	0011 8ad0 	not	s1,s1
+[ 0-9a-f]+:	0007 12d0 	not	v0,a3
+[ 0-9a-f]+:	00e0 12d0 	nor	v0,zero,a3
 [ 0-9a-f]+:	0083 12d0 	nor	v0,v1,a0
 [ 0-9a-f]+:	03fe ead0 	nor	sp,s8,ra
 [ 0-9a-f]+:	0082 12d0 	nor	v0,v0,a0
@@ -2203,28 +2193,28 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a1 ffff 	lui	at,0xffff
 [ 0-9a-f]+:	5021 7fff 	ori	at,at,0x7fff
 [ 0-9a-f]+:	0023 12d0 	nor	v0,v1,at
-[ 0-9a-f]+:	0c56      	move	v0,s6
-[ 0-9a-f]+:	0ec2      	move	s6,v0
-[ 0-9a-f]+:	0c56      	move	v0,s6
-[ 0-9a-f]+:	0ec2      	move	s6,v0
-[ 0-9a-f]+:	44d2      	or	v0,v0,v0
-[ 0-9a-f]+:	44d3      	or	v0,v0,v1
-[ 0-9a-f]+:	44d4      	or	v0,v0,a0
-[ 0-9a-f]+:	44d5      	or	v0,v0,a1
-[ 0-9a-f]+:	44d6      	or	v0,v0,a2
-[ 0-9a-f]+:	44d7      	or	v0,v0,a3
-[ 0-9a-f]+:	44d0      	or	v0,v0,s0
-[ 0-9a-f]+:	44d1      	or	v0,v0,s1
-[ 0-9a-f]+:	44da      	or	v1,v1,v0
-[ 0-9a-f]+:	44e2      	or	a0,a0,v0
-[ 0-9a-f]+:	44ea      	or	a1,a1,v0
-[ 0-9a-f]+:	44f2      	or	a2,a2,v0
-[ 0-9a-f]+:	44fa      	or	a3,a3,v0
-[ 0-9a-f]+:	44c2      	or	s0,s0,v0
-[ 0-9a-f]+:	44ca      	or	s1,s1,v0
-[ 0-9a-f]+:	44d2      	or	v0,v0,v0
-[ 0-9a-f]+:	44d3      	or	v0,v0,v1
-[ 0-9a-f]+:	44d3      	or	v0,v0,v1
+[ 0-9a-f]+:	0016 1290 	move	v0,s6
+[ 0-9a-f]+:	0002 b290 	move	s6,v0
+[ 0-9a-f]+:	02c0 1290 	or	v0,zero,s6
+[ 0-9a-f]+:	0040 b290 	or	s6,zero,v0
+[ 0-9a-f]+:	0042 1290 	or	v0,v0,v0
+[ 0-9a-f]+:	0062 1290 	or	v0,v0,v1
+[ 0-9a-f]+:	0082 1290 	or	v0,v0,a0
+[ 0-9a-f]+:	00a2 1290 	or	v0,v0,a1
+[ 0-9a-f]+:	00c2 1290 	or	v0,v0,a2
+[ 0-9a-f]+:	00e2 1290 	or	v0,v0,a3
+[ 0-9a-f]+:	0202 1290 	or	v0,v0,s0
+[ 0-9a-f]+:	0222 1290 	or	v0,v0,s1
+[ 0-9a-f]+:	0043 1a90 	or	v1,v1,v0
+[ 0-9a-f]+:	0044 2290 	or	a0,a0,v0
+[ 0-9a-f]+:	0045 2a90 	or	a1,a1,v0
+[ 0-9a-f]+:	0046 3290 	or	a2,a2,v0
+[ 0-9a-f]+:	0047 3a90 	or	a3,a3,v0
+[ 0-9a-f]+:	0050 8290 	or	s0,s0,v0
+[ 0-9a-f]+:	0051 8a90 	or	s1,s1,v0
+[ 0-9a-f]+:	0042 1290 	or	v0,v0,v0
+[ 0-9a-f]+:	0062 1290 	or	v0,v0,v1
+[ 0-9a-f]+:	0043 1290 	or	v0,v1,v0
 [ 0-9a-f]+:	0083 1290 	or	v0,v1,a0
 [ 0-9a-f]+:	03fe ea90 	or	sp,s8,ra
 [ 0-9a-f]+:	0082 1290 	or	v0,v0,a0
@@ -2238,7 +2228,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a1 ffff 	lui	at,0xffff
 [ 0-9a-f]+:	5021 7fff 	ori	at,at,0x7fff
 [ 0-9a-f]+:	0023 1290 	or	v0,v1,at
-[ 0-9a-f]+:	0c64      	move	v1,a0
+[ 0-9a-f]+:	5064 0000 	ori	v1,a0,0x0
 [ 0-9a-f]+:	5064 7fff 	ori	v1,a0,0x7fff
 [ 0-9a-f]+:	5064 ffff 	ori	v1,a0,0xffff
 [ 0-9a-f]+:	5063 ffff 	ori	v1,v1,0xffff
@@ -2262,7 +2252,7 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	b403 fffe 	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	0060 ab3c 	div	zero,zero,v1
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
@@ -2271,15 +2261,15 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a1 8000 	lui	at,0x8000
 [ 0-9a-f]+:	b420 fffe 	bne	zero,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4600      	mfhi	zero
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
 [ 0-9a-f]+:	b41f fffe 	bnez	ra,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	03e0 ab3c 	div	zero,zero,ra
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
@@ -2288,16 +2278,16 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a1 8000 	lui	at,0x8000
 [ 0-9a-f]+:	b420 fffe 	bne	zero,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4600      	mfhi	zero
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
+[ 0-9a-f]+:	0007 0007 	break	0x7
 [ 0-9a-f]+:	b404 fffe 	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	0083 ab3c 	div	zero,v1,a0
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
@@ -2306,55 +2296,55 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a1 8000 	lui	at,0x8000
 [ 0-9a-f]+:	b423 fffe 	bne	v1,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4602      	mfhi	v0
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c60      	move	v1,zero
-[ 0-9a-f]+:	0c60      	move	v1,zero
+[ 0-9a-f]+:	0002 0d7c 	mfhi	v0
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	0000 1950 	move	v1,zero
+[ 0-9a-f]+:	0000 1950 	move	v1,zero
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	0024 ab3c 	div	zero,a0,at
-[ 0-9a-f]+:	4603      	mfhi	v1
+[ 0-9a-f]+:	0003 0d7c 	mfhi	v1
 [ 0-9a-f]+:	0062 bb3c 	divu	zero,v0,v1
 [ 0-9a-f]+:	03fe bb3c 	divu	zero,s8,ra
 [ 0-9a-f]+:	b403 fffe 	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	0060 bb3c 	divu	zero,zero,v1
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4600      	mfhi	zero
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
 [ 0-9a-f]+:	b41f fffe 	bnez	ra,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	03e0 bb3c 	divu	zero,zero,ra
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4600      	mfhi	zero
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
 [ 0-9a-f]+:	b400 fffe 	bnez	zero,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	0003 bb3c 	divu	zero,v1,zero
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4602      	mfhi	v0
+[ 0-9a-f]+:	0002 0d7c 	mfhi	v0
 [ 0-9a-f]+:	b404 fffe 	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	0083 bb3c 	divu	zero,v1,a0
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4602      	mfhi	v0
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c60      	move	v1,zero
+[ 0-9a-f]+:	0002 0d7c 	mfhi	v0
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	0000 1950 	move	v1,zero
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
 [ 0-9a-f]+:	0024 bb3c 	divu	zero,a0,at
-[ 0-9a-f]+:	4603      	mfhi	v1
+[ 0-9a-f]+:	0003 0d7c 	mfhi	v1
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	0024 bb3c 	divu	zero,a0,at
-[ 0-9a-f]+:	4603      	mfhi	v1
+[ 0-9a-f]+:	0003 0d7c 	mfhi	v1
 [ 0-9a-f]+:	0080 11d0 	negu	v0,a0
 [ 0-9a-f]+:	0062 10d0 	rorv	v0,v1,v0
 [ 0-9a-f]+:	0080 09d0 	negu	at,a0
@@ -2381,37 +2371,37 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0044 10d0 	rorv	v0,v0,a0
 [ 0-9a-f]+:	0064 10d0 	rorv	v0,v1,a0
 [ 0-9a-f]+:	0044 10d0 	rorv	v0,v0,a0
-[ 0-9a-f]+:	8830      	sb	zero,0\(v1\)
-[ 0-9a-f]+:	8830      	sb	zero,0\(v1\)
-[ 0-9a-f]+:	8831      	sb	zero,1\(v1\)
-[ 0-9a-f]+:	8832      	sb	zero,2\(v1\)
-[ 0-9a-f]+:	8833      	sb	zero,3\(v1\)
-[ 0-9a-f]+:	8834      	sb	zero,4\(v1\)
-[ 0-9a-f]+:	8835      	sb	zero,5\(v1\)
-[ 0-9a-f]+:	8836      	sb	zero,6\(v1\)
-[ 0-9a-f]+:	8837      	sb	zero,7\(v1\)
-[ 0-9a-f]+:	8838      	sb	zero,8\(v1\)
-[ 0-9a-f]+:	8839      	sb	zero,9\(v1\)
-[ 0-9a-f]+:	883a      	sb	zero,10\(v1\)
-[ 0-9a-f]+:	883b      	sb	zero,11\(v1\)
-[ 0-9a-f]+:	883c      	sb	zero,12\(v1\)
-[ 0-9a-f]+:	883d      	sb	zero,13\(v1\)
-[ 0-9a-f]+:	883e      	sb	zero,14\(v1\)
-[ 0-9a-f]+:	883f      	sb	zero,15\(v1\)
-[ 0-9a-f]+:	893f      	sb	v0,15\(v1\)
-[ 0-9a-f]+:	89bf      	sb	v1,15\(v1\)
-[ 0-9a-f]+:	8a3f      	sb	a0,15\(v1\)
-[ 0-9a-f]+:	8abf      	sb	a1,15\(v1\)
-[ 0-9a-f]+:	8b3f      	sb	a2,15\(v1\)
-[ 0-9a-f]+:	8bbf      	sb	a3,15\(v1\)
-[ 0-9a-f]+:	88bf      	sb	s1,15\(v1\)
-[ 0-9a-f]+:	88cf      	sb	s1,15\(a0\)
-[ 0-9a-f]+:	88df      	sb	s1,15\(a1\)
-[ 0-9a-f]+:	88ef      	sb	s1,15\(a2\)
-[ 0-9a-f]+:	88ff      	sb	s1,15\(a3\)
-[ 0-9a-f]+:	88af      	sb	s1,15\(v0\)
-[ 0-9a-f]+:	888f      	sb	s1,15\(s0\)
-[ 0-9a-f]+:	889f      	sb	s1,15\(s1\)
+[ 0-9a-f]+:	1803 0000 	sb	zero,0\(v1\)
+[ 0-9a-f]+:	1803 0000 	sb	zero,0\(v1\)
+[ 0-9a-f]+:	1803 0001 	sb	zero,1\(v1\)
+[ 0-9a-f]+:	1803 0002 	sb	zero,2\(v1\)
+[ 0-9a-f]+:	1803 0003 	sb	zero,3\(v1\)
+[ 0-9a-f]+:	1803 0004 	sb	zero,4\(v1\)
+[ 0-9a-f]+:	1803 0005 	sb	zero,5\(v1\)
+[ 0-9a-f]+:	1803 0006 	sb	zero,6\(v1\)
+[ 0-9a-f]+:	1803 0007 	sb	zero,7\(v1\)
+[ 0-9a-f]+:	1803 0008 	sb	zero,8\(v1\)
+[ 0-9a-f]+:	1803 0009 	sb	zero,9\(v1\)
+[ 0-9a-f]+:	1803 000a 	sb	zero,10\(v1\)
+[ 0-9a-f]+:	1803 000b 	sb	zero,11\(v1\)
+[ 0-9a-f]+:	1803 000c 	sb	zero,12\(v1\)
+[ 0-9a-f]+:	1803 000d 	sb	zero,13\(v1\)
+[ 0-9a-f]+:	1803 000e 	sb	zero,14\(v1\)
+[ 0-9a-f]+:	1803 000f 	sb	zero,15\(v1\)
+[ 0-9a-f]+:	1843 000f 	sb	v0,15\(v1\)
+[ 0-9a-f]+:	1863 000f 	sb	v1,15\(v1\)
+[ 0-9a-f]+:	1883 000f 	sb	a0,15\(v1\)
+[ 0-9a-f]+:	18a3 000f 	sb	a1,15\(v1\)
+[ 0-9a-f]+:	18c3 000f 	sb	a2,15\(v1\)
+[ 0-9a-f]+:	18e3 000f 	sb	a3,15\(v1\)
+[ 0-9a-f]+:	1a23 000f 	sb	s1,15\(v1\)
+[ 0-9a-f]+:	1a24 000f 	sb	s1,15\(a0\)
+[ 0-9a-f]+:	1a25 000f 	sb	s1,15\(a1\)
+[ 0-9a-f]+:	1a26 000f 	sb	s1,15\(a2\)
+[ 0-9a-f]+:	1a27 000f 	sb	s1,15\(a3\)
+[ 0-9a-f]+:	1a22 000f 	sb	s1,15\(v0\)
+[ 0-9a-f]+:	1a30 000f 	sb	s1,15\(s0\)
+[ 0-9a-f]+:	1a31 000f 	sb	s1,15\(s1\)
 [ 0-9a-f]+:	1860 0004 	sb	v1,4\(zero\)
 [ 0-9a-f]+:	1860 0004 	sb	v1,4\(zero\)
 [ 0-9a-f]+:	1860 7fff 	sb	v1,32767\(zero\)
@@ -2508,23 +2498,23 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5021 5000 	ori	at,at,0x5000
 [ 0-9a-f]+:	0081 0950 	addu	at,at,a0
 [ 0-9a-f]+:	6061 b678 	sc	v1,1656\(at\)
-[ 0-9a-f]+:	46c0      	sdbbp
-[ 0-9a-f]+:	46c0      	sdbbp
-[ 0-9a-f]+:	46c1      	sdbbp	0x1
-[ 0-9a-f]+:	46c2      	sdbbp	0x2
-[ 0-9a-f]+:	46c3      	sdbbp	0x3
-[ 0-9a-f]+:	46c4      	sdbbp	0x4
-[ 0-9a-f]+:	46c5      	sdbbp	0x5
-[ 0-9a-f]+:	46c6      	sdbbp	0x6
-[ 0-9a-f]+:	46c7      	sdbbp	0x7
-[ 0-9a-f]+:	46c8      	sdbbp	0x8
-[ 0-9a-f]+:	46c9      	sdbbp	0x9
-[ 0-9a-f]+:	46ca      	sdbbp	0xa
-[ 0-9a-f]+:	46cb      	sdbbp	0xb
-[ 0-9a-f]+:	46cc      	sdbbp	0xc
-[ 0-9a-f]+:	46cd      	sdbbp	0xd
-[ 0-9a-f]+:	46ce      	sdbbp	0xe
-[ 0-9a-f]+:	46cf      	sdbbp	0xf
+[ 0-9a-f]+:	0000 db7c 	sdbbp
+[ 0-9a-f]+:	0000 db7c 	sdbbp
+[ 0-9a-f]+:	0001 db7c 	sdbbp	0x1
+[ 0-9a-f]+:	0002 db7c 	sdbbp	0x2
+[ 0-9a-f]+:	0003 db7c 	sdbbp	0x3
+[ 0-9a-f]+:	0004 db7c 	sdbbp	0x4
+[ 0-9a-f]+:	0005 db7c 	sdbbp	0x5
+[ 0-9a-f]+:	0006 db7c 	sdbbp	0x6
+[ 0-9a-f]+:	0007 db7c 	sdbbp	0x7
+[ 0-9a-f]+:	0008 db7c 	sdbbp	0x8
+[ 0-9a-f]+:	0009 db7c 	sdbbp	0x9
+[ 0-9a-f]+:	000a db7c 	sdbbp	0xa
+[ 0-9a-f]+:	000b db7c 	sdbbp	0xb
+[ 0-9a-f]+:	000c db7c 	sdbbp	0xc
+[ 0-9a-f]+:	000d db7c 	sdbbp	0xd
+[ 0-9a-f]+:	000e db7c 	sdbbp	0xe
+[ 0-9a-f]+:	000f db7c 	sdbbp	0xf
 [ 0-9a-f]+:	0000 db7c 	sdbbp
 [ 0-9a-f]+:	0000 db7c 	sdbbp
 [ 0-9a-f]+:	0001 db7c 	sdbbp	0x1
@@ -2633,37 +2623,37 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	41a1 ffff 	lui	at,0xffff
 [ 0-9a-f]+:	5021 7fff 	ori	at,at,0x7fff
 [ 0-9a-f]+:	0061 1390 	sltu	v0,at,v1
-[ 0-9a-f]+:	a930      	sh	v0,0\(v1\)
-[ 0-9a-f]+:	a930      	sh	v0,0\(v1\)
-[ 0-9a-f]+:	a931      	sh	v0,2\(v1\)
-[ 0-9a-f]+:	a932      	sh	v0,4\(v1\)
-[ 0-9a-f]+:	a933      	sh	v0,6\(v1\)
-[ 0-9a-f]+:	a934      	sh	v0,8\(v1\)
-[ 0-9a-f]+:	a935      	sh	v0,10\(v1\)
-[ 0-9a-f]+:	a936      	sh	v0,12\(v1\)
-[ 0-9a-f]+:	a937      	sh	v0,14\(v1\)
-[ 0-9a-f]+:	a938      	sh	v0,16\(v1\)
-[ 0-9a-f]+:	a939      	sh	v0,18\(v1\)
-[ 0-9a-f]+:	a93a      	sh	v0,20\(v1\)
-[ 0-9a-f]+:	a93b      	sh	v0,22\(v1\)
-[ 0-9a-f]+:	a93c      	sh	v0,24\(v1\)
-[ 0-9a-f]+:	a93d      	sh	v0,26\(v1\)
-[ 0-9a-f]+:	a93e      	sh	v0,28\(v1\)
-[ 0-9a-f]+:	a93f      	sh	v0,30\(v1\)
-[ 0-9a-f]+:	a94f      	sh	v0,30\(a0\)
-[ 0-9a-f]+:	a95f      	sh	v0,30\(a1\)
-[ 0-9a-f]+:	a96f      	sh	v0,30\(a2\)
-[ 0-9a-f]+:	a97f      	sh	v0,30\(a3\)
-[ 0-9a-f]+:	a92f      	sh	v0,30\(v0\)
-[ 0-9a-f]+:	a90f      	sh	v0,30\(s0\)
-[ 0-9a-f]+:	a91f      	sh	v0,30\(s1\)
-[ 0-9a-f]+:	a99f      	sh	v1,30\(s1\)
-[ 0-9a-f]+:	aa1f      	sh	a0,30\(s1\)
-[ 0-9a-f]+:	aa9f      	sh	a1,30\(s1\)
-[ 0-9a-f]+:	ab1f      	sh	a2,30\(s1\)
-[ 0-9a-f]+:	ab9f      	sh	a3,30\(s1\)
-[ 0-9a-f]+:	a89f      	sh	s1,30\(s1\)
-[ 0-9a-f]+:	a81f      	sh	zero,30\(s1\)
+[ 0-9a-f]+:	3843 0000 	sh	v0,0\(v1\)
+[ 0-9a-f]+:	3843 0000 	sh	v0,0\(v1\)
+[ 0-9a-f]+:	3843 0002 	sh	v0,2\(v1\)
+[ 0-9a-f]+:	3843 0004 	sh	v0,4\(v1\)
+[ 0-9a-f]+:	3843 0006 	sh	v0,6\(v1\)
+[ 0-9a-f]+:	3843 0008 	sh	v0,8\(v1\)
+[ 0-9a-f]+:	3843 000a 	sh	v0,10\(v1\)
+[ 0-9a-f]+:	3843 000c 	sh	v0,12\(v1\)
+[ 0-9a-f]+:	3843 000e 	sh	v0,14\(v1\)
+[ 0-9a-f]+:	3843 0010 	sh	v0,16\(v1\)
+[ 0-9a-f]+:	3843 0012 	sh	v0,18\(v1\)
+[ 0-9a-f]+:	3843 0014 	sh	v0,20\(v1\)
+[ 0-9a-f]+:	3843 0016 	sh	v0,22\(v1\)
+[ 0-9a-f]+:	3843 0018 	sh	v0,24\(v1\)
+[ 0-9a-f]+:	3843 001a 	sh	v0,26\(v1\)
+[ 0-9a-f]+:	3843 001c 	sh	v0,28\(v1\)
+[ 0-9a-f]+:	3843 001e 	sh	v0,30\(v1\)
+[ 0-9a-f]+:	3844 001e 	sh	v0,30\(a0\)
+[ 0-9a-f]+:	3845 001e 	sh	v0,30\(a1\)
+[ 0-9a-f]+:	3846 001e 	sh	v0,30\(a2\)
+[ 0-9a-f]+:	3847 001e 	sh	v0,30\(a3\)
+[ 0-9a-f]+:	3842 001e 	sh	v0,30\(v0\)
+[ 0-9a-f]+:	3850 001e 	sh	v0,30\(s0\)
+[ 0-9a-f]+:	3851 001e 	sh	v0,30\(s1\)
+[ 0-9a-f]+:	3871 001e 	sh	v1,30\(s1\)
+[ 0-9a-f]+:	3891 001e 	sh	a0,30\(s1\)
+[ 0-9a-f]+:	38b1 001e 	sh	a1,30\(s1\)
+[ 0-9a-f]+:	38d1 001e 	sh	a2,30\(s1\)
+[ 0-9a-f]+:	38f1 001e 	sh	a3,30\(s1\)
+[ 0-9a-f]+:	3a31 001e 	sh	s1,30\(s1\)
+[ 0-9a-f]+:	3811 001e 	sh	zero,30\(s1\)
 [ 0-9a-f]+:	3860 0004 	sh	v1,4\(zero\)
 [ 0-9a-f]+:	3860 0004 	sh	v1,4\(zero\)
 [ 0-9a-f]+:	3860 7fff 	sh	v1,32767\(zero\)
@@ -2759,30 +2749,30 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5021 7fff 	ori	at,at,0x7fff
 [ 0-9a-f]+:	0061 1390 	sltu	v0,at,v1
 [ 0-9a-f]+:	7042 0001 	xori	v0,v0,0x1
-[ 0-9a-f]+:	2522      	sll	v0,v0,1
-[ 0-9a-f]+:	2524      	sll	v0,v0,2
-[ 0-9a-f]+:	2526      	sll	v0,v0,3
-[ 0-9a-f]+:	2528      	sll	v0,v0,4
-[ 0-9a-f]+:	252a      	sll	v0,v0,5
-[ 0-9a-f]+:	252c      	sll	v0,v0,6
-[ 0-9a-f]+:	252e      	sll	v0,v0,7
-[ 0-9a-f]+:	2520      	sll	v0,v0,8
-[ 0-9a-f]+:	2530      	sll	v0,v1,8
-[ 0-9a-f]+:	2540      	sll	v0,a0,8
-[ 0-9a-f]+:	2550      	sll	v0,a1,8
-[ 0-9a-f]+:	2560      	sll	v0,a2,8
-[ 0-9a-f]+:	2570      	sll	v0,a3,8
-[ 0-9a-f]+:	2500      	sll	v0,s0,8
-[ 0-9a-f]+:	2510      	sll	v0,s1,8
-[ 0-9a-f]+:	25a0      	sll	v1,v0,8
-[ 0-9a-f]+:	2620      	sll	a0,v0,8
-[ 0-9a-f]+:	26a0      	sll	a1,v0,8
-[ 0-9a-f]+:	2720      	sll	a2,v0,8
-[ 0-9a-f]+:	27a0      	sll	a3,v0,8
-[ 0-9a-f]+:	2420      	sll	s0,v0,8
-[ 0-9a-f]+:	24a0      	sll	s1,v0,8
-[ 0-9a-f]+:	2522      	sll	v0,v0,1
-[ 0-9a-f]+:	25b2      	sll	v1,v1,1
+[ 0-9a-f]+:	0042 0800 	sll	v0,v0,0x1
+[ 0-9a-f]+:	0042 1000 	sll	v0,v0,0x2
+[ 0-9a-f]+:	0042 1800 	sll	v0,v0,0x3
+[ 0-9a-f]+:	0042 2000 	sll	v0,v0,0x4
+[ 0-9a-f]+:	0042 2800 	sll	v0,v0,0x5
+[ 0-9a-f]+:	0042 3000 	sll	v0,v0,0x6
+[ 0-9a-f]+:	0042 3800 	sll	v0,v0,0x7
+[ 0-9a-f]+:	0042 4000 	sll	v0,v0,0x8
+[ 0-9a-f]+:	0043 4000 	sll	v0,v1,0x8
+[ 0-9a-f]+:	0044 4000 	sll	v0,a0,0x8
+[ 0-9a-f]+:	0045 4000 	sll	v0,a1,0x8
+[ 0-9a-f]+:	0046 4000 	sll	v0,a2,0x8
+[ 0-9a-f]+:	0047 4000 	sll	v0,a3,0x8
+[ 0-9a-f]+:	0050 4000 	sll	v0,s0,0x8
+[ 0-9a-f]+:	0051 4000 	sll	v0,s1,0x8
+[ 0-9a-f]+:	0062 4000 	sll	v1,v0,0x8
+[ 0-9a-f]+:	0082 4000 	sll	a0,v0,0x8
+[ 0-9a-f]+:	00a2 4000 	sll	a1,v0,0x8
+[ 0-9a-f]+:	00c2 4000 	sll	a2,v0,0x8
+[ 0-9a-f]+:	00e2 4000 	sll	a3,v0,0x8
+[ 0-9a-f]+:	0202 4000 	sll	s0,v0,0x8
+[ 0-9a-f]+:	0222 4000 	sll	s1,v0,0x8
+[ 0-9a-f]+:	0042 0800 	sll	v0,v0,0x1
+[ 0-9a-f]+:	0063 0800 	sll	v1,v1,0x1
 [ 0-9a-f]+:	0064 1010 	sllv	v0,v1,a0
 [ 0-9a-f]+:	0044 1010 	sllv	v0,v0,a0
 [ 0-9a-f]+:	0044 1010 	sllv	v0,v0,a0
@@ -2859,35 +2849,35 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0044 1050 	srlv	v0,v0,a0
 [ 0-9a-f]+:	0044 1050 	srlv	v0,v0,a0
 [ 0-9a-f]+:	0044 0040 	srl	v0,a0,0x0
-[ 0-9a-f]+:	2543      	srl	v0,a0,1
+[ 0-9a-f]+:	0044 0840 	srl	v0,a0,0x1
 [ 0-9a-f]+:	0044 f840 	srl	v0,a0,0x1f
 [ 0-9a-f]+:	0042 f840 	srl	v0,v0,0x1f
 [ 0-9a-f]+:	0042 f840 	srl	v0,v0,0x1f
-[ 0-9a-f]+:	2523      	srl	v0,v0,1
-[ 0-9a-f]+:	2525      	srl	v0,v0,2
-[ 0-9a-f]+:	2527      	srl	v0,v0,3
-[ 0-9a-f]+:	2529      	srl	v0,v0,4
-[ 0-9a-f]+:	252b      	srl	v0,v0,5
-[ 0-9a-f]+:	252d      	srl	v0,v0,6
-[ 0-9a-f]+:	252f      	srl	v0,v0,7
-[ 0-9a-f]+:	2521      	srl	v0,v0,8
-[ 0-9a-f]+:	2531      	srl	v0,v1,8
-[ 0-9a-f]+:	2541      	srl	v0,a0,8
-[ 0-9a-f]+:	2551      	srl	v0,a1,8
-[ 0-9a-f]+:	2561      	srl	v0,a2,8
-[ 0-9a-f]+:	2571      	srl	v0,a3,8
-[ 0-9a-f]+:	2501      	srl	v0,s0,8
-[ 0-9a-f]+:	2511      	srl	v0,s1,8
-[ 0-9a-f]+:	2521      	srl	v0,v0,8
-[ 0-9a-f]+:	25a1      	srl	v1,v0,8
-[ 0-9a-f]+:	2621      	srl	a0,v0,8
-[ 0-9a-f]+:	26a1      	srl	a1,v0,8
-[ 0-9a-f]+:	2721      	srl	a2,v0,8
-[ 0-9a-f]+:	27a1      	srl	a3,v0,8
-[ 0-9a-f]+:	2421      	srl	s0,v0,8
-[ 0-9a-f]+:	24a1      	srl	s1,v0,8
-[ 0-9a-f]+:	25b3      	srl	v1,v1,1
-[ 0-9a-f]+:	25b3      	srl	v1,v1,1
+[ 0-9a-f]+:	0042 0840 	srl	v0,v0,0x1
+[ 0-9a-f]+:	0042 1040 	srl	v0,v0,0x2
+[ 0-9a-f]+:	0042 1840 	srl	v0,v0,0x3
+[ 0-9a-f]+:	0042 2040 	srl	v0,v0,0x4
+[ 0-9a-f]+:	0042 2840 	srl	v0,v0,0x5
+[ 0-9a-f]+:	0042 3040 	srl	v0,v0,0x6
+[ 0-9a-f]+:	0042 3840 	srl	v0,v0,0x7
+[ 0-9a-f]+:	0042 4040 	srl	v0,v0,0x8
+[ 0-9a-f]+:	0043 4040 	srl	v0,v1,0x8
+[ 0-9a-f]+:	0044 4040 	srl	v0,a0,0x8
+[ 0-9a-f]+:	0045 4040 	srl	v0,a1,0x8
+[ 0-9a-f]+:	0046 4040 	srl	v0,a2,0x8
+[ 0-9a-f]+:	0047 4040 	srl	v0,a3,0x8
+[ 0-9a-f]+:	0050 4040 	srl	v0,s0,0x8
+[ 0-9a-f]+:	0051 4040 	srl	v0,s1,0x8
+[ 0-9a-f]+:	0042 4040 	srl	v0,v0,0x8
+[ 0-9a-f]+:	0062 4040 	srl	v1,v0,0x8
+[ 0-9a-f]+:	0082 4040 	srl	a0,v0,0x8
+[ 0-9a-f]+:	00a2 4040 	srl	a1,v0,0x8
+[ 0-9a-f]+:	00c2 4040 	srl	a2,v0,0x8
+[ 0-9a-f]+:	00e2 4040 	srl	a3,v0,0x8
+[ 0-9a-f]+:	0202 4040 	srl	s0,v0,0x8
+[ 0-9a-f]+:	0222 4040 	srl	s1,v0,0x8
+[ 0-9a-f]+:	0063 0840 	srl	v1,v1,0x1
+[ 0-9a-f]+:	0063 0840 	srl	v1,v1,0x1
 [ 0-9a-f]+:	0083 1190 	sub	v0,v1,a0
 [ 0-9a-f]+:	03fe e990 	sub	sp,s8,ra
 [ 0-9a-f]+:	0082 1190 	sub	v0,v0,a0
@@ -2899,31 +2889,31 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0022 1190 	sub	v0,v0,at
 [ 0-9a-f]+:	5020 ffff 	li	at,0xffff
 [ 0-9a-f]+:	0022 1190 	sub	v0,v0,at
-[ 0-9a-f]+:	0527      	subu	v0,v1,v0
-[ 0-9a-f]+:	0537      	subu	v0,v1,v1
-[ 0-9a-f]+:	0547      	subu	v0,v1,a0
-[ 0-9a-f]+:	0557      	subu	v0,v1,a1
-[ 0-9a-f]+:	0567      	subu	v0,v1,a2
-[ 0-9a-f]+:	0577      	subu	v0,v1,a3
-[ 0-9a-f]+:	0507      	subu	v0,v1,s0
-[ 0-9a-f]+:	0517      	subu	v0,v1,s1
-[ 0-9a-f]+:	0515      	subu	v0,v0,s1
-[ 0-9a-f]+:	0519      	subu	v0,a0,s1
-[ 0-9a-f]+:	051b      	subu	v0,a1,s1
-[ 0-9a-f]+:	051d      	subu	v0,a2,s1
-[ 0-9a-f]+:	051f      	subu	v0,a3,s1
-[ 0-9a-f]+:	0511      	subu	v0,s0,s1
-[ 0-9a-f]+:	0513      	subu	v0,s1,s1
-[ 0-9a-f]+:	0515      	subu	v0,v0,s1
-[ 0-9a-f]+:	0595      	subu	v1,v0,s1
-[ 0-9a-f]+:	0615      	subu	a0,v0,s1
-[ 0-9a-f]+:	0695      	subu	a1,v0,s1
-[ 0-9a-f]+:	0715      	subu	a2,v0,s1
-[ 0-9a-f]+:	0795      	subu	a3,v0,s1
-[ 0-9a-f]+:	0415      	subu	s0,v0,s1
-[ 0-9a-f]+:	0495      	subu	s1,v0,s1
-[ 0-9a-f]+:	07af      	subu	a3,a3,v0
-[ 0-9a-f]+:	07af      	subu	a3,a3,v0
+[ 0-9a-f]+:	0043 11d0 	subu	v0,v1,v0
+[ 0-9a-f]+:	0063 11d0 	subu	v0,v1,v1
+[ 0-9a-f]+:	0083 11d0 	subu	v0,v1,a0
+[ 0-9a-f]+:	00a3 11d0 	subu	v0,v1,a1
+[ 0-9a-f]+:	00c3 11d0 	subu	v0,v1,a2
+[ 0-9a-f]+:	00e3 11d0 	subu	v0,v1,a3
+[ 0-9a-f]+:	0203 11d0 	subu	v0,v1,s0
+[ 0-9a-f]+:	0223 11d0 	subu	v0,v1,s1
+[ 0-9a-f]+:	0222 11d0 	subu	v0,v0,s1
+[ 0-9a-f]+:	0224 11d0 	subu	v0,a0,s1
+[ 0-9a-f]+:	0225 11d0 	subu	v0,a1,s1
+[ 0-9a-f]+:	0226 11d0 	subu	v0,a2,s1
+[ 0-9a-f]+:	0227 11d0 	subu	v0,a3,s1
+[ 0-9a-f]+:	0230 11d0 	subu	v0,s0,s1
+[ 0-9a-f]+:	0231 11d0 	subu	v0,s1,s1
+[ 0-9a-f]+:	0222 11d0 	subu	v0,v0,s1
+[ 0-9a-f]+:	0222 19d0 	subu	v1,v0,s1
+[ 0-9a-f]+:	0222 21d0 	subu	a0,v0,s1
+[ 0-9a-f]+:	0222 29d0 	subu	a1,v0,s1
+[ 0-9a-f]+:	0222 31d0 	subu	a2,v0,s1
+[ 0-9a-f]+:	0222 39d0 	subu	a3,v0,s1
+[ 0-9a-f]+:	0222 81d0 	subu	s0,v0,s1
+[ 0-9a-f]+:	0222 89d0 	subu	s1,v0,s1
+[ 0-9a-f]+:	0047 39d0 	subu	a3,a3,v0
+[ 0-9a-f]+:	0047 39d0 	subu	a3,a3,v0
 [ 0-9a-f]+:	0083 11d0 	subu	v0,v1,a0
 [ 0-9a-f]+:	03fe e9d0 	subu	sp,s8,ra
 [ 0-9a-f]+:	0082 11d0 	subu	v0,v0,a0
@@ -2935,54 +2925,54 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0022 11d0 	subu	v0,v0,at
 [ 0-9a-f]+:	5020 ffff 	li	at,0xffff
 [ 0-9a-f]+:	0022 11d0 	subu	v0,v0,at
-[ 0-9a-f]+:	e940      	sw	v0,0\(a0\)
-[ 0-9a-f]+:	e940      	sw	v0,0\(a0\)
-[ 0-9a-f]+:	e941      	sw	v0,4\(a0\)
-[ 0-9a-f]+:	e942      	sw	v0,8\(a0\)
-[ 0-9a-f]+:	e943      	sw	v0,12\(a0\)
-[ 0-9a-f]+:	e944      	sw	v0,16\(a0\)
-[ 0-9a-f]+:	e945      	sw	v0,20\(a0\)
-[ 0-9a-f]+:	e946      	sw	v0,24\(a0\)
-[ 0-9a-f]+:	e947      	sw	v0,28\(a0\)
-[ 0-9a-f]+:	e948      	sw	v0,32\(a0\)
-[ 0-9a-f]+:	e949      	sw	v0,36\(a0\)
-[ 0-9a-f]+:	e94a      	sw	v0,40\(a0\)
-[ 0-9a-f]+:	e94b      	sw	v0,44\(a0\)
-[ 0-9a-f]+:	e94c      	sw	v0,48\(a0\)
-[ 0-9a-f]+:	e94d      	sw	v0,52\(a0\)
-[ 0-9a-f]+:	e94e      	sw	v0,56\(a0\)
-[ 0-9a-f]+:	e94f      	sw	v0,60\(a0\)
-[ 0-9a-f]+:	e95f      	sw	v0,60\(a1\)
-[ 0-9a-f]+:	e96f      	sw	v0,60\(a2\)
-[ 0-9a-f]+:	e97f      	sw	v0,60\(a3\)
-[ 0-9a-f]+:	e90f      	sw	v0,60\(s0\)
-[ 0-9a-f]+:	e91f      	sw	v0,60\(s1\)
-[ 0-9a-f]+:	e92f      	sw	v0,60\(v0\)
-[ 0-9a-f]+:	e93f      	sw	v0,60\(v1\)
-[ 0-9a-f]+:	e9bf      	sw	v1,60\(v1\)
-[ 0-9a-f]+:	ea3f      	sw	a0,60\(v1\)
-[ 0-9a-f]+:	eabf      	sw	a1,60\(v1\)
-[ 0-9a-f]+:	eb3f      	sw	a2,60\(v1\)
-[ 0-9a-f]+:	ebbf      	sw	a3,60\(v1\)
-[ 0-9a-f]+:	e8bf      	sw	s1,60\(v1\)
-[ 0-9a-f]+:	e83f      	sw	zero,60\(v1\)
-[ 0-9a-f]+:	c800      	sw	zero,0\(sp\)
-[ 0-9a-f]+:	c800      	sw	zero,0\(sp\)
-[ 0-9a-f]+:	c801      	sw	zero,4\(sp\)
-[ 0-9a-f]+:	c802      	sw	zero,8\(sp\)
-[ 0-9a-f]+:	c803      	sw	zero,12\(sp\)
-[ 0-9a-f]+:	c804      	sw	zero,16\(sp\)
-[ 0-9a-f]+:	c805      	sw	zero,20\(sp\)
-[ 0-9a-f]+:	c81e      	sw	zero,120\(sp\)
-[ 0-9a-f]+:	c81f      	sw	zero,124\(sp\)
-[ 0-9a-f]+:	c85f      	sw	v0,124\(sp\)
-[ 0-9a-f]+:	ca3f      	sw	s1,124\(sp\)
-[ 0-9a-f]+:	c87f      	sw	v1,124\(sp\)
-[ 0-9a-f]+:	c89f      	sw	a0,124\(sp\)
-[ 0-9a-f]+:	c8bf      	sw	a1,124\(sp\)
-[ 0-9a-f]+:	c8df      	sw	a2,124\(sp\)
-[ 0-9a-f]+:	c8ff      	sw	a3,124\(sp\)
-[ 0-9a-f]+:	cbff      	sw	ra,124\(sp\)
+[ 0-9a-f]+:	f844 0000 	sw	v0,0\(a0\)
+[ 0-9a-f]+:	f844 0000 	sw	v0,0\(a0\)
+[ 0-9a-f]+:	f844 0004 	sw	v0,4\(a0\)
+[ 0-9a-f]+:	f844 0008 	sw	v0,8\(a0\)
+[ 0-9a-f]+:	f844 000c 	sw	v0,12\(a0\)
+[ 0-9a-f]+:	f844 0010 	sw	v0,16\(a0\)
+[ 0-9a-f]+:	f844 0014 	sw	v0,20\(a0\)
+[ 0-9a-f]+:	f844 0018 	sw	v0,24\(a0\)
+[ 0-9a-f]+:	f844 001c 	sw	v0,28\(a0\)
+[ 0-9a-f]+:	f844 0020 	sw	v0,32\(a0\)
+[ 0-9a-f]+:	f844 0024 	sw	v0,36\(a0\)
+[ 0-9a-f]+:	f844 0028 	sw	v0,40\(a0\)
+[ 0-9a-f]+:	f844 002c 	sw	v0,44\(a0\)
+[ 0-9a-f]+:	f844 0030 	sw	v0,48\(a0\)
+[ 0-9a-f]+:	f844 0034 	sw	v0,52\(a0\)
+[ 0-9a-f]+:	f844 0038 	sw	v0,56\(a0\)
+[ 0-9a-f]+:	f844 003c 	sw	v0,60\(a0\)
+[ 0-9a-f]+:	f845 003c 	sw	v0,60\(a1\)
+[ 0-9a-f]+:	f846 003c 	sw	v0,60\(a2\)
+[ 0-9a-f]+:	f847 003c 	sw	v0,60\(a3\)
+[ 0-9a-f]+:	f850 003c 	sw	v0,60\(s0\)
+[ 0-9a-f]+:	f851 003c 	sw	v0,60\(s1\)
+[ 0-9a-f]+:	f842 003c 	sw	v0,60\(v0\)
+[ 0-9a-f]+:	f843 003c 	sw	v0,60\(v1\)
+[ 0-9a-f]+:	f863 003c 	sw	v1,60\(v1\)
+[ 0-9a-f]+:	f883 003c 	sw	a0,60\(v1\)
+[ 0-9a-f]+:	f8a3 003c 	sw	a1,60\(v1\)
+[ 0-9a-f]+:	f8c3 003c 	sw	a2,60\(v1\)
+[ 0-9a-f]+:	f8e3 003c 	sw	a3,60\(v1\)
+[ 0-9a-f]+:	fa23 003c 	sw	s1,60\(v1\)
+[ 0-9a-f]+:	f803 003c 	sw	zero,60\(v1\)
+[ 0-9a-f]+:	f81d 0000 	sw	zero,0\(sp\)
+[ 0-9a-f]+:	f81d 0000 	sw	zero,0\(sp\)
+[ 0-9a-f]+:	f81d 0004 	sw	zero,4\(sp\)
+[ 0-9a-f]+:	f81d 0008 	sw	zero,8\(sp\)
+[ 0-9a-f]+:	f81d 000c 	sw	zero,12\(sp\)
+[ 0-9a-f]+:	f81d 0010 	sw	zero,16\(sp\)
+[ 0-9a-f]+:	f81d 0014 	sw	zero,20\(sp\)
+[ 0-9a-f]+:	f81d 0078 	sw	zero,120\(sp\)
+[ 0-9a-f]+:	f81d 007c 	sw	zero,124\(sp\)
+[ 0-9a-f]+:	f85d 007c 	sw	v0,124\(sp\)
+[ 0-9a-f]+:	fa3d 007c 	sw	s1,124\(sp\)
+[ 0-9a-f]+:	f87d 007c 	sw	v1,124\(sp\)
+[ 0-9a-f]+:	f89d 007c 	sw	a0,124\(sp\)
+[ 0-9a-f]+:	f8bd 007c 	sw	a1,124\(sp\)
+[ 0-9a-f]+:	f8dd 007c 	sw	a2,124\(sp\)
+[ 0-9a-f]+:	f8fd 007c 	sw	a3,124\(sp\)
+[ 0-9a-f]+:	fbfd 007c 	sw	ra,124\(sp\)
 [ 0-9a-f]+:	f860 0004 	sw	v1,4\(zero\)
 [ 0-9a-f]+:	f860 0004 	sw	v1,4\(zero\)
 [ 0-9a-f]+:	f860 7fff 	sw	v1,32767\(zero\)
@@ -3250,30 +3240,30 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5021 5000 	ori	at,at,0x5000
 [ 0-9a-f]+:	0081 0950 	addu	at,at,a0
 [ 0-9a-f]+:	6061 9678 	swr	v1,1656\(at\)
-[ 0-9a-f]+:	454c      	swm	s0,ra,48\(sp\)
-[ 0-9a-f]+:	455c      	swm	s0-s1,ra,48\(sp\)
-[ 0-9a-f]+:	455c      	swm	s0-s1,ra,48\(sp\)
-[ 0-9a-f]+:	456c      	swm	s0-s2,ra,48\(sp\)
-[ 0-9a-f]+:	456c      	swm	s0-s2,ra,48\(sp\)
-[ 0-9a-f]+:	457c      	swm	s0-s3,ra,48\(sp\)
-[ 0-9a-f]+:	457c      	swm	s0-s3,ra,48\(sp\)
-[ 0-9a-f]+:	4540      	swm	s0,ra,0\(sp\)
-[ 0-9a-f]+:	4540      	swm	s0,ra,0\(sp\)
-[ 0-9a-f]+:	4541      	swm	s0,ra,4\(sp\)
-[ 0-9a-f]+:	4542      	swm	s0,ra,8\(sp\)
-[ 0-9a-f]+:	4543      	swm	s0,ra,12\(sp\)
-[ 0-9a-f]+:	4544      	swm	s0,ra,16\(sp\)
-[ 0-9a-f]+:	4545      	swm	s0,ra,20\(sp\)
-[ 0-9a-f]+:	4546      	swm	s0,ra,24\(sp\)
-[ 0-9a-f]+:	4547      	swm	s0,ra,28\(sp\)
-[ 0-9a-f]+:	4548      	swm	s0,ra,32\(sp\)
-[ 0-9a-f]+:	4549      	swm	s0,ra,36\(sp\)
-[ 0-9a-f]+:	454a      	swm	s0,ra,40\(sp\)
-[ 0-9a-f]+:	454b      	swm	s0,ra,44\(sp\)
-[ 0-9a-f]+:	454c      	swm	s0,ra,48\(sp\)
-[ 0-9a-f]+:	454d      	swm	s0,ra,52\(sp\)
-[ 0-9a-f]+:	454e      	swm	s0,ra,56\(sp\)
-[ 0-9a-f]+:	454f      	swm	s0,ra,60\(sp\)
+[ 0-9a-f]+:	223d d030 	swm	s0,ra,48\(sp\)
+[ 0-9a-f]+:	225d d030 	swm	s0-s1,ra,48\(sp\)
+[ 0-9a-f]+:	225d d030 	swm	s0-s1,ra,48\(sp\)
+[ 0-9a-f]+:	227d d030 	swm	s0-s2,ra,48\(sp\)
+[ 0-9a-f]+:	227d d030 	swm	s0-s2,ra,48\(sp\)
+[ 0-9a-f]+:	229d d030 	swm	s0-s3,ra,48\(sp\)
+[ 0-9a-f]+:	229d d030 	swm	s0-s3,ra,48\(sp\)
+[ 0-9a-f]+:	223d d000 	swm	s0,ra,0\(sp\)
+[ 0-9a-f]+:	223d d000 	swm	s0,ra,0\(sp\)
+[ 0-9a-f]+:	223d d004 	swm	s0,ra,4\(sp\)
+[ 0-9a-f]+:	223d d008 	swm	s0,ra,8\(sp\)
+[ 0-9a-f]+:	223d d00c 	swm	s0,ra,12\(sp\)
+[ 0-9a-f]+:	223d d010 	swm	s0,ra,16\(sp\)
+[ 0-9a-f]+:	223d d014 	swm	s0,ra,20\(sp\)
+[ 0-9a-f]+:	223d d018 	swm	s0,ra,24\(sp\)
+[ 0-9a-f]+:	223d d01c 	swm	s0,ra,28\(sp\)
+[ 0-9a-f]+:	223d d020 	swm	s0,ra,32\(sp\)
+[ 0-9a-f]+:	223d d024 	swm	s0,ra,36\(sp\)
+[ 0-9a-f]+:	223d d028 	swm	s0,ra,40\(sp\)
+[ 0-9a-f]+:	223d d02c 	swm	s0,ra,44\(sp\)
+[ 0-9a-f]+:	223d d030 	swm	s0,ra,48\(sp\)
+[ 0-9a-f]+:	223d d034 	swm	s0,ra,52\(sp\)
+[ 0-9a-f]+:	223d d038 	swm	s0,ra,56\(sp\)
+[ 0-9a-f]+:	223d d03c 	swm	s0,ra,60\(sp\)
 [ 0-9a-f]+:	2020 d000 	swm	s0,0\(zero\)
 [ 0-9a-f]+:	2020 d004 	swm	s0,4\(zero\)
 [ 0-9a-f]+:	2020 d7ff 	swm	s0,2047\(zero\)
@@ -3906,24 +3896,24 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0044 7b3c 	wsbh	v0,a0
 [ 0-9a-f]+:	0042 7b3c 	wsbh	v0,v0
 [ 0-9a-f]+:	0042 7b3c 	wsbh	v0,v0
-[ 0-9a-f]+:	4452      	xor	v0,v0,v0
-[ 0-9a-f]+:	4453      	xor	v0,v0,v1
-[ 0-9a-f]+:	4454      	xor	v0,v0,a0
-[ 0-9a-f]+:	4455      	xor	v0,v0,a1
-[ 0-9a-f]+:	4456      	xor	v0,v0,a2
-[ 0-9a-f]+:	4457      	xor	v0,v0,a3
-[ 0-9a-f]+:	4450      	xor	v0,v0,s0
-[ 0-9a-f]+:	4451      	xor	v0,v0,s1
-[ 0-9a-f]+:	4459      	xor	v1,v1,s1
-[ 0-9a-f]+:	4461      	xor	a0,a0,s1
-[ 0-9a-f]+:	4469      	xor	a1,a1,s1
-[ 0-9a-f]+:	4471      	xor	a2,a2,s1
-[ 0-9a-f]+:	4479      	xor	a3,a3,s1
-[ 0-9a-f]+:	4441      	xor	s0,s0,s1
-[ 0-9a-f]+:	4449      	xor	s1,s1,s1
-[ 0-9a-f]+:	4453      	xor	v0,v0,v1
-[ 0-9a-f]+:	4453      	xor	v0,v0,v1
-[ 0-9a-f]+:	4453      	xor	v0,v0,v1
+[ 0-9a-f]+:	0042 1310 	xor	v0,v0,v0
+[ 0-9a-f]+:	0062 1310 	xor	v0,v0,v1
+[ 0-9a-f]+:	0082 1310 	xor	v0,v0,a0
+[ 0-9a-f]+:	00a2 1310 	xor	v0,v0,a1
+[ 0-9a-f]+:	00c2 1310 	xor	v0,v0,a2
+[ 0-9a-f]+:	00e2 1310 	xor	v0,v0,a3
+[ 0-9a-f]+:	0202 1310 	xor	v0,v0,s0
+[ 0-9a-f]+:	0222 1310 	xor	v0,v0,s1
+[ 0-9a-f]+:	0223 1b10 	xor	v1,v1,s1
+[ 0-9a-f]+:	0224 2310 	xor	a0,a0,s1
+[ 0-9a-f]+:	0225 2b10 	xor	a1,a1,s1
+[ 0-9a-f]+:	0226 3310 	xor	a2,a2,s1
+[ 0-9a-f]+:	0227 3b10 	xor	a3,a3,s1
+[ 0-9a-f]+:	0230 8310 	xor	s0,s0,s1
+[ 0-9a-f]+:	0231 8b10 	xor	s1,s1,s1
+[ 0-9a-f]+:	0062 1310 	xor	v0,v0,v1
+[ 0-9a-f]+:	0062 1310 	xor	v0,v0,v1
+[ 0-9a-f]+:	0043 1310 	xor	v0,v1,v0
 [ 0-9a-f]+:	0083 1310 	xor	v0,v1,a0
 [ 0-9a-f]+:	03fe eb10 	xor	sp,s8,ra
 [ 0-9a-f]+:	0082 1310 	xor	v0,v0,a0
@@ -3944,373 +3934,373 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	7063 ffff 	xori	v1,v1,0xffff
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9549 fffe 	beq	t1,t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	3020 0001 	li	at,1
 [ 0-9a-f]+:	9429 fffe 	beq	t1,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	404a fffe 	bgez	t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	404a fffe 	bgez	t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	408a fffe 	blez	t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	016a 0b50 	slt	at,t2,t3
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	404a fffe 	bgez	t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	40ca fffe 	bgtz	t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	902a 0002 	slti	at,t2,2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9440 fffe 	beq	zero,v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	0062 0b90 	sltu	at,v0,v1
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b402 fffe 	bnez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b022 0002 	sltiu	at,v0,2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4042 fffe 	bgez	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4062 fffe 	bgezal	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
 [ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	40c2 fffe 	bgtz	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4002 fffe 	bltz	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	012a 0b50 	slt	at,t2,t1
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4049 fffe 	bgez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	40c9 fffe 	bgtz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9029 0002 	slti	at,t1,2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	41a1 8000 	lui	at,0x8000
 [ 0-9a-f]+:	5021 0001 	ori	at,at,0x1
 [ 0-9a-f]+:	0029 0b50 	slt	at,t1,at
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	012a 0b90 	sltu	at,t2,t1
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b029 0002 	sltiu	at,t1,2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	40c9 fffe 	bgtz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4089 fffe 	blez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	404a fffe 	bgez	t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	012a 0b50 	slt	at,t2,t1
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4009 fffe 	bltz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4089 fffe 	blez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9029 0002 	slti	at,t1,2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	012a 0b90 	sltu	at,t2,t1
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b029 0002 	sltiu	at,t1,2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4089 fffe 	blez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4009 fffe 	bltz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	40ca fffe 	bgtz	t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	0149 0b50 	slt	at,t1,t2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4009 fffe 	bltz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4089 fffe 	blez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9029 0002 	slti	at,t1,2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b540 fffe 	bne	zero,t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	0149 0b90 	sltu	at,t1,t2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b029 0002 	sltiu	at,t1,2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4009 fffe 	bltz	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4029 fffe 	bltzal	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
 [ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b549 fffe 	bne	t1,t2,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	3020 0001 	li	at,1
 [ 0-9a-f]+:	b429 fffe 	bne	t1,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b549 fffe 	bne	t1,t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 0001 	li	at,1
 [ 0-9a-f]+:	b429 fffe 	bne	t1,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	400a fffe 	bltz	t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	400a fffe 	bltz	t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	40ca fffe 	bgtz	t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	016a 0b50 	slt	at,t2,t3
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	400a fffe 	bltz	t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	408a fffe 	blez	t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	902a 0002 	slti	at,t2,2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b440 fffe 	bne	zero,v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	0062 0b90 	sltu	at,v0,v1
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9402 fffe 	beqz	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b022 0002 	sltiu	at,v0,2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4002 fffe 	bltz	v0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4002 fffe 	bltz	v0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4060 fffe 	bal	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
 [ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
@@ -4318,60 +4308,60 @@ Disassembly of section \.text:
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4082 fffe 	blez	v0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4042 fffe 	bgez	v0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	012a 0b50 	slt	at,t2,t1
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4009 fffe 	bltz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4089 fffe 	blez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9029 0002 	slti	at,t1,2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	41a1 8000 	lui	at,0x8000
@@ -4379,301 +4369,301 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0029 0b50 	slt	at,t1,at
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	012a 0b90 	sltu	at,t2,t1
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b029 0002 	sltiu	at,t1,2
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4089 fffe 	blez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	40c9 fffe 	bgtz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	400a fffe 	bltz	t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	012a 0b50 	slt	at,t2,t1
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	4049 fffe 	bgez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	40c9 fffe 	bgtz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9029 0002 	slti	at,t1,2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	012a 0b90 	sltu	at,t2,t1
 [ 0-9a-f]+:	b401 fffe 	bnez	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b029 0002 	sltiu	at,t1,2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	40c9 fffe 	bgtz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4049 fffe 	bgez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	408a fffe 	blez	t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	0149 0b50 	slt	at,t1,t2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4049 fffe 	bgez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	40c9 fffe 	bgtz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9029 0002 	slti	at,t1,2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9540 fffe 	beq	zero,t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	0149 0b90 	sltu	at,t1,t2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b409 fffe 	bnez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	b029 0002 	sltiu	at,t1,2
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4049 fffe 	bgez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4049 fffe 	bgez	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4060 fffe 	bal	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
 [ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
@@ -4681,96 +4671,37 @@ Disassembly of section \.text:
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9549 fffe 	beq	t1,t2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	9409 fffe 	beqz	t1,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 0001 	li	at,1
 [ 0-9a-f]+:	9429 fffe 	beq	t1,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	6d01      	addiu	v0,sp,0
-[ 0-9a-f]+:	6d03      	addiu	v0,sp,4
-[ 0-9a-f]+:	6d05      	addiu	v0,sp,8
-[ 0-9a-f]+:	6d07      	addiu	v0,sp,12
-[ 0-9a-f]+:	6d09      	addiu	v0,sp,16
-[ 0-9a-f]+:	6d7f      	addiu	v0,sp,252
-[ 0-9a-f]+:	6dff      	addiu	v1,sp,252
-[ 0-9a-f]+:	6e7f      	addiu	a0,sp,252
-[ 0-9a-f]+:	6eff      	addiu	a1,sp,252
-[ 0-9a-f]+:	6f7f      	addiu	a2,sp,252
-[ 0-9a-f]+:	6fff      	addiu	a3,sp,252
-[ 0-9a-f]+:	6c7f      	addiu	s0,sp,252
-[ 0-9a-f]+:	6cff      	addiu	s1,sp,252
-[ 0-9a-f]+:	6d2e      	addiu	v0,v0,-1
-[ 0-9a-f]+:	6d3e      	addiu	v0,v1,-1
-[ 0-9a-f]+:	6d4e      	addiu	v0,a0,-1
-[ 0-9a-f]+:	6d5e      	addiu	v0,a1,-1
-[ 0-9a-f]+:	6d6e      	addiu	v0,a2,-1
-[ 0-9a-f]+:	6d7e      	addiu	v0,a3,-1
-[ 0-9a-f]+:	6d0e      	addiu	v0,s0,-1
-[ 0-9a-f]+:	6d1e      	addiu	v0,s1,-1
-[ 0-9a-f]+:	6d9e      	addiu	v1,s1,-1
-[ 0-9a-f]+:	6e1e      	addiu	a0,s1,-1
-[ 0-9a-f]+:	6e9e      	addiu	a1,s1,-1
-[ 0-9a-f]+:	6f1e      	addiu	a2,s1,-1
-[ 0-9a-f]+:	6f9e      	addiu	a3,s1,-1
-[ 0-9a-f]+:	6c1e      	addiu	s0,s1,-1
-[ 0-9a-f]+:	6c9e      	addiu	s1,s1,-1
-[ 0-9a-f]+:	6c90      	addiu	s1,s1,1
-[ 0-9a-f]+:	6c92      	addiu	s1,s1,4
-[ 0-9a-f]+:	6c94      	addiu	s1,s1,8
-[ 0-9a-f]+:	6c96      	addiu	s1,s1,12
-[ 0-9a-f]+:	6c98      	addiu	s1,s1,16
-[ 0-9a-f]+:	6c9a      	addiu	s1,s1,20
-[ 0-9a-f]+:	6c9c      	addiu	s1,s1,24
-[ 0-9a-f]+:	4c05      	addiu	sp,sp,8
-[ 0-9a-f]+:	4c07      	addiu	sp,sp,12
-[ 0-9a-f]+:	4dfd      	addiu	sp,sp,1016
-[ 0-9a-f]+:	4dff      	addiu	sp,sp,1020
-[ 0-9a-f]+:	4c01      	addiu	sp,sp,1024
-[ 0-9a-f]+:	4c03      	addiu	sp,sp,1028
-[ 0-9a-f]+:	4ffb      	addiu	sp,sp,-12
-[ 0-9a-f]+:	4ff9      	addiu	sp,sp,-16
-[ 0-9a-f]+:	4e03      	addiu	sp,sp,-1020
-[ 0-9a-f]+:	4e01      	addiu	sp,sp,-1024
-[ 0-9a-f]+:	4fff      	addiu	sp,sp,-1028
-[ 0-9a-f]+:	4ffd      	addiu	sp,sp,-1032
-[ 0-9a-f]+:	4c00      	addiu	zero,zero,0
-[ 0-9a-f]+:	4c40      	addiu	v0,v0,0
-[ 0-9a-f]+:	4c60      	addiu	v1,v1,0
-[ 0-9a-f]+:	4fc0      	addiu	s8,s8,0
-[ 0-9a-f]+:	4fe0      	addiu	ra,ra,0
-[ 0-9a-f]+:	4fe2      	addiu	ra,ra,1
-[ 0-9a-f]+:	4fe4      	addiu	ra,ra,2
-[ 0-9a-f]+:	4fe6      	addiu	ra,ra,3
-[ 0-9a-f]+:	4fee      	addiu	ra,ra,7
-[ 0-9a-f]+:	4ff4      	addiu	ra,ra,-6
-[ 0-9a-f]+:	4ff2      	addiu	ra,ra,-7
-[ 0-9a-f]+:	4ff0      	addiu	ra,ra,-8
 [ 0-9a-f]+:	f860 0004 	sw	v1,4\(zero\)
 [ 0-9a-f]+:	f880 0008 	sw	a0,8\(zero\)
 [ 0-9a-f]+:	f860 0004 	sw	v1,4\(zero\)
@@ -4915,19 +4846,32 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	0024 0950 	addu	at,a0,at
 [ 0-9a-f]+:	fc61 5678 	lw	v1,22136\(at\)
 [ 0-9a-f]+:	fc81 567c 	lw	a0,22140\(at\)
-[ 0-9a-f]+:	4700      	jraddiusp	0
-[ 0-9a-f]+:	4701      	jraddiusp	4
-[ 0-9a-f]+:	4702      	jraddiusp	8
-[ 0-9a-f]+:	4703      	jraddiusp	12
-[ 0-9a-f]+:	4704      	jraddiusp	16
-[ 0-9a-f]+:	4705      	jraddiusp	20
-[ 0-9a-f]+:	4706      	jraddiusp	24
-[ 0-9a-f]+:	4707      	jraddiusp	28
-[ 0-9a-f]+:	4708      	jraddiusp	32
-[ 0-9a-f]+:	4709      	jraddiusp	36
-[ 0-9a-f]+:	470a      	jraddiusp	40
-[ 0-9a-f]+:	471e      	jraddiusp	120
-[ 0-9a-f]+:	471f      	jraddiusp	124
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0000 	addiu	sp,sp,0
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0004 	addiu	sp,sp,4
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0008 	addiu	sp,sp,8
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 000c 	addiu	sp,sp,12
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0010 	addiu	sp,sp,16
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0014 	addiu	sp,sp,20
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0018 	addiu	sp,sp,24
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 001c 	addiu	sp,sp,28
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0020 	addiu	sp,sp,32
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0024 	addiu	sp,sp,36
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0028 	addiu	sp,sp,40
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 0078 	addiu	sp,sp,120
+[ 0-9a-f]+:	001f 0f3c 	jr	ra
+[ 0-9a-f]+:	33bd 007c 	addiu	sp,sp,124
 [ 0-9a-f]+:	2060 2000 	ldc2	\$3,0\(zero\)
 [ 0-9a-f]+:	2060 2000 	ldc2	\$3,0\(zero\)
 [ 0-9a-f]+:	2060 2004 	ldc2	\$3,4\(zero\)
@@ -5251,7 +5195,6 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	03ff 937c 	wait	0x3ff
 [ 0-9a-f]+:	03ff 8b7c 	syscall	0x3ff
 [ 0-9a-f]+:	03ff fffa 	cop2	0x7fffff
-[ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	0000 0000 	nop
 
 [0-9a-f]+ <fp_test>:
@@ -5294,58 +5237,58 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	57fd efd9 	alnv\.ps	\$f29,\$f29,\$f31,ra
 [ 0-9a-f]+:	4380 fffe 	bc1f	[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4380 fffe 	bc1f	[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4384 fffe 	bc1f	\$fcc1,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4388 fffe 	bc1f	\$fcc2,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	438c fffe 	bc1f	\$fcc3,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4390 fffe 	bc1f	\$fcc4,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4394 fffe 	bc1f	\$fcc5,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	4398 fffe 	bc1f	\$fcc6,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	439c fffe 	bc1f	\$fcc7,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43a0 fffe 	bc1t	[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43a0 fffe 	bc1t	[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43a4 fffe 	bc1t	\$fcc1,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43a8 fffe 	bc1t	\$fcc2,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43ac fffe 	bc1t	\$fcc3,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43b0 fffe 	bc1t	\$fcc4,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43b4 fffe 	bc1t	\$fcc5,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43b8 fffe 	bc1t	\$fcc6,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	43bc fffe 	bc1t	\$fcc7,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	5420 043c 	c\.f\.d	\$f0,\$f1
 [ 0-9a-f]+:	57fe 043c 	c\.f\.d	\$f30,\$f31
 [ 0-9a-f]+:	57fe 043c 	c\.f\.d	\$f30,\$f31
@@ -6616,15 +6559,15 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	57df e97b 	movt	s8,ra,\$fcc7
 [ 0-9a-f]+:	43a4 fffe 	bc1t	\$fcc1,[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4388 fffe 	bc1f	\$fcc2,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	9400 fffe 	b	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
 [ 0-9a-f]+:	0107 3150 	addu	a2,a3,t0
@@ -6632,29 +6575,29 @@ Disassembly of section \.text:
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	438c fffe 	bc1f	\$fcc3,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	05d8      	addu	v1,a0,a1
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	00a4 1950 	addu	v1,a0,a1
 [ 0-9a-f]+:	43b0 fffe 	bc1t	\$fcc4,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0107 3150 	addu	a2,a3,t0
 
 [0-9a-f]+ <test_mips64>:
 [ 0-9a-f]+:	4043 fffe 	bgez	v1,[0-9a-f]+ <test_mips64>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c43      	move	v0,v1
+[ 0-9a-f]+:	5803 1150 	move	v0,v1
 [ 0-9a-f]+:	5860 1190 	dneg	v0,v1
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4042 fffe 	bgez	v0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	5840 1190 	dneg	v0,v0
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	4042 fffe 	bgez	v0,[0-9a-f]+ <.*>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	5840 1190 	dneg	v0,v0
 
 [0-9a-f]+ <.*>:
@@ -6721,11 +6664,11 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5bfe ab3c 	ddiv	zero,s8,ra
 [ 0-9a-f]+:	5860 ab3c 	ddiv	zero,zero,v1
 [ 0-9a-f]+:	5be0 ab3c 	ddiv	zero,zero,ra
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 [ 0-9a-f]+:	b404 fffe 	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	5883 ab3c 	ddiv	zero,v1,a0
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
@@ -6735,17 +6678,17 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5821 f808 	dsll32	at,at,0x1f
 [ 0-9a-f]+:	b423 fffe 	bne	v1,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c64      	move	v1,a0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	5804 1950 	move	v1,a0
 [ 0-9a-f]+:	5880 1990 	dneg	v1,a0
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	5824 ab3c 	ddiv	zero,a0,at
-[ 0-9a-f]+:	4643      	mflo	v1
+[ 0-9a-f]+:	0003 1d7c 	mflo	v1
 [ 0-9a-f]+:	5862 bb3c 	ddivu	zero,v0,v1
 [ 0-9a-f]+:	5bfe bb3c 	ddivu	zero,s8,ra
 [ 0-9a-f]+:	5860 bb3c 	ddivu	zero,zero,v1
@@ -6753,25 +6696,25 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	b400 fffe 	bnez	zero,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	5803 bb3c 	ddivu	zero,v1,zero
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	b404 fffe 	bnez	a0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	5883 bb3c 	ddivu	zero,v1,a0
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c64      	move	v1,a0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	5804 1950 	move	v1,a0
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
 [ 0-9a-f]+:	5824 bb3c 	ddivu	zero,a0,at
-[ 0-9a-f]+:	4643      	mflo	v1
+[ 0-9a-f]+:	0003 1d7c 	mflo	v1
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	5824 bb3c 	ddivu	zero,a0,at
-[ 0-9a-f]+:	4643      	mflo	v1
+[ 0-9a-f]+:	0003 1d7c 	mflo	v1
 [ 0-9a-f]+:	5843 07ec 	dext	v0,v1,0x1f,0x1
 [ 0-9a-f]+:	5843 f82c 	dext	v0,v1,0x0,0x20
 [ 0-9a-f]+:	5843 07e4 	dextm	v0,v1,0x1f,0x21
@@ -7104,65 +7047,65 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5862 8b3c 	dmult	v0,v1
 [ 0-9a-f]+:	5862 9b3c 	dmultu	v0,v1
 [ 0-9a-f]+:	5883 9b3c 	dmultu	v1,a0
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	41a1 1234 	lui	at,0x1234
 [ 0-9a-f]+:	5021 5678 	ori	at,at,0x5678
 [ 0-9a-f]+:	5823 8b3c 	dmult	v1,at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	5883 8b3c 	dmult	v1,a0
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	5842 f888 	dsra32	v0,v0,0x1f
-[ 0-9a-f]+:	4601      	mfhi	at
+[ 0-9a-f]+:	0001 0d7c 	mfhi	at
 [ 0-9a-f]+:	9422 fffe 	beq	v0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	3020 0004 	li	at,4
 [ 0-9a-f]+:	5823 8b3c 	dmult	v1,at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	5842 f888 	dsra32	v0,v0,0x1f
-[ 0-9a-f]+:	4601      	mfhi	at
+[ 0-9a-f]+:	0001 0d7c 	mfhi	at
 [ 0-9a-f]+:	9422 fffe 	beq	v0,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	5883 9b3c 	dmultu	v1,a0
-[ 0-9a-f]+:	4601      	mfhi	at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0001 0d7c 	mfhi	at
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 0004 	li	at,4
 [ 0-9a-f]+:	5823 9b3c 	dmultu	v1,at
-[ 0-9a-f]+:	4601      	mfhi	at
-[ 0-9a-f]+:	4642      	mflo	v0
+[ 0-9a-f]+:	0001 0d7c 	mfhi	at
+[ 0-9a-f]+:	0002 1d7c 	mflo	v0
 [ 0-9a-f]+:	9401 fffe 	beqz	at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c60      	move	v1,zero
-[ 0-9a-f]+:	0c60      	move	v1,zero
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	5800 1950 	move	v1,zero
+[ 0-9a-f]+:	5800 1950 	move	v1,zero
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	5824 ab3c 	ddiv	zero,a0,at
-[ 0-9a-f]+:	4603      	mfhi	v1
+[ 0-9a-f]+:	0003 0d7c 	mfhi	v1
 [ 0-9a-f]+:	5862 ab3c 	ddiv	zero,v0,v1
 [ 0-9a-f]+:	5bfe ab3c 	ddiv	zero,s8,ra
 [ 0-9a-f]+:	b403 fffe 	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	5860 ab3c 	ddiv	zero,zero,v1
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
@@ -7172,15 +7115,15 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5821 f808 	dsll32	at,at,0x1f
 [ 0-9a-f]+:	b420 fffe 	bne	zero,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4600      	mfhi	zero
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
 [ 0-9a-f]+:	b41f fffe 	bnez	ra,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	5be0 ab3c 	ddiv	zero,zero,ra
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
@@ -7190,41 +7133,41 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5821 f808 	dsll32	at,at,0x1f
 [ 0-9a-f]+:	b420 fffe 	bne	zero,at,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4686      	break	0x6
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	0006 0007 	break	0x6
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4600      	mfhi	zero
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c60      	move	v1,zero
-[ 0-9a-f]+:	0c60      	move	v1,zero
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	5800 1950 	move	v1,zero
+[ 0-9a-f]+:	5800 1950 	move	v1,zero
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	5824 ab3c 	ddiv	zero,a0,at
-[ 0-9a-f]+:	4603      	mfhi	v1
+[ 0-9a-f]+:	0003 0d7c 	mfhi	v1
 [ 0-9a-f]+:	5862 bb3c 	ddivu	zero,v0,v1
 [ 0-9a-f]+:	5bfe bb3c 	ddivu	zero,s8,ra
 [ 0-9a-f]+:	b403 fffe 	bnez	v1,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	5860 bb3c 	ddivu	zero,zero,v1
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4600      	mfhi	zero
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
 [ 0-9a-f]+:	b41f fffe 	bnez	ra,[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	.*
 [ 0-9a-f]+:	5be0 bb3c 	ddivu	zero,zero,ra
-[ 0-9a-f]+:	4687      	break	0x7
+[ 0-9a-f]+:	0007 0007 	break	0x7
 
 [0-9a-f]+ <.*>:
-[ 0-9a-f]+:	4600      	mfhi	zero
-[ 0-9a-f]+:	4687      	break	0x7
-[ 0-9a-f]+:	0c60      	move	v1,zero
+[ 0-9a-f]+:	0000 0d7c 	mfhi	zero
+[ 0-9a-f]+:	0007 0007 	break	0x7
+[ 0-9a-f]+:	5800 1950 	move	v1,zero
 [ 0-9a-f]+:	3020 ffff 	li	at,-1
 [ 0-9a-f]+:	5824 bb3c 	ddivu	zero,a0,at
-[ 0-9a-f]+:	4603      	mfhi	v1
+[ 0-9a-f]+:	0003 0d7c 	mfhi	v1
 [ 0-9a-f]+:	3020 0002 	li	at,2
 [ 0-9a-f]+:	5824 bb3c 	ddivu	zero,a0,at
-[ 0-9a-f]+:	4603      	mfhi	v1
+[ 0-9a-f]+:	0003 0d7c 	mfhi	v1
 [ 0-9a-f]+:	5880 11d0 	dnegu	v0,a0
 [ 0-9a-f]+:	5862 10d0 	drorv	v0,v1,v0
 [ 0-9a-f]+:	5880 09d0 	dnegu	at,a0
@@ -7819,59 +7762,42 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	4023 fffe 	bltzal	v1,[0-9a-f]+ <test_delay_slot\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_delay_slot
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	4263 fffe 	bgezals	v1,[0-9a-f]+ <test_delay_slot\+0x[0-9a-f]+>
+[ 0-9a-f]+:	4063 fffe 	bgezal	v1,[0-9a-f]+ <test_delay_slot\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_delay_slot
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4223 fffe 	bltzals	v1,[0-9a-f]+ <test_delay_slot\+0x[0-9a-f]+>
+[ 0-9a-f]+:	0000 0000 	nop
+[ 0-9a-f]+:	4023 fffe 	bltzal	v1,[0-9a-f]+ <test_delay_slot\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_delay_slot
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	f400 0000 	jal	[0-9a-f]+ <test>
 [ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	f000 0000 	jalx	[0-9a-f]+ <test>
 [ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	45c2      	jalr	v0
-[ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03e2 0f3c 	jalr	v0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	4582      	jr	v0
-[ 0-9a-f]+:	0c00      	nop
 [ 0-9a-f]+:	0002 0f3c 	jr	v0
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	03e2 1f3c 	jalr\.hb	v0
 [ 0-9a-f]+:	0000 0000 	nop
 [ 0-9a-f]+:	0002 1f3c 	jr\.hb	v0
 [ 0-9a-f]+:	0000 0000 	nop
-[ 0-9a-f]+:	7400 0000 	jals	[0-9a-f]+ <test>
-[ 	]*[0-9a-f]+: R_MICROMIPS_26_S1	test_delay_slot
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	45e2      	jalrs	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	03e2 4f3c 	jalrs	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	0002 4f3c 	jrs	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	03e2 5f3c 	jalrs\.hb	v0
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	0002 5f3c 	jrs\.hb	v0
-[ 0-9a-f]+:	0c00      	nop
 
 [0-9a-f]+ <test_spec102>:
-[ 0-9a-f]+:	6540      	lw	v0,-256\(gp\)
-[ 0-9a-f]+:	65c0      	lw	v1,-256\(gp\)
-[ 0-9a-f]+:	6640      	lw	a0,-256\(gp\)
-[ 0-9a-f]+:	66c0      	lw	a1,-256\(gp\)
-[ 0-9a-f]+:	6740      	lw	a2,-256\(gp\)
-[ 0-9a-f]+:	67c0      	lw	a3,-256\(gp\)
-[ 0-9a-f]+:	6440      	lw	s0,-256\(gp\)
-[ 0-9a-f]+:	64c0      	lw	s1,-256\(gp\)
-[ 0-9a-f]+:	64c1      	lw	s1,-252\(gp\)
-[ 0-9a-f]+:	64ff      	lw	s1,-4\(gp\)
-[ 0-9a-f]+:	6480      	lw	s1,0\(gp\)
-[ 0-9a-f]+:	6481      	lw	s1,4\(gp\)
-[ 0-9a-f]+:	64be      	lw	s1,248\(gp\)
-[ 0-9a-f]+:	64bf      	lw	s1,252\(gp\)
+[ 0-9a-f]+:	fc5c ff00 	lw	v0,-256\(gp\)
+[ 0-9a-f]+:	fc7c ff00 	lw	v1,-256\(gp\)
+[ 0-9a-f]+:	fc9c ff00 	lw	a0,-256\(gp\)
+[ 0-9a-f]+:	fcbc ff00 	lw	a1,-256\(gp\)
+[ 0-9a-f]+:	fcdc ff00 	lw	a2,-256\(gp\)
+[ 0-9a-f]+:	fcfc ff00 	lw	a3,-256\(gp\)
+[ 0-9a-f]+:	fe1c ff00 	lw	s0,-256\(gp\)
+[ 0-9a-f]+:	fe3c ff00 	lw	s1,-256\(gp\)
+[ 0-9a-f]+:	fe3c ff04 	lw	s1,-252\(gp\)
+[ 0-9a-f]+:	fe3c fffc 	lw	s1,-4\(gp\)
+[ 0-9a-f]+:	fe3c 0000 	lw	s1,0\(gp\)
+[ 0-9a-f]+:	fe3c 0004 	lw	s1,4\(gp\)
+[ 0-9a-f]+:	fe3c 00f8 	lw	s1,248\(gp\)
+[ 0-9a-f]+:	fe3c 00fc 	lw	s1,252\(gp\)
 [ 0-9a-f]+:	fe3c 0100 	lw	s1,256\(gp\)
 [ 0-9a-f]+:	fe3c fefc 	lw	s1,-260\(gp\)
 [ 0-9a-f]+:	fe3c 0001 	lw	s1,1\(gp\)
@@ -7903,37 +7829,50 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	78c0 0000 	addiu	s1,\$pc,-16777216
 
 [0-9a-f]+ <test_spec107>:
-[ 0-9a-f]+:	8400      	movep	a1,a2,zero,zero
-[ 0-9a-f]+:	8480      	movep	a1,a3,zero,zero
-[ 0-9a-f]+:	8500      	movep	a2,a3,zero,zero
-[ 0-9a-f]+:	8580      	movep	a0,s5,zero,zero
-[ 0-9a-f]+:	8600      	movep	a0,s6,zero,zero
-[ 0-9a-f]+:	8680      	movep	a0,a1,zero,zero
-[ 0-9a-f]+:	8700      	movep	a0,a2,zero,zero
-[ 0-9a-f]+:	8780      	movep	a0,a3,zero,zero
-[ 0-9a-f]+:	8782      	movep	a0,a3,s1,zero
-[ 0-9a-f]+:	8784      	movep	a0,a3,v0,zero
-[ 0-9a-f]+:	8786      	movep	a0,a3,v1,zero
-[ 0-9a-f]+:	8788      	movep	a0,a3,s0,zero
-[ 0-9a-f]+:	878a      	movep	a0,a3,s2,zero
-[ 0-9a-f]+:	878c      	movep	a0,a3,s3,zero
-[ 0-9a-f]+:	878e      	movep	a0,a3,s4,zero
-[ 0-9a-f]+:	879e      	movep	a0,a3,s4,s1
-[ 0-9a-f]+:	87ae      	movep	a0,a3,s4,v0
-[ 0-9a-f]+:	87be      	movep	a0,a3,s4,v1
-[ 0-9a-f]+:	87ce      	movep	a0,a3,s4,s0
-[ 0-9a-f]+:	87de      	movep	a0,a3,s4,s2
-[ 0-9a-f]+:	87ee      	movep	a0,a3,s4,s3
-[ 0-9a-f]+:	87fe      	movep	a0,a3,s4,s4
-[ 0-9a-f]+:	4260 fffe 	bals	[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_spec107
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4262 fffe 	bgezals	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_spec107
-[ 0-9a-f]+:	0c00      	nop
-[ 0-9a-f]+:	4222 fffe 	bltzals	v0,[0-9a-f]+ <.*\+0x[0-9a-f]+>
-[ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_spec107
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	5800 2950 	move	a1,zero
+[ 0-9a-f]+:	5800 3150 	move	a2,zero
+[ 0-9a-f]+:	5800 2950 	move	a1,zero
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5800 3150 	move	a2,zero
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5800 2150 	move	a0,zero
+[ 0-9a-f]+:	5800 a950 	move	s5,zero
+[ 0-9a-f]+:	5800 2150 	move	a0,zero
+[ 0-9a-f]+:	5800 b150 	move	s6,zero
+[ 0-9a-f]+:	5800 2150 	move	a0,zero
+[ 0-9a-f]+:	5800 2950 	move	a1,zero
+[ 0-9a-f]+:	5800 2150 	move	a0,zero
+[ 0-9a-f]+:	5800 3150 	move	a2,zero
+[ 0-9a-f]+:	5800 2150 	move	a0,zero
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5811 2150 	move	a0,s1
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5802 2150 	move	a0,v0
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5803 2150 	move	a0,v1
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5810 2150 	move	a0,s0
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5812 2150 	move	a0,s2
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5813 2150 	move	a0,s3
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5814 2150 	move	a0,s4
+[ 0-9a-f]+:	5800 3950 	move	a3,zero
+[ 0-9a-f]+:	5814 2150 	move	a0,s4
+[ 0-9a-f]+:	5811 3950 	move	a3,s1
+[ 0-9a-f]+:	5814 2150 	move	a0,s4
+[ 0-9a-f]+:	5802 3950 	move	a3,v0
+[ 0-9a-f]+:	5814 2150 	move	a0,s4
+[ 0-9a-f]+:	5803 3950 	move	a3,v1
+[ 0-9a-f]+:	5814 2150 	move	a0,s4
+[ 0-9a-f]+:	5810 3950 	move	a3,s0
+[ 0-9a-f]+:	5814 2150 	move	a0,s4
+[ 0-9a-f]+:	5812 3950 	move	a3,s2
+[ 0-9a-f]+:	5814 2150 	move	a0,s4
+[ 0-9a-f]+:	5813 3950 	move	a3,s3
+[ 0-9a-f]+:	5814 2150 	move	a0,s4
+[ 0-9a-f]+:	5814 3950 	move	a3,s4
 [ 0-9a-f]+:	4060 fffe 	bal	[0-9a-f]+ <.*\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	test_spec107
 [ 0-9a-f]+:	0000 0000 	nop

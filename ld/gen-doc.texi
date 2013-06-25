@@ -14,6 +14,7 @@
 @set I960
 @set M68HC11
 @set M68K
+@set MIPS
 @set MMIX
 @set MSP430
 @set POWERPC
