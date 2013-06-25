@@ -1215,7 +1215,6 @@ md_parse_option (int c, char * arg)
   return 0;
 }
 
-
 const pseudo_typeS md_pseudo_table[] =
 {
   {"arch", msp430_set_arch, OPTION_MMCU},
@@ -1649,6 +1648,12 @@ msp430_srcoperand (struct msp430_operand_s * op,
       op->am = m ? 3 : 2;
       op->ol = 0;
 
+      /* PC cannot be used in indirect addressing.  */
+      if (target_is_430xv2 () && op->reg == 0)
+	{
+	  as_bad (_("cannot use indirect addressing with the PC"));
+	  return 1;
+	}
       return 0;
     }
 
@@ -2300,8 +2305,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  frag = frag_more (insn_length);
 	  where = frag - frag_now->fr_literal;
 
-	  /* Issue 3831743.  */
-	  if (op1.mode == OP_REG
+	  if (target_is_430xv2 ()
+	      && op1.mode == OP_REG
 	      && op1.reg == 0 
 	      && (is_opcode ("rlax")
 		  || is_opcode ("rlcx")
@@ -2580,8 +2585,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		    return 0;
 		  }
 
-		/* Issue 3831713:  CPU21 parts cannot use POPM to restore the SR register.  */
-		if (target_is_430x ()
+		/* CPU21 parts cannot use POPM to restore the SR register.  */
+		if (target_is_430xv2 ()
 		    && (reg - n + 1 < 3)
 		    && reg >= 2
 		    && is_opcode ("popm"))
@@ -2640,8 +2645,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		return 0;
 	      }
 
-	    /* Issue 3831743.  */
-	    if (reg == 0)
+	    if (target_is_430xv2 () && reg == 0)
 	      {
 		as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
 		return 0;
@@ -2681,8 +2685,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		return 0;
 	      }
 
-	    /* Issue 3831743.  */
-	    if (reg == 0)
+	    if (target_is_430xv2 () && reg == 0)
 	      {
 		as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
 		return 0;
@@ -3060,8 +3063,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
       if (res)
 	break;		/* Error in operand.  */
 
-      /* Issue 3831743.  */
-      if (op1.mode == OP_REG
+      if (target_is_430xv2 ()
+	  && op1.mode == OP_REG
 	  && op1.reg == 0 
 	  && (is_opcode ("rrax")
 	      || is_opcode ("rrcx")
