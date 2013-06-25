@@ -1,3 +1,8 @@
+2013-06-25  Tom Tromey  <tromey@redhat.com>
+
+	* common/create-version.sh (date): Use "$", not "$$" in sed
+	expression.
+
 2013-06-25  Kevin Buettner  <kevinb@redhat.com>
 
 	* NEWS (New targets): Add entry for TI MSP430.
