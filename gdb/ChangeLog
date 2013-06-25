@@ -1,3 +1,10 @@
+2013-06-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add msp430-tdep.o.
+	(ALLDEPFILES): Add msp430-tdep.c.
+	* configure.tgt (msp430*-*-elf): New target.
+	* msp430-tdep.c: New file.
+
 2013-06-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_elf_make_msymbol_special): Handle MIPS16 and

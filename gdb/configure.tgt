@@ -391,6 +391,11 @@ mn10300-*-*)
 	gdb_sim=../sim/mn10300/libsim.a
 	;;
 
+msp430*-*-elf)
+	gdb_target_obs="msp430-tdep.o"
+	gdb_sim=../sim/msp430/libsim.a
+	;;
+
 mt-*-*)
 	# Target: Morpho Technologies ms1 processor
 	gdb_target_obs="mt-tdep.o"
