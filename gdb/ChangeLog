@@ -1,3 +1,19 @@
+2013-06-25  Yao Qi  <yao@codesourcery.com>
+	    Hui Zhu  <hui@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/15075
+	PR breakpoints/15434
+	* breakpoint.c (bpstat_stop_status): Call
+	b->ops->after_condition_true.
+	(update_dprintf_command_list): Don't append "continue" command
+	to the command list of dprintf breakpoint.
+	(base_breakpoint_after_condition_true): New function.
+	(base_breakpoint_ops): Add base_breakpoint_after_condition_true.
+	(dprintf_after_condition_true): New function.
+	(initialize_breakpoint_ops): Set dprintf_after_condition_true.
+	* breakpoint.h (breakpoint_ops): Add after_condition_true.
+
 2013-06-24  Kevin Buettner  <kevinb@redhat.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add msp430-tdep.o.

@@ -1,3 +1,18 @@
+2013-06-25  Yao Qi  <yao@codesourcery.com>
+	    Hui Zhu  <hui@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/15075
+	PR breakpoints/15434
+	* gdb.base/dprintf-next.c: New file.
+	* gdb.base/dprintf-next.exp: New file.
+	* gdb.base/dprintf-non-stop.c: New file.
+	* gdb.base/dprintf-non-stop.exp: New file.
+	* gdb.base/dprintf.exp: Don't check "continue" in the output
+	of "info breakpoints".
+	* gdb.mi/mi-breakpoint-changed.exp (test_insert_delete_modify):
+	Don't check "continue" in script field.
+
 2013-06-21  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.trace/actions.exp (check_tracepoint): Don't use a full file

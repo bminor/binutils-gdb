@@ -5308,6 +5308,8 @@ bpstat_stop_status (struct address_space *aspace,
 	      if (command_line_is_silent (bs->commands
 					  ? bs->commands->commands : NULL))
 		bs->print = 0;
+
+	      b->ops->after_condition_true (bs);
 	    }
 
 	}
@@ -8943,25 +8945,16 @@ update_dprintf_command_list (struct breakpoint *b)
 		    _("Invalid dprintf style."));
 
   gdb_assert (printf_line != NULL);
-  /* Manufacture a printf/continue sequence.  */
+  /* Manufacture a printf sequence.  */
   {
-    struct command_line *printf_cmd_line, *cont_cmd_line = NULL;
-
-    if (strcmp (dprintf_style, dprintf_style_agent) != 0)
-      {
-	cont_cmd_line = xmalloc (sizeof (struct command_line));
-	cont_cmd_line->control_type = simple_control;
-	cont_cmd_line->body_count = 0;
-	cont_cmd_line->body_list = NULL;
-	cont_cmd_line->next = NULL;
-	cont_cmd_line->line = xstrdup ("continue");
-      }
+    struct command_line *printf_cmd_line
+      = xmalloc (sizeof (struct command_line));
 
     printf_cmd_line = xmalloc (sizeof (struct command_line));
     printf_cmd_line->control_type = simple_control;
     printf_cmd_line->body_count = 0;
     printf_cmd_line->body_list = NULL;
-    printf_cmd_line->next = cont_cmd_line;
+    printf_cmd_line->next = NULL;
     printf_cmd_line->line = printf_line;
 
     breakpoint_set_commands (b, printf_cmd_line);
@@ -12761,6 +12754,14 @@ base_breakpoint_explains_signal (struct breakpoint *b, enum gdb_signal sig)
   return BPSTAT_SIGNAL_HIDE;
 }
 
+/* The default "after_condition_true" method.  */
+
+static void
+base_breakpoint_after_condition_true (struct bpstats *bs)
+{
+  /* Nothing to do.   */
+}
+
 struct breakpoint_ops base_breakpoint_ops =
 {
   base_breakpoint_dtor,
@@ -12780,7 +12781,8 @@ struct breakpoint_ops base_breakpoint_ops =
   base_breakpoint_create_sals_from_address,
   base_breakpoint_create_breakpoints_sal,
   base_breakpoint_decode_linespec,
-  base_breakpoint_explains_signal
+  base_breakpoint_explains_signal,
+  base_breakpoint_after_condition_true,
 };
 
 /* Default breakpoint_ops methods.  */
@@ -13372,6 +13374,44 @@ dprintf_print_recreate (struct breakpoint *tp, struct ui_file *fp)
   fprintf_unfiltered (fp, "dprintf %s%s", tp->addr_string,
 		      tp->extra_string);
   print_recreate_thread (tp, fp);
+}
+
+/* Implement the "after_condition_true" breakpoint_ops method for
+   dprintf.
+
+   dprintf's are implemented with regular commands in their command
+   list, but we run the commands here instead of before presenting the
+   stop to the user, as dprintf's don't actually cause a stop.  This
+   also makes it so that the commands of multiple dprintfs at the same
+   address are all handled.  */
+
+static void
+dprintf_after_condition_true (struct bpstats *bs)
+{
+  struct cleanup *old_chain;
+  struct bpstats tmp_bs = { NULL };
+  struct bpstats *tmp_bs_p = &tmp_bs;
+
+  /* dprintf's never cause a stop.  This wasn't set in the
+     check_status hook instead because that would make the dprintf's
+     condition not be evaluated.  */
+  bs->stop = 0;
+
+  /* Run the command list here.  Take ownership of it instead of
+     copying.  We never want these commands to run later in
+     bpstat_do_actions, if a breakpoint that causes a stop happens to
+     be set at same address as this dprintf, or even if running the
+     commands here throws.  */
+  tmp_bs.commands = bs->commands;
+  bs->commands = NULL;
+  old_chain = make_cleanup_decref_counted_command_line (&tmp_bs.commands);
+
+  bpstat_do_actions_1 (&tmp_bs_p);
+
+  /* 'tmp_bs.commands' will usually be NULL by now, but
+     bpstat_do_actions_1 may return early without processing the whole
+     list.  */
+  do_cleanups (old_chain);
 }
 
 /* The breakpoint_ops structure to be used on static tracepoints with
@@ -15870,6 +15910,7 @@ initialize_breakpoint_ops (void)
   ops->print_it = bkpt_print_it;
   ops->print_mention = bkpt_print_mention;
   ops->print_recreate = dprintf_print_recreate;
+  ops->after_condition_true = dprintf_after_condition_true;
 }
 
 /* Chain containing all defined "enable breakpoint" subcommands.  */
