@@ -1,3 +1,7 @@
+2013-06-25  Yao Qi  <yao@codesourcery.com>
+
+	* gdbint.texinfo (Testsuite): Document 'gdb,predefined_tsv'.
+
 2013-06-24  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (POD2MAN1, POD2MAN5): Use version.subst.

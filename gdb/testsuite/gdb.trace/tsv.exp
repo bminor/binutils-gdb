@@ -188,3 +188,25 @@ gdb_test_multiple "target ctf ${tracefile}.ctf" "" {
 	check_tsv "ctf"
     }
 }
+
+# Restart.
+clean_restart ${binfile}
+
+if ![runto_main] then {
+    fail "Can't run to main"
+    return
+}
+
+# If there are predefined TSVs, test these predefined TSVs are correctly
+# uploaded.
+if [target_info exists gdb,predefined_tsv] {
+    set tsv [target_info gdb,predefined_tsv]
+
+    # Test predefined TSVs are uploaded.
+    gdb_test "info tvariables" ".*${tsv}.*" "predefined tsvs are uploaded"
+} else {
+    # Otherwise (the predefined TSVs are not defined in the board file),
+    # test there is no TSVs in GDB.
+    gdb_test "info tvariables" "No trace state variables\." \
+	"no predefined tsvs"
+}

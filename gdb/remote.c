@@ -3452,6 +3452,17 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 	error (_("Remote refused setting all-stop mode with: %s"), rs->buf);
     }
 
+  /* Upload TSVs regardless of whether the target is running or not.  The
+     remote stub, such as GDBserver, may have some predefined or builtin
+     TSVs, even if the target is not running.  */
+  if (remote_get_trace_status (current_trace_status ()) != -1)
+    {
+      struct uploaded_tsv *uploaded_tsvs = NULL;
+
+      remote_upload_trace_state_variables (&uploaded_tsvs);
+      merge_uploaded_trace_state_variables (&uploaded_tsvs);
+    }
+
   /* Check whether the target is running now.  */
   putpkt ("?");
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -3591,17 +3602,9 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   if (remote_get_trace_status (current_trace_status ()) != -1)
     {
       struct uploaded_tp *uploaded_tps = NULL;
-      struct uploaded_tsv *uploaded_tsvs = NULL;
 
       if (current_trace_status ()->running)
 	printf_filtered (_("Trace is already running on the target.\n"));
-
-      /* Get trace state variables first, they may be checked when
-	 parsing uploaded commands.  */
-
-      remote_upload_trace_state_variables (&uploaded_tsvs);
-
-      merge_uploaded_trace_state_variables (&uploaded_tsvs);
 
       remote_upload_tracepoints (&uploaded_tps);
 

@@ -7983,6 +7983,9 @@ The board does not support type @code{long long}.
 @c NEED DOCUMENT.
 @item use_gdb_stub
 The tests are running with gdb stub.
+@item gdb,predefined_tsv
+The predefined trace state variables the board has.
+
 @end table
 
 @node Hints

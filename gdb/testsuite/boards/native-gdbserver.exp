@@ -90,3 +90,6 @@ proc ${board}_file { dest op args } {
     }
     return [eval [list standard_file $dest $op] $args]
 }
+
+# The predefined TSVs in GDBserver.
+set_board_info gdb,predefined_tsv "\\\$trace_timestamp"

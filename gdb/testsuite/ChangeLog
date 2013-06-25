@@ -1,4 +1,15 @@
 2013-06-25  Yao Qi  <yao@codesourcery.com>
+
+	* boards/native-extended-gdbserver.exp: Set board_info
+	'gdb,predefined_tsv'.
+	* boards/native-gdbserver.exp: Likewise.
+	* boards/native-stdio-gdbserver.exp: Likewise.
+	* gdb.server/ext-attach.exp: Load trace-support.exp.  Check
+	uploaded TSVs if target supports tracing.
+	* gdb.trace/tsv.exp: Check uploaded TSVs if target supports
+	tracing and target has predefined tsv.
+
+2013-06-25  Yao Qi  <yao@codesourcery.com>
 	    Hui Zhu  <hui@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 
