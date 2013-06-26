@@ -1,3 +1,7 @@
+2013-06-26  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/mi-trace-frame-collected.exp: New.
+
 2013-06-25  Yao Qi  <yao@codesourcery.com>
 
 	* boards/native-extended-gdbserver.exp: Set board_info
