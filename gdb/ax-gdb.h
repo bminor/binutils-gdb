@@ -20,6 +20,7 @@
 #define AX_GDB_H
 
 struct expression;
+union exp_element;
 
 /* Types and enums */
 

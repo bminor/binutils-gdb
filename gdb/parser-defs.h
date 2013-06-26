@@ -25,6 +25,7 @@
 
 #include "doublest.h"
 #include "vec.h"
+#include "expression.h"
 
 struct block;
 

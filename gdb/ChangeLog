@@ -1,3 +1,8 @@
+2013-06-26  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* ax-gdb.h (union exp_element): Forward declare.
+	* parser-defs.h: Include expression.h.
+
 2013-06-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (fetch_mips_16): Use unmake_compact_addr.
