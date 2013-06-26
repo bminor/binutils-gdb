@@ -917,12 +917,14 @@ elf64-target.h : elfxx-target.h
 
 elf32-aarch64.c : elfnn-aarch64.c
 	rm -f elf32-aarch64.c
-	sed -e s/NN/32/g < $(srcdir)/elfnn-aarch64.c > elf32-aarch64.new
+	echo "#line 1 \"$(srcdir)/elfnn-aarch64.c\"" > elf32-aarch64.new
+	sed -e s/NN/32/g < $(srcdir)/elfnn-aarch64.c >> elf32-aarch64.new
 	mv -f elf32-aarch64.new elf32-aarch64.c
 
 elf64-aarch64.c : elfnn-aarch64.c
 	rm -f elf64-aarch64.c
-	sed -e s/NN/64/g < $(srcdir)/elfnn-aarch64.c > elf64-aarch64.new
+	echo "#line 1 \"$(srcdir)/elfnn-aarch64.c\"" > elf64-aarch64.new
+	sed -e s/NN/64/g < $(srcdir)/elfnn-aarch64.c >> elf64-aarch64.new
 	mv -f elf64-aarch64.new elf64-aarch64.c
 
 elf32-ia64.c : elfnn-ia64.c

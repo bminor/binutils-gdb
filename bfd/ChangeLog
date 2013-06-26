@@ -1,5 +1,12 @@
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* Makefile.am (elf32-aarch64.c): Add a #line cpp directive at the
+	beginning of the generated file.
+	(elf64-aarch64.c): Likewise.
+	* Makefile.in: Re-generated.
+
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* Makefile.am (BFD64_BACKENDS): Add elfxx-aarch64.c.
 	(BFD64_BACKENDS_CFILES): Add elfxx-aarch64.lo.
 	* Makefile.in: Re-generated.
