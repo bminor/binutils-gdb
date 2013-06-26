@@ -2982,10 +2982,7 @@ trace_dump_command (char *args, int from_tty)
   struct cleanup *old_chain;
 
   if (tracepoint_number == -1)
-    {
-      warning (_("No current trace frame."));
-      return;
-    }
+    error (_("No current trace frame."));
 
   old_chain = make_cleanup (null_cleanup, NULL);
   t = get_tracepoint (tracepoint_number);
