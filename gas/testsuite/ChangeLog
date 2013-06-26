@@ -1,3 +1,8 @@
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/ilp32-basic.d: New file.
+	* gas/aarch64/ilp32-basic.s: New file.
+
 2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/micromips-insn32.d: New test.

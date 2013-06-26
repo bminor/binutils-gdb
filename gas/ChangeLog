@@ -1,5 +1,20 @@
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* config/tc-aarch64.c (reloc_table): Replace
+	BFD_RELOC_AARCH64_LD64_GOT_LO12_NC with
+	BFD_RELOC_AARCH64_LD_GOT_LO12_NC; likewise to
+	BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC and
+	BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC.
+	(md_apply_fix): Handle BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
+	BFD_RELOC_AARCH64_LD32_GOT_LO12_NC,
+	BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC,
+	BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC,
+	BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC and
+	BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC.
+	(aarch64_force_relocation): Likewise.
+
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* config/tc-aarch64.c (ilp32_p): New static variable.
 	(elf64_aarch64_target_format): Return the target according to the
 	value of 'ilp32_p'.

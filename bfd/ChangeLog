@@ -1,5 +1,58 @@
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* bfd-in2.h: Re-generated.
+	* elfnn-aarch64.c (HOWTO64, HOWTO32): New define.
+	(IS_AARCH64_TLS_RELOC): Change to be based on the
+	bfd reloc enumerators.
+	(IS_AARCH64_TLSDESC_RELOC): Likewise.
+	(PG, PG_OFFSET): Cast literal to bfd_vma.
+	(elf64_aarch64_howto_table): Removed.
+	(elf64_aarch64_howto_dynrelocs): Removed.
+	(elf64_aarch64_tls_howto_table): Removed.
+	(elf64_aarch64_tlsdesc_howto_table): Removed.
+	(elfNN_aarch64_howto_table): New table to host all howto entires..
+	(R_AARCH64_*): Replaced by AARCH64_R (*) and AARCH64_R_STR (*).
+	(elfNN_aarch64_bfd_reloc_from_howto): New function.
+	(elfNN_aarch64_bfd_reloc_from_type): Ditto.
+	(struct elf_aarch64_reloc_map): New.
+	(elf_aarch64_reloc_map): New table.
+	(elfNN_aarch64_howto_from_bfd_reloc): New function.
+	(elfNN_aarch64_howto_from_type): Update to look up the new table
+	elfNN_aarch64_howto_table.
+	(struct elf64_aarch64_reloc_map): Remove.
+	(elf64_aarch64_reloc_map): Remove.
+	(elfNN_aarch64_reloc_type_lookup): Change to call
+	elfNN_aarch64_howto_from_bfd_reloc.
+	(elfNN_aarch64_reloc_name_lookup): Change to look up the new table
+	elfNN_aarch64_howto_table.
+	(aarch64_resolve_relocation): Refactor to switch on the bfd
+	reloc enumerators.
+	(bfd_elf_aarch64_put_addend): Likewise.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(aarch64_tls_transition_without_check): Likewise.
+	(aarch64_reloc_got_type): Likewise.
+	(aarch64_can_relax_tls): Likewise.
+	(aarch64_tls_transition): Likewise.
+	(elfNN_aarch64_tls_relax): Likewise.
+	(elfNN_aarch64_final_link_relocate): Likewise.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+	(aarch64_tls_transition): Change to return a bfd reloc enumerator.
+	* libbfd.h: Re-generated.
+	* reloc.c: Re-order the AArch64 bfd reloc enumerators.
+	(BFD_RELOC_AARCH64_RELOC_START)
+	(BFD_RELOC_AARCH64_RELOC_END)
+	(BFD_RELOC_AARCH64_LD_GOT_LO12_NC)
+	(BFD_RELOC_AARCH64_LD32_GOT_LO12_NC)
+	(BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC)
+	(BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC)
+	(BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC)
+	(BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC)
+	(BFD_RELOC_AARCH64_IRELATIVE): New relocs.
+
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* Makefile.am (BFD64_BACKENDS): Add elf32-aarch64.lo.
 	(BUILD_CFILES): Add elf32-aarch64.c.
 	(elf32-aarch64.c): New rule for generating from elfnn-aarch64.c.

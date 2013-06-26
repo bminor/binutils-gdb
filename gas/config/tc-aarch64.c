@@ -2377,7 +2377,7 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    0,
-   BFD_RELOC_AARCH64_LD64_GOT_LO12_NC},
+   BFD_RELOC_AARCH64_LD_GOT_LO12_NC},
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"tlsgd", 0,
@@ -2405,7 +2405,7 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
-   BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC},
+   BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC},
 
   /* Get to the page containing GOT TLS entry for a symbol */
   {"gottprel", 0,
@@ -2419,7 +2419,7 @@ static struct reloc_table_entry reloc_table[] = {
    0,
    0,
    0,
-   BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC},
+   BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC},
 
   /* Get tp offset for a symbol.  */
   {"tprel", 0,
@@ -6506,10 +6506,33 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
 	}
       break;
 
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
+      fixP->fx_r_type = (ilp32_p
+			 ? BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC
+			 : BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC);
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Should always be exported to object file, see
+	 aarch64_force_relocation().  */
+      gas_assert (!fixP->fx_done);
+      gas_assert (seg->use_rela_p);
+      break;
+
+    case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
+      fixP->fx_r_type = (ilp32_p
+			 ? BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC
+			 : BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC);
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      /* Should always be exported to object file, see
+	 aarch64_force_relocation().  */
+      gas_assert (!fixP->fx_done);
+      gas_assert (seg->use_rela_p);
+      break;
+
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6521,9 +6544,20 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
       S_SET_THREAD_LOCAL (fixP->fx_addsy);
       /* Should always be exported to object file, see
 	 aarch64_force_relocation().  */
+      gas_assert (!fixP->fx_done);
+      gas_assert (seg->use_rela_p);
+      break;
+
+    case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
+      /* Should always be exported to object file, see
+	 aarch64_force_relocation().  */
+      fixP->fx_r_type = (ilp32_p
+			 ? BFD_RELOC_AARCH64_LD32_GOT_LO12_NC
+			 : BFD_RELOC_AARCH64_LD64_GOT_LO12_NC);
       gas_assert (!fixP->fx_done);
       gas_assert (seg->use_rela_p);
       break;
@@ -6539,6 +6573,7 @@ md_apply_fix (fixS * fixP, valueT * valP, segT seg)
     case BFD_RELOC_AARCH64_GOT_LD_PREL19:
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
       /* Should always be exported to object file, see
 	 aarch64_force_relocation().  */
       gas_assert (!fixP->fx_done);
@@ -6669,10 +6704,18 @@ aarch64_force_relocation (struct fix *fixp)
          even if the symbol is extern or weak.  */
       return 0;
 
+    case BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC:
+    case BFD_RELOC_AARCH64_LD_GOT_LO12_NC:
+      /* Pseudo relocs that need to be fixed up according to
+	 ilp32_p.  */
+      return 0;
+
     case BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21:
     case BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12:
     case BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC:
@@ -6684,8 +6727,10 @@ aarch64_force_relocation (struct fix *fixp)
     case BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21:
     case BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC:
     case BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC:
+    case BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC:
     case BFD_RELOC_AARCH64_ADR_GOT_PAGE:
     case BFD_RELOC_AARCH64_LD64_GOT_LO12_NC:
+    case BFD_RELOC_AARCH64_LD32_GOT_LO12_NC:
     case BFD_RELOC_AARCH64_ADR_HI21_PCREL:
     case BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL:
     case BFD_RELOC_AARCH64_ADD_LO12:
