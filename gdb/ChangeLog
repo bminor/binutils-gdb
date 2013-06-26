@@ -1,5 +1,9 @@
 2013-06-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* mips-tdep.c (mips_next_pc): Fix a typo.
+
+2013-06-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* mips-tdep.c (micromips_scan_prologue): Fix a typo.
 
 2013-06-26  Pedro Alves  <pedro@codesourcery.com>
