@@ -3656,7 +3656,7 @@ cmd_qtstatus (char *packet)
 	   "circular:%d;"
 	   "disconn:%d;"
 	   "starttime:%s;stoptime:%s;"
-	   "username:%s:;notes:%s:",
+	   "username:%s;notes:%s:",
 	   tracing ? 1 : 0,
 	   stop_reason_rsp, tracing_stop_tpnum,
 	   traceframe_count, traceframes_created,

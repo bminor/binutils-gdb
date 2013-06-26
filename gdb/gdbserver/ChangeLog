@@ -1,5 +1,10 @@
 2013-06-10  Dmitry Kozlov <ddk@codesourcery.com>
 
+	Fix trace-status to output user name without trailing colon.
+	* tracepoint.c (cmd_qtstatus): Remove unnecessary colon from user name.
+
+2013-06-10  Dmitry Kozlov <ddk@codesourcery.com>
+
 	Fix trace-status to output proper start-time and stop-time.
 	* tracepoint.c (cmd_qtstatus): Modify trace-status output to
 	output start time and stop time in hex as gdb expects.
