@@ -1,6 +1,12 @@
 2013-06-26  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
+	* tracepoint.c (trace_dump_command): Move code to ...
+	(get_traceframe_location): ... here.  New.
+
+2013-06-26  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (trace_dump_command): GDB emits an error
 	 instead of a warning when a traceframe is not selected.
 

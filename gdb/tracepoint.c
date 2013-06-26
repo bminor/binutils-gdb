@@ -2933,6 +2933,48 @@ trace_dump_actions (struct command_line *action,
     }
 }
 
+/* Return bp_location of the tracepoint associated with the current
+   traceframe.  Set *STEPPING_FRAME_P to 1 if the current traceframe
+   is a stepping traceframe.  */
+
+static struct bp_location *
+get_traceframe_location (int *stepping_frame_p)
+{
+  struct tracepoint *t;
+  struct bp_location *tloc;
+  struct regcache *regcache;
+
+  if (tracepoint_number == -1)
+    error (_("No current trace frame."));
+
+  t = get_tracepoint (tracepoint_number);
+
+  if (t == NULL)
+    error (_("No known tracepoint matches 'current' tracepoint #%d."),
+	   tracepoint_number);
+
+  /* The current frame is a trap frame if the frame PC is equal to the
+     tracepoint PC.  If not, then the current frame was collected
+     during single-stepping.  */
+  regcache = get_current_regcache ();
+
+  /* If the traceframe's address matches any of the tracepoint's
+     locations, assume it is a direct hit rather than a while-stepping
+     frame.  (FIXME this is not reliable, should record each frame's
+     type.)  */
+  for (tloc = t->base.loc; tloc; tloc = tloc->next)
+    if (tloc->address == regcache_read_pc (regcache))
+      {
+	*stepping_frame_p = 0;
+	return tloc;
+      }
+
+  /* If this is a stepping frame, we don't know which location
+     triggered.  The first is as good (or bad) a guess as any...  */
+  *stepping_frame_p = 1;
+  return t->base.loc;
+}
+
 /* Return all the actions, including default collect, of a tracepoint
    T.  It constructs cleanups into the chain, and leaves the caller to
    handle them (call do_cleanups).  */
@@ -2973,43 +3015,19 @@ all_tracepoint_actions_and_cleanup (struct breakpoint *t)
 static void
 trace_dump_command (char *args, int from_tty)
 {
-  struct regcache *regcache;
-  struct tracepoint *t;
   int stepping_frame = 0;
   struct bp_location *loc;
-  char *default_collect_line = NULL;
-  struct command_line *actions, *default_collect_action = NULL;
   struct cleanup *old_chain;
+  struct command_line *actions;
 
-  if (tracepoint_number == -1)
-    error (_("No current trace frame."));
-
-  old_chain = make_cleanup (null_cleanup, NULL);
-  t = get_tracepoint (tracepoint_number);
-
-  if (t == NULL)
-    error (_("No known tracepoint matches 'current' tracepoint #%d."),
-	   tracepoint_number);
+  /* This throws an error is not inspecting a trace frame.  */
+  loc = get_traceframe_location (&stepping_frame);
 
   printf_filtered ("Data collected at tracepoint %d, trace frame %d:\n",
 		   tracepoint_number, traceframe_number);
 
-  /* The current frame is a trap frame if the frame PC is equal
-     to the tracepoint PC.  If not, then the current frame was
-     collected during single-stepping.  */
-
-  regcache = get_current_regcache ();
-
-  /* If the traceframe's address matches any of the tracepoint's
-     locations, assume it is a direct hit rather than a while-stepping
-     frame.  (FIXME this is not reliable, should record each frame's
-     type.)  */
-  stepping_frame = 1;
-  for (loc = t->base.loc; loc; loc = loc->next)
-    if (loc->address == regcache_read_pc (regcache))
-      stepping_frame = 0;
-
-  actions = all_tracepoint_actions_and_cleanup (&t->base);
+  old_chain = make_cleanup (null_cleanup, NULL);
+  actions = all_tracepoint_actions_and_cleanup (loc->owner);
 
   trace_dump_actions (actions, 0, stepping_frame, from_tty);
 
