@@ -10975,7 +10975,7 @@ validate_mips_insn (const struct mips_opcode *opc)
       case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
       case '[': break;
       case ']': break;
-      case '1':	USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
+      case '1': USE_BITS (OP_MASK_STYPE,	OP_SH_STYPE);	break;
       case '2': USE_BITS (OP_MASK_BP,		OP_SH_BP);	break;
       case '3': USE_BITS (OP_MASK_SA3,  	OP_SH_SA3);	break;
       case '4': USE_BITS (OP_MASK_SA4,  	OP_SH_SA4);	break;
