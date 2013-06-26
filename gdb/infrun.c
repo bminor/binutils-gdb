@@ -221,18 +221,6 @@ set_disable_randomization (char *args, int from_tty,
    (possibly confusing) stepping behavior is better than signaling an
    error, which will obscure the change in the inferior's state.  */
 
-/* This function returns TRUE if pc is the address of an instruction
-   that lies within the dynamic linker (such as the event hook, or the
-   dld itself).
-
-   This function must be used only when a dynamic linker event has
-   been caught, and the inferior is being stepped out of the hook, or
-   undefined results are guaranteed.  */
-
-#ifndef SOLIB_IN_DYNAMIC_LINKER
-#define SOLIB_IN_DYNAMIC_LINKER(pid,pc) 0
-#endif
-
 /* "Observer mode" is somewhat like a more extreme version of
    non-stop, in which all GDB operations that might affect the
    target's execution have been disabled.  */
