@@ -1,3 +1,10 @@
+2013-06-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* doc/as.texinfo (Overview): Remove @samp from MIPS ISA names.
+	* doc/c-mips.texi (MIPS Options): Remove @sc from MIPS ISA names.
+	Replace @sc{mips16} with literal `MIPS16'.
+	(MIPS ISA): Replace @sc{mips3} with literal `MIPS III'.
+
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (reloc_table): Replace

@@ -87,15 +87,12 @@ VxWorks-style position-independent macro expansions.
 Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} corresponds to the R2000 and R3000 processors,
 @samp{-mips2} to the R6000 processor, @samp{-mips3} to the
-R4000 processor, and @samp{-mips4} to the R8000 and
-R10000 processors.  @samp{-mips5}, @samp{-mips32}, @samp{-mips32r2},
-@samp{-mips64}, and @samp{-mips64r2}
-correspond to generic
-@sc{MIPS V}, @sc{MIPS32}, @sc{MIPS32 Release 2}, @sc{MIPS64},
-and @sc{MIPS64 Release 2}
-ISA processors, respectively.  You can also switch
-instruction sets during the assembly; see @ref{MIPS ISA, Directives to
-override the ISA level}.
+R4000 processor, and @samp{-mips4} to the R8000 and R10000 processors.
+@samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, @samp{-mips64}, and
+@samp{-mips64r2} correspond to generic MIPS V, MIPS32, MIPS32 Release 2,
+MIPS64, and MIPS64 Release 2 ISA processors, respectively.  You can also
+switch instruction sets during the assembly; see @ref{MIPS ISA,
+Directives to override the ISA level}.
 
 @item -mgp32
 @itemx -mfp32
@@ -414,7 +411,7 @@ be relaxed with the use of a longer sequence involving another branch,
 however this has not been implemented and if their target turns out of
 reach, they produce an error even if branch relaxation is enabled.
 
-Also no @sc{mips16} branches are ever relaxed.
+Also no MIPS16 branches are ever relaxed.
 
 By default @samp{--no-relax-branch} is selected, causing any out-of-range
 branches to produce an error.
@@ -636,7 +633,7 @@ assembly.  @code{.set mips@var{n}} affects not only which instructions
 are permitted, but also how certain macros are expanded.  @code{.set
 mips0} restores the ISA level to its original level: either the
 level you selected with command line options, or the default for your
-configuration.  You can use this feature to permit specific @sc{mips3}
+configuration.  You can use this feature to permit specific MIPS III
 instructions while assembling in 32 bit mode.  Use this directive with
 care!
 

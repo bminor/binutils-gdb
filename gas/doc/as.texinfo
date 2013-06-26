@@ -1253,11 +1253,8 @@ Generate code for a particular MIPS Instruction Set Architecture level.
 alias for @samp{-march=r6000}, @samp{-mips3} is an alias for
 @samp{-march=r4000} and @samp{-mips4} is an alias for @samp{-march=r8000}.
 @samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, @samp{-mips64}, and
-@samp{-mips64r2}
-correspond to generic
-@samp{MIPS V}, @samp{MIPS32}, @samp{MIPS32 Release 2}, @samp{MIPS64},
-and @samp{MIPS64 Release 2}
-ISA processors, respectively.
+@samp{-mips64r2} correspond to generic MIPS V, MIPS32, MIPS32 Release 2,
+MIPS64, and MIPS64 Release 2 ISA processors, respectively.
 
 @item -march=@var{cpu}
 Generate code for a particular MIPS CPU.
