@@ -1,5 +1,9 @@
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* emulparams/aarch64elf32.sh: New file.
+
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eaarch64elf32b.c.
 	(eaarch64elf32b.c): New dependency and rule.
 	* Makefile.in: Re-generated.
