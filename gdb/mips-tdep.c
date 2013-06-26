@@ -2911,7 +2911,7 @@ micromips_scan_prologue (struct gdbarch *gdbarch,
 	      break;
 
 	    /* LUI $v1 is used for larger $sp adjustments.  */
-	    /* Discard LUI $gp is used for PIC code.  */
+	    /* Discard LUI $gp used for PIC code.  */
 	    case 0x10: /* POOL32I: bits 010000 */
 	      if (b5s5_op (insn >> 16) == 0xd
 				/* LUI: bits 010000 001101 */
