@@ -50,10 +50,8 @@ gdb_test_sequence "info breakpoints" "dprintf info 1" {
     "\[\r\n\]2       breakpoint"
     "\[\r\n\]3       dprintf"
     "\[\r\n\]        printf \"At foo entry\\\\n\""
-    "\[\r\n\]        continue"
     "\[\r\n\]4       dprintf"
     "\[\r\n\]        printf \"arg=%d, g=%d\\\\n\", arg, g"
-    "\[\r\n\]        continue"
 }
 
 gdb_test "break $bp_location1" \
@@ -111,7 +109,6 @@ gdb_test_multiple "set dprintf-style agent" $msg {
 }
 
 if $target_can_dprintf {
-
     gdb_run_cmd
 
     gdb_test "" "Breakpoint"
@@ -121,7 +118,7 @@ if $target_can_dprintf {
     gdb_test "continue" "Breakpoint \[0-9\]+, foo .*" "2nd dprintf, agent"
 
     gdb_test_sequence "info breakpoints" "dprintf info 2" {
-	"\[\r\n\]Num     Type           Disp Enb Address    What"
+	"\[\r\n\]Num     Type           Disp Enb Address +What"
 	"\[\r\n\]2       breakpoint"
 	"\[\r\n\]\tbreakpoint already hit 2 times"
 	"\[\r\n\]3       dprintf"
@@ -135,4 +132,3 @@ if $target_can_dprintf {
 
 gdb_test "set dprintf-style foobar" "Undefined item: \"foobar\"." \
     "Set dprintf style to an unrecognized type"
-

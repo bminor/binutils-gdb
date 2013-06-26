@@ -614,6 +614,10 @@ struct breakpoint_ops
      'catch signal' interact properly with 'handle'; see
      bpstat_explains_signal.  */
   enum bpstat_signal_value (*explains_signal) (struct breakpoint *);
+
+  /* Called after evaluating the breakpoint's condition,
+     and only if it evaluated true.  */
+  void (*after_condition_true) (struct bpstats *bs);
 };
 
 /* Helper for breakpoint_ops->print_recreate implementations.  Prints
