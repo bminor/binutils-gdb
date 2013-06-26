@@ -1,3 +1,7 @@
+2013-06-26  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (fetch_mips_16): Use unmake_compact_addr.
+
 2013-06-26  Dmitry Kozlov <ddk@codesourcery.com>
 
 	* tracepoint.c (trace_save): Extend tsave to save starttime, stoptime.
