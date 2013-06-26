@@ -1,3 +1,8 @@
+2013-06-26  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c: Update comments on stepping over runtime loader
+	dynamic symbol resolution code.
+
 2013-06-26  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* ax-gdb.h (union exp_element): Forward declare.

@@ -204,22 +204,22 @@ set_disable_randomization (char *args, int from_tty,
 
    in_solib_dynsym_resolve_code() says whether we're in the dynamic
    linker code or not.  Normally, this means we single-step.  However,
-   if SKIP_SOLIB_RESOLVER then returns non-zero, then its value is an
-   address where we can place a step-resume breakpoint to get past the
-   linker's symbol resolution function.
+   if gdbarch_skip_solib_resolver then returns non-zero, then its
+   value is an address where we can place a step-resume breakpoint to
+   get past the linker's symbol resolution function.
 
-   in_solib_dynsym_resolve_code() can generally be implemented in a
-   pretty portable way, by comparing the PC against the address ranges
-   of the dynamic linker's sections.
+   The in_dynsym_resolve_code hook of the target_so_ops vector can
+   generally be implemented in a pretty portable way, by comparing the
+   PC against the address ranges of the dynamic linker's sections.
 
-   SKIP_SOLIB_RESOLVER is generally going to be system-specific, since
-   it depends on internal details of the dynamic linker.  It's usually
-   not too hard to figure out where to put a breakpoint, but it
-   certainly isn't portable.  SKIP_SOLIB_RESOLVER should do plenty of
-   sanity checking.  If it can't figure things out, returning zero and
-   getting the (possibly confusing) stepping behavior is better than
-   signalling an error, which will obscure the change in the
-   inferior's state.  */
+   The gdbarch_skip_solib_resolver implementation is generally going
+   to be system-specific, since it depends on internal details of the
+   dynamic linker.  It's usually not too hard to figure out where to
+   put a breakpoint, but it certainly isn't portable.
+   gdbarch_skip_solib_resolver should do plenty of sanity checking.
+   If it can't figure things out, returning zero and getting the
+   (possibly confusing) stepping behavior is better than signaling an
+   error, which will obscure the change in the inferior's state.  */
 
 /* This function returns TRUE if pc is the address of an instruction
    that lies within the dynamic linker (such as the event hook, or the
