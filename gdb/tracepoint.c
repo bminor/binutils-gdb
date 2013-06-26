@@ -873,8 +873,7 @@ struct collection_list
     /* True is the user requested a collection of "$_sdata", "static
        tracepoint data".  */
     int strace_data;
-  }
-tracepoint_list, stepping_list;
+  };
 
 /* MEMRANGE functions: */
 
@@ -1239,6 +1238,35 @@ clear_collection_list (struct collection_list *list)
   list->next_aexpr_elt = 0;
   memset (list->regs_mask, 0, sizeof (list->regs_mask));
   list->strace_data = 0;
+
+  xfree (list->aexpr_list);
+  xfree (list->list);
+}
+
+/* A cleanup wrapper for function clear_collection_list.  */
+
+static void
+do_clear_collection_list (void *list)
+{
+  struct collection_list *l = list;
+
+  clear_collection_list (l);
+}
+
+/* Initialize collection_list CLIST.  */
+
+static void
+init_collection_list (struct collection_list *clist)
+{
+  memset (clist, 0, sizeof *clist);
+
+  clist->listsize = 128;
+  clist->list = xcalloc (clist->listsize,
+			 sizeof (struct memrange));
+
+  clist->aexpr_listsize = 128;
+  clist->aexpr_list = xcalloc (clist->aexpr_listsize,
+			       sizeof (struct agent_expr *));
 }
 
 /* Reduce a collection list to string form (for gdb protocol).  */
@@ -1618,11 +1646,15 @@ encode_actions (struct bp_location *tloc, char ***tdp_actions,
   int frame_reg;
   LONGEST frame_offset;
   struct cleanup *back_to;
+  struct collection_list tracepoint_list, stepping_list;
 
   back_to = make_cleanup (null_cleanup, NULL);
 
-  clear_collection_list (&tracepoint_list);
-  clear_collection_list (&stepping_list);
+  init_collection_list (&tracepoint_list);
+  init_collection_list (&stepping_list);
+
+  make_cleanup (do_clear_collection_list, &tracepoint_list);
+  make_cleanup (do_clear_collection_list, &stepping_list);
 
   *tdp_actions = NULL;
   *stepping_actions = NULL;
@@ -5672,33 +5704,6 @@ _initialize_tracepoint (void)
 
   traceframe_number = -1;
   tracepoint_number = -1;
-
-  if (tracepoint_list.list == NULL)
-    {
-      tracepoint_list.listsize = 128;
-      tracepoint_list.list = xmalloc
-	(tracepoint_list.listsize * sizeof (struct memrange));
-    }
-  if (tracepoint_list.aexpr_list == NULL)
-    {
-      tracepoint_list.aexpr_listsize = 128;
-      tracepoint_list.aexpr_list = xmalloc
-	(tracepoint_list.aexpr_listsize * sizeof (struct agent_expr *));
-    }
-
-  if (stepping_list.list == NULL)
-    {
-      stepping_list.listsize = 128;
-      stepping_list.list = xmalloc
-	(stepping_list.listsize * sizeof (struct memrange));
-    }
-
-  if (stepping_list.aexpr_list == NULL)
-    {
-      stepping_list.aexpr_listsize = 128;
-      stepping_list.aexpr_list = xmalloc
-	(stepping_list.aexpr_listsize * sizeof (struct agent_expr *));
-    }
 
   add_info ("scope", scope_info,
 	    _("List the variables local to a scope"));

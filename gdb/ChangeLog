@@ -1,3 +1,17 @@
+2013-06-26  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (tracepoint_list, stepping_list): Remove.
+	(clear_collection_list): Free fields 'aexpre_list' and 'list'
+	in collection_list.
+	(do_clear_collection_list, init_collection_list): New.
+	(encode_actions): Add local variables 'tracepoint_list' and
+	'stepping_list'.  Call init_collection_list and make cleanup
+	which calls do_clear_collection_list.  Don't call
+	clear_collection_list.
+	(_initialize_tracepoint): Delete references to
+	'tracepoint_list' and 'stepping_list'.
+
 2013-06-25  Tom Tromey  <tromey@redhat.com>
 
 	* common/create-version.sh (date): Use "$", not "$$" in sed
