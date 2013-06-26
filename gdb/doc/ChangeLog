@@ -1,3 +1,9 @@
+2013-06-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdbint.texinfo (Versions and Branches): Use common/version.in.
+	Update.
+	(Releasing GDB): Likewise.
+
 2013-06-26  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
