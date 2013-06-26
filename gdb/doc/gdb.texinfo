@@ -33161,6 +33161,123 @@ with the @samp{$} character.
 
 The corresponding @value{GDBN} command is @samp{tvariable}.
 
+@subheading The @code{-trace-frame-collected} Command
+@findex -trace-frame-collected
+
+@subsubheading Synopsis
+
+@smallexample
+ -trace-frame-collected
+    [--var-print-values @var{var_pval}]
+    [--comp-print-values @var{comp_pval}]
+    [--registers-format @var{regformat}]
+    [--memory-contents]
+@end smallexample
+
+This command returns the set of collected objects, register names,
+trace state variable names, memory ranges and computed expressions
+that have been collected at a particular trace frame.  The optional
+parameters to the command affect the output format in different ways.
+See the output description table below for more details.
+
+The reported names can be used in the normal manner to create
+varobjs and inspect the objects themselves.  The items returned by
+this command are categorized so that it is clear which is a variable,
+which is a register, which is a trace state variable, which is a
+memory range and which is a computed expression.
+
+For instance, if the actions were
+@smallexample
+collect myVar, myArray[myIndex], myObj.field, myPtr->field, myCount + 2
+collect *(int*)0xaf02bef0@@40
+@end smallexample
+
+@noindent
+the object collected in its entirety would be @code{myVar}.  The
+object @code{myArray} would be partially collected, because only the
+element at index @code{myIndex} would be collected.  The remaining
+objects would be computed expressions.
+
+An example output would be:
+
+@smallexample
+(gdb)
+-trace-frame-collected
+^done,
+  explicit-variables=[@{name="myVar",value="1"@}],
+  computed-expressions=[@{name="myArray[myIndex]",value="0"@},
+                        @{name="myObj.field",value="0"@},
+                        @{name="myPtr->field",value="1"@},
+                        @{name="myCount + 2",value="3"@},
+                        @{name="$tvar1 + 1",value="43970027"@}],
+  registers=[@{number="0",value="0x7fe2c6e79ec8"@},
+             @{number="1",value="0x0"@},
+             @{number="2",value="0x4"@},
+             ...
+             @{number="125",value="0x0"@}],
+  tvars=[@{name="$tvar1",current="43970026"@}],
+  memory=[@{address="0x0000000000602264",length="4"@},
+          @{address="0x0000000000615bc0",length="4"@}]
+(gdb)
+@end smallexample
+
+Where:
+
+@table @code
+@item explicit-variables
+The set of objects that have been collected in their entirety (as
+opposed to collecting just a few elements of an array or a few struct
+members).  For each object, its name and value are printed.
+The @code{--var-print-values} option affects how or whether the value
+field is output.  If @var{var_pval} is 0, then print only the names;
+if it is 1, print also their values; and if it is 2, print the name,
+type and value for simple data types, and the name and type for
+arrays, structures and unions.
+
+@item computed-expressions
+The set of computed expressions that have been collected at the
+current trace frame.  The @code{--comp-print-values} option affects
+this set like the @code{--var-print-values} option affects the
+@code{explicit-variables} set.  See above.
+
+@item registers
+The registers that have been collected at the current trace frame.
+For each register collected, the name and current value are returned.
+The value is formatted according to the @code{--registers-format}
+option.  See the @command{-data-list-register-values} command for a
+list of the allowed formats.  The default is @samp{x}.
+
+@item tvars
+The trace state variables that have been collected at the current
+trace frame.  For each trace state variable collected, the name and
+current value are returned.
+
+@item memory
+The set of memory ranges that have been collected at the current trace
+frame.  Its content is a list of tuples.  Each tuple represents a
+collected memory range and has the following fields:
+
+@table @code
+@item address
+The start address of the memory range, as hexadecimal literal.
+
+@item length
+The length of the memory range, as decimal literal.
+
+@item contents
+The contents of the memory block, in hex.  This field is only present
+if the @code{--memory-contents} option is specified.
+
+@end table
+
+@end table
+
+@subsubheading @value{GDBN} Command
+
+There is no corresponding @value{GDBN} command.
+
+@subsubheading Example
+
 @subheading -trace-list-variables
 @findex -trace-list-variables
 

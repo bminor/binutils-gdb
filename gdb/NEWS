@@ -81,6 +81,9 @@ show range-stepping
      "--skip-unavailable" option.  When used, only the available registers
      are displayed.
 
+  ** The new command -trace-frame-collected dumps collected variables,
+     computed expressions, tvars, memory and registers in a traceframe.
+
 * New system-wide configuration scripts
   A GDB installation now provides scripts suitable for use as system-wide
   configuration scripts for the following systems:

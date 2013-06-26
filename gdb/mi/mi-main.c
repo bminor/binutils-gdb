@@ -2585,3 +2585,298 @@ mi_cmd_ada_task_info (char *command, char **argv, int argc)
 
   print_ada_task_info (current_uiout, argv[0], current_inferior ());
 }
+
+/* Print EXPRESSION according to VALUES.  */
+
+static void
+print_variable_or_computed (char *expression, enum print_values values)
+{
+  struct expression *expr;
+  struct cleanup *old_chain;
+  struct value *val;
+  struct ui_file *stb;
+  struct value_print_options opts;
+  struct type *type;
+  struct ui_out *uiout = current_uiout;
+
+  stb = mem_fileopen ();
+  old_chain = make_cleanup_ui_file_delete (stb);
+
+  expr = parse_expression (expression);
+
+  make_cleanup (free_current_contents, &expr);
+
+  if (values == PRINT_SIMPLE_VALUES)
+    val = evaluate_type (expr);
+  else
+    val = evaluate_expression (expr);
+
+  if (values != PRINT_NO_VALUES)
+    make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+  ui_out_field_string (uiout, "name", expression);
+
+  switch (values)
+    {
+    case PRINT_SIMPLE_VALUES:
+      type = check_typedef (value_type (val));
+      type_print (value_type (val), "", stb, -1);
+      ui_out_field_stream (uiout, "type", stb);
+      if (TYPE_CODE (type) != TYPE_CODE_ARRAY
+	  && TYPE_CODE (type) != TYPE_CODE_STRUCT
+	  && TYPE_CODE (type) != TYPE_CODE_UNION)
+	{
+	  struct value_print_options opts;
+
+	  get_raw_print_options (&opts);
+	  opts.deref_ref = 1;
+	  common_val_print (val, stb, 0, &opts, current_language);
+	  ui_out_field_stream (uiout, "value", stb);
+	}
+      break;
+    case PRINT_ALL_VALUES:
+      {
+	struct value_print_options opts;
+
+	get_raw_print_options (&opts);
+	opts.deref_ref = 1;
+	common_val_print (val, stb, 0, &opts, current_language);
+	ui_out_field_stream (uiout, "value", stb);
+      }
+      break;
+    }
+
+  do_cleanups (old_chain);
+}
+
+/* Implement the "-trace-frame-collected" command.  */
+
+void
+mi_cmd_trace_frame_collected (char *command, char **argv, int argc)
+{
+  struct cleanup *old_chain;
+  struct bp_location *tloc;
+  int stepping_frame;
+  struct collection_list *clist;
+  struct collection_list tracepoint_list, stepping_list;
+  struct traceframe_info *tinfo;
+  int oind = 0;
+  int var_print_values = PRINT_ALL_VALUES;
+  int comp_print_values = PRINT_ALL_VALUES;
+  int registers_format = 'x';
+  int memory_contents = 0;
+  struct ui_out *uiout = current_uiout;
+  enum opt
+  {
+    VAR_PRINT_VALUES,
+    COMP_PRINT_VALUES,
+    REGISTERS_FORMAT,
+    MEMORY_CONTENTS,
+  };
+  static const struct mi_opt opts[] =
+    {
+      {"-var-print-values", VAR_PRINT_VALUES, 1},
+      {"-comp-print-values", COMP_PRINT_VALUES, 1},
+      {"-registers-format", REGISTERS_FORMAT, 1},
+      {"-memory-contents", MEMORY_CONTENTS, 0},
+      { 0, 0, 0 }
+    };
+
+  while (1)
+    {
+      char *oarg;
+      int opt = mi_getopt ("-trace-frame-collected", argc, argv, opts,
+			   &oind, &oarg);
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+	{
+	case VAR_PRINT_VALUES:
+	  var_print_values = mi_parse_print_values (oarg);
+	  break;
+	case COMP_PRINT_VALUES:
+	  comp_print_values = mi_parse_print_values (oarg);
+	  break;
+	case REGISTERS_FORMAT:
+	  registers_format = oarg[0];
+	case MEMORY_CONTENTS:
+	  memory_contents = 1;
+	  break;
+	}
+    }
+
+  if (oind != argc)
+    error (_("Usage: -trace-frame-collected "
+	     "[--var-print-values PRINT_VALUES] "
+	     "[--comp-print-values PRINT_VALUES] "
+	     "[--registers-format FORMAT]"
+	     "[--memory-contents]"));
+
+  /* This throws an error is not inspecting a trace frame.  */
+  tloc = get_traceframe_location (&stepping_frame);
+
+  /* This command only makes sense for the current frame, not the
+     selected frame.  */
+  old_chain = make_cleanup_restore_current_thread ();
+  select_frame (get_current_frame ());
+
+  encode_actions_and_make_cleanup (tloc, &tracepoint_list,
+				   &stepping_list);
+
+  if (stepping_frame)
+    clist = &stepping_list;
+  else
+    clist = &tracepoint_list;
+
+  tinfo = get_traceframe_info ();
+
+  /* Explicitly wholly collected variables.  */
+  {
+    struct cleanup *list_cleanup;
+    char *p;
+    int i;
+
+    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout,
+						       "explicit-variables");
+    for (i = 0; VEC_iterate (char_ptr, clist->wholly_collected, i, p); i++)
+      print_variable_or_computed (p, var_print_values);
+    do_cleanups (list_cleanup);
+  }
+
+  /* Computed expressions.  */
+  {
+    struct cleanup *list_cleanup;
+    char *p;
+    int i;
+
+    list_cleanup
+      = make_cleanup_ui_out_list_begin_end (uiout,
+					    "computed-expressions");
+    for (i = 0; VEC_iterate (char_ptr, clist->computed, i, p); i++)
+      print_variable_or_computed (p, comp_print_values);
+    do_cleanups (list_cleanup);
+  }
+
+  /* Registers.  Given pseudo-registers, and that some architectures
+     (like MIPS) actually hide the raw registers, we don't go through
+     the trace frame info, but instead consult the register cache for
+     register availability.  */
+  {
+    struct cleanup *list_cleanup;
+    struct frame_info *frame;
+    struct gdbarch *gdbarch;
+    int regnum;
+    int numregs;
+
+    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "registers");
+
+    frame = get_selected_frame (NULL);
+    gdbarch = get_frame_arch (frame);
+    numregs = gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
+
+    for (regnum = 0; regnum < numregs; regnum++)
+      {
+	if (gdbarch_register_name (gdbarch, regnum) == NULL
+	    || *(gdbarch_register_name (gdbarch, regnum)) == '\0')
+	  continue;
+
+	output_register (frame, regnum, registers_format, 1);
+      }
+
+    do_cleanups (list_cleanup);
+  }
+
+  /* Trace state variables.  */
+  {
+    struct cleanup *list_cleanup;
+    int tvar;
+    char *tsvname;
+    int i;
+
+    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "tvars");
+
+    tsvname = NULL;
+    make_cleanup (free_current_contents, &tsvname);
+
+    for (i = 0; VEC_iterate (int, tinfo->tvars, i, tvar); i++)
+      {
+	struct cleanup *cleanup_child;
+	struct trace_state_variable *tsv;
+
+	tsv = find_trace_state_variable_by_number (tvar);
+
+	cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+	if (tsv != NULL)
+	  {
+	    tsvname = xrealloc (tsvname, strlen (tsv->name) + 2);
+	    tsvname[0] = '$';
+	    strcpy (tsvname + 1, tsv->name);
+	    ui_out_field_string (uiout, "name", tsvname);
+
+	    tsv->value_known = target_get_trace_state_variable_value (tsv->number,
+								      &tsv->value);
+	    ui_out_field_int (uiout, "current", tsv->value);
+	  }
+	else
+	  {
+	    ui_out_field_skip (uiout, "name");
+	    ui_out_field_skip (uiout, "current");
+	  }
+
+	do_cleanups (cleanup_child);
+      }
+
+    do_cleanups (list_cleanup);
+  }
+
+  /* Memory.  */
+  {
+    struct cleanup *list_cleanup;
+    VEC(mem_range_s) *available_memory = NULL;
+    struct mem_range *r;
+    int i;
+
+    traceframe_available_memory (&available_memory, 0, ULONGEST_MAX);
+    make_cleanup (VEC_cleanup(mem_range_s), &available_memory);
+
+    list_cleanup = make_cleanup_ui_out_list_begin_end (uiout, "memory");
+
+    for (i = 0; VEC_iterate (mem_range_s, available_memory, i, r); i++)
+      {
+	struct cleanup *cleanup_child;
+	gdb_byte *data;
+	struct gdbarch *gdbarch = target_gdbarch ();
+
+	cleanup_child = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+	ui_out_field_core_addr (uiout, "address", gdbarch, r->start);
+	ui_out_field_int (uiout, "length", r->length);
+
+	data = xmalloc (r->length);
+	make_cleanup (xfree, data);
+
+	if (memory_contents)
+	  {
+	    if (target_read_memory (r->start, data, r->length) == 0)
+	      {
+		int m;
+		char *data_str, *p;
+
+		data_str = xmalloc (r->length * 2 + 1);
+		make_cleanup (xfree, data_str);
+
+		for (m = 0, p = data_str; m < r->length; ++m, p += 2)
+		  sprintf (p, "%02x", data[m]);
+		ui_out_field_string (uiout, "contents", data_str);
+	      }
+	    else
+	      ui_out_field_skip (uiout, "contents");
+	  }
+	do_cleanups (cleanup_child);
+      }
+
+    do_cleanups (list_cleanup);
+  }
+
+  do_cleanups (old_chain);
+}

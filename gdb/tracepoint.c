@@ -340,6 +340,22 @@ find_trace_state_variable (const char *name)
   return NULL;
 }
 
+/* Look for a trace state variable of the given number.  Return NULL if
+   not found.  */
+
+struct trace_state_variable *
+find_trace_state_variable_by_number (int number)
+{
+  struct trace_state_variable *tsv;
+  int ix;
+
+  for (ix = 0; VEC_iterate (tsv_s, tvariables, ix, tsv); ++ix)
+    if (tsv->number == number)
+      return tsv;
+
+  return NULL;
+}
+
 static void
 delete_trace_state_variable (const char *name)
 {
@@ -853,29 +869,6 @@ enum {
   memrange_absolute = -1
 };
 
-struct memrange
-{
-  int type;		/* memrange_absolute for absolute memory range,
-                           else basereg number.  */
-  bfd_signed_vma start;
-  bfd_signed_vma end;
-};
-
-struct collection_list
-  {
-    unsigned char regs_mask[32];	/* room for up to 256 regs */
-    long listsize;
-    long next_memrange;
-    struct memrange *list;
-    long aexpr_listsize;	/* size of array pointed to by expr_list elt */
-    long next_aexpr_elt;
-    struct agent_expr **aexpr_list;
-
-    /* True is the user requested a collection of "$_sdata", "static
-       tracepoint data".  */
-    int strace_data;
-  };
-
 /* MEMRANGE functions: */
 
 static int memrange_cmp (const void *, const void *);
@@ -1166,6 +1159,9 @@ do_collect_symbol (const char *print_name,
   collect_symbol (p->collect, sym, p->gdbarch, p->frame_regno,
 		  p->frame_offset, p->pc, p->trace_string);
   p->count++;
+
+  VEC_safe_push (char_ptr, p->collect->wholly_collected,
+		 xstrdup (print_name));
 }
 
 /* Add all locals (or args) symbols to collection list.  */
@@ -1242,6 +1238,9 @@ clear_collection_list (struct collection_list *list)
 
   xfree (list->aexpr_list);
   xfree (list->list);
+
+  VEC_free (char_ptr, list->wholly_collected);
+  VEC_free (char_ptr, list->computed);
 }
 
 /* A cleanup wrapper for function clear_collection_list.  */
@@ -1392,6 +1391,21 @@ stringify_collection_list (struct collection_list *list)
     return *str_list;
 }
 
+/* Add the printed expression EXP to *LIST.  */
+
+static void
+append_exp (struct expression *exp, VEC(char_ptr) **list)
+{
+  struct ui_file *tmp_stream = mem_fileopen ();
+  char *text;
+
+  print_expression (exp, tmp_stream);
+
+  text = ui_file_xstrdup (tmp_stream, NULL);
+
+  VEC_safe_push (char_ptr, *list, text);
+  ui_file_delete (tmp_stream);
+}
 
 static void
 encode_actions_1 (struct command_line *action,
@@ -1537,16 +1551,25 @@ encode_actions_1 (struct command_line *action,
 		      check_typedef (exp->elts[1].type);
 		      add_memrange (collect, memrange_absolute, addr,
 				    TYPE_LENGTH (exp->elts[1].type));
+		      append_exp (exp, &collect->computed);
 		      break;
 
 		    case OP_VAR_VALUE:
-		      collect_symbol (collect,
-				      exp->elts[2].symbol,
-				      tloc->gdbarch,
-				      frame_reg,
-				      frame_offset,
-				      tloc->address,
-				      trace_string);
+		      {
+			struct symbol *sym = exp->elts[2].symbol;
+			char_ptr name = (char_ptr) SYMBOL_NATURAL_NAME (sym);
+
+			collect_symbol (collect,
+					exp->elts[2].symbol,
+					tloc->gdbarch,
+					frame_reg,
+					frame_offset,
+					tloc->address,
+					trace_string);
+			VEC_safe_push (char_ptr,
+				       collect->wholly_collected,
+				       name);
+		      }
 		      break;
 
 		    default:	/* Full-fledged expression.  */
@@ -1582,6 +1605,8 @@ encode_actions_1 (struct command_line *action,
 				}
 			    }
 			}
+
+		      append_exp (exp, &collect->computed);
 		      break;
 		    }		/* switch */
 		  do_cleanups (old_chain);
@@ -1635,46 +1660,64 @@ encode_actions_1 (struct command_line *action,
     }				/* for */
 }
 
-/* Render all actions into gdb protocol.  */
+/* Encode actions of tracepoint TLOC->owner and fill TRACEPOINT_LIST
+   and STEPPING_LIST.  Return a cleanup pointer to clean up both
+   TRACEPOINT_LIST and STEPPING_LIST.  */
 
-void
-encode_actions (struct bp_location *tloc, char ***tdp_actions,
-		char ***stepping_actions)
+struct cleanup *
+encode_actions_and_make_cleanup (struct bp_location *tloc,
+				 struct collection_list *tracepoint_list,
+				 struct collection_list *stepping_list)
 {
   char *default_collect_line = NULL;
   struct command_line *actions;
   struct command_line *default_collect_action = NULL;
   int frame_reg;
   LONGEST frame_offset;
-  struct cleanup *back_to;
-  struct collection_list tracepoint_list, stepping_list;
+  struct cleanup *back_to, *return_chain;
+
+  return_chain = make_cleanup (null_cleanup, NULL);
+  init_collection_list (tracepoint_list);
+  init_collection_list (stepping_list);
+
+  make_cleanup (do_clear_collection_list, tracepoint_list);
+  make_cleanup (do_clear_collection_list, stepping_list);
 
   back_to = make_cleanup (null_cleanup, NULL);
-
-  init_collection_list (&tracepoint_list);
-  init_collection_list (&stepping_list);
-
-  make_cleanup (do_clear_collection_list, &tracepoint_list);
-  make_cleanup (do_clear_collection_list, &stepping_list);
-
-  *tdp_actions = NULL;
-  *stepping_actions = NULL;
-
   gdbarch_virtual_frame_pointer (tloc->gdbarch,
 				 tloc->address, &frame_reg, &frame_offset);
 
   actions = all_tracepoint_actions_and_cleanup (tloc->owner);
 
   encode_actions_1 (actions, tloc, frame_reg, frame_offset,
-		    &tracepoint_list, &stepping_list);
+		    tracepoint_list, stepping_list);
 
-  memrange_sortmerge (&tracepoint_list);
-  memrange_sortmerge (&stepping_list);
+  memrange_sortmerge (tracepoint_list);
+  memrange_sortmerge (stepping_list);
+
+  do_cleanups (back_to);
+  return return_chain;
+}
+
+/* Render all actions into gdb protocol.  */
+
+void
+encode_actions_rsp (struct bp_location *tloc, char ***tdp_actions,
+		    char ***stepping_actions)
+{
+  struct collection_list tracepoint_list, stepping_list;
+  struct cleanup *cleanup;
+
+  *tdp_actions = NULL;
+  *stepping_actions = NULL;
+
+  cleanup = encode_actions_and_make_cleanup (tloc, &tracepoint_list,
+					     &stepping_list);
 
   *tdp_actions = stringify_collection_list (&tracepoint_list);
   *stepping_actions = stringify_collection_list (&stepping_list);
 
-  do_cleanups (back_to);
+  do_cleanups (cleanup);
 }
 
 static void
@@ -2938,7 +2981,7 @@ trace_dump_actions (struct command_line *action,
    traceframe.  Set *STEPPING_FRAME_P to 1 if the current traceframe
    is a stepping traceframe.  */
 
-static struct bp_location *
+struct bp_location *
 get_traceframe_location (int *stepping_frame_p)
 {
   struct tracepoint *t;
@@ -5673,7 +5716,7 @@ parse_traceframe_info (const char *tframe_info)
    This is where we avoid re-fetching the object from the target if we
    already have it cached.  */
 
-static struct traceframe_info *
+struct traceframe_info *
 get_traceframe_info (void)
 {
   if (traceframe_info == NULL)

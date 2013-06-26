@@ -1,4 +1,10 @@
 2013-06-26  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Tracepoint Commands): Document
+	-trace-frame-collected.
+
+2013-06-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Traceframe Info Format): Document tvar element
 	and its attributes.

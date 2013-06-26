@@ -323,6 +323,38 @@ struct trace_file_writer
   const struct trace_file_write_ops *ops;
 };
 
+struct memrange
+{
+  /* memrange_absolute for absolute memory range, else basereg
+     number.  */
+  int type;
+  bfd_signed_vma start;
+  bfd_signed_vma end;
+};
+
+struct collection_list
+{
+  /* room for up to 256 regs */
+  unsigned char regs_mask[32];
+  long listsize;
+  long next_memrange;
+  struct memrange *list;
+
+  /* size of array pointed to by expr_list elt.  */
+  long aexpr_listsize;
+  long next_aexpr_elt;
+  struct agent_expr **aexpr_list;
+
+  /* True is the user requested a collection of "$_sdata", "static
+     tracepoint data".  */
+  int strace_data;
+
+  /* A set of names of wholly collected objects.  */
+  VEC(char_ptr) *wholly_collected;
+  /* A set of computed expressions.  */
+  VEC(char_ptr) *computed;
+};
+
 extern void parse_static_tracepoint_marker_definition
   (char *line, char **pp,
    struct static_tracepoint_marker *marker);
@@ -360,13 +392,21 @@ void free_actions (struct breakpoint *);
 
 extern const char *decode_agent_options (const char *exp, int *trace_string);
 
-extern void encode_actions (struct bp_location *tloc,
-			    char ***tdp_actions, char ***stepping_actions);
+extern struct cleanup *
+  encode_actions_and_make_cleanup (struct bp_location *tloc,
+				   struct collection_list *tracepoint_list,
+				   struct collection_list *stepping_list);
+
+extern void encode_actions_rsp (struct bp_location *tloc,
+				char ***tdp_actions, char ***stepping_actions);
 
 extern void validate_actionline (const char *, struct breakpoint *);
 extern void validate_trace_state_variable_name (const char *name);
 
 extern struct trace_state_variable *find_trace_state_variable (const char *name);
+extern struct trace_state_variable *
+  find_trace_state_variable_by_number (int number);
+
 extern struct trace_state_variable *create_trace_state_variable (const char *name);
 
 extern int encode_source_string (int num, ULONGEST addr,
@@ -415,5 +455,9 @@ extern struct traceframe_info *parse_traceframe_info (const char *tframe_info);
 
 extern int traceframe_available_memory (VEC(mem_range_s) **result,
 					CORE_ADDR memaddr, ULONGEST len);
+
+extern struct traceframe_info *get_traceframe_info (void);
+
+extern struct bp_location *get_traceframe_location (int *stepping_frame_p);
 
 #endif	/* TRACEPOINT_H */

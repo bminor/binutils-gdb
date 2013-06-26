@@ -1,6 +1,38 @@
 2013-06-26  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
+	* mi/mi-cmds.c (mi_cmds): Register -trace-frame-collected.
+	* mi/mi-cmds.h (mi_cmd_trace_frame_collected): Declare.
+	* mi/mi-main.c (print_variable_or_computed): New function.
+	(mi_cmd_trace_frame_collected): New function.
+	* tracepoint.c (find_trace_state_variable_by_number): New.
+	(struct traceframe_info): Move to tracepoint.h
+	(struct collection_list): Likewise.
+	(do_collect_symbol): Include locals and arguments in the
+	collected variables list.
+	(clear_collection_list): Clear wholly collected variables list
+	and computed variables list.
+	(append_exp): New function.
+	(encode_actions_1): Include variables in the wholly
+	collected variables list.  Include memory ranges and
+	full-fledged expressions in the computed expressions list.
+	(encode_actions): Move some code to ...
+	Return the cleanup chain.
+	(encode_actions_rsp): ... here.  New function.
+	(get_traceframe_location, get_traceframe_info): Remove static.
+	* tracepoint.h (struct memrange): Moved	from tracepoint.c.
+	(struct collection_list): Moved from tracepoint.c.  Add two
+	new fields 'wholly_collected' and 'computed'.
+	(find_trace_state_variable_by_number): Declare.
+	(encode_actions): Adjust declaration.
+	(encode_actions_rsp): Declare.
+	(get_traceframe_info, get_traceframe_location): Declare.
+
+	* NEWS: Mention new MI command -trace-frame-collected.
+
+2013-06-26  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
 	* ctf.c (ctf_traceframe_info): Push trace state variables
 	present in the trace data into the traceframe info object.
 	* breakpoint.c (DEF_VEC_I): Remove.

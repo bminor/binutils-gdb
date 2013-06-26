@@ -148,6 +148,8 @@ static struct mi_cmd mi_cmds[] =
   DEF_MI_CMD_MI ("trace-define-variable", mi_cmd_trace_define_variable),
   DEF_MI_CMD_MI_1 ("trace-find", mi_cmd_trace_find,
 		   &mi_suppress_notification.traceframe),
+  DEF_MI_CMD_MI ("trace-frame-collected",
+		 mi_cmd_trace_frame_collected),
   DEF_MI_CMD_MI ("trace-list-variables", mi_cmd_trace_list_variables),
   DEF_MI_CMD_MI ("trace-save", mi_cmd_trace_save),
   DEF_MI_CMD_MI ("trace-start", mi_cmd_trace_start),
