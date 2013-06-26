@@ -631,10 +631,10 @@ the MIPS Instruction Set Architecture level on the fly: @code{.set
 mips@var{n}}.  @var{n} should be a number from 0 to 5, or 32, 32r2, 64
 or 64r2.
 The values other than 0 make the assembler accept instructions
-for the corresponding @sc{isa} level, from that point on in the
+for the corresponding ISA level, from that point on in the
 assembly.  @code{.set mips@var{n}} affects not only which instructions
 are permitted, but also how certain macros are expanded.  @code{.set
-mips0} restores the @sc{isa} level to its original level: either the
+mips0} restores the ISA level to its original level: either the
 level you selected with command line options, or the default for your
 configuration.  You can use this feature to permit specific @sc{mips3}
 instructions while assembling in 32 bit mode.  Use this directive with
@@ -759,7 +759,7 @@ instructions from being accepted.
 @kindex @code{.set nosmartmips}
 The directive @code{.set smartmips} makes the assembler accept
 instructions from the SmartMIPS Application Specific Extension to the
-MIPS32 @sc{isa} from that point on in the assembly.  The
+MIPS32 ISA from that point on in the assembly.  The
 @code{.set nosmartmips} directive prevents SmartMIPS instructions from
 being accepted.
 
