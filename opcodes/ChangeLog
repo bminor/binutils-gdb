@@ -1,3 +1,9 @@
+2013-06-26  Nick Clifton  <nickc@redhat.com>
+
+	* rx-decode.opc (rx_decode_opcode): Check sd field as well as ss
+	field when checking for type 2 nop.
+	* rx-decode.c: Regenerate.
+
 2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c (micromips_opcodes): Add "jraddiusp", "jrc"

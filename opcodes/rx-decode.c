@@ -6340,7 +6340,7 @@ rx_decode_opcode (unsigned long pc AU,
                   }
                 SYNTAX("mov%s	%1, %0");
 #line 307 "rx-decode.opc"
-                if (ss == 3 && sz == 2 && rsrc == 0 && rdst == 0)
+                if (sd == 3 && ss == 3 && sz == 2 && rsrc == 0 && rdst == 0)
                   {
                     ID(nop2);
                     rx->syntax = "nop";
