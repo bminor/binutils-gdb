@@ -1,5 +1,9 @@
 2013-06-26  Dmitry Kozlov <ddk@codesourcery.com>
 
+	* tracepoint.c (trace_save): Extend tsave to save starttime, stoptime.
+
+2013-06-26  Dmitry Kozlov <ddk@codesourcery.com>
+
 	Fix trace-status to output proper start-time and stop-time.
 	* tracepoint.c (trace_status_command): Fix type of printf arg to
 	prevent improper type conversion.

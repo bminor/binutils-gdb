@@ -3229,6 +3229,16 @@ tfile_write_status (struct trace_file_writer *self,
     fprintf (writer->fp, ";disconn:%x", ts->disconnected_tracing);
   if (ts->circular_buffer)
     fprintf (writer->fp, ";circular:%x", ts->circular_buffer);
+  if (ts->start_time)
+    {
+      fprintf (writer->fp, ";starttime:%s",
+      phex_nz (ts->start_time, sizeof (ts->start_time)));
+    }
+  if (ts->stop_time)
+    {
+      fprintf (writer->fp, ";stoptime:%s",
+      phex_nz (ts->stop_time, sizeof (ts->stop_time)));
+    }
   if (ts->notes != NULL)
     {
       char *buf = (char *) alloca (strlen (ts->notes) * 2 + 1);
