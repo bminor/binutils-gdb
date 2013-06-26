@@ -3663,7 +3663,8 @@ cmd_qtstatus (char *packet)
 	   free_space (), phex_nz (trace_buffer_hi - trace_buffer_lo, 0),
 	   circular_trace_buffer,
 	   disconnected_tracing,
-	   plongest (tracing_start_time), plongest (tracing_stop_time),
+	   phex_nz (tracing_start_time, sizeof (tracing_start_time)),
+	   phex_nz (tracing_stop_time, sizeof (tracing_stop_time)),
 	   buf1, buf2);
 }
 

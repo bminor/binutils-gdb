@@ -1,3 +1,9 @@
+2013-06-10  Dmitry Kozlov <ddk@codesourcery.com>
+
+	Fix trace-status to output proper start-time and stop-time.
+	* tracepoint.c (cmd_qtstatus): Modify trace-status output to
+	output start time and stop time in hex as gdb expects.
+
 2013-06-26  Pedro Alves  <pedro@codesourcery.com>
 
 	* tracepoint.c (build_traceframe_info_xml): Output trace state
