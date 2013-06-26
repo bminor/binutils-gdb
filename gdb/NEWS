@@ -92,6 +92,9 @@ show range-stepping
   the number of control packets from/to GDB.  See "New remote packets"
   below.
 
+* GDB now understands the element 'tvar' in the XML traceframe info.
+  It has the id of the collected trace state variables.
+
 * New remote packets
 
 vCont;r
@@ -112,6 +115,10 @@ qXfer:libraries-svr4:read's annex
 
   ** GDBserver now supports target-assisted range stepping.  Currently
      enabled on x86/x86_64 GNU/Linux targets.
+
+  ** GDBserver now adds element 'tvar' in the XML in the reply to
+     'qXfer:traceframe-info:read'.  It has the id of the collected
+     trace state variables.
 
 *** Changes in GDB 7.6
 

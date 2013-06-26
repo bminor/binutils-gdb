@@ -235,6 +235,7 @@ free_traceframe_info (struct traceframe_info *info)
   if (info != NULL)
     {
       VEC_free (mem_range_s, info->memory);
+      VEC_free (int, info->tvars);
 
       xfree (info);
     }
@@ -5224,6 +5225,12 @@ build_traceframe_info (char blocktype, void *data)
 	break;
       }
     case 'V':
+      {
+	int vnum;
+
+	tfile_read ((gdb_byte *) &vnum, 4);
+	VEC_safe_push (int, info->tvars, vnum);
+      }
     case 'R':
     case 'S':
       {
@@ -5581,6 +5588,21 @@ traceframe_info_start_memory (struct gdb_xml_parser *parser,
   r->length = *length_p;
 }
 
+/* Handle the start of a <tvar> element.  */
+
+static void
+traceframe_info_start_tvar (struct gdb_xml_parser *parser,
+			     const struct gdb_xml_element *element,
+			     void *user_data,
+			     VEC(gdb_xml_value_s) *attributes)
+{
+  struct traceframe_info *info = user_data;
+  const char *id_attrib = xml_find_attribute (attributes, "id")->value;
+  int id = gdb_xml_parse_ulongest (parser, id_attrib);
+
+  VEC_safe_push (int, info->tvars, id);
+}
+
 /* Discard the constructed trace frame info (if an error occurs).  */
 
 static void
@@ -5599,10 +5621,18 @@ static const struct gdb_xml_attribute memory_attributes[] = {
   { NULL, GDB_XML_AF_NONE, NULL, NULL }
 };
 
+static const struct gdb_xml_attribute tvar_attributes[] = {
+  { "id", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
 static const struct gdb_xml_element traceframe_info_children[] = {
   { "memory", memory_attributes, NULL,
     GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
     traceframe_info_start_memory, NULL },
+  { "tvar", tvar_attributes, NULL,
+    GDB_XML_EF_REPEATABLE | GDB_XML_EF_OPTIONAL,
+    traceframe_info_start_tvar, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 

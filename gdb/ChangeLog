@@ -1,6 +1,28 @@
 2013-06-26  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
+	* ctf.c (ctf_traceframe_info): Push trace state variables
+	present in the trace data into the traceframe info object.
+	* breakpoint.c (DEF_VEC_I): Remove.
+	* common/filestuff.c (DEF_VEC_I): Likewise.
+	* dwarf2loc.c (DEF_VEC_I): Likewise.
+	* mi/mi-main.c (DEF_VEC_I): Likewise.
+	* common/gdb_vecs.h (DEF_VEC_I): Define vector for int.
+	* features/traceframe-info.dtd: Add tvar element and its
+	attributes.
+	* tracepoint.c (free_traceframe_info): Free vector 'tvars'.
+	(build_traceframe_info): Push trace state variables present in
+	the trace data into the traceframe info object.
+	(traceframe_info_start_tvar): New function.
+	(tvar_attributes): New.
+	(traceframe_info_children): Add "tvar" element.
+	* tracepoint.h (struct traceframe_info) <tvars>: New field.
+
+	* NEWS: Mention the change in GDB and GDBserver.
+
+2013-06-26  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (trace_dump_command): Move code to ...
 	(get_traceframe_location): ... here.  New.
 

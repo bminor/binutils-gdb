@@ -5401,6 +5401,13 @@ build_traceframe_info_xml (char blocktype, unsigned char *dataptr, void *data)
 	break;
       }
     case 'V':
+      {
+	int vnum;
+
+	memcpy (&vnum, dataptr, sizeof (vnum));
+	buffer_xml_printf (buffer, "<tvar id=\"%d\"/>\n", vnum);
+	break;
+      }
     case 'R':
     case 'S':
       {

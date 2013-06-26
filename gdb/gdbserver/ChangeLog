@@ -1,3 +1,8 @@
+2013-06-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* tracepoint.c (build_traceframe_info_xml): Output trace state
+	variables present in the trace buffer.
+
 2013-06-24  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (version.c): Use bfd/version.h, common/version.in,

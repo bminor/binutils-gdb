@@ -30,6 +30,9 @@ struct traceframe_info
 {
   /* Collected memory.  */
   VEC(mem_range_s) *memory;
+
+  /* Collected trace state variables.  */
+  VEC(int) *tvars;
 };
 
 /* A trace state variable is a value managed by a target being

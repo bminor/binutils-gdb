@@ -157,8 +157,6 @@ fdwalk (int (*func) (void *, int), void *arg)
    don't use a hashtab because libiberty isn't linked into gdbserver;
    and anyway we don't expect there to be many open fds.  */
 
-DEF_VEC_I (int);
-
 static VEC (int) *open_fds;
 
 /* An fdwalk callback function used by notice_open_fds.  It puts the

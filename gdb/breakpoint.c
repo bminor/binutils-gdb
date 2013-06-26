@@ -5799,8 +5799,6 @@ bptype_string (enum bptype type)
   return bptypes[(int) type].description;
 }
 
-DEF_VEC_I(int);
-
 /* For MI, output a field named 'thread-groups' with a list as the value.
    For CLI, prefix the list with the string 'inf'. */
 

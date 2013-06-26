@@ -5,9 +5,12 @@
      notice and this notice are preserved.  -->
 
 <!-- traceframe-info: Root element with versioning -->
-<!ELEMENT traceframe-info  (memory)* >
+<!ELEMENT traceframe-info  (memory | tvar)* >
 <!ATTLIST traceframe-info  version CDATA   #FIXED  "1.0">
 
 <!ELEMENT memory        EMPTY>
 <!ATTLIST memory        start   CDATA   #REQUIRED
                         length  CDATA   #REQUIRED>
+
+<!ELEMENT tvar          EMPTY>
+<!ATTLIST tvar          id   CDATA   #REQUIRED>

@@ -1,3 +1,8 @@
+2013-06-26  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Traceframe Info Format): Document tvar element
+	and its attributes.
+
 2013-06-25  Yao Qi  <yao@codesourcery.com>
 
 	* gdbint.texinfo (Testsuite): Document 'gdb,predefined_tsv'.

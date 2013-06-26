@@ -41789,17 +41789,27 @@ A region of collected memory starting at @var{addr} and extending for
 <memory start="@var{addr}" length="@var{length}"/>
 @end smallexample
 
+@item
+A block indicating trace state variable numbered @var{number} has been
+collected:
+
+@smallexample
+<tvar id="@var{number}"/>
+@end smallexample
+
 @end itemize
 
 The formal DTD for the traceframe info format is given below:
 
 @smallexample
-<!ELEMENT traceframe-info  (memory)* >
+<!ELEMENT traceframe-info  (memory | tvar)* >
 <!ATTLIST traceframe-info  version CDATA   #FIXED  "1.0">
 
 <!ELEMENT memory        EMPTY>
 <!ATTLIST memory        start   CDATA   #REQUIRED
                         length  CDATA   #REQUIRED>
+<!ELEMENT tvar>
+<!ATTLIST tvar          id      CDATA   #REQUIRED>
 @end smallexample
 
 @node Branch Trace Format
