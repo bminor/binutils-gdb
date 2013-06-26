@@ -1,3 +1,12 @@
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eaarch64elf32.c.
+	(eaarch64elf32.c): New dependency and rule.
+	* Makefile.in: Re-generated.
+	* configure.tgt (aarch64-*-elf): Add aarch64elf32.
+	(aarch64_be-*-elf, aarch64_be-*-linux*, aarch64-*-linux*): Likewise.
+	* emulparams/aarch64elf32.sh: New file.
+
 2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* emultempl/mipself.em (insn32): New variable.

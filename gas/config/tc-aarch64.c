@@ -60,6 +60,12 @@ static const aarch64_feature_set aarch64_arch_none = AARCH64_ARCH_NONE;
 #ifdef OBJ_ELF
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_"	*/
 static symbolS *GOT_symbol;
+
+/* When non-zero, program to a 32-bit model, in which the C data types
+   int, long and all pointer types are 32-bit objects (ILP32); or to a
+   64-bit model, in which the C int type is 32-bits but the C long type
+   and all pointer types are 64-bit objects (LP64).  */
+static int ilp32_p = 0;
 #endif
 
 enum neon_el_type
@@ -5892,6 +5898,18 @@ tc_aarch64_regname_to_dw2regnum (char *regname)
   return -1;
 }
 
+/* Implement DWARF2_ADDR_SIZE.  */
+
+int
+aarch64_dwarf2_addr_size (void)
+{
+#if defined (OBJ_MAYBE_ELF) || defined (OBJ_ELF)
+  if (ilp32_p)
+    return 4;
+#endif
+  return bfd_arch_bits_per_address (stdoutput) / 8;
+}
+
 /* MD interface: Symbol and relocation handling.  */
 
 /* Return the address within the segment that a PC-relative fixup is
@@ -6693,9 +6711,9 @@ const char *
 elf64_aarch64_target_format (void)
 {
   if (target_big_endian)
-    return "elf64-bigaarch64";
+    return ilp32_p ? "elf32-bigaarch64" : "elf64-bigaarch64";
   else
-    return "elf64-littleaarch64";
+    return ilp32_p ? "elf32-littleaarch64" : "elf64-littleaarch64";
 }
 
 void
@@ -6986,7 +7004,7 @@ md_begin (void)
   cpu_variant = *mcpu_cpu_opt;
 
   /* Record the CPU type.  */
-  mach = bfd_mach_aarch64;
+  mach = ilp32_p ? bfd_mach_aarch64_ilp32 : bfd_mach_aarch64;
 
   bfd_set_arch_mach (stdoutput, TARGET_ARCH, mach);
 }
@@ -7031,6 +7049,10 @@ static struct aarch64_option_table aarch64_opts[] = {
   {"mbig-endian", N_("assemble for big-endian"), &target_big_endian, 1, NULL},
   {"mlittle-endian", N_("assemble for little-endian"), &target_big_endian, 0,
    NULL},
+#ifdef OBJ_ELF
+  {"mlp64", N_("select the LP64 model"), &ilp32_p, 0, NULL},
+  {"milp32", N_("select the ILP32 model"), &ilp32_p, 1, NULL},
+#endif /* OBJ_ELF */
 #ifdef DEBUG_AARCH64
   {"mdebug-dump", N_("temporary switch for dumping"), &debug_dump, 1, NULL},
 #endif /* DEBUG_AARCH64 */

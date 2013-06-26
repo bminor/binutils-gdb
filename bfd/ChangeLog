@@ -1,5 +1,42 @@
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* Makefile.am (BFD64_BACKENDS): Add elf32-aarch64.lo.
+	(BUILD_CFILES): Add elf32-aarch64.c.
+	(elf32-aarch64.c): New rule for generating from elfnn-aarch64.c.
+	* Makefile.in: Re-generated.
+	* archures.c (bfd_mach_aarch64_ilp32): New define.
+	* bfd-in.h (bfd_elf32_aarch64_init_maps): New declaration.
+	(bfd_elf32_aarch64_set_options): Ditto.
+	(elf32_aarch64_setup_section_lists): Ditto.
+	(elf32_aarch64_next_input_section): Ditto.
+	(elf32_aarch64_size_stubs): Ditto.
+	(elf32_aarch64_build_stubs): Ditto.
+	* bfd-in2.h: Re-generated.
+	* config.bfd (aarch64-*-elf): Add bfd_elf32_littleaarch64_vec
+	and bfd_elf32_bigaarch64_vec.
+	(aarch64-*-linux*): Likewise.
+	(aarch64_be-*-elf): Likewise.
+	(aarch64_be-*-linux*): Likewise.
+	* configure.in (bfd_elf32_bigaarch64_vec)
+	(bfd_elf32_littleaarch64_vec): New.
+	* configure: Re-generated.
+	* cpu-aarch64.c (compatible): Don't allow mixing ilp32 objects with
+	lp64 ones.
+	(bfd_aarch64_arch_ilp32): New.
+	(bfd_aarch64_arch): Link to bfd_aarch64_arch_ilp32.
+	* elfnn-aarch64.c (ARCH_SIZE): New define.
+	(AARCH64_R, AARCH64_R_STR, LOG_FILE_ALIGN): New defines.
+	(GOT_ENTRY_SIZE): Re-define as (ARCH_SIZE / 8).
+	(elf64_aarch64_*): Rename to elfNN_aarch64_*.
+	(ELF64_R_*): Rename to ELFNN_R_*.
+	Plus other paramaterization.
+	* targets.c (bfd_elf32_bigaarch64_vec, bfd_elf32_littleaarch64_vec):
+	New declarations.
+	(_bfd_target_vector): Add bfd_elf32_bigaarch64_vec and
+	bfd_elf32_littleaarch64_vec.
+
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* Makefile.am (BFD64_BACKENDS_CFILES): Remove elf64-aarch64.c.
 	(BUILD_CFILES): Add elf64-aarch64.c.
 	(elf64-aarch64.c): New rule for generating from elfnn-aarch64.c.

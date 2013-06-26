@@ -1,3 +1,14 @@
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (ilp32_p): New static variable.
+	(elf64_aarch64_target_format): Return the target according to the
+	value of 'ilp32_p'.
+	(md_begin): Determine 'mach' according to the value of 'ilp32_p'.
+	(aarch64_opts): Add support for options '-milp32' and '-mlp64'.
+	(aarch64_dwarf2_addr_size): New function.
+	* config/tc-aarch64.h (aarch64_dwarf2_addr_size): New declaration.
+	(DWARF2_ADDR_SIZE): New define.
+
 2013-06-26  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* doc/c-mips.texi: Use ISA instead of @sc{isa}.

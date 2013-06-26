@@ -1,5 +1,5 @@
-/* ELF support for AArch64.
-   Copyright 2009-2013 Free Software Foundation, Inc.
+/* AArch64-specific support for NN-bit ELF.
+   Copyright 2009-2013  Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -92,7 +92,7 @@
 
   The flow:
 
-  aarch64_check_relocs()
+  elfNN_aarch64_check_relocs()
 
   This function is invoked for each relocation.
 
@@ -104,7 +104,7 @@
   The reference count for a symbol is incremented.  The GOT type for
   each symbol is marked as general dynamic.
 
-  elf64_aarch64_allocate_dynrelocs ()
+  elfNN_aarch64_allocate_dynrelocs ()
 
   For each global with positive reference count we allocate a double
   GOT slot. For a traditional TLS symbol we allocate space for two
@@ -112,16 +112,16 @@
   allocate space for one relocation on the slot. Record the GOT offset
   for this symbol.
 
-  elf64_aarch64_size_dynamic_sections ()
+  elfNN_aarch64_size_dynamic_sections ()
 
   Iterate all input BFDS, look for in the local symbol data structure
   constructed earlier for local TLS symbols and allocate them double
   GOT slots along with space for a single GOT relocation. Update the
   local symbol structure to record the GOT offset allocated.
 
-  elf64_aarch64_relocate_section ()
+  elfNN_aarch64_relocate_section ()
 
-  Calls elf64_aarch64_final_link_relocate ()
+  Calls elfNN_aarch64_final_link_relocate ()
 
   Emit the relevant TLS relocations against the GOT for each TLS
   symbol. For local TLS symbols emit the GOT offset directly. The GOT
@@ -131,7 +131,7 @@
   emitted. All of the TLS code that uses the GOT offset needs to take
   care to mask out this flag bit before using the offset.
 
-  elf64_aarch64_final_link_relocate ()
+  elfNN_aarch64_final_link_relocate ()
 
   Fixup the R_AARCH64_TLSGD_{ADR_PREL21, ADD_LO12_NC} relocations.  */
 
@@ -143,6 +143,20 @@
 #include "elf-bfd.h"
 #include "bfdlink.h"
 #include "elf/aarch64.h"
+
+#define ARCH_SIZE	NN
+
+#if ARCH_SIZE == 64
+#define AARCH64_R(NAME)		R_AARCH64_ ## NAME
+#define AARCH64_R_STR(NAME)	"R_AARCH64_" #NAME
+#define LOG_FILE_ALIGN	3
+#endif
+
+#if ARCH_SIZE == 32
+#define AARCH64_R(NAME)		R_AARCH64_P32_ ## NAME
+#define AARCH64_R_STR(NAME)	"R_AARCH64_P32_" #NAME
+#define LOG_FILE_ALIGN	2
+#endif
 
 static bfd_reloc_status_type
 bfd_elf_aarch64_put_addend (bfd *abfd,
@@ -186,11 +200,11 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
 #define ELIMINATE_COPY_RELOCS 0
 
 /* Return size of a relocation entry.  HTAB is the bfd's
-   elf64_aarch64_link_hash_entry.  */
-#define RELOC_SIZE(HTAB) (sizeof (Elf64_External_Rela))
+   elf_aarch64_link_hash_entry.  */
+#define RELOC_SIZE(HTAB) (sizeof (ElfNN_External_Rela))
 
-/* GOT Entry size - 8 bytes.  */
-#define GOT_ENTRY_SIZE                  (8)
+/* GOT Entry size - 8 bytes in ELF64 and 4 bytes in ELF32.  */
+#define GOT_ENTRY_SIZE                  (ARCH_SIZE / 8)
 #define PLT_ENTRY_SIZE                  (32)
 #define PLT_SMALL_ENTRY_SIZE            (16)
 #define PLT_TLSDESC_ENTRY_SIZE          (32)
@@ -210,8 +224,8 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
    if the distance between the PLTGOT and the PLT is < 4GB use
    these PLT entries. Note that the dynamic linker gets &PLTGOT[2]
    in x16 and needs to work out PLTGOT[1] by using an address of
-   [x16,#-8].  */
-static const bfd_byte elf64_aarch64_small_plt0_entry[PLT_ENTRY_SIZE] =
+   [x16,#-GOT_ENTRY_SIZE].  */
+static const bfd_byte elfNN_aarch64_small_plt0_entry[PLT_ENTRY_SIZE] =
 {
   0xf0, 0x7b, 0xbf, 0xa9,	/* stp x16, x30, [sp, #-16]!  */
   0x10, 0x00, 0x00, 0x90,	/* adrp x16, (GOT+16)  */
@@ -226,7 +240,7 @@ static const bfd_byte elf64_aarch64_small_plt0_entry[PLT_ENTRY_SIZE] =
 /* Per function entry in a procedure linkage table looks like this
    if the distance between the PLTGOT and the PLT is < 4GB use
    these PLT entries.  */
-static const bfd_byte elf64_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
+static const bfd_byte elfNN_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
 {
   0x10, 0x00, 0x00, 0x90,	/* adrp x16, PLTGOT + n * 8  */
   0x11, 0x02, 0x40, 0xf9,	/* ldr x17, [x16, PLTGOT + n * 8] */
@@ -235,7 +249,7 @@ static const bfd_byte elf64_aarch64_small_plt_entry[PLT_SMALL_ENTRY_SIZE] =
 };
 
 static const bfd_byte
-elf64_aarch64_tlsdesc_small_plt_entry[PLT_TLSDESC_ENTRY_SIZE] =
+elfNN_aarch64_tlsdesc_small_plt_entry[PLT_TLSDESC_ENTRY_SIZE] =
 {
   0xe2, 0x0f, 0xbf, 0xa9,	/* stp x2, x3, [sp, #-16]! */
   0x02, 0x00, 0x00, 0x90,	/* adrp x2, 0 */
@@ -247,8 +261,8 @@ elf64_aarch64_tlsdesc_small_plt_entry[PLT_TLSDESC_ENTRY_SIZE] =
   0x1f, 0x20, 0x03, 0xd5,	/* nop */
 };
 
-#define elf_info_to_howto               elf64_aarch64_info_to_howto
-#define elf_info_to_howto_rel           elf64_aarch64_info_to_howto
+#define elf_info_to_howto               elfNN_aarch64_info_to_howto
+#define elf_info_to_howto_rel           elfNN_aarch64_info_to_howto
 
 #define AARCH64_ELF_ABI_VERSION		0
 
@@ -929,8 +943,8 @@ static reloc_howto_type elf64_aarch64_howto_table[] =
 	 0x1fffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
-  /* LD64: GOT offset G(S) & 0xff8 */
-  HOWTO (R_AARCH64_LD64_GOT_LO12_NC,	/* type */
+  /* LDNN: GOT offset G(S) & 0xff8 */
+  HOWTO (R_AARCH64_LDNN_GOT_LO12_NC,	/* type */
 	 3,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
 	 12,			/* bitsize */
@@ -938,7 +952,7 @@ static reloc_howto_type elf64_aarch64_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_AARCH64_LD64_GOT_LO12_NC",	/* name */
+	 "R_AARCH64_LDNN_GOT_LO12_NC",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0xff8,			/* src_mask */
 	 0xff8,			/* dst_mask */
@@ -1336,8 +1350,16 @@ static reloc_howto_type elf64_aarch64_tlsdesc_howto_table[] =
 };
 
 static reloc_howto_type *
-elf64_aarch64_howto_from_type (unsigned int r_type)
+elfNN_aarch64_howto_from_type (unsigned int r_type)
 {
+#if ARCH_SIZE == 32
+  if (r_type > 256)
+    {
+      bfd_set_error (bfd_error_bad_value);
+      return NULL;
+    }
+#endif
+
   if (r_type >= R_AARCH64_static_min && r_type < R_AARCH64_static_max)
     return &elf64_aarch64_howto_table[r_type - R_AARCH64_static_min];
 
@@ -1361,13 +1383,13 @@ elf64_aarch64_howto_from_type (unsigned int r_type)
 }
 
 static void
-elf64_aarch64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
+elfNN_aarch64_info_to_howto (bfd *abfd ATTRIBUTE_UNUSED, arelent *bfd_reloc,
 			     Elf_Internal_Rela *elf_reloc)
 {
   unsigned int r_type;
 
-  r_type = ELF64_R_TYPE (elf_reloc->r_info);
-  bfd_reloc->howto = elf64_aarch64_howto_from_type (r_type);
+  r_type = ELFNN_R_TYPE (elf_reloc->r_info);
+  bfd_reloc->howto = elfNN_aarch64_howto_from_type (r_type);
 }
 
 struct elf64_aarch64_reloc_map
@@ -1474,7 +1496,7 @@ static const struct elf64_aarch64_reloc_map elf64_aarch64_reloc_map[] =
 };
 
 static reloc_howto_type *
-elf64_aarch64_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+elfNN_aarch64_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 				 bfd_reloc_code_real_type code)
 {
   unsigned int i;
@@ -1489,7 +1511,7 @@ elf64_aarch64_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static reloc_howto_type *
-elf64_aarch64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
+elfNN_aarch64_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
 				 const char *r_name)
 {
   unsigned int i;
@@ -1536,10 +1558,10 @@ elf64_aarch64_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
 					  size, note->descpos + offset);
 }
 
-#define TARGET_LITTLE_SYM               bfd_elf64_littleaarch64_vec
-#define TARGET_LITTLE_NAME              "elf64-littleaarch64"
-#define TARGET_BIG_SYM                  bfd_elf64_bigaarch64_vec
-#define TARGET_BIG_NAME                 "elf64-bigaarch64"
+#define TARGET_LITTLE_SYM               bfd_elfNN_littleaarch64_vec
+#define TARGET_LITTLE_NAME              "elfNN-littleaarch64"
+#define TARGET_BIG_SYM                  bfd_elfNN_bigaarch64_vec
+#define TARGET_BIG_NAME                 "elfNN-bigaarch64"
 
 #define elf_backend_grok_prstatus	elf64_aarch64_grok_prstatus
 
@@ -1589,12 +1611,16 @@ static const uint32_t aarch64_adrp_branch_stub [] =
 
 static const uint32_t aarch64_long_branch_stub[] =
 {
+#if ARCH_SIZE == 64
   0x58000090,			/*	ldr   ip0, 1f */
+#else
+  0x18000090,			/*	ldr   wip0, 1f */
+#endif
   0x10000011,			/*	adr   ip1, #0 */
   0x8b110210,			/*	add   ip0, ip0, ip1 */
   0xd61f0200,			/*	br	ip0 */
-  0x00000000,			/* 1:	.xword
-				   R_AARCH64_PREL64(X) + 12
+  0x00000000,			/* 1:	.xword or .word
+				   R_AARCH64_PRELNN(X) + 12
 				 */
   0x00000000,
 };
@@ -1603,14 +1629,14 @@ static const uint32_t aarch64_long_branch_stub[] =
    string.  */
 #define STUB_SUFFIX ".stub"
 
-enum elf64_aarch64_stub_type
+enum elf_aarch64_stub_type
 {
   aarch64_stub_none,
   aarch64_stub_adrp_branch,
   aarch64_stub_long_branch,
 };
 
-struct elf64_aarch64_stub_hash_entry
+struct elf_aarch64_stub_hash_entry
 {
   /* Base hash table entry structure.  */
   struct bfd_hash_entry root;
@@ -1626,10 +1652,10 @@ struct elf64_aarch64_stub_hash_entry
   bfd_vma target_value;
   asection *target_section;
 
-  enum elf64_aarch64_stub_type stub_type;
+  enum elf_aarch64_stub_type stub_type;
 
   /* The symbol table entry, if any, that this was derived from.  */
-  struct elf64_aarch64_link_hash_entry *h;
+  struct elf_aarch64_link_hash_entry *h;
 
   /* Destination symbol type */
   unsigned char st_type;
@@ -1647,12 +1673,12 @@ struct elf64_aarch64_stub_hash_entry
 /* Used to build a map of a section.  This is required for mixed-endian
    code/data.  */
 
-typedef struct elf64_elf_section_map
+typedef struct elf_elf_section_map
 {
   bfd_vma vma;
   char type;
 }
-elf64_aarch64_section_map;
+elf_aarch64_section_map;
 
 
 typedef struct _aarch64_elf_section_data
@@ -1660,11 +1686,11 @@ typedef struct _aarch64_elf_section_data
   struct bfd_elf_section_data elf;
   unsigned int mapcount;
   unsigned int mapsize;
-  elf64_aarch64_section_map *map;
+  elf_aarch64_section_map *map;
 }
 _aarch64_elf_section_data;
 
-#define elf64_aarch64_section_data(sec) \
+#define elf_aarch64_section_data(sec) \
   ((_aarch64_elf_section_data *) elf_section_data (sec))
 
 /* The size of the thread control block.  */
@@ -1702,7 +1728,7 @@ struct elf_aarch64_obj_tdata
 #define elf_aarch64_tdata(bfd)				\
   ((struct elf_aarch64_obj_tdata *) (bfd)->tdata.any)
 
-#define elf64_aarch64_locals(bfd) (elf_aarch64_tdata (bfd)->locals)
+#define elf_aarch64_locals(bfd) (elf_aarch64_tdata (bfd)->locals)
 
 #define is_aarch64_elf(bfd)				\
   (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
@@ -1710,14 +1736,14 @@ struct elf_aarch64_obj_tdata
    && elf_object_id (bfd) == AARCH64_ELF_DATA)
 
 static bfd_boolean
-elf64_aarch64_mkobject (bfd *abfd)
+elfNN_aarch64_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct elf_aarch64_obj_tdata),
 				  AARCH64_ELF_DATA);
 }
 
-#define elf64_aarch64_hash_entry(ent) \
-  ((struct elf64_aarch64_link_hash_entry *)(ent))
+#define elf_aarch64_hash_entry(ent) \
+  ((struct elf_aarch64_link_hash_entry *)(ent))
 
 #define GOT_UNKNOWN    0
 #define GOT_NORMAL     1
@@ -1728,7 +1754,7 @@ elf64_aarch64_mkobject (bfd *abfd)
 #define GOT_TLS_GD_ANY_P(type)	((type & GOT_TLS_GD) || (type & GOT_TLSDESC_GD))
 
 /* AArch64 ELF linker hash entry.  */
-struct elf64_aarch64_link_hash_entry
+struct elf_aarch64_link_hash_entry
 {
   struct elf_link_hash_entry root;
 
@@ -1746,7 +1772,7 @@ struct elf64_aarch64_link_hash_entry
 
   /* A pointer to the most recently used stub hash entry against this
      symbol.  */
-  struct elf64_aarch64_stub_hash_entry *stub_cache;
+  struct elf_aarch64_stub_hash_entry *stub_cache;
 
   /* Offset of the GOTPLT entry reserved for the TLS descriptor.  The offset
      is from the end of the jump table and reserved entries within the PLTGOT.
@@ -1757,29 +1783,29 @@ struct elf64_aarch64_link_hash_entry
 };
 
 static unsigned int
-elf64_aarch64_symbol_got_type (struct elf_link_hash_entry *h,
+elfNN_aarch64_symbol_got_type (struct elf_link_hash_entry *h,
 			       bfd *abfd,
 			       unsigned long r_symndx)
 {
   if (h)
-    return elf64_aarch64_hash_entry (h)->got_type;
+    return elf_aarch64_hash_entry (h)->got_type;
 
-  if (! elf64_aarch64_locals (abfd))
+  if (! elf_aarch64_locals (abfd))
     return GOT_UNKNOWN;
 
-  return elf64_aarch64_locals (abfd)[r_symndx].got_type;
+  return elf_aarch64_locals (abfd)[r_symndx].got_type;
 }
 
 /* Get the AArch64 elf linker hash table from a link_info structure.  */
-#define elf64_aarch64_hash_table(info)					\
-  ((struct elf64_aarch64_link_hash_table *) ((info)->hash))
+#define elf_aarch64_hash_table(info)					\
+  ((struct elf_aarch64_link_hash_table *) ((info)->hash))
 
 #define aarch64_stub_hash_lookup(table, string, create, copy)		\
-  ((struct elf64_aarch64_stub_hash_entry *)				\
+  ((struct elf_aarch64_stub_hash_entry *)				\
    bfd_hash_lookup ((table), (string), (create), (copy)))
 
 /* AArch64 ELF linker hash table.  */
-struct elf64_aarch64_link_hash_table
+struct elf_aarch64_link_hash_table
 {
   /* The main hash table.  */
   struct elf_link_hash_table root;
@@ -1828,7 +1854,7 @@ struct elf64_aarch64_link_hash_table
     asection *stub_sec;
   } *stub_group;
 
-  /* Assorted information used by elf64_aarch64_size_stubs.  */
+  /* Assorted information used by elfNN_aarch64_size_stubs.  */
   unsigned int bfd_count;
   int top_index;
   asection **input_list;
@@ -1884,23 +1910,23 @@ aarch64_signed_overflow (bfd_vma value, unsigned int bits)
 /* Create an entry in an AArch64 ELF linker hash table.  */
 
 static struct bfd_hash_entry *
-elf64_aarch64_link_hash_newfunc (struct bfd_hash_entry *entry,
+elfNN_aarch64_link_hash_newfunc (struct bfd_hash_entry *entry,
 				 struct bfd_hash_table *table,
 				 const char *string)
 {
-  struct elf64_aarch64_link_hash_entry *ret =
-    (struct elf64_aarch64_link_hash_entry *) entry;
+  struct elf_aarch64_link_hash_entry *ret =
+    (struct elf_aarch64_link_hash_entry *) entry;
 
   /* Allocate the structure if it has not already been allocated by a
      subclass.  */
   if (ret == NULL)
     ret = bfd_hash_allocate (table,
-			     sizeof (struct elf64_aarch64_link_hash_entry));
+			     sizeof (struct elf_aarch64_link_hash_entry));
   if (ret == NULL)
     return (struct bfd_hash_entry *) ret;
 
   /* Call the allocation method of the superclass.  */
-  ret = ((struct elf64_aarch64_link_hash_entry *)
+  ret = ((struct elf_aarch64_link_hash_entry *)
 	 _bfd_elf_link_hash_newfunc ((struct bfd_hash_entry *) ret,
 				     table, string));
   if (ret != NULL)
@@ -1927,7 +1953,7 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
     {
       entry = bfd_hash_allocate (table,
 				 sizeof (struct
-					 elf64_aarch64_stub_hash_entry));
+					 elf_aarch64_stub_hash_entry));
       if (entry == NULL)
 	return entry;
     }
@@ -1936,10 +1962,10 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
   entry = bfd_hash_newfunc (entry, table, string);
   if (entry != NULL)
     {
-      struct elf64_aarch64_stub_hash_entry *eh;
+      struct elf_aarch64_stub_hash_entry *eh;
 
       /* Initialize the local fields.  */
-      eh = (struct elf64_aarch64_stub_hash_entry *) entry;
+      eh = (struct elf_aarch64_stub_hash_entry *) entry;
       eh->stub_sec = NULL;
       eh->stub_offset = 0;
       eh->target_value = 0;
@@ -1956,14 +1982,14 @@ stub_hash_newfunc (struct bfd_hash_entry *entry,
 /* Copy the extra info we tack onto an elf_link_hash_entry.  */
 
 static void
-elf64_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
+elfNN_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 				    struct elf_link_hash_entry *dir,
 				    struct elf_link_hash_entry *ind)
 {
-  struct elf64_aarch64_link_hash_entry *edir, *eind;
+  struct elf_aarch64_link_hash_entry *edir, *eind;
 
-  edir = (struct elf64_aarch64_link_hash_entry *) dir;
-  eind = (struct elf64_aarch64_link_hash_entry *) ind;
+  edir = (struct elf_aarch64_link_hash_entry *) dir;
+  eind = (struct elf_aarch64_link_hash_entry *) ind;
 
   if (eind->dyn_relocs != NULL)
     {
@@ -2012,18 +2038,18 @@ elf64_aarch64_copy_indirect_symbol (struct bfd_link_info *info,
 /* Create an AArch64 elf linker hash table.  */
 
 static struct bfd_link_hash_table *
-elf64_aarch64_link_hash_table_create (bfd *abfd)
+elfNN_aarch64_link_hash_table_create (bfd *abfd)
 {
-  struct elf64_aarch64_link_hash_table *ret;
-  bfd_size_type amt = sizeof (struct elf64_aarch64_link_hash_table);
+  struct elf_aarch64_link_hash_table *ret;
+  bfd_size_type amt = sizeof (struct elf_aarch64_link_hash_table);
 
   ret = bfd_zmalloc (amt);
   if (ret == NULL)
     return NULL;
 
   if (!_bfd_elf_link_hash_table_init
-      (&ret->root, abfd, elf64_aarch64_link_hash_newfunc,
-       sizeof (struct elf64_aarch64_link_hash_entry), AARCH64_ELF_DATA))
+      (&ret->root, abfd, elfNN_aarch64_link_hash_newfunc,
+       sizeof (struct elf_aarch64_link_hash_entry), AARCH64_ELF_DATA))
     {
       free (ret);
       return NULL;
@@ -2035,7 +2061,7 @@ elf64_aarch64_link_hash_table_create (bfd *abfd)
   ret->dt_tlsdesc_got = (bfd_vma) - 1;
 
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,
-			    sizeof (struct elf64_aarch64_stub_hash_entry)))
+			    sizeof (struct elf_aarch64_stub_hash_entry)))
     {
       free (ret);
       return NULL;
@@ -2047,10 +2073,10 @@ elf64_aarch64_link_hash_table_create (bfd *abfd)
 /* Free the derived linker hash table.  */
 
 static void
-elf64_aarch64_hash_table_free (struct bfd_link_hash_table *hash)
+elfNN_aarch64_hash_table_free (struct bfd_link_hash_table *hash)
 {
-  struct elf64_aarch64_link_hash_table *ret
-    = (struct elf64_aarch64_link_hash_table *) hash;
+  struct elf_aarch64_link_hash_table *ret
+    = (struct elf_aarch64_link_hash_table *) hash;
 
   bfd_hash_table_free (&ret->stub_hash_table);
   _bfd_elf_link_hash_table_free (hash);
@@ -2163,7 +2189,7 @@ aarch64_relocate (unsigned int r_type, bfd *input_bfd, asection *input_section,
   reloc_howto_type *howto;
   bfd_vma place;
 
-  howto = elf64_aarch64_howto_from_type (r_type);
+  howto = elfNN_aarch64_howto_from_type (r_type);
   place = (input_section->output_section->vma + input_section->output_offset
 	   + offset);
   value = aarch64_resolve_relocation (r_type, place, value, 0, FALSE);
@@ -2172,7 +2198,7 @@ aarch64_relocate (unsigned int r_type, bfd *input_bfd, asection *input_section,
 				     howto, value);
 }
 
-static enum elf64_aarch64_stub_type
+static enum elf_aarch64_stub_type
 aarch64_select_branch_stub (bfd_vma value, bfd_vma place)
 {
   if (aarch64_valid_for_adrp_p (value, place))
@@ -2182,25 +2208,25 @@ aarch64_select_branch_stub (bfd_vma value, bfd_vma place)
 
 /* Determine the type of stub needed, if any, for a call.  */
 
-static enum elf64_aarch64_stub_type
+static enum elf_aarch64_stub_type
 aarch64_type_of_stub (struct bfd_link_info *info,
 		      asection *input_sec,
 		      const Elf_Internal_Rela *rel,
 		      unsigned char st_type,
-		      struct elf64_aarch64_link_hash_entry *hash,
+		      struct elf_aarch64_link_hash_entry *hash,
 		      bfd_vma destination)
 {
   bfd_vma location;
   bfd_signed_vma branch_offset;
   unsigned int r_type;
-  struct elf64_aarch64_link_hash_table *globals;
-  enum elf64_aarch64_stub_type stub_type = aarch64_stub_none;
+  struct elf_aarch64_link_hash_table *globals;
+  enum elf_aarch64_stub_type stub_type = aarch64_stub_none;
   bfd_boolean via_plt_p;
 
   if (st_type != STT_FUNC)
     return stub_type;
 
-  globals = elf64_aarch64_hash_table (info);
+  globals = elf_aarch64_hash_table (info);
   via_plt_p = (globals->root.splt != NULL && hash != NULL
 	       && hash->root.plt.offset != (bfd_vma) - 1);
 
@@ -2213,7 +2239,7 @@ aarch64_type_of_stub (struct bfd_link_info *info,
 
   branch_offset = (bfd_signed_vma) (destination - location);
 
-  r_type = ELF64_R_TYPE (rel->r_info);
+  r_type = ELFNN_R_TYPE (rel->r_info);
 
   /* We don't want to redirect any old unconditional jump in this way,
      only one which is being used for a sibcall, where it is
@@ -2231,9 +2257,9 @@ aarch64_type_of_stub (struct bfd_link_info *info,
 /* Build a name for an entry in the stub hash table.  */
 
 static char *
-elf64_aarch64_stub_name (const asection *input_section,
+elfNN_aarch64_stub_name (const asection *input_section,
 			 const asection *sym_sec,
-			 const struct elf64_aarch64_link_hash_entry *hash,
+			 const struct elf_aarch64_link_hash_entry *hash,
 			 const Elf_Internal_Rela *rel)
 {
   char *stub_name;
@@ -2257,7 +2283,7 @@ elf64_aarch64_stub_name (const asection *input_section,
 	snprintf (stub_name, len, "%08x_%x:%x+%" BFD_VMA_FMT "x",
 		  (unsigned int) input_section->id,
 		  (unsigned int) sym_sec->id,
-		  (unsigned int) ELF64_R_SYM (rel->r_info),
+		  (unsigned int) ELFNN_R_SYM (rel->r_info),
 		  rel->r_addend);
     }
 
@@ -2267,16 +2293,16 @@ elf64_aarch64_stub_name (const asection *input_section,
 /* Look up an entry in the stub hash.  Stub entries are cached because
    creating the stub name takes a bit of time.  */
 
-static struct elf64_aarch64_stub_hash_entry *
-elf64_aarch64_get_stub_entry (const asection *input_section,
+static struct elf_aarch64_stub_hash_entry *
+elfNN_aarch64_get_stub_entry (const asection *input_section,
 			      const asection *sym_sec,
 			      struct elf_link_hash_entry *hash,
 			      const Elf_Internal_Rela *rel,
-			      struct elf64_aarch64_link_hash_table *htab)
+			      struct elf_aarch64_link_hash_table *htab)
 {
-  struct elf64_aarch64_stub_hash_entry *stub_entry;
-  struct elf64_aarch64_link_hash_entry *h =
-    (struct elf64_aarch64_link_hash_entry *) hash;
+  struct elf_aarch64_stub_hash_entry *stub_entry;
+  struct elf_aarch64_link_hash_entry *h =
+    (struct elf_aarch64_link_hash_entry *) hash;
   const asection *id_sec;
 
   if ((input_section->flags & SEC_CODE) == 0)
@@ -2298,7 +2324,7 @@ elf64_aarch64_get_stub_entry (const asection *input_section,
     {
       char *stub_name;
 
-      stub_name = elf64_aarch64_stub_name (id_sec, sym_sec, h, rel);
+      stub_name = elfNN_aarch64_stub_name (id_sec, sym_sec, h, rel);
       if (stub_name == NULL)
 	return NULL;
 
@@ -2316,14 +2342,14 @@ elf64_aarch64_get_stub_entry (const asection *input_section,
 /* Add a new stub entry to the stub hash.  Not all fields of the new
    stub entry are initialised.  */
 
-static struct elf64_aarch64_stub_hash_entry *
-elf64_aarch64_add_stub (const char *stub_name,
+static struct elf_aarch64_stub_hash_entry *
+elfNN_aarch64_add_stub (const char *stub_name,
 			asection *section,
-			struct elf64_aarch64_link_hash_table *htab)
+			struct elf_aarch64_link_hash_table *htab)
 {
   asection *link_sec;
   asection *stub_sec;
-  struct elf64_aarch64_stub_hash_entry *stub_entry;
+  struct elf_aarch64_stub_hash_entry *stub_entry;
 
   link_sec = htab->stub_group[section->id].link_sec;
   stub_sec = htab->stub_group[section->id].stub_sec;
@@ -2373,7 +2399,7 @@ static bfd_boolean
 aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
 			void *in_arg ATTRIBUTE_UNUSED)
 {
-  struct elf64_aarch64_stub_hash_entry *stub_entry;
+  struct elf_aarch64_stub_hash_entry *stub_entry;
   asection *stub_sec;
   bfd *stub_bfd;
   bfd_byte *loc;
@@ -2383,7 +2409,7 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
   unsigned int i;
 
   /* Massage our args to the form they really have.  */
-  stub_entry = (struct elf64_aarch64_stub_hash_entry *) gen_entry;
+  stub_entry = (struct elf_aarch64_stub_hash_entry *) gen_entry;
 
   stub_sec = stub_entry->stub_sec;
 
@@ -2442,7 +2468,7 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
 	BFD_FAIL ();
 
       _bfd_final_link_relocate
-	(elf64_aarch64_howto_from_type (R_AARCH64_ADD_ABS_LO12_NC),
+	(elfNN_aarch64_howto_from_type (R_AARCH64_ADD_ABS_LO12_NC),
 	 stub_bfd,
 	 stub_sec,
 	 stub_sec->contents,
@@ -2454,7 +2480,7 @@ aarch64_build_one_stub (struct bfd_hash_entry *gen_entry,
     case aarch64_stub_long_branch:
       /* We want the value relative to the address 12 bytes back from the
          value itself.  */
-      _bfd_final_link_relocate (elf64_aarch64_howto_from_type
+      _bfd_final_link_relocate (elfNN_aarch64_howto_from_type
 				(R_AARCH64_PREL64), stub_bfd, stub_sec,
 				stub_sec->contents,
 				stub_entry->stub_offset + 16,
@@ -2474,11 +2500,11 @@ static bfd_boolean
 aarch64_size_one_stub (struct bfd_hash_entry *gen_entry,
 		       void *in_arg ATTRIBUTE_UNUSED)
 {
-  struct elf64_aarch64_stub_hash_entry *stub_entry;
+  struct elf_aarch64_stub_hash_entry *stub_entry;
   int size;
 
   /* Massage our args to the form they really have.  */
-  stub_entry = (struct elf64_aarch64_stub_hash_entry *) gen_entry;
+  stub_entry = (struct elf_aarch64_stub_hash_entry *) gen_entry;
 
   switch (stub_entry->stub_type)
     {
@@ -2506,7 +2532,7 @@ aarch64_size_one_stub (struct bfd_hash_entry *gen_entry,
    0 when no stubs will be needed, and 1 on success.  */
 
 int
-elf64_aarch64_setup_section_lists (bfd *output_bfd,
+elfNN_aarch64_setup_section_lists (bfd *output_bfd,
 				   struct bfd_link_info *info)
 {
   bfd *input_bfd;
@@ -2515,8 +2541,8 @@ elf64_aarch64_setup_section_lists (bfd *output_bfd,
   asection *section;
   asection **input_list, **list;
   bfd_size_type amt;
-  struct elf64_aarch64_link_hash_table *htab =
-    elf64_aarch64_hash_table (info);
+  struct elf_aarch64_link_hash_table *htab =
+    elf_aarch64_hash_table (info);
 
   if (!is_elf_hash_table (htab))
     return 0;
@@ -2574,7 +2600,7 @@ elf64_aarch64_setup_section_lists (bfd *output_bfd,
   return 1;
 }
 
-/* Used by elf64_aarch64_next_input_section and group_sections.  */
+/* Used by elfNN_aarch64_next_input_section and group_sections.  */
 #define PREV_SEC(sec) (htab->stub_group[(sec)->id].link_sec)
 
 /* The linker repeatedly calls this function for each input section,
@@ -2583,10 +2609,10 @@ elf64_aarch64_setup_section_lists (bfd *output_bfd,
    we may insert linker stubs.  */
 
 void
-elf64_aarch64_next_input_section (struct bfd_link_info *info, asection *isec)
+elfNN_aarch64_next_input_section (struct bfd_link_info *info, asection *isec)
 {
-  struct elf64_aarch64_link_hash_table *htab =
-    elf64_aarch64_hash_table (info);
+  struct elf_aarch64_link_hash_table *htab =
+    elf_aarch64_hash_table (info);
 
   if (isec->output_section->index <= htab->top_index)
     {
@@ -2611,7 +2637,7 @@ elf64_aarch64_next_input_section (struct bfd_link_info *info, asection *isec)
    the middle of a function is not a good idea.  */
 
 static void
-group_sections (struct elf64_aarch64_link_hash_table *htab,
+group_sections (struct elf_aarch64_link_hash_table *htab,
 		bfd_size_type stub_group_size,
 		bfd_boolean stubs_always_before_branch)
 {
@@ -2683,7 +2709,7 @@ group_sections (struct elf64_aarch64_link_hash_table *htab,
    instruction.  */
 
 bfd_boolean
-elf64_aarch64_size_stubs (bfd *output_bfd,
+elfNN_aarch64_size_stubs (bfd *output_bfd,
 			  bfd *stub_bfd,
 			  struct bfd_link_info *info,
 			  bfd_signed_vma group_size,
@@ -2694,7 +2720,7 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
   bfd_size_type stub_group_size;
   bfd_boolean stubs_always_before_branch;
   bfd_boolean stub_changed = 0;
-  struct elf64_aarch64_link_hash_table *htab = elf64_aarch64_hash_table (info);
+  struct elf_aarch64_link_hash_table *htab = elf_aarch64_hash_table (info);
 
   /* Propagate mach to stub bfd, because it may not have been
      finalized when we created stub_bfd.  */
@@ -2770,20 +2796,20 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
 	      for (; irela < irelaend; irela++)
 		{
 		  unsigned int r_type, r_indx;
-		  enum elf64_aarch64_stub_type stub_type;
-		  struct elf64_aarch64_stub_hash_entry *stub_entry;
+		  enum elf_aarch64_stub_type stub_type;
+		  struct elf_aarch64_stub_hash_entry *stub_entry;
 		  asection *sym_sec;
 		  bfd_vma sym_value;
 		  bfd_vma destination;
-		  struct elf64_aarch64_link_hash_entry *hash;
+		  struct elf_aarch64_link_hash_entry *hash;
 		  const char *sym_name;
 		  char *stub_name;
 		  const asection *id_sec;
 		  unsigned char st_type;
 		  bfd_size_type len;
 
-		  r_type = ELF64_R_TYPE (irela->r_info);
-		  r_indx = ELF64_R_SYM (irela->r_info);
+		  r_type = ELFNN_R_TYPE (irela->r_info);
+		  r_indx = ELFNN_R_SYM (irela->r_info);
 
 		  if (r_type >= (unsigned int) R_AARCH64_end)
 		    {
@@ -2850,19 +2876,19 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
 		      int e_indx;
 
 		      e_indx = r_indx - symtab_hdr->sh_info;
-		      hash = ((struct elf64_aarch64_link_hash_entry *)
+		      hash = ((struct elf_aarch64_link_hash_entry *)
 			      elf_sym_hashes (input_bfd)[e_indx]);
 
 		      while (hash->root.root.type == bfd_link_hash_indirect
 			     || hash->root.root.type == bfd_link_hash_warning)
-			hash = ((struct elf64_aarch64_link_hash_entry *)
+			hash = ((struct elf_aarch64_link_hash_entry *)
 				hash->root.root.u.i.link);
 
 		      if (hash->root.root.type == bfd_link_hash_defined
 			  || hash->root.root.type == bfd_link_hash_defweak)
 			{
-			  struct elf64_aarch64_link_hash_table *globals =
-			    elf64_aarch64_hash_table (info);
+			  struct elf_aarch64_link_hash_table *globals =
+			    elf_aarch64_hash_table (info);
 			  sym_sec = hash->root.root.u.def.section;
 			  sym_value = hash->root.root.u.def.value;
 			  /* For a destination in a shared library,
@@ -2893,8 +2919,8 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
 			     target address to decide whether a long
 			     branch stub is needed.
 			     For absolute code, they cannot be handled.  */
-			  struct elf64_aarch64_link_hash_table *globals =
-			    elf64_aarch64_hash_table (info);
+			  struct elf_aarch64_link_hash_table *globals =
+			    elf_aarch64_hash_table (info);
 
 			  if (globals->root.splt != NULL && hash != NULL
 			      && hash->root.plt.offset != (bfd_vma) - 1)
@@ -2929,7 +2955,7 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
 		  id_sec = htab->stub_group[section->id].link_sec;
 
 		  /* Get the name of this stub.  */
-		  stub_name = elf64_aarch64_stub_name (id_sec, sym_sec, hash,
+		  stub_name = elfNN_aarch64_stub_name (id_sec, sym_sec, hash,
 						       irela);
 		  if (!stub_name)
 		    goto error_ret_free_internal;
@@ -2944,7 +2970,7 @@ elf64_aarch64_size_stubs (bfd *output_bfd,
 		      continue;
 		    }
 
-		  stub_entry = elf64_aarch64_add_stub (stub_name, section,
+		  stub_entry = elfNN_aarch64_add_stub (stub_name, section,
 						       htab);
 		  if (stub_entry == NULL)
 		    {
@@ -3009,13 +3035,13 @@ error_ret_free_local:
    linker.  */
 
 bfd_boolean
-elf64_aarch64_build_stubs (struct bfd_link_info *info)
+elfNN_aarch64_build_stubs (struct bfd_link_info *info)
 {
   asection *stub_sec;
   struct bfd_hash_table *table;
-  struct elf64_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_table *htab;
 
-  htab = elf64_aarch64_hash_table (info);
+  htab = elf_aarch64_hash_table (info);
 
   for (stub_sec = htab->stub_bfd->sections;
        stub_sec != NULL; stub_sec = stub_sec->next)
@@ -3045,15 +3071,15 @@ elf64_aarch64_build_stubs (struct bfd_link_info *info)
 /* Add an entry to the code/data map for section SEC.  */
 
 static void
-elf64_aarch64_section_map_add (asection *sec, char type, bfd_vma vma)
+elfNN_aarch64_section_map_add (asection *sec, char type, bfd_vma vma)
 {
   struct _aarch64_elf_section_data *sec_data =
-    elf64_aarch64_section_data (sec);
+    elf_aarch64_section_data (sec);
   unsigned int newidx;
 
   if (sec_data->map == NULL)
     {
-      sec_data->map = bfd_malloc (sizeof (elf64_aarch64_section_map));
+      sec_data->map = bfd_malloc (sizeof (elf_aarch64_section_map));
       sec_data->mapcount = 0;
       sec_data->mapsize = 1;
     }
@@ -3064,7 +3090,7 @@ elf64_aarch64_section_map_add (asection *sec, char type, bfd_vma vma)
     {
       sec_data->mapsize *= 2;
       sec_data->map = bfd_realloc_or_free
-	(sec_data->map, sec_data->mapsize * sizeof (elf64_aarch64_section_map));
+	(sec_data->map, sec_data->mapsize * sizeof (elf_aarch64_section_map));
     }
 
   if (sec_data->map)
@@ -3077,7 +3103,7 @@ elf64_aarch64_section_map_add (asection *sec, char type, bfd_vma vma)
 
 /* Initialise maps of insn/data for input BFDs.  */
 void
-bfd_elf64_aarch64_init_maps (bfd *abfd)
+bfd_elfNN_aarch64_init_maps (bfd *abfd)
 {
   Elf_Internal_Sym *isymbuf;
   Elf_Internal_Shdr *hdr;
@@ -3116,21 +3142,21 @@ bfd_elf64_aarch64_init_maps (bfd *abfd)
 
 	  if (bfd_is_aarch64_special_symbol_name
 	      (name, BFD_AARCH64_SPECIAL_SYM_TYPE_MAP))
-	    elf64_aarch64_section_map_add (sec, name[1], isym->st_value);
+	    elfNN_aarch64_section_map_add (sec, name[1], isym->st_value);
 	}
     }
 }
 
 /* Set option values needed during linking.  */
 void
-bfd_elf64_aarch64_set_options (struct bfd *output_bfd,
+bfd_elfNN_aarch64_set_options (struct bfd *output_bfd,
 			       struct bfd_link_info *link_info,
 			       int no_enum_warn,
 			       int no_wchar_warn, int pic_veneer)
 {
-  struct elf64_aarch64_link_hash_table *globals;
+  struct elf_aarch64_link_hash_table *globals;
 
-  globals = elf64_aarch64_hash_table (link_info);
+  globals = elf_aarch64_hash_table (link_info);
   globals->pic_veneer = pic_veneer;
 
   BFD_ASSERT (is_aarch64_elf (output_bfd));
@@ -3451,7 +3477,7 @@ bfd_elf_aarch64_put_addend (bfd *abfd,
 
 static bfd_vma
 aarch64_calculate_got_entry_vma (struct elf_link_hash_entry *h,
-				 struct elf64_aarch64_link_hash_table
+				 struct elf_aarch64_link_hash_table
 				 *globals, struct bfd_link_info *info,
 				 bfd_vma value, bfd *output_bfd,
 				 bfd_boolean *unresolved_reloc_p)
@@ -3482,7 +3508,7 @@ aarch64_calculate_got_entry_vma (struct elf_link_hash_entry *h,
 	    off &= ~1;
 	  else
 	    {
-	      bfd_put_64 (output_bfd, value, basegot->contents + off);
+	      bfd_put_NN (output_bfd, value, basegot->contents + off);
 	      h->got.offset |= 1;
 	    }
 	}
@@ -3581,7 +3607,7 @@ aarch64_can_relax_tls (bfd *input_bfd,
   if (! IS_AARCH64_TLS_RELOC (r_type))
     return FALSE;
 
-  symbol_got_type = elf64_aarch64_symbol_got_type (h, input_bfd, r_symndx);
+  symbol_got_type = elfNN_aarch64_symbol_got_type (h, input_bfd, r_symndx);
   reloc_got_type = aarch64_reloc_got_type (r_type);
 
   if (symbol_got_type == GOT_TLS_IE && GOT_TLS_GD_ANY_P (reloc_got_type))
@@ -3651,7 +3677,7 @@ symbol_got_offset_ref (bfd *input_bfd, struct elf_link_hash_entry *h,
       /* local symbol */
       struct elf_aarch64_local_symbol *l;
 
-      l = elf64_aarch64_locals (input_bfd);
+      l = elf_aarch64_locals (input_bfd);
       return &l[r_symndx].got_offset;
     }
 }
@@ -3692,8 +3718,8 @@ symbol_tlsdesc_got_offset_ref (bfd *input_bfd, struct elf_link_hash_entry *h,
      referred to in h.  */
   if (h != NULL)
     {
-      struct elf64_aarch64_link_hash_entry *eh;
-      eh = (struct elf64_aarch64_link_hash_entry *) h;
+      struct elf_aarch64_link_hash_entry *eh;
+      eh = (struct elf_aarch64_link_hash_entry *) h;
       return &eh->tlsdesc_got_jump_table_offset;
     }
   else
@@ -3701,7 +3727,7 @@ symbol_tlsdesc_got_offset_ref (bfd *input_bfd, struct elf_link_hash_entry *h,
       /* local symbol */
       struct elf_aarch64_local_symbol *l;
 
-      l = elf64_aarch64_locals (input_bfd);
+      l = elf_aarch64_locals (input_bfd);
       return &l[r_symndx].tlsdesc_got_jump_table_offset;
     }
 }
@@ -3737,7 +3763,7 @@ symbol_tlsdesc_got_offset (bfd *input_bfd, struct elf_link_hash_entry *h,
 
 /* Perform a relocation as part of a final link.  */
 static bfd_reloc_status_type
-elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
+elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 				   bfd *input_bfd,
 				   bfd *output_bfd,
 				   asection *input_section,
@@ -3756,21 +3782,21 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
   bfd_byte *hit_data = contents + rel->r_offset;
   bfd_vma place;
   bfd_signed_vma signed_addend;
-  struct elf64_aarch64_link_hash_table *globals;
+  struct elf_aarch64_link_hash_table *globals;
   bfd_boolean weak_undef_p;
 
-  globals = elf64_aarch64_hash_table (info);
+  globals = elf_aarch64_hash_table (info);
 
   BFD_ASSERT (is_aarch64_elf (input_bfd));
 
-  r_symndx = ELF64_R_SYM (rel->r_info);
+  r_symndx = ELFNN_R_SYM (rel->r_info);
 
   /* It is possible to have linker relaxations on some TLS access
      models.  Update our information here.  */
   r_type = aarch64_tls_transition (input_bfd, info, r_type, h, r_symndx);
 
   if (r_type != howto->type)
-    howto = elf64_aarch64_howto_from_type (r_type);
+    howto = elfNN_aarch64_howto_from_type (r_type);
 
   place = input_section->output_section->vma
     + input_section->output_offset + rel->r_offset;
@@ -3836,7 +3862,7 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
 	  else if (h != NULL
 		   && h->dynindx != -1
 		   && (!info->shared || !info->symbolic || !h->def_regular))
-	    outrel.r_info = ELF64_R_INFO (h->dynindx, r_type);
+	    outrel.r_info = ELFNN_R_INFO (h->dynindx, r_type);
 	  else
 	    {
 	      int symbol;
@@ -3845,12 +3871,12 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
 		 relocate the text and data segments independently,
 		 so the symbol does not matter.  */
 	      symbol = 0;
-	      outrel.r_info = ELF64_R_INFO (symbol, R_AARCH64_RELATIVE);
+	      outrel.r_info = ELFNN_R_INFO (symbol, R_AARCH64_RELATIVE);
 	      outrel.r_addend += value;
 	    }
 
 	  loc = sreloc->contents + sreloc->reloc_count++ * RELOC_SIZE (htab);
-	  bfd_elf64_swap_reloca_out (output_bfd, &outrel, loc);
+	  bfd_elfNN_swap_reloca_out (output_bfd, &outrel, loc);
 
 	  if (sreloc->reloc_count * RELOC_SIZE (htab) > sreloc->size)
 	    {
@@ -3913,8 +3939,8 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
 	      {
 		/* The target is out of reach, so redirect the branch to
 		   the local stub for this function.  */
-		struct elf64_aarch64_stub_hash_entry *stub_entry;
-		stub_entry = elf64_aarch64_get_stub_entry (input_section,
+		struct elf_aarch64_stub_hash_entry *stub_entry;
+		stub_entry = elfNN_aarch64_get_stub_entry (input_section,
 							   sym_sec, h,
 							   rel, globals);
 		if (stub_entry != NULL)
@@ -4045,12 +4071,12 @@ elf64_aarch64_final_link_relocate (reloc_howto_type *howto,
    case of error.  */
 
 static bfd_reloc_status_type
-elf64_aarch64_tls_relax (struct elf64_aarch64_link_hash_table *globals,
+elfNN_aarch64_tls_relax (struct elf_aarch64_link_hash_table *globals,
 			 bfd *input_bfd, bfd_byte *contents,
 			 Elf_Internal_Rela *rel, struct elf_link_hash_entry *h)
 {
   bfd_boolean is_local = h == NULL;
-  unsigned int r_type = ELF64_R_TYPE (rel->r_info);
+  unsigned int r_type = ELFNN_R_TYPE (rel->r_info);
   unsigned long insn;
 
   BFD_ASSERT (globals && input_bfd && contents && rel);
@@ -4111,7 +4137,7 @@ elf64_aarch64_tls_relax (struct elf64_aarch64_link_hash_table *globals,
 
 	  /* First kill the tls_get_addr reloc on the bl instruction.  */
 	  BFD_ASSERT (rel->r_offset + 4 == rel[1].r_offset);
-	  rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_AARCH64_NONE);
+	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
 
 	  bfd_putl32 (0xf2800000, contents + rel->r_offset);
 	  bfd_putl32 (0xd53bd041, contents + rel->r_offset + 4);
@@ -4127,10 +4153,10 @@ elf64_aarch64_tls_relax (struct elf64_aarch64_link_hash_table *globals,
 	     NOP                        => add  x0, x1, x0
 	   */
 
-	  BFD_ASSERT (ELF64_R_TYPE (rel[1].r_info) == R_AARCH64_CALL26);
+	  BFD_ASSERT (ELFNN_R_TYPE (rel[1].r_info) == R_AARCH64_CALL26);
 
 	  /* Remove the relocation on the BL instruction.  */
-	  rel[1].r_info = ELF64_R_INFO (STN_UNDEF, R_AARCH64_NONE);
+	  rel[1].r_info = ELFNN_R_INFO (STN_UNDEF, R_AARCH64_NONE);
 
 	  bfd_putl32 (0xf9400000, contents + rel->r_offset);
 
@@ -4183,7 +4209,7 @@ elf64_aarch64_tls_relax (struct elf64_aarch64_link_hash_table *globals,
 /* Relocate an AArch64 ELF section.  */
 
 static bfd_boolean
-elf64_aarch64_relocate_section (bfd *output_bfd,
+elfNN_aarch64_relocate_section (bfd *output_bfd,
 				struct bfd_link_info *info,
 				bfd *input_bfd,
 				asection *input_section,
@@ -4197,11 +4223,11 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   const char *name;
-  struct elf64_aarch64_link_hash_table *globals;
+  struct elf_aarch64_link_hash_table *globals;
   bfd_boolean save_addend = FALSE;
   bfd_vma addend = 0;
 
-  globals = elf64_aarch64_hash_table (info);
+  globals = elf_aarch64_hash_table (info);
 
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
@@ -4224,10 +4250,10 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
       bfd_boolean unresolved_reloc = FALSE;
       char *error_message = NULL;
 
-      r_symndx = ELF64_R_SYM (rel->r_info);
-      r_type = ELF64_R_TYPE (rel->r_info);
+      r_symndx = ELFNN_R_SYM (rel->r_info);
+      r_type = ELFNN_R_TYPE (rel->r_info);
 
-      bfd_reloc.howto = elf64_aarch64_howto_from_type (r_type);
+      bfd_reloc.howto = elfNN_aarch64_howto_from_type (r_type);
       howto = bfd_reloc.howto;
 
       if (howto == NULL)
@@ -4245,7 +4271,7 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
       if (r_symndx < symtab_hdr->sh_info)
 	{
 	  sym = local_syms + r_symndx;
-	  sym_type = ELF64_ST_TYPE (sym->st_info);
+	  sym_type = ELFNN_ST_TYPE (sym->st_info);
 	  sec = local_sections[r_symndx];
 
 	  /* An object file might have a reference to a local
@@ -4320,7 +4346,7 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 
       /* We relax only if we can see that there can be a valid transition
          from a reloc type to another.
-         We call elf64_aarch64_final_link_relocate unless we're completely
+         We call elfNN_aarch64_final_link_relocate unless we're completely
          done, i.e., the relaxation produced the final output we want.  */
 
       relaxed_r_type = aarch64_tls_transition (input_bfd, info, r_type,
@@ -4328,9 +4354,9 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
       if (relaxed_r_type != r_type)
 	{
 	  r_type = relaxed_r_type;
-	  howto = elf64_aarch64_howto_from_type (r_type);
+	  howto = elfNN_aarch64_howto_from_type (r_type);
 
-	  r = elf64_aarch64_tls_relax (globals, input_bfd, contents, rel, h);
+	  r = elfNN_aarch64_tls_relax (globals, input_bfd, contents, rel, h);
 	  unresolved_reloc = 0;
 	}
       else
@@ -4341,14 +4367,14 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
          output of each relocation as the addend for the next.  */
       if (rel + 1 < relend
 	  && rel->r_offset == rel[1].r_offset
-	  && ELF64_R_TYPE (rel[1].r_info) != R_AARCH64_NONE
-	  && ELF64_R_TYPE (rel[1].r_info) != R_AARCH64_NULL)
+	  && ELFNN_R_TYPE (rel[1].r_info) != R_AARCH64_NONE
+	  && ELFNN_R_TYPE (rel[1].r_info) != R_AARCH64_NULL)
 	save_addend = TRUE;
       else
 	save_addend = FALSE;
 
       if (r == bfd_reloc_continue)
-	r = elf64_aarch64_final_link_relocate (howto, input_bfd, output_bfd,
+	r = elfNN_aarch64_final_link_relocate (howto, input_bfd, output_bfd,
 					       input_section, contents, rel,
 					       relocation, info, sec,
 					       h, &unresolved_reloc,
@@ -4379,7 +4405,7 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 	      if (need_relocs)
 		{
 		  Elf_Internal_Rela rela;
-		  rela.r_info = ELF64_R_INFO (indx, R_AARCH64_TLS_DTPMOD64);
+		  rela.r_info = ELFNN_R_INFO (indx, R_AARCH64_TLS_DTPMOD64);
 		  rela.r_addend = 0;
 		  rela.r_offset = globals->root.sgot->output_section->vma +
 		    globals->root.sgot->output_offset + off;
@@ -4388,11 +4414,11 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 		  loc = globals->root.srelgot->contents;
 		  loc += globals->root.srelgot->reloc_count++
 		    * RELOC_SIZE (htab);
-		  bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
 		  if (indx == 0)
 		    {
-		      bfd_put_64 (output_bfd,
+		      bfd_put_NN (output_bfd,
 				  relocation - dtpoff_base (info),
 				  globals->root.sgot->contents + off
 				  + GOT_ENTRY_SIZE);
@@ -4403,7 +4429,7 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 			 relocation to fixup the tls offset at load
 			 time.  */
 		      rela.r_info =
-			ELF64_R_INFO (indx, R_AARCH64_TLS_DTPREL64);
+			ELFNN_R_INFO (indx, R_AARCH64_TLS_DTPREL64);
 		      rela.r_addend = 0;
 		      rela.r_offset =
 			(globals->root.sgot->output_section->vma
@@ -4413,17 +4439,17 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 		      loc = globals->root.srelgot->contents;
 		      loc += globals->root.srelgot->reloc_count++
 			* RELOC_SIZE (globals);
-		      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
-		      bfd_put_64 (output_bfd, (bfd_vma) 0,
+		      bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
+		      bfd_put_NN (output_bfd, (bfd_vma) 0,
 				  globals->root.sgot->contents + off
 				  + GOT_ENTRY_SIZE);
 		    }
 		}
 	      else
 		{
-		  bfd_put_64 (output_bfd, (bfd_vma) 1,
+		  bfd_put_NN (output_bfd, (bfd_vma) 1,
 			      globals->root.sgot->contents + off);
-		  bfd_put_64 (output_bfd,
+		  bfd_put_NN (output_bfd,
 			      relocation - dtpoff_base (info),
 			      globals->root.sgot->contents + off
 			      + GOT_ENTRY_SIZE);
@@ -4463,7 +4489,7 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 		  else
 		    rela.r_addend = 0;
 
-		  rela.r_info = ELF64_R_INFO (indx, R_AARCH64_TLS_TPREL64);
+		  rela.r_info = ELFNN_R_INFO (indx, R_AARCH64_TLS_TPREL64);
 		  rela.r_offset = globals->root.sgot->output_section->vma +
 		    globals->root.sgot->output_offset + off;
 
@@ -4471,13 +4497,13 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 		  loc += globals->root.srelgot->reloc_count++
 		    * RELOC_SIZE (htab);
 
-		  bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
-		  bfd_put_64 (output_bfd, rela.r_addend,
+		  bfd_put_NN (output_bfd, rela.r_addend,
 			      globals->root.sgot->contents + off);
 		}
 	      else
-		bfd_put_64 (output_bfd, relocation - tpoff_base (info),
+		bfd_put_NN (output_bfd, relocation - tpoff_base (info),
 			    globals->root.sgot->contents + off);
 
 	      symbol_got_offset_mark (input_bfd, h, r_symndx);
@@ -4514,7 +4540,7 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 		{
 		  bfd_byte *loc;
 		  Elf_Internal_Rela rela;
-		  rela.r_info = ELF64_R_INFO (indx, R_AARCH64_TLSDESC);
+		  rela.r_info = ELFNN_R_INFO (indx, R_AARCH64_TLSDESC);
 		  rela.r_addend = 0;
 		  rela.r_offset = (globals->root.sgotplt->output_section->vma
 				   + globals->root.sgotplt->output_offset
@@ -4535,12 +4561,12 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 		  loc += globals->root.srelplt->reloc_count++
 		    * RELOC_SIZE (globals);
 
-		  bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+		  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 
-		  bfd_put_64 (output_bfd, (bfd_vma) 0,
+		  bfd_put_NN (output_bfd, (bfd_vma) 0,
 			      globals->root.sgotplt->contents + off +
 			      globals->sgotplt_jump_table_size);
-		  bfd_put_64 (output_bfd, (bfd_vma) 0,
+		  bfd_put_NN (output_bfd, (bfd_vma) 0,
 			      globals->root.sgotplt->contents + off +
 			      globals->sgotplt_jump_table_size +
 			      GOT_ENTRY_SIZE);
@@ -4629,16 +4655,20 @@ elf64_aarch64_relocate_section (bfd *output_bfd,
 /* Set the right machine number.  */
 
 static bfd_boolean
-elf64_aarch64_object_p (bfd *abfd)
+elfNN_aarch64_object_p (bfd *abfd)
 {
+#if ARCH_SIZE == 32
+  bfd_default_set_arch_mach (abfd, bfd_arch_aarch64, bfd_mach_aarch64_ilp32);
+#else
   bfd_default_set_arch_mach (abfd, bfd_arch_aarch64, bfd_mach_aarch64);
+#endif
   return TRUE;
 }
 
 /* Function to keep AArch64 specific flags in the ELF header.  */
 
 static bfd_boolean
-elf64_aarch64_set_private_flags (bfd *abfd, flagword flags)
+elfNN_aarch64_set_private_flags (bfd *abfd, flagword flags)
 {
   if (elf_flags_init (abfd) && elf_elfheader (abfd)->e_flags != flags)
     {
@@ -4655,7 +4685,7 @@ elf64_aarch64_set_private_flags (bfd *abfd, flagword flags)
 /* Copy backend specific data from one object module to another.  */
 
 static bfd_boolean
-elf64_aarch64_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
+elfNN_aarch64_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   flagword in_flags;
 
@@ -4681,7 +4711,7 @@ elf64_aarch64_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
    object file when linking.  */
 
 static bfd_boolean
-elf64_aarch64_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+elfNN_aarch64_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
   flagword out_flags;
   flagword in_flags;
@@ -4767,7 +4797,7 @@ elf64_aarch64_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 /* Display the flags field.  */
 
 static bfd_boolean
-elf64_aarch64_print_private_bfd_data (bfd *abfd, void *ptr)
+elfNN_aarch64_print_private_bfd_data (bfd *abfd, void *ptr)
 {
   FILE *file = (FILE *) ptr;
   unsigned long flags;
@@ -4795,12 +4825,12 @@ elf64_aarch64_print_private_bfd_data (bfd *abfd, void *ptr)
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
-elf64_aarch64_gc_sweep_hook (bfd *abfd,
+elfNN_aarch64_gc_sweep_hook (bfd *abfd,
 			     struct bfd_link_info *info,
 			     asection *sec,
 			     const Elf_Internal_Rela * relocs)
 {
-  struct elf64_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_table *htab;
   Elf_Internal_Shdr *symtab_hdr;
   struct elf_link_hash_entry **sym_hashes;
   struct elf_aarch64_local_symbol *locals;
@@ -4809,7 +4839,7 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd,
   if (info->relocatable)
     return TRUE;
 
-  htab = elf64_aarch64_hash_table (info);
+  htab = elf_aarch64_hash_table (info);
 
   if (htab == NULL)
     return FALSE;
@@ -4819,7 +4849,7 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd,
   symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
 
-  locals = elf64_aarch64_locals (abfd);
+  locals = elf_aarch64_locals (abfd);
 
   relend = relocs + sec->reloc_count;
   for (rel = relocs; rel < relend; rel++)
@@ -4828,11 +4858,11 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd,
       unsigned int r_type;
       struct elf_link_hash_entry *h = NULL;
 
-      r_symndx = ELF64_R_SYM (rel->r_info);
+      r_symndx = ELFNN_R_SYM (rel->r_info);
 
       if (r_symndx >= symtab_hdr->sh_info)
 	{
-	  struct elf64_aarch64_link_hash_entry *eh;
+	  struct elf_aarch64_link_hash_entry *eh;
 	  struct elf_dyn_relocs **pp;
 	  struct elf_dyn_relocs *p;
 
@@ -4840,7 +4870,7 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
-	  eh = (struct elf64_aarch64_link_hash_entry *) h;
+	  eh = (struct elf_aarch64_link_hash_entry *) h;
 
 	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; pp = &p->next)
 	    {
@@ -4863,7 +4893,7 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd,
 	    return FALSE;
 	}
 
-      r_type = ELF64_R_TYPE (rel->r_info);
+      r_type = ELFNN_R_TYPE (rel->r_info);
       r_type = aarch64_tls_transition (abfd,info, r_type, h ,r_symndx);
       switch (r_type)
 	{
@@ -4925,7 +4955,7 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd,
 		h->plt.refcount -= 1;
 	    }
 	  break;
-        
+
 	default:
 	  break;
 	}
@@ -4941,10 +4971,10 @@ elf64_aarch64_gc_sweep_hook (bfd *abfd,
    understand.	*/
 
 static bfd_boolean
-elf64_aarch64_adjust_dynamic_symbol (struct bfd_link_info *info,
+elfNN_aarch64_adjust_dynamic_symbol (struct bfd_link_info *info,
 				     struct elf_link_hash_entry *h)
 {
-  struct elf64_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_table *htab;
   asection *s;
 
   /* If this is a function, put it in the procedure linkage table.  We
@@ -5020,7 +5050,7 @@ elf64_aarch64_adjust_dynamic_symbol (struct bfd_link_info *info,
      both the dynamic object and the regular object will refer to the
      same memory location for the variable.  */
 
-  htab = elf64_aarch64_hash_table (info);
+  htab = elf_aarch64_hash_table (info);
 
   /* We must generate a R_AARCH64_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
@@ -5038,17 +5068,17 @@ elf64_aarch64_adjust_dynamic_symbol (struct bfd_link_info *info,
 }
 
 static bfd_boolean
-elf64_aarch64_allocate_local_symbols (bfd *abfd, unsigned number)
+elfNN_aarch64_allocate_local_symbols (bfd *abfd, unsigned number)
 {
   struct elf_aarch64_local_symbol *locals;
-  locals = elf64_aarch64_locals (abfd);
+  locals = elf_aarch64_locals (abfd);
   if (locals == NULL)
     {
       locals = (struct elf_aarch64_local_symbol *)
 	bfd_zalloc (abfd, number * sizeof (struct elf_aarch64_local_symbol));
       if (locals == NULL)
 	return FALSE;
-      elf64_aarch64_locals (abfd) = locals;
+      elf_aarch64_locals (abfd) = locals;
     }
   return TRUE;
 }
@@ -5056,7 +5086,7 @@ elf64_aarch64_allocate_local_symbols (bfd *abfd, unsigned number)
 /* Look through the relocs for a section during the first phase.  */
 
 static bfd_boolean
-elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
+elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 			    asection *sec, const Elf_Internal_Rela *relocs)
 {
   Elf_Internal_Shdr *symtab_hdr;
@@ -5065,14 +5095,14 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
   const Elf_Internal_Rela *rel_end;
   asection *sreloc;
 
-  struct elf64_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_table *htab;
 
   if (info->relocatable)
     return TRUE;
 
   BFD_ASSERT (is_aarch64_elf (abfd));
 
-  htab = elf64_aarch64_hash_table (info);
+  htab = elf_aarch64_hash_table (info);
   sreloc = NULL;
 
   symtab_hdr = &elf_symtab_hdr (abfd);
@@ -5085,8 +5115,8 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
       unsigned long r_symndx;
       unsigned int r_type;
 
-      r_symndx = ELF64_R_SYM (rel->r_info);
-      r_type = ELF64_R_TYPE (rel->r_info);
+      r_symndx = ELFNN_R_SYM (rel->r_info);
+      r_type = ELFNN_R_TYPE (rel->r_info);
 
       if (r_symndx >= NUM_SHDR_ENTRIES (symtab_hdr))
 	{
@@ -5158,8 +5188,8 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	       relocations we need for this symbol.  */
 	    if (h != NULL)
 	      {
-		struct elf64_aarch64_link_hash_entry *eh;
-		eh = (struct elf64_aarch64_link_hash_entry *) h;
+		struct elf_aarch64_link_hash_entry *eh;
+		eh = (struct elf_aarch64_link_hash_entry *) h;
 		head = &eh->dyn_relocs;
 	      }
 	    else
@@ -5234,17 +5264,17 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if (h)
 	      {
 		h->got.refcount += 1;
-		old_got_type = elf64_aarch64_hash_entry (h)->got_type;
+		old_got_type = elf_aarch64_hash_entry (h)->got_type;
 	      }
 	    else
 	      {
 		struct elf_aarch64_local_symbol *locals;
 
-		if (!elf64_aarch64_allocate_local_symbols
+		if (!elfNN_aarch64_allocate_local_symbols
 		    (abfd, symtab_hdr->sh_info))
 		  return FALSE;
 
-		locals = elf64_aarch64_locals (abfd);
+		locals = elf_aarch64_locals (abfd);
 		BFD_ASSERT (r_symndx < symtab_hdr->sh_info);
 		locals[r_symndx].got_refcount += 1;
 		old_got_type = locals[r_symndx].got_type;
@@ -5272,11 +5302,11 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    if (old_got_type != got_type)
 	      {
 		if (h != NULL)
-		  elf64_aarch64_hash_entry (h)->got_type = got_type;
+		  elf_aarch64_hash_entry (h)->got_type = got_type;
 		else
 		  {
 		    struct elf_aarch64_local_symbol *locals;
-		    locals = elf64_aarch64_locals (abfd);
+		    locals = elf_aarch64_locals (abfd);
 		    BFD_ASSERT (r_symndx < symtab_hdr->sh_info);
 		    locals[r_symndx].got_type = got_type;
 		  }
@@ -5330,7 +5360,7 @@ elf64_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 /* Treat mapping symbols as special target symbols.  */
 
 static bfd_boolean
-elf64_aarch64_is_target_special_symbol (bfd *abfd ATTRIBUTE_UNUSED,
+elfNN_aarch64_is_target_special_symbol (bfd *abfd ATTRIBUTE_UNUSED,
 					asymbol *sym)
 {
   return bfd_is_aarch64_special_symbol_name (sym->name,
@@ -5401,7 +5431,7 @@ aarch64_elf_find_function (bfd *abfd ATTRIBUTE_UNUSED,
    that it uses aarch64_elf_find_function.  */
 
 static bfd_boolean
-elf64_aarch64_find_nearest_line (bfd *abfd,
+elfNN_aarch64_find_nearest_line (bfd *abfd,
 				 asection *section,
 				 asymbol **symbols,
 				 bfd_vma offset,
@@ -5449,7 +5479,7 @@ elf64_aarch64_find_nearest_line (bfd *abfd,
 }
 
 static bfd_boolean
-elf64_aarch64_find_inliner_info (bfd *abfd,
+elfNN_aarch64_find_inliner_info (bfd *abfd,
 				 const char **filename_ptr,
 				 const char **functionname_ptr,
 				 unsigned int *line_ptr)
@@ -5463,7 +5493,7 @@ elf64_aarch64_find_inliner_info (bfd *abfd,
 
 
 static void
-elf64_aarch64_post_process_headers (bfd *abfd,
+elfNN_aarch64_post_process_headers (bfd *abfd,
 				    struct bfd_link_info *link_info
 				    ATTRIBUTE_UNUSED)
 {
@@ -5475,11 +5505,11 @@ elf64_aarch64_post_process_headers (bfd *abfd,
 }
 
 static enum elf_reloc_type_class
-elf64_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+elfNN_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
 				const asection *rel_sec ATTRIBUTE_UNUSED,
 				const Elf_Internal_Rela *rela)
 {
-  switch ((int) ELF64_R_TYPE (rela->r_info))
+  switch ((int) ELFNN_R_TYPE (rela->r_info))
     {
     case R_AARCH64_RELATIVE:
       return reloc_class_relative;
@@ -5495,7 +5525,7 @@ elf64_aarch64_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSE
 /* Set the right machine number for an AArch64 ELF file.  */
 
 static bfd_boolean
-elf64_aarch64_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
+elfNN_aarch64_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
 {
   if (hdr->sh_type == SHT_NOTE)
     *flags |= SEC_LINK_ONCE | SEC_LINK_DUPLICATES_SAME_CONTENTS;
@@ -5508,7 +5538,7 @@ elf64_aarch64_section_flags (flagword *flags, const Elf_Internal_Shdr *hdr)
    type.  */
 
 static bfd_boolean
-elf64_aarch64_section_from_shdr (bfd *abfd,
+elfNN_aarch64_section_from_shdr (bfd *abfd,
 				 Elf_Internal_Shdr *hdr,
 				 const char *name, int shindex)
 {
@@ -5544,7 +5574,7 @@ section_list;
 
 /* Unfortunately we need to keep a list of sections for which
    an _aarch64_elf_section_data structure has been allocated.  This
-   is because it is possible for functions like elf64_aarch64_write_section
+   is because it is possible for functions like elfNN_aarch64_write_section
    to be called on a section which has had an elf_data_structure
    allocated for it (and so the used_by_bfd field is valid) but
    for which the AArch64 extended version of this structure - the
@@ -5641,7 +5671,7 @@ enum map_symbol_type
 /* Output a single mapping symbol.  */
 
 static bfd_boolean
-elf64_aarch64_output_map_sym (output_arch_syminfo *osi,
+elfNN_aarch64_output_map_sym (output_arch_syminfo *osi,
 			      enum map_symbol_type type, bfd_vma offset)
 {
   static const char *names[2] = { "$x", "$d" };
@@ -5661,7 +5691,7 @@ elf64_aarch64_output_map_sym (output_arch_syminfo *osi,
 /* Output mapping symbols for PLT entries associated with H.  */
 
 static bfd_boolean
-elf64_aarch64_output_plt_map (struct elf_link_hash_entry *h, void *inf)
+elfNN_aarch64_output_plt_map (struct elf_link_hash_entry *h, void *inf)
 {
   output_arch_syminfo *osi = (output_arch_syminfo *) inf;
   bfd_vma addr;
@@ -5681,7 +5711,7 @@ elf64_aarch64_output_plt_map (struct elf_link_hash_entry *h, void *inf)
   addr = h->plt.offset;
   if (addr == 32)
     {
-      if (!elf64_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
+      if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
 	return FALSE;
     }
   return TRUE;
@@ -5691,7 +5721,7 @@ elf64_aarch64_output_plt_map (struct elf_link_hash_entry *h, void *inf)
 /* Output a single local symbol for a generated stub.  */
 
 static bfd_boolean
-elf64_aarch64_output_stub_sym (output_arch_syminfo *osi, const char *name,
+elfNN_aarch64_output_stub_sym (output_arch_syminfo *osi, const char *name,
 			       bfd_vma offset, bfd_vma size)
 {
   Elf_Internal_Sym sym;
@@ -5708,14 +5738,14 @@ elf64_aarch64_output_stub_sym (output_arch_syminfo *osi, const char *name,
 static bfd_boolean
 aarch64_map_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 {
-  struct elf64_aarch64_stub_hash_entry *stub_entry;
+  struct elf_aarch64_stub_hash_entry *stub_entry;
   asection *stub_sec;
   bfd_vma addr;
   char *stub_name;
   output_arch_syminfo *osi;
 
   /* Massage our args to the form they really have.  */
-  stub_entry = (struct elf64_aarch64_stub_hash_entry *) gen_entry;
+  stub_entry = (struct elf_aarch64_stub_hash_entry *) gen_entry;
   osi = (output_arch_syminfo *) in_arg;
 
   stub_sec = stub_entry->stub_sec;
@@ -5732,19 +5762,19 @@ aarch64_map_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
   switch (stub_entry->stub_type)
     {
     case aarch64_stub_adrp_branch:
-      if (!elf64_aarch64_output_stub_sym (osi, stub_name, addr,
+      if (!elfNN_aarch64_output_stub_sym (osi, stub_name, addr,
 					  sizeof (aarch64_adrp_branch_stub)))
 	return FALSE;
-      if (!elf64_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
+      if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
 	return FALSE;
       break;
     case aarch64_stub_long_branch:
-      if (!elf64_aarch64_output_stub_sym
+      if (!elfNN_aarch64_output_stub_sym
 	  (osi, stub_name, addr, sizeof (aarch64_long_branch_stub)))
 	return FALSE;
-      if (!elf64_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
+      if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_INSN, addr))
 	return FALSE;
-      if (!elf64_aarch64_output_map_sym (osi, AARCH64_MAP_DATA, addr + 16))
+      if (!elfNN_aarch64_output_map_sym (osi, AARCH64_MAP_DATA, addr + 16))
 	return FALSE;
       break;
     default:
@@ -5757,7 +5787,7 @@ aarch64_map_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 /* Output mapping symbols for linker generated sections.  */
 
 static bfd_boolean
-elf64_aarch64_output_arch_local_syms (bfd *output_bfd,
+elfNN_aarch64_output_arch_local_syms (bfd *output_bfd,
 				      struct bfd_link_info *info,
 				      void *finfo,
 				      int (*func) (void *, const char *,
@@ -5767,9 +5797,9 @@ elf64_aarch64_output_arch_local_syms (bfd *output_bfd,
 						   *))
 {
   output_arch_syminfo osi;
-  struct elf64_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_table *htab;
 
-  htab = elf64_aarch64_hash_table (info);
+  htab = elf_aarch64_hash_table (info);
 
   osi.finfo = finfo;
   osi.info = info;
@@ -5806,7 +5836,7 @@ elf64_aarch64_output_arch_local_syms (bfd *output_bfd,
     (output_bfd, htab->root.splt->output_section);
   osi.sec = htab->root.splt;
 
-  elf_link_hash_traverse (&htab->root, elf64_aarch64_output_plt_map,
+  elf_link_hash_traverse (&htab->root, elfNN_aarch64_output_plt_map,
 			  (void *) &osi);
 
   return TRUE;
@@ -5816,7 +5846,7 @@ elf64_aarch64_output_arch_local_syms (bfd *output_bfd,
 /* Allocate target specific section data.  */
 
 static bfd_boolean
-elf64_aarch64_new_section_hook (bfd *abfd, asection *sec)
+elfNN_aarch64_new_section_hook (bfd *abfd, asection *sec)
 {
   if (!sec->used_by_bfd)
     {
@@ -5844,7 +5874,7 @@ unrecord_section_via_map_over_sections (bfd *abfd ATTRIBUTE_UNUSED,
 }
 
 static bfd_boolean
-elf64_aarch64_close_and_cleanup (bfd *abfd)
+elfNN_aarch64_close_and_cleanup (bfd *abfd)
 {
   if (abfd->sections)
     bfd_map_over_sections (abfd,
@@ -5854,7 +5884,7 @@ elf64_aarch64_close_and_cleanup (bfd *abfd)
 }
 
 static bfd_boolean
-elf64_aarch64_bfd_free_cached_info (bfd *abfd)
+elfNN_aarch64_bfd_free_cached_info (bfd *abfd)
 {
   if (abfd->sections)
     bfd_map_over_sections (abfd,
@@ -5864,7 +5894,7 @@ elf64_aarch64_bfd_free_cached_info (bfd *abfd)
 }
 
 static bfd_boolean
-elf64_aarch64_is_function_type (unsigned int type)
+elfNN_aarch64_is_function_type (unsigned int type)
 {
   return type == STT_FUNC;
 }
@@ -5874,16 +5904,16 @@ elf64_aarch64_is_function_type (unsigned int type)
    standard part of the bfd elf backend.  */
 
 static bfd_boolean
-elf64_aarch64_create_dynamic_sections (bfd *dynobj,
+elfNN_aarch64_create_dynamic_sections (bfd *dynobj,
 				       struct bfd_link_info *info)
 {
-  struct elf64_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_table *htab;
   struct elf_link_hash_entry *h;
 
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
 
-  htab = elf64_aarch64_hash_table (info);
+  htab = elf_aarch64_hash_table (info);
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!info->shared)
     htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
@@ -5909,11 +5939,11 @@ elf64_aarch64_create_dynamic_sections (bfd *dynobj,
    dynamic relocs.  */
 
 static bfd_boolean
-elf64_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+elfNN_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 {
   struct bfd_link_info *info;
-  struct elf64_aarch64_link_hash_table *htab;
-  struct elf64_aarch64_link_hash_entry *eh;
+  struct elf_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_entry *eh;
   struct elf_dyn_relocs *p;
 
   /* An example of a bfd_link_hash_indirect symbol is versioned
@@ -5922,7 +5952,7 @@ elf64_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
      There is no need to process bfd_link_hash_indirect symbols here
      because we will also be presented with the concrete instance of
-     the symbol and elf64_aarch64_copy_indirect_symbol () will have been
+     the symbol and elfNN_aarch64_copy_indirect_symbol () will have been
      called to copy all relevant data from the generic to the concrete
      symbol instance.
    */
@@ -5933,7 +5963,7 @@ elf64_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
   info = (struct bfd_link_info *) inf;
-  htab = elf64_aarch64_hash_table (info);
+  htab = elf_aarch64_hash_table (info);
 
   if (htab->root.dynamic_sections_created && h->plt.refcount > 0)
     {
@@ -6006,13 +6036,13 @@ elf64_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
       h->needs_plt = 0;
     }
 
-  eh = (struct elf64_aarch64_link_hash_entry *) h;
+  eh = (struct elf_aarch64_link_hash_entry *) h;
   eh->tlsdesc_got_jump_table_offset = (bfd_vma) - 1;
 
   if (h->got.refcount > 0)
     {
       bfd_boolean dyn;
-      unsigned got_type = elf64_aarch64_hash_entry (h)->got_type;
+      unsigned got_type = elf_aarch64_hash_entry (h)->got_type;
 
       h->got.offset = (bfd_vma) - 1;
 
@@ -6191,21 +6221,19 @@ elf64_aarch64_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 }
 
 
-
-
 /* This is the most important function of all . Innocuosly named
    though !  */
 static bfd_boolean
-elf64_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+elfNN_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 				     struct bfd_link_info *info)
 {
-  struct elf64_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_table *htab;
   bfd *dynobj;
   asection *s;
   bfd_boolean relocs;
   bfd *ibfd;
 
-  htab = elf64_aarch64_hash_table ((info));
+  htab = elf_aarch64_hash_table ((info));
   dynobj = htab->root.dynobj;
 
   BFD_ASSERT (dynobj != NULL);
@@ -6259,7 +6287,7 @@ elf64_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    }
 	}
 
-      locals = elf64_aarch64_locals (ibfd);
+      locals = elf_aarch64_locals (ibfd);
       if (!locals)
 	continue;
 
@@ -6327,7 +6355,7 @@ elf64_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   /* Allocate global sym .plt and .got entries, and space for global
      sym dynamic relocs.  */
-  elf_link_hash_traverse (&htab->root, elf64_aarch64_allocate_dynrelocs,
+  elf_link_hash_traverse (&htab->root, elfNN_aarch64_allocate_dynrelocs,
 			  info);
 
 
@@ -6422,7 +6450,7 @@ elf64_aarch64_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
   if (htab->root.dynamic_sections_created)
     {
       /* Add some entries to the .dynamic section.  We fill in the
-         values later, in elf64_aarch64_finish_dynamic_sections, but we
+         values later, in elfNN_aarch64_finish_dynamic_sections, but we
          must add the entries now so that we get the correct size for
          the .dynamic section.  The DT_DEBUG entry is filled in by the
          dynamic linker and used by the debugger.  */
@@ -6478,13 +6506,13 @@ elf64_aarch64_update_plt_entry (bfd *output_bfd,
 				bfd_byte *plt_entry, bfd_vma value)
 {
   reloc_howto_type *howto;
-  howto = elf64_aarch64_howto_from_type (r_type);
+  howto = elfNN_aarch64_howto_from_type (r_type);
   bfd_elf_aarch64_put_addend (output_bfd, plt_entry, howto, value);
 }
 
 static void
-elf64_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
-				       struct elf64_aarch64_link_hash_table
+elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
+				       struct elf_aarch64_link_hash_table
 				       *htab, bfd *output_bfd)
 {
   bfd_byte *plt_entry;
@@ -6498,7 +6526,7 @@ elf64_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
   plt_index = (h->plt.offset - htab->plt_header_size) / htab->plt_entry_size;
 
   /* Offset in the GOT is PLT index plus got GOT headers(3)
-     times 8.  */
+     times GOT_ENTRY_SIZE.  */
   got_offset = (plt_index + 3) * GOT_ENTRY_SIZE;
   plt_entry = htab->root.splt->contents + h->plt.offset;
   plt_entry_address = htab->root.splt->output_section->vma
@@ -6507,7 +6535,7 @@ elf64_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
     htab->root.sgotplt->output_offset + got_offset;
 
   /* Copy in the boiler-plate for the PLTn entry.  */
-  memcpy (plt_entry, elf64_aarch64_small_plt_entry, PLT_SMALL_ENTRY_SIZE);
+  memcpy (plt_entry, elfNN_aarch64_small_plt_entry, PLT_SMALL_ENTRY_SIZE);
 
   /* Fill in the top 21 bits for this: ADRP x16, PLT_GOT + n * 8.
      ADRP:   ((PG(S+A)-PG(P)) >> 12) & 0x1fffff */
@@ -6527,28 +6555,28 @@ elf64_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
 				  PG_OFFSET (gotplt_entry_address));
 
   /* All the GOTPLT Entries are essentially initialized to PLT0.  */
-  bfd_put_64 (output_bfd,
+  bfd_put_NN (output_bfd,
 	      (htab->root.splt->output_section->vma
 	       + htab->root.splt->output_offset),
 	      htab->root.sgotplt->contents + got_offset);
 
   /* Fill in the entry in the .rela.plt section.  */
   rela.r_offset = gotplt_entry_address;
-  rela.r_info = ELF64_R_INFO (h->dynindx, R_AARCH64_JUMP_SLOT);
+  rela.r_info = ELFNN_R_INFO (h->dynindx, AARCH64_R (JUMP_SLOT));
   rela.r_addend = 0;
 
   /* Compute the relocation entry to used based on PLT index and do
      not adjust reloc_count. The reloc_count has already been adjusted
      to account for this entry.  */
   loc = htab->root.srelplt->contents + plt_index * RELOC_SIZE (htab);
-  bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+  bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
 }
 
 /* Size sections even though they're not dynamic.  We use it to setup
    _TLS_MODULE_BASE_, if needed.  */
 
 static bfd_boolean
-elf64_aarch64_always_size_sections (bfd *output_bfd,
+elfNN_aarch64_always_size_sections (bfd *output_bfd,
 				    struct bfd_link_info *info)
 {
   asection *tls_sec;
@@ -6590,13 +6618,13 @@ elf64_aarch64_always_size_sections (bfd *output_bfd,
 /* Finish up dynamic symbol handling.  We set the contents of various
    dynamic sections here.  */
 static bfd_boolean
-elf64_aarch64_finish_dynamic_symbol (bfd *output_bfd,
+elfNN_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 				     struct bfd_link_info *info,
 				     struct elf_link_hash_entry *h,
 				     Elf_Internal_Sym *sym)
 {
-  struct elf64_aarch64_link_hash_table *htab;
-  htab = elf64_aarch64_hash_table (info);
+  struct elf_aarch64_link_hash_table *htab;
+  htab = elf_aarch64_hash_table (info);
 
   if (h->plt.offset != (bfd_vma) - 1)
     {
@@ -6608,7 +6636,7 @@ elf64_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	  || htab->root.sgotplt == NULL || htab->root.srelplt == NULL)
 	abort ();
 
-      elf64_aarch64_create_small_pltn_entry (h, htab, output_bfd);
+      elfNN_aarch64_create_small_pltn_entry (h, htab, output_bfd);
       if (!h->def_regular)
 	{
 	  /* Mark the symbol as undefined, rather than as defined in
@@ -6621,7 +6649,7 @@ elf64_aarch64_finish_dynamic_symbol (bfd *output_bfd,
     }
 
   if (h->got.offset != (bfd_vma) - 1
-      && elf64_aarch64_hash_entry (h)->got_type == GOT_NORMAL)
+      && elf_aarch64_hash_entry (h)->got_type == GOT_NORMAL)
     {
       Elf_Internal_Rela rela;
       bfd_byte *loc;
@@ -6641,7 +6669,7 @@ elf64_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 	    return FALSE;
 
 	  BFD_ASSERT ((h->got.offset & 1) != 0);
-	  rela.r_info = ELF64_R_INFO (0, R_AARCH64_RELATIVE);
+	  rela.r_info = ELFNN_R_INFO (0, R_AARCH64_RELATIVE);
 	  rela.r_addend = (h->root.u.def.value
 			   + h->root.u.def.section->output_section->vma
 			   + h->root.u.def.section->output_offset);
@@ -6649,15 +6677,15 @@ elf64_aarch64_finish_dynamic_symbol (bfd *output_bfd,
       else
 	{
 	  BFD_ASSERT ((h->got.offset & 1) == 0);
-	  bfd_put_64 (output_bfd, (bfd_vma) 0,
+	  bfd_put_NN (output_bfd, (bfd_vma) 0,
 		      htab->root.sgot->contents + h->got.offset);
-	  rela.r_info = ELF64_R_INFO (h->dynindx, R_AARCH64_GLOB_DAT);
+	  rela.r_info = ELFNN_R_INFO (h->dynindx, R_AARCH64_GLOB_DAT);
 	  rela.r_addend = 0;
 	}
 
       loc = htab->root.srelgot->contents;
       loc += htab->root.srelgot->reloc_count++ * RELOC_SIZE (htab);
-      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+      bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   if (h->needs_copy)
@@ -6676,11 +6704,11 @@ elf64_aarch64_finish_dynamic_symbol (bfd *output_bfd,
       rela.r_offset = (h->root.u.def.value
 		       + h->root.u.def.section->output_section->vma
 		       + h->root.u.def.section->output_offset);
-      rela.r_info = ELF64_R_INFO (h->dynindx, R_AARCH64_COPY);
+      rela.r_info = ELFNN_R_INFO (h->dynindx, R_AARCH64_COPY);
       rela.r_addend = 0;
       loc = htab->srelbss->contents;
       loc += htab->srelbss->reloc_count++ * RELOC_SIZE (htab);
-      bfd_elf64_swap_reloca_out (output_bfd, &rela, loc);
+      bfd_elfNN_swap_reloca_out (output_bfd, &rela, loc);
     }
 
   /* Mark _DYNAMIC and _GLOBAL_OFFSET_TABLE_ as absolute.  SYM may
@@ -6694,15 +6722,15 @@ elf64_aarch64_finish_dynamic_symbol (bfd *output_bfd,
 }
 
 static void
-elf64_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
-				     struct elf64_aarch64_link_hash_table
+elfNN_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
+				     struct elf_aarch64_link_hash_table
 				     *htab)
 {
   /* Fill in PLT0. Fixme:RR Note this doesn't distinguish between
      small and large plts and at the minute just generates
      the small PLT.  */
 
-  /* PLT0 of the small PLT looks like this -
+  /* PLT0 of the small PLT looks like this in ELF64 -
      stp x16, x30, [sp, #-16]!		// Save the reloc and lr on stack.
      adrp x16, PLT_GOT + 16		// Get the page base of the GOTPLT
      ldr  x17, [x16, #:lo12:PLT_GOT+16] // Load the address of the
@@ -6710,12 +6738,14 @@ elf64_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
      add  x16, x16, #:lo12:PLT_GOT+16   // Load the lo12 bits of the
 					// GOTPLT entry for this.
      br   x17
+     PLT0 will be slightly different in ELF32 due to different got entry
+     size.
    */
   bfd_vma plt_got_base;
   bfd_vma plt_base;
 
 
-  memcpy (htab->root.splt->contents, elf64_aarch64_small_plt0_entry,
+  memcpy (htab->root.splt->contents, elfNN_aarch64_small_plt0_entry,
 	  PLT_ENTRY_SIZE);
   elf_section_data (htab->root.splt->output_section)->this_hdr.sh_entsize =
     PLT_ENTRY_SIZE;
@@ -6742,32 +6772,32 @@ elf64_aarch64_init_small_plt0_entry (bfd *output_bfd ATTRIBUTE_UNUSED,
 }
 
 static bfd_boolean
-elf64_aarch64_finish_dynamic_sections (bfd *output_bfd,
+elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 				       struct bfd_link_info *info)
 {
-  struct elf64_aarch64_link_hash_table *htab;
+  struct elf_aarch64_link_hash_table *htab;
   bfd *dynobj;
   asection *sdyn;
 
-  htab = elf64_aarch64_hash_table (info);
+  htab = elf_aarch64_hash_table (info);
   dynobj = htab->root.dynobj;
   sdyn = bfd_get_linker_section (dynobj, ".dynamic");
 
   if (htab->root.dynamic_sections_created)
     {
-      Elf64_External_Dyn *dyncon, *dynconend;
+      ElfNN_External_Dyn *dyncon, *dynconend;
 
       if (sdyn == NULL || htab->root.sgot == NULL)
 	abort ();
 
-      dyncon = (Elf64_External_Dyn *) sdyn->contents;
-      dynconend = (Elf64_External_Dyn *) (sdyn->contents + sdyn->size);
+      dyncon = (ElfNN_External_Dyn *) sdyn->contents;
+      dynconend = (ElfNN_External_Dyn *) (sdyn->contents + sdyn->size);
       for (; dyncon < dynconend; dyncon++)
 	{
 	  Elf_Internal_Dyn dyn;
 	  asection *s;
 
-	  bfd_elf64_swap_dyn_in (dynobj, dyncon, &dyn);
+	  bfd_elfNN_swap_dyn_in (dynobj, dyncon, &dyn);
 
 	  switch (dyn.d_tag)
 	    {
@@ -6816,7 +6846,7 @@ elf64_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 	    }
 
-	  bfd_elf64_swap_dyn_out (output_bfd, &dyn, dyncon);
+	  bfd_elfNN_swap_dyn_out (output_bfd, &dyn, dyncon);
 	}
 
     }
@@ -6824,7 +6854,7 @@ elf64_aarch64_finish_dynamic_sections (bfd *output_bfd,
   /* Fill in the special first entry in the procedure linkage table.  */
   if (htab->root.splt && htab->root.splt->size > 0)
     {
-      elf64_aarch64_init_small_plt0_entry (output_bfd, htab);
+      elfNN_aarch64_init_small_plt0_entry (output_bfd, htab);
 
       elf_section_data (htab->root.splt->output_section)->
 	this_hdr.sh_entsize = htab->plt_entry_size;
@@ -6832,12 +6862,12 @@ elf64_aarch64_finish_dynamic_sections (bfd *output_bfd,
 
       if (htab->tlsdesc_plt)
 	{
-	  bfd_put_64 (output_bfd, (bfd_vma) 0,
+	  bfd_put_NN (output_bfd, (bfd_vma) 0,
 		      htab->root.sgot->contents + htab->dt_tlsdesc_got);
 
 	  memcpy (htab->root.splt->contents + htab->tlsdesc_plt,
-		  elf64_aarch64_tlsdesc_small_plt_entry,
-		  sizeof (elf64_aarch64_tlsdesc_small_plt_entry));
+		  elfNN_aarch64_tlsdesc_small_plt_entry,
+		  sizeof (elfNN_aarch64_tlsdesc_small_plt_entry));
 
 	  {
 	    bfd_vma adrp1_addr =
@@ -6912,17 +6942,17 @@ elf64_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	  /* Set the first entry in the global offset table to the address of
 	     the dynamic section.  */
 	  if (sdyn == NULL)
-	    bfd_put_64 (output_bfd, (bfd_vma) 0,
+	    bfd_put_NN (output_bfd, (bfd_vma) 0,
 			htab->root.sgotplt->contents);
 	  else
-	    bfd_put_64 (output_bfd,
+	    bfd_put_NN (output_bfd,
 			sdyn->output_section->vma + sdyn->output_offset,
 			htab->root.sgotplt->contents);
 	  /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
-	  bfd_put_64 (output_bfd,
+	  bfd_put_NN (output_bfd,
 		      (bfd_vma) 0,
 		      htab->root.sgotplt->contents + GOT_ENTRY_SIZE);
-	  bfd_put_64 (output_bfd,
+	  bfd_put_NN (output_bfd,
 		      (bfd_vma) 0,
 		      htab->root.sgotplt->contents + GOT_ENTRY_SIZE * 2);
 	}
@@ -6942,7 +6972,7 @@ elf64_aarch64_finish_dynamic_sections (bfd *output_bfd,
    or (bfd_vma) -1 if it should not be included.  */
 
 static bfd_vma
-elf64_aarch64_plt_sym_val (bfd_vma i, const asection *plt,
+elfNN_aarch64_plt_sym_val (bfd_vma i, const asection *plt,
 			   const arelent *rel ATTRIBUTE_UNUSED)
 {
   return plt->vma + PLT_ENTRY_SIZE + i * PLT_SMALL_ENTRY_SIZE;
@@ -6952,35 +6982,35 @@ elf64_aarch64_plt_sym_val (bfd_vma i, const asection *plt,
 /* We use this so we can override certain functions
    (though currently we don't).  */
 
-const struct elf_size_info elf64_aarch64_size_info =
+const struct elf_size_info elfNN_aarch64_size_info =
 {
-  sizeof (Elf64_External_Ehdr),
-  sizeof (Elf64_External_Phdr),
-  sizeof (Elf64_External_Shdr),
-  sizeof (Elf64_External_Rel),
-  sizeof (Elf64_External_Rela),
-  sizeof (Elf64_External_Sym),
-  sizeof (Elf64_External_Dyn),
+  sizeof (ElfNN_External_Ehdr),
+  sizeof (ElfNN_External_Phdr),
+  sizeof (ElfNN_External_Shdr),
+  sizeof (ElfNN_External_Rel),
+  sizeof (ElfNN_External_Rela),
+  sizeof (ElfNN_External_Sym),
+  sizeof (ElfNN_External_Dyn),
   sizeof (Elf_External_Note),
   4,				/* Hash table entry size.  */
   1,				/* Internal relocs per external relocs.  */
-  64,				/* Arch size.  */
-  3,				/* Log_file_align.  */
-  ELFCLASS64, EV_CURRENT,
-  bfd_elf64_write_out_phdrs,
-  bfd_elf64_write_shdrs_and_ehdr,
-  bfd_elf64_checksum_contents,
-  bfd_elf64_write_relocs,
-  bfd_elf64_swap_symbol_in,
-  bfd_elf64_swap_symbol_out,
-  bfd_elf64_slurp_reloc_table,
-  bfd_elf64_slurp_symbol_table,
-  bfd_elf64_swap_dyn_in,
-  bfd_elf64_swap_dyn_out,
-  bfd_elf64_swap_reloc_in,
-  bfd_elf64_swap_reloc_out,
-  bfd_elf64_swap_reloca_in,
-  bfd_elf64_swap_reloca_out
+  ARCH_SIZE,			/* Arch size.  */
+  LOG_FILE_ALIGN,		/* Log_file_align.  */
+  ELFCLASSNN, EV_CURRENT,
+  bfd_elfNN_write_out_phdrs,
+  bfd_elfNN_write_shdrs_and_ehdr,
+  bfd_elfNN_checksum_contents,
+  bfd_elfNN_write_relocs,
+  bfd_elfNN_swap_symbol_in,
+  bfd_elfNN_swap_symbol_out,
+  bfd_elfNN_slurp_reloc_table,
+  bfd_elfNN_slurp_symbol_table,
+  bfd_elfNN_swap_dyn_in,
+  bfd_elfNN_swap_dyn_out,
+  bfd_elfNN_swap_reloc_in,
+  bfd_elfNN_swap_reloc_out,
+  bfd_elfNN_swap_reloca_in,
+  bfd_elfNN_swap_reloca_out
 };
 
 #define ELF_ARCH			bfd_arch_aarch64
@@ -6989,112 +7019,112 @@ const struct elf_size_info elf64_aarch64_size_info =
 #define ELF_MINPAGESIZE			0x1000
 #define ELF_COMMONPAGESIZE		0x1000
 
-#define bfd_elf64_close_and_cleanup             \
-  elf64_aarch64_close_and_cleanup
+#define bfd_elfNN_close_and_cleanup             \
+  elfNN_aarch64_close_and_cleanup
 
-#define bfd_elf64_bfd_copy_private_bfd_data	\
-  elf64_aarch64_copy_private_bfd_data
+#define bfd_elfNN_bfd_copy_private_bfd_data	\
+  elfNN_aarch64_copy_private_bfd_data
 
-#define bfd_elf64_bfd_free_cached_info          \
-  elf64_aarch64_bfd_free_cached_info
+#define bfd_elfNN_bfd_free_cached_info          \
+  elfNN_aarch64_bfd_free_cached_info
 
-#define bfd_elf64_bfd_is_target_special_symbol	\
-  elf64_aarch64_is_target_special_symbol
+#define bfd_elfNN_bfd_is_target_special_symbol	\
+  elfNN_aarch64_is_target_special_symbol
 
-#define bfd_elf64_bfd_link_hash_table_create    \
-  elf64_aarch64_link_hash_table_create
+#define bfd_elfNN_bfd_link_hash_table_create    \
+  elfNN_aarch64_link_hash_table_create
 
-#define bfd_elf64_bfd_link_hash_table_free      \
-  elf64_aarch64_hash_table_free
+#define bfd_elfNN_bfd_link_hash_table_free      \
+  elfNN_aarch64_hash_table_free
 
-#define bfd_elf64_bfd_merge_private_bfd_data	\
-  elf64_aarch64_merge_private_bfd_data
+#define bfd_elfNN_bfd_merge_private_bfd_data	\
+  elfNN_aarch64_merge_private_bfd_data
 
-#define bfd_elf64_bfd_print_private_bfd_data	\
-  elf64_aarch64_print_private_bfd_data
+#define bfd_elfNN_bfd_print_private_bfd_data	\
+  elfNN_aarch64_print_private_bfd_data
 
-#define bfd_elf64_bfd_reloc_type_lookup		\
-  elf64_aarch64_reloc_type_lookup
+#define bfd_elfNN_bfd_reloc_type_lookup		\
+  elfNN_aarch64_reloc_type_lookup
 
-#define bfd_elf64_bfd_reloc_name_lookup		\
-  elf64_aarch64_reloc_name_lookup
+#define bfd_elfNN_bfd_reloc_name_lookup		\
+  elfNN_aarch64_reloc_name_lookup
 
-#define bfd_elf64_bfd_set_private_flags		\
-  elf64_aarch64_set_private_flags
+#define bfd_elfNN_bfd_set_private_flags		\
+  elfNN_aarch64_set_private_flags
 
-#define bfd_elf64_find_inliner_info		\
-  elf64_aarch64_find_inliner_info
+#define bfd_elfNN_find_inliner_info		\
+  elfNN_aarch64_find_inliner_info
 
-#define bfd_elf64_find_nearest_line		\
-  elf64_aarch64_find_nearest_line
+#define bfd_elfNN_find_nearest_line		\
+  elfNN_aarch64_find_nearest_line
 
-#define bfd_elf64_mkobject			\
-  elf64_aarch64_mkobject
+#define bfd_elfNN_mkobject			\
+  elfNN_aarch64_mkobject
 
-#define bfd_elf64_new_section_hook		\
-  elf64_aarch64_new_section_hook
+#define bfd_elfNN_new_section_hook		\
+  elfNN_aarch64_new_section_hook
 
 #define elf_backend_adjust_dynamic_symbol	\
-  elf64_aarch64_adjust_dynamic_symbol
+  elfNN_aarch64_adjust_dynamic_symbol
 
 #define elf_backend_always_size_sections	\
-  elf64_aarch64_always_size_sections
+  elfNN_aarch64_always_size_sections
 
 #define elf_backend_check_relocs		\
-  elf64_aarch64_check_relocs
+  elfNN_aarch64_check_relocs
 
 #define elf_backend_copy_indirect_symbol	\
-  elf64_aarch64_copy_indirect_symbol
+  elfNN_aarch64_copy_indirect_symbol
 
 /* Create .dynbss, and .rela.bss sections in DYNOBJ, and set up shortcuts
    to them in our hash.  */
 #define elf_backend_create_dynamic_sections	\
-  elf64_aarch64_create_dynamic_sections
+  elfNN_aarch64_create_dynamic_sections
 
 #define elf_backend_init_index_section		\
   _bfd_elf_init_2_index_sections
 
 #define elf_backend_is_function_type		\
-  elf64_aarch64_is_function_type
+  elfNN_aarch64_is_function_type
 
 #define elf_backend_finish_dynamic_sections	\
-  elf64_aarch64_finish_dynamic_sections
+  elfNN_aarch64_finish_dynamic_sections
 
 #define elf_backend_finish_dynamic_symbol	\
-  elf64_aarch64_finish_dynamic_symbol
+  elfNN_aarch64_finish_dynamic_symbol
 
 #define elf_backend_gc_sweep_hook		\
-  elf64_aarch64_gc_sweep_hook
+  elfNN_aarch64_gc_sweep_hook
 
 #define elf_backend_object_p			\
-  elf64_aarch64_object_p
+  elfNN_aarch64_object_p
 
 #define elf_backend_output_arch_local_syms      \
-  elf64_aarch64_output_arch_local_syms
+  elfNN_aarch64_output_arch_local_syms
 
 #define elf_backend_plt_sym_val			\
-  elf64_aarch64_plt_sym_val
+  elfNN_aarch64_plt_sym_val
 
 #define elf_backend_post_process_headers	\
-  elf64_aarch64_post_process_headers
+  elfNN_aarch64_post_process_headers
 
 #define elf_backend_relocate_section		\
-  elf64_aarch64_relocate_section
+  elfNN_aarch64_relocate_section
 
 #define elf_backend_reloc_type_class		\
-  elf64_aarch64_reloc_type_class
+  elfNN_aarch64_reloc_type_class
 
 #define elf_backend_section_flags		\
-  elf64_aarch64_section_flags
+  elfNN_aarch64_section_flags
 
 #define elf_backend_section_from_shdr		\
-  elf64_aarch64_section_from_shdr
+  elfNN_aarch64_section_from_shdr
 
 #define elf_backend_size_dynamic_sections	\
-  elf64_aarch64_size_dynamic_sections
+  elfNN_aarch64_size_dynamic_sections
 
 #define elf_backend_size_info			\
-  elf64_aarch64_size_info
+  elfNN_aarch64_size_info
 
 #define elf_backend_can_refcount       1
 #define elf_backend_can_gc_sections    1
@@ -7110,4 +7140,4 @@ const struct elf_size_info elf64_aarch64_size_info =
 #undef  elf_backend_obj_attrs_section
 #define elf_backend_obj_attrs_section		".ARM.attributes"
 
-#include "elf64-target.h"
+#include "elfNN-target.h"

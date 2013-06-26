@@ -153,6 +153,9 @@ struct aarch64_frag_type
 /* Registers are generally saved at negative offsets to the CFA.  */
 #define DWARF2_CIE_DATA_ALIGNMENT     (-4)
 
+extern int aarch64_dwarf2_addr_size (void);
+#define DWARF2_ADDR_SIZE(bfd) aarch64_dwarf2_addr_size ()
+
 #ifdef OBJ_ELF
 # define obj_frob_symbol(sym, punt)	aarch64elf_frob_symbol ((sym), & (punt))
 
