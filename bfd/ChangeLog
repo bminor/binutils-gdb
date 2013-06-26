@@ -1,3 +1,12 @@
+2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* Makefile.am (BFD64_BACKENDS_CFILES): Remove elf64-aarch64.c.
+	(BUILD_CFILES): Add elf64-aarch64.c.
+	(elf64-aarch64.c): New rule for generating from elfnn-aarch64.c.
+	* Makefile.in: Re-generated.
+	* elf64-aarch64.c: Rename to ...
+	* elfnn-aarch64.c: ... this.
+
 2013-06-25  Maciej W. Rozycki  <macro@codesourcery.com>
             Paul Brook  <paul@codesourcery.com>
 

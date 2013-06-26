@@ -678,7 +678,6 @@ BFD64_BACKENDS = \
 	vms-alpha.lo
 
 BFD64_BACKENDS_CFILES = \
-	elf64-aarch64.c \
 	aix5ppc-core.c \
 	aout64.c \
 	coff-alpha.c \
@@ -764,6 +763,7 @@ SOURCE_CFILES = \
 	$(OPTIONAL_BACKENDS_CFILES)
 
 BUILD_CFILES = \
+	elf64-aarch64.c \
 	elf32-ia64.c elf64-ia64.c peigen.c pepigen.c pex64igen.c
 
 CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
@@ -911,6 +911,11 @@ elf64-target.h : elfxx-target.h
 	rm -f elf64-target.h
 	sed -e s/NN/64/g < $(srcdir)/elfxx-target.h > elf64-target.new
 	mv -f elf64-target.new elf64-target.h
+
+elf64-aarch64.c : elfnn-aarch64.c
+	rm -f elf64-aarch64.c
+	sed -e s/NN/64/g < $(srcdir)/elfnn-aarch64.c > elf64-aarch64.new
+	mv -f elf64-aarch64.new elf64-aarch64.c
 
 elf32-ia64.c : elfnn-ia64.c
 	rm -f elf32-ia64.c
