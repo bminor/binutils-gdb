@@ -67,7 +67,7 @@ static struct core_fns *core_vec = NULL;
 /* FIXME: kettenis/20031023: Eventually this variable should
    disappear.  */
 
-struct gdbarch *core_gdbarch = NULL;
+static struct gdbarch *core_gdbarch = NULL;
 
 /* Per-core data.  Currently, only the section table.  Note that these
    target sections are *not* mapped in the current address spaces' set
