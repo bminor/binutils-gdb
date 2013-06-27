@@ -17,6 +17,8 @@
 # test special commands (if, while, etc)
 #
 
+standard_testfile
+
 if { [prepare_for_testing commands.exp commands run.c {debug additional_flags=-DFAKEARGV}] } {
     return -1
 }
@@ -555,7 +557,9 @@ proc stray_arg0_test { } {
 
 # Test that GDB is able to source a file with an indented comment.
 proc source_file_with_indented_comment {} {
-    set fd [open "file1" w]
+    set file1 [standard_output_file file1]
+
+    set fd [open "$file1" w]
     puts $fd \
 {define my_fun
     #indented comment
@@ -563,40 +567,44 @@ end
 echo Done!\n}
     close $fd
 
-    gdb_test "source file1" "Done!" "source file with indented comment"
+    gdb_test "source $file1" "Done!" "source file with indented comment"
 }
 
 # Test that GDB can handle arguments when sourcing files recursively.
 # If the arguments are overwritten with ####### then the test has failed.
 proc recursive_source_test {} {
-    set fd [open "file1" w]
+    set file1 [standard_output_file file1]
+    set file2 [standard_output_file file2]
+    set file3 [standard_output_file file3]
+
+    set fd [open "$file1" w]
     puts $fd \
-{source file2
-abcdef qwerty}
+"source $file2
+abcdef qwerty"
     close $fd
 
-    set fd [open "file2" w]
+    set fd [open "$file2" w]
     puts $fd \
-{define abcdef
-  echo 1: <<<$arg0>>>\n
-  source file3
-  echo 2: <<<$arg0>>>\n
-end}
+"define abcdef
+  echo 1: <<<\$arg0>>>\\n
+  source $file3
+  echo 2: <<<\$arg0>>>\\n
+end"
     close $fd
 
-    set fd [open "file3" w]
+    set fd [open "$file3" w]
     puts $fd \
 "echo in file3\\n
 #################################################################"
     close $fd
 
-    gdb_test "source file1" \
+    gdb_test "source $file1" \
 	"1: <<<qwerty>>>\[\r\n]+in file3\[\r\n]+2: <<<qwerty>>>" \
 	"recursive source test"
 
-    file delete file1
-    file delete file2
-    file delete file3
+    file delete $file1
+    file delete $file2
+    file delete $file3
 }
 
 proc gdb_test_no_prompt { command result msg } {

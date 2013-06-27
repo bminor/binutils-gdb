@@ -14,9 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-set testfile "cursal"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != ""} {
     untested "Couldn't compile $srcfile"

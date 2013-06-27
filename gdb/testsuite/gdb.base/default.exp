@@ -521,6 +521,9 @@ gdb_test "set height" "Argument required .integer to set it to.*" "set height"
 gdb_test_no_output "set history expansion" "set history expansion"
 #test set history filename
 gdb_test "set history filename" "Argument required .filename to set it to.*" "set history filename"
+# Make sure the history ends up in the right place.
+gdb_test_no_output "set history filename [standard_output_file .gdb_history]" \
+    "set the history filename"
 #test set history save
 gdb_test_no_output "set history save" "set history save"
 #test set history size

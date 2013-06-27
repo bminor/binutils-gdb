@@ -1,5 +1,18 @@
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
+	* call-ar-st.exp, call-rt-st.exp, call-sc.exp,
+	call-signal-resume.exp, call-strs.exp, callexit.exp,
+	callfuncs.exp, catch-load.exp, catch-syscall.exp, charset.exp,
+	checkpoint.exp, chng-syms.exp, code-expr.exp, code_elim.exp,
+	commands.exp, completion.exp, complex.exp, cond-expr.exp,
+	condbreak.exp, consecutive.exp, constvars.exp, corefile.exp,
+	ctxobj.exp, cursal.exp, cvexpr.exp, dbx.exp, default.exp,
+	define.exp, del.exp, detach.exp, dfp-test.exp, display.exp,
+	dmsym.exp, dump.exp, dup-sect.exp: Use standard_testfile,
+	standard_output_file, prepare_for_testing, clean_restart.
+
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
 	* a2-run.exp, all-bin.exp, annota1.exp, annota3.exp, anon.exp,
 	args.exp, arithmet.exp, arrayidx.exp, assign.exp, async-shell.exp,
 	async.exp, attach-pie-misread.exp, attach-pie-noexec.exp,

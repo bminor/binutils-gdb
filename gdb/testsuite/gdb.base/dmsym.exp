@@ -21,16 +21,18 @@ set testfile dmsym_main
 # This is why we use gdb_compile instead of relying on the usual
 # call to prepare_for_testing.
 
+set dmsym_o [standard_output_file dmsym.o]
+
 if {[gdb_compile "${srcdir}/${subdir}/dmsym.c" \
-                 ${objdir}/${subdir}/dmsym.o \
+                 $dmsym_o \
                  object {}] != ""} {
   untested dmsym.exp
   return -1
 }
 
 if {[gdb_compile \
-      [list ${srcdir}/${subdir}/dmsym_main.c ${objdir}/${subdir}/dmsym.o] \
-      ${objdir}/${subdir}/${testfile} \
+      [list ${srcdir}/${subdir}/dmsym_main.c $dmsym_o] \
+      [standard_output_file ${testfile}] \
       executable {debug}] != ""} {
     untested dmsym.exp
     return -1

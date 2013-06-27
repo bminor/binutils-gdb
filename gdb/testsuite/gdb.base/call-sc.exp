@@ -28,9 +28,7 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
-set testfile "call-sc"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
 # Create and source the file that provides information about the
 # compiler used to compile the test case.
@@ -47,7 +45,6 @@ proc start_scalars_test { type } {
     global testfile
     global srcfile
     global binfile
-    global objdir
     global subdir
     global srcdir
     global gdb_prompt
@@ -57,7 +54,7 @@ proc start_scalars_test { type } {
     set flags "debug additional_flags=-DT=${type}"
     set testfile "call-sc-${type}"
 
-    set binfile ${objdir}/${subdir}/${testfile}
+    set binfile [standard_output_file ${testfile}]
     if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags}"] != "" } {
 	# built the second test case since we can't use prototypes
 	warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"

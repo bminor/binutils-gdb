@@ -33,11 +33,9 @@ if {![istarget *-*-linux*]
     return 0
 }
 
-set testfile dup-sect
-set srcfile ${testfile}.S
+standard_testfile .S
 set srcmainfile start.c
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 
 if {[build_executable ${testfile}.exp $executable [list ${srcfile} ${srcmainfile}] {}] == -1} {
     return -1

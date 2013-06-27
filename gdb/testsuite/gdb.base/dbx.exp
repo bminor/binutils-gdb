@@ -14,28 +14,12 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-set testfile1 "average"
-set testfile2 "sum"
-set testfile "dbx-test"
-set binfile1 ${objdir}/${subdir}/${testfile1}
-set binfile2 ${objdir}/${subdir}/${testfile2}
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile average.c sum.c
 
-
-
-if  { [gdb_compile "${srcdir}/${subdir}/average.c" "${binfile1}.o" object {debug}] != "" } {
-     untested dbx.exp
-     return -1
-}
-
-if  { [gdb_compile "${srcdir}/${subdir}/sum.c" "${binfile2}.o" object {debug}] != "" } {
-     untested dbx.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile1}.o ${binfile2}.o" ${binfile} executable {debug}] != "" } {
-     untested dbx.exp
-     return -1
+if {[build_executable $testfile.exp $testfile \
+	 [list $srcfile $srcfile2] debug] == -1} {
+    untested $testfile.exp
+    return -1
 }
 
 #

@@ -16,9 +16,7 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 # and modified by Bob Manson. (manson@cygnus.com)
 
-set testfile "callfuncs"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 set compile_flags {debug}
 if [support_complex_tests] {
