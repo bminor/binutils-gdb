@@ -1,3 +1,11 @@
+2013-06-27  Jing Yu  <jingyu@google.com>
+
+	PR gold/15662
+	* powerpc.cc (Output_data_brlt_powerpc::reset_brlt_sizes): New
+	function.
+	(Output_data_brlt_powerpc::finalize_brlt_sizes): New function.
+	(Target_powerpc::do_relax): Call the above.
+
 2013-06-27  Cary Coutant  <ccoutant@google.com>
 
 	* powerpc.cc (Target_powerpc::symval_for_branch): Don't assert

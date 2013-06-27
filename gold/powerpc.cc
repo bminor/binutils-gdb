@@ -2628,7 +2628,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
       && parameters->options().output_is_position_independent())
     {
       // Fill in the BRLT relocs.
-      this->brlt_section_->reset_data_size();
+      this->brlt_section_->reset_brlt_sizes();
       for (typename Branch_lookup_table::const_iterator p
 	     = this->branch_lookup_table_.begin();
 	   p != this->branch_lookup_table_.end();
@@ -2636,7 +2636,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	{
 	  this->brlt_section_->add_reloc(p->first, p->second);
 	}
-      this->brlt_section_->finalize_data_size();
+      this->brlt_section_->finalize_brlt_sizes();
     }
   return again;
 }
@@ -3012,6 +3012,20 @@ class Output_data_brlt_powerpc : public Output_section_data_build
       rel_(brlt_rel),
       targ_(targ)
   { }
+
+  void
+  reset_brlt_sizes()
+  {
+    this->reset_data_size();
+    this->rel_->reset_data_size();
+  }
+
+  void
+  finalize_brlt_sizes()
+  {
+    this->finalize_data_size();
+    this->rel_->finalize_data_size();
+  }
 
   // Add a reloc for an entry in the BRLT.
   void
