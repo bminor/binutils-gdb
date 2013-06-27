@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 
-set testfile "anon"
-set srcfile $testfile.c
+standard_testfile .c
+
 if { [prepare_for_testing $testfile.exp $testfile $srcfile {debug}] } {
     return -1
 }

@@ -22,11 +22,11 @@ if { ![isnative] || [is_remote host] || [target_info exists use_gdb_stub]
 load_lib prelink-support.exp
 
 set test "break-interp"
-set binprefix ${objdir}/${subdir}/${test}
+set binprefix [standard_output_file ${test}]
 # Only to get the $interp_system name.
 set srcfile_test "start.c"
 set binfile_test ${test}-test
-set binfile_lib ${objdir}/${subdir}/${test}.so
+set binfile_lib ${binprefix}.so
 set srcfile "${test}-main.c"
 set srcfile_lib "${test}-lib.c"
 
@@ -83,7 +83,7 @@ gdb_test_multiple $test $test {
     }
 }
 
-set interp_system [section_get ${objdir}/${subdir}/$binfile_test .interp]
+set interp_system [section_get [standard_output_file $binfile_test] .interp]
 set interp_system_debug [system_debug_get $interp_system]
 verbose -log "$interp_system has debug $interp_system_debug"
 
@@ -390,10 +390,11 @@ proc test_ld {file ifmain trynosym displacement} {
     if $ifmain {
 	gdb_test_no_output "set args segv"
     } else {
-	global objdir binfile_test
+	global binfile_test
 
 	# ld.so needs some executable to run to reach _dl_debug_state.
-	gdb_test_no_output "set args ${objdir}/${subdir}/$binfile_test" "set args OBJDIR/${subdir}/$binfile_test"
+	gdb_test_no_output "set args [standard_output_file $binfile_test]" \
+	    "set args OBJDIR/${subdir}/$binfile_test"
     }
 
     reach $solib_bp "run" $displacement

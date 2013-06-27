@@ -1,3 +1,14 @@
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
+	* a2-run.exp, all-bin.exp, annota1.exp, annota3.exp, anon.exp,
+	args.exp, arithmet.exp, arrayidx.exp, assign.exp, async-shell.exp,
+	async.exp, attach-pie-misread.exp, attach-pie-noexec.exp,
+	attach-twice.exp, attach.exp, auxv.exp, bang.exp, bfp-test.exp,
+	bigcore.exp, bitfields.exp, bitfields2.exp, break-entry.exp,
+	break-interp.exp, break-on-linker-gcd-function.exp,
+	breakpoint-shadow.exp: Use standard_testfile,
+	standard_output_file, prepare_for_testing, clean_restart.
+
 2013-06-26  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/mi-trace-frame-collected.exp: New.

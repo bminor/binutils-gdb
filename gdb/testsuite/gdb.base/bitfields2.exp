@@ -23,9 +23,8 @@
 #
 
 
-set testfile "bitfields2"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested bitfields2.exp
     return -1
@@ -279,9 +278,7 @@ proc bitfield_set {} {
     gdb_stop_suppressing_tests
 }
 
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 gdb_test_no_output "set print sevenbit-strings"
 runto_main

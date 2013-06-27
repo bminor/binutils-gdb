@@ -25,22 +25,18 @@
 #
 if { [skip_cplus_tests] } { continue }
 
-set testfile "break-on-linker-gcd-function"
-set srcfile ${testfile}.cc
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .cc
 
 if [get_compiler_info "c++"] {
     return -1
 }
 
 set additional_flags {-ffunction-sections -Wl,--gc-sections}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable \
-	   [list debug c++ additional_flags=$additional_flags]] != "" } {
-    untested $srcfile
+if {[prepare_for_testing $testfile.exp $testfile $srcfile \
+	 [list debug c++ additional_flags=$additional_flags]]} {
+    untested $testfile.exp
     return -1
 }
-
-clean_restart $testfile
 
 # Single hex digit
 set xd {[0-9a-f]}

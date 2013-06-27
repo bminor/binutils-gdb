@@ -18,9 +18,8 @@ if [is_remote target] then {
     return 0
 }
 
-set testfile attach-twice
+standard_testfile
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 
 if { [prepare_for_testing ${testfile}.exp $executable] } {
     return -1

@@ -18,9 +18,8 @@ if [is_remote target] then {
     return 0
 }
 
-set testfile attach-pie-noexec
+standard_testfile .c
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
 
 if { [prepare_for_testing ${testfile}.exp $executable "" [list debug "additional_flags=-fPIE -pie"]] } {
     return -1

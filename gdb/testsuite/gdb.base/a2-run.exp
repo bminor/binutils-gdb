@@ -24,8 +24,9 @@ if [gdb_skip_stdio_test "a2run.exp"] {
 # test running programs
 #
 
-set testfile a2-run
-if { [prepare_for_testing ${testfile}.exp $testfile run.c] } {
+standard_testfile run.c
+
+if { [prepare_for_testing ${testfile}.exp $testfile $srcfile] } {
     return -1
 }
 
