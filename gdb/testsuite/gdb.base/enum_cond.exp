@@ -17,9 +17,7 @@
 # gdb can correctly print arrays with indexes for each element of the
 # array.
 
-set testfile "enum_cond"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
 set opts [list debug additional_flags=-fshort-enums]
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opts] != "" } {

@@ -1,5 +1,18 @@
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
+	* ena-dis-br.exp, enum_cond.exp, enumval.exp, environ.exp,
+	eu-strip-infcall.exp, eval-skip.exp, exe-lock.exp,
+	expand-psymtabs.exp, exprs.exp, fileio.exp, find.exp,
+	fixsection.exp, foll-exec.exp, foll-fork.exp,
+	fortran-sym-case.exp, frame-args.exp, freebpcmd.exp, fullname.exp,
+	funcargs.exp, gcore-buffer-overflow.exp, gcore.exp, gdb1090.exp,
+	gdb11530.exp, gdb11531.exp, gdb1250.exp, gdb1555.exp, gdb1821.exp,
+	gdbindex-stabs.exp, gdbvars.exp, gnu-ifunc.exp, gnu_vector.exp:
+	Use standard_testfile, standard_output_file, prepare_for_testing,
+	clean_restart.
+
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
 	* call-ar-st.exp, call-rt-st.exp, call-sc.exp,
 	call-signal-resume.exp, call-strs.exp, callexit.exp,
 	callfuncs.exp, catch-load.exp, catch-syscall.exp, charset.exp,

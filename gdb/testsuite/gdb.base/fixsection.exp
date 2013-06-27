@@ -18,13 +18,11 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-set testfile "fixsection"
-set srcfile ${srcdir}/${subdir}/${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
 set libfile "fixsectshr"
 set libsrc ${srcdir}/${subdir}/${libfile}.c
-set lib_sl ${objdir}/${subdir}/${libfile}.sl
+set lib_sl [standard_output_file ${libfile}.sl]
 
 set lib_opts [list debug nowarnings]
 set exec_opts [list debug nowarnings shlib=$lib_sl]
@@ -34,7 +32,8 @@ if [get_compiler_info] {
 }
 
 if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
-     || [gdb_compile $srcfile $binfile executable $exec_opts] != ""} {
+     || [gdb_compile $srcdir/$subdir/$srcfile $binfile \
+	     executable $exec_opts] != ""} {
     untested "Could not compile either $libsrc or $srcfile."
     return -1
 }

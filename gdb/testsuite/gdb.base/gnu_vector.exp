@@ -18,9 +18,7 @@
 # Tests GDBs support for GNU vectors.
 # http://gcc.gnu.org/onlinedocs/gcc/Vector-Extensions.html
 
-set testfile "gnu_vector"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
 if [get_compiler_info] {
     return -1

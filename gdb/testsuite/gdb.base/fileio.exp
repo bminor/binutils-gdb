@@ -21,9 +21,7 @@ if [target_info exists gdb,nofileio] {
 }
 
 
-set testfile "fileio"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
     untested fileio.exp

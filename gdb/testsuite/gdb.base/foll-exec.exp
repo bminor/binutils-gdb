@@ -23,12 +23,11 @@ if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
     continue
 }
 
-set testfile "foll-exec"
+standard_testfile foll-exec.c
+
 set testfile2 "execd-prog"
-set srcfile ${testfile}.c
 set srcfile2 ${testfile2}.c
-set binfile ${objdir}/${subdir}/${testfile}
-set binfile2 ${objdir}/${subdir}/${testfile2}
+set binfile2 [standard_output_file ${testfile2}]
 
 # build the first test case
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug}] != "" } {

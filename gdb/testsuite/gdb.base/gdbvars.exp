@@ -16,12 +16,10 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
 
-set testfile "gdbvars"
-set srcfile  ${testfile}.c
-set binfile  ${objdir}/${subdir}/${testfile}
+standard_testfile
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested gdbvars.exp
+if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
+    untested $testfile.exp
     return -1
 }
 
@@ -111,13 +109,6 @@ proc test_with_program {} {
     gdb_test "print /x \$prog_var" " = $hex" \
 	"Print contents of new convenience variable of program variable"
 }
-
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 gdb_test_no_output "set print sevenbit-strings"
 

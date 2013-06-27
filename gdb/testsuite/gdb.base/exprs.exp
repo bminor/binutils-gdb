@@ -19,9 +19,8 @@
 # test running programs
 #
 
-set testfile "exprs"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested exprs.exp
      return -1
@@ -31,10 +30,7 @@ if [get_compiler_info] {
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 #
 # set it up at a breakpoint so we can play with the variable values

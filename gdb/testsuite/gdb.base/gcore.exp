@@ -17,21 +17,12 @@
 # This is a test for the gdb command "generate-core-file".
 
 
-set testfile "gcore"
-set srcfile  ${testfile}.c
-set binfile  ${objdir}/${subdir}/${testfile}
+standard_testfile
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested gcore.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
+    untested $testfile.exp
+    return -1
 }
-
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 # Does this gdb support gcore?
 gdb_test_multiple "help gcore" "help gcore" {
@@ -86,7 +77,7 @@ set pre_corefile_local_array \
 set pre_corefile_extern_array \
 	[capture_command_output "print extern_array" "$print_prefix"]
 
-set corefile "${objdir}/${subdir}/gcore.test"
+set corefile [standard_output_file gcore.test]
 set core_supported [gdb_gcore_cmd "$corefile" "save a corefile"]
 if {!$core_supported} {
   return -1

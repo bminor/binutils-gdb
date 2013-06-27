@@ -17,18 +17,16 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-set testfile "gnu-ifunc"
+standard_testfile .c
 set executable ${testfile}
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${executable}
 set staticexecutable ${executable}-static
-set staticbinfile ${objdir}/${subdir}/${staticexecutable}
+set staticbinfile [standard_output_file ${staticexecutable}]
 
 set libfile "${testfile}-lib"
 set libsrc ${libfile}.c
-set lib_so ${objdir}/${subdir}/${libfile}.so
+set lib_so [standard_output_file ${libfile}.so]
 # $lib_o must not have {debug}, it would override the STT_GNU_IFUNC ELF markers.
-set lib_o ${objdir}/${subdir}/${libfile}.o
+set lib_o [standard_output_file ${libfile}.o]
 
 # We need DWARF for the "final" function as we "step" into the function and GDB
 # would step-over the "final" function if there would be no line number debug

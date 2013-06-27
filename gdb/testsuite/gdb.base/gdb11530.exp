@@ -18,8 +18,7 @@
 # Test GDB bug report 11530.
 # This is a problem related unnamed unions.
 
-set testfile "gdb11530"
-set binfile ${testfile}${EXEEXT}
+standard_testfile
 
 # Unnamed union is a GNU extension, thus we restrict the test
 # to gcc compiler.

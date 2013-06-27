@@ -19,42 +19,24 @@
 # test running programs
 #
 
-set testfile "break"
-set srcfile ${testfile}.c
-set srcfile1 ${testfile}1.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile break.c break1.c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug nowarnings}] != "" } {
-     untested ena-dis-br.exp
-     return -1
+if {[prepare_for_testing ${testfile}.exp ${testfile} \
+	 [list $srcfile $srcfile2] {debug nowarnings}]} {
+    return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug nowarnings}] != "" } {
-     untested ena-dis-br.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested ena-dis-br.exp
-     return -1
-}
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 set bp_location1 [gdb_get_line_number "set breakpoint 1 here"]
 set bp_location7 [gdb_get_line_number "set breakpoint 7 here"]
-set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile1]
-set bp_location9 [gdb_get_line_number "set breakpoint 9 here" $srcfile1]
+set bp_location8 [gdb_get_line_number "set breakpoint 8 here" $srcfile2]
+set bp_location9 [gdb_get_line_number "set breakpoint 9 here" $srcfile2]
 set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
-set bp_location13 [gdb_get_line_number "set breakpoint 13 here" $srcfile1]
-set bp_location14 [gdb_get_line_number "set breakpoint 14 here" $srcfile1]
-set bp_location15 [gdb_get_line_number "set breakpoint 15 here" $srcfile1]
-set bp_location16 [gdb_get_line_number "set breakpoint 16 here" $srcfile1]
-set bp_location17 [gdb_get_line_number "set breakpoint 17 here" $srcfile1]
-set bp_location18 [gdb_get_line_number "set breakpoint 18 here" $srcfile1]
+set bp_location13 [gdb_get_line_number "set breakpoint 13 here" $srcfile2]
+set bp_location14 [gdb_get_line_number "set breakpoint 14 here" $srcfile2]
+set bp_location15 [gdb_get_line_number "set breakpoint 15 here" $srcfile2]
+set bp_location16 [gdb_get_line_number "set breakpoint 16 here" $srcfile2]
+set bp_location17 [gdb_get_line_number "set breakpoint 17 here" $srcfile2]
+set bp_location18 [gdb_get_line_number "set breakpoint 18 here" $srcfile2]
 
 if ![runto_main] then { fail "enable/disable break tests suppressed" }
 
