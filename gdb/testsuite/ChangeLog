@@ -1,5 +1,21 @@
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/testenv.exp, gdb.base/tui-layout.exp,
+	gdb.base/twice.exp, gdb.base/type-opaque.exp, gdb.base/unload.exp,
+	gdb.base/unwindonsignal.exp, gdb.base/valgrind-db-attach.exp,
+	gdb.base/valgrind-infcall.exp, gdb.base/value-double-free.exp,
+	gdb.base/varargs.exp, gdb.base/watch-cond-infcall.exp,
+	gdb.base/watch-cond.exp, gdb.base/watch-non-mem.exp,
+	gdb.base/watch-read.exp, gdb.base/watch-vfork.exp,
+	gdb.base/watch_thread_num.exp, gdb.base/watchpoint-cond-gone.exp,
+	gdb.base/watchpoint-delete.exp, gdb.base/watchpoint-hw.exp,
+	gdb.base/watchpoint-solib.exp, gdb.base/watchpoint.exp,
+	gdb.base/watchpoints.exp, gdb.base/wchar.exp, gdb.base/whatis.exp:
+	Use standard_testfile, standard_output_file, prepare_for_testing,
+	clean_restart.
+
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/save-bp.exp, gdb.base/savedregs.exp,
 	gdb.base/scope.exp, gdb.base/sep.exp, gdb.base/sepsymtab.exp,
 	gdb.base/set-lang-auto.exp, gdb.base/setshow.exp,

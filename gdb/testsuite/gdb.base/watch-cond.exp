@@ -17,9 +17,7 @@
 # Tests involving watchpoint conditions with local expressions.
 #
 
-set testfile "watch-cond"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     untested ${testfile}.exp

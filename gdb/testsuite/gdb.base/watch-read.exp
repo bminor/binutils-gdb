@@ -22,8 +22,7 @@
 # watching the same memory as read watchpoints.
 #
 
-set testfile "watch-read"
-set srcfile ${testfile}.c
+standard_testfile .c
 
 if {[skip_hw_watchpoint_access_tests]} {
     return 0

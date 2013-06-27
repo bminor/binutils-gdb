@@ -26,10 +26,10 @@ set libfile "watchpoint-solib-shr"
 set libname "${libfile}.sl"
 set libsrcfile ${libfile}.c
 set srcfile $srcdir/$subdir/$testfile.c
-set binfile $objdir/$subdir/$testfile
-set shlibdir ${objdir}/${subdir}
+set binfile [standard_output_file $testfile]
+set shlibdir [standard_output_file {}]
 set libsrc  $srcdir/$subdir/$libfile.c
-set lib_sl  $objdir/$subdir/$libname
+set lib_sl  [standard_output_file $libname]
 set lib_dlopen [shlib_target_file ${libname}]
 set lib_syms [shlib_symbol_file ${libname}]
 

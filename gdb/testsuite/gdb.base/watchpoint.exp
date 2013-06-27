@@ -16,9 +16,7 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
 
-set testfile "watchpoint"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if [get_compiler_info] {
     return -1

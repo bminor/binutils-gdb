@@ -23,9 +23,7 @@ if { [is_remote target] } {
     return 0
 }
 
-set testfile "testenv"
-set srcfile ${testfile}.c
-set binfile ${testfile}
+standard_testfile .c
 
 # Compile binary
 # and start with a fresh gdb

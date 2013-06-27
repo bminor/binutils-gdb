@@ -18,18 +18,12 @@ if {[skip_hw_watchpoint_tests]} {
     return 0
 }
 
-set testfile watchpoint-hw
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested "Couldn't compile test program"
+standard_testfile
+
+if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
+    untested $testfile.exp
     return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 # Create the watchpoint before the inferior gets started.  Now the native CPU
 # target is still not active and its `to_can_use_hw_breakpoint' is not

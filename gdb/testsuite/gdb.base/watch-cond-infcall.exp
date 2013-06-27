@@ -16,9 +16,7 @@
 # Test for watchpoints with conditions that involve inferior function
 # calls.
 
-set testfile "watch-cond-infcall"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if { [build_executable ${testfile}.exp ${testfile} ${testfile}.c {debug}] } {
     untested ${testfile}.exp
