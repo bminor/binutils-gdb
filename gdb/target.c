@@ -153,7 +153,6 @@ static void debug_to_stop (ptid_t);
    array.  */
 struct target_ops **target_structs;
 unsigned target_struct_size;
-unsigned target_struct_index;
 unsigned target_struct_allocsize;
 #define	DEFAULT_ALLOCSIZE	10
 

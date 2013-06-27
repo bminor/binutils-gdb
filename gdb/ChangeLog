@@ -1,3 +1,7 @@
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
+	* target.c (target_struct_index): Remove.
+
 2013-06-27  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c: Remove comment describing the 'stepping over runtime
