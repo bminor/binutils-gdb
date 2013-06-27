@@ -60,52 +60,76 @@
 
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
-	* hook-stop-continue.exp, hook-stop-frame.exp, huge.exp,
-	included.exp, inferior-died.exp, infnan.exp, info-fun.exp,
-	info-macros.exp, info-os.exp, info-proc.exp, info-target.exp,
-	infoline.exp, interp.exp, interrupt.exp, jit-simple.exp,
-	jit-so.exp, jump.exp, kill-after-signal.exp, label.exp, langs.exp,
-	lineinc.exp, list.exp, logical.exp, long_long.exp, longjmp.exp,
-	macscp.exp, maint.exp, memattr.exp, mips_pro.exp, miscexprs.exp,
-	morestack.exp, moribund-step.exp, multi-forks.exp: Use
+	* gdb.base/hook-stop-continue.exp, gdb.base/hook-stop-frame.exp,
+	gdb.base/huge.exp, gdb.base/included.exp,
+	gdb.base/inferior-died.exp, gdb.base/infnan.exp,
+	gdb.base/info-fun.exp, gdb.base/info-macros.exp,
+	gdb.base/info-os.exp, gdb.base/info-proc.exp,
+	gdb.base/info-target.exp, gdb.base/infoline.exp,
+	gdb.base/interp.exp, gdb.base/interrupt.exp,
+	gdb.base/jit-simple.exp, gdb.base/jit-so.exp, gdb.base/jump.exp,
+	gdb.base/kill-after-signal.exp, gdb.base/label.exp,
+	gdb.base/langs.exp, gdb.base/lineinc.exp, gdb.base/list.exp,
+	gdb.base/logical.exp, gdb.base/long_long.exp,
+	gdb.base/longjmp.exp, gdb.base/macscp.exp, gdb.base/maint.exp,
+	gdb.base/memattr.exp, gdb.base/mips_pro.exp,
+	gdb.base/miscexprs.exp, gdb.base/morestack.exp,
+	gdb.base/moribund-step.exp, gdb.base/multi-forks.exp: Use
 	standard_testfile, standard_output_file, prepare_for_testing,
 	clean_restart.
 
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
-	* ena-dis-br.exp, enum_cond.exp, enumval.exp, environ.exp,
-	eu-strip-infcall.exp, eval-skip.exp, exe-lock.exp,
-	expand-psymtabs.exp, exprs.exp, fileio.exp, find.exp,
-	fixsection.exp, foll-exec.exp, foll-fork.exp,
-	fortran-sym-case.exp, frame-args.exp, freebpcmd.exp, fullname.exp,
-	funcargs.exp, gcore-buffer-overflow.exp, gcore.exp, gdb1090.exp,
-	gdb11530.exp, gdb11531.exp, gdb1250.exp, gdb1555.exp, gdb1821.exp,
-	gdbindex-stabs.exp, gdbvars.exp, gnu-ifunc.exp, gnu_vector.exp:
-	Use standard_testfile, standard_output_file, prepare_for_testing,
-	clean_restart.
-
-2013-06-27  Tom Tromey  <tromey@redhat.com>
-
-	* call-ar-st.exp, call-rt-st.exp, call-sc.exp,
-	call-signal-resume.exp, call-strs.exp, callexit.exp,
-	callfuncs.exp, catch-load.exp, catch-syscall.exp, charset.exp,
-	checkpoint.exp, chng-syms.exp, code-expr.exp, code_elim.exp,
-	commands.exp, completion.exp, complex.exp, cond-expr.exp,
-	condbreak.exp, consecutive.exp, constvars.exp, corefile.exp,
-	ctxobj.exp, cursal.exp, cvexpr.exp, dbx.exp, default.exp,
-	define.exp, del.exp, detach.exp, dfp-test.exp, display.exp,
-	dmsym.exp, dump.exp, dup-sect.exp: Use standard_testfile,
+	* gdb.base/ena-dis-br.exp, gdb.base/enum_cond.exp,
+	gdb.base/enumval.exp, gdb.base/environ.exp,
+	gdb.base/eu-strip-infcall.exp, gdb.base/eval-skip.exp,
+	gdb.base/exe-lock.exp, gdb.base/expand-psymtabs.exp,
+	gdb.base/exprs.exp, gdb.base/fileio.exp, gdb.base/find.exp,
+	gdb.base/fixsection.exp, gdb.base/foll-exec.exp,
+	gdb.base/foll-fork.exp, gdb.base/fortran-sym-case.exp,
+	gdb.base/frame-args.exp, gdb.base/freebpcmd.exp,
+	gdb.base/fullname.exp, gdb.base/funcargs.exp,
+	gdb.base/gcore-buffer-overflow.exp, gdb.base/gcore.exp,
+	gdb.base/gdb1090.exp, gdb.base/gdb11530.exp,
+	gdb.base/gdb11531.exp, gdb.base/gdb1250.exp, gdb.base/gdb1555.exp,
+	gdb.base/gdb1821.exp, gdb.base/gdbindex-stabs.exp,
+	gdb.base/gdbvars.exp, gdb.base/gnu-ifunc.exp,
+	gdb.base/gnu_vector.exp: Use standard_testfile,
 	standard_output_file, prepare_for_testing, clean_restart.
 
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
-	* a2-run.exp, all-bin.exp, annota1.exp, annota3.exp, anon.exp,
-	args.exp, arithmet.exp, arrayidx.exp, assign.exp, async-shell.exp,
-	async.exp, attach-pie-misread.exp, attach-pie-noexec.exp,
-	attach-twice.exp, attach.exp, auxv.exp, bang.exp, bfp-test.exp,
-	bigcore.exp, bitfields.exp, bitfields2.exp, break-entry.exp,
-	break-interp.exp, break-on-linker-gcd-function.exp,
-	breakpoint-shadow.exp: Use standard_testfile,
+	* gdb.base/call-ar-st.exp, gdb.base/call-rt-st.exp,
+	gdb.base/call-sc.exp, gdb.base/call-signal-resume.exp,
+	gdb.base/call-strs.exp, gdb.base/callexit.exp,
+	gdb.base/callfuncs.exp, gdb.base/catch-load.exp,
+	gdb.base/catch-syscall.exp, gdb.base/charset.exp,
+	gdb.base/checkpoint.exp, gdb.base/chng-syms.exp,
+	gdb.base/code-expr.exp, gdb.base/code_elim.exp,
+	gdb.base/commands.exp, gdb.base/completion.exp,
+	gdb.base/complex.exp, gdb.base/cond-expr.exp,
+	gdb.base/condbreak.exp, gdb.base/consecutive.exp,
+	gdb.base/constvars.exp, gdb.base/corefile.exp,
+	gdb.base/ctxobj.exp, gdb.base/cursal.exp, gdb.base/cvexpr.exp,
+	gdb.base/dbx.exp, gdb.base/default.exp, gdb.base/define.exp,
+	gdb.base/del.exp, gdb.base/detach.exp, gdb.base/dfp-test.exp,
+	gdb.base/display.exp, gdb.base/dmsym.exp, gdb.base/dump.exp,
+	gdb.base/dup-sect.exp: Use standard_testfile,
+	standard_output_file, prepare_for_testing, clean_restart.
+
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/a2-run.exp, gdb.base/all-bin.exp, gdb.base/annota1.exp,
+	gdb.base/annota3.exp, gdb.base/anon.exp, gdb.base/args.exp,
+	gdb.base/arithmet.exp, gdb.base/arrayidx.exp, gdb.base/assign.exp,
+	gdb.base/async-shell.exp, gdb.base/async.exp,
+	gdb.base/attach-pie-misread.exp, gdb.base/attach-pie-noexec.exp,
+	gdb.base/attach-twice.exp, gdb.base/attach.exp, gdb.base/auxv.exp,
+	gdb.base/bang.exp, gdb.base/bfp-test.exp, gdb.base/bigcore.exp,
+	gdb.base/bitfields.exp, gdb.base/bitfields2.exp,
+	gdb.base/break-entry.exp, gdb.base/break-interp.exp,
+	gdb.base/break-on-linker-gcd-function.exp,
+	gdb.base/breakpoint-shadow.exp: Use standard_testfile,
 	standard_output_file, prepare_for_testing, clean_restart.
 
 2013-06-26  Yao Qi  <yao@codesourcery.com>
