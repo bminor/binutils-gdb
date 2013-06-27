@@ -1,5 +1,10 @@
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
+	* target.c (find_run_target): Remove.
+	* target.h (find_run_target): Remove.
+
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
 	* corelow.c (core_gdbarch): Now static.
 
 2013-06-27  Tom Tromey  <tromey@redhat.com>

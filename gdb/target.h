@@ -1948,8 +1948,6 @@ extern void find_default_attach (struct target_ops *, char *, int);
 extern void find_default_create_inferior (struct target_ops *,
 					  char *, char *, char **, int);
 
-extern struct target_ops *find_run_target (void);
-
 extern struct target_ops *find_target_beneath (struct target_ops *);
 
 /* Read OS data object of type TYPE from the target, and return it in
