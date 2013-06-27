@@ -563,7 +563,7 @@ catch_errors (catch_errors_ftype *func, void *func_args, char *errstring,
 }
 
 int
-catch_command_errors (catch_command_errors_ftype * command,
+catch_command_errors (catch_command_errors_ftype *command,
 		      char *arg, int from_tty, return_mask mask)
 {
   volatile struct gdb_exception e;

@@ -1,3 +1,9 @@
+2013-06-27  Pedro Alves  <palves@redhat.com>
+
+	* exceptions.c (catch_command_errors): Remove spurious space.
+	* exceptions.h (catch_command_errors): Second parameter is "arg",
+	not "command".
+
 2013-06-27  Yao Qi  <yao@codesourcery.com>
 
 	* common/create-version.sh: Update comments.  Handle the case
