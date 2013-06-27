@@ -1,3 +1,8 @@
+2013-06-27  Yao Qi  <yao@codesourcery.com>
+
+	* common/create-version.sh: Update comments.  Handle the case
+	that TARGET_ALIAS is empty.
+
 2013-06-26  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (SOLIB_IN_DYNAMIC_LINKER): Delete macro and describing
