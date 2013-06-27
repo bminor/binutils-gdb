@@ -4886,6 +4886,7 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  htab->root.dynobj = abfd;
 		if (!_bfd_elf_create_got_section (htab->root.dynobj, info))
 		  return FALSE;
+		htab->root.sgot->size += GOT_ENTRY_SIZE;
 	      }
 	    break;
 	  }
@@ -6501,15 +6502,8 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
       /* Fill in the first three entries in the global offset table.  */
       if (htab->root.sgotplt->size > 0)
 	{
-	  /* Set the first entry in the global offset table to the address of
-	     the dynamic section.  */
-	  if (sdyn == NULL)
-	    bfd_put_NN (output_bfd, (bfd_vma) 0,
-			htab->root.sgotplt->contents);
-	  else
-	    bfd_put_NN (output_bfd,
-			sdyn->output_section->vma + sdyn->output_offset,
-			htab->root.sgotplt->contents);
+	  bfd_put_NN (output_bfd, (bfd_vma) 0, htab->root.sgotplt->contents);
+
 	  /* Write GOT[1] and GOT[2], needed for the dynamic linker.  */
 	  bfd_put_NN (output_bfd,
 		      (bfd_vma) 0,
@@ -6517,6 +6511,16 @@ elfNN_aarch64_finish_dynamic_sections (bfd *output_bfd,
 	  bfd_put_NN (output_bfd,
 		      (bfd_vma) 0,
 		      htab->root.sgotplt->contents + GOT_ENTRY_SIZE * 2);
+	}
+
+      if (htab->root.sgot)
+	{
+	  if (htab->root.sgot->size > 0)
+	    {
+	      bfd_vma addr =
+		sdyn ? sdyn->output_section->vma + sdyn->output_offset : 0;
+	      bfd_put_NN (output_bfd, addr, htab->root.sgot->contents);
+	    }
 	}
 
       elf_section_data (htab->root.sgotplt->output_section)->

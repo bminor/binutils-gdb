@@ -1,3 +1,10 @@
+2013-06-27  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs): Reserve one slot
+	in sgot.
+	(elfNN_aarch64_finish_dynamic_sections): Place the &_DYNAMIC reference
+	in sgot[0] rather than sgotplt[0].
+
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* Makefile.am (elf32-aarch64.c): Add a #line cpp directive at the
