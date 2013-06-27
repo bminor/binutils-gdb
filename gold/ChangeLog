@@ -1,3 +1,15 @@
+2013-06-27  Cary Coutant  <ccoutant@google.com>
+
+	* powerpc.cc (Target_powerpc::symval_for_branch): Don't assert
+	on garbage collected .opd section.
+
+2013-06-27  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::do_gc_add_reference): Test dst_shndx
+	is non-zero.
+	(Target_powerpc::do_gc_mark_symbols): Likewise for sym->shndx().
+	(Target_powerpc::do_function_location): Likewise for loc->shndx.
+
 2013-06-14  Cary Coutant  <ccoutant@google.com>
 
 	* resolve.cc (Symbol::override_base): Don't override st_type

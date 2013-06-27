@@ -5827,7 +5827,7 @@ Target_powerpc<size, big_endian>::do_gc_add_reference(
 
   Powerpc_relobj<size, big_endian>* ppc_object
     = static_cast<Powerpc_relobj<size, big_endian>*>(dst_obj);
-  if (dst_shndx == ppc_object->opd_shndx())
+  if (dst_shndx != 0 && dst_shndx == ppc_object->opd_shndx())
     {
       if (ppc_object->opd_valid())
 	{
@@ -5859,7 +5859,7 @@ Target_powerpc<size, big_endian>::do_gc_mark_symbol(
 	= static_cast<Powerpc_relobj<size, big_endian>*>(sym->object());
       bool is_ordinary;
       unsigned int shndx = sym->shndx(&is_ordinary);
-      if (is_ordinary && shndx == ppc_object->opd_shndx())
+      if (is_ordinary && shndx != 0 && shndx == ppc_object->opd_shndx())
 	{
 	  Sized_symbol<size>* gsym = symtab->get_sized_symbol<size>(sym);
 	  Address dst_off = gsym->value();
@@ -5882,7 +5882,7 @@ void
 Target_powerpc<size, big_endian>::do_function_location(
     Symbol_location* loc) const
 {
-  if (size == 64)
+  if (size == 64 && loc->shndx != 0)
     {
       if (loc->object->is_dynamic())
 	{
@@ -6183,7 +6183,8 @@ Target_powerpc<size, big_endian>::symval_for_branch(
   if (shndx == 0)
     return value;
   Address opd_addr = symobj->get_output_section_offset(shndx);
-  gold_assert(opd_addr != invalid_address);
+  if (opd_addr == invalid_address)
+    return value;
   opd_addr += symobj->output_section(shndx)->address();
   if (value >= opd_addr && value < opd_addr + symobj->section_size(shndx))
     {
