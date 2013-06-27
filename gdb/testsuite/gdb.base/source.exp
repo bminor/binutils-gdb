@@ -19,9 +19,7 @@
 
 
 
-set testfile "structs"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile structs.c
 
 gdb_start
 

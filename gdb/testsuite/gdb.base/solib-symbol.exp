@@ -22,12 +22,12 @@ if {[skip_shlib_tests]} {
 # Library file.
 set libname "solib-symbol-lib"
 set srcfile_lib ${srcdir}/${subdir}/${libname}.c
-set binfile_lib ${objdir}/${subdir}/${libname}.so
+set binfile_lib [standard_output_file ${libname}.so]
 set lib_flags [list debug ldflags=-Wl,-Bsymbolic]
 # Binary file.
 set testfile "solib-symbol-main"
 set srcfile ${srcdir}/${subdir}/${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile [standard_output_file ${testfile}]
 set bin_flags [list debug shlib=${binfile_lib}]
 
 if [get_compiler_info] {

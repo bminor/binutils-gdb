@@ -31,19 +31,11 @@ if [gdb_skip_stdio_test "siginfo-addr.exp"] {
 }
 
 
-set testfile siginfo-addr
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
+standard_testfile
+if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
     untested "Couldn't compile ${srcfile}.c"
     return -1
 }
-
-# get things started
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 gdb_test "display/i \$pc"
 

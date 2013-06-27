@@ -18,17 +18,11 @@ if [target_info exists gdb,nosignals] {
     continue
 }
 
+standard_testfile
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-
-set testfile sigall
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested sigall.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
+    untested $testfile.exp
+    return -1
 }
 
 proc test_one_sig {nextsig} {
@@ -97,8 +91,6 @@ proc test_one_sig {nextsig} {
     }
     set thissig $nextsig
 }
-
-gdb_load $binfile
 
 # The list of signals that the program generates, in the order they
 # are generated.

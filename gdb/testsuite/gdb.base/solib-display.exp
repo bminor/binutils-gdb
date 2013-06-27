@@ -35,13 +35,13 @@ if { [skip_shlib_tests] || [is_remote target] } {
 # Library file.
 set libname "solib-display-lib"
 set srcfile_lib ${srcdir}/${subdir}/${libname}.c
-set binfile_lib ${objdir}/${subdir}/${libname}.so
+set binfile_lib [standard_output_file ${libname}.so]
 set lib_flags {}
 # Binary file.
 set testfile "solib-display-main"
 set srcfile ${srcdir}/${subdir}/${testfile}.c
 set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
+set binfile [standard_output_file ${executable}]
 set bin_flags [list debug shlib=${binfile_lib}]
 
 if [get_compiler_info] {

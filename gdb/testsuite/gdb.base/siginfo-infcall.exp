@@ -18,10 +18,9 @@ if [target_info exists gdb,nosignals] {
     continue
 }
 
-set testfile siginfo-infcall
-set srcfile ${testfile}.c
-set executable ${testfile}
-if { [prepare_for_testing ${testfile}.exp $executable] } {
+standard_testfile .c
+
+if { [prepare_for_testing ${testfile}.exp $testfile $srcfile] } {
     return -1
 }
 

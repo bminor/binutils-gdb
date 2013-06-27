@@ -15,8 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile "signest"
-set srcfile ${testfile}.c
+standard_testfile
 
 if [target_info exists gdb,nosignals] {
     verbose "Skipping ${testfile}.exp because of nosignals."

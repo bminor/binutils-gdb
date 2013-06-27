@@ -25,9 +25,7 @@ if [target_info exists gdb,cannot_call_functions] {
     continue
 }
 
-set testfile "structs"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
 # Regex matching any value of `char' type like: a = 65 'A'
 set anychar_re {-?[0-9]{1,3} '(.|\\([0-7]{3}|[a-z]|\\|'))'}
@@ -49,7 +47,6 @@ proc start_structs_test { types } {
     global testfile
     global srcfile
     global binfile
-    global objdir
     global subdir
     global srcdir
     global gdb_prompt
@@ -67,7 +64,7 @@ proc start_structs_test { types } {
 	append testfile "-" "$t"
     }
 
-    set binfile ${objdir}/${subdir}/${testfile}
+    set binfile [standard_output_file ${testfile}]
     if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable "${flags}"] != "" } {
 	# built the second test case since we can't use prototypes
 	warning "Prototypes not supported, rebuilding with -DNO_PROTOTYPES"

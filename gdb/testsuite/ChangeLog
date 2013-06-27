@@ -1,5 +1,31 @@
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/save-bp.exp, gdb.base/savedregs.exp,
+	gdb.base/scope.exp, gdb.base/sep.exp, gdb.base/sepsymtab.exp,
+	gdb.base/set-lang-auto.exp, gdb.base/setshow.exp,
+	gdb.base/setvar.exp, gdb.base/shlib-call.exp,
+	gdb.base/shreloc.exp, gdb.base/sigall.exp,
+	gdb.base/sigaltstack.exp, gdb.base/sigbpt.exp,
+	gdb.base/sigchld.exp, gdb.base/siginfo-addr.exp,
+	gdb.base/siginfo-infcall.exp, gdb.base/siginfo-obj.exp,
+	gdb.base/siginfo.exp, gdb.base/signals.exp, gdb.base/signest.exp,
+	gdb.base/signull.exp, gdb.base/sigrepeat.exp,
+	gdb.base/sigstep.exp, gdb.base/sizeof.exp,
+	gdb.base/skip-solib.exp, gdb.base/so-impl-ld.exp,
+	gdb.base/solib-display.exp, gdb.base/solib-nodir.exp,
+	gdb.base/solib-overlap.exp, gdb.base/solib-symbol.exp,
+	gdb.base/solib-weak.exp, gdb.base/source.exp,
+	gdb.base/stack-checking.exp, gdb.base/stale-infcall.exp,
+	gdb.base/stap-probe.exp, gdb.base/start.exp,
+	gdb.base/step-break.exp, gdb.base/step-bt.exp,
+	gdb.base/step-line.exp, gdb.base/step-resume-infcall.exp,
+	gdb.base/step-test.exp, gdb.base/structs.exp,
+	gdb.base/structs2.exp, gdb.base/structs3.exp,
+	gdb.base/symbol-without-target_section.exp: Use standard_testfile,
+	standard_output_file, prepare_for_testing, clean_restart.
+
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/nextoverexit.exp, gdb.base/nextoverexit.exp,
 	gdb.base/nodebug.exp, gdb.base/nofield.exp, gdb.base/nostdlib.exp,
 	gdb.base/opaque.exp, gdb.base/overlays.exp, gdb.base/pc-fp.exp,

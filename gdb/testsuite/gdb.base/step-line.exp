@@ -20,21 +20,13 @@
 # step-line.exp -- Expect script to test stepping in files with
 # #line directives.
 
-set testfile step-line
-set srcfile ${testfile}.c
+standard_testfile
 set linefile ${testfile}.inp
-set binfile ${objdir}/${subdir}/${testfile}
 
-remote_exec build "rm -f ${binfile}"
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested step-line.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
+    untested $testfile.exp
+    return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 if ![runto_main] then {
    fail "Can't run to main"
