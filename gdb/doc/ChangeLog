@@ -1,3 +1,9 @@
+2013-06-27  Pedro Alves  <palves@redhat.com>
+
+	* gdbint.texinfo (Algorithms) <Stepping over runtime loader
+	dynamic symbol resolution code>: New section, based on infrun.c
+	comment.
+
 2013-06-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdbint.texinfo (Versions and Branches): Use common/version.in.
