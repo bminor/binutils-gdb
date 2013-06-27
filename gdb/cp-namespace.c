@@ -717,36 +717,40 @@ find_symbol_in_baseclass (struct type *parent_type, const char *name,
   for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
     {
       size_t len;
+      struct type *base_type = TYPE_BASECLASS (parent_type, i);
       const char *base_name = TYPE_BASECLASS_NAME (parent_type, i);
 
       if (base_name == NULL)
 	continue;
 
       /* Search this particular base class.  */
-      sym = cp_lookup_symbol_namespace (base_name, name, block, VAR_DOMAIN);
+      sym = cp_lookup_symbol_in_namespace (base_name, name, block,
+					   VAR_DOMAIN, 0);
       if (sym != NULL)
 	break;
 
+      /* Now search all static file-level symbols.  We have to do this for
+	 things like typedefs in the class.  First search in this symtab,
+	 what we want is possibly there.  */
       len = strlen (base_name) + 2 + strlen (name) + 1;
       concatenated_name = xrealloc (concatenated_name, len);
       xsnprintf (concatenated_name, len, "%s::%s", base_name, name);
       sym = lookup_symbol_static (concatenated_name, block, VAR_DOMAIN);
+      if (sym != NULL)
+	break;
 
-      /* If there is currently no BLOCK, e.g., the inferior hasn't yet
-	 been started, then try searching all STATIC_BLOCK symbols in
-	 all objfiles.  */
-      if (block == NULL)
-	{
-	  sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
-	  if (sym != NULL)
-	    break;
-	}
+      /* Nope.  We now have to search all static blocks in all objfiles,
+	 even if block != NULL, because there's no guarantees as to which
+	 symtab the symbol we want is in.  */
+      sym = lookup_static_symbol_aux (concatenated_name, VAR_DOMAIN);
+      if (sym != NULL)
+	break;
 
       /* If this class has base classes, search them next.  */
-      if (TYPE_N_BASECLASSES (TYPE_BASECLASS (parent_type, i)) > 0)
+      CHECK_TYPEDEF (base_type);
+      if (TYPE_N_BASECLASSES (base_type) > 0)
 	{
-	  sym = find_symbol_in_baseclass (TYPE_BASECLASS (parent_type, i),
-					  name, block);
+	  sym = find_symbol_in_baseclass (base_type, name, block);
 	  if (sym != NULL)
 	    break;
 	}
@@ -794,8 +798,8 @@ cp_lookup_nested_symbol (struct type *parent_type,
 	if (sym != NULL)
 	  return sym;
 
-	/* Now search all static file-level symbols.  Not strictly
-	   correct, but more useful than an error.  We do not try to
+	/* Now search all static file-level symbols.  We have to do this
+	   for things like typedefs in the class.  We do not try to
 	   guess any imported namespace as even the fully specified
 	   namespace search is already not C++ compliant and more
 	   assumptions could make it too magic.  */

@@ -1,3 +1,15 @@
+2013-06-06  Doug Evans  <dje@google.com>
+
+	* gdb.cp/derivation.exp: Make tests have unique names.
+
+2013-06-05  Doug Evans  <dje@google.com>
+	    Keith Seitz  <keiths@redhat.com>
+
+	* gdb.cp/derivation2.cc: New file.
+	* gdb.cp/derivation.cc (main): Call foo2.
+	* gdb.cp/derivation.exp: Add tests for typedefs in another
+	file, and when there's an active block.
+
 2013-05-10  Pedro Alves  <palves@redhat.com>
 
 	PR remote/15455

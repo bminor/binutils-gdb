@@ -16,6 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
    */
 
+extern void foo2 (); /* from derivation2.cc */
+
 namespace N {
   typedef double value_type;
   struct Base { typedef int value_type; };
@@ -306,9 +308,7 @@ int main(void)
     N::Derived::value_type d = 1;
     N::value_type n = 3.0;
     dobj.doit ();
+    foo2 ();
     return 0;
     
 }
-
-    
-    

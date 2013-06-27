@@ -32,22 +32,25 @@ if { [skip_cplus_tests] } { continue }
 
 load_lib "cp-support.exp"
 
-standard_testfile .cc
+standard_testfile derivation.cc derivation2.cc
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+if {[prepare_for_testing $testfile.exp $testfile \
+	[list $srcfile $srcfile2] {debug c++}]} {
     return -1
 }
 
 # Check inheritance of typedefs.
-foreach klass {"A" "D" "E" "F"} {
-    gdb_test "ptype ${klass}::value_type" "type = int"
-    gdb_test "whatis ${klass}::value_type" "type = int"
-    gdb_test "p (${klass}::value_type) 0" " = 0"
-}
-foreach klass {"Z" "ZZ"} {
-    gdb_test "ptype ${klass}::value_type" "type = float"
-    gdb_test "whatis ${klass}::value_type" "type = float"
-    gdb_test "p (${klass}::value_type) 0" " = 0"
+with_test_prefix "before run" {
+    foreach klass {"A" "D" "E" "F" "A2" "D2"} {
+	gdb_test "ptype ${klass}::value_type" "type = int"
+	gdb_test "whatis ${klass}::value_type" "type = int"
+	gdb_test "p (${klass}::value_type) 0" " = 0"
+    }
+    foreach klass {"Z" "ZZ"} {
+	gdb_test "ptype ${klass}::value_type" "type = float"
+	gdb_test "whatis ${klass}::value_type" "type = float"
+	gdb_test "p (${klass}::value_type) 0" " = 0"
+    }
 }
 
 # Set it up at a breakpoint so we can play with the variable values.
@@ -55,6 +58,15 @@ foreach klass {"Z" "ZZ"} {
 if ![runto 'marker1'] then {
     perror "couldn't run to marker1"
     continue
+}
+
+# Check inheritance of typedefs again, but this time with an active block.
+with_test_prefix "at marker1" {
+    foreach klass {"A" "D" "A2" "D2"} {
+	gdb_test "ptype ${klass}::value_type" "type = int"
+	gdb_test "whatis ${klass}::value_type" "type = int"
+	gdb_test "p (${klass}::value_type) 0" " = 0"
+    }
 }
 
 gdb_test "up" ".*main.*" "up from marker1"
