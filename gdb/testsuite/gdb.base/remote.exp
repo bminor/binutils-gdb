@@ -20,9 +20,7 @@ if {! [is_remote target]} {
     return
 }
 
-set testfile "remote"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
 gdb_start
 

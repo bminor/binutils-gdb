@@ -1,5 +1,23 @@
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/nextoverexit.exp, gdb.base/nextoverexit.exp,
+	gdb.base/nodebug.exp, gdb.base/nofield.exp, gdb.base/nostdlib.exp,
+	gdb.base/opaque.exp, gdb.base/overlays.exp, gdb.base/pc-fp.exp,
+	gdb.base/pending.exp, gdb.base/permissions.exp,
+	gdb.base/pie-execl.exp, gdb.base/pointers.exp,
+	gdb.base/pr11022.exp, gdb.base/print-file-var.exp,
+	gdb.base/printcmds.exp, gdb.base/prologue.exp,
+	gdb.base/psymtab.exp, gdb.base/ptr-typedef.exp,
+	gdb.base/ptype.exp, gdb.base/randomize.exp,
+	gdb.base/readline-ask.exp, gdb.base/recpar.exp,
+	gdb.base/recurse.exp, gdb.base/relativedebug.exp,
+	gdb.base/relocate.exp, gdb.base/remote.exp, gdb.base/reread.exp,
+	gdb.base/return-nodebug.exp, gdb.base/return2.exp: Use
+	standard_testfile, standard_output_file, prepare_for_testing,
+	clean_restart.
+
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
 	* hook-stop-continue.exp, hook-stop-frame.exp, huge.exp,
 	included.exp, inferior-died.exp, infnan.exp, info-fun.exp,
 	info-macros.exp, info-os.exp, info-proc.exp, info-target.exp,

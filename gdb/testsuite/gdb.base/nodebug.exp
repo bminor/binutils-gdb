@@ -16,9 +16,7 @@
 # Test that things still (sort of) work when compiled without -g.
 
 
-set testfile nodebug
-set srcfile $srcdir/$subdir/$testfile.c
-set binfile $objdir/$subdir/$testfile
+standard_testfile .c
 
 if [get_compiler_info] {
     return -1
@@ -32,17 +30,14 @@ if [test_compiler_info "xlc-*"] {
     set exec_opts ""
 }
 
-if  { [gdb_compile $srcfile $binfile executable $exec_opts] != "" } {
+if  { [gdb_compile $srcdir/$subdir/$srcfile $binfile executable $exec_opts] != "" } {
     untested "Couldn't compile $srcfile."
     return -1
 }
 
 # Start with a fresh gdb.
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load $binfile
+clean_restart $binfile
 
 if [runto inner] then {
     

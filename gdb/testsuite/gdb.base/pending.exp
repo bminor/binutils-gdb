@@ -23,12 +23,10 @@ if {[skip_shlib_tests]} {
     return 0
 }
 
-set testfile "pending"
+standard_testfile .c
 set libfile "pendshr"
-set srcfile $testfile.c
 set libsrc  $srcdir/$subdir/$libfile.c
-set binfile $objdir/$subdir/$testfile
-set lib_sl  $objdir/$subdir/$libfile.sl
+set lib_sl  [standard_output_file $libfile.sl]
 
 set lib_opts  debug
 set exec_opts [list debug shlib=$lib_sl]

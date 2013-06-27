@@ -20,9 +20,8 @@
 
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
-set testfile "printcmds"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
+
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested printcmds.exp
      return -1

@@ -20,7 +20,7 @@ set prototypes 1
 set testfile1 "reread1"
 set srcfile1 ${testfile1}.c
 # Cygwin needs $EXEEXT.
-set binfile1 ${objdir}/${subdir}/${testfile1}$EXEEXT
+set binfile1 [standard_output_file ${testfile1}$EXEEXT]
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile1}" executable {debug nowarnings}] != "" } {
     untested reread.exp
@@ -31,7 +31,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile1}" executable {d
 
 set testfile2 "reread2"
 set srcfile2 ${testfile2}.c
-set binfile2 ${objdir}/${subdir}/${testfile2}$EXEEXT
+set binfile2 [standard_output_file ${testfile2}$EXEEXT]
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug nowarnings}] != ""
       && [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {debug nowarnings additional_flags=-DNO_SECTIONS}] != ""} {
@@ -42,7 +42,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${binfile2}" executable {d
 # Start with a fresh gdb.
 
 set testfile "reread"
-set binfile ${objdir}/${subdir}/${testfile}$EXEEXT
+set binfile [standard_output_file ${testfile}$EXEEXT]
 
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir

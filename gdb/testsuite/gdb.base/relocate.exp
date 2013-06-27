@@ -16,9 +16,8 @@
 # relocate.exp -- Expect script to test loading symbols from unrelocated
 #		  object files.
 
-set testfile relocate
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}.o
+standard_testfile .c
+append binfile .o
 
 remote_exec build "rm -f ${binfile}"
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object {debug}] != "" } {

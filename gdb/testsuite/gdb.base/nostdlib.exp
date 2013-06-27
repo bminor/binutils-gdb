@@ -13,10 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile "nostdlib"
-set srcfile ${testfile}.c
-set executable ${testfile}
-set binfile ${objdir}/${subdir}/${executable}
+standard_testfile .c
 
 # If we're using a stub, breakpoints at the entry point will not trigger.
 # See also the comment in break-entry.exp.
@@ -48,7 +45,7 @@ if {$err != ""} {
     return -1
 }
 
-clean_restart $executable
+clean_restart $binfile
 
 gdb_breakpoint "*marker"
 gdb_breakpoint "*_start"
