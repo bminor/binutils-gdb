@@ -16,29 +16,15 @@
 # This file was written by Fred Fish. (fnf@cygnus.com)
 
 
-set testfile "list"
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile list0.c list1.c
 
 # Need to download the header to the host.
 remote_download host ${srcdir}/${subdir}/list0.h list0.h
 
-
-if  { [gdb_compile "${srcdir}/${subdir}/list0.c" "${binfile}0.o" object {debug}] != "" } {
-     untested list.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile [list $srcfile $srcfile2] \
+	 {debug}]} {
+    return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/list1.c" "${binfile}1.o" object {debug}] != "" } {
-     untested list.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile}0.o ${binfile}1.o" ${binfile} executable {debug}] != "" } {
-     untested list.exp
-     return -1
-}
-
-
 
 # Create and source the file that provides information about the compiler
 # used to compile the test case.

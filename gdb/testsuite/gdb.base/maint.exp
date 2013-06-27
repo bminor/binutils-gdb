@@ -47,30 +47,13 @@
 
 
 
-set testfile "break"
-set srcfile ${testfile}.c
-set srcfile1 ${testfile}1.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile break.c break1.c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug nowarnings}] != "" } {
-     untested maint.exp
-     return -1
+if {[prepare_for_testing $testfile.exp $testfile \
+	 [list $srcfile $srcfile2] {debug nowarnings}]} {
+    untested $testfile.exp
+    return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug nowarnings}] != "" } {
-     untested maint.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested maint.exp
-     return -1
-}
-
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
 
 # The commands we test here produce many lines of output; disable "press
 # <return> to continue" prompts.
@@ -168,7 +151,7 @@ if [istarget "*-*-cygwin*"] {
 
 send_gdb "maint print statistics\n"
 gdb_expect  {
-    -re "Statistics for\[^\n\r\]*break\[^\n\r\]*:\r\n  Number of \"minimal\" symbols read: $decimal\r\n(  Number of \"partial\" symbols read: $decimal\r\n)?  Number of \"full\" symbols read: $decimal\r\n  Number of \"types\" defined: $decimal\r\n(  Number of psym tables \\(not yet expanded\\): $decimal\r\n)?(  Number of read CUs: $decimal\r\n  Number of unread CUs: $decimal\r\n)?  Number of symbol tables: $decimal\r\n  Number of symbol tables with line tables: $decimal\r\n  Number of symbol tables with blockvectors: $decimal\r\n  Total memory used for objfile obstack: $decimal\r\n  Total memory used for BFD obstack: $decimal\r\n  Total memory used for psymbol cache: $decimal\r\n  Total memory used for macro cache: $decimal\r\n  Total memory used for file name cache: $decimal\r\n" {
+    -re "Statistics for\[^\n\r\]*maint\[^\n\r\]*:\r\n  Number of \"minimal\" symbols read: $decimal\r\n(  Number of \"partial\" symbols read: $decimal\r\n)?  Number of \"full\" symbols read: $decimal\r\n  Number of \"types\" defined: $decimal\r\n(  Number of psym tables \\(not yet expanded\\): $decimal\r\n)?(  Number of read CUs: $decimal\r\n  Number of unread CUs: $decimal\r\n)?  Number of symbol tables: $decimal\r\n  Number of symbol tables with line tables: $decimal\r\n  Number of symbol tables with blockvectors: $decimal\r\n  Total memory used for objfile obstack: $decimal\r\n  Total memory used for BFD obstack: $decimal\r\n  Total memory used for psymbol cache: $decimal\r\n  Total memory used for macro cache: $decimal\r\n  Total memory used for file name cache: $decimal\r\n" {
 	gdb_expect {
 	    -re "$gdb_prompt $" {
 		pass "maint print statistics"
@@ -197,7 +180,7 @@ set keep_looking 1
 while {$keep_looking} {
     gdb_expect  {
 
-	-re ".*Object file.*break($EXEEXT)?:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n" { set header 1 }
+	-re ".*Object file.*maint($EXEEXT)?:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n" { set header 1 }
 	-re ".*Psymtabs:\[\r\t \]+\n" { set psymtabs 1 }
 	-re ".*Symtabs:\[\r\t \]+\n" { set symtabs 1 }
 
@@ -226,18 +209,19 @@ gdb_test "maint print psymbols" \
     "maint print psymbols w/o args"
 
 if { ! $have_gdb_index } {
-    send_gdb "maint print psymbols psymbols_output ${srcdir}/${subdir}/${srcfile}\n"
+    set psymbols_output [standard_output_file psymbols_output]
+    send_gdb "maint print psymbols $psymbols_output ${srcdir}/${subdir}/${srcfile}\n"
     gdb_expect  {
-	-re "^maint print psymbols psymbols_output \[^\n\]*\r\n$gdb_prompt $" {
-	    send_gdb "shell ls psymbols_output\n"
+	-re "^maint print psymbols $psymbols_output \[^\n\]*\r\n$gdb_prompt $" {
+	    send_gdb "shell ls $psymbols_output\n"
 	    gdb_expect {
-		-re "psymbols_output\r\n$gdb_prompt $" {
+		-re "$psymbols_output\r\n$gdb_prompt $" {
 		    # We want this grep to be as specific as possible,
 		    # so it's less likely to match symbol file names in
 		    # psymbols_output.  Yes, this actually happened;
 		    # poor expect got tons of output, and timed out
 		    # trying to match it.   --- Jim Blandy <jimb@cygnus.com>
-		    send_gdb "shell grep 'main.*function' psymbols_output\n"
+		    send_gdb "shell grep 'main.*function' $psymbols_output\n"
 		    gdb_expect {
 			-re ".main., function, $hex.*$gdb_prompt $" {
 			    pass "maint print psymbols 1"
@@ -248,7 +232,8 @@ if { ! $have_gdb_index } {
 			-re ".*$gdb_prompt $" { fail "maint print psymbols" }
 			timeout     { fail "(timeout) maint print psymbols" }
 		    }
-		    gdb_test "shell rm -f psymbols_output" ".*"
+		    gdb_test "shell rm -f $psymbols_output" ".*" \
+			"shell rm -f psymbols_output"
 		}
 		-re ".*$gdb_prompt $"       { fail "maint print psymbols" }
 		timeout           { fail "(timeout) maint print psymbols" }
@@ -264,13 +249,14 @@ gdb_test "maint print msymbols" \
     "maint print msymbols w/o args"
 
 
-send_gdb "maint print msymbols msymbols_output ${binfile}\n"
+set msymbols_output [standard_output_file msymbols_output]
+send_gdb "maint print msymbols $msymbols_output ${binfile}\n"
 gdb_expect  {
-    -re "^maint print msymbols msymbols_output \[^\n\]*\r\n$gdb_prompt $" {
-	send_gdb "shell ls msymbols_output\n"
+    -re "^maint print msymbols $msymbols_output \[^\n\]*\r\n$gdb_prompt $" {
+	send_gdb "shell ls $msymbols_output\n"
 	gdb_expect {
-	    -re "msymbols_output\r\n$gdb_prompt $" {
-		send_gdb "shell grep factorial msymbols_output\n"
+	    -re "$msymbols_output\r\n$gdb_prompt $" {
+		send_gdb "shell grep factorial $msymbols_output\n"
 		gdb_expect {
 		    -re "\\\[ *$decimal\\\] \[tT\]\[ \t\]+$hex \\.?factorial.*$gdb_prompt $" {
 			pass "maint print msymbols"
@@ -278,7 +264,8 @@ gdb_expect  {
 		    -re ".*$gdb_prompt $"     { fail "maint print msymbols" }
 		    timeout         { fail "(timeout) maint print msymbols" }
 		}
-		gdb_test "shell rm -f msymbols_output" ".*"
+		gdb_test "shell rm -f $msymbols_output" ".*" \
+		    "shell rm -f msymbols_output"
 	    }
 	    -re ".*$gdb_prompt $"     { fail "maint print msymbols" }
 	    timeout         { fail "(timeout) maint print msymbols" }
@@ -309,7 +296,8 @@ gdb_test_multiple "maint print msymbols msymbols_output2 ${subdir}/${testfile}" 
 		        fail "(timeout) maint print msymbols"
 		    }
 		}
-		gdb_test "shell rm -f msymbols_output2" ".*"
+		gdb_test "shell rm -f msymbols_output2" ".*" \
+		    "shell rm -f msymbols_output2"
 	    }
 	    -re ".*$gdb_prompt $" {
 		fail "maint print msymbols"
@@ -339,14 +327,15 @@ gdb_test "maint print symbols" \
 # dump the symbol information for the entire C library - over 500MB nowadays
 # for GNU libc.
 
-send_gdb "maint print symbols symbols_output ${srcdir}/${subdir}/${srcfile}\n"
+set symbols_output [standard_output_file symbols_output]
+send_gdb "maint print symbols $symbols_output ${srcdir}/${subdir}/${srcfile}\n"
 gdb_expect  {
-    -re "^maint print symbols symbols_output \[^\n\]*\r\n$gdb_prompt $" {
-	send_gdb "shell ls symbols_output\n"
+    -re "^maint print symbols $symbols_output \[^\n\]*\r\n$gdb_prompt $" {
+	send_gdb "shell ls $symbols_output\n"
 	gdb_expect {
-	    -re "symbols_output\r\n$gdb_prompt $" {
+	    -re "$symbols_output\r\n$gdb_prompt $" {
 		# See comments for `maint print psymbols'.
-		send_gdb "shell grep 'main(.*block' symbols_output\n"
+		send_gdb "shell grep 'main(.*block' $symbols_output\n"
 		gdb_expect {
 		    -re "int main\\(int, char \\*\\*, char \\*\\*\\); block.*$gdb_prompt $" {
 			pass "maint print symbols"
@@ -354,7 +343,8 @@ gdb_expect  {
 		    -re ".*$gdb_prompt $"     { fail "maint print symbols" }
 		    timeout         { fail "(timeout) maint print symbols" }
 		}
-		gdb_test "shell rm -f symbols_output" ".*"
+		gdb_test "shell rm -f $symbols_output" ".*" \
+		    "shell rm -f symbols_output"
 	    }
 	    -re ".*$gdb_prompt $"     { fail "maint print symbols" }
 	    timeout         { fail "(timeout) maint print symbols" }
@@ -401,18 +391,18 @@ set text_section ".text"
 set data_section ".data"
 
 gdb_test_multiple "maint info sections" "maint info sections" {
-    -re "Exec file:\r\n.*break($EXEEXT)?., file type.*ER_RO.*$gdb_prompt $" {
+    -re "Exec file:\r\n.*maint($EXEEXT)?., file type.*ER_RO.*$gdb_prompt $" {
 	# Looks like RealView which uses different section names.
 	set text_section ER_RO
 	set data_section ER_RW
 	pass "maint info sections"
     }
-    -re "Exec file:\r\n.*break($EXEEXT)?., file type.*neardata.*$gdb_prompt $" {
+    -re "Exec file:\r\n.*maint($EXEEXT)?., file type.*neardata.*$gdb_prompt $" {
 	# c6x doesn't have .data section.  It has .neardata and .fardata section.
 	set data_section ".neardata"
 	pass "maint info sections"
     }
-    -re "Exec file:\r\n.*break($EXEEXT)?., file type.*$gdb_prompt $" {
+    -re "Exec file:\r\n.*maint($EXEEXT)?., file type.*$gdb_prompt $" {
 	pass "maint info sections"
     }
 }

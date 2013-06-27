@@ -24,18 +24,16 @@ if [target_info exists gdb,noinferiorio] {
 }
 
 
-set testfile interrupt
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 set options { debug }
 if { ! [target_info exists gdb,nosignals] } {
     lappend options "additional_flags=-DSIGNALS"
 }
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $options] != "" } {
-     untested interrupt.exp
-     return -1
+if {[build_executable $testfile.exp $testfile $srcfile $options] == -1} {
+    untested $testfile.exp
+    return -1
 }
 
 gdb_start

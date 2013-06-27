@@ -14,8 +14,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-set testfile info-target
-if { [prepare_for_testing ${testfile}.exp $testfile start.c] } {
+standard_testfile start.c
+
+if { [prepare_for_testing ${testfile}.exp $testfile $srcfile] } {
     return -1
 }
 

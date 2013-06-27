@@ -15,9 +15,9 @@
 
 # interp.exp   Test interpreter-exec command
 
-set testfile "interp"
+standard_testfile
 
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${testfile}.c {debug}] } {
+if { [prepare_for_testing ${testfile}.exp ${testfile} $srcfile {debug}] } {
     return -1
 }
 

@@ -31,9 +31,7 @@ if { ![support_displaced_stepping] } {
     return -1
 }
 
-set testfile "inferior-died"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${testfile}.c] } {
     return -1

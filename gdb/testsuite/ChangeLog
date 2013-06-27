@@ -1,5 +1,18 @@
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
+	* hook-stop-continue.exp, hook-stop-frame.exp, huge.exp,
+	included.exp, inferior-died.exp, infnan.exp, info-fun.exp,
+	info-macros.exp, info-os.exp, info-proc.exp, info-target.exp,
+	infoline.exp, interp.exp, interrupt.exp, jit-simple.exp,
+	jit-so.exp, jump.exp, kill-after-signal.exp, label.exp, langs.exp,
+	lineinc.exp, list.exp, logical.exp, long_long.exp, longjmp.exp,
+	macscp.exp, maint.exp, memattr.exp, mips_pro.exp, miscexprs.exp,
+	morestack.exp, moribund-step.exp, multi-forks.exp: Use
+	standard_testfile, standard_output_file, prepare_for_testing,
+	clean_restart.
+
+2013-06-27  Tom Tromey  <tromey@redhat.com>
+
 	* ena-dis-br.exp, enum_cond.exp, enumval.exp, environ.exp,
 	eu-strip-infcall.exp, eval-skip.exp, exe-lock.exp,
 	expand-psymtabs.exp, exprs.exp, fileio.exp, find.exp,

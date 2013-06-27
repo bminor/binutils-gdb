@@ -21,8 +21,9 @@ if {$gcc_compiled == 0} {
     return -1
 }
 
-set testfile morestack
-if { [prepare_for_testing ${testfile}.exp ${testfile} ${testfile}.c {additional_flags=-fsplit-stack}] } {
+standard_testfile
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} $srcfile {additional_flags=-fsplit-stack}] } {
     return -1
 }
 

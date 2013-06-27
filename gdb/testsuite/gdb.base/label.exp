@@ -23,11 +23,9 @@ if [is_remote target] then {
 # test running programs
 #
 
-set testfile "label"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
-if { [prepare_for_testing ${testfile}.exp $testfile ${testfile}.c debug] } {
+if { [prepare_for_testing ${testfile}.exp $testfile ${srcfile} debug] } {
     untested label.exp
     return -1
 }

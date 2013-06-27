@@ -78,19 +78,14 @@
 # read the above debugging info.
 
 
-set testfile "lineinc"
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 
-
-if {[gdb_compile "${srcdir}/${subdir}/${testfile}.c" ${binfile} executable {debug}] != ""} {
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" ${binfile} executable {debug}] != ""} {
     untested lineinc.exp
     return -1
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 # Any command that causes GDB to read the debugging info for the
 # lineinc.c compilation unit will do here.

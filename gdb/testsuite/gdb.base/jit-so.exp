@@ -33,7 +33,7 @@ if {[get_compiler_info]} {
 
 set testfile jit-dlmain
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+set binfile [standard_output_file ${testfile}]
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug shlib_load}] != "" } {
     untested jit-so.exp
     return -1
@@ -41,7 +41,7 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 
 set testfile2 jit-main
 set srcfile2 ${testfile2}.c
-set binfile2 ${objdir}/${subdir}/${testfile2}.so
+set binfile2 [standard_output_file ${testfile2}.so]
 set binfile2_dlopen [shlib_target_file ${testfile2}.so]
 if { [gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" ${binfile2} {debug additional_flags="-DMAIN=jit_dl_main"}] != "" } {
     untested jit.exp
@@ -50,7 +50,7 @@ if { [gdb_compile_shlib "${srcdir}/${subdir}/${srcfile2}" ${binfile2} {debug add
 
 set solib_testfile "jit-solib"
 set solib_srcfile "${srcdir}/${subdir}/${solib_testfile}.c"
-set solib_binfile "${objdir}/${subdir}/${solib_testfile}.so"
+set solib_binfile [standard_output_file ${solib_testfile}.so]
 set solib_binfile_test_msg "SHLIBDIR/${solib_testfile}.so"
 
 # Note: compiling without debug info: the library goes through symbol

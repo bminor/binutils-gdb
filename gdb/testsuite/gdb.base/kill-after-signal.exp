@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile "kill-after-signal"
+standard_testfile .c
 
 if { ![can_single_step_to_signal_handler] } {
     untested ${testfile}.exp
