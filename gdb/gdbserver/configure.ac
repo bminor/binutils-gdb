@@ -471,6 +471,14 @@ if test x"$STDINT_H" != x; then
 fi
 AC_SUBST(GNULIB_STDINT_H)
 
+# For --version, we want to the print --host/--target exactly
+# as passed to configure.  But if those were not specified, then
+# print the canonical host/target.
+version_host=${host_alias:-$host}
+version_target=${target_alias:-$target}
+AC_SUBST(version_host)
+AC_SUBST(version_target)
+
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in
 xconfig.h:config.in)

@@ -20,6 +20,8 @@ exec_prefix = @exec_prefix@
 
 host_alias = @host_alias@
 target_alias = @target_alias@
+version_host = @version_host@
+version_target = @version_target@
 program_transform_name = @program_transform_name@
 bindir = @bindir@
 libdir = @libdir@
@@ -391,7 +393,7 @@ force:
 
 version.c: Makefile $(srcdir)/../common/version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
 	$(SHELL) $(srcdir)/../common/create-version.sh $(srcdir)/.. \
-	    $(host_alias) $(target_alias) version.c
+	    $(version_host) $(version_target) version.c
 
 xml-builtin.c: stamp-xml; @true
 stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)

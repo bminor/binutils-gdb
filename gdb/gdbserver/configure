@@ -589,6 +589,8 @@ ac_includes_default="\
 #endif"
 
 ac_subst_vars='LTLIBOBJS
+version_target
+version_host
 GNULIB_STDINT_H
 extra_libraries
 IPA_DEPFILES
@@ -5924,6 +5926,14 @@ GNULIB_STDINT_H=
 if test x"$STDINT_H" != x; then
   GNULIB_STDINT_H=$GNULIB/$STDINT_H
 fi
+
+
+# For --version, we want to the print --host/--target exactly
+# as passed to configure.  But if those were not specified, then
+# print the canonical host/target.
+version_host=${host_alias:-$host}
+version_target=${target_alias:-$target}
+
 
 
 ac_config_files="$ac_config_files Makefile"
