@@ -463,7 +463,12 @@ extern void mark_value_bytes_unavailable (struct value *value,
    value_available_contents_eq(val, 4, val, 12, 2) => 1
    value_available_contents_eq(val, 4, val, 12, 4) => 0
    value_available_contents_eq(val, 3, val, 4, 4) => 0
-*/
+
+   We only know whether a value chunk is available if we've tried to
+   read it.  As this routine is used by printing routines, which may
+   be printing values in the value history, long after the inferior is
+   gone, it works with const values.  Therefore, this routine must not
+   be called with lazy values.  */
 
 extern int value_available_contents_eq (const struct value *val1, int offset1,
 					const struct value *val2, int offset2,
