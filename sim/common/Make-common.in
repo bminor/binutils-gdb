@@ -300,7 +300,7 @@ stamp-tvals: gentmap
 	$(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
 	touch stamp-tvals
 
-version.c: Makefile $(srccom)/create-version.sh ../../bfd/version.h ../../gdb/common/version.in
+version.c: Makefile $(srccom)/create-version.sh ../../bfd/version.h ../../gdb/version.in
 	$(SHELL) $(srccom)/create-version.sh $(srccom) version.c
 
 #

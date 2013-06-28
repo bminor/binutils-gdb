@@ -1,3 +1,11 @@
+2013-06-28  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (version.c): Use version.in, not
+	common/version.in.
+	* common/create-version.sh: Likewise.
+	* common/version.in: Move...
+	* version.in: ...here.
+
 2013-06-28  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (set_observer_mode): Don't declare pagination_enabled

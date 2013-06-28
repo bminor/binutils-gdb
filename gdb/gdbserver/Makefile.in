@@ -391,7 +391,7 @@ am--refresh:
 
 force:
 
-version.c: Makefile $(srcdir)/../common/version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
+version.c: Makefile $(srcdir)/../version.in $(srcdir)/../../bfd/version.h $(srcdir)/../common/create-version.sh
 	$(SHELL) $(srcdir)/../common/create-version.sh $(srcdir)/.. \
 	    $(version_host) $(version_target) version.c
 

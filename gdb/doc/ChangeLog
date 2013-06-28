@@ -1,3 +1,10 @@
+2013-06-28  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (version.subst): Use version.in, not
+	common/version.in.
+	* gdbint.texinfo (Versions and Branches, Releasing GDB):
+	Likewise.
+
 2013-06-27  Pedro Alves  <palves@redhat.com>
 
 	* gdbint.texinfo (Algorithms) <Stepping over runtime loader

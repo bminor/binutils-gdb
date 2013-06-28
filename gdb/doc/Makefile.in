@@ -396,9 +396,9 @@ GDBvn.texi : version.subst
 	fi
 	mv GDBvn.new GDBvn.texi
 
-version.subst: $(gdbdir)/common/version.in $(gdbdir)/../bfd/version.h
+version.subst: $(gdbdir)/version.in $(gdbdir)/../bfd/version.h
 	date=`sed -n -e 's/^.* BFD_VERSION_DATE \(.*\)$$/\1/p' $(gdbdir)/../bfd/version.h`; \
-	sed -e "s/DATE/$$date/" < $(gdbdir)/common/version.in > version.subst
+	sed -e "s/DATE/$$date/" < $(gdbdir)/version.in > version.subst
 
 # Updated atomically
 .PRECIOUS: GDBvn.texi

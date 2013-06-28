@@ -1421,7 +1421,7 @@ $(srcdir)/copying.c: @MAINTAINER_MODE_TRUE@ $(srcdir)/../COPYING3 $(srcdir)/copy
 		< $(srcdir)/../COPYING3 > $(srcdir)/copying.tmp
 	mv $(srcdir)/copying.tmp $(srcdir)/copying.c
 
-version.c: Makefile common/version.in $(srcdir)/../bfd/version.h $(srcdir)/common/create-version.sh
+version.c: Makefile version.in $(srcdir)/../bfd/version.h $(srcdir)/common/create-version.sh
 	$(SHELL) $(srcdir)/common/create-version.sh $(srcdir) \
 	    $(host_alias) $(target_alias) version.c
 

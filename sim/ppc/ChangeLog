@@ -1,3 +1,8 @@
+2013-06-28  Tom Tromey  <tromey@redhat.com>
+
+	* Make-common.in (version.c): Use version.in, not
+	common/version.in.
+
 2013-06-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* Makefile.in (srccom): New variable.

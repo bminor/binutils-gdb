@@ -1,3 +1,8 @@
+2013-06-28  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (version.c): Use version.in, not
+	common/version.in.
+
 2013-06-28  Mircea Gherzan  <mircea.gherzan@intel.com>
 
 	* configure.ac (version_host, version_target): Set and AC_SUBST them.

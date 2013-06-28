@@ -34,7 +34,7 @@ fi
 
 rm -f version.c-tmp $output version.tmp
 date=`sed -n -e 's/^.* BFD_VERSION_DATE \(.*\)$/\1/p' $srcdir/../bfd/version.h`
-sed -e "s/DATE/$date/" < $srcdir/common/version.in > version.tmp
+sed -e "s/DATE/$date/" < $srcdir/version.in > version.tmp
 echo '#include "version.h"' >> version.c-tmp
 echo 'const char version[] = "'"`sed q version.tmp`"'";' >> version.c-tmp
 echo 'const char host_name[] = "'"$host_alias"'";' >> version.c-tmp
