@@ -1,5 +1,11 @@
 2013-06-28  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (set_observer_mode): Don't declare pagination_enabled
+	here.
+	* utils.h (pagination_enabled): Declare.
+
+2013-06-28  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (non_stop, non_stop_1, set_non_stop, show_non_stop):
 	Move higher up in file.
 

@@ -219,8 +219,6 @@ static void
 set_observer_mode (char *args, int from_tty,
 		   struct cmd_list_element *c)
 {
-  extern int pagination_enabled;
-
   if (target_has_execution)
     {
       observer_mode_1 = observer_mode;
