@@ -1,3 +1,11 @@
+2013-06-28  Pedro Alves  <palves@redhat.com>
+
+	PR tui/14880
+	* tui/tui-regs.c (tui_get_register): Fetch value contents before
+	checking if they're available.
+	* value.c (value_available_contents_eq): Change comment.
+	* value.h (value_available_contents_eq): Expand comment.
+
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
 	* target.c (find_run_target): Remove.
