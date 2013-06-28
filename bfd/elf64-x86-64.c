@@ -4332,6 +4332,11 @@ direct:
 	  relocation = elf_x86_64_tpoff (info, relocation);
 	  break;
 
+	case R_X86_64_DTPOFF64:
+	  BFD_ASSERT ((input_section->flags & SEC_CODE) == 0);
+	  relocation -= elf_x86_64_dtpoff_base (info);
+	  break;
+
 	default:
 	  break;
 	}
