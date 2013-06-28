@@ -1,3 +1,8 @@
+2013-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* rx.c (SHIFT_OP): A shift by zero still sets the condition
+	codes.
+
 2013-06-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* aclocal.m4, configure: Regenerate.

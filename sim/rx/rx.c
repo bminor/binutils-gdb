@@ -732,8 +732,7 @@ poppc()
       c = val & carry_mask; \
       val OP 1; \
     } \
-  if (count) \
-    set_oszc (val, 4, c); \
+  set_oszc (val, 4, c); \
   PD (val); \
 }
 
