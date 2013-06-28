@@ -1,3 +1,9 @@
+2013-06-28  Tom Tromey  <tromey@redhat.com>
+
+	* tracepoint.c (deprecated_readline_begin_hook)
+	(deprecated_readline_hook, deprecated_readline_end_hook): Don't
+	declare.
+
 2013-06-28  Pedro Alves  <palves@redhat.com>
 
 	PR tui/14880
