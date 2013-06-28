@@ -181,11 +181,36 @@ set_disable_randomization (char *args, int from_tty,
 	     "this platform."));
 }
 
+/* User interface for non-stop mode.  */
+
+int non_stop = 0;
+static int non_stop_1 = 0;
+
+static void
+set_non_stop (char *args, int from_tty,
+	      struct cmd_list_element *c)
+{
+  if (target_has_execution)
+    {
+      non_stop_1 = non_stop;
+      error (_("Cannot change this setting while the inferior is running."));
+    }
+
+  non_stop = non_stop_1;
+}
+
+static void
+show_non_stop (struct ui_file *file, int from_tty,
+	       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Controlling the inferior in non-stop mode is %s.\n"),
+		    value);
+}
+
 /* "Observer mode" is somewhat like a more extreme version of
    non-stop, in which all GDB operations that might affect the
    target's execution have been disabled.  */
-
-static int non_stop_1 = 0;
 
 int observer_mode = 0;
 static int observer_mode_1 = 0;
@@ -7083,32 +7108,6 @@ show_exec_direction_func (struct ui_file *out, int from_tty,
 		    _("bogus execution_direction value: %d"),
 		    (int) execution_direction);
   }
-}
-
-/* User interface for non-stop mode.  */
-
-int non_stop = 0;
-
-static void
-set_non_stop (char *args, int from_tty,
-	      struct cmd_list_element *c)
-{
-  if (target_has_execution)
-    {
-      non_stop_1 = non_stop;
-      error (_("Cannot change this setting while the inferior is running."));
-    }
-
-  non_stop = non_stop_1;
-}
-
-static void
-show_non_stop (struct ui_file *file, int from_tty,
-	       struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file,
-		    _("Controlling the inferior in non-stop mode is %s.\n"),
-		    value);
 }
 
 static void
