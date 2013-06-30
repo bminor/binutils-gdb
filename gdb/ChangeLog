@@ -1,3 +1,9 @@
+2013-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* remote.c (async_remote_interrupt_twice): Make it static.
+	* remote.h (async_remote_interrupt_twice): Remove the declaration.
+
 2013-06-29  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* ia64-linux-tdep.c: Include <ctype.h>.

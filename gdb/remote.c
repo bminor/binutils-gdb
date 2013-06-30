@@ -97,7 +97,7 @@ static int getpkt_or_notif_sane (char **buf, long *sizeof_buf,
 static void handle_remote_sigint (int);
 static void handle_remote_sigint_twice (int);
 static void async_remote_interrupt (gdb_client_data);
-void async_remote_interrupt_twice (gdb_client_data);
+static void async_remote_interrupt_twice (gdb_client_data);
 
 static void remote_files_info (struct target_ops *ignore);
 
@@ -5022,7 +5022,7 @@ async_remote_interrupt (gdb_client_data arg)
 
 /* Perform interrupt, if the first attempt did not succeed.  Just give
    up on the target alltogether.  */
-void
+static void
 async_remote_interrupt_twice (gdb_client_data arg)
 {
   if (remote_debug)

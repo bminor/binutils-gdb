@@ -45,8 +45,6 @@ extern int bin2hex (const gdb_byte *bin, char *hex, int count);
 
 extern char *unpack_varlen_hex (char *buff, ULONGEST *result);
 
-extern void async_remote_interrupt_twice (void *arg);
-
 void register_remote_g_packet_guess (struct gdbarch *gdbarch, int bytes,
 				     const struct target_desc *tdesc);
 void register_remote_support_xml (const char *);
