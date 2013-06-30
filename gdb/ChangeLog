@@ -1,3 +1,9 @@
+2013-06-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* ia64-linux-tdep.c: Include <ctype.h>.
+	(ia64_linux_stap_is_single_operand): New function.
+	(ia64_linux_init_abi): Initialize SystemTap related attributes.
+
 2013-06-28  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (version.c): Use version.in, not
