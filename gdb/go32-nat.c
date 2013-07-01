@@ -1028,9 +1028,6 @@ init_go32_ops (void)
 
   /* We are always processing GCC-compiled programs.  */
   processing_gcc_compilation = 2;
-
-  /* Override the default name of the GDB init file.  */
-  strcpy (gdbinit, "gdb.ini");
 }
 
 /* Return the current DOS codepage number.  */

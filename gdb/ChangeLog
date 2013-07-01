@@ -1,5 +1,16 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	* configure.ac (GDBINIT): Define, depending on host.
+	* go32-nat.c (init_go32_ops): Don't override gdbinit here.
+	* top.c (PATH_MAX): Delete fallback definition.
+	(GDBINIT_FILENAME): Delete.
+	(gdbinit): Reimplement as const char array set to the GDBINIT
+	string constant.
+	* top.h (gdbinit): Make const.
+	* configure, config.in: Regenerate.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-cmds.c (source_script): Make 'file' parameter const.
 	* cli/cli-cmds.h (source_script): Likewise.
 	* exceptions.c (catch_command_errors_const): New function.

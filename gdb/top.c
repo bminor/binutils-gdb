@@ -78,20 +78,9 @@ extern void initialize_all_files (void);
 #define DEFAULT_PROMPT	"(gdb) "
 #endif
 
-/* Initialization file name for gdb.  This is overridden in some configs.  */
+/* Initialization file name for gdb.  This is host-dependent.  */
 
-#ifndef PATH_MAX
-# ifdef FILENAME_MAX
-#  define PATH_MAX FILENAME_MAX
-# else
-#  define PATH_MAX 512
-# endif
-#endif
-
-#ifndef	GDBINIT_FILENAME
-#define	GDBINIT_FILENAME	".gdbinit"
-#endif
-char gdbinit[PATH_MAX + 1] = GDBINIT_FILENAME;
+const char gdbinit[] = GDBINIT;
 
 int inhibit_gdbinit = 0;
 

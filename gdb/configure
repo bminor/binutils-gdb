@@ -12329,6 +12329,20 @@ $as_echo "#define HAVE_PERSONALITY 1" >>confdefs.h
 
 fi
 
+case $host_os in
+  go32* | *djgpp*)
+    gdbinit=gdb.ini
+    ;;
+  *)
+    gdbinit=.gdbinit
+    ;;
+esac
+
+cat >>confdefs.h <<_ACEOF
+#define GDBINIT "$gdbinit"
+_ACEOF
+
+
 
 # Support for --with-sysroot is a copy of GDB_AC_WITH_DIR,
 # except that the argument to --with-sysroot is optional.

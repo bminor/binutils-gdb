@@ -37,6 +37,9 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* The .gdbinit filename. */
+#undef GDBINIT
+
 /* look for global separate data files in this path [DATADIR/gdb] */
 #undef GDB_DATADIR
 

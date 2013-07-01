@@ -1881,6 +1881,17 @@ then
 	      [Define if you support the personality syscall.])
 fi
 
+dnl Set the host's .gdbinit filename.
+case $host_os in
+  go32* | *djgpp*)
+    gdbinit=gdb.ini
+    ;;
+  *)
+    gdbinit=.gdbinit
+    ;;
+esac
+AC_DEFINE_UNQUOTED(GDBINIT,"$gdbinit",[The .gdbinit filename.])
+
 dnl Handle optional features that can be enabled.
 
 # Support for --with-sysroot is a copy of GDB_AC_WITH_DIR,
