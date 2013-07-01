@@ -1,5 +1,11 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	* hostio.c (HOSTIO_PATH_MAX): Define.
+	(require_filename, handle_open, handle_unlink, handle_readlink):
+	Use it.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	* server.h: Include "pathmax.h".
 	* linux-low.c: Don't include sys/param.h.
 	(linux_pid_exe_is_elf_64_file): Use PATH_MAX instead of
