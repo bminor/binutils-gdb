@@ -1,5 +1,13 @@
 2013-07-01  Tom Tromey  <tromey@redhat.com>
 
+	* configure.ac (build_warnings): Add -Wold-style-definition.
+	* configure: Rebuild.
+	* machoread.c (_initialize_machoread): Use "(void)".
+	* macrocmd.c (macro_inform_no_debuginfo): Fix formatting;
+	use "(void)".
+
+2013-07-01  Tom Tromey  <tromey@redhat.com>
+
 	* configure.ac (build_warnings): Add -Wold-style-declaration.
 	* configure: Rebuild.
 	* dsrec.c (make_srec): Use "static const", not "const static".

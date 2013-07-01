@@ -1037,7 +1037,7 @@ static const struct sym_fns macho_sym_fns = {
 extern initialize_file_ftype _initialize_machoread;
 
 void
-_initialize_machoread ()
+_initialize_machoread (void)
 {
   add_symtab_fns (&macho_sym_fns);
 
