@@ -39,7 +39,6 @@
 #include "inf-child.h"
 #include "inf-ptrace.h"
 #include "auxv.h"
-#include <sys/param.h>		/* for MAXPATHLEN */
 #include <sys/procfs.h>		/* for elf_gregset etc.  */
 #include "elf-bfd.h"		/* for elfcore_write_* */
 #include "gregset.h"		/* for gregset */
@@ -4306,14 +4305,14 @@ linux_child_pid_to_exec_file (int pid)
 {
   char *name1, *name2;
 
-  name1 = xmalloc (MAXPATHLEN);
-  name2 = xmalloc (MAXPATHLEN);
+  name1 = xmalloc (PATH_MAX);
+  name2 = xmalloc (PATH_MAX);
   make_cleanup (xfree, name1);
   make_cleanup (xfree, name2);
-  memset (name2, 0, MAXPATHLEN);
+  memset (name2, 0, PATH_MAX);
 
   sprintf (name1, "/proc/%d/exe", pid);
-  if (readlink (name1, name2, MAXPATHLEN - 1) > 0)
+  if (readlink (name1, name2, PATH_MAX - 1) > 0)
     return name2;
   else
     return name1;
@@ -4562,7 +4561,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending,
 			    sigset_t *blocked, sigset_t *ignored)
 {
   FILE *procfile;
-  char buffer[MAXPATHLEN], fname[MAXPATHLEN];
+  char buffer[PATH_MAX], fname[PATH_MAX];
   struct cleanup *cleanup;
 
   sigemptyset (pending);
@@ -4574,7 +4573,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending,
     error (_("Could not open %s"), fname);
   cleanup = make_cleanup_fclose (procfile);
 
-  while (fgets (buffer, MAXPATHLEN, procfile) != NULL)
+  while (fgets (buffer, PATH_MAX, procfile) != NULL)
     {
       /* Normal queued signals are on the SigPnd line in the status
 	 file.  However, 2.6 kernels also have a "shared" pending

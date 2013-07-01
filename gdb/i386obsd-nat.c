@@ -22,7 +22,6 @@
 #include "regcache.h"
 #include "target.h"
 
-#include <sys/param.h>
 #include <sys/sysctl.h>
 #include <machine/frame.h>
 #include <machine/pcb.h>

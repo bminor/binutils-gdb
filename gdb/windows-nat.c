@@ -54,7 +54,6 @@
 #include "gdb_string.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
-#include <sys/param.h>
 #include <unistd.h>
 #include "exec.h"
 #include "solist.h"

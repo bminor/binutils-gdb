@@ -41,7 +41,6 @@
 #include <sys/ptrace.h>
 #include <sys/reg.h>
 
-#include <sys/param.h>
 #include <sys/dir.h>
 #include <sys/user.h>
 #include <signal.h>

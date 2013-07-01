@@ -189,7 +189,7 @@ ia64_hpux_handle_load_event (struct regcache *regcache)
   CORE_ADDR module_desc_addr;
   ULONGEST module_desc_size;
   CORE_ADDR so_path_addr;
-  char so_path[MAXPATHLEN];
+  char so_path[PATH_MAX];
   struct load_module_desc module_desc;
   struct so_list *new_so;
 
@@ -210,7 +210,7 @@ ia64_hpux_handle_load_event (struct regcache *regcache)
              sizeof (struct load_module_desc),
 	     pulongest (module_desc_size));
 
-  read_memory_string (so_path_addr, so_path, MAXPATHLEN);
+  read_memory_string (so_path_addr, so_path, PATH_MAX);
   read_memory (module_desc_addr, (gdb_byte *) &module_desc,
 	       sizeof (module_desc));
 

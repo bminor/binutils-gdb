@@ -31,7 +31,6 @@
 
 #include <stdint.h>
 #include <sys/types.h>
-#include <sys/param.h>
 #include <signal.h>
 #include <sys/user.h>
 #include <sys/ioctl.h>

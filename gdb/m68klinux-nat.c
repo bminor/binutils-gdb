@@ -29,7 +29,6 @@
 
 #include "m68k-tdep.h"
 
-#include <sys/param.h>
 #include <sys/dir.h>
 #include <signal.h>
 #include <sys/ptrace.h>

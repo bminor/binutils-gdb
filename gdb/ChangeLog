@@ -1,5 +1,38 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	* defs.h: Include "pathmax.h".
+	* utils.c: Don't include sys/param.h.
+	(gdb_realpath): Remove code that checks for MAXPATHLEN.
+	* solib-ia64-hpux.c (ia64_hpux_handle_load_event): Use PATH_MAX
+	instead of MAXPATHLEN.
+	* solib-sunos.c: Don't include sys/param.h.
+	* xcoffread.c: Don't include sys/param.h.
+	* bsd-kvm.c: Don't include sys/param.h.
+	* darwin-nat.c: Don't include sys/param.h.
+	(darwin_pid_to_exec_file): Use PATH_MAX instead of MAXPATHLEN.
+	* darwin-nat-info.c: Don't include sys/param.h.
+	* fbsd-nat.c (fbsd_pid_to_exec_file): Use PATH_MAX instead of
+	MAXPATHLEN.
+	* i386obsd-nat.c: Don't include sys/param.h.
+	* inf-child.c: Don't include sys/param.h.
+	(inf_child_fileio_readlink): Use PATH_MAX instead of MAXPATHLEN.
+	* linux-fork.c: Don't include sys/param.h.
+	(fork_save_infrun_state): Use PATH_MAX instead of MAXPATHLEN.
+	* linux-nat.c: Don't include sys/param.h.
+	(linux_child_pid_to_exec_file, linux_proc_pending_signals)
+	(linux_proc_pending_signals): Use PATH_MAX instead of MAXPATHLEN.
+	* m68klinux-nat.c: Don't include sys/param.h.
+	* nbsd-nat.c: Don't include sys/param.h.
+	(nbsd_pid_to_exec_file): Use PATH_MAX instead of MAXPATHLEN.
+	* ppc-linux-nat.c: Don't include sys/param.h.
+	* rs6000-nat.c: Don't include sys/param.h.
+	* spu-linux-nat.c. Don't include sys/param.h.
+	* windows-nat.c: Don't include sys/param.h.
+	* xtensa-linux-nat.c: Don't include sys/param.h.
+	* config/i386/nm-fbsd.h: Don't include sys/param.h.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add pathmax.
 	* gnulib/Makefile.in (aclocal_m4_deps): Add import/m4/pathmax.m4.
 	* gnulib/aclocal.m4: Regenerate.

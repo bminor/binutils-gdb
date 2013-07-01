@@ -32,7 +32,6 @@
 #include <imagehlp.h>
 #include <tlhelp32.h>
 #include <psapi.h>
-#include <sys/param.h>
 #include <process.h>
 
 #ifndef USE_WIN32API
@@ -515,7 +514,7 @@ static int
 win32_create_inferior (char *program, char **program_args)
 {
 #ifndef USE_WIN32API
-  char real_path[MAXPATHLEN];
+  char real_path[PATH_MAX];
   char *orig_path, *new_path, *path_ptr;
 #endif
   BOOL ret;
@@ -546,8 +545,7 @@ win32_create_inferior (char *program, char **program_args)
       cygwin_conv_path_list (CCP_POSIX_TO_WIN_A, path_ptr, new_path, size);
       setenv ("PATH", new_path, 1);
      }
-  cygwin_conv_path (CCP_POSIX_TO_WIN_A, program, real_path,
-		    MAXPATHLEN);
+  cygwin_conv_path (CCP_POSIX_TO_WIN_A, program, real_path, PATH_MAX);
   program = real_path;
 #endif
 

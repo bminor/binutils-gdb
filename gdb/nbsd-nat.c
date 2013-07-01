@@ -19,8 +19,6 @@
 
 #include "defs.h"
 
-#include <sys/param.h>
-
 #include "nbsd-nat.h"
 
 /* Return the name of a file that can be opened to get the symbols for
@@ -29,12 +27,12 @@
 char *
 nbsd_pid_to_exec_file (int pid)
 {
-  size_t len = MAXPATHLEN;
+  size_t len = PATH_MAX;
   char *buf = xcalloc (len, sizeof (char));
   char *path;
 
   path = xstrprintf ("/proc/%d/exe", pid);
-  if (readlink (path, buf, MAXPATHLEN - 1) == -1)
+  if (readlink (path, buf, PATH_MAX - 1) == -1)
     {
       xfree (buf);
       buf = NULL;

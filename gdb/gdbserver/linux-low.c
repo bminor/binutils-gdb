@@ -23,7 +23,6 @@
 
 #include "gdb_wait.h"
 #include <stdio.h>
-#include <sys/param.h>
 #include <sys/ptrace.h>
 #include "linux-ptrace.h"
 #include "linux-procfs.h"
@@ -342,7 +341,7 @@ elf_64_file_p (const char *file, unsigned int *machine)
 int
 linux_pid_exe_is_elf_64_file (int pid, unsigned int *machine)
 {
-  char file[MAXPATHLEN];
+  char file[PATH_MAX];
 
   sprintf (file, "/proc/%d/exe", pid);
   return elf_64_file_p (file, machine);

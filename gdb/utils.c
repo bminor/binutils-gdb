@@ -66,8 +66,6 @@
 
 #include "inferior.h"		/* for signed_pointer_to_address */
 
-#include <sys/param.h>		/* For MAXPATHLEN */
-
 #include "gdb_curses.h"
 
 #include "readline/readline.h"
@@ -3130,22 +3128,14 @@ gdb_realpath (const char *filename)
      path.  Use that and realpath() to canonicalize the name.  This is
      the most common case.  Note that, if there isn't a compile time
      upper bound, you want to avoid realpath() at all costs.  */
-#if defined(HAVE_REALPATH)
+#if defined (HAVE_REALPATH) && defined (PATH_MAX)
   {
-# if defined (PATH_MAX)
     char buf[PATH_MAX];
-#  define USE_REALPATH
-# elif defined (MAXPATHLEN)
-    char buf[MAXPATHLEN];
-#  define USE_REALPATH
-# endif
-# if defined (USE_REALPATH)
     const char *rp = realpath (filename, buf);
 
     if (rp == NULL)
       rp = filename;
     return xstrdup (rp);
-# endif
   }
 #endif /* HAVE_REALPATH */
 

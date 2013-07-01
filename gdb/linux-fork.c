@@ -33,7 +33,6 @@
 
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
-#include <sys/param.h>
 #include "gdb_dirent.h"
 #include <ctype.h>
 
@@ -269,7 +268,7 @@ fork_load_infrun_state (struct fork_info *fp)
 static void
 fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
 {
-  char path[MAXPATHLEN];
+  char path[PATH_MAX];
   struct dirent *de;
   DIR *d;
 
@@ -283,7 +282,7 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
     {
       /* Now save the 'state' (file position) of all open file descriptors.
 	 Unfortunately fork does not take care of that for us...  */
-      snprintf (path, MAXPATHLEN, "/proc/%ld/fd", (long) PIDGET (fp->ptid));
+      snprintf (path, PATH_MAX, "/proc/%ld/fd", (long) PIDGET (fp->ptid));
       if ((d = opendir (path)) != NULL)
 	{
 	  long tmp;

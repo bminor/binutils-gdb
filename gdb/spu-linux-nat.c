@@ -34,7 +34,6 @@
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
 #include <sys/types.h>
-#include <sys/param.h>
 
 #include "spu-tdep.h"
 

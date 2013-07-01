@@ -48,7 +48,6 @@
 #include <signal.h>
 #include <string.h>
 #include <ctype.h>
-#include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/proc.h>
 #include <libproc.h>
@@ -2002,10 +2001,10 @@ darwin_pid_to_exec_file (int pid)
   char *path;
   int res;
 
-  path = xmalloc (MAXPATHLEN);
+  path = xmalloc (PATH_MAX);
   make_cleanup (xfree, path);
 
-  res = proc_pidinfo (pid, PROC_PIDPATHINFO, 0, path, MAXPATHLEN);
+  res = proc_pidinfo (pid, PROC_PIDPATHINFO, 0, path, PATH_MAX);
   if (res >= 0)
     return path;
   else

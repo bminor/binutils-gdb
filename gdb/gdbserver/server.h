@@ -38,6 +38,9 @@
 #endif
 #include <setjmp.h>
 
+/* For gnulib's PATH_MAX.  */
+#include "pathmax.h"
+
 #ifdef HAVE_STRING_H
 #include <string.h>
 #endif

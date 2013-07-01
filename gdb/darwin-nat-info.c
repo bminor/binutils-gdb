@@ -35,7 +35,6 @@
 #include "gdbcmd.h"
 #include "inferior.h"
 
-#include <sys/param.h>
 #include <sys/sysctl.h>
 
 #include "darwin-nat.h"

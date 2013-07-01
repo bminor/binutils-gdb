@@ -22,7 +22,6 @@
 #include <sys/types.h>
 #include <signal.h>
 #include "gdb_string.h"
-#include <sys/param.h>
 #include <fcntl.h>
 
 /* SunOS shared libs need the nlist structure.  */

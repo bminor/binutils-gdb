@@ -53,6 +53,10 @@
 #endif
 
 #include <unistd.h>
+
+/* For gnulib's PATH_MAX.  */
+#include "pathmax.h"
+
 #include <fcntl.h>
 
 /* First include ansidecl.h so we can use the various macro definitions
