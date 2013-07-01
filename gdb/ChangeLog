@@ -1,5 +1,10 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	* utils.c <pathconf/_PC_PATH_MAX use>: Check if _PC_PATH_MAX is
+	defined instead of checking HAVE_UNISTD_H.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	Reimport gnulib from scratch.
 	* gnulib/Makefile.in (aclocal_m4_deps): Remove reference to
 	import/m4/onceonly.m4.

@@ -3179,7 +3179,7 @@ gdb_realpath (const char *filename)
      pathconf()) making it impossible to pass a correctly sized buffer
      to realpath() (it could always overflow).  On those systems, we
      skip this.  */
-#if defined (HAVE_REALPATH) && defined (HAVE_UNISTD_H) && defined(HAVE_ALLOCA)
+#if defined (HAVE_REALPATH) && defined (_PC_PATH_MAX) && defined(HAVE_ALLOCA)
   {
     /* Find out the max path size.  */
     long path_max = pathconf ("/", _PC_PATH_MAX);
