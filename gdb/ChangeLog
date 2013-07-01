@@ -1,3 +1,8 @@
+2013-07-01  Tom Tromey  <tromey@redhat.com>
+
+	* configure.ac (build_warnings): Add -Wmissing-parameter-type.
+	* configure: Rebuild.
+
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
 	* defs.h: Include "pathmax.h".
