@@ -1,5 +1,11 @@
 2013-07-01  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (dwarf2_get_dwz_file): Return NULL if
+	.gnu_debugaltlink not found.  Use bfd_get_alt_debug_link_info.
+	(dwarf2_read_index, create_all_comp_units): Update.
+
+2013-07-01  Tom Tromey  <tromey@redhat.com>
+
 	* configure.ac (build_warnings): Add -Wold-style-definition.
 	* configure: Rebuild.
 	* machoread.c (_initialize_machoread): Use "(void)".

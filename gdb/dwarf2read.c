@@ -2099,29 +2099,33 @@ locate_dwz_sections (bfd *abfd, asection *sectp, void *arg)
     }
 }
 
-/* Open the separate '.dwz' debug file, if needed.  Error if the file
-   cannot be found.  */
+/* Open the separate '.dwz' debug file, if needed.  Return NULL if
+   there is no .gnu_debugaltlink section in the file.  Error if there
+   is such a section but the file cannot be found.  */
 
 static struct dwz_file *
 dwarf2_get_dwz_file (void)
 {
-  bfd *abfd, *dwz_bfd;
-  asection *section;
-  gdb_byte *data;
+  bfd *dwz_bfd;
+  char *data;
   struct cleanup *cleanup;
   const char *filename;
   struct dwz_file *result;
+  unsigned long buildid;
 
   if (dwarf2_per_objfile->dwz_file != NULL)
     return dwarf2_per_objfile->dwz_file;
 
-  abfd = dwarf2_per_objfile->objfile->obfd;
-  section = bfd_get_section_by_name (abfd, ".gnu_debugaltlink");
-  if (section == NULL)
-    error (_("could not find '.gnu_debugaltlink' section"));
-  if (!bfd_malloc_and_get_section (abfd, section, &data))
-    error (_("could not read '.gnu_debugaltlink' section: %s"),
-	   bfd_errmsg (bfd_get_error ()));
+  bfd_set_error (bfd_error_no_error);
+  data = bfd_get_alt_debug_link_info (dwarf2_per_objfile->objfile->obfd,
+				      &buildid);
+  if (data == NULL)
+    {
+      if (bfd_get_error () == bfd_error_no_error)
+	return NULL;
+      error (_("could not read '.gnu_debugaltlink' section: %s"),
+	     bfd_errmsg (bfd_get_error ()));
+    }
   cleanup = make_cleanup (xfree, data);
 
   filename = (const char *) data;
@@ -2799,6 +2803,7 @@ dwarf2_read_index (struct objfile *objfile)
   struct mapped_index local_map, *map;
   const gdb_byte *cu_list, *types_list, *dwz_list = NULL;
   offset_type cu_list_elements, types_list_elements, dwz_list_elements = 0;
+  struct dwz_file *dwz;
 
   if (!read_index_from_section (objfile, objfile->name,
 				use_deprecated_index_sections,
@@ -2813,9 +2818,9 @@ dwarf2_read_index (struct objfile *objfile)
 
   /* If there is a .dwz file, read it so we can get its CU list as
      well.  */
-  if (bfd_get_section_by_name (objfile->obfd, ".gnu_debugaltlink") != NULL)
+  dwz = dwarf2_get_dwz_file ();
+  if (dwz != NULL)
     {
-      struct dwz_file *dwz = dwarf2_get_dwz_file ();
       struct mapped_index dwz_map;
       const gdb_byte *dwz_types_ignore;
       offset_type dwz_types_elements_ignore;
@@ -6121,6 +6126,7 @@ create_all_comp_units (struct objfile *objfile)
   int n_allocated;
   int n_comp_units;
   struct dwarf2_per_cu_data **all_comp_units;
+  struct dwz_file *dwz;
 
   n_comp_units = 0;
   n_allocated = 10;
@@ -6130,14 +6136,11 @@ create_all_comp_units (struct objfile *objfile)
   read_comp_units_from_section (objfile, &dwarf2_per_objfile->info, 0,
 				&n_allocated, &n_comp_units, &all_comp_units);
 
-  if (bfd_get_section_by_name (objfile->obfd, ".gnu_debugaltlink") != NULL)
-    {
-      struct dwz_file *dwz = dwarf2_get_dwz_file ();
-
-      read_comp_units_from_section (objfile, &dwz->info, 1,
-				    &n_allocated, &n_comp_units,
-				    &all_comp_units);
-    }
+  dwz = dwarf2_get_dwz_file ();
+  if (dwz != NULL)
+    read_comp_units_from_section (objfile, &dwz->info, 1,
+				  &n_allocated, &n_comp_units,
+				  &all_comp_units);
 
   dwarf2_per_objfile->all_comp_units
     = obstack_alloc (&objfile->objfile_obstack,
