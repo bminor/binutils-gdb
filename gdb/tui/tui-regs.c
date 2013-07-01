@@ -661,8 +661,6 @@ _initialize_tui_regs (void)
 ** STATIC LOCAL FUNCTIONS                 **
 ******************************************/
 
-extern int pagination_enabled;
-
 static void
 tui_restore_gdbout (void *ui)
 {

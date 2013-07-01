@@ -1,3 +1,7 @@
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
+	* tui/tui-regs.c (pagination_enabled): Delete declaration.
+
 2013-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
