@@ -226,10 +226,10 @@ make_srec (char *srec, CORE_ADDR targ_addr, bfd *abfd, asection *sect,
 {
   unsigned char checksum;
   int tmp;
-  const static char hextab[] = "0123456789ABCDEF";
-  const static char data_code_table[] = "123";
-  const static char term_code_table[] = "987";
-  const static char header_code_table[] = "000";
+  static const char hextab[] = "0123456789ABCDEF";
+  static const char data_code_table[] = "123";
+  static const char term_code_table[] = "987";
+  static const char header_code_table[] = "000";
   char const *code_table;
   int addr_size;
   int payload_size;

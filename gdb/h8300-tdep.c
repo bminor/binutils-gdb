@@ -1192,7 +1192,7 @@ h8300s_dbg_reg_to_regnum (struct gdbarch *gdbarch, int regno)
   return regno;
 }
 
-const static unsigned char *
+static const unsigned char *
 h8300_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 			  int *lenptr)
 {

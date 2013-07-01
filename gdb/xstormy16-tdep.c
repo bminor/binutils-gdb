@@ -505,7 +505,7 @@ xstormy16_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   return 0;
 }
 
-const static unsigned char *
+static const unsigned char *
 xstormy16_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
 			      int *lenptr)
 {

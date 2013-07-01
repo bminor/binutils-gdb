@@ -326,7 +326,7 @@ mn10300_write_pc (struct regcache *regcache, CORE_ADDR val)
    so we need a single byte breakpoint.  Matsushita hasn't defined
    one, so we defined it ourselves.  */
 
-const static unsigned char *
+static const unsigned char *
 mn10300_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
 			    int *bp_size)
 {

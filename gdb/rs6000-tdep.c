@@ -943,7 +943,7 @@ rs6000_fetch_pointer_argument (struct frame_info *frame, int argi,
 
 /* Sequence of bytes for breakpoint instruction.  */
 
-const static unsigned char *
+static const unsigned char *
 rs6000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
 			   int *bp_size)
 {

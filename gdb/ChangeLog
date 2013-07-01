@@ -1,5 +1,26 @@
 2013-07-01  Tom Tromey  <tromey@redhat.com>
 
+	* configure.ac (build_warnings): Add -Wold-style-declaration.
+	* configure: Rebuild.
+	* dsrec.c (make_srec): Use "static const", not "const static".
+	* h8300-tdep.c (h8300_breakpoint_from_pc): Use "static const",
+	not "const static".
+	* mi/mi-parse.c (mi_no_values, mi_simple_values, mi_all_values):
+	Use "static const", not "const static".
+	* mn10300-tdep.c (mn10300_breakpoint_from_pc): Use "static const",
+	not "const static".
+	* moxie-tdep.c (moxie_breakpoint_from_pc): Use "static const",
+	not "const static".
+	* rs6000-tdep.c (rs6000_breakpoint_from_pc): Use "static const",
+	not "const static".
+	* v850-tdep.c (v850_breakpoint_from_pc): Use "static const",
+	not "const static".
+	(v850_dbtrap_breakpoint_from_pc): Likewise.
+	* xstormy16-tdep.c (xstormy16_breakpoint_from_pc): Use "static const",
+	not "const static".
+
+2013-07-01  Tom Tromey  <tromey@redhat.com>
+
 	* configure.ac (build_warnings): Add -Wmissing-parameter-type.
 	* configure: Rebuild.
 

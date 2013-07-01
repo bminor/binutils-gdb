@@ -1170,7 +1170,7 @@ v850_return_value (struct gdbarch *gdbarch, struct value *function,
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
-const static unsigned char *
+static const unsigned char *
 v850_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
                          int *lenptr)
 {
@@ -1184,7 +1184,7 @@ v850_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr,
    Older architectures had no such instruction.  For those, an
    unconditional branch to self instruction is used.  */
 
-const static unsigned char *
+static const unsigned char *
 v850_dbtrap_breakpoint_from_pc (struct gdbarch *gdbarch,
                                 CORE_ADDR *pcptr, int *lenptr)
 {

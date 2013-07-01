@@ -28,9 +28,9 @@
 #include "gdb_string.h"
 #include "cli/cli-utils.h"
 
-const static char mi_no_values[] = "--no-values";
-const static char mi_simple_values[] = "--simple-values";
-const static char mi_all_values[] = "--all-values";
+static const char mi_no_values[] = "--no-values";
+static const char mi_simple_values[] = "--simple-values";
+static const char mi_all_values[] = "--all-values";
 
 /* Like parse_escape, but leave the results as a host char, not a
    target char.  */

@@ -72,7 +72,7 @@ moxie_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 
 /* Implement the "breakpoint_from_pc" gdbarch method.  */
 
-const static unsigned char *
+static const unsigned char *
 moxie_breakpoint_from_pc (struct gdbarch *gdbarch,
 			  CORE_ADDR *pcptr, int *lenptr)
 {
