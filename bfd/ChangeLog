@@ -1,3 +1,21 @@
+2013-07-01  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.h (ppc64_elf_toc): Delete.
+	(ppc64_elf_set_toc): Declare.
+	* elf64-ppc.c (ppc64_elf_toc_reloc): Replace call to ppc64_elf_toc
+	with call the ppc64_elf_set_toc.
+	(ppc64_elf_toc_ha_reloc, ppc64_elf_toc64_reloc): Likewise.
+	(ppc64_elf_start_multitoc_partition): Likewise.
+	(struct ppc_link_hash_table): Delete dot_toc_dot.  Replace all uses
+	with elf.hgot.
+	(ppc64_elf_process_dot_syms): Don't make a fake function descriptor
+	for ".TOC.".
+	(ppc64_elf_check_relocs): Mark sections with a reference to .TOC.
+	as needing a toc pointer.
+	(ppc64_elf_size_stubs): Don't set dot_toc_dot here.
+	(ppc64_elf_set_toc): Rename from ppc64_elf_toc.  Add info param.
+	Set elf.hgot value.
+
 2013-06-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15685

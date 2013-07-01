@@ -423,8 +423,7 @@ ppc_layout_sections_again (void)
   gld${EMULATION_NAME}_map_segments (TRUE);
 
   if (!link_info.relocatable)
-    _bfd_set_gp_value (link_info.output_bfd,
-		       ppc64_elf_toc (link_info.output_bfd));
+    ppc64_elf_set_toc (&link_info, link_info.output_bfd);
 
   need_laying_out = -1;
 }
@@ -525,8 +524,7 @@ gld${EMULATION_NAME}_after_allocation (void)
       gld${EMULATION_NAME}_map_segments (need_laying_out);
 
       if (!link_info.relocatable)
-	_bfd_set_gp_value (link_info.output_bfd,
-			   ppc64_elf_toc (link_info.output_bfd));
+	ppc64_elf_set_toc (&link_info, link_info.output_bfd);
     }
 }
 

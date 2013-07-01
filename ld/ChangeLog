@@ -1,3 +1,9 @@
+2013-07-01  Alan Modra  <amodra@gmail.com>
+
+	* emultempl/ppc64elf.em: (ppc_layout_sections_again): Call
+	ppc64_elf_set_toc rather than ppc64_elf_toc/_bfd_set_gp_value.
+	(gld${EMULATION_NAME}_after_allocation): Likewise.
+
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* emulparams/aarch64elf32.sh: New file.

@@ -2472,7 +2472,7 @@ ppc64_elf_toc_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
   if (TOCstart == 0)
-    TOCstart = ppc64_elf_toc (input_section->output_section->owner);
+    TOCstart = ppc64_elf_set_toc (NULL, input_section->output_section->owner);
 
   /* Subtract the TOC base address.  */
   reloc_entry->addend -= TOCstart + TOC_BASE_OFF;
@@ -2495,7 +2495,7 @@ ppc64_elf_toc_ha_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
   if (TOCstart == 0)
-    TOCstart = ppc64_elf_toc (input_section->output_section->owner);
+    TOCstart = ppc64_elf_set_toc (NULL, input_section->output_section->owner);
 
   /* Subtract the TOC base address.  */
   reloc_entry->addend -= TOCstart + TOC_BASE_OFF;
@@ -2522,7 +2522,7 @@ ppc64_elf_toc64_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
   TOCstart = _bfd_get_gp_value (input_section->output_section->owner);
   if (TOCstart == 0)
-    TOCstart = ppc64_elf_toc (input_section->output_section->owner);
+    TOCstart = ppc64_elf_set_toc (NULL, input_section->output_section->owner);
 
   octets = reloc_entry->address * bfd_octets_per_byte (abfd);
   bfd_put_64 (abfd, TOCstart + TOC_BASE_OFF, (bfd_byte *) data + octets);
@@ -3772,9 +3772,6 @@ struct ppc_link_hash_table
   struct ppc_link_hash_entry *tls_get_addr;
   struct ppc_link_hash_entry *tls_get_addr_fd;
 
-  /* The special .TOC. symbol.  */
-  struct ppc_link_hash_entry *dot_toc_dot;
-
   /* The size of reliplt used by got entry relocs.  */
   bfd_size_type got_reli_size;
 
@@ -4774,7 +4771,12 @@ ppc64_elf_process_dot_syms (bfd *ibfd, struct bfd_link_info *info)
       while ((eh = *p) != NULL)
 	{
 	  *p = NULL;
-	  if (!add_symbol_adjust (eh, info))
+	  if (&eh->elf == htab->elf.hgot)
+	    ;
+	  else if (htab->elf.hgot == NULL
+		   && strcmp (eh->elf.root.root.string, ".TOC.") == 0)
+	    htab->elf.hgot = &eh->elf;
+	  else if (!add_symbol_adjust (eh, info))
 	    return FALSE;
 	  p = &eh->u.next_dot_sym;
 	}
@@ -5007,6 +5009,9 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  /* PR15323, ref flags aren't set for references in the same
 	     object.  */
 	  h->root.non_ir_ref = 1;
+
+	  if (h == htab->elf.hgot)
+	    sec->has_toc_reloc = 1;
 	}
 
       tls_type = 0;
@@ -10617,8 +10622,7 @@ ppc64_elf_start_multitoc_partition (struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
-  elf_gp (info->output_bfd) = ppc64_elf_toc (info->output_bfd);
-  htab->toc_curr = elf_gp (info->output_bfd);
+  htab->toc_curr = ppc64_elf_set_toc (info, info->output_bfd);
   htab->toc_bfd = NULL;
   htab->toc_first_sec = NULL;
 }
@@ -11450,9 +11454,6 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
 	}
     }
   htab->plt_thread_safe = plt_thread_safe;
-  htab->dot_toc_dot = ((struct ppc_link_hash_entry *)
-		       elf_link_hash_lookup (&htab->elf, ".TOC.",
-					     FALSE, FALSE, TRUE));
   stubs_always_before_branch = group_size < 0;
   if (group_size < 0)
     stub_group_size = -group_size;
@@ -11853,7 +11854,7 @@ ppc64_elf_size_stubs (struct bfd_link_info *info, bfd_signed_vma group_size,
    move, we'll be called again.  Provide a value for TOCstart.  */
 
 bfd_vma
-ppc64_elf_toc (bfd *obfd)
+ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
 {
   asection *s;
   bfd_vma TOCstart;
@@ -11904,6 +11905,20 @@ ppc64_elf_toc (bfd *obfd)
   if (s != NULL)
     TOCstart = s->output_section->vma + s->output_offset;
 
+  _bfd_set_gp_value (obfd, TOCstart);
+
+  if (info != NULL && s != NULL && is_ppc64_elf (obfd))
+    {
+      struct ppc_link_hash_table *htab = ppc_hash_table (info);
+
+      if (htab != NULL
+	  && htab->elf.hgot != NULL)
+	{
+	  htab->elf.hgot->root.type = bfd_link_hash_defined;
+	  htab->elf.hgot->root.u.def.value = TOC_BASE_OFF;
+	  htab->elf.hgot->root.u.def.section = s;
+	}
+    }
   return TOCstart;
 }
 
@@ -12452,7 +12467,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      }
 		  }
 	    }
-	  if (h_elf == &htab->dot_toc_dot->elf)
+	  if (h_elf == htab->elf.hgot)
 	    {
 	      relocation = (TOCstart
 			    + htab->stub_group[input_section->id].toc_off);
