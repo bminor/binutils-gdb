@@ -69,12 +69,15 @@ AC_DEFUN([gl_EARLY],
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
+  # Code from module ssize_t:
   # Code from module stdbool:
   # Code from module stddef:
   # Code from module stdint:
   # Code from module streq:
   # Code from module string:
   # Code from module strnlen1:
+  # Code from module sys_types:
+  # Code from module unistd:
   # Code from module update-copyright:
   # Code from module verify:
   # Code from module wchar:
@@ -178,10 +181,14 @@ AC_DEFUN([gl_INIT],
   fi
   gl_STRING_MODULE_INDICATOR([memmem])
   gl_MULTIARCH
+  gt_TYPE_SSIZE_T
   AM_STDBOOL_H
   gl_STDDEF_H
   gl_STDINT_H
   gl_HEADER_STRING_H
+  gl_SYS_TYPES_H
+  AC_PROG_MKDIR_P
+  gl_UNISTD_H
   gl_WCHAR_H
   gl_WCTYPE_H
   # End of code from modules
@@ -369,6 +376,9 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/string.in.h
   lib/strnlen1.c
   lib/strnlen1.h
+  lib/sys_types.in.h
+  lib/unistd.c
+  lib/unistd.in.h
   lib/verify.h
   lib/wchar.in.h
   lib/wctype-h.c
@@ -408,10 +418,14 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/memmem.m4
   m4/mmap-anon.m4
   m4/multiarch.m4
+  m4/off_t.m4
+  m4/ssize_t.m4
   m4/stdbool.m4
   m4/stddef_h.m4
   m4/stdint.m4
   m4/string_h.m4
+  m4/sys_types_h.m4
+  m4/unistd_h.m4
   m4/warn-on-use.m4
   m4/wchar_h.m4
   m4/wchar_t.m4

@@ -235,10 +235,14 @@ aclocal_m4_deps = \
 	import/m4/memmem.m4 \
 	import/m4/mmap-anon.m4 \
 	import/m4/multiarch.m4 \
+	import/m4/off_t.m4 \
+	import/m4/ssize_t.m4 \
 	import/m4/stdbool.m4 \
 	import/m4/stddef_h.m4 \
 	import/m4/stdint.m4 \
 	import/m4/string_h.m4 \
+	import/m4/sys_types_h.m4 \
+	import/m4/unistd_h.m4 \
 	import/m4/warn-on-use.m4 \
 	import/m4/wchar_h.m4 \
 	import/m4/wchar_t.m4 \

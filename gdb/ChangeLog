@@ -1,5 +1,27 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	Import the "unistd" gnulib module.
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add "unistd".
+	* gnulib/Makefile.in (aclocal_m4_deps): Add import/m4/off_t.m4,
+	import/m4/ssize_t.m4, import/m4/sys_types_h.m4 and
+	import/m4/unistd_h.m4.
+	* gnulib/aclocal.m4: Renenerate.
+	* gnulib/config.in: Renenerate.
+	* gnulib/configure: Renenerate.
+	* gnulib/import/Makefile.am: Renenerate.
+	* gnulib/import/Makefile.in: Renenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Renenerate.
+	* gnulib/import/m4/gnulib-comp.m4: Renenerate.
+	* gnulib/import/m4/off_t.m4: New file.
+	* gnulib/import/m4/ssize_t.m4: New file.
+	* gnulib/import/m4/sys_types_h.m4: New file.
+	* gnulib/import/m4/unistd_h.m4: New file.
+	* gnulib/import/sys_types.in.h: New file.
+	* gnulib/import/unistd.c: New file.
+	* gnulib/import/unistd.in.h: New file.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	* utils.c <pathconf/_PC_PATH_MAX use>: Check if _PC_PATH_MAX is
 	defined instead of checking HAVE_UNISTD_H.
 
