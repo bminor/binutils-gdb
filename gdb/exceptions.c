@@ -577,3 +577,19 @@ catch_command_errors (catch_command_errors_ftype *command,
     return 0;
   return 1;
 }
+
+int
+catch_command_errors_const (catch_command_errors_const_ftype *command,
+			    const char *arg, int from_tty, return_mask mask)
+{
+  volatile struct gdb_exception e;
+
+  TRY_CATCH (e, mask)
+    {
+      command (arg, from_tty);
+    }
+  print_any_exception (gdb_stderr, NULL, e);
+  if (e.reason < 0)
+    return 0;
+  return 1;
+}

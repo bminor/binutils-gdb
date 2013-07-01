@@ -117,7 +117,7 @@ extern void cd_command (char *, int);
 
 extern void quit_command (char *, int);
 
-extern void source_script (char *, int);
+extern void source_script (const char *, int);
 
 /* Exported to objfiles.c.  */
 

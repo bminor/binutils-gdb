@@ -1,5 +1,18 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-cmds.c (source_script): Make 'file' parameter const.
+	* cli/cli-cmds.h (source_script): Likewise.
+	* exceptions.c (catch_command_errors_const): New function.
+	* exceptions.h (catch_command_errors_const): Declare.
+	* main.c (get_init_files): Make parameters const, and adjust.
+	(captured_main): Make 'system_gdbinit', 'home_gdbinit' and
+	'local_gdbinit' locals const.  Adjust to use
+	catch_command_errors_const.
+	(print_gdb_help): Make 'system_gdbinit', 'home_gdbinit' and
+	'local_gdbinit' locals const.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	* defs.h: Don't check HAVE_UNISTD_H before including <unistd.h>.
 	(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO): Delete.
 	* tracepoint.c: Don't check HAVE_UNISTD_H before including

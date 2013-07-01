@@ -597,7 +597,7 @@ source_script_with_search (const char *file, int from_tty, int search_path)
    for use in loading .gdbinit scripts.  */
 
 void
-source_script (char *file, int from_tty)
+source_script (const char *file, int from_tty)
 {
   source_script_with_search (file, from_tty, 0);
 }

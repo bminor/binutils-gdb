@@ -160,13 +160,13 @@ relocate_gdb_directory (const char *initial, int flag)
    to be loaded, then SYSTEM_GDBINIT (resp. HOME_GDBINIT and
    LOCAL_GDBINIT) is set to NULL.  */
 static void
-get_init_files (char **system_gdbinit,
-		char **home_gdbinit,
-		char **local_gdbinit)
+get_init_files (const char **system_gdbinit,
+		const char **home_gdbinit,
+		const char **local_gdbinit)
 {
-  static char *sysgdbinit = NULL;
+  static const char *sysgdbinit = NULL;
   static char *homeinit = NULL;
-  static char *localinit = NULL;
+  static const char *localinit = NULL;
   static int initialized = 0;
 
   if (!initialized)
@@ -336,9 +336,9 @@ captured_main (void *data)
   int ndir;
 
   /* gdb init files.  */
-  char *system_gdbinit;
-  char *home_gdbinit;
-  char *local_gdbinit;
+  const char *system_gdbinit;
+  const char *home_gdbinit;
+  const char *local_gdbinit;
 
   int i;
   int save_auto_load;
@@ -894,7 +894,8 @@ captured_main (void *data)
      processed; it sets global parameters, which are independent of
      what file you are debugging or what directory you are in.  */
   if (system_gdbinit && !inhibit_gdbinit)
-    catch_command_errors (source_script, system_gdbinit, 0, RETURN_MASK_ALL);
+    catch_command_errors_const (source_script, system_gdbinit,
+				0, RETURN_MASK_ALL);
 
   /* Read and execute $HOME/.gdbinit file, if it exists.  This is done
      *before* all the command line arguments are processed; it sets
@@ -902,15 +903,16 @@ captured_main (void *data)
      debugging or what directory you are in.  */
 
   if (home_gdbinit && !inhibit_gdbinit && !inhibit_home_gdbinit)
-    catch_command_errors (source_script, home_gdbinit, 0, RETURN_MASK_ALL);
+    catch_command_errors_const (source_script,
+				home_gdbinit, 0, RETURN_MASK_ALL);
 
   /* Process '-ix' and '-iex' options early.  */
   for (i = 0; VEC_iterate (cmdarg_s, cmdarg_vec, i, cmdarg_p); i++)
     switch (cmdarg_p->type)
     {
       case CMDARG_INIT_FILE:
-        catch_command_errors (source_script, cmdarg_p->string,
-			      !batch_flag, RETURN_MASK_ALL);
+        catch_command_errors_const (source_script, cmdarg_p->string,
+				    !batch_flag, RETURN_MASK_ALL);
 	break;
       case CMDARG_INIT_COMMAND:
         catch_command_errors (execute_command, cmdarg_p->string,
@@ -1006,8 +1008,8 @@ captured_main (void *data)
 	{
 	  auto_load_local_gdbinit_loaded = 1;
 
-	  catch_command_errors (source_script, local_gdbinit, 0,
-				RETURN_MASK_ALL);
+	  catch_command_errors_const (source_script, local_gdbinit, 0,
+				      RETURN_MASK_ALL);
 	}
     }
 
@@ -1024,8 +1026,8 @@ captured_main (void *data)
     switch (cmdarg_p->type)
     {
       case CMDARG_FILE:
-        catch_command_errors (source_script, cmdarg_p->string,
-			      !batch_flag, RETURN_MASK_ALL);
+        catch_command_errors_const (source_script, cmdarg_p->string,
+				    !batch_flag, RETURN_MASK_ALL);
 	break;
       case CMDARG_COMMAND:
         catch_command_errors (execute_command, cmdarg_p->string,
@@ -1075,9 +1077,9 @@ gdb_main (struct captured_main_args *args)
 static void
 print_gdb_help (struct ui_file *stream)
 {
-  char *system_gdbinit;
-  char *home_gdbinit;
-  char *local_gdbinit;
+  const char *system_gdbinit;
+  const char *home_gdbinit;
+  const char *local_gdbinit;
 
   get_init_files (&system_gdbinit, &home_gdbinit, &local_gdbinit);
 
