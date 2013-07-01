@@ -64,9 +64,7 @@
 /* readline defines this.  */
 #undef savestring
 
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0

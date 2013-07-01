@@ -52,10 +52,7 @@
 #include <stddef.h>
 #endif
 
-#ifdef HAVE_UNISTD_H
 #include <unistd.h>
-#endif
-
 #include <fcntl.h>
 
 /* First include ansidecl.h so we can use the various macro definitions
@@ -764,17 +761,6 @@ extern int use_windows;
 #define PIDGET(PTID) (ptid_get_pid (PTID))
 #define TIDGET(PTID) (ptid_get_lwp (PTID))
 #define MERGEPID(PID, TID) ptid_build (PID, TID, 0)
-#endif
-
-/* Define well known filenos if the system does not define them.  */
-#ifndef STDIN_FILENO
-#define STDIN_FILENO   0
-#endif
-#ifndef STDOUT_FILENO
-#define STDOUT_FILENO  1
-#endif
-#ifndef STDERR_FILENO
-#define STDERR_FILENO  2
 #endif
 
 /* If this definition isn't overridden by the header files, assume

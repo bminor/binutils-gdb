@@ -1,3 +1,13 @@
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
+	* event-loop.c: Don't check HAVE_UNISTD_H before including
+	<unistd.h>.
+	* gdbreplay.c: Likewise.
+	* remote-utils.c: Likewise.
+	* server.c: Likewise.
+	* configure.ac: Don't check for unistd.h.
+	* configure: Regenerate.
+
 2013-06-28  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (version.c): Use version.in, not

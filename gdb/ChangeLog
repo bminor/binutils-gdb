@@ -1,5 +1,12 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	* defs.h: Don't check HAVE_UNISTD_H before including <unistd.h>.
+	(STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO): Delete.
+	* tracepoint.c: Don't check HAVE_UNISTD_H before including
+	<unistd.h>.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	Import the "unistd" gnulib module.
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add "unistd".
 	* gnulib/Makefile.in (aclocal_m4_deps): Add import/m4/off_t.m4,
