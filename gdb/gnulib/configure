@@ -3003,6 +3003,7 @@ as_fn_append ac_func_list " mbsinit"
 as_fn_append ac_func_list " mbrtowc"
 as_fn_append ac_header_list " sys/mman.h"
 as_fn_append ac_func_list " mprotect"
+as_fn_append ac_header_list " sys/param.h"
 as_fn_append ac_header_list " features.h"
 as_fn_append ac_func_list " iswcntrl"
 # Check that the precious variables saved in the cache have kept the same
@@ -4735,6 +4736,7 @@ fi
   # Code from module memmem:
   # Code from module memmem-simple:
   # Code from module multiarch:
+  # Code from module pathmax:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
@@ -8990,6 +8992,8 @@ $as_echo "$gl_cv_func_memmem_works_always" >&6; }
   fi
   :
 
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
 $as_echo_n "checking for stdbool.h that conforms to C99... " >&6; }
 if test "${ac_cv_header_stdbool_h+set}" = set; then :
@@ -12891,6 +12895,9 @@ $as_echo "$gl_cv_func_memmem_works_always" >&6; }
 
 
 $as_echo "#define GNULIB_TEST_MEMMEM 1" >>confdefs.h
+
+
+
 
 
 

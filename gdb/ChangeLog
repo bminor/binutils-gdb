@@ -1,5 +1,19 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add pathmax.
+	* gnulib/Makefile.in (aclocal_m4_deps): Add import/m4/pathmax.m4.
+	* gnulib/aclocal.m4: Regenerate.
+	* gnulib/config.in: Regenerate.
+	* gnulib/configure: Regenerate.
+	* gnulib/import/pathmax.h: New file.
+	* gnulib/import/Makefile.am: Regenerate.
+	* gnulib/import/Makefile.in: Regenerate.
+	* gnulib/import/m4/gnulib-cache.m4: Regenerate.
+	* gnulib/import/m4/gnulib-comp.m4: Regenerate.
+	* gnulib/import/m4/pathmax.m4: New file.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	* configure.ac (GDBINIT): Define, depending on host.
 	* go32-nat.c (init_go32_ops): Don't override gdbinit here.
 	* top.c (PATH_MAX): Delete fallback definition.

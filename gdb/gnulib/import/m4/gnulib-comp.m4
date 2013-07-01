@@ -66,6 +66,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module memmem:
   # Code from module memmem-simple:
   # Code from module multiarch:
+  # Code from module pathmax:
   # Code from module snippet/arg-nonnull:
   # Code from module snippet/c++defs:
   # Code from module snippet/warn-on-use:
@@ -181,6 +182,7 @@ AC_DEFUN([gl_INIT],
   fi
   gl_STRING_MODULE_INDICATOR([memmem])
   gl_MULTIARCH
+  gl_PATHMAX
   gt_TYPE_SSIZE_T
   AM_STDBOOL_H
   gl_STDDEF_H
@@ -366,6 +368,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/memchr.c
   lib/memchr.valgrind
   lib/memmem.c
+  lib/pathmax.h
   lib/ref-add.sin
   lib/ref-del.sin
   lib/stdbool.in.h
@@ -419,6 +422,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/mmap-anon.m4
   m4/multiarch.m4
   m4/off_t.m4
+  m4/pathmax.m4
   m4/ssize_t.m4
   m4/stdbool.m4
   m4/stddef_h.m4
