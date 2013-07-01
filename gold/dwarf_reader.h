@@ -338,7 +338,7 @@ class Dwarf_ranges_table
   Dwarf_ranges_table(Dwarf_info_reader* dwinfo)
     : dwinfo_(dwinfo), ranges_shndx_(0), ranges_buffer_(NULL),
       ranges_buffer_end_(NULL), owns_ranges_buffer_(false),
-      ranges_reloc_mapper_(NULL), output_section_offset_(0)
+      ranges_reloc_mapper_(NULL), reloc_type_(0), output_section_offset_(0)
   { }
 
   ~Dwarf_ranges_table()
@@ -365,6 +365,11 @@ class Dwarf_ranges_table
 		  unsigned int ranges_shndx,
 		  off_t ranges_offset);
 
+  // Look for a relocation at offset OFF in the range table,
+  // and return the section index and offset of the target.
+  unsigned int
+  lookup_reloc(off_t off, off_t* target_off);
+
  private:
   // The Dwarf_info_reader, for reading data.
   Dwarf_info_reader* dwinfo_;
@@ -377,6 +382,8 @@ class Dwarf_ranges_table
   bool owns_ranges_buffer_;
   // Relocation mapper for the .debug_ranges section.
   Elf_reloc_mapper* ranges_reloc_mapper_;
+  // Type of the relocation section (SHT_REL or SHT_RELA).
+  unsigned int reloc_type_;
   // For incremental update links, this will hold the offset of the
   // input section within the output section.  Offsets read from
   // relocated data will be relative to the output section, and need

@@ -1,3 +1,14 @@
+2013-07-01  Cary Coutant  <ccoutant@google.com>
+
+	* dwarf_reader.cc (Dwarf_ranges_table::read_ranges_table): Save
+	reloc_type_.
+	(Dwarf_ranges_table::read_range_list): Call lookup_reloc.
+	(Dwarf_ranges_table::lookup_reloc): New function.
+	* dwarf_reader.h (Dwarf_ranges_table::Dwarf_ranges_table): Initialize
+	reloc_type_.
+	(Dwarf_ranges_table::lookup_reloc): New function.
+	(Dwarf_ranges_table::reloc_type_): New data member.
+
 2013-06-27  Jing Yu  <jingyu@google.com>
 
 	PR gold/15662

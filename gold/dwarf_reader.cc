@@ -374,6 +374,7 @@ Dwarf_ranges_table::read_ranges_table(
   this->ranges_reloc_mapper_ = make_elf_reloc_mapper(object, symtab,
 						     symtab_size);
   this->ranges_reloc_mapper_->initialize(reloc_shndx, reloc_type);
+  this->reloc_type_ = reloc_type;
 
   return true;
 }
@@ -430,11 +431,8 @@ Dwarf_ranges_table::read_range_list(
       unsigned int shndx2 = 0;
       if (this->ranges_reloc_mapper_ != NULL)
         {
-	  shndx1 =
-	      this->ranges_reloc_mapper_->get_reloc_target(offset, &start);
-	  shndx2 =
-	      this->ranges_reloc_mapper_->get_reloc_target(offset + addr_size,
-							   &end);
+	  shndx1 = this->lookup_reloc(offset, &start);
+	  shndx2 = this->lookup_reloc(offset + addr_size, &end);
         }
 
       // End of list is marked by a pair of zeroes.
@@ -458,6 +456,24 @@ Dwarf_ranges_table::read_range_list(
     }
 
   return ranges;
+}
+
+// Look for a relocation at offset OFF in the range table,
+// and return the section index and offset of the target.
+
+unsigned int
+Dwarf_ranges_table::lookup_reloc(off_t off, off_t* target_off)
+{
+  off_t value;
+  unsigned int shndx =
+      this->ranges_reloc_mapper_->get_reloc_target(off, &value);
+  if (shndx == 0)
+    return 0;
+  if (this->reloc_type_ == elfcpp::SHT_REL)
+    *target_off += value;
+  else
+    *target_off = value;
+  return shndx;
 }
 
 // class Dwarf_pubnames_table
