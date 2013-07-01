@@ -54,7 +54,7 @@
 /* Define to 1 when the gnulib module memmem should be tested. */
 #undef GNULIB_TEST_MEMMEM
 
-/* Define to 1 if you have the 'alarm' function. */
+/* Define to 1 if you have the `alarm' function. */
 #undef HAVE_ALARM
 
 /* Define to 1 if you have 'alloca' after including <alloca.h>, a header that
@@ -68,7 +68,7 @@
 /* Define to 1 if you have the <bp-sym.h> header file. */
 #undef HAVE_BP_SYM_H
 
-/* Define to 1 if you have the 'btowc' function. */
+/* Define to 1 if you have the `btowc' function. */
 #undef HAVE_BTOWC
 
 /* Define to 1 if you have the declaration of `getc_unlocked', and to 0 if you
@@ -111,7 +111,7 @@
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
-/* Define to 1 if you have the 'isblank' function. */
+/* Define to 1 if you have the `isblank' function. */
 #undef HAVE_ISBLANK
 
 /* Define if the isnan(double) function is available in libc. */
@@ -120,10 +120,10 @@
 /* Define if the isnan(long double) function is available in libc. */
 #undef HAVE_ISNANL_IN_LIBC
 
-/* Define to 1 if you have the 'iswcntrl' function. */
+/* Define to 1 if you have the `iswcntrl' function. */
 #undef HAVE_ISWCNTRL
 
-/* Define to 1 if you have the 'iswctype' function. */
+/* Define to 1 if you have the `iswctype' function. */
 #undef HAVE_ISWCTYPE
 
 /* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
@@ -139,13 +139,13 @@
 /* Define to 1 if you have the <math.h> header file. */
 #undef HAVE_MATH_H
 
-/* Define to 1 if you have the 'mbrtowc' function. */
+/* Define to 1 if you have the `mbrtowc' function. */
 #undef HAVE_MBRTOWC
 
-/* Define to 1 if you have the 'mbsinit' function. */
+/* Define to 1 if you have the `mbsinit' function. */
 #undef HAVE_MBSINIT
 
-/* Define to 1 if you have the 'mbsrtowcs' function. */
+/* Define to 1 if you have the `mbsrtowcs' function. */
 #undef HAVE_MBSRTOWCS
 
 /* Define to 1 if <wchar.h> declares mbstate_t. */
@@ -157,10 +157,10 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
-/* Define to 1 if you have the 'mempcpy' function. */
+/* Define to 1 if you have the `mempcpy' function. */
 #undef HAVE_MEMPCPY
 
-/* Define to 1 if you have the 'mprotect' function. */
+/* Define to 1 if you have the `mprotect' function. */
 #undef HAVE_MPROTECT
 
 /* Define to 1 if acosf is declared even after undefining macros. */
@@ -637,7 +637,7 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define to 1 if you have the 'symlink' function. */
+/* Define to 1 if you have the `symlink' function. */
 #undef HAVE_SYMLINK
 
 /* Define to 1 if you have the <sys/bitypes.h> header file. */
@@ -676,13 +676,13 @@
 /* Define if you have the 'wint_t' type. */
 #undef HAVE_WINT_T
 
-/* Define to 1 if you have the 'wmemchr' function. */
+/* Define to 1 if you have the `wmemchr' function. */
 #undef HAVE_WMEMCHR
 
-/* Define to 1 if you have the 'wmemcpy' function. */
+/* Define to 1 if you have the `wmemcpy' function. */
 #undef HAVE_WMEMCPY
 
-/* Define to 1 if you have the 'wmempcpy' function. */
+/* Define to 1 if you have the `wmempcpy' function. */
 #undef HAVE_WMEMPCPY
 
 /* Define to 1 if O_NOATIME works. */

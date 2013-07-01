@@ -589,8 +589,8 @@ ac_includes_default="\
 #endif"
 
 gl_fnmatch_required=POSIX
-gl_func_list=
-gl_header_list=
+ac_func_list=
+ac_header_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 gltests_LTLIBOBJS
@@ -2856,29 +2856,29 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
-gl_func_list="$gl_func_list btowc"
-gl_func_list="$gl_func_list isblank"
-gl_func_list="$gl_func_list iswctype"
-gl_func_list="$gl_func_list mbsrtowcs"
-gl_func_list="$gl_func_list mempcpy"
-gl_func_list="$gl_func_list wmemchr"
-gl_func_list="$gl_func_list wmemcpy"
-gl_func_list="$gl_func_list wmempcpy"
-gl_header_list="$gl_header_list wctype.h"
+as_fn_append ac_func_list " btowc"
+as_fn_append ac_func_list " isblank"
+as_fn_append ac_func_list " iswctype"
+as_fn_append ac_func_list " mbsrtowcs"
+as_fn_append ac_func_list " mempcpy"
+as_fn_append ac_func_list " wmemchr"
+as_fn_append ac_func_list " wmemcpy"
+as_fn_append ac_func_list " wmempcpy"
+as_fn_append ac_header_list " wctype.h"
 gl_fnmatch_required=GNU
-gl_func_list="$gl_func_list alarm"
-gl_header_list="$gl_header_list wchar.h"
-gl_header_list="$gl_header_list stdint.h"
-gl_header_list="$gl_header_list inttypes.h"
-gl_header_list="$gl_header_list unistd.h"
-gl_func_list="$gl_func_list symlink"
-gl_header_list="$gl_header_list math.h"
-gl_func_list="$gl_func_list mbsinit"
-gl_func_list="$gl_func_list mbrtowc"
-gl_header_list="$gl_header_list sys/mman.h"
-gl_func_list="$gl_func_list mprotect"
-gl_header_list="$gl_header_list features.h"
-gl_func_list="$gl_func_list iswcntrl"
+as_fn_append ac_func_list " alarm"
+as_fn_append ac_header_list " wchar.h"
+as_fn_append ac_header_list " stdint.h"
+as_fn_append ac_header_list " inttypes.h"
+as_fn_append ac_header_list " unistd.h"
+as_fn_append ac_func_list " symlink"
+as_fn_append ac_header_list " math.h"
+as_fn_append ac_func_list " mbsinit"
+as_fn_append ac_func_list " mbrtowc"
+as_fn_append ac_header_list " sys/mman.h"
+as_fn_append ac_func_list " mprotect"
+as_fn_append ac_header_list " features.h"
+as_fn_append ac_func_list " iswcntrl"
 # Check that the precious variables saved in the cache have kept the same
 # value.
 ac_cache_corrupted=false
@@ -5595,8 +5595,7 @@ $as_echo "#define mbstate_t int" >>confdefs.h
 
 
 
-
-  for ac_func in $gl_func_list
+  for ac_func in $ac_func_list
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -5628,34 +5627,11 @@ done
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  for ac_header in $gl_header_list
+  for ac_header in $ac_header_list
 do :
   as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
 eval as_val=\$$as_ac_Header
    if test "x$as_val" = x""yes; then :
   cat >>confdefs.h <<_ACEOF
@@ -5665,8 +5641,6 @@ _ACEOF
 fi
 
 done
-
-
 
 
 
@@ -5960,9 +5934,6 @@ $as_echo "$gl_cv_func_frexp_no_libm" >&6; }
 
 
 
-
-
-
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether long double and double are the same" >&5
 $as_echo_n "checking whether long double and double are the same... " >&6; }
 if test "${gl_cv_long_double_equals_double+set}" = set; then :
@@ -6126,12 +6097,6 @@ $as_echo "#define HAVE_LONG_LONG_INT 1" >>confdefs.h
 
 
 
-
-
-
-
-
-
     gl_cv_c_multiarch=no
   cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
@@ -6191,12 +6156,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
 
-  :
-
-
-
-
-
   if test $ac_cv_header_wchar_h = yes; then
     HAVE_WCHAR_H=1
   else
@@ -6219,12 +6178,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 
 
 
-
-
-
-
-
-  :
 
 
 
@@ -6914,9 +6867,6 @@ fi
 
 
 
-
-
-
   GNULIB_IMAXABS=0;
   GNULIB_IMAXDIV=0;
   GNULIB_STRTOIMAX=0;
@@ -6936,21 +6886,9 @@ fi
 
 
 
-  :
 
 
 
-
-
-
-
-
-
-
-
-
-
-  :
 
 
 
@@ -7743,24 +7681,6 @@ $as_echo "#define HAVE_LANGINFO_CODESET 1" >>confdefs.h
 
 
 
-
-
-
-
-
-  :
-
-
-
-
-
-
-  :
-
-
-
-
-
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for working fcntl.h" >&5
 $as_echo_n "checking for working fcntl.h... " >&6; }
 if test "${gl_cv_header_working_fcntl_h+set}" = set; then :
@@ -7902,8 +7822,7 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-
-      ac_fn_c_check_decl "$LINENO" "getc_unlocked" "ac_cv_have_decl_getc_unlocked" "$ac_includes_default"
+ac_fn_c_check_decl "$LINENO" "getc_unlocked" "ac_cv_have_decl_getc_unlocked" "$ac_includes_default"
 if test "x$ac_cv_have_decl_getc_unlocked" = x""yes; then :
   ac_have_decl=1
 else
@@ -7913,7 +7832,6 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_GETC_UNLOCKED $ac_have_decl
 _ACEOF
-
 
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we are using the GNU C Library >= 2.1 or uClibc" >&5
@@ -7950,9 +7868,6 @@ fi
 $as_echo "$ac_cv_gnu_library_2_1" >&6; }
 
     GLIBC21="$ac_cv_gnu_library_2_1"
-
-
-
 
 
 
@@ -8049,12 +7964,6 @@ $as_echo "$ac_cv_gnu_library_2_1" >&6; }
   REPLACE_WCSNRTOMBS=0;
   REPLACE_WCWIDTH=0;
   REPLACE_WCSWIDTH=0;
-
-
-
-
-
-
 
 
 
@@ -8600,12 +8509,6 @@ $as_echo "$gt_cv_locale_fr" >&6; }
 
 
 
-
-
-
-
-
-
   GNULIB_FFSL=0;
   GNULIB_FFSLL=0;
   GNULIB_MEMCHR=0;
@@ -8745,18 +8648,6 @@ $as_echo "#define HAVE_MAP_ANONYMOUS 1" >>confdefs.h
   fi
 
 
-  :
-
-
-
-
-
-
-  :
-
-
-
-
 
 
 
@@ -8849,8 +8740,7 @@ $as_echo "$gl_cv_func_memchr_works" >&6; }
     fi
   fi
 
-
-      ac_fn_c_check_decl "$LINENO" "memmem" "ac_cv_have_decl_memmem" "$ac_includes_default"
+ac_fn_c_check_decl "$LINENO" "memmem" "ac_cv_have_decl_memmem" "$ac_includes_default"
 if test "x$ac_cv_have_decl_memmem" = x""yes; then :
   ac_have_decl=1
 else
@@ -8860,7 +8750,6 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_MEMMEM $ac_have_decl
 _ACEOF
-
 
 
 
@@ -8882,12 +8771,6 @@ done
   else
     HAVE_MEMMEM=0
   fi
-
-  :
-
-
-
-
 
   if test $ac_cv_have_decl_memmem = no; then
     HAVE_DECL_MEMMEM=0
@@ -9339,15 +9222,6 @@ Configuration aborted." "$LINENO" 5
 
 
 
-
-
-
-  :
-
-
-
-
-
   if test $ac_cv_header_features_h = yes; then
     HAVE_FEATURES_H=1
   else
@@ -9406,9 +9280,6 @@ $as_echo "#define HAVE_WINT_T 1" >>confdefs.h
   HAVE_WCTYPE_T=1;
   HAVE_WCTRANS_T=1;
   REPLACE_ISWBLANK=0;
-
-
-
 
 
 
@@ -9916,39 +9787,6 @@ cat >>confdefs.h <<_ACEOF
 _ACEOF
 
 
-  :
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  :
-
-
-
-
 
 
   fi
@@ -9986,39 +9824,6 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_ISBLANK $ac_have_decl
 _ACEOF
-
-
-  :
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  :
-
-
 
 
 
@@ -10069,12 +9874,6 @@ $as_echo "$gl_cv_func_frexp_in_libm" >&6; }
      || test $gl_cv_func_frexp_in_libm = yes; then
     save_LIBS="$LIBS"
     LIBS="$LIBS $FREXP_LIBM"
-
-
-
-  :
-
-
 
 
 
@@ -11133,12 +10932,6 @@ _ACEOF
 
 
 
-  :
-
-
-
-
-
 
 
 
@@ -11148,12 +10941,6 @@ _ACEOF
 
 
 
-
-
-
-
-
-  :
 
 
 
@@ -11344,18 +11131,6 @@ fi
 
 
 
-  :
-
-
-
-
-
-
-  :
-
-
-
-
 
   if test $ac_cv_func_mbsinit = yes && test $ac_cv_func_mbrtowc = yes; then
 
@@ -11500,12 +11275,6 @@ $as_echo "$gl_cv_func_mbrtowc_sanitycheck" >&6; }
   else
     REPLACE_MBSTATE_T=1
   fi
-
-
-
-  :
-
-
 
 
 
@@ -11956,18 +11725,6 @@ $as_echo "#define GNULIB_TEST_MBRTOWC 1" >>confdefs.h
 
 
 
-  :
-
-
-
-
-
-
-  :
-
-
-
-
 
   if test $ac_cv_func_mbsinit = yes && test $ac_cv_func_mbrtowc = yes; then
 
@@ -12112,12 +11869,6 @@ $as_echo "$gl_cv_func_mbrtowc_sanitycheck" >&6; }
   else
     REPLACE_MBSTATE_T=1
   fi
-
-
-
-  :
-
-
 
 
 
@@ -12196,18 +11947,6 @@ $as_echo "#define GNULIB_TEST_MBSINIT 1" >>confdefs.h
 
 
 
-  :
-
-
-
-
-
-
-  :
-
-
-
-
 
   if test $ac_cv_func_mbsinit = yes && test $ac_cv_func_mbrtowc = yes; then
 
@@ -12352,12 +12091,6 @@ $as_echo "$gl_cv_func_mbrtowc_sanitycheck" >&6; }
   else
     REPLACE_MBSTATE_T=1
   fi
-
-
-
-  :
-
-
 
 
 
@@ -12721,12 +12454,6 @@ done
     HAVE_MEMMEM=0
   fi
 
-  :
-
-
-
-
-
   if test $ac_cv_have_decl_memmem = no; then
     HAVE_DECL_MEMMEM=0
   else
@@ -13002,12 +12729,6 @@ $as_echo "$gl_cv_next_stddef_h" >&6; }
 
 
 
-  :
-
-
-
-
-
 
 
 
@@ -13150,12 +12871,6 @@ fi
 
 
 
-  :
-
-
-
-
-
   if test $ac_cv_func_iswcntrl = yes; then
     HAVE_ISWCNTRL=1
   else
@@ -13172,12 +12887,6 @@ fi
 
 
 
-
-
-
-
-
-  :
 
 
 

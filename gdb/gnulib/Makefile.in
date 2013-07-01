@@ -235,7 +235,6 @@ aclocal_m4_deps = \
 	import/m4/memmem.m4 \
 	import/m4/mmap-anon.m4 \
 	import/m4/multiarch.m4 \
-	import/m4/onceonly.m4 \
 	import/m4/stdbool.m4 \
 	import/m4/stddef_h.m4 \
 	import/m4/stdint.m4 \

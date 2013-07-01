@@ -99,7 +99,6 @@ am__aclocal_m4_deps = $(top_srcdir)/import/m4/00gnulib.m4 \
 	$(top_srcdir)/import/m4/memmem.m4 \
 	$(top_srcdir)/import/m4/mmap-anon.m4 \
 	$(top_srcdir)/import/m4/multiarch.m4 \
-	$(top_srcdir)/import/m4/onceonly.m4 \
 	$(top_srcdir)/import/m4/stdbool.m4 \
 	$(top_srcdir)/import/m4/stddef_h.m4 \
 	$(top_srcdir)/import/m4/stdint.m4 \

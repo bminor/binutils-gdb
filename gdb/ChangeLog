@@ -1,5 +1,17 @@
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
+	Reimport gnulib from scratch.
+	* gnulib/Makefile.in (aclocal_m4_deps): Remove reference to
+	import/m4/onceonly.m4.
+	* gnulib/aclocal.m4: Renegerate.
+	* gnulib/config.in: Renegerate.
+	* gnulib/configure: Renegerate.
+	* gnulib/import/Makefile.in: Renegerate.
+	* gnulib/import/extra/update-copyright: Renegerate.
+	* gnulib/import/m4/onceonly.m4: Delete.
+
+2013-07-01  Pedro Alves  <palves@redhat.com>
+
 	* tui/tui-regs.c (pagination_enabled): Delete declaration.
 
 2013-06-30  Jan Kratochvil  <jan.kratochvil@redhat.com>
