@@ -1,3 +1,8 @@
+2013-07-02  Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* notif.h (notif_event): Add a dummy member to avoid compiler
+	errors.
+
 2013-07-01  Pedro Alves  <palves@redhat.com>
 
 	* hostio.c (HOSTIO_PATH_MAX): Define.
