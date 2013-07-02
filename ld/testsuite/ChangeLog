@@ -1,3 +1,13 @@
+2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/gc-plt-relocs.d: Adjust expected .got offsets.
+	* ld-aarch64/tls-desc-ie.d: Likewise.
+	* ld-aarch64/emit-relocs-311.d: Adjust expected	symbol.
+	* ld-aarch64/tls-relax-all.d: Likewise.
+	* ld-aarch64/tls-relax-gd-ie.d: Likewise.
+	* ld-aarch64/tls-relax-gdesc-ie.d: Likewise.
+	* ld-aarch64/tls-relax-gdesc-ie-2.d: Likewise.
+
 2013-07-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/tlsg.sd: Adjusted.

@@ -4647,6 +4647,70 @@ elfNN_aarch64_allocate_local_symbols (bfd *abfd, unsigned number)
   return TRUE;
 }
 
+/* Create the .got section to hold the global offset table.  */
+
+static bfd_boolean
+aarch64_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
+{
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  flagword flags;
+  asection *s;
+  struct elf_link_hash_entry *h;
+  struct elf_link_hash_table *htab = elf_hash_table (info);
+
+  /* This function may be called more than once.  */
+  s = bfd_get_linker_section (abfd, ".got");
+  if (s != NULL)
+    return TRUE;
+
+  flags = bed->dynamic_sec_flags;
+
+  s = bfd_make_section_anyway_with_flags (abfd,
+					  (bed->rela_plts_and_copies_p
+					   ? ".rela.got" : ".rel.got"),
+					  (bed->dynamic_sec_flags
+					   | SEC_READONLY));
+  if (s == NULL
+      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+    return FALSE;
+  htab->srelgot = s;
+
+  s = bfd_make_section_anyway_with_flags (abfd, ".got", flags);
+  if (s == NULL
+      || !bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
+    return FALSE;
+  htab->sgot = s;
+  htab->sgot->size += GOT_ENTRY_SIZE;
+
+  if (bed->want_got_sym)
+    {
+      /* Define the symbol _GLOBAL_OFFSET_TABLE_ at the start of the .got
+	 (or .got.plt) section.  We don't do this in the linker script
+	 because we don't want to define the symbol if we are not creating
+	 a global offset table.  */
+      h = _bfd_elf_define_linkage_sym (abfd, info, s,
+				       "_GLOBAL_OFFSET_TABLE_");
+      elf_hash_table (info)->hgot = h;
+      if (h == NULL)
+	return FALSE;
+    }
+
+  if (bed->want_got_plt)
+    {
+      s = bfd_make_section_anyway_with_flags (abfd, ".got.plt", flags);
+      if (s == NULL
+	  || !bfd_set_section_alignment (abfd, s,
+					 bed->s->log_file_align))
+	return FALSE;
+      htab->sgotplt = s;
+    }
+
+  /* The first bit of the global offset table is the header.  */
+  s->size += bed->got_header_size;
+
+  return TRUE;
+}
+
 /* Look through the relocs for a section during the first phase.  */
 
 static bfd_boolean
@@ -4880,14 +4944,10 @@ elfNN_aarch64_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  }
 	      }
 
-	    if (htab->root.sgot == NULL)
-	      {
-		if (htab->root.dynobj == NULL)
-		  htab->root.dynobj = abfd;
-		if (!_bfd_elf_create_got_section (htab->root.dynobj, info))
-		  return FALSE;
-		htab->root.sgot->size += GOT_ENTRY_SIZE;
-	      }
+	    if (htab->root.dynobj == NULL)
+	      htab->root.dynobj = abfd;
+	    if (! aarch64_elf_create_got_section (htab->root.dynobj, info))
+	      return FALSE;
 	    break;
 	  }
 
@@ -5481,7 +5541,10 @@ elfNN_aarch64_create_dynamic_sections (bfd *dynobj,
 				       struct bfd_link_info *info)
 {
   struct elf_aarch64_link_hash_table *htab;
-  struct elf_link_hash_entry *h;
+
+  /* We need to create .got section.  */
+  if (!aarch64_elf_create_got_section (dynobj, info))
+    return FALSE;
 
   if (!_bfd_elf_create_dynamic_sections (dynobj, info))
     return FALSE;
@@ -5493,16 +5556,6 @@ elfNN_aarch64_create_dynamic_sections (bfd *dynobj,
 
   if (!htab->sdynbss || (!info->shared && !htab->srelbss))
     abort ();
-
-  /* Define the symbol _GLOBAL_OFFSET_TABLE_ at the start of the
-     dynobj's .got section.  We don't do this in the linker script
-     because we don't want to define the symbol if we are not creating
-     a global offset table.  */
-  h = _bfd_elf_define_linkage_sym (dynobj, info,
-				   htab->root.sgot, "_GLOBAL_OFFSET_TABLE_");
-  elf_hash_table (info)->hgot = h;
-  if (h == NULL)
-    return FALSE;
 
   return TRUE;
 }

@@ -2,7 +2,7 @@
 #ld: -T relocs.ld -e0
 #objdump: -dr
 #...
- +10000:	90000080 	adrp	x0, 20000 <var\+0x20000>
+ +10000:	90000080 	adrp	x0, 20000 <_GLOBAL_OFFSET_TABLE_>
  +10004:	f9400400 	ldr	x0, \[x0,#8\]
  +10008:	d53bd041 	mrs	x1, tpidr_el0
  +1000c:	8b000020 	add	x0, x1, x0

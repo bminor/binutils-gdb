@@ -1,5 +1,12 @@
 2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* elfnn-aarch64.c (aarch64_elf_create_got_section): New.
+	(elfNN_aarch64_check_relocs): Use aarch64_elf_create_got_section.
+	(elfNN_aarch64_create_dynamic_sections): Do not define
+	_GLOBAL_OFFSET_TABLE_; call aarch64_elf_create_got_section.
+
+2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* ld-aarch64/emit-relocs-309-low.d: Adjust .text address.
 	* ld-aarch64/emit-relocs-309-up.d: Adjust .got address.
 	* ld-aarch64/emit-relocs-312.d: Adjust offsets into .got.
