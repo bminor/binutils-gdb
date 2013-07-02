@@ -24,6 +24,7 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
+#include "libiberty.h"
 #include "bfd.h"
 #include "bfdlink.h"
 #include "libbfd.h"
@@ -3555,14 +3556,14 @@ xcoff_create_csect_from_smclas (bfd *abfd,
 
   /* .sv64 = x_smclas == 17
      This is an invalid csect for 32 bit apps.  */
-  static const char *names[19] =
-  {
-    ".pr", ".ro", ".db", ".tc", ".ua", ".rw", ".gl", ".xo",
-    ".sv", ".bs", ".ds", ".uc", ".ti", ".tb", NULL, ".tc0",
-    ".td", NULL, ".sv3264"
-  };
-
-  if ((19 >= aux->x_csect.x_smclas)
+  static const char * const names[] =
+    {
+      ".pr", ".ro", ".db", ".tc", ".ua", ".rw", ".gl", ".xo", /* 0 - 7 */
+      ".sv", ".bs", ".ds", ".uc", ".ti", ".tb", NULL, ".tc0", /* 8 - 15 */
+      ".td", NULL, ".sv3264", NULL, ".tl", ".ul", ".te"
+    };
+  
+  if ((aux->x_csect.x_smclas < ARRAY_SIZE (names))
       && (NULL != names[aux->x_csect.x_smclas]))
     {
       return_value = bfd_make_section_anyway

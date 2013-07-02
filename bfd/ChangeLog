@@ -1,5 +1,9 @@
 2013-07-02  Tristan Gingold  <gingold@adacore.com>
 
+	* coff-rs6000.c (xcoff_create_csect_from_smclas): Handle more smclas.
+
+2013-07-02  Tristan Gingold  <gingold@adacore.com>
+
 	* coff-rs6000.c (xcoff_find_nearest_line_discriminator): New function.
 	(rs6000coff_vec): Reference it.
 
