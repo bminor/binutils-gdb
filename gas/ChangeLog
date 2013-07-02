@@ -1,3 +1,7 @@
+2013-07-02  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_elf_adjust_symtab): Don't make .TOC. weak.
+
 2013-06-26  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* doc/as.texinfo (Overview): Remove @samp from MIPS ISA names.

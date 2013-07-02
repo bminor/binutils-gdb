@@ -2318,8 +2318,6 @@ ppc_elf_adjust_symtab (void)
 	  asymbol *bsym = symbol_get_bfdsym (symp);
 	  if ((bsym->flags & BSF_KEEP) == 0)
 	    symbol_remove (symp, &symbol_rootP, &symbol_lastP);
-	  else
-	    S_SET_WEAK (symp);
 	}
     }
 }

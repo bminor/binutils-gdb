@@ -12467,13 +12467,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		      }
 		  }
 	    }
-	  if (h_elf == htab->elf.hgot)
-	    {
-	      relocation = (TOCstart
-			    + htab->stub_group[input_section->id].toc_off);
-	      sec = bfd_abs_section_ptr;
-	      unresolved_reloc = FALSE;
-	    }
 	}
       h = (struct ppc_link_hash_entry *) h_elf;
 
@@ -12485,6 +12478,14 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
       if (info->relocatable)
 	continue;
+
+      if (h != NULL && &h->elf == htab->elf.hgot)
+	{
+	  relocation = (TOCstart
+			+ htab->stub_group[input_section->id].toc_off);
+	  sec = bfd_abs_section_ptr;
+	  unresolved_reloc = FALSE;
+	}
 
       /* TLS optimizations.  Replace instruction sequences and relocs
 	 based on information we collected in tls_optimize.  We edit
