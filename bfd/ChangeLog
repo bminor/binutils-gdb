@@ -1,3 +1,15 @@
+2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/emit-relocs-309-low.d: Adjust .text address.
+	* ld-aarch64/emit-relocs-309-up.d: Adjust .got address.
+	* ld-aarch64/emit-relocs-312.d: Adjust offsets into .got.
+	* ld-aarch64/tls-relax-all.d: Likewise.
+	* ld-aarch64/gc-got-relocs.d: Adjust expected .got content.
+	* ld-aarch64/gc-tls-relocs.d: Likewise.
+	* ld-aarch64/tls-relax-gd-ie.d: Likewise.
+	* ld-aarch64/tls-relax-gdesc-ie-2.d: Likewise.
+	* ld-aarch64/tls-relax-gdesc-ie.d: Likewise.
+
 2013-07-02  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_relocate_section): Set "relocation" for

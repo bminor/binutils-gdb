@@ -25,7 +25,7 @@ Contents of section .text:
  8000 1f2003d5                             .*
 Contents of section .got:
  9000 0+ 0+ 0+ 0+  .*
- 9010 0+ 0+                    .*
+ 9010 0+ 0+ 0+ 0+  .*
 
 Disassembly of section .text:
 

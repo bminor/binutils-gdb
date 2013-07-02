@@ -1,7 +1,7 @@
 #name: aarch64-emit-relocs-309-up
 #source: emit-relocs-309.s
 #as:
-#ld: -Ttext 0x0 --section-start .got=0x100000
+#ld: -Ttext 0x0 --section-start .got=0xffff8
 #objdump: -dr
 #...
 
