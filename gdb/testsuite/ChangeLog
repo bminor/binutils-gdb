@@ -1,3 +1,8 @@
+2013-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/break-on-linker-gcd-function.exp: Replace
+	prepare_for_testing by build_executable_from_specs and clean_restart.
+
 2013-06-27  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/testenv.exp, gdb.base/tui-layout.exp,
