@@ -140,8 +140,9 @@ then
     echo ERROR: missing version file 1>&2
     exit 1
 fi
-version=`cat ${version_in}`
 
+date=`sed -n -e 's/^.* BFD_VERSION_DATE \(.*\)$/\1/p' $srcdir/bfd/version.h`
+version=`sed -e "s/DATE/$date/" < ${version_in}`
 
 # THIS HAS SUFFERED BIT ROT
 if ${check_warning_p} && test -d "${srcdir}"

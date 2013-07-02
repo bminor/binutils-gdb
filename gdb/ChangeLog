@@ -1,5 +1,9 @@
 2013-07-02  Tom Tromey  <tromey@redhat.com>
 
+	* contrib/ari/update-web-ari.sh: Update for version.in change.
+
+2013-07-02  Tom Tromey  <tromey@redhat.com>
+
 	* common/ptid.h: Comment fixes.
 
 2013-07-01  Tom Tromey  <tromey@redhat.com>
