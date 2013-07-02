@@ -450,6 +450,7 @@ xcoff_find_nearest_line (bfd *abfd,
                                             line_ptr);
 }
 
+static bfd_boolean
 xcoff_find_nearest_line_discriminator (bfd *abfd,
                                       asection *section,
                                       asymbol **symbols,
