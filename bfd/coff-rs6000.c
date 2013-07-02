@@ -449,6 +449,22 @@ xcoff_find_nearest_line (bfd *abfd,
                                             line_ptr);
 }
 
+xcoff_find_nearest_line_discriminator (bfd *abfd,
+                                      asection *section,
+                                      asymbol **symbols,
+                                      bfd_vma offset,
+                                      const char **filename_ptr,
+                                      const char **functionname_ptr,
+                                      unsigned int *line_ptr,
+                                      unsigned int *discriminator)
+{
+  *discriminator = 0;
+  return coff_find_nearest_line_with_names (abfd, xcoff_debug_sections,
+                                            section, symbols, offset,
+                                            filename_ptr, functionname_ptr,
+                                            line_ptr);
+}
+
 
 void
 _bfd_xcoff_swap_sym_in (bfd *abfd, void * ext1, void * in1)
@@ -4120,7 +4136,7 @@ const bfd_target rs6000coff_vec =
     coff_bfd_is_target_special_symbol,
     coff_get_lineno,
     xcoff_find_nearest_line,
-    _bfd_generic_find_nearest_line_discriminator,
+    xcoff_find_nearest_line_discriminator,
     _bfd_generic_find_line,
     coff_find_inliner_info,
     coff_bfd_make_debug_symbol,

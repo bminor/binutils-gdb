@@ -1,3 +1,8 @@
+2013-07-02  Tristan Gingold  <gingold@adacore.com>
+
+	* coff-rs6000.c (xcoff_find_nearest_line_discriminator): New function.
+	(rs6000coff_vec): Reference it.
+
 2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* elfnn-aarch64.c (aarch64_elf_create_got_section): New.
