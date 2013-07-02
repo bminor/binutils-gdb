@@ -1,3 +1,7 @@
+2013-07-02  Tom Tromey  <tromey@redhat.com>
+
+	* common/ptid.h: Comment fixes.
+
 2013-07-01  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_get_dwz_file): Return NULL if

@@ -24,8 +24,8 @@
    for identifying the inferior.  This consists of the process id
    (pid), thread id (tid), and other fields necessary for uniquely
    identifying the inferior process/thread being debugged.  When
-   manipulating ptids, the constructors, accessors, and predicate
-   declared in server.h should be used.  These are as follows:
+   manipulating ptids, the constructors, accessors, and predicates
+   declared in this file should be used.  These are as follows:
 
       ptid_build	- Make a new ptid from a pid, lwp, and tid.
       pid_to_ptid	- Make a new ptid from just a pid.
