@@ -17687,16 +17687,6 @@ Processors}.
 
 @end table
 
-Some configurations may include these targets as well:
-
-@table @code
-
-@item target nrom @var{dev}
-@cindex NetROM ROM emulator target
-NetROM ROM emulator.  This target only supports downloading.
-
-@end table
-
 Different targets are available on different configurations of @value{GDBN};
 your configuration may have more or fewer targets.
 

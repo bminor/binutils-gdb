@@ -1,3 +1,7 @@
+2013-07-02  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Target Commands): Don't mention "target nrom".
+
 2013-06-28  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (version.subst): Use version.in, not
