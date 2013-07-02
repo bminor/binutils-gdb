@@ -1,5 +1,13 @@
 2013-07-02  Mircea Gherzan  <mircea.gherzan@intel.com>
 
+	* win32-low.c (winapi_DebugActiveProcessStop): Move the WINAPI
+	attribute inside the parentheses.
+	(winapi_DebugSetProcessKillOnExit): Ditto.
+	(winapi_DebugBreakProcess): Ditto.
+	(winapi_GenerateConsoleCtrlEvent): Ditto.
+	
+2013-07-02  Mircea Gherzan  <mircea.gherzan@intel.com>
+
 	* notif.h (notif_event): Add a dummy member to avoid compiler
 	errors.
 

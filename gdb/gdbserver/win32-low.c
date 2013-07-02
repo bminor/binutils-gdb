@@ -90,10 +90,10 @@ const struct target_desc *win32_tdesc;
 
 #define NUM_REGS (the_low_target.num_regs)
 
-typedef BOOL WINAPI (*winapi_DebugActiveProcessStop) (DWORD dwProcessId);
-typedef BOOL WINAPI (*winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
-typedef BOOL WINAPI (*winapi_DebugBreakProcess) (HANDLE);
-typedef BOOL WINAPI (*winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
+typedef BOOL (WINAPI *winapi_DebugActiveProcessStop) (DWORD dwProcessId);
+typedef BOOL (WINAPI *winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
+typedef BOOL (WINAPI *winapi_DebugBreakProcess) (HANDLE);
+typedef BOOL (WINAPI *winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
 
 static void win32_resume (struct thread_resume *resume_info, size_t n);
 
