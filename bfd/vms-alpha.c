@@ -4740,6 +4740,26 @@ _bfd_vms_find_nearest_dst_line (bfd *abfd, asection *section,
 
   return FALSE;
 }
+
+/* Likewise but with a discriminator.  */
+
+static bfd_boolean
+_bfd_vms_find_nearest_line_discriminator (bfd *abfd,
+					  asection *section,
+					  asymbol **symbols,
+					  bfd_vma offset,
+					  const char **filename_ptr,
+					  const char **functionname_ptr,
+					  unsigned int *line_ptr,
+					  unsigned int *discriminator)
+{
+  *discriminator = 0;
+
+  return _bfd_vms_find_nearest_dst_line (abfd, section, symbols, offset,
+					 filename_ptr, functionname_ptr,
+					 line_ptr);
+}
+
 
 /* Canonicalizations.  */
 /* Set name, value, section and flags of SYM from E.  */
@@ -9322,6 +9342,8 @@ bfd_vms_get_data (bfd *abfd)
 #define alpha_vms_find_inliner_info        _bfd_nosymbols_find_inliner_info
 #define alpha_vms_bfd_make_debug_symbol    _bfd_nosymbols_bfd_make_debug_symbol
 #define alpha_vms_find_nearest_line        _bfd_vms_find_nearest_dst_line
+#define _bfd_generic_find_nearest_line_discriminator \
+  _bfd_vms_find_nearest_line_discriminator
 #define alpha_vms_bfd_is_local_label_name  vms_bfd_is_local_label_name
 
 /* Generic table.  */

@@ -1,5 +1,10 @@
 2013-07-02  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (_bfd_generic_find_nearest_line_discriminator): Define.
+	(_bfd_vms_find_nearest_line_discriminator): New function.
+
+2013-07-02  Tristan Gingold  <gingold@adacore.com>
+	
 	* coff-rs6000.c (xcoff_create_csect_from_smclas): Handle more smclas.
 
 2013-07-02  Tristan Gingold  <gingold@adacore.com>
