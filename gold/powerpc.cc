@@ -6346,10 +6346,13 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 	    }
 	  if (!can_plt_call)
 	    {
-	      // This is not an error in one special case: A self
-	      // call.  It isn't possible to cheaply verify we have
-	      // such a call so just check for a call to the same
-	      // section.
+	      // g++ as of 20130507 emits self-calls without a
+	      // following nop.  This is arguably wrong since we have
+	      // conflicting information.  On the one hand a global
+	      // symbol and on the other a local call sequence, but
+	      // don't error for this special case.
+	      // It isn't possible to cheaply verify we have exactly
+	      // such a call.  Allow all calls to the same section.
 	      bool ok = false;
 	      Address code = value;
 	      if (gsym->source() == Symbol::FROM_OBJECT

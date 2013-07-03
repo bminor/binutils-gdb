@@ -1,5 +1,14 @@
 2013-07-03  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc_stub_hash_entry): Delete "addend".
+	(ppc64_elf_size_stubs): Don't set "addend".
+	(ppc64_elf_relocate_section): Don't allow calls via
+	toc-adjusting stubs without a following nop even in an
+	executable, except for self-calls and both libc_start_main
+	and .libc_start_main.
+
+2013-07-03  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Hide ".TOC.".
 
 2013-07-02  Tristan Gingold  <gingold@adacore.com>

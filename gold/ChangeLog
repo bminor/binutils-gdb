@@ -1,3 +1,8 @@
+2013-07-03  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::Relocate::relocate): Update self-call
+	comment.
+
 2013-07-01  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf_reader.cc (Dwarf_ranges_table::read_ranges_table): Save
