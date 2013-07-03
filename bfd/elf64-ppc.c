@@ -6550,6 +6550,13 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
   if (htab == NULL)
     return FALSE;
 
+  if (htab->elf.hgot != NULL)
+    {
+      htab->elf.hgot->root.type = bfd_link_hash_new;
+      htab->elf.hgot->type = STT_OBJECT;
+      _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, TRUE);
+    }
+
   if (htab->sfpr == NULL)
     /* We don't have any relocs.  */
     return TRUE;
