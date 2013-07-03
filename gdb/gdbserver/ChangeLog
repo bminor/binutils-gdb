@@ -1,3 +1,9 @@
+2013-07-03  Pedro Alves  <palves@redhat.com>
+
+	* Makefile.in (config.status): Depend on development.sh.
+	* acinclude.m4: Include libmcheck.m4.
+	* configure: Regenerate.
+
 2013-07-02  Mircea Gherzan  <mircea.gherzan@intel.com>
 
 	* win32-low.c (winapi_DebugActiveProcessStop): Move the WINAPI

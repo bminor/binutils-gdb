@@ -687,6 +687,7 @@ ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
 enable_largefile
+enable_libmcheck
 with_ust
 with_ust_include
 with_ust_lib
@@ -1326,6 +1327,7 @@ Optional Features:
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
   --disable-largefile     omit support for large files
+  --enable-libmcheck      Try linking with -lmcheck if available
   --enable-werror         treat compile warnings as errors
   --enable-inprocess-agent
                           inprocess agent
@@ -4478,6 +4480,74 @@ _ACEOF
 
 
 fi
+
+
+# Set the 'development' global.
+. $srcdir/../development.sh
+
+# Enable -lmcheck by default (it provides cheap-enough memory
+# mangling), but turn it off for releases.
+if $development; then
+  libmcheck_default=yes
+else
+  libmcheck_default=no
+fi
+
+  # Check whether --enable-libmcheck was given.
+if test "${enable_libmcheck+set}" = set; then :
+  enableval=$enable_libmcheck; case "${enableval}" in
+      yes | y) ENABLE_LIBMCHECK="yes" ;;
+      no | n)  ENABLE_LIBMCHECK="no" ;;
+      *) as_fn_error "bad value ${enableval} for --enable-libmcheck" "$LINENO" 5 ;;
+    esac
+fi
+
+
+  if test -z "${ENABLE_LIBMCHECK}"; then
+    ENABLE_LIBMCHECK=${libmcheck_default}
+  fi
+
+  if test "$ENABLE_LIBMCHECK" = "yes" ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmcheck" >&5
+$as_echo_n "checking for main in -lmcheck... " >&6; }
+if test "${ac_cv_lib_mcheck_main+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmcheck  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main ()
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_mcheck_main=yes
+else
+  ac_cv_lib_mcheck_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_mcheck_main" >&5
+$as_echo "$ac_cv_lib_mcheck_main" >&6; }
+if test "x$ac_cv_lib_mcheck_main" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBMCHECK 1
+_ACEOF
+
+  LIBS="-lmcheck $LIBS"
+
+fi
+
+  fi
 
 
 # Dependency checking.

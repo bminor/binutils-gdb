@@ -23,10 +23,8 @@ AC_INIT(main.c)
 AC_CONFIG_HEADER(config.h:config.in)
 AM_MAINTAINER_MODE
 
-# Provide more thorough testing by -lmcheck.
-# Set it to 'true' for development snapshots, 'false' for releases or
-# pre-releases.
-development=true
+# Set the 'development' global.
+. $srcdir/development.sh
 
 AC_PROG_CC
 AC_USE_SYSTEM_EXTENSIONS
@@ -1052,34 +1050,22 @@ AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(PYTHON_LIBS)
 
-# Provide a --enable-libmcheck/--disable-libmcheck set of options
-# allowing a user to enable this option even when building releases,
-# or to disable it when building a snapshot.
-AC_ARG_ENABLE(libmcheck,
-  AS_HELP_STRING([--enable-libmcheck],
-                 [Try building GDB with -lmcheck if available]),
-  [case "${enableval}" in
-     yes | y) ENABLE_LIBMCHECK="yes" ;;
-     no | n)  ENABLE_LIBMCHECK="no" ;;
-     *) AC_MSG_ERROR(bad value ${enableval} for --enable-libmcheck) ;;
-   esac])
-
 # Enable -lmcheck by default (it provides cheap-enough memory mangling),
 # but turn it off if Python is enabled with threads, since -lmcheck is
 # not thread safe (http://sourceware.org/bugzilla/show_bug.cgi?id=9939),
 # and for releases.
-if test -z "${ENABLE_LIBMCHECK}" \
-        -a \( "${have_libpython}" = "no" \
-	     -o "${python_has_threads}" = "no" \) \
-    && $development; then
-  ENABLE_LIBMCHECK=yes
+if test \( "${have_libpython}" = "no" -o "${python_has_threads}" = "no" \) \
+   && $development; then
+  libmcheck_default=yes
+else
+  libmcheck_default=no
 fi
+GDB_AC_LIBMCHECK(${libmcheck_default})
 
-if test "$ENABLE_LIBMCHECK" = "yes" ; then
-  if test "${have_libpython}" != "no" -a "${python_has_threads}" = "yes" ; then
-    AC_MSG_WARN(--enable-libmcheck may lead to spurious crashes if threads are used in python)
-  fi
-  AC_CHECK_LIB(mcheck, main)
+if test "$ENABLE_LIBMCHECK" = "yes" \
+	-a "${have_libpython}" != "no" \
+	-a "${python_has_threads}" = "yes" ; then
+  AC_MSG_WARN(--enable-libmcheck may lead to spurious crashes if threads are used in python)
 fi
 
 # ------------------------- #

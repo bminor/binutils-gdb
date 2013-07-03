@@ -1480,7 +1480,7 @@ Optional Features:
   --enable-gdbtk          enable gdbtk graphical user interface (GUI)
   --enable-profiling      enable profiling of GDB
   --disable-rpath         do not hardcode runtime library paths
-  --enable-libmcheck      Try building GDB with -lmcheck if available
+  --enable-libmcheck      Try linking with -lmcheck if available
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings if gcc is used
   --enable-gdb-build-warnings
@@ -2704,10 +2704,8 @@ fi
 
 
 
-# Provide more thorough testing by -lmcheck.
-# Set it to 'true' for development snapshots, 'false' for releases or
-# pre-releases.
-development=true
+# Set the 'development' global.
+. $srcdir/development.sh
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -8565,36 +8563,33 @@ fi
 
 
 
-# Provide a --enable-libmcheck/--disable-libmcheck set of options
-# allowing a user to enable this option even when building releases,
-# or to disable it when building a snapshot.
-# Check whether --enable-libmcheck was given.
-if test "${enable_libmcheck+set}" = set; then :
-  enableval=$enable_libmcheck; case "${enableval}" in
-     yes | y) ENABLE_LIBMCHECK="yes" ;;
-     no | n)  ENABLE_LIBMCHECK="no" ;;
-     *) as_fn_error "bad value ${enableval} for --enable-libmcheck" "$LINENO" 5 ;;
-   esac
-fi
-
-
 # Enable -lmcheck by default (it provides cheap-enough memory mangling),
 # but turn it off if Python is enabled with threads, since -lmcheck is
 # not thread safe (http://sourceware.org/bugzilla/show_bug.cgi?id=9939),
 # and for releases.
-if test -z "${ENABLE_LIBMCHECK}" \
-        -a \( "${have_libpython}" = "no" \
-	     -o "${python_has_threads}" = "no" \) \
-    && $development; then
-  ENABLE_LIBMCHECK=yes
+if test \( "${have_libpython}" = "no" -o "${python_has_threads}" = "no" \) \
+   && $development; then
+  libmcheck_default=yes
+else
+  libmcheck_default=no
 fi
 
-if test "$ENABLE_LIBMCHECK" = "yes" ; then
-  if test "${have_libpython}" != "no" -a "${python_has_threads}" = "yes" ; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&5
-$as_echo "$as_me: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&2;}
+  # Check whether --enable-libmcheck was given.
+if test "${enable_libmcheck+set}" = set; then :
+  enableval=$enable_libmcheck; case "${enableval}" in
+      yes | y) ENABLE_LIBMCHECK="yes" ;;
+      no | n)  ENABLE_LIBMCHECK="no" ;;
+      *) as_fn_error "bad value ${enableval} for --enable-libmcheck" "$LINENO" 5 ;;
+    esac
+fi
+
+
+  if test -z "${ENABLE_LIBMCHECK}"; then
+    ENABLE_LIBMCHECK=${libmcheck_default}
   fi
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmcheck" >&5
+
+  if test "$ENABLE_LIBMCHECK" = "yes" ; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for main in -lmcheck" >&5
 $as_echo_n "checking for main in -lmcheck... " >&6; }
 if test "${ac_cv_lib_mcheck_main+set}" = set; then :
   $as_echo_n "(cached) " >&6
@@ -8633,6 +8628,14 @@ _ACEOF
 
 fi
 
+  fi
+
+
+if test "$ENABLE_LIBMCHECK" = "yes" \
+	-a "${have_libpython}" != "no" \
+	-a "${python_has_threads}" = "yes" ; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&5
+$as_echo "$as_me: WARNING: --enable-libmcheck may lead to spurious crashes if threads are used in python" >&2;}
 fi
 
 # ------------------------- #

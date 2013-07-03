@@ -41,6 +41,18 @@ AC_HEADER_DIRENT
 
 AC_FUNC_ALLOCA
 
+# Set the 'development' global.
+. $srcdir/../development.sh
+
+# Enable -lmcheck by default (it provides cheap-enough memory
+# mangling), but turn it off for releases.
+if $development; then
+  libmcheck_default=yes
+else
+  libmcheck_default=no
+fi
+GDB_AC_LIBMCHECK(${libmcheck_default})
+
 # Dependency checking.
 ZW_CREATE_DEPDIR
 ZW_PROG_COMPILER_DEPENDENCIES([CC])

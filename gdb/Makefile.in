@@ -1348,7 +1348,7 @@ stamp-h: $(srcdir)/config.in config.status
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
-config.status: $(srcdir)/configure configure.tgt configure.host
+config.status: $(srcdir)/configure configure.tgt configure.host development.sh
 	$(SHELL) config.status --recheck
 
 ACLOCAL = aclocal
@@ -1358,6 +1358,7 @@ ACLOCAL_AMFLAGS = -I ../config
 aclocal_m4_deps = \
 	configure.ac \
 	acx_configure_dir.m4 \
+	libmcheck.m4 \
 	../bfd/bfd.m4 \
 	../config/acinclude.m4 \
 	../config/plugins.m4 \

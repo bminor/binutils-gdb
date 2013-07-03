@@ -3,6 +3,9 @@ sinclude(../../bfd/bfd.m4)
 
 sinclude(../acx_configure_dir.m4)
 
+# This gets GDB_AC_LIBMCHECK.
+sinclude(../libmcheck.m4)
+
 dnl This gets autoconf bugfixes
 sinclude(../../config/override.m4)
 
