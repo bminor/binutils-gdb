@@ -1,5 +1,11 @@
 2013-07-03  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Don't hide .TOC.
+	when relocatable.  Don't change root.type or type here.
+	(ppc64_elf_set_toc): Set type of .TOC. to STT_OBJECT.
+
+2013-07-03  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (struct ppc_stub_hash_entry): Delete "addend".
 	(ppc64_elf_size_stubs): Don't set "addend".
 	(ppc64_elf_relocate_section): Don't allow calls via

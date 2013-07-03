@@ -6547,12 +6547,9 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
   if (htab == NULL)
     return FALSE;
 
-  if (htab->elf.hgot != NULL)
-    {
-      htab->elf.hgot->root.type = bfd_link_hash_new;
-      htab->elf.hgot->type = STT_OBJECT;
-      _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, TRUE);
-    }
+  if (!info->relocatable
+      && htab->elf.hgot != NULL)
+    _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, TRUE);
 
   if (htab->sfpr == NULL)
     /* We don't have any relocs.  */
@@ -11917,6 +11914,7 @@ ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
       if (htab != NULL
 	  && htab->elf.hgot != NULL)
 	{
+	  htab->elf.hgot->type = STT_OBJECT;
 	  htab->elf.hgot->root.type = bfd_link_hash_defined;
 	  htab->elf.hgot->root.u.def.value = TOC_BASE_OFF;
 	  htab->elf.hgot->root.u.def.section = s;
