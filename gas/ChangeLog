@@ -1,3 +1,8 @@
+2013-07-03  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* config/tc-aarch64.c (md_apply_fix): Reorder case values.
+	(aarch64_force_relocation): Likewise.
+
 2013-07-02  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c (ppc_elf_adjust_symtab): Don't make .TOC. weak.
