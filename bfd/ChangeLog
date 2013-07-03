@@ -1,3 +1,11 @@
+2013-07-03  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Reorder case
+	values.
+	(elfNN_aarch64_relocate_section): Likewise.
+	(elfNN_aarch64_gc_sweep_hook): Likewise.
+	(elfNN_aarch64_check_relocs): Likewise.
+
 2013-07-03  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Don't hide .TOC.
