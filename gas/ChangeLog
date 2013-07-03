@@ -1,5 +1,9 @@
 2013-07-03  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
+	* config/tc-aarch64.c (reloc_table): Merge got_prel19 into got.
+
+2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
 	* config/tc-aarch64.c (md_apply_fix): Reorder case values.
 	(aarch64_force_relocation): Likewise.
 

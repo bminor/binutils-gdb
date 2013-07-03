@@ -3,5 +3,4 @@
 .text
 _test_gc_rel309:
 	nop
-	ldr     x1, :got_prel19:sym309_notused
-
+	ldr     x1, :got:sym309_notused

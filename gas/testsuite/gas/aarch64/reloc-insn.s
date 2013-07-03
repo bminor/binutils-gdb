@@ -178,7 +178,7 @@ func:
 	prfm	pstl1keep, [x7, #:lo12:ldata+4100]
 
 	// BFD_RELOC_AARCH64_GOT_LD_PREL19
-	ldr	x0, :got_prel19:cdata
+	ldr	x0, :got:cdata
 	ldrb	w1, [x0]
 	
 	ret

@@ -11,4 +11,4 @@
 
 _start:
 	nop
-	ldr	x0, :got_prel19:src
+	ldr	x0, :got:src

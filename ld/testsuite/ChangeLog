@@ -1,3 +1,8 @@
+2013-07-03  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* ld-aarch64/emit-relocs-309.s: Replace got_prel19 with got.
+	* ld-aarch64/gc-relocs-309.s: Likewise.
+
 2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* ld-aarch64/gc-plt-relocs.d: Adjust expected .got offsets.

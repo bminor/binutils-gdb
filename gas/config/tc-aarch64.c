@@ -2360,18 +2360,14 @@ static struct reloc_table_entry reloc_table[] = {
    BFD_RELOC_AARCH64_MOVW_G3,
    0,
    0},
-  /* Get to the GOT entry for a symbol.  */
-  {"got_prel19", 0,
-   0,
-   0,
-   0,
-   BFD_RELOC_AARCH64_GOT_LD_PREL19},
+
   /* Get to the page containing GOT entry for a symbol.  */
   {"got", 1,
    BFD_RELOC_AARCH64_ADR_GOT_PAGE,
    0,
    0,
-   0},
+   BFD_RELOC_AARCH64_GOT_LD_PREL19},
+
   /* 12 bit offset into the page containing GOT entry for that symbol.  */
   {"got_lo12", 0,
    0,

@@ -1,3 +1,7 @@
+2013-07-03  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* gas/aarch64/reloc-insn.s (func): Replace :got_prel19: with :got:.
+
 2013-06-26  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/ilp32-basic.d: New file.
