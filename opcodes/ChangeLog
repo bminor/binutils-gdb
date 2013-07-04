@@ -1,3 +1,7 @@
+2013-07-04  Alan Modra  <amodra@gmail.com>
+
+	* ppc-opc.c (powerpc_opcodes): Add tdui, twui, tdu, twu, tui, tu.
+
 2013-06-26  Nick Clifton  <nickc@redhat.com>
 
 	* rx-decode.opc (rx_decode_opcode): Check sd field as well as ss
