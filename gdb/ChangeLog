@@ -1,5 +1,13 @@
 2013-07-04  Pedro Alves  <palves@redhat.com>
 
+	* findvar.c (value_of_register): Use allocate_optimized_out_value
+	if the register has been optimized out, instead of
+	set_value_optimized_out.
+	* frame-unwind.c (frame_unwind_got_optimized): Use
+	allocate_optimized_out_value.
+
+2013-07-04  Pedro Alves  <palves@redhat.com>
+
 	* value.c (value_bits_valid): If the value is not lval_computed,
 	or doesn't have a check_validity hook, assume the value is entirely
 	valid.

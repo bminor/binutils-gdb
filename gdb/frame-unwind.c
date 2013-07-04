@@ -162,11 +162,9 @@ struct value *
 frame_unwind_got_optimized (struct frame_info *frame, int regnum)
 {
   struct gdbarch *gdbarch = frame_unwind_arch (frame);
-  struct value *reg_val;
+  struct type *reg_type = register_type (gdbarch, regnum);
 
-  reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
-  set_value_optimized_out (reg_val, 1);
-  return reg_val;
+  return allocate_optimized_out_value (reg_type);
 }
 
 /* Return a value which indicates that FRAME copied REGNUM into

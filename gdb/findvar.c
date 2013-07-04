@@ -266,6 +266,7 @@ value_of_register (int regnum, struct frame_info *frame)
   int optim;
   int unavail;
   struct value *reg_val;
+  struct type *reg_type;
   int realnum;
   gdb_byte raw_buffer[MAX_REGISTER_SIZE];
   enum lval_type lval;
@@ -279,7 +280,11 @@ value_of_register (int regnum, struct frame_info *frame)
   frame_register (frame, regnum, &optim, &unavail,
 		  &lval, &addr, &realnum, raw_buffer);
 
-  reg_val = allocate_value (register_type (gdbarch, regnum));
+  reg_type = register_type (gdbarch, regnum);
+  if (optim)
+    reg_val = allocate_optimized_out_value (reg_type);
+  else
+    reg_val = allocate_value (reg_type);
 
   if (!optim && !unavail)
     memcpy (value_contents_raw (reg_val), raw_buffer,
@@ -291,7 +296,6 @@ value_of_register (int regnum, struct frame_info *frame)
   VALUE_LVAL (reg_val) = lval;
   set_value_address (reg_val, addr);
   VALUE_REGNUM (reg_val) = regnum;
-  set_value_optimized_out (reg_val, optim);
   if (unavail)
     mark_value_bytes_unavailable (reg_val, 0, register_size (gdbarch, regnum));
   VALUE_FRAME_ID (reg_val) = get_frame_id (frame);
