@@ -1,3 +1,19 @@
+2013-07-04  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (host_alias): Use @host_noncanonical@.
+	(target_alias): Use @target_noncanonical@.
+	* configure.ac: Use ACX_NONCANONICAL_TARGET and
+	ACX_NONCANONICAL_HOST.
+	* configure: Regenerated.
+
+	Revert:
+	2013-06-28  Mircea Gherzan  <mircea.gherzan@intel.com>
+
+	* configure.ac (version_host, version_target): Set and AC_SUBST them.
+	* configure: Rebuild.
+	* Makefile.in (version_host, version_target): Get from configure.
+	(version.c): Use $(version_host) and $(version_target).
+
 2013-07-03  Pedro Alves  <palves@redhat.com>
 
 	* Makefile.in (config.status): Depend on development.sh.

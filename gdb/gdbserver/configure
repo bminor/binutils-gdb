@@ -589,8 +589,6 @@ ac_includes_default="\
 #endif"
 
 ac_subst_vars='LTLIBOBJS
-version_target
-version_host
 GNULIB_STDINT_H
 extra_libraries
 IPA_DEPFILES
@@ -614,6 +612,8 @@ MAKE
 CCDEPMODE
 DEPDIR
 am__leading_dot
+host_noncanonical
+target_noncanonical
 ALLOCA
 RANLIB
 INSTALL_DATA
@@ -4550,6 +4550,26 @@ fi
   fi
 
 
+ case ${build_alias} in
+  "") build_noncanonical=${build} ;;
+  *) build_noncanonical=${build_alias} ;;
+esac
+
+ case ${host_alias} in
+  "") host_noncanonical=${build_noncanonical} ;;
+  *) host_noncanonical=${host_alias} ;;
+esac
+
+ case ${target_alias} in
+  "") target_noncanonical=${host_noncanonical} ;;
+  *) target_noncanonical=${target_alias} ;;
+esac
+
+
+
+
+
+
 # Dependency checking.
 rm -rf .tst 2>/dev/null
 mkdir .tst 2>/dev/null
@@ -5996,14 +6016,6 @@ GNULIB_STDINT_H=
 if test x"$STDINT_H" != x; then
   GNULIB_STDINT_H=$GNULIB/$STDINT_H
 fi
-
-
-# For --version, we want to the print --host/--target exactly
-# as passed to configure.  But if those were not specified, then
-# print the canonical host/target.
-version_host=${host_alias:-$host}
-version_target=${target_alias:-$target}
-
 
 
 ac_config_files="$ac_config_files Makefile"
