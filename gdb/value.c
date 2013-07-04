@@ -1086,7 +1086,7 @@ value_bits_valid (const struct value *value, int offset, int length)
     return 1;
   if (value->lval != lval_computed
       || !value->location.computed.funcs->check_validity)
-    return 0;
+    return 1;
   return value->location.computed.funcs->check_validity (value, offset,
 							 length);
 }

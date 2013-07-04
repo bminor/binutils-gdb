@@ -1,3 +1,9 @@
+2013-07-04  Pedro Alves  <palves@redhat.com>
+
+	* value.c (value_bits_valid): If the value is not lval_computed,
+	or doesn't have a check_validity hook, assume the value is entirely
+	valid.
+
 2013-07-04  Andrew Burgess  <aburgess@broadcom.com>
 
 	* stack.c (read_frame_arg): No longer fetch lazy values.
