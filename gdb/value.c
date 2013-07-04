@@ -1054,6 +1054,11 @@ value_contents_equal (struct value *val1, struct value *val2)
 int
 value_optimized_out (struct value *value)
 {
+  /* We can only know if a value is optimized out once we have tried to
+     fetch it.  */
+  if (!value->optimized_out && value->lazy)
+    value_fetch_lazy (value);
+
   return value->optimized_out;
 }
 
@@ -2628,9 +2633,7 @@ value_primitive_field (struct value *arg1, int offset,
      description correctly.  */
   check_typedef (type);
 
-  if (value_optimized_out (arg1))
-    v = allocate_optimized_out_value (type);
-  else if (TYPE_FIELD_BITSIZE (arg_type, fieldno))
+  if (TYPE_FIELD_BITSIZE (arg_type, fieldno))
     {
       /* Handle packed fields.
 
@@ -2644,19 +2647,24 @@ value_primitive_field (struct value *arg1, int offset,
       int bitpos = TYPE_FIELD_BITPOS (arg_type, fieldno);
       int container_bitsize = TYPE_LENGTH (type) * 8;
 
-      v = allocate_value_lazy (type);
-      v->bitsize = TYPE_FIELD_BITSIZE (arg_type, fieldno);
-      if ((bitpos % container_bitsize) + v->bitsize <= container_bitsize
-	  && TYPE_LENGTH (type) <= (int) sizeof (LONGEST))
-	v->bitpos = bitpos % container_bitsize;
+      if (arg1->optimized_out)
+	v = allocate_optimized_out_value (type);
       else
-	v->bitpos = bitpos % 8;
-      v->offset = (value_embedded_offset (arg1)
-		   + offset
-		   + (bitpos - v->bitpos) / 8);
-      set_value_parent (v, arg1);
-      if (!value_lazy (arg1))
-	value_fetch_lazy (v);
+	{
+	  v = allocate_value_lazy (type);
+	  v->bitsize = TYPE_FIELD_BITSIZE (arg_type, fieldno);
+	  if ((bitpos % container_bitsize) + v->bitsize <= container_bitsize
+	      && TYPE_LENGTH (type) <= (int) sizeof (LONGEST))
+	    v->bitpos = bitpos % container_bitsize;
+	  else
+	    v->bitpos = bitpos % 8;
+	  v->offset = (value_embedded_offset (arg1)
+		       + offset
+		       + (bitpos - v->bitpos) / 8);
+	  set_value_parent (v, arg1);
+	  if (!value_lazy (arg1))
+	    value_fetch_lazy (v);
+	}
     }
   else if (fieldno < TYPE_N_BASECLASSES (arg_type))
     {
@@ -2669,29 +2677,37 @@ value_primitive_field (struct value *arg1, int offset,
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
 	value_fetch_lazy (arg1);
 
-      /* We special case virtual inheritance here because this
-	 requires access to the contents, which we would rather avoid
-	 for references to ordinary fields of unavailable values.  */
-      if (BASETYPE_VIA_VIRTUAL (arg_type, fieldno))
-	boffset = baseclass_offset (arg_type, fieldno,
-				    value_contents (arg1),
-				    value_embedded_offset (arg1),
-				    value_address (arg1),
-				    arg1);
-      else
-	boffset = TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
-
-      if (value_lazy (arg1))
-	v = allocate_value_lazy (value_enclosing_type (arg1));
+      /* The optimized_out flag is only set correctly once a lazy value is
+         loaded, having just loaded some lazy values we should check the
+         optimized out case now.  */
+      if (arg1->optimized_out)
+	v = allocate_optimized_out_value (type);
       else
 	{
-	  v = allocate_value (value_enclosing_type (arg1));
-	  value_contents_copy_raw (v, 0, arg1, 0,
-				   TYPE_LENGTH (value_enclosing_type (arg1)));
+	  /* We special case virtual inheritance here because this
+	     requires access to the contents, which we would rather avoid
+	     for references to ordinary fields of unavailable values.  */
+	  if (BASETYPE_VIA_VIRTUAL (arg_type, fieldno))
+	    boffset = baseclass_offset (arg_type, fieldno,
+					value_contents (arg1),
+					value_embedded_offset (arg1),
+					value_address (arg1),
+					arg1);
+	  else
+	    boffset = TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
+
+	  if (value_lazy (arg1))
+	    v = allocate_value_lazy (value_enclosing_type (arg1));
+	  else
+	    {
+	      v = allocate_value (value_enclosing_type (arg1));
+	      value_contents_copy_raw (v, 0, arg1, 0,
+				       TYPE_LENGTH (value_enclosing_type (arg1)));
+	    }
+	  v->type = type;
+	  v->offset = value_offset (arg1);
+	  v->embedded_offset = offset + value_embedded_offset (arg1) + boffset;
 	}
-      v->type = type;
-      v->offset = value_offset (arg1);
-      v->embedded_offset = offset + value_embedded_offset (arg1) + boffset;
     }
   else
     {
@@ -2702,7 +2718,12 @@ value_primitive_field (struct value *arg1, int offset,
       if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
 	value_fetch_lazy (arg1);
 
-      if (value_lazy (arg1))
+      /* The optimized_out flag is only set correctly once a lazy value is
+         loaded, having just loaded some lazy values we should check for
+         the optimized out case now.  */
+      if (arg1->optimized_out)
+	v = allocate_optimized_out_value (type);
+      else if (value_lazy (arg1))
 	v = allocate_value_lazy (type);
       else
 	{
@@ -3526,7 +3547,10 @@ value_fetch_lazy (struct value *val)
   else if (VALUE_LVAL (val) == lval_computed
 	   && value_computed_funcs (val)->read != NULL)
     value_computed_funcs (val)->read (val);
-  else if (value_optimized_out (val))
+  /* Don't call value_optimized_out on val, doing so would result in a
+     recursive call back to value_fetch_lazy, instead check the
+     optimized_out flag directly.  */
+  else if (val->optimized_out)
     /* Keep it optimized out.  */;
   else
     internal_error (__FILE__, __LINE__, _("Unexpected lazy value type."));

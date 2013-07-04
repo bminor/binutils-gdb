@@ -1,5 +1,15 @@
 2013-07-04  Andrew Burgess  <aburgess@broadcom.com>
 
+	* stack.c (read_frame_arg): No longer fetch lazy values.
+	* value.c (value_optimized_out): If the value is not already
+	marked optimized out, and is lazy then fetch it.
+	(value_primitive_field): Move optimized out check to later in the
+	function, after we have loaded any lazy values.
+	(value_fetch_lazy): Use optimized out flag directly rather than
+	calling optimized_out method.
+
+2013-07-04  Andrew Burgess  <aburgess@broadcom.com>
+
 	* valops.c: Don't include "user-regs.h".
 	(value_fetch_lazy): Moved to value.c.
 	* value.c: Include "user-regs.h".

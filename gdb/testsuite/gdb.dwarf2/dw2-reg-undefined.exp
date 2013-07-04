@@ -1,0 +1,59 @@
+# Copyright 2013 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+load_lib dwarf.exp
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+if {![dwarf2_support]} {
+    return 0
+}
+
+# This test can only be run on x86_64 targets.
+if {![istarget "x86_64-*-*"] || ![is_lp64_target]} {
+    return 0
+}
+
+standard_testfile .S
+
+if { [prepare_for_testing $testfile.exp $testfile $srcfile {nodebug}] } {
+    return -1
+}
+
+if ![runto stop_frame] {
+    perror "Failed to stop in stop_frame"
+    return -1
+}
+
+gdb_test "bt" "#0  (0x\[0-9a-f\]+ in )?stop_frame \[^\r\n\]*\r\n#1  \[^\r\n\]*first_frame \[^\r\n\]*\r\n#2  \[^\r\n\]*main\[^\r\n\]*" \
+    "backtrace from stop_frame"
+
+set value_pattern "0x\[0-9a-f\]+\\s+\[0-9\]+"
+set opt_out_pattern "\\*value not available\\*"
+
+for {set f 0} {$f < 3} {incr f} {
+    if {${f} == 0} {
+	set pattern_rax_rbx_rcx ${value_pattern}
+	set pattern_r8_r9 ${value_pattern}
+    } else {
+	set pattern_rax_rbx_rcx ${opt_out_pattern}
+	set pattern_r8_r9 ${value_pattern}
+    }
+
+    # Select frame.
+    gdb_test "frame ${f}" "#${f}.*" "Switch to frame ${f}"
+
+    # Display register values.
+    gdb_test "info registers rax rbx rcx r8 r9" "rax\\s+${pattern_rax_rbx_rcx}\\s*\r\nrbx\\s+${pattern_rax_rbx_rcx}\\s*\r\nrcx\\s+${pattern_rax_rbx_rcx}\\s*\r\nr8\\s+${pattern_r8_r9}\\s*\r\nr9\\s+${pattern_r8_r9}\\s*" \
+	"Check values of rax, rbx, rcx, r8, r9 in frame ${f}"
+}

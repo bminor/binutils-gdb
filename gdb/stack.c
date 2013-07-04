@@ -359,10 +359,6 @@ read_frame_arg (struct symbol *sym, struct frame_info *frame,
 	    {
 	      struct type *type = value_type (val);
 
-	      if (!value_optimized_out (val) && value_lazy (val))
-		value_fetch_lazy (val);
-	      if (!value_optimized_out (val) && value_lazy (entryval))
-		value_fetch_lazy (entryval);
 	      if (!value_optimized_out (val)
 		  && value_available_contents_eq (val, 0, entryval, 0,
 						  TYPE_LENGTH (type)))

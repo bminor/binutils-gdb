@@ -1,3 +1,9 @@
+2013-07-04  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.dwarf2/dw2-reg-undefined.exp: New file.
+	* gdb.dwarf2/dw2-reg-undefined.c: Likewise.
+	* gdb.dwarf2/dw2-reg-undefined.S: Likewise.
+
 2013-07-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/break-on-linker-gcd-function.exp: Replace
