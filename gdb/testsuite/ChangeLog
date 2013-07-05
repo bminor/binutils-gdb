@@ -1,3 +1,10 @@
+2013-07-05  Yao Qi  <yao@codesourcery.com>
+
+	* boards/local-remote-host.exp: Remove obsolete comments.
+	* boards/native-extended-gdbserver.exp: Likewise.
+	* boards/native-gdbserver.exp: Likewise.
+	* boards/native-stdio-gdbserver.exp: Likewise.
+
 2013-07-04  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.dwarf2/dw2-reg-undefined.exp: New file.

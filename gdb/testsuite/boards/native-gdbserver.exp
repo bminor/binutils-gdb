@@ -17,11 +17,6 @@
 # natively with gdbserver.
 #
 # To use this file:
-# bash$ touch ${my_dejagnu_dir}/my-dejagnu.exp
-# bash$ export DEJAGNU=${my_dejagnu_dir}/my-dejagnu.exp
-# bash$ mkdir ${my_dejagnu_dir}/boards
-# bash$ cp ${src_dir}/gdb/testsuite/boards/native-gdbserver.exp \
-#   ${my_dejagnu_dir}/boards
 # bash$ cd ${build_dir}/gdb
 # bash$ make check RUNTESTFLAGS="--target_board=native-gdbserver"
 
