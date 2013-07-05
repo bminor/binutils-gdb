@@ -48,6 +48,11 @@ set s390tests {
      {{readelf -Ssrl tlsbin.rd} {objdump -dzrj.text tlsbin.dd}
       {objdump -sj.got tlsbin.sd} {objdump -sj.tdata tlsbin.td}}
      "tlsbin"}
+    {"GOT: symbol address load from got to larl"
+     "-shared -melf_s390 --version-script=gotreloc-1.ver" ""
+     "-m31" {gotreloc-1.s}
+     {{objdump -dzrj.text gotreloc_31-1.dd}}
+     "gotreloc_31-1"}
 }
 
 set s390xtests {
@@ -64,6 +69,11 @@ set s390xtests {
      {{readelf -WSsrl tlsbin_64.rd} {objdump -dzrj.text tlsbin_64.dd}
       {objdump -sj.got tlsbin_64.sd} {objdump -sj.tdata tlsbin_64.td}}
      "tlsbin_64"}
+    {"GOT: symbol address load from got to larl"
+     "-shared -melf64_s390 --version-script=gotreloc-1.ver" ""
+     "-m64" {gotreloc-1.s}
+     {{objdump -dzrj.text gotreloc_64-1.dd}}
+     "gotreloc_64-1"}
 }
 
 if [istarget "s390-*-*"] {
@@ -71,5 +81,6 @@ if [istarget "s390-*-*"] {
 }
 
 if [istarget "s390x-*-*"] {
+    run_ld_link_tests $s390tests
     run_ld_link_tests $s390xtests
 }

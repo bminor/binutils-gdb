@@ -2496,6 +2496,37 @@ elf_s390_relocate_section (bfd *output_bfd,
 				  base_got->contents + off);
 		      h->got.offset |= 1;
 		    }
+
+		  if ((h->def_regular
+		       && info->shared
+		       && SYMBOL_REFERENCES_LOCAL (info, h))
+		      /* lgrl rx,sym@GOTENT -> larl rx, sym */
+		      && ((r_type == R_390_GOTENT
+			   && (bfd_get_16 (input_bfd,
+					   contents + rel->r_offset - 2)
+			       & 0xff0f) == 0xc408)
+			  /* lg rx, sym@GOT(r12) -> larl rx, sym */
+			  || (r_type == R_390_GOT20
+			      && (bfd_get_32 (input_bfd,
+					      contents + rel->r_offset - 2)
+				  & 0xff00f000) == 0xe300c000
+			      && bfd_get_8 (input_bfd,
+					    contents + rel->r_offset + 3) == 0x04)))
+
+		    {
+		      unsigned short new_insn =
+			(0xc000 | (bfd_get_8 (input_bfd,
+					      contents + rel->r_offset - 1) & 0xf0));
+		      bfd_put_16 (output_bfd, new_insn,
+				  contents + rel->r_offset - 2);
+		      r_type = R_390_PC32DBL;
+		      rel->r_addend = 2;
+		      howto = elf_howto_table + r_type;
+		      relocation = h->root.u.def.value
+			+ h->root.u.def.section->output_section->vma
+			+ h->root.u.def.section->output_offset;
+		      goto do_relocation;
+		    }
 		}
 	      else
 		unresolved_reloc = FALSE;
