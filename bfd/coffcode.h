@@ -3953,7 +3953,7 @@ coff_write_object_contents (bfd * abfd)
 	  bfd_size_type amt;
 
 	  internal_f.f_nscns++;
-	  strncpy (&(scnhdr.s_name[0]), current->name, 8);
+	  memcpy (scnhdr.s_name, ".ovrflo", 8);
 	  scnhdr.s_paddr = current->reloc_count;
 	  scnhdr.s_vaddr = current->lineno_count;
 	  scnhdr.s_size = 0;

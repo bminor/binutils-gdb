@@ -1,3 +1,8 @@
+2013-07-05  Tristan Gingold  <gingold@adacore.com>
+
+	* coffcode.h (coff_write_object_contents): Use ".ovrflo" name for
+	overflow sections.
+
 2013-07-05  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* elf32-s390.c: Add new relocation definitions R_390_PC12DBL,
