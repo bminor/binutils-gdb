@@ -21,7 +21,7 @@ extern int final (int arg);
 
 typedef int (*final_t) (int arg);
 
-asm (".type gnu_ifunc, @gnu_indirect_function");
+asm (".type gnu_ifunc, %gnu_indirect_function");
 
 final_t
 gnu_ifunc (void)

@@ -1,3 +1,8 @@
+2013-07-05  Will Newton  <will.newton@linaro.org>
+
+	* gdb.base/gnu-ifunc-lib.c: Use %function instead of @function
+	in asm syntax to allow building on ARM.
+
 2013-07-05  Yao Qi  <yao@codesourcery.com>
 
 	* boards/local-remote-host.exp: Remove obsolete comments.
