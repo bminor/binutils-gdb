@@ -7,7 +7,7 @@ foo:
 	tbeginc	4000(%r6),65000
 	tend
 	bpp	10,.,4000(%r6)
-	bprp	10,.,-80000
+	bprp	10,.,.+24
 	niai	10,13
 	lat	%r6,-5555(%r7,%r8)
 	lgat	%r6,-5555(%r7,%r8)
@@ -52,3 +52,7 @@ foo:
 	ppa	%r5,%r6,12
 	crdte	%r5,%r6,%r9
 	crdte	%r5,%r6,%r9,1
+
+	bprp	10,bar,bar
+	bprp	10,bar@PLT,bar@PLT
+bar:

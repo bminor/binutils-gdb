@@ -1316,8 +1316,14 @@ md_gather_operands (char *str,
 	  else if (suffix == ELF_SUFFIX_PLT)
 	    {
 	      if ((operand->flags & S390_OPERAND_PCREL)
-		  && (operand->bits == 16))
+		  && (operand->bits == 12))
+		reloc = BFD_RELOC_390_PLT12DBL;
+	      else if ((operand->flags & S390_OPERAND_PCREL)
+		       && (operand->bits == 16))
 		reloc = BFD_RELOC_390_PLT16DBL;
+	      else if ((operand->flags & S390_OPERAND_PCREL)
+		       && (operand->bits == 24))
+		reloc = BFD_RELOC_390_PLT24DBL;
 	      else if ((operand->flags & S390_OPERAND_PCREL)
 		       && (operand->bits == 32))
 		reloc = BFD_RELOC_390_PLT32DBL;
@@ -1554,7 +1560,7 @@ md_gather_operands (char *str,
 	  if (!reloc_howto)
 	    abort ();
 
-	  size = bfd_get_reloc_size (reloc_howto);
+	  size = ((reloc_howto->bitsize - 1) / 8) + 1;
 
 	  if (size < 1 || size > 4)
 	    abort ();
@@ -2034,7 +2040,9 @@ tc_s390_fix_adjustable (fixS *fixP)
       || fixP->fx_r_type == BFD_RELOC_390_PLTOFF16
       || fixP->fx_r_type == BFD_RELOC_390_PLTOFF32
       || fixP->fx_r_type == BFD_RELOC_390_PLTOFF64
+      || fixP->fx_r_type == BFD_RELOC_390_PLT12DBL
       || fixP->fx_r_type == BFD_RELOC_390_PLT16DBL
+      || fixP->fx_r_type == BFD_RELOC_390_PLT24DBL
       || fixP->fx_r_type == BFD_RELOC_390_PLT32
       || fixP->fx_r_type == BFD_RELOC_390_PLT32DBL
       || fixP->fx_r_type == BFD_RELOC_390_PLT64
@@ -2100,7 +2108,9 @@ tc_s390_force_relocation (struct fix *fixp)
     case BFD_RELOC_390_GOT64:
     case BFD_RELOC_390_GOTENT:
     case BFD_RELOC_390_PLT32:
+    case BFD_RELOC_390_PLT12DBL:
     case BFD_RELOC_390_PLT16DBL:
+    case BFD_RELOC_390_PLT24DBL:
     case BFD_RELOC_390_PLT32DBL:
     case BFD_RELOC_390_PLT64:
     case BFD_RELOC_390_GOTPLT12:
@@ -2192,6 +2202,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  fixP->fx_where += 1;
 	  fixP->fx_r_type = BFD_RELOC_8;
 	}
+      else if (operand->bits == 12 && operand->shift == 12
+	       && (operand->flags & S390_OPERAND_PCREL))
+	{
+	  fixP->fx_size = 2;
+	  fixP->fx_where += 1;
+	  fixP->fx_offset += 1;
+	  fixP->fx_r_type = BFD_RELOC_390_PC12DBL;
+	}
       else if (operand->bits == 16 && operand->shift == 16)
 	{
 	  fixP->fx_size = 2;
@@ -2203,6 +2221,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	    }
 	  else
 	    fixP->fx_r_type = BFD_RELOC_16;
+	}
+      else if (operand->bits == 24 && operand->shift == 24
+	       && (operand->flags & S390_OPERAND_PCREL))
+	{
+	  fixP->fx_size = 3;
+	  fixP->fx_where += 3;
+	  fixP->fx_offset += 3;
+	  fixP->fx_r_type = BFD_RELOC_390_PC24DBL;
 	}
       else if (operand->bits == 32 && operand->shift == 16
 	       && (operand->flags & S390_OPERAND_PCREL))
@@ -2242,9 +2268,17 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_390_12:
 	case BFD_RELOC_390_GOT12:
 	case BFD_RELOC_390_GOTPLT12:
+	case BFD_RELOC_390_PC12DBL:
+	case BFD_RELOC_390_PLT12DBL:
+	  if (fixP->fx_pcrel)
+	    value++;
+
 	  if (fixP->fx_done)
 	    {
 	      unsigned short mop;
+
+	      if (fixP->fx_pcrel)
+		value >>= 1;
 
 	      mop = bfd_getb16 ((unsigned char *) where);
 	      mop |= (unsigned short) (value & 0xfff);
@@ -2291,6 +2325,20 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  value += 2;
 	  if (fixP->fx_done)
 	    md_number_to_chars (where, (offsetT) value >> 1, 2);
+	  break;
+
+	case BFD_RELOC_390_PC24DBL:
+	case BFD_RELOC_390_PLT24DBL:
+	  value += 3;
+	  if (fixP->fx_done)
+	    {
+	      unsigned int mop;
+	      value >>= 1;
+
+	      mop = bfd_getb32 ((unsigned char *) where - 1);
+	      mop |= (unsigned int) (value & 0xffffff);
+	      bfd_putb32 ((bfd_vma) mop, (unsigned char *) where - 1);
+	    }
 	  break;
 
 	case BFD_RELOC_32:

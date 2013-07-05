@@ -1,3 +1,9 @@
+2013-07-05  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* gas/s390/zarch-zEC12.s: Change bprp second operand and add
+	variants requiring relocations.
+	* gas/s390/zarch-zEC12.d: Likewise.
+
 2013-07-03  Marcus Shawcroft  <marcus.shawcroft@arm.com>
 
 	* gas/aarch64/reloc-insn.s (func): Replace :got_prel19: with :got:.

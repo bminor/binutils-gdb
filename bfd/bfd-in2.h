@@ -4332,11 +4332,23 @@ in .byte hlo8(symbol)  */
 /* 16 bit GOT offset.  */
   BFD_RELOC_390_GOT16,
 
+/* PC relative 12 bit shifted by 1.  */
+  BFD_RELOC_390_PC12DBL,
+
+/* 12 bit PC rel. PLT shifted by 1.  */
+  BFD_RELOC_390_PLT12DBL,
+
 /* PC relative 16 bit shifted by 1.  */
   BFD_RELOC_390_PC16DBL,
 
 /* 16 bit PC rel. PLT shifted by 1.  */
   BFD_RELOC_390_PLT16DBL,
+
+/* PC relative 24 bit shifted by 1.  */
+  BFD_RELOC_390_PC24DBL,
+
+/* 24 bit PC rel. PLT shifted by 1.  */
+  BFD_RELOC_390_PLT24DBL,
 
 /* PC relative 32 bit shifted by 1.  */
   BFD_RELOC_390_PC32DBL,

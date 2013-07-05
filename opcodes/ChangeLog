@@ -1,3 +1,10 @@
+2013-07-05  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.c (J12_12, J24_24): New macros.
+	(INSTR_MII_UPI): Rename to INSTR_MII_UPP.
+	(MASK_MII_UPI): Rename to MASK_MII_UPP.
+	* s390-opc.txt: Rename MII_UPI to MII_UPP for bprp instruction.
+
 2013-07-04  Alan Modra  <amodra@gmail.com>
 
 	* ppc-opc.c (powerpc_opcodes): Add tdui, twui, tdu, twu, tui, tu.
