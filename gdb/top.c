@@ -1241,6 +1241,12 @@ This GDB was configured as follows:\n\
              --without-babeltrace\n\
 "));
 #endif
+    /* We assume "relocatable" will be printed at least once, thus we always
+       print this text.  It's a reasonably safe assumption for now.  */
+    fprintf_filtered (stream, _("\n\
+(\"Relocatable\" means the directory can be moved with the GDB installation\n\
+tree, and GDB will still find it.)\n\
+"));
 }
 
 

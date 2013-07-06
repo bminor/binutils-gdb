@@ -1,5 +1,8 @@
 2013-07-06  Eli Zaretskii  <eliz@gnu.org>
 
+	* top.c (print_gdb_configuration): Explain in output of
+	--configuration what does "relocatable" mean.
+
 	* main.c (print_gdb_help): Regroup options in the --help text.
 	See http://sourceware.org/ml/gdb-patches/2013-04/msg00362.html for
 	the relevant discussions.
