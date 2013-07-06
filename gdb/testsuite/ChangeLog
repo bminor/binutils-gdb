@@ -1,5 +1,10 @@
 2013-07-05  Luis Machado  <lgustavo@codesourcery.com>
 
+	* gdb.base/dump.exp: Remove arch-specific tests and do a
+	generic data address check to set is64bitonly correctly.
+
+2013-07-05  Luis Machado  <lgustavo@codesourcery.com>
+
 	* gdb.mi/gdb2549.exp (register_tests): Expect any decimal for
 	the register number instead of expecting only 0.
 

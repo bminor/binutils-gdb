@@ -30,10 +30,6 @@ if [istarget "alpha*-*-*"] then {
     lappend options "additional_flags=-Wl,-taso"
 }
 
-if {[istarget "ia64*-*-*"] || [istarget "hppa64-*-*"]} then {
-    set is64bitonly "yes"
-}
-
 if {[istarget "spu*-*-*"]} then {
     # The internal address format used for the combined Cell/B.E.
     # debugger requires 64-bit.
@@ -55,6 +51,15 @@ gdb_test "dump mem /dev/null 0x10 0x20" "Cannot access memory at address 0x10" \
 	 "inaccessible memory is reported"
 
 gdb_load ${binfile}
+
+# Check the address of a variable.  If it is bigger than 32-bit,
+# assume our target has 64-bit addresses that are not supported by SREC,
+# IHEX and TEKHEX.  We skip those tests then.
+set max_32bit_address "0xffffffff"
+set data_address [get_hexadecimal_valueof "&intarray" 0x100000000]
+if {${data_address} > ${max_32bit_address}} then {
+    set is64bitonly "yes"
+}
 
 # Clean up any stale output files from previous test runs
 
