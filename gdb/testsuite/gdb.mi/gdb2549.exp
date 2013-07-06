@@ -56,23 +56,23 @@ proc register_tests { } {
     set float "\\-?((\[0-9\]+(\\.\[0-9\]+)?(e\[-+\]\[0-9\]+)?)|(nan\\($hex\\)))"
 
     mi_gdb_test "222-data-list-register-values x" \
-	    "222\\^done,register-values=\\\[\{number=\"0\",value=\"$hex\"\}.*\\\]" \
+	    "222\\^done,register-values=\\\[\{number=\"$decimal\",value=\"$hex\"\}.*\\\]" \
 	    "register values x"
 
     mi_gdb_test "333-data-list-register-values f" \
-	    "333\\^done,register-values=\\\[\{number=\"0\",value=\"$float\"\}.*\\\]" \
+	    "333\\^done,register-values=\\\[\{number=\"$decimal\",value=\"$float\"\}.*\\\]" \
 	    "register values f"
 
     mi_gdb_test "444-data-list-register-values d" \
-	    "444\\^done,register-values=\\\[\{number=\"0\",value=\"-?$decimal\"\}.*\\\]" \
+	    "444\\^done,register-values=\\\[\{number=\"$decimal\",value=\"-?$decimal\"\}.*\\\]" \
 	    "register values d"
 
     mi_gdb_test "555-data-list-register-values o" \
-	    "555\\^done,register-values=\\\[\{number=\"0\",value=\"$octal\"\}.*\\\]" \
+	    "555\\^done,register-values=\\\[\{number=\"$decimal\",value=\"$octal\"\}.*\\\]" \
 	    "register values o"
 
     mi_gdb_test "666-data-list-register-values t" \
-	    "666\\^done,register-values=\\\[\{number=\"0\",value=\"$binary\"\}.*\\\]" \
+	    "666\\^done,register-values=\\\[\{number=\"$decimal\",value=\"$binary\"\}.*\\\]" \
 	    "register values t"
 }
 

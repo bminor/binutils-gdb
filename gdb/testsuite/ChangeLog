@@ -1,3 +1,8 @@
+2013-07-05  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.mi/gdb2549.exp (register_tests): Expect any decimal for
+	the register number instead of expecting only 0.
+
 2013-07-05  Will Newton  <will.newton@linaro.org>
 
 	* gdb.base/gnu-ifunc-lib.c: Use %function instead of @function
