@@ -1,3 +1,9 @@
+2013-07-05  Luis Machado  <lgustavo@codesourcery.com>
+
+	* rs6000-tdep.c (rs6000_stab_reg_to_regnum): Return the real
+	register number instead of the pseudo register one.
+	(rs6000_dwarf2_reg_to_regnum): Likewise.
+
 2013-07-04  Pedro Alves  <palves@redhat.com>
 
 	* findvar.c (value_of_register): Use allocate_optimized_out_value

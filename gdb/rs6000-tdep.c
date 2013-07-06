@@ -2854,7 +2854,7 @@ rs6000_stab_reg_to_regnum (struct gdbarch *gdbarch, int num)
   else if (77 <= num && num <= 108)
     return tdep->ppc_vr0_regnum + (num - 77);
   else if (1200 <= num && num < 1200 + 32)
-    return tdep->ppc_ev0_regnum + (num - 1200);
+    return tdep->ppc_ev0_upper_regnum + (num - 1200);
   else
     switch (num)
       {
@@ -2896,7 +2896,7 @@ rs6000_dwarf2_reg_to_regnum (struct gdbarch *gdbarch, int num)
   else if (1124 <= num && num < 1124 + 32)
     return tdep->ppc_vr0_regnum + (num - 1124);
   else if (1200 <= num && num < 1200 + 32)
-    return tdep->ppc_ev0_regnum + (num - 1200);
+    return tdep->ppc_ev0_upper_regnum + (num - 1200);
   else
     switch (num)
       {
