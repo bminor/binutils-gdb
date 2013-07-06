@@ -9610,13 +9610,13 @@ create_breakpoint (struct gdbarch *gdbarch,
      breakpoint.  */
   if (!pending)
     {
-      struct linespec_sals *lsal;
-
-      lsal = VEC_index (linespec_sals, canonical.sals, 0);
-
       if (parse_arg)
         {
 	  char *rest;
+	  struct linespec_sals *lsal;
+
+	  lsal = VEC_index (linespec_sals, canonical.sals, 0);
+
 	  /* Here we only parse 'arg' to separate condition
 	     from thread number, so parsing in context of first
 	     sal is OK.  When setting the breakpoint we'll
@@ -9650,7 +9650,7 @@ create_breakpoint (struct gdbarch *gdbarch,
 	    }
         }
 
-      ops->create_breakpoints_sal (gdbarch, &canonical, lsal,
+      ops->create_breakpoints_sal (gdbarch, &canonical,
 				   cond_string, extra_string, type_wanted,
 				   tempflag ? disp_del : disp_donttouch,
 				   thread, task, ignore_count, ops,
@@ -12723,7 +12723,6 @@ base_breakpoint_create_sals_from_address (char **arg,
 static void
 base_breakpoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 					struct linespec_result *c,
-					struct linespec_sals *lsal,
 					char *cond_string,
 					char *extra_string,
 					enum bptype type_wanted,
@@ -12945,7 +12944,6 @@ bkpt_create_sals_from_address (char **arg,
 static void
 bkpt_create_breakpoints_sal (struct gdbarch *gdbarch,
 			     struct linespec_result *canonical,
-			     struct linespec_sals *lsal,
 			     char *cond_string,
 			     char *extra_string,
 			     enum bptype type_wanted,
@@ -13283,7 +13281,6 @@ tracepoint_create_sals_from_address (char **arg,
 static void
 tracepoint_create_breakpoints_sal (struct gdbarch *gdbarch,
 				   struct linespec_result *canonical,
-				   struct linespec_sals *lsal,
 				   char *cond_string,
 				   char *extra_string,
 				   enum bptype type_wanted,
@@ -13435,7 +13432,6 @@ strace_marker_create_sals_from_address (char **arg,
 static void
 strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 				      struct linespec_result *canonical,
-				      struct linespec_sals *lsal,
 				      char *cond_string,
 				      char *extra_string,
 				      enum bptype type_wanted,
@@ -13447,6 +13443,8 @@ strace_marker_create_breakpoints_sal (struct gdbarch *gdbarch,
 				      int internal, unsigned flags)
 {
   int i;
+  struct linespec_sals *lsal = VEC_index (linespec_sals,
+					  canonical->sals, 0);
 
   /* If the user is creating a static tracepoint by marker id
      (strace -m MARKER_ID), then store the sals index, so that
