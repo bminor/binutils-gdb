@@ -1,3 +1,9 @@
+2013-07-06  Eli Zaretskii  <eliz@gnu.org>
+
+	* main.c (print_gdb_help): Regroup options in the --help text.
+	See http://sourceware.org/ml/gdb-patches/2013-04/msg00362.html for
+	the relevant discussions.
+
 2013-07-06  Yao Qi  <yao@codesourcery.com>
 
 	* breakpoint.h (struct breakpoint_ops) <create_breakpoints_sal>:
