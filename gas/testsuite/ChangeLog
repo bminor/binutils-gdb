@@ -1,3 +1,8 @@
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/lb.d, gas/mips/sb.d: Use coprocessor register names
+	for LWC0 and SWC0.
+
 2013-07-05  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/s390/zarch-zEC12.s: Change bprp second operand and add

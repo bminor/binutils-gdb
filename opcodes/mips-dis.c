@@ -977,9 +977,8 @@ print_insn_args (const char *d,
 		 const struct mips_opcode *opp)
 {
   const fprintf_ftype infprintf = info->fprintf_func;
-  unsigned int lsb, msb, msbd;
+  unsigned int lsb, msb, msbd, cpreg;
   void *is = info->stream;
-  int op;
 
   lsb = 0;
 
@@ -1044,28 +1043,6 @@ print_insn_args (const char *d,
 	      infprintf (is, "0x%x", msbd + 1);
 	      break;
 
-	    case 'D':
-	      {
-		const struct mips_cp0sel_name *n;
-		unsigned int cp0reg, sel;
-
-		cp0reg = GET_OP (l, RD);
-		sel = GET_OP (l, SEL);
-
-		/* CP0 register including 'sel' code for mtcN (et al.), to be
-		   printed textually if known.  If not known, print both
-		   CP0 register name and sel numerically since CP0 register
-		   with sel 0 may have a name unrelated to register being
-		   printed.  */
-		n = lookup_mips_cp0sel_name(mips_cp0sel_names,
-					    mips_cp0sel_names_len, cp0reg, sel);
-		if (n != NULL)
-		  infprintf (is, "%s", n->name);
-		else
-		  infprintf (is, "$%d,%d", cp0reg, sel);
-		break;
-	      }
-
 	    case 'E':
 	      lsb = GET_OP (l, SHAMT) + 32;
 	      infprintf (is, "0x%x", lsb);
@@ -1088,28 +1065,6 @@ print_insn_args (const char *d,
 	    case 't': /* Coprocessor 0 reg name */
 	      infprintf (is, "%s", mips_cp0_names[GET_OP (l, RT)]);
 	      break;
-
-	    case 'T': /* Coprocessor 0 reg name */
-	      {
-		const struct mips_cp0sel_name *n;
-		unsigned int cp0reg, sel;
-
-		cp0reg = GET_OP (l, RT);
-		sel = GET_OP (l, SEL);
-
-		/* CP0 register including 'sel' code for mftc0, to be
-		   printed textually if known.  If not known, print both
-		   CP0 register name and sel numerically since CP0 register
-		   with sel 0 may have a name unrelated to register being
-		   printed.  */
-		n = lookup_mips_cp0sel_name(mips_cp0sel_names,
-					    mips_cp0sel_names_len, cp0reg, sel);
-		if (n != NULL)
-		  infprintf (is, "%s", n->name);
-		else
-		  infprintf (is, "$%d,%d", cp0reg, sel);
-		break;
-	      }
 
 	    case 'x':		/* bbit bit index */
 	      infprintf (is, "0x%x", GET_OP (l, BBITIND));
@@ -1364,26 +1319,44 @@ print_insn_args (const char *d,
 	  break;
 
 	case 'E':
-	  /* Coprocessor register for lwcN instructions, et al.
-
-	     Note that there is no load/store cp0 instructions, and
-	     that FPU (cp1) instructions disassemble this field using
-	     'T' format.  Therefore, until we gain understanding of
-	     cp2 register names, we can simply print the register
-	     numbers.  */
-	  infprintf (is, "$%d", GET_OP (l, RT));
-	  break;
+	  cpreg = GET_OP (l, RT);
+	  goto copro;
 
 	case 'G':
+	  cpreg = GET_OP (l, RD);
+	copro:
 	  /* Coprocessor register for mtcN instructions, et al.  Note
 	     that FPU (cp1) instructions disassemble this field using
 	     'S' format.  Therefore, we only need to worry about cp0,
 	     cp2, and cp3.  */
-	  op = GET_OP (l, OP);
-	  if (op == OP_OP_COP0)
-	    infprintf (is, "%s", mips_cp0_names[GET_OP (l, RD)]);
+	  if (opp->name[strlen (opp->name) - 1] == '0')
+	    {
+	      if (d[1] == ',' && d[2] == 'H')
+		{
+		  const struct mips_cp0sel_name *n;
+		  unsigned int sel;
+
+		  sel = GET_OP (l, SEL);
+
+		  /* CP0 register including 'sel' code for mtcN (et al.), to be
+		     printed textually if known.  If not known, print both
+		     CP0 register name and sel numerically since CP0 register
+		     with sel 0 may have a name unrelated to register being
+		     printed.  */
+		  n = lookup_mips_cp0sel_name (mips_cp0sel_names,
+					       mips_cp0sel_names_len,
+					       cpreg, sel);
+		  if (n != NULL)
+		    infprintf (is, "%s", n->name);
+		  else
+		    infprintf (is, "$%d,%d", cpreg, sel);
+		  d += 2;
+		}
+	      else
+		infprintf (is, "%s", mips_cp0_names[cpreg]);
+	    }
 	  else
-	    infprintf (is, "$%d", GET_OP (l, RD));
+	    infprintf (is, "$%d", cpreg);
 	  break;
 
 	case 'K':
@@ -2586,28 +2559,37 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		  /* Coprocessor register for mtcN instructions, et al.  Note
 		     that FPU (cp1) instructions disassemble this field using
 		     'S' format.  Therefore, we only need to worry about cp0,
-		     cp2, and cp3.
-		     The microMIPS encoding does not have a coprocessor
-		     identifier field as such, so we must work out the
-		     coprocessor number by looking at the opcode.  */
-		  switch (insn
-			  & ~((MICROMIPSOP_MASK_RT << MICROMIPSOP_SH_RT)
-			      | (MICROMIPSOP_MASK_RS << MICROMIPSOP_SH_RS)))
+		     cp2, and cp3.  */
+		  if (op->name[strlen (op->name) - 1] == '0')
 		    {
-		    case 0x000000fc:				/* mfc0  */
-		    case 0x000002fc:				/* mtc0  */
-		    case 0x000004fc:				/* mfgc0  */
-		    case 0x000006fc:				/* mtgc0  */
-		    case 0x580000fc:				/* dmfc0 */
-		    case 0x580002fc:				/* dmtc0 */
-		    case 0x580000e7:				/* dmfgc0 */
-		    case 0x580002e7:				/* dmtgc0 */
-		      infprintf (is, "%s", mips_cp0_names[GET_OP (insn, RS)]);
-		      break;
-		    default:
-		      infprintf (is, "$%d", GET_OP (insn, RS));
-		      break;
+		      if (s[1] == ',' && s[2] == 'H')
+			{
+			  const struct mips_cp0sel_name *n;
+			  unsigned int cp0reg, sel;
+
+			  cp0reg = GET_OP (insn, RS);
+			  sel = GET_OP (insn, SEL);
+
+			  /* CP0 register including 'sel' code for mtcN
+			     (et al.), to be printed textually if known.
+			     If not known, print both CP0 register name and
+			     sel numerically since CP0 register with sel 0 may
+			     have a name unrelated to register being
+			     printed.  */
+			  n = lookup_mips_cp0sel_name (mips_cp0sel_names,
+						       mips_cp0sel_names_len,
+						       cp0reg, sel);
+			  if (n != NULL)
+			    infprintf (is, "%s", n->name);
+			  else
+			    infprintf (is, "$%d,%d", cp0reg, sel);
+			  s += 2;
+			}
+		      else
+			infprintf (is, "%s", mips_cp0_names[GET_OP (insn, RS)]);
 		    }
+		  else
+		    infprintf (is, "$%d", GET_OP (insn, RS));
 		  break;
 
 		case 'H':
@@ -2662,29 +2644,6 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		      msbd = GET_OP (insn, EXTMSBD);
 		      infprintf (is, "0x%x", msbd + 1);
 		      break;
-
-		    case 'D':
-		      {
-			const struct mips_cp0sel_name *n;
-			unsigned int cp0reg, sel;
-
-			cp0reg = GET_OP (insn, RS);
-			sel = GET_OP (insn, SEL);
-
-			/* CP0 register including 'sel' code for mtcN
-			   (et al.), to be printed textually if known.
-			   If not known, print both CP0 register name and
-			   sel numerically since CP0 register with sel 0 may
-			   have a name unrelated to register being printed.  */
-			n = lookup_mips_cp0sel_name (mips_cp0sel_names,
-						     mips_cp0sel_names_len,
-						     cp0reg, sel);
-			if (n != NULL)
-			  infprintf (is, "%s", n->name);
-			else
-			  infprintf (is, "$%d,%d", cp0reg, sel);
-			break;
-		      }
 
 		    case 'E':
 		      lsb = GET_OP (insn, EXTLSB) + 32;

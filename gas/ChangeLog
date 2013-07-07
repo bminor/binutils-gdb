@@ -1,3 +1,8 @@
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (validate_mips_insn, validate_micromips_insn)
+	(mips_ip): Remove "+D" and "+T" handling.
+
 2013-07-05  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c (md_gather_operands, md_apply_fix): Support new

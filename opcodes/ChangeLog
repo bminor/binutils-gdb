@@ -1,3 +1,11 @@
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Remove "+D" and "+T" entries.
+	* micromips-opc.c (micromips_opcodes): Likewise.
+	* mips-dis.c (print_insn_args, print_insn_micromips): Remove "+D"
+	and "+T" handling.  Check for a "0" suffix when deciding whether to
+	use coprocessor 0 names.  In that case, also check for ",H" selectors.
+
 2013-07-05  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.c (J12_12, J24_24): New macros.

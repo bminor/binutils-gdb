@@ -10889,8 +10889,6 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'A': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
 	  case 'B': USE_BITS (OP_MASK_INSMSB,	OP_SH_INSMSB);	break;
 	  case 'C': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
-	  case 'D': USE_BITS (OP_MASK_RD,	OP_SH_RD);
-		    USE_BITS (OP_MASK_SEL,	OP_SH_SEL);	break;
 	  case 'E': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
 	  case 'F': USE_BITS (OP_MASK_INSMSB,	OP_SH_INSMSB);	break;
 	  case 'G': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
@@ -10898,8 +10896,6 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'I': break;
 	  case 'J': USE_BITS (OP_MASK_CODE10,	OP_SH_CODE10);	break;
 	  case 't': USE_BITS (OP_MASK_RT,	OP_SH_RT);	break;
-	  case 'T': USE_BITS (OP_MASK_RT,	OP_SH_RT);
-		    USE_BITS (OP_MASK_SEL,	OP_SH_SEL);	break;
 	  case 'x': USE_BITS (OP_MASK_BBITIND,	OP_SH_BBITIND);	break;
 	  case 'X': USE_BITS (OP_MASK_BBITIND,	OP_SH_BBITIND);	break;
 	  case 'p': USE_BITS (OP_MASK_CINSPOS,	OP_SH_CINSPOS);	break;
@@ -11069,7 +11065,6 @@ validate_micromips_insn (const struct mips_opcode *opc)
 	  case 'A': USE_BITS (EXTLSB);	break;
 	  case 'B': USE_BITS (INSMSB);	break;
 	  case 'C': USE_BITS (EXTMSBD);	break;
-	  case 'D': USE_BITS (RS);	USE_BITS (SEL);	break;
 	  case 'E': USE_BITS (EXTLSB);	break;
 	  case 'F': USE_BITS (INSMSB);	break;
 	  case 'G': USE_BITS (EXTMSBD);	break;
@@ -11938,10 +11933,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  s = expr_end;
 		  continue;
 
-		case 'D':
-		  /* +D is for disassembly only; never match.  */
-		  break;
-
 		case 'I':
 		  /* "+I" is like "I", except that imm2_expr is used.  */
 		  my_getExpression (&imm2_expr, s);
@@ -11952,11 +11943,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		    normalize_constant_expr (&imm2_expr);
 		  s = expr_end;
 		  continue;
-
-		case 'T': /* Coprocessor register.  */
-		  gas_assert (!mips_opts.micromips);
-		  /* +T is for disassembly only; never match.  */
-		  break;
 
 		case 't': /* Coprocessor register number.  */
 		  gas_assert (!mips_opts.micromips);
