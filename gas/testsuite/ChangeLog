@@ -1,5 +1,10 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/mips16.d, gas/mips/mips16-64.d: Remove trailing whitespace
+	from ENTRY and EXIT lines.
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/vr5400-ill.s, gas/mips/vr5400-ill.l: New test.
 	* gas/mips/mips.exp: Run it.
 
