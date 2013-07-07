@@ -1,5 +1,10 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (validate_mips_insn, validate_micromips_insn):
+	(mips_ip, mips16_ip): Handle "+i".
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips32_to_micromips_reg_h_map): Delete.
 	(micromips_to_32_reg_h_map): Rename to...
 	(micromips_to_32_reg_h_map1): ...this.

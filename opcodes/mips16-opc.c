@@ -167,7 +167,7 @@ const struct mips_opcode mips16_opcodes[] =
 {"jal",     "x",	0xe840, 0xf8ff, UBD|WR_31|RD_x,	0,	I1 },
 {"jal",     "R,x",	0xe840, 0xf8ff, UBD|WR_31|RD_x,	0,	I1 },
 {"jal",	    "a",	0x1800, 0xfc00, UBD|WR_31,	0,	I1 },
-{"jalx",    "a",	0x1c00, 0xfc00, UBD|WR_31,	0,	I1 },
+{"jalx",    "i",	0x1c00, 0xfc00, UBD|WR_31,	0,	I1 },
 {"jr",	    "x",	0xe800, 0xf8ff, UBD|RD_x,	0,	I1 },
 {"jr",	    "R",	0xe820, 0xffff, UBD|RD_31,	0,	I1 },
 {"j",	    "x",	0xe800, 0xf8ff, UBD|RD_x,	0,	I1 },

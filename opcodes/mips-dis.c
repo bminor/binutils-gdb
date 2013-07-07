@@ -1105,6 +1105,15 @@ print_insn_args (const char *d,
 	      infprintf (is, "%s", mips_fpr_names[GET_OP (l, FZ)]);
 	      break;
 
+	    case 'i': /* JALX destination */
+	      info->target = (((pc + 4) & ~(bfd_vma) 0x0fffffff)
+			      | (GET_OP (l, TARGET) << 2));
+	      /* For gdb disassembler, force odd address on jalx.  */
+	      if (info->flavour == bfd_target_unknown_flavour)
+		info->target |= 1;
+	      (*info->print_address_func) (info->target, info);
+	      break;
+
 	    case 'j':	/* 9-bit signed offset in bit 7.  */
 	      infprintf (is, "%d", GET_OP_S (l, EVAOFFSET));
 	      break;
@@ -1229,10 +1238,6 @@ print_insn_args (const char *d,
 	case 'a':
 	  info->target = (((pc + 4) & ~(bfd_vma) 0x0fffffff)
 			  | (GET_OP (l, TARGET) << 2));
-	  /* For gdb disassembler, force odd address on jalx.  */
-	  if (info->flavour == bfd_target_unknown_flavour
-	      && strcmp (opp->name, "jalx") == 0)
-	    info->target |= 1;
 	  (*info->print_address_func) (info->target, info);
 	  break;
 
@@ -1874,13 +1879,12 @@ print_mips16_insn_arg (char type,
       break;
 
     case 'a':
+    case 'i':
       {
-	int jalx = l & 0x400;
-
 	if (! use_extend)
 	  extend = 0;
 	l = ((l & 0x1f) << 23) | ((l & 0x3e0) << 13) | (extend << 2);
-	if (!jalx && info->flavour == bfd_target_unknown_flavour)
+	if (type == 'a' && info->flavour == bfd_target_unknown_flavour)
 	  /* For gdb disassembler, maintain odd address.  */
 	  l |= 1;
       }
@@ -2147,7 +2151,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 	{
 	  const char *s;
 
-	  if (strchr (op->args, 'a') != NULL)
+	  if (op->args[0] == 'a' || op->args[0] == 'i')
 	    {
 	      if (use_extend)
 		{
@@ -2422,15 +2426,10 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		  break;
 
 		case 'a':
-		  if (strcmp (op->name, "jalx") == 0)
-		    info->target = (((memaddr + 4) & ~(bfd_vma) 0x0fffffff)
-				    | (GET_OP (insn, TARGET) << 2));
-		  else
-		    info->target = (((memaddr + 4) & ~(bfd_vma) 0x07ffffff)
-				    | (GET_OP (insn, TARGET) << 1));
-		  /* For gdb disassembler, force odd address on jalx.  */
-		  if (info->flavour == bfd_target_unknown_flavour
-		      && strcmp (op->name, "jalx") == 0)
+		  info->target = (((memaddr + 4) & ~(bfd_vma) 0x07ffffff)
+				  | (GET_OP (insn, TARGET) << 1));
+		  /* For gdb disassembler, maintain odd address.  */
+		  if (info->flavour == bfd_target_unknown_flavour)
 		    info->target |= 1;
 		  (*info->print_address_func) (info->target, info);
 		  break;
@@ -2656,6 +2655,12 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		    case 'G':
 		      msbd = GET_OP (insn, EXTMSBD) + 32;
 		      infprintf (is, "0x%x", msbd + 1);
+		      break;
+
+		    case 'i':
+		      info->target = (((memaddr + 4) & ~(bfd_vma) 0x0fffffff)
+				      | (GET_OP (insn, TARGET) << 2));
+		      (*info->print_address_func) (info->target, info);
 		      break;
 
 		    case 'j':   /* 9-bit signed offset in bit 0. */

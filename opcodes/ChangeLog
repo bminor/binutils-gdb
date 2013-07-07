@@ -1,5 +1,16 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* mips-opc.c (mips_builtin_opcodes): Use "+i" rather than "a" for
+	"jalx".
+	* mips16-opc.c (mips16_opcodes): Likewise.
+	* micromips-opc.c (micromips_opcodes): Likewise.
+	* mips-dis.c (print_insn_args, print_mips16_insn_arg)
+	(print_insn_mips16): Handle "+i".
+	(print_insn_micromips): Likewise.  Conditionally preserve the
+	ISA bit for "a" but not for "+i".
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* micromips-opc.c (WR_mhi): Rename to..
 	(WR_mh): ...this.
 	(micromips_opcodes): Update "movep" entry accordingly.  Replace

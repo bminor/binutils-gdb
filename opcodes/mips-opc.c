@@ -852,7 +852,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
    assembler, but will never match user input (because the line above
    will match first).  */
 {"jal",     "a",	0x0c000000, 0xfc000000,	UBD|WR_31,		0,		I1	},
-{"jalx",    "a",	0x74000000, 0xfc000000, UBD|WR_31,		0,		I1	},
+{"jalx",    "+i",	0x74000000, 0xfc000000, UBD|WR_31,		0,		I1	},
 {"la",      "t,A(b)",	0,    (int) M_LA_AB,	INSN_MACRO,		0,		I1	},
 {"laa",     "d,(b),t",	0x7000049f, 0xfc0007ff, LDD|SM|WR_d|RD_t|RD_b,	0,		IOCT2	},
 {"laad",    "d,(b),t",	0x700004df, 0xfc0007ff, LDD|SM|WR_d|RD_t|RD_b,	0,		IOCT2	},

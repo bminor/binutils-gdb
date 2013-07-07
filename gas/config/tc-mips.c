@@ -10910,6 +10910,7 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'a': USE_BITS (OP_MASK_OFFSET_A,	OP_SH_OFFSET_A); break;
 	  case 'b': USE_BITS (OP_MASK_OFFSET_B,	OP_SH_OFFSET_B); break;
 	  case 'c': USE_BITS (OP_MASK_OFFSET_C,	OP_SH_OFFSET_C); break;
+	  case 'i': USE_BITS (OP_MASK_TARGET,	OP_SH_TARGET);	break;
 	  case 'j': USE_BITS (OP_MASK_EVAOFFSET, OP_SH_EVAOFFSET); break;
 
 	  default:
@@ -11071,6 +11072,7 @@ validate_micromips_insn (const struct mips_opcode *opc)
 	  case 'F': USE_BITS (INSMSB);	break;
 	  case 'G': USE_BITS (EXTMSBD);	break;
 	  case 'H': USE_BITS (EXTMSBD);	break;
+	  case 'i': USE_BITS (TARGET);	break;
 	  case 'j': USE_BITS (EVAOFFSET);	break;
 	  default:
 	    as_bad (_("Internal error: bad mips opcode "
@@ -12173,6 +12175,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  INSERT_OPERAND (0, FZ, *ip, regno);
 		  continue;
 
+		case 'i':
+		  goto jump;
+
 		case 'j':
 		  {
 		    int shift = 8;
@@ -13031,6 +13036,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case 'a':		/* 26-bit address.  */
+	    jump:
 	      *offset_reloc = BFD_RELOC_MIPS_JMP;
 	      my_getExpression (&offset_expr, s);
 	      s = expr_end;
@@ -14280,6 +14286,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case 'a':		/* 26 bit address */
+	    case 'i':
 	      my_getExpression (&offset_expr, s);
 	      s = expr_end;
 	      *offset_reloc = BFD_RELOC_MIPS16_JMP;
