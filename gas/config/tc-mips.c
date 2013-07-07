@@ -10972,8 +10972,6 @@ validate_mips_insn (const struct mips_opcode *opc)
 	        USE_BITS (OP_MASK_RT,           OP_SH_RT);	break;
       case 'e': USE_BITS (OP_MASK_VECBYTE,	OP_SH_VECBYTE);	break;
       case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
-      case '[': break;
-      case ']': break;
       case '1': USE_BITS (OP_MASK_STYPE,	OP_SH_STYPE);	break;
       case '2': USE_BITS (OP_MASK_BP,		OP_SH_BP);	break;
       case '3': USE_BITS (OP_MASK_SA3,  	OP_SH_SA3);	break;
@@ -11781,13 +11779,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      /* Fall through.  */
 
 	    case ')':		/* These must match exactly.  */
-	      if (*s++ == *args)
-		continue;
-	      break;
-
-	    case '[':		/* These must match exactly.  */
-	    case ']':
-	      gas_assert (!mips_opts.micromips);
 	      if (*s++ == *args)
 		continue;
 	      break;
@@ -12656,7 +12647,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	    case 'X':           /* MDMX destination register.  */
 	    case 'Y':           /* MDMX source register.  */
 	    case 'Z':           /* MDMX target register.  */
-	      is_mdmx = 1;
+	      is_mdmx = !(insn->membership & INSN_5400);
 	    case 'W':
 	      gas_assert (!mips_opts.micromips);
 	    case 'D':		/* Floating point destination register.  */
@@ -12712,6 +12703,11 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		      /* This is like 'Z', but also needs to fix the MDMX
 			 vector/scalar select bits.  Note that the
 			 scalar immediate case is handled above.  */
+		      if ((ip->insn_mo->membership & INSN_5400)
+			  && strcmp (insn->name, "rzu.ob") == 0)
+			as_bad (_("Operand %d of `%s' must be an immediate"),
+				argnum, ip->insn_mo->name);
+
 		      if (*s == '[')
 			{
 			  int is_qh = (ip->insn_opcode & (1 << OP_SH_VSEL));
@@ -12734,7 +12730,13 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			    s++;
 			}
 		      else
-                        {
+			{
+			  if ((ip->insn_mo->membership & INSN_5400)
+			      && (strcmp (insn->name, "sll.ob") == 0
+				  || strcmp (insn->name, "srl.ob") == 0))
+			    as_bad (_("Operand %d of `%s' must be scalar"),
+				    argnum, ip->insn_mo->name);
+
                           if (ip->insn_opcode & (OP_MASK_VSEL << OP_SH_VSEL))
                             ip->insn_opcode |= (MDMX_FMTSEL_VEC_QH
 						<< OP_SH_VSEL);

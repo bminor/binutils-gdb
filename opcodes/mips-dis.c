@@ -992,8 +992,6 @@ print_insn_args (const char *d,
 	case ',':
 	case '(':
 	case ')':
-	case '[':
-	case ']':
 	  infprintf (is, "%c", *d);
 	  break;
 
@@ -1396,7 +1394,9 @@ print_insn_args (const char *d,
 	case 'Q':
 	  {
 	    unsigned int vsel = GET_OP (l, VSEL);
+	    char prefix;
 
+	    prefix = opp->membership & INSN_5400 ? 'f' : 'v';
 	    if ((vsel & 0x10) == 0)
 	      {
 		int fmt;
@@ -1405,11 +1405,11 @@ print_insn_args (const char *d,
 		for (fmt = 0; fmt < 3; fmt++, vsel >>= 1)
 		  if ((vsel & 1) == 0)
 		    break;
-		infprintf (is, "$v%d[%d]", GET_OP (l, FT), vsel >> 1);
+		infprintf (is, "$%c%d[%d]", prefix, GET_OP (l, FT), vsel >> 1);
 	      }
 	    else if ((vsel & 0x08) == 0)
 	      {
-		infprintf (is, "$v%d", GET_OP (l, FT));
+		infprintf (is, "$%c%d", prefix, GET_OP (l, FT));
 	      }
 	    else
 	      {

@@ -1,5 +1,10 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/vr5400-ill.s, gas/mips/vr5400-ill.l: New test.
+	* gas/mips/mips.exp: Run it.
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/lb.d, gas/mips/sb.d: Use coprocessor register names
 	for LWC0 and SWC0.
 

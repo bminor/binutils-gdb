@@ -707,6 +707,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "vr4120-2"
     run_dump_test "vr4130"
     run_dump_test "vr5400"
+    run_list_test "vr5400-ill" "-march=vr5400"
     run_dump_test "vr5500"
     run_dump_test "rm7000"
     run_dump_test "perfcount"

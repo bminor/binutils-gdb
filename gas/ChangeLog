@@ -1,5 +1,11 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (validate_mips_insn): Remove "[" and "]" handling.
+	(mips_ip): Likewise.  Do not set is_mdmx for INSN_5400 instructions.
+	Check constraints on the VR5400 RZU.OB, SLL.OB and SRL.OB instructions.
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips_ip): Preserve the real bit number for "+p".
 	Require the msb to be <= 31 for "+s".  Check that the size is <= 31
 	for both "+s" and "+S".
