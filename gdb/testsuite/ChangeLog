@@ -1,3 +1,16 @@
+2013-07-07  Yao Qi  <yao@codesourcery.com>
+
+	* boards/native-gdbserver.exp: Move invoke of
+	process_multilib_options to gdbserver-base.exp.
+	Move set_board_info 'compiler', 'gdb,noinferiorio',
+	'gdb,nofileio', 'gdb_server_prog' and 'gdb,predefined_tsv' to
+	gdbserver-base.exp.
+	Move proc ${board}_download, ${board}_upload and
+	${board}_file to gdbserver-base.exp.
+	* boards/native-extended-gdbserver.exp: Likewise.
+	* boards/native-stdio-gdbserver.exp: Likewise.
+	* boards/gdbserver-base.exp: New file.
+
 2013-07-05  Luis Machado  <lgustavo@codesourcery.com>
 
 	* gdb.base/dump.exp: Remove arch-specific tests and do a
