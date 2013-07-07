@@ -42,7 +42,7 @@
 #define RD_mf	INSN2_MOD_GPR_MF
 #define WR_mf	INSN2_MOD_GPR_MF
 #define RD_mg	INSN2_READ_GPR_MG
-#define WR_mhi	INSN2_WRITE_GPR_MHI
+#define WR_mh	INSN2_WRITE_GPR_MH
 #define RD_mj	INSN2_READ_GPR_MJ
 #define WR_mj	INSN2_WRITE_GPR_MJ
 #define RD_ml	RD_mc	/* Reuse, since the bit position is the same.  */
@@ -703,10 +703,10 @@ const struct mips_opcode micromips_opcodes[] =
 {"mov.d",   "T,S",	0x5400207b, 0xfc00ffff,	WR_T|RD_S|FP_D,		0,		I1	},
 {"mov.s",   "T,S",	0x5400007b, 0xfc00ffff,	WR_T|RD_S|FP_S,		0,		I1	},
 {"mov.ps",  "T,S",	0x5400407b, 0xfc00ffff,	WR_T|RD_S|FP_D,		0,		I1	},
-{"movep",   "mh,mi,mm,mn",  0x8400,     0xfc01,	NODS,			WR_mhi|RD_mmn,	I1	},
+{"movep",   "mh,mm,mn",     0x8400,     0xfc01,	NODS,			WR_mh|RD_mmn,	I1	},
 /* This macro is after the real instruction so that it only matches with
    -minsn32.  */
-{"movep",   "mh,mi,mm,mn", 0, (int) M_MOVEP,	INSN_MACRO,		0,		I1	},
+{"movep",   "mh,mm,mn", 0, (int) M_MOVEP,	INSN_MACRO,		0,		I1	},
 {"movf",    "t,s,M",	0x5400017b, 0xfc001fff,	WR_t|RD_s|RD_CC|FP_S|FP_D, 0,		I1	},
 {"movf.d",  "T,S,M",	0x54000220, 0xfc001fff,	WR_T|RD_S|RD_CC|FP_D,	0,		I1	},
 {"movf.s",  "T,S,M",	0x54000020, 0xfc001fff,	WR_T|RD_S|RD_CC|FP_S,	0,		I1	},

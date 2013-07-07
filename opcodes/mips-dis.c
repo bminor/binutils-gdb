@@ -76,13 +76,11 @@ static const unsigned int mips16_to_32_reg_map[] =
 #define micromips_to_32_reg_g_map	mips16_to_32_reg_map
 
 /* The microMIPS registers with type h.  */
-static const unsigned int micromips_to_32_reg_h_map[] =
+static const unsigned int micromips_to_32_reg_h_map1[] =
 {
   5, 5, 6, 4, 4, 4, 4, 4
 };
-
-/* The microMIPS registers with type i.  */
-static const unsigned int micromips_to_32_reg_i_map[] =
+static const unsigned int micromips_to_32_reg_h_map2[] =
 {
   6, 7, 7, 21, 22, 5, 6, 7
 };
@@ -2716,13 +2714,10 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		      break;
 
 		    case 'h':
-		      regno = micromips_to_32_reg_h_map[GET_OP (insn, MH)];
+		      regno = micromips_to_32_reg_h_map1[GET_OP (insn, MH)];
 		      infprintf (is, "%s", mips_gpr_names[regno]);
-		      break;
-
-		    case 'i':
-		      regno = micromips_to_32_reg_i_map[GET_OP (insn, MI)];
-		      infprintf (is, "%s", mips_gpr_names[regno]);
+		      regno = micromips_to_32_reg_h_map2[GET_OP (insn, MH)];
+		      infprintf (is, ",%s", mips_gpr_names[regno]);
 		      break;
 
 		    case 'j':

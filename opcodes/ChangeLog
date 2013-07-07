@@ -1,5 +1,18 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* micromips-opc.c (WR_mhi): Rename to..
+	(WR_mh): ...this.
+	(micromips_opcodes): Update "movep" entry accordingly.  Replace
+	"mh,mi" with "mh".
+	* mips-dis.c (micromips_to_32_reg_h_map): Rename to...
+	(micromips_to_32_reg_h_map1): ...this.
+	(micromips_to_32_reg_i_map): Rename to...
+	(micromips_to_32_reg_h_map2): ...this.
+	(print_micromips_insn): Remove "mi" case.  Print both registers
+	in the pair for "mh".
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips-opc.c (mips_builtin_opcodes): Remove "+D" and "+T" entries.
 	* micromips-opc.c (micromips_opcodes): Likewise.
 	* mips-dis.c (print_insn_args, print_insn_micromips): Remove "+D"

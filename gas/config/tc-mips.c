@@ -779,15 +779,6 @@ static const unsigned int mips16_to_32_reg_map[] =
 #define mips32_to_micromips_reg_l_map	mips32_to_16_reg_map
 
 #define X ILLEGAL_REG
-/* reg type h: 4, 5, 6.  */
-static const int mips32_to_micromips_reg_h_map[] =
-{
-  X, X, X, X, 4, 5, 6, X,
-  X, X, X, X, X, X, X, X,
-  X, X, X, X, X, X, X, X,
-  X, X, X, X, X, X, X, X
-};
-
 /* reg type m: 0, 17, 2, 3, 16, 18, 19, 20.  */
 static const int mips32_to_micromips_reg_m_map[] =
 {
@@ -819,13 +810,11 @@ static const int mips32_to_micromips_reg_q_map[] =
 #define micromips_to_32_reg_g_map	mips16_to_32_reg_map
 
 /* The microMIPS registers with type h.  */
-static const unsigned int micromips_to_32_reg_h_map[] =
+static const unsigned int micromips_to_32_reg_h_map1[] =
 {
   5, 5, 6, 4, 4, 4, 4, 4
 };
-
-/* The microMIPS registers with type i.  */
-static const unsigned int micromips_to_32_reg_i_map[] =
+static const unsigned int micromips_to_32_reg_h_map2[] =
 {
   6, 7, 7, 21, 22, 5, 6, 7
 };
@@ -2591,6 +2580,19 @@ reglist_lookup (char **s, unsigned int types, unsigned int *reglistp)
   return ok && reglist != 0;
 }
 
+static unsigned int
+mips_lookup_reg_pair (unsigned int regno1, unsigned int regno2,
+		      const unsigned int *map1, const unsigned int *map2,
+		      unsigned int count)
+{
+  unsigned int i;
+
+  for (i = 0; i < count; i++)
+    if (map1[i] == regno1 && map2[i] == regno2)
+      return i;
+  return ILLEGAL_REG;
+}
+
 /* Return TRUE if opcode MO is valid on the currently selected ISA, ASE
    and architecture.  Use is_opcode_valid_16 for MIPS16 opcodes.  */
 
@@ -3503,10 +3505,10 @@ gpr_write_mask (const struct mips_cl_insn *ip)
     {
       if (pinfo2 & INSN2_WRITE_GPR_MB)
 	mask |= 1 << micromips_to_32_reg_b_map[EXTRACT_OPERAND (1, MB, *ip)];
-      if (pinfo2 & INSN2_WRITE_GPR_MHI)
+      if (pinfo2 & INSN2_WRITE_GPR_MH)
 	{
-	  mask |= 1 << micromips_to_32_reg_h_map[EXTRACT_OPERAND (1, MH, *ip)];
-	  mask |= 1 << micromips_to_32_reg_i_map[EXTRACT_OPERAND (1, MI, *ip)];
+	  mask |= 1 << micromips_to_32_reg_h_map1[EXTRACT_OPERAND (1, MH, *ip)];
+	  mask |= 1 << micromips_to_32_reg_h_map2[EXTRACT_OPERAND (1, MH, *ip)];
 	}
       if (pinfo2 & INSN2_WRITE_GPR_MJ)
 	mask |= 1 << EXTRACT_OPERAND (1, MJ, *ip);
@@ -9843,8 +9845,8 @@ macro (struct mips_cl_insn *ip, char *str)
     case M_MOVEP:
       gas_assert (mips_opts.micromips);
       gas_assert (mips_opts.insn32);
-      dreg = micromips_to_32_reg_h_map[EXTRACT_OPERAND (1, MH, *ip)];
-      breg = micromips_to_32_reg_i_map[EXTRACT_OPERAND (1, MI, *ip)];
+      dreg = micromips_to_32_reg_h_map1[EXTRACT_OPERAND (1, MH, *ip)];
+      breg = micromips_to_32_reg_h_map2[EXTRACT_OPERAND (1, MH, *ip)];
       sreg = micromips_to_32_reg_m_map[EXTRACT_OPERAND (1, MM, *ip)];
       treg = micromips_to_32_reg_n_map[EXTRACT_OPERAND (1, MN, *ip)];
       move_register (dreg, sreg);
@@ -11110,7 +11112,6 @@ validate_micromips_insn (const struct mips_opcode *opc)
 	  case 'f': USE_BITS (MF);	break;
 	  case 'g': USE_BITS (MG);	break;
 	  case 'h': USE_BITS (MH);	break;
-	  case 'i': USE_BITS (MI);	break;
 	  case 'j': USE_BITS (MJ);	break;
 	  case 'l': USE_BITS (ML);	break;
 	  case 'm': USE_BITS (MM);	break;
@@ -11287,7 +11288,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   char c = 0;
   struct mips_opcode *insn;
   char *argsStart;
-  unsigned int regno;
+  unsigned int regno, regno2;
   unsigned int lastregno;
   unsigned int destregno = 0;
   unsigned int lastpos = 0;
@@ -13141,7 +13142,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		case 'f':
 		case 'g':
 		case 'h':
-		case 'i':
 		case 'j':
 		case 'l':
 		case 'm':
@@ -13264,47 +13264,32 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			break;
 
 		      case 'h':
-			regno = mips32_to_micromips_reg_h_map[regno];
-			break;
-
-		      case 'i':
-			switch (EXTRACT_OPERAND (1, MI, *ip))
+			s += strspn (s, " \t");
+			if (*s != ',')
 			  {
-			    case 4:
-			      if (regno == 21)
-				regno = 3;
-			      else if (regno == 22)
-				regno = 4;
-			      else if (regno == 5)
-				regno = 5;
-			      else if (regno == 6)
-				regno = 6;
-			      else if (regno == 7)
-				regno = 7;
-			      else
-				regno = ILLEGAL_REG;
-			      break;
-
-			    case 5:
-			      if (regno == 6)
-				regno = 0;
-			      else if (regno == 7)
-				regno = 1;
-			      else
-				regno = ILLEGAL_REG;
-			      break;
-
-			    case 6:
-			      if (regno == 7)
-				regno = 2;
-			      else
-				regno = ILLEGAL_REG;
-			      break;
-
-			    default:
-			      regno = ILLEGAL_REG;
-			      break;
+			    regno = ILLEGAL_REG;
+			    break;
 			  }
+			++s;
+			s += strspn (s, " \t");
+			ok = reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno2);
+			if (!ok)
+			  {
+			    regno = ILLEGAL_REG;
+			    break;
+			  }
+			if (regno2 == AT && mips_opts.at)
+			  {
+			    if (mips_opts.at == ATREG)
+			      as_warn (_("Used $at without \".set noat\""));
+			    else
+			      as_warn (_("Used $%u with \".set at=$%u\""),
+				       regno2, mips_opts.at);
+			  }
+			regno = (mips_lookup_reg_pair
+				 (regno, regno2,
+				  micromips_to_32_reg_h_map1,
+				  micromips_to_32_reg_h_map2, 8));
 			break;
 
 		      case 'l':
@@ -13379,10 +13364,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
 		      case 'h':
 			INSERT_OPERAND (1, MH, *ip, regno);
-			break;
-
-		      case 'i':
-			INSERT_OPERAND (1, MI, *ip, regno);
 			break;
 
 		      case 'j':
