@@ -1,5 +1,10 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/eva.d, gas/mips/micromips@eva.d: Remove hard-coded
+	addresses.  Use gpr-names=numeric.
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/mips16.d, gas/mips/mips16-64.d: Remove trailing whitespace
 	from ENTRY and EXIT lines.
 
