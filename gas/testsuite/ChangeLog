@@ -1,5 +1,30 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/ldstla-32.d: Avoid "lui at,0x0" sequences for
+	truncated constants.
+	* gas/mips/ldstla-32-shared.d: Likewise.
+	* gas/mips/mcu.d: Use ADDIU in preference to LI+ADDU when adding
+	16-bit constants to the base.
+	* gas/mips/micromips@mcu.d: Likewise.
+	* gas/mips/micromips@cache.d: Likewise.
+	* gas/mips/micromips@pref.d: Likewise.
+	* gas/mips/micromips.d, gas/mips/micromips-insn32.d,
+	gas/mips/micromips-noinsn32.d, gas/mips/micromips-trap.d: Likewise.
+	Allow the full 16-bit offset range to be used for SB, LB and LBU in
+	USH and ULH sequences.  Fix the expected output for LD and SD when
+	the two LW and SW offsets need different high parts.
+	* gas/mips/eva.s: Test PREFE with relocation operators.
+	* gas/mips/eva.d: Use ADDIU in preference to LI+ADDU for 16-bit
+	constants.  Update after eva.s change.
+	* gas/mips/micromips@eva.d: Likewise.
+	* gas/mips/ld-reloc.s, gas/mips/ld-reloc.d, gas/mips/l_d-reloc.s,
+	gas/mips/l_d-reloc.d, gas/mips/ulw-reloc.s, gas/mips/ulw-reloc.d,
+	gas/mips/micromips@ulw-reloc.d, gas/mips/ulh-reloc.s,
+	gas/mips/ulh-reloc.d: New tests.
+	* gas/mips/mips.exp: Run them.
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/eva.d, gas/mips/micromips@eva.d: Remove hard-coded
 	addresses.  Use gpr-names=numeric.
 

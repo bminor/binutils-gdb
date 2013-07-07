@@ -610,3 +610,4 @@ test_eva:
 	prefe	10,2147483647
 	prefe	11,($12)
 	prefe	13,MYDATA
+	prefe	5,%lo(foo)($6)

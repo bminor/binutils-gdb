@@ -1114,4 +1114,16 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test "ase-errors-2" "-mabi=o64 -march=mips3" "ASE errors (2)"
     run_list_test "ase-errors-3" "-mabi=32 -march=mips1" "ASE errors (3)"
     run_list_test "ase-errors-4" "-mabi=o64 -march=mips3" "ASE errors (4)"
+
+    run_dump_test_arches "la-reloc"	[mips_arch_list_matching mips1]
+    if { $has_newabi } {
+	run_dump_test_arches "dla-reloc" [mips_arch_list_matching mips3]
+    }
+
+    # Start with MIPS II to avoid load delay nops.
+    run_dump_test_arches "ld-reloc"	[mips_arch_list_matching mips2]
+    run_dump_test_arches "ulw-reloc"	[mips_arch_list_matching mips2]
+    run_dump_test_arches "ulh-reloc"	[mips_arch_list_matching mips2]
+
+    run_dump_test "l_d-reloc"
 }

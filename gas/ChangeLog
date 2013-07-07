@@ -1,5 +1,34 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (gprel16_reloc_p): New function.
+	(macro_read_relocs): Assume BFD_RELOC_LO16 if all relocs are
+	BFD_RELOC_UNUSED.
+	(offset_high_part, small_offset_p): New functions.
+	(nacro): Use them.  Remove *_OB and *_DOB cases.  For single-
+	register load and store macros, handle the 16-bit offset case first.
+	If a 16-bit offset is not suitable for the instruction we're
+	generating, load it into the temporary register using
+	ADDRESS_ADDI_INSN.  Make the M_LI_DD code fall through into the
+	M_L_DAB code once the address has been constructed.  For double load
+	and store macros, again handle the 16-bit offset case first.
+	If the second register cannot be accessed from the same high
+	part as the first, load it into AT using ADDRESS_ADDI_INSN.
+	Fix the handling of LD in cases where the first register is the
+	same as the base.  Also handle the case where the offset is
+	not 16 bits and the second register cannot be accessed from the
+	same high part as the first.  For unaligned loads and stores,
+	fuse the offbits == 12 and old "ab" handling.  Apply this handling
+	whenever the second offset needs a different high part from the first.
+	Construct the offset using ADDRESS_ADDI_INSN where possible,
+	for offbits == 16 as well as offbits == 12.  Use offset_reloc
+	when constructing the individual loads and stores.
+	(mips_ip): Set up imm_expr, imm2_expr, offset_expr, imm_reloc
+	and offset_reloc before matching against a particular opcode.
+	Handle elided 'A' constants.  Allow 'A' constants to use
+	relocation operators.
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (validate_mips_insn): Remove "[" and "]" handling.
 	(mips_ip): Likewise.  Do not set is_mdmx for INSN_5400 instructions.
 	Check constraints on the VR5400 RZU.OB, SLL.OB and SRL.OB instructions.
