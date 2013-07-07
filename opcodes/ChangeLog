@@ -1,5 +1,12 @@
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* mips-opc.c (mips_builtin_opcodes): Use "+s" for "cins32" and
+	"+S" for "cins".
+	* mips-dis.c (print_mips_arg): Update "+s" and "+S" comments.
+	Combine cases.
+
+2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips-opc.c (mips_builtin_opcodes): Use "+i" rather than "a" for
 	"jalx".
 	* mips16-opc.c (mips16_opcodes): Likewise.

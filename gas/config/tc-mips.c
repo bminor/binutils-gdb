@@ -12016,8 +12016,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			      (unsigned long) imm_expr.X_add_number);
 		      imm_expr.X_add_number = 0;
 		    }
-		  /* Make the pos explicit to simplify +S.  */
-		  lastpos = imm_expr.X_add_number + 32;
+ 		  lastpos = imm_expr.X_add_number;
 		  INSERT_OPERAND (0, CINSPOS, *ip, imm_expr.X_add_number);
 		  imm_expr.X_op = O_absent;
 		  s = expr_end;
@@ -12039,11 +12038,12 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  continue;
 
 		case 's':
-		  /* cins and exts length-minus-one field.  */
+		  /* cins32 and exts32 length-minus-one field.  */
 		  gas_assert (!mips_opts.micromips);
 		  my_getExpression (&imm_expr, s);
 		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned long) imm_expr.X_add_number > 31)
+		  if ((unsigned long) imm_expr.X_add_number > 31
+		      || (unsigned long) imm_expr.X_add_number + lastpos > 31)
 		    {
 		      as_bad (_("Improper size (%lu)"),
 			      (unsigned long) imm_expr.X_add_number);
@@ -12055,12 +12055,11 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  continue;
 
 		case 'S':
-		  /* cins32/exts32 and cins/exts aliasing cint32/exts32
-		     length-minus-one field.  */
+		  /* cins/exts length-minus-one field.  */
 		  gas_assert (!mips_opts.micromips);
 		  my_getExpression (&imm_expr, s);
 		  check_absolute_expr (ip, &imm_expr);
-		  if ((long) imm_expr.X_add_number < 0
+		  if ((unsigned long) imm_expr.X_add_number > 31
 		      || (unsigned long) imm_expr.X_add_number + lastpos > 63)
 		    {
 		      as_bad (_("Improper size (%lu)"),

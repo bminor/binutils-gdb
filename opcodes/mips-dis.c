@@ -1072,11 +1072,8 @@ print_insn_args (const char *d,
 	      infprintf (is, "0x%x", GET_OP (l, CINSPOS));
 	      break;
 
-	    case 's':		/* cins and exts length-minus-one */
-	      infprintf (is, "0x%x", GET_OP (l, CINSLM1));
-	      break;
-
-	    case 'S':		/* cins32 and exts32 length-minus-one field */
+	    case 's':		/* cins32 and exts32 length-minus-one */
+	    case 'S':		/* cins and exts length-minus-one field */
 	      infprintf (is, "0x%x", GET_OP (l, CINSLM1));
 	      break;
 
