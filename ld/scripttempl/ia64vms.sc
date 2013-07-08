@@ -16,14 +16,14 @@ SECTIONS
 
   \$DATA\$ ALIGN (${BLOCKSIZE}) : {
     *(\$DATA\$ .data .data.*)
-    *(\$BSS\$ .bss)
+    *(\$BSS\$ .bss .bss.*)
   }
 
   /* Code segment.  Note: name must be \$CODE\$ */
   ${RELOCATING+. = ALIGN (${PAGESIZE});}
 
   \$CODE\$ ALIGN (${BLOCKSIZE}) : {
-    *(\$CODE\$ .text)
+    *(\$CODE\$ .text .text.*)
   }
   .plt ALIGN (8) : {
     *(.plt)
@@ -35,7 +35,7 @@ SECTIONS
   /* RO initialized data.  */
   \$LITERAL\$ ALIGN (${BLOCKSIZE}) : {
     *(\$LITERAL\$)
-    *(\$READONLY\$ .rodata)
+    *(\$READONLY\$ .rodata .rodata.*)
     *(.jcr)
     *(.ctors)
     *(.dtors)
@@ -53,7 +53,7 @@ SECTIONS
   ${RELOCATING+. = ALIGN (${PAGESIZE});}
 
   .srodata : {
-    *(.srodata)
+    *(.srodata .srodata.*)
   }
   .got ALIGN (8) : {
     *(.got)
@@ -71,7 +71,7 @@ SECTIONS
 
   \$RW_SHORT\$ ALIGN (${BLOCKSIZE}) : {
     *(.sdata .sdata.*)
-    *(.sbss)
+    *(.sbss .sbss.*)
   }
 
   ${RELOCATING+. = ALIGN (${PAGESIZE});}
@@ -111,6 +111,6 @@ EOF
 cat <<EOF  
   .note : { *(.vms.note) }
 
-  /DISCARD/ : { *(.note) }
+  /DISCARD/ : { *(.note) *(.vms_display_name_info) }
 }
 EOF

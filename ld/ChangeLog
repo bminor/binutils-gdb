@@ -1,3 +1,8 @@
+2013-07-08  Tristan Gingold  <gingold@adacore.com>
+
+	* scripttempl/ia64vms.sc: Add support of per data and per function
+	sections.
+
 2013-07-01  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em: (ppc_layout_sections_again): Call
