@@ -81,6 +81,14 @@ while { $done == 0 } {
   gdb_test_multiple "continue" "watchpoint created successfully" {
     -re ".*Breakpoint 2, empty_cycle \\(\\).*$gdb_prompt $" {
       incr hwatch_count
+
+      # Some targets (like S/390) behave as though supporting
+      # unlimited hardware watchpoints.  In this case we just take a
+      # safe exit out of the loop.
+      if { $hwatch_count == $NR_THREADS } {
+	set done 1
+	break
+      }
     }
     -re ".*Could not insert hardware watchpoint.*$gdb_prompt $" {
       set done 1

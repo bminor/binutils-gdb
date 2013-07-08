@@ -1,3 +1,8 @@
+2013-07-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.threads/wp-replication.exp: Stop counting available hardware
+	watchpoints after NR_THREADS iterations.
+
 2013-07-08  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.python/py-explore.exp: Add $gdb_prompt to test regexp.
