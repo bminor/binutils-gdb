@@ -1,3 +1,10 @@
+2013-07-08  Andrew Burgess  <aburgess@broadcom.com>
+            Pedro Alves  <palves@redhat.com>
+
+	* value.c (value_bits_valid): If the value is not lval_computed
+	or has no check validity handler then the answer is the
+	optimized_out flag, otherwise defer to the handler.
+
 2013-07-06  Eli Zaretskii  <eliz@gnu.org>
 
 	* top.c (print_gdb_configuration): Explain in output of
