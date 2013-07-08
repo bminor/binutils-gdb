@@ -12702,17 +12702,17 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case 'A':
-	      /* If we expect a base register, check whether there is only
-		 a single bracketed expression left.  If so, it must be the
-		 base register and the constant must be zero.  */
-	      if (args[1] == '(' && *s == '(' && strchr (s + 1, '(') == 0)
+	      my_getSmallExpression (&offset_expr, offset_reloc, s);
+	      if (offset_expr.X_op == O_register)
 		{
+		  /* Assume that the offset has been elided and that what
+		     we saw was a base register.  The match will fail later
+		     if that assumption turns out to be wrong.  */
 		  offset_expr.X_op = O_constant;
 		  offset_expr.X_add_number = 0;
 		}
 	      else
 		{
-		  my_getSmallExpression (&offset_expr, offset_reloc, s);
 		  normalize_address_expr (&offset_expr);
 		  s = expr_end;
 		}

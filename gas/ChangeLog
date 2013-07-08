@@ -1,3 +1,9 @@
+2013-07-08  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (mips_ip): Unconditionally parse an expression
+	for 'A' and assume that the constant has been elided if the result
+	is an O_register.
+
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (gprel16_reloc_p): New function.

@@ -1,3 +1,8 @@
+2013-07-08  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/la.s, gas/mips/la.d, gas/mips/la-svr4pic.d,
+	gas/mips/la-xgot.d: Add tests for bracketed addresses.
+
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/ldstla-32.d: Avoid "lui at,0x0" sequences for
