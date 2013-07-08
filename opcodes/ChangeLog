@@ -1,3 +1,9 @@
+2013-07-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/13572
+	* i386-opc.tbl: Replace Xmmword with Qword on cvttps2pi.
+	* i386-tbl.h: Regenerated.
+
 2013-07-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Remove o(b) macros.  Move LD

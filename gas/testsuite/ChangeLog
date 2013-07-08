@@ -1,3 +1,10 @@
+2013-07-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/13572
+	* gas/i386/simd.s: Add a test for cvttps2pi.
+	* gas/i386/simd-intel.d: Updated.
+	* gas/i386/simd.d: Likewise.
+
 2013-07-08  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/la.s, gas/mips/la.d, gas/mips/la-svr4pic.d,
