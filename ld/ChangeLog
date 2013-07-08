@@ -1,3 +1,8 @@
+2013-07-08  Jeff Law  <law@redhat.com>
+
+	* scripttempl/elf.sc: Handle function names and other text after
+	.text.unlikely too.
+
 2013-07-08  Tristan Gingold  <gingold@adacore.com>
 
 	* scripttempl/ia64vms.sc: Add support of per data and per function

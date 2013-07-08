@@ -470,7 +470,7 @@ cat <<EOF
   .text         ${RELOCATING-0} :
   {
     ${RELOCATING+${TEXT_START_SYMBOLS}}
-    ${RELOCATING+*(.text.unlikely .text.*_unlikely)}
+    ${RELOCATING+*(.text.unlikely .text.*_unlikely .text.unlikely.*)}
     ${RELOCATING+*(.text.exit .text.exit.*)}
     ${RELOCATING+*(.text.startup .text.startup.*)}
     ${RELOCATING+*(.text.hot .text.hot.*)}
