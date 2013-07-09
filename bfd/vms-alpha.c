@@ -330,10 +330,6 @@ struct vms_private_data_struct
 
   /* linkage index counter used by conditional store commands */
   unsigned int vms_linkage_index;
-
-  /* see tc-alpha.c of gas for a description.  */
-  int flag_hash_long_names;	/* -+, hash instead of truncate */
-  int flag_show_after_trunc;	/* -H, show hashing/truncation */
 };
 
 #define PRIV2(abfd, name) \
@@ -2685,88 +2681,6 @@ _bfd_vms_write_eeom (bfd *abfd)
   return TRUE;
 }
 
-/* This hash routine borrowed from GNU-EMACS, and strengthened
-   slightly.  ERY.  */
-
-static int
-hash_string (const char *ptr)
-{
-  const unsigned char *p = (unsigned char *) ptr;
-  const unsigned char *end = p + strlen (ptr);
-  unsigned char c;
-  int hash = 0;
-
-  while (p != end)
-    {
-      c = *p++;
-      hash = ((hash << 3) + (hash << 15) + (hash >> 28) + c);
-    }
-  return hash;
-}
-
-/* Generate a length-hashed VMS symbol name (limited to maxlen chars).  */
-
-static char *
-_bfd_vms_length_hash_symbol (bfd *abfd, const char *in, int maxlen)
-{
-  unsigned long result;
-  int in_len;
-  char *new_name;
-  const char *old_name;
-  int i;
-  static char outbuf[EOBJ__C_SYMSIZ + 1];
-  char *out = outbuf;
-
-#if VMS_DEBUG
-  vms_debug (4, "_bfd_vms_length_hash_symbol \"%s\"\n", in);
-#endif
-
-  if (maxlen > EOBJ__C_SYMSIZ)
-    maxlen = EOBJ__C_SYMSIZ;
-
-  /* Save this for later.  */
-  new_name = out;
-
-  /* We may need to truncate the symbol, save the hash for later.  */
-  in_len = strlen (in);
-
-  result = (in_len > maxlen) ? hash_string (in) : 0;
-
-  old_name = in;
-
-  /* Do the length checking.  */
-  if (in_len <= maxlen)
-    i = in_len;
-  else
-    {
-      if (PRIV (flag_hash_long_names))
-	i = maxlen - 9;
-      else
-	i = maxlen;
-    }
-
-  strncpy (out, in, (size_t) i);
-  in += i;
-  out += i;
-
-  if ((in_len > maxlen)
-      && PRIV (flag_hash_long_names))
-    sprintf (out, "_%08lx", result);
-  else
-    *out = 0;
-
-#if VMS_DEBUG
-  vms_debug (4, "--> [%d]\"%s\"\n", (int)strlen (outbuf), outbuf);
-#endif
-
-  if (in_len > maxlen
-	&& PRIV (flag_hash_long_names)
-	&& PRIV (flag_show_after_trunc))
-    printf (_("Symbol %s replaced by %s\n"), old_name, new_name);
-
-  return outbuf;
-}
-
 static void
 vector_grow1 (struct vector_type *vec, size_t elsz)
 {
@@ -3240,7 +3154,6 @@ alpha_vms_write_exec (bfd *abfd)
       for (i = 0; i < PRIV (gsd_sym_count); i++)
         {
           struct vms_symbol_entry *sym = PRIV (syms)[i];
-          char *hash;
           bfd_vma val;
           bfd_vma ep;
 
@@ -3267,8 +3180,7 @@ alpha_vms_write_exec (bfd *abfd)
 	  _bfd_vms_output_quad (recwr, ep);
 	  _bfd_vms_output_quad (recwr, val);
 	  _bfd_vms_output_long (recwr, 0);
-          hash = _bfd_vms_length_hash_symbol (abfd, sym->name, EOBJ__C_SYMSIZ);
-          _bfd_vms_output_counted (recwr, hash);
+          _bfd_vms_output_counted (recwr, sym->name);
           _bfd_vms_output_end_subrec (recwr);
           if ((i % 5) == 4)
             _bfd_vms_output_end (abfd, recwr);
@@ -3363,8 +3275,6 @@ _bfd_vms_write_egsd (bfd *abfd)
 	  else if ((*sname == 'l') && (strcmp (sname, "lcomm") == 0))
 	    sname = EVAX_LOCAL_NAME;
 	}
-      else
-	sname = _bfd_vms_length_hash_symbol (abfd, sname, EOBJ__C_SECSIZ);
 
       if (bfd_is_com_section (section))
 	new_flags = (EGPS__V_OVR | EGPS__V_REL | EGPS__V_GBL | EGPS__V_RD
@@ -3404,18 +3314,13 @@ _bfd_vms_write_egsd (bfd *abfd)
 
   for (symnum = 0; symnum < abfd->symcount; symnum++)
     {
-      char *hash;
-
       symbol = abfd->outsymbols[symnum];
       old_flags = symbol->flags;
 
       /* Work-around a missing feature:  consider __main as the main entry
          point.  */
-      if (*(symbol->name) == '_')
-	{
-	  if (strcmp (symbol->name, "__main") == 0)
-	    bfd_set_start_address (abfd, (bfd_vma)symbol->value);
-	}
+      if (symbol->name[0] == '_' && strcmp (symbol->name, "__main") == 0)
+	bfd_set_start_address (abfd, (bfd_vma)symbol->value);
 
       /* Only put in the GSD the global and the undefined symbols.  */
       if (old_flags & BSF_FILE)
@@ -3508,8 +3413,7 @@ _bfd_vms_write_egsd (bfd *abfd)
 	  _bfd_vms_output_long (recwr, ca_psindx);
 	  _bfd_vms_output_long (recwr, psindx);
 	}
-      hash = _bfd_vms_length_hash_symbol (abfd, symbol->name, EOBJ__C_SYMSIZ);
-      _bfd_vms_output_counted (recwr, hash);
+      _bfd_vms_output_counted (recwr, symbol->name);
 
       _bfd_vms_output_end_subrec (recwr);
     }
@@ -3527,8 +3431,6 @@ _bfd_vms_write_ehdr (bfd *abfd)
 {
   asymbol *symbol;
   unsigned int symnum;
-  int had_case = 0;
-  int had_file = 0;
   struct vms_rec_wr *recwr = &PRIV (recwr);
 
   vms_debug2 ((2, "vms_write_ehdr (%p)\n", abfd));
@@ -3548,22 +3450,9 @@ _bfd_vms_write_ehdr (bfd *abfd)
 
       if (symbol->flags & BSF_FILE)
 	{
-	  if (CONST_STRNEQ ((char *)symbol->name, "<CASE:"))
-	    {
-	      PRIV (flag_hash_long_names) = symbol->name[6] - '0';
-	      PRIV (flag_show_after_trunc) = symbol->name[7] - '0';
-
-	      if (had_file)
-		break;
-	      had_case = 1;
-	      continue;
-	    }
-
 	  _bfd_vms_output_dump (recwr, (unsigned char *) symbol->name,
 				(int) strlen (symbol->name));
-	  if (had_case)
-	    break;
-	  had_file = 1;
+	  break;
 	}
     }
 
@@ -3799,7 +3688,6 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 	      asection *sec = sym->section;
 	      bfd_boolean defer = defer_reloc_p (rptr);
 	      unsigned int slen;
-	      char *hash;
 
 	      if (pass2_in_progress)
 		{
@@ -3838,13 +3726,11 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		    {
 		      bfd_vma addend = rptr->addend;
 		      slen = strlen ((char *) sym->name);
-		      hash = _bfd_vms_length_hash_symbol
-                        (abfd, sym->name, EOBJ__C_SYMSIZ);
 		      etir_output_check (abfd, section, curr_addr, slen);
 		      if (addend)
 			{
 			  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STA_GBL);
-			  _bfd_vms_output_counted (recwr, hash);
+			  _bfd_vms_output_counted (recwr, sym->name);
 			  _bfd_vms_output_end_subrec (recwr);
 			  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STA_LW);
 			  _bfd_vms_output_long (recwr, (unsigned long) addend);
@@ -3858,7 +3744,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 			{
 			  _bfd_vms_output_begin_subrec
                             (recwr, ETIR__C_STO_GBL_LW);
-			  _bfd_vms_output_counted (recwr, hash);
+			  _bfd_vms_output_counted (recwr, sym->name);
 			  _bfd_vms_output_end_subrec (recwr);
 			}
 		    }
@@ -3893,13 +3779,11 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		    {
 		      bfd_vma addend = rptr->addend;
 		      slen = strlen ((char *) sym->name);
-		      hash = _bfd_vms_length_hash_symbol
-                        (abfd, sym->name, EOBJ__C_SYMSIZ);
 		      etir_output_check (abfd, section, curr_addr, slen);
 		      if (addend)
 			{
 			  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STA_GBL);
-			  _bfd_vms_output_counted (recwr, hash);
+			  _bfd_vms_output_counted (recwr, sym->name);
 			  _bfd_vms_output_end_subrec (recwr);
 			  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STA_QW);
 			  _bfd_vms_output_quad (recwr, addend);
@@ -3912,7 +3796,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		      else
 			{
 			  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STO_GBL);
-			  _bfd_vms_output_counted (recwr, hash);
+			  _bfd_vms_output_counted (recwr, sym->name);
 			  _bfd_vms_output_end_subrec (recwr);
 			}
 		    }
@@ -3949,20 +3833,16 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		    (recwr, (unsigned long) rptr->addend);
                   if (rptr->addend > PRIV (vms_linkage_index))
                     PRIV (vms_linkage_index) = rptr->addend;
-		  hash = _bfd_vms_length_hash_symbol
-                    (abfd, sym->name, EOBJ__C_SYMSIZ);
-		  _bfd_vms_output_counted (recwr, hash);
+		  _bfd_vms_output_counted (recwr, sym->name);
 		  _bfd_vms_output_byte (recwr, 0);
 		  _bfd_vms_output_end_subrec (recwr);
 		  break;
 
 		case ALPHA_R_CODEADDR:
 		  slen = strlen ((char *) sym->name);
-		  hash = _bfd_vms_length_hash_symbol
-                    (abfd, sym->name, EOBJ__C_SYMSIZ);
 		  etir_output_check (abfd, section, curr_addr, slen);
 		  _bfd_vms_output_begin_subrec (recwr, ETIR__C_STO_CA);
-		  _bfd_vms_output_counted (recwr, hash);
+		  _bfd_vms_output_counted (recwr, sym->name);
 		  _bfd_vms_output_end_subrec (recwr);
 		  break;
 
@@ -3980,9 +3860,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  _bfd_vms_output_long
 		    (recwr, (unsigned long) section->target_index);
 		  _bfd_vms_output_quad (recwr, rptr->addend);
-		  _bfd_vms_output_counted
-		    (recwr, _bfd_vms_length_hash_symbol
-                     (abfd, udata->origname, EOBJ__C_SYMSIZ));
+		  _bfd_vms_output_counted (recwr, udata->origname);
 		  _bfd_vms_output_end_subrec (recwr);
 		  break;
 
@@ -4005,9 +3883,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  _bfd_vms_output_long
 		    (recwr, (unsigned long) udata->bsym->section->target_index);
 		  _bfd_vms_output_quad (recwr, rptr->addend);
-		  _bfd_vms_output_counted
-		    (recwr, _bfd_vms_length_hash_symbol
-                     (abfd, udata->origname, EOBJ__C_SYMSIZ));
+		  _bfd_vms_output_counted (recwr, udata->origname);
 		  _bfd_vms_output_end_subrec (recwr);
 		  break;
 
@@ -4025,9 +3901,7 @@ _bfd_vms_write_etir (bfd * abfd, int objtype ATTRIBUTE_UNUSED)
 		  _bfd_vms_output_long
 		    (recwr, (unsigned long) section->target_index);
 		  _bfd_vms_output_quad (recwr, rptr->addend);
-		  _bfd_vms_output_counted
-		    (recwr, _bfd_vms_length_hash_symbol
-                     (abfd, udata->origname, EOBJ__C_SYMSIZ));
+		  _bfd_vms_output_counted (recwr, udata->origname);
 		  _bfd_vms_output_end_subrec (recwr);
 		  break;
 
@@ -9248,7 +9122,6 @@ static bfd_boolean
 vms_bfd_is_local_label_name (bfd * abfd ATTRIBUTE_UNUSED,
 			     const char *name)
 {
-  vms_debug2 ((1, "vms_bfd_is_local_label_name (%p, %s)\n", abfd, name));
   return name[0] == '$';
 }
 

@@ -1,5 +1,17 @@
 2013-07-09  Tristan Gingold  <gingold@adacore.com>
 
+	* vms-alpha.c (struct vms_private_data_struct): Remove
+	flag_hash_long_names and flag_show_after_trunc.
+	(hash_string): Remove.
+	(_bfd_vms_length_hash_symbol): Remove.
+	(alpha_vms_write_exec): Remove call to _bfd_vms_length_hash_symbol.
+	(_bfd_vms_write_egsd): Likewise.  Rewrite condition.
+	(_bfd_vms_write_ehdr): Remove code that set removed flags.
+	(_bfd_vms_write_etir): Remove call to _bfd_vms_length_hash_symbol.
+	(vms_bfd_is_local_label_name): Remove trace call.
+
+2013-07-09  Tristan Gingold  <gingold@adacore.com>
+
 	* hosts/alphavms.h: Include config.h and ansidecl.h, remove useless
 	macros.
 	* configure.com: Adjust to match changes in configure.
