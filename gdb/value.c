@@ -1082,12 +1082,13 @@ value_entirely_optimized_out (const struct value *value)
 int
 value_bits_valid (const struct value *value, int offset, int length)
 {
+  if (!value->optimized_out)
+    return 1;
   if (value->lval != lval_computed
       || !value->location.computed.funcs->check_validity)
-    return !value->optimized_out;
-  else
-    return value->location.computed.funcs->check_validity (value, offset,
-							   length);
+    return 0;
+  return value->location.computed.funcs->check_validity (value, offset,
+							 length);
 }
 
 int

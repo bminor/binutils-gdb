@@ -1,3 +1,9 @@
+2013-07-09  Andrew Burgess  <aburgess@broadcom.com>
+
+	* value.c (value_bits_valid): Revert previous change, and change
+	by Pedro on 2013-07-04, due to regressions in
+	gdb.dwarf2/implptr.exp and gdb.dwarf2/pieces.exp.
+
 2013-07-08  Andrew Burgess  <aburgess@broadcom.com>
             Pedro Alves  <palves@redhat.com>
 
