@@ -1,3 +1,8 @@
+2013-07-09  Doug Evans  <dje@google.com>
+
+	* gdb.base/default.exp: Update expected output of "show print array"
+	and "show print pretty".
+
 2013-07-08  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.threads/wp-replication.exp: Stop counting available hardware

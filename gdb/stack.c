@@ -275,7 +275,7 @@ print_frame_arg (const struct frame_arg *arg)
 	      else
 		language = current_language;
 
-	      get_raw_print_options (&opts);
+	      get_no_prettyformat_print_options (&opts);
 	      opts.deref_ref = 1;
 
 	      /* True in "summary" mode, false otherwise.  */

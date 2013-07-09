@@ -99,7 +99,7 @@ print_subexp_standard (struct expression *exp, int *pos,
       {
 	struct value_print_options opts;
 
-	get_raw_print_options (&opts);
+	get_no_prettyformat_print_options (&opts);
 	(*pos) += 3;
 	value_print (value_from_longest (exp->elts[pc + 1].type,
 					 exp->elts[pc + 2].longconst),
@@ -111,7 +111,7 @@ print_subexp_standard (struct expression *exp, int *pos,
       {
 	struct value_print_options opts;
 
-	get_raw_print_options (&opts);
+	get_no_prettyformat_print_options (&opts);
 	(*pos) += 3;
 	value_print (value_from_double (exp->elts[pc + 1].type,
 					exp->elts[pc + 2].doubleconst),
@@ -448,7 +448,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  (*pos) += 4;
 	  val = value_at_lazy (exp->elts[pc + 1].type,
 			       (CORE_ADDR) exp->elts[pc + 5].longconst);
-	  get_raw_print_options (&opts);
+	  get_no_prettyformat_print_options (&opts);
 	  value_print (val, stream, &opts);
 	}
       else

@@ -24,14 +24,14 @@
    functions.  */
 struct value_print_options
 {
-  /* Pretty-printing control.  */
-  enum val_prettyprint pretty;
+  /* Pretty-formatting control.  */
+  enum val_prettyformat prettyformat;
 
-  /* Controls pretty printing of arrays.  */
-  int prettyprint_arrays;
+  /* Controls pretty formatting of arrays.  */
+  int prettyformat_arrays;
 
-  /* Controls pretty printing of structures.  */
-  int prettyprint_structs;
+  /* Controls pretty formatting of structures.  */
+  int prettyformat_structs;
 
   /* Controls printing of virtual tables.  */
   int vtblprint;
@@ -101,8 +101,8 @@ extern struct value_print_options user_print_options;
 extern void get_user_print_options (struct value_print_options *opts);
 
 /* Initialize *OPTS to be a copy of the user print options, but with
-   pretty-printing disabled.  */
-extern void get_raw_print_options (struct value_print_options *opts);
+   pretty-formatting disabled.  */
+extern void get_no_prettyformat_print_options (struct value_print_options *);
 
 /* Initialize *OPTS to be a copy of the user print options, but using
    FORMAT as the formatting option.  */

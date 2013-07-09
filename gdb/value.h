@@ -899,7 +899,7 @@ extern void value_print (struct value *val, struct ui_file *stream,
 
 extern void value_print_array_elements (struct value *val,
 					struct ui_file *stream, int format,
-					enum val_prettyprint pretty);
+					enum val_prettyformat pretty);
 
 extern struct value *value_release_to_mark (struct value *mark);
 

@@ -1506,7 +1506,7 @@ print_return_value (struct value *function, struct type *value_type)
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
 			record_latest_value (value));
       ui_out_text (uiout, " = ");
-      get_raw_print_options (&opts);
+      get_no_prettyformat_print_options (&opts);
       value_print (value, stb, &opts);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");

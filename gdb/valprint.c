@@ -104,9 +104,9 @@ void _initialize_valprint (void);
 
 struct value_print_options user_print_options =
 {
-  Val_pretty_default,		/* pretty */
-  0,				/* prettyprint_arrays */
-  0,				/* prettyprint_structs */
+  Val_prettyformat_default,	/* prettyformat */
+  0,				/* prettyformat_arrays */
+  0,				/* prettyformat_structs */
   0,				/* vtblprint */
   1,				/* unionprint */
   1,				/* addressprint */
@@ -133,12 +133,12 @@ get_user_print_options (struct value_print_options *opts)
 }
 
 /* Initialize *OPTS to be a copy of the user print options, but with
-   pretty-printing disabled.  */
+   pretty-formatting disabled.  */
 void
-get_raw_print_options (struct value_print_options *opts)
+get_no_prettyformat_print_options (struct value_print_options *opts)
 {  
   *opts = user_print_options;
-  opts->pretty = Val_no_prettyprint;
+  opts->prettyformat = Val_no_prettyformat;
 }
 
 /* Initialize *OPTS to be a copy of the user print options, but using
@@ -221,19 +221,19 @@ show_stop_print_at_null (struct ui_file *file, int from_tty,
 /* Controls pretty printing of structures.  */
 
 static void
-show_prettyprint_structs (struct ui_file *file, int from_tty,
+show_prettyformat_structs (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Prettyprinting of structures is %s.\n"), value);
+  fprintf_filtered (file, _("Pretty formatting of structures is %s.\n"), value);
 }
 
 /* Controls pretty printing of arrays.  */
 
 static void
-show_prettyprint_arrays (struct ui_file *file, int from_tty,
+show_prettyformat_arrays (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Prettyprinting of arrays is %s.\n"), value);
+  fprintf_filtered (file, _("Pretty formatting of arrays is %s.\n"), value);
 }
 
 /* If nonzero, causes unions inside structures or other unions to be
@@ -390,7 +390,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
           if (!get_array_bounds (type, &low_bound, &high_bound))
             error (_("Could not determine the array high bound"));
 
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
@@ -736,9 +736,9 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   struct value_print_options local_opts = *options;
   struct type *real_type = check_typedef (type);
 
-  if (local_opts.pretty == Val_pretty_default)
-    local_opts.pretty = (local_opts.prettyprint_structs
-			 ? Val_prettyprint : Val_no_prettyprint);
+  if (local_opts.prettyformat == Val_prettyformat_default)
+    local_opts.prettyformat = (local_opts.prettyformat_structs
+			       ? Val_prettyformat : Val_no_prettyformat);
 
   QUIT;
 
@@ -1642,7 +1642,7 @@ val_print_array_elements (struct type *type,
     {
       if (i != 0)
 	{
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    {
 	      fprintf_filtered (stream, ",\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
@@ -2730,11 +2730,11 @@ Show threshold for repeated print elements."), _("\
 			    &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("pretty", class_support,
-			   &user_print_options.prettyprint_structs, _("\
-Set prettyprinting of structures."), _("\
-Show prettyprinting of structures."), NULL,
+			   &user_print_options.prettyformat_structs, _("\
+Set pretty formatting of structures."), _("\
+Show pretty formatting of structures."), NULL,
 			   NULL,
-			   show_prettyprint_structs,
+			   show_prettyformat_structs,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("union", class_support,
@@ -2746,11 +2746,11 @@ Show printing of unions interior to structures."), NULL,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("array", class_support,
-			   &user_print_options.prettyprint_arrays, _("\
-Set prettyprinting of arrays."), _("\
-Show prettyprinting of arrays."), NULL,
+			   &user_print_options.prettyformat_arrays, _("\
+Set pretty formatting of arrays."), _("\
+Show pretty formatting of arrays."), NULL,
 			   NULL,
-			   show_prettyprint_arrays,
+			   show_prettyformat_arrays,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("address", class_support,

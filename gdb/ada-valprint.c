@@ -171,7 +171,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 
       if (i != 0)
 	{
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    {
 	      fprintf_filtered (stream, ",\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
@@ -227,7 +227,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 	    {
 	      if (j > i0)
 		{
-		  if (options->prettyprint_arrays)
+		  if (options->prettyformat_arrays)
 		    {
 		      fprintf_filtered (stream, ",\n");
 		      print_spaces_filtered (2 + 2 * recurse, stream);
@@ -600,7 +600,7 @@ ada_val_print_array (struct type *type, const gdb_byte *valaddr,
       eltlen = TYPE_LENGTH (elttype);
       len = TYPE_LENGTH (type) / eltlen;
 
-      if (options->prettyprint_arrays)
+      if (options->prettyformat_arrays)
         print_spaces_filtered (2 + 2 * recurse, stream);
 
       /* If requested, look for the first null char and only print
@@ -1001,7 +1001,7 @@ print_record (struct type *type, const gdb_byte *valaddr,
 
   if (print_field_values (type, valaddr, offset,
 			  stream, recurse, val, options,
-			  0, type, offset) != 0 && options->pretty)
+			  0, type, offset) != 0 && options->prettyformat)
     {
       fprintf_filtered (stream, "\n");
       print_spaces_filtered (2 * recurse, stream);
@@ -1067,7 +1067,7 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 	fprintf_filtered (stream, ", ");
       comma_needed = 1;
 
-      if (options->pretty)
+      if (options->prettyformat)
 	{
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 + 2 * recurse, stream);

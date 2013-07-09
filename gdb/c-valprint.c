@@ -161,7 +161,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 
 	  eltlen = TYPE_LENGTH (elttype);
 	  len = high_bound - low_bound + 1;
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
@@ -353,7 +353,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 		  vt_val = value_at (wtype, vt_address);
 		  common_val_print (vt_val, stream, recurse + 1,
 				    options, current_language);
-		  if (options->pretty)
+		  if (options->prettyformat)
 		    {
 		      fprintf_filtered (stream, "\n");
 		      print_spaces_filtered (2 + 2 * recurse, stream);

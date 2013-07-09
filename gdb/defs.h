@@ -483,18 +483,18 @@ extern char *current_directory;
 extern unsigned input_radix;
 extern unsigned output_radix;
 
-/* Possibilities for prettyprint parameters to routines which print
+/* Possibilities for prettyformat parameters to routines which print
    things.  Like enum language, this should be in value.h, but needs
    to be here for the same reason.  FIXME:  If we can eliminate this
    as an arg to LA_VAL_PRINT, then we can probably move it back to
    value.h.  */
 
-enum val_prettyprint
+enum val_prettyformat
   {
-    Val_no_prettyprint = 0,
-    Val_prettyprint,
+    Val_no_prettyformat = 0,
+    Val_prettyformat,
     /* Use the default setting which the user has specified.  */
-    Val_pretty_default
+    Val_prettyformat_default
   };
 
 /* Optional native machine support.  Non-native (and possibly pure

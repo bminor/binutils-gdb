@@ -83,7 +83,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  len = high_bound - low_bound + 1;
 	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
 	  eltlen = TYPE_LENGTH (elttype);
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
@@ -263,7 +263,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	      vt_val = value_at (wtype, vt_address);
 	      common_val_print (vt_val, stream, recurse + 1, options,
 				current_language);
-	      if (options->pretty)
+	      if (options->prettyformat)
 		{
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
@@ -575,7 +575,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	    fprintf_filtered (stream, ", ");
 	  else if (n_baseclasses > 0)
 	    {
-	      if (options->pretty)
+	      if (options->prettyformat)
 		{
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
@@ -586,7 +586,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	    }
 	  fields_seen = 1;
 
-	  if (options->pretty)
+	  if (options->prettyformat)
 	    {
 	      fprintf_filtered (stream, "\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
@@ -688,7 +688,7 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	  dont_print_statmem_obstack = tmp_obstack;
 	}
 
-      if (options->pretty)
+      if (options->prettyformat)
 	{
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
@@ -787,7 +787,7 @@ pascal_object_print_value (struct type *type, const gdb_byte *valaddr,
 	    base_valaddr = valaddr;
 	}
 
-      if (options->pretty)
+      if (options->prettyformat)
 	{
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);

@@ -667,7 +667,7 @@ gdb_test "show paths" "Executable and object file path:.*" "show paths"
 #test show print address
 gdb_test "show print address" "Printing of addresses is on." "show print address"
 #test show print array
-gdb_test "show print array" "Prettyprinting of arrays is on." "show print array"
+gdb_test "show print array" "Pretty formatting of arrays is on." "show print array"
 #test show print asm-demangle
 gdb_test "show print asm-demangle" "Demangling of C\[+\]+/ObjC names in disassembly listings is on." "show print asm-demangle"
 #test show print demangle
@@ -677,7 +677,7 @@ gdb_test "show print elements" "Limit on string chars or array elements to print
 #test show print object
 gdb_test "show print object" "Printing of object's derived type based on vtable info is on." "show print object"
 #test show print pretty
-gdb_test "show print pretty" "Prettyprinting of structures is on." "show print pretty"
+gdb_test "show print pretty" "Pretty formatting of structures is on." "show print pretty"
 #test show print sevenbit-strings
 gdb_test "show print sevenbit-strings" "Printing of 8-bit characters in strings as .nnn is on." "show print sevenbit-strings"
 #test show print union

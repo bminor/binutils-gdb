@@ -511,16 +511,16 @@ print_children (PyObject *printer, const char *hint,
     }
   make_cleanup_py_decref (iter);
 
-  /* Use the prettyprint_arrays option if we are printing an array,
+  /* Use the prettyformat_arrays option if we are printing an array,
      and the pretty option otherwise.  */
   if (is_array)
-    pretty = options->prettyprint_arrays;
+    pretty = options->prettyformat_arrays;
   else
     {
-      if (options->pretty == Val_prettyprint)
+      if (options->prettyformat == Val_prettyformat)
 	pretty = 1;
       else
-	pretty = options->prettyprint_structs;
+	pretty = options->prettyformat_structs;
     }
 
   /* Manufacture a dummy Python frame to work around Python 2.4 bug,

@@ -1,3 +1,22 @@
+2013-07-09  Doug Evans  <dje@google.com>
+
+	* defs.h (enum val_prettyformat): Renamed from val_prettyprint.
+	Enum values rename as well.  All uses updated.
+	* valprint.h (value_print_options): Rename member pretty to
+	pretty format.  Rename member prettyprint_arrays to
+	prettyformat_arrays.  Rename member prettyprint_structs to
+	prettyformat_structs.  All uses updated.
+	(get_no_prettyformat_print_options): Renamed from
+	get_raw_print_options.
+	* valprint.c (get_no_prettyformat_print_options): Renamed from
+	get_raw_print_options.  All callers updated.
+	(show_prettyformat_structs): Renamed from show_prettyprint_structs.
+	All callers updated.
+	(show_prettyformat_arrays): Renamed from show_prettyprint_arrays.
+	All callers updated.
+	(_initialize_valprint): Improve help text for "set print pretty" and
+	"set print arrays".
+
 2013-07-09  Andrew Burgess  <aburgess@broadcom.com>
 
 	* value.c (value_bits_valid): Revert previous change, and change

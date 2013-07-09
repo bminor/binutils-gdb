@@ -2627,7 +2627,7 @@ print_variable_or_computed (char *expression, enum print_values values)
 	{
 	  struct value_print_options opts;
 
-	  get_raw_print_options (&opts);
+	  get_no_prettyformat_print_options (&opts);
 	  opts.deref_ref = 1;
 	  common_val_print (val, stb, 0, &opts, current_language);
 	  ui_out_field_stream (uiout, "value", stb);
@@ -2637,7 +2637,7 @@ print_variable_or_computed (char *expression, enum print_values values)
       {
 	struct value_print_options opts;
 
-	get_raw_print_options (&opts);
+	get_no_prettyformat_print_options (&opts);
 	opts.deref_ref = 1;
 	common_val_print (val, stb, 0, &opts, current_language);
 	ui_out_field_stream (uiout, "value", stb);

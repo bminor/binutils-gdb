@@ -272,7 +272,7 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 
   if (TYPE_LENGTH (type) > 0)
     {
-      if (options->prettyprint_arrays)
+      if (options->prettyformat_arrays)
 	print_spaces_filtered (2 + 2 * recurse, stream);
       /* For an array of chars, print with string syntax.  */
       if (TYPE_LENGTH (type) == 1 &&
@@ -327,7 +327,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	{
 	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
 	  len = TYPE_LENGTH (type) / TYPE_LENGTH (elttype);
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    print_spaces_filtered (2 + 2 * recurse, stream);
 	  /* For an array of chars, print with string syntax.  */
 	  if (TYPE_LENGTH (elttype) == 1 &&
