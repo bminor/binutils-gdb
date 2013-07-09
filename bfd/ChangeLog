@@ -1,3 +1,10 @@
+2013-07-09  Tristan Gingold  <gingold@adacore.com>
+
+	* hosts/alphavms.h: Include config.h and ansidecl.h, remove useless
+	macros.
+	* configure.com: Adjust to match changes in configure.
+	* makefile.vms (OBJS): Update list.
+
 2013-07-05  Tristan Gingold  <gingold@adacore.com>
 
 	* coffcode.h (coff_write_object_contents): Use ".ovrflo" name for
