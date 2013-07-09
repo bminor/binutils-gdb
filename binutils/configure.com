@@ -53,11 +53,32 @@ $ create config.h
 #define HAVE_SYS_FILE_H 1
 /* Define if you have the <unistd.h> header file.  */
 #define HAVE_UNISTD_H 1
+
 /* Alloca.  */
 #ifdef __DECC
 #include <builtins.h>
 #define C_alloca(x) __ALLOCA(x)
 #endif
+/* Name of package */
+#define PACKAGE "binutils"
+
+/* Define to the address where bug reports for this package should be sent. */
+#define PACKAGE_BUGREPORT ""
+
+/* Define to the full name of this package. */
+#define PACKAGE_NAME ""
+
+/* Define to the full name and version of this package. */
+#define PACKAGE_STRING ""
+
+/* Define to the one symbol short name of this package. */
+#define PACKAGE_TARNAME ""
+
+/* Define to the home page for this package. */
+#define PACKAGE_URL ""
+
+/* Define to the version of this package. */
+#define PACKAGE_VERSION ""
 $!
 $! Add TARGET.
 $!

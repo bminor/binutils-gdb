@@ -140,10 +140,10 @@ $  create config-vms.in
 #undef HAVE_SYS_STAT_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
-#undef HAVE_SYS_TYPES_H
+#define HAVE_SYS_TYPES_H
 
 /* Define to 1 if you have the <unistd.h> header file. */
-#undef HAVE_UNISTD_H
+#define HAVE_UNISTD_H
 
 /* Define to 1 if you have the `unlink' function. */
 #undef HAVE_UNLINK

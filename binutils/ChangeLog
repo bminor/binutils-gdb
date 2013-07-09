@@ -1,3 +1,7 @@
+2013-07-09  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.com: Add new defines to match changes in configure.
+
 2013-05-28  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.c (display_debug_lines_raw): Print section offsets.
