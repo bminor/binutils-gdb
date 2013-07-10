@@ -1,3 +1,11 @@
+2013-07-09  Pedro Alves  <palves@redhat.com>
+
+	Checked in by Joel Brobecker  <brobecker@adacore.com>.
+	* ada-lang.c (coerce_unspec_val_to_type): Use
+	value_optimized_out_const.
+	* value.c (value_optimized_out_const): New function.
+	* value.h (value_optimized_out_const): New declaration.
+
 2013-07-09  Doug Evans  <dje@google.com>
 
 	* defs.h (enum val_prettyformat): Renamed from val_prettyprint.

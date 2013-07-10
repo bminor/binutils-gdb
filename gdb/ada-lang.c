@@ -581,7 +581,7 @@ coerce_unspec_val_to_type (struct value *val, struct type *type)
       set_value_bitsize (result, value_bitsize (val));
       set_value_bitpos (result, value_bitpos (val));
       set_value_address (result, value_address (val));
-      set_value_optimized_out (result, value_optimized_out (val));
+      set_value_optimized_out (result, value_optimized_out_const (val));
       return result;
     }
 }

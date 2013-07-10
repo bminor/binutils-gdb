@@ -1062,6 +1062,12 @@ value_optimized_out (struct value *value)
   return value->optimized_out;
 }
 
+int
+value_optimized_out_const (const struct value *value)
+{
+  return value->optimized_out;
+}
+
 void
 set_value_optimized_out (struct value *value, int val)
 {

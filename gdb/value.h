@@ -319,9 +319,15 @@ extern int value_fetch_lazy (struct value *val);
 extern int value_contents_equal (struct value *val1, struct value *val2);
 
 /* If nonzero, this is the value of a variable which does not actually
-   exist in the program.  */
+   exist in the program, at least partially.  If the value is lazy,
+   this may fetch it now.  */
 extern int value_optimized_out (struct value *value);
 extern void set_value_optimized_out (struct value *value, int val);
+
+/* Like value_optimized_out, but don't fetch the value even if it is
+   lazy.  Mainly useful for constructing other values using VALUE as
+   template.  */
+extern int value_optimized_out_const (const struct value *value);
 
 /* Like value_optimized_out, but return false if any bit in the object
    is valid.  */
