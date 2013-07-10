@@ -1,3 +1,8 @@
+2013-07-10  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (GDB_WARN_CFLAGS_NO_DEFS, ADA_EXP_C): New macros.
+	(ada-exp.o): New target.
+
 2013-07-10  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* mt-tdep.c (mt_registers_info): Call

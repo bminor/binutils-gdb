@@ -165,6 +165,8 @@ GDB_WERROR_CFLAGS = $(WERROR_CFLAGS)
 
 GDB_WARN_CFLAGS_NO_FORMAT = `echo " $(GDB_WARN_CFLAGS) " \
 		   | sed "s/ -Wformat-nonliteral / -Wno-format-nonliteral /g"`
+GDB_WARN_CFLAGS_NO_DEFS = `echo " $(GDB_WARN_CFLAGS) " \
+		   | sed "s/ -Wold-style-definition / -Wno-old-style-definition /g"`
 
 RDYNAMIC = @RDYNAMIC@
 
@@ -1579,6 +1581,17 @@ monitor.o: $(srcdir)/monitor.c
 printcmd.o: $(srcdir)/printcmd.c
 	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_FORMAT) \
 		$(COMPILE.post) $(srcdir)/printcmd.c
+	$(POSTCOMPILE)
+
+# ada-exp.c can appear in srcdir, for releases; or in ., for
+# development builds.
+ADA_EXP_C = `if test -f ada-exp.c; then echo ada-exp.c; else echo $(srcdir)/ada-exp.c; fi`
+
+# Some versions of flex give output that triggers
+# -Wold-style-definition.
+ada-exp.o: ada-exp.c
+	$(COMPILE.pre) $(INTERNAL_CFLAGS) $(GDB_WARN_CFLAGS_NO_DEFS) \
+		$(COMPILE.post) $(ADA_EXP_C)
 	$(POSTCOMPILE)
 
 # Message files.  Based on code in gcc/Makefile.in.
