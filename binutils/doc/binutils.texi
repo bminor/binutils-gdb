@@ -2173,8 +2173,8 @@ format (the lists of options is displayed with the help).
 
 For XCOFF, the available options are: @option{header}, @option{aout},
 @option{sections}, @option{syms}, @option{relocs}, @option{lineno},
-@option{loader}, @option{except}, @option{typchk}, @option{traceback}
-and @option{toc}.
+@option{loader}, @option{except}, @option{typchk}, @option{traceback},
+@option{toc} and @option{ldinfo}.
 
 @item -r
 @itemx --reloc

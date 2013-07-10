@@ -1,3 +1,15 @@
+2013-07-10  Tristan Gingold  <gingold@adacore.com>
+
+	* od-xcoff.c (OPT_LDINFO): Define.
+	(options): Add ldinfo.
+	(xcoff_help): Mention ldinfo.
+	(xcoff_dump): Rename to ...
+	(xcoff_dump_obj): ... this.  Add a break.
+	(dump_dumpx_core): New function.
+	(xcoff_dump_core): Likewise.
+	(xcoff_dump): Likewise.
+	* doc/binutils.texi (objdump): Mention ldinfo.
+
 2013-07-09  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.com: Add new defines to match changes in configure.
