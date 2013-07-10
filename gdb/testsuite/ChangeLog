@@ -1,3 +1,7 @@
+2013-07-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/small_reg_param.exp: Remove trailing space.
+
 2013-07-09  Doug Evans  <dje@google.com>
 
 	* gdb.base/default.exp: Update expected output of "show print array"

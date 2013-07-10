@@ -26,7 +26,7 @@ clean_restart ${testfile}
 if ![runto main] then {
   perror "Couldn't run ${testfile}"
   return
-} 
+}
 
 gdb_breakpoint "call_me"
 
