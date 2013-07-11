@@ -2052,17 +2052,8 @@ default_print_one_register_info (struct ui_file *file,
 		 value_embedded_offset (val), 0,
 		 file, 0, val, &opts, current_language);
 
-      fprintf_filtered (file, "\t(raw 0x");
-      for (j = 0; j < TYPE_LENGTH (regtype); j++)
-	{
-	  int idx;
-
-	  if (byte_order == BFD_ENDIAN_BIG)
-	    idx = j;
-	  else
-	    idx = TYPE_LENGTH (regtype) - 1 - j;
-	  fprintf_filtered (file, "%02x", (unsigned char) valaddr[idx]);
-	}
+      fprintf_filtered (file, "\t(raw ");
+      print_hex_chars (file, valaddr, TYPE_LENGTH (regtype), byte_order);
       fprintf_filtered (file, ")");
     }
   else

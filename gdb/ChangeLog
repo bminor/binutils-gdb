@@ -1,3 +1,8 @@
+2013-07-11  Andrew Burgess  <aburgess@broadcom.com>
+
+	* infcmd.c (default_print_one_register_info): Reuse function
+	print_hex_chars.
+
 2013-07-10  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (GDB_WARN_CFLAGS_NO_DEFS, ADA_EXP_C): New macros.
