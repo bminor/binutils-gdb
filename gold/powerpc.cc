@@ -735,7 +735,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
 	 p != this->branch_lookup_table_.end();
 	 ++p)
       {
-	elfcpp::Swap<32, big_endian>::writeval(oview + p->second, p->first);
+	elfcpp::Swap<size, big_endian>::writeval(oview + p->second, p->first);
       }
   }
 

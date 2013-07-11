@@ -1,3 +1,8 @@
+2013-07-11  Cary Coutant  <ccoutant@google.com>
+
+	* powerpc.cc (Target_powerpc::write_branch_lookup_table): Use
+	correct BRLT entry size.
+
 2013-07-03  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::Relocate::relocate): Update self-call
