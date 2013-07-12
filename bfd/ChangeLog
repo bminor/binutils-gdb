@@ -1,3 +1,11 @@
+2013-07-12  Roland McGrath  <mcgrathr@google.com>
+
+	* reloc.c: Add BFD_RELOC_390_PC12DBL, BFD_RELOC_390_PLT12DBL,
+	BFD_RELOC_390_PC24DBL, BFD_RELOC_390_PLT24DBL (should have
+	been added here with 2013-07-05 elf32-s390.c change).
+	* bfd-in2.h: Regenerate (no-op).
+	* libbfd.h: Regenerate (no-op).
+
 2013-07-12  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Handle
