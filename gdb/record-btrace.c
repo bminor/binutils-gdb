@@ -874,7 +874,7 @@ record_btrace_insert_breakpoint (struct target_ops *ops,
 
   ret = 0;
   TRY_CATCH (except, RETURN_MASK_ALL)
-    ret = forward_target_insert_breakpoint (ops->beneath, gdbarch, bp_tgt);
+    ret = ops->beneath->to_insert_breakpoint (ops->beneath, gdbarch, bp_tgt);
 
   record_btrace_allow_memory_access = old;
 
@@ -901,7 +901,7 @@ record_btrace_remove_breakpoint (struct target_ops *ops,
 
   ret = 0;
   TRY_CATCH (except, RETURN_MASK_ALL)
-    ret = forward_target_remove_breakpoint (ops->beneath, gdbarch, bp_tgt);
+    ret = ops->beneath->to_remove_breakpoint (ops->beneath, gdbarch, bp_tgt);
 
   record_btrace_allow_memory_access = old;
 

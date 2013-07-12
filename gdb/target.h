@@ -407,11 +407,14 @@ struct target_ops
     void (*to_post_attach) (int);
     void (*to_detach) (struct target_ops *ops, const char *, int);
     void (*to_disconnect) (struct target_ops *, char *, int);
-    void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal);
+    void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
+      TARGET_DEFAULT_NORETURN (noprocess ());
     ptid_t (*to_wait) (struct target_ops *,
-		       ptid_t, struct target_waitstatus *, int);
+		       ptid_t, struct target_waitstatus *, int)
+      TARGET_DEFAULT_NORETURN (noprocess ());
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int);
-    void (*to_store_registers) (struct target_ops *, struct regcache *, int);
+    void (*to_store_registers) (struct target_ops *, struct regcache *, int)
+      TARGET_DEFAULT_NORETURN (noprocess ());
     void (*to_prepare_to_store) (struct target_ops *, struct regcache *);
 
     /* Transfer LEN bytes of memory between GDB address MYADDR and
@@ -442,9 +445,11 @@ struct target_ops
 
     void (*to_files_info) (struct target_ops *);
     int (*to_insert_breakpoint) (struct target_ops *, struct gdbarch *,
-				 struct bp_target_info *);
+				 struct bp_target_info *)
+      TARGET_DEFAULT_FUNC (memory_insert_breakpoint);
     int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
-				 struct bp_target_info *);
+				 struct bp_target_info *)
+      TARGET_DEFAULT_FUNC (memory_remove_breakpoint);
     int (*to_can_use_hw_breakpoint) (int, int, int);
     int (*to_ranged_break_num_registers) (struct target_ops *);
     int (*to_insert_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
@@ -459,10 +464,12 @@ struct target_ops
 				      CORE_ADDR, CORE_ADDR, int);
     int (*to_remove_mask_watchpoint) (struct target_ops *,
 				      CORE_ADDR, CORE_ADDR, int);
-    int (*to_stopped_by_watchpoint) (struct target_ops *);
+    int (*to_stopped_by_watchpoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
     int to_have_steppable_watchpoint;
     int to_have_continuable_watchpoint;
-    int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
+    int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *)
+      TARGET_DEFAULT_RETURN (0);
     int (*to_watchpoint_addr_within_range) (struct target_ops *,
 					    CORE_ADDR, CORE_ADDR, int);
 
@@ -524,10 +531,12 @@ struct target_ops
     int to_has_thread_control;	/* control thread execution */
     int to_attach_no_wait;
     /* ASYNC target controls */
-    int (*to_can_async_p) (struct target_ops *);
-    int (*to_is_async_p) (struct target_ops *);
-    void (*to_async) (struct target_ops *,
-		      async_callback_ftype *, void *);
+    int (*to_can_async_p) (struct target_ops *)
+      TARGET_DEFAULT_FUNC (find_default_can_async_p);
+    int (*to_is_async_p) (struct target_ops *)
+      TARGET_DEFAULT_FUNC (find_default_is_async_p);
+    void (*to_async) (struct target_ops *, async_callback_ftype *, void *)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
     int (*to_supports_non_stop) (void);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (find_memory_region_ftype func, void *data);
@@ -582,7 +591,8 @@ struct target_ops
 						gdb_byte *readbuf,
 						const gdb_byte *writebuf,
 						ULONGEST offset, ULONGEST len,
-						ULONGEST *xfered_len);
+						ULONGEST *xfered_len)
+      TARGET_DEFAULT_RETURN (TARGET_XFER_E_IO);
 
     /* Returns the memory map for the target.  A return value of NULL
        means that no memory map is available.  If a memory address
@@ -1190,28 +1200,11 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 /* Insert a hardware breakpoint at address BP_TGT->placed_address in
    the target machine.  Returns 0 for success, and returns non-zero or
    throws an error (with a detailed failure reason error code and
-   message) otherwise.
-   Start the target search at OPS.  */
-
-extern int forward_target_insert_breakpoint (struct target_ops *ops,
-					     struct gdbarch *gdbarch,
-					     struct bp_target_info *bp_tgt);
-
-/* Insert a hardware breakpoint at address BP_TGT->placed_address in
-   the target machine.  Returns 0 for success, and returns non-zero or
-   throws an error (with a detailed failure reason error code and
    message) otherwise.  */
 
 extern int target_insert_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt);
 
-/* Remove a breakpoint at address BP_TGT->placed_address in the target
-   machine.  Result is 0 for success, non-zero for error.
-   Start the target search at OPS.  */
-
-extern int forward_target_remove_breakpoint (struct target_ops *ops,
-					     struct gdbarch *gdbarch,
-					     struct bp_target_info *bp_tgt);
 /* Remove a breakpoint at address BP_TGT->placed_address in the target
    machine.  Result is 0 for success, non-zero for error.  */
 

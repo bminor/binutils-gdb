@@ -1,5 +1,63 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* record-full.c (record_full_beneath_to_resume_ops)
+	(record_full_beneath_to_resume, record_full_beneath_to_wait_ops)
+	(record_full_beneath_to_wait)
+	(record_full_beneath_to_store_registers_ops)
+	(record_full_beneath_to_store_registers)
+	(record_full_beneath_to_xfer_partial_ops)
+	(record_full_beneath_to_xfer_partial)
+	(record_full_beneath_to_insert_breakpoint_ops)
+	(record_full_beneath_to_insert_breakpoint)
+	(record_full_beneath_to_remove_breakpoint_ops)
+	(record_full_beneath_to_remove_breakpoint)
+	(record_full_beneath_to_stopped_by_watchpoint)
+	(record_full_beneath_to_stopped_data_address)
+	(record_full_beneath_to_async, tmp_to_resume_ops, tmp_to_resume)
+	(tmp_to_wait_ops, tmp_to_wait, tmp_to_store_registers_ops)
+	(tmp_to_store_registers, tmp_to_xfer_partial_ops)
+	(tmp_to_xfer_partial, tmp_to_instmp_to_insert_breakpoint_ops)
+	(tmp_to_insert_breakpoint, tmp_to_remove_breakpoint_ops)
+	(tmp_to_remove_breakpoint, tmp_to_stopped_by_watchpoint)
+	(tmp_to_stopped_data_address, tmp_to_async): Remove.
+	(record_full_open_1, record_full_open): Update.  Use RECORD_IS_USED.
+	(record_full_resume, record_full_wait_1)
+	(record_full_stopped_by_watchpoint, record_full_stopped_data_address)
+	(record_full_store_registers, record_full_xfer_partial)
+	(record_full_insert_breakpoint, record_full_remove_breakpoint)
+	(record_full_async, record_full_core_xfer_partial): Use target
+	delegation.
+	* target-delegates.c: Rebuild.
+	* target.c (current_xfer_partial): Remove.
+	(update_current_target): Do not INHERIT or de_fault
+	to_insert_breakpoint, to_remove_breakpoint,
+	to_stopped_data_address, to_stopped_by_watchpoint, to_can_async_p,
+	to_is_async_p, to_async.  Do not set to_xfer_partial field.
+	(default_xfer_partial): Simplify.
+	(current_xfer_partial): Remove.
+	(target_wait, target_resume): Simplify.
+	(find_default_can_async_p, find_default_is_async_p): Update.
+	(init_dummy_target): Don't set to_can_async_p, to_is_async_p,
+	to_xfer_partial, to_stopped_by_watchpoint,
+	to_stopped_data_address.
+	(target_store_registers): Simplify.
+	(forward_target_remove_breakpoint)
+	(forward_target_insert_breakpoint): Remove.
+	(target_remove_breakpoint, target_insert_breakpoint)
+	(debug_to_insert_breakpoint, debug_to_remove_breakpoint): Update.
+	* target.h (struct target_ops) <to_resume, to_wait,
+	to_store_registers, to_insert_breakpoint, to_remove_breakpoint,
+	to_stopped_by_watchpoint, to_stopped_data_address, to_can_async_p,
+	to_is_async_p, to_async, to_xfer_partial>: Add TARGET_DEFAULT
+	markup.
+	(forward_target_remove_breakpoint)
+	(forward_target_insert_breakpoint): Remove.
+	* record-btrace.c (record_btrace_remove_breakpoint): Delegate
+	directly.
+	(record_btrace_insert_breakpoint): Delegate directly.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	PR build/7701:
 	* target-delegates.c: New file.
 	* target.c: Include target-delegates.c.

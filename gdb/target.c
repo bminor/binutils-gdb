@@ -74,10 +74,12 @@ static struct target_ops *find_default_run_target (char *);
 
 static target_xfer_partial_ftype default_xfer_partial;
 
-static target_xfer_partial_ftype current_xfer_partial;
-
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
 						    ptid_t ptid);
+
+static int find_default_can_async_p (struct target_ops *ignore);
+
+static int find_default_is_async_p (struct target_ops *ignore);
 
 #include "target-delegates.c"
 
@@ -600,10 +602,10 @@ update_current_target (void)
       INHERIT (to_remove_watchpoint, t);
       /* Do not inherit to_insert_mask_watchpoint.  */
       /* Do not inherit to_remove_mask_watchpoint.  */
-      INHERIT (to_stopped_data_address, t);
+      /* Do not inherit to_stopped_data_address.  */
       INHERIT (to_have_steppable_watchpoint, t);
       INHERIT (to_have_continuable_watchpoint, t);
-      INHERIT (to_stopped_by_watchpoint, t);
+      /* Do not inherit to_stopped_by_watchpoint.  */
       INHERIT (to_watchpoint_addr_within_range, t);
       INHERIT (to_region_ok_for_hw_watchpoint, t);
       INHERIT (to_can_accel_watchpoint_condition, t);
@@ -648,9 +650,9 @@ update_current_target (void)
       /* Do not inherit to_has_registers.  */
       /* Do not inherit to_has_execution.  */
       INHERIT (to_has_thread_control, t);
-      INHERIT (to_can_async_p, t);
-      INHERIT (to_is_async_p, t);
-      INHERIT (to_async, t);
+      /* Do not inherit to_can_async_p.  */
+      /* Do not inherit to_is_async_p.  */
+      /* Do not inherit to_async.  */
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_bookmark, t);
@@ -746,12 +748,6 @@ update_current_target (void)
   de_fault (to_remove_watchpoint,
 	    (int (*) (CORE_ADDR, int, int, struct expression *))
 	    return_minus_one);
-  de_fault (to_stopped_by_watchpoint,
-	    (int (*) (struct target_ops *))
-	    return_zero);
-  de_fault (to_stopped_data_address,
-	    (int (*) (struct target_ops *, CORE_ADDR *))
-	    return_zero);
   de_fault (to_watchpoint_addr_within_range,
 	    default_watchpoint_addr_within_range);
   de_fault (to_region_ok_for_hw_watchpoint,
@@ -817,18 +813,12 @@ update_current_target (void)
   de_fault (to_stop,
 	    (void (*) (ptid_t))
 	    target_ignore);
-  current_target.to_xfer_partial = current_xfer_partial;
   de_fault (to_rcmd,
 	    (void (*) (char *, struct ui_file *))
 	    tcomplain);
   de_fault (to_pid_to_exec_file,
 	    (char *(*) (int))
 	    return_null);
-  de_fault (to_async,
-	    (void (*) (struct target_ops *,
-		       void (*) (enum inferior_event_type, void*),
-		       void*))
-	    tcomplain);
   de_fault (to_thread_architecture,
 	    default_thread_architecture);
   current_target.to_read_description = NULL;
@@ -2042,30 +2032,13 @@ default_xfer_partial (struct target_ops *ops, enum target_object object,
       else
 	return TARGET_XFER_E_IO;
     }
-  else if (ops->beneath != NULL)
-    return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					  readbuf, writebuf, offset, len,
-					  xfered_len);
   else
-    return TARGET_XFER_E_IO;
-}
-
-/* The xfer_partial handler for the topmost target.  Unlike the default,
-   it does not need to handle memory specially; it just passes all
-   requests down the stack.  */
-
-static enum target_xfer_status
-current_xfer_partial (struct target_ops *ops, enum target_object object,
-		      const char *annex, gdb_byte *readbuf,
-		      const gdb_byte *writebuf, ULONGEST offset, ULONGEST len,
-		      ULONGEST *xfered_len)
-{
-  if (ops->beneath != NULL)
-    return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
-					  readbuf, writebuf, offset, len,
-					  xfered_len);
-  else
-    return TARGET_XFER_E_IO;
+    {
+      gdb_assert (ops->beneath != NULL);
+      return ops->beneath->to_xfer_partial (ops->beneath, object, annex,
+					    readbuf, writebuf, offset, len,
+					    xfered_len);
+    }
 }
 
 /* Target vector read/write partial wrapper functions.  */
@@ -2530,20 +2503,6 @@ get_target_memory_unsigned (struct target_ops *ops, CORE_ADDR addr,
 /* See target.h.  */
 
 int
-forward_target_insert_breakpoint (struct target_ops *ops,
-				  struct gdbarch *gdbarch,
-				  struct bp_target_info *bp_tgt)
-{
-  for (; ops != NULL; ops = ops->beneath)
-    if (ops->to_insert_breakpoint != NULL)
-      return ops->to_insert_breakpoint (ops, gdbarch, bp_tgt);
-
-  return memory_insert_breakpoint (ops, gdbarch, bp_tgt);
-}
-
-/* See target.h.  */
-
-int
 target_insert_breakpoint (struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
@@ -2553,15 +2512,15 @@ target_insert_breakpoint (struct gdbarch *gdbarch,
       return 1;
     }
 
-  return forward_target_insert_breakpoint (&current_target, gdbarch, bp_tgt);
+  return current_target.to_insert_breakpoint (&current_target,
+					      gdbarch, bp_tgt);
 }
 
 /* See target.h.  */
 
 int
-forward_target_remove_breakpoint (struct target_ops *ops,
-				  struct gdbarch *gdbarch,
-				  struct bp_target_info *bp_tgt)
+target_remove_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
 {
   /* This is kind of a weird case to handle, but the permission might
      have been changed after breakpoints were inserted - in which case
@@ -2573,20 +2532,8 @@ forward_target_remove_breakpoint (struct target_ops *ops,
       return 1;
     }
 
-  for (; ops != NULL; ops = ops->beneath)
-    if (ops->to_remove_breakpoint != NULL)
-      return ops->to_remove_breakpoint (ops, gdbarch, bp_tgt);
-
-  return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
-}
-
-/* See target.h.  */
-
-int
-target_remove_breakpoint (struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
-{
-  return forward_target_remove_breakpoint (&current_target, gdbarch, bp_tgt);
+  return current_target.to_remove_breakpoint (&current_target,
+					      gdbarch, bp_tgt);
 }
 
 static void
@@ -2766,34 +2713,26 @@ ptid_t
 target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 {
   struct target_ops *t;
+  ptid_t retval = (current_target.to_wait) (&current_target, ptid,
+					    status, options);
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
+  if (targetdebug)
     {
-      if (t->to_wait != NULL)
-	{
-	  ptid_t retval = (*t->to_wait) (t, ptid, status, options);
+      char *status_string;
+      char *options_string;
 
-	  if (targetdebug)
-	    {
-	      char *status_string;
-	      char *options_string;
-
-	      status_string = target_waitstatus_to_string (status);
-	      options_string = target_options_to_string (options);
-	      fprintf_unfiltered (gdb_stdlog,
-				  "target_wait (%d, status, options={%s})"
-				  " = %d,   %s\n",
-				  ptid_get_pid (ptid), options_string,
-				  ptid_get_pid (retval), status_string);
-	      xfree (status_string);
-	      xfree (options_string);
-	    }
-
-	  return retval;
-	}
+      status_string = target_waitstatus_to_string (status);
+      options_string = target_options_to_string (options);
+      fprintf_unfiltered (gdb_stdlog,
+			  "target_wait (%d, status, options={%s})"
+			  " = %d,   %s\n",
+			  ptid_get_pid (ptid), options_string,
+			  ptid_get_pid (retval), status_string);
+      xfree (status_string);
+      xfree (options_string);
     }
 
-  noprocess ();
+  return retval;
 }
 
 char *
@@ -2831,26 +2770,17 @@ target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 
   target_dcache_invalidate ();
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_resume != NULL)
-	{
-	  t->to_resume (t, ptid, step, signal);
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n",
-				ptid_get_pid (ptid),
-				step ? "step" : "continue",
-				gdb_signal_to_name (signal));
+  current_target.to_resume (&current_target, ptid, step, signal);
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n",
+			ptid_get_pid (ptid),
+			step ? "step" : "continue",
+			gdb_signal_to_name (signal));
 
-	  registers_changed_ptid (ptid);
-	  set_executing (ptid, 1);
-	  set_running (ptid, 1);
-	  clear_inline_frame_state (ptid);
-	  return;
-	}
-    }
-
-  noprocess ();
+  registers_changed_ptid (ptid);
+  set_executing (ptid, 1);
+  set_running (ptid, 1);
+  clear_inline_frame_state (ptid);
 }
 
 void
@@ -3247,7 +3177,7 @@ find_default_can_async_p (struct target_ops *ignore)
      configured with a native debugger, and target remote isn't
      connected yet.  */
   t = find_default_run_target (NULL);
-  if (t && t->to_can_async_p)
+  if (t && t->to_can_async_p != delegate_can_async_p)
     return (t->to_can_async_p) (t);
   return 0;
 }
@@ -3262,7 +3192,7 @@ find_default_is_async_p (struct target_ops *ignore)
      configured with a native debugger, and target remote isn't
      connected yet.  */
   t = find_default_run_target (NULL);
-  if (t && t->to_is_async_p)
+  if (t && t->to_is_async_p != delegate_is_async_p)
     return (t->to_is_async_p) (t);
   return 0;
 }
@@ -3867,8 +3797,6 @@ init_dummy_target (void)
   dummy_target.to_detach = 
     (void (*)(struct target_ops *, const char *, int))target_ignore;
   dummy_target.to_create_inferior = find_default_create_inferior;
-  dummy_target.to_can_async_p = find_default_can_async_p;
-  dummy_target.to_is_async_p = find_default_is_async_p;
   dummy_target.to_supports_non_stop = find_default_supports_non_stop;
   dummy_target.to_supports_disable_randomization
     = find_default_supports_disable_randomization;
@@ -3878,17 +3806,12 @@ init_dummy_target (void)
   dummy_target.to_make_corefile_notes = dummy_make_corefile_notes;
   dummy_target.to_get_bookmark = dummy_get_bookmark;
   dummy_target.to_goto_bookmark = dummy_goto_bookmark;
-  dummy_target.to_xfer_partial = default_xfer_partial;
   dummy_target.to_has_all_memory = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_memory = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_stack = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_registers = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_execution
     = (int (*) (struct target_ops *, ptid_t)) return_zero;
-  dummy_target.to_stopped_by_watchpoint
-    = (int (*) (struct target_ops *)) return_zero;
-  dummy_target.to_stopped_data_address =
-    (int (*) (struct target_ops *, CORE_ADDR *)) return_zero;
   dummy_target.to_magic = OPS_MAGIC;
 
   install_dummy_methods (&dummy_target);
@@ -4108,20 +4031,11 @@ target_store_registers (struct regcache *regcache, int regno)
   if (!may_write_registers)
     error (_("Writing to registers is not allowed (regno %d)"), regno);
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
+  current_target.to_store_registers (&current_target, regcache, regno);
+  if (targetdebug)
     {
-      if (t->to_store_registers != NULL)
-	{
-	  t->to_store_registers (t, regcache, regno);
-	  if (targetdebug)
-	    {
-	      debug_print_register ("target_store_registers", regcache, regno);
-	    }
-	  return;
-	}
+      debug_print_register ("target_store_registers", regcache, regno);
     }
-
-  noprocess ();
 }
 
 int
@@ -4695,7 +4609,7 @@ debug_to_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 {
   int retval;
 
-  retval = forward_target_insert_breakpoint (&debug_target, gdbarch, bp_tgt);
+  retval = debug_target.to_insert_breakpoint (&debug_target, gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_insert_breakpoint (%s, xxx) = %ld\n",
@@ -4710,7 +4624,7 @@ debug_to_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 {
   int retval;
 
-  retval = forward_target_remove_breakpoint (&debug_target, gdbarch, bp_tgt);
+  retval = debug_target.to_remove_breakpoint (&debug_target, gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_remove_breakpoint (%s, xxx) = %ld\n",
