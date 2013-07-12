@@ -272,6 +272,9 @@ static int file_mips_soft_float = 0;
 /* 1 if -msingle-float, 0 if -mdouble-float.  The default is 0.   */
 static int file_mips_single_float = 0;
 
+/* True if -mnan=2008, false if -mnan=legacy.  */
+static bfd_boolean mips_flag_nan2008 = FALSE;
+
 static struct mips_set_options mips_opts =
 {
   /* isa */ ISA_UNKNOWN, /* ase */ 0, /* mips16 */ -1, /* micromips */ -1,
@@ -1310,6 +1313,7 @@ static void s_gpdword (int);
 static void s_ehword (int);
 static void s_cpadd (int);
 static void s_insn (int);
+static void s_nan (int);
 static void md_obj_begin (void);
 static void md_obj_end (void);
 static void s_mips_ent (int);
@@ -1441,6 +1445,7 @@ enum options
     OPTION_PDR,
     OPTION_NO_PDR,
     OPTION_MVXWORKS_PIC,
+    OPTION_NAN,
     OPTION_END_OF_ENUM
   };
 
@@ -1556,6 +1561,7 @@ struct option md_longopts[] =
   {"mpdr", no_argument, NULL, OPTION_PDR},
   {"mno-pdr", no_argument, NULL, OPTION_NO_PDR},
   {"mvxworks-pic", no_argument, NULL, OPTION_MVXWORKS_PIC},
+  {"mnan", required_argument, NULL, OPTION_NAN},
 
   {NULL, no_argument, NULL, 0}
 };
@@ -1680,6 +1686,7 @@ static const pseudo_typeS mips_pseudo_table[] =
   {"ehword", s_ehword, 0},
   {"cpadd", s_cpadd, 0},
   {"insn", s_insn, 0},
+  {"nan", s_nan, 0},
 
   /* Relatively generic pseudo-ops that happen to be used on MIPS
      chips.  */
@@ -15262,6 +15269,18 @@ md_parse_option (int c, char *arg)
       mips_pic = VXWORKS_PIC;
       break;
 
+    case OPTION_NAN:
+      if (strcmp (arg, "2008") == 0)
+	mips_flag_nan2008 = TRUE;
+      else if (strcmp (arg, "legacy") == 0)
+	mips_flag_nan2008 = FALSE;
+      else
+	{
+	  as_fatal (_("Invalid NaN setting -mnan=%s"), arg);
+	  return 0;
+	}
+      break;
+
     default:
       return 0;
     }
@@ -17152,6 +17171,30 @@ s_insn (int ignore ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
+/* Handle the .nan pseudo-op.  */
+
+static void
+s_nan (int ignore ATTRIBUTE_UNUSED)
+{
+  static const char str_legacy[] = "legacy";
+  static const char str_2008[] = "2008";
+  size_t i;
+
+  for (i = 0; !is_end_of_line[(unsigned char) input_line_pointer[i]]; i++);
+
+  if (i == sizeof (str_2008) - 1
+      && memcmp (input_line_pointer, str_2008, i) == 0)
+    mips_flag_nan2008 = TRUE;
+  else if (i == sizeof (str_legacy) - 1
+	   && memcmp (input_line_pointer, str_legacy, i) == 0)
+    mips_flag_nan2008 = FALSE;
+  else
+    as_bad (_("Bad .nan directive"));
+
+  input_line_pointer += i;
+  demand_empty_rest_of_line ();
+}
+
 /* Handle a .stab[snd] directive.  Ideally these directives would be
    implemented in a transparent way, so that removing them would not
    have any effect on the generated instructions.  However, s_stab
@@ -18751,6 +18794,9 @@ mips_elf_final_processing (void)
   if (mips_32bitmode)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_32BITMODE;
 
+  if (mips_flag_nan2008)
+    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_NAN2008;
+
 #if 0 /* XXX FIXME */
   /* 32 bit code with 64 bit FP registers.  */
   if (!file_mips_fp32 && ABI_NEEDS_32BIT_REGS (mips_abi))
@@ -19588,8 +19634,16 @@ MIPS options:\n\
 -msingle-float		only allow 32-bit floating-point operations\n\
 -mdouble-float		allow 32-bit and 64-bit floating-point operations\n\
 --[no-]construct-floats	[dis]allow floating point values to be constructed\n\
---[no-]relax-branch	[dis]allow out-of-range branches to be relaxed\n"
-		     ));
+--[no-]relax-branch	[dis]allow out-of-range branches to be relaxed\n\
+-mnan=ENCODING		select an IEEE 754 NaN encoding convention, either of:\n"));
+
+  first = 1;
+
+  show (stream, "legacy", &column, &first);
+  show (stream, "2008", &column, &first);
+
+  fputc ('\n', stream);
+
   fprintf (stream, _("\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
 -call_nonpic		generate non-PIC code that can operate with DSOs\n\

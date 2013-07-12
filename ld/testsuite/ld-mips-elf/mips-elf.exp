@@ -666,6 +666,11 @@ run_dump_test "attr-gnu-4-44"
 run_dump_test "attr-gnu-4-45"
 run_dump_test "attr-gnu-4-51"
 
+run_dump_test "nan-legacy"
+run_dump_test "nan-2008"
+run_dump_test "nan-mixed-1"
+run_dump_test "nan-mixed-2"
+
 if { $linux_gnu } {
     run_ld_link_tests {
 	{"GOT and versioning 1"

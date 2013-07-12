@@ -1,3 +1,9 @@
+2013-07-12  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_merge_private_bfd_data): Handle
+	EF_MIPS_NAN2008.
+	(_bfd_mips_elf_print_private_bfd_data): Likewise.
+
 2013-07-09  Tristan Gingold  <gingold@adacore.com>
 
 	* vms-alpha.c (struct vms_private_data_struct): Remove

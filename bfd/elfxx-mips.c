@@ -14730,6 +14730,20 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       old_flags &= ~ EF_MIPS_ARCH_ASE;
     }
 
+  /* Compare NaN encodings.  */
+  if ((new_flags & EF_MIPS_NAN2008) != (old_flags & EF_MIPS_NAN2008))
+    {
+      _bfd_error_handler (_("%B: linking %s module with previous %s modules"),
+			  ibfd,
+			  (new_flags & EF_MIPS_NAN2008
+			   ? "-mnan=2008" : "-mnan=legacy"),
+			  (old_flags & EF_MIPS_NAN2008
+			   ? "-mnan=2008" : "-mnan=legacy"));
+      ok = FALSE;
+      new_flags &= ~EF_MIPS_NAN2008;
+      old_flags &= ~EF_MIPS_NAN2008;
+    }
+
   /* Warn about any other mismatches */
   if (new_flags != old_flags)
     {
@@ -14920,6 +14934,9 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_ARCH_ASE_MICROMIPS)
     fprintf (file, " [micromips]");
+
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_NAN2008)
+    fprintf (file, " [nan2008]");
 
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_32BITMODE)
     fprintf (file, " [32bitmode]");

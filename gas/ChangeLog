@@ -1,3 +1,18 @@
+2013-07-12  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* config/tc-mips.c (mips_flag_nan2008): New variable.
+	(options): Add OPTION_NAN enum value.
+	(md_longopts): Handle it.
+	(md_parse_option): Likewise.
+	(s_nan): New function.
+	(mips_elf_final_processing): Handle EF_MIPS_NAN2008.
+	(md_show_usage): Add -mnan.
+
+	* doc/as.texinfo (Overview): Add -mnan.
+	* doc/c-mips.texi (MIPS Opts): Document -mnan.
+	(MIPS NaN Encodings): New node.  Document .nan directive.
+	(MIPS-Dependent): List the new node.
+
 2013-07-09  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.com: Define HAVE_SYS_TYPES_H and HAVE_UNISTD_H

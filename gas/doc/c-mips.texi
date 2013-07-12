@@ -30,6 +30,7 @@ Assembly Language Programming'' in the same work.
 * MIPS assembly options:: Directives to control code generation
 * MIPS autoextend::	Directives for extending MIPS 16 bit instructions
 * MIPS insn::		Directive to mark data as an instruction
+* MIPS NaN Encodings::	Directives to record which NaN encoding is being used
 * MIPS Option Stack::	Directives to save and restore options
 * MIPS ASE Instruction Generation Overrides:: Directives to control
   			generation of MIPS ASE instructions
@@ -416,6 +417,16 @@ Also no MIPS16 branches are ever relaxed.
 By default @samp{--no-relax-branch} is selected, causing any out-of-range
 branches to produce an error.
 
+@cindex @option{-mnan=} command line option, MIPS
+@item -mnan=@var{encoding}
+This option indicates whether the source code uses the IEEE 2008
+NaN encoding (@option{-mnan=2008}) or the original MIPS encoding
+(@option{-mnan=legacy}).  It is equivalent to adding a @code{.nan}
+directive to the beginning of the source file.  @xref{MIPS NaN Encodings}.
+
+@option{-mnan=legacy} is the default if no @option{-mnan} option or
+@code{.nan} directive is used.
+
 @item --trap
 @itemx --no-break
 @c FIXME!  (1) reflect these options (next item too) in option summaries;
@@ -721,6 +732,47 @@ baz:
         .word 0x1
 
 @end example
+
+@node MIPS NaN Encodings
+@section Directives to record which NaN encoding is being used
+
+@cindex MIPS IEEE 754 NaN data encoding selection
+@cindex @code{.nan} directive, MIPS
+The IEEE 754 floating-point standard defines two types of not-a-number
+(NaN) data: ``signalling'' NaNs and ``quiet'' NaNs.  The original version
+of the standard did not specify how these two types should be
+distinguished.  Most implementations followed the i387 model, in which
+the first bit of the significand is set for quiet NaNs and clear for
+signalling NaNs.  However, the original MIPS implementation assigned the
+opposite meaning to the bit, so that it was set for signalling NaNs and
+clear for quiet NaNs.
+
+The 2008 revision of the standard formally suggested the i387 choice
+and as from Sep 2012 the current release of the MIPS architecture
+therefore optionally supports that form.  Code that uses one NaN encoding
+would usually be incompatible with code that uses the other NaN encoding,
+so MIPS ELF objects have a flag (@code{EF_MIPS_NAN2008}) to record which
+encoding is being used.
+
+Assembly files can use the @code{.nan} directive to select between the
+two encodings.  @samp{.nan 2008} says that the assembly file uses the
+IEEE 754-2008 encoding while @samp{.nan legacy} says that the file uses
+the original MIPS encoding.  If several @code{.nan} directives are given,
+the final setting is the one that is used.
+
+The command-line options @option{-mnan=legacy} and @option{-mnan=2008}
+can be used instead of @samp{.nan legacy} and @samp{.nan 2008}
+respectively.  However, any @code{.nan} directive overrides the
+command-line setting.
+
+@samp{.nan legacy} is the default if no @code{.nan} directive or
+@option{-mnan} option is given.
+
+Note that @sc{gnu} @code{@value{AS}} does not produce NaNs itself and
+therefore these directives do not affect code generation.  They simply
+control the setting of the @code{EF_MIPS_NAN2008} flag.
+
+Traditional MIPS assemblers do not support these directives.
 
 @node MIPS Option Stack
 @section Directives to save and restore options

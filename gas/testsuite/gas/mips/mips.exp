@@ -915,6 +915,20 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "loc-swap-2"	[mips_arch_list_all]
     run_dump_test_arches "loc-swap-3"	[mips_arch_list_all]
 
+    run_dump_test "nan-legacy-1"
+    run_dump_test "nan-legacy-2"
+    run_dump_test "nan-legacy-3"
+    run_dump_test "nan-legacy-4"
+    run_dump_test "nan-legacy-5"
+
+    run_dump_test "nan-2008-1"
+    run_dump_test "nan-2008-2"
+    run_dump_test "nan-2008-3"
+    run_dump_test "nan-2008-4"
+
+    run_list_test "nan-error-1"
+    run_list_test "nan-error-2" "-mnan=foo"
+
     if $has_newabi {
 	run_dump_test "n32-consec"
     }

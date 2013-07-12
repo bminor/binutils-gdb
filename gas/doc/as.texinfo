@@ -402,6 +402,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mips3}] [@b{-mips4}] [@b{-mips5}] [@b{-mips32}] [@b{-mips32r2}]
    [@b{-mips64}] [@b{-mips64r2}]
    [@b{-construct-floats}] [@b{-no-construct-floats}]
+   [@b{-mnan=@var{encoding}}]
    [@b{-trap}] [@b{-no-break}] [@b{-break}] [@b{-no-trap}]
    [@b{-mips16}] [@b{-no-mips16}]
    [@b{-mmicromips}] [@b{-mno-micromips}]
@@ -1362,6 +1363,10 @@ selected, allowing construction of these floating point constants.
 The @samp{--relax-branch} option enables the relaxation of out-of-range
 branches.  By default @samp{--no-relax-branch} is selected, causing any
 out-of-range branches to produce an error.
+
+@item -mnan=@var{encoding}
+Select between the IEEE 754-2008 (@option{-mnan=2008}) or the legacy
+(@option{-mnan=legacy}) NaN encoding format.  The latter is the default.
 
 @cindex emulation
 @item --emulation=@var{name}

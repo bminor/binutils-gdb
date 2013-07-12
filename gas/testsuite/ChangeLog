@@ -1,3 +1,24 @@
+2013-07-12  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/mips/nan-2008-1.d: New test.
+	* gas/mips/nan-2008-2.d: New test.
+	* gas/mips/nan-2008-3.d: New test.
+	* gas/mips/nan-2008-4.d: New test.
+	* gas/mips/nan-legacy-1.d: New test.
+	* gas/mips/nan-legacy-2.d: New test.
+	* gas/mips/nan-legacy-3.d: New test.
+	* gas/mips/nan-legacy-4.d: New test.
+	* gas/mips/nan-legacy-5.d: New test.
+	* gas/mips/nan-error-1.l: New list test.
+	* gas/mips/nan-error-2.l: New list test.
+	* gas/mips/nan-2008-override.s: New test source.
+	* gas/mips/nan-2008.s: New test source.
+	* gas/mips/nan-legacy-override.s: New test source.
+	* gas/mips/nan-legacy.s: New test source.
+	* gas/mips/nan-error-1.s: New test source.
+	* gas/mips/nan-error-2.s: New test source.
+	* gas/mips/mips.exp: Run the new tests.
+
 2013-07-09  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/la-reloc.s, gas/mips/la-reloc.d, gas/mips/dla-reloc.s,
