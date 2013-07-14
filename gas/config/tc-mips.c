@@ -4607,6 +4607,167 @@ match_tied_reg_operand (struct mips_arg_info *arg, char *s,
   return s;
 }
 
+/* Read a floating-point constant from S for LI.S or LI.D.  LENGTH is
+   the length of the value in bytes (4 for float, 8 for double) and
+   USING_GPRS says whether the destination is a GPR rather than an FPR.
+
+   Return the constant in IMM and OFFSET as follows:
+
+   - If the constant should be loaded via memory, set IMM to O_absent and
+     OFFSET to the memory address.
+
+   - Otherwise, if the constant should be loaded into two 32-bit registers,
+     set IMM to the O_constant to load into the high register and OFFSET
+     to the corresponding value for the low register.
+
+   - Otherwise, set IMM to the full O_constant and set OFFSET to O_absent.
+
+   These constants only appear as the last operand in an instruction,
+   and every instruction that accepts them in any variant accepts them
+   in all variants.  This means we don't have to worry about backing out
+   any changes if the instruction does not match.  We just match
+   unconditionally and report an error if the constant is invalid.  */
+
+static char *
+parse_float_constant (char *s, expressionS *imm, expressionS *offset,
+		      int length, bfd_boolean using_gprs)
+{
+  char *save_in, *p, *err;
+  unsigned char data[8];
+  int atof_length;
+  segT seg, new_seg;
+  subsegT subseg;
+  const char *newname;
+
+  /* Where the constant is placed is based on how the MIPS assembler
+     does things:
+
+     length == 4 && using_gprs  -- immediate value only
+     length == 8 && using_gprs  -- .rdata or immediate value
+     length == 4 && !using_gprs -- .lit4 or immediate value
+     length == 8 && !using_gprs -- .lit8 or immediate value
+
+     The .lit4 and .lit8 sections are only used if permitted by the
+     -G argument.  */
+  save_in = input_line_pointer;
+  input_line_pointer = s;
+  err = md_atof (length == 8 ? 'd' : 'f', (char *) data, &atof_length);
+  s = input_line_pointer;
+  input_line_pointer = save_in;
+  if (err && *err)
+    {
+      as_bad (_("Bad floating point constant: %s"), err);
+      memset (data, '\0', sizeof (data));
+    }
+  else
+    gas_assert (atof_length == length);
+
+  /* Handle 32-bit constants for which an immediate value is best.  */
+  if (length == 4
+      && (using_gprs
+	  || g_switch_value < 4
+	  || (data[0] == 0 && data[1] == 0)
+	  || (data[2] == 0 && data[3] == 0)))
+    {
+      imm->X_op = O_constant;
+      if (!target_big_endian)
+	imm->X_add_number = bfd_getl32 (data);
+      else
+	imm->X_add_number = bfd_getb32 (data);
+      offset->X_op = O_absent;
+      return s;
+    }
+
+  /* Handle 64-bit constants for which an immediate value is best.  */
+  if (length == 8
+      && !mips_disable_float_construction
+      /* Constants can only be constructed in GPRs and copied
+	 to FPRs if the GPRs are at least as wide as the FPRs.
+	 Force the constant into memory if we are using 64-bit FPRs
+	 but the GPRs are only 32 bits wide.  */
+      /* ??? No longer true with the addition of MTHC1, but this
+	 is legacy code...  */
+      && (using_gprs || !(HAVE_64BIT_FPRS && HAVE_32BIT_GPRS))
+      && ((data[0] == 0 && data[1] == 0)
+	  || (data[2] == 0 && data[3] == 0))
+      && ((data[4] == 0 && data[5] == 0)
+	  || (data[6] == 0 && data[7] == 0)))
+    {
+      /* The value is simple enough to load with a couple of instructions.
+	 If using 32-bit registers, set IMM to the high order 32 bits and
+	 OFFSET to the low order 32 bits.  Otherwise, set IMM to the entire
+	 64 bit constant.  */
+      if (using_gprs ? HAVE_32BIT_GPRS : HAVE_32BIT_FPRS)
+	{
+	  imm->X_op = O_constant;
+	  offset->X_op = O_constant;
+	  if (!target_big_endian)
+	    {
+	      imm->X_add_number = bfd_getl32 (data + 4);
+	      offset->X_add_number = bfd_getl32 (data);
+	    }
+	  else
+	    {
+	      imm->X_add_number = bfd_getb32 (data);
+	      offset->X_add_number = bfd_getb32 (data + 4);
+	    }
+	  if (offset->X_add_number == 0)
+	    offset->X_op = O_absent;
+	}
+      else
+	{
+	  imm->X_op = O_constant;
+	  if (!target_big_endian)
+	    imm->X_add_number = bfd_getl64 (data);
+	  else
+	    imm->X_add_number = bfd_getb64 (data);
+	  offset->X_op = O_absent;
+	}
+      return s;
+    }
+
+  /* Switch to the right section.  */
+  seg = now_seg;
+  subseg = now_subseg;
+  if (length == 4)
+    {
+      gas_assert (!using_gprs && g_switch_value >= 4);
+      newname = ".lit4";
+    }
+  else
+    {
+      if (using_gprs || g_switch_value < 8)
+	newname = RDATA_SECTION_NAME;
+      else
+	newname = ".lit8";
+    }
+
+  new_seg = subseg_new (newname, (subsegT) 0);
+  bfd_set_section_flags (stdoutput, new_seg,
+			 SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_DATA);
+  frag_align (length == 4 ? 2 : 3, 0, 0);
+  if (strncmp (TARGET_OS, "elf", 3) != 0)
+    record_alignment (new_seg, 4);
+  else
+    record_alignment (new_seg, length == 4 ? 2 : 3);
+  if (seg == now_seg)
+    as_bad (_("Can't use floating point insn in this section"));
+
+  /* Set the argument to the current address in the section.  */
+  imm->X_op = O_absent;
+  offset->X_op = O_symbol;
+  offset->X_add_symbol = symbol_temp_new_now ();
+  offset->X_add_number = 0;
+
+  /* Put the floating point number into the section.  */
+  p = frag_more (length);
+  memcpy (p, data, length);
+
+  /* Switch back to the original section.  */
+  subseg_set (seg, subseg);
+  return s;
+}
+
 /* S is the text seen for ARG.  Match it against OPERAND.  Return the end
    of the argument text if the match is successful, otherwise return null.  */
 
@@ -11957,172 +12118,19 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case 'F':
+	      s = parse_float_constant (s, &imm_expr, &offset_expr, 8, TRUE);
+	      continue;
+
 	    case 'L':
+	      s = parse_float_constant (s, &imm_expr, &offset_expr, 8, FALSE);
+	      continue;
+
 	    case 'f':
+	      s = parse_float_constant (s, &imm_expr, &offset_expr, 4, TRUE);
+	      continue;
+
 	    case 'l':
-	      {
-		int f64;
-		int using_gprs;
-		char *save_in;
-		char *err;
-		unsigned char temp[8];
-		int len;
-		unsigned int length;
-		segT seg;
-		subsegT subseg;
-		char *p;
-
-		/* These only appear as the last operand in an
-		   instruction, and every instruction that accepts
-		   them in any variant accepts them in all variants.
-		   This means we don't have to worry about backing out
-		   any changes if the instruction does not match.
-
-		   The difference between them is the size of the
-		   floating point constant and where it goes.  For 'F'
-		   and 'L' the constant is 64 bits; for 'f' and 'l' it
-		   is 32 bits.  Where the constant is placed is based
-		   on how the MIPS assembler does things:
-		    F -- .rdata
-		    L -- .lit8
-		    f -- immediate value
-		    l -- .lit4
-
-		    The .lit4 and .lit8 sections are only used if
-		    permitted by the -G argument.
-
-		    The code below needs to know whether the target register
-		    is 32 or 64 bits wide.  It relies on the fact 'f' and
-		    'F' are used with GPR-based instructions and 'l' and
-		    'L' are used with FPR-based instructions.  */
-
-		f64 = *args == 'F' || *args == 'L';
-		using_gprs = *args == 'F' || *args == 'f';
-
-		save_in = input_line_pointer;
-		input_line_pointer = s;
-		err = md_atof (f64 ? 'd' : 'f', (char *) temp, &len);
-		length = len;
-		s = input_line_pointer;
-		input_line_pointer = save_in;
-		if (err != NULL && *err != '\0')
-		  {
-		    as_bad (_("Bad floating point constant: %s"), err);
-		    memset (temp, '\0', sizeof temp);
-		    length = f64 ? 8 : 4;
-		  }
-
-		gas_assert (length == (unsigned) (f64 ? 8 : 4));
-
-		if (*args == 'f'
-		    || (*args == 'l'
-			&& (g_switch_value < 4
-			    || (temp[0] == 0 && temp[1] == 0)
-			    || (temp[2] == 0 && temp[3] == 0))))
-		  {
-		    imm_expr.X_op = O_constant;
-		    if (!target_big_endian)
-		      imm_expr.X_add_number = bfd_getl32 (temp);
-		    else
-		      imm_expr.X_add_number = bfd_getb32 (temp);
-		  }
-		else if (length > 4
-			 && !mips_disable_float_construction
-			 /* Constants can only be constructed in GPRs and
-			    copied to FPRs if the GPRs are at least as wide
-			    as the FPRs.  Force the constant into memory if
-			    we are using 64-bit FPRs but the GPRs are only
-			    32 bits wide.  */
-			 && (using_gprs
-			     || !(HAVE_64BIT_FPRS && HAVE_32BIT_GPRS))
-			 && ((temp[0] == 0 && temp[1] == 0)
-			     || (temp[2] == 0 && temp[3] == 0))
-			 && ((temp[4] == 0 && temp[5] == 0)
-			     || (temp[6] == 0 && temp[7] == 0)))
-		  {
-		    /* The value is simple enough to load with a couple of
-		       instructions.  If using 32-bit registers, set
-		       imm_expr to the high order 32 bits and offset_expr to
-		       the low order 32 bits.  Otherwise, set imm_expr to
-		       the entire 64 bit constant.  */
-		    if (using_gprs ? HAVE_32BIT_GPRS : HAVE_32BIT_FPRS)
-		      {
-			imm_expr.X_op = O_constant;
-			offset_expr.X_op = O_constant;
-			if (!target_big_endian)
-			  {
-			    imm_expr.X_add_number = bfd_getl32 (temp + 4);
-			    offset_expr.X_add_number = bfd_getl32 (temp);
-			  }
-			else
-			  {
-			    imm_expr.X_add_number = bfd_getb32 (temp);
-			    offset_expr.X_add_number = bfd_getb32 (temp + 4);
-			  }
-			if (offset_expr.X_add_number == 0)
-			  offset_expr.X_op = O_absent;
-		      }
-		    else
-		      {
-			imm_expr.X_op = O_constant;
-			if (!target_big_endian)
-			  imm_expr.X_add_number = bfd_getl64 (temp);
-			else
-			  imm_expr.X_add_number = bfd_getb64 (temp);
-		      }
-		  }
-		else
-		  {
-		    const char *newname;
-		    segT new_seg;
-
-		    /* Switch to the right section.  */
-		    seg = now_seg;
-		    subseg = now_subseg;
-		    switch (*args)
-		      {
-		      default: /* unused default case avoids warnings.  */
-		      case 'L':
-			newname = RDATA_SECTION_NAME;
-			if (g_switch_value >= 8)
-			  newname = ".lit8";
-			break;
-		      case 'F':
-			newname = RDATA_SECTION_NAME;
-			break;
-		      case 'l':
-			gas_assert (g_switch_value >= 4);
-			newname = ".lit4";
-			break;
-		      }
-		    new_seg = subseg_new (newname, (subsegT) 0);
-		    bfd_set_section_flags (stdoutput, new_seg,
-					   (SEC_ALLOC
-					    | SEC_LOAD
-					    | SEC_READONLY
-					    | SEC_DATA));
-		    frag_align (*args == 'l' ? 2 : 3, 0, 0);
-		    if (strncmp (TARGET_OS, "elf", 3) != 0)
-		      record_alignment (new_seg, 4);
-		    else
-		      record_alignment (new_seg, *args == 'l' ? 2 : 3);
-		    if (seg == now_seg)
-		      as_bad (_("Can't use floating point insn in this section"));
-
-		    /* Set the argument to the current address in the
-		       section.  */
-		    offset_expr.X_op = O_symbol;
-		    offset_expr.X_add_symbol = symbol_temp_new_now ();
-		    offset_expr.X_add_number = 0;
-
-		    /* Put the floating point number into the section.  */
-		    p = frag_more ((int) length);
-		    memcpy (p, temp, length);
-
-		    /* Switch back to the original section.  */
-		    subseg_set (seg, subseg);
-		  }
-	      }
+	      s = parse_float_constant (s, &imm_expr, &offset_expr, 4, FALSE);
 	      continue;
 
 	      /* ??? This is the traditional behavior, but is flaky if
