@@ -1,5 +1,13 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* Makefile.am (mips-opc.lo, micromips-opc.lo, mips16-opc.lo): Remove
+	special rules.
+	* Makefile.in: Regenerate.
+	* mips-opc.c, micromips-opc.c, mips16-opc.c: Explicitly initialize
+	all fields.  Reformat.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips16-opc.c: Include mips-formats.h.
 	(reg_0_map, reg_29_map, reg_31_map, reg_m16_map, reg32r_map): New
 	static arrays.
