@@ -14223,6 +14223,16 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      s = expr_end;
 	      continue;
 
+	    case 'I':
+	      my_getExpression (&imm_expr, s);
+	      if (imm_expr.X_op != O_big
+		  && imm_expr.X_op != O_constant)
+		insn_error = _("absolute expression required");
+	      if (HAVE_32BIT_GPRS)
+		normalize_constant_expr (&imm_expr);
+	      s = expr_end;
+	      continue;
+
 	    case 'a':		/* 26 bit address */
 	    case 'i':
 	      my_getExpression (&offset_expr, s);
