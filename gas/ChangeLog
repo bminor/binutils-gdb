@@ -1,5 +1,18 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (imm_expr, imm2_expr, offset_expr): Tweak commentary.
+	(imm_reloc): Delete.
+	(md_assemble): Remove imm_reloc handling.
+	(mips_ip): Update commentary.  Use offset_expr and offset_reloc
+	rather than imm_expr and imm_reloc for 'i', 'j' and 'u'.
+	Use a temporary array rather than imm_reloc when parsing
+	constant expressions.  Remove imm_reloc initialization.
+	(mips16_ip): Update commentary.  Use offset_expr and offset_reloc
+	for the relaxable field.  Use a relax_char variable to track the
+	type of this field.  Remove imm_reloc initialization.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips16_ip): Handle "I".
 
 2013-07-12  Maciej W. Rozycki  <macro@codesourcery.com>

@@ -1810,17 +1810,18 @@ mips_mark_labels (void)
 
 static char *expr_end;
 
-/* Expressions which appear in instructions.  These are set by
-   mips_ip.  */
+/* Expressions which appear in macro instructions.  These are set by
+   mips_ip and read by macro.  */
 
 static expressionS imm_expr;
 static expressionS imm2_expr;
+
+/* The relocatable field in an instruction and the relocs associated
+   with it.  These variables are used for instructions like LUI and
+   JAL as well as true offsets.  They are also used for address
+   operands in macros.  */
+
 static expressionS offset_expr;
-
-/* Relocs associated with imm_expr and offset_expr.  */
-
-static bfd_reloc_code_real_type imm_reloc[3]
-  = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 static bfd_reloc_code_real_type offset_reloc[3]
   = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 
@@ -2970,9 +2971,6 @@ md_assemble (char *str)
   imm_expr.X_op = O_absent;
   imm2_expr.X_op = O_absent;
   offset_expr.X_op = O_absent;
-  imm_reloc[0] = BFD_RELOC_UNUSED;
-  imm_reloc[1] = BFD_RELOC_UNUSED;
-  imm_reloc[2] = BFD_RELOC_UNUSED;
   offset_reloc[0] = BFD_RELOC_UNUSED;
   offset_reloc[1] = BFD_RELOC_UNUSED;
   offset_reloc[2] = BFD_RELOC_UNUSED;
@@ -3002,9 +3000,7 @@ md_assemble (char *str)
     }
   else
     {
-      if (imm_expr.X_op != O_absent)
-	append_insn (&insn, &imm_expr, imm_reloc, FALSE);
-      else if (offset_expr.X_op != O_absent)
+      if (offset_expr.X_op != O_absent)
 	append_insn (&insn, &offset_expr, offset_reloc, FALSE);
       else
 	append_insn (&insn, NULL, unused_reloc, FALSE);
@@ -11187,10 +11183,12 @@ expr_const_in_range (expressionS *ep, offsetT min, offsetT max, int bit)
 	  && ep->X_add_number < max << bit);
 }
 
-/* This routine assembles an instruction into its binary format.  As a
-   side effect, it sets one of the global variables imm_reloc or
-   offset_reloc to the type of relocation to do if one of the operands
-   is an address expression.  */
+/* Assemble an instruction into its binary format.  If the instruction
+   is a macro, set imm_expr, imm2_expr and offset_expr to the values
+   associated with "I", "+I" and "A" operands respectively.  Otherwise
+   store the value of the relocatable field (if any) in offset_expr.
+   In both cases set offset_reloc to the relocation operators applied
+   to offset_expr.  */
 
 static void
 mips_ip (char *str, struct mips_cl_insn *ip)
@@ -11336,9 +11334,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       imm_expr.X_op = O_absent;
       imm2_expr.X_op = O_absent;
       offset_expr.X_op = O_absent;
-      imm_reloc[0] = BFD_RELOC_UNUSED;
-      imm_reloc[1] = BFD_RELOC_UNUSED;
-      imm_reloc[2] = BFD_RELOC_UNUSED;
       offset_reloc[0] = BFD_RELOC_UNUSED;
       offset_reloc[1] = BFD_RELOC_UNUSED;
       offset_reloc[2] = BFD_RELOC_UNUSED;
@@ -12099,6 +12094,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  {
 		    int shift = 8;
 		    size_t i;
+		    bfd_reloc_code_real_type r[3];
+
 		    /* Check whether there is only a single bracketed expression
 		       left.  If so, it must be the base register and the
 		       constant must be zero.  */
@@ -12108,7 +12105,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		    /* If this value won't fit into the offset, then go find
 		       a macro that will generate a 16- or 32-bit offset code
 		       pattern.  */
-		    i = my_getSmallExpression (&imm_expr, imm_reloc, s);
+		    i = my_getSmallExpression (&imm_expr, r, s);
 		    if ((i == 0 && (imm_expr.X_op != O_constant
 				    || imm_expr.X_add_number >= 1 << shift
 				    || imm_expr.X_add_number < -1 << shift))
@@ -12140,6 +12137,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      {
 		int shift = *args == '.' ? 9 : 11;
 		size_t i;
+		bfd_reloc_code_real_type r[3];
 
 		/* Check whether there is only a single bracketed expression
 		   left.  If so, it must be the base register and the
@@ -12150,7 +12148,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		/* If this value won't fit into the offset, then go find
 		   a macro that will generate a 16- or 32-bit offset code
 		   pattern.  */
-		i = my_getSmallExpression (&imm_expr, imm_reloc, s);
+		i = my_getSmallExpression (&imm_expr, r, s);
 		if ((i == 0 && (imm_expr.X_op != O_constant
 				|| imm_expr.X_add_number >= 1 << shift
 				|| imm_expr.X_add_number < -1 << shift))
@@ -12896,8 +12894,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
 	    case 'i':		/* 16-bit unsigned immediate.  */
 	    case 'j':		/* 16-bit signed immediate.  */
-	      *imm_reloc = BFD_RELOC_LO16;
-	      if (my_getSmallExpression (&imm_expr, imm_reloc, s) == 0)
+	      *offset_reloc = BFD_RELOC_LO16;
+	      if (my_getSmallExpression (&offset_expr, offset_reloc, s) == 0)
 		{
 		  int more;
 		  offsetT minval, maxval;
@@ -12915,14 +12913,14 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  else
 		    minval = -0x8000, maxval = 0xffff;
 
-		  if (imm_expr.X_op != O_constant
-		      || imm_expr.X_add_number < minval
-		      || imm_expr.X_add_number > maxval)
+		  if (offset_expr.X_op != O_constant
+		      || offset_expr.X_add_number < minval
+		      || offset_expr.X_add_number > maxval)
 		    {
 		      if (more)
 			break;
-		      if (imm_expr.X_op == O_constant
-			  || imm_expr.X_op == O_big)
+		      if (offset_expr.X_op == O_constant
+			  || offset_expr.X_op == O_big)
 			as_bad (_("Expression out of range"));
 		    }
 		}
@@ -12963,13 +12961,13 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 
 	    case 'u':		/* Upper 16 bits.  */
-	      *imm_reloc = BFD_RELOC_LO16;
-	      if (my_getSmallExpression (&imm_expr, imm_reloc, s) == 0
-		  && imm_expr.X_op == O_constant
-		  && (imm_expr.X_add_number < 0
-		      || imm_expr.X_add_number >= 0x10000))
+	      *offset_reloc = BFD_RELOC_LO16;
+	      if (my_getSmallExpression (&offset_expr, offset_reloc, s) == 0
+		  && offset_expr.X_op == O_constant
+		  && (offset_expr.X_add_number < 0
+		      || offset_expr.X_add_number >= 0x10000))
 		as_bad (_("lui expression (%lu) not in range 0..65535"),
-			(unsigned long) imm_expr.X_add_number);
+			(unsigned long) offset_expr.X_add_number);
 	      s = expr_end;
 	      continue;
 
@@ -13833,12 +13831,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
 #define SKIP_SPACE_TABS(S) { while (*(S) == ' ' || *(S) == '\t') ++(S); }
 
-/* This routine assembles an instruction into its binary format when
-   assembling for the mips16.  As a side effect, it sets one of the
-   global variables imm_reloc or offset_reloc to the type of relocation
-   to do if one of the operands is an address expression.  It also sets
-   forced_insn_length to the resulting instruction size in bytes if the
-   user explicitly requested a small or extended instruction.  */
+/* As for mips_ip, but used when assembling MIPS16 code.
+   Also set forced_insn_length to the resulting instruction size in
+   bytes if the user explicitly requested a small or extended instruction.  */
 
 static void
 mips16_ip (char *str, struct mips_cl_insn *ip)
@@ -13901,6 +13896,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   for (;;)
     {
       bfd_boolean ok;
+      char relax_char;
 
       gas_assert (strcmp (insn->name, str) == 0);
 
@@ -13930,14 +13926,12 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 
       create_insn (ip, insn);
       imm_expr.X_op = O_absent;
-      imm_reloc[0] = BFD_RELOC_UNUSED;
-      imm_reloc[1] = BFD_RELOC_UNUSED;
-      imm_reloc[2] = BFD_RELOC_UNUSED;
       imm2_expr.X_op = O_absent;
       offset_expr.X_op = O_absent;
       offset_reloc[0] = BFD_RELOC_UNUSED;
       offset_reloc[1] = BFD_RELOC_UNUSED;
       offset_reloc[2] = BFD_RELOC_UNUSED;
+      relax_char = 0;
       for (args = insn->args; 1; ++args)
 	{
 	  int c;
@@ -13958,19 +13952,31 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		  offsetT value;
 
 		  /* Stuff the immediate value in now, if we can.  */
-		  if (imm_expr.X_op == O_constant
-		      && *imm_reloc > BFD_RELOC_UNUSED
-		      && insn->pinfo != INSN_MACRO
-		      && calculate_reloc (*offset_reloc,
-					  imm_expr.X_add_number, &value))
+		  if (insn->pinfo == INSN_MACRO)
 		    {
-		      mips16_immed (NULL, 0, *imm_reloc - BFD_RELOC_UNUSED,
-				    *offset_reloc, value, forced_insn_length,
-				    &ip->insn_opcode);
-		      imm_expr.X_op = O_absent;
-		      *imm_reloc = BFD_RELOC_UNUSED;
+		      gas_assert (relax_char == 0);
+		      gas_assert (*offset_reloc == BFD_RELOC_UNUSED);
+		    }
+		  else if (relax_char
+			   && offset_expr.X_op == O_constant
+			   && calculate_reloc (*offset_reloc,
+					       offset_expr.X_add_number,
+					       &value))
+		    {
+		      mips16_immed (NULL, 0, relax_char, *offset_reloc, value,
+				    forced_insn_length, &ip->insn_opcode);
+		      offset_expr.X_op = O_absent;
 		      *offset_reloc = BFD_RELOC_UNUSED;
 		    }
+		  else if (relax_char && *offset_reloc != BFD_RELOC_UNUSED)
+		    {
+		      if (forced_insn_length == 2)
+			as_bad (_("invalid unextended operand value"));
+		      forced_insn_length = 4;
+		      ip->insn_opcode |= MIPS16_EXTEND;
+		    }
+		  else if (relax_char)
+		    *offset_reloc = (int) BFD_RELOC_UNUSED + relax_char;
 
 		  return;
 		}
@@ -14141,24 +14147,14 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	    case 'U':
 	    case 'k':
 	    case 'K':
-	      i = my_getSmallExpression (&imm_expr, imm_reloc, s);
+	      i = my_getSmallExpression (&offset_expr, offset_reloc, s);
 	      if (i > 0)
 		{
-		  if (imm_expr.X_op != O_constant)
-		    {
-		      forced_insn_length = 4;
-		      ip->insn_opcode |= MIPS16_EXTEND;
-		    }
-		  else
-		    {
-		      /* We need to relax this instruction.  */
-		      *offset_reloc = *imm_reloc;
-		      *imm_reloc = (int) BFD_RELOC_UNUSED + c;
-		    }
+		  relax_char = c;
 		  s = expr_end;
 		  continue;
 		}
-	      *imm_reloc = BFD_RELOC_UNUSED;
+	      *offset_reloc = BFD_RELOC_UNUSED;
 	      /* Fall through.  */
 	    case '<':
 	    case '>':
@@ -14166,8 +14162,8 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	    case ']':
 	    case '4':
 	    case '8':
-	      my_getExpression (&imm_expr, s);
-	      if (imm_expr.X_op == O_register)
+	      my_getExpression (&offset_expr, s);
+	      if (offset_expr.X_op == O_register)
 		{
 		  /* What we thought was an expression turned out to
                      be a register.  */
@@ -14177,11 +14173,11 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		      /* It looks like the expression was omitted
 			 before a register indirection, which means
 			 that the expression is implicitly zero.  We
-			 still set up imm_expr, so that we handle
+			 still set up offset_expr, so that we handle
 			 explicit extensions correctly.  */
-		      imm_expr.X_op = O_constant;
-		      imm_expr.X_add_number = 0;
-		      *imm_reloc = (int) BFD_RELOC_UNUSED + c;
+		      offset_expr.X_op = O_constant;
+		      offset_expr.X_add_number = 0;
+		      relax_char = c;
 		      continue;
 		    }
 
@@ -14189,7 +14185,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		}
 
 	      /* We need to relax this instruction.  */
-	      *imm_reloc = (int) BFD_RELOC_UNUSED + c;
+	      relax_char = c;
 	      s = expr_end;
 	      continue;
 
@@ -14207,7 +14203,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		break;
 
 	      /* We need to relax this instruction.  */
-	      *offset_reloc = (int) BFD_RELOC_UNUSED + c;
+	      relax_char = c;
 	      s = expr_end;
 	      continue;
 
