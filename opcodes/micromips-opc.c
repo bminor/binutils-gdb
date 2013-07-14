@@ -20,8 +20,155 @@
    MA 02110-1301, USA.  */
 
 #include "sysdep.h"
-#include <stdio.h>
 #include "opcode/mips.h"
+#include "mips-formats.h"
+
+static unsigned char reg_0_map[] = { 0 };
+static unsigned char reg_28_map[] = { 28 };
+static unsigned char reg_29_map[] = { 29 };
+static unsigned char reg_31_map[] = { 31 };
+static unsigned char reg_m16_map[] = { 16, 17, 2, 3, 4, 5, 6, 7 };
+static unsigned char reg_mn_map[] = { 0, 17, 2, 3, 16, 18, 19, 20 };
+static unsigned char reg_q_map[] = { 0, 17, 2, 3, 4, 5, 6, 7 };
+
+static unsigned char reg_h_map1[] = { 5, 5, 6, 4, 4, 4, 4, 4 };
+static unsigned char reg_h_map2[] = { 6, 7, 7, 21, 22, 5, 6, 7 };
+
+static int int_b_map[] = {
+  1, 4, 8, 12, 16, 20, 24, -1
+};
+static int int_c_map[] = {
+  128, 1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 255, 32768, 65535
+};
+
+/* Return the mips_operand structure for the operand at the beginning of P.  */
+
+const struct mips_operand *
+decode_micromips_operand (const char *p)
+{
+  switch (p[0])
+    {
+    case 'm':
+      switch (p[1])
+	{
+	case 'a': MAPPED_REG (0, 0, GP, reg_28_map);
+	case 'b': MAPPED_REG (3, 23, GP, reg_m16_map);
+	case 'c': MAPPED_REG (3, 4, GP, reg_m16_map);
+	case 'd': MAPPED_REG (3, 7, GP, reg_m16_map);
+	case 'e': MAPPED_REG (3, 1, GP, reg_m16_map);
+	case 'f': MAPPED_REG (3, 3, GP, reg_m16_map);
+	case 'g': MAPPED_REG (3, 0, GP, reg_m16_map);
+	case 'h': REG_PAIR (3, 7, GP, reg_h_map);
+	case 'j': REG (5, 0, GP);
+	case 'l': MAPPED_REG (3, 4, GP, reg_m16_map);
+	case 'm': MAPPED_REG (3, 1, GP, reg_mn_map);
+	case 'n': MAPPED_REG (3, 4, GP, reg_mn_map);
+	case 'p': REG (5, 5, GP);
+	case 'q': MAPPED_REG (3, 7, GP, reg_q_map);
+	case 'r': SPECIAL (0, 0, PC);
+	case 's': MAPPED_REG (0, 0, GP, reg_29_map);
+	case 't': SPECIAL (0, 0, REPEAT_PREV_REG);
+	case 'x': SPECIAL (0, 0, REPEAT_DEST_REG);
+	case 'y': MAPPED_REG (0, 0, GP, reg_31_map);
+	case 'z': MAPPED_REG (0, 0, GP, reg_0_map);
+
+	case 'A': INT_ADJ (7, 0, 63, 2, FALSE);	 /* (-64 .. 63) << 2 */
+	case 'B': MAPPED_INT (3, 1, int_b_map, FALSE);
+	case 'C': MAPPED_INT (4, 0, int_c_map, TRUE);
+	case 'D': BRANCH (10, 0, 1);
+	case 'E': BRANCH (7, 0, 1);
+	case 'F': HINT (4, 0);
+	case 'G': INT_ADJ (4, 0, 14, 0, FALSE);	 /* (-1 .. 14) */
+	case 'H': INT_ADJ (4, 0, 15, 1, FALSE);	 /* (0 .. 15) << 1 */
+	case 'I': INT_ADJ (7, 0, 126, 0, FALSE); /* (-1 .. 126) */
+	case 'J': INT_ADJ (4, 0, 15, 2, FALSE);	 /* (0 .. 15) << 2 */
+	case 'L': INT_ADJ (4, 0, 15, 0, FALSE);	 /* (0 .. 15) */
+	case 'M': INT_ADJ (3, 1, 8, 0, FALSE);   /* (1 .. 8) */
+	case 'N': SPECIAL (2, 4, LWM_SWM_LIST);
+	case 'O': HINT (4, 0);
+	case 'P': INT_ADJ (5, 0, 31, 2, FALSE);	 /* (0 .. 31) << 2 */
+	case 'Q': INT_ADJ (23, 0, 4194303, 2, FALSE);
+	  					 /* (-4194304 .. 4194303) */
+	case 'U': INT_ADJ (5, 0, 31, 2, FALSE);	 /* (0 .. 31) << 2 */
+	case 'W': INT_ADJ (6, 1, 63, 2, FALSE);	 /* (0 .. 63) << 2 */
+	case 'X': SINT (4, 1);
+	case 'Y': SPECIAL (9, 1, ADDIUSP_INT);
+	case 'Z': UINT (0, 0);			 /* 0 only */
+	}
+      break;
+
+    case '+':
+      switch (p[1])
+	{
+	case 'A': BIT (5, 6, 0);		 /* (0 .. 31) */
+	case 'B': MSB (5, 11, 1, TRUE, 32);	 /* (1 .. 32), 32-bit op */
+	case 'C': MSB (5, 11, 1, FALSE, 32);	 /* (1 .. 32), 32-bit op */
+	case 'E': BIT (5, 6, 32);		 /* (32 .. 63) */
+	case 'F': MSB (5, 11, 33, TRUE, 64);	 /* (33 .. 64), 64-bit op */
+	case 'G': MSB (5, 11, 33, FALSE, 64);	 /* (33 .. 64), 64-bit op */
+	case 'H': MSB (5, 11, 1, FALSE, 64);	 /* (1 .. 32), 64-bit op */
+
+	case 'i': JALX (26, 0, 2);
+	case 'j': SINT (9, 0);
+	}
+      break;
+
+    case '.': SINT (10, 6);
+    case '<': BIT (5, 11, 0);			 /* (0 .. 31) */
+    case '>': BIT (5, 11, 32);			 /* (32 .. 63) */
+    case '\\': BIT (3, 21, 0);			 /* (0 .. 7) */
+    case '|': HINT (4, 12);
+    case '~': SINT (12, 0);
+    case '@': SINT (10, 16);
+    case '^': HINT (5, 11);
+
+    case '0': SINT (6, 16);
+    case '1': HINT (5, 16);
+    case '2': HINT (2, 14);
+    case '3': HINT (3, 13);
+    case '4': HINT (4, 12);
+    case '5': HINT (8, 13);
+    case '6': HINT (5, 16);
+    case '7': REG (2, 14, ACC);
+    case '8': HINT (6, 14);
+
+    case 'B': HINT (10, 16);
+    case 'C': HINT (23, 3);
+    case 'D': REG (5, 11, FP);
+    case 'E': REG (5, 21, COPRO);
+    case 'G': REG (5, 16, COPRO);
+    case 'K': REG (5, 16, HW);
+    case 'H': UINT (3, 11);
+    case 'M': REG (3, 13, CCC);
+    case 'N': REG (3, 18, CCC);
+    case 'R': REG (5, 6, FP);
+    case 'S': REG (5, 16, FP);
+    case 'T': REG (5, 21, FP);
+    case 'V': REG (5, 16, FP);
+
+    case 'a': JUMP (26, 0, 1);
+    case 'b': REG (5, 16, GP);
+    case 'c': HINT (10, 16);
+    case 'd': REG (5, 11, GP);
+    case 'h': HINT (5, 11);
+    case 'i': HINT (16, 0);
+    case 'j': SINT (16, 0);
+    case 'k': HINT (5, 21);
+    case 'n': SPECIAL (5, 21, LWM_SWM_LIST);
+    case 'o': SINT (16, 0);
+    case 'p': BRANCH (16, 0, 1);
+    case 'q': HINT (10, 6);
+    case 'r': REG (5, 16, GP);
+    case 's': REG (5, 16, GP);
+    case 't': REG (5, 21, GP);
+    case 'u': HINT (16, 0);
+    case 'v': REG (5, 16, GP);
+    case 'w': REG (5, 21, GP);
+    case 'y': REG (5, 6, GP);
+    case 'z': MAPPED_REG (0, 0, GP, reg_0_map);
+    }
+  return 0;
+}
 
 #define UBD	INSN_UNCOND_BRANCH_DELAY
 #define CBD	INSN_COND_BRANCH_DELAY

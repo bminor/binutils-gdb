@@ -1,5 +1,31 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* mips-formats.h: New file.
+	* mips-opc.c: Include mips-formats.h.
+	(reg_0_map): New static array.
+	(decode_mips_operand): New function.
+	* micromips-opc.c: Remove <stdio.h> include.  Include mips-formats.h.
+	(reg_0_map, reg_28_map, reg_29_map, reg_31_map, reg_m16_map)
+	(reg_mn_map, reg_q_map, reg_h_map1, reg_h_map2, int_b_map)
+	(int_c_map): New static arrays.
+	(decode_micromips_operand): New function.
+	* mips-dis.c (micromips_to_32_reg_b_map, micromips_to_32_reg_c_map)
+	(micromips_to_32_reg_d_map, micromips_to_32_reg_e_map)
+	(micromips_to_32_reg_f_map, micromips_to_32_reg_g_map)
+	(micromips_to_32_reg_h_map1, micromips_to_32_reg_h_map2)
+	(micromips_to_32_reg_l_map, micromips_to_32_reg_m_map)
+	(micromips_to_32_reg_n_map, micromips_to_32_reg_q_map)
+	(micromips_imm_b_map, micromips_imm_c_map): Delete.
+	(print_reg): New function.
+	(mips_print_arg_state): New structure.
+	(init_print_arg_state, print_insn_arg): New functions.
+	(print_insn_args): Change interface and use mips_operand structures.
+	Delete GET_OP_S.  Move GET_OP definition to...
+	(print_insn_mips): ...here.  Update the call to print_insn_args.
+	(print_insn_micromips): Use print_insn_args.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips16-opc.c (mips16_opcodes): Use "I" for immediate operands
 	in macros.
 

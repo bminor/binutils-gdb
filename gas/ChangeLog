@@ -1,5 +1,14 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (validate_mips_insn): Move further up file.
+	Add insn_bits and decode_operand arguments.  Use the mips_operand
+	fields to work out which bits an operand occupies.  Detect double
+	definitions.
+	(validate_micromips_insn): Move further up file.  Call into
+	validate_mips_insn.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips16_macro_build): Remove 'Y' case.
 
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>

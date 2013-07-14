@@ -28,6 +28,123 @@
 #include "sysdep.h"
 #include <stdio.h>
 #include "opcode/mips.h"
+#include "mips-formats.h"
+
+static unsigned char reg_0_map[] = { 0 };
+
+/* Return the mips_operand structure for the operand at the beginning of P.  */
+
+const struct mips_operand *
+decode_mips_operand (const char *p)
+{
+  switch (p[0])
+    {
+    case '+':
+      switch (p[1])
+	{
+	case '1': HINT (5, 6);
+	case '2': HINT (10, 6);
+	case '3': HINT (15, 6);
+	case '4': HINT (20, 6);
+
+	case 'A': BIT (5, 6, 0);		/* (0 .. 31) */
+	case 'B': MSB (5, 11, 1, TRUE, 32);	/* (1 .. 32), 32-bit op */
+	case 'C': MSB (5, 11, 1, FALSE, 32);	/* (1 .. 32), 32-bit op */
+	case 'E': BIT (5, 6, 32);		/* (32 .. 63) */
+	case 'F': MSB (5, 11, 33, TRUE, 64);	/* (33 .. 64), 64-bit op */
+	case 'G': MSB (5, 11, 33, FALSE, 64);	/* (33 .. 64), 64-bit op */
+	case 'H': MSB (5, 11, 1, FALSE, 64);	/* (1 .. 32), 64-bit op */
+	case 'J': HINT (10, 11);
+	case 'P': BIT (5, 6, 32);		/* (32 .. 63) */
+	case 'Q': SINT (10, 6);
+	case 'S': MSB (5, 11, 0, FALSE, 63);	/* (0 .. 31), 64-bit op */
+	case 'X': BIT (5, 16, 32);		/* (32 .. 63) */
+	case 'Z': REG (5, 0, FP);
+
+	case 'a': SINT (8, 6);
+	case 'b': SINT (8, 3);
+	case 'c': INT_ADJ (9, 6, 255, 4, FALSE); /* (-256 .. 255) << 4 */
+	case 'i': JALX (26, 0, 2);
+	case 'j': SINT (9, 7);
+	case 'p': BIT (5, 6, 0);		/* (0 .. 31), 32-bit op */
+	case 's': MSB (5, 11, 0, FALSE, 31);	/* (0 .. 31) */
+	case 't': REG (5, 16, COPRO);
+	case 'x': BIT (5, 16, 0);		/* (0 .. 31) */
+	case 'z': REG (5, 0, GP);
+	}
+      break;
+
+    case '<': BIT (5, 6, 0);			/* (0 .. 31) */
+    case '>': BIT (5, 6, 32);			/* (32 .. 63) */
+    case '%': UINT (3, 21);
+    case ':': SINT (7, 19);
+    case '\'': HINT (6, 16);
+    case '@': SINT (10, 16);
+    case '!': UINT (1, 5);
+    case '$': UINT (1, 4);
+    case '*': REG (2, 18, ACC);
+    case '&': REG (2, 13, ACC);
+    case '~': SINT (12, 0);
+    case '\\': BIT (3, 12, 0);			/* (0 .. 7) */
+
+    case '0': SINT (6, 20);
+    case '1': HINT (5, 6);
+    case '2': HINT (2, 11);
+    case '3': HINT (3, 21);
+    case '4': HINT (4, 21);
+    case '5': HINT (8, 16);
+    case '6': HINT (5, 21);
+    case '7': REG (2, 11, ACC);
+    case '8': HINT (6, 11);
+    case '9': REG (2, 21, ACC);
+
+    case 'B': HINT (20, 6);
+    case 'C': HINT (25, 0);
+    case 'D': REG (5, 6, FP);
+    case 'E': REG (5, 16, COPRO);
+    case 'G': REG (5, 11, COPRO);
+    case 'H': UINT (3, 0);
+    case 'J': HINT (19, 6);
+    case 'K': REG (5, 11, HW);
+    case 'M': REG (3, 8, CCC);
+    case 'N': REG (3, 18, CCC);
+    case 'O': UINT (3, 21);
+    case 'P': SPECIAL (5, 1, PERF_REG);
+    case 'Q': SPECIAL (10, 16, MDMX_IMM_REG);
+    case 'R': REG (5, 21, FP);
+    case 'S': REG (5, 11, FP);
+    case 'T': REG (5, 16, FP);
+    case 'U': SPECIAL (10, 11, CLO_CLZ_DEST);
+    case 'V': REG (5, 11, FP);
+    case 'W': REG (5, 16, FP);
+    case 'X': REG (5, 6, VEC);
+    case 'Y': REG (5, 11, VEC);
+    case 'Z': REG (5, 16, VEC);
+
+    case 'a': JUMP (26, 0, 2);
+    case 'b': REG (5, 21, GP);
+    case 'c': HINT (10, 16);
+    case 'd': REG (5, 11, GP);
+    case 'e': UINT (3, 22)
+    case 'g': REG (5, 11, COPRO);
+    case 'h': HINT (5, 11);
+    case 'i': HINT (16, 0);
+    case 'j': SINT (16, 0);
+    case 'k': HINT (5, 16);
+    case 'o': SINT (16, 0);
+    case 'p': BRANCH (16, 0, 2);
+    case 'q': HINT (10, 6);
+    case 'r': REG (5, 21, GP);
+    case 's': REG (5, 21, GP);
+    case 't': REG (5, 16, GP);
+    case 'u': HINT (16, 0);
+    case 'v': REG (5, 21, GP);
+    case 'w': REG (5, 16, GP);
+    case 'x': REG (0, 0, GP);
+    case 'z': MAPPED_REG (0, 0, GP, reg_0_map);
+    }
+  return 0;
+}
 
 /* Short hand so the lines aren't too long.  */
 

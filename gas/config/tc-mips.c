@@ -1326,8 +1326,6 @@ static void s_mips_file (int);
 static void s_mips_loc (int);
 static bfd_boolean pic_need_relax (symbolS *, asection *);
 static int relaxed_branch_length (fragS *, asection *, int);
-static int validate_mips_insn (const struct mips_opcode *);
-static int validate_micromips_insn (const struct mips_opcode *);
 static int relaxed_micromips_16bit_branch_length (fragS *, asection *, int);
 static int relaxed_micromips_32bit_branch_length (fragS *, asection *, int);
 
@@ -2707,6 +2705,111 @@ is_delay_slot_valid (const struct mips_opcode *mo)
   return TRUE;
 }
 
+/* For consistency checking, verify that all bits of OPCODE are
+   specified either by the match/mask part of the instruction
+   definition, or by the operand list.  INSN_BITS says which
+   bits of the instruction are significant and DECODE_OPERAND
+   provides the mips_operand description of each operand.  */
+
+static int
+validate_mips_insn (const struct mips_opcode *opcode,
+		    unsigned long insn_bits,
+		    const struct mips_operand *(*decode_operand) (const char *))
+{
+  const char *s;
+  unsigned long used_bits, doubled, undefined;
+  const struct mips_operand *operand;
+
+  if ((opcode->mask & opcode->match) != opcode->match)
+    {
+      as_bad (_("internal: bad mips opcode (mask error): %s %s"),
+	      opcode->name, opcode->args);
+      return 0;
+    }
+  used_bits = 0;
+  for (s = opcode->args; *s; ++s)
+    switch (*s)
+      {
+      case ',':
+      case '(':
+      case ')':
+	break;
+
+      default:
+	operand = decode_operand (s);
+	if (!operand)
+	  {
+	    as_bad (_("internal: unknown operand type: %s %s"),
+		    opcode->name, opcode->args);
+	    return 0;
+	  }
+	used_bits |= ((1 << operand->size) - 1) << operand->lsb;
+	if (operand->type == OP_MDMX_IMM_REG)
+	  /* Bit 5 is the format selector (OB vs QH).  The opcode table
+	     has separate entries for each format.  */
+	  used_bits &= ~(1 << (operand->lsb + 5));
+	/* Skip prefix characters.  */
+	if (*s == '+' || *s == 'm')
+	  ++s;
+	break;
+      }
+  doubled = used_bits & opcode->mask & insn_bits;
+  if (doubled)
+    {
+      as_bad (_("internal: bad mips opcode (bits 0x%08lx doubly defined):"
+		" %s %s"), doubled, opcode->name, opcode->args);
+      return 0;
+    }
+  used_bits |= opcode->mask;
+  undefined = ~used_bits & insn_bits;
+  if (undefined)
+    {
+      as_bad (_("internal: bad mips opcode (bits 0x%08lx undefined): %s %s"),
+	      undefined, opcode->name, opcode->args);
+      return 0;
+    }
+  used_bits &= ~insn_bits;
+  if (used_bits)
+    {
+      as_bad (_("internal: bad mips opcode (bits 0x%08lx defined): %s %s"),
+	      used_bits, opcode->name, opcode->args);
+      return 0;
+    }
+  return 1;
+}
+
+/* The microMIPS version of validate_mips_insn.  */
+
+static int
+validate_micromips_insn (const struct mips_opcode *opc)
+{
+  unsigned long insn_bits;
+  unsigned long major;
+  unsigned int length;
+
+  length = micromips_insn_length (opc);
+  if (length != 2 && length != 4)
+    {
+      as_bad (_("Internal error: bad microMIPS opcode (incorrect length: %u): "
+		"%s %s"), length, opc->name, opc->args);
+      return 0;
+    }
+  major = opc->match >> (10 + 8 * (length - 2));
+  if ((length == 2 && (major & 7) != 1 && (major & 6) != 2)
+      || (length == 4 && (major & 7) != 0 && (major & 4) != 4))
+    {
+      as_bad (_("Internal error: bad microMIPS opcode "
+		"(opcode/length mismatch): %s %s"), opc->name, opc->args);
+      return 0;
+    }
+
+  /* Shift piecewise to avoid an overflow where unsigned long is 32-bit.  */
+  insn_bits = 1 << 4 * length;
+  insn_bits <<= 4 * length;
+  insn_bits -= 1;
+  return validate_mips_insn (opc, insn_bits, decode_micromips_operand);
+}
+
 /* This function is called once, at assembler startup time.  It should set up
    all the tables, etc. that the MD part of the assembler will need.  */
 
@@ -2745,7 +2848,8 @@ md_begin (void)
 	{
 	  if (mips_opcodes[i].pinfo != INSN_MACRO)
 	    {
-	      if (!validate_mips_insn (&mips_opcodes[i]))
+	      if (!validate_mips_insn (&mips_opcodes[i], 0xffffffff,
+				       decode_mips_operand))
 		broken = 1;
 	      if (nop_insn.insn_mo == NULL && strcmp (name, "nop") == 0)
 		{
@@ -10746,351 +10850,6 @@ mips16_macro (struct mips_cl_insn *ip)
       macro_build (&expr1, "bteqz", "p");
       macro_build (NULL, "neg", "x,w", xreg, xreg);
     }
-}
-
-/* For consistency checking, verify that all bits are specified either
-   by the match/mask part of the instruction definition, or by the
-   operand list.  */
-static int
-validate_mips_insn (const struct mips_opcode *opc)
-{
-  const char *p = opc->args;
-  char c;
-  unsigned long used_bits = opc->mask;
-
-  if ((used_bits & opc->match) != opc->match)
-    {
-      as_bad (_("internal: bad mips opcode (mask error): %s %s"),
-	      opc->name, opc->args);
-      return 0;
-    }
-#define USE_BITS(mask,shift)	(used_bits |= ((mask) << (shift)))
-  while (*p)
-    switch (c = *p++)
-      {
-      case ',': break;
-      case '(': break;
-      case ')': break;
-      case '+':
-    	switch (c = *p++)
-	  {
-	  case '1': USE_BITS (OP_MASK_UDI1,     OP_SH_UDI1); 	break;
-	  case '2': USE_BITS (OP_MASK_UDI2,	OP_SH_UDI2); 	break;
-	  case '3': USE_BITS (OP_MASK_UDI3,	OP_SH_UDI3); 	break;
-	  case '4': USE_BITS (OP_MASK_UDI4,	OP_SH_UDI4); 	break;
-	  case 'A': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
-	  case 'B': USE_BITS (OP_MASK_INSMSB,	OP_SH_INSMSB);	break;
-	  case 'C': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
-	  case 'E': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
-	  case 'F': USE_BITS (OP_MASK_INSMSB,	OP_SH_INSMSB);	break;
-	  case 'G': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
-	  case 'H': USE_BITS (OP_MASK_EXTMSBD,	OP_SH_EXTMSBD);	break;
-	  case 'I': break;
-	  case 'J': USE_BITS (OP_MASK_CODE10,	OP_SH_CODE10);	break;
-	  case 't': USE_BITS (OP_MASK_RT,	OP_SH_RT);	break;
-	  case 'x': USE_BITS (OP_MASK_BBITIND,	OP_SH_BBITIND);	break;
-	  case 'X': USE_BITS (OP_MASK_BBITIND,	OP_SH_BBITIND);	break;
-	  case 'p': USE_BITS (OP_MASK_CINSPOS,	OP_SH_CINSPOS);	break;
-	  case 'P': USE_BITS (OP_MASK_CINSPOS,	OP_SH_CINSPOS);	break;
-	  case 'Q': USE_BITS (OP_MASK_SEQI,	OP_SH_SEQI);	break;
-	  case 's': USE_BITS (OP_MASK_CINSLM1,	OP_SH_CINSLM1);	break;
-	  case 'S': USE_BITS (OP_MASK_CINSLM1,	OP_SH_CINSLM1);	break;
-	  case 'z': USE_BITS (OP_MASK_RZ,	OP_SH_RZ);	break;
-	  case 'Z': USE_BITS (OP_MASK_FZ,	OP_SH_FZ);	break;
-	  case 'a': USE_BITS (OP_MASK_OFFSET_A,	OP_SH_OFFSET_A); break;
-	  case 'b': USE_BITS (OP_MASK_OFFSET_B,	OP_SH_OFFSET_B); break;
-	  case 'c': USE_BITS (OP_MASK_OFFSET_C,	OP_SH_OFFSET_C); break;
-	  case 'i': USE_BITS (OP_MASK_TARGET,	OP_SH_TARGET);	break;
-	  case 'j': USE_BITS (OP_MASK_EVAOFFSET, OP_SH_EVAOFFSET); break;
-
-	  default:
-	    as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
-		    c, opc->name, opc->args);
-	    return 0;
-	  }
-	break;
-      case '<': USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
-      case '>':	USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
-      case 'A': break;
-      case 'B': USE_BITS (OP_MASK_CODE20,       OP_SH_CODE20);  break;
-      case 'C':	USE_BITS (OP_MASK_COPZ,		OP_SH_COPZ);	break;
-      case 'D':	USE_BITS (OP_MASK_FD,		OP_SH_FD);	break;
-      case 'E':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
-      case 'F': break;
-      case 'G':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
-      case 'H': USE_BITS (OP_MASK_SEL,		OP_SH_SEL);	break;
-      case 'I': break;
-      case 'J': USE_BITS (OP_MASK_CODE19,       OP_SH_CODE19);  break;
-      case 'K':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
-      case 'L': break;
-      case 'M':	USE_BITS (OP_MASK_CCC,		OP_SH_CCC);	break;
-      case 'N':	USE_BITS (OP_MASK_BCC,		OP_SH_BCC);	break;
-      case 'O':	USE_BITS (OP_MASK_ALN,		OP_SH_ALN);	break;
-      case 'Q':	USE_BITS (OP_MASK_VSEL,		OP_SH_VSEL);
-		USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
-      case 'R':	USE_BITS (OP_MASK_FR,		OP_SH_FR);	break;
-      case 'S':	USE_BITS (OP_MASK_FS,		OP_SH_FS);	break;
-      case 'T':	USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
-      case 'V':	USE_BITS (OP_MASK_FS,		OP_SH_FS);	break;
-      case 'W':	USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
-      case 'X':	USE_BITS (OP_MASK_FD,		OP_SH_FD);	break;
-      case 'Y':	USE_BITS (OP_MASK_FS,		OP_SH_FS);	break;
-      case 'Z':	USE_BITS (OP_MASK_FT,		OP_SH_FT);	break;
-      case 'a':	USE_BITS (OP_MASK_TARGET,	OP_SH_TARGET);	break;
-      case 'b':	USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
-      case 'c':	USE_BITS (OP_MASK_CODE,		OP_SH_CODE);	break;
-      case 'd':	USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
-      case 'f': break;
-      case 'h':	USE_BITS (OP_MASK_PREFX,	OP_SH_PREFX);	break;
-      case 'i':	USE_BITS (OP_MASK_IMMEDIATE,	OP_SH_IMMEDIATE); break;
-      case 'j':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
-      case 'k':	USE_BITS (OP_MASK_CACHE,	OP_SH_CACHE);	break;
-      case 'l': break;
-      case 'o': USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
-      case 'p':	USE_BITS (OP_MASK_DELTA,	OP_SH_DELTA);	break;
-      case 'q':	USE_BITS (OP_MASK_CODE2,	OP_SH_CODE2);	break;
-      case 'r': USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
-      case 's':	USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
-      case 't':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
-      case 'u':	USE_BITS (OP_MASK_IMMEDIATE,	OP_SH_IMMEDIATE); break;
-      case 'v':	USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
-      case 'w':	USE_BITS (OP_MASK_RT,		OP_SH_RT);	break;
-      case 'x': break;
-      case 'z': break;
-      case 'P': USE_BITS (OP_MASK_PERFREG,	OP_SH_PERFREG);	break;
-      case 'U': USE_BITS (OP_MASK_RD,           OP_SH_RD);
-	        USE_BITS (OP_MASK_RT,           OP_SH_RT);	break;
-      case 'e': USE_BITS (OP_MASK_VECBYTE,	OP_SH_VECBYTE);	break;
-      case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
-      case '1': USE_BITS (OP_MASK_STYPE,	OP_SH_STYPE);	break;
-      case '2': USE_BITS (OP_MASK_BP,		OP_SH_BP);	break;
-      case '3': USE_BITS (OP_MASK_SA3,  	OP_SH_SA3);	break;
-      case '4': USE_BITS (OP_MASK_SA4,  	OP_SH_SA4);	break;
-      case '5': USE_BITS (OP_MASK_IMM8, 	OP_SH_IMM8);	break;
-      case '6': USE_BITS (OP_MASK_RS,		OP_SH_RS);	break;
-      case '7': USE_BITS (OP_MASK_DSPACC,	OP_SH_DSPACC);	break;
-      case '8': USE_BITS (OP_MASK_WRDSP,	OP_SH_WRDSP);	break;
-      case '9': USE_BITS (OP_MASK_DSPACC_S,	OP_SH_DSPACC_S);break;
-      case '0': USE_BITS (OP_MASK_DSPSFT,	OP_SH_DSPSFT);	break;
-      case '\'': USE_BITS (OP_MASK_RDDSP,	OP_SH_RDDSP);	break;
-      case ':': USE_BITS (OP_MASK_DSPSFT_7,	OP_SH_DSPSFT_7);break;
-      case '@': USE_BITS (OP_MASK_IMM10,	OP_SH_IMM10);	break;
-      case '!': USE_BITS (OP_MASK_MT_U,		OP_SH_MT_U);	break;
-      case '$': USE_BITS (OP_MASK_MT_H,		OP_SH_MT_H);	break;
-      case '*': USE_BITS (OP_MASK_MTACC_T,	OP_SH_MTACC_T);	break;
-      case '&': USE_BITS (OP_MASK_MTACC_D,	OP_SH_MTACC_D);	break;
-      case '\\': USE_BITS (OP_MASK_3BITPOS,	OP_SH_3BITPOS);	break;
-      case '~': USE_BITS (OP_MASK_OFFSET12,	OP_SH_OFFSET12); break;
-      case 'g': USE_BITS (OP_MASK_RD,		OP_SH_RD);	break;
-      default:
-	as_bad (_("internal: bad mips opcode (unknown operand type `%c'): %s %s"),
-		c, opc->name, opc->args);
-	return 0;
-      }
-#undef USE_BITS
-  if (used_bits != 0xffffffff)
-    {
-      as_bad (_("internal: bad mips opcode (bits 0x%lx undefined): %s %s"),
-	      ~used_bits & 0xffffffff, opc->name, opc->args);
-      return 0;
-    }
-  return 1;
-}
-
-/* For consistency checking, verify that the length implied matches the
-   major opcode and that all bits are specified either by the match/mask
-   part of the instruction definition, or by the operand list.  */
-
-static int
-validate_micromips_insn (const struct mips_opcode *opc)
-{
-  unsigned long match = opc->match;
-  unsigned long mask = opc->mask;
-  const char *p = opc->args;
-  unsigned long insn_bits;
-  unsigned long used_bits;
-  unsigned long major;
-  unsigned int length;
-  char e;
-  char c;
-
-  if ((mask & match) != match)
-    {
-      as_bad (_("Internal error: bad microMIPS opcode (mask error): %s %s"),
-	      opc->name, opc->args);
-      return 0;
-    }
-  length = micromips_insn_length (opc);
-  if (length != 2 && length != 4)
-    {
-      as_bad (_("Internal error: bad microMIPS opcode (incorrect length: %u): "
-		"%s %s"), length, opc->name, opc->args);
-      return 0;
-    }
-  major = match >> (10 + 8 * (length - 2));
-  if ((length == 2 && (major & 7) != 1 && (major & 6) != 2)
-      || (length == 4 && (major & 7) != 0 && (major & 4) != 4))
-    {
-      as_bad (_("Internal error: bad microMIPS opcode "
-		"(opcode/length mismatch): %s %s"), opc->name, opc->args);
-      return 0;
-    }
-
-  /* Shift piecewise to avoid an overflow where unsigned long is 32-bit.  */
-  insn_bits = 1 << 4 * length;
-  insn_bits <<= 4 * length;
-  insn_bits -= 1;
-  used_bits = mask;
-#define USE_BITS(field) \
-  (used_bits |= MICROMIPSOP_MASK_##field << MICROMIPSOP_SH_##field)
-  while (*p)
-    switch (c = *p++)
-      {
-      case ',': break;
-      case '(': break;
-      case ')': break;
-      case '+':
-	e = c;
-    	switch (c = *p++)
-	  {
-	  case 'A': USE_BITS (EXTLSB);	break;
-	  case 'B': USE_BITS (INSMSB);	break;
-	  case 'C': USE_BITS (EXTMSBD);	break;
-	  case 'E': USE_BITS (EXTLSB);	break;
-	  case 'F': USE_BITS (INSMSB);	break;
-	  case 'G': USE_BITS (EXTMSBD);	break;
-	  case 'H': USE_BITS (EXTMSBD);	break;
-	  case 'i': USE_BITS (TARGET);	break;
-	  case 'j': USE_BITS (EVAOFFSET);	break;
-	  default:
-	    as_bad (_("Internal error: bad mips opcode "
-		      "(unknown extension operand type `%c%c'): %s %s"),
-		    e, c, opc->name, opc->args);
-	    return 0;
-	  }
-	break;
-      case 'm':
-	e = c;
-    	switch (c = *p++)
-	  {
-	  case 'A': USE_BITS (IMMA);	break;
-	  case 'B': USE_BITS (IMMB);	break;
-	  case 'C': USE_BITS (IMMC);	break;
-	  case 'D': USE_BITS (IMMD);	break;
-	  case 'E': USE_BITS (IMME);	break;
-	  case 'F': USE_BITS (IMMF);	break;
-	  case 'G': USE_BITS (IMMG);	break;
-	  case 'H': USE_BITS (IMMH);	break;
-	  case 'I': USE_BITS (IMMI);	break;
-	  case 'J': USE_BITS (IMMJ);	break;
-	  case 'L': USE_BITS (IMML);	break;
-	  case 'M': USE_BITS (IMMM);	break;
-	  case 'N': USE_BITS (IMMN);	break;
-	  case 'O': USE_BITS (IMMO);	break;
-	  case 'P': USE_BITS (IMMP);	break;
-	  case 'Q': USE_BITS (IMMQ);	break;
-	  case 'U': USE_BITS (IMMU);	break;
-	  case 'W': USE_BITS (IMMW);	break;
-	  case 'X': USE_BITS (IMMX);	break;
-	  case 'Y': USE_BITS (IMMY);	break;
-	  case 'Z': break;
-	  case 'a': break;
-	  case 'b': USE_BITS (MB);	break;
-	  case 'c': USE_BITS (MC);	break;
-	  case 'd': USE_BITS (MD);	break;
-	  case 'e': USE_BITS (ME);	break;
-	  case 'f': USE_BITS (MF);	break;
-	  case 'g': USE_BITS (MG);	break;
-	  case 'h': USE_BITS (MH);	break;
-	  case 'j': USE_BITS (MJ);	break;
-	  case 'l': USE_BITS (ML);	break;
-	  case 'm': USE_BITS (MM);	break;
-	  case 'n': USE_BITS (MN);	break;
-	  case 'p': USE_BITS (MP);	break;
-	  case 'q': USE_BITS (MQ);	break;
-	  case 'r': break;
-	  case 's': break;
-	  case 't': break;
-	  case 'x': break;
-	  case 'y': break;
-	  case 'z': break;
-	  default:
-	    as_bad (_("Internal error: bad mips opcode "
-		      "(unknown extension operand type `%c%c'): %s %s"),
-		    e, c, opc->name, opc->args);
-	    return 0;
-	  }
-	break;
-      case '.': USE_BITS (OFFSET10);	break;
-      case '1': USE_BITS (STYPE);	break;
-      case '2': USE_BITS (BP);		break;
-      case '3': USE_BITS (SA3);		break;
-      case '4': USE_BITS (SA4);		break;
-      case '5': USE_BITS (IMM8);	break;
-      case '6': USE_BITS (RS);		break;
-      case '7': USE_BITS (DSPACC);	break;
-      case '8': USE_BITS (WRDSP);	break;
-      case '0': USE_BITS (DSPSFT);	break;
-      case '<': USE_BITS (SHAMT);	break;
-      case '>': USE_BITS (SHAMT);	break;
-      case '@': USE_BITS (IMM10);	break;
-      case 'B': USE_BITS (CODE10);	break;
-      case 'C': USE_BITS (COPZ);	break;
-      case 'D': USE_BITS (FD);		break;
-      case 'E': USE_BITS (RT);		break;
-      case 'G': USE_BITS (RS);		break;
-      case 'H': USE_BITS (SEL);		break;
-      case 'K': USE_BITS (RS);		break;
-      case 'M': USE_BITS (CCC);		break;
-      case 'N': USE_BITS (BCC);		break;
-      case 'R': USE_BITS (FR);		break;
-      case 'S': USE_BITS (FS);		break;
-      case 'T': USE_BITS (FT);		break;
-      case 'V': USE_BITS (FS);		break;
-      case '\\': USE_BITS (3BITPOS);	break;
-      case '^': USE_BITS (RD);		break;
-      case 'a': USE_BITS (TARGET);	break;
-      case 'b': USE_BITS (RS);		break;
-      case 'c': USE_BITS (CODE);	break;
-      case 'd': USE_BITS (RD);		break;
-      case 'h': USE_BITS (PREFX);	break;
-      case 'i': USE_BITS (IMMEDIATE);	break;
-      case 'j': USE_BITS (DELTA);	break;
-      case 'k': USE_BITS (CACHE);	break;
-      case 'n': USE_BITS (RT);		break;
-      case 'o': USE_BITS (DELTA);	break;
-      case 'p': USE_BITS (DELTA);	break;
-      case 'q': USE_BITS (CODE2);	break;
-      case 'r': USE_BITS (RS);		break;
-      case 's': USE_BITS (RS);		break;
-      case 't': USE_BITS (RT);		break;
-      case 'u': USE_BITS (IMMEDIATE);	break;
-      case 'v': USE_BITS (RS);		break;
-      case 'w': USE_BITS (RT);		break;
-      case 'y': USE_BITS (RS3);		break;
-      case 'z': break;
-      case '|': USE_BITS (TRAP);	break;
-      case '~': USE_BITS (OFFSET12);	break;
-      default:
-	as_bad (_("Internal error: bad microMIPS opcode "
-		  "(unknown operand type `%c'): %s %s"),
-		c, opc->name, opc->args);
-	return 0;
-      }
-#undef USE_BITS
-  if (used_bits != insn_bits)
-    {
-      if (~used_bits & insn_bits)
-	as_bad (_("Internal error: bad microMIPS opcode "
-		  "(bits 0x%lx undefined): %s %s"),
-		~used_bits & insn_bits, opc->name, opc->args);
-      if (used_bits & ~insn_bits)
-	as_bad (_("Internal error: bad microMIPS opcode "
-		  "(bits 0x%lx defined): %s %s"),
-		used_bits & ~insn_bits, opc->name, opc->args);
-      return 0;
-    }
-  return 1;
 }
 
 /* UDI immediates.  */
