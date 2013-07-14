@@ -1,5 +1,14 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (mips32_to_16_reg_map): Delete.
+	(match_entry_exit_operand): New function.
+	(match_save_restore_list_operand): Likewise.
+	(match_operand): Use them.
+	(check_absolute_expr): Delete.
+	(mips16_ip): Rewrite main parsing loop to use mips_operands.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c: Enable functions commented out in previous patch.
 	(SKIP_SPACE_TABS): Move further up file.
 	(mips32_to_micromips_reg_b_map, mips32_to_micromips_reg_c_map)

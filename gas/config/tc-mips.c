@@ -755,18 +755,6 @@ static struct mips_hi_fixup *mips_hi_fixup_list;
 
 static fragS *prev_reloc_op_frag;
 
-/* Map normal MIPS register numbers to mips16 register numbers.  */
-
-#define X ILLEGAL_REG
-static const int mips32_to_16_reg_map[] =
-{
-  X, X, 2, 3, 4, 5, 6, 7,
-  X, X, X, X, X, X, X, X,
-  0, 1, X, X, X, X, X, X,
-  X, X, X, X, X, X, X, X
-};
-#undef X
-
 /* Map mips16 register numbers to normal MIPS register numbers.  */
 
 static const unsigned int mips16_to_32_reg_map[] =
@@ -4280,6 +4268,236 @@ match_lwm_swm_list_operand (struct mips_arg_info *arg,
   return s;
 }
 
+/* OP_ENTRY_EXIT_LIST matcher.  */
+
+static char *
+match_entry_exit_operand (struct mips_arg_info *arg,
+			  const struct mips_operand *operand, char *s)
+{
+  unsigned int mask;
+  bfd_boolean is_exit;
+
+  /* The format is the same for both ENTRY and EXIT, but the constraints
+     are different.  */
+  is_exit = strcmp (arg->insn->insn_mo->name, "exit") == 0;
+  mask = (is_exit ? 7 << 3 : 0);
+  for (;;)
+    {
+      unsigned int regno1, regno2;
+      bfd_boolean is_freg;
+
+      if (reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &regno1))
+	is_freg = FALSE;
+      else if (reg_lookup (&s, RTYPE_FPU, &regno1))
+	is_freg = TRUE;
+      else
+	return 0;
+
+      SKIP_SPACE_TABS (s);
+      if (*s == '-')
+	{
+	  ++s;
+	  SKIP_SPACE_TABS (s);
+	  if (!reg_lookup (&s, (is_freg ? RTYPE_FPU
+				: RTYPE_GP | RTYPE_NUM), &regno2))
+	    return 0;
+	  SKIP_SPACE_TABS (s);
+	}
+      else
+	regno2 = regno1;
+
+      if (is_exit && is_freg && regno1 == 0 && regno2 < 2)
+	{
+	  mask &= ~(7 << 3);
+	  mask |= (5 + regno2) << 3;
+	}
+      else if (!is_exit && regno1 == 4 && regno2 >= 4 && regno2 <= 7)
+	mask |= (regno2 - 3) << 3;
+      else if (regno1 == 16 && regno2 >= 16 && regno2 <= 17)
+	mask |= (regno2 - 15) << 1;
+      else if (regno1 == RA && regno2 == RA)
+	mask |= 1;
+      else
+	return 0;
+
+      if (!*s)
+	break;
+      if (*s != ',')
+	return 0;
+      arg->argnum += 1;
+      ++s;
+      SKIP_SPACE_TABS (s);
+    }
+  insn_insert_operand (arg->insn, operand, mask);
+  return s;
+}
+
+/* OP_SAVE_RESTORE_LIST matcher.  */
+
+static char *
+match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
+{
+  unsigned int opcode, args, statics, sregs;
+  unsigned int num_frame_sizes, num_args, num_statics, num_sregs;
+  expressionS value;
+  offsetT frame_size;
+  const char *error;
+
+  error = 0;
+  opcode = arg->insn->insn_opcode;
+  frame_size = 0;
+  num_frame_sizes = 0;
+  args = 0;
+  statics = 0;
+  sregs = 0;
+  for (;;)
+    {
+      unsigned int regno1, regno2;
+
+      my_getExpression (&value, s);
+      if (value.X_op == O_constant)
+	{
+	  /* Handle the frame size.  */
+	  num_frame_sizes += 1;
+	  frame_size = value.X_add_number;
+	  s = expr_end;
+	  SKIP_SPACE_TABS (s);
+	}
+      else
+	{
+	  if (!reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &regno1))
+	    return 0;
+
+	  SKIP_SPACE_TABS (s);
+	  if (*s == '-')
+	    {
+	      ++s;
+	      SKIP_SPACE_TABS (s);
+	      if (!reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &regno2)
+		  || regno2 < regno1)
+		return 0;
+	      SKIP_SPACE_TABS (s);
+	    }
+	  else
+	    regno2 = regno1;
+
+	  while (regno1 <= regno2)
+	    {
+	      if (regno1 >= 4 && regno1 <= 7)
+		{
+		  if (num_frame_sizes == 0)
+		    /* args $a0-$a3 */
+		    args |= 1 << (regno1 - 4);
+		  else
+		    /* statics $a0-$a3 */
+		    statics |= 1 << (regno1 - 4);
+		}
+	      else if (regno1 >= 16 && regno1 <= 23)
+		/* $s0-$s7 */
+		sregs |= 1 << (regno1 - 16);
+	      else if (regno1 == 30)
+		/* $s8 */
+		sregs |= 1 << 8;
+	      else if (regno1 == 31)
+		/* Add $ra to insn.  */
+		opcode |= 0x40;
+	      else
+		return 0;
+	      regno1 += 1;
+	      if (regno1 == 24)
+		regno1 = 30;
+	    }
+	}
+      if (!*s)
+	break;
+      if (*s != ',')
+	return 0;
+      arg->argnum += 1;
+      ++s;
+      SKIP_SPACE_TABS (s);
+    }
+
+  /* Encode args/statics combination.  */
+  if (args & statics)
+    return 0;
+  else if (args == 0xf)
+    /* All $a0-$a3 are args.  */
+    opcode |= MIPS16_ALL_ARGS << 16;
+  else if (statics == 0xf)
+    /* All $a0-$a3 are statics.  */
+    opcode |= MIPS16_ALL_STATICS << 16;
+  else
+    {
+      /* Count arg registers.  */
+      num_args = 0;
+      while (args & 0x1)
+	{
+	  args >>= 1;
+	  num_args += 1;
+	}
+      if (args != 0)
+	return 0;
+
+      /* Count static registers.  */
+      num_statics = 0;
+      while (statics & 0x8)
+	{
+	  statics = (statics << 1) & 0xf;
+	  num_statics += 1;
+	}
+      if (statics != 0)
+	return 0;
+
+      /* Encode args/statics.  */
+      opcode |= ((num_args << 2) | num_statics) << 16;
+    }
+
+  /* Encode $s0/$s1.  */
+  if (sregs & (1 << 0))		/* $s0 */
+    opcode |= 0x20;
+  if (sregs & (1 << 1))		/* $s1 */
+    opcode |= 0x10;
+  sregs >>= 2;
+
+  /* Encode $s2-$s8. */
+  num_sregs = 0;
+  while (sregs & 1)
+    {
+      sregs >>= 1;
+      num_sregs += 1;
+    }
+  if (sregs != 0)
+    return 0;
+  opcode |= num_sregs << 24;
+
+  /* Encode frame size.  */
+  if (num_frame_sizes == 0)
+    error = _("Missing frame size");
+  else if (num_frame_sizes > 1)
+    error = _("Frame size specified twice");
+  else if ((frame_size & 7) != 0 || frame_size < 0 || frame_size > 0xff * 8)
+    error = _("Invalid frame size");
+  else if (frame_size != 128 || (opcode >> 16) != 0)
+    {
+      frame_size /= 8;
+      opcode |= (((frame_size & 0xf0) << 16)
+		 | (frame_size & 0x0f));
+    }
+
+  if (error)
+    {
+      if (arg->soft_match)
+	return 0;
+      as_bad (error);
+    }
+
+  /* Finally build the instruction.  */
+  if ((opcode >> 16) != 0 || frame_size == 0)
+    opcode |= MIPS16_EXTEND;
+  arg->insn->insn_opcode = opcode;
+  return s;
+}
+
 /* OP_MDMX_IMM_REG matcher.  */
 
 static char *
@@ -4454,8 +4672,10 @@ match_operand (struct mips_arg_info *arg,
       return match_lwm_swm_list_operand (arg, operand, s);
 
     case OP_ENTRY_EXIT_LIST:
+      return match_entry_exit_operand (arg, operand, s);
+
     case OP_SAVE_RESTORE_LIST:
-      abort ();
+      return match_save_restore_list_operand (arg, s);
 
     case OP_MDMX_IMM_REG:
       return match_mdmx_imm_reg_operand (arg, operand, s);
@@ -6571,21 +6791,6 @@ set_at (int reg, int unsignedp)
       load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
       macro_build (NULL, unsignedp ? "sltu" : "slt", "d,v,t", AT, reg, AT);
     }
-}
-
-/* Warn if an expression is not a constant.  */
-
-static void
-check_absolute_expr (struct mips_cl_insn *ip, expressionS *ex)
-{
-  if (ex->X_op == O_big)
-    as_bad (_("unsupported large constant"));
-  else if (ex->X_op != O_constant)
-    as_bad (_("Instruction %s requires absolute expression"),
-	    ip->insn_mo->name);
-
-  if (HAVE_32BIT_GPRS)
-    normalize_constant_expr (ex);
 }
 
 /* Count the leading zeroes by performing a binary chop. This is a
@@ -12064,10 +12269,10 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   const char *args;
   struct mips_opcode *insn;
   char *argsstart;
-  unsigned int regno;
-  unsigned int lastregno = 0;
-  char *s_reset;
   size_t i;
+  const struct mips_operand *operand;
+  const struct mips_operand *ext_operand;
+  struct mips_arg_info arg;
 
   insn_error = NULL;
 
@@ -12118,15 +12323,17 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   for (;;)
     {
       bfd_boolean ok;
+      bfd_boolean more_alts;
       char relax_char;
 
       gas_assert (strcmp (insn->name, str) == 0);
 
       ok = is_opcode_valid_16 (insn);
+      more_alts = (insn + 1 < &mips16_opcodes[bfd_mips16_num_opcodes]
+		   && strcmp (insn[0].name, insn[1].name) == 0);
       if (! ok)
 	{
-	  if (insn + 1 < &mips16_opcodes[bfd_mips16_num_opcodes]
-	      && strcmp (insn->name, insn[1].name) == 0)
+	  if (more_alts)
 	    {
 	      ++insn;
 	      continue;
@@ -12154,292 +12361,103 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
       offset_reloc[1] = BFD_RELOC_UNUSED;
       offset_reloc[2] = BFD_RELOC_UNUSED;
       relax_char = 0;
+
+      memset (&arg, 0, sizeof (arg));
+      arg.insn = ip;
+      arg.argnum = 1;
+      arg.last_regno = ILLEGAL_REG;
+      arg.dest_regno = ILLEGAL_REG;
+      arg.soft_match = more_alts;
+      relax_char = 0;
       for (args = insn->args; 1; ++args)
 	{
 	  int c;
 
-	  if (*s == ' ')
-	    ++s;
+	  SKIP_SPACE_TABS (s);
+	  if (*s == 0)
+	    {
+	      offsetT value;
 
-	  /* In this switch statement we call break if we did not find
-             a match, continue if we did find a match, or return if we
-             are done.  */
+	      /* Handle unary instructions in which only one operand is given.
+		 The source is then the same as the destination.  */
+	      if (arg.opnum == 1 && *args == ',')
+		switch (args[1])
+		  {
+		  case 'v':
+		  case 'w':
+		    arg.argnum = 1;
+		    s = argsstart;
+		    continue;
+		  }
 
+	      /* Fail the match if there were too few operands.  */
+	      if (*args)
+		break;
+
+	      /* Successful match.  Stuff the immediate value in now, if
+		 we can.  */
+	      if (insn->pinfo == INSN_MACRO)
+		{
+		  gas_assert (relax_char == 0);
+		  gas_assert (*offset_reloc == BFD_RELOC_UNUSED);
+		}
+	      else if (relax_char
+		       && offset_expr.X_op == O_constant
+		       && calculate_reloc (*offset_reloc,
+					   offset_expr.X_add_number,
+					   &value))
+		{
+		  mips16_immed (NULL, 0, relax_char, *offset_reloc, value,
+				forced_insn_length, &ip->insn_opcode);
+		  offset_expr.X_op = O_absent;
+		  *offset_reloc = BFD_RELOC_UNUSED;
+		}
+	      else if (relax_char && *offset_reloc != BFD_RELOC_UNUSED)
+		{
+		  if (forced_insn_length == 2)
+		    as_bad (_("invalid unextended operand value"));
+		  forced_insn_length = 4;
+		  ip->insn_opcode |= MIPS16_EXTEND;
+		}
+	      else if (relax_char)
+		*offset_reloc = (int) BFD_RELOC_UNUSED + relax_char;
+
+	      check_completed_insn (&arg);
+	      return;
+	    }
+
+	  /* Fail the match if the line has too many operands.   */
+	  if (*args == 0)
+	    break;
+
+	  /* Handle characters that need to match exactly.  */
+	  if (*args == '(' || *args == ')' || *args == ',')
+	    {
+	      if (*s != *args)
+		break;
+	      if (*s == ',')
+		arg.argnum += 1;
+	      ++s;
+	      continue;
+	    }
+
+	  arg.opnum += 1;
+	  arg.optional_reg = FALSE;
 	  c = *args;
 	  switch (c)
 	    {
-	    case '\0':
-	      if (*s == '\0')
-		{
-		  offsetT value;
-
-		  /* Stuff the immediate value in now, if we can.  */
-		  if (insn->pinfo == INSN_MACRO)
-		    {
-		      gas_assert (relax_char == 0);
-		      gas_assert (*offset_reloc == BFD_RELOC_UNUSED);
-		    }
-		  else if (relax_char
-			   && offset_expr.X_op == O_constant
-			   && calculate_reloc (*offset_reloc,
-					       offset_expr.X_add_number,
-					       &value))
-		    {
-		      mips16_immed (NULL, 0, relax_char, *offset_reloc, value,
-				    forced_insn_length, &ip->insn_opcode);
-		      offset_expr.X_op = O_absent;
-		      *offset_reloc = BFD_RELOC_UNUSED;
-		    }
-		  else if (relax_char && *offset_reloc != BFD_RELOC_UNUSED)
-		    {
-		      if (forced_insn_length == 2)
-			as_bad (_("invalid unextended operand value"));
-		      forced_insn_length = 4;
-		      ip->insn_opcode |= MIPS16_EXTEND;
-		    }
-		  else if (relax_char)
-		    *offset_reloc = (int) BFD_RELOC_UNUSED + relax_char;
-
-		  return;
-		}
-	      break;
-
-	    case ',':
-	      if (*s++ == c)
-		continue;
-	      s--;
-	      switch (*++args)
-		{
-		case 'v':
-		  MIPS16_INSERT_OPERAND (RX, *ip, lastregno);
-		  continue;
-		case 'w':
-		  MIPS16_INSERT_OPERAND (RY, *ip, lastregno);
-		  continue;
-		}
-	      break;
-
-	    case '(':
-	    case ')':
-	      if (*s++ == c)
-		continue;
-	      break;
-
 	    case 'v':
 	    case 'w':
-	      if (s[0] != '$')
-		{
-		  if (c == 'v')
-		    MIPS16_INSERT_OPERAND (RX, *ip, lastregno);
-		  else
-		    MIPS16_INSERT_OPERAND (RY, *ip, lastregno);
-		  ++args;
-		  continue;
-		}
-	      /* Fall through.  */
-	    case 'x':
-	    case 'y':
-	    case 'z':
-	    case 'Z':
-	    case '0':
-	    case 'S':
-	    case 'R':
-	    case 'X':
-	    case 'Y':
-  	      s_reset = s;
-	      if (!reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno))
-		{
-		  if (c == 'v' || c == 'w')
-		    {
-		      if (c == 'v')
-			MIPS16_INSERT_OPERAND (RX, *ip, lastregno);
-		      else
-			MIPS16_INSERT_OPERAND (RY, *ip, lastregno);
-		      ++args;
-		      continue;
-		    }
-		  break;
-		}
-
-	      if (*s == ' ')
-		++s;
-	      if (args[1] != *s)
-		{
-		  if (c == 'v' || c == 'w')
-		    {
-		      regno = mips16_to_32_reg_map[lastregno];
-		      s = s_reset;
-		      ++args;
-		    }
-		}
-
-	      switch (c)
-		{
-		case 'x':
-		case 'y':
-		case 'z':
-		case 'v':
-		case 'w':
-		case 'Z':
-		  regno = mips32_to_16_reg_map[regno];
-		  break;
-
-		case '0':
-		  if (regno != 0)
-		    regno = ILLEGAL_REG;
-		  break;
-
-		case 'S':
-		  if (regno != SP)
-		    regno = ILLEGAL_REG;
-		  break;
-
-		case 'R':
-		  if (regno != RA)
-		    regno = ILLEGAL_REG;
-		  break;
-
-		case 'X':
-		case 'Y':
-		  if (regno == AT && mips_opts.at)
-		    {
-		      if (mips_opts.at == ATREG)
-			as_warn (_("used $at without \".set noat\""));
-		      else
-			as_warn (_("used $%u with \".set at=$%u\""),
-				 regno, mips_opts.at);
-		    }
-		  break;
-
-		default:
-		  abort ();
-		}
-
-	      if (regno == ILLEGAL_REG)
-		break;
-
-	      switch (c)
-		{
-		case 'x':
-		case 'v':
-		  MIPS16_INSERT_OPERAND (RX, *ip, regno);
-		  break;
-		case 'y':
-		case 'w':
-		  MIPS16_INSERT_OPERAND (RY, *ip, regno);
-		  break;
-		case 'z':
-		  MIPS16_INSERT_OPERAND (RZ, *ip, regno);
-		  break;
-		case 'Z':
-		  MIPS16_INSERT_OPERAND (MOVE32Z, *ip, regno);
-		case '0':
-		case 'S':
-		case 'R':
-		  break;
-		case 'X':
-		  MIPS16_INSERT_OPERAND (REGR32, *ip, regno);
-		  break;
-		case 'Y':
-		  regno = ((regno & 7) << 2) | ((regno & 0x18) >> 3);
-		  MIPS16_INSERT_OPERAND (REG32R, *ip, regno);
-		  break;
-		default:
-		  abort ();
-		}
-
-	      lastregno = regno;
-	      continue;
-
-	    case 'P':
-	      if (strncmp (s, "$pc", 3) == 0)
-		{
-		  s += 3;
-		  continue;
-		}
+	      arg.optional_reg = (args[1] == ',');
 	      break;
-
-	    case '5':
-	    case 'H':
-	    case 'W':
-	    case 'D':
-	    case 'j':
-	    case 'V':
-	    case 'C':
-	    case 'U':
-	    case 'k':
-	    case 'K':
-	      i = my_getSmallExpression (&offset_expr, offset_reloc, s);
-	      if (i > 0)
-		{
-		  relax_char = c;
-		  s = expr_end;
-		  continue;
-		}
-	      *offset_reloc = BFD_RELOC_UNUSED;
-	      /* Fall through.  */
-	    case '<':
-	    case '>':
-	    case '[':
-	    case ']':
-	    case '4':
-	    case '8':
-	      my_getExpression (&offset_expr, s);
-	      if (offset_expr.X_op == O_register)
-		{
-		  /* What we thought was an expression turned out to
-                     be a register.  */
-
-		  if (s[0] == '(' && args[1] == '(')
-		    {
-		      /* It looks like the expression was omitted
-			 before a register indirection, which means
-			 that the expression is implicitly zero.  We
-			 still set up offset_expr, so that we handle
-			 explicit extensions correctly.  */
-		      offset_expr.X_op = O_constant;
-		      offset_expr.X_add_number = 0;
-		      relax_char = c;
-		      continue;
-		    }
-
-		  break;
-		}
-
-	      /* We need to relax this instruction.  */
-	      relax_char = c;
-	      s = expr_end;
-	      continue;
 
 	    case 'p':
 	    case 'q':
 	    case 'A':
 	    case 'B':
 	    case 'E':
-	      /* We use offset_reloc rather than imm_reloc for the PC
-                 relative operands.  This lets macros with both
-                 immediate and address operands work correctly.  */
-	      my_getExpression (&offset_expr, s);
-
-	      if (offset_expr.X_op == O_register)
-		break;
-
-	      /* We need to relax this instruction.  */
 	      relax_char = c;
-	      s = expr_end;
-	      continue;
-
-	    case '6':		/* break code */
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number > 63)
-		as_warn (_("Invalid value for `%s' (%lu)"),
-			 ip->insn_mo->name,
-			 (unsigned long) imm_expr.X_add_number);
-	      MIPS16_INSERT_OPERAND (IMM6, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
+	      break;
 
 	    case 'I':
 	      my_getExpression (&imm_expr, s);
@@ -12451,268 +12469,73 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      s = expr_end;
 	      continue;
 
-	    case 'a':		/* 26 bit address */
+	    case 'a':
 	    case 'i':
-	      my_getExpression (&offset_expr, s);
-	      s = expr_end;
 	      *offset_reloc = BFD_RELOC_MIPS16_JMP;
 	      ip->insn_opcode <<= 16;
-	      continue;
-
-	    case 'l':		/* register list for entry macro */
-	    case 'L':		/* register list for exit macro */
-	      {
-		int mask;
-
-		if (c == 'l')
-		  mask = 0;
-		else
-		  mask = 7 << 3;
-		while (*s != '\0')
-		  {
-		    unsigned int freg, reg1, reg2;
-
-		    while (*s == ' ' || *s == ',')
-		      ++s;
-		    if (reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &reg1))
-		      freg = 0;
-		    else if (reg_lookup (&s, RTYPE_FPU, &reg1))
-		      freg = 1;
-		    else
-		      {
-			as_bad (_("can't parse register list"));
-			break;
-		      }
-		    if (*s == ' ')
-		      ++s;
-		    if (*s != '-')
-		      reg2 = reg1;
-		    else
-		      {
-			++s;
-			if (!reg_lookup (&s, freg ? RTYPE_FPU 
-					 : (RTYPE_GP | RTYPE_NUM), &reg2))
-			  {
-			    as_bad (_("invalid register list"));
-			    break;
-			  }
-		      }
-		    if (freg && reg1 == 0 && reg2 == 0 && c == 'L')
-		      {
-			mask &= ~ (7 << 3);
-			mask |= 5 << 3;
-		      }
-		    else if (freg && reg1 == 0 && reg2 == 1 && c == 'L')
-		      {
-			mask &= ~ (7 << 3);
-			mask |= 6 << 3;
-		      }
-		    else if (reg1 == 4 && reg2 >= 4 && reg2 <= 7 && c != 'L')
-		      mask |= (reg2 - 3) << 3;
-		    else if (reg1 == 16 && reg2 >= 16 && reg2 <= 17)
-		      mask |= (reg2 - 15) << 1;
-		    else if (reg1 == RA && reg2 == RA)
-		      mask |= 1;
-		    else
-		      {
-			as_bad (_("invalid register list"));
-			break;
-		      }
-		  }
-		/* The mask is filled in in the opcode table for the
-                   benefit of the disassembler.  We remove it before
-                   applying the actual mask.  */
-		ip->insn_opcode &= ~ ((7 << 3) << MIPS16OP_SH_IMM6);
-		ip->insn_opcode |= mask << MIPS16OP_SH_IMM6;
-	      }
-	    continue;
-
-	    case 'm':		/* Register list for save insn.  */
-	    case 'M':		/* Register list for restore insn.  */
-	      {
-		int opcode = ip->insn_opcode;
-		int framesz = 0, seen_framesz = 0;
-		int nargs = 0, statics = 0, sregs = 0;
-
-		while (*s != '\0')
-		  {
-		    unsigned int reg1, reg2;
-
-		    SKIP_SPACE_TABS (s);
-		    while (*s == ',')
-		      ++s;
-		    SKIP_SPACE_TABS (s);
-
-		    my_getExpression (&imm_expr, s);
-		    if (imm_expr.X_op == O_constant)
-		      {
-			/* Handle the frame size.  */
-			if (seen_framesz)
-			  {
-			    as_bad (_("more than one frame size in list"));
-			    break;
-			  }
-			seen_framesz = 1;
-			framesz = imm_expr.X_add_number;
-			imm_expr.X_op = O_absent;
-			s = expr_end;
-			continue;
-		      }
-
-		    if (! reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &reg1))
-		      {
-			as_bad (_("can't parse register list"));
-			break;
-		      }
-
-		    while (*s == ' ')
-		      ++s;
-
-		    if (*s != '-')
-		      reg2 = reg1;
-		    else
-		      {
-			++s;
-			if (! reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &reg2)
-			    || reg2 < reg1)
-			  {
-			    as_bad (_("can't parse register list"));
-			    break;
-			  }
-		      }
-
-		    while (reg1 <= reg2)
-		      {
-			if (reg1 >= 4 && reg1 <= 7)
-			  {
-			    if (!seen_framesz)
-				/* args $a0-$a3 */
-				nargs |= 1 << (reg1 - 4);
-			    else
-				/* statics $a0-$a3 */
-				statics |= 1 << (reg1 - 4);
-			  }
-			else if ((reg1 >= 16 && reg1 <= 23) || reg1 == 30)
-			  {
-			    /* $s0-$s8 */
-			    sregs |= 1 << ((reg1 == 30) ? 8 : (reg1 - 16));
-			  }
-			else if (reg1 == 31)
-			  {
-			    /* Add $ra to insn.  */
-			    opcode |= 0x40;
-			  }
-			else
-			  {
-			    as_bad (_("unexpected register in list"));
-			    break;
-			  }
-			if (++reg1 == 24)
-			  reg1 = 30;
-		      }
-		  }
-
-		/* Encode args/statics combination.  */
-		if (nargs & statics)
-		  as_bad (_("arg/static registers overlap"));
-		else if (nargs == 0xf)
-		  /* All $a0-$a3 are args.  */
-		  opcode |= MIPS16_ALL_ARGS << 16;
-		else if (statics == 0xf)
-		  /* All $a0-$a3 are statics.  */
-		  opcode |= MIPS16_ALL_STATICS << 16;
-		else 
-		  {
-		    int narg = 0, nstat = 0;
-
-		    /* Count arg registers.  */
-		    while (nargs & 0x1)
-		      {
-			nargs >>= 1;
-			narg++;
-		      }
-		    if (nargs != 0)
-		      as_bad (_("invalid arg register list"));
-
-		    /* Count static registers.  */
-		    while (statics & 0x8)
-		      {
-			statics = (statics << 1) & 0xf;
-			nstat++;
-		      }
-		    if (statics != 0) 
-		      as_bad (_("invalid static register list"));
-
-		    /* Encode args/statics.  */
-		    opcode |= ((narg << 2) | nstat) << 16;
-		  }
-
-		/* Encode $s0/$s1.  */
-		if (sregs & (1 << 0))		/* $s0 */
-		  opcode |= 0x20;
-		if (sregs & (1 << 1))		/* $s1 */
-		  opcode |= 0x10;
-		sregs >>= 2;
-
-		if (sregs != 0)
-		  {
-		    /* Count regs $s2-$s8.  */
-		    int nsreg = 0;
-		    while (sregs & 1)
-		      {
-			sregs >>= 1;
-			nsreg++;
-		      }
-		    if (sregs != 0)
-		      as_bad (_("invalid static register list"));
-		    /* Encode $s2-$s8. */
-		    opcode |= nsreg << 24;
-		  }
-
-		/* Encode frame size.  */
-		if (!seen_framesz)
-		  as_bad (_("missing frame size"));
-		else if ((framesz & 7) != 0 || framesz < 0
-			 || framesz > 0xff * 8)
-		  as_bad (_("invalid frame size"));
-		else if (framesz != 128 || (opcode >> 16) != 0)
-		  {
-		    framesz /= 8;
-		    opcode |= (((framesz & 0xf0) << 16)
-			     | (framesz & 0x0f));
-		  }
-
-		/* Finally build the instruction.  */
-		if ((opcode >> 16) != 0 || framesz == 0)
-		  opcode |= MIPS16_EXTEND;
-		ip->insn_opcode = opcode;
-	      }
-	    continue;
-
-	    case 'e':		/* extend code */
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number > 0x7ff)
-		{
-		  as_warn (_("Invalid value for `%s' (%lu)"),
-			   ip->insn_mo->name,
-			   (unsigned long) imm_expr.X_add_number);
-		  imm_expr.X_add_number &= 0x7ff;
-		}
-	      ip->insn_opcode |= imm_expr.X_add_number;
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    default:
-	      abort ();
+	      break;
 	    }
-	  break;
+
+	  operand = decode_mips16_operand (c, FALSE);
+	  if (!operand)
+	    abort ();
+
+	  /* '6' is a special case.  It is used for BREAK and SDBBP,
+	     whose operands are only meaningful to the software that decodes
+	     them.  This means that there is no architectural reason why
+	     they cannot be prefixed by EXTEND, but in practice,
+	     exception handlers will only look at the instruction
+	     itself.  We therefore allow '6' to be extended when
+	     disassembling but not when assembling.  */
+	  if (operand->type != OP_PCREL && c != '6')
+	    {
+	      ext_operand = decode_mips16_operand (c, TRUE);
+	      if (operand != ext_operand)
+		{
+		  /* Parse the expression, allowing relocation operators.  */
+		  i = my_getSmallExpression (&offset_expr, offset_reloc, s);
+		  s = expr_end;
+
+		  if (offset_expr.X_op == O_register)
+		    {
+		      /* Handle elided offsets, which are equivalent to 0.  */
+		      if (*s == '(')
+			{
+			  offset_expr.X_op = O_constant;
+			  offset_expr.X_add_number = 0;
+			  relax_char = c;
+			  continue;
+			}
+		      /* Fail the match.  */
+		      break;
+		    }
+		  /* '8' is used for SLTI(U) and has traditionally not
+		     been allowed to take relocation operators.  */
+		  if (i > 0 && (ext_operand->size != 16 || c == '8'))
+		    break;
+		  relax_char = c;
+		  continue;
+		}
+	    }
+
+	  s = match_operand (&arg, operand, s);
+	  if (!s && arg.optional_reg)
+	    {
+	      /* Assume that the register has been elided and is the
+		 same as the first operand.  */
+	      arg.optional_reg = FALSE;
+	      arg.argnum = 1;
+	      s = argsstart;
+	      SKIP_SPACE_TABS (s);
+	      s = match_operand (&arg, operand, s);
+	    }
+	  if (!s)
+	    break;
+	  continue;
 	}
 
       /* Args don't match.  */
-      if (insn + 1 < &mips16_opcodes[bfd_mips16_num_opcodes] &&
-	  strcmp (insn->name, insn[1].name) == 0)
+      if (more_alts)
 	{
 	  ++insn;
 	  s = argsstart;
