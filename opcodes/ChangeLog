@@ -1,5 +1,19 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* mips16-opc.c: Include mips-formats.h.
+	(reg_0_map, reg_29_map, reg_31_map, reg_m16_map, reg32r_map): New
+	static arrays.
+	(decode_mips16_operand): New function.
+	* mips-dis.c (mips16_to_32_reg_map, mips16_reg_names): Delete.
+	(print_insn_arg): Handle OP_ENTRY_EXIT list.
+	Abort for OP_SAVE_RESTORE_LIST.
+	(print_mips16_insn_arg): Change interface.  Use mips_operand
+	structures.  Delete GET_OP_S.  Move GET_OP definition to...
+	(print_insn_mips16): ...here.  Call init_print_arg_state.
+	Update the call to print_mips16_insn_arg.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips-formats.h: New file.
 	* mips-opc.c: Include mips-formats.h.
 	(reg_0_map): New static array.

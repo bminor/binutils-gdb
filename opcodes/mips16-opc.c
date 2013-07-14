@@ -23,6 +23,116 @@
 #include "sysdep.h"
 #include <stdio.h>
 #include "opcode/mips.h"
+#include "mips-formats.h"
+
+static unsigned char reg_0_map[] = { 0 };
+static unsigned char reg_29_map[] = { 29 };
+static unsigned char reg_31_map[] = { 31 };
+static unsigned char reg_m16_map[] = { 16, 17, 2, 3, 4, 5, 6, 7 };
+static unsigned char reg32r_map[] = {
+  0, 8, 16, 24,
+  1, 9, 17, 25,
+  2, 10, 18, 26,
+  3, 11, 19, 27,
+  4, 12, 20, 28,
+  5, 13, 21, 29,
+  6, 14, 22, 30,
+  7, 15, 23, 31
+};
+
+/* Return the meaning of operand character TYPE, or null if it isn't
+   recognized.  If the operand is affected by the EXTEND instruction,
+   EXTENDED_P selects between the extended and unextended forms.
+   The extended forms all have an lsb of 0.  */
+
+const struct mips_operand *
+decode_mips16_operand (char type, bfd_boolean extended_p)
+{
+  switch (type)
+    {
+    case '0': MAPPED_REG (0, 0, GP, reg_0_map);
+
+    case 'L': SPECIAL (6, 5, ENTRY_EXIT_LIST);
+    case 'M': SPECIAL (7, 0, SAVE_RESTORE_LIST);
+    case 'P': SPECIAL (0, 0, PC);
+    case 'R': MAPPED_REG (0, 0, GP, reg_31_map);
+    case 'S': MAPPED_REG (0, 0, GP, reg_29_map);
+    case 'X': REG (5, 0, GP);
+    case 'Y': MAPPED_REG (5, 3, GP, reg32r_map);
+    case 'Z': MAPPED_REG (3, 0, GP, reg_m16_map);
+
+    case 'a': JUMP (26, 0, 2);
+    case 'e': UINT (11, 0);
+    case 'i': JALX (26, 0, 2);
+    case 'l': SPECIAL (6, 5, ENTRY_EXIT_LIST);
+    case 'm': SPECIAL (7, 0, SAVE_RESTORE_LIST);
+    case 'v': MAPPED_REG (3, 8, GP, reg_m16_map);
+    case 'w': MAPPED_REG (3, 5, GP, reg_m16_map);
+    case 'x': MAPPED_REG (3, 8, GP, reg_m16_map);
+    case 'y': MAPPED_REG (3, 5, GP, reg_m16_map);
+    case 'z': MAPPED_REG (3, 2, GP, reg_m16_map);
+    }
+
+  if (extended_p)
+    switch (type)
+      {
+      case '<': UINT (5, 0);
+      case '>': UINT (5, 0);
+      case '[': UINT (6, 0);
+      case ']': UINT (6, 0);
+
+      case '4': SINT (15, 0);
+      case '5': SINT (16, 0);
+      case '6': SINT (16, 0);
+      case '8': SINT (16, 0);
+
+      case 'A': PCREL (16, 0, 2, 0, TRUE, FALSE, FALSE);
+      case 'B': PCREL (16, 0, 3, 0, TRUE, FALSE, FALSE);
+      case 'C': SINT (16, 0);
+      case 'D': SINT (16, 0);
+      case 'E': PCREL (16, 0, 2, 0, TRUE, FALSE, FALSE);
+      case 'H': SINT (16, 0);
+      case 'K': SINT (16, 0);
+      case 'U': UINT (16, 0);
+      case 'V': SINT (16, 0);
+      case 'W': SINT (16, 0);
+
+      case 'j': SINT (16, 0);
+      case 'k': SINT (16, 0);
+      case 'p': BRANCH (16, 0, 1);
+      case 'q': BRANCH (16, 0, 1);
+      }
+  else
+    switch (type)
+      {
+      case '<': INT_ADJ (3, 2, 8, 0, FALSE);
+      case '>': INT_ADJ (3, 8, 8, 0, FALSE);
+      case '[': INT_ADJ (3, 2, 8, 0, FALSE);
+      case ']': INT_ADJ (3, 8, 8, 0, FALSE);
+
+      case '4': SINT (4, 0);
+      case '5': UINT (5, 0);
+      case '6': UINT (6, 5);
+      case '8': UINT (8, 0);
+
+      case 'A': PCREL (8, 0, 2, 2, FALSE, FALSE, FALSE);
+      case 'B': PCREL (5, 0, 3, 3, FALSE, FALSE, FALSE);
+      case 'C': INT_ADJ (8, 0, 255, 3, FALSE);	/* (0 .. 255) << 3 */
+      case 'D': INT_ADJ (5, 0, 31, 3, FALSE);	/* (0 .. 31) << 3 */
+      case 'E': PCREL (5, 0, 2, 2, FALSE, FALSE, FALSE);
+      case 'H': INT_ADJ (5, 0, 31, 1, FALSE);	/* (0 .. 31) << 1 */
+      case 'K': INT_ADJ (8, 0, 127, 3, FALSE);	/* (-128 .. 127) << 3 */
+      case 'U': UINT (8, 0);
+      case 'V': INT_ADJ (8, 0, 255, 2, FALSE);	/* (0 .. 255) << 2 */
+      case 'W': INT_ADJ (5, 0, 31, 2, FALSE);	/* (0 .. 31) << 2 */
+
+      case 'j': SINT (5, 0);
+      case 'k': SINT (8, 0);
+      case 'p': BRANCH (8, 0, 1);
+      case 'q': BRANCH (11, 0, 1);
+      }
+  return 0;
+}
 
 /* This is the opcodes table for the mips16 processor.  The format of
    this table is intentionally identical to the one in mips-opc.c.
