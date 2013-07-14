@@ -1,3 +1,12 @@
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/at-2.l: Remove duplicated $at warnings.
+	* gas/mips/ext-ill.l, gas/mips/lui-1.l, gas/mips/mips32r2-ill.l,
+	gas/mips/mips32r2-ill-nofp.l, gas/mips/mips32r2-ill-fp64.l,
+	gas/mips/mips64r2-ill.l, gas/mips/octeon-ill.l: Update error
+	messages.  Expect negative numbers to be printed as such,
+	rather than as large unsigned positive numbers.
+
 2013-07-12  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/mips/nan-2008-1.d: New test.

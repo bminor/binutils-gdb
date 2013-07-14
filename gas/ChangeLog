@@ -1,5 +1,20 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c: Enable functions commented out in previous patch.
+	(SKIP_SPACE_TABS): Move further up file.
+	(mips32_to_micromips_reg_b_map, mips32_to_micromips_reg_c_map)
+	(mips32_to_micromips_reg_d_map, mips32_to_micromips_reg_e_map)
+	(ips32_to_micromips_reg_f_map, mips32_to_micromips_reg_g_map)
+	(mips32_to_micromips_reg_l_map, mips32_to_micromips_reg_m_map)
+	(mips32_to_micromips_reg_q_map, mips32_to_micromips_reg_n_map)
+	(micromips_imm_b_map, micromips_imm_c_map): Delete.
+	(mips_lookup_reg_pair): Delete.
+	(macro): Use report_bad_range and report_bad_field.
+	(mips_immed, expr_const_in_range): Delete.
+	(mips_ip): Rewrite main parsing loop to use new functions.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips_oddfpreg_ok): Move further up file.
 	Change return type to bfd_boolean.
 	(report_bad_range, report_bad_field): New functions.

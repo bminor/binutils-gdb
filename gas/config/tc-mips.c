@@ -44,6 +44,9 @@ typedef char static_assert2[sizeof (valueT) < 8 ? -1 : 1];
 #define DBG(x)
 #endif
 
+#define SKIP_SPACE_TABS(S) \
+  do { while (*(S) == ' ' || *(S) == '\t') ++(S); } while (0)
+
 /* Clean up namespace so we can include obj-elf.h too.  */
 static int mips_output_flavor (void);
 static int mips_output_flavor (void) { return OUTPUT_FLAVOR; }
@@ -771,38 +774,6 @@ static const unsigned int mips16_to_32_reg_map[] =
   16, 17, 2, 3, 4, 5, 6, 7
 };
 
-/* Map normal MIPS register numbers to microMIPS register numbers.  */
-
-#define mips32_to_micromips_reg_b_map	mips32_to_16_reg_map
-#define mips32_to_micromips_reg_c_map	mips32_to_16_reg_map
-#define mips32_to_micromips_reg_d_map	mips32_to_16_reg_map
-#define mips32_to_micromips_reg_e_map	mips32_to_16_reg_map
-#define mips32_to_micromips_reg_f_map	mips32_to_16_reg_map
-#define mips32_to_micromips_reg_g_map	mips32_to_16_reg_map
-#define mips32_to_micromips_reg_l_map	mips32_to_16_reg_map
-
-#define X ILLEGAL_REG
-/* reg type m: 0, 17, 2, 3, 16, 18, 19, 20.  */
-static const int mips32_to_micromips_reg_m_map[] =
-{
-  0, X, 2, 3, X, X, X, X,
-  X, X, X, X, X, X, X, X,
-  4, 1, 5, 6, 7, X, X, X,
-  X, X, X, X, X, X, X, X
-};
-
-/* reg type q: 0, 2-7. 17.  */
-static const int mips32_to_micromips_reg_q_map[] =
-{
-  0, X, 2, 3, 4, 5, 6, 7,
-  X, X, X, X, X, X, X, X,
-  X, 1, X, X, X, X, X, X,
-  X, X, X, X, X, X, X, X
-};
-
-#define mips32_to_micromips_reg_n_map  mips32_to_micromips_reg_m_map
-#undef X
-
 /* Map microMIPS register numbers to normal MIPS register numbers.  */
 
 #define micromips_to_32_reg_b_map	mips16_to_32_reg_map
@@ -836,18 +807,6 @@ static const unsigned int micromips_to_32_reg_m_map[] =
 static const unsigned int micromips_to_32_reg_q_map[] =
 {
   0, 17, 2, 3, 4, 5, 6, 7
-};
-
-/* microMIPS imm type B.  */
-static const int micromips_imm_b_map[] =
-{
-  1, 4, 8, 12, 16, 20, 24, -1
-};
-
-/* microMIPS imm type C.  */
-static const int micromips_imm_c_map[] =
-{
-  128, 1, 2, 3, 4, 7, 8, 15, 16, 31, 32, 63, 64, 255, 32768, 65535
 };
 
 /* Classifies the kind of instructions we're interested in when
@@ -2595,19 +2554,6 @@ reglist_lookup (char **s, unsigned int types, unsigned int *reglistp)
   return ok && reglist != 0;
 }
 
-static unsigned int
-mips_lookup_reg_pair (unsigned int regno1, unsigned int regno2,
-		      const unsigned int *map1, const unsigned int *map2,
-		      unsigned int count)
-{
-  unsigned int i;
-
-  for (i = 0; i < count; i++)
-    if (map1[i] == regno1 && map2[i] == regno2)
-      return i;
-  return ILLEGAL_REG;
-}
-
 /* Return TRUE if opcode MO is valid on the currently selected ISA, ASE
    and architecture.  Use is_opcode_valid_16 for MIPS16 opcodes.  */
 
@@ -3744,7 +3690,6 @@ mips_oddfpreg_ok (const struct mips_opcode *insn, int opnum)
   return FALSE;
 }
 
-#if 0
 /* Report that user-supplied argument ARGNUM for INSN was VAL, but should
    have been in the range [MIN_VAL, MAX_VAL].  PRINT_HEX says whether
    this operand is normally printed in hex or decimal.  */
@@ -4541,7 +4486,6 @@ check_completed_insn (struct mips_arg_info *arg)
 	as_warn (_("Used $%u with \".set at=$%u\""), AT, AT);
     }
 }
-#endif
 
 /* Classify an instruction according to the FIX_VR4120_* enumeration.
    Return NUM_FIX_VR4120_CLASSES if the instruction isn't affected
@@ -8046,13 +7990,12 @@ macro (struct mips_cl_insn *ip, char *str)
 
 	if (pos > 63)
 	  {
-	    as_bad (_("Improper position (%lu)"), (unsigned long) pos);
+	    report_bad_range (ip, 3, pos, 0, 63, FALSE);
 	    pos = 1;
 	  }
 	if (size == 0 || size > 64 || (pos + size - 1) > 63)
 	  {
-	    as_bad (_("Improper extract size (%lu, position %lu)"),
-		    (unsigned long) size, (unsigned long) pos);
+	    report_bad_field (pos, size);
 	    size = 1;
 	  }
 
@@ -8095,13 +8038,12 @@ macro (struct mips_cl_insn *ip, char *str)
 
 	if (pos > 63)
 	  {
-	    as_bad (_("Improper position (%lu)"), (unsigned long) pos);
+	    report_bad_range (ip, 3, pos, 0, 63, FALSE);
 	    pos = 1;
 	  }
 	if (size == 0 || size > 64 || (pos + size - 1) > 63)
 	  {
-	    as_bad (_("Improper insert size (%lu, position %lu)"),
-		    (unsigned long) size, (unsigned long) pos);
+	    report_bad_field (pos, size);
 	    size = 1;
 	  }
 
@@ -11501,33 +11443,6 @@ mips16_macro (struct mips_cl_insn *ip)
     }
 }
 
-/* UDI immediates.  */
-struct mips_immed {
-  char		type;
-  unsigned int	shift;
-  unsigned long	mask;
-  const char *	desc;
-};
-
-static const struct mips_immed mips_immed[] = {
-  { '1',	OP_SH_UDI1,	OP_MASK_UDI1,		0},
-  { '2',	OP_SH_UDI2,	OP_MASK_UDI2,		0},
-  { '3',	OP_SH_UDI3,	OP_MASK_UDI3,		0},
-  { '4',	OP_SH_UDI4,	OP_MASK_UDI4,		0},
-  { 0,0,0,0 }
-};
-
-/* Check if EXPR is a constant between MIN (inclusive) and MAX (exclusive)
-   taking bits from BIT up.  */
-static int
-expr_const_in_range (expressionS *ep, offsetT min, offsetT max, int bit)
-{
-  return (ep->X_op == O_constant
-	  && (ep->X_add_number & ((1 << bit) - 1)) == 0
-	  && ep->X_add_number >= min << bit
-	  && ep->X_add_number < max << bit);
-}
-
 /* Assemble an instruction into its binary format.  If the instruction
    is a macro, set imm_expr, imm2_expr and offset_expr to the values
    associated with "I", "+I" and "A" operands respectively.  Otherwise
@@ -11548,20 +11463,12 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   char c = 0;
   struct mips_opcode *insn;
   char *argsStart;
-  unsigned int regno, regno2;
-  unsigned int lastregno;
-  unsigned int destregno = 0;
-  unsigned int lastpos = 0;
-  unsigned int limlo, limhi;
-  int sizelo;
-  char *s_reset;
-  offsetT min_range, max_range;
   long opend;
   char *name;
-  int argnum;
-  unsigned int rtype;
   char *dot;
   long end;
+  const struct mips_operand *operand;
+  struct mips_arg_info arg;
 
   insn_error = NULL;
 
@@ -11630,6 +11537,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       bfd_boolean delay_slot_ok;
       bfd_boolean size_ok;
       bfd_boolean ok;
+      bfd_boolean more_alts;
 
       gas_assert (strcmp (insn->name, name) == 0);
 
@@ -11641,11 +11549,13 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  firstinsn = insn;
 	  wrong_delay_slot_insns = TRUE;
 	}
+      more_alts = (insn + 1 < past
+		   && strcmp (insn[0].name, insn[1].name) == 0);
       if (!ok || !size_ok || delay_slot_ok != need_delay_slot_ok)
 	{
 	  static char buf[256];
 
-	  if (insn + 1 < past && strcmp (insn->name, insn[1].name) == 0)
+	  if (more_alts)
 	    {
 	      ++insn;
 	      continue;
@@ -11685,514 +11595,98 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
       create_insn (ip, insn);
       insn_error = NULL;
-      argnum = 1;
-      lastregno = 0xffffffff;
+      memset (&arg, 0, sizeof (arg));
+      arg.insn = ip;
+      arg.argnum = 1;
+      arg.last_regno = ILLEGAL_REG;
+      arg.dest_regno = ILLEGAL_REG;
+      arg.soft_match = (more_alts
+			|| (wrong_delay_slot_insns && need_delay_slot_ok));
       for (args = insn->args;; ++args)
 	{
-	  int is_mdmx;
+	  SKIP_SPACE_TABS (s);
+	  if (*s == 0)
+	    {
+	      /* Handle unary instructions in which only one operand is given.
+		 The source is then the same as the destination.  */
+	      if (arg.opnum == 1 && *args == ',')
+		switch (args[1])
+		  {
+		  case 'r':
+		  case 'v':
+		  case 'w':
+		  case 'W':
+		  case 'V':
+		    arg.argnum = 1;
+		    s = argsStart;
+		    continue;
+		  }
 
-	  s += strspn (s, " \t");
-	  is_mdmx = 0;
+	      /* Treat elided base registers as $0.  */
+	      if (strcmp (args, "(b)") == 0)
+		args += 3;
+
+	      /* Fail the match if there were too few operands.  */
+	      if (*args)
+		break;
+
+	      /* Successful match.  */
+	      if (arg.dest_regno == arg.last_regno
+		  && strncmp (ip->insn_mo->name, "jalr", 4) == 0)
+		{
+		  if (arg.opnum == 2)
+		    as_bad (_("Source and destination must be different"));
+		  else if (arg.last_regno == 31)
+		    as_bad (_("A destination register must be supplied"));
+		}
+	      check_completed_insn (&arg);
+	      return;
+	    }
+
+	  /* Fail the match if the line has too many operands.   */
+	  if (*args == 0)
+	    break;
+
+	  /* Handle characters that need to match exactly.  */
+	  if (*args == '(' || *args == ')' || *args == ',')
+	    {
+	      if (*s != *args)
+		break;
+	      if (*s == ',')
+		arg.argnum += 1;
+	      ++s;
+	      continue;
+	    }
+
+	  /* Handle special macro operands.  Work out the properties of
+	     other operands.  */
+	  arg.opnum += 1;
+	  arg.optional_reg = FALSE;
+	  arg.lax_max = FALSE;
 	  switch (*args)
 	    {
-	    case '\0':		/* end of args */
-	      if (*s == '\0')
-		return;
-	      break;
-
-	    case '2':
-	      /* DSP 2-bit unsigned immediate in bit 11 (for standard MIPS
-	         code) or 14 (for microMIPS code).  */
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number != 1
-		  && (unsigned long) imm_expr.X_add_number != 3)
+	    case '+':
+	      switch (args[1])
 		{
-		  as_bad (_("BALIGN immediate not 1 or 3 (%lu)"),
-			  (unsigned long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (mips_opts.micromips,
-			      BP, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case '3':
-	      /* DSP 3-bit unsigned immediate in bit 21 (for standard MIPS
-	         code) or 13 (for microMIPS code).  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_SA3 : OP_MASK_SA3);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
-			  mask, (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				SA3, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case '4':
-	      /* DSP 4-bit unsigned immediate in bit 21 (for standard MIPS
-	         code) or 12 (for microMIPS code).  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_SA4 : OP_MASK_SA4);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
-			  mask, (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				SA4, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case '5':
-	      /* DSP 8-bit unsigned immediate in bit 16 (for standard MIPS
-	         code) or 13 (for microMIPS code).  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_IMM8 : OP_MASK_IMM8);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
-			  mask, (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				IMM8, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case '6':
-	      /* DSP 5-bit unsigned immediate in bit 21 (for standard MIPS
-	         code) or 16 (for microMIPS code).  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_RS : OP_MASK_RS);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
-			  mask, (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				RS, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case '7':
-	      /* Four DSP accumulators in bit 11 (for standard MIPS code)
-		 or 14 (for microMIPS code).  */
-	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c'
-		  && s[3] >= '0' && s[3] <= '3')
-		{
-		  regno = s[3] - '0';
-		  s += 4;
-		  INSERT_OPERAND (mips_opts.micromips, DSPACC, *ip, regno);
-		  continue;
-		}
-	      else
-		as_bad (_("Invalid dsp acc register"));
-	      break;
-
-	    case '8':
-	      /* DSP 6-bit unsigned immediate in bit 11 (for standard MIPS
-	         code) or 14 (for microMIPS code).  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_WRDSP
-				      : OP_MASK_WRDSP);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_bad (_("DSP immediate not in range 0..%lu (%lu)"),
-			  mask, (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				WRDSP, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case '9': /* Four DSP accumulators in bits 21,22.  */
-	      gas_assert (!mips_opts.micromips);
-	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c'
-		  && s[3] >= '0' && s[3] <= '3')
-		{
-		  regno = s[3] - '0';
-		  s += 4;
-		  INSERT_OPERAND (0, DSPACC_S, *ip, regno);
-		  continue;
-		}
-	      else
-		as_bad (_("Invalid dsp acc register"));
-	      break;
-
-	    case '0':
-	      /* DSP 6-bit signed immediate in bit 20 (for standard MIPS
-	         code) or 16 (for microMIPS code).  */
-	      {
-		long mask = (mips_opts.micromips
-			     ? MICROMIPSOP_MASK_DSPSFT : OP_MASK_DSPSFT);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		min_range = -((mask + 1) >> 1);
-		max_range = ((mask + 1) >> 1) - 1;
-		if (imm_expr.X_add_number < min_range
-		    || imm_expr.X_add_number > max_range)
-		  as_bad (_("DSP immediate not in range %ld..%ld (%ld)"),
-			  (long) min_range, (long) max_range,
-			  (long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				DSPSFT, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case '\'': /* DSP 6-bit unsigned immediate in bit 16.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~OP_MASK_RDDSP)
-		{
-		  as_bad (_("DSP immediate not in range 0..%d (%lu)"),
-			  OP_MASK_RDDSP,
-			  (unsigned long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, RDDSP, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case ':': /* DSP 7-bit signed immediate in bit 19.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      min_range = -((OP_MASK_DSPSFT_7 + 1) >> 1);
-	      max_range = ((OP_MASK_DSPSFT_7 + 1) >> 1) - 1;
-	      if (imm_expr.X_add_number < min_range ||
-		  imm_expr.X_add_number > max_range)
-		{
-		  as_bad (_("DSP immediate not in range %ld..%ld (%ld)"),
-			  (long) min_range, (long) max_range,
-			  (long) imm_expr.X_add_number);
-		}
-	      INSERT_OPERAND (0, DSPSFT_7, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case '@': /* DSP 10-bit signed immediate in bit 16.  */
-	      {
-		long mask = (mips_opts.micromips
-			     ? MICROMIPSOP_MASK_IMM10 : OP_MASK_IMM10);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		min_range = -((mask + 1) >> 1);
-		max_range = ((mask + 1) >> 1) - 1;
-		if (imm_expr.X_add_number < min_range
-		    || imm_expr.X_add_number > max_range)
-		  as_bad (_("DSP immediate not in range %ld..%ld (%ld)"),
-			  (long) min_range, (long) max_range,
-			  (long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				IMM10, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case '^': /* DSP 5-bit unsigned immediate in bit 11.  */
-	      gas_assert (mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~MICROMIPSOP_MASK_RD)
-		as_bad (_("DSP immediate not in range 0..%d (%lu)"),
-			MICROMIPSOP_MASK_RD,
-			(unsigned long) imm_expr.X_add_number);
-	      INSERT_OPERAND (1, RD, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-            case '!': /* MT usermode flag bit.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~OP_MASK_MT_U)
-		as_bad (_("MT usermode bit not 0 or 1 (%lu)"),
-			(unsigned long) imm_expr.X_add_number);
-	      INSERT_OPERAND (0, MT_U, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-            case '$': /* MT load high flag bit.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number & ~OP_MASK_MT_H)
-		as_bad (_("MT load high bit not 0 or 1 (%lu)"),
-			(unsigned long) imm_expr.X_add_number);
-	      INSERT_OPERAND (0, MT_H, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case '*': /* Four DSP accumulators in bits 18,19.  */
-	      gas_assert (!mips_opts.micromips);
-	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c' &&
-		  s[3] >= '0' && s[3] <= '3')
-		{
-		  regno = s[3] - '0';
-		  s += 4;
-		  INSERT_OPERAND (0, MTACC_T, *ip, regno);
-		  continue;
-		}
-	      else
-		as_bad (_("Invalid dsp/smartmips acc register"));
-	      break;
-
-	    case '&': /* Four DSP accumulators in bits 13,14.  */
-	      gas_assert (!mips_opts.micromips);
-	      if (s[0] == '$' && s[1] == 'a' && s[2] == 'c' &&
-		  s[3] >= '0' && s[3] <= '3')
-		{
-		  regno = s[3] - '0';
-		  s += 4;
-		  INSERT_OPERAND (0, MTACC_D, *ip, regno);
-		  continue;
-		}
-	      else
-		as_bad (_("Invalid dsp/smartmips acc register"));
-	      break;
-
-	    case '\\':		/* 3-bit bit position.  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_3BITPOS
-				      : OP_MASK_3BITPOS);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_warn (_("Bit position for %s not in range 0..%lu (%lu)"),
-			   ip->insn_mo->name,
-			   mask, (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				3BITPOS, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case ',':
-	      ++argnum;
-	      if (*s++ == *args)
-		continue;
-	      s--;
-	      switch (*++args)
-		{
-		case 'r':
-		case 'v':
-		  INSERT_OPERAND (mips_opts.micromips, RS, *ip, lastregno);
-		  continue;
-
-		case 'w':
-		  INSERT_OPERAND (mips_opts.micromips, RT, *ip, lastregno);
-		  continue;
-
-		case 'W':
-		  gas_assert (!mips_opts.micromips);
-		  INSERT_OPERAND (0, FT, *ip, lastregno);
-		  continue;
-
-		case 'V':
-		  INSERT_OPERAND (mips_opts.micromips, FS, *ip, lastregno);
-		  continue;
-		}
-	      break;
-
-	    case '(':
-	      /* Handle optional base register.
-		 Either the base register is omitted or
-		 we must have a left paren.  */
-	      /* This is dependent on the next operand specifier
-		 is a base register specification.  */
-	      gas_assert (args[1] == 'b'
-			  || (mips_opts.micromips
-			      && args[1] == 'm'
-			      && (args[2] == 'l' || args[2] == 'n'
-				  || args[2] == 's' || args[2] == 'a')));
-	      if (*s == '\0' && args[1] == 'b')
-		return;
-	      /* Fall through.  */
-
-	    case ')':		/* These must match exactly.  */
-	      if (*s++ == *args)
-		continue;
-	      break;
-
-	    case '+':		/* Opcode extension character.  */
-	      switch (*++args)
-		{
-		case '1':	/* UDI immediates.  */
+		case '1':
 		case '2':
 		case '3':
 		case '4':
-		  gas_assert (!mips_opts.micromips);
-		  {
-		    const struct mips_immed *imm = mips_immed;
-
-		    while (imm->type && imm->type != *args)
-		      ++imm;
-		    if (! imm->type)
-		      abort ();
-		    my_getExpression (&imm_expr, s);
-		    check_absolute_expr (ip, &imm_expr);
-		    if ((unsigned long) imm_expr.X_add_number & ~imm->mask)
-		      {
-		        as_warn (_("Illegal %s number (%lu, 0x%lx)"),
-				 imm->desc ? imm->desc : ip->insn_mo->name,
-				 (unsigned long) imm_expr.X_add_number,
-				 (unsigned long) imm_expr.X_add_number);
-			imm_expr.X_add_number &= imm->mask;
-		      }
-		    ip->insn_opcode |= ((unsigned long) imm_expr.X_add_number
-					<< imm->shift);
-		    imm_expr.X_op = O_absent;
-		    s = expr_end;
-		  }
-		  continue;
-
-		case 'J':		/* 10-bit hypcall code.  */
-		  gas_assert (!mips_opts.micromips);
-		  {
-		    unsigned long mask = OP_MASK_CODE10;
-
-		    my_getExpression (&imm_expr, s);
-		    check_absolute_expr (ip, &imm_expr);
-		    if ((unsigned long) imm_expr.X_add_number > mask)
-		      as_warn (_("Code for %s not in range 0..%lu (%lu)"),
-			       ip->insn_mo->name,
-			       mask, (unsigned long) imm_expr.X_add_number);
-		    INSERT_OPERAND (0, CODE10, *ip, imm_expr.X_add_number);
-		    imm_expr.X_op = O_absent;
-		    s = expr_end;
-		  }
-		  continue;
-
-		case 'A':		/* ins/ext position, becomes LSB.  */
-		  limlo = 0;
-		  limhi = 31;
-		  goto do_lsb;
-		case 'E':
-		  limlo = 32;
-		  limhi = 63;
-		  goto do_lsb;
-		do_lsb:
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned long) imm_expr.X_add_number < limlo
-		      || (unsigned long) imm_expr.X_add_number > limhi)
-		    {
-		      as_bad (_("Improper position (%lu)"),
-			      (unsigned long) imm_expr.X_add_number);
-		      imm_expr.X_add_number = limlo;
-		    }
-		  lastpos = imm_expr.X_add_number;
-		  INSERT_OPERAND (mips_opts.micromips,
-				  EXTLSB, *ip, imm_expr.X_add_number);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'B':		/* ins size, becomes MSB.  */
-		  limlo = 1;
-		  limhi = 32;
-		  goto do_msb;
+		case 'B':
+		case 'C':
 		case 'F':
-		  limlo = 33;
-		  limhi = 64;
-		  goto do_msb;
-		do_msb:
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  /* Check for negative input so that small negative numbers
-		     will not succeed incorrectly.  The checks against
-		     (pos+size) transitively check "size" itself,
-		     assuming that "pos" is reasonable.  */
-		  if ((long) imm_expr.X_add_number < 0
-		      || ((unsigned long) imm_expr.X_add_number
-			  + lastpos) < limlo
-		      || ((unsigned long) imm_expr.X_add_number
-			  + lastpos) > limhi)
-		    {
-		      as_bad (_("Improper insert size (%lu, position %lu)"),
-			      (unsigned long) imm_expr.X_add_number,
-			      (unsigned long) lastpos);
-		      imm_expr.X_add_number = limlo - lastpos;
-		    }
-		  INSERT_OPERAND (mips_opts.micromips, INSMSB, *ip,
-				  lastpos + imm_expr.X_add_number - 1);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'C':		/* ext size, becomes MSBD.  */
-		  limlo = 1;
-		  limhi = 32;
-		  sizelo = 1;
-		  goto do_msbd;
 		case 'G':
-		  limlo = 33;
-		  limhi = 64;
-		  sizelo = 33;
-		  goto do_msbd;
 		case 'H':
-		  limlo = 33;
-		  limhi = 64;
-		  sizelo = 1;
-		  goto do_msbd;
-		do_msbd:
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  /* The checks against (pos+size) don't transitively check
-		     "size" itself, assuming that "pos" is reasonable.
-		     We also need to check the lower bound of "size".  */
-		  if ((long) imm_expr.X_add_number < sizelo
-		      || ((unsigned long) imm_expr.X_add_number
-			  + lastpos) < limlo
-		      || ((unsigned long) imm_expr.X_add_number
-			  + lastpos) > limhi)
-		    {
-		      as_bad (_("Improper extract size (%lu, position %lu)"),
-			      (unsigned long) imm_expr.X_add_number,
-			      (unsigned long) lastpos);
-		      imm_expr.X_add_number = limlo - lastpos;
-		    }
-		  INSERT_OPERAND (mips_opts.micromips,
-				  EXTMSBD, *ip, imm_expr.X_add_number - 1);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
+		case 'J':
+		case 'Q':
+		case 'S':
+		case 's':
+		  /* If these integer forms come last, there is no other
+		     form of the instruction that could match.  Prefer to
+		     give detailed error messages where possible.  */
+		  if (args[2] == 0)
+		    arg.soft_match = FALSE;
+		  break;
 
 		case 'I':
 		  /* "+I" is like "I", except that imm2_expr is used.  */
@@ -12203,842 +11697,56 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  if (HAVE_32BIT_GPRS)
 		    normalize_constant_expr (&imm2_expr);
 		  s = expr_end;
-		  continue;
-
-		case 't': /* Coprocessor register number.  */
-		  gas_assert (!mips_opts.micromips);
-		  if (s[0] == '$' && ISDIGIT (s[1]))
-		    {
-		      ++s;
-		      regno = 0;
-		      do
-		        {
-			  regno *= 10;
-			  regno += *s - '0';
-			  ++s;
-			}
-		      while (ISDIGIT (*s));
-		      if (regno > 31)
-			as_bad (_("Invalid register number (%d)"), regno);
-		      else
-			{
-			  INSERT_OPERAND (0, RT, *ip, regno);
-			  continue;
-			}
-		    }
-		  else
-		    as_bad (_("Invalid coprocessor 0 register number"));
-		  break;
-
-		case 'x':
-		  /* bbit[01] and bbit[01]32 bit index.  Give error if index
-		     is not in the valid range.  */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned) imm_expr.X_add_number > 31)
-		    {
-		      as_bad (_("Improper bit index (%lu)"),
-			      (unsigned long) imm_expr.X_add_number);
-		      imm_expr.X_add_number = 0;
-		    }
-		  INSERT_OPERAND (0, BBITIND, *ip, imm_expr.X_add_number);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'X':
-		  /* bbit[01] bit index when bbit is used but we generate
-		     bbit[01]32 because the index is over 32.  Move to the
-		     next candidate if index is not in the valid range.  */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned) imm_expr.X_add_number < 32
-		      || (unsigned) imm_expr.X_add_number > 63)
-		    break;
-		  INSERT_OPERAND (0, BBITIND, *ip, imm_expr.X_add_number - 32);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'p':
-		  /* cins, cins32, exts and exts32 position field.  Give error
-		     if it's not in the valid range.  */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned) imm_expr.X_add_number > 31)
-		    {
-		      as_bad (_("Improper position (%lu)"),
-			      (unsigned long) imm_expr.X_add_number);
-		      imm_expr.X_add_number = 0;
-		    }
- 		  lastpos = imm_expr.X_add_number;
-		  INSERT_OPERAND (0, CINSPOS, *ip, imm_expr.X_add_number);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'P':
-		  /* cins, cins32, exts and exts32 position field.  Move to
-		     the next candidate if it's not in the valid range.  */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned) imm_expr.X_add_number < 32
-		      || (unsigned) imm_expr.X_add_number > 63)
-		    break;
- 		  lastpos = imm_expr.X_add_number;
-		  INSERT_OPERAND (0, CINSPOS, *ip, imm_expr.X_add_number - 32);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 's':
-		  /* cins32 and exts32 length-minus-one field.  */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned long) imm_expr.X_add_number > 31
-		      || (unsigned long) imm_expr.X_add_number + lastpos > 31)
-		    {
-		      as_bad (_("Improper size (%lu)"),
-			      (unsigned long) imm_expr.X_add_number);
-		      imm_expr.X_add_number = 0;
-		    }
-		  INSERT_OPERAND (0, CINSLM1, *ip, imm_expr.X_add_number);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'S':
-		  /* cins/exts length-minus-one field.  */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned long) imm_expr.X_add_number > 31
-		      || (unsigned long) imm_expr.X_add_number + lastpos > 63)
-		    {
-		      as_bad (_("Improper size (%lu)"),
-			      (unsigned long) imm_expr.X_add_number);
-		      imm_expr.X_add_number = 0;
-		    }
-		  INSERT_OPERAND (0, CINSLM1, *ip, imm_expr.X_add_number);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'Q':
-		  /* seqi/snei immediate field.  */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((long) imm_expr.X_add_number < -512
-		      || (long) imm_expr.X_add_number >= 512)
-		    {
-		      as_bad (_("Improper immediate (%ld)"),
-			       (long) imm_expr.X_add_number);
-		      imm_expr.X_add_number = 0;
-		    }
-		  INSERT_OPERAND (0, SEQI, *ip, imm_expr.X_add_number);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'a': /* 8-bit signed offset in bit 6 */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  min_range = -((OP_MASK_OFFSET_A + 1) >> 1);
-		  max_range = ((OP_MASK_OFFSET_A + 1) >> 1) - 1;
-		  if (imm_expr.X_add_number < min_range
-		      || imm_expr.X_add_number > max_range)
-		    {
-		      as_bad (_("Offset not in range %ld..%ld (%ld)"),
-		              (long) min_range, (long) max_range,
-		              (long) imm_expr.X_add_number);
-		    }
-		  INSERT_OPERAND (0, OFFSET_A, *ip, imm_expr.X_add_number);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'b': /* 8-bit signed offset in bit 3 */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  min_range = -((OP_MASK_OFFSET_B + 1) >> 1);
-		  max_range = ((OP_MASK_OFFSET_B + 1) >> 1) - 1;
-		  if (imm_expr.X_add_number < min_range
-		      || imm_expr.X_add_number > max_range)
-		    {
-		      as_bad (_("Offset not in range %ld..%ld (%ld)"),
-		              (long) min_range, (long) max_range,
-		              (long) imm_expr.X_add_number);
-		    }
-		  INSERT_OPERAND (0, OFFSET_B, *ip, imm_expr.X_add_number);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'c': /* 9-bit signed offset in bit 6 */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  min_range = -((OP_MASK_OFFSET_C + 1) >> 1);
-		  max_range = ((OP_MASK_OFFSET_C + 1) >> 1) - 1;
-		  /* We check the offset range before adjusted.  */
-		  min_range <<= 4;
-		  max_range <<= 4;
-		  if (imm_expr.X_add_number < min_range
-		      || imm_expr.X_add_number > max_range)
-		    {
-		      as_bad (_("Offset not in range %ld..%ld (%ld)"),
-		              (long) min_range, (long) max_range,
-		              (long) imm_expr.X_add_number);
-		    }
-		  if (imm_expr.X_add_number & 0xf)
-		    {
-		      as_bad (_("Offset not 16 bytes alignment (%ld)"),
-			      (long) imm_expr.X_add_number);
-		    }
-		  /* Right shift 4 bits to adjust the offset operand.  */
-		  INSERT_OPERAND (0, OFFSET_C, *ip,
-				  imm_expr.X_add_number >> 4);
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-
-		case 'z':
-		  gas_assert (!mips_opts.micromips);
-		  if (!reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno))
-		    break;
-		  if (regno == AT && mips_opts.at)
-		    {
-		      if (mips_opts.at == ATREG)
-			as_warn (_("used $at without \".set noat\""));
-		      else
-			as_warn (_("used $%u with \".set at=$%u\""),
-				 regno, mips_opts.at);
-		    }
-		  INSERT_OPERAND (0, RZ, *ip, regno);
-		  continue;
-
-		case 'Z':
-		  gas_assert (!mips_opts.micromips);
-		  if (!reg_lookup (&s, RTYPE_FPU, &regno))
-		    break;
-		  INSERT_OPERAND (0, FZ, *ip, regno);
+		  ++args;
 		  continue;
 
 		case 'i':
-		  goto jump;
-
-		case 'j':
-		  {
-		    int shift = 8;
-		    size_t i;
-		    bfd_reloc_code_real_type r[3];
-
-		    /* Check whether there is only a single bracketed expression
-		       left.  If so, it must be the base register and the
-		       constant must be zero.  */
-		    if (*s == '(' && strchr (s + 1, '(') == 0)
-		      continue;
-
-		    /* If this value won't fit into the offset, then go find
-		       a macro that will generate a 16- or 32-bit offset code
-		       pattern.  */
-		    i = my_getSmallExpression (&imm_expr, r, s);
-		    if ((i == 0 && (imm_expr.X_op != O_constant
-				    || imm_expr.X_add_number >= 1 << shift
-				    || imm_expr.X_add_number < -1 << shift))
-			|| i > 0)
-		      {
-			imm_expr.X_op = O_absent;
-			break;
-		      }
-		    INSERT_OPERAND (mips_opts.micromips, EVAOFFSET, *ip,
-				    imm_expr.X_add_number);
-		    imm_expr.X_op = O_absent;
-		    s = expr_end;
-		  }
-		  continue;
-
-		default:
-		  as_bad (_("Internal error: bad %s opcode "
-			    "(unknown extension operand type `+%c'): %s %s"),
-			  mips_opts.micromips ? "microMIPS" : "MIPS",
-			  *args, insn->name, insn->args);
-		  /* Further processing is fruitless.  */
-		  return;
+		  *offset_reloc = BFD_RELOC_MIPS_JMP;
+		  break;
 		}
 	      break;
 
-	    case '.':		/* 10-bit offset.  */
-	      gas_assert (mips_opts.micromips);
-	    case '~':		/* 12-bit offset.  */
-	      {
-		int shift = *args == '.' ? 9 : 11;
-		size_t i;
-		bfd_reloc_code_real_type r[3];
-
-		/* Check whether there is only a single bracketed expression
-		   left.  If so, it must be the base register and the
-		   constant must be zero.  */
-		if (*s == '(' && strchr (s + 1, '(') == 0)
-		  continue;
-
-		/* If this value won't fit into the offset, then go find
-		   a macro that will generate a 16- or 32-bit offset code
-		   pattern.  */
-		i = my_getSmallExpression (&imm_expr, r, s);
-		if ((i == 0 && (imm_expr.X_op != O_constant
-				|| imm_expr.X_add_number >= 1 << shift
-				|| imm_expr.X_add_number < -1 << shift))
-		    || i > 0)
-		  {
-		    imm_expr.X_op = O_absent;
-		    break;
-		  }
-		if (shift == 9)
-		  INSERT_OPERAND (1, OFFSET10, *ip, imm_expr.X_add_number);
-		else
-		  INSERT_OPERAND (mips_opts.micromips,
-				  OFFSET12, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case '<':		/* must be at least one digit */
-	      /*
-	       * According to the manual, if the shift amount is greater
-	       * than 31 or less than 0, then the shift amount should be
-	       * mod 32.  In reality the mips assembler issues an error.
-	       * We issue a warning and mask out all but the low 5 bits.
-	       */
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number > 31)
-		as_warn (_("Improper shift amount (%lu)"),
-			 (unsigned long) imm_expr.X_add_number);
-	      INSERT_OPERAND (mips_opts.micromips,
-			      SHAMT, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case '>':		/* shift amount minus 32 */
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number < 32
-		  || (unsigned long) imm_expr.X_add_number > 63)
-		break;
-	      INSERT_OPERAND (mips_opts.micromips,
-			      SHAMT, *ip, imm_expr.X_add_number - 32);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case 'k':		/* CACHE code.  */
-	    case 'h':		/* PREFX code.  */
-	    case '1':		/* SYNC type.  */
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number > 31)
-		as_warn (_("Invalid value for `%s' (%lu)"),
-			 ip->insn_mo->name,
-			 (unsigned long) imm_expr.X_add_number);
-	      switch (*args)
-		{
-		case 'k':
-		  if (mips_fix_cn63xxp1
-		      && !mips_opts.micromips
-		      && strcmp ("pref", insn->name) == 0)
-		    switch (imm_expr.X_add_number)
-		      {
-		      case 5:
-		      case 25:
-		      case 26:
-		      case 27:
-		      case 28:
-		      case 29:
-		      case 30:
-		      case 31:  /* These are ok.  */
-			break;
-
-		      default:  /* The rest must be changed to 28.  */
-			imm_expr.X_add_number = 28;
-			break;
-		      }
-		  INSERT_OPERAND (mips_opts.micromips,
-				  CACHE, *ip, imm_expr.X_add_number);
-		  break;
-		case 'h':
-		  INSERT_OPERAND (mips_opts.micromips,
-				  PREFX, *ip, imm_expr.X_add_number);
-		  break;
-		case '1':
-		  INSERT_OPERAND (mips_opts.micromips,
-				  STYPE, *ip, imm_expr.X_add_number);
-		  break;
-		}
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case 'c':		/* BREAK code.  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_CODE
-				      : OP_MASK_CODE);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_warn (_("Code for %s not in range 0..%lu (%lu)"),
-			   ip->insn_mo->name,
-			   mask, (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				CODE, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case 'q':		/* Lower BREAK code.  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_CODE2
-				      : OP_MASK_CODE2);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_warn (_("Lower code for %s not in range 0..%lu (%lu)"),
-			   ip->insn_mo->name,
-			   mask, (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				CODE2, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case 'B':		/* 20- or 10-bit syscall/break/wait code.  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_CODE10
-				      : OP_MASK_CODE20);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_warn (_("Code for %s not in range 0..%lu (%lu)"),
-			   ip->insn_mo->name,
-			   mask, (unsigned long) imm_expr.X_add_number);
-		if (mips_opts.micromips)
-		  INSERT_OPERAND (1, CODE10, *ip, imm_expr.X_add_number);
-		else
-		  INSERT_OPERAND (0, CODE20, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case 'C':		/* 25- or 23-bit coprocessor code.  */
-	      {
-		unsigned long mask = (mips_opts.micromips
-				      ? MICROMIPSOP_MASK_COPZ
-				      : OP_MASK_COPZ);
-
-		my_getExpression (&imm_expr, s);
-		check_absolute_expr (ip, &imm_expr);
-		if ((unsigned long) imm_expr.X_add_number > mask)
-		  as_warn (_("Coproccesor code > %u bits (%lu)"),
-			   mips_opts.micromips ? 23U : 25U,
-			   (unsigned long) imm_expr.X_add_number);
-		INSERT_OPERAND (mips_opts.micromips,
-				COPZ, *ip, imm_expr.X_add_number);
-		imm_expr.X_op = O_absent;
-		s = expr_end;
-	      }
-	      continue;
-
-	    case 'J':		/* 19-bit WAIT code.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_CODE19)
-	        {
-	          as_warn (_("Illegal 19-bit code (%lu)"),
-			   (unsigned long) imm_expr.X_add_number);
-	          imm_expr.X_add_number &= OP_MASK_CODE19;
-	        }
-	      INSERT_OPERAND (0, CODE19, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case 'P':		/* Performance register.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if (imm_expr.X_add_number != 0 && imm_expr.X_add_number != 1)
-		as_warn (_("Invalid performance register (%lu)"),
-			 (unsigned long) imm_expr.X_add_number);
-	      if (imm_expr.X_add_number != 0 && mips_opts.arch == CPU_R5900
-	        && (!strcmp(insn->name,"mfps") || !strcmp(insn->name,"mtps")))
-	        as_warn (_("Invalid performance register (%lu)"),
-	          (unsigned long) imm_expr.X_add_number);
-	      INSERT_OPERAND (0, PERFREG, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case 'G':		/* Coprocessor destination register.  */
-	      {
-		unsigned long opcode = ip->insn_opcode;
-		unsigned long mask;
-		unsigned int types;
-		int cop0;
-
-		if (mips_opts.micromips)
-		  {
-		    mask = ~((MICROMIPSOP_MASK_RT << MICROMIPSOP_SH_RT)
-			     | (MICROMIPSOP_MASK_RS << MICROMIPSOP_SH_RS)
-			     | (MICROMIPSOP_MASK_SEL << MICROMIPSOP_SH_SEL));
-		    opcode &= mask;
-		    switch (opcode)
-		      {
-		      case 0x000000fc:				/* mfc0  */
-		      case 0x000002fc:				/* mtc0  */
-		      case 0x580000fc:				/* dmfc0 */
-		      case 0x580002fc:				/* dmtc0 */
-			cop0 = 1;
-			break;
-		      default:
-			cop0 = 0;
-			break;
-		      }
-		  }
-		else
-		  {
-		    opcode = (opcode >> OP_SH_OP) & OP_MASK_OP;
-		    cop0 = opcode == OP_OP_COP0;
-		  }
-		types = RTYPE_NUM | (cop0 ? RTYPE_CP0 : RTYPE_GP);
-		ok = reg_lookup (&s, types, &regno);
-		if (mips_opts.micromips)
-		  INSERT_OPERAND (1, RS, *ip, regno);
-		else
-		  INSERT_OPERAND (0, RD, *ip, regno);
-		if (ok)
-		  {
-		    lastregno = regno;
-		    continue;
-		  }
-	      }
+	    case '\'':
+	    case ':':
+	    case '@':
+	    case '^':
+	    case '$':
+	    case '\\':
+	    case '%':
+	    case '|':
+	    case '0':
+	    case '1':
+	    case '2':
+	    case '3':
+	    case '4':
+	    case '5':
+	    case '6':
+	    case '8':
+	    case 'B':
+	    case 'C':
+	    case 'J':
+	    case 'O':
+	    case 'P':
+	    case 'Q':
+	    case 'c':
+	    case 'h':
+	    case 'q':
+	      /* If these integer forms come last, there is no other
+		 form of the instruction that could match.  Prefer to
+		 give detailed error messages where possible.  */
+	      if (args[1] == 0)
+		arg.soft_match = FALSE;
 	      break;
 
-	    case 'y':		/* ALNV.PS source register.  */
-	      gas_assert (mips_opts.micromips);
-	      goto do_reg;
-	    case 'x':		/* Ignore register name.  */
-	    case 'U':           /* Destination register (CLO/CLZ).  */
-	    case 'g':		/* Coprocessor destination register.  */
-	      gas_assert (!mips_opts.micromips);
-	    case 'b':		/* Base register.  */
-	    case 'd':		/* Destination register.  */
-	    case 's':		/* Source register.  */
-	    case 't':		/* Target register.  */
-	    case 'r':		/* Both target and source.  */
-	    case 'v':		/* Both dest and source.  */
-	    case 'w':		/* Both dest and target.  */
-	    case 'E':		/* Coprocessor target register.  */
-	    case 'K':		/* RDHWR destination register.  */
-	    case 'z':		/* Must be zero register.  */
-	    do_reg:
-	      s_reset = s;
-	      if (*args == 'E' || *args == 'K')
-		ok = reg_lookup (&s, RTYPE_NUM, &regno);
-	      else
-		{
-		  ok = reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno);
-		  if (regno == AT && mips_opts.at)
-		    {
-		      if (mips_opts.at == ATREG)
-			as_warn (_("Used $at without \".set noat\""));
-		      else
-			as_warn (_("Used $%u with \".set at=$%u\""),
-				 regno, mips_opts.at);
-		    }
-		}
-	      if (ok)
-		{
-		  c = *args;
-		  if (*s == ' ')
-		    ++s;
-		  if (args[1] != *s)
-		    {
-		      if (c == 'r' || c == 'v' || c == 'w')
-			{
-			  regno = lastregno;
-			  s = s_reset;
-			  ++args;
-			}
-		    }
-		  /* 'z' only matches $0.  */
-		  if (c == 'z' && regno != 0)
-		    break;
-
-		  if (c == 's' && !strncmp (ip->insn_mo->name, "jalr", 4))
-		    {
-		      if (regno == lastregno)
-			{
-			  insn_error
-			    = _("Source and destination must be different");
-			  continue;
-			}
-		      if (regno == 31 && lastregno == 0xffffffff)
-			{
-			  insn_error
-			    = _("A destination register must be supplied");
-			  continue;
-			}
-		    }
-		  /* Now that we have assembled one operand, we use the args
-		     string to figure out where it goes in the instruction.  */
-		  switch (c)
-		    {
-		    case 'r':
-		    case 's':
-		    case 'v':
-		    case 'b':
-		      INSERT_OPERAND (mips_opts.micromips, RS, *ip, regno);
-		      break;
-
-		    case 'K':
-		      if (mips_opts.micromips)
-			INSERT_OPERAND (1, RS, *ip, regno);
-		      else
-			INSERT_OPERAND (0, RD, *ip, regno);
-		      break;
-
-		    case 'd':
-		    case 'g':
-		      INSERT_OPERAND (mips_opts.micromips, RD, *ip, regno);
-		      break;
-
-		    case 'U':
-		      gas_assert (!mips_opts.micromips);
-		      INSERT_OPERAND (0, RD, *ip, regno);
-		      INSERT_OPERAND (0, RT, *ip, regno);
-		      break;
-
-		    case 'w':
-		    case 't':
-		    case 'E':
-		      INSERT_OPERAND (mips_opts.micromips, RT, *ip, regno);
-		      break;
-
-		    case 'y':
-		      gas_assert (mips_opts.micromips);
-		      INSERT_OPERAND (1, RS3, *ip, regno);
-		      break;
-
-		    case 'x':
-		      /* This case exists because on the r3000 trunc
-			 expands into a macro which requires a gp
-			 register.  On the r6000 or r4000 it is
-			 assembled into a single instruction which
-			 ignores the register.  Thus the insn version
-			 is MIPS_ISA2 and uses 'x', and the macro
-			 version is MIPS_ISA1 and uses 't'.  */
-		      break;
-
-		    case 'z':
-		      /* This case is for the div instruction, which
-			 acts differently if the destination argument
-			 is $0.  This only matches $0, and is checked
-			 outside the switch.  */
-		      break;
-		    }
-		  lastregno = regno;
-		  continue;
-		}
-	      switch (*args++)
-		{
-		case 'r':
-		case 'v':
-		  INSERT_OPERAND (mips_opts.micromips, RS, *ip, lastregno);
-		  continue;
-
-		case 'w':
-		  INSERT_OPERAND (mips_opts.micromips, RT, *ip, lastregno);
-		  continue;
-		}
-	      break;
-
-	    case 'O':		/* MDMX alignment immediate constant.  */
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number > OP_MASK_ALN)
-		as_warn (_("Improper align amount (%ld), using low bits"),
-			 (long) imm_expr.X_add_number);
-	      INSERT_OPERAND (0, ALN, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case 'Q':		/* MDMX vector, element sel, or const.  */
-	      if (s[0] != '$')
-		{
-		  /* MDMX Immediate.  */
-		  gas_assert (!mips_opts.micromips);
-		  my_getExpression (&imm_expr, s);
-		  check_absolute_expr (ip, &imm_expr);
-		  if ((unsigned long) imm_expr.X_add_number > OP_MASK_FT)
-		    as_warn (_("Invalid MDMX Immediate (%ld)"),
-			     (long) imm_expr.X_add_number);
-		  INSERT_OPERAND (0, FT, *ip, imm_expr.X_add_number);
-		  if (ip->insn_opcode & (OP_MASK_VSEL << OP_SH_VSEL))
-		    ip->insn_opcode |= MDMX_FMTSEL_IMM_QH << OP_SH_VSEL;
-		  else
-		    ip->insn_opcode |= MDMX_FMTSEL_IMM_OB << OP_SH_VSEL;
-		  imm_expr.X_op = O_absent;
-		  s = expr_end;
-		  continue;
-		}
-	      /* Not MDMX Immediate.  Fall through.  */
-	    case 'X':           /* MDMX destination register.  */
-	    case 'Y':           /* MDMX source register.  */
-	    case 'Z':           /* MDMX target register.  */
-	      is_mdmx = !(insn->membership & INSN_5400);
+	    case 'r':
+	    case 'v':
+	    case 'w':
 	    case 'W':
-	      gas_assert (!mips_opts.micromips);
-	    case 'D':		/* Floating point destination register.  */
-	    case 'S':		/* Floating point source register.  */
-	    case 'T':		/* Floating point target register.  */
-	    case 'R':		/* Floating point source register.  */
 	    case 'V':
-	      rtype = RTYPE_FPU;
-	      if (is_mdmx
-		  || ((mips_opts.ase & ASE_MDMX)
-		      && (ip->insn_mo->pinfo & FP_D)
-		      && (ip->insn_mo->pinfo & (INSN_COPROC_MOVE_DELAY
-						| INSN_COPROC_MEMORY_DELAY
-						| INSN_LOAD_COPROC_DELAY
-						| INSN_LOAD_MEMORY_DELAY
-						| INSN_STORE_MEMORY))))
-		rtype |= RTYPE_VEC;
-	      s_reset = s;
-	      if (reg_lookup (&s, rtype, &regno))
-		{
-		  if ((regno & 1) != 0
-		      && HAVE_32BIT_FPRS
-		      && !mips_oddfpreg_ok (ip->insn_mo, argnum))
-		    as_warn (_("Float register should be even, was %d"),
-			     regno);
-
-		  c = *args;
-		  if (*s == ' ')
-		    ++s;
-		  if (args[1] != *s)
-		    {
-		      if (c == 'V' || c == 'W')
-			{
-			  regno = lastregno;
-			  s = s_reset;
-			  ++args;
-			}
-		    }
-		  switch (c)
-		    {
-		    case 'D':
-		    case 'X':
-		      INSERT_OPERAND (mips_opts.micromips, FD, *ip, regno);
-		      break;
-
-		    case 'V':
-		    case 'S':
-		    case 'Y':
-		      INSERT_OPERAND (mips_opts.micromips, FS, *ip, regno);
-		      break;
-
-		    case 'Q':
-		      /* This is like 'Z', but also needs to fix the MDMX
-			 vector/scalar select bits.  Note that the
-			 scalar immediate case is handled above.  */
-		      if ((ip->insn_mo->membership & INSN_5400)
-			  && strcmp (insn->name, "rzu.ob") == 0)
-			as_bad (_("Operand %d of `%s' must be an immediate"),
-				argnum, ip->insn_mo->name);
-
-		      if (*s == '[')
-			{
-			  int is_qh = (ip->insn_opcode & (1 << OP_SH_VSEL));
-			  int max_el = (is_qh ? 3 : 7);
-			  s++;
-			  my_getExpression(&imm_expr, s);
-			  check_absolute_expr (ip, &imm_expr);
-			  s = expr_end;
-			  if (imm_expr.X_add_number > max_el)
-			    as_bad (_("Bad element selector %ld"),
-				    (long) imm_expr.X_add_number);
-			  imm_expr.X_add_number &= max_el;
-			  ip->insn_opcode |= (imm_expr.X_add_number
-					      << (OP_SH_VSEL +
-						  (is_qh ? 2 : 1)));
-			  imm_expr.X_op = O_absent;
-			  if (*s != ']')
-			    as_warn (_("Expecting ']' found '%s'"), s);
-			  else
-			    s++;
-			}
-		      else
-			{
-			  if ((ip->insn_mo->membership & INSN_5400)
-			      && (strcmp (insn->name, "sll.ob") == 0
-				  || strcmp (insn->name, "srl.ob") == 0))
-			    as_bad (_("Operand %d of `%s' must be scalar"),
-				    argnum, ip->insn_mo->name);
-
-                          if (ip->insn_opcode & (OP_MASK_VSEL << OP_SH_VSEL))
-                            ip->insn_opcode |= (MDMX_FMTSEL_VEC_QH
-						<< OP_SH_VSEL);
-			  else
-			    ip->insn_opcode |= (MDMX_FMTSEL_VEC_OB <<
-						OP_SH_VSEL);
-			}
-                      /* Fall through.  */
-		    case 'W':
-		    case 'T':
-		    case 'Z':
-		      INSERT_OPERAND (mips_opts.micromips, FT, *ip, regno);
-		      break;
-
-		    case 'R':
-		      INSERT_OPERAND (mips_opts.micromips, FR, *ip, regno);
-		      break;
-		    }
-		  lastregno = regno;
-		  continue;
-		}
-
-	      switch (*args++)
-		{
-		case 'V':
-		  INSERT_OPERAND (mips_opts.micromips, FS, *ip, lastregno);
-		  continue;
-
-		case 'W':
-		  INSERT_OPERAND (mips_opts.micromips, FT, *ip, lastregno);
-		  continue;
-		}
+	      /* We have already matched a comma by this point, so the register
+		 is only optional if there is another operand to come.  */
+	      gas_assert (arg.opnum == 2);
+	      arg.optional_reg = (args[1] == ',');
 	      break;
 
 	    case 'I':
@@ -13237,932 +11945,103 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      }
 	      continue;
 
-	    case 'i':		/* 16-bit unsigned immediate.  */
-	    case 'j':		/* 16-bit signed immediate.  */
-	      *offset_reloc = BFD_RELOC_LO16;
-	      if (my_getSmallExpression (&offset_expr, offset_reloc, s) == 0)
-		{
-		  int more;
-		  offsetT minval, maxval;
+	      /* ??? This is the traditional behavior, but is flaky if
+		 there are alternative versions of the same instruction
+		 for different subarchitectures.  The next alternative
+		 might not be suitable.  */
+	    case 'j':
+	      /* For compatibility with older assemblers, we accept
+		 0x8000-0xffff as signed 16-bit numbers when only
+		 signed numbers are allowed.  */
+	      arg.lax_max = !more_alts;
+	    case 'i':
+	      /* Only accept non-constant operands if this is the
+		 final alternative.  Later alternatives might include
+		 a macro implementation.  */
+	      arg.allow_nonconst = !more_alts;
+	      break;
 
-		  more = (insn + 1 < past
-			  && strcmp (insn->name, insn[1].name) == 0);
+	    case 'u':
+	      /* There are no macro implementations for out-of-range values.  */
+	      arg.allow_nonconst = TRUE;
+	      break;
 
-		  /* For compatibility with older assemblers, we accept
-		     0x8000-0xffff as signed 16-bit numbers when only
-		     signed numbers are allowed.  */
-		  if (*args == 'i')
-		    minval = 0, maxval = 0xffff;
-		  else if (more)
-		    minval = -0x8000, maxval = 0x7fff;
-		  else
-		    minval = -0x8000, maxval = 0xffff;
+	    case 'o':
+	      /* There should always be a macro implementation.  */
+	      arg.allow_nonconst = FALSE;
+	      break;
 
-		  if (offset_expr.X_op != O_constant
-		      || offset_expr.X_add_number < minval
-		      || offset_expr.X_add_number > maxval)
-		    {
-		      if (more)
-			break;
-		      if (offset_expr.X_op == O_constant
-			  || offset_expr.X_op == O_big)
-			as_bad (_("Expression out of range"));
-		    }
-		}
-	      s = expr_end;
-	      continue;
-
-	    case 'o':		/* 16-bit offset.  */
-	      offset_reloc[0] = BFD_RELOC_LO16;
-	      offset_reloc[1] = BFD_RELOC_UNUSED;
-	      offset_reloc[2] = BFD_RELOC_UNUSED;
-
-	      /* Check whether there is only a single bracketed expression
-		 left.  If so, it must be the base register and the
-		 constant must be zero.  */
-	      if (*s == '(' && strchr (s + 1, '(') == 0)
-		{
-		  offset_expr.X_op = O_constant;
-		  offset_expr.X_add_number = 0;
-		  continue;
-		}
-
-	      /* If this value won't fit into a 16 bit offset, then go
-		 find a macro that will generate the 32 bit offset
-		 code pattern.  */
-	      if (my_getSmallExpression (&offset_expr, offset_reloc, s) == 0
-		  && (offset_expr.X_op != O_constant
-		      || offset_expr.X_add_number >= 0x8000
-		      || offset_expr.X_add_number < -0x8000))
-		break;
-
-	      s = expr_end;
-	      continue;
-
-	    case 'p':		/* PC-relative offset.  */
+	    case 'p':
 	      *offset_reloc = BFD_RELOC_16_PCREL_S2;
-	      my_getExpression (&offset_expr, s);
-	      s = expr_end;
-	      continue;
+	      break;
 
-	    case 'u':		/* Upper 16 bits.  */
-	      *offset_reloc = BFD_RELOC_LO16;
-	      if (my_getSmallExpression (&offset_expr, offset_reloc, s) == 0
-		  && offset_expr.X_op == O_constant
-		  && (offset_expr.X_add_number < 0
-		      || offset_expr.X_add_number >= 0x10000))
-		as_bad (_("lui expression (%lu) not in range 0..65535"),
-			(unsigned long) offset_expr.X_add_number);
-	      s = expr_end;
-	      continue;
-
-	    case 'a':		/* 26-bit address.  */
-	    jump:
+	    case 'a':
 	      *offset_reloc = BFD_RELOC_MIPS_JMP;
-	      my_getExpression (&offset_expr, s);
-	      s = expr_end;
-	      continue;
+	      break;
 
-	    case 'N':		/* 3-bit branch condition code.  */
-	    case 'M':		/* 3-bit compare condition code.  */
-	      rtype = RTYPE_CCC;
-	      if (ip->insn_mo->pinfo & (FP_D | FP_S))
-		rtype |= RTYPE_FCC;
-	      if (!reg_lookup (&s, rtype, &regno))
-		break;
-	      if ((strcmp (str + strlen (str) - 3, ".ps") == 0
-		   || strcmp (str + strlen (str) - 5, "any2f") == 0
-		   || strcmp (str + strlen (str) - 5, "any2t") == 0)
-		  && (regno & 1) != 0)
-		as_warn (_("Condition code register should be even for %s, "
-			   "was %d"),
-			 str, regno);
-	      if ((strcmp (str + strlen (str) - 5, "any4f") == 0
-		   || strcmp (str + strlen (str) - 5, "any4t") == 0)
-		  && (regno & 3) != 0)
-		as_warn (_("Condition code register should be 0 or 4 for %s, "
-			   "was %d"),
-			 str, regno);
-	      if (*args == 'N')
-		INSERT_OPERAND (mips_opts.micromips, BCC, *ip, regno);
-	      else
-		INSERT_OPERAND (mips_opts.micromips, CCC, *ip, regno);
-	      continue;
-
-	    case 'H':
-	      if (s[0] == '0' && (s[1] == 'x' || s[1] == 'X'))
-		s += 2;
-	      if (ISDIGIT (*s))
-		{
-		  c = 0;
-		  do
-		    {
-		      c *= 10;
-		      c += *s - '0';
-		      ++s;
-		    }
-		  while (ISDIGIT (*s));
-		}
-	      else
-		c = 8; /* Invalid sel value.  */
-
-	      if (c > 7)
-		as_bad (_("Invalid coprocessor sub-selection value (0-7)"));
-	      INSERT_OPERAND (mips_opts.micromips, SEL, *ip, c);
-	      continue;
-
-	    case 'e':
-	      gas_assert (!mips_opts.micromips);
-	      /* Must be at least one digit.  */
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-
-	      if ((unsigned long) imm_expr.X_add_number
-		  > (unsigned long) OP_MASK_VECBYTE)
-		{
-		  as_bad (_("bad byte vector index (%ld)"),
-			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number = 0;
-		}
-
-	      INSERT_OPERAND (0, VECBYTE, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case '%':
-	      gas_assert (!mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-
-	      if ((unsigned long) imm_expr.X_add_number
-		  > (unsigned long) OP_MASK_VECALIGN)
-		{
-		  as_bad (_("bad byte vector index (%ld)"),
-			   (long) imm_expr.X_add_number);
-		  imm_expr.X_add_number = 0;
-		}
-
-	      INSERT_OPERAND (0, VECALIGN, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    case 'm':		/* Opcode extension character.  */
+	    case 'm':
 	      gas_assert (mips_opts.micromips);
-	      c = *++args;
+	      c = args[1];
 	      switch (c)
 		{
-		case 'r':
-		  if (strncmp (s, "$pc", 3) == 0)
-		    {
-		      s += 3;
-		      continue;
-		    }
+		case 't':
+		case 'c':
+		case 'e':
+		  /* We have already matched a comma by this point,
+		     so the register is only optional if there is another
+		     operand to come.  */
+		  gas_assert (arg.opnum == 2);
+		  arg.optional_reg = (args[2] == ',');
 		  break;
 
-		case 'a':
-		case 'b':
-		case 'c':
-		case 'd':
-		case 'e':
-		case 'f':
-		case 'g':
-		case 'h':
-		case 'j':
-		case 'l':
-		case 'm':
-		case 'n':
-		case 'p':
-		case 'q':
-		case 's':
-		case 't':
-		case 'x':
-		case 'y':
-		case 'z':
-		  s_reset = s;
-		  ok = reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno);
-		  if (regno == AT && mips_opts.at)
-		    {
-		      if (mips_opts.at == ATREG)
-			as_warn (_("Used $at without \".set noat\""));
-		      else
-			as_warn (_("Used $%u with \".set at=$%u\""),
-				 regno, mips_opts.at);
-		    }
-		  if (!ok)
-		    {
-		      if (c == 'c')
-			{
-			  gas_assert (args[1] == ',');
-			  regno = lastregno;
-			  ++args;
-			}
-		      else if (c == 't')
-			{
-			  gas_assert (args[1] == ',');
-			  ++args;
-			  continue;			/* Nothing to do.  */
-			}
-		      else
-			break;
-		    }
-
-		  if (c == 'j' && !strncmp (ip->insn_mo->name, "jalr", 4))
-		    {
-		      if (regno == lastregno)
-			{
-			  insn_error
-			    = _("Source and destination must be different");
-			  continue;
-			}
-		      if (regno == 31 && lastregno == 0xffffffff)
-			{
-			  insn_error
-			    = _("A destination register must be supplied");
-			  continue;
-			}
-		    }
-
-		  if (*s == ' ')
-		    ++s;
-		  if (args[1] != *s)
-		    {
-		      if (c == 'e')
-			{
-			  gas_assert (args[1] == ',');
-			  regno = lastregno;
-			  s = s_reset;
-			  ++args;
-			}
-		      else if (c == 't')
-			{
-			  gas_assert (args[1] == ',');
-			  s = s_reset;
-			  ++args;
-			  continue;			/* Nothing to do.  */
-			}
-		    }
-
-		  /* Make sure regno is the same as lastregno.  */
-		  if (c == 't' && regno != lastregno)
-		    break;
-
-		  /* Make sure regno is the same as destregno.  */
-		  if (c == 'x' && regno != destregno)
-		    break;
-
-		  /* We need to save regno, before regno maps to the
-		     microMIPS register encoding.  */
-		  lastregno = regno;
-
-		  if (c == 'f')
-		    destregno = regno;
-
-		  switch (c)
-		    {
-		      case 'a':
-			if (regno != GP)
-			  regno = ILLEGAL_REG;
-			break;
-
-		      case 'b':
-			regno = mips32_to_micromips_reg_b_map[regno];
-			break;
-
-		      case 'c':
-			regno = mips32_to_micromips_reg_c_map[regno];
-			break;
-
-		      case 'd':
-			regno = mips32_to_micromips_reg_d_map[regno];
-			break;
-
-		      case 'e':
-			regno = mips32_to_micromips_reg_e_map[regno];
-			break;
-
-		      case 'f':
-			regno = mips32_to_micromips_reg_f_map[regno];
-			break;
-
-		      case 'g':
-			regno = mips32_to_micromips_reg_g_map[regno];
-			break;
-
-		      case 'h':
-			s += strspn (s, " \t");
-			if (*s != ',')
-			  {
-			    regno = ILLEGAL_REG;
-			    break;
-			  }
-			++s;
-			s += strspn (s, " \t");
-			ok = reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno2);
-			if (!ok)
-			  {
-			    regno = ILLEGAL_REG;
-			    break;
-			  }
-			if (regno2 == AT && mips_opts.at)
-			  {
-			    if (mips_opts.at == ATREG)
-			      as_warn (_("Used $at without \".set noat\""));
-			    else
-			      as_warn (_("Used $%u with \".set at=$%u\""),
-				       regno2, mips_opts.at);
-			  }
-			regno = (mips_lookup_reg_pair
-				 (regno, regno2,
-				  micromips_to_32_reg_h_map1,
-				  micromips_to_32_reg_h_map2, 8));
-			break;
-
-		      case 'l':
-			regno = mips32_to_micromips_reg_l_map[regno];
-			break;
-
-		      case 'm':
-			regno = mips32_to_micromips_reg_m_map[regno];
-			break;
-
-		      case 'n':
-			regno = mips32_to_micromips_reg_n_map[regno];
-			break;
-
-		      case 'q':
-			regno = mips32_to_micromips_reg_q_map[regno];
-			break;
-
-		      case 's':
-			if (regno != SP)
-			  regno = ILLEGAL_REG;
-			break;
-
-		      case 'y':
-			if (regno != 31)
-			  regno = ILLEGAL_REG;
-			break;
-
-		      case 'z':
-			if (regno != ZERO)
-			  regno = ILLEGAL_REG;
-			break;
-
-		      case 'j': /* Do nothing.  */
-		      case 'p':
-		      case 't':
-		      case 'x':
-			break;
-
-		      default:
-			abort ();
-		    }
-
-		  if (regno == ILLEGAL_REG)
-		    break;
-
-		  switch (c)
-		    {
-		      case 'b':
-			INSERT_OPERAND (1, MB, *ip, regno);
-			break;
-
-		      case 'c':
-			INSERT_OPERAND (1, MC, *ip, regno);
-			break;
-
-		      case 'd':
-			INSERT_OPERAND (1, MD, *ip, regno);
-			break;
-
-		      case 'e':
-			INSERT_OPERAND (1, ME, *ip, regno);
-			break;
-
-		      case 'f':
-			INSERT_OPERAND (1, MF, *ip, regno);
-			break;
-
-		      case 'g':
-			INSERT_OPERAND (1, MG, *ip, regno);
-			break;
-
-		      case 'h':
-			INSERT_OPERAND (1, MH, *ip, regno);
-			break;
-
-		      case 'j':
-			INSERT_OPERAND (1, MJ, *ip, regno);
-			break;
-
-		      case 'l':
-			INSERT_OPERAND (1, ML, *ip, regno);
-			break;
-
-		      case 'm':
-			INSERT_OPERAND (1, MM, *ip, regno);
-			break;
-
-		      case 'n':
-			INSERT_OPERAND (1, MN, *ip, regno);
-			break;
-
-		      case 'p':
-			INSERT_OPERAND (1, MP, *ip, regno);
-			break;
-
-		      case 'q':
-			INSERT_OPERAND (1, MQ, *ip, regno);
-			break;
-
-		      case 'a':	/* Do nothing.  */
-		      case 's':	/* Do nothing.  */
-		      case 't':	/* Do nothing.  */
-		      case 'x':	/* Do nothing.  */
-		      case 'y':	/* Do nothing.  */
-		      case 'z':	/* Do nothing.  */
-			break;
-
-		      default:
-			abort ();
-		    }
-		  continue;
-
-		case 'A':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    /* Check whether there is only a single bracketed
-		       expression left.  If so, it must be the base register
-		       and the constant must be zero.  */
-		    if (*s == '(' && strchr (s + 1, '(') == 0)
-		      {
-			INSERT_OPERAND (1, IMMA, *ip, 0);
-			continue;
-		      }
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, -64, 64, 2))
-		      break;
-
-		    imm = ep.X_add_number >> 2;
-		    INSERT_OPERAND (1, IMMA, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'B':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| ep.X_op != O_constant)
-		      break;
-
-		    for (imm = 0; imm < 8; imm++)
-		      if (micromips_imm_b_map[imm] == ep.X_add_number)
-			break;
-		    if (imm >= 8)
-		      break;
-
-		    INSERT_OPERAND (1, IMMB, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'C':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| ep.X_op != O_constant)
-		      break;
-
-		    for (imm = 0; imm < 16; imm++)
-		      if (micromips_imm_c_map[imm] == ep.X_add_number)
-			break;
-		    if (imm >= 16)
-		      break;
-
-		    INSERT_OPERAND (1, IMMC, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'D':	/* pc relative offset */
-		case 'E':	/* pc relative offset */
-		  my_getExpression (&offset_expr, s);
-		  if (offset_expr.X_op == O_register)
-		    break;
-
+		case 'D':
+		case 'E':
 		  if (!forced_insn_length)
 		    *offset_reloc = (int) BFD_RELOC_UNUSED + c;
 		  else if (c == 'D')
 		    *offset_reloc = BFD_RELOC_MICROMIPS_10_PCREL_S1;
 		  else
 		    *offset_reloc = BFD_RELOC_MICROMIPS_7_PCREL_S1;
-		  s = expr_end;
-		  continue;
-
-		case 'F':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 16, 0))
-		      break;
-
-		    imm = ep.X_add_number;
-		    INSERT_OPERAND (1, IMMF, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'G':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    /* Check whether there is only a single bracketed
-		       expression left.  If so, it must be the base register
-		       and the constant must be zero.  */
-		    if (*s == '(' && strchr (s + 1, '(') == 0)
-		      {
-			INSERT_OPERAND (1, IMMG, *ip, 0);
-			continue;
-		      }
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, -1, 15, 0))
-		      break;
-
-		    imm = ep.X_add_number & 15;
-		    INSERT_OPERAND (1, IMMG, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'H':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    /* Check whether there is only a single bracketed
-		       expression left.  If so, it must be the base register
-		       and the constant must be zero.  */
-		    if (*s == '(' && strchr (s + 1, '(') == 0)
-		      {
-			INSERT_OPERAND (1, IMMH, *ip, 0);
-			continue;
-		      }
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 16, 1))
-		      break;
-
-		    imm = ep.X_add_number >> 1;
-		    INSERT_OPERAND (1, IMMH, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'I':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, -1, 127, 0))
-		      break;
-
-		    imm = ep.X_add_number & 127;
-		    INSERT_OPERAND (1, IMMI, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'J':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    /* Check whether there is only a single bracketed
-		       expression left.  If so, it must be the base register
-		       and the constant must be zero.  */
-		    if (*s == '(' && strchr (s + 1, '(') == 0)
-		      {
-			INSERT_OPERAND (1, IMMJ, *ip, 0);
-			continue;
-		      }
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 16, 2))
-		      break;
-
-		    imm = ep.X_add_number >> 2;
-		    INSERT_OPERAND (1, IMMJ, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'L':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    /* Check whether there is only a single bracketed
-		       expression left.  If so, it must be the base register
-		       and the constant must be zero.  */
-		    if (*s == '(' && strchr (s + 1, '(') == 0)
-		      {
-			INSERT_OPERAND (1, IMML, *ip, 0);
-			continue;
-		      }
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 16, 0))
-		      break;
-
-		    imm = ep.X_add_number;
-		    INSERT_OPERAND (1, IMML, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'M':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 1, 9, 0))
-		      break;
-
-		    imm = ep.X_add_number & 7;
-		    INSERT_OPERAND (1, IMMM, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'N':	/* Register list for lwm and swm.  */
-		  {
-		    /* A comma-separated list of registers and/or
-		       dash-separated contiguous ranges including
-		       both ra and a set of one or more registers
-		       starting at s0 up to s3 which have to be
-		       consecutive, e.g.:
-
-		       s0, ra
-		       s0, s1, ra, s2, s3
-		       s0-s2, ra
-
-		       and any permutations of these.  */
-		    unsigned int reglist;
-		    int imm;
-
-		    if (!reglist_lookup (&s, RTYPE_NUM | RTYPE_GP, &reglist))
-		      break;
-
-		    if ((reglist & 0xfff1ffff) != 0x80010000)
-		      break;
-
-		    reglist = (reglist >> 17) & 7;
-		    reglist += 1;
-		    if ((reglist & -reglist) != reglist)
-		      break;
-
-		    imm = ffs (reglist) - 1;
-		    INSERT_OPERAND (1, IMMN, *ip, imm);
-		  }
-		  continue;
-
-		case 'O':	/* sdbbp 4-bit code.  */
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 16, 0))
-		      break;
-
-		    imm = ep.X_add_number;
-		    INSERT_OPERAND (1, IMMO, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'P':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 32, 2))
-		      break;
-
-		    imm = ep.X_add_number >> 2;
-		    INSERT_OPERAND (1, IMMP, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'Q':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, -0x400000, 0x400000, 2))
-		      break;
-
-		    imm = ep.X_add_number >> 2;
-		    INSERT_OPERAND (1, IMMQ, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'U':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    /* Check whether there is only a single bracketed
-		       expression left.  If so, it must be the base register
-		       and the constant must be zero.  */
-		    if (*s == '(' && strchr (s + 1, '(') == 0)
-		      {
-			INSERT_OPERAND (1, IMMU, *ip, 0);
-			continue;
-		      }
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 32, 2))
-		      break;
-
-		    imm = ep.X_add_number >> 2;
-		    INSERT_OPERAND (1, IMMU, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'W':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 64, 2))
-		      break;
-
-		    imm = ep.X_add_number >> 2;
-		    INSERT_OPERAND (1, IMMW, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'X':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, -8, 8, 0))
-		      break;
-
-		    imm = ep.X_add_number;
-		    INSERT_OPERAND (1, IMMX, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'Y':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-		    int imm;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| expr_const_in_range (&ep, -2, 2, 2)
-			|| !expr_const_in_range (&ep, -258, 258, 2))
-		      break;
-
-		    imm = ep.X_add_number >> 2;
-		    imm = ((imm >> 1) & ~0xff) | (imm & 0xff);
-		    INSERT_OPERAND (1, IMMY, *ip, imm);
-		  }
-		  s = expr_end;
-		  continue;
-
-		case 'Z':
-		  {
-		    bfd_reloc_code_real_type r[3];
-		    expressionS ep;
-
-		    if (my_getSmallExpression (&ep, r, s) > 0
-			|| !expr_const_in_range (&ep, 0, 1, 0))
-		      break;
-		  }
-		  s = expr_end;
-		  continue;
-
-		default:
-		  as_bad (_("Internal error: bad microMIPS opcode "
-			    "(unknown extension operand type `m%c'): %s %s"),
-			  *args, insn->name, insn->args);
-		  /* Further processing is fruitless.  */
-		  return;
+		  break;
 		}
 	      break;
-
-	    case 'n':		/* Register list for 32-bit lwm and swm.  */
-	      gas_assert (mips_opts.micromips);
-	      {
-		/* A comma-separated list of registers and/or
-		   dash-separated contiguous ranges including
-		   at least one of ra and a set of one or more
-		   registers starting at s0 up to s7 and then
-		   s8 which have to be consecutive, e.g.:
-
-		   ra
-		   s0
-		   ra, s0, s1, s2
-		   s0-s8
-		   s0-s5, ra
-
-		   and any permutations of these.  */
-		unsigned int reglist;
-		int imm;
-		int ra;
-
-		if (!reglist_lookup (&s, RTYPE_NUM | RTYPE_GP, &reglist))
-		  break;
-
-		if ((reglist & 0x3f00ffff) != 0)
-		  break;
-
-		ra = (reglist >> 27) & 0x10;
-		reglist = ((reglist >> 22) & 0x100) | ((reglist >> 16) & 0xff);
-		reglist += 1;
-		if ((reglist & -reglist) != reglist)
-		  break;
-
-		imm = (ffs (reglist) - 1) | ra;
-		INSERT_OPERAND (1, RT, *ip, imm);
-		imm_expr.X_op = O_absent;
-	      }
-	      continue;
-
-	    case '|':		/* 4-bit trap code.  */
-	      gas_assert (mips_opts.micromips);
-	      my_getExpression (&imm_expr, s);
-	      check_absolute_expr (ip, &imm_expr);
-	      if ((unsigned long) imm_expr.X_add_number
-		  > MICROMIPSOP_MASK_TRAP)
-		as_bad (_("Trap code (%lu) for %s not in 0..15 range"),
-			(unsigned long) imm_expr.X_add_number,
-			ip->insn_mo->name);
-	      INSERT_OPERAND (1, TRAP, *ip, imm_expr.X_add_number);
-	      imm_expr.X_op = O_absent;
-	      s = expr_end;
-	      continue;
-
-	    default:
-	      as_bad (_("Bad char = '%c'\n"), *args);
-	      abort ();
 	    }
-	  break;
+
+	  operand = (mips_opts.micromips
+		     ? decode_micromips_operand (args)
+		     : decode_mips_operand (args));
+	  if (!operand)
+	    abort ();
+
+	  s = match_operand (&arg, operand, s);
+	  if (!s && arg.optional_reg)
+	    {
+	      /* Assume that the register has been elided and is the
+		 same as the first operand.  */
+	      arg.optional_reg = FALSE;
+	      arg.argnum = 1;
+	      s = argsStart;
+	      SKIP_SPACE_TABS (s);
+	      s = match_operand (&arg, operand, s);
+	    }
+	  if (!s)
+	    break;
+
+	  /* Skip prefixes.  */
+	  if (*args == '+' || *args == 'm')
+	    args++;
+
+	  continue;
 	}
       /* Args don't match.  */
       s = argsStart;
       insn_error = _("Illegal operands");
-      if (insn + 1 < past && !strcmp (insn->name, insn[1].name))
+      if (more_alts)
 	{
 	  ++insn;
 	  continue;
 	}
-      else if (wrong_delay_slot_insns && need_delay_slot_ok)
+      if (wrong_delay_slot_insns && need_delay_slot_ok)
 	{
 	  gas_assert (firstinsn);
 	  need_delay_slot_ok = FALSE;
@@ -14173,8 +12052,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       return;
     }
 }
-
-#define SKIP_SPACE_TABS(S) { while (*(S) == ' ' || *(S) == '\t') ++(S); }
 
 /* As for mips_ip, but used when assembling MIPS16 code.
    Also set forced_insn_length to the resulting instruction size in
