@@ -1108,35 +1108,10 @@ static int mips_relax_branch;
   (((x) &~ (offsetT) 0xffffffff) == 0					\
    || (((x) &~ (offsetT) 0xffffffff) == ~ (offsetT) 0xffffffff))
 
-/* Replace bits MASK << SHIFT of STRUCT with the equivalent bits in
-   VALUE << SHIFT.  VALUE is evaluated exactly once.  */
-#define INSERT_BITS(STRUCT, VALUE, MASK, SHIFT) \
-  (STRUCT) = (((STRUCT) & ~((MASK) << (SHIFT))) \
-	      | (((VALUE) & (MASK)) << (SHIFT)))
-
 /* Extract bits MASK << SHIFT from STRUCT and shift them right
    SHIFT places.  */
 #define EXTRACT_BITS(STRUCT, MASK, SHIFT) \
   (((STRUCT) >> (SHIFT)) & (MASK))
-
-/* Change INSN's opcode so that the operand given by FIELD has value VALUE.
-   INSN is a mips_cl_insn structure and VALUE is evaluated exactly once.
-
-   include/opcode/mips.h specifies operand fields using the macros
-   OP_MASK_<FIELD> and OP_SH_<FIELD>.  The MIPS16 equivalents start
-   with "MIPS16OP" instead of "OP".  */
-#define INSERT_OPERAND(MICROMIPS, FIELD, INSN, VALUE) \
-  do \
-    if (!(MICROMIPS)) \
-      INSERT_BITS ((INSN).insn_opcode, VALUE, \
-		   OP_MASK_##FIELD, OP_SH_##FIELD); \
-    else \
-      INSERT_BITS ((INSN).insn_opcode, VALUE, \
-		   MICROMIPSOP_MASK_##FIELD, MICROMIPSOP_SH_##FIELD); \
-  while (0)
-#define MIPS16_INSERT_OPERAND(FIELD, INSN, VALUE) \
-  INSERT_BITS ((INSN).insn_opcode, VALUE, \
-		MIPS16OP_MASK_##FIELD, MIPS16OP_SH_##FIELD)
 
 /* Extract the operand given by FIELD from mips_cl_insn INSN.  */
 #define EXTRACT_OPERAND(MICROMIPS, FIELD, INSN) \
