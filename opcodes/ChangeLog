@@ -1,3 +1,8 @@
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Use "S,T" rather than "V,T" for
+	ADDA.S, MULA.S and SUBA.S.
+
 2013-07-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/13572
