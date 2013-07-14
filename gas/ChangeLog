@@ -1,5 +1,12 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (insn_insert_operand): New function.
+	(macro_build, mips16_macro_build): Put null character check
+	in the for loop and convert continues to breaks.  Use operand
+	structures to handle constant operands.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (validate_mips_insn): Move further up file.
 	Add insn_bits and decode_operand arguments.  Use the mips_operand
 	fields to work out which bits an operand occupies.  Detect double

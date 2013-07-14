@@ -2044,6 +2044,15 @@ create_insn (struct mips_cl_insn *insn, const struct mips_opcode *mo)
   insn->cleared_p = 0;
 }
 
+/* Install UVAL as the value of OPERAND in INSN.  */
+
+static inline void
+insn_insert_operand (struct mips_cl_insn *insn,
+		     const struct mips_operand *operand, unsigned int uval)
+{
+  insn->insn_opcode = mips_insert_operand (operand, insn->insn_opcode, uval);
+}
+
 /* Record the current MIPS16/microMIPS mode in now_seg.  */
 
 static void
@@ -5401,9 +5410,11 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
   const struct mips_opcode *mo = NULL;
   bfd_reloc_code_real_type r[3];
   const struct mips_opcode *amo;
+  const struct mips_operand *operand;
   struct hash_control *hash;
   struct mips_cl_insn insn;
   va_list args;
+  unsigned int uval;
 
   va_start (args, fmt);
 
@@ -5453,152 +5464,15 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
   gas_assert (mo);
   create_insn (&insn, mo);
-  for (;;)
+  for (; *fmt; ++fmt)
     {
-      switch (*fmt++)
+      switch (*fmt)
 	{
-	case '\0':
-	  break;
-
 	case ',':
 	case '(':
 	case ')':
-	  continue;
-
-	case '+':
-	  switch (*fmt++)
-	    {
-	    case 'A':
-	    case 'E':
-	      INSERT_OPERAND (mips_opts.micromips,
-			      EXTLSB, insn, va_arg (args, int));
-	      continue;
-
-	    case 'B':
-	    case 'F':
-	      /* Note that in the macro case, these arguments are already
-		 in MSB form.  (When handling the instruction in the
-		 non-macro case, these arguments are sizes from which
-		 MSB values must be calculated.)  */
-	      INSERT_OPERAND (mips_opts.micromips,
-			      INSMSB, insn, va_arg (args, int));
-	      continue;
-
-	    case 'J':
-	      gas_assert (!mips_opts.micromips);
-	      INSERT_OPERAND (0, CODE10, insn, va_arg (args, int));
-	      continue;
-
-	    case 'C':
-	    case 'G':
-	    case 'H':
-	      /* Note that in the macro case, these arguments are already
-		 in MSBD form.  (When handling the instruction in the
-		 non-macro case, these arguments are sizes from which
-		 MSBD values must be calculated.)  */
-	      INSERT_OPERAND (mips_opts.micromips,
-			      EXTMSBD, insn, va_arg (args, int));
-	      continue;
-
-	    case 'Q':
-	      gas_assert (!mips_opts.micromips);
-	      INSERT_OPERAND (0, SEQI, insn, va_arg (args, int));
-	      continue;
-
-	    case 'j':
-	      INSERT_OPERAND (mips_opts.micromips, EVAOFFSET, insn, va_arg (args, int));
-	      continue;
-
-	    default:
-	      abort ();
-	    }
-	  continue;
-
-	case '2':
-	  INSERT_OPERAND (mips_opts.micromips, BP, insn, va_arg (args, int));
-	  continue;
-
-	case 'n':
-	  gas_assert (mips_opts.micromips);
-	case 't':
-	case 'w':
-	case 'E':
-	  INSERT_OPERAND (mips_opts.micromips, RT, insn, va_arg (args, int));
-	  continue;
-
-	case 'c':
-	  INSERT_OPERAND (mips_opts.micromips, CODE, insn, va_arg (args, int));
-	  continue;
-
-	case 'W':
-	  gas_assert (!mips_opts.micromips);
-	case 'T':
-	  INSERT_OPERAND (mips_opts.micromips, FT, insn, va_arg (args, int));
-	  continue;
-
-	case 'G':
-	  if (mips_opts.micromips)
-	    INSERT_OPERAND (1, RS, insn, va_arg (args, int));
-	  else
-	    INSERT_OPERAND (0, RD, insn, va_arg (args, int));
-	  continue;
-
-	case 'K':
-	  gas_assert (!mips_opts.micromips);
-	case 'd':
-	  INSERT_OPERAND (mips_opts.micromips, RD, insn, va_arg (args, int));
-	  continue;
-
-	case 'U':
-	  gas_assert (!mips_opts.micromips);
-	  {
-	    int tmp = va_arg (args, int);
-
-	    INSERT_OPERAND (0, RT, insn, tmp);
-	    INSERT_OPERAND (0, RD, insn, tmp);
-	  }
-	  continue;
-
-	case 'V':
-	case 'S':
-	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, FS, insn, va_arg (args, int));
-	  continue;
-
 	case 'z':
-	  continue;
-
-	case '<':
-	  INSERT_OPERAND (mips_opts.micromips,
-			  SHAMT, insn, va_arg (args, int));
-	  continue;
-
-	case 'D':
-	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, FD, insn, va_arg (args, int));
-	  continue;
-
-	case 'B':
-	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, CODE20, insn, va_arg (args, int));
-	  continue;
-
-	case 'J':
-	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, CODE19, insn, va_arg (args, int));
-	  continue;
-
-	case 'q':
-	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, CODE2, insn, va_arg (args, int));
-	  continue;
-
-	case 'b':
-	case 's':
-	case 'r':
-	case 'v':
-	  INSERT_OPERAND (mips_opts.micromips, RS, insn, va_arg (args, int));
-	  continue;
+	  break;
 
 	case 'i':
 	case 'j':
@@ -5608,11 +5482,11 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 		      || *r == BFD_RELOC_HI16_S
 		      || *r == BFD_RELOC_LO16
 		      || *r == BFD_RELOC_MIPS_GOT_OFST);
-	  continue;
+	  break;
 
 	case 'o':
 	  macro_read_relocs (&args, r);
-	  continue;
+	  break;
 
 	case 'u':
 	  macro_read_relocs (&args, r);
@@ -5625,7 +5499,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 				  || *r == BFD_RELOC_GPREL16
 				  || *r == BFD_RELOC_MIPS_GOT_HI16
 				  || *r == BFD_RELOC_MIPS_CALL_HI16))));
-	  continue;
+	  break;
 
 	case 'p':
 	  gas_assert (ep != NULL);
@@ -5654,73 +5528,29 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	    }
 	  else
 	    *r = BFD_RELOC_16_PCREL_S2;
-	  continue;
+	  break;
 
 	case 'a':
 	  gas_assert (ep != NULL);
 	  *r = BFD_RELOC_MIPS_JMP;
-	  continue;
-
-	case 'C':
-	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, COPZ, insn, va_arg (args, int));
-	  continue;
-
-	case 'k':
-	  INSERT_OPERAND (mips_opts.micromips,
-			  CACHE, insn, va_arg (args, int));
-	  continue;
-
-	case '|':
-	  gas_assert (mips_opts.micromips);
-	  INSERT_OPERAND (1, TRAP, insn, va_arg (args, int));
-	  continue;
-
-	case '.':
-	  gas_assert (mips_opts.micromips);
-	  INSERT_OPERAND (1, OFFSET10, insn, va_arg (args, int));
-	  continue;
-
-	case '\\':
-	  INSERT_OPERAND (mips_opts.micromips,
-			  3BITPOS, insn, va_arg (args, int));
-	  continue;
-
-	case '~':
-	  INSERT_OPERAND (mips_opts.micromips,
-			  OFFSET12, insn, va_arg (args, int));
-	  continue;
-
-	case 'N':
-	  gas_assert (mips_opts.micromips);
-	  INSERT_OPERAND (1, BCC, insn, va_arg (args, int));
-	  continue;
-
-	case 'm':	/* Opcode extension character.  */
-	  gas_assert (mips_opts.micromips);
-	  switch (*fmt++)
-	    {
-	    case 'j':
-	      INSERT_OPERAND (1, MJ, insn, va_arg (args, int));
-	      break;
-
-	    case 'p':
-	      INSERT_OPERAND (1, MP, insn, va_arg (args, int));
-	      break;
-
-	    case 'F':
-	      INSERT_OPERAND (1, IMMF, insn, va_arg (args, int));
-	      break;
-
-	    default:
-	      abort ();
-	    }
-	  continue;
+	  break;
 
 	default:
-	  abort ();
+	  operand = (mips_opts.micromips
+		     ? decode_micromips_operand (fmt)
+		     : decode_mips_operand (fmt));
+	  if (!operand)
+	    abort ();
+
+	  uval = va_arg (args, int);
+	  if (operand->type == OP_CLO_CLZ_DEST)
+	    uval |= (uval << 5);
+	  insn_insert_operand (&insn, operand, uval);
+
+	  if (*fmt == '+' || *fmt == 'm')
+	    ++fmt;
+	  break;
 	}
-      break;
     }
   va_end (args);
   gas_assert (*r == BFD_RELOC_UNUSED ? ep == NULL : ep != NULL);
@@ -5734,6 +5564,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 {
   struct mips_opcode *mo;
   struct mips_cl_insn insn;
+  const struct mips_operand *operand;
   bfd_reloc_code_real_type r[3]
     = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 
@@ -5749,48 +5580,23 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
     }
 
   create_insn (&insn, mo);
-  for (;;)
+  for (; *fmt; ++fmt)
     {
       int c;
 
-      c = *fmt++;
+      c = *fmt;
       switch (c)
 	{
-	case '\0':
-	  break;
-
 	case ',':
 	case '(':
 	case ')':
-	  continue;
-
-	case 'y':
-	case 'w':
-	  MIPS16_INSERT_OPERAND (RY, insn, va_arg (*args, int));
-	  continue;
-
-	case 'x':
-	case 'v':
-	  MIPS16_INSERT_OPERAND (RX, insn, va_arg (*args, int));
-	  continue;
-
-	case 'z':
-	  MIPS16_INSERT_OPERAND (RZ, insn, va_arg (*args, int));
-	  continue;
-
-	case 'Z':
-	  MIPS16_INSERT_OPERAND (MOVE32Z, insn, va_arg (*args, int));
-	  continue;
+	  break;
 
 	case '0':
 	case 'S':
 	case 'P':
 	case 'R':
-	  continue;
-
-	case 'X':
-	  MIPS16_INSERT_OPERAND (REGR32, insn, va_arg (*args, int));
-	  continue;
+	  break;
 
 	case '<':
 	case '>':
@@ -5822,14 +5628,16 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 		*r = BFD_RELOC_UNUSED;
 	      }
 	  }
-	  continue;
+	  break;
 
-	case '6':
-	  MIPS16_INSERT_OPERAND (IMM6, insn, va_arg (*args, int));
-	  continue;
+	default:
+	  operand = decode_mips16_operand (c, FALSE);
+	  if (!operand)
+	    abort ();
+
+	  insn_insert_operand (&insn, operand, va_arg (args, int));
+	  break;
 	}
-
-      break;
     }
 
   gas_assert (*r == BFD_RELOC_UNUSED ? ep == NULL : ep != NULL);
