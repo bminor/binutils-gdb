@@ -3702,6 +3702,847 @@ fpr_write_mask (const struct mips_cl_insn *ip)
   return mask;
 }
 
+/* Operand OPNUM of INSN is an odd-numbered floating-point register.
+   Check whether that is allowed.  */
+
+static bfd_boolean
+mips_oddfpreg_ok (const struct mips_opcode *insn, int opnum)
+{
+  const char *s = insn->name;
+
+  if (insn->pinfo == INSN_MACRO)
+    /* Let a macro pass, we'll catch it later when it is expanded.  */
+    return TRUE;
+
+  if (ISA_HAS_ODD_SINGLE_FPR (mips_opts.isa) || mips_opts.arch == CPU_R5900)
+    {
+      /* Allow odd registers for single-precision ops.  */
+      switch (insn->pinfo & (FP_S | FP_D))
+	{
+	case FP_S:
+	case 0:
+	  return TRUE;
+	case FP_D:
+	  return FALSE;
+	default:
+	  break;
+	}
+
+      /* Cvt.w.x and cvt.x.w allow an odd register for a 'w' or 's' operand.  */
+      s = strchr (insn->name, '.');
+      if (s != NULL && opnum == 2)
+	s = strchr (s + 1, '.');
+      return (s != NULL && (s[1] == 'w' || s[1] == 's'));
+    }
+
+  /* Single-precision coprocessor loads and moves are OK too.  */
+  if ((insn->pinfo & FP_S)
+      && (insn->pinfo & (INSN_COPROC_MEMORY_DELAY | INSN_STORE_MEMORY
+			 | INSN_LOAD_COPROC_DELAY | INSN_COPROC_MOVE_DELAY)))
+    return TRUE;
+
+  return FALSE;
+}
+
+#if 0
+/* Report that user-supplied argument ARGNUM for INSN was VAL, but should
+   have been in the range [MIN_VAL, MAX_VAL].  PRINT_HEX says whether
+   this operand is normally printed in hex or decimal.  */
+
+static void
+report_bad_range (struct mips_cl_insn *insn, int argnum,
+		  offsetT val, int min_val, int max_val,
+		  bfd_boolean print_hex)
+{
+  if (print_hex && val >= 0)
+    as_bad (_("Operand %d of `%s' must be in the range [0x%x, 0x%x],"
+	      " was 0x%lx."),
+	    argnum, insn->insn_mo->name, min_val, max_val, (unsigned long) val);
+  else if (print_hex)
+    as_bad (_("Operand %d of `%s' must be in the range [0x%x, 0x%x],"
+	      " was %ld."),
+	    argnum, insn->insn_mo->name, min_val, max_val, (unsigned long) val);
+  else
+    as_bad (_("Operand %d of `%s' must be in the range [%d, %d],"
+	      " was %ld."),
+	    argnum, insn->insn_mo->name, min_val, max_val, (unsigned long) val);
+}
+
+/* Report an invalid combination of position and size operands for a bitfield
+   operation.  POS and SIZE are the values that were given.  */
+
+static void
+report_bad_field (offsetT pos, offsetT size)
+{
+  as_bad (_("Invalid field specification (position %ld, size %ld)"),
+	  (unsigned long) pos, (unsigned long) size);
+}
+
+/* Information about an instruction argument that we're trying to match.  */
+struct mips_arg_info
+{
+  /* The instruction so far.  */
+  struct mips_cl_insn *insn;
+
+  /* The 1-based operand number, in terms of insn->insn_mo->args.  */
+  int opnum;
+
+  /* The 1-based argument number, for error reporting.  This does not
+     count elided optional registers, etc..  */
+  int argnum;
+
+  /* The last OP_REG operand seen, or ILLEGAL_REG if none.  */
+  unsigned int last_regno;
+
+  /* If the first operand was an OP_REG, this is the register that it
+     specified, otherwise it is ILLEGAL_REG.  */
+  unsigned int dest_regno;
+
+  /* The value of the last OP_INT operand.  Only used for OP_MSB,
+     where it gives the lsb position.  */
+  unsigned int last_op_int;
+
+  /* If true, match routines should silently reject invalid arguments.
+     If false, match routines can accept invalid arguments as long as
+     they report an appropriate error.  They still have the option of
+     silently rejecting arguments, in which case a generic "Invalid operands"
+     style of error will be used instead.  */
+  bfd_boolean soft_match;
+
+  /* If true, the OP_INT match routine should treat plain symbolic operands
+     as if a relocation operator like %lo(...) had been used.  This is only
+     ever true if the operand can be relocated.  */
+  bfd_boolean allow_nonconst;
+
+  /* When true, the OP_INT match routine should allow unsigned N-bit
+     arguments to be used where a signed N-bit operand is expected.  */
+  bfd_boolean lax_max;
+
+  /* When true, the OP_REG match routine should assume that another operand
+     appears after this one.  It should fail the match if the register it
+     sees is at the end of the argument list.  */
+  bfd_boolean optional_reg;
+
+  /* True if a reference to the current AT register was seen.  */
+  bfd_boolean seen_at;
+};
+
+/* Match a constant integer at S for ARG.  Return null if the match failed.
+   Otherwise return the end of the matched string and store the constant value
+   in *VALUE.  In the latter case, use FALLBACK as the value if the match
+   succeeded with an error.  */
+
+static char *
+match_const_int (struct mips_arg_info *arg, char *s, offsetT *value,
+		 offsetT fallback)
+{
+  expressionS ex;
+  bfd_reloc_code_real_type r[3];
+  int num_relocs;
+
+  num_relocs = my_getSmallExpression (&ex, r, s);
+  if (*s == '(' && ex.X_op == O_register)
+    {
+      /* Assume that the constant has been elided and that S is a base
+	 register.  The rest of the match will fail if the assumption
+	 turns out to be wrong.  */
+      *value = 0;
+      return s;
+    }
+
+  if (num_relocs == 0 && ex.X_op == O_constant)
+    *value = ex.X_add_number;
+  else
+    {
+      /* If we got a register rather than an expression, the default
+	 "Invalid operands" style of error seems more appropriate.  */
+      if (arg->soft_match || ex.X_op == O_register)
+	return 0;
+      as_bad (_("Operand %d of `%s' must be constant"),
+	      arg->argnum, arg->insn->insn_mo->name);
+      *value = fallback;
+    }
+  return expr_end;
+}
+
+/* Return the RTYPE_* flags for a register operand of type TYPE that
+   appears in instruction OPCODE.  */
+
+static unsigned int
+convert_reg_type (const struct mips_opcode *opcode,
+		  enum mips_reg_operand_type type)
+{
+  switch (type)
+    {
+    case OP_REG_GP:
+      return RTYPE_NUM | RTYPE_GP;
+
+    case OP_REG_FP:
+      /* Allow vector register names for MDMX if the instruction is a 64-bit
+	 FPR load, store or move (including moves to and from GPRs).  */
+      if ((mips_opts.ase & ASE_MDMX)
+	  && (opcode->pinfo & FP_D)
+	  && (opcode->pinfo & (INSN_COPROC_MOVE_DELAY
+			       | INSN_COPROC_MEMORY_DELAY
+			       | INSN_LOAD_COPROC_DELAY
+			       | INSN_LOAD_MEMORY_DELAY
+			       | INSN_STORE_MEMORY)))
+	return RTYPE_FPU | RTYPE_VEC;
+      return RTYPE_FPU;
+
+    case OP_REG_CCC:
+      if (opcode->pinfo & (FP_D | FP_S))
+	return RTYPE_CCC | RTYPE_FCC;
+      return RTYPE_CCC;
+
+    case OP_REG_VEC:
+      if (opcode->membership & INSN_5400)
+	return RTYPE_FPU;
+      return RTYPE_FPU | RTYPE_VEC;
+
+    case OP_REG_ACC:
+      return RTYPE_ACC;
+
+    case OP_REG_COPRO:
+      if (opcode->name[strlen (opcode->name) - 1] == '0')
+	return RTYPE_NUM | RTYPE_CP0;
+      return RTYPE_NUM;
+
+    case OP_REG_HW:
+      return RTYPE_NUM;
+    }
+  abort ();
+}
+
+/* ARG is register REGNO, of type TYPE.  Warn about any dubious registers.  */
+
+static void
+check_regno (struct mips_arg_info *arg,
+	     enum mips_reg_operand_type type, unsigned int regno)
+{
+  if (AT && type == OP_REG_GP && regno == AT)
+    arg->seen_at = TRUE;
+
+  if (type == OP_REG_FP
+      && (regno & 1) != 0
+      && HAVE_32BIT_FPRS
+      && !mips_oddfpreg_ok (arg->insn->insn_mo, arg->opnum))
+    as_warn (_("Float register should be even, was %d"), regno);
+
+  if (type == OP_REG_CCC)
+    {
+      const char *name;
+      size_t length;
+
+      name = arg->insn->insn_mo->name;
+      length = strlen (name);
+      if ((regno & 1) != 0
+	  && ((length >= 3 && strcmp (name + length - 3, ".ps") == 0)
+	      || (length >= 5 && strncmp (name + length - 5, "any2", 4) == 0)))
+	as_warn (_("Condition code register should be even for %s, was %d"),
+		 name, regno);
+
+      if ((regno & 3) != 0
+	  && (length >= 5 && strncmp (name + length - 5, "any4", 4) == 0))
+	as_warn (_("Condition code register should be 0 or 4 for %s, was %d"),
+		 name, regno);
+    }
+}
+
+/* OP_INT matcher.  */
+
+static char *
+match_int_operand (struct mips_arg_info *arg,
+		   const struct mips_operand *operand_base, char *s)
+{
+  const struct mips_int_operand *operand;
+  unsigned int uval, mask;
+  int min_val, max_val, factor;
+  offsetT sval;
+  bfd_boolean print_hex;
+
+  operand = (const struct mips_int_operand *) operand_base;
+  factor = 1 << operand->shift;
+  mask = (1 << operand_base->size) - 1;
+  max_val = (operand->max_val + operand->bias) << operand->shift;
+  min_val = max_val - (mask << operand->shift);
+  if (arg->lax_max)
+    max_val = mask << operand->shift;
+
+  if (operand_base->lsb == 0
+      && operand_base->size == 16
+      && operand->shift == 0
+      && operand->bias == 0
+      && (operand->max_val == 32767 || operand->max_val == 65535))
+    {
+      /* The operand can be relocated.  */
+      offset_reloc[0] = BFD_RELOC_LO16;
+      offset_reloc[1] = BFD_RELOC_UNUSED;
+      offset_reloc[2] = BFD_RELOC_UNUSED;
+      if (my_getSmallExpression (&offset_expr, offset_reloc, s) > 0)
+	/* Relocation operators were used.  Accept the arguent and
+	   leave the relocation value in offset_expr and offset_relocs
+	   for the caller to process.  */
+	return expr_end;
+      if (*s == '(' && offset_expr.X_op == O_register)
+	/* Assume that the constant has been elided and that S is a base
+	   register.  The rest of the match will fail if the assumption
+	   turns out to be wrong.  */
+	sval = 0;
+      else
+	{
+	  s = expr_end;
+	  if (offset_expr.X_op != O_constant)
+	    /* If non-constant operands are allowed then leave them for
+	       the caller to process, otherwise fail the match.  */
+	    return arg->allow_nonconst ? s : 0;
+	  sval = offset_expr.X_add_number;
+	}
+      /* Clear the global state; we're going to install the operand
+	 ourselves.  */
+      offset_reloc[0] = BFD_RELOC_UNUSED;
+      offset_expr.X_op = O_absent;
+    }
+  else
+    {
+      s = match_const_int (arg, s, &sval, min_val);
+      if (!s)
+	return 0;
+    }
+
+  arg->last_op_int = sval;
+
+  /* Check the range.  If there's a problem, record the lowest acceptable
+     value in arg->last_op_int in order to prevent an unhelpful error
+     from OP_MSB too.
+
+     Bit counts have traditionally been printed in hex by the disassembler
+     but printed as decimal in error messages.  Only resort to hex if
+     the operand is bigger than 6 bits.  */
+  print_hex = operand->print_hex && operand_base->size > 6;
+  if (sval < min_val || sval > max_val)
+    {
+      if (arg->soft_match)
+	return 0;
+      report_bad_range (arg->insn, arg->argnum, sval, min_val, max_val,
+			print_hex);
+      arg->last_op_int = min_val;
+    }
+  else if (sval % factor)
+    {
+      if (arg->soft_match)
+	return 0;
+      as_bad (print_hex && sval >= 0
+	      ? _("Operand %d of `%s' must be a factor of %d, was 0x%lx.")
+	      : _("Operand %d of `%s' must be a factor of %d, was %ld."),
+	      arg->argnum, arg->insn->insn_mo->name, factor,
+	      (unsigned long) sval);
+      arg->last_op_int = min_val;
+    }
+
+  uval = (unsigned int) sval >> operand->shift;
+  uval -= operand->bias;
+
+  /* Handle -mfix-cn63xxp1.  */
+  if (arg->opnum == 1
+      && mips_fix_cn63xxp1
+      && !mips_opts.micromips
+      && strcmp ("pref", arg->insn->insn_mo->name) == 0)
+    switch (uval)
+      {
+      case 5:
+      case 25:
+      case 26:
+      case 27:
+      case 28:
+      case 29:
+      case 30:
+      case 31:
+	/* These are ok.  */
+	break;
+
+      default:
+	/* The rest must be changed to 28.  */
+	uval = 28;
+	break;
+      }
+
+  insn_insert_operand (arg->insn, operand_base, uval);
+  return s;
+}
+
+/* OP_MAPPED_INT matcher.  */
+
+static char *
+match_mapped_int_operand (struct mips_arg_info *arg,
+			  const struct mips_operand *operand_base, char *s)
+{
+  const struct mips_mapped_int_operand *operand;
+  unsigned int uval, num_vals;
+  offsetT sval;
+
+  operand = (const struct mips_mapped_int_operand *) operand_base;
+  s = match_const_int (arg, s, &sval, operand->int_map[0]);
+  if (!s)
+    return 0;
+
+  num_vals = 1 << operand_base->size;
+  for (uval = 0; uval < num_vals; uval++)
+    if (operand->int_map[uval] == sval)
+      break;
+  if (uval == num_vals)
+    return 0;
+
+  insn_insert_operand (arg->insn, operand_base, uval);
+  return s;
+}
+
+/* OP_MSB matcher.  */
+
+static char *
+match_msb_operand (struct mips_arg_info *arg,
+		   const struct mips_operand *operand_base, char *s)
+{
+  const struct mips_msb_operand *operand;
+  int min_val, max_val, max_high;
+  offsetT size, sval, high;
+
+  operand = (const struct mips_msb_operand *) operand_base;
+  min_val = operand->bias;
+  max_val = min_val + (1 << operand_base->size) - 1;
+  max_high = operand->opsize;
+
+  s = match_const_int (arg, s, &size, 1);
+  if (!s)
+    return 0;
+
+  high = size + arg->last_op_int;
+  sval = operand->add_lsb ? high : size;
+
+  if (size < 0 || high > max_high || sval < min_val || sval > max_val)
+    {
+      if (arg->soft_match)
+	return 0;
+      report_bad_field (arg->last_op_int, size);
+      sval = min_val;
+    }
+  insn_insert_operand (arg->insn, operand_base, sval - min_val);
+  return s;
+}
+
+/* OP_REG matcher.  */
+
+static char *
+match_reg_operand (struct mips_arg_info *arg,
+		   const struct mips_operand *operand_base, char *s)
+{
+  const struct mips_reg_operand *operand;
+  unsigned int regno, uval, num_vals, types;
+
+  operand = (const struct mips_reg_operand *) operand_base;
+  types = convert_reg_type (arg->insn->insn_mo, operand->reg_type);
+  if (!reg_lookup (&s, types, &regno))
+    return 0;
+
+  SKIP_SPACE_TABS (s);
+  if (arg->optional_reg && *s == 0)
+    return 0;
+
+  if (operand->reg_map)
+    {
+      num_vals = 1 << operand->root.size;
+      for (uval = 0; uval < num_vals; uval++)
+	if (operand->reg_map[uval] == regno)
+	  break;
+      if (num_vals == uval)
+	return 0;
+    }
+  else
+    uval = regno;
+
+  check_regno (arg, operand->reg_type, regno);
+  arg->last_regno = regno;
+  if (arg->opnum == 1)
+    arg->dest_regno = regno;
+  insn_insert_operand (arg->insn, operand_base, uval);
+  return s;
+}
+
+/* OP_REG_PAIR matcher.  */
+
+static char *
+match_reg_pair_operand (struct mips_arg_info *arg,
+			const struct mips_operand *operand_base, char *s)
+{
+  const struct mips_reg_pair_operand *operand;
+  unsigned int regno1, regno2, uval, num_vals, types;
+
+  operand = (const struct mips_reg_pair_operand *) operand_base;
+  types = convert_reg_type (arg->insn->insn_mo, operand->reg_type);
+
+  if (!reg_lookup (&s, types, &regno1))
+    return 0;
+
+  SKIP_SPACE_TABS (s);
+  if (*s++ != ',')
+    return 0;
+  arg->argnum += 1;
+
+  if (!reg_lookup (&s, types, &regno2))
+    return 0;
+
+  num_vals = 1 << operand_base->size;
+  for (uval = 0; uval < num_vals; uval++)
+    if (operand->reg1_map[uval] == regno1 && operand->reg2_map[uval] == regno2)
+      break;
+  if (uval == num_vals)
+    return 0;
+
+  check_regno (arg, operand->reg_type, regno1);
+  check_regno (arg, operand->reg_type, regno2);
+  insn_insert_operand (arg->insn, operand_base, uval);
+  return s;
+}
+
+/* OP_PCREL matcher.  The caller chooses the relocation type.  */
+
+static char *
+match_pcrel_operand (char *s)
+{
+  my_getExpression (&offset_expr, s);
+  return expr_end;
+}
+
+/* OP_PERF_REG matcher.  */
+
+static char *
+match_perf_reg_operand (struct mips_arg_info *arg,
+			const struct mips_operand *operand, char *s)
+{
+  offsetT sval;
+
+  s = match_const_int (arg, s, &sval, 0);
+  if (!s)
+    return 0;
+
+  if (sval != 0
+      && (sval != 1
+	  || (mips_opts.arch == CPU_R5900
+	      && (strcmp (arg->insn->insn_mo->name, "mfps") == 0
+		  || strcmp (arg->insn->insn_mo->name, "mtps") == 0))))
+    {
+      if (arg->soft_match)
+	return 0;
+      as_bad (_("Invalid performance register (%ld)"), (unsigned long) sval);
+    }
+
+  insn_insert_operand (arg->insn, operand, sval);
+  return s;
+}
+
+/* OP_ADDIUSP matcher.  */
+
+static char *
+match_addiusp_operand (struct mips_arg_info *arg,
+		       const struct mips_operand *operand, char *s)
+{
+  offsetT sval;
+  unsigned int uval;
+
+  s = match_const_int (arg, s, &sval, -256);
+  if (!s)
+    return 0;
+
+  if (sval % 4)
+    return 0;
+
+  sval /= 4;
+  if (!(sval >= -258 && sval <= 257) || (sval >= -2 && sval <= 1))
+    return 0;
+
+  uval = (unsigned int) sval;
+  uval = ((uval >> 1) & ~0xff) | (uval & 0xff);
+  insn_insert_operand (arg->insn, operand, uval);
+  return s;
+}
+
+/* OP_CLO_CLZ_DEST matcher.  */
+
+static char *
+match_clo_clz_dest_operand (struct mips_arg_info *arg,
+			    const struct mips_operand *operand, char *s)
+{
+  unsigned int regno;
+
+  if (!reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno))
+    return 0;
+
+  check_regno (arg, OP_REG_GP, regno);
+  insn_insert_operand (arg->insn, operand, regno | (regno << 5));
+  return s;
+}
+
+/* OP_LWM_SWM_LIST matcher.  */
+
+static char *
+match_lwm_swm_list_operand (struct mips_arg_info *arg,
+			    const struct mips_operand *operand, char *s)
+{
+  unsigned int reglist, sregs, ra;
+
+  if (!reglist_lookup (&s, RTYPE_NUM | RTYPE_GP, &reglist))
+    return 0;
+
+  if (operand->size == 2)
+    {
+      /* The list must include both ra and s0-sN, for 0 <= N <= 3.  E.g.:
+
+	 s0, ra
+	 s0, s1, ra, s2, s3
+	 s0-s2, ra
+
+	 and any permutations of these.  */
+      if ((reglist & 0xfff1ffff) != 0x80010000)
+	return 0;
+
+      sregs = (reglist >> 17) & 7;
+      ra = 0;
+    }
+  else
+    {
+      /* The list must include at least one of ra and s0-sN,
+	 for 0 <= N <= 8.  (Note that there is a gap between s7 and s8,
+	 which are $23 and $30 respectively.)  E.g.:
+
+	 ra
+	 s0
+	 ra, s0, s1, s2
+	 s0-s8
+	 s0-s5, ra
+
+	 and any permutations of these.  */
+      if ((reglist & 0x3f00ffff) != 0)
+	return 0;
+
+      ra = (reglist >> 27) & 0x10;
+      sregs = ((reglist >> 22) & 0x100) | ((reglist >> 16) & 0xff);
+    }
+  sregs += 1;
+  if ((sregs & -sregs) != sregs)
+    return 0;
+
+  insn_insert_operand (arg->insn, operand, (ffs (sregs) - 1) | ra);
+  return s;
+}
+
+/* OP_MDMX_IMM_REG matcher.  */
+
+static char *
+match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
+			    const struct mips_operand *operand, char *s)
+{
+  unsigned int regno, uval, types;
+  bfd_boolean is_qh;
+  const struct mips_opcode *opcode;
+
+  /* The mips_opcode records whether this is an octobyte or quadhalf
+     instruction.  Start out with that bit in place.  */
+  opcode = arg->insn->insn_mo;
+  uval = mips_extract_operand (operand, opcode->match);
+  is_qh = (uval != 0);
+
+  types = convert_reg_type (arg->insn->insn_mo, OP_REG_VEC);
+  if (reg_lookup (&s, types, &regno))
+    {
+      if ((opcode->membership & INSN_5400)
+	  && strcmp (opcode->name, "rzu.ob") == 0)
+	{
+	  if (arg->soft_match)
+	    return 0;
+	  as_bad (_("Operand %d of `%s' must be an immediate"),
+		  arg->argnum, opcode->name);
+	}
+
+      /* Check whether this is a vector register or a broadcast of
+	 a single element.  */
+      SKIP_SPACE_TABS (s);
+      if (*s == '[')
+	{
+	  /* Read the element number.  */
+	  expressionS value;
+
+	  ++s;
+	  SKIP_SPACE_TABS (s);
+	  my_getExpression (&value, s);
+	  s = expr_end;
+	  if (value.X_op != O_constant
+	      || value.X_add_number < 0
+	      || value.X_add_number > (is_qh ? 3 : 7))
+	    {
+	      if (arg->soft_match)
+		return 0;
+	      as_bad (_("Invalid element selector"));
+	      value.X_add_number = 0;
+	    }
+	  uval |= (unsigned int) value.X_add_number << (is_qh ? 2 : 1) << 5;
+	  SKIP_SPACE_TABS (s);
+	  if (*s == ']')
+	    ++s;
+	  else
+	    {
+	      if (arg->soft_match)
+		return 0;
+	      as_bad (_("Expecting ']' found '%s'"), s);
+	    }
+	}
+      else
+	{
+	  /* A full vector.  */
+	  if ((opcode->membership & INSN_5400)
+	      && (strcmp (opcode->name, "sll.ob") == 0
+		  || strcmp (opcode->name, "srl.ob") == 0))
+	    {
+	      if (arg->soft_match)
+		return 0;
+	      as_bad (_("Operand %d of `%s' must be scalar"),
+		      arg->argnum, opcode->name);
+	    }
+
+	  if (is_qh)
+	    uval |= MDMX_FMTSEL_VEC_QH << 5;
+	  else
+	    uval |= MDMX_FMTSEL_VEC_OB << 5;
+	}
+      check_regno (arg, OP_REG_FP, regno);
+      uval |= regno;
+    }
+  else
+    {
+      offsetT sval;
+
+      s = match_const_int (arg, s, &sval, 0);
+      if (!s)
+	return 0;
+      if (sval < 0 || sval > 31)
+	{
+	  if (arg->soft_match)
+	    return 0;
+	  report_bad_range (arg->insn, arg->argnum, sval, 0, 31, FALSE);
+	}
+      uval |= (sval & 31);
+      if (is_qh)
+	uval |= MDMX_FMTSEL_IMM_QH << 5;
+      else
+	uval |= MDMX_FMTSEL_IMM_OB << 5;
+    }
+  insn_insert_operand (arg->insn, operand, uval);
+  return s;
+}
+
+/* OP_PC matcher.  */
+
+static char *
+match_pc_operand (char *s)
+{
+  if (strncmp (s, "$pc", 3) != 0)
+    return 0;
+  s += 3;
+  SKIP_SPACE_TABS (s);
+  return s;
+}
+
+/* OP_REPEAT_DEST_REG and OP_REPEAT_PREV_REG matcher.  OTHER_REGNO is the
+   register that we need to match.  */
+
+static char *
+match_tied_reg_operand (struct mips_arg_info *arg, char *s,
+			unsigned int other_regno)
+{
+  unsigned int regno;
+
+  if (!reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno)
+      || regno != other_regno)
+    return 0;
+  SKIP_SPACE_TABS (s);
+  if (arg->optional_reg && *s == 0)
+    return 0;
+  return s;
+}
+
+/* S is the text seen for ARG.  Match it against OPERAND.  Return the end
+   of the argument text if the match is successful, otherwise return null.  */
+
+static char *
+match_operand (struct mips_arg_info *arg,
+	       const struct mips_operand *operand, char *s)
+{
+  switch (operand->type)
+    {
+    case OP_INT:
+      return match_int_operand (arg, operand, s);
+
+    case OP_MAPPED_INT:
+      return match_mapped_int_operand (arg, operand, s);
+
+    case OP_MSB:
+      return match_msb_operand (arg, operand, s);
+
+    case OP_REG:
+      return match_reg_operand (arg, operand, s);
+
+    case OP_REG_PAIR:
+      return match_reg_pair_operand (arg, operand, s);
+
+    case OP_PCREL:
+      return match_pcrel_operand (s);
+
+    case OP_PERF_REG:
+      return match_perf_reg_operand (arg, operand, s);
+
+    case OP_ADDIUSP_INT:
+      return match_addiusp_operand (arg, operand, s);
+
+    case OP_CLO_CLZ_DEST:
+      return match_clo_clz_dest_operand (arg, operand, s);
+
+    case OP_LWM_SWM_LIST:
+      return match_lwm_swm_list_operand (arg, operand, s);
+
+    case OP_ENTRY_EXIT_LIST:
+    case OP_SAVE_RESTORE_LIST:
+      abort ();
+
+    case OP_MDMX_IMM_REG:
+      return match_mdmx_imm_reg_operand (arg, operand, s);
+
+    case OP_REPEAT_DEST_REG:
+      return match_tied_reg_operand (arg, s, arg->dest_regno);
+
+    case OP_REPEAT_PREV_REG:
+      return match_tied_reg_operand (arg, s, arg->last_regno);
+
+    case OP_PC:
+      return match_pc_operand (s);
+    }
+  abort ();
+}
+
+/* ARG is the state after successfully matching an instruction.
+   Issue any queued-up warnings.  */
+
+static void
+check_completed_insn (struct mips_arg_info *arg)
+{
+  if (arg->seen_at)
+    {
+      if (AT == ATREG)
+	as_warn (_("Used $at without \".set noat\""));
+      else
+	as_warn (_("Used $%u with \".set at=$%u\""), AT, AT);
+    }
+}
+#endif
+
 /* Classify an instruction according to the FIX_VR4120_* enumeration.
    Return NUM_FIX_VR4120_CLASSES if the instruction isn't affected
    by VR4120 errata.  */
@@ -10675,46 +11516,6 @@ static const struct mips_immed mips_immed[] = {
   { '4',	OP_SH_UDI4,	OP_MASK_UDI4,		0},
   { 0,0,0,0 }
 };
-
-/* Check whether an odd floating-point register is allowed.  */
-static int
-mips_oddfpreg_ok (const struct mips_opcode *insn, int argnum)
-{
-  const char *s = insn->name;
-
-  if (insn->pinfo == INSN_MACRO)
-    /* Let a macro pass, we'll catch it later when it is expanded.  */
-    return 1;
-
-  if (ISA_HAS_ODD_SINGLE_FPR (mips_opts.isa) || (mips_opts.arch == CPU_R5900))
-    {
-      /* Allow odd registers for single-precision ops.  */
-      switch (insn->pinfo & (FP_S | FP_D))
-	{
-	case FP_S:
-	case 0:
-	  return 1;	/* both single precision - ok */
-	case FP_D:
-	  return 0;	/* both double precision - fail */
-	default:
-	  break;
-	}
-
-      /* Cvt.w.x and cvt.x.w allow an odd register for a 'w' or 's' operand.  */
-      s = strchr (insn->name, '.');
-      if (argnum == 2)
-	s = s != NULL ? strchr (s + 1, '.') : NULL;
-      return (s != NULL && (s[1] == 'w' || s[1] == 's'));
-    } 
-
-  /* Single-precision coprocessor loads and moves are OK too.  */
-  if ((insn->pinfo & FP_S)
-      && (insn->pinfo & (INSN_COPROC_MEMORY_DELAY | INSN_STORE_MEMORY
-			 | INSN_LOAD_COPROC_DELAY | INSN_COPROC_MOVE_DELAY)))
-    return 1;
-
-  return 0;
-}
 
 /* Check if EXPR is a constant between MIN (inclusive) and MAX (exclusive)
    taking bits from BIT up.  */

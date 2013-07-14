@@ -1,5 +1,19 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (mips_oddfpreg_ok): Move further up file.
+	Change return type to bfd_boolean.
+	(report_bad_range, report_bad_field): New functions.
+	(mips_arg_info): New structure.
+	(match_const_int, convert_reg_type, check_regno, match_int_operand)
+	(match_mapped_int_operand, match_msb_operand, match_reg_operand)
+	(match_reg_pair_operand, match_pcrel_operand, match_perf_reg_operand)
+	(match_addiusp_operand, match_clo_clz_dest_operand)
+	(match_lwm_swm_list_operand, match_mdmx_imm_reg_operand)
+	(match_pc_operand, match_tied_reg_operand, match_operand)
+	(check_completed_insn): New functions, commented out for now.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (insn_insert_operand): New function.
 	(macro_build, mips16_macro_build): Put null character check
 	in the for loop and convert continues to breaks.  Use operand
