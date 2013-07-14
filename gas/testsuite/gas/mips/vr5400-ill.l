@@ -11,3 +11,5 @@
 .*:21: Error: Illegal operands `add.ob \$f2,\$v4,\$f6\[1\]'
 .*:22: Error: Illegal operands `add.ob \$f2,\$f4,\$v6\[1\]'
 .*:23: Error: Illegal operands `add.ob \$v2,\$v4,\$v6\[1\]'
+.*:25: Error: Vector element must be constant `add.ob \$f2,\$f4,\$f6\[foo\]'
+.*:26: Error: Missing `\]' `add.ob \$f2,\$f4,\$f6\[1}'

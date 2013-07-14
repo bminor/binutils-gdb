@@ -1,5 +1,11 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/vr5400-ill.s, gas/mips/vr5400-ill.l: Add some more cases.
+	* gas/mips/micromips-ill.s, gas/mips/micromips-ill.l: New test.
+	* gas/mips/mips.exp: Run it.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/at-2.l: Remove duplicated $at warnings.
 	* gas/mips/ext-ill.l, gas/mips/lui-1.l, gas/mips/mips32r2-ill.l,
 	gas/mips/mips32r2-ill-nofp.l, gas/mips/mips32r2-ill-fp64.l,

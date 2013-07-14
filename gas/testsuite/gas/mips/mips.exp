@@ -1102,6 +1102,7 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "micromips-warn-branch-delay"
     run_dump_test "micromips-warn-branch-delay-1"
     run_dump_test "micromips-b16"
+    run_list_test "micromips-ill"
 
     run_dump_test_arches "mcu"		[mips_arch_list_matching mips32r2 \
 					    !octeon]

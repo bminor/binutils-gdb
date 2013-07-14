@@ -2399,20 +2399,33 @@ static const struct regname reg_names_n32n64[] = {
   {0, 0}
 };
 
-/* Check if S points at a valid register specifier according to TYPES.
-   If so, then return 1, advance S to consume the specifier and store
-   the register's number in REGNOP, otherwise return 0.  */
+/* Register symbols $v0 and $v1 map to GPRs 2 and 3, but they can also be
+   interpreted as vector registers 0 and 1.  If SYMVAL is the value of one
+   of these register symbols, return the associated vector register,
+   otherwise return SYMVAL itself.  */
 
-static int
-reg_lookup (char **s, unsigned int types, unsigned int *regnop)
+static unsigned int
+mips_prefer_vec_regno (unsigned int symval)
 {
-  symbolS *symbolP;
-  char *e;
+  if ((symval & -2) == (RTYPE_GP | 2))
+    return RTYPE_VEC | (symval & 1);
+  return symval;
+}
+
+/* Return true if the string at *SPTR is a valid register name.  If so,
+   move *SPTR past the register and store the register's symbol value
+   in *SYMVAL.  This symbol value includes the register number
+   (RNUM_MASK) and register type (RTYPE_MASK).  */
+
+static bfd_boolean
+mips_parse_register (char **sptr, unsigned int *symval)
+{
+  symbolS *symbol;
+  char *s, *e;
   char save_c;
-  int reg = -1;
 
   /* Find end of name.  */
-  e = *s;
+  s = e = *sptr;
   if (is_name_beginner (*e))
     ++e;
   while (is_part_of_name (*e))
@@ -2422,99 +2435,294 @@ reg_lookup (char **s, unsigned int types, unsigned int *regnop)
   save_c = *e;
   *e = '\0';
 
-  /* Look for a register symbol.  */
-  if ((symbolP = symbol_find (*s)) && S_GET_SEGMENT (symbolP) == reg_section)
-    {
-      int r = S_GET_VALUE (symbolP);
-      if (r & types)
-	reg = r & RNUM_MASK;
-      else if ((types & RTYPE_VEC) && (r & ~1) == (RTYPE_GP | 2))
-	/* Convert GP reg $v0/1 to MDMX reg $v0/1!  */
-	reg = (r & RNUM_MASK) - 2;
-    }
-  /* Else see if this is a register defined in an itbl entry.  */
-  else if ((types & RTYPE_GP) && itbl_have_entries)
-    {
-      char *n = *s;
-      unsigned long r;
-
-      if (*n == '$')
-	++n;
-      if (itbl_get_reg_val (n, &r))
-	reg = r & RNUM_MASK;
-    }
-
-  /* Advance to next token if a register was recognised.  */
-  if (reg >= 0)
-    *s = e;
-  else if (types & RWARN)
-    as_warn (_("Unrecognized register name `%s'"), *s);
-
+  /* Look up the name.  */
+  symbol = symbol_find (s);
   *e = save_c;
-  if (regnop)
-    *regnop = reg;
-  return reg >= 0;
+
+  if (!symbol || S_GET_SEGMENT (symbol) != reg_section)
+    return FALSE;
+
+  *sptr = e;
+  *symval = S_GET_VALUE (symbol);
+  return TRUE;
 }
 
-/* Check if S points at a valid register list according to TYPES.
-   If so, then return 1, advance S to consume the list and store
-   the registers present on the list as a bitmask of ones in REGLISTP,
-   otherwise return 0.  A valid list comprises a comma-separated
-   enumeration of valid single registers and/or dash-separated
-   contiguous register ranges as determined by their numbers.
-
-   As a special exception if one of s0-s7 registers is specified as
-   the range's lower delimiter and s8 (fp) is its upper one, then no
-   registers whose numbers place them between s7 and s8 (i.e. $24-$29)
-   are selected; they have to be listed separately if needed.  */
+/* Check if SPTR points at a valid register specifier according to TYPES.
+   If so, then return 1, advance S to consume the specifier and store
+   the register's number in REGNOP, otherwise return 0.  */
 
 static int
-reglist_lookup (char **s, unsigned int types, unsigned int *reglistp)
+reg_lookup (char **s, unsigned int types, unsigned int *regnop)
 {
-  unsigned int reglist = 0;
-  unsigned int lastregno;
-  bfd_boolean ok = TRUE;
-  unsigned int regmask;
-  char *s_endlist = *s;
-  char *s_reset = *s;
   unsigned int regno;
 
-  while (reg_lookup (s, types, &regno))
+  if (mips_parse_register (s, &regno))
     {
-      lastregno = regno;
-      if (**s == '-')
-	{
-	  (*s)++;
-	  ok = reg_lookup (s, types, &lastregno);
-	  if (ok && lastregno < regno)
-	    ok = FALSE;
-	  if (!ok)
-	    break;
-	}
+      if (types & RTYPE_VEC)
+	regno = mips_prefer_vec_regno (regno);
+      if (regno & types)
+	regno &= RNUM_MASK;
+      else
+	regno = ~0;
+    }
+  else
+    {
+      if (types & RWARN)
+	as_warn (_("Unrecognized register name `%s'"), *s);
+      regno = ~0;
+    }
+  if (regnop)
+    *regnop = regno;
+  return regno <= RNUM_MASK;
+}
 
-      if (lastregno == FP && regno >= S0 && regno <= S7)
-	{
-	  lastregno = S7;
-	  reglist |= 1 << FP;
-	}
-      regmask = 1 << lastregno;
-      regmask = (regmask << 1) - 1;
-      regmask ^= (1 << regno) - 1;
-      reglist |= regmask;
+/* Token types for parsed operand lists.  */
+enum mips_operand_token_type {
+  /* A plain register, e.g. $f2.  */
+  OT_REG,
 
-      s_endlist = *s;
-      if (**s != ',')
-	break;
-      (*s)++;
+  /* An element of a vector, e.g. $v0[1].  */
+  OT_REG_ELEMENT,
+
+  /* A continuous range of registers, e.g. $s0-$s4.  */
+  OT_REG_RANGE,
+
+  /* A (possibly relocated) expression.  */
+  OT_INTEGER,
+
+  /* A floating-point value.  */
+  OT_FLOAT,
+
+  /* A single character.  This can be '(', ')' or ',', but '(' only appears
+     before OT_REGs.  */
+  OT_CHAR,
+
+  /* The end of the operand list.  */
+  OT_END
+};
+
+/* A parsed operand token.  */
+struct mips_operand_token
+{
+  /* The type of token.  */
+  enum mips_operand_token_type type;
+  union
+  {
+    /* The register symbol value for an OT_REG.  */
+    unsigned int regno;
+
+    /* The register symbol value and index for an OT_REG_ELEMENT.  */
+    struct {
+      unsigned int regno;
+      addressT index;
+    } reg_element;
+
+    /* The two register symbol values involved in an OT_REG_RANGE.  */
+    struct {
+      unsigned int regno1;
+      unsigned int regno2;
+    } reg_range;
+
+    /* The value of an OT_INTEGER.  The value is represented as an
+       expression and the relocation operators that were applied to
+       that expression.  The reloc entries are BFD_RELOC_UNUSED if no
+       relocation operators were used.  */
+    struct {
+      expressionS value;
+      bfd_reloc_code_real_type relocs[3];
+    } integer;
+
+    /* The binary data for an OT_FLOAT constant, and the number of bytes
+       in the constant.  */
+    struct {
+      unsigned char data[8];
+      int length;
+    } flt;
+
+    /* The character represented by an OT_CHAR.  */
+    char ch;
+  } u;
+};
+
+/* An obstack used to construct lists of mips_operand_tokens.  */
+static struct obstack mips_operand_tokens;
+
+/* Give TOKEN type TYPE and add it to mips_operand_tokens.  */
+
+static void
+mips_add_token (struct mips_operand_token *token,
+		enum mips_operand_token_type type)
+{
+  token->type = type;
+  obstack_grow (&mips_operand_tokens, token, sizeof (*token));
+}
+
+/* Check whether S is '(' followed by a register name.  Add OT_CHAR
+   and OT_REG tokens for them if so, and return a pointer to the first
+   unconsumed character.  Return null otherwise.  */
+
+static char *
+mips_parse_base_start (char *s)
+{
+  struct mips_operand_token token;
+  unsigned int regno;
+
+  if (*s != '(')
+    return 0;
+
+  ++s;
+  SKIP_SPACE_TABS (s);
+  if (!mips_parse_register (&s, &regno))
+    return 0;
+
+  token.u.ch = '(';
+  mips_add_token (&token, OT_CHAR);
+
+  token.u.regno = regno;
+  mips_add_token (&token, OT_REG);
+
+  return s;
+}
+
+/* Parse one or more tokens from S.  Return a pointer to the first
+   unconsumed character on success.  Return null if an error was found
+   and store the error text in insn_error.  FLOAT_FORMAT is as for
+   mips_parse_arguments.  */
+
+static char *
+mips_parse_argument_token (char *s, char float_format)
+{
+  char *end, *save_in, *err;
+  unsigned int regno1, regno2;
+  struct mips_operand_token token;
+
+  /* First look for "($reg", since we want to treat that as an
+     OT_CHAR and OT_REG rather than an expression.  */
+  end = mips_parse_base_start (s);
+  if (end)
+    return end;
+
+  /* Handle other characters that end up as OT_CHARs.  */
+  if (*s == ')' || *s == ',')
+    {
+      token.u.ch = *s;
+      mips_add_token (&token, OT_CHAR);
+      ++s;
+      return s;
     }
 
-  if (ok)
-    *s = s_endlist;
-  else
-    *s = s_reset;
-  if (reglistp)
-    *reglistp = reglist;
-  return ok && reglist != 0;
+  /* Handle tokens that start with a register.  */
+  if (mips_parse_register (&s, &regno1))
+    {
+      SKIP_SPACE_TABS (s);
+      if (*s == '-')
+	{
+	  /* A register range.  */
+	  ++s;
+	  SKIP_SPACE_TABS (s);
+	  if (!mips_parse_register (&s, &regno2))
+	    {
+	      insn_error = _("Invalid register range");
+	      return 0;
+	    }
+
+	  token.u.reg_range.regno1 = regno1;
+	  token.u.reg_range.regno2 = regno2;
+	  mips_add_token (&token, OT_REG_RANGE);
+	  return s;
+	}
+      else if (*s == '[')
+	{
+	  /* A vector element.  */
+	  expressionS element;
+
+	  ++s;
+	  SKIP_SPACE_TABS (s);
+	  my_getExpression (&element, s);
+	  if (element.X_op != O_constant)
+	    {
+	      insn_error = _("Vector element must be constant");
+	      return 0;
+	    }
+	  s = expr_end;
+	  SKIP_SPACE_TABS (s);
+	  if (*s != ']')
+	    {
+	      insn_error = _("Missing `]'");
+	      return 0;
+	    }
+	  ++s;
+
+	  token.u.reg_element.regno = regno1;
+	  token.u.reg_element.index = element.X_add_number;
+	  mips_add_token (&token, OT_REG_ELEMENT);
+	  return s;
+	}
+
+      /* Looks like just a plain register.  */
+      token.u.regno = regno1;
+      mips_add_token (&token, OT_REG);
+      return s;
+    }
+
+  if (float_format)
+    {
+      /* First try to treat expressions as floats.  */
+      save_in = input_line_pointer;
+      input_line_pointer = s;
+      err = md_atof (float_format, (char *) token.u.flt.data,
+		     &token.u.flt.length);
+      end = input_line_pointer;
+      input_line_pointer = save_in;
+      if (err && *err)
+	{
+	  insn_error = err;
+	  return 0;
+	}
+      if (s != end)
+	{
+	  mips_add_token (&token, OT_FLOAT);
+	  return end;
+	}
+    }
+
+  /* Treat everything else as an integer expression.  */
+  token.u.integer.relocs[0] = BFD_RELOC_UNUSED;
+  token.u.integer.relocs[1] = BFD_RELOC_UNUSED;
+  token.u.integer.relocs[2] = BFD_RELOC_UNUSED;
+  my_getSmallExpression (&token.u.integer.value, token.u.integer.relocs, s);
+  s = expr_end;
+  mips_add_token (&token, OT_INTEGER);
+  return s;
+}
+
+/* S points to the operand list for an instruction.  FLOAT_FORMAT is 'f'
+   if expressions should be treated as 32-bit floating-point constants,
+   'd' if they should be treated as 64-bit floating-point constants,
+   or 0 if they should be treated as integer expressions (the usual case).
+
+   Return a list of tokens on success, otherwise return 0.  The caller
+   must obstack_free the list after use.  */
+
+static struct mips_operand_token *
+mips_parse_arguments (char *s, char float_format)
+{
+  struct mips_operand_token token;
+
+  SKIP_SPACE_TABS (s);
+  while (*s)
+    {
+      s = mips_parse_argument_token (s, float_format);
+      if (!s)
+	{
+	  obstack_free (&mips_operand_tokens,
+			obstack_finish (&mips_operand_tokens));
+	  return 0;
+	}
+      SKIP_SPACE_TABS (s);
+    }
+  mips_add_token (&token, OT_END);
+  return (struct mips_operand_token *) obstack_finish (&mips_operand_tokens);
 }
 
 /* Return TRUE if opcode MO is valid on the currently selected ISA, ASE
@@ -2871,6 +3079,8 @@ md_begin (void)
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
 				       reg_names_o32[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
+
+  obstack_init (&mips_operand_tokens);
 
   mips_no_prev_insn ();
 
@@ -3692,6 +3902,9 @@ struct mips_arg_info
   /* The instruction so far.  */
   struct mips_cl_insn *insn;
 
+  /* The first unconsumed operand token.  */
+  struct mips_operand_token *token;
+
   /* The 1-based operand number, in terms of insn->insn_mo->args.  */
   int opnum;
 
@@ -3726,51 +3939,92 @@ struct mips_arg_info
      arguments to be used where a signed N-bit operand is expected.  */
   bfd_boolean lax_max;
 
-  /* When true, the OP_REG match routine should assume that another operand
-     appears after this one.  It should fail the match if the register it
-     sees is at the end of the argument list.  */
-  bfd_boolean optional_reg;
-
   /* True if a reference to the current AT register was seen.  */
   bfd_boolean seen_at;
 };
 
-/* Match a constant integer at S for ARG.  Return null if the match failed.
-   Otherwise return the end of the matched string and store the constant value
-   in *VALUE.  In the latter case, use FALLBACK as the value if the match
-   succeeded with an error.  */
+/* Try to match an OT_CHAR token for character CH.  Consume the token
+   and return true on success, otherwise return false.  */
 
-static char *
-match_const_int (struct mips_arg_info *arg, char *s, offsetT *value,
-		 offsetT fallback)
+static bfd_boolean
+match_char (struct mips_arg_info *arg, char ch)
+{
+  if (arg->token->type == OT_CHAR && arg->token->u.ch == ch)
+    {
+      ++arg->token;
+      if (ch == ',')
+	arg->argnum += 1;
+      return TRUE;
+    }
+  return FALSE;
+}
+
+/* Try to get an expression from the next tokens in ARG.  Consume the
+   tokens and return true on success, storing the expression value in
+   VALUE and relocation types in R.  */
+
+static bfd_boolean
+match_expression (struct mips_arg_info *arg, expressionS *value,
+		  bfd_reloc_code_real_type *r)
+{
+  if (arg->token->type == OT_INTEGER)
+    {
+      *value = arg->token->u.integer.value;
+      memcpy (r, arg->token->u.integer.relocs, 3 * sizeof (*r));
+      ++arg->token;
+      return TRUE;
+    }
+
+  /* Error-reporting is more consistent if we treat registers as O_register
+     rather than rejecting them outright.  "$1", "($1)" and "(($1))" are
+     then handled in the same way.  */
+  if (arg->token->type == OT_REG)
+    {
+      value->X_add_number = arg->token->u.regno;
+      ++arg->token;
+    }
+  else if (arg->token[0].type == OT_CHAR
+	   && arg->token[0].u.ch == '('
+	   && arg->token[1].type == OT_REG
+	   && arg->token[2].type == OT_CHAR
+	   && arg->token[2].u.ch == ')')
+    {
+      value->X_add_number = arg->token[1].u.regno;
+      arg->token += 3;
+    }
+  else
+    return FALSE;
+
+  value->X_op = O_register;
+  r[0] = r[1] = r[2] = BFD_RELOC_UNUSED;
+  return TRUE;
+}
+
+/* Try to get a constant expression from the next tokens in ARG.  Consume
+   the tokens and return return true on success, storing the constant value
+   in *VALUE.  Use FALLBACK as the value if the match succeeded with an
+   error.  */
+
+static bfd_boolean
+match_const_int (struct mips_arg_info *arg, offsetT *value, offsetT fallback)
 {
   expressionS ex;
   bfd_reloc_code_real_type r[3];
-  int num_relocs;
 
-  num_relocs = my_getSmallExpression (&ex, r, s);
-  if (*s == '(' && ex.X_op == O_register)
-    {
-      /* Assume that the constant has been elided and that S is a base
-	 register.  The rest of the match will fail if the assumption
-	 turns out to be wrong.  */
-      *value = 0;
-      return s;
-    }
+  if (!match_expression (arg, &ex, r))
+    return FALSE;
 
-  if (num_relocs == 0 && ex.X_op == O_constant)
+  if (r[0] == BFD_RELOC_UNUSED && ex.X_op == O_constant)
     *value = ex.X_add_number;
   else
     {
-      /* If we got a register rather than an expression, the default
-	 "Invalid operands" style of error seems more appropriate.  */
-      if (arg->soft_match || ex.X_op == O_register)
-	return 0;
+      if (arg->soft_match)
+	return FALSE;
       as_bad (_("Operand %d of `%s' must be constant"),
 	      arg->argnum, arg->insn->insn_mo->name);
       *value = fallback;
     }
-  return expr_end;
+  return TRUE;
 }
 
 /* Return the RTYPE_* flags for a register operand of type TYPE that
@@ -3857,11 +4111,70 @@ check_regno (struct mips_arg_info *arg,
     }
 }
 
+/* ARG is a register with symbol value SYMVAL.  Try to interpret it as
+   a register of type TYPE.  Return true on success, storing the register
+   number in *REGNO and warning about any dubious uses.  */
+
+static bfd_boolean
+match_regno (struct mips_arg_info *arg, enum mips_reg_operand_type type,
+	     unsigned int symval, unsigned int *regno)
+{
+  if (type == OP_REG_VEC)
+    symval = mips_prefer_vec_regno (symval);
+  if (!(symval & convert_reg_type (arg->insn->insn_mo, type)))
+    return FALSE;
+
+  *regno = symval & RNUM_MASK;
+  check_regno (arg, type, *regno);
+  return TRUE;
+}
+
+/* Try to interpret the next token in ARG as a register of type TYPE.
+   Consume the token and return true on success, storing the register
+   number in *REGNO.  Return false on failure.  */
+
+static bfd_boolean
+match_reg (struct mips_arg_info *arg, enum mips_reg_operand_type type,
+	   unsigned int *regno)
+{
+  if (arg->token->type == OT_REG
+      && match_regno (arg, type, arg->token->u.regno, regno))
+    {
+      ++arg->token;
+      return TRUE;
+    }
+  return FALSE;
+}
+
+/* Try to interpret the next token in ARG as a range of registers of type TYPE.
+   Consume the token and return true on success, storing the register numbers
+   in *REGNO1 and *REGNO2.  Return false on failure.  */
+
+static bfd_boolean
+match_reg_range (struct mips_arg_info *arg, enum mips_reg_operand_type type,
+		 unsigned int *regno1, unsigned int *regno2)
+{
+  if (match_reg (arg, type, regno1))
+    {
+      *regno2 = *regno1;
+      return TRUE;
+    }
+  if (arg->token->type == OT_REG_RANGE
+      && match_regno (arg, type, arg->token->u.reg_range.regno1, regno1)
+      && match_regno (arg, type, arg->token->u.reg_range.regno2, regno2)
+      && *regno1 <= *regno2)
+    {
+      ++arg->token;
+      return TRUE;
+    }
+  return FALSE;
+}
+
 /* OP_INT matcher.  */
 
-static char *
+static bfd_boolean
 match_int_operand (struct mips_arg_info *arg,
-		   const struct mips_operand *operand_base, char *s)
+		   const struct mips_operand *operand_base)
 {
   const struct mips_int_operand *operand;
   unsigned int uval, mask;
@@ -3877,45 +4190,45 @@ match_int_operand (struct mips_arg_info *arg,
   if (arg->lax_max)
     max_val = mask << operand->shift;
 
-  if (operand_base->lsb == 0
-      && operand_base->size == 16
-      && operand->shift == 0
-      && operand->bias == 0
-      && (operand->max_val == 32767 || operand->max_val == 65535))
+  if (arg->token->type == OT_CHAR && arg->token->u.ch == '(')
+    /* Assume we have an elided offset.  The later match will fail
+       if this turns out to be wrong.  */
+    sval = 0;
+  else if (operand_base->lsb == 0
+	   && operand_base->size == 16
+	   && operand->shift == 0
+	   && operand->bias == 0
+	   && (operand->max_val == 32767 || operand->max_val == 65535))
     {
       /* The operand can be relocated.  */
-      offset_reloc[0] = BFD_RELOC_LO16;
-      offset_reloc[1] = BFD_RELOC_UNUSED;
-      offset_reloc[2] = BFD_RELOC_UNUSED;
-      if (my_getSmallExpression (&offset_expr, offset_reloc, s) > 0)
+      if (!match_expression (arg, &offset_expr, offset_reloc))
+	return FALSE;
+
+      if (offset_reloc[0] != BFD_RELOC_UNUSED)
 	/* Relocation operators were used.  Accept the arguent and
 	   leave the relocation value in offset_expr and offset_relocs
 	   for the caller to process.  */
-	return expr_end;
-      if (*s == '(' && offset_expr.X_op == O_register)
-	/* Assume that the constant has been elided and that S is a base
-	   register.  The rest of the match will fail if the assumption
-	   turns out to be wrong.  */
-	sval = 0;
-      else
+	return TRUE;
+
+      if (offset_expr.X_op != O_constant)
 	{
-	  s = expr_end;
-	  if (offset_expr.X_op != O_constant)
-	    /* If non-constant operands are allowed then leave them for
-	       the caller to process, otherwise fail the match.  */
-	    return arg->allow_nonconst ? s : 0;
-	  sval = offset_expr.X_add_number;
+	  /* If non-constant operands are allowed then leave them for
+	     the caller to process, otherwise fail the match.  */
+	  if (!arg->allow_nonconst)
+	    return FALSE;
+	  offset_reloc[0] = BFD_RELOC_LO16;
+	  return TRUE;
 	}
+
       /* Clear the global state; we're going to install the operand
 	 ourselves.  */
-      offset_reloc[0] = BFD_RELOC_UNUSED;
+      sval = offset_expr.X_add_number;
       offset_expr.X_op = O_absent;
     }
   else
     {
-      s = match_const_int (arg, s, &sval, min_val);
-      if (!s)
-	return 0;
+      if (!match_const_int (arg, &sval, min_val))
+	return FALSE;
     }
 
   arg->last_op_int = sval;
@@ -3931,7 +4244,7 @@ match_int_operand (struct mips_arg_info *arg,
   if (sval < min_val || sval > max_val)
     {
       if (arg->soft_match)
-	return 0;
+	return FALSE;
       report_bad_range (arg->insn, arg->argnum, sval, min_val, max_val,
 			print_hex);
       arg->last_op_int = min_val;
@@ -3939,7 +4252,7 @@ match_int_operand (struct mips_arg_info *arg,
   else if (sval % factor)
     {
       if (arg->soft_match)
-	return 0;
+	return FALSE;
       as_bad (print_hex && sval >= 0
 	      ? _("Operand %d of `%s' must be a factor of %d, was 0x%lx.")
 	      : _("Operand %d of `%s' must be a factor of %d, was %ld."),
@@ -3976,40 +4289,39 @@ match_int_operand (struct mips_arg_info *arg,
       }
 
   insn_insert_operand (arg->insn, operand_base, uval);
-  return s;
+  return TRUE;
 }
 
 /* OP_MAPPED_INT matcher.  */
 
-static char *
+static bfd_boolean
 match_mapped_int_operand (struct mips_arg_info *arg,
-			  const struct mips_operand *operand_base, char *s)
+			  const struct mips_operand *operand_base)
 {
   const struct mips_mapped_int_operand *operand;
   unsigned int uval, num_vals;
   offsetT sval;
 
   operand = (const struct mips_mapped_int_operand *) operand_base;
-  s = match_const_int (arg, s, &sval, operand->int_map[0]);
-  if (!s)
-    return 0;
+  if (!match_const_int (arg, &sval, operand->int_map[0]))
+    return FALSE;
 
   num_vals = 1 << operand_base->size;
   for (uval = 0; uval < num_vals; uval++)
     if (operand->int_map[uval] == sval)
       break;
   if (uval == num_vals)
-    return 0;
+    return FALSE;
 
   insn_insert_operand (arg->insn, operand_base, uval);
-  return s;
+  return TRUE;
 }
 
 /* OP_MSB matcher.  */
 
-static char *
+static bfd_boolean
 match_msb_operand (struct mips_arg_info *arg,
-		   const struct mips_operand *operand_base, char *s)
+		   const struct mips_operand *operand_base)
 {
   const struct mips_msb_operand *operand;
   int min_val, max_val, max_high;
@@ -4020,9 +4332,8 @@ match_msb_operand (struct mips_arg_info *arg,
   max_val = min_val + (1 << operand_base->size) - 1;
   max_high = operand->opsize;
 
-  s = match_const_int (arg, s, &size, 1);
-  if (!s)
-    return 0;
+  if (!match_const_int (arg, &size, 1))
+    return FALSE;
 
   high = size + arg->last_op_int;
   sval = operand->add_lsb ? high : size;
@@ -4030,31 +4341,26 @@ match_msb_operand (struct mips_arg_info *arg,
   if (size < 0 || high > max_high || sval < min_val || sval > max_val)
     {
       if (arg->soft_match)
-	return 0;
+	return FALSE;
       report_bad_field (arg->last_op_int, size);
       sval = min_val;
     }
   insn_insert_operand (arg->insn, operand_base, sval - min_val);
-  return s;
+  return TRUE;
 }
 
 /* OP_REG matcher.  */
 
-static char *
+static bfd_boolean
 match_reg_operand (struct mips_arg_info *arg,
-		   const struct mips_operand *operand_base, char *s)
+		   const struct mips_operand *operand_base)
 {
   const struct mips_reg_operand *operand;
-  unsigned int regno, uval, num_vals, types;
+  unsigned int regno, uval, num_vals;
 
   operand = (const struct mips_reg_operand *) operand_base;
-  types = convert_reg_type (arg->insn->insn_mo, operand->reg_type);
-  if (!reg_lookup (&s, types, &regno))
-    return 0;
-
-  SKIP_SPACE_TABS (s);
-  if (arg->optional_reg && *s == 0)
-    return 0;
+  if (!match_reg (arg, operand->reg_type, &regno))
+    return FALSE;
 
   if (operand->reg_map)
     {
@@ -4063,75 +4369,64 @@ match_reg_operand (struct mips_arg_info *arg,
 	if (operand->reg_map[uval] == regno)
 	  break;
       if (num_vals == uval)
-	return 0;
+	return FALSE;
     }
   else
     uval = regno;
 
-  check_regno (arg, operand->reg_type, regno);
   arg->last_regno = regno;
   if (arg->opnum == 1)
     arg->dest_regno = regno;
   insn_insert_operand (arg->insn, operand_base, uval);
-  return s;
+  return TRUE;
 }
 
 /* OP_REG_PAIR matcher.  */
 
-static char *
+static bfd_boolean
 match_reg_pair_operand (struct mips_arg_info *arg,
-			const struct mips_operand *operand_base, char *s)
+			const struct mips_operand *operand_base)
 {
   const struct mips_reg_pair_operand *operand;
-  unsigned int regno1, regno2, uval, num_vals, types;
+  unsigned int regno1, regno2, uval, num_vals;
 
   operand = (const struct mips_reg_pair_operand *) operand_base;
-  types = convert_reg_type (arg->insn->insn_mo, operand->reg_type);
-
-  if (!reg_lookup (&s, types, &regno1))
-    return 0;
-
-  SKIP_SPACE_TABS (s);
-  if (*s++ != ',')
-    return 0;
-  arg->argnum += 1;
-
-  if (!reg_lookup (&s, types, &regno2))
-    return 0;
+  if (!match_reg (arg, operand->reg_type, &regno1)
+      || !match_char (arg, ',')
+      || !match_reg (arg, operand->reg_type, &regno2))
+    return FALSE;
 
   num_vals = 1 << operand_base->size;
   for (uval = 0; uval < num_vals; uval++)
     if (operand->reg1_map[uval] == regno1 && operand->reg2_map[uval] == regno2)
       break;
   if (uval == num_vals)
-    return 0;
+    return FALSE;
 
-  check_regno (arg, operand->reg_type, regno1);
-  check_regno (arg, operand->reg_type, regno2);
   insn_insert_operand (arg->insn, operand_base, uval);
-  return s;
+  return TRUE;
 }
 
 /* OP_PCREL matcher.  The caller chooses the relocation type.  */
 
-static char *
-match_pcrel_operand (char *s)
+static bfd_boolean
+match_pcrel_operand (struct mips_arg_info *arg)
 {
-  my_getExpression (&offset_expr, s);
-  return expr_end;
+  bfd_reloc_code_real_type r[3];
+
+  return match_expression (arg, &offset_expr, r) && r[0] == BFD_RELOC_UNUSED;
 }
 
 /* OP_PERF_REG matcher.  */
 
-static char *
+static bfd_boolean
 match_perf_reg_operand (struct mips_arg_info *arg,
-			const struct mips_operand *operand, char *s)
+			const struct mips_operand *operand)
 {
   offsetT sval;
 
-  s = match_const_int (arg, s, &sval, 0);
-  if (!s)
-    return 0;
+  if (!match_const_int (arg, &sval, 0))
+    return FALSE;
 
   if (sval != 0
       && (sval != 1
@@ -4140,66 +4435,79 @@ match_perf_reg_operand (struct mips_arg_info *arg,
 		  || strcmp (arg->insn->insn_mo->name, "mtps") == 0))))
     {
       if (arg->soft_match)
-	return 0;
+	return FALSE;
       as_bad (_("Invalid performance register (%ld)"), (unsigned long) sval);
     }
 
   insn_insert_operand (arg->insn, operand, sval);
-  return s;
+  return TRUE;
 }
 
 /* OP_ADDIUSP matcher.  */
 
-static char *
+static bfd_boolean
 match_addiusp_operand (struct mips_arg_info *arg,
-		       const struct mips_operand *operand, char *s)
+		       const struct mips_operand *operand)
 {
   offsetT sval;
   unsigned int uval;
 
-  s = match_const_int (arg, s, &sval, -256);
-  if (!s)
-    return 0;
+  if (!match_const_int (arg, &sval, -256))
+    return FALSE;
 
   if (sval % 4)
-    return 0;
+    return FALSE;
 
   sval /= 4;
   if (!(sval >= -258 && sval <= 257) || (sval >= -2 && sval <= 1))
-    return 0;
+    return FALSE;
 
   uval = (unsigned int) sval;
   uval = ((uval >> 1) & ~0xff) | (uval & 0xff);
   insn_insert_operand (arg->insn, operand, uval);
-  return s;
+  return TRUE;
 }
 
 /* OP_CLO_CLZ_DEST matcher.  */
 
-static char *
+static bfd_boolean
 match_clo_clz_dest_operand (struct mips_arg_info *arg,
-			    const struct mips_operand *operand, char *s)
+			    const struct mips_operand *operand)
 {
   unsigned int regno;
 
-  if (!reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno))
-    return 0;
+  if (!match_reg (arg, OP_REG_GP, &regno))
+    return FALSE;
 
-  check_regno (arg, OP_REG_GP, regno);
   insn_insert_operand (arg->insn, operand, regno | (regno << 5));
-  return s;
+  return TRUE;
 }
 
 /* OP_LWM_SWM_LIST matcher.  */
 
-static char *
+static bfd_boolean
 match_lwm_swm_list_operand (struct mips_arg_info *arg,
-			    const struct mips_operand *operand, char *s)
+			    const struct mips_operand *operand)
 {
-  unsigned int reglist, sregs, ra;
+  unsigned int reglist, sregs, ra, regno1, regno2;
+  struct mips_arg_info reset;
 
-  if (!reglist_lookup (&s, RTYPE_NUM | RTYPE_GP, &reglist))
-    return 0;
+  reglist = 0;
+  if (!match_reg_range (arg, OP_REG_GP, &regno1, &regno2))
+    return FALSE;
+  do
+    {
+      if (regno2 == FP && regno1 >= S0 && regno1 <= S7)
+	{
+	  reglist |= 1 << FP;
+	  regno2 = S7;
+	}
+      reglist |= ((1U << regno2 << 1) - 1) & -(1U << regno1);
+      reset = *arg;
+    }
+  while (match_char (arg, ',')
+	 && match_reg_range (arg, OP_REG_GP, &regno1, &regno2));
+  *arg = reset;
 
   if (operand->size == 2)
     {
@@ -4211,7 +4519,7 @@ match_lwm_swm_list_operand (struct mips_arg_info *arg,
 
 	 and any permutations of these.  */
       if ((reglist & 0xfff1ffff) != 0x80010000)
-	return 0;
+	return FALSE;
 
       sregs = (reglist >> 17) & 7;
       ra = 0;
@@ -4230,24 +4538,24 @@ match_lwm_swm_list_operand (struct mips_arg_info *arg,
 
 	 and any permutations of these.  */
       if ((reglist & 0x3f00ffff) != 0)
-	return 0;
+	return FALSE;
 
       ra = (reglist >> 27) & 0x10;
       sregs = ((reglist >> 22) & 0x100) | ((reglist >> 16) & 0xff);
     }
   sregs += 1;
   if ((sregs & -sregs) != sregs)
-    return 0;
+    return FALSE;
 
   insn_insert_operand (arg->insn, operand, (ffs (sregs) - 1) | ra);
-  return s;
+  return TRUE;
 }
 
 /* OP_ENTRY_EXIT_LIST matcher.  */
 
-static char *
+static unsigned int
 match_entry_exit_operand (struct mips_arg_info *arg,
-			  const struct mips_operand *operand, char *s)
+			  const struct mips_operand *operand)
 {
   unsigned int mask;
   bfd_boolean is_exit;
@@ -4256,30 +4564,17 @@ match_entry_exit_operand (struct mips_arg_info *arg,
      are different.  */
   is_exit = strcmp (arg->insn->insn_mo->name, "exit") == 0;
   mask = (is_exit ? 7 << 3 : 0);
-  for (;;)
+  do
     {
       unsigned int regno1, regno2;
       bfd_boolean is_freg;
 
-      if (reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &regno1))
+      if (match_reg_range (arg, OP_REG_GP, &regno1, &regno2))
 	is_freg = FALSE;
-      else if (reg_lookup (&s, RTYPE_FPU, &regno1))
+      else if (match_reg_range (arg, OP_REG_FP, &regno1, &regno2))
 	is_freg = TRUE;
       else
-	return 0;
-
-      SKIP_SPACE_TABS (s);
-      if (*s == '-')
-	{
-	  ++s;
-	  SKIP_SPACE_TABS (s);
-	  if (!reg_lookup (&s, (is_freg ? RTYPE_FPU
-				: RTYPE_GP | RTYPE_NUM), &regno2))
-	    return 0;
-	  SKIP_SPACE_TABS (s);
-	}
-      else
-	regno2 = regno1;
+	return FALSE;
 
       if (is_exit && is_freg && regno1 == 0 && regno2 < 2)
 	{
@@ -4293,28 +4588,21 @@ match_entry_exit_operand (struct mips_arg_info *arg,
       else if (regno1 == RA && regno2 == RA)
 	mask |= 1;
       else
-	return 0;
-
-      if (!*s)
-	break;
-      if (*s != ',')
-	return 0;
-      arg->argnum += 1;
-      ++s;
-      SKIP_SPACE_TABS (s);
+	return FALSE;
     }
+  while (match_char (arg, ','));
+
   insn_insert_operand (arg->insn, operand, mask);
-  return s;
+  return TRUE;
 }
 
 /* OP_SAVE_RESTORE_LIST matcher.  */
 
-static char *
-match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
+static bfd_boolean
+match_save_restore_list_operand (struct mips_arg_info *arg)
 {
   unsigned int opcode, args, statics, sregs;
   unsigned int num_frame_sizes, num_args, num_statics, num_sregs;
-  expressionS value;
   offsetT frame_size;
   const char *error;
 
@@ -4325,36 +4613,21 @@ match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
   args = 0;
   statics = 0;
   sregs = 0;
-  for (;;)
+  do
     {
       unsigned int regno1, regno2;
 
-      my_getExpression (&value, s);
-      if (value.X_op == O_constant)
+      if (arg->token->type == OT_INTEGER)
 	{
 	  /* Handle the frame size.  */
+	  if (!match_const_int (arg, &frame_size, 0))
+	    return FALSE;
 	  num_frame_sizes += 1;
-	  frame_size = value.X_add_number;
-	  s = expr_end;
-	  SKIP_SPACE_TABS (s);
 	}
       else
 	{
-	  if (!reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &regno1))
-	    return 0;
-
-	  SKIP_SPACE_TABS (s);
-	  if (*s == '-')
-	    {
-	      ++s;
-	      SKIP_SPACE_TABS (s);
-	      if (!reg_lookup (&s, RTYPE_GP | RTYPE_NUM, &regno2)
-		  || regno2 < regno1)
-		return 0;
-	      SKIP_SPACE_TABS (s);
-	    }
-	  else
-	    regno2 = regno1;
+	  if (!match_reg_range (arg, OP_REG_GP, &regno1, &regno2))
+	    return FALSE;
 
 	  while (regno1 <= regno2)
 	    {
@@ -4377,24 +4650,18 @@ match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
 		/* Add $ra to insn.  */
 		opcode |= 0x40;
 	      else
-		return 0;
+		return FALSE;
 	      regno1 += 1;
 	      if (regno1 == 24)
 		regno1 = 30;
 	    }
 	}
-      if (!*s)
-	break;
-      if (*s != ',')
-	return 0;
-      arg->argnum += 1;
-      ++s;
-      SKIP_SPACE_TABS (s);
     }
+  while (match_char (arg, ','));
 
   /* Encode args/statics combination.  */
   if (args & statics)
-    return 0;
+    return FALSE;
   else if (args == 0xf)
     /* All $a0-$a3 are args.  */
     opcode |= MIPS16_ALL_ARGS << 16;
@@ -4411,7 +4678,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
 	  num_args += 1;
 	}
       if (args != 0)
-	return 0;
+	return FALSE;
 
       /* Count static registers.  */
       num_statics = 0;
@@ -4421,7 +4688,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
 	  num_statics += 1;
 	}
       if (statics != 0)
-	return 0;
+	return FALSE;
 
       /* Encode args/statics.  */
       opcode |= ((num_args << 2) | num_statics) << 16;
@@ -4442,7 +4709,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
       num_sregs += 1;
     }
   if (sregs != 0)
-    return 0;
+    return FALSE;
   opcode |= num_sregs << 24;
 
   /* Encode frame size.  */
@@ -4462,7 +4729,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
   if (error)
     {
       if (arg->soft_match)
-	return 0;
+	return FALSE;
       as_bad (error);
     }
 
@@ -4470,16 +4737,16 @@ match_save_restore_list_operand (struct mips_arg_info *arg, char *s)
   if ((opcode >> 16) != 0 || frame_size == 0)
     opcode |= MIPS16_EXTEND;
   arg->insn->insn_opcode = opcode;
-  return s;
+  return TRUE;
 }
 
 /* OP_MDMX_IMM_REG matcher.  */
 
-static char *
+static bfd_boolean
 match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
-			    const struct mips_operand *operand, char *s)
+			    const struct mips_operand *operand)
 {
-  unsigned int regno, uval, types;
+  unsigned int regno, uval;
   bfd_boolean is_qh;
   const struct mips_opcode *opcode;
 
@@ -4489,49 +4756,32 @@ match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
   uval = mips_extract_operand (operand, opcode->match);
   is_qh = (uval != 0);
 
-  types = convert_reg_type (arg->insn->insn_mo, OP_REG_VEC);
-  if (reg_lookup (&s, types, &regno))
+  if (arg->token->type == OT_REG || arg->token->type == OT_REG_ELEMENT)
     {
       if ((opcode->membership & INSN_5400)
 	  && strcmp (opcode->name, "rzu.ob") == 0)
 	{
 	  if (arg->soft_match)
-	    return 0;
+	    return FALSE;
 	  as_bad (_("Operand %d of `%s' must be an immediate"),
 		  arg->argnum, opcode->name);
 	}
 
       /* Check whether this is a vector register or a broadcast of
 	 a single element.  */
-      SKIP_SPACE_TABS (s);
-      if (*s == '[')
+      if (arg->token->type == OT_REG_ELEMENT)
 	{
-	  /* Read the element number.  */
-	  expressionS value;
-
-	  ++s;
-	  SKIP_SPACE_TABS (s);
-	  my_getExpression (&value, s);
-	  s = expr_end;
-	  if (value.X_op != O_constant
-	      || value.X_add_number < 0
-	      || value.X_add_number > (is_qh ? 3 : 7))
+	  if (!match_regno (arg, OP_REG_VEC, arg->token->u.reg_element.regno,
+			    &regno))
+	    return FALSE;
+	  if (arg->token->u.reg_element.index > (is_qh ? 3 : 7))
 	    {
 	      if (arg->soft_match)
-		return 0;
+		return FALSE;
 	      as_bad (_("Invalid element selector"));
-	      value.X_add_number = 0;
 	    }
-	  uval |= (unsigned int) value.X_add_number << (is_qh ? 2 : 1) << 5;
-	  SKIP_SPACE_TABS (s);
-	  if (*s == ']')
-	    ++s;
 	  else
-	    {
-	      if (arg->soft_match)
-		return 0;
-	      as_bad (_("Expecting ']' found '%s'"), s);
-	    }
+	    uval |= arg->token->u.reg_element.index << (is_qh ? 2 : 1) << 5;
 	}
       else
 	{
@@ -4541,30 +4791,31 @@ match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
 		  || strcmp (opcode->name, "srl.ob") == 0))
 	    {
 	      if (arg->soft_match)
-		return 0;
+		return FALSE;
 	      as_bad (_("Operand %d of `%s' must be scalar"),
 		      arg->argnum, opcode->name);
 	    }
 
+	  if (!match_regno (arg, OP_REG_VEC, arg->token->u.regno, &regno))
+	    return FALSE;
 	  if (is_qh)
 	    uval |= MDMX_FMTSEL_VEC_QH << 5;
 	  else
 	    uval |= MDMX_FMTSEL_VEC_OB << 5;
 	}
-      check_regno (arg, OP_REG_FP, regno);
       uval |= regno;
+      ++arg->token;
     }
   else
     {
       offsetT sval;
 
-      s = match_const_int (arg, s, &sval, 0);
-      if (!s)
-	return 0;
+      if (!match_const_int (arg, &sval, 0))
+	return FALSE;
       if (sval < 0 || sval > 31)
 	{
 	  if (arg->soft_match)
-	    return 0;
+	    return FALSE;
 	  report_bad_range (arg->insn, arg->argnum, sval, 0, 31, FALSE);
 	}
       uval |= (sval & 31);
@@ -4574,37 +4825,31 @@ match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
 	uval |= MDMX_FMTSEL_IMM_OB << 5;
     }
   insn_insert_operand (arg->insn, operand, uval);
-  return s;
+  return TRUE;
 }
 
 /* OP_PC matcher.  */
 
-static char *
-match_pc_operand (char *s)
+static bfd_boolean
+match_pc_operand (struct mips_arg_info *arg)
 {
-  if (strncmp (s, "$pc", 3) != 0)
-    return 0;
-  s += 3;
-  SKIP_SPACE_TABS (s);
-  return s;
+  if (arg->token->type == OT_REG && (arg->token->u.regno & RTYPE_PC))
+    {
+      ++arg->token;
+      return TRUE;
+    }
+  return FALSE;
 }
 
 /* OP_REPEAT_DEST_REG and OP_REPEAT_PREV_REG matcher.  OTHER_REGNO is the
    register that we need to match.  */
 
-static char *
-match_tied_reg_operand (struct mips_arg_info *arg, char *s,
-			unsigned int other_regno)
+static bfd_boolean
+match_tied_reg_operand (struct mips_arg_info *arg, unsigned int other_regno)
 {
   unsigned int regno;
 
-  if (!reg_lookup (&s, RTYPE_NUM | RTYPE_GP, &regno)
-      || regno != other_regno)
-    return 0;
-  SKIP_SPACE_TABS (s);
-  if (arg->optional_reg && *s == 0)
-    return 0;
-  return s;
+  return match_reg (arg, OP_REG_GP, &regno) && regno == other_regno;
 }
 
 /* Read a floating-point constant from S for LI.S or LI.D.  LENGTH is
@@ -4628,16 +4873,15 @@ match_tied_reg_operand (struct mips_arg_info *arg, char *s,
    any changes if the instruction does not match.  We just match
    unconditionally and report an error if the constant is invalid.  */
 
-static char *
-parse_float_constant (char *s, expressionS *imm, expressionS *offset,
-		      int length, bfd_boolean using_gprs)
+static bfd_boolean
+match_float_constant (struct mips_arg_info *arg, expressionS *imm,
+		      expressionS *offset, int length, bfd_boolean using_gprs)
 {
-  char *save_in, *p, *err;
-  unsigned char data[8];
-  int atof_length;
+  char *p;
   segT seg, new_seg;
   subsegT subseg;
   const char *newname;
+  unsigned char *data;
 
   /* Where the constant is placed is based on how the MIPS assembler
      does things:
@@ -4649,18 +4893,12 @@ parse_float_constant (char *s, expressionS *imm, expressionS *offset,
 
      The .lit4 and .lit8 sections are only used if permitted by the
      -G argument.  */
-  save_in = input_line_pointer;
-  input_line_pointer = s;
-  err = md_atof (length == 8 ? 'd' : 'f', (char *) data, &atof_length);
-  s = input_line_pointer;
-  input_line_pointer = save_in;
-  if (err && *err)
-    {
-      as_bad (_("Bad floating point constant: %s"), err);
-      memset (data, '\0', sizeof (data));
-    }
-  else
-    gas_assert (atof_length == length);
+  if (arg->token->type != OT_FLOAT)
+    return FALSE;
+
+  gas_assert (arg->token->u.flt.length == length);
+  data = arg->token->u.flt.data;
+  ++arg->token;
 
   /* Handle 32-bit constants for which an immediate value is best.  */
   if (length == 4
@@ -4675,7 +4913,7 @@ parse_float_constant (char *s, expressionS *imm, expressionS *offset,
       else
 	imm->X_add_number = bfd_getb32 (data);
       offset->X_op = O_absent;
-      return s;
+      return TRUE;
     }
 
   /* Handle 64-bit constants for which an immediate value is best.  */
@@ -4723,7 +4961,7 @@ parse_float_constant (char *s, expressionS *imm, expressionS *offset,
 	    imm->X_add_number = bfd_getb64 (data);
 	  offset->X_op = O_absent;
 	}
-      return s;
+      return TRUE;
     }
 
   /* Switch to the right section.  */
@@ -4765,65 +5003,65 @@ parse_float_constant (char *s, expressionS *imm, expressionS *offset,
 
   /* Switch back to the original section.  */
   subseg_set (seg, subseg);
-  return s;
+  return TRUE;
 }
 
 /* S is the text seen for ARG.  Match it against OPERAND.  Return the end
    of the argument text if the match is successful, otherwise return null.  */
 
-static char *
+static bfd_boolean
 match_operand (struct mips_arg_info *arg,
-	       const struct mips_operand *operand, char *s)
+	       const struct mips_operand *operand)
 {
   switch (operand->type)
     {
     case OP_INT:
-      return match_int_operand (arg, operand, s);
+      return match_int_operand (arg, operand);
 
     case OP_MAPPED_INT:
-      return match_mapped_int_operand (arg, operand, s);
+      return match_mapped_int_operand (arg, operand);
 
     case OP_MSB:
-      return match_msb_operand (arg, operand, s);
+      return match_msb_operand (arg, operand);
 
     case OP_REG:
-      return match_reg_operand (arg, operand, s);
+      return match_reg_operand (arg, operand);
 
     case OP_REG_PAIR:
-      return match_reg_pair_operand (arg, operand, s);
+      return match_reg_pair_operand (arg, operand);
 
     case OP_PCREL:
-      return match_pcrel_operand (s);
+      return match_pcrel_operand (arg);
 
     case OP_PERF_REG:
-      return match_perf_reg_operand (arg, operand, s);
+      return match_perf_reg_operand (arg, operand);
 
     case OP_ADDIUSP_INT:
-      return match_addiusp_operand (arg, operand, s);
+      return match_addiusp_operand (arg, operand);
 
     case OP_CLO_CLZ_DEST:
-      return match_clo_clz_dest_operand (arg, operand, s);
+      return match_clo_clz_dest_operand (arg, operand);
 
     case OP_LWM_SWM_LIST:
-      return match_lwm_swm_list_operand (arg, operand, s);
+      return match_lwm_swm_list_operand (arg, operand);
 
     case OP_ENTRY_EXIT_LIST:
-      return match_entry_exit_operand (arg, operand, s);
+      return match_entry_exit_operand (arg, operand);
 
     case OP_SAVE_RESTORE_LIST:
-      return match_save_restore_list_operand (arg, s);
+      return match_save_restore_list_operand (arg);
 
     case OP_MDMX_IMM_REG:
-      return match_mdmx_imm_reg_operand (arg, operand, s);
+      return match_mdmx_imm_reg_operand (arg, operand);
 
     case OP_REPEAT_DEST_REG:
-      return match_tied_reg_operand (arg, s, arg->dest_regno);
+      return match_tied_reg_operand (arg, arg->dest_regno);
 
     case OP_REPEAT_PREV_REG:
-      return match_tied_reg_operand (arg, s, arg->last_regno);
+      return match_tied_reg_operand (arg, arg->last_regno);
 
     case OP_PC:
-      return match_pc_operand (s);
+      return match_pc_operand (arg);
     }
   abort ();
 }
@@ -11799,17 +12037,18 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   struct mips_opcode *firstinsn = NULL;
   const struct mips_opcode *past;
   struct hash_control *hash;
-  char *s;
   const char *args;
   char c = 0;
   struct mips_opcode *insn;
-  char *argsStart;
   long opend;
   char *name;
   char *dot;
+  char format;
   long end;
   const struct mips_operand *operand;
   struct mips_arg_info arg;
+  struct mips_operand_token *tokens;
+  bfd_boolean optional_reg;
 
   insn_error = NULL;
 
@@ -11866,13 +12105,22 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       return;
     }
 
+  if (strcmp (name, "li.s") == 0)
+    format = 'f';
+  else if (strcmp (name, "li.d") == 0)
+    format = 'd';
+  else
+    format = 0;
+  tokens = mips_parse_arguments (str + end, format);
+  if (!tokens)
+    return;
+
   /* For microMIPS instructions placed in a fixed-length branch delay slot
      we make up to two passes over the relevant fragment of the opcode
      table.  First we try instructions that meet the delay slot's length
      requirement.  If none matched, then we retry with the remaining ones
      and if one matches, then we use it and then issue an appropriate
      warning later on.  */
-  argsStart = s = str + end;
   for (;;)
     {
       bfd_boolean delay_slot_ok;
@@ -11910,6 +12158,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 	    }
 
+	  obstack_free (&mips_operand_tokens, tokens);
 	  if (insn_error)
 	    return;
 
@@ -11938,6 +12187,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       insn_error = NULL;
       memset (&arg, 0, sizeof (arg));
       arg.insn = ip;
+      arg.token = tokens;
       arg.argnum = 1;
       arg.last_regno = ILLEGAL_REG;
       arg.dest_regno = ILLEGAL_REG;
@@ -11945,8 +12195,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 			|| (wrong_delay_slot_insns && need_delay_slot_ok));
       for (args = insn->args;; ++args)
 	{
-	  SKIP_SPACE_TABS (s);
-	  if (*s == 0)
+	  if (arg.token->type == OT_END)
 	    {
 	      /* Handle unary instructions in which only one operand is given.
 		 The source is then the same as the destination.  */
@@ -11958,8 +12207,8 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  case 'w':
 		  case 'W':
 		  case 'V':
+		    arg.token = tokens;
 		    arg.argnum = 1;
-		    s = argsStart;
 		    continue;
 		  }
 
@@ -11981,6 +12230,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		    as_bad (_("A destination register must be supplied"));
 		}
 	      check_completed_insn (&arg);
+	      obstack_free (&mips_operand_tokens, tokens);
 	      return;
 	    }
 
@@ -11991,19 +12241,16 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  /* Handle characters that need to match exactly.  */
 	  if (*args == '(' || *args == ')' || *args == ',')
 	    {
-	      if (*s != *args)
-		break;
-	      if (*s == ',')
-		arg.argnum += 1;
-	      ++s;
-	      continue;
+	      if (match_char (&arg, *args))
+ 		continue;
+ 	      break;
 	    }
 
 	  /* Handle special macro operands.  Work out the properties of
 	     other operands.  */
 	  arg.opnum += 1;
-	  arg.optional_reg = FALSE;
 	  arg.lax_max = FALSE;
+	  optional_reg = FALSE;
 	  switch (*args)
 	    {
 	    case '+':
@@ -12031,13 +12278,12 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
 		case 'I':
 		  /* "+I" is like "I", except that imm2_expr is used.  */
-		  my_getExpression (&imm2_expr, s);
-		  if (imm2_expr.X_op != O_big
-		      && imm2_expr.X_op != O_constant)
-		  insn_error = _("absolute expression required");
+		  if (match_const_int (&arg, &imm2_expr.X_add_number, 0))
+		    imm2_expr.X_op = O_constant;
+		  else
+		    insn_error = _("absolute expression required");
 		  if (HAVE_32BIT_GPRS)
 		    normalize_constant_expr (&imm2_expr);
-		  s = expr_end;
 		  ++args;
 		  continue;
 
@@ -12087,22 +12333,20 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      /* We have already matched a comma by this point, so the register
 		 is only optional if there is another operand to come.  */
 	      gas_assert (arg.opnum == 2);
-	      arg.optional_reg = (args[1] == ',');
+	      optional_reg = (args[1] == ',');
 	      break;
 
 	    case 'I':
-	      my_getExpression (&imm_expr, s);
-	      if (imm_expr.X_op != O_big
-		  && imm_expr.X_op != O_constant)
+	      if (match_const_int (&arg, &imm_expr.X_add_number, 0))
+		imm_expr.X_op = O_constant;
+	      else
 		insn_error = _("absolute expression required");
 	      if (HAVE_32BIT_GPRS)
 		normalize_constant_expr (&imm_expr);
-	      s = expr_end;
 	      continue;
 
 	    case 'A':
-	      my_getSmallExpression (&offset_expr, offset_reloc, s);
-	      if (offset_expr.X_op == O_register)
+	      if (arg.token->type == OT_CHAR && arg.token->u.ch == '(')
 		{
 		  /* Assume that the offset has been elided and that what
 		     we saw was a base register.  The match will fail later
@@ -12110,27 +12354,34 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		  offset_expr.X_op = O_constant;
 		  offset_expr.X_add_number = 0;
 		}
+	      else if (match_expression (&arg, &offset_expr, offset_reloc))
+		normalize_address_expr (&offset_expr);
 	      else
-		{
-		  normalize_address_expr (&offset_expr);
-		  s = expr_end;
-		}
+		insn_error = _("absolute expression required");
 	      continue;
 
 	    case 'F':
-	      s = parse_float_constant (s, &imm_expr, &offset_expr, 8, TRUE);
+	      if (!match_float_constant (&arg, &imm_expr, &offset_expr,
+					 8, TRUE))
+		insn_error = _("floating-point expression required");
 	      continue;
 
 	    case 'L':
-	      s = parse_float_constant (s, &imm_expr, &offset_expr, 8, FALSE);
+	      if (!match_float_constant (&arg, &imm_expr, &offset_expr,
+					 8, FALSE))
+		insn_error = _("floating-point expression required");
 	      continue;
 
 	    case 'f':
-	      s = parse_float_constant (s, &imm_expr, &offset_expr, 4, TRUE);
+	      if (!match_float_constant (&arg, &imm_expr, &offset_expr,
+					 4, TRUE))
+		insn_error = _("floating-point expression required");
 	      continue;
 
 	    case 'l':
-	      s = parse_float_constant (s, &imm_expr, &offset_expr, 4, FALSE);
+	      if (!match_float_constant (&arg, &imm_expr, &offset_expr,
+					 4, FALSE))
+		insn_error = _("floating-point expression required");
 	      continue;
 
 	      /* ??? This is the traditional behavior, but is flaky if
@@ -12179,7 +12430,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		     so the register is only optional if there is another
 		     operand to come.  */
 		  gas_assert (arg.opnum == 2);
-		  arg.optional_reg = (args[2] == ',');
+		  optional_reg = (args[2] == ',');
 		  break;
 
 		case 'D':
@@ -12201,18 +12452,17 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  if (!operand)
 	    abort ();
 
-	  s = match_operand (&arg, operand, s);
-	  if (!s && arg.optional_reg)
+	  if (optional_reg
+	      && (arg.token[0].type != OT_REG
+		  || arg.token[1].type == OT_END))
 	    {
 	      /* Assume that the register has been elided and is the
 		 same as the first operand.  */
-	      arg.optional_reg = FALSE;
+	      arg.token = tokens;
 	      arg.argnum = 1;
-	      s = argsStart;
-	      SKIP_SPACE_TABS (s);
-	      s = match_operand (&arg, operand, s);
 	    }
-	  if (!s)
+
+	  if (!match_operand (&arg, operand))
 	    break;
 
 	  /* Skip prefixes.  */
@@ -12222,7 +12472,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  continue;
 	}
       /* Args don't match.  */
-      s = argsStart;
       insn_error = _("Illegal operands");
       if (more_alts)
 	{
@@ -12237,6 +12486,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  insn = firstinsn;
 	  continue;
 	}
+      obstack_free (&mips_operand_tokens, tokens);
       return;
     }
 }
@@ -12251,11 +12501,11 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   char *s;
   const char *args;
   struct mips_opcode *insn;
-  char *argsstart;
-  size_t i;
   const struct mips_operand *operand;
   const struct mips_operand *ext_operand;
   struct mips_arg_info arg;
+  struct mips_operand_token *tokens;
+  bfd_boolean optional_reg;
 
   insn_error = NULL;
 
@@ -12302,7 +12552,10 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
       return;
     }
 
-  argsstart = s;
+  tokens = mips_parse_arguments (s, 0);
+  if (!tokens)
+    return;
+
   for (;;)
     {
       bfd_boolean ok;
@@ -12332,6 +12585,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 			   mips_cpu_info_from_isa (mips_opts.isa)->name);
 		  insn_error = buf;
 		}
+	      obstack_free (&mips_operand_tokens, tokens);
 	      return;
 	    }
 	}
@@ -12347,6 +12601,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 
       memset (&arg, 0, sizeof (arg));
       arg.insn = ip;
+      arg.token = tokens;
       arg.argnum = 1;
       arg.last_regno = ILLEGAL_REG;
       arg.dest_regno = ILLEGAL_REG;
@@ -12356,8 +12611,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	{
 	  int c;
 
-	  SKIP_SPACE_TABS (s);
-	  if (*s == 0)
+	  if (arg.token->type == OT_END)
 	    {
 	      offsetT value;
 
@@ -12368,8 +12622,8 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		  {
 		  case 'v':
 		  case 'w':
+		    arg.token = tokens;
 		    arg.argnum = 1;
-		    s = argsstart;
 		    continue;
 		  }
 
@@ -12406,6 +12660,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		*offset_reloc = (int) BFD_RELOC_UNUSED + relax_char;
 
 	      check_completed_insn (&arg);
+	      obstack_free (&mips_operand_tokens, tokens);
 	      return;
 	    }
 
@@ -12416,22 +12671,19 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	  /* Handle characters that need to match exactly.  */
 	  if (*args == '(' || *args == ')' || *args == ',')
 	    {
-	      if (*s != *args)
-		break;
-	      if (*s == ',')
-		arg.argnum += 1;
-	      ++s;
-	      continue;
+	      if (match_char (&arg, *args))
+ 		continue;
+ 	      break;
 	    }
 
 	  arg.opnum += 1;
-	  arg.optional_reg = FALSE;
+	  optional_reg = FALSE;
 	  c = *args;
 	  switch (c)
 	    {
 	    case 'v':
 	    case 'w':
-	      arg.optional_reg = (args[1] == ',');
+	      optional_reg = (args[1] == ',');
 	      break;
 
 	    case 'p':
@@ -12443,13 +12695,12 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      break;
 
 	    case 'I':
-	      my_getExpression (&imm_expr, s);
-	      if (imm_expr.X_op != O_big
-		  && imm_expr.X_op != O_constant)
+	      if (match_const_int (&arg, &imm_expr.X_add_number, 0))
+		imm_expr.X_op = O_constant;
+	      else
 		insn_error = _("absolute expression required");
 	      if (HAVE_32BIT_GPRS)
 		normalize_constant_expr (&imm_expr);
-	      s = expr_end;
 	      continue;
 
 	    case 'a':
@@ -12475,44 +12726,42 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      ext_operand = decode_mips16_operand (c, TRUE);
 	      if (operand != ext_operand)
 		{
-		  /* Parse the expression, allowing relocation operators.  */
-		  i = my_getSmallExpression (&offset_expr, offset_reloc, s);
-		  s = expr_end;
-
-		  if (offset_expr.X_op == O_register)
+		  if (arg.token->type == OT_CHAR && arg.token->u.ch == '(')
 		    {
-		      /* Handle elided offsets, which are equivalent to 0.  */
-		      if (*s == '(')
-			{
-			  offset_expr.X_op = O_constant;
-			  offset_expr.X_add_number = 0;
-			  relax_char = c;
-			  continue;
-			}
-		      /* Fail the match.  */
-		      break;
+		      offset_expr.X_op = O_constant;
+		      offset_expr.X_add_number = 0;
+		      relax_char = c;
+		      continue;
 		    }
+
+		  /* We need the OT_INTEGER check because some MIPS16
+		     immediate variants are listed before the register ones.  */
+		  if (arg.token->type != OT_INTEGER
+		      || !match_expression (&arg, &offset_expr, offset_reloc))
+		    break;
+
 		  /* '8' is used for SLTI(U) and has traditionally not
 		     been allowed to take relocation operators.  */
-		  if (i > 0 && (ext_operand->size != 16 || c == '8'))
+		  if (offset_reloc[0] != BFD_RELOC_UNUSED
+		      && (ext_operand->size != 16 || c == '8'))
 		    break;
+
 		  relax_char = c;
 		  continue;
 		}
 	    }
 
-	  s = match_operand (&arg, operand, s);
-	  if (!s && arg.optional_reg)
+	  if (optional_reg
+	      && (arg.token[0].type != OT_REG
+		  || arg.token[1].type == OT_END))
 	    {
 	      /* Assume that the register has been elided and is the
 		 same as the first operand.  */
-	      arg.optional_reg = FALSE;
+	      arg.token = tokens;
 	      arg.argnum = 1;
-	      s = argsstart;
-	      SKIP_SPACE_TABS (s);
-	      s = match_operand (&arg, operand, s);
 	    }
-	  if (!s)
+
+	  if (!match_operand (&arg, operand))
 	    break;
 	  continue;
 	}
@@ -12521,12 +12770,12 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
       if (more_alts)
 	{
 	  ++insn;
-	  s = argsstart;
 	  continue;
 	}
 
       insn_error = _("illegal operands");
 
+      obstack_free (&mips_operand_tokens, tokens);
       return;
     }
 }

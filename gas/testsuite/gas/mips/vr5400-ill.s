@@ -21,3 +21,6 @@
 	add.ob	$f2,$v4,$f6[1]
 	add.ob	$f2,$f4,$v6[1]
 	add.ob	$v2,$v4,$v6[1]
+
+	add.ob	$f2,$f4,$f6[foo]
+	add.ob	$f2,$f4,$f6[1}
