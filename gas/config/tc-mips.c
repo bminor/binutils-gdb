@@ -5688,16 +5688,6 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	  MIPS16_INSERT_OPERAND (REGR32, insn, va_arg (*args, int));
 	  continue;
 
-	case 'Y':
-	  {
-	    int regno;
-
-	    regno = va_arg (*args, int);
-	    regno = ((regno & 7) << 2) | ((regno & 0x18) >> 3);
-	    MIPS16_INSERT_OPERAND (REG32R, insn, regno);
-	  }
-	  continue;
-
 	case '<':
 	case '>':
 	case '4':

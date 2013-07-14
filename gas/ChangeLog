@@ -1,5 +1,9 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (mips16_macro_build): Remove 'Y' case.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (macro_build): Take an int for "C", "k", "\\"
 	and "~".
 	(macro): Update accordingly.
