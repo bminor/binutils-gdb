@@ -1,5 +1,11 @@
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (macro_build): Take an int for "C", "k", "\\"
+	and "~".
+	(macro): Update accordingly.
+
+2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (imm_expr, imm2_expr, offset_expr): Tweak commentary.
 	(imm_reloc): Delete.
 	(md_assemble): Remove imm_reloc handling.

@@ -5559,12 +5559,12 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
 	case 'C':
 	  gas_assert (!mips_opts.micromips);
-	  INSERT_OPERAND (0, COPZ, insn, va_arg (args, unsigned long));
+	  INSERT_OPERAND (0, COPZ, insn, va_arg (args, int));
 	  continue;
 
 	case 'k':
 	  INSERT_OPERAND (mips_opts.micromips,
-			  CACHE, insn, va_arg (args, unsigned long));
+			  CACHE, insn, va_arg (args, int));
 	  continue;
 
 	case '|':
@@ -5579,12 +5579,12 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 
 	case '\\':
 	  INSERT_OPERAND (mips_opts.micromips,
-			  3BITPOS, insn, va_arg (args, unsigned int));
+			  3BITPOS, insn, va_arg (args, int));
 	  continue;
 
 	case '~':
 	  INSERT_OPERAND (mips_opts.micromips,
-			  OFFSET12, insn, va_arg (args, unsigned long));
+			  OFFSET12, insn, va_arg (args, int));
 	  continue;
 
 	case 'N':
@@ -8180,26 +8180,17 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_MSGSND:
       gas_assert (!mips_opts.micromips);
-      {
-	unsigned long temp = (treg << 16) | (0x01);
-	macro_build (NULL, "c2", "C", temp);
-      }
+      macro_build (NULL, "c2", "C", (treg << 16) | 0x01);
       break;
 
     case M_MSGLD:
       gas_assert (!mips_opts.micromips);
-      {
-	unsigned long temp = (0x02);
-	macro_build (NULL, "c2", "C", temp);
-      }
+      macro_build (NULL, "c2", "C", 0x02);
       break;
 
     case M_MSGLD_T:
       gas_assert (!mips_opts.micromips);
-      {
-	unsigned long temp = (treg << 16) | (0x02);
-	macro_build (NULL, "c2", "C", temp);
-      }
+      macro_build (NULL, "c2", "C", (treg << 16) | 0x02);
       break;
 
     case M_MSGWAIT:
@@ -8209,10 +8200,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_MSGWAIT_T:
       gas_assert (!mips_opts.micromips);
-      {
-	unsigned long temp = (treg << 16) | 0x03;
-	macro_build (NULL, "c2", "C", temp);
-      }
+      macro_build (NULL, "c2", "C", (treg << 16) | 0x03);
       break;
 
     case M_J_A:
@@ -8834,7 +8822,7 @@ macro (struct mips_cl_insn *ip, char *str)
 		macro_build (NULL, s, fmt, treg, breg);
 	      else
 		macro_build (NULL, s, fmt, treg,
-			     (unsigned long) offset_expr.X_add_number, breg);
+			     (int) offset_expr.X_add_number, breg);
 	    }
 	  else
 	    {
@@ -8846,7 +8834,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	      if (offbits == 0)
 		macro_build (NULL, s, fmt, treg, tempreg);
 	      else
-		macro_build (NULL, s, fmt, treg, 0L, tempreg);
+		macro_build (NULL, s, fmt, treg, 0, tempreg);
 	    }
 	  break;
 	}
@@ -8893,7 +8881,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	    macro_build (&offset_expr, s, fmt, treg, BFD_RELOC_LO16, tempreg);
 	  else
 	    macro_build (NULL, s, fmt, treg,
-			 (unsigned long) offset_expr.X_add_number, tempreg);
+			 (int) offset_expr.X_add_number, tempreg);
 	}
       else if (offbits != 16)
 	{
@@ -8907,7 +8895,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	  if (offbits == 0)
 	    macro_build (NULL, s, fmt, treg, tempreg);
 	  else
-	    macro_build (NULL, s, fmt, treg, 0L, tempreg);
+	    macro_build (NULL, s, fmt, treg, 0, tempreg);
 	}
       else if (mips_pic == NO_PIC)
 	{
@@ -9763,7 +9751,7 @@ macro (struct mips_cl_insn *ip, char *str)
       gas_assert (!mips_opts.micromips);
       /* For now we just do C (same as Cz).  The parameter will be
          stored in insn_opcode by mips_ip.  */
-      macro_build (NULL, s, "C", ip->insn_opcode);
+      macro_build (NULL, s, "C", (int) ip->insn_opcode);
       break;
 
     case M_MOVE:
@@ -10462,8 +10450,7 @@ macro (struct mips_cl_insn *ip, char *str)
       if (!target_big_endian)
 	ep->X_add_number += off;
       if (offbits == 12)
-	macro_build (NULL, s, "t,~(b)",
-		     tempreg, (unsigned long) ep->X_add_number, breg);
+	macro_build (NULL, s, "t,~(b)", tempreg, (int) ep->X_add_number, breg);
       else
 	macro_build (ep, s, "t,o(b)", tempreg, -1,
 		     offset_reloc[0], offset_reloc[1], offset_reloc[2], breg);
@@ -10474,7 +10461,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	ep->X_add_number += off;
       if (offbits == 12)
 	macro_build (NULL, s2, "t,~(b)",
-		     tempreg, (unsigned long) ep->X_add_number, breg);
+		     tempreg, (int) ep->X_add_number, breg);
       else
 	macro_build (ep, s2, "t,o(b)", tempreg, -1,
 		     offset_reloc[0], offset_reloc[1], offset_reloc[2], breg);
