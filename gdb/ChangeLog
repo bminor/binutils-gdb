@@ -1,3 +1,11 @@
+2013-07-15  Ali Anwar  <ali_anwar@codesourcery.com>
+
+	PR threads/13217
+	* thread.c (thread_apply_all_command): Check for valid threads
+	and thread count.
+	(thread_array_cleanup): New struct.
+	(set_thread_refcount): New function.
+
 2013-07-11  Andrew Burgess  <aburgess@broadcom.com>
 
 	* infcmd.c (default_print_one_register_info): Reuse function

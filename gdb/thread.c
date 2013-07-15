@@ -65,6 +65,19 @@ static void thread_apply_command (char *, int);
 static void restore_current_thread (ptid_t);
 static void prune_threads (void);
 
+/* Data to cleanup thread array.  */
+
+struct thread_array_cleanup
+{
+  /* Array of thread pointers used to set
+     reference count.  */
+  struct thread_info **tp_array;
+
+  /* Thread count in the array.  */
+  int count;
+};
+
+
 struct thread_info*
 inferior_thread (void)
 {
@@ -1132,6 +1145,18 @@ restore_current_thread_cleanup_dtor (void *arg)
   xfree (old);
 }
 
+/* Set the thread reference count.  */
+
+static void
+set_thread_refcount (void *data)
+{
+  int k;
+  struct thread_array_cleanup *ta_cleanup = data;
+
+  for (k = 0; k != ta_cleanup->count; k++)
+    ta_cleanup->tp_array[k]->refcount--;
+}
+
 struct cleanup *
 make_cleanup_restore_current_thread (void)
 {
@@ -1187,9 +1212,10 @@ make_cleanup_restore_current_thread (void)
 static void
 thread_apply_all_command (char *cmd, int from_tty)
 {
-  struct thread_info *tp;
   struct cleanup *old_chain;
   char *saved_cmd;
+  int tc;
+  struct thread_array_cleanup ta_cleanup;
 
   if (cmd == NULL || *cmd == '\000')
     error (_("Please specify a command following the thread ID list"));
@@ -1202,17 +1228,43 @@ thread_apply_all_command (char *cmd, int from_tty)
      execute_command.  */
   saved_cmd = xstrdup (cmd);
   make_cleanup (xfree, saved_cmd);
-  for (tp = thread_list; tp; tp = tp->next)
-    if (thread_alive (tp))
-      {
-	switch_to_thread (tp->ptid);
+  tc = thread_count ();
 
-	printf_filtered (_("\nThread %d (%s):\n"),
-			 tp->num, target_pid_to_str (inferior_ptid));
-	execute_command (cmd, from_tty);
-	strcpy (cmd, saved_cmd);	/* Restore exact command used
-					   previously.  */
-      }
+  if (tc)
+    {
+      struct thread_info **tp_array;
+      struct thread_info *tp;
+      int i = 0, k;
+
+      /* Save a copy of the thread_list in case we execute detach
+         command.  */
+      tp_array = xmalloc (sizeof (struct thread_info *) * tc);
+      make_cleanup (xfree, tp_array);
+      ta_cleanup.tp_array = tp_array;
+      ta_cleanup.count = tc;
+
+      ALL_THREADS (tp)
+        {
+          tp_array[i] = tp;
+          tp->refcount++;
+          i++;
+        }
+
+      make_cleanup (set_thread_refcount, &ta_cleanup);
+
+      for (k = 0; k != i; k++)
+        if (thread_alive (tp_array[k]))
+          {
+            switch_to_thread (tp_array[k]->ptid);
+            printf_filtered (_("\nThread %d (%s):\n"), 
+			     tp_array[k]->num,
+			     target_pid_to_str (inferior_ptid));
+            execute_command (cmd, from_tty);
+
+            /* Restore exact command used previously.  */
+            strcpy (cmd, saved_cmd);
+	  }
+    }
 
   do_cleanups (old_chain);
 }
