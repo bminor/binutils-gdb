@@ -1,3 +1,8 @@
+2013-07-15  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* readelf.c (display_mips_gnu_attribute): Replace hardcoded magic
+	numbers with enum values.
+
 2013-07-12  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* readelf.c (get_machine_flags): Handle EF_MIPS_NAN2008.

@@ -1,3 +1,8 @@
+2013-07-15  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Replace hardcoded magic
+	numbers with enum values.
+
 2013-07-15  Ali Anwar  <ali_anwar@codesourcery.com>
 
 	PR threads/13217

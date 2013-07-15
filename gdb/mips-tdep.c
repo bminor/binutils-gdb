@@ -7910,7 +7910,7 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   int i, num_regs;
   enum mips_fpu_type fpu_type;
   struct tdesc_arch_data *tdesc_data = NULL;
-  int elf_fpu_type = 0;
+  int elf_fpu_type = Val_GNU_MIPS_ABI_FP_ANY;
   const char **reg_names;
   struct mips_regnum mips_regnum, *regnum;
   enum mips_isa mips_isa;
@@ -8235,17 +8235,17 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   if (!mips_fpu_type_auto)
     fpu_type = mips_fpu_type;
-  else if (elf_fpu_type != 0)
+  else if (elf_fpu_type != Val_GNU_MIPS_ABI_FP_ANY)
     {
       switch (elf_fpu_type)
 	{
-	case 1:
+	case Val_GNU_MIPS_ABI_FP_DOUBLE:
 	  fpu_type = MIPS_FPU_DOUBLE;
 	  break;
-	case 2:
+	case Val_GNU_MIPS_ABI_FP_SINGLE:
 	  fpu_type = MIPS_FPU_SINGLE;
 	  break;
-	case 3:
+	case Val_GNU_MIPS_ABI_FP_SOFT:
 	default:
 	  /* Soft float or unknown.  */
 	  fpu_type = MIPS_FPU_NONE;

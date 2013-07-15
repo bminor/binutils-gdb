@@ -11735,19 +11735,19 @@ display_mips_gnu_attribute (unsigned char * p,
 
       switch (val)
 	{
-	case 0:
+	case Val_GNU_MIPS_ABI_FP_ANY:
 	  printf (_("Hard or soft float\n"));
 	  break;
-	case 1:
+	case Val_GNU_MIPS_ABI_FP_DOUBLE:
 	  printf (_("Hard float (double precision)\n"));
 	  break;
-	case 2:
+	case Val_GNU_MIPS_ABI_FP_SINGLE:
 	  printf (_("Hard float (single precision)\n"));
 	  break;
-	case 3:
+	case Val_GNU_MIPS_ABI_FP_SOFT:
 	  printf (_("Soft float\n"));
 	  break;
-	case 4:
+	case Val_GNU_MIPS_ABI_FP_64:
 	  printf (_("Hard float (MIPS32r2 64-bit FPU)\n"));
 	  break;
 	default:
