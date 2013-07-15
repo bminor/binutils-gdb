@@ -141,12 +141,13 @@ class File_read
   // SIZE bytes.  OFFSET is the offset into the input file for the
   // file we are reading; this is zero for a normal object file,
   // non-zero for an object file in an archive.  ALIGNED is true if
-  // the data must be naturally aligned; this only matters when OFFSET
-  // is not zero.  The pointer will remain valid until the File_read
-  // is unlocked.  It is an error if we can not read enough data from
-  // the file.  The CACHE parameter is a hint as to whether it will be
-  // useful to cache this data for later accesses--i.e., later calls
-  // to get_view, read, or get_lasting_view which retrieve the same
+  // the data must be naturally aligned (i.e., aligned to the size
+  // of a target word); this only matters when OFFSET is not zero.
+  // The pointer will remain valid until the File_read is unlocked.
+  // It is an error if we can not read enough data from the file.
+  // The CACHE parameter is a hint as to whether it will be useful
+  // to cache this data for later accesses--i.e., later calls to
+  // get_view, read, or get_lasting_view which retrieve the same
   // data.
   const unsigned char*
   get_view(off_t offset, off_t start, section_size_type size, bool aligned,

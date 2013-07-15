@@ -1,3 +1,9 @@
+2013-07-15  Shawn Landden  <shawnlandden@gmail.com>
+
+	PR gold/15070
+	* fileread.h (File_read::get_view): Clarify comment about ALIGNED.
+	* nacl.h (Sniff_file::View::View): Request aligned view.
+
 2013-07-11  Cary Coutant  <ccoutant@google.com>
 
 	* powerpc.cc (Target_powerpc::write_branch_lookup_table): Use
