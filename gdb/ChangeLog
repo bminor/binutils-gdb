@@ -1,3 +1,22 @@
+2013-07-15  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c: Since the new PowerPC specific ptrace interface is
+	now available for embedded (BookE) and server (BookS) processors,
+	correct mentions of 'booke' and adjust comments accordingly in order to
+	avoid confusion. Rename struct 'booke_debug_info' to 'hwdebug_info'.
+	(have_ptrace_booke_interface): Rename function and variable
+	'have_ptrace_booke_interface' to 'have_ptrace_hwdebug_interface'.
+	Rename struct 'booke_debug_info' to 'hwdebug_info'. Update all uses.
+	(booke_cmp_hw_point): Rename function 'booke_cmp_hw_point' to
+	'hwdebug_point_cmp'. Update all uses.
+	(booke_find_thread_points_by_tid): Rename function
+	'booke_find_thread_points_by_tid' to
+	'hwdebug_find_thread_points_by_tid'. Update all uses.
+	(booke_insert_point): Rename function 'booke_insert_point' to
+	'hwdebug_insert_point'. Update all uses.
+	(booke_remove_point): Rename function 'booke_remove_point' to
+	'hwdebug_remove_point'. Update all uses.
+
 2013-07-15  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (mips_gdbarch_init): Replace hardcoded magic

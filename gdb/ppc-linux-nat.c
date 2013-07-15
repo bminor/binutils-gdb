@@ -101,7 +101,7 @@
 #endif
 
 /* Similarly for the hardware watchpoint support.  These requests are used
-   when the BookE kernel interface is not available.  */
+   when the PowerPC HWDEBUG ptrace interface is not available.  */
 #ifndef PTRACE_GET_DEBUGREG
 #define PTRACE_GET_DEBUGREG    25
 #endif
@@ -112,15 +112,15 @@
 #define PTRACE_GETSIGINFO    0x4202
 #endif
 
-/* These requests are used when the BookE kernel interface is available.
-   It exposes the additional debug features of BookE processors, such as
-   ranged breakpoints and watchpoints and hardware-accelerated condition
-   evaluation.  */
+/* These requests are used when the PowerPC HWDEBUG ptrace interface is
+   available.  It exposes the debug facilities of PowerPC processors, as well
+   as additional features of BookE processors, such as ranged breakpoints and
+   watchpoints and hardware-accelerated condition evaluation.  */
 #ifndef PPC_PTRACE_GETHWDBGINFO
 
-/* Not having PPC_PTRACE_GETHWDBGINFO defined means that the new BookE
-   interface is not present in ptrace.h, so we'll have to pretty much include
-   it all here so that the code at least compiles on older systems.  */
+/* Not having PPC_PTRACE_GETHWDBGINFO defined means that the PowerPC HWDEBUG 
+   ptrace interface is not present in ptrace.h, so we'll have to pretty much
+   include it all here so that the code at least compiles on older systems.  */
 #define PPC_PTRACE_GETHWDBGINFO 0x89
 #define PPC_PTRACE_SETHWDEBUG   0x88
 #define PPC_PTRACE_DELHWDEBUG   0x87
@@ -1361,16 +1361,17 @@ ppc_linux_get_hwcap (void)
 }
 
 /* The cached DABR value, to install in new threads.
-   This variable is used when we are dealing with non-BookE
-   processors.  */
+   This variable is used when the PowerPC HWDEBUG ptrace
+   interface is not available.  */
 static long saved_dabr_value;
 
 /* Global structure that will store information about the available
-   features on this BookE processor.  */
-static struct ppc_debug_info booke_debug_info;
+   features provided by the PowerPC HWDEBUG ptrace interface.  */
+static struct ppc_debug_info hwdebug_info;
 
 /* Global variable that holds the maximum number of slots that the
-   kernel will use.  This is only used when the processor is BookE.  */
+   kernel will use.  This is only used when PowerPC HWDEBUG ptrace interface
+   is available.  */
 static size_t max_slots_number = 0;
 
 struct hw_break_tuple
@@ -1380,7 +1381,8 @@ struct hw_break_tuple
 };
 
 /* This is an internal VEC created to store information about *points inserted
-   for each thread.  This is used for BookE processors.  */
+   for each thread.  This is used when PowerPC HWDEBUG ptrace interface is
+   available.  */
 typedef struct thread_points
   {
     /* The TID to which this *point relates.  */
@@ -1397,18 +1399,17 @@ DEF_VEC_P (thread_points_p);
 
 VEC(thread_points_p) *ppc_threads = NULL;
 
-/* The version of the kernel interface that we will use if the processor is
-   BookE.  */
+/* The version of the PowerPC HWDEBUG kernel interface that we will use, if
+   available.  */
 #define PPC_DEBUG_CURRENT_VERSION 1
 
-/* Returns non-zero if we support the ptrace interface which enables
-   booke debugging resources.  */
+/* Returns non-zero if we support the PowerPC HWDEBUG ptrace interface.  */
 static int
-have_ptrace_booke_interface (void)
+have_ptrace_hwdebug_interface (void)
 {
-  static int have_ptrace_booke_interface = -1;
+  static int have_ptrace_hwdebug_interface = -1;
 
-  if (have_ptrace_booke_interface == -1)
+  if (have_ptrace_hwdebug_interface == -1)
     {
       int tid;
 
@@ -1416,26 +1417,26 @@ have_ptrace_booke_interface (void)
       if (tid == 0)
 	tid = PIDGET (inferior_ptid);
 
-      /* Check for kernel support for BOOKE debug registers.  */
-      if (ptrace (PPC_PTRACE_GETHWDBGINFO, tid, 0, &booke_debug_info) >= 0)
+      /* Check for kernel support for PowerPC HWDEBUG ptrace interface.  */
+      if (ptrace (PPC_PTRACE_GETHWDBGINFO, tid, 0, &hwdebug_info) >= 0)
 	{
-	  /* Check whether ptrace BOOKE interface is functional and
+	  /* Check whether PowerPC HWDEBUG ptrace interface is functional and
 	     provides any supported feature.  */
-	  if (booke_debug_info.features != 0)
+	  if (hwdebug_info.features != 0)
 	    {
-	      have_ptrace_booke_interface = 1;
-	      max_slots_number = booke_debug_info.num_instruction_bps
-	        + booke_debug_info.num_data_bps
-	        + booke_debug_info.num_condition_regs;
-	      return have_ptrace_booke_interface;
+	      have_ptrace_hwdebug_interface = 1;
+	      max_slots_number = hwdebug_info.num_instruction_bps
+	        + hwdebug_info.num_data_bps
+	        + hwdebug_info.num_condition_regs;
+	      return have_ptrace_hwdebug_interface;
 	    }
 	}
-      /* Old school interface and no BOOKE debug registers support.  */
-      have_ptrace_booke_interface = 0;
-      memset (&booke_debug_info, 0, sizeof (struct ppc_debug_info));
+      /* Old school interface and no PowerPC HWDEBUG ptrace support.  */
+      have_ptrace_hwdebug_interface = 0;
+      memset (&hwdebug_info, 0, sizeof (struct ppc_debug_info));
     }
 
-  return have_ptrace_booke_interface;
+  return have_ptrace_hwdebug_interface;
 }
 
 static int
@@ -1443,18 +1444,18 @@ ppc_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
 {
   int total_hw_wp, total_hw_bp;
 
-  if (have_ptrace_booke_interface ())
+  if (have_ptrace_hwdebug_interface ())
     {
-      /* For PPC BookE processors, the number of available hardware
-         watchpoints and breakpoints is stored at the booke_debug_info
-	 struct.  */
-      total_hw_bp = booke_debug_info.num_instruction_bps;
-      total_hw_wp = booke_debug_info.num_data_bps;
+      /* When PowerPC HWDEBUG ptrace interface is available, the number of
+	 available hardware watchpoints and breakpoints is stored at the
+	 hwdebug_info struct.  */
+      total_hw_bp = hwdebug_info.num_instruction_bps;
+      total_hw_wp = hwdebug_info.num_data_bps;
     }
   else
     {
-      /* For PPC server processors, we accept 1 hardware watchpoint and 0
-	 hardware breakpoints.  */
+      /* When we do not have PowerPC HWDEBUG ptrace interface, we should
+	 consider having 1 hardware watchpoint and no hardware breakpoints.  */
       total_hw_bp = 0;
       total_hw_wp = 1;
     }
@@ -1471,7 +1472,7 @@ ppc_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
 	return -1;
     }
 
-  if (!have_ptrace_booke_interface ())
+  if (!have_ptrace_hwdebug_interface ())
     {
       int tid;
       ptid_t ptid = inferior_ptid;
@@ -1497,30 +1498,31 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
   if (len <= 0)
     return 0;
 
-  /* The new BookE ptrace interface tells if there are alignment restrictions
-     for watchpoints in the processors.  In that case, we use that information
-     to determine the hardcoded watchable region for watchpoints.  */
-  if (have_ptrace_booke_interface ())
+  /* The PowerPC HWDEBUG ptrace interface tells if there are alignment
+     restrictions for watchpoints in the processors.  In that case, we use that
+     information to determine the hardcoded watchable region for
+     watchpoints.  */
+  if (have_ptrace_hwdebug_interface ())
     {
       /* Embedded DAC-based processors, like the PowerPC 440 have ranged
 	 watchpoints and can watch any access within an arbitrary memory
 	 region. This is useful to watch arrays and structs, for instance.  It
          takes two hardware watchpoints though.  */
       if (len > 1
-	  && booke_debug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE
+	  && hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE
 	  && ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
 	return 2;
       /* Server processors provide one hardware watchpoint and addr+len should
          fall in the watchable region provided by the ptrace interface.  */
-      if (booke_debug_info.data_bp_alignment
-	  && (addr + len > (addr & ~(booke_debug_info.data_bp_alignment - 1))
-	      + booke_debug_info.data_bp_alignment))
+      if (hwdebug_info.data_bp_alignment
+	  && (addr + len > (addr & ~(hwdebug_info.data_bp_alignment - 1))
+	      + hwdebug_info.data_bp_alignment))
 	return 0;
     }
   /* addr+len must fall in the 8 byte watchable region for DABR-based
-     processors (i.e., server processors).  Without the new BookE ptrace
-     interface, DAC-based processors (i.e., embedded processors) will use
-     addresses aligned to 4-bytes due to the way the read/write flags are
+     processors (i.e., server processors).  Without the new PowerPC HWDEBUG 
+     ptrace interface, DAC-based processors (i.e., embedded processors) will
+     use addresses aligned to 4-bytes due to the way the read/write flags are
      passed in the old ptrace interface.  */
   else if (((ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
 	   && (addr + len) > (addr & ~3) + 4)
@@ -1532,7 +1534,7 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 
 /* This function compares two ppc_hw_breakpoint structs field-by-field.  */
 static int
-booke_cmp_hw_point (struct ppc_hw_breakpoint *a, struct ppc_hw_breakpoint *b)
+hwdebug_point_cmp (struct ppc_hw_breakpoint *a, struct ppc_hw_breakpoint *b)
 {
   return (a->trigger_type == b->trigger_type
 	  && a->addr_mode == b->addr_mode
@@ -1547,7 +1549,7 @@ booke_cmp_hw_point (struct ppc_hw_breakpoint *a, struct ppc_hw_breakpoint *b)
    it returns NULL.  If ALLOC_NEW is non-zero, a new thread_points for the
    provided TID will be created and returned.  */
 static struct thread_points *
-booke_find_thread_points_by_tid (int tid, int alloc_new)
+hwdebug_find_thread_points_by_tid (int tid, int alloc_new)
 {
   int i;
   struct thread_points *t;
@@ -1576,7 +1578,7 @@ booke_find_thread_points_by_tid (int tid, int alloc_new)
    *point (i.e., calling `ptrace' in order to issue the request to the
    kernel) and registering it internally in GDB.  */
 static void
-booke_insert_point (struct ppc_hw_breakpoint *b, int tid)
+hwdebug_insert_point (struct ppc_hw_breakpoint *b, int tid)
 {
   int i;
   long slot;
@@ -1594,7 +1596,7 @@ booke_insert_point (struct ppc_hw_breakpoint *b, int tid)
     perror_with_name (_("Unexpected error setting breakpoint or watchpoint"));
 
   /* Everything went fine, so we have to register this *point.  */
-  t = booke_find_thread_points_by_tid (tid, 1);
+  t = hwdebug_find_thread_points_by_tid (tid, 1);
   gdb_assert (t != NULL);
   hw_breaks = t->hw_breaks;
 
@@ -1616,18 +1618,18 @@ booke_insert_point (struct ppc_hw_breakpoint *b, int tid)
    *point (i.e., calling `ptrace' in order to issue the request to the
    kernel), and unregistering it internally at GDB.  */
 static void
-booke_remove_point (struct ppc_hw_breakpoint *b, int tid)
+hwdebug_remove_point (struct ppc_hw_breakpoint *b, int tid)
 {
   int i;
   struct hw_break_tuple *hw_breaks;
   struct thread_points *t;
 
-  t = booke_find_thread_points_by_tid (tid, 0);
+  t = hwdebug_find_thread_points_by_tid (tid, 0);
   gdb_assert (t != NULL);
   hw_breaks = t->hw_breaks;
 
   for (i = 0; i < max_slots_number; i++)
-    if (hw_breaks[i].hw_break && booke_cmp_hw_point (hw_breaks[i].hw_break, b))
+    if (hw_breaks[i].hw_break && hwdebug_point_cmp (hw_breaks[i].hw_break, b))
       break;
 
   gdb_assert (i != max_slots_number);
@@ -1650,8 +1652,8 @@ booke_remove_point (struct ppc_hw_breakpoint *b, int tid)
 static int
 ppc_linux_ranged_break_num_registers (struct target_ops *target)
 {
-  return ((have_ptrace_booke_interface ()
-	   && booke_debug_info.features & PPC_DEBUG_FEATURE_INSN_BP_RANGE)?
+  return ((have_ptrace_hwdebug_interface ()
+	   && hwdebug_info.features & PPC_DEBUG_FEATURE_INSN_BP_RANGE)?
 	  2 : -1);
 }
 
@@ -1665,7 +1667,7 @@ ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
-  if (!have_ptrace_booke_interface ())
+  if (!have_ptrace_hwdebug_interface ())
     return -1;
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
@@ -1689,7 +1691,7 @@ ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
     }
 
   ALL_LWPS (lp)
-    booke_insert_point (&p, TIDGET (lp->ptid));
+    hwdebug_insert_point (&p, TIDGET (lp->ptid));
 
   return 0;
 }
@@ -1701,7 +1703,7 @@ ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
-  if (!have_ptrace_booke_interface ())
+  if (!have_ptrace_hwdebug_interface ())
     return -1;
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
@@ -1725,7 +1727,7 @@ ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
     }
 
   ALL_LWPS (lp)
-    booke_remove_point (&p, TIDGET (lp->ptid));
+    hwdebug_remove_point (&p, TIDGET (lp->ptid));
 
   return 0;
 }
@@ -1757,7 +1759,7 @@ ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
-  gdb_assert (have_ptrace_booke_interface ());
+  gdb_assert (have_ptrace_hwdebug_interface ());
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
   p.trigger_type = get_trigger_type (rw);
@@ -1768,7 +1770,7 @@ ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
   p.condition_value = 0;
 
   ALL_LWPS (lp)
-    booke_insert_point (&p, TIDGET (lp->ptid));
+    hwdebug_insert_point (&p, TIDGET (lp->ptid));
 
   return 0;
 }
@@ -1785,7 +1787,7 @@ ppc_linux_remove_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
   struct lwp_info *lp;
   struct ppc_hw_breakpoint p;
 
-  gdb_assert (have_ptrace_booke_interface ());
+  gdb_assert (have_ptrace_hwdebug_interface ());
 
   p.version = PPC_DEBUG_CURRENT_VERSION;
   p.trigger_type = get_trigger_type (rw);
@@ -1796,7 +1798,7 @@ ppc_linux_remove_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
   p.condition_value = 0;
 
   ALL_LWPS (lp)
-    booke_remove_point (&p, TIDGET (lp->ptid));
+    hwdebug_remove_point (&p, TIDGET (lp->ptid));
 
   return 0;
 }
@@ -1807,13 +1809,13 @@ can_use_watchpoint_cond_accel (void)
 {
   struct thread_points *p;
   int tid = TIDGET (inferior_ptid);
-  int cnt = booke_debug_info.num_condition_regs, i;
+  int cnt = hwdebug_info.num_condition_regs, i;
   CORE_ADDR tmp_value;
 
-  if (!have_ptrace_booke_interface () || cnt == 0)
+  if (!have_ptrace_hwdebug_interface () || cnt == 0)
     return 0;
 
-  p = booke_find_thread_points_by_tid (tid, 0);
+  p = hwdebug_find_thread_points_by_tid (tid, 0);
 
   if (p)
     {
@@ -1852,10 +1854,10 @@ calculate_dvc (CORE_ADDR addr, int len, CORE_ADDR data_value,
      We need to calculate where our watch region is relative to that
      window and enable comparison of the bytes which fall within it.  */
 
-  align_offset = addr % booke_debug_info.sizeof_condition;
+  align_offset = addr % hwdebug_info.sizeof_condition;
   addr_end_data = addr + len;
   addr_end_dvc = (addr - align_offset
-		  + booke_debug_info.sizeof_condition);
+		  + hwdebug_info.sizeof_condition);
   num_bytes_off_dvc = (addr_end_data > addr_end_dvc)?
 			 addr_end_data - addr_end_dvc : 0;
   num_byte_enable = len - num_bytes_off_dvc;
@@ -2003,8 +2005,8 @@ ppc_linux_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
 {
   CORE_ADDR data_value;
 
-  return (have_ptrace_booke_interface ()
-	  && booke_debug_info.num_condition_regs > 0
+  return (have_ptrace_hwdebug_interface ()
+	  && hwdebug_info.num_condition_regs > 0
 	  && check_condition (addr, cond, &data_value, &len));
 }
 
@@ -2019,13 +2021,13 @@ create_watchpoint_request (struct ppc_hw_breakpoint *p, CORE_ADDR addr,
 			   int insert)
 {
   if (len == 1
-      || !(booke_debug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE))
+      || !(hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE))
     {
       int use_condition;
       CORE_ADDR data_value;
 
       use_condition = (insert? can_use_watchpoint_cond_accel ()
-			: booke_debug_info.num_condition_regs > 0);
+			: hwdebug_info.num_condition_regs > 0);
       if (cond && use_condition && check_condition (addr, cond,
 						    &data_value, &len))
 	calculate_dvc (addr, len, data_value, &p->condition_mode,
@@ -2066,14 +2068,14 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
   struct lwp_info *lp;
   int ret = -1;
 
-  if (have_ptrace_booke_interface ())
+  if (have_ptrace_hwdebug_interface ())
     {
       struct ppc_hw_breakpoint p;
 
       create_watchpoint_request (&p, addr, len, rw, cond, 1);
 
       ALL_LWPS (lp)
-	booke_insert_point (&p, TIDGET (lp->ptid));
+	hwdebug_insert_point (&p, TIDGET (lp->ptid));
 
       ret = 0;
     }
@@ -2134,14 +2136,14 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
   struct lwp_info *lp;
   int ret = -1;
 
-  if (have_ptrace_booke_interface ())
+  if (have_ptrace_hwdebug_interface ())
     {
       struct ppc_hw_breakpoint p;
 
       create_watchpoint_request (&p, addr, len, rw, cond, 0);
 
       ALL_LWPS (lp)
-	booke_remove_point (&p, TIDGET (lp->ptid));
+	hwdebug_remove_point (&p, TIDGET (lp->ptid));
 
       ret = 0;
     }
@@ -2164,7 +2166,7 @@ ppc_linux_new_thread (struct lwp_info *lp)
 {
   int tid = TIDGET (lp->ptid);
 
-  if (have_ptrace_booke_interface ())
+  if (have_ptrace_hwdebug_interface ())
     {
       int i;
       struct thread_points *p;
@@ -2190,7 +2192,7 @@ ppc_linux_new_thread (struct lwp_info *lp)
 	       Ask the kernel the deallocate this specific *point's slot.  */
 	    ptrace (PPC_PTRACE_DELHWDEBUG, tid, 0, hw_breaks[i].slot);
 
-	    booke_insert_point (hw_breaks[i].hw_break, tid);
+	    hwdebug_insert_point (hw_breaks[i].hw_break, tid);
 	  }
     }
   else
@@ -2205,7 +2207,7 @@ ppc_linux_thread_exit (struct thread_info *tp, int silent)
   struct hw_break_tuple *hw_breaks;
   struct thread_points *t = NULL, *p;
 
-  if (!have_ptrace_booke_interface ())
+  if (!have_ptrace_hwdebug_interface ())
     return;
 
   for (i = 0; VEC_iterate (thread_points_p, ppc_threads, i, p); i++)
@@ -2242,7 +2244,7 @@ ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
       || (siginfo.si_code & 0xffff) != 0x0004 /* TRAP_HWBKPT */)
     return 0;
 
-  if (have_ptrace_booke_interface ())
+  if (have_ptrace_hwdebug_interface ())
     {
       int i;
       struct thread_points *t;
@@ -2250,7 +2252,7 @@ ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
       /* The index (or slot) of the *point is passed in the si_errno field.  */
       int slot = siginfo.si_errno;
 
-      t = booke_find_thread_points_by_tid (TIDGET (inferior_ptid), 0);
+      t = hwdebug_find_thread_points_by_tid (TIDGET (inferior_ptid), 0);
 
       /* Find out if this *point is a hardware breakpoint.
 	 If so, we should return 0.  */
@@ -2283,7 +2285,7 @@ ppc_linux_watchpoint_addr_within_range (struct target_ops *target,
 {
   int mask;
 
-  if (have_ptrace_booke_interface ()
+  if (have_ptrace_hwdebug_interface ()
       && ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
     return start <= addr && start + length >= addr;
   else if (ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
@@ -2303,8 +2305,8 @@ static int
 ppc_linux_masked_watch_num_registers (struct target_ops *target,
 				      CORE_ADDR addr, CORE_ADDR mask)
 {
-  if (!have_ptrace_booke_interface ()
-	   || (booke_debug_info.features & PPC_DEBUG_FEATURE_DATA_BP_MASK) == 0)
+  if (!have_ptrace_hwdebug_interface ()
+	   || (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_MASK) == 0)
     return -1;
   else if ((mask & 0xC0000000) != 0xC0000000)
     {
