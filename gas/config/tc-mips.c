@@ -4730,7 +4730,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
     {
       if (arg->soft_match)
 	return FALSE;
-      as_bad (error);
+      as_bad ("%s", error);
     }
 
   /* Finally build the instruction.  */
@@ -7014,7 +7014,7 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
 	  if (!operand)
 	    abort ();
 
-	  insn_insert_operand (&insn, operand, va_arg (args, int));
+	  insn_insert_operand (&insn, operand, va_arg (*args, int));
 	  break;
 	}
     }

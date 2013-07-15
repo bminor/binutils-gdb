@@ -1,3 +1,9 @@
+2013-07-15  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (match_save_restore_list_operand): Avoid -Wformat
+	error with older GCCs.
+	(mips16_macro_build): Dereference args.
+
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (mips_prefer_vec_regno, mips_parse_register):
