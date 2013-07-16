@@ -1,5 +1,11 @@
 2013-07-16  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.mi/mi-basics.exp: Use standard_output_file.
+	(test_dir_specification, test_cwd_specification)
+	(test_path_specification): Use testsubdir, not subdir and objdir.
+
+2013-07-16  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.trace/mi-traceframe-changed.exp: Don't use objdir.
 
 2013-07-09  Joel Brobecker  <brobecker@adacore.com>
