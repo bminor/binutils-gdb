@@ -1,5 +1,10 @@
 2013-07-16  Doug Evans  <dje@google.com>
 
+	* solist.h (target_so_ops.find_and_open_solib): Clarify usage of
+	temp_pathname argument.
+	* nto-tdep.c (nto_find_and_open_solib): Fix setting of temp_pathname
+	when opening the file fails.
+
 	* target.h (struct target_section): Delete member bfd.
 	All users updated to use the_bfd_section->owner instead.
 	* exec.c (add_to_section_table): Assert bfd is expected value.

@@ -138,7 +138,7 @@ nto_find_and_open_solib (char *solib, unsigned o_flags, char **temp_pathname)
 	  if (ret >= 0)
 	    *temp_pathname = gdb_realpath (arch_path);
 	  else
-	    **temp_pathname = '\0';
+	    *temp_pathname = NULL;
 	}
     }
   return ret;
