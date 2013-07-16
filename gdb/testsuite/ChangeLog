@@ -1,5 +1,9 @@
 2013-07-16  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.ada/info_types.exp: Use standard_testfile.
+
+2013-07-16  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.mi/mi-basics.exp: Use standard_output_file.
 	(test_dir_specification, test_cwd_specification)
 	(test_path_specification): Use testsubdir, not subdir and objdir.

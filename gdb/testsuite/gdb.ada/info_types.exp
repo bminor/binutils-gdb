@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile info_types
-set srcfile ${testfile}.c
+standard_testfile .c
+
 if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] } {
     return -1
 }
