@@ -156,7 +156,7 @@ parse_format_string (const char **arg)
 
 	/* The first part of a format specifier is a set of flag
 	   characters.  */
-	while (strchr ("0-+ #", *f))
+	while (*f != '\0' && strchr ("0-+ #", *f))
 	  {
 	    if (*f == '#')
 	      seen_hash = 1;
@@ -170,7 +170,7 @@ parse_format_string (const char **arg)
 	  }
 
 	/* The next part of a format specifier is a width.  */
-	while (strchr ("0123456789", *f))
+	while (*f != '\0' && strchr ("0123456789", *f))
 	  f++;
 
 	/* The next part of a format specifier is a precision.  */
@@ -178,7 +178,7 @@ parse_format_string (const char **arg)
 	  {
 	    seen_prec = 1;
 	    f++;
-	    while (strchr ("0123456789", *f))
+	    while (*f != '\0' && strchr ("0123456789", *f))
 	      f++;
 	  }
 

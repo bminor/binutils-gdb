@@ -1,3 +1,8 @@
+2013-07-16  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/printcmds.exp (test_printf): Add tests for format
+	strings with missing format specifier.
+
 2013-07-16  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.ada/info_types.exp: Use standard_testfile.

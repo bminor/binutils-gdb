@@ -718,6 +718,12 @@ proc test_printf {} {
     # Regression test for "%% at end of format string.
     # See http://sourceware.org/bugzilla/show_bug.cgi?id=11345
     gdb_test "printf \"%%%d%%\\n\", 5" "%5%"
+
+    # Some tests for missing format specifier after '%'.
+    gdb_test "printf \"%\", 0" "Incomplete format specifier at end of format string"
+    gdb_test "printf \"%.234\", 0" "Incomplete format specifier at end of format string"
+    gdb_test "printf \"%-\", 0" "Incomplete format specifier at end of format string"
+    gdb_test "printf \"%-23\", 0" "Incomplete format specifier at end of format string"
 }
 
 #Test printing DFP values with printf
