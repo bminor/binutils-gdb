@@ -1,3 +1,21 @@
+2013-07-16  Doug Evans  <dje@google.com>
+
+	* target.h (struct target_section): Delete member bfd.
+	All users updated to use the_bfd_section->owner instead.
+	* exec.c (add_to_section_table): Assert bfd is expected value.
+	Remove initialization of target_section.bfd.
+	(remove_target_sections): Update.
+	(section_table_available_memory): Update.
+	(section_table_xfer_memory_partial): Update.
+	(print_section_info): Update.
+	(exec_set_section_address): Update.
+	* record-full.c (record_full_core_xfer_partial): Update.
+	* solib-svr4.c (svr4_relocate_section_addresses): Update.
+	* solib-target.c (solib_target_relocate_section_addresses): Update.
+	* symfile.c (build_section_addr_info_from_section_table): Update.
+	* target.c (memory_xfer_live_readonly_partial): Update.
+	(memory_xfer_partial_1): Update.
+
 2013-07-15  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* ppc-linux-nat.c: Since the new PowerPC specific ptrace interface is

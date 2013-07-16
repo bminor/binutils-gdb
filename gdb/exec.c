@@ -328,6 +328,8 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
   struct target_section **table_pp = (struct target_section **) table_pp_char;
   flagword aflag;
 
+  gdb_assert (abfd == asect->owner);
+
   /* Check the section flags, but do not discard zero-length sections, since
      some symbols may still be attached to this section.  For instance, we
      encountered on sparc-solaris 2.10 a shared library with an empty .bss
@@ -338,7 +340,6 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
     return;
 
   (*table_pp)->key = NULL;
-  (*table_pp)->bfd = abfd;
   (*table_pp)->the_bfd_section = asect;
   (*table_pp)->addr = bfd_section_vma (abfd, asect);
   (*table_pp)->endaddr = (*table_pp)->addr + bfd_section_size (abfd, asect);
@@ -436,7 +437,7 @@ remove_target_sections (void *key, bfd *abfd)
 
   dest = table->sections;
   for (src = table->sections; src < table->sections_end; src++)
-    if (src->key != key || src->bfd != abfd)
+    if (src->key != key || src->the_bfd_section->owner != abfd)
       {
 	/* Keep this section.  */
 	if (dest < src)
@@ -479,7 +480,8 @@ section_table_available_memory (VEC(mem_range_s) *memory,
 
   for (p = sections; p < sections_end; p++)
     {
-      if ((bfd_get_section_flags (p->bfd, p->the_bfd_section)
+      if ((bfd_get_section_flags (p->the_bfd_section->owner,
+				  p->the_bfd_section)
 	   & SEC_READONLY) == 0)
 	continue;
 
@@ -523,7 +525,10 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 
   for (p = sections; p < sections_end; p++)
     {
-      if (section_name && strcmp (section_name, p->the_bfd_section->name) != 0)
+      struct bfd_section *asect = p->the_bfd_section;
+      bfd *abfd = asect->owner;
+
+      if (section_name && strcmp (section_name, asect->name) != 0)
 	continue;		/* not the section we need.  */
       if (memaddr >= p->addr)
         {
@@ -531,11 +536,11 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 	    {
 	      /* Entire transfer is within this section.  */
 	      if (writebuf)
-		res = bfd_set_section_contents (p->bfd, p->the_bfd_section,
+		res = bfd_set_section_contents (abfd, asect,
 						writebuf, memaddr - p->addr,
 						len);
 	      else
-		res = bfd_get_section_contents (p->bfd, p->the_bfd_section,
+		res = bfd_get_section_contents (abfd, asect,
 						readbuf, memaddr - p->addr,
 						len);
 	      return (res != 0) ? len : 0;
@@ -550,11 +555,11 @@ section_table_xfer_memory_partial (gdb_byte *readbuf, const gdb_byte *writebuf,
 	      /* This section overlaps the transfer.  Just do half.  */
 	      len = p->endaddr - memaddr;
 	      if (writebuf)
-		res = bfd_set_section_contents (p->bfd, p->the_bfd_section,
+		res = bfd_set_section_contents (abfd, asect,
 						writebuf, memaddr - p->addr,
 						len);
 	      else
-		res = bfd_get_section_contents (p->bfd, p->the_bfd_section,
+		res = bfd_get_section_contents (abfd, asect,
 						readbuf, memaddr - p->addr,
 						len);
 	      return (res != 0) ? len : 0;
@@ -610,17 +615,18 @@ print_section_info (struct target_section_table *t, bfd *abfd)
 
       for (p = t->sections; p < t->sections_end; p++)
 	{
-	  asection *asect = p->the_bfd_section;
+	  struct bfd_section *psect = p->the_bfd_section;
+	  bfd *pbfd = psect->owner;
 
-	  if ((bfd_get_section_flags (abfd, asect) & (SEC_ALLOC | SEC_LOAD))
+	  if ((bfd_get_section_flags (pbfd, psect) & (SEC_ALLOC | SEC_LOAD))
 	      != (SEC_ALLOC | SEC_LOAD))
 	    continue;
 
-	  if (bfd_get_section_vma (abfd, asect) <= abfd->start_address
-	      && abfd->start_address < (bfd_get_section_vma (abfd, asect)
-					+ bfd_get_section_size (asect)))
+	  if (bfd_get_section_vma (pbfd, psect) <= abfd->start_address
+	      && abfd->start_address < (bfd_get_section_vma (pbfd, psect)
+					+ bfd_get_section_size (psect)))
 	    {
-	      displacement = p->addr - bfd_get_section_vma (abfd, asect);
+	      displacement = p->addr - bfd_get_section_vma (pbfd, psect);
 	      break;
 	    }
 	}
@@ -636,6 +642,9 @@ print_section_info (struct target_section_table *t, bfd *abfd)
     }
   for (p = t->sections; p < t->sections_end; p++)
     {
+      struct bfd_section *psect = p->the_bfd_section;
+      bfd *pbfd = psect->owner;
+
       printf_filtered ("\t%s", hex_string_custom (p->addr, wid));
       printf_filtered (" - %s", hex_string_custom (p->endaddr, wid));
 
@@ -647,11 +656,10 @@ print_section_info (struct target_section_table *t, bfd *abfd)
       /* FIXME: i18n: Need to rewrite this sentence.  */
       if (info_verbose)
 	printf_filtered (" @ %s",
-			 hex_string_custom (p->the_bfd_section->filepos, 8));
-      printf_filtered (" is %s", bfd_section_name (p->bfd,
-						   p->the_bfd_section));
-      if (p->bfd != abfd)
-	printf_filtered (" in %s", bfd_get_filename (p->bfd));
+			 hex_string_custom (psect->filepos, 8));
+      printf_filtered (" is %s", bfd_section_name (pbfd, psect));
+      if (pbfd != abfd)
+	printf_filtered (" in %s", bfd_get_filename (pbfd));
       printf_filtered ("\n");
     }
 }
@@ -720,7 +728,7 @@ exec_set_section_address (const char *filename, int index, CORE_ADDR address)
   table = current_target_sections;
   for (p = table->sections; p < table->sections_end; p++)
     {
-      if (filename_cmp (filename, p->bfd->filename) == 0
+      if (filename_cmp (filename, p->the_bfd_section->owner->filename) == 0
 	  && index == p->the_bfd_section->index)
 	{
 	  p->endaddr += address - p->addr;

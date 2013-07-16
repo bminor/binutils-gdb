@@ -2219,9 +2219,10 @@ record_full_core_xfer_partial (struct target_ops *ops,
 			    xmalloc
 			    (sizeof (struct record_full_core_buf_entry));
 			  entry->p = p;
-			  if (!bfd_malloc_and_get_section (p->bfd,
-							   p->the_bfd_section,
-							   &entry->buf))
+			  if (!bfd_malloc_and_get_section
+			        (p->the_bfd_section->owner,
+				 p->the_bfd_section,
+				 &entry->buf))
 			    {
 			      xfree (entry);
 			      return 0;

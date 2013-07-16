@@ -1898,8 +1898,6 @@ struct target_section
        just some convenient pointer that can be used to differentiate
        the BFDs.  These are managed only by convention.  */
     void *key;
-
-    bfd *bfd;			/* BFD file pointer */
   };
 
 /* Holds an array of target sections.  Defined by [SECTIONS..SECTIONS_END[.  */

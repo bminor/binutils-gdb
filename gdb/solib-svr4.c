@@ -2907,10 +2907,10 @@ static void
 svr4_relocate_section_addresses (struct so_list *so,
                                  struct target_section *sec)
 {
-  sec->addr    = svr4_truncate_ptr (sec->addr    + lm_addr_check (so,
-								  sec->bfd));
-  sec->endaddr = svr4_truncate_ptr (sec->endaddr + lm_addr_check (so,
-								  sec->bfd));
+  bfd *abfd = sec->the_bfd_section->owner;
+
+  sec->addr = svr4_truncate_ptr (sec->addr + lm_addr_check (so, abfd));
+  sec->endaddr = svr4_truncate_ptr (sec->endaddr + lm_addr_check (so, abfd));
 }
 
 

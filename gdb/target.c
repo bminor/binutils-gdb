@@ -1396,7 +1396,8 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
 
   secp = target_section_by_addr (ops, memaddr);
   if (secp != NULL
-      && (bfd_get_section_flags (secp->bfd, secp->the_bfd_section)
+      && (bfd_get_section_flags (secp->the_bfd_section->owner,
+				 secp->the_bfd_section)
 	  & SEC_READONLY))
     {
       struct target_section *p;
@@ -1475,7 +1476,8 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
       secp = target_section_by_addr (ops, memaddr);
       if (secp != NULL
-	  && (bfd_get_section_flags (secp->bfd, secp->the_bfd_section)
+	  && (bfd_get_section_flags (secp->the_bfd_section->owner,
+				     secp->the_bfd_section)
 	      & SEC_READONLY))
 	{
 	  table = target_get_section_table (ops);

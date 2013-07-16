@@ -456,8 +456,9 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 	}
     }
 
-  offset = so->lm_info->offsets->offsets[gdb_bfd_section_index (sec->bfd,
-								sec->the_bfd_section)];
+  offset = so->lm_info->offsets->offsets[gdb_bfd_section_index
+					 (sec->the_bfd_section->owner,
+					  sec->the_bfd_section)];
   sec->addr += offset;
   sec->endaddr += offset;
 }

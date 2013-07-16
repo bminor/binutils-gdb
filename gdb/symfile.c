@@ -229,15 +229,15 @@ build_section_addr_info_from_section_table (const struct target_section *start,
 
   for (stp = start, oidx = 0; stp != end; stp++)
     {
-      if (bfd_get_section_flags (stp->bfd,
-				 stp->the_bfd_section) & (SEC_ALLOC | SEC_LOAD)
+      struct bfd_section *asect = stp->the_bfd_section;
+      bfd *abfd = asect->owner;
+
+      if (bfd_get_section_flags (abfd, asect) & (SEC_ALLOC | SEC_LOAD)
 	  && oidx < end - start)
 	{
 	  sap->other[oidx].addr = stp->addr;
-	  sap->other[oidx].name
-	    = xstrdup (bfd_section_name (stp->bfd, stp->the_bfd_section));
-	  sap->other[oidx].sectindex
-	    = gdb_bfd_section_index (stp->bfd, stp->the_bfd_section);
+	  sap->other[oidx].name = xstrdup (bfd_section_name (abfd, asect));
+	  sap->other[oidx].sectindex = gdb_bfd_section_index (abfd, asect);
 	  oidx++;
 	}
     }
