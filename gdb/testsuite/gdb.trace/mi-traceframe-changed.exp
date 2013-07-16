@@ -76,8 +76,8 @@ test_tfind_tfile
 # Change to a different test case in order to run it on target, and get
 # several traceframes.
 standard_testfile status-stop.c
-set testfile ${testfile}-1
-set binfile ${objdir}/${subdir}/${testfile}
+append testfile -1
+append binfile -1
 set executable $testfile
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \

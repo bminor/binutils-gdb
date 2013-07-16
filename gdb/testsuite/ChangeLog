@@ -1,3 +1,7 @@
+2013-07-16  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.trace/mi-traceframe-changed.exp: Don't use objdir.
+
 2013-07-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/small_reg_param.exp: Accept optional entry value
