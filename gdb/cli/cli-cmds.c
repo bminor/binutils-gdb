@@ -1558,27 +1558,6 @@ void
 init_cmd_lists (void)
 {
   max_user_call_depth = 1024;
-
-  cmdlist = NULL;
-  infolist = NULL;
-  enablelist = NULL;
-  disablelist = NULL;
-  stoplist = NULL;
-  deletelist = NULL;
-  detachlist = NULL;
-  setlist = NULL;
-  unsetlist = NULL;
-  showlist = NULL;
-  sethistlist = NULL;
-  showhistlist = NULL;
-  unsethistlist = NULL;
-  maintenancelist = NULL;
-  maintenanceinfolist = NULL;
-  maintenanceprintlist = NULL;
-  setprintlist = NULL;
-  showprintlist = NULL;
-  setchecklist = NULL;
-  showchecklist = NULL;
 }
 
 static void

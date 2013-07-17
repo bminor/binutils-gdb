@@ -1,5 +1,8 @@
 2013-07-17  Doug Evans  <dje@google.com>
 
+	* cli/cli-cmds.c (init_cmd_lists): Delete unnecessary initialization
+	of all *list variables.
+
 	* gdbcmd.h (togglelist): Delete.
 	* cli/cli-cmds.c (togglelist): Delete.
 	(init_cmd_lists): Update.
