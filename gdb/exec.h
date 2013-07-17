@@ -27,6 +27,7 @@
 struct target_section;
 struct target_ops;
 struct bfd;
+struct objfile;
 
 extern struct target_ops exec_ops;
 
@@ -92,6 +93,11 @@ extern void remove_target_sections (void *owner);
 extern void add_target_sections (void *owner,
 				 struct target_section *sections,
 				 struct target_section *sections_end);
+
+/* Add the sections of OBJFILE to the current set of target sections.
+ * OBJFILE owns the new target sections.  */
+
+extern void add_target_sections_of_objfile (struct objfile *objfile);
 
 /* Prints info about all sections defined in the TABLE.  ABFD is
    special cased --- it's filename is omitted; if it is the executable

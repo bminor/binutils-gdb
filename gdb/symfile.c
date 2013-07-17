@@ -57,6 +57,7 @@
 #include "stack.h"
 #include "gdb_bfd.h"
 #include "cli/cli-utils.h"
+#include "target.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -2206,6 +2207,7 @@ add_symbol_file_command (char *args, int from_tty)
   int expecting_sec_name = 0;
   int expecting_sec_addr = 0;
   char **argv;
+  struct objfile *objf;
 
   struct sect_opt
   {
@@ -2332,8 +2334,10 @@ add_symbol_file_command (char *args, int from_tty)
   if (from_tty && (!query ("%s", "")))
     error (_("Not confirmed."));
 
-  symbol_file_add (filename, from_tty ? SYMFILE_VERBOSE : 0,
-                   section_addrs, flags);
+  objf = symbol_file_add (filename, from_tty ? SYMFILE_VERBOSE : 0,
+			  section_addrs, flags);
+
+  add_target_sections_of_objfile (objf);
 
   /* Getting new symbols may change our opinion about what is
      frameless.  */
@@ -3819,10 +3823,22 @@ symfile_find_segment_sections (struct objfile *objfile)
   free_symfile_segment_data (data);
 }
 
+/* Listen for free_objfile events.  */
+
+static void
+symfile_free_objfile (struct objfile *objfile)
+{
+  /* Remove the target sections of user-added objfiles.  */
+  if (objfile != 0 && objfile->flags & OBJF_USERLOADED)
+    remove_target_sections ((void *) objfile);
+}
+
 void
 _initialize_symfile (void)
 {
   struct cmd_list_element *c;
+
+  observer_attach_free_objfile (symfile_free_objfile);
 
   c = add_cmd ("symbol-file", class_files, symbol_file_command, _("\
 Load symbol table from executable file FILE.\n\
