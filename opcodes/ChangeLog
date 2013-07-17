@@ -1,3 +1,8 @@
+2013-07-17  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-formats.h (MAPPED_INT, MAPPED_REG, REG_PAIR): Add
+	ATTRIBUTE_UNUSED.
+
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* Makefile.am (mips-opc.lo, micromips-opc.lo, mips16-opc.lo): Remove

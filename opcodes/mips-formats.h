@@ -45,7 +45,8 @@
 
 #define MAPPED_INT(SIZE, LSB, MAP, PRINT_HEX) \
   { \
-    typedef char static_assert[(1 << (SIZE)) == ARRAY_SIZE (MAP)]; \
+    typedef char ATTRIBUTE_UNUSED \
+      static_assert[(1 << (SIZE)) == ARRAY_SIZE (MAP)]; \
     static const struct mips_mapped_int_operand op = { \
       { OP_MAPPED_INT, SIZE, LSB }, MAP, PRINT_HEX \
     }; \
@@ -70,7 +71,8 @@
 
 #define MAPPED_REG(SIZE, LSB, BANK, MAP) \
   { \
-    typedef char static_assert[(1 << (SIZE)) == ARRAY_SIZE (MAP)]; \
+    typedef char ATTRIBUTE_UNUSED \
+      static_assert[(1 << (SIZE)) == ARRAY_SIZE (MAP)]; \
     static const struct mips_reg_operand op = { \
       { OP_REG, SIZE, LSB }, OP_REG_##BANK, MAP \
     }; \
@@ -79,8 +81,10 @@
 
 #define REG_PAIR(SIZE, LSB, BANK, MAP) \
   { \
-    typedef char static_assert1[(1 << (SIZE)) == ARRAY_SIZE (MAP##1)]; \
-    typedef char static_assert2[(1 << (SIZE)) == ARRAY_SIZE (MAP##2)]; \
+    typedef char ATTRIBUTE_UNUSED \
+      static_assert1[(1 << (SIZE)) == ARRAY_SIZE (MAP##1)]; \
+    typedef char ATTRIBUTE_UNUSED \
+      static_assert2[(1 << (SIZE)) == ARRAY_SIZE (MAP##2)]; \
     static const struct mips_reg_pair_operand op = { \
       { OP_REG_PAIR, SIZE, LSB }, OP_REG_##BANK, MAP##1, MAP##2 \
     }; \
