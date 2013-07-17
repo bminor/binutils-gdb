@@ -76,6 +76,9 @@ struct converted_character
 typedef struct converted_character converted_character_d;
 DEF_VEC_O (converted_character_d);
 
+/* Command lists for set/show print raw.  */
+struct cmd_list_element *setprintrawlist;
+struct cmd_list_element *showprintrawlist;
 
 /* Prototypes for local functions */
 
@@ -2686,6 +2689,21 @@ show_print (char *args, int from_tty)
 {
   cmd_show_list (showprintlist, from_tty, "");
 }
+
+static void
+set_print_raw (char *arg, int from_tty)
+{
+  printf_unfiltered (
+     "\"set print raw\" must be followed by the name of a \"print raw\" subcommand.\n");
+  help_list (setprintrawlist, "set print raw ", -1, gdb_stdout);
+}
+
+static void
+show_print_raw (char *args, int from_tty)
+{
+  cmd_show_list (showprintrawlist, from_tty, "");
+}
+
 
 void
 _initialize_valprint (void)
@@ -2702,6 +2720,14 @@ _initialize_valprint (void)
 		  &showprintlist, "show print ", 0, &showlist);
   add_alias_cmd ("p", "print", no_class, 1, &showlist);
   add_alias_cmd ("pr", "print", no_class, 1, &showlist);
+
+  add_prefix_cmd ("raw", no_class, set_print_raw,
+		  _("\
+Generic command for setting what things to print in \"raw\" mode."),
+		  &setprintrawlist, "set print raw ", 0, &setprintlist);
+  add_prefix_cmd ("raw", no_class, show_print_raw,
+		  _("Generic command for showing \"print raw\" settings."),
+		  &showprintrawlist, "show print raw ", 0, &showprintlist);
 
   add_setshow_uinteger_cmd ("elements", no_class,
 			    &user_print_options.print_max, _("\

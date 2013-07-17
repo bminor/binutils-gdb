@@ -34,6 +34,11 @@ maint set|show per-command symtab
 
 * New options
 
+set print raw frame-arguments
+show print raw frame-arguments
+  Set/show whether to print frame arguments in raw mode,
+  disregarding any defined pretty-printers.
+
 set remote trace-status-packet
 show remote trace-status-packet
   Set/show the use of remote protocol qTStatus packet.

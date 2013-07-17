@@ -1,3 +1,9 @@
+2013-07-17  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-frame-args.c: New file.
+	* gdb.python/py-frame-args.py: New file.
+	* gdb.python/py-frame-args.exp New file.
+
 2013-07-16  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/printcmds.exp (test_printf): Add tests for format

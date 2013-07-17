@@ -1,5 +1,15 @@
 2013-07-17  Doug Evans  <dje@google.com>
 
+	* NEWS: Mention "set print raw frame-arguments".
+	* gdbcmd.h (setprintrawlist, showprintrawlist): Declare.
+	* stack.c (print_raw_frame_arguments): New static global.
+	(print_frame_arg): Set opts.raw from print_raw_frame_arguments.
+	(_initialize_stack): New command "set/show print raw frame-arguments".
+	* valprint.c (setprintrawlist, showprintrawlist): New globals.
+	(set_print_raw, show_print_raw): New functions.
+	(_initialize_valprint): New prefix command "set/show print raw".
+	* valprint.h (value_print_options): Improve comments.
+
 	* cli/cli-cmds.c (init_cmd_lists): Delete unnecessary initialization
 	of all *list variables.
 

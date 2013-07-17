@@ -65,6 +65,9 @@ static const char *const print_frame_arguments_choices[] =
   {"all", "scalars", "none", NULL};
 static const char *print_frame_arguments = "scalars";
 
+/* If non-zero, don't invoke pretty-printers for frame arguments.  */
+static int print_raw_frame_arguments;
+
 /* The possible choices of "set print entry-values", and the value
    of this setting.  */
 
@@ -277,6 +280,7 @@ print_frame_arg (const struct frame_arg *arg)
 
 	      get_no_prettyformat_print_options (&opts);
 	      opts.deref_ref = 1;
+	      opts.raw = print_raw_frame_arguments;
 
 	      /* True in "summary" mode, false otherwise.  */
 	      opts.summary = !strcmp (print_frame_arguments, "scalars");
@@ -2639,6 +2643,15 @@ Usage: func <name>\n"));
 			_("Set printing of non-scalar frame arguments"),
 			_("Show printing of non-scalar frame arguments"),
 			NULL, NULL, NULL, &setprintlist, &showprintlist);
+
+  add_setshow_boolean_cmd ("frame-arguments", no_class,
+			   &print_raw_frame_arguments, _("\
+Set whether to print frame arguments in raw form."), _("\
+Show whether to print frame arguments in raw form."), _("\
+If set, frame arguments are printed in raw form, bypassing any\n\
+pretty-printers for that value."),
+			   NULL, NULL,
+			   &setprintrawlist, &showprintrawlist);
 
   add_setshow_auto_boolean_cmd ("disassemble-next-line", class_stack,
 			        &disassemble_next_line, _("\

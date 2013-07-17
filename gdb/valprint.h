@@ -81,10 +81,12 @@ struct value_print_options
      share one flag, why not Pascal too?  */
   int pascal_static_field_print;
 
-  /* Controls Python pretty-printing.  */
+  /* If non-zero don't do Python pretty-printing.  */
   int raw;
 
-  /* If nonzero, print the value in "summary" form.  */
+  /* If nonzero, print the value in "summary" form.
+     If raw and summary are both non-zero, don't print non-scalar values
+     ("..." is printed instead).  */
   int summary;
 
   /* If nonzero, when printing a pointer, print the symbol to which it

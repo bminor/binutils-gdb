@@ -9030,6 +9030,18 @@ thus speeding up the display of each Ada frame.
 @item show print frame-arguments
 Show how the value of arguments should be displayed when printing a frame.
 
+@item set print raw frame-arguments on
+Print frame arguments in raw, non pretty-printed, form.
+
+@item set print raw frame-arguments off
+Print frame arguments in pretty-printed form, if there is a pretty-printer
+for the value (@pxref{Pretty Printing}),
+otherwise print the value in raw form.
+This is the default.
+
+@item show print raw frame-arguments
+Show whether to print frame arguments in raw form.
+
 @anchor{set print entry-values}
 @item set print entry-values @var{value}
 @kindex set print entry-values

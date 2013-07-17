@@ -107,6 +107,10 @@ extern struct cmd_list_element *setprintlist;
 
 extern struct cmd_list_element *showprintlist;
 
+extern struct cmd_list_element *setprintrawlist;
+
+extern struct cmd_list_element *showprintrawlist;
+
 extern struct cmd_list_element *setprinttypelist;
 
 extern struct cmd_list_element *showprinttypelist;
