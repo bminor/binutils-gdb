@@ -383,7 +383,8 @@ ppc64_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
       gdb_byte buf[8];
       int res;
 
-      res = bfd_get_section_contents (s->bfd, s->the_bfd_section,
+      res = bfd_get_section_contents (s->the_bfd_section->owner,
+				      s->the_bfd_section,
 				      &buf, addr - s->addr, 8);
       if (res != 0)
 	return extract_unsigned_integer (buf, 8, byte_order)

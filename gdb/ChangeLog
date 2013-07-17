@@ -1,3 +1,11 @@
+2013-07-16  Doug Evans  <dje@google.com>
+
+	* nto-tdep.c (nto_relocate_section_addresses): Update,
+	target_section.bfd deleted.
+	* ppc64-tdep.c (ppc64_convert_from_func_ptr_addr): Ditto.
+	* s390-tdep.c (s390_load): Ditto.
+	* solib-aix.c (solib_aix_relocate_section_addresses): Ditto.
+
 2013-07-16  Andrew Burgess  <aburgess@broadcom.com>
 
 	* common/format.c (parse_format_string): Add checks for NULL

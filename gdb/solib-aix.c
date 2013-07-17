@@ -390,8 +390,8 @@ static void
 solib_aix_relocate_section_addresses (struct so_list *so,
 				      struct target_section *sec)
 {
-  bfd *abfd = sec->bfd;
   struct bfd_section *bfd_sect = sec->the_bfd_section;
+  bfd *abfd = bfd_sect->owner;
   const char *section_name = bfd_section_name (abfd, bfd_sect);
   struct lm_info *info = so->lm_info;
 
