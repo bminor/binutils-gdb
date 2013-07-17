@@ -1,3 +1,8 @@
+2013-07-17  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_per_objfile_free): Clear
+	dwarf2_per_objfile.
+
 2013-07-16  Doug Evans  <dje@google.com>
 
 	* nto-tdep.c (nto_relocate_section_addresses): Update,

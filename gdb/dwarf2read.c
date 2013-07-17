@@ -20546,6 +20546,10 @@ dwarf2_per_objfile_free (struct objfile *objfile, void *d)
   struct dwarf2_per_objfile *data = d;
   int ix;
 
+  /* Make sure we don't accidentally use dwarf2_per_objfile while
+     cleaning up.  */
+  dwarf2_per_objfile = NULL;
+
   for (ix = 0; ix < data->n_comp_units; ++ix)
    VEC_free (dwarf2_per_cu_ptr, data->all_comp_units[ix]->imported_symtabs);
 
