@@ -116,10 +116,6 @@ struct cmd_list_element *enablelist;
 
 struct cmd_list_element *disablelist;
 
-/* Chain containing all defined toggle subcommands.  */
-
-struct cmd_list_element *togglelist;
-
 /* Chain containing all defined stop subcommands.  */
 
 struct cmd_list_element *stoplist;
@@ -1567,7 +1563,6 @@ init_cmd_lists (void)
   infolist = NULL;
   enablelist = NULL;
   disablelist = NULL;
-  togglelist = NULL;
   stoplist = NULL;
   deletelist = NULL;
   detachlist = NULL;

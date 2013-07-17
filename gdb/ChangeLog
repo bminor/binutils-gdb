@@ -1,3 +1,10 @@
+2013-07-17  Doug Evans  <dje@google.com>
+
+	* gdbcmd.h (togglelist): Delete.
+	* cli/cli-cmds.c (togglelist): Delete.
+	(init_cmd_lists): Update.
+	* cli/cli-cmds.h (togglelist): Delete.
+
 2013-07-17  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_per_objfile_free): Clear
