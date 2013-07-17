@@ -1796,6 +1796,45 @@ proc supports_reverse {} {
     return 0
 }
 
+# Return 1 if target is ELF.
+gdb_caching_proc is_elf_target {
+    set me "is_elf_target"
+
+    set src [standard_temp_file is_elf_target[pid].c]
+    set obj [standard_temp_file is_elf_target[pid].o]
+
+    set fp_src [open $src "w"]
+    puts $fp_src "int foo () {return 0;}"
+    close $fp_src
+
+    verbose "$me:  compiling testfile $src" 2
+    set lines [gdb_compile $src $obj object {quiet}]
+
+    file delete $src
+
+    if ![string match "" $lines] then {
+	verbose "$me:  testfile compilation failed, returning 0" 2
+	return 0
+    }
+
+    set fp_obj [open $obj "r"]
+    fconfigure $fp_obj -translation binary
+    set data [read $fp_obj]
+    close $fp_obj
+
+    file delete $obj
+
+    set ELFMAG "\u007FELF"
+
+    if {[string compare -length 4 $data $ELFMAG] != 0} {
+	verbose "$me:  returning 0" 2
+	return 0
+    }
+
+    verbose "$me:  returning 1" 2
+    return 1
+}
+
 # Return 1 if target is ILP32.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.
