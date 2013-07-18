@@ -1,3 +1,10 @@
+2013-07-18  Yao Qi  <yao@codesourcery.com>
+
+	* coffread.c (coff_symfile_read): Iterate over minimal symbols,
+	if the name is prefixed by "__imp_" or "_imp_", look for minimal
+	symbol without prefix.  If found, set its type to
+	'mst_solib_trampoline'.
+
 2013-07-17  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention "set print raw frame-arguments".
