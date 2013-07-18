@@ -650,6 +650,35 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 
   install_minimal_symbols (objfile);
 
+  if (pe_file)
+    {
+      struct minimal_symbol *msym;
+
+      ALL_OBJFILE_MSYMBOLS (objfile, msym)
+	{
+	  const char *name = SYMBOL_LINKAGE_NAME (msym);
+
+	  /* If the minimal symbols whose name are prefixed by "__imp_"
+	     or "_imp_", get rid of the prefix, and search the minimal
+	     symbol in OBJFILE.  Note that 'maintenance print msymbols'
+	     shows that type of these "_imp_XXXX" symbols is mst_data.  */
+	  if (MSYMBOL_TYPE (msym) == mst_data
+	      && (strncmp (name, "__imp_", 6) == 0
+		  || strncmp (name, "_imp_", 5) == 0))
+	    {
+	      const char *name1 = (name[1] == '_' ? &name[7] : &name[6]);
+	      struct minimal_symbol *found;
+
+	      found = lookup_minimal_symbol (name1, NULL, objfile);
+	      /* If found, there are symbols named "_imp_foo" and "foo"
+		 respectively in OBJFILE.  Set the type of symbol "foo"
+		 as 'mst_solib_trampoline'.  */
+	      if (found != NULL && MSYMBOL_TYPE (found) == mst_text)
+		MSYMBOL_TYPE (found) = mst_solib_trampoline;
+	    }
+	}
+    }
+
   /* Free the installed minimal symbol data.  */
   do_cleanups (cleanup_minimal_symbols);
 
