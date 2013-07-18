@@ -2652,11 +2652,14 @@ proc gdb_compile {source dest type options} {
 		if { $result != "" } {
 		    return $result
 		}
-
-		set gdb_saved_set_unbuffered_mode_obj ${objdir}/set_unbuffered_mode_saved.o
+		if {[is_remote host]} {
+		    set gdb_saved_set_unbuffered_mode_obj set_unbuffered_mode_saved.o
+		} else {
+		    set gdb_saved_set_unbuffered_mode_obj ${objdir}/set_unbuffered_mode_saved.o
+		}
 		# Link a copy of the output object, because the
 		# original may be automatically deleted.
-		remote_exec host "cp -f $unbuf_obj $gdb_saved_set_unbuffered_mode_obj"
+		remote_download host $unbuf_obj $gdb_saved_set_unbuffered_mode_obj
 	    } else {
 		verbose "gdb_saved_set_unbuffered_obj already compiled"
 	    }

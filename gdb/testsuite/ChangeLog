@@ -1,3 +1,10 @@
+2013-07-18  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (gdb_compile): Set
+	gdb_saved_set_unbuffered_mode_obj to
+	set_unbuffered_mode_saved.o if host is remote.  Invoke
+	remote_download to copy $unbuf_obj to host.
+
 2013-07-17  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-frame-args.c: New file.
