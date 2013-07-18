@@ -1,5 +1,10 @@
 2013-07-19  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/read-memory.exp (test_from_remote): Update test.
+	(teset_from_exec): Likewise.
+
+2013-07-19  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.trace/read-memory.c: New.
 	* gdb.trace/read-memory.exp: New.
 

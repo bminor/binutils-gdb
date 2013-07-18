@@ -955,8 +955,7 @@ read_value_memory (struct value *val, int embedded_offset,
     {
       VEC(mem_range_s) *available_memory;
 
-      if (get_traceframe_number () < 0
-	  || !traceframe_available_memory (&available_memory, memaddr, length))
+      if (!traceframe_available_memory (&available_memory, memaddr, length))
 	{
 	  if (stack)
 	    read_stack (memaddr, buffer, length);

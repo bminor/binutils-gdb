@@ -1,3 +1,12 @@
+2013-07-19  Yao Qi  <yao@codesourcery.com>
+
+	* target.c (update_current_target): Change the default action
+	of 'to_traceframe_info' from tcomplain to return_zero.
+	* target.h (struct target_ops) <to_traceframe_info>: Add more
+	comments.
+	* valops.c (read_value_memory): Call
+	traceframe_available_memory unconditionally.
+
 2013-07-18  Yao Qi  <yao@codesourcery.com>
 
 	* coffread.c (coff_symfile_read): Iterate over minimal symbols,

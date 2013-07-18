@@ -103,9 +103,8 @@ proc test_from_remote { target } {
 	}
 
 	with_test_prefix "w/o setting traceframe" {
-	    gdb_test "print testglob" "Cannot access memory at address.*"
-	    gdb_test "print testglob_not_collected" \
-		"Cannot access memory at address.*"
+	    gdb_test "print testglob" " = <unavailable>"
+	    gdb_test "print testglob_not_collected" " = <unavailable>"
 	    gdb_test "print constglob" " = 10000"
 	    gdb_test "print constglob_not_collected" " = 100"
 	}
@@ -140,9 +139,8 @@ proc teset_from_exec { target } {
 	"change to ${target} target"
 
     with_test_prefix "exec to ${target} w/o setting traceframe" {
-	gdb_test "print testglob" "Cannot access memory at address.*"
-	gdb_test "print testglob_not_collected" \
-	    "Cannot access memory at address.*"
+	gdb_test "print testglob" " = <unavailable>"
+	gdb_test "print testglob_not_collected" " = <unavailable>"
 	gdb_test "print constglob" " = 10000"
 	gdb_test "print constglob_not_collected" " = 100"
     }

@@ -962,7 +962,7 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_traceframe_info,
 	    (struct traceframe_info * (*) (void))
-	    tcomplain);
+	    return_zero);
   de_fault (to_supports_evaluation_of_breakpoint_conditions,
 	    (int (*) (void))
 	    return_zero);
