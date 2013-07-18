@@ -1,3 +1,8 @@
+2013-07-18  Terry Guo  <terry.guo@arm.com>
+
+        * ld-arm/thumb-b-lks-sym.d: Updated to be more flexible.
+        * ld-arm/thumb-bl-lks-sym.d: Likewise.
+
 2013-07-18  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-arm/farcall-arm-nacl.d: New file.

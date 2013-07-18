@@ -3609,6 +3609,12 @@ arm_type_of_stub (struct bfd_link_info *info,
 
   r_type = ELF32_R_TYPE (rel->r_info);
 
+  /* ST_BRANCH_TO_ARM is nonsense to thumb-only targets when we
+     are considering a function call relocation.  */
+  if (thumb_only && (r_type == R_ARM_THM_CALL || r_type == R_ARM_THM_JUMP24)
+      && branch_type == ST_BRANCH_TO_ARM)
+    branch_type = ST_BRANCH_TO_THUMB;
+
   /* For TLS call relocs, it is the caller's responsibility to provide
      the address of the appropriate trampoline.  */
   if (r_type != R_ARM_TLS_CALL
@@ -8122,6 +8128,14 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
     }
   else
     addend = signed_addend = rel->r_addend;
+
+  /* ST_BRANCH_TO_ARM is nonsense to thumb-only targets when we
+     are resolving a function call relocation.  */
+  if (using_thumb_only (globals)
+      && (r_type == R_ARM_THM_CALL
+	  || r_type == R_ARM_THM_JUMP24)
+      && branch_type == ST_BRANCH_TO_ARM)
+    branch_type = ST_BRANCH_TO_THUMB;
 
   /* Record the symbol information that should be used in dynamic
      relocations.  */
