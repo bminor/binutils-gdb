@@ -1,3 +1,12 @@
+2013-07-18  Travis Snoozy  <quandary@remstate.com>
+
+	PR ld/15721
+	* elf32-msp430.c (R_MSP430_10_PCREL): Use 10-bit source and
+	destination masks.
+	* R_MSP430_2X_PCREL: Likewise.
+	* R_MSP430X_10_PCREL: Likewise.
+	* R_MSP430X_2X_PCREL: Likewise.
+
 2013-07-18  Terry Guo  <terry.guo@arm.com>
 
         * elf32-arm.c (arm_type_of_stub): Don't use ST_BRANCH_TO_ARM for

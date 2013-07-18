@@ -56,7 +56,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
 	 0xffffffff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
-  /* A 13 bit PC relative relocation.  */
+  /* A 10 bit PC relative relocation.  */
   HOWTO (R_MSP430_10_PCREL,	/* type */
 	 1,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -67,8 +67,8 @@ static reloc_howto_type elf_msp430_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MSP430_10_PCREL",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,			/* src_mask */
-	 0xfff,			/* dst_mask */
+	 0x3ff,			/* src_mask */
+	 0x3ff,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   /* A 16 bit absolute relocation.  */
@@ -131,7 +131,7 @@ static reloc_howto_type elf_msp430_howto_table[] =
 	 0xffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
-  /* A 13 bit PC relative relocation for complicated polymorphs.  */
+  /* A 10 bit PC relative relocation for complicated polymorphs.  */
   HOWTO (R_MSP430_2X_PCREL,	/* type */
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -142,8 +142,8 @@ static reloc_howto_type elf_msp430_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MSP430_2X_PCREL",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,			/* src_mask */
-	 0xfff,			/* dst_mask */
+	 0x3ff,			/* src_mask */
+	 0x3ff,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   /* A 16 bit relaxable relocation for command address.  */
@@ -449,7 +449,7 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 
   EMPTY_HOWTO (R_MSP430_EHTYPE),
   
-  /* A 13 bit PC relative relocation.  */
+  /* A 10 bit PC relative relocation.  */
   HOWTO (R_MSP430X_10_PCREL,	/* type */
 	 1,			/* rightshift */
 	 1,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -460,11 +460,11 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MSP430X_10_PCREL",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,			/* src_mask */
-	 0xfff,			/* dst_mask */
+	 0x3ff,			/* src_mask */
+	 0x3ff,			/* dst_mask */
 	 TRUE),  		/* pcrel_offset */
 
-  /* A 13 bit PC relative relocation for complicated polymorphs.  */
+  /* A 10 bit PC relative relocation for complicated polymorphs.  */
   HOWTO (R_MSP430X_2X_PCREL,	/* type */
 	 1,			/* rightshift */
 	 2,			/* size (0 = byte, 1 = short, 2 = long) */
@@ -475,8 +475,8 @@ static reloc_howto_type elf_msp430x_howto_table[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_MSP430X_2X_PCREL",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0xfff,			/* src_mask */
-	 0xfff,			/* dst_mask */
+	 0x3ff,			/* src_mask */
+	 0x3ff,			/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   /* Together with a following reloc, allows for the difference
