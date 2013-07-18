@@ -7491,7 +7491,10 @@ process_unwind (FILE * file)
 
   for (i = 0; handlers[i].handler != NULL; i++)
     if (elf_header.e_machine == handlers[i].machtype)
-      return handlers[i].handler (file);
+      {
+	handlers[i].handler (file);
+	return;
+      }
 
   printf (_("\nThe decoding of unwind sections for machine type %s is not currently supported.\n"),
 	  get_machine_name (elf_header.e_machine));

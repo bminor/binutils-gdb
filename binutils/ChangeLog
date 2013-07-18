@@ -1,3 +1,8 @@
+2013-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_unwind): Do not return the result of a void
+	function.
+
 2013-07-15  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* readelf.c (display_mips_gnu_attribute): Replace hardcoded magic
