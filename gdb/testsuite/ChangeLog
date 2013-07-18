@@ -1,3 +1,10 @@
+2013-07-18  Will Newton  <will.newton@linaro.org>
+
+	* gdb.threads/tls-nodebug.c: Call pthread_testcancel
+	to ensure the test is linked against pthreads.
+	* gdb.threads/tls-var-main.c: Likewise.
+	* gdb.threads/tls-shared.c: Likewise.
+
 2013-07-18  Yao Qi  <yao@codesourcery.com>
 
 	* lib/future.exp (gdb_default_target_compile): Use tail name

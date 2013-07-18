@@ -15,8 +15,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include <pthread.h>
+
 int
 main (void)
 {
+  /* Ensure we link against pthreads even with --as-needed.  */
+  pthread_testcancel();
   return 0;
 }
