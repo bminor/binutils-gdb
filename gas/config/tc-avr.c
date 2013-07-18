@@ -456,6 +456,7 @@ md_show_usage (FILE *stream)
 	"                   avr5  - enhanced AVR core with up to 64K program memory\n"
 	"                   avr51 - enhanced AVR core with up to 128K program memory\n"
 	"                   avr6  - enhanced AVR core with up to 256K program memory\n"
+	"                   avrxmega2 - XMEGA, > 8K, < 64K FLASH, < 64K RAM\n"
 	"                   avrxmega3 - XMEGA, > 8K, <= 64K FLASH, > 64K RAM\n"
 	"                   avrxmega4 - XMEGA, > 64K, <= 128K FLASH, <= 64K RAM\n"
 	"                   avrxmega5 - XMEGA, > 64K, <= 128K FLASH, > 64K RAM\n"
