@@ -1,3 +1,21 @@
+2013-07-18  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-arm/farcall-arm-nacl.d: New file.
+	* ld-arm/farcall-arm-nacl-pic.d: New file.
+	* ld-arm/farcall-data-nacl.d: New file.
+	* ld-arm/arm-elf.exp (armeabitests_common): Add extra element to
+	"action" lists for those cases to use a different dump file for NaCl
+	targets.
+	Massage $armeabitests_common to drop the extra element or the one
+	before it, depending on [istarget "arm*-*-nacl*"].
+
+	* ld-arm/arm-elf.exp (armelftests_common): Move all "Cortex-A8
+	erratum fix", Thumb-only and interworking cases to ...
+	(armelftests_nonacl): ... here.
+	(armeabitests_common): Move all "erratum 760522 fix", Thumb-only
+	and interworking cases to ...
+	(armeabitests_nonacl): ... here.
+
 2013-05-28  Will Newton  <will.newton@linaro.org>
 
 	* ld-arm/arm-elf.exp: Add IFUNC test 17.

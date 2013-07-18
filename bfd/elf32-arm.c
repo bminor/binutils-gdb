@@ -2416,6 +2416,33 @@ static const insn_sequence elf32_arm_stub_long_branch_v4t_thumb_tls_pic[] =
   DATA_WORD (0, R_ARM_REL32, -4),    /* dcd  R_ARM_REL32(X) */
 };
 
+/* NaCl ARM -> ARM long branch stub.  */
+static const insn_sequence elf32_arm_stub_long_branch_arm_nacl[] =
+{
+  ARM_INSN (0xe59fc00c),		/* ldr	ip, [pc, #12] */
+  ARM_INSN (0xe3ccc13f),		/* bic	ip, ip, #0xc000000f */
+  ARM_INSN (0xe12fff1c),                /* bx	ip */
+  ARM_INSN (0xe320f000),                /* nop */
+  ARM_INSN (0xe125be70),                /* bkpt	0x5be0 */
+  DATA_WORD (0, R_ARM_ABS32, 0),        /* dcd	R_ARM_ABS32(X) */
+  DATA_WORD (0, R_ARM_NONE, 0),         /* .word 0 */
+  DATA_WORD (0, R_ARM_NONE, 0),         /* .word 0 */
+};
+
+/* NaCl ARM -> ARM long branch stub, PIC.  */
+static const insn_sequence elf32_arm_stub_long_branch_arm_nacl_pic[] =
+{
+  ARM_INSN (0xe59fc00c),		/* ldr	ip, [pc, #12] */
+  ARM_INSN (0xe08cc00f),                /* add	ip, ip, pc */
+  ARM_INSN (0xe3ccc13f),		/* bic	ip, ip, #0xc000000f */
+  ARM_INSN (0xe12fff1c),                /* bx	ip */
+  ARM_INSN (0xe125be70),                /* bkpt	0x5be0 */
+  DATA_WORD (0, R_ARM_REL32, 8),        /* dcd	R_ARM_REL32(X+8) */
+  DATA_WORD (0, R_ARM_NONE, 0),         /* .word 0 */
+  DATA_WORD (0, R_ARM_NONE, 0),         /* .word 0 */
+};
+
+
 /* Cortex-A8 erratum-workaround stubs.  */
 
 /* Stub used for conditional branches (which may be beyond +/-1MB away, so we
@@ -2492,6 +2519,8 @@ static const insn_sequence elf32_arm_stub_a8_veneer_blx[] =
   DEF_STUB(long_branch_thumb_only_pic) \
   DEF_STUB(long_branch_any_tls_pic) \
   DEF_STUB(long_branch_v4t_thumb_tls_pic) \
+  DEF_STUB(long_branch_arm_nacl) \
+  DEF_STUB(long_branch_arm_nacl_pic) \
   DEF_STUB(a8_veneer_b_cond) \
   DEF_STUB(a8_veneer_b) \
   DEF_STUB(a8_veneer_bl) \
@@ -2984,7 +3013,7 @@ struct elf32_arm_link_hash_table
   bfd *stub_bfd;
 
   /* Linker call-backs.  */
-  asection * (*add_stub_section) (const char *, asection *);
+  asection * (*add_stub_section) (const char *, asection *, unsigned int);
   void (*layout_sections_again) (void);
 
   /* Array to keep track of which stub sections have been created, and
@@ -3808,8 +3837,10 @@ arm_type_of_stub (struct bfd_link_info *info,
 		? (r_type == R_ARM_TLS_CALL
 		   /* TLS PIC Stub */
 		   ? arm_stub_long_branch_any_tls_pic
+		   : globals->nacl_p ? arm_stub_long_branch_arm_nacl_pic
 		   : arm_stub_long_branch_any_arm_pic)
 		/* non-PIC stubs.  */
+		: globals->nacl_p ? arm_stub_long_branch_arm_nacl
 		: arm_stub_long_branch_any_any;
 	    }
 	}
@@ -3946,7 +3977,8 @@ elf32_arm_create_or_find_stub_sec (asection **link_sec_p, asection *section,
 
 	  memcpy (s_name, link_sec->name, namelen);
 	  memcpy (s_name + namelen, STUB_SUFFIX, sizeof (STUB_SUFFIX));
-	  stub_sec = (*htab->add_stub_section) (s_name, link_sec);
+	  stub_sec = (*htab->add_stub_section) (s_name, link_sec,
+						htab->nacl_p ? 4 : 3);
 	  if (stub_sec == NULL)
 	    return NULL;
 	  htab->stub_group[link_sec->id].stub_sec = stub_sec;
@@ -4079,6 +4111,10 @@ arm_stub_required_alignment (enum elf32_arm_stub_type stub_type)
     case arm_stub_a8_veneer_blx:
       return 4;
 
+    case arm_stub_long_branch_arm_nacl:
+    case arm_stub_long_branch_arm_nacl_pic:
+      return 16;
+
     default:
       abort ();  /* Should be unreachable.  */
     }
@@ -4088,7 +4124,7 @@ static bfd_boolean
 arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 		    void * in_arg)
 {
-#define MAXRELOCS 2
+#define MAXRELOCS 3
   struct elf32_arm_stub_hash_entry *stub_entry;
   struct elf32_arm_link_hash_table *globals;
   struct bfd_link_info *info;
@@ -4900,7 +4936,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		      bfd *stub_bfd,
 		      struct bfd_link_info *info,
 		      bfd_signed_vma group_size,
-		      asection * (*add_stub_section) (const char *, asection *),
+		      asection * (*add_stub_section) (const char *, asection *,
+						      unsigned int),
 		      void (*layout_sections_again) (void))
 {
   bfd_size_type stub_group_size;

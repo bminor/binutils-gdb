@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 #   Copyright 1991, 1993, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
+#   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -74,8 +74,8 @@ arm_elf_before_allocation (void)
       /* Here we rummage through the found bfds to collect glue information.  */
       LANG_FOR_EACH_INPUT_STATEMENT (is)
 	{
-          /* Initialise mapping tables for code/data.  */
-          bfd_elf32_arm_init_maps (is->the_bfd);
+	  /* Initialise mapping tables for code/data.  */
+	  bfd_elf32_arm_init_maps (is->the_bfd);
 
 	  if (!bfd_elf32_arm_process_before_allocation (is->the_bfd,
 							&link_info)
@@ -185,7 +185,8 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
 
 static asection *
 elf32_arm_add_stub_section (const char *stub_sec_name,
-			    asection *input_section)
+			    asection *input_section,
+			    unsigned int alignment_power)
 {
   asection *stub_sec;
   flagword flags;
@@ -201,7 +202,7 @@ elf32_arm_add_stub_section (const char *stub_sec_name,
   if (stub_sec == NULL)
     goto err_ret;
 
-  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 3);
+  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, alignment_power);
 
   output_section = input_section->output_section;
   secname = bfd_get_section_name (output_section->owner, output_section);
@@ -280,7 +281,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 	 the unwind table index.  */
       unsigned int list_size = 10;
       asection **sec_list = (asection **)
-          xmalloc (list_size * sizeof (asection *));
+	  xmalloc (list_size * sizeof (asection *));
       unsigned int sec_count = 0;
 
       LANG_FOR_EACH_INPUT_STATEMENT (is)
@@ -307,7 +308,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 		    {
 		      list_size *= 2;
 		      sec_list = (asection **)
-                          xrealloc (sec_list, list_size * sizeof (asection *));
+			  xrealloc (sec_list, list_size * sizeof (asection *));
 		    }
 
 		  sec_list[sec_count++] = sec;
@@ -373,9 +374,9 @@ gld${EMULATION_NAME}_finish (void)
   {
     LANG_FOR_EACH_INPUT_STATEMENT (is)
       {
-        /* Figure out where VFP11 erratum veneers (and the labels returning
-           from same) have been placed.  */
-        bfd_elf32_arm_vfp11_fix_veneer_locations (is->the_bfd, &link_info);
+	/* Figure out where VFP11 erratum veneers (and the labels returning
+	   from same) have been placed.  */
+	bfd_elf32_arm_vfp11_fix_veneer_locations (is->the_bfd, &link_info);
       }
   }
 
@@ -470,13 +471,13 @@ arm_elf_create_output_section_statements (void)
 				   fix_arm1176);
 
   stub_file = lang_add_input_file ("linker stubs",
- 				   lang_input_file_is_fake_enum,
- 				   NULL);
+				   lang_input_file_is_fake_enum,
+				   NULL);
   stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
   if (stub_file->the_bfd == NULL
       || ! bfd_set_arch_mach (stub_file->the_bfd,
- 			      bfd_get_arch (link_info.output_bfd),
- 			      bfd_get_mach (link_info.output_bfd)))
+			      bfd_get_arch (link_info.output_bfd),
+			      bfd_get_mach (link_info.output_bfd)))
     {
       einfo ("%X%P: can not create BFD %E\n");
       return;
@@ -577,13 +578,13 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --pic-veneer                Always generate PIC interworking veneers\n"));
   fprintf (file, _("\
   --stub-group-size=N         Maximum size of a group of input sections that\n\
-                               can be handled by one stub section.  A negative\n\
-                               value locates all stubs after their branches\n\
-                               (with a group size of -N), while a positive\n\
-                               value allows two groups of input sections, one\n\
-                               before, and one after each stub section.\n\
-                               Values of +/-1 indicate the linker should\n\
-                               choose suitable defaults.\n"));
+			       can be handled by one stub section.  A negative\n\
+			       value locates all stubs after their branches\n\
+			       (with a group size of -N), while a positive\n\
+			       value allows two groups of input sections, one\n\
+			       before, and one after each stub section.\n\
+			       Values of +/-1 indicate the linker should\n\
+			       choose suitable defaults.\n"));
   fprintf (file, _("  --[no-]fix-cortex-a8        Disable/enable Cortex-A8 Thumb-2 branch erratum fix\n"));
   fprintf (file, _("  --no-merge-exidx-entries    Disable merging exidx entries\n"));
   fprintf (file, _("  --[no-]fix-arm1176          Disable/enable ARM1176 BLX immediate erratum fix\n"));
@@ -628,13 +629,13 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_VFP11_DENORM_FIX:
       if (strcmp (optarg, "none") == 0)
-        vfp11_denorm_fix = BFD_ARM_VFP11_FIX_NONE;
+	vfp11_denorm_fix = BFD_ARM_VFP11_FIX_NONE;
       else if (strcmp (optarg, "scalar") == 0)
-        vfp11_denorm_fix = BFD_ARM_VFP11_FIX_SCALAR;
+	vfp11_denorm_fix = BFD_ARM_VFP11_FIX_SCALAR;
       else if (strcmp (optarg, "vector") == 0)
-        vfp11_denorm_fix = BFD_ARM_VFP11_FIX_VECTOR;
+	vfp11_denorm_fix = BFD_ARM_VFP11_FIX_VECTOR;
       else
-        einfo (_("Unrecognized VFP11 fix type '\''%s'\''.\n"), optarg);
+	einfo (_("Unrecognized VFP11 fix type '\''%s'\''.\n"), optarg);
       break;
 
     case OPTION_NO_ENUM_SIZE_WARNING:
@@ -653,8 +654,8 @@ PARSE_AND_LIST_ARGS_CASES='
       {
 	const char *end;
 
-        group_size = bfd_scan_vma (optarg, &end, 0);
-        if (*end)
+	group_size = bfd_scan_vma (optarg, &end, 0);
+	if (*end)
 	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
       }
       break;

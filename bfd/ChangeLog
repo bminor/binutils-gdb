@@ -1,3 +1,17 @@
+2013-07-18  Roland McGrath  <mcgrathr@google.com>
+
+	* elf32-arm.c (elf32_arm_stub_long_branch_arm_nacl): New variable.
+	(elf32_arm_stub_long_branch_arm_nacl_pic): New variable.
+	(arm_build_one_stub): Increase MAXRELOCS to 3.
+	(arm_type_of_stub): Use them if GLOBALS->nacl_p.
+	(struct elf32_arm_link_hash_table): Give add_stub_section member's
+	pointee type a third argument.
+	(elf32_arm_create_or_find_stub_sec): Update caller.
+	(elf32_arm_size_stubs): Update argument type.
+	* bfd-in.h (elf32_arm_size_stubs): Update decl.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2013-05-28  Will Newton  <will.newton@linaro.org>
 
 	* elf32-arm.c (elf32_arm_populate_plt_entry): Call
@@ -276,7 +290,7 @@
 
 2012-11-19  Joey Ye  <joey.ye@arm.com>
 
-	* elf32-arm.c (elf32_arm_final_link_relocate, 
+	* elf32-arm.c (elf32_arm_final_link_relocate,
 	case R_ARM_THM_ALU_PREL_11_0, case R_ARM_THM_PC12): Align address of
 	the place being relocated.
 	(elf32_arm_final_link_relocate, case R_ARM_THM_PC8): Align address
