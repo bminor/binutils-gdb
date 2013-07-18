@@ -1,5 +1,11 @@
 2013-07-18  Yao Qi  <yao@codesourcery.com>
 
+	* lib/future.exp (gdb_default_target_compile): Use tail name
+	of $destfile as the output name of compile.  Move the
+	generated file to $destfile on build.
+
+2013-07-18  Yao Qi  <yao@codesourcery.com>
+
 	* lib/gdb.exp (gdb_compile): Set
 	gdb_saved_set_unbuffered_mode_obj to
 	set_unbuffered_mode_saved.o if host is remote.  Invoke

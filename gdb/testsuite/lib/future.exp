@@ -419,8 +419,8 @@ proc gdb_default_target_compile {source destfile type options} {
     }
 
     if {[is_remote host]} {
-	append add_flags " -o a.out"
-	remote_file host delete a.out
+	append add_flags " -o " [file tail $destfile]
+	remote_file host delete [file tail $destfile]
     } else {
 	if { $destfile != "" } {
 	    append add_flags " -o $destfile"
@@ -478,8 +478,8 @@ proc gdb_default_target_compile {source destfile type options} {
 
     set compiler_flags $opts
     if {[is_remote host]} {
-	remote_upload host a.out $destfile
-	remote_file host delete a.out
+	remote_upload host [file tail $destfile] $destfile
+	remote_file host delete [file tail $destfile]
     }
     set comp_output [prune_warnings [lindex $status 1]]
     regsub "^\[\r\n\]+" $comp_output "" comp_output
