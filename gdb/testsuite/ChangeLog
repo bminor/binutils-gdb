@@ -1,3 +1,9 @@
+2013-07-19  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (gdb_compile_shlib): Pass the tail name of
+	$dest to link options if host is remote.  Move the
+	generated file to $dest.a on host if host is remote.
+
 2013-07-18  Will Newton  <will.newton@linaro.org>
 
 	* gdb.threads/tls-nodebug.c: Call pthread_testcancel
