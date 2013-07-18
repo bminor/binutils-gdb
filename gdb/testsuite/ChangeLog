@@ -1,5 +1,10 @@
 2013-07-19  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/read-memory.c: New.
+	* gdb.trace/read-memory.exp: New.
+
+2013-07-19  Yao Qi  <yao@codesourcery.com>
+
 	* lib/gdb.exp (gdb_compile_shlib): Pass the tail name of
 	$dest to link options if host is remote.  Move the
 	generated file to $dest.a on host if host is remote.
