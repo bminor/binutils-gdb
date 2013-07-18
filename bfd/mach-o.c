@@ -195,6 +195,9 @@ static const mach_o_section_name_xlat dwarf_section_names_xlat[] =
     {	".debug_macro",			"__debug_macro",
 	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
 	BFD_MACH_O_S_ATTR_DEBUG,	0},
+    {	".debug_gdb_scripts",		"__debug_gdb_scri",
+	SEC_DEBUGGING,			BFD_MACH_O_S_REGULAR,
+	BFD_MACH_O_S_ATTR_DEBUG,	0},
     { NULL, NULL, 0, 0, 0, 0}
   };
 
