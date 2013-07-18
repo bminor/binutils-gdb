@@ -1,3 +1,8 @@
+2013-07-18  Vishnu K.S  <vishnu.k_s@atmel.com>
+
+	* config/tc-avr.c: Make ata6289's ISA to AVR_ISA_AVR4.
+	* doc/c-avr.texi: Likewise.
+
 2013-07-15  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (match_save_restore_list_operand): Avoid -Wformat

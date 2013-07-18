@@ -45,7 +45,7 @@ space plus the MOVW instruction (MCU types: attiny13, attiny13a, attiny2313,
 attiny2313a, attiny24, attiny24a, attiny4313, attiny44, attiny44a, attiny84,
 attiny84a, attiny25, attiny45, attiny85, attiny261, attiny261a, attiny461,
 attiny461a, attiny861, attiny861a, attiny87, attiny43u, attiny48, attiny88,
-at86rf401, ata6289).
+at86rf401).
 
 Instruction set avr3 is for the classic AVR core with up to 128K program
 memory space (MCU types: at43usb355, at76c711).
@@ -60,7 +60,7 @@ atmega16u2, atmega32u2).
 Instruction set avr4 is for the enhanced AVR core with up to 8K program
 memory space (MCU types: atmega48, atmega48a, atmega48p, atmega8, atmega88,
 atmega88a, atmega88p, atmega88pa, atmega8515, atmega8535, atmega8hva, at90pwm1,
-at90pwm2, at90pwm2b, at90pwm3, at90pwm3b, at90pwm81).
+at90pwm2, at90pwm2b, at90pwm3, at90pwm3b, at90pwm81, ata6289).
 
 Instruction set avr5 is for the enhanced AVR core with up to 128K program
 memory space (MCU types: atmega16, atmega16a, atmega161, atmega162,
