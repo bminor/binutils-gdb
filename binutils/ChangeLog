@@ -1,5 +1,8 @@
 2013-07-18  Nick Clifton  <nickc@redhat.com>
 
+	* doc/binutils.texi (nm, objdump): Remove bogus links to STABS
+	documentation.
+
 	* readelf.c (process_unwind): Do not return the result of a void
 	function.
 

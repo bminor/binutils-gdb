@@ -853,10 +853,6 @@ specified.
 The symbol is a stabs symbol in an a.out object file.  In this case, the
 next values printed are the stabs other field, the stabs desc field, and
 the stab type.  Stabs symbols are used to hold debugging information.
-@ifclear man
-For more information, see @ref{Top,Stabs,Stabs Overview,stabs.info, The
-``stabs'' debug format}.
-@end ifclear
 
 @item ?
 The symbol type is unknown, or object file format specific.
@@ -2280,10 +2276,6 @@ ELF file.  This is only useful on systems (such as Solaris 2.0) in which
 section.  In most other file formats, debugging symbol-table entries are
 interleaved with linkage symbols, and are visible in the @option{--syms}
 output.
-@ifclear man
-For more information on stabs symbols, see @ref{Top,Stabs,Stabs
-Overview,stabs.info, The ``stabs'' debug format}.
-@end ifclear
 
 @item --start-address=@var{address}
 @cindex start-address
