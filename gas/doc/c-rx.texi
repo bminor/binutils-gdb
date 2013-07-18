@@ -1,5 +1,4 @@
-@c Copyright 2008, 2009, 2011
-@c Free Software Foundation, Inc.
+@c Copyright 2008-2013 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @ifset GENERIC
@@ -105,6 +104,13 @@ This option tells the assembler that the official RX ABI is being used
 by the assembled code.  With this version of the ABI function
 arguments that are passed on the stack are aligned to their natural
 alignments.  This option is the default.
+
+@cindex @samp{-mcpu=}
+@item -mcpu=@var{name}
+This option tells the assembler the target CPU type.  Currently the
+@code{rx200}, @code{rx600} and @code{rx610} are recognised as valid
+cpu names.  Attempting to assemble an instruction not supported by the
+indicated cpu type will result in an error message being generated.
 
 @end table
 

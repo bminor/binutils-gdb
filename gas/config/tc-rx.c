@@ -1,6 +1,5 @@
 /* tc-rx.c -- Assembler for the Renesas RX
-   Copyright 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright 2008-2013 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -56,6 +55,8 @@ static int rx_num_int_regs = 0;
 int rx_pid_register;
 int rx_gp_register;
 
+enum rx_cpu_types rx_cpu = RX600;
+
 static void rx_fetchalign (int ignore ATTRIBUTE_UNUSED);
 
 enum options
@@ -72,6 +73,7 @@ enum options
   OPTION_INT_REGS,
   OPTION_USES_GCC_ABI,
   OPTION_USES_RX_ABI,
+  OPTION_CPU,
 };
 
 #define RX_SHORTOPTS ""
@@ -98,6 +100,7 @@ struct option md_longopts[] =
   {"mint-register", required_argument, NULL, OPTION_INT_REGS},
   {"mgcc-abi", no_argument, NULL, OPTION_USES_GCC_ABI},
   {"mrx-abi", no_argument, NULL, OPTION_USES_RX_ABI},
+  {"mcpu",required_argument,NULL,OPTION_CPU},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -155,6 +158,22 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
     case OPTION_USES_RX_ABI:
       elf_flags |= E_FLAG_RX_ABI;
       return 1;
+
+    case OPTION_CPU:
+      if (strcasecmp (arg, "rx100") == 0)
+        rx_cpu = RX100;
+      else if (strcasecmp (arg, "rx200") == 0)
+	rx_cpu = RX200;
+      else if (strcasecmp (arg, "rx600") == 0)
+	rx_cpu = RX600;
+      else if (strcasecmp (arg, "rx610") == 0)
+	rx_cpu = RX610;
+      else
+	{
+	  as_warn (_("unrecognised RX CPU type %s"), arg);
+	  break;
+	}
+      return 1;
     }
   return 0;
 }
@@ -173,6 +192,7 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("  --mrelax\n"));
   fprintf (stream, _("  --mpid\n"));
   fprintf (stream, _("  --mint-register=<value>\n"));
+  fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610>\n"));
 }
 
 static void

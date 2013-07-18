@@ -1,6 +1,5 @@
 /* rx-parse.y  Renesas RX parser
-   Copyright 2008, 2009
-   Free Software Foundation, Inc.
+   Copyright 2008-2013 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -104,6 +103,7 @@ static int sizemap[] = { BSIZE, WSIZE, LSIZE, WSIZE };
 
 #define id24(a,b2,b3)	   B3 (0xfb+a, b2, b3)
 
+static void	   rx_check_float_support (void);
 static int         rx_intop (expressionS, int, int);
 static int         rx_uintop (expressionS, int);
 static int         rx_disp3op (expressionS);
@@ -881,17 +881,16 @@ op_shift
 	;
 
 
-
 float2_op
 	: '#' EXPR ',' REG
-	  { id24 (2, 0x72, sub_op << 4); F ($4, 20, 4); O4 ($2); }
+	{ rx_check_float_support (); id24 (2, 0x72, sub_op << 4); F ($4, 20, 4); O4 ($2); }
 	| float2_op_ni
 	;
 float2_op_ni
 	: REG ',' REG
-	  { id24 (1, 0x83 + (sub_op << 2), 0); F ($1, 16, 4); F ($3, 20, 4); }
+	  { rx_check_float_support (); id24 (1, 0x83 + (sub_op << 2), 0); F ($1, 16, 4); F ($3, 20, 4); }
 	| disp '[' REG ']' opt_l ',' REG
-	  { id24 (1, 0x80 + (sub_op << 2), 0); F ($3, 16, 4); F ($7, 20, 4); DSP ($1, 14, LSIZE); }
+	  { rx_check_float_support (); id24 (1, 0x80 + (sub_op << 2), 0); F ($3, 16, 4); F ($7, 20, 4); DSP ($1, 14, LSIZE); }
 	;
 
 /* ====================================================================== */
@@ -1628,4 +1627,11 @@ rx_range (expressionS exp, int minv, int maxv)
   val = exp.X_add_number;
   if (val < minv || val > maxv)
     as_warn (_("Value %d out of range %d..%d"), val, minv, maxv);
+}
+
+static void
+rx_check_float_support (void)
+{
+  if (rx_cpu == RX100 || rx_cpu == RX200)
+    rx_error (_("target CPU type does not support floating point instructions"));
 }
