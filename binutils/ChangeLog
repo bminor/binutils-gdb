@@ -1,3 +1,7 @@
+2013-07-18  Jim Thomas  <thomas@cfht.hawaii.edu>
+
+	* ar.c (usage): Fix C conformance issue.
+
 2013-07-18  Nick Clifton  <nickc@redhat.com>
 
 	* doc/binutils.texi (nm, objdump): Remove bogus links to STABS

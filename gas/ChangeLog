@@ -1,3 +1,8 @@
+2013-07-18  Jim Thomas  <thomas@cfht.hawaii.edu>
+
+	* config/tc-i386-intel.c (i386_intel_operand): Fixed signed vs
+	unsigned comparison.
+
 2013-07-18  Sandeep Kumar Singh  <Sandeep.Singh2@kpitcummins.com>
 
         * config/rx-defs.h: Add macros for RX100, RX200, RX600, and

@@ -243,8 +243,6 @@ usage (int help)
 {
   FILE *s;
 
-  s = help ? stdout : stderr;
-
 #if BFD_SUPPORTS_PLUGINS
   /* xgettext:c-format */
   const char *command_line
@@ -257,6 +255,8 @@ usage (int help)
     = _("Usage: %s [emulation options] [-]{dmpqrstx}[abcDfilMNoPsSTuvV]"
 	" [member-name] [count] archive-file file...\n");
 #endif
+  s = help ? stdout : stderr;
+
   fprintf (s, command_line, program_name);
 
   /* xgettext:c-format */

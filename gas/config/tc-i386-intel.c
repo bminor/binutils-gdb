@@ -792,7 +792,7 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	   || intel_state.is_mem)
     {
       /* Memory operand.  */
-      if (i.mem_operands
+      if ((int) i.mem_operands
 	  >= 2 - !current_templates->start->opcode_modifier.isstring)
 	{
 	  /* Handle
