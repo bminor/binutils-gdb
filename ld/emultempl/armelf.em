@@ -1,7 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 1991, 1993, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#   2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-#   Free Software Foundation, Inc.
+#   Copyright 1991-2013 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -184,8 +182,9 @@ hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
    immediately after INPUT_SECTION.  */
 
 static asection *
-elf32_arm_add_stub_section (const char *stub_sec_name,
-			    asection *input_section)
+elf32_arm_add_stub_section (const char * stub_sec_name,
+			    asection *   input_section,
+			    unsigned int alignment_power)
 {
   asection *stub_sec;
   flagword flags;
@@ -201,7 +200,7 @@ elf32_arm_add_stub_section (const char *stub_sec_name,
   if (stub_sec == NULL)
     goto err_ret;
 
-  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 3);
+  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, alignment_power);
 
   output_section = input_section->output_section;
   secname = bfd_get_section_name (output_section->owner, output_section);

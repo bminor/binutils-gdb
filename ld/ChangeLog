@@ -1,3 +1,8 @@
+2013-07-18  Roland McGrath  <mcgrathr@google.com>
+
+	* emultempl/armelf.em (elf32_arm_add_stub_section): Take third
+	argument ALIGNMENT_POWER, use it instead of constant 3.
+
 2013-07-08  Jeff Law  <law@redhat.com>
 
 	* scripttempl/elf.sc: Handle function names and other text after

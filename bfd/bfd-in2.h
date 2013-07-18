@@ -7,9 +7,7 @@
 
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-   2012 Free Software Foundation, Inc.
+   Copyright 1990-2013 2013 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -918,7 +916,8 @@ extern void elf32_arm_next_input_section
   (struct bfd_link_info *, struct bfd_section *);
 extern bfd_boolean elf32_arm_size_stubs
   (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
-   struct bfd_section * (*) (const char *, struct bfd_section *), void (*) (void));
+   struct bfd_section * (*) (const char *, struct bfd_section *, unsigned int),
+   void (*) (void));
 extern bfd_boolean elf32_arm_build_stubs
   (struct bfd_link_info *);
 
@@ -1016,9 +1015,8 @@ struct coff_comdat_info
   long symbol;
 };
 
-extern struct coff_comdat_info *bfd_coff_get_comdat_section
+extern struct coff_comdat_info * bfd_coff_get_comdat_section
   (bfd *, struct bfd_section *);
-
 /* Extracted from init.c.  */
 void bfd_init (void);
 

@@ -1,3 +1,17 @@
+2013-07-18  Roland McGrath  <mcgrathr@google.com>
+
+	* elf32-arm.c (elf32_arm_stub_long_branch_arm_nacl): New variable.
+	(elf32_arm_stub_long_branch_arm_nacl_pic): New variable.
+	(arm_build_one_stub): Increase MAXRELOCS to 3.
+	(arm_type_of_stub): Use them if GLOBALS->nacl_p.
+	(struct elf32_arm_link_hash_table): Give add_stub_section member's
+	pointee type a third argument.
+	(elf32_arm_create_or_find_stub_sec): Update caller.
+	(elf32_arm_size_stubs): Update argument type.
+	* bfd-in.h (elf32_arm_size_stubs): Update decl.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2013-07-15  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_merge_obj_attributes): Replace hardcoded
