@@ -499,6 +499,32 @@ struct Struct_special : public Struct_var
   };									\
   Struct_no_##option__ no_##option__##_initializer_
 
+// This is like DEFINE_uint64, but VARNAME is the name of a different
+// option.  This option becomes an alias for that one.
+#define DEFINE_uint64_alias(option__, varname__, dashes__, shortname__,	\
+			    helpstring__, helparg__)			\
+ private:								\
+  struct Struct_##option__ : public options::Struct_var			\
+  {									\
+    Struct_##option__()							\
+      : option(#option__, dashes__, shortname__, "", helpstring__,	\
+	       helparg__, false, this)					\
+    { }									\
+									\
+    void								\
+    parse_to_value(const char* option_name, const char* arg,		\
+		   Command_line*, General_options* options)		\
+    {									\
+      uint64_t value;							\
+      options::parse_uint64(option_name, arg, &value);			\
+      options->set_##varname__(value);					\
+      options->set_user_set_##varname__();				\
+    }									\
+									\
+    options::One_option option;						\
+  };									\
+  Struct_##option__ option__##_;
+
 // This is used for non-standard flags.  It defines no functions; it
 // just calls General_options::parse_VARNAME whenever the flag is
 // seen.  We declare parse_VARNAME as a static member of
@@ -1100,6 +1126,9 @@ class General_options
 		N_("Set the address of the data segment"), N_("ADDRESS"));
   DEFINE_uint64(Ttext, options::ONE_DASH, '\0', -1U,
 		N_("Set the address of the text segment"), N_("ADDRESS"));
+  DEFINE_uint64_alias(Ttext_segment, Ttext, options::ONE_DASH, '\0',
+		      N_("Set the address of the text segment"),
+		      N_("ADDRESS"));
 
   DEFINE_set(undefined, options::TWO_DASHES, 'u',
 	     N_("Create undefined reference to SYMBOL"), N_("SYMBOL"));

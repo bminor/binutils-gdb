@@ -1,3 +1,9 @@
+2013-02-15  Ian Lance Taylor  <iant@google.com>
+
+	* options.h (DEFINE_uint64_alias): Define.
+	(class General_options): Add -Ttext-segment as an alias for
+	-Ttext.
+
 2013-05-10  Roland McGrath  <mcgrathr@google.com>
 
 	* options.h (General_options): Add --rosegment-gap option.
