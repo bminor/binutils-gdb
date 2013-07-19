@@ -1129,6 +1129,8 @@ class General_options
   DEFINE_uint64_alias(Ttext_segment, Ttext, options::ONE_DASH, '\0',
 		      N_("Set the address of the text segment"),
 		      N_("ADDRESS"));
+  DEFINE_uint64(Trodata_segment, options::ONE_DASH, '\0', -1U,
+		N_("Set the address of the rodata segment"), N_("ADDRESS"));
 
   DEFINE_set(undefined, options::TWO_DASHES, 'u',
 	     N_("Create undefined reference to SYMBOL"), N_("SYMBOL"));

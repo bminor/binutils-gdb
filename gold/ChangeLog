@@ -1,3 +1,17 @@
+2013-07-19  Roland McGrath  <mcgrathr@google.com>
+
+	* options.h (General_options): Add -Trodata-segment option.
+	* parameters.cc (Parameters::check_rodata_segment): New function.
+	(Parameters::set_target_once): Call it.
+	* parameters.h (Parameters): Declare it (private member function).
+	* layout.cc (load_seg_unusable_for_headers): New function, broken
+	out of Layout::relaxation_loop_body.  If TARGET->isolate_execinstr()
+	then validate rodata segment rather than text segment.
+	(relaxation_loop_body): Call that.
+	(is_text_segment): New function.  Don't admit a non-executable
+	segment if TARGET->isolate_execinstr().
+	(set_segment_offsets): Call it.  Honor -Trodata-segment option.
+
 2013-02-15  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (DEFINE_uint64_alias): Define.
