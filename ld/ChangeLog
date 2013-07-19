@@ -1,3 +1,13 @@
+2013-07-19  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* ldgram.y: Add ALIGN_WITH_INPUT output section attribute.
+	* ldlang.c: Likewise.
+	* ldlang.h: Likewise.
+	* ldlex.l: Likewise.
+	* mri.c: Likewise.
+	* ld.texinfo: Document new feature.
+	* NEWS: Mention new feature.
+
 2013-07-18  Roland McGrath  <mcgrathr@google.com>
 
 	* emultempl/armelf.em (elf32_arm_add_stub_section): Take third

@@ -1,7 +1,6 @@
 # Test basic linker script functionality
 # By Ian Lance Taylor, Cygnus Support
-#   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2009, 2010
-#   Free Software Foundation, Inc.
+#   Copyright 1999-2013 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -136,4 +135,12 @@ foreach test_script $test_script_list {
     } else {
         xpass "REGION_ALIAS: $testname"
     }
+}
+
+set testname "ALIGN_WITH_INPUT"
+
+if ![ld_simple_link $ld tmpdir/script "$flags -T $srcdir/$subdir/align-with-input.t tmpdir/script.o"] {
+    xfail $testname
+} else {
+    xpass $testname
 }

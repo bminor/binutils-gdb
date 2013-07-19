@@ -1,7 +1,5 @@
 /* ldlang.h - linker command language support
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright 1991-2013 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -167,6 +165,8 @@ typedef struct lang_output_section_statement_struct
   unsigned int update_dot : 1;
   /* If this section is after assignment to _end.  */
   unsigned int after_end : 1;
+  /* If this section uses the alignment of its input sections.  */
+  unsigned int align_lma_with_input : 1;
 } lang_output_section_statement_type;
 
 typedef struct
@@ -502,12 +502,8 @@ extern void lang_set_flags
 extern void lang_add_output
   (const char *, int from_script);
 extern lang_output_section_statement_type *lang_enter_output_section_statement
-  (const char *output_section_statement_name,
-   etree_type *address_exp,
-   enum section_type sectype,
-   etree_type *align,
-   etree_type *subalign,
-   etree_type *, int);
+  (const char *, etree_type *, enum section_type, etree_type *, etree_type *,
+   etree_type *, int, int);
 extern void lang_final
   (void);
 extern void lang_relax_sections

@@ -1,3 +1,10 @@
+2013-07-19  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* ld-scripts/script.exp: Run align with input test.
+	* ld-scripts/align-with-input.t: New file.
+	* ld-scripts/rgn-at8.d: Likewise.
+	* ld-scripts/rgn-at8.t: Likewise.
+
 2013-07-18  Terry Guo  <terry.guo@arm.com>
 
         * ld-arm/thumb-b-lks-sym.d: Updated to be more flexible.

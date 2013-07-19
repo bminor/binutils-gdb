@@ -1,7 +1,5 @@
 /* A YACC grammar to parse a superset of the AT&T linker scripting language.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright 1991-2013 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support (steve@cygnus.com).
 
    This file is part of the GNU Binutils.
@@ -147,14 +145,14 @@ static int error_index;
 %token ORIGIN FILL
 %token LENGTH CREATE_OBJECT_SYMBOLS INPUT GROUP OUTPUT CONSTRUCTORS
 %token ALIGNMOD AT SUBALIGN HIDDEN PROVIDE PROVIDE_HIDDEN AS_NEEDED
-%type <token> assign_op atype attributes_opt sect_constraint
+%type <token> assign_op atype attributes_opt sect_constraint opt_align_with_input
 %type <name>  filename
 %token CHIP LIST SECT ABSOLUTE  LOAD NEWLINE ENDWORD ORDER NAMEWORD ASSERT_K
 %token FORMAT PUBLIC DEFSYMEND BASE ALIAS TRUNCATE REL
 %token INPUT_SCRIPT INPUT_MRI_SCRIPT INPUT_DEFSYM CASE EXTERN START
 %token <name> VERS_TAG VERS_IDENTIFIER
 %token GLOBAL LOCAL VERSIONK INPUT_VERSION_SCRIPT
-%token KEEP ONLY_IF_RO ONLY_IF_RW SPECIAL INPUT_SECTION_FLAGS
+%token KEEP ONLY_IF_RO ONLY_IF_RW SPECIAL INPUT_SECTION_FLAGS ALIGN_WITH_INPUT
 %token EXCLUDE_FILE
 %token CONSTANT
 %type <versyms> vers_defns
@@ -1030,6 +1028,11 @@ opt_align:
 	|	{ $$ = 0; }
 	;
 
+opt_align_with_input:
+		ALIGN_WITH_INPUT { $$ = ALIGN_WITH_INPUT; }
+	|	{ $$ = 0; }
+	;
+
 opt_subalign:
 		SUBALIGN '(' exp ')' { $$ = $3; }
 	|	{ $$ = 0; }
@@ -1046,20 +1049,21 @@ section:	NAME 		{ ldlex_expression(); }
 		opt_exp_with_type
 		opt_at
 		opt_align
+		opt_align_with_input
 		opt_subalign	{ ldlex_popstate (); ldlex_script (); }
 		sect_constraint
 		'{'
 			{
 			  lang_enter_output_section_statement($1, $3,
 							      sectype,
-							      $5, $6, $4, $8);
+							      $5, $7, $4, $9, $6);
 			}
 		statement_list_opt
  		'}' { ldlex_popstate (); ldlex_expression (); }
 		memspec_opt memspec_at_opt phdr_opt fill_opt
 		{
 		  ldlex_popstate ();
-		  lang_leave_output_section_statement ($17, $14, $16, $15);
+		  lang_leave_output_section_statement ($18, $15, $17, $16);
 		}
 		opt_comma
 		{}

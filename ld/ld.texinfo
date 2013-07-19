@@ -3762,7 +3762,7 @@ The full description of an output section looks like this:
 @group
 @var{section} [@var{address}] [(@var{type})] :
   [AT(@var{lma})]
-  [ALIGN(@var{section_align})]
+  [ALIGN(@var{section_align}) | ALIGN_WITH_INPUT]
   [SUBALIGN(@var{subsection_align})]
   [@var{constraint}]
   @{
@@ -4585,7 +4585,11 @@ for (dst = &_bstart; dst< &_bend; dst++)
 @kindex ALIGN(@var{section_align})
 @cindex forcing output section alignment
 @cindex output section alignment
-You can increase an output section's alignment by using ALIGN.
+You can increase an output section's alignment by using ALIGN.  As an
+alternative you can force the output section alignment to the maximum alignment
+of all its input sections with ALIGN_WITH_INPUT.  The alignment forced by
+ALIGN_WITH_INPUT is used even in case the load and virtual memory regions are
+different.
 
 @node Forced Input Alignment
 @subsubsection Forced Input Alignment

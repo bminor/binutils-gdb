@@ -12,6 +12,9 @@
 
 * Remove linker support for MIPS ECOFF targets.
 
+* Add ALIGN_WITH_INPUT to the linker script language to force the alignment of
+  an output section to use the maximum alignment of all its input sections.
+
 Changes in 2.23:
 
 * Enable compressed debug section feature for x86/x86_64 pe-coff.
