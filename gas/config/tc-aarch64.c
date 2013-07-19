@@ -61,11 +61,21 @@ static const aarch64_feature_set aarch64_arch_none = AARCH64_ARCH_NONE;
 /* Pre-defined "_GLOBAL_OFFSET_TABLE_"	*/
 static symbolS *GOT_symbol;
 
+/* Which ABI to use.  */
+enum aarch64_abi_type
+{
+  AARCH64_ABI_LP64 = 0,
+  AARCH64_ABI_ILP32 = 1
+};
+
+/* AArch64 ABI for the output file.  */
+static enum aarch64_abi_type aarch64_abi = AARCH64_ABI_LP64;
+
 /* When non-zero, program to a 32-bit model, in which the C data types
    int, long and all pointer types are 32-bit objects (ILP32); or to a
    64-bit model, in which the C int type is 32-bits but the C long type
    and all pointer types are 64-bit objects (LP64).  */
-static int ilp32_p = 0;
+#define ilp32_p		(aarch64_abi == AARCH64_ABI_ILP32)
 #endif
 
 enum neon_el_type
@@ -7090,10 +7100,6 @@ static struct aarch64_option_table aarch64_opts[] = {
   {"mbig-endian", N_("assemble for big-endian"), &target_big_endian, 1, NULL},
   {"mlittle-endian", N_("assemble for little-endian"), &target_big_endian, 0,
    NULL},
-#ifdef OBJ_ELF
-  {"mlp64", N_("select the LP64 model"), &ilp32_p, 0, NULL},
-  {"milp32", N_("select the ILP32 model"), &ilp32_p, 1, NULL},
-#endif /* OBJ_ELF */
 #ifdef DEBUG_AARCH64
   {"mdebug-dump", N_("temporary switch for dumping"), &debug_dump, 1, NULL},
 #endif /* DEBUG_AARCH64 */
@@ -7312,7 +7318,47 @@ aarch64_parse_arch (char *str)
   return 0;
 }
 
+/* ABIs.  */
+struct aarch64_option_abi_value_table
+{
+  char *name;
+  enum aarch64_abi_type value;
+};
+
+static const struct aarch64_option_abi_value_table aarch64_abis[] = {
+  {"ilp32",		AARCH64_ABI_ILP32},
+  {"lp64",		AARCH64_ABI_LP64},
+  {NULL,		0}
+};
+
+static int
+aarch64_parse_abi (char *str)
+{
+  const struct aarch64_option_abi_value_table *opt;
+  size_t optlen = strlen (str);
+
+  if (optlen == 0)
+    {
+      as_bad (_("missing abi name `%s'"), str);
+      return 0;
+    }
+
+  for (opt = aarch64_abis; opt->name != NULL; opt++)
+    if (strlen (opt->name) == optlen && strncmp (str, opt->name, optlen) == 0)
+      {
+	aarch64_abi = opt->value;
+	return 1;
+      }
+
+  as_bad (_("unknown abi `%s'\n"), str);
+  return 0;
+}
+
 static struct aarch64_long_option_table aarch64_long_opts[] = {
+#ifdef OBJ_ELF
+  {"mabi=", N_("<abi name>\t  specify for ABI <abi name>"),
+   aarch64_parse_abi, NULL},
+#endif /* OBJ_ELF */
   {"mcpu=", N_("<cpu name>\t  assemble for CPU <cpu name>"),
    aarch64_parse_cpu, NULL},
   {"march=", N_("<arch name>\t  assemble for architecture <arch name>"),

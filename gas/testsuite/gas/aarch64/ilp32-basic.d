@@ -1,4 +1,4 @@
-#as: -milp32
+#as: -mabi=ilp32
 #objdump: -dr
 
 .*:     file format elf32-.*aarch64

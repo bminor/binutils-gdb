@@ -1,3 +1,7 @@
+2013-07-19  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/ilp32-basic.d (#as): Update to use -mabi=ilp32
+
 2013-07-14  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/vr5400-ill.s, gas/mips/vr5400-ill.l: Add some more cases.

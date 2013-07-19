@@ -1,3 +1,17 @@
+2013-07-19  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (enum aarch64_abi_type): New enumeration tag.
+	(AARCH64_ABI_LP64, AARCH64_ABI_ILP32): New enumerators.
+	(aarch64_abi): New variable.
+	(ilp32_p): Change to be a macro.
+	(aarch64_opts): Remove the support for option -milp32 and -mlp64.
+	(struct aarch64_option_abi_value_table): New struct.
+	(aarch64_abis): New table.
+	(aarch64_parse_abi): New function.
+	(aarch64_long_opts): Add entry for -mabi=.
+	* doc/as.texinfo (Target AArch64 options): Document -mabi.
+	* doc/c-aarch64.texi: Likewise.
+
 2013-07-18  Jim Thomas  <thomas@cfht.hawaii.edu>
 
 	* config/tc-i386-intel.c (i386_intel_operand): Fixed signed vs
