@@ -1,3 +1,8 @@
+2013-07-19  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-rx.c (rx_elf_relocate_section): Fix typo: move
+	saw_subtract from R_RX_OPdiv to R_RX_OPneg.
+
 2013-07-18  Travis Snoozy  <quandary@remstate.com>
 
 	PR ld/15721
