@@ -6623,7 +6623,10 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
 	   ++relsec)
 	{
 	  if (relsec->sh_info >= elf_header.e_shnum
-	      || section_headers + relsec->sh_info != sec)
+	      || section_headers + relsec->sh_info != sec
+	      /* PR 15745: Check the section type as well.  */
+	      || (relsec->sh_type != SHT_REL
+		  && relsec->sh_type != SHT_RELA))
 	    continue;
 
 	  arm_sec->rel_type = relsec->sh_type;
@@ -6633,19 +6636,15 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
 				     relsec->sh_size,
 				     & arm_sec->rela, & arm_sec->nrelas))
 		return FALSE;
-	      break;
 	    }
-	  else if (relsec->sh_type == SHT_RELA)
+	  else /* relsec->sh_type == SHT_RELA */
 	    {
 	      if (!slurp_rela_relocs (aux->file, relsec->sh_offset,
 				      relsec->sh_size,
 				      & arm_sec->rela, & arm_sec->nrelas))
 		return FALSE;
-	      break;
 	    }
-	  else
-	    warn (_("unexpected relocation type (%d) for section %d"),
-		  relsec->sh_type, relsec->sh_info);
+	  break;
 	}
 
       arm_sec->next_rela = arm_sec->rela;

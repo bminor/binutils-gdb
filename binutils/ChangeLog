@@ -1,3 +1,10 @@
+2013-07-19  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15745
+	* readelf.c (get_unwind_section_word): Whilst searching for a
+	reloc section associated with an unwind section, check the type as
+	well as the section number.
+
 2013-07-18  Jim Thomas  <thomas@cfht.hawaii.edu>
 
 	* ar.c (usage): Fix C conformance issue.
