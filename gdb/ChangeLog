@@ -1,3 +1,8 @@
+2013-07-19  Hui Zhu  <hui@codesourcery.com>
+
+	PR gdb/15692
+	* mi/mi-cmd-break.c (mi_argv_to_format): Handle double quotes.
+
 2013-07-19  Yao Qi  <yao@codesourcery.com>
 
 	* target.c (update_current_target): Change the default action

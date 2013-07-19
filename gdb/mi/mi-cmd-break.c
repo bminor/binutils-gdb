@@ -128,6 +128,9 @@ mi_argv_to_format (char **argv, int argc)
 	case '\v':
 	  obstack_grow (&obstack, "\\v", 2);
 	  break;
+	case '"':
+	  obstack_grow (&obstack, "\\\"", 2);
+	  break;
 	default:
 	  if (isprint (argv[0][i]))
 	    obstack_grow (&obstack, argv[0] + i, 1);

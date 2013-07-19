@@ -1,3 +1,8 @@
+2013-07-19  Hui Zhu  <hui@codesourcery.com>
+
+	PR gdb/15692
+	* gdb.mi/mi-dprintf.exp: Add double quotes test.
+
 2013-07-19  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/read-memory.exp (test_from_remote): Update test.

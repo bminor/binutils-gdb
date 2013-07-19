@@ -48,7 +48,7 @@ mi_gdb_test "3-dprintf-insert 29" \
 mi_gdb_test "-break-insert main" ".*" "mi insert breakpoint main"
 mi_delete_breakpoints
 
-mi_gdb_test "4-dprintf-insert foo \"At foo entry\\n\"" \
+mi_gdb_test "4-dprintf-insert foo \"\\\"foobarbazqux\\\" At foo entry\\n\"" \
     "4\\^done,bkpt=\{number=\".*\",type=\"dprintf\".*func=\"foo\",file=\".*mi-dprintf.c\",fullname=\".*mi-dprintf.c\",line=\".*\".*" "mi insert dprintf foo"
 
 mi_gdb_test "5-dprintf-insert $dp_location1 \"arg=%d, g=%d\\n\" arg g" \
@@ -65,10 +65,16 @@ proc mi_continue_dprintf {args} {
     with_test_prefix $args {
 	global mi_gdb_prompt
 
+	if { $args == "call" || $args == "fprintf" } {
+	    set foobarbazqux "\"foobarbazqux\""
+	} else {
+	    set foobarbazqux "\\\\\"foobarbazqux\\\\\""
+	}
+
 	mi_run_cmd
 	set msg "mi 1st dprintf"
 	gdb_expect {
-            -re ".*At foo entry.*arg=1234, g=1234" {
+            -re ".*$foobarbazqux At foo entry.*arg=1234, g=1234" {
 		pass $msg
 	    }
 	    -re ".*$mi_gdb_prompt$" {
@@ -83,7 +89,7 @@ proc mi_continue_dprintf {args} {
 	set msg "mi 2nd dprintf"
 	mi_send_resuming_command "exec-continue" "$msg continue"
 	gdb_expect {
-            -re ".*At foo entry.*arg=1235, g=2222" {
+            -re ".*$foobarbazqux At foo entry.*arg=1235, g=2222" {
 		pass $msg
 	    }
 	    -re ".*$mi_gdb_prompt$" {
