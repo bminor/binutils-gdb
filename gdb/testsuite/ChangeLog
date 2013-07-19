@@ -1,5 +1,10 @@
 2013-07-19  Omair Javaid  <Omair.Javaid@linaro.org>
 
+	* gdb.base/disp-step-syscall.exp: Add svc and swi syscall
+	instructions and enable disp-step-syscall for arm targets.
+
+2013-07-19  Omair Javaid  <Omair.Javaid@linaro.org>
+
 	* gdb.dwarf2/fission-reread.S: Replace @ sign with % sign to remove
 	assembler errors on arm.
 	* gdb.dwarf2/mac-fileno.S: Likewise.
