@@ -1162,6 +1162,8 @@ class General_options
   DEFINE_uint64_alias(Ttext_segment, Ttext, options::ONE_DASH, '\0',
 		      N_("Set the address of the text segment"),
 		      N_("ADDRESS"));
+  DEFINE_uint64(Trodata_segment, options::ONE_DASH, '\0', -1U,
+		N_("Set the address of the rodata segment"), N_("ADDRESS"));
 
   DEFINE_bool(toc_optimize, options::TWO_DASHES, '\0', true,
 	      N_("(PowerPC64 only) Optimize TOC code sequences"),
