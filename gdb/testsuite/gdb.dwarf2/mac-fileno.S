@@ -200,7 +200,7 @@ func_cu1:
 
 .Lline1_end:
 
-	.section	.debug_macinfo,"",@progbits
+	.section	.debug_macinfo,"",%progbits
 .Ldebug_macinfo0:
 	.byte	0x3	/* Start new file */
 	.uleb128 0x0	/* Included from line number 0 */

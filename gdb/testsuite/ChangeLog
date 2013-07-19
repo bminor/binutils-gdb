@@ -1,3 +1,11 @@
+2013-07-19  Omair Javaid  <Omair.Javaid@linaro.org>
+
+	* gdb.dwarf2/fission-reread.S: Replace @ sign with % sign to remove
+	assembler errors on arm.
+	* gdb.dwarf2/mac-fileno.S: Likewise.
+	* gdb.dwarf2/member-ptr-forwardref.S: Likewise.
+	* gdb.dwarf2/pr13961.S: Likewise.
+
 2013-07-19  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15692

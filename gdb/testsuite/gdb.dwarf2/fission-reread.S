@@ -43,7 +43,7 @@
 	.globl	baz
 	.data	/* Previously this used .bss, but it's not portable.  */
 	.align 4
-	.type	baz, @object
+	.type	baz, %object
 	.size	baz, 4
 baz:
 	.zero	4
@@ -51,7 +51,7 @@ baz:
 	.text
 .Ltext0:
 	.globl	main
-	.type	main, @function
+	.type	main, %function
 main:
 .LFB0:
 	.file 1 "fission-reread.cc"
