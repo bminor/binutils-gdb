@@ -1,3 +1,10 @@
+2013-07-20  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15762
+	PR ld/12761
+	* elflink.c (elf_link_add_object_symbols): Don't clobber
+	.gnu.warning.symbol sections when shared.
+
 2013-07-18  Roland McGrath  <mcgrathr@google.com>
 
 	* elf32-arm.c (elf32_arm_stub_long_branch_arm_nacl): New variable.

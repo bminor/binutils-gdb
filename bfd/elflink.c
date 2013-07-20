@@ -3468,7 +3468,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		      FALSE, bed->collect, NULL)))
 		goto error_return;
 
-	      if (! info->relocatable)
+	      if (!info->relocatable && !info->shared)
 		{
 		  /* Clobber the section size so that the warning does
 		     not get copied into the output file.  */
