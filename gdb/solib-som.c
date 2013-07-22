@@ -698,6 +698,7 @@ som_open_symbol_file_object (void *from_ttyp)
   int errcode;
   int from_tty = *(int *)from_ttyp;
   gdb_byte buf[4];
+  struct cleanup *cleanup;
 
   if (symfile_objfile)
     if (!query (_("Attempt to reload symbols from process? ")))
@@ -727,10 +728,11 @@ som_open_symbol_file_object (void *from_ttyp)
       return 0;
     }
 
-  make_cleanup (xfree, filename);
+  cleanup = make_cleanup (xfree, filename);
   /* Have a pathname: read the symbol file.  */
   symbol_file_add_main (filename, from_tty);
 
+  do_cleanups (cleanup);
   return 1;
 }
 

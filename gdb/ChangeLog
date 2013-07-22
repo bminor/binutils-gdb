@@ -1,5 +1,9 @@
 2013-07-22  Tom Tromey  <tromey@redhat.com>
 
+	* solib-som.c (som_open_symbol_file_object): Call do_cleanups.
+
+2013-07-22  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (init_cutu_and_read_dies): Remove 'free_cu_cleanup'.
 	Simplify cleanup handling.
 
