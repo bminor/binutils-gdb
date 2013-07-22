@@ -1,11 +1,13 @@
 2013-07-22  Doug Evans  <dje@google.com>
 
 	* exec.h (remove_target_sections): Delete arg abfd.
-	* exec.c (remove_target_sections): Delete arg abfd.
-	(exec_close): Update call to remove_target_sections.
+	* exec.c (exec_close): Update call to remove_target_sections.
+	(remove_target_sections): Delete arg abfd.
 	* solib.c (update_solib_list): Ditto.
 	(reload_shared_libraries_1): Ditto.
 	(clear_solib): Ditto, and unconditionally call remove_target_sections.
+	* target.h (struct target_section): Rename key to owner.
+	All uses updated.
 
 2013-07-22  Tom Tromey  <tromey@redhat.com>
 
