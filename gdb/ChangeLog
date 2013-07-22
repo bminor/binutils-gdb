@@ -1,3 +1,12 @@
+2013-07-22  Doug Evans  <dje@google.com>
+
+	* exec.h (remove_target_sections): Delete arg abfd.
+	* exec.c (remove_target_sections): Delete arg abfd.
+	(exec_close): Update call to remove_target_sections.
+	* solib.c (update_solib_list): Ditto.
+	(reload_shared_libraries_1): Ditto.
+	(clear_solib): Ditto, and unconditionally call remove_target_sections.
+
 2013-07-22  Tom Tromey  <tromey@redhat.com>
 
 	* solib-som.c (som_open_symbol_file_object): Call do_cleanups.

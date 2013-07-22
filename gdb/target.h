@@ -1902,11 +1902,12 @@ struct target_section
 
     struct bfd_section *the_bfd_section;
 
-    /* A given BFD may appear multiple times in the target section
-       list, so each BFD is associated with a given key.  The key is
-       just some convenient pointer that can be used to differentiate
-       the BFDs.  These are managed only by convention.  */
-    void *key;
+    /* The "owner" of the section.
+       It can be any unique value.  It is set by add_target_sections
+       and used by remove_target_sections.
+       For example, for executables it is a pointer to exec_bfd and
+       for shlibs it is the so_list pointer.  */
+    void *owner;
   };
 
 /* Holds an array of target sections.  Defined by [SECTIONS..SECTIONS_END[.  */

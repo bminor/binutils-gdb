@@ -770,7 +770,7 @@ update_solib_list (int from_tty, struct target_ops *target)
 
 	  /* Some targets' section tables might be referring to
 	     sections from so->abfd; remove them.  */
-	  remove_target_sections (gdb, gdb->abfd);
+	  remove_target_sections (gdb);
 
 	  free_so (gdb);
 	  gdb = *gdb_link;
@@ -1151,8 +1151,7 @@ clear_solib (void)
 
       so_list_head = so->next;
       observer_notify_solib_unloaded (so);
-      if (so->abfd)
-	remove_target_sections (so, so->abfd);
+      remove_target_sections (so);
       free_so (so);
     }
 
@@ -1276,7 +1275,7 @@ reload_shared_libraries_1 (int from_tty)
 	  if (so->objfile && ! (so->objfile->flags & OBJF_USERLOADED)
 	      && !solib_used (so))
 	    free_objfile (so->objfile);
-	  remove_target_sections (so, so->abfd);
+	  remove_target_sections (so);
 	  clear_so (so);
 	}
 

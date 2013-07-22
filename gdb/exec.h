@@ -81,14 +81,14 @@ extern int section_table_xfer_memory_partial (gdb_byte *, const gdb_byte *,
 /* Set the loaded address of a section.  */
 extern void exec_set_section_address (const char *, int, CORE_ADDR);
 
-/* Remove all target sections taken from ABFD.  */
+/* Remove all target sections owned by OWNER.  */
 
-extern void remove_target_sections (void *key, bfd *abfd);
+extern void remove_target_sections (void *owner);
 
 /* Add the sections array defined by [SECTIONS..SECTIONS_END[ to the
    current set of target sections.  */
 
-extern void add_target_sections (void *key,
+extern void add_target_sections (void *owner,
 				 struct target_section *sections,
 				 struct target_section *sections_end);
 

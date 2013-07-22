@@ -101,7 +101,7 @@ exec_close (void)
       exec_bfd = NULL;
       exec_bfd_mtime = 0;
 
-      remove_target_sections (&exec_bfd, abfd);
+      remove_target_sections (&exec_bfd);
     }
 }
 
@@ -339,7 +339,7 @@ add_to_section_table (bfd *abfd, struct bfd_section *asect,
   if (!(aflag & SEC_ALLOC))
     return;
 
-  (*table_pp)->key = NULL;
+  (*table_pp)->owner = NULL;
   (*table_pp)->the_bfd_section = asect;
   (*table_pp)->addr = bfd_section_vma (abfd, asect);
   (*table_pp)->endaddr = (*table_pp)->addr + bfd_section_size (abfd, asect);
@@ -397,7 +397,7 @@ build_section_table (struct bfd *some_bfd, struct target_section **start,
    current set of target sections.  */
 
 void
-add_target_sections (void *key,
+add_target_sections (void *owner,
 		     struct target_section *sections,
 		     struct target_section *sections_end)
 {
@@ -414,7 +414,7 @@ add_target_sections (void *key,
       for (i = 0; i < count; ++i)
 	{
 	  table->sections[space + i] = sections[i];
-	  table->sections[space + i].key = key;
+	  table->sections[space + i].owner = owner;
 	}
 
       /* If these are the first file sections we can provide memory
@@ -427,17 +427,20 @@ add_target_sections (void *key,
     }
 }
 
-/* Remove all target sections taken from ABFD.  */
+/* Remove all target sections owned by OWNER.
+   OWNER must be the same value passed to add_target_sections.  */
 
 void
-remove_target_sections (void *key, bfd *abfd)
+remove_target_sections (void *owner)
 {
   struct target_section *src, *dest;
   struct target_section_table *table = current_target_sections;
 
+  gdb_assert (owner != NULL);
+
   dest = table->sections;
   for (src = table->sections; src < table->sections_end; src++)
-    if (src->key != key || src->the_bfd_section->owner != abfd)
+    if (src->owner != owner)
       {
 	/* Keep this section.  */
 	if (dest < src)
