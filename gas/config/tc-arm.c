@@ -25018,7 +25018,7 @@ s_arm_arch_extension (int ignored ATTRIBUTE_UNUSED)
       }
 
   if (opt->name == NULL)
-    as_bad (_("unknown architecture `%s'\n"), name);
+    as_bad (_("unknown architecture extension `%s'\n"), name);
 
   *input_line_pointer = saved_char;
   ignore_rest_of_line ();
