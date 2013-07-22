@@ -1,3 +1,8 @@
+2013-07-22  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* top.c (print_gdb_version): Add help, apropos description and
+	url to online documentation.
+
 2013-07-19  Hui Zhu  <hui@codesourcery.com>
 
 	PR gdb/15692

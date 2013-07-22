@@ -1145,8 +1145,14 @@ Type \"show configuration\" for configuration details.");
     {
       fprintf_filtered (stream,
 			_("\nFor bug reporting instructions, please see:\n"));
-      fprintf_filtered (stream, "%s.", REPORT_BUGS_TO);
+      fprintf_filtered (stream, "%s.\n", REPORT_BUGS_TO);
     }
+  fprintf_filtered (stream,
+		    _("Find the GDB manual and other documentation \
+resources online at:\n<http://www.gnu.org/software/gdb/documentation/>.\n"));
+  fprintf_filtered (stream, _("For help, type \"help\".\n"));
+  fprintf_filtered (stream, _("Type \"apropos word\" to search for \
+commands related to \"word\".\n"));
 }
 
 /* Print the details of GDB build-time configuration.  */
