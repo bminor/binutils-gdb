@@ -1,3 +1,9 @@
+2013-07-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* ppc-linux-nat.c (PPC_DEBUG_FEATURE_DATA_BP_DAWR): New define.
+	(ppc_linux_region_ok_for_hw_watchpoint): Add checking to use the new
+	DAWR interface for longer ranges hardware watchpoint (up to 512 bytes).
+
 2013-07-22  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* top.c (print_gdb_version): Add help, apropos description and

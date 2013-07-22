@@ -177,7 +177,11 @@ struct ppc_hw_breakpoint
         (1<<((n)+PPC_BREAKPOINT_CONDITION_BE_SHIFT))
 #endif /* PPC_PTRACE_GETHWDBGINFO */
 
-
+/* Feature defined on Linux kernel v3.9: DAWR interface, that enables wider
+   watchpoint (up to 512 bytes).  */
+#ifndef PPC_DEBUG_FEATURE_DATA_BP_DAWR
+#define PPC_DEBUG_FEATURE_DATA_BP_DAWR	0x10
+#endif /* PPC_DEBUG_FEATURE_DATA_BP_DAWR */
 
 /* Similarly for the general-purpose (gp0 -- gp31)
    and floating-point registers (fp0 -- fp31).  */
@@ -1504,6 +1508,7 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
      watchpoints.  */
   if (have_ptrace_hwdebug_interface ())
     {
+      int region_size;
       /* Embedded DAC-based processors, like the PowerPC 440 have ranged
 	 watchpoints and can watch any access within an arbitrary memory
 	 region. This is useful to watch arrays and structs, for instance.  It
@@ -1512,11 +1517,17 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 	  && hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_RANGE
 	  && ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
 	return 2;
+      /* Check if the processor provides DAWR interface.  */
+      if (hwdebug_info.features & PPC_DEBUG_FEATURE_DATA_BP_DAWR)
+	/* DAWR interface allows to watch up to 512 byte wide ranges which
+	   can't cross a 512 byte boundary.  */
+	region_size = 512;
+      else
+	region_size = hwdebug_info.data_bp_alignment;
       /* Server processors provide one hardware watchpoint and addr+len should
          fall in the watchable region provided by the ptrace interface.  */
-      if (hwdebug_info.data_bp_alignment
-	  && (addr + len > (addr & ~(hwdebug_info.data_bp_alignment - 1))
-	      + hwdebug_info.data_bp_alignment))
+      if (region_size
+	  && (addr + len > (addr & ~(region_size - 1)) + region_size))
 	return 0;
     }
   /* addr+len must fall in the 8 byte watchable region for DABR-based
