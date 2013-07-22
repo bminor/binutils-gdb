@@ -15704,6 +15704,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
   if (line_ptr + lh->total_length > (section->buffer + section->size))
     {
       dwarf2_statement_list_fits_in_line_number_section_complaint ();
+      do_cleanups (back_to);
       return 0;
     }
   lh->statement_program_end = line_ptr + lh->total_length;

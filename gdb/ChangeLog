@@ -1,3 +1,8 @@
+2013-07-22  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf_decode_line_header): Call do_cleanups
+	on all return paths.
+
 2013-07-22  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* ppc-linux-nat.c (PPC_DEBUG_FEATURE_DATA_BP_DAWR): New define.
