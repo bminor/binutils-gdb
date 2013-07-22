@@ -5015,7 +5015,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   struct die_info *comp_unit_die;
   int has_children;
   struct attribute *attr;
-  struct cleanup *cleanups, *free_cu_cleanup = NULL;
+  struct cleanup *cleanups;
   struct signatured_type *sig_type = NULL;
   struct dwarf2_section_info *abbrev_section;
   /* Non-zero if CU currently points to a DWO file and we need to
@@ -5074,7 +5074,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
       init_one_comp_unit (cu, this_cu);
 
       /* If an error occurs while loading, release our storage.  */
-      free_cu_cleanup = make_cleanup (free_heap_comp_unit, cu);
+      make_cleanup (free_heap_comp_unit, cu);
     }
 
   /* Get the header.  */
@@ -5203,27 +5203,22 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
   die_reader_func (&reader, info_ptr, comp_unit_die, has_children, data);
 
   /* Done, clean up.  */
-  if (free_cu_cleanup != NULL)
+  if (keep)
     {
-      if (keep)
-	{
-	  /* We've successfully allocated this compilation unit.  Let our
-	     caller clean it up when finished with it.  */
-	  discard_cleanups (free_cu_cleanup);
+      /* We've successfully allocated this compilation unit.  Let our
+	 caller clean it up when finished with it.  */
+      discard_cleanups (cleanups);
 
-	  /* We can only discard free_cu_cleanup and all subsequent cleanups.
-	     So we have to manually free the abbrev table.  */
-	  dwarf2_free_abbrev_table (cu);
+      /* We can only discard free_cu_cleanup and all subsequent cleanups.
+	 So we have to manually free the abbrev table.  */
+      dwarf2_free_abbrev_table (cu);
 
-	  /* Link this CU into read_in_chain.  */
-	  this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
-	  dwarf2_per_objfile->read_in_chain = this_cu;
-	}
-      else
-	do_cleanups (free_cu_cleanup);
+      /* Link this CU into read_in_chain.  */
+      this_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+      dwarf2_per_objfile->read_in_chain = this_cu;
     }
-
-  do_cleanups (cleanups);
+  else
+    do_cleanups (cleanups);
 }
 
 /* Read CU/TU THIS_CU in section SECTION,

@@ -1,5 +1,10 @@
 2013-07-22  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (init_cutu_and_read_dies): Remove 'free_cu_cleanup'.
+	Simplify cleanup handling.
+
+2013-07-22  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dwarf_decode_line_header): Call do_cleanups
 	on all return paths.
 
