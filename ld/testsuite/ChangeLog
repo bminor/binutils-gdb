@@ -1,3 +1,13 @@
+* 2013-07-22  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* ld-scripts/script.exp: Use run_dump_test instead of
+	ld_simple_link to check the error message.
+	* ld-scripts/align-with-input.d: New file.
+	* ld-scripts/region-alias-1.d: Likewise.
+	* ld-scripts/region-alias-2.d: Likewise.
+	* ld-scripts/region-alias-3.d: Likewise.
+	* ld-scripts/region-alias-4.d: Likewise.
+
 2013-07-19  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* ld-scripts/script.exp: Run align with input test.
