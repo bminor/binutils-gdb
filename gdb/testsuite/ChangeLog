@@ -1,3 +1,8 @@
+2013-07-23  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-var-cmd.exp: Adjust pattern to match current error
+	message.
+
 2013-07-19  Omair Javaid  <Omair.Javaid@linaro.org>
 
 	* gdb.base/disp-step-syscall.exp: Add svc and swi syscall

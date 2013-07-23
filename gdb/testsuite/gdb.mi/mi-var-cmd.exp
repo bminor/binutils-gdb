@@ -621,17 +621,17 @@ mi_gdb_test "kill" \
     "kill program before endvar"
 
 mi_gdb_test "-var-create endvar * _end" \
-    {(\^done,name="endvar",numchild="0",value=".*",type=".*"|&".*unable to.*".*\^error,msg=".*")} \
+    {(\^done,name="endvar",numchild="0",value=".*",type=".*"|\^error,msg=".*")} \
     "create endvar"
 
 # Allow this to succeed whether the value is readable, unreadable, or
 # missing.  Most important is that GDB does not crash.
 mi_gdb_test "-var-update endvar" \
-    {(\^done,changelist=\[.*\]|^".*".*\^error,msg=".*not found")} \
+    {(\^done,changelist=\[.*\]|\^error,msg=".*not found")} \
     "update endvar"
 
 mi_gdb_test "-var-delete endvar" \
-    "\\^done,ndeleted=\"1\"" \
+    {(\^done,ndeleted="1"|\^error,msg=".*not found")} \
     "delete endvar"
 
 mi_delete_breakpoints
