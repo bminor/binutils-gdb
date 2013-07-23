@@ -1,3 +1,8 @@
+2013-07-23  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (init_cutu_and_read_dies): Revert patch from
+	2013-07-22.
+
 2013-07-22  Doug Evans  <dje@google.com>
 
 	* exec.h (remove_target_sections): Delete arg abfd.
