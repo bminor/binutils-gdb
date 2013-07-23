@@ -599,8 +599,7 @@ static int i386_linux_sc_reg_offset[] =
 /* Get XSAVE extended state xcr0 from core dump.  */
 
 uint64_t
-i386_linux_core_read_xcr0 (struct gdbarch *gdbarch,
-			   struct target_ops *target, bfd *abfd)
+i386_linux_core_read_xcr0 (bfd *abfd)
 {
   asection *xstate = bfd_get_section_by_name (abfd, ".reg-xstate");
   uint64_t xcr0;
@@ -642,7 +641,7 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 				  bfd *abfd)
 {
   /* Linux/i386.  */
-  uint64_t xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
+  uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
   switch ((xcr0 & I386_XSTATE_AVX_MASK))
     {
     case I386_XSTATE_AVX_MASK:

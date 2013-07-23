@@ -1286,7 +1286,7 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
 				  bfd *abfd)
 {
   /* Linux/x86-64.  */
-  uint64_t xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
+  uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
   switch ((xcr0 & I386_XSTATE_AVX_MASK))
     {
     case I386_XSTATE_AVX_MASK:

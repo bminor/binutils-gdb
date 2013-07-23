@@ -35,8 +35,7 @@
 #define I386_LINUX_NUM_REGS (I386_LINUX_ORIG_EAX_REGNUM + 1)
 
 /* Get XSAVE extended state xcr0 from core dump.  */
-extern uint64_t i386_linux_core_read_xcr0
-  (struct gdbarch *gdbarch, struct target_ops *target, bfd *abfd);
+extern uint64_t i386_linux_core_read_xcr0 (bfd *abfd);
 
 /* Linux target description.  */
 extern struct target_desc *tdesc_i386_linux;

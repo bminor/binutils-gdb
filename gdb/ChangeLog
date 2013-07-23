@@ -1,3 +1,16 @@
+2013-07-23  Yao Qi  <yao@codesourcery.com>
+
+	* i386-tdep.c (i386_in_stack_tramp_p): Remove unused
+	parameter 'gdbarch'.
+	(i386_stack_tramp_frame_sniffer): Caller update.
+	* i386-linux-tdep.c (i386_linux_core_read_xcr0): Remove
+	parameter 'gdbarch' and 'target'.
+	(i386_linux_core_read_description): Caller update.
+	* amd64-linux-tdep.c (amd64_linux_core_read_description):
+	Likewise.
+	* i386-linux-tdep.h (i386_linux_core_read_xcr0): Update
+	declaration.
+
 2013-07-23  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (init_cutu_and_read_dies): Revert patch from

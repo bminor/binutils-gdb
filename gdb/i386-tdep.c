@@ -2094,7 +2094,7 @@ struct i386_insn i386_tramp_chain_on_stack_insns[] =
 /* Return whether PC points inside a stack trampoline.   */
 
 static int
-i386_in_stack_tramp_p (struct gdbarch *gdbarch, CORE_ADDR pc)
+i386_in_stack_tramp_p (CORE_ADDR pc)
 {
   gdb_byte insn;
   const char *name;
@@ -2123,8 +2123,7 @@ i386_stack_tramp_frame_sniffer (const struct frame_unwind *self,
 				void **this_cache)
 {
   if (frame_relative_level (this_frame) == 0)
-    return i386_in_stack_tramp_p (get_frame_arch (this_frame),
-				  get_frame_pc (this_frame));
+    return i386_in_stack_tramp_p (get_frame_pc (this_frame));
   else
     return 0;
 }
