@@ -1,3 +1,8 @@
+2013-07-24  Doug Evans  <dje@google.com>
+
+	* boards/native-stdio-gdbserver.exp (${board}_build_remote_cmd): Pass
+	"--" to switch.
+
 2013-07-24  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-var-cmd.exp: If host is remote, use ${testfile} on

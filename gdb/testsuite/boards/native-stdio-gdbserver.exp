@@ -60,7 +60,7 @@ proc ${board}_build_remote_cmd { cmd } {
 
     for { set i 1 } { $i < $len } { incr i } {
 	set elm [lindex $cmd $i]
-	switch $elm {
+	switch -- $elm {
 	    --multi {
 		set args "$args $elm"
 	    }
