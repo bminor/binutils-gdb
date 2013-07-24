@@ -1,3 +1,30 @@
+2013-07-24  Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* gas/i386/mpx-add-bnd-prefix.s: New.
+	* gas/i386/mpx-add-bnd-prefix.d: New.
+	* gas/i386/mpx-inval-1.l: New.
+	* gas/i386/mpx-inval-1.s: New.
+	* gas/i386/mpx.d: New.
+	* gas/i386/mpx.s: New.
+	* gas/i386/x86-64-mpx-add-bnd-prefix.d: New.
+	* gas/i386/x86-64-mpx-add-bnd-prefix.s: New.
+	* gas/i386/x86-64-mpx-addr32.d: New.
+	* gas/i386/x86-64-mpx-addr32.s: New.
+	* gas/i386/x86-64-mpx-inval-1.l: New.
+	* gas/i386/x86-64-mpx-inval-1.s: New.
+	* gas/i386/x86-64-mpx-inval-2.l: New.
+	* gas/i386/x86-64-mpx-inval-2.s: New.
+	* gas/i386/x86-64-mpx.d: New.
+	* gas/i386/x86-64-mpx.s: New.
+	* gas/i386/nops.d: Adjust to MPX changes.
+	* gas/i386/nops.s: Likewise.
+	* gas/i386/x86-64-nops.d: Likewise.
+	* gas/i386/x86-64-nops.s: Likewise.
+	* gas/i386/ilp32/x86-64-nops.d: Likewise.
+	* gas/i386/i386.exp: Run new MPX tests.
+
 2013-07-24  Tristan Gingold  <gingold@adacore.com>
 
 	* gas/ppc/test2xcoff32.s, gas/ppc/test2xcoff32.d: New files

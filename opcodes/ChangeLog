@@ -1,3 +1,48 @@
+2013-07-24  Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* i386-dis.c (BND_Fixup): New.
+	(Ebnd): New.
+	(Ev_bnd): New.
+	(Gbnd): New.
+	(BND): New.
+	(v_bnd_mode): New.
+	(bnd_mode): New.
+	(MOD enum): Add new entries.
+	(PREFIX enum): Likewise.
+	(dis tables): Replace XX with BND for near branch and call
+	instructions.
+	(prefix_table): Add new entries.
+	(mod_table): Likewise.
+	(names_bnd): New.
+	(intel_names_bnd): New.
+	(att_names_bnd): New.
+	(BND_PREFIX): New.
+	(prefix_name): Handle BND_PREFIX.
+	(print_insn): Initialize names_bnd.
+	(intel_operand_size): Handle new modes.
+	(OP_E_register): Likewise.
+	(OP_E_memory): Likewise.
+	(OP_G): Likewise.
+	* i386-gen.c (cpu_flag_init): Add CpuMPX.
+	(cpu_flags): Add CpuMPX.
+	(operand_type_init): Add RegBND.
+	(opcode_modifiers): Add BNDPrefixOk.
+	(operand_types): Add RegBND.
+	* i386-init.h: Regenerate.
+	* i386-opc.h (CpuMPX): New.
+	(CpuUnused): Comment out.
+	(i386_cpu_flags): Add cpumpx.
+	(BNDPrefixOk): New.
+	(i386_opcode_modifier): Add bndprefixok.
+	(RegBND): New.
+	(i386_operand_type): Add regbnd.
+	* i386-opc.tbl: Add BNDPrefixOk to near jumps, calls and rets.
+	Add MPX instructions and bnd prefix.
+	* i386-reg.tbl: Add bnd0-bnd3 registers.
+	* i386-tbl.h: Regenerate.
+
 2013-07-17  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* mips-formats.h (MAPPED_INT, MAPPED_REG, REG_PAIR): Add

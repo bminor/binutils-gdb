@@ -205,6 +205,11 @@ ymm12, RegYMM, RegRex, 4, Dw2Inval, Dw2Inval
 ymm13, RegYMM, RegRex, 5, Dw2Inval, Dw2Inval
 ymm14, RegYMM, RegRex, 6, Dw2Inval, Dw2Inval
 ymm15, RegYMM, RegRex, 7, Dw2Inval, Dw2Inval
+// Bound registers for MPX
+bnd0, RegBND, 0, 0, Dw2Inval, Dw2Inval
+bnd1, RegBND, 0, 1, Dw2Inval, Dw2Inval
+bnd2, RegBND, 0, 2, Dw2Inval, Dw2Inval
+bnd3, RegBND, 0, 3, Dw2Inval, Dw2Inval
 // No type will make these registers rejected for all purposes except
 // for addressing.  This saves creating one extra type for RIP/EIP.
 rip, BaseIndex, RegRex64, RegRip, Dw2Inval, 16

@@ -1,3 +1,24 @@
+2013-07-24  Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386.c (BND_PREFIX): New.
+	(struct _i386_insn): Add new field bnd_prefix.
+	(add_bnd_prefix): New.
+	(cpu_arch): Add MPX.
+	(i386_operand_type): Add regbnd.
+	(md_assemble): Handle BND prefixes.
+	(parse_insn): Likewise.
+	(output_branch): Likewise.
+	(output_jump): Likewise.
+	(build_modrm_byte): Handle regbnd.
+	(OPTION_MADD_BND_PREFIX): New.
+	(md_longopts): Add entry for 'madd-bnd-prefix'.
+	(md_parse_option): Handle madd-bnd-prefix option.
+	(md_show_usage): Add description for madd-bnd-prefix
+	option.
+	* doc/c-i386.texi: Document mpx/.mpx and -madd-bnd-prefix.
+
 2013-07-24  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ppc.c (md_apply_fix): Adjust BFD_RELOC_PPC_B16 on

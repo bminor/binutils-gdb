@@ -150,6 +150,7 @@ accept various extension mnemonics.  For example,
 @code{rdseed},
 @code{prfchw},
 @code{smap},
+@code{mpx},
 @code{noavx},
 @code{vmx},
 @code{vmfunc},
@@ -249,6 +250,12 @@ take precedent.
 @item -mnaked-reg
 This opetion specifies that registers don't require a @samp{%} prefix.
 The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
+
+@cindex @samp{-madd-bnd-prefix} option, i386
+@cindex @samp{-madd-bnd-prefix} option, x86-64
+@item -madd-bnd-prefix
+This option forces the assembler to add BND prefix to all branches, even
+if such prefix was not explicitly specified in the source code.
 
 @end table
 @c man end
@@ -1028,7 +1035,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.rdrnd} @tab @samp{.f16c} @tab @samp{.avx2} @tab @samp{.bmi2}
 @item @samp{.lzcnt} @tab @samp{.invpcid} @tab @samp{.vmfunc} @tab @samp{.hle}
 @item @samp{.rtm} @tab @samp{.adx} @tab @samp{.rdseed} @tab @samp{.prfchw}
-@item @samp{.smap}
+@item @samp{.smap} @tab @samp{.mpx}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}

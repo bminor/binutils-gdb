@@ -208,6 +208,8 @@ static initializer cpu_flag_init[] =
     "CpuPRFCHW" },
   { "CPU_SMAP_FLAGS",
     "CpuSMAP" },
+  { "CPU_MPX_FLAGS",
+    "CpuMPX" },
 };
 
 static initializer operand_type_init[] =
@@ -308,6 +310,8 @@ static initializer operand_type_init[] =
     "Imm32|Imm32S|Imm64|Disp32|Disp64" },
   { "OPERAND_TYPE_VEC_IMM4",
     "Vec_Imm4" },
+  { "OPERAND_TYPE_REGBND",
+    "RegBND" },
 };
 
 typedef struct bitfield
@@ -384,6 +388,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuSMAP),
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
+  BITFIELD (CpuMPX),
 #ifdef CpuUnused
   BITFIELD (CpuUnused),
 #endif
@@ -417,6 +422,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (No_ldSuf),
   BITFIELD (FWait),
   BITFIELD (IsString),
+  BITFIELD (BNDPrefixOk),
   BITFIELD (IsLockable),
   BITFIELD (RegKludge),
   BITFIELD (FirstXmm0),
@@ -493,6 +499,7 @@ static bitfield operand_types[] =
   BITFIELD (Unspecified),
   BITFIELD (Anysize),
   BITFIELD (Vec_Imm4),
+  BITFIELD (RegBND),
 #ifdef OTUnused
   BITFIELD (OTUnused),
 #endif

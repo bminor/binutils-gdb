@@ -144,6 +144,8 @@ enum
   CpuINVPCID,
   /* VMFUNC Instruction required */
   CpuVMFUNC,
+  /* Intel MPX Instructions required  */
+  CpuMPX,
   /* 64bit support available, used by -march= in assembler.  */
   CpuLM,
   /* RDRSEED instruction required.  */
@@ -169,7 +171,7 @@ enum
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
-#define CpuUnused	(CpuMax + 1)
+/* #define CpuUnused	(CpuMax + 1) */
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -233,6 +235,7 @@ typedef union i386_cpu_flags
       unsigned int cpurtm:1;
       unsigned int cpuinvpcid:1;
       unsigned int cpuvmfunc:1;
+      unsigned int cpumpx:1;
       unsigned int cpulm:1;
       unsigned int cpurdseed:1;
       unsigned int cpuadx:1;
@@ -305,6 +308,8 @@ enum
   FWait,
   /* quick test for string instructions */
   IsString,
+  /* quick test if branch instruction is MPX supported */
+  BNDPrefixOk,
   /* quick test for lockable instructions */
   IsLockable,
   /* fake an extra reg operand for clr, imul and special register
@@ -455,6 +460,7 @@ typedef struct i386_opcode_modifier
   unsigned int no_ldsuf:1;
   unsigned int fwait:1;
   unsigned int isstring:1;
+  unsigned int bndprefixok:1;
   unsigned int islockable:1;
   unsigned int regkludge:1;
   unsigned int firstxmm0:1;
@@ -591,6 +597,9 @@ enum
   /* Vector 4 bit immediate.  */
   Vec_Imm4,
 
+  /* Bound register.  */
+  RegBND,
+
   /* The last bitfield in i386_operand_type.  */
   OTMax
 };
@@ -653,6 +662,7 @@ typedef union i386_operand_type
       unsigned int unspecified:1;
       unsigned int anysize:1;
       unsigned int vec_imm4:1;
+      unsigned int regbnd:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
 #endif

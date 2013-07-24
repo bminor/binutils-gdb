@@ -67,6 +67,7 @@
 #define DATA_PREFIX	3
 #define REP_PREFIX	4
 #define HLE_PREFIX	REP_PREFIX
+#define BND_PREFIX	REP_PREFIX
 #define LOCK_PREFIX	5
 #define REX_PREFIX	6       /* must come last.  */
 #define MAX_PREFIXES	7	/* max prefixes per opcode */
@@ -296,6 +297,9 @@ struct _i386_insn
     /* HLE prefix.  */
     const char *hle_prefix;
 
+    /* Have BND prefix.  */
+    const char *bnd_prefix;
+
     /* Error message.  */
     enum i386_error error;
   };
@@ -441,6 +445,11 @@ static int allow_pseudo_reg = 0;
 
 /* 1 if register prefix % not required.  */
 static int allow_naked_reg = 0;
+
+/* 1 if the assembler should add BND prefix for all control-tranferring
+   instructions supporting it, even if this prefix wasn't specified
+   explicitly.  */
+static int add_bnd_prefix = 0;
 
 /* 1 if pseudo index register, eiz/riz, is allowed .  */
 static int allow_index_reg = 0;
@@ -779,6 +788,8 @@ static const arch_entry cpu_arch[] =
     CPU_PRFCHW_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".smap"), PROCESSOR_UNKNOWN,
     CPU_SMAP_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".mpx"), PROCESSOR_UNKNOWN,
+    CPU_MPX_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF
@@ -1540,6 +1551,7 @@ static const i386_operand_type imm16_32 = OPERAND_TYPE_IMM16_32;
 static const i386_operand_type imm16_32s = OPERAND_TYPE_IMM16_32S;
 static const i386_operand_type imm16_32_32s = OPERAND_TYPE_IMM16_32_32S;
 static const i386_operand_type vec_imm4 = OPERAND_TYPE_VEC_IMM4;
+static const i386_operand_type regbnd = OPERAND_TYPE_REGBND;
 
 enum operand_type
 {
@@ -3214,6 +3226,21 @@ md_assemble (char *line)
   if (i.hle_prefix && !check_hle ())
     return;
 
+  /* Check BND prefix.  */
+  if (i.bnd_prefix && !i.tm.opcode_modifier.bndprefixok)
+    as_bad (_("expecting valid branch instruction after `bnd'"));
+
+  if (i.tm.cpu_flags.bitfield.cpumpx
+      && flag_code == CODE_64BIT
+      && i.prefix[ADDR_PREFIX])
+    as_bad (_("32-bit address isn't allowed in 64-bit MPX instructions."));
+
+  /* Insert BND prefix.  */
+  if (add_bnd_prefix
+      && i.tm.opcode_modifier.bndprefixok
+      && !i.prefix[BND_PREFIX])
+    add_prefix (BND_PREFIX_OPCODE);
+
   /* Check string instruction segment overrides.  */
   if (i.tm.opcode_modifier.isstring && i.mem_operands != 0)
     {
@@ -3416,6 +3443,8 @@ parse_insn (char *line, char *mnemonic)
 	    case PREFIX_REP:
 	      if (current_templates->start->cpu_flags.bitfield.cpuhle)
 		i.hle_prefix = current_templates->start->name;
+	      else if (current_templates->start->cpu_flags.bitfield.cpumpx)
+		i.bnd_prefix = current_templates->start->name;
 	      else
 		i.rep_prefix = current_templates->start->name;
 	      break;
@@ -5892,6 +5921,7 @@ build_modrm_byte (void)
 		|| i.types[op].bitfield.regmmx
 		|| i.types[op].bitfield.regxmm
 		|| i.types[op].bitfield.regymm
+		|| i.types[op].bitfield.regbnd
 		|| i.types[op].bitfield.sreg2
 		|| i.types[op].bitfield.sreg3
 		|| i.types[op].bitfield.control
@@ -6031,6 +6061,13 @@ output_branch (void)
       i.prefixes--;
     }
 
+  /* BND prefixed jump.  */
+  if (i.prefix[BND_PREFIX] != 0)
+    {
+      FRAG_APPEND_1_CHAR (i.prefix[BND_PREFIX]);
+      i.prefixes -= 1;
+    }
+
   if (i.prefixes != 0 && !intel_syntax)
     as_warn (_("skipping prefixes on this instruction"));
 
@@ -6122,6 +6159,13 @@ output_jump (void)
   if (i.prefix[REX_PREFIX] != 0)
     {
       FRAG_APPEND_1_CHAR (i.prefix[REX_PREFIX]);
+      i.prefixes -= 1;
+    }
+
+  /* BND prefixed jump.  */
+  if (i.prefix[BND_PREFIX] != 0)
+    {
+      FRAG_APPEND_1_CHAR (i.prefix[BND_PREFIX]);
       i.prefixes -= 1;
     }
 
@@ -8536,6 +8580,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MOPERAND_CHECK (OPTION_MD_BASE + 12)
 #define OPTION_MAVXSCALAR (OPTION_MD_BASE + 13)
 #define OPTION_X32 (OPTION_MD_BASE + 14)
+#define OPTION_MADD_BND_PREFIX (OPTION_MD_BASE + 15)
 
 struct option md_longopts[] =
 {
@@ -8559,6 +8604,7 @@ struct option md_longopts[] =
   {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
   {"moperand-check", required_argument, NULL, OPTION_MOPERAND_CHECK},
   {"mavxscalar", required_argument, NULL, OPTION_MAVXSCALAR},
+  {"madd-bnd-prefix", no_argument, NULL, OPTION_MADD_BND_PREFIX},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -8816,6 +8862,10 @@ md_parse_option (int c, char *arg)
 	as_fatal (_("invalid -mavxscalar= option: `%s'"), arg);
       break;
 
+    case OPTION_MADD_BND_PREFIX:
+      add_bnd_prefix = 1;
+      break;
+
     default:
       return 0;
     }
@@ -8960,6 +9010,8 @@ md_show_usage (FILE *stream)
   -mnaked-reg             don't require `%%' prefix for registers\n"));
   fprintf (stream, _("\
   -mold-gcc               support old (<= 2.8.1) versions of gcc\n"));
+  fprintf (stream, _("\
+  -madd-bnd-prefix        add BND prefix for all valid branches\n"));
 }
 
 #if ((defined (OBJ_MAYBE_COFF) && defined (OBJ_MAYBE_AOUT)) \

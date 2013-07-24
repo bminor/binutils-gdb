@@ -108,6 +108,7 @@ static void OP_3DNowSuffix (int, int);
 static void CMP_Fixup (int, int);
 static void BadOp (void);
 static void REP_Fixup (int, int);
+static void BND_Fixup (int, int);
 static void HLE_Fixup1 (int, int);
 static void HLE_Fixup2 (int, int);
 static void HLE_Fixup3 (int, int);
@@ -222,8 +223,10 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Bad_Opcode NULL, { { NULL, 0 } }
 
 #define Eb { OP_E, b_mode }
+#define Ebnd { OP_E, bnd_mode }
 #define EbS { OP_E, b_swap_mode }
 #define Ev { OP_E, v_mode }
+#define Ev_bnd { OP_E, v_bnd_mode }
 #define EvS { OP_E, v_swap_mode }
 #define Ed { OP_E, d_mode }
 #define Edq { OP_E, dq_mode }
@@ -246,6 +249,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Mx { OP_M, x_mode }
 #define Mxmm { OP_M, xmm_mode }
 #define Gb { OP_G, b_mode }
+#define Gbnd { OP_G, bnd_mode }
 #define Gv { OP_G, v_mode }
 #define Gd { OP_G, d_mode }
 #define Gdq { OP_G, dq_mode }
@@ -423,6 +427,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ebh3 { HLE_Fixup3, b_mode }
 #define Evh3 { HLE_Fixup3, v_mode }
 
+#define BND { BND_Fixup, 0 }
+
 #define cond_jump_flag { NULL, cond_jump_mode }
 #define loop_jcxz_flag { NULL, loop_jcxz_mode }
 
@@ -485,10 +491,12 @@ enum
   a_mode,
   cond_jump_mode,
   loop_jcxz_mode,
+  v_bnd_mode,
   /* operand size depends on REX prefixes.  */
   dq_mode,
   /* registers like dq_mode, memory like w_mode.  */
   dqw_mode,
+  bnd_mode,
   /* 4- or 6-byte pointer operand */
   f_mode,
   const_1_mode,
@@ -672,6 +680,9 @@ enum
   MOD_0F18_REG_5,
   MOD_0F18_REG_6,
   MOD_0F18_REG_7,
+  MOD_0F1A_PREFIX_0,
+  MOD_0F1B_PREFIX_0,
+  MOD_0F1B_PREFIX_1,
   MOD_0F20,
   MOD_0F21,
   MOD_0F22,
@@ -766,6 +777,8 @@ enum
   PREFIX_0F11,
   PREFIX_0F12,
   PREFIX_0F16,
+  PREFIX_0F1A,
+  PREFIX_0F1B,
   PREFIX_0F2A,
   PREFIX_0F2B,
   PREFIX_0F2C,
@@ -1800,23 +1813,23 @@ static const struct dis386 dis386[] = {
   { "outs{b|}",		{ indirDXr, Xb } },
   { X86_64_TABLE (X86_64_6F) },
   /* 70 */
-  { "joH",		{ Jb, XX, cond_jump_flag } },
-  { "jnoH",		{ Jb, XX, cond_jump_flag } },
-  { "jbH",		{ Jb, XX, cond_jump_flag } },
-  { "jaeH",		{ Jb, XX, cond_jump_flag } },
-  { "jeH",		{ Jb, XX, cond_jump_flag } },
-  { "jneH",		{ Jb, XX, cond_jump_flag } },
-  { "jbeH",		{ Jb, XX, cond_jump_flag } },
-  { "jaH",		{ Jb, XX, cond_jump_flag } },
+  { "joH",		{ Jb, BND, cond_jump_flag } },
+  { "jnoH",		{ Jb, BND, cond_jump_flag } },
+  { "jbH",		{ Jb, BND, cond_jump_flag } },
+  { "jaeH",		{ Jb, BND, cond_jump_flag } },
+  { "jeH",		{ Jb, BND, cond_jump_flag } },
+  { "jneH",		{ Jb, BND, cond_jump_flag } },
+  { "jbeH",		{ Jb, BND, cond_jump_flag } },
+  { "jaH",		{ Jb, BND, cond_jump_flag } },
   /* 78 */
-  { "jsH",		{ Jb, XX, cond_jump_flag } },
-  { "jnsH",		{ Jb, XX, cond_jump_flag } },
-  { "jpH",		{ Jb, XX, cond_jump_flag } },
-  { "jnpH",		{ Jb, XX, cond_jump_flag } },
-  { "jlH",		{ Jb, XX, cond_jump_flag } },
-  { "jgeH",		{ Jb, XX, cond_jump_flag } },
-  { "jleH",		{ Jb, XX, cond_jump_flag } },
-  { "jgH",		{ Jb, XX, cond_jump_flag } },
+  { "jsH",		{ Jb, BND, cond_jump_flag } },
+  { "jnsH",		{ Jb, BND, cond_jump_flag } },
+  { "jpH",		{ Jb, BND, cond_jump_flag } },
+  { "jnpH",		{ Jb, BND, cond_jump_flag } },
+  { "jlH",		{ Jb, BND, cond_jump_flag } },
+  { "jgeH",		{ Jb, BND, cond_jump_flag } },
+  { "jleH",		{ Jb, BND, cond_jump_flag } },
+  { "jgH",		{ Jb, BND, cond_jump_flag } },
   /* 80 */
   { REG_TABLE (REG_80) },
   { REG_TABLE (REG_81) },
@@ -1892,8 +1905,8 @@ static const struct dis386 dis386[] = {
   /* c0 */
   { REG_TABLE (REG_C0) },
   { REG_TABLE (REG_C1) },
-  { "retT",		{ Iw } },
-  { "retT",		{ XX } },
+  { "retT",		{ Iw, BND } },
+  { "retT",		{ BND } },
   { X86_64_TABLE (X86_64_C4) },
   { X86_64_TABLE (X86_64_C5) },
   { REG_TABLE (REG_C6) },
@@ -1935,10 +1948,10 @@ static const struct dis386 dis386[] = {
   { "outB",		{ Ib, AL } },
   { "outG",		{ Ib, zAX } },
   /* e8 */
-  { "callT",		{ Jv } },
-  { "jmpT",		{ Jv } },
+  { "callT",		{ Jv, BND } },
+  { "jmpT",		{ Jv, BND } },
   { X86_64_TABLE (X86_64_EA) },
-  { "jmp",		{ Jb } },
+  { "jmp",		{ Jb, BND } },
   { "inB",		{ AL, indirDX } },
   { "inG",		{ zAX, indirDX } },
   { "outB",		{ indirDX, AL } },
@@ -1994,8 +2007,8 @@ static const struct dis386 dis386_twobyte[] = {
   /* 18 */
   { REG_TABLE (REG_0F18) },
   { "nopQ",		{ Ev } },
-  { "nopQ",		{ Ev } },
-  { "nopQ",		{ Ev } },
+  { PREFIX_TABLE (PREFIX_0F1A) },
+  { PREFIX_TABLE (PREFIX_0F1B) },
   { "nopQ",		{ Ev } },
   { "nopQ",		{ Ev } },
   { "nopQ",		{ Ev } },
@@ -2109,23 +2122,23 @@ static const struct dis386 dis386_twobyte[] = {
   { PREFIX_TABLE (PREFIX_0F7E) },
   { PREFIX_TABLE (PREFIX_0F7F) },
   /* 80 */
-  { "joH",		{ Jv, XX, cond_jump_flag } },
-  { "jnoH",		{ Jv, XX, cond_jump_flag } },
-  { "jbH",		{ Jv, XX, cond_jump_flag } },
-  { "jaeH",		{ Jv, XX, cond_jump_flag } },
-  { "jeH",		{ Jv, XX, cond_jump_flag } },
-  { "jneH",		{ Jv, XX, cond_jump_flag } },
-  { "jbeH",		{ Jv, XX, cond_jump_flag } },
-  { "jaH",		{ Jv, XX, cond_jump_flag } },
+  { "joH",		{ Jv, BND, cond_jump_flag } },
+  { "jnoH",		{ Jv, BND, cond_jump_flag } },
+  { "jbH",		{ Jv, BND, cond_jump_flag } },
+  { "jaeH",		{ Jv, BND, cond_jump_flag } },
+  { "jeH",		{ Jv, BND, cond_jump_flag } },
+  { "jneH",		{ Jv, BND, cond_jump_flag } },
+  { "jbeH",		{ Jv, BND, cond_jump_flag } },
+  { "jaH",		{ Jv, BND, cond_jump_flag } },
   /* 88 */
-  { "jsH",		{ Jv, XX, cond_jump_flag } },
-  { "jnsH",		{ Jv, XX, cond_jump_flag } },
-  { "jpH",		{ Jv, XX, cond_jump_flag } },
-  { "jnpH",		{ Jv, XX, cond_jump_flag } },
-  { "jlH",		{ Jv, XX, cond_jump_flag } },
-  { "jgeH",		{ Jv, XX, cond_jump_flag } },
-  { "jleH",		{ Jv, XX, cond_jump_flag } },
-  { "jgH",		{ Jv, XX, cond_jump_flag } },
+  { "jsH",		{ Jv, BND, cond_jump_flag } },
+  { "jnsH",		{ Jv, BND, cond_jump_flag } },
+  { "jpH",		{ Jv, BND, cond_jump_flag } },
+  { "jnpH",		{ Jv, BND, cond_jump_flag } },
+  { "jlH",		{ Jv, BND, cond_jump_flag } },
+  { "jgeH",		{ Jv, BND, cond_jump_flag } },
+  { "jleH",		{ Jv, BND, cond_jump_flag } },
+  { "jgH",		{ Jv, BND, cond_jump_flag } },
   /* 90 */
   { "seto",		{ Eb } },
   { "setno",		{ Eb } },
@@ -2366,6 +2379,7 @@ static const char **names_seg;
 static const char *index64;
 static const char *index32;
 static const char **index16;
+static const char **names_bnd;
 
 static const char *intel_names64[] = {
   "rax", "rcx", "rdx", "rbx", "rsp", "rbp", "rsi", "rdi",
@@ -2431,6 +2445,14 @@ static const char *intel_names_mm[] = {
 static const char *att_names_mm[] = {
   "%mm0", "%mm1", "%mm2", "%mm3",
   "%mm4", "%mm5", "%mm6", "%mm7"
+};
+
+static const char *intel_names_bnd[] = {
+  "bnd0", "bnd1", "bnd2", "bnd3"
+};
+
+static const char *att_names_bnd[] = {
+  "%bnd0", "%bnd1", "%bnd2", "%bnd3"
 };
 
 static const char **names_xmm;
@@ -2623,9 +2645,9 @@ static const struct dis386 reg_table[][8] = {
   {
     { "incQ",	{ Evh1 } },
     { "decQ",	{ Evh1 } },
-    { "call{T|}", { indirEv } },
+    { "call{T|}", { indirEv, BND } },
     { "Jcall{T|}", { indirEp } },
-    { "jmp{T|}", { indirEv } },
+    { "jmp{T|}", { indirEv, BND } },
     { "Jjmp{T|}", { indirEp } },
     { "pushU",	{ stackEv } },
     { Bad_Opcode },
@@ -2868,6 +2890,22 @@ static const struct dis386 prefix_table[][4] = {
     { MOD_TABLE (MOD_0F16_PREFIX_0) },
     { "movshdup", { XM, EXx } },
     { "movhpd",	{ XM, EXq } },
+  },
+
+  /* PREFIX_0F1A */
+  {
+    { MOD_TABLE (MOD_0F1A_PREFIX_0) },
+    { "bndcl",  { Gbnd, Ev_bnd } },
+    { "bndmov", { Gbnd, Ebnd } },
+    { "bndcu",  { Gbnd, Ev_bnd } },
+  },
+
+  /* PREFIX_0F1B */
+  {
+    { MOD_TABLE (MOD_0F1B_PREFIX_0) },
+    { MOD_TABLE (MOD_0F1B_PREFIX_1) },
+    { "bndmov", { Ebnd, Gbnd } },
+    { "bndcn",  { Gbnd, Ev_bnd } },
   },
 
   /* PREFIX_0F2A */
@@ -10251,6 +10289,21 @@ static const struct dis386 mod_table[][2] = {
     { "nop/reserved",	{ Mb } },
   },
   {
+    /* MOD_0F1A_PREFIX_0 */
+    { "bndldx",		{ Gbnd, Ev_bnd } },
+    { "nopQ",		{ Ev } },
+  },
+  {
+    /* MOD_0F1B_PREFIX_0 */
+    { "bndstx",		{ Ev_bnd, Gbnd } },
+    { "nopQ",		{ Ev } },
+  },
+  {
+    /* MOD_0F1B_PREFIX_1 */
+    { "bndmk",		{ Gbnd, Ev_bnd } },
+    { "nopQ",		{ Ev } },
+  },
+  {
     /* MOD_0F20 */
     { Bad_Opcode },
     { "movZ",		{ Rm, Cm } },
@@ -10655,6 +10708,7 @@ static const struct dis386 rm_table[][8] = {
 #define REP_PREFIX	(0xf3 | 0x100)
 #define XACQUIRE_PREFIX	(0xf2 | 0x200)
 #define XRELEASE_PREFIX	(0xf3 | 0x400)
+#define BND_PREFIX	(0xf2 | 0x400)
 
 static int
 ckprefix (void)
@@ -10892,6 +10946,8 @@ prefix_name (int pref, int sizeflag)
       return "xacquire";
     case XRELEASE_PREFIX:
       return "xrelease";
+    case BND_PREFIX:
+      return "bnd";
     default:
       return NULL;
     }
@@ -11397,6 +11453,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
       names8rex = intel_names8rex;
       names_seg = intel_names_seg;
       names_mm = intel_names_mm;
+      names_bnd = intel_names_bnd;
       names_xmm = intel_names_xmm;
       names_ymm = intel_names_ymm;
       index64 = intel_index64;
@@ -11416,6 +11473,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
       names8rex = att_names8rex;
       names_seg = att_names_seg;
       names_mm = att_names_mm;
+      names_bnd = att_names_bnd;
       names_xmm = att_names_xmm;
       names_ymm = att_names_ymm;
       index64 = att_index64;
@@ -12766,6 +12824,7 @@ intel_operand_size (int bytemode, int sizeflag)
 	}
       /* FALLTHRU */
     case v_mode:
+    case v_bnd_mode:
     case v_swap_mode:
     case dq_mode:
       USED_REX (REX_W);
@@ -13035,6 +13094,9 @@ OP_E_register (int bytemode, int sizeflag)
     case m_mode:
       names = address_mode == mode_64bit ? names64 : names32;
       break;
+    case bnd_mode:
+      names = names_bnd;
+      break;
     case stack_v_mode:
       if (address_mode == mode_64bit && ((sizeflag & DFLAG) || (rex & REX_W)))
 	{
@@ -13044,6 +13106,7 @@ OP_E_register (int bytemode, int sizeflag)
       bytemode = v_mode;
       /* FALLTHRU */
     case v_mode:
+    case v_bnd_mode:
     case v_swap_mode:
     case dq_mode:
     case dqb_mode:
@@ -13095,6 +13158,9 @@ OP_E_memory (int bytemode, int sizeflag)
       int base, rbase;
       int vindex = 0;
       int scale = 0;
+      int addr32flag = !((sizeflag & AFLAG)
+			 || bytemode == v_bnd_mode
+			 || bytemode == bnd_mode);
       const char **indexes64 = names64;
       const char **indexes32 = names32;
 
@@ -13190,7 +13256,9 @@ OP_E_memory (int bytemode, int sizeflag)
 	      }
 	  }
 
-      if (havebase || haveindex || riprel)
+      if ((havebase || haveindex || riprel)
+	  && (bytemode != v_bnd_mode)
+	  && (bytemode != bnd_mode))
 	used_prefixes |= PREFIX_ADDR;
 
       if (havedisp || (intel_syntax && riprel))
@@ -13203,7 +13271,7 @@ OP_E_memory (int bytemode, int sizeflag)
 	    }
 	  *obufp = '\0';
 	  if (havebase)
-	    oappend (address_mode == mode_64bit && (sizeflag & AFLAG)
+	    oappend (address_mode == mode_64bit && !addr32flag
 		     ? names64[rbase] : names32[rbase]);
 	  if (havesib)
 	    {
@@ -13220,12 +13288,10 @@ OP_E_memory (int bytemode, int sizeflag)
 		      *obufp = '\0';
 		    }
 		  if (haveindex)
-		    oappend (address_mode == mode_64bit
-			     && (sizeflag & AFLAG)
+		    oappend (address_mode == mode_64bit && !addr32flag
 			     ? indexes64[vindex] : indexes32[vindex]);
 		  else
-		    oappend (address_mode == mode_64bit
-			     && (sizeflag & AFLAG)
+		    oappend (address_mode == mode_64bit && !addr32flag
 			     ? index64 : index32);
 
 		  *obufp++ = scale_char;
@@ -13390,6 +13456,9 @@ OP_G (int bytemode, int sizeflag)
       break;
     case q_mode:
       oappend (names64[modrm.reg + add]);
+      break;
+    case bnd_mode:
+      oappend (names_bnd[modrm.reg]);
       break;
     case v_mode:
     case dq_mode:
@@ -14519,6 +14588,16 @@ REP_Fixup (int bytemode, int sizeflag)
       abort ();
       break;
     }
+}
+
+/* For BND-prefixed instructions 0xF2 prefix should be displayed as
+   "bnd".  */
+
+static void
+BND_Fixup (int bytemode ATTRIBUTE_UNUSED, int sizeflag ATTRIBUTE_UNUSED)
+{
+  if (prefixes & PREFIX_REPNZ)
+    all_prefixes[last_repnz_prefix] = BND_PREFIX;
 }
 
 /* Similar to OP_E.  But the 0xf2/0xf3 prefixes should be displayed as
