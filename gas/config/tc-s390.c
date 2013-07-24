@@ -1847,10 +1847,6 @@ s390_machine (int ignore ATTRIBUTE_UNUSED)
     {
       unsigned int old_cpu = current_cpu;
       unsigned int new_cpu;
-      char *p;
-
-      for (p = cpu_string; *p != 0; p++)
-	*p = TOLOWER (*p);
 
       if (strcmp (cpu_string, "push") == 0)
 	{

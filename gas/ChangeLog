@@ -1,3 +1,8 @@
+2013-07-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* config/tc-s390.c (s390_machine): Don't force the .machine
+	argument to lower case.
+
 2013-07-22  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (s_arm_arch_extension): Improve error message
