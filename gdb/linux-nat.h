@@ -23,20 +23,6 @@
 
 struct arch_lwp_info;
 
-/* Ways to "resume" a thread.  */
-
-enum resume_kind
-{
-  /* Thread should continue.  */
-  resume_continue,
-
-  /* Thread should single-step.  */
-  resume_step,
-
-  /* Thread should be stopped.  */
-  resume_stop
-};
-
 /* Structure describing an LWP.  This is public only for the purposes
    of ALL_LWPS; target-specific code should generally not access it
    directly.  */

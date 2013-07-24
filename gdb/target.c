@@ -3863,52 +3863,6 @@ debug_to_post_attach (int pid)
   fprintf_unfiltered (gdb_stdlog, "target_post_attach (%d)\n", pid);
 }
 
-/* Return a pretty printed form of target_waitstatus.
-   Space for the result is malloc'd, caller must free.  */
-
-char *
-target_waitstatus_to_string (const struct target_waitstatus *ws)
-{
-  const char *kind_str = "status->kind = ";
-
-  switch (ws->kind)
-    {
-    case TARGET_WAITKIND_EXITED:
-      return xstrprintf ("%sexited, status = %d",
-			 kind_str, ws->value.integer);
-    case TARGET_WAITKIND_STOPPED:
-      return xstrprintf ("%sstopped, signal = %s",
-			 kind_str, gdb_signal_to_name (ws->value.sig));
-    case TARGET_WAITKIND_SIGNALLED:
-      return xstrprintf ("%ssignalled, signal = %s",
-			 kind_str, gdb_signal_to_name (ws->value.sig));
-    case TARGET_WAITKIND_LOADED:
-      return xstrprintf ("%sloaded", kind_str);
-    case TARGET_WAITKIND_FORKED:
-      return xstrprintf ("%sforked", kind_str);
-    case TARGET_WAITKIND_VFORKED:
-      return xstrprintf ("%svforked", kind_str);
-    case TARGET_WAITKIND_EXECD:
-      return xstrprintf ("%sexecd", kind_str);
-    case TARGET_WAITKIND_VFORK_DONE:
-      return xstrprintf ("%svfork-done", kind_str);
-    case TARGET_WAITKIND_SYSCALL_ENTRY:
-      return xstrprintf ("%sentered syscall", kind_str);
-    case TARGET_WAITKIND_SYSCALL_RETURN:
-      return xstrprintf ("%sexited syscall", kind_str);
-    case TARGET_WAITKIND_SPURIOUS:
-      return xstrprintf ("%sspurious", kind_str);
-    case TARGET_WAITKIND_IGNORE:
-      return xstrprintf ("%signore", kind_str);
-    case TARGET_WAITKIND_NO_HISTORY:
-      return xstrprintf ("%sno-history", kind_str);
-    case TARGET_WAITKIND_NO_RESUMED:
-      return xstrprintf ("%sno-resumed", kind_str);
-    default:
-      return xstrprintf ("%sunknown???", kind_str);
-    }
-}
-
 /* Concatenate ELEM to LIST, a comma separate list, and return the
    result.  The LIST incoming argument is released.  */
 

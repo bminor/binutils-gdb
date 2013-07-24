@@ -2470,10 +2470,17 @@ queue_stop_reply_callback (struct inferior_list_entry *entry, void *arg)
       if (thread_stopped (thread))
 	{
 	  if (debug_threads)
-	    fprintf (stderr,
-		     "Reporting thread %s as already stopped with %s\n",
-		     target_pid_to_str (entry->id),
-		     target_waitstatus_to_string (&thread->last_status));
+	    {
+	      char *status_string
+		= target_waitstatus_to_string (&thread->last_status);
+
+	      fprintf (stderr,
+		       "Reporting thread %s as already stopped with %s\n",
+		       target_pid_to_str (entry->id),
+		       status_string);
+
+	      xfree (status_string);
+	    }
 
 	  gdb_assert (thread->last_status.kind != TARGET_WAITKIND_IGNORE);
 

@@ -1,3 +1,18 @@
+2013-07-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* Makefile.in (SFILES): /common/target-common.c.
+	(OBS): Add target-common.o.
+	(server_h): Add $(srcdir)/../common/target-common.h.
+	(target-common.o): New target.
+	* server.c (queue_stop_reply_callback): Free
+	status string after use.
+	* target.c (target_waitstatus_to_string): Remove.
+	* target.h: Include target-common.h.
+	(resume_kind): Likewise.
+	(target_waitkind): Likewise.
+	(target_waitstatus): Likewise.
+	(TARGET_WNOHANG): Likewise.
+
 2013-07-04  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (host_alias): Use @host_noncanonical@.

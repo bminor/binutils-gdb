@@ -1,3 +1,19 @@
+2013-07-24  Luis Machado  <lgustavo@codesourcery.com>
+
+	* Makefile.in (SFILES): Add common/target-common.c.
+	Add common/target-common.h to headers.
+	(COMMON_OBS): Add target-common.o.
+	(target-common.o): New target.
+	* linux-nat.h (resume_kind): Move to common/target-common.h.
+	* target.c (target_waitstatus_to_string): Move to
+	common/target-common.c.
+	* target.h: Include target-common.h.
+	(target_waitkind): Move to common/target-common.h.
+	(target_waitstatus): Likewise.
+	(TARGET_WNOHANG): Likewise.
+	* common/target-common.c: New file.
+	* common/target-common.h: New file.
+
 2013-07-24  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (lookup_dwo_cutu): Change missing DWO complaint to

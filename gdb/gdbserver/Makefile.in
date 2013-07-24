@@ -157,7 +157,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
 	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
 	$(srcdir)/common/buffer.c $(srcdir)/common/linux-btrace.c \
-	$(srcdir)/common/filestuff.c
+	$(srcdir)/common/filestuff.c $(srcdir)/common/target-common.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -166,13 +166,11 @@ LIBOBJS = @LIBOBJS@
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
-OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
-	utils.o version.o vec.o gdb_vecs.o \
-	mem-break.o hostio.o event-loop.o tracepoint.o \
-	xml-utils.o common-utils.o ptid.o buffer.o format.o filestuff.o \
-	dll.o notif.o tdesc.o \
-	$(XML_BUILTIN) \
-	$(DEPFILES) $(LIBOBJS)
+OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
+      target.o target-common.o utils.o version.o vec.o gdb_vecs.o \
+      mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
+      common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
+      tdesc.o $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
 GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@
@@ -438,6 +436,7 @@ server_h = $(srcdir)/server.h $(regcache_h) $(srcdir)/target.h \
 		$(srcdir)/../common/buffer.h \
 		$(srcdir)/../common/gdb_assert.h \
 		$(srcdir)/../common/gdb_locale.h \
+		$(srcdir)/../common/target-common.h \
 		$(ptid_h) \
 		$(signals_h) \
 		$(libiberty_h) \
@@ -546,6 +545,9 @@ filestuff.o: ../common/filestuff.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 agent.o: ../common/agent.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
+target-common.o: ../common/target-common.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
