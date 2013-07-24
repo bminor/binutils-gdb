@@ -1,3 +1,10 @@
+2013-07-24  Tristan Gingold  <gingold@adacore.com>
+
+	* coff-rs6000.c (xcoff_howto_table): Fix masks and pc_relative for
+	R_RBR.  Add numbers in comments.
+	(_bfd_xcoff_reloc_type_lookup): Handle BFD_RELOC_PPC_B16.
+	* coff64-rs6000.c: Likewise.
+
 2013-07-20  Alan Modra  <amodra@gmail.com>
 
 	PR ld/15762

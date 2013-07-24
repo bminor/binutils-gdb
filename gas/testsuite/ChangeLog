@@ -1,3 +1,11 @@
+2013-07-24  Tristan Gingold  <gingold@adacore.com>
+
+	* gas/ppc/test2xcoff32.s, gas/ppc/test2xcoff32.d: New files
+	* gas/ppc/ppc.exp: Add new test.
+	* gas/ppc/xcoff-br16-1.s, gas/ppc/xcoff-br16-1.d,
+	gas/ppc/xcoff-br16-2.s, gas/ppc/xcoff-br16-2.d: New files
+	* gas/ppc/aix.exp: Add new tests.
+
 2013-07-19  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/ilp32-basic.d (#as): Update to use -mabi=ilp32

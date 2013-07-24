@@ -1,3 +1,8 @@
+2013-07-24  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-ppc.c (md_apply_fix): Adjust BFD_RELOC_PPC_B16 on
+	xcoff targets.
+
 2013-07-24  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* config/tc-s390.c (s390_machine): Don't force the .machine

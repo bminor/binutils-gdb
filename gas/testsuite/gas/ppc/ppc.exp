@@ -31,6 +31,7 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
     run_list_test "range64" "-a64"
 } elseif { [istarget powerpc*-*aix*] } then {
     run_dump_test "test1xcoff32"
+    run_dump_test "test2xcoff32"
 } elseif { [istarget powerpc*-*-*bsd*] \
      || [istarget powerpc*-*-elf*] \
      || [istarget powerpc*-*-eabi*] \

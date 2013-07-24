@@ -6417,9 +6417,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       char *where;
       unsigned long insn;
 
-#ifdef OBJ_ELF
       switch (fixP->fx_r_type)
 	{
+#ifdef OBJ_ELF
 	  /* The following relocs can't be calculated by the assembler.
 	     Leave the field zero.  */
 	case BFD_RELOC_PPC_TPREL16:
@@ -6528,11 +6528,18 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	case BFD_RELOC_PPC_TLSLD:
 	  fieldval = 0;
 	  break;
+#endif
+
+#ifdef OBJ_XCOFF
+	case BFD_RELOC_PPC_B16:
+	  /* Adjust the offset to the instruction boundary.  */
+	  fieldval += 2;
+	  break;
+#endif
 
 	default:
 	  break;
 	}
-#endif
 
 #ifdef OBJ_ELF
 /* powerpc uses RELA style relocs, so if emitting a reloc the field
