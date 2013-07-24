@@ -3943,7 +3943,7 @@ micromips_deal_with_atomic_sequence (struct gdbarch *gdbarch,
 
   /* Effectively inserts the breakpoints.  */
   for (index = 0; index <= last_breakpoint; index++)
-      insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
+    insert_single_step_breakpoint (gdbarch, aspace, breaks[index]);
 
   return 1;
 }
