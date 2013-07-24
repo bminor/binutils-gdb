@@ -50,7 +50,7 @@ set build_tests {
    {begin.c end.c} {} "libbar.so"}
   {"Build warn libbar.so"
    "-shared" "-fPIC"
-   {beginwarn.c end.c} {} "libbarw.so"
+   {beginwarn.c end.c} {{readelf {-S --wide} libbarw.rd}} "libbarw.so"
     "C" "^.*\\\): warning: function foo is deprecated$"}
   {"Build hidden libbar.so"
    "-shared" "-fPIC"

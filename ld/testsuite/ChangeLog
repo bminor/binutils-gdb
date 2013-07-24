@@ -1,4 +1,14 @@
-* 2013-07-22  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+2013-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/15762
+	* ld-elf/shared.exp (build_tests): Check .gnu.warning section
+	in the libbarw.so library.
+	* ld-elf/libbarw.rd: New.
+
+	* lib/ld-lib.exp (run_cc_link_tests): Support checking on
+	output with warning message.
+
+2013-07-22  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* ld-scripts/script.exp: Use run_dump_test instead of
 	ld_simple_link to check the error message.
@@ -17,8 +27,8 @@
 
 2013-07-18  Terry Guo  <terry.guo@arm.com>
 
-        * ld-arm/thumb-b-lks-sym.d: Updated to be more flexible.
-        * ld-arm/thumb-bl-lks-sym.d: Likewise.
+	* ld-arm/thumb-b-lks-sym.d: Updated to be more flexible.
+	* ld-arm/thumb-bl-lks-sym.d: Likewise.
 
 2013-07-18  Roland McGrath  <mcgrathr@google.com>
 

@@ -1424,7 +1424,7 @@ proc run_cc_link_tests { ldtests } {
 	    if { $warnings != "" } then {
 		verbose -log "returned with: <$exec_output>, expected: <$warnings>"
 		if { [regexp $warnings $exec_output] } then {
-		    set failed 2
+		    set failed 0
 		} else {
 		    set failed 1
 		}
