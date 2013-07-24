@@ -9783,12 +9783,13 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 			  kind, dwo_name, hex_string (signature));
     }
 
-  complaint (&symfile_complaints,
-	     _("Could not find DWO %s %s(%s) referenced by %s at offset 0x%x"
-	       " [in module %s]"),
-	     kind, dwo_name, hex_string (signature),
-	     this_unit->is_debug_types ? "TU" : "CU",
-	     this_unit->offset.sect_off, objfile->name);
+  /* This is a warning and not a complaint because it can be caused by
+     pilot error (e.g., user accidentally deleting the DWO).  */
+  warning (_("Could not find DWO %s %s(%s) referenced by %s at offset 0x%x"
+	     " [in module %s]"),
+	   kind, dwo_name, hex_string (signature),
+	   this_unit->is_debug_types ? "TU" : "CU",
+	   this_unit->offset.sect_off, objfile->name);
   return NULL;
 }
 

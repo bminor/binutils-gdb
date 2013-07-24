@@ -1,3 +1,8 @@
+2013-07-24  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (lookup_dwo_cutu): Change missing DWO complaint to
+	a warning.
+
 2013-07-23  Yao Qi  <yao@codesourcery.com>
 
 	* i386-tdep.c (i386_in_stack_tramp_p): Remove unused
