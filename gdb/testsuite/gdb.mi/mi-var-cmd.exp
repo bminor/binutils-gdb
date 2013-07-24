@@ -558,7 +558,13 @@ mi_gdb_test "-var-update selected_a" \
 	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",type_changed=\"true\",new_type=\"int\",new_num_children=\"0\",has_more=\"0\"\}\\\]" \
 	"update selected_a in do_special_tests"
 
-mi_gdb_test "-file-exec-and-symbols ${binfile}" "\\^done" \
+if [is_remote host] {
+    set filename ${testfile}
+} else {
+    set filename ${binfile}
+}
+
+mi_gdb_test "-file-exec-and-symbols ${filename}" "\\^done" \
     "floating varobj invalidation"
 
 mi_delete_varobj selected_a "delete selected_a"

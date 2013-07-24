@@ -71,13 +71,20 @@ proc test_mi_interpreter_selection {} {
 
 proc test_exec_and_symbol_mi_operatons {} {
     global mi_gdb_prompt
-    global binfile
+    global binfile testfile
+
+    if [is_remote host] {
+	set filename ${testfile}
+	remote_download host ${binfile} ${filename}
+    } else {
+	set filename ${binfile}
+    }
 
     # Load symbols and specify executable on a single operation
     # Tests:
     # -file-exec-and-symbols
 
-    if [mi_gdb_test "-file-exec-and-symbols ${binfile}" "\\\^done" \
+    if [mi_gdb_test "-file-exec-and-symbols ${filename}" "\\\^done" \
        "file-exec-and-symbols operation"] {
 	note "Skipping all other MI tests."
 	return 0
@@ -98,11 +105,11 @@ proc test_exec_and_symbol_mi_operatons {} {
 #            "\\\^done" \
 #            "file-clear operation"
 
-    mi_gdb_test "-file-exec-file ${binfile}" \
+    mi_gdb_test "-file-exec-file ${filename}" \
              "\\\^done" \
              "file-exec-file operation"
 
-    mi_gdb_test "-file-symbol-file ${binfile}" \
+    mi_gdb_test "-file-symbol-file ${filename}" \
              "\\\^done" \
              "file-symbol-file operation"
 

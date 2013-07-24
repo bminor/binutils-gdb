@@ -1,3 +1,10 @@
+2013-07-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.mi/mi-var-cmd.exp: If host is remote, use ${testfile} on
+	host.
+	* gdb.mi/mi-basics.exp (test_exec_and_symbol_mi_operatons):
+	Likewise.  If host is remote, copy ${binfile} to host.
+
 2013-07-23  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-var-cmd.exp: Adjust pattern to match current error
