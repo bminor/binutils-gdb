@@ -315,6 +315,14 @@ struct sym_probe_fns
      implement this method as well.  */
   unsigned (*sym_get_probe_argument_count) (struct probe *probe);
 
+  /* Return 1 if the probe interface can evaluate the arguments of probe
+     PROBE, zero otherwise.  This function can be probe-specific, informing
+     whether only the arguments of PROBE can be evaluated, of generic,
+     informing whether the probe interface is able to evaluate any kind of
+     argument.  If you provide an implementation of sym_get_probes, you must
+     implement this method as well.  */
+  int (*can_evaluate_probe_arguments) (struct probe *probe);
+
   /* Evaluate the Nth argument available to PROBE.  PROBE will have
      come from a call to this objfile's sym_get_probes method.  N will
      be between 0 and the number of arguments available to this probe.

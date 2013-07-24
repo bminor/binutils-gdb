@@ -1978,12 +1978,14 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 	{
 	  VEC (probe_p) *probes[NUM_PROBES];
 	  int all_probes_found = 1;
+	  int checked_can_use_probe_arguments = 0;
 	  int i;
 
 	  memset (probes, 0, sizeof (probes));
 	  for (i = 0; i < NUM_PROBES; i++)
 	    {
 	      const char *name = probe_info[i].name;
+	      struct probe *p;
 	      char buf[32];
 
 	      /* Fedora 17 and Red Hat Enterprise Linux 6.2-6.4
@@ -2011,6 +2013,18 @@ svr4_create_solib_event_breakpoints (struct gdbarch *gdbarch,
 		{
 		  all_probes_found = 0;
 		  break;
+		}
+
+	      /* Ensure probe arguments can be evaluated.  */
+	      if (!checked_can_use_probe_arguments)
+		{
+		  p = VEC_index (probe_p, probes[i], 0);
+		  if (!can_evaluate_probe_arguments (p))
+		    {
+		      all_probes_found = 0;
+		      break;
+		    }
+		  checked_can_use_probe_arguments = 1;
 		}
 	    }
 

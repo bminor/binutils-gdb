@@ -628,6 +628,23 @@ get_probe_argument_count (struct probe *probe)
 
 /* See comments in probe.h.  */
 
+int
+can_evaluate_probe_arguments (struct probe *probe)
+{
+  const struct sym_probe_fns *probe_fns;
+
+  gdb_assert (probe->objfile != NULL);
+  gdb_assert (probe->objfile->sf != NULL);
+
+  probe_fns = probe->objfile->sf->sym_probe_fns;
+
+  gdb_assert (probe_fns != NULL);
+
+  return probe_fns->can_evaluate_probe_arguments (probe);
+}
+
+/* See comments in probe.h.  */
+
 struct value *
 evaluate_probe_argument (struct probe *probe, unsigned n)
 {

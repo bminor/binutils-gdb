@@ -3194,8 +3194,23 @@ create_longjmp_master_breakpoint (void)
 
       if (!bp_objfile_data->longjmp_searched)
 	{
-	  bp_objfile_data->longjmp_probes
-	    = find_probes_in_objfile (objfile, "libc", "longjmp");
+	  VEC (probe_p) *ret;
+
+	  ret = find_probes_in_objfile (objfile, "libc", "longjmp");
+	  if (ret != NULL)
+	    {
+	      /* We are only interested in checking one element.  */
+	      struct probe *p = VEC_index (probe_p, ret, 0);
+
+	      if (!can_evaluate_probe_arguments (p))
+		{
+		  /* We cannot use the probe interface here, because it does
+		     not know how to evaluate arguments.  */
+		  VEC_free (probe_p, ret);
+		  ret = NULL;
+		}
+	    }
+	  bp_objfile_data->longjmp_probes = ret;
 	  bp_objfile_data->longjmp_searched = 1;
 	}
 
@@ -3336,8 +3351,24 @@ create_exception_master_breakpoint (void)
       /* We prefer the SystemTap probe point if it exists.  */
       if (!bp_objfile_data->exception_searched)
 	{
-	  bp_objfile_data->exception_probes
-	    = find_probes_in_objfile (objfile, "libgcc", "unwind");
+	  VEC (probe_p) *ret;
+
+	  ret = find_probes_in_objfile (objfile, "libgcc", "unwind");
+
+	  if (ret != NULL)
+	    {
+	      /* We are only interested in checking one element.  */
+	      struct probe *p = VEC_index (probe_p, ret, 0);
+
+	      if (!can_evaluate_probe_arguments (p))
+		{
+		  /* We cannot use the probe interface here, because it does
+		     not know how to evaluate arguments.  */
+		  VEC_free (probe_p, ret);
+		  ret = NULL;
+		}
+	    }
+	  bp_objfile_data->exception_probes = ret;
 	  bp_objfile_data->exception_searched = 1;
 	}
 

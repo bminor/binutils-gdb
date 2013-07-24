@@ -1,3 +1,27 @@
+2013-07-24  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* breakpoint.c (create_longjmp_master_breakpoint): Check if probe
+	interface can evaluate arguments.  Fallback to the old mode if it
+	cannot.
+	(create_exception_master_breakpoint): Likewise.
+	* elfread.c (elf_can_evaluate_probe_arguments): New function.
+	(struct sym_probe_fns elf_probe_fns): Export function above to the
+	probe interface.
+	* probe.c (can_evaluate_probe_arguments): New function.
+	* probe.h (struct probe_ops) <can_evaluate_probe_arguments>: New
+	function pointer.
+	(can_evaluate_probe_arguments): New function prototype.
+	* solib-svr4.c (svr4_create_solib_event_breakpoints): Check if
+	probe interface can evaluate arguments.  Fallback to the old mode
+	if it cannot.
+	* stap-probe.c (stap_get_probe_argument_count): Check if probe
+	interface can evaluate arguments.  Warning the user if it cannot.
+	(stap_can_evaluate_probe_arguments): New function.
+	(struct probe_ops stap_probe_ops): Export function above to the
+	probe interface.
+	* symfile.h (struct sym_probe_fns) <can_evaluate_probe_arguments>:
+	New function pointer.
+
 2013-07-24  Luis Machado  <lgustavo@codesourcery.com>
 
 	* Makefile.in (SFILES): Add common/target-common.c.
