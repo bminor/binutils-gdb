@@ -381,16 +381,12 @@ target_has_execution_current (void)
   return target_has_execution_1 (inferior_ptid);
 }
 
-/* Add possible target architecture T to the list and add a new
-   command 'target T->to_shortname'.  Set COMPLETER as the command's
-   completer if not NULL.  */
+/* Complete initialization of T.  This ensures that various fields in
+   T are set, if needed by the target implementation.  */
 
 void
-add_target_with_completer (struct target_ops *t,
-			   completer_ftype *completer)
+complete_target_initialization (struct target_ops *t)
 {
-  struct cmd_list_element *c;
-
   /* Provide default values for all "must have" methods.  */
   if (t->to_xfer_partial == NULL)
     t->to_xfer_partial = default_xfer_partial;
@@ -409,6 +405,19 @@ add_target_with_completer (struct target_ops *t,
 
   if (t->to_has_execution == NULL)
     t->to_has_execution = (int (*) (struct target_ops *, ptid_t)) return_zero;
+}
+
+/* Add possible target architecture T to the list and add a new
+   command 'target T->to_shortname'.  Set COMPLETER as the command's
+   completer if not NULL.  */
+
+void
+add_target_with_completer (struct target_ops *t,
+			   completer_ftype *completer)
+{
+  struct cmd_list_element *c;
+
+  complete_target_initialization (t);
 
   if (!target_structs)
     {

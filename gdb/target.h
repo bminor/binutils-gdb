@@ -1747,6 +1747,9 @@ int target_verify_memory (const gdb_byte *data,
 
 /* Routines for maintenance of the target structures...
 
+   complete_target_initialization: Finalize a target_ops by filling in
+   any fields needed by the target implementation.
+
    add_target:   Add a target to the list of all possible targets.
 
    push_target:  Make this target the top of the stack of currently used
@@ -1764,6 +1767,8 @@ extern void add_target (struct target_ops *);
 
 extern void add_target_with_completer (struct target_ops *t,
 				       completer_ftype *completer);
+
+extern void complete_target_initialization (struct target_ops *t);
 
 /* Adds a command ALIAS for target T and marks it deprecated.  This is useful
    for maintaining backwards compatibility when renaming targets.  */

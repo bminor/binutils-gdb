@@ -1,3 +1,12 @@
+2013-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* linux-thread-db.c (init_thread_db_ops): Call
+	complete_target_initialization.
+	(_initialize_thread_db): Don't call add_target.
+	* target.c (complete_target_initialization): New function.
+	(add_target_with_completer): Call it.
+	* target.h (complete_target_initialization): Declare.
+
 2013-07-25  Mark Kettenis  <kettenis@gnu.org>
 
 	* hppa-tdep.h (enum hppa_regnum): Add members for all space registers.

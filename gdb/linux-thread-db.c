@@ -2057,6 +2057,8 @@ init_thread_db_ops (void)
   thread_db_ops.to_extra_thread_info = thread_db_extra_thread_info;
   thread_db_ops.to_get_ada_task_ptid = thread_db_get_ada_task_ptid;
   thread_db_ops.to_magic = OPS_MAGIC;
+
+  complete_target_initialization (&thread_db_ops);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
@@ -2066,7 +2068,6 @@ void
 _initialize_thread_db (void)
 {
   init_thread_db_ops ();
-  add_target (&thread_db_ops);
 
   /* Defer loading of libthread_db.so until inferior is running.
      This allows gdb to load correct libthread_db for a given
