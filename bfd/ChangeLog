@@ -1,5 +1,12 @@
 2013-07-25  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Replace opd_relocs
+	with a union.
+	(opd_entry_value): Cache .opd section contents.
+	(ppc64_elf_relocate_section): Adjust.
+
+2013-07-25  Alan Modra  <amodra@gmail.com>
+
 	PR ld/15762
 	PR ld/12761
 	* elflink.c (elf_link_add_object_symbols): Correct test in

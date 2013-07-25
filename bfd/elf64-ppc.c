@@ -2615,8 +2615,13 @@ struct ppc64_elf_obj_tdata
      sections means we potentially need one of these for each input bfd.  */
   struct got_entry tlsld_got;
 
-  /* A copy of relocs before they are modified for --emit-relocs.  */
-  Elf_Internal_Rela *opd_relocs;
+  union {
+    /* A copy of relocs before they are modified for --emit-relocs.  */
+    Elf_Internal_Rela *relocs;
+
+    /* Section contents.  */
+    bfd_byte *contents;
+  } opd;
 
   /* Nonzero if this bfd has small toc/got relocs, ie. that expect
      the reloc to be in the range -32768 to 32767.  */
@@ -5574,12 +5579,16 @@ opd_entry_value (asection *opd_sec,
      at a final linked executable with addr2line or somesuch.  */
   if (opd_sec->reloc_count == 0)
     {
-      char buf[8];
+      bfd_byte *contents = ppc64_elf_tdata (opd_bfd)->opd.contents;
 
-      if (!bfd_get_section_contents (opd_bfd, opd_sec, buf, offset, 8))
-	return (bfd_vma) -1;
+      if (contents == NULL)
+	{
+	  if (!bfd_malloc_and_get_section (opd_bfd, opd_sec, &contents))
+	    return (bfd_vma) -1;
+	  ppc64_elf_tdata (opd_bfd)->opd.contents = contents;
+	}
 
-      val = bfd_get_64 (opd_bfd, buf);
+      val = bfd_get_64 (opd_bfd, contents + offset);
       if (code_sec != NULL)
 	{
 	  asection *sec, *likely = NULL;
@@ -5611,7 +5620,7 @@ opd_entry_value (asection *opd_sec,
 
   BFD_ASSERT (is_ppc64_elf (opd_bfd));
 
-  relocs = ppc64_elf_tdata (opd_bfd)->opd_relocs;
+  relocs = ppc64_elf_tdata (opd_bfd)->opd.relocs;
   if (relocs == NULL)
     relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
 
@@ -14065,8 +14074,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
       bfd_size_type amt;
       amt = input_section->reloc_count * sizeof (Elf_Internal_Rela);
       rel = bfd_alloc (input_bfd, amt);
-      BFD_ASSERT (ppc64_elf_tdata (input_bfd)->opd_relocs == NULL);
-      ppc64_elf_tdata (input_bfd)->opd_relocs = rel;
+      BFD_ASSERT (ppc64_elf_tdata (input_bfd)->opd.relocs == NULL);
+      ppc64_elf_tdata (input_bfd)->opd.relocs = rel;
       if (rel == NULL)
 	return FALSE;
       memcpy (rel, relocs, amt);
