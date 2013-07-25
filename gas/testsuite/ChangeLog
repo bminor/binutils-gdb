@@ -1,3 +1,8 @@
+2013-07-25  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/loongson-2f.d: Fix expected output for madd.ps,
+	msub.ps, nmadd.ps and nmsub.ps.
+
 2013-07-25  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	* gas/i386/sha.d: New.

@@ -1,3 +1,9 @@
+2013-07-25  Aaro Koskinen  <aaro.koskinen@iki.fi>
+
+	PR gas/15220
+	* mips-opc.c (mips_builtin_opcodes): Fix wrong opcodes for
+	Loongson 2F madd.ps, msub.ps, nmadd.ps and nmsub.ps.
+
 2013-07-25  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	* i386-dis.c (PREFIX enum): Add PREFIX_0F38C8, PREFIX_0F38C9,
