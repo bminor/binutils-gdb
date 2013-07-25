@@ -1,3 +1,9 @@
+2013-07-25  Mark Kettenis  <kettenis@gnu.org>
+
+	* hppabsd-tdep.c: Include "dwarf2-frame.h".
+	(hppabsd_dwarf2_frame_init_reg): New function.
+	(hppabsd_init_abi): Hook in the DWARF CFI frame unwinder.
+
 2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
 
 	* mi/mi-main.c (output_register): Make MI 'r' format use standard

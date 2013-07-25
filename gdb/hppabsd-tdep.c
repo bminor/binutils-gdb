@@ -26,6 +26,7 @@
 
 #include "hppa-tdep.h"
 #include "hppabsd-tdep.h"
+#include "dwarf2-frame.h"
 #include "solib-svr4.h"
 
 static CORE_ADDR
@@ -104,6 +105,17 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 }
 
 
+static void
+hppabsd_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+			       struct dwarf2_frame_state_reg *reg,
+			       struct frame_info *this_frame)
+{
+  if (regnum == HPPA_PCOQ_HEAD_REGNUM)
+    reg->how = DWARF2_FRAME_REG_RA;
+  else if (regnum == HPPA_SP_REGNUM)
+    reg->how = DWARF2_FRAME_REG_CFA;
+}
+
 void
 hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -122,4 +134,8 @@ hppabsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* OpenBSD and NetBSD use SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets
     (gdbarch, svr4_ilp32_fetch_link_map_offsets);
+
+  /* Hook in the DWARF CFI frame unwinder.  */
+  dwarf2_frame_set_init_reg (gdbarch, hppabsd_dwarf2_frame_init_reg);
+  dwarf2_append_unwinders (gdbarch);
 }
