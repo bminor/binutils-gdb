@@ -1,3 +1,8 @@
+2013-07-25  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .sha.
+	* doc/c-i386.texi: Document sha/.sha.
+
 2013-07-24  Anna Tikhonova  <anna.tikhonova@intel.com>
 	    Kirill Yukhin  <kirill.yukhin@intel.com>
 	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>

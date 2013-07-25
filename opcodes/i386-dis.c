@@ -861,6 +861,12 @@ enum
   PREFIX_0F3880,
   PREFIX_0F3881,
   PREFIX_0F3882,
+  PREFIX_0F38C8,
+  PREFIX_0F38C9,
+  PREFIX_0F38CA,
+  PREFIX_0F38CB,
+  PREFIX_0F38CC,
+  PREFIX_0F38CD,
   PREFIX_0F38DB,
   PREFIX_0F38DC,
   PREFIX_0F38DD,
@@ -891,6 +897,7 @@ enum
   PREFIX_0F3A61,
   PREFIX_0F3A62,
   PREFIX_0F3A63,
+  PREFIX_0F3ACC,
   PREFIX_0F3ADF,
   PREFIX_VEX_0F10,
   PREFIX_VEX_0F11,
@@ -3495,6 +3502,36 @@ static const struct dis386 prefix_table[][4] = {
     { "invpcid", { Gm, M } },
   },
 
+  /* PREFIX_0F38C8 */
+  {
+    { "sha1nexte", { XM, EXxmm } },
+  },
+
+  /* PREFIX_0F38C9 */
+  {
+    { "sha1msg1", { XM, EXxmm } },
+  },
+
+  /* PREFIX_0F38CA */
+  {
+    { "sha1msg2", { XM, EXxmm } },
+  },
+
+  /* PREFIX_0F38CB */
+  {
+    { "sha256rnds2", { XM, EXxmm, XMM0 } },
+  },
+
+  /* PREFIX_0F38CC */
+  {
+    { "sha256msg1", { XM, EXxmm } },
+  },
+
+  /* PREFIX_0F38CD */
+  {
+    { "sha256msg2", { XM, EXxmm } },
+  },
+
   /* PREFIX_0F38DB */
   {
     { Bad_Opcode },
@@ -3706,6 +3743,11 @@ static const struct dis386 prefix_table[][4] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { "pcmpistri", { XM, EXx, Ib } },
+  },
+
+  /* PREFIX_0F3ACC */
+  {
+    { "sha1rnds4", { XM, EXxmm, Ib } },
   },
 
   /* PREFIX_0F3ADF */
@@ -6073,12 +6115,12 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     /* c8 */
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F38C8) },
+    { PREFIX_TABLE (PREFIX_0F38C9) },
+    { PREFIX_TABLE (PREFIX_0F38CA) },
+    { PREFIX_TABLE (PREFIX_0F38CB) },
+    { PREFIX_TABLE (PREFIX_0F38CC) },
+    { PREFIX_TABLE (PREFIX_0F38CD) },
     { Bad_Opcode },
     { Bad_Opcode },
     /* d0 */
@@ -6368,7 +6410,7 @@ static const struct dis386 three_byte_table[][256] = {
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },
-    { Bad_Opcode },
+    { PREFIX_TABLE (PREFIX_0F3ACC) },
     { Bad_Opcode },
     { Bad_Opcode },
     { Bad_Opcode },

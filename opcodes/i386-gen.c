@@ -210,6 +210,8 @@ static initializer cpu_flag_init[] =
     "CpuSMAP" },
   { "CPU_MPX_FLAGS",
     "CpuMPX" },
+  { "CPU_SHA_FLAGS",
+    "CpuSHA" },
 };
 
 static initializer operand_type_init[] =
@@ -386,6 +388,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuADX),
   BITFIELD (CpuPRFCHW),
   BITFIELD (CpuSMAP),
+  BITFIELD (CpuSHA),
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
   BITFIELD (CpuMPX),

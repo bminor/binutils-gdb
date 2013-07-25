@@ -1,3 +1,20 @@
+2013-07-25  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* i386-dis.c (PREFIX enum): Add PREFIX_0F38C8, PREFIX_0F38C9,
+	PREFIX_0F38CA, PREFIX_0F38CB, PREFIX_0F38CC, PREFIX_0F38CD,
+	PREFIX_0F3ACC.
+	(prefix_table): Updated.
+	(three_byte_table): Likewise.
+	* i386-gen.c (cpu_flag_init): Add CPU_SHA_FLAGS.
+	(cpu_flags): Add CpuSHA.
+	(i386_cpu_flags): Add cpusha.
+	* i386-init.h: Regenerate.
+	* i386-opc.h (CpuSHA): New.
+	(CpuUnused): Restored.
+	(i386_cpu_flags): Add cpusha.
+	* i386-opc.tbl: Add SHA instructions.
+	* i386-tbl.h: Regenerate.
+
 2013-07-24  Anna Tikhonova  <anna.tikhonova@intel.com>
 	    Kirill Yukhin  <kirill.yukhin@intel.com>
 	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>

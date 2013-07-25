@@ -1,3 +1,11 @@
+2013-07-25  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* gas/i386/sha.d: New.
+	* gas/i386/sha.s: New.
+	* gas/i386/x86-64-sha.d: New.
+	* gas/i386/x86-64-sha.s: New.
+	* gas/i386/i386.exp: Run new SHA tests.
+
 2013-07-24  Anna Tikhonova  <anna.tikhonova@intel.com>
 	    Kirill Yukhin  <kirill.yukhin@intel.com>
 	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>

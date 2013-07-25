@@ -790,6 +790,8 @@ static const arch_entry cpu_arch[] =
     CPU_SMAP_FLAGS, 0, 0 },
   { STRING_COMMA_LEN (".mpx"), PROCESSOR_UNKNOWN,
     CPU_MPX_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN (".sha"), PROCESSOR_UNKNOWN,
+    CPU_SHA_FLAGS, 0, 0 },
 };
 
 #ifdef I386COFF

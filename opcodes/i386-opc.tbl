@@ -3069,3 +3069,13 @@ bndcu, 2, 0xf20f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No
 bndcn, 2, 0xf20f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Reg64|Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegBND }
 bndstx, 2, 0x0f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegBND, Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 bndldx, 2, 0x0f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegBND }
+
+// SHA instructions.
+sha1rnds4, 3, 0xf3acc, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
+sha1nexte, 2, 0xf38c8, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
+sha1msg1, 2, 0xf38c9, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
+sha1msg2, 2, 0xf38ca, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
+sha256rnds2, 3, 0xf38cb, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|FirstXmm0, { RegXMM, Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
+sha256rnds2, 2, 0xf38cb, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
+sha256msg1, 2, 0xf38cc, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
+sha256msg2, 2, 0xf38cd, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }

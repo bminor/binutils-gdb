@@ -156,6 +156,8 @@ enum
   CpuPRFCHW,
   /* SMAP instructions required.  */
   CpuSMAP,
+  /* SHA instructions required.  */
+  CpuSHA,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -171,7 +173,7 @@ enum
 
 /* If you get a compiler error for zero width of the unused field,
    comment it out.  */
-/* #define CpuUnused	(CpuMax + 1) */
+#define CpuUnused	(CpuMax + 1)
 
 /* We can check if an instruction is available with array instead
    of bitfield. */
@@ -241,6 +243,7 @@ typedef union i386_cpu_flags
       unsigned int cpuadx:1;
       unsigned int cpuprfchw:1;
       unsigned int cpusmap:1;
+      unsigned int cpusha:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused
