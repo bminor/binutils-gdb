@@ -1,3 +1,10 @@
+2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/printcmds.exp (test_print_int_arrays): Add tests for x,
+	z, o, and t output formats.
+	* gdb.base/display.exp: Use 'k' as an undefined format now that
+	'z' is defined.
+
 2013-07-24  Doug Evans  <dje@google.com>
 
 	* boards/native-stdio-gdbserver.exp (${board}_build_remote_cmd): Pass

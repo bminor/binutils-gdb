@@ -587,6 +587,16 @@ proc test_print_int_arrays {} {
 	" = {{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}"
     gdb_test_escape_braces "p int4dim" \
 	" = {{{{0, 1}, {2, 3}, {4, 5}}, {{6, 7}, {8, 9}, {10, 11}}}}"
+
+    # Some checks for various output formats.
+    gdb_test_escape_braces "p/x int4dim" \
+	" = {{{{0x0, 0x1}, {0x2, 0x3}, {0x4, 0x5}}, {{0x6, 0x7}, {0x8, 0x9}, {0xa, 0xb}}}}"
+    gdb_test_escape_braces "p/z int4dim" \
+       " = {{{{0x0+0, 0x0+1}, {0x0+2, 0x0+3}, {0x0+4, 0x0+5}}, {{0x0+6, 0x0+7}, {0x0+8, 0x0+9}, {0x0+a, 0x0+b}}}}"
+    gdb_test_escape_braces "p/o int4dim" \
+       " = {{{{0, 01}, {02, 03}, {04, 05}}, {{06, 07}, {010, 011}, {012, 013}}}}"
+    gdb_test_escape_braces "p/t int4dim" \
+       " = {{{{0, 1}, {10, 11}, {100, 101}}, {{110, 111}, {1000, 1001}, {1010, 1011}}}}"
 }
 
 proc test_print_typedef_arrays {} {

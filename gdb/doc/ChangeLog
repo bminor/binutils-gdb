@@ -1,3 +1,7 @@
+2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.texinfo (Output Formats): Mention the new 'z' formatter.
+
 2013-07-17  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Print Settings): Document "print raw frame-arguments".

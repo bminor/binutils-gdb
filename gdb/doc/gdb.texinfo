@@ -8517,6 +8517,11 @@ Without this format, @value{GDBN} displays pointers to and arrays of
 strings.  Single-byte members of a vector are displayed as an integer
 array.
 
+@item z
+Like @samp{x} formatting, the value is treated as an integer and
+printed as hexadecimal, but leading zeros are printed to pad the value
+to the size of the integer type.
+
 @item r
 @cindex raw printing
 Print using the @samp{raw} formatting.  By default, @value{GDBN} will

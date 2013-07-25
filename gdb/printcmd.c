@@ -533,6 +533,10 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       }
       break;
 
+    case 'z':
+      print_hex_chars (stream, valaddr, len, byte_order);
+      break;
+
     default:
       error (_("Undefined output format \"%c\"."), options->format);
     }
@@ -2496,7 +2500,8 @@ Examine memory: x/FMT ADDRESS.\n\
 ADDRESS is an expression for the memory address to examine.\n\
 FMT is a repeat count followed by a format letter and a size letter.\n\
 Format letters are o(octal), x(hex), d(decimal), u(unsigned decimal),\n\
-  t(binary), f(float), a(address), i(instruction), c(char) and s(string).\n\
+  t(binary), f(float), a(address), i(instruction), c(char), s(string)\n\
+  and z(hex, zero padded on the left).\n\
 Size letters are b(byte), h(halfword), w(word), g(giant, 8 bytes).\n\
 The specified number of objects of the specified size are printed\n\
 according to the format.\n\n\

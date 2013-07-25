@@ -1,3 +1,10 @@
+2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
+
+	* NEWS: Mention new 'z' formatter.
+	* printcmd.c (print_scalar_formatted): Add new 'z' formatter.
+	(_initialize_printcmd): Mention 'z' formatter in help text of the
+	'x' command.
+
 2013-07-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-tdep.c (micromips_deal_with_atomic_sequence): Correct
