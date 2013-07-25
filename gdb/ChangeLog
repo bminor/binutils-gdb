@@ -1,5 +1,16 @@
 2013-07-25  Mark Kettenis  <kettenis@gnu.org>
 
+	* hppa-tdep.h (enum hppa_regnum): Add members for all space registers.
+	* hppaobsd-tdep.c (HPPAOBSD_SIZEOF_GREGS): Add comment.
+	(HPPANBSD_SIZEOF_GREGS): New define.
+	(hppaobsd_supply_gregset): Handle additional registers.
+	* hppabsd-nat.c (hppabsd_gregset_supplies_p): Adjust to indicate
+	we provide more registers now.
+	(hppabsd_supply_gregset): Supply additional registers.
+	(hppabsd_collect_gregset): Collect additional registers.
+
+2013-07-25  Mark Kettenis  <kettenis@gnu.org>
+
 	* hppabsd-tdep.c: Include "dwarf2-frame.h".
 	(hppabsd_dwarf2_frame_init_reg): New function.
 	(hppabsd_init_abi): Hook in the DWARF CFI frame unwinder.

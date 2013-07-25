@@ -50,6 +50,13 @@ enum hppa_regnum
   HPPA_ISR_REGNUM = 39,		/* Interrupt Space Register */
   HPPA_IOR_REGNUM = 40,		/* Interrupt Offset Register */
   HPPA_SR4_REGNUM = 43,		/* space register 4 */
+  HPPA_SR0_REGNUM = 44,		/* space register 0 */
+  HPPA_SR1_REGNUM = 45,		/* space register 1 */
+  HPPA_SR2_REGNUM = 46,		/* space register 2 */
+  HPPA_SR3_REGNUM = 47,		/* space register 3 */
+  HPPA_SR5_REGNUM = 48,		/* space register 5 */
+  HPPA_SR6_REGNUM = 49,		/* space register 6 */
+  HPPA_SR7_REGNUM = 50,		/* space register 7 */
   HPPA_RCR_REGNUM = 51,		/* Recover Counter (also known as cr0) */
   HPPA_PID0_REGNUM = 52,	/* Protection ID */
   HPPA_PID1_REGNUM = 53,	/* Protection ID */
