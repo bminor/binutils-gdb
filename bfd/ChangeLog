@@ -1,3 +1,10 @@
+2013-07-25  Alan Modra  <amodra@gmail.com>
+
+	PR ld/15762
+	PR ld/12761
+	* elflink.c (elf_link_add_object_symbols): Correct test in
+	last patch.  Remove unnecessary code.
+
 2013-07-24  Tristan Gingold  <gingold@adacore.com>
 
 	* coff-rs6000.c (xcoff_howto_table): Fix masks and pc_relative for

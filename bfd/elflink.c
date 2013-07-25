@@ -3344,6 +3344,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   long old_dynsymcount = 0;
   bfd_size_type old_dynstr_size = 0;
   size_t tabsize = 0;
+  asection *s;
 
   htab = elf_hash_table (info);
   bed = get_elf_backend_data (abfd);
@@ -3385,75 +3386,64 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
      symbol.  This differs from .gnu.warning sections, which generate
      warnings when they are included in an output file.  */
   /* PR 12761: Also generate this warning when building shared libraries.  */
-  if (info->executable || info->shared)
+  for (s = abfd->sections; s != NULL; s = s->next)
     {
-      asection *s;
+      const char *name;
 
-      for (s = abfd->sections; s != NULL; s = s->next)
+      name = bfd_get_section_name (abfd, s);
+      if (CONST_STRNEQ (name, ".gnu.warning."))
 	{
-	  const char *name;
+	  char *msg;
+	  bfd_size_type sz;
 
-	  name = bfd_get_section_name (abfd, s);
-	  if (CONST_STRNEQ (name, ".gnu.warning."))
+	  name += sizeof ".gnu.warning." - 1;
+
+	  /* If this is a shared object, then look up the symbol
+	     in the hash table.  If it is there, and it is already
+	     been defined, then we will not be using the entry
+	     from this shared object, so we don't need to warn.
+	     FIXME: If we see the definition in a regular object
+	     later on, we will warn, but we shouldn't.  The only
+	     fix is to keep track of what warnings we are supposed
+	     to emit, and then handle them all at the end of the
+	     link.  */
+	  if (dynamic)
 	    {
-	      char *msg;
-	      bfd_size_type sz;
+	      struct elf_link_hash_entry *h;
 
-	      name += sizeof ".gnu.warning." - 1;
+	      h = elf_link_hash_lookup (htab, name, FALSE, FALSE, TRUE);
 
-	      /* If this is a shared object, then look up the symbol
-		 in the hash table.  If it is there, and it is already
-		 been defined, then we will not be using the entry
-		 from this shared object, so we don't need to warn.
-		 FIXME: If we see the definition in a regular object
-		 later on, we will warn, but we shouldn't.  The only
-		 fix is to keep track of what warnings we are supposed
-		 to emit, and then handle them all at the end of the
-		 link.  */
-	      if (dynamic)
-		{
-		  struct elf_link_hash_entry *h;
+	      /* FIXME: What about bfd_link_hash_common?  */
+	      if (h != NULL
+		  && (h->root.type == bfd_link_hash_defined
+		      || h->root.type == bfd_link_hash_defweak))
+		continue;
+	    }
 
-		  h = elf_link_hash_lookup (htab, name, FALSE, FALSE, TRUE);
+	  sz = s->size;
+	  msg = (char *) bfd_alloc (abfd, sz + 1);
+	  if (msg == NULL)
+	    goto error_return;
 
-		  /* FIXME: What about bfd_link_hash_common?  */
-		  if (h != NULL
-		      && (h->root.type == bfd_link_hash_defined
-			  || h->root.type == bfd_link_hash_defweak))
-		    {
-		      /* We don't want to issue this warning.  Clobber
-			 the section size so that the warning does not
-			 get copied into the output file.  */
-		      s->size = 0;
-		      continue;
-		    }
-		}
+	  if (! bfd_get_section_contents (abfd, s, msg, 0, sz))
+	    goto error_return;
 
-	      sz = s->size;
-	      msg = (char *) bfd_alloc (abfd, sz + 1);
-	      if (msg == NULL)
-		goto error_return;
+	  msg[sz] = '\0';
 
-	      if (! bfd_get_section_contents (abfd, s, msg, 0, sz))
-		goto error_return;
+	  if (! (_bfd_generic_link_add_one_symbol
+		 (info, abfd, name, BSF_WARNING, s, 0, msg,
+		  FALSE, bed->collect, NULL)))
+	    goto error_return;
 
-	      msg[sz] = '\0';
+	  if (!info->relocatable && info->executable)
+	    {
+	      /* Clobber the section size so that the warning does
+		 not get copied into the output file.  */
+	      s->size = 0;
 
-	      if (! (_bfd_generic_link_add_one_symbol
-		     (info, abfd, name, BSF_WARNING, s, 0, msg,
-		      FALSE, bed->collect, NULL)))
-		goto error_return;
-
-	      if (!info->relocatable && !info->shared)
-		{
-		  /* Clobber the section size so that the warning does
-		     not get copied into the output file.  */
-		  s->size = 0;
-
-		  /* Also set SEC_EXCLUDE, so that symbols defined in
-		     the warning section don't get copied to the output.  */
-		  s->flags |= SEC_EXCLUDE;
-		}
+	      /* Also set SEC_EXCLUDE, so that symbols defined in
+		 the warning section don't get copied to the output.  */
+	      s->flags |= SEC_EXCLUDE;
 	    }
 	}
     }
@@ -3479,7 +3469,6 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
     goto error_return;
   else
     {
-      asection *s;
       const char *soname = NULL;
       char *audit = NULL;
       struct bfd_link_needed_list *rpath = NULL, *runpath = NULL;
