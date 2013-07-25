@@ -1,5 +1,11 @@
 2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
 
+	* gdb.mi/mi-reg-undefined.exp: New file.
+	* gdb.mi/mi-reg-undefined.c: Likewise.
+	* gdb.mi/mi-reg-undefined.S: Likewise.
+
+2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
+
 	* gdb.base/printcmds.exp (test_print_int_arrays): Add tests for x,
 	z, o, and t output formats.
 	* gdb.base/display.exp: Use 'k' as an undefined format now that

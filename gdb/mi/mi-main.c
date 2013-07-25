@@ -1163,6 +1163,8 @@ output_register (struct frame_info *frame, int regnum, int format,
   struct ui_out *uiout = current_uiout;
   struct value *val = get_frame_register_value (frame, regnum);
   struct cleanup *tuple_cleanup;
+  struct value_print_options opts;
+  struct ui_file *stb;
 
   if (skip_unavailable && !value_entirely_available (val))
     return;
@@ -1173,45 +1175,19 @@ output_register (struct frame_info *frame, int regnum, int format,
   if (format == 'N')
     format = 0;
 
-  if (value_optimized_out (val))
-    error (_("Optimized out"));
-
   if (format == 'r')
-    {
-      int j;
-      char *ptr, buf[1024];
-      const gdb_byte *valaddr = value_contents_for_printing (val);
+    format = 'z';
 
-      strcpy (buf, "0x");
-      ptr = buf + 2;
-      for (j = 0; j < register_size (gdbarch, regnum); j++)
-	{
-	  int idx = gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG ?
-		    j : register_size (gdbarch, regnum) - 1 - j;
+  stb = mem_fileopen ();
+  make_cleanup_ui_file_delete (stb);
 
-	  sprintf (ptr, "%02x", (unsigned char) valaddr[idx]);
-	  ptr += 2;
-	}
-      ui_out_field_string (uiout, "value", buf);
-    }
-  else
-    {
-      struct value_print_options opts;
-      struct ui_file *stb;
-      struct cleanup *old_chain;
-
-      stb = mem_fileopen ();
-      old_chain = make_cleanup_ui_file_delete (stb);
-
-      get_formatted_print_options (&opts, format);
-      opts.deref_ref = 1;
-      val_print (value_type (val),
-		 value_contents_for_printing (val),
-		 value_embedded_offset (val), 0,
-		 stb, 0, val, &opts, current_language);
-      ui_out_field_stream (uiout, "value", stb);
-      do_cleanups (old_chain);
-    }
+  get_formatted_print_options (&opts, format);
+  opts.deref_ref = 1;
+  val_print (value_type (val),
+	     value_contents_for_printing (val),
+	     value_embedded_offset (val), 0,
+	     stb, 0, val, &opts, current_language);
+  ui_out_field_stream (uiout, "value", stb);
 
   do_cleanups (tuple_cleanup);
 }

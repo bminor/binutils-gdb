@@ -1,5 +1,11 @@
 2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
 
+	* mi/mi-main.c (output_register): Make MI 'r' format use standard
+	'z' format code.  Remove error for optimized out values, standard
+	code will handle these fine.
+
+2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
+
 	* NEWS: Mention new 'z' formatter.
 	* printcmd.c (print_scalar_formatted): Add new 'z' formatter.
 	(_initialize_printcmd): Mention 'z' formatter in help text of the
