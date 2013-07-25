@@ -4366,8 +4366,8 @@ tfile_open (char *filename, int from_tty)
     }
   if (ex.reason < 0)
     {
-      /* Pop the partially set up target.  */
-      pop_target ();
+      /* Remove the partially set up target.  */
+      unpush_target (&tfile_ops);
       throw_exception (ex);
     }
 

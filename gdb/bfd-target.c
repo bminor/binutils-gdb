@@ -96,6 +96,7 @@ target_bfd_reopen (struct bfd *abfd)
   t->to_xfer_partial = target_bfd_xfer_partial;
   t->to_xclose = target_bfd_xclose;
   t->to_data = data;
+  t->to_magic = OPS_MAGIC;
 
   return t;
 }

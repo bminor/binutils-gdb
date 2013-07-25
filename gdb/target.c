@@ -1094,25 +1094,10 @@ unpush_target (struct target_ops *t)
 }
 
 void
-pop_target (void)
-{
-  target_close (target_stack);		/* Let it clean up.  */
-  if (unpush_target (target_stack) == 1)
-    return;
-
-  fprintf_unfiltered (gdb_stderr,
-		      "pop_target couldn't find target %s\n",
-		      current_target.to_shortname);
-  internal_error (__FILE__, __LINE__,
-		  _("failed internal consistency check"));
-}
-
-void
 pop_all_targets_above (enum strata above_stratum)
 {
   while ((int) (current_target.to_stratum) > (int) above_stratum)
     {
-      target_close (target_stack);
       if (!unpush_target (target_stack))
 	{
 	  fprintf_unfiltered (gdb_stderr,
@@ -3781,6 +3766,8 @@ debug_to_open (char *args, int from_tty)
 void
 target_close (struct target_ops *targ)
 {
+  gdb_assert (!target_is_pushed (targ));
+
   if (targ->to_xclose != NULL)
     targ->to_xclose (targ);
   else if (targ->to_close != NULL)

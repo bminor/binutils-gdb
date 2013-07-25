@@ -877,7 +877,7 @@ monitor_close (void)
 static void
 monitor_detach (struct target_ops *ops, char *args, int from_tty)
 {
-  pop_target ();		/* calls monitor_close to do the real work.  */
+  unpush_target (ops);		/* calls monitor_close to do the real work.  */
   if (from_tty)
     printf_unfiltered (_("Ending remote %s debugging\n"), target_shortname);
 }

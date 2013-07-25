@@ -1759,9 +1759,7 @@ int target_verify_memory (const gdb_byte *data,
 
    unpush_target: Remove this from the stack of currently used targets,
    no matter where it is on the list.  Returns 0 if no
-   change, 1 if removed from stack.
-
-   pop_target:   Remove the top thing on the stack of current targets.  */
+   change, 1 if removed from stack.  */
 
 extern void add_target (struct target_ops *);
 
@@ -1782,8 +1780,6 @@ extern int unpush_target (struct target_ops *);
 extern void target_pre_inferior (int);
 
 extern void target_preopen (int);
-
-extern void pop_target (void);
 
 /* Does whatever cleanup is required to get rid of all pushed targets.  */
 extern void pop_all_targets (void);

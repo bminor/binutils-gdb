@@ -821,7 +821,7 @@ gdbsim_detach (struct target_ops *ops, char *args, int from_tty)
   if (remote_debug)
     printf_filtered ("gdbsim_detach: args \"%s\"\n", args);
 
-  pop_target ();		/* calls gdbsim_close to do the real work */
+  unpush_target (ops);		/* calls gdbsim_close to do the real work */
   if (from_tty)
     printf_filtered ("Ending simulator %s debugging\n", target_shortname);
 }

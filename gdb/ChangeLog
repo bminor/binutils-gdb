@@ -1,5 +1,20 @@
 2013-07-25  Tom Tromey  <tromey@redhat.com>
 
+	PR remote/15256, PR remote/15266:
+	* bfd-target.c (target_bfd_reopen): Initialize to_magic.
+	* monitor.c (monitor_detach): Use unpush_target.
+	* remote-m32r-sdi.c (m32r_detach): Use unpush_target.
+	* remote-mips.c (mips_detach): Use unpush_target.  Don't
+	call mips_close.
+	* remote-sim.c (gdbsim_detach): Use unpush_target.
+	* target.c (pop_target): Remove.
+	(pop_all_targets_above): Don't call target_close.
+	(target_close): Assert that the target is unpushed.
+	* target.h (pop_target): Don't declare.
+	* tracepoint.c (tfile_open): Use unpush_target.
+
+2013-07-25  Tom Tromey  <tromey@redhat.com>
+
 	* linux-thread-db.c (init_thread_db_ops): Call
 	complete_target_initialization.
 	(_initialize_thread_db): Don't call add_target.

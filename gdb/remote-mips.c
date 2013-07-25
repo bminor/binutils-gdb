@@ -1755,9 +1755,7 @@ mips_detach (struct target_ops *ops, char *args, int from_tty)
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));
 
-  pop_target ();
-
-  mips_close ();
+  unpush_target (ops);
 
   if (from_tty)
     printf_unfiltered ("Ending remote MIPS debugging.\n");
