@@ -25,6 +25,3 @@ extern void linux_fork_mourn_inferior (void);
 extern void linux_fork_detach (char *, int);
 extern int forks_exist_p (void);
 extern int linux_fork_checkpointing_p (int);
-
-extern int detach_fork;
-

@@ -1,3 +1,7 @@
+2013-07-25  Doug Evans  <dje@google.com>
+
+	* linux-fork.h (detach_fork): Delete.
+
 2013-07-25  Tom Tromey  <tromey@redhat.com>
 
 	PR remote/15256, PR remote/15266:
