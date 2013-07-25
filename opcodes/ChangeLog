@@ -9,8 +9,9 @@
 	(BND): New.
 	(v_bnd_mode): New.
 	(bnd_mode): New.
-	(MOD enum): Add new entries.
-	(PREFIX enum): Likewise.
+	(MOD enum): Add MOD_0F1A_PREFIX_0, MOD_0F1B_PREFIX_0,
+	MOD_0F1B_PREFIX_1.
+	(PREFIX enum): Add PREFIX_0F1A, PREFIX_0F1B.
 	(dis tables): Replace XX with BND for near branch and call
 	instructions.
 	(prefix_table): Add new entries.
