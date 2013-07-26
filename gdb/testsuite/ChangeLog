@@ -1,3 +1,12 @@
+2013-07-26  Keith Seitz  <keiths@redhat.com>
+
+	* gdb.mi/mi-var-child-f.exp: Pass f90 to gdb_compile instead
+	of f77.
+	Allow for compiler variations of integer types.
+	Use mi_create_varobj.
+	Use mi_list_varobj_children for the immediate children of `array'.
+	Add "has_more" attribute for grandchildren test.
+
 2013-07-26  Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/interrupt-noterm.c, gdb.base/interrupt-noterm.exp: New
