@@ -8,7 +8,7 @@ Disassembly of section .text:
 0+ <amd_prefetch>:
 \s*[a-f0-9]+:	0f 0d 00             	prefetch \(%eax\)
 \s*[a-f0-9]+:	0f 0d 08             	prefetchw \(%eax\)
-\s*[a-f0-9]+:	0f 0d 10             	prefetch \(%eax\)
+\s*[a-f0-9]+:	0f 0d 10             	prefetchwt1 \(%eax\)
 \s*[a-f0-9]+:	0f 0d 18             	prefetch \(%eax\)
 \s*[a-f0-9]+:	0f 0d 20             	prefetch \(%eax\)
 \s*[a-f0-9]+:	0f 0d 28             	prefetch \(%eax\)

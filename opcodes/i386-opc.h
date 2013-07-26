@@ -94,6 +94,15 @@ enum
   CpuAVX,
   /* AVX2 support required */
   CpuAVX2,
+  /* Intel AVX-512 Foundation Instructions support required */
+  CpuAVX512F,
+  /* Intel AVX-512 Conflict Detection Instructions support required */
+  CpuAVX512CD,
+  /* Intel AVX-512 Exponential and Reciprocal Instructions support
+     required */
+  CpuAVX512ER,
+  /* Intel AVX-512 Prefetch Instructions support required */
+  CpuAVX512PF,
   /* Intel L1OM support required */
   CpuL1OM,
   /* Intel K1OM support required */
@@ -158,6 +167,8 @@ enum
   CpuSMAP,
   /* SHA instructions required.  */
   CpuSHA,
+  /* VREX support required  */
+  CpuVREX,
   /* 64bit support required  */
   Cpu64,
   /* Not supported in the 64bit mode  */
@@ -212,6 +223,10 @@ typedef union i386_cpu_flags
       unsigned int cpusse4_2:1;
       unsigned int cpuavx:1;
       unsigned int cpuavx2:1;
+      unsigned int cpuavx512f:1;
+      unsigned int cpuavx512cd:1;
+      unsigned int cpuavx512er:1;
+      unsigned int cpuavx512pf:1;
       unsigned int cpul1om:1;
       unsigned int cpuk1om:1;
       unsigned int cpuxsave:1;
@@ -244,6 +259,7 @@ typedef union i386_cpu_flags
       unsigned int cpuprfchw:1;
       unsigned int cpusmap:1;
       unsigned int cpusha:1;
+      unsigned int cpuvrex:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
 #ifdef CpuUnused
@@ -415,14 +431,67 @@ enum
   /* Instruction with vector SIB byte:
 	1: 128bit vector register.
 	2: 256bit vector register.
+	3: 512bit vector register.
    */
 #define VecSIB128	1
 #define VecSIB256	2
+#define VecSIB512	3
   VecSIB,
   /* SSE to AVX support required */
   SSE2AVX,
   /* No AVX equivalent */
   NoAVX,
+
+  /* insn has EVEX prefix:
+	1: 512bit EVEX prefix.
+	2: 128bit EVEX prefix.
+	3: 256bit EVEX prefix.
+	4: Length-ignored (LIG) EVEX prefix.
+   */
+#define EVEX512                1
+#define EVEX128                2
+#define EVEX256                3
+#define EVEXLIG                4
+  EVex,
+
+  /* AVX512 masking support:
+	1: Zeroing-masking.
+	2: Merging-masking.
+	3: Both zeroing and merging masking.
+   */
+#define ZEROING_MASKING 1
+#define MERGING_MASKING 2
+#define BOTH_MASKING    3
+  Masking,
+
+  /* Input element size of vector insn:
+	0: 32bit.
+	1: 64bit.
+   */
+  VecESize,
+
+  /* Broadcast factor.
+	0: No broadcast.
+	1: 1to16 broadcast.
+	2: 1to8 broadcast.
+   */
+#define NO_BROADCAST	0
+#define BROADCAST_1TO16	1
+#define BROADCAST_1TO8	2
+  Broadcast,
+
+  /* Static rounding control is supported.  */
+  StaticRounding,
+
+  /* Supress All Exceptions is supported.  */
+  SAE,
+
+  /* Copressed Disp8*N attribute.  */
+  Disp8MemShift,
+
+  /* Default mask isn't allowed.  */
+  NoDefMask,
+
   /* Compatible with old (<= 2.8.1) versions of gcc  */
   OldGcc,
   /* AT&T mnemonic.  */
@@ -487,6 +556,14 @@ typedef struct i386_opcode_modifier
   unsigned int vecsib:2;
   unsigned int sse2avx:1;
   unsigned int noavx:1;
+  unsigned int evex:3;
+  unsigned int masking:2;
+  unsigned int vecesize:1;
+  unsigned int broadcast:3;
+  unsigned int staticrounding:1;
+  unsigned int sae:1;
+  unsigned int disp8memshift:3;
+  unsigned int nodefmask:1;
   unsigned int oldgcc:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;
@@ -513,6 +590,10 @@ enum
   RegXMM,
   /* AVX registers */
   RegYMM,
+  /* AVX512 registers */
+  RegZMM,
+  /* Vector Mask registers */
+  RegMask,
   /* Control register */
   Control,
   /* Debug register */
@@ -592,6 +673,8 @@ enum
   Xmmword,
   /* YMMWORD memory. */
   Ymmword,
+  /* ZMMWORD memory.  */
+  Zmmword,
   /* Unspecified memory size.  */
   Unspecified,
   /* Any memory size.  */
@@ -602,6 +685,9 @@ enum
 
   /* Bound register.  */
   RegBND,
+
+  /* Vector 8bit displacement */
+  Vec_Disp8,
 
   /* The last bitfield in i386_operand_type.  */
   OTMax
@@ -628,6 +714,8 @@ typedef union i386_operand_type
       unsigned int regmmx:1;
       unsigned int regxmm:1;
       unsigned int regymm:1;
+      unsigned int regzmm:1;
+      unsigned int regmask:1;
       unsigned int control:1;
       unsigned int debug:1;
       unsigned int test:1;
@@ -662,10 +750,12 @@ typedef union i386_operand_type
       unsigned int tbyte:1;
       unsigned int xmmword:1;
       unsigned int ymmword:1;
+      unsigned int zmmword:1;
       unsigned int unspecified:1;
       unsigned int anysize:1;
       unsigned int vec_imm4:1;
       unsigned int regbnd:1;
+      unsigned int vec_disp8:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
 #endif
@@ -727,6 +817,7 @@ typedef struct
   unsigned char reg_flags;
 #define RegRex	    0x1  /* Extended register.  */
 #define RegRex64    0x2  /* Extended 8 bit register.  */
+#define RegVRex	    0x4  /* Extended vector register.  */
   unsigned char reg_num;
 #define RegRip	((unsigned char ) ~0)
 #define RegEip	(RegRip - 1)

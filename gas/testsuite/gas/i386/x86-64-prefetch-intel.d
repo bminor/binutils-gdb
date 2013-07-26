@@ -9,7 +9,7 @@ Disassembly of section .text:
 0+ <amd_prefetch>:
 \s*[a-f0-9]+:	0f 0d 00             	prefetch BYTE PTR \[rax\]
 \s*[a-f0-9]+:	0f 0d 08             	prefetchw BYTE PTR \[rax\]
-\s*[a-f0-9]+:	0f 0d 10             	prefetch BYTE PTR \[rax\]
+\s*[a-f0-9]+:	0f 0d 10             	prefetchwt1 BYTE PTR \[rax\]
 \s*[a-f0-9]+:	0f 0d 18             	prefetch BYTE PTR \[rax\]
 \s*[a-f0-9]+:	0f 0d 20             	prefetch BYTE PTR \[rax\]
 \s*[a-f0-9]+:	0f 0d 28             	prefetch BYTE PTR \[rax\]

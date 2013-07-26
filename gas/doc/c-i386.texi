@@ -152,6 +152,10 @@ accept various extension mnemonics.  For example,
 @code{smap},
 @code{mpx},
 @code{sha},
+@code{avx512f},
+@code{avx512cd},
+@code{avx512er},
+@code{avx512pf},
 @code{noavx},
 @code{vmx},
 @code{vmfunc},
@@ -229,6 +233,28 @@ instructions.  @option{-mavxscalar=@var{128}} will encode scalar
 AVX instructions with 128bit vector length, which is the default.
 @option{-mavxscalar=@var{256}} will encode scalar AVX instructions
 with 256bit vector length.
+
+@cindex @samp{-mevexlig=} option, i386
+@cindex @samp{-mevexlig=} option, x86-64
+@item -mevexlig=@var{128}
+@itemx -mevexlig=@var{256}
+@itemx -mevexlig=@var{512}
+These options control how the assembler should encode length-ignored
+(LIG) EVEX instructions.  @option{-mevexlig=@var{128}} will encode LIG
+EVEX instructions with 128bit vector length, which is the default.
+@option{-mevexlig=@var{256}} and @option{-mevexlig=@var{512}} will
+encode LIG EVEX instructions with 256bit and 512bit vector length,
+respectively.
+
+@cindex @samp{-mevexwig=} option, i386
+@cindex @samp{-mevexwig=} option, x86-64
+@item -mevexwig=@var{0}
+@itemx -mevexwig=@var{1}
+These options control how the assembler should encode w-ignored (WIG)
+EVEX instructions.  @option{-mevexwig=@var{0}} will encode WIG
+EVEX instructions with evex.w = 0, which is the default.
+@option{-mevexwig=@var{1}} will encode WIG EVEX instructions with
+evex.w = 1.
 
 @cindex @samp{-mmnemonic=} option, i386
 @cindex @samp{-mmnemonic=} option, x86-64
@@ -1042,6 +1068,11 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
 @item @samp{.padlock}
+@item @samp{.smap} @tab @samp{.avx512f} @tab @samp{.avx512cd} @tab @samp{.avx512er}
+@item @samp{.avx512pf} @tab @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a}
+@item @samp{.sse5} @tab @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme}
+@item @samp{.abm} @tab @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop}
+@item @samp{.cx16} @tab @samp{.padlock}
 @end multitable
 
 Apart from the warning, there are only two other effects on

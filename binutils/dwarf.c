@@ -4939,19 +4939,26 @@ frame_need_space (Frame_Chunk *fc, unsigned int reg)
 
 static const char *const dwarf_regnames_i386[] =
 {
-  "eax", "ecx", "edx", "ebx",
-  "esp", "ebp", "esi", "edi",
-  "eip", "eflags", NULL,
-  "st0", "st1", "st2", "st3",
-  "st4", "st5", "st6", "st7",
-  NULL, NULL,
-  "xmm0", "xmm1", "xmm2", "xmm3",
-  "xmm4", "xmm5", "xmm6", "xmm7",
-  "mm0", "mm1", "mm2", "mm3",
-  "mm4", "mm5", "mm6", "mm7",
-  "fcw", "fsw", "mxcsr",
-  "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL,
-  "tr", "ldtr"
+  "eax", "ecx", "edx", "ebx",			  /* 0 - 3  */
+  "esp", "ebp", "esi", "edi",			  /* 4 - 7  */
+  "eip", "eflags", NULL,			  /* 8 - 10  */
+  "st0", "st1", "st2", "st3",			  /* 11 - 14  */
+  "st4", "st5", "st6", "st7",			  /* 15 - 18  */
+  NULL, NULL,					  /* 19 - 20  */
+  "xmm0", "xmm1", "xmm2", "xmm3",		  /* 21 - 24  */
+  "xmm4", "xmm5", "xmm6", "xmm7",		  /* 25 - 28  */
+  "mm0", "mm1", "mm2", "mm3",			  /* 29 - 32  */
+  "mm4", "mm5", "mm6", "mm7",			  /* 33 - 36  */
+  "fcw", "fsw", "mxcsr",			  /* 37 - 39  */
+  "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL, /* 40 - 47  */
+  "tr", "ldtr",					  /* 48 - 49  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 50 - 57  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 58 - 65  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 66 - 73  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 74 - 81  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 82 - 89  */
+  NULL, NULL, NULL,				  /* 90 - 92  */
+  "k0", "k1", "k2", "k3", "k4", "k5", "k6", "k7"  /* 93 - 100  */
 };
 
 void
@@ -4980,7 +4987,17 @@ static const char *const dwarf_regnames_x86_64[] =
   "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL,
   "fs.base", "gs.base", NULL, NULL,
   "tr", "ldtr",
-  "mxcsr", "fcw", "fsw"
+  "mxcsr", "fcw", "fsw",
+  "xmm16",  "xmm17",  "xmm18",  "xmm19",
+  "xmm20",  "xmm21",  "xmm22",  "xmm23",
+  "xmm24",  "xmm25",  "xmm26",  "xmm27",
+  "xmm28",  "xmm29",  "xmm30",  "xmm31",
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 83 - 90  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 91 - 98  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 99 - 106  */
+  NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, /* 107 - 114  */
+  NULL, NULL, NULL,				  /* 115 - 117  */
+  "k0", "k1", "k2", "k3", "k4", "k5", "k6", "k7"
 };
 
 void

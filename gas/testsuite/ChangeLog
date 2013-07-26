@@ -1,3 +1,81 @@
+2013-07-26  Sergey Guriev  <sergey.s.guriev@intel.com>
+	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
+	    Sergey Lega  <sergey.s.lega@intel.com>
+	    Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Ilya Tocar  <ilya.tocar@intel.com>
+	    Andrey Turetskiy  <andrey.turetskiy@intel.com>
+	    Ilya Verbin  <ilya.verbin@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* gas/cfi/cfi-i386.s: Add tests for k0-k7.
+	* gas/cfi/cfi-i386.d: Change to reflect above mentioned changes.
+	* gas/cfi/cfi-x86_64.s: Add tests for xmm16-31, k0-7.
+	* gas/cfi/cfi-x86_64.d: Change to reflect above mentioned changes.
+	* gas/i386/ilp32/cfi/cfi-x86_64.d: Ditto.
+	* gas/i386/intel-regs.s: Add tests for zmm0 and xmm16 registers.
+	* gas/i386/intel-regs.d: Change correspondingly.
+	* gas/i386/prefetch-intel.d: Reflect implementation of prefetchwt1.
+	* gas/i386/prefetch.d: Ditto.
+	* gas/i386/x86-64-prefetch-intel.d: Ditto.
+	* gas/i386/x86-64-prefetch.d: Ditto.
+	* gas/i386/avx512f-intel.d: New.
+	* gas/i386/avx512f-nondef.d: New.
+	* gas/i386/avx512f-nondef.s: New.
+	* gas/i386/avx512f-opts-intel.d: New.
+	* gas/i386/avx512f-opts.d: New.
+	* gas/i386/avx512f-opts.s: New.
+	* gas/i386/avx512f.d: New.
+	* gas/i386/avx512f.s: New.
+	* gas/i386/avx512cd-intel.d: New.
+	* gas/i386/avx512cd.d: New.
+	* gas/i386/avx512cd.s: New.
+	* gas/i386/avx512er-intel.d: New.
+	* gas/i386/avx512er.d: New.
+	* gas/i386/avx512er.s: New.
+	* gas/i386/avx512pf-intel.d: New.
+	* gas/i386/avx512pf.d: New.
+	* gas/i386/avx512pf.s: New.
+	* gas/i386/evex-lig.s: New.
+	* gas/i386/evex-lig256-intel.d: New.
+	* gas/i386/evex-lig256.d: New.
+	* gas/i386/evex-lig512-intel.d: New.
+	* gas/i386/evex-lig512.d: New.
+	* gas/i386/evex-wig.s: New.
+	* gas/i386/evex-wig1-intel.d: New.
+	* gas/i386/evex-wig1.d: New.
+	* gas/i386/inval-avx512f.l: New.
+	* gas/i386/inval-avx512f.s: New.
+	* gas/i386/x86-64-avx512f-intel.d: New.
+	* gas/i386/x86-64-avx512f-nondef.d: New.
+	* gas/i386/x86-64-avx512f-nondef.s: New.
+	* gas/i386/x86-64-avx512f-opts-intel.d: New.
+	* gas/i386/x86-64-avx512f-opts.d: New.
+	* gas/i386/x86-64-avx512f-opts.s: New.
+	* gas/i386/x86-64-avx512f.d: New.
+	* gas/i386/x86-64-avx512f.s: New.
+	* gas/i386/x86-64-avx512cd-intel.d: New.
+	* gas/i386/x86-64-avx512cd.d: New.
+	* gas/i386/x86-64-avx512cd.s: New.
+	* gas/i386/x86-64-avx512er-intel.d: New.
+	* gas/i386/x86-64-avx512er.d: New.
+	* gas/i386/x86-64-avx512er.s: New.
+	* gas/i386/x86-64-avx512pf-intel.d: New.
+	* gas/i386/x86-64-avx512pf.d: New.
+	* gas/i386/x86-64-avx512pf.s: New.
+	* gas/i386/x86-64-evex-lig.s: New.
+	* gas/i386/x86-64-evex-lig256-intel.d: New.
+	* gas/i386/x86-64-evex-lig256.d: New.
+	* gas/i386/x86-64-evex-lig512-intel.d: New.
+	* gas/i386/x86-64-evex-lig512.d: New.
+	* gas/i386/x86-64-evex-wig.s: New.
+	* gas/i386/x86-64-evex-wig1-intel.d: New.
+	* gas/i386/x86-64-evex-wig1.d: New.
+	* gas/i386/x86-64-inval-avx512f.l: New.
+	* gas/i386/x86-64-inval-avx512f.s: New.
+	* gas/i386/i386.exp: Run new AVX-512 tests.
+
 2013-07-25  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/loongson-2f.d: Fix expected output for madd.ps,

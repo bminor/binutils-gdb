@@ -1,3 +1,77 @@
+2013-07-26  Sergey Guriev  <sergey.s.guriev@intel.com>
+	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
+	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
+	    Sergey Lega  <sergey.s.lega@intel.com>
+	    Anna Tikhonova  <anna.tikhonova@intel.com>
+	    Ilya Tocar  <ilya.tocar@intel.com>
+	    Andrey Turetskiy  <andrey.turetskiy@intel.com>
+	    Ilya Verbin  <ilya.verbin@intel.com>
+	    Kirill Yukhin  <kirill.yukhin@intel.com>
+	    Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
+
+	* config/tc-i386-intel.c (O_zmmword_ptr): New.
+	(i386_types): Add zmmword.
+	(i386_intel_simplify_register): Allow regzmm.
+	(i386_intel_simplify): Handle zmmwords.
+	(i386_intel_operand): Handle RC/SAE, vector operations and
+	zmmwords.
+	* config/tc-i386.c (ZMMWORD_MNEM_SUFFIX): New.
+	(struct RC_Operation): New.
+	(struct Mask_Operation): New.
+	(struct Broadcast_Operation): New.
+	(vex_prefix): Size of bytes increased to 4 to support EVEX
+	encoding.
+	(enum i386_error): Add new error codes: unsupported_broadcast,
+	broadcast_not_on_src_operand, broadcast_needed,
+	unsupported_masking, mask_not_on_destination, no_default_mask,
+	unsupported_rc_sae, rc_sae_operand_not_last_imm,
+	invalid_register_operand, try_vector_disp8.
+	(struct _i386_insn): Add new fields vrex, need_vrex, mask,
+	rounding, broadcast, memshift.
+	(struct RC_name): New.
+	(RC_NamesTable): New.
+	(evexlig): New.
+	(evexwig): New.
+	(extra_symbol_chars): Add '{'.
+	(cpu_arch): Add AVX512F, AVX512CD, AVX512ER and AVX512PF.
+	(i386_operand_type): Add regzmm, regmask and vec_disp8.
+	(match_mem_size): Handle zmmwords.
+	(operand_type_match): Handle zmm-registers.
+	(mode_from_disp_size): Handle vec_disp8.
+	(fits_in_vec_disp8): New.
+	(md_begin): Handle {} properly.
+	(type_names): Add "rZMM", "Mask reg" and "Vector d8".
+	(build_vex_prefix): Handle vrex.
+	(build_evex_prefix): New.
+	(process_immext): Adjust to properly handle EVEX.
+	(md_assemble): Add EVEX encoding support.
+	(swap_2_operands): Correctly handle operands with masking,
+	broadcasting or RC/SAE.
+	(check_VecOperands): Support EVEX features.
+	(VEX_check_operands): Properly handle 16 upper [xyz]mm registers.
+	(match_template): Support regzmm and handle new error codes.
+	(process_suffix): Handle zmmwords and zmm-registers.
+	(check_byte_reg): Extend to zmm-registers.
+	(process_operands): Extend to zmm-registers.
+	(build_modrm_byte): Handle EVEX.
+	(output_insn): Adjust to properly handle EVEX case.
+	(disp_size): Handle vec_disp8.
+	(output_disp): Support compressed disp8*N evex feature.
+	(output_imm): Handle RC/SAE immediates properly.
+	(check_VecOperations): New.
+	(i386_immediate): Handle EVEX features.
+	(i386_index_check): Handle zmmwords and zmm-registers.
+	(RC_SAE_immediate): New.
+	(i386_att_operand): Handle EVEX features.
+	(parse_real_register): Add a check for ZMM/Mask registers.
+	(OPTION_MEVEXLIG): New.
+	(OPTION_MEVEXWIG): New.
+	(md_longopts): Add mevexlig and mevexwig.
+	(md_parse_option): Handle mevexlig and mevexwig options.
+	(md_show_usage): Add description for mevexlig and mevexwig.
+	* doc/c-i386.texi: Document avx512f/.avx512f, avx512cd/.avx512cd,
+	avx512er/.avx512er, avx512pf/.avx512pf, mevexlig and mevexwig.
+
 2013-07-25  Michael Zolotukhin  <michael.v.zolotukhin@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .sha.

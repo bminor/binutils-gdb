@@ -9,7 +9,7 @@ Disassembly of section .text:
 0+ <amd_prefetch>:
 \s*[a-f0-9]+:	0f 0d 00             	prefetch \(%rax\)
 \s*[a-f0-9]+:	0f 0d 08             	prefetchw \(%rax\)
-\s*[a-f0-9]+:	0f 0d 10             	prefetch \(%rax\)
+\s*[a-f0-9]+:	0f 0d 10             	prefetchwt1 \(%rax\)
 \s*[a-f0-9]+:	0f 0d 18             	prefetch \(%rax\)
 \s*[a-f0-9]+:	0f 0d 20             	prefetch \(%rax\)
 \s*[a-f0-9]+:	0f 0d 28             	prefetch \(%rax\)

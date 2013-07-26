@@ -63,6 +63,8 @@ intel_state;
 #define O_xmmword_ptr O_md21
 /* ymmword ptr X_add_symbol */
 #define O_ymmword_ptr O_md20
+/* zmmword ptr X_add_symbol */
+#define O_zmmword_ptr O_md19
 
 static struct
   {
@@ -108,6 +110,7 @@ const i386_types[] =
     I386_TYPE(oword, 16),
     I386_TYPE(xmmword, 16),
     I386_TYPE(ymmword, 32),
+    I386_TYPE(zmmword, 64),
 #undef I386_TYPE
     { "near", O_near_ptr, { 0xff04, 0xff02, 0xff08 } },
     { "far", O_far_ptr, { 0xff06, 0xff05, 0xff06 } },
@@ -280,7 +283,8 @@ i386_intel_simplify_register (expressionS *e)
     }
   else if (!intel_state.index
 	   && (i386_regtab[reg_num].reg_type.bitfield.regxmm
-	       || i386_regtab[reg_num].reg_type.bitfield.regymm))
+	       || i386_regtab[reg_num].reg_type.bitfield.regymm
+	       || i386_regtab[reg_num].reg_type.bitfield.regzmm))
     intel_state.index = i386_regtab + reg_num;
   else if (!intel_state.base && !intel_state.in_scale)
     intel_state.base = i386_regtab + reg_num;
@@ -371,6 +375,7 @@ static int i386_intel_simplify (expressionS *e)
     case O_oword_ptr:
     case O_xmmword_ptr:
     case O_ymmword_ptr:
+    case O_zmmword_ptr:
     case O_near_ptr:
     case O_far_ptr:
       if (intel_state.op_modifier == O_absent)
@@ -529,6 +534,10 @@ i386_intel_operand (char *operand_string, int got_a_float)
   char suffix = 0;
   int ret;
 
+  /* Handle vector immediates.  */
+  if (RC_SAE_immediate (operand_string))
+    return 1;
+
   /* Initialize state structure.  */
   intel_state.op_modifier = O_absent;
   intel_state.is_mem = 0;
@@ -552,6 +561,17 @@ i386_intel_operand (char *operand_string, int got_a_float)
   intel_syntax = 1;
 
   SKIP_WHITESPACE ();
+
+  /* Handle vector operations.  */
+  if (*input_line_pointer == '{')
+    {
+      char *end = check_VecOperations (input_line_pointer, NULL);
+      if (end)
+	input_line_pointer = end;
+      else
+	ret = 0;
+    }
+
   if (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
       as_bad (_("junk `%s' after expression"), input_line_pointer);
@@ -664,6 +684,11 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	case O_ymmword_ptr:
 	  i.types[this_operand].bitfield.ymmword = 1;
 	  suffix = YMMWORD_MNEM_SUFFIX;
+	  break;
+
+	case O_zmmword_ptr:
+	  i.types[this_operand].bitfield.zmmword = 1;
+	  suffix = ZMMWORD_MNEM_SUFFIX;
 	  break;
 
 	case O_far_ptr:
