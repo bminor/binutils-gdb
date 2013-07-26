@@ -1,3 +1,8 @@
+2013-07-26  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/interrupt-noterm.c, gdb.base/interrupt-noterm.exp: New
+	files.
+
 2013-07-25  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.mi/mi-reg-undefined.exp: New file.

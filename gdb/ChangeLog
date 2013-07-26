@@ -1,3 +1,8 @@
+2013-07-26  Cyril Nikolaev  <cyril@nichtverstehen.de>
+
+	* inflow.c (terminal_init_inferior_with_pgrp): Save inferior
+	process group regardless of having tty on stdin.
+
 2013-07-25  Doug Evans  <dje@google.com>
 
 	* linux-fork.h (detach_fork): Delete.
