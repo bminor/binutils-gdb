@@ -1,5 +1,10 @@
 2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_always_size_sections): Correct a comment
+	typo.
+
+2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_discard_got_entries): New function.
 	(elf_vax_always_size_sections): Likewise.
 	(elf_vax_size_dynamic_sections): Remove code moved to

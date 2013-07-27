@@ -1080,7 +1080,7 @@ elf_vax_always_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* We may have created entries in the .rela.got and .got sections.
 	 However, if we are not creating the dynamic sections, we will
 	 not actually use these entries.  Reset the size of .rela.got
-	 and .got, which will cause it to get stripped from the output
+	 and .got, which will cause them to get stripped from the output
 	 file below.  */
       s = bfd_get_linker_section (dynobj, ".rela.got");
       if (s != NULL)
