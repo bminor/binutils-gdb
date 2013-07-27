@@ -1,5 +1,10 @@
 2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_finish_dynamic_sections): Don't set GOT's
+	entry size if there is no ELF section data.
+
+2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_check_relocs) <R_VAX_GOT32, R_VAX_PLT32>:
 	Don't check symbol visibility here.  Remove a check already
 	asserted for.

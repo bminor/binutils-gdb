@@ -1989,7 +1989,8 @@ elf_vax_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
       bfd_put_32 (output_bfd, (bfd_vma) 0, sgot->contents + 8);
     }
 
-  elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
+  if (elf_section_data (sgot->output_section) != NULL)
+    elf_section_data (sgot->output_section)->this_hdr.sh_entsize = 4;
 
   return TRUE;
 }
