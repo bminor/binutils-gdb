@@ -184,6 +184,7 @@ case "${target}" in
 			srv_regobj="${srv_regobj} mips64-dsp-linux.o"
 			srv_tgtobj="linux-low.o linux-osdata.o linux-mips-low.o linux-procfs.o"
 			srv_tgtobj="${srv_tgtobj} linux-ptrace.o"
+			srv_tgtobj="${srv_tgtobj} mips-linux-watch.o"
 			srv_xmlfiles="mips-linux.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips-dsp-linux.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips-cpu.xml"

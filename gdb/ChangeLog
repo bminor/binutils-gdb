@@ -1,5 +1,10 @@
 2013-07-27  Yao Qi  <yao@codesourcery.com>
 
+	* NEWS: Mention that GDBserver now supports hardware
+	watchpoints on the MIPS GNU/Linux target.
+
+2013-07-27  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add
 	common/mips-linux-watch.h.
 	(mips-linux-watch.o): New rule.

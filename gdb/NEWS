@@ -128,6 +128,9 @@ qXfer:libraries-svr4:read's annex
      'qXfer:traceframe-info:read'.  It has the id of the collected
      trace state variables.
 
+  ** GDBserver now supports hardware watchpoints on the MIPS GNU/Linux
+     target.
+
 * New 'z' formatter for printing and examining memory, this displays the
   value as hexadecimal zero padded on the left to the size of the type.
 

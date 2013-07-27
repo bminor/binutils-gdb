@@ -157,7 +157,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
 	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
 	$(srcdir)/common/buffer.c $(srcdir)/common/linux-btrace.c \
-	$(srcdir)/common/filestuff.c $(srcdir)/common/target-common.c
+	$(srcdir)/common/filestuff.c $(srcdir)/common/target-common.c \
+    $(srcdir)/common/mips-linux-watch.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
@@ -456,6 +457,8 @@ lynx_low_h = $(srcdir)/lynx-low.h $(srcdir)/server.h
 
 nto_low_h = $(srcdir)/nto-low.h
 
+mips_linux_watch_h = $(srcdir)/../common/mips-linux-watch.h
+
 UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 
 # Note, we only build the IPA if -fvisibility=hidden is supported in
@@ -552,6 +555,9 @@ target-common.o: ../common/target-common.c
 	$(POSTCOMPILE)
 
 linux-btrace.o: ../common/linux-btrace.c $(linux_btrace_h) $(server_h)
+	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
+
+mips-linux-watch.o: ../common/mips-linux-watch.c $(mips_linux_watch_h) $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 # We build vasprintf with -DHAVE_CONFIG_H because we want that unit to
