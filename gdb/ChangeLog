@@ -1,5 +1,41 @@
 2013-07-27  Yao Qi  <yao@codesourcery.com>
 
+	* mips-linux-nat.c (get_irw_mask): Rename to ...
+	(mips_linux_watch_get_irw_mask): ... this.  Rename parameter
+	'set' to 'n'.  Update function comment.  All callers changed.
+	(get_reg_mask): Rename parameter 'set' to 'n'.  Update
+	function comment.  All callers changed.
+	(get_num_valid): Rename to ...
+	(mips_linux_watch_get_num_valid): ... this.  Rename parameter
+	'set' to 'n'.  Update function comment.  All callers changed.
+	(get_watchlo): Rename to ...
+	(mips_linux_watch_get_watchlo): ... this.  Rename parameter
+	'set' to 'n'.  Update function comment.  All callers changed.
+	(set_watchlo): Rename to ...
+	(mips_linux_watch_set_watchlo): ... this.  Rename parameter
+	'set' to 'n'.  Update function comment.  All callers changed.
+	(get_watchhi): Rename to ...
+	(mips_linux_watch_get_watchhi): ... this.  Update function
+	comment.  All callers changed.
+	(set_watchhi): Rename to ...
+	(mips_linux_watch_set_watchhi): ... this.  Update function
+	comment.  All callers changed.
+	(mips_linux_read_watch_registers): Update function comment.
+	Add new parameters 'lwpid', 'watch_readback', and
+	'watch_readback_valid'.  Update.
+	(type_to_irw): Rename to ...
+	(mips_linux_watch_type_to_irw): ... this.  Update function
+	comment.  All callers changed.
+	(fill_mask): Update function comment.
+	(try_one_watch): Rename to ...
+	(mips_linux_watch_try_one_watch): ... this.  Change the type
+	of parameter 'irw' from 'unsigned' to 'uint32_t'.
+	(populate_regs_from_watches): Rename to ...
+	(mips_linux_watch_populate_regs): ... this.  Add parameter
+	'current_watches'.  All callers changed.
+
+2013-07-27  Yao Qi  <yao@codesourcery.com>
+
 	* mips-linux-nat.c (MAX_DEBUG_REGISTER): Move it earlier in
 	the code.
 	(PTRACE_SET_WATCH_REGS, enum pt_watch_style): Remove.

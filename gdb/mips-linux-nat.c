@@ -556,44 +556,46 @@ static struct mips_watchpoint *current_watches;
 
 static struct pt_watch_regs watch_mirror;
 
-/* Assuming usable watch registers, return the irw_mask.  */
+/* Assuming usable watch registers REGS, return the irw_mask of
+   register N.  */
 
 static uint32_t
-get_irw_mask (struct pt_watch_regs *regs, int set)
+mips_linux_watch_get_irw_mask (struct pt_watch_regs *regs, int n)
 {
   switch (regs->style)
     {
     case pt_watch_style_mips32:
-      return regs->mips32.watch_masks[set] & IRW_MASK;
+      return regs->mips32.watch_masks[n] & IRW_MASK;
     case pt_watch_style_mips64:
-      return regs->mips64.watch_masks[set] & IRW_MASK;
+      return regs->mips64.watch_masks[n] & IRW_MASK;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Unrecognized watch register style"));
     }
 }
 
-/* Assuming usable watch registers, return the reg_mask.  */
+/* Assuming usable watch registers REGS, return the reg_mask of
+   register N.  */
 
 static uint32_t
-get_reg_mask (struct pt_watch_regs *regs, int set)
+get_reg_mask (struct pt_watch_regs *regs, int n)
 {
   switch (regs->style)
     {
     case pt_watch_style_mips32:
-      return regs->mips32.watch_masks[set] & ~IRW_MASK;
+      return regs->mips32.watch_masks[n] & ~IRW_MASK;
     case pt_watch_style_mips64:
-      return regs->mips64.watch_masks[set] & ~IRW_MASK;
+      return regs->mips64.watch_masks[n] & ~IRW_MASK;
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Unrecognized watch register style"));
     }
 }
 
-/* Assuming usable watch registers, return the num_valid.  */
+/* Assuming usable watch registers REGS, return the num_valid.  */
 
 static uint32_t
-get_num_valid (struct pt_watch_regs *regs)
+mips_linux_watch_get_num_valid (struct pt_watch_regs *regs)
 {
   switch (regs->style)
     {
@@ -607,37 +609,40 @@ get_num_valid (struct pt_watch_regs *regs)
     }
 }
 
-/* Assuming usable watch registers, return the watchlo.  */
+/* Assuming usable watch registers REGS, return the watchlo of
+   register N.  */
 
 static CORE_ADDR
-get_watchlo (struct pt_watch_regs *regs, int set)
+mips_linux_watch_get_watchlo (struct pt_watch_regs *regs, int n)
 {
   switch (regs->style)
     {
     case pt_watch_style_mips32:
-      return regs->mips32.watchlo[set];
+      return regs->mips32.watchlo[n];
     case pt_watch_style_mips64:
-      return regs->mips64.watchlo[set];
+      return regs->mips64.watchlo[n];
     default:
       internal_error (__FILE__, __LINE__,
 		      _("Unrecognized watch register style"));
     }
 }
 
-/* Assuming usable watch registers, set a watchlo value.  */
+/* Assuming usable watch registers REGS, set watchlo of register N to
+   VALUE.  */
 
 static void
-set_watchlo (struct pt_watch_regs *regs, int set, CORE_ADDR value)
+mips_linux_watch_set_watchlo (struct pt_watch_regs *regs, int n,
+			      CORE_ADDR value)
 {
   switch (regs->style)
     {
     case pt_watch_style_mips32:
       /*  The cast will never throw away bits as 64 bit addresses can
 	  never be used on a 32 bit kernel.  */
-      regs->mips32.watchlo[set] = (uint32_t)value;
+      regs->mips32.watchlo[n] = (uint32_t) value;
       break;
     case pt_watch_style_mips64:
-      regs->mips64.watchlo[set] = value;
+      regs->mips64.watchlo[n] = value;
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -645,10 +650,11 @@ set_watchlo (struct pt_watch_regs *regs, int set, CORE_ADDR value)
     }
 }
 
-/* Assuming usable watch registers, return the watchhi.  */
+/* Assuming usable watch registers REGS, return the watchhi of
+   register N.  */
 
 static uint32_t
-get_watchhi (struct pt_watch_regs *regs, int n)
+mips_linux_watch_get_watchhi (struct pt_watch_regs *regs, int n)
 {
   switch (regs->style)
     {
@@ -662,10 +668,12 @@ get_watchhi (struct pt_watch_regs *regs, int n)
     }
 }
 
-/* Assuming usable watch registers, set a watchhi value.  */
+/* Assuming usable watch registers REGS, set watchhi of register N to
+   VALUE.  */
 
 static void
-set_watchhi (struct pt_watch_regs *regs, int n, uint16_t value)
+mips_linux_watch_set_watchhi (struct pt_watch_regs *regs, int n,
+			      uint16_t value)
 {
   switch (regs->style)
     {
@@ -701,57 +709,60 @@ mips_show_dr (const char *func, CORE_ADDR addr,
   for (i = 0; i < MAX_DEBUG_REGISTER; i++)
     printf_unfiltered ("\tDR%d: lo=%s, hi=%s\n", i,
 		       paddress (target_gdbarch (),
-				 get_watchlo (&watch_mirror, i)),
+				 mips_linux_watch_get_watchlo (&watch_mirror,
+							       i)),
 		       paddress (target_gdbarch (),
-				 get_watchhi (&watch_mirror, i)));
+				 mips_linux_watch_get_watchhi (&watch_mirror,
+							       i)));
 }
 
-/* Return 1 if watch registers are usable.  Cached information is used
-   unless force is true.  */
+/* Read the watch registers of process LWPID and store it in
+   WATCH_READBACK.  Save true to *WATCH_READBACK_VALID if watch
+   registers are valid.  Return 1 if watch registers are usable.
+   Cached information is used unless FORCE is true.  */
 
 static int
-mips_linux_read_watch_registers (int force)
+mips_linux_read_watch_registers (long lwpid,
+				 struct pt_watch_regs *watch_readback,
+				 int *watch_readback_valid, int force)
 {
-  int tid;
-
-  if (force || watch_readback_valid == 0)
+  if (force || *watch_readback_valid == 0)
     {
-      tid = ptid_get_lwp (inferior_ptid);
-      if (ptrace (PTRACE_GET_WATCH_REGS, tid, &watch_readback) == -1)
+      if (ptrace (PTRACE_GET_WATCH_REGS, lwpid, watch_readback) == -1)
 	{
-	  watch_readback_valid = -1;
+	  *watch_readback_valid = -1;
 	  return 0;
 	}
-      switch (watch_readback.style)
+      switch (watch_readback->style)
 	{
 	case pt_watch_style_mips32:
-	  if (watch_readback.mips32.num_valid == 0)
+	  if (watch_readback->mips32.num_valid == 0)
 	    {
-	      watch_readback_valid = -1;
+	      *watch_readback_valid = -1;
 	      return 0;
 	    }
 	  break;
 	case pt_watch_style_mips64:
-	  if (watch_readback.mips64.num_valid == 0)
+	  if (watch_readback->mips64.num_valid == 0)
 	    {
-	      watch_readback_valid = -1;
+	      *watch_readback_valid = -1;
 	      return 0;
 	    }
 	  break;
 	default:
-	  watch_readback_valid = -1;
+	  *watch_readback_valid = -1;
 	  return 0;
 	}
       /* Watch registers appear to be usable.  */
-      watch_readback_valid = 1;
+      *watch_readback_valid = 1;
     }
-  return (watch_readback_valid == 1) ? 1 : 0;
+  return (*watch_readback_valid == 1) ? 1 : 0;
 }
 
-/* Convert GDB's type to an IRW mask.  */
+/* Convert GDB's TYPE to an IRW mask.  */
 
-static unsigned
-type_to_irw (int type)
+static uint32_t
+mips_linux_watch_type_to_irw (int type)
 {
   switch (type)
     {
@@ -775,7 +786,9 @@ mips_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
   int i;
   uint32_t wanted_mask, irw_mask;
 
-  if (!mips_linux_read_watch_registers (0))
+  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+					&watch_readback,
+					&watch_readback_valid, 0))
     return 0;
 
    switch (type)
@@ -793,9 +806,11 @@ mips_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
       return 0;
     }
  
-  for (i = 0; i < get_num_valid (&watch_readback) && cnt; i++)
+  for (i = 0;
+       i < mips_linux_watch_get_num_valid (&watch_readback) && cnt;
+       i++)
     {
-      irw_mask = get_irw_mask (&watch_readback, i);
+      irw_mask = mips_linux_watch_get_irw_mask (&watch_readback, i);
       if ((irw_mask & wanted_mask) == wanted_mask)
 	cnt--;
     }
@@ -812,13 +827,15 @@ mips_linux_stopped_by_watchpoint (void)
   int n;
   int num_valid;
 
-  if (!mips_linux_read_watch_registers (1))
+  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+					&watch_readback,
+					&watch_readback_valid, 1))
     return 0;
 
-  num_valid = get_num_valid (&watch_readback);
+  num_valid = mips_linux_watch_get_num_valid (&watch_readback);
 
   for (n = 0; n < MAX_DEBUG_REGISTER && n < num_valid; n++)
-    if (get_watchhi (&watch_readback, n) & (R_MASK | W_MASK))
+    if (mips_linux_watch_get_watchhi (&watch_readback, n) & (R_MASK | W_MASK))
       return 1;
 
   return 0;
@@ -836,12 +853,13 @@ mips_linux_stopped_data_address (struct target_ops *t, CORE_ADDR *paddr)
   return 0;
 }
 
-/* Set any low order bits in mask that are not set.  */
+/* Set any low order bits in MASK that are not set.  */
 
 static CORE_ADDR
 fill_mask (CORE_ADDR mask)
 {
   CORE_ADDR f = 1;
+
   while (f && f < mask)
     {
       mask |= f;
@@ -850,15 +868,16 @@ fill_mask (CORE_ADDR mask)
   return mask;
 }
 
-/* Try to add a single watch to the specified registers.  Return 1 on
-   success, 0 on failure.  */
+/* Try to add a single watch to the specified registers REGS.  The
+   address of added watch is ADDR, the length is LEN, and the mask
+   is IRW.  Return 1 on success, 0 on failure.  */
 
 static int
-try_one_watch (struct pt_watch_regs *regs, CORE_ADDR addr,
-	       int len, unsigned irw)
+mips_linux_watch_try_one_watch (struct pt_watch_regs *regs,
+				CORE_ADDR addr, int len, uint32_t irw)
 {
   CORE_ADDR base_addr, last_byte, break_addr, segment_len;
-  CORE_ADDR mask_bits, t_low, t_low_end;
+  CORE_ADDR mask_bits, t_low;
   uint16_t t_hi;
   int i, free_watches;
   struct pt_watch_regs regs_copy;
@@ -871,29 +890,30 @@ try_one_watch (struct pt_watch_regs *regs, CORE_ADDR addr,
   base_addr = addr & ~mask_bits;
 
   /* Check to see if it is covered by current registers.  */
-  for (i = 0; i < get_num_valid (regs); i++)
+  for (i = 0; i < mips_linux_watch_get_num_valid (regs); i++)
     {
-      t_low = get_watchlo (regs, i);
-      if (t_low != 0 && irw == ((unsigned)t_low & irw))
+      t_low = mips_linux_watch_get_watchlo (regs, i);
+      if (t_low != 0 && irw == ((uint32_t) t_low & irw))
 	{
-	  t_hi = get_watchhi (regs, i) | IRW_MASK;
-	  t_low &= ~(CORE_ADDR)t_hi;
+	  t_hi = mips_linux_watch_get_watchhi (regs, i) | IRW_MASK;
+	  t_low &= ~(CORE_ADDR) t_hi;
 	  if (addr >= t_low && last_byte <= (t_low + t_hi))
 	    return 1;
 	}
     }
   /* Try to find an empty register.  */
   free_watches = 0;
-  for (i = 0; i < get_num_valid (regs); i++)
+  for (i = 0; i < mips_linux_watch_get_num_valid (regs); i++)
     {
-      t_low = get_watchlo (regs, i);
-      if (t_low == 0 && irw == (get_irw_mask (regs, i) & irw))
+      t_low = mips_linux_watch_get_watchlo (regs, i);
+      if (t_low == 0
+	  && irw == (mips_linux_watch_get_irw_mask (regs, i) & irw))
 	{
 	  if (mask_bits <= (get_reg_mask (regs, i) | IRW_MASK))
 	    {
 	      /* It fits, we'll take it.  */
-	      set_watchlo (regs, i, base_addr | irw);
-	      set_watchhi (regs, i, mask_bits & ~IRW_MASK);
+	      mips_linux_watch_set_watchlo (regs, i, base_addr | irw);
+	      mips_linux_watch_set_watchhi (regs, i, mask_bits & ~IRW_MASK);
 	      return 1;
 	    }
 	  else
@@ -907,21 +927,23 @@ try_one_watch (struct pt_watch_regs *regs, CORE_ADDR addr,
     {
       /* Try to split it across several registers.  */
       regs_copy = *regs;
-      for (i = 0; i < get_num_valid (&regs_copy); i++)
+      for (i = 0; i < mips_linux_watch_get_num_valid (&regs_copy); i++)
 	{
-	  t_low = get_watchlo (&regs_copy, i);
+	  t_low = mips_linux_watch_get_watchlo (&regs_copy, i);
 	  t_hi = get_reg_mask (&regs_copy, i) | IRW_MASK;
 	  if (t_low == 0 && irw == (t_hi & irw))
 	    {
-	      t_low = addr & ~(CORE_ADDR)t_hi;
+	      t_low = addr & ~(CORE_ADDR) t_hi;
 	      break_addr = t_low + t_hi + 1;
 	      if (break_addr >= addr + len)
 		segment_len = len;
 	      else
 		segment_len = break_addr - addr;
 	      mask_bits = fill_mask (addr ^ (addr + segment_len - 1));
-	      set_watchlo (&regs_copy, i, (addr & ~mask_bits) | irw);
-	      set_watchhi (&regs_copy, i, mask_bits & ~IRW_MASK);
+	      mips_linux_watch_set_watchlo (&regs_copy, i,
+					    (addr & ~mask_bits) | irw);
+	      mips_linux_watch_set_watchhi (&regs_copy, i,
+					    mask_bits & ~IRW_MASK);
 	      if (break_addr >= addr + len)
 		{
 		  *regs = regs_copy;
@@ -945,16 +967,17 @@ mips_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
   struct pt_watch_regs dummy_regs;
   int i;
 
-  if (!mips_linux_read_watch_registers (0))
+  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+					&watch_readback,
+					&watch_readback_valid, 0))
     return 0;
 
   dummy_regs = watch_readback;
   /* Clear them out.  */
-  for (i = 0; i < get_num_valid (&dummy_regs); i++)
-    set_watchlo (&dummy_regs, i, 0);
-  return try_one_watch (&dummy_regs, addr, len, 0);
+  for (i = 0; i < mips_linux_watch_get_num_valid (&dummy_regs); i++)
+    mips_linux_watch_set_watchlo (&dummy_regs, i, 0);
+  return mips_linux_watch_try_one_watch (&dummy_regs, addr, len, 0);
 }
-
 
 /* Write the mirrored watch register values for each thread.  */
 
@@ -981,7 +1004,9 @@ mips_linux_new_thread (struct lwp_info *lp)
 {
   int tid;
 
-  if (!mips_linux_read_watch_registers (0))
+  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+					&watch_readback,
+					&watch_readback_valid, 0))
     return;
 
   tid = ptid_get_lwp (lp->ptid);
@@ -989,25 +1014,29 @@ mips_linux_new_thread (struct lwp_info *lp)
     perror_with_name (_("Couldn't write debug register"));
 }
 
-/* Fill in the watch registers with the currently cached watches.  */
+/* Fill in the watch registers REGS with the currently cached
+   watches CURRENT_WATCHES.  */
 
 static void
-populate_regs_from_watches (struct pt_watch_regs *regs)
+mips_linux_watch_populate_regs (struct mips_watchpoint *current_watches,
+				struct pt_watch_regs *regs)
 {
   struct mips_watchpoint *w;
   int i;
 
   /* Clear them out.  */
-  for (i = 0; i < get_num_valid (regs); i++)
+  for (i = 0; i < mips_linux_watch_get_num_valid (regs); i++)
     {
-      set_watchlo (regs, i, 0);
-      set_watchhi (regs, i, 0);
+      mips_linux_watch_set_watchlo (regs, i, 0);
+      mips_linux_watch_set_watchhi (regs, i, 0);
     }
 
   w = current_watches;
   while (w)
     {
-      i = try_one_watch (regs, w->addr, w->len, type_to_irw (w->type));
+      uint32_t irw = mips_linux_watch_type_to_irw (w->type);
+
+      i = mips_linux_watch_try_one_watch (regs, w->addr, w->len, irw);
       /* They must all fit, because we previously calculated that they
 	 would.  */
       gdb_assert (i);
@@ -1029,7 +1058,9 @@ mips_linux_insert_watchpoint (CORE_ADDR addr, int len, int type,
   int i;
   int retval;
 
-  if (!mips_linux_read_watch_registers (0))
+  if (!mips_linux_read_watch_registers (ptid_get_lwp (inferior_ptid),
+					&watch_readback,
+					&watch_readback_valid, 0))
     return -1;
 
   if (len <= 0)
@@ -1037,10 +1068,11 @@ mips_linux_insert_watchpoint (CORE_ADDR addr, int len, int type,
 
   regs = watch_readback;
   /* Add the current watches.  */
-  populate_regs_from_watches (&regs);
+  mips_linux_watch_populate_regs (current_watches, &regs);
 
   /* Now try to add the new watch.  */
-  if (!try_one_watch (&regs, addr, len, type_to_irw (type)))
+  if (!mips_linux_watch_try_one_watch (&regs, addr, len,
+				       mips_linux_watch_type_to_irw (type)))
     return -1;
 
   /* It fit.  Stick it on the end of the list.  */
@@ -1102,7 +1134,7 @@ mips_linux_remove_watchpoint (CORE_ADDR addr, int len, int type,
   gdb_assert (watch_readback_valid == 1);
 
   watch_mirror = watch_readback;
-  populate_regs_from_watches (&watch_mirror);
+  mips_linux_watch_populate_regs (current_watches, &watch_mirror);
 
   retval = write_watchpoint_regs ();
 
