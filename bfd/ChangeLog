@@ -1,5 +1,20 @@
 2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* elf32-vax.c (elf_vax_check_relocs) <R_VAX_GOT32, R_VAX_PLT32>:
+	Don't check symbol visibility here.  Remove a check already
+	asserted for.
+	(elf_vax_instantiate_got_entries): Use SYMBOL_REFERENCES_LOCAL
+	instead of individual checks.
+	(elf_vax_relocate_section) <R_VAX_GOT32, R_VAX_PLT32>: Only
+	check the offset to decide if produce a GOT or PLT entry.
+	Remove redundant assertions.  Remove code to produce GOT entries
+	for local symbols.  Remove a duplicate comment and add a comment
+	on GOT relocations.
+	(elf_vax_finish_dynamic_symbol): Remove code to produce RELATIVE
+	dynamic relocs.
+
+2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* elf32-vax.c (elf_vax_always_size_sections): Correct a comment
 	typo.
 

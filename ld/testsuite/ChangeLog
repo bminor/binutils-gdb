@@ -1,3 +1,12 @@
+2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* ld-vax-elf/got-local-exe.xd: New test.
+	* ld-vax-elf/got-local-lib.xd: New test.
+	* ld-vax-elf/got-local-aux.s: New test source.
+	* ld-vax-elf/got-local-def.s: New test source.
+	* ld-vax-elf/got-local-ref.s: New test source.
+	* ld-vax-elf/vax-elf.exp: Run the new tests.
+
 2013-07-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/15762

@@ -48,3 +48,37 @@ run_ld_link_tests [list \
 	  { plt-local.s } \
 	  { { objdump -d plt-local.dd } } \
 	  "plt-local"]]
+
+# Global offset table tests.  Make sure hidden symbols do not get GOT
+# assignments.
+run_ld_link_tests [list \
+    [list "GOT test (auxiliary shared library)" \
+	  "-shared" "" \
+	  "-k" \
+	  { got-local-aux.s } \
+	  {} \
+	  "got-local-aux.so"] \
+    [list "GOT test (object 1)" \
+	  "-r" "" \
+	  "-k" \
+	  { got-local-ref.s } \
+	  {} \
+	  "got-local-ref-r.o"] \
+    [list "GOT test (object 2)" \
+	  "-r" "" \
+	  "-k" \
+	  { got-local-def.s } \
+	  {} \
+	  "got-local-def-r.o"] \
+    [list "GOT test (executable)" \
+	  "-e 0 tmpdir/got-local-aux.so tmpdir/got-local-ref-r.o tmpdir/got-local-def-r.o" "" \
+	  "" \
+	  {} \
+	  { { readelf "-x .got" got-local-exe.xd } } \
+	  "got-local-exe"] \
+    [list "GOT test (shared library)" \
+	  "-shared tmpdir/got-local-aux.so tmpdir/got-local-ref-r.o tmpdir/got-local-def-r.o" "" \
+	  "" \
+	  {} \
+	  { { readelf "-x .got" got-local-lib.xd } } \
+	  "got-local-lib.so"]]

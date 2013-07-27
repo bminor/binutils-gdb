@@ -595,14 +595,12 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
 	{
 	case R_VAX_GOT32:
 	  BFD_ASSERT (h != NULL);
-	  if (h->forced_local
-	      || h == elf_hash_table (info)->hgot
-	      || h == elf_hash_table (info)->hplt)
-	    break;
 
 	  /* If this is a local symbol, we resolve it directly without
 	     creating a global offset table entry.  */
-	  if (h == NULL || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	  if (h->forced_local
+	      || h == elf_hash_table (info)->hgot
+	      || h == elf_hash_table (info)->hplt)
 	    break;
 
 	  /* This symbol requires a global offset table entry.  */
@@ -672,11 +670,11 @@ elf_vax_check_relocs (bfd *abfd, struct bfd_link_info *info, asection *sec,
              never referenced by a dynamic object, in which case we
              don't need to generate a procedure linkage table entry
              after all.  */
+	  BFD_ASSERT (h != NULL);
 
 	  /* If this is a local symbol, we resolve it directly without
 	     creating a procedure linkage table entry.  */
-	  BFD_ASSERT (h != NULL);
-	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT || h->forced_local)
+	  if (h->forced_local)
 	    break;
 
 	  h->needs_plt = 1;
@@ -1321,16 +1319,13 @@ elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, void * infoptr)
   sgot = bfd_get_linker_section (dynobj, ".got");
   srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 
-  if ((info->shared && info->symbolic)
-      || h->forced_local)
+  if (SYMBOL_REFERENCES_LOCAL (info, h))
     {
       h->got.refcount = -1;
       h->plt.refcount = -1;
     }
   else if (h->got.refcount > 0)
     {
-      bfd_boolean dyn;
-
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (h->dynindx == -1)
 	{
@@ -1338,15 +1333,9 @@ elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, void * infoptr)
 	    return FALSE;
 	}
 
-      dyn = elf_hash_table (info)->dynamic_sections_created;
       /* Allocate space in the .got and .rela.got sections.  */
-      if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-	  && (info->shared
-	      || WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, 0, h)))
-	{
-	  sgot->size += 4;
-	  srelgot->size += sizeof (Elf32_External_Rela);
-	}
+      sgot->size += 4;
+      srelgot->size += sizeof (Elf32_External_Rela);
     }
 
   return TRUE;
@@ -1471,17 +1460,14 @@ elf_vax_relocate_section (bfd *output_bfd,
 	case R_VAX_GOT32:
 	  /* Relocation is to the address of the entry for this symbol
 	     in the global offset table.  */
+
+	  /* Resolve a GOTxx reloc against a local symbol directly,
+	     without using the global offset table.  */
 	  if (h == NULL
-	      || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	      || h->got.offset == (bfd_vma) -1
-	      || h->forced_local)
+	      || h->got.offset == (bfd_vma) -1)
 	    break;
 
-	  /* Relocation is the offset of the entry for this symbol in
-	     the global offset table.  */
-
 	  {
-	    bfd_boolean dyn;
 	    bfd_vma off;
 
 	    if (sgot == NULL)
@@ -1490,37 +1476,10 @@ elf_vax_relocate_section (bfd *output_bfd,
 		BFD_ASSERT (sgot != NULL);
 	      }
 
-	    BFD_ASSERT (h != NULL);
 	    off = h->got.offset;
-	    BFD_ASSERT (off != (bfd_vma) -1);
 	    BFD_ASSERT (off < sgot->size);
 
-	    dyn = elf_hash_table (info)->dynamic_sections_created;
-	    if (! WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared, h)
-		|| (info->shared
-		    && SYMBOL_REFERENCES_LOCAL (info, h)))
-	      {
-		/* The symbol was forced to be local
-		   because of a version file..  We must initialize
-		   this entry in the global offset table.  Since
-		   the offset must always be a multiple of 4, we
-		   use the least significant bit to record whether
-		   we have initialized it already.
-
-		   When doing a dynamic link, we create a .rela.got
-		   relocation entry to initialize the value.  This
-		   is done in the finish_dynamic_symbol routine.  */
-		if ((off & 1) != 0)
-		  off &= ~1;
-		else
-		  {
-		    bfd_put_32 (output_bfd, relocation + rel->r_addend,
-				sgot->contents + off);
-		    h->got.offset |= 1;
-		  }
-	      } else {
-		bfd_put_32 (output_bfd, rel->r_addend, sgot->contents + off);
-	      }
+	    bfd_put_32 (output_bfd, rel->r_addend, sgot->contents + off);
 
 	    relocation = sgot->output_offset + off;
 	    /* The GOT relocation uses the addend.  */
@@ -1547,18 +1506,8 @@ elf_vax_relocate_section (bfd *output_bfd,
 	  /* Resolve a PLTxx reloc against a local symbol directly,
 	     without using the procedure linkage table.  */
 	  if (h == NULL
-	      || ELF_ST_VISIBILITY (h->other) != STV_DEFAULT
-	      || h->forced_local)
+	      || h->plt.offset == (bfd_vma) -1)
 	    break;
-
-	  if (h->plt.offset == (bfd_vma) -1
-	      || !elf_hash_table (info)->dynamic_sections_created)
-	    {
-	      /* We didn't make a PLT entry for this symbol.  This
-		 happens when statically linking PIC code, or when
-		 using -Bsymbolic.  */
-	      break;
-	    }
 
 	  if (splt == NULL)
 	    {
@@ -1894,25 +1843,10 @@ elf_vax_finish_dynamic_symbol (bfd *output_bfd, struct bfd_link_info *info,
 
       rela.r_offset = (sgot->output_section->vma
 		       + sgot->output_offset
-		       + (h->got.offset &~ 1));
-
-      /* If the symbol was forced to be local because of a version file
-	 locally we just want to emit a RELATIVE reloc.  The entry in
-	 the global offset table will already have been initialized in
-	 the relocate_section function.  */
-      if (info->shared
-	  && h->dynindx == -1
-	  && h->def_regular)
-	{
-	  rela.r_info = ELF32_R_INFO (0, R_VAX_RELATIVE);
-	}
-      else
-	{
-	  rela.r_info = ELF32_R_INFO (h->dynindx, R_VAX_GLOB_DAT);
-	}
+		       + h->got.offset);
+      rela.r_info = ELF32_R_INFO (h->dynindx, R_VAX_GLOB_DAT);
       rela.r_addend = bfd_get_signed_32 (output_bfd,
-					 (sgot->contents
-					  + (h->got.offset & ~1)));
+					 sgot->contents + h->got.offset);
 
       loc = srela->contents;
       loc += srela->reloc_count++ * sizeof (Elf32_External_Rela);
