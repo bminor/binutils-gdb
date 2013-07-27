@@ -1,5 +1,22 @@
 2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* ld-vax-elf/export-class-call.dd: New test.
+	* ld-vax-elf/export-class-call.rd: New test.
+	* ld-vax-elf/export-class-call.xd: New test.
+	* ld-vax-elf/export-class-data.dd: New test.
+	* ld-vax-elf/export-class-data.rd: New test.
+	* ld-vax-elf/export-class-data.xd: New test.
+	* ld-vax-elf/export-class.ld: New test linker script.
+	* ld-vax-elf/export-class-call.s: New test source.
+	* ld-vax-elf/export-class-data.s: New test source.
+	* ld-vax-elf/export-class-def.s: New test source.
+	* ld-vax-elf/vax-elf.exp: Run the new tests.
+	* ld-vax-elf/vax-export-class.rd: New test.
+	* ld-vax-elf/vax-export-class.xd: New test.
+	* ld-vax-elf/export-class.exp: New test script.
+
+2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* ld-vax-elf/got-local-exe.xd: New test.
 	* ld-vax-elf/got-local-lib.xd: New test.
 	* ld-vax-elf/got-local-aux.s: New test source.

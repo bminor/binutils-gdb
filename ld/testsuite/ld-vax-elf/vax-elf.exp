@@ -82,3 +82,26 @@ run_ld_link_tests [list \
 	  {} \
 	  { { readelf "-x .got" got-local-lib.xd } } \
 	  "got-local-lib.so"]]
+
+# Export class relocation tests.
+run_ld_link_tests [list \
+    [list \
+	"VAX export class call relocation test" \
+	"-shared -Ttext 0x12340000 -T export-class.ld" "" \
+	"-k" \
+	[list export-class-call.s export-class-def.s] \
+	[list \
+	    [list objdump -d export-class-call.dd] \
+	    [list readelf -r export-class-call.rd] \
+	    [list readelf "-x .got" export-class-call.xd]] \
+	"export-class-call.so"] \
+    [list \
+	"VAX export class data relocation test" \
+	"-shared -Ttext 0x12340000 -T export-class.ld" "" \
+	"-k" \
+	[list export-class-data.s export-class-def.s] \
+	[list \
+	    [list objdump -d export-class-data.dd] \
+	    [list readelf -r export-class-data.rd] \
+	    [list readelf "-x .got" export-class-data.xd]] \
+	"export-class-data.so"]]
