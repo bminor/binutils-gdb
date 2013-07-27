@@ -1,5 +1,18 @@
 2013-07-27  Yao Qi  <yao@codesourcery.com>
 
+	* mips-linux-nat.c (MAX_DEBUG_REGISTER): Move it earlier in
+	the code.
+	(PTRACE_SET_WATCH_REGS, enum pt_watch_style): Remove.
+	(struct mips32_watch_regs, struct mips64_watch_regs): Remove.
+	(struct pt_watch_regs): Likewise.
+	[!PTRACE_GET_WATCH_REGS] (PTRACE_SET_WATCH_REGS): New macro.
+	[!PTRACE_GET_WATCH_REGS] (enum pt_watch_style): New.
+	[!PTRACE_GET_WATCH_REGS] (struct mips32_watch_regs): New.
+	[!PTRACE_GET_WATCH_REGS] (struct mips64_watch_regs): New.
+	[!PTRACE_GET_WATCH_REGS] (struct pt_watch_regs): New.
+
+2013-07-27  Yao Qi  <yao@codesourcery.com>
+
 	* breakpoint.h: Include break-common.h.
 	(enum target_hw_bp_type): Move to ...
 	* common/break-common.h: ... here.  New.

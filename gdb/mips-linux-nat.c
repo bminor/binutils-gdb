@@ -34,6 +34,7 @@
 
 #include <sgidefs.h>
 #include <sys/ptrace.h>
+#include <asm/ptrace.h>
 
 #include "features/mips-linux.c"
 #include "features/mips-dsp-linux.c"
@@ -460,30 +461,19 @@ mips_linux_read_description (struct target_ops *ops)
     return have_dsp ? tdesc_mips64_dsp_linux : tdesc_mips64_linux;
 }
 
+#define MAX_DEBUG_REGISTER 8
+
+/* If macro PTRACE_GET_WATCH_REGS is not defined, kernel header doesn't
+   have hardware watchpoint-related structures.  Define them below.  */
+
 #ifndef PTRACE_GET_WATCH_REGS
 #  define PTRACE_GET_WATCH_REGS	0xd0
-#endif
-
-#ifndef PTRACE_SET_WATCH_REGS
 #  define PTRACE_SET_WATCH_REGS	0xd1
-#endif
-
-#define W_BIT 0
-#define R_BIT 1
-#define I_BIT 2
-
-#define W_MASK (1 << W_BIT)
-#define R_MASK (1 << R_BIT)
-#define I_MASK (1 << I_BIT)
-
-#define IRW_MASK (I_MASK | R_MASK | W_MASK)
 
 enum pt_watch_style {
   pt_watch_style_mips32,
   pt_watch_style_mips64
 };
-
-#define MAX_DEBUG_REGISTER 8
 
 /* A value of zero in a watchlo indicates that it is available.  */
 
@@ -523,6 +513,18 @@ struct pt_watch_regs
     struct mips64_watch_regs mips64;
   };
 };
+
+#endif /* !PTRACE_GET_WATCH_REGS */
+
+#define W_BIT 0
+#define R_BIT 1
+#define I_BIT 2
+
+#define W_MASK (1 << W_BIT)
+#define R_MASK (1 << R_BIT)
+#define I_MASK (1 << I_BIT)
+
+#define IRW_MASK (I_MASK | R_MASK | W_MASK)
 
 /* -1 if the kernel and/or CPU do not support watch registers.
     1 if watch_readback is valid and we can read style, num_valid
