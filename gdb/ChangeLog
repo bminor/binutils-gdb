@@ -1,5 +1,35 @@
 2013-07-27  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Add
+	common/mips-linux-watch.h.
+	(mips-linux-watch.o): New rule.
+	* common/mips-linux-watch.c: New.
+	* common/mips-linux-watch.h: New.
+	* config/mips/linux.mh (NATDEPFILES): Add mips-linux-watch.o
+	* mips-linux-nat.c: Include mips-linux-watch.h.
+	(W_BIT, R_BIT, I_BIT, W_MASK, R_MASK, I_MASK, IRW_MASK): Move
+	to common/mips-linux-watch.h.
+	(MAX_DEBUG_REGISTER): Likewise.
+	(enum pt_watch_style): Likewise.
+	(struct mips32_watch_regs): Likewise.
+	(struct mips64_watch_regs): Likewise.
+	(struct pt_watch_regs): Likewise.
+	(struct mips_watchpoint): Likewise.
+	(mips_linux_watch_get_irw_mask): Move to
+	common/mips-linux-watch.c.
+	(get_reg_mask, mips_linux_watch_get_num_valid): Likewise.
+	(mips_linux_watch_get_watchlo): Likewise.
+	(mips_linux_watch_set_watchlo): Likewise.
+	(mips_linux_watch_get_watchhi): Likewise.
+	(mips_linux_watch_set_watchhi): Likewise.
+	(mips_linux_read_watch_registers): Likewise.
+	(mips_linux_watch_type_to_irw): Likewise.
+	(mips_linux_stopped_data_address, fill_mask): Likewise.
+	(mips_linux_watch_try_one_watch): Likewise.
+	(mips_linux_watch_populate_regs): Likewise.
+
+2013-07-27  Yao Qi  <yao@codesourcery.com>
+
 	* mips-linux-nat.c (get_irw_mask): Rename to ...
 	(mips_linux_watch_get_irw_mask): ... this.  Rename parameter
 	'set' to 'n'.  Update function comment.  All callers changed.

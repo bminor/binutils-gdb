@@ -787,7 +787,7 @@ LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
 HFILES_NO_SRCDIR = \
 common/gdb_signals.h common/gdb_thread_db.h common/gdb_vecs.h \
-common/i386-xstate.h common/linux-ptrace.h \
+common/i386-xstate.h common/linux-ptrace.h common/mips-linux-watch.h \
 proc-utils.h aarch64-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
 ppcnbsd-tdep.h cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h amd64bsd-nat.h \
@@ -2024,6 +2024,10 @@ linux-btrace.o: ${srcdir}/common/linux-btrace.c
 
 target-common.o: ${srcdir}/common/target-common.c
 	$(COMPILE) $(srcdir)/common/target-common.c
+	$(POSTCOMPILE)
+
+mips-linux-watch.o: ${srcdir}/common/mips-linux-watch.c
+	$(COMPILE) $(srcdir)/common/mips-linux-watch.c
 	$(POSTCOMPILE)
 
 #
