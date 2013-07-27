@@ -1,3 +1,15 @@
+2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elf32-vax.c (elf_vax_discard_got_entries): New function.
+	(elf_vax_always_size_sections): Likewise.
+	(elf_vax_size_dynamic_sections): Remove code moved to
+	elf_vax_always_size_sections.  Make comment on
+	elf_vax_instantiate_got_entries match reality.
+	(elf_vax_instantiate_got_entries): Assert that rather than check
+	if dynobj is null.  Don't check for dynamic_sections_created.
+	Make function description match reality.
+	(elf_backend_always_size_sections): New macro.
+
 2013-07-25  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (struct ppc64_elf_obj_tdata): Replace opd_relocs

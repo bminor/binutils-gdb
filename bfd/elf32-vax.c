@@ -1050,6 +1050,59 @@ elf_vax_adjust_dynamic_symbol (struct bfd_link_info *info,
   return _bfd_elf_adjust_dynamic_copy (h, s);
 }
 
+/* This function is called via elf_link_hash_traverse.  It resets GOT
+   and PLT (.GOT) reference counts back to -1 so normal PC32 relocation
+   will be done.  */
+
+static bfd_boolean
+elf_vax_discard_got_entries (struct elf_link_hash_entry *h,
+			     void *infoptr ATTRIBUTE_UNUSED)
+{
+  h->got.refcount = -1;
+  h->plt.refcount = -1;
+
+  return TRUE;
+}
+
+/* Discard unused dynamic data if this is a static link.  */
+
+static bfd_boolean
+elf_vax_always_size_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info)
+{
+  bfd *dynobj;
+  asection *s;
+
+  dynobj = elf_hash_table (info)->dynobj;
+
+  if (dynobj && !elf_hash_table (info)->dynamic_sections_created)
+    {
+      /* We may have created entries in the .rela.got and .got sections.
+	 However, if we are not creating the dynamic sections, we will
+	 not actually use these entries.  Reset the size of .rela.got
+	 and .got, which will cause it to get stripped from the output
+	 file below.  */
+      s = bfd_get_linker_section (dynobj, ".rela.got");
+      if (s != NULL)
+	s->size = 0;
+      s = bfd_get_linker_section (dynobj, ".got.plt");
+      if (s != NULL)
+	s->size = 0;
+      s = bfd_get_linker_section (dynobj, ".got");
+      if (s != NULL)
+	s->size = 0;
+    }
+
+  /* If this is a static link, we need to discard all the got entries we've
+     recorded.  */
+  if (!dynobj || !elf_hash_table (info)->dynamic_sections_created)
+    elf_link_hash_traverse (elf_hash_table (info),
+			    elf_vax_discard_got_entries,
+			    info);
+
+  return TRUE;
+}
+
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
@@ -1075,23 +1128,6 @@ elf_vax_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 	  s->contents = (unsigned char *) ELF_DYNAMIC_INTERPRETER;
 	}
     }
-  else
-    {
-      /* We may have created entries in the .rela.got and .got sections.
-	 However, if we are not creating the dynamic sections, we will
-	 not actually use these entries.  Reset the size of .rela.got
-	 and .got, which will cause it to get stripped from the output
-	 file below.  */
-      s = bfd_get_linker_section (dynobj, ".rela.got");
-      if (s != NULL)
-	s->size = 0;
-      s = bfd_get_linker_section (dynobj, ".got.plt");
-      if (s != NULL)
-	s->size = 0;
-      s = bfd_get_linker_section (dynobj, ".got");
-      if (s != NULL)
-	s->size = 0;
-    }
 
   /* If this is a -Bsymbolic shared link, then we need to discard all PC
      relative relocs against symbols defined in a regular object.  We
@@ -1102,9 +1138,9 @@ elf_vax_size_dynamic_sections (bfd *output_bfd, struct bfd_link_info *info)
 				elf_vax_discard_copies,
 				NULL);
 
-  /* If this is a -Bsymbolic shared link or a static link, we need to
-     discard all the got entries we've recorded.  Otherwise, we need to
-     instantiate (allocate space for them).  */
+  /* If this is a -Bsymbolic shared link, we need to discard all the got
+     entries we've recorded.  Otherwise, we need to instantiate (allocate
+     space for them).  */
   elf_link_hash_traverse (elf_hash_table (info),
 			  elf_vax_instantiate_got_entries,
 			  info);
@@ -1260,12 +1296,12 @@ elf_vax_discard_copies (struct elf_vax_link_hash_entry *h,
   return TRUE;
 }
 
-/* This function is called via elf_link_hash_traverse.  It looks for entries
-   that have GOT or PLT (.GOT) references.  If creating a static object or a
-   shared object with -Bsymbolic, or the symbol has been forced local, then
-   it resets the reference count back to -1 so normal PC32 relocation will
-   be done.  Otherwise space in the .got and .rela.got will be reserved for
-   the symbol.  */
+/* This function is called via elf_link_hash_traverse.  It looks for
+   entries that have GOT or PLT (.GOT) references.  If creating a shared
+   object with -Bsymbolic, or the symbol has been forced local, then it
+   resets the reference count back to -1 so normal PC32 relocation will
+   be done.  Otherwise space in the .got and .rela.got will be reserved
+   for the symbol.  */
 
 static bfd_boolean
 elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, void * infoptr)
@@ -1280,14 +1316,12 @@ elf_vax_instantiate_got_entries (struct elf_link_hash_entry *h, void * infoptr)
     return TRUE;
 
   dynobj = elf_hash_table (info)->dynobj;
-  if (dynobj == NULL)
-    return TRUE;
+  BFD_ASSERT (dynobj != NULL);
 
   sgot = bfd_get_linker_section (dynobj, ".got");
   srelgot = bfd_get_linker_section (dynobj, ".rela.got");
 
-  if (!elf_hash_table (info)->dynamic_sections_created
-      || (info->shared && info->symbolic)
+  if ((info->shared && info->symbolic)
       || h->forced_local)
     {
       h->got.refcount = -1;
@@ -2065,6 +2099,8 @@ elf_vax_plt_sym_val (bfd_vma i, const asection *plt,
 #define elf_backend_check_relocs	elf_vax_check_relocs
 #define elf_backend_adjust_dynamic_symbol \
 					elf_vax_adjust_dynamic_symbol
+#define elf_backend_always_size_sections \
+					elf_vax_always_size_sections
 #define elf_backend_size_dynamic_sections \
 					elf_vax_size_dynamic_sections
 #define elf_backend_init_index_section	_bfd_elf_init_1_index_section
