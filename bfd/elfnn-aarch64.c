@@ -1465,6 +1465,9 @@ elfNN_aarch64_howto_from_bfd_reloc (bfd_reloc_code_real_type code)
     if (elfNN_aarch64_howto_table[code - BFD_RELOC_AARCH64_RELOC_START].type)
       return &elfNN_aarch64_howto_table[code - BFD_RELOC_AARCH64_RELOC_START];
 
+  if (code == BFD_RELOC_AARCH64_NONE)
+    return &elfNN_aarch64_howto_none;
+
   return NULL;
 }
 

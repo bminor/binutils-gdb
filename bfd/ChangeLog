@@ -1,3 +1,8 @@
+2013-07-27  Andrew Pinski  <apinski@cavium.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_howto_from_bfd_reloc): Handle
+	BFD_RELOC_AARCH64_NONE explicitly.
+
 2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elf32-vax.c (elf_vax_finish_dynamic_sections): Don't set GOT's
