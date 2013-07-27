@@ -1,3 +1,8 @@
+2013-07-27  Yao Qi  <yao@codesourcery.com>
+
+	* i386-low.c: Include break-common.h.
+	(enum target_hw_bp_type): Remove.
+
 2013-07-24  Luis Machado  <lgustavo@codesourcery.com>
 
 	* Makefile.in (SFILES): /common/target-common.c.

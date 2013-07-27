@@ -20,20 +20,13 @@
 #include "server.h"
 #include "target.h"
 #include "i386-low.h"
+#include "break-common.h"
 
 /* Support for 8-byte wide hw watchpoints.  */
 #ifndef TARGET_HAS_DR_LEN_8
 /* NOTE: sizeof (long) == 4 on win64.  */
 #define TARGET_HAS_DR_LEN_8 (sizeof (void *) == 8)
 #endif
-
-enum target_hw_bp_type
-  {
-    hw_write   = 0,	/* Common  HW watchpoint */
-    hw_read    = 1,	/* Read    HW watchpoint */
-    hw_access  = 2,	/* Access  HW watchpoint */
-    hw_execute = 3	/* Execute HW breakpoint */
-  };
 
 /* DR7 Debug Control register fields.  */
 

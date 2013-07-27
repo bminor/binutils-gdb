@@ -24,6 +24,7 @@
 #include "vec.h"
 #include "ax.h"
 #include "command.h"
+#include "break-common.h"
 
 struct value;
 struct block;
@@ -214,15 +215,6 @@ enum bpdisp
     disp_disable,		/* Disable it */
     disp_donttouch		/* Leave it alone */
   };
-
-enum target_hw_bp_type
-  {
-    hw_write   = 0, 		/* Common  HW watchpoint */
-    hw_read    = 1, 		/* Read    HW watchpoint */
-    hw_access  = 2, 		/* Access  HW watchpoint */
-    hw_execute = 3		/* Execute HW breakpoint */
-  };
-
 
 /* Status of breakpoint conditions used when synchronizing
    conditions with the target.  */
