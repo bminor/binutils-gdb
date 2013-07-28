@@ -1,5 +1,11 @@
 2013-07-27  Andrew Pinski  <apinski@cavium.com>
 
+	* elfnn-aarch64.c (elfNN_aarch64_check_relocs):
+	Use the correct alignment for
+	_bfd_elf_make_dynamic_reloc_section for ILP32.
+
+2013-07-27  Andrew Pinski  <apinski@cavium.com>
+
 	* elfnn-aarch64.c (elfNN_aarch64_howto_from_bfd_reloc): Handle
 	BFD_RELOC_AARCH64_NONE explicitly.
 
