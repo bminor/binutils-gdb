@@ -1,5 +1,7 @@
 2013-07-29  Doug Evans  <dje@google.com>
 
+	* target.c (target_async_permitted_1): Fix comment.
+
 	* symtab.c (iterate_over_some_symtabs): Add comment.
 
 	* symtab.c (iterate_over_some_symtabs): Fix indentation.

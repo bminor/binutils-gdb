@@ -4975,7 +4975,7 @@ maintenance_print_target_stack (char *cmd, int from_tty)
 int target_async_permitted = 0;
 
 /* The set command writes to this variable.  If the inferior is
-   executing, linux_nat_async_permitted is *not* updated.  */
+   executing, target_async_permitted is *not* updated.  */
 static int target_async_permitted_1 = 0;
 
 static void
