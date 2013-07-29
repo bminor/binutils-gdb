@@ -273,9 +273,13 @@ class Gdb_index_info_reader : public Dwarf_info_reader
   void
   record_cu_ranges(Dwarf_die* die);
 
-  // Read the .debug_pubnames and .debug_pubtypes tables.
+  // Wrapper for read_pubtable.
   bool
   read_pubnames_and_pubtypes(Dwarf_die* die);
+
+  // Read the .debug_pubnames and .debug_pubtypes tables.
+  bool
+  read_pubtable(Dwarf_pubnames_table* table, off_t offset);
 
   // Clear the declarations map.
   void
@@ -851,69 +855,86 @@ Gdb_index_info_reader::record_cu_ranges(Dwarf_die* die)
     }
 }
 
+// Read table and add the relevant names to the index.  Returns true
+// if any names were added.
+
+bool
+Gdb_index_info_reader::read_pubtable(Dwarf_pubnames_table* table, off_t offset)
+{
+  // If we couldn't read the section when building the cu_pubname_map,
+  // then we won't find any pubnames now.
+  if (table == NULL)
+    return false;
+
+  if (!table->read_header(offset))
+    return false;
+  while (true)
+    {
+      const char* name = table->next_name();
+      if (name == NULL)
+        break;
+
+      this->gdb_index_->add_symbol(this->cu_index_, name);
+    }
+  return true;
+}
+
 // Read the .debug_pubnames and .debug_pubtypes tables for the CU or TU.
 // Returns TRUE if either a pubnames or pubtypes section was found.
 
 bool
 Gdb_index_info_reader::read_pubnames_and_pubtypes(Dwarf_die* die)
 {
-  bool ret = false;
+  // We use stmt_list_off as a unique identifier for the
+  // compilation unit and its associated type units.
+  unsigned int shndx;
+  off_t stmt_list_off = die->ref_attribute (elfcpp::DW_AT_stmt_list,
+                                            &shndx);
+  // Look for the attr as either a flag or a ref.
+  off_t offset = die->ref_attribute(elfcpp::DW_AT_GNU_pubnames, &shndx);
 
-  // If we find a DW_AT_GNU_pubnames attribute, read the pubnames table.
-  unsigned int pubnames_shndx;
-  off_t pubnames_offset = die->ref_attribute(elfcpp::DW_AT_GNU_pubnames,
-					     &pubnames_shndx);
-  if (pubnames_offset != -1)
+  // Newer versions of GCC generate CUs, but not TUs, with
+  // DW_AT_FORM_flag_present.
+  unsigned int flag = die->uint_attribute(elfcpp::DW_AT_GNU_pubnames);
+  if (offset == -1 && flag == 0)
     {
-      if (this->gdb_index_->pubnames_read(this->object(), pubnames_shndx,
-                                          pubnames_offset))
-	ret = true;
+      // Didn't find the attribute.
+      if (die->tag() == elfcpp::DW_TAG_type_unit)
+        {
+          // If die is a TU, then it might correspond to a CU which we
+          // have read. If it does, then no need to read the pubnames.
+          // If it doesn't, then the caller will have to parse the
+          // dies manually to find the names.
+          return this->gdb_index_->pubnames_read(this->object(),
+                                                 stmt_list_off);
+        }
       else
-	{
-	  Dwarf_pubnames_table pubnames(this, false);
-	  if (!pubnames.read_section(this->object(), pubnames_shndx))
-	    return false;
-	  if (!pubnames.read_header(pubnames_offset))
-	    return false;
-	  while (true)
-	    {
-	      const char* name = pubnames.next_name();
-	      if (name == NULL)
-		break;
-	      this->gdb_index_->add_symbol(this->cu_index_, name);
-	    }
-	  ret = true;
-	}
+        {
+          // No attribute on the CU means that no pubnames were read.
+          return false;
+        }
     }
 
-  // If we find a DW_AT_GNU_pubtypes attribute, read the pubtypes table.
-  unsigned int pubtypes_shndx;
-  off_t pubtypes_offset = die->ref_attribute(elfcpp::DW_AT_GNU_pubtypes,
-					     &pubtypes_shndx);
-  if (pubtypes_offset != -1)
-    {
-      if (this->gdb_index_->pubtypes_read(this->object(),
-                                          pubtypes_shndx, pubtypes_offset))
-	ret = true;
-      else
-	{
-	  Dwarf_pubnames_table pubtypes(this, true);
-	  if (!pubtypes.read_section(this->object(), pubtypes_shndx))
-	    return false;
-	  if (!pubtypes.read_header(pubtypes_offset))
-	    return false;
-	  while (true)
-	    {
-	      const char* name = pubtypes.next_name();
-	      if (name == NULL)
-		break;
-	      this->gdb_index_->add_symbol(this->cu_index_, name);
-	    }
-	  ret = true;
-	}
-    }
+  // We found the attribute, so we can check if the corresponding
+  // pubnames have been read.
+  if (this->gdb_index_->pubnames_read(this->object(), stmt_list_off))
+    return true;
 
-  return ret;
+  this->gdb_index_->set_pubnames_read(this->object(), stmt_list_off);
+
+  // We have an attribute, and the pubnames haven't been read, so read
+  // them.
+  bool names = false;
+  // In some of the cases, we could rely on the previous value of
+  // offset here, but sorting out which cases complicates the logic
+  // enough that it isn't worth it. So just look up the offset again.
+  offset = this->gdb_index_->find_pubname_offset(this->cu_offset());
+  names = this->read_pubtable(this->gdb_index_->pubnames_table(), offset);
+
+  bool types = false;
+  offset = this->gdb_index_->find_pubtype_offset(this->cu_offset());
+  types = this->read_pubtable(this->gdb_index_->pubtypes_table(), offset);
+  return names || types;
 }
 
 // Clear the declarations map.
@@ -952,6 +973,8 @@ Gdb_index_info_reader::print_stats()
 
 Gdb_index::Gdb_index(Output_section* gdb_index_section)
   : Output_section_data(4),
+    pubnames_table_(NULL),
+    pubtypes_table_(NULL),
     gdb_index_section_(gdb_index_section),
     comp_units_(),
     type_units_(),
@@ -965,11 +988,7 @@ Gdb_index::Gdb_index(Output_section* gdb_index_section)
     cu_pool_offset_(0),
     stringpool_offset_(0),
     pubnames_object_(NULL),
-    pubnames_shndx_(0),
-    pubnames_offset_(0),
-    pubtypes_object_(NULL),
-    pubtypes_shndx_(0),
-    pubtypes_offset_(0)
+    stmt_list_offset_(-1)
 {
   this->gdb_symtab_ = new Gdb_hashtab<Gdb_symbol>();
 }
@@ -981,6 +1000,93 @@ Gdb_index::~Gdb_index()
   // Free the memory used by the CU vectors.
   for (unsigned int i = 0; i < this->cu_vector_list_.size(); ++i)
     delete this->cu_vector_list_[i];
+}
+
+
+// Scan the pubnames and pubtypes sections and build a map of the
+// various cus and tus they refer to, so we can process the entries
+// when we encounter the die for that cu or tu.
+// Return the just-read table so it can be cached.
+
+Dwarf_pubnames_table*
+Gdb_index::map_pubtable_to_dies(unsigned int attr,
+                                Gdb_index_info_reader* dwinfo,
+                                Relobj* object,
+                                const unsigned char* symbols,
+                                off_t symbols_size)
+{
+  uint64_t section_offset = 0;
+  Dwarf_pubnames_table* table;
+  Pubname_offset_map* map;
+
+  if (attr == elfcpp::DW_AT_GNU_pubnames)
+    {
+      table = new Dwarf_pubnames_table(dwinfo, false);
+      map = &this->cu_pubname_map_;
+    }
+  else
+    {
+      table = new Dwarf_pubnames_table(dwinfo, true);
+      map = &this->cu_pubtype_map_;
+    }
+
+  map->clear();
+  if (!table->read_section(object, symbols, symbols_size))
+    return NULL;
+
+  while (table->read_header(section_offset))
+    {
+      map->insert(std::make_pair(table->cu_offset(), section_offset));
+      section_offset += table->subsection_size();
+    }
+
+  return table;
+}
+
+// Wrapper for map_pubtable_to_dies
+
+void
+Gdb_index::map_pubnames_and_types_to_dies(Gdb_index_info_reader* dwinfo,
+                                          Relobj* object,
+                                          const unsigned char* symbols,
+                                          off_t symbols_size)
+{
+  // This is a new object, so reset the relevant variables.
+  this->pubnames_object_ = object;
+  this->stmt_list_offset_ = -1;
+
+  delete this->pubnames_table_;
+  this->pubnames_table_
+      = this->map_pubtable_to_dies(elfcpp::DW_AT_GNU_pubnames, dwinfo,
+                                   object, symbols, symbols_size);
+  delete this->pubtypes_table_;
+  this->pubtypes_table_
+      = this->map_pubtable_to_dies(elfcpp::DW_AT_GNU_pubtypes, dwinfo,
+                                   object, symbols, symbols_size);
+}
+
+// Given a cu_offset, find the associated section of the pubnames
+// table.
+
+off_t
+Gdb_index::find_pubname_offset(off_t cu_offset)
+{
+  Pubname_offset_map::iterator it = this->cu_pubname_map_.find(cu_offset);
+  if (it != this->cu_pubname_map_.end())
+    return it->second;
+  return -1;
+}
+
+// Given a cu_offset, find the associated section of the pubnames
+// table.
+
+off_t
+Gdb_index::find_pubtype_offset(off_t cu_offset)
+{
+  Pubname_offset_map::iterator it = this->cu_pubtype_map_.find(cu_offset);
+  if (it != this->cu_pubtype_map_.end())
+    return it->second;
+  return -1;
 }
 
 // Scan a .debug_info or .debug_types input section.
@@ -998,6 +1104,8 @@ Gdb_index::scan_debug_info(bool is_type_unit,
 			       symbols, symbols_size,
 			       shndx, reloc_shndx,
 			       reloc_type, this);
+  if (object != this->pubnames_object_)
+    map_pubnames_and_types_to_dies(&dwinfo, object, symbols, symbols_size);
   dwinfo.parse();
 }
 
@@ -1035,34 +1143,25 @@ Gdb_index::add_symbol(int cu_index, const char* sym_name)
     cu_vec->push_back(cu_index);
 }
 
-// Return TRUE if we have already processed the pubnames set at
-// OFFSET in section SHNDX
+// Return TRUE if we have already processed the pubnames associated
+// with the statement list at the given OFFSET.
 
 bool
-Gdb_index::pubnames_read(const Relobj* object, unsigned int shndx, off_t offset)
+Gdb_index::pubnames_read(const Relobj* object, off_t offset)
 {
   bool ret = (this->pubnames_object_ == object
-              && this->pubnames_shndx_ == shndx
-	      && this->pubnames_offset_ == offset);
-  this->pubnames_object_ = object;
-  this->pubnames_shndx_ = shndx;
-  this->pubnames_offset_ = offset;
+	      && this->stmt_list_offset_ == offset);
   return ret;
 }
 
-// Return TRUE if we have already processed the pubtypes set at
-// OFFSET in section SHNDX
+// Record that we have processed the pubnames associated with the
+// statement list for OBJECT at the given OFFSET.
 
-bool
-Gdb_index::pubtypes_read(const Relobj* object, unsigned int shndx, off_t offset)
+void
+Gdb_index::set_pubnames_read(const Relobj* object, off_t offset)
 {
-  bool ret = (this->pubtypes_object_ == object
-              && this->pubtypes_shndx_ == shndx
-	      && this->pubtypes_offset_ == offset);
-  this->pubtypes_object_ = object;
-  this->pubtypes_shndx_ = shndx;
-  this->pubtypes_offset_ = offset;
-  return ret;
+  this->pubnames_object_ = object;
+  this->stmt_list_offset_ = offset;
 }
 
 // Set the size of the .gdb_index section.
