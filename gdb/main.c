@@ -253,7 +253,7 @@ get_init_files (const char **system_gdbinit,
 static int
 captured_command_loop (void *data)
 {
-  /* Top-level execution commands can be run on the background from
+  /* Top-level execution commands can be run in the background from
      here on.  */
   interpreter_async = 1;
 

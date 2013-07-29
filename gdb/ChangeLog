@@ -1,5 +1,7 @@
 2013-07-29  Doug Evans  <dje@google.com>
 
+	* main.c (captured_command_loop): Tweak comment.
+
 	* target.c (target_async_permitted_1): Fix comment.
 
 	* symtab.c (iterate_over_some_symtabs): Add comment.
