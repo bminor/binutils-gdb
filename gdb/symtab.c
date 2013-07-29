@@ -215,35 +215,35 @@ iterate_over_some_symtabs (const char *name,
 	  continue;
 	}
 
-    /* Before we invoke realpath, which can get expensive when many
-       files are involved, do a quick comparison of the basenames.  */
-    if (! basenames_may_differ
-	&& FILENAME_CMP (base_name, lbasename (s->filename)) != 0)
-      continue;
-
-    if (compare_filenames_for_search (symtab_to_fullname (s), name))
-      {
-	if (callback (s, data))
-	  return 1;
+      /* Before we invoke realpath, which can get expensive when many
+	 files are involved, do a quick comparison of the basenames.  */
+      if (! basenames_may_differ
+	  && FILENAME_CMP (base_name, lbasename (s->filename)) != 0)
 	continue;
-      }
 
-    /* If the user gave us an absolute path, try to find the file in
-       this symtab and use its absolute path.  */
+      if (compare_filenames_for_search (symtab_to_fullname (s), name))
+	{
+	  if (callback (s, data))
+	    return 1;
+	  continue;
+	}
 
-    if (real_path != NULL)
-      {
-        const char *fullname = symtab_to_fullname (s);
+      /* If the user gave us an absolute path, try to find the file in
+	 this symtab and use its absolute path.  */
 
-	gdb_assert (IS_ABSOLUTE_PATH (real_path));
-	gdb_assert (IS_ABSOLUTE_PATH (name));
-	if (FILENAME_CMP (real_path, fullname) == 0)
-	  {
-	    if (callback (s, data))
-	      return 1;
-	    continue;
-	  }
-      }
+      if (real_path != NULL)
+	{
+	  const char *fullname = symtab_to_fullname (s);
+
+	  gdb_assert (IS_ABSOLUTE_PATH (real_path));
+	  gdb_assert (IS_ABSOLUTE_PATH (name));
+	  if (FILENAME_CMP (real_path, fullname) == 0)
+	    {
+	      if (callback (s, data))
+		return 1;
+	      continue;
+	    }
+	}
     }
 
   return 0;
