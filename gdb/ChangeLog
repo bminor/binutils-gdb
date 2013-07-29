@@ -1,5 +1,7 @@
 2013-07-29  Doug Evans  <dje@google.com>
 
+	* symtab.c (iterate_over_some_symtabs): Add comment.
+
 	* symtab.c (iterate_over_some_symtabs): Fix indentation.
 
 2013-07-27  Yao Qi  <yao@codesourcery.com>

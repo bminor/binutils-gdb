@@ -186,6 +186,9 @@ compare_filenames_for_search (const char *filename, const char *search_name)
 /* Check for a symtab of a specific name by searching some symtabs.
    This is a helper function for callbacks of iterate_over_symtabs.
 
+   If NAME is not absolute, then REAL_PATH is NULL
+   If NAME is absolute, then REAL_PATH is the gdb_realpath form of NAME.
+
    The return value, NAME, REAL_PATH, CALLBACK, and DATA
    are identical to the `map_symtabs_matching_filename' method of
    quick_symbol_functions.
@@ -230,7 +233,6 @@ iterate_over_some_symtabs (const char *name,
 
       /* If the user gave us an absolute path, try to find the file in
 	 this symtab and use its absolute path.  */
-
       if (real_path != NULL)
 	{
 	  const char *fullname = symtab_to_fullname (s);
