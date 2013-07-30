@@ -3433,7 +3433,10 @@ value_fetch_lazy (struct value *val)
       LONGEST offset = value_offset (val);
       LONGEST num;
 
-      if (!value_bits_valid (val,
+      if (value_lazy (parent))
+	value_fetch_lazy (parent);
+
+      if (!value_bits_valid (parent,
 			     TARGET_CHAR_BIT * offset + value_bitpos (val),
 			     value_bitsize (val)))
 	error (_("value has been optimized out"));

@@ -1,3 +1,9 @@
+2013-07-30  Andrew Burgess  <aburgess@broadcom.com>
+
+	* value.c (value_fetch_lazy): Ensure parent value is not lazy
+	before checking which bits of the parent, not the child, value are
+	valid.
+
 2013-07-30  Muhammad Bilal  <mbilal@codesorcery.com>
 
 	PR gdb/15715
