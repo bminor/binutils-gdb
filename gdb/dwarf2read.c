@@ -1608,8 +1608,6 @@ static void dump_die_1 (struct ui_file *, int level, int max_level,
 static void store_in_ref_table (struct die_info *,
 				struct dwarf2_cu *);
 
-static int is_ref_attr (struct attribute *);
-
 static sect_offset dwarf2_get_ref_die_offset (struct attribute *);
 
 static LONGEST dwarf2_get_attr_constant_value (struct attribute *, int);
@@ -1656,6 +1654,8 @@ static int attr_form_is_block (struct attribute *);
 static int attr_form_is_section_offset (struct attribute *);
 
 static int attr_form_is_constant (struct attribute *);
+
+static int attr_form_is_ref (struct attribute *);
 
 static void fill_in_loclist_baton (struct dwarf2_cu *cu,
 				   struct dwarf2_loclist_baton *baton,
@@ -10365,7 +10365,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       SET_FIELD_DWARF_BLOCK (call_site->target, dlbaton);
     }
-  else if (is_ref_attr (attr))
+  else if (attr_form_is_ref (attr))
     {
       struct dwarf2_cu *target_cu = cu;
       struct die_info *target_die;
@@ -10438,7 +10438,7 @@ read_call_site_scope (struct die_info *die, struct dwarf2_cu *cu)
 
       loc = dwarf2_attr (child_die, DW_AT_location, cu);
       origin = dwarf2_attr (child_die, DW_AT_abstract_origin, cu);
-      if (loc == NULL && origin != NULL && is_ref_attr (origin))
+      if (loc == NULL && origin != NULL && attr_form_is_ref (origin))
 	{
 	  sect_offset offset;
 
@@ -13380,7 +13380,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   attr = dwarf2_attr (die, DW_AT_upper_bound, cu);
   if (attr)
     {
-      if (attr_form_is_block (attr) || is_ref_attr (attr))
+      if (attr_form_is_block (attr) || attr_form_is_ref (attr))
         {
           /* GCC encodes arrays with unspecified or dynamic length
              with a DW_FORM_block1 attribute or a reference attribute.
@@ -14821,7 +14821,7 @@ read_attribute_value (const struct die_reader_specs *reader,
     }
 
   /* Super hack.  */
-  if (cu->per_cu->is_dwz && is_ref_attr (attr))
+  if (cu->per_cu->is_dwz && attr_form_is_ref (attr))
     attr->form = DW_FORM_GNU_ref_alt;
 
   /* We have seen instances where the compiler tried to emit a byte
@@ -17080,7 +17080,7 @@ lookup_die_type (struct die_info *die, struct attribute *attr,
       per_cu = dwarf2_find_containing_comp_unit (offset, 1, cu->objfile);
       this_type = get_die_type_at_offset (offset, per_cu);
     }
-  else if (is_ref_attr (attr))
+  else if (attr_form_is_ref (attr))
     {
       sect_offset offset = dwarf2_get_ref_die_offset (attr);
 
@@ -17109,7 +17109,7 @@ lookup_die_type (struct die_info *die, struct attribute *attr,
       struct die_info *type_die = NULL;
       struct dwarf2_cu *type_cu = cu;
 
-      if (is_ref_attr (attr))
+      if (attr_form_is_ref (attr))
 	type_die = follow_die_ref (die, attr, &type_cu);
       if (type_die == NULL)
 	return build_error_marker_type (cu, die);
@@ -17952,27 +17952,6 @@ store_in_ref_table (struct die_info *die, struct dwarf2_cu *cu)
   *slot = die;
 }
 
-/* DW_ADDR is always stored already as sect_offset; despite for the forms
-   besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
-
-static int
-is_ref_attr (struct attribute *attr)
-{
-  switch (attr->form)
-    {
-    case DW_FORM_ref_addr:
-    case DW_FORM_ref1:
-    case DW_FORM_ref2:
-    case DW_FORM_ref4:
-    case DW_FORM_ref8:
-    case DW_FORM_ref_udata:
-    case DW_FORM_GNU_ref_alt:
-      return 1;
-    default:
-      return 0;
-    }
-}
-
 /* Return DIE offset of ATTR.  Return 0 with complaint if ATTR is not of the
    required kind.  */
 
@@ -17981,7 +17960,7 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
 {
   sect_offset retval = { DW_UNSND (attr) };
 
-  if (is_ref_attr (attr))
+  if (attr_form_is_ref (attr))
     return retval;
 
   retval.sect_off = 0;
@@ -18024,7 +18003,7 @@ follow_die_ref_or_sig (struct die_info *src_die, struct attribute *attr,
 {
   struct die_info *die;
 
-  if (is_ref_attr (attr))
+  if (attr_form_is_ref (attr))
     die = follow_die_ref (src_die, attr, ref_cu);
   else if (attr->form == DW_FORM_ref_sig8)
     die = follow_die_sig (src_die, attr, ref_cu);
@@ -18507,7 +18486,7 @@ get_DW_AT_signature_type (struct die_info *die, struct attribute *attr,
 			  struct dwarf2_cu *cu) /* ARI: editCase function */
 {
   /* Yes, DW_AT_signature can use a non-ref_sig8 reference.  */
-  if (is_ref_attr (attr))
+  if (attr_form_is_ref (attr))
     {
       struct dwarf2_cu *type_cu = cu;
       struct die_info *type_die = follow_die_ref (die, attr, &type_cu);
@@ -19869,6 +19848,28 @@ attr_form_is_constant (struct attribute *attr)
     case DW_FORM_data2:
     case DW_FORM_data4:
     case DW_FORM_data8:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+
+/* DW_ADDR is always stored already as sect_offset; despite for the forms
+   besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
+
+static int
+attr_form_is_ref (struct attribute *attr)
+{
+  switch (attr->form)
+    {
+    case DW_FORM_ref_addr:
+    case DW_FORM_ref1:
+    case DW_FORM_ref2:
+    case DW_FORM_ref4:
+    case DW_FORM_ref8:
+    case DW_FORM_ref_udata:
+    case DW_FORM_GNU_ref_alt:
       return 1;
     default:
       return 0;

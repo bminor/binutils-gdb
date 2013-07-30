@@ -1,3 +1,9 @@
+2013-07-30  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* dwarf2read.c (attr_is_ref): Rename to attr_form_is_ref.
+	All uses updated.
+	(attr_form_is_ref): Moved below attr_form_is_constant.
+
 2013-07-29  Doug Evans  <dje@google.com>
 
 	* main.c (captured_command_loop): Tweak comment.
