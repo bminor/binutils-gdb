@@ -1452,10 +1452,10 @@ static struct symbol *new_symbol (struct die_info *, struct type *,
 static struct symbol *new_symbol_full (struct die_info *, struct type *,
 				       struct dwarf2_cu *, struct symbol *);
 
-static void dwarf2_const_value (struct attribute *, struct symbol *,
+static void dwarf2_const_value (const struct attribute *, struct symbol *,
 				struct dwarf2_cu *);
 
-static void dwarf2_const_value_attr (struct attribute *attr,
+static void dwarf2_const_value_attr (const struct attribute *attr,
 				     struct type *type,
 				     const char *name,
 				     struct obstack *obstack,
@@ -1476,7 +1476,7 @@ static void set_descriptive_type (struct type *, struct die_info *,
 static struct type *die_containing_type (struct die_info *,
 					 struct dwarf2_cu *);
 
-static struct type *lookup_die_type (struct die_info *, struct attribute *,
+static struct type *lookup_die_type (struct die_info *, const struct attribute *,
 				     struct dwarf2_cu *);
 
 static struct type *read_type_die (struct die_info *, struct dwarf2_cu *);
@@ -1608,27 +1608,27 @@ static void dump_die_1 (struct ui_file *, int level, int max_level,
 static void store_in_ref_table (struct die_info *,
 				struct dwarf2_cu *);
 
-static sect_offset dwarf2_get_ref_die_offset (struct attribute *);
+static sect_offset dwarf2_get_ref_die_offset (const struct attribute *);
 
-static LONGEST dwarf2_get_attr_constant_value (struct attribute *, int);
+static LONGEST dwarf2_get_attr_constant_value (const struct attribute *, int);
 
 static struct die_info *follow_die_ref_or_sig (struct die_info *,
-					       struct attribute *,
+					       const struct attribute *,
 					       struct dwarf2_cu **);
 
 static struct die_info *follow_die_ref (struct die_info *,
-					struct attribute *,
+					const struct attribute *,
 					struct dwarf2_cu **);
 
 static struct die_info *follow_die_sig (struct die_info *,
-					struct attribute *,
+					const struct attribute *,
 					struct dwarf2_cu **);
 
 static struct type *get_signatured_type (struct die_info *, ULONGEST,
 					 struct dwarf2_cu *);
 
 static struct type *get_DW_AT_signature_type (struct die_info *,
-					      struct attribute *,
+					      const struct attribute *,
 					      struct dwarf2_cu *);
 
 static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
@@ -1636,7 +1636,7 @@ static void load_full_type_unit (struct dwarf2_per_cu_data *per_cu);
 static void read_signatured_type (struct signatured_type *);
 
 static struct type_unit_group *get_type_unit_group
-    (struct dwarf2_cu *, struct attribute *);
+    (struct dwarf2_cu *, const struct attribute *);
 
 static void build_type_unit_groups (die_reader_func_ftype *, void *);
 
@@ -1659,9 +1659,9 @@ static int attr_form_is_ref (const struct attribute *);
 
 static void fill_in_loclist_baton (struct dwarf2_cu *cu,
 				   struct dwarf2_loclist_baton *baton,
-				   struct attribute *attr);
+				   const struct attribute *attr);
 
-static void dwarf2_symbol_mark_computed (struct attribute *attr,
+static void dwarf2_symbol_mark_computed (const struct attribute *attr,
 					 struct symbol *sym,
 					 struct dwarf2_cu *cu,
 					 int is_block);
@@ -5414,7 +5414,7 @@ create_type_unit_group (struct dwarf2_cu *cu, sect_offset line_offset_struct)
    STMT_LIST is a DW_AT_stmt_list attribute.  */
 
 static struct type_unit_group *
-get_type_unit_group (struct dwarf2_cu *cu, struct attribute *stmt_list)
+get_type_unit_group (struct dwarf2_cu *cu, const struct attribute *stmt_list)
 {
   struct tu_stats *tu_stats = &dwarf2_per_objfile->tu_stats;
   struct type_unit_group *tu_group;
@@ -16786,7 +16786,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
    because that is the interpretation long in use by GCC.  */
 
 static gdb_byte *
-dwarf2_const_value_data (struct attribute *attr, struct obstack *obstack,
+dwarf2_const_value_data (const struct attribute *attr, struct obstack *obstack,
 			 struct dwarf2_cu *cu, LONGEST *value, int bits)
 {
   struct objfile *objfile = cu->objfile;
@@ -16818,7 +16818,7 @@ dwarf2_const_value_data (struct attribute *attr, struct obstack *obstack,
    expression.  */
 
 static void
-dwarf2_const_value_attr (struct attribute *attr, struct type *type,
+dwarf2_const_value_attr (const struct attribute *attr, struct type *type,
 			 const char *name, struct obstack *obstack,
 			 struct dwarf2_cu *cu,
 			 LONGEST *value, const gdb_byte **bytes,
@@ -16921,7 +16921,7 @@ dwarf2_const_value_attr (struct attribute *attr, struct type *type,
 /* Copy constant value from an attribute to a symbol.  */
 
 static void
-dwarf2_const_value (struct attribute *attr, struct symbol *sym,
+dwarf2_const_value (const struct attribute *attr, struct symbol *sym,
 		    struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
@@ -17060,7 +17060,7 @@ build_error_marker_type (struct dwarf2_cu *cu, struct die_info *die)
    If there is no type substitute an error marker.  */
 
 static struct type *
-lookup_die_type (struct die_info *die, struct attribute *attr,
+lookup_die_type (struct die_info *die, const struct attribute *attr,
 		 struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
@@ -17956,7 +17956,7 @@ store_in_ref_table (struct die_info *die, struct dwarf2_cu *cu)
    required kind.  */
 
 static sect_offset
-dwarf2_get_ref_die_offset (struct attribute *attr)
+dwarf2_get_ref_die_offset (const struct attribute *attr)
 {
   sect_offset retval = { DW_UNSND (attr) };
 
@@ -17974,7 +17974,7 @@ dwarf2_get_ref_die_offset (struct attribute *attr)
  * the value held by the attribute is not constant.  */
 
 static LONGEST
-dwarf2_get_attr_constant_value (struct attribute *attr, int default_value)
+dwarf2_get_attr_constant_value (const struct attribute *attr, int default_value)
 {
   if (attr->form == DW_FORM_sdata)
     return DW_SND (attr);
@@ -17998,7 +17998,7 @@ dwarf2_get_attr_constant_value (struct attribute *attr, int default_value)
    On exit *REF_CU is the CU of the result.  */
 
 static struct die_info *
-follow_die_ref_or_sig (struct die_info *src_die, struct attribute *attr,
+follow_die_ref_or_sig (struct die_info *src_die, const struct attribute *attr,
 		       struct dwarf2_cu **ref_cu)
 {
   struct die_info *die;
@@ -18072,7 +18072,7 @@ follow_die_offset (sect_offset offset, int offset_in_dwz,
    On exit *REF_CU is the CU of the result.  */
 
 static struct die_info *
-follow_die_ref (struct die_info *src_die, struct attribute *attr,
+follow_die_ref (struct die_info *src_die, const struct attribute *attr,
 		struct dwarf2_cu **ref_cu)
 {
   sect_offset offset = dwarf2_get_ref_die_offset (attr);
@@ -18384,7 +18384,7 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
    If the referenced type cannot be found an error is thrown.  */
 
 static struct die_info *
-follow_die_sig (struct die_info *src_die, struct attribute *attr,
+follow_die_sig (struct die_info *src_die, const struct attribute *attr,
 		struct dwarf2_cu **ref_cu)
 {
   ULONGEST signature = DW_SIGNATURE (attr);
@@ -18482,7 +18482,7 @@ get_signatured_type (struct die_info *die, ULONGEST signature,
    reading in and processing the type unit if necessary.  */
 
 static struct type *
-get_DW_AT_signature_type (struct die_info *die, struct attribute *attr,
+get_DW_AT_signature_type (struct die_info *die, const struct attribute *attr,
 			  struct dwarf2_cu *cu) /* ARI: editCase function */
 {
   /* Yes, DW_AT_signature can use a non-ref_sig8 reference.  */
@@ -19892,7 +19892,7 @@ cu_debug_loc_section (struct dwarf2_cu *cu)
 static void
 fill_in_loclist_baton (struct dwarf2_cu *cu,
 		       struct dwarf2_loclist_baton *baton,
-		       struct attribute *attr)
+		       const struct attribute *attr)
 {
   struct dwarf2_section_info *section = cu_debug_loc_section (cu);
 
@@ -19909,7 +19909,7 @@ fill_in_loclist_baton (struct dwarf2_cu *cu,
 }
 
 static void
-dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
+dwarf2_symbol_mark_computed (const struct attribute *attr, struct symbol *sym,
 			     struct dwarf2_cu *cu, int is_block)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;

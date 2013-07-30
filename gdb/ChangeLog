@@ -1,5 +1,23 @@
 2013-07-30  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* dwarf2read.c (dwarf2_get_ref_die_offset): Constify struct
+	attribute parameter.
+	(dwarf2_const_value_data): Constify struct attribute parameter.
+	(dwarf2_const_value): Constify struct attribute parameter.
+	(dwarf2_const_value_attr): Constify struct attribute parameter.
+	(lookup_die_type): Constify struct attribute parameter.
+	(dwarf2_get_attr_constant_value): Constify struct attribute parameter.
+	(follow_die_ref_or_sig): Constify struct attribute parameter.
+	(follow_die_ref): Constify struct attribute parameter.
+	(follow_die_sig): Constify struct attribute parameter.
+	(get_DW_AT_signature_type): Constify struct attribute parameter.
+	(get_type_unit_group): Constify struct attribute parameter.
+	(fill_in_loclist_baton): Constify struct attribute parameter.
+	(dwarf2_symbol_mark_computed): Constify struct attribute parameter.
+	(type_unit_group): Constify struct attribute parameter.
+
+2013-07-30  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* dwarf2read.c (attr_form_is_block): Make argument const.
 	(attr_form_is_section_offset): Make argument const.
 	(attr_form_is_constant): Make argument const.
