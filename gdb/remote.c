@@ -125,12 +125,14 @@ static void remote_serial_write (const char *str, int len);
 
 static void remote_kill (struct target_ops *ops);
 
-static int remote_can_async_p (void);
+static int remote_can_async_p (struct target_ops *);
 
-static int remote_is_async_p (void);
+static int remote_is_async_p (struct target_ops *);
 
-static void remote_async (void (*callback) (enum inferior_event_type event_type,
-					    void *context), void *context);
+static void remote_async (struct target_ops *ops,
+			  void (*callback) (enum inferior_event_type event_type,
+					    void *context),
+			  void *context);
 
 static void sync_remote_interrupt_twice (int signo);
 
@@ -8294,7 +8296,7 @@ remote_check_watch_resources (int type, int cnt, int ot)
 }
 
 static int
-remote_stopped_by_watchpoint (void)
+remote_stopped_by_watchpoint (struct target_ops *ops)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -8307,7 +8309,7 @@ remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
   struct remote_state *rs = get_remote_state ();
   int rc = 0;
 
-  if (remote_stopped_by_watchpoint ())
+  if (remote_stopped_by_watchpoint (target))
     {
       *addr_p = rs->remote_watch_data_address;
       rc = 1;
@@ -11493,7 +11495,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
 }
 
 static int
-remote_can_async_p (void)
+remote_can_async_p (struct target_ops *ops)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -11506,7 +11508,7 @@ remote_can_async_p (void)
 }
 
 static int
-remote_is_async_p (void)
+remote_is_async_p (struct target_ops *ops)
 {
   struct remote_state *rs = get_remote_state ();
 
@@ -11541,8 +11543,10 @@ remote_async_inferior_event_handler (gdb_client_data data)
 }
 
 static void
-remote_async (void (*callback) (enum inferior_event_type event_type,
-				void *context), void *context)
+remote_async (struct target_ops *ops,
+	      void (*callback) (enum inferior_event_type event_type,
+				void *context),
+	      void *context)
 {
   struct remote_state *rs = get_remote_state ();
 

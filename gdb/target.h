@@ -435,7 +435,7 @@ struct target_ops
 				      CORE_ADDR, CORE_ADDR, int);
     int (*to_remove_mask_watchpoint) (struct target_ops *,
 				      CORE_ADDR, CORE_ADDR, int);
-    int (*to_stopped_by_watchpoint) (void);
+    int (*to_stopped_by_watchpoint) (struct target_ops *);
     int to_have_steppable_watchpoint;
     int to_have_continuable_watchpoint;
     int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
@@ -500,9 +500,10 @@ struct target_ops
     int to_has_thread_control;	/* control thread execution */
     int to_attach_no_wait;
     /* ASYNC target controls */
-    int (*to_can_async_p) (void);
-    int (*to_is_async_p) (void);
-    void (*to_async) (async_callback_ftype *, void *);
+    int (*to_can_async_p) (struct target_ops *);
+    int (*to_is_async_p) (struct target_ops *);
+    void (*to_async) (struct target_ops *,
+		      async_callback_ftype *, void *);
     int (*to_supports_non_stop) (void);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (find_memory_region_ftype func, void *data);
@@ -1469,16 +1470,16 @@ extern int default_child_has_execution (struct target_ops *ops,
 extern int target_async_permitted;
 
 /* Can the target support asynchronous execution?  */
-#define target_can_async_p() (current_target.to_can_async_p ())
+#define target_can_async_p() (current_target.to_can_async_p (&current_target))
 
 /* Is the target in asynchronous execution mode?  */
-#define target_is_async_p() (current_target.to_is_async_p ())
+#define target_is_async_p() (current_target.to_is_async_p (&current_target))
 
 int target_supports_non_stop (void);
 
 /* Put the target in async mode with the specified callback function.  */
 #define target_async(CALLBACK,CONTEXT) \
-     (current_target.to_async ((CALLBACK), (CONTEXT)))
+     (current_target.to_async (&current_target, (CALLBACK), (CONTEXT)))
 
 #define target_execution_direction() \
   (current_target.to_execution_direction ())
@@ -1552,8 +1553,8 @@ extern char *target_thread_name (struct thread_info *);
 /* Returns non-zero if we were stopped by a hardware watchpoint (memory read or
    write).  Only the INFERIOR_PTID task is being queried.  */
 
-#define target_stopped_by_watchpoint \
-   (*current_target.to_stopped_by_watchpoint)
+#define target_stopped_by_watchpoint()		\
+  ((*current_target.to_stopped_by_watchpoint) (&current_target))
 
 /* Non-zero if we have steppable watchpoints  */
 

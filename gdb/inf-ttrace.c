@@ -374,7 +374,7 @@ inf_ttrace_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
    by hitting a "hardware" watchpoint.  */
 
 static int
-inf_ttrace_stopped_by_watchpoint (void)
+inf_ttrace_stopped_by_watchpoint (struct target_ops *ops)
 {
   pid_t pid = ptid_get_pid (inferior_ptid);
   lwpid_t lwpid = ptid_get_lwp (inferior_ptid);

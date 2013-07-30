@@ -110,8 +110,6 @@ static int debug_to_insert_watchpoint (CORE_ADDR, int, int,
 static int debug_to_remove_watchpoint (CORE_ADDR, int, int,
 				       struct expression *);
 
-static int debug_to_stopped_by_watchpoint (void);
-
 static int debug_to_stopped_data_address (struct target_ops *, CORE_ADDR *);
 
 static int debug_to_watchpoint_addr_within_range (struct target_ops *,
@@ -742,7 +740,7 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, int, int, struct expression *))
 	    return_minus_one);
   de_fault (to_stopped_by_watchpoint,
-	    (int (*) (void))
+	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_stopped_data_address,
 	    (int (*) (struct target_ops *, CORE_ADDR *))
@@ -820,7 +818,9 @@ update_current_target (void)
 	    (char *(*) (int))
 	    return_null);
   de_fault (to_async,
-	    (void (*) (void (*) (enum inferior_event_type, void*), void*))
+	    (void (*) (struct target_ops *,
+		       void (*) (enum inferior_event_type, void*),
+		       void*))
 	    tcomplain);
   de_fault (to_thread_architecture,
 	    default_thread_architecture);
@@ -3231,7 +3231,7 @@ find_default_create_inferior (struct target_ops *ops,
 }
 
 static int
-find_default_can_async_p (void)
+find_default_can_async_p (struct target_ops *ignore)
 {
   struct target_ops *t;
 
@@ -3241,12 +3241,12 @@ find_default_can_async_p (void)
      connected yet.  */
   t = find_default_run_target (NULL);
   if (t && t->to_can_async_p)
-    return (t->to_can_async_p) ();
+    return (t->to_can_async_p) (t);
   return 0;
 }
 
 static int
-find_default_is_async_p (void)
+find_default_is_async_p (struct target_ops *ignore)
 {
   struct target_ops *t;
 
@@ -3256,7 +3256,7 @@ find_default_is_async_p (void)
      connected yet.  */
   t = find_default_run_target (NULL);
   if (t && t->to_is_async_p)
-    return (t->to_is_async_p) ();
+    return (t->to_is_async_p) (t);
   return 0;
 }
 
@@ -3864,7 +3864,8 @@ init_dummy_target (void)
   dummy_target.to_has_registers = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_execution
     = (int (*) (struct target_ops *, ptid_t)) return_zero;
-  dummy_target.to_stopped_by_watchpoint = return_zero;
+  dummy_target.to_stopped_by_watchpoint
+    = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_stopped_data_address =
     (int (*) (struct target_ops *, CORE_ADDR *)) return_zero;
   dummy_target.to_magic = OPS_MAGIC;
@@ -4743,11 +4744,11 @@ debug_to_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
 }
 
 static int
-debug_to_stopped_by_watchpoint (void)
+debug_to_stopped_by_watchpoint (struct target_ops *ops)
 {
   int retval;
 
-  retval = debug_target.to_stopped_by_watchpoint ();
+  retval = debug_target.to_stopped_by_watchpoint (&debug_target);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_stopped_by_watchpoint () = %ld\n",

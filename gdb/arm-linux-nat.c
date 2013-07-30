@@ -1171,10 +1171,10 @@ arm_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 
 /* Has the target been stopped by hitting a watchpoint?  */
 static int
-arm_linux_stopped_by_watchpoint (void)
+arm_linux_stopped_by_watchpoint (struct target_ops *ops)
 {
   CORE_ADDR addr;
-  return arm_linux_stopped_data_address (&current_target, &addr);
+  return arm_linux_stopped_data_address (ops, &addr);
 }
 
 static int

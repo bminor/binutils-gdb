@@ -433,7 +433,7 @@ struct watch_area
 static struct watch_area *watch_base = NULL;
 
 static int
-s390_stopped_by_watchpoint (void)
+s390_stopped_by_watchpoint (struct target_ops *ops)
 {
   per_lowcore_bits per_lowcore;
   ptrace_area parea;

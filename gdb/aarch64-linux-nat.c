@@ -1476,11 +1476,11 @@ aarch64_linux_stopped_data_address (struct target_ops *target,
 /* Implement the "to_stopped_by_watchpoint" target_ops method.  */
 
 static int
-aarch64_linux_stopped_by_watchpoint (void)
+aarch64_linux_stopped_by_watchpoint (struct target_ops *ops)
 {
   CORE_ADDR addr;
 
-  return aarch64_linux_stopped_data_address (&current_target, &addr);
+  return aarch64_linux_stopped_data_address (ops, &addr);
 }
 
 /* Implement the "to_watchpoint_addr_within_range" target_ops method.  */

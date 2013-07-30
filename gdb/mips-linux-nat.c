@@ -553,7 +553,7 @@ mips_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
    register triggered.  */
 
 static int
-mips_linux_stopped_by_watchpoint (void)
+mips_linux_stopped_by_watchpoint (struct target_ops *ops)
 {
   int n;
   int num_valid;

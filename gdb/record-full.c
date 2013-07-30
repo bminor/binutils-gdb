@@ -252,11 +252,12 @@ static int
 					       struct gdbarch *,
 					       struct bp_target_info *);
 static struct target_ops *record_full_beneath_to_remove_breakpoint_ops;
-static int (*record_full_beneath_to_stopped_by_watchpoint) (void);
+static int (*record_full_beneath_to_stopped_by_watchpoint) (struct target_ops *);
 static int (*record_full_beneath_to_stopped_data_address) (struct target_ops *,
 							   CORE_ADDR *);
 static void
-  (*record_full_beneath_to_async) (void (*) (enum inferior_event_type, void *),
+  (*record_full_beneath_to_async) (struct target_ops *,
+				   void (*) (enum inferior_event_type, void *),
 				   void *);
 
 static void record_full_goto_insn (struct record_full_entry *entry,
@@ -824,10 +825,10 @@ static struct target_ops *tmp_to_insert_breakpoint_ops;
 static int (*tmp_to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
 					struct bp_target_info *);
 static struct target_ops *tmp_to_remove_breakpoint_ops;
-static int (*tmp_to_stopped_by_watchpoint) (void);
+static int (*tmp_to_stopped_by_watchpoint) (struct target_ops *);
 static int (*tmp_to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
-static int (*tmp_to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
-static void (*tmp_to_async) (void (*) (enum inferior_event_type, void *), void *);
+static void (*tmp_to_async) (struct target_ops *,
+			     void (*) (enum inferior_event_type, void *), void *);
 
 static void record_full_restore (void);
 
@@ -1523,12 +1524,16 @@ record_full_wait (struct target_ops *ops,
 }
 
 static int
-record_full_stopped_by_watchpoint (void)
+record_full_stopped_by_watchpoint (struct target_ops *ops)
 {
   if (RECORD_FULL_IS_REPLAY)
     return record_full_hw_watchpoint;
   else
-    return record_full_beneath_to_stopped_by_watchpoint ();
+    {
+      struct target_ops *beneath = find_target_beneath (ops);
+
+      return record_full_beneath_to_stopped_by_watchpoint (beneath);
+    }
 }
 
 static int
@@ -1909,25 +1914,26 @@ record_full_goto_bookmark (gdb_byte *raw_bookmark, int from_tty)
 }
 
 static void
-record_full_async (void (*callback) (enum inferior_event_type event_type,
+record_full_async (struct target_ops *ops,
+		   void (*callback) (enum inferior_event_type event_type,
 				     void *context), void *context)
 {
   /* If we're on top of a line target (e.g., linux-nat, remote), then
      set it to async mode as well.  Will be NULL if we're sitting on
      top of the core target, for "record restore".  */
   if (record_full_beneath_to_async != NULL)
-    record_full_beneath_to_async (callback, context);
+    record_full_beneath_to_async (find_target_beneath (ops), callback, context);
 }
 
 static int
-record_full_can_async_p (void)
+record_full_can_async_p (struct target_ops *ops)
 {
   /* We only enable async when the user specifically asks for it.  */
   return target_async_permitted;
 }
 
 static int
-record_full_is_async_p (void)
+record_full_is_async_p (struct target_ops *ops)
 {
   /* We only enable async when the user specifically asks for it.  */
   return target_async_permitted;

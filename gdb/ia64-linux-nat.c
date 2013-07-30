@@ -669,10 +669,10 @@ ia64_linux_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 }
 
 static int
-ia64_linux_stopped_by_watchpoint (void)
+ia64_linux_stopped_by_watchpoint (struct target_ops *ops)
 {
   CORE_ADDR addr;
-  return ia64_linux_stopped_data_address (&current_target, &addr);
+  return ia64_linux_stopped_data_address (ops, &addr);
 }
 
 static int

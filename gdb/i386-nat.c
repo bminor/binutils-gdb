@@ -756,10 +756,10 @@ i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 }
 
 static int
-i386_stopped_by_watchpoint (void)
+i386_stopped_by_watchpoint (struct target_ops *ops)
 {
   CORE_ADDR addr = 0;
-  return i386_stopped_data_address (&current_target, &addr);
+  return i386_stopped_data_address (ops, &addr);
 }
 
 /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.

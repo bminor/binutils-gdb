@@ -262,10 +262,6 @@ async_file_mark (void)
      be awakened anyway.  */
 }
 
-static void linux_nat_async (void (*callback)
-			     (enum inferior_event_type event_type,
-			      void *context),
-			     void *context);
 static int kill_lwp (int lwpid, int signo);
 
 static int stop_callback (struct lwp_info *lp, void *data);
@@ -2484,7 +2480,7 @@ save_sigtrap (struct lwp_info *lp)
   old_chain = save_inferior_ptid ();
   inferior_ptid = lp->ptid;
 
-  lp->stopped_by_watchpoint = linux_ops->to_stopped_by_watchpoint ();
+  lp->stopped_by_watchpoint = linux_ops->to_stopped_by_watchpoint (linux_ops);
 
   if (lp->stopped_by_watchpoint)
     {
@@ -2502,7 +2498,7 @@ save_sigtrap (struct lwp_info *lp)
 /* See save_sigtrap.  */
 
 static int
-linux_nat_stopped_by_watchpoint (void)
+linux_nat_stopped_by_watchpoint (struct target_ops *ops)
 {
   struct lwp_info *lp = find_lwp_pid (inferior_ptid);
 
@@ -4536,7 +4532,7 @@ linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int))
 /* target_is_async_p implementation.  */
 
 static int
-linux_nat_is_async_p (void)
+linux_nat_is_async_p (struct target_ops *ops)
 {
   /* NOTE: palves 2008-03-21: We're only async when the user requests
      it explicitly with the "set target-async" command.
@@ -4547,7 +4543,7 @@ linux_nat_is_async_p (void)
 /* target_can_async_p implementation.  */
 
 static int
-linux_nat_can_async_p (void)
+linux_nat_can_async_p (struct target_ops *ops)
 {
   /* NOTE: palves 2008-03-21: We're only async when the user requests
      it explicitly with the "set target-async" command.
@@ -4707,8 +4703,10 @@ linux_async_pipe (int enable)
 /* target_async implementation.  */
 
 static void
-linux_nat_async (void (*callback) (enum inferior_event_type event_type,
-				   void *context), void *context)
+linux_nat_async (struct target_ops *ops,
+		 void (*callback) (enum inferior_event_type event_type,
+				   void *context),
+		 void *context)
 {
   if (callback != NULL)
     {
@@ -4793,8 +4791,8 @@ static void
 linux_nat_close (void)
 {
   /* Unregister from the event loop.  */
-  if (linux_nat_is_async_p ())
-    linux_nat_async (NULL, 0);
+  if (linux_nat_is_async_p (NULL))
+    linux_nat_async (NULL, NULL, 0);
 
   if (linux_ops->to_close)
     linux_ops->to_close ();

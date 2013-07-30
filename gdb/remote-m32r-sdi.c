@@ -1477,7 +1477,7 @@ m32r_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 }
 
 static int
-m32r_stopped_by_watchpoint (void)
+m32r_stopped_by_watchpoint (struct target_ops *ops)
 {
   CORE_ADDR addr;
 

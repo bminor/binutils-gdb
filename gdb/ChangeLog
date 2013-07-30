@@ -1,3 +1,45 @@
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* aarch64-linux-nat.c (aarch64_linux_stopped_by_watchpoint):
+	Add 'ops' argument.
+	* arm-linux-nat.c (arm_linux_stopped_by_watchpoint): Add
+	'ops' argument.
+	* i386-nat.c (i386_stopped_by_watchpoint): Add 'ops' argument.
+	* ia64-linux-nat.c (ia64_linux_stopped_by_watchpoint): Add
+	'ops' argument.
+	* inf-ttrace.c (inf_ttrace_stopped_by_watchpoint): Add 'ops'
+	argument.
+	* linux-nat.c (save_sigtrap): Update.
+	(linux_nat_stopped_by_watchpoint, linux_nat_is_async_p)
+	(linux_nat_can_async_p, linux_nat_async): Add 'ops' argument.
+	(linux_nat_close): Update.
+	* mips-linux-nat.c (mips_linux_stopped_by_watchpoint): Add 'ops'
+	argument.
+	* ppc-linux-nat.c (ppc_linux_stopped_by_watchpoint): Add 'ops'
+	argument.
+	* procfs.c (procfs_stopped_by_watchpoint): Add 'ops' argument.
+	* record-full.c (record_full_beneath_to_stopped_by_watchpoint)
+	(record_full_beneath_to_async, tmp_to_stopped_by_watchpoint)
+	(tmp_to_async): Add 'ops' argument.
+	(record_full_stopped_by_watchpoint, record_full_async)
+	(record_full_can_async_p, record_full_is_async_p): Add 'ops'
+	argument.
+	* remote-m32r-sdi.c (m32r_insert_breakpoint, m32r_remove_breakpoint)
+	(m32r_stopped_by_watchpoint): Add 'ops' argument.
+	* remote-mips.c	(mips_stopped_by_watchpoint): Add 'ops' argument.
+	* remote.c (remote_stopped_by_watchpoint_p, remote_can_async_p)
+	(remote_is_async_p, remote_async): Add 'ops' argument.
+	(remote_stopped_data_address): Update.
+	* s390-nat.c (s390_stopped_by_watchpoint): Add 'ops' argument.
+	* target.c (update_current_target)
+	(find_default_can_async_p, find_default_is_async_p): Update.
+	(init_dummy_target): Update.
+	(debug_to_stopped_by_watchpoint): Add 'ops' argument.
+	* target.h (struct target_ops) <to_stopped_by_watchpoint,
+	to_can_async_p, to_is_async_p, to_async>: Add 'ops' argument.
+	(target_can_async_p, target_is_async_p, target_async)
+	(target_stopped_by_watchpoint): Update.
+
 2014-02-19  Yao Qi  <yao@codesourcery.com>
 
 	PR gdb/16220

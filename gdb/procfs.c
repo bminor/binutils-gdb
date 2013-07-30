@@ -4858,7 +4858,7 @@ procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
    fault, else returns zero.  */
 
 static int
-procfs_stopped_by_watchpoint (void)
+procfs_stopped_by_watchpoint (struct target_ops *ops)
 {
   procinfo *pi;
 

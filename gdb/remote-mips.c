@@ -2450,7 +2450,7 @@ mips_remove_watchpoint (CORE_ADDR addr, int len, int type,
    if not.  */
 
 static int
-mips_stopped_by_watchpoint (void)
+mips_stopped_by_watchpoint (struct target_ops *ops)
 {
   return hit_watchpoint;
 }
