@@ -1,3 +1,7 @@
+2013-07-29  Peter Bergner <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Use ppc_parse_cpu() to set dialect.
+
 2013-07-26  Sergey Guriev  <sergey.s.guriev@intel.com>
 	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
 	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
