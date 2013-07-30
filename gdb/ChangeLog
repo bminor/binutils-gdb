@@ -1,5 +1,12 @@
 2013-07-30  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* dwarf2read.c (attr_form_is_block): Make argument const.
+	(attr_form_is_section_offset): Make argument const.
+	(attr_form_is_constant): Make argument const.
+	(attr_form_is_ref): Make argument const.
+
+2013-07-30  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* dwarf2read.c (attr_is_ref): Rename to attr_form_is_ref.
 	All uses updated.
 	(attr_form_is_ref): Moved below attr_form_is_constant.

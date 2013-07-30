@@ -1649,13 +1649,13 @@ static struct die_info *dwarf_alloc_die (struct dwarf2_cu *, int);
 static void dwarf_decode_macros (struct dwarf2_cu *, unsigned int,
 				 const char *, int);
 
-static int attr_form_is_block (struct attribute *);
+static int attr_form_is_block (const struct attribute *);
 
-static int attr_form_is_section_offset (struct attribute *);
+static int attr_form_is_section_offset (const struct attribute *);
 
-static int attr_form_is_constant (struct attribute *);
+static int attr_form_is_constant (const struct attribute *);
 
-static int attr_form_is_ref (struct attribute *);
+static int attr_form_is_ref (const struct attribute *);
 
 static void fill_in_loclist_baton (struct dwarf2_cu *cu,
 				   struct dwarf2_loclist_baton *baton,
@@ -19797,7 +19797,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
    if so return true else false.  */
 
 static int
-attr_form_is_block (struct attribute *attr)
+attr_form_is_block (const struct attribute *attr)
 {
   return (attr == NULL ? 0 :
       attr->form == DW_FORM_block1
@@ -19817,7 +19817,7 @@ attr_form_is_block (struct attribute *attr)
    of them.  */
 
 static int
-attr_form_is_section_offset (struct attribute *attr)
+attr_form_is_section_offset (const struct attribute *attr)
 {
   return (attr->form == DW_FORM_data4
           || attr->form == DW_FORM_data8
@@ -19838,7 +19838,7 @@ attr_form_is_section_offset (struct attribute *attr)
    taken as section offsets, not constants.  */
 
 static int
-attr_form_is_constant (struct attribute *attr)
+attr_form_is_constant (const struct attribute *attr)
 {
   switch (attr->form)
     {
@@ -19859,7 +19859,7 @@ attr_form_is_constant (struct attribute *attr)
    besides DW_FORM_ref_addr it is stored as cu_offset in the DWARF file.  */
 
 static int
-attr_form_is_ref (struct attribute *attr)
+attr_form_is_ref (const struct attribute *attr)
 {
   switch (attr->form)
     {
