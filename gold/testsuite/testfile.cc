@@ -107,7 +107,8 @@ const Target::Target_info Target_test<size, big_endian>::test_target_info =
   0,					// small_common_section_flags
   0,					// large_common_section_flags
   NULL,					// attributes_section
-  NULL					// attributes_vendor
+  NULL,					// attributes_vendor
+  "_start"		// entry_symbol_name
 };
 
 // The test targets.

@@ -1,3 +1,19 @@
+2013-07-23  Cary Coutant  <ccoutant@google.com>
+
+	* parameters.cc (Parameters::entry): Return target-specific entry
+	symbol name.
+	* target.h (Target::entry_symbol_name): New function.
+	(Target_info::entry_symbol_name): New data member.
+
+	* arm.cc (Target_arm::arm_info): Add entry_symbol_name.
+	* i386.cc (Target_i386::i386_info): Likewise.
+	(Target_i386_nacl::i386_nacl_info): Likewise.
+	* sparc.cc (Target_sparc::sparc_info): Likewise.
+	* tilegx.cc (Target_tilegx::tilegx_info): Likewise.
+	* x86_64.cc: (Target_x86_64::x86_64_info) Likewise.
+	(Target_x86_64_nacl::x86_64_nacl_info) Likewise.
+	* testsuite/testfile.cc (Target_test::test_target_info): Likewise.
+
 2013-07-22  Sterling Augustine  <saugustine@google.com>
 
 	* dwarf_reader.cc (Dwarf_pubnames_table::read_section):

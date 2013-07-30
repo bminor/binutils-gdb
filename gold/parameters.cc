@@ -238,10 +238,7 @@ Parameters::entry() const
 {
   const char* ret = this->options().entry();
   if (ret == NULL)
-    {
-      // FIXME: Need to support target specific entry symbol.
-      ret = "_start";
-    }
+    ret = parameters->target().entry_symbol_name();
   return ret;
 }
 

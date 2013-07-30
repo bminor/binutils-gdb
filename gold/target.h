@@ -449,6 +449,11 @@ class Target
   gc_mark_symbol(Symbol_table* symtab, Symbol* sym) const
   { this->do_gc_mark_symbol(symtab, sym); }
 
+  // Return the name of the entry point symbol.
+  const char*
+  entry_symbol_name() const
+  { return this->pti_->entry_symbol_name; }
+
  protected:
   // This struct holds the constant information for a child class.  We
   // use a struct to avoid the overhead of virtual function calls for
@@ -502,6 +507,8 @@ class Target
     const char* attributes_section;
     // Vendor name of vendor attributes.
     const char* attributes_vendor;
+    // Name of the main entry point to the program.
+    const char* entry_symbol_name;
   };
 
   Target(const Target_info* pti)

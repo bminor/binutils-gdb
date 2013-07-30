@@ -681,7 +681,8 @@ const Target::Target_info Target_tilegx<64, false>::tilegx_info =
   0,                    // small_common_section_flags
   0,                    // large_common_section_flags
   NULL,                 // attributes_section
-  NULL                  // attributes_vendor
+  NULL,                 // attributes_vendor
+  "_start"		// entry_symbol_name
 };
 
 template<>
@@ -707,7 +708,8 @@ const Target::Target_info Target_tilegx<32, false>::tilegx_info =
   0,                    // small_common_section_flags
   0,                    // large_common_section_flags
   NULL,                 // attributes_section
-  NULL                  // attributes_vendor
+  NULL,                 // attributes_vendor
+  "_start"		// entry_symbol_name
 };
 
 template<>
@@ -733,7 +735,8 @@ const Target::Target_info Target_tilegx<64, true>::tilegx_info =
   0,                    // small_common_section_flags
   0,                    // large_common_section_flags
   NULL,                 // attributes_section
-  NULL                  // attributes_vendor
+  NULL,                 // attributes_vendor
+  "_start"		// entry_symbol_name
 };
 
 template<>
@@ -759,7 +762,8 @@ const Target::Target_info Target_tilegx<32, true>::tilegx_info =
   0,                    // small_common_section_flags
   0,                    // large_common_section_flags
   NULL,                 // attributes_section
-  NULL                  // attributes_vendor
+  NULL,                  // attributes_vendor
+  "_start"		// entry_symbol_name
 };
 
 // tilegx relocation handlers
