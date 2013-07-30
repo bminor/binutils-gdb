@@ -44,6 +44,7 @@ gdb_test "p s" \
     "print s"
 gdb_test "p s.a" " = 5" "print s.a"
 gdb_test "p s.b" " = <optimized out>" "print s.b"
-gdb_test "p s.c" "value has been optimized out" "print s.c"
-gdb_test "p s.d" "value has been optimized out" "print s.d"
+gdb_test "p s.c" " = <optimized out>" "print s.c"
+gdb_test "p s.d" " = <optimized out>" "print s.d"
+gdb_test "p s.d + 1" "value has been optimized out" "print s.d + 1"
 

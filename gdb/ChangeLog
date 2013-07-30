@@ -1,5 +1,10 @@
 2013-07-30  Andrew Burgess  <aburgess@broadcom.com>
 
+	* value.c (value_fetch_lazy): Mark optimized out values as such
+	rather than raising an error.
+
+2013-07-30  Andrew Burgess  <aburgess@broadcom.com>
+
 	* value.c (value_fetch_lazy): Ensure parent value is not lazy
 	before checking which bits of the parent, not the child, value are
 	valid.

@@ -1,5 +1,11 @@
 2013-07-30  Andrew Burgess  <aburgess@broadcom.com>
 
+	* gdb.dwarf2/pieces-optimized-out.exp: Expect "<optimized out>"
+	when printing an optimized out value.  Expect an error when using
+	an optimized out value in an expression.
+
+2013-07-30  Andrew Burgess  <aburgess@broadcom.com>
+
 	* gdb.dwarf2/pieces-optimized-out.exp: New file.
 	* gdb.dwarf2/pieces-optimized-out.c: New file.
 	* gdb.dwarf2/pieces-optimized-out.S: New file.
