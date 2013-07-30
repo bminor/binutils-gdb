@@ -1,3 +1,9 @@
+2013-07-30  Muhammad Bilal  <mbilal@codesourcery.com>
+
+	PR gdb/15715
+	* gdb.base/setshow.exp: Test that relative paths passed to
+	'set history filename' are converted to absolute paths.
+
 2013-07-26  Keith Seitz  <keiths@redhat.com>
 
 	* gdb.mi/mi-var-child-f.exp: Pass f90 to gdb_compile instead

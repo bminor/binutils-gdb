@@ -1,3 +1,11 @@
+2013-07-30  Muhammad Bilal  <mbilal@codesorcery.com>
+
+	PR gdb/15715
+	* top.c: Include "filenames.h".
+	(set_history_filename): New function.
+	(init_main): Install it as set hook of the "set history filename"
+	command.
+
 2013-07-30  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* dwarf2read.c (dwarf2_get_ref_die_offset): Constify struct

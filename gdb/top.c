@@ -48,6 +48,7 @@
 #include "interps.h"
 #include "observer.h"
 #include "maint.h"
+#include "filenames.h"
 
 /* readline include files.  */
 #include "readline/readline.h"
@@ -1704,6 +1705,17 @@ set_gdb_datadir (char *args, int from_tty, struct cmd_list_element *c)
 }
 
 static void
+set_history_filename (char *args, int from_tty, struct cmd_list_element *c)
+{
+  /* We include the current directory so that if the user changes
+     directories the file written will be the same as the one
+     that was read.  */
+  if (!IS_ABSOLUTE_PATH (history_filename))
+    history_filename = reconcat (history_filename, current_directory, "/", 
+				 history_filename, (char *) NULL);
+}
+
+static void
 init_main (void)
 {
   /* Initialize the prompt to a simple "(gdb) " prompt or to whatever
@@ -1779,7 +1791,7 @@ variable \"HISTSIZE\", or to 256 if this variable is not set."),
 Set the filename in which to record the command history"), _("\
 Show the filename in which to record the command history"), _("\
 (the list of previous commands of which a record is kept)."),
-			    NULL,
+			    set_history_filename,
 			    show_history_filename,
 			    &sethistlist, &showhistlist);
 
