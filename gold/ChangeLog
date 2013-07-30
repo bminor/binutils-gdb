@@ -1,4 +1,5 @@
 2013-07-23  Cary Coutant  <ccoutant@google.com>
+	    Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
 	* parameters.cc (Parameters::entry): Return target-specific entry
 	symbol name.
