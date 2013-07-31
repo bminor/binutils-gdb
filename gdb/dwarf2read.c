@@ -7028,14 +7028,21 @@ process_queue (void)
 	  : (item->per_cu->v.psymtab && !item->per_cu->v.psymtab->readin))
 	{
 	  struct dwarf2_per_cu_data *per_cu = item->per_cu;
+	  char buf[100];
+
+	  if (per_cu->is_debug_types)
+	    {
+	      struct signatured_type *sig_type =
+		(struct signatured_type *) per_cu;
+
+	      sprintf (buf, "TU %s at offset 0x%x",
+		       hex_string (sig_type->signature), per_cu->offset.sect_off);
+	    }
+	  else
+	    sprintf (buf, "CU at offset 0x%x", per_cu->offset.sect_off);
 
 	  if (dwarf2_read_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "Expanding symtab of %s at offset 0x%x\n",
-				  per_cu->is_debug_types ? "TU" : "CU",
-				  per_cu->offset.sect_off);
-	    }
+	    fprintf_unfiltered (gdb_stdlog, "Expanding symtab of %s\n", buf);
 
 	  if (per_cu->is_debug_types)
 	    process_full_type_unit (per_cu, item->pretend_language);
@@ -7043,12 +7050,7 @@ process_queue (void)
 	    process_full_comp_unit (per_cu, item->pretend_language);
 
 	  if (dwarf2_read_debug)
-	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "Done expanding %s at offset 0x%x\n",
-				  per_cu->is_debug_types ? "TU" : "CU",
-				  per_cu->offset.sect_off);
-	    }
+	    fprintf_unfiltered (gdb_stdlog, "Done expanding %s\n", buf);
 	}
 
       item->per_cu->queued = 0;
