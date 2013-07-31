@@ -1,4 +1,13 @@
-2013-07-23  Cary Coutant  <ccoutant@google.com>
+2013-07-31  Cary Coutant  <ccoutant@google.com>
+
+	* object.cc (Sized_relobj::do_output_section_address): New function.
+	(Sized_relobj): Instantiate explicitly.
+	* object.h (Object::output_section_address): New function.
+	(Object::do_output_section_address): New function.
+	(Sized_relobj::do_output_section_address): New function.
+	* powerpc.cc (Target_powerpc::symval_for_branch): Use it.
+
+2013-07-30  Cary Coutant  <ccoutant@google.com>
 	    Sasa Stankovic  <Sasa.Stankovic@imgtec.com>
 
 	* parameters.cc (Parameters::entry): Return target-specific entry

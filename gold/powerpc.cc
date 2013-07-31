@@ -6203,7 +6203,7 @@ Target_powerpc<size, big_endian>::symval_for_branch(
   Address opd_addr = symobj->get_output_section_offset(shndx);
   if (opd_addr == invalid_address)
     return value;
-  opd_addr += symobj->output_section(shndx)->address();
+  opd_addr += symobj->output_section_address(shndx);
   if (value >= opd_addr && value < opd_addr + symobj->section_size(shndx))
     {
       Address sec_off;

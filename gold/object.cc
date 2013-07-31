@@ -389,6 +389,23 @@ Sized_relobj<size, big_endian>::do_for_all_local_got_entries(
     }
 }
 
+// Get the address of an output section.
+
+template<int size, bool big_endian>
+uint64_t
+Sized_relobj<size, big_endian>::do_output_section_address(
+    unsigned int shndx)
+{
+  // If the input file is linked as --just-symbols, the output
+  // section address is the input section address.
+  if (this->just_symbols())
+    return this->section_address(shndx);
+
+  const Output_section* os = this->do_output_section(shndx);
+  gold_assert(os != NULL);
+  return os->address();
+}
+
 // Class Sized_relobj_file.
 
 template<int size, bool big_endian>
@@ -3217,20 +3234,32 @@ Object::find_shdr<64,true>(const unsigned char*, const char*, const char*,
 
 #ifdef HAVE_TARGET_32_LITTLE
 template
+class Sized_relobj<32, false>;
+
+template
 class Sized_relobj_file<32, false>;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
+template
+class Sized_relobj<32, true>;
+
 template
 class Sized_relobj_file<32, true>;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
 template
+class Sized_relobj<64, false>;
+
+template
 class Sized_relobj_file<64, false>;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
+template
+class Sized_relobj<64, true>;
+
 template
 class Sized_relobj_file<64, true>;
 #endif
