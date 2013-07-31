@@ -1,3 +1,8 @@
+2013-07-31  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (trace_dump_command): Select the current frame.
+
 2013-07-30  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (process_queue): Add type signature to debug output.

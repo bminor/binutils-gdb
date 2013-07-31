@@ -1,5 +1,10 @@
 2013-07-31  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/backtrace.exp (gdb_backtrace_tdp_4): Test command
+	'tdump' on stack frame 0 and 1 respectively.
+
+2013-07-31  Yao Qi  <yao@codesourcery.com>
+
 	PR gdb/13443
 	* gdb.trace/backtrace.exp (gdb_backtrace_tdp_3): Add parameter
 	'traceframe'.  Wrap test with with_test_prefix.

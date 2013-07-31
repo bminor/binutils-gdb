@@ -230,6 +230,37 @@ proc gdb_backtrace_tdp_4 { msg depth traceframe } {
 		fail "$msg (fewer than $depth stack frames found)"
 	    }
 	}
+
+	set output_string0 ""
+	# Match the output of command 'tdump' and save it in
+	# $output_string0.
+	set test "tdump on frame 0"
+	gdb_test_multiple "tdump" $test {
+	    -re "tdump\[\r\n\]+(.*)\[\r\n\]+$gdb_prompt $" {
+		set output_string0 $expect_out(1,string)
+	    }
+	}
+
+	gdb_test "up" ".*" ""
+
+	# Test that command 'tdump' still works properly when the
+	# selected frame is not the current frame, and save the output
+	# in $output_string1.
+	set test "tdump on frame 1"
+	set output_string1 ""
+	gdb_test_multiple "tdump" $test {
+	    -re "tdump\[\r\n\]+(.*)\[\r\n\]+$gdb_prompt $" {
+		set output_string1 $expect_out(1,string)
+	    }
+	}
+
+	# Output of 'tdump' on frame 0 and frame 1 should be
+	# identical.
+	if ![string compare $output_string0 $output_string1]  {
+	    pass "tdump output"
+	} else {
+	    fail "tdump output"
+	}
     }
 }
 
