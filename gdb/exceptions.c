@@ -234,28 +234,6 @@ throw_exception (struct gdb_exception exception)
   EXCEPTIONS_SIGLONGJMP (current_catcher->buf, exception.reason);
 }
 
-void
-deprecated_throw_reason (enum return_reason reason)
-{
-  struct gdb_exception exception;
-
-  memset (&exception, 0, sizeof exception);
-
-  exception.reason = reason;
-  switch (reason)
-    {
-    case RETURN_QUIT:
-      break;
-    case RETURN_ERROR:
-      exception.error = GENERIC_ERROR;
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("bad switch"));
-    }
-  
-  throw_exception (exception);
-}
-
 static void
 print_flush (void)
 {

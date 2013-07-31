@@ -186,11 +186,6 @@ extern void throw_vfatal (const char *fmt, va_list ap)
 extern void throw_error (enum errors error, const char *fmt, ...)
      ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (2, 3);
 
-/* Instead of deprecated_throw_reason, code should use
-   throw_exception.  */
-extern void deprecated_throw_reason (enum return_reason reason)
-     ATTRIBUTE_NORETURN;
-
 /* Call FUNC(UIOUT, FUNC_ARGS) but wrapped within an exception
    handler.  If an exception (enum return_reason) is thrown using
    throw_exception() than all cleanups installed since
