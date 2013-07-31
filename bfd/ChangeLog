@@ -1,3 +1,9 @@
+2013-07-31  John Tytgat  <john@bass-software.com>
+
+	PR ld/15787
+	* elf32-arm.c (elf32_arm_final_link_relocate): Base SB on the
+	output section VMA.
+
 2013-07-28  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* elf64-hppa.c (elf64_hppa_finish_dynamic_sections)

@@ -67,7 +67,7 @@ if { ![is_elf_format] || ![istarget "arm*-*-*"] } {
 # readelf: Apply readelf options on result.  Compare with regex (last arg).
 
 set armelftests_common {
-    {"Group relocations" "-Ttext 0x8000 --section-start zero=0x0 --section-start alpha=0xeef0 --section-start beta=0xffeef0" "" "" {group-relocs.s}
+    {"Group relocations" "-Ttext 0x8000 -Tdata 0x3000000 --section-start alpha=0xeef0 --section-start beta=0xffeef0" "" "" {group-relocs.s}
      {{objdump -dr group-relocs.d}}
      "group-relocs"}
     {"Indirect cross-library function reference (set-up)"
@@ -464,9 +464,13 @@ if { ![istarget "arm*-*-nacl*"] } {
 }
 
 run_dump_test "group-relocs-alu-bad"
+run_dump_test "group-relocs-alu-bad-2"
 run_dump_test "group-relocs-ldr-bad"
+run_dump_test "group-relocs-ldr-bad-2"
 run_dump_test "group-relocs-ldrs-bad"
+run_dump_test "group-relocs-ldrs-bad-2"
 run_dump_test "group-relocs-ldc-bad"
+run_dump_test "group-relocs-ldc-bad-2"
 run_dump_test "thumb2-bl-undefweak"
 run_dump_test "thumb2-bl-undefweak1"
 run_dump_test "emit-relocs1"

@@ -1,3 +1,22 @@
+2013-07-31  John Tytgat  <john@bass-software.com>
+
+	PR ld/15787
+	* ld-arm/group-relocs-alu-bad-2.d; New.
+	* ld-arm/group-relocs-alu-bad-2.s: New.
+	* ld-arm/group-relocs-ldc-bad-2.d: New.
+	* ld-arm/group-relocs-ldc-bad-2.s: New.
+	* ld-arm/group-relocs-ldr-bad-2.d: New.
+	* ld-arm/group-relocs-ldr-bad-2.s: New.
+	* ld-arm/group-relocs-ldrs-bad-2.d: New.
+	* ld-arm/group-relocs-ldrs-bad-2: New.
+	* ld-arm/arm-elf.exp: Add the new tests.
+	* ld-arm/group-relocs-ldr-bad.d: Update expected output.
+	* ld-arm/group-relocs-ldr-bad.s: Likewise.
+	* ld-arm/group-relocs-ldrs-bad.d: Likewise.
+	* ld-arm/group-relocs-ldrs-bad.s: Likewise.
+	* ld-arm/group-relocs.d: Likewise.
+	* ld-arm/group-relocs.s: Likewise.
+
 2013-07-27  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* ld-vax-elf/export-class-call.dd: New test.
