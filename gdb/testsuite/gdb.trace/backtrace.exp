@@ -17,21 +17,20 @@
 
 load_lib "trace-support.exp"
 
-
-gdb_exit
-gdb_start
-
 standard_testfile actions.c
-if { [gdb_compile "$srcdir/$subdir/$srcfile" $binfile \
-	  executable {debug nowarnings}] != "" } {
-    untested backtrace.exp
+set executable $testfile
+set expfile $testfile.exp
+
+if [prepare_for_testing $expfile $executable $srcfile \
+	[list debug nowarnings]] {
+    untested "failed to prepare for trace tests"
     return -1
 }
-gdb_load $binfile
-gdb_test "tstop"       ".*" ""
-gdb_test "tfind none"  ".*" ""
-runto_main
-gdb_reinitialize_dir $srcdir/$subdir
+
+if ![runto_main] {
+    fail "Can't run to main to check for trace support"
+    return -1
+}
 
 if { ![gdb_target_supports_trace] } then {
     unsupported "Current target does not support trace"
@@ -156,14 +155,14 @@ gdb_trace_setactions "8.6: setup TP to collect stack mem cast expr" \
        "$tdp6" \
        "collect $fpreg, \(\*\(void \*\*\) \($spreg\)\) @ 64" "^$"
 
-gdb_test "tstart" ".*" ""
+gdb_test_no_output "tstart" ""
 
 gdb_test "break end" ".*" ""
 gdb_test "continue" \
     "Continuing.*Breakpoint $decimal, end.*" \
     "run trace experiment"
 
-gdb_test "tstop" ".*" ""
+gdb_test_no_output "tstop" ""
 
 proc gdb_backtrace_tdp_1 { msg } {
     global gdb_prompt

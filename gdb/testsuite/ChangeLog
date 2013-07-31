@@ -1,3 +1,10 @@
+2013-07-31  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/backtrace.exp: Don't invoke 'get_exit' and
+	'gdb_start'.
+	Invoke 'prepare_for_testing' instead of 'gdb_compile'.
+	Use gdb_test_no_output to issue commands 'tstart' and 'tstop'.
+
 2013-07-30  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.dwarf2/pieces-optimized-out.exp: Expect "<optimized out>"
