@@ -488,17 +488,11 @@ static void ATTRIBUTE_NORETURN
 mips_error (char *string,...)
 {
   va_list args;
-
-  va_start (args, string);
+  char *fmt;
 
   target_terminal_ours ();
   wrap_here ("");		/* Force out any buffered output.  */
   gdb_flush (gdb_stdout);
-  if (error_pre_print)
-    fputs_filtered (error_pre_print, gdb_stderr);
-  vfprintf_filtered (gdb_stderr, string, args);
-  fprintf_filtered (gdb_stderr, "\n");
-  va_end (args);
   gdb_flush (gdb_stderr);
 
   /* Clean up in such a way that mips_close won't try to talk to the
@@ -506,11 +500,16 @@ mips_error (char *string,...)
      it).  */
   close_ports ();
 
-  printf_unfiltered ("Ending remote MIPS debugging.\n");
   if (!ptid_equal (inferior_ptid, null_ptid))
     target_mourn_inferior ();
 
-  deprecated_throw_reason (RETURN_ERROR);
+  fmt = concat (_("Ending remote MIPS debugging: "),
+		string, (char *) NULL);
+  make_cleanup (xfree, fmt);
+
+  va_start (args, string);
+  throw_verror (TARGET_CLOSE_ERROR, fmt, args);
+  va_end (args);
 }
 
 /* putc_readable - print a character, displaying non-printable chars in

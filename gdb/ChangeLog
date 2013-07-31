@@ -1,5 +1,11 @@
 2013-07-31  Andrew Burgess  <aburgess@broadcom.com>
 
+	* remote-mips.c (mips_error): Replace use of
+	deprecated_throw_reason with throw_verror.  Use the error message
+	passed to mips_error as the error message for throw_verror.
+
+2013-07-31  Andrew Burgess  <aburgess@broadcom.com>
+
 	* monitor.c (monitor_interrupt_query): Replace use of
 	deprecated_throw_reason with quit.
 	* nto-procfs.c (interrupt_query): Likewise.
