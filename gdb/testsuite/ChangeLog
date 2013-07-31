@@ -1,5 +1,12 @@
 2013-07-31  Yao Qi  <yao@codesourcery.com>
 
+	PR gdb/13443
+	* gdb.trace/backtrace.exp (gdb_backtrace_tdp_3): Add parameter
+	'traceframe'.  Wrap test with with_test_prefix.
+	(top level): Update.
+
+2013-07-31  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.trace/backtrace.exp: Don't invoke 'get_exit' and
 	'gdb_start'.
 	Invoke 'prepare_for_testing' instead of 'gdb_compile'.

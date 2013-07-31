@@ -209,24 +209,26 @@ proc gdb_backtrace_tdp_3 { msg } {
     }
 }
 
-proc gdb_backtrace_tdp_4 { msg depth } {
+proc gdb_backtrace_tdp_4 { msg depth traceframe } {
     global gdb_prompt
 
-    # We are in a trace frame at which we collected all registers,
-    # plus a sizeable hunk of stack memory.  This should enable us to
-    # display at least several stack frames worth of backtrace.  We'll
-    # assume that if we can't display at least "depth" levels (with
-    # args), it counts as an error.
+    with_test_prefix "traceframe $traceframe" {
+	# We are in a trace frame at which we collected all registers,
+	# plus a sizeable hunk of stack memory.  This should enable us to
+	# display at least several stack frames worth of backtrace.  We'll
+	# assume that if we can't display at least "depth" levels (with
+	# args), it counts as an error.
 
-    gdb_test_multiple "backtrace" "$msg" {
-	-re "#$depth\[\t \].*gdb_recursion_test.*depth=\[0-9\]+.*q1=\[0-9\]+.*q2=\[0-9\]+.*q3=\[0-9\]+.*q4=\[0-9\]+.*q5=\[0-9\]+.*q6=\[0-9\]+.*$gdb_prompt $" {
-	    pass "$msg"
-	}
-	-re "#$depth\[\t \].*gdb_recursion_test.*depth=.*$gdb_prompt $" {
-	    fail "$msg (args missing from #$depth stack frame)"
-	}
-	-re "#\[0-9\]+\[\t \].*gdb_recursion_test.*depth=.*$gdb_prompt $" {
-	    fail "$msg (fewer than $depth stack frames found)"
+	gdb_test_multiple "backtrace" "$msg" {
+	    -re "#$depth\[\t \].*gdb_recursion_test.*depth=\[0-9\]+.*q1=\[0-9\]+.*q2=\[0-9\]+.*q3=\[0-9\]+.*q4=\[0-9\]+.*q5=\[0-9\]+.*q6=\[0-9\]+.*$gdb_prompt $" {
+		pass "$msg"
+	    }
+	    -re "#$depth\[\t \].*gdb_recursion_test.*depth=.*$gdb_prompt $" {
+		fail "$msg (args missing from #$depth stack frame)"
+	    }
+	    -re "#\[0-9\]+\[\t \].*gdb_recursion_test.*depth=.*$gdb_prompt $" {
+		fail "$msg (fewer than $depth stack frames found)"
+	    }
 	}
     }
 }
@@ -258,7 +260,7 @@ gdb_backtrace_tdp_3 "8.6: Backtrace, depth == 1, collect args and locals"
 gdb_tfind_test "8.6: find frame 4"     "4" "4"
 gdb_test "printf \"TDP \%d:\\n\", \$tracepoint" \
 	"TDP $tdp6:" ""
-gdb_backtrace_tdp_4 "8.6: Backtrace, depth == 1, collect stack mem expr" "0"
+gdb_backtrace_tdp_4 "8.6: Backtrace, depth == 1, collect stack mem expr" "0" 4
 
 gdb_tfind_test "8.6: find frame 5"     "5" "5"
 gdb_test "printf \"TDP \%d:\\n\", \$tracepoint" \
@@ -279,7 +281,7 @@ gdb_backtrace_tdp_3 "8.6: Backtrace, depth == 2, collect args and locals"
 gdb_tfind_test "8.6: find frame 9"     "9" "9"
 gdb_test "printf \"TDP \%d:\\n\", \$tracepoint" \
 	"TDP $tdp6:" ""
-gdb_backtrace_tdp_4 "8.6: Backtrace, depth == 1, collect stack mem expr" "0"
+gdb_backtrace_tdp_4 "8.6: Backtrace, depth == 1, collect stack mem expr" "0" 9
 
 gdb_tfind_test "8.6: find frame 10"    "10" "10"
 gdb_test "printf \"TDP \%d:\\n\", \$tracepoint" \
@@ -300,7 +302,7 @@ gdb_backtrace_tdp_3 "8.6: Backtrace, depth == 3, collect args and locals"
 gdb_tfind_test "8.6: find frame 14"    "14" "14"
 gdb_test "printf \"TDP \%d:\\n\", \$tracepoint" \
 	"TDP $tdp6:" ""
-gdb_backtrace_tdp_4 "8.6: Backtrace, depth == 1, collect stack mem expr" "0"
+gdb_backtrace_tdp_4 "8.6: Backtrace, depth == 1, collect stack mem expr" "0" 14
 
 gdb_tfind_test "8.6: find frame 15"    "15" "15"
 gdb_test "printf \"TDP \%d:\\n\", \$tracepoint" \
@@ -321,7 +323,7 @@ gdb_backtrace_tdp_3 "8.6: Backtrace, depth == 4, collect args and locals"
 gdb_tfind_test "8.6: find frame 19"    "19" "19"
 gdb_test "printf \"TDP \%d:\\n\", \$tracepoint" \
 	"TDP $tdp6:" ""
-gdb_backtrace_tdp_4 "8.6: Backtrace, depth == 1, collect stack mem expr" "0"
+gdb_backtrace_tdp_4 "8.6: Backtrace, depth == 1, collect stack mem expr" "0" 19
 
 gdb_test "printf \"x \%d x\\n\", depth == 3" \
 	"x 0 x" \
