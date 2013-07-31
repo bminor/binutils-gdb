@@ -1,3 +1,8 @@
+2013-07-31  Andrew Burgess  <aburgess@broadcom.com>
+
+	* utils.c (internal_verror): Replace use of deprecated_throw_reason
+	with call to fatal.
+
 2013-07-31  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
