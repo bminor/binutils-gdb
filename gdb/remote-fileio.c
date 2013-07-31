@@ -513,7 +513,7 @@ remote_fileio_sig_exit (void)
 static void
 async_remote_fileio_interrupt (gdb_client_data arg)
 {
-  deprecated_throw_reason (RETURN_QUIT);
+  quit ();
 }
 
 static void

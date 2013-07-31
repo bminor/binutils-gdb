@@ -5165,7 +5165,7 @@ interrupt_query (void)
   if (target_can_async_p ())
     {
       signal (SIGINT, handle_sigint);
-      deprecated_throw_reason (RETURN_QUIT);
+      quit ();
     }
   else
     {
@@ -5173,7 +5173,7 @@ interrupt_query (void)
 Give up (and stop debugging it)? ")))
 	{
 	  remote_unpush_target ();
-	  deprecated_throw_reason (RETURN_QUIT);
+	  quit ();
 	}
     }
 

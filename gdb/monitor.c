@@ -1036,7 +1036,7 @@ monitor_interrupt_query (void)
 Give up (and stop debugging it)? ")))
     {
       target_mourn_inferior ();
-      deprecated_throw_reason (RETURN_QUIT);
+      quit ();
     }
 
   target_terminal_inferior ();

@@ -1,5 +1,14 @@
 2013-07-31  Andrew Burgess  <aburgess@broadcom.com>
 
+	* monitor.c (monitor_interrupt_query): Replace use of
+	deprecated_throw_reason with quit.
+	* nto-procfs.c (interrupt_query): Likewise.
+	* remote-fileio.c (remote_fileio_sig_exit): Likewise.
+	* remote-mips.c (mips_kill): Likewise.
+	* remote.c (interrupt_query): Likewise.
+
+2013-07-31  Andrew Burgess  <aburgess@broadcom.com>
+
 	* utils.c (internal_verror): Replace use of deprecated_throw_reason
 	with call to fatal.
 

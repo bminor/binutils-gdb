@@ -2291,8 +2291,7 @@ Give up (and stop debugging it)? ")))
 
 	  printf_unfiltered ("Ending remote MIPS debugging.\n");
 	  target_mourn_inferior ();
-
-	  deprecated_throw_reason (RETURN_QUIT);
+	  quit ();
 	}
 
       target_terminal_inferior ();
