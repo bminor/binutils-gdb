@@ -1,5 +1,9 @@
 2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* micromips-opc.c (WR_s): Delete.
+
+2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips-opc.c (WR_1, WR_2, RD_1, RD_2, RD_3, RD_4, MOD_1, MOD_2, UDI):
 	New macros.
 	(WR_d, WR_t, WR_D, WR_T, WR_S, RD_s, RD_b, RD_t, RD_S, RD_T, RD_R)

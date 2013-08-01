@@ -196,7 +196,6 @@ decode_micromips_operand (const char *p)
 #define RD_pc	INSN2_READ_PC
 
 /* For 32-bit microMIPS instructions.  */
-#define WR_s	INSN_WRITE_GPR_S
 #define WR_31	INSN_WRITE_GPR_31
 #define WR_CC	INSN_WRITE_COND_CODE
 
