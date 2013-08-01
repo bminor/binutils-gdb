@@ -1,5 +1,13 @@
 2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* mips16-opc.c (UBR, CBR, RD_31, RD_PC): Redefine as INSN2_* flags.
+	(WR_SP): Replace with...
+	(MOD_SP): ...this.
+	(mips16_opcodes): Update accordingly.
+	* mips-dis.c (print_insn_mips16): Likewise.
+
+2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips16-opc.c (mips16_opcodes): Reformat.
 
 2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>

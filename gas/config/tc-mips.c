@@ -3547,12 +3547,8 @@ delayed_branch_p (const struct mips_cl_insn *ip)
 static inline bfd_boolean
 compact_branch_p (const struct mips_cl_insn *ip)
 {
-  if (mips_opts.mips16)
-    return (ip->insn_mo->pinfo & (MIPS16_INSN_UNCOND_BRANCH
-				  | MIPS16_INSN_COND_BRANCH)) != 0;
-  else
-    return (ip->insn_mo->pinfo2 & (INSN2_UNCOND_BRANCH
-				   | INSN2_COND_BRANCH)) != 0;
+  return (ip->insn_mo->pinfo2 & (INSN2_UNCOND_BRANCH
+				 | INSN2_COND_BRANCH)) != 0;
 }
 
 /* Return true if IP is an unconditional branch or jump.  */
@@ -3561,9 +3557,7 @@ static inline bfd_boolean
 uncond_branch_p (const struct mips_cl_insn *ip)
 {
   return ((ip->insn_mo->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0
-	  || (mips_opts.mips16
-	      ? (ip->insn_mo->pinfo & MIPS16_INSN_UNCOND_BRANCH) != 0
-	      : (ip->insn_mo->pinfo2 & INSN2_UNCOND_BRANCH) != 0));
+	  || (ip->insn_mo->pinfo2 & INSN2_UNCOND_BRANCH) != 0);
 }
 
 /* Return true if IP is a branch-likely instruction.  */
@@ -3602,9 +3596,9 @@ gpr_mod_mask (const struct mips_cl_insn *ip)
 	mask |= 1 << micromips_to_32_reg_d_map[EXTRACT_OPERAND (1, MD, *ip)];
       if (pinfo2 & INSN2_MOD_GPR_MF)
 	mask |= 1 << micromips_to_32_reg_f_map[EXTRACT_OPERAND (1, MF, *ip)];
-      if (pinfo2 & INSN2_MOD_SP)
-	mask |= 1 << SP;
     }
+  if (pinfo2 & INSN2_MOD_SP)
+    mask |= 1 << SP;
   return mask;
 }
 
@@ -3629,8 +3623,6 @@ gpr_read_mask (const struct mips_cl_insn *ip)
 	mask |= 1 << TREG;
       if (pinfo & MIPS16_INSN_READ_SP)
 	mask |= 1 << SP;
-      if (pinfo & MIPS16_INSN_READ_31)
-	mask |= 1 << RA;
       if (pinfo & MIPS16_INSN_READ_Z)
 	mask |= 1 << (mips16_to_32_reg_map
 		      [MIPS16_EXTRACT_OPERAND (MOVE32Z, *ip)]);
@@ -3647,11 +3639,11 @@ gpr_read_mask (const struct mips_cl_insn *ip)
 	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RS, *ip);
       if (pinfo2 & INSN2_READ_GP)
 	mask |= 1 << GP;
-      if (pinfo2 & INSN2_READ_GPR_31)
-	mask |= 1 << RA;
       if (pinfo2 & INSN2_READ_GPR_Z)
 	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RZ, *ip);
     }
+  if (pinfo2 & INSN2_READ_GPR_31)
+    mask |= 1 << RA;
   if (mips_opts.micromips)
     {
       if (pinfo2 & INSN2_READ_GPR_MC)
@@ -3697,8 +3689,6 @@ gpr_write_mask (const struct mips_cl_insn *ip)
 	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RZ, *ip)];
       if (pinfo & MIPS16_INSN_WRITE_T)
 	mask |= 1 << TREG;
-      if (pinfo & MIPS16_INSN_WRITE_SP)
-	mask |= 1 << SP;
       if (pinfo & MIPS16_INSN_WRITE_31)
 	mask |= 1 << RA;
       if (pinfo & MIPS16_INSN_WRITE_GPR_Y)
@@ -5603,7 +5593,7 @@ fix_loongson2f (struct mips_cl_insn * ip)
 
 static bfd_boolean
 can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
-  bfd_reloc_code_real_type *reloc_type)
+		   bfd_reloc_code_real_type *reloc_type)
 {
   unsigned long pinfo, pinfo2, prev_pinfo, prev_pinfo2;
   unsigned int gpr_read, gpr_write, prev_gpr_read, prev_gpr_write;
@@ -5705,9 +5695,7 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
 
   /* If the previous instruction uses the PC, we can not swap.  */
   prev_pinfo2 = history[0].insn_mo->pinfo2;
-  if (mips_opts.mips16 && (prev_pinfo & MIPS16_INSN_READ_PC))
-    return FALSE;
-  if (mips_opts.micromips && (prev_pinfo2 & INSN2_READ_PC))
+  if (prev_pinfo2 & INSN2_READ_PC)
     return FALSE;
 
   /* If the previous instruction has an incorrect size for a fixed
@@ -5779,9 +5767,9 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
 
 static enum append_method
 get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
-  bfd_reloc_code_real_type *reloc_type)
+		   bfd_reloc_code_real_type *reloc_type)
 {
-  unsigned long pinfo;
+  unsigned long pinfo, pinfo2;
 
   /* The relaxed version of a macro sequence must be inherently
      hazard-free.  */
@@ -5800,9 +5788,11 @@ get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
 	return APPEND_SWAP;
 
       pinfo = ip->insn_mo->pinfo;
+      pinfo2 = ip->insn_mo->pinfo2;
       if (mips_opts.mips16
 	  && ISA_SUPPORTS_MIPS16E
-	  && (pinfo & (MIPS16_INSN_READ_X | MIPS16_INSN_READ_31)))
+	  && ((pinfo & MIPS16_INSN_READ_X) != 0
+	      || (pinfo2 & INSN2_READ_GPR_31) != 0))
 	return APPEND_ADD_COMPACT;
 
       return APPEND_ADD_WITH_NOP;

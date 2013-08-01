@@ -1,5 +1,15 @@
 2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (compact_branch_p, uncond_branch_p): Use the same
+	flags for MIPS16 and non-MIPS16 instructions.
+	(gpr_mod_mask): Move the INSN2_MOD_SP case outside the micromips block.
+	(gpr_read_mask): Use INSN2_READ_GPR_31 for MIPS16 instructions too.
+	(gpr_write_mask): Remove MIPS16_INSN_WRITE_SP handling.
+	(can_swap_branch_p, get_append_method): Use the same flags for MIPS16
+	and non-MIPS16 instructions.  Fix formatting.
+
+2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (reg_needs_delay): Move later in file.
 	Use gpr_write_mask.
 	(insns_between): Use gpr_read_mask instead of EXTRACT_OPERAND.

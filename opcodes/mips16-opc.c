@@ -143,14 +143,11 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
    the opcodes table.  */
 
 #define UBD     INSN_UNCOND_BRANCH_DELAY
-#define UBR	MIPS16_INSN_UNCOND_BRANCH
-#define CBR	MIPS16_INSN_COND_BRANCH
 
 #define WR_x	MIPS16_INSN_WRITE_X
 #define WR_y	MIPS16_INSN_WRITE_Y
 #define WR_z	MIPS16_INSN_WRITE_Z
 #define WR_T	MIPS16_INSN_WRITE_T
-#define WR_SP	MIPS16_INSN_WRITE_SP
 #define WR_31	MIPS16_INSN_WRITE_31
 #define WR_Y	MIPS16_INSN_WRITE_GPR_Y
 
@@ -159,8 +156,6 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 #define RD_Z	MIPS16_INSN_READ_Z
 #define RD_T	MIPS16_INSN_READ_T
 #define RD_SP	MIPS16_INSN_READ_SP
-#define RD_31	MIPS16_INSN_READ_31
-#define RD_PC	MIPS16_INSN_READ_PC
 #define RD_X	MIPS16_INSN_READ_GPR_X
 
 #define WR_HI	INSN_WRITE_HI
@@ -170,6 +165,12 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
 
 #define NODS	INSN_NO_DELAY_SLOT
 #define TRAP	INSN_NO_DELAY_SLOT
+
+#define MOD_SP	INSN2_MOD_SP
+#define RD_31	INSN2_READ_GPR_31
+#define RD_PC	INSN2_READ_PC
+#define UBR	INSN2_UNCOND_BRANCH
+#define CBR	INSN2_COND_BRANCH
 
 #define I1	INSN_ISA1
 #define I3	INSN_ISA3
@@ -181,26 +182,26 @@ const struct mips_opcode mips16_opcodes[] =
 {
 /* name,    args,	match,	mask,		pinfo,	         	pinfo2, membership */
 {"nop",	    "",		0x6500, 0xffff,		RD_Z,			0,		I1,	0,	0 }, /* move $0,$Z */
-{"la",	    "x,A",	0x0800, 0xf800,		WR_x|RD_PC,		0,		I1,	0,	0 },
+{"la",	    "x,A",	0x0800, 0xf800,		WR_x,			RD_PC,		I1,	0,	0 },
 {"abs",	    "x,w",	0, (int) M_ABS,		INSN_MACRO,		0,		I1,	0,	0 },
 {"addiu",   "y,x,4",	0x4000, 0xf810,		WR_y|RD_x,		0,		I1,	0,	0 },
 {"addiu",   "x,k",	0x4800, 0xf800,		WR_x|RD_x,		0,		I1,	0,	0 },
-{"addiu",   "S,K",	0x6300, 0xff00,		WR_SP|RD_SP,		0,		I1,	0,	0 },
-{"addiu",   "S,S,K",	0x6300, 0xff00,		WR_SP|RD_SP,		0,		I1,	0,	0 },
-{"addiu",   "x,P,V",	0x0800, 0xf800,		WR_x|RD_PC,		0,		I1,	0,	0 },
+{"addiu",   "S,K",	0x6300, 0xff00,		0,			MOD_SP,		I1,	0,	0 },
+{"addiu",   "S,S,K",	0x6300, 0xff00,		0,			MOD_SP,		I1,	0,	0 },
+{"addiu",   "x,P,V",	0x0800, 0xf800,		WR_x,			RD_PC,		I1,	0,	0 },
 {"addiu",   "x,S,V",	0x0000, 0xf800,		WR_x|RD_SP,		0,		I1,	0,	0 },
 {"addu",    "z,v,y",	0xe001, 0xf803,		WR_z|RD_x|RD_y,		0,		I1,	0,	0 },
 {"addu",    "y,x,4",	0x4000, 0xf810,		WR_y|RD_x,		0,		I1,	0,	0 },
 {"addu",    "x,k",	0x4800, 0xf800,		WR_x|RD_x,		0,		I1,	0,	0 },
-{"addu",    "S,K",	0x6300, 0xff00,		WR_SP|RD_SP,		0,		I1,	0,	0 },
-{"addu",    "S,S,K",	0x6300, 0xff00,		WR_SP|RD_SP,		0,		I1,	0,	0 },
-{"addu",    "x,P,V",	0x0800, 0xf800,		WR_x|RD_PC,		0,		I1,	0,	0 },
+{"addu",    "S,K",	0x6300, 0xff00,		0,			MOD_SP,		I1,	0,	0 },
+{"addu",    "S,S,K",	0x6300, 0xff00,		0,			MOD_SP,		I1,	0,	0 },
+{"addu",    "x,P,V",	0x0800, 0xf800,		WR_x,			RD_PC,		I1,	0,	0 },
 {"addu",    "x,S,V",	0x0000, 0xf800,		WR_x|RD_SP,		0,		I1,	0,	0 },
 {"and",	    "x,y",	0xe80c, 0xf81f,		WR_x|RD_x|RD_y,		0,		I1,	0,	0 },
-{"b",	    "q",	0x1000, 0xf800,		UBR,			0,		I1,	0,	0 },
+{"b",	    "q",	0x1000, 0xf800,		0,			UBR,		I1,	0,	0 },
 {"beq",	    "x,y,p",	0, (int) M_BEQ,		INSN_MACRO,		0,		I1,	0,	0 },
 {"beq",     "x,I,p",	0, (int) M_BEQ_I,	INSN_MACRO,		0,		I1,	0,	0 },
-{"beqz",    "x,p",	0x2000, 0xf800,		CBR|RD_x,		0,		I1,	0,	0 },
+{"beqz",    "x,p",	0x2000, 0xf800,		RD_x,			CBR,		I1,	0,	0 },
 {"bge",	    "x,y,p",	0, (int) M_BGE,		INSN_MACRO,		0,		I1,	0,	0 },
 {"bge",     "x,I,p",	0, (int) M_BGE_I,	INSN_MACRO,		0,		I1,	0,	0 },
 {"bgeu",    "x,y,p",	0, (int) M_BGEU,	INSN_MACRO,		0,		I1,	0,	0 },
@@ -219,26 +220,26 @@ const struct mips_opcode mips16_opcodes[] =
 {"bltu",    "x,I,p",	0, (int) M_BLTU_I,	INSN_MACRO,		0,		I1,	0,	0 },
 {"bne",	    "x,y,p",	0, (int) M_BNE,		INSN_MACRO,		0,		I1,	0,	0 },
 {"bne",     "x,I,p",	0, (int) M_BNE_I,	INSN_MACRO,		0,		I1,	0,	0 },
-{"bnez",    "x,p",	0x2800, 0xf800,		CBR|RD_x,		0,		I1,	0,	0 },
+{"bnez",    "x,p",	0x2800, 0xf800,		RD_x,			CBR,		I1,	0,	0 },
 {"break",   "6",	0xe805, 0xf81f,		TRAP,			0,		I1,	0,	0 },
-{"bteqz",   "p",	0x6000, 0xff00,		CBR|RD_T,		0,		I1,	0,	0 },
-{"btnez",   "p",	0x6100, 0xff00,		CBR|RD_T,		0,		I1,	0,	0 },
+{"bteqz",   "p",	0x6000, 0xff00,		RD_T,			CBR,		I1,	0,	0 },
+{"btnez",   "p",	0x6100, 0xff00,		RD_T,			CBR,		I1,	0,	0 },
 {"cmpi",    "x,U",	0x7000, 0xf800,		WR_T|RD_x,		0,		I1,	0,	0 },
 {"cmp",	    "x,y",	0xe80a, 0xf81f,		WR_T|RD_x|RD_y,		0,		I1,	0,	0 },
 {"cmp",     "x,U",	0x7000, 0xf800,		WR_T|RD_x,		0,		I1,	0,	0 },
-{"dla",	    "y,E",	0xfe00, 0xff00,		WR_y|RD_PC, 		0,		I3,	0,	0 },
+{"dla",	    "y,E",	0xfe00, 0xff00,		WR_y, 			RD_PC,		I3,	0,	0 },
 {"daddiu",  "y,x,4",	0x4010, 0xf810,		WR_y|RD_x, 		0,		I3,	0,	0 },
 {"daddiu",  "y,j",	0xfd00, 0xff00,		WR_y|RD_y, 		0,		I3,	0,	0 },
-{"daddiu",  "S,K",	0xfb00, 0xff00,		WR_SP|RD_SP, 		0,		I3,	0,	0 },
-{"daddiu",  "S,S,K",	0xfb00, 0xff00,		WR_SP|RD_SP, 		0,		I3,	0,	0 },
-{"daddiu",  "y,P,W",	0xfe00, 0xff00,		WR_y|RD_PC, 		0,		I3,	0,	0 },
+{"daddiu",  "S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
+{"daddiu",  "S,S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
+{"daddiu",  "y,P,W",	0xfe00, 0xff00,		WR_y,	 		RD_PC,		I3,	0,	0 },
 {"daddiu",  "y,S,W",	0xff00, 0xff00,		WR_y|RD_SP, 		0,		I3,	0,	0 },
 {"daddu",   "z,v,y",	0xe000, 0xf803,		WR_z|RD_x|RD_y, 	0,		I3,	0,	0 },
 {"daddu",   "y,x,4",	0x4010, 0xf810,		WR_y|RD_x, 		0,		I3,	0,	0 },
 {"daddu",   "y,j",	0xfd00, 0xff00,		WR_y|RD_y, 		0,		I3,	0,	0 },
-{"daddu",   "S,K",	0xfb00, 0xff00,		WR_SP|RD_SP, 		0,		I3,	0,	0 },
-{"daddu",   "S,S,K",	0xfb00, 0xff00,		WR_SP|RD_SP, 		0,		I3,	0,	0 },
-{"daddu",   "y,P,W",	0xfe00, 0xff00,		WR_y|RD_PC, 		0,		I3,	0,	0 },
+{"daddu",   "S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
+{"daddu",   "S,S,K",	0xfb00, 0xff00,		0,	 		MOD_SP,		I3,	0,	0 },
+{"daddu",   "y,P,W",	0xfe00, 0xff00,		WR_y,	 		RD_PC,		I3,	0,	0 },
 {"daddu",   "y,S,W",	0xff00, 0xff00,		WR_y|RD_SP, 		0,		I3,	0,	0 },
 {"ddiv",    "0,x,y",	0xe81e, 0xf81f,		RD_x|RD_y|WR_HI|WR_LO,	0,		I3,	0,	0 },
 {"ddiv",    "z,v,y",	0, (int) M_DDIV_3,	INSN_MACRO,		0,		I1,	0,	0 },
@@ -281,28 +282,28 @@ const struct mips_opcode mips16_opcodes[] =
 {"jal",	    "a",	0x1800, 0xfc00,		UBD|WR_31,		0,		I1,	0,	0 },
 {"jalx",    "i",	0x1c00, 0xfc00,		UBD|WR_31,		0,		I1,	0,	0 },
 {"jr",	    "x",	0xe800, 0xf8ff,		UBD|RD_x,		0,		I1,	0,	0 },
-{"jr",	    "R",	0xe820, 0xffff,		UBD|RD_31,		0,		I1,	0,	0 },
+{"jr",	    "R",	0xe820, 0xffff,		UBD,			RD_31,		I1,	0,	0 },
 {"j",	    "x",	0xe800, 0xf8ff,		UBD|RD_x,		0,		I1,	0,	0 },
-{"j",	    "R",	0xe820, 0xffff,		UBD|RD_31,		0,		I1,	0,	0 },
+{"j",	    "R",	0xe820, 0xffff,		UBD,			RD_31,		I1,	0,	0 },
 /* MIPS16e compact branches.  We keep them near the ordinary branches
    so that we easily find them when converting a normal branch to a
    compact one.  */
-{"jalrc",   "x",	0xe8c0, 0xf8ff,		UBR|WR_31|RD_x|NODS,	0,		I32,	0,	0 },
-{"jalrc",   "R,x",	0xe8c0, 0xf8ff,		UBR|WR_31|RD_x|NODS,	0,		I32,	0,	0 },
-{"jrc",	    "x",	0xe880, 0xf8ff,		UBR|RD_x|NODS,		0,		I32,	0,	0 },
-{"jrc",	    "R",	0xe8a0, 0xffff,		UBR|RD_31|NODS,		0,		I32,	0,	0 },
+{"jalrc",   "x",	0xe8c0, 0xf8ff,		WR_31|RD_x|NODS,	UBR,		I32,	0,	0 },
+{"jalrc",   "R,x",	0xe8c0, 0xf8ff,		WR_31|RD_x|NODS,	UBR,		I32,	0,	0 },
+{"jrc",	    "x",	0xe880, 0xf8ff,		RD_x|NODS,		UBR,		I32,	0,	0 },
+{"jrc",	    "R",	0xe8a0, 0xffff,		NODS,			UBR|RD_31,	I32,	0,	0 },
 {"lb",	    "y,5(x)",	0x8000, 0xf800,		WR_y|RD_x,		0,		I1,	0,	0 },
 {"lbu",	    "y,5(x)",	0xa000, 0xf800,		WR_y|RD_x,		0,		I1,	0,	0 },
 {"ld",	    "y,D(x)",	0x3800, 0xf800,		WR_y|RD_x, 		0,		I3,	0,	0 },
-{"ld",	    "y,B",	0xfc00, 0xff00,		WR_y|RD_PC, 		0,		I3,	0,	0 },
-{"ld",	    "y,D(P)",	0xfc00, 0xff00,		WR_y|RD_PC, 		0,		I3,	0,	0 },
+{"ld",	    "y,B",	0xfc00, 0xff00,		WR_y,	 		RD_PC,		I3,	0,	0 },
+{"ld",	    "y,D(P)",	0xfc00, 0xff00,		WR_y,	 		RD_PC,		I3,	0,	0 },
 {"ld",	    "y,D(S)",	0xf800, 0xff00,		WR_y|RD_SP, 		0,		I3,	0,	0 },
 {"lh",	    "y,H(x)",	0x8800, 0xf800,		WR_y|RD_x,		0,		I1,	0,	0 },
 {"lhu",	    "y,H(x)",	0xa800, 0xf800,		WR_y|RD_x,		0,		I1,	0,	0 },
 {"li",	    "x,U",	0x6800, 0xf800,		WR_x,			0,		I1,	0,	0 },
 {"lw",	    "y,W(x)",	0x9800, 0xf800,		WR_y|RD_x,		0,		I1,	0,	0 },
-{"lw",	    "x,A",	0xb000, 0xf800,		WR_x|RD_PC,		0,		I1,	0,	0 },
-{"lw",	    "x,V(P)",	0xb000, 0xf800,		WR_x|RD_PC,		0,		I1,	0,	0 },
+{"lw",	    "x,A",	0xb000, 0xf800,		WR_x,			RD_PC,		I1,	0,	0 },
+{"lw",	    "x,V(P)",	0xb000, 0xf800,		WR_x,			RD_PC,		I1,	0,	0 },
 {"lw",	    "x,V(S)",	0x9000, 0xf800,		WR_x|RD_SP,		0,		I1,	0,	0 },
 {"lwu",     "y,W(x)",	0xb800, 0xf800,		WR_y|RD_x, 		0,		I3,	0,	0 },
 {"mfhi",    "x",	0xe810, 0xf8ff,		WR_x|RD_HI,		0,		I1,	0,	0 },
@@ -321,8 +322,8 @@ const struct mips_opcode mips16_opcodes[] =
 {"remu",    "z,v,y",	0, (int) M_REMU_3,	INSN_MACRO,		0,		I1,	0,	0 },
 {"sb",	    "y,5(x)",	0xc000, 0xf800,		RD_y|RD_x,		0,		I1,	0,	0 },
 {"sd",	    "y,D(x)",	0x7800, 0xf800,		RD_y|RD_x, 		0,		I3,	0,	0 },
-{"sd",	    "y,D(S)",	0xf900, 0xff00,		RD_y|RD_PC, 		0,		I3,	0,	0 },
-{"sd",	    "R,C(S)",	0xfa00, 0xff00,		RD_31|RD_PC,		0,		I1,	0,	0 },
+{"sd",	    "y,D(S)",	0xf900, 0xff00,		RD_y, 			RD_PC,		I3,	0,	0 },
+{"sd",	    "R,C(S)",	0xfa00, 0xff00,		0,			RD_PC|RD_31,	I1,	0,	0 },
 {"sh",	    "y,H(x)",	0xc800, 0xf800,		RD_y|RD_x,		0,		I1,	0,	0 },
 {"sllv",    "y,x",	0xe804, 0xf81f,		WR_y|RD_y|RD_x, 	0,		I1,	0,	0 },
 {"sll",	    "x,w,<",	0x3000, 0xf803,		WR_x|RD_y,		0,		I1,	0,	0 },
@@ -344,11 +345,11 @@ const struct mips_opcode mips16_opcodes[] =
 {"subu",    "x,I",	0, (int) M_SUBU_I_2,	INSN_MACRO,		0,		I1,	0,	0 },
 {"sw",	    "y,W(x)",	0xd800, 0xf800,		RD_y|RD_x,		0,		I1,	0,	0 },
 {"sw",	    "x,V(S)",	0xd000, 0xf800,		RD_x|RD_SP,		0,		I1,	0,	0 },
-{"sw",	    "R,V(S)",	0x6200, 0xff00,		RD_31|RD_SP,		0,		I1,	0,	0 },
+{"sw",	    "R,V(S)",	0x6200, 0xff00,		RD_SP,			RD_31,		I1,	0,	0 },
 {"xor",	    "x,y",	0xe80e, 0xf81f,		WR_x|RD_x|RD_y, 	0,		I1,	0,	0 },
   /* MIPS16e additions */
-{"restore", "M",	0x6400, 0xff80,		WR_31|RD_SP|WR_SP|NODS,	0,		I32,	0,	0 },
-{"save",    "m",	0x6480, 0xff80,		RD_31|RD_SP|WR_SP|NODS,	0,		I32,	0,	0 },
+{"restore", "M",	0x6400, 0xff80,		WR_31|NODS,		MOD_SP,		I32,	0,	0 },
+{"save",    "m",	0x6480, 0xff80,		NODS,			MOD_SP|RD_31,	I32,	0,	0 },
 {"sdbbp",   "6",	0xe801, 0xf81f,		TRAP,			0,		I32,	0,	0 },
 {"seb",	    "x",	0xe891, 0xf8ff,		WR_x|RD_x,		0,		I32,	0,	0 },
 {"seh",	    "x",	0xe8b1, 0xf8ff,		WR_x|RD_x,		0,		I32,	0,	0 },

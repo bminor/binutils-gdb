@@ -1749,15 +1749,15 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 	  /* Figure out branch instruction type and delay slot information.  */
 	  if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
 	    info->branch_delay_insns = 1;
-	  if ((op->pinfo & (INSN_UNCOND_BRANCH_DELAY
-			    | MIPS16_INSN_UNCOND_BRANCH)) != 0)
+	  if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0
+	      || (op->pinfo2 & INSN2_UNCOND_BRANCH) != 0)
 	    {
 	      if ((op->pinfo & INSN_WRITE_GPR_31) != 0)
 		info->insn_type = dis_jsr;
 	      else
 		info->insn_type = dis_branch;
 	    }
-	  else if ((op->pinfo & MIPS16_INSN_COND_BRANCH) != 0)
+	  else if ((op->pinfo2 & INSN2_COND_BRANCH) != 0)
 	    info->insn_type = dis_condbranch;
 
 	  return length;
