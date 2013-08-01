@@ -1,3 +1,7 @@
+2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-dis.c (print_mips16_insn_arg): Include ISA bit in base address.
+
 2013-07-29  Peter Bergner <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (powerpc_init_dialect): Use ppc_parse_cpu() to set dialect.

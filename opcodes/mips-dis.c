@@ -1565,7 +1565,7 @@ print_mips16_insn_arg (struct disassemble_info *info,
 	     }
 	}
 
-      print_insn_arg (info, state, opcode, operand, baseaddr, uval);
+      print_insn_arg (info, state, opcode, operand, baseaddr + 1, uval);
       break;
     }
 }
