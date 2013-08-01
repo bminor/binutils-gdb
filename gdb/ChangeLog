@@ -1,5 +1,9 @@
 2013-08-01  Doug Evans  <dje@google.com>
 
+	PR symtab/15695
+	* valops.c (value_struct_elt): Add missing call to check_typedef.
+	(value_find_oload_method_list): Ditto.
+
 	* symtab.c (do_free_search_symbols_cleanup): Change arg to,
 	effectively, struct symbol_search **.
 	(make_cleanup_free_search_symbols): Change arg to struct

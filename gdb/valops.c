@@ -2188,7 +2188,7 @@ value_struct_elt (struct value **argp, struct value **args,
     {
       *argp = value_ind (*argp);
       /* Don't coerce fn pointer to fn and then back again!  */
-      if (TYPE_CODE (value_type (*argp)) != TYPE_CODE_FUNC)
+      if (TYPE_CODE (check_typedef (value_type (*argp))) != TYPE_CODE_FUNC)
 	*argp = coerce_array (*argp);
       t = check_typedef (value_type (*argp));
     }
@@ -2352,7 +2352,7 @@ value_find_oload_method_list (struct value **argp, const char *method,
     {
       *argp = value_ind (*argp);
       /* Don't coerce fn pointer to fn and then back again!  */
-      if (TYPE_CODE (value_type (*argp)) != TYPE_CODE_FUNC)
+      if (TYPE_CODE (check_typedef (value_type (*argp))) != TYPE_CODE_FUNC)
 	*argp = coerce_array (*argp);
       t = check_typedef (value_type (*argp));
     }

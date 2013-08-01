@@ -1,3 +1,9 @@
+2013-08-01  Doug Evans  <dje@google.com>
+
+	PR symtab/15695
+	* gdb.base/func-ptr.exp: New file.
+	* gdb.base/func-ptr.c: New file.
+
 2013-08-01  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.python/py-sync-interp.c: New.
