@@ -212,16 +212,46 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
   int raw_arg = 0;
   enum py_bt_status result = PY_BT_ERROR;
   int print_value;
+  int oind = 0;
 
-  if (argc > 0)
-    raw_arg = parse_no_frames_option (argv[0]);
+  if (argc > 1)
+    {
+      int i;
+      enum opt
+      {
+	NO_FRAME_FILTERS
+      };
+      static const struct mi_opt opts[] =
+	{
+	  {"-no-frame-filters", NO_FRAME_FILTERS, 0},
+	  { 0, 0, 0 }
+	};
 
-  if (argc < 1 || argc > 2 || (argc == 2 && ! raw_arg)
-      || (argc == 1 && raw_arg))
+      while (1)
+	{
+	  char *oarg;
+	  /* Don't parse 'print-values' as an option.  */
+	  int opt = mi_getopt ("-stack-list-locals", argc - 1, argv,
+			       opts, &oind, &oarg);
+
+	  if (opt < 0)
+	    break;
+	  switch ((enum opt) opt)
+	    {
+	    case NO_FRAME_FILTERS:
+	      raw_arg = oind;
+	      break;
+	    }
+	}
+    }
+
+  /* After the last option is parsed, there should be only
+     'print-values'.  */
+  if (argc - oind != 1)
     error (_("-stack-list-locals: Usage: [--no-frame-filters] PRINT_VALUES"));
 
   frame = get_selected_frame (NULL);
-  print_value = mi_parse_print_values (argv[raw_arg]);
+  print_value = mi_parse_print_values (argv[oind]);
 
    if (! raw_arg && frame_filters)
      {
@@ -341,17 +371,46 @@ mi_cmd_stack_list_variables (char *command, char **argv, int argc)
   int raw_arg = 0;
   enum py_bt_status result = PY_BT_ERROR;
   int print_value;
+  int oind = 0;
 
-  if (argc > 0)
-    raw_arg = parse_no_frames_option (argv[0]);
+  if (argc > 1)
+    {
+      int i;
+      enum opt
+      {
+	NO_FRAME_FILTERS
+      };
+      static const struct mi_opt opts[] =
+	{
+	  {"-no-frame-filters", NO_FRAME_FILTERS, 0},
+	  { 0, 0, 0 }
+	};
 
-  if (argc < 1 || argc > 2 || (argc == 2 && ! raw_arg)
-      || (argc == 1 && raw_arg))
+      while (1)
+	{
+	  char *oarg;
+	  /* Don't parse 'print-values' as an option.  */
+	  int opt = mi_getopt ("-stack-list-variables", argc - 1,
+			       argv, opts, &oind, &oarg);
+	  if (opt < 0)
+	    break;
+	  switch ((enum opt) opt)
+	    {
+	    case NO_FRAME_FILTERS:
+	      raw_arg = oind;
+	      break;
+	    }
+	}
+    }
+
+  /* After the last option is parsed, there should be only
+     'print-values'.  */
+  if (argc - oind != 1)
     error (_("-stack-list-variables: Usage: " \
 	     "[--no-frame-filters] PRINT_VALUES"));
 
    frame = get_selected_frame (NULL);
-   print_value = mi_parse_print_values (argv[raw_arg]);
+   print_value = mi_parse_print_values (argv[oind]);
 
    if (! raw_arg && frame_filters)
      {

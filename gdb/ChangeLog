@@ -1,3 +1,9 @@
+2013-08-01  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_locals): Parse argv
+	with mi_getopt.
+	(mi_cmd_stack_list_variables): Likewise.
+
 2013-07-31  Andrew Burgess  <aburgess@broadcom.com>
 
 	* exceptions.c (deprecated_throw_reason): Remove.
