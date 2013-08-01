@@ -689,6 +689,15 @@ static int mips_debug = 0;
    fill a branch delay slot.  */
 static struct mips_cl_insn history[1 + MAX_NOPS];
 
+/* Arrays of operands for each instruction.  */
+#define MAX_OPERANDS 5
+struct mips_operand_array {
+  const struct mips_operand *operand[MAX_OPERANDS];
+};
+static struct mips_operand_array *mips_operands;
+static struct mips_operand_array *mips16_operands;
+static struct mips_operand_array *micromips_operands;
+
 /* Nop instructions used by emit_nop.  */
 static struct mips_cl_insn nop_insn;
 static struct mips_cl_insn mips16_nop_insn;
@@ -764,12 +773,7 @@ static const unsigned int mips16_to_32_reg_map[] =
 
 /* Map microMIPS register numbers to normal MIPS register numbers.  */
 
-#define micromips_to_32_reg_b_map	mips16_to_32_reg_map
-#define micromips_to_32_reg_c_map	mips16_to_32_reg_map
 #define micromips_to_32_reg_d_map	mips16_to_32_reg_map
-#define micromips_to_32_reg_e_map	mips16_to_32_reg_map
-#define micromips_to_32_reg_f_map	mips16_to_32_reg_map
-#define micromips_to_32_reg_g_map	mips16_to_32_reg_map
 
 /* The microMIPS registers with type h.  */
 static const unsigned int micromips_to_32_reg_h_map1[] =
@@ -781,8 +785,6 @@ static const unsigned int micromips_to_32_reg_h_map2[] =
   6, 7, 7, 21, 22, 5, 6, 7
 };
 
-#define micromips_to_32_reg_l_map	mips16_to_32_reg_map
-
 /* The microMIPS registers with type m.  */
 static const unsigned int micromips_to_32_reg_m_map[] =
 {
@@ -790,12 +792,6 @@ static const unsigned int micromips_to_32_reg_m_map[] =
 };
 
 #define micromips_to_32_reg_n_map      micromips_to_32_reg_m_map
-
-/* The microMIPS registers with type q.  */
-static const unsigned int micromips_to_32_reg_q_map[] =
-{
-  0, 17, 2, 3, 4, 5, 6, 7
-};
 
 /* Classifies the kind of instructions we're interested in when
    implementing -mfix-vr4120.  */
@@ -1966,6 +1962,39 @@ create_insn (struct mips_cl_insn *insn, const struct mips_opcode *mo)
   insn->cleared_p = 0;
 }
 
+/* Get a list of all the operands in INSN.  */
+
+static const struct mips_operand_array *
+insn_operands (const struct mips_cl_insn *insn)
+{
+  if (insn->insn_mo >= &mips_opcodes[0]
+      && insn->insn_mo < &mips_opcodes[NUMOPCODES])
+    return &mips_operands[insn->insn_mo - &mips_opcodes[0]];
+
+  if (insn->insn_mo >= &mips16_opcodes[0]
+      && insn->insn_mo < &mips16_opcodes[bfd_mips16_num_opcodes])
+    return &mips16_operands[insn->insn_mo - &mips16_opcodes[0]];
+
+  if (insn->insn_mo >= &micromips_opcodes[0]
+      && insn->insn_mo < &micromips_opcodes[bfd_micromips_num_opcodes])
+    return &micromips_operands[insn->insn_mo - &micromips_opcodes[0]];
+
+  abort ();
+}
+
+/* Get a description of operand OPNO of INSN.  */
+
+static const struct mips_operand *
+insn_opno (const struct mips_cl_insn *insn, unsigned opno)
+{
+  const struct mips_operand_array *operands;
+
+  operands = insn_operands (insn);
+  if (opno >= MAX_OPERANDS || !operands->operand[opno])
+    abort ();
+  return operands->operand[opno];
+}
+
 /* Install UVAL as the value of OPERAND in INSN.  */
 
 static inline void
@@ -1973,6 +2002,15 @@ insn_insert_operand (struct mips_cl_insn *insn,
 		     const struct mips_operand *operand, unsigned int uval)
 {
   insn->insn_opcode = mips_insert_operand (operand, insn->insn_opcode, uval);
+}
+
+/* Extract the value of OPERAND from INSN.  */
+
+static inline unsigned
+insn_extract_operand (const struct mips_cl_insn *insn,
+		      const struct mips_operand *operand)
+{
+  return mips_extract_operand (operand, insn->insn_opcode);
 }
 
 /* Record the current MIPS16/microMIPS mode in now_seg.  */
@@ -2831,28 +2869,34 @@ is_delay_slot_valid (const struct mips_opcode *mo)
   return TRUE;
 }
 
-/* For consistency checking, verify that all bits of OPCODE are
-   specified either by the match/mask part of the instruction
-   definition, or by the operand list.  INSN_BITS says which
-   bits of the instruction are significant and DECODE_OPERAND
-   provides the mips_operand description of each operand.  */
+/* For consistency checking, verify that all bits of OPCODE are specified
+   either by the match/mask part of the instruction definition, or by the
+   operand list.  Also build up a list of operands in OPERANDS.
+
+   INSN_BITS says which bits of the instruction are significant.
+   If OPCODE is a standard or microMIPS instruction, DECODE_OPERAND
+   provides the mips_operand description of each operand.  DECODE_OPERAND
+   is null for MIPS16 instructions.  */
 
 static int
 validate_mips_insn (const struct mips_opcode *opcode,
 		    unsigned long insn_bits,
-		    const struct mips_operand *(*decode_operand) (const char *))
+		    const struct mips_operand *(*decode_operand) (const char *),
+		    struct mips_operand_array *operands)
 {
   const char *s;
-  unsigned long used_bits, doubled, undefined;
+  unsigned long used_bits, doubled, undefined, opno, mask;
   const struct mips_operand *operand;
 
-  if ((opcode->mask & opcode->match) != opcode->match)
+  mask = (opcode->pinfo == INSN_MACRO ? 0 : opcode->mask);
+  if ((mask & opcode->match) != opcode->match)
     {
       as_bad (_("internal: bad mips opcode (mask error): %s %s"),
 	      opcode->name, opcode->args);
       return 0;
     }
   used_bits = 0;
+  opno = 0;
   for (s = opcode->args; *s; ++s)
     switch (*s)
       {
@@ -2862,33 +2906,44 @@ validate_mips_insn (const struct mips_opcode *opcode,
 	break;
 
       default:
-	operand = decode_operand (s);
-	if (!operand)
+	if (!decode_operand)
+	  operand = decode_mips16_operand (*s, FALSE);
+	else
+	  operand = decode_operand (s);
+	if (!operand && opcode->pinfo != INSN_MACRO)
 	  {
 	    as_bad (_("internal: unknown operand type: %s %s"),
 		    opcode->name, opcode->args);
 	    return 0;
 	  }
-	used_bits |= ((1 << operand->size) - 1) << operand->lsb;
-	if (operand->type == OP_MDMX_IMM_REG)
-	  /* Bit 5 is the format selector (OB vs QH).  The opcode table
-	     has separate entries for each format.  */
-	  used_bits &= ~(1 << (operand->lsb + 5));
+	gas_assert (opno < MAX_OPERANDS);
+	operands->operand[opno] = operand;
+	if (operand)
+	  {
+	    used_bits |= ((1 << operand->size) - 1) << operand->lsb;
+	    if (operand->type == OP_MDMX_IMM_REG)
+	      /* Bit 5 is the format selector (OB vs QH).  The opcode table
+		 has separate entries for each format.  */
+	      used_bits &= ~(1 << (operand->lsb + 5));
+	    if (operand->type == OP_ENTRY_EXIT_LIST)
+	      used_bits &= ~(mask & 0x700);
+	  }
 	/* Skip prefix characters.  */
-	if (*s == '+' || *s == 'm')
+	if (decode_operand && (*s == '+' || *s == 'm'))
 	  ++s;
+	opno += 1;
 	break;
       }
-  doubled = used_bits & opcode->mask & insn_bits;
+  doubled = used_bits & mask & insn_bits;
   if (doubled)
     {
       as_bad (_("internal: bad mips opcode (bits 0x%08lx doubly defined):"
 		" %s %s"), doubled, opcode->name, opcode->args);
       return 0;
     }
-  used_bits |= opcode->mask;
+  used_bits |= mask;
   undefined = ~used_bits & insn_bits;
-  if (undefined)
+  if (opcode->pinfo != INSN_MACRO && undefined)
     {
       as_bad (_("internal: bad mips opcode (bits 0x%08lx undefined): %s %s"),
 	      undefined, opcode->name, opcode->args);
@@ -2904,14 +2959,39 @@ validate_mips_insn (const struct mips_opcode *opcode,
   return 1;
 }
 
+/* The MIPS16 version of validate_mips_insn.  */
+
+static int
+validate_mips16_insn (const struct mips_opcode *opcode,
+		      struct mips_operand_array *operands)
+{
+  if (opcode->args[0] == 'a' || opcode->args[0] == 'i')
+    {
+      /* In this case OPCODE defines the first 16 bits in a 32-bit jump
+	 instruction.  Use TMP to describe the full instruction.  */
+      struct mips_opcode tmp;
+
+      tmp = *opcode;
+      tmp.match <<= 16;
+      tmp.mask <<= 16;
+      return validate_mips_insn (&tmp, 0xffffffff, 0, operands);
+    }
+  return validate_mips_insn (opcode, 0xffff, 0, operands);
+}
+
 /* The microMIPS version of validate_mips_insn.  */
 
 static int
-validate_micromips_insn (const struct mips_opcode *opc)
+validate_micromips_insn (const struct mips_opcode *opc,
+			 struct mips_operand_array *operands)
 {
   unsigned long insn_bits;
   unsigned long major;
   unsigned int length;
+
+  if (opc->pinfo == INSN_MACRO)
+    return validate_mips_insn (opc, 0xffffffff, decode_micromips_operand,
+			       operands);
 
   length = micromips_insn_length (opc);
   if (length != 2 && length != 4)
@@ -2933,7 +3013,8 @@ validate_micromips_insn (const struct mips_opcode *opc)
   insn_bits = 1 << 4 * length;
   insn_bits <<= 4 * length;
   insn_bits -= 1;
-  return validate_mips_insn (opc, insn_bits, decode_micromips_operand);
+  return validate_mips_insn (opc, insn_bits, decode_micromips_operand,
+			     operands);
 }
 
 /* This function is called once, at assembler startup time.  It should set up
@@ -2958,6 +3039,7 @@ md_begin (void)
 
   op_hash = hash_new ();
 
+  mips_operands = XCNEWVEC (struct mips_operand_array, NUMOPCODES);
   for (i = 0; i < NUMOPCODES;)
     {
       const char *name = mips_opcodes[i].name;
@@ -2972,18 +3054,15 @@ md_begin (void)
 	}
       do
 	{
-	  if (mips_opcodes[i].pinfo != INSN_MACRO)
+	  if (!validate_mips_insn (&mips_opcodes[i], 0xffffffff,
+				   decode_mips_operand, &mips_operands[i]))
+	    broken = 1;
+	  if (nop_insn.insn_mo == NULL && strcmp (name, "nop") == 0)
 	    {
-	      if (!validate_mips_insn (&mips_opcodes[i], 0xffffffff,
-				       decode_mips_operand))
-		broken = 1;
-	      if (nop_insn.insn_mo == NULL && strcmp (name, "nop") == 0)
-		{
-		  create_insn (&nop_insn, mips_opcodes + i);
-		  if (mips_fix_loongson2f_nop)
-		    nop_insn.insn_opcode = LOONGSON2F_NOP_INSN;
-		  nop_insn.fixed_p = 1;
-		}
+	      create_insn (&nop_insn, mips_opcodes + i);
+	      if (mips_fix_loongson2f_nop)
+		nop_insn.insn_opcode = LOONGSON2F_NOP_INSN;
+	      nop_insn.fixed_p = 1;
 	    }
 	  ++i;
 	}
@@ -2991,6 +3070,8 @@ md_begin (void)
     }
 
   mips16_op_hash = hash_new ();
+  mips16_operands = XCNEWVEC (struct mips_operand_array,
+			      bfd_mips16_num_opcodes);
 
   i = 0;
   while (i < bfd_mips16_num_opcodes)
@@ -3003,14 +3084,8 @@ md_begin (void)
 		  mips16_opcodes[i].name, retval);
       do
 	{
-	  if (mips16_opcodes[i].pinfo != INSN_MACRO
-	      && ((mips16_opcodes[i].match & mips16_opcodes[i].mask)
-		  != mips16_opcodes[i].match))
-	    {
-	      fprintf (stderr, _("internal error: bad mips16 opcode: %s %s\n"),
-		       mips16_opcodes[i].name, mips16_opcodes[i].args);
-	      broken = 1;
-	    }
+	  if (!validate_mips16_insn (&mips16_opcodes[i], &mips16_operands[i]))
+	    broken = 1;
 	  if (mips16_nop_insn.insn_mo == NULL && strcmp (name, "nop") == 0)
 	    {
 	      create_insn (&mips16_nop_insn, mips16_opcodes + i);
@@ -3023,6 +3098,8 @@ md_begin (void)
     }
 
   micromips_op_hash = hash_new ();
+  micromips_operands = XCNEWVEC (struct mips_operand_array,
+				 bfd_micromips_num_opcodes);
 
   i = 0;
   while (i < bfd_micromips_num_opcodes)
@@ -3035,27 +3112,30 @@ md_begin (void)
 	as_fatal (_("internal: can't hash `%s': %s"),
 		  micromips_opcodes[i].name, retval);
       do
-        if (micromips_opcodes[i].pinfo != INSN_MACRO)
-          {
-            struct mips_cl_insn *micromips_nop_insn;
+	{
+	  struct mips_cl_insn *micromips_nop_insn;
 
-            if (!validate_micromips_insn (&micromips_opcodes[i]))
-              broken = 1;
+	  if (!validate_micromips_insn (&micromips_opcodes[i],
+					&micromips_operands[i]))
+	    broken = 1;
 
-	    if (micromips_insn_length (micromips_opcodes + i) == 2)
-	      micromips_nop_insn = &micromips_nop16_insn;
-	    else if (micromips_insn_length (micromips_opcodes + i) == 4)
-	      micromips_nop_insn = &micromips_nop32_insn;
-	    else
-	      continue;
+	  if (micromips_opcodes[i].pinfo != INSN_MACRO)
+	    {
+	      if (micromips_insn_length (micromips_opcodes + i) == 2)
+		micromips_nop_insn = &micromips_nop16_insn;
+	      else if (micromips_insn_length (micromips_opcodes + i) == 4)
+		micromips_nop_insn = &micromips_nop32_insn;
+	      else
+		continue;
 
-            if (micromips_nop_insn->insn_mo == NULL
-		&& strcmp (name, "nop") == 0)
-              {
-                create_insn (micromips_nop_insn, micromips_opcodes + i);
-                micromips_nop_insn->fixed_p = 1;
-              }
-          }
+	      if (micromips_nop_insn->insn_mo == NULL
+		  && strcmp (name, "nop") == 0)
+		{
+		  create_insn (micromips_nop_insn, micromips_opcodes + i);
+		  micromips_nop_insn->fixed_p = 1;
+		}
+	    }
+	}
       while (++i < bfd_micromips_num_opcodes
 	     && strcmp (micromips_opcodes[i].name, name) == 0);
     }
@@ -3580,26 +3660,116 @@ get_delay_slot_nop (const struct mips_cl_insn *ip)
   return NOP_INSN;
 }
 
-/* Return the mask of core registers that IP reads or writes.  */
+/* Return a mask that has bit N set if OPCODE reads the register(s)
+   in operand N.  */
 
 static unsigned int
-gpr_mod_mask (const struct mips_cl_insn *ip)
+insn_read_mask (const struct mips_opcode *opcode)
 {
-  unsigned long pinfo2;
-  unsigned int mask;
+  return (opcode->pinfo & INSN_READ_ALL) >> INSN_READ_SHIFT;
+}
 
-  mask = 0;
-  pinfo2 = ip->insn_mo->pinfo2;
-  if (mips_opts.micromips)
+/* Return a mask that has bit N set if OPCODE writes to the register(s)
+   in operand N.  */
+
+static unsigned int
+insn_write_mask (const struct mips_opcode *opcode)
+{
+  return (opcode->pinfo & INSN_WRITE_ALL) >> INSN_WRITE_SHIFT;
+}
+
+/* Return a mask of the registers specified by operand OPERAND of INSN.
+   Ignore registers of type OP_REG_<t> unless bit OP_REG_<t> of TYPE_MASK
+   is set.  */
+
+static unsigned int
+operand_reg_mask (const struct mips_cl_insn *insn,
+		  const struct mips_operand *operand,
+		  unsigned int type_mask)
+{
+  unsigned int uval, vsel;
+
+  switch (operand->type)
     {
-      if (pinfo2 & INSN2_MOD_GPR_MD)
-	mask |= 1 << micromips_to_32_reg_d_map[EXTRACT_OPERAND (1, MD, *ip)];
-      if (pinfo2 & INSN2_MOD_GPR_MF)
-	mask |= 1 << micromips_to_32_reg_f_map[EXTRACT_OPERAND (1, MF, *ip)];
+    case OP_INT:
+    case OP_MAPPED_INT:
+    case OP_MSB:
+    case OP_PCREL:
+    case OP_PERF_REG:
+    case OP_ADDIUSP_INT:
+    case OP_ENTRY_EXIT_LIST:
+    case OP_REPEAT_DEST_REG:
+    case OP_REPEAT_PREV_REG:
+    case OP_PC:
+      abort ();
+
+    case OP_REG:
+      {
+	const struct mips_reg_operand *reg_op;
+
+	reg_op = (const struct mips_reg_operand *) operand;
+	if (!(type_mask & (1 << reg_op->reg_type)))
+	  return 0;
+	uval = insn_extract_operand (insn, operand);
+	return 1 << mips_decode_reg_operand (reg_op, uval);
+      }
+
+    case OP_REG_PAIR:
+      {
+	const struct mips_reg_pair_operand *pair_op;
+
+	pair_op = (const struct mips_reg_pair_operand *) operand;
+	if (!(type_mask & (1 << pair_op->reg_type)))
+	  return 0;
+	uval = insn_extract_operand (insn, operand);
+	return (1 << pair_op->reg1_map[uval]) | (1 << pair_op->reg2_map[uval]);
+      }
+
+    case OP_CLO_CLZ_DEST:
+      if (!(type_mask & (1 << OP_REG_GP)))
+	return 0;
+      uval = insn_extract_operand (insn, operand);
+      return (1 << (uval & 31)) | (1 << (uval >> 5));
+
+    case OP_LWM_SWM_LIST:
+      abort ();
+
+    case OP_SAVE_RESTORE_LIST:
+      abort ();
+
+    case OP_MDMX_IMM_REG:
+      if (!(type_mask & (1 << OP_REG_VEC)))
+	return 0;
+      uval = insn_extract_operand (insn, operand);
+      vsel = uval >> 5;
+      if ((vsel & 0x18) == 0x18)
+	return 0;
+      return 1 << (uval & 31);
     }
-  if (pinfo2 & INSN2_MOD_SP)
-    mask |= 1 << SP;
-  return mask;
+  abort ();
+}
+
+/* Return a mask of the registers specified by operands OPNO_MASK of INSN,
+   where bit N of OPNO_MASK is set if operand N should be included.
+   Ignore registers of type OP_REG_<t> unless bit OP_REG_<t> of TYPE_MASK
+   is set.  */
+
+static unsigned int
+insn_reg_mask (const struct mips_cl_insn *insn,
+	       unsigned int type_mask, unsigned int opno_mask)
+{
+  unsigned int opno, reg_mask;
+
+  opno = 0;
+  reg_mask = 0;
+  while (opno_mask != 0)
+    {
+      if (opno_mask & 1)
+	reg_mask |= operand_reg_mask (insn, insn_opno (insn, opno), type_mask);
+      opno_mask >>= 1;
+      opno += 1;
+    }
+  return reg_mask;
 }
 
 /* Return the mask of core registers that IP reads.  */
@@ -3610,60 +3780,24 @@ gpr_read_mask (const struct mips_cl_insn *ip)
   unsigned long pinfo, pinfo2;
   unsigned int mask;
 
-  mask = gpr_mod_mask (ip);
+  mask = insn_reg_mask (ip, 1 << OP_REG_GP, insn_read_mask (ip->insn_mo));
   pinfo = ip->insn_mo->pinfo;
   pinfo2 = ip->insn_mo->pinfo2;
-  if (mips_opts.mips16)
+  if (pinfo & INSN_UDI)
     {
-      if (pinfo & MIPS16_INSN_READ_X)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, *ip)];
-      if (pinfo & MIPS16_INSN_READ_Y)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RY, *ip)];
-      if (pinfo & MIPS16_INSN_READ_T)
-	mask |= 1 << TREG;
-      if (pinfo & MIPS16_INSN_READ_SP)
-	mask |= 1 << SP;
-      if (pinfo & MIPS16_INSN_READ_Z)
-	mask |= 1 << (mips16_to_32_reg_map
-		      [MIPS16_EXTRACT_OPERAND (MOVE32Z, *ip)]);
-      if (pinfo & MIPS16_INSN_READ_GPR_X)
-	mask |= 1 << MIPS16_EXTRACT_OPERAND (REGR32, *ip);
+      /* UDI instructions have traditionally been assumed to read RS
+	 and RT.  */
+      mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RT, *ip);
+      mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RS, *ip);
     }
-  else
-    {
-      if (pinfo2 & INSN2_READ_GPR_D)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RD, *ip);
-      if (pinfo & INSN_READ_GPR_T)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RT, *ip);
-      if (pinfo & INSN_READ_GPR_S)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RS, *ip);
-      if (pinfo2 & INSN2_READ_GP)
-	mask |= 1 << GP;
-      if (pinfo2 & INSN2_READ_GPR_Z)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RZ, *ip);
-    }
+  if (pinfo & INSN_READ_GPR_24)
+    mask |= 1 << 24;
+  if (pinfo2 & INSN2_READ_GPR_16)
+    mask |= 1 << 16;
+  if (pinfo2 & INSN2_READ_SP)
+    mask |= 1 << SP;
   if (pinfo2 & INSN2_READ_GPR_31)
-    mask |= 1 << RA;
-  if (mips_opts.micromips)
-    {
-      if (pinfo2 & INSN2_READ_GPR_MC)
-	mask |= 1 << micromips_to_32_reg_c_map[EXTRACT_OPERAND (1, MC, *ip)];
-      if (pinfo2 & INSN2_READ_GPR_ME)
-	mask |= 1 << micromips_to_32_reg_e_map[EXTRACT_OPERAND (1, ME, *ip)];
-      if (pinfo2 & INSN2_READ_GPR_MG)
-	mask |= 1 << micromips_to_32_reg_g_map[EXTRACT_OPERAND (1, MG, *ip)];
-      if (pinfo2 & INSN2_READ_GPR_MJ)
-	mask |= 1 << EXTRACT_OPERAND (1, MJ, *ip);
-      if (pinfo2 & INSN2_READ_GPR_MMN)
-	{
-	  mask |= 1 << micromips_to_32_reg_m_map[EXTRACT_OPERAND (1, MM, *ip)];
-	  mask |= 1 << micromips_to_32_reg_n_map[EXTRACT_OPERAND (1, MN, *ip)];
-	}
-      if (pinfo2 & INSN2_READ_GPR_MP)
-	mask |= 1 << EXTRACT_OPERAND (1, MP, *ip);
-      if (pinfo2 & INSN2_READ_GPR_MQ)
-	mask |= 1 << micromips_to_32_reg_q_map[EXTRACT_OPERAND (1, MQ, *ip)];
-    }
+    mask |= 1 << 31;
   /* Don't include register 0.  */
   return mask & ~1;
 }
@@ -3676,51 +3810,18 @@ gpr_write_mask (const struct mips_cl_insn *ip)
   unsigned long pinfo, pinfo2;
   unsigned int mask;
 
-  mask = gpr_mod_mask (ip);
+  mask = insn_reg_mask (ip, 1 << OP_REG_GP, insn_write_mask (ip->insn_mo));
   pinfo = ip->insn_mo->pinfo;
   pinfo2 = ip->insn_mo->pinfo2;
-  if (mips_opts.mips16)
-    {
-      if (pinfo & MIPS16_INSN_WRITE_X)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RX, *ip)];
-      if (pinfo & MIPS16_INSN_WRITE_Y)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RY, *ip)];
-      if (pinfo & MIPS16_INSN_WRITE_Z)
-	mask |= 1 << mips16_to_32_reg_map[MIPS16_EXTRACT_OPERAND (RZ, *ip)];
-      if (pinfo & MIPS16_INSN_WRITE_T)
-	mask |= 1 << TREG;
-      if (pinfo & MIPS16_INSN_WRITE_31)
-	mask |= 1 << RA;
-      if (pinfo & MIPS16_INSN_WRITE_GPR_Y)
-	mask |= 1 << MIPS16OP_EXTRACT_REG32R (ip->insn_opcode);
-    }
-  else
-    {
-      if (pinfo & INSN_WRITE_GPR_D)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RD, *ip);
-      if (pinfo & INSN_WRITE_GPR_T)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RT, *ip);
-      if (pinfo & INSN_WRITE_GPR_S)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RS, *ip);
-      if (pinfo & INSN_WRITE_GPR_31)
-	mask |= 1 << RA;
-      if (pinfo2 & INSN2_WRITE_GPR_Z)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RZ, *ip);
-    }
-  if (mips_opts.micromips)
-    {
-      if (pinfo2 & INSN2_WRITE_GPR_MB)
-	mask |= 1 << micromips_to_32_reg_b_map[EXTRACT_OPERAND (1, MB, *ip)];
-      if (pinfo2 & INSN2_WRITE_GPR_MH)
-	{
-	  mask |= 1 << micromips_to_32_reg_h_map1[EXTRACT_OPERAND (1, MH, *ip)];
-	  mask |= 1 << micromips_to_32_reg_h_map2[EXTRACT_OPERAND (1, MH, *ip)];
-	}
-      if (pinfo2 & INSN2_WRITE_GPR_MJ)
-	mask |= 1 << EXTRACT_OPERAND (1, MJ, *ip);
-      if (pinfo2 & INSN2_WRITE_GPR_MP)
-	mask |= 1 << EXTRACT_OPERAND (1, MP, *ip);
-    }
+  if (pinfo & INSN_WRITE_GPR_24)
+    mask |= 1 << 24;
+  if (pinfo & INSN_WRITE_GPR_31)
+    mask |= 1 << 31;
+  if (pinfo & INSN_UDI)
+    /* UDI instructions have traditionally been assumed to write to RD.  */
+    mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, RD, *ip);
+  if (pinfo2 & INSN2_WRITE_SP)
+    mask |= 1 << SP;
   /* Don't include register 0.  */
   return mask & ~1;
 }
@@ -3730,25 +3831,12 @@ gpr_write_mask (const struct mips_cl_insn *ip)
 static unsigned int
 fpr_read_mask (const struct mips_cl_insn *ip)
 {
-  unsigned long pinfo, pinfo2;
+  unsigned long pinfo;
   unsigned int mask;
 
-  mask = 0;
+  mask = insn_reg_mask (ip, (1 << OP_REG_FP) | (1 << OP_REG_VEC),
+			insn_read_mask (ip->insn_mo));
   pinfo = ip->insn_mo->pinfo;
-  pinfo2 = ip->insn_mo->pinfo2;
-  if (!mips_opts.mips16)
-    {
-      if (pinfo2 & INSN2_READ_FPR_D)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FD, *ip);
-      if (pinfo & INSN_READ_FPR_S)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FS, *ip);
-      if (pinfo & INSN_READ_FPR_T)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FT, *ip);
-      if (pinfo & INSN_READ_FPR_R)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FR, *ip);
-      if (pinfo2 & INSN2_READ_FPR_Z)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FZ, *ip);
-    }
   /* Conservatively treat all operands to an FP_D instruction are doubles.
      (This is overly pessimistic for things like cvt.d.s.)  */
   if (HAVE_32BIT_FPRS && (pinfo & FP_D))
@@ -3761,23 +3849,12 @@ fpr_read_mask (const struct mips_cl_insn *ip)
 static unsigned int
 fpr_write_mask (const struct mips_cl_insn *ip)
 {
-  unsigned long pinfo, pinfo2;
+  unsigned long pinfo;
   unsigned int mask;
 
-  mask = 0;
+  mask = insn_reg_mask (ip, (1 << OP_REG_FP) | (1 << OP_REG_VEC),
+			insn_write_mask (ip->insn_mo));
   pinfo = ip->insn_mo->pinfo;
-  pinfo2 = ip->insn_mo->pinfo2;
-  if (!mips_opts.mips16)
-    {
-      if (pinfo & INSN_WRITE_FPR_D)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FD, *ip);
-      if (pinfo & INSN_WRITE_FPR_S)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FS, *ip);
-      if (pinfo & INSN_WRITE_FPR_T)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FT, *ip);
-      if (pinfo2 & INSN2_WRITE_FPR_Z)
-	mask |= 1 << EXTRACT_OPERAND (mips_opts.micromips, FZ, *ip);
-    }
   /* Conservatively treat all operands to an FP_D instruction are doubles.
      (This is overly pessimistic for things like cvt.s.d.)  */
   if (HAVE_32BIT_FPRS && (pinfo & FP_D))
@@ -5769,8 +5846,6 @@ static enum append_method
 get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
 		   bfd_reloc_code_real_type *reloc_type)
 {
-  unsigned long pinfo, pinfo2;
-
   /* The relaxed version of a macro sequence must be inherently
      hazard-free.  */
   if (mips_relax.sequence == 2)
@@ -5787,12 +5862,9 @@ get_append_method (struct mips_cl_insn *ip, expressionS *address_expr,
 	  && can_swap_branch_p (ip, address_expr, reloc_type))
 	return APPEND_SWAP;
 
-      pinfo = ip->insn_mo->pinfo;
-      pinfo2 = ip->insn_mo->pinfo2;
       if (mips_opts.mips16
 	  && ISA_SUPPORTS_MIPS16E
-	  && ((pinfo & MIPS16_INSN_READ_X) != 0
-	      || (pinfo2 & INSN2_READ_GPR_31) != 0))
+	  && gpr_read_mask (ip) != 0)
 	return APPEND_ADD_COMPACT;
 
       return APPEND_ADD_WITH_NOP;

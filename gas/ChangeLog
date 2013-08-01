@@ -1,5 +1,31 @@
 2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (MAX_OPERANDS): New macro.
+	(mips_operand_array): New structure.
+	(mips_operands, mips16_operands, micromips_operands): New arrays.
+	(micromips_to_32_reg_b_map, micromips_to_32_reg_c_map)
+	(micromips_to_32_reg_e_map, micromips_to_32_reg_f_map)
+	(micromips_to_32_reg_g_map, micromips_to_32_reg_l_map)
+	(micromips_to_32_reg_q_map): Delete.
+	(insn_operands, insn_opno, insn_extract_operand): New functions.
+	(validate_mips_insn): Take a mips_operand_array as argument and
+	use it to build up a list of operands.  Extend to handle INSN_MACRO
+	and MIPS16.
+	(validate_mips16_insn): New function.
+	(validate_micromips_insn): Take a mips_operand_array as argument.
+	Handle INSN_MACRO.
+	(md_begin): Initialize mips_operands, mips16_operands and
+	micromips_operands.  Call validate_mips_insn and
+	validate_micromips_insn for macro instructions too.
+	Call validate_mips16_insn for MIPS16 instructions.
+	(insn_read_mask, insn_write_mask, operand_reg_mask, insn_reg_mask):
+	New functions.
+	(gpr_read_mask, gpr_write_mask, fpr_read_mask, fpr_write_mask): Use
+	them.  Handle INSN_UDI.
+	(get_append_method): Use gpr_read_mask.
+
+2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (compact_branch_p, uncond_branch_p): Use the same
 	flags for MIPS16 and non-MIPS16 instructions.
 	(gpr_mod_mask): Move the INSN2_MOD_SP case outside the micromips block.

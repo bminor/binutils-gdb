@@ -1,5 +1,35 @@
 2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* mips-opc.c (WR_1, WR_2, RD_1, RD_2, RD_3, RD_4, MOD_1, MOD_2, UDI):
+	New macros.
+	(WR_d, WR_t, WR_D, WR_T, WR_S, RD_s, RD_b, RD_t, RD_S, RD_T, RD_R)
+	(WR_z, WR_Z, RD_z, RD_Z, RD_d): Delete.
+	(mips_builtin_opcodes): Use the new position-based read-write flags
+	instead of field-based ones.  Use UDI for "udi..." instructions.
+	* mips16-opc.c (WR_1, WR_2, RD_1, RD_2, RD_3, RD_4, MOD_1, MOD_2):
+	New macros.
+	(WR_x, WR_y, WR_z, WR_Y, RD_x, RD_y, RD_Z, RD_X): Delete.
+	(RD_T, WR_T, WR_31): Redefine using generic INSN_* flags.
+	(WR_SP, RD_16): New macros.
+	(RD_SP): Redefine as an INSN2_* flag.
+	(MOD_SP): Redefine in terms of RD_SP and WR_SP.
+	(mips16_opcodes): Use the new position-based read-write flags
+	instead of field-based ones.  Use RD_16 for "nop".  Move RD_SP to
+	pinfo2 field.
+	* micromips-opc.c (WR_1, WR_2, RD_1, RD_2, RD_3, RD_4, MOD_1, MOD_2):
+	New macros.
+	(WR_mb, RD_mc, RD_md, WR_md, RD_me, RD_mf, WR_mf, RD_mg, WR_mh, RD_mj)
+	(WR_mj, RD_ml, RD_mmn, RD_mp, WR_mp, RD_mq, RD_gp, WR_d, WR_t, WR_D)
+	(WR_T, WR_S, RD_s, RD_b, RD_t, RD_T, RD_S, RD_R, RD_D): Delete.
+	(RD_sp, WR_sp): Redefine to INSN2_READ_SP and INSN2_WRITE_SP.
+	(micromips_opcodes): Use the new position-based read-write flags
+	instead of field-based ones.
+	* mips-dis.c (print_insn_arg): Use mips_decode_reg_operand.
+	(print_insn_mips, print_insn_micromips): Use INSN_WRITE_1 instead
+	of field-based flags.
+
+2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips16-opc.c (UBR, CBR, RD_31, RD_PC): Redefine as INSN2_* flags.
 	(WR_SP): Replace with...
 	(MOD_SP): ...this.

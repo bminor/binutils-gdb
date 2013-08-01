@@ -1003,8 +1003,7 @@ print_insn_arg (struct disassemble_info *info,
 	const struct mips_reg_operand *reg_op;
 
 	reg_op = (const struct mips_reg_operand *) operand;
-	if (reg_op->reg_map)
-	  uval = reg_op->reg_map[uval];
+	uval = mips_decode_reg_operand (reg_op, uval);
 	print_reg (info, opcode, reg_op->reg_type, uval);
 
 	state->last_reg_type = reg_op->reg_type;
@@ -1346,8 +1345,7 @@ print_insn_mips (bfd_vma memaddr,
 	      /* Figure out instruction type and branch delay information.  */
 	      if ((op->pinfo & INSN_UNCOND_BRANCH_DELAY) != 0)
 	        {
-		  if ((op->pinfo & (INSN_WRITE_GPR_31
-				    | INSN_WRITE_GPR_D)) != 0)
+		  if ((op->pinfo & (INSN_WRITE_GPR_31 | INSN_WRITE_1)) != 0)
 		    info->insn_type = dis_jsr;
 		  else
 		    info->insn_type = dis_branch;
@@ -1894,7 +1892,7 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 	  if (((op->pinfo & INSN_UNCOND_BRANCH_DELAY)
 	       | (op->pinfo2 & INSN2_UNCOND_BRANCH)) != 0)
 	    {
-	      if ((op->pinfo & (INSN_WRITE_GPR_31 | INSN_WRITE_GPR_T)) != 0)
+	      if ((op->pinfo & (INSN_WRITE_GPR_31 | INSN_WRITE_1)) != 0)
 		info->insn_type = dis_jsr;
 	      else
 		info->insn_type = dis_branch;
