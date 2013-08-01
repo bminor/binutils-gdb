@@ -7354,12 +7354,13 @@ get_symtab (struct dwarf2_per_cu_data *per_cu)
    included by PER_CU.  */
 
 static void
-recursively_compute_inclusions (VEC (dwarf2_per_cu_ptr) **result,
-				htab_t all_children,
+recursively_compute_inclusions (VEC (symtab_ptr) **result,
+				htab_t all_children, htab_t all_type_symtabs,
 				struct dwarf2_per_cu_data *per_cu)
 {
   void **slot;
   int ix;
+  struct symtab *symtab;
   struct dwarf2_per_cu_data *iter;
 
   slot = htab_find_slot (all_children, per_cu, INSERT);
@@ -7371,13 +7372,31 @@ recursively_compute_inclusions (VEC (dwarf2_per_cu_ptr) **result,
 
   *slot = per_cu;
   /* Only add a CU if it has a symbol table.  */
-  if (get_symtab (per_cu) != NULL)
-    VEC_safe_push (dwarf2_per_cu_ptr, *result, per_cu);
+  symtab = get_symtab (per_cu);
+  if (symtab != NULL)
+    {
+      /* If this is a type unit only add its symbol table if we haven't
+	 seen it yet (type unit per_cu's can share symtabs).  */
+      if (per_cu->is_debug_types)
+	{
+	  slot = htab_find_slot (all_type_symtabs, symtab, INSERT);
+	  if (*slot == NULL)
+	    {
+	      *slot = symtab;
+	      VEC_safe_push (symtab_ptr, *result, symtab);
+	    }
+	}
+      else
+	VEC_safe_push (symtab_ptr, *result, symtab);
+    }
 
   for (ix = 0;
        VEC_iterate (dwarf2_per_cu_ptr, per_cu->imported_symtabs, ix, iter);
        ++ix)
-    recursively_compute_inclusions (result, all_children, iter);
+    {
+      recursively_compute_inclusions (result, all_children,
+				      all_type_symtabs, iter);
+    }
 }
 
 /* Compute the symtab 'includes' fields for the symtab related to
@@ -7391,9 +7410,10 @@ compute_symtab_includes (struct dwarf2_per_cu_data *per_cu)
   if (!VEC_empty (dwarf2_per_cu_ptr, per_cu->imported_symtabs))
     {
       int ix, len;
-      struct dwarf2_per_cu_data *iter;
-      VEC (dwarf2_per_cu_ptr) *result_children = NULL;
-      htab_t all_children;
+      struct dwarf2_per_cu_data *per_cu_iter;
+      struct symtab *symtab_iter;
+      VEC (symtab_ptr) *result_symtabs = NULL;
+      htab_t all_children, all_type_symtabs;
       struct symtab *symtab = get_symtab (per_cu);
 
       /* If we don't have a symtab, we can just skip this case.  */
@@ -7402,28 +7422,32 @@ compute_symtab_includes (struct dwarf2_per_cu_data *per_cu)
 
       all_children = htab_create_alloc (1, htab_hash_pointer, htab_eq_pointer,
 					NULL, xcalloc, xfree);
+      all_type_symtabs = htab_create_alloc (1, htab_hash_pointer, htab_eq_pointer,
+					    NULL, xcalloc, xfree);
 
       for (ix = 0;
 	   VEC_iterate (dwarf2_per_cu_ptr, per_cu->imported_symtabs,
-			ix, iter);
+			ix, per_cu_iter);
 	   ++ix)
-	recursively_compute_inclusions (&result_children, all_children, iter);
+	{
+	  recursively_compute_inclusions (&result_symtabs, all_children,
+					  all_type_symtabs, per_cu_iter);
+	}
 
-      /* Now we have a transitive closure of all the included CUs, and
-	 for .gdb_index version 7 the included TUs, so we can convert it
-	 to a list of symtabs.  */
-      len = VEC_length (dwarf2_per_cu_ptr, result_children);
+      /* Now we have a transitive closure of all the included symtabs.  */
+      len = VEC_length (symtab_ptr, result_symtabs);
       symtab->includes
 	= obstack_alloc (&dwarf2_per_objfile->objfile->objfile_obstack,
 			 (len + 1) * sizeof (struct symtab *));
       for (ix = 0;
-	   VEC_iterate (dwarf2_per_cu_ptr, result_children, ix, iter);
+	   VEC_iterate (symtab_ptr, result_symtabs, ix, symtab_iter);
 	   ++ix)
-	symtab->includes[ix] = get_symtab (iter);
+	symtab->includes[ix] = symtab_iter;
       symtab->includes[len] = NULL;
 
-      VEC_free (dwarf2_per_cu_ptr, result_children);
+      VEC_free (symtab_ptr, result_symtabs);
       htab_delete (all_children);
+      htab_delete (all_type_symtabs);
     }
 }
 

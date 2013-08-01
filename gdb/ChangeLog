@@ -1,3 +1,17 @@
+2013-08-01  Doug Evans  <dje@google.com>
+
+	Further workarounds for binutils/15021.
+	* dwarf2read.c (recursively_compute_inclusions): Change type of result
+	parameter to VEC (symtab_ptr) **.  New parameter all_type_symtabs.
+	Watch for duplicate symtabs coming from type units.
+	(compute_symtab_includes): Update call to
+	recursively_compute_inclusions. Build vector of included symtabs
+	instead of per_cus.
+	* symtab.h (symtab_ptr): New typedef.
+	(DEF_VEC_P (symtab_ptr)): New VEC type.
+	* linespec.c (symtab_p): Delete.  All uses updated to use symtab_ptr
+	instead.
+
 2013-08-01  Andrew Burgess  <aburgess@broadcom.com>
 
 	* cli/cli-script.c (script_from_file): Remove use of

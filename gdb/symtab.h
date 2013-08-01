@@ -936,6 +936,10 @@ struct symtab
 #define BLOCKVECTOR(symtab)	(symtab)->blockvector
 #define LINETABLE(symtab)	(symtab)->linetable
 #define SYMTAB_PSPACE(symtab)	(symtab)->objfile->pspace
+
+typedef struct symtab *symtab_ptr;
+DEF_VEC_P (symtab_ptr);
+
 
 
 /* The virtual function table is now an array of structures which have the
