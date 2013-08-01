@@ -3397,32 +3397,6 @@ fixup_has_matching_lo_p (fixS *fixp)
 	  && fixp->fx_offset == fixp->fx_next->fx_offset);
 }
 
-/* This function returns true if modifying a register requires a
-   delay.  */
-
-static int
-reg_needs_delay (unsigned int reg)
-{
-  unsigned long prev_pinfo;
-
-  prev_pinfo = history[0].insn_mo->pinfo;
-  if (! mips_opts.noreorder
-      && (((prev_pinfo & INSN_LOAD_MEMORY_DELAY)
-	   && ! gpr_interlocks)
-	  || ((prev_pinfo & INSN_LOAD_COPROC_DELAY)
-	      && ! cop_interlocks)))
-    {
-      /* A load from a coprocessor or from memory.  All load delays
-	 delay the use of general register rt for one instruction.  */
-      /* Itbl support may require additional care here.  */
-      know (prev_pinfo & INSN_WRITE_GPR_T);
-      if (reg == EXTRACT_OPERAND (mips_opts.micromips, RT, history[0]))
-	return 1;
-    }
-
-  return 0;
-}
-
 /* Move all labels in LABELS to the current insertion point.  TEXT_P
    says whether the labels refer to text or data.  */
 
@@ -5081,6 +5055,23 @@ check_completed_insn (struct mips_arg_info *arg)
     }
 }
 
+/* Return true if modifying general-purpose register REG needs a delay.  */
+
+static bfd_boolean
+reg_needs_delay (unsigned int reg)
+{
+  unsigned long prev_pinfo;
+
+  prev_pinfo = history[0].insn_mo->pinfo;
+  if (!mips_opts.noreorder
+      && (((prev_pinfo & INSN_LOAD_MEMORY_DELAY) && !gpr_interlocks)
+	  || ((prev_pinfo & INSN_LOAD_COPROC_DELAY) && !cop_interlocks))
+      && (gpr_write_mask (&history[0]) & (1 << reg)))
+    return TRUE;
+
+  return FALSE;
+}
+
 /* Classify an instruction according to the FIX_VR4120_* enumeration.
    Return NUM_FIX_VR4120_CLASSES if the instruction isn't affected
    by VR4120 errata.  */
@@ -5117,15 +5108,10 @@ insns_between (const struct mips_cl_insn *insn1,
   unsigned long pinfo1, pinfo2;
   unsigned int mask;
 
-  /* This function needs to know which pinfo flags are set for INSN2
-     and which registers INSN2 uses.  The former is stored in PINFO2 and
-     the latter is tested via INSN2_USES_GPR.  If INSN2 is null, PINFO2
-     will have every flag set and INSN2_USES_GPR will always return true.  */
+  /* If INFO2 is null, pessimistically assume that all flags are set for
+     the second instruction.  */
   pinfo1 = insn1->insn_mo->pinfo;
   pinfo2 = insn2 ? insn2->insn_mo->pinfo : ~0U;
-
-#define INSN2_USES_GPR(REG) \
-  (insn2 == NULL || (gpr_read_mask (insn2) & (1U << (REG))) != 0)
 
   /* For most targets, write-after-read dependencies on the HI and LO
      registers must be separated by at least two instructions.  */
@@ -5142,7 +5128,7 @@ insns_between (const struct mips_cl_insn *insn1,
   if (mips_7000_hilo_fix
       && !mips_opts.micromips
       && MF_HILO_INSN (pinfo1)
-      && INSN2_USES_GPR (EXTRACT_OPERAND (0, RD, *insn1)))
+      && (insn2 == NULL || (gpr_read_mask (insn2) & gpr_write_mask (insn1))))
     return 2;
 
   /* If we're working around 24K errata, one instruction is required
@@ -5185,8 +5171,7 @@ insns_between (const struct mips_cl_insn *insn1,
       if ((!gpr_interlocks && (pinfo1 & INSN_LOAD_MEMORY_DELAY))
 	  || (!cop_interlocks && (pinfo1 & INSN_LOAD_COPROC_DELAY)))
 	{
-	  know (pinfo1 & INSN_WRITE_GPR_T);
-	  if (INSN2_USES_GPR (EXTRACT_OPERAND (0, RT, *insn1)))
+	  if (insn2 == NULL || (gpr_read_mask (insn2) & gpr_write_mask (insn1)))
 	    return 1;
 	}
 
@@ -5236,8 +5221,6 @@ insns_between (const struct mips_cl_insn *insn1,
 	       && (pinfo2 & INSN_READ_COND_CODE))
 	return 1;
     }
-
-#undef INSN2_USES_GPR
 
   return 0;
 }
