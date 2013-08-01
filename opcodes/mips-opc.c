@@ -942,11 +942,11 @@ const struct mips_opcode mips_builtin_opcodes[] =
    assembler, but will never match user input (because the line above
    will match first).  */
 {"j",			"a",		0x08000000, 0xfc000000,	UBD,			0,		I1,		0,	0 },
-{"jalr",		"s",		0x0000f809, 0xfc1fffff,	UBD|RD_s|WR_d,		0,		I1,		0,	0 },
+{"jalr",		"s",		0x0000f809, 0xfc1fffff,	UBD|RD_s|WR_31,		0,		I1,		0,	0 },
 {"jalr",		"d,s",		0x00000009, 0xfc1f07ff,	UBD|RD_s|WR_d,		0,		I1,		0,	0 },
 /* jalr.hb is officially MIPS{32,64}R2, but it works on R1 as jalr
    with the same hazard barrier effect.  */
-{"jalr.hb",		"s",		0x0000fc09, 0xfc1fffff,	UBD|RD_s|WR_d,		0,		I32,		0,	0 },
+{"jalr.hb",		"s",		0x0000fc09, 0xfc1fffff,	UBD|RD_s|WR_31,		0,		I32,		0,	0 },
 {"jalr.hb",		"d,s",		0x00000409, 0xfc1f07ff,	UBD|RD_s|WR_d,		0,		I32,		0,	0 },
 /* SVR4 PIC code requires special handling for jal, so it must be a
    macro.  */
