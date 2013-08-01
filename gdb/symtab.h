@@ -1292,7 +1292,7 @@ struct symbol_search
 
   /* Information describing what was found.
 
-     If symtab abd symbol are NOT NULL, then information was found
+     If symtab and symbol are NOT NULL, then information was found
      for this match.  */
   struct symtab *symtab;
   struct symbol *symbol;
@@ -1309,7 +1309,7 @@ extern void search_symbols (char *, enum search_domain, int, char **,
 			    struct symbol_search **);
 extern void free_search_symbols (struct symbol_search *);
 extern struct cleanup *make_cleanup_free_search_symbols (struct symbol_search
-							 *);
+							 **);
 
 /* The name of the ``main'' function.
    FIXME: cagney/2001-03-20: Can't make main_name() const since some

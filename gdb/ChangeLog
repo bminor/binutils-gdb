@@ -1,5 +1,18 @@
 2013-08-01  Doug Evans  <dje@google.com>
 
+	* symtab.c (do_free_search_symbols_cleanup): Change arg to,
+	effectively, struct symbol_search **.
+	(make_cleanup_free_search_symbols): Change arg to struct
+	symbol_search **.  All callers updated.
+	(compare_search_syms): Compare symtab file name and block as well.
+	(search_symbols_equal): New function.
+	(sort_search_symbols_remove_dups): Renamed from sort_search_symbols.
+	New args new_head, new_tail.  Result is now void.  Remove dups after
+	sorting the symbols.
+	(search_symbols): Sort all found symbols once, after all have been
+	found, and remove duplicates.  Simplify cleanup tracking of result.
+	* symtab.h (make_cleanup_free_search_symbols): Update prototype.
+
 	Further workarounds for binutils/15021.
 	* dwarf2read.c (recursively_compute_inclusions): Change type of result
 	parameter to VEC (symtab_ptr) **.  New parameter all_type_symtabs.
