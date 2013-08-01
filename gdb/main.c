@@ -885,8 +885,6 @@ captured_main (void *data)
     }
 
   /* Set off error and warning messages with a blank line.  */
-  error_pre_print = "\n";
-  quit_pre_print = error_pre_print;
   warning_pre_print = _("\nwarning: ");
 
   /* Read and execute the system-wide gdbinit file, if it exists.
@@ -990,8 +988,6 @@ captured_main (void *data)
     set_inferior_io_terminal (ttyarg);
 
   /* Error messages should no longer be distinguished with extra output.  */
-  error_pre_print = NULL;
-  quit_pre_print = NULL;
   warning_pre_print = _("warning: ");
 
   /* Read the .gdbinit file in the current directory, *if* it isn't

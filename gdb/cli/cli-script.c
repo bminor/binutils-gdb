@@ -1636,9 +1636,6 @@ script_from_file (FILE *stream, const char *file)
   old_cleanups = make_cleanup (source_cleanup_lines, &old_lines);
   source_line_number = 0;
   source_file_name = file;
-  /* This will get set every time we read a line.  So it won't stay ""
-     for long.  */
-  error_pre_print = "";
 
   {
     volatile struct gdb_exception e;

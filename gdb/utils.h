@@ -291,14 +291,6 @@ extern void print_sys_errmsg (const char *, int);
 
 extern void (*deprecated_error_begin_hook) (void);
 
-/* Message to be printed before the error message, when an error occurs.  */
-
-extern char *error_pre_print;
-
-/* Message to be printed before the error message, when an error occurs.  */
-
-extern char *quit_pre_print;
-
 /* Message to be printed before the warning message, when a warning occurs.  */
 
 extern char *warning_pre_print;

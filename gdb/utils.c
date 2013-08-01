@@ -185,14 +185,6 @@ show_sevenbit_strings (struct ui_file *file, int from_tty,
 		    value);
 }
 
-/* String to be printed before error messages, if any.  */
-
-char *error_pre_print;
-
-/* String to be printed before quit messages, if any.  */
-
-char *quit_pre_print;
-
 /* String to be printed before warning messages, if any.  */
 
 char *warning_pre_print = "\nwarning: ";
