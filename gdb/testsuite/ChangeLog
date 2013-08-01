@@ -1,3 +1,8 @@
+2013-08-01  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.python/py-sync-interp.c: New.
+	* gdb.python/py-sync-interp.exp: New.
+
 2013-07-31  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/backtrace.exp (gdb_backtrace_tdp_4): Test command
