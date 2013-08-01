@@ -1,5 +1,11 @@
 2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* mips-opc.c (mips_builtin_opcodes): Remove WR_* and RD_* flags
+	for operands that are hard-coded to $0.
+	* micromips-opc.c (micromips_opcodes): Likewise.
+
+2013-08-01  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* mips-opc.c (mips_builtin_opcodes): Use WR_31 rather than WR_d
 	for the single-operand forms of JALR and JALR.HB.
 	* micromips-opc.c (micromips_opcodes): Likewise JALR, JALRS, JALR.HB

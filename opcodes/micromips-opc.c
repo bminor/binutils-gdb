@@ -571,15 +571,15 @@ const struct mips_opcode micromips_opcodes[] =
 {"dextu",		"t,r,+E,+H",	0x58000014, 0xfc00003f, WR_t|RD_s,		0,		I3,		0,	0 },
 /* For ddiv, see the comments about div.  */
 {"ddiv",		"z,s,t",	0x5800ab3c, 0xfc00ffff,	RD_s|RD_t|WR_HILO,	0,		I3,		0,	0 },
-{"ddiv",		"z,t",		0x5800ab3c, 0xfc1fffff,	RD_s|RD_t|WR_HILO,	0,		I3,		0,	0 },
+{"ddiv",		"z,t",		0x5800ab3c, 0xfc1fffff,	RD_t|WR_HILO,		0,		I3,		0,	0 },
 {"ddiv",		"d,v,t",	0,    (int) M_DDIV_3,	INSN_MACRO,		0,		I3,		0,	0 },
 {"ddiv",		"d,v,I",	0,    (int) M_DDIV_3I,	INSN_MACRO,		0,		I3,		0,	0 },
 /* For ddivu, see the comments about div.  */
 {"ddivu",		"z,s,t",	0x5800bb3c, 0xfc00ffff,	RD_s|RD_t|WR_HILO,	0,		I3,		0,	0 },
-{"ddivu",		"z,t",		0x5800bb3c, 0xfc1fffff,	RD_s|RD_t|WR_HILO,	0,		I3,		0,	0 },
+{"ddivu",		"z,t",		0x5800bb3c, 0xfc1fffff,	RD_t|WR_HILO,		0,		I3,		0,	0 },
 {"ddivu",		"d,v,t",	0,    (int) M_DDIVU_3,	INSN_MACRO,		0,		I3,		0,	0 },
 {"ddivu",		"d,v,I",	0,    (int) M_DDIVU_3I,	INSN_MACRO,		0,		I3,		0,	0 },
-{"di",			"",		0x0000477c, 0xffffffff,	WR_s|RD_C0,		0,		I1,		0,	0 },
+{"di",			"",		0x0000477c, 0xffffffff,	RD_C0,			0,		I1,		0,	0 },
 {"di",			"s",		0x0000477c, 0xffe0ffff,	WR_s|RD_C0,		0,		I1,		0,	0 },
 {"dins",		"t,r,I,+I",	0,    (int) M_DINS,	INSN_MACRO,		0,		I3,		0,	0 },
 {"dins",		"t,r,+A,+B",	0x5800000c, 0xfc00003f, WR_t|RD_s,		0,		I3,		0,	0 },
@@ -590,14 +590,14 @@ const struct mips_opcode micromips_opcodes[] =
    a source and a destination).  To get the div machine instruction,
    you must use an explicit destination of $0.  */
 {"div",			"z,s,t",	0x0000ab3c, 0xfc00ffff,	RD_s|RD_t|WR_HILO,	0,		I1,		0,	0 },
-{"div",			"z,t",		0x0000ab3c, 0xfc1fffff,	RD_s|RD_t|WR_HILO,	0,		I1,		0,	0 },
+{"div",			"z,t",		0x0000ab3c, 0xfc1fffff,	RD_t|WR_HILO,		0,		I1,		0,	0 },
 {"div",			"d,v,t",	0,    (int) M_DIV_3,	INSN_MACRO,		0,		I1,		0,	0 },
 {"div",			"d,v,I",	0,    (int) M_DIV_3I,	INSN_MACRO,		0,		I1,		0,	0 },
 {"div.d",		"D,V,T",	0x540001f0, 0xfc0007ff,	WR_D|RD_S|RD_T|FP_D,	0,		I1,		0,	0 },
 {"div.s",		"D,V,T",	0x540000f0, 0xfc0007ff,	WR_D|RD_S|RD_T|FP_S,	0,		I1,		0,	0 },
 /* For divu, see the comments about div.  */
 {"divu",		"z,s,t",	0x0000bb3c, 0xfc00ffff,	RD_s|RD_t|WR_HILO,	0,		I1,		0,	0 },
-{"divu",		"z,t",		0x0000bb3c, 0xfc1fffff,	RD_s|RD_t|WR_HILO,	0,		I1,		0,	0 },
+{"divu",		"z,t",		0x0000bb3c, 0xfc1fffff,	RD_t|WR_HILO,		0,		I1,		0,	0 },
 {"divu",		"d,v,t",	0,    (int) M_DIVU_3,	INSN_MACRO,		0,		I1,		0,	0 },
 {"divu",		"d,v,I",	0,    (int) M_DIVU_3I,	INSN_MACRO,		0,		I1,		0,	0 },
 {"dla",			"t,A(b)",	0,    (int) M_DLA_AB,	INSN_MACRO,		0,		I3,		0,	0 },
@@ -671,7 +671,7 @@ const struct mips_opcode micromips_opcodes[] =
 {"dsub",		"d,v,I",	0,    (int) M_DSUB_I,	INSN_MACRO,		0,		I3,		0,	0 },
 {"dsubu",		"d,v,t",	0x580001d0, 0xfc0007ff,	WR_d|RD_s|RD_t,		0,		I3,		0,	0 },
 {"dsubu",		"d,v,I",	0,    (int) M_DSUBU_I,	INSN_MACRO,		0,		I3,		0,	0 },
-{"ei",			"",		0x0000577c, 0xffffffff,	WR_s|WR_C0,		0,		I1,		0,	0 },
+{"ei",			"",		0x0000577c, 0xffffffff,	WR_C0,			0,		I1,		0,	0 },
 {"ei",			"s",		0x0000577c, 0xffe0ffff,	WR_s|WR_C0,		0,		I1,		0,	0 },
 {"eret",		"",		0x0000f37c, 0xffffffff,	NODS,			0,		I1,		0,	0 },
 {"ext",			"t,r,+A,+C",	0x0000002c, 0xfc00003f, WR_t|RD_s,		0,		I1,		0,	0 },
@@ -897,7 +897,7 @@ const struct mips_opcode micromips_opcodes[] =
 {"nmsub.ps",		"D,R,S,T",	0x54000032, 0xfc00003f,	RD_R|RD_S|RD_T|WR_D|FP_D, 0,		I1,		0,	0 },
 /* nop is at the start of the table.  */
 {"not",			"mf,mg",	    0x4400,     0xffc0,	0,			WR_mf|RD_mg,	I1,		0,	0 }, /* put not before nor */
-{"not",			"d,v",		0x000002d0, 0xffe007ff,	WR_d|RD_s|RD_t,		0,		I1,		0,	0 }, /* nor d,s,0 */
+{"not",			"d,v",		0x000002d0, 0xffe007ff,	WR_d|RD_s,		0,		I1,		0,	0 }, /* nor d,s,0 */
 {"nor",			"mf,mz,mg",	    0x4400,     0xffc0,	0,			WR_mf|RD_mg,	I1,		0,	0 }, /* not */
 {"nor",			"mf,mg,mz",	    0x4400,     0xffc0,	0,			WR_mf|RD_mg,	I1,		0,	0 }, /* not */
 {"nor",			"d,v,t",	0x000002d0, 0xfc0007ff,	WR_d|RD_s|RD_t,		0,		I1,		0,	0 },
