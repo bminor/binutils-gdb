@@ -171,10 +171,12 @@ evaluate_subexpression_type (struct expression *exp, int subexp)
    in *VAL_CHAIN.  RESULTP and VAL_CHAIN may be NULL if the caller does
    not need them.
 
-   If a memory error occurs while evaluating the expression, *RESULTP will
-   be set to NULL.  *RESULTP may be a lazy value, if the result could
-   not be read from memory.  It is used to determine whether a value
-   is user-specified (we should watch the whole value) or intermediate
+   If PRESERVE_ERRORS is true, then exceptions are passed through.
+   Otherwise, if PRESERVE_ERRORS is false, then if a memory error
+   occurs while evaluating the expression, *RESULTP will be set to
+   NULL.  *RESULTP may be a lazy value, if the result could not be
+   read from memory.  It is used to determine whether a value is
+   user-specified (we should watch the whole value) or intermediate
    (we should watch only the bit used to locate the final value).
 
    If the final value, or any intermediate value, could not be read
@@ -189,7 +191,8 @@ evaluate_subexpression_type (struct expression *exp, int subexp)
 
 void
 fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
-		    struct value **resultp, struct value **val_chain)
+		    struct value **resultp, struct value **val_chain,
+		    int preserve_errors)
 {
   struct value *mark, *new_mark, *result;
   volatile struct gdb_exception ex;
@@ -210,13 +213,14 @@ fetch_subexp_value (struct expression *exp, int *pc, struct value **valp,
     }
   if (ex.reason < 0)
     {
-      /* Ignore memory errors, we want watchpoints pointing at
+      /* Ignore memory errors if we want watchpoints pointing at
 	 inaccessible memory to still be created; otherwise, throw the
 	 error to some higher catcher.  */
       switch (ex.error)
 	{
 	case MEMORY_ERROR:
-	  break;
+	  if (!preserve_errors)
+	    break;
 	default:
 	  throw_exception (ex);
 	  break;

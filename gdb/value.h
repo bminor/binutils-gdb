@@ -728,7 +728,8 @@ extern struct value *evaluate_subexpression_type (struct expression *exp,
 
 extern void fetch_subexp_value (struct expression *exp, int *pc,
 				struct value **valp, struct value **resultp,
-				struct value **val_chain);
+				struct value **val_chain,
+				int preserve_errors);
 
 extern char *extract_field_op (struct expression *exp, int *subexp);
 

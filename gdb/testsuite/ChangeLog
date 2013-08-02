@@ -1,3 +1,9 @@
+2013-08-02  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/watchpoint.c (struct foo5): New.
+	(nullptr): New global.
+	* gdb.base/watchpoint.exp (test_watch_location): Add test.
+
 2013-08-01  Doug Evans  <dje@google.com>
 
 	PR symtab/15691

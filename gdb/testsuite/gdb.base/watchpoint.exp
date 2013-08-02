@@ -603,6 +603,9 @@ proc test_watch_location {} {
     gdb_breakpoint [gdb_get_line_number "func5 breakpoint here"]
     gdb_continue_to_breakpoint "func5 breakpoint here"
 
+    gdb_test "watch -location nullptr->p->x" \
+	"Cannot access memory at address 0x0"
+
     gdb_test "watch -location *x" "atchpoint .*: .*" "watch -location .x"
 
     gdb_test "continue" \

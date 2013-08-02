@@ -1952,7 +1952,7 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
   if (cond->elts[0].opcode != BINOP_EQUAL)
     return 0;
 
-  fetch_subexp_value (cond, &pc, &left_val, NULL, &left_chain);
+  fetch_subexp_value (cond, &pc, &left_val, NULL, &left_chain, 0);
   num_accesses_left = num_memory_accesses (left_chain);
 
   if (left_val == NULL || num_accesses_left < 0)
@@ -1962,7 +1962,7 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
       return 0;
     }
 
-  fetch_subexp_value (cond, &pc, &right_val, NULL, &right_chain);
+  fetch_subexp_value (cond, &pc, &right_val, NULL, &right_chain, 0);
   num_accesses_right = num_memory_accesses (right_chain);
 
   if (right_val == NULL || num_accesses_right < 0)

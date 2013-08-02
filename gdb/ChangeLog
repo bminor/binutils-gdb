@@ -1,3 +1,13 @@
+2013-08-02  Tom Tromey  <tromey@redhat.com>
+
+	PR symtab/15719:
+	* breakpoint.c (update_watchpoint, watchpoint_check)
+	(watch_command_1): Update.
+	* eval.c (fetch_subexp_value): Add "preserve_errors"
+	parameter.
+	* ppc-linux-nat.c (check_condition): Update.
+	* value.h (fetch_subexp_value): Update.
+
 2013-08-02  Andrew Burgess  <aburgess@broadcom.com>
 
 	* mi/mi-interp.c (mi_interpreter_resume): Remove call to
