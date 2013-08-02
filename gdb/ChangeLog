@@ -1,5 +1,13 @@
 2013-08-01  Doug Evans  <dje@google.com>
 
+	PR symtab/15691
+	* dwarf2read.c (struct dwarf2_per_cu_data): New member tu_read.
+	(fill_in_sig_entry_from_dwo_entry): Reorganize asserts.
+	Add assert of sig_entry->dwo_unit == NULL.
+	(lookup_dwo_signatured_type): Don't assign TU to a DWO if the TU
+	had already been read.
+	(read_signatured_type): Set per_cu.tu_read.
+
 	PR symtab/15695
 	* valops.c (value_struct_elt): Add missing call to check_typedef.
 	(value_find_oload_method_list): Ditto.

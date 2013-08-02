@@ -558,6 +558,16 @@ struct dwarf2_per_cu_data
      attributes in the stub.  */
   unsigned int reading_dwo_directly : 1;
 
+  /* Non-zero if the TU has been read.
+     This is used to assist the "Stay in DWO Optimization" for Fission:
+     When reading a DWO, it's faster to read TUs from the DWO instead of
+     fetching them from random other DWOs (due to comdat folding).
+     If the TU has already been read, the optimization is unnecessary
+     (and unwise - we don't want to change where gdb thinks the TU lives
+     "midflight").
+     This flag is only valid if is_debug_types is true.  */
+  unsigned int tu_read : 1;
+
   /* The section this CU/TU lives in.
      If the DIE refers to a DWO file, this is always the original die,
      not the DWO file.  */
@@ -4443,11 +4453,7 @@ fill_in_sig_entry_from_dwo_entry (struct objfile *objfile,
 				  struct signatured_type *sig_entry,
 				  struct dwo_unit *dwo_entry)
 {
-  sig_entry->per_cu.section = dwo_entry->section;
-  sig_entry->per_cu.offset = dwo_entry->offset;
-  sig_entry->per_cu.length = dwo_entry->length;
-  sig_entry->per_cu.reading_dwo_directly = 1;
-  sig_entry->per_cu.objfile = objfile;
+  /* Make sure we're not clobbering something we don't expect to.  */
   gdb_assert (! sig_entry->per_cu.queued);
   gdb_assert (sig_entry->per_cu.cu == NULL);
   gdb_assert (sig_entry->per_cu.v.quick != NULL);
@@ -4455,19 +4461,26 @@ fill_in_sig_entry_from_dwo_entry (struct objfile *objfile,
   gdb_assert (sig_entry->signature == dwo_entry->signature);
   gdb_assert (sig_entry->type_offset_in_section.sect_off == 0);
   gdb_assert (sig_entry->type_unit_group == NULL);
+  gdb_assert (sig_entry->dwo_unit == NULL);
+
+  sig_entry->per_cu.section = dwo_entry->section;
+  sig_entry->per_cu.offset = dwo_entry->offset;
+  sig_entry->per_cu.length = dwo_entry->length;
+  sig_entry->per_cu.reading_dwo_directly = 1;
+  sig_entry->per_cu.objfile = objfile;
   sig_entry->type_offset_in_tu = dwo_entry->type_offset_in_tu;
   sig_entry->dwo_unit = dwo_entry;
 }
 
 /* Subroutine of lookup_signatured_type.
-   Create the signatured_type data structure for a TU to be read in
-   directly from a DWO file, bypassing the stub.
-   We do this for the case where there is no DWP file and we're using
-   .gdb_index: When reading a CU we want to stay in the DWO file containing
-   that CU.  Otherwise we could end up reading several other DWO files (due
-   to comdat folding) to process the transitive closure of all the mentioned
-   TUs, and that can be slow.  The current DWO file will have every type
-   signature that it needs.
+   If we haven't read the TU yet, create the signatured_type data structure
+   for a TU to be read in directly from a DWO file, bypassing the stub.
+   This is the "Stay in DWO Optimization": When there is no DWP file and we're
+   using .gdb_index, then when reading a CU we want to stay in the DWO file
+   containing that CU.  Otherwise we could end up reading several other DWO
+   files (due to comdat folding) to process the transitive closure of all the
+   mentioned TUs, and that can be slow.  The current DWO file will have every
+   type signature that it needs.
    We only do this for .gdb_index because in the psymtab case we already have
    to read all the DWOs to build the type unit groups.  */
 
@@ -4496,8 +4509,13 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
   sig_entry = htab_find (dwarf2_per_objfile->signatured_types, &find_sig_entry);
   if (sig_entry == NULL)
     return NULL;
+
+  /* We can get here with the TU already read, *or* in the process of being
+     read.  Don't reassign it if that's the case.  Also note that if the TU is
+     already being read, it may not have come from a DWO, the program may be
+     a mix of Fission-compiled code and non-Fission-compiled code.  */
   /* Have we already tried to read this TU?  */
-  if (sig_entry->dwo_unit != NULL)
+  if (sig_entry->per_cu.tu_read)
     return sig_entry;
 
   /* Ok, this is the first time we're reading this TU.  */
@@ -18608,6 +18626,7 @@ read_signatured_type (struct signatured_type *sig_type)
 
   init_cutu_and_read_dies (per_cu, NULL, 0, 1,
 			   read_signatured_type_reader, NULL);
+  sig_type->per_cu.tu_read = 1;
 }
 
 /* Decode simple location descriptions.

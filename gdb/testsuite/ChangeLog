@@ -1,5 +1,11 @@
 2013-08-01  Doug Evans  <dje@google.com>
 
+	PR symtab/15691
+	* gdb.dwarf2/fission-mix.exp: New file.
+	* gdb.dwarf2/fission-mix.h: New file.
+	* gdb.dwarf2/fission-mix.c: New file.
+	* gdb.dwarf2/fission-mix2.c: New file.
+
 	PR symtab/15695
 	* gdb.base/func-ptr.exp: New file.
 	* gdb.base/func-ptr.c: New file.
