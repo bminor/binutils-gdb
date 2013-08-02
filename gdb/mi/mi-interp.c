@@ -169,7 +169,6 @@ mi_interpreter_resume (void *data)
      _intialize_event_loop.  */
   call_readline = gdb_readline2;
   input_handler = mi_execute_command_input_handler;
-  add_file_handler (input_fd, stdin_event_handler, 0);
   async_command_editing_p = 0;
   /* FIXME: This is a total hack for now.  PB's use of the MI
      implicitly relies on a bug in the async support which allows

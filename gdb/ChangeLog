@@ -1,3 +1,8 @@
+2013-08-02  Andrew Burgess  <aburgess@broadcom.com>
+
+	* mi/mi-interp.c (mi_interpreter_resume): Remove call to
+	add_file_handler.
+
 2013-08-01  Doug Evans  <dje@google.com>
 
 	PR symtab/15691
