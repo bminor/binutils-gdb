@@ -1,3 +1,8 @@
+2013-08-03  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/mips16-macro.s, gas/mips/mips16-macro.d: New test.
+	* gas/mips/mips.exp: Run it.
+
 2013-07-26  Sergey Guriev  <sergey.s.guriev@intel.com>
 	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
 	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>

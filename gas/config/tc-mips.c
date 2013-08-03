@@ -12060,10 +12060,11 @@ mips16_macro (struct mips_cl_insn *ip)
       expr1.X_add_number = 0;
       macro_build (&expr1, "slti", "x,8", yreg);
       if (xreg != yreg)
-	move_register (xreg, yreg);
+	macro_build (NULL, "move", "y,X", xreg, mips16_to_32_reg_map[yreg]);
       expr1.X_add_number = 2;
       macro_build (&expr1, "bteqz", "p");
       macro_build (NULL, "neg", "x,w", xreg, xreg);
+      break;
     }
 }
 
@@ -12680,7 +12681,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		 we can.  */
 	      if (insn->pinfo == INSN_MACRO)
 		{
-		  gas_assert (relax_char == 0);
+		  gas_assert (relax_char == 0 || relax_char == 'p');
 		  gas_assert (*offset_reloc == BFD_RELOC_UNUSED);
 		}
 	      else if (relax_char
