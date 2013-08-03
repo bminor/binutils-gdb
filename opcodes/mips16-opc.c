@@ -86,11 +86,11 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
       case '6': SINT (16, 0);
       case '8': SINT (16, 0);
 
-      case 'A': PCREL (16, 0, 2, 0, TRUE, FALSE, FALSE);
-      case 'B': PCREL (16, 0, 3, 0, TRUE, FALSE, FALSE);
+      case 'A': PCREL (16, 0, TRUE, 0, 2, FALSE, FALSE);
+      case 'B': PCREL (16, 0, TRUE, 0, 3, FALSE, FALSE);
       case 'C': SINT (16, 0);
       case 'D': SINT (16, 0);
-      case 'E': PCREL (16, 0, 2, 0, TRUE, FALSE, FALSE);
+      case 'E': PCREL (16, 0, TRUE, 0, 2, FALSE, FALSE);
       case 'H': SINT (16, 0);
       case 'K': SINT (16, 0);
       case 'U': UINT (16, 0);
@@ -115,11 +115,11 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
       case '6': UINT (6, 5);
       case '8': UINT (8, 0);
 
-      case 'A': PCREL (8, 0, 2, 2, FALSE, FALSE, FALSE);
-      case 'B': PCREL (5, 0, 3, 3, FALSE, FALSE, FALSE);
+      case 'A': PCREL (8, 0, FALSE, 2, 2, FALSE, FALSE);
+      case 'B': PCREL (5, 0, FALSE, 3, 3, FALSE, FALSE);
       case 'C': INT_ADJ (8, 0, 255, 3, FALSE);	/* (0 .. 255) << 3 */
       case 'D': INT_ADJ (5, 0, 31, 3, FALSE);	/* (0 .. 31) << 3 */
-      case 'E': PCREL (5, 0, 2, 2, FALSE, FALSE, FALSE);
+      case 'E': PCREL (5, 0, FALSE, 2, 2, FALSE, FALSE);
       case 'H': INT_ADJ (5, 0, 31, 1, FALSE);	/* (0 .. 31) << 1 */
       case 'K': INT_ADJ (8, 0, 127, 3, FALSE);	/* (-128 .. 127) << 3 */
       case 'U': UINT (8, 0);

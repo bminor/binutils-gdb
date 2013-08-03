@@ -4218,18 +4218,17 @@ match_int_operand (struct mips_arg_info *arg,
 		   const struct mips_operand *operand_base)
 {
   const struct mips_int_operand *operand;
-  unsigned int uval, mask;
+  unsigned int uval;
   int min_val, max_val, factor;
   offsetT sval;
   bfd_boolean print_hex;
 
   operand = (const struct mips_int_operand *) operand_base;
   factor = 1 << operand->shift;
-  mask = (1 << operand_base->size) - 1;
-  max_val = (operand->max_val + operand->bias) << operand->shift;
-  min_val = max_val - (mask << operand->shift);
+  min_val = mips_int_operand_min (operand);
+  max_val = mips_int_operand_max (operand);
   if (arg->lax_max)
-    max_val = mask << operand->shift;
+    max_val = ((1 << operand_base->size) - 1) << operand->shift;
 
   if (arg->token->type == OT_CHAR && arg->token->u.ch == '(')
     /* Assume we have an elided offset.  The later match will fail
@@ -12826,61 +12825,6 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
     }
 }
 
-/* This structure holds information we know about a mips16 immediate
-   argument type.  */
-
-struct mips16_immed_operand
-{
-  /* The type code used in the argument string in the opcode table.  */
-  int type;
-  /* The number of bits in the short form of the opcode.  */
-  int nbits;
-  /* The number of bits in the extended form of the opcode.  */
-  int extbits;
-  /* The amount by which the short form is shifted when it is used;
-     for example, the sw instruction has a shift count of 2.  */
-  int shift;
-  /* The amount by which the short form is shifted when it is stored
-     into the instruction code.  */
-  int op_shift;
-  /* Non-zero if the short form is unsigned.  */
-  int unsp;
-  /* Non-zero if the extended form is unsigned.  */
-  int extu;
-  /* Non-zero if the value is PC relative.  */
-  int pcrel;
-};
-
-/* The mips16 immediate operand types.  */
-
-static const struct mips16_immed_operand mips16_immed_operands[] =
-{
-  { '<',  3,  5, 0, MIPS16OP_SH_RZ,   1, 1, 0 },
-  { '>',  3,  5, 0, MIPS16OP_SH_RX,   1, 1, 0 },
-  { '[',  3,  6, 0, MIPS16OP_SH_RZ,   1, 1, 0 },
-  { ']',  3,  6, 0, MIPS16OP_SH_RX,   1, 1, 0 },
-  { '4',  4, 15, 0, MIPS16OP_SH_IMM4, 0, 0, 0 },
-  { '5',  5, 16, 0, MIPS16OP_SH_IMM5, 1, 0, 0 },
-  { 'H',  5, 16, 1, MIPS16OP_SH_IMM5, 1, 0, 0 },
-  { 'W',  5, 16, 2, MIPS16OP_SH_IMM5, 1, 0, 0 },
-  { 'D',  5, 16, 3, MIPS16OP_SH_IMM5, 1, 0, 0 },
-  { 'j',  5, 16, 0, MIPS16OP_SH_IMM5, 0, 0, 0 },
-  { '8',  8, 16, 0, MIPS16OP_SH_IMM8, 1, 0, 0 },
-  { 'V',  8, 16, 2, MIPS16OP_SH_IMM8, 1, 0, 0 },
-  { 'C',  8, 16, 3, MIPS16OP_SH_IMM8, 1, 0, 0 },
-  { 'U',  8, 16, 0, MIPS16OP_SH_IMM8, 1, 1, 0 },
-  { 'k',  8, 16, 0, MIPS16OP_SH_IMM8, 0, 0, 0 },
-  { 'K',  8, 16, 3, MIPS16OP_SH_IMM8, 0, 0, 0 },
-  { 'p',  8, 16, 0, MIPS16OP_SH_IMM8, 0, 0, 1 },
-  { 'q', 11, 16, 0, MIPS16OP_SH_IMM8, 0, 0, 1 },
-  { 'A',  8, 16, 2, MIPS16OP_SH_IMM8, 1, 0, 1 },
-  { 'B',  5, 16, 3, MIPS16OP_SH_IMM5, 1, 0, 1 },
-  { 'E',  5, 16, 2, MIPS16OP_SH_IMM5, 1, 0, 1 }
-};
-
-#define MIPS16_NUM_IMMED \
-  (sizeof mips16_immed_operands / sizeof mips16_immed_operands[0])
-
 /* Marshal immediate value VAL for an extended MIPS16 instruction.
    NBITS is the number of significant bits in VAL.  */
 
@@ -12906,6 +12850,43 @@ mips16_immed_extend (offsetT val, unsigned int nbits)
   return (extval << 16) | val;
 }
 
+/* Like decode_mips16_operand, but require the operand to be defined and
+   require it to be an integer.  */
+
+static const struct mips_int_operand *
+mips16_immed_operand (int type, bfd_boolean extended_p)
+{
+  const struct mips_operand *operand;
+
+  operand = decode_mips16_operand (type, extended_p);
+  if (!operand || (operand->type != OP_INT && operand->type != OP_PCREL))
+    abort ();
+  return (const struct mips_int_operand *) operand;
+}
+
+/* Return true if SVAL fits OPERAND.  RELOC is as for mips16_immed.  */
+
+static bfd_boolean
+mips16_immed_in_range_p (const struct mips_int_operand *operand,
+			 bfd_reloc_code_real_type reloc, offsetT sval)
+{
+  int min_val, max_val;
+
+  min_val = mips_int_operand_min (operand);
+  max_val = mips_int_operand_max (operand);
+  if (reloc != BFD_RELOC_UNUSED)
+    {
+      if (min_val < 0)
+	sval = SEXT_16BIT (sval);
+      else
+	sval &= 0xffff;
+    }
+
+  return (sval >= min_val
+	  && sval <= max_val
+	  && (sval & ((1 << operand->shift) - 1)) == 0);
+}
+
 /* Install immediate value VAL into MIPS16 instruction *INSN,
    extending it if necessary.  The instruction in *INSN may
    already be extended.
@@ -12922,46 +12903,11 @@ mips16_immed (char *file, unsigned int line, int type,
 	      bfd_reloc_code_real_type reloc, offsetT val,
 	      unsigned int user_insn_length, unsigned long *insn)
 {
-  const struct mips16_immed_operand *op;
-  int mintiny, maxtiny;
+  const struct mips_int_operand *operand;
+  unsigned int uval, length;
 
-  op = mips16_immed_operands;
-  while (op->type != type)
-    {
-      ++op;
-      gas_assert (op < mips16_immed_operands + MIPS16_NUM_IMMED);
-    }
-
-  if (op->unsp)
-    {
-      if (type == '<' || type == '>' || type == '[' || type == ']')
-	{
-	  mintiny = 1;
-	  maxtiny = 1 << op->nbits;
-	}
-      else
-	{
-	  mintiny = 0;
-	  maxtiny = (1 << op->nbits) - 1;
-	}
-      if (reloc != BFD_RELOC_UNUSED)
-	val &= 0xffff;
-    }
-  else
-    {
-      mintiny = - (1 << (op->nbits - 1));
-      maxtiny = (1 << (op->nbits - 1)) - 1;
-      if (reloc != BFD_RELOC_UNUSED)
-	val = SEXT_16BIT (val);
-    }
-
-  /* Branch offsets have an implicit 0 in the lowest bit.  */
-  if (type == 'p' || type == 'q')
-    val /= 2;
-
-  if ((val & ((1 << op->shift) - 1)) != 0
-      || val < (mintiny << op->shift)
-      || val > (maxtiny << op->shift))
+  operand = mips16_immed_operand (type, FALSE);
+  if (!mips16_immed_in_range_p (operand, reloc, val))
     {
       /* We need an extended instruction.  */
       if (user_insn_length == 2)
@@ -12978,37 +12924,19 @@ mips16_immed (char *file, unsigned int line, int type,
 		     _("extended operand requested but not required"));
     }
 
-  if (mips16_opcode_length (*insn) == 2)
+  length = mips16_opcode_length (*insn);
+  if (length == 4)
     {
-      int insnval;
-
-      insnval = ((val >> op->shift) & ((1 << op->nbits) - 1));
-      insnval <<= op->op_shift;
-      *insn |= insnval;
+      operand = mips16_immed_operand (type, TRUE);
+      if (!mips16_immed_in_range_p (operand, reloc, val))
+	as_bad_where (file, line,
+		      _("operand value out of range for instruction"));
     }
+  uval = ((unsigned int) val >> operand->shift) - operand->bias;
+  if (length == 2)
+    *insn = mips_insert_operand (&operand->root, *insn, uval);
   else
-    {
-      long minext, maxext;
-
-      if (reloc == BFD_RELOC_UNUSED)
-	{
-	  if (op->extu)
-	    {
-	      minext = 0;
-	      maxext = (1 << op->extbits) - 1;
-	    }
-	  else
-	    {
-	      minext = - (1 << (op->extbits - 1));
-	      maxext = (1 << (op->extbits - 1)) - 1;
-	    }
-	  if (val < minext || val > maxext)
-	    as_bad_where (file, line,
-			  _("operand value out of range for instruction"));
-	}
-
-      *insn |= mips16_immed_extend (val, op->extbits);
-    }
+    *insn |= mips16_immed_extend (uval, operand->root.size);
 }
 
 struct percent_op_match
@@ -15744,9 +15672,8 @@ static int
 mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 {
   int type;
-  const struct mips16_immed_operand *op;
+  const struct mips_int_operand *operand;
   offsetT val;
-  int mintiny, maxtiny;
   segT symsec;
   fragS *sym_frag;
 
@@ -15756,39 +15683,17 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
     return 1;
 
   type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
-  op = mips16_immed_operands;
-  while (op->type != type)
-    {
-      ++op;
-      gas_assert (op < mips16_immed_operands + MIPS16_NUM_IMMED);
-    }
-
-  if (op->unsp)
-    {
-      if (type == '<' || type == '>' || type == '[' || type == ']')
-	{
-	  mintiny = 1;
-	  maxtiny = 1 << op->nbits;
-	}
-      else
-	{
-	  mintiny = 0;
-	  maxtiny = (1 << op->nbits) - 1;
-	}
-    }
-  else
-    {
-      mintiny = - (1 << (op->nbits - 1));
-      maxtiny = (1 << (op->nbits - 1)) - 1;
-    }
+  operand = mips16_immed_operand (type, FALSE);
 
   sym_frag = symbol_get_frag (fragp->fr_symbol);
   val = S_GET_VALUE (fragp->fr_symbol);
   symsec = S_GET_SEGMENT (fragp->fr_symbol);
 
-  if (op->pcrel)
+  if (operand->root.type == OP_PCREL)
     {
+      const struct mips_pcrel_operand *pcrel_op;
       addressT addr;
+      offsetT maxtiny;
 
       /* We won't have the section when we are called from
          mips_relax_frag.  However, we will always have been called
@@ -15796,6 +15701,7 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
          branch to a different section, we mark it as such.  If SEC is
          NULL, and the frag is not marked, then it must be a branch to
          the same section.  */
+      pcrel_op = (const struct mips_pcrel_operand *) operand;
       if (sec == NULL)
 	{
 	  if (RELAX_MIPS16_LONG_BRANCH (fragp->fr_subtype))
@@ -15865,7 +15771,7 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
          PC relative load or add is the instruction itself, but if it
          is in a delay slot (in which case it can not be extended) use
          the address of the instruction whose delay slot it is in.  */
-      if (type == 'p' || type == 'q')
+      if (pcrel_op->include_isa_bit)
 	{
 	  addr += 2;
 
@@ -15877,26 +15783,21 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 
 	  /* Ignore the low bit in the target, since it will be set
              for a text label.  */
-	  if ((val & 1) != 0)
-	    --val;
+	  val &= -2;
 	}
       else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
 	addr -= 4;
       else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
 	addr -= 2;
 
-      val -= addr & ~ ((1 << op->shift) - 1);
-
-      /* Branch offsets have an implicit 0 in the lowest bit.  */
-      if (type == 'p' || type == 'q')
-	val /= 2;
+      val -= addr & -(1 << pcrel_op->align_log2);
 
       /* If any of the shifted bits are set, we must use an extended
          opcode.  If the address depends on the size of this
          instruction, this can lead to a loop, so we arrange to always
          use an extended opcode.  We only check this when we are in
          the main relaxation loop, when SEC is NULL.  */
-      if ((val & ((1 << op->shift) - 1)) != 0 && sec == NULL)
+      if ((val & ((1 << operand->shift) - 1)) != 0 && sec == NULL)
 	{
 	  fragp->fr_subtype =
 	    RELAX_MIPS16_MARK_LONG_BRANCH (fragp->fr_subtype);
@@ -15904,8 +15805,8 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 	}
 
       /* If we are about to mark a frag as extended because the value
-         is precisely maxtiny + 1, then there is a chance of an
-         infinite loop as in the following code:
+         is precisely the next value above maxtiny, then there is a
+         chance of an infinite loop as in the following code:
 	     la	$4,foo
 	     .skip	1020
 	     .align	2
@@ -15914,8 +15815,9 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
 	 away, so the la can be shrunk, but then foo is 0x400 away, so
 	 the la must be extended.  To avoid this loop, we mark the
 	 frag as extended if it was small, and is about to become
-	 extended with a value of maxtiny + 1.  */
-      if (val == ((maxtiny + 1) << op->shift)
+	 extended with the next value above maxtiny.  */
+      maxtiny = mips_int_operand_max (operand);
+      if (val == maxtiny + (1 << operand->shift)
 	  && ! RELAX_MIPS16_EXTENDED (fragp->fr_subtype)
 	  && sec == NULL)
 	{
@@ -15927,12 +15829,7 @@ mips16_extended_frag (fragS *fragp, asection *sec, long stretch)
   else if (symsec != absolute_section && sec != NULL)
     as_bad_where (fragp->fr_file, fragp->fr_line, _("unsupported relocation"));
 
-  if ((val & ((1 << op->shift) - 1)) != 0
-      || val < (mintiny << op->shift)
-      || val > (maxtiny << op->shift))
-    return 1;
-  else
-    return 0;
+  return !mips16_immed_in_range_p (operand, BFD_RELOC_UNUSED, val);
 }
 
 /* Compute the length of a branch sequence, and adjust the
@@ -16820,7 +16717,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
   if (RELAX_MIPS16_P (fragp->fr_subtype))
     {
       int type;
-      const struct mips16_immed_operand *op;
+      const struct mips_int_operand *operand;
       offsetT val;
       char *buf;
       unsigned int user_length, length;
@@ -16828,42 +16725,41 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED, segT asec, fragS *fragp)
       bfd_boolean ext;
 
       type = RELAX_MIPS16_TYPE (fragp->fr_subtype);
-      op = mips16_immed_operands;
-      while (op->type != type)
-	++op;
+      operand = mips16_immed_operand (type, FALSE);
 
       ext = RELAX_MIPS16_EXTENDED (fragp->fr_subtype);
       val = resolve_symbol_value (fragp->fr_symbol);
-      if (op->pcrel)
+      if (operand->root.type == OP_PCREL)
 	{
+	  const struct mips_pcrel_operand *pcrel_op;
 	  addressT addr;
 
+	  pcrel_op = (const struct mips_pcrel_operand *) operand;
 	  addr = fragp->fr_address + fragp->fr_fix;
 
 	  /* The rules for the base address of a PC relative reloc are
              complicated; see mips16_extended_frag.  */
-	  if (type == 'p' || type == 'q')
+	  if (pcrel_op->include_isa_bit)
 	    {
 	      addr += 2;
 	      if (ext)
 		addr += 2;
 	      /* Ignore the low bit in the target, since it will be
                  set for a text label.  */
-	      if ((val & 1) != 0)
-		--val;
+	      val &= -2;
 	    }
 	  else if (RELAX_MIPS16_JAL_DSLOT (fragp->fr_subtype))
 	    addr -= 4;
 	  else if (RELAX_MIPS16_DSLOT (fragp->fr_subtype))
 	    addr -= 2;
 
-	  addr &= ~ (addressT) ((1 << op->shift) - 1);
+	  addr &= -(1 << pcrel_op->align_log2);
 	  val -= addr;
 
 	  /* Make sure the section winds up with the alignment we have
              assumed.  */
-	  if (op->shift > 0)
-	    record_alignment (asec, op->shift);
+	  if (operand->shift > 0)
+	    record_alignment (asec, operand->shift);
 	}
 
       if (ext

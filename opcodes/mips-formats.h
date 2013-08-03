@@ -91,24 +91,25 @@
     return &op.root; \
   }
 
-#define PCREL(SIZE, LSB, ALIGN_LOG2, SHIFT, IS_SIGNED, INCLUDE_ISA_BIT, \
+#define PCREL(SIZE, LSB, IS_SIGNED, SHIFT, ALIGN_LOG2, INCLUDE_ISA_BIT, \
               FLIP_ISA_BIT) \
   { \
     static const struct mips_pcrel_operand op = { \
-      { OP_PCREL, SIZE, LSB }, ALIGN_LOG2, SHIFT, IS_SIGNED, \
-      INCLUDE_ISA_BIT, FLIP_ISA_BIT \
+      { { OP_PCREL, SIZE, LSB }, \
+	(1 << ((SIZE) - (IS_SIGNED))) - 1, 0, SHIFT, TRUE }, \
+      ALIGN_LOG2, INCLUDE_ISA_BIT, FLIP_ISA_BIT \
     }; \
-    return &op.root; \
+    return &op.root.root; \
   }
 
 #define JUMP(SIZE, LSB, SHIFT) \
-  PCREL (SIZE, LSB, SIZE + SHIFT, SHIFT, FALSE, TRUE, FALSE)
+  PCREL (SIZE, LSB, FALSE, SHIFT, SIZE + SHIFT, TRUE, FALSE)
 
 #define JALX(SIZE, LSB, SHIFT) \
-  PCREL (SIZE, LSB, SIZE + SHIFT, SHIFT, FALSE, TRUE, TRUE)
+  PCREL (SIZE, LSB, FALSE, SHIFT, SIZE + SHIFT, TRUE, TRUE)
 
 #define BRANCH(SIZE, LSB, SHIFT) \
-  PCREL (SIZE, LSB, 0, SHIFT, TRUE, TRUE, FALSE)
+  PCREL (SIZE, LSB, TRUE, SHIFT, 0, TRUE, FALSE)
 
 #define SPECIAL(SIZE, LSB, TYPE) \
   { \

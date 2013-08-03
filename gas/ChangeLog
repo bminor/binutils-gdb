@@ -1,5 +1,15 @@
 2013-08-03  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (match_int_operand): Use mips_int_operand_min
+	and mips_int_operand_max.
+	(mips16_immed_operand, mips16_immed_operands, MIPS16_NUM_IMMED):
+	Delete.
+	(mips16_immed_operand, mips16_immed_in_range_p): New functions.
+	(mips16_immed, mips16_extended_frag): Use them.  Use mips_int_operand
+	instead of mips16_immed_operand.
+
+2013-08-03  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips16_macro): Don't use move_register.
 	(mips16_ip): Allow macros to use 'p'.
 
