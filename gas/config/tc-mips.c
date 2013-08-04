@@ -690,7 +690,7 @@ static int mips_debug = 0;
 static struct mips_cl_insn history[1 + MAX_NOPS];
 
 /* Arrays of operands for each instruction.  */
-#define MAX_OPERANDS 5
+#define MAX_OPERANDS 6
 struct mips_operand_array {
   const struct mips_operand *operand[MAX_OPERANDS];
 };
@@ -2206,18 +2206,24 @@ struct regname {
   unsigned int num;
 };
 
-#define RTYPE_MASK	0x1ff00
-#define RTYPE_NUM	0x00100
-#define RTYPE_FPU	0x00200
-#define RTYPE_FCC	0x00400
-#define RTYPE_VEC	0x00800
-#define RTYPE_GP	0x01000
-#define RTYPE_CP0	0x02000
-#define RTYPE_PC	0x04000
-#define RTYPE_ACC	0x08000
-#define RTYPE_CCC	0x10000
-#define RNUM_MASK	0x000ff
-#define RWARN		0x80000
+#define RNUM_MASK	0x00000ff
+#define RTYPE_MASK	0x0efff00
+#define RTYPE_NUM	0x0000100
+#define RTYPE_FPU	0x0000200
+#define RTYPE_FCC	0x0000400
+#define RTYPE_VEC	0x0000800
+#define RTYPE_GP	0x0001000
+#define RTYPE_CP0	0x0002000
+#define RTYPE_PC	0x0004000
+#define RTYPE_ACC	0x0008000
+#define RTYPE_CCC	0x0010000
+#define RTYPE_VI	0x0020000
+#define RTYPE_VF	0x0040000
+#define RTYPE_R5900_I	0x0080000
+#define RTYPE_R5900_Q	0x0100000
+#define RTYPE_R5900_R	0x0200000
+#define RTYPE_R5900_ACC	0x0400000
+#define RWARN		0x8000000
 
 #define GENERIC_REGISTER_NUMBERS \
     {"$0",	RTYPE_NUM | 0},  \
@@ -2403,6 +2409,18 @@ struct regname {
     {"$v30",	RTYPE_VEC | 30}, \
     {"$v31",	RTYPE_VEC | 31}
 
+#define R5900_I_NAMES \
+    {"$I",	RTYPE_R5900_I | 0}
+
+#define R5900_Q_NAMES \
+    {"$Q",	RTYPE_R5900_Q | 0}
+
+#define R5900_R_NAMES \
+    {"$R",	RTYPE_R5900_R | 0}
+
+#define R5900_ACC_NAMES \
+    {"$ACC",	RTYPE_R5900_ACC | 0 }
+
 #define MIPS_DSP_ACCUMULATOR_NAMES \
     {"$ac0",	RTYPE_ACC | 0}, \
     {"$ac1",	RTYPE_ACC | 1}, \
@@ -2423,6 +2441,10 @@ static const struct regname reg_names[] = {
 
   MIPS16_SPECIAL_REGISTER_NAMES,
   MDMX_VECTOR_REGISTER_NAMES,
+  R5900_I_NAMES,
+  R5900_Q_NAMES,
+  R5900_R_NAMES,
+  R5900_ACC_NAMES,
   MIPS_DSP_ACCUMULATOR_NAMES,
   {0, 0}
 };
@@ -2450,24 +2472,14 @@ mips_prefer_vec_regno (unsigned int symval)
   return symval;
 }
 
-/* Return true if the string at *SPTR is a valid register name.  If so,
-   move *SPTR past the register and store the register's symbol value
-   in *SYMVAL.  This symbol value includes the register number
-   (RNUM_MASK) and register type (RTYPE_MASK).  */
+/* Return true if string [S, E) is a valid register name, storing its
+   symbol value in *SYMVAL_PTR if so.  */
 
 static bfd_boolean
-mips_parse_register (char **sptr, unsigned int *symval)
+mips_parse_register_1 (char *s, char *e, unsigned int *symval_ptr)
 {
-  symbolS *symbol;
-  char *s, *e;
   char save_c;
-
-  /* Find end of name.  */
-  s = e = *sptr;
-  if (is_name_beginner (*e))
-    ++e;
-  while (is_part_of_name (*e))
-    ++e;
+  symbolS *symbol;
 
   /* Terminate name.  */
   save_c = *e;
@@ -2480,8 +2492,63 @@ mips_parse_register (char **sptr, unsigned int *symval)
   if (!symbol || S_GET_SEGMENT (symbol) != reg_section)
     return FALSE;
 
+  *symval_ptr = S_GET_VALUE (symbol);
+  return TRUE;
+}
+
+/* Return true if the string at *SPTR is a valid register name.  Allow it
+   to have a VU0-style channel suffix of the form x?y?z?w? if CHANNELS_PTR
+   is nonnull.
+
+   When returning true, move *SPTR past the register, store the
+   register's symbol value in *SYMVAL_PTR and the channel mask in
+   *CHANNELS_PTR (if nonnull).  The symbol value includes the register
+   number (RNUM_MASK) and register type (RTYPE_MASK).  The channel mask
+   is a 4-bit value of the form XYZW and is 0 if no suffix was given.  */
+
+static bfd_boolean
+mips_parse_register (char **sptr, unsigned int *symval_ptr,
+		     unsigned int *channels_ptr)
+{
+  char *s, *e, *m;
+  const char *q;
+  unsigned int channels, symval, bit;
+
+  /* Find end of name.  */
+  s = e = *sptr;
+  if (is_name_beginner (*e))
+    ++e;
+  while (is_part_of_name (*e))
+    ++e;
+
+  channels = 0;
+  if (!mips_parse_register_1 (s, e, &symval))
+    {
+      if (!channels_ptr)
+	return FALSE;
+
+      /* Eat characters from the end of the string that are valid
+	 channel suffixes.  The preceding register must be $ACC or
+	 end with a digit, so there is no ambiguity.  */
+      bit = 1;
+      m = e;
+      for (q = "wzyx"; *q; q++, bit <<= 1)
+	if (m > s && m[-1] == *q)
+	  {
+	    --m;
+	    channels |= bit;
+	  }
+
+      if (channels == 0
+	  || !mips_parse_register_1 (s, m, &symval)
+	  || (symval & (RTYPE_VI | RTYPE_VF | RTYPE_R5900_ACC)) == 0)
+	return FALSE;
+    }
+
   *sptr = e;
-  *symval = S_GET_VALUE (symbol);
+  *symval_ptr = symval;
+  if (channels_ptr)
+    *channels_ptr = channels;
   return TRUE;
 }
 
@@ -2494,7 +2561,7 @@ reg_lookup (char **s, unsigned int types, unsigned int *regnop)
 {
   unsigned int regno;
 
-  if (mips_parse_register (s, &regno))
+  if (mips_parse_register (s, &regno, NULL))
     {
       if (types & RTYPE_VEC)
 	regno = mips_prefer_vec_regno (regno);
@@ -2514,10 +2581,31 @@ reg_lookup (char **s, unsigned int types, unsigned int *regnop)
   return regno <= RNUM_MASK;
 }
 
+/* Parse a VU0 "x?y?z?w?" channel mask at S and store the associated
+   mask in *CHANNELS.  Return a pointer to the first unconsumed character.  */
+
+static char *
+mips_parse_vu0_channels (char *s, unsigned int *channels)
+{
+  unsigned int i;
+
+  *channels = 0;
+  for (i = 0; i < 4; i++)
+    if (*s == "xyzw"[i])
+      {
+	*channels |= 1 << (3 - i);
+	++s;
+      }
+  return s;
+}
+
 /* Token types for parsed operand lists.  */
 enum mips_operand_token_type {
   /* A plain register, e.g. $f2.  */
   OT_REG,
+
+  /* A 4-bit XYZW channel mask.  */
+  OT_CHANNELS,
 
   /* An element of a vector, e.g. $v0[1].  */
   OT_REG_ELEMENT,
@@ -2535,6 +2623,9 @@ enum mips_operand_token_type {
      before OT_REGs.  */
   OT_CHAR,
 
+  /* A doubled character, either "--" or "++".  */
+  OT_DOUBLE_CHAR,
+
   /* The end of the operand list.  */
   OT_END
 };
@@ -2548,6 +2639,9 @@ struct mips_operand_token
   {
     /* The register symbol value for an OT_REG.  */
     unsigned int regno;
+
+    /* The 4-bit channel mask for an OT_CHANNEL_SUFFIX.  */
+    unsigned int channels;
 
     /* The register symbol value and index for an OT_REG_ELEMENT.  */
     struct {
@@ -2577,7 +2671,7 @@ struct mips_operand_token
       int length;
     } flt;
 
-    /* The character represented by an OT_CHAR.  */
+    /* The character represented by an OT_CHAR or OT_DOUBLE_CHAR.  */
     char ch;
   } u;
 };
@@ -2603,21 +2697,55 @@ static char *
 mips_parse_base_start (char *s)
 {
   struct mips_operand_token token;
-  unsigned int regno;
+  unsigned int regno, channels;
+  bfd_boolean decrement_p;
 
   if (*s != '(')
     return 0;
 
   ++s;
   SKIP_SPACE_TABS (s);
-  if (!mips_parse_register (&s, &regno))
+
+  /* Only match "--" as part of a base expression.  In other contexts "--X"
+     is a double negative.  */
+  decrement_p = (s[0] == '-' && s[1] == '-');
+  if (decrement_p)
+    {
+      s += 2;
+      SKIP_SPACE_TABS (s);
+    }
+
+  /* Allow a channel specifier because that leads to better error messages
+     than treating something like "$vf0x++" as an expression.  */
+  if (!mips_parse_register (&s, &regno, &channels))
     return 0;
 
   token.u.ch = '(';
   mips_add_token (&token, OT_CHAR);
 
+  if (decrement_p)
+    {
+      token.u.ch = '-';
+      mips_add_token (&token, OT_DOUBLE_CHAR);
+    }
+
   token.u.regno = regno;
   mips_add_token (&token, OT_REG);
+
+  if (channels)
+    {
+      token.u.channels = channels;
+      mips_add_token (&token, OT_CHANNELS);
+    }
+
+  /* For consistency, only match "++" as part of base expressions too.  */
+  SKIP_SPACE_TABS (s);
+  if (s[0] == '+' && s[1] == '+')
+    {
+      s += 2;
+      token.u.ch = '+';
+      mips_add_token (&token, OT_DOUBLE_CHAR);
+    }
 
   return s;
 }
@@ -2631,7 +2759,7 @@ static char *
 mips_parse_argument_token (char *s, char float_format)
 {
   char *end, *save_in, *err;
-  unsigned int regno1, regno2;
+  unsigned int regno1, regno2, channels;
   struct mips_operand_token token;
 
   /* First look for "($reg", since we want to treat that as an
@@ -2650,15 +2778,26 @@ mips_parse_argument_token (char *s, char float_format)
     }
 
   /* Handle tokens that start with a register.  */
-  if (mips_parse_register (&s, &regno1))
+  if (mips_parse_register (&s, &regno1, &channels))
     {
+      if (channels)
+	{
+	  /* A register and a VU0 channel suffix.  */
+	  token.u.regno = regno1;
+	  mips_add_token (&token, OT_REG);
+
+	  token.u.channels = channels;
+	  mips_add_token (&token, OT_CHANNELS);
+	  return s;
+	}
+
       SKIP_SPACE_TABS (s);
       if (*s == '-')
 	{
 	  /* A register range.  */
 	  ++s;
 	  SKIP_SPACE_TABS (s);
-	  if (!mips_parse_register (&s, &regno2))
+	  if (!mips_parse_register (&s, &regno2, NULL))
 	    {
 	      insn_error = _("Invalid register range");
 	      return 0;
@@ -2897,12 +3036,18 @@ validate_mips_insn (const struct mips_opcode *opcode,
     }
   used_bits = 0;
   opno = 0;
+  if (opcode->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX)
+    used_bits = mips_insert_operand (&mips_vu0_channel_mask, used_bits, -1);
   for (s = opcode->args; *s; ++s)
     switch (*s)
       {
       case ',':
       case '(':
       case ')':
+	break;
+
+      case '#':
+	s++;
 	break;
 
       default:
@@ -2918,9 +3063,9 @@ validate_mips_insn (const struct mips_opcode *opcode,
 	  }
 	gas_assert (opno < MAX_OPERANDS);
 	operands->operand[opno] = operand;
-	if (operand)
+	if (operand && operand->type != OP_VU0_MATCH_SUFFIX)
 	  {
-	    used_bits |= ((1 << operand->size) - 1) << operand->lsb;
+	    used_bits = mips_insert_operand (operand, used_bits, -1);
 	    if (operand->type == OP_MDMX_IMM_REG)
 	      /* Bit 5 is the format selector (OB vs QH).  The opcode table
 		 has separate entries for each format.  */
@@ -3159,6 +3304,23 @@ md_begin (void)
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
 				       reg_names_o32[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
+
+  for (i = 0; i < 32; i++)
+    {
+      char regname[7];
+
+      /* R5900 VU0 floating-point register.  */
+      regname[sizeof (rename) - 1] = 0;
+      snprintf (regname, sizeof (regname) - 1, "$vf%d", i);
+      symbol_table_insert (symbol_new (regname, reg_section,
+				       RTYPE_VF | i, &zero_address_frag));
+
+      /* R5900 VU0 integer register.  */
+      snprintf (regname, sizeof (regname) - 1, "$vi%d", i);
+      symbol_table_insert (symbol_new (regname, reg_section,
+				       RTYPE_VI | i, &zero_address_frag));
+
+    }
 
   obstack_init (&mips_operand_tokens);
 
@@ -3701,6 +3863,8 @@ operand_reg_mask (const struct mips_cl_insn *insn,
     case OP_REPEAT_DEST_REG:
     case OP_REPEAT_PREV_REG:
     case OP_PC:
+    case OP_VU0_SUFFIX:
+    case OP_VU0_MATCH_SUFFIX:
       abort ();
 
     case OP_REG:
@@ -4113,6 +4277,24 @@ convert_reg_type (const struct mips_opcode *opcode,
 
     case OP_REG_HW:
       return RTYPE_NUM;
+
+    case OP_REG_VI:
+      return RTYPE_NUM | RTYPE_VI;
+
+    case OP_REG_VF:
+      return RTYPE_NUM | RTYPE_VF;
+
+    case OP_REG_R5900_I:
+      return RTYPE_R5900_I;
+
+    case OP_REG_R5900_Q:
+      return RTYPE_R5900_Q;
+
+    case OP_REG_R5900_R:
+      return RTYPE_R5900_R;
+
+    case OP_REG_R5900_ACC:
+      return RTYPE_R5900_ACC;
     }
   abort ();
 }
@@ -5046,6 +5228,42 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
   return TRUE;
 }
 
+/* OP_VU0_SUFFIX and OP_VU0_MATCH_SUFFIX matcher; MATCH_P selects between
+   them.  */
+
+static bfd_boolean
+match_vu0_suffix_operand (struct mips_arg_info *arg,
+			  const struct mips_operand *operand,
+			  bfd_boolean match_p)
+{
+  unsigned int uval;
+
+  /* The operand can be an XYZW mask or a single 2-bit channel index
+     (with X being 0).  */
+  gas_assert (operand->size == 2 || operand->size == 4);
+
+  /* The suffix can be omitted when matching a previous 4-bit mask.  */
+  if (arg->token->type != OT_CHANNELS)
+    return operand->size == 4 && match_p;
+
+  uval = arg->token->u.channels;
+  if (operand->size == 2)
+    {
+      /* Check that a single bit is set and convert it into a 2-bit index.  */
+      if ((uval & -uval) != uval)
+	return FALSE;
+      uval = 4 - ffs (uval);
+    }
+
+  if (match_p && insn_extract_operand (arg->insn, operand) != uval)
+    return FALSE;
+
+  ++arg->token;
+  if (!match_p)
+    insn_insert_operand (arg->insn, operand, uval);
+  return TRUE;
+}
+
 /* S is the text seen for ARG.  Match it against OPERAND.  Return the end
    of the argument text if the match is successful, otherwise return null.  */
 
@@ -5102,6 +5320,12 @@ match_operand (struct mips_arg_info *arg,
 
     case OP_PC:
       return match_pc_operand (arg);
+
+    case OP_VU0_SUFFIX:
+      return match_vu0_suffix_operand (arg, operand, FALSE);
+
+    case OP_VU0_MATCH_SUFFIX:
+      return match_vu0_suffix_operand (arg, operand, TRUE);
     }
   abort ();
 }
@@ -9913,7 +10137,7 @@ macro (struct mips_cl_insn *ip, char *str)
       goto ld_st;
     case M_LQC2_AB:
       s = "lqc2";
-      fmt = "E,o(b)";
+      fmt = "+7,o(b)";
       /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld_st;
@@ -10077,7 +10301,7 @@ macro (struct mips_cl_insn *ip, char *str)
       goto ld_st;
     case M_SQC2_AB:
       s = "sqc2";
-      fmt = "E,o(b)";
+      fmt = "+7,o(b)";
       /* Itbl support may require additional care here.  */
       coproc = 1;
       goto ld_st;
@@ -12078,6 +12302,74 @@ mips16_macro (struct mips_cl_insn *ip)
     }
 }
 
+/* Look up instruction [START, START + LENGTH) in HASH.  Record any extra
+   opcode bits in *OPCODE_EXTRA.  */
+
+static struct mips_opcode *
+mips_lookup_insn (struct hash_control *hash, const char *start,
+		  unsigned int length, unsigned int *opcode_extra)
+{
+  char *name, *dot, *p;
+  unsigned int mask, suffix;
+  size_t opend;
+  struct mips_opcode *insn;
+
+  /* Make a copy of the instruction so that we can fiddle with it.  */
+  name = alloca (length + 1);
+  memcpy (name, start, length);
+  name[length] = '\0';
+
+  /* Look up the instruction as-is.  */
+  insn = (struct mips_opcode *) hash_find (hash, name);
+  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) == 0)
+    return insn;
+
+  dot = strchr (name, '.');
+  if (dot && dot[1])
+    {
+      /* Try to interpret the text after the dot as a VU0 channel suffix.  */
+      p = mips_parse_vu0_channels (dot + 1, &mask);
+      if (*p == 0 && mask != 0)
+	{
+	  *dot = 0;
+	  insn = (struct mips_opcode *) hash_find (hash, name);
+	  *dot = '.';
+	  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0)
+	    {
+	      *opcode_extra |= mask << mips_vu0_channel_mask.lsb;
+	      return insn;
+	    }
+	}
+    }
+
+  if (mips_opts.micromips)
+    {
+      /* See if there's an instruction size override suffix,
+	 either `16' or `32', at the end of the mnemonic proper,
+	 that defines the operation, i.e. before the first `.'
+	 character if any.  Strip it and retry.  */
+      opend = dot != NULL ? dot - name : length;
+      if (opend >= 3 && name[opend - 2] == '1' && name[opend - 1] == '6')
+	suffix = 2;
+      else if (name[opend - 2] == '3' && name[opend - 1] == '2')
+	suffix = 4;
+      else
+	suffix = 0;
+      if (suffix)
+	{
+	  memcpy (name + opend - 2, name + opend, length - opend + 1);
+	  insn = (struct mips_opcode *) hash_find (hash, name);
+	  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) == 0)
+	    {
+	      forced_insn_length = suffix;
+	      return insn;
+	    }
+	}
+    }
+
+  return NULL;
+}
+
 /* Assemble an instruction into its binary format.  If the instruction
    is a macro, set imm_expr, imm2_expr and offset_expr to the values
    associated with "I", "+I" and "A" operands respectively.  Otherwise
@@ -12095,16 +12387,14 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   struct hash_control *hash;
   const char *args;
   char c = 0;
-  struct mips_opcode *insn;
-  long opend;
-  char *name;
-  char *dot;
+  struct mips_opcode *first, *insn;
   char format;
-  long end;
+  size_t end;
   const struct mips_operand *operand;
   struct mips_arg_info arg;
   struct mips_operand_token *tokens;
   bfd_boolean optional_reg;
+  unsigned int opcode_extra;
 
   insn_error = NULL;
 
@@ -12120,50 +12410,22 @@ mips_ip (char *str, struct mips_cl_insn *ip)
     }
   forced_insn_length = 0;
   insn = NULL;
+  opcode_extra = 0;
 
   /* We first try to match an instruction up to a space or to the end.  */
   for (end = 0; str[end] != '\0' && !ISSPACE (str[end]); end++)
     continue;
 
-  /* Make a copy of the instruction so that we can fiddle with it.  */
-  name = alloca (end + 1);
-  memcpy (name, str, end);
-  name[end] = '\0';
-
-  for (;;)
-    {
-      insn = (struct mips_opcode *) hash_find (hash, name);
-
-      if (insn != NULL || !mips_opts.micromips)
-	break;
-      if (forced_insn_length)
-	break;
-
-      /* See if there's an instruction size override suffix,
-         either `16' or `32', at the end of the mnemonic proper,
-         that defines the operation, i.e. before the first `.'
-         character if any.  Strip it and retry.  */
-      dot = strchr (name, '.');
-      opend = dot != NULL ? dot - name : end;
-      if (opend < 3)
-	break;
-      if (name[opend - 2] == '1' && name[opend - 1] == '6')
-	forced_insn_length = 2;
-      else if (name[opend - 2] == '3' && name[opend - 1] == '2')
-	forced_insn_length = 4;
-      else
-	break;
-      memcpy (name + opend - 2, name + opend, end - opend + 1);
-    }
+  first = insn = mips_lookup_insn (hash, str, end, &opcode_extra);
   if (insn == NULL)
     {
       insn_error = _("Unrecognized opcode");
       return;
     }
 
-  if (strcmp (name, "li.s") == 0)
+  if (strcmp (insn->name, "li.s") == 0)
     format = 'f';
-  else if (strcmp (name, "li.d") == 0)
+  else if (strcmp (insn->name, "li.d") == 0)
     format = 'd';
   else
     format = 0;
@@ -12184,7 +12446,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       bfd_boolean ok;
       bfd_boolean more_alts;
 
-      gas_assert (strcmp (insn->name, name) == 0);
+      gas_assert (strcmp (insn->name, first->name) == 0);
 
       ok = is_opcode_valid (insn);
       size_ok = is_size_valid (insn);
@@ -12240,6 +12502,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       offset_reloc[2] = BFD_RELOC_UNUSED;
 
       create_insn (ip, insn);
+      ip->insn_opcode |= opcode_extra;
       insn_error = NULL;
       memset (&arg, 0, sizeof (arg));
       arg.insn = ip;
@@ -12272,6 +12535,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      if (strcmp (args, "(b)") == 0)
 		args += 3;
 
+	      if (args[0] == '+' && args[1] == 'K')
+		args += 2;
+
 	      /* Fail the match if there were too few operands.  */
 	      if (*args)
 		break;
@@ -12299,6 +12565,17 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	    {
 	      if (match_char (&arg, *args))
  		continue;
+ 	      break;
+	    }
+	  if (*args == '#')
+	    {
+	      ++args;
+	      if (arg.token->type == OT_DOUBLE_CHAR
+		  && arg.token->u.ch == *args)
+		{
+		  ++arg.token;
+		  continue;
+		}
  	      break;
 	    }
 

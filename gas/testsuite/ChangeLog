@@ -1,3 +1,12 @@
+2013-08-04  Jürgen Urban  <JuergenUrban@gmx.de>
+
+	* gas/mips/r5900-vu0.d: Expect $vfN and $viN instead of numeric
+	coprocessor registers.
+	* gas/mips/r5900-all-vu0.s, gas/mips/r5900-all-vu0.d,
+	gas/mips/r5900-full-vu0.s, gas/mips/r5900-full-vu0.d,
+	gas/mips/r5900-error-vu0.s, gas/mips/r5900-error-vu0.l: New tests.
+	* gas/mips/mips.exp: Run them.
+
 2013-08-03  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/mips16-macro.s, gas/mips/mips16-macro.d: New test.

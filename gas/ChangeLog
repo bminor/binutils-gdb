@@ -1,3 +1,38 @@
+2013-08-04  Jürgen Urban  <JuergenUrban@gmx.de>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (MAX_OPERANDS): Bump to 6.
+	(RWARN): Bump to 0x8000000.
+	(RTYPE_VI, RTYPE_VF, RTYPE_R5900_I, RTYPE_R5900_Q, RTYPE_R5900_R)
+	(RTYPE_R5900_ACC): New register types.
+	(RTYPE_MASK): Include them.
+	(R5900_I_NAMES, R5900_Q_NAMES, R5900_R_NAMES, R5900_ACC_NAMES): New
+	macros.
+	(reg_names): Include them.
+	(mips_parse_register_1): New function, split out from...
+	(mips_parse_register): ...here.  Add a channels_ptr parameter.
+	Look for VU0 channel suffixes when nonnull.
+	(reg_lookup): Update the call to mips_parse_register.
+	(mips_parse_vu0_channels): New function.
+	(OT_CHANNELS, OT_DOUBLE_CHAR): New mips_operand_token_types.
+	(mips_operand_token): Add a "channels" field to the union.
+	Extend the comment above "ch" to OT_DOUBLE_CHAR.
+	(mips_parse_base_start): Match -- and ++.  Handle channel suffixes.
+	(mips_parse_argument_token): Handle channel suffixes here too.
+	(validate_mips_insn): Handle INSN2_VU0_CHANNEL_SUFFIX.
+	Ignore OP_VU0_MATCH_SUFFIX when calculating the used bits.
+	Handle '#' formats.
+	(md_begin): Register $vfN and $vfI registers.
+	(operand_reg_mask): Handle OP_VU0_SUFFIX and OP_VU0_MATCH_SUFFIX.
+	(convert_reg_type): Handle OP_REG_VI, OP_REG_VF, OP_REG_R5900_I,
+	OP_REG_R5900_Q, OP_REG_R5900_R and OP_REG_R5900_ACC.
+	(match_vu0_suffix_operand): New function.
+	(match_operand): Handle OP_VU0_SUFFIX and OP_VU0_MATCH_SUFFIX.
+	(macro): Use "+7" rather than "E" for LDQ2 and STQ2.
+	(mips_lookup_insn): New function.
+	(mips_ip): Use it.  Allow "+K" operands to be elided at the end
+	of an instruction.  Handle '#' sequences.
+
 2013-08-03  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (macro, mips16_macro): Create an array of operand

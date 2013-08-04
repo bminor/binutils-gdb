@@ -917,6 +917,30 @@ print_reg (struct disassemble_info *info, const struct mips_opcode *opcode,
     case OP_REG_HW:
       info->fprintf_func (info->stream, "%s", mips_hwr_names[regno]);
       break;
+
+    case OP_REG_VF:
+      info->fprintf_func (info->stream, "$vf%d", regno);
+      break;
+
+    case OP_REG_VI:
+      info->fprintf_func (info->stream, "$vi%d", regno);
+      break;
+
+    case OP_REG_R5900_I:
+      info->fprintf_func (info->stream, "$I");
+      break;
+
+    case OP_REG_R5900_Q:
+      info->fprintf_func (info->stream, "$Q");
+      break;
+
+    case OP_REG_R5900_R:
+      info->fprintf_func (info->stream, "$R");
+      break;
+
+    case OP_REG_R5900_ACC:
+      info->fprintf_func (info->stream, "$ACC");
+      break;
     }
 }
 
@@ -939,6 +963,25 @@ static inline void
 init_print_arg_state (struct mips_print_arg_state *state)
 {
   memset (state, 0, sizeof (*state));
+}
+
+/* Print OP_VU0_SUFFIX or OP_VU0_MATCH_SUFFIX operand OPERAND,
+   whose value is given by UVAL.  */
+
+static void
+print_vu0_channel (struct disassemble_info *info,
+		   const struct mips_operand *operand, unsigned int uval)
+{
+  if (operand->size == 4)
+    info->fprintf_func (info->stream, "%s%s%s%s",
+			uval & 8 ? "x" : "",
+			uval & 4 ? "y" : "",
+			uval & 2 ? "z" : "",
+			uval & 1 ? "w" : "");
+  else if (operand->size == 2)
+    info->fprintf_func (info->stream, "%c", "xyzw"[uval]);
+  else
+    abort ();
 }
 
 /* Print operand OPERAND of OPCODE, using STATE to track inter-operand state.
@@ -1201,6 +1244,11 @@ print_insn_arg (struct disassemble_info *info,
     case OP_PC:
       infprintf (is, "$pc");
       break;
+
+    case OP_VU0_SUFFIX:
+    case OP_VU0_MATCH_SUFFIX:
+      print_vu0_channel (info, operand, uval);
+      break;
     }
 }
 
@@ -1229,6 +1277,11 @@ print_insn_args (struct disassemble_info *info,
 	case '(':
 	case ')':
 	  infprintf (is, "%c", *s);
+	  break;
+
+	case '#':
+	  ++s;
+	  infprintf (is, "%c%c", *s, *s);
 	  break;
 
 	default:
@@ -1365,6 +1418,14 @@ print_insn_mips (bfd_vma memaddr,
 		info->insn_type = dis_dref;
 
 	      infprintf (is, "%s", op->name);
+	      if (op->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX)
+		{
+		  unsigned int uval;
+
+		  infprintf (is, ".");
+		  uval = mips_extract_operand (&mips_vu0_channel_mask, word);
+		  print_vu0_channel (info, &mips_vu0_channel_mask, uval);
+		}
 
 	      if (op->args[0])
 		{

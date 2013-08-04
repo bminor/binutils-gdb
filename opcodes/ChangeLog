@@ -1,3 +1,19 @@
+2013-08-04  Jürgen Urban  <JuergenUrban@gmx.de>
+	    Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-dis.c (print_reg): Handle OP_REG_VI, OP_REG_VF, OP_REG_R5900_I,
+	OP_REG_R5900_Q, OP_REG_R5900_R and OP_REG_R5900_ACC.
+	(print_vu0_channel): New function.
+	(print_insn_arg): Handle OP_VU0_SUFFIX and OP_VU0_MATCH_SUFFIX.
+	(print_insn_args): Handle '#'.
+	(print_insn_mips): Handle INSN2_VU0_CHANNEL_SUFFIX.
+	* mips-opc.c (mips_vu0_channel_mask): New constant.
+	(decode_mips_operand): Handle new VU0 operand types.
+	(VU0, VU0CH): New macros.
+	(mips_builtin_opcodes): Add VU0 opcodes.  Use "+7" rather than "E"
+	for LQC2 and SQC2.  Use "+9" rather than "G" for EE CFC2 and CTC2.
+	Use "+6" rather than "G" for QMFC2 and QMTC2.
+
 2013-08-03  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* mips-formats.h (PCREL): Reorder parameters and update the definition

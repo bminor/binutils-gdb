@@ -30,6 +30,9 @@
 #include "opcode/mips.h"
 #include "mips-formats.h"
 
+/* The 4-bit XYZW mask used in some VU0 instructions.  */
+const struct mips_operand mips_vu0_channel_mask = { OP_VU0_SUFFIX, 4, 21 };
+
 static unsigned char reg_0_map[] = { 0 };
 
 /* Return the mips_operand structure for the operand at the beginning of P.  */
@@ -46,6 +49,12 @@ decode_mips_operand (const char *p)
 	case '2': HINT (10, 6);
 	case '3': HINT (15, 6);
 	case '4': HINT (20, 6);
+	case '5': REG (5, 6, VF);
+	case '6': REG (5, 11, VF);
+	case '7': REG (5, 16, VF);
+	case '8': REG (5, 6, VI);
+	case '9': REG (5, 11, VI);
+	case '0': REG (5, 16, VI);
 
 	case 'A': BIT (5, 6, 0);		/* (0 .. 31) */
 	case 'B': MSB (5, 11, 1, TRUE, 32);	/* (1 .. 32), 32-bit op */
@@ -55,6 +64,10 @@ decode_mips_operand (const char *p)
 	case 'G': MSB (5, 11, 33, FALSE, 64);	/* (33 .. 64), 64-bit op */
 	case 'H': MSB (5, 11, 1, FALSE, 64);	/* (1 .. 32), 64-bit op */
 	case 'J': HINT (10, 11);
+	case 'K': SPECIAL (4, 21, VU0_MATCH_SUFFIX);
+	case 'L': SPECIAL (2, 21, VU0_SUFFIX);
+	case 'M': SPECIAL (2, 23, VU0_SUFFIX);
+	case 'N': SPECIAL (2, 0, VU0_MATCH_SUFFIX);
 	case 'P': BIT (5, 6, 32);		/* (32 .. 63) */
 	case 'Q': SINT (10, 6);
 	case 'S': MSB (5, 11, 0, FALSE, 63);	/* (0 .. 31), 64-bit op */
@@ -64,12 +77,18 @@ decode_mips_operand (const char *p)
 	case 'a': SINT (8, 6);
 	case 'b': SINT (8, 3);
 	case 'c': INT_ADJ (9, 6, 255, 4, FALSE); /* (-256 .. 255) << 4 */
+	case 'f': INT_ADJ (15, 6, 32767, 3, TRUE);
+	case 'g': SINT (5, 6);
 	case 'i': JALX (26, 0, 2);
 	case 'j': SINT (9, 7);
+	case 'm': REG (0, 0, R5900_ACC);
 	case 'p': BIT (5, 6, 0);		/* (0 .. 31), 32-bit op */
+	case 'q': REG (0, 0, R5900_Q);
+	case 'r': REG (0, 0, R5900_R);
 	case 's': MSB (5, 11, 0, FALSE, 31);	/* (0 .. 31) */
 	case 't': REG (5, 16, COPRO);
 	case 'x': BIT (5, 16, 0);		/* (0 .. 31) */
+	case 'y': REG (0, 0, R5900_I);
 	case 'z': REG (5, 0, GP);
 	}
       break;
@@ -267,6 +286,10 @@ decode_mips_operand (const char *p)
 /* 64 bit CPU with only 32 bit multiplication/division support. */
 #define M32	EE
 
+/* Support for VU0 Coprocessor instructions */
+#define VU0	EE
+#define VU0CH	INSN2_VU0_CHANNEL_SUFFIX
+
 /* MIPS DSP ASE support.
    NOTE:
    1. MIPS DSP ASE includes 4 accumulators ($ac0 - $ac3).  $ac0 is the pair
@@ -402,6 +425,136 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"gssq",		"+z,t,+c(b)",	0xe8000020, 0xfc008020,	RD_1|RD_2|RD_4|SM,	0,		IL3A,		0,	0 },
 {"gslqc1",		"+Z,T,+c(b)",	0xc8008020, 0xfc008020,	WR_1|WR_2|RD_4|LDD,	0,		IL3A,		0,	0 },
 {"gssqc1",		"+Z,T,+c(b)",	0xe8008020, 0xfc008020,	RD_1|RD_2|RD_4|SM,	0,		IL3A,		0,	0 },
+
+/* R5900 VU0 Macromode instructions. */
+{"vabs",		"+7+K,+6+K",	  0x4a0001fd, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vadd",		"+5+K,+6+K,+7+K", 0x4a000028, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddi",		"+5+K,+6+K,+y",	  0x4a000022, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddq",		"+5+K,+6+K,+q",	  0x4a000020, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddw",		"+5+K,+6+K,+7+N", 0x4a000003, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddx",		"+5+K,+6+K,+7+N", 0x4a000000, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddy",		"+5+K,+6+K,+7+N", 0x4a000001, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddz",		"+5+K,+6+K,+7+N", 0x4a000002, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vadda",		"+m+K,+7+K,+6+K", 0x4a0002bc, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddai",		"+m+K,+6+K,+y",	  0x4a00023e, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddaq",		"+m+K,+6+K,+q",	  0x4a00023c, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddaw",		"+m+K,+6+K,+7+N", 0x4a00003f, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddax",		"+m+K,+6+K,+7+N", 0x4a00003c, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vadday",		"+m+K,+6+K,+7+N", 0x4a00003d, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vaddaz",		"+m+K,+6+K,+7+N", 0x4a00003e, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vcallms",		"+f",		  0x4a000038, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
+{"vcallmsr",		"+9",		  0x4a000039, 0xffff07ff,	CP,		0,		VU0,		0,	0 },
+{"vclipw.xyz",		"+6+K,+7+N",	  0x4bc001ff, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"vdiv",		"+q,+6+L,+7+M",	  0x4a0003bc, 0xfe0007ff,	CP,		0,		VU0,		0,	0 },
+{"vftoi0",		"+7+K,+6+K",	  0x4a00017c, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vftoi4",		"+7+K,+6+K",	  0x4a00017d, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vftoi12",		"+7+K,+6+K",	  0x4a00017e, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vftoi15",		"+7+K,+6+K",	  0x4a00017f, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"viadd",		"+8,+9,+0",	  0x4a000030, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
+{"viaddi",		"+0,+9,+g",	  0x4a000032, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
+{"viand",		"+8,+9,+0",	  0x4a000034, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
+{"vilwr.w",		"+0,(+9)",	  0x4a2003fe, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"vilwr.x",		"+0,(+9)",	  0x4b0003fe, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"vilwr.y",		"+0,(+9)",	  0x4a8003fe, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"vilwr.z",		"+0,(+9)",	  0x4a4003fe, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"vior",		"+8,+9,+0",	  0x4a000035, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
+{"viswr.w",		"+0,(+9)",	  0x4a2003ff, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"viswr.x",		"+0,(+9)",	  0x4b0003ff, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"viswr.y",		"+0,(+9)",	  0x4a8003ff, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"viswr.z",		"+0,(+9)",	  0x4a4003ff, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"visub",		"+8,+9,+0",	  0x4a000031, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
+{"vitof0",		"+7+K,+6+K",	  0x4a00013c, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vitof4",		"+7+K,+6+K",	  0x4a00013d, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vitof12",		"+7+K,+6+K",	  0x4a00013e, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vitof15",		"+7+K,+6+K",	  0x4a00013f, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vlqd",		"+7+K,(#-+9)",	  0x4a00037e, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vlqi",		"+7+K,(+9#+)",	  0x4a00037c, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmadd",		"+5+K,+6+K,+7+K", 0x4a000029, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddi",		"+5+K,+6+K,+y",	  0x4a000023, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddq",		"+5+K,+6+K,+q",	  0x4a000021, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddw",		"+5+K,+6+K,+7+N", 0x4a00000b, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddx",		"+5+K,+6+K,+7+N", 0x4a000008, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddy",		"+5+K,+6+K,+7+N", 0x4a000009, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddz",		"+5+K,+6+K,+7+N", 0x4a00000a, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmadda",		"+m+K,+6+K,+7+K", 0x4a0002bd, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddai",		"+m+K,+6+K,+y",	  0x4a00023f, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddaq",		"+m+K,+6+K,+q",	  0x4a00023d, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddaw",		"+m+K,+6+K,+7+N", 0x4a0000bf, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddax",		"+m+K,+6+K,+7+N", 0x4a0000bc, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmadday",		"+m+K,+6+K,+7+N", 0x4a0000bd, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaddaz",		"+m+K,+6+K,+7+N", 0x4a0000be, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmax",		"+5+K,+6+K,+7+K", 0x4a00002b, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaxi",		"+5+K,+6+K,+y",	  0x4a00001d, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaxw",		"+5+K,+6+K,+7+N", 0x4a000013, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaxx",		"+5+K,+6+K,+7+N", 0x4a000010, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaxy",		"+5+K,+6+K,+7+N", 0x4a000011, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmaxz",		"+5+K,+6+K,+7+N", 0x4a000012, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmfir",		"+7+K,+9",	  0x4a0003fd, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmini",		"+5+K,+6+K,+7+K", 0x4a00002f, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vminii",		"+5+K,+6+K,+y",	  0x4a00001f, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vminiw",		"+5+K,+6+K,+7+N", 0x4a000017, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vminix",		"+5+K,+6+K,+7+N", 0x4a000014, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vminiy",		"+5+K,+6+K,+7+N", 0x4a000015, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vminiz",		"+5+K,+6+K,+7+N", 0x4a000016, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmove",		"+7+K,+6+K",	  0x4a00033c, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmr32",		"+7+K,+6+K",	  0x4a00033d, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsub",		"+5+K,+6+K,+7+K", 0x4a00002d, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubi",		"+5+K,+6+K,+y",	  0x4a000027, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubq",		"+5+K,+6+K,+q",	  0x4a000025, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubw",		"+5+K,+6+K,+7+N", 0x4a00000f, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubx",		"+5+K,+6+K,+7+N", 0x4a00000c, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsuby",		"+5+K,+6+K,+7+N", 0x4a00000d, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubz",		"+5+K,+6+K,+7+N", 0x4a00000e, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsuba",		"+m+K,+7+K,+6+K", 0x4a0002fd, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubai",		"+m+K,+6+K,+y",	  0x4a00027f, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubaq",		"+m+K,+6+K,+q",	  0x4a00027d, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubaw",		"+m+K,+6+K,+7+N", 0x4a0000ff, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubax",		"+m+K,+6+K,+7+N", 0x4a0000fc, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubay",		"+m+K,+6+K,+7+N", 0x4a0000fd, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmsubaz",		"+m+K,+6+K,+7+N", 0x4a0000fe, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmtir",		"+0,+6+L",	  0x4a0003fc, 0xff8007ff,	CP,		0,		VU0,		0,	0 },
+{"vmul",		"+5+K,+6+K,+7+K", 0x4a00002a, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmuli",		"+5+K,+6+K,+y",	  0x4a00001e, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulq",		"+5+K,+6+K,+q",	  0x4a00001c, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulw",		"+5+K,+6+K,+7+N", 0x4a00001b, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulx",		"+5+K,+6+K,+7+N", 0x4a000018, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmuly",		"+5+K,+6+K,+7+N", 0x4a000019, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulz",		"+5+K,+6+K,+7+N", 0x4a00001a, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmula",		"+m+K,+6+K,+7+K", 0x4a0002be, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulai",		"+m+K,+6+K,+y",	  0x4a0001fe, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulaq",		"+m+K,+6+K,+q",	  0x4a0001fc, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulaw",		"+m+K,+6+K,+7+N", 0x4a0001bf, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulax",		"+m+K,+6+K,+7+N", 0x4a0001bc, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulay",		"+m+K,+6+K,+7+N", 0x4a0001bd, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vmulaz",		"+m+K,+6+K,+7+N", 0x4a0001be, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vnop",		"",		  0x4a0002ff, 0xffffffff,	CP,		0,		VU0,		0,	0 },
+{"vopmula.xyz",		"+m+K,+6+K,+7+K", 0x4bc002fe, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"vopmula",		"+m+K,+6+K,+7+K", 0x4bc002fe, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"vopmsub.xyz",		"+5+K,+6+K,+7+K", 0x4bc0002e, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
+{"vopmsub",		"+5+K,+6+K,+7+K", 0x4bc0002e, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
+{"vrget",		"+7+K,+r",	  0x4a00043d, 0xfe00ffff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vrinit",		"+r,+6+L",	  0x4a00043e, 0xff9f07ff,	CP,		0,		VU0,		0,	0 },
+{"vrnext",		"+7+K,+r",	  0x4a00043c, 0xfe00ffff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vrsqrt",		"+q,+6+L,+7+M",	  0x4a0003be, 0xfe0007ff,	CP,		0,		VU0,		0,	0 },
+{"vrxor",		"+r,+6+L",	  0x4a00043f, 0xff9f07ff,	CP,		0,		VU0,		0,	0 },
+{"vsqd",		"+6+K,(#-+0)",	  0x4a00037f, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsqi",		"+6+K,(+0#+)",	  0x4a00037d, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsqrt",		"+q,+7+M",	  0x4a2003bd, 0xfe60ffff,	CP,		0,		VU0,		0,	0 },
+{"vsub",		"+5+K,+6+K,+7+K", 0x4a00002c, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubi",		"+5+K,+6+K,+y",	  0x4a000026, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubq",		"+5+K,+6+K,+q",	  0x4a000024, 0xfe1f003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubw",		"+5+K,+6+K,+7+N", 0x4a000007, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubx",		"+5+K,+6+K,+7+N", 0x4a000004, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsuby",		"+5+K,+6+K,+7+N", 0x4a000005, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubz",		"+5+K,+6+K,+7+N", 0x4a000006, 0xfe00003f,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsuba",		"+m+K,+6+K,+7+K", 0x4a0002fc, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubai",		"+m+K,+6+K,+y",	  0x4a00027e, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubaq",		"+m+K,+6+K,+q",	  0x4a00027c, 0xfe1f07ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubaw",		"+m+K,+6+K,+7+N", 0x4a00007f, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubax",		"+m+K,+6+K,+7+N", 0x4a00007c, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubay",		"+m+K,+6+K,+7+N", 0x4a00007d, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vsubaz",		"+m+K,+6+K,+7+N", 0x4a00007e, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
+{"vwaitq",		"",		  0x4a0003bf, 0xffffffff,	CP,		0,		VU0,		0,	0 },
 
 {"abs",			"d,v",		0,    (int) M_ABS,	INSN_MACRO,		0,		I1,		0,	0 },
 {"abs.s",		"D,V",		0x46000005, 0xffff003f,	WR_1|RD_2|FP_S,		0,		I1,		0,	0 },
@@ -1011,8 +1164,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"lld",			"t,A(b)",	0,    (int) M_LLD_AB,	INSN_MACRO,		0,		I3,		0,	EE },
 {"lq",			"t,o(b)",	0x78000000, 0xfc000000, WR_1|RD_3,		0,		MMI,		0,	0 },
 {"lq",			"t,A(b)",	0,    (int) M_LQ_AB,	INSN_MACRO,		0,		MMI,		0,	0 },
-{"lqc2",		"E,o(b)",	0xd8000000, 0xfc000000,	RD_3|WR_C2,		0,		EE,		0,	0 },
-{"lqc2",		"E,A(b)",	0,    (int) M_LQC2_AB,	INSN_MACRO,		0,		EE,		0,	0 },
+{"lqc2",		"+7,o(b)",	0xd8000000, 0xfc000000,	RD_3|WR_C2,		0,		EE,		0,	0 },
+{"lqc2",		"+7,A(b)",	0,    (int) M_LQC2_AB,	INSN_MACRO,		0,		EE,		0,	0 },
 {"lui",			"t,u",		0x3c000000, 0xffe00000,	WR_1,			0,		I1,		0,	0 },
 {"luxc1",		"D,t(b)",	0x4c000005, 0xfc00f83f, WR_1|RD_2|RD_3|LDD|FP_D, 0,		I5_33|N55,	0,	0},
 {"lw",			"t,o(b)",	0x8c000000, 0xfc000000,	WR_1|RD_3|LDD,		0,		I1,		0,	0 },
@@ -1601,8 +1754,8 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"snei",		"t,r,+Q",	0x7000002f, 0xfc00003f, WR_1|RD_2,		0,		IOCT,		0,	0 },
 {"sq",			"t,o(b)",	0x7c000000, 0xfc000000,	RD_1|RD_3|SM,		0,		MMI,		0,	0 },
 {"sq",			"t,A(b)",	0,    (int) M_SQ_AB,	INSN_MACRO,		0,		MMI,		0,	0 },
-{"sqc2",		"E,o(b)",	0xf8000000, 0xfc000000,	RD_3|RD_C2|SM,		0,		EE,		0,	0 },
-{"sqc2",		"E,A(b)",	0,    (int) M_SQC2_AB,	INSN_MACRO,		0,		EE,		0,	0 },
+{"sqc2",		"+7,o(b)",	0xf8000000, 0xfc000000,	RD_3|RD_C2|SM,		0,		EE,		0,	0 },
+{"sqc2",		"+7,A(b)",	0,    (int) M_SQC2_AB,	INSN_MACRO,		0,		EE,		0,	0 },
 {"sqrt.d",		"D,S",		0x46200004, 0xffff003f, WR_1|RD_2|FP_D,		0,		I2,		0,	SF },
 {"sqrt.s",		"D,S",		0x46000004, 0xffff003f, WR_1|RD_2|FP_S,		0,		I2,		0,	0 },
 {"sqrt.ps",		"D,S",		0x46c00004, 0xffff003f, WR_1|RD_2|FP_D,		0,		SB1,		0,	0 },
@@ -1847,12 +2000,14 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"bc2t",		"N,p",		0x49010000, 0xffe30000,	RD_CC|CBD,		0,		I32,		0,	IOCT|IOCTP|IOCT2 },
 {"bc2tl",		"p",		0x49030000, 0xffff0000,	RD_CC|CBL,		0,		I2|T3,		0,	IOCT|IOCTP|IOCT2 },
 {"bc2tl",		"N,p",		0x49030000, 0xffe30000,	RD_CC|CBL,		0,		I32,		0,	IOCT|IOCTP|IOCT2 },
-{"cfc2",		"t,G",		0x48400000, 0xffe007ff,	WR_1|RD_C2|LCD,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
-{"cfc2.i",		"t,G",		0x48400001, 0xffe007ff, WR_1|RD_C2|LCD,		0,		EE,		0,	0 },
-{"cfc2.ni",		"t,G",		0x48400000, 0xffe007ff, WR_1|RD_C2|LCD,		0,		EE,		0,	0 },
-{"ctc2",		"t,G",		0x48c00000, 0xffe007ff,	RD_1|WR_CC|COD,		0,		I1,		0,	IOCT|IOCTP|IOCT2 },
-{"ctc2.i",		"t,G",		0x48c00001, 0xffe007ff, RD_1|WR_CC|COD,		0,		EE,		0,	0 },
-{"ctc2.ni",		"t,G",		0x48c00000, 0xffe007ff, RD_1|WR_CC|COD,		0,		EE,		0,	0 },
+{"cfc2",		"t,G",		0x48400000, 0xffe007ff,	WR_1|RD_C2|LCD,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE },
+{"cfc2",		"t,+9",		0x48400000, 0xffe007ff,	WR_1|RD_C2|LCD,		0,		EE,		0,	0 },
+{"cfc2.i",		"t,+9",		0x48400001, 0xffe007ff, WR_1|RD_C2|LCD,		0,		EE,		0,	0 },
+{"cfc2.ni",		"t,+9",		0x48400000, 0xffe007ff, WR_1|RD_C2|LCD,		0,		EE,		0,	0 },
+{"ctc2",		"t,G",		0x48c00000, 0xffe007ff,	RD_1|WR_CC|COD,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE },
+{"ctc2",		"t,+9",		0x48c00000, 0xffe007ff,	RD_1|WR_CC|COD,		0,		EE,		0,	0 },
+{"ctc2.i",		"t,+9",		0x48c00001, 0xffe007ff, RD_1|WR_CC|COD,		0,		EE,		0,	0 },
+{"ctc2.ni",		"t,+9",		0x48c00000, 0xffe007ff, RD_1|WR_CC|COD,		0,		EE,		0,	0 },
 {"dmfc2",		"t,i",		0x48200000, 0xffe00000,	WR_1|RD_C2|LCD,		0,		IOCT,		0,	0 },
 {"dmfc2",		"t,G",		0x48200000, 0xffe007ff,	WR_1|RD_C2|LCD,		0,		I3,		0,	IOCT|IOCTP|IOCT2|EE },
 {"dmfc2",		"t,G,H",	0x48200000, 0xffe007f8,	WR_1|RD_C2|LCD,		0,		I64,		0,	IOCT|IOCTP|IOCT2 },
@@ -1869,12 +2024,12 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mthc2",		"t,G",		0x48e00000, 0xffe007ff,	RD_1|WR_C2|WR_CC|COD,	0,		I33,		0,	IOCT|IOCTP|IOCT2 },
 {"mthc2",		"t,G,H",	0x48e00000, 0xffe007f8,	RD_1|WR_C2|WR_CC|COD,	0,		I33,		0,	IOCT|IOCTP|IOCT2 },
 {"mthc2",		"t,i",		0x48e00000, 0xffe00000,	RD_1|WR_C2|WR_CC|COD,	0,		I33,		0,	IOCT|IOCTP|IOCT2 },
-{"qmfc2",		"t,G",		0x48200000, 0xffe007ff, WR_1|RD_C2,		0,		EE,		0,	0 },
-{"qmfc2.i",		"t,G",		0x48200001, 0xffe007ff,	WR_1|RD_C2,		0,		EE,		0,	0 },
-{"qmfc2.ni",		"t,G",		0x48200000, 0xffe007ff,	WR_1|RD_C2,		0,		EE,		0,	0 },
-{"qmtc2",		"t,G",		0x48a00000, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
-{"qmtc2.i",		"t,G",		0x48a00001, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
-{"qmtc2.ni",		"t,G",		0x48a00000, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
+{"qmfc2",		"t,+6",		0x48200000, 0xffe007ff, WR_1|RD_C2,		0,		EE,		0,	0 },
+{"qmfc2.i",		"t,+6",		0x48200001, 0xffe007ff,	WR_1|RD_C2,		0,		EE,		0,	0 },
+{"qmfc2.ni",		"t,+6",		0x48200000, 0xffe007ff,	WR_1|RD_C2,		0,		EE,		0,	0 },
+{"qmtc2",		"t,+6",		0x48a00000, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
+{"qmtc2.i",		"t,+6",		0x48a00001, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
+{"qmtc2.ni",		"t,+6",		0x48a00000, 0xffe007ff,	RD_1|WR_C2,		0,		EE,		0,	0 },
 /* Coprocessor 3 move/branch operations overlap with MIPS IV COP1X 
    instructions, so they are here for the latters to take precedence.  */
 {"bc3f",		"p",		0x4d000000, 0xffff0000,	RD_CC|CBD,		0,		I1,		0,	IOCT|IOCTP|IOCT2|EE },
