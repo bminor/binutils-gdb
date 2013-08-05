@@ -54,6 +54,7 @@ is explicitly requested.  SPARC v9 is always incompatible with sparclite.
 @kindex -Av6
 @kindex -Av7
 @kindex -Av8
+@kindex -Aleon
 @kindex -Asparclet
 @kindex -Asparclite
 @kindex -Av9
@@ -69,7 +70,7 @@ is explicitly requested.  SPARC v9 is always incompatible with sparclite.
 @kindex -Asparcima
 @kindex -Asparcvis3
 @kindex -Asparcvis3r
-@item -Av6 | -Av7 | -Av8 | -Asparclet | -Asparclite
+@item -Av6 | -Av7 | -Av8 | -Aleon | -Asparclet | -Asparclite
 @itemx -Av8plus | -Av8plusa | -Av8plusb | -Av8plusc | -Av8plusd | -Av8plusv
 @itemx -Av9 | -Av9a | -Av9b | -Av9c | -Av9d | -Av9v
 @itemx -Asparc | -Asparcvis | -Asparcvis2 | -Asparcfmaf | -Asparcima

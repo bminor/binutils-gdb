@@ -1,3 +1,19 @@
+2013-08-05  Eric Botcazou  <ebotcazou@adacore.com>
+            Konrad Eisele  <konrad@gaisler.com>
+
+	* sparc-dis.c (compute_arch_mask): Set SPARC_OPCODE_ARCH_LEON bit for
+	bfd_mach_sparc.
+	* sparc-opc.c (MASK_LEON): Define.
+	(v6, v6notlet, v7, v8, v6notv9): Add MASK_LEON.
+	(letandleon): New macro.
+	(v9andleon): Likewise.
+	(sparc_opc): Add leon.
+	(umac): Enable for letandleon.
+	(smac): Likewise.
+	(casa): Enable for v9andleon.
+	(cas): Likewise.
+	(casl): Likewise.
+
 2013-08-04  Jürgen Urban  <JuergenUrban@gmx.de>
 	    Richard Sandiford  <rdsandiford@googlemail.com>
 

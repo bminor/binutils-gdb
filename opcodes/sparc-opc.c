@@ -33,6 +33,7 @@
 #define MASK_V6		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V6)
 #define MASK_V7		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V7)
 #define MASK_V8		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V8)
+#define MASK_LEON	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_LEON)
 #define MASK_SPARCLET	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_SPARCLET)
 #define MASK_SPARCLITE	SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_SPARCLITE)
 #define MASK_V9		SPARC_OPCODE_ARCH_MASK (SPARC_OPCODE_ARCH_V9)
@@ -41,12 +42,13 @@
 
 /* Bit masks of architectures supporting the insn.  */
 
-#define v6		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET \
-			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B)
+#define v6		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
+			 | MASK_SPARCLET | MASK_SPARCLITE \
+			 | MASK_V9 | MASK_V9A | MASK_V9B)
 /* v6 insns not supported on the sparclet.  */
-#define v6notlet	(MASK_V6 | MASK_V7 | MASK_V8 \
+#define v6notlet	(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
 			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B)
-#define v7		(MASK_V7 | MASK_V8 | MASK_SPARCLET \
+#define v7		(MASK_V7 | MASK_V8 | MASK_LEON | MASK_SPARCLET \
 			 | MASK_SPARCLITE | MASK_V9 | MASK_V9A | MASK_V9B)
 /* Although not all insns are implemented in hardware, sparclite is defined
    to be a superset of v8.  Unimplemented insns trap and are then theoretically
@@ -54,15 +56,19 @@
    It's not clear that the same is true for sparclet, although the docs
    suggest it is.  Rather than complicating things, the sparclet assembler
    recognizes all v8 insns.  */
-#define v8		(MASK_V8 | MASK_SPARCLET | MASK_SPARCLITE \
+#define v8		(MASK_V8 | MASK_LEON | MASK_SPARCLET | MASK_SPARCLITE \
 			 | MASK_V9 | MASK_V9A | MASK_V9B)
 #define sparclet	(MASK_SPARCLET)
+/* sparclet insns supported by leon.  */
+#define letandleon	(MASK_SPARCLET | MASK_LEON)
 #define sparclite	(MASK_SPARCLITE)
 #define v9		(MASK_V9 | MASK_V9A | MASK_V9B)
 #define v9a		(MASK_V9A | MASK_V9B)
 #define v9b		(MASK_V9B)
+/* v9 insns supported by leon.  */
+#define v9andleon	(MASK_V9 | MASK_LEON)
 /* v6 insns not supported by v9.  */
-#define v6notv9		(MASK_V6 | MASK_V7 | MASK_V8 \
+#define v6notv9		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
 			 | MASK_SPARCLET | MASK_SPARCLITE)
 /* v9a instructions which would appear to be aliases to v9's impdep's
    otherwise.  */
@@ -76,6 +82,7 @@ const struct sparc_opcode_arch sparc_opcode_archs[] =
   { "v6", MASK_V6 },
   { "v7", MASK_V6 | MASK_V7 },
   { "v8", MASK_V6 | MASK_V7 | MASK_V8 },
+  { "leon", MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON },
   { "sparclet", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLET },
   { "sparclite", MASK_V6 | MASK_V7 | MASK_V8 | MASK_SPARCLITE },
   /* ??? Don't some v8 priviledged insns conflict with v9?  */
@@ -1728,8 +1735,9 @@ EFPOP2_2 ("efcmpes",	0x055, "e,f"),
 
 /* sparclet specific insns */
 
-COMMUTEOP ("umac", 0x3e, sparclet),
-COMMUTEOP ("smac", 0x3f, sparclet),
+COMMUTEOP ("umac", 0x3e, letandleon),
+COMMUTEOP ("smac", 0x3f, letandleon),
+
 COMMUTEOP ("umacd", 0x2e, sparclet),
 COMMUTEOP ("smacd", 0x2f, sparclet),
 COMMUTEOP ("umuld", 0x09, sparclet),
@@ -1780,8 +1788,8 @@ SLCBCC("cbnefr", 15),
 #undef SLCBCC2
 #undef SLCBCC
 
-{ "casa",	F3(3, 0x3c, 0), F3(~3, ~0x3c, ~0), "[1]A,2,d", 0, 0, v9 },
-{ "casa",	F3(3, 0x3c, 1), F3(~3, ~0x3c, ~1), "[1]o,2,d", 0, 0, v9 },
+{ "casa",	F3(3, 0x3c, 0), F3(~3, ~0x3c, ~0), "[1]A,2,d", 0, 0, v9andleon },
+{ "casa",	F3(3, 0x3c, 1), F3(~3, ~0x3c, ~1), "[1]o,2,d", 0, 0, v9andleon },
 { "casxa",	F3(3, 0x3e, 0), F3(~3, ~0x3e, ~0), "[1]A,2,d", 0, 0, v9 },
 { "casxa",	F3(3, 0x3e, 1), F3(~3, ~0x3e, ~1), "[1]o,2,d", 0, 0, v9 },
 
@@ -1791,8 +1799,8 @@ SLCBCC("cbnefr", 15),
 { "signx",	F3(2, 0x27, 0), F3(~2, ~0x27, ~0)|(1<<12)|ASI(~0)|RS2_G0, "r", F_ALIAS, 0, v9 }, /* sra rd,%g0,rd */
 { "clruw",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|(1<<12)|ASI(~0)|RS2_G0, "1,d", F_ALIAS, 0, v9 }, /* srl rs1,%g0,rd */
 { "clruw",	F3(2, 0x26, 0), F3(~2, ~0x26, ~0)|(1<<12)|ASI(~0)|RS2_G0, "r", F_ALIAS, 0, v9 }, /* srl rd,%g0,rd */
-{ "cas",	F3(3, 0x3c, 0)|ASI(0x80), F3(~3, ~0x3c, ~0)|ASI(~0x80), "[1],2,d", F_ALIAS, 0, v9 }, /* casa [rs1]ASI_P,rs2,rd */
-{ "casl",	F3(3, 0x3c, 0)|ASI(0x88), F3(~3, ~0x3c, ~0)|ASI(~0x88), "[1],2,d", F_ALIAS, 0, v9 }, /* casa [rs1]ASI_P_L,rs2,rd */
+{ "cas",	F3(3, 0x3c, 0)|ASI(0x80), F3(~3, ~0x3c, ~0)|ASI(~0x80), "[1],2,d", F_ALIAS, 0, v9andleon }, /* casa [rs1]ASI_P,rs2,rd */
+{ "casl",	F3(3, 0x3c, 0)|ASI(0x88), F3(~3, ~0x3c, ~0)|ASI(~0x88), "[1],2,d", F_ALIAS, 0, v9andleon }, /* casa [rs1]ASI_P_L,rs2,rd */
 { "casx",	F3(3, 0x3e, 0)|ASI(0x80), F3(~3, ~0x3e, ~0)|ASI(~0x80), "[1],2,d", F_ALIAS, 0, v9 }, /* casxa [rs1]ASI_P,rs2,rd */
 { "casxl",	F3(3, 0x3e, 0)|ASI(0x88), F3(~3, ~0x3e, ~0)|ASI(~0x88), "[1],2,d", F_ALIAS, 0, v9 }, /* casxa [rs1]ASI_P_L,rs2,rd */
 
