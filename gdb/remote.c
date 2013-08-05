@@ -88,16 +88,13 @@ static long target_buf_size;
 enum { REMOTE_ALIGN_WRITES = 16 };
 
 /* Prototypes for local functions.  */
-static void cleanup_sigint_signal_handler (void *dummy);
-static void initialize_sigint_signal_handler (void);
+static void async_cleanup_sigint_signal_handler (void *dummy);
 static int getpkt_sane (char **buf, long *sizeof_buf, int forever);
 static int getpkt_or_notif_sane (char **buf, long *sizeof_buf,
 				 int forever, int *is_notif);
 
-static void handle_remote_sigint (int);
-static void handle_remote_sigint_twice (int);
-static void async_remote_interrupt (gdb_client_data);
-static void async_remote_interrupt_twice (gdb_client_data);
+static void async_handle_remote_sigint (int);
+static void async_handle_remote_sigint_twice (int);
 
 static void remote_files_info (struct target_ops *ignore);
 
@@ -138,9 +135,7 @@ static void remote_async (void (*callback) (enum inferior_event_type event_type,
 
 static void remote_detach (struct target_ops *ops, char *args, int from_tty);
 
-static void remote_interrupt (int signo);
-
-static void remote_interrupt_twice (int signo);
+static void sync_remote_interrupt_twice (int signo);
 
 static void interrupt_query (void);
 
@@ -1410,8 +1405,8 @@ static int use_threadinfo_query;
 static int use_threadextra_query;
 
 /* Tokens for use by the asynchronous signal handlers for SIGINT.  */
-static struct async_signal_handler *sigint_remote_twice_token;
-static struct async_signal_handler *sigint_remote_token;
+static struct async_signal_handler *async_sigint_remote_twice_token;
+static struct async_signal_handler *async_sigint_remote_token;
 
 
 /* Asynchronous signal handle registered as event loop source for
@@ -4986,27 +4981,27 @@ remote_resume (struct target_ops *ops,
 /* Set up the signal handler for SIGINT, while the target is
    executing, ovewriting the 'regular' SIGINT signal handler.  */
 static void
-initialize_sigint_signal_handler (void)
+async_initialize_sigint_signal_handler (void)
 {
-  signal (SIGINT, handle_remote_sigint);
+  signal (SIGINT, async_handle_remote_sigint);
 }
 
 /* Signal handler for SIGINT, while the target is executing.  */
 static void
-handle_remote_sigint (int sig)
+async_handle_remote_sigint (int sig)
 {
-  signal (sig, handle_remote_sigint_twice);
-  mark_async_signal_handler (sigint_remote_token);
+  signal (sig, async_handle_remote_sigint_twice);
+  mark_async_signal_handler (async_sigint_remote_token);
 }
 
 /* Signal handler for SIGINT, installed after SIGINT has already been
    sent once.  It will take effect the second time that the user sends
    a ^C.  */
 static void
-handle_remote_sigint_twice (int sig)
+async_handle_remote_sigint_twice (int sig)
 {
-  signal (sig, handle_remote_sigint);
-  mark_async_signal_handler (sigint_remote_twice_token);
+  signal (sig, async_handle_remote_sigint);
+  mark_async_signal_handler (async_sigint_remote_twice_token);
 }
 
 /* Perform the real interruption of the target execution, in response
@@ -5034,7 +5029,7 @@ async_remote_interrupt_twice (gdb_client_data arg)
 /* Reinstall the usual SIGINT handlers, after the target has
    stopped.  */
 static void
-cleanup_sigint_signal_handler (void *dummy)
+async_cleanup_sigint_signal_handler (void *dummy)
 {
   signal (SIGINT, handle_sigint);
 }
@@ -5049,22 +5044,22 @@ static void (*ofunc) (int);
    response from the target (it didn't stop when the user requested it),
    we ask the user if he'd like to detach from the target.  */
 static void
-remote_interrupt (int signo)
+sync_remote_interrupt (int signo)
 {
   /* If this doesn't work, try more severe steps.  */
-  signal (signo, remote_interrupt_twice);
+  signal (signo, sync_remote_interrupt_twice);
 
-  gdb_call_async_signal_handler (sigint_remote_token, 1);
+  gdb_call_async_signal_handler (async_sigint_remote_token, 1);
 }
 
 /* The user typed ^C twice.  */
 
 static void
-remote_interrupt_twice (int signo)
+sync_remote_interrupt_twice (int signo)
 {
   signal (signo, ofunc);
-  gdb_call_async_signal_handler (sigint_remote_twice_token, 1);
-  signal (signo, remote_interrupt);
+  gdb_call_async_signal_handler (async_sigint_remote_twice_token, 1);
+  signal (signo, sync_remote_interrupt);
 }
 
 /* Non-stop version of target_stop.  Uses `vCont;t' to stop a remote
@@ -5202,7 +5197,7 @@ remote_terminal_inferior (void)
     return;
   delete_file_handler (input_fd);
   remote_async_terminal_ours_p = 0;
-  initialize_sigint_signal_handler ();
+  async_initialize_sigint_signal_handler ();
   /* NOTE: At this point we could also register our selves as the
      recipient of all input.  Any characters typed could then be
      passed on down to the target.  */
@@ -5218,7 +5213,7 @@ remote_terminal_ours (void)
   /* See FIXME in remote_terminal_inferior.  */
   if (remote_async_terminal_ours_p)
     return;
-  cleanup_sigint_signal_handler (NULL);
+  async_cleanup_sigint_signal_handler (NULL);
   add_file_handler (input_fd, stdin_event_handler, 0);
   remote_async_terminal_ours_p = 1;
 }
@@ -5939,13 +5934,13 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 
       if (!target_is_async_p ())
 	{
-	  ofunc = signal (SIGINT, remote_interrupt);
+	  ofunc = signal (SIGINT, sync_remote_interrupt);
 	  /* If the user hit C-c before this packet, or between packets,
 	     pretend that it was hit right here.  */
 	  if (check_quit_flag ())
 	    {
 	      clear_quit_flag ();
-	      remote_interrupt (SIGINT);
+	      sync_remote_interrupt (SIGINT);
 	    }
 	}
 
@@ -11847,9 +11842,9 @@ _initialize_remote (void)
   observer_attach_inferior_exit (discard_pending_stop_replies);
 
   /* Set up signal handlers.  */
-  sigint_remote_token =
+  async_sigint_remote_token =
     create_async_signal_handler (async_remote_interrupt, NULL);
-  sigint_remote_twice_token =
+  async_sigint_remote_twice_token =
     create_async_signal_handler (async_remote_interrupt_twice, NULL);
 
 #if 0
