@@ -63,10 +63,10 @@
 #define letandleon	(MASK_SPARCLET | MASK_LEON)
 #define sparclite	(MASK_SPARCLITE)
 #define v9		(MASK_V9 | MASK_V9A | MASK_V9B)
+/* v9 insns supported by leon.  */
+#define v9andleon	(MASK_V9 | MASK_V9A | MASK_V9B | MASK_LEON)
 #define v9a		(MASK_V9A | MASK_V9B)
 #define v9b		(MASK_V9B)
-/* v9 insns supported by leon.  */
-#define v9andleon	(MASK_V9 | MASK_LEON)
 /* v6 insns not supported by v9.  */
 #define v6notv9		(MASK_V6 | MASK_V7 | MASK_V8 | MASK_LEON \
 			 | MASK_SPARCLET | MASK_SPARCLITE)
