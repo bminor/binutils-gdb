@@ -1276,7 +1276,7 @@ _initialize_sol_thread (void)
   resolve (td_thr_getgregs);
   resolve (td_thr_setgregs);
 
-  add_target (&sol_thread_ops);
+  complete_target_initialization (&sol_thread_ops);
 
   add_cmd ("sol-threads", class_maintenance, info_solthreads,
 	   _("Show info on Solaris user threads."), &maintenanceinfolist);

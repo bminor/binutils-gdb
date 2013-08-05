@@ -547,7 +547,7 @@ extern initialize_file_ftype _initialize_bsd_uthread;
 void
 _initialize_bsd_uthread (void)
 {
-  add_target (bsd_uthread_target ());
+  complete_target_initialization (bsd_uthread_target ());
 
   bsd_uthread_data = gdbarch_data_register_pre_init (bsd_uthread_init);
 

@@ -1837,7 +1837,7 @@ void
 _initialize_aix_thread (void)
 {
   init_aix_thread_ops ();
-  add_target (&aix_thread_ops);
+  complete_target_initialization (&aix_thread_ops);
 
   /* Notice when object files get loaded and unloaded.  */
   observer_attach_new_objfile (new_objfile);

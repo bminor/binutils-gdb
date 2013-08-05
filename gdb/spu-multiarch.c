@@ -410,7 +410,7 @@ _initialize_spu_multiarch (void)
 {
   /* Install ourselves on the target stack.  */
   init_spu_ops ();
-  add_target (&spu_ops);
+  complete_target_initialization (&spu_ops);
 
   /* Install observers to watch for SPU objects.  */
   observer_attach_inferior_created (spu_multiarch_inferior_created);

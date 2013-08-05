@@ -433,7 +433,7 @@ _initialize_ravenscar (void)
      ravenscar ops if needed.  */
   observer_attach_inferior_created (ravenscar_inferior_created);
 
-  add_target (&ravenscar_ops);
+  complete_target_initialization (&ravenscar_ops);
 
   add_prefix_cmd ("ravenscar", no_class, set_ravenscar_command,
                   _("Prefix command for changing Ravenscar-specific settings"),
