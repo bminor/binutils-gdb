@@ -12307,11 +12307,11 @@ mips16_macro (struct mips_cl_insn *ip)
 
 static struct mips_opcode *
 mips_lookup_insn (struct hash_control *hash, const char *start,
-		  unsigned int length, unsigned int *opcode_extra)
+		  ssize_t length, unsigned int *opcode_extra)
 {
   char *name, *dot, *p;
   unsigned int mask, suffix;
-  size_t opend;
+  ssize_t opend;
   struct mips_opcode *insn;
 
   /* Make a copy of the instruction so that we can fiddle with it.  */
