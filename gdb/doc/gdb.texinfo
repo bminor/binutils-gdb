@@ -18182,7 +18182,7 @@ completeness, at most one @value{GDBN} can be connected at a time.
 
 @cindex @option{--once}, @code{gdbserver} option
 By default, @code{gdbserver} keeps the listening TCP port open, so that
-additional connections are possible.  However, if you start @code{gdbserver}
+subsequent connections are possible.  However, if you start @code{gdbserver}
 with the @option{--once} option, it will stop listening for any further
 connection attempts after connecting to the first @value{GDBN} session.  This
 means no further connections to @code{gdbserver} will be possible after the
