@@ -1369,9 +1369,9 @@ write_var_or_type (const struct block *block, struct stoken name0)
 	    }
 	  else if (nsyms == 0) 
 	    {
-	      struct minimal_symbol *msym 
+	      struct bound_minimal_symbol msym
 		= ada_lookup_simple_minsym (encoded_name);
-	      if (msym != NULL)
+	      if (msym.minsym != NULL)
 		{
 		  write_exp_msymbol (msym);
 		  /* Maybe cause error here rather than later? FIXME? */

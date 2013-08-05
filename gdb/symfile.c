@@ -3399,7 +3399,8 @@ read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr,
 static int
 simple_read_overlay_table (void)
 {
-  struct minimal_symbol *novlys_msym, *ovly_table_msym;
+  struct minimal_symbol *novlys_msym;
+  struct bound_minimal_symbol ovly_table_msym;
   struct gdbarch *gdbarch;
   int word_size;
   enum bfd_endian byte_order;
@@ -3414,8 +3415,8 @@ simple_read_overlay_table (void)
       return 0;
     }
 
-  ovly_table_msym = lookup_minimal_symbol ("_ovly_table", NULL, NULL);
-  if (! ovly_table_msym)
+  ovly_table_msym = lookup_bound_minimal_symbol ("_ovly_table");
+  if (! ovly_table_msym.minsym)
     {
       error (_("Error reading inferior's overlay table: couldn't find "
              "`_ovly_table' array\n"
@@ -3423,7 +3424,7 @@ simple_read_overlay_table (void)
       return 0;
     }
 
-  gdbarch = get_objfile_arch (msymbol_objfile (ovly_table_msym));
+  gdbarch = get_objfile_arch (ovly_table_msym.objfile);
   word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   byte_order = gdbarch_byte_order (gdbarch);
 
@@ -3431,7 +3432,7 @@ simple_read_overlay_table (void)
 				      4, byte_order);
   cache_ovly_table
     = (void *) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
-  cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym);
+  cache_ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym.minsym);
   read_target_long_array (cache_ovly_table_base,
                           (unsigned int *) cache_ovly_table,
                           cache_novlys * 4, word_size, byte_order);

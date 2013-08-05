@@ -1391,10 +1391,10 @@ push_expression_name (struct stoken name)
     }
   else
     {
-      struct minimal_symbol *msymbol;
+      struct bound_minimal_symbol msymbol;
 
-      msymbol = lookup_minimal_symbol (tmp, NULL, NULL);
-      if (msymbol != NULL)
+      msymbol = lookup_bound_minimal_symbol (tmp);
+      if (msymbol.minsym != NULL)
 	write_exp_msymbol (msymbol);
       else if (!have_full_symbols () && !have_partial_symbols ())
 	error (_("No symbol table is loaded.  Use the \"file\" command"));

@@ -1,3 +1,40 @@
+2013-08-05  Tom Tromey  <tromey@redhat.com>
+
+	* ada-exp.y (write_var_or_type): Use bound_minimal_symbol.
+	* ada-lang.c (ada_lookup_simple_minsym): Return
+	bound_minimal_symbol.
+	* ada-lang.h (ada_lookup_simple_minsym): Update.
+	* c-exp.y (variable): Use lookup_bound_minimal_symbol.
+	* f-exp.y (variable): Use lookup_bound_minimal_symbol.
+	* go-exp.y (variable): Use lookup_bound_minimal_symbol.
+	* jv-exp.y (push_expression_name): Use lookup_bound_minimal_symbol.
+	* m2-exp.y (variable): Use lookup_bound_minimal_symbol.
+	* minsyms.c (msymbol_objfile): Remove.
+	(lookup_minimal_symbol_internal): New function, from
+	lookup_minimal_symbol.
+	(lookup_minimal_symbol): Rewrite using
+	lookup_minimal_symbol_internal.
+	(lookup_bound_minimal_symbol): New function.
+	* minsyms.h (msymbol_objfile): Remove.
+	(lookup_bound_minimal_symbol): Declare.
+	* p-exp.y (variable): Use lookup_bound_minimal_symbol.
+	* parse.c (write_exp_msymbol): Change parameter to a
+	bound_minimal_symbol.
+	(write_dollar_variable): Use lookup_bound_minimal_symbol.
+	* parser-defs.h (write_exp_msymbol): Update.
+	* printcmd.c (address_info): Use lookup_bound_minimal_symbol.
+	* symfile.c (simple_read_overlay_table): Use
+	lookup_bound_minimal_symbol.
+	* symtab.c (skip_prologue_sal): Don't use msymbol_objfile.
+	(search_symbols): Likewise.
+	(print_msymbol_info): Take a bound_minimal_symbol argument.
+	(symtab_symbol_info, rbreak_command): Update.
+	* symtab.h (struct symbol_search) <msymbol>: Change type
+	to bound_minimal_symbol.
+	* valops.c (find_function_in_inferior): Use
+	lookup_bound_minimal_symbol.
+	* value.c (value_fn_field): Use lookup_bound_minimal_symbol.
+
 2013-08-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

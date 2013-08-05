@@ -101,8 +101,6 @@ struct symbol *lookup_symbol_aux_quick (struct objfile *objfile,
 					const char *name,
 					const domain_enum domain);
 
-static void print_msymbol_info (struct minimal_symbol *);
-
 void _initialize_symtab (void);
 
 /* */
@@ -2832,19 +2830,19 @@ skip_prologue_sal (struct symtab_and_line *sal)
     }
   else
     {
-      struct minimal_symbol *msymbol
-        = lookup_minimal_symbol_by_pc_section (sal->pc, sal->section).minsym;
+      struct bound_minimal_symbol msymbol
+        = lookup_minimal_symbol_by_pc_section (sal->pc, sal->section);
 
-      if (msymbol == NULL)
+      if (msymbol.minsym == NULL)
 	{
 	  do_cleanups (old_chain);
 	  return;
 	}
 
-      objfile = msymbol_objfile (msymbol);
-      pc = SYMBOL_VALUE_ADDRESS (msymbol);
-      section = SYMBOL_OBJ_SECTION (objfile, msymbol);
-      name = SYMBOL_LINKAGE_NAME (msymbol);
+      objfile = msymbol.objfile;
+      pc = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
+      section = SYMBOL_OBJ_SECTION (objfile, msymbol.minsym);
+      name = SYMBOL_LINKAGE_NAME (msymbol.minsym);
     }
 
   gdbarch = get_objfile_arch (objfile);
@@ -3666,7 +3664,7 @@ search_symbols (char *regexp, enum search_domain kind,
 		psr->block = i;
 		psr->symtab = real_symtab;
 		psr->symbol = sym;
-		psr->msymbol = NULL;
+		memset (&psr->msymbol, 0, sizeof (psr->msymbol));
 		psr->next = NULL;
 		if (tail == NULL)
 		  found = psr;
@@ -3719,7 +3717,8 @@ search_symbols (char *regexp, enum search_domain kind,
 			struct symbol_search *psr = (struct symbol_search *)
 			  xmalloc (sizeof (struct symbol_search));
 			psr->block = i;
-			psr->msymbol = msymbol;
+			psr->msymbol.minsym = msymbol;
+			psr->msymbol.objfile = objfile;
 			psr->symtab = NULL;
 			psr->symbol = NULL;
 			psr->next = NULL;
@@ -3783,20 +3782,20 @@ print_symbol_info (enum search_domain kind,
    for non-debugging symbols to gdb_stdout.  */
 
 static void
-print_msymbol_info (struct minimal_symbol *msymbol)
+print_msymbol_info (struct bound_minimal_symbol msymbol)
 {
-  struct gdbarch *gdbarch = get_objfile_arch (msymbol_objfile (msymbol));
+  struct gdbarch *gdbarch = get_objfile_arch (msymbol.objfile);
   char *tmp;
 
   if (gdbarch_addr_bit (gdbarch) <= 32)
-    tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol)
+    tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol.minsym)
 			     & (CORE_ADDR) 0xffffffff,
 			     8);
   else
-    tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol),
+    tmp = hex_string_custom (SYMBOL_VALUE_ADDRESS (msymbol.minsym),
 			     16);
   printf_filtered ("%s  %s\n",
-		   tmp, SYMBOL_PRINT_NAME (msymbol));
+		   tmp, SYMBOL_PRINT_NAME (msymbol.minsym));
 }
 
 /* This is the guts of the commands "info functions", "info types", and
@@ -3831,7 +3830,7 @@ symtab_symbol_info (char *regexp, enum search_domain kind, int from_tty)
     {
       QUIT;
 
-      if (p->msymbol != NULL)
+      if (p->msymbol.minsym != NULL)
 	{
 	  if (first)
 	    {
@@ -3928,7 +3927,7 @@ rbreak_command (char *regexp, int from_tty)
   make_cleanup (do_end_rbreak_breakpoints, NULL);
   for (p = ss; p != NULL; p = p->next)
     {
-      if (p->msymbol == NULL)
+      if (p->msymbol.minsym == NULL)
 	{
 	  const char *fullname = symtab_to_fullname (p->symtab);
 
@@ -3954,7 +3953,7 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  int newlen = (strlen (SYMBOL_LINKAGE_NAME (p->msymbol)) + 3);
+	  int newlen = (strlen (SYMBOL_LINKAGE_NAME (p->msymbol.minsym)) + 3);
 
 	  if (newlen > len)
 	    {
@@ -3962,12 +3961,12 @@ rbreak_command (char *regexp, int from_tty)
 	      len = newlen;
 	    }
 	  strcpy (string, "'");
-	  strcat (string, SYMBOL_LINKAGE_NAME (p->msymbol));
+	  strcat (string, SYMBOL_LINKAGE_NAME (p->msymbol.minsym));
 	  strcat (string, "'");
 
 	  break_command (string, from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
-			   SYMBOL_PRINT_NAME (p->msymbol));
+			   SYMBOL_PRINT_NAME (p->msymbol.minsym));
 	}
     }
 

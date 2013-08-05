@@ -149,12 +149,12 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
     }
   else
     {
-      struct minimal_symbol *msymbol = 
-	lookup_minimal_symbol (name, NULL, NULL);
+      struct bound_minimal_symbol msymbol = 
+	lookup_bound_minimal_symbol (name);
 
-      if (msymbol != NULL)
+      if (msymbol.minsym != NULL)
 	{
-	  struct objfile *objfile = msymbol_objfile (msymbol);
+	  struct objfile *objfile = msymbol.objfile;
 	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
 	  struct type *type;
@@ -162,7 +162,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
 	  type = lookup_pointer_type (builtin_type (gdbarch)->builtin_char);
 	  type = lookup_function_type (type);
 	  type = lookup_pointer_type (type);
-	  maddr = SYMBOL_VALUE_ADDRESS (msymbol);
+	  maddr = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
 
 	  if (objf_p)
 	    *objf_p = objfile;

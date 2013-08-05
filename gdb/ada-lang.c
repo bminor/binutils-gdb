@@ -4405,17 +4405,21 @@ defns_collected (struct obstack *obstackp, int finish)
     return (struct ada_symbol_info *) obstack_base (obstackp);
 }
 
-/* Return a minimal symbol matching NAME according to Ada decoding
-   rules.  Returns NULL if there is no such minimal symbol.  Names
-   prefixed with "standard__" are handled specially: "standard__" is
-   first stripped off, and only static and global symbols are searched.  */
+/* Return a bound minimal symbol matching NAME according to Ada
+   decoding rules.  Returns an invalid symbol if there is no such
+   minimal symbol.  Names prefixed with "standard__" are handled
+   specially: "standard__" is first stripped off, and only static and
+   global symbols are searched.  */
 
-struct minimal_symbol *
+struct bound_minimal_symbol
 ada_lookup_simple_minsym (const char *name)
 {
+  struct bound_minimal_symbol result;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
   const int wild_match_p = should_use_wild_match (name);
+
+  memset (&result, 0, sizeof (result));
 
   /* Special case: If the user specifies a symbol name inside package
      Standard, do a non-wild matching of the symbol name without
@@ -4431,10 +4435,14 @@ ada_lookup_simple_minsym (const char *name)
   {
     if (match_name (SYMBOL_LINKAGE_NAME (msymbol), name, wild_match_p)
         && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
-      return msymbol;
+      {
+	result.minsym = msymbol;
+	result.objfile = objfile;
+	break;
+      }
   }
 
-  return NULL;
+  return result;
 }
 
 /* For all subprograms that statically enclose the subprogram of the

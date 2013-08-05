@@ -1004,7 +1004,7 @@ variable:	qualified_name
 			{
 			  char *name = copy_name ($2.stoken);
 			  struct symbol *sym;
-			  struct minimal_symbol *msymbol;
+			  struct bound_minimal_symbol msymbol;
 
 			  sym =
 			    lookup_symbol (name, (const struct block *) NULL,
@@ -1018,8 +1018,8 @@ variable:	qualified_name
 			      break;
 			    }
 
-			  msymbol = lookup_minimal_symbol (name, NULL, NULL);
-			  if (msymbol != NULL)
+			  msymbol = lookup_bound_minimal_symbol (name);
+			  if (msymbol.minsym != NULL)
 			    write_exp_msymbol (msymbol);
 			  else if (!have_full_symbols () && !have_partial_symbols ())
 			    error (_("No symbol table is loaded.  Use the \"file\" command."));
@@ -1066,12 +1066,12 @@ variable:	name_not_typename
 			    }
 			  else
 			    {
-			      struct minimal_symbol *msymbol;
+			      struct bound_minimal_symbol msymbol;
 			      char *arg = copy_name ($1.stoken);
 
 			      msymbol =
-				lookup_minimal_symbol (arg, NULL, NULL);
-			      if (msymbol != NULL)
+				lookup_bound_minimal_symbol (arg);
+			      if (msymbol.minsym != NULL)
 				write_exp_msymbol (msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
 				error (_("No symbol table is loaded.  Use the \"file\" command."));

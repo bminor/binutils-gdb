@@ -1299,7 +1299,7 @@ struct symbol_search
 
   /* If msymbol is non-null, then a match was made on something for
      which only minimal_symbols exist.  */
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
 
   /* A link to the next match, or NULL for the end.  */
   struct symbol_search *next;

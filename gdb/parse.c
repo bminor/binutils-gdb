@@ -496,9 +496,10 @@ write_exp_bitstring (struct stoken str)
    the expression.  */
 
 void
-write_exp_msymbol (struct minimal_symbol *msymbol)
+write_exp_msymbol (struct bound_minimal_symbol bound_msym)
 {
-  struct objfile *objfile = msymbol_objfile (msymbol);
+  struct minimal_symbol *msymbol = bound_msym.minsym;
+  struct objfile *objfile = bound_msym.objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
   CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (msymbol);
@@ -640,7 +641,7 @@ void
 write_dollar_variable (struct stoken str)
 {
   struct symbol *sym = NULL;
-  struct minimal_symbol *msym = NULL;
+  struct bound_minimal_symbol msym;
   struct internalvar *isym = NULL;
 
   /* Handle the tokens $digits; also $ (short for $0) and $$ (short for $$1)
@@ -704,8 +705,8 @@ write_dollar_variable (struct stoken str)
       write_exp_elt_opcode (OP_VAR_VALUE);
       return;
     }
-  msym = lookup_minimal_symbol (copy_name (str), NULL, NULL);
-  if (msym)
+  msym = lookup_bound_minimal_symbol (copy_name (str));
+  if (msym.minsym)
     {
       write_exp_msymbol (msym);
       return;

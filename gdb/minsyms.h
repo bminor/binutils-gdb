@@ -162,14 +162,6 @@ unsigned int msymbol_hash_iw (const char *);
 
 
 
-/* Return the objfile that holds the minimal symbol SYM.  Every
-   minimal symbols is held by some objfile; this will never return
-   NULL.  */
-
-struct objfile *msymbol_objfile (struct minimal_symbol *sym);
-
-
-
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
    the search to that objfile.  If SFILE is non-NULL, the only file-scope
@@ -180,6 +172,11 @@ struct objfile *msymbol_objfile (struct minimal_symbol *sym);
 struct minimal_symbol *lookup_minimal_symbol (const char *,
 					      const char *,
 					      struct objfile *);
+
+/* Like lookup_minimal_symbol, but searches all files and objfiles
+   and returns a bound minimal symbol.  */
+
+struct bound_minimal_symbol lookup_bound_minimal_symbol (const char *);
 
 /* Find the minimal symbol named NAME, and return both the minsym
    struct and its objfile.  This only checks the linkage name.  */

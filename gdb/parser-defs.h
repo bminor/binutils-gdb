@@ -195,7 +195,7 @@ extern void write_exp_elt_block (const struct block *);
 
 extern void write_exp_elt_objfile (struct objfile *objfile);
 
-extern void write_exp_msymbol (struct minimal_symbol *);
+extern void write_exp_msymbol (struct bound_minimal_symbol);
 
 extern void write_dollar_variable (struct stoken str);
 
