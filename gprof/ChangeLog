@@ -1,3 +1,7 @@
+2013-08-05  John Tytgat  <john@bass-software.com>
+
+	* po/POTFILES.in: Regenerate.
+
 2013-05-24  Alan Modra  <amodra@gmail.com>
 
 	* aarch64.c (aarch64_find_call): Promote to bfd_vma before sign

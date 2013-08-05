@@ -17,7 +17,6 @@ config/e-criself.c
 config/e-i386aout.c
 config/e-i386coff.c
 config/e-i386elf.c
-config/e-mipsecoff.c
 config/e-mipself.c
 config/obj-aout.c
 config/obj-aout.h
@@ -116,6 +115,8 @@ config/tc-msp430.c
 config/tc-msp430.h
 config/tc-mt.c
 config/tc-mt.h
+config/tc-nios2.c
+config/tc-nios2.h
 config/tc-ns32k.c
 config/tc-ns32k.h
 config/tc-openrisc.c
@@ -188,7 +189,6 @@ config/te-hppalinux64.h
 config/te-i386aix.h
 config/te-ia64aix.h
 config/te-interix.h
-config/te-lnews.h
 config/te-lynx.h
 config/te-mach.h
 config/te-macos.h
