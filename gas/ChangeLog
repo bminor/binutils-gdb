@@ -1,3 +1,11 @@
+2013-08-06  Jürgen Urban  <JuergenUrban@gmx.de>
+
+	* config/tc-mips.c (match_vu0_suffix_operand): Allow single-channel
+	suffixes to be elided too.
+	(mips_lookup_insn): Don't reject INSN2_VU0_CHANNEL_SUFFIX here.
+	(mips_ip): Assume .xyzw if no VU0 suffix is specified.  Allow +N
+	to be omitted too.
+
 2013-08-05  John Tytgat  <john@bass-software.com>
 
 	* po/POTFILES.in: Regenerate.

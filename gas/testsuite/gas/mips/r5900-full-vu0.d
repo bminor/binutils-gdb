@@ -25,6 +25,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 4a007ff8 	vcallms	0xff8
 [0-9a-f]+ <[^>]*> 4a00d839 	vcallmsr	\$vi27
 [0-9a-f]+ <[^>]*> 4bc1f9ff 	vclipw\.xyz	\$vf31xyz,\$vf1w
+[0-9a-f]+ <[^>]*> 4bc1f9ff 	vclipw\.xyz	\$vf31xyz,\$vf1w
 [0-9a-f]+ <[^>]*> 4a2b0bbc 	vdiv	\$Q,\$vf1y,\$vf11x
 [0-9a-f]+ <[^>]*> 4be0f97c 	vftoi0\.xyzw	\$vf0xyzw,\$vf31xyzw
 [0-9a-f]+ <[^>]*> 4be0f97d 	vftoi4\.xyzw	\$vf0xyzw,\$vf31xyzw
@@ -56,12 +57,15 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 4be1fa88 	vmaddx\.xyzw	\$vf10xyzw,\$vf31xyzw,\$vf1x
 [0-9a-f]+ <[^>]*> 4be1fa89 	vmaddy\.xyzw	\$vf10xyzw,\$vf31xyzw,\$vf1y
 [0-9a-f]+ <[^>]*> 4be1fa8a 	vmaddz\.xyzw	\$vf10xyzw,\$vf31xyzw,\$vf1z
+[0-9a-f]+ <[^>]*> 4be5198a 	vmaddz\.xyzw	\$vf6xyzw,\$vf3xyzw,\$vf5z
 [0-9a-f]+ <[^>]*> 4be0fabd 	vmadda\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf0xyzw
 [0-9a-f]+ <[^>]*> 4be0fa3f 	vmaddai\.xyzw	\$ACCxyzw,\$vf31xyzw,\$I
 [0-9a-f]+ <[^>]*> 4be0fa3d 	vmaddaq\.xyzw	\$ACCxyzw,\$vf31xyzw,\$Q
 [0-9a-f]+ <[^>]*> 4be1f8bf 	vmaddaw\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf1w
 [0-9a-f]+ <[^>]*> 4be1f8bc 	vmaddax\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf1x
+[0-9a-f]+ <[^>]*> 4be508bc 	vmaddax\.xyzw	\$ACCxyzw,\$vf1xyzw,\$vf5x
 [0-9a-f]+ <[^>]*> 4be1f8bd 	vmadday\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf1y
+[0-9a-f]+ <[^>]*> 4be510bd 	vmadday\.xyzw	\$ACCxyzw,\$vf2xyzw,\$vf5y
 [0-9a-f]+ <[^>]*> 4be1f8be 	vmaddaz\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf1z
 [0-9a-f]+ <[^>]*> 4be0faab 	vmax\.xyzw	\$vf10xyzw,\$vf31xyzw,\$vf0xyzw
 [0-9a-f]+ <[^>]*> 4be0fa9d 	vmaxi\.xyzw	\$vf10xyzw,\$vf31xyzw,\$I
@@ -104,6 +108,7 @@ Disassembly of section \.text:
 [0-9a-f]+ <[^>]*> 4be0f9fe 	vmulai\.xyzw	\$ACCxyzw,\$vf31xyzw,\$I
 [0-9a-f]+ <[^>]*> 4be0f9fc 	vmulaq\.xyzw	\$ACCxyzw,\$vf31xyzw,\$Q
 [0-9a-f]+ <[^>]*> 4be1f9bf 	vmulaw\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf1w
+[0-9a-f]+ <[^>]*> 4be021bf 	vmulaw\.xyzw	\$ACCxyzw,\$vf4xyzw,\$vf0w
 [0-9a-f]+ <[^>]*> 4be1f9bc 	vmulax\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf1x
 [0-9a-f]+ <[^>]*> 4be1f9bd 	vmulay\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf1y
 [0-9a-f]+ <[^>]*> 4be1f9be 	vmulaz\.xyzw	\$ACCxyzw,\$vf31xyzw,\$vf1z

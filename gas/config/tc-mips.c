@@ -5242,9 +5242,9 @@ match_vu0_suffix_operand (struct mips_arg_info *arg,
      (with X being 0).  */
   gas_assert (operand->size == 2 || operand->size == 4);
 
-  /* The suffix can be omitted when matching a previous 4-bit mask.  */
+  /* The suffix can be omitted when it is already part of the opcode.  */
   if (arg->token->type != OT_CHANNELS)
-    return operand->size == 4 && match_p;
+    return match_p;
 
   uval = arg->token->u.channels;
   if (operand->size == 2)
@@ -12321,7 +12321,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
 
   /* Look up the instruction as-is.  */
   insn = (struct mips_opcode *) hash_find (hash, name);
-  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) == 0)
+  if (insn)
     return insn;
 
   dot = strchr (name, '.');
@@ -12359,7 +12359,7 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
 	{
 	  memcpy (name + opend - 2, name + opend, length - opend + 1);
 	  insn = (struct mips_opcode *) hash_find (hash, name);
-	  if (insn && (insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) == 0)
+	  if (insn)
 	    {
 	      forced_insn_length = suffix;
 	      return insn;
@@ -12422,6 +12422,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       insn_error = _("Unrecognized opcode");
       return;
     }
+  /* When no opcode suffix is specified, assume ".xyzw". */
+  if ((insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0 && opcode_extra == 0)
+    opcode_extra = 0xf << mips_vu0_channel_mask.lsb;
 
   if (strcmp (insn->name, "li.s") == 0)
     format = 'f';
@@ -12535,8 +12538,15 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      if (strcmp (args, "(b)") == 0)
 		args += 3;
 
-	      if (args[0] == '+' && args[1] == 'K')
-		args += 2;
+	      if (args[0] == '+')
+	        switch (args[1])
+		  {
+		    case 'K':
+		    case 'N':
+		      /* The register suffix is optional. */
+		      args += 2;
+		      break;
+		  }
 
 	      /* Fail the match if there were too few operands.  */
 	      if (*args)

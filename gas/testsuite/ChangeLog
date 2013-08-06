@@ -1,3 +1,9 @@
+2013-08-06  Jürgen Urban  <JuergenUrban@gmx.de>
+
+	* gas/mips/r5900-error-vu0.s, gas/mips/r5900-error-vu0.l,
+	gas/mips/r5900-full-vu0.s, gas/mips/r5900-full-vu0.d: Allow
+	single-channel suffixes to be elided.
+
 2013-08-04  Jürgen Urban  <JuergenUrban@gmx.de>
 
 	* gas/mips/r5900-vu0.d: Expect $vfN and $viN instead of numeric

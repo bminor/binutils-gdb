@@ -25,7 +25,8 @@ text_label:
 	vcallms	0xff8
 	vcallmsr	$vi27
 	vclipw.xyz	$vf31xyz,$vf1w
-	vdiv	$Q,$vf1y,$vf11x
+	vclipw		$vf31xyz,$vf1w
+	vdiv		$Q,$vf1y,$vf11x
 	vftoi0.xyzw	$vf0xyzw,$vf31xyzw
 	vftoi4.xyzw	$vf0xyzw,$vf31xyzw
 	vftoi12.xyzw	$vf0xyzw,$vf31xyzw
@@ -56,12 +57,15 @@ text_label:
 	vmaddx.xyzw	$vf10xyzw,$vf31xyzw,$vf1x
 	vmaddy.xyzw	$vf10xyzw,$vf31xyzw,$vf1y
 	vmaddz.xyzw	$vf10xyzw,$vf31xyzw,$vf1z
+	vmaddz		$vf6, $vf3, $vf5
 	vmadda.xyzw	$ACCxyzw,$vf31xyzw,$vf0xyzw
 	vmaddai.xyzw	$ACCxyzw,$vf31xyzw,$I
 	vmaddaq.xyzw	$ACCxyzw,$vf31xyzw,$Q
 	vmaddaw.xyzw	$ACCxyzw,$vf31xyzw,$vf1w
 	vmaddax.xyzw	$ACCxyzw,$vf31xyzw,$vf1x
+	vmaddax		$ACC, $vf1, $vf5
 	vmadday.xyzw	$ACCxyzw,$vf31xyzw,$vf1y
+	vmadday		$ACC, $vf2, $vf5
 	vmaddaz.xyzw	$ACCxyzw,$vf31xyzw,$vf1z
 	vmax.xyzw	$vf10xyzw,$vf31xyzw,$vf0xyzw
 	vmaxi.xyzw	$vf10xyzw,$vf31xyzw,$I
@@ -104,6 +108,7 @@ text_label:
 	vmulai.xyzw	$ACCxyzw,$vf31xyzw,$I
 	vmulaq.xyzw	$ACCxyzw,$vf31xyzw,$Q
 	vmulaw.xyzw	$ACCxyzw,$vf31xyzw,$vf1w
+	vmulaw		$ACC, $vf4, $vf0
 	vmulax.xyzw	$ACCxyzw,$vf31xyzw,$vf1x
 	vmulay.xyzw	$ACCxyzw,$vf31xyzw,$vf1y
 	vmulaz.xyzw	$ACCxyzw,$vf31xyzw,$vf1z

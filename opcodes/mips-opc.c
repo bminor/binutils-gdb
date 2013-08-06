@@ -445,6 +445,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"vcallms",		"+f",		  0x4a000038, 0xffe0003f,	CP,		0,		VU0,		0,	0 },
 {"vcallmsr",		"+9",		  0x4a000039, 0xffff07ff,	CP,		0,		VU0,		0,	0 },
 {"vclipw.xyz",		"+6+K,+7+N",	  0x4bc001ff, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
+{"vclipw",		"+6+K,+7+N",	  0x4bc001ff, 0xffe007ff,	CP,		0,		VU0,		0,	0 },
 {"vdiv",		"+q,+6+L,+7+M",	  0x4a0003bc, 0xfe0007ff,	CP,		0,		VU0,		0,	0 },
 {"vftoi0",		"+7+K,+6+K",	  0x4a00017c, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },
 {"vftoi4",		"+7+K,+6+K",	  0x4a00017d, 0xfe0007ff,	CP,		VU0CH,		VU0,		0,	0 },

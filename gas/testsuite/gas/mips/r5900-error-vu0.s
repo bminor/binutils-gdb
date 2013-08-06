@@ -77,7 +77,6 @@ text_label:
 	vaddaz.xy	$ACCxyz, $vf0xy, $vf31z
 	vaddaz.y	$ACCx, $vf31y, $vf0z
 	vaddaz.yw	$ACCyw, $vf0yw, $a0
-	vaddaz.yw	$ACC, $0, $31
 	vaddi.w		$vf0w, $vf31w, $Q
 	vaddi.w		$vf1w, $vf2w, $R
 	vaddi.w		$vf31w, $vf0w, $ACC
@@ -641,7 +640,6 @@ text_label:
 	vsubax.w	$ACCx, $vf31x, $vf0x
 	vsubax.xyzw	$ACCxyzw, $vf31xyzw, $vf0xyzw
 	vsubax.xzw	$ACCxzw, $vf1xzw, $vf2xzw
-	vsubax.y	$ACCy, $vf1y, $vf2
 	vsubax.y	$ACCy, $vf31y, $vf0y
 	vsubax.yw	$ACCyw, $vf0yw, $vf0yw
 	vsubay.yw	$ACCyw, $vf0yw, $vf31yw
