@@ -126,7 +126,7 @@ mips*-*-netbsd* | mips*-*-knetbsd*-gnu)
 			gdb_host=nbsd ;;
 mips64*-*-openbsd*)	gdb_host=obsd64 ;;
 
-powerpc-*-aix* | rs6000-*-*)
+powerpc-*-aix* | rs6000-*-* | powerpc64-*-aix*)
 			gdb_host=aix ;;
 powerpc*-*-freebsd*)	gdb_host=fbsd ;;
 powerpc-*-linux*)	gdb_host=linux ;;

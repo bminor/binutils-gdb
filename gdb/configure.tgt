@@ -432,7 +432,7 @@ powerpc-*-openbsd*)
 			solib-svr4.o \
 			ravenscar-thread.o ppc-ravenscar-thread.o"
 	;;
-powerpc-*-aix* | rs6000-*-*)
+powerpc-*-aix* | rs6000-*-* | powerpc64-*-aix*)
 	# Target: PowerPC running AIX
 	gdb_target_obs="rs6000-tdep.o rs6000-aix-tdep.o xcoffread.o \
 			ppc-sysv-tdep.o solib-aix.o \
@@ -719,6 +719,8 @@ m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
 *-*-dicos*)	gdb_osabi=GDB_OSABI_DICOS ;;
 *-*-symbianelf*)
 		gdb_osabi=GDB_OSABI_SYMBIAN ;;
+powerpc-*-aix* | rs6000-*-* | powerpc64-*-aix*)
+                gdb_osabi=GDB_OSABI_AIX ;;
 esac
 
 # Check whether this target supports gcore.

@@ -1,6 +1,12 @@
 2013-08-07  Raunaq Bathija  <raunaq12@in.ibm.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.tgt (powerpc64-*-aix*): Match powerpc64 running aix.
+	* configure.host (powerpc64-*-aix*): Likewise.
+
+2013-08-07  Raunaq Bathija  <raunaq12@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdb_ptrace.h: Use ptrace64 instead of ptrace if HAVE_PTRACE64
 	is defined.
 	* rs6000-nat.c: Check for __ld_info64_ if compiling 64 BIT gdb.
