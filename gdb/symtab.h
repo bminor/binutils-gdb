@@ -1252,8 +1252,6 @@ extern VEC (char_ptr) *make_source_files_completion_list (const char *,
 
 int matching_obj_sections (struct obj_section *, struct obj_section *);
 
-extern const char *find_main_filename (void);
-
 extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
 
 extern struct symtab_and_line find_function_start_sal (struct symbol *sym,

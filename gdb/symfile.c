@@ -1612,11 +1612,11 @@ set_initial_language (void)
     lang = language_of_main;
   else
     {
-      const char *filename;
+      char *name = main_name ();
+      struct symbol *sym = lookup_symbol (name, NULL, VAR_DOMAIN, NULL);
 
-      filename = find_main_filename ();
-      if (filename != NULL)
-	lang = deduce_language_from_filename (filename);
+      if (sym != NULL)
+	lang = SYMBOL_LANGUAGE (sym);
     }
 
   if (lang == language_unknown)

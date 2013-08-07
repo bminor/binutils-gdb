@@ -72,9 +72,10 @@ gdb_test "maint print registers" "Name.*Nr.*Rel.*Offset.*Size.*Type.*"
 gdb_test_no_output "mt set per on" "mt set per on for expand-symtabs"
 gdb_test_multiple "mt expand-symtabs $subdir/break\[.\]c$" \
     "mt expand-symtabs" {
-	-re "#primary symtabs: (1|2) \\(\[+\](1|2)\\),.*$gdb_prompt $" {
-	    # This should expand one or at most two primary symtabs.
-	    # "Normally" it will expand just the one for break.c, but if the
+	-re "#primary symtabs: (1|2) \\(\[+\](0|1|2)\\),.*$gdb_prompt $" {
+	    # This should expand at most two primary symtabs.
+	    # "Normally" it will not expand any, because the symtab
+	    # holding "main" will already have been expanded, but if the
 	    # file is compiled with -fdebug-types-section then a second primary
 	    # symtab for break.c will be created for any types.
 	    pass "mt expand-symtabs"

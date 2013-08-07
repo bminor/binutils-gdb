@@ -1,5 +1,12 @@
 2013-08-07  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (set_initial_language): Look up "main" symbol
+	and use its language.
+	* symtab.c (find_main_filename): Remove.
+	* symtab.h (find_main_filename): Remove.
+
+2013-08-07  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (recursively_compute_inclusions): Add
 	"immediate_parent" argument.  Set symtab's "user" field
 	if not set.

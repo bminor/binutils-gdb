@@ -1949,29 +1949,6 @@ basic_lookup_transparent_type (const char *name)
   return (struct type *) 0;
 }
 
-/* Find the name of the file containing main().  */
-/* FIXME:  What about languages without main() or specially linked
-   executables that have no main() ?   */
-
-const char *
-find_main_filename (void)
-{
-  struct objfile *objfile;
-  char *name = main_name ();
-
-  ALL_OBJFILES (objfile)
-  {
-    const char *result;
-
-    if (!objfile->sf)
-      continue;
-    result = objfile->sf->qf->find_symbol_file (objfile, name);
-    if (result)
-      return result;
-  }
-  return (NULL);
-}
-
 /* Search BLOCK for symbol NAME in DOMAIN.
 
    Note that if NAME is the demangled form of a C++ symbol, we will fail
