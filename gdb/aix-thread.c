@@ -237,7 +237,14 @@ ptrace_check (int req, int id, int ret)
   return 0;  /* Not reached.  */
 }
 
-/* Call ptracex (REQ, ID, ADDR, DATA, BUF).  Return success.  */
+/* Call ptracex (REQ, ID, ADDR, DATA, BUF) or
+   ptrace64 (REQ, ID, ADDR, DATA, BUF) if HAVE_PTRACE64.
+   Return success.  */
+
+#ifdef HAVE_PTRACE64
+# define ptracex(request, pid, addr, data, buf) \
+	 ptrace64 (request, pid, addr, data, buf)
+#endif
 
 static int
 ptrace64aix (int req, int id, long long addr, int data, int *buf)
@@ -246,14 +253,24 @@ ptrace64aix (int req, int id, long long addr, int data, int *buf)
   return ptrace_check (req, id, ptracex (req, id, addr, data, buf));
 }
 
-/* Call ptrace (REQ, ID, ADDR, DATA, BUF).  Return success.  */
+/* Call ptrace (REQ, ID, ADDR, DATA, BUF) or
+   ptrace64 (REQ, ID, ADDR, DATA, BUF) if HAVE_PTRACE64.
+   Return success.  */
+
+#ifdef HAVE_PTRACE64
+# define ptrace(request, pid, addr, data, buf) \
+	 ptrace64 (request, pid, addr, data, buf)
+# define addr_ptr long long
+#else
+# define addr_ptr int *
+#endif
 
 static int
-ptrace32 (int req, int id, int *addr, int data, int *buf)
+ptrace32 (int req, int id, addr_ptr addr, int data, int *buf)
 {
   errno = 0;
   return ptrace_check (req, id, 
-		       ptrace (req, id, (int *) addr, data, buf));
+		       ptrace (req, id, (addr_ptr) addr, data, buf));
 }
 
 /* If *PIDP is a composite process/thread id, convert it to a
@@ -361,7 +378,7 @@ pdc_read_regs (pthdb_user_t user,
   /* Floating-point registers.  */
   if (flags & PTHDB_FLAG_FPRS)
     {
-      if (!ptrace32 (PTT_READ_FPRS, tid, (void *) fprs, 0, NULL))
+      if (!ptrace32 (PTT_READ_FPRS, tid, (addr_ptr) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
       memcpy (context->fpr, fprs, sizeof(fprs));
     }
@@ -378,7 +395,7 @@ pdc_read_regs (pthdb_user_t user,
 	}
       else
 	{
-	  if (!ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL))
+	  if (!ptrace32 (PTT_READ_SPRS, tid, (addr_ptr) &sprs32, 0, NULL))
 	    memset (&sprs32, 0, sizeof (sprs32));
       	  memcpy (&context->msr, &sprs32, sizeof(sprs32));
 	}
@@ -413,13 +430,13 @@ pdc_write_regs (pthdb_user_t user,
 	ptrace64aix (PTT_WRITE_GPRS, tid, 
 		     (unsigned long) context->gpr, 0, NULL);
       else
-	ptrace32 (PTT_WRITE_GPRS, tid, (int *) context->gpr, 0, NULL);
+	ptrace32 (PTT_WRITE_GPRS, tid, (addr_ptr) context->gpr, 0, NULL);
     }
 
  /* Floating-point registers.  */
   if (flags & PTHDB_FLAG_FPRS)
     {
-      ptrace32 (PTT_WRITE_FPRS, tid, (int *) context->fpr, 0, NULL);
+      ptrace32 (PTT_WRITE_FPRS, tid, (addr_ptr) context->fpr, 0, NULL);
     }
 
   /* Special-purpose registers.  */
@@ -432,7 +449,7 @@ pdc_write_regs (pthdb_user_t user,
 	}
       else
 	{
-	  ptrace32 (PTT_WRITE_SPRS, tid, (void *) &context->msr, 0, NULL);
+	  ptrace32 (PTT_WRITE_SPRS, tid, (addr_ptr) &context->msr, 0, NULL);
 	}
     }
   return 0;
@@ -997,10 +1014,10 @@ aix_thread_resume (struct target_ops *ops,
       tid[1] = 0;
 
       if (arch64)
-	ptrace64aix (PTT_CONTINUE, tid[0], 1, 
+	ptrace64aix (PTT_CONTINUE, tid[0], (long long) 1,
 		     gdb_signal_to_host (sig), (void *) tid);
       else
-	ptrace32 (PTT_CONTINUE, tid[0], (int *) 1,
+	ptrace32 (PTT_CONTINUE, tid[0], (addr_ptr) 1,
 		  gdb_signal_to_host (sig), (void *) tid);
     }
 }
@@ -1239,7 +1256,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
 	}
       else
 	{
-	  if (!ptrace32 (PTT_READ_GPRS, tid, gprs32, 0, NULL))
+	  if (!ptrace32 (PTT_READ_GPRS, tid, (addr_ptr) gprs32, 0, NULL))
 	    memset (gprs32, 0, sizeof (gprs32));
 	  for (i = 0; i < ppc_num_gprs; i++)
 	    supply_reg32 (regcache, tdep->ppc_gp0_regnum + i, gprs32[i]);
@@ -1253,7 +1270,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
           || (regno >= tdep->ppc_fp0_regnum
               && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
     {
-      if (!ptrace32 (PTT_READ_FPRS, tid, (void *) fprs, 0, NULL))
+      if (!ptrace32 (PTT_READ_FPRS, tid, (addr_ptr) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
       supply_fprs (regcache, fprs);
     }
@@ -1275,7 +1292,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
 	{
 	  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-	  if (!ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL))
+	  if (!ptrace32 (PTT_READ_SPRS, tid, (addr_ptr) &sprs32, 0, NULL))
 	    memset (&sprs32, 0, sizeof (sprs32));
 	  supply_sprs32 (regcache, sprs32.pt_iar, sprs32.pt_msr, sprs32.pt_cr,
 			 sprs32.pt_lr, sprs32.pt_ctr, sprs32.pt_xer,
@@ -1570,9 +1587,9 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
       else
 	{
 	  /* Pre-fetch: some regs may not be in the cache.  */
-	  ptrace32 (PTT_READ_GPRS, tid, gprs32, 0, NULL);
+	  ptrace32 (PTT_READ_GPRS, tid, (addr_ptr) gprs32, 0, NULL);
 	  fill_gprs32 (regcache, gprs32);
-	  ptrace32 (PTT_WRITE_GPRS, tid, gprs32, 0, NULL);
+	  ptrace32 (PTT_WRITE_GPRS, tid, (addr_ptr) gprs32, 0, NULL);
 	}
     }
 
@@ -1584,9 +1601,9 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
               && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
     {
       /* Pre-fetch: some regs may not be in the cache.  */
-      ptrace32 (PTT_READ_FPRS, tid, (void *) fprs, 0, NULL);
+      ptrace32 (PTT_READ_FPRS, tid, (addr_ptr) fprs, 0, NULL);
       fill_fprs (regcache, fprs);
-      ptrace32 (PTT_WRITE_FPRS, tid, (void *) fprs, 0, NULL);
+      ptrace32 (PTT_WRITE_FPRS, tid, (addr_ptr) fprs, 0, NULL);
     }
 
   /* Special-purpose registers.  */
@@ -1618,7 +1635,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 	  gdb_assert (sizeof (sprs32.pt_iar) == 4);
 
 	  /* Pre-fetch: some registers won't be in the cache.  */
-	  ptrace32 (PTT_READ_SPRS, tid, (int *) &sprs32, 0, NULL);
+	  ptrace32 (PTT_READ_SPRS, tid, (addr_ptr) &sprs32, 0, NULL);
 
 	  fill_sprs32 (regcache, &tmp_iar, &tmp_msr, &tmp_cr, &tmp_lr,
 		       &tmp_ctr, &tmp_xer, &tmp_fpscr);
@@ -1637,7 +1654,7 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
 	      regcache_raw_collect (regcache, tdep->ppc_mq_regnum,
 				    &sprs32.pt_mq);
 
-	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &sprs32, 0, NULL);
+	  ptrace32 (PTT_WRITE_SPRS, tid, (addr_ptr) &sprs32, 0, NULL);
 	}
     }
 }

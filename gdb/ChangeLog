@@ -1,3 +1,15 @@
+2013-08-07  Raunaq Bathija  <raunaq12@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* aixthread.c: Call ptrace64 instead of ptracex if defined.
+	Call ptrace64 instead of ptrace if defined.
+	Add macro addr_ptr to take care of ptrace address argument.
+	(pdc_read_regs): Likewise.
+	(pdc_write_regs): Likewise.
+	(aix_thread_resume): Likewise.
+	(fetch_regs_kernel_thread): Likewise.
+	(store_regs_kernel_thread): Likewise.
+
 2013-08-07  Anton Blanchard  <anton@samba.org>
 
 	* MAINTAINERS: Add myself to Write After Approval.
