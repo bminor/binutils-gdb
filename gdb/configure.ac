@@ -1166,7 +1166,7 @@ AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid getgid \
 		sigaction sigprocmask sigsetmask socketpair syscall \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
 		setrlimit getrlimit posix_madvise waitpid lstat \
-		fdwalk pipe2])
+		fdwalk pipe2 ptrace64])
 AM_LANGINFO_CODESET
 
 # Check the return and argument types of ptrace.  No canned test for
