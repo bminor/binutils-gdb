@@ -1,5 +1,16 @@
 2013-08-07  Tom Tromey  <tromey@redhat.com>
 
+	PR symtab/15028:
+	* dwarf2read.c (struct process_psymtab_comp_unit_data): New.
+	(process_psymtab_comp_unit_reader): Use it.
+	(process_psymtab_comp_unit): Update.  Add "pretend_language"
+	argument.
+	(dwarf2_build_psymtabs_hard): Update.
+	(scan_partial_symbols): Pass CU's language to
+	process_psymtab_comp_unit.
+
+2013-08-07  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dw2_get_primary_filename_reader): Remove.
 	(dwarf2_gdb_index_functions): Update.
 	* psymtab.c (find_symbol_file_from_partial): Remove.
