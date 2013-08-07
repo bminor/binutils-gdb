@@ -18,7 +18,7 @@
 
 if { [skip_cplus_tests] } { continue }
 
-standard_testfile py-value.cc
+standard_testfile .cc
 
 if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
     return -1

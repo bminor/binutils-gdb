@@ -21,13 +21,26 @@ load_lib gdb-python.exp
 standard_testfile
 
 # Build inferior to language specification.
+# LANG is one of "c" or "c++".
 proc build_inferior {exefile lang} {
   global srcdir subdir srcfile testfile hex
 
-  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang"] != "" } {
+  # Use different names for .o files based on the language.
+  # For Fission, the debug info goes in foo.dwo and we don't want,
+  # for example, a C++ compile to clobber the dwo of a C compile.
+  # ref: http://gcc.gnu.org/wiki/DebugFission
+  switch ${lang} {
+      "c" { set filename ${testfile}.o }
+      "c++" { set filename ${testfile}-cxx.o }
+  }
+  set objfile [standard_output_file $filename]
+
+  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object "debug $lang"] != ""
+       || [gdb_compile "${objfile}" "${exefile}" executable "debug $lang"] != "" } {
       untested "Couldn't compile ${srcfile} in $lang mode"
       return -1
   }
+  return 0
 }
 
 proc test_value_creation {} {
@@ -463,9 +476,10 @@ proc test_value_hash {} {
     gdb_test "python print (one.__hash__() == hash(one))" "True" "Test inbuilt hash"
 }
 
-# Build C and C++ versions of executable
-build_inferior "${binfile}" "c"
-build_inferior "${binfile}-cxx" "c++"
+# Build C version of executable.  C++ is built later.
+if { [build_inferior "${binfile}" "c"] < 0 } {
+    return -1
+}
 
 # Start with a fresh gdb.
 clean_restart ${binfile}
@@ -494,5 +508,12 @@ test_lazy_strings
 test_value_after_death
 
 # Test either C or C++ values. 
+
 test_subscript_regression "${binfile}" "c"
-test_subscript_regression "${binfile}-cxx" "c++"
+
+if ![skip_cplus_tests] {
+    if { [build_inferior "${binfile}-cxx" "c++"] < 0 } {
+	return -1
+    }
+    test_subscript_regression "${binfile}-cxx" "c++"
+}
