@@ -1,3 +1,80 @@
+2013-08-07  Cary Coutant  <ccoutant@google.com>
+
+	Revert support for v2 DWP files:
+
+	2013-03-01  Cary Coutant  <ccoutant@google.com>
+
+	    Add dwp support for v2 DWARF package file format.
+	    * dwarf_reader.cc (Dwarf_info_reader::visit_type_unit): Add
+	    tu_length parameter.  Adjust all callers.
+	    * dwarf_reader.h (Dwarf_info_reader::visit_type_unit): Likewise.
+	    * dwp.cc: Include dwarf.h.
+	    (Section_bounds): New struct type.
+	    (Unit_set): New struct type.
+	    (Dwo_file::Dwo_file): Initialize new data member.
+	    (Dwo_file::read_compunit_index, Dwo_file::read_typeunit_index):
+	    Combine and rename to...
+	    (Dwo_file::read_unit_index): ...this.
+	    (Dwo_file::sized_read_compunit_index)
+	    (Dwo_file::sized_read_typeunit_index): Combine and rename to...
+	    (Dwo_file::sized_read_unit_index): ...this.
+	    (Dwo_file::copy_section): Remove section_name, is_str_offsets
+	    parameters; add section_id parameter.
+	    (Dwo_file::add_cu_set, Dwo_file::add_tu_set): Combine and rename to...
+	    (Dwo_file::add_unit_set): ...this.
+	    (Dwo_file::shndx_map_): Remove.
+	    (Dwo_file::sect_offsets_): New data member.
+	    (Dwp_output_file::Dwp_output_file): Initialize new data members.
+	    (Dwp_output_file::add_section): Rename to...
+	    (Dwp_output_file::add_contribution): ...this.
+	    (Dwp_output_file::add_cu_set): Combine parameters into a struct.
+	    (Dwp_output_file::add_tu_set): Likewise.
+	    (Dwp_output_file::Contribution): New type.
+	    (Dwp_output_file::Section::contributions): New data member.
+	    (Dwp_output_file::Cu_or_tu_set): Remove.
+	    (Dwp_output_file::Section::Section): New ctor.
+	    (Dwp_output_file::Dwp_index::Shndx_pool): Remove.
+	    (Dwp_output_file::Dwp_index::Section_table): New type.
+	    (Dwp_output_file::Dwp_index::Dwp_index): Initialize new data members.
+	    (Dwp_output_file::Dwp_index::enter_set): Change type of "set"
+	    parameter.
+	    (Dwp_output_file::Dwp_index::shndx_pool): Remove.
+	    (Dwp_output_file::Dwp_index::shndx_pool_end): Remove.
+	    (Dwp_output_file::Dwp_index::section_table): New member function.
+	    (Dwp_output_file::Dwp_index::section_table_end): New member function.
+	    (Dwp_output_file::Dwp_index::shndx_pool_size): Remove.
+	    (Dwp_output_file::Dwp_index::section_table_rows): New member function.
+	    (Dwp_output_file::Dwp_index::section_table_cols): New member function.
+	    (Dwp_output_file::Dwp_index::shndx_pool_): Remove.
+	    (Dwp_output_file::Dwp_index::section_table_): New data member.
+	    (Dwp_output_file::Dwp_index::section_mask_): New data member.
+	    (Dwp_output_file::add_output_section): New member function.
+	    (Dwp_output_file::write_new_section): New member function.
+	    (Dwp_output_file::write_contributions): New member function.
+	    (Dwp_output_file::section_id_map_): New data member.
+	    (class Dwo_id_info_reader): Remove.
+	    (class Unit_reader): New class.
+	    (get_dwarf_section_name): New function.
+	    (Dwo_file::read_executable): Adjust initializations of class data.
+	    (Dwo_file::read): Add support for v2 package file format.
+	    (Dwo_file::read_unit_index): Likewise.
+	    (Dwo_file::sized_read_unit_index): Likewise.
+	    (Dwo_file::copy_section): Likewise.
+	    (Dwo_file::add_unit_set): Likewise.
+	    (Dwp_output_file::add_output_section): Likewise.
+	    (Dwp_output_file::add_contribution): Likewise.
+	    (Dwp_output_file::Dwp_index::find_or_add): Use row index to check
+	    for empty slot.
+	    (Dwp_output_file::Dwp_index::enter_set): Add support for v2 package
+	    file format.
+	    (Dwp_output_file::Dwp_index::grow): Use row index to check for empty
+	    slot.
+	    (Dwp_output_file::initialize): Remove unused function.
+	    (Dwp_output_file::finalize): Add support for v2 package file format.
+	    (Dwp_output_file::write_index): Likewise.
+	    * gdb-index.cc (Gdb_index_info_reader::visit_type_unit): Adjust
+	    function prototype.
+
 2013-07-31  Cary Coutant  <ccoutant@google.com>
 
 	* object.cc (Sized_relobj::do_output_section_address): New function.

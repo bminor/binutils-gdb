@@ -802,8 +802,8 @@ class Dwarf_info_reader
 
   // Visit a type unit.
   virtual void
-  visit_type_unit(off_t tu_offset, off_t tu_length, off_t type_offset,
-		  uint64_t signature, Dwarf_die* root_die);
+  visit_type_unit(off_t tu_offset, off_t type_offset, uint64_t signature,
+		  Dwarf_die* root_die);
 
   // Read the range table.
   Dwarf_range_list*

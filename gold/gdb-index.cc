@@ -203,8 +203,8 @@ class Gdb_index_info_reader : public Dwarf_info_reader
 
   // Visit a type unit.
   virtual void
-  visit_type_unit(off_t tu_offset, off_t tu_length, off_t type_offset,
-		  uint64_t signature, Dwarf_die*);
+  visit_type_unit(off_t tu_offset, off_t type_offset, uint64_t signature,
+		  Dwarf_die*);
 
  private:
   // A map for recording DIEs we've seen that may be referred to be
@@ -329,9 +329,8 @@ Gdb_index_info_reader::visit_compilation_unit(off_t cu_offset, off_t cu_length,
 // Process a type unit and parse its child DIE.
 
 void
-Gdb_index_info_reader::visit_type_unit(off_t tu_offset, off_t,
-				       off_t type_offset, uint64_t signature,
-				       Dwarf_die* root_die)
+Gdb_index_info_reader::visit_type_unit(off_t tu_offset, off_t type_offset,
+				       uint64_t signature, Dwarf_die* root_die)
 {
   ++Gdb_index_info_reader::dwarf_tu_count;
   // Use a negative index to flag this as a TU instead of a CU.

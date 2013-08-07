@@ -1334,8 +1334,7 @@ Dwarf_info_reader::do_parse()
 	  // Visit the CU or TU.
 	  if (this->is_type_unit_)
 	    this->visit_type_unit(section_offset + this->cu_offset_,
-				  cu_end - cu_start, type_offset, signature,
-				  &root_die);
+				  type_offset, signature, &root_die);
 	  else
 	    this->visit_compilation_unit(section_offset + this->cu_offset_,
 					 cu_end - cu_start, &root_die);
@@ -1478,7 +1477,7 @@ Dwarf_info_reader::visit_compilation_unit(off_t, off_t, Dwarf_die*)
 // Process a type unit and parse its child DIE.
 
 void
-Dwarf_info_reader::visit_type_unit(off_t, off_t, off_t, uint64_t, Dwarf_die*)
+Dwarf_info_reader::visit_type_unit(off_t, off_t, uint64_t, Dwarf_die*)
 {
 }
 
