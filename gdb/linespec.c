@@ -1996,7 +1996,10 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 
       for (i = 0; VEC_iterate (symbolp, ls->labels.label_symbols, i, sym); ++i)
 	{
-	  if (symbol_to_sal (&sal, state->funfirstline, sym))
+	  struct program_space *pspace = SYMTAB_PSPACE (SYMBOL_SYMTAB (sym));
+
+	  if (symbol_to_sal (&sal, state->funfirstline, sym)
+	      && maybe_add_address (state->addr_set, pspace, sal.pc))
 	    add_sal_to_sals (state, &sals, &sal,
 			     SYMBOL_NATURAL_NAME (sym), 0);
 	}
