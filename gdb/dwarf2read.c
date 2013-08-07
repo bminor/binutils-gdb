@@ -7374,7 +7374,8 @@ get_symtab (struct dwarf2_per_cu_data *per_cu)
 static void
 recursively_compute_inclusions (VEC (symtab_ptr) **result,
 				htab_t all_children, htab_t all_type_symtabs,
-				struct dwarf2_per_cu_data *per_cu)
+				struct dwarf2_per_cu_data *per_cu,
+				struct symtab *immediate_parent)
 {
   void **slot;
   int ix;
@@ -7402,10 +7403,16 @@ recursively_compute_inclusions (VEC (symtab_ptr) **result,
 	    {
 	      *slot = symtab;
 	      VEC_safe_push (symtab_ptr, *result, symtab);
+	      if (symtab->user == NULL)
+		symtab->user = immediate_parent;
 	    }
 	}
       else
-	VEC_safe_push (symtab_ptr, *result, symtab);
+	{
+	  VEC_safe_push (symtab_ptr, *result, symtab);
+	  if (symtab->user == NULL)
+	    symtab->user = immediate_parent;
+	}
     }
 
   for (ix = 0;
@@ -7413,7 +7420,7 @@ recursively_compute_inclusions (VEC (symtab_ptr) **result,
        ++ix)
     {
       recursively_compute_inclusions (result, all_children,
-				      all_type_symtabs, iter);
+				      all_type_symtabs, iter, symtab);
     }
 }
 
@@ -7449,7 +7456,8 @@ compute_symtab_includes (struct dwarf2_per_cu_data *per_cu)
 	   ++ix)
 	{
 	  recursively_compute_inclusions (&result_symtabs, all_children,
-					  all_type_symtabs, per_cu_iter);
+					  all_type_symtabs, per_cu_iter,
+					  symtab);
 	}
 
       /* Now we have a transitive closure of all the included symtabs.  */

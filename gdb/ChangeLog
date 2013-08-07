@@ -1,5 +1,12 @@
 2013-08-07  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (recursively_compute_inclusions): Add
+	"immediate_parent" argument.  Set symtab's "user" field
+	if not set.
+	(compute_symtab_includes): Update.
+
+2013-08-07  Tom Tromey  <tromey@redhat.com>
+
 	* linespec.c (convert_linespec_to_sals): Use maybe_add_address
 	when adding label symbols.
 
