@@ -1,5 +1,14 @@
 2013-08-07  Tom Tromey  <tromey@redhat.com>
 
+	* dwarf2read.c (dw2_get_primary_filename_reader): Remove.
+	(dwarf2_gdb_index_functions): Update.
+	* psymtab.c (find_symbol_file_from_partial): Remove.
+	(psym_functions): Update.
+	* symfile.h (struct quick_symbol_functions) <find_symbol_file>:
+	Remove.
+
+2013-08-07  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (set_initial_language): Look up "main" symbol
 	and use its language.
 	* symtab.c (find_main_filename): Remove.

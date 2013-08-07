@@ -3445,83 +3445,6 @@ dw2_expand_symtabs_with_fullname (struct objfile *objfile,
     }
 }
 
-/* A helper function for dw2_find_symbol_file that finds the primary
-   file name for a given CU.  This is a die_reader_func.  */
-
-static void
-dw2_get_primary_filename_reader (const struct die_reader_specs *reader,
-				 const gdb_byte *info_ptr,
-				 struct die_info *comp_unit_die,
-				 int has_children,
-				 void *data)
-{
-  const char **result_ptr = data;
-  struct dwarf2_cu *cu = reader->cu;
-  struct attribute *attr;
-
-  attr = dwarf2_attr (comp_unit_die, DW_AT_name, cu);
-  if (attr == NULL)
-    *result_ptr = NULL;
-  else
-    *result_ptr = DW_STRING (attr);
-}
-
-static const char *
-dw2_find_symbol_file (struct objfile *objfile, const char *name)
-{
-  struct dwarf2_per_cu_data *per_cu;
-  offset_type *vec;
-  const char *filename;
-
-  dw2_setup (objfile);
-
-  /* index_table is NULL if OBJF_READNOW.  */
-  if (!dwarf2_per_objfile->index_table)
-    {
-      struct symtab *s;
-
-      ALL_OBJFILE_PRIMARY_SYMTABS (objfile, s)
-	{
-	  struct blockvector *bv = BLOCKVECTOR (s);
-	  const struct block *block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	  struct symbol *sym = lookup_block_symbol (block, name, VAR_DOMAIN);
-
-	  if (sym)
-	    {
-	      /* Only file extension of returned filename is recognized.  */
-	      return SYMBOL_SYMTAB (sym)->filename;
-	    }
-	}
-      return NULL;
-    }
-
-  if (!find_slot_in_mapped_hash (dwarf2_per_objfile->index_table,
-				 name, &vec))
-    return NULL;
-
-  /* Note that this just looks at the very first one named NAME -- but
-     actually we are looking for a function.  find_main_filename
-     should be rewritten so that it doesn't require a custom hook.  It
-     could just use the ordinary symbol tables.  */
-  /* vec[0] is the length, which must always be >0.  */
-  per_cu = dw2_get_cu (GDB_INDEX_CU_VALUE (MAYBE_SWAP (vec[1])));
-
-  if (per_cu->v.quick->symtab != NULL)
-    {
-      /* Only file extension of returned filename is recognized.  */
-      return per_cu->v.quick->symtab->filename;
-    }
-
-  /* Initialize filename in case there's a problem reading the DWARF,
-     dw2_get_primary_filename_reader may not get called.  */
-  filename = NULL;
-  init_cutu_and_read_dies (per_cu, NULL, 0, 0,
-			   dw2_get_primary_filename_reader, &filename);
-
-  /* Only file extension of returned filename is recognized.  */
-  return filename;
-}
-
 static void
 dw2_map_matching_symbols (const char * name, domain_enum namespace,
 			  struct objfile *objfile, int global,
@@ -3845,7 +3768,6 @@ const struct quick_symbol_functions dwarf2_gdb_index_functions =
   dw2_expand_symtabs_for_function,
   dw2_expand_all_symtabs,
   dw2_expand_symtabs_with_fullname,
-  dw2_find_symbol_file,
   dw2_map_matching_symbols,
   dw2_expand_symtabs_matching,
   dw2_find_pc_sect_symtab,

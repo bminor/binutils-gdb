@@ -1206,19 +1206,6 @@ psymtab_to_fullname (struct partial_symtab *ps)
   return ps->fullname;
 }
 
-static const char *
-find_symbol_file_from_partial (struct objfile *objfile, const char *name)
-{
-  struct partial_symtab *pst;
-
-  ALL_OBJFILE_PSYMTABS_REQUIRED (objfile, pst)
-    {
-      if (lookup_partial_symbol (objfile, pst, name, 1, VAR_DOMAIN))
-	return pst->filename;
-    }
-  return NULL;
-}
-
 /*  For all symbols, s, in BLOCK that are in NAMESPACE and match NAME
     according to the function MATCH, call CALLBACK(BLOCK, s, DATA).
     BLOCK is assumed to come from OBJFILE.  Returns 1 iff CALLBACK
@@ -1442,7 +1429,6 @@ const struct quick_symbol_functions psym_functions =
   read_symtabs_for_function,
   expand_partial_symbol_tables,
   read_psymtabs_with_fullname,
-  find_symbol_file_from_partial,
   map_matching_symbols_psymtab,
   expand_symtabs_matching_via_partial,
   find_pc_sect_symtab_from_partial,

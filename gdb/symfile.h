@@ -220,11 +220,6 @@ struct quick_symbol_functions
   void (*expand_symtabs_with_fullname) (struct objfile *objfile,
 					const char *fullname);
 
-  /* Return the file name of the file holding the global symbol in OBJFILE
-     named NAME.  If no such symbol exists in OBJFILE, return NULL.
-     Only file extension of returned filename is recognized.  */
-  const char *(*find_symbol_file) (struct objfile *objfile, const char *name);
-
   /* Find global or static symbols in all tables that are in NAMESPACE 
      and for which MATCH (symbol name, NAME) == 0, passing each to 
      CALLBACK, reading in partial symbol tables as needed.  Look
