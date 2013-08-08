@@ -1,3 +1,12 @@
+2013-08-08  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.trace/mi-trace-unavailable.exp: Don't set
+	"print entry-values" to "no".
+	(test_trace_unavailable): Set various values to
+	"print entry-values" to test that the output of
+	'-stack-list-locals' is not affected, and then set
+	set "print entry-values" to "no".
+
 2013-08-07  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-value-cc.cc: Renamed from py-value.cc.

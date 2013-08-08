@@ -1,5 +1,12 @@
 2013-08-08  Yao Qi  <yao@codesourcery.com>
 
+	* frame.h (read_frame_local): Declare.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Call
+	read_frame_local.
+	* stack.c (read_frame_local): New.
+
+2013-08-08  Yao Qi  <yao@codesourcery.com>
+
 	* mi/mi-cmd-stack.c: Update comments to function
 	list_args_or_locals.
 

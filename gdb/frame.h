@@ -714,6 +714,8 @@ struct frame_arg
 extern void read_frame_arg (struct symbol *sym, struct frame_info *frame,
 			    struct frame_arg *argp,
 			    struct frame_arg *entryargp);
+extern void read_frame_local (struct symbol *sym, struct frame_info *frame,
+			      struct frame_arg *argp);
 
 extern void args_info (char *, int);
 
