@@ -502,10 +502,9 @@ list_arg_or_local (const struct frame_arg *arg, enum what_to_list what,
   do_cleanups (old_chain);
 }
 
-/* Print a list of the locals or the arguments for the currently
-   selected frame.  If the argument passed is 0, printonly the names
-   of the variables, if an argument of 1 is passed, print the values
-   as well.  */
+/* Print a list of the objects for the frame FI in a certain form,
+   which is determined by VALUES.  The objects can be locals,
+   arguments or both, which is determined by WHAT.  */
 
 static void
 list_args_or_locals (enum what_to_list what, enum print_values values,

@@ -1,3 +1,8 @@
+2013-08-08  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-cmd-stack.c: Update comments to function
+	list_args_or_locals.
+
 2013-08-07  Tom Tromey  <tromey@redhat.com>
 
 	PR symtab/15028:
