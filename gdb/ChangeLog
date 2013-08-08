@@ -1,3 +1,7 @@
+2013-08-08  Azat Khuzhin  <a3at.mail@gmail.com>  (tiny change)
+
+	* gcore.c (create_gcore_bfd): Use tilde_expand.
+
 2013-08-08  Yao Qi  <yao@codesourcery.com>
 
 	* frame.h (read_frame_local): Declare.

@@ -34,6 +34,7 @@
 #include "regcache.h"
 #include "regset.h"
 #include "gdb_bfd.h"
+#include "readline/tilde.h"
 
 /* The largest amount of memory to read from the target at once.  We
    must throttle it to limit the amount of memory used by GDB during
@@ -51,7 +52,12 @@ static int gcore_memory_sections (bfd *);
 bfd *
 create_gcore_bfd (const char *filename)
 {
-  bfd *obfd = gdb_bfd_openw (filename, default_gcore_target ());
+  char *fullname;
+  bfd *obfd;
+
+  fullname = tilde_expand (filename);
+  obfd = gdb_bfd_openw (fullname, default_gcore_target ());
+  xfree (fullname);
 
   if (!obfd)
     error (_("Failed to open '%s' for output."), filename);
