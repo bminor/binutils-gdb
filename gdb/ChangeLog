@@ -1,5 +1,14 @@
 2013-08-09  Pedro Alves  <palves@redhat.com>
 
+	* cli/cli-dump.c: Don't include cli/cli-dump.h.
+	(scan_expression_with_cleanup, scan_filename_with_cleanup)
+	(fopen_with_cleanup, add_dump_command): Make static.
+	* cli/cli-dump.h: Delete file.
+	* Makefile.in (HFILES_NO_SRCDIR): Remove reference to
+	cli/cli-dump.h.
+
+2013-08-09  Pedro Alves  <palves@redhat.com>
+
 	* tracepoint.c (tfile_start): Show tilde-expanded filename in
 	error message.
 

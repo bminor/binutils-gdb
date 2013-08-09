@@ -25,7 +25,6 @@
 #include "cli/cli-cmds.h"
 #include "value.h"
 #include "completer.h"
-#include "cli/cli-dump.h"
 #include "gdb_assert.h"
 #include <ctype.h>
 #include "target.h"
@@ -38,7 +37,7 @@
 #define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
 
 
-char *
+static char *
 scan_expression_with_cleanup (char **cmd, const char *def)
 {
   if ((*cmd) == NULL || (**cmd) == '\0')
@@ -62,7 +61,7 @@ scan_expression_with_cleanup (char **cmd, const char *def)
 }
 
 
-char *
+static char *
 scan_filename_with_cleanup (char **cmd, const char *defname)
 {
   char *filename;
@@ -97,7 +96,7 @@ scan_filename_with_cleanup (char **cmd, const char *defname)
   return fullname;
 }
 
-FILE *
+static FILE *
 fopen_with_cleanup (const char *filename, const char *mode)
 {
   FILE *file = gdb_fopen_cloexec (filename, mode);
@@ -389,7 +388,7 @@ call_dump_func (struct cmd_list_element *c, char *args, int from_tty)
   d->func (args, d->mode);
 }
 
-void
+static void
 add_dump_command (char *name, void (*func) (char *args, char *mode),
 		  char *descr)
 
