@@ -2574,7 +2574,7 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
 	{
 	  complaint (&symfile_complaints,
 		     _(".gdb_index address table has invalid range (%s - %s)"),
-		     pulongest (lo), pulongest (hi));
+		     hex_string (lo), hex_string (hi));
 	  continue;
 	}
 
