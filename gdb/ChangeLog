@@ -1,3 +1,8 @@
+2013-08-09  Yao Qi  <yao@codesourcery.com>
+
+	* stack.c (read_frame_arg): Set 'entryval_error' to NULL if
+	'entryval' is set.
+
 2013-08-08  Azat Khuzhin  <a3at.mail@gmail.com>  (tiny change)
 
 	* gcore.c (create_gcore_bfd): Use tilde_expand.
