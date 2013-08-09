@@ -52,12 +52,7 @@ static int gcore_memory_sections (bfd *);
 bfd *
 create_gcore_bfd (const char *filename)
 {
-  char *fullname;
-  bfd *obfd;
-
-  fullname = tilde_expand (filename);
-  obfd = gdb_bfd_openw (fullname, default_gcore_target ());
-  xfree (fullname);
+  bfd *obfd = gdb_bfd_openw (filename, default_gcore_target ());
 
   if (!obfd)
     error (_("Failed to open '%s' for output."), filename);
@@ -127,8 +122,9 @@ do_bfd_delete_cleanup (void *arg)
 static void
 gcore_command (char *args, int from_tty)
 {
-  struct cleanup *old_chain;
-  char *corefilename, corefilename_buffer[40];
+  struct cleanup *filename_chain;
+  struct cleanup *bfd_chain;
+  char *corefilename;
   bfd *obfd;
 
   /* No use generating a corefile without a target process.  */
@@ -136,14 +132,13 @@ gcore_command (char *args, int from_tty)
     noprocess ();
 
   if (args && *args)
-    corefilename = args;
+    corefilename = tilde_expand (args);
   else
     {
       /* Default corefile name is "core.PID".  */
-      xsnprintf (corefilename_buffer, sizeof (corefilename_buffer),
-		 "core.%d", PIDGET (inferior_ptid));
-      corefilename = corefilename_buffer;
+      corefilename = xstrprintf ("core.%d", PIDGET (inferior_ptid));
     }
+  filename_chain = make_cleanup (xfree, corefilename);
 
   if (info_verbose)
     fprintf_filtered (gdb_stdout,
@@ -153,16 +148,17 @@ gcore_command (char *args, int from_tty)
   obfd = create_gcore_bfd (corefilename);
 
   /* Need a cleanup that will close and delete the file.  */
-  old_chain = make_cleanup (do_bfd_delete_cleanup, obfd);
+  bfd_chain = make_cleanup (do_bfd_delete_cleanup, obfd);
 
   /* Call worker function.  */
   write_gcore_file (obfd);
 
   /* Succeeded.  */
-  fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename);
-
-  discard_cleanups (old_chain);
+  discard_cleanups (bfd_chain);
   gdb_bfd_unref (obfd);
+
+  fprintf_filtered (gdb_stdout, "Saved corefile %s\n", corefilename);
+  do_cleanups (filename_chain);
 }
 
 static unsigned long
