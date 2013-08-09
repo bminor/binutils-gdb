@@ -2570,17 +2570,24 @@ create_addrmap_from_index (struct objfile *objfile, struct mapped_index *index)
       cu_index = extract_unsigned_integer (iter, 4, BFD_ENDIAN_LITTLE);
       iter += 4;
 
-      if (cu_index < dwarf2_per_objfile->n_comp_units)
+      if (lo > hi)
 	{
-	  addrmap_set_empty (mutable_map, lo + baseaddr, hi + baseaddr - 1,
-			     dw2_get_cu (cu_index));
+	  complaint (&symfile_complaints,
+		     _(".gdb_index address table has invalid range (%s - %s)"),
+		     pulongest (lo), pulongest (hi));
+	  continue;
 	}
-      else
+
+      if (cu_index >= dwarf2_per_objfile->n_comp_units)
 	{
 	  complaint (&symfile_complaints,
 		     _(".gdb_index address table has invalid CU number %u"),
 		     (unsigned) cu_index);
+	  continue;
 	}
+
+      addrmap_set_empty (mutable_map, lo + baseaddr, hi + baseaddr - 1,
+			 dw2_get_cu (cu_index));
     }
 
   objfile->psymtabs_addrmap = addrmap_create_fixed (mutable_map,

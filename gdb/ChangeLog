@@ -1,3 +1,8 @@
+2013-08-09  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (create_addrmap_from_index): Ignore bad address table
+	entries.
+
 2013-08-09  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* linux-tdep.c: Define enum with generic signal numbers.
