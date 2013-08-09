@@ -1,6 +1,5 @@
 /* Renesas RL78 specific support for 32-bit ELF.
-   Copyright (C) 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright (C) 2011-2013 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -1021,15 +1020,34 @@ static bfd_boolean
 rl78_elf_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 {
   flagword new_flags;
+  flagword old_flags;
   bfd_boolean error = FALSE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
+  old_flags = elf_elfheader (obfd)->e_flags;
 
   if (!elf_flags_init (obfd))
     {
       /* First call, no flags set.  */
       elf_flags_init (obfd) = TRUE;
       elf_elfheader (obfd)->e_flags = new_flags;
+    }
+  else if (old_flags != new_flags)
+    {
+      flagword changed_flags = old_flags ^ new_flags;
+
+      if (changed_flags & E_FLAG_RL78_G10)
+	{
+	  (*_bfd_error_handler)
+	    (_("RL78/G10 ABI conflict: cannot link G10 and non-G10 objects together"));
+
+	  if (old_flags & E_FLAG_RL78_G10)
+	    (*_bfd_error_handler) (_("- %s is G10, %s is not"),
+				   bfd_get_filename (obfd), bfd_get_filename (ibfd));
+	  else
+	    (*_bfd_error_handler) (_("- %s is G10, %s is not"),
+				   bfd_get_filename (ibfd), bfd_get_filename (obfd));
+	}
     }
 
   return !error;
@@ -1048,6 +1066,9 @@ rl78_elf_print_private_bfd_data (bfd * abfd, void * ptr)
 
   flags = elf_elfheader (abfd)->e_flags;
   fprintf (file, _("private flags = 0x%lx:"), (long) flags);
+
+  if (flags & E_FLAG_RL78_G10)
+    fprintf (file, _(" [G10]"));
 
   fputc ('\n', file);
   return TRUE;

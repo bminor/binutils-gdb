@@ -1,3 +1,13 @@
+2013-08-09  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rl78.c (elf_flags): New variable.
+	(enum options): Add OPTION_G10.
+	(md_longopts): Add mg10.
+	(md_parse_option): Parse -mg10.
+	(rl78_elf_final_processing): New function.
+	* config/tc-rl78.c (tc_final_processing): Define.
+	* doc/c-rl78.texi: Document -mg10 option.
+
 2013-08-06  Jürgen Urban  <JuergenUrban@gmx.de>
 
 	* config/tc-mips.c (match_vu0_suffix_operand): Allow single-channel

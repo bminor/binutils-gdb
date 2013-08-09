@@ -2779,6 +2779,11 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, ", G-Float");
 	  break;
 
+	case EM_RL78:
+	  if (e_flags & E_FLAG_RL78_G10)
+	    strcat (buf, ", G10");
+	  break;
+	  
 	case EM_RX:
 	  if (e_flags & E_FLAG_RX_64BIT_DOUBLES)
 	    strcat (buf, ", 64-bit doubles");

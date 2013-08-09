@@ -1,3 +1,8 @@
+2013-08-09  Nick Clifton  <nickc@redhat.com>
+
+	* lib/ld-lib.exp (check_shared_lib_support): Note that the RL78
+	does not support shared library generation.
+
 2013-07-31  John Tytgat  <john@bass-software.com>
 
 	PR ld/15787

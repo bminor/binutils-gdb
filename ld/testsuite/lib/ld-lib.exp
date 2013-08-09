@@ -1595,6 +1595,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget openrisc-*-*]
 	 && ![istarget or32-*-*]
 	 && ![istarget pj-*-*]
+	 && ![istarget rl78-*-*]
 	 && ![istarget rx-*-*]
 	 && ![istarget spu-*-*]
 	 && ![istarget v850*-*-*]

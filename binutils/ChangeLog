@@ -1,3 +1,7 @@
+2013-08-09  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Handle RL78 G10 flag.
+
 2013-07-26  Sergey Guriev  <sergey.s.guriev@intel.com>
 	    Alexander Ivchenko  <alexander.ivchenko@intel.com>
 	    Maxim Kuznetsov  <maxim.kuznetsov@intel.com>
