@@ -15460,7 +15460,6 @@ save_breakpoints (char *filename, int from_tty,
 {
   struct breakpoint *tp;
   int any = 0;
-  char *pathname;
   struct cleanup *cleanup;
   struct ui_file *fp;
   int extra_trace_bits = 0;
@@ -15496,9 +15495,9 @@ save_breakpoints (char *filename, int from_tty,
       return;
     }
 
-  pathname = tilde_expand (filename);
-  cleanup = make_cleanup (xfree, pathname);
-  fp = gdb_fopen (pathname, "w");
+  filename = tilde_expand (filename);
+  cleanup = make_cleanup (xfree, filename);
+  fp = gdb_fopen (filename, "w");
   if (!fp)
     error (_("Unable to open file '%s' for saving (%s)"),
 	   filename, safe_strerror (errno));
@@ -15568,9 +15567,9 @@ save_breakpoints (char *filename, int from_tty,
   if (extra_trace_bits && *default_collect)
     fprintf_unfiltered (fp, "set default-collect %s\n", default_collect);
 
-  do_cleanups (cleanup);
   if (from_tty)
     printf_filtered (_("Saved to file '%s'.\n"), filename);
+  do_cleanups (cleanup);
 }
 
 /* The `save breakpoints' command.  */
