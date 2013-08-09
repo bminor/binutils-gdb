@@ -124,7 +124,8 @@ proc build_executable_own_libs {testname executable sources options {interp ""} 
     }
     set binfile ${objdir}/${subdir}/${executable}
 
-    set command "ldd $binfile"
+    set ldd [gdb_find_ldd]
+    set command "$ldd $binfile"
     set test "ldd $executable"
     set result [catch "exec $command" output]
     verbose -log "result of $command is $result"
@@ -235,7 +236,7 @@ proc prelink_no {arg {name {}}} {
     }
     # Last line does miss the trailing \n.  There can be multiple such messages
     # as ARG may list multiple files.
-    if {$result == 1 && [regexp {^(/usr/sbin/prelink[^\r\n]*: [^ ]* does not have .gnu.prelink_undo section\n?)*$} $output]} {
+    if {$result == 1 && [regexp {^([^\r\n]*prelink[^\r\n]*: [^ ]* does not have .gnu.prelink_undo section\n?)*$} $output]} {
 	pass $test
 	return 1
     } else {

@@ -84,6 +84,16 @@ proc gdb_find_go_linker {} {
     return [find_go]
 }
 
+proc gdb_find_ldd {} {
+    global LDD_FOR_TARGET
+    if [info exists LDD_FOR_TARGET] {
+	set ldd $LDD_FOR_TARGET
+    } else {
+	set ldd "ldd"
+    }
+    return $ldd
+}
+
 proc gdb_default_target_compile {source destfile type options} {
     global target_triplet
     global tool_root_dir

@@ -1,3 +1,9 @@
+2013-08-09  Doug Evans  <dje@google.com>
+
+	* lib/future.exp (gdb_find_ldd): New proc.
+	* lib/prelink-support.exp (build_executable_own_libs): Call it.
+	Make "/usr/sbin/" in prelink path optional.
+
 2013-08-09  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/collection.exp (gdb_collect_args_test): Set
