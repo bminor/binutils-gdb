@@ -993,6 +993,20 @@ typedef enum gdb_signal (gdbarch_gdb_signal_from_target_ftype) (struct gdbarch *
 extern enum gdb_signal gdbarch_gdb_signal_from_target (struct gdbarch *gdbarch, int signo);
 extern void set_gdbarch_gdb_signal_from_target (struct gdbarch *gdbarch, gdbarch_gdb_signal_from_target_ftype *gdb_signal_from_target);
 
+/* Signal translation: translate the GDB's internal signal number into
+   the inferior's signal (target's) representation.  The implementation
+   of this method must be host independent.  IOW, don't rely on symbols
+   of the NAT_FILE header (the nm-*.h files), the host <signal.h>
+   header, or similar headers.
+   Return the target signal number if found, or -1 if the GDB internal
+   signal number is invalid. */
+
+extern int gdbarch_gdb_signal_to_target_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_gdb_signal_to_target_ftype) (struct gdbarch *gdbarch, enum gdb_signal signal);
+extern int gdbarch_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal);
+extern void set_gdbarch_gdb_signal_to_target (struct gdbarch *gdbarch, gdbarch_gdb_signal_to_target_ftype *gdb_signal_to_target);
+
 /* Extra signal info inspection.
   
    Return a type suitable to inspect extra signal information. */

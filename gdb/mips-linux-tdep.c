@@ -45,6 +45,42 @@
 
 static struct target_so_ops mips_svr4_so_ops;
 
+/* This enum represents the signals' numbers on the MIPS
+   architecture.  It just contains the signal definitions which are
+   different from the generic implementation.
+
+   It is derived from the file <arch/mips/include/uapi/asm/signal.h>,
+   from the Linux kernel tree.  */
+
+enum
+  {
+    MIPS_LINUX_SIGEMT = 7,
+    MIPS_LINUX_SIGBUS = 10,
+    MIPS_LINUX_SIGSYS = 12,
+    MIPS_LINUX_SIGUSR1 = 16,
+    MIPS_LINUX_SIGUSR2 = 17,
+    MIPS_LINUX_SIGCHLD = 18,
+    MIPS_LINUX_SIGCLD = MIPS_LINUX_SIGCHLD,
+    MIPS_LINUX_SIGPWR = 19,
+    MIPS_LINUX_SIGWINCH = 20,
+    MIPS_LINUX_SIGURG = 21,
+    MIPS_LINUX_SIGIO = 22,
+    MIPS_LINUX_SIGPOLL = MIPS_LINUX_SIGIO,
+    MIPS_LINUX_SIGSTOP = 23,
+    MIPS_LINUX_SIGTSTP = 24,
+    MIPS_LINUX_SIGCONT = 25,
+    MIPS_LINUX_SIGTTIN = 26,
+    MIPS_LINUX_SIGTTOU = 27,
+    MIPS_LINUX_SIGVTALRM = 28,
+    MIPS_LINUX_SIGPROF = 29,
+    MIPS_LINUX_SIGXCPU = 30,
+    MIPS_LINUX_SIGXFSZ = 31,
+
+    MIPS_LINUX_SIGRTMIN = 32,
+    MIPS_LINUX_SIGRT64 = 64,
+    MIPS_LINUX_SIGRTMAX = 127,
+  };
+
 /* Figure out where the longjmp will land.
    We expect the first arg to be a pointer to the jmp_buf structure
    from which we extract the pc (MIPS_LINUX_JB_PC) that we will land
@@ -1339,94 +1375,184 @@ mips_linux_get_syscall_number (struct gdbarch *gdbarch,
   return ret;
 }
 
+/* Implementation of `gdbarch_gdb_signal_to_target', as defined in
+   gdbarch.h.  */
+
+static int
+mips_gdb_signal_to_target (struct gdbarch *gdbarch,
+			   enum gdb_signal signal)
+{
+  switch (signal)
+    {
+    case GDB_SIGNAL_EMT:
+      return MIPS_LINUX_SIGEMT;
+
+    case GDB_SIGNAL_BUS:
+      return MIPS_LINUX_SIGBUS;
+
+    case GDB_SIGNAL_SYS:
+      return MIPS_LINUX_SIGSYS;
+
+    case GDB_SIGNAL_USR1:
+      return MIPS_LINUX_SIGUSR1;
+
+    case GDB_SIGNAL_USR2:
+      return MIPS_LINUX_SIGUSR2;
+
+    case GDB_SIGNAL_CHLD:
+      return MIPS_LINUX_SIGCHLD;
+
+    case GDB_SIGNAL_PWR:
+      return MIPS_LINUX_SIGPWR;
+
+    case GDB_SIGNAL_WINCH:
+      return MIPS_LINUX_SIGWINCH;
+
+    case GDB_SIGNAL_URG:
+      return MIPS_LINUX_SIGURG;
+
+    case GDB_SIGNAL_IO:
+      return MIPS_LINUX_SIGIO;
+
+    case GDB_SIGNAL_POLL:
+      return MIPS_LINUX_SIGPOLL;
+
+    case GDB_SIGNAL_STOP:
+      return MIPS_LINUX_SIGSTOP;
+
+    case GDB_SIGNAL_TSTP:
+      return MIPS_LINUX_SIGTSTP;
+
+    case GDB_SIGNAL_CONT:
+      return MIPS_LINUX_SIGCONT;
+
+    case GDB_SIGNAL_TTIN:
+      return MIPS_LINUX_SIGTTIN;
+
+    case GDB_SIGNAL_TTOU:
+      return MIPS_LINUX_SIGTTOU;
+
+    case GDB_SIGNAL_VTALRM:
+      return MIPS_LINUX_SIGVTALRM;
+
+    case GDB_SIGNAL_PROF:
+      return MIPS_LINUX_SIGPROF;
+
+    case GDB_SIGNAL_XCPU:
+      return MIPS_LINUX_SIGXCPU;
+
+    case GDB_SIGNAL_XFSZ:
+      return MIPS_LINUX_SIGXFSZ;
+
+    /* GDB_SIGNAL_REALTIME_32 is not continuous in <gdb/signals.def>,
+       therefore we have to handle it here.  */
+    case GDB_SIGNAL_REALTIME_32:
+      return MIPS_LINUX_SIGRTMIN;
+    }
+
+  if (signal >= GDB_SIGNAL_REALTIME_33
+      && signal <= GDB_SIGNAL_REALTIME_63)
+    {
+      int offset = signal - GDB_SIGNAL_REALTIME_33;
+
+      return MIPS_LINUX_SIGRTMIN + 1 + offset;
+    }
+  else if (signal >= GDB_SIGNAL_REALTIME_64
+	   && signal <= GDB_SIGNAL_REALTIME_127)
+    {
+      int offset = signal - GDB_SIGNAL_REALTIME_64;
+
+      return MIPS_LINUX_SIGRT64 + offset;
+    }
+
+  return linux_gdb_signal_to_target (gdbarch, signal);
+}
+
 /* Translate signals based on MIPS signal values.
    Adapted from gdb/common/signals.c.  */
 
 static enum gdb_signal
-mips_gdb_signal_from_target (struct gdbarch *gdbarch, int signo)
+mips_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
 {
-  switch (signo)
+  switch (signal)
     {
-    case 0:
-      return GDB_SIGNAL_0;
-    case MIPS_SIGHUP:
-      return GDB_SIGNAL_HUP;
-    case MIPS_SIGINT:
-      return GDB_SIGNAL_INT;
-    case MIPS_SIGQUIT:
-      return GDB_SIGNAL_QUIT;
-    case MIPS_SIGILL:
-      return GDB_SIGNAL_ILL;
-    case MIPS_SIGTRAP:
-      return GDB_SIGNAL_TRAP;
-    case MIPS_SIGABRT:
-      return GDB_SIGNAL_ABRT;
-    case MIPS_SIGEMT:
+    case MIPS_LINUX_SIGEMT:
       return GDB_SIGNAL_EMT;
-    case MIPS_SIGFPE:
-      return GDB_SIGNAL_FPE;
-    case MIPS_SIGKILL:
-      return GDB_SIGNAL_KILL;
-    case MIPS_SIGBUS:
-      return GDB_SIGNAL_BUS;
-    case MIPS_SIGSEGV:
-      return GDB_SIGNAL_SEGV;
-    case MIPS_SIGSYS:
-      return GDB_SIGNAL_SYS;
-    case MIPS_SIGPIPE:
-      return GDB_SIGNAL_PIPE;
-    case MIPS_SIGALRM:
-      return GDB_SIGNAL_ALRM;
-    case MIPS_SIGTERM:
-      return GDB_SIGNAL_TERM;
-    case MIPS_SIGUSR1:
-      return GDB_SIGNAL_USR1;
-    case MIPS_SIGUSR2:
-      return GDB_SIGNAL_USR2;
-    case MIPS_SIGCHLD:
-      return GDB_SIGNAL_CHLD;
-    case MIPS_SIGPWR:
-      return GDB_SIGNAL_PWR;
-    case MIPS_SIGWINCH:
-      return GDB_SIGNAL_WINCH;
-    case MIPS_SIGURG:
-      return GDB_SIGNAL_URG;
-    case MIPS_SIGPOLL:
-      return GDB_SIGNAL_POLL;
-    case MIPS_SIGSTOP:
-      return GDB_SIGNAL_STOP;
-    case MIPS_SIGTSTP:
-      return GDB_SIGNAL_TSTP;
-    case MIPS_SIGCONT:
-      return GDB_SIGNAL_CONT;
-    case MIPS_SIGTTIN:
-      return GDB_SIGNAL_TTIN;
-    case MIPS_SIGTTOU:
-      return GDB_SIGNAL_TTOU;
-    case MIPS_SIGVTALRM:
-      return GDB_SIGNAL_VTALRM;
-    case MIPS_SIGPROF:
-      return GDB_SIGNAL_PROF;
-    case MIPS_SIGXCPU:
-      return GDB_SIGNAL_XCPU;
-    case MIPS_SIGXFSZ:
-      return GDB_SIGNAL_XFSZ;
-  }
 
-  if (signo >= MIPS_SIGRTMIN && signo <= MIPS_SIGRTMAX)
+    case MIPS_LINUX_SIGBUS:
+      return GDB_SIGNAL_BUS;
+
+    case MIPS_LINUX_SIGSYS:
+      return GDB_SIGNAL_SYS;
+
+    case MIPS_LINUX_SIGUSR1:
+      return GDB_SIGNAL_USR1;
+
+    case MIPS_LINUX_SIGUSR2:
+      return GDB_SIGNAL_USR2;
+
+    case MIPS_LINUX_SIGCHLD:
+      return GDB_SIGNAL_CHLD;
+
+    case MIPS_LINUX_SIGPWR:
+      return GDB_SIGNAL_PWR;
+
+    case MIPS_LINUX_SIGWINCH:
+      return GDB_SIGNAL_WINCH;
+
+    case MIPS_LINUX_SIGURG:
+      return GDB_SIGNAL_URG;
+
+    /* No way to differentiate between SIGIO and SIGPOLL.
+       Therefore, we just handle the first one.  */
+    case MIPS_LINUX_SIGIO:
+      return GDB_SIGNAL_IO;
+
+    case MIPS_LINUX_SIGSTOP:
+      return GDB_SIGNAL_STOP;
+
+    case MIPS_LINUX_SIGTSTP:
+      return GDB_SIGNAL_TSTP;
+
+    case MIPS_LINUX_SIGCONT:
+      return GDB_SIGNAL_CONT;
+
+    case MIPS_LINUX_SIGTTIN:
+      return GDB_SIGNAL_TTIN;
+
+    case MIPS_LINUX_SIGTTOU:
+      return GDB_SIGNAL_TTOU;
+
+    case MIPS_LINUX_SIGVTALRM:
+      return GDB_SIGNAL_VTALRM;
+
+    case MIPS_LINUX_SIGPROF:
+      return GDB_SIGNAL_PROF;
+
+    case MIPS_LINUX_SIGXCPU:
+      return GDB_SIGNAL_XCPU;
+
+    case MIPS_LINUX_SIGXFSZ:
+      return GDB_SIGNAL_XFSZ;
+    }
+
+  if (signal >= MIPS_LINUX_SIGRTMIN && signal <= MIPS_LINUX_SIGRTMAX)
     {
       /* GDB_SIGNAL_REALTIME values are not contiguous, map parts of
          the MIPS block to the respective GDB_SIGNAL_REALTIME blocks.  */
-      signo -= MIPS_SIGRTMIN;
-      if (signo == 0)
+      int offset = signal - MIPS_LINUX_SIGRTMIN;
+
+      if (offset == 0)
 	return GDB_SIGNAL_REALTIME_32;
-      else if (signo < 32)
-	return ((enum gdb_signal) (signo - 1 + (int) GDB_SIGNAL_REALTIME_33));
+      else if (offset < 32)
+	return (enum gdb_signal) (offset - 1
+				  + (int) GDB_SIGNAL_REALTIME_33);
       else
-	return ((enum gdb_signal) (signo - 32 + (int) GDB_SIGNAL_REALTIME_64));
+	return (enum gdb_signal) (offset - 32
+				  + (int) GDB_SIGNAL_REALTIME_64);
     }
 
-  return GDB_SIGNAL_UNKNOWN;
+  return linux_gdb_signal_from_target (gdbarch, signal);
 }
 
 /* Initialize one of the GNU/Linux OS ABIs.  */
@@ -1515,6 +1641,9 @@ mips_linux_init_abi (struct gdbarch_info info,
 
   set_gdbarch_gdb_signal_from_target (gdbarch,
 				      mips_gdb_signal_from_target);
+
+  set_gdbarch_gdb_signal_to_target (gdbarch,
+				    mips_gdb_signal_to_target);
 
   tdep->syscall_next_pc = mips_linux_syscall_next_pc;
 

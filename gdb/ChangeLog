@@ -1,3 +1,45 @@
+2013-08-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* linux-tdep.c: Define enum with generic signal numbers.
+	(linux_gdb_signal_from_target): New function.
+	(linux_gdb_signal_to_target): Likewise.
+	(linux_init_abi): Set gdbarch_gdb_signal_{to,from}_target
+	methods to the functions above.
+	* linux-tdep.h (linux_gdb_signal_from_target): New prototype.
+	(linux_gdb_signal_to_target): Likewise.
+	* alpha-linux-tdep.c: Define new enum with signals different
+	from generic Linux kernel.
+	(alpha_linux_gdb_signal_from_target): New function.
+	(alpha_linux_gdb_signal_to_target): Likewise.
+	(alpha_linux_init_abi): Set gdbarch_gdb_signal_{to,from}_target
+	with the functions mentioned above.
+	* avr-tdep.c: Define enum with differences between Linux kernel
+	and AVR signals.
+	(avr_linux_gdb_signal_from_target): New function.
+	(avr_linux_gdb_signal_to_target): Likewise.
+	(avr_gdbarch_init): Set gdbarch_gdb_signal_{to,from}_target to
+	the functions mentioned above.
+	* sparc-linux-tdep.c: Define enum with differences between SPARC
+	and generic Linux kernel signal numbers.
+	(sparc32_linux_gdb_signal_from_target): New function.
+	(sparc32_linux_gdb_signal_to_target): Likewise.
+	(sparc32_linux_init_abi): Set gdbarch_gdb_signal_{to,from}_target
+	to the functions defined above.
+	* xtensa-linux-tdep.c: Define enum with differences between
+	Xtensa and Linux kernel generic signals.
+	(xtensa_linux_gdb_signal_from_target): New function.
+	(xtensa_linux_gdb_signal_to_target): Likewise.
+	(xtensa_linux_init_abi): Set gdbarch_gdb_signal_to_target
+	to the functions defined above.
+	* mips-linux-tdep.c: Define enum with differences between
+	signals in MIPS and Linux kernel generic ones.
+	(mips_gdb_signal_to_target): New function.
+	(mips_gdb_signal_from_target): Redefine to use new enum, handle
+	only different signals from the Linux kernel generic.
+	(mips_linux_init_abi): Set gdbarch_gdb_signal_{to,from}_target
+	the functions defined above.
+	* mips-linux-tdep.h (enum mips_signals): Remove.
+
 2013-08-09  Pedro Alves  <palves@redhat.com>
 
 	* avr-tdep.c (XMALLOC): Delete macro.

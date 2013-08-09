@@ -261,6 +261,7 @@ struct gdbarch
   gdbarch_process_record_ftype *process_record;
   gdbarch_process_record_signal_ftype *process_record_signal;
   gdbarch_gdb_signal_from_target_ftype *gdb_signal_from_target;
+  gdbarch_gdb_signal_to_target_ftype *gdb_signal_to_target;
   gdbarch_get_siginfo_type_ftype *get_siginfo_type;
   gdbarch_record_special_symbol_ftype *record_special_symbol;
   gdbarch_get_syscall_number_ftype *get_syscall_number;
@@ -433,6 +434,7 @@ struct gdbarch startup_gdbarch =
   0,  /* process_record */
   0,  /* process_record_signal */
   0,  /* gdb_signal_from_target */
+  0,  /* gdb_signal_to_target */
   0,  /* get_siginfo_type */
   0,  /* record_special_symbol */
   0,  /* get_syscall_number */
@@ -738,6 +740,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of process_record, has predicate.  */
   /* Skip verify of process_record_signal, has predicate.  */
   /* Skip verify of gdb_signal_from_target, has predicate.  */
+  /* Skip verify of gdb_signal_to_target, has predicate.  */
   /* Skip verify of get_siginfo_type, has predicate.  */
   /* Skip verify of record_special_symbol, has predicate.  */
   /* Skip verify of get_syscall_number, has predicate.  */
@@ -1032,6 +1035,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdb_signal_from_target = <%s>\n",
                       host_address_to_string (gdbarch->gdb_signal_from_target));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_gdb_signal_to_target_p() = %d\n",
+                      gdbarch_gdb_signal_to_target_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdb_signal_to_target = <%s>\n",
+                      host_address_to_string (gdbarch->gdb_signal_to_target));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gen_return_address = <%s>\n",
                       host_address_to_string (gdbarch->gen_return_address));
@@ -3897,6 +3906,30 @@ set_gdbarch_gdb_signal_from_target (struct gdbarch *gdbarch,
                                     gdbarch_gdb_signal_from_target_ftype gdb_signal_from_target)
 {
   gdbarch->gdb_signal_from_target = gdb_signal_from_target;
+}
+
+int
+gdbarch_gdb_signal_to_target_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->gdb_signal_to_target != NULL;
+}
+
+int
+gdbarch_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->gdb_signal_to_target != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_gdb_signal_to_target called\n");
+  return gdbarch->gdb_signal_to_target (gdbarch, signal);
+}
+
+void
+set_gdbarch_gdb_signal_to_target (struct gdbarch *gdbarch,
+                                  gdbarch_gdb_signal_to_target_ftype gdb_signal_to_target)
+{
+  gdbarch->gdb_signal_to_target = gdb_signal_to_target;
 }
 
 int

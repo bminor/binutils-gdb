@@ -799,6 +799,15 @@ M:int:process_record_signal:struct regcache *regcache, enum gdb_signal signal:re
 # (target_wait, target_resume, etc.).
 M:enum gdb_signal:gdb_signal_from_target:int signo:signo
 
+# Signal translation: translate the GDB's internal signal number into
+# the inferior's signal (target's) representation.  The implementation
+# of this method must be host independent.  IOW, don't rely on symbols
+# of the NAT_FILE header (the nm-*.h files), the host <signal.h>
+# header, or similar headers.
+# Return the target signal number if found, or -1 if the GDB internal
+# signal number is invalid.
+M:int:gdb_signal_to_target:enum gdb_signal signal:signal
+
 # Extra signal info inspection.
 #
 # Return a type suitable to inspect extra signal information.
