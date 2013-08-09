@@ -68,9 +68,6 @@
    via the remote serial protocol.  The extra bits are the MSBs and are used to
    decode which memory space the address is referring to.  */
 
-#undef XMALLOC
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
-
 /* Constants: prefixed with AVR_ to avoid name space clashes */
 
 enum

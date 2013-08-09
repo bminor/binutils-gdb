@@ -34,8 +34,6 @@
 #include "gdb_bfd.h"
 #include "filestuff.h"
 
-#define XMALLOC(TYPE) ((TYPE*) xmalloc (sizeof (TYPE)))
-
 
 static char *
 scan_expression_with_cleanup (char **cmd, const char *def)

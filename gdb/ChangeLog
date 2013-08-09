@@ -1,5 +1,10 @@
 2013-08-09  Pedro Alves  <palves@redhat.com>
 
+	* avr-tdep.c (XMALLOC): Delete macro.
+	* cli/cli-dump.c (XMALLOC): Delete macro.
+
+2013-08-09  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-dump.c: Don't include cli/cli-dump.h.
 	(scan_expression_with_cleanup, scan_filename_with_cleanup)
 	(fopen_with_cleanup, add_dump_command): Make static.
@@ -14,7 +19,7 @@
 
 2013-08-09  Pedro Alves  <palves@redhat.com>
 
-        * breakpoint.c (save_breakpoints): Show tilde-expanded filename in
+	* breakpoint.c (save_breakpoints): Show tilde-expanded filename in
 	error message.
 
 2013-08-09  Pedro Alves  <palves@redhat.com>
