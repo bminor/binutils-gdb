@@ -1,7 +1,7 @@
 /* objdump.c -- dump information about an object file.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
    2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-   2012 Free Software Foundation, Inc.
+   2012, 2013 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -1915,6 +1915,27 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   if (datasize == 0)
     return;
 
+  if (start_address == (bfd_vma) -1
+      || start_address < section->vma)
+    addr_offset = 0;
+  else
+    addr_offset = start_address - section->vma;
+
+  if (stop_address == (bfd_vma) -1)
+    stop_offset = datasize / opb;
+  else
+    {
+      if (stop_address < section->vma)
+	stop_offset = 0;
+      else
+	stop_offset = stop_address - section->vma;
+      if (stop_offset > datasize / opb)
+	stop_offset = datasize / opb;
+    }
+
+  if (addr_offset >= stop_offset)
+    return;
+
   /* Decide which set of relocs to use.  Load them if necessary.  */
   paux = (struct objdump_disasm_info *) pinfo->application_data;
   if (paux->dynrelbuf)
@@ -1965,32 +1986,13 @@ disassemble_section (bfd *abfd, asection *section, void *inf)
   pinfo->buffer_length = datasize;
   pinfo->section = section;
 
-  if (start_address == (bfd_vma) -1
-      || start_address < pinfo->buffer_vma)
-    addr_offset = 0;
-  else
-    addr_offset = start_address - pinfo->buffer_vma;
-
-  if (stop_address == (bfd_vma) -1)
-    stop_offset = datasize / opb;
-  else
-    {
-      if (stop_address < pinfo->buffer_vma)
-	stop_offset = 0;
-      else
-	stop_offset = stop_address - pinfo->buffer_vma;
-      if (stop_offset > pinfo->buffer_length / opb)
-	stop_offset = pinfo->buffer_length / opb;
-    }
-
   /* Skip over the relocs belonging to addresses below the
      start address.  */
   while (rel_pp < rel_ppend
 	 && (*rel_pp)->address < rel_offset + addr_offset)
     ++rel_pp;
 
-  if (addr_offset < stop_offset)
-    printf (_("\nDisassembly of section %s:\n"), section->name);
+  printf (_("\nDisassembly of section %s:\n"), section->name);
 
   /* Find the nearest symbol forwards from our current position.  */
   paux->require_sec = TRUE;

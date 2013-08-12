@@ -1,3 +1,9 @@
+2013-08-12  Andreas Schwab  <schwab@suse.de>
+
+	PR binutils/15818
+	* objdump.c (disassemble_section): Return early if nothing from
+	this section needs to be disassembled.
+
 2013-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_flags): Handle RL78 G10 flag.
