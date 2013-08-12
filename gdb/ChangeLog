@@ -1,3 +1,14 @@
+2013-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	Revert implementation of gdbarch_gdb_signal_{to,from}_target for
+	AVR.
+	* avr-tdep.c: Remove include of "linux-tdep.h".  Remove enum with
+	different signals between the generic Linux kernel implementation
+	and AVR's.
+	(avr_linux_gdb_signal_from_target): Delete.
+	(avr_linux_gdb_signal_to_target): Delete.
+	(avr_gdbarch_init): Don't set gdbarch_gdb_signal_{to,from}_target.
+
 2013-08-09  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (create_addrmap_from_index): Ignore bad address table

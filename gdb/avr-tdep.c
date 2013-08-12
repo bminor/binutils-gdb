@@ -36,7 +36,6 @@
 #include "regcache.h"
 #include "gdb_string.h"
 #include "dis-asm.h"
-#include "linux-tdep.h"
 
 /* AVR Background:
 
@@ -190,19 +189,6 @@ struct gdbarch_tdep
   /* Type for a pointer to a function.  Used for the type of PC.  */
   struct type *pc_type;
 };
-
-/* This enum represents the signals' numbers on the AVR
-   architecture.  It just contains the signal definitions which are
-   different from the generic implementation.
-
-   It is derived from the file <arch/avr32/include/uapi/asm/signal.h>,
-   from the Linux kernel tree.  */
-
-enum
-  {
-    AVR_LINUX_SIGRTMIN = 32,
-    AVR_LINUX_SIGRTMAX = 63,
-  };
 
 /* Lookup the name of a register given it's number.  */
 
@@ -1355,60 +1341,6 @@ avr_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return -1;
 }
 
-/* Implementation of `gdbarch_gdb_signal_from_target', as defined in
-   gdbarch.h.  */
-
-static enum gdb_signal
-avr_linux_gdb_signal_from_target (struct gdbarch *gdbarch, int signal)
-{
-  if (signal >= AVR_LINUX_SIGRTMIN && signal <= AVR_LINUX_SIGRTMAX)
-    {
-      int offset = signal - AVR_LINUX_SIGRTMIN;
-
-      if (offset == 0)
-	return GDB_SIGNAL_REALTIME_32;
-      else
-	return (enum gdb_signal) (offset - 1
-				  + (int) GDB_SIGNAL_REALTIME_33);
-    }
-  else if (signal > AVR_LINUX_SIGRTMAX)
-    return GDB_SIGNAL_UNKNOWN;
-
-  return linux_gdb_signal_from_target (gdbarch, signal);
-}
-
-/* Implementation of `gdbarch_gdb_signal_to_target', as defined in
-   gdbarch.h.  */
-
-static int
-avr_linux_gdb_signal_to_target (struct gdbarch *gdbarch,
-				enum gdb_signal signal)
-{
-  switch (signal)
-    {
-    /* GDB_SIGNAL_REALTIME_32 is not continuous in <gdb/signals.def>,
-       therefore we have to handle it here.  */
-    case GDB_SIGNAL_REALTIME_32:
-      return AVR_LINUX_SIGRTMIN;
-
-    /* GDB_SIGNAL_REALTIME_64 is not valid on AVR.  */
-    case GDB_SIGNAL_REALTIME_64:
-      return -1;
-    }
-
-  /* GDB_SIGNAL_REALTIME_33 to _63 are continuous.
-     AVR does not have _64.  */
-  if (signal >= GDB_SIGNAL_REALTIME_33
-      && signal <= GDB_SIGNAL_REALTIME_63)
-    {
-      int offset = signal - GDB_SIGNAL_REALTIME_33;
-
-      return AVR_LINUX_SIGRTMIN + 1 + offset;
-    }
-
-  return linux_gdb_signal_to_target (gdbarch, signal);
-}
-
 /* Initialize the gdbarch structure for the AVR's.  */
 
 static struct gdbarch *
@@ -1511,11 +1443,6 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_unwind_pc (gdbarch, avr_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, avr_unwind_sp);
-
-  set_gdbarch_gdb_signal_from_target (gdbarch,
-				      avr_linux_gdb_signal_from_target);
-  set_gdbarch_gdb_signal_to_target (gdbarch,
-				    avr_linux_gdb_signal_to_target);
 
   return gdbarch;
 }
