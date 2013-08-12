@@ -252,20 +252,20 @@ would be appropriate if the branch was created on January 1st, 2005.
 
 Having selected the branch name, create the branch as follows:
 
-1. Check out binutils, so that you have a CVS checkout corresponding
+1. Check out binutils, so that you have a git checkout corresponding
    to the initial state of your branch.
 
 2. Create a tag:
 
-     cvs tag binutils-<org>-<name>-branchpoint
+     git tag binutils-<org>-<name>-branchpoint
 
    That tag will allow you, and others, to easily determine what's
    changed on the branch relative to the initial state.
 
-3. Create the branch:
+3. Create and push the branch:
 
-     cvs rtag -b -r binutils-<org>-<name>-branchpoint \
-       binutils-<org>-<name>-branch
+     git checkout -b binutils-<org>-<name>-branch
+     git push origin HEAD
 
 4. Document the branch:
 

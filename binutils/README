@@ -170,7 +170,7 @@ Always mention the version number you are running; this is printed by
 running any of the binutils with the --version option.  We appreciate
 reports about bugs, but we do not promise to fix them, particularly so
 when the bug report is against an old version.  If you are able, please
-consider building the latest tools from CVS to check that your bug has
+consider building the latest tools from git to check that your bug has
 not already been fixed.
 
 When reporting problems about gas and ld, it's useful to provide a
