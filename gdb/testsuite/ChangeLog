@@ -1,3 +1,7 @@
+2013-08-12  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (ALL_SUBDIRS): Add gdb.go.
+
 2013-08-12  Ali Anwar  <alianwar@codesourcery.com>
 
 	* gdb.base/break.exp: Test break via convenience variable
