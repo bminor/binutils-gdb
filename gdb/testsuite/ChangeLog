@@ -1,3 +1,8 @@
+2013-08-12  Ali Anwar  <alianwar@codesourcery.com>
+
+	* gdb.base/break.exp: Test break via convenience variable
+	with file name.
+
 2013-08-09  Doug Evans  <dje@google.com>
 
 	* lib/future.exp (gdb_find_ldd): New proc.

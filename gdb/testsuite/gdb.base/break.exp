@@ -957,6 +957,18 @@ gdb_expect {
     }
 }
 
+#
+# Test break via convenience variable with file name
+#
+set line [gdb_get_line_number "set breakpoint 1 here"]
+gdb_test_no_output "set \$l = $line"
+gdb_breakpoint ${srcfile}:\$l
+
+gdb_test_no_output "set \$foo=81.5" \
+    "set convenience variable \$foo to 81.5"
+gdb_test "break $srcfile:\$foo" \
+    "Convenience variables used in line specs must have integer values.*" \
+    "set breakpoint via non-integer convenience variable disallowed"
 
 # Reset the default arguments for VxWorks
 if [istarget "*-*-vxworks*"] {

@@ -1646,7 +1646,7 @@ linespec_parse_basic (linespec_parser *parser)
   else
     {
       /* NAME was not a function or a method.  So it must be a label
-	 name.  */
+	 name or user specified variable like "break foo.c:$zippo".  */
       labels = find_label_symbols (PARSER_STATE (parser), NULL,
 				   &symbols, name);
       if (labels != NULL)
@@ -1656,6 +1656,22 @@ linespec_parse_basic (linespec_parser *parser)
 	  PARSER_RESULT (parser)->label_name = name;
 	  symbols = NULL;
 	  discard_cleanups (cleanup);
+	}
+      else if (token.type == LSTOKEN_STRING
+	       && *LS_TOKEN_STOKEN (token).ptr == '$')
+	{
+	  /* User specified a convenience variable or history value.  */
+	  PARSER_RESULT (parser)->line_offset
+	    = linespec_parse_variable (PARSER_STATE (parser), name);
+
+	  if (PARSER_RESULT (parser)->line_offset.sign == LINE_OFFSET_UNKNOWN)
+	    {
+	      /* The user-specified variable was not valid.  Do not
+		 throw an error here.  parse_linespec will do it for us.  */
+	      PARSER_RESULT (parser)->function_name = name;
+	      discard_cleanups (cleanup);
+	      return;
+	    }
 	}
       else
 	{

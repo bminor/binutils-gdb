@@ -1,3 +1,9 @@
+2013-08-12  Ali Anwar  <ali_anwar@codesourcery.com>
+
+	PR breakpoints/15117
+	* linespec.c (linespec_parse_basic): Check for convenience
+	variable or history value while parsing.
+
 2013-08-12  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	Revert implementation of gdbarch_gdb_signal_{to,from}_target for
