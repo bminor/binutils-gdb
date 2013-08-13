@@ -813,10 +813,9 @@ struct internalvar_funcs
   void (*destroy) (void *data);
 };
 
-extern struct internalvar *
-create_internalvar_type_lazy (const char *name,
-			      const struct internalvar_funcs *funcs,
-			      void *data);
+extern struct internalvar *create_internalvar_type_lazy (const char *name,
+				const struct internalvar_funcs *funcs,
+				void *data);
 
 /* Compile an internal variable to an agent expression.  VAR is the
    variable to compile; EXPR and VALUE are the agent expression we are

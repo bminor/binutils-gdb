@@ -1,3 +1,8 @@
+2013-08-13  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* value.h (create_internalvar_type_lazy): Adjust prototype
+	declaration.
+
 2013-08-13  Andrew Burgess  <aburgess@broadcom.com>
 
 	* common/format.c (parse_format_string): Don't allow '#' flag for
