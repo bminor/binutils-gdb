@@ -1708,8 +1708,8 @@ proc support_complex_tests {} {
     # Set up, compile, and execute a test program containing _Complex types.
     # Include the current process ID in the file names to prevent conflicts
     # with invocations for multiple testsuites.
-    set src complex[pid].c
-    set exe complex[pid].x
+    set src [standard_temp_file complex[pid].c]
+    set exe [standard_temp_file complex[pid].x]
 
     set f [open $src "w"]
     puts $f "int main() {"
@@ -1798,8 +1798,8 @@ proc is_ilp32_target {} {
     }
 
 
-    set src ilp32[pid].c
-    set obj ilp32[pid].o
+    set src [standard_temp_file ilp32[pid].c]
+    set obj [standard_temp_file ilp32[pid].o]
 
     set f [open $src "w"]
     puts $f "int dummy\[sizeof (int) == 4"
@@ -1836,8 +1836,8 @@ proc is_lp64_target {} {
         return $is_lp64_target_saved($board)
     }
 
-    set src lp64[pid].c
-    set obj lp64[pid].o
+    set src [standard_temp_file lp64[pid].c]
+    set obj [standard_temp_file lp64[pid].o]
 
     set f [open $src "w"]
     puts $f "int dummy\[sizeof (int) == 4"
@@ -1878,8 +1878,8 @@ proc is_amd64_regs_target {} {
         return $is_amd64_regs_target_saved($board)
     }
 
-    set src reg64[pid].s
-    set obj reg64[pid].o
+    set src [standard_temp_file reg64[pid].s]
+    set obj [standard_temp_file reg64[pid].o]
 
     set f [open $src "w"]
     foreach reg \
@@ -1960,8 +1960,8 @@ proc skip_altivec_tests {} {
     # Set up, compile, and execute a test program containing VMX instructions.
     # Include the current process ID in the file names to prevent conflicts
     # with invocations for multiple testsuites.
-    set src vmx[pid].c
-    set exe vmx[pid].x
+    set src [standard_temp_file vmx[pid].c]
+    set exe [standard_temp_file vmx[pid].x]
 
     set f [open $src "w"]
     puts $f "int main() {"
@@ -2046,8 +2046,8 @@ proc skip_vsx_tests {} {
         return 1
     }
 
-    set src vsx[pid].c
-    set exe vsx[pid].x
+    set src [standard_temp_file vsx[pid].c]
+    set exe [standard_temp_file vsx[pid].x]
 
     set f [open $src "w"]
     puts $f "int main() {"
@@ -3399,6 +3399,12 @@ proc standard_output_file {basename} {
     global objdir subdir
 
     return [file join $objdir $subdir $basename]
+}
+
+# Return the name of a file in our standard temporary directory.
+
+proc standard_temp_file {basename} {
+    return $basename
 }
 
 # Set 'testfile', 'srcfile', and 'binfile'.

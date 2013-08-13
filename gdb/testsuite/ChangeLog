@@ -1,5 +1,12 @@
 2013-08-13  Tom Tromey  <tromey@redhat.com>
 
+	* lib/gdb.exp (standard_temp_file): New proc.
+	(support_complex_tests, is_ilp32_target, is_lp64_target)
+	(is_amd64_regs_target, skip_altivec_tests, skip_vsx_tests): Use
+	standard_temp_file.
+
+2013-08-13  Tom Tromey  <tromey@redhat.com>
+
 	* lib/gdb.exp (build_id_debug_filename_get): Use
 	standard_output_file.
 	* lib/prelink-support.exp (section_get)
