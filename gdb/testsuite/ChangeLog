@@ -1,5 +1,15 @@
 2013-08-13  Tom Tromey  <tromey@redhat.com>
 
+	* lib/cache.exp: New file.
+	* lib/cell.exp (skip_cell_tests): Use gdb_caching_proc.
+	* lib/gdb.exp: Load cache.exp.
+	(support_complex_tests, is_ilp32_target, is_lp64_target)
+	(is_amd64_regs_target, skip_altivec_tests, skip_vsx_tests)
+	(gdb_skip_xml_test): Use gdb_caching_proc.
+	* lib/opencl.exp (skip_opencl_tests): Use gdb_caching_proc.
+
+2013-08-13  Tom Tromey  <tromey@redhat.com>
+
 	* lib/gdb.exp (standard_temp_file): New proc.
 	(support_complex_tests, is_ilp32_target, is_lp64_target)
 	(is_amd64_regs_target, skip_altivec_tests, skip_vsx_tests): Use

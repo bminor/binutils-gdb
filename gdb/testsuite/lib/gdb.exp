@@ -26,6 +26,7 @@ if {$tool == ""} {
 }
 
 load_lib libgloss.exp
+load_lib cache.exp
 
 global GDB
 
@@ -1696,15 +1697,7 @@ proc with_test_prefix { prefix body } {
 
 # Return 1 if _Complex types are supported, otherwise, return 0.
 
-proc support_complex_tests {} {
-    global support_complex_tests_saved
-
-    # Use the cached value, if it exists.
-    if [info exists support_complex_tests_saved] {
-        verbose "returning saved $support_complex_tests_saved" 2
-        return $support_complex_tests_saved
-    }
-
+gdb_caching_proc support_complex_tests {
     # Set up, compile, and execute a test program containing _Complex types.
     # Include the current process ID in the file names to prevent conflicts
     # with invocations for multiple testsuites.
@@ -1727,12 +1720,12 @@ proc support_complex_tests {} {
 
     if ![string match "" $lines] then {
         verbose "testfile compilation failed, returning 0" 2
-        set support_complex_tests_saved 0
+        set result 0
     } else {
-	set support_complex_tests_saved 1
+	set result 1
     }
 
-    return $support_complex_tests_saved
+    return $result
 }
 
 # Return 1 if target hardware or OS supports single stepping to signal
@@ -1785,18 +1778,8 @@ proc supports_reverse {} {
 # Return 1 if target is ILP32.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.
-proc is_ilp32_target {} {
-    global is_ilp32_target_saved
-
-    # Use the cached value, if it exists.  Cache value per "board" to handle
-    # runs with multiple options (e.g. unix/{-m32,-64}) correctly.
+gdb_caching_proc is_ilp32_target {
     set me "is_ilp32_target"
-    set board [target_info name]
-    if [info exists is_ilp32_target_saved($board)] {
-        verbose "$me:  returning saved $is_ilp32_target_saved($board)" 2
-        return $is_ilp32_target_saved($board)
-    }
-
 
     set src [standard_temp_file ilp32[pid].c]
     set obj [standard_temp_file ilp32[pid].o]
@@ -1814,27 +1797,18 @@ proc is_ilp32_target {} {
 
     if ![string match "" $lines] then {
         verbose "$me:  testfile compilation failed, returning 0" 2
-        return [set is_ilp32_target_saved($board) 0]
+        return 0
     }
 
     verbose "$me:  returning 1" 2
-    return [set is_ilp32_target_saved($board) 1]
+    return 1
 }
 
 # Return 1 if target is LP64.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.
-proc is_lp64_target {} {
-    global is_lp64_target_saved
-
-    # Use the cached value, if it exists.  Cache value per "board" to handle
-    # runs with multiple options (e.g. unix/{-m32,-64}) correctly.
+gdb_caching_proc is_lp64_target {
     set me "is_lp64_target"
-    set board [target_info name]
-    if [info exists is_lp64_target_saved($board)] {
-        verbose "$me:  returning saved $is_lp64_target_saved($board)" 2
-        return $is_lp64_target_saved($board)
-    }
 
     set src [standard_temp_file lp64[pid].c]
     set obj [standard_temp_file lp64[pid].o]
@@ -1852,31 +1826,22 @@ proc is_lp64_target {} {
 
     if ![string match "" $lines] then {
         verbose "$me:  testfile compilation failed, returning 0" 2
-        return [set is_lp64_target_saved($board) 0]
+        return 0
     }
 
     verbose "$me:  returning 1" 2
-    return [set is_lp64_target_saved($board) 1]
+    return 1
 }
 
 # Return 1 if target has x86_64 registers - either amd64 or x32.
 # x32 target identifies as x86_64-*-linux*, therefore it cannot be determined
 # just from the target string.
-proc is_amd64_regs_target {} {
-    global is_amd64_regs_target_saved
-
+gdb_caching_proc is_amd64_regs_target {
     if {![istarget "x86_64-*-*"] && ![istarget "i?86-*"]} {
 	return 0
     }
 
-    # Use the cached value, if it exists.  Cache value per "board" to handle
-    # runs with multiple options (e.g. unix/{-m32,-64}) correctly.
     set me "is_amd64_regs_target"
-    set board [target_info name]
-    if [info exists is_amd64_regs_target_saved($board)] {
-        verbose "$me:  returning saved $is_amd64_regs_target_saved($board)" 2
-        return $is_amd64_regs_target_saved($board)
-    }
 
     set src [standard_temp_file reg64[pid].s]
     set obj [standard_temp_file reg64[pid].o]
@@ -1895,11 +1860,11 @@ proc is_amd64_regs_target {} {
 
     if ![string match "" $lines] then {
         verbose "$me:  testfile compilation failed, returning 0" 2
-        return [set is_amd64_regs_target_saved($board) 0]
+        return 0
     }
 
     verbose "$me:  returning 1" 2
-    return [set is_amd64_regs_target_saved($board) 1]
+    return 1
 }
 
 # Return 1 if this target is an x86 or x86-64 with -m32.
@@ -1925,21 +1890,15 @@ proc support_displaced_stepping {} {
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so, 
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
-proc skip_altivec_tests {} {
-    global skip_vmx_tests_saved
+gdb_caching_proc skip_altivec_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
-    # Use the cached value, if it exists.
     set me "skip_altivec_tests"
-    if [info exists skip_vmx_tests_saved] {
-        verbose "$me:  returning saved $skip_vmx_tests_saved" 2
-        return $skip_vmx_tests_saved
-    }
 
     # Some simulators are known to not support VMX instructions.
     if { [istarget powerpc-*-eabi] || [istarget powerpc*-*-eabispe] } {
         verbose "$me:  target known to not support VMX, returning 1" 2
-        return [set skip_vmx_tests_saved 1]
+        return 1
     }
 
     # Make sure we have a compiler that understands altivec.
@@ -1979,7 +1938,7 @@ proc skip_altivec_tests {} {
 
     if ![string match "" $lines] then {
         verbose "$me:  testfile compilation failed, returning 1" 2
-        return [set skip_vmx_tests_saved 1]
+        return 1
     }
 
     # No error message, compilation succeeded so now run it via gdb.
@@ -1992,43 +1951,37 @@ proc skip_altivec_tests {} {
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
             verbose -log "\n$me altivec hardware not detected" 
-            set skip_vmx_tests_saved 1
+            set skip_vmx_tests 1
         }
         -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
             verbose -log "\n$me: altivec hardware detected" 
-            set skip_vmx_tests_saved 0
+            set skip_vmx_tests 0
         }
         default {
           warning "\n$me: default case taken"
-            set skip_vmx_tests_saved 1
+            set skip_vmx_tests 1
         }
     }
     gdb_exit
     remote_file build delete $exe
 
-    verbose "$me:  returning $skip_vmx_tests_saved" 2
-    return $skip_vmx_tests_saved
+    verbose "$me:  returning $skip_vmx_tests" 2
+    return $skip_vmx_tests
 }
 
 # Run a test on the target to see if it supports vmx hardware.  Return 0 if so,
 # 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
 
-proc skip_vsx_tests {} {
-    global skip_vsx_tests_saved
+gdb_caching_proc skip_vsx_tests {
     global srcdir subdir gdb_prompt inferior_exited_re
 
-    # Use the cached value, if it exists.
     set me "skip_vsx_tests"
-    if [info exists skip_vsx_tests_saved] {
-        verbose "$me:  returning saved $skip_vsx_tests_saved" 2
-        return $skip_vsx_tests_saved
-    }
 
     # Some simulators are known to not support Altivec instructions, so
     # they won't support VSX instructions as well.
     if { [istarget powerpc-*-eabi] || [istarget powerpc*-*-eabispe] } {
         verbose "$me:  target known to not support VSX, returning 1" 2
-        return [set skip_vsx_tests_saved 1]
+        return 1
     }
 
     # Make sure we have a compiler that understands altivec.
@@ -2066,7 +2019,7 @@ proc skip_vsx_tests {} {
 
     if ![string match "" $lines] then {
         verbose "$me:  testfile compilation failed, returning 1" 2
-        return [set skip_vsx_tests_saved 1]
+        return 1
     }
 
     # No error message, compilation succeeded so now run it via gdb.
@@ -2079,22 +2032,22 @@ proc skip_vsx_tests {} {
     gdb_expect {
         -re ".*Illegal instruction.*${gdb_prompt} $" {
             verbose -log "\n$me VSX hardware not detected"
-            set skip_vsx_tests_saved 1
+            set skip_vsx_tests 1
         }
         -re ".*$inferior_exited_re normally.*${gdb_prompt} $" {
             verbose -log "\n$me: VSX hardware detected"
-            set skip_vsx_tests_saved 0
+            set skip_vsx_tests 0
         }
         default {
           warning "\n$me: default case taken"
-            set skip_vsx_tests_saved 1
+            set skip_vsx_tests 1
         }
     }
     gdb_exit
     remote_file build delete $exe
 
-    verbose "$me:  returning $skip_vsx_tests_saved" 2
-    return $skip_vsx_tests_saved
+    verbose "$me:  returning $skip_vsx_tests" 2
+    return $skip_vsx_tests
 }
 
 # Run a test on the target to see if it supports btrace hardware.  Return 0 if so,
@@ -3855,25 +3808,20 @@ proc gdb_skip_bogus_test { msg } {
 # in the host GDB.
 # NOTE: This must be called while gdb is *not* running.
 
-proc gdb_skip_xml_test { } {
+gdb_caching_proc gdb_skip_xml_test {
     global gdb_prompt
     global srcdir
-    global xml_missing_cached
-
-    if {[info exists xml_missing_cached]} {
-	return $xml_missing_cached
-    }
 
     gdb_start
-    set xml_missing_cached 0
+    set xml_missing 0
     gdb_test_multiple "set tdesc filename ${srcdir}/gdb.xml/trivial.xml" "" {
 	-re ".*XML support was disabled at compile time.*$gdb_prompt $" {
-	    set xml_missing_cached 1
+	    set xml_missing 1
 	}
 	-re ".*$gdb_prompt $" { }
     }
     gdb_exit
-    return $xml_missing_cached
+    return $xml_missing
 }
 
 # Note: the procedure gdb_gnu_strip_debug will produce an executable called
