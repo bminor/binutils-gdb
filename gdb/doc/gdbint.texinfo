@@ -7732,9 +7732,9 @@ UNRESOLVED: gdb.base/example.exp: This test script does not work on a remote hos
 
 Several variables exist to modify the behavior of the testsuite.
 
-@itemize @bullet
+@table @code
 
-@item @code{TRANSCRIPT}
+@item TRANSCRIPT
 
 Sometimes it is convenient to get a transcript of the commands which
 the testsuite sends to @value{GDBN}.  For example, if @value{GDBN}
@@ -7757,7 +7757,7 @@ make check RUNTESTFLAGS=TRANSCRIPT=y
 Note that the transcript is not always complete.  In particular, tests
 of completion can yield partial command lines.
 
-@item @code{GDB}
+@item GDB
 
 Sometimes one wishes to test a different @value{GDBN} than the one in the build
 directory.  For example, one may wish to run the testsuite on
@@ -7767,7 +7767,7 @@ directory.  For example, one may wish to run the testsuite on
 make check RUNTESTFLAGS=GDB=/usr/bin/gdb
 @end smallexample
 
-@item @code{GDBSERVER}
+@item GDBSERVER
 
 When testing a different @value{GDBN}, it is often useful to also test a
 different gdbserver.
@@ -7776,7 +7776,7 @@ different gdbserver.
 make check RUNTESTFLAGS="GDB=/usr/bin/gdb GDBSERVER=/usr/bin/gdbserver"
 @end smallexample
 
-@item @code{INTERNAL_GDBFLAGS}
+@item INTERNAL_GDBFLAGS
 
 When running the testsuite normally one doesn't want whatever is in
 @file{~/.gdbinit} to interfere with the tests, therefore the test harness
@@ -7803,7 +7803,38 @@ HOME=`pwd` runtest \
   INTERNAL_GDBFLAGS=-nw
 @end smallexample
 
-@end itemize
+@item GDB_PARALLEL
+
+When testing natively (that is, not with a remote host), the
+@value{GDBN} test suite can be run in a fully parallel mode.  In this
+mode, each @file{.exp} file can be run separately.  The test suite
+will ensure that all the temporary files created by the test suite do
+not clash, by putting them into separate directories.  This mode is
+primarily intended for use by the @file{Makefile}.
+
+To use this mode, set the @code{GDB_PARALLEL} on the @command{runtest}
+command line.  Before starting the tests, you must ensure that the
+directories @file{cache}, @file{outputs}, and @file{temp} in the test
+suite build directory are either empty or have been deleted.
+@file{cache} in particular is used to share data across invocations of
+@command{runtest}, and files there may affect the test results.  Note
+that the @file{Makefile} automatically does these deletions.
+
+@item GDB_INOTIFY
+
+For debugging parallel mode, it is handy to be able to see when a test
+case writes to a file outside of its designated output directory.
+
+If you have the @samp{inotify-tools} package installed, you can set
+the @code{GDB_INOTIFY} variable on the @command{runtest} command line.
+This will cause the test suite to watch for parallel-unsafe file
+creations and report them, both on @samp{stdout} and in the test suite
+@file{.log} file.
+
+This setting is only meaningful in conjunction with
+@code{GDB_PARALLEL}.
+
+@end table
 
 There are two ways to run the testsuite and pass additional parameters
 to DejaGnu.  The first is with @kbd{make check} and specifying the

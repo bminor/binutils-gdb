@@ -21,6 +21,7 @@ array set gdb_data_cache {}
 
 proc gdb_do_cache {name} {
     global gdb_data_cache objdir
+    global GDB_PARALLEL
 
     # See if some other process wrote the cache file.  Cache value per
     # "board" to handle runs with multiple options
@@ -33,9 +34,29 @@ proc gdb_do_cache {name} {
 	return $gdb_data_cache($cache_name)
     }
 
+    if {[info exists GDB_PARALLEL]} {
+	set cache_filename [file join $objdir cache $cache_name]
+	if {[file exists $cache_filename]} {
+	    set fd [open $cache_filename]
+	    set gdb_data_cache($cache_name) [read -nonewline $fd]
+	    close $fd
+	    verbose "$name: returning '$gdb_data_cache($cache_name)' from file cache" 2
+	    return $gdb_data_cache($cache_name)
+	}
+    }
+
     set real_name gdb_real__$name
     set gdb_data_cache($cache_name) [uplevel 1 $real_name]
 
+    if {[info exists GDB_PARALLEL]} {
+	verbose "$name: returning '$gdb_data_cache($cache_name)' and writing file" 2
+	file mkdir [file dirname $cache_filename]
+	# Make sure to write the results file atomically.
+	set fd [open $cache_filename.[pid] w]
+	puts $fd $gdb_data_cache($cache_name)
+	close $fd
+	file rename -force -- $cache_filename.[pid] $cache_filename
+    }
     return $gdb_data_cache($cache_name)
 }
 

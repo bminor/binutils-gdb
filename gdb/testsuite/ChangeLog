@@ -1,3 +1,15 @@
+2013-08-13  Tom Tromey  <tromey@redhat.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* lib/cache.exp (gdb_do_cache): Handle GDB_PARALLEL.
+	* lib/gdb.exp: Handle GDB_PARALLEL.
+	(default_gdb_version): Kill inotify_pid if it exists.
+	(default_gdb_exit): Emit warning if the inotify log is not
+	empty.
+	(standard_output_file): Respect GDB_PARALLEL.
+	(standard_temp_file): Likewise.
+	(gdb_init): Start inotifywait if requested.
+
 2013-08-13  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/printcmds.exp (test_printf): Add test for printf of

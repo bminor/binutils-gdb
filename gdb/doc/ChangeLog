@@ -1,3 +1,8 @@
+2013-08-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdbint.texinfo (Testsuite): Use @table, not @itemize.
+	Document GDB_PARALLEL and GDB_INOTIFY.
+
 2013-08-09  Stan Shebs  <stan@codesourcery.com>
 
 	* LRS: Remove file, describes a long-abandoned live-range

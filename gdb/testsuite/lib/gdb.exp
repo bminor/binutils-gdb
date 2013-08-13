@@ -112,6 +112,12 @@ proc default_gdb_version {} {
     global GDB
     global INTERNAL_GDBFLAGS GDBFLAGS
     global gdb_prompt
+    global inotify_pid
+
+    if {[info exists inotify_pid]} {
+	eval exec kill $inotify_pid
+    }
+
     set output [remote_exec host "$GDB $INTERNAL_GDBFLAGS --version"]
     set tmp [lindex $output 1]
     set version ""
@@ -1246,6 +1252,7 @@ proc default_gdb_exit {} {
     global INTERNAL_GDBFLAGS GDBFLAGS
     global verbose
     global gdb_spawn_id
+    global inotify_log_file
 
     gdb_stop_suppressing_tests
 
@@ -1254,6 +1261,20 @@ proc default_gdb_exit {} {
     }
 
     verbose "Quitting $GDB $INTERNAL_GDBFLAGS $GDBFLAGS"
+
+    if {[info exists inotify_log_file] && [file exists $inotify_log_file]} {
+	set fd [open $inotify_log_file]
+	set data [read -nonewline $fd]
+	close $fd
+
+	if {[string compare $data ""] != 0} {
+	    warning "parallel-unsafe file creations noticed"
+
+	    # Clear the log.
+	    set fd [open $inotify_log_file w]
+	    close $fd
+	}
+    }
 
     if { [is_remote host] && [board_info host exists fileid] } {
 	send_gdb "quit\n"
@@ -3349,15 +3370,27 @@ proc default_gdb_init { args } {
 # the directory is returned.
 
 proc standard_output_file {basename} {
-    global objdir subdir
+    global objdir subdir gdb_test_file_name GDB_PARALLEL
 
-    return [file join $objdir $subdir $basename]
+    if {[info exists GDB_PARALLEL]} {
+	set dir [file join $objdir outputs $subdir $gdb_test_file_name]
+	file mkdir $dir
+	return [file join $dir $basename]
+    } else {
+	return [file join $objdir $subdir $basename]
+    }
 }
 
 # Return the name of a file in our standard temporary directory.
 
 proc standard_temp_file {basename} {
-    return $basename
+    global objdir GDB_PARALLEL
+
+    if {[info exists GDB_PARALLEL]} {
+	return [file join $objdir temp $basename]
+    } else {
+	return $basename
+    }
 }
 
 # Set 'testfile', 'srcfile', and 'binfile'.
@@ -3462,6 +3495,31 @@ proc gdb_init { args } {
     global gdb_test_timeout
     global timeout
     set timeout $gdb_test_timeout
+
+    # If GDB_INOTIFY is given, check for writes to '.'.  This is a
+    # debugging tool to help confirm that the test suite is
+    # parallel-safe.  You need "inotifywait" from the
+    # inotify-tools package to use this.
+    global GDB_INOTIFY inotify_pid
+    if {[info exists GDB_INOTIFY] && ![info exists inotify_pid]} {
+	global outdir tool inotify_log_file
+
+	set exclusions {outputs temp gdb[.](log|sum) cache}
+	set exclusion_re ([join $exclusions |])
+
+	set inotify_log_file [standard_temp_file inotify.out]
+	set inotify_pid [exec inotifywait -r -m -e move,create,delete . \
+			     --exclude $exclusion_re \
+			     |& tee -a $outdir/$tool.log $inotify_log_file &]
+
+	# Wait for the watches; hopefully this is long enough.
+	sleep 2
+
+	# Clear the log so that we don't emit a warning the first time
+	# we check it.
+	set fd [open $inotify_log_file w]
+	close $fd
+    }
 
     # Block writes to all banned variables, and invocation of all
     # banned procedures...
@@ -4256,6 +4314,15 @@ if {[info exists TRANSCRIPT]} {
 
     return [uplevel real_send_gdb $args]
   }
+}
+
+# If GDB_PARALLEL exists, then set up the parallel-mode directories.
+if {[info exists GDB_PARALLEL]} {
+    if {[is_remote host]} {
+	unset GDB_PARALLEL
+    } else {
+	file mkdir outputs temp cache
+    }
 }
 
 proc core_find {binfile {deletefiles {}} {arg ""}} {
