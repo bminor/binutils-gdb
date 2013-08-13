@@ -1660,12 +1660,16 @@ init_page_info (void)
       lines_per_page = rows;
       chars_per_line = cols;
 
-      /* Readline should have fetched the termcap entry for us.  */
-      if (tgetnum ("li") < 0 || getenv ("EMACS"))
+      /* Readline should have fetched the termcap entry for us.
+         Only try to use tgetnum function if rl_get_screen_size
+         did not return a useful value. */
+      if (((rows <= 0) && (tgetnum ("li") < 0))
+	/* Also disable paging if inside EMACS.  */
+	  || getenv ("EMACS"))
 	{
-	  /* The number of lines per page is not mentioned in the
-	     terminal description.  This probably means that paging is
-	     not useful (e.g. emacs shell window), so disable paging.  */
+	  /* The number of lines per page is not mentioned in the terminal
+	     description or EMACS evironment variable is set.  This probably
+	     means that paging is not useful, so disable paging.  */
 	  lines_per_page = UINT_MAX;
 	}
 
