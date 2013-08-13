@@ -18,9 +18,8 @@
 # for sections ".interp" or ".gnu_debuglink".
 
 proc section_get {exec section} {
-    global objdir
     global subdir
-    set tmp "${objdir}/${subdir}/section_get.tmp"
+    set tmp [standard_output_file section_get.tmp]
     set objcopy_program [transform objcopy]
 
     set command "exec $objcopy_program -O binary --set-section-flags $section=A --change-section-address $section=0 -j $section $exec $tmp"
@@ -117,12 +116,12 @@ proc file_copy {src dest} {
 # with -Wl,-soname,NAME.so are not copied.
 
 proc build_executable_own_libs {testname executable sources options {interp ""} {dir ""}} {
-    global objdir subdir
+    global subdir
 
     if {[build_executable $testname $executable $sources $options] == -1} {
 	return ""
     }
-    set binfile ${objdir}/${subdir}/${executable}
+    set binfile [standard_output_file ${executable}]
 
     set ldd [gdb_find_ldd]
     set command "$ldd $binfile"

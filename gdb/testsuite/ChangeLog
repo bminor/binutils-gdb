@@ -1,3 +1,10 @@
+2013-08-13  Tom Tromey  <tromey@redhat.com>
+
+	* lib/gdb.exp (build_id_debug_filename_get): Use
+	standard_output_file.
+	* lib/prelink-support.exp (section_get)
+	(build_executable_own_libs): Use standard_output_file.
+
 2013-08-12  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (ALL_SUBDIRS): Add gdb.go.

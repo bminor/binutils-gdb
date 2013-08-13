@@ -3890,7 +3890,7 @@ proc gdb_skip_xml_test { } {
 # converted to the form: .build-id/ab/cdef1234...89.debug
 # Return "" if no build-id found.
 proc build_id_debug_filename_get { exec } {
-    set tmp "${exec}-tmp"
+    set tmp [standard_output_file "${exec}-tmp"]
     set objcopy_program [transform objcopy]
 
     set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $exec $tmp" output]
