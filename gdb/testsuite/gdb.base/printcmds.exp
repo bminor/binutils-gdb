@@ -734,6 +734,12 @@ proc test_printf {} {
     gdb_test "printf \"%.234\", 0" "Incomplete format specifier at end of format string"
     gdb_test "printf \"%-\", 0" "Incomplete format specifier at end of format string"
     gdb_test "printf \"%-23\", 0" "Incomplete format specifier at end of format string"
+
+    # Test for invalid printf flags on pointer types.
+    gdb_test "printf \"%#p\", 0" "Inappropriate modifiers to format specifier 'p' in printf"
+    gdb_test "printf \"% p\", 0" "Inappropriate modifiers to format specifier 'p' in printf"
+    gdb_test "printf \"%0p\", 0" "Inappropriate modifiers to format specifier 'p' in printf"
+    gdb_test "printf \"%+p\", 0" "Inappropriate modifiers to format specifier 'p' in printf"
 }
 
 #Test printing DFP values with printf

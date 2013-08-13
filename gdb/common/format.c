@@ -263,7 +263,9 @@ parse_format_string (const char **arg)
 	    this_argclass = ptr_arg;
 	    if (lcount || seen_h || seen_big_l)
 	      bad = 1;
-	    if (seen_prec || seen_zero || seen_space || seen_plus)
+	    if (seen_prec)
+	      bad = 1;
+	    if (seen_hash || seen_zero || seen_space || seen_plus)
 	      bad = 1;
 	    break;
 
