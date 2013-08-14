@@ -10,7 +10,7 @@
 
 2013-08-13  Pierre Muller  <muller@sourceware.org>
 
-	* src/gdb/utils.c (init_page_info): Only call tgetnum function
+	* utils.c (init_page_info): Only call tgetnum function
 	if rl_get_screen_size did not return useful values.
 
 2013-08-12  Ali Anwar  <ali_anwar@codesourcery.com>
