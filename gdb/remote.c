@@ -363,6 +363,11 @@ struct remote_state
   /* Nonzero if the user has pressed Ctrl-C, but the target hasn't
      responded to that.  */
   int ctrlc_pending_p;
+
+  /* Descriptor for I/O to remote machine.  Initialize it to NULL so that
+     remote_open knows that we don't have a file open when the program
+     starts.  */
+  struct serial *remote_desc;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -840,11 +845,6 @@ show_remotebreak (struct ui_file *file, int from_tty,
 		  const char *value)
 {
 }
-
-/* Descriptor for I/O to remote machine.  Initialize it to NULL so that
-   remote_open knows that we don't have a file open when the program
-   starts.  */
-static struct serial *remote_desc = NULL;
 
 /* This variable sets the number of bits in an address that are to be
    sent in a memory ("M" or "m") packet.  Normally, after stripping
@@ -2735,7 +2735,7 @@ remote_threads_info (struct target_ops *ops)
   char *bufp;
   ptid_t new_thread;
 
-  if (remote_desc == 0)		/* paranoia */
+  if (rs->remote_desc == 0)		/* paranoia */
     error (_("Command can only be used when connected to the remote target."));
 
 #if defined(HAVE_LIBEXPAT)
@@ -2861,7 +2861,7 @@ remote_threads_extra_info (struct thread_info *tp)
   static char display_buf[100];	/* arbitrary...  */
   int n = 0;                    /* position in display_buf */
 
-  if (remote_desc == 0)		/* paranoia */
+  if (rs->remote_desc == 0)		/* paranoia */
     internal_error (__FILE__, __LINE__,
 		    _("remote_threads_extra_info"));
 
@@ -3038,15 +3038,17 @@ extended_remote_restart (void)
 static void
 remote_close (void)
 {
-  if (remote_desc == NULL)
+  struct remote_state *rs = get_remote_state ();
+
+  if (rs->remote_desc == NULL)
     return; /* already closed */
 
   /* Make sure we leave stdin registered in the event loop, and we
      don't leave the async SIGINT signal handler installed.  */
   remote_terminal_ours ();
 
-  serial_close (remote_desc);
-  remote_desc = NULL;
+  serial_close (rs->remote_desc);
+  rs->remote_desc = NULL;
 
   /* We don't have a connection to the remote stub anymore.  Get rid
      of all the inferiors and their threads we were controlling.
@@ -3247,13 +3249,15 @@ set_stop_requested_callback (struct thread_info *thread, void *data)
 static void
 send_interrupt_sequence (void)
 {
+  struct remote_state *rs = get_remote_state ();
+
   if (interrupt_sequence_mode == interrupt_sequence_control_c)
     remote_serial_write ("\x03", 1);
   else if (interrupt_sequence_mode == interrupt_sequence_break)
-    serial_send_break (remote_desc);
+    serial_send_break (rs->remote_desc);
   else if (interrupt_sequence_mode == interrupt_sequence_break_g)
     {
-      serial_send_break (remote_desc);
+      serial_send_break (rs->remote_desc);
       remote_serial_write ("g", 1);
     }
   else
@@ -3370,7 +3374,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
     send_interrupt_sequence ();
 
   /* Ack any packet which the remote side has already sent.  */
-  serial_write (remote_desc, "+", 1);
+  serial_write (rs->remote_desc, "+", 1);
 
   /* Signal other parts that we're going through the initial setup,
      and so things may not be stable yet.  */
@@ -4267,7 +4271,7 @@ remote_open_1 (char *name, int from_tty,
   /* If we're connected to a running target, target_preopen will kill it.
      Ask this question first, before target_preopen has a chance to kill
      anything.  */
-  if (remote_desc != NULL && !have_inferiors ())
+  if (rs->remote_desc != NULL && !have_inferiors ())
     {
       if (from_tty
 	  && !query (_("Already connected to a remote target.  Disconnect? ")))
@@ -4290,29 +4294,29 @@ remote_open_1 (char *name, int from_tty,
   reopen_exec_file ();
   reread_symbols ();
 
-  remote_desc = remote_serial_open (name);
-  if (!remote_desc)
+  rs->remote_desc = remote_serial_open (name);
+  if (!rs->remote_desc)
     perror_with_name (name);
 
   if (baud_rate != -1)
     {
-      if (serial_setbaudrate (remote_desc, baud_rate))
+      if (serial_setbaudrate (rs->remote_desc, baud_rate))
 	{
 	  /* The requested speed could not be set.  Error out to
 	     top level after closing remote_desc.  Take care to
 	     set remote_desc to NULL to avoid closing remote_desc
 	     more than once.  */
-	  serial_close (remote_desc);
-	  remote_desc = NULL;
+	  serial_close (rs->remote_desc);
+	  rs->remote_desc = NULL;
 	  perror_with_name (name);
 	}
     }
 
-  serial_raw (remote_desc);
+  serial_raw (rs->remote_desc);
 
   /* If there is something sitting in the buffer we might take it as a
      response to a command, which would be bad.  */
-  serial_flush_input (remote_desc);
+  serial_flush_input (rs->remote_desc);
 
   if (from_tty)
     {
@@ -4395,7 +4399,7 @@ remote_open_1 (char *name, int from_tty,
       {
 	/* Pop the partially set up target - unless something else did
 	   already before throwing the exception.  */
-	if (remote_desc != NULL)
+	if (rs->remote_desc != NULL)
 	  remote_unpush_target ();
 	if (target_async_permitted)
 	  wait_forever_enabled_p = 1;
@@ -7145,8 +7149,9 @@ static int
 readchar (int timeout)
 {
   int ch;
+  struct remote_state *rs = get_remote_state ();
 
-  ch = serial_readchar (remote_desc, timeout);
+  ch = serial_readchar (rs->remote_desc, timeout);
 
   if (ch >= 0)
     return ch;
@@ -7173,7 +7178,9 @@ readchar (int timeout)
 static void
 remote_serial_write (const char *str, int len)
 {
-  if (serial_write (remote_desc, str, len))
+  struct remote_state *rs = get_remote_state ();
+
+  if (serial_write (rs->remote_desc, str, len))
     {
       unpush_and_perror (_("Remote communication error.  "
 			   "Target disconnected."));
@@ -8902,7 +8909,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
 
     case TARGET_OBJECT_OSDATA:
       /* Should only get here if we're connected.  */
-      gdb_assert (remote_desc);
+      gdb_assert (rs->remote_desc);
       return remote_read_qxfer
        (ops, "osdata", annex, readbuf, offset, len,
         &remote_protocol_packets[PACKET_qXfer_osdata]);
@@ -8945,7 +8952,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   len = get_remote_packet_size ();
 
   /* Except for querying the minimum buffer size, target must be open.  */
-  if (!remote_desc)
+  if (!rs->remote_desc)
     error (_("remote query is only available after target open"));
 
   gdb_assert (annex != NULL);
@@ -9079,7 +9086,7 @@ remote_rcmd (char *command,
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
 
-  if (!remote_desc)
+  if (!rs->remote_desc)
     error (_("remote rcmd is only available after target open"));
 
   /* Send a NULL command across as an empty command.  */
@@ -9165,7 +9172,7 @@ packet_command (char *args, int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
 
-  if (!remote_desc)
+  if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
   if (!args)
@@ -9705,7 +9712,7 @@ remote_hostio_send_command (int command_bytes, int which_packet,
   int ret, bytes_read;
   char *attachment_tmp;
 
-  if (!remote_desc
+  if (!rs->remote_desc
       || remote_protocol_packets[which_packet].support == PACKET_DISABLE)
     {
       *remote_errno = FILEIO_ENOSYS;
@@ -10106,8 +10113,9 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   int bytes_in_buffer;
   int saw_eof;
   ULONGEST offset;
+  struct remote_state *rs = get_remote_state ();
 
-  if (!remote_desc)
+  if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
   file = gdb_fopen_cloexec (local_file, "rb");
@@ -10194,8 +10202,9 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   FILE *file;
   gdb_byte *buffer;
   ULONGEST offset;
+  struct remote_state *rs = get_remote_state ();
 
-  if (!remote_desc)
+  if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
   fd = remote_hostio_open (remote_file, FILEIO_O_RDONLY, 0, &remote_errno);
@@ -10245,8 +10254,9 @@ void
 remote_file_delete (const char *remote_file, int from_tty)
 {
   int retcode, remote_errno;
+  struct remote_state *rs = get_remote_state ();
 
-  if (!remote_desc)
+  if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
   retcode = remote_hostio_unlink (remote_file, &remote_errno);
@@ -11602,23 +11612,27 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
 static int
 remote_can_async_p (void)
 {
+  struct remote_state *rs = get_remote_state ();
+
   if (!target_async_permitted)
     /* We only enable async when the user specifically asks for it.  */
     return 0;
 
   /* We're async whenever the serial device is.  */
-  return serial_can_async_p (remote_desc);
+  return serial_can_async_p (rs->remote_desc);
 }
 
 static int
 remote_is_async_p (void)
 {
+  struct remote_state *rs = get_remote_state ();
+
   if (!target_async_permitted)
     /* We only enable async when the user specifically asks for it.  */
     return 0;
 
   /* We're async whenever the serial device is.  */
-  return serial_is_async_p (remote_desc);
+  return serial_is_async_p (rs->remote_desc);
 }
 
 /* Pass the SERIAL event on and up to the client.  One day this code
@@ -11648,14 +11662,16 @@ static void
 remote_async (void (*callback) (enum inferior_event_type event_type,
 				void *context), void *context)
 {
+  struct remote_state *rs = get_remote_state ();
+
   if (callback != NULL)
     {
-      serial_async (remote_desc, remote_async_serial_handler, NULL);
+      serial_async (rs->remote_desc, remote_async_serial_handler, NULL);
       async_client_callback = callback;
       async_client_context = context;
     }
   else
-    serial_async (remote_desc, NULL, NULL);
+    serial_async (rs->remote_desc, NULL, NULL);
 }
 
 static void
@@ -11705,7 +11721,9 @@ show_remote_cmd (char *args, int from_tty)
 static void
 remote_new_objfile (struct objfile *objfile)
 {
-  if (remote_desc != 0)		/* Have a remote connection.  */
+  struct remote_state *rs = get_remote_state ();
+
+  if (rs->remote_desc != 0)		/* Have a remote connection.  */
     remote_check_symbols ();
 }
 
@@ -11774,14 +11792,14 @@ static void
 set_range_stepping (char *ignore_args, int from_tty,
 		    struct cmd_list_element *c)
 {
+  struct remote_state *rs = get_remote_state ();
+
   /* Whene enabling, check whether range stepping is actually
      supported by the target, and warn if not.  */
   if (use_range_stepping)
     {
-      if (remote_desc != NULL)
+      if (rs->remote_desc != NULL)
 	{
-	  struct remote_state *rs = get_remote_state ();
-
 	  if (remote_protocol_packets[PACKET_vCont].support == PACKET_SUPPORT_UNKNOWN)
 	    remote_vcont_probe (rs);
 

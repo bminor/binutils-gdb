@@ -1,5 +1,16 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <remote_desc>: New field.
+	(remote_desc): Remove.
+	(remote_threads_info, remote_threads_extra_info, remote_close)
+	(send_interrupt_sequence, remote_start_remote, remote_open_1)
+	(readchar, remote_xfer_partial, remote_rcmd, packet_command)
+	(remote_hostio_send_command, remote_file_put, remote_file_get)
+	(remote_file_delete, remote_can_async_p, remote_is_async_p)
+	(remote_async, remote_new_objfile, set_range_stepping): Update.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (remote_state): Now a pointer.
 	(get_remote_state_raw): Update.
 	(new_remote_state): New function.
