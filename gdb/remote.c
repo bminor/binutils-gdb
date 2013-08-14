@@ -387,6 +387,10 @@ struct remote_state
   enum gdb_signal last_sent_signal;
 
   int last_sent_step;
+
+  char *finished_object;
+  char *finished_annex;
+  ULONGEST finished_offset;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -8701,10 +8705,6 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
 		   gdb_byte *readbuf, ULONGEST offset, LONGEST len,
 		   struct packet_config *packet)
 {
-  static char *finished_object;
-  static char *finished_annex;
-  static ULONGEST finished_offset;
-
   struct remote_state *rs = get_remote_state ();
   LONGEST i, n, packet_len;
 
@@ -8713,19 +8713,19 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
 
   /* Check whether we've cached an end-of-object packet that matches
      this request.  */
-  if (finished_object)
+  if (rs->finished_object)
     {
-      if (strcmp (object_name, finished_object) == 0
-	  && strcmp (annex ? annex : "", finished_annex) == 0
-	  && offset == finished_offset)
+      if (strcmp (object_name, rs->finished_object) == 0
+	  && strcmp (annex ? annex : "", rs->finished_annex) == 0
+	  && offset == rs->finished_offset)
 	return 0;
 
       /* Otherwise, we're now reading something different.  Discard
 	 the cache.  */
-      xfree (finished_object);
-      xfree (finished_annex);
-      finished_object = NULL;
-      finished_annex = NULL;
+      xfree (rs->finished_object);
+      xfree (rs->finished_annex);
+      rs->finished_object = NULL;
+      rs->finished_annex = NULL;
     }
 
   /* Request only enough to fit in a single packet.  The actual data
@@ -8764,9 +8764,9 @@ remote_read_qxfer (struct target_ops *ops, const char *object_name,
      object, record this fact to bypass a subsequent partial read.  */
   if (rs->buf[0] == 'l' && offset + i > 0)
     {
-      finished_object = xstrdup (object_name);
-      finished_annex = xstrdup (annex ? annex : "");
-      finished_offset = offset + i;
+      rs->finished_object = xstrdup (object_name);
+      rs->finished_annex = xstrdup (annex ? annex : "");
+      rs->finished_offset = offset + i;
     }
 
   return i;

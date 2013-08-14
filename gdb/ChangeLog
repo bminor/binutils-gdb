@@ -1,5 +1,12 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <finished_object,
+	finished_annex, finished_offset>: New fields.
+	(remote_read_qxfer): Use remote_state fields; remove static
+	variables.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <last_sent_step>:
 	New field.
 	(last_sent_step): Remove.
