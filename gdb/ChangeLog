@@ -1,5 +1,9 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (remote_protocol_features): Now const.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (crc32_table, crc32): Remove.
 	(remote_verify_memory): Use xcrc32.
 

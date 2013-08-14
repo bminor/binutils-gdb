@@ -3963,7 +3963,7 @@ remote_augmented_libraries_svr4_read_feature
   rs->augmented_libraries_svr4_read = (support == PACKET_ENABLE);
 }
 
-static struct protocol_feature remote_protocol_features[] = {
+static const struct protocol_feature remote_protocol_features[] = {
   { "PacketSize", PACKET_DISABLE, remote_packet_size, -1 },
   { "qXfer:auxv:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_auxv },
