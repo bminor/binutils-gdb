@@ -1,5 +1,12 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <async_client_callback,
+	async_client_context>: New fields.
+	(async_client_callback, async_client_context): Remove.
+	(remote_async_serial_handler, remote_async): Update.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (sizeof_pkt): Remove.
 	(remote_trace_find): Use rs->buf_size, not sizeof_pkt.
 

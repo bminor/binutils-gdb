@@ -401,6 +401,10 @@ struct remote_state
      and set to false when the target fails to recognize it).  */
   int use_threadinfo_query;
   int use_threadextra_query;
+
+  void (*async_client_callback) (enum inferior_event_type event_type,
+				 void *context);
+  void *async_client_context;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -11635,17 +11639,16 @@ remote_is_async_p (void)
    will be able to delay notifying the client of an event until the
    point where an entire packet has been received.  */
 
-static void (*async_client_callback) (enum inferior_event_type event_type,
-				      void *context);
-static void *async_client_context;
 static serial_event_ftype remote_async_serial_handler;
 
 static void
 remote_async_serial_handler (struct serial *scb, void *context)
 {
+  struct remote_state *rs = context;
+
   /* Don't propogate error information up to the client.  Instead let
      the client find out about the error by querying the target.  */
-  async_client_callback (INF_REG_EVENT, async_client_context);
+  rs->async_client_callback (INF_REG_EVENT, rs->async_client_context);
 }
 
 static void
@@ -11662,9 +11665,9 @@ remote_async (void (*callback) (enum inferior_event_type event_type,
 
   if (callback != NULL)
     {
-      serial_async (rs->remote_desc, remote_async_serial_handler, NULL);
-      async_client_callback = callback;
-      async_client_context = context;
+      serial_async (rs->remote_desc, remote_async_serial_handler, rs);
+      rs->async_client_callback = callback;
+      rs->async_client_context = context;
     }
   else
     serial_async (rs->remote_desc, NULL, NULL);
