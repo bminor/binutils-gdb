@@ -405,6 +405,13 @@ struct remote_state
   void (*async_client_callback) (enum inferior_event_type event_type,
 				 void *context);
   void *async_client_context;
+
+  /* This is set to the data address of the access causing the target
+     to stop for a watchpoint.  */
+  CORE_ADDR remote_watch_data_address;
+
+  /* This is non-zero if target stopped for a watchpoint.  */
+  int remote_stopped_by_watchpoint_p;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -788,17 +795,6 @@ packet_reg_from_pnum (struct remote_arch_state *rsa, LONGEST pnum)
     }
   return NULL;
 }
-
-/* FIXME: graces/2002-08-08: These variables should eventually be
-   bound to an instance of the target object (as in gdbarch-tdep()),
-   when such a thing exists.  */
-
-/* This is set to the data address of the access causing the target
-   to stop for a watchpoint.  */
-static CORE_ADDR remote_watch_data_address;
-
-/* This is non-zero if target stopped for a watchpoint.  */
-static int remote_stopped_by_watchpoint_p;
 
 static struct target_ops remote_ops;
 
@@ -5843,6 +5839,8 @@ process_stop_reply (struct stop_reply *stop_reply,
   if (status->kind != TARGET_WAITKIND_EXITED
       && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
+      struct remote_state *rs = get_remote_state ();
+
       /* Expedited registers.  */
       if (stop_reply->regcache)
 	{
@@ -5858,8 +5856,8 @@ process_stop_reply (struct stop_reply *stop_reply,
 	  VEC_free (cached_reg_t, stop_reply->regcache);
 	}
 
-      remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
-      remote_watch_data_address = stop_reply->watch_data_address;
+      rs->remote_stopped_by_watchpoint_p = stop_reply->stopped_by_watchpoint_p;
+      rs->remote_watch_data_address = stop_reply->watch_data_address;
 
       remote_notice_new_inferior (ptid, 0);
       demand_private_info (ptid)->core = stop_reply->core;
@@ -5985,7 +5983,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 
   buf = rs->buf;
 
-  remote_stopped_by_watchpoint_p = 0;
+  rs->remote_stopped_by_watchpoint_p = 0;
 
   /* We got something.  */
   rs->waiting_for_stop_reply = 0;
@@ -8426,17 +8424,20 @@ remote_check_watch_resources (int type, int cnt, int ot)
 static int
 remote_stopped_by_watchpoint (void)
 {
-  return remote_stopped_by_watchpoint_p;
+  struct remote_state *rs = get_remote_state ();
+
+  return rs->remote_stopped_by_watchpoint_p;
 }
 
 static int
 remote_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
 {
+  struct remote_state *rs = get_remote_state ();
   int rc = 0;
 
   if (remote_stopped_by_watchpoint ())
     {
-      *addr_p = remote_watch_data_address;
+      *addr_p = rs->remote_watch_data_address;
       rc = 1;
     }
 

@@ -1,5 +1,13 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <remote_stopped_by_watchpoint_p,
+	remote_watch_data_address>: New fields.
+	(remote_stopped_by_watchpoint_p, remote_watch_data_address): Remove.
+	(process_stop_reply, remote_wait_as)
+	(remote_check_watch_resources, remote_stopped_data_address): Update.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <async_client_callback,
 	async_client_context>: New fields.
 	(async_client_callback, async_client_context): Remove.
