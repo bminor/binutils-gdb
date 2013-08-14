@@ -262,6 +262,15 @@ struct vCont_action_support
 
 static int use_range_stepping = 1;
 
+#define OPAQUETHREADBYTES 8
+
+/* a 64 bit opaque identifier */
+typedef unsigned char threadref[OPAQUETHREADBYTES];
+
+/* About this many threadisds fit in a packet.  */
+
+#define MAXTHREADLISTRESULTS 32
+
 /* Description of the remote protocol state for the currently
    connected target.  This is per-target state, and independent of the
    selected architecture.  */
@@ -412,6 +421,10 @@ struct remote_state
 
   /* This is non-zero if target stopped for a watchpoint.  */
   int remote_stopped_by_watchpoint_p;
+
+  threadref echo_nextthread;
+  threadref nextthread;
+  threadref resultthreadlist[MAXTHREADLISTRESULTS];
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -1873,11 +1886,6 @@ remote_thread_alive (struct target_ops *ops, ptid_t ptid)
    remote protocol in general.  There is a matching unit test module
    in libstub.  */
 
-#define OPAQUETHREADBYTES 8
-
-/* a 64 bit opaque identifier */
-typedef unsigned char threadref[OPAQUETHREADBYTES];
-
 /* WARNING: This threadref data structure comes from the remote O.S.,
    libstub protocol encoding, and remote.c.  It is not particularly
    changable.  */
@@ -2493,7 +2501,6 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
 		       int *done, int *result_count, threadref *threadlist)
 {
   struct remote_state *rs = get_remote_state ();
-  static threadref echo_nextthread;
   int result = 1;
 
   /* Trancate result limit to be smaller than the packet size.  */
@@ -2509,10 +2516,10 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
     return 0;
   else
     *result_count =
-      parse_threadlist_response (rs->buf + 2, result_limit, &echo_nextthread,
-                                 threadlist, done);
+      parse_threadlist_response (rs->buf + 2, result_limit,
+				 &rs->echo_nextthread, threadlist, done);
 
-  if (!threadmatch (&echo_nextthread, nextthread))
+  if (!threadmatch (&rs->echo_nextthread, nextthread))
     {
       /* FIXME: This is a good reason to drop the packet.  */
       /* Possably, there is a duplicate response.  */
@@ -2553,20 +2560,15 @@ remote_get_threadlist (int startflag, threadref *nextthread, int result_limit,
    quit_flag is required.  */
 
 
-/* About this many threadisds fit in a packet.  */
-
-#define MAXTHREADLISTRESULTS 32
-
 static int
 remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
 			    int looplimit)
 {
+  struct remote_state *rs = get_remote_state ();
   int done, i, result_count;
   int startflag = 1;
   int result = 1;
   int loopcount = 0;
-  static threadref nextthread;
-  static threadref resultthreadlist[MAXTHREADLISTRESULTS];
 
   done = 0;
   while (!done)
@@ -2577,8 +2579,9 @@ remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
 	  warning (_("Remote fetch threadlist -infinite loop-."));
 	  break;
 	}
-      if (!remote_get_threadlist (startflag, &nextthread, MAXTHREADLISTRESULTS,
-				  &done, &result_count, resultthreadlist))
+      if (!remote_get_threadlist (startflag, &rs->nextthread,
+				  MAXTHREADLISTRESULTS,
+				  &done, &result_count, rs->resultthreadlist))
 	{
 	  result = 0;
 	  break;
@@ -2587,10 +2590,11 @@ remote_threadlist_iterator (rmt_thread_action stepfunction, void *context,
       startflag = 0;
       /* Setup to resume next batch of thread references, set nextthread.  */
       if (result_count >= 1)
-	copy_threadref (&nextthread, &resultthreadlist[result_count - 1]);
+	copy_threadref (&rs->nextthread,
+			&rs->resultthreadlist[result_count - 1]);
       i = 0;
       while (result_count--)
-	if (!(result = (*stepfunction) (&resultthreadlist[i++], context)))
+	if (!(result = (*stepfunction) (&rs->resultthreadlist[i++], context)))
 	  break;
     }
   return result;

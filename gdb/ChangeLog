@@ -1,5 +1,13 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <echo_nextthread, nextthread,
+	resultthreadlist>: New fields.
+	(OPAQUETHREADBYTES, threadref, MAXTHREADLISTRESULTS): Move earlier.
+	(remote_get_threadlist, remote_threadlist_iterator): Use
+	new fields.  Remove static variables.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <remote_stopped_by_watchpoint_p,
 	remote_watch_data_address>: New fields.
 	(remote_stopped_by_watchpoint_p, remote_watch_data_address): Remove.
