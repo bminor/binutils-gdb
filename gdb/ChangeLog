@@ -1,5 +1,13 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <remote_traceframe_number>:
+	New field.
+	(remote_traceframe_number): Remove.
+	(new_remote_state, remote_open_1, set_remote_traceframe)
+	(remote_trace_find): Update.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <general_thread, continue_thread>:
 	New fields.
 	(general_thread, continue_thread): Remove.

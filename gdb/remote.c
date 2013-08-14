@@ -371,6 +371,10 @@ struct remote_state
      TID member will be -1 for all or -2 for not sent yet.  */
   ptid_t general_thread;
   ptid_t continue_thread;
+
+  /* This is the traceframe which we last selected on the remote system.
+     It will be -1 if no traceframe is selected.  */
+  int remote_traceframe_number;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -418,6 +422,7 @@ new_remote_state (void)
      whenever a larger buffer is needed. */
   result->buf_size = 400;
   result->buf = xmalloc (result->buf_size);
+  result->remote_traceframe_number = -1;
 
   return result;
 }
@@ -1438,10 +1443,6 @@ static struct async_event_handler *remote_async_inferior_event_token;
 static ptid_t magic_null_ptid;
 static ptid_t not_sent_ptid;
 static ptid_t any_thread_ptid;
-
-/* This is the traceframe which we last selected on the remote system.
-   It will be -1 if no traceframe is selected.  */
-static int remote_traceframe_number = -1;
 
 /* Find out if the stub attached to PID (and hence GDB should offer to
    detach instead of killing it when bailing out).  */
@@ -4343,7 +4344,7 @@ remote_open_1 (char *name, int from_tty,
 
   rs->general_thread = not_sent_ptid;
   rs->continue_thread = not_sent_ptid;
-  remote_traceframe_number = -1;
+  rs->remote_traceframe_number = -1;
 
   /* Probe for ability to use "ThreadInfo" query, as required.  */
   use_threadinfo_query = 1;
@@ -6293,12 +6294,13 @@ static void
 set_remote_traceframe (void)
 {
   int newnum;
+  struct remote_state *rs = get_remote_state ();
 
-  if (remote_traceframe_number == get_traceframe_number ())
+  if (rs->remote_traceframe_number == get_traceframe_number ())
     return;
 
   /* Avoid recursion, remote_trace_find calls us again.  */
-  remote_traceframe_number = get_traceframe_number ();
+  rs->remote_traceframe_number = get_traceframe_number ();
 
   newnum = target_trace_find (tfind_number,
 			      get_traceframe_number (), 0, 0, NULL);
@@ -11005,7 +11007,7 @@ remote_trace_find (enum trace_find_type type, int num,
   if (tpp)
     *tpp = target_tracept;
 
-  remote_traceframe_number = target_frameno;
+  rs->remote_traceframe_number = target_frameno;
   return target_frameno;
 }
 
