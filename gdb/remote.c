@@ -383,6 +383,8 @@ struct remote_state
      packet is exactly the same as the last we sent.  IOW, we only let
      the target know about program signals list changes.  */
   char *last_program_signals_packet;
+
+  enum gdb_signal last_sent_signal;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -431,6 +433,7 @@ new_remote_state (void)
   result->buf_size = 400;
   result->buf = xmalloc (result->buf_size);
   result->remote_traceframe_number = -1;
+  result->last_sent_signal = GDB_SIGNAL_0;
 
   return result;
 }
@@ -4907,8 +4910,6 @@ remote_vcont_resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 
 /* Tell the remote machine to resume.  */
 
-static enum gdb_signal last_sent_signal = GDB_SIGNAL_0;
-
 static int last_sent_step;
 
 static void
@@ -4927,7 +4928,7 @@ remote_resume (struct target_ops *ops,
   if (!non_stop)
     remote_notif_process (&notif_client_stop);
 
-  last_sent_signal = siggnal;
+  rs->last_sent_signal = siggnal;
   last_sent_step = step;
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
@@ -6019,15 +6020,15 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 
       break;
     case '\0':
-      if (last_sent_signal != GDB_SIGNAL_0)
+      if (rs->last_sent_signal != GDB_SIGNAL_0)
 	{
 	  /* Zero length reply means that we tried 'S' or 'C' and the
 	     remote system doesn't support it.  */
 	  target_terminal_ours_for_output ();
 	  printf_filtered
 	    ("Can't send signals to this remote system.  %s not sent.\n",
-	     gdb_signal_to_name (last_sent_signal));
-	  last_sent_signal = GDB_SIGNAL_0;
+	     gdb_signal_to_name (rs->last_sent_signal));
+	  rs->last_sent_signal = GDB_SIGNAL_0;
 	  target_terminal_inferior ();
 
 	  strcpy ((char *) buf, last_sent_step ? "s" : "c");
