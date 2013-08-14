@@ -417,7 +417,10 @@ list_args_or_locals (enum what_to_list what, enum print_values values,
 		      && TYPE_CODE (type) != TYPE_CODE_UNION)
 		    {
 		case PRINT_ALL_VALUES:
-		      read_frame_arg (sym2, fi, &arg, &entryarg);
+		  if (SYMBOL_IS_ARGUMENT (sym))
+		    read_frame_arg (sym2, fi, &arg, &entryarg);
+		  else
+		    read_frame_local (sym2, fi, &arg);
 		    }
 		  break;
 		}
