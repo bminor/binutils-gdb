@@ -1,5 +1,10 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (sizeof_pkt): Remove.
+	(remote_trace_find): Use rs->buf_size, not sizeof_pkt.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <use_threadinfo_query,
 	use_threadextra_query>: New fields.
 	(remote_threads_info, remote_threads_extra_info)

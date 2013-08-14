@@ -490,8 +490,6 @@ struct remote_arch_state
   long remote_packet_size;
 };
 
-long sizeof_pkt = 2000;
-
 /* Utility: generate error from an incoming stub packet.  */
 static void
 trace_error (char *buf)
@@ -10971,7 +10969,7 @@ remote_trace_find (enum trace_find_type type, int num,
     }
 
   putpkt (rs->buf);
-  reply = remote_get_noisy_reply (&(rs->buf), &sizeof_pkt);
+  reply = remote_get_noisy_reply (&(rs->buf), &rs->buf_size);
   if (*reply == '\0')
     error (_("Target does not support this command."));
 
