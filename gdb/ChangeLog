@@ -1,5 +1,14 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <general_thread, continue_thread>:
+	New fields.
+	(general_thread, continue_thread): Remove.
+	(record_currthread, set_thread, set_general_process)
+	(remote_open_1, extended_remote_attach_1, remote_wait_as)
+	(extended_remote_mourn_1): Update.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <remote_desc>: New field.
 	(remote_desc): Remove.
 	(remote_threads_info, remote_threads_extra_info, remote_close)

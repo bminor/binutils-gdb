@@ -178,8 +178,6 @@ static ptid_t remote_current_thread (ptid_t oldptid);
 
 static void remote_find_new_threads (void);
 
-static void record_currthread (ptid_t currthread);
-
 static int fromhex (int a);
 
 static int putpkt_binary (char *buf, int cnt);
@@ -368,6 +366,11 @@ struct remote_state
      remote_open knows that we don't have a file open when the program
      starts.  */
   struct serial *remote_desc;
+
+  /* These are the threads which we last sent to the remote system.  The
+     TID member will be -1 for all or -2 for not sent yet.  */
+  ptid_t general_thread;
+  ptid_t continue_thread;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -1436,12 +1439,6 @@ static ptid_t magic_null_ptid;
 static ptid_t not_sent_ptid;
 static ptid_t any_thread_ptid;
 
-/* These are the threads which we last sent to the remote system.  The
-   TID member will be -1 for all or -2 for not sent yet.  */
-
-static ptid_t general_thread;
-static ptid_t continue_thread;
-
 /* This is the traceframe which we last selected on the remote system.
    It will be -1 if no traceframe is selected.  */
 static int remote_traceframe_number = -1;
@@ -1646,9 +1643,9 @@ demand_private_info (ptid_t ptid)
    3) Successful execution of set thread */
 
 static void
-record_currthread (ptid_t currthread)
+record_currthread (struct remote_state *rs, ptid_t currthread)
 {
-  general_thread = currthread;
+  rs->general_thread = currthread;
 }
 
 static char *last_pass_packet;
@@ -1772,7 +1769,7 @@ static void
 set_thread (struct ptid ptid, int gen)
 {
   struct remote_state *rs = get_remote_state ();
-  ptid_t state = gen ? general_thread : continue_thread;
+  ptid_t state = gen ? rs->general_thread : rs->continue_thread;
   char *buf = rs->buf;
   char *endbuf = rs->buf + get_remote_packet_size ();
 
@@ -1792,9 +1789,9 @@ set_thread (struct ptid ptid, int gen)
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
   if (gen)
-    general_thread = ptid;
+    rs->general_thread = ptid;
   else
-    continue_thread = ptid;
+    rs->continue_thread = ptid;
 }
 
 static void
@@ -1829,7 +1826,7 @@ set_general_process (void)
 
   /* We only need to change the remote current thread if it's pointing
      at some other process.  */
-  if (ptid_get_pid (general_thread) != ptid_get_pid (inferior_ptid))
+  if (ptid_get_pid (rs->general_thread) != ptid_get_pid (inferior_ptid))
     set_general_thread (inferior_ptid);
 }
 
@@ -4344,8 +4341,8 @@ remote_open_1 (char *name, int from_tty,
   rs->waiting_for_stop_reply = 0;
   rs->ctrlc_pending_p = 0;
 
-  general_thread = not_sent_ptid;
-  continue_thread = not_sent_ptid;
+  rs->general_thread = not_sent_ptid;
+  rs->continue_thread = not_sent_ptid;
   remote_traceframe_number = -1;
 
   /* Probe for ability to use "ThreadInfo" query, as required.  */
@@ -4563,7 +4560,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 	inferior_ptid = pid_to_ptid (pid);
 
       /* Invalidate our notion of the remote current thread.  */
-      record_currthread (minus_one_ptid);
+      record_currthread (rs, minus_one_ptid);
     }
   else
     {
@@ -6062,13 +6059,13 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	   && status->kind != TARGET_WAITKIND_SIGNALLED)
     {
       if (!ptid_equal (event_ptid, null_ptid))
-	record_currthread (event_ptid);
+	record_currthread (rs, event_ptid);
       else
 	event_ptid = inferior_ptid;
     }
   else
     /* A process exit.  Invalidate our notion of current thread.  */
-    record_currthread (minus_one_ptid);
+    record_currthread (rs, minus_one_ptid);
 
   return event_ptid;
 }
@@ -7919,7 +7916,7 @@ extended_remote_mourn_1 (struct target_ops *target)
 
      To keep things simple, we always invalidate our notion of the
      current thread.  */
-  record_currthread (minus_one_ptid);
+  record_currthread (rs, minus_one_ptid);
 
   /* Unlike "target remote", we do not want to unpush the target; then
      the next time the user says "run", we won't be connected.  */
