@@ -1,5 +1,12 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <last_sent_step>:
+	New field.
+	(last_sent_step): Remove.
+	(remote_resume, remote_wait_as): Update.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <last_sent_signal>:
 	New field.
 	(last_sent_signal): Remove.

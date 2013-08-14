@@ -385,6 +385,8 @@ struct remote_state
   char *last_program_signals_packet;
 
   enum gdb_signal last_sent_signal;
+
+  int last_sent_step;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -4910,8 +4912,6 @@ remote_vcont_resume (ptid_t ptid, int step, enum gdb_signal siggnal)
 
 /* Tell the remote machine to resume.  */
 
-static int last_sent_step;
-
 static void
 remote_resume (struct target_ops *ops,
 	       ptid_t ptid, int step, enum gdb_signal siggnal)
@@ -4929,7 +4929,7 @@ remote_resume (struct target_ops *ops,
     remote_notif_process (&notif_client_stop);
 
   rs->last_sent_signal = siggnal;
-  last_sent_step = step;
+  rs->last_sent_step = step;
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
   /* No reverse support (yet) for vCont.  */
@@ -6031,7 +6031,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status, int options)
 	  rs->last_sent_signal = GDB_SIGNAL_0;
 	  target_terminal_inferior ();
 
-	  strcpy ((char *) buf, last_sent_step ? "s" : "c");
+	  strcpy ((char *) buf, rs->last_sent_step ? "s" : "c");
 	  putpkt ((char *) buf);
 
 	  /* We just told the target to resume, so a stop reply is in
