@@ -1,3 +1,8 @@
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
+	* remote.c (crc32_table, crc32): Remove.
+	(remote_verify_memory): Use xcrc32.
+
 2013-08-13  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* value.h (create_internalvar_type_lazy): Adjust prototype

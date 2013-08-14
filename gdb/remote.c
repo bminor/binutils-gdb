@@ -8521,36 +8521,6 @@ remote_remove_hw_breakpoint (struct gdbarch *gdbarch,
 		  _("remote_remove_hw_breakpoint: reached end of function"));
 }
 
-/* Table used by the crc32 function to calcuate the checksum.  */
-
-static unsigned long crc32_table[256] =
-{0, 0};
-
-static unsigned long
-crc32 (const unsigned char *buf, int len, unsigned int crc)
-{
-  if (!crc32_table[1])
-    {
-      /* Initialize the CRC table and the decoding table.  */
-      int i, j;
-      unsigned int c;
-
-      for (i = 0; i < 256; i++)
-	{
-	  for (c = i << 24, j = 8; j > 0; --j)
-	    c = c & 0x80000000 ? (c << 1) ^ 0x04c11db7 : (c << 1);
-	  crc32_table[i] = c;
-	}
-    }
-
-  while (len--)
-    {
-      crc = (crc << 8) ^ crc32_table[((crc >> 24) ^ *buf) & 255];
-      buf++;
-    }
-  return crc;
-}
-
 /* Verify memory using the "qCRC:" request.  */
 
 static int
@@ -8571,7 +8541,7 @@ remote_verify_memory (struct target_ops *ops,
 
   /* Be clever; compute the host_crc before waiting for target
      reply.  */
-  host_crc = crc32 (data, size, 0xffffffff);
+  host_crc = xcrc32 (data, size, 0xffffffff);
 
   getpkt (&rs->buf, &rs->buf_size, 0);
   if (rs->buf[0] == 'E')
