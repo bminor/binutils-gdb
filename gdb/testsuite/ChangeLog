@@ -1,3 +1,7 @@
+2013-08-14  Cary Coutant  <ccoutant@google.com>
+
+	* boards/fission.exp: Add -fdebug-types-section to debug_flags.
+
 2013-08-13  Tom Tromey  <tromey@redhat.com>
 	    Yao Qi  <yao@codesourcery.com>
 
