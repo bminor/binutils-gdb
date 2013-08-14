@@ -1,3 +1,13 @@
+2013-08-13  Luis Machado  <lgustavo@codesourcery.com>
+
+	* linux-arm-low.c: Rename all occurrences of PTRACE_ARG3_TYPE
+	to PTRACE_TYPE_ARG3.
+	* linux-low.c: Rename all occurrences of PTRACE_ARG3_TYPE
+	to PTRACE_TYPE_ARG3 and PTRACE_ARG4_TYPE to
+	PTRACE_TYPE_ARG4.
+	* linux-low.h (PTRACE_ARG3_TYPE): Rename to PTRACE_TYPE_ARG3.
+	(PTRACE_ARG4_TYPE): Rename to PTRACE_TYPE_ARG4.
+
 2013-07-27  Jie Zhang  <jie@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
