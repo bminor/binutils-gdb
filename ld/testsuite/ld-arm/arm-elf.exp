@@ -836,4 +836,5 @@ run_dump_test "unresolved-1"
 if { ![istarget "arm*-*-nacl*"] } {
     run_dump_test "unresolved-1-dyn"
 }
+run_dump_test "unresolved-2"
 run_dump_test "gc-hidden-1"

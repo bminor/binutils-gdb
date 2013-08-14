@@ -1,3 +1,10 @@
+2013-08-14  John Tytgat  <john@bass-software.com>
+
+	PR ld/15787
+	* elf32-arm.c (elf32_arm_final_link_relocate): Use origin of output
+	segment containing the relocating symbol instead of assuming 0 for
+	sb group relocations.
+
 2013-08-09  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-rl78.c (rl78_elf_merge_private_bfd_data): Complain if G10

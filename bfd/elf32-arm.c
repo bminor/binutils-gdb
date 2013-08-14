@@ -9853,7 +9853,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_vma pc = input_section->output_section->vma
 		     + input_section->output_offset + rel->r_offset;
 	/* sb is the origin of the *segment* containing the symbol.  */
-	bfd_vma sb = sym_sec->output_section->vma;
+	bfd_vma sb = sym_sec ? sym_sec->output_section->vma : 0;
 	bfd_vma residual;
 	bfd_vma g_n;
 	bfd_signed_vma signed_value;
@@ -9987,7 +9987,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_vma pc = input_section->output_section->vma
 		     + input_section->output_offset + rel->r_offset;
 	/* sb is the origin of the *segment* containing the symbol.  */
-	bfd_vma sb = sym_sec->output_section->vma;
+	bfd_vma sb = sym_sec ? sym_sec->output_section->vma : 0;
 	bfd_vma residual;
 	bfd_signed_vma signed_value;
 	int group = 0;
@@ -10071,7 +10071,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_vma pc = input_section->output_section->vma
 		     + input_section->output_offset + rel->r_offset;
 	/* sb is the origin of the *segment* containing the symbol.  */
-	bfd_vma sb = sym_sec->output_section->vma;
+	bfd_vma sb = sym_sec ? sym_sec->output_section->vma : 0;
 	bfd_vma residual;
 	bfd_signed_vma signed_value;
 	int group = 0;
@@ -10155,7 +10155,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	bfd_vma pc = input_section->output_section->vma
 		     + input_section->output_offset + rel->r_offset;
 	/* sb is the origin of the *segment* containing the symbol.  */
-	bfd_vma sb = sym_sec->output_section->vma;
+	bfd_vma sb = sym_sec ? sym_sec->output_section->vma : 0;
 	bfd_vma residual;
 	bfd_signed_vma signed_value;
 	int group = 0;
