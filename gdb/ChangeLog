@@ -1,5 +1,12 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <last_pass_packet>:
+	New field.
+	(last_pass_packet): Remove.
+	(remote_pass_signals, remote_open_1): Update.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <remote_traceframe_number>:
 	New field.
 	(remote_traceframe_number): Remove.
