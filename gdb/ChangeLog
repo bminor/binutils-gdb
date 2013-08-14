@@ -1,5 +1,12 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (remote_state): Now a pointer.
+	(get_remote_state_raw): Update.
+	(new_remote_state): New function.
+	(_initialize_remote): Use new_remote_state.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (remote_protocol_features): Now const.
 
 2013-08-14  Tom Tromey  <tromey@redhat.com>

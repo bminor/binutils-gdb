@@ -390,12 +390,28 @@ remote_multi_process_p (struct remote_state *rs)
    have access to the current target when we need it, so for now it is
    static.  This will be fine for as long as only one target is in use
    at a time.  */
-static struct remote_state remote_state;
+static struct remote_state *remote_state;
 
 static struct remote_state *
 get_remote_state_raw (void)
 {
-  return &remote_state;
+  return remote_state;
+}
+
+/* Allocate a new struct remote_state with xmalloc, initialize it, and
+   return it.  */
+
+static struct remote_state *
+new_remote_state (void)
+{
+  struct remote_state *result = XCNEW (struct remote_state);
+
+  /* The default buffer size is unimportant; it will be expanded
+     whenever a larger buffer is needed. */
+  result->buf_size = 400;
+  result->buf = xmalloc (result->buf_size);
+
+  return result;
 }
 
 /* Description of the remote protocol for a given architecture.  */
@@ -11793,11 +11809,8 @@ _initialize_remote (void)
 
   /* Initialize the per-target state.  At the moment there is only one
      of these, not one per target.  Only one target is active at a
-     time.  The default buffer size is unimportant; it will be expanded
-     whenever a larger buffer is needed.  */
-  rs = get_remote_state_raw ();
-  rs->buf_size = 400;
-  rs->buf = xmalloc (rs->buf_size);
+     time.  */
+  remote_state = new_remote_state ();
 
   init_remote_ops ();
   add_target (&remote_ops);
