@@ -1,5 +1,12 @@
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (struct remote_state) <use_threadinfo_query,
+	use_threadextra_query>: New fields.
+	(remote_threads_info, remote_threads_extra_info)
+	(remote_open_1): Update.
+
+2013-08-14  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (struct remote_state) <finished_object,
 	finished_annex, finished_offset>: New fields.
 	(remote_read_qxfer): Use remote_state fields; remove static
