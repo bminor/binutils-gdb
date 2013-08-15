@@ -1,3 +1,11 @@
+2013-08-14  Clemens Lang  <clemens.lang@fau.de>
+
+	* ldexp.c: Add LOG2CEIL() builtin function to linker script language
+	* ldgram.y: Likewise
+	* ldlex.l: Likewise
+	* NEWS: Mention the new feature.
+	* ld.texinfo: Document the new feature.
+
 2013-07-19  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* ldgram.y: Add ALIGN_WITH_INPUT output section attribute.

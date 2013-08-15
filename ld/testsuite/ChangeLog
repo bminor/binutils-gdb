@@ -1,3 +1,9 @@
+2013-08-14  Clemens Lang  <clemens.lang@fau.de>
+
+	* ld-scripts/log2.exp: New: Run the new log2 test.
+	* ld-scripts/log2.s: Source for the new test.
+	* ld-scripts/log2.t: Linker script for new test.
+
 2013-08-14  John Tytgat  <john@bass-software.com>
 
 	PR ld/15787

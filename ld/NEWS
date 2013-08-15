@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add LOG2CEIL() builtin function to the linker script language
+
 * Add support for the Texas Instruments MSP430X processor.
 
 * Add support for Altera Nios II.

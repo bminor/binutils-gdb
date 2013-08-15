@@ -5947,6 +5947,11 @@ Return the length of the memory region named @var{memory}.
 Return the absolute LMA of the named @var{section}.  (@pxref{Output
 Section LMA}).
 
+@item LOG2CEIL(@var{exp})
+@kindex LOG2CEIL(@var{exp})
+Return the binary logarithm of @var{exp} rounded towards infinity.
+@code{LOG2CEIL(0)} returns 0.
+
 @kindex MAX
 @item MAX(@var{exp1}, @var{exp2})
 Returns the maximum of @var{exp1} and @var{exp2}.
