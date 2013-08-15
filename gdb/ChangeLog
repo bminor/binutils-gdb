@@ -1,5 +1,15 @@
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
+	* minsyms.c (prim_record_minimal_symbol_full): Use
+	SET_MSYMBOL_VALUE_ADDRESS.
+	* objfiles.c (objfile_relocate1): Use SET_MSYMBOL_VALUE_ADDRESS.
+	* sh64-tdep.c (sh64_elf_make_msymbol_special): Use
+	SET_MSYMBOL_VALUE_ADDRESS.
+	* symtab.h (MSYMBOL_VALUE_ADDRESS): Expand to an rvalue.
+	(SET_MSYMBOL_VALUE_ADDRESS): New macro.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.h (struct minimal_symbol) <mginfo>: Rename from ginfo.
 	(MSYMBOL_VALUE, MSYMBOL_VALUE_ADDRESS, MSYMBOL_VALUE_BYTES)
 	(MSYMBOL_BLOCK_VALUE, MSYMBOL_VALUE_CHAIN, MSYMBOL_LANGUAGE)

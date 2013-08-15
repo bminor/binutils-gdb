@@ -805,8 +805,9 @@ objfile_relocate1 (struct objfile *objfile,
 
     ALL_OBJFILE_MSYMBOLS (objfile, msym)
       if (MSYMBOL_SECTION (msym) >= 0)
-	MSYMBOL_VALUE_ADDRESS (msym) += ANOFFSET (delta,
-						  MSYMBOL_SECTION (msym));
+	SET_MSYMBOL_VALUE_ADDRESS (msym, (MSYMBOL_VALUE_ADDRESS (msym)
+					  + ANOFFSET (delta,
+						      MSYMBOL_SECTION (msym))));
   }
   /* Relocating different sections by different amounts may cause the symbols
      to be out of order.  */

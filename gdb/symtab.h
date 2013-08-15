@@ -391,7 +391,9 @@ struct minimal_symbol
 #define MSYMBOL_TYPE(msymbol)		(msymbol)->type
 
 #define MSYMBOL_VALUE(symbol)		(symbol)->mginfo.value.ivalue
-#define MSYMBOL_VALUE_ADDRESS(symbol)	(symbol)->mginfo.value.address
+#define MSYMBOL_VALUE_ADDRESS(symbol)	((symbol)->mginfo.value.address + 0)
+#define SET_MSYMBOL_VALUE_ADDRESS(symbol, new_value) \
+  ((symbol)->mginfo.value.address = (new_value))
 #define MSYMBOL_VALUE_BYTES(symbol)	(symbol)->mginfo.value.bytes
 #define MSYMBOL_BLOCK_VALUE(symbol)	(symbol)->mginfo.value.block
 #define MSYMBOL_VALUE_CHAIN(symbol)	(symbol)->mginfo.value.chain

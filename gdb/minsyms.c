@@ -944,7 +944,7 @@ prim_record_minimal_symbol_full (const char *name, int name_len, int copy_name,
   MSYMBOL_SET_LANGUAGE (msymbol, language_auto, &objfile->objfile_obstack);
   MSYMBOL_SET_NAMES (msymbol, name, name_len, copy_name, objfile);
 
-  MSYMBOL_VALUE_ADDRESS (msymbol) = address;
+  SET_MSYMBOL_VALUE_ADDRESS (msymbol, address);
   MSYMBOL_SECTION (msymbol) = section;
 
   MSYMBOL_TYPE (msymbol) = ms_type;
