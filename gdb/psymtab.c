@@ -226,7 +226,7 @@ static struct partial_symtab *
 find_pc_sect_psymtab_closer (struct objfile *objfile,
 			     CORE_ADDR pc, struct obj_section *section,
 			     struct partial_symtab *pst,
-			     struct minimal_symbol *msymbol)
+			     struct bound_minimal_symbol msymbol)
 {
   struct partial_symtab *tpst;
   struct partial_symtab *best_pst = pst;
@@ -242,7 +242,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
       section == 0)	/* Can't validate section this way.  */
     return pst;
 
-  if (msymbol == NULL)
+  if (msymbol.minsym == NULL)
     return (pst);
 
   /* The code range of partial symtabs sometimes overlap, so, in
@@ -266,7 +266,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 	  p = find_pc_sect_psymbol (objfile, tpst, pc, section);
 	  if (p != NULL
 	      && SYMBOL_VALUE_ADDRESS (p)
-	      == MSYMBOL_VALUE_ADDRESS (msymbol))
+	      == BMSYMBOL_VALUE_ADDRESS (msymbol))
 	    return tpst;
 
 	  /* Also accept the textlow value of a psymtab as a
@@ -305,7 +305,7 @@ find_pc_sect_psymtab_closer (struct objfile *objfile,
 static struct partial_symtab *
 find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 		      struct obj_section *section,
-		      struct minimal_symbol *msymbol)
+		      struct bound_minimal_symbol msymbol)
 {
   struct partial_symtab *pst;
 
@@ -320,7 +320,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 	  /* FIXME: addrmaps currently do not handle overlayed sections,
 	     so fall back to the non-addrmap case if we're debugging
 	     overlays and the addrmap returned the wrong section.  */
-	  if (overlay_debugging && msymbol && section)
+	  if (overlay_debugging && msymbol.minsym && section)
 	    {
 	      struct partial_symbol *p;
 
@@ -331,7 +331,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 	      p = find_pc_sect_psymbol (objfile, pst, pc, section);
 	      if (!p
 		  || SYMBOL_VALUE_ADDRESS (p)
-		  != MSYMBOL_VALUE_ADDRESS (msymbol))
+		  != BMSYMBOL_VALUE_ADDRESS (msymbol))
 		goto next;
 	    }
 
@@ -373,7 +373,7 @@ find_pc_sect_psymtab (struct objfile *objfile, CORE_ADDR pc,
 
 static struct symtab *
 find_pc_sect_symtab_from_partial (struct objfile *objfile,
-				  struct minimal_symbol *msymbol,
+				  struct bound_minimal_symbol msymbol,
 				  CORE_ADDR pc, struct obj_section *section,
 				  int warn_if_readin)
 {

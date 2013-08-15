@@ -47,6 +47,7 @@
 #include "inline-frame.h"
 #include "linespec.h"
 #include "cli/cli-utils.h"
+#include "objfiles.h"
 
 #include "gdb_assert.h"
 #include <ctype.h>
@@ -1076,7 +1077,7 @@ find_frame_funname (struct frame_info *frame, char **funname,
 	memset (&msymbol, 0, sizeof (msymbol));
 
       if (msymbol.minsym != NULL
-	  && (MSYMBOL_VALUE_ADDRESS (msymbol.minsym)
+	  && (BMSYMBOL_VALUE_ADDRESS (msymbol)
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
 	{
 	  /* We also don't know anything about the function besides

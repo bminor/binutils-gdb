@@ -605,7 +605,7 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
 			  : MSYMBOL_PRINT_NAME (msym.minsym)));
 			
 	  }
-	return MSYMBOL_VALUE_ADDRESS (msym.minsym);
+	return BMSYMBOL_VALUE_ADDRESS (msym);
       }
 
     case FIELD_LOC_KIND_PHYSADDR:

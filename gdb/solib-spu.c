@@ -418,7 +418,7 @@ spu_enable_break (struct objfile *objfile)
   /* Place a solib_event breakpoint on the symbol.  */
   if (spe_event_sym.minsym)
     {
-      CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (spe_event_sym.minsym);
+      CORE_ADDR addr = BMSYMBOL_VALUE_ADDRESS (spe_event_sym);
 
       addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (), addr,
                                                  &current_target);
@@ -448,7 +448,7 @@ ocl_enable_break (struct objfile *objfile)
   if (event_sym.minsym && addr_sym.minsym)
     {
       /* Place a solib_event breakpoint on the symbol.  */
-      CORE_ADDR event_addr = MSYMBOL_VALUE_ADDRESS (event_sym.minsym);
+      CORE_ADDR event_addr = BMSYMBOL_VALUE_ADDRESS (event_sym);
       create_solib_event_breakpoint (get_objfile_arch (objfile), event_addr);
 
       /* Store the address of the symbol that will point to OpenCL program
@@ -459,7 +459,7 @@ ocl_enable_break (struct objfile *objfile)
 		  &objfile->objfile_obstack,
 		  objfile->sections_end - objfile->sections,
 		  CORE_ADDR);
-	  *ocl_program_addr_base = MSYMBOL_VALUE_ADDRESS (addr_sym.minsym);
+	  *ocl_program_addr_base = BMSYMBOL_VALUE_ADDRESS (addr_sym);
 	  set_objfile_data (objfile, ocl_program_data_key,
 			    ocl_program_addr_base);
         }

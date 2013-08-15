@@ -973,7 +973,7 @@ hppa64_hpux_search_dummy_call_sequence (struct gdbarch *gdbarch, CORE_ADDR pc,
       gdb_byte buf[2 * HPPA_INSN_SIZE];
       int offset;
 
-      find_pc_partial_function (MSYMBOL_VALUE_ADDRESS (msym), &name,
+      find_pc_partial_function (MSYMBOL_VALUE_ADDRESS (obj, msym), &name,
       				&begin, &end);
 
       if (name == NULL || begin == 0 || end == 0)
@@ -1096,10 +1096,10 @@ hppa_hpux_find_dummy_bpaddr (CORE_ADDR addr)
       find_pc_partial_function (addr, NULL, &func, NULL);
       ALL_OBJFILE_MSYMBOLS (sec->objfile, msym)
 	{
-	  u = find_unwind_entry (MSYMBOL_VALUE_ADDRESS (msym));
-	  if (func != MSYMBOL_VALUE_ADDRESS (msym) 
+	  u = find_unwind_entry (MSYMBOL_VALUE_ADDRESS (sec->objfile, msym));
+	  if (func != MSYMBOL_VALUE_ADDRESS (sec->objfile, msym) 
 	      && (!u || u->stub_unwind.stub_type == 0))
-	    return MSYMBOL_VALUE_ADDRESS (msym);
+	    return MSYMBOL_VALUE_ADDRESS (sec->objfile, msym);
 	}
     }
 

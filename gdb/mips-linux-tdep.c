@@ -826,7 +826,7 @@ mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   resolver = lookup_minimal_symbol ("__dl_runtime_resolve", NULL, NULL);
 
-  if (resolver.minsym && MSYMBOL_VALUE_ADDRESS (resolver.minsym) == pc)
+  if (resolver.minsym && BMSYMBOL_VALUE_ADDRESS (resolver) == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 
   return glibc_skip_solib_resolver (gdbarch, pc);

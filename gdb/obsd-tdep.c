@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "frame.h"
 #include "symtab.h"
+#include "objfiles.h"
 
 #include "obsd-tdep.h"
 
@@ -29,7 +30,7 @@ obsd_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol("_dl_bind", NULL, NULL);
-  if (msym.minsym && MSYMBOL_VALUE_ADDRESS (msym.minsym) == pc)
+  if (msym.minsym && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
     return frame_unwind_caller_pc (get_current_frame ());
   else
     return find_solib_trampoline_target (get_current_frame (), pc);

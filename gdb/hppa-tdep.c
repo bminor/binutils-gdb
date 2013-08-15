@@ -166,7 +166,7 @@ hppa_symbol_address(const char *sym)
 
   minsym = lookup_minimal_symbol (sym, NULL, NULL);
   if (minsym.minsym)
-    return MSYMBOL_VALUE_ADDRESS (minsym.minsym);
+    return BMSYMBOL_VALUE_ADDRESS (minsym);
   else
     return (CORE_ADDR)-1;
 }

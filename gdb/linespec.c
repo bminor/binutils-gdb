@@ -3417,7 +3417,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   CORE_ADDR pc;
   struct symtab_and_line sal;
 
-  sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (msymbol),
+  sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
 			   (struct obj_section *) 0, 0);
   sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 
@@ -3498,6 +3498,9 @@ add_minsym (struct minimal_symbol *minsym, void *d)
   struct collect_minsyms *info = d;
   bound_minimal_symbol_d mo;
 
+  mo.minsym = minsym;
+  mo.objfile = info->objfile;
+
   /* Exclude data symbols when looking for breakpoint locations.   */
   if (!info->list_mode)
     switch (minsym->type)
@@ -3513,16 +3516,14 @@ add_minsym (struct minimal_symbol *minsym, void *d)
 	       before we decide to discard it.  */
 	    struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
 	    CORE_ADDR addr = gdbarch_convert_from_func_ptr_addr
-			       (gdbarch, MSYMBOL_VALUE_ADDRESS (minsym),
+			       (gdbarch, BMSYMBOL_VALUE_ADDRESS (mo),
 				&current_target);
 
-	    if (addr == MSYMBOL_VALUE_ADDRESS (minsym))
+	    if (addr == BMSYMBOL_VALUE_ADDRESS (mo))
 	      return;
 	  }
       }
 
-  mo.minsym = minsym;
-  mo.objfile = info->objfile;
   VEC_safe_push (bound_minimal_symbol_d, info->msyms, &mo);
 }
 

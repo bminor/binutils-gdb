@@ -1131,8 +1131,7 @@ gnuv3_get_typeid (struct value *value)
       if (minsym.minsym == NULL)
 	error (_("could not find typeinfo symbol for '%s'"), typename);
 
-      result = value_at_lazy (typeinfo_type,
-			      MSYMBOL_VALUE_ADDRESS (minsym.minsym));
+      result = value_at_lazy (typeinfo_type, BMSYMBOL_VALUE_ADDRESS (minsym));
     }
 
   do_cleanups (cleanup);
@@ -1236,7 +1235,7 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
   if (fn_sym.minsym == NULL)
     return 0;
 
-  method_stop_pc = MSYMBOL_VALUE_ADDRESS (fn_sym.minsym);
+  method_stop_pc = BMSYMBOL_VALUE_ADDRESS (fn_sym);
 
   /* Some targets have minimal symbols pointing to function descriptors
      (powerpc 64 for example).  Make sure to retrieve the address

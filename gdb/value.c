@@ -2758,7 +2758,7 @@ value_static_field (struct type *type, int fieldno)
 	  else
 	    {
 	      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
-				      MSYMBOL_VALUE_ADDRESS (msym.minsym));
+				      BMSYMBOL_VALUE_ADDRESS (msym));
 	    }
 	}
       else
@@ -2974,7 +2974,7 @@ value_fn_field (struct value **arg1p, struct fn_field *f,
 
       set_value_address (v,
 	gdbarch_convert_from_func_ptr_addr
-	   (gdbarch, MSYMBOL_VALUE_ADDRESS (msym.minsym), &current_target));
+	   (gdbarch, BMSYMBOL_VALUE_ADDRESS (msym), &current_target));
     }
 
   if (arg1p)

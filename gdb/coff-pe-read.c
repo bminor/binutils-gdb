@@ -244,7 +244,7 @@ add_pe_forwarded_sym (const char *sym_name, const char *forward_dll_name,
 			" \"%s\" in dll \"%s\", pointing to \"%s\"\n"),
 			sym_name, dll_name, forward_qualified_name);
 
-  vma = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
+  vma = BMSYMBOL_VALUE_ADDRESS (msymbol);
   msymtype = MSYMBOL_TYPE (msymbol.minsym);
   section = MSYMBOL_SECTION (msymbol.minsym);
 

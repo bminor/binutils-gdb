@@ -21,6 +21,7 @@
 #include "frame.h"
 #include "symtab.h"
 #include "inferior.h"
+#include "objfiles.h"
 
 #include "sol2-tdep.h"
 
@@ -30,7 +31,7 @@ sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol("elf_bndr", NULL, NULL);
-  if (msym.minsym && MSYMBOL_VALUE_ADDRESS (msym.minsym) == pc)
+  if (msym.minsym && BMSYMBOL_VALUE_ADDRESS (msym) == pc)
     return frame_unwind_caller_pc (get_current_frame ());
 
   return 0;

@@ -40,6 +40,7 @@
 #include "reggroups.h"
 #include "prologue-value.h"
 #include "target.h"
+#include "objfiles.h"
 
 
 /* The m32c tdep structure.  */
@@ -2247,8 +2248,7 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     "its address."));
-	  read_memory (MSYMBOL_VALUE_ADDRESS (mem0.minsym), readbuf,
-		       valtype_len);
+	  read_memory (BMSYMBOL_VALUE_ADDRESS (mem0), readbuf, valtype_len);
 	}
     }
 
@@ -2280,8 +2280,7 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     " its address."));
-	  write_memory (MSYMBOL_VALUE_ADDRESS (mem0.minsym), writebuf,
-			valtype_len);
+	  write_memory (BMSYMBOL_VALUE_ADDRESS (mem0), writebuf, valtype_len);
 	}
     }
 
@@ -2507,7 +2506,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       else
 	{
 	  /* The trampoline's address is our pointer.  */
-	  addr = MSYMBOL_VALUE_ADDRESS (tramp_msym.minsym);
+	  addr = BMSYMBOL_VALUE_ADDRESS (tramp_msym);
 	}
     }
 
@@ -2560,7 +2559,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
               /* If we do have such a symbol, return its value as the
                  function's true address.  */
               if (func_msym.minsym)
-                ptr = MSYMBOL_VALUE_ADDRESS (func_msym.minsym);
+                ptr = BMSYMBOL_VALUE_ADDRESS (func_msym);
             }
         }
       else

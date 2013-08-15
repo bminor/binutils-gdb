@@ -36,6 +36,7 @@
 #include "regcache.h"
 #include "trad-frame.h"
 #include "dis-asm.h"
+#include "objfiles.h"
 
 #include "gdb_assert.h"
 
@@ -844,8 +845,7 @@ m32r_frame_this_id (struct frame_info *this_frame,
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);
-  if (msym_stack.minsym
-      && info->base == MSYMBOL_VALUE_ADDRESS (msym_stack.minsym))
+  if (msym_stack.minsym && info->base == BMSYMBOL_VALUE_ADDRESS (msym_stack))
     return;
 
   /* Hopefully the prologue analysis either correctly determined the

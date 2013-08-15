@@ -38,6 +38,7 @@
 #include "cp-abi.h"
 #include "cp-support.h"
 #include "exceptions.h"
+#include "objfiles.h"
 
 
 /* Decorations for Pascal.  */
@@ -227,7 +228,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	  /* If 'symbol_print' is set, we did the work above.  */
 	  if (!options->symbol_print
 	      && (msymbol.minsym != NULL)
-	      && (vt_address == MSYMBOL_VALUE_ADDRESS (msymbol.minsym)))
+	      && (vt_address == BMSYMBOL_VALUE_ADDRESS (msymbol)))
 	    {
 	      if (want_space)
 		fputs_filtered (" ", stream);

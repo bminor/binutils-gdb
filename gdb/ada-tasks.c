@@ -859,7 +859,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_ARRAY;
-      data->known_tasks_addr = MSYMBOL_VALUE_ADDRESS (msym.minsym);
+      data->known_tasks_addr = BMSYMBOL_VALUE_ADDRESS (msym);
 
       /* Try to get pointer type and array length from the symtab.  */
       sym = lookup_symbol_in_language (KNOWN_TASKS_NAME, NULL, VAR_DOMAIN,
@@ -904,7 +904,7 @@ ada_tasks_inferior_data_sniffer (struct ada_tasks_inferior_data *data)
   if (msym.minsym != NULL)
     {
       data->known_tasks_kind = ADA_TASKS_LIST;
-      data->known_tasks_addr = MSYMBOL_VALUE_ADDRESS (msym.minsym);
+      data->known_tasks_addr = BMSYMBOL_VALUE_ADDRESS (msym);
       data->known_tasks_length = 1;
 
       sym = lookup_symbol_in_language (KNOWN_TASKS_LIST, NULL, VAR_DOMAIN,

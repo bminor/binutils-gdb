@@ -292,7 +292,7 @@ struct quick_symbol_functions
      symbol table that contains a symbol whose address is closest to
      PC.  */
   struct symtab *(*find_pc_sect_symtab) (struct objfile *objfile,
-					 struct minimal_symbol *msymbol,
+					 struct bound_minimal_symbol msymbol,
 					 CORE_ADDR pc,
 					 struct obj_section *section,
 					 int warn_if_readin);

@@ -574,7 +574,7 @@ inferior_has_bug (const char *ver_symbol, int ver_major_min, int ver_minor_min)
   if (version_msym.minsym == NULL)
     return 0;
 
-  version_addr = MSYMBOL_VALUE_ADDRESS (version_msym.minsym);
+  version_addr = BMSYMBOL_VALUE_ADDRESS (version_msym);
   got = target_read_string (version_addr, &version, 32, &err);
   if (err == 0 && memchr (version, 0, got) == &version[got -1])
     {

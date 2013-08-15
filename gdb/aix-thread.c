@@ -49,6 +49,7 @@
 #include "ppc-tdep.h"
 #include <string.h>
 #include "observer.h"
+#include "objfiles.h"
 
 #include <procinfo.h>
 #include <sys/types.h>
@@ -313,7 +314,7 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 		fprintf_unfiltered (gdb_stdlog, " returning PDC_FAILURE\n");
 	      return PDC_FAILURE;
 	    }
-	  symbols[i].addr = MSYMBOL_VALUE_ADDRESS (ms.minsym);
+	  symbols[i].addr = BMSYMBOL_VALUE_ADDRESS (ms);
 	}
       if (debug_aix_thread)
 	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].addr = %s\n",
@@ -912,7 +913,7 @@ pd_enable (void)
   ms = lookup_minimal_symbol (stub_name, NULL, NULL);
   if (ms.minsym == NULL)
     return;
-  pd_brk_addr = MSYMBOL_VALUE_ADDRESS (ms.minsym);
+  pd_brk_addr = BMSYMBOL_VALUE_ADDRESS (ms);
   if (!create_thread_event_breakpoint (target_gdbarch (), pd_brk_addr))
     return;
 

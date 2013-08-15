@@ -572,7 +572,7 @@ lm_base (void)
 
   if (got_sym.minsym != 0)
     {
-      addr = MSYMBOL_VALUE_ADDRESS (got_sym.minsym);
+      addr = BMSYMBOL_VALUE_ADDRESS (got_sym);
       if (solib_dsbt_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "lm_base: get addr %x by _GLOBAL_OFFSET_TABLE_.\n",

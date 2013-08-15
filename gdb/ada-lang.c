@@ -922,7 +922,7 @@ ada_main_name (void)
       CORE_ADDR main_program_name_addr;
       int err_code;
 
-      main_program_name_addr = MSYMBOL_VALUE_ADDRESS (msym.minsym);
+      main_program_name_addr = BMSYMBOL_VALUE_ADDRESS (msym);
       if (main_program_name_addr == 0)
         error (_("Invalid address for Ada main program name."));
 
@@ -12673,7 +12673,7 @@ ada_add_standard_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 	  if (msymbol.minsym != NULL)
 	    {
 	      struct ada_exc_info info
-		= {standard_exc[i], MSYMBOL_VALUE_ADDRESS (msymbol.minsym)};
+		= {standard_exc[i], BMSYMBOL_VALUE_ADDRESS (msymbol)};
 
 	      VEC_safe_push (ada_exc_info, *exceptions, &info);
 	    }

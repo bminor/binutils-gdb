@@ -67,6 +67,7 @@
 #include "buffer.h"
 #include "target-descriptions.h"
 #include "filestuff.h"
+#include "objfiles.h"
 
 #ifndef SPUFS_MAGIC
 #define SPUFS_MAGIC 0x23c9b64e
@@ -5038,8 +5039,7 @@ get_signo (const char *name)
   if (ms.minsym == NULL)
     return 0;
 
-  if (target_read_memory (MSYMBOL_VALUE_ADDRESS (ms.minsym),
-			  (gdb_byte *) &signo,
+  if (target_read_memory (BMSYMBOL_VALUE_ADDRESS (ms), (gdb_byte *) &signo,
 			  sizeof (signo)) != 0)
     return 0;
 

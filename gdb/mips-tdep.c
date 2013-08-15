@@ -7635,7 +7635,7 @@ mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
      which jumps to foo.  */
   msym = lookup_minimal_symbol_by_pc (pc);
   if (msym.minsym == NULL
-      || MSYMBOL_VALUE_ADDRESS (msym.minsym) != pc
+      || BMSYMBOL_VALUE_ADDRESS (msym) != pc
       || MSYMBOL_LINKAGE_NAME (msym.minsym) == NULL
       || strncmp (MSYMBOL_LINKAGE_NAME (msym.minsym), ".pic.", 5) != 0)
     return 0;

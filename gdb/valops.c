@@ -160,7 +160,7 @@ find_function_in_inferior (const char *name, struct objfile **objf_p)
 	  type = lookup_pointer_type (builtin_type (gdbarch)->builtin_char);
 	  type = lookup_function_type (type);
 	  type = lookup_pointer_type (type);
-	  maddr = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
+	  maddr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
 	  if (objf_p)
 	    *objf_p = objfile;

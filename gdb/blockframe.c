@@ -104,7 +104,7 @@ get_pc_function_start (CORE_ADDR pc)
   msymbol = lookup_minimal_symbol_by_pc (pc);
   if (msymbol.minsym)
     {
-      CORE_ADDR fstart = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
+      CORE_ADDR fstart = BMSYMBOL_VALUE_ADDRESS (msymbol);
 
       if (find_pc_section (fstart))
 	return fstart;
@@ -221,7 +221,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
   ALL_OBJFILES (objfile)
   {
     if (objfile->sf)
-      symtab = objfile->sf->qf->find_pc_sect_symtab (objfile, msymbol.minsym,
+      symtab = objfile->sf->qf->find_pc_sect_symtab (objfile, msymbol,
 						     mapped_pc, section, 0);
     if (symtab)
       break;
@@ -235,7 +235,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
       if (f != NULL
 	  && (msymbol.minsym == NULL
 	      || (BLOCK_START (SYMBOL_BLOCK_VALUE (f))
-		  >= MSYMBOL_VALUE_ADDRESS (msymbol.minsym))))
+		  >= BMSYMBOL_VALUE_ADDRESS (msymbol))))
 	{
 	  cache_pc_function_low = BLOCK_START (SYMBOL_BLOCK_VALUE (f));
 	  cache_pc_function_high = BLOCK_END (SYMBOL_BLOCK_VALUE (f));
@@ -269,7 +269,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
       return 0;
     }
 
-  cache_pc_function_low = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
+  cache_pc_function_low = BMSYMBOL_VALUE_ADDRESS (msymbol);
   cache_pc_function_name = MSYMBOL_LINKAGE_NAME (msymbol.minsym);
   cache_pc_function_section = section;
   cache_pc_function_is_gnu_ifunc = (MSYMBOL_TYPE (msymbol.minsym)

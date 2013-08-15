@@ -251,7 +251,8 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	  break;
 	}
       fprintf_filtered (outfile, "[%2d] %c ", index, ms_type);
-      fputs_filtered (paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (msymbol)),
+      fputs_filtered (paddress (gdbarch, MSYMBOL_VALUE_ADDRESS (objfile,
+								msymbol)),
 		      outfile);
       fprintf_filtered (outfile, " %s", MSYMBOL_LINKAGE_NAME (msymbol));
       if (section)

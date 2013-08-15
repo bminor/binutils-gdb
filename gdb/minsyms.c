@@ -407,7 +407,7 @@ lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
 	       msymbol != NULL;
 	       msymbol = msymbol->hash_next)
 	    {
-	      if (MSYMBOL_VALUE_ADDRESS (msymbol) == pc
+	      if (MSYMBOL_VALUE_ADDRESS (objfile, msymbol) == pc
 		  && strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0)
 		return msymbol;
 	    }
@@ -454,6 +454,28 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
   return found_symbol;
 }
 
+/* A helper function that makes *PC section-relative.  This searches
+   the sections of OBJFILE and if *PC is in a section, it subtracts
+   the section offset and returns true.  Otherwise it returns
+   false.  */
+
+static int
+frob_address (struct objfile *objfile, CORE_ADDR *pc)
+{
+  struct obj_section *iter;
+
+  ALL_OBJFILE_OSECTIONS (objfile, iter)
+    {
+      if (*pc >= obj_section_addr (iter) && *pc < obj_section_endaddr (iter))
+	{
+	  *pc -= obj_section_offset (iter);
+	  return 1;
+	}
+    }
+
+  return 0;
+}
+
 /* Search through the minimal symbol table for each objfile and find
    the symbol whose address is the largest address that is still less
    than or equal to PC, and matches SECTION (which is not NULL).
@@ -470,7 +492,7 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
    Otherwise prefer mst_text symbols.  */
 
 static struct bound_minimal_symbol
-lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
+lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc_in,
 				       struct obj_section *section,
 				       int want_trampoline)
 {
@@ -502,6 +524,8 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
        objfile != NULL;
        objfile = objfile_separate_debug_iterate (section->objfile, objfile))
     {
+      CORE_ADDR pc = pc_in;
+
       /* If this objfile has a minimal symbol table, go search it using
          a binary search.  Note that a minimal symbol table always consists
          of at least two symbols, a "real" symbol and the terminating
@@ -534,16 +558,16 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 
 	     Warning: this code is trickier than it would appear at first.  */
 
-	  /* Should also require that pc is <= end of objfile.  FIXME!  */
-	  if (pc >= MSYMBOL_VALUE_ADDRESS (&msymbol[lo]))
+	  if (frob_address (objfile, &pc)
+	      && pc >= MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[lo]))
 	    {
-	      while (MSYMBOL_VALUE_ADDRESS (&msymbol[hi]) > pc)
+	      while (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi]) > pc)
 		{
 		  /* pc is still strictly less than highest address.  */
 		  /* Note "new" will always be >= lo.  */
 		  new = (lo + hi) / 2;
-		  if ((MSYMBOL_VALUE_ADDRESS (&msymbol[new]) >= pc) ||
-		      (lo == new))
+		  if ((MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[new]) >= pc)
+		      || (lo == new))
 		    {
 		      hi = new;
 		    }
@@ -557,8 +581,8 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 	         hi to point to the last one.  That way we can find the
 	         right symbol if it has an index greater than hi.  */
 	      while (hi < objfile->minimal_symbol_count - 1
-		     && (MSYMBOL_VALUE_ADDRESS (&msymbol[hi])
-			 == MSYMBOL_VALUE_ADDRESS (&msymbol[hi + 1])))
+		     && (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi])
+			 == MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi + 1])))
 		hi++;
 
 	      /* Skip various undesirable symbols.  */
@@ -606,8 +630,8 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 		      && MSYMBOL_TYPE (&msymbol[hi - 1]) == want_type
 		      && (MSYMBOL_SIZE (&msymbol[hi])
 			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
-		      && (MSYMBOL_VALUE_ADDRESS (&msymbol[hi])
-			  == MSYMBOL_VALUE_ADDRESS (&msymbol[hi - 1]))
+		      && (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi])
+			  == MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi - 1]))
 		      && (MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi])
 			  == MSYMBOL_OBJ_SECTION (objfile, &msymbol[hi - 1])))
 		    {
@@ -636,9 +660,9 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 		     the cancellable variants, but both have sizes.  */
 		  if (hi > 0
 		      && MSYMBOL_SIZE (&msymbol[hi]) != 0
-		      && pc >= (MSYMBOL_VALUE_ADDRESS (&msymbol[hi])
+		      && pc >= (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi])
 				+ MSYMBOL_SIZE (&msymbol[hi]))
-		      && pc < (MSYMBOL_VALUE_ADDRESS (&msymbol[hi - 1])
+		      && pc < (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi - 1])
 			       + MSYMBOL_SIZE (&msymbol[hi - 1])))
 		    {
 		      hi--;
@@ -668,7 +692,7 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 
 	      if (hi >= 0
 		  && MSYMBOL_SIZE (&msymbol[hi]) != 0
-		  && pc >= (MSYMBOL_VALUE_ADDRESS (&msymbol[hi])
+		  && pc >= (MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi])
 			    + MSYMBOL_SIZE (&msymbol[hi])))
 		{
 		  if (best_zero_sized != -1)
@@ -684,8 +708,8 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 
 	      if (hi >= 0
 		  && ((best_symbol == NULL) ||
-		      (MSYMBOL_VALUE_ADDRESS (best_symbol) <
-		       MSYMBOL_VALUE_ADDRESS (&msymbol[hi]))))
+		      (MSYMBOL_VALUE_RAW_ADDRESS (best_symbol) <
+		       MSYMBOL_VALUE_RAW_ADDRESS (&msymbol[hi]))))
 		{
 		  best_symbol = &msymbol[hi];
 		  best_objfile = objfile;
@@ -981,11 +1005,11 @@ compare_minimal_symbols (const void *fn1p, const void *fn2p)
   fn1 = (const struct minimal_symbol *) fn1p;
   fn2 = (const struct minimal_symbol *) fn2p;
 
-  if (MSYMBOL_VALUE_ADDRESS (fn1) < MSYMBOL_VALUE_ADDRESS (fn2))
+  if (MSYMBOL_VALUE_RAW_ADDRESS (fn1) < MSYMBOL_VALUE_RAW_ADDRESS (fn2))
     {
       return (-1);		/* addr 1 is less than addr 2.  */
     }
-  else if (MSYMBOL_VALUE_ADDRESS (fn1) > MSYMBOL_VALUE_ADDRESS (fn2))
+  else if (MSYMBOL_VALUE_RAW_ADDRESS (fn1) > MSYMBOL_VALUE_RAW_ADDRESS (fn2))
     {
       return (1);		/* addr 1 is greater than addr 2.  */
     }
@@ -1085,8 +1109,9 @@ compact_minimal_symbols (struct minimal_symbol *msymbol, int mcount,
       copyfrom = copyto = msymbol;
       while (copyfrom < msymbol + mcount - 1)
 	{
-	  if (MSYMBOL_VALUE_ADDRESS (copyfrom)
-	      == MSYMBOL_VALUE_ADDRESS ((copyfrom + 1))
+	  if (MSYMBOL_VALUE_RAW_ADDRESS (copyfrom)
+	      == MSYMBOL_VALUE_RAW_ADDRESS ((copyfrom + 1))
+	      && MSYMBOL_SECTION (copyfrom) == MSYMBOL_SECTION (copyfrom + 1)
 	      && strcmp (MSYMBOL_LINKAGE_NAME (copyfrom),
 			 MSYMBOL_LINKAGE_NAME ((copyfrom + 1))) == 0)
 	    {
@@ -1326,7 +1351,7 @@ find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
 	    || MSYMBOL_TYPE (msymbol) == mst_text_gnu_ifunc)
 	    && strcmp (MSYMBOL_LINKAGE_NAME (msymbol),
 		       MSYMBOL_LINKAGE_NAME (tsymbol)) == 0)
-	  return MSYMBOL_VALUE_ADDRESS (msymbol);
+	  return MSYMBOL_VALUE_ADDRESS (objfile, msymbol);
 
 	/* Also handle minimal symbols pointing to function descriptors.  */
 	if (MSYMBOL_TYPE (msymbol) == mst_data
@@ -1337,11 +1362,11 @@ find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
 
 	    func = gdbarch_convert_from_func_ptr_addr
 		    (get_objfile_arch (objfile),
-		     MSYMBOL_VALUE_ADDRESS (msymbol),
+		     MSYMBOL_VALUE_ADDRESS (objfile, msymbol),
 		     &current_target);
 
 	    /* Ignore data symbols that are not function descriptors.  */
-	    if (func != MSYMBOL_VALUE_ADDRESS (msymbol))
+	    if (func != MSYMBOL_VALUE_ADDRESS (objfile, msymbol))
 	      return func;
 	  }
       }
@@ -1367,7 +1392,7 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
      of the section, as the end of the function.  */
 
   if (MSYMBOL_SIZE (minsym.minsym) != 0)
-    return MSYMBOL_VALUE_ADDRESS (minsym.minsym) + MSYMBOL_SIZE (minsym.minsym);
+    return BMSYMBOL_VALUE_ADDRESS (minsym) + MSYMBOL_SIZE (minsym.minsym);
 
   /* Step over other symbols at this same address, and symbols in
      other sections, to find the next symbol in this section with a
@@ -1377,16 +1402,17 @@ minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
   section = MSYMBOL_SECTION (msymbol);
   for (i = 1; MSYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
     {
-      if (MSYMBOL_VALUE_ADDRESS (msymbol + i) != MSYMBOL_VALUE_ADDRESS (msymbol)
+      if ((MSYMBOL_VALUE_RAW_ADDRESS (msymbol + i)
+	   != MSYMBOL_VALUE_RAW_ADDRESS (msymbol))
 	  && MSYMBOL_SECTION (msymbol + i) == section)
 	break;
     }
 
   obj_section = MSYMBOL_OBJ_SECTION (minsym.objfile, minsym.minsym);
   if (MSYMBOL_LINKAGE_NAME (msymbol + i) != NULL
-      && (MSYMBOL_VALUE_ADDRESS (msymbol + i)
+      && (MSYMBOL_VALUE_ADDRESS (minsym.objfile, msymbol + i)
 	  < obj_section_endaddr (obj_section)))
-    result = MSYMBOL_VALUE_ADDRESS (msymbol + i);
+    result = MSYMBOL_VALUE_ADDRESS (minsym.objfile, msymbol + i);
   else
     /* We got the start address from the last msymbol in the objfile.
        So the end address is the end of the section.  */

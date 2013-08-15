@@ -1276,7 +1276,7 @@ find_objc_msgsend (void)
 	  continue; 
 	}
 
-      methcalls[i].begin = MSYMBOL_VALUE_ADDRESS (func.minsym);
+      methcalls[i].begin = BMSYMBOL_VALUE_ADDRESS (func);
       methcalls[i].end = minimal_symbol_upper_bound (func);
     }
 }

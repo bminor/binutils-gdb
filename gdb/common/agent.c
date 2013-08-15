@@ -23,6 +23,7 @@
 #include "defs.h"
 #include "target.h"
 #include "inferior.h" /* for non_stop */
+#include "objfiles.h"
 #endif
 
 #include <string.h>
@@ -103,7 +104,7 @@ agent_look_up_symbols (void *arg)
 			       (struct objfile *) arg);
 
       if (sym.minsym != NULL)
-	*addrp = MSYMBOL_VALUE_ADDRESS (sym.minsym);
+	*addrp = BMSYMBOL_VALUE_ADDRESS (sym);
       else
 #endif
 	{

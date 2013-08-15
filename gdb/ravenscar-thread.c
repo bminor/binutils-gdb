@@ -30,6 +30,7 @@
 #include "gdbcmd.h"
 #include "top.h"
 #include "regcache.h"
+#include "objfiles.h"
 
 /* If non-null, ravenscar task support is enabled.  */
 static int ravenscar_task_support = 1;
@@ -164,7 +165,7 @@ get_running_thread_id (void)
   if (!object_msym.minsym)
     return 0;
 
-  object_addr = MSYMBOL_VALUE_ADDRESS (object_msym.minsym);
+  object_addr = BMSYMBOL_VALUE_ADDRESS (object_msym);
   object_size = TYPE_LENGTH (builtin_type_void_data_ptr);
   buf_size = object_size;
   buf = alloca (buf_size);

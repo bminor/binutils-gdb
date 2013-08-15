@@ -805,7 +805,7 @@ objfile_relocate1 (struct objfile *objfile,
 
     ALL_OBJFILE_MSYMBOLS (objfile, msym)
       if (MSYMBOL_SECTION (msym) >= 0)
-	SET_MSYMBOL_VALUE_ADDRESS (msym, (MSYMBOL_VALUE_ADDRESS (msym)
+	SET_MSYMBOL_VALUE_ADDRESS (msym, (MSYMBOL_VALUE_ADDRESS (objfile, msym)
 					  + ANOFFSET (delta,
 						      MSYMBOL_SECTION (msym))));
   }

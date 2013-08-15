@@ -1097,7 +1097,7 @@ convert_code_addr_to_desc_addr (CORE_ADDR code_addr, CORE_ADDR *desc_addr)
   if (fn.minsym == NULL)
     return 0;
   /* Found a descriptor.  */
-  (*desc_addr) = MSYMBOL_VALUE_ADDRESS (fn.minsym);
+  (*desc_addr) = BMSYMBOL_VALUE_ADDRESS (fn);
   return 1;
 }
 

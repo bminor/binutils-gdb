@@ -3981,7 +3981,7 @@ recursively_find_pc_sect_symtab (struct symtab *symtab, CORE_ADDR pc)
 
 static struct symtab *
 dw2_find_pc_sect_symtab (struct objfile *objfile,
-			 struct minimal_symbol *msymbol,
+			 struct bound_minimal_symbol msymbol,
 			 CORE_ADDR pc,
 			 struct obj_section *section,
 			 int warn_if_readin)

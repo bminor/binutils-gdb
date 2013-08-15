@@ -817,7 +817,7 @@ elf_locate_base (void)
      conventionally named _r_debug, as a last resort.  */
   msymbol = lookup_minimal_symbol ("_r_debug", NULL, symfile_objfile);
   if (msymbol.minsym != NULL)
-    return MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
+    return BMSYMBOL_VALUE_ADDRESS (msymbol);
 
   /* DT_DEBUG entry not found.  */
   return 0;
@@ -2349,9 +2349,9 @@ enable_break (struct svr4_info *info, int from_tty)
     {
       msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
       if ((msymbol.minsym != NULL)
-	  && (MSYMBOL_VALUE_ADDRESS (msymbol.minsym) != 0))
+	  && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	{
-	  sym_addr = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
+	  sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							 sym_addr,
 							 &current_target);
@@ -2366,9 +2366,9 @@ enable_break (struct svr4_info *info, int from_tty)
 	{
 	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
 	  if ((msymbol.minsym != NULL)
-	      && (MSYMBOL_VALUE_ADDRESS (msymbol.minsym) != 0))
+	      && (BMSYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	    {
-	      sym_addr = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
+	      sym_addr = BMSYMBOL_VALUE_ADDRESS (msymbol);
 	      sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
 							     &current_target);

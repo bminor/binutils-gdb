@@ -573,11 +573,11 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	if (msym == NULL)
 	  error (_("No global symbol \"%s\"."), SYMBOL_LINKAGE_NAME (var));
 	if (overlay_debugging)
-	  addr = symbol_overlayed_address (MSYMBOL_VALUE_ADDRESS (msym),
+	  addr = symbol_overlayed_address (BMSYMBOL_VALUE_ADDRESS (lookup_data.result),
 					   MSYMBOL_OBJ_SECTION (lookup_data.result.objfile,
 								msym));
 	else
-	  addr = MSYMBOL_VALUE_ADDRESS (msym);
+	  addr = BMSYMBOL_VALUE_ADDRESS (lookup_data.result);
 
 	obj_section = MSYMBOL_OBJ_SECTION (lookup_data.result.objfile, msym);
 	if (obj_section

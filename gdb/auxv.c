@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "observer.h"
 #include "filestuff.h"
+#include "objfiles.h"
 
 #include "auxv.h"
 #include "elf/common.h"
@@ -105,7 +106,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
      resides.  DATA_ADDRESS is the inferior value present in
      `_dl_auxv', therefore the real inferior AUXV address.  */
 
-  pointer_address = MSYMBOL_VALUE_ADDRESS (msym.minsym);
+  pointer_address = BMSYMBOL_VALUE_ADDRESS (msym);
 
   /* The location of the _dl_auxv symbol may no longer be correct if
      ld.so runs at a different address than the one present in the
