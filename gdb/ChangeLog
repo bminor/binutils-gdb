@@ -1,3 +1,9 @@
+2013-12-02  Pedro Alves  <palves@redhat.com>
+
+	PR remote/15974
+	* remote-notif.c (handle_notification): Return early if no
+	notification is found.
+
 2013-12-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* common/filestuff.c (fdwalk): Add "defined(RLIMIT_NOFILE)"
