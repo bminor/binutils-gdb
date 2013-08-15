@@ -3243,7 +3243,7 @@ create_overlay_event_breakpoint (void)
 	  bp_objfile_data->overlay_msym = m;
 	}
 
-      addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->overlay_msym);
+      addr = MSYMBOL_VALUE_ADDRESS (bp_objfile_data->overlay_msym);
       b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
                                       bp_overlay_event,
 				      &internal_breakpoint_ops);
@@ -3360,7 +3360,7 @@ create_longjmp_master_breakpoint (void)
 	      bp_objfile_data->longjmp_msym[i] = m;
 	    }
 
-	  addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
+	  addr = MSYMBOL_VALUE_ADDRESS (bp_objfile_data->longjmp_msym[i]);
 	  b = create_internal_breakpoint (gdbarch, addr, bp_longjmp_master,
 					  &internal_breakpoint_ops);
 	  b->addr_string = xstrdup (func_name);
@@ -3415,7 +3415,7 @@ create_std_terminate_master_breakpoint (void)
 	  bp_objfile_data->terminate_msym = m;
 	}
 
-      addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->terminate_msym);
+      addr = MSYMBOL_VALUE_ADDRESS (bp_objfile_data->terminate_msym);
       b = create_internal_breakpoint (get_objfile_arch (objfile), addr,
                                       bp_std_terminate_master,
 				      &internal_breakpoint_ops);
@@ -3515,7 +3515,7 @@ create_exception_master_breakpoint (void)
 	  bp_objfile_data->exception_msym = debug_hook;
 	}
 
-      addr = SYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
+      addr = MSYMBOL_VALUE_ADDRESS (bp_objfile_data->exception_msym);
       addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
 						 &current_target);
       b = create_internal_breakpoint (gdbarch, addr, bp_exception_master,
@@ -9992,7 +9992,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 
 	      msym = lookup_minimal_symbol_by_pc (sal->pc);
 	      if (msym.minsym)
-		sal->section = SYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
+		sal->section = MSYMBOL_OBJ_SECTION (msym.objfile, msym.minsym);
 
 	      do_cleanups (old_chain);
 	    }

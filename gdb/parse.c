@@ -502,8 +502,8 @@ write_exp_msymbol (struct bound_minimal_symbol bound_msym)
   struct objfile *objfile = bound_msym.objfile;
   struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
-  CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (msymbol);
-  struct obj_section *section = SYMBOL_OBJ_SECTION (objfile, msymbol);
+  CORE_ADDR addr = MSYMBOL_VALUE_ADDRESS (msymbol);
+  struct obj_section *section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
   enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
   CORE_ADDR pc;
 
@@ -519,7 +519,7 @@ write_exp_msymbol (struct bound_minimal_symbol bound_msym)
 
       if (ifunc_msym.minsym != NULL
 	  && MSYMBOL_TYPE (ifunc_msym.minsym) == mst_text_gnu_ifunc
-	  && SYMBOL_VALUE_ADDRESS (ifunc_msym.minsym) == pc)
+	  && MSYMBOL_VALUE_ADDRESS (ifunc_msym.minsym) == pc)
 	{
 	  /* A function descriptor has been resolved but PC is still in the
 	     STT_GNU_IFUNC resolver body (such as because inferior does not

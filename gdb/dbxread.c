@@ -1170,7 +1170,7 @@ find_stab_function_addr (char *namestring, const char *filename,
       msym = lookup_minimal_symbol (p, NULL, objfile);
     }
 
-  return msym == NULL ? 0 : SYMBOL_VALUE_ADDRESS (msym);
+  return msym == NULL ? 0 : MSYMBOL_VALUE_ADDRESS (msym);
 }
 
 static void
@@ -2278,7 +2278,7 @@ end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 	}
 
       if (minsym)
-	pst->texthigh = SYMBOL_VALUE_ADDRESS (minsym) + MSYMBOL_SIZE (minsym);
+	pst->texthigh = MSYMBOL_VALUE_ADDRESS (minsym) + MSYMBOL_SIZE (minsym);
 
       last_function_name = NULL;
     }

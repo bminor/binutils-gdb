@@ -719,7 +719,7 @@ gen_var_ref (struct gdbarch *gdbarch, struct agent_expr *ax,
 	  error (_("Couldn't resolve symbol `%s'."), SYMBOL_PRINT_NAME (var));
 
 	/* Push the address of the variable.  */
-	ax_const_l (ax, SYMBOL_VALUE_ADDRESS (msym));
+	ax_const_l (ax, MSYMBOL_VALUE_ADDRESS (msym));
 	value->kind = axs_lvalue_memory;
       }
       break;

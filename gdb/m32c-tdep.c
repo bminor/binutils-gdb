@@ -2247,7 +2247,7 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     "its address."));
-	  read_memory (SYMBOL_VALUE_ADDRESS (mem0), readbuf, valtype_len);
+	  read_memory (MSYMBOL_VALUE_ADDRESS (mem0), readbuf, valtype_len);
 	}
     }
 
@@ -2279,7 +2279,7 @@ m32c_return_value (struct gdbarch *gdbarch,
 	    error (_("The return value is stored in memory at 'mem0', "
 		     "but GDB cannot find\n"
 		     " its address."));
-	  write_memory (SYMBOL_VALUE_ADDRESS (mem0), writebuf, valtype_len);
+	  write_memory (MSYMBOL_VALUE_ADDRESS (mem0), writebuf, valtype_len);
 	}
     }
 
@@ -2461,7 +2461,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
                "couldn't find a symbol at that address, to find trampoline."),
                paddress (gdbarch, addr));
 
-      func_name = SYMBOL_LINKAGE_NAME (func_msym.minsym);
+      func_name = MSYMBOL_LINKAGE_NAME (func_msym.minsym);
       tramp_name = xmalloc (strlen (func_name) + 5);
       strcpy (tramp_name, func_name);
       strcat (tramp_name, ".plt");
@@ -2505,7 +2505,7 @@ m32c_m16c_address_to_pointer (struct gdbarch *gdbarch,
       else
 	{
 	  /* The trampoline's address is our pointer.  */
-	  addr = SYMBOL_VALUE_ADDRESS (tramp_msym);
+	  addr = MSYMBOL_VALUE_ADDRESS (tramp_msym);
 	}
     }
 
@@ -2536,7 +2536,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
 
       if (ptr_msym.minsym)
         {
-          const char *ptr_msym_name = SYMBOL_LINKAGE_NAME (ptr_msym.minsym);
+          const char *ptr_msym_name = MSYMBOL_LINKAGE_NAME (ptr_msym.minsym);
           int len = strlen (ptr_msym_name);
 
           if (len > 4
@@ -2558,7 +2558,7 @@ m32c_m16c_pointer_to_address (struct gdbarch *gdbarch,
               /* If we do have such a symbol, return its value as the
                  function's true address.  */
               if (func_msym)
-                ptr = SYMBOL_VALUE_ADDRESS (func_msym);
+                ptr = MSYMBOL_VALUE_ADDRESS (func_msym);
             }
         }
       else

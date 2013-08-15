@@ -817,7 +817,7 @@ elf_locate_base (void)
      conventionally named _r_debug, as a last resort.  */
   msymbol = lookup_minimal_symbol ("_r_debug", NULL, symfile_objfile);
   if (msymbol != NULL)
-    return SYMBOL_VALUE_ADDRESS (msymbol);
+    return MSYMBOL_VALUE_ADDRESS (msymbol);
 
   /* DT_DEBUG entry not found.  */
   return 0;
@@ -2348,9 +2348,9 @@ enable_break (struct svr4_info *info, int from_tty)
   for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
     {
       msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
-      if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+      if ((msymbol != NULL) && (MSYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	{
-	  sym_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+	  sym_addr = MSYMBOL_VALUE_ADDRESS (msymbol);
 	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							 sym_addr,
 							 &current_target);
@@ -2364,9 +2364,9 @@ enable_break (struct svr4_info *info, int from_tty)
       for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
 	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
-	  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	  if ((msymbol != NULL) && (MSYMBOL_VALUE_ADDRESS (msymbol) != 0))
 	    {
-	      sym_addr = SYMBOL_VALUE_ADDRESS (msymbol);
+	      sym_addr = MSYMBOL_VALUE_ADDRESS (msymbol);
 	      sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
 							     &current_target);

@@ -577,13 +577,13 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	if (msym == NULL)
 	  error (_("No global symbol \"%s\"."), SYMBOL_LINKAGE_NAME (var));
 	if (overlay_debugging)
-	  addr = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (msym),
-					   SYMBOL_OBJ_SECTION (lookup_data.objfile,
-							       msym));
+	  addr = symbol_overlayed_address (MSYMBOL_VALUE_ADDRESS (msym),
+					   MSYMBOL_OBJ_SECTION (lookup_data.objfile,
+								msym));
 	else
-	  addr = SYMBOL_VALUE_ADDRESS (msym);
+	  addr = MSYMBOL_VALUE_ADDRESS (msym);
 
-	obj_section = SYMBOL_OBJ_SECTION (lookup_data.objfile, msym);
+	obj_section = MSYMBOL_OBJ_SECTION (lookup_data.objfile, msym);
 	if (obj_section
 	    && (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
 	  addr = target_translate_tls_address (obj_section->objfile, addr);

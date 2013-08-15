@@ -204,7 +204,7 @@ m68hc11_get_register_info (struct m68hc11_soft_reg *reg, const char *name)
   msymbol = lookup_minimal_symbol (name, NULL, NULL);
   if (msymbol)
     {
-      reg->addr = SYMBOL_VALUE_ADDRESS (msymbol);
+      reg->addr = MSYMBOL_VALUE_ADDRESS (msymbol);
       reg->name = xstrdup (name);
 
       /* Keep track of the address range for soft registers.  */

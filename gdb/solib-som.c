@@ -219,7 +219,7 @@ som_solib_create_inferior_hook (int from_tty)
   if (msymbol == NULL)
     goto keep_going;
 
-  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+  anaddr = MSYMBOL_VALUE_ADDRESS (msymbol);
   store_unsigned_integer (buf, 4, byte_order, ptid_get_pid (inferior_ptid));
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
@@ -251,16 +251,16 @@ Suggest linking with /opt/langtools/lib/end.o.\n\
 GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
-  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+  anaddr = MSYMBOL_VALUE_ADDRESS (msymbol);
   dld_cache.hook.address = anaddr;
 
   /* Grrr, this might not be an export symbol!  We have to find the
      export stub.  */
-  msymbol = hppa_lookup_stub_minimal_symbol (SYMBOL_LINKAGE_NAME (msymbol),
+  msymbol = hppa_lookup_stub_minimal_symbol (MSYMBOL_LINKAGE_NAME (msymbol),
                                              EXPORT);
   if (msymbol != NULL)
     {
-      anaddr = SYMBOL_VALUE (msymbol);
+      anaddr = MSYMBOL_VALUE (msymbol);
       dld_cache.hook_stub.address = anaddr;
     }
   store_unsigned_integer (buf, 4, byte_order, anaddr);
@@ -274,7 +274,7 @@ Suggest linking with /opt/langtools/lib/end.o.\n\
 GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
-  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+  anaddr = MSYMBOL_VALUE_ADDRESS (msymbol);
   status = target_write_memory (anaddr, buf, 4);
 
   /* Now set a shlib_event breakpoint at __d_trap so we can track
@@ -289,7 +289,7 @@ GDB will be unable to track shl_load/shl_unload calls"));
       goto keep_going;
     }
   create_solib_event_breakpoint (target_gdbarch (),
-				 SYMBOL_VALUE_ADDRESS (msymbol));
+				 MSYMBOL_VALUE_ADDRESS (msymbol));
 
   /* We have all the support usually found in end.o, so we can track
      shl_load and shl_unload calls.  */
@@ -305,7 +305,7 @@ keep_going:
       error (_("Unable to find __dld_flags symbol in object file."));
     }
 
-  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+  anaddr = MSYMBOL_VALUE_ADDRESS (msymbol);
 
   /* Read the current contents.  */
   status = target_read_memory (anaddr, buf, 4);
@@ -350,7 +350,7 @@ manpage for methods to privately map shared library text."));
   if (msymbol == NULL)
     error (_("Unable to find _start symbol in object file."));
 
-  anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
+  anaddr = MSYMBOL_VALUE_ADDRESS (msymbol);
 
   /* Make the breakpoint at "_start" a shared library event breakpoint.  */
   create_solib_event_breakpoint (target_gdbarch (), anaddr);
@@ -384,7 +384,7 @@ som_solib_desire_dynamic_linker_symbols (void)
     dld_msymbol = lookup_minimal_symbol ("shl_load", NULL, objfile);
     if (dld_msymbol != NULL)
       {
-	dld_cache.load.address = SYMBOL_VALUE (dld_msymbol);
+	dld_cache.load.address = MSYMBOL_VALUE (dld_msymbol);
 	dld_cache.load.unwind = find_unwind_entry (dld_cache.load.address);
       }
 
@@ -394,10 +394,10 @@ som_solib_desire_dynamic_linker_symbols (void)
       {
 	if (MSYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
 	  {
-	    u = find_unwind_entry (SYMBOL_VALUE (dld_msymbol));
+	    u = find_unwind_entry (MSYMBOL_VALUE (dld_msymbol));
 	    if ((u != NULL) && (u->stub_unwind.stub_type == EXPORT))
 	      {
-		dld_cache.load_stub.address = SYMBOL_VALUE (dld_msymbol);
+		dld_cache.load_stub.address = MSYMBOL_VALUE (dld_msymbol);
 		dld_cache.load_stub.unwind = u;
 	      }
 	  }
@@ -406,7 +406,7 @@ som_solib_desire_dynamic_linker_symbols (void)
     dld_msymbol = lookup_minimal_symbol ("shl_unload", NULL, objfile);
     if (dld_msymbol != NULL)
       {
-	dld_cache.unload.address = SYMBOL_VALUE (dld_msymbol);
+	dld_cache.unload.address = MSYMBOL_VALUE (dld_msymbol);
 	dld_cache.unload.unwind = find_unwind_entry (dld_cache.unload.address);
 
 	/* ??rehrauer: I'm not sure exactly what this is, but it appears
@@ -433,10 +433,10 @@ som_solib_desire_dynamic_linker_symbols (void)
       {
 	if (MSYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
 	  {
-	    u = find_unwind_entry (SYMBOL_VALUE (dld_msymbol));
+	    u = find_unwind_entry (MSYMBOL_VALUE (dld_msymbol));
 	    if ((u != NULL) && (u->stub_unwind.stub_type == EXPORT))
 	      {
-		dld_cache.unload_stub.address = SYMBOL_VALUE (dld_msymbol);
+		dld_cache.unload_stub.address = MSYMBOL_VALUE (dld_msymbol);
 		dld_cache.unload_stub.unwind = u;
 	      }
 	  }
@@ -534,7 +534,7 @@ link_map_start (void)
   sym = lookup_minimal_symbol ("__dld_flags", NULL, NULL);
   if (!sym)
     error (_("Unable to find __dld_flags symbol in object file."));
-  addr = SYMBOL_VALUE_ADDRESS (sym);
+  addr = MSYMBOL_VALUE_ADDRESS (sym);
   read_memory (addr, buf, 4);
   dld_flags = extract_unsigned_integer (buf, 4, byte_order);
   if ((dld_flags & DLD_FLAGS_LISTVALID) == 0)
@@ -551,10 +551,10 @@ link_map_start (void)
 	  error (_("Unable to find dynamic library list."));
 	  return 0;
 	}
-      addr = SYMBOL_VALUE_ADDRESS (sym) - 8;
+      addr = MSYMBOL_VALUE_ADDRESS (sym) - 8;
     }
   else
-    addr = SYMBOL_VALUE_ADDRESS (sym);
+    addr = MSYMBOL_VALUE_ADDRESS (sym);
 
   read_memory (addr, buf, 4);
   addr = extract_unsigned_integer (buf, 4, byte_order);

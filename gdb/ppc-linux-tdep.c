@@ -343,8 +343,8 @@ powerpc_linux_in_dynsym_resolve_code (CORE_ADDR pc)
   /* Check if we are in the resolver.  */
   sym = lookup_minimal_symbol_by_pc (pc);
   if (sym.minsym != NULL
-      && (strcmp (SYMBOL_LINKAGE_NAME (sym.minsym), "__glink") == 0
-	  || strcmp (SYMBOL_LINKAGE_NAME (sym.minsym),
+      && (strcmp (MSYMBOL_LINKAGE_NAME (sym.minsym), "__glink") == 0
+	  || strcmp (MSYMBOL_LINKAGE_NAME (sym.minsym),
 		     "__glink_PLTresolve") == 0))
     return 1;
 
@@ -919,9 +919,9 @@ ppc_elfv2_skip_entrypoint (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (MSYMBOL_TARGET_FLAG_1 (fun.minsym))
     local_entry_offset = 8;
 
-  if (SYMBOL_VALUE_ADDRESS (fun.minsym) <= pc
-      && pc < SYMBOL_VALUE_ADDRESS (fun.minsym) + local_entry_offset)
-    return SYMBOL_VALUE_ADDRESS (fun.minsym) + local_entry_offset;
+  if (MSYMBOL_VALUE_ADDRESS (fun.minsym) <= pc
+      && pc < MSYMBOL_VALUE_ADDRESS (fun.minsym) + local_entry_offset)
+    return MSYMBOL_VALUE_ADDRESS (fun.minsym) + local_entry_offset;
 
   return pc;
 }
@@ -1028,7 +1028,7 @@ ppc_linux_spe_context_lookup (struct objfile *objfile)
     {
       spe_context_objfile = objfile;
       spe_context_lm_addr = svr4_fetch_objfile_link_map (objfile);
-      spe_context_offset = SYMBOL_VALUE_ADDRESS (sym);
+      spe_context_offset = MSYMBOL_VALUE_ADDRESS (sym);
       spe_context_cache_ptid = minus_one_ptid;
       spe_context_cache_address = 0;
       return;

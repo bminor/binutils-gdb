@@ -207,7 +207,7 @@ ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *obj,
     result = PS_NOSYM;
   else
     {
-      *sym_addr = core_addr_to_ps_addr (SYMBOL_VALUE_ADDRESS (ms));
+      *sym_addr = core_addr_to_ps_addr (MSYMBOL_VALUE_ADDRESS (ms));
       result = PS_OK;
     }
 

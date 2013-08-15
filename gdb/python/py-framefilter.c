@@ -1195,7 +1195,7 @@ py_print_frame (PyObject *filter, int flags,
 
 		  msymbol = lookup_minimal_symbol_by_pc (addr);
 		  if (msymbol.minsym != NULL)
-		    function = SYMBOL_PRINT_NAME (msymbol.minsym);
+		    function = MSYMBOL_PRINT_NAME (msymbol.minsym);
 		}
 	      else if (py_func != Py_None)
 		{

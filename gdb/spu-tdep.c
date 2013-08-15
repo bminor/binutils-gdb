@@ -1768,10 +1768,10 @@ spu_get_overlay_table (struct objfile *objfile)
   if (!ovly_buf_table_msym)
     return NULL;
 
-  ovly_table_base = SYMBOL_VALUE_ADDRESS (ovly_table_msym);
+  ovly_table_base = MSYMBOL_VALUE_ADDRESS (ovly_table_msym);
   ovly_table_size = MSYMBOL_SIZE (ovly_table_msym);
 
-  ovly_buf_table_base = SYMBOL_VALUE_ADDRESS (ovly_buf_table_msym);
+  ovly_buf_table_base = MSYMBOL_VALUE_ADDRESS (ovly_buf_table_msym);
   ovly_buf_table_size = MSYMBOL_SIZE (ovly_buf_table_msym);
 
   ovly_table = xmalloc (ovly_table_size);
@@ -1923,8 +1923,8 @@ spu_catch_start (struct objfile *objfile)
 
   /* If we have debugging information, try to use it -- this
      will allow us to properly skip the prologue.  */
-  pc = SYMBOL_VALUE_ADDRESS (minsym);
-  symtab = find_pc_sect_symtab (pc, SYMBOL_OBJ_SECTION (objfile, minsym));
+  pc = MSYMBOL_VALUE_ADDRESS (minsym);
+  symtab = find_pc_sect_symtab (pc, MSYMBOL_OBJ_SECTION (objfile, minsym));
   if (symtab != NULL)
     {
       struct blockvector *bv = BLOCKVECTOR (symtab);
@@ -2001,7 +2001,7 @@ flush_ea_cache (void)
       type = objfile_type (obj)->builtin_void;
       type = lookup_function_type (type);
       type = lookup_pointer_type (type);
-      addr = SYMBOL_VALUE_ADDRESS (msymbol);
+      addr = MSYMBOL_VALUE_ADDRESS (msymbol);
 
       call_function_by_hand (value_from_pointer (type, addr), 0, NULL);
     }

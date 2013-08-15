@@ -285,9 +285,9 @@ locate_base (void)
   CORE_ADDR address = 0;
 
   msymbol = lookup_minimal_symbol (DEBUG_BASE, NULL, symfile_objfile);
-  if ((msymbol != NULL) && (SYMBOL_VALUE_ADDRESS (msymbol) != 0))
+  if ((msymbol != NULL) && (MSYMBOL_VALUE_ADDRESS (msymbol) != 0))
     {
-      address = SYMBOL_VALUE_ADDRESS (msymbol);
+      address = MSYMBOL_VALUE_ADDRESS (msymbol);
     }
   return (address);
 }

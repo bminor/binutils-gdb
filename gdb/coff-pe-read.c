@@ -244,9 +244,9 @@ add_pe_forwarded_sym (const char *sym_name, const char *forward_dll_name,
 			" \"%s\" in dll \"%s\", pointing to \"%s\"\n"),
 			sym_name, dll_name, forward_qualified_name);
 
-  vma = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
+  vma = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
   msymtype = MSYMBOL_TYPE (msymbol.minsym);
-  section = SYMBOL_SECTION (msymbol.minsym);
+  section = MSYMBOL_SECTION (msymbol.minsym);
 
   /* Generate a (hopefully unique) qualified name using the first part
      of the dll name, e.g. KERNEL32!AddAtomA.  This matches the style

@@ -3417,9 +3417,9 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
   CORE_ADDR pc;
   struct symtab_and_line sal;
 
-  sal = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
+  sal = find_pc_sect_line (MSYMBOL_VALUE_ADDRESS (msymbol),
 			   (struct obj_section *) 0, 0);
-  sal.section = SYMBOL_OBJ_SECTION (objfile, msymbol);
+  sal.section = MSYMBOL_OBJ_SECTION (objfile, msymbol);
 
   /* The minimal symbol might point to a function descriptor;
      resolve it to the actual code address instead.  */
@@ -3431,7 +3431,7 @@ minsym_found (struct linespec_state *self, struct objfile *objfile,
     skip_prologue_sal (&sal);
 
   if (maybe_add_address (self->addr_set, objfile->pspace, sal.pc))
-    add_sal_to_sals (self, result, &sal, SYMBOL_NATURAL_NAME (msymbol), 0);
+    add_sal_to_sals (self, result, &sal, MSYMBOL_NATURAL_NAME (msymbol), 0);
 }
 
 /* A helper struct to pass some data through
@@ -3513,10 +3513,10 @@ add_minsym (struct minimal_symbol *minsym, void *d)
 	       before we decide to discard it.  */
 	    struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
 	    CORE_ADDR addr = gdbarch_convert_from_func_ptr_addr
-			       (gdbarch, SYMBOL_VALUE_ADDRESS (minsym),
+			       (gdbarch, MSYMBOL_VALUE_ADDRESS (minsym),
 				&current_target);
 
-	    if (addr == SYMBOL_VALUE_ADDRESS (minsym))
+	    if (addr == MSYMBOL_VALUE_ADDRESS (minsym))
 	      return;
 	  }
       }

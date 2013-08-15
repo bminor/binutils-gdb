@@ -129,7 +129,7 @@ bsd_uthread_lookup_address (const char *name, struct objfile *objfile)
 
   sym = lookup_minimal_symbol (name, NULL, objfile);
   if (sym)
-    return SYMBOL_VALUE_ADDRESS (sym);
+    return MSYMBOL_VALUE_ADDRESS (sym);
 
   return 0;
 }

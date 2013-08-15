@@ -292,7 +292,7 @@ lm_base (void)
       return 0;
     }
 
-  addr = SYMBOL_VALUE_ADDRESS (got_sym) + 8;
+  addr = MSYMBOL_VALUE_ADDRESS (got_sym) + 8;
 
   if (solib_frv_debug)
     fprintf_unfiltered (gdb_stdlog,
@@ -926,7 +926,7 @@ main_got (void)
   if (got_sym == 0)
     return 0;
 
-  return SYMBOL_VALUE_ADDRESS (got_sym);
+  return MSYMBOL_VALUE_ADDRESS (got_sym);
 }
 
 /* Find the global pointer for the given function address ADDR.  */

@@ -322,7 +322,7 @@ gnuv3_rtti_type (struct value *value,
      If we didn't like this approach, we could instead look in the
      type_info object itself to get the class name.  But this way
      should work just as well, and doesn't read target memory.  */
-  vtable_symbol_name = SYMBOL_DEMANGLED_NAME (vtable_symbol);
+  vtable_symbol_name = MSYMBOL_DEMANGLED_NAME (vtable_symbol);
   if (vtable_symbol_name == NULL
       || strncmp (vtable_symbol_name, "vtable for ", 11))
     {
@@ -1131,7 +1131,7 @@ gnuv3_get_typeid (struct value *value)
       if (minsym == NULL)
 	error (_("could not find typeinfo symbol for '%s'"), typename);
 
-      result = value_at_lazy (typeinfo_type, SYMBOL_VALUE_ADDRESS (minsym));
+      result = value_at_lazy (typeinfo_type, MSYMBOL_VALUE_ADDRESS (minsym));
     }
 
   do_cleanups (cleanup);
@@ -1158,11 +1158,11 @@ gnuv3_get_typename_from_type_info (struct value *type_info_ptr)
 
 #define TYPEINFO_PREFIX "typeinfo for "
 #define TYPEINFO_PREFIX_LEN (sizeof (TYPEINFO_PREFIX) - 1)
-  symname = SYMBOL_DEMANGLED_NAME (typeinfo_sym.minsym);
+  symname = MSYMBOL_DEMANGLED_NAME (typeinfo_sym.minsym);
   if (symname == NULL || strncmp (symname, TYPEINFO_PREFIX,
 				  TYPEINFO_PREFIX_LEN))
     error (_("typeinfo symbol '%s' has unexpected name"),
-	   SYMBOL_LINKAGE_NAME (typeinfo_sym.minsym));
+	   MSYMBOL_LINKAGE_NAME (typeinfo_sym.minsym));
   class_name = symname + TYPEINFO_PREFIX_LEN;
 
   /* Strip off @plt and version suffixes.  */
@@ -1226,7 +1226,7 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
   /* The symbol's demangled name should be something like "virtual
      thunk to FUNCTION", where FUNCTION is the name of the function
      being thunked to.  */
-  thunk_name = SYMBOL_DEMANGLED_NAME (thunk_sym);
+  thunk_name = MSYMBOL_DEMANGLED_NAME (thunk_sym);
   if (thunk_name == NULL || strstr (thunk_name, " thunk to ") == NULL)
     return 0;
 
@@ -1235,7 +1235,7 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
   if (fn_sym == NULL)
     return 0;
 
-  method_stop_pc = SYMBOL_VALUE_ADDRESS (fn_sym);
+  method_stop_pc = MSYMBOL_VALUE_ADDRESS (fn_sym);
 
   /* Some targets have minimal symbols pointing to function descriptors
      (powerpc 64 for example).  Make sure to retrieve the address

@@ -922,7 +922,7 @@ ada_main_name (void)
       CORE_ADDR main_program_name_addr;
       int err_code;
 
-      main_program_name_addr = SYMBOL_VALUE_ADDRESS (msym);
+      main_program_name_addr = MSYMBOL_VALUE_ADDRESS (msym);
       if (main_program_name_addr == 0)
         error (_("Invalid address for Ada main program name."));
 
@@ -4661,7 +4661,7 @@ ada_lookup_simple_minsym (const char *name)
 
   ALL_MSYMBOLS (objfile, msymbol)
   {
-    if (match_name (SYMBOL_LINKAGE_NAME (msymbol), name, wild_match_p)
+    if (match_name (MSYMBOL_LINKAGE_NAME (msymbol), name, wild_match_p)
         && MSYMBOL_TYPE (msymbol) != mst_solib_trampoline)
       {
 	result.minsym = msymbol;
@@ -6182,7 +6182,7 @@ ada_make_symbol_completion_list (const char *text0, const char *word,
   ALL_MSYMBOLS (objfile, msymbol)
   {
     QUIT;
-    symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (msymbol),
+    symbol_completion_add (&completions, MSYMBOL_LINKAGE_NAME (msymbol),
 			   text, text_len, text0, word, wild_match_p,
 			   encoded_p);
   }
@@ -12673,7 +12673,7 @@ ada_add_standard_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
 	  if (msymbol.minsym != NULL)
 	    {
 	      struct ada_exc_info info
-		= {standard_exc[i], SYMBOL_VALUE_ADDRESS (msymbol.minsym)};
+		= {standard_exc[i], MSYMBOL_VALUE_ADDRESS (msymbol.minsym)};
 
 	      VEC_safe_push (ada_exc_info, *exceptions, &info);
 	    }

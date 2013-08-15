@@ -166,7 +166,7 @@ hppa_symbol_address(const char *sym)
 
   minsym = lookup_minimal_symbol (sym, NULL, NULL);
   if (minsym)
-    return SYMBOL_VALUE_ADDRESS (minsym);
+    return MSYMBOL_VALUE_ADDRESS (minsym);
   else
     return (CORE_ADDR)-1;
 }
@@ -2472,11 +2472,11 @@ hppa_lookup_stub_minimal_symbol (const char *name,
 
   ALL_MSYMBOLS (objfile, msym)
     {
-      if (strcmp (SYMBOL_LINKAGE_NAME (msym), name) == 0)
+      if (strcmp (MSYMBOL_LINKAGE_NAME (msym), name) == 0)
         {
           struct unwind_table_entry *u;
 
-          u = find_unwind_entry (SYMBOL_VALUE (msym));
+          u = find_unwind_entry (MSYMBOL_VALUE (msym));
           if (u != NULL && u->stub_unwind.stub_type == stub_type)
             return msym;
         }

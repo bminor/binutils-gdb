@@ -1,5 +1,176 @@
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
+	* symtab.h (struct minimal_symbol) <mginfo>: Rename from ginfo.
+	(MSYMBOL_VALUE, MSYMBOL_VALUE_ADDRESS, MSYMBOL_VALUE_BYTES)
+	(MSYMBOL_BLOCK_VALUE, MSYMBOL_VALUE_CHAIN, MSYMBOL_LANGUAGE)
+	(MSYMBOL_SECTION, MSYMBOL_OBJ_SECTION, MSYMBOL_NATURAL_NAME)
+	(MSYMBOL_LINKAGE_NAME, MSYMBOL_PRINT_NAME, MSYMBOL_DEMANGLED_NAME)
+	(MSYMBOL_SET_LANGUAGE, MSYMBOL_SEARCH_NAME)
+	(MSYMBOL_MATCHES_SEARCH_NAME, MSYMBOL_SET_NAMES): New macros.
+	* ada-lang.c (ada_main_name): Update.
+	(ada_lookup_simple_minsym): Update.
+	(ada_make_symbol_completion_list): Update.
+	(ada_add_standard_exceptions): Update.
+	* ada-tasks.c (read_atcb, ada_tasks_inferior_data_sniffer): Update.
+	* aix-thread.c (pdc_symbol_addrs, pd_enable): Update.
+	* amd64-windows-tdep.c (amd64_skip_main_prologue): Update.
+	* arm-tdep.c (skip_prologue_function): Update.
+	(arm_skip_stack_protector, arm_skip_stub): Update.
+	* arm-wince-tdep.c (arm_pe_skip_trampoline_code): Update.
+	(arm_wince_skip_main_prologue): Update.
+	* auxv.c (ld_so_xfer_auxv): Update.
+	* avr-tdep.c (avr_scan_prologue): Update.
+	* ax-gdb.c (gen_var_ref): Update.
+	* block.c (call_site_for_pc): Update.
+	* blockframe.c (get_pc_function_start): Update.
+	(find_pc_partial_function_gnu_ifunc): Update.
+	* breakpoint.c (create_overlay_event_breakpoint): Update.
+	(create_longjmp_master_breakpoint): Update.
+	(create_std_terminate_master_breakpoint): Update.
+	(create_exception_master_breakpoint): Update.
+	(resolve_sal_pc): Update.
+	* bsd-uthread.c (bsd_uthread_lookup_address): Update.
+	* btrace.c (ftrace_print_function_name, ftrace_function_switched):
+	Update.
+	* c-valprint.c (c_val_print): Update.
+	* coff-pe-read.c (add_pe_forwarded_sym): Update.
+	* coffread.c (coff_symfile_read): Update.
+	* common/agent.c (agent_look_up_symbols): Update.
+	* dbxread.c (find_stab_function_addr): Update.
+	(end_psymtab): Update.
+	* dwarf2loc.c (call_site_to_target_addr): Update.
+	(func_verify_no_selftailcall): Update.
+	(tailcall_dump): Update.
+	(call_site_find_chain_1): Update.
+	(dwarf_expr_reg_to_entry_parameter): Update.
+	* elfread.c (elf_gnu_ifunc_record_cache): Update.
+	(elf_gnu_ifunc_resolve_by_got): Update.
+	* f-valprint.c (info_common_command): Update.
+	* findvar.c (read_var_value): Update.
+	* frame.c (get_prev_frame_1): Update.
+	(inside_main_func): Update.
+	* frv-tdep.c (frv_skip_main_prologue): Update.
+	(frv_frame_this_id): Update.
+	* glibc-tdep.c (glibc_skip_solib_resolver): Update.
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Update.
+	* gnu-v3-abi.c (gnuv3_rtti_type): Update.
+	(gnuv3_skip_trampoline): Update.
+	* hppa-hpux-tdep.c (hppa32_hpux_in_solib_call_trampoline): Update.
+	(hppa64_hpux_in_solib_call_trampoline): Update.
+	(hppa_hpux_skip_trampoline_code): Update.
+	(hppa64_hpux_search_dummy_call_sequence): Update.
+	(hppa_hpux_find_import_stub_for_addr): Update.
+	(hppa_hpux_find_dummy_bpaddr): Update.
+	* hppa-tdep.c (hppa_symbol_address)
+	(hppa_lookup_stub_minimal_symbol): Update.
+	* i386-tdep.c (i386_skip_main_prologue): Update.
+	(i386_pe_skip_trampoline_code): Update.
+	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Update.
+	* infcall.c (get_function_name): Update.
+	* infcmd.c (until_next_command): Update.
+	* jit.c (jit_breakpoint_re_set_internal): Update.
+	(jit_inferior_init): Update.
+	* linespec.c (minsym_found): Update.
+	(add_minsym): Update.
+	* linux-fork.c (info_checkpoints_command): Update.
+	* linux-nat.c (get_signo): Update.
+	* linux-thread-db.c (inferior_has_bug): Update.
+	* m32c-tdep.c (m32c_return_value): Update.
+	(m32c_m16c_address_to_pointer): Update.
+	(m32c_m16c_pointer_to_address): Update.
+	* m32r-tdep.c (m32r_frame_this_id): Update.
+	* m68hc11-tdep.c (m68hc11_get_register_info): Update.
+	* machoread.c (macho_resolve_oso_sym_with_minsym): Update.
+	* maint.c (maintenance_translate_address): Update.
+	* minsyms.c (add_minsym_to_hash_table): Update.
+	(add_minsym_to_demangled_hash_table): Update.
+	(msymbol_objfile): Update.
+	(lookup_minimal_symbol): Update.
+	(iterate_over_minimal_symbols): Update.
+	(lookup_minimal_symbol_text): Update.
+	(lookup_minimal_symbol_by_pc_name): Update.
+	(lookup_minimal_symbol_solib_trampoline): Update.
+	(lookup_minimal_symbol_by_pc_section_1): Update.
+	(lookup_minimal_symbol_and_objfile): Update.
+	(prim_record_minimal_symbol_full): Update.
+	(compare_minimal_symbols): Update.
+	(compact_minimal_symbols): Update.
+	(build_minimal_symbol_hash_tables): Update.
+	(install_minimal_symbols): Update.
+	(terminate_minimal_symbol_table): Update.
+	(find_solib_trampoline_target): Update.
+	(minimal_symbol_upper_bound): Update.
+	* mips-linux-tdep.c (mips_linux_skip_resolver): Update.
+	* mips-tdep.c (mips_stub_frame_sniffer): Update.
+	(mips_skip_pic_trampoline_code): Update.
+	* msp430-tdep.c (msp430_skip_trampoline_code): Update.
+	* objc-lang.c (selectors_info): Update.
+	(classes_info): Update.
+	(find_methods): Update.
+	(find_imps): Update.
+	(find_objc_msgsend): Update.
+	* objfiles.c (objfile_relocate1): Update.
+	* objfiles.h (ALL_OBJFILE_MSYMBOLS): Update.
+	* obsd-tdep.c (obsd_skip_solib_resolver): Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* parse.c (write_exp_msymbol): Update.
+	* ppc-linux-tdep.c (powerpc_linux_in_dynsym_resolve_code)
+	(ppc_linux_spe_context_lookup, ppc_elfv2_skip_entrypoint): Update.
+	* ppc-sysv-tdep.c (convert_code_addr_to_desc_addr): Update.
+	* printcmd.c (build_address_symbolic): Update.
+	(sym_info): Update.
+	(address_info): Update.
+	* proc-service.c (ps_pglobal_lookup): Update.
+	* psymtab.c (find_pc_sect_psymtab_closer): Update.
+	(find_pc_sect_psymtab): Update.
+	* python/py-framefilter.c (py_print_frame): Update.
+	* ravenscar-thread.c (get_running_thread_id): Update.
+	* record-btrace.c (btrace_call_history, btrace_get_bfun_name):
+	Update.
+	* remote.c (remote_check_symbols): Update.
+	* rs6000-tdep.c (rs6000_skip_main_prologue): Update.
+	(rs6000_skip_trampoline_code): Update.
+	* sh64-tdep.c (sh64_elf_make_msymbol_special): Update.
+	* sol2-tdep.c (sol2_skip_solib_resolver): Update.
+	* solib-dsbt.c (lm_base): Update.
+	* solib-frv.c (lm_base): Update.
+	(main_got): Update.
+	* solib-irix.c (locate_base): Update.
+	* solib-som.c (som_solib_create_inferior_hook): Update.
+	(som_solib_desire_dynamic_linker_symbols): Update.
+	(link_map_start): Update.
+	* solib-spu.c (spu_enable_break): Update.
+	(ocl_enable_break): Update.
+	* solib-svr4.c (elf_locate_base): Update.
+	(enable_break): Update.
+	* spu-tdep.c (spu_get_overlay_table): Update.
+	(spu_catch_start): Update.
+	(flush_ea_cache): Update.
+	* stabsread.c (define_symbol): Update.
+	(scan_file_globals): Update.
+	* stack.c (find_frame_funname): Update.
+	(frame_info): Update.
+	* symfile.c (simple_read_overlay_table): Update.
+	(simple_overlay_update): Update.
+	* symmisc.c (dump_msymbols): Update.
+	* symtab.c (fixup_section): Update.
+	(find_pc_sect_line): Update.
+	(skip_prologue_sal): Update.
+	(search_symbols): Update.
+	(print_msymbol_info): Update.
+	(rbreak_command): Update.
+	(MCOMPLETION_LIST_ADD_SYMBOL): New macro.
+	(completion_list_objc_symbol): Update.
+	(default_make_symbol_completion_list_break_on): Update.
+	* tracepoint.c (scope_info): Update.
+	* tui/tui-disasm.c (tui_find_disassembly_address): Update.
+	(tui_get_begin_asm_address): Update.
+	* valops.c (find_function_in_inferior): Update.
+	* value.c (value_static_field): Update.
+	(value_fn_field): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
 	* blockframe.c (find_pc_partial_function_gnu_ifunc): Use
 	bound minimal symbols.  Move code that knows about minsym
 	table layout...

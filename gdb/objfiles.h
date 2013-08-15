@@ -589,7 +589,7 @@ extern void default_iterate_over_objfiles_in_search_order
 /* Traverse all minimal symbols in one objfile.  */
 
 #define	ALL_OBJFILE_MSYMBOLS(objfile, m) \
-    for ((m) = (objfile) -> msymbols; SYMBOL_LINKAGE_NAME(m) != NULL; (m)++)
+    for ((m) = (objfile) -> msymbols; MSYMBOL_LINKAGE_NAME(m) != NULL; (m)++)
 
 /* Traverse all symtabs in all objfiles in the current symbol
    space.  */

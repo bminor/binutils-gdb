@@ -572,7 +572,7 @@ lm_base (void)
 
   if (got_sym != 0)
     {
-      addr = SYMBOL_VALUE_ADDRESS (got_sym);
+      addr = MSYMBOL_VALUE_ADDRESS (got_sym);
       if (solib_dsbt_debug)
 	fprintf_unfiltered (gdb_stdlog,
 			    "lm_base: get addr %x by _GLOBAL_OFFSET_TABLE_.\n",

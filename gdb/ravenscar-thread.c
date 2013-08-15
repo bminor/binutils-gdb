@@ -163,7 +163,7 @@ get_running_thread_id (void)
   if (!object_msym)
     return 0;
 
-  object_addr = SYMBOL_VALUE_ADDRESS (object_msym);
+  object_addr = MSYMBOL_VALUE_ADDRESS (object_msym);
   object_size = TYPE_LENGTH (builtin_type_void_data_ptr);
   buf_size = object_size;
   buf = alloca (buf_size);

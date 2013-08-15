@@ -124,7 +124,7 @@ tui_find_disassembly_address (struct gdbarch *gdbarch, CORE_ADDR pc, int from)
          msymbol = lookup_minimal_symbol_by_pc_section (new_low, 0).minsym;
 
          if (msymbol)
-            new_low = SYMBOL_VALUE_ADDRESS (msymbol);
+            new_low = MSYMBOL_VALUE_ADDRESS (msymbol);
          else
             new_low += 1 * max_lines;
 
@@ -349,7 +349,7 @@ tui_get_begin_asm_address (struct gdbarch **gdbarch_p, CORE_ADDR *addr_p)
       if (main_symbol == 0)
         main_symbol = lookup_minimal_symbol ("_start", NULL, NULL);
       if (main_symbol)
-        addr = SYMBOL_VALUE_ADDRESS (main_symbol);
+        addr = MSYMBOL_VALUE_ADDRESS (main_symbol);
       else
         addr = 0;
     }
