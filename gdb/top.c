@@ -1433,7 +1433,8 @@ quit_force (char *args, int from_tty)
   /* Save the history information if it is appropriate to do so.  */
   DO_TRY
     {
-      if (write_history_p && history_filename)
+      if (write_history_p && history_filename
+	  && input_from_terminal_p ())
 	write_history (history_filename);
     }
   DO_PRINT_EX;

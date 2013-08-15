@@ -1,3 +1,9 @@
+2013-08-15  Muhammad Bilal  <mbilal@codesourcery.com>
+
+	PR cli/15841
+	* top.c (quit_force): Skip writing history file
+	if input is not from terminal.
+
 2013-08-14  Tom Tromey  <tromey@redhat.com>
 
 	* remote.c (struct remote_state) <echo_nextthread, nextthread,
