@@ -292,6 +292,11 @@ proc prelink_yes {arg {name ""}} {
 	xfail $test
 	return 0
     }
+    if {$result == 1 && [regexp {DWARF [^\r\n]* unhandled} $output]} {
+	# Prelink didn't understand the version of dwarf present.
+	unsupported "$test (dwarf version unhandled)"
+	return 0
+    }
     if {$result == 0 && $output == ""} {
 	pass $test
 	return 1
