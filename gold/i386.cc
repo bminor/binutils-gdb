@@ -3930,6 +3930,9 @@ class Target_i386_nacl : public Target_i386
       return new Output_data_plt_i386_nacl_exec(layout, got_plt, got_irelative);
   }
 
+  virtual std::string
+  do_code_fill(section_size_type length) const;
+
  private:
   static const Target::Target_info i386_nacl_info;
 };
@@ -4128,6 +4131,15 @@ Output_data_plt_i386_nacl::plt_eh_frame_fde[plt_eh_frame_fde_size] =
   elfcpp::DW_CFA_nop,			// Align to 32 bytes.
   elfcpp::DW_CFA_nop
 };
+
+// Return a string used to fill a code section with nops.
+// For NaCl, long NOPs are only valid if they do not cross
+// bundle alignment boundaries, so keep it simple with one-byte NOPs.
+std::string
+Target_i386_nacl::do_code_fill(section_size_type length) const
+{
+  return std::string(length, static_cast<char>(0x90));
+}
 
 // The selector for i386-nacl object files.
 

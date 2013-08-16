@@ -4560,6 +4560,9 @@ class Target_x86_64_nacl : public Target_x86_64<size>
 						 plt_count);
   }
 
+  virtual std::string
+  do_code_fill(section_size_type length) const;
+
  private:
   static const Target::Target_info x86_64_nacl_info;
 };
@@ -4783,6 +4786,16 @@ Output_data_plt_x86_64_nacl<size>::plt_eh_frame_fde[plt_eh_frame_fde_size] =
   elfcpp::DW_CFA_nop,			// Align to 32 bytes.
   elfcpp::DW_CFA_nop
 };
+
+// Return a string used to fill a code section with nops.
+// For NaCl, long NOPs are only valid if they do not cross
+// bundle alignment boundaries, so keep it simple with one-byte NOPs.
+template<int size>
+std::string
+Target_x86_64_nacl<size>::do_code_fill(section_size_type length) const
+{
+  return std::string(length, static_cast<char>(0x90));
+}
 
 // The selector for x86_64-nacl object files.
 
