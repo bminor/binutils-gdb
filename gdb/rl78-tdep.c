@@ -94,7 +94,7 @@ enum
   RL78_PSW_REGNUM,	/* 8 bits */
   RL78_ES_REGNUM,	/* 8 bits */
   RL78_CS_REGNUM,	/* 8 bits */
-  RL78_PC_REGNUM,	/* 20 bits; we'll use 32 bits for it.  */
+  RL78_RAW_PC_REGNUM,	/* 20 bits; we'll use 32 bits for it.  */
 
   /* Fixed address SFRs (some of those above are SFRs too.) */
   RL78_SPL_REGNUM,	/* 8 bits; lower half of SP */
@@ -105,7 +105,8 @@ enum
   RL78_NUM_REGS,
 
   /* Pseudo registers.  */
-  RL78_SP_REGNUM = RL78_NUM_REGS,
+  RL78_PC_REGNUM = RL78_NUM_REGS,
+  RL78_SP_REGNUM,
 
   RL78_X_REGNUM,
   RL78_A_REGNUM,
@@ -243,6 +244,8 @@ rl78_register_type (struct gdbarch *gdbarch, int reg_nr)
 
   if (reg_nr == RL78_PC_REGNUM)
     return tdep->rl78_code_pointer;
+  else if (reg_nr == RL78_RAW_PC_REGNUM)
+    return tdep->rl78_uint32;
   else if (reg_nr <= RL78_MEM_REGNUM
            || (RL78_X_REGNUM <= reg_nr && reg_nr <= RL78_H_REGNUM)
 	   || (RL78_BANK0_R0_REGNUM <= reg_nr
@@ -298,13 +301,14 @@ rl78_register_name (struct gdbarch *gdbarch, int regnr)
     "psw",
     "es",
     "cs",
-    "pc",
+    "",
 
     "",		/* spl */
     "",		/* sph */
     "pmc",
     "mem",
 
+    "pc",
     "sp",
 
     "x",
@@ -394,9 +398,11 @@ rl78_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   if (group == save_reggroup || group == restore_reggroup)
     {
       if ((regnum < RL78_NUM_REGS
-           && regnum != RL78_SPL_REGNUM
-	   && regnum != RL78_SPH_REGNUM)
-          || regnum == RL78_SP_REGNUM)
+	   && regnum != RL78_SPL_REGNUM
+	   && regnum != RL78_SPH_REGNUM
+	   && regnum != RL78_RAW_PC_REGNUM)
+	  || regnum == RL78_SP_REGNUM
+	  || regnum == RL78_PC_REGNUM)
 	return 1;
       else
 	return 0;
@@ -409,6 +415,7 @@ rl78_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
       || regnum == RL78_SPH_REGNUM
       || regnum == RL78_PMC_REGNUM
       || regnum == RL78_MEM_REGNUM
+      || regnum == RL78_RAW_PC_REGNUM
       || (RL78_BANK0_RP0_REGNUM <= regnum && regnum <= RL78_BANK3_RP3_REGNUM))
     return group == system_reggroup;
 
@@ -463,6 +470,13 @@ rl78_pseudo_register_read (struct gdbarch *gdbarch,
       status = regcache_raw_read (regcache, RL78_SPL_REGNUM, buffer);
       if (status == REG_VALID)
 	status = regcache_raw_read (regcache, RL78_SPH_REGNUM, buffer + 1);
+    }
+  else if (reg == RL78_PC_REGNUM)
+    {
+      gdb_byte rawbuf[4];
+
+      status = regcache_raw_read (regcache, RL78_RAW_PC_REGNUM, rawbuf);
+      memcpy (buffer, rawbuf, 3);
     }
   else if (RL78_X_REGNUM <= reg && reg <= RL78_H_REGNUM)
     {
@@ -526,6 +540,14 @@ rl78_pseudo_register_write (struct gdbarch *gdbarch,
     {
       regcache_raw_write (regcache, RL78_SPL_REGNUM, buffer);
       regcache_raw_write (regcache, RL78_SPH_REGNUM, buffer + 1);
+    }
+  else if (reg == RL78_PC_REGNUM)
+    {
+      gdb_byte rawbuf[4];
+
+      memcpy (rawbuf, buffer, 3);
+      rawbuf[3] = 0;
+      regcache_raw_write (regcache, RL78_RAW_PC_REGNUM, rawbuf);
     }
   else if (RL78_X_REGNUM <= reg && reg <= RL78_H_REGNUM)
     {

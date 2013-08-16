@@ -1,3 +1,12 @@
+2013-08-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (RL78_RAW_PC_REGNUM): New enum.
+	(RL78_PC_REGNUM): Move to list of pseudo-register enums.
+	(rl78_register_type, rl78_register_name, rl78_register_reggroup_p):
+	Update to account for fact that PC is now a pseudo-register.
+	(rl78_pseudo_register_write, rl78_pseudo_register_read):  Add
+	cases for RL78_PC_REGNUM.
+
 2013-08-15  Muhammad Bilal  <mbilal@codesourcery.com>
 
 	PR cli/15841
