@@ -2050,8 +2050,7 @@ ppc_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long, 8=.llong */)
   do
     {
       expression (&exp);
-      if (exp.X_op == O_symbol
-	  && *input_line_pointer == '@'
+      if (*input_line_pointer == '@'
 	  && (reloc = ppc_elf_suffix (&input_line_pointer,
 				      &exp)) != BFD_RELOC_UNUSED)
 	{

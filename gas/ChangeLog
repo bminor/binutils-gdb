@@ -1,5 +1,10 @@
 2013-08-16  Alan Modra  <amodra@gmail.com>
 
+	* config/tc-ppc.c (ppc_elf_cons): Allow @l and other reloc
+	modifiers generally.
+
+2013-08-16  Alan Modra  <amodra@gmail.com>
+
 	* config/tc-ppc.c (ppc_elf_lcomm): Use subsection 1.
 
 2013-08-14  David Edelsohn  <dje.gcc@gmail.com>
