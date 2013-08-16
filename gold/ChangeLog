@@ -1,3 +1,8 @@
+2013-08-16  Roland McGrath  <mcgrathr@google.com>
+
+	* i386.cc (Target_i386_nacl::do_code_fill): New virtual function.
+	* x86_64.cc (Target_x86_64_nacl::do_code_fill): New virtual function.
+
 2013-08-07  Cary Coutant  <ccoutant@google.com>
 
 	Revert support for v2 DWP files:
