@@ -1,3 +1,7 @@
+2013-08-16  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (ppc_elf_lcomm): Use subsection 1.
+
 2013-08-14  David Edelsohn  <dje.gcc@gmail.com>
 
 	* config/tc-ppc.c (ppc_comm): Accept optional fourth .lcomm
@@ -270,14 +274,14 @@
 
 2013-07-18  Sandeep Kumar Singh  <Sandeep.Singh2@kpitcummins.com>
 
-        * config/rx-defs.h: Add macros for RX100, RX200, RX600, and
+	* config/rx-defs.h: Add macros for RX100, RX200, RX600, and
 	RX610.
-        * config/rx-parse.y: (rx_check_float_support): Add function to
+	* config/rx-parse.y: (rx_check_float_support): Add function to
 	check floating point operation support for target RX100 and
 	RX200.
-        * config/tc-rx.c: Add CPU options RX100, RX200, RX600, and RX610.
-        * doc/c-rx.texi: Add -mcpu option to recognize macros for RX100,
-        RX200, RX600, and RX610
+	* config/tc-rx.c: Add CPU options RX100, RX200, RX600, and RX610.
+	* doc/c-rx.texi: Add -mcpu option to recognize macros for RX100,
+	RX200, RX600, and RX610
 
 2013-07-18  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
@@ -852,7 +856,7 @@
 
 2013-06-01  George Thomas <george.thomas@atmel.com>
 
-        * gas/config/tc-avr.c: Change ISA for devices with USB support to
+	* gas/config/tc-avr.c: Change ISA for devices with USB support to
 	AVR_ISA_XMEGAU
 
 2013-05-31  H.J. Lu  <hongjiu.lu@intel.com>
@@ -862,7 +866,6 @@
 
 2013-05-31  Paul Brook  <paul@codesourcery.com>
 
-	gas/
 	* config/tc-mips.c (s_ehword): New.
 
 2013-05-30  Paul Brook  <paul@codesourcery.com>
