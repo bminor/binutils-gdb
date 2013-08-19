@@ -544,8 +544,9 @@ const struct mips_opcode micromips_opcodes[] =
 {"dclo",		"t,s",		0x58004b3c, 0xfc00ffff,	WR_1|RD_2,		0,		I3,		0,	0 },
 {"dclz",		"t,s",		0x58005b3c, 0xfc00ffff,	WR_1|RD_2,		0,		I3,		0,	0 },
 {"deret",		"",		0x0000e37c, 0xffffffff,	NODS,			0,		I1,		0,	0 },
-{"dext",		"t,r,I,+I",	0,    (int) M_DEXT,	INSN_MACRO,		0,		I3,		0,	0 },
-{"dext",		"t,r,+A,+C",	0x5800002c, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 },
+{"dext",		"t,r,+A,+H",	0x5800002c, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 },
+{"dext",		"t,r,+A,+G",	0x58000024, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 }, /* dextm */
+{"dext",		"t,r,+E,+H",	0x58000014, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 }, /* dextu */
 {"dextm",		"t,r,+A,+G",	0x58000024, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 },
 {"dextu",		"t,r,+E,+H",	0x58000014, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 },
 /* For ddiv, see the comments about div.  */
@@ -560,8 +561,9 @@ const struct mips_opcode micromips_opcodes[] =
 {"ddivu",		"d,v,I",	0,    (int) M_DDIVU_3I,	INSN_MACRO,		0,		I3,		0,	0 },
 {"di",			"",		0x0000477c, 0xffffffff,	RD_C0,			0,		I1,		0,	0 },
 {"di",			"s",		0x0000477c, 0xffe0ffff,	WR_1|RD_C0,		0,		I1,		0,	0 },
-{"dins",		"t,r,I,+I",	0,    (int) M_DINS,	INSN_MACRO,		0,		I3,		0,	0 },
 {"dins",		"t,r,+A,+B",	0x5800000c, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 },
+{"dins",		"t,r,+A,+F",	0x58000004, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 }, /* dinsm */
+{"dins",		"t,r,+E,+F",	0x58000034, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 }, /* dinsu */
 {"dinsm",		"t,r,+A,+F",	0x58000004, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 },
 {"dinsu",		"t,r,+E,+F",	0x58000034, 0xfc00003f, WR_1|RD_2,		0,		I3,		0,	0 },
 /* The MIPS assembler treats the div opcode with two operands as

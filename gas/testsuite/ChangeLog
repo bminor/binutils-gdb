@@ -1,5 +1,14 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/ext-ill.l, gas/mips/mips64r2-ill.l: Expect DEXT and DINS
+	error messages to have the same form as the EXT and INS ones.
+	* gas/mips/micromips-insn32.d, gas/mips/micromips-noinsn32.d,
+	gas/mips/micromips-trap.d, gas/mips/micromips.d,
+	gas/mips/micromips@mips64r2.d, gas/mips/mips64r2.d: Expect
+	"dext" and "dins" instead of "dextm", "dextu", "dinsm" and "dinsu".
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/octeon-ill.l: Adjust expected output.
 	* gas/mips/lui-1.l, gas/mips/lui-1.s: Add more cases.
 

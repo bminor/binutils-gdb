@@ -1,12 +1,12 @@
 .*: Assembler messages:
-.*:12: Error: Operand 3 of `dext' must be in the range \[0, 63\], was -1.
-.*:15: Error: Operand 3 of `dext' must be in the range \[0, 63\], was 64.
-.*:18: Error: Invalid field specification \(position 0, size 0\)
-.*:21: Error: Invalid field specification \(position 0, size 65\)
-.*:31: Error: Invalid field specification \(position 1, size 64\)
-.*:33: Error: Invalid field specification \(position 63, size 2\)
-.*:34: Error: Invalid field specification \(position 63, size 63\)
-.*:35: Error: Invalid field specification \(position 63, size 64\)
+.*:12: Error: operand 3 out of range `dext \$4,\$5,-1,1'
+.*:15: Error: operand 3 out of range `dext \$4,\$5,64,1'
+.*:18: Error: operand 4 out of range `dext \$4,\$5,0,0'
+.*:21: Error: operand 4 out of range `dext \$4,\$5,0,65'
+.*:31: Error: operand 4 out of range `dext \$4,\$5,1,64'
+.*:33: Error: operand 4 out of range `dext \$4,\$5,63,2'
+.*:34: Error: operand 4 out of range `dext \$4,\$5,63,63'
+.*:35: Error: operand 4 out of range `dext \$4,\$5,63,64'
 .*:40: Error: operand 3 out of range `dextm \$4,\$5,-1,33'
 .*:43: Error: operand 3 out of range `dextm \$4,\$5,32,33'
 .*:46: Error: operand 4 out of range `dextm \$4,\$5,0,32'
@@ -23,14 +23,14 @@
 .*:89: Error: operand 4 out of range `dextu \$4,\$5,63,2'
 .*:90: Error: operand 4 out of range `dextu \$4,\$5,63,31'
 .*:91: Error: operand 4 out of range `dextu \$4,\$5,63,32'
-.*:96: Error: Operand 3 of `dins' must be in the range \[0, 63\], was -1.
-.*:99: Error: Operand 3 of `dins' must be in the range \[0, 63\], was 64.
-.*:102: Error: Invalid field specification \(position 0, size 0\)
-.*:105: Error: Invalid field specification \(position 0, size 65\)
-.*:115: Error: Invalid field specification \(position 1, size 64\)
-.*:117: Error: Invalid field specification \(position 63, size 2\)
-.*:118: Error: Invalid field specification \(position 63, size 63\)
-.*:119: Error: Invalid field specification \(position 63, size 64\)
+.*:96: Error: operand 3 out of range `dins \$4,\$5,-1,1'
+.*:99: Error: operand 3 out of range `dins \$4,\$5,64,1'
+.*:102: Error: operand 4 out of range `dins \$4,\$5,0,0'
+.*:105: Error: operand 4 out of range `dins \$4,\$5,0,65'
+.*:115: Error: operand 4 out of range `dins \$4,\$5,1,64'
+.*:117: Error: operand 4 out of range `dins \$4,\$5,63,2'
+.*:118: Error: operand 4 out of range `dins \$4,\$5,63,63'
+.*:119: Error: operand 4 out of range `dins \$4,\$5,63,64'
 .*:124: Error: operand 3 out of range `dinsm \$4,\$5,-1,33'
 .*:127: Error: operand 3 out of range `dinsm \$4,\$5,32,33'
 .*:130: Error: operand 4 out of range `dinsm \$4,\$5,31,1'

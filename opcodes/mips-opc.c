@@ -921,8 +921,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dctr",		"o(b)",	 	0xbc050000, 0xfc1f0000, RD_2,			0,		I3,		0,	0 },
 {"dctw",		"o(b)",		0xbc090000, 0xfc1f0000, RD_2,			0,		I3,		0,	0 },
 {"deret",		"",		0x4200001f, 0xffffffff, NODS, 			0,		I32|G2,		0,	0 },
-{"dext",		"t,r,I,+I",	0,    (int) M_DEXT,	INSN_MACRO,		0,		I65,		0,	0 },
-{"dext",		"t,r,+A,+C",	0x7c000003, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 },
+{"dext",		"t,r,+A,+H",	0x7c000003, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 },
+{"dext",		"t,r,+A,+G",	0x7c000001, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 }, /* dextm */
+{"dext",		"t,r,+E,+H",	0x7c000002, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 }, /* dextu */
 {"dextm",		"t,r,+A,+G",	0x7c000001, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 },
 {"dextu",		"t,r,+E,+H",	0x7c000002, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 },
 /* For ddiv, see the comments about div.  */
@@ -936,8 +937,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"di",			"",		0x42000039, 0xffffffff,	WR_C0,			0,		EE,		0,	0 },
 {"di",			"",		0x41606000, 0xffffffff,	WR_C0,			0,		I33,		0,	0 },
 {"di",			"t",		0x41606000, 0xffe0ffff,	WR_1|WR_C0,		0,		I33,		0,	0 },
-{"dins",		"t,r,I,+I",	0,    (int) M_DINS,	INSN_MACRO,		0,		I65,		0,	0 },
 {"dins",		"t,r,+A,+B",	0x7c000007, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 },
+{"dins",		"t,r,+A,+F",	0x7c000005, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 }, /* dinsm */
+{"dins",		"t,r,+E,+F",	0x7c000006, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 }, /* dinsu */
 {"dinsm",		"t,r,+A,+F",	0x7c000005, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 },
 {"dinsu",		"t,r,+E,+F",	0x7c000006, 0xfc00003f, WR_1|RD_2,    		0,		I65,		0,	0 },
 /* The MIPS assembler treats the div opcode with two operands as

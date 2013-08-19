@@ -1,5 +1,10 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (report_bad_range, report_bad_field): Delete.
+	(macro): Remove M_DEXT and M_DINS handling.
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips_arg_info): Replace allow_nonconst and
 	lax_max with lax_match.
 	(match_int_operand): Update accordingly.  Don't report an error
