@@ -11,5 +11,5 @@
 .*:39: Error: operand 4 out of range `ins \$4,\$5,0,33'
 .*:42: Error: operand 4 out of range `ins \$4,\$5,0,0'
 .*:45: Error: operand 4 out of range `ins \$4,\$5,31,2'
-.*:54: Warning: Float register should be even, was 1
-.*:57: Warning: Float register should be even, was 1
+.*:54: Warning: float register should be even, was 1
+.*:57: Warning: float register should be even, was 1

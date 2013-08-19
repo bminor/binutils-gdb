@@ -1,5 +1,21 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (mips_check_isa_supports_ase, reg_lookup)
+	(mips_parse_argument_token, validate_micromips_insn, md_begin)
+	(check_regno, match_float_constant, check_completed_insn, append_insn)
+	(match_insn, match_mips16_insn, match_insns, macro_start)
+	(macro_build_ldst_constoffset, load_register, macro, mips_ip)
+	(mips16_ip, mips_set_option_string, md_parse_option)
+	(mips_after_parse_args, mips_after_parse_args, md_pcrel_from)
+	(md_apply_fix, s_align, s_option, s_mipsset, s_tls_rel_directive)
+	(s_gpword, s_gpdword, s_ehword, s_nan, tc_gen_reloc, md_convert_frag)
+	(s_mips_end, s_mips_ent, s_mips_frame, s_mips_mask, mips_parse_cpu):
+	Start error messages with a lower-case letter.  Do not end error
+	messages with a period.  Wrap long messages to 80 character-lines.
+	Use "cannot" instead of "can't" and "can not".
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (imm_expr): Expand comment.
 	(set_at, macro, mips16_macro): Expect imm_expr to be O_constant
 	when populated.

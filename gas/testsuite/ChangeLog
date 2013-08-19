@@ -1,5 +1,34 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/ase-errors-1.l, gas/mips/ase-errors-2.l,
+	gas/mips/ase-errors-3.l, gas/mips/ase-errors-4.l, gas/mips/at-2.l,
+	gas/mips/baddata1.l, gas/mips/elf-rel30.l, gas/mips/illegal.l,
+	gas/mips/jalr.l, gas/mips/ldstla-32-1.l, gas/mips/ldstla-32-mips3-1.l,
+	gas/mips/lui-1.l, gas/mips/macro-warn-1.l, gas/mips/macro-warn-1-n32.l,
+	gas/mips/macro-warn-2.l, gas/mips/macro-warn-3.l,
+	gas/mips/macro-warn-4.l, gas/mips/micromips-branch-delay.l,
+	gas/mips/micromips-branch-relax.l,
+	gas/mips/micromips-branch-relax-pic.l, gas/mips/micromips-ill.l,
+	gas/mips/micromips.l, gas/mips/micromips-size-0.l,
+	gas/mips/micromips-size-1.l, gas/mips/micromips-warn-branch-delay.l,
+	gas/mips/micromips-warn.l, gas/mips/mips16e-64.l,
+	gas/mips/mips16e-save-err.l, gas/mips/mips1-fp.l,
+	gas/mips/mips32r2-fp32.l, gas/mips/mips32r2-ill.l,
+	gas/mips/mips32-sf32.l, gas/mips/mips4-branch-likely.l,
+	gas/mips/mips4-fp.l, gas/mips/mips5-fp.l, gas/mips/mips64-mips3d.l,
+	gas/mips/mips-double-float-flag.l, gas/mips/mips-gp64-fp32.l,
+	gas/mips/mips-gp64-fp64.l, gas/mips/mips-hard-float-flag.l,
+	gas/mips/mips-macro-ill-nofp.l, gas/mips/mips-macro-ill-sfp.l,
+	gas/mips/nan-error-1.l, gas/mips/nan-error-2.l, gas/mips/noat-2.l,
+	gas/mips/noat-3.l, gas/mips/noat-4.l, gas/mips/noat-5.l,
+	gas/mips/noat-6.l, gas/mips/noat-7.l, gas/mips/octeon-ill.l,
+	gas/mips/r5900-error-vu0.l, gas/mips/r5900-nollsc.l,
+	gas/mips/relax-bc1any.l, gas/mips/relax-bposge.l, gas/mips/relax.l,
+	gas/mips/relax-swap1.l, gas/mips/relax-swap2.l, gas/mips/set-arch.l,
+	gas/mips/tls-ill.l, gas/mips/vr5400-ill.l: Adjust expected output.
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/ext-ill.l, gas/mips/mips64r2-ill.l: Expect DEXT and DINS
 	error messages to have the same form as the EXT and INS ones.
 	* gas/mips/micromips-insn32.d, gas/mips/micromips-noinsn32.d,

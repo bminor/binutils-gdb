@@ -1,5 +1,5 @@
 .*: Assembler messages:
-.*:2: Error: Illegal operands `save \$3,100'
+.*:2: Error: invalid operands `save \$3,100'
 .*:3: Error: missing frame size `save \$4'
 .*:4: Error: frame size specified twice `save \$4,100,200'
 .*:5: Error: operand 2 must be constant `save \$4,foo'
@@ -8,6 +8,6 @@
 .*:10: Error: invalid frame size `save \$4,12'
 .*:11: Error: invalid frame size `save \$4,2048'
 .*:12: Error: invalid frame size `save \$4,2052'
-.*:14: Error: Illegal operands `save \$4,\$6,0'
-.*:15: Error: Illegal operands `save 0,\$5,\$7'
-.*:18: Error: Illegal operands `save \$16,\$18,\$20,0'
+.*:14: Error: invalid operands `save \$4,\$6,0'
+.*:15: Error: invalid operands `save 0,\$5,\$7'
+.*:18: Error: invalid operands `save \$16,\$18,\$20,0'

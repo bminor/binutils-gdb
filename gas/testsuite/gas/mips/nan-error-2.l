@@ -1,2 +1,2 @@
 Assembler messages:
-Fatal error: Invalid NaN setting -mnan=foo
+Fatal error: invalid NaN setting -mnan=foo
