@@ -1,5 +1,10 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (imm2_expr): Delete.
+	(md_assemble, match_insn, imm2_expr.X_op, mips_ip): Update accordingly.
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (report_bad_range, report_bad_field): Delete.
 	(macro): Remove M_DEXT and M_DINS handling.
 

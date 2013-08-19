@@ -1762,11 +1762,10 @@ mips_mark_labels (void)
 
 static char *expr_end;
 
-/* Expressions which appear in macro instructions.  These are set by
-   mips_ip and read by macro.  */
+/* An expression in a macro instruction.  This is set by mips_ip and
+   mips16_ip.  */
 
 static expressionS imm_expr;
-static expressionS imm2_expr;
 
 /* The relocatable field in an instruction and the relocs associated
    with it.  These variables are used for instructions like LUI and
@@ -3584,7 +3583,6 @@ md_assemble (char *str)
     = {BFD_RELOC_UNUSED, BFD_RELOC_UNUSED, BFD_RELOC_UNUSED};
 
   imm_expr.X_op = O_absent;
-  imm2_expr.X_op = O_absent;
   offset_expr.X_op = O_absent;
   offset_reloc[0] = BFD_RELOC_UNUSED;
   offset_reloc[1] = BFD_RELOC_UNUSED;
@@ -7024,7 +7022,6 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
   char c;
 
   imm_expr.X_op = O_absent;
-  imm2_expr.X_op = O_absent;
   offset_expr.X_op = O_absent;
   offset_reloc[0] = BFD_RELOC_UNUSED;
   offset_reloc[1] = BFD_RELOC_UNUSED;
@@ -7129,16 +7126,6 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	case '+':
 	  switch (args[1])
 	    {
-	    case 'I':
-	      /* "+I" is like "I", except that imm2_expr is used.  */
-	      if (!match_const_int (&arg, &imm2_expr.X_add_number))
-		return FALSE;
-	      imm2_expr.X_op = O_constant;
-	      if (HAVE_32BIT_GPRS)
-		normalize_constant_expr (&imm2_expr);
-	      ++args;
-	      continue;
-
 	    case 'i':
 	      *offset_reloc = BFD_RELOC_MIPS_JMP;
 	      break;
@@ -7260,7 +7247,6 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 
   create_insn (insn, opcode);
   imm_expr.X_op = O_absent;
-  imm2_expr.X_op = O_absent;
   offset_expr.X_op = O_absent;
   offset_reloc[0] = BFD_RELOC_UNUSED;
   offset_reloc[1] = BFD_RELOC_UNUSED;
@@ -12933,11 +12919,10 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
 }
 
 /* Assemble an instruction into its binary format.  If the instruction
-   is a macro, set imm_expr, imm2_expr and offset_expr to the values
-   associated with "I", "+I" and "A" operands respectively.  Otherwise
-   store the value of the relocatable field (if any) in offset_expr.
-   In both cases set offset_reloc to the relocation operators applied
-   to offset_expr.  */
+   is a macro, set imm_expr and offset_expr to the values associated
+   with "I" and "A" operands respectively.  Otherwise store the value
+   of the relocatable field (if any) in offset_expr.  In both cases
+   set offset_reloc to the relocation operators applied to offset_expr.  */
 
 static void
 mips_ip (char *str, struct mips_cl_insn *insn)
