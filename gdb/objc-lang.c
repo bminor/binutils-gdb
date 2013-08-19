@@ -1260,25 +1260,23 @@ find_objc_msgsend (void)
 
   for (i = 0; i < nmethcalls; i++)
     {
-      struct minimal_symbol *func;
+      struct bound_minimal_symbol func;
 
       /* Try both with and without underscore.  */
-      func = lookup_minimal_symbol (methcalls[i].name, NULL, NULL);
-      if ((func == NULL) && (methcalls[i].name[0] == '_'))
+      func = lookup_bound_minimal_symbol (methcalls[i].name);
+      if ((func.minsym == NULL) && (methcalls[i].name[0] == '_'))
 	{
-	  func = lookup_minimal_symbol (methcalls[i].name + 1, NULL, NULL);
+	  func = lookup_bound_minimal_symbol (methcalls[i].name + 1);
 	}
-      if (func == NULL)
+      if (func.minsym == NULL)
 	{ 
 	  methcalls[i].begin = 0;
 	  methcalls[i].end = 0;
 	  continue; 
 	}
 
-      methcalls[i].begin = SYMBOL_VALUE_ADDRESS (func);
-      do {
-	methcalls[i].end = SYMBOL_VALUE_ADDRESS (++func);
-      } while (methcalls[i].begin == methcalls[i].end);
+      methcalls[i].begin = SYMBOL_VALUE_ADDRESS (func.minsym);
+      methcalls[i].end = minimal_symbol_upper_bound (func);
     }
 }
 

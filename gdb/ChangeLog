@@ -1,3 +1,14 @@
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
+	* blockframe.c (find_pc_partial_function_gnu_ifunc): Use
+	bound minimal symbols.  Move code that knows about minsym
+	table layout...
+	* minsyms.c (minimal_symbol_upper_bound): ... here.  New
+	function.
+	* minsyms.h (minimal_symbol_upper_bound): Declare.
+	* objc-lang.c (find_objc_msgsend): Use bound minimal symbols,
+	minimal_symbol_upper_bound.
+
 2014-02-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* python/lib/gdb/printing.py (RegexpCollectionPrettyPrinter):

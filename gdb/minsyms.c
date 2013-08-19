@@ -1358,3 +1358,48 @@ find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
     }
   return 0;
 }
+
+/* See minsyms.h.  */
+
+CORE_ADDR
+minimal_symbol_upper_bound (struct bound_minimal_symbol minsym)
+{
+  int i;
+  short section;
+  struct obj_section *obj_section;
+  CORE_ADDR result;
+  struct minimal_symbol *msymbol;
+
+  gdb_assert (minsym.minsym != NULL);
+
+  /* If the minimal symbol has a size, use it.  Otherwise use the
+     lesser of the next minimal symbol in the same section, or the end
+     of the section, as the end of the function.  */
+
+  if (MSYMBOL_SIZE (minsym.minsym) != 0)
+    return SYMBOL_VALUE_ADDRESS (minsym.minsym) + MSYMBOL_SIZE (minsym.minsym);
+
+  /* Step over other symbols at this same address, and symbols in
+     other sections, to find the next symbol in this section with a
+     different address.  */
+
+  msymbol = minsym.minsym;
+  section = SYMBOL_SECTION (msymbol);
+  for (i = 1; SYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
+    {
+      if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
+	  && SYMBOL_SECTION (msymbol + i) == section)
+	break;
+    }
+
+  obj_section = SYMBOL_OBJ_SECTION (minsym.objfile, minsym.minsym);
+  if (SYMBOL_LINKAGE_NAME (msymbol + i) != NULL
+      && SYMBOL_VALUE_ADDRESS (msymbol + i) < obj_section_endaddr (obj_section))
+    result = SYMBOL_VALUE_ADDRESS (msymbol + i);
+  else
+    /* We got the start address from the last msymbol in the objfile.
+       So the end address is the end of the section.  */
+    result = obj_section_endaddr (obj_section);
+
+  return result;
+}
