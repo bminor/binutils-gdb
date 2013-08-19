@@ -1763,7 +1763,7 @@ mips_mark_labels (void)
 static char *expr_end;
 
 /* An expression in a macro instruction.  This is set by mips_ip and
-   mips16_ip.  */
+   mips16_ip and when populated is always an O_constant.  */
 
 static expressionS imm_expr;
 
@@ -8067,8 +8067,7 @@ macro_build_ldst_constoffset (expressionS *ep, const char *op,
 static void
 set_at (int reg, int unsignedp)
 {
-  if (imm_expr.X_op == O_constant
-      && imm_expr.X_add_number >= -0x8000
+  if (imm_expr.X_add_number >= -0x8000
       && imm_expr.X_add_number < 0x8000)
     macro_build (&imm_expr, unsignedp ? "sltiu" : "slti", "t,r,j",
 		 AT, reg, BFD_RELOC_LO16);
@@ -9083,11 +9082,11 @@ macro (struct mips_cl_insn *ip, char *str)
       s2 = "dadd";
       if (!mips_opts.micromips)
 	goto do_addi;
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= -0x200
+      if (imm_expr.X_add_number >= -0x200
 	  && imm_expr.X_add_number < 0x200)
 	{
-	  macro_build (NULL, s, "t,r,.", op[0], op[1], imm_expr.X_add_number);
+	  macro_build (NULL, s, "t,r,.", op[0], op[1],
+		       (int) imm_expr.X_add_number);
 	  break;
 	}
       goto do_addi_i;
@@ -9096,8 +9095,7 @@ macro (struct mips_cl_insn *ip, char *str)
       s = "daddiu";
       s2 = "daddu";
     do_addi:
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= -0x8000
+      if (imm_expr.X_add_number >= -0x8000
 	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build (&imm_expr, s, "t,r,j", op[0], op[1], BFD_RELOC_LO16);
@@ -9125,8 +9123,7 @@ macro (struct mips_cl_insn *ip, char *str)
       s = "xori";
       s2 = "xor";
     do_bit:
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= 0
+      if (imm_expr.X_add_number >= 0
 	  && imm_expr.X_add_number < 0x10000)
 	{
 	  if (mask != M_NOR_I)
@@ -9179,7 +9176,7 @@ macro (struct mips_cl_insn *ip, char *str)
     case M_BEQL_I:
     case M_BNE_I:
     case M_BNEL_I:
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
+      if (imm_expr.X_add_number == 0)
 	op[1] = 0;
       else
 	{
@@ -9222,7 +9219,7 @@ macro (struct mips_cl_insn *ip, char *str)
       likely = 1;
     case M_BGT_I:
       /* Check for > max integer.  */
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number >= GPR_SMAX)
+      if (imm_expr.X_add_number >= GPR_SMAX)
 	{
 	do_false:
 	  /* Result is always false.  */
@@ -9232,27 +9229,25 @@ macro (struct mips_cl_insn *ip, char *str)
 	    macro_build_branch_rsrt (M_BNEL, &offset_expr, ZERO, ZERO);
 	  break;
 	}
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("Unsupported large constant"));
       ++imm_expr.X_add_number;
       /* FALLTHROUGH */
     case M_BGE_I:
     case M_BGEL_I:
       if (mask == M_BGEL_I)
 	likely = 1;
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
+      if (imm_expr.X_add_number == 0)
 	{
 	  macro_build_branch_rs (likely ? M_BGEZL : M_BGEZ,
 				 &offset_expr, op[0]);
 	  break;
 	}
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
+      if (imm_expr.X_add_number == 1)
 	{
 	  macro_build_branch_rs (likely ? M_BGTZL : M_BGTZ,
 				 &offset_expr, op[0]);
 	  break;
 	}
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number <= GPR_SMIN)
+      if (imm_expr.X_add_number <= GPR_SMIN)
 	{
 	do_true:
 	  /* result is always true */
@@ -9288,20 +9283,17 @@ macro (struct mips_cl_insn *ip, char *str)
     case M_BGTU_I:
       if (op[0] == 0
 	  || (HAVE_32BIT_GPRS
-	      && imm_expr.X_op == O_constant
 	      && imm_expr.X_add_number == -1))
 	goto do_false;
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("Unsupported large constant"));
       ++imm_expr.X_add_number;
       /* FALLTHROUGH */
     case M_BGEU_I:
     case M_BGEUL_I:
       if (mask == M_BGEUL_I)
 	likely = 1;
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
+      if (imm_expr.X_add_number == 0)
 	goto do_true;
-      else if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
+      else if (imm_expr.X_add_number == 1)
 	macro_build_branch_rsrt (likely ? M_BNEL : M_BNE,
 				 &offset_expr, op[0], ZERO);
       else
@@ -9365,19 +9357,17 @@ macro (struct mips_cl_insn *ip, char *str)
     case M_BLEL_I:
       likely = 1;
     case M_BLE_I:
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number >= GPR_SMAX)
+      if (imm_expr.X_add_number >= GPR_SMAX)
 	goto do_true;
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("Unsupported large constant"));
       ++imm_expr.X_add_number;
       /* FALLTHROUGH */
     case M_BLT_I:
     case M_BLTL_I:
       if (mask == M_BLTL_I)
 	likely = 1;
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
+      if (imm_expr.X_add_number == 0)
 	macro_build_branch_rs (likely ? M_BLTZL : M_BLTZ, &offset_expr, op[0]);
-      else if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
+      else if (imm_expr.X_add_number == 1)
 	macro_build_branch_rs (likely ? M_BLEZL : M_BLEZ, &offset_expr, op[0]);
       else
 	{
@@ -9410,20 +9400,17 @@ macro (struct mips_cl_insn *ip, char *str)
     case M_BLEU_I:
       if (op[0] == 0
 	  || (HAVE_32BIT_GPRS
-	      && imm_expr.X_op == O_constant
 	      && imm_expr.X_add_number == -1))
 	goto do_true;
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("Unsupported large constant"));
       ++imm_expr.X_add_number;
       /* FALLTHROUGH */
     case M_BLTU_I:
     case M_BLTUL_I:
       if (mask == M_BLTUL_I)
 	likely = 1;
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
+      if (imm_expr.X_add_number == 0)
 	goto do_false;
-      else if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
+      else if (imm_expr.X_add_number == 1)
 	macro_build_branch_rsrt (likely ? M_BEQL : M_BEQ,
 				 &offset_expr, op[0], ZERO);
       else
@@ -9588,7 +9575,7 @@ macro (struct mips_cl_insn *ip, char *str)
       s = "ddivu";
       s2 = "mfhi";
     do_divi:
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
+      if (imm_expr.X_add_number == 0)
 	{
 	  as_warn (_("Divide by zero."));
 	  if (mips_trap)
@@ -9597,7 +9584,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	    macro_build (NULL, "break", BRK_FMT, 7);
 	  break;
 	}
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 1)
+      if (imm_expr.X_add_number == 1)
 	{
 	  if (strcmp (s2, "mflo") == 0)
 	    move_register (op[0], op[1]);
@@ -9605,9 +9592,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	    move_register (op[0], ZERO);
 	  break;
 	}
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number == -1
-	  && s[strlen (s) - 1] != 'u')
+      if (imm_expr.X_add_number == -1 && s[strlen (s) - 1] != 'u')
 	{
 	  if (strcmp (s2, "mflo") == 0)
 	    macro_build (NULL, dbl ? "dneg" : "neg", "d,w", op[0], op[1]);
@@ -11324,7 +11309,8 @@ macro (struct mips_cl_insn *ip, char *str)
 	}
       else
 	{
-	  gas_assert (offset_expr.X_op == O_symbol
+	  gas_assert (imm_expr.X_op == O_absent
+		      && offset_expr.X_op == O_symbol
 		      && strcmp (segment_name (S_GET_SEGMENT
 					       (offset_expr.X_add_symbol)),
 				 ".lit4") == 0
@@ -11339,7 +11325,7 @@ macro (struct mips_cl_insn *ip, char *str)
          wide, IMM_EXPR is the entire value.  Otherwise IMM_EXPR is the high
          order 32 bits of the value and the low order 32 bits are either
          zero or in OFFSET_EXPR.  */
-      if (imm_expr.X_op == O_constant || imm_expr.X_op == O_big)
+      if (imm_expr.X_op == O_constant)
 	{
 	  if (HAVE_64BIT_GPRS)
 	    load_register (op[0], &imm_expr, 1);
@@ -11373,6 +11359,7 @@ macro (struct mips_cl_insn *ip, char *str)
 	    }
 	  break;
 	}
+      gas_assert (imm_expr.X_op == O_absent);
 
       /* We know that sym is in the .rdata section.  First we get the
 	 upper 16 bits of the address.  */
@@ -11417,7 +11404,7 @@ macro (struct mips_cl_insn *ip, char *str)
          bits wide as well.  Otherwise IMM_EXPR is the high order 32 bits of
          the value and the low order 32 bits are either zero or in
          OFFSET_EXPR.  */
-      if (imm_expr.X_op == O_constant || imm_expr.X_op == O_big)
+      if (imm_expr.X_op == O_constant)
 	{
 	  used_at = 1;
 	  load_register (AT, &imm_expr, HAVE_64BIT_FPRS);
@@ -11441,7 +11428,8 @@ macro (struct mips_cl_insn *ip, char *str)
 	  break;
 	}
 
-      gas_assert (offset_expr.X_op == O_symbol
+      gas_assert (imm_expr.X_op == O_absent
+		  && offset_expr.X_op == O_symbol
 		  && offset_expr.X_add_number == 0);
       s = segment_name (S_GET_SEGMENT (offset_expr.X_add_symbol));
       if (strcmp (s, ".lit8") == 0)
@@ -12005,8 +11993,6 @@ macro (struct mips_cl_insn *ip, char *str)
 	char *l;
 	char *rr;
 
-	if (imm_expr.X_op != O_constant)
-	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x3f;
 	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
 	  {
@@ -12036,8 +12022,6 @@ macro (struct mips_cl_insn *ip, char *str)
       {
 	unsigned int rot;
 
-	if (imm_expr.X_op != O_constant)
-	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x1f;
 	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	  {
@@ -12089,8 +12073,6 @@ macro (struct mips_cl_insn *ip, char *str)
 	char *l;
 	char *rr;
 
-	if (imm_expr.X_op != O_constant)
-	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x3f;
 	if (ISA_HAS_DROR (mips_opts.isa) || CPU_HAS_DROR (mips_opts.arch))
 	  {
@@ -12119,8 +12101,6 @@ macro (struct mips_cl_insn *ip, char *str)
       {
 	unsigned int rot;
 
-	if (imm_expr.X_op != O_constant)
-	  as_bad (_("Improper rotate count"));
 	rot = imm_expr.X_add_number & 0x1f;
 	if (ISA_HAS_ROR (mips_opts.isa) || CPU_HAS_ROR (mips_opts.arch))
 	  {
@@ -12152,7 +12132,7 @@ macro (struct mips_cl_insn *ip, char *str)
       break;
 
     case M_SEQ_I:
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
+      if (imm_expr.X_add_number == 0)
 	{
 	  macro_build (&expr1, "sltiu", "t,r,j", op[0], op[1], BFD_RELOC_LO16);
 	  break;
@@ -12172,12 +12152,10 @@ macro (struct mips_cl_insn *ip, char *str)
 		       (int) imm_expr.X_add_number);
 	  break;
 	}
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= 0
+      if (imm_expr.X_add_number >= 0
 	  && imm_expr.X_add_number < 0x10000)
 	macro_build (&imm_expr, "xori", "t,r,i", op[0], op[1], BFD_RELOC_LO16);
-      else if (imm_expr.X_op == O_constant
-	       && imm_expr.X_add_number > -0x8000
+      else if (imm_expr.X_add_number > -0x8000
 	       && imm_expr.X_add_number < 0)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
@@ -12212,8 +12190,7 @@ macro (struct mips_cl_insn *ip, char *str)
 
     case M_SGE_I:	/* X >= I  <==>  not (X < I) */
     case M_SGEU_I:
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= -0x8000
+      if (imm_expr.X_add_number >= -0x8000
 	  && imm_expr.X_add_number < 0x8000)
 	macro_build (&imm_expr, mask == M_SGE_I ? "slti" : "sltiu", "t,r,j",
 		     op[0], op[1], BFD_RELOC_LO16);
@@ -12270,8 +12247,7 @@ macro (struct mips_cl_insn *ip, char *str)
       break;
 
     case M_SLT_I:
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= -0x8000
+      if (imm_expr.X_add_number >= -0x8000
 	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build (&imm_expr, "slti", "t,r,j", op[0], op[1],
@@ -12284,8 +12260,7 @@ macro (struct mips_cl_insn *ip, char *str)
       break;
 
     case M_SLTU_I:
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= -0x8000
+      if (imm_expr.X_add_number >= -0x8000
 	  && imm_expr.X_add_number < 0x8000)
 	{
 	  macro_build (&imm_expr, "sltiu", "t,r,j", op[0], op[1],
@@ -12310,7 +12285,7 @@ macro (struct mips_cl_insn *ip, char *str)
       break;
 
     case M_SNE_I:
-      if (imm_expr.X_op == O_constant && imm_expr.X_add_number == 0)
+      if (imm_expr.X_add_number == 0)
 	{
 	  macro_build (NULL, "sltu", "d,v,t", op[0], 0, op[1]);
 	  break;
@@ -12331,15 +12306,13 @@ macro (struct mips_cl_insn *ip, char *str)
 		       (int) imm_expr.X_add_number);
 	  break;
 	}
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number >= 0
+      if (imm_expr.X_add_number >= 0
 	  && imm_expr.X_add_number < 0x10000)
 	{
 	  macro_build (&imm_expr, "xori", "t,r,i", op[0], op[1],
 		       BFD_RELOC_LO16);
 	}
-      else if (imm_expr.X_op == O_constant
-	       && imm_expr.X_add_number > -0x8000
+      else if (imm_expr.X_add_number > -0x8000
 	       && imm_expr.X_add_number < 0)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
@@ -12376,11 +12349,11 @@ macro (struct mips_cl_insn *ip, char *str)
       s2 = "dsub";
       if (!mips_opts.micromips)
 	goto do_subi;
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number > -0x200
+      if (imm_expr.X_add_number > -0x200
 	  && imm_expr.X_add_number <= 0x200)
 	{
-	  macro_build (NULL, s, "t,r,.", op[0], op[1], -imm_expr.X_add_number);
+	  macro_build (NULL, s, "t,r,.", op[0], op[1],
+		       (int) -imm_expr.X_add_number);
 	  break;
 	}
       goto do_subi_i;
@@ -12389,8 +12362,7 @@ macro (struct mips_cl_insn *ip, char *str)
       s = "daddiu";
       s2 = "dsubu";
     do_subi:
-      if (imm_expr.X_op == O_constant
-	  && imm_expr.X_add_number > -0x8000
+      if (imm_expr.X_add_number > -0x8000
 	  && imm_expr.X_add_number <= 0x8000)
 	{
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
@@ -12708,22 +12680,16 @@ mips16_macro (struct mips_cl_insn *ip)
       goto do_subu;
     case M_SUBU_I:
     do_subu:
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("Unsupported large constant"));
       imm_expr.X_add_number = -imm_expr.X_add_number;
       macro_build (&imm_expr, dbl ? "daddiu" : "addiu", "y,x,4", op[0], op[1]);
       break;
 
     case M_SUBU_I_2:
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("Unsupported large constant"));
       imm_expr.X_add_number = -imm_expr.X_add_number;
       macro_build (&imm_expr, "addiu", "x,k", op[0]);
       break;
 
     case M_DSUBU_I_2:
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("Unsupported large constant"));
       imm_expr.X_add_number = -imm_expr.X_add_number;
       macro_build (&imm_expr, "daddiu", "y,j", op[0]);
       break;
@@ -12829,8 +12795,6 @@ mips16_macro (struct mips_cl_insn *ip)
       s3 = "x,8";
 
     do_addone_branch_i:
-      if (imm_expr.X_op != O_constant)
-	as_bad (_("Unsupported large constant"));
       ++imm_expr.X_add_number;
 
     do_branch_i:

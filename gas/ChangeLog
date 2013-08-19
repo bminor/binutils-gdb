@@ -1,5 +1,11 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (imm_expr): Expand comment.
+	(set_at, macro, mips16_macro): Expect imm_expr to be O_constant
+	when populated.
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (imm2_expr): Delete.
 	(md_assemble, match_insn, imm2_expr.X_op, mips_ip): Update accordingly.
 
