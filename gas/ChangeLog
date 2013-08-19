@@ -1,5 +1,12 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (normalize_constant_expr): Move further up file.
+	(normalize_address_expr): Likewise.
+	(match_insn, match_mips16_insn): New functions, split out from...
+	(mips_ip, mips16_ip): ...here.
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (operand_reg_mask, match_operand): Handle
 	OP_OPTIONAL_REG.
 	(mips_ip, mips16_ip): Use mips_optional_operand_p to check

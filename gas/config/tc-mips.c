@@ -6880,6 +6880,526 @@ end_noreorder (void)
     }
 }
 
+/* Sign-extend 32-bit mode constants that have bit 31 set and all
+   higher bits unset.  */
+
+static void
+normalize_constant_expr (expressionS *ex)
+{
+  if (ex->X_op == O_constant
+      && IS_ZEXT_32BIT_NUM (ex->X_add_number))
+    ex->X_add_number = (((ex->X_add_number & 0xffffffff) ^ 0x80000000)
+			- 0x80000000);
+}
+
+/* Sign-extend 32-bit mode address offsets that have bit 31 set and
+   all higher bits unset.  */
+
+static void
+normalize_address_expr (expressionS *ex)
+{
+  if (((ex->X_op == O_constant && HAVE_32BIT_ADDRESSES)
+	|| (ex->X_op == O_symbol && HAVE_32BIT_SYMBOLS))
+      && IS_ZEXT_32BIT_NUM (ex->X_add_number))
+    ex->X_add_number = (((ex->X_add_number & 0xffffffff) ^ 0x80000000)
+			- 0x80000000);
+}
+
+/* Try to match TOKENS against OPCODE, storing the result in INSN.
+   Return true if the match was successful.
+
+   OPCODE_EXTRA is a value that should be ORed into the opcode
+   (used for VU0 channel suffixes, etc.).  MORE_ALTS is true if
+   there are more alternatives after OPCODE and SOFT_MATCH is
+   as for mips_arg_info.  */
+
+static bfd_boolean
+match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
+	    struct mips_operand_token *tokens, unsigned int opcode_extra,
+	    bfd_boolean more_alts, bfd_boolean soft_match)
+{
+  const char *args;
+  struct mips_arg_info arg;
+  const struct mips_operand *operand;
+  char c;
+
+  imm_expr.X_op = O_absent;
+  imm2_expr.X_op = O_absent;
+  offset_expr.X_op = O_absent;
+  offset_reloc[0] = BFD_RELOC_UNUSED;
+  offset_reloc[1] = BFD_RELOC_UNUSED;
+  offset_reloc[2] = BFD_RELOC_UNUSED;
+
+  create_insn (insn, opcode);
+  insn->insn_opcode |= opcode_extra;
+  insn_error = NULL;
+  memset (&arg, 0, sizeof (arg));
+  arg.insn = insn;
+  arg.token = tokens;
+  arg.argnum = 1;
+  arg.last_regno = ILLEGAL_REG;
+  arg.dest_regno = ILLEGAL_REG;
+  arg.soft_match = soft_match;
+  for (args = opcode->args;; ++args)
+    {
+      if (arg.token->type == OT_END)
+	{
+	  /* Handle unary instructions in which only one operand is given.
+	     The source is then the same as the destination.  */
+	  if (arg.opnum == 1 && *args == ',')
+	    {
+	      operand = (mips_opts.micromips
+			 ? decode_micromips_operand (args + 1)
+			 : decode_mips_operand (args + 1));
+	      if (operand && mips_optional_operand_p (operand))
+		{
+		  arg.token = tokens;
+		  arg.argnum = 1;
+		  continue;
+		}
+	    }
+
+	  /* Treat elided base registers as $0.  */
+	  if (strcmp (args, "(b)") == 0)
+	    args += 3;
+
+	  if (args[0] == '+')
+	    switch (args[1])
+	      {
+	      case 'K':
+	      case 'N':
+		/* The register suffix is optional. */
+		args += 2;
+		break;
+	      }
+
+	  /* Fail the match if there were too few operands.  */
+	  if (*args)
+	    return FALSE;
+
+	  /* Successful match.  */
+	  if (arg.dest_regno == arg.last_regno
+	      && strncmp (insn->insn_mo->name, "jalr", 4) == 0)
+	    {
+	      if (arg.opnum == 2)
+		as_bad (_("Source and destination must be different"));
+	      else if (arg.last_regno == 31)
+		as_bad (_("A destination register must be supplied"));
+	    }
+	  check_completed_insn (&arg);
+	  return TRUE;
+	}
+
+      /* Fail the match if the line has too many operands.   */
+      if (*args == 0)
+	return FALSE;
+
+      /* Handle characters that need to match exactly.  */
+      if (*args == '(' || *args == ')' || *args == ',')
+	{
+	  if (match_char (&arg, *args))
+	    continue;
+	  return FALSE;
+	}
+      if (*args == '#')
+	{
+	  ++args;
+	  if (arg.token->type == OT_DOUBLE_CHAR
+	      && arg.token->u.ch == *args)
+	    {
+	      ++arg.token;
+	      continue;
+	    }
+	  return FALSE;
+	}
+
+      /* Handle special macro operands.  Work out the properties of
+	 other operands.  */
+      arg.opnum += 1;
+      arg.lax_max = FALSE;
+      switch (*args)
+	{
+	case '+':
+	  switch (args[1])
+	    {
+	    case '1':
+	    case '2':
+	    case '3':
+	    case '4':
+	    case 'B':
+	    case 'C':
+	    case 'F':
+	    case 'G':
+	    case 'H':
+	    case 'J':
+	    case 'Q':
+	    case 'S':
+	    case 's':
+	      /* If these integer forms come last, there is no other
+		 form of the instruction that could match.  Prefer to
+		 give detailed error messages where possible.  */
+	      if (args[2] == 0)
+		arg.soft_match = FALSE;
+	      break;
+
+	    case 'I':
+	      /* "+I" is like "I", except that imm2_expr is used.  */
+	      if (match_const_int (&arg, &imm2_expr.X_add_number, 0))
+		imm2_expr.X_op = O_constant;
+	      else
+		insn_error = _("absolute expression required");
+	      if (HAVE_32BIT_GPRS)
+		normalize_constant_expr (&imm2_expr);
+	      ++args;
+	      continue;
+
+	    case 'i':
+	      *offset_reloc = BFD_RELOC_MIPS_JMP;
+	      break;
+	    }
+	  break;
+
+	case '\'':
+	case ':':
+	case '@':
+	case '^':
+	case '$':
+	case '\\':
+	case '%':
+	case '|':
+	case '0':
+	case '1':
+	case '2':
+	case '3':
+	case '4':
+	case '5':
+	case '6':
+	case '8':
+	case 'B':
+	case 'C':
+	case 'J':
+	case 'O':
+	case 'P':
+	case 'Q':
+	case 'c':
+	case 'h':
+	case 'q':
+	  /* If these integer forms come last, there is no other
+	     form of the instruction that could match.  Prefer to
+	     give detailed error messages where possible.  */
+	  if (args[1] == 0)
+	    arg.soft_match = FALSE;
+	  break;
+
+	case 'I':
+	  if (match_const_int (&arg, &imm_expr.X_add_number, 0))
+	    imm_expr.X_op = O_constant;
+	  else
+	    insn_error = _("absolute expression required");
+	  if (HAVE_32BIT_GPRS)
+	    normalize_constant_expr (&imm_expr);
+	  continue;
+
+	case 'A':
+	  if (arg.token->type == OT_CHAR && arg.token->u.ch == '(')
+	    {
+	      /* Assume that the offset has been elided and that what
+		 we saw was a base register.  The match will fail later
+		 if that assumption turns out to be wrong.  */
+	      offset_expr.X_op = O_constant;
+	      offset_expr.X_add_number = 0;
+	    }
+	  else if (match_expression (&arg, &offset_expr, offset_reloc))
+	    normalize_address_expr (&offset_expr);
+	  else
+	    insn_error = _("absolute expression required");
+	  continue;
+
+	case 'F':
+	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
+				     8, TRUE))
+	    insn_error = _("floating-point expression required");
+	  continue;
+
+	case 'L':
+	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
+				     8, FALSE))
+	    insn_error = _("floating-point expression required");
+	  continue;
+
+	case 'f':
+	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
+				     4, TRUE))
+	    insn_error = _("floating-point expression required");
+	  continue;
+
+	case 'l':
+	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
+				     4, FALSE))
+	    insn_error = _("floating-point expression required");
+	  continue;
+
+	  /* ??? This is the traditional behavior, but is flaky if
+	     there are alternative versions of the same instruction
+	     for different subarchitectures.  The next alternative
+	     might not be suitable.  */
+	case 'j':
+	  /* For compatibility with older assemblers, we accept
+	     0x8000-0xffff as signed 16-bit numbers when only
+	     signed numbers are allowed.  */
+	  arg.lax_max = !more_alts;
+	case 'i':
+	  /* Only accept non-constant operands if this is the
+	     final alternative.  Later alternatives might include
+	     a macro implementation.  */
+	  arg.allow_nonconst = !more_alts;
+	  break;
+
+	case 'u':
+	  /* There are no macro implementations for out-of-range values.  */
+	  arg.allow_nonconst = TRUE;
+	  break;
+
+	case 'o':
+	  /* There should always be a macro implementation.  */
+	  arg.allow_nonconst = FALSE;
+	  break;
+
+	case 'p':
+	  *offset_reloc = BFD_RELOC_16_PCREL_S2;
+	  break;
+
+	case 'a':
+	  *offset_reloc = BFD_RELOC_MIPS_JMP;
+	  break;
+
+	case 'm':
+	  gas_assert (mips_opts.micromips);
+	  c = args[1];
+	  switch (c)
+	    {
+	    case 'D':
+	    case 'E':
+	      if (!forced_insn_length)
+		*offset_reloc = (int) BFD_RELOC_UNUSED + c;
+	      else if (c == 'D')
+		*offset_reloc = BFD_RELOC_MICROMIPS_10_PCREL_S1;
+	      else
+		*offset_reloc = BFD_RELOC_MICROMIPS_7_PCREL_S1;
+	      break;
+	    }
+	  break;
+	}
+
+      operand = (mips_opts.micromips
+		 ? decode_micromips_operand (args)
+		 : decode_mips_operand (args));
+      if (!operand)
+	abort ();
+
+      /* Skip prefixes.  */
+      if (*args == '+' || *args == 'm')
+	args++;
+
+      if (mips_optional_operand_p (operand)
+	  && args[1] == ','
+	  && (arg.token[0].type != OT_REG
+	      || arg.token[1].type == OT_END))
+	{
+	  /* Assume that the register has been elided and is the
+	     same as the first operand.  */
+	  arg.token = tokens;
+	  arg.argnum = 1;
+	}
+
+      if (!match_operand (&arg, operand))
+	return FALSE;
+    }
+}
+
+/* Like match_insn, but for MIPS16.  */
+
+static bfd_boolean
+match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
+		   struct mips_operand_token *tokens, bfd_boolean soft_match)
+{
+  const char *args;
+  const struct mips_operand *operand;
+  const struct mips_operand *ext_operand;
+  struct mips_arg_info arg;
+  int relax_char;
+
+  create_insn (insn, opcode);
+  imm_expr.X_op = O_absent;
+  imm2_expr.X_op = O_absent;
+  offset_expr.X_op = O_absent;
+  offset_reloc[0] = BFD_RELOC_UNUSED;
+  offset_reloc[1] = BFD_RELOC_UNUSED;
+  offset_reloc[2] = BFD_RELOC_UNUSED;
+  relax_char = 0;
+
+  memset (&arg, 0, sizeof (arg));
+  arg.insn = insn;
+  arg.token = tokens;
+  arg.argnum = 1;
+  arg.last_regno = ILLEGAL_REG;
+  arg.dest_regno = ILLEGAL_REG;
+  arg.soft_match = soft_match;
+  relax_char = 0;
+  for (args = opcode->args;; ++args)
+    {
+      int c;
+
+      if (arg.token->type == OT_END)
+	{
+	  offsetT value;
+
+	  /* Handle unary instructions in which only one operand is given.
+	     The source is then the same as the destination.  */
+	  if (arg.opnum == 1 && *args == ',')
+	    {
+	      operand = decode_mips16_operand (args[1], FALSE);
+	      if (operand && mips_optional_operand_p (operand))
+		{
+		  arg.token = tokens;
+		  arg.argnum = 1;
+		  continue;
+		}
+	    }
+
+	  /* Fail the match if there were too few operands.  */
+	  if (*args)
+	    return FALSE;
+
+	  /* Successful match.  Stuff the immediate value in now, if
+	     we can.  */
+	  if (opcode->pinfo == INSN_MACRO)
+	    {
+	      gas_assert (relax_char == 0 || relax_char == 'p');
+	      gas_assert (*offset_reloc == BFD_RELOC_UNUSED);
+	    }
+	  else if (relax_char
+		   && offset_expr.X_op == O_constant
+		   && calculate_reloc (*offset_reloc,
+				       offset_expr.X_add_number,
+				       &value))
+	    {
+	      mips16_immed (NULL, 0, relax_char, *offset_reloc, value,
+			    forced_insn_length, &insn->insn_opcode);
+	      offset_expr.X_op = O_absent;
+	      *offset_reloc = BFD_RELOC_UNUSED;
+	    }
+	  else if (relax_char && *offset_reloc != BFD_RELOC_UNUSED)
+	    {
+	      if (forced_insn_length == 2)
+		as_bad (_("invalid unextended operand value"));
+	      forced_insn_length = 4;
+	      insn->insn_opcode |= MIPS16_EXTEND;
+	    }
+	  else if (relax_char)
+	    *offset_reloc = (int) BFD_RELOC_UNUSED + relax_char;
+
+	  check_completed_insn (&arg);
+	  return TRUE;
+	}
+
+      /* Fail the match if the line has too many operands.   */
+      if (*args == 0)
+	return FALSE;
+
+      /* Handle characters that need to match exactly.  */
+      if (*args == '(' || *args == ')' || *args == ',')
+	{
+	  if (match_char (&arg, *args))
+	    continue;
+	  return FALSE;
+	}
+
+      arg.opnum += 1;
+      c = *args;
+      switch (c)
+	{
+	case 'p':
+	case 'q':
+	case 'A':
+	case 'B':
+	case 'E':
+	  relax_char = c;
+	  break;
+
+	case 'I':
+	  if (match_const_int (&arg, &imm_expr.X_add_number, 0))
+	    imm_expr.X_op = O_constant;
+	  else
+	    insn_error = _("absolute expression required");
+	  if (HAVE_32BIT_GPRS)
+	    normalize_constant_expr (&imm_expr);
+	  continue;
+
+	case 'a':
+	case 'i':
+	  *offset_reloc = BFD_RELOC_MIPS16_JMP;
+	  insn->insn_opcode <<= 16;
+	  break;
+	}
+
+      operand = decode_mips16_operand (c, FALSE);
+      if (!operand)
+	abort ();
+
+      /* '6' is a special case.  It is used for BREAK and SDBBP,
+	 whose operands are only meaningful to the software that decodes
+	 them.  This means that there is no architectural reason why
+	 they cannot be prefixed by EXTEND, but in practice,
+	 exception handlers will only look at the instruction
+	 itself.  We therefore allow '6' to be extended when
+	 disassembling but not when assembling.  */
+      if (operand->type != OP_PCREL && c != '6')
+	{
+	  ext_operand = decode_mips16_operand (c, TRUE);
+	  if (operand != ext_operand)
+	    {
+	      if (arg.token->type == OT_CHAR && arg.token->u.ch == '(')
+		{
+		  offset_expr.X_op = O_constant;
+		  offset_expr.X_add_number = 0;
+		  relax_char = c;
+		  continue;
+		}
+
+	      /* We need the OT_INTEGER check because some MIPS16
+		 immediate variants are listed before the register ones.  */
+	      if (arg.token->type != OT_INTEGER
+		  || !match_expression (&arg, &offset_expr, offset_reloc))
+		return FALSE;
+
+	      /* '8' is used for SLTI(U) and has traditionally not
+		 been allowed to take relocation operators.  */
+	      if (offset_reloc[0] != BFD_RELOC_UNUSED
+		  && (ext_operand->size != 16 || c == '8'))
+		return FALSE;
+
+	      relax_char = c;
+	      continue;
+	    }
+	}
+
+      if (mips_optional_operand_p (operand)
+	  && args[1] == ','
+	  && (arg.token[0].type != OT_REG
+	      || arg.token[1].type == OT_END))
+	{
+	  /* Assume that the register has been elided and is the
+	     same as the first operand.  */
+	  arg.token = tokens;
+	  arg.argnum = 1;
+	}
+
+      if (!match_operand (&arg, operand))
+	return FALSE;
+    }
+}
+
 /* Set up global variables for the start of a new macro.  */
 
 static void
@@ -7292,33 +7812,6 @@ mips16_macro_build (expressionS *ep, const char *name, const char *fmt,
   gas_assert (*r == BFD_RELOC_UNUSED ? ep == NULL : ep != NULL);
 
   append_insn (&insn, ep, r, TRUE);
-}
-
-/*
- * Sign-extend 32-bit mode constants that have bit 31 set and all
- * higher bits unset.
- */
-static void
-normalize_constant_expr (expressionS *ex)
-{
-  if (ex->X_op == O_constant
-      && IS_ZEXT_32BIT_NUM (ex->X_add_number))
-    ex->X_add_number = (((ex->X_add_number & 0xffffffff) ^ 0x80000000)
-			- 0x80000000);
-}
-
-/*
- * Sign-extend 32-bit mode address offsets that have bit 31 set and
- * all higher bits unset.
- */
-static void
-normalize_address_expr (expressionS *ex)
-{
-  if (((ex->X_op == O_constant && HAVE_32BIT_ADDRESSES)
-	|| (ex->X_op == O_symbol && HAVE_32BIT_SYMBOLS))
-      && IS_ZEXT_32BIT_NUM (ex->X_add_number))
-    ex->X_add_number = (((ex->X_add_number & 0xffffffff) ^ 0x80000000)
-			- 0x80000000);
 }
 
 /*
@@ -12387,13 +12880,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   struct mips_opcode *firstinsn = NULL;
   const struct mips_opcode *past;
   struct hash_control *hash;
-  const char *args;
-  char c = 0;
   struct mips_opcode *first, *insn;
   char format;
   size_t end;
-  const struct mips_operand *operand;
-  struct mips_arg_info arg;
   struct mips_operand_token *tokens;
   unsigned int opcode_extra;
 
@@ -12498,302 +12987,14 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  return;
 	}
 
-      imm_expr.X_op = O_absent;
-      imm2_expr.X_op = O_absent;
-      offset_expr.X_op = O_absent;
-      offset_reloc[0] = BFD_RELOC_UNUSED;
-      offset_reloc[1] = BFD_RELOC_UNUSED;
-      offset_reloc[2] = BFD_RELOC_UNUSED;
-
-      create_insn (ip, insn);
-      ip->insn_opcode |= opcode_extra;
-      insn_error = NULL;
-      memset (&arg, 0, sizeof (arg));
-      arg.insn = ip;
-      arg.token = tokens;
-      arg.argnum = 1;
-      arg.last_regno = ILLEGAL_REG;
-      arg.dest_regno = ILLEGAL_REG;
-      arg.soft_match = (more_alts
-			|| (wrong_delay_slot_insns && need_delay_slot_ok));
-      for (args = insn->args;; ++args)
+      if (match_insn (ip, insn, tokens, opcode_extra, more_alts,
+		      more_alts || (wrong_delay_slot_insns
+				    && need_delay_slot_ok)))
 	{
-	  if (arg.token->type == OT_END)
-	    {
-	      /* Handle unary instructions in which only one operand is given.
-		 The source is then the same as the destination.  */
-	      if (arg.opnum == 1 && *args == ',')
-		{
-		  operand = (mips_opts.micromips
-			     ? decode_micromips_operand (args + 1)
-			     : decode_mips_operand (args + 1));
-		  if (operand && mips_optional_operand_p (operand))
-		    {
-		      arg.token = tokens;
-		      arg.argnum = 1;
-		      continue;
-		    }
-		}
-
-	      /* Treat elided base registers as $0.  */
-	      if (strcmp (args, "(b)") == 0)
-		args += 3;
-
-	      if (args[0] == '+')
-	        switch (args[1])
-		  {
-		    case 'K':
-		    case 'N':
-		      /* The register suffix is optional. */
-		      args += 2;
-		      break;
-		  }
-
-	      /* Fail the match if there were too few operands.  */
-	      if (*args)
-		break;
-
-	      /* Successful match.  */
-	      if (arg.dest_regno == arg.last_regno
-		  && strncmp (ip->insn_mo->name, "jalr", 4) == 0)
-		{
-		  if (arg.opnum == 2)
-		    as_bad (_("Source and destination must be different"));
-		  else if (arg.last_regno == 31)
-		    as_bad (_("A destination register must be supplied"));
-		}
-	      check_completed_insn (&arg);
-	      obstack_free (&mips_operand_tokens, tokens);
-	      return;
-	    }
-
-	  /* Fail the match if the line has too many operands.   */
-	  if (*args == 0)
-	    break;
-
-	  /* Handle characters that need to match exactly.  */
-	  if (*args == '(' || *args == ')' || *args == ',')
-	    {
-	      if (match_char (&arg, *args))
- 		continue;
- 	      break;
-	    }
-	  if (*args == '#')
-	    {
-	      ++args;
-	      if (arg.token->type == OT_DOUBLE_CHAR
-		  && arg.token->u.ch == *args)
-		{
-		  ++arg.token;
-		  continue;
-		}
- 	      break;
-	    }
-
-	  /* Handle special macro operands.  Work out the properties of
-	     other operands.  */
-	  arg.opnum += 1;
-	  arg.lax_max = FALSE;
-	  switch (*args)
-	    {
-	    case '+':
-	      switch (args[1])
-		{
-		case '1':
-		case '2':
-		case '3':
-		case '4':
-		case 'B':
-		case 'C':
-		case 'F':
-		case 'G':
-		case 'H':
-		case 'J':
-		case 'Q':
-		case 'S':
-		case 's':
-		  /* If these integer forms come last, there is no other
-		     form of the instruction that could match.  Prefer to
-		     give detailed error messages where possible.  */
-		  if (args[2] == 0)
-		    arg.soft_match = FALSE;
-		  break;
-
-		case 'I':
-		  /* "+I" is like "I", except that imm2_expr is used.  */
-		  if (match_const_int (&arg, &imm2_expr.X_add_number, 0))
-		    imm2_expr.X_op = O_constant;
-		  else
-		    insn_error = _("absolute expression required");
-		  if (HAVE_32BIT_GPRS)
-		    normalize_constant_expr (&imm2_expr);
-		  ++args;
-		  continue;
-
-		case 'i':
-		  *offset_reloc = BFD_RELOC_MIPS_JMP;
-		  break;
-		}
-	      break;
-
-	    case '\'':
-	    case ':':
-	    case '@':
-	    case '^':
-	    case '$':
-	    case '\\':
-	    case '%':
-	    case '|':
-	    case '0':
-	    case '1':
-	    case '2':
-	    case '3':
-	    case '4':
-	    case '5':
-	    case '6':
-	    case '8':
-	    case 'B':
-	    case 'C':
-	    case 'J':
-	    case 'O':
-	    case 'P':
-	    case 'Q':
-	    case 'c':
-	    case 'h':
-	    case 'q':
-	      /* If these integer forms come last, there is no other
-		 form of the instruction that could match.  Prefer to
-		 give detailed error messages where possible.  */
-	      if (args[1] == 0)
-		arg.soft_match = FALSE;
-	      break;
-
-	    case 'I':
-	      if (match_const_int (&arg, &imm_expr.X_add_number, 0))
-		imm_expr.X_op = O_constant;
-	      else
-		insn_error = _("absolute expression required");
-	      if (HAVE_32BIT_GPRS)
-		normalize_constant_expr (&imm_expr);
-	      continue;
-
-	    case 'A':
-	      if (arg.token->type == OT_CHAR && arg.token->u.ch == '(')
-		{
-		  /* Assume that the offset has been elided and that what
-		     we saw was a base register.  The match will fail later
-		     if that assumption turns out to be wrong.  */
-		  offset_expr.X_op = O_constant;
-		  offset_expr.X_add_number = 0;
-		}
-	      else if (match_expression (&arg, &offset_expr, offset_reloc))
-		normalize_address_expr (&offset_expr);
-	      else
-		insn_error = _("absolute expression required");
-	      continue;
-
-	    case 'F':
-	      if (!match_float_constant (&arg, &imm_expr, &offset_expr,
-					 8, TRUE))
-		insn_error = _("floating-point expression required");
-	      continue;
-
-	    case 'L':
-	      if (!match_float_constant (&arg, &imm_expr, &offset_expr,
-					 8, FALSE))
-		insn_error = _("floating-point expression required");
-	      continue;
-
-	    case 'f':
-	      if (!match_float_constant (&arg, &imm_expr, &offset_expr,
-					 4, TRUE))
-		insn_error = _("floating-point expression required");
-	      continue;
-
-	    case 'l':
-	      if (!match_float_constant (&arg, &imm_expr, &offset_expr,
-					 4, FALSE))
-		insn_error = _("floating-point expression required");
-	      continue;
-
-	      /* ??? This is the traditional behavior, but is flaky if
-		 there are alternative versions of the same instruction
-		 for different subarchitectures.  The next alternative
-		 might not be suitable.  */
-	    case 'j':
-	      /* For compatibility with older assemblers, we accept
-		 0x8000-0xffff as signed 16-bit numbers when only
-		 signed numbers are allowed.  */
-	      arg.lax_max = !more_alts;
-	    case 'i':
-	      /* Only accept non-constant operands if this is the
-		 final alternative.  Later alternatives might include
-		 a macro implementation.  */
-	      arg.allow_nonconst = !more_alts;
-	      break;
-
-	    case 'u':
-	      /* There are no macro implementations for out-of-range values.  */
-	      arg.allow_nonconst = TRUE;
-	      break;
-
-	    case 'o':
-	      /* There should always be a macro implementation.  */
-	      arg.allow_nonconst = FALSE;
-	      break;
-
-	    case 'p':
-	      *offset_reloc = BFD_RELOC_16_PCREL_S2;
-	      break;
-
-	    case 'a':
-	      *offset_reloc = BFD_RELOC_MIPS_JMP;
-	      break;
-
-	    case 'm':
-	      gas_assert (mips_opts.micromips);
-	      c = args[1];
-	      switch (c)
-		{
-		case 'D':
-		case 'E':
-		  if (!forced_insn_length)
-		    *offset_reloc = (int) BFD_RELOC_UNUSED + c;
-		  else if (c == 'D')
-		    *offset_reloc = BFD_RELOC_MICROMIPS_10_PCREL_S1;
-		  else
-		    *offset_reloc = BFD_RELOC_MICROMIPS_7_PCREL_S1;
-		  break;
-		}
-	      break;
-	    }
-
-	  operand = (mips_opts.micromips
-		     ? decode_micromips_operand (args)
-		     : decode_mips_operand (args));
-	  if (!operand)
-	    abort ();
-
-	  /* Skip prefixes.  */
-	  if (*args == '+' || *args == 'm')
-	    args++;
-
-	  if (mips_optional_operand_p (operand)
-	      && args[1] == ','
-	      && (arg.token[0].type != OT_REG
-		  || arg.token[1].type == OT_END))
-	    {
-	      /* Assume that the register has been elided and is the
-		 same as the first operand.  */
-	      arg.token = tokens;
-	      arg.argnum = 1;
-	    }
-
-	  if (!match_operand (&arg, operand))
-	    break;
-
-	  continue;
+	  obstack_free (&mips_operand_tokens, tokens);
+	  return;
 	}
+
       /* Args don't match.  */
       insn_error = _("Illegal operands");
       if (more_alts)
@@ -12822,11 +13023,7 @@ static void
 mips16_ip (char *str, struct mips_cl_insn *ip)
 {
   char *s;
-  const char *args;
   struct mips_opcode *insn;
-  const struct mips_operand *operand;
-  const struct mips_operand *ext_operand;
-  struct mips_arg_info arg;
   struct mips_operand_token *tokens;
 
   insn_error = NULL;
@@ -12882,7 +13079,6 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
     {
       bfd_boolean ok;
       bfd_boolean more_alts;
-      char relax_char;
 
       gas_assert (strcmp (insn->name, str) == 0);
 
@@ -12912,176 +13108,10 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	    }
 	}
 
-      create_insn (ip, insn);
-      imm_expr.X_op = O_absent;
-      imm2_expr.X_op = O_absent;
-      offset_expr.X_op = O_absent;
-      offset_reloc[0] = BFD_RELOC_UNUSED;
-      offset_reloc[1] = BFD_RELOC_UNUSED;
-      offset_reloc[2] = BFD_RELOC_UNUSED;
-      relax_char = 0;
-
-      memset (&arg, 0, sizeof (arg));
-      arg.insn = ip;
-      arg.token = tokens;
-      arg.argnum = 1;
-      arg.last_regno = ILLEGAL_REG;
-      arg.dest_regno = ILLEGAL_REG;
-      arg.soft_match = more_alts;
-      relax_char = 0;
-      for (args = insn->args; 1; ++args)
+      if (match_mips16_insn (ip, insn, tokens, more_alts))
 	{
-	  int c;
-
-	  if (arg.token->type == OT_END)
-	    {
-	      offsetT value;
-
-	      /* Handle unary instructions in which only one operand is given.
-		 The source is then the same as the destination.  */
-	      if (arg.opnum == 1 && *args == ',')
-		{
-		  operand = decode_mips16_operand (args[1], FALSE);
-		  if (operand && mips_optional_operand_p (operand))
-		    {
-		      arg.token = tokens;
-		      arg.argnum = 1;
-		      continue;
-		    }
-		}
-
-	      /* Fail the match if there were too few operands.  */
-	      if (*args)
-		break;
-
-	      /* Successful match.  Stuff the immediate value in now, if
-		 we can.  */
-	      if (insn->pinfo == INSN_MACRO)
-		{
-		  gas_assert (relax_char == 0 || relax_char == 'p');
-		  gas_assert (*offset_reloc == BFD_RELOC_UNUSED);
-		}
-	      else if (relax_char
-		       && offset_expr.X_op == O_constant
-		       && calculate_reloc (*offset_reloc,
-					   offset_expr.X_add_number,
-					   &value))
-		{
-		  mips16_immed (NULL, 0, relax_char, *offset_reloc, value,
-				forced_insn_length, &ip->insn_opcode);
-		  offset_expr.X_op = O_absent;
-		  *offset_reloc = BFD_RELOC_UNUSED;
-		}
-	      else if (relax_char && *offset_reloc != BFD_RELOC_UNUSED)
-		{
-		  if (forced_insn_length == 2)
-		    as_bad (_("invalid unextended operand value"));
-		  forced_insn_length = 4;
-		  ip->insn_opcode |= MIPS16_EXTEND;
-		}
-	      else if (relax_char)
-		*offset_reloc = (int) BFD_RELOC_UNUSED + relax_char;
-
-	      check_completed_insn (&arg);
-	      obstack_free (&mips_operand_tokens, tokens);
-	      return;
-	    }
-
-	  /* Fail the match if the line has too many operands.   */
-	  if (*args == 0)
-	    break;
-
-	  /* Handle characters that need to match exactly.  */
-	  if (*args == '(' || *args == ')' || *args == ',')
-	    {
-	      if (match_char (&arg, *args))
- 		continue;
- 	      break;
-	    }
-
-	  arg.opnum += 1;
-	  c = *args;
-	  switch (c)
-	    {
-	    case 'p':
-	    case 'q':
-	    case 'A':
-	    case 'B':
-	    case 'E':
-	      relax_char = c;
-	      break;
-
-	    case 'I':
-	      if (match_const_int (&arg, &imm_expr.X_add_number, 0))
-		imm_expr.X_op = O_constant;
-	      else
-		insn_error = _("absolute expression required");
-	      if (HAVE_32BIT_GPRS)
-		normalize_constant_expr (&imm_expr);
-	      continue;
-
-	    case 'a':
-	    case 'i':
-	      *offset_reloc = BFD_RELOC_MIPS16_JMP;
-	      ip->insn_opcode <<= 16;
-	      break;
-	    }
-
-	  operand = decode_mips16_operand (c, FALSE);
-	  if (!operand)
-	    abort ();
-
-	  /* '6' is a special case.  It is used for BREAK and SDBBP,
-	     whose operands are only meaningful to the software that decodes
-	     them.  This means that there is no architectural reason why
-	     they cannot be prefixed by EXTEND, but in practice,
-	     exception handlers will only look at the instruction
-	     itself.  We therefore allow '6' to be extended when
-	     disassembling but not when assembling.  */
-	  if (operand->type != OP_PCREL && c != '6')
-	    {
-	      ext_operand = decode_mips16_operand (c, TRUE);
-	      if (operand != ext_operand)
-		{
-		  if (arg.token->type == OT_CHAR && arg.token->u.ch == '(')
-		    {
-		      offset_expr.X_op = O_constant;
-		      offset_expr.X_add_number = 0;
-		      relax_char = c;
-		      continue;
-		    }
-
-		  /* We need the OT_INTEGER check because some MIPS16
-		     immediate variants are listed before the register ones.  */
-		  if (arg.token->type != OT_INTEGER
-		      || !match_expression (&arg, &offset_expr, offset_reloc))
-		    break;
-
-		  /* '8' is used for SLTI(U) and has traditionally not
-		     been allowed to take relocation operators.  */
-		  if (offset_reloc[0] != BFD_RELOC_UNUSED
-		      && (ext_operand->size != 16 || c == '8'))
-		    break;
-
-		  relax_char = c;
-		  continue;
-		}
-	    }
-
-	  if (mips_optional_operand_p (operand)
-	      && args[1] == ','
-	      && (arg.token[0].type != OT_REG
-		  || arg.token[1].type == OT_END))
-	    {
-	      /* Assume that the register has been elided and is the
-		 same as the first operand.  */
-	      arg.token = tokens;
-	      arg.argnum = 1;
-	    }
-
-	  if (!match_operand (&arg, operand))
-	    break;
-	  continue;
+	  obstack_free (&mips_operand_tokens, tokens);
+	  return;
 	}
 
       /* Args don't match.  */
