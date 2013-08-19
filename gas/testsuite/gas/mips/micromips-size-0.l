@@ -26,7 +26,7 @@
 .*:108: Warning: Wrong size instruction in a 32-bit branch delay slot
 .*:110: Warning: Wrong size instruction in a 32-bit branch delay slot
 .*:112: Error: Unrecognized 32-bit version of microMIPS opcode `addiusp32 256'
-.*:120: Error: Illegal operands `sll16 \$2,\$3,13'
+.*:120: Error: operand 3 out of range `sll16 \$2,\$3,13'
 .*:123: Error: Illegal operands `sll16 \$10,\$11,5'
 .*:128: Error: Unrecognized 16-bit version of microMIPS opcode `dsll16 \$2,\$3,5'
 .*:130: Error: Unrecognized 16-bit version of microMIPS opcode `dsll3216 \$2,\$3,5'
@@ -34,3 +34,11 @@
 .*:135: Error: Unrecognized 16-bit version of microMIPS opcode `dsll3216 \$2,\$3,13'
 .*:138: Error: Unrecognized 16-bit version of microMIPS opcode `dsll16 \$10,\$11,5'
 .*:140: Error: Unrecognized 16-bit version of microMIPS opcode `dsll3216 \$10,\$11,5'
+.*:145: Error: operand 3 out of range `addiu16 \$2,\$4,5'
+.*:146: Error: operand 3 out of range `addiu16 \$2,\$4,7'
+.*:149: Error: operand 3 out of range `andi16 \$2,\$4,5'
+.*:154: Error: operand 1 out of range `addiusp16 4'
+.*:155: Error: operand 1 out of range `addiusp16 7'
+.*:157: Error: operand 1 out of range `addiusp16 10'
+.*:160: Error: operand 1 out of range `addiusp16 1032'
+.*:162: Error: operand 1 out of range `addiusp16 -1036'

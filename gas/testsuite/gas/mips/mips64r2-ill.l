@@ -7,22 +7,22 @@
 .*:33: Error: Invalid field specification \(position 63, size 2\)
 .*:34: Error: Invalid field specification \(position 63, size 63\)
 .*:35: Error: Invalid field specification \(position 63, size 64\)
-.*:40: Error: Operand 3 of `dextm' must be in the range \[0, 31\], was -1.
-.*:43: Error: Operand 3 of `dextm' must be in the range \[0, 31\], was 32.
-.*:46: Error: Invalid field specification \(position 0, size 32\)
-.*:49: Error: Invalid field specification \(position 0, size 65\)
-.*:59: Error: Invalid field specification \(position 1, size 64\)
-.*:61: Error: Invalid field specification \(position 31, size 34\)
-.*:62: Error: Invalid field specification \(position 31, size 63\)
-.*:63: Error: Invalid field specification \(position 31, size 64\)
-.*:68: Error: Operand 3 of `dextu' must be in the range \[32, 63\], was 31.
-.*:71: Error: Operand 3 of `dextu' must be in the range \[32, 63\], was 64.
-.*:74: Error: Invalid field specification \(position 32, size 0\)
-.*:77: Error: Invalid field specification \(position 32, size 33\)
-.*:87: Error: Invalid field specification \(position 33, size 32\)
-.*:89: Error: Invalid field specification \(position 63, size 2\)
-.*:90: Error: Invalid field specification \(position 63, size 31\)
-.*:91: Error: Invalid field specification \(position 63, size 32\)
+.*:40: Error: operand 3 out of range `dextm \$4,\$5,-1,33'
+.*:43: Error: operand 3 out of range `dextm \$4,\$5,32,33'
+.*:46: Error: operand 4 out of range `dextm \$4,\$5,0,32'
+.*:49: Error: operand 4 out of range `dextm \$4,\$5,0,65'
+.*:59: Error: operand 4 out of range `dextm \$4,\$5,1,64'
+.*:61: Error: operand 4 out of range `dextm \$4,\$5,31,34'
+.*:62: Error: operand 4 out of range `dextm \$4,\$5,31,63'
+.*:63: Error: operand 4 out of range `dextm \$4,\$5,31,64'
+.*:68: Error: operand 3 out of range `dextu \$4,\$5,31,1'
+.*:71: Error: operand 3 out of range `dextu \$4,\$5,64,1'
+.*:74: Error: operand 4 out of range `dextu \$4,\$5,32,0'
+.*:77: Error: operand 4 out of range `dextu \$4,\$5,32,33'
+.*:87: Error: operand 4 out of range `dextu \$4,\$5,33,32'
+.*:89: Error: operand 4 out of range `dextu \$4,\$5,63,2'
+.*:90: Error: operand 4 out of range `dextu \$4,\$5,63,31'
+.*:91: Error: operand 4 out of range `dextu \$4,\$5,63,32'
 .*:96: Error: Operand 3 of `dins' must be in the range \[0, 63\], was -1.
 .*:99: Error: Operand 3 of `dins' must be in the range \[0, 63\], was 64.
 .*:102: Error: Invalid field specification \(position 0, size 0\)
@@ -31,27 +31,27 @@
 .*:117: Error: Invalid field specification \(position 63, size 2\)
 .*:118: Error: Invalid field specification \(position 63, size 63\)
 .*:119: Error: Invalid field specification \(position 63, size 64\)
-.*:124: Error: Operand 3 of `dinsm' must be in the range \[0, 31\], was -1.
-.*:127: Error: Operand 3 of `dinsm' must be in the range \[0, 31\], was 32.
-.*:130: Error: Invalid field specification \(position 31, size 1\)
-.*:133: Error: Invalid field specification \(position 0, size 65\)
-.*:136: Error: Invalid field specification \(position 0, size 2\)
-.*:137: Error: Invalid field specification \(position 0, size 3\)
-.*:140: Error: Invalid field specification \(position 1, size 2\)
-.*:141: Error: Invalid field specification \(position 1, size 3\)
-.*:143: Error: Invalid field specification \(position 1, size 64\)
-.*:144: Error: Invalid field specification \(position 30, size 2\)
-.*:146: Error: Invalid field specification \(position 30, size 63\)
-.*:147: Error: Invalid field specification \(position 30, size 64\)
-.*:150: Error: Invalid field specification \(position 31, size 63\)
-.*:151: Error: Invalid field specification \(position 31, size 64\)
-.*:156: Error: Operand 3 of `dinsu' must be in the range \[32, 63\], was 31.
-.*:159: Error: Operand 3 of `dinsu' must be in the range \[32, 63\], was 64.
-.*:162: Error: Invalid field specification \(position 32, size 0\)
-.*:165: Error: Invalid field specification \(position 32, size 33\)
-.*:175: Error: Invalid field specification \(position 33, size 32\)
-.*:178: Error: Invalid field specification \(position 62, size 31\)
-.*:179: Error: Invalid field specification \(position 62, size 32\)
-.*:181: Error: Invalid field specification \(position 63, size 2\)
-.*:182: Error: Invalid field specification \(position 63, size 31\)
-.*:183: Error: Invalid field specification \(position 63, size 32\)
+.*:124: Error: operand 3 out of range `dinsm \$4,\$5,-1,33'
+.*:127: Error: operand 3 out of range `dinsm \$4,\$5,32,33'
+.*:130: Error: operand 4 out of range `dinsm \$4,\$5,31,1'
+.*:133: Error: operand 4 out of range `dinsm \$4,\$5,0,65'
+.*:136: Error: operand 4 out of range `dinsm \$4,\$5,0,2'
+.*:137: Error: operand 4 out of range `dinsm \$4,\$5,0,3'
+.*:140: Error: operand 4 out of range `dinsm \$4,\$5,1,2'
+.*:141: Error: operand 4 out of range `dinsm \$4,\$5,1,3'
+.*:143: Error: operand 4 out of range `dinsm \$4,\$5,1,64'
+.*:144: Error: operand 4 out of range `dinsm \$4,\$5,30,2'
+.*:146: Error: operand 4 out of range `dinsm \$4,\$5,30,63'
+.*:147: Error: operand 4 out of range `dinsm \$4,\$5,30,64'
+.*:150: Error: operand 4 out of range `dinsm \$4,\$5,31,63'
+.*:151: Error: operand 4 out of range `dinsm \$4,\$5,31,64'
+.*:156: Error: operand 3 out of range `dinsu \$4,\$5,31,1'
+.*:159: Error: operand 3 out of range `dinsu \$4,\$5,64,1'
+.*:162: Error: operand 4 out of range `dinsu \$4,\$5,32,0'
+.*:165: Error: operand 4 out of range `dinsu \$4,\$5,32,33'
+.*:175: Error: operand 4 out of range `dinsu \$4,\$5,33,32'
+.*:178: Error: operand 4 out of range `dinsu \$4,\$5,62,31'
+.*:179: Error: operand 4 out of range `dinsu \$4,\$5,62,32'
+.*:181: Error: operand 4 out of range `dinsu \$4,\$5,63,2'
+.*:182: Error: operand 4 out of range `dinsu \$4,\$5,63,31'
+.*:183: Error: operand 4 out of range `dinsu \$4,\$5,63,32'

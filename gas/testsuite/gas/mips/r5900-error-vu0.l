@@ -94,14 +94,14 @@
 .*: Error: Illegal operands `vaddz\.xyzw \$vf31xyzw,\$vf0xyzw,\$vf0x'
 .*: Error: Illegal operands `vaddz\.xyzw \$vf31xyzw,\$vf15xyzw,\$vf7y'
 .*: Error: Illegal operands `vaddz\.xyzw \$vf31xyzw,\$vf31xyzw,\$vf31w'
-.*: Error: Operand 1 of `vcallms' must be in the range \[0x0, 0x3fff8\], was \-1\.
-.*: Error: Operand 1 of `vcallms' must be in the range \[0x0, 0x3fff8\], was \-128\.
-.*: Error: Operand 1 of `vcallms' must be a factor of 8, was 0x1\.
-.*: Error: Operand 1 of `vcallms' must be a factor of 8, was 0x7\.
-.*: Error: Operand 1 of `vcallms' must be a factor of 8, was 0x4\.
-.*: Error: Operand 1 of `vcallms' must be a factor of 8, was 0x2\.
-.*: Error: Operand 1 of `vcallms' must be in the range \[0x0, 0x3fff8\], was 0x40000\.
-.*: Error: Operand 1 of `vcallms' must be in the range \[0x0, 0x3fff8\], was 0x40008\.
+.*: Error: operand 1 out of range `vcallms -1'
+.*: Error: operand 1 out of range `vcallms -0x0080'
+.*: Error: operand 1 out of range `vcallms 0x1'
+.*: Error: operand 1 out of range `vcallms 0x7'
+.*: Error: operand 1 out of range `vcallms 0x4'
+.*: Error: operand 1 out of range `vcallms 0x2'
+.*: Error: operand 1 out of range `vcallms 0x40000'
+.*: Error: operand 1 out of range `vcallms 0x40008'
 .*: Error: Illegal operands `vclipw\.xyz \$vf0xyz,\$vf0x'
 .*: Error: Illegal operands `vclipw\.xyz \$vf0xyz,\$vf31y'
 .*: Error: Illegal operands `vclipw\.xyz \$vf1xyz,\$vf2z'
@@ -123,11 +123,11 @@
 .*: Error: Illegal operands `vftoi15\.xyzw \$vf0xyzw,\$vf0xyz'
 .*: Error: Illegal operands `vftoi15\.y \$vf1y,\$vf2x'
 .*: Error: Illegal operands `vftoi15\.y \$vf31y,\$vf0w'
-.*: Error: Operand 3 of `viaddi' must be in the range \[\-16, 15\], was \-17\.
-.*: Error: Operand 3 of `viaddi' must be in the range \[\-16, 15\], was 16\.
-.*: Error: Operand 3 of `viaddi' must be in the range \[\-16, 15\], was 17\.
-.*: Error: Operand 3 of `viaddi' must be in the range \[\-16, 15\], was 32\.
-.*: Error: Operand 3 of `viaddi' must be in the range \[\-16, 15\], was 31\.
+.*: Error: operand 3 out of range `viaddi \$vi0,\$vi0,-17'
+.*: Error: operand 3 out of range `viaddi \$vi1,\$vi2,16'
+.*: Error: operand 3 out of range `viaddi \$vi31,\$vi0,17'
+.*: Error: operand 3 out of range `viaddi \$vi31,\$vi15,32'
+.*: Error: operand 3 out of range `viaddi \$vi31,\$vi31,31'
 .*: Error: Illegal operands `viand \$vi0xyzw,\$vi0,\$vi0'
 .*: Error: Illegal operands `viand \$vi0,\$vi0xyzw,\$vi31'
 .*: Error: Illegal operands `viand \$vi0,\$vi31,\$vi0xyzw'

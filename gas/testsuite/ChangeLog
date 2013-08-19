@@ -1,5 +1,17 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* gas/mips/ext-ill.l, gas/mips/lui-1.l, gas/mips/mips16e-64.l,
+	gas/mips/mips32r2-ill-fp64.l, gas/mips/mips32r2-ill-nofp.l,
+	gas/mips/mips32r2-ill.l, gas/mips/mips64r2-ill.l,
+	gas/mips/octeon-ill.l, gas/mips/r5900-error-vu0.l,
+	gas/mips/vr5400-ill.l: Adjust expected errors.
+	* gas/mips/micromips-size-0.l,
+	gas/mips/micromips-size-0.s: Likewise.  Add new tests.
+	* gas/mips/mips16e-save-err.s, gas/mips/mips16e-save-err.l: New test.
+	* gas/mips/mips.exp: Run it.
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* gas/mips/micromips-ill.l: Expect "floating-point expression required"
 
 2013-08-06  Jürgen Urban  <JuergenUrban@gmx.de>

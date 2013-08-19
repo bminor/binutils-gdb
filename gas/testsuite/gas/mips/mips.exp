@@ -1039,6 +1039,7 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "mips16e-jrc"
     run_dump_test "mips16e-save"
+    run_list_test "mips16e-save-err" "-march=mips32 -32"
     run_dump_test "mips16e-64"
     run_list_test "mips16e-64" "-march=mips32 -32"
     run_dump_test "mips16-intermix"

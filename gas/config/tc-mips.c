@@ -4271,13 +4271,6 @@ struct mips_arg_info
      where it gives the lsb position.  */
   unsigned int last_op_int;
 
-  /* If true, match routines should silently reject invalid arguments.
-     If false, match routines can accept invalid arguments as long as
-     they report an appropriate error.  They still have the option of
-     silently rejecting arguments, in which case a generic "Invalid operands"
-     style of error will be used instead.  */
-  bfd_boolean soft_match;
-
   /* If true, the OP_INT match routine should treat plain symbolic operands
      as if a relocation operator like %lo(...) had been used.  This is only
      ever true if the operand can be relocated.  */
@@ -4290,6 +4283,23 @@ struct mips_arg_info
   /* True if a reference to the current AT register was seen.  */
   bfd_boolean seen_at;
 };
+
+/* Record that the argument is out of range.  */
+
+static void
+match_out_of_range (struct mips_arg_info *arg)
+{
+  set_insn_error_i (arg->argnum, _("operand %d out of range"), arg->argnum);
+}
+
+/* Record that the argument isn't constant but needs to be.  */
+
+static void
+match_not_constant (struct mips_arg_info *arg)
+{
+  set_insn_error_i (arg->argnum, _("operand %d must be constant"),
+		    arg->argnum);
+}
 
 /* Try to match an OT_CHAR token for character CH.  Consume the token
    and return true on success, otherwise return false.  */
@@ -4354,7 +4364,7 @@ match_expression (struct mips_arg_info *arg, expressionS *value,
    error.  */
 
 static bfd_boolean
-match_const_int (struct mips_arg_info *arg, offsetT *value, offsetT fallback)
+match_const_int (struct mips_arg_info *arg, offsetT *value)
 {
   expressionS ex;
   bfd_reloc_code_real_type r[3];
@@ -4366,11 +4376,8 @@ match_const_int (struct mips_arg_info *arg, offsetT *value, offsetT fallback)
     *value = ex.X_add_number;
   else
     {
-      if (arg->soft_match)
-	return FALSE;
-      as_bad (_("Operand %d of `%s' must be constant"),
-	      arg->argnum, arg->insn->insn_mo->name);
-      *value = fallback;
+      match_not_constant (arg);
+      return FALSE;
     }
   return TRUE;
 }
@@ -4546,7 +4553,6 @@ match_int_operand (struct mips_arg_info *arg,
   unsigned int uval;
   int min_val, max_val, factor;
   offsetT sval;
-  bfd_boolean print_hex;
 
   operand = (const struct mips_int_operand *) operand_base;
   factor = 1 << operand->shift;
@@ -4580,7 +4586,10 @@ match_int_operand (struct mips_arg_info *arg,
 	  /* If non-constant operands are allowed then leave them for
 	     the caller to process, otherwise fail the match.  */
 	  if (!arg->allow_nonconst)
-	    return FALSE;
+	    {
+	      match_not_constant (arg);
+	      return FALSE;
+	    }
 	  offset_reloc[0] = BFD_RELOC_LO16;
 	  return TRUE;
 	}
@@ -4592,38 +4601,16 @@ match_int_operand (struct mips_arg_info *arg,
     }
   else
     {
-      if (!match_const_int (arg, &sval, min_val))
+      if (!match_const_int (arg, &sval))
 	return FALSE;
     }
 
   arg->last_op_int = sval;
 
-  /* Check the range.  If there's a problem, record the lowest acceptable
-     value in arg->last_op_int in order to prevent an unhelpful error
-     from OP_MSB too.
-
-     Bit counts have traditionally been printed in hex by the disassembler
-     but printed as decimal in error messages.  Only resort to hex if
-     the operand is bigger than 6 bits.  */
-  print_hex = operand->print_hex && operand_base->size > 6;
-  if (sval < min_val || sval > max_val)
+  if (sval < min_val || sval > max_val || sval % factor)
     {
-      if (arg->soft_match)
-	return FALSE;
-      report_bad_range (arg->insn, arg->argnum, sval, min_val, max_val,
-			print_hex);
-      arg->last_op_int = min_val;
-    }
-  else if (sval % factor)
-    {
-      if (arg->soft_match)
-	return FALSE;
-      as_bad (print_hex && sval >= 0
-	      ? _("Operand %d of `%s' must be a factor of %d, was 0x%lx.")
-	      : _("Operand %d of `%s' must be a factor of %d, was %ld."),
-	      arg->argnum, arg->insn->insn_mo->name, factor,
-	      (unsigned long) sval);
-      arg->last_op_int = min_val;
+      match_out_of_range (arg);
+      return FALSE;
     }
 
   uval = (unsigned int) sval >> operand->shift;
@@ -4668,7 +4655,7 @@ match_mapped_int_operand (struct mips_arg_info *arg,
   offsetT sval;
 
   operand = (const struct mips_mapped_int_operand *) operand_base;
-  if (!match_const_int (arg, &sval, operand->int_map[0]))
+  if (!match_const_int (arg, &sval))
     return FALSE;
 
   num_vals = 1 << operand_base->size;
@@ -4676,7 +4663,10 @@ match_mapped_int_operand (struct mips_arg_info *arg,
     if (operand->int_map[uval] == sval)
       break;
   if (uval == num_vals)
-    return FALSE;
+    {
+      match_out_of_range (arg);
+      return FALSE;
+    }
 
   insn_insert_operand (arg->insn, operand_base, uval);
   return TRUE;
@@ -4697,7 +4687,7 @@ match_msb_operand (struct mips_arg_info *arg,
   max_val = min_val + (1 << operand_base->size) - 1;
   max_high = operand->opsize;
 
-  if (!match_const_int (arg, &size, 1))
+  if (!match_const_int (arg, &size))
     return FALSE;
 
   high = size + arg->last_op_int;
@@ -4705,10 +4695,8 @@ match_msb_operand (struct mips_arg_info *arg,
 
   if (size < 0 || high > max_high || sval < min_val || sval > max_val)
     {
-      if (arg->soft_match)
-	return FALSE;
-      report_bad_field (arg->last_op_int, size);
-      sval = min_val;
+      match_out_of_range (arg);
+      return FALSE;
     }
   insn_insert_operand (arg->insn, operand_base, sval - min_val);
   return TRUE;
@@ -4790,7 +4778,7 @@ match_perf_reg_operand (struct mips_arg_info *arg,
 {
   offsetT sval;
 
-  if (!match_const_int (arg, &sval, 0))
+  if (!match_const_int (arg, &sval))
     return FALSE;
 
   if (sval != 0
@@ -4799,9 +4787,8 @@ match_perf_reg_operand (struct mips_arg_info *arg,
 	      && (strcmp (arg->insn->insn_mo->name, "mfps") == 0
 		  || strcmp (arg->insn->insn_mo->name, "mtps") == 0))))
     {
-      if (arg->soft_match)
-	return FALSE;
-      as_bad (_("Invalid performance register (%ld)"), (unsigned long) sval);
+      set_insn_error (arg->argnum, _("invalid performance register"));
+      return FALSE;
     }
 
   insn_insert_operand (arg->insn, operand, sval);
@@ -4817,15 +4804,21 @@ match_addiusp_operand (struct mips_arg_info *arg,
   offsetT sval;
   unsigned int uval;
 
-  if (!match_const_int (arg, &sval, -256))
+  if (!match_const_int (arg, &sval))
     return FALSE;
 
   if (sval % 4)
-    return FALSE;
+    {
+      match_out_of_range (arg);
+      return FALSE;
+    }
 
   sval /= 4;
   if (!(sval >= -258 && sval <= 257) || (sval >= -2 && sval <= 1))
-    return FALSE;
+    {
+      match_out_of_range (arg);
+      return FALSE;
+    }
 
   uval = (unsigned int) sval;
   uval = ((uval >> 1) & ~0xff) | (uval & 0xff);
@@ -4969,9 +4962,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
   unsigned int opcode, args, statics, sregs;
   unsigned int num_frame_sizes, num_args, num_statics, num_sregs;
   offsetT frame_size;
-  const char *error;
 
-  error = 0;
   opcode = arg->insn->insn_opcode;
   frame_size = 0;
   num_frame_sizes = 0;
@@ -4985,7 +4976,7 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
       if (arg->token->type == OT_INTEGER)
 	{
 	  /* Handle the frame size.  */
-	  if (!match_const_int (arg, &frame_size, 0))
+	  if (!match_const_int (arg, &frame_size))
 	    return FALSE;
 	  num_frame_sizes += 1;
 	}
@@ -5079,23 +5070,25 @@ match_save_restore_list_operand (struct mips_arg_info *arg)
 
   /* Encode frame size.  */
   if (num_frame_sizes == 0)
-    error = _("Missing frame size");
-  else if (num_frame_sizes > 1)
-    error = _("Frame size specified twice");
-  else if ((frame_size & 7) != 0 || frame_size < 0 || frame_size > 0xff * 8)
-    error = _("Invalid frame size");
-  else if (frame_size != 128 || (opcode >> 16) != 0)
+    {
+      set_insn_error (arg->argnum, _("missing frame size"));
+      return FALSE;
+    }
+  if (num_frame_sizes > 1)
+    {
+      set_insn_error (arg->argnum, _("frame size specified twice"));
+      return FALSE;
+    }
+  if ((frame_size & 7) != 0 || frame_size < 0 || frame_size > 0xff * 8)
+    {
+      set_insn_error (arg->argnum, _("invalid frame size"));
+      return FALSE;
+    }
+  if (frame_size != 128 || (opcode >> 16) != 0)
     {
       frame_size /= 8;
       opcode |= (((frame_size & 0xf0) << 16)
 		 | (frame_size & 0x0f));
-    }
-
-  if (error)
-    {
-      if (arg->soft_match)
-	return FALSE;
-      as_bad ("%s", error);
     }
 
   /* Finally build the instruction.  */
@@ -5126,10 +5119,9 @@ match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
       if ((opcode->membership & INSN_5400)
 	  && strcmp (opcode->name, "rzu.ob") == 0)
 	{
-	  if (arg->soft_match)
-	    return FALSE;
-	  as_bad (_("Operand %d of `%s' must be an immediate"),
-		  arg->argnum, opcode->name);
+	  set_insn_error_i (arg->argnum, _("operand %d must be an immediate"),
+			    arg->argnum);
+	  return FALSE;
 	}
 
       /* Check whether this is a vector register or a broadcast of
@@ -5141,9 +5133,8 @@ match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
 	    return FALSE;
 	  if (arg->token->u.reg_element.index > (is_qh ? 3 : 7))
 	    {
-	      if (arg->soft_match)
-		return FALSE;
-	      as_bad (_("Invalid element selector"));
+	      set_insn_error (arg->argnum, _("invalid element selector"));
+	      return FALSE;
 	    }
 	  else
 	    uval |= arg->token->u.reg_element.index << (is_qh ? 2 : 1) << 5;
@@ -5155,10 +5146,9 @@ match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
 	      && (strcmp (opcode->name, "sll.ob") == 0
 		  || strcmp (opcode->name, "srl.ob") == 0))
 	    {
-	      if (arg->soft_match)
-		return FALSE;
-	      as_bad (_("Operand %d of `%s' must be scalar"),
-		      arg->argnum, opcode->name);
+	      set_insn_error_i (arg->argnum, _("operand %d must be scalar"),
+				arg->argnum);
+	      return FALSE;
 	    }
 
 	  if (!match_regno (arg, OP_REG_VEC, arg->token->u.regno, &regno))
@@ -5175,13 +5165,12 @@ match_mdmx_imm_reg_operand (struct mips_arg_info *arg,
     {
       offsetT sval;
 
-      if (!match_const_int (arg, &sval, 0))
+      if (!match_const_int (arg, &sval))
 	return FALSE;
       if (sval < 0 || sval > 31)
 	{
-	  if (arg->soft_match)
-	    return FALSE;
-	  report_bad_range (arg->insn, arg->argnum, sval, 0, 31, FALSE);
+	  match_out_of_range (arg);
+	  return FALSE;
 	}
       uval |= (sval & 31);
       if (is_qh)
@@ -5259,7 +5248,10 @@ match_float_constant (struct mips_arg_info *arg, expressionS *imm,
      The .lit4 and .lit8 sections are only used if permitted by the
      -G argument.  */
   if (arg->token->type != OT_FLOAT)
-    return FALSE;
+    {
+      set_insn_error (arg->argnum, _("floating-point expression required"));
+      return FALSE;
+    }
 
   gas_assert (arg->token->u.flt.length == length);
   data = arg->token->u.flt.data;
@@ -7058,7 +7050,7 @@ normalize_address_expr (expressionS *ex)
 static bfd_boolean
 match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	    struct mips_operand_token *tokens, unsigned int opcode_extra,
-	    bfd_boolean more_alts, bfd_boolean soft_match)
+	    bfd_boolean more_alts)
 {
   const char *args;
   struct mips_arg_info arg;
@@ -7080,7 +7072,6 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
   arg.argnum = 1;
   arg.last_regno = ILLEGAL_REG;
   arg.dest_regno = ILLEGAL_REG;
-  arg.soft_match = soft_match;
   for (args = opcode->args;; ++args)
     {
       if (arg.token->type == OT_END)
@@ -7166,32 +7157,11 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	case '+':
 	  switch (args[1])
 	    {
-	    case '1':
-	    case '2':
-	    case '3':
-	    case '4':
-	    case 'B':
-	    case 'C':
-	    case 'F':
-	    case 'G':
-	    case 'H':
-	    case 'J':
-	    case 'Q':
-	    case 'S':
-	    case 's':
-	      /* If these integer forms come last, there is no other
-		 form of the instruction that could match.  Prefer to
-		 give detailed error messages where possible.  */
-	      if (args[2] == 0)
-		arg.soft_match = FALSE;
-	      break;
-
 	    case 'I':
 	      /* "+I" is like "I", except that imm2_expr is used.  */
-	      if (match_const_int (&arg, &imm2_expr.X_add_number, 0))
-		imm2_expr.X_op = O_constant;
-	      else
-		set_insn_error (arg.argnum, _("absolute expression required"));
+	      if (!match_const_int (&arg, &imm2_expr.X_add_number))
+		return FALSE;
+	      imm2_expr.X_op = O_constant;
 	      if (HAVE_32BIT_GPRS)
 		normalize_constant_expr (&imm2_expr);
 	      ++args;
@@ -7203,43 +7173,10 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	    }
 	  break;
 
-	case '\'':
-	case ':':
-	case '@':
-	case '^':
-	case '$':
-	case '\\':
-	case '%':
-	case '|':
-	case '0':
-	case '1':
-	case '2':
-	case '3':
-	case '4':
-	case '5':
-	case '6':
-	case '8':
-	case 'B':
-	case 'C':
-	case 'J':
-	case 'O':
-	case 'P':
-	case 'Q':
-	case 'c':
-	case 'h':
-	case 'q':
-	  /* If these integer forms come last, there is no other
-	     form of the instruction that could match.  Prefer to
-	     give detailed error messages where possible.  */
-	  if (args[1] == 0)
-	    arg.soft_match = FALSE;
-	  break;
-
 	case 'I':
-	  if (match_const_int (&arg, &imm_expr.X_add_number, 0))
-	    imm_expr.X_op = O_constant;
-	  else
-	    set_insn_error (arg.argnum, _("absolute expression required"));
+	  if (!match_const_int (&arg, &imm_expr.X_add_number))
+	    return FALSE;
+	  imm_expr.X_op = O_constant;
 	  if (HAVE_32BIT_GPRS)
 	    normalize_constant_expr (&imm_expr);
 	  continue;
@@ -7253,38 +7190,36 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	      offset_expr.X_op = O_constant;
 	      offset_expr.X_add_number = 0;
 	    }
-	  else if (match_expression (&arg, &offset_expr, offset_reloc))
-	    normalize_address_expr (&offset_expr);
 	  else
-	    set_insn_error (arg.argnum, _("absolute expression required"));
+	    {
+	      if (!match_expression (&arg, &offset_expr, offset_reloc))
+		return FALSE;
+	      normalize_address_expr (&offset_expr);
+	    }
 	  continue;
 
 	case 'F':
 	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
 				     8, TRUE))
-	    set_insn_error (arg.argnum,
-			    _("floating-point expression required"));
+	    return FALSE;
 	  continue;
 
 	case 'L':
 	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
 				     8, FALSE))
-	    set_insn_error (arg.argnum,
-			    _("floating-point expression required"));
+	    return FALSE;
 	  continue;
 
 	case 'f':
 	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
 				     4, TRUE))
-	    set_insn_error (arg.argnum,
-			    _("floating-point expression required"));
+	    return FALSE;
 	  continue;
 
 	case 'l':
 	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
 				     4, FALSE))
-	    set_insn_error (arg.argnum,
-			    _("floating-point expression required"));
+	    return FALSE;
 	  continue;
 
 	  /* ??? This is the traditional behavior, but is flaky if
@@ -7369,7 +7304,7 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 
 static bfd_boolean
 match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
-		   struct mips_operand_token *tokens, bfd_boolean soft_match)
+		   struct mips_operand_token *tokens)
 {
   const char *args;
   const struct mips_operand *operand;
@@ -7392,7 +7327,6 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
   arg.argnum = 1;
   arg.last_regno = ILLEGAL_REG;
   arg.dest_regno = ILLEGAL_REG;
-  arg.soft_match = soft_match;
   relax_char = 0;
   for (args = opcode->args;; ++args)
     {
@@ -7477,10 +7411,9 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	  break;
 
 	case 'I':
-	  if (match_const_int (&arg, &imm_expr.X_add_number, 0))
-	    imm_expr.X_op = O_constant;
-	  else
-	    set_insn_error (arg.argnum, _("absolute expression required"));
+	  if (!match_const_int (&arg, &imm_expr.X_add_number))
+	    return FALSE;
+	  imm_expr.X_op = O_constant;
 	  if (HAVE_32BIT_GPRS)
 	    normalize_constant_expr (&imm_expr);
 	  continue;
@@ -13129,7 +13062,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  break;
 	}
 
-      if (match_insn (ip, insn, tokens, opcode_extra, more_alts,
+      if (match_insn (ip, insn, tokens, opcode_extra,
 		      more_alts || (wrong_delay_slot_insns
 				    && need_delay_slot_ok)))
 	break;
@@ -13161,34 +13094,34 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 static void
 mips16_ip (char *str, struct mips_cl_insn *ip)
 {
-  char *s;
-  struct mips_opcode *insn;
+  char *end, *s, c;
+  struct mips_opcode *insn, *first;
   struct mips_operand_token *tokens;
 
   forced_insn_length = 0;
 
   for (s = str; ISLOWER (*s); ++s)
     ;
-  switch (*s)
+  end = s;
+  c = *end;
+  switch (c)
     {
     case '\0':
       break;
 
     case ' ':
-      *s++ = '\0';
+      s++;
       break;
 
     case '.':
       if (s[1] == 't' && s[2] == ' ')
 	{
-	  *s = '\0';
 	  forced_insn_length = 2;
 	  s += 3;
 	  break;
 	}
       else if (s[1] == 'e' && s[2] == ' ')
 	{
-	  *s = '\0';
 	  forced_insn_length = 4;
 	  s += 3;
 	  break;
@@ -13202,7 +13135,11 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   if (mips_opts.noautoextend && !forced_insn_length)
     forced_insn_length = 2;
 
-  if ((insn = (struct mips_opcode *) hash_find (mips16_op_hash, str)) == NULL)
+  *end = 0;
+  first = insn = (struct mips_opcode *) hash_find (mips16_op_hash, str);
+  *end = c;
+
+  if (!insn)
     {
       set_insn_error (0, _("Unrecognized opcode"));
       return;
@@ -13217,7 +13154,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
       bfd_boolean ok;
       bfd_boolean more_alts;
 
-      gas_assert (strcmp (insn->name, str) == 0);
+      gas_assert (strcmp (insn->name, first->name) == 0);
 
       ok = is_opcode_valid_16 (insn);
       more_alts = (insn + 1 < &mips16_opcodes[bfd_mips16_num_opcodes]
@@ -13239,7 +13176,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	    }
 	}
 
-      if (match_mips16_insn (ip, insn, tokens, more_alts))
+      if (match_mips16_insn (ip, insn, tokens))
 	break;
 
       /* Args don't match.  */

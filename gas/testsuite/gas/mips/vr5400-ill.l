@@ -1,8 +1,8 @@
 .*: Assembler messages:
-.*:3: Error: Operand 3 of `sll.ob' must be scalar
-.*:7: Error: Operand 3 of `srl.ob' must be scalar
-.*:10: Error: Operand 2 of `rzu.ob' must be an immediate
-.*:11: Error: Operand 2 of `rzu.ob' must be an immediate
+.*:3: Error: operand 3 must be scalar `sll.ob \$f2,\$f4,\$f6'
+.*:7: Error: operand 3 must be scalar `srl.ob \$f2,\$f4,\$f6'
+.*:10: Error: operand 2 must be an immediate `rzu.ob \$f2,\$f6\[1\]'
+.*:11: Error: operand 2 must be an immediate `rzu.ob \$f2,\$f6'
 .*:14: Error: Illegal operands `add.ob \$v2,\$f4,\$f6'
 .*:15: Error: Illegal operands `add.ob \$f2,\$v4,\$f6'
 .*:16: Error: Illegal operands `add.ob \$f2,\$f4,\$v6'
