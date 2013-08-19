@@ -1,3 +1,9 @@
+2013-08-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (PREFIX_EVEX_0F3A3E): Removed.
+	(PREFIX_EVEX_0F3A3F): Likewise.
+	* i386-dis-evex.h (evex_table): Updated.
+
 2013-08-06  Jürgen Urban  <JuergenUrban@gmx.de>
 
 	* mips-opc.c (mips_builtin_opcodes): Add a suffixless version of
