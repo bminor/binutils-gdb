@@ -1,3 +1,11 @@
+2013-08-19  Pedro Alves  <palves@redhat.com>
+
+	* linux-nat.c (linux_test_for_tracefork)
+	(linux_test_for_tracesysgood, linux_child_follow_fork)
+	(lin_lwp_attach_lwp, linux_nat_resume): Don't block child signals.
+	(linux_nat_wait_1): Extend comment.
+	(linux_async_pipe): Add comment.
+
 2013-08-15  Kevin Buettner  <kevinb@redhat.com>
 
 	* rl78-tdep.c (RL78_RAW_PC_REGNUM): New enum.

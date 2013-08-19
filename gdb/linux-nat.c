@@ -395,20 +395,13 @@ linux_test_for_tracefork (int original_pid)
 {
   int child_pid, ret, status;
   long second_pid;
-  sigset_t prev_mask;
-
-  /* We don't want those ptrace calls to be interrupted.  */
-  block_child_signals (&prev_mask);
 
   linux_supports_tracefork_flag = 0;
   linux_supports_tracevforkdone_flag = 0;
 
   ret = ptrace (PTRACE_SETOPTIONS, original_pid, 0, PTRACE_O_TRACEFORK);
   if (ret != 0)
-    {
-      restore_child_signals_mask (&prev_mask);
-      return;
-    }
+    return;
 
   child_pid = fork ();
   if (child_pid == -1)
@@ -433,7 +426,6 @@ linux_test_for_tracefork (int original_pid)
       if (ret != 0)
 	{
 	  warning (_("linux_test_for_tracefork: failed to kill child"));
-	  restore_child_signals_mask (&prev_mask);
 	  return;
 	}
 
@@ -445,7 +437,6 @@ linux_test_for_tracefork (int original_pid)
 	warning (_("linux_test_for_tracefork: unexpected "
 		   "wait status 0x%x from killed child"), status);
 
-      restore_child_signals_mask (&prev_mask);
       return;
     }
 
@@ -482,12 +473,14 @@ linux_test_for_tracefork (int original_pid)
     warning (_("linux_test_for_tracefork: unexpected result from waitpid "
 	     "(%d, status 0x%x)"), ret, status);
 
-  ret = ptrace (PTRACE_KILL, child_pid, 0, 0);
-  if (ret != 0)
-    warning (_("linux_test_for_tracefork: failed to kill child"));
-  my_waitpid (child_pid, &status, 0);
-
-  restore_child_signals_mask (&prev_mask);
+  do
+    {
+      ret = ptrace (PTRACE_KILL, child_pid, 0, 0);
+      if (ret != 0)
+	warning ("linux_test_for_tracefork: failed to kill child");
+      my_waitpid (child_pid, &status, 0);
+    }
+  while (WIFSTOPPED (status));
 }
 
 /* Determine if PTRACE_O_TRACESYSGOOD can be used to follow syscalls.
@@ -500,20 +493,14 @@ static void
 linux_test_for_tracesysgood (int original_pid)
 {
   int ret;
-  sigset_t prev_mask;
-
-  /* We don't want those ptrace calls to be interrupted.  */
-  block_child_signals (&prev_mask);
 
   linux_supports_tracesysgood_flag = 0;
 
   ret = ptrace (PTRACE_SETOPTIONS, original_pid, 0, PTRACE_O_TRACESYSGOOD);
   if (ret != 0)
-    goto out;
+    return;
 
   linux_supports_tracesysgood_flag = 1;
-out:
-  restore_child_signals_mask (&prev_mask);
 }
 
 /* Determine wether we support PTRACE_O_TRACESYSGOOD option available.
@@ -630,11 +617,8 @@ delete_lwp_cleanup (void *lp_voidp)
 static int
 linux_child_follow_fork (struct target_ops *ops, int follow_child)
 {
-  sigset_t prev_mask;
   int has_vforked;
   int parent_pid, child_pid;
-
-  block_child_signals (&prev_mask);
 
   has_vforked = (inferior_thread ()->pending_follow.kind
 		 == TARGET_WAITKIND_VFORKED);
@@ -954,7 +938,6 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
       check_for_thread_db ();
     }
 
-  restore_child_signals_mask (&prev_mask);
   return 0;
 }
 
@@ -1427,12 +1410,9 @@ int
 lin_lwp_attach_lwp (ptid_t ptid)
 {
   struct lwp_info *lp;
-  sigset_t prev_mask;
   int lwpid;
 
   gdb_assert (is_lwp (ptid));
-
-  block_child_signals (&prev_mask);
 
   lp = find_lwp_pid (ptid);
   lwpid = GET_LWP (ptid);
@@ -1461,7 +1441,6 @@ lin_lwp_attach_lwp (ptid_t ptid)
 		  /* We've already seen this thread stop, but we
 		     haven't seen the PTRACE_EVENT_CLONE extended
 		     event yet.  */
-		  restore_child_signals_mask (&prev_mask);
 		  return 0;
 		}
 	      else
@@ -1478,8 +1457,6 @@ lin_lwp_attach_lwp (ptid_t ptid)
 		    {
 		      if (WIFSTOPPED (status))
 			add_to_pid_list (&stopped_pids, lwpid, status);
-
-		      restore_child_signals_mask (&prev_mask);
 		      return 1;
 		    }
 		}
@@ -1492,7 +1469,6 @@ lin_lwp_attach_lwp (ptid_t ptid)
 	     to create them.  */
 	  warning (_("Can't attach %s: %s"), target_pid_to_str (ptid),
 		   safe_strerror (errno));
-	  restore_child_signals_mask (&prev_mask);
 	  return -1;
 	}
 
@@ -1503,10 +1479,7 @@ lin_lwp_attach_lwp (ptid_t ptid)
 
       status = linux_nat_post_attach_wait (ptid, 0, &cloned, &signalled);
       if (!WIFSTOPPED (status))
-	{
-	  restore_child_signals_mask (&prev_mask);
-	  return 1;
-	}
+	return 1;
 
       lp = add_lwp (ptid);
       lp->stopped = 1;
@@ -1542,7 +1515,6 @@ lin_lwp_attach_lwp (ptid_t ptid)
     }
 
   lp->last_resume_kind = resume_stop;
-  restore_child_signals_mask (&prev_mask);
   return 0;
 }
 
@@ -1975,7 +1947,6 @@ static void
 linux_nat_resume (struct target_ops *ops,
 		  ptid_t ptid, int step, enum gdb_signal signo)
 {
-  sigset_t prev_mask;
   struct lwp_info *lp;
   int resume_many;
 
@@ -1987,8 +1958,6 @@ linux_nat_resume (struct target_ops *ops,
 			(signo != GDB_SIGNAL_0
 			 ? strsignal (gdb_signal_to_host (signo)) : "0"),
 			target_pid_to_str (inferior_ptid));
-
-  block_child_signals (&prev_mask);
 
   /* A specific PTID means `step only this process id'.  */
   resume_many = (ptid_equal (minus_one_ptid, ptid)
@@ -2047,7 +2016,6 @@ linux_nat_resume (struct target_ops *ops,
 			    "LLR: Short circuiting for status 0x%x\n",
 			    lp->status);
 
-      restore_child_signals_mask (&prev_mask);
       if (target_can_async_p ())
 	{
 	  target_async (inferior_event_handler, 0);
@@ -2080,7 +2048,6 @@ linux_nat_resume (struct target_ops *ops,
 			(signo != GDB_SIGNAL_0
 			 ? strsignal (gdb_signal_to_host (signo)) : "0"));
 
-  restore_child_signals_mask (&prev_mask);
   if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
 }
@@ -3477,7 +3444,7 @@ linux_nat_wait_1 (struct target_ops *ops,
       lp->resumed = 1;
     }
 
-  /* Make sure SIGCHLD is blocked.  */
+  /* Make sure SIGCHLD is blocked until the sigsuspend below.  */
   block_child_signals (&prev_mask);
 
 retry:
@@ -4907,6 +4874,8 @@ linux_async_pipe (int enable)
     {
       sigset_t prev_mask;
 
+      /* Block child signals while we create/destroy the pipe, as
+	 their handler writes to it.  */
       block_child_signals (&prev_mask);
 
       if (enable)
