@@ -1,3 +1,29 @@
+2013-08-19  Luis Machado  <lgustavo@codesourcery.com>
+    
+	* Makefile.in (SFILES): Remove common/target-common.c and
+	add target/waitstatus.c.
+	(HFILES_NO_SRCDIR): Remove common/target-common.h and add
+	target/resume.h, target/wait.h and target/waitstatus.h.
+	(COMMON_OBS): Remove target-common.o and add
+	waitstatus.o.
+	(target-common.o): Remove.
+	(waitstatus.o): New target object file.
+	* common/target-common.c: Move contents to
+	target/waitstatus.c and remove.
+	* common/target-common.h: Move contents to other files and
+	remove.
+	(enum resume_kind: Move to target/resume.h.
+	(TARGET_WNOHANG): Move to target/wait.h.
+	(enum target_waitkind): Move to target/waitstatus.h.
+	(struct target_waitstatus): Likewise.
+	* target.h: Do not include target-common.h and
+	include target/resume.h, target/wait.h and
+	target/waitstatus.h.
+	* target/resume.h: New file.
+	* target/wait.h: New file.
+	* target/waitstatus.h: New file.
+	* target/waitstatus.c: New file.
+
 2013-08-19  Pedro Alves  <palves@redhat.com>
 
 	* linux-nat.c (linux_test_for_tracefork)

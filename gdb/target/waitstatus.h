@@ -1,9 +1,6 @@
-/* Interface between the debugger and target environments, including files
-   and processes, shared between GDB and gdbserver.
+/* Target waitstatus definitions and prototypes.
 
    Copyright (C) 1990-2013 Free Software Foundation, Inc.
-
-   Contributed by Cygnus Support.  Written by John Gilmore.
 
    This file is part of GDB.
 
@@ -20,26 +17,12 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef TARGET_COMMON_H
-#define TARGET_COMMON_H
+#ifndef WAITSTATUS_H
+#define WAITSTATUS_H
 
 #include "common-utils.h"
 #include "ptid.h"
 #include "gdb_signals.h"
-
-/* Ways to "resume" a thread.  */
-
-enum resume_kind
-{
-  /* Thread should continue.  */
-  resume_continue,
-
-  /* Thread should single-step.  */
-  resume_step,
-
-  /* Thread should be stopped.  */
-  resume_stop
-};
 
 /* Stuff for target_wait.  */
 
@@ -57,8 +40,8 @@ enum target_waitkind
      value.sig.  */
   TARGET_WAITKIND_SIGNALLED,
 
-  /* The program is letting us know that it dynamically loaded something
-     (e.g. it called load(2) on AIX).  */
+  /* The program is letting us know that it dynamically loaded
+     something (e.g. it called load(2) on AIX).  */
   TARGET_WAITKIND_LOADED,
 
   /* The program has forked.  A "related" process' PTID is in
@@ -85,13 +68,14 @@ enum target_waitkind
 
   /* The program has entered or returned from a system call.  On
      HP-UX, this is used in the hardware watchpoint implementation.
-     The syscall's unique integer ID number is in value.syscall_id.  */
+     The syscall's unique integer ID number is in
+     value.syscall_id.  */
   TARGET_WAITKIND_SYSCALL_ENTRY,
   TARGET_WAITKIND_SYSCALL_RETURN,
 
-  /* Nothing happened, but we stopped anyway.  This perhaps should be handled
-     within target_wait, but I'm not sure target_wait should be resuming the
-     inferior.  */
+  /* Nothing happened, but we stopped anyway.  This perhaps should
+     be handled within target_wait, but I'm not sure target_wait
+     should be resuming the inferior.  */
   TARGET_WAITKIND_SPURIOUS,
 
   /* An event has occured, but we should wait again.
@@ -133,17 +117,10 @@ struct target_waitstatus
     } value;
 };
 
-/* Options that can be passed to target_wait.  */
-
-/* Return immediately if there's no event already queued.  If this
-   options is not requested, target_wait blocks waiting for an
-   event.  */
-#define TARGET_WNOHANG 1
-
 /* Prototypes */
 
 /* Return a pretty printed form of target_waitstatus.
    Space for the result is malloc'd, caller must free.  */
 extern char *target_waitstatus_to_string (const struct target_waitstatus *);
 
-#endif /* TARGET_COMMON_H */
+#endif /* WAITSTATUS_H */

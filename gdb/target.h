@@ -57,7 +57,9 @@ struct expression;
    it goes into the file stratum, which is always below the process
    stratum.  */
 
-#include "target-common.h"
+#include "target/resume.h"
+#include "target/wait.h"
+#include "target/waitstatus.h"
 #include "bfd.h"
 #include "symtab.h"
 #include "memattr.h"

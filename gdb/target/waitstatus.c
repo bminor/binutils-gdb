@@ -1,9 +1,6 @@
-/* Common target operations for GDB and gdbserver.
+/* Target waitstatus implementations.
 
    Copyright (C) 1990-2013 Free Software Foundation, Inc.
-
-   Contributed by Cygnus Support.
-   Contributed by MontaVista Software.
 
    This file is part of GDB.
 
@@ -26,10 +23,7 @@
 #include "defs.h"
 #endif
 
-/* Return a pretty printed form of target_waitstatus.
-   Space for the result is malloc'd, caller must free.  */
-
-#include "target-common.h"
+#include "waitstatus.h"
 
 /* Return a pretty printed form of target_waitstatus.
    Space for the result is malloc'd, caller must free.  */

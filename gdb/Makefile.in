@@ -775,7 +775,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	common/gdb_vecs.c common/common-utils.c common/xml-utils.c \
 	common/ptid.c common/buffer.c gdb-dlfcn.c common/agent.c \
 	common/format.c common/filestuff.c btrace.c record-btrace.c ctf.c \
-	common/target-common.c
+	target/waitstatus.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -854,7 +854,8 @@ common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
 common/format.h common/host-defs.h utils.h common/queue.h common/gdb_string.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h common/linux-btrace.h \
-ctf.h common/i386-cpuid.h common/i386-gcc-cpuid.h common/target-common.h
+ctf.h common/i386-cpuid.h common/i386-gcc-cpuid.h target/resume.h \
+target/wait.h target/waitstatus.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -948,7 +949,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	inferior.o osdata.o gdb_usleep.o record.o record-full.o gcore.o \
 	gdb_vecs.o jit.o progspace.o skip.o probe.o \
 	common-utils.o buffer.o ptid.o gdb-dlfcn.o common-agent.o \
-	format.o registry.o btrace.o record-btrace.o target-common.o
+	format.o registry.o btrace.o record-btrace.o waitstatus.o
 
 TSOBS = inflow.o
 
@@ -2022,12 +2023,18 @@ linux-btrace.o: ${srcdir}/common/linux-btrace.c
 	$(COMPILE) $(srcdir)/common/linux-btrace.c
 	$(POSTCOMPILE)
 
-target-common.o: ${srcdir}/common/target-common.c
-	$(COMPILE) $(srcdir)/common/target-common.c
-	$(POSTCOMPILE)
-
 mips-linux-watch.o: ${srcdir}/common/mips-linux-watch.c
 	$(COMPILE) $(srcdir)/common/mips-linux-watch.c
+	$(POSTCOMPILE)
+
+#
+# gdb/target/ dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the sub-directory.
+
+waitstatus.o: ${srcdir}/target/waitstatus.c
+	$(COMPILE) $(srcdir)/target/waitstatus.c
 	$(POSTCOMPILE)
 
 #

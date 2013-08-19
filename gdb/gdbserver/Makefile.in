@@ -101,7 +101,7 @@ GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 # -I${srcdir} for our headers.
 # -I$(srcdir)/../regformats for regdef.h.
 INCLUDE_CFLAGS = -I. -I${srcdir} -I$(srcdir)/../common \
-	-I$(srcdir)/../regformats -I$(INCLUDE_DIR) \
+	-I$(srcdir)/../regformats -I$(srcdir)/../ -I$(INCLUDE_DIR) \
 	$(INCGNU)
 
 # M{H,T}_CFLAGS, if defined, has host- and target-dependent CFLAGS
@@ -157,7 +157,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c $(srcdir)/dll.c \
 	$(srcdir)/common/common-utils.c $(srcdir)/common/xml-utils.c \
 	$(srcdir)/common/linux-osdata.c $(srcdir)/common/ptid.c \
 	$(srcdir)/common/buffer.c $(srcdir)/common/linux-btrace.c \
-	$(srcdir)/common/filestuff.c $(srcdir)/common/target-common.c \
+	$(srcdir)/common/filestuff.c $(srcdir)/target/waitstatus.c \
     $(srcdir)/common/mips-linux-watch.c
 
 DEPFILES = @GDBSERVER_DEPFILES@
@@ -168,7 +168,7 @@ SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS}
 
 OBS = agent.o ax.o inferiors.o regcache.o remote-utils.o server.o signals.o \
-      target.o target-common.o utils.o version.o vec.o gdb_vecs.o \
+      target.o waitstatus.o utils.o version.o vec.o gdb_vecs.o \
       mem-break.o hostio.o event-loop.o tracepoint.o xml-utils.o \
       common-utils.o ptid.o buffer.o format.o filestuff.o dll.o notif.o \
       tdesc.o $(XML_BUILTIN) $(DEPFILES) $(LIBOBJS)
@@ -437,7 +437,9 @@ server_h = $(srcdir)/server.h $(regcache_h) $(srcdir)/target.h \
 		$(srcdir)/../common/buffer.h \
 		$(srcdir)/../common/gdb_assert.h \
 		$(srcdir)/../common/gdb_locale.h \
-		$(srcdir)/../common/target-common.h \
+		$(srcdir)/../target/resume.h \
+		$(srcdir)/../target/wait.h \
+		$(srcdir)/../target/waitstatus.h \
 		$(ptid_h) \
 		$(signals_h) \
 		$(libiberty_h) \
@@ -550,7 +552,7 @@ filestuff.o: ../common/filestuff.c
 agent.o: ../common/agent.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
-target-common.o: ../common/target-common.c
+waitstatus.o: ../target/waitstatus.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 

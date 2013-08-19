@@ -1,3 +1,18 @@
+2013-08-19  Luis Machado  <lgustavo@codesourcery.com>
+    
+	* Makefile.in (INCLUDE_CFLAGS): Include -I$(srcdir)/../.
+	(SFILES): Remove $(srcdir)/common/target-common.c and
+	add $(srcdir)/target/waitstatus.c.
+	(OBS): Remove target-common.o and add waitstatus.o.
+	(server_h): Remove $(srcdir)/../common/target-common.h and
+	add $(srcdir)/../target/resume.h, $(srcdir)/../target/wait.h
+	and $(srcdir)/../target/waitstatus.h.
+	(target-common.o): Remove.
+	(waitstatus.o): New target object file.
+	* target.h: Do not include target-common.h and
+	include target/resume.h, target/wait.h and
+	target/waitstatus.h.
+
 2013-08-13  Luis Machado  <lgustavo@codesourcery.com>
 
 	* linux-arm-low.c: Rename all occurrences of PTRACE_ARG3_TYPE
