@@ -4271,14 +4271,11 @@ struct mips_arg_info
      where it gives the lsb position.  */
   unsigned int last_op_int;
 
-  /* If true, the OP_INT match routine should treat plain symbolic operands
-     as if a relocation operator like %lo(...) had been used.  This is only
-     ever true if the operand can be relocated.  */
-  bfd_boolean allow_nonconst;
-
-  /* When true, the OP_INT match routine should allow unsigned N-bit
-     arguments to be used where a signed N-bit operand is expected.  */
-  bfd_boolean lax_max;
+  /* If true, match routines should assume that no later instruction
+     alternative matches and should therefore be as accomodating as
+     possible.  Match routines should not report errors if something
+     is only invalid for !LAX_MATCH.  */
+  bfd_boolean lax_match;
 
   /* True if a reference to the current AT register was seen.  */
   bfd_boolean seen_at;
@@ -4559,8 +4556,6 @@ match_int_operand (struct mips_arg_info *arg,
   factor = 1 << operand->shift;
   min_val = mips_int_operand_min (operand);
   max_val = mips_int_operand_max (operand);
-  if (arg->lax_max)
-    max_val = ((1 << operand_base->size) - 1) << operand->shift;
 
   if (operand_base->lsb == 0
       && operand_base->size == 16
@@ -4580,13 +4575,10 @@ match_int_operand (struct mips_arg_info *arg,
 
       if (offset_expr.X_op != O_constant)
 	{
-	  /* If non-constant operands are allowed then leave them for
-	     the caller to process, otherwise fail the match.  */
-	  if (!arg->allow_nonconst)
-	    {
-	      match_not_constant (arg);
-	      return FALSE;
-	    }
+	  /* Accept non-constant operands if no later alternative matches,
+	     leaving it for the caller to process.  */
+	  if (!arg->lax_match)
+	    return FALSE;
 	  offset_reloc[0] = BFD_RELOC_LO16;
 	  return TRUE;
 	}
@@ -4595,6 +4587,16 @@ match_int_operand (struct mips_arg_info *arg,
 	 ourselves.  */
       sval = offset_expr.X_add_number;
       offset_expr.X_op = O_absent;
+
+      /* For compatibility with older assemblers, we accept
+	 0x8000-0xffff as signed 16-bit numbers when only
+	 signed numbers are allowed.  */
+      if (sval > max_val)
+	{
+	  max_val = ((1 << operand_base->size) - 1) << operand->shift;
+	  if (!arg->lax_match && sval <= max_val)
+	    return FALSE;
+	}
     }
   else
     {
@@ -7047,7 +7049,7 @@ normalize_address_expr (expressionS *ex)
 static bfd_boolean
 match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	    struct mips_operand_token *tokens, unsigned int opcode_extra,
-	    bfd_boolean more_alts)
+	    bfd_boolean lax_match, bfd_boolean complete_p)
 {
   const char *args;
   struct mips_arg_info arg;
@@ -7062,13 +7064,18 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
   offset_reloc[2] = BFD_RELOC_UNUSED;
 
   create_insn (insn, opcode);
-  insn->insn_opcode |= opcode_extra;
+  /* When no opcode suffix is specified, assume ".xyzw". */
+  if ((opcode->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0 && opcode_extra == 0)
+    insn->insn_opcode |= 0xf << mips_vu0_channel_mask.lsb;
+  else
+    insn->insn_opcode |= opcode_extra;
   memset (&arg, 0, sizeof (arg));
   arg.insn = insn;
   arg.token = tokens;
   arg.argnum = 1;
   arg.last_regno = ILLEGAL_REG;
   arg.dest_regno = ILLEGAL_REG;
+  arg.lax_match = lax_match;
   for (args = opcode->args;; ++args)
     {
       if (arg.token->type == OT_END)
@@ -7107,6 +7114,8 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	    return FALSE;
 
 	  /* Successful match.  */
+	  if (!complete_p)
+	    return TRUE;
 	  clear_insn_error ();
 	  if (arg.dest_regno == arg.last_regno
 	      && strncmp (insn->insn_mo->name, "jalr", 4) == 0)
@@ -7148,7 +7157,6 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
       /* Handle special macro operands.  Work out the properties of
 	 other operands.  */
       arg.opnum += 1;
-      arg.lax_max = FALSE;
       switch (*args)
 	{
 	case '+':
@@ -7218,32 +7226,6 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 				     4, FALSE))
 	    return FALSE;
 	  continue;
-
-	  /* ??? This is the traditional behavior, but is flaky if
-	     there are alternative versions of the same instruction
-	     for different subarchitectures.  The next alternative
-	     might not be suitable.  */
-	case 'j':
-	  /* For compatibility with older assemblers, we accept
-	     0x8000-0xffff as signed 16-bit numbers when only
-	     signed numbers are allowed.  */
-	  arg.lax_max = !more_alts;
-	case 'i':
-	  /* Only accept non-constant operands if this is the
-	     final alternative.  Later alternatives might include
-	     a macro implementation.  */
-	  arg.allow_nonconst = !more_alts;
-	  break;
-
-	case 'u':
-	  /* There are no macro implementations for out-of-range values.  */
-	  arg.allow_nonconst = TRUE;
-	  break;
-
-	case 'o':
-	  /* There should always be a macro implementation.  */
-	  arg.allow_nonconst = FALSE;
-	  break;
 
 	case 'p':
 	  *offset_reloc = BFD_RELOC_16_PCREL_S2;
@@ -7477,6 +7459,141 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
       if (!match_operand (&arg, operand))
 	return FALSE;
     }
+}
+
+/* Record that the current instruction is invalid for the current ISA.  */
+
+static void
+match_invalid_for_isa (void)
+{
+  set_insn_error_ss
+    (0, _("Opcode not supported on this processor: %s (%s)"),
+     mips_cpu_info_from_arch (mips_opts.arch)->name,
+     mips_cpu_info_from_isa (mips_opts.isa)->name);
+}
+
+/* Try to match TOKENS against a series of opcode entries, starting at FIRST.
+   Return true if a definite match or failure was found, storing any match
+   in INSN.  OPCODE_EXTRA is a value that should be ORed into the opcode
+   (to handle things like VU0 suffixes).  LAX_MATCH is true if we have already
+   tried and failed to match under normal conditions and now want to try a
+   more relaxed match.  */
+
+static bfd_boolean
+match_insns (struct mips_cl_insn *insn, const struct mips_opcode *first,
+	     const struct mips_opcode *past, struct mips_operand_token *tokens,
+	     int opcode_extra, bfd_boolean lax_match)
+{
+  const struct mips_opcode *opcode;
+  const struct mips_opcode *invalid_delay_slot;
+  bfd_boolean seen_valid_for_isa, seen_valid_for_size;
+
+  /* Search for a match, ignoring alternatives that don't satisfy the
+     current ISA or forced_length.  */
+  invalid_delay_slot = 0;
+  seen_valid_for_isa = FALSE;
+  seen_valid_for_size = FALSE;
+  opcode = first;
+  do
+    {
+      gas_assert (strcmp (opcode->name, first->name) == 0);
+      if (is_opcode_valid (opcode))
+	{
+	  seen_valid_for_isa = TRUE;
+	  if (is_size_valid (opcode))
+	    {
+	      bfd_boolean delay_slot_ok;
+
+	      seen_valid_for_size = TRUE;
+	      delay_slot_ok = is_delay_slot_valid (opcode);
+	      if (match_insn (insn, opcode, tokens, opcode_extra,
+			      lax_match, delay_slot_ok))
+		{
+		  if (!delay_slot_ok)
+		    {
+		      if (!invalid_delay_slot)
+			invalid_delay_slot = opcode;
+		    }
+		  else
+		    return TRUE;
+		}
+	    }
+	}
+      ++opcode;
+    }
+  while (opcode < past && strcmp (opcode->name, first->name) == 0);
+
+  /* If the only matches we found had the wrong length for the delay slot,
+     pick the first such match.  We'll issue an appropriate warning later.  */
+  if (invalid_delay_slot)
+    {
+      if (match_insn (insn, invalid_delay_slot, tokens, opcode_extra,
+		      lax_match, TRUE))
+	return TRUE;
+      abort ();
+    }
+
+  /* Handle the case where we didn't try to match an instruction because
+     all the alternatives were incompatible with the current ISA.  */
+  if (!seen_valid_for_isa)
+    {
+      match_invalid_for_isa ();
+      return TRUE;
+    }
+
+  /* Handle the case where we didn't try to match an instruction because
+     all the alternatives were of the wrong size.  */
+  if (!seen_valid_for_size)
+    {
+      if (mips_opts.insn32)
+	set_insn_error (0, _("Opcode not supported in the `insn32' mode"));
+      else
+	set_insn_error_i
+	  (0, _("Unrecognized %d-bit version of microMIPS opcode"),
+	   8 * forced_insn_length);
+      return TRUE;
+    }
+
+  return FALSE;
+}
+
+/* Like match_insns, but for MIPS16.  */
+
+static bfd_boolean
+match_mips16_insns (struct mips_cl_insn *insn, const struct mips_opcode *first,
+		    struct mips_operand_token *tokens)
+{
+  const struct mips_opcode *opcode;
+  bfd_boolean seen_valid_for_isa;
+
+  /* Search for a match, ignoring alternatives that don't satisfy the
+     current ISA.  There are no separate entries for extended forms so
+     we deal with forced_length later.  */
+  seen_valid_for_isa = FALSE;
+  opcode = first;
+  do
+    {
+      gas_assert (strcmp (opcode->name, first->name) == 0);
+      if (is_opcode_valid_16 (opcode))
+	{
+	  seen_valid_for_isa = TRUE;
+	  if (match_mips16_insn (insn, opcode, tokens))
+	    return TRUE;
+	}
+      ++opcode;
+    }
+  while (opcode < &mips16_opcodes[bfd_mips16_num_opcodes]
+	 && strcmp (opcode->name, first->name) == 0);
+
+  /* Handle the case where we didn't try to match an instruction because
+     all the alternatives were incompatible with the current ISA.  */
+  if (!seen_valid_for_isa)
+    {
+      match_invalid_for_isa ();
+      return TRUE;
+    }
+
+  return FALSE;
 }
 
 /* Set up global variables for the start of a new macro.  */
@@ -12952,14 +13069,10 @@ mips_lookup_insn (struct hash_control *hash, const char *start,
    to offset_expr.  */
 
 static void
-mips_ip (char *str, struct mips_cl_insn *ip)
+mips_ip (char *str, struct mips_cl_insn *insn)
 {
-  bfd_boolean wrong_delay_slot_insns = FALSE;
-  bfd_boolean need_delay_slot_ok = TRUE;
-  struct mips_opcode *firstinsn = NULL;
-  const struct mips_opcode *past;
+  const struct mips_opcode *first, *past;
   struct hash_control *hash;
-  struct mips_opcode *first, *insn;
   char format;
   size_t end;
   struct mips_operand_token *tokens;
@@ -12976,26 +13089,22 @@ mips_ip (char *str, struct mips_cl_insn *ip)
       past = &mips_opcodes[NUMOPCODES];
     }
   forced_insn_length = 0;
-  insn = NULL;
   opcode_extra = 0;
 
   /* We first try to match an instruction up to a space or to the end.  */
   for (end = 0; str[end] != '\0' && !ISSPACE (str[end]); end++)
     continue;
 
-  first = insn = mips_lookup_insn (hash, str, end, &opcode_extra);
-  if (insn == NULL)
+  first = mips_lookup_insn (hash, str, end, &opcode_extra);
+  if (first == NULL)
     {
       set_insn_error (0, _("Unrecognized opcode"));
       return;
     }
-  /* When no opcode suffix is specified, assume ".xyzw". */
-  if ((insn->pinfo2 & INSN2_VU0_CHANNEL_SUFFIX) != 0 && opcode_extra == 0)
-    opcode_extra = 0xf << mips_vu0_channel_mask.lsb;
 
-  if (strcmp (insn->name, "li.s") == 0)
+  if (strcmp (first->name, "li.s") == 0)
     format = 'f';
-  else if (strcmp (insn->name, "li.d") == 0)
+  else if (strcmp (first->name, "li.d") == 0)
     format = 'd';
   else
     format = 0;
@@ -13003,84 +13112,10 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   if (!tokens)
     return;
 
-  /* For microMIPS instructions placed in a fixed-length branch delay slot
-     we make up to two passes over the relevant fragment of the opcode
-     table.  First we try instructions that meet the delay slot's length
-     requirement.  If none matched, then we retry with the remaining ones
-     and if one matches, then we use it and then issue an appropriate
-     warning later on.  */
-  for (;;)
-    {
-      bfd_boolean delay_slot_ok;
-      bfd_boolean size_ok;
-      bfd_boolean ok;
-      bfd_boolean more_alts;
+  if (!match_insns (insn, first, past, tokens, opcode_extra, FALSE)
+      && !match_insns (insn, first, past, tokens, opcode_extra, TRUE))
+    set_insn_error (0, _("Illegal operands"));
 
-      gas_assert (strcmp (insn->name, first->name) == 0);
-
-      ok = is_opcode_valid (insn);
-      size_ok = is_size_valid (insn);
-      delay_slot_ok = is_delay_slot_valid (insn);
-      if (!delay_slot_ok && !wrong_delay_slot_insns)
-	{
-	  firstinsn = insn;
-	  wrong_delay_slot_insns = TRUE;
-	}
-      more_alts = (insn + 1 < past
-		   && strcmp (insn[0].name, insn[1].name) == 0);
-      if (!ok || !size_ok || delay_slot_ok != need_delay_slot_ok)
-	{
-	  if (more_alts)
-	    {
-	      ++insn;
-	      continue;
-	    }
-	  if (wrong_delay_slot_insns && need_delay_slot_ok)
-	    {
-	      gas_assert (firstinsn);
-	      need_delay_slot_ok = FALSE;
-	      past = insn + 1;
-	      insn = firstinsn;
-	      continue;
-	    }
-
-	  if (!ok)
-	    set_insn_error_ss
-	      (0, _("Opcode not supported on this processor: %s (%s)"),
-	       mips_cpu_info_from_arch (mips_opts.arch)->name,
-	       mips_cpu_info_from_isa (mips_opts.isa)->name);
-	  else if (mips_opts.insn32)
-	    set_insn_error
-	      (0, _("Opcode not supported in the `insn32' mode"));
-	  else
-	    set_insn_error_i
-	      (0, _("Unrecognized %d-bit version of microMIPS opcode"),
-	       8 * forced_insn_length);
-	  break;
-	}
-
-      if (match_insn (ip, insn, tokens, opcode_extra,
-		      more_alts || (wrong_delay_slot_insns
-				    && need_delay_slot_ok)))
-	break;
-
-      /* Args don't match.  */
-      set_insn_error (0, _("Illegal operands"));
-      if (more_alts)
-	{
-	  ++insn;
-	  continue;
-	}
-      if (wrong_delay_slot_insns && need_delay_slot_ok)
-	{
-	  gas_assert (firstinsn);
-	  need_delay_slot_ok = FALSE;
-	  past = insn + 1;
-	  insn = firstinsn;
-	  continue;
-	}
-      break;
-    }
   obstack_free (&mips_operand_tokens, tokens);
 }
 
@@ -13089,10 +13124,10 @@ mips_ip (char *str, struct mips_cl_insn *ip)
    bytes if the user explicitly requested a small or extended instruction.  */
 
 static void
-mips16_ip (char *str, struct mips_cl_insn *ip)
+mips16_ip (char *str, struct mips_cl_insn *insn)
 {
   char *end, *s, c;
-  struct mips_opcode *insn, *first;
+  struct mips_opcode *first;
   struct mips_operand_token *tokens;
 
   forced_insn_length = 0;
@@ -13133,10 +13168,10 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
     forced_insn_length = 2;
 
   *end = 0;
-  first = insn = (struct mips_opcode *) hash_find (mips16_op_hash, str);
+  first = (struct mips_opcode *) hash_find (mips16_op_hash, str);
   *end = c;
 
-  if (!insn)
+  if (!first)
     {
       set_insn_error (0, _("Unrecognized opcode"));
       return;
@@ -13146,45 +13181,9 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   if (!tokens)
     return;
 
-  for (;;)
-    {
-      bfd_boolean ok;
-      bfd_boolean more_alts;
+  if (!match_mips16_insns (insn, first, tokens))
+    set_insn_error (0, _("Illegal operands"));
 
-      gas_assert (strcmp (insn->name, first->name) == 0);
-
-      ok = is_opcode_valid_16 (insn);
-      more_alts = (insn + 1 < &mips16_opcodes[bfd_mips16_num_opcodes]
-		   && strcmp (insn[0].name, insn[1].name) == 0);
-      if (! ok)
-	{
-	  if (more_alts)
-	    {
-	      ++insn;
-	      continue;
-	    }
-	  else
-	    {
-	      set_insn_error_ss
-		(0, _("Opcode not supported on this processor: %s (%s)"),
-		 mips_cpu_info_from_arch (mips_opts.arch)->name,
-		 mips_cpu_info_from_isa (mips_opts.isa)->name);
-	      break;
-	    }
-	}
-
-      if (match_mips16_insn (ip, insn, tokens))
-	break;
-
-      /* Args don't match.  */
-      set_insn_error (0, _("Illegal operands"));
-      if (more_alts)
-	{
-	  ++insn;
-	  continue;
-	}
-      break;
-    }
   obstack_free (&mips_operand_tokens, tokens);
 }
 
