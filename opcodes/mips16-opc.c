@@ -66,8 +66,8 @@ decode_mips16_operand (char type, bfd_boolean extended_p)
     case 'i': JALX (26, 0, 2);
     case 'l': SPECIAL (6, 5, ENTRY_EXIT_LIST);
     case 'm': SPECIAL (7, 0, SAVE_RESTORE_LIST);
-    case 'v': MAPPED_REG (3, 8, GP, reg_m16_map);
-    case 'w': MAPPED_REG (3, 5, GP, reg_m16_map);
+    case 'v': OPTIONAL_MAPPED_REG (3, 8, GP, reg_m16_map);
+    case 'w': OPTIONAL_MAPPED_REG (3, 5, GP, reg_m16_map);
     case 'x': MAPPED_REG (3, 8, GP, reg_m16_map);
     case 'y': MAPPED_REG (3, 5, GP, reg_m16_map);
     case 'z': MAPPED_REG (3, 2, GP, reg_m16_map);

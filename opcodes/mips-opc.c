@@ -134,8 +134,8 @@ decode_mips_operand (const char *p)
     case 'S': REG (5, 11, FP);
     case 'T': REG (5, 16, FP);
     case 'U': SPECIAL (10, 11, CLO_CLZ_DEST);
-    case 'V': REG (5, 11, FP);
-    case 'W': REG (5, 16, FP);
+    case 'V': OPTIONAL_REG (5, 11, FP);
+    case 'W': OPTIONAL_REG (5, 16, FP);
     case 'X': REG (5, 6, VEC);
     case 'Y': REG (5, 11, VEC);
     case 'Z': REG (5, 16, VEC);
@@ -153,12 +153,12 @@ decode_mips_operand (const char *p)
     case 'o': SINT (16, 0);
     case 'p': BRANCH (16, 0, 2);
     case 'q': HINT (10, 6);
-    case 'r': REG (5, 21, GP);
+    case 'r': OPTIONAL_REG (5, 21, GP);
     case 's': REG (5, 21, GP);
     case 't': REG (5, 16, GP);
     case 'u': HINT (16, 0);
-    case 'v': REG (5, 21, GP);
-    case 'w': REG (5, 16, GP);
+    case 'v': OPTIONAL_REG (5, 21, GP);
+    case 'w': OPTIONAL_REG (5, 16, GP);
     case 'x': REG (0, 0, GP);
     case 'z': MAPPED_REG (0, 0, GP, reg_0_map);
     }

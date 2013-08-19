@@ -1,3 +1,12 @@
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-formats.h (OPTIONAL_REG, OPTIONAL_MAPPED_REG): New macros.
+	* micromips-opc.c (decode_micromips_operand): Use OPTIONAL_REG
+	and OPTIONAL_MAPPED_REG.
+	* mips-opc.c (decode_mips_operand): Likewise.
+	* mips16-opc.c (decode_mips16_operand): Likewise.
+	* mips-dis.c (print_insn_arg): Handle OP_OPTIONAL_REG.
+
 2013-08-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (PREFIX_EVEX_0F3A3E): Removed.

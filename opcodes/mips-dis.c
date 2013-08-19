@@ -1042,6 +1042,7 @@ print_insn_arg (struct disassemble_info *info,
       break;
 
     case OP_REG:
+    case OP_OPTIONAL_REG:
       {
 	const struct mips_reg_operand *reg_op;
 

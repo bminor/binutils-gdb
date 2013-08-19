@@ -3868,6 +3868,7 @@ operand_reg_mask (const struct mips_cl_insn *insn,
       abort ();
 
     case OP_REG:
+    case OP_OPTIONAL_REG:
       {
 	const struct mips_reg_operand *reg_op;
 
@@ -5283,6 +5284,7 @@ match_operand (struct mips_arg_info *arg,
       return match_msb_operand (arg, operand);
 
     case OP_REG:
+    case OP_OPTIONAL_REG:
       return match_reg_operand (arg, operand);
 
     case OP_REG_PAIR:
@@ -12393,7 +12395,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   const struct mips_operand *operand;
   struct mips_arg_info arg;
   struct mips_operand_token *tokens;
-  bfd_boolean optional_reg;
   unsigned int opcode_extra;
 
   insn_error = NULL;
@@ -12522,17 +12523,17 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      /* Handle unary instructions in which only one operand is given.
 		 The source is then the same as the destination.  */
 	      if (arg.opnum == 1 && *args == ',')
-		switch (args[1])
-		  {
-		  case 'r':
-		  case 'v':
-		  case 'w':
-		  case 'W':
-		  case 'V':
-		    arg.token = tokens;
-		    arg.argnum = 1;
-		    continue;
-		  }
+		{
+		  operand = (mips_opts.micromips
+			     ? decode_micromips_operand (args + 1)
+			     : decode_mips_operand (args + 1));
+		  if (operand && mips_optional_operand_p (operand))
+		    {
+		      arg.token = tokens;
+		      arg.argnum = 1;
+		      continue;
+		    }
+		}
 
 	      /* Treat elided base registers as $0.  */
 	      if (strcmp (args, "(b)") == 0)
@@ -12593,7 +12594,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	     other operands.  */
 	  arg.opnum += 1;
 	  arg.lax_max = FALSE;
-	  optional_reg = FALSE;
 	  switch (*args)
 	    {
 	    case '+':
@@ -12666,17 +12666,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		 give detailed error messages where possible.  */
 	      if (args[1] == 0)
 		arg.soft_match = FALSE;
-	      break;
-
-	    case 'r':
-	    case 'v':
-	    case 'w':
-	    case 'W':
-	    case 'V':
-	      /* We have already matched a comma by this point, so the register
-		 is only optional if there is another operand to come.  */
-	      gas_assert (arg.opnum == 2);
-	      optional_reg = (args[1] == ',');
 	      break;
 
 	    case 'I':
@@ -12766,16 +12755,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      c = args[1];
 	      switch (c)
 		{
-		case 't':
-		case 'c':
-		case 'e':
-		  /* We have already matched a comma by this point,
-		     so the register is only optional if there is another
-		     operand to come.  */
-		  gas_assert (arg.opnum == 2);
-		  optional_reg = (args[2] == ',');
-		  break;
-
 		case 'D':
 		case 'E':
 		  if (!forced_insn_length)
@@ -12795,7 +12774,12 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  if (!operand)
 	    abort ();
 
-	  if (optional_reg
+	  /* Skip prefixes.  */
+	  if (*args == '+' || *args == 'm')
+	    args++;
+
+	  if (mips_optional_operand_p (operand)
+	      && args[1] == ','
 	      && (arg.token[0].type != OT_REG
 		  || arg.token[1].type == OT_END))
 	    {
@@ -12807,10 +12791,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
 	  if (!match_operand (&arg, operand))
 	    break;
-
-	  /* Skip prefixes.  */
-	  if (*args == '+' || *args == 'm')
-	    args++;
 
 	  continue;
 	}
@@ -12848,7 +12828,6 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   const struct mips_operand *ext_operand;
   struct mips_arg_info arg;
   struct mips_operand_token *tokens;
-  bfd_boolean optional_reg;
 
   insn_error = NULL;
 
@@ -12961,14 +12940,15 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	      /* Handle unary instructions in which only one operand is given.
 		 The source is then the same as the destination.  */
 	      if (arg.opnum == 1 && *args == ',')
-		switch (args[1])
-		  {
-		  case 'v':
-		  case 'w':
-		    arg.token = tokens;
-		    arg.argnum = 1;
-		    continue;
-		  }
+		{
+		  operand = decode_mips16_operand (args[1], FALSE);
+		  if (operand && mips_optional_operand_p (operand))
+		    {
+		      arg.token = tokens;
+		      arg.argnum = 1;
+		      continue;
+		    }
+		}
 
 	      /* Fail the match if there were too few operands.  */
 	      if (*args)
@@ -13020,15 +13000,9 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	    }
 
 	  arg.opnum += 1;
-	  optional_reg = FALSE;
 	  c = *args;
 	  switch (c)
 	    {
-	    case 'v':
-	    case 'w':
-	      optional_reg = (args[1] == ',');
-	      break;
-
 	    case 'p':
 	    case 'q':
 	    case 'A':
@@ -13094,7 +13068,8 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		}
 	    }
 
-	  if (optional_reg
+	  if (mips_optional_operand_p (operand)
+	      && args[1] == ','
 	      && (arg.token[0].type != OT_REG
 		  || arg.token[1].type == OT_END))
 	    {

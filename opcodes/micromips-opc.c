@@ -53,9 +53,9 @@ decode_micromips_operand (const char *p)
 	{
 	case 'a': MAPPED_REG (0, 0, GP, reg_28_map);
 	case 'b': MAPPED_REG (3, 23, GP, reg_m16_map);
-	case 'c': MAPPED_REG (3, 4, GP, reg_m16_map);
+	case 'c': OPTIONAL_MAPPED_REG (3, 4, GP, reg_m16_map);
 	case 'd': MAPPED_REG (3, 7, GP, reg_m16_map);
-	case 'e': MAPPED_REG (3, 1, GP, reg_m16_map);
+	case 'e': OPTIONAL_MAPPED_REG (3, 1, GP, reg_m16_map);
 	case 'f': MAPPED_REG (3, 3, GP, reg_m16_map);
 	case 'g': MAPPED_REG (3, 0, GP, reg_m16_map);
 	case 'h': REG_PAIR (3, 7, GP, reg_h_map);
@@ -144,7 +144,7 @@ decode_micromips_operand (const char *p)
     case 'R': REG (5, 6, FP);
     case 'S': REG (5, 16, FP);
     case 'T': REG (5, 21, FP);
-    case 'V': REG (5, 16, FP);
+    case 'V': OPTIONAL_REG (5, 16, FP);
 
     case 'a': JUMP (26, 0, 1);
     case 'b': REG (5, 16, GP);
@@ -158,12 +158,12 @@ decode_micromips_operand (const char *p)
     case 'o': SINT (16, 0);
     case 'p': BRANCH (16, 0, 1);
     case 'q': HINT (10, 6);
-    case 'r': REG (5, 16, GP);
+    case 'r': OPTIONAL_REG (5, 16, GP);
     case 's': REG (5, 16, GP);
     case 't': REG (5, 21, GP);
     case 'u': HINT (16, 0);
-    case 'v': REG (5, 16, GP);
-    case 'w': REG (5, 21, GP);
+    case 'v': OPTIONAL_REG (5, 16, GP);
+    case 'w': OPTIONAL_REG (5, 21, GP);
     case 'y': REG (5, 6, GP);
     case 'z': MAPPED_REG (0, 0, GP, reg_0_map);
     }

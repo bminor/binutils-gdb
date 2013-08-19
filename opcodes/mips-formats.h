@@ -69,12 +69,30 @@
     return &op.root; \
   }
 
+#define OPTIONAL_REG(SIZE, LSB, BANK) \
+  { \
+    static const struct mips_reg_operand op = { \
+      { OP_OPTIONAL_REG, SIZE, LSB }, OP_REG_##BANK, 0 \
+    }; \
+    return &op.root; \
+  }
+
 #define MAPPED_REG(SIZE, LSB, BANK, MAP) \
   { \
     typedef char ATTRIBUTE_UNUSED \
       static_assert[(1 << (SIZE)) == ARRAY_SIZE (MAP)]; \
     static const struct mips_reg_operand op = { \
       { OP_REG, SIZE, LSB }, OP_REG_##BANK, MAP \
+    }; \
+    return &op.root; \
+  }
+
+#define OPTIONAL_MAPPED_REG(SIZE, LSB, BANK, MAP) \
+  { \
+    typedef char ATTRIBUTE_UNUSED \
+      static_assert[(1 << (SIZE)) == ARRAY_SIZE (MAP)]; \
+    static const struct mips_reg_operand op = { \
+      { OP_OPTIONAL_REG, SIZE, LSB }, OP_REG_##BANK, MAP \
     }; \
     return &op.root; \
   }
