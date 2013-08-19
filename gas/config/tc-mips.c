@@ -630,7 +630,43 @@ const char FLT_CHARS[] = "rRsSfFdDxXpP";
    but nothing is ideal around here.
  */
 
-static char *insn_error;
+/* Types of printf format used for instruction-related error messages.
+   "I" means int ("%d") and "S" means string ("%s"). */
+enum mips_insn_error_format {
+  ERR_FMT_PLAIN,
+  ERR_FMT_I,
+  ERR_FMT_SS,
+};
+
+/* Information about an error that was found while assembling the current
+   instruction.  */
+struct mips_insn_error {
+  /* We sometimes need to match an instruction against more than one
+     opcode table entry.  Errors found during this matching are reported
+     against a particular syntactic argument rather than against the
+     instruction as a whole.  We grade these messages so that errors
+     against argument N have a greater priority than an error against
+     any argument < N, since the former implies that arguments up to N
+     were acceptable and that the opcode entry was therefore a closer match.
+     If several matches report an error against the same argument,
+     we only use that error if it is the same in all cases.
+
+     min_argnum is the minimum argument number for which an error message
+     should be accepted.  It is 0 if MSG is against the instruction as
+     a whole.  */
+  int min_argnum;
+
+  /* The printf()-style message, including its format and arguments.  */
+  enum mips_insn_error_format format;
+  const char *msg;
+  union {
+    int i;
+    const char *ss[2];
+  } u;
+};
+
+/* The error that should be reported for the current instruction.  */
+static struct mips_insn_error insn_error;
 
 static int auto_align = 1;
 
@@ -2157,6 +2193,111 @@ insert_into_history (unsigned int first, unsigned int n,
     }
 }
 
+/* Clear the error in insn_error.  */
+
+static void
+clear_insn_error (void)
+{
+  memset (&insn_error, 0, sizeof (insn_error));
+}
+
+/* Possibly record error message MSG for the current instruction.
+   If the error is about a particular argument, ARGNUM is the 1-based
+   number of that argument, otherwise it is 0.  FORMAT is the format
+   of MSG.  Return true if MSG was used, false if the current message
+   was kept.  */
+
+static bfd_boolean
+set_insn_error_format (int argnum, enum mips_insn_error_format format,
+		       const char *msg)
+{
+  if (argnum == 0)
+    {
+      /* Give priority to errors against specific arguments, and to
+	 the first whole-instruction message.  */
+      if (insn_error.msg)
+	return FALSE;
+    }
+  else
+    {
+      /* Keep insn_error if it is against a later argument.  */
+      if (argnum < insn_error.min_argnum)
+	return FALSE;
+
+      /* If both errors are against the same argument but are different,
+	 give up on reporting a specific error for this argument.
+	 See the comment about mips_insn_error for details.  */
+      if (argnum == insn_error.min_argnum
+	  && insn_error.msg
+	  && strcmp (insn_error.msg, msg) != 0)
+	{
+	  insn_error.msg = 0;
+	  insn_error.min_argnum += 1;
+	  return FALSE;
+	}
+    }
+  insn_error.min_argnum = argnum;
+  insn_error.format = format;
+  insn_error.msg = msg;
+  return TRUE;
+}
+
+/* Record an instruction error with no % format fields.  ARGNUM and MSG are
+   as for set_insn_error_format.  */
+
+static void
+set_insn_error (int argnum, const char *msg)
+{
+  set_insn_error_format (argnum, ERR_FMT_PLAIN, msg);
+}
+
+/* Record an instruction error with one %d field I.  ARGNUM and MSG are
+   as for set_insn_error_format.  */
+
+static void
+set_insn_error_i (int argnum, const char *msg, int i)
+{
+  if (set_insn_error_format (argnum, ERR_FMT_I, msg))
+    insn_error.u.i = i;
+}
+
+/* Record an instruction error with two %s fields S1 and S2.  ARGNUM and MSG
+   are as for set_insn_error_format.  */
+
+static void
+set_insn_error_ss (int argnum, const char *msg, const char *s1, const char *s2)
+{
+  if (set_insn_error_format (argnum, ERR_FMT_SS, msg))
+    {
+      insn_error.u.ss[0] = s1;
+      insn_error.u.ss[1] = s2;
+    }
+}
+
+/* Report the error in insn_error, which is against assembly code STR.  */
+
+static void
+report_insn_error (const char *str)
+{
+  const char *msg;
+
+  msg = ACONCAT ((insn_error.msg, " `%s'", NULL));
+  switch (insn_error.format)
+    {
+    case ERR_FMT_PLAIN:
+      as_bad (msg, str);
+      break;
+
+    case ERR_FMT_I:
+      as_bad (msg, insn_error.u.i, str);
+      break;
+
+    case ERR_FMT_SS:
+      as_bad (msg, insn_error.u.ss[0], insn_error.u.ss[1], str);
+      break;
+    }
+}
+
 /* Initialize vr4120_conflicts.  There is a bit of duplication here:
    the idea is to make it obvious at a glance that each errata is
    included.  */
@@ -2799,7 +2940,7 @@ mips_parse_argument_token (char *s, char float_format)
 	  SKIP_SPACE_TABS (s);
 	  if (!mips_parse_register (&s, &regno2, NULL))
 	    {
-	      insn_error = _("Invalid register range");
+	      set_insn_error (0, _("Invalid register range"));
 	      return 0;
 	    }
 
@@ -2818,14 +2959,14 @@ mips_parse_argument_token (char *s, char float_format)
 	  my_getExpression (&element, s);
 	  if (element.X_op != O_constant)
 	    {
-	      insn_error = _("Vector element must be constant");
+	      set_insn_error (0, _("Vector element must be constant"));
 	      return 0;
 	    }
 	  s = expr_end;
 	  SKIP_SPACE_TABS (s);
 	  if (*s != ']')
 	    {
-	      insn_error = _("Missing `]'");
+	      set_insn_error (0, _("Missing `]'"));
 	      return 0;
 	    }
 	  ++s;
@@ -2853,7 +2994,7 @@ mips_parse_argument_token (char *s, char float_format)
       input_line_pointer = save_in;
       if (err && *err)
 	{
-	  insn_error = err;
+	  set_insn_error (0, err);
 	  return 0;
 	}
       if (s != end)
@@ -3451,6 +3592,7 @@ md_assemble (char *str)
 
   mips_mark_labels ();
   mips_assembling_insn = TRUE;
+  clear_insn_error ();
 
   if (mips_opts.mips16)
     mips16_ip (str, &insn);
@@ -3461,8 +3603,8 @@ md_assemble (char *str)
 	    str, insn.insn_opcode));
     }
 
-  if (insn_error)
-    as_bad ("%s `%s'", insn_error, str);
+  if (insn_error.msg)
+    report_insn_error (str);
   else if (insn.insn_mo->pinfo == INSN_MACRO)
     {
       macro_start ();
@@ -6932,7 +7074,6 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 
   create_insn (insn, opcode);
   insn->insn_opcode |= opcode_extra;
-  insn_error = NULL;
   memset (&arg, 0, sizeof (arg));
   arg.insn = insn;
   arg.token = tokens;
@@ -6978,13 +7119,16 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	    return FALSE;
 
 	  /* Successful match.  */
+	  clear_insn_error ();
 	  if (arg.dest_regno == arg.last_regno
 	      && strncmp (insn->insn_mo->name, "jalr", 4) == 0)
 	    {
 	      if (arg.opnum == 2)
-		as_bad (_("Source and destination must be different"));
+		set_insn_error
+		  (0, _("Source and destination must be different"));
 	      else if (arg.last_regno == 31)
-		as_bad (_("A destination register must be supplied"));
+		set_insn_error
+		  (0, _("A destination register must be supplied"));
 	    }
 	  check_completed_insn (&arg);
 	  return TRUE;
@@ -7047,7 +7191,7 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	      if (match_const_int (&arg, &imm2_expr.X_add_number, 0))
 		imm2_expr.X_op = O_constant;
 	      else
-		insn_error = _("absolute expression required");
+		set_insn_error (arg.argnum, _("absolute expression required"));
 	      if (HAVE_32BIT_GPRS)
 		normalize_constant_expr (&imm2_expr);
 	      ++args;
@@ -7095,7 +7239,7 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	  if (match_const_int (&arg, &imm_expr.X_add_number, 0))
 	    imm_expr.X_op = O_constant;
 	  else
-	    insn_error = _("absolute expression required");
+	    set_insn_error (arg.argnum, _("absolute expression required"));
 	  if (HAVE_32BIT_GPRS)
 	    normalize_constant_expr (&imm_expr);
 	  continue;
@@ -7112,31 +7256,35 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	  else if (match_expression (&arg, &offset_expr, offset_reloc))
 	    normalize_address_expr (&offset_expr);
 	  else
-	    insn_error = _("absolute expression required");
+	    set_insn_error (arg.argnum, _("absolute expression required"));
 	  continue;
 
 	case 'F':
 	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
 				     8, TRUE))
-	    insn_error = _("floating-point expression required");
+	    set_insn_error (arg.argnum,
+			    _("floating-point expression required"));
 	  continue;
 
 	case 'L':
 	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
 				     8, FALSE))
-	    insn_error = _("floating-point expression required");
+	    set_insn_error (arg.argnum,
+			    _("floating-point expression required"));
 	  continue;
 
 	case 'f':
 	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
 				     4, TRUE))
-	    insn_error = _("floating-point expression required");
+	    set_insn_error (arg.argnum,
+			    _("floating-point expression required"));
 	  continue;
 
 	case 'l':
 	  if (!match_float_constant (&arg, &imm_expr, &offset_expr,
 				     4, FALSE))
-	    insn_error = _("floating-point expression required");
+	    set_insn_error (arg.argnum,
+			    _("floating-point expression required"));
 	  continue;
 
 	  /* ??? This is the traditional behavior, but is flaky if
@@ -7273,6 +7421,7 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 
 	  /* Successful match.  Stuff the immediate value in now, if
 	     we can.  */
+	  clear_insn_error ();
 	  if (opcode->pinfo == INSN_MACRO)
 	    {
 	      gas_assert (relax_char == 0 || relax_char == 'p');
@@ -7292,7 +7441,7 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	  else if (relax_char && *offset_reloc != BFD_RELOC_UNUSED)
 	    {
 	      if (forced_insn_length == 2)
-		as_bad (_("invalid unextended operand value"));
+		set_insn_error (0, _("invalid unextended operand value"));
 	      forced_insn_length = 4;
 	      insn->insn_opcode |= MIPS16_EXTEND;
 	    }
@@ -7331,7 +7480,7 @@ match_mips16_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 	  if (match_const_int (&arg, &imm_expr.X_add_number, 0))
 	    imm_expr.X_op = O_constant;
 	  else
-	    insn_error = _("absolute expression required");
+	    set_insn_error (arg.argnum, _("absolute expression required"));
 	  if (HAVE_32BIT_GPRS)
 	    normalize_constant_expr (&imm_expr);
 	  continue;
@@ -12886,8 +13035,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   struct mips_operand_token *tokens;
   unsigned int opcode_extra;
 
-  insn_error = NULL;
-
   if (mips_opts.micromips)
     {
       hash = micromips_op_hash;
@@ -12909,7 +13056,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
   first = insn = mips_lookup_insn (hash, str, end, &opcode_extra);
   if (insn == NULL)
     {
-      insn_error = _("Unrecognized opcode");
+      set_insn_error (0, _("Unrecognized opcode"));
       return;
     }
   /* When no opcode suffix is specified, assume ".xyzw". */
@@ -12953,8 +13100,6 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 		   && strcmp (insn[0].name, insn[1].name) == 0);
       if (!ok || !size_ok || delay_slot_ok != need_delay_slot_ok)
 	{
-	  static char buf[256];
-
 	  if (more_alts)
 	    {
 	      ++insn;
@@ -12969,34 +13114,28 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	      continue;
 	    }
 
-	  obstack_free (&mips_operand_tokens, tokens);
-	  if (insn_error)
-	    return;
-
 	  if (!ok)
-	    sprintf (buf, _("Opcode not supported on this processor: %s (%s)"),
-		     mips_cpu_info_from_arch (mips_opts.arch)->name,
-		     mips_cpu_info_from_isa (mips_opts.isa)->name);
+	    set_insn_error_ss
+	      (0, _("Opcode not supported on this processor: %s (%s)"),
+	       mips_cpu_info_from_arch (mips_opts.arch)->name,
+	       mips_cpu_info_from_isa (mips_opts.isa)->name);
 	  else if (mips_opts.insn32)
-	    sprintf (buf, _("Opcode not supported in the `insn32' mode"));
+	    set_insn_error
+	      (0, _("Opcode not supported in the `insn32' mode"));
 	  else
-	    sprintf (buf, _("Unrecognized %u-bit version of microMIPS opcode"),
-		     8 * forced_insn_length);
-	  insn_error = buf;
-
-	  return;
+	    set_insn_error_i
+	      (0, _("Unrecognized %d-bit version of microMIPS opcode"),
+	       8 * forced_insn_length);
+	  break;
 	}
 
       if (match_insn (ip, insn, tokens, opcode_extra, more_alts,
 		      more_alts || (wrong_delay_slot_insns
 				    && need_delay_slot_ok)))
-	{
-	  obstack_free (&mips_operand_tokens, tokens);
-	  return;
-	}
+	break;
 
       /* Args don't match.  */
-      insn_error = _("Illegal operands");
+      set_insn_error (0, _("Illegal operands"));
       if (more_alts)
 	{
 	  ++insn;
@@ -13010,9 +13149,9 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 	  insn = firstinsn;
 	  continue;
 	}
-      obstack_free (&mips_operand_tokens, tokens);
-      return;
+      break;
     }
+  obstack_free (&mips_operand_tokens, tokens);
 }
 
 /* As for mips_ip, but used when assembling MIPS16 code.
@@ -13025,8 +13164,6 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
   char *s;
   struct mips_opcode *insn;
   struct mips_operand_token *tokens;
-
-  insn_error = NULL;
 
   forced_insn_length = 0;
 
@@ -13058,7 +13195,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	}
       /* Fall through.  */
     default:
-      insn_error = _("unknown opcode");
+      set_insn_error (0, _("Unrecognized opcode"));
       return;
     }
 
@@ -13067,7 +13204,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 
   if ((insn = (struct mips_opcode *) hash_find (mips16_op_hash, str)) == NULL)
     {
-      insn_error = _("unrecognized opcode");
+      set_insn_error (0, _("Unrecognized opcode"));
       return;
     }
 
@@ -13094,38 +13231,27 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 	    }
 	  else
 	    {
-	      if (!insn_error)
-		{
-		  static char buf[100];
-		  sprintf (buf,
-			   _("Opcode not supported on this processor: %s (%s)"),
-			   mips_cpu_info_from_arch (mips_opts.arch)->name,
-			   mips_cpu_info_from_isa (mips_opts.isa)->name);
-		  insn_error = buf;
-		}
-	      obstack_free (&mips_operand_tokens, tokens);
-	      return;
+	      set_insn_error_ss
+		(0, _("Opcode not supported on this processor: %s (%s)"),
+		 mips_cpu_info_from_arch (mips_opts.arch)->name,
+		 mips_cpu_info_from_isa (mips_opts.isa)->name);
+	      break;
 	    }
 	}
 
       if (match_mips16_insn (ip, insn, tokens, more_alts))
-	{
-	  obstack_free (&mips_operand_tokens, tokens);
-	  return;
-	}
+	break;
 
       /* Args don't match.  */
+      set_insn_error (0, _("Illegal operands"));
       if (more_alts)
 	{
 	  ++insn;
 	  continue;
 	}
-
-      insn_error = _("illegal operands");
-
-      obstack_free (&mips_operand_tokens, tokens);
-      return;
+      break;
     }
+  obstack_free (&mips_operand_tokens, tokens);
 }
 
 /* Marshal immediate value VAL for an extended MIPS16 instruction.

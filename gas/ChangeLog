@@ -1,5 +1,18 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (mips_insn_error_format): New enum.
+	(mips_insn_error): New struct.
+	(insn_error): Change to a mips_insn_error.
+	(clear_insn_error, set_insn_error_format, set_insn_error)
+	(set_insn_error_i, set_insn_error_ss, report_insn_error): New
+	functions.
+	(mips_parse_argument_token, md_assemble, match_insn)
+	(match_mips16_insn): Use them instead of manipulating insn_error
+	directly.
+	(mips_ip, mips16_ip): Likewise.  Simplify control flow.
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (normalize_constant_expr): Move further up file.
 	(normalize_address_expr): Likewise.
 	(match_insn, match_mips16_insn): New functions, split out from...
