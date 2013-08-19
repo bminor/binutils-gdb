@@ -155,4 +155,38 @@ if [regexp $want $got] then {
     fail "nm -P"
 }
 
+# Test nm --size-sort
+
+if [is_elf_format] {
+    set nm_1_src "nm-elf-1.s"
+} else {
+    set nm_1_src "nm-1.s"
+}
+
+if {![binutils_assemble $srcdir/$subdir/$nm_1_src tmpdir/nm-1.o]} then {
+    return
+}
+
+if [is_remote host] {
+    set tempfile [remote_download host tmpdir/nm-1.o]
+} else {
+    set tempfile tmpdir/nm-1.o
+}
+
+# This test does not work correctly on ECOFF targets, because ECOFF
+# stores most symbols twice, which messes up the nm output.
+setup_xfail "alpha*-*-osf*" "alpha*-*-netware*"
+setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
+setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*" "mips*-sony-bsd*"
+
+set got [binutils_run $NM "$NMFLAGS --size-sort $tempfile"]
+
+set want "0*4 T text_symbol3.*0*8 T text_symbol2.*0*c T text_symbol1"
+
+if [regexp $want $got] then {
+    pass "nm --size-sort"
+} else {
+    fail "nm --size-sort"
+}
+
 # There are certainly other tests that could be run.

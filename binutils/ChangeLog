@@ -1,3 +1,7 @@
+2013-08-19  Tristan Gingold  <gingold@adacore.com>
+
+	* nm.c (print_size_symbols): Directly get symbol size.
+
 2013-08-12  Andreas Schwab  <schwab@suse.de>
 
 	PR binutils/15818

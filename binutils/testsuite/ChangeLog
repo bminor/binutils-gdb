@@ -1,3 +1,9 @@
+2013-08-19  Tristan Gingold  <gingold@adacore.com>
+
+	* binutils-all/nm.exp: Add a test for nm --size-sort
+	* binutils-all/nm-elf-1.s: New file.
+	* binutils-all/nm-1.s: New file.
+
 2013-05-31  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/i386/compressed-1b.d: Updated for text/data/bss

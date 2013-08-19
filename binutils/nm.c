@@ -951,19 +951,12 @@ print_size_symbols (bfd *abfd, bfd_boolean is_dynamic,
   for (; from < fromend; from++)
     {
       asymbol *sym;
-      bfd_vma ssize;
 
       sym = bfd_minisymbol_to_symbol (abfd, is_dynamic, from->minisym, store);
       if (sym == NULL)
 	bfd_fatal (bfd_get_filename (abfd));
 
-      /* For elf we have already computed the correct symbol size.  */
-      if (bfd_get_flavour (abfd) == bfd_target_elf_flavour)
-	ssize = from->size;
-      else
-	ssize = from->size - bfd_section_vma (abfd, bfd_get_section (sym));
-
-      print_symbol (abfd, sym, ssize, archive_bfd);
+      print_symbol (abfd, sym, from->size, archive_bfd);
     }
 }
 
