@@ -1,5 +1,12 @@
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* config/tc-mips.c (match_expression):  Report uses of registers here.
+	Add a "must be an immediate expression" error.  Handle elided offsets
+	here rather than...
+	(match_int_operand): ...here.
+
+2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* config/tc-mips.c (mips_arg_info): Remove soft_match.
 	(match_out_of_range, match_not_constant): New functions.
 	(match_const_int): Remove fallback parameter and check for soft_match.

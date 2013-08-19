@@ -4325,6 +4325,26 @@ static bfd_boolean
 match_expression (struct mips_arg_info *arg, expressionS *value,
 		  bfd_reloc_code_real_type *r)
 {
+  /* If the next token is a '(' that was parsed as being part of a base
+     expression, assume we have an elided offset.  The later match will fail
+     if this turns out to be wrong.  */
+  if (arg->token->type == OT_CHAR && arg->token->u.ch == '(')
+    {
+      value->X_op = O_constant;
+      value->X_add_number = 0;
+      r[0] = r[1] = r[2] = BFD_RELOC_UNUSED;
+      return TRUE;
+    }
+
+  /* Reject register-based expressions such as "0+$2" and "(($2))".
+     For plain registers the default error seems more appropriate.  */
+  if (arg->token->type == OT_INTEGER
+      && arg->token->u.integer.value.X_op == O_register)
+    {
+      set_insn_error (arg->argnum, _("register value used as expression"));
+      return FALSE;
+    }
+
   if (arg->token->type == OT_INTEGER)
     {
       *value = arg->token->u.integer.value;
@@ -4333,29 +4353,10 @@ match_expression (struct mips_arg_info *arg, expressionS *value,
       return TRUE;
     }
 
-  /* Error-reporting is more consistent if we treat registers as O_register
-     rather than rejecting them outright.  "$1", "($1)" and "(($1))" are
-     then handled in the same way.  */
-  if (arg->token->type == OT_REG)
-    {
-      value->X_add_number = arg->token->u.regno;
-      ++arg->token;
-    }
-  else if (arg->token[0].type == OT_CHAR
-	   && arg->token[0].u.ch == '('
-	   && arg->token[1].type == OT_REG
-	   && arg->token[2].type == OT_CHAR
-	   && arg->token[2].u.ch == ')')
-    {
-      value->X_add_number = arg->token[1].u.regno;
-      arg->token += 3;
-    }
-  else
-    return FALSE;
-
-  value->X_op = O_register;
-  r[0] = r[1] = r[2] = BFD_RELOC_UNUSED;
-  return TRUE;
+  set_insn_error_i
+    (arg->argnum, _("operand %d must be an immediate expression"),
+     arg->argnum);
+  return FALSE;
 }
 
 /* Try to get a constant expression from the next tokens in ARG.  Consume
@@ -4561,15 +4562,11 @@ match_int_operand (struct mips_arg_info *arg,
   if (arg->lax_max)
     max_val = ((1 << operand_base->size) - 1) << operand->shift;
 
-  if (arg->token->type == OT_CHAR && arg->token->u.ch == '(')
-    /* Assume we have an elided offset.  The later match will fail
-       if this turns out to be wrong.  */
-    sval = 0;
-  else if (operand_base->lsb == 0
-	   && operand_base->size == 16
-	   && operand->shift == 0
-	   && operand->bias == 0
-	   && (operand->max_val == 32767 || operand->max_val == 65535))
+  if (operand_base->lsb == 0
+      && operand_base->size == 16
+      && operand->shift == 0
+      && operand->bias == 0
+      && (operand->max_val == 32767 || operand->max_val == 65535))
     {
       /* The operand can be relocated.  */
       if (!match_expression (arg, &offset_expr, offset_reloc))
