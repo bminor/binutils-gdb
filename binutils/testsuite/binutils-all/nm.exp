@@ -157,7 +157,10 @@ if [regexp $want $got] then {
 
 # Test nm --size-sort
 
-if [is_elf_format] {
+# The target exceptions here are intended for targets that have ELF as
+# an intermediate format or otherwise require the ELF-variant syntax
+# for proper size annotation.
+if {[is_elf_format] || [istarget "mmix-knuth-mmixware"]} {
     set nm_1_src "nm-elf-1.s"
 } else {
     set nm_1_src "nm-1.s"
@@ -178,10 +181,6 @@ if [is_remote host] {
 setup_xfail "alpha*-*-osf*" "alpha*-*-netware*"
 setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
 setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*" "mips*-sony-bsd*"
-
-# It also doesn't work with the MMO object format, because a MMO
-# symbol has no size information.
-setup_xfail "mmix-knuth-mmixware"
 
 set got [binutils_run $NM "$NMFLAGS --size-sort $tempfile"]
 

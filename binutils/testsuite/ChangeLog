@@ -1,3 +1,8 @@
+2013-08-21  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* binutils-all/nm.exp: Revert last change.  Instead use nm-elf-1.s
+	for mmix-knuth-mmixware.
+
 2013-08-20  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* binutils-all/nm.exp: Xfail test for nm --size-sort for
