@@ -190,7 +190,8 @@ convert_floatformat_to_doublest (const struct floatformat *fmt,
     {
       double dto;
 
-      floatformat_to_double (fmt, from, &dto);
+      floatformat_to_double (fmt->split_half ? fmt->split_half : fmt,
+			     from, &dto);
       *to = (DOUBLEST) dto;
       return;
     }
@@ -514,6 +515,11 @@ floatformat_is_negative (const struct floatformat *fmt,
   gdb_assert (fmt->totalsize
 	      <= FLOATFORMAT_LARGEST_BYTES * FLOATFORMAT_CHAR_BIT);
 
+  /* An IBM long double (a two element array of double) always takes the
+     sign of the first double.  */
+  if (fmt->split_half)
+    fmt = fmt->split_half;
+
   order = floatformat_normalize_byteorder (fmt, uval, newfrom);
 
   if (order != fmt->byteorder)
@@ -539,6 +545,13 @@ floatformat_classify (const struct floatformat *fmt,
   gdb_assert (fmt != NULL);
   gdb_assert (fmt->totalsize
 	      <= FLOATFORMAT_LARGEST_BYTES * FLOATFORMAT_CHAR_BIT);
+
+  /* An IBM long double (a two element array of double) can be classified
+     by looking at the first double.  inf and nan are specified as
+     ignoring the second double.  zero and subnormal will always have
+     the second double 0.0 if the long double is correctly rounded.  */
+  if (fmt->split_half)
+    fmt = fmt->split_half;
 
   order = floatformat_normalize_byteorder (fmt, uval, newfrom);
 
@@ -621,6 +634,16 @@ floatformat_mantissa (const struct floatformat *fmt,
   gdb_assert (fmt != NULL);
   gdb_assert (fmt->totalsize
 	      <= FLOATFORMAT_LARGEST_BYTES * FLOATFORMAT_CHAR_BIT);
+
+  /* For IBM long double (a two element array of double), return the
+     mantissa of the first double.  The problem with returning the
+     actual mantissa from both doubles is that there can be an
+     arbitrary number of implied 0's or 1's between the mantissas
+     of the first and second double.  In any case, this function
+     is only used for dumping out nans, and a nan is specified to
+     ignore the value in the second double.  */
+  if (fmt->split_half)
+    fmt = fmt->split_half;
 
   order = floatformat_normalize_byteorder (fmt, uval, newfrom);
 
@@ -878,28 +901,4 @@ convert_typed_floating (const void *from, const struct type *from_type,
       floatformat_to_doublest (from_fmt, from, &d);
       floatformat_from_doublest (to_fmt, &d, to);
     }
-}
-
-const struct floatformat *floatformat_ieee_single[BFD_ENDIAN_UNKNOWN];
-const struct floatformat *floatformat_ieee_double[BFD_ENDIAN_UNKNOWN];
-const struct floatformat *floatformat_ieee_quad[BFD_ENDIAN_UNKNOWN];
-const struct floatformat *floatformat_arm_ext[BFD_ENDIAN_UNKNOWN];
-const struct floatformat *floatformat_ia64_spill[BFD_ENDIAN_UNKNOWN];
-
-extern void _initialize_doublest (void);
-
-extern void
-_initialize_doublest (void)
-{
-  floatformat_ieee_single[BFD_ENDIAN_LITTLE] = &floatformat_ieee_single_little;
-  floatformat_ieee_single[BFD_ENDIAN_BIG] = &floatformat_ieee_single_big;
-  floatformat_ieee_double[BFD_ENDIAN_LITTLE] = &floatformat_ieee_double_little;
-  floatformat_ieee_double[BFD_ENDIAN_BIG] = &floatformat_ieee_double_big;
-  floatformat_arm_ext[BFD_ENDIAN_LITTLE]
-    = &floatformat_arm_ext_littlebyte_bigword;
-  floatformat_arm_ext[BFD_ENDIAN_BIG] = &floatformat_arm_ext_big;
-  floatformat_ia64_spill[BFD_ENDIAN_LITTLE] = &floatformat_ia64_spill_little;
-  floatformat_ia64_spill[BFD_ENDIAN_BIG] = &floatformat_ia64_spill_big;
-  floatformat_ieee_quad[BFD_ENDIAN_LITTLE] = &floatformat_ia64_quad_little;
-  floatformat_ieee_quad[BFD_ENDIAN_BIG] = &floatformat_ia64_quad_big;
 }

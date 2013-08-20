@@ -1,5 +1,18 @@
+2013-08-20  Alan Modra  <amodra@gmail.com>
+
+	* doublest.c (convert_floatformat_to_doublest): Use fmt->split_half
+	for IBM long double nan and inf.
+	(floatformat_is_negative, floatformat_classify,
+	floatformat_mantissa): Similarly.
+	(floatformat_ieee_single, floatformat_ieee_double,
+	floatformat_ieee_quad, floatformat_arm_ext,
+	floatformat_ia64_spill): Delete unused vars.
+	(_initialize_doublest): Delete unused function.
+	* gdbtypes.c (floatformats_ibm_long_double): Use new big- and
+	little-endian variants of floatformat_ibm_long_double.
+
 2013-08-19  Luis Machado  <lgustavo@codesourcery.com>
-    
+
 	* Makefile.in (SFILES): Remove common/target-common.c and
 	add target/waitstatus.c.
 	(HFILES_NO_SRCDIR): Remove common/target-common.h and add
@@ -2752,10 +2765,10 @@
 
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
-        * python/py-event.h (evpy_emit_event): Use
-        CPYCHECKER_STEALS_REFERENCE_TO_ARG.
-        * python/python-internal.h (CPYCHECKER_STEALS_REFERENCE_TO_ARG):
-        New macro.
+	* python/py-event.h (evpy_emit_event): Use
+	CPYCHECKER_STEALS_REFERENCE_TO_ARG.
+	* python/python-internal.h (CPYCHECKER_STEALS_REFERENCE_TO_ARG):
+	New macro.
 
 2013-05-20  Tom Tromey  <tromey@redhat.com>
 
@@ -3042,7 +3055,7 @@
 
 2013-05-13  Tom Tromey  <tromey@redhat.com>
 
-    	PR gdb/15338:
+	PR gdb/15338:
 	* dwarf2read.c (dwarf2_record_block_ranges): Ensure that the
 	ranges section has been read.
 
@@ -4897,7 +4910,7 @@
 2013-04-01  Jiong Wang  <jiwang@tilera.com>
 
 	* NEWS: Mention TILE-Gx in "New native configurations" and
-	"New targets" sections. 
+	"New targets" sections.
 
 2013-04-01  Doug Evans  <dje@google.com>
 
@@ -6769,7 +6782,7 @@
 	* v850-tdep.c: (v850e2_register_name): Revise system register
 	names to match current V850E2M architecture specifications.
 	Update register number enum comments too.
-	
+
 2013-03-01  Jiong Wang  <jiwang@tilera.com>
 	    Pedro Alves  <palves@redhat.com>
 

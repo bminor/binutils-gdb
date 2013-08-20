@@ -108,8 +108,8 @@ const struct floatformat *floatformats_vax_d[BFD_ENDIAN_UNKNOWN] = {
   &floatformat_vax_d
 };
 const struct floatformat *floatformats_ibm_long_double[BFD_ENDIAN_UNKNOWN] = {
-  &floatformat_ibm_long_double,
-  &floatformat_ibm_long_double
+  &floatformat_ibm_long_double_big,
+  &floatformat_ibm_long_double_little
 };
 
 /* Should opaque types be resolved?  */
