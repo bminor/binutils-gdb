@@ -179,6 +179,10 @@ setup_xfail "alpha*-*-osf*" "alpha*-*-netware*"
 setup_xfail "mips*-*-ultrix*" "mips*-*-ecoff*" "mips*-*-irix4*"
 setup_xfail "mips*-*-riscos*" "mips*-*-sysv3*" "mips*-sony-bsd*"
 
+# It also doesn't work with the MMO object format, because a MMO
+# symbol has no size information.
+setup_xfail "mmix-knuth-mmixware"
+
 set got [binutils_run $NM "$NMFLAGS --size-sort $tempfile"]
 
 set want "0*4 T text_symbol3.*0*8 T text_symbol2.*0*c T text_symbol1"
