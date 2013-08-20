@@ -1,3 +1,9 @@
+2013-08-20  Tom Tromey  <tromey@redhat.com>
+
+	* dbxread.c (record_minimal_symbol): Make 'name' argument const.
+	Update.
+	(read_dbx_dynamic_symtab): Make 'name' const.  Remove casts.
+
 2013-08-20  Doug Evans  <dje@google.com>
 
 	* blockframe.c: Remove #include "psymtab.h".
