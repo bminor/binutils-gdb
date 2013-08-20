@@ -1086,7 +1086,7 @@ static int
 stap_can_evaluate_probe_arguments (struct probe *probe_generic)
 {
   struct stap_probe *stap_probe = (struct stap_probe *) probe_generic;
-  struct gdbarch *gdbarch = stap_probe->p.objfile->gdbarch;
+  struct gdbarch *gdbarch = get_objfile_arch (stap_probe->p.objfile);
 
   /* For SystemTap probes, we have to guarantee that the method
      stap_is_single_operand is defined on gdbarch.  If it is not, then it

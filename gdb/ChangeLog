@@ -1,3 +1,22 @@
+2013-08-20  Tom Tromey  <tromey@redhat.com>
+
+	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Use
+	get_objfile_arch.
+	* elfread.c (elf_rel_plt_read, elf_gnu_ifunc_record_cache)
+	(elf_gnu_ifunc_resolve_by_got): Use get_objfile_arch.
+	* jit.c (jit_object_close_impl): Update.
+	* jv-lang.c (get_dynamics_objfile): Update.
+	* linespec.c (add_minsym): Use get_dynamics_objfile.
+	* objfiles.c (get_objfile_bfd_data): Initialize 'gdbarch' field.
+	(allocate_objfile): Don't initialize 'gdbarch' field.
+	(get_objfile_arch): Update.
+	* objfiles.h (struct objfile_per_bfd_storage) <gdbarch>: New field,
+	moved from...
+	(struct objfile) <gdbarch>: ... here.  Remove.
+	* stap-probe.c (stap_can_evaluate_probe_arguments): Use
+	get_objfile_arch.
+	* symfile.c (init_entry_point_info): Use get_objfile_arch.
+
 2013-08-20  Alan Modra  <amodra@gmail.com>
 
 	* doublest.c (convert_floatformat_to_doublest): Use fmt->split_half

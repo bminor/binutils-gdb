@@ -3511,7 +3511,7 @@ add_minsym (struct minimal_symbol *minsym, void *d)
 	  {
 	    /* Make sure this minsym is not a function descriptor
 	       before we decide to discard it.  */
-	    struct gdbarch *gdbarch = info->objfile->gdbarch;
+	    struct gdbarch *gdbarch = get_objfile_arch (info->objfile);
 	    CORE_ADDR addr = gdbarch_convert_from_func_ptr_addr
 			       (gdbarch, SYMBOL_VALUE_ADDRESS (minsym),
 				&current_target);

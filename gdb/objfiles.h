@@ -178,6 +178,13 @@ struct objfile_per_bfd_storage
 
   /* Byte cache for macros.  */
   struct bcache *macro_cache;
+
+  /* The gdbarch associated with the BFD.  Note that this gdbarch is
+     determined solely from BFD information, without looking at target
+     information.  The gdbarch determined from a running target may
+     differ from this e.g. with respect to register types and names.  */
+
+  struct gdbarch *gdbarch;
 };
 
 /* Master structure for keeping track of each file from which
@@ -247,13 +254,6 @@ struct objfile
        is NULL.  */
 
     struct objfile_per_bfd_storage *per_bfd;
-
-    /* The gdbarch associated with the BFD.  Note that this gdbarch is
-       determined solely from BFD information, without looking at target
-       information.  The gdbarch determined from a running target may
-       differ from this e.g. with respect to register types and names.  */
-
-    struct gdbarch *gdbarch;
 
     /* The modification timestamp of the object file, as of the last time
        we read its symbols.  */

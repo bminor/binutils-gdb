@@ -636,7 +636,7 @@ elf_rel_plt_read (struct objfile *objfile, asymbol **dyn_symbol_table)
   char *string_buffer = NULL;
   size_t string_buffer_size = 0;
   struct cleanup *back_to;
-  struct gdbarch *gdbarch = objfile->gdbarch;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
   size_t ptr_size = TYPE_LENGTH (ptr_type);
 
@@ -797,7 +797,7 @@ elf_gnu_ifunc_record_cache (const char *name, CORE_ADDR addr)
   if (*slot != NULL)
     {
       struct elf_gnu_ifunc_cache *entry_found_p = *slot;
-      struct gdbarch *gdbarch = objfile->gdbarch;
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
       if (entry_found_p->addr != addr)
 	{
@@ -877,7 +877,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
   ALL_PSPACE_OBJFILES (current_program_space, objfile)
     {
       bfd *obfd = objfile->obfd;
-      struct gdbarch *gdbarch = objfile->gdbarch;
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
       struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
       size_t ptr_size = TYPE_LENGTH (ptr_type);
       CORE_ADDR pointer_address, addr;

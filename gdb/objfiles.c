@@ -143,6 +143,9 @@ get_objfile_bfd_data (struct objfile *objfile, struct bfd *abfd)
 	{
 	  storage = bfd_zalloc (abfd, sizeof (struct objfile_per_bfd_storage));
 	  set_bfd_data (abfd, objfiles_bfd_data, storage);
+
+	  /* Look up the gdbarch associated with the BFD.  */
+	  storage->gdbarch = gdbarch_from_bfd (abfd);
 	}
       else
 	storage = OBSTACK_ZALLOC (&objfile->objfile_obstack,
@@ -282,9 +285,6 @@ allocate_objfile (bfd *abfd, int flags)
   gdb_bfd_ref (abfd);
   if (abfd != NULL)
     {
-      /* Look up the gdbarch associated with the BFD.  */
-      objfile->gdbarch = gdbarch_from_bfd (abfd);
-
       objfile->name = bfd_get_filename (abfd);
       objfile->mtime = bfd_get_mtime (abfd);
 
@@ -335,7 +335,7 @@ allocate_objfile (bfd *abfd, int flags)
 struct gdbarch *
 get_objfile_arch (struct objfile *objfile)
 {
-  return objfile->gdbarch;
+  return objfile->per_bfd->gdbarch;
 }
 
 /* If there is a valid and known entry point, function fills *ENTRY_P with it
