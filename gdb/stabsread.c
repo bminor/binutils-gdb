@@ -207,6 +207,23 @@ static int noname_undefs_length;
     if (**(pp) == '\\' || (**(pp) == '?' && (*(pp))[1] == '\0')) \
       *(pp) = next_symbol_text (objfile);	\
   } while (0)
+
+/* Vector of types defined so far, indexed by their type numbers.
+   (In newer sun systems, dbx uses a pair of numbers in parens,
+   as in "(SUBFILENUM,NUMWITHINSUBFILE)".
+   Then these numbers must be translated through the type_translations
+   hash table to get the index into the type vector.)  */
+
+static struct type **type_vector;
+
+/* Number of elements allocated for type_vector currently.  */
+
+static int type_vector_length;
+
+/* Initial size of type vector.  Is realloc'd larger if needed, and
+   realloc'd down to the size actually used, when completed.  */
+
+#define INITIAL_TYPE_VECTOR_LENGTH 160
 
 
 /* Look up a dbx type-number pair.  Return the address of the slot

@@ -2530,7 +2530,6 @@ read_ofile_symtab (struct objfile *objfile, struct partial_symtab *pst)
   section_offsets = pst->section_offsets;
 
   dbxread_objfile = objfile;
-  subfile_stack = NULL;
 
   stringtab_global = DBX_STRINGTAB (objfile);
   set_last_source_file (NULL);

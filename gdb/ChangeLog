@@ -1,3 +1,21 @@
+2013-08-20  Doug Evans  <dje@google.com>
+
+	* buildsym.c (subfile_stack): Move here from buildsym.h.
+	(pending_macros): Ditto.
+	(get_macro_table): New function.
+	(buildsym_init): Initialize subfile_stack.
+	* coffread.c (type_vector,type_vector_length): Moved here from
+	buildsym.h.
+	(INITIAL_TYPE_VECTOR_LENGTH): Ditto.
+	(coff_symtab_read): Use it.
+	* dbxread.c (read_ofile_symtab): Delete init of subfile_stack.
+	* dwarf2read.c (macro_start_file): Replace uses of pending_macros
+	with call to get_macro_table.
+	* stabsread.c (type_vector,type_vector_length): Moved here from
+	buildsym.h.
+	(INITIAL_TYPE_VECTOR_LENGTH): Ditto.
+	* buildsym.h (get_macro_table): Declare.
+
 2013-08-20  Tom Tromey  <tromey@redhat.com>
 
 	* dbxread.c (record_minimal_symbol): Make 'name' argument const.

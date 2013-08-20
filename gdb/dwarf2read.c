@@ -18943,19 +18943,16 @@ macro_start_file (int file, int line,
   /* File name relative to the compilation directory of this source file.  */
   char *file_name = file_file_name (file, lh);
 
-  /* We don't create a macro table for this compilation unit
-     at all until we actually get a filename.  */
-  if (! pending_macros)
-    pending_macros = new_macro_table (&objfile->per_bfd->storage_obstack,
-				      objfile->per_bfd->macro_cache,
-				      comp_dir);
-
   if (! current_file)
     {
+      /* Note: We don't create a macro table for this compilation unit
+	 at all until we actually get a filename.  */
+      struct macro_table *macro_table = get_macro_table (objfile, comp_dir);
+
       /* If we have no current file, then this must be the start_file
 	 directive for the compilation unit's main source file.  */
-      current_file = macro_set_main (pending_macros, file_name);
-      macro_define_special (pending_macros);
+      current_file = macro_set_main (macro_table, file_name);
+      macro_define_special (macro_table);
     }
   else
     current_file = macro_include (current_file, line, file_name);

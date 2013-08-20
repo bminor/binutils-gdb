@@ -146,6 +146,19 @@ struct coff_symbol
     unsigned int c_type;
   };
 
+/* Vector of types defined so far, indexed by their type numbers.  */
+
+static struct type **type_vector;
+
+/* Number of elements allocated for type_vector currently.  */
+
+static int type_vector_length;
+
+/* Initial size of type vector.  Is realloc'd larger if needed, and
+   realloc'd down to the size actually used, when completed.  */
+
+#define INITIAL_TYPE_VECTOR_LENGTH 160
+
 extern void stabsread_clear_cache (void);
 
 static struct type *coff_read_struct_type (int, int, int,
@@ -816,7 +829,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
   if (type_vector)		/* Get rid of previous one.  */
     xfree (type_vector);
-  type_vector_length = 160;
+  type_vector_length = INITIAL_TYPE_VECTOR_LENGTH;
   type_vector = (struct type **)
     xmalloc (type_vector_length * sizeof (struct type *));
   memset (type_vector, 0, type_vector_length * sizeof (struct type *));

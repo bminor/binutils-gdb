@@ -102,13 +102,24 @@ struct pending_block
    associated symtab.  */
 
 static struct pending_block *pending_blocks;
-
+
+struct subfile_stack
+  {
+    struct subfile_stack *next;
+    char *name;
+  };
+
+static struct subfile_stack *subfile_stack;
+
+/* The macro table for the compilation unit whose symbols we're
+   currently reading.  All the symtabs for the CU will point to this.  */
+static struct macro_table *pending_macros;
+
 static int compare_line_numbers (const void *ln1p, const void *ln2p);
 
 static void record_pending_block (struct objfile *objfile,
 				  struct block *block,
 				  struct pending_block *opblock);
-
 
 /* Initial sizes of data structures.  These are realloc'd larger if
    needed, and realloc'd down to the size actually used, when
@@ -825,6 +836,19 @@ compare_line_numbers (const void *ln1p, const void *ln2p)
   return ln1->line - ln2->line;
 }
 
+/* Return the macro table.
+   Initialize it if this is the first use.  */
+
+struct macro_table *
+get_macro_table (struct objfile *objfile, const char *comp_dir)
+{
+  if (! pending_macros)
+    pending_macros = new_macro_table (&objfile->per_bfd->storage_obstack,
+				      objfile->per_bfd->macro_cache,
+				      comp_dir);
+  return pending_macros;
+}
+
 /* Start a new symtab for a new source file.  Called, for example,
    when a stabs symbol of type N_SO is seen, or when a DWARF
    TAG_compile_unit DIE is seen.  It indicates the start of data for
@@ -1538,6 +1562,7 @@ buildsym_init (void)
   pending_blocks = NULL;
   pending_macros = NULL;
   using_directives = NULL;
+  subfile_stack = NULL;
 
   /* We shouldn't have any address map at this point.  */
   gdb_assert (! pending_addrmap);
