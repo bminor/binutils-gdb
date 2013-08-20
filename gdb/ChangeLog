@@ -1,3 +1,10 @@
+2013-08-20  Doug Evans  <dje@google.com>
+
+	* blockframe.c: Remove #include "psymtab.h".
+	* cp-support.c: Ditto.
+	* source.c: Ditto.
+	* stack.c: Ditto.
+
 2013-08-20  Tom Tromey  <tromey@redhat.com>
 
 	PR python/15816:

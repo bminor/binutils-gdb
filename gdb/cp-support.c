@@ -38,8 +38,6 @@
 
 #include "safe-ctype.h"
 
-#include "psymtab.h"
-
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
 

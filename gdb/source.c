@@ -45,9 +45,6 @@
 #include "ui-out.h"
 #include "readline/readline.h"
 
-#include "psymtab.h"
-
-
 #define OPEN_MODE (O_RDONLY | O_BINARY)
 #define FDOPEN_MODE FOPEN_RB
 

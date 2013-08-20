@@ -52,7 +52,6 @@
 #include <ctype.h>
 #include "gdb_string.h"
 
-#include "psymtab.h"
 #include "symfile.h"
 #include "python/python.h"
 
