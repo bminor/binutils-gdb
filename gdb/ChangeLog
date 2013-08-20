@@ -1,5 +1,12 @@
 2013-08-20  Tom Tromey  <tromey@redhat.com>
 
+	PR python/15816:
+	* exceptions.h (return_mask): Now an enum.
+	(RETURN_MASK_QUIT, RETURN_MASK_ERROR, RETURN_MASK_ALL): Now
+	enum constants.
+
+2013-08-20  Tom Tromey  <tromey@redhat.com>
+
 	* cp-namespace.c (cp_lookup_symbol_imports_or_template): Use
 	get_objfile_arch.
 	* elfread.c (elf_rel_plt_read, elf_gnu_ifunc_record_cache)
