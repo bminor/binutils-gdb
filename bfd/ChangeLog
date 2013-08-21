@@ -1,3 +1,10 @@
+2013-08-21  Tristan Gingold  <gingold@adacore.com>
+
+	* coff-rs6000.c (_bfd_xcoff_sizeof_headers): Also count
+	.ovrflo sections.
+	* coffcode.h (coff_compute_section_file_positions): Force
+	match between file offset and vma offset.
+
 2013-08-21  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): Set *poldbfd, *poldweak,

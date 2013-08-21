@@ -2570,6 +2570,60 @@ _bfd_xcoff_sizeof_headers (bfd *abfd,
   else
     size += SMALL_AOUTSZ;
   size += abfd->section_count * SCNHSZ;
+
+  if (info->strip != strip_all)
+    {
+      /* There can be additional sections just for dealing with overflow in
+	 reloc and lineno counts. But the numbers of relocs and lineno aren't
+	 known when bfd_sizeof_headers is called, so we compute them by
+	 summing the numbers from input sections.  */
+      struct nbr_reloc_lineno
+      {
+	unsigned int reloc_count;
+	unsigned int lineno_count;
+      };
+      struct nbr_reloc_lineno *n_rl;
+      bfd *sub;
+      int max_index;
+      asection *s;
+
+      /* Although the number of sections is known, the maximum value of
+	 section->index isn't (because some sections may have been removed).
+	 Don't try to renumber sections, just compute the upper bound.  */
+      max_index = 0;
+      for (s = abfd->sections; s != NULL; s = s->next)
+	if (s->index > max_index)
+	  max_index = s->index;
+
+      /* Allocate the per section counters. It could be possible to use a
+	 preallocated array as the number of sections is limited on XCOFF,
+	 but this creates a maintainance issue.  */
+      n_rl = bfd_zmalloc ((max_index + 1) * sizeof (*n_rl));
+      if (n_rl == NULL)
+	return -1;
+
+      /* Sum.  */
+      for (sub = info->input_bfds; sub != NULL; sub = sub->link_next)
+	for (s = sub->sections; s != NULL; s = s->next)
+	  {
+	    struct nbr_reloc_lineno *e = &n_rl[s->output_section->index];
+	    e->reloc_count += s->reloc_count;
+	    e->lineno_count += s->lineno_count;
+	  }
+
+      /* Add the size of a section for each section with an overflow.  */
+      for (s = abfd->sections; s != NULL; s = s->next)
+	{
+	  struct nbr_reloc_lineno *e = &n_rl[s->index];
+
+	  if (e->reloc_count >= 0xffff
+	      || (e->lineno_count >= 0xffff && info->strip != strip_debugger))
+	    size += SCNHSZ;
+	}
+
+      free (n_rl);
+    }
+
   return size;
 }
 

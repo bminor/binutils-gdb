@@ -3363,36 +3363,38 @@ coff_compute_section_file_positions (bfd * abfd)
 	     padding the previous section up if necessary.  */
 	  old_sofar = sofar;
 
+	  sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+
 #ifdef RS6000COFF_C
-	  /* AIX loader checks the text section alignment of (vma - filepos)
-	     So even though the filepos may be aligned wrt the o_algntext, for
-	     AIX executables, this check fails. This shows up when a native
-	     AIX executable is stripped with gnu strip because the default vma
-	     of native is 0x10000150 but default for gnu is 0x10000140.  Gnu
-	     stripped gnu excutable passes this check because the filepos is
-	     0x0140.  This problem also show up with 64 bit shared objects. The
-	     data section must also be aligned.  */
+	  /* Make sure the file offset and the vma of .text/.data are at the
+	     same page offset, so that the file can be mmap'ed without being
+	     relocated.  Failing that, AIX is able to load and execute the
+	     program, but it will be silently relocated (possible as
+	     executables are PIE).  But the relocation is slightly costly and
+	     complexify the use of addr2line or gdb.  So better to avoid it,
+	     like does the native linker.  Usually gnu ld makes sure that
+	     the vma of .text is the file offset so this issue shouldn't
+	     appear unless you are stripping such an executable.
+
+	     AIX loader checks the text section alignment of (vma - filepos),
+	     and the native linker doesn't try to align the text sections.
+	     For example:
+
+	     0 .text         000054cc  10000128  10000128  00000128  2**5
+                             CONTENTS, ALLOC, LOAD, CODE
+	  */
+
 	  if (!strcmp (current->name, _TEXT)
 	      || !strcmp (current->name, _DATA))
 	    {
-	      bfd_vma pad;
-	      bfd_vma align;
+	      bfd_vma align = 4096;
+	      bfd_vma sofar_off = sofar % align;
+	      bfd_vma vma_off = current->vma % align;
 
-	      sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
-
-	      align = 1 << current->alignment_power;
-	      pad = abs (current->vma - sofar) % align;
-
-	      if (pad)
-		{
-		  pad = align - pad;
-		  sofar += pad;
-		}
-	    }
-	  else
-#else
-	    {
-	      sofar = BFD_ALIGN (sofar, 1 << current->alignment_power);
+	      if (vma_off > sofar_off)
+		sofar += vma_off - sofar_off;
+	      else if (vma_off < sofar_off)
+		sofar += align + vma_off - sofar_off;
 	    }
 #endif
 	  if (previous != NULL)
