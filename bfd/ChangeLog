@@ -1,3 +1,8 @@
+2013-08-21  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_define_linkage_sym): Don't set STV_INTERNAL
+	symbols to STV_HIDDEN.
+
 2013-08-14  John Tytgat  <john@bass-software.com>
 
 	PR ld/15787
@@ -120,9 +125,9 @@
 
 2013-07-18  Terry Guo  <terry.guo@arm.com>
 
-        * elf32-arm.c (arm_type_of_stub): Don't use ST_BRANCH_TO_ARM for
+	* elf32-arm.c (arm_type_of_stub): Don't use ST_BRANCH_TO_ARM for
 	thumb only targets.
-        (elf32_arm_final_link_relocate): Likewise.
+	(elf32_arm_final_link_relocate): Likewise.
 
 2013-07-18  Bill Neubauer  <wcn@google.com>
 

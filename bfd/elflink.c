@@ -85,7 +85,8 @@ _bfd_elf_define_linkage_sym (bfd *abfd,
   h->def_regular = 1;
   h->non_elf = 0;
   h->type = STT_OBJECT;
-  h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+  if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+    h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
 
   bed = get_elf_backend_data (abfd);
   (*bed->elf_backend_hide_symbol) (info, h, TRUE);
