@@ -1,5 +1,10 @@
 2013-08-21  Alan Modra  <amodra@gmail.com>
 
+	* elflink.c (_bfd_elf_merge_symbol): Set *poldbfd, *poldweak,
+	and *poldalignment before exiting when !relocs_compatible.
+
+2013-08-21  Alan Modra  <amodra@gmail.com>
+
 	* elflink.c (_bfd_elf_define_linkage_sym): Don't set STV_INTERNAL
 	symbols to STV_HIDDEN.
 
