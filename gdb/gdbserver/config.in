@@ -76,6 +76,9 @@
 /* Define to 1 if you have the `dl' library (-ldl). */
 #undef HAVE_LIBDL
 
+/* Define to 1 if you have the `mcheck' library (-lmcheck). */
+#undef HAVE_LIBMCHECK
+
 /* Define if the target supports branch tracing. */
 #undef HAVE_LINUX_BTRACE
 
