@@ -1,5 +1,5 @@
 2013-08-19  Luis Machado  <lgustavo@codesourcery.com>
-    
+
 	* Makefile.in (INCLUDE_CFLAGS): Include -I$(srcdir)/../.
 	(SFILES): Remove $(srcdir)/common/target-common.c and
 	add $(srcdir)/target/waitstatus.c.
@@ -93,7 +93,7 @@
 	(winapi_DebugSetProcessKillOnExit): Ditto.
 	(winapi_DebugBreakProcess): Ditto.
 	(winapi_GenerateConsoleCtrlEvent): Ditto.
-	
+
 2013-07-02  Mircea Gherzan  <mircea.gherzan@intel.com>
 
 	* notif.h (notif_event): Add a dummy member to avoid compiler
@@ -500,14 +500,14 @@
 	(nios2_regs_info): New function.
 	(the_low_target): Adjust.
 	(initialize_low_arch): New function.
-        * linux-aarch64-low.c (tdesc_aarch64): Declare.
-        (aarch64_arch_setup): Set the current process'es tdesc.
-        (target_regsets): Rename to ...
-        (aarch64_regsets): ... this.
-        (aarch64_regsets_info, aarch64_usrregs_info, regs_info): New globals.
-        (aarch64_regs_info): New function.
-        (the_low_target): Adjust.
-        (initialize_low_arch): New function.
+	* linux-aarch64-low.c (tdesc_aarch64): Declare.
+	(aarch64_arch_setup): Set the current process'es tdesc.
+	(target_regsets): Rename to ...
+	(aarch64_regsets): ... this.
+	(aarch64_regsets_info, aarch64_usrregs_info, regs_info): New globals.
+	(aarch64_regs_info): New function.
+	(the_low_target): Adjust.
+	(initialize_low_arch): New function.
 	* linux-tile-low.c (tdesc_tilegx, tdesc_tilegx32): Declare
 	globals.
 	(target_regsets): Rename to ...
@@ -1225,7 +1225,7 @@
 
 2012-07-19  Michael Eager  <eager@eagercon.com>
 
-	* i386-low.c (Z_packet_to_hw_type): Add Z_PACKET_HW_BP, translate 
+	* i386-low.c (Z_packet_to_hw_type): Add Z_PACKET_HW_BP, translate
 	to hw_execute.
 	* linux-x86-low.c (x86_insert_point, x86_remove_point):
 	Call i386_low_insert_watchpoint, i386_low_remove_watchpoint to add/del
