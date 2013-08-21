@@ -1,3 +1,8 @@
+2013-08-21  Alan Modra  <amodra@gmail.com>
+
+	* symbols.c (fb_label_instance_inc, fb_label_instance): Properly
+	range check label number for use with fb_low_counter array.
+
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (mips_check_isa_supports_ase, reg_lookup)

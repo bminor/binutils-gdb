@@ -1749,7 +1749,7 @@ fb_label_instance_inc (long label)
 {
   long *i;
 
-  if (label < FB_LABEL_SPECIAL)
+  if ((unsigned long) label < FB_LABEL_SPECIAL)
     {
       ++fb_low_counter[label];
       return;
@@ -1797,7 +1797,7 @@ fb_label_instance (long label)
 {
   long *i;
 
-  if (label < FB_LABEL_SPECIAL)
+  if ((unsigned long) label < FB_LABEL_SPECIAL)
     {
       return (fb_low_counter[label]);
     }
