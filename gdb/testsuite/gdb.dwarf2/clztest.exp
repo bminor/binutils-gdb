@@ -15,6 +15,7 @@
 
 load_lib dwarf.exp
 
+standard_testfile .S
 set test "clztest"
 
 # This test can only be run on targets which support DWARF-2 and use gas.

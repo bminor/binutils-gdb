@@ -135,11 +135,8 @@ main:
 	.uleb128 0x2	/* (DIE (0) DW_TAG_type_unit) */
 	.ascii "/tmp/src/gdb/testsuite\0"	/* DW_AT_comp_dir */
 	/* Normally dwo_name would be "fission-reread.dwo".
-	   Simplification: Leave the DWO contents in the executable.
-	   "gdb.dwarf2/" is included so that gdb can load the file without
-	   having to set "debug-file-directory".  This is useful when
-	   testing with cc-with-tweaks.sh -i.  */
-	.ascii "gdb.dwarf2/fission-reread\0"	/* DW_AT_GNU_dwo_name */
+	   Simplification: Leave the DWO contents in the executable.  */
+	.ascii "fission-reread\0"	/* DW_AT_GNU_dwo_name */
 	.4byte	.Ldebug_pubnames0	/* DW_AT_GNU_pubnames */
 	.4byte	.Ldebug_pubtypes0	/* DW_AT_GNU_pubtypes */
 	.4byte	.Ldebug_addr0	/* DW_AT_GNU_addr_base */

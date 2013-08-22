@@ -1,3 +1,16 @@
+2013-08-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/clztest.exp: Use standard_testfile.
+	* gdb.dwarf2/dw2-minsym-in-cu.exp: Use standard_testfile.
+	* gdb.dwarf2/fission-base.S: Remove directory from
+	DW_AT_GNU_dwo_name.
+	* gdb.dwarf2/fission-base.exp: Use build_executable.  Set
+	debug-file-directory.
+	* gdb.dwarf2/fission-reread.S: Remove directory from
+	DW_AT_GNU_dwo_name.
+	* gdb.dwarf2/fission-reread.exp: Use build_executable.  Set
+	debug-file-directory.
+
 2013-08-16  Doug Evans  <dje@google.com>
 
 	* lib/prelink-support.exp (prelink_yes): Flag test as unsupported if

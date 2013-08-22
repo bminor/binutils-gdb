@@ -29,9 +29,18 @@ set basename "fission-base"
 
 standard_testfile .S
 
-if { [prepare_for_testing "$testfile.exp" "$testfile" "$srcfile" {nodebug}] } {
+if { [build_executable "$testfile.exp" "$testfile" "$srcfile" {nodebug}] } {
     return -1
 }
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+gdb_test_no_output "set debug-file-directory [file dirname $binfile]" \
+    "set debug-file-directory"
+
+gdb_load ${binfile}
 
 if ![runto_main] {
     return -1

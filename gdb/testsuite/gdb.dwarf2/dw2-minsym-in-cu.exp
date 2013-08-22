@@ -21,11 +21,9 @@ if {![dwarf2_support]} {
 
 # This testfile has reproducibility only with cc-with-index.sh.
 
-set testfile "dw2-minsym-in-cu"
-set srcfile ${testfile}.S
-set executable ${testfile}
+standard_testfile .S
 
-if [prepare_for_testing ${testfile}.exp ${executable} ${srcfile}] {
+if [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile}] {
     return -1
 }
 
