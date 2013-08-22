@@ -1,3 +1,10 @@
+2013-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/nm.exp: --size-sort test: Add more ELF-like
+	targets.
+	* binutils-all/nm-1.s: Use .byte instead of .long.
+	Provide a terminating symbol.
+
 2013-08-21  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	* binutils-all/nm.exp: Revert last change.  Instead use nm-elf-1.s

@@ -159,8 +159,22 @@ if [regexp $want $got] then {
 
 # The target exceptions here are intended for targets that have ELF as
 # an intermediate format or otherwise require the ELF-variant syntax
-# for proper size annotation.
-if {[is_elf_format] || [istarget "mmix-knuth-mmixware"]} {
+# for proper size annotation.  It would be nice if is_elf_format found
+# all the ELF variants, but adding the patterns here to that proc then
+# introduces a whole slew of new regressions in the GAS and LD testsuites.
+if {   [is_elf_format]
+    || [istarget *-*-dragonfly*]
+    || [istarget *-*-*elf]
+    || [istarget *-*-freebsd*]
+    || [istarget *-*-lynxos*]
+    || [istarget "mmix-knuth-mmixware"]
+    || [istarget *-*-netware*]
+    || [istarget *-*-nto*]
+    || [istarget *-*-rdos*]
+    || [istarget *-*-tpf*]
+    || [istarget *-*-uclinux*]
+    || [istarget ia64-*-*vms*]
+    || [istarget *-*-vxworks*] } {
     set nm_1_src "nm-elf-1.s"
 } else {
     set nm_1_src "nm-1.s"
