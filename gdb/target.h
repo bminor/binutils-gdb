@@ -199,6 +199,26 @@ enum target_object
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
+/* Possible error codes returned by target_xfer_partial, etc.  */
+
+enum target_xfer_error
+{
+  /* Generic I/O error.  Note that it's important that this is '-1',
+     as we still have target_xfer-related code returning hardcoded
+     '-1' on error.  */
+  TARGET_XFER_E_IO = -1,
+
+  /* Transfer failed because the piece of the object requested is
+     unavailable.  */
+  TARGET_XFER_E_UNAVAILABLE = -2,
+
+  /* Keep list in sync with target_xfer_error_to_string.  */
+};
+
+/* Return the string form of ERR.  */
+
+extern const char *target_xfer_error_to_string (enum target_xfer_error err);
+
 /* Enumeration of the kinds of traceframe searches that a target may
    be able to perform.  */
 
@@ -292,6 +312,14 @@ extern LONGEST target_read_alloc (struct target_ops *ops,
 extern char *target_read_stralloc (struct target_ops *ops,
 				   enum target_object object,
 				   const char *annex);
+
+/* See target_ops->to_xfer_partial.  */
+
+extern LONGEST target_xfer_partial (struct target_ops *ops,
+				    enum target_object object,
+				    const char *annex,
+				    void *readbuf, const void *writebuf,
+				    ULONGEST offset, LONGEST len);
 
 /* Wrappers to target read/write that perform memory transfers.  They
    throw an error if the memory transfer fails.
@@ -475,7 +503,8 @@ struct target_ops
        data-specific information to the target.
 
        Return the number of bytes actually transfered, zero when no
-       further transfer is possible, and -1 when the transfer is not
+       further transfer is possible, and a negative error code (really
+       an 'enum target_xfer_error' value) when the transfer is not
        supported.  Return of a positive value smaller than LEN does
        not indicate the end of the object, only the end of the
        transfer; higher level code should continue transferring if

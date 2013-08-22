@@ -81,12 +81,6 @@ static LONGEST current_xfer_partial (struct target_ops *ops,
 				     const gdb_byte *writebuf,
 				     ULONGEST offset, LONGEST len);
 
-static LONGEST target_xfer_partial (struct target_ops *ops,
-				    enum target_object object,
-				    const char *annex,
-				    void *readbuf, const void *writebuf,
-				    ULONGEST offset, LONGEST len);
-
 static struct gdbarch *default_thread_architecture (struct target_ops *ops,
 						    ptid_t ptid);
 
@@ -1238,6 +1232,21 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
   return addr;
 }
 
+const char *
+target_xfer_error_to_string (enum target_xfer_error err)
+{
+#define CASE(X) case X: return #X
+  switch (err)
+    {
+      CASE(TARGET_XFER_E_IO);
+      CASE(TARGET_XFER_E_UNAVAILABLE);
+    default:
+      return "<unknown>";
+    }
+#undef CASE
+};
+
+
 #undef	MIN
 #define MIN(A, B) (((A) <= (B)) ? (A) : (B))
 
@@ -1523,7 +1532,7 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 
 	      /* No use trying further, we know some memory starting
 		 at MEMADDR isn't available.  */
-	      return -1;
+	      return TARGET_XFER_E_UNAVAILABLE;
 	    }
 
 	  /* Don't try to read more than how much is available, in
@@ -1700,7 +1709,7 @@ make_show_memory_breakpoints_cleanup (int show)
 
 /* For docs see target.h, to_xfer_partial.  */
 
-static LONGEST
+LONGEST
 target_xfer_partial (struct target_ops *ops,
 		     enum target_object object, const char *annex,
 		     void *readbuf, const void *writebuf,

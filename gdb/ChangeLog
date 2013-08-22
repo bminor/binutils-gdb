@@ -1,3 +1,19 @@
+2013-08-22  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15871
+	* corefile.c (target_xfer_memory_error): New function.
+	(memory_error): Defer EIO to target_memory_error.
+	(read_memory): Use target_xfer_partial, and handle finer-grained
+	target xfer errors.
+	* target.c (target_xfer_error_to_string): New function.
+	(memory_xfer_partial_1): If memory is known to be
+	unavailable, return TARGET_XFER_E_UNAVAILABLE instead of -1.
+	(target_xfer_partial): Make extern.
+	* target.h (enum target_xfer_error): New enum.
+	(target_xfer_error_to_string): Declare function.
+	(target_xfer_partial): Declare function.
+	(struct target_ops) <xfer_partial>: Adjust describing comment.
+
 2013-08-22  Alan Modra  <amodra@gmail.com>
 
 	* configure.host: Support powerpc64le-linux and powerpcle-linux hosts.
