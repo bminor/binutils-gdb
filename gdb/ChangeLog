@@ -1,3 +1,8 @@
+2013-08-22  Alan Modra  <amodra@gmail.com>
+
+	* configure.host: Support powerpc64le-linux and powerpcle-linux hosts.
+	* configure.tgt: Likewise as targets.
+
 2013-08-20  Doug Evans  <dje@google.com>
 
 	* buildsym.c (subfile_stack): Move here from buildsym.h.
