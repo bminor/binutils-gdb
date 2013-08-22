@@ -1,5 +1,10 @@
 2013-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* lib/gdb.exp (skip_btrace_tests): Use gdb_caching_proc and
+	standard_temp_file.
+
+2013-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.arch/amd64-byte.exp: Use standard_testfile,
 	clean_restart.
 	* gdb.arch/amd64-disp-step.exp: Use standard_testfile.
