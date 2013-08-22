@@ -241,8 +241,10 @@ fragment <<EOF
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC + 1)
 #define OPTION_LARGE_ADDRESS_AWARE \
 					(OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC + 1)
+#define OPTION_DISABLE_LARGE_ADDRESS_AWARE \
+ 					(OPTION_LARGE_ADDRESS_AWARE + 1)
 #define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1	\
-					(OPTION_LARGE_ADDRESS_AWARE + 1)
+					(OPTION_DISABLE_LARGE_ADDRESS_AWARE + 1)
 #define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2	\
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1 + 1)
 #define OPTION_EXCLUDE_MODULES_FOR_IMPLIB \
@@ -332,6 +334,7 @@ gld${EMULATION_NAME}_add_options
     {"enable-runtime-pseudo-reloc-v2", no_argument, NULL, OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2},
 #endif
     {"large-address-aware", no_argument, NULL, OPTION_LARGE_ADDRESS_AWARE},
+    {"disable-large-address-aware", no_argument, NULL, OPTION_DISABLE_LARGE_ADDRESS_AWARE},
     {"enable-long-section-names", no_argument, NULL, OPTION_ENABLE_LONG_SECTION_NAMES},
     {"disable-long-section-names", no_argument, NULL, OPTION_DISABLE_LONG_SECTION_NAMES},
     {"dynamicbase",no_argument, NULL, OPTION_DYNAMIC_BASE},
@@ -471,6 +474,8 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
 #endif
   fprintf (file, _("  --large-address-aware              Executable supports virtual addresses\n\
                                        greater than 2 gigabytes\n"));
+  fprintf (file, _("  --disable-large-address-aware      Executable does not support virtual\n\
+                                       addresses greater than 2 gigabytes\n"));
   fprintf (file, _("  --enable-long-section-names        Use long COFF section names even in\n\
                                        executable image files\n"));
   fprintf (file, _("  --disable-long-section-names       Never use long COFF section names, even\n\
@@ -826,6 +831,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
 #endif
     case OPTION_LARGE_ADDRESS_AWARE:
       real_flags |= IMAGE_FILE_LARGE_ADDRESS_AWARE;
+      break;
+    case OPTION_DISABLE_LARGE_ADDRESS_AWARE:
+      real_flags &= ~ IMAGE_FILE_LARGE_ADDRESS_AWARE;
       break;
     case OPTION_ENABLE_LONG_SECTION_NAMES:
       pe_use_coff_long_section_names = 1;

@@ -2348,6 +2348,14 @@ or /USERVA=@var{value} megabytes switch in the ``[operating systems]''
 section of the BOOT.INI.  Otherwise, this bit has no effect.
 [This option is specific to PE targeted ports of the linker]
 
+@kindex --disable-large-address-aware
+@item --disable-large-address-aware
+Reverts the effect of a previous @samp{--large-address-aware} option.
+This is useful if @samp{--large-address-aware} is always set by the compiler
+driver (e.g. Cygwin gcc) and the executable does not support virtual
+addresses greater than 2 gigabytes.
+[This option is specific to PE targeted ports of the linker]
+
 @kindex --major-image-version
 @item --major-image-version @var{value}
 Sets the major number of the ``image version''.  Defaults to 1.

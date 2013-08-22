@@ -1,3 +1,8 @@
+2013-08-22  Christian Franke  <franke@computer.org>
+
+	* emultempl/pe.em: Add --disable-large-address-aware option.
+	* ld.texinfo (--disable-large-address-aware): Add documentation.
+
 2013-08-14  Clemens Lang  <clemens.lang@fau.de>
 
 	* ldexp.c: Add LOG2CEIL() builtin function to linker script language
