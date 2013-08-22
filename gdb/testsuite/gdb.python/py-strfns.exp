@@ -64,9 +64,9 @@ gdb_test "p /d {char\[4\]} arg" "= \\{0, 1, 2, 4\\}"
 # Verify use on a core file.
 
 proc test_strfns_core_file { } {
-    global objdir subdir gdb_prompt testfile
+    global gdb_prompt testfile
 
-    set filename "${objdir}/${subdir}/py-strfns.core"
+    set filename [standard_output_file py-strfns.core]
 
     if {![gdb_gcore_cmd "$filename" "save a corefile"]} {
 	# No use proceeding from here.

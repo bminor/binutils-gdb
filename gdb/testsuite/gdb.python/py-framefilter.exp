@@ -39,7 +39,7 @@ if { [skip_python_tests] } { continue }
 set remote_obj_python_file \
     [remote_download \
 	 host ${srcdir}/${subdir}/${testfile}-gdb.py.in \
-	 ${subdir}/${testfile}-gdb.py]
+	 [standard_output_file ${testfile}-gdb.py]]
 
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_test_no_output "set auto-load safe-path ${remote_obj_python_file}" \
@@ -57,7 +57,8 @@ gdb_test_no_output "set python print-stack full" \
     "Set python print-stack to full"
 
 # Load global frame-filters
-set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}.py]
+set remote_python_file [gdb_remote_download host \
+			    ${srcdir}/${subdir}/${testfile}.py]
 gdb_test_no_output "python execfile ('${remote_python_file}')" \
     "Load python file"
 
@@ -199,7 +200,7 @@ if { [skip_python_tests] } { continue }
 set remote_obj_python_file \
     [remote_download \
 	 host ${srcdir}/${subdir}/${testfile}-gdb.py.in \
-	 ${subdir}/${testfile}-gdb.py]
+	 [standard_output_file ${testfile}-gdb.py]]
 
 gdb_reinitialize_dir $srcdir/$subdir
 gdb_test_no_output "set auto-load safe-path ${remote_obj_python_file}" \
@@ -218,7 +219,8 @@ gdb_test_no_output "set python print-stack full" \
     "set python print-stack full for no debuginfo tests"
 
 # Load global frame-filters
-set remote_python_file [remote_download host ${srcdir}/${subdir}/${testfile}.py]
+set remote_python_file [gdb_remote_download host \
+			    ${srcdir}/${subdir}/${testfile}.py]
 gdb_test_no_output "python execfile ('${remote_python_file}')" \
     "Load python file for no debuginfo tests"
 

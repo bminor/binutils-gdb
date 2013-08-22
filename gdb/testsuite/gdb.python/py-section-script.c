@@ -26,7 +26,7 @@
 .popsection \n\
 ");
 
-DEFINE_GDB_SCRIPT ("py-section-script.py")
+DEFINE_GDB_SCRIPT (SCRIPT_FILE)
 
 struct ss
 {

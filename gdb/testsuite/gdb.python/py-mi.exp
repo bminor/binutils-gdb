@@ -42,7 +42,7 @@ if {[lsearch -exact [mi_get_features] python] < 0} {
 
 mi_runto main
 
-set remote_python_file [remote_download host ${srcdir}/${subdir}/${pyfile}]
+set remote_python_file [gdb_remote_download host ${srcdir}/${subdir}/${pyfile}]
 
 mi_gdb_test "python exec (open ('${remote_python_file}').read ())" ""
 
