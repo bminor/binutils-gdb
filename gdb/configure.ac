@@ -1207,7 +1207,7 @@ AC_CACHE_CHECK([types of arguments for ptrace], gdb_cv_func_ptrace_args, [
 for gdb_arg1 in 'int' 'long'; do
  for gdb_arg2 in 'pid_t' 'int' 'long'; do
   for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long' 'void *'; do
-   for gdb_arg4 in 'int' 'long'; do
+   for gdb_arg4 in 'int' 'long' 'void *'; do
      AC_TRY_COMPILE($gdb_ptrace_headers, [
 extern $gdb_cv_func_ptrace_ret
   ptrace ($gdb_arg1, $gdb_arg2, $gdb_arg3, $gdb_arg4);
@@ -1234,6 +1234,8 @@ IFS=$ac_save_IFS
 shift
 AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG3, $[3],
   [Define to the type of arg 3 for ptrace.])
+AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG4, $[4],
+  [Define to the type of arg 4 for ptrace.])
 if test -n "$[5]"; then
   AC_DEFINE_UNQUOTED(PTRACE_TYPE_ARG5, $[5],
     [Define to the type of arg 5 for ptrace.])

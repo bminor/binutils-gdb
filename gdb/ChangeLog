@@ -1,3 +1,84 @@
+2013-08-22  Luis Machado  <lgustavo@codesourcery.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Add nat/linux-nat.h and
+	nat/linux-waitpid.h.
+	(linux-waitpid.o): New object file rule.
+	* common/linux-ptrace.c: Include nat/linux-waitpid.h.
+	(current_ptrace_options): Moved from linux-nat.c.
+	(linux_ptrace_test_ret_to_nx): Use type casts for ptrace
+	parameters.
+	(linux_fork_to_function): New function.
+	(linux_grandchild_function): Likewise.
+	(linux_child_function): Likewise.
+	(linux_check_ptrace_features): New function, heavily
+	based on linux-nat.c:linux_test_for_tracefork.
+	(linux_enable_event_reporting): New function.
+	(ptrace_supports_feature): Likewise.
+	(linux_supports_tracefork): Likewise.
+	(linux_supports_traceclone): Likewise.
+	(linux_supports_tracevforkdone): Likewise.
+	(linux_supports_tracesysgood): Likewise.
+	* common/linux-ptrace.h (HAS_NOMMU): Moved from
+	gdbserver/linux-low.c.
+	(linux_enable_event_reporting): New declaration.
+	(linux_supports_tracefork): Likewise.
+	(linux_supports_traceclone): Likewise.
+	(linux_supports_tracevforkdone): Likewise.
+	(linux_supports_tracesysgood): Likewise.
+	* config.in (PTRACE_TYPE_ARG4): Regenerate.
+	* config/aarch64/linux.mh (NATDEPFILES): Add linux-waitpid.o.
+	* config/alpha/alpha-linux.mh (NATDEPFILES): Likewise.
+	* config/arm/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux.mh (NATDEPFILES): Likewise.
+	* config/i386/linux64.mh (NATDEPFILES): Likewise.
+	* config/ia64/linux.mh (NATDEPFILES): Likewise.
+	* config/m32r/linux.mh (NATDEPFILES): Likewise.
+	* config/m68k/linux.mh (NATDEPFILES): Likewise.
+	* config/mips/linux.mh (NATDEPFILES): Likewise.
+	* config/pa/linux.mh (NATDEPFILES): Likewise..
+	* config/powerpc/linux.mh (NATDEPFILES): Likewise..
+	* config/powerpc/ppc64-linux.mh (NATDEPFILES): Likewise.
+	* config/powerpc/spu-linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux.mh (NATDEPFILES): Likewise.
+	* config/sparc/linux64.mh (NATDEPFILES): Likewise.
+	* config/tilegx/linux.mh (NATDEPFILES): Likewise.
+	* config/xtensa/linux.mh (NATDEPFILES): Likewise.
+	* configure.ac (AC_CACHE_CHECK): Add void * to the list of
+	ptrace's 4th argument's types.
+	Check the type of PTRACE_TYPE_ARG4.
+	* configure: Regenerate.
+	* linux-nat.c: Include nat/linux-nat.h and nat/linux-waitpid.h.
+	(SYSCALL_SIGTRAP): Moved to nat/linux-nat.h.
+	(linux_supports_tracefork_flag): Remove.
+	(linux_supports_tracesysgood_flag): Likewise.
+	(linux_supports_tracevforkdone_flag): Likewise.
+	(current_ptrace_options): Moved to
+	common/linux-ptrace.c.
+	(linux_tracefork_child): Remove.
+	(my_waitpid): Remove.
+	(linux_test_for_tracefork): Renamed to
+	linux_check_ptrace_features and moved to common/linux-ptrace.c.
+	(linux_test_for_tracesysgood): Remove.
+	(linux_supports_tracesysgood): Remove.
+	(linux_supports_tracefork): Remove.
+	(linux_supports_tracevforkdone): Remove.
+	(linux_enable_tracesysgood): Remove.
+	(linux_enable_event_reporting): Remove.
+	(linux_init_ptrace): New function.
+	(linux_child_post_attach): Call linux_init_ptrace.
+	(linux_child_post_startup_inferior): Call linux_init_ptrace.
+	(linux_child_follow_fork): Call linux_supports_tracefork
+	and linux_supports_tracevforkdone.
+	(linux_child_insert_fork_catchpoint): Call
+	linux_supports_tracefork.
+	(linux_child_insert_vfork_catchpoint): Likewise.
+	(linux_child_set_syscall_catchpoint): Call
+	linux_supports_tracesysgood.
+	(lin_lwp_attach_lwp): Call linux_supports_tracefork.
+	* nat/linux-nat.h: New file.
+	* nat/linux-waitpid.c: New file.
+	* nat/linux-waitpid.h: New file.
+
 2013-08-22  Samuel Bronson  <naesten@gmail.com>
 
 	ARM Linux support for `catch syscall'.

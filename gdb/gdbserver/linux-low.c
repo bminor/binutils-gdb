@@ -21,6 +21,8 @@
 #include "linux-osdata.h"
 #include "agent.h"
 
+#include "nat/linux-nat.h"
+#include "nat/linux-waitpid.h"
 #include "gdb_wait.h"
 #include <stdio.h>
 #include <sys/ptrace.h>
@@ -73,14 +75,6 @@
    SIGRTMIN.  */
 #ifndef __SIGRTMIN
 #define __SIGRTMIN 32
-#endif
-
-#ifdef __UCLIBC__
-#if !(defined(__UCLIBC_HAS_MMU__) || defined(__ARCH_HAS_MMU__))
-/* PTRACE_TEXT_ADDR and friends.  */
-#include <asm/ptrace.h>
-#define HAS_NOMMU
-#endif
 #endif
 
 /* Some targets did not define these ptrace constants from the start,
@@ -236,7 +230,6 @@ static void proceed_all_lwps (void);
 static int finish_step_over (struct lwp_info *lwp);
 static CORE_ADDR get_stop_pc (struct lwp_info *lwp);
 static int kill_lwp (unsigned long lwpid, int signo);
-static void linux_enable_event_reporting (int pid);
 
 /* True if the low target can hardware single-step.  Such targets
    don't need a BREAKPOINT_REINSERT_ADDR callback.  */
@@ -374,81 +367,6 @@ linux_add_process (int pid, int attached)
     proc->private->arch_private = the_low_target.new_process ();
 
   return proc;
-}
-
-/* Wrapper function for waitpid which handles EINTR, and emulates
-   __WALL for systems where that is not available.  */
-
-static int
-my_waitpid (int pid, int *status, int flags)
-{
-  int ret, out_errno;
-
-  if (debug_threads)
-    fprintf (stderr, "my_waitpid (%d, 0x%x)\n", pid, flags);
-
-  if (flags & __WALL)
-    {
-      sigset_t block_mask, org_mask, wake_mask;
-      int wnohang;
-
-      wnohang = (flags & WNOHANG) != 0;
-      flags &= ~(__WALL | __WCLONE);
-      flags |= WNOHANG;
-
-      /* Block all signals while here.  This avoids knowing about
-	 LinuxThread's signals.  */
-      sigfillset (&block_mask);
-      sigprocmask (SIG_BLOCK, &block_mask, &org_mask);
-
-      /* ... except during the sigsuspend below.  */
-      sigemptyset (&wake_mask);
-
-      while (1)
-	{
-	  /* Since all signals are blocked, there's no need to check
-	     for EINTR here.  */
-	  ret = waitpid (pid, status, flags);
-	  out_errno = errno;
-
-	  if (ret == -1 && out_errno != ECHILD)
-	    break;
-	  else if (ret > 0)
-	    break;
-
-	  if (flags & __WCLONE)
-	    {
-	      /* We've tried both flavors now.  If WNOHANG is set,
-		 there's nothing else to do, just bail out.  */
-	      if (wnohang)
-		break;
-
-	      if (debug_threads)
-		fprintf (stderr, "blocking\n");
-
-	      /* Block waiting for signals.  */
-	      sigsuspend (&wake_mask);
-	    }
-
-	  flags ^= __WCLONE;
-	}
-
-      sigprocmask (SIG_SETMASK, &org_mask, NULL);
-    }
-  else
-    {
-      do
-	ret = waitpid (pid, status, flags);
-      while (ret == -1 && errno == EINTR);
-      out_errno = errno;
-    }
-
-  if (debug_threads)
-    fprintf (stderr, "my_waitpid (%d, 0x%x): status(%x), %d\n",
-	     pid, flags, status ? *status : -1, ret);
-
-  errno = out_errno;
-  return ret;
 }
 
 /* Handle a GNU/Linux extended wait response.  If we see a clone
@@ -4659,168 +4577,6 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   return 0;
 }
 
-/* Non-zero if the kernel supports PTRACE_O_TRACEFORK.  */
-static int linux_supports_tracefork_flag;
-
-static void
-linux_enable_event_reporting (int pid)
-{
-  if (!linux_supports_tracefork_flag)
-    return;
-
-  ptrace (PTRACE_SETOPTIONS, pid, (PTRACE_TYPE_ARG3) 0,
-	  (PTRACE_TYPE_ARG4) PTRACE_O_TRACECLONE);
-}
-
-/* Helper functions for linux_test_for_tracefork, called via clone ().  */
-
-static int
-linux_tracefork_grandchild (void *arg)
-{
-  _exit (0);
-}
-
-#define STACK_SIZE 4096
-
-static int
-linux_tracefork_child (void *arg)
-{
-  ptrace (PTRACE_TRACEME, 0, (PTRACE_TYPE_ARG3) 0, (PTRACE_TYPE_ARG4) 0);
-  kill (getpid (), SIGSTOP);
-
-#if !(defined(__UCLIBC__) && defined(HAS_NOMMU))
-
-  if (fork () == 0)
-    linux_tracefork_grandchild (NULL);
-
-#else /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
-
-#ifdef __ia64__
-  __clone2 (linux_tracefork_grandchild, arg, STACK_SIZE,
-	    CLONE_VM | SIGCHLD, NULL);
-#else
-  clone (linux_tracefork_grandchild, (char *) arg + STACK_SIZE,
-	 CLONE_VM | SIGCHLD, NULL);
-#endif
-
-#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
-
-  _exit (0);
-}
-
-/* Determine if PTRACE_O_TRACEFORK can be used to follow fork events.  Make
-   sure that we can enable the option, and that it had the desired
-   effect.  */
-
-static void
-linux_test_for_tracefork (void)
-{
-  int child_pid, ret, status;
-  long second_pid;
-#if defined(__UCLIBC__) && defined(HAS_NOMMU)
-  char *stack = xmalloc (STACK_SIZE * 4);
-#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
-
-  linux_supports_tracefork_flag = 0;
-
-#if !(defined(__UCLIBC__) && defined(HAS_NOMMU))
-
-  child_pid = fork ();
-  if (child_pid == 0)
-    linux_tracefork_child (NULL);
-
-#else /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
-
-  /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
-#ifdef __ia64__
-  child_pid = __clone2 (linux_tracefork_child, stack, STACK_SIZE,
-			CLONE_VM | SIGCHLD, stack + STACK_SIZE * 2);
-#else /* !__ia64__ */
-  child_pid = clone (linux_tracefork_child, stack + STACK_SIZE,
-		     CLONE_VM | SIGCHLD, stack + STACK_SIZE * 2);
-#endif /* !__ia64__ */
-
-#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
-
-  if (child_pid == -1)
-    perror_with_name ("clone");
-
-  ret = my_waitpid (child_pid, &status, 0);
-  if (ret == -1)
-    perror_with_name ("waitpid");
-  else if (ret != child_pid)
-    error ("linux_test_for_tracefork: waitpid: unexpected result %d.", ret);
-  if (! WIFSTOPPED (status))
-    error ("linux_test_for_tracefork: waitpid: unexpected status %d.", status);
-
-  ret = ptrace (PTRACE_SETOPTIONS, child_pid, (PTRACE_TYPE_ARG3) 0,
-		(PTRACE_TYPE_ARG4) PTRACE_O_TRACEFORK);
-  if (ret != 0)
-    {
-      ret = ptrace (PTRACE_KILL, child_pid, (PTRACE_TYPE_ARG3) 0,
-		    (PTRACE_TYPE_ARG4) 0);
-      if (ret != 0)
-	{
-	  warning ("linux_test_for_tracefork: failed to kill child");
-	  return;
-	}
-
-      ret = my_waitpid (child_pid, &status, 0);
-      if (ret != child_pid)
-	warning ("linux_test_for_tracefork: failed to wait for killed child");
-      else if (!WIFSIGNALED (status))
-	warning ("linux_test_for_tracefork: unexpected wait status 0x%x from "
-		 "killed child", status);
-
-      return;
-    }
-
-  ret = ptrace (PTRACE_CONT, child_pid, (PTRACE_TYPE_ARG3) 0,
-		(PTRACE_TYPE_ARG4) 0);
-  if (ret != 0)
-    warning ("linux_test_for_tracefork: failed to resume child");
-
-  ret = my_waitpid (child_pid, &status, 0);
-
-  if (ret == child_pid && WIFSTOPPED (status)
-      && status >> 16 == PTRACE_EVENT_FORK)
-    {
-      second_pid = 0;
-      ret = ptrace (PTRACE_GETEVENTMSG, child_pid, (PTRACE_TYPE_ARG3) 0,
-		    &second_pid);
-      if (ret == 0 && second_pid != 0)
-	{
-	  int second_status;
-
-	  linux_supports_tracefork_flag = 1;
-	  my_waitpid (second_pid, &second_status, 0);
-	  ret = ptrace (PTRACE_KILL, second_pid, (PTRACE_TYPE_ARG3) 0,
-			(PTRACE_TYPE_ARG4) 0);
-	  if (ret != 0)
-	    warning ("linux_test_for_tracefork: failed to kill second child");
-	  my_waitpid (second_pid, &status, 0);
-	}
-    }
-  else
-    warning ("linux_test_for_tracefork: unexpected result from waitpid "
-	     "(%d, status 0x%x)", ret, status);
-
-  do
-    {
-      ret = ptrace (PTRACE_KILL, child_pid, (PTRACE_TYPE_ARG3) 0,
-		    (PTRACE_TYPE_ARG4) 0);
-      if (ret != 0)
-	warning ("linux_test_for_tracefork: failed to kill child");
-      my_waitpid (child_pid, &status, 0);
-    }
-  while (WIFSTOPPED (status));
-
-#if defined(__UCLIBC__) && defined(HAS_NOMMU)
-  free (stack);
-#endif /* defined(__UCLIBC__) && defined(HAS_NOMMU) */
-}
-
-
 static void
 linux_look_up_symbols (void)
 {
@@ -4830,10 +4586,10 @@ linux_look_up_symbols (void)
   if (proc->private->thread_db != NULL)
     return;
 
-  /* If the kernel supports tracing forks then it also supports tracing
-     clones, and then we don't need to use the magic thread event breakpoint
-     to learn about threads.  */
-  thread_db_init (!linux_supports_tracefork_flag);
+  /* If the kernel supports tracing clones, then we don't need to
+     use the magic thread event breakpoint to learn about
+     threads.  */
+  thread_db_init (!linux_supports_traceclone ());
 #endif
 }
 
@@ -6097,7 +5853,6 @@ initialize_low (void)
   set_breakpoint_data (the_low_target.breakpoint,
 		       the_low_target.breakpoint_len);
   linux_init_signals ();
-  linux_test_for_tracefork ();
   linux_ptrace_init_warnings ();
 
   sigchld_action.sa_handler = sigchld_handler;

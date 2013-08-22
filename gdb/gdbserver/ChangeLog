@@ -1,3 +1,30 @@
+2013-08-22  Luis Machado  <lgustavo@codesourcery.com>
+
+	* Makefile.in: Explain why ../target and ../nat are not
+	listed as include file search paths.
+	(linux-waitpid.o): New object file rule.
+	* configure.srv (srv_native_linux_obj): New variable.
+	Replace all occurrences of linux native object files with
+	$srv_native_linux_obj.
+	* linux-low.c: Include nat/linux-nat.h and nat/linux-waitpid.h.
+	(HAS_NOMMU): Move defining logic to common/linux-ptrace.c.
+	(linux_enable_event_reporting): Remove declaration.
+	(my_waitpid): Moved to common/linux-waitpid.c.
+	(linux_wait_for_event): Pass ptid when calling
+	linux_enable_event_reporting.
+	(linux_supports_tracefork_flag): Remove.
+	(linux_enable_event_reporting): Likewise.
+	(linux_tracefork_grandchild): Remove.
+	(STACK_SIZE): Moved to common/linux-ptrace.c.
+	(linux_tracefork_child): Remove.
+	(linux_test_for_tracefork): Remove.
+	(linux_look_up_symbols): Call linux_supports_traceclone.
+	(initialize_low): Remove call to linux_test_for_tracefork.
+	* linux-low.h (PTRACE_TYPE_ARG3): Move to
+	common/linux-ptrace.h.
+	(PTRACE_TYPE_ARG4): Likewise.
+	Include linux-ptrace.h.
+
 2013-08-21  Pedro Alves  <palves@redhat.com>
 
 	* config.in: Renegerate.

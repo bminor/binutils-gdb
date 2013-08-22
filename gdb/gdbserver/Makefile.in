@@ -100,6 +100,11 @@ GNULIB_H = $(GNULIB_BUILDDIR)/import/string.h @GNULIB_STDINT_H@
 # -I. for config files.
 # -I${srcdir} for our headers.
 # -I$(srcdir)/../regformats for regdef.h.
+#
+# We do not include ../target or ../nat in here because headers
+# in those directories should be included with the subdirectory.
+# e.g.: "target/wait.h".
+#
 INCLUDE_CFLAGS = -I. -I${srcdir} -I$(srcdir)/../common \
 	-I$(srcdir)/../regformats -I$(srcdir)/../ -I$(INCLUDE_DIR) \
 	$(INCGNU)
@@ -561,6 +566,12 @@ linux-btrace.o: ../common/linux-btrace.c $(linux_btrace_h) $(server_h)
 
 mips-linux-watch.o: ../common/mips-linux-watch.c $(mips_linux_watch_h) $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
+
+# Native object files rules from ../nat
+
+linux-waitpid.o: ../nat/linux-waitpid.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
 # We build vasprintf with -DHAVE_CONFIG_H because we want that unit to
 # include our config.h file.  Otherwise, some system headers do not get

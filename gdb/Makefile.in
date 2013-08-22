@@ -855,7 +855,7 @@ common/format.h common/host-defs.h utils.h common/queue.h common/gdb_string.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h common/linux-btrace.h \
 ctf.h common/i386-cpuid.h common/i386-gcc-cpuid.h target/resume.h \
-target/wait.h target/waitstatus.h
+target/wait.h target/waitstatus.h nat/linux-nat.h nat/linux-waitpid.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -2035,6 +2035,15 @@ mips-linux-watch.o: ${srcdir}/common/mips-linux-watch.c
 
 waitstatus.o: ${srcdir}/target/waitstatus.c
 	$(COMPILE) $(srcdir)/target/waitstatus.c
+	$(POSTCOMPILE)
+
+# gdb/nat/ dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the sub-directory.
+
+linux-waitpid.o: ${srcdir}/nat/linux-waitpid.c
+	$(COMPILE) $(srcdir)/nat/linux-waitpid.c
 	$(POSTCOMPILE)
 
 #

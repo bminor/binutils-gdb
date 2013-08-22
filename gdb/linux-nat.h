@@ -127,9 +127,6 @@ extern void lin_thread_get_thread_signals (sigset_t *mask);
 void linux_proc_pending_signals (int pid, sigset_t *pending,
 				 sigset_t *blocked, sigset_t *ignored);
 
-/* linux-nat functions for handling fork events.  */
-extern void linux_enable_event_reporting (ptid_t ptid);
-
 extern int lin_lwp_attach_lwp (ptid_t ptid);
 
 extern void linux_stop_lwp (struct lwp_info *lwp);

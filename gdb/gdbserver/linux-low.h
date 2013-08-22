@@ -22,8 +22,9 @@
 #include "gdbthread.h"
 #include "gdb_proc_service.h"
 
-#define PTRACE_TYPE_ARG3 void *
-#define PTRACE_TYPE_ARG4 void *
+/* Included for ptrace type definitions.  */
+#include "linux-ptrace.h"
+
 #define PTRACE_XFER_TYPE long
 
 #ifdef HAVE_LINUX_REGSETS

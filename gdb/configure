@@ -10336,7 +10336,7 @@ else
 for gdb_arg1 in 'int' 'long'; do
  for gdb_arg2 in 'pid_t' 'int' 'long'; do
   for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long' 'void *'; do
-   for gdb_arg4 in 'int' 'long'; do
+   for gdb_arg4 in 'int' 'long' 'void *'; do
      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 $gdb_ptrace_headers
@@ -10397,6 +10397,11 @@ shift
 
 cat >>confdefs.h <<_ACEOF
 #define PTRACE_TYPE_ARG3 $3
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define PTRACE_TYPE_ARG4 $4
 _ACEOF
 
 if test -n "$5"; then
