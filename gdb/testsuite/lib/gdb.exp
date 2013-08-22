@@ -1854,6 +1854,34 @@ gdb_caching_proc is_lp64_target {
     return 1
 }
 
+# Return 1 if target has 64 bit addresses.
+# This cannot be decided simply from looking at the target string,
+# as it might depend on externally passed compiler options like -m64.
+gdb_caching_proc is_64_target {
+    set me "is_64_target"
+
+    set src [standard_temp_file is64[pid].c]
+    set obj [standard_temp_file is64[pid].o]
+
+    set f [open $src "w"]
+    puts $f "int function(void) { return 3; }"
+    puts $f "int dummy\[sizeof (&function) == 8 ? 1 : -1\];"
+    close $f
+
+    verbose "$me:  compiling testfile $src" 2
+    set lines [gdb_compile $src $obj object {quiet}]
+    file delete $src
+    file delete $obj
+
+    if ![string match "" $lines] then {
+        verbose "$me:  testfile compilation failed, returning 0" 2
+        return 0
+    }
+
+    verbose "$me:  returning 1" 2
+    return 1
+}
+
 # Return 1 if target has x86_64 registers - either amd64 or x32.
 # x32 target identifies as x86_64-*-linux*, therefore it cannot be determined
 # just from the target string.

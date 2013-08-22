@@ -1,5 +1,11 @@
 2013-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* lib/dwarf.exp (cu, tu): Handle addr_size of "default".  Change
+	default addr_size.
+	* lib/gdb.exp (is_64_target): New gdb_caching_proc.
+
+2013-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* lib/gdb.exp (skip_btrace_tests): Use gdb_caching_proc and
 	standard_temp_file.
 

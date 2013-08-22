@@ -684,8 +684,8 @@ namespace eval Dwarf {
     #                default = 0 (32-bit)
     # version n    - DWARF version number to emit
     #                default = 4
-    # addr_size n  - the size of addresses, 32 or 64
-    #                default = 64
+    # addr_size n  - the size of addresses, 32, 64, or default
+    #                default = default
     # fission 0|1  - boolean indicating if generating Fission debug info
     #                default = 0
     # BODY is Tcl code that emits the DIEs which make up the body of
@@ -702,7 +702,7 @@ namespace eval Dwarf {
 	# Establish the defaults.
 	set is_64 0
 	set _cu_version 4
-	set _cu_addr_size 8
+	set _cu_addr_size default
 	set fission 0
 	set section ".debug_info"
 	set _abbrev_section ".debug_abbrev"
@@ -714,6 +714,13 @@ namespace eval Dwarf {
 		addr_size { set _cu_addr_size $value }
 		fission { set fission $value }
 		default { error "unknown option $name" }
+	    }
+	}
+	if {$_cu_addr_size == "default"} {
+	    if {[is_64_target]} {
+		set _cu_addr_size 8
+	    } else {
+		set _cu_addr_size 4
 	    }
 	}
 	set _cu_offset_size [expr { $is_64 ? 8 : 4 }]
@@ -767,8 +774,8 @@ namespace eval Dwarf {
     #                default = 0 (32-bit)
     # version n    - DWARF version number to emit
     #                default = 4
-    # addr_size n  - the size of addresses, 32 or 64
-    #                default = 64
+    # addr_size n  - the size of addresses, 32, 64, or default
+    #                default = default
     # fission 0|1  - boolean indicating if generating Fission debug info
     #                default = 0
     # SIGNATURE is the 64-bit signature of the type.
@@ -788,7 +795,7 @@ namespace eval Dwarf {
 	# Establish the defaults.
 	set is_64 0
 	set _cu_version 4
-	set _cu_addr_size 8
+	set _cu_addr_size default
 	set fission 0
 	set section ".debug_types"
 	set _abbrev_section ".debug_abbrev"
@@ -800,6 +807,13 @@ namespace eval Dwarf {
 		addr_size { set _cu_addr_size $value }
 		fission { set fission $value }
 		default { error "unknown option $name" }
+	    }
+	}
+	if {$_cu_addr_size == "default"} {
+	    if {[is_64_target]} {
+		set _cu_addr_size 8
+	    } else {
+		set _cu_addr_size 4
 	    }
 	}
 	set _cu_offset_size [expr { $is_64 ? 8 : 4 }]
