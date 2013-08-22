@@ -1,3 +1,9 @@
+2013-08-22  Samuel Bronson  <naesten@gmail.com>
+
+	ARM Linux support for `catch syscall'.
+	* gdb.base/catch-syscall.exp: Test this on ARM now.
+	(fill_all_syscalls_numbers): ARM has close/chroot on 6/61, too.
+
 2013-08-22  Tom Tromey  <tromey@redhat.com>
 
 	* lib/dwarf.exp (cu, tu): Handle addr_size of "default".  Change

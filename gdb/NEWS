@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.6
 
+* The "catch syscall" command now works on arm*-linux* targets.
+
 * Python scripting
 
   ** Frame filters and frame decorators have been added.

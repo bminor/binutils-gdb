@@ -34,7 +34,7 @@ if {![istarget "hppa*-hp-hpux*"] && ![istarget "*-linux*"]} then {
 if { ![istarget "x86_64-*-linux*"] && ![istarget "i\[34567\]86-*-linux*"]
      && ![istarget "powerpc-*-linux*"] && ![istarget "powerpc64-*-linux*"]
      && ![istarget "sparc-*-linux*"] && ![istarget "sparc64-*-linux*"]
-     && ![istarget "mips*-linux*"] } {
+     && ![istarget "mips*-linux*"] && ![istarget "arm*-linux*"] } {
      continue
 }
 
@@ -407,11 +407,12 @@ proc do_syscall_tests_without_xml {} {
 proc fill_all_syscalls_numbers {} {
     global all_syscalls_numbers
 
-    # For Linux on x86, PPC, PPC64, SPARC and SPARC64, the numbers for the syscalls
-    # "close" and "chroot" are the same.
+    # For Linux on x86, PPC, PPC64, SPARC, SPARC64 and ARM,
+    # the numbers for the syscalls "close" and "chroot" are the same.
     if { [istarget "i\[34567\]86-*-linux*"]
          || [istarget "powerpc-*-linux*"] || [istarget "powerpc64-*-linux*"]
-         || [istarget "sparc-*-linux*"] || [istarget "sparc64-*-linux*"] } {
+         || [istarget "sparc-*-linux*"] || [istarget "sparc64-*-linux*"]
+         || [istarget "arm*-linux*"] } {
          set all_syscalls_numbers { "6" "61" }
     }
 }

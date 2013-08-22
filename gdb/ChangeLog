@@ -1,3 +1,13 @@
+2013-08-22  Samuel Bronson  <naesten@gmail.com>
+
+	ARM Linux support for `catch syscall'.
+	* syscalls/arm-linux.py: New file.
+	* syscalls/arm-linux.xml: Likewise.
+	* arm-linux-tdep.c (arm_linux_get_syscall_number): New function.
+	(arm_linux_init_abi): Register the new function and syscall xml file.
+	* data-directory/Makefile.in: Install the new syscall xml file.
+	* NEWS: Brag about this.
+
 2013-08-22  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15871

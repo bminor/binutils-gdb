@@ -45,6 +45,7 @@ SYSCALLS_DIR = syscalls
 SYSCALLS_INSTALL_DIR = $(DESTDIR)$(GDB_DATADIR)/$(SYSCALLS_DIR)
 SYSCALLS_FILES = \
 	gdb-syscalls.dtd \
+	arm-linux.xml \
 	ppc-linux.xml ppc64-linux.xml \
 	i386-linux.xml amd64-linux.xml \
 	sparc-linux.xml sparc64-linux.xml \
