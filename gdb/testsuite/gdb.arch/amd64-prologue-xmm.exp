@@ -15,10 +15,9 @@
 
 # Test GCC PR debug/48827 workaround in GDB.
 
-set testfile "amd64-prologue-xmm"
-set srcfile ${testfile}.s
+standard_testfile .s
+set csrcfile [file rootname $srcfile].c
 set csrcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}.x
 set opts {}
 
 if [info exists COMPILE] {
@@ -30,7 +29,7 @@ if [info exists COMPILE] {
     return 0
 }
 
-if {[prepare_for_testing ${testfile}.exp ${testfile} $srcfile $opts]} {
+if {[prepare_for_testing ${testfile}.exp ${binfile} $srcfile $opts]} {
     return -1
 }
 

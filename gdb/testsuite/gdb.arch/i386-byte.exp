@@ -24,9 +24,7 @@ if {(![istarget "x86_64-*-*"] && ![istarget "i?86-*-*"])} then {
     return
 }
 
-set testfile "i386-byte"
-set srcfile i386-pseudo.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile i386-pseudo.c
 
 if [get_compiler_info] {
     return -1
@@ -37,10 +35,7 @@ if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list
     return
 }
 
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+clean_restart ${binfile}
 
 if ![runto_main] then {
     gdb_suppress_tests

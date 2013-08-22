@@ -1,5 +1,28 @@
 2013-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.arch/amd64-byte.exp: Use standard_testfile,
+	clean_restart.
+	* gdb.arch/amd64-disp-step.exp: Use standard_testfile.
+	* gdb.arch/amd64-dword.exp: Use standard_testfile,
+	clean_restart.
+	* gdb.arch/amd64-entry-value-param.exp: Use standard_testfile.
+	* gdb.arch/amd64-entry-value.exp: Use standard_testfile.
+	* gdb.arch/amd64-prologue-xmm.exp: Use standard_testfile.
+	* gdb.arch/amd64-word.exp: Use standard_testfile,
+	clean_restart.
+	* gdb.arch/i386-avx.exp: Use standard_testfile, clean_restart.
+	* gdb.arch/i386-byte.exp: Use standard_testfile, clean_restart.
+	* gdb.arch/i386-disp-step.exp: Use standard_testfile.
+	* gdb.arch/i386-dr3-watch.exp: Use standard_testfile.
+	* gdb.arch/i386-permbkpt.exp: Use standard_testfile, clean_restart.
+	* gdb.arch/i386-signal.exp: Use standard_testfile.
+	* gdb.arch/i386-size-overlap.exp: Use standard_testfile, clean_restart.
+	* gdb.arch/i386-sse.exp: Use standard_testfile, clean_restart.
+	* gdb.arch/i386-unwind.exp: Use standard_testfile.
+	* gdb.arch/i386-word.exp: Use standard_testfile, clean_restart.
+
+2013-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.python/py-error.exp: Use gdb_remote_download.
 	* gdb.python/py-mi.exp: Use gdb_remote_download.
 	* gdb.python/py-objfile-script.exp: Use standard_output_file.

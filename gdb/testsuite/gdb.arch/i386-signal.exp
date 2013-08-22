@@ -20,9 +20,7 @@ if { ![istarget "i?86-*-*"] && ![istarget "x86_64-*-*"] } then {
     return
 }
 
-set testfile "i386-signal"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
 	  executable { debug }] != "" } {

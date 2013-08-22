@@ -22,9 +22,7 @@ if { ![is_x86_like_target] } then {
     return
 }
 
-set testfile "i386-size-overlap"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile
 
 # some targets have leading underscores on assembly symbols.
 set additional_flags [gdb_target_symbol_prefix_flags]

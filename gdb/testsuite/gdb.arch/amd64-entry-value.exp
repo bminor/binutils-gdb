@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-set testfile amd64-entry-value
-set srcfile ${testfile}.s
+standard_testfile .s
 set opts {}
 
 if [info exists COMPILE] {

@@ -23,9 +23,7 @@ if { ![is_x86_like_target] } then {
     return
 }
 
-set testfile "i386-disp-step"
-set srcfile ${testfile}.S
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .S
 
 set additional_flags "-Wa,-g"
 
