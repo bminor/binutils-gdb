@@ -1,5 +1,12 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/gcore-buffer-overflow.exp: Use
+	standard_output_file, not standard_testfile.
+	* gdb.base/twice.exp: Use standard_testfile, not
+	standard_output_file.  Use gdb_remote_download.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* lib/gdb.exp (get_compiler_info): Use log_file -info and
 	restore from that.
 

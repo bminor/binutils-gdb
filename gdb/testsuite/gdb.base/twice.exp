@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-standard_output_file twice.c
+standard_testfile twice.c
 set options debug
 lappend options "additional_flags=-I."
 
@@ -23,7 +23,7 @@ set fileid [open $local_srcfile w]
 puts $fileid "#include \"twice.c\""
 close $fileid
 
-remote_download host ${srcdir}/${subdir}/twice.c twice.c
+gdb_remote_download host ${srcdir}/${subdir}/twice.c
 
 if  { [gdb_compile $local_srcfile "${binfile}" executable $options] != "" } {
      untested twice.exp

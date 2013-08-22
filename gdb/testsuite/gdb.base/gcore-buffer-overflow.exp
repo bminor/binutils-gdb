@@ -51,4 +51,5 @@ if { ! [ runto_main ] } then {
     return -1
 }
 
-gdb_gcore_cmd [standard_testfile gcore-buffer-overflow.test] "save a corefile"
+gdb_gcore_cmd [standard_output_file gcore-buffer-overflow.test] \
+    "save a corefile"
