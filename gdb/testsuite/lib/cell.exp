@@ -78,10 +78,10 @@ gdb_caching_proc skip_cell_tests {
     # Set up, compile, and execute a combined Cell/B.E. test program.
     # Include the current process ID in the file names to prevent conflicts
     # with invocations for multiple testsuites.
-    set src cell[pid].c
-    set exe cell[pid].x
-    set src_spu cell[pid]-spu.c
-    set exe_spu cell[pid]-spu.x
+    set src [standard_temp_file cell[pid].c]
+    set exe [standard_temp_file cell[pid].x]
+    set src_spu [standard_temp_file cell[pid]-spu.c]
+    set exe_spu [standard_temp_file cell[pid]-spu.x]
 
     set f [open $src "w"]
     puts $f "#include <libspe2.h>"

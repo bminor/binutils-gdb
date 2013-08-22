@@ -1,5 +1,9 @@
 2013-08-22  Tom Tromey  <tromey@redhat.com>
 
+       * lib/cell.exp (skip_cell_tests): Use standard_temp_file.
+
+2013-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/dw2-basic.exp: Use gdb_remote_download.
 	* gdb.dwarf2/dw2-compressed.exp: Use gdb_remote_download.
 	* gdb.dwarf2/dw2-intercu.exp: Use gdb_remote_download.
