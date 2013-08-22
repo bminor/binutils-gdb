@@ -2445,6 +2445,7 @@ proc get_compiler_info {{arg ""}} {
 
     # Run $ifile through the right preprocessor.
     # Toggle gdb.log to keep the compiler output out of the log.
+    set saved_log [log_file -info]
     log_file
     if [is_remote host] {
 	# We have to use -E and -o together, despite the comments
@@ -2457,7 +2458,7 @@ proc get_compiler_info {{arg ""}} {
     } else {
 	set cppout [ gdb_compile "${ifile}" "" preprocess [list "$arg" quiet] ]
     }
-    log_file -a "$outdir/$tool.log" 
+    eval log_file $saved_log
 
     # Eval the output.
     set unknown 0
