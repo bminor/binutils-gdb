@@ -1,5 +1,15 @@
 2013-08-22  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/dw2-basic.exp: Use gdb_remote_download.
+	* gdb.dwarf2/dw2-compressed.exp: Use gdb_remote_download.
+	* gdb.dwarf2/dw2-intercu.exp: Use gdb_remote_download.
+	* gdb.dwarf2/dw2-intermix.exp: Use gdb_remote_download.
+	* gdb.dwarf2/dw2-producer.exp: Use gdb_remote_download.
+	* gdb.dwarf2/mac-fileno.exp: Use gdb_remote_download.
+	* lib/gdb.exp (gdb_remote_download): New proc.
+
+2013-08-22  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/clztest.exp: Use standard_testfile.
 	* gdb.dwarf2/dw2-minsym-in-cu.exp: Use standard_testfile.
 	* gdb.dwarf2/fission-base.S: Remove directory from

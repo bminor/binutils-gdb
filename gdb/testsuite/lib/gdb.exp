@@ -3263,6 +3263,18 @@ proc gdb_touch_execfile { binfile } {
     }
 }
 
+# Like remote_download but provides a gdb-specific behavior.  If DEST
+# is "host", and the host is not remote, and TOFILE is not specified,
+# then the [file tail] of FROMFILE is passed through
+# standard_output_file to compute the destination.
+
+proc gdb_remote_download {dest fromfile {tofile {}}} {
+    if {$dest == "host" && ![is_remote host] && $tofile == ""} {
+	set tofile [standard_output_file [file tail $fromfile]]
+    }
+    return [remote_download $dest $fromfile $tofile]
+}
+
 # gdb_download
 #
 # Copy a file to the remote target and return its target filename.
