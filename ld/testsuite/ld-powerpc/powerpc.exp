@@ -82,7 +82,7 @@ proc supports_ppc64 { } {
     global ld
 
     catch "exec $ld --help | grep emulations" tmp
-    if [ string match "*elf64ppc*" $tmp ] then {
+    if [ regexp "elf64l?ppc" $tmp ] then {
 	return 1
     } else {
 	return 0
@@ -243,7 +243,7 @@ set ppceabitests {
 }
 
 if [istarget "powerpc*le*-*-*"] then {
-    set options_regsub(ld) {-melf32ppc -melf32lppc}
+    set options_regsub(ld) {{-melf([3264]*)ppc} {-melf\1lppc}}
 
     for {set i 0} {$i < [llength $ppcelftests]} {incr i} {
 	set line [lindex $ppcelftests $i]
@@ -255,7 +255,7 @@ if [istarget "powerpc*le*-*-*"] then {
 
     if [ supports_ppc64 ] then {
 	for {set i 0} {$i < [llength $ppc64elftests]} {incr i} {
-	    set line [lindex $ppcelftests $i]
+	    set line [lindex $ppc64elftests $i]
 	    set ld_options [lindex $line 1]
 	    regsub -all elf64ppc $ld_options elf64lppc ld_options
 	    set line [lreplace $line 1 1 $ld_options]

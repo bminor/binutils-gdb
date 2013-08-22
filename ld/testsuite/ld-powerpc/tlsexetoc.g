@@ -4,7 +4,7 @@
 #objdump: -sj.got
 #target: powerpc64*-*-*
 
-.*: +file format elf64-powerpc
+.*
 
 Contents of section \.got:
 .* (00000000|c0850110) (100185c0|00000000) 00000000 00000000  .*

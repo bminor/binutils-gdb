@@ -1,3 +1,24 @@
+2013-08-22  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/powerpc.exp: Substitute for le in options_regsub(ld).
+	Correct ppc64elftests option replacement.
+	(supports_ppc64): Match elf64lppc too.
+	* ld-powerpc/relbrlt.d: Update for little-endian.
+	* ld-powerpc/symtocbase.d: Likewise.
+	* ld-powerpc/tls.t: Likewise.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+	* ld-powerpc/tlsso.d: Likewise.
+	* ld-powerpc/tlsso.g: Likewise.
+	* ld-powerpc/tlstoc.t: Likewise.
+	* ld-powerpc/tlstocso.d: Likewise.
+	* ld-powerpc/tlstocso.g: Likewise.
+	* ld-powerpc/tlstocso.t: Likewise.
+	* ld-powerpc/tocopt.d: Likewise.
+	* ld-powerpc/tocopt2.d: Likewise.
+	* ld-powerpc/tocopt3.d: Likewise.
+	* ld-powerpc/tocopt4.d: Likewise.
+	* ld-powerpc/tocopt5.d: Likewise.
+
 2013-08-14  Clemens Lang  <clemens.lang@fau.de>
 
 	* ld-scripts/log2.exp: New: Run the new log2 test.
@@ -306,7 +327,7 @@
 	with regexp.
 	* ld-aarch64/ifunc-1.d: Likewise.
 	* ld-aarch64/ifunc-2-local.d: Likewise.
-	* ld-aarch64/ifunc-2.d: Likewise. 
+	* ld-aarch64/ifunc-2.d: Likewise.
 	* ld-aarch64/ifunc-3a.d: Likewise.
 	* ld-aarch64/ifunc-2-local.s: Change not to declare __GI_foo and foo
 	global.

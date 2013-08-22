@@ -4,7 +4,7 @@
 #objdump: -dr
 #target: powerpc64*-*-*
 
-.*: +file format elf64-powerpc
+.*
 
 Disassembly of section \.text:
 
