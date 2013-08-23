@@ -81,7 +81,7 @@ SECTIONS
     KEEP(*(.vectors))
 
     /* For data that needs to reside in the lower 64k of progmem.  */
-    ${RELOCATING+. *(.progmem.gcc*)}
+    ${RELOCATING+ *(.progmem.gcc*)}
 
     /* PR 13812: Placing the trampolines here gives a better chance
        that they will be in range of the code that uses them.  */
@@ -89,21 +89,21 @@ SECTIONS
     ${CONSTRUCTING+ __trampolines_start = . ; }
     /* The jump trampolines for the 16-bit limited relocs will reside here.  */
     *(.trampolines)
-    ${RELOCATING+. *(.trampolines*)}
+    ${RELOCATING+ *(.trampolines*)}
     ${CONSTRUCTING+ __trampolines_end = . ; }
 
-    ${RELOCATING+. *(.progmem*)}
+    ${RELOCATING+ *(.progmem*)}
     
     ${RELOCATING+. = ALIGN(2);}
 
     /* For future tablejump instruction arrays for 3 byte pc devices.
        We don't relax jump/call instructions within these sections.  */
     *(.jumptables) 
-    ${RELOCATING+. *(.jumptables*)}
+    ${RELOCATING+ *(.jumptables*)}
 
     /* For code that needs to reside in the lower 128k progmem.  */
     *(.lowtext)
-    ${RELOCATING+. *(.lowtext*)}
+    ${RELOCATING+ *(.lowtext*)}
 
     ${CONSTRUCTING+ __ctors_start = . ; }
     ${CONSTRUCTING+ *(.ctors) }
@@ -170,7 +170,7 @@ SECTIONS
        addresses for subsequent sections because -Tdata= from the command
        line will have no effect, see PR13697.  Thus, keep .data  */
     KEEP (*(.data))    
-    ${RELOCATING+*(.data*)}
+    ${RELOCATING+ *(.data*)}
     *(.rodata)  /* We need to include .rodata here if gcc is used */
     ${RELOCATING+ *(.rodata*)} /* with -fdata-sections.  */
     *(.gnu.linkonce.d*)
