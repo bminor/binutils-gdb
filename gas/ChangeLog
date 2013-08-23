@@ -1,3 +1,8 @@
+2013-08-23  Sandeep Kumar Singh  <Sandeep.Singh2@kpitcummins.com>
+
+	* config/rx-parse.y: Rearrange the components of a bison grammar to issue
+	assembler errors at correct position.
+
 2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR binutils/15834

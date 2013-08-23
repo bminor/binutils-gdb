@@ -882,15 +882,19 @@ op_shift
 
 
 float2_op
-	: '#' EXPR ',' REG
-	{ rx_check_float_support (); id24 (2, 0x72, sub_op << 4); F ($4, 20, 4); O4 ($2); }
+	: { rx_check_float_support (); }
+	  '#' EXPR ',' REG
+	  { id24 (2, 0x72, sub_op << 4); F ($5, 20, 4); O4 ($3); }
 	| float2_op_ni
 	;
+
 float2_op_ni
-	: REG ',' REG
-	  { rx_check_float_support (); id24 (1, 0x83 + (sub_op << 2), 0); F ($1, 16, 4); F ($3, 20, 4); }
-	| disp '[' REG ']' opt_l ',' REG
-	  { rx_check_float_support (); id24 (1, 0x80 + (sub_op << 2), 0); F ($3, 16, 4); F ($7, 20, 4); DSP ($1, 14, LSIZE); }
+	: { rx_check_float_support (); } 
+	  REG ',' REG
+	  { id24 (1, 0x83 + (sub_op << 2), 0); F ($2, 16, 4); F ($4, 20, 4); }
+	| { rx_check_float_support (); }
+	  disp '[' REG ']' opt_l ',' REG
+	  { id24 (1, 0x80 + (sub_op << 2), 0); F ($4, 16, 4); F ($8, 20, 4); DSP ($2, 14, LSIZE); }
 	;
 
 /* ====================================================================== */
