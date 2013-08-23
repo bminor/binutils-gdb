@@ -1,5 +1,13 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.mi/mi-cmd-param-changed.exp (test_command_param_changed):
+	Use "dwarf2 always-disassemble" for the "maint set" test.
+	* gdb.mi/mi-file-transfer.exp (test_file_transfer): Use
+	standard_output_file.
+	* gdb.mi/mi-logging.exp: Use standard_output_file.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.xml/tdesc-arch.exp: Use standard_output_file.  Make
 	downloads conditional on remote host.
 	(set_arch): Likewise.
