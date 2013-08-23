@@ -1,5 +1,9 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.asm/asm-source.exp: Use standard_output_file.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.server/file-transfer.exp: Use standard_output_file.
 
 2013-11-04  Tom Tromey  <tromey@redhat.com>

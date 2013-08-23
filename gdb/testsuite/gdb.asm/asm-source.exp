@@ -200,10 +200,13 @@ if [board_info $dest exists multilib_flags] {
 
 standard_testfile asmsrc1.s asmsrc2.s
 
-remote_exec build "rm -f ${subdir}/arch.inc"
-remote_download host ${srcdir}/${subdir}/${asm-arch}.inc ${subdir}/arch.inc
-remote_exec build "rm -f ${subdir}/note.inc"
-remote_download host ${srcdir}/${subdir}/${asm-note}.inc ${subdir}/note.inc
+set arch_inc [standard_output_file arch.inc]
+set note_inc [standard_output_file note.inc]
+
+remote_exec build "rm -f $arch_inc"
+remote_download host ${srcdir}/${subdir}/${asm-arch}.inc $arch_inc
+remote_exec build "rm -f $note_inc"
+remote_download host ${srcdir}/${subdir}/${asm-note}.inc $note_inc
 
 if { [string equal ${asm-flags} ""] } {
     set asm-flags "-I${srcdir}/${subdir} $obj_include"
@@ -467,5 +470,5 @@ test_dis "disassem &staticvar, &staticvar+1" "staticvar"
 gdb_test "disassem foostatic" ".*<\\+0>:.*End of assembler dump." \
 	"look at static function"
 
-remote_exec build "rm -f ${subdir}/arch.inc"
-remote_exec build "rm -f ${subdir}/note.inc"
+remote_exec build "rm -f $arch_inc"
+remote_exec build "rm -f $note_inc"
