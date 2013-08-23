@@ -4,6 +4,9 @@
 	* doc/binutils.texi (ar cmdline): Update description of 'q'
 	command.
 
+	PR binutils/14136
+	(nm): Add description of 'I' symbol type.
+
 2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR binutils/15834

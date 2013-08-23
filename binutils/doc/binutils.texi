@@ -807,6 +807,9 @@ symbol which if referenced by a relocation does not evaluate to its
 address, but instead must be invoked at runtime.  The runtime
 execution will then return the value to be used in the relocation.
 
+@item I
+The symbol is an indirect reference to another symbol.
+
 @item N
 The symbol is a debugging symbol.
 
