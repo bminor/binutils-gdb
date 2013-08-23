@@ -29,9 +29,7 @@
 # test running programs
 #
 
-set testfile "sepdebug"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}${EXEEXT}
+standard_testfile .c
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] != "" } {
     untested sepdebug.exp
@@ -54,14 +52,15 @@ if [gdb_gnu_strip_debug $binfile] {
 # PR gdb/9538.  Verify that symlinked executable still finds the separate
 # debuginfo.
 #
-set old_subdir ${subdir}
-set subdir ${subdir}/pr9538
+set old_subdir $subdir
+set subdir [file join ${old_subdir} pr9538]
 
 # Cleanup any stale state.
-remote_exec build "rm -rf ${subdir}"
+set new_name [standard_output_file ${testfile}${EXEEXT}]
+remote_exec build "rm -rf [file dirname $new_name]"
 
-remote_exec build "mkdir ${subdir}"
-remote_exec build "ln -s ${binfile} ${subdir}"
+remote_exec build "mkdir [file dirname $new_name]"
+remote_exec build "ln -s ${binfile} $new_name"
 clean_restart ${testfile}${EXEEXT}
 if { $gdb_file_cmd_debug_info != "debug" } then {
     fail "No debug information found."
@@ -650,7 +649,7 @@ test_next_with_recursion
 
 proc test_different_dir {type test_different_dir xfail} {
     with_test_prefix "$type" {
-	global srcdir subdir objdir binfile srcfile timeout gdb_prompt
+	global srcdir subdir binfile srcfile timeout gdb_prompt
 	global bp_location6 decimal hex
 
 	gdb_exit
@@ -750,11 +749,11 @@ proc test_different_dir {type test_different_dir xfail} {
 # now move the .debug file to a different location so that we can test
 # the "set debug-file-directory" command.
 
-set different_dir "${objdir}/${subdir}/${testfile}.dir"
-set debugfile "${different_dir}/${objdir}/${subdir}/${testfile}.debug"
+set different_dir [standard_output_file ${testfile}.dir]
+set debugfile "${different_dir}/[standard_output_file ${testfile}.debug]"
 remote_exec build "rm -rf $different_dir"
 remote_exec build "mkdir -p [file dirname $debugfile]"
-remote_exec build "mv -f ${objdir}/${subdir}/${testfile}.debug $debugfile"
+remote_exec build "mv -f [standard_output_file ${testfile}.debug] $debugfile"
 
 test_different_dir debuglink $different_dir 0
 
@@ -762,17 +761,17 @@ test_different_dir debuglink $different_dir 0
 # Test CRC mismatch is reported.
 
 if {[build_executable sepdebug.exp sepdebug2 sepdebug2.c debug] != -1
-    && ![gdb_gnu_strip_debug ${objdir}/${subdir}/sepdebug2]} {
+    && ![gdb_gnu_strip_debug [standard_output_file sepdebug2]]} {
 
-    remote_exec build "cp ${debugfile} ${objdir}/${subdir}/sepdebug2.debug"
+    remote_exec build "cp ${debugfile} [standard_output_file sepdebug2.debug]"
 
     gdb_exit
     gdb_start
     gdb_reinitialize_dir $srcdir/$subdir
 
-    set escapedobjdirsubdir [string_to_regexp ${objdir}/${subdir}]
+    set escapedobjdirsubdir [string_to_regexp [standard_output_file {}]]
 
-    gdb_test "file ${objdir}/${subdir}/sepdebug2" "warning: the debug information found in \"${escapedobjdirsubdir}/sepdebug2\\.debug\" does not match \"${escapedobjdirsubdir}/sepdebug2\" \\(CRC mismatch\\)\\..*\\(no debugging symbols found\\).*" "CRC mismatch is reported"
+    gdb_test "file [standard_output_file sepdebug2]" "warning: the debug information found in \"${escapedobjdirsubdir}/sepdebug2\\.debug\" does not match \"${escapedobjdirsubdir}/sepdebug2\" \\(CRC mismatch\\)\\..*\\(no debugging symbols found\\).*" "CRC mismatch is reported"
 }
 
 
@@ -797,17 +796,17 @@ if ![string compare $build_id_debug_filename ""] then {
 	pass $test
     }
 
-    file mkdir [file dirname ${objdir}/${subdir}/${build_id_debug_filename}]
-    remote_exec build "mv $debugfile ${objdir}/${subdir}/${build_id_debug_filename}"
+    file mkdir [file dirname [standard_output_file ${build_id_debug_filename}]]
+    remote_exec build "mv $debugfile [standard_output_file ${build_id_debug_filename}]"
 
-    test_different_dir build-id "${objdir}/${subdir}" $xfail
+    test_different_dir build-id [standard_output_file {}] $xfail
 
     # Test also multiple directories can be specified.  Without the build-id
     # reference GDB would find the separate debug info just at the same
     # location as the executable file.
 
-    test_different_dir multiple-dirs "/doesnotexist:${objdir}/${subdir}" $xfail
+    test_different_dir multiple-dirs "/doesnotexist:[standard_output_file {}]" $xfail
 
     # Spare debug files may confuse testsuite runs in the future.
-    remote_exec build "rm -f ${objdir}/${subdir}/${build_id_debug_filename}"
+    remote_exec build "rm -f [standard_output_file ${build_id_debug_filename}]"
 }

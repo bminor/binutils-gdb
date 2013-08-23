@@ -48,8 +48,13 @@ gdb_test "commands\nsilent\nend" "End with.*" "add breakpoint commands"
 gdb_test "dprintf ${srcfile}:${loc_bp5},\"At foo entry\\n\"" "Dprintf .*"
 
 # Now, save the breakpoints into a file...
-remote_file host delete "bps"
-gdb_test "save breakpoint bps"
+if {[is_remote host]} {
+    set bps bps
+} else {
+    set bps [standard_output_file bps]
+}
+remote_file host delete "$bps"
+gdb_test "save breakpoint $bps" "" "save breakpoint bps"
 
 # Now start a new debugger session...
 clean_restart $testfile
@@ -62,7 +67,7 @@ if ![runto_main] {
 delete_breakpoints
 
 # ... and restore the breakpoints.
-gdb_test "source bps"
+gdb_test "source $bps" "" "source bps"
 
 # Now, verify that all breakpoints have been created correctly...
 set bp_row_start "\[0-9\]+ +breakpoint +keep +y +0x\[0-9a-f\]+ +in"

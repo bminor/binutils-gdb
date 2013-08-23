@@ -35,33 +35,35 @@ set right_lib_subdir "solib-search-right"
 # First library file.
 set libname1 "solib-search-lib1"
 set srcfile1_lib ${srcdir}/${subdir}/${libname1}.c
-set wrong_binfile1_lib ${objdir}/${subdir}/${wrong_lib_subdir}/${libname1}.so
-set right_binfile1_lib ${objdir}/${subdir}/${right_lib_subdir}/${libname1}.so
+set wrong_binfile1_lib \
+    [standard_output_file ${wrong_lib_subdir}/${libname1}.so]
+set right_binfile1_lib \
+    [standard_output_file ${right_lib_subdir}/${libname1}.so]
 # Second library file.
 set libname2 "solib-search-lib2"
 set srcfile2_lib ${srcdir}/${subdir}/${libname2}.c
-set wrong_binfile2_lib ${objdir}/${subdir}/${wrong_lib_subdir}/${libname2}.so
-set right_binfile2_lib ${objdir}/${subdir}/${right_lib_subdir}/${libname2}.so
+set wrong_binfile2_lib \
+    [standard_output_file ${wrong_lib_subdir}/${libname2}.so]
+set right_binfile2_lib \
+    [standard_output_file ${right_lib_subdir}/${libname2}.so]
 # Link with the library that lives here.
 # This is so that we can replace what gdb sees with the wrong copy,
 # and then tell gdb to use the right copy that lives someplace else.
-set binfile1_lib ${objdir}/${subdir}/${libname1}.so
-set binfile2_lib ${objdir}/${subdir}/${libname2}.so
+set binfile1_lib [standard_output_file ${libname1}.so]
+set binfile2_lib [standard_output_file ${libname2}.so]
 
 set lib_flags [list debug ldflags=-Wl,-Bsymbolic]
 set wrong_lib_flags "$lib_flags additional_flags=-DARRAY_SIZE=1"
 set right_lib_flags "$lib_flags additional_flags=-DARRAY_SIZE=8192 -DRIGHT"
 
 # Binary file.
-set testfile "solib-search"
-set srcfile ${srcdir}/${subdir}/${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c
 set bin_flags [list debug shlib=${binfile1_lib} shlib=${binfile2_lib}]
 
-remote_exec build "rm -rf ${subdir}/${wrong_lib_subdir}"
-remote_exec build "rm -rf ${subdir}/${right_lib_subdir}"
-remote_exec build "mkdir ${subdir}/${wrong_lib_subdir}"
-remote_exec build "mkdir ${subdir}/${right_lib_subdir}"
+remote_exec build "rm -rf [standard_output_file ${wrong_lib_subdir}]"
+remote_exec build "rm -rf [standard_output_file ${right_lib_subdir}]"
+remote_exec build "mkdir [standard_output_file ${wrong_lib_subdir}]"
+remote_exec build "mkdir [standard_output_file ${right_lib_subdir}]"
 
 if { [gdb_compile_shlib ${srcfile1_lib} ${wrong_binfile1_lib} $wrong_lib_flags] != ""
      || [gdb_compile_shlib ${srcfile2_lib} ${wrong_binfile2_lib} $wrong_lib_flags] != ""
@@ -74,7 +76,8 @@ if { [gdb_compile_shlib ${srcfile1_lib} ${wrong_binfile1_lib} $wrong_lib_flags] 
 # Build the test binary using the right copies of the libraries.
 remote_exec build "ln -sf ${right_lib_subdir}/${libname1}.so ${binfile1_lib}"
 remote_exec build "ln -sf ${right_lib_subdir}/${libname2}.so ${binfile2_lib}"
-if { [gdb_compile ${srcfile} ${binfile} executable $bin_flags] != "" } {
+if { [gdb_compile $srcdir/$subdir/${srcfile} ${binfile} \
+	  executable $bin_flags] != "" } {
     untested "Could not compile $binfile."
     return -1
 }
@@ -89,7 +92,7 @@ if { ![runto_main] } {
 gdb_breakpoint "break_here"
 gdb_continue "break_here"
 
-set corefile "${objdir}/${subdir}/solib-search.core"
+set corefile [standard_output_file solib-search.core]
 set core_supported [gdb_gcore_cmd "$corefile" "save a corefile"]
 
 if {!$core_supported} {
@@ -175,7 +178,7 @@ test_backtrace 1
 remote_exec build "rm -f ${binfile1_lib}"
 remote_exec build "rm -f ${binfile2_lib}"
 # Set solib-search-path to use the correct copies of libraries.
-gdb_test "set solib-search-path ${objdir}/${subdir}/${right_lib_subdir}" \
+gdb_test "set solib-search-path [standard_output_file ${right_lib_subdir}]" \
     "" \
     "set solib-search-path"
 

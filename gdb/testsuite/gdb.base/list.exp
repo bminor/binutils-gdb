@@ -19,7 +19,7 @@
 standard_testfile list0.c list1.c
 
 # Need to download the header to the host.
-remote_download host ${srcdir}/${subdir}/list0.h list0.h
+gdb_remote_download host ${srcdir}/${subdir}/list0.h
 
 if {[prepare_for_testing $testfile.exp $testfile [list $srcfile $srcfile2] \
 	 {debug}]} {

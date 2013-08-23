@@ -33,7 +33,7 @@ if ![runto_main] then {
    return 0
 }
 
-set remote_linefile [remote_download host ${srcdir}/${subdir}/${linefile}]
+set remote_linefile [gdb_remote_download host ${srcdir}/${subdir}/${linefile}]
 
 gdb_test "break f1" ".*Breakpoint 2 at .* file .*step-line.c.*" "break f1"
 gdb_test "continue" \

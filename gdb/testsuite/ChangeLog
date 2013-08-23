@@ -1,5 +1,28 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/advance.exp: Use standard_testfile and
+	prepare_for_testing.
+	* gdb.base/bigcore.exp: Use standard_output_file.  "cd" to
+	appropriate directory when local.
+	* gdb.base/dump.exp: Use standard_output_file.  Update all
+	"dump" and "restore" filenames.
+	* gdb.base/interact.exp: Use standard_output_file.
+	* gdb.base/jit-so.exp: Don't download file when local.
+	* gdb.base/jit.exp (compile_jit_test): Don't download file
+	when local.
+	* gdb.base/list.exp: Use gdb_remote_download.
+	* gdb.base/maint.exp: Use standard_output_file.
+	* gdb.base/prelink.exp: Use standard_output_file.
+	* gdb.base/save-bp.exp: Use standard_output_file.
+	* gdb.base/sepdebug.exp: Use standard_testfile,
+	standard_output_file.
+	(test_different_dir): Don't declare objdir.
+	* gdb.base/solib-search.exp: Use standard_output_file.
+	* gdb.base/step-line.exp: Use gdb_remote_download.
+	* gdb.base/trace-commands.exp: Use standard_output_file.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.trace/mi-traceframe-changed.exp: Pass -DTFILE_DIR
 	to compilation.  Use standard_output_file.
 	(test_tfind_tfile): Update.

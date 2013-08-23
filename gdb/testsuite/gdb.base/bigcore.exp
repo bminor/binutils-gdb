@@ -47,7 +47,7 @@ if { [istarget "*-*-*irix*"] } {
 }
 
 standard_testfile .c
-set corefile ${binfile}.corefile
+set corefile [standard_output_file ${binfile}.corefile]
 
 if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
      untested bigcore.exp
@@ -59,6 +59,12 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 clean_restart ${binfile}
 gdb_test_no_output "set print sevenbit-strings"
 gdb_test_no_output "set width 0"
+
+# Get the core into the output directory.
+if {![is_remote host]} {
+    gdb_test "cd [file dirname $corefile]" "Working directory .*" \
+	"cd to test directory"
+}
 
 if { ![runto_main] } then {
     gdb_suppress_tests
@@ -139,7 +145,7 @@ set timeout $oldtimeout
 # Find the corefile
 set file ""
 foreach pat [list core.${inferior_pid} ${testfile}.core core] {
-    set names [glob -nocomplain $pat]
+    set names [glob -nocomplain [standard_output_file $pat]]
     if {[llength $names] == 1} {
 	set file [lindex $names 0]
 	remote_exec build "mv $file $corefile"
@@ -188,7 +194,9 @@ if {! $core_ok} {
 # Now load up that core file
 
 set test "load corefile"
-gdb_test_multiple "core $corefile" "$test" {
+# We use [file tail] because gdb is still "cd"d to the
+# output directory.
+gdb_test_multiple "core [file tail $corefile]" "$test" {
     -re "A program is being debugged already.  Kill it. .y or n. " {
 	send_gdb "y\n"
 	exp_continue

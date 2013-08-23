@@ -56,7 +56,11 @@ proc compile_jit_test {testname options} {
 	return -1
     }
 
-    set solib_binfile_target [gdb_download ${solib_binfile}]
+    if {[is_remote target]} {
+	set solib_binfile_target [gdb_download ${solib_binfile}]
+    } else {
+	set solib_binfile_target $solib_binfile
+    }
 
     return 0
 }
