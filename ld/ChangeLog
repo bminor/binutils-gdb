@@ -1,3 +1,9 @@
+2013-08-23  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/15839
+	* scripttempl/avr.sc: Do not include gc'able sections into general
+	sections during relocatable links.
+
 2013-08-22  Christian Franke  <franke@computer.org>
 
 	* emultempl/pe.em: Add --disable-large-address-aware option.
