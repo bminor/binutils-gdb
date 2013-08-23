@@ -1364,7 +1364,7 @@ static LONGEST
 target_read_live_memory (enum target_object object,
 			 ULONGEST memaddr, gdb_byte *myaddr, LONGEST len)
 {
-  int ret;
+  LONGEST ret;
   struct cleanup *cleanup;
 
   /* Switch momentarily out of tfind mode so to access live memory.
