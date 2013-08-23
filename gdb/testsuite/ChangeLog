@@ -1,5 +1,15 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.trace/mi-traceframe-changed.exp: Pass -DTFILE_DIR
+	to compilation.  Use standard_output_file.
+	(test_tfind_tfile): Update.
+	* gdb.trace/tfile.c (write_basic_trace_file)
+	(write_error_trace_file): Use TFILE_DIR.
+	* gdb.trace/tfile.exp: Pass -DTFILE_DIR to compilation.  Use
+	standard_output_file.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.mi/mi-cmd-param-changed.exp (test_command_param_changed):
 	Use "dwarf2 always-disassemble" for the "maint set" test.
 	* gdb.mi/mi-file-transfer.exp (test_file_transfer): Use
