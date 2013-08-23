@@ -1,8 +1,5 @@
 /* tc-sparc.c -- Assemble for the SPARC
-   Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
-   2011
-   Free Software Foundation, Inc.
+   Copyright 1989-2013 Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
    GAS is free software; you can redistribute it and/or modify
@@ -3000,7 +2997,7 @@ sparc_ip (char *str, const struct sparc_opcode **pinsn)
 	      return special_case;
 	    }
 
-	  /* Make sure the the hwcaps used by the instruction are
+	  /* Make sure the hwcaps used by the instruction are
 	     currently enabled.  */
 	  if (hwcaps & ~hwcap_allowed)
 	    {

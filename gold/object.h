@@ -1178,7 +1178,7 @@ class Relobj : public Object
     return this->output_sections_[shndx] != NULL;
   }
 
-  // The the output section of the input section with index SHNDX.
+  // The output section of the input section with index SHNDX.
   // This is only used currently to remove a section from the link in
   // relaxation.
   void

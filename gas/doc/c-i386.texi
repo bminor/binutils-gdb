@@ -1,6 +1,4 @@
-@c Copyright 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999, 2000,
-@c 2001, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2011
-@c Free Software Foundation, Inc.
+@c Copyright 1991-2013 Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
 @c man end
@@ -217,12 +215,12 @@ with VEX prefix.
 @item -msse-check=@var{none}
 @itemx -msse-check=@var{warning}
 @itemx -msse-check=@var{error}
-These options control if the assembler should check SSE intructions.
+These options control if the assembler should check SSE instructions.
 @option{-msse-check=@var{none}} will make the assembler not to check SSE
 instructions,  which is the default.  @option{-msse-check=@var{warning}}
-will make the assembler issue a warning for any SSE intruction.
+will make the assembler issue a warning for any SSE instruction.
 @option{-msse-check=@var{error}} will make the assembler issue an error
-for any SSE intruction.
+for any SSE instruction.
 
 @cindex @samp{-mavxscalar=} option, i386
 @cindex @samp{-mavxscalar=} option, x86-64

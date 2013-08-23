@@ -6176,7 +6176,7 @@ elfNN_aarch64_create_small_pltn_entry (struct elf_link_hash_entry *h,
 				plt_entry + 4,
 				PG_OFFSET (gotplt_entry_address));
 
-  /* Fill in the the lo12 bits for the add from the pltgot entry.  */
+  /* Fill in the lo12 bits for the add from the pltgot entry.  */
   elf_aarch64_update_plt_entry (output_bfd, BFD_RELOC_AARCH64_ADD_LO12,
 				plt_entry + 8,
 				PG_OFFSET (gotplt_entry_address));

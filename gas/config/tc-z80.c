@@ -1098,7 +1098,7 @@ emit_adc (char prefix, char opcode, const char * args)
   p = parse_exp (args, &term);
   if (*p++ != ',')
     {
-      error (_("bad intruction syntax"));
+      error (_("bad instruction syntax"));
       return p;
     }
 
@@ -1141,7 +1141,7 @@ emit_add (char prefix, char opcode, const char * args)
   p = parse_exp (args, &term);
   if (*p++ != ',')
     {
-      error (_("bad intruction syntax"));
+      error (_("bad instruction syntax"));
       return p;
     }
 
@@ -1185,7 +1185,7 @@ emit_bit (char prefix, char opcode, const char * args)
 
   p = parse_exp (args, &b);
   if (*p++ != ',')
-    error (_("bad intruction syntax"));
+    error (_("bad instruction syntax"));
 
   bn = b.X_add_number;
   if ((!b.X_md)
@@ -1305,7 +1305,7 @@ emit_in (char prefix ATTRIBUTE_UNUSED, char opcode ATTRIBUTE_UNUSED,
   p = parse_exp (args, &reg);
   if (*p++ != ',')
     {
-      error (_("bad intruction syntax"));
+      error (_("bad instruction syntax"));
       return p;
     }
 
@@ -1359,7 +1359,7 @@ emit_out (char prefix ATTRIBUTE_UNUSED, char opcode ATTRIBUTE_UNUSED,
   p = parse_exp (args, & port);
   if (*p++ != ',')
     {
-      error (_("bad intruction syntax"));
+      error (_("bad instruction syntax"));
       return p;
     }
   p = parse_exp (p, &reg);
@@ -1628,7 +1628,7 @@ emit_ld (char prefix_in ATTRIBUTE_UNUSED, char opcode_in ATTRIBUTE_UNUSED,
 
   p = parse_exp (args, &dst);
   if (*p++ != ',')
-    error (_("bad intruction syntax"));
+    error (_("bad instruction syntax"));
   p = parse_exp (p, &src);
 
   switch (dst.X_op)

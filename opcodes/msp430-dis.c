@@ -836,7 +836,7 @@ msp430x_calla_instr (disassemble_info * info,
       break;
 
     default:
-      strcpy (comm1, _("unercognised CALLA addressing mode"));
+      strcpy (comm1, _("unrecognised CALLA addressing mode"));
       return -1;
     }
 

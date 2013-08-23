@@ -1,6 +1,15 @@
+2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
+
+	PR binutils/15834
+	* config/tc-ia64.c: Fix typos.
+	* config/tc-sparc.c: Likewise.
+	* config/tc-z80.c: Likewise.
+	* doc/c-i386.texi: Likewise.
+	* doc/c-m32r.texi: Likewise.
+
 2013-08-23  Will Newton  <will.newton@linaro.org>
 
-	* config/tc-arm.c (do_neon_ldx_stx): Add extra constraints
+	* config/tc-arm.c: (do_neon_ldx_stx): Add extra constraints
 	for pre-indexed addressing modes.
 
 2013-08-21  Alan Modra  <amodra@gmail.com>

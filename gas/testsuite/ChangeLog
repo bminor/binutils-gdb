@@ -1,3 +1,9 @@
+2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
+
+	PR binutils/15834
+	* gas/d10v/instruction_packing.d: Fix typos.
+	* gas/z80/atend.d: Likewise.
+
 2013-08-23  Will Newton  <will.newton@linaro.org>
 
 	* testsuite/gas/arm/neon-addressing-bad.l: Add test for

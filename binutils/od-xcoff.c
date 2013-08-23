@@ -1,5 +1,5 @@
 /* od-xcoff.c -- dump information about an xcoff object file.
-   Copyright 2011, 2012 Free Software Foundation, Inc.
+   Copyright 2011-2013 Free Software Foundation, Inc.
    Written by Tristan Gingold, Adacore.
 
    This file is part of GNU Binutils.
@@ -451,7 +451,7 @@ dump_xcoff32_aout_header (bfd *abfd, struct xcoff_dump *data)
     }
   if (data->opthdr > sizeof (auxhdr))
     {
-      printf (_("warning: optionnal header size too large (> %d)\n"),
+      printf (_("warning: optional header size too large (> %d)\n"),
               (int)sizeof (auxhdr));
       sz = sizeof (auxhdr);
     }

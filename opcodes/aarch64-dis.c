@@ -1,5 +1,5 @@
 /* aarch64-dis.c -- AArch64 disassembler.
-   Copyright 2009, 2010, 2011, 2012, 2013  Free Software Foundation, Inc.
+   Copyright 2009-2013  Free Software Foundation, Inc.
    Contributed by ARM Ltd.
 
    This file is part of the GNU opcodes library.
@@ -120,7 +120,7 @@ parse_aarch64_dis_options (const char *options)
    N.B. the fields are required to be in such an order than the most signficant
    field for VALUE comes the first, e.g. the <index> in
     SQDMLAL <Va><d>, <Vb><n>, <Vm>.<Ts>[<index>]
-   is encoded in H:L:M in some cases, the the fields H:L:M should be passed in
+   is encoded in H:L:M in some cases, the fields H:L:M should be passed in
    the order of H, L, M.  */
 
 static inline aarch64_insn

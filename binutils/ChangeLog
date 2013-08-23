@@ -1,3 +1,8 @@
+2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
+
+	PR binutils/15834
+	* od-xcoff.c: Fix typos.
+
 2013-08-19  Tristan Gingold  <gingold@adacore.com>
 
 	* nm.c (print_size_symbols): Directly get symbol size.

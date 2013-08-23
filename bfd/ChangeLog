@@ -1,3 +1,10 @@
+2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
+
+	PR binutils/15834
+	* bfdio.c: Fix typos.
+	* elf32-spu.c: Likewise.
+	* elfnn-aarch64.c: Likewise.
+
 2013-08-21  Tristan Gingold  <gingold@adacore.com>
 
 	* coff-rs6000.c (_bfd_xcoff_sizeof_headers): Also count
