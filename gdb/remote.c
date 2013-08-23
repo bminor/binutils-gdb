@@ -6744,10 +6744,11 @@ check_binary_download (CORE_ADDR addr)
    If USE_LENGTH is 0, then the <LENGTH> field and the preceding comma
    are omitted.
 
-   Returns the number of bytes transferred, or 0 (setting errno) for
-   error.  Only transfer a single packet.  */
+   Returns the number of bytes transferred, or a negative value (an
+   'enum target_xfer_error' value) for error.  Only transfer a single
+   packet.  */
 
-static int
+static LONGEST
 remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
 			const gdb_byte *myaddr, ssize_t len,
 			char packet_format, int use_length)
@@ -6886,14 +6887,7 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
   getpkt (&rs->buf, &rs->buf_size, 0);
 
   if (rs->buf[0] == 'E')
-    {
-      /* There is no correspondance between what the remote protocol
-	 uses for errors and errno codes.  We would like a cleaner way
-	 of representing errors (big enough to include errno codes,
-	 bfd_error codes, and others).  But for now just return EIO.  */
-      errno = EIO;
-      return 0;
-    }
+    return TARGET_XFER_E_IO;
 
   /* Return NR_BYTES, not TODO, in case escape chars caused us to send
      fewer bytes than we'd planned.  */
@@ -6906,10 +6900,11 @@ remote_write_bytes_aux (const char *header, CORE_ADDR memaddr,
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.
 
-   Returns number of bytes transferred, or 0 (setting errno) for
-   error.  Only transfer a single packet.  */
+   Returns number of bytes transferred, or a negative value (an 'enum
+   target_xfer_error' value) for error.  Only transfer a single
+   packet.  */
 
-static int
+static LONGEST
 remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 {
   char *packet_format = 0;
@@ -6942,9 +6937,10 @@ remote_write_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
    MYADDR is the address of the buffer in our space.
    LEN is the number of bytes.
 
-   Returns number of bytes transferred, or 0 for error.  */
+   Returns number of bytes transferred, or a negative value (an 'enum
+   target_xfer_error' value) for error.  */
 
-static int
+static LONGEST
 remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 {
   struct remote_state *rs = get_remote_state ();
@@ -6976,15 +6972,7 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   if (rs->buf[0] == 'E'
       && isxdigit (rs->buf[1]) && isxdigit (rs->buf[2])
       && rs->buf[3] == '\0')
-    {
-      /* There is no correspondance between what the remote protocol
-	 uses for errors and errno codes.  We would like a cleaner way
-	 of representing errors (big enough to include errno codes,
-	 bfd_error codes, and others).  But for now just return
-	 EIO.  */
-      errno = EIO;
-      return 0;
-    }
+    return TARGET_XFER_E_IO;
   /* Reply describes memory byte by byte, each byte encoded as two hex
      characters.  */
   p = rs->buf;
@@ -6994,28 +6982,6 @@ remote_read_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 }
 
 
-/* Read or write LEN bytes from inferior memory at MEMADDR,
-   transferring to or from debugger address BUFFER.  Write to inferior
-   if SHOULD_WRITE is nonzero.  Returns length of data written or
-   read; 0 for error.  TARGET is unused.  */
-
-static int
-remote_xfer_memory (CORE_ADDR mem_addr, gdb_byte *buffer, int mem_len,
-		    int should_write, struct mem_attrib *attrib,
-		    struct target_ops *target)
-{
-  int res;
-
-  set_remote_traceframe ();
-  set_general_thread (inferior_ptid);
-
-  if (should_write)
-    res = remote_write_bytes (mem_addr, buffer, mem_len);
-  else
-    res = remote_read_bytes (mem_addr, buffer, mem_len);
-
-  return res;
-}
 
 /* Sends a packet with content determined by the printf format string
    FORMAT and the remaining arguments, then gets the reply.  Returns
@@ -7090,7 +7056,7 @@ remote_flash_write (struct target_ops *ops,
                     const gdb_byte *data)
 {
   int saved_remote_timeout = remote_timeout;
-  int ret;
+  LONGEST ret;
   struct cleanup *back_to = make_cleanup (restore_remote_timeout,
                                           &saved_remote_timeout);
 
@@ -8796,9 +8762,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   /* Handle memory using the standard memory routines.  */
   if (object == TARGET_OBJECT_MEMORY)
     {
-      int xfered;
-
-      errno = 0;
+      LONGEST xfered;
 
       /* If the remote target is connected but not running, we should
 	 pass this request down to a lower stratum (e.g. the executable
@@ -8811,12 +8775,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       else
 	xfered = remote_read_bytes (offset, readbuf, len);
 
-      if (xfered > 0)
-	return xfered;
-      else if (xfered == 0 && errno == 0)
-	return 0;
-      else
-	return -1;
+      return xfered;
     }
 
   /* Handle SPU memory using qxfer packets.  */
@@ -8865,14 +8824,7 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
       switch (object)
 	{
 	case TARGET_OBJECT_FLASH:
-	  xfered = remote_flash_write (ops, offset, len, writebuf);
-
-	  if (xfered > 0)
-	    return xfered;
-	  else if (xfered == 0 && errno == 0)
-	    return 0;
-	  else
-	    return -1;
+	  return remote_flash_write (ops, offset, len, writebuf);
 
 	default:
 	  return -1;
@@ -11482,7 +11434,6 @@ Specify the serial device it is connected to\n\
   remote_ops.to_fetch_registers = remote_fetch_registers;
   remote_ops.to_store_registers = remote_store_registers;
   remote_ops.to_prepare_to_store = remote_prepare_to_store;
-  remote_ops.deprecated_xfer_memory = remote_xfer_memory;
   remote_ops.to_files_info = remote_files_info;
   remote_ops.to_insert_breakpoint = remote_insert_breakpoint;
   remote_ops.to_remove_breakpoint = remote_remove_breakpoint;

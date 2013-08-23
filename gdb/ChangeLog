@@ -1,3 +1,13 @@
+2013-08-23  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_write_bytes_aux, remote_write_bytes)
+	(remote_read_bytes): Change return type to LONGEST, and adjust to
+	return a target_xfer_error on error.
+	(remote_xfer_memory): Delete.
+	(remote_flash_write): Change type of 'ret' local to LONGEST.
+	(remote_xfer_partial, remote_xfer_partial): Adjust.
+	(init_remote_ops): Don't install a deprecated_xfer_memory hook.
+
 2013-08-23  Pierre Muller  <muller@sourceware.org>
 
 	ARI fix: Push # directives to start of line.
