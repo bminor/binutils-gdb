@@ -1,3 +1,8 @@
+2013-08-23  Roland McGrath  <mcgrathr@google.com>
+
+	* emulparams/elf_nacl.sh (nacl_rodata_addr): Don't add in
+	SIZEOF_HEADERS here; elf.sc does it already.
+
 2013-07-18  Roland McGrath  <mcgrathr@google.com>
 
 	* emultempl/armelf.em (elf32_arm_add_stub_section): Take third
