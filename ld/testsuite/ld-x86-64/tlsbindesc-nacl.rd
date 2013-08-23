@@ -10,7 +10,7 @@ There are [0-9]+ section headers, starting at offset 0x[0-9a-f]+:
 Section Headers:
  +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
  +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
- +\[[ 0-9]+\] .text +PROGBITS +0+20000 0+10000 0+200 00 +AX +0 +0 +4096
+ +\[[ 0-9]+\] .text +PROGBITS +0+20000 0+10000 0+1fd 00 +AX +0 +0 +4096
  +\[[ 0-9]+\] .interp +.*
  +\[[ 0-9]+\] .hash +.*
  +\[[ 0-9]+\] .dynsym +.*
@@ -30,7 +30,7 @@ Key to Flags:
 .*
 
 Elf file type is EXEC \(Executable file\)
-Entry point 0x20108
+Entry point 0x20105
 There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
@@ -38,7 +38,7 @@ Program Headers:
  +PHDR.*
  +INTERP.*
 .*Requesting program interpreter.*
- +LOAD +0x0+10000 0x0+20000 0x0+20000 0x0+200 0x0+200 R E 0x10000
+ +LOAD +0x0+10000 0x0+20000 0x0+20000 0x0+1fd 0x0+1fd R E 0x10000
  +LOAD +0x0+ 0x0+10020000 0x0+10020000 0x0+370 0x0+370 R +0x10000
  +LOAD +0x0+370 0x0+10030370 0x0+10030370 0x0+198 0x0+198 RW +0x10000
  +DYNAMIC +0x0+3d0 0x0+100303d0 0x0+100303d0 0x0+100 0x0+100 RW +0x8
@@ -122,7 +122,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+58 +0 +TLS +GLOBAL +HIDDEN +7 sh7
  +[0-9]+: 0+5c +0 +TLS +GLOBAL +HIDDEN +7 sh8
  +[0-9]+: 0+ +0 +TLS +GLOBAL +DEFAULT +7 sg1
- +[0-9]+: 0+20108 +0 +FUNC +GLOBAL +DEFAULT +1 _start
+ +[0-9]+: 0+20105 +0 +FUNC +GLOBAL +DEFAULT +1 _start
  +[0-9]+: 0+4c +0 +TLS +GLOBAL +HIDDEN +7 sh4
  +[0-9]+: 0+78 +0 +TLS +GLOBAL +DEFAULT +8 bg7
  +[0-9]+: 0+50 +0 +TLS +GLOBAL +HIDDEN +7 sh5

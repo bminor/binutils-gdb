@@ -11,7 +11,7 @@ Section Headers:
  +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
  +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
  +\[[ 0-9]+\] .plt +.*
- +\[[ 0-9]+\] .text +PROGBITS +0+21000 [0-9a-f]+ 0+234 00 +AX +0 +0 +4096
+ +\[[ 0-9]+\] .text +PROGBITS +0+21000 [0-9a-f]+ 0+231 00 +AX +0 +0 +4096
  +\[[ 0-9]+\] .interp +.*
  +\[[ 0-9]+\] .hash +.*
  +\[[ 0-9]+\] .dynsym +.*
@@ -32,7 +32,7 @@ Key to Flags:
 .*
 
 Elf file type is EXEC \(Executable file\)
-Entry point 0x2113c
+Entry point 0x21139
 There are [0-9]+ program headers, starting at offset [0-9]+
 
 Program Headers:
@@ -40,7 +40,7 @@ Program Headers:
  +PHDR.*
  +INTERP.*
 .*Requesting program interpreter.*
- +LOAD +0x0+10000 0x0+20000 0x0+20000 0x0+1234 0x0+1234 R E +0x10000
+ +LOAD +0x0+10000 0x0+20000 0x0+20000 0x0+1231 0x0+1231 R E +0x10000
  +LOAD +0x0+ 0x0+10020000 0x0+10020000 0x0+3b0 0x0+3b0 R +0x10000
  +LOAD +0x0+3b0 0x0+100303b0 0x0+100303b0 0x0+1e0 0x0+1e0 RW +0x10000
  +DYNAMIC +0x0+410 0x0+10030410 0x0+10030410 0x0+140 0x0+140 RW +0x8

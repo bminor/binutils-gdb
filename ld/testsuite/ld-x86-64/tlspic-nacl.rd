@@ -11,7 +11,7 @@ Section Headers:
  +\[Nr\] Name +Type +Address +Off +Size +ES Flg Lk Inf Al
  +\[[ 0-9]+\] +NULL +0+ 0+ 0+ 00 +0 +0 +0
  +\[[ 0-9]+\] .plt +.*
- +\[[ 0-9]+\] .text +PROGBITS +0+1000 [0-9a-f]+ 0+1ac 00 +AX +0 +0 4096
+ +\[[ 0-9]+\] .text +PROGBITS +0+1000 [0-9a-f]+ 0+1aa 00 +AX +0 +0 4096
  +\[[ 0-9]+\] .hash +.*
  +\[[ 0-9]+\] .dynsym +.*
  +\[[ 0-9]+\] .dynstr +.*

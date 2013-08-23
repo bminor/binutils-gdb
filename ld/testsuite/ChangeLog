@@ -1,3 +1,11 @@
+2013-08-23  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-x86-64/ilp32-4-nacl.d: Update for 2013-05-31 gas alignment change.
+	* ld/testsuite/ld-x86-64/tlsbin-nacl.rd: Likewise.
+	* ld/testsuite/ld-x86-64/tlsbindesc-nacl.rd: Likewise.
+	* ld/testsuite/ld-x86-64/tlsdesc-nacl.rd: Likewise.
+	* ld/testsuite/ld-x86-64/tlspic-nacl.rd: Likewise.
+
 2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR binutils/15834
