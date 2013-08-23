@@ -628,9 +628,11 @@ struct elf_x86_64_backend_data
   unsigned int eh_frame_plt_size;
 };
 
+#define get_elf_x86_64_arch_data(bed) \
+  ((const struct elf_x86_64_backend_data *) (bed)->arch_data)
+
 #define get_elf_x86_64_backend_data(abfd) \
-  ((const struct elf_x86_64_backend_data *) \
-   get_elf_backend_data (abfd)->arch_data)
+  get_elf_x86_64_arch_data (get_elf_backend_data (abfd))
 
 #define GET_PLT_ENTRY_SIZE(abfd) \
   get_elf_x86_64_backend_data (abfd)->plt_entry_size
@@ -2906,7 +2908,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
       && _bfd_elf_eh_frame_present (info))
     {
       const struct elf_x86_64_backend_data *arch_data
-	= (const struct elf_x86_64_backend_data *) bed->arch_data;
+	= get_elf_x86_64_arch_data (bed);
       htab->plt_eh_frame->size = arch_data->eh_frame_plt_size;
     }
 
@@ -2978,7 +2980,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
       && htab->plt_eh_frame->contents != NULL)
     {
       const struct elf_x86_64_backend_data *arch_data
-	= (const struct elf_x86_64_backend_data *) bed->arch_data;
+	= get_elf_x86_64_arch_data (bed);
 
       memcpy (htab->plt_eh_frame->contents,
 	      arch_data->eh_frame_plt, htab->plt_eh_frame->size);

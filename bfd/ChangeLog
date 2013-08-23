@@ -1,3 +1,9 @@
+2013-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (get_elf_x86_64_arch_data): New.
+	(get_elf_x86_64_backend_data): Use it.
+	(elf_x86_64_size_dynamic_sections): Likewise.
+
 2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR binutils/15834
