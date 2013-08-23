@@ -131,11 +131,11 @@ regmap (struct gdbarch *gdbarch, int regno, int *isfloat)
 static int
 rs6000_ptrace32 (int req, int id, int *addr, int data, int *buf)
 {
-  #ifdef HAVE_PTRACE64
+#ifdef HAVE_PTRACE64
   int ret = ptrace64 (req, id, (long long) addr, data, buf);
-  #else
+#else
   int ret = ptrace (req, id, (int *)addr, data, buf);
-  #endif
+#endif
 #if 0
   printf ("rs6000_ptrace32 (%d, %d, 0x%x, %08x, 0x%x) = 0x%x\n",
 	  req, id, (unsigned int)addr, data, (unsigned int)buf, ret);
@@ -149,11 +149,11 @@ static int
 rs6000_ptrace64 (int req, int id, long long addr, int data, void *buf)
 {
 #ifdef ARCH3264
-  #ifdef HAVE_PTRACE64
+#  ifdef HAVE_PTRACE64
   int ret = ptrace64 (req, id, addr, data, buf);
-  #else
+#  else
   int ret = ptracex (req, id, addr, data, buf);
-  #endif
+#  endif
 #else
   int ret = 0;
 #endif

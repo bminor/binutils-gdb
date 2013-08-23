@@ -1,3 +1,8 @@
+2013-08-23  Pierre Muller  <muller@sourceware.org>
+
+	ARI fix: Push # directives to start of line.
+	* rs6000-nat.c (rs6000_ptrace32, rs6000_ptrace64): Rule applied.
+
 2013-08-12  Muhammad Waqas  <mwaqas@codesourcery.com>
 
 	PR gdb/15501
