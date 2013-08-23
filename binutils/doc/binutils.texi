@@ -2477,8 +2477,10 @@ Operate in @emph{deterministic} mode.  The symbol map archive member's
 header will show zero for the UID, GID, and timestamp.  When this
 option is used, multiple runs will produce identical output files.
 
-This is the default unless @file{binutils} was configured with
-@option{--enable-deterministic-archives}.
+If @file{binutils} was configured with
+@option{--enable-deterministic-archives}, then this mode is on by
+default.  It can be disabled with the @samp{-U} option, described
+below.
 
 @item -t
 Update the timestamp of the symbol map of an archive.
@@ -2490,8 +2492,10 @@ Do @emph{not} operate in @emph{deterministic} mode.  This is the
 inverse of the @samp{-D} option, above: the archive index will get
 actual UID, GID, timestamp, and file mode values.
 
-This is the default unless @file{binutils} was configured with
-@option{--enable-deterministic-archives}.
+If @file{binutils} was configured @emph{without}
+@option{--enable-deterministic-archives}, then this mode is on by
+default.
+
 @end table
 
 @c man end

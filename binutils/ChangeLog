@@ -1,3 +1,8 @@
+2013-08-23  Mikael Pettersson  <mikpe@it.uu.se>
+
+	PR binutils/15779
+	* doc/binutils.texi (ranlib -D): Correct description.
+
 2013-08-23  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15798
