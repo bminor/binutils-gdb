@@ -70,7 +70,8 @@ if { [gdb_breakpoint [standard_output_file tmp-${srcfile}]:${line} {no-message}]
 }
 
 # Build the test executable using a relative path.
-if  { [gdb_compile "${subdir}/tmp-${srcfile}" "${binfile}" executable {debug}] != "" } {
+if  { [gdb_compile [relative_filename [pwd] [standard_output_file tmp-${srcfile}]] \
+	   "${binfile}" executable {debug}] != "" } {
     return -1
 }
 
@@ -99,7 +100,7 @@ if { [gdb_breakpoint [standard_output_file tmp-${srcfile}]:${line} {no-message}]
 # we'll run GDB from.
 
 set save_pwd [pwd]
-cd ${subdir}
+cd [standard_output_file {}]
 if  { [gdb_compile [standard_output_file tmp-${srcfile}] "${testfile}" \
 	   executable {debug}] != "" } {
     cd $save_pwd

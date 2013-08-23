@@ -4372,6 +4372,25 @@ proc set_remotetimeout { timeout } {
     }
 }
 
+# ROOT and FULL are file names.  Returns the relative path from ROOT
+# to FULL.  Note that FULL must be in a subdirectory of ROOT.
+# For example, given ROOT = /usr/bin and FULL = /usr/bin/ls, this
+# will return "ls".
+
+proc relative_filename {root full} {
+    set root_split [file split $root]
+    set full_split [file split $full]
+
+    set len [llength $root_split]
+
+    if {[eval file join $root_split]
+	!= [eval file join [lrange $full_split 0 [expr {$len - 1}]]]} {
+	error "$full not a subdir of $root"
+    }
+
+    return [eval file join [lrange $full_split $len end]]
+}
+
 # Log gdb command line and script if requested.
 if {[info exists TRANSCRIPT]} {
   rename send_gdb real_send_gdb

@@ -1,5 +1,17 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/fullname.exp: Use standard_output_file,
+	relative_filename.
+	* gdb.base/hashline1.exp: Use standard_testfile,
+	standard_output_file, relative_filename, clean_restart.
+	* gdb.base/hashline2.exp: Use standard_testfile,
+	standard_output_file.
+	* gdb.base/hashline3.exp: Use standard_testfile,
+	standard_output_file, relative_filename.
+	* lib/gdb.exp (relative_filename): New proc.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/fileio.c (test_open, test_write, test_read)
 	(test_lseek, test_close, test_stat, test_fstat)
 	(test_isatty, test_system, test_rename, test_unlink):
