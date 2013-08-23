@@ -1,3 +1,7 @@
+2013-08-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/binutils.texi: Remove the extra space.
+
 2013-08-23  Mikael Pettersson  <mikpe@it.uu.se>
 
 	PR binutils/15779

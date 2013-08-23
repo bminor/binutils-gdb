@@ -331,7 +331,7 @@ table if one exists.  Too many different systems however assume that
 symbol tables are always up-to-date, so @sc{gnu} @command{ar} will
 rebuild the table even with a quick append.
 
-Note - @sc{gnu} @command{ar} treats the command @samp {qs} as a
+Note - @sc{gnu} @command{ar} treats the command @samp{qs} as a
 synonym for @samp{r} - replacing already existing files in the
 archive and appending new ones at the end.
 
