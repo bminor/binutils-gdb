@@ -5085,10 +5085,9 @@ Disassembly of section \.text:
 [ 0-9a-f]+:	5441 0099 	alnv\.ps	\$f0,\$f1,\$f2,v0
 [ 0-9a-f]+:	5441 07d9 	alnv\.ps	\$f0,\$f1,\$f2,ra
 [ 0-9a-f]+:	57fe efd9 	alnv\.ps	\$f29,\$f30,\$f31,ra
-[ 0-9a-f]+:	57fd efd9 	alnv\.ps	\$f29,\$f29,\$f31,ra
 [ 0-9a-f]+:	4380 fffe 	bc1f	[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
-[ 0-9a-f]+:	0c00      	nop
+[ 0-9a-f]+:	57fd efd9 	alnv\.ps	\$f29,\$f29,\$f31,ra
 [ 0-9a-f]+:	4380 fffe 	bc1f	[0-9a-f]+ <fp_test\+0x[0-9a-f]+>
 [ 	]*[0-9a-f]+: R_MICROMIPS_PC16_S1	fp_test
 [ 0-9a-f]+:	0c00      	nop

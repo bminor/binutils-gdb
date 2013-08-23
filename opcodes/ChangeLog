@@ -1,3 +1,8 @@
+2013-08-23  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* micromips-opc.c (micromips_opcodes): Use RD_4 for "alnv.ps",
+	replacing NODS.
+
 2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR binutils/15834

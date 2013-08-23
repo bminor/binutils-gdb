@@ -1,3 +1,12 @@
+2013-08-23  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gas/testsuite/gas/mips/micromips-insn32.d: Adjust for delay
+	slot scheduling of ALNV.PS.
+	* gas/testsuite/gas/mips/micromips-noinsn32.d: Likewise.
+	* gas/testsuite/gas/mips/micromips-trap.d: Likewise.
+	* gas/testsuite/gas/mips/micromips.d: Likewise.
+	* gas/testsuite/gas/mips/micromips@alnv_ps-swap.d: Likewise.
+
 2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR binutils/15834
