@@ -14553,25 +14553,35 @@ disable_command (char *args, int from_tty)
 	if (user_breakpoint_p (bpt))
 	  disable_breakpoint (bpt);
     }
-  else if (strchr (args, '.'))
-    {
-      struct bp_location *loc = find_location_by_number (args);
-      if (loc)
-	{
-	  if (loc->enabled)
-	    {
-	      loc->enabled = 0;
-	      mark_breakpoint_location_modified (loc);
-	    }
-	  if (target_supports_enable_disable_tracepoint ()
-	      && current_trace_status ()->running && loc->owner
-	      && is_tracepoint (loc->owner))
-	    target_disable_tracepoint (loc);
-	}
-      update_global_location_list (0);
-    }
   else
-    map_breakpoint_numbers (args, do_map_disable_breakpoint, NULL);
+    {
+      char *num = extract_arg (&args);
+
+      while (num)
+	{
+	  if (strchr (num, '.'))
+	    {
+	      struct bp_location *loc = find_location_by_number (num);
+
+	      if (loc)
+		{
+		  if (loc->enabled)
+		    {
+		      loc->enabled = 0;
+		      mark_breakpoint_location_modified (loc);
+		    }
+		  if (target_supports_enable_disable_tracepoint ()
+		      && current_trace_status ()->running && loc->owner
+		      && is_tracepoint (loc->owner))
+		    target_disable_tracepoint (loc);
+		}
+	      update_global_location_list (0);
+	    }
+	  else
+	    map_breakpoint_numbers (num, do_map_disable_breakpoint, NULL);
+	  num = extract_arg (&args);
+	}
+    }
 }
 
 static void
@@ -14677,25 +14687,35 @@ enable_command (char *args, int from_tty)
 	if (user_breakpoint_p (bpt))
 	  enable_breakpoint (bpt);
     }
-  else if (strchr (args, '.'))
-    {
-      struct bp_location *loc = find_location_by_number (args);
-      if (loc)
-	{
-	  if (!loc->enabled)
-	    {
-	      loc->enabled = 1;
-	      mark_breakpoint_location_modified (loc);
-	    }
-	  if (target_supports_enable_disable_tracepoint ()
-	      && current_trace_status ()->running && loc->owner
-	      && is_tracepoint (loc->owner))
-	    target_enable_tracepoint (loc);
-	}
-      update_global_location_list (1);
-    }
   else
-    map_breakpoint_numbers (args, do_map_enable_breakpoint, NULL);
+    {
+      char *num = extract_arg (&args);
+
+      while (num)
+	{
+	  if (strchr (num, '.'))
+	    {
+	      struct bp_location *loc = find_location_by_number (num);
+
+	      if (loc)
+		{
+		  if (!loc->enabled)
+		    {
+		      loc->enabled = 1;
+		      mark_breakpoint_location_modified (loc);
+		    }
+		  if (target_supports_enable_disable_tracepoint ()
+		      && current_trace_status ()->running && loc->owner
+		      && is_tracepoint (loc->owner))
+		    target_enable_tracepoint (loc);
+		}
+	      update_global_location_list (1);
+	    }
+	  else
+	    map_breakpoint_numbers (num, do_map_enable_breakpoint, NULL);
+	  num = extract_arg (&args);
+	}
+    }
 }
 
 /* This struct packages up disposition data for application to multiple

@@ -1,3 +1,10 @@
+2013-07-12  Muhammad Waqas  <mwaqas@codesourccery.com>
+
+	PR gdb/15501
+	* gdb.base/ena-dis-br.exp: Add test to verify
+ 	enable/disable commands work correctly with
+	multiple arguments that include multiple locations.
+
 2013-08-22  Samuel Bronson  <naesten@gmail.com>
 
 	ARM Linux support for `catch syscall'.

@@ -1,3 +1,9 @@
+2013-08-12  Muhammad Waqas  <mwaqas@codesourcery.com>
+
+	PR gdb/15501
+	* breakpoint.c (enable_command, disable_command): Iterate over
+	all specified breakpoint locations.
+
 2013-08-22  Luis Machado  <lgustavo@codesourcery.com>
 
 	* common/linux-ptrace.c (linux_fork_to_function): Push #
