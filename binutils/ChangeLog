@@ -2,6 +2,8 @@
 
 	PR binutils/15779
 	* doc/binutils.texi (ranlib -D): Correct description.
+	PR binutils/15777
+	(nm --special-syms): Fix typo.
 
 2013-08-23  Nick Clifton  <nickc@redhat.com>
 

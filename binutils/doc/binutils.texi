@@ -1021,10 +1021,9 @@ both size and value to be printed.
 @item --special-syms
 Display symbols which have a target-specific special meaning.  These
 symbols are usually used by the target for some special processing and
-are not normally helpful when included included in the normal symbol
-lists.  For example for ARM targets this option would skip the mapping
-symbols used to mark transitions between ARM code, THUMB code and
-data.
+are not normally helpful when included in the normal symbol lists.
+For example for ARM targets this option would skip the mapping symbols
+used to mark transitions between ARM code, THUMB code and data.
 
 @item --synthetic
 Include synthetic symbols in the output.  These are special symbols
