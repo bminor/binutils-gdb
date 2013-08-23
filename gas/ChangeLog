@@ -1,3 +1,8 @@
+2013-08-23  Will Newton  <will.newton@linaro.org>
+
+	* config/tc-arm.c (do_neon_ldx_stx): Add extra constraints
+	for pre-indexed addressing modes.
+
 2013-08-21  Alan Modra  <amodra@gmail.com>
 
 	* symbols.c (fb_label_instance_inc, fb_label_instance): Properly

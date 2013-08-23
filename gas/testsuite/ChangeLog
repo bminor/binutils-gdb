@@ -1,3 +1,9 @@
+2013-08-23  Will Newton  <will.newton@linaro.org>
+
+	* testsuite/gas/arm/neon-addressing-bad.l: Add test for
+	VLDn and VSTn instructions.
+	* testsuite/gas/arm/neon-addressing-bad.s: Likewise.
+
 2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/ase-errors-1.l, gas/mips/ase-errors-2.l,

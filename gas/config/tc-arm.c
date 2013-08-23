@@ -16008,12 +16008,20 @@ do_neon_ldx_stx (void)
 		  _("bad register for post-index"));
       inst.instruction |= postreg;
     }
-  else if (inst.operands[1].writeback)
-    {
-      inst.instruction |= 0xd;
-    }
   else
-    inst.instruction |= 0xf;
+    {
+      constraint (inst.operands[1].immisreg, BAD_ADDR_MODE);
+      constraint (inst.reloc.exp.X_op != O_constant
+		  || inst.reloc.exp.X_add_number != 0,
+		  BAD_ADDR_MODE);
+
+      if (inst.operands[1].writeback)
+	{
+	  inst.instruction |= 0xd;
+	}
+      else
+	inst.instruction |= 0xf;
+    }
 
   if (thumb_mode)
     inst.instruction |= 0xf9000000;
