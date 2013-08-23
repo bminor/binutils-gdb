@@ -325,12 +325,15 @@ operation; new members are always placed at the end of the archive.
 
 The modifier @samp{v} makes @command{ar} list each file as it is appended.
 
-Since the point of this operation is speed, the archive's symbol table
-index is not updated, even if it already existed; you can use @samp{ar s} or
-@command{ranlib} explicitly to update the symbol table index.
+Since the point of this operation is speed, implementations of
+@command{ar} have the option of not updating the archive's symbol
+table if one exists.  Too many different systems however assume that
+symbol tables are always up-to-date, so @sc{gnu} @command{ar} will
+rebuild the table even with a quick append.
 
-However, too many different systems assume quick append rebuilds the
-index, so @sc{gnu} @command{ar} implements @samp{q} as a synonym for @samp{r}.
+Note - @sc{gnu} @command{ar} treats the command @samp {qs} as a
+synonym for @samp{r} - replacing already existing files in the
+archive and appending new ones at the end.
 
 @item r
 @cindex replacement in archive
