@@ -255,13 +255,13 @@ linux_fork_to_function (gdb_byte *child_stack, void (*function) (gdb_byte *))
       child_stack = xmalloc (STACK_SIZE * 4);
 
     /* Use CLONE_VM instead of fork, to support uClinux (no MMU).  */
-    #ifdef __ia64__
+#ifdef __ia64__
       child_pid = __clone2 (function, child_stack, STACK_SIZE,
 			    CLONE_VM | SIGCHLD, child_stack + STACK_SIZE * 2);
-    #else /* !__ia64__ */
+#else /* !__ia64__ */
       child_pid = clone (function, child_stack + STACK_SIZE,
 			 CLONE_VM | SIGCHLD, child_stack + STACK_SIZE * 2);
-  #endif /* !__ia64__ */
+#endif /* !__ia64__ */
 #else /* !defined(__UCLIBC) && defined(HAS_NOMMU) */
   child_pid = fork ();
 
@@ -445,7 +445,7 @@ linux_check_ptrace_features (void)
       ret = ptrace (PTRACE_KILL, child_pid, (PTRACE_TYPE_ARG3) 0,
 		    (PTRACE_TYPE_ARG4) 0);
       if (ret != 0)
-	warning ("linux_check_ptrace_features: failed to kill child");
+	warning (_("linux_check_ptrace_features: failed to kill child"));
       my_waitpid (child_pid, &status, 0);
     }
   while (WIFSTOPPED (status));

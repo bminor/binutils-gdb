@@ -1,5 +1,12 @@
 2013-08-22  Luis Machado  <lgustavo@codesourcery.com>
 
+	* common/linux-ptrace.c (linux_fork_to_function): Push #
+	directives to the start of the line.
+	(linux_check_ptrace_features): Fix warning message to use
+	the "_" markup.
+
+2013-08-22  Luis Machado  <lgustavo@codesourcery.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Add nat/linux-nat.h and
 	nat/linux-waitpid.h.
 	(linux-waitpid.o): New object file rule.
