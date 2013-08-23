@@ -28,8 +28,8 @@ main()
   long i;
   int c = 0;
 
-  in  = fopen ("pi.txt", "r");
-  out = fopen ("copy1.txt", "w");
+  in  = fopen (PI_TXT, "r");
+  out = fopen (COPY1_TXT, "w");
 
   if (!in || !out)
     {
@@ -54,6 +54,6 @@ main()
   fclose (in);
   fclose (out);
   printf ("Deleting copy.\n");	/* breakpoint 3 */
-  unlink ("copy1.txt");
+  unlink (COPY1_TXT);
   exit (0);			/* breakpoint 4 */
 }

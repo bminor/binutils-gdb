@@ -1,5 +1,12 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/checkpoint.c (main): Use PI_TXT and COPY1_TXT
+	defines.
+	* gdb.base/checkpoint.exp: Define PI_TXT and COPY1_TXT during
+	compilation.  Use prepare_for_testing, standard_output_file.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/advance.exp: Use standard_testfile and
 	prepare_for_testing.
 	* gdb.base/bigcore.exp: Use standard_output_file.  "cd" to
