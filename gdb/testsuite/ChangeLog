@@ -1,5 +1,14 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/fileio.c (test_open, test_write, test_read)
+	(test_lseek, test_close, test_stat, test_fstat)
+	(test_isatty, test_system, test_rename, test_unlink):
+	Use OUTDIR define.
+	* gdb.base/fileio.exp: Define OUTDIR during compilation.
+	Use standard_output_file.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/checkpoint.c (main): Use PI_TXT and COPY1_TXT
 	defines.
 	* gdb.base/checkpoint.exp: Define PI_TXT and COPY1_TXT during
