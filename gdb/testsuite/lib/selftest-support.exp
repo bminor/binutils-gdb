@@ -129,11 +129,17 @@ proc do_self_tests {function body} {
 
     set GDB_FULLPATH [find_gdb $GDB]
 
+    if {[is_remote host]} {
+	set xgdb x$tool
+    } else {
+	set xgdb [standard_output_file x$tool]
+    }
+
     # Remove any old copy lying around.
-    remote_file host delete x$tool
+    remote_file host delete $xgdb
 
     gdb_start
-    set file [remote_download host $GDB_FULLPATH x$tool]
+    set file [remote_download host $GDB_FULLPATH $xgdb]
 
     set result [selftest_setup $file $function]
     if {$result == 0} then {

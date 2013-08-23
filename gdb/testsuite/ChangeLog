@@ -1,5 +1,11 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.gdb/selftest.exp: Use standard_output_file.
+	* lib/selftest-support.exp (do_self_tests): Use
+	standard_output_file.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.stabs/weird.exp: Use gdb_remote_download and
 	standard_output_file.
 
