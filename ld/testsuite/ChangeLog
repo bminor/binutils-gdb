@@ -1,3 +1,7 @@
+2013-08-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* ld-arm/export-class.exp: Handle non-EABI targets.
+
 2013-08-23  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-x86-64/ilp32-4-nacl.d: Update for 2013-05-31 gas alignment change.
