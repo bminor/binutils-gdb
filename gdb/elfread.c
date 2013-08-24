@@ -1364,6 +1364,9 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   install_minimal_symbols (objfile);
   do_cleanups (back_to);
 
+  if (symtab_create_debug)
+    fprintf_unfiltered (gdb_stdlog, "Done reading minimal symbols.\n");
+
   /* Now process debugging information, which is contained in
      special ELF sections.  */
 
@@ -1407,9 +1410,6 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 				str_sect->filepos,
 				bfd_section_size (abfd, str_sect));
     }
-
-  if (symtab_create_debug)
-    fprintf_unfiltered (gdb_stdlog, "Done reading minimal symbols.\n");
 
   if (dwarf2_has_info (objfile, NULL))
     {

@@ -1,3 +1,8 @@
+2013-08-23  Doug Evans  <dje@google.com>
+
+	* elfread.c (elf_symfile_read): Move "Done reading minimal symbols"
+	debugging printf to better location.
+
 2013-08-23  Pedro Alves  <palves@redhat.com>
 
 	* target.c (target_read_live_memory): Change type of 'ret' local
