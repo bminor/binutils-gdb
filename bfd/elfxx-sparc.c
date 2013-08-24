@@ -4793,9 +4793,10 @@ _bfd_sparc_elf_finish_dynamic_sections (bfd *output_bfd, struct bfd_link_info *i
 	    }
 	}
 
-      elf_section_data (splt->output_section)->this_hdr.sh_entsize
-	= (htab->is_vxworks || !ABI_64_P (output_bfd))
-	  ? 0 : htab->plt_entry_size;
+      if (elf_section_data (splt->output_section) != NULL)
+        elf_section_data (splt->output_section)->this_hdr.sh_entsize
+          = ((htab->is_vxworks || !ABI_64_P (output_bfd))
+             ? 0 : htab->plt_entry_size);
     }
 
   /* Set the first entry in the global offset table to the address of

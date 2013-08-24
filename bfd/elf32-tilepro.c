@@ -3909,8 +3909,9 @@ tilepro_elf_finish_dynamic_sections (bfd *output_bfd,
 		  PLT_ENTRY_SIZE - PLT_HEADER_SIZE);
 	}
 
-      elf_section_data (splt->output_section)->this_hdr.sh_entsize
-	= PLT_ENTRY_SIZE;
+      if (elf_section_data (splt->output_section) != NULL)
+	elf_section_data (splt->output_section)->this_hdr.sh_entsize
+	  = PLT_ENTRY_SIZE;
     }
 
   if (htab->elf.sgotplt)

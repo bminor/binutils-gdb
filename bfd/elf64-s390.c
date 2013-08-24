@@ -3692,8 +3692,9 @@ elf_s390_finish_dynamic_sections (bfd *output_bfd,
 		       - htab->elf.splt->output_section->vma - 6)/2,
 		      htab->elf.splt->contents + 8);
 	}
-      elf_section_data (htab->elf.splt->output_section)
-	->this_hdr.sh_entsize = PLT_ENTRY_SIZE;
+      if (elf_section_data (htab->elf.splt->output_section) != NULL)
+	elf_section_data (htab->elf.splt->output_section)->this_hdr.sh_entsize
+	  = PLT_ENTRY_SIZE;
     }
 
   if (htab->elf.sgotplt)

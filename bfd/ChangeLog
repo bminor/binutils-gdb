@@ -1,3 +1,11 @@
+2013-08-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* elf32-tilepro.c (tilepro_elf_finish_dynamic_sections): Don't
+	set GOT's entry size if there is no ELF section data.
+	* elf64-s390.c (elf_s390_finish_dynamic_sections): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_finish_dynamic_sections):
+	Likewise.
+
 2013-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (get_elf_x86_64_arch_data): New.
