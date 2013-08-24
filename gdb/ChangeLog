@@ -1,5 +1,10 @@
 2013-08-23  Doug Evans  <dje@google.com>
 
+	* symmisc.c (dump_symtab): Delete prototype.
+	(dump_msymbols, dump_objfile): Ditto.
+	(maintenance_info_symtabs): Mark as dont_repeat.
+	(_initialize_symmisc): Improve doc string for "mt info symtabs".
+
 	* elfread.c (elf_symfile_read): Move "Done reading minimal symbols"
 	debugging printf to better location.
 

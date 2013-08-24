@@ -59,13 +59,6 @@ FILE *std_err;
 
 /* Prototypes for local functions */
 
-static void dump_symtab (struct objfile *, struct symtab *,
-			 struct ui_file *);
-
-static void dump_msymbols (struct objfile *, struct ui_file *);
-
-static void dump_objfile (struct objfile *);
-
 static int block_depth (struct block *);
 
 void _initialize_symmisc (void);
@@ -717,6 +710,8 @@ maintenance_info_symtabs (char *regexp, int from_tty)
   struct program_space *pspace;
   struct objfile *objfile;
 
+  dont_repeat ();
+
   if (regexp)
     re_comp (regexp);
 
@@ -947,7 +942,7 @@ If a SOURCE file is specified, dump only that file's minimal symbols."),
 List the full symbol tables for all object files.\n\
 This does not include information about individual symbols, blocks, or\n\
 linetables --- just the symbol table structures themselves.\n\
-With an argument REGEXP, list the symbol tables whose names that match that."),
+With an argument REGEXP, list the symbol tables with matching names."),
 	   &maintenanceinfolist);
 
   add_cmd ("check-symtabs", class_maintenance, maintenance_check_symtabs,
