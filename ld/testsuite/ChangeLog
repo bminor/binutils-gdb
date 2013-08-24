@@ -1,5 +1,23 @@
 2013-08-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
+	* ld-elf/comm-data.exp: Use check_shared_lib_support rather than
+	explicit patterns for test target qualification.  Define extra
+	tool flags for *-*-hpux* and tic6x-*-* targets.  Link with a
+	linker script.  Use alternative patterns for targets that do not
+	eliminate copy relocs, currently mn10300-*-* and vax-*-*.
+	* ld-elf/comm-data2.s: Handle HPUX's `.comm' syntax.
+	* ld-elf/comm-data2.ld: New test linker script.
+	* ld-elf/comm-data2.xd: Match section's VMA too.  Ignore ASCII
+	data dump.
+	* ld-elf/comm-data2r.rd: New test pattern.
+	* ld-elf/comm-data2r.sd: New test pattern.
+	* ld-elf/comm-data2r.xd: New test pattern.
+	* ld-mips-elf/comm-data.exp: Use check_shared_lib_support rather
+	than an explicit pattern for test target qualification.  Link
+	with a linker script.
+
+2013-08-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
 	* ld-arm/export-class.exp: Handle non-EABI targets.
 
 2013-08-23  Roland McGrath  <mcgrathr@google.com>
