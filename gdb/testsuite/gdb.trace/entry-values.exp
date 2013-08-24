@@ -230,3 +230,50 @@ gdb_test_sequence "bt" "bt (2)" {
     "\[\r\n\]#1 .* bar \\(i=<optimized out>, i@entry=<optimized out>\\)"
     "\[\r\n\]#2 .* main \\(\\)"
 }
+
+# Restart GDB and trace.
+
+clean_restart $binfile
+
+load_lib "trace-support.exp"
+
+if ![runto_main] {
+    fail "Can't run to main to check for trace support"
+    return -1
+}
+
+if ![gdb_target_supports_trace] {
+    unsupported "target does not support trace"
+    return -1
+}
+
+gdb_test "trace foo" "Tracepoint $decimal at .*"
+
+if [is_amd64_regs_target] {
+    set spreg "\$rsp"
+} elseif [is_x86_like_target] {
+    set spreg "\$esp"
+} else {
+    set spreg "\$sp"
+}
+
+# Collect arguments i and j.  Collect 'global1' which is entry value
+# of argument i.  Don't collect 'global2' to test the entry value of
+# argument j.
+
+gdb_trace_setactions "set action for tracepoint 1" "" \
+    "collect i, j, global1, \(\*\(void \*\*\) \($spreg\)\) @ 64" "^$"
+
+gdb_test_no_output "tstart"
+
+gdb_breakpoint "end"
+gdb_continue_to_breakpoint "end"
+
+gdb_test_no_output "tstop"
+
+gdb_test "tfind" "Found trace frame 0, .*" "tfind start"
+
+# Since 'global2' is not collected, j@entry is expected to be 'unavailable'.
+gdb_test "bt 1" "#0 .* foo \\(i=\[-\]?$decimal, i@entry=2, j=\[-\]?$decimal, j@entry=<unavailable>\\).*"
+
+gdb_test "tfind" "Target failed to find requested trace frame\..*"

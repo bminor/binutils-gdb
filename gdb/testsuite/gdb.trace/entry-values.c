@@ -32,6 +32,10 @@ bar (int i)
 int global1 = 1;
 int global2 = 2;
 
+static void
+end (void)
+{}
+
 int
 main (void)
 {
@@ -41,5 +45,6 @@ main (void)
   global2++;
   ret = bar (0);
 
+  end ();
   return ret;
 }

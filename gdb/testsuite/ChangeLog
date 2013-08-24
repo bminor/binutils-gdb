@@ -1,5 +1,12 @@
 2013-08-24  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/entry-values.c (end): New
+	(main): Call end.
+	* gdb.trace/entry-values.exp: Load trace-support.exp.  Set
+	tracepoint and collect data.  Test entry value is unavailable.
+
+2013-08-24  Yao Qi  <yao@codesourcery.com>
+
 	* lib/dwarf.exp (_location): Handle DW_OP_deref_size.
 	* gdb.trace/entry-values.c: New.
 	* gdb.trace/entry-values.exp: New.
