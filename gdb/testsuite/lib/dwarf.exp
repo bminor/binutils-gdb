@@ -667,6 +667,14 @@ namespace eval Dwarf {
 		    _op .sleb128 [lindex $line 2]
 		}
 
+		DW_OP_deref_size {
+		    if {[llength $line] != 2} {
+			error "usage: DW_OP_deref_size SIZE"
+		    }
+
+		    _op .byte [lindex $line 1]
+		}
+
 		default {
 		    if {[llength $line] > 1} {
 			error "Unimplemented: operands in location for $opcode"

@@ -1,3 +1,9 @@
+2013-08-24  Yao Qi  <yao@codesourcery.com>
+
+	* lib/dwarf.exp (_location): Handle DW_OP_deref_size.
+	* gdb.trace/entry-values.c: New.
+	* gdb.trace/entry-values.exp: New.
+
 2013-07-12  Muhammad Waqas  <mwaqas@codesourccery.com>
 
 	PR gdb/15501
