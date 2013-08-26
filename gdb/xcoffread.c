@@ -437,6 +437,7 @@ arrange_linetable (struct linetable *oldLineTb)
   struct linetable_entry *fentry;	/* function entry vector */
   int fentry_size;		/* # of function entries */
   struct linetable *newLineTb;	/* new line table */
+  int extra_lines = 0;
 
 #define NUM_OF_FUNCTIONS 20
 
@@ -458,6 +459,12 @@ arrange_linetable (struct linetable *oldLineTb)
 	  fentry[function_count].line = ii;
 	  fentry[function_count].pc = oldLineTb->item[ii].pc;
 	  ++function_count;
+
+	  /* If the function was compiled with XLC, we may have to add an
+             extra line entry later.  Reserve space for that.  */
+	  if (ii + 1 < oldLineTb->nitems
+	      && oldLineTb->item[ii].pc != oldLineTb->item[ii + 1].pc)
+	    extra_lines++;
 	}
     }
 
@@ -474,7 +481,7 @@ arrange_linetable (struct linetable *oldLineTb)
   newLineTb = (struct linetable *)
     xmalloc
     (sizeof (struct linetable) +
-    (oldLineTb->nitems - function_count) * sizeof (struct linetable_entry));
+    (oldLineTb->nitems - function_count + extra_lines) * sizeof (struct linetable_entry));
 
   /* If line table does not start with a function beginning, copy up until
      a function begin.  */
@@ -489,13 +496,26 @@ arrange_linetable (struct linetable *oldLineTb)
 
   for (ii = 0; ii < function_count; ++ii)
     {
+      /* If the function was compiled with XLC, we may have to add an
+         extra line to cover the function prologue.  */
+      jj = fentry[ii].line;
+      if (jj + 1 < oldLineTb->nitems
+	  && oldLineTb->item[jj].pc != oldLineTb->item[jj + 1].pc)
+	{
+	  newLineTb->item[newline] = oldLineTb->item[jj];
+	  newLineTb->item[newline].line = oldLineTb->item[jj + 1].line;
+	  newline++;
+	}
+
       for (jj = fentry[ii].line + 1;
 	   jj < oldLineTb->nitems && oldLineTb->item[jj].line != 0;
 	   ++jj, ++newline)
 	newLineTb->item[newline] = oldLineTb->item[jj];
     }
   xfree (fentry);
-  newLineTb->nitems = oldLineTb->nitems - function_count;
+  /* The number of items in the line table must include these
+     extra lines which were added in case of XLC compiled functions.  */
+  newLineTb->nitems = oldLineTb->nitems - function_count + extra_lines;
   return newLineTb;
 }
 
