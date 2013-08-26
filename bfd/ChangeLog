@@ -1,5 +1,15 @@
 2013-08-26  Roland McGrath  <mcgrathr@google.com>
 
+	* archures.c (bfd_mach_i386_nacl, bfd_mach_i386_i386_nacl): New macros.
+	(bfd_mach_x86_64_nacl, bfd_mach_x64_32_nacl): New macros.
+	* cpu-i386.c (bfd_arch_i386_onebyte_nop_fill): New function.
+	(bfd_i386_nacl_arch): New variable.
+	(bfd_x86_64_nacl_arch, bfd_x64_32_nacl_arch): New variables.
+	(bfd_x64_32_arch_intel_syntax): Link them into the list.
+	* bfd-in2.h: Regenerate.
+
+2013-08-26  Roland McGrath  <mcgrathr@google.com>
+
 	* elf-nacl.c (nacl_modify_segment_map): Fix logic reordering the
 	elf_segment_map list.  If an executable segment is page-aligned
 	but does not end with a full page, then append a fake section into

@@ -1,5 +1,17 @@
 2013-08-26  Roland McGrath  <mcgrathr@google.com>
 
+	* ld-x86-64/x86-64.exp (Mixed x86_64 and i386 input test 1):
+	Loosen string match to admit i386:x86-64*.
+	(Mixed x86_64 and i386 input test 2): Likewise.
+	* ld-x86-64/ilp32-2.d: Likewise.
+	* ld-x86-64/ilp32-3.d: Likewise.
+	* ld-x86-64/lp64-2.d: Likewise.
+	* ld-x86-64/lp64-3.d: Likewise.
+	* ld-x86-64/ia32-2.d: Likewise, and i386.* too.
+	* ld-x86-64/ia32-3.d: Likewise.
+
+2013-08-26  Roland McGrath  <mcgrathr@google.com>
+
 	* ld-x86-64/ilp32-4-nacl.d: Loosen .shstrtab line regexp to match
 	any file offset.
 	* ld-x86-64/tlsbin-nacl.rd: Update expected code segment PT_LOAD.
