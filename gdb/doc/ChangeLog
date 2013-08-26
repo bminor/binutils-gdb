@@ -1,3 +1,8 @@
+2013-08-26  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Maintenance Commands): "maint print objfiles" now takes
+	an optional regexp.
+
 2013-08-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdbint.texinfo (Testsuite): Use @table, not @itemize.

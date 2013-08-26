@@ -3,6 +3,8 @@
 
 *** Changes since GDB 7.6
 
+* The "maintenance print objfiles" command now takes an optional regexp.
+
 * The "catch syscall" command now works on arm*-linux* targets.
 
 * Python scripting

@@ -1,5 +1,10 @@
 2013-08-26  Doug Evans  <dje@google.com>
 
+	* NEWS: Document "mt print objfiles" now takes optional regexp.
+	* symmisc.c (maintenance_print_objfiles): Argument is now an optional
+	regexp of objfiles to print.
+	(_initialize_symmisc): Update doc string for "mt print objfiles".
+
 	* dwarf2read.c (write_psymtabs_to_index): Move error checks ahead of
 	missing debug info checks.
 

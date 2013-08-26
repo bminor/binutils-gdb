@@ -36820,10 +36820,11 @@ This command forces @value{GDBN} to flush its internal register cache.
 
 @kindex maint print objfiles
 @cindex info for known object files
-@item maint print objfiles
-Print a dump of all known object files.  For each object file, this
-command prints its name, address in memory, and all of its psymtabs
-and symtabs.
+@item maint print objfiles @r{[}@var{regexp}@r{]}
+Print a dump of all known object files.
+If @var{regexp} is specified, only print object files whose names
+match @var{regexp}.  For each object file, this command prints its name,
+address in memory, and all of its psymtabs and symtabs.
 
 @kindex maint print section-scripts
 @cindex info for known .debug_gdb_scripts-loaded scripts
