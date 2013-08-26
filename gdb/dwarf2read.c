@@ -21263,14 +21263,14 @@ write_psymtabs_to_index (struct objfile *objfile, const char *dir)
   htab_t cu_index_htab;
   struct psymtab_cu_index_map *psymtab_cu_index_map;
 
-  if (!objfile->psymtabs || !objfile->psymtabs_addrmap)
-    return;
-
   if (dwarf2_per_objfile->using_index)
     error (_("Cannot use an index to create the index"));
 
   if (VEC_length (dwarf2_section_info_def, dwarf2_per_objfile->types) > 1)
     error (_("Cannot make an index when the file has multiple .debug_types sections"));
+
+  if (!objfile->psymtabs || !objfile->psymtabs_addrmap)
+    return;
 
   if (stat (objfile->name, &st) < 0)
     perror_with_name (objfile->name);

@@ -1,3 +1,8 @@
+2013-08-26  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (write_psymtabs_to_index): Move error checks ahead of
+	missing debug info checks.
+
 2013-08-26  Raunaq Bathija  <raunaq12@in.ibm.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
