@@ -3357,10 +3357,25 @@ dw2_print_stats (struct objfile *objfile)
   printf_filtered (_("  Number of unread CUs: %d\n"), count);
 }
 
+/* This dumps minimal information about the index.
+   It is called via "mt print objfiles".
+   One use is to verify .gdb_index has been loaded by the
+   gdb.dwarf2/gdb-index.exp testcase.  */
+
 static void
 dw2_dump (struct objfile *objfile)
 {
-  /* Nothing worth printing.  */
+  dw2_setup (objfile);
+  gdb_assert (dwarf2_per_objfile->using_index);
+  printf_filtered (".gdb_index:");
+  if (dwarf2_per_objfile->index_table != NULL)
+    {
+      printf_filtered (" version %d\n",
+		       dwarf2_per_objfile->index_table->version);
+    }
+  else
+    printf_filtered (" faked for \"readnow\"\n");
+  printf_filtered ("\n");
 }
 
 static void

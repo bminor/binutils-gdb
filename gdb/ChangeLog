@@ -1,5 +1,10 @@
 2013-08-26  Doug Evans  <dje@google.com>
 
+	PR symtab/15885
+	* dwarf2read.c (dw2_dump): Print some minimal information indicating
+	.gdb_index is in use.
+	* symfile.c (reread_symbols): Reset objfile->sf.
+
 	* NEWS: Document "mt print objfiles" now takes optional regexp.
 	* symmisc.c (maintenance_print_objfiles): Argument is now an optional
 	regexp of objfiles to print.

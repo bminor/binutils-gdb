@@ -1,5 +1,10 @@
 2013-08-26  Doug Evans  <dje@google.com>
 
+	PR symtab/15885
+	* gdb.dwarf2/Makefile.in (EXECUTABLES): Add gdb-index.
+	(clean): rm -f *.gdb-index *.with-index.
+	* gdb.dwarf2/gdb-index.exp: New testcase.
+
 	* lib/gdb.exp (run_on_host): Moved here from gnu-debugdata.exp.
 	* gdb.base/gnu-debugdata.exp (run): Moved to gdb.exp and renamed to
 	run_on_host.  All callers updated.

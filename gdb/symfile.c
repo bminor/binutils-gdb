@@ -2504,6 +2504,12 @@ reread_symbols (void)
 	     empty.  We could use obstack_specify_allocation but
 	     gdb_obstack.h specifies the alloc/dealloc functions.  */
 	  obstack_init (&objfile->objfile_obstack);
+
+	  /* Reset the sym_fns pointer.  The ELF reader can change it
+	     based on whether .gdb_index is present, and we need it to
+	     start over.  PR symtab/15885  */
+	  objfile->sf = find_sym_fns (objfile->obfd);
+
 	  build_objfile_section_table (objfile);
 	  terminate_minimal_symbol_table (objfile);
 
