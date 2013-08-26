@@ -4443,5 +4443,30 @@ proc gdb_target_symbol_prefix_flags {} {
     }
 }
 
+# A wrapper for 'remote_exec host' that passes or fails a test.
+# Returns 0 if all went well, nonzero on failure.
+# TEST is the name of the test, other arguments are as for remote_exec.
+
+proc run_on_host { test program args } {
+    verbose -log "run_on_host: $program $args"
+    # remote_exec doesn't work properly if the output is set but the
+    # input is the empty string -- so replace an empty input with
+    # /dev/null.
+    if {[llength $args] > 1 && [lindex $args 1] == ""} {
+	set args [lreplace $args 1 1 "/dev/null"]
+    }
+    set result [eval remote_exec host [list $program] $args]
+    verbose "result is $result"
+    set status [lindex $result 0]
+    set output [lindex $result 1]
+    if {$status == 0} {
+ 	pass $test
+ 	return 0
+    } else {
+	fail $test
+	return -1
+    }
+}
+
 # Always load compatibility stuff.
 load_lib future.exp

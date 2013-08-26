@@ -1,3 +1,9 @@
+2013-08-26  Doug Evans  <dje@google.com>
+
+	* lib/gdb.exp (run_on_host): Moved here from gnu-debugdata.exp.
+	* gdb.base/gnu-debugdata.exp (run): Moved to gdb.exp and renamed to
+	run_on_host.  All callers updated.
+
 2013-08-24  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/entry-values.c (end): New
