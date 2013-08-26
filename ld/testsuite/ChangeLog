@@ -1,3 +1,12 @@
+2013-08-26  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-x86-64/ilp32-4-nacl.d: Loosen .shstrtab line regexp to match
+	any file offset.
+	* ld-x86-64/tlsbin-nacl.rd: Update expected code segment PT_LOAD.
+	* ld-x86-64/tlsbindesc-nacl.rd: Likewise.
+	* ld-scripts/rgn-at3.d: XFAIL for *-*-nacl* targets.
+	* ld-scripts/rgn-over8-ok.d: Likewise.
+
 2013-08-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* ld-elf/comm-data.exp: Use check_shared_lib_support rather than

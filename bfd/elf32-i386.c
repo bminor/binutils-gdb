@@ -5302,12 +5302,15 @@ static const struct elf_i386_backend_data elf_i386_nacl_arch_bed =
 #define	elf_backend_modify_segment_map		nacl_modify_segment_map
 #undef	elf_backend_modify_program_headers
 #define	elf_backend_modify_program_headers	nacl_modify_program_headers
+#undef	elf_backend_final_write_processing
+#define elf_backend_final_write_processing	nacl_final_write_processing
 
 #include "elf32-target.h"
 
 /* Restore defaults.  */
 #undef	elf_backend_modify_segment_map
 #undef	elf_backend_modify_program_headers
+#undef	elf_backend_final_write_processing
 
 /* VxWorks support.  */
 

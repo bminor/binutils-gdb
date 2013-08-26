@@ -15860,6 +15860,14 @@ elf32_arm_nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 	  && nacl_modify_segment_map (abfd, info));
 }
 
+static void
+elf32_arm_nacl_final_write_processing (bfd *abfd, bfd_boolean linker)
+{
+  elf32_arm_final_write_processing (abfd, linker);
+  nacl_final_write_processing (abfd, linker);
+}
+
+
 #undef	elf32_bed
 #define elf32_bed			elf32_arm_nacl_bed
 #undef  bfd_elf32_bfd_link_hash_table_create
@@ -15871,9 +15879,14 @@ elf32_arm_nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 #define	elf_backend_modify_segment_map		elf32_arm_nacl_modify_segment_map
 #undef	elf_backend_modify_program_headers
 #define	elf_backend_modify_program_headers	nacl_modify_program_headers
+#undef  elf_backend_final_write_processing
+#define elf_backend_final_write_processing	elf32_arm_nacl_final_write_processing
 
 #undef	ELF_MAXPAGESIZE
 #define ELF_MAXPAGESIZE			0x10000
+#undef	ELF_MINPAGESIZE
+#undef	ELF_COMMONPAGESIZE
+
 
 #include "elf32-target.h"
 
@@ -15882,6 +15895,13 @@ elf32_arm_nacl_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 #undef	elf_backend_modify_segment_map
 #define elf_backend_modify_segment_map		elf32_arm_modify_segment_map
 #undef	elf_backend_modify_program_headers
+#undef  elf_backend_final_write_processing
+#define elf_backend_final_write_processing	elf32_arm_final_write_processing
+#undef	ELF_MINPAGESIZE
+#define ELF_MINPAGESIZE			0x1000
+#undef	ELF_COMMONPAGESIZE
+#define ELF_COMMONPAGESIZE		0x1000
+
 
 /* VxWorks Targets.  */
 
