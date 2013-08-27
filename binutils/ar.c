@@ -189,6 +189,9 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
      mapping over each file each time -- we want to hack multiple
      references.  */
 
+  for (head = arch->archive_next; head; head = head->archive_next)
+    head->archive_pass = 0;
+
   for (; count > 0; files++, count--)
     {
       bfd_boolean found = FALSE;
@@ -199,6 +202,14 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
 	  const char * filename;
 
 	  PROGRESS (1);
+	  /* PR binutils/15796: Once an archive element has been matched
+	     do not match it again.  If the user provides multiple same-named
+	     parameters on the command line their intent is to match multiple
+	     same-named entries in the archive, not the same entry multiple
+	     times.  */
+	  if (head->archive_pass)
+	    continue;
+
 	  filename = head->filename;
 	  if (filename == NULL)
 	    {
@@ -227,6 +238,13 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
 
 	      found = TRUE;
 	      function (head);
+	      head->archive_pass = 1;
+	      /* PR binutils/15796: Once a file has been matched, do not
+		 match any more same-named files in the archive.  If the
+		 user does want to match multiple same-name files in an
+		 archive they should provide multiple same-name parameters
+		 to the ar command.  */
+	      break;
 	    }
 	}
 

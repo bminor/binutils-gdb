@@ -1,3 +1,9 @@
+2013-08-27  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15796
+	* ar.c (map_over_members): Correctly handle multiple same-name
+	entries on the command line and in the archive.
+
 2013-08-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* doc/binutils.texi: Remove the extra space.
