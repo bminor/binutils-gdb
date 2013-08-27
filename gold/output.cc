@@ -1,6 +1,7 @@
 // output.cc -- manage the output file for gold
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -589,7 +590,7 @@ Output_file_header::entry()
 {
   const bool should_issue_warning = (parameters->options().entry() != NULL
 				     && !parameters->options().relocatable()
-                                     && !parameters->options().shared());
+				     && !parameters->options().shared());
   const char* entry = parameters->entry();
   Symbol* sym = this->symtab_->lookup(entry);
 
@@ -768,7 +769,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     shndx_(INVALID_CODE)
 {
   gold_assert(local_sym_index != GSYM_CODE
-              && local_sym_index != INVALID_CODE);
+	      && local_sym_index != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
   this->u1_.relobj = relobj;
@@ -794,7 +795,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     shndx_(shndx)
 {
   gold_assert(local_sym_index != GSYM_CODE
-              && local_sym_index != INVALID_CODE);
+	      && local_sym_index != INVALID_CODE);
   gold_assert(shndx != INVALID_CODE);
   // this->type_ is a bitfield; make sure TYPE fits.
   gold_assert(this->type_ == type);
@@ -949,14 +950,14 @@ set_needs_dynsym_index()
 
     default:
       {
-        const unsigned int lsi = this->local_sym_index_;
+	const unsigned int lsi = this->local_sym_index_;
 	Sized_relobj_file<size, big_endian>* relobj =
 	    this->u1_.relobj->sized_relobj();
 	gold_assert(relobj != NULL);
-        if (!this->is_section_symbol_)
-          relobj->set_needs_output_dynsym_entry(lsi);
-        else
-          relobj->output_section(lsi)->set_needs_dynsym_index();
+	if (!this->is_section_symbol_)
+	  relobj->set_needs_output_dynsym_entry(lsi);
+	else
+	  relobj->output_section(lsi)->set_needs_dynsym_index();
       }
       break;
     }
@@ -1005,26 +1006,26 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
 
     default:
       {
-        const unsigned int lsi = this->local_sym_index_;
+	const unsigned int lsi = this->local_sym_index_;
 	Sized_relobj_file<size, big_endian>* relobj =
 	    this->u1_.relobj->sized_relobj();
 	gold_assert(relobj != NULL);
-        if (!this->is_section_symbol_)
-          {
-            if (dynamic)
-              index = relobj->dynsym_index(lsi);
-            else
-              index = relobj->symtab_index(lsi);
-          }
-        else
-          {
-            Output_section* os = relobj->output_section(lsi);
-            gold_assert(os != NULL);
-            if (dynamic)
-              index = os->dynsym_index();
-            else
-              index = os->symtab_index();
-          }
+	if (!this->is_section_symbol_)
+	  {
+	    if (dynamic)
+	      index = relobj->dynsym_index(lsi);
+	    else
+	      index = relobj->symtab_index(lsi);
+	  }
+	else
+	  {
+	    Output_section* os = relobj->output_section(lsi);
+	    gold_assert(os != NULL);
+	    if (dynamic)
+	      index = os->dynsym_index();
+	    else
+	      index = os->symtab_index();
+	  }
       }
       break;
     }
@@ -1041,11 +1042,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
   local_section_offset(Addend addend) const
 {
   gold_assert(this->local_sym_index_ != GSYM_CODE
-              && this->local_sym_index_ != SECTION_CODE
+	      && this->local_sym_index_ != SECTION_CODE
 	      && this->local_sym_index_ != TARGET_CODE
-              && this->local_sym_index_ != INVALID_CODE
+	      && this->local_sym_index_ != INVALID_CODE
 	      && this->local_sym_index_ != 0
-              && this->is_section_symbol_);
+	      && this->is_section_symbol_);
   const unsigned int lsi = this->local_sym_index_;
   Output_section* os = this->u1_.relobj->output_section(lsi);
   gold_assert(os != NULL);
@@ -1136,9 +1137,9 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
     }
   gold_assert(this->local_sym_index_ != SECTION_CODE
 	      && this->local_sym_index_ != TARGET_CODE
-              && this->local_sym_index_ != INVALID_CODE
+	      && this->local_sym_index_ != INVALID_CODE
 	      && this->local_sym_index_ != 0
-              && !this->is_section_symbol_);
+	      && !this->is_section_symbol_);
   const unsigned int lsi = this->local_sym_index_;
   Sized_relobj_file<size, big_endian>* relobj =
       this->u1_.relobj->sized_relobj();
@@ -1397,14 +1398,14 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
     case RESERVED_CODE:
       // If we're doing an incremental update, don't touch this GOT entry.
       if (parameters->incremental_update())
-        return;
+	return;
       val = this->u_.constant;
       break;
 
     default:
       {
 	const Relobj* object = this->u_.object;
-        const unsigned int lsi = this->local_sym_index_;
+	const unsigned int lsi = this->local_sym_index_;
 	if (!this->use_plt_offset_)
 	  {
 	    uint64_t lval = object->local_symbol_value(lsi, 0);
@@ -2185,9 +2186,9 @@ Output_section::Input_section::print_to_mapfile(Mapfile* mapfile) const
 
     case RELAXED_INPUT_SECTION_CODE:
       {
-        Output_relaxed_input_section* relaxed_section =
+	Output_relaxed_input_section* relaxed_section =
 	  this->relaxed_input_section();
-        mapfile->print_input_section(relaxed_section->relobj(),
+	mapfile->print_input_section(relaxed_section->relobj(),
 				     relaxed_section->shndx());
       }
       break;
@@ -2365,7 +2366,7 @@ Output_section::add_input_section(Layout* layout,
       offset_in_section = this->free_list_.allocate(input_section_size,
 						    addralign, 0);
       if (offset_in_section == -1)
-        gold_fallback(_("out of patch space in section %s; "
+	gold_fallback(_("out of patch space in section %s; "
 			"relink with --incremental-full"),
 		      this->name());
       aligned_offset_in_section = offset_in_section;
@@ -2388,7 +2389,7 @@ Output_section::add_input_section(Layout* layout,
       && (sh_flags & elfcpp::SHF_EXECINSTR) != 0
       && parameters->target().has_code_fill()
       && (parameters->target().may_relax()
-          || layout->is_section_ordering_specified()))
+	  || layout->is_section_ordering_specified()))
     {
       gold_assert(this->fills_.empty());
       this->generate_code_fills_at_write_ = true;
@@ -2405,13 +2406,13 @@ Output_section::add_input_section(Layout* layout,
       // sections without input sections.
       off_t fill_len = aligned_offset_in_section - offset_in_section;
       if (this->input_sections_.empty())
-        this->fills_.push_back(Fill(offset_in_section, fill_len));
+	this->fills_.push_back(Fill(offset_in_section, fill_len));
       else
-        {
-          std::string fill_data(parameters->target().code_fill(fill_len));
-          Output_data_const* odc = new Output_data_const(fill_data, 1);
-          this->input_sections_.push_back(Input_section(odc));
-        }
+	{
+	  std::string fill_data(parameters->target().code_fill(fill_len));
+	  Output_data_const* odc = new Output_data_const(fill_data, 1);
+	  this->input_sections_.push_back(Input_section(odc));
+	}
     }
 
   // We need to keep track of this section if we are already keeping
@@ -2434,15 +2435,15 @@ Output_section::add_input_section(Layout* layout,
 	 using --section-ordering-file, match the section name with
 	 a pattern.  */
       if (parameters->options().section_ordering_file())
-        {
-          unsigned int section_order_index =
-            layout->find_section_order_index(std::string(secname));
+	{
+	  unsigned int section_order_index =
+	    layout->find_section_order_index(std::string(secname));
 	  if (section_order_index != 0)
-            {
-              isecn.set_section_order_index(section_order_index);
-              this->set_input_section_order_specified();
-            }
-        }
+	    {
+	      isecn.set_section_order_index(section_order_index);
+	      this->set_input_section_order_specified();
+	    }
+	}
       if (this->has_fixed_layout())
 	{
 	  // For incremental updates, finalize the address and offset now.
@@ -2519,12 +2520,12 @@ Output_section::add_relaxed_input_section(Layout* layout,
   if (layout->is_section_ordering_specified())
     {
       unsigned int section_order_index =
-        layout->find_section_order_index(name);
+	layout->find_section_order_index(name);
       if (section_order_index != 0)
-        {
-          inp.set_section_order_index(section_order_index);
-          this->set_input_section_order_specified();
-        }
+	{
+	  inp.set_section_order_index(section_order_index);
+	  this->set_input_section_order_specified();
+	}
     }
 
   this->add_output_section_data(&inp);
@@ -3078,7 +3079,7 @@ Output_section::set_final_data_size()
       double pct = parameters->options().incremental_patch();
       size_t extra = static_cast<size_t>(data_size * pct);
       if (this->free_space_fill_ != NULL
-          && this->free_space_fill_->minimum_hole_size() > extra)
+	  && this->free_space_fill_->minimum_hole_size() > extra)
 	extra = this->free_space_fill_->minimum_hole_size();
       off_t new_size = align_address(data_size + extra, this->addralign());
       this->patch_space_ = new_size - data_size;
@@ -3166,7 +3167,7 @@ class Output_section::Input_section_sort_entry
 			|| input_section.is_relaxed_input_section())
   {
     if (this->section_has_name_
-        && must_sort_attached_input_sections)
+	&& must_sort_attached_input_sections)
       {
 	// This is only called single-threaded from Layout::finalize,
 	// so it is OK to lock.  Unfortunately we have no way to pass
@@ -3270,10 +3271,10 @@ class Output_section::Input_section_sort_entry
     unsigned int s_secn_index = s.input_section().section_order_index();
     if (this_secn_index > 0 && s_secn_index > 0)
       {
-        if (this_secn_index < s_secn_index)
-          return 1;
-        else if (this_secn_index > s_secn_index)
-          return -1;
+	if (this_secn_index < s_secn_index)
+	  return 1;
+	else if (this_secn_index > s_secn_index)
+	  return -1;
       }
     return 0;
   }
@@ -3450,10 +3451,10 @@ Output_section::update_section_layout(
     {
       if (p->is_input_section()
 	  || p->is_relaxed_input_section())
-        {
+	{
 	  Object* obj = (p->is_input_section()
 			 ? p->relobj()
-		         : p->relaxed_input_section()->relobj());
+			 : p->relaxed_input_section()->relobj());
 	  unsigned int shndx = p->shndx();
 	  Section_layout_order::const_iterator it
 	    = order_map->find(Section_id(obj, shndx));
@@ -3461,11 +3462,11 @@ Output_section::update_section_layout(
 	    continue;
 	  unsigned int section_order_index = it->second;
 	  if (section_order_index != 0)
-            {
-              p->set_section_order_index(section_order_index);
-              this->set_input_section_order_specified();
+	    {
+	      p->set_section_order_index(section_order_index);
+	      this->set_input_section_order_specified();
 	    }
-        }
+	}
     }
 }
 
@@ -3495,25 +3496,25 @@ Output_section::sort_attached_input_sections()
        p != this->input_sections_.end();
        ++p, ++i)
       sort_list.push_back(Input_section_sort_entry(*p, i,
-                            this->must_sort_attached_input_sections()));
+			    this->must_sort_attached_input_sections()));
 
   // Sort the input sections.
   if (this->must_sort_attached_input_sections())
     {
       if (this->type() == elfcpp::SHT_PREINIT_ARRAY
-          || this->type() == elfcpp::SHT_INIT_ARRAY
-          || this->type() == elfcpp::SHT_FINI_ARRAY)
-        std::sort(sort_list.begin(), sort_list.end(),
-	          Input_section_sort_init_fini_compare());
+	  || this->type() == elfcpp::SHT_INIT_ARRAY
+	  || this->type() == elfcpp::SHT_FINI_ARRAY)
+	std::sort(sort_list.begin(), sort_list.end(),
+		  Input_section_sort_init_fini_compare());
       else
-        std::sort(sort_list.begin(), sort_list.end(),
-	          Input_section_sort_compare());
+	std::sort(sort_list.begin(), sort_list.end(),
+		  Input_section_sort_compare());
     }
   else
     {
       gold_assert(this->input_section_order_specified());
       std::sort(sort_list.begin(), sort_list.end(),
-	        Input_section_sort_section_order_index_compare());
+		Input_section_sort_section_order_index_compare());
     }
 
   // Copy the sorted input sections back to our list.
@@ -4174,8 +4175,9 @@ Output_segment::has_dynamic_reloc_list(const Output_data_list* pdl) const
 // and *PSHNDX.
 
 uint64_t
-Output_segment::set_section_addresses(Layout* layout, bool reset,
-                                      uint64_t addr,
+Output_segment::set_section_addresses(const Target* target,
+				      Layout* layout, bool reset,
+				      uint64_t addr,
 				      unsigned int* increase_relro,
 				      bool* has_relro,
 				      off_t* poff,
@@ -4314,6 +4316,41 @@ Output_segment::set_section_addresses(Layout* layout, bool reset,
   // objects.
   *poff = off;
 
+  // If code segments must contain only code, and this code segment is
+  // page-aligned in the file, then fill it out to a whole page with
+  // code fill (the tail of the segment will not be within any section).
+  // Thus the entire code segment can be mapped from the file as whole
+  // pages and that mapping will contain only valid instructions.
+  if (target->isolate_execinstr() && (this->flags() & elfcpp::PF_X) != 0)
+    {
+      uint64_t abi_pagesize = target->abi_pagesize();
+      if (orig_off % abi_pagesize == 0 && off % abi_pagesize != 0)
+	{
+	  size_t fill_size = abi_pagesize - (off % abi_pagesize);
+
+	  std::string fill_data;
+	  if (target->has_code_fill())
+	    fill_data = target->code_fill(fill_size);
+	  else
+	    fill_data.resize(fill_size); // Zero fill.
+
+	  Output_data_const* fill = new Output_data_const(fill_data, 0);
+	  fill->set_address(this->vaddr_ + this->memsz_);
+	  fill->set_file_offset(off);
+	  layout->add_relax_output(fill);
+
+	  off += fill_size;
+	  gold_assert(off % abi_pagesize == 0);
+	  ret += fill_size;
+	  gold_assert(ret % abi_pagesize == 0);
+
+	  gold_assert((uint64_t) this->filesz_ == this->memsz_);
+	  this->memsz_ = this->filesz_ += fill_size;
+
+	  *poff = off;
+	}
+    }
+
   return ret;
 }
 
@@ -4322,10 +4359,10 @@ Output_segment::set_section_addresses(Layout* layout, bool reset,
 
 uint64_t
 Output_segment::set_section_list_addresses(Layout* layout, bool reset,
-                                           Output_data_list* pdl,
+					   Output_data_list* pdl,
 					   uint64_t addr, off_t* poff,
 					   unsigned int* pshndx,
-                                           bool* in_tls)
+					   bool* in_tls)
 {
   off_t startoff = *poff;
   // For incremental updates, we may allocate non-fixed sections from
@@ -4344,40 +4381,40 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
       // the section will most likely already have an address.
       if (!(*p)->is_address_valid())
 	{
-          uint64_t align = (*p)->addralign();
+	  uint64_t align = (*p)->addralign();
 
-          if ((*p)->is_section_flag_set(elfcpp::SHF_TLS))
-            {
-              // Give the first TLS section the alignment of the
-              // entire TLS segment.  Otherwise the TLS segment as a
-              // whole may be misaligned.
-              if (!*in_tls)
-                {
-                  Output_segment* tls_segment = layout->tls_segment();
-                  gold_assert(tls_segment != NULL);
-                  uint64_t segment_align = tls_segment->maximum_alignment();
-                  gold_assert(segment_align >= align);
-                  align = segment_align;
+	  if ((*p)->is_section_flag_set(elfcpp::SHF_TLS))
+	    {
+	      // Give the first TLS section the alignment of the
+	      // entire TLS segment.  Otherwise the TLS segment as a
+	      // whole may be misaligned.
+	      if (!*in_tls)
+		{
+		  Output_segment* tls_segment = layout->tls_segment();
+		  gold_assert(tls_segment != NULL);
+		  uint64_t segment_align = tls_segment->maximum_alignment();
+		  gold_assert(segment_align >= align);
+		  align = segment_align;
 
-                  *in_tls = true;
-                }
-            }
-          else
-            {
-              // If this is the first section after the TLS segment,
-              // align it to at least the alignment of the TLS
-              // segment, so that the size of the overall TLS segment
-              // is aligned.
-              if (*in_tls)
-                {
-                  uint64_t segment_align =
-                      layout->tls_segment()->maximum_alignment();
-                  if (segment_align > align)
-                    align = segment_align;
+		  *in_tls = true;
+		}
+	    }
+	  else
+	    {
+	      // If this is the first section after the TLS segment,
+	      // align it to at least the alignment of the TLS
+	      // segment, so that the size of the overall TLS segment
+	      // is aligned.
+	      if (*in_tls)
+		{
+		  uint64_t segment_align =
+		      layout->tls_segment()->maximum_alignment();
+		  if (segment_align > align)
+		    align = segment_align;
 
-                  *in_tls = false;
-                }
-            }
+		  *in_tls = false;
+		}
+	    }
 
 	  if (!parameters->incremental_update())
 	    {
@@ -4391,12 +4428,12 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 	      off_t current_size = (*p)->current_data_size();
 	      off = layout->allocate(current_size, align, startoff);
 	      if (off == -1)
-	        {
+		{
 		  gold_assert((*p)->output_section() != NULL);
 		  gold_fallback(_("out of patch space for section %s; "
 				  "relink with --incremental-full"),
 				(*p)->output_section()->name());
-	        }
+		}
 	      (*p)->set_address_and_file_offset(addr + (off - startoff), off);
 	      if ((*p)->data_size() > current_size)
 		{
@@ -4408,11 +4445,11 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 	    }
 	}
       else if (parameters->incremental_update())
-        {
-          // For incremental updates, use the fixed offset for the
-          // high-water mark computation.
-          off = (*p)->offset();
-        }
+	{
+	  // For incremental updates, use the fixed offset for the
+	  // high-water mark computation.
+	  off = (*p)->offset();
+	}
       else
 	{
 	  // The script may have inserted a skip forward, but it
@@ -4462,7 +4499,7 @@ Output_segment::set_section_list_addresses(Layout* layout, bool reset,
 	off += (*p)->data_size();
 
       if (off > maxoff)
-        maxoff = off;
+	maxoff = off;
 
       if ((*p)->is_section())
 	{
@@ -5061,8 +5098,8 @@ Output_file::map()
     return;
 
   gold_fatal(_("%s: mmap: failed to allocate %lu bytes for output file: %s"),
-             this->name_, static_cast<unsigned long>(this->file_size_),
-             strerror(errno));
+	     this->name_, static_cast<unsigned long>(this->file_size_),
+	     strerror(errno));
 }
 
 // Unmap the file from memory.
@@ -5094,19 +5131,19 @@ Output_file::close()
       size_t bytes_to_write = this->file_size_;
       size_t offset = 0;
       while (bytes_to_write > 0)
-        {
-          ssize_t bytes_written = ::write(this->o_, this->base_ + offset,
-                                          bytes_to_write);
-          if (bytes_written == 0)
-            gold_error(_("%s: write: unexpected 0 return-value"), this->name_);
-          else if (bytes_written < 0)
-            gold_error(_("%s: write: %s"), this->name_, strerror(errno));
-          else
-            {
-              bytes_to_write -= bytes_written;
-              offset += bytes_written;
-            }
-        }
+	{
+	  ssize_t bytes_written = ::write(this->o_, this->base_ + offset,
+					  bytes_to_write);
+	  if (bytes_written == 0)
+	    gold_error(_("%s: write: unexpected 0 return-value"), this->name_);
+	  else if (bytes_written < 0)
+	    gold_error(_("%s: write: %s"), this->name_, strerror(errno));
+	  else
+	    {
+	      bytes_to_write -= bytes_written;
+	      offset += bytes_written;
+	    }
+	}
     }
   this->unmap();
 

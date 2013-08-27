@@ -1,3 +1,25 @@
+2013-08-27  Roland McGrath  <mcgrathr@google.com>
+
+	* output.cc (Output_segment::set_section_addresses): Take new
+	Target* argument.  If target->isolate_execinstr() and the segment
+	is executable and starts at a target->abi_pagesize() boundary,
+	pad its end out to a target->abi_pagesize() boundary with code fill.
+	* output.h (Output_segment::set_section_addresses): Update decl.
+	* layout.h (Layout::check_output_data_for_reset_values): Take new
+	argument RELAX_OUTPUTS.
+	(Layout): New member relax_output_list_.
+	(Layout::add_relax_output): New method.
+	* layout.cc (Layout::Layout): Update constructor.
+	(Layout::reset_relax_output): New method.
+	(Layout::clean_up_after_relaxation): Call it.
+	(Layout::prepare_for_relaxation): Update caller.
+	(Layout::set_segment_offsets): Update callers of set_section_addresses.
+	Call reset_relax_output before re-processing segments for
+	isolate_execinstr case.
+	(Layout::write_data): Handle relax_output_list_.
+	(Layout::Relaxation_debug_check::check_output_data_for_reset_values):
+	Take new argument RELAX_OUTPUTS.  Assert it's an empty collection.
+
 2013-08-16  Roland McGrath  <mcgrathr@google.com>
 
 	* i386.cc (Target_i386_nacl::do_code_fill): New virtual function.
