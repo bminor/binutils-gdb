@@ -3309,6 +3309,18 @@ _bfd_elf_relocs_compatible (const bfd_target *input,
   return ibed->relocs_compatible == obed->relocs_compatible;
 }
 
+/* Make a special call to the linker "notice" function to tell it that
+   we are about to handle an as-needed lib, or have finished
+   processing the lib.  */ 
+
+bfd_boolean
+_bfd_elf_notice_as_needed (bfd *ibfd,
+			   struct bfd_link_info *info,
+			   enum notice_asneeded_action act)
+{
+  return (*info->callbacks->notice) (info, NULL, ibfd, NULL, act, 0, NULL);
+}
+
 /* Add symbols from an ELF object file to the linker hash table.  */
 
 static bfd_boolean
@@ -3766,8 +3778,7 @@ error_free_dyn:
 
       /* Make a special call to the linker "notice" function to
 	 tell it that we are about to handle an as-needed lib.  */
-      if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_as_needed, 0, NULL))
+      if (!(*bed->notice_as_needed) (abfd, info, notice_as_needed))
 	goto error_free_vers;
 
       /* Clone the symbol table.  Remember some pointers into the
@@ -4461,8 +4472,6 @@ error_free_dyn:
       unsigned int i;
 
       /* Restore the symbol table.  */
-      if (bed->as_needed_cleanup)
-	(*bed->as_needed_cleanup) (abfd, info);
       old_ent = (char *) old_tab + tabsize;
       memset (elf_sym_hashes (abfd), 0,
 	      extsymcount * sizeof (struct elf_link_hash_entry *));
@@ -4524,8 +4533,7 @@ error_free_dyn:
 
       /* Make a special call to the linker "notice" function to
 	 tell it that symbols added for crefs may need to be removed.  */
-      if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_not_needed, 0, NULL))
+      if (!(*bed->notice_as_needed) (abfd, info, notice_not_needed))
 	goto error_free_vers;
 
       free (old_tab);
@@ -4538,8 +4546,7 @@ error_free_dyn:
 
   if (old_tab != NULL)
     {
-      if (!(*info->callbacks->notice) (info, NULL, abfd, NULL,
-				       notice_needed, 0, NULL))
+      if (!(*bed->notice_as_needed) (abfd, info, notice_needed))
 	goto error_free_vers;
       free (old_tab);
       old_tab = NULL;

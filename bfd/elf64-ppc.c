@@ -96,7 +96,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_add_symbol_hook	      ppc64_elf_add_symbol_hook
 #define elf_backend_check_directives	      ppc64_elf_process_dot_syms
-#define elf_backend_as_needed_cleanup	      ppc64_elf_as_needed_cleanup
+#define elf_backend_notice_as_needed	      ppc64_elf_notice_as_needed
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
 #define elf_backend_gc_keep		      ppc64_elf_gc_keep
@@ -4806,16 +4806,20 @@ ppc64_elf_process_dot_syms (bfd *ibfd, struct bfd_link_info *info)
    not to be needed.  */
 
 static bfd_boolean
-ppc64_elf_as_needed_cleanup (bfd *ibfd ATTRIBUTE_UNUSED,
-			     struct bfd_link_info *info)
+ppc64_elf_notice_as_needed (bfd *ibfd,
+			    struct bfd_link_info *info,
+			    enum notice_asneeded_action act)
 {
-  struct ppc_link_hash_table *htab = ppc_hash_table (info);
+  if (act == notice_not_needed)
+    {
+      struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
-  if (htab == NULL)
-    return FALSE;
+      if (htab == NULL)
+	return FALSE;
 
-  htab->dot_syms = NULL;
-  return TRUE;
+      htab->dot_syms = NULL;
+    }
+  return _bfd_elf_notice_as_needed (ibfd, info, act);
 }
 
 /* If --just-symbols against a final linked binary, then assume we need

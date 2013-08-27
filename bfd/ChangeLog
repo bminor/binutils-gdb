@@ -1,3 +1,17 @@
+2013-08-27  Alan Modra  <amodra@gmail.com>
+
+	* elf-bfd.h (struct elf_backend_data): Remove as_needed_cleanup.
+	Add notice_as_needed.
+	* elf64-ppc.c (elf_backend_as_needed_cleanup): Don't define.
+	(elf_backend_notice_as_needed): Define.
+	(ppc64_elf_as_needed_cleanup): Rename and adjust..
+	(ppc64_elf_notice_as_needed): ..to this.
+	* elflink.c (_bfd_elf_notice_as_needed): New function, extracted..
+	(elf_link_add_object_symbols): ..from here.
+	* elfxx-target.h (elf_backend_as_needed_cleanup): Don't define.
+	(elf_backend_notice_as_needed): Define..
+	(elfNN_bed): ..and use here.
+
 2013-08-26  Roland McGrath  <mcgrathr@google.com>
 
 	* archures.c (bfd_mach_i386_nacl, bfd_mach_i386_i386_nacl): New macros.

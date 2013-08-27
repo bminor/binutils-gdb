@@ -881,12 +881,12 @@ struct elf_backend_data
   bfd_boolean (*check_directives)
     (bfd *abfd, struct bfd_link_info *info);
 
-  /* The AS_NEEDED_CLEANUP function is called once per --as-needed
-     input file that was not needed by the add_symbols phase of the
-     ELF backend linker.  The function must undo any target specific
-     changes in the symbol hash table.  */
-  bfd_boolean (*as_needed_cleanup)
-    (bfd *abfd, struct bfd_link_info *info);
+  /* The NOTICE_AS_NEEDED function is called as the linker is about to
+     handle an as-needed lib (ACT = notice_as_needed), and after the
+     linker has decided to keep the lib (ACT = notice_needed) or when
+     the lib is not needed (ACT = notice_not_needed).  */
+  bfd_boolean (*notice_as_needed)
+    (bfd *abfd, struct bfd_link_info *info, enum notice_asneeded_action act);
 
   /* The ADJUST_DYNAMIC_SYMBOL function is called by the ELF backend
      linker for every symbol which is defined by a dynamic object and
@@ -2139,6 +2139,8 @@ extern bfd_boolean _bfd_elf_default_relocs_compatible
 
 extern bfd_boolean _bfd_elf_relocs_compatible
   (const bfd_target *, const bfd_target *);
+extern bfd_boolean _bfd_elf_notice_as_needed
+  (bfd *, struct bfd_link_info *, enum notice_asneeded_action);
 
 extern struct elf_link_hash_entry *_bfd_elf_archive_symbol_lookup
   (bfd *, struct bfd_link_info *, const char *);
