@@ -1,5 +1,19 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* Makefile.in (TEST_DIRS): Remove.
+	(TEST_TARGETS, check-parallel): Rewrite.
+	(check-gdb.%, BASE1_FILES, BASE2_FILES, check-gdb.base%)
+	(subdir_do, subdirs): Remove.
+	(do-check-parallel, check/%): New targets.
+	(clean): Remove outputs, temp, and cache directories.
+	(saw_dash_j): New variable.
+	(CHECK_TARGET): Use it.
+	(check): Depend on all, site.exp.  Rewrite.
+	(check-single): Remove dependencies.
+	(slow_tests, all_tests, reordered_tests): New variables.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.dwarf2/fission-base.S: Remove "gdb.dwarf/".
 	* gdb.dwarf2/fission-base.exp: Set debug-file-directory
 	before loading binfile.
