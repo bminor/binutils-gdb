@@ -435,6 +435,10 @@ extern int value_bytes_available (const struct value *value,
    whole object is unavailable.  */
 extern int value_entirely_available (struct value *value);
 
+/* Like value_entirely_available, but return false if any byte in the
+   whole object is available.  */
+extern int value_entirely_unavailable (struct value *value);
+
 /* Mark VALUE's content bytes starting at OFFSET and extending for
    LENGTH bytes as unavailable.  */
 

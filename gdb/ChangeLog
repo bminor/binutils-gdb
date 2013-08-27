@@ -1,3 +1,27 @@
+2013-08-27  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-cmd-stack.c (list_args_or_locals): Adjust prototype.
+	(parse_no_frames_option): Remove.
+	(mi_cmd_stack_list_locals): Handle --skip-unavailable.
+	(mi_cmd_stack_list_args): Adjust.
+	(mi_cmd_stack_list_variables): Handle --skip-unavailable.
+	(list_arg_or_local): Add new parameter 'skip_unavailable'.  Return
+	early if SKIP_UNAVAILABLE is true and ARG->val is unavailable.
+	Caller update.
+	(list_args_or_locals): New parameter 'skip_unavailable'.
+	Handle it.
+	* valprint.c (scalar_type_p): Rename to ...
+	(val_print_scalar_type_p): ... this.  Make extern.
+	(val_print, value_check_printable): Adjust.
+	* valprint.h (val_print_scalar_type_p): Declare.
+	* value.c (value_entirely_unavailable): New function.
+	* value.h (value_entirely_unavailable): Declare.
+
+	* NEWS: Mention the new option "--skip-unavailable" to MI
+	commands '-stack-list-locals', '-stack-list-arguments' and
+	'-stack-list-variables'.
+
 2013-08-27  Yao Qi  <yao@codesourcery.com>
 
 	* mi/mi-cmd-stack.c (parse_no_frames_option): Remove.

@@ -211,4 +211,6 @@ extern void generic_printstr (struct ui_file *stream, struct type *type,
 
 extern void output_command_const (const char *args, int from_tty);
 
+extern int val_print_scalar_type_p (struct type *type);
+
 #endif

@@ -106,16 +106,25 @@ proc test_trace_unavailable { data_source } {
 	mi_gdb_test "-stack-list-locals --simple-values" \
 	    ".*\\^done,locals=\\\[\{name=\"array\",type=\"unsigned char \\\[2\\\]\"\},\{name=\"i\",type=\"int\",value=\"<unavailable>\"\}\\\]" \
 	    "-stack-list-locals --simple-values"
+	mi_gdb_test "-stack-list-locals --skip-unavailable --simple-values" \
+	    ".*\\^done,locals=\\\[\{name=\"array\",type=\"unsigned char \\\[2\\\]\"\}\\\]" \
+	    "-stack-list-locals --skip-unavailable --simple-values"
 
 	# Test MI command '-stack-list-arguments'.
 	mi_gdb_test "-stack-list-arguments --simple-values" \
 	    ".*\\^done,stack-args=\\\[frame=\{level=\"0\",args=\\\[\{name=\"j\",type=\"int\",value=\"4\"\},\{name=\"s\",type=\"char \\\*\",value=\"<unavailable>\"\}\\\]\},.*\}.*" \
 	    "-stack-list-arguments --simple-values"
+	mi_gdb_test "-stack-list-arguments --skip-unavailable --simple-values" \
+	    ".*\\^done,stack-args=\\\[frame=\{level=\"0\",args=\\\[\{name=\"j\",type=\"int\",value=\"4\"\}\\\]\},.*\}.*" \
+	    "-stack-list-arguments --skip-unavailable --simple-values"
 
 	# Test MI command '-stack-list-variables'.
 	mi_gdb_test "-stack-list-variables --simple-values" \
 	    ".*\\^done,variables=\\\[\{name=\"j\",arg=\"1\",type=\"int\",value=\"4\"\},\{name=\"s\",arg=\"1\",type=\"char \\\*\",value=\"<unavailable>\"\},\{name=\"array\",type=\"unsigned char \\\[2\\\]\"\},\{name=\"i\",type=\"int\",value=\"<unavailable>\"\}\\\]" \
 	    "-stack-list-variables --simple-values"
+	mi_gdb_test "-stack-list-variables --skip-unavailable --simple-values" \
+	    ".*\\^done,variables=\\\[\{name=\"j\",arg=\"1\",type=\"int\",value=\"4\"\},\{name=\"array\",type=\"unsigned char \\\[2\\\]\"\}\\\]" \
+	    "-stack-list-variables --skip-unavailable --simple-values"
 
 	mi_gdb_test "-trace-find frame-number 1" \
 	    ".*\\^done,found=\"1\",tracepoint=\"${decimal}\",traceframe=\"1\",frame=\{.*" \

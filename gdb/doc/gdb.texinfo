@@ -31249,7 +31249,7 @@ For a stack with frame levels 0 through 11:
 @subsubheading Synopsis
 
 @smallexample
- -stack-list-arguments [ --no-frame-filters ] @var{print-values}
+ -stack-list-arguments [ --no-frame-filters ] [ --skip-unavailable ] @var{print-values}
     [ @var{low-frame} @var{high-frame} ]
 @end smallexample
 
@@ -31269,6 +31269,9 @@ type and value for simple data types, and the name and type for arrays,
 structures and unions.  If the option @code{--no-frame-filters} is
 supplied, then Python frame filters will not be executed.
 
+If the @code{--skip-unavailable} option is specified, arguments that
+are not available are not listed.  Partially available arguments
+are still displayed, however.
 
 Use of this command to obtain arguments in a single frame is
 deprecated in favor of the @samp{-stack-list-variables} command.
@@ -31453,7 +31456,7 @@ Show a single frame:
 @subsubheading Synopsis
 
 @smallexample
- -stack-list-locals [ --no-frame-filters ] @var{print-values}
+ -stack-list-locals [ --no-frame-filters ] [ --skip-unavailable ] @var{print-values}
 @end smallexample
 
 Display the local variable names for the selected frame.  If
@@ -31466,6 +31469,10 @@ display the value of simple data types and create variable objects for
 other data types when the user wishes to explore their values in
 more detail.  If the option @code{--no-frame-filters} is supplied, then
 Python frame filters will not be executed.
+
+If the @code{--skip-unavailable} option is specified, local variables
+that are not available are not listed.  Partially available local
+variables are still displayed, however.
 
 This command is deprecated in favor of the
 @samp{-stack-list-variables} command.
@@ -31497,7 +31504,7 @@ This command is deprecated in favor of the
 @subsubheading Synopsis
 
 @smallexample
- -stack-list-variables [ --no-frame-filters ] @var{print-values}
+ -stack-list-variables [ --no-frame-filters ] [ --skip-unavailable ] @var{print-values}
 @end smallexample
 
 Display the names of local variables and function arguments for the selected frame.  If
@@ -31507,6 +31514,10 @@ values; and if it is 2 or @code{--simple-values}, print the name,
 type and value for simple data types, and the name and type for arrays,
 structures and unions.  If the option @code{--no-frame-filters} is
 supplied, then Python frame filters will not be executed.
+
+If the @code{--skip-unavailable} option is specified, local variables
+and arguments that are not available are not listed.  Partially
+available arguments and local variables are still displayed, however.
 
 @subsubheading Example
 

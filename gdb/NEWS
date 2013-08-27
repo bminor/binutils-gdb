@@ -93,6 +93,10 @@ show range-stepping
   ** The new command -trace-frame-collected dumps collected variables,
      computed expressions, tvars, memory and registers in a traceframe.
 
+  ** The commands -stack-list-locals, -stack-list-arguments and
+     -stack-list-variables now accept an option "--skip-unavailable".
+     When used, only the available locals or arguments are displayed.
+
 * New system-wide configuration scripts
   A GDB installation now provides scripts suitable for use as system-wide
   configuration scripts for the following systems:

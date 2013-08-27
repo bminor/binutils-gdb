@@ -1,5 +1,12 @@
 2013-08-27  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.trace/entry-values.exp: Test unavailable entry value is
+	not shown when option '--skip-unavailable' is specified.
+	* gdb.trace/mi-trace-unavailable.exp (test_trace_unavailable):
+	Add tests for new option '--skip-unavailable'.
+
+2013-08-27  Yao Qi  <yao@codesourcery.com>
+
 	* lib/gdb.exp (gdb_remote_download): Don't pass $tofile to
 	remote_download if it is empty.
 

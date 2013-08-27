@@ -275,8 +275,8 @@ show_symbol_print (struct ui_file *file, int from_tty,
    we want to print scalar arguments, but not aggregate arguments.
    This function distinguishes between the two.  */
 
-static int
-scalar_type_p (struct type *type)
+int
+val_print_scalar_type_p (struct type *type)
 {
   CHECK_TYPEDEF (type);
   while (TYPE_CODE (type) == TYPE_CODE_REF)
@@ -770,7 +770,7 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
   /* Handle summary mode.  If the value is a scalar, print it;
      otherwise, print an ellipsis.  */
-  if (options->summary && !scalar_type_p (type))
+  if (options->summary && !val_print_scalar_type_p (type))
     {
       fprintf_filtered (stream, "...");
       return;
@@ -802,7 +802,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
 
   if (value_entirely_optimized_out (val))
     {
-      if (options->summary && !scalar_type_p (value_type (val)))
+      if (options->summary && !val_print_scalar_type_p (value_type (val)))
 	fprintf_filtered (stream, "...");
       else
 	val_print_optimized_out (stream);

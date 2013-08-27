@@ -353,6 +353,26 @@ value_entirely_available (struct value *value)
   return 0;
 }
 
+int
+value_entirely_unavailable (struct value *value)
+{
+  /* We can only tell whether the whole value is available when we try
+     to read it.  */
+  if (value->lazy)
+    value_fetch_lazy (value);
+
+  if (VEC_length (range_s, value->unavailable) == 1)
+    {
+      struct range *t = VEC_index (range_s, value->unavailable, 0);
+
+      if (t->offset == 0
+	  && t->length == TYPE_LENGTH (value_enclosing_type (value)))
+	return 1;
+    }
+
+  return 0;
+}
+
 void
 mark_value_bytes_unavailable (struct value *value, int offset, int length)
 {

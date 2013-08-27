@@ -1,3 +1,10 @@
+2013-08-27  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Stack Manipulation) <-stack-list-locals>:
+	Document new --skip-unavailable option.
+	<-stack-list-variables>: Document new --skip-unavailable option.
+
 2013-08-26  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Maintenance Commands): "maint print objfiles" now takes
