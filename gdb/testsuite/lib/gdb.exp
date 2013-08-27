@@ -3296,7 +3296,12 @@ proc gdb_remote_download {dest fromfile {tofile {}}} {
     if {$dest == "host" && ![is_remote host] && $tofile == ""} {
 	set tofile [standard_output_file [file tail $fromfile]]
     }
-    return [remote_download $dest $fromfile $tofile]
+
+    if { $tofile == "" } {
+	return [remote_download $dest $fromfile]
+    } else {
+	return [remote_download $dest $fromfile $tofile]
+    }
 }
 
 # gdb_download

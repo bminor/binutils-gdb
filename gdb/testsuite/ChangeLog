@@ -1,3 +1,8 @@
+2013-08-27  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (gdb_remote_download): Don't pass $tofile to
+	remote_download if it is empty.
+
 2013-08-26  Doug Evans  <dje@google.com>
 
 	PR symtab/15885
