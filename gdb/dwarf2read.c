@@ -439,7 +439,7 @@ struct dwarf2_cu
      compilation units are cached...  */
   struct dwarf2_per_cu_data *read_in_chain;
 
-  /* Backchain to our per_cu entry if the tree has been built.  */
+  /* Backlink to our per_cu entry.  */
   struct dwarf2_per_cu_data *per_cu;
 
   /* How many compilation units ago was this CU last referenced?  */
@@ -610,7 +610,8 @@ struct dwarf2_per_cu_data
      DW_TAG_imported_unit, so we just use the same mechanism: For
      .gdb_index version <=7 this also records the TUs that the CU referred
      to.  Concurrently with this change gdb was modified to emit version 8
-     indices so we only pay a price for gold generated indices.  */
+     indices so we only pay a price for gold generated indices.
+     http://sourceware.org/bugzilla/show_bug.cgi?id=15021.  */
   VEC (dwarf2_per_cu_ptr) *imported_symtabs;
 };
 
@@ -1736,10 +1737,6 @@ static void dwarf2_release_queue (void *dummy);
 
 static void queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 			     enum language pretend_language);
-
-static int maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
-				  struct dwarf2_per_cu_data *per_cu,
-				  enum language pretend_language);
 
 static void process_queue (void);
 
@@ -6946,7 +6943,10 @@ queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
 /* THIS_CU has a reference to PER_CU.  If necessary, load the new compilation
    unit and add it to our queue.
    The result is non-zero if PER_CU was queued, otherwise the result is zero
-   meaning either PER_CU is already queued or it is already loaded.  */
+   meaning either PER_CU is already queued or it is already loaded.
+
+   N.B. There is an invariant here that if a CU is queued then it is loaded.
+   The caller is required to load PER_CU if we return non-zero.  */
 
 static int
 maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
@@ -7666,7 +7666,7 @@ process_imported_unit_die (struct die_info *die, struct dwarf2_cu *cu)
       is_dwz = (attr->form == DW_FORM_GNU_ref_alt || cu->per_cu->is_dwz);
       per_cu = dwarf2_find_containing_comp_unit (offset, is_dwz, cu->objfile);
 
-      /* Queue the unit, if needed.  */
+      /* If necessary, add it to the queue and load its DIEs.  */
       if (maybe_queue_comp_unit (cu, per_cu, cu->language))
 	load_full_comp_unit (per_cu, cu->language);
 
@@ -18365,9 +18365,8 @@ follow_die_sig_1 (struct die_info *src_die, struct signatured_type *sig_type,
   if (maybe_queue_comp_unit (*ref_cu, &sig_type->per_cu, language_minimal))
     read_signatured_type (sig_type);
 
-  gdb_assert (sig_type->per_cu.cu != NULL);
-
   sig_cu = sig_type->per_cu.cu;
+  gdb_assert (sig_cu != NULL);
   gdb_assert (sig_type->type_offset_in_section.sect_off != 0);
   temp_die.offset = sig_type->type_offset_in_section;
   die = htab_find_with_hash (sig_cu->die_hash, &temp_die,

@@ -1,3 +1,11 @@
+2013-08-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (struct dwarf2_cu): Tweak comment.
+	(struct dwarf2_per_cu_data): Ditto.
+	(maybe_queue_comp_unit): Delete forward decl.  Add comment.
+	(process_imported_unit_die): Ditto.
+	(follow_die_sig_1): Simplify assert.
+
 2013-08-27  Pedro Alves  <palves@redhat.com>
 
 	* windows-nat.c (windows_xfer_memory): Adjust prototype to follow
