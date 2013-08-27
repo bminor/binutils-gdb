@@ -1,5 +1,13 @@
 2013-08-27  Pedro Alves  <palves@redhat.com>
 
+	* windows-nat.c (windows_xfer_memory): Adjust prototype to follow
+	xfer_partial's interface.  Return TARGET_XFER_E_IO on error.
+	(windows_xfer_partial): Defer TARGET_OBJECT_MEMORY handling to
+	windows_xfer_memory directly.
+	(init_windows_ops): Don't install a deprecated_xfer_memory method.
+
+2013-08-27  Pedro Alves  <palves@redhat.com>
+
 	* darwin-nat.c (darwin_xfer_memory): Delete.
 	(_initialize_darwin_inferior): Don't install a
 	deprecated_xfer_memory method.

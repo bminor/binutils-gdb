@@ -2315,20 +2315,23 @@ windows_stop (ptid_t ptid)
   registers_changed ();		/* refresh register state */
 }
 
-static int
-windows_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
-		   int write, struct mem_attrib *mem,
-		   struct target_ops *target)
+/* Helper for windows_xfer_partial that handles memory transfers.
+   Arguments are like target_xfer_partial.  */
+
+static LONGEST
+windows_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
+		     ULONGEST memaddr, LONGEST len)
 {
   SIZE_T done = 0;
-  if (write)
+  BOOL success;
+
+  if (writebuf != NULL)
     {
       DEBUG_MEM (("gdb: write target memory, %d bytes at %s\n",
 		  len, core_addr_to_string (memaddr)));
-      if (!WriteProcessMemory (current_process_handle,
-			       (LPVOID) (uintptr_t) memaddr, our,
-			       len, &done))
-	done = 0;
+      success = WriteProcessMemory (current_process_handle,
+				    (LPVOID) (uintptr_t) memaddr, writebuf,
+				    len, &done);
       FlushInstructionCache (current_process_handle,
 			     (LPCVOID) (uintptr_t) memaddr, len);
     }
@@ -2336,12 +2339,11 @@ windows_xfer_memory (CORE_ADDR memaddr, gdb_byte *our, int len,
     {
       DEBUG_MEM (("gdb: read target memory, %d bytes at %s\n",
 		  len, core_addr_to_string (memaddr)));
-      if (!ReadProcessMemory (current_process_handle,
-			      (LPCVOID) (uintptr_t) memaddr, our,
-			      len, &done))
-	done = 0;
+      success = ReadProcessMemory (current_process_handle,
+				   (LPCVOID) (uintptr_t) memaddr, readbuf,
+				   len, &done);
     }
-  return done;
+  return success ? done : TARGET_XFER_E_IO;
 }
 
 static void
@@ -2442,13 +2444,7 @@ windows_xfer_partial (struct target_ops *ops, enum target_object object,
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
-      if (readbuf)
-	return (*ops->deprecated_xfer_memory) (offset, readbuf,
-					       len, 0/*read*/, NULL, ops);
-      if (writebuf)
-	return (*ops->deprecated_xfer_memory) (offset, (gdb_byte *) writebuf,
-					       len, 1/*write*/, NULL, ops);
-      return -1;
+      return windows_xfer_memory (readbuf, writebuf, offset, len);
 
     case TARGET_OBJECT_LIBRARIES:
       return windows_xfer_shared_libraries (ops, object, annex, readbuf,
@@ -2502,7 +2498,6 @@ init_windows_ops (void)
   windows_ops.to_fetch_registers = windows_fetch_inferior_registers;
   windows_ops.to_store_registers = windows_store_inferior_registers;
   windows_ops.to_prepare_to_store = windows_prepare_to_store;
-  windows_ops.deprecated_xfer_memory = windows_xfer_memory;
   windows_ops.to_xfer_partial = windows_xfer_partial;
   windows_ops.to_files_info = windows_files_info;
   windows_ops.to_insert_breakpoint = memory_insert_breakpoint;
