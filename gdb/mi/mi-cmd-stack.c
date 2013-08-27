@@ -54,17 +54,6 @@ mi_cmd_enable_frame_filters (char *command, char **argv, int argc)
   frame_filters = 1;
 }
 
-/* Parse the --no-frame-filters option in commands where we cannot use
-   mi_getopt. */
-static int
-parse_no_frames_option (const char *arg)
-{
-  if (arg && (strcmp (arg, "--no-frame-filters") == 0))
-    return 1;
-
-  return 0;
-}
-
 /* Print a list of the stack frames.  Args can be none, in which case
    we want to print the whole backtrace, or a pair of numbers
    specifying the frame numbers at which to start and stop the
@@ -284,19 +273,42 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
   enum print_values print_values;
   struct ui_out *uiout = current_uiout;
   int raw_arg = 0;
+  int oind = 0;
   enum py_bt_status result = PY_BT_ERROR;
+  enum opt
+  {
+    NO_FRAME_FILTERS,
+  };
+  static const struct mi_opt opts[] =
+    {
+      {"-no-frame-filters", NO_FRAME_FILTERS, 0},
+      { 0, 0, 0 }
+    };
 
-  if (argc > 0)
-    raw_arg = parse_no_frames_option (argv[0]);
+  while (1)
+    {
+      char *oarg;
+      int opt = mi_getopt_allow_unknown ("-stack-list-args", argc, argv,
+					 opts, &oind, &oarg);
 
-  if (argc < 1 || (argc > 3 && ! raw_arg) || (argc == 2 && ! raw_arg))
-    error (_("-stack-list-arguments: Usage: " \
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+	{
+	case NO_FRAME_FILTERS:
+	  raw_arg = oind;
+	  break;
+	}
+    }
+
+  if (argc - oind != 1 && argc - oind != 3)
+    error (_("-stack-list-arguments: Usage: "	\
 	     "[--no-frame-filters] PRINT_VALUES [FRAME_LOW FRAME_HIGH]"));
 
-  if (argc >= 3)
+  if (argc - oind == 3)
     {
-      frame_low = atoi (argv[1 + raw_arg]);
-      frame_high = atoi (argv[2 + raw_arg]);
+      frame_low = atoi (argv[1 + oind]);
+      frame_high = atoi (argv[2 + oind]);
     }
   else
     {
@@ -306,7 +318,7 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
       frame_high = -1;
     }
 
-  print_values = mi_parse_print_values (argv[raw_arg]);
+  print_values = mi_parse_print_values (argv[oind]);
 
   /* Let's position fi on the frame at which to start the
      display. Could be the innermost frame if the whole stack needs

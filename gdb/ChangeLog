@@ -1,3 +1,15 @@
+2013-08-27  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-cmd-stack.c (parse_no_frames_option): Remove.
+	(mi_cmd_stack_list_args): Use mi_getopt_silent to handle
+	options.
+	* mi/mi-getopt.c (mi_getopt): Remove.
+	(mi_getopt_1): Renamed from mi_getopt.  Add one parameter
+	'error_on_unknown'.
+	(mi_getopt): Call mi_getopt_1.
+	(mi_getopt_silent): New.
+	* mi/mi-getopt.h (mi_getopt_silent): Declare.
+
 2013-08-26  Doug Evans  <dje@google.com>
 
 	PR symtab/15885
