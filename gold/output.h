@@ -1,6 +1,7 @@
 // output.h -- manage the output file for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2013
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -4596,7 +4597,7 @@ class Output_segment
   // address of the immediately following segment.  Update *POFF and
   // *PSHNDX.  This should only be called for a PT_LOAD segment.
   uint64_t
-  set_section_addresses(Layout*, bool reset, uint64_t addr,
+  set_section_addresses(const Target*, Layout*, bool reset, uint64_t addr,
 			unsigned int* increase_relro, bool* has_relro,
 			off_t* poff, unsigned int* pshndx);
 

@@ -293,7 +293,8 @@ Hash_task::is_runnable()
 void
 Layout::Relaxation_debug_check::check_output_data_for_reset_values(
     const Layout::Section_list& sections,
-    const Layout::Data_list& special_outputs)
+    const Layout::Data_list& special_outputs,
+    const Layout::Data_list& relax_outputs)
 {
   for(Layout::Section_list::const_iterator p = sections.begin();
       p != sections.end();
@@ -304,6 +305,8 @@ Layout::Relaxation_debug_check::check_output_data_for_reset_values(
       p != special_outputs.end();
       ++p)
     gold_assert((*p)->address_and_file_offset_have_reset_values());
+
+  gold_assert(relax_outputs.empty());
 }
 
 // Save information of SECTIONS for checking later.
@@ -428,6 +431,7 @@ Layout::Layout(int number_of_input_files, Script_options* script_options)
     section_list_(),
     unattached_section_list_(),
     special_output_list_(),
+    relax_output_list_(),
     section_headers_(NULL),
     tls_segment_(NULL),
     relro_segment_(NULL),
@@ -2341,6 +2345,20 @@ Layout::clean_up_after_relaxation()
        ++p)
     delete *p;
   this->script_output_section_data_list_.clear();
+
+  // Special-case fill output objects are recreated each time through
+  // the relaxation loop.
+  this->reset_relax_output();
+}
+
+void
+Layout::reset_relax_output()
+{
+  for (Data_list::const_iterator p = this->relax_output_list_.begin();
+       p != this->relax_output_list_.end();
+       ++p)
+    delete *p;
+  this->relax_output_list_.clear();
 }
 
 // Prepare for relaxation.
@@ -2363,7 +2381,8 @@ Layout::prepare_for_relaxation()
 
   if (is_debugging_enabled(DEBUG_RELAXATION))
     this->relaxation_debug_check_->check_output_data_for_reset_values(
-	this->section_list_, this->special_output_list_);
+	this->section_list_, this->special_output_list_,
+	this->relax_output_list_);
 
   // Also enable recording of output section data from scripts.
   this->record_output_section_data_from_script_ = true;
@@ -3540,7 +3559,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 	  unsigned int shndx_hold = *pshndx;
 	  bool has_relro = false;
-	  uint64_t new_addr = (*p)->set_section_addresses(this, false, addr,
+	  uint64_t new_addr = (*p)->set_section_addresses(target, this,
+							  false, addr,
 							  &increase_relro,
 							  &has_relro,
 							  &off, pshndx);
@@ -3581,7 +3601,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 		    increase_relro = 0;
 		  has_relro = false;
 
-		  new_addr = (*p)->set_section_addresses(this, true, addr,
+		  new_addr = (*p)->set_section_addresses(target, this,
+							 true, addr,
 							 &increase_relro,
 							 &has_relro,
 							 &off, pshndx);
@@ -3617,6 +3638,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
       // so they land after the segments starting at LOAD_SEG.
       off = align_file_offset(off, 0, target->abi_pagesize());
 
+      this->reset_relax_output();
+
       for (Segment_list::iterator p = this->segment_list_.begin();
 	   *p != load_seg;
 	   ++p)
@@ -3630,8 +3653,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	      bool has_relro = false;
 	      const uint64_t old_addr = (*p)->vaddr();
 	      const uint64_t old_end = old_addr + (*p)->memsz();
-	      uint64_t new_addr = (*p)->set_section_addresses(this, true,
-							      old_addr,
+	      uint64_t new_addr = (*p)->set_section_addresses(target, this,
+							      true, old_addr,
 							      &increase_relro,
 							      &has_relro,
 							      &off,
@@ -5266,6 +5289,13 @@ Layout::write_data(const Symbol_table* symtab, Output_file* of) const
   // Write out the Output_data which are not in an Output_section.
   for (Data_list::const_iterator p = this->special_output_list_.begin();
        p != this->special_output_list_.end();
+       ++p)
+    (*p)->write(of);
+
+  // Write out the Output_data which are not in an Output_section
+  // and are regenerated in each iteration of relaxation.
+  for (Data_list::const_iterator p = this->relax_output_list_.begin();
+       p != this->relax_output_list_.end();
        ++p)
     (*p)->write(of);
 }
