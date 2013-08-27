@@ -1917,26 +1917,6 @@ darwin_read_dyld_info (task_t task, CORE_ADDR addr, gdb_byte *rdaddr,
 #endif
 
 
-/* Return 0 on failure, number of bytes handled otherwise.  TARGET
-   is ignored.  */
-static int
-darwin_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
-		    struct mem_attrib *attrib, struct target_ops *target)
-{
-  struct inferior *inf = current_inferior ();
-  task_t task = inf->private->task;
-
-  if (task == MACH_PORT_NULL)
-    return 0;
-
-  inferior_debug (8, _("darwin_xfer_memory(%s, %d, %c)\n"),
-		  core_addr_to_string (memaddr), len, write ? 'w' : 'r');
-
-  if (write)
-    return darwin_read_write_inferior (task, memaddr, NULL, myaddr, len);
-  else
-    return darwin_read_write_inferior (task, memaddr, myaddr, NULL, len);
-}
 
 static LONGEST
 darwin_xfer_partial (struct target_ops *ops,
@@ -2123,7 +2103,6 @@ _initialize_darwin_inferior (void)
   darwin_ops->to_pid_to_str = darwin_pid_to_str;
   darwin_ops->to_pid_to_exec_file = darwin_pid_to_exec_file;
   darwin_ops->to_load = NULL;
-  darwin_ops->deprecated_xfer_memory = darwin_xfer_memory;
   darwin_ops->to_xfer_partial = darwin_xfer_partial;
   darwin_ops->to_supports_multi_process = darwin_supports_multi_process;
   darwin_ops->to_get_ada_task_ptid = darwin_get_ada_task_ptid;
