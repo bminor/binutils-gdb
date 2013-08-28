@@ -1,3 +1,15 @@
+2013-08-28  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* event-top.c (gdb_setup_readline): Call stderr_fileopen
+	instead of stdio_fileopen.
+	* main.c (captured_main) [__MINGW32__]: Set stderr unbuffered.
+	.Call stderr_fileopen instead of stdio_fileopen.
+	* ui-file.c [__MINGW32__] (stderr_file_write): New function.
+	[__MINGW32__] (stderr_file_fputs): New function.
+	(stderr_fileopen): New function.
+	* ui-file.h (stderr_fileopen): Declare.
+
 2013-08-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct dwarf2_cu): Tweak comment.

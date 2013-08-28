@@ -129,6 +129,10 @@ extern struct ui_file *mem_fileopen (void);
 /* Open/create a STDIO based UI_FILE using the already open FILE.  */
 extern struct ui_file *stdio_fileopen (FILE *file);
 
+/* Create a ui_file from stderr.  */
+extern struct ui_file *stderr_fileopen (void);
+
+
 /* Open NAME returning an STDIO based UI_FILE.  */
 extern struct ui_file *gdb_fopen (const char *name, const char *mode);
 

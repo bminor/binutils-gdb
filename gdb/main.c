@@ -375,8 +375,15 @@ captured_main (void *data)
   saved_command_line[0] = '\0';
   instream = stdin;
 
+#ifdef __MINGW32__
+  /* Ensure stderr is unbuffered.  A Cygwin pty or pipe is implemented
+     as a Windows pipe, and Windows buffers on pipes.  */
+  setvbuf (stderr, NULL, _IONBF, BUFSIZ);
+#endif
+
   gdb_stdout = stdio_fileopen (stdout);
-  gdb_stderr = stdio_fileopen (stderr);
+  gdb_stderr = stderr_fileopen ();
+
   gdb_stdlog = gdb_stderr;	/* for moment */
   gdb_stdtarg = gdb_stderr;	/* for moment */
   gdb_stdin = stdio_fileopen (stdin);

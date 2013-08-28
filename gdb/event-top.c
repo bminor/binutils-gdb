@@ -955,7 +955,7 @@ gdb_setup_readline (void)
      time.  */
   if (!batch_silent)
     gdb_stdout = stdio_fileopen (stdout);
-  gdb_stderr = stdio_fileopen (stderr);
+  gdb_stderr = stderr_fileopen ();
   gdb_stdlog = gdb_stderr;  /* for moment */
   gdb_stdtarg = gdb_stderr; /* for moment */
   gdb_stdtargerr = gdb_stderr; /* for moment */
