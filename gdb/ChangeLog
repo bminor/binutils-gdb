@@ -1,3 +1,21 @@
+2013-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/15415
+	* corefile.c (get_exec_file): Use exec_filename.
+	* defs.h (OPF_DISABLE_REALPATH): New definition.  Add new comment.
+	* exec.c (exec_close): Free EXEC_FILENAME.
+	(exec_file_attach): New variable canonical_pathname.  Use
+	OPF_DISABLE_REALPATH.  Call gdb_realpath explicitly.  Set
+	EXEC_FILENAME.
+	* exec.h (exec_filename): New.
+	* inferior.c (print_inferior, inferior_command): Use
+	PSPACE_EXEC_FILENAME.
+	* mi/mi-main.c (print_one_inferior): Likewise.
+	* progspace.c (clone_program_space, print_program_space): Likewise.
+	* progspace.h (struct program_space): New field pspace_exec_filename.
+	* source.c (openp): Describe OPF_DISABLE_REALPATH.  New variable
+	realpath_fptr, initialize it from OPF_DISABLE_REALPATH, use it.
+
 2013-08-14  Yao Qi  <yao@codesourcery.com>
 
 	PR gdb/15837:

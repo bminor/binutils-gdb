@@ -587,9 +587,8 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
       ui_out_field_string (uiout, "target-id",
 			   inferior_pid_to_str (inf->pid));
 
-      if (inf->pspace->ebfd)
-	ui_out_field_string (uiout, "exec",
-			     bfd_get_filename (inf->pspace->ebfd));
+      if (inf->pspace->pspace_exec_filename != NULL)
+	ui_out_field_string (uiout, "exec", inf->pspace->pspace_exec_filename);
       else
 	ui_out_field_skip (uiout, "exec");
 
@@ -703,8 +702,8 @@ inferior_command (char *args, int from_tty)
   printf_filtered (_("[Switching to inferior %d [%s] (%s)]\n"),
 		   inf->num,
 		   inferior_pid_to_str (inf->pid),
-		   (inf->pspace->ebfd
-		    ? bfd_get_filename (inf->pspace->ebfd)
+		   (inf->pspace->pspace_exec_filename != NULL
+		    ? inf->pspace->pspace_exec_filename
 		    : _("<noexec>")));
 
   if (inf->pid != 0)

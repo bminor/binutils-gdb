@@ -196,8 +196,8 @@ clone_program_space (struct program_space *dest, struct program_space *src)
 
   set_current_program_space (dest);
 
-  if (src->ebfd != NULL)
-    exec_file_attach (bfd_get_filename (src->ebfd), 0);
+  if (src->pspace_exec_filename != NULL)
+    exec_file_attach (src->pspace_exec_filename, 0);
 
   if (src->symfile_object_file != NULL)
     symbol_file_add_main (src->symfile_object_file->name, 0);
@@ -336,9 +336,8 @@ print_program_space (struct ui_out *uiout, int requested)
 
       ui_out_field_int (uiout, "id", pspace->num);
 
-      if (pspace->ebfd)
-	ui_out_field_string (uiout, "exec",
-			     bfd_get_filename (pspace->ebfd));
+      if (pspace->pspace_exec_filename)
+	ui_out_field_string (uiout, "exec", pspace->pspace_exec_filename);
       else
 	ui_out_field_skip (uiout, "exec");
 
