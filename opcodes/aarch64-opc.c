@@ -1063,7 +1063,8 @@ aarch64_logical_immediate_p (uint64_t value, int is32, aarch64_insn *encoding)
       /* Allow all zeros or all ones in top 32-bits, so that
 	 constant expressions like ~1 are permitted.  */
       if (value >> 32 != 0 && value >> 32 != 0xffffffff)
-	return 0xffffffff;
+	return FALSE;
+
       /* Replicate the 32 lower bits to the 32 upper bits.  */
       value &= 0xffffffff;
       value |= value << 32;

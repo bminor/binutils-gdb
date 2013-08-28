@@ -1,3 +1,9 @@
+2013-08-28  Nick Clifton  <nickc@redhat.com>
+
+	* gas/aarch64/illegal.s: Add illegal constant for logical
+	operation.
+	* gas/aarch64/illegal.l: Add expected error message.
+
 2013-08-23  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gas/testsuite/gas/mips/micromips-insn32.d: Adjust for delay

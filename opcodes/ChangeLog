@@ -1,3 +1,8 @@
+2013-08-28  Nick Clifton  <nickc@redhat.com>
+
+	* aarch64-opc.c (aarch64_logical_immediate_p): Return FALSE if the
+	immediate is not suitable for the 32-bit ABI.
+
 2013-08-23  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* micromips-opc.c (micromips_opcodes): Use RD_4 for "alnv.ps",

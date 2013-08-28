@@ -547,4 +547,7 @@
 	// No 16-byte relocation
 	ldr	q0, =one_label
 
+	ands	w0, w24, #0xffeefffffffffffd
+
 one_label:
+	

@@ -551,4 +551,5 @@
 [^:]*:543: Error: .*`fmov s0,#0x11'
 [^:]*:544: Error: .*`fmov s0,#0xC0280000C1400000'
 [^:]*:545: Error: .*`fmov d0,#0xC02f800000000000'
-[^:]*:550: Error: .*
+[^:]*:550: Error: .*`ands w0,w24,#0xffeefffffffffffd'
+[^:]*:553: Error: .*
