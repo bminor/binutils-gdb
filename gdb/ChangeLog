@@ -1,3 +1,7 @@
+2013-08-28  Will Newton  <will.newton@linaro.org>
+
+	* common/linux-ptrace.c: Include stdint.h unconditionally.
+
 2013-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.

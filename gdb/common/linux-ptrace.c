@@ -30,6 +30,8 @@
 #include "gdb_assert.h"
 #include "gdb_wait.h"
 
+#include <stdint.h>
+
 /* Stores the currently supported ptrace options.  A value of
    -1 means we did not check for features yet.  A value of 0 means
    there are no supported features.  */
@@ -64,7 +66,6 @@ extern void (linux_ptrace_test_ret_to_nx_instr) (void);
 #include <sys/reg.h>
 #include <sys/mman.h>
 #include <signal.h>
-#include <stdint.h>
 
 #endif /* defined __i386__ || defined __x86_64__ */
 
