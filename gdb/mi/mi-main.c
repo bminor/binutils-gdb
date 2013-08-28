@@ -573,10 +573,10 @@ print_one_inferior (struct inferior *inferior, void *xdata)
       if (inferior->pid != 0)
 	ui_out_field_int (uiout, "pid", inferior->pid);
 
-      if (inferior->pspace->ebfd)
+      if (inferior->pspace->pspace_exec_filename != NULL)
 	{
 	  ui_out_field_string (uiout, "executable",
-			       bfd_get_filename (inferior->pspace->ebfd));
+			       inferior->pspace->pspace_exec_filename);
 	}
 
       data.cores = 0;

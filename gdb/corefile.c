@@ -182,8 +182,8 @@ validate_files (void)
 char *
 get_exec_file (int err)
 {
-  if (exec_bfd)
-    return bfd_get_filename (exec_bfd);
+  if (exec_filename)
+    return exec_filename;
   if (!err)
     return NULL;
 

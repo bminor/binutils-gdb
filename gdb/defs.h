@@ -346,8 +346,10 @@ extern const char *pc_prefix (CORE_ADDR);
 
 /* From source.c */
 
+/* See openp function definition for their description.  */
 #define OPF_TRY_CWD_FIRST     0x01
 #define OPF_SEARCH_IN_PATH    0x02
+#define OPF_DISABLE_REALPATH  0x04
 
 extern int openp (const char *, int, const char *, int, char **);
 

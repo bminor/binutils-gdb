@@ -102,6 +102,9 @@ exec_close (void)
       exec_bfd_mtime = 0;
 
       remove_target_sections (&exec_bfd);
+
+      xfree (exec_filename);
+      exec_filename = NULL;
     }
 }
 
@@ -179,12 +182,13 @@ exec_file_attach (char *filename, int from_tty)
   else
     {
       struct cleanup *cleanups;
-      char *scratch_pathname;
+      char *scratch_pathname, *canonical_pathname;
       int scratch_chan;
       struct target_section *sections = NULL, *sections_end = NULL;
       char **matching;
 
-      scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, filename,
+      scratch_chan = openp (getenv ("PATH"),
+			    OPF_TRY_CWD_FIRST | OPF_DISABLE_REALPATH, filename,
 		   write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY,
 			    &scratch_pathname);
 #if defined(__GO32__) || defined(_WIN32) || defined(__CYGWIN__)
@@ -193,7 +197,9 @@ exec_file_attach (char *filename, int from_tty)
 	  char *exename = alloca (strlen (filename) + 5);
 
 	  strcat (strcpy (exename, filename), ".exe");
-	  scratch_chan = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST, exename,
+	  scratch_chan = openp (getenv ("PATH"),
+				OPF_TRY_CWD_FIRST | OPF_DISABLE_REALPATH,
+				exename,
 	     write_files ? O_RDWR | O_BINARY : O_RDONLY | O_BINARY,
 	     &scratch_pathname);
 	}
@@ -203,17 +209,25 @@ exec_file_attach (char *filename, int from_tty)
 
       cleanups = make_cleanup (xfree, scratch_pathname);
 
+      /* gdb_bfd_open (and its variants) prefers canonicalized pathname for
+	 better BFD caching.  */
+      canonical_pathname = gdb_realpath (scratch_pathname);
+      make_cleanup (xfree, canonical_pathname);
+
       if (write_files)
-	exec_bfd = gdb_bfd_fopen (scratch_pathname, gnutarget,
+	exec_bfd = gdb_bfd_fopen (canonical_pathname, gnutarget,
 				  FOPEN_RUB, scratch_chan);
       else
-	exec_bfd = gdb_bfd_open (scratch_pathname, gnutarget, scratch_chan);
+	exec_bfd = gdb_bfd_open (canonical_pathname, gnutarget, scratch_chan);
 
       if (!exec_bfd)
 	{
 	  error (_("\"%s\": could not open as an executable file: %s"),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
+
+      gdb_assert (exec_filename == NULL);
+      exec_filename = xstrdup (scratch_pathname);
 
       if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
 	{
