@@ -28,6 +28,7 @@
 #endif
 #include "gdb_wait.h"
 #include "btrace-common.h"
+#include "filestuff.h"
 
 /* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of
    `vCont'.  Note the multi-process extensions made `vCont' a
@@ -2849,6 +2850,10 @@ main (int argc, char *argv[])
       gdbserver_usage (stderr);
       exit (1);
     }
+
+  /* Remember stdio descriptors.  LISTEN_DESC must not be listed, it will be
+     opened by remote_prepare.  */
+  notice_open_fds ();
 
   /* We need to know whether the remote connection is stdio before
      starting the inferior.  Inferiors created in this scenario have

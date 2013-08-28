@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include "gdb_wait.h"
 #include <signal.h>
+#include "filestuff.h"
 
 int using_threads = 1;
 
@@ -239,6 +240,8 @@ lynx_create_inferior (char *program, char **allargs)
   if (pid == 0)
     {
       int pgrp;
+
+      close_most_fds ();
 
       /* Switch child to its own process group so that signals won't
          directly affect gdbserver. */

@@ -1,3 +1,15 @@
+2013-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR server/15604
+	* linux-low.c: Include filestuff.h.
+	(linux_create_inferior) <pid == 0>: Call close_most_fds.
+	* lynx-low.c: Include filestuff.h.
+	(lynx_create_inferior) <pid == 0>: Call close_most_fds.
+	* server.c: Include filestuff.h.
+	(main): Call notice_open_fds.
+	* spu-low.c: Include filestuff.h.
+	(spu_create_inferior) <pid == 0>: Call close_most_fds.
+
 2013-08-22  Luis Machado  <lgustavo@codesourcery.com>
 
 	* Makefile.in: Explain why ../target and ../nat are not

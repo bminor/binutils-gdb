@@ -29,6 +29,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include <sys/syscall.h>
+#include "filestuff.h"
 
 /* Some older glibc versions do not define this.  */
 #ifndef __WNOTHREAD
@@ -274,6 +275,7 @@ spu_create_inferior (char *program, char **allargs)
 
   if (pid == 0)
     {
+      close_most_fds ();
       ptrace (PTRACE_TRACEME, 0, 0, 0);
 
       setpgid (0, 0);
