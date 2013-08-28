@@ -1,3 +1,8 @@
+2013-08-28  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/gdb-index.exp (add_gdb_index): Use explicit test name
+	when saving index.
+
 2013-08-27  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.trace/entry-values.exp: Test unavailable entry value is

@@ -36,7 +36,8 @@ proc add_gdb_index { program } {
     set index_file ${program}.gdb-index
     verbose -log "index_file: ${index_file}"
     remote_file host delete ${index_file}
-    gdb_test_no_output "save gdb-index [file dirname ${index_file}]"
+    gdb_test_no_output "save gdb-index [file dirname ${index_file}]" \
+	"save gdb-index for file [file tail ${program}]"
 
     # No point in continuing if generating the index failed.
     # N.B.: There are times when gdb won't create an index, and it's not a
