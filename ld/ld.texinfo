@@ -2318,7 +2318,7 @@ file offsets which are multiples of this number.  This defaults to
 @item --heap @var{reserve}
 @itemx --heap @var{reserve},@var{commit}
 Specify the number of bytes of memory to reserve (and optionally commit)
-to be used as heap for this program.  The default is 1Mb reserved, 4K
+to be used as heap for this program.  The default is 1MB reserved, 4K
 committed.
 [This option is specific to the i386 PE targeted port of the linker]
 
@@ -2602,7 +2602,7 @@ addresses which are a multiple of this number.  Defaults to 0x1000.
 @item --stack @var{reserve}
 @itemx --stack @var{reserve},@var{commit}
 Specify the number of bytes of memory to reserve (and optionally commit)
-to be used as stack for this program.  The default is 2Mb reserved, 4K
+to be used as stack for this program.  The default is 2MB reserved, 4K
 committed.
 [This option is specific to the i386 PE targeted port of the linker]
 
