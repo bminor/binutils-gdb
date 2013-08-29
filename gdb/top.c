@@ -1153,7 +1153,7 @@ Type \"show configuration\" for configuration details.");
 resources online at:\n<http://www.gnu.org/software/gdb/documentation/>.\n"));
   fprintf_filtered (stream, _("For help, type \"help\".\n"));
   fprintf_filtered (stream, _("Type \"apropos word\" to search for \
-commands related to \"word\".\n"));
+commands related to \"word\"."));
 }
 
 /* Print the details of GDB build-time configuration.  */
