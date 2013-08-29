@@ -3188,10 +3188,7 @@ value_from_contents_and_address (struct type *type,
   if (valaddr == NULL)
     v = allocate_value_lazy (type);
   else
-    {
-      v = allocate_value (type);
-      memcpy (value_contents_raw (v), valaddr, TYPE_LENGTH (type));
-    }
+    v = value_from_contents (type, valaddr);
   set_value_address (v, address);
   VALUE_LVAL (v) = lval_memory;
   return v;

@@ -1,3 +1,8 @@
+2013-08-29  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* value.c (value_from_contents_and_address): Replace allocate_value and
+	memcpy with value_from_contents.
+
 2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/py-framefilter.c (py_print_frame): Remove usage of
