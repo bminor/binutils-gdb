@@ -59,7 +59,7 @@ gdb_test_no_output "set python print-stack full" \
 # Load global frame-filters
 set remote_python_file [gdb_remote_download host \
 			    ${srcdir}/${subdir}/${testfile}.py]
-gdb_test_no_output "python execfile ('${remote_python_file}')" \
+gdb_test_no_output "python exec (open ('${remote_python_file}').read ())" \
     "Load python file"
 
 gdb_breakpoint [gdb_get_line_number "Backtrace end breakpoint"]
@@ -221,7 +221,7 @@ gdb_test_no_output "set python print-stack full" \
 # Load global frame-filters
 set remote_python_file [gdb_remote_download host \
 			    ${srcdir}/${subdir}/${testfile}.py]
-gdb_test_no_output "python execfile ('${remote_python_file}')" \
+gdb_test_no_output "python exec (open ('${remote_python_file}').read ())" \
     "Load python file for no debuginfo tests"
 
 # Disable Reverse

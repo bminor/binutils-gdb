@@ -108,13 +108,15 @@ def return_list(name):
     # cannot return a combined dictionary as keys() may clash in
     # between different dictionaries.  As we just want all the frame
     # filters to enable/disable them all, just return the combined
-    # items() as a list.
+    # items() as a chained iterator of dictionary values.
     if name == "all":
-        all_dicts = gdb.frame_filters.values()
-        all_dicts = all_dicts + gdb.current_progspace().frame_filters.values()
+        glob = gdb.frame_filters.values()
+        prog = gdb.current_progspace().frame_filters.values()
+        return_iter = itertools.chain(glob, prog)
         for objfile in gdb.objfiles():
-            all_dicts = all_dicts + objfile.frame_filters.values()
-            return all_dicts
+            return_iter = itertools.chain(return_iter, objfile.frame_filters.values())
+
+        return return_iter
 
     if name == "global":
         return gdb.frame_filters
@@ -140,14 +142,7 @@ def _sort_list():
                      execute.
     """
 
-    all_filters = []
-    for objfile in gdb.objfiles():
-        all_filters = all_filters + objfile.frame_filters.values()
-    cp = gdb.current_progspace()
-
-    all_filters = all_filters + cp.frame_filters.values()
-    all_filters = all_filters + gdb.frame_filters.values()
-
+    all_filters = return_list("all")
     sorted_frame_filters = sorted(all_filters, key = get_priority,
                                   reverse = True)
 
@@ -180,7 +175,7 @@ def execute_frame_filters(frame, frame_low, frame_high):
     """
 
     # Get a sorted list of frame filters.
-    sorted_list = _sort_list()
+    sorted_list = list(_sort_list())
 
     # Check to see if there are any frame-filters.  If not, just
     # return None and let default backtrace printing occur.
@@ -189,9 +184,13 @@ def execute_frame_filters(frame, frame_low, frame_high):
 
     frame_iterator = FrameIterator(frame)
 
-    # Apply a basic frame decorator to all gdb.Frames.  This unifies the
-    # interface.
-    frame_iterator = itertools.imap(FrameDecorator, frame_iterator)
+    # Apply a basic frame decorator to all gdb.Frames.  This unifies
+    # the interface.  Python 3.x moved the itertools.imap
+    # functionality to map(), so check if it is available.
+    if hasattr(itertools,"imap"):
+        frame_iterator = itertools.imap(FrameDecorator, frame_iterator)
+    else:
+        frame_iterator = map(FrameDecorator, frame_iterator)
 
     for ff in sorted_list:
         frame_iterator = ff.filter(frame_iterator)

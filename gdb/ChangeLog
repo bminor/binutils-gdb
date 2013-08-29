@@ -1,5 +1,24 @@
 2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
 
+	* python/py-framefilter.c (py_print_frame): Remove usage of
+	PyString_AsString.  Use python_string_to_host_string instead.
+	Refactor function to work with a string as a new allocation
+	instead of a pointer.
+	(py_print_frame): Ditto.
+	* python/lib/gdb/frames.py (return_list): Cain iterators together
+	instead of adding them as a list.
+	(_sort_list): Call return_list, and remove duplicate code.
+	(execute_frame_filters): Convert iterator to a list with list().
+	* python/lib/gdb/command/frame_filters.py
+	(SetFrameFilterPriority._set_filter_priority): Convert priority
+	attribute to an integer.
+	* python/lib/gdb/FrameIterator.py (FrameIterator.next): Define
+	wrapper function __next__.
+	* python/lib/gdb/FrameDecorator.py: If basestring not defined,
+	define as "str".
+
+2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
+
 	PR python/15752
 	* python/py-framefilter.c (apply_frame_filter): Check
 	gdb_python_initialized.  Exit if the Python frame-filter code

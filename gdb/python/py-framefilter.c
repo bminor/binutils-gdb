@@ -1170,13 +1170,17 @@ py_print_frame (PyObject *filter, int flags, enum py_frame_args args_type,
 
 	      if (gdbpy_is_string (py_func))
 		{
-		  function = PyString_AsString (py_func);
+		  char *function_to_free = NULL;
+
+		  function = function_to_free =
+		    python_string_to_host_string (py_func);
 
 		  if (function == NULL)
 		    {
 		      Py_DECREF (py_func);
 		      goto error;
 		    }
+		  make_cleanup (xfree, function_to_free);
 		}
 	      else if (PyLong_Check (py_func))
 		{
@@ -1251,13 +1255,15 @@ py_print_frame (PyObject *filter, int flags, enum py_frame_args args_type,
 	    {
 	      if (py_fn != Py_None)
 		{
-		  char *filename = PyString_AsString (py_fn);
+		  char *filename = python_string_to_host_string (py_fn);
 
 		  if (filename == NULL)
 		    {
 		      Py_DECREF (py_fn);
 		      goto error;
 		    }
+
+		  make_cleanup (xfree, filename);
 		  TRY_CATCH (except, RETURN_MASK_ALL)
 		    {
 		      ui_out_wrap_hint (out, "   ");

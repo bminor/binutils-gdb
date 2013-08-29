@@ -70,8 +70,14 @@ class FrameFilter ():
         gdb.frame_filters [self.name] = self
 
     def filter (self, frame_iter):
-        frame_iter = itertools.imap (Reverse_Function,
-                                     frame_iter)
+        # Python 3.x moved the itertools.imap functionality to map(),
+        # so check if it is available.
+        if hasattr(itertools, "imap"):
+            frame_iter = itertools.imap (Reverse_Function,
+                                         frame_iter)
+        else:
+            frame_iter = map(Reverse_Function, frame_iter)
+
         return frame_iter
 
 class ElidingFrameDecorator(FrameDecorator):
@@ -101,6 +107,12 @@ class ElidingIterator:
         # "sentinel".
         elided = next(self.input_iterator)
         return ElidingFrameDecorator(frame, [elided])
+
+    # Python 3.x requires __next__(self) while Python 2.x requires
+    # next(self).  Define next(self), and for Python 3.x create this
+    # wrapper.
+    def __next__(self):
+        return self.next()
 
 class FrameElider ():
 

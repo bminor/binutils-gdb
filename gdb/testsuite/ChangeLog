@@ -1,3 +1,16 @@
+2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-framefilter.py (FrameFilter.filter): Check
+	itertools for imap attribute.  Otherwise use map().
+	(ElidingIterator): Define wrapper function __next__.
+	* gdb.python/py-framefilter-mi.exp: Do not use execfile,
+	use exec (open (read ())) instead.
+	* gdb.python/py-framefilter.exp: Ditto.
+	* gdb.python/py-arch.exp: Update print based test to Python 3.x
+	compliance.
+	* gdb.python/py-frame.exp: Ditto.
+	* gdb.python/py-type.exp: Ditto.
+
 2013-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/15415

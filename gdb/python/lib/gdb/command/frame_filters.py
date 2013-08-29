@@ -335,7 +335,10 @@ class SetFrameFilterPriority(gdb.Command):
 
         list_op = command_tuple[0]
         frame_filter = command_tuple[1]
-        priority = command_tuple[2]
+
+        # GDB returns arguments as a string, so convert priority to
+        # a number.
+        priority = int(command_tuple[2])
 
         op_list = gdb.frames.return_list(list_op)
 

@@ -15,6 +15,15 @@
 
 import gdb
 
+# This small code snippet deals with problem of strings in Python 2.x
+# and Python 3.x.  Python 2.x has str and unicode classes which are
+# sub-classes of basestring.  In Python 3.x all strings are encoded
+# and basestring has been removed.
+try:
+    basestring
+except NameError:
+    basestring = str
+
 class FrameDecorator(object):
     """Basic implementation of a Frame Decorator"""
 

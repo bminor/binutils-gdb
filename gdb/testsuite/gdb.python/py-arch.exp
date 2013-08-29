@@ -38,16 +38,16 @@ gdb_py_test_silent_cmd "python insn_list3 = arch.disassemble(pc, count=1)" \
 gdb_py_test_silent_cmd "python insn_list4 = arch.disassemble(pc)" \
   "disassemble no end no count" 0
 
-gdb_test "python print len(insn_list1)" "1" "test number of instructions 1"
-gdb_test "python print len(insn_list2)" "1" "test number of instructions 2"
-gdb_test "python print len(insn_list3)" "1" "test number of instructions 3"
-gdb_test "python print len(insn_list4)" "1" "test number of instructions 4"
+gdb_test "python print (len(insn_list1))" "1" "test number of instructions 1"
+gdb_test "python print (len(insn_list2))" "1" "test number of instructions 2"
+gdb_test "python print (len(insn_list3))" "1" "test number of instructions 3"
+gdb_test "python print (len(insn_list4))" "1" "test number of instructions 4"
 
 gdb_py_test_silent_cmd "python insn = insn_list1\[0\]" "get instruction" 0
 
-gdb_test "python print \"addr\" in insn" "True" "test key addr"
-gdb_test "python print \"asm\" in insn" "True" "test key asm"
-gdb_test "python print \"length\" in insn" "True" "test key length"
+gdb_test "python print (\"addr\" in insn)" "True" "test key addr"
+gdb_test "python print (\"asm\" in insn)" "True" "test key asm"
+gdb_test "python print (\"length\" in insn)" "True" "test key length"
 
 # Negative test
 gdb_test "python arch.disassemble(0, 0)" ".*gdb\.MemoryError.*" \

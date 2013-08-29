@@ -43,3 +43,9 @@ class FrameIterator(object):
             raise StopIteration
         self.frame = result.older()
         return result
+
+    # Python 3.x requires __next__(self) while Python 2.x requires
+    # next(self).  Define next(self), and for Python 3.x create this
+    # wrapper.
+    def __next__(self):
+        return self.next()

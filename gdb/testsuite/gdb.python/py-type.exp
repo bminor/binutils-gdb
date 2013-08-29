@@ -65,7 +65,7 @@ proc test_fields {lang} {
 
     if {$lang == "c++"} {
       # Test usage with a class
-      gdb_py_test_silent_cmd "print c" "print value (c)" 1
+      gdb_py_test_silent_cmd "print (c)" "print value (c)" 1
       gdb_py_test_silent_cmd "python c = gdb.history (0)" "get value (c) from history" 1
       gdb_py_test_silent_cmd "python fields = c.type.fields()" "get fields from c.type" 1
       gdb_test "python print (len(fields))" "2" "Check number of fields (c)"
@@ -78,7 +78,7 @@ proc test_fields {lang} {
     }
 
     # Test normal fields usage in structs.
-    gdb_py_test_silent_cmd "print st" "print value (st)" 1
+    gdb_py_test_silent_cmd "print (st)" "print value (st)" 1
     gdb_py_test_silent_cmd "python st = gdb.history (0)" "get value (st) from history" 1
     gdb_py_test_silent_cmd "python fields = st.type.fields()" "get fields from st.type" 1
     gdb_test "python print (len(fields))" "2" "Check number of fields (st)"
@@ -109,7 +109,7 @@ proc test_fields {lang} {
     gdb_test "python print (not not st.type\['a'\].type)" "True"
   
     # Test regression PR python/10805
-    gdb_py_test_silent_cmd "print ar" "print value (ar)" 1
+    gdb_py_test_silent_cmd "print (ar)" "print value (ar)" 1
     gdb_py_test_silent_cmd "python ar = gdb.history (0)" "get value (ar) from history" 1
     gdb_test "python fields = ar.type.fields()"
     gdb_test "python print (len(fields))" "1" "Check the number of fields"
@@ -118,7 +118,7 @@ proc test_fields {lang} {
     # Test gdb.Type.array.
     gdb_test "python print (ar\[0\].cast(ar\[0\].type.array(1)))" \
         ".1, 2." "cast to array with one argument"
-    gdb_test "python print ar\[0\].cast(ar\[0\].type.array(0, 1))" \
+    gdb_test "python print (ar\[0\].cast(ar\[0\].type.array(0, 1)))" \
         ".1, 2." "cast to array with two arguments"
 
     gdb_test "python print (ar\[0\].type == ar\[0\].type)" "True"
@@ -126,26 +126,26 @@ proc test_fields {lang} {
     # Test gdb.Type.vector.
     # Note: vectors cast differently than arrays.  Here ar[0] is replicated
     # for the size of the vector.
-    gdb_py_test_silent_cmd "print vec_data_1" "print value (vec_data_1)" 1
+    gdb_py_test_silent_cmd "print (vec_data_1)" "print value (vec_data_1)" 1
     gdb_py_test_silent_cmd "python vec_data_1 = gdb.history (0)" "get value (vec_data_1) from history" 1
 
-    gdb_py_test_silent_cmd "print vec_data_2" "print value (vec_data_2)" 1
+    gdb_py_test_silent_cmd "print (vec_data_2)" "print value (vec_data_2)" 1
     gdb_py_test_silent_cmd "python vec_data_2 = gdb.history (0)" "get value (vec_data_2) from history" 1
 
     gdb_py_test_silent_cmd "python vec1 = vec_data_1.cast(ar\[0\].type.vector(1))" "set vec1" 1
-    gdb_test "python print vec1" ".1, 1." "cast to vector with one argument"
+    gdb_test "python print (vec1)" ".1, 1." "cast to vector with one argument"
     gdb_py_test_silent_cmd "python vec2 = vec_data_1.cast(ar\[0\].type.vector(0, 1))" "set vec2" 1
-    gdb_test "python print vec2" ".1, 1." "cast to vector with two arguments"
-    gdb_test "python print vec1 == vec2" "True"
+    gdb_test "python print (vec2)" ".1, 1." "cast to vector with two arguments"
+    gdb_test "python print (vec1 == vec2)" "True"
     gdb_py_test_silent_cmd "python vec3 = vec_data_2.cast(ar\[0\].type.vector(1))" "set vec3" 1
-    gdb_test "python print vec1 == vec3" "False"
+    gdb_test "python print (vec1 == vec3)" "False"
   }
 }
 
 proc test_enums {} {
   with_test_prefix "test_enum" {
-    gdb_py_test_silent_cmd "print e" "print value (e)" 1
-    gdb_py_test_silent_cmd "python e = gdb.history (0)" "get value (e) from history" 1
+    gdb_py_test_silent_cmd "print (e)" "print value (e)" 1
+    gdb_py_test_silent_cmd "python (e) = gdb.history (0)" "get value (e) from history" 1
     gdb_py_test_silent_cmd "python fields = e.type.fields()" "extract type fields from e" 1
     gdb_test "python print (len(fields))" "3" "Check the number of enum fields"
     gdb_test "python print (fields\[0\].name)" "v1" "Check enum field\[0\] name"
@@ -161,7 +161,7 @@ proc test_enums {} {
 }
 proc test_base_class {} {
   with_test_prefix "test_base_class" {
-    gdb_py_test_silent_cmd "print d" "print value (d)" 1
+    gdb_py_test_silent_cmd "print (d)" "print value (d)" 1
     gdb_py_test_silent_cmd "python d = gdb.history (0)" "get value (d) from history" 1
     gdb_py_test_silent_cmd "python fields = d.type.fields()" "extract type fields from d" 1
     gdb_test "python print (len(fields))" "3" "Check the number of fields"
@@ -174,7 +174,7 @@ proc test_range {} {
   with_test_prefix "test_range" {
     with_test_prefix "on ranged value" {
       # Test a valid range request.
-      gdb_py_test_silent_cmd "print ar" "print value (ar)" 1
+      gdb_py_test_silent_cmd "print (ar)" "print value (ar)" 1
       gdb_py_test_silent_cmd "python ar = gdb.history (0)" "get value (ar) from history" 1
       gdb_test "python print (len(ar.type.range()))" "2" "Check correct tuple length"
       gdb_test "python print (ar.type.range()\[0\])" "0" "Check range low bound"
@@ -183,7 +183,7 @@ proc test_range {} {
 
     with_test_prefix "on ranged type" {
       # Test a range request on a ranged type.
-      gdb_py_test_silent_cmd "print ar" "print value (ar)" 1
+      gdb_py_test_silent_cmd "print (ar)" "print value (ar)" 1
       gdb_py_test_silent_cmd "python ar = gdb.history (0)" "get value (ar) from history" 1
       gdb_py_test_silent_cmd "python fields = ar.type.fields()" "get fields" 1
       gdb_test "python print (fields\[0\].type.range()\[0\])" "0" "Check range low bound"
@@ -192,7 +192,7 @@ proc test_range {} {
 
     with_test_prefix "on unranged value" {
       # Test where a range does not exist.
-      gdb_py_test_silent_cmd "print st" "print value (st)" 1
+      gdb_py_test_silent_cmd "print (st)" "print value (st)" 1
       gdb_py_test_silent_cmd "python st = gdb.history (0)" "get value (st) from history" 1
       gdb_test "python print (st.type.range())" "RuntimeError: This type does not have a range.*" "Check range for non ranged type."
     }
