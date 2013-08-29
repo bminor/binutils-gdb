@@ -274,6 +274,8 @@ extern void hostio_last_error_from_errno (char *own_buf);
 /* From remote-utils.c */
 
 extern int remote_debug;
+extern gdb_fildes_t remote_desc;
+extern gdb_fildes_t listen_desc;
 extern int noack_mode;
 extern int transport_is_reliable;
 

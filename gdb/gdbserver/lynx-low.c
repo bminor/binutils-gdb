@@ -218,6 +218,12 @@ lynx_create_inferior (char *program, char **allargs)
       pgrp = getpid();
       setpgid (0, pgrp);
       ioctl (0, TIOCSPGRP, &pgrp);
+      if (!remote_connection_is_stdio ())
+	{
+	  close (listen_desc);
+	  if (gdb_connected ())
+	    close (remote_desc);
+	}
       lynx_ptrace (PTRACE_TRACEME, null_ptid, 0, 0, 0);
       execv (program, allargs);
       fprintf (stderr, "Cannot exec %s: %s.\n", program, strerror (errno));

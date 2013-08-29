@@ -108,8 +108,8 @@ struct ui_file *gdb_stdlog;
 
 static int remote_is_stdio = 0;
 
-static gdb_fildes_t remote_desc = INVALID_DESCRIPTOR;
-static gdb_fildes_t listen_desc = INVALID_DESCRIPTOR;
+gdb_fildes_t remote_desc = INVALID_DESCRIPTOR;
+gdb_fildes_t listen_desc = INVALID_DESCRIPTOR;
 
 /* FIXME headerize? */
 extern int using_threads;

@@ -273,6 +273,12 @@ spu_create_inferior (char *program, char **allargs)
 
   if (pid == 0)
     {
+      if (!remote_connection_is_stdio ())
+	{
+	  close (listen_desc);
+	  if (gdb_connected ())
+	    close (remote_desc);
+	}
       ptrace (PTRACE_TRACEME, 0, 0, 0);
 
       setpgid (0, 0);

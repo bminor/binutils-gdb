@@ -1,3 +1,17 @@
+2013-08-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR server/15604
+	* linux-low.c
+	(linux_create_inferior) <pid == 0 && !remote_connection_is_stdio ()>:
+	Close LISTEN_DESC and optionally REMOTE_DESC.
+	(lynx_create_inferior) <pid == 0 && !remote_connection_is_stdio ()>:
+	Close LISTEN_DESC and optionally REMOTE_DESC.
+	* remote-utils.c (remote_desc, listen_desc): Remove static qualifier.
+	* server.h (remote_desc, listen_desc): New declaration.
+	* spu-low.c
+	(spu_create_inferior) <pid == 0 && !remote_connection_is_stdio ()>:
+	Close LISTEN_DESC and optionally REMOTE_DESC.
+
 2013-05-31  Doug Evans  <dje@google.com>
 
 	PR server/15594
