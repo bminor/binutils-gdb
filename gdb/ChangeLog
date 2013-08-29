@@ -1,3 +1,8 @@
+2013-08-29  Yao Qi  <yao@codesourcery.com>
+
+	* varobj.c (install_dynamic_child): Remove trailing space.
+	Add one blank line after variable declaration.
+
 2013-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/15415

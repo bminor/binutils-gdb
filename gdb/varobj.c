@@ -1045,11 +1045,11 @@ install_dynamic_child (struct varobj *var,
 	  *cchanged = 1;
 	}
     }
-  else 
+  else
     {
       varobj_p existing = VEC_index (varobj_p, var->children, index);
-
       int type_updated = update_type_if_necessary (existing, value);
+
       if (type_updated)
 	{
 	  if (type_changed)
