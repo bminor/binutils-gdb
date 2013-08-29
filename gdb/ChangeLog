@@ -1,3 +1,8 @@
+2013-08-29  Joel Brobecker  <brobecker@adacore.com>
+
+	* rs6000-nat.c (rs6000_ptrace32): Cast "addr" to "uintptr_t"
+	instead of "long long" in call to ptrace64.
+
 2013-08-29  Andrew Burgess  <aburgess@broadcom.com>
 
 	* mi/mi-interp.c (mi_command_loop): Change signature to match

@@ -132,7 +132,7 @@ static int
 rs6000_ptrace32 (int req, int id, int *addr, int data, int *buf)
 {
 #ifdef HAVE_PTRACE64
-  int ret = ptrace64 (req, id, (long long) addr, data, buf);
+  int ret = ptrace64 (req, id, (uintptr_t) addr, data, buf);
 #else
   int ret = ptrace (req, id, (int *)addr, data, buf);
 #endif
