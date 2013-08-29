@@ -1,5 +1,10 @@
 2013-08-29  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* value.c (allocate_value_contents): Make static.
+	* value.h (allocate_value_contents): Remove prototype.
+
+2013-08-29  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): Use value_at_lazy instead
 	of assembling value via allocate_value_lazy and attribute setter.
 	* findvar.c (default_read_var_value): Use value_at_lazy instead of

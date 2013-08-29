@@ -707,7 +707,7 @@ allocate_value_lazy (struct type *type)
 
 /* Allocate the contents of VAL if it has not been allocated yet.  */
 
-void
+static void
 allocate_value_contents (struct value *val)
 {
   if (!val->contents)
