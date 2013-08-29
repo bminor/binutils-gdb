@@ -1468,6 +1468,9 @@ apply_frame_filter (struct frame_info *frame, int flags,
   PyObject *item;
   htab_t levels_printed;
 
+  if (!gdb_python_initialized)
+    return PY_BT_NO_FILTERS;
+
   cleanups = ensure_python_env (gdbarch, current_language);
 
   TRY_CATCH (except, RETURN_MASK_ALL)
@@ -1483,7 +1486,24 @@ apply_frame_filter (struct frame_info *frame, int flags,
   iterable = bootstrap_python_frame_filters (frame, frame_low, frame_high);
 
   if (iterable == NULL)
-    goto error;
+    {
+      /* Normally if there is an error GDB prints the exception,
+	 abandons the backtrace and exits.  The user can then call "bt
+	 no-filters", and get a default backtrace (it would be
+	 confusing to automatically start a standard backtrace halfway
+	 through a Python filtered backtrace).  However in the case
+	 where GDB cannot initialize the frame filters (most likely
+	 due to incorrect auto-load paths), GDB has printed nothing.
+	 In this case it is OK to print the default backtrace after
+	 printing the error message.  GDB returns PY_BT_NO_FILTERS
+	 here to signify there are no filters after printing the
+	 initialization error.  This return code will trigger a
+	 default backtrace.  */
+
+      gdbpy_print_stack ();
+      do_cleanups (cleanups);
+      return PY_BT_NO_FILTERS;
+    }
 
   /* If iterable is None, then there are no frame filters registered.
      If this is the case, defer to default GDB printing routines in MI
@@ -1521,6 +1541,8 @@ apply_frame_filter (struct frame_info *frame, int flags,
   do_cleanups (cleanups);
   return success;
 
+  /* Exit and abandon backtrace on error, printing the exception that
+     is set.  */
  error:
   gdbpy_print_stack ();
   do_cleanups (cleanups);

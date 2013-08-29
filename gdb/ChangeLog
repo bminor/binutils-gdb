@@ -1,5 +1,13 @@
 2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
 
+	PR python/15752
+
+	* python/py-framefilter.c (apply_frame_filter): Check
+	gdb_python_initialized.  Exit if the Python frame-filter code
+	cannot be initialized.
+
+2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
+
 	PR cli/15842
 
 	* top.c (print_gdb_version): Remove erroneous newline after help
