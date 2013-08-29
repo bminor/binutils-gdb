@@ -1,3 +1,15 @@
+2013-08-29  Andrew Burgess  <aburgess@broadcom.com>
+
+	* mi/mi-interp.c (mi_command_loop): Change signature to match
+	interp_command_loop_ftype.
+	(mi1_command_loop): Remove.
+	(mi2_command_loop): Remove.
+	(mi3_command_loop): Remove.
+	(mi_interpreter_resume): Remove setting of
+	deprecated_command_loop_hook.
+	(_initialize_mi_interp): Set mi_command_loop as the command loop
+	callback.
+
 2013-08-29  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* valops.c (do_search_struct_field): Pass v2 instead of base_type to

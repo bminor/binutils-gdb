@@ -43,7 +43,7 @@
 
 static void mi_execute_command_wrapper (const char *cmd);
 static void mi_execute_command_input_handler (char *cmd);
-static void mi_command_loop (int mi_version);
+static void mi_command_loop (void *data);
 
 /* These are hooks that we put in place while doing interpreter_exec
    so we can report interesting things that happened "behind the MI's
@@ -51,10 +51,6 @@ static void mi_command_loop (int mi_version);
 
 static int mi_interp_query_hook (const char *ctlstr, va_list ap)
   ATTRIBUTE_PRINTF (1, 0);
-
-static void mi3_command_loop (void);
-static void mi2_command_loop (void);
-static void mi1_command_loop (void);
 
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
@@ -193,16 +189,6 @@ mi_interpreter_resume (void *data)
 
   deprecated_show_load_progress = mi_load_progress;
 
-  /* If we're _the_ interpreter, take control.  */
-  if (current_interp_named_p (INTERP_MI1))
-    deprecated_command_loop_hook = mi1_command_loop;
-  else if (current_interp_named_p (INTERP_MI2))
-    deprecated_command_loop_hook = mi2_command_loop;
-  else if (current_interp_named_p (INTERP_MI3))
-    deprecated_command_loop_hook = mi3_command_loop;
-  else
-    deprecated_command_loop_hook = mi2_command_loop;
-
   return 1;
 }
 
@@ -322,25 +308,7 @@ mi_execute_command_input_handler (char *cmd)
 }
 
 static void
-mi1_command_loop (void)
-{
-  mi_command_loop (1);
-}
-
-static void
-mi2_command_loop (void)
-{
-  mi_command_loop (2);
-}
-
-static void
-mi3_command_loop (void)
-{
-  mi_command_loop (3);
-}
-
-static void
-mi_command_loop (int mi_version)
+mi_command_loop (void *data)
 {
   /* Turn off 8 bit strings in quoted output.  Any character with the
      high bit set is printed using C's octal format.  */
@@ -996,7 +964,8 @@ _initialize_mi_interp (void)
       mi_interpreter_exec,	/* exec_proc */
       mi_interpreter_prompt_p,	/* prompt_proc_p */
       mi_ui_out, 		/* ui_out_proc */
-      mi_set_logging		/* set_logging_proc */
+      mi_set_logging,		/* set_logging_proc */
+      mi_command_loop		/* command_loop_proc */
     };
 
   /* The various interpreter levels.  */
