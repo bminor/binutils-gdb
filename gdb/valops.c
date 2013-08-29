@@ -1950,14 +1950,12 @@ do_search_struct_field (const char *name, struct value *arg1, int offset,
 	    {
 	      CORE_ADDR base_addr;
 
-	      v2  = allocate_value (basetype);
 	      base_addr = value_address (arg1) + boffset;
+	      v2 = value_at_lazy (basetype, base_addr);
 	      if (target_read_memory (base_addr, 
 				      value_contents_raw (v2),
-				      TYPE_LENGTH (basetype)) != 0)
+				      TYPE_LENGTH (value_type (basetype))) != 0)
 		error (_("virtual baseclass botch"));
-	      VALUE_LVAL (v2) = lval_memory;
-	      set_value_address (v2, base_addr);
 	    }
 	  else
 	    {

@@ -502,7 +502,6 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
       return v;
 
     case LOC_STATIC:
-      v = allocate_value_lazy (type);
       if (overlay_debugging)
 	addr = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
 					 SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (var),
@@ -517,7 +516,6 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	error (_("Unknown argument list address for `%s'."),
 	       SYMBOL_PRINT_NAME (var));
       addr += SYMBOL_VALUE (var);
-      v = allocate_value_lazy (type);
       break;
 
     case LOC_REF_ARG:
@@ -532,14 +530,12 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	argref += SYMBOL_VALUE (var);
 	ref = value_at (lookup_pointer_type (type), argref);
 	addr = value_as_address (ref);
-	v = allocate_value_lazy (type);
 	break;
       }
 
     case LOC_LOCAL:
       addr = get_frame_locals_address (frame);
       addr += SYMBOL_VALUE (var);
-      v = allocate_value_lazy (type);
       break;
 
     case LOC_TYPEDEF:
@@ -548,7 +544,6 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
       break;
 
     case LOC_BLOCK:
-      v = allocate_value_lazy (type);
       if (overlay_debugging)
 	addr = symbol_overlayed_address
 	  (BLOCK_START (SYMBOL_BLOCK_VALUE (var)), SYMBOL_OBJ_SECTION (SYMBOL_OBJFILE (var),
@@ -575,7 +570,6 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	             SYMBOL_PRINT_NAME (var));
 
 	    addr = value_as_address (regval);
-	    v = allocate_value_lazy (type);
 	  }
 	else
 	  {
@@ -620,7 +614,6 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	if (obj_section
 	    && (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
 	  addr = target_translate_tls_address (obj_section->objfile, addr);
-	v = allocate_value_lazy (type);
       }
       break;
 
@@ -633,8 +626,7 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
       break;
     }
 
-  VALUE_LVAL (v) = lval_memory;
-  set_value_address (v, addr);
+  v = value_at_lazy (type, addr);
   return v;
 }
 
