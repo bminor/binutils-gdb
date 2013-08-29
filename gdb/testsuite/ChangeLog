@@ -1,3 +1,9 @@
+2013-08-29  Sterling Augustine  <saugustine@google.com>
+
+	* boards/remote-stdio-gdbserver.exp: Set rcp_prog and
+	rsh_prog in new conditional.  Move use of REMOTE_PORTNUM into
+	said conditional.
+
 2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* gdb.python/py-arch.exp: Load gdb-python.exp.

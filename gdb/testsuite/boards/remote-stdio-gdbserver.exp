@@ -26,9 +26,6 @@
 
 load_board_description "native-stdio-gdbserver"
 
-set_board_info rsh_prog /usr/bin/ssh
-set_board_info rcp_prog /usr/bin/scp
-
 # Test machine info. The generic_config gdbserver reads some of these
 # values from board_info, so this file must set them there.
 if [info exists REMOTE_USERNAME] {
@@ -41,8 +38,17 @@ if [info exists REMOTE_HOSTNAME] {
 } else {
     set_board_info hostname unspecified_hostname
 }
+
+# The two programs have different syntax to set the remote port, so
+# set it as part of the program name rather than in get_remote_login.
+
 if [info exists REMOTE_PORTNUM] {
     set_board_info portnum $REMOTE_PORTNUM
+    set_board_info rsh_prog "/usr/bin/ssh -p$REMOTE_PORTNUM"
+    set_board_info rcp_prog "/usr/bin/scp -P$REMOTE_PORTNUM"
+} else {
+    set_board_info rsh_prog /usr/bin/ssh
+    set_board_info rcp_prog /usr/bin/scp
 }
 
 # Some remote machines don't have writable home directories.
@@ -63,9 +69,6 @@ proc get_remote_login { } {
     }
     if {[board_info [target_info name] exists hostname]} {
 	append result "[board_info [target_info name] hostname]"
-    }
-    if {[board_info [target_info name] exists portnum]} {
-	append result ":[board_info [target_info name] portnum]"
     }
     return $result
 }
