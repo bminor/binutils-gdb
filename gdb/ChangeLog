@@ -1,5 +1,10 @@
 2013-08-29  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* valops.c (do_search_struct_field): Pass v2 instead of base_type to
+	value_type.
+
+2013-08-29  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* value.c (allocate_value_contents): Make static.
 	* value.h (allocate_value_contents): Remove prototype.
 

@@ -1954,7 +1954,7 @@ do_search_struct_field (const char *name, struct value *arg1, int offset,
 	      v2 = value_at_lazy (basetype, base_addr);
 	      if (target_read_memory (base_addr, 
 				      value_contents_raw (v2),
-				      TYPE_LENGTH (value_type (basetype))) != 0)
+				      TYPE_LENGTH (value_type (v2))) != 0)
 		error (_("virtual baseclass botch"));
 	    }
 	  else
