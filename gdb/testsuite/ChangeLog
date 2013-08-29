@@ -1,5 +1,9 @@
 2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
 
+	* gdb.python/py-arch.exp: Load gdb-python.exp.
+
+2013-08-29  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* gdb.python/py-framefilter.py (FrameFilter.filter): Check
 	itertools for imap attribute.  Otherwise use map().
 	(ElidingIterator): Define wrapper function __next__.
