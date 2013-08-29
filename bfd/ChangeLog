@@ -1,3 +1,10 @@
+2013-08-29  Jakub Jelinek  <jakub@redhat.com>
+
+	* elf64-x86-64.c (elf_x86_64_check_tls_transition): Allow
+	64-bit -mcmodel=large -fpic TLS GD and LD sequences.
+	(elf_x86_64_relocate_section): Handle -mcmodel=large -fpic
+	TLS GD and LD sequences in GD->LE, GD->IE and LD->LE transitions.
+
 2013-08-27  Alan Modra  <amodra@gmail.com>
 
 	* elf-bfd.h (struct elf_backend_data): Remove as_needed_cleanup.

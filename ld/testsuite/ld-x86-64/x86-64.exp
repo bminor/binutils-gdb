@@ -124,6 +124,15 @@ set x86_64tests {
     {"TLS X32 LD->LE transition" "-melf32_x86_64" ""
      "--x32" {tlsld2.s}
      {{objdump -dwr tlsld2.dd}} "tlsld2"}
+    {"TLS -mcmodel=large GD->LE transition" "-melf_x86_64" ""
+     "--64" {tlsgd7.s}
+     {{objdump -dwr tlsgd7.dd}} "tlsgd7"}
+    {"TLS -mcmodel=large LD->LE transition" "-melf_x86_64" ""
+     "--64" {tlsld3.s}
+     {{objdump -dwr tlsld3.dd}} "tlsld3"}
+    {"TLS -mcmodel=large GD->IE transition" "-melf_x86_64 tmpdir/libtlsgd5.so" ""
+     "--64" {tlsgd8.s}
+     {{objdump -dwrj.text tlsgd8.dd}} "tlsgd8"}
 
      {"build 32-bit object with 33 locals" "-melf_x86_64 -e 0" "" "--32" {32bit.s} {{ ld incompatible.l }} "dummy" }
      {"build 64-bit object" "-melf_x86_64 -e 0 --defsym foo=1" "" "--64" {64bit.s} {} "dummy" }

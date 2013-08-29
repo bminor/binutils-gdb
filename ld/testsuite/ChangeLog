@@ -1,3 +1,18 @@
+2013-08-29  Jakub Jelinek  <jakub@redhat.com>
+
+	* ld-x86-64/x86-64.exp: Add tlsld3, tlsgd7 and tlsgd8 tests.
+	* ld-x86-64/tlspic1.s: Add -mcmodel=large -fpic TLS GD and LD
+	sequences.
+	* ld-x86-64/tlspic.dd: Adjusted.
+	* ld-x86-64/tlspic.rd: Adjusted.
+	* ld-x86-64/tlspic-nacl.rd: Adjusted.
+	* ld-x86-64/tlsld3.dd: New test.
+	* ld-x86-64/tlsld3.s: New file.
+	* ld-x86-64/tlsgd7.dd: New test.
+	* ld-x86-64/tlsgd7.s: New file.
+	* ld-x86-64/tlsgd8.dd: New test.
+	* ld-x86-64/tlsgd8.s: New file.
+
 2013-08-26  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-x86-64/x86-64.exp (Mixed x86_64 and i386 input test 1):
