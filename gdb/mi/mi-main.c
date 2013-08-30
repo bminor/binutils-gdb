@@ -2484,7 +2484,7 @@ mi_cmd_trace_find (char *command, char **argv, int argc)
     error (_("Invalid mode '%s'"), mode);
 
   if (has_stack_frames () || get_traceframe_number () >= 0)
-    print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+    print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS);
 }
 
 void

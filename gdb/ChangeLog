@@ -1,5 +1,10 @@
 2013-08-30  Pedro Alves  <palves@redhat.com>
 
+	* mi/mi-main.c (mi_cmd_trace_find): Use LOC_AND_ADDRESS instead of
+	SRC_AND_LOC.
+
+2013-08-30  Pedro Alves  <palves@redhat.com>
+
 	* thread.c (restore_selected_frame): Use SRC_AND_LOC, and change
 	warning text.
 
