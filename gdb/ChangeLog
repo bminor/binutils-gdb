@@ -1,5 +1,10 @@
 2013-08-30  Pedro Alves  <palves@redhat.com>
 
+	* bsd-kvm.c (bsd_kvm_open, bsd_kvm_proc_cmd, bsd_kvm_pcb_cmd):
+	Adjust arguments to print_stack_frame.
+
+2013-08-30  Pedro Alves  <palves@redhat.com>
+
 	* ada-tasks.c (task_command_1): Write SRC_AND_LOC instead '1'.
 
 2013-08-30  Pedro Alves  <palves@redhat.com>
