@@ -376,7 +376,8 @@ SUBDIR_PYTHON_OBS = \
 	py-threadevent.o \
 	py-type.o \
 	py-utils.o \
-	py-value.o
+	py-value.o \
+	py-varobj.o
 
 SUBDIR_PYTHON_SRCS = \
 	python/python.c \
@@ -413,7 +414,8 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-threadevent.c \
 	python/py-type.c \
 	python/py-utils.c \
-	python/py-value.c
+	python/py-value.c \
+	python/py-varobj.c
 SUBDIR_PYTHON_DEPS =
 SUBDIR_PYTHON_LDFLAGS=
 SUBDIR_PYTHON_CFLAGS=
@@ -865,7 +867,8 @@ proc-utils.h aarch64-tdep.h arm-tdep.h ax-gdb.h ppcfbsd-tdep.h \
 ppcnbsd-tdep.h cli-out.h gdb_expat.h breakpoint.h infcall.h obsd-tdep.h \
 exec.h m32r-tdep.h osabi.h gdbcore.h solib-som.h amd64bsd-nat.h \
 i386bsd-nat.h xml-support.h xml-tdesc.h alphabsd-tdep.h gdb_obstack.h \
-ia64-tdep.h ada-lang.h varobj.h frv-tdep.h nto-tdep.h serial.h \
+ia64-tdep.h ada-lang.h ada-varobj.h varobj.h varobj-iter.h frv-tdep.h \
+nto-tdep.h serial.h \
 c-lang.h d-lang.h go-lang.h frame.h event-loop.h block.h cli/cli-setshow.h \
 cli/cli-decode.h cli/cli-cmds.h cli/cli-utils.h \
 cli/cli-script.h macrotab.h symtab.h common/version.h \
@@ -2504,6 +2507,10 @@ py-utils.o: $(srcdir)/python/py-utils.c
 
 py-value.o: $(srcdir)/python/py-value.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-value.c
+	$(POSTCOMPILE)
+
+py-varobj.o: $(srcdir)/python/py-varobj.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-varobj.c
 	$(POSTCOMPILE)
 
 #

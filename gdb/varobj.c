@@ -41,6 +41,8 @@
 typedef int PyObject;
 #endif
 
+#include "varobj-iter.h"
+
 /* Non-zero if we want to see trace of varobj level stuff.  */
 
 unsigned int varobjdebug = 0;
@@ -140,14 +142,14 @@ struct varobj_dynamic
 
   /* The iterator returned by the printer's 'children' method, or NULL
      if not available.  */
-  PyObject *child_iter;
+  struct varobj_iter *child_iter;
 
   /* We request one extra item from the iterator, so that we can
      report to the caller whether there are more items than we have
      already reported.  However, we don't want to install this value
      when we read it, because that will mess up future updates.  So,
      we stash it here instead.  */
-  PyObject *saved_item;
+  varobj_item *saved_item;
 };
 
 struct cpstack
@@ -256,7 +258,7 @@ is_root_p (struct varobj *var)
 #ifdef HAVE_PYTHON
 /* Helper function to install a Python environment suitable for
    use during operations on VAR.  */
-static struct cleanup *
+struct cleanup *
 varobj_ensure_python_env (struct varobj *var)
 {
   return ensure_python_env (var->root->exp->gdbarch,
@@ -773,6 +775,19 @@ dynamic_varobj_has_child_method (struct varobj *var)
   return result;
 }
 
+/* A factory for creating dynamic varobj's iterators.  Returns an
+   iterator object suitable for iterating over VAR's children.  */
+
+static struct varobj_iter *
+varobj_get_iterator (struct varobj *var)
+{
+  if (var->dynamic->pretty_printer)
+    return py_varobj_get_iterator (var, var->dynamic->pretty_printer);
+
+  gdb_assert_not_reached (_("\
+requested an iterator from a non-dynamic varobj"));
+}
+
 #endif
 
 static int
@@ -788,9 +803,7 @@ update_dynamic_varobj_children (struct varobj *var,
 {
 #if HAVE_PYTHON
   struct cleanup *back_to;
-  PyObject *children;
   int i;
-  PyObject *printer = var->dynamic->pretty_printer;
 
   if (!gdb_python_initialized)
     return 0;
@@ -798,37 +811,22 @@ update_dynamic_varobj_children (struct varobj *var,
   back_to = varobj_ensure_python_env (var);
 
   *cchanged = 0;
-  if (!PyObject_HasAttr (printer, gdbpy_children_cst))
-    {
-      do_cleanups (back_to);
-      return 0;
-    }
 
   if (update_children || var->dynamic->child_iter == NULL)
     {
-      children = PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
-					     NULL);
-
-      if (!children)
-	{
-	  gdbpy_print_stack ();
-	  error (_("Null value returned for children"));
-	}
-
-      make_cleanup_py_decref (children);
-
-      Py_XDECREF (var->dynamic->child_iter);
-      var->dynamic->child_iter = PyObject_GetIter (children);
-      if (var->dynamic->child_iter == NULL)
-	{
-	  gdbpy_print_stack ();
-	  error (_("Could not get children iterator"));
-	}
+      varobj_iter_delete (var->dynamic->child_iter);
+      var->dynamic->child_iter = varobj_get_iterator (var);
 
       Py_XDECREF (var->dynamic->saved_item);
       var->dynamic->saved_item = NULL;
 
       i = 0;
+
+      if (var->dynamic->child_iter == NULL)
+	{
+	  do_cleanups (back_to);
+	  return 0;
+	}
     }
   else
     i = VEC_length (varobj_p, var->children);
@@ -838,7 +836,6 @@ update_dynamic_varobj_children (struct varobj *var,
   for (; to < 0 || i < to + 1; ++i)
     {
       PyObject *item;
-      int force_done = 0;
 
       /* See if there was a leftover from last time.  */
       if (var->dynamic->saved_item)
@@ -847,52 +844,17 @@ update_dynamic_varobj_children (struct varobj *var,
 	  var->dynamic->saved_item = NULL;
 	}
       else
-	item = PyIter_Next (var->dynamic->child_iter);
-
-      if (!item)
 	{
-	  /* Normal end of iteration.  */
-	  if (!PyErr_Occurred ())
-	    break;
-
-	  /* If we got a memory error, just use the text as the
-	     item.  */
-	  if (PyErr_ExceptionMatches (gdbpy_gdb_memory_error))
-	    {
-	      PyObject *type, *value, *trace;
-	      char *name_str, *value_str;
-
-	      PyErr_Fetch (&type, &value, &trace);
-	      value_str = gdbpy_exception_to_string (type, value);
-	      Py_XDECREF (type);
-	      Py_XDECREF (value);
-	      Py_XDECREF (trace);
-	      if (!value_str)
-		{
-		  gdbpy_print_stack ();
-		  break;
-		}
-
-	      name_str = xstrprintf ("<error at %d>", i);
-	      item = Py_BuildValue ("(ss)", name_str, value_str);
-	      xfree (name_str);
-	      xfree (value_str);
-	      if (!item)
-		{
-		  gdbpy_print_stack ();
-		  break;
-		}
-
-	      force_done = 1;
-	    }
-	  else
-	    {
-	      /* Any other kind of error.  */
-	      gdbpy_print_stack ();
-	      break;
-	    }
+	  item = varobj_iter_next (var->dynamic->child_iter);
 	}
 
+      if (item == NULL)
+	{
+	  /* Iteration is done.  Remove iterator from VAR.  */
+	  varobj_iter_delete (var->dynamic->child_iter);
+	  var->dynamic->child_iter = NULL;
+	  break;
+	}
       /* We don't want to push the extra child on any report list.  */
       if (to < 0 || i < to)
 	{
@@ -932,9 +894,6 @@ update_dynamic_varobj_children (struct varobj *var,
 	     element.  */
 	  break;
 	}
-
-      if (force_done)
-	break;
     }
 
   if (i < VEC_length (varobj_p, var->children))
@@ -953,9 +912,8 @@ update_dynamic_varobj_children (struct varobj *var,
     *cchanged = 1;
 
   var->num_children = VEC_length (varobj_p, var->children);
- 
-  do_cleanups (back_to);
 
+  do_cleanups (back_to);
   return 1;
 #else
   gdb_assert_not_reached ("should never be called if Python is not enabled");
@@ -1245,7 +1203,7 @@ install_visualizer (struct varobj_dynamic *var, PyObject *constructor,
   Py_XDECREF (var->pretty_printer);
   var->pretty_printer = visualizer;
 
-  Py_XDECREF (var->child_iter);
+  varobj_iter_delete (var->child_iter);
   var->child_iter = NULL;
 }
 

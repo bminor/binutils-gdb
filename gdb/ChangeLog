@@ -1,3 +1,25 @@
+2014-06-12  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add "py-varobj.o".
+	(SUBDIR_PYTHON_SRCS): Add "python/py-varobj.c".
+	(HFILES_NO_SRCDIR): Add "varobj-iter.h".
+	(py-varobj.o): New rule.
+	* python/py-varobj.c: New file.
+	* python/python-internal.h (py_varobj_get_iterator): Declare.
+	* varobj-iter.h: New file.
+	* varobj.c: Include "varobj-iter.h"
+	(struct varobj) <child_iter>: Change its type from "PyObject *"
+	to "struct varobj_iter *".
+	<saved_item>: Likewise.
+	[HAVE_PYTHON] (varobj_ensure_python_env): Make it extern.
+	[HAVE_PYTHON] (varobj_get_iterator): New function.
+	(update_dynamic_varobj_children) [HAVE_PYTHON]: Move
+	python-specific code to python/py-varobj.c.
+	(install_visualizer): Call varobj_iter_delete instead of
+	Py_XDECREF.
+	* varobj.h (varobj_ensure_python_env): Declare.
+
 2014-06-12  Yao Qi  <yao@codesourcery.com>
 
 	* varobj.c (struct varobj_item): New structure.

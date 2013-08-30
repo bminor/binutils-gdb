@@ -568,4 +568,9 @@ int gdb_pymodule_addobject (PyObject *module, const char *name,
 			    PyObject *object)
   CPYCHECKER_NEGATIVE_RESULT_SETS_EXCEPTION;
 
+struct varobj_iter;
+struct varobj;
+struct varobj_iter *py_varobj_get_iterator (struct varobj *var,
+					    PyObject *printer);
+
 #endif /* GDB_PYTHON_INTERNAL_H */
