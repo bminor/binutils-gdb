@@ -212,12 +212,8 @@ static char *my_value_of_variable (struct varobj *var,
 
 static int is_root_p (struct varobj *var);
 
-#if HAVE_PYTHON
-
 static struct varobj *varobj_add_child (struct varobj *var,
 					struct varobj_item *item);
-
-#endif /* HAVE_PYTHON */
 
 /* Private data */
 
@@ -701,8 +697,6 @@ varobj_restrict_range (VEC (varobj_p) *children, int *from, int *to)
     }
 }
 
-#if HAVE_PYTHON
-
 /* A helper for update_dynamic_varobj_children that installs a new
    child when needed.  */
 
@@ -747,6 +741,8 @@ install_dynamic_child (struct varobj *var,
     }
 }
 
+#if HAVE_PYTHON
+
 static int
 dynamic_varobj_has_child_method (struct varobj *var)
 {
@@ -762,6 +758,7 @@ dynamic_varobj_has_child_method (struct varobj *var)
   do_cleanups (back_to);
   return result;
 }
+#endif
 
 /* A factory for creating dynamic varobj's iterators.  Returns an
    iterator object suitable for iterating over VAR's children.  */
@@ -769,8 +766,10 @@ dynamic_varobj_has_child_method (struct varobj *var)
 static struct varobj_iter *
 varobj_get_iterator (struct varobj *var)
 {
+#if HAVE_PYTHON
   if (var->dynamic->pretty_printer)
     return py_varobj_get_iterator (var, var->dynamic->pretty_printer);
+#endif
 
   gdb_assert_not_reached (_("\
 requested an iterator from a non-dynamic varobj"));
@@ -788,7 +787,6 @@ varobj_clear_saved_item (struct varobj_dynamic *var)
       var->saved_item = NULL;
     }
 }
-#endif
 
 static int
 update_dynamic_varobj_children (struct varobj *var,
@@ -801,7 +799,6 @@ update_dynamic_varobj_children (struct varobj *var,
 				int from,
 				int to)
 {
-#if HAVE_PYTHON
   int i;
 
   *cchanged = 0;
@@ -891,9 +888,6 @@ update_dynamic_varobj_children (struct varobj *var,
   var->num_children = VEC_length (varobj_p, var->children);
 
   return 1;
-#else
-  gdb_assert_not_reached ("should never be called if Python is not enabled");
-#endif
 }
 
 int
@@ -970,8 +964,6 @@ varobj_list_children (struct varobj *var, int *from, int *to)
   return var->children;
 }
 
-#if HAVE_PYTHON
-
 static struct varobj *
 varobj_add_child (struct varobj *var, struct varobj_item *item)
 {
@@ -982,8 +974,6 @@ varobj_add_child (struct varobj *var, struct varobj_item *item)
   VEC_safe_push (varobj_p, var->children, v);
   return v;
 }
-
-#endif /* HAVE_PYTHON */
 
 /* Obtain the type of an object Variable as a string similar to the one gdb
    prints on the console.  */

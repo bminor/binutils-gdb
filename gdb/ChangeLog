@@ -1,6 +1,14 @@
 2014-06-12  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
+	* varobj.c: Remove "#if HAVE_PYTHON" and "#endif".
+	(varobj_get_iterator): Wrap up code for pretty-printer by
+	"#if HAVE_PYTHON" and "#endif".
+	(update_dynamic_varobj_children): Likewise.
+
+2014-06-12  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
 	* python/py-varobj.c (py_varobj_iter_next): Return NULL if
 	gdb_python_initialized is false.  Move some code from varobj.c.
 	* varobj-iter.h (struct varobj_item): Moved from varobj.c.
