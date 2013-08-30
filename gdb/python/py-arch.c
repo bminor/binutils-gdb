@@ -30,6 +30,18 @@ typedef struct arch_object_type_object {
 
 static struct gdbarch_data *arch_object_data = NULL;
 
+/* Require a valid Architecture.  */
+#define ARCHPY_REQUIRE_VALID(arch_obj, arch)			\
+  do {								\
+    arch = arch_object_to_gdbarch (arch_obj);			\
+    if (arch == NULL)						\
+      {								\
+	PyErr_SetString (PyExc_RuntimeError,			\
+			 _("Architecture is invalid."));	\
+	return NULL;						\
+      }								\
+  } while (0)
+
 static PyTypeObject arch_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("arch_object");
 
@@ -82,9 +94,14 @@ gdbarch_to_arch_object (struct gdbarch *gdbarch)
 static PyObject *
 archpy_name (PyObject *self, PyObject *args)
 {
-  struct gdbarch *gdbarch = arch_object_to_gdbarch (self);
-  const char *name = (gdbarch_bfd_arch_info (gdbarch))->printable_name;
-  PyObject *py_name = PyString_FromString (name);
+  struct gdbarch *gdbarch = NULL;
+  const char *name;
+  PyObject *py_name;
+
+  ARCHPY_REQUIRE_VALID (self, gdbarch);
+
+  name = (gdbarch_bfd_arch_info (gdbarch))->printable_name;
+  py_name = PyString_FromString (name);
 
   return py_name;
 }
@@ -104,7 +121,9 @@ archpy_disassemble (PyObject *self, PyObject *args, PyObject *kw)
   gdb_py_ulongest start_temp;
   long count = 0, i;
   PyObject *result_list, *end_obj = NULL, *count_obj = NULL;
-  struct gdbarch *gdbarch = arch_object_to_gdbarch (self);
+  struct gdbarch *gdbarch = NULL;
+
+  ARCHPY_REQUIRE_VALID (self, gdbarch);
 
   if (!PyArg_ParseTupleAndKeywords (args, kw, GDB_PY_LLU_ARG "|OO", keywords,
                                     &start_temp, &end_obj, &count_obj))

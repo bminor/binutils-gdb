@@ -1,3 +1,7 @@
+2013-08-30  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-arch.exp: Tests for invalid architecture.
+
 2013-08-29  Sterling Augustine  <saugustine@google.com>
 
 	* boards/remote-stdio-gdbserver.exp: Set rcp_prog and

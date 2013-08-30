@@ -1,3 +1,11 @@
+2013-08-30  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/15461
+
+	* python/py-arch.c (ARCHPY_REQUIRE_VALID): New macro.
+	(archpy_name): Check for valid architecture.
+	(archpy_disassemble): Ditto.
+
 2013-08-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* rs6000-nat.c (rs6000_ptrace32): Cast "addr" to "uintptr_t"
