@@ -1310,7 +1310,8 @@ task_command_1 (char *taskno_str, int from_tty, struct inferior *inf)
   ada_find_printable_frame (get_selected_frame (NULL));
   printf_filtered (_("[Switching to task %d]\n"), taskno);
   print_stack_frame (get_selected_frame (NULL),
-                     frame_relative_level (get_selected_frame (NULL)), 1);
+                     frame_relative_level (get_selected_frame (NULL)),
+		     SRC_AND_LOC);
 }
 
 

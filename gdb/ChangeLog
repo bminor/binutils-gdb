@@ -1,5 +1,9 @@
 2013-08-30  Pedro Alves  <palves@redhat.com>
 
+	* ada-tasks.c (task_command_1): Write SRC_AND_LOC instead '1'.
+
+2013-08-30  Pedro Alves  <palves@redhat.com>
+
 	* frame.h (show_and_print_stack_frame): Delete declaration.
 
 2013-08-30  Phil Muldoon  <pmuldoon@redhat.com>
