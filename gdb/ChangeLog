@@ -1,5 +1,10 @@
 2013-08-30  Pedro Alves  <palves@redhat.com>
 
+	* thread.c (restore_selected_frame): Use SRC_AND_LOC, and change
+	warning text.
+
+2013-08-30  Pedro Alves  <palves@redhat.com>
+
 	* bsd-kvm.c (bsd_kvm_open, bsd_kvm_proc_cmd, bsd_kvm_pcb_cmd):
 	Adjust arguments to print_stack_frame.
 
