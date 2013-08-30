@@ -3096,7 +3096,8 @@ handle_syscall_event (struct execution_control_state *ecs)
 	= bpstat_stop_status (get_regcache_aspace (regcache),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
-      sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat);
+      sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+				     GDB_SIGNAL_TRAP);
       ecs->random_signal = sval == BPSTAT_SIGNAL_NO;
 
       if (!ecs->random_signal)
@@ -3342,7 +3343,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 				  stop_pc, ecs->ptid, &ecs->ws);
 
 	  sval
-	    = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat);
+	    = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+				      GDB_SIGNAL_TRAP);
 	  ecs->random_signal = sval == BPSTAT_SIGNAL_NO;
 
 	  if (!ecs->random_signal)
@@ -3641,7 +3643,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
 			      stop_pc, ecs->ptid, &ecs->ws);
       ecs->random_signal
-	= (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat)
+	= (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+				   GDB_SIGNAL_TRAP)
 	   == BPSTAT_SIGNAL_NO);
 
       /* Note that this may be referenced from inside
@@ -4216,7 +4219,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (debug_infrun
       && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-      && (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat)
+      && (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+				  GDB_SIGNAL_TRAP)
 	  == BPSTAT_SIGNAL_NO)
       && stopped_by_watchpoint)
     fprintf_unfiltered (gdb_stdlog,
@@ -4245,7 +4249,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
     ecs->random_signal
-      = !((bpstat_explains_signal (ecs->event_thread->control.stop_bpstat)
+      = !((bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+				   GDB_SIGNAL_TRAP)
 	   != BPSTAT_SIGNAL_NO)
 	  || stopped_by_watchpoint
 	  || ecs->event_thread->control.trap_expected
@@ -4256,7 +4261,8 @@ handle_inferior_event (struct execution_control_state *ecs)
     {
       enum bpstat_signal_value sval;
 
-      sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat);
+      sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+				     ecs->event_thread->suspend.stop_signal);
       ecs->random_signal = (sval == BPSTAT_SIGNAL_NO);
 
       if (sval == BPSTAT_SIGNAL_HIDE)

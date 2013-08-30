@@ -1,3 +1,19 @@
+2013-08-30  Tom Tromey  <tromey@redhat.com>
+
+	PR cli/15603:
+	* break-catch-sig.c (signal_catchpoint_explains_signal): Add 'sig'
+	argument.
+	* breakpoint.c (bpstat_explains_signal): Add 'sig' argument.
+	Special case signals other than GDB_SIGNAL_TRAP.
+	(explains_signal_watchpoint): New function.
+	(base_breakpoint_explains_signal): Add 'sig' argument.
+	(initialize_breakpoint_ops): Set 'explains_signal' method for
+	watchpoints.
+	* breakpoint.h (struct breakpoint_ops) <explains_signal>: Add
+	signal argument.
+	(bpstat_explains_signal): Likewise.
+	* infrun.c (handle_syscall_event, handle_inferior_event): Update.
+
 2013-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/15415

@@ -613,7 +613,8 @@ struct breakpoint_ops
      should still be delivered to the inferior.  This is used to make
      'catch signal' interact properly with 'handle'; see
      bpstat_explains_signal.  */
-  enum bpstat_signal_value (*explains_signal) (struct breakpoint *);
+  enum bpstat_signal_value (*explains_signal) (struct breakpoint *,
+					       enum gdb_signal);
 
   /* Called after evaluating the breakpoint's condition,
      and only if it evaluated true.  */
@@ -1012,7 +1013,8 @@ bpstat bpstat_find_breakpoint (bpstat, struct breakpoint *);
 /* Nonzero if a signal that we got in wait() was due to circumstances
    explained by the bpstat; and the signal should therefore not be
    delivered.  */
-extern enum bpstat_signal_value bpstat_explains_signal (bpstat);
+extern enum bpstat_signal_value bpstat_explains_signal (bpstat,
+							enum gdb_signal);
 
 /* Nonzero is this bpstat causes a stop.  */
 extern int bpstat_causes_stop (bpstat);

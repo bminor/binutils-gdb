@@ -4149,7 +4149,7 @@ bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
 /* See breakpoint.h.  */
 
 enum bpstat_signal_value
-bpstat_explains_signal (bpstat bsp)
+bpstat_explains_signal (bpstat bsp, enum gdb_signal sig)
 {
   enum bpstat_signal_value result = BPSTAT_SIGNAL_NO;
 
@@ -4157,10 +4157,20 @@ bpstat_explains_signal (bpstat bsp)
     {
       /* Ensure that, if we ever entered this loop, then we at least
 	 return BPSTAT_SIGNAL_HIDE.  */
-      enum bpstat_signal_value newval = BPSTAT_SIGNAL_HIDE;
+      enum bpstat_signal_value newval;
 
-      if (bsp->breakpoint_at != NULL)
-	newval = bsp->breakpoint_at->ops->explains_signal (bsp->breakpoint_at);
+      if (bsp->breakpoint_at == NULL)
+	{
+	  /* A moribund location can never explain a signal other than
+	     GDB_SIGNAL_TRAP.  */
+	  if (sig == GDB_SIGNAL_TRAP)
+	    newval = BPSTAT_SIGNAL_HIDE;
+	  else
+	    newval = BPSTAT_SIGNAL_NO;
+	}
+      else
+	newval = bsp->breakpoint_at->ops->explains_signal (bsp->breakpoint_at,
+							   sig);
 
       if (newval > result)
 	result = newval;
@@ -10639,6 +10649,20 @@ print_recreate_watchpoint (struct breakpoint *b, struct ui_file *fp)
   print_recreate_thread (b, fp);
 }
 
+/* Implement the "explains_signal" breakpoint_ops method for
+   watchpoints.  */
+
+static enum bpstat_signal_value
+explains_signal_watchpoint (struct breakpoint *b, enum gdb_signal sig)
+{
+  /* A software watchpoint cannot cause a signal other than
+     GDB_SIGNAL_TRAP.  */
+  if (b->type == bp_watchpoint && sig != GDB_SIGNAL_TRAP)
+    return BPSTAT_SIGNAL_NO;
+
+  return BPSTAT_SIGNAL_HIDE;
+}
+
 /* The breakpoint_ops structure to be used in hardware watchpoints.  */
 
 static struct breakpoint_ops watchpoint_breakpoint_ops;
@@ -12916,7 +12940,7 @@ base_breakpoint_decode_linespec (struct breakpoint *b, char **s,
 /* The default 'explains_signal' method.  */
 
 static enum bpstat_signal_value
-base_breakpoint_explains_signal (struct breakpoint *b)
+base_breakpoint_explains_signal (struct breakpoint *b, enum gdb_signal sig)
 {
   return BPSTAT_SIGNAL_HIDE;
 }
@@ -15984,6 +16008,7 @@ initialize_breakpoint_ops (void)
   ops->print_it = print_it_watchpoint;
   ops->print_mention = print_mention_watchpoint;
   ops->print_recreate = print_recreate_watchpoint;
+  ops->explains_signal = explains_signal_watchpoint;
 
   /* Masked watchpoints.  */
   ops = &masked_watchpoint_breakpoint_ops;
