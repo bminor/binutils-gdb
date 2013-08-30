@@ -1,3 +1,7 @@
+2013-08-30  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.6.1 released.
+
 2013-08-30  Pedro Alves  <palves@redhat.com>
 
 	* mi/mi-main.c (mi_cmd_trace_find): Use LOC_AND_ADDRESS instead of
