@@ -1,5 +1,9 @@
 2013-08-30  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 7.6.1 released.
+
+2013-08-30  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Update GDB version number to 7.6.1.
 
 2013-08-30  Tom Tromey  <tromey@redhat.com>
