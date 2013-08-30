@@ -17,6 +17,13 @@
 
 int my_global_symbol = 42;
 
+/* Symbol MY_BSS_SYMBOL is referenced, and should be placed into .bss
+   section.  */
+
+static int my_bss_symbol;
+
+/* Symbol MY_STATIC_SYMBOL is never referenced and so will be eliminated.  */
+
 static int my_static_symbol;
 
 int
@@ -24,7 +31,7 @@ main ()
 {
   int v_in_main;
 
-  return v_in_main;
+  return v_in_main + my_bss_symbol;
 }
 
 int
