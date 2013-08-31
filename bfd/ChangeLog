@@ -1,3 +1,8 @@
+2013-08-31  John David Anglin  <dave.anglin@bell.net>
+
+	* elf64-hppa.c (elf_hppa_final_link_relocate): Add missing '%' to
+	format string.
+
 2013-08-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* elf64-x86-64.c (elf_x86_64_check_tls_transition): Allow
