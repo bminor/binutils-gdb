@@ -1,3 +1,9 @@
+2013-09-02  Pierre Muller  <muller@sourceware.org>
+
+	* win32-low.c (child_xfer_memory): Check if ReadProcessMemory
+	or WriteProcessMemory complete successfully and handle
+	ERROR_PARTIAL_COPY error.
+
 2013-09-02  Pedro Alves  <palves@redhat.com>
 
 	* server.c (gdb_read_memory): Return -1 on traceframe memory read
