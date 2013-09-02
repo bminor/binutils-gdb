@@ -1,5 +1,14 @@
 2013-09-03  Yao Qi  <yao@codesourcery.com>
 
+	* linux-tdep.c (linux_is_uclinux): New function.  Code moved
+	from linux_has_shared_address_space.
+	(linux_has_shared_address_space): Call linux_is_uclinux.
+	* linux-tdep.h (linux_is_uclinux): Declare.
+	* m68klinux-tdep.c (m68k_linux_get_sigtramp_info): Call
+	linux_is_uclinux.
+
+2013-09-03  Yao Qi  <yao@codesourcery.com>
+
 	* config/djgpp/fnchange.lst: Remove entry of
 	i386-interix-nat.c and i386-interix-tdep.c.
 	* configure.ac: Remove '*-*-interix*'.

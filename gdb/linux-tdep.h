@@ -42,4 +42,6 @@ extern int linux_gdb_signal_to_target (struct gdbarch *gdbarch,
 
 extern void linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch);
 
+extern int linux_is_uclinux (void);
+
 #endif /* linux-tdep.h */

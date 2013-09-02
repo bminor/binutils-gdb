@@ -228,16 +228,10 @@ m68k_linux_get_sigtramp_info (struct frame_info *this_frame)
   CORE_ADDR sp;
   struct m68k_linux_sigtramp_info info;
 
+  /* Determine whether we are running on a uClinux or normal GNU/Linux
+     target so we can use the correct sigcontext layouts.  */
   if (target_is_uclinux == -1)
-    {
-      /* Determine whether we are running on a uClinux or normal GNU/Linux
-         target so we can use the correct sigcontext layouts.  */
-      CORE_ADDR dummy;
-
-      target_is_uclinux
-        = (target_auxv_search (&current_target, AT_NULL, &dummy) > 0
-	   && target_auxv_search (&current_target, AT_PAGESZ, &dummy) == 0);
-    }
+    target_is_uclinux = linux_is_uclinux ();
 
   sp = get_frame_register_unsigned (this_frame, M68K_SP_REGNUM);
 

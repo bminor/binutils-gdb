@@ -241,19 +241,22 @@ linux_get_siginfo_type (struct gdbarch *gdbarch)
   return siginfo_type;
 }
 
+/* Return true if the target is running on uClinux instead of normal
+   Linux kernel.  */
+
+int
+linux_is_uclinux (void)
+{
+  CORE_ADDR dummy;
+
+  return (target_auxv_search (&current_target, AT_NULL, &dummy) > 0
+	  && target_auxv_search (&current_target, AT_PAGESZ, &dummy) == 0);
+}
+
 static int
 linux_has_shared_address_space (struct gdbarch *gdbarch)
 {
-  /* Determine whether we are running on uClinux or normal Linux
-     kernel.  */
-  CORE_ADDR dummy;
-  int target_is_uclinux;
-
-  target_is_uclinux
-    = (target_auxv_search (&current_target, AT_NULL, &dummy) > 0
-       && target_auxv_search (&current_target, AT_PAGESZ, &dummy) == 0);
-
-  return target_is_uclinux;
+  return linux_is_uclinux ();
 }
 
 /* This is how we want PTIDs from core files to be printed.  */
