@@ -1,3 +1,8 @@
+2013-09-02  Pedro Alves  <palves@redhat.com>
+
+	* server.c (gdb_read_memory): Return -1 on traceframe memory read
+	error instead of EIO.
+
 2013-08-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR server/15604

@@ -716,7 +716,7 @@ gdb_read_memory (CORE_ADDR memaddr, unsigned char *myaddr, int len)
 
       if (traceframe_read_mem (current_traceframe,
 			       memaddr, myaddr, len, &nbytes))
-	return EIO;
+	return -1;
       /* Data read from trace buffer, we're done.  */
       if (nbytes > 0)
 	return nbytes;
