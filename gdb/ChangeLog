@@ -1,3 +1,8 @@
+2013-09-02  Pierre Muller  <muller@sourceware.org>
+
+	* windows-nat.c (windows_xfer_memory): Fix compilation failure
+	by use of plongest function.
+
 2013-09-02  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add entry mentioning support for native Windows x64
