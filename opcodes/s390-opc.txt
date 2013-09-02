@@ -1082,9 +1082,9 @@ b39e clfxbr RRF_UURFE "convert to 32 bit fixed logical from extended bfp with ro
 b3ac clgebr RRF_UURF "convert to 64 bit fixed logical from short bfp with rounding mode" z196 zarch
 b3ad clgdbr RRF_UURF "convert to 64 bit fixed logical from long bfp with rounding mode" z196 zarch
 b3ae clgxbr RRF_UURFE "convert to 64 bit fixed logical from extended bfp with rounding mode" z196 zarch
-b357 fiebra RRF_UUFF "load fp integer short bfp with rounding mode" z196 zarch
-b35f fidbra RRF_UUFF "load fp integer long bfp with rounding mode" z196 zarch
-b347 fixbra RRF_UUFEFE "load fp integer extended bfp with rounding mode" z196 zarch
+b357 fiebra RRF_UUFF "load fp integer short bfp with inexact suppression" z196 zarch
+b35f fidbra RRF_UUFF "load fp integer long bfp with inexact suppression" z196 zarch
+b347 fixbra RRF_UUFEFE "load fp integer extended bfp with inexact suppression" z196 zarch
 b344 ledbra RRF_UUFF "load rounded short/long bfp to short/long bfp with rounding mode" z196 zarch
 b345 ldxbra RRF_UUFEFE "load rounded long/extended bfp to long/extended bfp with rounding mode" z196 zarch
 b346 lexbra RRF_UUFEFE "load rounded short/extended bfp to short/extended bfp with rounding mode" z196 zarch

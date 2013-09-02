@@ -1,3 +1,9 @@
+2013-09-02  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.txt: Fix description for fiebra, fidbra, and fixbra.
+	For the load fp integer instructions only the suppression flag was
+	new with z196 version.
+
 2013-08-28  Nick Clifton  <nickc@redhat.com>
 
 	* aarch64-opc.c (aarch64_logical_immediate_p): Return FALSE if the
