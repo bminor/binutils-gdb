@@ -1,5 +1,10 @@
 2013-09-02  Pierre Muller  <muller@sourceware.org>
 
+	* windows-nat.c (windows_xfer_memory): Handle ERROR_PARTIAL_COPY
+	error code.
+
+2013-09-02  Pierre Muller  <muller@sourceware.org>
+
 	* windows-nat.c (windows_xfer_memory): Fix compilation failure
 	by use of plongest function.
 
