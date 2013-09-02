@@ -1395,7 +1395,7 @@ fi
 
 if test "${target}" = "${host}"; then
   case "${host}" in
-  *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
+  *-*-sysv4.2* | *-*-sysv5* )
       AC_DEFINE(NEW_PROC_API, 1,
       [Define if you want to use new multi-fd /proc interface
        (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros).])

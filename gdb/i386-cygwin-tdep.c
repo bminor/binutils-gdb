@@ -267,8 +267,6 @@ i386_cygwin_osabi_sniffer (bfd *abfd)
 {
   char *target_name = bfd_get_target (abfd);
 
-  /* Interix also uses pei-i386.
-     We need a way to distinguish between the two.  */
   if (strcmp (target_name, "pei-i386") == 0)
     return GDB_OSABI_CYGWIN;
 

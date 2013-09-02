@@ -10846,7 +10846,7 @@ fi
 
 if test "${target}" = "${host}"; then
   case "${host}" in
-  *-*-sysv4.2* | *-*-sysv5* | *-*-interix* )
+  *-*-sysv4.2* | *-*-sysv5* )
 
 $as_echo "#define NEW_PROC_API 1" >>confdefs.h
 

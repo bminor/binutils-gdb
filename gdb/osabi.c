@@ -63,7 +63,6 @@ static const char * const gdb_osabi_names[] =
   "Windows CE",
   "DJGPP",
   "Irix",
-  "Interix",
   "HP/UX ELF",
   "HP/UX SOM",
   "QNX Neutrino",

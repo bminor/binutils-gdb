@@ -1,5 +1,16 @@
 2013-09-03  Yao Qi  <yao@codesourcery.com>
 
+	* config/djgpp/fnchange.lst: Remove entry of
+	i386-interix-nat.c and i386-interix-tdep.c.
+	* configure.ac: Remove '*-*-interix*'.
+	* configure: Re-generated.
+	* defs.h (enum gdb_osabi): Remove GDB_OSABI_INTERIX.
+	* i386-cygwin-tdep.c (i386_cygwin_osabi_sniffer): Remove
+	obsolete comments.
+	* osabi.c (gdb_osabi_names): Remove "Interix".
+
+2013-09-03  Yao Qi  <yao@codesourcery.com>
+
 	* arch-utils.c: Fix typo in the comment to gdbarch_update_p.
 
 2013-09-02  Markus Metzger  <markus.t.metzger@intel.com>

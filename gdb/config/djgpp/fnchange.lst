@@ -282,8 +282,6 @@
 @V@/gdb/hppnbsd-tdep.c @V@/gdb/hppnb-tdep.c
 @V@/gdb/i386-darwin-nat.c @V@/gdb/i386dw-nat.c
 @V@/gdb/i386-darwin-tdep.c @V@/gdb/i386dw-tdep.c
-@V@/gdb/i386-interix-nat.c @V@/gdb/i386ix-nat.c
-@V@/gdb/i386-interix-tdep.c @V@/gdb/i386ix-tdep.c
 @V@/gdb/i386-linux-tdep.c @V@/gdb/i386lx-tdep.c
 @V@/gdb/i386-linux-nat.c @V@/gdb/i386lx-nat.c
 @V@/gdb/i386bsd-nat.c @V@/gdb/i3bsd-nat.c
