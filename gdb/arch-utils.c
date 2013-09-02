@@ -477,7 +477,7 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
 }
 
 /* Try to select a global architecture that matches "info".  Return
-   non-zero if the attempt succeds.  */
+   non-zero if the attempt succeeds.  */
 int
 gdbarch_update_p (struct gdbarch_info info)
 {

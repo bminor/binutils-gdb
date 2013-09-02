@@ -1,3 +1,7 @@
+2013-09-03  Yao Qi  <yao@codesourcery.com>
+
+	* arch-utils.c: Fix typo in the comment to gdbarch_update_p.
+
 2013-09-02  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* record.h (record_print_flag) <record_print_src_line,
