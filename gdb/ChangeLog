@@ -1,3 +1,22 @@
+2013-09-02  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add entry mentioning support for native Windows x64
+	SEH data.
+
+	* amd64-windows-tdep.c: #include "objfiles.h", "frame-unwind.h",
+	"coff/internal.h", "coff/i386.h", "coff/pe.h" and "libcoff.h".
+	(struct amd64_windows_frame_cache): New struct.
+	(amd64_windows_w2gdb_regnum): New global.
+	(pc_in_range, amd64_windows_frame_decode_epilogue)
+	(amd64_windows_frame_decode_insns, amd64_windows_find_unwind_info)
+	(amd64_windows_frame_cache, amd64_windows_frame_prev_register)
+	(amd64_windows_frame_this_id): New functions.
+	(amd64_windows_frame_unwind): New static global.
+	(amd64_windows_skip_prologue): New function.
+	(amd64_windows_init_abi): Call frame_unwind_prepend_unwinder
+	with amd64_windows_frame_unwind. Call set_gdbarch_skip_prologue
+	with amd64_windows_skip_prologue.
+
 2013-08-30  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.6.1 released.

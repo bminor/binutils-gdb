@@ -142,6 +142,8 @@ qXfer:libraries-svr4:read's annex
 * New 'z' formatter for printing and examining memory, this displays the
   value as hexadecimal zero padded on the left to the size of the type.
 
+* GDB can now use Windows x64 unwinding data.
+
 *** Changes in GDB 7.6
 
 * Target record has been renamed to record-full.
