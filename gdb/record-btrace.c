@@ -469,13 +469,13 @@ btrace_func_history (struct btrace_thread_info *btinfo, struct ui_out *uiout,
       ui_out_field_uint (uiout, "index", idx);
       ui_out_text (uiout, "\t");
 
-      if ((flags & record_print_insn_range) != 0)
+      if ((flags & RECORD_PRINT_INSN_RANGE) != 0)
 	{
 	  btrace_func_history_insn_range (uiout, bfun);
 	  ui_out_text (uiout, "\t");
 	}
 
-      if ((flags & record_print_src_line) != 0)
+      if ((flags & RECORD_PRINT_SRC_LINE) != 0)
 	{
 	  btrace_func_history_src_line (uiout, bfun);
 	  ui_out_text (uiout, "\t");

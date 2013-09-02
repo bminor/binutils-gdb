@@ -570,10 +570,10 @@ get_call_history_modifiers (char **arg)
 	  switch (*args)
 	    {
 	    case 'l':
-	      modifiers |= record_print_src_line;
+	      modifiers |= RECORD_PRINT_SRC_LINE;
 	      break;
 	    case 'i':
-	      modifiers |= record_print_insn_range;
+	      modifiers |= RECORD_PRINT_INSN_RANGE;
 	      break;
 	    default:
 	      error (_("Invalid modifier: %c."), *args);
