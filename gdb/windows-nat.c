@@ -2334,7 +2334,7 @@ windows_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 				    (LPVOID) (uintptr_t) memaddr, writebuf,
 				    len, &done);
       if (!success)
-       lasterror = GetLastError ();
+	lasterror = GetLastError ();
       FlushInstructionCache (current_process_handle,
 			     (LPCVOID) (uintptr_t) memaddr, len);
     }
@@ -2346,7 +2346,7 @@ windows_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
 				   (LPCVOID) (uintptr_t) memaddr, readbuf,
 				   len, &done);
       if (!success)
-       lasterror = GetLastError ();
+	lasterror = GetLastError ();
     }
   if (!success && lasterror == ERROR_PARTIAL_COPY && done > 0)
     return done;
