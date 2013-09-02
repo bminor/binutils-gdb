@@ -1,3 +1,10 @@
+2013-09-02  Pedro Alves  <palves@redhat.com>
+
+	* tracepoint.c (TRACEFRAME_EOB_MARKER_SIZE): New macro.
+	(init_trace_buffer): Ensure at least TRACEFRAME_EOB_MARKER_SIZE is
+	allocated.
+	(trace_buffer_alloc): Use TRACEFRAME_EOB_MARKER_SIZE.
+
 2013-09-02  Pierre Muller  <muller@sourceware.org>
 
 	* win32-low.c (child_xfer_memory): Check if ReadProcessMemory

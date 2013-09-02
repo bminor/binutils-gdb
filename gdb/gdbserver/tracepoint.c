@@ -982,6 +982,10 @@ struct traceframe
 
 } ATTR_PACKED;
 
+/* The size of the EOB marker, in bytes.  A traceframe with zeroed
+   fields (and no data) marks the end of trace data.  */
+#define TRACEFRAME_EOB_MARKER_SIZE offsetof (struct traceframe, data)
+
 /* The traceframe to be used as the source of data to send back to
    GDB.  A value of -1 means to get data from the live program.  */
 
@@ -1487,12 +1491,17 @@ clear_inferior_trace_buffer (void)
 static void
 init_trace_buffer (LONGEST bufsize)
 {
+  size_t alloc_size;
+
   trace_buffer_size = bufsize;
 
-  /* If we already have a trace buffer, try realloc'ing.  */
-  trace_buffer_lo = xrealloc (trace_buffer_lo, bufsize);
+  /* Make sure to internally allocate at least space for the EOB
+     marker.  */
+  alloc_size = (bufsize < TRACEFRAME_EOB_MARKER_SIZE
+		? TRACEFRAME_EOB_MARKER_SIZE : bufsize);
+  trace_buffer_lo = xrealloc (trace_buffer_lo, alloc_size);
 
-  trace_buffer_hi = trace_buffer_lo + bufsize;
+  trace_buffer_hi = trace_buffer_lo + trace_buffer_size;
 
   clear_trace_buffer ();
 }
@@ -1532,7 +1541,7 @@ trace_buffer_alloc (size_t amt)
 	       (long) amt, (long) sizeof (struct traceframe));
 
   /* Account for the EOB marker.  */
-  amt += sizeof (struct traceframe);
+  amt += TRACEFRAME_EOB_MARKER_SIZE;
 
 #ifdef IN_PROCESS_AGENT
  again:
