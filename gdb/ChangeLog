@@ -1,3 +1,22 @@
+2013-09-03  Luis Machado  <lgustavo@codesourcery.com>
+
+	* inf-child.c (inf_child_follow_fork) New parameter
+	detach_fork.
+	* inf-ptrace.c (inf_ptrace_follow_fork): Likewise.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Likewise.
+	* inferior.h (detach_fork): Remove.
+	* infrun.c (detach_fork): Adjust comment and make it
+	static.
+	(follow_fork): Pass detach_fork parameter to
+	target_follow_fork.
+	* linux-nat.c (linux_child_follow_fork): New parameter
+	detach_fork.
+	* target.c (target_follow_fork): New parameter detach_fork.
+	Pass detach_fork as parameter and print its value.
+	* target.h (struct target_ops) <to_follow_fork>: New int
+	parameter.
+	(target_follow_fork): New parameter detach_fork.
+
 2013-09-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib-ia64-hpux.c (ia64_hpux_relocate_section_addresses):

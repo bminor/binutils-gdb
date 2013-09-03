@@ -2811,7 +2811,7 @@ target_program_signals (int numsigs, unsigned char *program_signals)
    follow forks.  */
 
 int
-target_follow_fork (int follow_child)
+target_follow_fork (int follow_child, int detach_fork)
 {
   struct target_ops *t;
 
@@ -2819,11 +2819,12 @@ target_follow_fork (int follow_child)
     {
       if (t->to_follow_fork != NULL)
 	{
-	  int retval = t->to_follow_fork (t, follow_child);
+	  int retval = t->to_follow_fork (t, follow_child, detach_fork);
 
 	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_follow_fork (%d) = %d\n",
-				follow_child, retval);
+	    fprintf_unfiltered (gdb_stdlog,
+				"target_follow_fork (%d, %d) = %d\n",
+				follow_child, detach_fork, retval);
 	  return retval;
 	}
     }

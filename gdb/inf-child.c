@@ -118,7 +118,8 @@ inf_child_post_startup_inferior (ptid_t ptid)
 }
 
 static int
-inf_child_follow_fork (struct target_ops *ops, int follow_child)
+inf_child_follow_fork (struct target_ops *ops, int follow_child,
+		       int detach_fork)
 {
   /* This version of Unix doesn't support following fork or vfork
      events.  */

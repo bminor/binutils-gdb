@@ -132,8 +132,12 @@ int sync_execution = 0;
 
 static ptid_t previous_inferior_ptid;
 
-/* Default behavior is to detach newly forked processes (legacy).  */
-int detach_fork = 1;
+/* If set (default for legacy reasons), when following a fork, GDB
+   will detach from one of the fork branches, child or parent.
+   Exactly which branch is detached depends on 'set follow-fork-mode'
+   setting.  */
+
+static int detach_fork = 1;
 
 int debug_displaced = 0;
 static void
@@ -497,7 +501,7 @@ follow_fork (void)
 
 	/* Tell the target to do whatever is necessary to follow
 	   either parent or child.  */
-	if (target_follow_fork (follow_child))
+	if (target_follow_fork (follow_child, detach_fork))
 	  {
 	    /* Target refused to follow, or there's some other reason
 	       we shouldn't resume.  */

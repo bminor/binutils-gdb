@@ -440,7 +440,7 @@ struct target_ops
     int (*to_remove_fork_catchpoint) (int);
     int (*to_insert_vfork_catchpoint) (int);
     int (*to_remove_vfork_catchpoint) (int);
-    int (*to_follow_fork) (struct target_ops *, int);
+    int (*to_follow_fork) (struct target_ops *, int, int);
     int (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
     int (*to_set_syscall_catchpoint) (int, int, int, int, int *);
@@ -1235,7 +1235,7 @@ void target_create_inferior (char *exec_file, char *args,
    This function returns 1 if the inferior should not be resumed
    (i.e. there is another event pending).  */
 
-int target_follow_fork (int follow_child);
+int target_follow_fork (int follow_child, int detach_fork);
 
 /* On some targets, we can catch an inferior exec event when it
    occurs.  These functions insert/remove an already-created

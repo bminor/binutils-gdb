@@ -376,7 +376,8 @@ delete_lwp_cleanup (void *lp_voidp)
 }
 
 static int
-linux_child_follow_fork (struct target_ops *ops, int follow_child)
+linux_child_follow_fork (struct target_ops *ops, int follow_child,
+			 int detach_fork)
 {
   int has_vforked;
   int parent_pid, child_pid;

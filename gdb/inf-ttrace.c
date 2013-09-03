@@ -409,7 +409,8 @@ inf_ttrace_stopped_by_watchpoint (void)
 static pid_t inf_ttrace_vfork_ppid = -1;
 
 static int
-inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
+inf_ttrace_follow_fork (struct target_ops *ops, int follow_child,
+			int detach_fork)
 {
   pid_t pid, fpid;
   lwpid_t lwpid, flwpid;
