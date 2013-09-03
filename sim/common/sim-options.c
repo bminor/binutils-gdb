@@ -920,7 +920,7 @@ find_match (SIM_DESC sd, sim_cpu *cpu, char *argv[], int *pargi)
 
 static char **
 complete_option_list (char **ret, size_t *cnt, const struct option_list *ol,
-		      char *text, char *word)
+		      const char *text, const char *word)
 {
   const OPTION *opt = NULL;
   int argi;
