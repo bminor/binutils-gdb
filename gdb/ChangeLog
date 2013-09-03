@@ -1,3 +1,8 @@
+2013-09-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-ia64-hpux.c (ia64_hpux_relocate_section_addresses):
+	Replace sec->bfd by sec->the_bfd_section->owner.
+
 2013-09-03  Yao Qi  <yao@codesourcery.com>
 
 	* linux-tdep.c (linux_is_uclinux): New function.  Code moved

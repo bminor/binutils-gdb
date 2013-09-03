@@ -336,7 +336,8 @@ ia64_hpux_relocate_section_addresses (struct so_list *so,
      bfd, whereas we would have had to open our own if we wanted to do it
      while processing the library-load event.  */
   if (so->lm_info->text_start == 0 && so->lm_info->data_start == 0)
-    ia64_hpux_find_start_vma (sec->bfd, &so->lm_info->text_start,
+    ia64_hpux_find_start_vma (sec->the_bfd_section->owner,
+			      &so->lm_info->text_start,
 			      &so->lm_info->data_start);
 
   /* Determine the relocation offset based on which segment
