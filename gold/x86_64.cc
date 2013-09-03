@@ -2742,7 +2742,8 @@ Target_x86_64<size>::Scan::global(Symbol_table* symtab,
 						       reloc.get_r_offset(),
 						       reloc.get_r_addend());
 	      }
-	    else if (r_type == elfcpp::R_X86_64_64
+	    else if (((size == 64 && r_type == elfcpp::R_X86_64_64)
+		      || (size == 32 && r_type == elfcpp::R_X86_64_32))
 		     && gsym->can_use_relative_reloc(false))
 	      {
 		Reloc_section* rela_dyn = target->rela_dyn_section(layout);

@@ -1,3 +1,9 @@
+2013-09-03  Pavel Chupin  <pavel.v.chupin@intel.com>
+
+	PR gold/15927
+	* x86_64.cc (Target_x86_64<size>::Scan::global): Use relative
+	relocation for R_X86_64_32 on x32.
+
 2013-08-27  Roland McGrath  <mcgrathr@google.com>
 
 	* output.cc (Output_segment::set_section_addresses): Take new
