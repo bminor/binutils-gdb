@@ -70,3 +70,9 @@ gdb_test_multiple $test $test {
 	}
     }
 }
+
+# gold/15021
+# With -fdebug-types-section, Gold's .gdb_index entry for ZERO refers to the
+# CU, but the CU doesn't use the TU (type unit) that defines ZERO.
+# Thus gdb has to read in every TU for the CU.
+gdb_test "p ZERO" "ZERO"

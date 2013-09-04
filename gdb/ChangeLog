@@ -1,3 +1,13 @@
+2013-09-04  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (queue_and_load_all_dwo_tus): New function.
+	(queue_and_load_dwo_tu): New function.
+	(lookup_dwo_signatured_type): Set per_cu.tu_read.
+	(maybe_queue_comp_unit): Rename this_cu argument to dependent_cu.
+	Make dependent_cu optional.
+	(dw2_do_instantiate_symtab): If we just loaded a CU from a DWO,
+	and an older .gdb_index is in use, queue and load all its TUs too.
+
 2013-09-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup: Change OPF_DISABLE_REALPATH to OPF_RETURN_REALPATH.

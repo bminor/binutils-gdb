@@ -1,4 +1,10 @@
-2013-09-13  Muhammad Bilal  <mbilal@codesourcery.com>
+2013-09-04  Doug Evans  <dje@google.com>
+
+	* gdb.base/enumval.c (ZERO): New enum value.
+	(main): Use it
+	* gdb.base/enumval.exp: Test ability to print ZERO.
+
+2013-09-03  Muhammad Bilal  <mbilal@codesourcery.com>
             Pedro Alves  <palves@redhat.com>
 
 	* gdb.base/relocate.exp: Check that invalid options are

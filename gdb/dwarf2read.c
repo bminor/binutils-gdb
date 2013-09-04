@@ -1778,6 +1778,8 @@ static struct dwo_unit *lookup_dwo_comp_unit
 static struct dwo_unit *lookup_dwo_type_unit
   (struct signatured_type *, const char *, const char *);
 
+static void queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *);
+
 static void free_dwo_file_cleanup (void *);
 
 static void process_cu_includes (void);
@@ -2338,6 +2340,17 @@ dw2_do_instantiate_symtab (struct dwarf2_per_cu_data *per_cu)
     {
       queue_comp_unit (per_cu, language_minimal);
       load_cu (per_cu);
+
+      /* If we just loaded a CU from a DWO, and we're working with an index
+	 that may badly handle TUs, load all the TUs in that DWO as well.
+	 http://sourceware.org/bugzilla/show_bug.cgi?id=15021  */
+      if (!per_cu->is_debug_types
+	  && per_cu->cu->dwo_unit != NULL
+	  && dwarf2_per_objfile->index_table != NULL
+	  && dwarf2_per_objfile->index_table->version <= 7
+	  /* DWP files aren't supported yet.  */
+	  && get_dwp_file () == NULL)
+	queue_and_load_all_dwo_tus (per_cu);
     }
 
   process_queue ();
@@ -4468,6 +4481,7 @@ lookup_dwo_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
     return NULL;
 
   fill_in_sig_entry_from_dwo_entry (objfile, sig_entry, dwo_entry);
+  sig_entry->per_cu.tu_read = 1;
   return sig_entry;
 }
 
@@ -6940,8 +6954,9 @@ queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
   dwarf2_queue_tail = item;
 }
 
-/* THIS_CU has a reference to PER_CU.  If necessary, load the new compilation
-   unit and add it to our queue.
+/* If PER_CU is not yet queued, add it to the queue.
+   If DEPENDENT_CU is non-NULL, it has a reference to PER_CU so add a
+   dependency.
    The result is non-zero if PER_CU was queued, otherwise the result is zero
    meaning either PER_CU is already queued or it is already loaded.
 
@@ -6949,7 +6964,7 @@ queue_comp_unit (struct dwarf2_per_cu_data *per_cu,
    The caller is required to load PER_CU if we return non-zero.  */
 
 static int
-maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
+maybe_queue_comp_unit (struct dwarf2_cu *dependent_cu,
 		       struct dwarf2_per_cu_data *per_cu,
 		       enum language pretend_language)
 {
@@ -6965,7 +6980,8 @@ maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
 
   /* Mark the dependence relation so that we don't flush PER_CU
      too early.  */
-  dwarf2_add_dependence (this_cu, per_cu);
+  if (dependent_cu != NULL)
+    dwarf2_add_dependence (dependent_cu, per_cu);
 
   /* If it's already on the queue, we have nothing to do.  */
   if (per_cu->queued)
@@ -9826,6 +9842,55 @@ lookup_dwo_type_unit (struct signatured_type *this_tu,
 		      const char *dwo_name, const char *comp_dir)
 {
   return lookup_dwo_cutu (&this_tu->per_cu, dwo_name, comp_dir, this_tu->signature, 1);
+}
+
+/* Traversal function for queue_and_load_all_dwo_tus.  */
+
+static int
+queue_and_load_dwo_tu (void **slot, void *info)
+{
+  struct dwo_unit *dwo_unit = (struct dwo_unit *) *slot;
+  struct dwarf2_per_cu_data *per_cu = (struct dwarf2_per_cu_data *) info;
+  ULONGEST signature = dwo_unit->signature;
+  struct signatured_type *sig_type =
+    lookup_dwo_signatured_type (per_cu->cu, signature);
+
+  if (sig_type != NULL)
+    {
+      struct dwarf2_per_cu_data *sig_cu = &sig_type->per_cu;
+
+      /* We pass NULL for DEPENDENT_CU because we don't yet know if there's
+	 a real dependency of PER_CU on SIG_TYPE.  That is detected later
+	 while processing PER_CU.  */
+      if (maybe_queue_comp_unit (NULL, sig_cu, per_cu->cu->language))
+	load_full_type_unit (sig_cu);
+      VEC_safe_push (dwarf2_per_cu_ptr, per_cu->imported_symtabs, sig_cu);
+    }
+
+  return 1;
+}
+
+/* Queue all TUs contained in the DWO of PER_CU to be read in.
+   The DWO may have the only definition of the type, though it may not be
+   referenced anywhere in PER_CU.  Thus we have to load *all* its TUs.
+   http://sourceware.org/bugzilla/show_bug.cgi?id=15021  */
+
+static void
+queue_and_load_all_dwo_tus (struct dwarf2_per_cu_data *per_cu)
+{
+  struct dwo_unit *dwo_unit;
+  struct dwo_file *dwo_file;
+
+  gdb_assert (!per_cu->is_debug_types);
+  gdb_assert (get_dwp_file () == NULL);
+  gdb_assert (per_cu->cu != NULL);
+
+  dwo_unit = per_cu->cu->dwo_unit;
+  gdb_assert (dwo_unit != NULL);
+
+  dwo_file = dwo_unit->dwo_file;
+  if (dwo_file->tus != NULL)
+    htab_traverse_noresize (dwo_file->tus, queue_and_load_dwo_tu, per_cu);
 }
 
 /* Free all resources associated with DWO_FILE.

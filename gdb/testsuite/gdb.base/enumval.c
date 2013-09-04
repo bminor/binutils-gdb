@@ -17,6 +17,8 @@
 
 enum e { I, J = 0xffffffffU, K = 0xf000000000000000ULL } e = J, f = K;
 
+enum { ZERO };
+
 void
 dummy()
 {
@@ -26,5 +28,5 @@ int
 main(void)
 {
   dummy();
-  return 0;
+  return ZERO; /* This is here to ensure it survives into the debug info.  */
 }
