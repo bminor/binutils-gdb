@@ -1,3 +1,22 @@
+2013-09-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup: Change OPF_DISABLE_REALPATH to OPF_RETURN_REALPATH.
+	* cli/cli-cmds.c (find_and_open_script): Add OPF_RETURN_REALPATH to
+	variable search_flags.
+	* defs.h (OPF_DISABLE_REALPATH): Rename to ...
+	(OPF_RETURN_REALPATH): ... here.
+	* dwarf2read.c (try_open_dwop_file): Set OPF_RETURN_REALPATH for flags.
+	* exec.c (exec_file_attach): Remove OPF_DISABLE_REALPATH from openp
+	call.  Twice.
+	* nto-tdep.c (nto_find_and_open_solib): Add OPF_RETURN_REALPATH for
+	openp call.
+	* solib.c (solib_find): Likewise.  Four times.
+	* source.c (openp): Change OPF_DISABLE_REALPATH to OPF_RETURN_REALPATH
+	in the function comment and for the realpath_fptr variable.
+	(source_full_path_of): Add OPF_RETURN_REALPATH for openp call.
+	(find_and_open_source): Likewise.  Twice.
+	* symfile.c (symfile_bfd_open): Likewise, also twice.
+
 2013-09-04  Doug Evans  <dje@google.com>
 
 	* progspace.c (save_current_space_and_thread): Remove unnecessary

@@ -9349,7 +9349,7 @@ try_open_dwop_file (const char *file_name, int is_dwp, int search_cwd)
   else
     search_path = xstrdup (debug_file_directory);
 
-  flags = 0;
+  flags = OPF_RETURN_REALPATH;
   if (is_dwp)
     flags |= OPF_SEARCH_IN_PATH;
   desc = openp (search_path, flags, file_name,

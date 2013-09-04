@@ -479,7 +479,7 @@ find_and_open_script (const char *script_file, int search_path,
   char *file;
   int fd;
   struct cleanup *old_cleanups;
-  int search_flags = OPF_TRY_CWD_FIRST;
+  int search_flags = OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH;
 
   file = tilde_expand (script_file);
   old_cleanups = make_cleanup (xfree, file);
