@@ -471,7 +471,8 @@ save_current_space_and_thread (void)
   /* If restoring to null thread, we need to restore the pspace as
      well, hence, we need to save the current program space first.  */
   old_chain = save_current_program_space ();
-  save_current_inferior ();
+  /* There's no need to save the current inferior here.
+     That is handled by make_cleanup_restore_current_thread.  */
   make_cleanup_restore_current_thread ();
 
   return old_chain;

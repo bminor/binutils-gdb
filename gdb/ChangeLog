@@ -1,3 +1,8 @@
+2013-09-04  Doug Evans  <dje@google.com>
+
+	* progspace.c (save_current_space_and_thread): Remove unnecessary
+	call to save_current_inferior.
+
 2013-09-04  Andrew Burgess  <aburgess@broadcom.com>
 
 	* sh64-tdep.c (sh64_do_register): Return after printing message
