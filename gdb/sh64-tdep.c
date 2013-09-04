@@ -2045,7 +2045,10 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
 
   /* Get the data in raw format.  */
   if (!deprecated_frame_register_read (frame, regnum, raw_buffer))
-    fprintf_filtered (file, "*value not available*\n");
+    {
+      fprintf_filtered (file, "*value not available*\n");
+      return;
+    }
 
   get_formatted_print_options (&opts, 'x');
   opts.deref_ref = 1;

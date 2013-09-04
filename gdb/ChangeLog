@@ -1,3 +1,8 @@
+2013-09-04  Andrew Burgess  <aburgess@broadcom.com>
+
+	* sh64-tdep.c (sh64_do_register): Return after printing message
+	about unavailable register contents.
+
 2013-09-04  Muhammad Bilal  <mbilal@codesourcery.com>
             Pedro Alves  <palves@redhat.com>
 
