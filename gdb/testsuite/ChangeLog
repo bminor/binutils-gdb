@@ -1,5 +1,14 @@
 2013-09-04  Doug Evans  <dje@google.com>
 
+	* gdb.python/py-events.py (exit_handler): Verify we get the expected
+	event.
+	(continue_handler, new_objfile_handler): Ditto.
+	(test_events): Rename command to "test-events".
+	(test_newobj_events): Rename command to "test-objfile-events".
+	* gdb.python/py-events.exp: Update.
+	* gdb.python/py-evsignal.exp: Update.
+	* gdb.python/py-evthreads.exp: Update.
+
 	* gdb.base/enumval.c (ZERO): New enum value.
 	(main): Use it
 	* gdb.base/enumval.exp: Test ability to print ZERO.
