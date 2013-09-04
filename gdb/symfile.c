@@ -2214,63 +2214,55 @@ add_symbol_file_command (char *args, int from_tty)
 	  filename = tilde_expand (arg);
 	  make_cleanup (xfree, filename);
 	}
+      else if (argcnt == 1)
+	{
+	  /* The second argument is always the text address at which
+	     to load the program.  */
+	  sect_opts[section_index].name = ".text";
+	  sect_opts[section_index].value = arg;
+	  if (++section_index >= num_sect_opts)
+	    {
+	      num_sect_opts *= 2;
+	      sect_opts = ((struct sect_opt *)
+			   xrealloc (sect_opts,
+				     num_sect_opts
+				     * sizeof (struct sect_opt)));
+	    }
+	}
       else
-	if (argcnt == 1)
-	  {
-	    /* The second argument is always the text address at which
-               to load the program.  */
-	    sect_opts[section_index].name = ".text";
-	    sect_opts[section_index].value = arg;
-	    if (++section_index >= num_sect_opts)
-	      {
-		num_sect_opts *= 2;
-		sect_opts = ((struct sect_opt *)
-			     xrealloc (sect_opts,
-				       num_sect_opts
-				       * sizeof (struct sect_opt)));
-	      }
-	  }
-	else
-	  {
-	    /* It's an option (starting with '-') or it's an argument
-	       to an option.  */
-
-	    if (*arg == '-')
-	      {
-		if (strcmp (arg, "-readnow") == 0)
-		  flags |= OBJF_READNOW;
-		else if (strcmp (arg, "-s") == 0)
-		  {
-		    expecting_sec_name = 1;
-		    expecting_sec_addr = 1;
-		  }
-	      }
-	    else
-	      {
-		if (expecting_sec_name)
-		  {
-		    sect_opts[section_index].name = arg;
-		    expecting_sec_name = 0;
-		  }
-		else
-		  if (expecting_sec_addr)
-		    {
-		      sect_opts[section_index].value = arg;
-		      expecting_sec_addr = 0;
-		      if (++section_index >= num_sect_opts)
-			{
-			  num_sect_opts *= 2;
-			  sect_opts = ((struct sect_opt *)
-				       xrealloc (sect_opts,
-						 num_sect_opts
-						 * sizeof (struct sect_opt)));
-			}
-		    }
-		  else
-		    error (_("USAGE: add-symbol-file <filename> <textaddress>"
-			     " [-readnow] [-s <secname> <addr>]*"));
-	      }
-	  }
+	{
+	  /* It's an option (starting with '-') or it's an argument
+	     to an option.  */
+	    
+	  if (expecting_sec_name)
+	    {
+	      sect_opts[section_index].name = arg;
+	      expecting_sec_name = 0;
+	    }
+	  else if (expecting_sec_addr)
+	    {
+	      sect_opts[section_index].value = arg;
+	      expecting_sec_addr = 0;
+	      if (++section_index >= num_sect_opts)
+		{
+		  num_sect_opts *= 2;
+		  sect_opts = ((struct sect_opt *)
+			       xrealloc (sect_opts,
+					 num_sect_opts
+					 * sizeof (struct sect_opt)));
+		}
+	    }
+	  else if (strcmp (arg, "-readnow") == 0)
+	    flags |= OBJF_READNOW;
+	  else if (strcmp (arg, "-s") == 0)
+	    {
+	      expecting_sec_name = 1;
+	      expecting_sec_addr = 1;
+	    }
+	  else
+	    error (_("USAGE: add-symbol-file <filename> <textaddress>"
+		     " [-readnow] [-s <secname> <addr>]*"));
+	}
     }
 
   /* This command takes at least two arguments.  The first one is a

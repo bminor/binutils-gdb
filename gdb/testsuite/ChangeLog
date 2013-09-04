@@ -1,3 +1,9 @@
+2013-09-13  Muhammad Bilal  <mbilal@codesourcery.com>
+            Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/relocate.exp: Check that invalid options are
+	rejected.
+
 2013-08-30  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/code_elim1.c (my_bss_symbol): New variable added.

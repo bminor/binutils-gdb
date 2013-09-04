@@ -1,3 +1,10 @@
+2013-09-04  Muhammad Bilal  <mbilal@codesourcery.com>
+            Pedro Alves  <palves@redhat.com>
+
+	* symfile.c (add_symbol_file_command): Error out on unknown
+        option.  Handle EXPECTING_SEC_ADDR/EXPECTING_SEC_NAME before '-'
+        options and collapse into single conditional branch.
+
 2013-09-03  Luis Machado  <lgustavo@codesourcery.com>
 
 	* inf-child.c (inf_child_follow_fork) New parameter

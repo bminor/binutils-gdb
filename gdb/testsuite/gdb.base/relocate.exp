@@ -52,6 +52,13 @@ gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
+#Check that invalid options are rejected.
+foreach x {"-raednow" "readnow" "foo" "-readnow s"} {
+    gdb_test "add-symbol-file ${binfile} 0 $x" \
+	"USAGE: add-symbol-file <filename> <textaddress>.*-readnow.*-s <secname> <addr>.*" \
+	"add-symbol-file: unknown option $x"
+}
+
 # Load the object file.
 gdb_test "add-symbol-file ${binfile} 0" \
 	"Reading symbols from .*${testfile}\\.o\\.\\.\\.done\\.(|\r\nUsing host libthread_db library .*libthread_db.so.*\\.)" \
