@@ -9563,7 +9563,8 @@ encode_thumb32_addr_mode (int i, bfd_boolean is_t, bfd_boolean is_d)
   X(_wfe,   bf20, f3af8002),			\
   X(_wfi,   bf30, f3af8003),			\
   X(_sev,   bf40, f3af8004),                    \
-  X(_sevl,  bf50, f3af8005)
+  X(_sevl,  bf50, f3af8005),			\
+  X(_udf,   de00, f7f0a000)
 
 /* To catch errors in encoding functions, the codes are all offset by
    0xF800, putting them in one of the 32-bit prefix ranges, ergo undefined
@@ -12217,6 +12218,30 @@ do_t_tb (void)
 	      _("instruction does not allow shifted index"));
   inst.instruction |= (Rn << 16) | Rm;
 }
+
+static void
+do_t_udf (void)
+{
+  if (!inst.operands[0].present)
+    inst.operands[0].imm = 0;
+
+  if ((unsigned int) inst.operands[0].imm > 255 || inst.size_req == 4)
+    {
+      constraint (inst.size_req == 2,
+                  _("immediate value out of range"));
+      inst.instruction = THUMB_OP32 (inst.instruction);
+      inst.instruction |= (inst.operands[0].imm & 0xf000u) << 4;
+      inst.instruction |= (inst.operands[0].imm & 0x0fffu) << 0;
+    }
+  else
+    {
+      inst.instruction = THUMB_OP16 (inst.instruction);
+      inst.instruction |= inst.operands[0].imm;
+    }
+
+  set_it_insn_type (NEUTRAL_IT_INSN);
+}
+
 
 static void
 do_t_usat (void)
@@ -17969,8 +17994,8 @@ static struct asm_barrier_opt barrier_opt_names[] =
 
 static const struct asm_opcode insns[] =
 {
-#define ARM_VARIANT &arm_ext_v1 /* Core ARM Instructions.  */
-#define THUMB_VARIANT &arm_ext_v4t
+#define ARM_VARIANT    & arm_ext_v1 /* Core ARM Instructions.  */
+#define THUMB_VARIANT  & arm_ext_v4t
  tCE("and",	0000000, _and,     3, (RR, oRR, SH), arit, t_arit3c),
  tC3("ands",	0100000, _ands,	   3, (RR, oRR, SH), arit, t_arit3c),
  tCE("eor",	0200000, _eor,	   3, (RR, oRR, SH), arit, t_arit3c),
@@ -18029,6 +18054,7 @@ static const struct asm_opcode insns[] =
  tCE("adr",	28f0000, _adr,	   2, (RR, EXP),     adr,  t_adr),
   C3(adrl,	28f0000,           2, (RR, EXP),     adrl),
  tCE("nop",	1a00000, _nop,	   1, (oI255c),	     nop,  t_nop),
+ tCE("udf",	7f000f0, _udf,     1, (oIffffb),     bkpt, t_udf),
 
   /* Thumb-compatibility pseudo ops.  */
  tCE("lsl",	1a00000, _lsl,	   3, (RR, oRR, SH), shift, t_shift),
@@ -18179,9 +18205,9 @@ static const struct asm_opcode insns[] =
  TUF("mrc2",	e100010, fe100010, 6, (RCP, I7b, RR, RCN, RCN, oI7b),   co_reg, co_reg),
 
 #undef  ARM_VARIANT
-#define ARM_VARIANT  & arm_ext_v5exp /*  ARM Architecture 5TExP.  */
-#undef THUMB_VARIANT
-#define THUMB_VARIANT &arm_ext_v5exp
+#define ARM_VARIANT    & arm_ext_v5exp /*  ARM Architecture 5TExP.  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v5exp
 
  TCE("smlabb",	1000080, fb100000, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
  TCE("smlatb",	10000a0, fb100020, 4, (RRnpc, RRnpc, RRnpc, RRnpc),   smla, t_mla),
@@ -18210,9 +18236,9 @@ static const struct asm_opcode insns[] =
  TCE("qdsub",	1600050, fa80f0b0, 3, (RRnpc, RRnpc, RRnpc),	    rd_rm_rn, t_simd2),
 
 #undef  ARM_VARIANT
-#define ARM_VARIANT  & arm_ext_v5e /*  ARM Architecture 5TE.  */
-#undef THUMB_VARIANT
-#define THUMB_VARIANT &arm_ext_v6t2
+#define ARM_VARIANT    & arm_ext_v5e /*  ARM Architecture 5TE.  */
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & arm_ext_v6t2
 
  TUF("pld",	450f000, f810f000, 1, (ADDR),		     pld,  t_pld),
  TC3("ldrd",	00000d0, e8500000, 3, (RRnpc_npcsp, oRRnpc_npcsp, ADDRGLDRS),
@@ -18288,40 +18314,40 @@ static const struct asm_opcode insns[] =
  TCE("qadd8",	6200f90, fa80f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("qasx",	6200f30, faa0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for QASX.  */
- TCE("qaddsubx",	6200f30, faa0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qaddsubx",6200f30, faa0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("qsax",	6200f50, fae0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for QSAX.  */
- TCE("qsubaddx",	6200f50, fae0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("qsubaddx",6200f50, fae0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("qsub16",	6200f70, fad0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("qsub8",	6200ff0, fac0f010, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("sadd16",	6100f10, fa90f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("sadd8",	6100f90, fa80f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("sasx",	6100f30, faa0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for SASX.  */
- TCE("saddsubx",	6100f30, faa0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("saddsubx",6100f30, faa0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("shadd16",	6300f10, fa90f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("shadd8",	6300f90, fa80f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE("shasx",     6300f30, faa0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shasx",   6300f30, faa0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for SHASX.  */
  TCE("shaddsubx", 6300f30, faa0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE("shsax",      6300f50, fae0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("shsax",     6300f50, fae0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for SHSAX.  */
  TCE("shsubaddx", 6300f50, fae0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("shsub16",	6300f70, fad0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("shsub8",	6300ff0, fac0f020, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("ssax",	6100f50, fae0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for SSAX.  */
- TCE("ssubaddx",	6100f50, fae0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("ssubaddx",6100f50, fae0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("ssub16",	6100f70, fad0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("ssub8",	6100ff0, fac0f000, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uadd16",	6500f10, fa90f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uadd8",	6500f90, fa80f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uasx",	6500f30, faa0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for UASX.  */
- TCE("uaddsubx",	6500f30, faa0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uaddsubx",6500f30, faa0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uhadd16",	6700f10, fa90f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uhadd8",	6700f90, fa80f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE("uhasx",     6700f30, faa0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uhasx",   6700f30, faa0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for UHASX.  */
  TCE("uhaddsubx", 6700f30, faa0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uhsax",     6700f50, fae0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
@@ -18331,7 +18357,7 @@ static const struct asm_opcode insns[] =
  TCE("uhsub8",	6700ff0, fac0f060, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uqadd16",	6600f10, fa90f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uqadd8",	6600f90, fa80f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
- TCE("uqasx",     6600f30, faa0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("uqasx",   6600f30, faa0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for UQASX.  */
  TCE("uqaddsubx", 6600f30, faa0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("uqsax",     6600f50, fae0f050, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
@@ -18342,7 +18368,7 @@ static const struct asm_opcode insns[] =
  TCE("usub16",	6500f70, fad0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("usax",	6500f50, fae0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  /* Old name for USAX.  */
- TCE("usubaddx",	6500f50, fae0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
+ TCE("usubaddx",6500f50, fae0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("usub8",	6500ff0, fac0f040, 3, (RRnpc, RRnpc, RRnpc),	   rd_rn_rm, t_simd),
  TCE("sxtah",	6b00070, fa00f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
  TCE("sxtab16",	6800070, fa20f080, 4, (RRnpc, RRnpc, RRnpc, oROR), sxtah, t_sxtah),
@@ -18408,7 +18434,7 @@ static const struct asm_opcode insns[] =
 
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_sec
-#undef THUMB_VARIANT
+#undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_sec
 
  TCE("smc",	1600070, f7f08000, 1, (EXPi), smc, t_smc),
@@ -18422,7 +18448,7 @@ static const struct asm_opcode insns[] =
  TCE("eret",	160006e, f3de8f00, 0, (), noargs, noargs),
 
 #undef  ARM_VARIANT
-#define ARM_VARIANT  & arm_ext_v6t2
+#define ARM_VARIANT    & arm_ext_v6t2
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_v6t2
 
@@ -18442,7 +18468,7 @@ static const struct asm_opcode insns[] =
  TC3("strht",	02000b0, f8200e00, 2, (RRnpc_npcsp, ADDR), ldsttv4, t_ldstt),
 
  /* Thumb-only instructions.  */
-#undef ARM_VARIANT
+#undef  ARM_VARIANT
 #define ARM_VARIANT NULL
   TUE("cbnz",     0,           b900,     2, (RR, EXP), 0, t_cbz),
   TUE("cbz",      0,           b100,     2, (RR, EXP), 0, t_cbz),
@@ -18511,9 +18537,9 @@ static const struct asm_opcode insns[] =
  TUF("pli",	450f000, f910f000, 1, (ADDR),	  pli,	    t_pld),
  TCE("dbg",	320f0f0, f3af80f0, 1, (I15),	  dbg,	    t_dbg),
 
-#undef ARM_VARIANT
+#undef  ARM_VARIANT
 #define ARM_VARIANT    & arm_ext_mp
-#undef THUMB_VARIANT
+#undef  THUMB_VARIANT
 #define THUMB_VARIANT  & arm_ext_mp
 
  TUF("pldw",	410f000, f830f000, 1, (ADDR),	pld,	t_pld),
@@ -18547,7 +18573,7 @@ static const struct asm_opcode insns[] =
  TCE("stlh",	1e0fc90, e8c00f9f, 2, (RRnpc, RRnpcb),	rm_rn,  rd_rn),
 
  /* ARMv8 T32 only.  */
-#undef ARM_VARIANT
+#undef  ARM_VARIANT
 #define ARM_VARIANT  NULL
  TUF("dcps1",	0,	 f78f8001, 0, (),	noargs, noargs),
  TUF("dcps2",	0,	 f78f8002, 0, (),	noargs, noargs),
@@ -18555,7 +18581,7 @@ static const struct asm_opcode insns[] =
 
   /* FP for ARMv8.  */
 #undef  ARM_VARIANT
-#define ARM_VARIANT & fpu_vfp_ext_armv8
+#define ARM_VARIANT   & fpu_vfp_ext_armv8
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & fpu_vfp_ext_armv8
 
@@ -18599,7 +18625,7 @@ static const struct asm_opcode insns[] =
   nUF(sha256su0, _sha2op, 2, (RNQ, RNQ), sha256su0),
 
 #undef  ARM_VARIANT
-#define ARM_VARIANT & crc_ext_armv8
+#define ARM_VARIANT   & crc_ext_armv8
 #undef  THUMB_VARIANT
 #define THUMB_VARIANT & crc_ext_armv8
   TUEc("crc32b", 1000040, fac0f080, 3, (RR, oRR, RR), crc32b),
@@ -19473,9 +19499,9 @@ static const struct asm_opcode insns[] =
  nUF(vst4,      _vst4,    2, (NSTRLST, ADDR),  neon_ldx_stx),
 
 #undef  THUMB_VARIANT
-#define THUMB_VARIANT &fpu_vfp_ext_v3xd
-#undef ARM_VARIANT
-#define ARM_VARIANT &fpu_vfp_ext_v3xd
+#define THUMB_VARIANT & fpu_vfp_ext_v3xd
+#undef  ARM_VARIANT
+#define ARM_VARIANT   & fpu_vfp_ext_v3xd
  cCE("fconsts",   eb00a00, 2, (RVS, I255),      vfp_sp_const),
  cCE("fshtos",    eba0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
  cCE("fsltos",    eba0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
@@ -19486,7 +19512,7 @@ static const struct asm_opcode insns[] =
  cCE("ftouhs",    ebf0a40, 2, (RVS, I16z),      vfp_sp_conv_16),
  cCE("ftouls",    ebf0ac0, 2, (RVS, I32),       vfp_sp_conv_32),
 
-#undef THUMB_VARIANT
+#undef  THUMB_VARIANT
 #define THUMB_VARIANT  & fpu_vfp_ext_v3
 #undef  ARM_VARIANT
 #define ARM_VARIANT    & fpu_vfp_ext_v3
@@ -19501,10 +19527,10 @@ static const struct asm_opcode insns[] =
  cCE("ftouhd",    ebf0b40, 2, (RVD, I16z),      vfp_dp_conv_16),
  cCE("ftould",    ebf0bc0, 2, (RVD, I32),       vfp_dp_conv_32),
 
-#undef ARM_VARIANT
-#define ARM_VARIANT &fpu_vfp_ext_fma
-#undef THUMB_VARIANT
-#define THUMB_VARIANT &fpu_vfp_ext_fma
+#undef  ARM_VARIANT
+#define ARM_VARIANT    & fpu_vfp_ext_fma
+#undef  THUMB_VARIANT
+#define THUMB_VARIANT  & fpu_vfp_ext_fma
  /* Mnemonics shared by Neon and VFP.  These are included in the
     VFP FMA variant; NEON and VFP FMA always includes the NEON
     FMA instructions.  */
@@ -19544,12 +19570,12 @@ static const struct asm_opcode insns[] =
  cCE("textrcb",	e130170, 2, (RR, I7),		    iwmmxt_textrc),
  cCE("textrch",	e530170, 2, (RR, I7),		    iwmmxt_textrc),
  cCE("textrcw",	e930170, 2, (RR, I7),		    iwmmxt_textrc),
- cCE("textrmub",	e100070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE("textrmuh",	e500070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE("textrmuw",	e900070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE("textrmsb",	e100078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE("textrmsh",	e500078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
- cCE("textrmsw",	e900078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmub",e100070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmuh",e500070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmuw",e900070, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmsb",e100078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmsh",e500078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
+ cCE("textrmsw",e900078, 3, (RR, RIWR, I7),	    iwmmxt_textrm),
  cCE("tinsrb",	e600010, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
  cCE("tinsrh",	e600050, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
  cCE("tinsrw",	e600090, 3, (RIWR, RR, I7),	    iwmmxt_tinsr),
@@ -19561,9 +19587,9 @@ static const struct asm_opcode insns[] =
  cCE("tmiabt",	e2d0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
  cCE("tmiatb",	e2e0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
  cCE("tmiatt",	e2f0010, 3, (RIWR, RR, RR),	    iwmmxt_tmia),
- cCE("tmovmskb",	e100030, 2, (RR, RIWR),		    rd_rn),
- cCE("tmovmskh",	e500030, 2, (RR, RIWR),		    rd_rn),
- cCE("tmovmskw",	e900030, 2, (RR, RIWR),		    rd_rn),
+ cCE("tmovmskb",e100030, 2, (RR, RIWR),		    rd_rn),
+ cCE("tmovmskh",e500030, 2, (RR, RIWR),		    rd_rn),
+ cCE("tmovmskw",e900030, 2, (RR, RIWR),		    rd_rn),
  cCE("tmrc",	e100110, 2, (RR, RIWC_RIWG),	    rd_rn),
  cCE("tmrrc",	c500000, 3, (RR, RR, RIWR),	    rd_rn_rm),
  cCE("torcb",	e13f150, 1, (RR),		    iwmmxt_tandorc),
@@ -19582,10 +19608,10 @@ static const struct asm_opcode insns[] =
  cCE("waddw",	e800180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("waddwus",	e900180, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("waligni",	e000020, 4, (RIWR, RIWR, RIWR, I7), iwmmxt_waligni),
- cCE("walignr0",	e800020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("walignr1",	e900020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("walignr2",	ea00020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("walignr3",	eb00020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("walignr0",e800020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("walignr1",e900020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("walignr2",ea00020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("walignr3",eb00020, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wand",	e200000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wandn",	e300000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wavg2b",	e800000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
@@ -19595,12 +19621,12 @@ static const struct asm_opcode insns[] =
  cCE("wcmpeqb",	e000060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wcmpeqh",	e400060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wcmpeqw",	e800060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wcmpgtub",	e100060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wcmpgtuh",	e500060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wcmpgtuw",	e900060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wcmpgtsb",	e300060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wcmpgtsh",	e700060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wcmpgtsw",	eb00060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtub",e100060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtuh",e500060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtuw",e900060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtsb",e300060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtsh",e700060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wcmpgtsw",eb00060, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wldrb",	c100000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
  cCE("wldrh",	c500000, 2, (RIWR, ADDR),	    iwmmxt_wldstbh),
  cCE("wldrw",	c100100, 2, (RIWR_RIWC, ADDR),	    iwmmxt_wldstw),
@@ -19629,12 +19655,12 @@ static const struct asm_opcode insns[] =
  cCE("wmulum",	e100100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wmulul",	e000100, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wor",	e000000, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wpackhss",	e700080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wpackhus",	e500080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wpackwss",	eb00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wpackwus",	e900080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wpackdss",	ef00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
- cCE("wpackdus",	ed00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackhss",e700080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackhus",e500080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackwss",eb00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackwus",e900080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackdss",ef00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
+ cCE("wpackdus",ed00080, 3, (RIWR, RIWR, RIWR),	    rd_rn_rm),
  cCE("wrorh",	e700040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
  cCE("wrorhg",	e700148, 3, (RIWR, RIWR, RIWG),	    rd_rn_rm),
  cCE("wrorw",	eb00040, 3, (RIWR, RIWR, RIWR_I32z),iwmmxt_wrwrwr_or_imm5),
@@ -19776,36 +19802,36 @@ static const struct asm_opcode insns[] =
  cCE("cfmvrdl",	e100410, 2, (RR, RMD),		      rd_rn),
  cCE("cfmvdhr",	e000430, 2, (RMD, RR),		      rn_rd),
  cCE("cfmvrdh",	e100430, 2, (RR, RMD),		      rd_rn),
- cCE("cfmv64lr",	e000510, 2, (RMDX, RR),		      rn_rd),
- cCE("cfmvr64l",	e100510, 2, (RR, RMDX),		      rd_rn),
- cCE("cfmv64hr",	e000530, 2, (RMDX, RR),		      rn_rd),
- cCE("cfmvr64h",	e100530, 2, (RR, RMDX),		      rd_rn),
- cCE("cfmval32",	e200440, 2, (RMAX, RMFX),	      rd_rn),
- cCE("cfmv32al",	e100440, 2, (RMFX, RMAX),	      rd_rn),
- cCE("cfmvam32",	e200460, 2, (RMAX, RMFX),	      rd_rn),
- cCE("cfmv32am",	e100460, 2, (RMFX, RMAX),	      rd_rn),
- cCE("cfmvah32",	e200480, 2, (RMAX, RMFX),	      rd_rn),
- cCE("cfmv32ah",	e100480, 2, (RMFX, RMAX),	      rd_rn),
+ cCE("cfmv64lr",e000510, 2, (RMDX, RR),		      rn_rd),
+ cCE("cfmvr64l",e100510, 2, (RR, RMDX),		      rd_rn),
+ cCE("cfmv64hr",e000530, 2, (RMDX, RR),		      rn_rd),
+ cCE("cfmvr64h",e100530, 2, (RR, RMDX),		      rd_rn),
+ cCE("cfmval32",e200440, 2, (RMAX, RMFX),	      rd_rn),
+ cCE("cfmv32al",e100440, 2, (RMFX, RMAX),	      rd_rn),
+ cCE("cfmvam32",e200460, 2, (RMAX, RMFX),	      rd_rn),
+ cCE("cfmv32am",e100460, 2, (RMFX, RMAX),	      rd_rn),
+ cCE("cfmvah32",e200480, 2, (RMAX, RMFX),	      rd_rn),
+ cCE("cfmv32ah",e100480, 2, (RMFX, RMAX),	      rd_rn),
  cCE("cfmva32",	e2004a0, 2, (RMAX, RMFX),	      rd_rn),
  cCE("cfmv32a",	e1004a0, 2, (RMFX, RMAX),	      rd_rn),
  cCE("cfmva64",	e2004c0, 2, (RMAX, RMDX),	      rd_rn),
  cCE("cfmv64a",	e1004c0, 2, (RMDX, RMAX),	      rd_rn),
- cCE("cfmvsc32",	e2004e0, 2, (RMDS, RMDX),	      mav_dspsc),
- cCE("cfmv32sc",	e1004e0, 2, (RMDX, RMDS),	      rd),
+ cCE("cfmvsc32",e2004e0, 2, (RMDS, RMDX),	      mav_dspsc),
+ cCE("cfmv32sc",e1004e0, 2, (RMDX, RMDS),	      rd),
  cCE("cfcpys",	e000400, 2, (RMF, RMF),		      rd_rn),
  cCE("cfcpyd",	e000420, 2, (RMD, RMD),		      rd_rn),
  cCE("cfcvtsd",	e000460, 2, (RMD, RMF),		      rd_rn),
  cCE("cfcvtds",	e000440, 2, (RMF, RMD),		      rd_rn),
- cCE("cfcvt32s",	e000480, 2, (RMF, RMFX),	      rd_rn),
- cCE("cfcvt32d",	e0004a0, 2, (RMD, RMFX),	      rd_rn),
- cCE("cfcvt64s",	e0004c0, 2, (RMF, RMDX),	      rd_rn),
- cCE("cfcvt64d",	e0004e0, 2, (RMD, RMDX),	      rd_rn),
- cCE("cfcvts32",	e100580, 2, (RMFX, RMF),	      rd_rn),
- cCE("cfcvtd32",	e1005a0, 2, (RMFX, RMD),	      rd_rn),
+ cCE("cfcvt32s",e000480, 2, (RMF, RMFX),	      rd_rn),
+ cCE("cfcvt32d",e0004a0, 2, (RMD, RMFX),	      rd_rn),
+ cCE("cfcvt64s",e0004c0, 2, (RMF, RMDX),	      rd_rn),
+ cCE("cfcvt64d",e0004e0, 2, (RMD, RMDX),	      rd_rn),
+ cCE("cfcvts32",e100580, 2, (RMFX, RMF),	      rd_rn),
+ cCE("cfcvtd32",e1005a0, 2, (RMFX, RMD),	      rd_rn),
  cCE("cftruncs32",e1005c0, 2, (RMFX, RMF),	      rd_rn),
  cCE("cftruncd32",e1005e0, 2, (RMFX, RMD),	      rd_rn),
- cCE("cfrshl32",	e000550, 3, (RMFX, RMFX, RR),	      mav_triple),
- cCE("cfrshl64",	e000570, 3, (RMDX, RMDX, RR),	      mav_triple),
+ cCE("cfrshl32",e000550, 3, (RMFX, RMFX, RR),	      mav_triple),
+ cCE("cfrshl64",e000570, 3, (RMDX, RMDX, RR),	      mav_triple),
  cCE("cfsh32",	e000500, 3, (RMFX, RMFX, I63s),	      mav_shift),
  cCE("cfsh64",	e200500, 3, (RMDX, RMDX, I63s),	      mav_shift),
  cCE("cfcmps",	e100490, 3, (RR, RMF, RMF),	      rd_rn_rm),
@@ -19834,8 +19860,8 @@ static const struct asm_opcode insns[] =
  cCE("cfmul64",	e100520, 3, (RMDX, RMDX, RMDX),	      rd_rn_rm),
  cCE("cfmac32",	e100540, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
  cCE("cfmsc32",	e100560, 3, (RMFX, RMFX, RMFX),	      rd_rn_rm),
- cCE("cfmadd32",	e000600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
- cCE("cfmsub32",	e100600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
+ cCE("cfmadd32",e000600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
+ cCE("cfmsub32",e100600, 4, (RMAX, RMFX, RMFX, RMFX), mav_quad),
  cCE("cfmadda32", e200600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
  cCE("cfmsuba32", e300600, 4, (RMAX, RMAX, RMFX, RMFX), mav_quad),
 };

@@ -1,3 +1,13 @@
+2013-09-04  Roland McGrath  <mcgrathr@google.com>
+
+	PR gas/15914
+	* gas/arm/udf-bad.s: New file.
+	* gas/arm/udf-bad.d: New file.
+	* gas/arm/udf-bad.l: New file.
+	* gas/arm/udf.s: New file.
+	* gas/arm/udf.d: New file.
+	* gas/arm/udf.l: New file.
+
 2013-08-28  Nick Clifton  <nickc@redhat.com>
 
 	* gas/aarch64/illegal.s: Add illegal constant for logical

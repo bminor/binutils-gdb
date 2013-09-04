@@ -1,3 +1,11 @@
+2013-09-04  Roland McGrath  <mcgrathr@google.com>
+
+	PR gas/15914
+	* arm-dis.c (arm_opcodes): Add udf.
+	(thumb_opcodes): Use "udf" mnemonic rather than UNDEFINED_INSTRUCTION.
+	(thumb32_opcodes): Add udf.w.
+	(print_insn_thumb32): Handle %H as the thumb32_opcodes comment says.
+
 2013-09-02  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.txt: Fix description for fiebra, fidbra, and fixbra.

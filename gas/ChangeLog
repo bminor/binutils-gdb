@@ -1,3 +1,10 @@
+2013-09-04  Roland McGrath  <mcgrathr@google.com>
+
+	PR gas/15914
+	* config/tc-arm.c (T16_32_TAB): Add _udf.
+	(do_t_udf): New function.
+	(insns): Add "udf".
+
 2013-08-23  Sandeep Kumar Singh  <Sandeep.Singh2@kpitcummins.com>
 
 	* config/rx-parse.y: Rearrange the components of a bison grammar to issue
