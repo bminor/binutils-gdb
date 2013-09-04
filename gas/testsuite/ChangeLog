@@ -1,3 +1,8 @@
+2013-09-04  Tristan Gingold  <gingold@adacore.com>
+
+	* gas/ppc/aix.exp: Run xcoff-toc-1 test.
+	* gas/ppc/xcoff-toc-1.s, gas/ppc/xcoff-toc-1.d: New test.
+
 2013-09-04  Roland McGrath  <mcgrathr@google.com>
 
 	PR gas/15914

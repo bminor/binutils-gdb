@@ -3146,6 +3146,7 @@ md_assemble (char *str)
 		   && (operand->bitm & 0xfff0) == 0xfff0
 		   && operand->shift == 0)
 	    {
+	      /* Note: the symbol may be not yet defined.  */
 	      if (ppc_is_toc_sym (ex.X_add_symbol))
 		{
 		  reloc = BFD_RELOC_PPC_TOC16;
@@ -6363,6 +6364,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  value = fixP->fx_offset;
 	  fixP->fx_done = 1;
 	}
+
+       /* During parsing of instructions, a TOC16 reloc is generated for
+          instructions such as 'lwz RT,SYM(RB)' if SYM is a symbol defined
+          in the toc.  But at parse time, SYM may be not yet defined, so
+          check again here.  */
+       if (fixP->fx_r_type == BFD_RELOC_16
+           && fixP->fx_addsy != NULL
+           && ppc_is_toc_sym (fixP->fx_addsy))
+         fixP->fx_r_type = BFD_RELOC_PPC_TOC16;
 #endif
     }
 
@@ -6873,6 +6883,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       fixP->fx_addnumber =
 	- bfd_get_section_vma (stdoutput, S_GET_SEGMENT (fixP->fx_addsy))
 	- S_GET_VALUE (ppc_toc_csect);
+      /* Set *valP to avoid errors.  */
+      *valP = value;
 #endif
     }
 #endif

@@ -1,3 +1,8 @@
+2013-09-04  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-ppc.c (md_apply_fix): Handle defined after use toc
+	symbols.
+
 2013-09-04  Roland McGrath  <mcgrathr@google.com>
 
 	PR gas/15914
