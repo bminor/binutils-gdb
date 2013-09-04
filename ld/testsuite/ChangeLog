@@ -1,3 +1,7 @@
+2013-09-04  Vidya Praveen  <vidyapraveen@arm.com>
+
+	* ld-arm/export-class.exp: Fix the condition.
+
 2013-08-29  Jakub Jelinek  <jakub@redhat.com>
 
 	* ld-x86-64/x86-64.exp: Add tlsld3, tlsgd7 and tlsgd8 tests.

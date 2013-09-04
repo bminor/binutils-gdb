@@ -32,7 +32,7 @@ if { ![istarget arm*-*-linux*] } {
 
 set testname "ARM symbol export class test"
 
-if [istarget arm*-*-linux*eabi] {
+if [istarget arm*-*-linux-*eabi*] {
     set emul armelf_linux_eabi
 } else {
     set emul armelf_linux
