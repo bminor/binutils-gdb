@@ -102,25 +102,9 @@ typedef unsigned long long ULONGEST;
 #include "gdbthread.h"
 #include "inferiors.h"
 
-struct dll_info
-{
-  struct inferior_list_entry entry;
-  char *name;
-  CORE_ADDR base_addr;
-};
-
 /* Target-specific functions */
 
 void initialize_low ();
-
-/* From dll.c.  */
-
-extern struct inferior_list all_dlls;
-extern int dlls_changed;
-extern void clear_dlls (void);
-
-void loaded_dll (const char *name, CORE_ADDR base_addr);
-void unloaded_dll (const char *name, CORE_ADDR base_addr);
 
 /* Public variables in server.c */
 

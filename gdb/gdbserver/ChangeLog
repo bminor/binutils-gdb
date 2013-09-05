@@ -1,5 +1,13 @@
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
+	* dll.c, inferiors.c, remote-utils.c, server.c: Include "dll.h".
+	* server.h (struct dll_info, all_dlls, dlls_changed, clear_dlls)
+	(loaded_dll, unloaded_dll): Move to ...
+	* dll.h: ... this new file.
+	* inferiors.c, remote-utils.c, win32-low.c: Include "dll.h".
+
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
 	* server.h (current_process, get_thread_process, all_processes)
 	(add_inferior_to_list, for_each_inferior, current_inferior)
 	(remove_inferior, add_process, remove_process, find_process_pid)

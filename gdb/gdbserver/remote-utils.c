@@ -21,6 +21,8 @@
 #include "target.h"
 #include "gdbthread.h"
 #include "tdesc.h"
+#include "dll.h"
+
 #include <stdio.h>
 #include <string.h>
 #if HAVE_SYS_IOCTL_H

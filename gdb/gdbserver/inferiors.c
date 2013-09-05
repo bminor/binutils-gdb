@@ -22,6 +22,7 @@
 
 #include "server.h"
 #include "gdbthread.h"
+#include "dll.h"
 
 struct inferior_list all_processes;
 struct inferior_list all_threads;
