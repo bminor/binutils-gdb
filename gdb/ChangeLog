@@ -1,3 +1,8 @@
+2013-09-05  Muhammad Bilal  <mbilal@codesourcery.com>
+
+	* symfile.c (add_symbol_file_command): Remove trailing
+	 whitespaces and blank line after comment.
+
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
 	* tui/tui-regs.c (tui_register_format): Don't look at the

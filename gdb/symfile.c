@@ -2233,7 +2233,6 @@ add_symbol_file_command (char *args, int from_tty)
 	{
 	  /* It's an option (starting with '-') or it's an argument
 	     to an option.  */
-	    
 	  if (expecting_sec_name)
 	    {
 	      sect_opts[section_index].name = arg;
