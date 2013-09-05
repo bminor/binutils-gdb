@@ -199,11 +199,6 @@ void (*deprecated_init_ui_hook) (char *argv0);
 
 int (*deprecated_ui_loop_hook) (int);
 
-/* Called instead of command_loop at top level.  Can be invoked via
-   throw_exception().  */
-
-void (*deprecated_command_loop_hook) (void);
-
 
 /* Called from print_frame_info to list the line we stopped in.  */
 

@@ -1,3 +1,13 @@
+2013-09-05  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb/defs.h (deprecated_command_loop_hook): Remove, including
+	references in comments.
+	* gdb/interps.c (current_interp_command_loop): No longer use
+	deprecated_command_loop_hook.
+	(clear_interpreter_hooks): Remove deprecated_command_loop_hook
+	setup.
+	* gdb/top.c (deprecated_command_loop_hook): Remove.
+
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): 'dwarf_regnum'

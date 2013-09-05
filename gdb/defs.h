@@ -703,10 +703,8 @@ extern int watchdog;
 extern char *interpreter_p;
 
 /* If a given interpreter matches INTERPRETER_P then it should update
-   deprecated_command_loop_hook and deprecated_init_ui_hook with the
-   per-interpreter implementation.  */
-/* FIXME: deprecated_command_loop_hook and deprecated_init_ui_hook
-   should be moved here.  */
+   deprecated_init_ui_hook with the per-interpreter implementation.  */
+/* FIXME: deprecated_init_ui_hook should be moved here.  */
 
 struct target_waitstatus;
 struct cmd_list_element;
@@ -716,7 +714,6 @@ extern void (*deprecated_post_add_symbol_hook) (void);
 extern void (*selected_frame_level_changed_hook) (int);
 extern int (*deprecated_ui_loop_hook) (int signo);
 extern void (*deprecated_init_ui_hook) (char *argv0);
-extern void (*deprecated_command_loop_hook) (void);
 extern void (*deprecated_show_load_progress) (const char *section,
 					      unsigned long section_sent, 
 					      unsigned long section_size, 
