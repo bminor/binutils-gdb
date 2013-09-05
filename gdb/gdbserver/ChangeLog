@@ -1,5 +1,23 @@
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
+	* server.h (remote_debug, noack_mode, transport_is_reliable)
+	(gdb_connected, STDIO_CONNECTION_NAME, remote_connection_is_stdio)
+	(read_ptid, write_ptid, putpkt, putpkt_binary, putpkt_notif)
+	(getpkt, remote_prepare, remote_open, remote_close, write_ok)
+	(write_enn, initialize_async_io, enable_async_io)
+	(disable_async_io, check_remote_input_interrupt_request)
+	(convert_ascii_to_int, convert_int_to_ascii, new_thread_notify)
+	(dead_thread_notify, prepare_resume_reply)
+	(decode_address_to_semicolon, decode_address, decode_m_packet)
+	(decode_M_packet, decode_X_packet, decode_xfer_write)
+	(decode_search_memory_packet, unhexify, hexify)
+	(remote_escape_output, unpack_varlen_hex, clear_symbol_cache)
+	(look_up_one_symbol, relocate_instruction)
+	(monitor_output): Move to remote-utils.h, and include it.
+	* remote-utils.h: New file.
+
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
 	* server.h (_): Delete.
 
 2013-09-02  Pedro Alves  <palves@redhat.com>
