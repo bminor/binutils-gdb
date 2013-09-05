@@ -138,20 +138,7 @@ typedef SOCKET gdb_fildes_t;
 typedef int gdb_fildes_t;
 #endif
 
-/* Functions from event-loop.c.  */
-typedef void *gdb_client_data;
-typedef int (handler_func) (int, gdb_client_data);
-typedef int (callback_handler_func) (gdb_client_data);
-
-extern void delete_file_handler (gdb_fildes_t fd);
-extern void add_file_handler (gdb_fildes_t fd, handler_func *proc,
-			      gdb_client_data client_data);
-extern int append_callback_event (callback_handler_func *proc,
-				   gdb_client_data client_data);
-extern void delete_callback_event (int id);
-
-extern void start_event_loop (void);
-extern void initialize_event_loop (void);
+#include "event-loop.h"
 
 /* Functions from server.c.  */
 extern int handle_serial_event (int err, gdb_client_data client_data);
