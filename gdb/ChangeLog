@@ -1,3 +1,7 @@
+2013-09-05  Tristan Gingold  <gingold@adacore.com>
+
+	* MAINTAINERS: Remove avr maintainership.
+
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
 	* findvar.c (value_of_register): Rework in terms of
