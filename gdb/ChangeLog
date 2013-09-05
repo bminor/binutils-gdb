@@ -1,3 +1,9 @@
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
+	PR tui/15933
+	* tui/tui-regs.c (tui_show_registers): Show registers of the
+	selected frame, not the current frame.
+
 2013-09-05  Ricard Wanderlof  <ricardw@axis.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.

@@ -157,7 +157,7 @@ tui_show_registers (struct reggroup *group)
 
   if (target_has_registers && target_has_stack && target_has_memory)
     {
-      ret = tui_show_register_group (group, get_current_frame (),
+      ret = tui_show_register_group (group, get_selected_frame (NULL),
                                      group == display_info->current_group);
     }
   if (ret == TUI_FAILURE)
