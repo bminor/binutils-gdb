@@ -1,5 +1,11 @@
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
+	* server.h (struct emit_ops, current_insn_ptr, emit_error):
+	Move ...
+        * ax.h: ... here.
+
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
 	* ax.c, linux-low.c, linux-x86-low.c, server.c: Include
 	tracepoint.h.
 	* server.h (IPA_BUFSIZ, initialize_tracepoint, tracing)
