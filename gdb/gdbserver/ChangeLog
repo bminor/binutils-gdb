@@ -1,3 +1,7 @@
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
+	* server.h (_): Delete.
+
 2013-09-02  Pedro Alves  <palves@redhat.com>
 
 	* tracepoint.c (TRACEFRAME_EOB_MARKER_SIZE): New macro.

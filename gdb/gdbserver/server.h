@@ -73,12 +73,6 @@ extern int vasprintf(char **strp, const char *fmt, va_list ap);
 int vsnprintf(char *str, size_t size, const char *format, va_list ap);
 #endif
 
-/* Define underscore macro, if not available, to be able to use it inside
-   code shared with gdb in common directory.  */
-#ifndef _
-#define _(String) (String)
-#endif
-
 #ifdef IN_PROCESS_AGENT
 #  define PROG "ipa"
 #else
