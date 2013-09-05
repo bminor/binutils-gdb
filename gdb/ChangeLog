@@ -1,5 +1,9 @@
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* common/i386-gcc-cpuid.h (bit_MPX): Synchronize with gcc file.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* python/lib/gdb/command/bound_register.py: New file.
 	* gdb/data-directory/Makefile.in: copy bond_register.py to the right path to
 	be initialized at gdb startup.
