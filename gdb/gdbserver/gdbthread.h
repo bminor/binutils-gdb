@@ -20,6 +20,7 @@
 #define GDB_THREAD_H
 
 #include "server.h"
+#include "inferiors.h"
 
 struct btrace_target_info;
 

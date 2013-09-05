@@ -28,6 +28,7 @@
 struct emit_ops;
 struct btrace_target_info;
 struct buffer;
+struct process_info;
 
 /* This structure describes how to resume a particular thread (or all
    threads) based on the client's request.  If thread is -1, then this

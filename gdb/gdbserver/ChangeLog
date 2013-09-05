@@ -1,5 +1,18 @@
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
+	* server.h (current_process, get_thread_process, all_processes)
+	(add_inferior_to_list, for_each_inferior, current_inferior)
+	(remove_inferior, add_process, remove_process, find_process_pid)
+	(have_started_inferiors_p, have_attached_inferiors_p)
+	(thread_id_to_gdb_id, thread_to_gdb_id, gdb_id_to_thread_id)
+	(clear_inferiors, find_inferior, find_inferior_id)
+	(inferior_target_data, set_inferior_target_data)
+	(inferior_regcache_data, set_inferior_regcache_data): Move to
+	inferiors.h, and include it.
+	* inferiors.h: New file.
+
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
 	* server.h (struct emit_ops, current_insn_ptr, emit_error):
 	Move ...
         * ax.h: ... here.
