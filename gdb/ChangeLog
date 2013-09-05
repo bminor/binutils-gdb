@@ -1,3 +1,9 @@
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full): 'dwarf_regnum'
+	local is now int instead of ULONGEST.  Print it with %d
+	instead of paddress.
+
 2013-09-05  Tristan Gingold  <gingold@adacore.com>
 
 	* MAINTAINERS: Remove avr maintainership.

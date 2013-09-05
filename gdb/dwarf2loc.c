@@ -2283,7 +2283,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	case DWARF_VALUE_REGISTER:
 	  {
 	    struct gdbarch *arch = get_frame_arch (frame);
-	    ULONGEST dwarf_regnum = value_as_long (dwarf_expr_fetch (ctx, 0));
+	    int dwarf_regnum
+	      = longest_to_int (value_as_long (dwarf_expr_fetch (ctx, 0)));
 	    int gdb_regnum = gdbarch_dwarf2_reg_to_regnum (arch, dwarf_regnum);
 
 	    if (byte_offset != 0)
@@ -2292,8 +2293,8 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    if (gdb_regnum != -1)
 	      retval = value_from_register (type, gdb_regnum, frame);
 	    else
-	      error (_("Unable to access DWARF register number %s"),
-		     paddress (arch, dwarf_regnum));
+	      error (_("Unable to access DWARF register number %d"),
+		     dwarf_regnum);
 	  }
 	  break;
 
