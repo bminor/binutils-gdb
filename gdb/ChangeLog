@@ -1,3 +1,7 @@
+2013-09-05  Ricard Wanderlof  <ricardw@axis.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2013-09-04  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (queue_and_load_all_dwo_tus): New function.
