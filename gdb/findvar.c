@@ -262,14 +262,7 @@ struct value *
 value_of_register (int regnum, struct frame_info *frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  CORE_ADDR addr;
-  int optim;
-  int unavail;
   struct value *reg_val;
-  struct type *reg_type;
-  int realnum;
-  gdb_byte raw_buffer[MAX_REGISTER_SIZE];
-  enum lval_type lval;
 
   /* User registers lie completely outside of the range of normal
      registers.  Catch them early so that the target never sees them.  */
@@ -277,28 +270,8 @@ value_of_register (int regnum, struct frame_info *frame)
 		+ gdbarch_num_pseudo_regs (gdbarch))
     return value_of_user_reg (regnum, frame);
 
-  frame_register (frame, regnum, &optim, &unavail,
-		  &lval, &addr, &realnum, raw_buffer);
-
-  reg_type = register_type (gdbarch, regnum);
-  if (optim)
-    reg_val = allocate_optimized_out_value (reg_type);
-  else
-    reg_val = allocate_value (reg_type);
-
-  if (!optim && !unavail)
-    memcpy (value_contents_raw (reg_val), raw_buffer,
-	    register_size (gdbarch, regnum));
-  else
-    memset (value_contents_raw (reg_val), 0,
-	    register_size (gdbarch, regnum));
-
-  VALUE_LVAL (reg_val) = lval;
-  set_value_address (reg_val, addr);
-  VALUE_REGNUM (reg_val) = regnum;
-  if (unavail)
-    mark_value_bytes_unavailable (reg_val, 0, register_size (gdbarch, regnum));
-  VALUE_FRAME_ID (reg_val) = get_frame_id (frame);
+  reg_val = value_of_register_lazy (frame, regnum);
+  value_fetch_lazy (reg_val);
   return reg_val;
 }
 
