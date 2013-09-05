@@ -30,6 +30,7 @@
 #include <errno.h>
 #include <sys/syscall.h>
 #include "filestuff.h"
+#include "hostio.h"
 
 /* Some older glibc versions do not define this.  */
 #ifndef __WNOTHREAD

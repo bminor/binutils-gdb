@@ -31,6 +31,7 @@
 #include "filestuff.h"
 #include "tracepoint.h"
 #include "dll.h"
+#include "hostio.h"
 
 /* The thread set with an `Hc' packet.  `Hc' is deprecated in favor of
    `vCont'.  Note the multi-process extensions made `vCont' a

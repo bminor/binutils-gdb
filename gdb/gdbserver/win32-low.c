@@ -26,6 +26,7 @@
 #include "win32-low.h"
 #include "gdbthread.h"
 #include "dll.h"
+#include "hostio.h"
 
 #include <stdint.h>
 #include <windows.h>

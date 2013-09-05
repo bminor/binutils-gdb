@@ -1,5 +1,13 @@
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
+	* server.h (handle_vFile, hostio_last_error_from_errno): Move
+	to ...
+	* hostio.h: ... this new file.
+	* hostio.c, server.c, linux-low.c, nto-low.c, spu-low,
+	win32-low.c: Include hostio.h.
+
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
 	* server.h (gdb_client_data, handler_func, callback_handler_func)
 	(delete_file_handler, add_file_handler, append_callback_event)
 	(delete_callback_event, start_event_loop, initialize_event_loop):

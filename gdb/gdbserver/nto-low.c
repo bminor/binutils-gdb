@@ -21,6 +21,7 @@
 #include "server.h"
 #include "gdbthread.h"
 #include "nto-low.h"
+#include "hostio.h"
 
 #include <limits.h>
 #include <fcntl.h>

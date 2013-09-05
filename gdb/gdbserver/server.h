@@ -144,12 +144,6 @@ typedef int gdb_fildes_t;
 extern int handle_serial_event (int err, gdb_client_data client_data);
 extern int handle_target_event (int err, gdb_client_data client_data);
 
-/* Functions from hostio.c.  */
-extern int handle_vFile (char *, int, int *);
-
-/* Functions from hostio-errno.c.  */
-extern void hostio_last_error_from_errno (char *own_buf);
-
 #include "remote-utils.h"
 
 #include "common-utils.h"

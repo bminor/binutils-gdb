@@ -20,6 +20,7 @@
 
 #include "server.h"
 #include "gdb/fileio.h"
+#include "hostio.h"
 
 #include <fcntl.h>
 #include <limits.h>
