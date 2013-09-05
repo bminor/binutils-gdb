@@ -19,6 +19,7 @@
 #include "server.h"
 #include "ax.h"
 #include "format.h"
+#include "tracepoint.h"
 
 static void ax_vdebug (const char *, ...) ATTRIBUTE_PRINTF (1, 2);
 

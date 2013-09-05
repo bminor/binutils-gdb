@@ -1,5 +1,29 @@
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
+	* ax.c, linux-low.c, linux-x86-low.c, server.c: Include
+	tracepoint.h.
+	* server.h (IPA_BUFSIZ, initialize_tracepoint, tracing)
+	(disconnected_tracing, tracepoint_look_up_symbols, stop_tracing
+	(handle_tracepoint_general_set, handle_tracepoint_query)
+	(tracepoint_finished_step, tracepoint_was_hit)
+	(release_while_stepping_state_list, current_traceframe)
+	(in_readonly_region, traceframe_read_mem)
+	(fetch_traceframe_registers, traceframe_read_sdata)
+	(traceframe_read_info, struct fast_tpoint_collect_status)
+	(fast_tracepoint_collecting, force_unlock_trace_buffer)
+	(handle_tracepoit_bkpts, initialize_low_tracepoint)
+	(supply_fast_tracepoint_registers)
+	(supply_static_tracepoint_registers, set_trampoline_buffer_space)
+	(ipa_tdesc, claim_trampoline_space)
+	(have_fast_tracepoint_trampoline_buffer, gdb_agent_about_to_close)
+	(agent_mem_read, agent_get_trace_state_variable_value)
+	(agent_set_trace_state_variable_value, agent_tsv_read)
+	(agent_mem_read_string, get_raw_reg_func_addr)
+	(get_get_tsv_func_addr, get_set_tsv_func_addr): Move to ...
+	* tracepoint.h: ... this new file.
+
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
 	* server.h (perror_with_name, error, fatal, warning, paddress)
 	(pulongest, plongest, phex_nz, pfildes): Move to utils.h, and
 	include it.

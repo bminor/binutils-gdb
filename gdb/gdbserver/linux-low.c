@@ -45,6 +45,7 @@
 #include <sys/vfs.h>
 #include <sys/uio.h>
 #include "filestuff.h"
+#include "tracepoint.h"
 #ifndef ELFMAG0
 /* Don't include <linux/elf.h> here.  If it got included by gdb_proc_service.h
    then ELFMAG0 will have been defined.  If it didn't get included by
