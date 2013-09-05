@@ -1,5 +1,12 @@
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
+	* server.h (perror_with_name, error, fatal, warning, paddress)
+	(pulongest, plongest, phex_nz, pfildes): Move to utils.h, and
+	include it.
+	* utils.h: New file.
+
+2013-09-05  Pedro Alves  <palves@redhat.com>
+
 	* server.h (remote_debug, noack_mode, transport_is_reliable)
 	(gdb_connected, STDIO_CONNECTION_NAME, remote_connection_is_stdio)
 	(read_ptid, write_ptid, putpkt, putpkt_binary, putpkt_notif)

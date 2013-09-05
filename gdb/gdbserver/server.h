@@ -274,18 +274,8 @@ extern void hostio_last_error_from_errno (char *own_buf);
 
 #include "remote-utils.h"
 
-/* Functions from utils.c */
 #include "common-utils.h"
-
-void perror_with_name (const char *string);
-void error (const char *string,...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
-void fatal (const char *string,...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF (1, 2);
-void warning (const char *string,...) ATTRIBUTE_PRINTF (1, 2);
-char *paddress (CORE_ADDR addr);
-char *pulongest (ULONGEST u);
-char *plongest (LONGEST l);
-char *phex_nz (ULONGEST l, int sizeof_l);
-char *pfildes (gdb_fildes_t fd);
+#include "utils.h"
 
 #include "gdb_assert.h"
 
