@@ -1,5 +1,10 @@
 2013-09-06  Andrew Burgess  <aburgess@broadcom.com>
 
+	* tui/tui-io.c (tui_initialize_io): Remove legacy comment referring
+	to deprecated_init_ui_hook.
+
+2013-09-06  Andrew Burgess  <aburgess@broadcom.com>
+
 	* cli/cli-interp.c (_initialize_cli_interp): Add a
 	command_loop_proc to interp_procs.
 	* event-top.c (cli_command_loop): Change signature to match
