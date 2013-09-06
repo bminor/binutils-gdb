@@ -62,6 +62,6 @@ extern void (*input_handler) (char *);
 extern int input_fd;
 extern void (*after_char_processing_hook) (void);
 
-extern void cli_command_loop (void);
+extern void cli_command_loop (void *);
 
 #endif

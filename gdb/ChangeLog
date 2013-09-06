@@ -1,3 +1,17 @@
+2013-09-06  Andrew Burgess  <aburgess@broadcom.com>
+
+	* cli/cli-interp.c (_initialize_cli_interp): Add a
+	command_loop_proc to interp_procs.
+	* event-top.c (cli_command_loop): Change signature to match
+	interp_command_loop_ftype.
+	* event-top.h (cli_command_loop): Same.
+	* interps.c (interp_new): Require every interpreter to have a
+	command_loop_proc.
+	(current_interp_command_loop): Just call the command_loop_proc on
+	the current interpreter.
+	* tui/tui-interp.c (_initialize_tui_interp): Add a
+	command_loop_proc to interp_procs.
+
 2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
 
 	* cris-tdep.c (cris_gdbarch_init): Add call to

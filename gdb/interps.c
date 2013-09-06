@@ -101,6 +101,9 @@ interp_new (const char *name, const struct interp_procs *procs)
   new_interp->procs = procs;
   new_interp->inited = 0;
 
+  /* Check for required procs.  */
+  gdb_assert (procs->command_loop_proc != NULL);
+
   return new_interp;
 }
 
@@ -319,13 +322,9 @@ current_interp_display_prompt_p (void)
 void
 current_interp_command_loop (void)
 {
-  /* Somewhat messy.  For the moment prop up all the old ways of
-     selecting the command loop.  */
-  if (current_interpreter != NULL
-      && current_interpreter->procs->command_loop_proc != NULL)
-    current_interpreter->procs->command_loop_proc (current_interpreter->data);
-  else
-    cli_command_loop ();
+  gdb_assert (current_interpreter != NULL);
+
+  current_interpreter->procs->command_loop_proc (current_interpreter->data);
 }
 
 int

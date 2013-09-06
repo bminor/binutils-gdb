@@ -151,7 +151,9 @@ _initialize_cli_interp (void)
     cli_interpreter_suspend,	/* suspend_proc */
     cli_interpreter_exec,	/* exec_proc */
     cli_interpreter_display_prompt_p,	/* prompt_proc_p */
-    cli_ui_out			/* ui_out_proc */
+    cli_ui_out,			/* ui_out_proc */
+    NULL,                       /* set_logging_proc */
+    cli_command_loop            /* command_loop_proc */
   };
   struct interp *cli_interp;
 

@@ -153,6 +153,8 @@ _initialize_tui_interp (void)
     tui_exec,
     tui_display_prompt_p,
     tui_ui_out,
+    NULL,
+    cli_command_loop
   };
   struct interp *tui_interp;
 

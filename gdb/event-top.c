@@ -167,9 +167,11 @@ rl_callback_read_char_wrapper (gdb_client_data client_data)
 }
 
 /* Initialize all the necessary variables, start the event loop,
-   register readline, and stdin, start the loop.  */
+   register readline, and stdin, start the loop.  The DATA is the
+   interpreter data cookie, ignored for now.  */
+
 void
-cli_command_loop (void)
+cli_command_loop (void *data)
 {
   display_gdb_prompt (0);
 
