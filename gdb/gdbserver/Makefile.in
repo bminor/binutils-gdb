@@ -561,11 +561,13 @@ waitstatus.o: ../target/waitstatus.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
 
-linux-btrace.o: ../common/linux-btrace.c $(linux_btrace_h) $(server_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
+linux-btrace.o: ../common/linux-btrace.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
-mips-linux-watch.o: ../common/mips-linux-watch.c $(mips_linux_watch_h) $(server_h)
-	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
+mips-linux-watch.o: ../common/mips-linux-watch.c
+	$(COMPILE) $<
+	$(POSTCOMPILE)
 
 # Native object files rules from ../nat
 

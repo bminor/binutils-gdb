@@ -1,5 +1,10 @@
 2013-09-06  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (linux-btrace.o, mips-linux-watch.o): Remove
+	explicit header dependencies and use $COMPILE/$POSTCOMPILE.
+
+2013-09-06  Pedro Alves  <palves@redhat.com>
+
 	* linux-amd64-ipa.c: Include tracepoint.h.
 	* linux-i386-ipa.c: Include tracepoint.h.
 
