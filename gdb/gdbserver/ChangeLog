@@ -1,5 +1,14 @@
 2013-09-06  Pedro Alves  <palves@redhat.com>
 
+	* Makefile.in (gdb_proc_service_h, regdef_h, regcache_h)
+	(signals_def, signals_h, ptid_h, ax_h, agent_h, linux_btrace_h)
+	(linux_osdata_h, vec_h, gdb_vecs_h, host_defs_h, libiberty_h)
+	(server_h, gdbthread_h, linux_low_h, linux_ptrace_h)
+	(gdb_thread_db_h, linux_procfs_h, lynx_low_h, nto_low_h)
+	(mips_linux_watch_h, i386_low_h, win32_low_h): Delete.
+
+2013-09-06  Pedro Alves  <palves@redhat.com>
+
 	* Makefile.in (linux-btrace.o, mips-linux-watch.o): Remove
 	explicit header dependencies and use $COMPILE/$POSTCOMPILE.
 

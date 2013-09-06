@@ -417,54 +417,7 @@ stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
 # will remove them.
 MAKEOVERRIDES=
 
-gdb_proc_service_h = $(srcdir)/gdb_proc_service.h
 regdat_sh = $(srcdir)/../regformats/regdat.sh
-regdef_h = $(srcdir)/../regformats/regdef.h
-regcache_h = $(srcdir)/regcache.h
-signals_def = $(srcdir)/../../include/gdb/signals.def
-signals_h = $(srcdir)/../../include/gdb/signals.h $(signals_def)
-ptid_h = $(srcdir)/../common/ptid.h
-ax_h = $(srcdir)/ax.h
-agent_h = $(srcdir)/../common/agent.h
-linux_btrace_h = $(srcdir)/../common/linux-btrace.h \
-		$(srcdir)/../common/btrace-common.h $(vec_h) $(ptid_h)
-linux_osdata_h = $(srcdir)/../common/linux-osdata.h
-vec_h = $(srcdir)/../common/vec.h
-gdb_vecs_h = $(srcdir)/../common/gdb_vecs.h
-host_defs_h = $(srcdir)/../common/host-defs.h
-libiberty_h = $(srcdir)/../../include/libiberty.h
-# Since everything must include server.h, we make that depend on
-# generated files.
-server_h = $(srcdir)/server.h $(regcache_h) $(srcdir)/target.h \
-		$(srcdir)/mem-break.h $(srcdir)/../common/gdb_signals.h \
-		$(srcdir)/../common/common-utils.h \
-		$(srcdir)/../common/xml-utils.h \
-		$(srcdir)/../common/buffer.h \
-		$(srcdir)/../common/gdb_assert.h \
-		$(srcdir)/../common/gdb_locale.h \
-		$(srcdir)/../target/resume.h \
-		$(srcdir)/../target/wait.h \
-		$(srcdir)/../target/waitstatus.h \
-		$(ptid_h) \
-		$(signals_h) \
-		$(libiberty_h) \
-		$(srcdir)/../../include/ansidecl.h \
-		$(generated_files)
-
-gdbthread_h = $(srcdir)/gdbthread.h $(target_h) $(srcdir)/server.h
-linux_low_h = $(srcdir)/linux-low.h $(gdbthread_h)
-
-linux_ptrace_h = $(srcdir)/../common/linux-ptrace.h
-
-gdb_thread_db_h = $(srcdir)/../common/gdb_thread_db.h
-
-linux_procfs_h = $(srcdir)/../common/linux-procfs.h
-
-lynx_low_h = $(srcdir)/lynx-low.h $(srcdir)/server.h
-
-nto_low_h = $(srcdir)/nto-low.h
-
-mips_linux_watch_h = $(srcdir)/../common/mips-linux-watch.h
 
 UST_CFLAGS = $(ustinc) -DCONFIG_UST_GDB_INTEGRATION
 
@@ -585,9 +538,6 @@ vasprintf.o: $(srcdir)/../../libiberty/vasprintf.c
 vsnprintf.o: $(srcdir)/../../libiberty/vsnprintf.c
 	$(COMPILE) $<
 	$(POSTCOMPILE)
-
-i386_low_h = $(srcdir)/i386-low.h
-win32_low_h = $(srcdir)/win32-low.h
 
 aarch64.c : $(srcdir)/../regformats/aarch64.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/aarch64.dat aarch64.c
