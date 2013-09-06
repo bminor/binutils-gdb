@@ -369,8 +369,6 @@ cris_arch_setup (void)
   current_process ()->tdesc = tdesc_crisv32;
 }
 
-typedef unsigned long elf_gregset_t[cris_num_regs];
-
 static struct regset_info cris_regsets[] = {
   { PTRACE_GETREGS, PTRACE_SETREGS, 0, cris_num_regs * 4,
     GENERAL_REGS, cris_fill_gregset, cris_store_gregset },
@@ -426,7 +424,7 @@ struct linux_target_ops the_low_target = {
 void
 initialize_low_arch (void)
 {
-  init_register_crisv32 ();
+  init_registers_crisv32 ();
 
   initialize_regsets_info (&cris_regsets_info);
 }

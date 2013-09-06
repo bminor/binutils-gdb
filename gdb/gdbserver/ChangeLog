@@ -1,3 +1,9 @@
+2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
+
+	* linux-crisv32-low.c (elf_gregset_t): Delete typedef.
+	(initialize_low_arch): Call init_registers_crisv32 rather than
+	init_register_crisv32.
+
 2013-09-05  Pedro Alves  <palves@redhat.com>
 
 	* server.h (handle_vFile, hostio_last_error_from_errno): Move
