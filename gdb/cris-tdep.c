@@ -3820,7 +3820,7 @@ cris_delayed_get_disassembler (bfd_vma addr, struct disassemble_info *info)
 }
 
 /* Copied from <asm/elf.h>.  */
-typedef unsigned long elf_greg_t;
+typedef unsigned char elf_greg_t[4];
 
 /* Same as user_regs_struct struct in <asm/user.h>.  */
 #define CRISV10_ELF_NGREG 35

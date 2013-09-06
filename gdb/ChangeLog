@@ -1,3 +1,7 @@
+2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
+
+	* cris-tdep.c (elf_greg_t): Change typedef to unsigned char[4]
+
 2013-09-05  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb/defs.h (deprecated_command_loop_hook): Remove, including
