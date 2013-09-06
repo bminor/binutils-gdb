@@ -1,3 +1,16 @@
+2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Add cris-linux-tdep.o.
+	* configure.tgt: Add cris-linux-tdep.o and linux-tdep.o to
+	gdb_target_obs for cris target.
+	* cris-tdep.c (struct gdbarch_tdep): Move to cris-tdep.h.
+	(cris_gdbarch_init): Move calls to
+	set_gdbarch_fetch_tls_load_module_address and
+	set_solib_svr4_fetch_link_map_offsets to cris-linux-tdep.c.
+	Add call to gdbarch_init_osabi.
+	* cris-linux-tdep.c: New file.
+	* cris-tdep.h: New file.
+
 2013-09-06  Andrew Burgess  <aburgess@broadcom.com>
 
 	* tui/tui-io.c (tui_initialize_io): Remove legacy comment referring

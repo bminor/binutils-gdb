@@ -131,7 +131,7 @@ bfin-*-*)
 
 cris*)
 	# Target: CRIS
-	gdb_target_obs="cris-tdep.o solib-svr4.o"
+	gdb_target_obs="cris-tdep.o cris-linux-tdep.o linux-tdep.o solib-svr4.o"
 	;;
 
 frv-*-*)

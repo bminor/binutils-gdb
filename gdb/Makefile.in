@@ -550,7 +550,7 @@ ALL_TARGET_OBS = \
 	arm-tdep.o arm-wince-tdep.o \
 	avr-tdep.o \
 	bfin-linux-tdep.o bfin-tdep.o \
-	cris-tdep.o \
+	cris-linux-tdep.o cris-tdep.o \
 	dicos-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
 	h8300-tdep.o \

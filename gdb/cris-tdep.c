@@ -34,6 +34,7 @@
 #include "target.h"
 #include "value.h"
 #include "opcode/cris.h"
+#include "osabi.h"
 #include "arch-utils.h"
 #include "regcache.h"
 #include "gdb_assert.h"
@@ -44,6 +45,8 @@
 #include "solib-svr4.h"
 #include "gdb_string.h"
 #include "dis-asm.h"
+
+#include "cris-tdep.h"
 
 enum cris_num_regs
 {
@@ -163,14 +166,6 @@ static const char *usr_cmd_cris_mode = cris_mode_normal;
 
 /* Whether to make use of Dwarf-2 CFI (default on).  */
 static int usr_cmd_cris_dwarf2_cfi = 1;
-
-/* CRIS architecture specific information.  */
-struct gdbarch_tdep
-{
-  unsigned int cris_version;
-  const char *cris_mode;
-  int cris_dwarf2_cfi;
-};
 
 /* Sigtramp identification code copied from i386-linux-tdep.c.  */
 
@@ -4137,11 +4132,6 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_single_step_through_delay 
 	(gdbarch, crisv32_single_step_through_delay);
 
-      /* FIXME: Ricard W/2013-09-03: Linux-specific stuff like this
-         should really go in (a new) cris-linux-tdep.c. */
-      set_gdbarch_fetch_tls_load_module_address (gdbarch,
-                                                 svr4_fetch_objfile_link_map);
-
       break;
 
     default:
@@ -4181,9 +4171,9 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   frame_unwind_append_unwinder (gdbarch, &cris_frame_unwind);
   frame_base_set_default (gdbarch, &cris_frame_base);
 
-  set_solib_svr4_fetch_link_map_offsets
-    (gdbarch, svr4_ilp32_fetch_link_map_offsets);
-  
+  /* Hook in ABI-specific overrides, if they have been registered.  */
+  gdbarch_init_osabi (info, gdbarch);
+
   /* FIXME: cagney/2003-08-27: It should be possible to select a CRIS
      disassembler, even when there is no BFD.  Does something like
      "gdb; target remote; disassmeble *0x123" work?  */
