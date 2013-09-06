@@ -3819,25 +3819,25 @@ cris_delayed_get_disassembler (bfd_vma addr, struct disassemble_info *info)
   return print_insn (addr, info);
 }
 
-/* Copied from <asm/elf.h>.  */
-typedef unsigned char elf_greg_t[4];
+/* Originally from <asm/elf.h>.  */
+typedef unsigned char cris_elf_greg_t[4];
 
 /* Same as user_regs_struct struct in <asm/user.h>.  */
 #define CRISV10_ELF_NGREG 35
-typedef elf_greg_t elf_gregset_t[CRISV10_ELF_NGREG];
+typedef cris_elf_greg_t cris_elf_gregset_t[CRISV10_ELF_NGREG];
 
 #define CRISV32_ELF_NGREG 32
-typedef elf_greg_t crisv32_elf_gregset_t[CRISV32_ELF_NGREG];
+typedef cris_elf_greg_t crisv32_elf_gregset_t[CRISV32_ELF_NGREG];
 
-/* Unpack an elf_gregset_t into GDB's register cache.  */
+/* Unpack a cris_elf_gregset_t into GDB's register cache.  */
 
 static void 
-cris_supply_gregset (struct regcache *regcache, elf_gregset_t *gregsetp)
+cris_supply_gregset (struct regcache *regcache, cris_elf_gregset_t *gregsetp)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int i;
-  elf_greg_t *regp = *gregsetp;
+  cris_elf_greg_t *regp = *gregsetp;
   static char zerobuf[4] = {0};
 
   /* The kernel dumps all 32 registers as unsigned longs, but supply_register
@@ -3868,12 +3868,12 @@ fetch_core_registers (struct regcache *regcache,
 		      char *core_reg_sect, unsigned core_reg_size,
                       int which, CORE_ADDR reg_addr)
 {
-  elf_gregset_t gregset;
+  cris_elf_gregset_t gregset;
 
   switch (which)
     {
     case 0:
-      if (core_reg_size != sizeof (elf_gregset_t) 
+      if (core_reg_size != sizeof (cris_elf_gregset_t)
 	  && core_reg_size != sizeof (crisv32_elf_gregset_t))
         {
           warning (_("wrong size gregset struct in core file"));

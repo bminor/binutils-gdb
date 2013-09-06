@@ -1,5 +1,12 @@
 2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
 
+	* cris-tdep.c (cris_elf_greg_t): Rename from elf_greg_t.
+	(cris_elf_gregset_t): Rename from elf_gregset_t.
+	(crisv32_elf_gregset_t): Adjust.
+	(cris_supply_gregset, fetch_core_registers): Adjust.
+
+2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
+
 	* cris-tdep.c (elf_greg_t): Change typedef to unsigned char[4]
 
 2013-09-05  Andrew Burgess  <aburgess@broadcom.com>
