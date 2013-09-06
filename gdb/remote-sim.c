@@ -46,8 +46,6 @@
 
 extern void _initialize_remote_sim (void);
 
-static void dump_mem (gdb_byte *buf, int len);
-
 static void init_callbacks (void);
 
 static void end_callbacks (void);
@@ -271,7 +269,7 @@ sim_inferior_data_cleanup (struct inferior *inf, void *data)
 }
 
 static void
-dump_mem (gdb_byte *buf, int len)
+dump_mem (const gdb_byte *buf, int len)
 {
   printf_filtered ("\t");
 
@@ -1054,16 +1052,13 @@ gdbsim_prepare_to_store (struct regcache *regcache)
   /* Do nothing, since we can store individual regs.  */
 }
 
-/* Transfer LEN bytes between GDB address MYADDR and target address
-   MEMADDR.  If WRITE is non-zero, transfer them to the target,
-   otherwise transfer them from the target.  TARGET is unused.
+/* Helper for gdbsim_xfer_partial that handles memory transfers.
+   Arguments are like target_xfer_partial.  */
 
-   Returns the number of bytes transferred.  */
-
-static int
-gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
-			     int write, struct mem_attrib *attrib,
-			     struct target_ops *target)
+static LONGEST
+gdbsim_xfer_memory (struct target_ops *target,
+		    gdb_byte *readbuf, const gdb_byte *writebuf,
+		    ULONGEST memaddr, LONGEST len)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);
@@ -1087,25 +1082,43 @@ gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog,
-			"gdbsim_xfer_inferior_memory: myaddr %s, "
-			"memaddr %s, len %d, write %d\n",
-			host_address_to_string (myaddr),
+			"gdbsim_xfer_memory: readbuf %s, writebuf %s, "
+			"memaddr %s, len %s\n",
+			host_address_to_string (readbuf),
+			host_address_to_string (writebuf),
 			paddress (target_gdbarch (), memaddr),
-			len, write);
+			plongest (len));
 
-  if (write)
+  if (writebuf)
     {
       if (remote_debug && len > 0)
-	dump_mem (myaddr, len);
-      len = sim_write (sim_data->gdbsim_desc, memaddr, myaddr, len);
+	dump_mem (writebuf, len);
+      len = sim_write (sim_data->gdbsim_desc, memaddr, writebuf, len);
     }
   else
     {
-      len = sim_read (sim_data->gdbsim_desc, memaddr, myaddr, len);
+      len = sim_read (sim_data->gdbsim_desc, memaddr, readbuf, len);
       if (remote_debug && len > 0)
-	dump_mem (myaddr, len);
+	dump_mem (readbuf, len);
     }
   return len;
+}
+
+/* Target to_xfer_partial implementation.  */
+
+static LONGEST
+gdbsim_xfer_partial (struct target_ops *ops, enum target_object object,
+		     const char *annex, gdb_byte *readbuf,
+		     const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+{
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      return gdbsim_xfer_memory (ops, readbuf, writebuf, offset, len);
+
+    default:
+      return -1;
+    }
 }
 
 static void
@@ -1283,7 +1296,7 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_fetch_registers = gdbsim_fetch_register;
   gdbsim_ops.to_store_registers = gdbsim_store_register;
   gdbsim_ops.to_prepare_to_store = gdbsim_prepare_to_store;
-  gdbsim_ops.deprecated_xfer_memory = gdbsim_xfer_inferior_memory;
+  gdbsim_ops.to_xfer_partial = gdbsim_xfer_partial;
   gdbsim_ops.to_files_info = gdbsim_files_info;
   gdbsim_ops.to_insert_breakpoint = memory_insert_breakpoint;
   gdbsim_ops.to_remove_breakpoint = memory_remove_breakpoint;

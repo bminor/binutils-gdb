@@ -1,5 +1,15 @@
 2013-09-06  Pedro Alves  <palves@redhat.com>
 
+	* remote-sim.c (dump_mem): Constify buf parameter.
+	gdbsim_xfer_inferior_memory): Rename to ...
+	(gdbsim_xfer_memory): ... this.  Adjust interface as
+	target_xfer_partial helper.
+	(gdbsim_xfer_partial): New function.
+	(init_gdbsim_ops): Don't install a deprecated_xfer_memory hook.
+	Install a to_xfer_partial hook.  Send output to gdb_stdlog.
+
+2013-09-06  Pedro Alves  <palves@redhat.com>
+
 	* remote-sim.c (gdbsim_xfer_inferior_memory): Use
 	host_address_to_string, and send debug output to gdb_stdlog.
 
