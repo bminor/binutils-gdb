@@ -1,3 +1,8 @@
+2013-09-06  Pedro Alves  <palves@redhat.com>
+
+	* linux-amd64-ipa.c: Include tracepoint.h.
+	* linux-i386-ipa.c: Include tracepoint.h.
+
 2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
 
 	* linux-crisv32-low.c (PTRACE_GET_THREAD_AREA): New macro.

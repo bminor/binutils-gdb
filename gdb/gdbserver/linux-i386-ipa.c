@@ -21,6 +21,7 @@
 #include "server.h"
 #include <stdint.h>
 #include <sys/mman.h>
+#include "tracepoint.h"
 
 /* GDB register numbers.  */
 
