@@ -1,3 +1,12 @@
+2013-09-06  Pedro Alves <palves@redhat.com>
+
+	* remote-sim.c (dump_mem, gdbsim_fetch_register)
+	(gdbsim_store_register, gdbsim_kill, gdbsim_load)
+	(gdbsim_create_inferior, gdbsim_open, gdbsim_close)
+	(gdbsim_detach, gdbsim_resume_inferior, gdbsim_wait)
+	(gdbsim_files_info, gdbsim_mourn_inferior): Send debug output to
+	gdb_stdlog.
+
 2013-09-06  Pedro Alves  <palves@redhat.com>
 
 	* remote-sim.c (dump_mem): Constify buf parameter.
