@@ -1,5 +1,10 @@
 2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
 
+	* cris-tdep.c (cris_gdbarch_init): Add call to
+	get_gdbarch_fetch_tls_load_module_address.
+
+2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
+
 	* cris-tdep.c (cris_elf_greg_t): Rename from elf_greg_t.
 	(cris_elf_gregset_t): Rename from elf_gregset_t.
 	(crisv32_elf_gregset_t): Adjust.

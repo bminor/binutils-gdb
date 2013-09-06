@@ -4137,6 +4137,11 @@ cris_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_single_step_through_delay 
 	(gdbarch, crisv32_single_step_through_delay);
 
+      /* FIXME: Ricard W/2013-09-03: Linux-specific stuff like this
+         should really go in (a new) cris-linux-tdep.c. */
+      set_gdbarch_fetch_tls_load_module_address (gdbarch,
+                                                 svr4_fetch_objfile_link_map);
+
       break;
 
     default:

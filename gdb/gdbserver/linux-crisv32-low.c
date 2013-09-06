@@ -27,6 +27,10 @@ extern const struct target_desc *tdesc_crisv32;
 /* CRISv32 */
 #define cris_num_regs 49
 
+#ifndef PTRACE_GET_THREAD_AREA
+#define PTRACE_GET_THREAD_AREA 25
+#endif
+
 /* Note: Ignoring USP (having the stack pointer in two locations causes trouble
    without any significant gain).  */
 
@@ -337,6 +341,20 @@ cris_stopped_data_address (void)
 
   /* FIXME: Possibly adjust to match watched range.  */
   return eda;
+}
+
+ps_err_e
+ps_get_thread_area (const struct ps_prochandle *ph,
+                    lwpid_t lwpid, int idx, void **base)
+{
+  if (ptrace (PTRACE_GET_THREAD_AREA, lwpid, NULL, base) != 0)
+    return PS_ERR;
+
+  /* IDX is the bias from the thread pointer to the beginning of the
+     thread descriptor.  It has to be subtracted due to implementation
+     quirks in libthread_db.  */
+  *base = (void *) ((char *) *base - idx);
+  return PS_OK;
 }
 
 static void
