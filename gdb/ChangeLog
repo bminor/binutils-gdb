@@ -1,3 +1,8 @@
+2013-09-06  Pedro Alves  <palves@redhat.com>
+
+	* remote-sim.c (gdbsim_xfer_inferior_memory): Use
+	host_address_to_string, and send debug output to gdb_stdlog.
+
 2013-09-06  Ricard Wanderlof  <ricardw@axis.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Add cris-linux-tdep.o.

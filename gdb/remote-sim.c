@@ -1086,18 +1086,17 @@ gdbsim_xfer_inferior_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
   gdb_assert (sim_data->gdbsim_desc != NULL);
 
   if (remote_debug)
-    {
-      /* FIXME: Send to something other than STDOUT?  */
-      printf_filtered ("gdbsim_xfer_inferior_memory: myaddr 0x");
-      gdb_print_host_address (myaddr, gdb_stdout);
-      printf_filtered (", memaddr %s, len %d, write %d\n",
-		       paddress (target_gdbarch (), memaddr), len, write);
-      if (remote_debug && write)
-	dump_mem (myaddr, len);
-    }
+    fprintf_unfiltered (gdb_stdlog,
+			"gdbsim_xfer_inferior_memory: myaddr %s, "
+			"memaddr %s, len %d, write %d\n",
+			host_address_to_string (myaddr),
+			paddress (target_gdbarch (), memaddr),
+			len, write);
 
   if (write)
     {
+      if (remote_debug && len > 0)
+	dump_mem (myaddr, len);
       len = sim_write (sim_data->gdbsim_desc, memaddr, myaddr, len);
     }
   else
