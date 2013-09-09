@@ -1,3 +1,7 @@
+2013-09-09  Andrew Burgess  <aburgess@broadcom.com>
+
+	* top.c (quit_confirm): Remove use of deprecated_init_ui_hook.
+
 2013-09-06  Pedro Alves <palves@redhat.com>
 
 	* remote-sim.c (dump_mem, gdbsim_fetch_register)

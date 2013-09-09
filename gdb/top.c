@@ -1355,18 +1355,9 @@ quit_confirm (void)
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  /* This is something of a hack.  But there's no reliable way to see
-     if a GUI is running.  The `use_windows' variable doesn't cut
-     it.  */
-  if (deprecated_init_ui_hook)
-    fprintf_filtered (stb, _("A debugging session is active.\n"
-			     "Do you still want to close the debugger?"));
-  else
-    {
-      fprintf_filtered (stb, _("A debugging session is active.\n\n"));
-      iterate_over_inferiors (print_inferior_quit_action, stb);
-      fprintf_filtered (stb, _("\nQuit anyway? "));
-    }
+  fprintf_filtered (stb, _("A debugging session is active.\n\n"));
+  iterate_over_inferiors (print_inferior_quit_action, stb);
+  fprintf_filtered (stb, _("\nQuit anyway? "));
 
   str = ui_file_xstrdup (stb, NULL);
   make_cleanup (xfree, str);
