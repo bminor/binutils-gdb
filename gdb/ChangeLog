@@ -1,3 +1,7 @@
+2013-09-10  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* config/s390/s390.mh (NATDEPFILES): Add linux-waitpid.o.
+
 2013-09-09  Andrew Burgess  <aburgess@broadcom.com>
 
 	* top.c (quit_confirm): Remove use of deprecated_init_ui_hook.
