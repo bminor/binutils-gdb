@@ -1,3 +1,14 @@
+2014-06-12  Yao Qi  <yao@codesourcery.com>
+
+	* varobj.c (struct varobj_item): New structure.
+	(create_child_with_value): Update declaration.
+	(varobj_add_child): Replace arguments 'name' and 'value' with
+	'item'.  All callers updated.
+	(install_dynamic_child): Likewise.
+	(update_dynamic_varobj_children): Likewise.
+	(varobj_add_child): Likewise.
+	(create_child_with_value): Likewise.
+
 2014-06-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Create a new section for the next release branch.

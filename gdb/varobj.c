@@ -108,6 +108,17 @@ struct varobj_root
   struct varobj_root *next;
 };
 
+/* A node or item of varobj, composed of the name and the value.  */
+
+struct varobj_item
+{
+  /* Name of this item.  */
+  char *name;
+
+  /* Value of this item.  */
+  struct value *value;
+};
+
 /* Dynamic part of varobj.  */
 
 struct varobj_dynamic
@@ -169,8 +180,8 @@ static void uninstall_variable (struct varobj *);
 static struct varobj *create_child (struct varobj *, int, char *);
 
 static struct varobj *
-create_child_with_value (struct varobj *parent, int index, char *name,
-			 struct value *value);
+create_child_with_value (struct varobj *parent, int index,
+			 struct varobj_item *item);
 
 /* Utility routines */
 
@@ -214,8 +225,7 @@ static int is_root_p (struct varobj *var);
 #if HAVE_PYTHON
 
 static struct varobj *varobj_add_child (struct varobj *var,
-					char *name,
-					struct value *value);
+					struct varobj_item *item);
 
 #endif /* HAVE_PYTHON */
 
@@ -714,13 +724,12 @@ install_dynamic_child (struct varobj *var,
 		       VEC (varobj_p) **unchanged,
 		       int *cchanged,
 		       int index,
-		       char *name,
-		       struct value *value)
+		       struct varobj_item *item)
 {
   if (VEC_length (varobj_p, var->children) < index + 1)
     {
       /* There's no child yet.  */
-      struct varobj *child = varobj_add_child (var, name, value);
+      struct varobj *child = varobj_add_child (var, item);
 
       if (new)
 	{
@@ -731,14 +740,14 @@ install_dynamic_child (struct varobj *var,
   else
     {
       varobj_p existing = VEC_index (varobj_p, var->children, index);
-      int type_updated = update_type_if_necessary (existing, value);
+      int type_updated = update_type_if_necessary (existing, item->value);
 
       if (type_updated)
 	{
 	  if (type_changed)
 	    VEC_safe_push (varobj_p, *type_changed, existing);
 	}
-      if (install_new_value (existing, value, 0))
+      if (install_new_value (existing, item->value, 0))
 	{
 	  if (!type_updated && changed)
 	    VEC_safe_push (varobj_p, *changed, existing);
@@ -889,7 +898,7 @@ update_dynamic_varobj_children (struct varobj *var,
 	{
 	  PyObject *py_v;
 	  const char *name;
-	  struct value *v;
+	  struct varobj_item varobj_item;
 	  struct cleanup *inner;
 	  int can_mention = from < 0 || i >= from;
 
@@ -901,15 +910,17 @@ update_dynamic_varobj_children (struct varobj *var,
 	      error (_("Invalid item from the child list"));
 	    }
 
-	  v = convert_value_from_python (py_v);
-	  if (v == NULL)
+	  varobj_item.value = convert_value_from_python (py_v);
+	  if (varobj_item.value == NULL)
 	    gdbpy_print_stack ();
+	  varobj_item.name = xstrdup (name);
+
 	  install_dynamic_child (var, can_mention ? changed : NULL,
 				 can_mention ? type_changed : NULL,
 				 can_mention ? new : NULL,
 				 can_mention ? unchanged : NULL,
 				 can_mention ? cchanged : NULL, i,
-				 xstrdup (name), v);
+				 &varobj_item);
 	  do_cleanups (inner);
 	}
       else
@@ -1028,11 +1039,11 @@ varobj_list_children (struct varobj *var, int *from, int *to)
 #if HAVE_PYTHON
 
 static struct varobj *
-varobj_add_child (struct varobj *var, char *name, struct value *value)
+varobj_add_child (struct varobj *var, struct varobj_item *item)
 {
-  varobj_p v = create_child_with_value (var, 
+  varobj_p v = create_child_with_value (var,
 					VEC_length (varobj_p, var->children), 
-					name, value);
+					item);
 
   VEC_safe_push (varobj_p, var->children, v);
   return v;
@@ -2107,13 +2118,17 @@ uninstall_variable (struct varobj *var)
 static struct varobj *
 create_child (struct varobj *parent, int index, char *name)
 {
-  return create_child_with_value (parent, index, name, 
-				  value_of_child (parent, index));
+  struct varobj_item item;
+
+  item.name = name;
+  item.value = value_of_child (parent, index);
+
+  return create_child_with_value (parent, index, &item);
 }
 
 static struct varobj *
-create_child_with_value (struct varobj *parent, int index, char *name,
-			 struct value *value)
+create_child_with_value (struct varobj *parent, int index,
+			 struct varobj_item *item)
 {
   struct varobj *child;
   char *childs_name;
@@ -2121,7 +2136,7 @@ create_child_with_value (struct varobj *parent, int index, char *name,
   child = new_variable ();
 
   /* NAME is allocated by caller.  */
-  child->name = name;
+  child->name = item->name;
   child->index = index;
   child->parent = parent;
   child->root = parent->root;
@@ -2129,22 +2144,22 @@ create_child_with_value (struct varobj *parent, int index, char *name,
   if (varobj_is_anonymous_child (child))
     childs_name = xstrprintf ("%s.%d_anonymous", parent->obj_name, index);
   else
-    childs_name = xstrprintf ("%s.%s", parent->obj_name, name);
+    childs_name = xstrprintf ("%s.%s", parent->obj_name, item->name);
   child->obj_name = childs_name;
 
   install_variable (child);
 
   /* Compute the type of the child.  Must do this before
      calling install_new_value.  */
-  if (value != NULL)
+  if (item->value != NULL)
     /* If the child had no evaluation errors, var->value
        will be non-NULL and contain a valid type.  */
-    child->type = value_actual_type (value, 0, NULL);
+    child->type = value_actual_type (item->value, 0, NULL);
   else
     /* Otherwise, we must compute the type.  */
     child->type = (*child->root->lang_ops->type_of_child) (child->parent,
 							   child->index);
-  install_new_value (child, value, 1);
+  install_new_value (child, item->value, 1);
 
   return child;
 }
