@@ -1,3 +1,8 @@
+2013-09-10  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* gdb.base/default.exp: Adjust regexpr for 'cd' to match optional
+	canonical pathname.
+
 2013-09-04  Doug Evans  <dje@google.com>
 
 	* gdb.python/py-events.py (exit_handler): Verify we get the expected
