@@ -1,5 +1,15 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c: Include regcache.h.
+	(btrace_add_pc): New.
+	(btrace_enable): Call btrace_add_pc.
+	(btrace_is_empty): New.
+	* btrace.h (btrace_is_empty): New.
+	* record-btrace.c (require_btrace, record_btrace_info): Call
+	btrace_is_empty.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/linux-btrace.c (perf_event_read_bts, linux_read_btrace):
 	Support delta reads.
 	(linux_disable_btrace): Change return type.

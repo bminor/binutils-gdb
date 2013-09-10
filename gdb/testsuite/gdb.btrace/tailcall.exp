@@ -49,20 +49,22 @@ gdb_test "next"
 
 # show the flat branch trace
 gdb_test "record function-call-history 1" [join [list \
-  "1\tfoo" \
-  "2\tbar" \
-  "3\tmain" \
+  "1\tmain" \
+  "2\tfoo" \
+  "3\tbar" \
+  "4\tmain" \
   ] "\r\n"] "flat"
 
 # show the branch trace with calls indented
 gdb_test "record function-call-history /c 1" [join [list \
-  "1\t  foo" \
-  "2\t    bar" \
-  "3\tmain" \
+  "1\tmain" \
+  "2\t  foo" \
+  "3\t    bar" \
+  "4\tmain" \
   ] "\r\n"] "indented"
 
 # go into bar
-gdb_test "record goto 3" ".*bar \\(\\) at .*x86-tailcall.c:24\r\n.*"
+gdb_test "record goto 4" ".*bar \\(\\) at .*x86-tailcall.c:24\r\n.*"
 
 # check the backtrace
 gdb_test "backtrace" [join [list \

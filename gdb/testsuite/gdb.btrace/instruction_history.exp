@@ -56,48 +56,48 @@ gdb_test_multiple "info record" $testname {
     }
 }
 
-# we have exactly 6 instructions here
-set message "exactly 6 instructions"
-if { $traced != 6 } {
+# we have exactly 11 instructions here
+set message "exactly 11 instructions"
+if { $traced != 11 } {
     fail $message
 } else {
     pass $message
 }
 
 # test that we see the expected instructions
-gdb_test "record instruction-history 2,6" [join [list \
-  "2\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
-  "3\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tdec    %eax" \
-  "4\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tjmp    0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
-  "5\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tcmp    \\\$0x0,%eax" \
-  "6\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r" \
+gdb_test "record instruction-history 3,7" [join [list \
+  "3\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
+  "4\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tdec    %eax" \
+  "5\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tjmp    0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
+  "6\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tcmp    \\\$0x0,%eax" \
+  "7\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r" \
   ] "\r\n"]
 
-gdb_test "record instruction-history /f 2,+5" [join [list \
-  "2\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
-  "3\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tdec    %eax" \
-  "4\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tjmp    0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
-  "5\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tcmp    \\\$0x0,%eax" \
-  "6\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r" \
+gdb_test "record instruction-history /f 3,+5" [join [list \
+  "3\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
+  "4\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tdec    %eax" \
+  "5\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tjmp    0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
+  "6\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tcmp    \\\$0x0,%eax" \
+  "7\t   0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r" \
   ] "\r\n"]
 
-gdb_test "record instruction-history /p 6,-5" [join [list \
-  "2\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
-  "3\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tdec    %eax" \
-  "4\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tjmp    0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
-  "5\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tcmp    \\\$0x0,%eax" \
-  "6\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r" \
+gdb_test "record instruction-history /p 7,-5" [join [list \
+  "3\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
+  "4\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tdec    %eax" \
+  "5\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tjmp    0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
+  "6\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tcmp    \\\$0x0,%eax" \
+  "7\t0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r" \
   ] "\r\n"]
 
-gdb_test "record instruction-history /pf 2,6" [join [list \
-  "2\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
-  "3\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tdec    %eax" \
-  "4\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tjmp    0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
-  "5\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tcmp    \\\$0x0,%eax" \
-  "6\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r" \
+gdb_test "record instruction-history /pf 3,7" [join [list \
+  "3\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
+  "4\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tdec    %eax" \
+  "5\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tjmp    0x\[0-9a-f\]+ <loop\\+\[0-9\]+>" \
+  "6\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tcmp    \\\$0x0,%eax" \
+  "7\t0x\[0-9a-f\]+ <\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r" \
   ] "\r\n"]
 
-gdb_test "record instruction-history 2,2" "2\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r"
+gdb_test "record instruction-history 3,3" "3\t   0x\[0-9a-f\]+ <loop\\+\[0-9\]+>:\tje     0x\[0-9a-f\]+ <loop\\+\[0-9\]+>\r"
 
 # the following tests are checking the iterators
 # to avoid lots of regexps, we just check the number of lines that
@@ -140,7 +140,7 @@ if { $traced != $lines } {
 }
 
 # test that the iterator works
-set history_size 3
+set history_size 4
 gdb_test_no_output "set record instruction-history-size $history_size"
 set message "browse history forward start"
 set lines [test_lines_length "record instruction-history 1" $message]
@@ -150,8 +150,6 @@ if { $lines != $history_size } {
     pass $message
 }
 
-set history_size 2
-gdb_test_no_output "set record instruction-history-size $history_size"
 set message "browse history forward middle"
 set lines [test_lines_length "record instruction-history +" $message]
 if { $lines != $history_size } {
@@ -162,7 +160,7 @@ if { $lines != $history_size } {
 
 set message "browse history forward last"
 set lines [test_lines_length "record instruction-history +" $message]
-if { $lines != 1 } {
+if { $lines != 3 } {
     fail $message
 } else {
     pass $message
@@ -173,8 +171,6 @@ gdb_test "record instruction-history" "At the end of the branch trace record\\."
 # make sure we cannot move further
 gdb_test "record instruction-history" "At the end of the branch trace record\\." "browse history forward beyond 2"
 
-set history_size 3
-gdb_test_no_output "set record instruction-history-size $history_size"
 set message "browse history backward last"
 set lines [test_lines_length "record instruction-history -" $message]
 if { $lines != $history_size } {
@@ -183,8 +179,6 @@ if { $lines != $history_size } {
     pass $message
 }
 
-set history_size 2
-gdb_test_no_output "set record instruction-history-size $history_size"
 set message "browse history backward middle"
 set lines [test_lines_length "record instruction-history -" $message]
 if { $lines != $history_size } {
@@ -195,7 +189,7 @@ if { $lines != $history_size } {
 
 set message "browse history backward first"
 set lines [test_lines_length "record instruction-history -" $message]
-if { $lines != 1 } {
+if { $lines != 3 } {
     fail $message
 } else {
     pass $message

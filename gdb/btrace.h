@@ -314,4 +314,8 @@ extern void btrace_set_call_history (struct btrace_thread_info *,
 /* Determine if branch tracing is currently replaying TP.  */
 extern int btrace_is_replaying (struct thread_info *tp);
 
+/* Return non-zero if the branch trace for TP is empty; zero otherwise.  */
+extern int btrace_is_empty (struct thread_info *tp);
+
+
 #endif /* BTRACE_H */

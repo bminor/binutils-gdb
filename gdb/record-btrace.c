@@ -68,7 +68,6 @@ static struct thread_info *
 require_btrace_thread (void)
 {
   struct thread_info *tp;
-  struct btrace_thread_info *btinfo;
 
   DEBUG ("require");
 
@@ -78,9 +77,7 @@ require_btrace_thread (void)
 
   btrace_fetch (tp);
 
-  btinfo = &tp->btrace;
-
-  if (btinfo->begin == NULL)
+  if (btrace_is_empty (tp))
     error (_("No trace."));
 
   return tp;
@@ -241,7 +238,8 @@ record_btrace_info (void)
   calls = 0;
 
   btinfo = &tp->btrace;
-  if (btinfo->begin != NULL)
+
+  if (!btrace_is_empty (tp))
     {
       struct btrace_call_iterator call;
       struct btrace_insn_iterator insn;

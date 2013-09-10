@@ -1,5 +1,15 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/Makefile.in (EXECUTABLES): Add delta.
+	* gdb.btrace/exception.exp: Update.
+	* gdb.btrace/instruction_history.exp: Update.
+	* gdb.btrace/record_goto.exp: Update.
+	* gdb.btrace/tailcall.exp: Update.
+	* gdb.btrace/unknown_functions.exp: Update.
+	* gdb.btrace/delta.exp: New.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/record_goto.exp: Add backtrace test.
 	* gdb.btrace/tailcall.exp: Add backtrace test.
 

@@ -30,6 +30,7 @@
 #include "source.h"
 #include "filenames.h"
 #include "xml-support.h"
+#include "regcache.h"
 
 /* Print a record debug message.  Use do ... while (0) to avoid ambiguities
    when used in if statements.  */
@@ -674,6 +675,32 @@ btrace_compute_ftrace (struct btrace_thread_info *btinfo,
   btinfo->level = -level;
 }
 
+/* Add an entry for the current PC.  */
+
+static void
+btrace_add_pc (struct thread_info *tp)
+{
+  VEC (btrace_block_s) *btrace;
+  struct btrace_block *block;
+  struct regcache *regcache;
+  struct cleanup *cleanup;
+  CORE_ADDR pc;
+
+  regcache = get_thread_regcache (tp->ptid);
+  pc = regcache_read_pc (regcache);
+
+  btrace = NULL;
+  cleanup = make_cleanup (VEC_cleanup (btrace_block_s), &btrace);
+
+  block = VEC_safe_push (btrace_block_s, btrace, NULL);
+  block->begin = pc;
+  block->end = pc;
+
+  btrace_compute_ftrace (&tp->btrace, btrace);
+
+  do_cleanups (cleanup);
+}
+
 /* See btrace.h.  */
 
 void
@@ -688,6 +715,11 @@ btrace_enable (struct thread_info *tp)
   DEBUG ("enable thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
 
   tp->btrace.target = target_enable_btrace (tp->ptid);
+
+  /* Add an entry for the current PC so we start tracing from where we
+     enabled it.  */
+  if (tp->btrace.target != NULL)
+    btrace_add_pc (tp);
 }
 
 /* See btrace.h.  */
@@ -1474,4 +1506,23 @@ int
 btrace_is_replaying (struct thread_info *tp)
 {
   return tp->btrace.replay != NULL;
+}
+
+/* See btrace.h.  */
+
+int
+btrace_is_empty (struct thread_info *tp)
+{
+  struct btrace_insn_iterator begin, end;
+  struct btrace_thread_info *btinfo;
+
+  btinfo = &tp->btrace;
+
+  if (btinfo->begin == NULL)
+    return 1;
+
+  btrace_insn_begin (&begin, btinfo);
+  btrace_insn_end (&end, btinfo);
+
+  return btrace_insn_cmp (&begin, &end) == 0;
 }
