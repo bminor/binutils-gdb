@@ -1,3 +1,8 @@
+2013-09-10  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (display_debug_frames): Check for DW64_CIE_ID when
+	parsing 64-bit frames.
+
 2013-08-27  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15796

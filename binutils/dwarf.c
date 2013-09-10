@@ -5188,7 +5188,8 @@ display_debug_frames (struct dwarf_section *section,
 
       SAFE_BYTE_GET_AND_INC (cie_id, start, offset_size, end);
 
-      if (is_eh ? (cie_id == 0) : (cie_id == DW_CIE_ID))
+      if (is_eh ? (cie_id == 0) : ((offset_size == 4 && cie_id == DW_CIE_ID)
+				   || (offset_size == 8 && cie_id == DW64_CIE_ID)))
 	{
 	  int version;
 
