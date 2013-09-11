@@ -17330,8 +17330,10 @@ nm -D @var{binary} --format=posix --defined-only \
   | awk '@{ print $1 @}' | sort > dynsyms
 
 # Extract all the text (i.e. function) symbols from the debuginfo.
+# (Note that we actually also accept "D" symbols, for the benefit
+# of platforms like PowerPC64 that use function descriptors.)
 nm @var{binary} --format=posix --defined-only \
-  | awk '@{ if ($2 == "T" || $2 == "t") print $1 @}' \
+  | awk '@{ if ($2 == "T" || $2 == "t" || $2 == "D") print $1 @}' \
   | sort > funcsyms
 
 # Keep all the function symbols not already in the dynamic symbol

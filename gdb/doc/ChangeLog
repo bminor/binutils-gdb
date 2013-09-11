@@ -1,5 +1,10 @@
 2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Sync documentation with gdb.base/gnu-debugdata.exp.
+	* gdb.texinfo (MiniDebugInfo): Add comment and "D" in the example.
+
+2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.texinfo (MiniDebugInfo): Fix two trailing dots.
 
 2013-08-27  Pedro Alves  <pedro@codesourcery.com>
