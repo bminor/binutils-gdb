@@ -1,3 +1,7 @@
+2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.texinfo (MiniDebugInfo): Fix two trailing dots.
+
 2013-08-27  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 

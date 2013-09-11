@@ -17325,11 +17325,11 @@ standard utilities:
 
 @smallexample
 # Extract the dynamic symbols from the main binary, there is no need
-# to also have these in the normal symbol table
+# to also have these in the normal symbol table.
 nm -D @var{binary} --format=posix --defined-only \
   | awk '@{ print $1 @}' | sort > dynsyms
 
-# Extract all the text (i.e. function) symbols from the debuginfo .
+# Extract all the text (i.e. function) symbols from the debuginfo.
 nm @var{binary} --format=posix --defined-only \
   | awk '@{ if ($2 == "T" || $2 == "t") print $1 @}' \
   | sort > funcsyms

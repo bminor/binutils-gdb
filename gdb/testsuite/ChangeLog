@@ -1,3 +1,8 @@
+2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/gnu-debugdata.exp (strip): Add -R .comment.
+	(addlink): Add comment.
+
 2013-09-10  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* gdb.base/default.exp: Adjust regexpr for 'cd' to match optional

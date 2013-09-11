@@ -99,7 +99,7 @@ if {[run_on_host "objcopy 1" [transform objcopy] "-S --remove-section .gdb_index
 # GDB specific - we do not have split executable in advance.
 remote_file host delete ${binfile}.strip
 if {[run_on_host "strip" [transform strip] \
-	 "--strip-all -o ${binfile}.strip ${binfile}"]} {
+	 "--strip-all -R .comment -o ${binfile}.strip ${binfile}"]} {
     return -1
 }
 
@@ -113,7 +113,8 @@ if {[run_on_host "copydebug" [transform objcopy] \
 # Add the .gnu_debuglink section to the .gnu_debugdata file.
 # .gnu_debuglink is normally not present in the .gnu_debugdata section but in
 # some files there may be PT_NOTE with NT_GNU_BUILD_ID and GDB could look up
-# the .debug file from it.
+# the .debug file from it.  This is only an additional test of GDB, such link
+# is not present in usual MiniDebugInfo sections.
 if {[run_on_host "addlink" [transform objcopy] \
 	 "--add-gnu-debuglink=${binfile}.debug ${binfile}.mini_debuginfo ${binfile}.mini_debuginfo-debuglink"]} {
     return -1
