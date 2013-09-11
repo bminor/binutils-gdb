@@ -17340,10 +17340,16 @@ nm @var{binary} --format=posix --defined-only \
 # table.
 comm -13 dynsyms funcsyms > keep_symbols
 
+# Separate full debug info into debug binary.
+objcopy --only-keep-debug @var{binary} debug
+
 # Copy the full debuginfo, keeping only a minimal set of symbols and
 # removing some unnecessary sections.
 objcopy -S --remove-section .gdb_index --remove-section .comment \
-  --keep-symbols=keep_symbols @var{binary} mini_debuginfo
+  --keep-symbols=keep_symbols debug mini_debuginfo
+
+# Drop the full debug info from the original binary.
+strip --strip-all -R .comment @var{binary}
 
 # Inject the compressed data into the .gnu_debugdata section of the
 # original binary.

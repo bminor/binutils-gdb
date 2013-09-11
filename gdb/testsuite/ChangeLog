@@ -1,5 +1,10 @@
 2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/gnu-debugdata.exp (objcopy 1): Move it lower and use only
+	debug part of the binary.
+
+2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/gnu-debugdata.exp (strip): Add -R .comment.
 	(addlink): Add comment.
 

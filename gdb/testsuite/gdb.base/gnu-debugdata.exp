@@ -89,13 +89,6 @@ if {[run_on_host "comm" "comm" "-13 ${binfile}.dynsyms ${binfile}.funcsyms" "" \
     return -1
 }
 
-# Copy the full debuginfo, keeping only a minimal set of symbols and
-# removing some unnecessary sections.
-remote_file host delete ${binfile}.mini_debuginfo
-if {[run_on_host "objcopy 1" [transform objcopy] "-S --remove-section .gdb_index --remove-section .comment --keep-symbols=${binfile}.keep_symbols ${binfile} ${binfile}.mini_debuginfo"]} {
-    return -1
-}
-
 # GDB specific - we do not have split executable in advance.
 remote_file host delete ${binfile}.strip
 if {[run_on_host "strip" [transform strip] \
@@ -107,6 +100,13 @@ if {[run_on_host "strip" [transform strip] \
 remote_file host delete ${binfile}.debug
 if {[run_on_host "copydebug" [transform objcopy] \
 	 "--only-keep-debug ${binfile} ${binfile}.debug"]} {
+    return -1
+}
+
+# Copy the full debuginfo, keeping only a minimal set of symbols and
+# removing some unnecessary sections.
+remote_file host delete ${binfile}.mini_debuginfo
+if {[run_on_host "objcopy 1" [transform objcopy] "-S --remove-section .gdb_index --remove-section .comment --keep-symbols=${binfile}.keep_symbols ${binfile}.debug ${binfile}.mini_debuginfo"]} {
     return -1
 }
 

@@ -1,5 +1,10 @@
 2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.texinfo (MiniDebugInfo): Prepare file debug and use it to create
+	mini_debuginfo.  Strip binary before adding mini_debuginfo to it.
+
+2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Sync documentation with gdb.base/gnu-debugdata.exp.
 	* gdb.texinfo (MiniDebugInfo): Add comment and "D" in the example.
 
