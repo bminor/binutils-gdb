@@ -1,3 +1,8 @@
+2013-09-12  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/x86-64/compressed-1a.d: Update expected output to
+	allow for 64-bit addresses.
+
 2013-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/nm.exp: --size-sort test: Add more ELF-like

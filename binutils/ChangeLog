@@ -1,3 +1,20 @@
+2013-09-12  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (dwarf_vmatoa): Rename to dwarf_vmatoa_1 and add a
+	precision parameter.
+	(dwarf_vmatoa): New wrapper for dwarf_vmatoa_1.
+	(print_dwarf_vma): Use dwarf_vmatoa_1.
+	(SAFE_BYTE_GET): Add check that VAL is big enough to contain
+	AMOUNT bytes.
+	(process_debug_info): Use an unsigned int for the offset size.
+	(process_debug_pubnames): Likewise.
+	(display_debug_aranges): Likewise.
+	(struct Frame_Chunk): Use dwarf_vma type for pc_begin and pc_range
+	fields.
+	(frame_display_row): Use print_dwarf_vma to display dwarf_vma
+	values.
+	(display_debug_frames): Likewise.
+
 2013-09-10  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (display_debug_frames): Check for DW64_CIE_ID when

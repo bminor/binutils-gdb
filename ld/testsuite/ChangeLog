@@ -1,3 +1,16 @@
+2013-09-12  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/eh1.d: Update expected output to allow for
+	64-bit addresses.
+	* ld-elf/eh2.d: Likewise.
+	* ld-elf/eh3.d: Likewise.
+	* ld-elf/eh4.d: Likewise.
+	* ld-elf/eh5.d: Likewise.
+	* ld-elf/eh6.d: Likewise.
+	* ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* ld-mips-elf/eh-frame2-n64.d: Likewise.
+	* ld-mips-elf/eh-frame3.d: Likewise.
+
 2013-09-04  Vidya Praveen  <vidyapraveen@arm.com>
 
 	* ld-arm/export-class.exp: Fix the condition.

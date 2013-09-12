@@ -1,3 +1,29 @@
+2013-09-12  Nick Clifton  <nickc@redhat.com>
+
+	* gas/cfi/cfi-alpha-1.d: Update expected output to allow for
+	64-bit addresses.
+	* gas/cfi/cfi-alpha-3.d: Likewise.
+	* gas/cfi/cfi-arm-1.d: Likewise.
+	* gas/cfi/cfi-common-1.d: Likewise.
+	* gas/cfi/cfi-common-2.d: Likewise.
+	* gas/cfi/cfi-common-3.d: Likewise.
+	* gas/cfi/cfi-common-4.d: Likewise.
+	* gas/cfi/cfi-common-5.d: Likewise.
+	* gas/cfi/cfi-common-6.d: Likewise.
+	* gas/cfi/cfi-common-7.d: Likewise.
+	* gas/cfi/cfi-hppa-1.d: Likewise.
+	* gas/cfi/cfi-i386-2.d: Likewise.
+	* gas/cfi/cfi-i386.d: Likewise.
+	* gas/cfi/cfi-m68k.d: Likewise.
+	* gas/cfi/cfi-mips-1.d: Likewise.
+	* gas/cfi/cfi-ppc-1.d: Likewise.
+	* gas/cfi/cfi-s390-1.d: Likewise.
+	* gas/cfi/cfi-s390x-1.d: Likewise.
+	* gas/cfi/cfi-sh-1.d: Likewise.
+	* gas/cfi/cfi-sparc-1.d: Likewise.
+	* gas/cfi/cfi-sparc64-1.d: Likewise.
+	* gas/cfi/cfi-x86_64.d: Likewise.
+
 2013-09-04  Tristan Gingold  <gingold@adacore.com>
 
 	* gas/ppc/aix.exp: Run xcoff-toc-1 test.
