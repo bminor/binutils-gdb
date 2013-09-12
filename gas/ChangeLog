@@ -1,3 +1,8 @@
+2013-09-12  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* config/tc-mips.c (match_insn): Set error when $31 is used for
+	bltzal* and bgezal*.
+
 2013-09-04  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-ppc.c (md_apply_fix): Handle defined after use toc

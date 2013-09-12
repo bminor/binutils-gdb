@@ -7091,6 +7091,10 @@ match_insn (struct mips_cl_insn *insn, const struct mips_opcode *opcode,
 		set_insn_error
 		  (0, _("a destination register must be supplied"));
 	    }
+	  else if (arg.last_regno == 31
+		   && (strncmp (insn->insn_mo->name, "bltzal", 6) == 0
+		       || strncmp (insn->insn_mo->name, "bgezal", 6) == 0))
+	    set_insn_error (0, _("the source register must not be $31"));
 	  check_completed_insn (&arg);
 	  return TRUE;
 	}
