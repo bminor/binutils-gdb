@@ -2439,6 +2439,39 @@ elf_arc_add_symbol_hook (bfd * abfd,
   return TRUE;
 }
 
+/* GDB expects general purpose registers to be in section .reg.  However Linux
+   kernel doesn't create this section and instead writes registers to NOTE
+   section.  It is up to the binutils to create a pseudo-section .reg from the
+   contents of NOTE.  Also BFD will read pid and signal number from NOTE.  This
+   function relies on offsets inside elf_prstatus structure in Linux to be
+   stable.  */
+
+static bfd_boolean
+elf32_arc_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
+{
+  int offset;
+  size_t size;
+
+  switch (note->descsz)
+    {
+    default:
+      return FALSE;
+
+    case 236: /* sizeof (struct elf_prstatus) on Linux/arc.  */
+      /* pr_cursig */
+      elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
+      /* pr_pid */
+      elf_tdata (abfd)->core->lwpid = bfd_get_32 (abfd, note->descdata + 24);
+      /* pr_regs */
+      offset = 72;
+      size = (40 * 4); /* There are 40 registers in user_regs_struct.  */
+      break;
+    }
+  /* Make a ".reg/999" section.  */
+  return _bfd_elfcore_make_pseudosection (abfd, ".reg", size,
+					  note->descpos + offset);
+}
+
 #define TARGET_LITTLE_SYM   arc_elf32_le_vec
 #define TARGET_LITTLE_NAME  "elf32-littlearc"
 #define TARGET_BIG_SYM	    arc_elf32_be_vec
@@ -2483,6 +2516,8 @@ elf_arc_add_symbol_hook (bfd * abfd,
 #define elf_backend_may_use_rel_p	0
 #define elf_backend_may_use_rela_p	1
 #define elf_backend_default_use_rela_p	1
+
+#define elf_backend_grok_prstatus elf32_arc_grok_prstatus
 
 #define elf_backend_default_execstack	0
 
