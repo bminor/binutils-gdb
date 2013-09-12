@@ -56,7 +56,6 @@ def new_objfile_handler (event):
     assert (isinstance (event, gdb.NewObjFileEvent))
     print ("event type: new_objfile")
     print ("new objfile name: %s" % (event.new_objfile.filename))
-    print ("inferior number: %d" % (event.inferior.num))
 
 class test_events (gdb.Command):
     """Test events."""

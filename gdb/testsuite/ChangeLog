@@ -1,3 +1,8 @@
+2013-09-12  Doug Evans  <dje@google.com>
+
+	* gdb.python/py-events.py (new_objfile_handler): Remove accidentally
+	added code to print event.inferior.
+
 2013-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/gnu-debugdata.exp (objcopy 1): Move it lower and use only
