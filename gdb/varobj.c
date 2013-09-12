@@ -1046,7 +1046,7 @@ varobj_add_child (struct varobj *var, char *name, struct value *value)
 char *
 varobj_get_type (struct varobj *var)
 {
-  /* For the "fake" variables, do not return a type.  (It's type is
+  /* For the "fake" variables, do not return a type.  (Its type is
      NULL, too.)
      Do not return a type for invalid variables as well.  */
   if (CPLUS_FAKE_CHILD (var) || !var->root->is_valid)
