@@ -1,3 +1,9 @@
+2013-09-12  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* gas/mips/bltzal.s: New file.
+	* gas/mips/bltzal.l: New file.
+	* gas/mips/mips.exp: Run the bltzal test.
+
 2013-09-12  Nick Clifton  <nickc@redhat.com>
 
 	* gas/cfi/cfi-alpha-1.d: Update expected output to allow for

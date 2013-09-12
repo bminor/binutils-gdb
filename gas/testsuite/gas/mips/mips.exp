@@ -1146,4 +1146,5 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "ulh-reloc"	[mips_arch_list_matching mips2]
 
     run_dump_test "l_d-reloc"
+    run_list_test "bltzal"
 }
