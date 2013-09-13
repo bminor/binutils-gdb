@@ -141,7 +141,7 @@ s390_write_pc (struct regcache *regcache, CORE_ADDR pc)
 
 /* DWARF Register Mapping.  */
 
-static int s390_dwarf_regmap[] =
+static const short s390_dwarf_regmap[] =
 {
   /* General Purpose Registers.  */
   S390_R0_REGNUM, S390_R1_REGNUM, S390_R2_REGNUM, S390_R3_REGNUM,
@@ -212,6 +212,14 @@ s390_adjust_frame_regnum (struct gdbarch *gdbarch, int num, int eh_frame_p)
 
 /* Pseudo registers.  */
 
+static int
+regnum_is_gpr_full (struct gdbarch_tdep *tdep, int regnum)
+{
+  return (tdep->gpr_full_regnum != -1
+	  && regnum >= tdep->gpr_full_regnum
+	  && regnum <= tdep->gpr_full_regnum + 15);
+}
+
 static const char *
 s390_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
@@ -223,9 +231,7 @@ s390_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   if (regnum == tdep->cc_regnum)
     return "cc";
 
-  if (tdep->gpr_full_regnum != -1
-      && regnum >= tdep->gpr_full_regnum
-      && regnum < tdep->gpr_full_regnum + 16)
+  if (regnum_is_gpr_full (tdep, regnum))
     {
       static const char *full_name[] = {
 	"r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
@@ -248,9 +254,7 @@ s390_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == tdep->cc_regnum)
     return builtin_type (gdbarch)->builtin_int;
 
-  if (tdep->gpr_full_regnum != -1
-      && regnum >= tdep->gpr_full_regnum
-      && regnum < tdep->gpr_full_regnum + 16)
+  if (regnum_is_gpr_full (tdep, regnum))
     return builtin_type (gdbarch)->builtin_uint64;
 
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
@@ -295,9 +299,7 @@ s390_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
       return status;
     }
 
-  if (tdep->gpr_full_regnum != -1
-      && regnum >= tdep->gpr_full_regnum
-      && regnum < tdep->gpr_full_regnum + 16)
+  if (regnum_is_gpr_full (tdep, regnum))
     {
       enum register_status status;
       ULONGEST val_upper;
@@ -352,9 +354,7 @@ s390_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
       return;
     }
 
-  if (tdep->gpr_full_regnum != -1
-      && regnum >= tdep->gpr_full_regnum
-      && regnum < tdep->gpr_full_regnum + 16)
+  if (regnum_is_gpr_full (tdep, regnum))
     {
       regnum -= tdep->gpr_full_regnum;
       val = extract_unsigned_integer (buf, regsize, byte_order);
@@ -409,175 +409,166 @@ s390_pseudo_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 }
 
 
-/* Core file register sets.  */
+/* Maps for register sets.  */
 
-int s390_regmap_gregset[S390_NUM_REGS] =
-{
-  /* Program Status Word.  */
-  0x00, 0x04,
-  /* General Purpose Registers.  */
-  0x08, 0x0c, 0x10, 0x14,
-  0x18, 0x1c, 0x20, 0x24,
-  0x28, 0x2c, 0x30, 0x34,
-  0x38, 0x3c, 0x40, 0x44,
-  /* Access Registers.  */
-  0x48, 0x4c, 0x50, 0x54,
-  0x58, 0x5c, 0x60, 0x64,
-  0x68, 0x6c, 0x70, 0x74,
-  0x78, 0x7c, 0x80, 0x84,
-  /* Floating Point Control Word.  */
-  -1,
-  /* Floating Point Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GPR Uppper Halves.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GNU/Linux-specific optional "registers".  */
-  0x88, -1, -1,
-};
+const short s390_regmap_gregset[] =
+  {
+    0x00, S390_PSWM_REGNUM,
+    0x04, S390_PSWA_REGNUM,
+    0x08, S390_R0_REGNUM,
+    0x0c, S390_R1_REGNUM,
+    0x10, S390_R2_REGNUM,
+    0x14, S390_R3_REGNUM,
+    0x18, S390_R4_REGNUM,
+    0x1c, S390_R5_REGNUM,
+    0x20, S390_R6_REGNUM,
+    0x24, S390_R7_REGNUM,
+    0x28, S390_R8_REGNUM,
+    0x2c, S390_R9_REGNUM,
+    0x30, S390_R10_REGNUM,
+    0x34, S390_R11_REGNUM,
+    0x38, S390_R12_REGNUM,
+    0x3c, S390_R13_REGNUM,
+    0x40, S390_R14_REGNUM,
+    0x44, S390_R15_REGNUM,
+    0x48, S390_A0_REGNUM,
+    0x4c, S390_A1_REGNUM,
+    0x50, S390_A2_REGNUM,
+    0x54, S390_A3_REGNUM,
+    0x58, S390_A4_REGNUM,
+    0x5c, S390_A5_REGNUM,
+    0x60, S390_A6_REGNUM,
+    0x64, S390_A7_REGNUM,
+    0x68, S390_A8_REGNUM,
+    0x6c, S390_A9_REGNUM,
+    0x70, S390_A10_REGNUM,
+    0x74, S390_A11_REGNUM,
+    0x78, S390_A12_REGNUM,
+    0x7c, S390_A13_REGNUM,
+    0x80, S390_A14_REGNUM,
+    0x84, S390_A15_REGNUM,
+    0x88, S390_ORIG_R2_REGNUM,
+    -1, -1
+  };
 
-int s390x_regmap_gregset[S390_NUM_REGS] =
-{
-  /* Program Status Word.  */
-  0x00, 0x08,
-  /* General Purpose Registers.  */
-  0x10, 0x18, 0x20, 0x28,
-  0x30, 0x38, 0x40, 0x48,
-  0x50, 0x58, 0x60, 0x68,
-  0x70, 0x78, 0x80, 0x88,
-  /* Access Registers.  */
-  0x90, 0x94, 0x98, 0x9c,
-  0xa0, 0xa4, 0xa8, 0xac,
-  0xb0, 0xb4, 0xb8, 0xbc,
-  0xc0, 0xc4, 0xc8, 0xcc,
-  /* Floating Point Control Word.  */
-  -1,
-  /* Floating Point Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GPR Uppper Halves.  */
-  0x10, 0x18, 0x20, 0x28,
-  0x30, 0x38, 0x40, 0x48,
-  0x50, 0x58, 0x60, 0x68,
-  0x70, 0x78, 0x80, 0x88,
-  /* GNU/Linux-specific optional "registers".  */
-  0xd0, -1, -1,
-};
+const short s390x_regmap_gregset[] =
+  {
+    0x00, S390_PSWM_REGNUM,
+    0x08, S390_PSWA_REGNUM,
+    0x10, S390_R0_REGNUM,
+    0x18, S390_R1_REGNUM,
+    0x20, S390_R2_REGNUM,
+    0x28, S390_R3_REGNUM,
+    0x30, S390_R4_REGNUM,
+    0x38, S390_R5_REGNUM,
+    0x40, S390_R6_REGNUM,
+    0x48, S390_R7_REGNUM,
+    0x50, S390_R8_REGNUM,
+    0x58, S390_R9_REGNUM,
+    0x60, S390_R10_REGNUM,
+    0x68, S390_R11_REGNUM,
+    0x70, S390_R12_REGNUM,
+    0x78, S390_R13_REGNUM,
+    0x80, S390_R14_REGNUM,
+    0x88, S390_R15_REGNUM,
+    0x90, S390_A0_REGNUM,
+    0x94, S390_A1_REGNUM,
+    0x98, S390_A2_REGNUM,
+    0x9c, S390_A3_REGNUM,
+    0xa0, S390_A4_REGNUM,
+    0xa4, S390_A5_REGNUM,
+    0xa8, S390_A6_REGNUM,
+    0xac, S390_A7_REGNUM,
+    0xb0, S390_A8_REGNUM,
+    0xb4, S390_A9_REGNUM,
+    0xb8, S390_A10_REGNUM,
+    0xbc, S390_A11_REGNUM,
+    0xc0, S390_A12_REGNUM,
+    0xc4, S390_A13_REGNUM,
+    0xc8, S390_A14_REGNUM,
+    0xcc, S390_A15_REGNUM,
+    0x10, S390_R0_UPPER_REGNUM,
+    0x18, S390_R1_UPPER_REGNUM,
+    0x20, S390_R2_UPPER_REGNUM,
+    0x28, S390_R3_UPPER_REGNUM,
+    0x30, S390_R4_UPPER_REGNUM,
+    0x38, S390_R5_UPPER_REGNUM,
+    0x40, S390_R6_UPPER_REGNUM,
+    0x48, S390_R7_UPPER_REGNUM,
+    0x50, S390_R8_UPPER_REGNUM,
+    0x58, S390_R9_UPPER_REGNUM,
+    0x60, S390_R10_UPPER_REGNUM,
+    0x68, S390_R11_UPPER_REGNUM,
+    0x70, S390_R12_UPPER_REGNUM,
+    0x78, S390_R13_UPPER_REGNUM,
+    0x80, S390_R14_UPPER_REGNUM,
+    0x88, S390_R15_UPPER_REGNUM,
+    0xd0, S390_ORIG_R2_REGNUM,
+    -1, -1
+  };
 
-int s390_regmap_fpregset[S390_NUM_REGS] =
-{
-  /* Program Status Word.  */
-  -1, -1,
-  /* General Purpose Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Access Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Floating Point Control Word.  */
-  0x00,
-  /* Floating Point Registers.  */
-  0x08, 0x10, 0x18, 0x20,
-  0x28, 0x30, 0x38, 0x40,
-  0x48, 0x50, 0x58, 0x60,
-  0x68, 0x70, 0x78, 0x80,
-  /* GPR Uppper Halves.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GNU/Linux-specific optional "registers".  */
-  -1, -1, -1,
-};
+const short s390_regmap_fpregset[] =
+  {
+    0x00, S390_FPC_REGNUM,
+    0x08, S390_F0_REGNUM,
+    0x10, S390_F1_REGNUM,
+    0x18, S390_F2_REGNUM,
+    0x20, S390_F3_REGNUM,
+    0x28, S390_F4_REGNUM,
+    0x30, S390_F5_REGNUM,
+    0x38, S390_F6_REGNUM,
+    0x40, S390_F7_REGNUM,
+    0x48, S390_F8_REGNUM,
+    0x50, S390_F9_REGNUM,
+    0x58, S390_F10_REGNUM,
+    0x60, S390_F11_REGNUM,
+    0x68, S390_F12_REGNUM,
+    0x70, S390_F13_REGNUM,
+    0x78, S390_F14_REGNUM,
+    0x80, S390_F15_REGNUM,
+    -1, -1
+  };
 
-int s390_regmap_upper[S390_NUM_REGS] =
-{
-  /* Program Status Word.  */
-  -1, -1,
-  /* General Purpose Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Access Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Floating Point Control Word.  */
-  -1,
-  /* Floating Point Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GPR Uppper Halves.  */
-  0x00, 0x04, 0x08, 0x0c,
-  0x10, 0x14, 0x18, 0x1c,
-  0x20, 0x24, 0x28, 0x2c,
-  0x30, 0x34, 0x38, 0x3c,
-  /* GNU/Linux-specific optional "registers".  */
-  -1, -1, -1,
-};
+const short s390_regmap_upper[] =
+  {
+    0x00, S390_R0_UPPER_REGNUM,
+    0x04, S390_R1_UPPER_REGNUM,
+    0x08, S390_R2_UPPER_REGNUM,
+    0x0c, S390_R3_UPPER_REGNUM,
+    0x10, S390_R4_UPPER_REGNUM,
+    0x14, S390_R5_UPPER_REGNUM,
+    0x18, S390_R6_UPPER_REGNUM,
+    0x1c, S390_R7_UPPER_REGNUM,
+    0x20, S390_R8_UPPER_REGNUM,
+    0x24, S390_R9_UPPER_REGNUM,
+    0x28, S390_R10_UPPER_REGNUM,
+    0x2c, S390_R11_UPPER_REGNUM,
+    0x30, S390_R12_UPPER_REGNUM,
+    0x34, S390_R13_UPPER_REGNUM,
+    0x38, S390_R14_UPPER_REGNUM,
+    0x3c, S390_R15_UPPER_REGNUM,
+    -1, -1
+  };
 
-int s390_regmap_last_break[S390_NUM_REGS] =
-{
-  /* Program Status Word.  */
-  -1, -1,
-  /* General Purpose Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Access Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Floating Point Control Word.  */
-  -1,
-  /* Floating Point Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GPR Uppper Halves.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GNU/Linux-specific optional "registers".  */
-  -1, 4, -1,
-};
+const short s390_regmap_last_break[] =
+  {
+    0x04, S390_LAST_BREAK_REGNUM,
+    -1, -1
+  };
 
-int s390x_regmap_last_break[S390_NUM_REGS] =
-{
-  /* Program Status Word.  */
-  -1, -1,
-  /* General Purpose Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Access Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Floating Point Control Word.  */
-  -1,
-  /* Floating Point Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GPR Uppper Halves.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GNU/Linux-specific optional "registers".  */
-  -1, 0, -1,
-};
+const short s390x_regmap_last_break[] =
+  {
+    0x00, S390_LAST_BREAK_REGNUM,
+    -1, -1
+  };
 
-int s390_regmap_system_call[S390_NUM_REGS] =
-{
-  /* Program Status Word.  */
-  -1, -1,
-  /* General Purpose Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Access Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* Floating Point Control Word.  */
-  -1,
-  /* Floating Point Registers.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GPR Uppper Halves.  */
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1, -1, -1, -1, -1,
-  /* GNU/Linux-specific optional "registers".  */
-  -1, -1, 0,
-};
+const short s390_regmap_system_call[] =
+  {
+    0x00, S390_SYSTEM_CALL_REGNUM,
+    -1, -1
+  };
+
+
 
 /* Supply register REGNUM from the register set REGSET to register cache 
    REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
@@ -585,14 +576,10 @@ static void
 s390_supply_regset (const struct regset *regset, struct regcache *regcache,
 		    int regnum, const void *regs, size_t len)
 {
-  const int *offset = regset->descr;
-  int i;
-
-  for (i = 0; i < S390_NUM_REGS; i++)
-    {
-      if ((regnum == i || regnum == -1) && offset[i] != -1)
-	regcache_raw_supply (regcache, i, (const char *)regs + offset[i]);
-    }
+  const short *map;
+  for (map = regset->descr; map[0] >= 0; map += 2)
+    if (regnum == -1 || regnum == map[1])
+      regcache_raw_supply (regcache, map[1], (const char *)regs + map[0]);
 }
 
 /* Collect register REGNUM from the register cache REGCACHE and store
@@ -604,14 +591,10 @@ s390_collect_regset (const struct regset *regset,
 		     const struct regcache *regcache,
 		     int regnum, void *regs, size_t len)
 {
-  const int *offset = regset->descr;
-  int i;
-
-  for (i = 0; i < S390_NUM_REGS; i++)
-    {
-      if ((regnum == i || regnum == -1) && offset[i] != -1)
-	regcache_raw_collect (regcache, i, (char *)regs + offset[i]);
-    }
+  const short *map;
+  for (map = regset->descr; map[0] >= 0; map += 2)
+    if (regnum == -1 || regnum == map[1])
+      regcache_raw_collect (regcache, map[1], (char *)regs + map[0]);
 }
 
 static const struct regset s390_gregset = {
@@ -1719,9 +1702,7 @@ s390_unwind_pseudo_register (struct frame_info *this_frame, int regnum)
 
   /* Unwind full GPRs to show at least the lower halves (as the
      upper halves are undefined).  */
-  if (tdep->gpr_full_regnum != -1
-      && regnum >= tdep->gpr_full_regnum
-      && regnum < tdep->gpr_full_regnum + 16)
+  if (regnum_is_gpr_full (tdep, regnum))
     {
       int reg = regnum - tdep->gpr_full_regnum;
       struct value *val;

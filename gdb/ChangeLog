@@ -1,3 +1,33 @@
+2013-09-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-tdep.h (S390_IS_GREGSET_REGNUM): New macro.
+	(S390_IS_FPREGSET_REGNUM): New macro.
+	* s390-tdep.c (s390_dwarf_regmap): Make const.
+	(regnum_is_gpr_full): New function for replacing repeated code.
+	(s390_pseudo_register_name): Use it.
+	(s390_pseudo_register_type): Likewise.
+	(s390_pseudo_register_read): Likewise.
+	(s390_pseudo_register_write): Likewise.
+	(s390_unwind_pseudo_register): Likewise.
+	(s390_regmap_gregset): New format for regmap.
+	(s390x_regmap_gregset): Likewise.
+	(s390_regmap_fpregset): Likewise.
+	(s390_regmap_upper): Likewise.
+	(s390_regmap_last_break): Likewise.
+	(s390_regmap_system_call): Likewise.
+	(s390_supply_regset): Adjust to new regmap format.
+	(s390_collect_regset): Likewise.
+	* s390-nat.c (s390_native_supply): Adjust to new regmap format.
+	(s390_native_collect): Likewise.
+	(supply_gregset): Likewise.
+	(fill_gregset): Likewise.
+	(supply_fpregset): Likewise.
+	(fill_fpregset): Likewise.
+	(fetch_regset): Likewise.
+	(store_regset): Likewise.
+	(s390_linux_fetch_inferior_registers): Likewise.
+	(s390_linux_fetch_inferior_registers): Likewise.
+
 2013-09-12  Andrew Pinski  <apinski@cavium.com>
 
 	* aarch64-linux-nat.c (aarch64_linux_set_debug_regs): Zero out regs.

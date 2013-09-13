@@ -106,16 +106,24 @@
 #define S390_RETADDR_REGNUM S390_R14_REGNUM
 #define S390_FRAME_REGNUM S390_R11_REGNUM
 
+#define S390_IS_GREGSET_REGNUM(i)					\
+  (((i) >= S390_PSWM_REGNUM && (i) <= S390_A15_REGNUM)			\
+   || ((i) >= S390_R0_UPPER_REGNUM && (i) <= S390_R15_UPPER_REGNUM)	\
+   || (i) == S390_ORIG_R2_REGNUM)
+
+#define S390_IS_FPREGSET_REGNUM(i)			\
+  ((i) >= S390_FPC_REGNUM && (i) <= S390_F15_REGNUM)
+
 /* Core file register sets, defined in s390-tdep.c.  */
 #define s390_sizeof_gregset 0x90
-extern int s390_regmap_gregset[S390_NUM_REGS];
+extern const short s390_regmap_gregset[];
 #define s390x_sizeof_gregset 0xd8
-extern int s390x_regmap_gregset[S390_NUM_REGS];
+extern const short s390x_regmap_gregset[];
 #define s390_sizeof_fpregset 0x88
-extern int s390_regmap_fpregset[S390_NUM_REGS];
-extern int s390_regmap_last_break[S390_NUM_REGS];
-extern int s390x_regmap_last_break[S390_NUM_REGS];
-extern int s390_regmap_system_call[S390_NUM_REGS];
+extern const short s390_regmap_fpregset[];
+extern const short s390_regmap_last_break[];
+extern const short s390x_regmap_last_break[];
+extern const short s390_regmap_system_call[];
 
 /* GNU/Linux target descriptions.  */
 extern struct target_desc *tdesc_s390_linux32;
