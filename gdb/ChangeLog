@@ -1,3 +1,9 @@
+2013-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Code cleanup.
+	* symfile.c (reread_symbols): Move variable obfd_filename to a more
+	inner block.
+
 2013-09-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* NEWS: Mention TDB support.

@@ -2372,7 +2372,6 @@ reread_symbols (void)
 	  struct cleanup *old_cleanups;
 	  struct section_offsets *offsets;
 	  int num_offsets;
-	  char *obfd_filename;
 
 	  printf_unfiltered (_("`%s' has changed; re-reading symbols.\n"),
 			     objfile->name);
@@ -2426,6 +2425,7 @@ reread_symbols (void)
 	  /* Clean up any state BFD has sitting around.  */
 	  {
 	    struct bfd *obfd = objfile->obfd;
+	    char *obfd_filename;
 
 	    obfd_filename = bfd_get_filename (objfile->obfd);
 	    /* Open the new BFD before freeing the old one, so that
