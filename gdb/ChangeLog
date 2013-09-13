@@ -1,5 +1,84 @@
 2013-09-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* NEWS: Mention TDB support.
+	* features/s390-tdb.xml: New file.
+	* features/s390-te-linux64.xml: New file.
+	* features/s390x-te-linux64.xml: New file.
+	* features/Makefile (WHICH): Add new tdescs above.
+	(s390-te-linux64-expedite): Set.
+	(s390x-te-linux64-expedite): Set.
+	* features/s390-te-linux64.c: New file (generated).
+	* features/s390x-te-linux64.c: New file (generated).
+	* regformats/s390-te-linux64.dat: New file (generated).
+	* regformats/s390x-te-linux64.dat: New file (generated).
+	* s390-tdep.h (HWCAP_S390_HIGH_GPRS): Define.
+	(HWCAP_S390_TE): Likewise.
+	(S390_TDB_DWORD0_REGNUM): Likewise.
+	(S390_TDB_DWORD0_REGNUM): Likewise.
+	(S390_TDB_ABORT_CODE_REGNUM): Likewise.
+	(S390_TDB_CONFLICT_TOKEN_REGNUM): Likewise.
+	(S390_TDB_ATIA_REGNUM): Likewise.
+	(S390_TDB_R0_REGNUM): Likewise.
+	(S390_TDB_R1_REGNUM): Likewise.
+	(S390_TDB_R2_REGNUM): Likewise.
+	(S390_TDB_R3_REGNUM): Likewise.
+	(S390_TDB_R4_REGNUM): Likewise.
+	(S390_TDB_R5_REGNUM): Likewise.
+	(S390_TDB_R6_REGNUM): Likewise.
+	(S390_TDB_R7_REGNUM): Likewise.
+	(S390_TDB_R8_REGNUM): Likewise.
+	(S390_TDB_R9_REGNUM): Likewise.
+	(S390_TDB_R10_REGNUM): Likewise.
+	(S390_TDB_R11_REGNUM): Likewise.
+	(S390_TDB_R12_REGNUM): Likewise.
+	(S390_TDB_R13_REGNUM): Likewise.
+	(S390_TDB_R14_REGNUM): Likewise.
+	(S390_TDB_R15_REGNUM): Likewise.
+	(S390_NUM_REGS): Increase.
+	(S390_IS_TDBREGSET_REGNUM): New macro.
+	(s390_regmap_tdb): Declare.
+	(s390_sizeof_tdbregset): Define.
+	(tdesc_s390_te_linux64): Declare.
+	(tdesc_s390x_te_linux64): Likewise.
+	* s390-tdep.c: Add includes for "auxv.h", <elf.h>,
+	"features/s390-te-linux64.c", and "features/s390x-te-linux64.c".
+	(s390_regmap_tdb): New regmap.
+	(s390_supply_tdb_regset): New function.
+	(s390_tdb_regset): New regset.
+	(s390_linux64v2_regset_sections): Add TDB regset to list.
+	(s390x_linux64v2_regset_sections): Likewise.
+	(s390_regset_from_core_section): Recognize TDB core note section.
+	(s390_core_read_description): If HWCAP indicates TE support,
+	select tdesc_s390_te_linux64 or tdesc_s390_s390x_te_linux64.
+	(s390_gdbarch_init): Handle TDB regset.
+	(_initialize_s390_tdep): Initialize new tdescs.
+	* s390-nat.c (HWCAP_S390_HIGH_GPRS): Remove define.
+	(have_regset_tdb): New variable.
+	(s390_native_supply): Support register invalidation.
+	(fetch_regset): Invalidate registers if ptrace yields ENODATA.
+	(check_regset): Treat ENODATA as "regset exists".
+	(s390_linux_fetch_inferior_registers): Add TDB.
+	(s390_read_description): Check for TDB existence and select
+	appropriate tdesc.
+	* gdbserver/Makefile.in (clean): Add removal of new makefile
+	targets.
+	(s390-te-linux64.c): New makefile target.
+	(s390x-te-linux64.c): Likewise.
+	* gdbserver/configure.srv (srv_regobj): Append new objects
+	s390-te-linux64.o and s390x-te-linux64.o.
+	(srv_xmlfiles): Append new files s390-te-linux64.xml,
+	s390x-te-linux64.xml, and s390-tdb.xml.
+	* gdbserver/linux-s390-low.c (init_registers_s390_te_linux64): New
+	declaration.
+	(tdesc_s390_te_linux64): Likewise.
+	(init_registers_s390x_te_linux64): Likewise.
+	(tdesc_s390x_te_linux64): Likewise.
+	(s390_check_regset): Treat ENODATA as "regset exists".
+	(s390_arch_setup): Add TDB regset support.
+	(initialize_low_arch): Initialize registers for new tdescs.
+
+2013-09-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-tdep.h (S390_IS_GREGSET_REGNUM): New macro.
 	(S390_IS_FPREGSET_REGNUM): New macro.
 	* s390-tdep.c (s390_dwarf_regmap): Make const.

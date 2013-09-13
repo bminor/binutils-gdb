@@ -44,6 +44,7 @@
 #include "prologue-value.h"
 #include "linux-tdep.h"
 #include "s390-tdep.h"
+#include "auxv.h"
 
 #include "stap-probe.h"
 #include "ax.h"
@@ -51,6 +52,7 @@
 #include "user-regs.h"
 #include "cli/cli-utils.h"
 #include <ctype.h>
+#include <elf.h>
 
 #include "features/s390-linux32.c"
 #include "features/s390-linux32v1.c"
@@ -58,9 +60,11 @@
 #include "features/s390-linux64.c"
 #include "features/s390-linux64v1.c"
 #include "features/s390-linux64v2.c"
+#include "features/s390-te-linux64.c"
 #include "features/s390x-linux64.c"
 #include "features/s390x-linux64v1.c"
 #include "features/s390x-linux64v2.c"
+#include "features/s390x-te-linux64.c"
 
 /* The tdep structure.  */
 
@@ -568,6 +572,30 @@ const short s390_regmap_system_call[] =
     -1, -1
   };
 
+const short s390_regmap_tdb[] =
+  {
+    0x00, S390_TDB_DWORD0_REGNUM,
+    0x08, S390_TDB_ABORT_CODE_REGNUM,
+    0x10, S390_TDB_CONFLICT_TOKEN_REGNUM,
+    0x18, S390_TDB_ATIA_REGNUM,
+    0x80, S390_TDB_R0_REGNUM,
+    0x88, S390_TDB_R1_REGNUM,
+    0x90, S390_TDB_R2_REGNUM,
+    0x98, S390_TDB_R3_REGNUM,
+    0xa0, S390_TDB_R4_REGNUM,
+    0xa8, S390_TDB_R5_REGNUM,
+    0xb0, S390_TDB_R6_REGNUM,
+    0xb8, S390_TDB_R7_REGNUM,
+    0xc0, S390_TDB_R8_REGNUM,
+    0xc8, S390_TDB_R9_REGNUM,
+    0xd0, S390_TDB_R10_REGNUM,
+    0xd8, S390_TDB_R11_REGNUM,
+    0xe0, S390_TDB_R12_REGNUM,
+    0xe8, S390_TDB_R13_REGNUM,
+    0xf0, S390_TDB_R14_REGNUM,
+    0xf8, S390_TDB_R15_REGNUM,
+    -1, -1
+  };
 
 
 /* Supply register REGNUM from the register set REGSET to register cache 
@@ -579,7 +607,25 @@ s390_supply_regset (const struct regset *regset, struct regcache *regcache,
   const short *map;
   for (map = regset->descr; map[0] >= 0; map += 2)
     if (regnum == -1 || regnum == map[1])
-      regcache_raw_supply (regcache, map[1], (const char *)regs + map[0]);
+      regcache_raw_supply (regcache, map[1],
+			   regs ? (const char *)regs + map[0] : NULL);
+}
+
+/* Supply the TDB regset.  Like s390_supply_regset, but invalidate the
+   TDB registers unless the TDB format field is valid.  */
+
+static void
+s390_supply_tdb_regset (const struct regset *regset, struct regcache *regcache,
+		    int regnum, const void *regs, size_t len)
+{
+  ULONGEST tdw;
+  enum register_status ret;
+  int i;
+
+  s390_supply_regset (regset, regcache, regnum, regs, len);
+  ret = regcache_cooked_read_unsigned (regcache, S390_TDB_DWORD0_REGNUM, &tdw);
+  if (ret != REG_VALID || (tdw >> 56) != 1)
+    s390_supply_regset (regset, regcache, regnum, NULL, len);
 }
 
 /* Collect register REGNUM from the register cache REGCACHE and store
@@ -639,6 +685,12 @@ static const struct regset s390_system_call_regset = {
   s390_collect_regset
 };
 
+static const struct regset s390_tdb_regset = {
+  s390_regmap_tdb,
+  s390_supply_tdb_regset,
+  s390_collect_regset
+};
+
 static struct core_regset_section s390_linux32_regset_sections[] =
 {
   { ".reg", s390_sizeof_gregset, "general-purpose" },
@@ -687,6 +739,7 @@ static struct core_regset_section s390_linux64v2_regset_sections[] =
   { ".reg-s390-high-gprs", 16*4, "s390 GPR upper halves" },
   { ".reg-s390-last-break", 8, "s930 last-break address" },
   { ".reg-s390-system-call", 4, "s390 system-call" },
+  { ".reg-s390-tdb", s390_sizeof_tdbregset, "s390 TDB" },
   { NULL, 0}
 };
 
@@ -711,6 +764,7 @@ static struct core_regset_section s390x_linux64v2_regset_sections[] =
   { ".reg2", s390_sizeof_fpregset, "floating-point" },
   { ".reg-s390-last-break", 8, "s930 last-break address" },
   { ".reg-s390-system-call", 4, "s390 system-call" },
+  { ".reg-s390-tdb", s390_sizeof_tdbregset, "s390 TDB" },
   { NULL, 0}
 };
 
@@ -739,6 +793,9 @@ s390_regset_from_core_section (struct gdbarch *gdbarch,
   if (strcmp (sect_name, ".reg-s390-system-call") == 0 && sect_size >= 4)
     return &s390_system_call_regset;
 
+  if (strcmp (sect_name, ".reg-s390-tdb") == 0 && sect_size >= 256)
+    return &s390_tdb_regset;
+
   return NULL;
 }
 
@@ -750,6 +807,9 @@ s390_core_read_description (struct gdbarch *gdbarch,
   asection *v1 = bfd_get_section_by_name (abfd, ".reg-s390-last-break");
   asection *v2 = bfd_get_section_by_name (abfd, ".reg-s390-system-call");
   asection *section = bfd_get_section_by_name (abfd, ".reg");
+  unsigned long hwcap = 0;
+
+  target_auxv_search (target, AT_HWCAP, &hwcap);
   if (!section)
     return NULL;
 
@@ -757,14 +817,16 @@ s390_core_read_description (struct gdbarch *gdbarch,
     {
     case s390_sizeof_gregset:
       if (high_gprs)
-	return (v2? tdesc_s390_linux64v2 :
+	return ((hwcap & HWCAP_S390_TE) ? tdesc_s390_te_linux64 :
+		v2? tdesc_s390_linux64v2 :
 		v1? tdesc_s390_linux64v1 : tdesc_s390_linux64);
       else
 	return (v2? tdesc_s390_linux32v2 :
 		v1? tdesc_s390_linux32v1 : tdesc_s390_linux32);
 
     case s390x_sizeof_gregset:
-      return (v2? tdesc_s390x_linux64v2 :
+      return ((hwcap & HWCAP_S390_TE) ? tdesc_s390x_te_linux64 :
+	      v2? tdesc_s390x_linux64v2 :
 	      v1? tdesc_s390x_linux64v1 : tdesc_s390x_linux64);
 
     default:
@@ -3012,6 +3074,11 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	"r0h", "r1h", "r2h", "r3h", "r4h", "r5h", "r6h", "r7h",
 	"r8h", "r9h", "r10h", "r11h", "r12h", "r13h", "r14h", "r15h"
       };
+      static const char *const tdb_regs[] = {
+	"tdb0", "tac", "tct", "atia",
+	"tr0", "tr1", "tr2", "tr3", "tr4", "tr5", "tr6", "tr7",
+	"tr8", "tr9", "tr10", "tr11", "tr12", "tr13", "tr14", "tr15"
+      };
       const struct tdesc_feature *feature;
       int i, valid_p = 1;
 
@@ -3087,6 +3154,16 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
 	  if (have_linux_v2 > have_linux_v1)
 	    valid_p = 0;
+	}
+
+      /* Transaction diagnostic block.  */
+      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.s390.tdb");
+      if (feature)
+	{
+	  for (i = 0; i < ARRAY_SIZE (tdb_regs); i++)
+	    valid_p &= tdesc_numbered_register (feature, tdesc_data,
+						S390_TDB_DWORD0_REGNUM + i,
+						tdb_regs[i]);
 	}
 
       if (!valid_p)
@@ -3305,7 +3382,9 @@ _initialize_s390_tdep (void)
   initialize_tdesc_s390_linux64 ();
   initialize_tdesc_s390_linux64v1 ();
   initialize_tdesc_s390_linux64v2 ();
+  initialize_tdesc_s390_te_linux64 ();
   initialize_tdesc_s390x_linux64 ();
   initialize_tdesc_s390x_linux64v1 ();
   initialize_tdesc_s390x_linux64v2 ();
+  initialize_tdesc_s390x_te_linux64 ();
 }

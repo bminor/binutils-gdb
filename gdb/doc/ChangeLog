@@ -1,3 +1,9 @@
+2013-09-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.texinfo (Decimal Floating Point format): Mention S/390.
+	(Standard Target Features): Add new node to menu.
+	(S/390 and System z Features): New node.
+
 2013-09-13  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Use

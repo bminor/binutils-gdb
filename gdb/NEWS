@@ -111,6 +111,10 @@ show range-stepping
 * GDB now understands the element 'tvar' in the XML traceframe info.
   It has the id of the collected trace state variables.
 
+* On S/390 targets that provide the transactional-execution feature,
+  the program interruption transaction diagnostic block (TDB) is now
+  represented as a number of additional "registers" in GDB.
+
 * New remote packets
 
 vCont;r

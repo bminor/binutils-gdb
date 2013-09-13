@@ -1,3 +1,8 @@
+2013-09-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-tdbregs.c: New file.
+	* gdb.arch/s390-tdbregs.exp: New file.
+
 2013-09-12  Stan Shebs  <stan@codesourcery.com>
 
 	* README: New file.

@@ -64,6 +64,10 @@ extern const struct target_desc *tdesc_s390_linux64v1;
 void init_registers_s390_linux64v2 (void);
 extern const struct target_desc *tdesc_s390_linux64v2;
 
+/* Defined in auto-generated file s390-te-linux64.c.  */
+void init_registers_s390_te_linux64 (void);
+extern const struct target_desc *tdesc_s390_te_linux64;
+
 /* Defined in auto-generated file s390x-linux64.c.  */
 void init_registers_s390x_linux64 (void);
 extern const struct target_desc *tdesc_s390x_linux64;
@@ -75,6 +79,10 @@ extern const struct target_desc *tdesc_s390x_linux64v1;
 /* Defined in auto-generated file s390x-linux64v2.c.  */
 void init_registers_s390x_linux64v2 (void);
 extern const struct target_desc *tdesc_s390x_linux64v2;
+
+/* Defined in auto-generated file s390x-te-linux64.c.  */
+void init_registers_s390x_te_linux64 (void);
+extern const struct target_desc *tdesc_s390x_te_linux64;
 
 #define s390_num_regs 52
 
@@ -391,10 +399,10 @@ s390_check_regset (int pid, int regset, int regsize)
   iov.iov_base = buf;
   iov.iov_len = regsize;
 
-  if (ptrace (PTRACE_GETREGSET, pid, (long) regset, (long) &iov) < 0)
-    return 0;
-  else
+  if (ptrace (PTRACE_GETREGSET, pid, (long) regset, (long) &iov) >= 0
+      || errno == ENODATA)
     return 1;
+  return 0;
 }
 
 #ifdef __s390x__
@@ -415,6 +423,7 @@ s390_arch_setup (void)
     = s390_check_regset (pid, NT_S390_LAST_BREAK, 8);
   int have_regset_system_call
     = s390_check_regset (pid, NT_S390_SYSTEM_CALL, 4);
+  int have_regset_tdb = s390_check_regset (pid, NT_S390_TDB, 256);
 
   /* Update target_regsets according to available register sets.  */
   for (regset = s390_regsets; regset->fill_function != NULL; regset++)
@@ -427,6 +436,8 @@ s390_arch_setup (void)
 	case NT_S390_SYSTEM_CALL:
 	  regset->size = have_regset_system_call? 4 : 0;
 	  break;
+	case NT_S390_TDB:
+	  regset->size = have_regset_tdb ? 256 : 0;
 	default:
 	  break;
 	}
@@ -451,6 +462,8 @@ s390_arch_setup (void)
 
     if (pswm & 1)
       {
+	if (have_regset_tdb)
+	  tdesc = tdesc_s390x_te_linux64;
 	if (have_regset_system_call)
 	  tdesc = tdesc_s390x_linux64v2;
 	else if (have_regset_last_break)
@@ -465,7 +478,9 @@ s390_arch_setup (void)
       {
 	have_hwcap_s390_high_gprs = 1;
 
-	if (have_regset_system_call)
+	if (have_regset_tdb)
+	  tdesc = tdesc_s390_te_linux64;
+	else if (have_regset_system_call)
 	  tdesc = tdesc_s390_linux64v2;
 	else if (have_regset_last_break)
 	  tdesc = tdesc_s390_linux64v1;
@@ -575,9 +590,11 @@ initialize_low_arch (void)
   init_registers_s390_linux64 ();
   init_registers_s390_linux64v1 ();
   init_registers_s390_linux64v2 ();
+  init_registers_s390_te_linux64 ();
   init_registers_s390x_linux64 ();
   init_registers_s390x_linux64v1 ();
   init_registers_s390x_linux64v2 ();
+  init_registers_s390x_te_linux64 ();
 
   initialize_regsets_info (&s390_regsets_info);
 #ifdef __s390x__

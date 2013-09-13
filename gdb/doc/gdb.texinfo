@@ -13849,8 +13849,8 @@ specified by the extension to support decimal floating-point arithmetic.
 
 There are two encodings in use, depending on the architecture: BID (Binary
 Integer Decimal) for x86 and x86-64, and DPD (Densely Packed Decimal) for
-PowerPC.  @value{GDBN} will use the appropriate encoding for the configured
-target.
+PowerPC and S/390.  @value{GDBN} will use the appropriate encoding for the
+configured target.
 
 Because of a limitation in @file{libdecnumber}, the library used by @value{GDBN}
 to manipulate decimal floating point numbers, it is not possible to convert
@@ -42470,6 +42470,7 @@ registers using the capitalization used in the description.
 * M68K Features::
 * Nios II Features::
 * PowerPC Features::
+* S/390 and System z Features::
 * TIC6x Features::
 @end menu
 
@@ -42658,6 +42659,39 @@ contain registers @samp{ev0h} through @samp{ev31h}, @samp{acc}, and
 @samp{ev0h} through @samp{ev31h}.  @value{GDBN} will combine
 these to present registers @samp{ev0} through @samp{ev31} to the
 user.
+
+@node S/390 and System z Features
+@subsection S/390 and System z Features
+@cindex target descriptions, S/390 features
+@cindex target descriptions, System z features
+
+The @samp{org.gnu.gdb.s390.core} feature is required for S/390 and
+System z targets.  It should contain the PSW and the 16 general
+registers.  In particular, System z targets should provide the 64-bit
+registers @samp{pswm}, @samp{pswa}, and @samp{r0} through @samp{r15}.
+S/390 targets should provide the 32-bit versions of these registers.
+A System z target that runs in 31-bit addressing mode should provide
+32-bit versions of @samp{pswm} and @samp{pswa}, as well as the general
+register's upper halves @samp{r0h} through @samp{r15h}, and their
+lower halves @samp{r0l} through @samp{r15l}.
+
+The @samp{org.gnu.gdb.s390.fpr} feature is required.  It should
+contain the 64-bit registers @samp{f0} through @samp{f15}, and
+@samp{fpc}.
+
+The @samp{org.gnu.gdb.s390.acr} feature is required.  It should
+contain the 32-bit registers @samp{acr0} through @samp{acr15}.
+
+The @samp{org.gnu.gdb.s390.linux} feature is optional.  It should
+contain the register @samp{orig_r2}, which is 64-bit wide on System z
+targets and 32-bit otherwise.  In addition, the feature may contain
+the @samp{last_break} register, whose width depends on the addressing
+mode, as well as the @samp{system_call} register, which is always
+32-bit wide.
+
+The @samp{org.gnu.gdb.s390.tdb} feature is optional.  It should
+contain the 64-bit registers @samp{tdb0}, @samp{tac}, @samp{tct},
+@samp{atia}, and @samp{tr0} through @samp{tr15}.
 
 @node TIC6x Features
 @subsection TMS320C6x Features

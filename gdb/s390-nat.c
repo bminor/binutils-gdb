@@ -37,10 +37,6 @@
 #include <sys/ucontext.h>
 #include <elf.h>
 
-#ifndef HWCAP_S390_HIGH_GPRS
-#define HWCAP_S390_HIGH_GPRS 512
-#endif
-
 #ifndef PTRACE_GETREGSET
 #define PTRACE_GETREGSET 0x4204
 #endif
@@ -51,6 +47,7 @@
 
 static int have_regset_last_break = 0;
 static int have_regset_system_call = 0;
+static int have_regset_tdb = 0;
 
 /* Map registers to gregset/ptrace offsets.
    These arrays are defined in s390-tdep.c.  */
@@ -72,7 +69,7 @@ s390_native_supply (struct regcache *regcache, const short *map,
 		    const gdb_byte *regp)
 {
   for (; map[0] >= 0; map += 2)
-    regcache_raw_supply (regcache, map[1], regp + map[0]);
+    regcache_raw_supply (regcache, map[1], regp ? regp + map[0] : NULL);
 }
 
 /* Collect the register REGNO out of the regset described by MAP from
@@ -315,9 +312,14 @@ fetch_regset (struct regcache *regcache, int tid,
   iov.iov_len = regsize;
 
   if (ptrace (PTRACE_GETREGSET, tid, (long) regset, (long) &iov) < 0)
-    perror_with_name (_("Couldn't get register set"));
-
-  s390_native_supply (regcache, regmap, buf);
+    {
+      if (errno == ENODATA)
+	s390_native_supply (regcache, regmap, NULL);
+      else
+	perror_with_name (_("Couldn't get register set"));
+    }
+  else
+    s390_native_supply (regcache, regmap, buf);
 }
 
 /* Store all registers in the kernel's register set whose number is REGSET,
@@ -353,10 +355,10 @@ check_regset (int tid, int regset, int regsize)
   iov.iov_base = buf;
   iov.iov_len = regsize;
 
-  if (ptrace (PTRACE_GETREGSET, tid, (long) regset, (long) &iov) < 0)
-    return 0;
-  else
+  if (ptrace (PTRACE_GETREGSET, tid, (long) regset, (long) &iov) >= 0
+      || errno == ENODATA)
     return 1;
+  return 0;
 }
 
 /* Fetch register REGNUM from the child process.  If REGNUM is -1, do
@@ -383,6 +385,11 @@ s390_linux_fetch_inferior_registers (struct target_ops *ops,
     if (regnum == -1 || regnum == S390_SYSTEM_CALL_REGNUM)
       fetch_regset (regcache, tid, NT_S390_SYSTEM_CALL, 4,
 		    s390_regmap_system_call);
+
+  if (have_regset_tdb)
+    if (regnum == -1 || S390_IS_TDBREGSET_REGNUM (regnum))
+      fetch_regset (regcache, tid, NT_S390_TDB, s390_sizeof_tdbregset,
+		    s390_regmap_tdb);
 }
 
 /* Store register REGNUM back into the child process.  If REGNUM is
@@ -625,6 +632,8 @@ s390_read_description (struct target_ops *ops)
     = check_regset (tid, NT_S390_LAST_BREAK, 8);
   have_regset_system_call
     = check_regset (tid, NT_S390_SYSTEM_CALL, 4);
+  have_regset_tdb
+    = check_regset (tid, NT_S390_TDB, s390_sizeof_tdbregset);
 
 #ifdef __s390x__
   /* If GDB itself is compiled as 64-bit, we are running on a machine in
@@ -634,12 +643,14 @@ s390_read_description (struct target_ops *ops)
      that mode, report s390 architecture with 64-bit GPRs.  */
 
   if (s390_target_wordsize () == 8)
-    return (have_regset_system_call? tdesc_s390x_linux64v2 :
+    return (have_regset_tdb ? tdesc_s390x_te_linux64 :
+	    have_regset_system_call? tdesc_s390x_linux64v2 :
 	    have_regset_last_break? tdesc_s390x_linux64v1 :
 	    tdesc_s390x_linux64);
 
   if (s390_get_hwcap () & HWCAP_S390_HIGH_GPRS)
-    return (have_regset_system_call? tdesc_s390_linux64v2 :
+    return (have_regset_tdb ? tdesc_s390_te_linux64 :
+	    have_regset_system_call? tdesc_s390_linux64v2 :
 	    have_regset_last_break? tdesc_s390_linux64v1 :
 	    tdesc_s390_linux64);
 #endif
