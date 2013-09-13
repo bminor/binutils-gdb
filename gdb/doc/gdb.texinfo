@@ -34570,7 +34570,7 @@ may change, and the frontend should obtain it again.
 Example output:
 
 @smallexample
-(gdb) -list-features
+(gdb) -list-target-features
 ^done,result=["async"]
 @end smallexample
 
