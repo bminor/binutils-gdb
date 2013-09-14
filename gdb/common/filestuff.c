@@ -311,7 +311,13 @@ FILE *
 gdb_fopen_cloexec (const char *filename, const char *opentype)
 {
   FILE *result = NULL;
-  static int fopen_e_ever_failed;
+  /* Probe for "e" support once.  But, if we can tell the operating
+     system doesn't know about close on exec mode "e" without probing,
+     skip it.  E.g., the Windows runtime issues an "Invalid parameter
+     passed to C runtime function" OutputDebugString warning for
+     unknown modes.  Assume that if O_CLOEXEC is zero, then "e" isn't
+     supported.  */
+  static int fopen_e_ever_failed = O_CLOEXEC == 0;
 
   if (!fopen_e_ever_failed)
     {

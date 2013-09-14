@@ -1,3 +1,10 @@
+2013-09-14  Pierre Muller  <muller@sourceware.org>
+	    Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* common/filestuff.c (gdb_fopen_cloexec): Do not try to use "e"
+	mode if operating system doesn't know O_CLOEXEC.
+
 2013-09-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Code cleanup.
