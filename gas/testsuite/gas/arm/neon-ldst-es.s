@@ -60,3 +60,6 @@
 
 	@ PR 14987 and 14887: Allow for whitespace in the instruction.
 	vld1.32 { d1 [ ] } , [ r2 ] , r3
+
+	vld1.64 {d0}, [r0]
+	vld1.64 {d0-d3}, [r0]

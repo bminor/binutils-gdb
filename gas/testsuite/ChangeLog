@@ -1,3 +1,11 @@
+2013-09-16  Will Newton  <will.newton@linaro.org>
+
+	* gas/arm/neon-ldst-es.d: Add VLD1.64 instructions.
+	* gas/arm/neon-ldst-es.s: Likewise.
+	* testsuite/gas/arm/neon-ldst-es-bad.d: New file.
+	* testsuite/gas/arm/neon-ldst-es-bad.l: Likewise.
+	* testsuite/gas/arm/neon-ldst-es-bad.s: Likewise.
+
 2013-09-12  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* gas/mips/bltzal.s: New file.

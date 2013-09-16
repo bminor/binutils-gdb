@@ -15783,6 +15783,8 @@ do_neon_ld_st_interleave (void)
   typebits = typetable[idx];
 
   constraint (typebits == -1, _("bad list type for instruction"));
+  constraint (((inst.instruction >> 8) & 3) && et.size == 64,
+	      _("bad element type for instruction"));
 
   inst.instruction &= ~0xf00;
   inst.instruction |= typebits << 8;
