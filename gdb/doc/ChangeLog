@@ -1,3 +1,16 @@
+2013-09-16  Stan Shebs  <stan@codesourcery.com>
+
+	Remove the internals manual gdbint.texinfo.
+	* Makefile.in (INFO_DEPS): Remove gdbint.info.
+	(PDFFILES): Remove gdbint.pdf.
+	(HTMLFILES): Remove gdbint/index.html.
+	(HTMLFILES_INSTALL): Remove gdbint.
+	(GDBINT_DOC_FILES): Remove.
+	(dvi): Remove gdbint.dvi.
+	(ps): Remove gdbint.ps.
+	* gdbint.texinfo: Remove file.
+	* gdb.texinfo (Maintenance Commands): Remove reference to gdbint.
+
 2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.texinfo (Convenience Functions): Mention new convenience

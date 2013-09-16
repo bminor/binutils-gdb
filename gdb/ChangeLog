@@ -1,3 +1,13 @@
+2013-09-16  Stan Shebs  <stan@codesourcery.com>
+
+	* README: Update references to writing code for GDB.
+	* configure.ac (build_warnings): Remove obsolete comment.
+	* configure: Regenerate.
+	* gdbarch.sh: Remove references to gdbint.texinfo.
+	* gdbarch.h: Regenerate.
+	* gdbtypes.c (objfile_type): Remove comments referencing internals
+	manual and D10V.
+
 2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* NEWS: Mention new convenience function $_isvoid.

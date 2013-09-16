@@ -36870,8 +36870,7 @@ including registers which aren't available on the target nor visible
 to user; the command @code{maint print register-groups} includes the
 groups that each register is a member of; and the command @code{maint
 print remote-registers} includes the remote target's register numbers
-and offsets in the `G' packets.  @xref{Registers,, Registers, gdbint,
-@value{GDBN} Internals}.
+and offsets in the `G' packets.
 
 These commands take an optional parameter, a file name to which to
 write the information.

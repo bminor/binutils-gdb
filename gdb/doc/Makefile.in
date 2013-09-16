@@ -79,13 +79,13 @@ SET_TEXINPUTS = \
    TEXINPUTS=${TEXIDIR}:.:$(srcdir):$(READLINE_DIR):$(GDBMI_DIR):$$TEXINPUTS
 
 # Files which should be generated via 'info' and installed by 'install-info'
-INFO_DEPS = gdb.info gdbint.info stabs.info annotate.info
+INFO_DEPS = gdb.info stabs.info annotate.info
 
 # Files which should be generated via 'pdf' and installed by 'install-pdf'
-PDFFILES = gdb.pdf gdbint.pdf stabs.pdf refcard.pdf annotate.pdf
+PDFFILES = gdb.pdf stabs.pdf refcard.pdf annotate.pdf
 # Files which should be generated via 'html' and installed by 'install-html'
-HTMLFILES =  gdb/index.html gdbint/index.html stabs/index.html annotate/index.html
-HTMLFILES_INSTALL = gdb gdbint stabs annotate
+HTMLFILES =  gdb/index.html stabs/index.html annotate/index.html
+HTMLFILES_INSTALL = gdb stabs annotate
 
 # There may be alternate predefined collections of switches to configure
 # the GDB manual.  Normally this is not done in synch with the software
@@ -133,18 +133,6 @@ GDB_DOC_FILES = \
 	$(GDB_DOC_SOURCE_INCLUDES) \
 	$(GDB_DOC_BUILD_INCLUDES)
 
-# Internals Manual
-GDBINT_DOC_SOURCE_INCLUDES = \
-	$(srcdir)/fdl.texi \
-	$(srcdir)/observer.texi
-GDBINT_DOC_BUILD_INCLUDES = \
-	gdb-cfg.texi \
-	GDBvn.texi
-GDBINT_DOC_FILES = \
-	$(srcdir)/gdbint.texinfo \
-	$(GDBINT_DOC_SOURCE_INCLUDES) \
-	$(GDBINT_DOC_BUILD_INCLUDES)
-
 # Stabs manual: All files
 STABS_DOC_SOURCE_INCLUDES = \
 	$(srcdir)/fdl.texi
@@ -191,8 +179,8 @@ HAVE_NATIVE_GCORE_TARGET = @HAVE_NATIVE_GCORE_TARGET@
 all:
 
 info: $(INFO_DEPS)
-dvi: gdb.dvi gdbint.dvi stabs.dvi refcard.dvi annotate.dvi
-ps: gdb.ps gdbint.ps stabs.ps refcard.ps annotate.ps
+dvi: gdb.dvi stabs.dvi refcard.dvi annotate.dvi
+ps: gdb.ps stabs.ps refcard.ps annotate.ps
 html: $(HTMLFILES)
 pdf: $(PDFFILES)
 man: $(MANS)
@@ -530,34 +518,6 @@ gdb.mm: $(GDB_DOC_FILES) links2roff
 gdb/index.html: ${GDB_DOC_FILES}
 	$(MAKEHTML) $(MAKEHTMLFLAGS) $(READLINE_TEXI_INCFLAG) -I ${GDBMI_DIR} -I $(srcdir) $(srcdir)/gdb.texinfo
 
-# Clean these up before each run.  Avoids a catch 22 with not being
-# able to re-generate these files (to fix a corruption) because these
-# files contain a corruption.
-GDBINT_TEX_TMPS = gdbint.aux gdbint.cp* gdbint.fn* gdbint.ky* \
-	gdbint.log gdbint.pg* gdbint.toc gdbint.tp* gdbint.vr*
-
-# GDB INTERNALS MANUAL: TeX dvi file
-gdbint.dvi: $(GDBINT_DOC_FILES)
-	rm -f $(GDBINT_TEX_TMPS)
-	$(TEXI2DVI) -I $(srcdir) $(srcdir)/gdbint.texinfo
-
-gdbint.ps : gdbint.dvi
-	$(DVIPS) -o $@ $?
-
-gdbint.pdf: $(GDBINT_DOC_FILES)
-	rm -f $(GDBINT_TEX_TMPS)
-	$(TEXI2DVI) --pdf -I $(srcdir) $(srcdir)/gdbint.texinfo
-
-# GDB INTERNALS MANUAL: info file
-
-gdbint.info: $(GDBINT_DOC_FILES)
-	$(MAKEINFO_CMD) -I $(srcdir) -o gdbint.info $(srcdir)/gdbint.texinfo
-
-# GDB INTERNALS MANUAL: HTML file
-
-gdbint/index.html: $(GDBINT_DOC_FILES)
-	$(MAKEHTML) $(MAKEHTMLFLAGS) -I $(srcdir) $(srcdir)/gdbint.texinfo
-
 stabs.info: $(STABS_DOC_FILES)
 	$(MAKEINFO_CMD) -I $(srcdir) -o stabs.info $(srcdir)/stabs.texinfo
 
@@ -649,7 +609,6 @@ Makefile: Makefile.in $(host_makefile_frag) ../config.status
 mostlyclean:
 	rm -f gdb.mm gdb.ms gdb.me links2roff
 	rm -f $(GDB_TEX_TMPS)
-	rm -f $(GDBINT_TEX_TMPS)
 	rm -f $(STABS_TEX_TMPS)
 	rm -f $(ANNOTATE_TEX_TMPS)
 	rm -f sedref.dvi sedref.tex tmp.sed
