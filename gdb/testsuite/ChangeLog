@@ -1,3 +1,7 @@
+2013-09-16  Doug Evans  <dje@google.com>
+
+	* gdb.base/break-interp.exp: Fix indentation.
+
 2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/gdbvars.c (foo_void): New function.

@@ -548,7 +548,7 @@ foreach ldprelink {NO YES} {
 	    } elseif {$ldsepdebug == "IN" && $interp_system_debug == ""} {
 		file_copy $interp_system $interp
 	    } elseif {$ldsepdebug == "IN" && $interp_system_debug != ""} {
-	    file_copy $interp_system $interp
+		file_copy $interp_system $interp
 		file_copy $interp_system_debug "${interp}.debug"
 		# eu-unstrip: DWARF data in '...' not adjusted for prelinking bias; consider prelink -u
 		if {![prelinkNO $interp] || ![prelinkNO "${interp}.debug"]} {
