@@ -15,6 +15,12 @@
 
 standard_testfile .c
 
+# Fission doesn't support macros yet.  Bug 15954.
+if [using_fission] {
+    untested ${testfile}.exp
+    return -1
+}
+
 get_compiler_info
 if ![test_compiler_info gcc*] {
   untested ${testfile}.exp

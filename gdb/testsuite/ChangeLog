@@ -1,5 +1,8 @@
 2013-09-16  Doug Evans  <dje@google.com>
 
+	* lib/gdb.exp (using_fission): New proc.
+	* gdb.base/info-macros.exp: Skip test if using Fission.
+
 	* gdb.base/break-interp.exp: Fix indentation.
 
 2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>

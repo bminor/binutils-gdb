@@ -4473,5 +4473,15 @@ proc run_on_host { test program args } {
     }
 }
 
+# Return non-zero if "board_info debug_flags" mentions Fission.
+# http://gcc.gnu.org/wiki/DebugFission
+# Fission doesn't support everything yet.
+# This supports working around bug 15954.
+
+proc using_fission { } {
+    set debug_flags [board_info [target_info name] debug_flags]
+    return [regexp -- "-gsplit-dwarf" $debug_flags]
+}
+
 # Always load compatibility stuff.
 load_lib future.exp
