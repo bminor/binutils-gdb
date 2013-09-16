@@ -600,6 +600,7 @@ aarch64_linux_set_debug_regs (const struct aarch64_debug_reg_state *state,
   const CORE_ADDR *addr;
   const unsigned int *ctrl;
 
+  memset (&regs, 0, sizeof (regs));
   iov.iov_base = &regs;
   iov.iov_len = sizeof (regs);
   count = watchpoint ? aarch64_num_wp_regs : aarch64_num_bp_regs;
