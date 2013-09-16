@@ -52,7 +52,7 @@
 #include "user-regs.h"
 #include "cli/cli-utils.h"
 #include <ctype.h>
-#include <elf.h>
+#include "elf/common.h"
 
 #include "features/s390-linux32.c"
 #include "features/s390-linux32v1.c"
@@ -807,7 +807,7 @@ s390_core_read_description (struct gdbarch *gdbarch,
   asection *v1 = bfd_get_section_by_name (abfd, ".reg-s390-last-break");
   asection *v2 = bfd_get_section_by_name (abfd, ".reg-s390-system-call");
   asection *section = bfd_get_section_by_name (abfd, ".reg");
-  unsigned long hwcap = 0;
+  CORE_ADDR hwcap = 0;
 
   target_auxv_search (target, AT_HWCAP, &hwcap);
   if (!section)

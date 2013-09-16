@@ -1,3 +1,14 @@
+2013-09-16  Pierre Muller  <muller@sourceware.org>
+
+	* arm-linux-tdep.c: Add "elf/common.h" header.
+	Remove AT_HWCAP macro definintion as it is provided in
+	added include file.
+	* s390-tdep.c: Remove system header <elf.h>
+	Add "elf/common.h" header for AT_HWCAP definition.
+	(s390_core_read_description): Use correct CORE_ADDR
+	for hwcap local variable used as third parameter
+	of function target_auxv_search.
+
 2013-09-14  Pierre Muller  <muller@sourceware.org>
 	    Tom Tromey  <tromey@redhat.com>
 	    Pedro Alves  <palves@redhat.com>

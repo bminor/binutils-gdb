@@ -49,11 +49,8 @@
 #include "parser-defs.h"
 #include "user-regs.h"
 #include <ctype.h>
-
+#include "elf/common.h"
 #include "gdb_string.h"
-
-/* This is defined in <elf.h> on ARM GNU/Linux systems.  */
-#define AT_HWCAP        16
 
 extern int arm_apcs_32;
 
