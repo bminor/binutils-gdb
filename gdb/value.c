@@ -3594,7 +3594,7 @@ isvoid_internal_fn (struct gdbarch *gdbarch,
   int ret;
 
   if (argc != 1)
-    error (_("You must provide one parameter for $_isvoid."));
+    error (_("You must provide one argument for $_isvoid."));
 
   ret = TYPE_CODE (value_type (argv[0])) == TYPE_CODE_VOID;
 

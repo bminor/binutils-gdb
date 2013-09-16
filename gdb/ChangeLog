@@ -1,3 +1,8 @@
+2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* value.c (isvoid_internal_fn): Replace "parameter" with
+	"argument".
+
 2013-09-16  Stan Shebs  <stan@codesourcery.com>
 
 	* README: Update references to writing code for GDB.
