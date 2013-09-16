@@ -3584,6 +3584,23 @@ value_fetch_lazy (struct value *val)
   return 0;
 }
 
+/* Implementation of the convenience function $_isvoid.  */
+
+static struct value *
+isvoid_internal_fn (struct gdbarch *gdbarch,
+		    const struct language_defn *language,
+		    void *cookie, int argc, struct value **argv)
+{
+  int ret;
+
+  if (argc != 1)
+    error (_("You must provide one parameter for $_isvoid."));
+
+  ret = TYPE_CODE (value_type (argv[0])) == TYPE_CODE_VOID;
+
+  return value_from_longest (builtin_type (gdbarch)->builtin_int, ret);
+}
+
 void
 _initialize_values (void)
 {
@@ -3616,4 +3633,10 @@ VARIABLE is already initialized."));
   add_prefix_cmd ("function", no_class, function_command, _("\
 Placeholder command for showing help on convenience functions."),
 		  &functionlist, "function ", 0, &cmdlist);
+
+  add_internal_function ("_isvoid", _("\
+Check whether an expression is void.\n\
+Usage: $_isvoid (expression)\n\
+Return 1 if the expression is void, zero otherwise."),
+			 isvoid_internal_fn, NULL);
 }

@@ -1,3 +1,8 @@
+2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Convenience Functions): Mention new convenience
+	function $_isvoid.
+
 2013-09-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.texinfo (Decimal Floating Point format): Mention S/390.

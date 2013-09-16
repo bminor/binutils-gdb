@@ -9800,6 +9800,69 @@ function can be used in an expression just like an ordinary function;
 however, a convenience function is implemented internally to
 @value{GDBN}.
 
+These functions do not require @value{GDBN} to be configured with
+@code{Python} support, which means that they are always available.
+
+@table @code
+
+@item $_isvoid (@var{expr})
+@findex $_isvoid@r{, convenience function}
+Return one if the expression @var{expr} is @code{void}.  Otherwise it
+returns zero.
+
+A @code{void} expression is an expression where the type of the result
+is @code{void}.  For example, you can examine a convenience variable
+(see @ref{Convenience Vars,, Convenience Variables}) to check whether
+it is @code{void}:
+
+@smallexample
+(@value{GDBP}) print $_exitcode
+$1 = void
+(@value{GDBP}) print $_isvoid ($_exitcode)
+$2 = 1
+(@value{GDBP}) run
+Starting program: ./a.out
+[Inferior 1 (process 29572) exited normally]
+(@value{GDBP}) print $_exitcode
+$3 = 0
+(@value{GDBP}) print $_isvoid ($_exitcode)
+$4 = 0
+@end smallexample
+
+In the example above, we used @code{$_isvoid} to check whether
+@code{$_exitcode} is @code{void} before and after the execution of the
+program being debugged.  Before the execution there is no exit code to
+be examined, therefore @code{$_exitcode} is @code{void}.  After the
+execution the program being debugged returned zero, therefore
+@code{$_exitcode} is zero, which means that it is not @code{void}
+anymore.
+
+The @code{void} expression can also be a call of a function from the
+program being debugged.  For example, given the following function:
+
+@smallexample
+void
+foo (void)
+@{
+@}
+@end smallexample
+
+The result of calling it inside @value{GDBN} is @code{void}:
+
+@smallexample
+(@value{GDBP}) print foo ()
+$1 = void
+(@value{GDBP}) print $_isvoid (foo ())
+$2 = 1
+(@value{GDBP}) set $v = foo ()
+(@value{GDBP}) print $v
+$3 = void
+(@value{GDBP}) print $_isvoid ($v)
+$4 = 1
+@end smallexample
+
+@end table
+
 These functions require @value{GDBN} to be configured with
 @code{Python} support.
 

@@ -1,3 +1,9 @@
+2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* NEWS: Mention new convenience function $_isvoid.
+	* value.c (isvoid_internal_fn): New function.
+	(_initialize_values): Add new convenience function $_isvoid.
+
 2013-09-16  Pierre Muller  <muller@sourceware.org>
 
 	* arm-linux-tdep.c: Add "elf/common.h" header.

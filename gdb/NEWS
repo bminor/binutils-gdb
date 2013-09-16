@@ -3,6 +3,14 @@
 
 *** Changes since GDB 7.6
 
+* New convenience function "$_isvoid", to check whether an expression
+  is void.  A void expression is an expression where the type of the
+  result is "void".  For example, some convenience variables may be
+  "void" when evaluated (e.g., "$_exitcode" before the execution of
+  the program being debugged; or an undefined convenience variable).
+  Another example, when calling a function whose return type is
+  "void".
+
 * The "maintenance print objfiles" command now takes an optional regexp.
 
 * The "catch syscall" command now works on arm*-linux* targets.

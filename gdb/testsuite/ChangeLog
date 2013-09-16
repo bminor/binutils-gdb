@@ -1,3 +1,10 @@
+2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/gdbvars.c (foo_void): New function.
+	(foo_int): Likewise.
+	* gdb.base/gdbvars.exp (test_convenience_functions): New
+	function.  Call it.
+
 2013-09-13  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/s390-tdbregs.c: New file.

@@ -54,6 +54,34 @@ proc test_convenience_variables {} {
 	"Print contents of uninitialized convenience variable"
 }
 
+proc test_convenience_functions {} {
+    gdb_test "print \$_isvoid" " = <internal function _isvoid>" \
+	"Print internal function \$_isvoid"
+
+    gdb_test "print \$isvoid_foo" " = void" \
+	"Print void convenience variable"
+
+    gdb_test "print \$_isvoid (\$isvoid_foo)" " = 1" \
+	"Check whether void convenience variable is void"
+
+    gdb_test_no_output "set \$isvoid_foo = 1" \
+	"Set void convenience variable to 1"
+
+    gdb_test "print \$_isvoid (\$isvoid_foo)" " = 0" \
+	"Check whether non-void convenience variable is void"
+
+    # For the next test, we need the inferior to be running.
+    if { ![runto_main] } {
+	return -1
+    }
+
+    gdb_test "print \$_isvoid (foo_void ())" " = 1" \
+	"Check whether void function is void"
+
+    gdb_test "print \$_isvoid (foo_int ())" " = 0" \
+	"Check whether non-void function is void"
+}
+
 proc test_value_history {} {
     global gdb_prompt
 
@@ -114,4 +142,5 @@ gdb_test_no_output "set print sevenbit-strings"
 
 test_value_history
 test_convenience_variables
+test_convenience_functions
 test_with_program
