@@ -1,3 +1,7 @@
+2013-09-16  Jiong Wang  <jiwang@tilera.com>
+	* configure.srv <tilegx*-*-linux*>: Remove linux-osdata.o from and add
+	linux-tile-low.o to srv_tgtobj.
+
 2013-09-16  Will Newton  <will.newton@linaro.org>
 
 	* linux-aarch64-low.c (aarch64_linux_set_debug_regs): Zero
