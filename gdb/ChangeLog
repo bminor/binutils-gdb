@@ -1,3 +1,11 @@
+2013-09-17  Muhammad Waqas <mwaqas@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/11568
+	* breakpoint.c (remove_threaded_breakpoints): New function.
+	(_initialize_breakpoint): Attach remove_threaded_breakpoints
+	as thread_exit observer.
+
 2013-09-17  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15911

@@ -2928,6 +2928,30 @@ remove_breakpoints (void)
   return val;
 }
 
+/* When a thread exits, remove breakpoints that are related to
+   that thread.  */
+
+static void
+remove_threaded_breakpoints (struct thread_info *tp, int silent)
+{
+  struct breakpoint *b, *b_tmp;
+
+  ALL_BREAKPOINTS_SAFE (b, b_tmp)
+    {
+      if (b->thread == tp->num)
+	{
+	  b->disposition = disp_del_at_next_stop;
+
+	  printf_filtered (_("\
+Thread-specific breakpoint %d deleted - thread %d is gone.\n"),
+			  b->number, tp->num);
+
+	  /* Hide it from the user.  */
+	  b->number = 0;
+       }
+    }
+}
+
 /* Remove breakpoints of process PID.  */
 
 int
@@ -16587,4 +16611,5 @@ agent-printf \"printf format string\", arg1, arg2, arg3, ..., argn\n\
   automatic_hardware_breakpoints = 1;
 
   observer_attach_about_to_proceed (breakpoint_about_to_proceed);
+  observer_attach_thread_exit (remove_threaded_breakpoints);
 }

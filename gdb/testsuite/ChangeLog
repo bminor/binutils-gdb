@@ -1,3 +1,11 @@
+2013-09-17  Muhammad Waqas  <mwaqas@codesourccery.com>
+	    Jan Kratochvil  <jan.kartochvil@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR gdb/11568
+	* gdb.thread/thread-specific-bp.c: New file.
+	* gdb.thread/thread-specific-bp.exp: New file.
+
 2013-09-17  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/defaults.exp (<show_conv_list>): Add check for $_isvoid
