@@ -1,3 +1,12 @@
+2013-09-17  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/catch-load.c: Remove the include of "dlfcn.h".
+	 [__WIN32__]: Include "windows.h" and define macro dlopen
+	 and dlclose.
+	[!__WIN32__]: Include "dlfcn.h".
+	* gdb.base/catch-load.exp (one_catch_load_test): Match
+	directory separator.
+
 2013-09-16  Doug Evans  <dje@google.com>
 
 	* lib/gdb.exp (using_fission): New proc.

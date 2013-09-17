@@ -64,7 +64,7 @@ proc one_catch_load_test {scenario kind match sostop} {
 	gdb_test "catch $kind" "Catchpoint $decimal \\(.*\\)"
 
 	gdb_test_multiple "continue" "continue" {
-	    -re "Catchpoint $decimal\r\n.*loaded .*/$testfile2.*\r\n.*$gdb_prompt $" {
+	    -re "Catchpoint $decimal\r\n.*loaded .*(\\\\|/)$testfile2.*\r\n.*$gdb_prompt $" {
 		if {$match} {
 		    pass "continue"
 		} else {
