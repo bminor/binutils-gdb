@@ -55,6 +55,11 @@ if [ -z "${webdir}" ] ; then
 # Use 'branch' subdir name if Tag contains branch
   if [ -f "${srcdir}/gdb/CVS/Tag" ] ; then
     tagname=`cat "${srcdir}/gdb/CVS/Tag"`
+  elif [ -d "${srcdir}/.git" ] ; then
+    tagname=`cd ${srcdir} && git rev-parse --abbrev-ref HEAD`
+    if test "$tagname" = "master"; then
+      tagname=trunk
+    fi
   else
     tagname=trunk
   fi
