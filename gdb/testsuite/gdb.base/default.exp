@@ -621,6 +621,7 @@ set show_conv_list \
 	{$_probe_arg9 = <error: No frame selected>} \
 	{$_probe_arg10 = <error: No frame selected>} \
 	{$_probe_arg11 = <error: No frame selected>} \
+	{$_isvoid = <internal function _isvoid>} \
     }
 if ![skip_python_tests] {
     append show_conv_list \

@@ -1,3 +1,8 @@
+2013-09-17  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/defaults.exp (<show_conv_list>): Add check for $_isvoid
+	convenience function.
+
 2013-09-17  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/15911
