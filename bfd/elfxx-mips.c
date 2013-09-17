@@ -14938,6 +14938,9 @@ _bfd_mips_elf_print_private_bfd_data (bfd *abfd, void *ptr)
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_NAN2008)
     fprintf (file, " [nan2008]");
 
+  if (elf_elfheader (abfd)->e_flags & EF_MIPS_FP64)
+    fprintf (file, " [fp64]");
+
   if (elf_elfheader (abfd)->e_flags & EF_MIPS_32BITMODE)
     fprintf (file, " [32bitmode]");
   else

@@ -1,3 +1,8 @@
+2013-09-17  Doug Gilmore  <Doug.Gilmore@imgtec.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_print_private_bfd_data): Handle
+	EF_MIPS_FP64.
+
 2013-08-31  John David Anglin  <dave.anglin@bell.net>
 
 	* elf64-hppa.c (elf_hppa_final_link_relocate): Add missing '%' to
