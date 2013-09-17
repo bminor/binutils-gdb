@@ -2004,7 +2004,7 @@ record_full_goto_entry (struct record_full_entry *p)
 
   registers_changed ();
   reinit_frame_cache ();
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* The "to_goto_record_begin" target method.  */
@@ -2590,7 +2590,7 @@ record_full_restore (void)
   printf_filtered (_("Restored records from core file %s.\n"),
 		   bfd_get_filename (core_bfd));
 
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* bfdcore_write -- write bytes into a core file section.  */

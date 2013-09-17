@@ -194,7 +194,7 @@ mi_cmd_exec_return (char *command, char **argv, int argc)
 
   /* Because we have called return_command with from_tty = 0, we need
      to print the frame here.  */
-  print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS);
+  print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 1);
 }
 
 void
@@ -2484,7 +2484,7 @@ mi_cmd_trace_find (char *command, char **argv, int argc)
     error (_("Invalid mode '%s'"), mode);
 
   if (has_stack_frames () || get_traceframe_number () >= 0)
-    print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS);
+    print_stack_frame (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 1);
 }
 
 void

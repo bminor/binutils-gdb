@@ -660,10 +660,12 @@ extern CORE_ADDR get_pc_function_start (CORE_ADDR);
 extern struct frame_info *find_relative_frame (struct frame_info *, int *);
 
 extern void print_stack_frame (struct frame_info *, int print_level,
-			       enum print_what print_what);
+			       enum print_what print_what,
+			       int set_current_sal);
 
 extern void print_frame_info (struct frame_info *, int print_level,
-			      enum print_what print_what, int args);
+			      enum print_what print_what, int args,
+			      int set_current_sal);
 
 extern struct frame_info *block_innermost_frame (const struct block *);
 

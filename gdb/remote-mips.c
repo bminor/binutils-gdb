@@ -1661,7 +1661,7 @@ seen from the board via TFTP, specify that name as the third parameter.\n"));
   reinit_frame_cache ();
   registers_changed ();
   stop_pc = regcache_read_pc (get_current_regcache ());
-  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
   xfree (serial_port_name);
 
   do_cleanups (cleanup);

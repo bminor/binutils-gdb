@@ -100,7 +100,7 @@ bsd_kvm_open (char *filename, int from_tty)
   target_fetch_registers (get_current_regcache (), -1);
 
   reinit_frame_cache ();
-  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 }
 
 static void
@@ -286,7 +286,7 @@ bsd_kvm_proc_cmd (char *arg, int fromtty)
   target_fetch_registers (get_current_regcache (), -1);
 
   reinit_frame_cache ();
-  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 }
 
 #endif
@@ -306,7 +306,7 @@ bsd_kvm_pcb_cmd (char *arg, int fromtty)
   target_fetch_registers (get_current_regcache (), -1);
 
   reinit_frame_cache ();
-  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 }
 
 static int

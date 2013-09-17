@@ -1765,7 +1765,7 @@ finish_command (char *arg, int from_tty)
       if (from_tty)
 	{
 	  printf_filtered (_("Run till exit from "));
-	  print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
+	  print_stack_frame (get_selected_frame (NULL), 1, LOCATION, 0);
 	}
 
       proceed ((CORE_ADDR) -1, GDB_SIGNAL_DEFAULT, 1);
@@ -1790,7 +1790,7 @@ finish_command (char *arg, int from_tty)
       else
 	printf_filtered (_("Run till exit from "));
 
-      print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
+      print_stack_frame (get_selected_frame (NULL), 1, LOCATION, 0);
     }
 
   if (execution_direction == EXEC_REVERSE)
@@ -2334,7 +2334,7 @@ kill_command (char *arg, int from_tty)
       if (target_has_stack)
 	{
 	  printf_filtered (_("In %s,\n"), target_longname);
-	  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+	  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 	}
     }
   bfd_cache_close_all ();

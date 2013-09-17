@@ -154,7 +154,8 @@ frame_show_address (struct frame_info *frame,
 
 void
 print_stack_frame (struct frame_info *frame, int print_level,
-		   enum print_what print_what)
+		   enum print_what print_what,
+		   int set_current_sal)
 {
   volatile struct gdb_exception e;
 
@@ -166,8 +167,10 @@ print_stack_frame (struct frame_info *frame, int print_level,
     {
       int center = (print_what == SRC_LINE || print_what == SRC_AND_LOC);
 
-      print_frame_info (frame, print_level, print_what, 1 /* print_args */);
-      set_current_sal_from_frame (frame, center);
+      print_frame_info (frame, print_level, print_what, 1 /* print_args */,
+			set_current_sal);
+      if (set_current_sal)
+	set_current_sal_from_frame (frame, center);
     }
 }
 
@@ -780,7 +783,8 @@ do_gdb_disassembly (struct gdbarch *gdbarch,
 
 void
 print_frame_info (struct frame_info *frame, int print_level,
-		  enum print_what print_what, int print_args)
+		  enum print_what print_what, int print_args,
+		  int set_current_sal)
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct symtab_and_line sal;
@@ -905,7 +909,7 @@ print_frame_info (struct frame_info *frame, int print_level,
 	do_gdb_disassembly (get_frame_arch (frame), -1, sal.pc, sal.end);
     }
 
-  if (print_what != LOCATION)
+  if (set_current_sal)
     {
       CORE_ADDR pc;
 
@@ -1787,7 +1791,7 @@ backtrace_command_1 (char *count_exp, int show_locals, int no_filters,
 	     hand, perhaps the code does or could be fixed to make sure
 	     the frame->prev field gets set to NULL in that case).  */
 
-	  print_frame_info (fi, 1, LOCATION, 1);
+	  print_frame_info (fi, 1, LOCATION, 1, 0);
 	  if (show_locals)
 	    {
 	      struct frame_id frame_id = get_frame_id (fi);
@@ -2184,7 +2188,7 @@ select_and_print_frame (struct frame_info *frame)
 {
   select_frame (frame);
   if (frame)
-    print_stack_frame (frame, 1, SRC_AND_LOC);
+    print_stack_frame (frame, 1, SRC_AND_LOC, 1);
 }
 
 /* Return the symbol-block in which the selected frame is executing.
@@ -2262,7 +2266,7 @@ static void
 frame_command (char *level_exp, int from_tty)
 {
   select_frame_command (level_exp, from_tty);
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* The XDB Compatibility command to print the current frame.  */
@@ -2270,7 +2274,7 @@ frame_command (char *level_exp, int from_tty)
 static void
 current_frame_command (char *level_exp, int from_tty)
 {
-  print_stack_frame (get_selected_frame (_("No stack.")), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (_("No stack.")), 1, SRC_AND_LOC, 1);
 }
 
 /* Select the frame up one or COUNT_EXP stack levels from the
@@ -2301,7 +2305,7 @@ static void
 up_command (char *count_exp, int from_tty)
 {
   up_silently_base (count_exp);
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* Select the frame down one or COUNT_EXP stack levels from the previously
@@ -2340,7 +2344,7 @@ static void
 down_command (char *count_exp, int from_tty)
 {
   down_silently_base (count_exp);
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 

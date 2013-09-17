@@ -731,7 +731,7 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
   printf_filtered (_("Switching to %s\n"),
 		   target_pid_to_str (inferior_ptid));
 
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
 }
 
 /* Switch inferior process (checkpoint) context, by checkpoint id.  */

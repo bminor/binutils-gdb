@@ -1,3 +1,35 @@
+2013-09-17  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15911
+	* ada-tasks.c (task_command_1): Adjust call to print_stack_frame.
+	* bsd-kvm.c (bsd_kvm_open, bsd_kvm_proc_cmd, bsd_kvm_pcb_cmd):
+	* corelow.c (core_open):
+	* frame.h (print_stack_frame, print_frame_info): New
+	'set_current_sal' parameter.
+	* infcmd.c (finish_command, kill_command): Adjust call to
+	print_stack_frame.
+	* inferior.c (inferior_command): Likewise.
+	* infrun.c (normal_stop): Likewise.
+	* linux-fork.c (linux_fork_context): Likewise.
+	* record-full.c (record_full_goto_entry, record_full_restore):
+	Likewise.
+	* remote-mips.c (common_open): Likewise.
+	* stack.c (print_stack_frame): New 'set_current_sal' parameter.
+	Use it.
+	(print_frame_info): New 'set_current_sal' parameter.  Set the last
+	displayed sal depending on the new paremeter instead of looking at
+	print_what.
+	(backtrace_command_1, select_and_print_frame, frame_command)
+	(current_frame_command, up_command, down_command): Adjust call to
+	print_stack_frame.
+	* thread.c (print_thread_info, restore_selected_frame)
+	(do_captured_thread_select): Adjust call to print_stack_frame.
+	* tracepoint.c (tfind_1): Likewise.
+	* mi/mi-cmd-stack.c (mi_cmd_stack_list_frames)
+	(mi_cmd_stack_info_frame): Likewise.
+	* mi/mi-interp.c (mi_on_normal_stop): Likewise.
+	* mi/mi-main.c (mi_cmd_exec_return, mi_cmd_trace_find): Likewise.
+
 2013-09-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* value.c (isvoid_internal_fn): Replace "parameter" with

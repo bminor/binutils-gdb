@@ -159,7 +159,7 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
 	  QUIT;
 	  /* Print the location and the address always, even for level 0.
 	     If args is 0, don't print the arguments.  */
-	  print_frame_info (fi, 1, LOC_AND_ADDRESS, 0 /* args */ );
+	  print_frame_info (fi, 1, LOC_AND_ADDRESS, 0 /* args */, 0);
 	}
     }
 
@@ -691,5 +691,5 @@ mi_cmd_stack_info_frame (char *command, char **argv, int argc)
   if (argc > 0)
     error (_("-stack-info-frame: No arguments allowed"));
 
-  print_frame_info (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 0);
+  print_frame_info (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 0, 1);
 }

@@ -739,7 +739,7 @@ inferior_command (char *args, int from_tty)
   else if (inf->pid != 0)
     {
       ui_out_text (current_uiout, "\n");
-      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
     }
 }
 

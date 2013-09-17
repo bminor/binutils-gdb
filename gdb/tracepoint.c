@@ -2444,7 +2444,7 @@ tfind_1 (enum trace_find_type type, int num,
       else
 	print_what = SRC_AND_LOC;
 
-      print_stack_frame (get_selected_frame (NULL), 1, print_what);
+      print_stack_frame (get_selected_frame (NULL), 1, print_what, 1);
       do_displays ();
     }
 }

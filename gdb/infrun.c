@@ -6102,7 +6102,7 @@ normal_stop (void)
 	     LOCATION: Print only location
 	     SRC_AND_LOC: Print location and source line.  */
 	  if (do_frame_printing)
-	    print_stack_frame (get_selected_frame (NULL), 0, source_flag);
+	    print_stack_frame (get_selected_frame (NULL), 0, source_flag, 1);
 
 	  /* Display the auto-display expressions.  */
 	  do_displays ();

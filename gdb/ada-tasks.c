@@ -1311,7 +1311,7 @@ task_command_1 (char *taskno_str, int from_tty, struct inferior *inf)
   printf_filtered (_("[Switching to task %d]\n"), taskno);
   print_stack_frame (get_selected_frame (NULL),
                      frame_relative_level (get_selected_frame (NULL)),
-		     SRC_AND_LOC);
+		     SRC_AND_LOC, 1);
 }
 
 

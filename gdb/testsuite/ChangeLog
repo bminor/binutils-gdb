@@ -1,3 +1,10 @@
+2013-09-17  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/15911
+	* gdb.threads/info-threads-cur-sal-2.c: New file.
+	* gdb.threads/info-threads-cur-sal.c: New file.
+	* gdb.threads/info-threads-cur-sal.exp: New file.
+
 2013-09-17  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/catch-load.c: Remove the include of "dlfcn.h".
