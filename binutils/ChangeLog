@@ -1,3 +1,7 @@
+2013-09-17  Doug Gilmore  <Doug.Gilmore@imgtec.com>
+
+	* readelf.c (get_machine_flags): Handle EF_MIPS_FP64.
+
 2013-09-12  Nick Clifton  <nickc@redhat.com>
 
 	* dwarf.c (dwarf_vmatoa): Rename to dwarf_vmatoa_1 and add a

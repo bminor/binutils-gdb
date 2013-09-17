@@ -2571,6 +2571,9 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if (e_flags & EF_MIPS_NAN2008)
 	    strcat (buf, ", nan2008");
 
+	  if (e_flags & EF_MIPS_FP64)
+	    strcat (buf, ", fp64");
+
 	  switch ((e_flags & EF_MIPS_MACH))
 	    {
 	    case E_MIPS_MACH_3900: strcat (buf, ", 3900"); break;
