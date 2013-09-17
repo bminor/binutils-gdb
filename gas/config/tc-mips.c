@@ -17211,11 +17211,9 @@ mips_elf_final_processing (void)
   if (mips_flag_nan2008)
     elf_elfheader (stdoutput)->e_flags |= EF_MIPS_NAN2008;
 
-#if 0 /* XXX FIXME */
   /* 32 bit code with 64 bit FP registers.  */
   if (!file_mips_fp32 && ABI_NEEDS_32BIT_REGS (mips_abi))
-    elf_elfheader (stdoutput)->e_flags |= ???;
-#endif
+    elf_elfheader (stdoutput)->e_flags |= EF_MIPS_FP64;
 }
 
 typedef struct proc {

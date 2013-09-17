@@ -1,3 +1,8 @@
+2013-09-17  Doug Gilmore  <Doug.Gilmore@imgtec.com>
+
+	* config/tc-mips.c (mips_elf_final_processing): Set
+	EF_MIPS_FP64 for -mgp32 -mfp64, removing old FIXME. 
+
 2013-09-16  Will Newton  <will.newton@linaro.org>
 
 	* config/tc-arm.c (do_neon_ld_st_interleave): Add constraint
