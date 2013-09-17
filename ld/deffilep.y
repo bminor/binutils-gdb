@@ -934,13 +934,20 @@ def_file_add_directive (def_file *my_def, const char *param, int len)
 
       if (!diropts[i].param)
 	{
-	  char saved;
+	  if (tend < pend)
+	    {
+	      char saved;
 
-	  saved = * tend;
-	  * tend = 0;
-	  /* xgettext:c-format */
-	  einfo (_("Warning: .drectve `%s' unrecognized\n"), param);
-	  * tend = saved;
+	      saved = * tend;
+	      * tend = 0;
+	      /* xgettext:c-format */
+	      einfo (_("Warning: .drectve `%s' unrecognized\n"), param);
+	      * tend = saved;
+	    }
+	  else
+	    {
+	      einfo (_("Warning: corrupt .drectve at end of def file\n"));
+	    }
 	}
 
       lex_parse_string = 0;

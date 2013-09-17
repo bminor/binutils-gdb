@@ -1,3 +1,9 @@
+2013-09-17  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/15957
+	* deffilep.y (def_file_add_directive): Avoid readin past end of
+	buffer.
+
 2013-08-28  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/15896
