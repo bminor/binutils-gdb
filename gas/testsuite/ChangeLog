@@ -1,3 +1,8 @@
+2013-09-17  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
+
+	* gas/s390/zarch-z196.s, gas/s390/zarch-z196.d: Test CLIH with
+	4000000000.
+
 2013-09-16  Will Newton  <will.newton@linaro.org>
 
 	* gas/arm/neon-ldst-es.d: Add VLD1.64 instructions.

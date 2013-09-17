@@ -16,6 +16,7 @@ foo:
 	clhlr	%r6,%r7
 	clhf	%r6,5555(%r7,%r8)
 	clih	%r6,650000
+	clih	%r9,4000000000
 	lbh	%r6,-5555(%r7,%r8)
 	lhh	%r6,-5555(%r7,%r8)
 	lfh	%r6,-5555(%r7,%r8)

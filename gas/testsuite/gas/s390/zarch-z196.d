@@ -22,6 +22,7 @@ Disassembly of section .text:
 .*:	b9 df 00 67 [	 ]*clhlr	%r6,%r7
 .*:	e3 67 85 b3 01 cf [	 ]*clhf	%r6,5555\(%r7,%r8\)
 .*:	cc 6f 00 09 eb 10 [	 ]*clih	%r6,650000
+.*:	cc 9f ee 6b 28 00 [	 ]*clih	%r9,4000000000
 .*:	e3 67 8a 4d fe c0 [	 ]*lbh	%r6,-5555\(%r7,%r8\)
 .*:	e3 67 8a 4d fe c4 [	 ]*lhh	%r6,-5555\(%r7,%r8\)
 .*:	e3 67 8a 4d fe ca [	 ]*lfh	%r6,-5555\(%r7,%r8\)
@@ -257,3 +258,4 @@ Disassembly of section .text:
 .*:	b9 2b 00 56 [	 ]*kmo	%r5,%r6
 .*:	b9 2c 00 00 [	 ]*pcc
 .*:	b9 2d 90 56 [	 ]*kmctr	%r5,%r6,%r9
+.*:	07 07 [	 ]*nopr	%r7

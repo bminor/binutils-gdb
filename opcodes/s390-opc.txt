@@ -995,7 +995,7 @@ cc0d cih RIL_RI "compare immediate high" z196 zarch
 b9cf clhhr RRE_RR "compare logical high high" z196 zarch
 b9df clhlr RRE_RR "compare logical high low" z196 zarch
 e300000000cf clhf RXY_RRRD "compare logical high" z196 zarch
-cc0f clih RIL_RI "compare logical immediate" z196 zarch
+cc0f clih RIL_RU "compare logical immediate" z196 zarch
 e300000000c0 lbh RXY_RRRD "load byte high" z196 zarch
 e300000000c4 lhh RXY_RRRD "load halfword high" z196 zarch
 e300000000ca lfh RXY_RRRD "load high" z196 zarch
