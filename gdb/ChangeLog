@@ -1,3 +1,8 @@
+2013-09-17  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c: Move definitions of complaint functions to after
+	forward declarations of local functions.
+
 2013-09-17  Muhammad Waqas <mwaqas@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 

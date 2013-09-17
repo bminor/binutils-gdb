@@ -1235,74 +1235,7 @@ show_dwarf2_max_cache_age (struct ui_file *file, int from_tty,
 			    "dwarf2 compilation units is %s.\n"),
 		    value);
 }
-
-
-/* Various complaints about symbol reading that don't abort the process.  */
-
-static void
-dwarf2_statement_list_fits_in_line_number_section_complaint (void)
-{
-  complaint (&symfile_complaints,
-	     _("statement list doesn't fit in .debug_line section"));
-}
-
-static void
-dwarf2_debug_line_missing_file_complaint (void)
-{
-  complaint (&symfile_complaints,
-	     _(".debug_line section has line data without a file"));
-}
-
-static void
-dwarf2_debug_line_missing_end_sequence_complaint (void)
-{
-  complaint (&symfile_complaints,
-	     _(".debug_line section has line "
-	       "program sequence without an end"));
-}
-
-static void
-dwarf2_complex_location_expr_complaint (void)
-{
-  complaint (&symfile_complaints, _("location expression too complex"));
-}
-
-static void
-dwarf2_const_value_length_mismatch_complaint (const char *arg1, int arg2,
-					      int arg3)
-{
-  complaint (&symfile_complaints,
-	     _("const value length mismatch for '%s', got %d, expected %d"),
-	     arg1, arg2, arg3);
-}
-
-static void
-dwarf2_section_buffer_overflow_complaint (struct dwarf2_section_info *section)
-{
-  complaint (&symfile_complaints,
-	     _("debug info runs off end of %s section"
-	       " [in module %s]"),
-	     section->asection->name,
-	     bfd_get_filename (section->asection->owner));
-}
-
-static void
-dwarf2_macro_malformed_definition_complaint (const char *arg1)
-{
-  complaint (&symfile_complaints,
-	     _("macro debug info contains a "
-	       "malformed macro definition:\n`%s'"),
-	     arg1);
-}
-
-static void
-dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
-{
-  complaint (&symfile_complaints,
-	     _("invalid attribute class or form for '%s' in '%s'"),
-	     arg1, arg2);
-}
-
+
 /* local function prototypes */
 
 static void dwarf2_locate_sections (bfd *, asection *, void *);
@@ -1785,7 +1718,73 @@ static void free_dwo_file_cleanup (void *);
 static void process_cu_includes (void);
 
 static void check_producer (struct dwarf2_cu *cu);
+
+/* Various complaints about symbol reading that don't abort the process.  */
 
+static void
+dwarf2_statement_list_fits_in_line_number_section_complaint (void)
+{
+  complaint (&symfile_complaints,
+	     _("statement list doesn't fit in .debug_line section"));
+}
+
+static void
+dwarf2_debug_line_missing_file_complaint (void)
+{
+  complaint (&symfile_complaints,
+	     _(".debug_line section has line data without a file"));
+}
+
+static void
+dwarf2_debug_line_missing_end_sequence_complaint (void)
+{
+  complaint (&symfile_complaints,
+	     _(".debug_line section has line "
+	       "program sequence without an end"));
+}
+
+static void
+dwarf2_complex_location_expr_complaint (void)
+{
+  complaint (&symfile_complaints, _("location expression too complex"));
+}
+
+static void
+dwarf2_const_value_length_mismatch_complaint (const char *arg1, int arg2,
+					      int arg3)
+{
+  complaint (&symfile_complaints,
+	     _("const value length mismatch for '%s', got %d, expected %d"),
+	     arg1, arg2, arg3);
+}
+
+static void
+dwarf2_section_buffer_overflow_complaint (struct dwarf2_section_info *section)
+{
+  complaint (&symfile_complaints,
+	     _("debug info runs off end of %s section"
+	       " [in module %s]"),
+	     section->asection->name,
+	     bfd_get_filename (section->asection->owner));
+}
+
+static void
+dwarf2_macro_malformed_definition_complaint (const char *arg1)
+{
+  complaint (&symfile_complaints,
+	     _("macro debug info contains a "
+	       "malformed macro definition:\n`%s'"),
+	     arg1);
+}
+
+static void
+dwarf2_invalid_attrib_class_complaint (const char *arg1, const char *arg2)
+{
+  complaint (&symfile_complaints,
+	     _("invalid attribute class or form for '%s' in '%s'"),
+	     arg1, arg2);
+}
+
 #if WORDS_BIGENDIAN
 
 /* Convert VALUE between big- and little-endian.  */
