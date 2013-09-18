@@ -98,6 +98,13 @@ int return_child_result_value = -1;
 /* GDB as it has been invoked from the command line (i.e. argv[0]).  */
 static char *gdb_program_name;
 
+/* Return read only pointer to GDB_PROGRAM_NAME.  */
+const char *
+get_gdb_program_name (void)
+{
+  return gdb_program_name;
+}
+
 static void print_gdb_help (struct ui_file *);
 
 /* Relocate a file or directory.  PROGNAME is the name by which gdb

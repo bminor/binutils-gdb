@@ -1,3 +1,8 @@
+2013-09-18  Andrew Burgess  <aburgess@broadcom.com>
+
+	* main.h (get_gdb_program_name): Add declaration.
+	* main.c (get_gdb_program_name): Add definition.
+
 2013-09-17  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c: Move definitions of complaint functions to after
