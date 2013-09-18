@@ -1,3 +1,12 @@
+2013-09-18  Pedro Alves  <palves@redhat.com>
+
+	* gnu-nat.c (inf_validate_procs, gnu_wait, gnu_resume)
+	(gnu_create_inferior)
+	(gnu_attach, gnu_thread_alive, gnu_pid_to_str, cur_thread)
+	(set_sig_thread_cmd): Use the lwpid field of ptids to
+	store/extract thread ids instead of the tid field.
+	* i386gnu-nat.c (gnu_fetch_registers): Adjust.
+
 2013-09-18  Andrew Burgess  <aburgess@broadcom.com>
 
 	* infcmd.c (default_print_one_register_info): Add detection of

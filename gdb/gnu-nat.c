@@ -1083,7 +1083,7 @@ inf_validate_procs (struct inf *inf)
 	    last = thread;
 	    proc_debug (thread, "new thread: %d", threads[i]);
 
-	    ptid = ptid_build (inf->pid, 0, thread->tid);
+	    ptid = ptid_build (inf->pid, thread->tid, 0);
 
 	    /* Tell GDB's generic thread code.  */
 
@@ -1613,17 +1613,17 @@ rewait:
 
   thread = inf->wait.thread;
   if (thread)
-    ptid = ptid_build (inf->pid, 0, thread->tid);
+    ptid = ptid_build (inf->pid, thread->tid, 0);
   else if (ptid_equal (ptid, minus_one_ptid))
     thread = inf_tid_to_thread (inf, -1);
   else
-    thread = inf_tid_to_thread (inf, ptid_get_tid (ptid));
+    thread = inf_tid_to_thread (inf, ptid_get_lwp (ptid));
 
   if (!thread || thread->port == MACH_PORT_NULL)
     {
       /* TID is dead; try and find a new thread.  */
       if (inf_update_procs (inf) && inf->threads)
-	ptid = ptid_build (inf->pid, 0, inf->threads->tid); /* The first
+	ptid = ptid_build (inf->pid, inf->threads->tid, 0); /* The first
 							       available
 							       thread.  */
       else
@@ -2022,7 +2022,7 @@ gnu_resume (struct target_ops *ops,
   else
     /* Just allow a single thread to run.  */
     {
-      struct proc *thread = inf_tid_to_thread (inf, ptid_get_tid (ptid));
+      struct proc *thread = inf_tid_to_thread (inf, ptid_get_lwp (ptid));
 
       if (!thread)
 	error (_("Can't run single thread id %s: no such thread!"),
@@ -2033,7 +2033,7 @@ gnu_resume (struct target_ops *ops,
 
   if (step)
     {
-      step_thread = inf_tid_to_thread (inf, ptid_get_tid (ptid));
+      step_thread = inf_tid_to_thread (inf, ptid_get_lwp (ptid));
       if (!step_thread)
 	warning (_("Can't step thread id %s: no such thread."),
 		 target_pid_to_str (ptid));
@@ -2133,7 +2133,7 @@ gnu_create_inferior (struct target_ops *ops,
 
   /* We now have thread info.  */
   thread_change_ptid (inferior_ptid,
-		      ptid_build (inf->pid, 0, inf_pick_first_thread ()));
+		      ptid_build (inf->pid, inf_pick_first_thread (), 0));
 
   startup_inferior (inf->pending_execs);
 
@@ -2190,7 +2190,7 @@ gnu_attach (struct target_ops *ops, char *args, int from_tty)
 
   inf_update_procs (inf);
 
-  inferior_ptid = ptid_build (pid, 0, inf_pick_first_thread ());
+  inferior_ptid = ptid_build (pid, inf_pick_first_thread (), 0);
 
   /* We have to initialize the terminal settings now, since the code
      below might try to restore them.  */
@@ -2261,7 +2261,7 @@ gnu_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   inf_update_procs (gnu_current_inf);
   return !!inf_tid_to_thread (gnu_current_inf,
-			      ptid_get_tid (ptid));
+			      ptid_get_lwp (ptid));
 }
 
 
@@ -2596,7 +2596,7 @@ static char *
 gnu_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   struct inf *inf = gnu_current_inf;
-  int tid = ptid_get_tid (ptid);
+  int tid = ptid_get_lwp (ptid);
   struct proc *thread = inf_tid_to_thread (inf, tid);
 
   if (thread)
@@ -2729,7 +2729,7 @@ cur_thread (void)
 {
   struct inf *inf = cur_inf ();
   struct proc *thread = inf_tid_to_thread (inf,
-					   ptid_get_tid (inferior_ptid));
+					   ptid_get_lwp (inferior_ptid));
   if (!thread)
     error (_("No current thread."));
   return thread;
@@ -2928,7 +2928,7 @@ set_sig_thread_cmd (char *args, int from_tty)
 	error (_("Thread ID %s not known.  "
 		 "Use the \"info threads\" command to\n"
 	       "see the IDs of currently known threads."), args);
-      inf->signal_thread = inf_tid_to_thread (inf, ptid_get_tid (ptid));
+      inf->signal_thread = inf_tid_to_thread (inf, ptid_get_lwp (ptid));
     }
 }
 
