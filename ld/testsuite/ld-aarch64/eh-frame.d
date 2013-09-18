@@ -2,7 +2,7 @@
 
 Contents of the .eh_frame section:
 
-00000000 00000044 00000000 CIE
+0+0000 0+0044 0+0000 CIE
   Version:               1
   Augmentation:          "zR"
   Code alignment factor: 2
@@ -34,7 +34,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
-00000048 00000014 0000004c FDE cie=00000000 pc=f*ffffff80..f*ffffffc0
+0+0048 0+0014 0+004c FDE cie=0+0000 pc=f+fffff80..f+fffffc0
   DW_CFA_nop
   DW_CFA_nop
   DW_CFA_nop
@@ -43,7 +43,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
-00000060 00000044 00000000 CIE
+0+0060 0+0044 0+0000 CIE
   Version:               1
   Augmentation:          "zR"
   Code alignment factor: 2
@@ -75,7 +75,7 @@ Contents of the .eh_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
-000000a8 00000014 0000004c FDE cie=00000060 pc=f*ffffffc0..00000000
+0+00a8 0+0014 0+004c FDE cie=0+0060 pc=f+fffffc0..0+0000
   DW_CFA_nop
   DW_CFA_nop
   DW_CFA_nop
