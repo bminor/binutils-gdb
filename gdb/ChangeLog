@@ -1,3 +1,10 @@
+2013-09-18  Raunaq Bathija  <raunaq12@in.ibm.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* xcoffread.c (struct coff_symbol): Use CORE_ADDR as type
+	of c_value member.
+	(read_xcoff_symtab): Use CORE_ADDR as type of fcn_start_addr.
+
 2013-09-18  Pedro Alves  <palves@redhat.com>
 	    Yue Lu  <hacklu.newborn@gmail.com>
 

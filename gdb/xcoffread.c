@@ -94,7 +94,7 @@ struct coff_symbol
     char *c_name;
     int c_symnum;		/* Symbol number of this entry.  */
     int c_naux;			/* 0 if syment only, 1 if syment + auxent.  */
-    long c_value;
+    CORE_ADDR c_value;
     unsigned char c_sclass;
     int c_secnum;
     unsigned int c_type;
@@ -1033,7 +1033,7 @@ read_xcoff_symtab (struct objfile *objfile, struct partial_symtab *pst)
   unsigned int max_symnum;
   int just_started = 1;
   int depth = 0;
-  int fcn_start_addr = 0;
+  CORE_ADDR fcn_start_addr = 0;
 
   struct coff_symbol fcn_stab_saved = { 0 };
 
