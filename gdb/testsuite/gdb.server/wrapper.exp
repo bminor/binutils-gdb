@@ -25,8 +25,9 @@ if { [skip_gdbserver_tests] } {
     return 0
 }
 
-if [istarget *-*-mingw*] {
-    unsupported "Command env doesn't exist on Windows."
+if { [istarget *-*-mingw*]
+     || [istarget *-*-cygwin*] } {
+    unsupported "gdbserver does not support --wrapper on this target (PR server/15967)"
     return -1
 }
 

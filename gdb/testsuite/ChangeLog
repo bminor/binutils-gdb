@@ -1,3 +1,9 @@
+2013-09-18  Pedro Alves  <palves@redhat.com>
+
+	PR server/15967
+	* gdb.server/wrapper.exp: Also return unsupported for Cygwin, and
+	change text.
+
 2013-09-18  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.server/wrapper.c: New.
