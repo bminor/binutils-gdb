@@ -1,21 +1,3 @@
-2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
-
-	PR binutils/15834
-	* i960.h: Fix typos.
-
-2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
-
-	* mips.h: Remove references to "+I" and imm2_expr.
-
-2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
-
-	* mips.h (M_DEXT, M_DINS): Delete.
-
-2013-08-19  Richard Sandiford  <rdsandiford@googlemail.com>
-
-	* mips.h (OP_OPTIONAL_REG): New mips_operand_type.
-	(mips_optional_operand_p): New function.
-
 2013-08-04  Jürgen Urban  <JuergenUrban@gmx.de>
 	    Richard Sandiford  <rdsandiford@googlemail.com>
 
@@ -1115,7 +1097,7 @@
 
 2008-04-28  Adam Nemet  <anemet@caviumnetworks.com>
 
-	* mips.h (INSN_MACRO): Move it up to the pinfo macros.
+	* mips.h (INSN_MACRO): Move it up to the the pinfo macros.
 	(INSN2_M_FP_S, INSN2_M_FP_D): New pinfo2 macros.
 
 2008-04-14  Edmar Wienskoski  <edmar@freescale.com>

@@ -346,10 +346,6 @@ enum mips_operand_type {
   /* Described by mips_reg_operand.  */
   OP_REG,
 
-  /* Like OP_REG, but can be omitted if the register is the same as the
-     previous operand.  */
-  OP_OPTIONAL_REG,
-
   /* Described by mips_reg_pair_operand.  */
   OP_REG_PAIR,
 
@@ -578,15 +574,6 @@ struct mips_pcrel_operand
   unsigned int flip_isa_bit : 1;
 };
 
-/* Return true if the assembly syntax allows OPERAND to be omitted.  */
-
-static inline bfd_boolean
-mips_optional_operand_p (const struct mips_operand *operand)
-{
-  return (operand->type == OP_OPTIONAL_REG
-	  || operand->type == OP_REPEAT_PREV_REG);
-}
-
 /* Return a version of INSN in which the field specified by OPERAND
    has value UVAL.  */
 
@@ -799,6 +786,7 @@ struct mips_opcode
    Macro instructions:
    "A" General 32 bit expression
    "I" 32 bit immediate (value placed in imm_expr).
+   "+I" 32 bit immediate (value placed in imm2_expr).
    "F" 64 bit floating point constant in .rdata
    "L" 64 bit floating point constant in .lit8
    "f" 32 bit floating point constant
@@ -905,7 +893,7 @@ struct mips_opcode
    Extension character sequences used so far ("+" followed by the
    following), for quick reference when adding more:
    "1234567890"
-   "ABCEFGHJKLMNPQSXZ"
+   "ABCEFGHIJKLMNPQSXZ"
    "abcfgijmpqrstxyz"
 */
 
@@ -1353,6 +1341,8 @@ enum
   M_DDIV_3I,
   M_DDIVU_3,
   M_DDIVU_3I,
+  M_DEXT,
+  M_DINS,
   M_DIV_3,
   M_DIV_3I,
   M_DIVU_3,
@@ -2024,6 +2014,7 @@ extern const int bfd_mips16_num_opcodes;
    Macro instructions:
    "A" general 32 bit expression
    "I" 32-bit immediate (value placed in imm_expr).
+   "+I" 32-bit immediate (value placed in imm2_expr).
    "F" 64-bit floating point constant in .rdata
    "L" 64-bit floating point constant in .lit8
    "f" 32-bit floating point constant
@@ -2060,7 +2051,7 @@ extern const int bfd_mips16_num_opcodes;
    following), for quick reference when adding more:
    ""
    ""
-   "ABCEFGH"
+   "ABCEFGHI"
    "ij"
 
    Extension character sequences used so far ("m" followed by the
