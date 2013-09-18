@@ -1,3 +1,8 @@
+2013-09-18  Yao Qi  <yao@codesourcery.com>
+
+	PR server/15959
+	* server.c (start_inferior): Clear 'resume_info'.
+
 2013-09-16  Jiong Wang  <jiwang@tilera.com>
 
 	* linux-tile-low.c (tile_regsets): Modify the size field to 64-bit

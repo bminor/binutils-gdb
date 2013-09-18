@@ -256,6 +256,7 @@ start_inferior (char **argv)
     {
       struct thread_resume resume_info;
 
+      memset (&resume_info, 0, sizeof (resume_info));
       resume_info.thread = pid_to_ptid (signal_pid);
       resume_info.kind = resume_continue;
       resume_info.sig = 0;
