@@ -57,6 +57,10 @@ instruction happens automatically, but this command line option
 disables this behaviour.  It is then up to the programmer to ensure
 that interrupts are enabled and disabled correctly.
 
+@item -md
+mark the object file as one that requires data to copied from ROM to
+RAM at execution startup.  Disabled by default.
+
 @end table
 
 @node MSP430 Syntax

@@ -1,7 +1,22 @@
+2013-09-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (OPTION_MOVE_DATA): Define.
+	(move_data): New variable.
+	(md_parse_option): Parse -md.
+	(msp430_section): New function.  Catch references to the .bss or
+	.data sections and generate a special symbol for use by the libcrt
+	library.
+	(md_pseudo_table): Intercept .section directives.
+	(md_longopt): Add -md
+	(md_show_usage): Likewise.
+	(msp430_operands): Generate a warning message if a NOP is inserted
+	into the instruction stream.
+	* doc/c-msp430.texi (node MSP430 Options): Document -md option.
+
 2013-09-17  Doug Gilmore  <Doug.Gilmore@imgtec.com>
 
 	* config/tc-mips.c (mips_elf_final_processing): Set
-	EF_MIPS_FP64 for -mgp32 -mfp64, removing old FIXME. 
+	EF_MIPS_FP64 for -mgp32 -mfp64, removing old FIXME.
 
 2013-09-16  Will Newton  <will.newton@linaro.org>
 

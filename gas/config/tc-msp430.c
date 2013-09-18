@@ -1123,6 +1123,8 @@ static bfd_boolean large_model = FALSE;
 #define OPTION_NO_INTR_NOPS 'N'
 static bfd_boolean gen_interrupt_nops = TRUE;
 #define OPTION_MCPU 'c'
+#define OPTION_MOVE_DATA 'd'
+static bfd_boolean move_data = FALSE;
 
 static void
 msp430_set_arch (int option)
@@ -1210,9 +1212,32 @@ md_parse_option (int c, char * arg)
     case OPTION_NO_INTR_NOPS:
       gen_interrupt_nops = FALSE;
       return 1;
+
+    case OPTION_MOVE_DATA:
+      move_data = TRUE;
+      return 1;
     }
 
   return 0;
+}
+
+static void
+msp430_section (int arg)
+{
+  char * saved_ilp = input_line_pointer;
+  char * name = obj_elf_section_name ();
+
+  if (strncmp (name, ".bss", 4) == 0
+      || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
+    (void) symbol_find_or_make ("__crt0_init_bss");
+
+  if (move_data
+      && (strncmp (name, ".data", 5) == 0
+	  || strncmp (name, ".gnu.linkonce.d.", 16) == 0))
+    (void) symbol_find_or_make ("__crt0_movedata");
+
+  input_line_pointer = saved_ilp;
+  obj_elf_section (arg);
 }
 
 const pseudo_typeS md_pseudo_table[] =
@@ -1220,6 +1245,11 @@ const pseudo_typeS md_pseudo_table[] =
   {"arch", msp430_set_arch, OPTION_MMCU},
   {"cpu", msp430_set_arch, OPTION_MCPU},
   {"profiler", msp430_profiler, 0},
+  {"section", msp430_section, 0},
+  {"section.s", msp430_section, 0},
+  {"sect", msp430_section, 0},
+  {"sect.s", msp430_section, 0},
+  {"pushsection", msp430_section, 1},
   {NULL, NULL, 0}
 };
 
@@ -1233,6 +1263,7 @@ struct option md_longopts[] =
   {"mQ", no_argument, NULL, OPTION_RELAX},
   {"ml", no_argument, NULL, OPTION_LARGE},
   {"mN", no_argument, NULL, OPTION_NO_INTR_NOPS},
+  {"md", no_argument, NULL, OPTION_MOVE_DATA},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -1252,6 +1283,8 @@ md_show_usage (FILE * stream)
 	   _("  -ml - enable large code model\n"));
   fprintf (stream,
 	   _("  -mN - disable generation of NOP after changing interrupts\n"));
+  fprintf (stream,
+	   _("  -md - Force copying of data from ROM to RAM at startup\n"));
 
   show_mcu_list (stream);
 }
@@ -2201,6 +2234,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		 See 1.3.4.1 of the MSP430x5xx User Guide.  */
 	      insn_length += 2;
 	      frag = frag_more (2);
+	      as_warn (_("a NOP instruction has been inserted after %s"),
+		       opcode->name);
 	      bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
 	    }
 	  dwarf2_emit_insn (insn_length);
@@ -2285,6 +2320,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      insn_length += 2;
 	      frag = frag_more (2);
 	      bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
+	      as_warn (_("a NOP instruction has been inserted after %s"),
+		       opcode->name);
 	    }
 
 	  dwarf2_emit_insn (insn_length);
@@ -3041,6 +3078,8 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  insn_length += 2;
 	  frag = frag_more (2);
 	  bfd_putl16 ((bfd_vma) 0x4303 /* NOP */, frag);
+	  as_warn (_("a NOP instruction has been inserted after %s"),
+		   opcode->name);
 	}
 
       dwarf2_emit_insn (insn_length);
