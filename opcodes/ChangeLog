@@ -1,21 +1,3 @@
-2013-09-17  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
-
-	* s390-opc.txt (clih): Make the immediate unsigned.
-
-2013-09-04  Roland McGrath  <mcgrathr@google.com>
-
-	PR gas/15914
-	* arm-dis.c (arm_opcodes): Add udf.
-	(thumb_opcodes): Use "udf" mnemonic rather than UNDEFINED_INSTRUCTION.
-	(thumb32_opcodes): Add udf.w.
-	(print_insn_thumb32): Handle %H as the thumb32_opcodes comment says.
-
-2013-09-02  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
-
-	* s390-opc.txt: Fix description for fiebra, fidbra, and fixbra.
-	For the load fp integer instructions only the suppression flag was
-	new with z196 version.
-
 2013-08-28  Nick Clifton  <nickc@redhat.com>
 
 	* aarch64-opc.c (aarch64_logical_immediate_p): Return FALSE if the

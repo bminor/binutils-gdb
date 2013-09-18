@@ -995,7 +995,7 @@ cc0d cih RIL_RI "compare immediate high" z196 zarch
 b9cf clhhr RRE_RR "compare logical high high" z196 zarch
 b9df clhlr RRE_RR "compare logical high low" z196 zarch
 e300000000cf clhf RXY_RRRD "compare logical high" z196 zarch
-cc0f clih RIL_RU "compare logical immediate" z196 zarch
+cc0f clih RIL_RI "compare logical immediate" z196 zarch
 e300000000c0 lbh RXY_RRRD "load byte high" z196 zarch
 e300000000c4 lhh RXY_RRRD "load halfword high" z196 zarch
 e300000000ca lfh RXY_RRRD "load high" z196 zarch
@@ -1082,9 +1082,9 @@ b39e clfxbr RRF_UURFE "convert to 32 bit fixed logical from extended bfp with ro
 b3ac clgebr RRF_UURF "convert to 64 bit fixed logical from short bfp with rounding mode" z196 zarch
 b3ad clgdbr RRF_UURF "convert to 64 bit fixed logical from long bfp with rounding mode" z196 zarch
 b3ae clgxbr RRF_UURFE "convert to 64 bit fixed logical from extended bfp with rounding mode" z196 zarch
-b357 fiebra RRF_UUFF "load fp integer short bfp with inexact suppression" z196 zarch
-b35f fidbra RRF_UUFF "load fp integer long bfp with inexact suppression" z196 zarch
-b347 fixbra RRF_UUFEFE "load fp integer extended bfp with inexact suppression" z196 zarch
+b357 fiebra RRF_UUFF "load fp integer short bfp with rounding mode" z196 zarch
+b35f fidbra RRF_UUFF "load fp integer long bfp with rounding mode" z196 zarch
+b347 fixbra RRF_UUFEFE "load fp integer extended bfp with rounding mode" z196 zarch
 b344 ledbra RRF_UUFF "load rounded short/long bfp to short/long bfp with rounding mode" z196 zarch
 b345 ldxbra RRF_UUFEFE "load rounded long/extended bfp to long/extended bfp with rounding mode" z196 zarch
 b346 lexbra RRF_UUFEFE "load rounded short/extended bfp to short/extended bfp with rounding mode" z196 zarch
