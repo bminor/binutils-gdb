@@ -1,3 +1,8 @@
+2013-09-18  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.24.51
+	* configure: Regenerate.
+
 2013-09-17  Doug Gilmore  <Doug.Gilmore@imgtec.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_print_private_bfd_data): Handle

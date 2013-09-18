@@ -18,7 +18,7 @@ dnl <http://www.gnu.org/licenses/>.
 dnl
 
 AC_PREREQ(2.59)
-AC_INIT([bfd], [2.23.52])
+AC_INIT([bfd], [2.24.51])
 AC_CONFIG_SRCDIR([libbfd.c])
 
 AC_CANONICAL_TARGET
