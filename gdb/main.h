@@ -46,6 +46,6 @@ extern char *windows_get_absolute_argv0 (const char *argv0);
    might have been expanded to an absolute path if required by the
    platform.  Could return NULL if called before gdb has had a chance to
    parse the argv array.  */
-extern const char * get_gdb_program_name (void);
+extern const char *get_gdb_program_name (void);
 
 #endif

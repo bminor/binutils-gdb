@@ -1,5 +1,9 @@
 2013-09-18  Andrew Burgess  <aburgess@broadcom.com>
 
+	* main.h (get_gdb_program_name): Remove extra whitespace.
+
+2013-09-18  Andrew Burgess  <aburgess@broadcom.com>
+
 	* main.h (get_gdb_program_name): Add declaration.
 	* main.c (get_gdb_program_name): Add definition.
 
