@@ -1,3 +1,7 @@
+2013-09-18  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.24.
+
 2013-09-18  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (OPTION_MOVE_DATA): Define.

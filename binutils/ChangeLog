@@ -1,5 +1,9 @@
 2013-09-18  Tristan Gingold  <gingold@adacore.com>
 
+	* NEWS: Add marker for 2.24.
+
+2013-09-18  Tristan Gingold  <gingold@adacore.com>
+
 	* Makefile.am (LEXLIB): Define.  Replase references to @LEXLIB@
 	by $(LEXLIB).
 	* Makefile.in: Regenerate.

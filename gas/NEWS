@@ -1,5 +1,7 @@
 -*- text -*-
 
+Changes in 2.24:
+
 * Add support for the Texas Instruments MSP430X processor.
 
 * Add -gdwarf-sections command line option to enable per-code-section

@@ -1,3 +1,7 @@
+2013-09-18  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add marker for 2.24.
+
 2013-09-17  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/15957
