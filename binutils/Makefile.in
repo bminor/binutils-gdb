@@ -587,26 +587,26 @@ ar_SOURCES = arparse.y arlex.l ar.c not-ranlib.c arsup.c rename.c binemul.c \
 	emul_$(EMULATION).c $(BULIBS)
 
 EXTRA_ar_SOURCES = $(CFILES)
-ar_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
+ar_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL)
 ranlib_SOURCES = ar.c is-ranlib.c arparse.y arlex.l arsup.c rename.c \
 	binemul.c emul_$(EMULATION).c $(BULIBS)
 
-ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
+ranlib_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL)
 addr2line_SOURCES = addr2line.c $(BULIBS)
 srconv_SOURCES = srconv.c coffgrok.c $(BULIBS)
 dlltool_SOURCES = dlltool.c defparse.y deflex.l $(BULIBS)
-dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL)
+dlltool_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL)
 coffdump_SOURCES = coffdump.c coffgrok.c $(BULIBS)
 sysdump_SOURCES = sysdump.c $(BULIBS)
 nlmconv_SOURCES = nlmconv.c nlmheader.y $(BULIBS)
 windres_SOURCES = windres.c resrc.c rescoff.c resbin.c rcparse.y rclex.c \
 	winduni.c resres.c $(BULIBS)
 
-windres_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL) $(LIBICONV)
+windres_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL) $(LIBICONV)
 windmc_SOURCES = windmc.c mcparse.y mclex.c \
 	winduni.c $(BULIBS)
 
-windmc_LDADD = $(BFDLIB) $(LIBIBERTY) @LEXLIB@ $(LIBINTL) $(LIBICONV)
+windmc_LDADD = $(BFDLIB) $(LIBIBERTY) $(LEXLIB) $(LIBINTL) $(LIBICONV)
 dllwrap_SOURCES = dllwrap.c version.c
 dllwrap_LDADD = $(LIBIBERTY) $(LIBINTL)
 EXTRA_DIST = arparse.c arparse.h arlex.c nlmheader.c sysinfo.c sysinfo.h \
