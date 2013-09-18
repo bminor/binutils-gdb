@@ -1,4 +1,5 @@
 2013-09-18  Pedro Alves  <palves@redhat.com>
+	    Yue Lu  <hacklu.newborn@gmail.com>
 
 	* gnu-nat.c (inf_validate_procs, gnu_wait, gnu_resume)
 	(gnu_create_inferior)
