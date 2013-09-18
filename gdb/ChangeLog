@@ -1,3 +1,9 @@
+2013-09-18  Pedro Alves  <palves@redhat.com>
+
+	* gnu-nat.c (set_sig_thread_cmd): Compare the thread's ptid to
+	minus_one_ptid instead of looking at the ptid's tid field and
+	comparing that to -1.
+
 2013-09-18  Andrew Burgess  <aburgess@broadcom.com>
 
 	* main.h (get_gdb_program_name): Remove extra whitespace.

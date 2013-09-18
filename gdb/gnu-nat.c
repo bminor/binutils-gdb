@@ -2922,13 +2922,13 @@ set_sig_thread_cmd (char *args, int from_tty)
     inf->signal_thread = 0;
   else
     {
-      int tid = ptid_get_tid (thread_id_to_pid (atoi (args)));
+      ptid_t ptid = thread_id_to_pid (atoi (args));
 
-      if (tid < 0)
+      if (ptid_equal (ptid, minus_one_ptid))
 	error (_("Thread ID %s not known.  "
 		 "Use the \"info threads\" command to\n"
 	       "see the IDs of currently known threads."), args);
-      inf->signal_thread = inf_tid_to_thread (inf, tid);
+      inf->signal_thread = inf_tid_to_thread (inf, ptid_get_tid (ptid));
     }
 }
 
