@@ -1,3 +1,8 @@
+2013-09-18  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* infrun.c (handle_inferior_event): Check if we know the
+	function start address before setting a resume breakpoint.
+
 2013-09-18  Pedro Alves  <palves@redhat.com>
 
 	* gnu-nat.c (set_sig_thread_cmd): Compare the thread's ptid to
