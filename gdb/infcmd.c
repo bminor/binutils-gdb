@@ -2033,6 +2033,12 @@ default_print_one_register_info (struct ui_file *file,
       fprintf_filtered (file, "*value not available*\n");
       return;
     }
+  else if (value_optimized_out (val))
+    {
+      val_print_optimized_out (file);
+      fprintf_filtered (file, "\n");
+      return;
+    }
 
   /* If virtual format is floating, print it that way, and in raw
      hex.  */
@@ -2107,9 +2113,6 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
   for (i = 0; i < numregs; i++)
     {
-      struct type *regtype;
-      struct value *val;
-
       /* Decide between printing all regs, non-float / vector regs, or
          specific reg.  */
       if (regnum == -1)
@@ -2137,16 +2140,9 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	  || *(gdbarch_register_name (gdbarch, i)) == '\0')
 	continue;
 
-      regtype = register_type (gdbarch, i);
-      val = allocate_value (regtype);
-
-      /* Get the data in raw format.  */
-      if (! deprecated_frame_register_read (frame, i, value_contents_raw (val)))
-	mark_value_bytes_unavailable (val, 0, TYPE_LENGTH (value_type (val)));
-
       default_print_one_register_info (file,
 				       gdbarch_register_name (gdbarch, i),
-				       val);
+				       get_frame_register_value (frame, i));
     }
 }
 

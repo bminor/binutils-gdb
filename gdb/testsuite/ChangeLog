@@ -1,3 +1,8 @@
+2013-09-18  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.dwarf2/dw2-reg-undefined.exp: Change pattern for info
+	register to "<optimized out>", and also print the registers.
+
 2013-09-18  Pedro Alves  <palves@redhat.com>
 
 	PR server/15967

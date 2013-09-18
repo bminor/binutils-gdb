@@ -1,3 +1,10 @@
+2013-09-18  Andrew Burgess  <aburgess@broadcom.com>
+
+	* infcmd.c (default_print_one_register_info): Add detection of
+	optimized out values.
+	(default_print_registers_info): Switch to using
+	get_frame_register_value.
+
 2013-09-18  Markus Metzger  <markus.t.metzger@intel.com>
 
 	* infrun.c (handle_inferior_event): Check if we know the
