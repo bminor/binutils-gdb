@@ -2268,8 +2268,8 @@ gnu_thread_alive (struct target_ops *ops, ptid_t ptid)
 /* Read inferior task's LEN bytes from ADDR and copy it to MYADDR in
    gdb's address space.  Return 0 on failure; number of bytes read
    otherwise.  */
-int
-gnu_read_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
+static int
+gnu_read_inferior (task_t task, CORE_ADDR addr, gdb_byte *myaddr, int length)
 {
   error_t err;
   vm_address_t low_address = (vm_address_t) trunc_page (addr);
@@ -2314,8 +2314,9 @@ struct obstack region_obstack;
 
 /* Write gdb's LEN bytes from MYADDR and copy it to ADDR in inferior
    task's address space.  */
-int
-gnu_write_inferior (task_t task, CORE_ADDR addr, char *myaddr, int length)
+static int
+gnu_write_inferior (task_t task, CORE_ADDR addr,
+		    const gdb_byte *myaddr, int length)
 {
   error_t err = 0;
   vm_address_t low_address = (vm_address_t) trunc_page (addr);
@@ -2471,30 +2472,55 @@ out:
 }
 
 
-/* Return 0 on failure, number of bytes handled otherwise.  TARGET
-   is ignored.  */
-static int
-gnu_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
-		 struct mem_attrib *attrib,
-		 struct target_ops *target)
+
+/* Helper for gnu_xfer_partial that handles memory transfers.  */
+
+static LONGEST
+gnu_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
+		 CORE_ADDR memaddr, LONGEST len)
 {
   task_t task = (gnu_current_inf
 		 ? (gnu_current_inf->task
 		    ? gnu_current_inf->task->port : 0)
 		 : 0);
+  int res;
 
   if (task == MACH_PORT_NULL)
-    return 0;
+    return TARGET_XFER_E_IO;
+
+  if (writebuf != NULL)
+    {
+      inf_debug (gnu_current_inf, "writing %s[%s] <-- %s",
+		 paddress (target_gdbarch (), memaddr), plongest (len),
+		 host_address_to_string (writebuf));
+      res = gnu_write_inferior (task, memaddr, writebuf, len);
+    }
   else
     {
-      inf_debug (gnu_current_inf, "%s %s[%d] %s %s",
-		 write ? "writing" : "reading",
-		 paddress (target_gdbarch (), memaddr), len,
-		 write ? "<--" : "-->", host_address_to_string (myaddr));
-      if (write)
-	return gnu_write_inferior (task, memaddr, myaddr, len);
-      else
-	return gnu_read_inferior (task, memaddr, myaddr, len);
+      inf_debug (gnu_current_inf, "reading %s[%s] --> %s",
+		 paddress (target_gdbarch (), memaddr), plongest (len),
+		 host_address_to_string (readbuf));
+      res = gnu_read_inferior (task, memaddr, readbuf, len);
+    }
+  if (res == 0)
+    return TARGET_XFER_E_IO;
+  return res;
+}
+
+/* Target to_xfer_partial implementation.  */
+
+static LONGEST
+gnu_xfer_partial (struct target_ops *ops, enum target_object object,
+		  const char *annex, gdb_byte *readbuf,
+		  const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+{
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      return gnu_xfer_memory (readbuf, writebuf, offset, len);
+
+    default:
+      return -1;
     }
 }
 
@@ -2628,7 +2654,7 @@ gnu_target (void)
   t->to_detach = gnu_detach;
   t->to_resume = gnu_resume;
   t->to_wait = gnu_wait;
-  t->deprecated_xfer_memory = gnu_xfer_memory;
+  t->to_xfer_partial = gnu_xfer_partial;
   t->to_find_memory_regions = gnu_find_memory_regions;
   t->to_terminal_init = gnu_terminal_init_inferior;
   t->to_kill = gnu_kill_inferior;

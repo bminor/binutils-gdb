@@ -1,3 +1,16 @@
+2013-09-19  Pedro Alves  <palves@redhat.com>
+	    Thomas Schwinge  <thomas@codesourcery.com>
+	    Yue Lu  <hacklu.newborn@gmail.com>
+
+	* gnu-nat.c (gnu_read_inferior, gnu_write_inferior): Make static.
+	Take a gdb_byte pointer instead of a char pointer.
+
+	* gnu-nat.c (gnu_xfer_memory): Adjust interface as
+	gnu_xfer_partial helper.
+	(gnu_xfer_partial): New function.
+	(gnu_target): Don't install a deprecated_xfer_memory hook.
+	Install a to_xfer_partial hook.
+
 2013-09-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Constification.
