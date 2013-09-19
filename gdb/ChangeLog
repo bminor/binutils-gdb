@@ -1,4 +1,9 @@
 2013-09-19  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (remove_threaded_breakpoints): Skip non-user
+	breakpoints.
+
+2013-09-19  Pedro Alves  <palves@redhat.com>
 	    Thomas Schwinge  <thomas@codesourcery.com>
 	    Yue Lu  <hacklu.newborn@gmail.com>
 

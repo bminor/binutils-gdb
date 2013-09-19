@@ -2938,7 +2938,7 @@ remove_threaded_breakpoints (struct thread_info *tp, int silent)
 
   ALL_BREAKPOINTS_SAFE (b, b_tmp)
     {
-      if (b->thread == tp->num)
+      if (b->thread == tp->num && user_breakpoint_p (b))
 	{
 	  b->disposition = disp_del_at_next_stop;
 
