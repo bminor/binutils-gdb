@@ -477,7 +477,7 @@ enum symfile_add_flags
 
 extern void new_symfile_objfile (struct objfile *, int);
 
-extern struct objfile *symbol_file_add (char *, int,
+extern struct objfile *symbol_file_add (const char *, int,
 					struct section_addr_info *, int);
 
 extern struct objfile *symbol_file_add_from_bfd (bfd *, int,
@@ -528,7 +528,7 @@ extern void set_initial_language (void);
 
 extern void find_lowest_section (bfd *, asection *, void *);
 
-extern bfd *symfile_bfd_open (char *);
+extern bfd *symfile_bfd_open (const char *);
 
 extern bfd *gdb_bfd_open_maybe_remote (const char *);
 
@@ -572,7 +572,7 @@ extern CORE_ADDR overlay_unmapped_address (CORE_ADDR, struct obj_section *);
 extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Load symbols from a file.  */
-extern void symbol_file_add_main (char *args, int from_tty);
+extern void symbol_file_add_main (const char *args, int from_tty);
 
 /* Clear GDB symbol tables.  */
 extern void symbol_file_clear (int from_tty);

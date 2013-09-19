@@ -87,7 +87,7 @@ int readnow_symbol_files;	/* Read full symbols immediately.  */
 
 static void load_command (char *, int);
 
-static void symbol_file_add_main_1 (char *args, int from_tty, int flags);
+static void symbol_file_add_main_1 (const char *args, int from_tty, int flags);
 
 static void add_symbol_file_command (char *, int);
 
@@ -1200,8 +1200,8 @@ symbol_file_add_from_bfd (bfd *abfd, int add_flags,
    loaded file.  See symbol_file_add_with_addrs's comments for details.  */
 
 struct objfile *
-symbol_file_add (char *name, int add_flags, struct section_addr_info *addrs,
-		 int flags)
+symbol_file_add (const char *name, int add_flags,
+		 struct section_addr_info *addrs, int flags)
 {
   bfd *bfd = symfile_bfd_open (name);
   struct cleanup *cleanup = make_cleanup_bfd_unref (bfd);
@@ -1221,13 +1221,13 @@ symbol_file_add (char *name, int add_flags, struct section_addr_info *addrs,
    command itself.  */
 
 void
-symbol_file_add_main (char *args, int from_tty)
+symbol_file_add_main (const char *args, int from_tty)
 {
   symbol_file_add_main_1 (args, from_tty, 0);
 }
 
 static void
-symbol_file_add_main_1 (char *args, int from_tty, int flags)
+symbol_file_add_main_1 (const char *args, int from_tty, int flags)
 {
   const int add_flags = (current_inferior ()->symfile_flags
 			 | SYMFILE_MAINLINE | (from_tty ? SYMFILE_VERBOSE : 0));
@@ -1652,31 +1652,31 @@ gdb_bfd_open_maybe_remote (const char *name)
    absolute).  In case of trouble, error() is called.  */
 
 bfd *
-symfile_bfd_open (char *name)
+symfile_bfd_open (const char *cname)
 {
   bfd *sym_bfd;
   int desc;
-  char *absolute_name;
+  char *name, *absolute_name;
   struct cleanup *back_to;
 
-  if (remote_filename_p (name))
+  if (remote_filename_p (cname))
     {
-      sym_bfd = remote_bfd_open (name, gnutarget);
+      sym_bfd = remote_bfd_open (cname, gnutarget);
       if (!sym_bfd)
-	error (_("`%s': can't open to read symbols: %s."), name,
+	error (_("`%s': can't open to read symbols: %s."), cname,
 	       bfd_errmsg (bfd_get_error ()));
 
       if (!bfd_check_format (sym_bfd, bfd_object))
 	{
 	  make_cleanup_bfd_unref (sym_bfd);
-	  error (_("`%s': can't read symbols: %s."), name,
+	  error (_("`%s': can't read symbols: %s."), cname,
 		 bfd_errmsg (bfd_get_error ()));
 	}
 
       return sym_bfd;
     }
 
-  name = tilde_expand (name);	/* Returns 1st new malloc'd copy.  */
+  name = tilde_expand (cname);	/* Returns 1st new malloc'd copy.  */
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
   desc = openp (getenv ("PATH"), OPF_TRY_CWD_FIRST | OPF_RETURN_REALPATH, name,

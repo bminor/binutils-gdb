@@ -957,8 +957,8 @@ captured_main (void *data)
          catch_command_errors returns non-zero on success!  */
       if (catch_command_errors (exec_file_attach, execarg,
 				!batch_flag, RETURN_MASK_ALL))
-	catch_command_errors (symbol_file_add_main, symarg,
-			      !batch_flag, RETURN_MASK_ALL);
+	catch_command_errors_const (symbol_file_add_main, symarg,
+				    !batch_flag, RETURN_MASK_ALL);
     }
   else
     {
@@ -966,8 +966,8 @@ captured_main (void *data)
 	catch_command_errors (exec_file_attach, execarg,
 			      !batch_flag, RETURN_MASK_ALL);
       if (symarg != NULL)
-	catch_command_errors (symbol_file_add_main, symarg,
-			      !batch_flag, RETURN_MASK_ALL);
+	catch_command_errors_const (symbol_file_add_main, symarg,
+				    !batch_flag, RETURN_MASK_ALL);
     }
 
   if (corearg && pidarg)

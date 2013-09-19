@@ -1,3 +1,17 @@
+2013-09-19  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Constification.
+	* main.c (captured_main): Replace catch_command_errors by
+	catch_command_errors_const.  Twice.
+	* symfile.c (symbol_file_add_main_1): Make args parameter const.
+	(symbol_file_add): Make name parameter const.
+	(symbol_file_add_main, symbol_file_add_main_1): Make args parameter const.
+	(symfile_bfd_open): Make name parameter const, rename it to cname.  Add
+	variable name.  Change their usage accordingly.
+	* symfile.h (symbol_file_add, symfile_bfd_open): Make first parameter
+	const.
+	(symbol_file_add_main): Make args parameter const.
+
 2013-09-18  Raunaq Bathija  <raunaq12@in.ibm.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
