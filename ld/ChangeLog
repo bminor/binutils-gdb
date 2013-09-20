@@ -1,3 +1,8 @@
+2013-09-20  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* Makefile.am (enios2elf.c): Change tdir_nios2 to tdir_nios2elf.
+	* Makefile.in: Regenerate.
+
 2013-09-20  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
