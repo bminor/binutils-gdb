@@ -21,6 +21,8 @@ if [build_executable ${testfile}.exp $testfile] {
 
 set pipeline_counter 0
 
+set objcopy_program [gdb_find_objcopy]
+
 # Run a pipeline of processes through 'run_on_host'.
 # TEST is the base name of the test, it is modified and passed to 'run_on_host'.
 # Each subsequent argument is a list of the form {PROGRAM [ARG]...}.
@@ -98,7 +100,7 @@ if {[run_on_host "strip" [transform strip] \
 
 # Separate full debug info into ${binfile}.debug.
 remote_file host delete ${binfile}.debug
-if {[run_on_host "copydebug" [transform objcopy] \
+if {[run_on_host "copydebug" ${objcopy_program} \
 	 "--only-keep-debug ${binfile} ${binfile}.debug"]} {
     return -1
 }
@@ -106,7 +108,7 @@ if {[run_on_host "copydebug" [transform objcopy] \
 # Copy the full debuginfo, keeping only a minimal set of symbols and
 # removing some unnecessary sections.
 remote_file host delete ${binfile}.mini_debuginfo
-if {[run_on_host "objcopy 1" [transform objcopy] "-S --remove-section .gdb_index --remove-section .comment --keep-symbols=${binfile}.keep_symbols ${binfile}.debug ${binfile}.mini_debuginfo"]} {
+if {[run_on_host "objcopy 1" ${objcopy_program} "-S --remove-section .gdb_index --remove-section .comment --keep-symbols=${binfile}.keep_symbols ${binfile}.debug ${binfile}.mini_debuginfo"]} {
     return -1
 }
 
@@ -115,7 +117,7 @@ if {[run_on_host "objcopy 1" [transform objcopy] "-S --remove-section .gdb_index
 # some files there may be PT_NOTE with NT_GNU_BUILD_ID and GDB could look up
 # the .debug file from it.  This is only an additional test of GDB, such link
 # is not present in usual MiniDebugInfo sections.
-if {[run_on_host "addlink" [transform objcopy] \
+if {[run_on_host "addlink" ${objcopy_program} \
 	 "--add-gnu-debuglink=${binfile}.debug ${binfile}.mini_debuginfo ${binfile}.mini_debuginfo-debuglink"]} {
     return -1
 }
@@ -127,7 +129,7 @@ if {[run_on_host "xz" "xz" "-k ${binfile}.mini_debuginfo-debuglink"]} {
     return -1
 }
 remote_file host delete ${binfile}.test
-if {[run_on_host "objcopy 2" [transform objcopy] "--add-section .gnu_debugdata=${binfile}.mini_debuginfo-debuglink.xz ${binfile}.strip ${binfile}.test"]} {
+if {[run_on_host "objcopy 2" ${objcopy_program} "--add-section .gnu_debugdata=${binfile}.mini_debuginfo-debuglink.xz ${binfile}.strip ${binfile}.test"]} {
     return -1
 }
 

@@ -94,6 +94,26 @@ proc gdb_find_ldd {} {
     return $ldd
 }
 
+proc gdb_find_objcopy {} {
+    global OBJCOPY_FOR_TARGET
+    if [info exists OBJCOPY_FOR_TARGET] {
+	set objcopy $OBJCOPY_FOR_TARGET
+    } else {
+	set objcopy [transform objcopy]
+    }
+    return $objcopy
+}
+
+proc gdb_find_readelf {} {
+    global READELF_FOR_TARGET
+    if [info exists READELF_FOR_TARGET] {
+	set readelf $READELF_FOR_TARGET
+    } else {
+	set readelf [transform readelf]
+    }
+    return $readelf
+}
+
 proc gdb_default_target_compile {source destfile type options} {
     global target_triplet
     global tool_root_dir

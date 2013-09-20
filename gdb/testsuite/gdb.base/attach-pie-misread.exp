@@ -36,7 +36,7 @@ if {[build_executable_own_libs ${testfile}.exp $executable $srcfile [list additi
 #   DYNAMIC        0x134f618 0x000000000194f618 0x000000000194f618 0x000200 0x000200 RW  0x8
 #
 proc read_phdr {binfile test} {
-    set readelf_program [transform readelf]
+    set readelf_program [gdb_find_readelf]
     set command "exec $readelf_program -Wl $binfile"
     verbose -log "command is $command"
     set result [catch $command output]

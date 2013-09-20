@@ -39,7 +39,7 @@ gdb_unload
 
 # Strip out any labels there as they could corrupt the `main' name.
 
-set objcopy_program [transform objcopy]
+set objcopy_program [gdb_find_objcopy]
 set command "$objcopy_program -N block_start -N block_end -N break_at ${binfile}"
 verbose -log "Executing: $command"
 set result [catch "exec $command" output]

@@ -3944,7 +3944,7 @@ gdb_caching_proc gdb_skip_xml_test {
 # Return "" if no build-id found.
 proc build_id_debug_filename_get { exec } {
     set tmp [standard_output_file "${exec}-tmp"]
-    set objcopy_program [transform objcopy]
+    set objcopy_program [gdb_find_objcopy]
 
     set result [catch "exec $objcopy_program -j .note.gnu.build-id -O binary $exec $tmp" output]
     verbose "result is $result"
@@ -3982,7 +3982,7 @@ proc gdb_gnu_strip_debug { dest args } {
     set debug_file "${dest}.debug"
 
     set strip_to_file_program [transform strip]
-    set objcopy_program [transform objcopy]
+    set objcopy_program [gdb_find_objcopy]
 
     set debug_link [file tail $debug_file]
     set stripped_file "${dest}.stripped"

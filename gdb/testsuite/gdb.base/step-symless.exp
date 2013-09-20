@@ -20,7 +20,7 @@ if {[build_executable ${testfile}.exp ${testfile} ${srcfile} {nodebug}] == -1} {
 
 # We need those symbols global to access them from the .S file.
 set test "strip stub symbols"
-set objcopy_program [transform objcopy]
+set objcopy_program [gdb_find_objcopy]
 set result [catch "exec $objcopy_program -N symless ${binfile}" output]
 verbose "result is $result"
 verbose "output is $output"

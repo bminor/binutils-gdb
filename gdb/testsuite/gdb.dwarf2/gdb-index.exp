@@ -52,7 +52,7 @@ proc add_gdb_index { program } {
     }
 
     set program_with_index ${program}.with-index
-    if {[run_on_host "objcopy" [transform objcopy] "--remove-section .gdb_index --add-section .gdb_index=$index_file --set-section-flags .gdb_index=readonly ${program} ${program_with_index}"]} {
+    if {[run_on_host "objcopy" [gdb_find_objcopy] "--remove-section .gdb_index --add-section .gdb_index=$index_file --set-section-flags .gdb_index=readonly ${program} ${program_with_index}"]} {
 	return ""
     }
     return ${program_with_index}

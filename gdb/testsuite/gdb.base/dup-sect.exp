@@ -42,7 +42,7 @@ if {[build_executable ${testfile}.exp $executable [list ${srcfile} ${srcmainfile
 }
 
 set test "rename section"
-set objcopy_program [transform objcopy]
+set objcopy_program [gdb_find_objcopy]
 set result [catch "exec $objcopy_program --rename-section sect2=sect1 $binfile" output]
 verbose "result is $result"
 verbose "output is $output"

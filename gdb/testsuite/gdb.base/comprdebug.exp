@@ -22,7 +22,7 @@ if {[gdb_compile $srcdir/$subdir/$srcfile $ofile \
     return
 }
 
-set objcopy_program [transform objcopy]
+set objcopy_program [gdb_find_objcopy]
 set cmd "$objcopy_program --compress-debug-sections $ofile"
 verbose "invoking $cmd"
 set result [catch "exec $cmd" output]

@@ -20,7 +20,7 @@
 proc section_get {exec section} {
     global subdir
     set tmp [standard_output_file section_get.tmp]
-    set objcopy_program [transform objcopy]
+    set objcopy_program [gdb_find_objcopy]
 
     set command "exec $objcopy_program -O binary --set-section-flags $section=A --change-section-address $section=0 -j $section $exec $tmp"
     verbose -log "command is $command"
@@ -211,7 +211,7 @@ proc prelink_no {arg {name {}}} {
 		# Skip prelink options.
 		continue
 	    }
-	    set readelf_program [transform readelf]
+	    set readelf_program [gdb_find_readelf]
 	    set command "exec $readelf_program -WS $bin"
 	    verbose -log "command is $command"
 	    set result [catch $command output]
