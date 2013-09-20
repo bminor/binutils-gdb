@@ -1,5 +1,15 @@
 2013-09-20  Doug Evans  <dje@google.com>
 
+	* lib/dwarf.exp (build_executable_from_fission_assembler): New proc.
+	* gdb.dwarf2/fission-base.S: Update.  Split out .dwo into separate
+	file.
+	* gdb.dwarf2/fission-loclists.S: Ditto.
+	* gdb.dwarf2/fission-reread.S: Ditto.
+	* gdb.dwarf2/fission-base.exp: Skip of remote host.  Compile with
+	build_executable_from_fission_assembler.
+	* gdb.dwarf2/fission-loclists.exp: Ditto.
+	* gdb.dwarf2/fission-reread.exp: Ditto.
+
 	* lib/future.exp (gdb_find_objcopy, gdb_find_readelf): New procs.
 	* lib/gdb.exp (build_id_debug_filename_get): Update to use them.
 	(gdb_gnu_strip_debug): Ditto.

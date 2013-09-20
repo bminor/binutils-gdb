@@ -15,6 +15,11 @@
 
 load_lib dwarf.exp
 
+# We run objcopy locally to split out the .dwo file.
+if [is_remote host] {
+    return 0
+}
+
 # This test can only be run on targets which support DWARF-2 and use gas.
 if ![dwarf2_support] {
     return 0  
@@ -25,13 +30,14 @@ if {![istarget x86_64-*] || ![is_lp64_target]} {
     return 0
 }
 
-set basename "fission-loclists"
-
 standard_testfile .S
 
-if { [prepare_for_testing "$testfile.exp" "$testfile" "$srcfile" {nodebug}] } {
+if [build_executable_from_fission_assembler \
+	"$testfile.exp" "$binfile" "$srcfile" {nodebug}] {
     return -1
 }
+
+clean_restart ${binfile}
 
 if ![runto_main] {
     return -1
