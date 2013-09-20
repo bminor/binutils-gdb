@@ -1,3 +1,7 @@
+2013-09-20  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2013-09-18  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add marker for 2.24.
