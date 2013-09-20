@@ -1,3 +1,7 @@
+2013-09-20  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2013-08-05  John Tytgat  <john@bass-software.com>
 
 	* po/POTFILES.in: Regenerate.
