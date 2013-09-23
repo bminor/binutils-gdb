@@ -1,3 +1,7 @@
+2013-09-23  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
 2013-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* bfin-sim.c (decode_dsp32alu_0): Add note about broken handling of
