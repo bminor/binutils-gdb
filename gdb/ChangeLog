@@ -1,3 +1,13 @@
+2013-09-23  Tom Tromey  <tromey@redhat.com>
+
+	* linespec.c (struct minsym_and_objfile): Remove.
+	(minsym_and_objfile_d): Remove.
+	(struct linespec, struct collect_info, linespec_parse_basic)
+	(convert_linespec_to_sals, linespec_parser_delete, decode_objc)
+	(compare_msymbols, find_method, find_function_symbols)
+	(find_linespec_symbols, struct collect_minsyms, compare_msyms)
+	(add_minsym, search_minsyms_for_name): Update.
+
 2013-09-23  Andrew Burgess  <aburgess@broadcom.com>
 
 	* regcache.c: Add include of valprint.h.

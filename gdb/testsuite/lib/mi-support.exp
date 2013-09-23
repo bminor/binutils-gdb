@@ -2264,6 +2264,9 @@ namespace eval ::varobj_tree {
       error "tree does not contain enough elements"
     }
 
+variable _root_idx
+      set _root_idx 0
+
     # Create root node and process the tree.
     array set root [list language $language]
     array set root [list obj_name "root"]

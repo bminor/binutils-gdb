@@ -61,16 +61,9 @@ struct address_entry
   CORE_ADDR addr;
 };
 
-/* A helper struct which just holds a minimal symbol and the object
-   file from which it came.  */
+typedef struct bound_minimal_symbol bound_minimal_symbol_d;
 
-typedef struct minsym_and_objfile
-{
-  struct minimal_symbol *minsym;
-  struct objfile *objfile;
-} minsym_and_objfile_d;
-
-DEF_VEC_O (minsym_and_objfile_d);
+DEF_VEC_O (bound_minimal_symbol_d);
 
 /* An enumeration of possible signs for a line offset.  */
 enum offset_relative_sign
@@ -132,7 +125,7 @@ struct linespec
   /* A list of matching function symbols and minimal symbols.  Both lists
      may be NULL if no matching symbols were found.  */
   VEC (symbolp) *function_symbols;
-  VEC (minsym_and_objfile_d) *minimal_symbols;
+  VEC (bound_minimal_symbol_d) *minimal_symbols;
 
   /* The name of a label and matching symbols.  */
 
@@ -220,7 +213,7 @@ struct collect_info
   struct
   {
     VEC (symbolp) *symbols;
-    VEC (minsym_and_objfile_d) *minimal_symbols;
+    VEC (bound_minimal_symbol_d) *minimal_symbols;
   } result;
 };
 
@@ -340,7 +333,7 @@ static void find_linespec_symbols (struct linespec_state *self,
 				   VEC (symtab_ptr) *file_symtabs,
 				   const char *name,
 				   VEC (symbolp) **symbols,
-				   VEC (minsym_and_objfile_d) **minsyms);
+				   VEC (bound_minimal_symbol_d) **minsyms);
 
 static struct line_offset
      linespec_parse_variable (struct linespec_state *self,
@@ -1587,7 +1580,7 @@ linespec_parse_basic (linespec_parser *parser)
   char *name;
   linespec_token token;
   VEC (symbolp) *symbols, *labels;
-  VEC (minsym_and_objfile_d) *minimal_symbols;
+  VEC (bound_minimal_symbol_d) *minimal_symbols;
   struct cleanup *cleanup;
 
   /* Get the next token.  */
@@ -2026,7 +2019,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
       int i;
       struct symtab_and_line sal;
       struct symbol *sym;
-      minsym_and_objfile_d *elem;
+      bound_minimal_symbol_d *elem;
       struct program_space *pspace;
 
       if (ls->function_symbols != NULL)
@@ -2051,12 +2044,13 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
       if (ls->minimal_symbols != NULL)
 	{
 	  /* Sort minimal symbols by program space, too.  */
-	  qsort (VEC_address (minsym_and_objfile_d, ls->minimal_symbols),
-		 VEC_length (minsym_and_objfile_d, ls->minimal_symbols),
-		 sizeof (minsym_and_objfile_d), compare_msymbols);
+	  qsort (VEC_address (bound_minimal_symbol_d, ls->minimal_symbols),
+		 VEC_length (bound_minimal_symbol_d, ls->minimal_symbols),
+		 sizeof (bound_minimal_symbol_d), compare_msymbols);
 
 	  for (i = 0;
-	       VEC_iterate (minsym_and_objfile_d, ls->minimal_symbols, i, elem);
+	       VEC_iterate (bound_minimal_symbol_d, ls->minimal_symbols,
+			    i, elem);
 	       ++i)
 	    {
 	      pspace = elem->objfile->pspace;
@@ -2407,7 +2401,7 @@ linespec_parser_delete (void *arg)
     VEC_free (symbolp, PARSER_RESULT (parser)->function_symbols);
 
   if (PARSER_RESULT (parser)->minimal_symbols != NULL)
-    VEC_free (minsym_and_objfile_d, PARSER_RESULT (parser)->minimal_symbols);
+    VEC_free (bound_minimal_symbol_d, PARSER_RESULT (parser)->minimal_symbols);
 
   if (PARSER_RESULT (parser)->labels.label_symbols != NULL)
     VEC_free (symbolp, PARSER_RESULT (parser)->labels.label_symbols);
@@ -2636,7 +2630,7 @@ decode_objc (struct linespec_state *self, linespec_p ls, char **argptr)
   add_all_symbol_names_from_pspace (&info, NULL, symbol_names);
 
   if (!VEC_empty (symbolp, info.result.symbols)
-      || !VEC_empty (minsym_and_objfile_d, info.result.minimal_symbols))
+      || !VEC_empty (bound_minimal_symbol_d, info.result.minimal_symbols))
     {
       char *saved_arg;
 
@@ -2794,8 +2788,8 @@ compare_symbols (const void *a, const void *b)
 static int
 compare_msymbols (const void *a, const void *b)
 {
-  const struct minsym_and_objfile *sa = a;
-  const struct minsym_and_objfile *sb = b;
+  const struct bound_minimal_symbol *sa = a;
+  const struct bound_minimal_symbol *sb = b;
   uintptr_t uia, uib;
 
   uia = (uintptr_t) sa->objfile->pspace;
@@ -2872,7 +2866,7 @@ static void
 find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
 	     const char *class_name, const char *method_name,
 	     VEC (symbolp) *sym_classes, VEC (symbolp) **symbols,
-	     VEC (minsym_and_objfile_d) **minsyms)
+	     VEC (bound_minimal_symbol_d) **minsyms)
 {
   struct symbol *sym;
   struct cleanup *cleanup = make_cleanup (null_cleanup, NULL);
@@ -2945,7 +2939,7 @@ find_method (struct linespec_state *self, VEC (symtab_ptr) *file_symtabs,
     }
 
   if (!VEC_empty (symbolp, info.result.symbols)
-      || !VEC_empty (minsym_and_objfile_d, info.result.minimal_symbols))
+      || !VEC_empty (bound_minimal_symbol_d, info.result.minimal_symbols))
     {
       *symbols = info.result.symbols;
       *minsyms = info.result.minimal_symbols;
@@ -3046,7 +3040,7 @@ static void
 find_function_symbols (struct linespec_state *state,
 		       VEC (symtab_ptr) *file_symtabs, const char *name,
 		       VEC (symbolp) **symbols,
-		       VEC (minsym_and_objfile_d) **minsyms)
+		       VEC (bound_minimal_symbol_d) **minsyms)
 {
   struct collect_info info;
   VEC (const_char_ptr) *symbol_names = NULL;
@@ -3075,9 +3069,9 @@ find_function_symbols (struct linespec_state *state,
   else
     *symbols = info.result.symbols;
 
-  if (VEC_empty (minsym_and_objfile_d, info.result.minimal_symbols))
+  if (VEC_empty (bound_minimal_symbol_d, info.result.minimal_symbols))
     {
-      VEC_free (minsym_and_objfile_d, info.result.minimal_symbols);
+      VEC_free (bound_minimal_symbol_d, info.result.minimal_symbols);
       *minsyms = NULL;
     }
   else
@@ -3092,7 +3086,7 @@ find_linespec_symbols (struct linespec_state *state,
 		       VEC (symtab_ptr) *file_symtabs,
 		       const char *name,
 		       VEC (symbolp) **symbols,
-		       VEC (minsym_and_objfile_d) **minsyms)
+		       VEC (bound_minimal_symbol_d) **minsyms)
 {
   struct cleanup *cleanup;
   char *canon;
@@ -3132,7 +3126,7 @@ find_linespec_symbols (struct linespec_state *state,
      the name into class and method names and searching the class and its
      baseclasses.  */
   if (VEC_empty (symbolp, *symbols)
-      && VEC_empty (minsym_and_objfile_d, *minsyms))
+      && VEC_empty (bound_minimal_symbol_d, *minsyms))
     {
       char *klass, *method;
       const char *last, *p, *scope_op;
@@ -3449,7 +3443,7 @@ struct collect_minsyms
   int list_mode;
 
   /* The resulting symbols.  */
-  VEC (minsym_and_objfile_d) *msyms;
+  VEC (bound_minimal_symbol_d) *msyms;
 };
 
 /* A helper function to classify a minimal_symbol_type according to
@@ -3481,8 +3475,8 @@ classify_mtype (enum minimal_symbol_type t)
 static int
 compare_msyms (const void *a, const void *b)
 {
-  const minsym_and_objfile_d *moa = a;
-  const minsym_and_objfile_d *mob = b;
+  const bound_minimal_symbol_d *moa = a;
+  const bound_minimal_symbol_d *mob = b;
   enum minimal_symbol_type ta = MSYMBOL_TYPE (moa->minsym);
   enum minimal_symbol_type tb = MSYMBOL_TYPE (mob->minsym);
 
@@ -3496,7 +3490,7 @@ static void
 add_minsym (struct minimal_symbol *minsym, void *d)
 {
   struct collect_minsyms *info = d;
-  minsym_and_objfile_d mo;
+  bound_minimal_symbol_d mo;
 
   /* Exclude data symbols when looking for breakpoint locations.   */
   if (!info->list_mode)
@@ -3523,7 +3517,7 @@ add_minsym (struct minimal_symbol *minsym, void *d)
 
   mo.minsym = minsym;
   mo.objfile = info->objfile;
-  VEC_safe_push (minsym_and_objfile_d, info->msyms, &mo);
+  VEC_safe_push (bound_minimal_symbol_d, info->msyms, &mo);
 }
 
 /* Search minimal symbols in all objfiles for NAME.  If SEARCH_PSPACE
@@ -3553,7 +3547,7 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
     local.funfirstline = info->state->funfirstline;
     local.list_mode = info->state->list_mode;
 
-    cleanup = make_cleanup (VEC_cleanup (minsym_and_objfile_d),
+    cleanup = make_cleanup (VEC_cleanup (bound_minimal_symbol_d),
 			    &local.msyms);
 
     ALL_OBJFILES (objfile)
@@ -3562,31 +3556,31 @@ search_minsyms_for_name (struct collect_info *info, const char *name,
       iterate_over_minimal_symbols (objfile, name, add_minsym, &local);
     }
 
-    if (!VEC_empty (minsym_and_objfile_d, local.msyms))
+    if (!VEC_empty (bound_minimal_symbol_d, local.msyms))
       {
 	int classification;
 	int ix;
-	minsym_and_objfile_d *item;
+	bound_minimal_symbol_d *item;
 
-	qsort (VEC_address (minsym_and_objfile_d, local.msyms),
-	       VEC_length (minsym_and_objfile_d, local.msyms),
-	       sizeof (minsym_and_objfile_d),
+	qsort (VEC_address (bound_minimal_symbol_d, local.msyms),
+	       VEC_length (bound_minimal_symbol_d, local.msyms),
+	       sizeof (bound_minimal_symbol_d),
 	       compare_msyms);
 
 	/* Now the minsyms are in classification order.  So, we walk
 	   over them and process just the minsyms with the same
 	   classification as the very first minsym in the list.  */
-	item = VEC_index (minsym_and_objfile_d, local.msyms, 0);
+	item = VEC_index (bound_minimal_symbol_d, local.msyms, 0);
 	classification = classify_mtype (MSYMBOL_TYPE (item->minsym));
 
 	for (ix = 0;
-	     VEC_iterate (minsym_and_objfile_d, local.msyms, ix, item);
+	     VEC_iterate (bound_minimal_symbol_d, local.msyms, ix, item);
 	     ++ix)
 	  {
 	    if (classify_mtype (MSYMBOL_TYPE (item->minsym)) != classification)
 	      break;
 
-	    VEC_safe_push (minsym_and_objfile_d,
+	    VEC_safe_push (bound_minimal_symbol_d,
 			   info->result.minimal_symbols, item);
 	  }
       }
