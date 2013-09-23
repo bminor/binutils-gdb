@@ -1,3 +1,7 @@
+2013-09-23  Andrew Burgess  <aburgess@broadcom.com>
+
+	* sh64-tdep.c (sh64_do_fp_register): Use print_hex_chars.
+
 2013-09-19  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (remove_threaded_breakpoints): Skip non-user

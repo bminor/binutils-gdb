@@ -1948,14 +1948,10 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
     fprintf_filtered (file, "%-10.9g", flt);
 
   /* Print the fp register as hex.  */
-  fprintf_filtered (file, "\t(raw 0x");
-  for (j = 0; j < register_size (gdbarch, regnum); j++)
-    {
-      int idx = gdbarch_byte_order (gdbarch)
-		== BFD_ENDIAN_BIG ? j : register_size
-		(gdbarch, regnum) - 1 - j;
-      fprintf_filtered (file, "%02x", raw_buffer[idx]);
-    }
+  fprintf_filtered (file, "\t(raw ");
+  print_hex_chars (file, raw_buffer,
+		   register_size (gdbarch, regnum),
+		   gdbarch_byte_order (gdbarch));
   fprintf_filtered (file, ")");
   fprintf_filtered (file, "\n");
 }
