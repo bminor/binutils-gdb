@@ -1,5 +1,11 @@
 2013-09-23  Andrew Burgess  <aburgess@broadcom.com>
 
+	* regcache.c: Add include of valprint.h.
+	(dump_endian_bytes): Delete.
+	(regcache_dump): Use print_hex_chars not dump_endian_bytes.
+
+2013-09-23  Andrew Burgess  <aburgess@broadcom.com>
+
 	* sh64-tdep.c (sh64_do_fp_register): Use print_hex_chars.
 
 2013-09-19  Pedro Alves  <palves@redhat.com>
