@@ -36,7 +36,7 @@
 
 2013-09-24  Joel Brobecker  <brobecker@adacore.com>
 
-	* amd64-tdep.c: #include "value.h"
+	* amd64-windows-tdep.c: #include "value.h"
 	(amd64_windows_classify): Delete.
 	(amd64_windows_passed_by_integer_register)
 	(amd64_windows_passed_by_xmm_register)
