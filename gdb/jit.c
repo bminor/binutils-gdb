@@ -785,12 +785,10 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 
   priv_data = cb->priv_data;
 
-  objfile = allocate_objfile (NULL, 0);
+  objfile = allocate_objfile (NULL, "<< JIT compiled code >>", 0);
   objfile->per_bfd->gdbarch = target_gdbarch ();
 
   terminate_minimal_symbol_table (objfile);
-
-  objfile->original_name = "<< JIT compiled code >>";
 
   j = NULL;
   for (i = obj->symtabs; i; i = j)
@@ -927,7 +925,8 @@ JITed symbol file is not an object file, ignoring it.\n"));
 
   /* This call does not take ownership of SAI.  */
   make_cleanup_bfd_unref (nbfd);
-  objfile = symbol_file_add_from_bfd (nbfd, 0, sai, OBJF_SHARED, NULL);
+  objfile = symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd), 0, sai,
+				      OBJF_SHARED, NULL);
 
   do_cleanups (old_cleanups);
   add_objfile_entry (objfile, entry_addr);

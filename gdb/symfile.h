@@ -480,11 +480,12 @@ extern void new_symfile_objfile (struct objfile *, int);
 extern struct objfile *symbol_file_add (const char *, int,
 					struct section_addr_info *, int);
 
-extern struct objfile *symbol_file_add_from_bfd (bfd *, int,
+extern struct objfile *symbol_file_add_from_bfd (bfd *, const char *, int,
                                                  struct section_addr_info *,
                                                  int, struct objfile *parent);
 
-extern void symbol_file_add_separate (bfd *, int, struct objfile *);
+extern void symbol_file_add_separate (bfd *, const char *, int,
+				      struct objfile *);
 
 extern char *find_separate_debug_file_by_debuglink (struct objfile *);
 

@@ -431,7 +431,7 @@ struct objfile
 
 /* Declarations for functions defined in objfiles.c */
 
-extern struct objfile *allocate_objfile (bfd *, int);
+extern struct objfile *allocate_objfile (bfd *, const char *name, int);
 
 extern struct gdbarch *get_objfile_arch (struct objfile *);
 

@@ -738,7 +738,7 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 	  bfd *abfd = symfile_bfd_open (debugfile);
 
 	  make_cleanup_bfd_unref (abfd);
-	  symbol_file_add_separate (abfd, symfile_flags, objfile);
+	  symbol_file_add_separate (abfd, debugfile, symfile_flags, objfile);
 	}
     }
 

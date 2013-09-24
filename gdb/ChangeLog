@@ -1,5 +1,42 @@
 2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Pass down original filename for objfile.
+	* coffread.c (coff_symfile_read): Update symbol_file_add_separate call.
+	* elfread.c (elf_symfile_read): Likewise.
+	* jit.c (jit_object_close_impl): Update allocate_objfile call, no
+	longer set ORIGINAL_NAME.
+	(jit_bfd_try_read_symtab): Update symbol_file_add_from_bfd call.
+	* jv-lang.c (get_dynamics_objfile): Update allocate_objfile call.
+	* machoread.c (macho_add_oso_symfile): Add parameter name.  Update
+	symbol_file_add_from_bfd call.
+	(macho_symfile_read_all_oso): Update two macho_add_oso_symfile calls.
+	(macho_check_dsym): Add parameter filenamep.  Change function comment.
+	Set *filenamep.
+	(macho_symfile_read): New variable dsym_filename.  Update
+	macho_check_dsym call.  Use it for symbol_file_add_separate.
+	* objfiles.c (allocate_objfile): Add parameter name.  New comment for
+	it.  Use it for objfile->original_name.
+	(objfile_name): Return OBFD's filename, if available.
+	* objfiles.h (allocate_objfile): Add new parameter name.
+	* solib.c (solib_read_symbols): Update symbol_file_add_from_bfd call.
+	* symfile-mem.c (symbol_file_add_from_memory): Update
+	symbol_file_add_from_bfd call.
+	* symfile.c (read_symbols): Update symbol_file_add_separate call, new
+	comment for it.
+	(symbol_file_add_with_addrs): New parameter name, add function comment
+	for it.  Remove variable name.  Update allocate_objfile call.
+	(symbol_file_add_separate): New parameter name, add function comment
+	for it.  Update symbol_file_add_with_addrs call.
+	(symbol_file_add_from_bfd): New parameter name.  Update
+	symbol_file_add_with_addrs call.
+	(symbol_file_add): Update symbol_file_add_from_bfd call.
+	(reread_symbols): New variable original_name.  Save
+	objfile->original_name by it.
+	* symfile.h (symbol_file_add_from_bfd, symbol_file_add_separate): Add
+	second parameter.
+
+2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup: Add objfile_name accessor function.
 	* ada-lang.c (is_known_support_routine): Use objfile_name.
 	* auto-load.c (source_gdb_script_for_objfile)

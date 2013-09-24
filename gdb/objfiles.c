@@ -248,6 +248,11 @@ build_objfile_section_table (struct objfile *objfile)
    into the list of all known objfiles, and return a pointer to the
    new objfile struct.
 
+   NAME should contain original non-canonicalized filename or other
+   identifier as entered by user.  If there is no better source use
+   bfd_get_filename (ABFD).  NAME may be NULL only if ABFD is NULL.
+   NAME content is copied into returned objfile.
+
    The FLAGS word contains various bits (OBJF_*) that can be taken as
    requests for specific operations.  Other bits like OBJF_SHARED are
    simply copied through to the new objfile flags member.  */
@@ -262,7 +267,7 @@ build_objfile_section_table (struct objfile *objfile)
    things in a consistent state even if abfd is NULL.  */
 
 struct objfile *
-allocate_objfile (bfd *abfd, int flags)
+allocate_objfile (bfd *abfd, const char *name, int flags)
 {
   struct objfile *objfile;
 
@@ -279,19 +284,22 @@ allocate_objfile (bfd *abfd, int flags)
      that any data that is reference is saved in the per-objfile data
      region.  */
 
+  if (name == NULL)
+    {
+      gdb_assert (abfd == NULL);
+      name = "<<anonymous objfile>>";
+    }
+  objfile->original_name = obstack_copy0 (&objfile->objfile_obstack, name,
+					  strlen (name));
+
   objfile->obfd = abfd;
   gdb_bfd_ref (abfd);
   if (abfd != NULL)
     {
-      objfile->original_name = bfd_get_filename (abfd);
       objfile->mtime = bfd_get_mtime (abfd);
 
       /* Build section table.  */
       build_objfile_section_table (objfile);
-    }
-  else
-    {
-      objfile->original_name = "<<anonymous objfile>>";
     }
 
   objfile->per_bfd = get_objfile_bfd_data (objfile, abfd);
@@ -1486,6 +1494,9 @@ default_iterate_over_objfiles_in_search_order
 const char *
 objfile_name (const struct objfile *objfile)
 {
+  if (objfile->obfd != NULL)
+    return bfd_get_filename (objfile->obfd);
+
   return objfile->original_name;
 }
 

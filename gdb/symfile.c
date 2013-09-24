@@ -839,7 +839,14 @@ read_symbols (struct objfile *objfile, int add_flags)
       struct cleanup *cleanup = make_cleanup_bfd_unref (abfd);
 
       if (abfd != NULL)
-	symbol_file_add_separate (abfd, add_flags, objfile);
+	{
+	  /* find_separate_debug_file_in_section uses the same filename for the
+	     virtual section-as-bfd like the bfd filename containing the
+	     section.  Therefore use also non-canonical name form for the same
+	     file containing the section.  */
+	  symbol_file_add_separate (abfd, objfile->original_name, add_flags,
+				    objfile);
+	}
 
       do_cleanups (cleanup);
     }
@@ -1047,6 +1054,8 @@ new_symfile_objfile (struct objfile *objfile, int add_flags)
    ABFD is a BFD already open on the file, as from symfile_bfd_open.
    A new reference is acquired by this function.
 
+   For NAME description see allocate_objfile's definition.
+
    ADD_FLAGS encodes verbosity, whether this is main symbol file or
    extra, such as dynamically loaded code, and what to do with breakpoins.
 
@@ -1060,12 +1069,11 @@ new_symfile_objfile (struct objfile *objfile, int add_flags)
    Upon failure, jumps back to command level (never returns).  */
 
 static struct objfile *
-symbol_file_add_with_addrs (bfd *abfd, int add_flags,
+symbol_file_add_with_addrs (bfd *abfd, const char *name, int add_flags,
 			    struct section_addr_info *addrs,
 			    int flags, struct objfile *parent)
 {
   struct objfile *objfile;
-  const char *name = bfd_get_filename (abfd);
   const int from_tty = add_flags & SYMFILE_VERBOSE;
   const int mainline = add_flags & SYMFILE_MAINLINE;
   const int should_print = ((from_tty || info_verbose)
@@ -1087,7 +1095,8 @@ symbol_file_add_with_addrs (bfd *abfd, int add_flags,
       && !query (_("Load new symbol table from \"%s\"? "), name))
     error (_("Not confirmed."));
 
-  objfile = allocate_objfile (abfd, flags | (mainline ? OBJF_MAINLINE : 0));
+  objfile = allocate_objfile (abfd, name,
+			      flags | (mainline ? OBJF_MAINLINE : 0));
 
   if (parent)
     add_separate_debug_objfile (objfile, parent);
@@ -1160,10 +1169,12 @@ symbol_file_add_with_addrs (bfd *abfd, int add_flags,
   return (objfile);
 }
 
-/* Add BFD as a separate debug file for OBJFILE.  */
+/* Add BFD as a separate debug file for OBJFILE.  For NAME description
+   see allocate_objfile's definition.  */
 
 void
-symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
+symbol_file_add_separate (bfd *bfd, const char *name, int symfile_flags,
+			  struct objfile *objfile)
 {
   struct objfile *new_objfile;
   struct section_addr_info *sap;
@@ -1176,7 +1187,7 @@ symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
   my_cleanup = make_cleanup_free_section_addr_info (sap);
 
   new_objfile = symbol_file_add_with_addrs
-    (bfd, symfile_flags, sap,
+    (bfd, name, symfile_flags, sap,
      objfile->flags & (OBJF_REORDERED | OBJF_SHARED | OBJF_READNOW
 		       | OBJF_USERLOADED),
      objfile);
@@ -1189,11 +1200,12 @@ symbol_file_add_separate (bfd *bfd, int symfile_flags, struct objfile *objfile)
    See symbol_file_add_with_addrs's comments for details.  */
 
 struct objfile *
-symbol_file_add_from_bfd (bfd *abfd, int add_flags,
+symbol_file_add_from_bfd (bfd *abfd, const char *name, int add_flags,
                           struct section_addr_info *addrs,
                           int flags, struct objfile *parent)
 {
-  return symbol_file_add_with_addrs (abfd, add_flags, addrs, flags, parent);
+  return symbol_file_add_with_addrs (abfd, name, add_flags, addrs, flags,
+				     parent);
 }
 
 /* Process a symbol file, as either the main file or as a dynamically
@@ -1207,7 +1219,7 @@ symbol_file_add (const char *name, int add_flags,
   struct cleanup *cleanup = make_cleanup_bfd_unref (bfd);
   struct objfile *objf;
 
-  objf = symbol_file_add_from_bfd (bfd, add_flags, addrs, flags, NULL);
+  objf = symbol_file_add_from_bfd (bfd, name, add_flags, addrs, flags, NULL);
   do_cleanups (cleanup);
   return objf;
 }
@@ -2372,6 +2384,7 @@ reread_symbols (void)
 	  struct cleanup *old_cleanups;
 	  struct section_offsets *offsets;
 	  int num_offsets;
+	  char *original_name;
 
 	  printf_unfiltered (_("`%s' has changed; re-reading symbols.\n"),
 			     objfile_name (objfile));
@@ -2442,7 +2455,9 @@ reread_symbols (void)
 	    gdb_bfd_unref (obfd);
 	  }
 
-	  objfile->original_name = bfd_get_filename (objfile->obfd);
+	  original_name = xstrdup (objfile->original_name);
+	  make_cleanup (xfree, original_name);
+
 	  /* bfd_openr sets cacheable to true, which is what we want.  */
 	  if (!bfd_check_format (objfile->obfd, bfd_object))
 	    error (_("Can't read symbols from %s: %s."), objfile_name (objfile),
@@ -2495,6 +2510,10 @@ reread_symbols (void)
 	     empty.  We could use obstack_specify_allocation but
 	     gdb_obstack.h specifies the alloc/dealloc functions.  */
 	  obstack_init (&objfile->objfile_obstack);
+
+	  objfile->original_name = obstack_copy0 (&objfile->objfile_obstack,
+						  original_name,
+						  strlen (original_name));
 
 	  /* Reset the sym_fns pointer.  The ELF reader can change it
 	     based on whether .gdb_index is present, and we need it to

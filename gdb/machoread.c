@@ -447,7 +447,7 @@ macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
 /* Add oso file OSO/ABFD as a symbol file.  */
 
 static void
-macho_add_oso_symfile (oso_el *oso, bfd *abfd,
+macho_add_oso_symfile (oso_el *oso, bfd *abfd, const char *name,
                        struct objfile *main_objfile, int symfile_flags)
 {
   int storage;
@@ -636,7 +636,7 @@ macho_add_oso_symfile (oso_el *oso, bfd *abfd,
      from symfile.c:symbol_file_add_with_addrs_or_offsets.  */
   cleanup = make_cleanup_bfd_unref (abfd);
   symbol_file_add_from_bfd
-    (abfd, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE), NULL,
+    (abfd, name, symfile_flags & ~(SYMFILE_MAINLINE | SYMFILE_VERBOSE), NULL,
      main_objfile->flags & (OBJF_REORDERED | OBJF_SHARED
 			    | OBJF_READNOW | OBJF_USERLOADED),
      main_objfile);
@@ -736,6 +736,7 @@ macho_symfile_read_all_oso (VEC (oso_el) **oso_vector_ptr,
                                   member_len))
                     {
                       macho_add_oso_symfile (oso2, member_bfd,
+					     bfd_get_filename (member_bfd),
                                              main_objfile, symfile_flags);
                       oso2->name = NULL;
                       break;
@@ -769,7 +770,8 @@ macho_symfile_read_all_oso (VEC (oso_el) **oso_vector_ptr,
             warning (_("`%s': can't open to read symbols: %s."), oso->name,
                      bfd_errmsg (bfd_get_error ()));
           else
-            macho_add_oso_symfile (oso, abfd, main_objfile, symfile_flags);
+            macho_add_oso_symfile (oso, abfd, oso->name, main_objfile,
+				   symfile_flags);
 
           ix++;
         }
@@ -785,11 +787,13 @@ macho_symfile_read_all_oso (VEC (oso_el) **oso_vector_ptr,
    executable name and the executable base name to get the DSYM file name.  */
 #define DSYM_SUFFIX ".dSYM/Contents/Resources/DWARF/"
 
-/* Check if a dsym file exists for OBJFILE.  If so, returns a bfd for it.
-   Return NULL if no valid dsym file is found.  */
+/* Check if a dsym file exists for OBJFILE.  If so, returns a bfd for it
+   and return *FILENAMEP with its original xmalloc-ated filename.
+   Return NULL if no valid dsym file is found (FILENAMEP is not used in
+   such case).  */
 
 static bfd *
-macho_check_dsym (struct objfile *objfile)
+macho_check_dsym (struct objfile *objfile, char **filenamep)
 {
   size_t name_len = strlen (objfile_name (objfile));
   size_t dsym_len = strlen (DSYM_SUFFIX);
@@ -842,6 +846,7 @@ macho_check_dsym (struct objfile *objfile)
       gdb_bfd_unref (dsym_bfd);
       return NULL;
     }
+  *filenamep = xstrdup (dsym_filename);
   return dsym_bfd;
 }
 
@@ -860,6 +865,8 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
      be in the executable.  */
   if (bfd_get_file_flags (abfd) & (EXEC_P | DYNAMIC))
     {
+      char *dsym_filename;
+
       /* Process the normal symbol table first.  */
       storage_needed = bfd_get_symtab_upper_bound (objfile->obfd);
       if (storage_needed < 0)
@@ -897,12 +904,14 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
       dwarf2_build_frame_info (objfile);
 
       /* Check for DSYM file.  */
-      dsym_bfd = macho_check_dsym (objfile);
+      dsym_bfd = macho_check_dsym (objfile, &dsym_filename);
       if (dsym_bfd != NULL)
 	{
 	  int ix;
 	  oso_el *oso;
           struct bfd_section *asect, *dsect;
+
+	  make_cleanup (xfree, dsym_filename);
 
 	  if (mach_o_debug_level > 0)
 	    printf_unfiltered (_("dsym file found\n"));
@@ -920,7 +929,8 @@ macho_symfile_read (struct objfile *objfile, int symfile_flags)
 
 	  /* Add the dsym file as a separate file.  */
 	  make_cleanup_bfd_unref (dsym_bfd);
-          symbol_file_add_separate (dsym_bfd, symfile_flags, objfile);
+          symbol_file_add_separate (dsym_bfd, dsym_filename, symfile_flags,
+				    objfile);
 
 	  /* Don't try to read dwarf2 from main file or shared libraries.  */
 	  do_cleanups (old_chain);
