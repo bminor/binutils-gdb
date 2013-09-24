@@ -1,5 +1,9 @@
 2013-09-24  Alan Modra  <amodra@gmail.com>
 
+	* elf32-mips.c (ELF_OSABI): Undef for vxworks.
+
+2013-09-24  Alan Modra  <amodra@gmail.com>
+
 	* syms.c (_bfd_stab_section_find_nearest_line): Ignore partial
 	stabs at end of .stab.  Tidy variable usage.  Don't drop the need
 	for a NULL function name stab if If N_FUN stab is ignored.
