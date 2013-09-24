@@ -1,3 +1,11 @@
+2013-09-24  Alan Modra  <amodra@gmail.com>
+
+	* genscripts.sh (LIB_PATH): Don't exclude libdir or tooldir when
+	sysrooted.  Also, don't always add tooldir when non-sysrooted.
+	Instead add both when native and tooldir also when TOOL_DIR is
+	defined.  Always prepend '=' to paths when sysrooted.  Always
+	put paths with LIBPATH_SUFFIX first in search order.
+
 2013-09-20  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* Makefile.am (enios2elf.c): Change tdir_nios2 to tdir_nios2elf.
