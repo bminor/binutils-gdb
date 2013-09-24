@@ -1,5 +1,14 @@
 2013-11-06  Yao Qi  <yao@codesourcery.com>
 
+	* lib/perftest.exp: New.
+	* gdb.perf/lib/perftest/__init__.py: New.
+	* gdb.perf/lib/perftest/measure.py: New.
+	* gdb.perf/lib/perftest/perftest.py: New.
+	* gdb.perf/lib/perftest/reporter.py: New.
+	* gdb.perf/lib/perftest/testresult.py: New.
+
+2013-11-06  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (check-perf): New target.
 	* configure.ac (AC_OUTPUT): Output Makefile in gdb.perf.
 	* configure: Re-generated.
