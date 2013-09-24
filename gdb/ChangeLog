@@ -1,6 +1,13 @@
 2013-09-24  Joel Brobecker  <brobecker@adacore.com>
 
 	Revert:
+	* i386-tdep.h (gdbarch_tdep): Add field memory_args_by_pointer.
+	* amd64-tdep.c (amd64_push_arguments): Add handling of architectures
+	where tdep->memory_args_by_pointer is non-zero.
+
+2013-09-24  Joel Brobecker  <brobecker@adacore.com>
+
+	Revert:
 	* i386-tdep.h (struct gdbarch_tdep): Add new field
 	integer_param_regs_saved_in_caller_frame.
 	* amd64-tdep.c (amd64_push_dummy_call): Allocate some memory on
