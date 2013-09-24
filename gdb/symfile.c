@@ -2343,7 +2343,6 @@ reread_symbols (void)
 
   for (objfile = object_files; objfile; objfile = objfile->next)
     {
-      /* solib-sunos.c creates one objfile with obfd.  */
       if (objfile->obfd == NULL)
 	continue;
 

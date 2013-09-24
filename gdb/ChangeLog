@@ -1,5 +1,16 @@
 2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Remove solib-sunos.c.
+	* Makefile.in (ALLDEPFILES): Remove solib-sunos.c.
+	* config/m68k/obsd.mh (NATDEPFILES): Remove solib-sunos.o.
+	* objfiles.c (rt_common_objfile): Remove.
+	(free_objfile): Remove rt_common_objfile comparison.
+	* objfiles.h (rt_common_objfile): Remove.
+	* solib-sunos.c: Remove.
+	* symfile.c (reread_symbols): Remove solib-sunos.c comment.
+
+2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Remove a.out NetBSD and OpenBSD hosts.
 	* NEWS (Removed native configurations): New.
 	* config/arm/nbsdaout.mh: Remove.

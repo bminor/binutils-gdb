@@ -429,11 +429,6 @@ struct objfile
 
 #define OBJF_MAINLINE (1 << 5)
 
-/* The object file that contains the runtime common minimal symbols
-   for SunOS4.  Note that this objfile has no associated BFD.  */
-
-extern struct objfile *rt_common_objfile;
-
 /* Declarations for functions defined in objfiles.c */
 
 extern struct objfile *allocate_objfile (bfd *, int);

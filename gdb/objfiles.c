@@ -63,8 +63,6 @@ DEFINE_REGISTRY (objfile, REGISTRY_ACCESS_FIELD)
 /* Externally visible variables that are owned by this module.
    See declarations in objfile.h for more info.  */
 
-struct objfile *rt_common_objfile;	/* For runtime common symbols */
-
 struct objfile_pspace_info
 {
   struct obj_section **sections;
@@ -611,9 +609,6 @@ free_objfile (struct objfile *objfile)
 
   if (objfile == symfile_objfile)
     symfile_objfile = NULL;
-
-  if (objfile == rt_common_objfile)
-    rt_common_objfile = NULL;
 
   /* Before the symbol table code was redone to make it easier to
      selectively load and remove information particular to a specific
