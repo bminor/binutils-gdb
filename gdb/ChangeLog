@@ -1,5 +1,13 @@
 2013-09-24  Joel Brobecker  <brobecker@adacore.com>
 
+	Revert:
+	* i386-tdep.h (struct gdbarch_tdep): Add new field
+	integer_param_regs_saved_in_caller_frame.
+	* amd64-tdep.c (amd64_push_dummy_call): Allocate some memory on
+	stack if tdep->integer_param_regs_saved_in_caller_frame is set.
+
+2013-09-24  Joel Brobecker  <brobecker@adacore.com>
+
 	* amd64-tdep.c: #include "value.h"
 	(amd64_windows_classify): Delete.
 	(amd64_windows_passed_by_integer_register)

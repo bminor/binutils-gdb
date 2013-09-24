@@ -926,11 +926,6 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
       regcache_cooked_write (regcache, arg_regnum, buf);
     }
 
-  /* Reserve some memory on the stack for the integer-parameter registers,
-     if required by the ABI.  */
-  if (tdep->integer_param_regs_saved_in_caller_frame)
-    sp -= tdep->call_dummy_num_integer_regs * 8;
-
   /* Store return address.  */
   sp -= 8;
   store_unsigned_integer (buf, 8, byte_order, bp_addr);
