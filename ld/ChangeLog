@@ -1,5 +1,12 @@
 2013-09-24  Alan Modra  <amodra@gmail.com>
 
+	* emulparams/elf32ppccommon.sh (LIBPATH_SUFFIX): Provide 32-bit
+	and cross-endian values.
+	* emulparams/elf64ppc.sh: Source elf32ppccomon.sh.  Delete duplicate,
+	and unset unwanted variables.
+
+2013-09-24  Alan Modra  <amodra@gmail.com>
+
 	* genscripts.sh (LIB_PATH): Don't exclude libdir or tooldir when
 	sysrooted.  Also, don't always add tooldir when non-sysrooted.
 	Instead add both when native and tooldir also when TOOL_DIR is
