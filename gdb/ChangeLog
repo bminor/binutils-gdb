@@ -1,3 +1,21 @@
+2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Remove a.out NetBSD and OpenBSD hosts.
+	* NEWS (Removed native configurations): New.
+	* config/arm/nbsdaout.mh: Remove.
+	* config/i386/nbsdaout.mh: Remove.
+	* config/i386/obsdaout.mh: Remove.
+	* config/m68k/nbsdaout.mh: Remove.
+	* config/sparc/nbsdaout.mh: Remove.
+	* config/vax/nbsdaout.mh: Remove.
+	* configure.host (arm*-*-netbsd*, i[34567]86-*-netbsd*)
+	(i[34567]86-*-openbsd[0-2].*, i[34567]86-*-openbsd3.[0-3])
+	(m68*-*-netbsd*, sparc-*-netbsd*, vax-*-netbsd*): Add them to obsolete
+	error.
+	(arm*-*-netbsd*, i[34567]86-*-netbsd*, i[34567]86-*-openbsd[0-2].*)
+	(i[34567]86-*-openbsd3.[0-3], m68*-*-netbsd*, sparc-*-netbsdaout*)
+	(sparc-*-netbsd*, vax-*-netbsd*): Remove.
+
 2013-09-23  Tom Tromey  <tromey@redhat.com>
 
 	* linespec.c (struct minsym_and_objfile): Remove.

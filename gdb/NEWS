@@ -25,6 +25,19 @@ Nios II ELF 			nios2*-*-elf
 Nios II GNU/Linux		nios2*-*-linux
 Texas Instruments MSP430	msp430*-*-elf
 
+* Removed native configurations
+
+Support for these a.out NetBSD and OpenBSD obsolete configurations has
+been removed.  ELF variants of these configurations are kept supported.
+
+arm*-*-netbsd*              but arm*-*-netbsdelf*       is kept supported.
+i[34567]86-*-netbsd*        but i[34567]86-*-netbsdelf* is kept supported.
+i[34567]86-*-openbsd[0-2].* but i[34567]86-*-openbsd*   is kept supported.
+i[34567]86-*-openbsd3.[0-3]
+m68*-*-netbsd*              but m68*-*-netbsdelf*       is kept supported.
+sparc-*-netbsd*             but sparc-*-netbsdelf*      is kept supported.
+vax-*-netbsd*               but vax-*-netbsdelf*        is kept supported.
+
 * New commands:
 catch rethrow
   Like "catch throw", but catches a re-thrown exception.
