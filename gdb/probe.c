@@ -41,7 +41,7 @@ struct symtabs_and_lines
 parse_probes (char **argptr, struct linespec_result *canonical)
 {
   char *arg_start, *arg_end, *arg;
-  char *objfile_name = NULL, *provider = NULL, *name, *p;
+  char *objfile_namestr = NULL, *provider = NULL, *name, *p;
   struct cleanup *cleanup;
   struct symtabs_and_lines result;
   struct objfile *objfile;
@@ -92,7 +92,7 @@ parse_probes (char **argptr, struct linespec_result *canonical)
 	{
 	  /* This is `-p objfile:provider:name'.  */
 	  *p = '\0';
-	  objfile_name = arg;
+	  objfile_namestr = arg;
 	  provider = hold;
 	  name = p + 1;
 	}
@@ -102,7 +102,7 @@ parse_probes (char **argptr, struct linespec_result *canonical)
     error (_("no probe name specified"));
   if (provider && *provider == '\0')
     error (_("invalid provider name"));
-  if (objfile_name && *objfile_name == '\0')
+  if (objfile_namestr && *objfile_namestr == '\0')
     error (_("invalid objfile name"));
 
   ALL_PSPACES (pspace)
@@ -115,9 +115,9 @@ parse_probes (char **argptr, struct linespec_result *canonical)
 	if (!objfile->sf || !objfile->sf->sym_probe_fns)
 	  continue;
 
-	if (objfile_name
-	    && FILENAME_CMP (objfile->name, objfile_name) != 0
-	    && FILENAME_CMP (lbasename (objfile->name), objfile_name) != 0)
+	if (objfile_namestr
+	    && FILENAME_CMP (objfile->name, objfile_namestr) != 0
+	    && FILENAME_CMP (lbasename (objfile->name), objfile_namestr) != 0)
 	  continue;
 
 	probes = objfile->sf->sym_probe_fns->sym_get_probes (objfile);
@@ -155,7 +155,7 @@ parse_probes (char **argptr, struct linespec_result *canonical)
     {
       throw_error (NOT_FOUND_ERROR,
 		   _("No probe matching objfile=`%s', provider=`%s', name=`%s'"),
-		   objfile_name ? objfile_name : _("<any>"),
+		   objfile_namestr ? objfile_namestr : _("<any>"),
 		   provider ? provider : _("<any>"),
 		   name);
     }

@@ -1,5 +1,11 @@
 2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup.
+	* probe.c (parse_probes): Rename variable objfile_name to
+	objfile_namestr.
+
+2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Remove solib-sunos.c.
 	* Makefile.in (ALLDEPFILES): Remove solib-sunos.c.
 	* config/m68k/obsd.mh (NATDEPFILES): Remove solib-sunos.o.
