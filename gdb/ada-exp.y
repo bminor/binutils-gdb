@@ -125,8 +125,6 @@ static int yylex (void);
 
 void yyerror (char *);
 
-static struct stoken string_to_operator (struct stoken);
-
 static void write_int (LONGEST, struct type *);
 
 static void write_object_renaming (const struct block *, const char *, int,
@@ -784,34 +782,6 @@ void
 yyerror (char *msg)
 {
   error (_("Error in expression, near `%s'."), lexptr);
-}
-
-/* The operator name corresponding to operator symbol STRING (adds
-   quotes and maps to lower-case).  Destroys the previous contents of
-   the array pointed to by STRING.ptr.  Error if STRING does not match
-   a valid Ada operator.  Assumes that STRING.ptr points to a
-   null-terminated string and that, if STRING is a valid operator
-   symbol, the array pointed to by STRING.ptr contains at least
-   STRING.length+3 characters.  */
-
-static struct stoken
-string_to_operator (struct stoken string)
-{
-  int i;
-
-  for (i = 0; ada_opname_table[i].encoded != NULL; i += 1)
-    {
-      if (string.length == strlen (ada_opname_table[i].decoded)-2
-	  && strncasecmp (string.ptr, ada_opname_table[i].decoded+1,
-			  string.length) == 0)
-	{
-	  strncpy (string.ptr, ada_opname_table[i].decoded,
-		   string.length+2);
-	  string.length += 2;
-	  return string;
-	}
-    }
-  error (_("Invalid operator symbol `%s'"), string.ptr);
 }
 
 /* Emit expression to access an instance of SYM, in block BLOCK (if
@@ -1533,12 +1503,3 @@ _initialize_ada_exp (void)
 {
   obstack_init (&temp_parse_space);
 }
-
-/* FIXME: hilfingr/2004-10-05: Hack to remove warning.  The function
-   string_to_operator is supposed to be used for cases where one
-   calls an operator function with prefix notation, as in 
-   "+" (a, b), but at some point, this code seems to have gone
-   missing. */
-
-struct stoken (*dummy_string_to_ada_operator) (struct stoken) 
-     = string_to_operator;

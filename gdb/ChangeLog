@@ -1,5 +1,10 @@
 2013-09-24  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-exp.y (string_to_operator): Delete.
+	(dummy_string_to_ada_operator): Delete.
+
+2013-09-24  Joel Brobecker  <brobecker@adacore.com>
+
 	Revert:
 	* i386-tdep.h (enum amd64_reg_class): New, moved here from
 	amd64-tdep.c.
