@@ -9648,10 +9648,21 @@ open_and_init_dwp_file (void)
   bfd *dbfd;
   struct cleanup *cleanups;
 
-  dwp_name = xstrprintf ("%s.dwp", objfile_name (dwarf2_per_objfile->objfile));
+  /* Try to find first .dwp for the binary file before any symbolic links
+     resolving.  */
+  dwp_name = xstrprintf ("%s.dwp", objfile->original_name);
   cleanups = make_cleanup (xfree, dwp_name);
 
   dbfd = open_dwp_file (dwp_name);
+  if (dbfd == NULL
+      && strcmp (objfile->original_name, objfile_name (objfile)) != 0)
+    {
+      /* Try to find .dwp for the binary file after gdb_realpath resolving.  */
+      dwp_name = xstrprintf ("%s.dwp", objfile_name (objfile));
+      make_cleanup (xfree, dwp_name);
+      dbfd = open_dwp_file (dwp_name);
+    }
+
   if (dbfd == NULL)
     {
       if (dwarf2_read_debug)

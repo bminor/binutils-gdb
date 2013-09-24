@@ -1,3 +1,8 @@
+2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dwp-symlink.c: New file.
+	* gdb.dwarf2/dwp-symlink.exp: New file.
+
 2013-09-20  Doug Evans  <dje@google.com>
 
 	* lib/dwarf.exp (build_executable_from_fission_assembler): New proc.

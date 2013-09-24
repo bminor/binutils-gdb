@@ -1,5 +1,10 @@
 2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* dwarf2read.c (open_and_init_dwp_file): Try open_dwp_file also with
+	objfile->original_name.
+
+2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Pass down original filename for objfile.
 	* coffread.c (coff_symfile_read): Update symbol_file_add_separate call.
 	* elfread.c (elf_symfile_read): Likewise.
