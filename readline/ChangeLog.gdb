@@ -1,7 +1,7 @@
 2013-09-23  Martin Benda  <martin.benda@omsquare.com>
 
 	Checked in by Joel Brobecker  <brobecker@adacore.com>
-	* readline/util.c (_rl_strnicmp): Add missing semicolon.
+	* util.c (_rl_strnicmp): Add missing semicolon.
 
 2013-05-22  Yao Qi  <yao@codesourcery.com>
 
