@@ -3487,7 +3487,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       fprintf_filtered (stream, 
 			_("a thread-local variable at offset 0x%s "
 			  "in the thread-local storage for `%s'"),
-			phex_nz (offset, addr_size), objfile->name);
+			phex_nz (offset, addr_size), objfile_name (objfile));
 
       data += 1 + addr_size + 1;
     }
@@ -3510,7 +3510,7 @@ locexpr_describe_location_piece (struct symbol *symbol, struct ui_file *stream,
       fprintf_filtered (stream, 
 			_("a thread-local variable at offset 0x%s "
 			  "in the thread-local storage for `%s'"),
-			phex_nz (offset, addr_size), objfile->name);
+			phex_nz (offset, addr_size), objfile_name (objfile));
       ++data;
     }
 

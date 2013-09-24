@@ -4732,7 +4732,7 @@ scan_file_globals (struct objfile *objfile)
 	    complaint (&symfile_complaints,
 		       _("%s: common block `%s' from "
 			 "global_sym_chain unresolved"),
-		       objfile->name, SYMBOL_PRINT_NAME (prev));
+		       objfile_name (objfile), SYMBOL_PRINT_NAME (prev));
 	}
     }
   memset (global_sym_chain, 0, sizeof (global_sym_chain));

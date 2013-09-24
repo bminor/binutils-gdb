@@ -283,7 +283,7 @@ allocate_objfile (bfd *abfd, int flags)
   gdb_bfd_ref (abfd);
   if (abfd != NULL)
     {
-      objfile->name = bfd_get_filename (abfd);
+      objfile->original_name = bfd_get_filename (abfd);
       objfile->mtime = bfd_get_mtime (abfd);
 
       /* Build section table.  */
@@ -291,7 +291,7 @@ allocate_objfile (bfd *abfd, int flags)
     }
   else
     {
-      objfile->name = "<<anonymous objfile>>";
+      objfile->original_name = "<<anonymous objfile>>";
     }
 
   objfile->per_bfd = get_objfile_bfd_data (objfile, abfd);
@@ -1267,10 +1267,10 @@ filter_overlapping_sections (struct obj_section **map, int map_size)
 			   " (A) section `%s' from `%s' [%s, %s)\n"
 			   " (B) section `%s' from `%s' [%s, %s).\n"
 			   "Will ignore section B"),
-			 bfd_section_name (abfd1, bfds1), objf1->name,
+			 bfd_section_name (abfd1, bfds1), objfile_name (objf1),
 			 paddress (gdbarch, sect1_addr),
 			 paddress (gdbarch, sect1_endaddr),
-			 bfd_section_name (abfd2, bfds2), objf2->name,
+			 bfd_section_name (abfd2, bfds2), objfile_name (objf2),
 			 paddress (gdbarch, sect2_addr),
 			 paddress (gdbarch, sect2_endaddr));
 	    }
@@ -1479,6 +1479,14 @@ default_iterate_over_objfiles_in_search_order
        if (stop)
 	 return;
     }
+}
+
+/* Return canonical name for OBJFILE.  */
+
+const char *
+objfile_name (const struct objfile *objfile)
+{
+  return objfile->original_name;
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

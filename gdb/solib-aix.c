@@ -765,7 +765,7 @@ solib_aix_get_toc_value (CORE_ADDR pc)
   if (data_osect == NULL)
     error (_("unable to find TOC entry for pc %s "
 	     "(%s has no data section)"),
-	   core_addr_to_string (pc), pc_osect->objfile->name);
+	   core_addr_to_string (pc), objfile_name (pc_osect->objfile));
 
   result = (obj_section_addr (data_osect)
 	    + xcoff_get_toc_offset (pc_osect->objfile));

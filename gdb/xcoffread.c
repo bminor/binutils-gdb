@@ -2958,12 +2958,12 @@ xcoff_initial_scan (struct objfile *objfile, int symfile_flags)
   file_ptr symtab_offset;	/* symbol table and */
   file_ptr stringtab_offset;	/* string table file offsets */
   struct coff_symfile_info *info;
-  char *name;
+  const char *name;
   unsigned int size;
 
   info = XCOFF_DATA (objfile);
   symfile_bfd = abfd = objfile->obfd;
-  name = objfile->name;
+  name = objfile_name (objfile);
 
   num_symbols = bfd_get_symcount (abfd);	/* # of symbols */
   symtab_offset = obj_sym_filepos (abfd);	/* symbol table file offset */

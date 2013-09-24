@@ -209,7 +209,7 @@ struct objfile
        pointer is never NULL.  This does not have to be freed; it is
        guaranteed to have a lifetime at least as long as the objfile.  */
 
-    char *name;
+    char *original_name;
 
     CORE_ADDR addr_low;
 
@@ -672,5 +672,7 @@ extern void default_iterate_over_objfiles_in_search_order
 /* Reset the per-BFD storage area on OBJ.  */
 
 void set_objfile_per_bfd (struct objfile *obj);
+
+const char *objfile_name (const struct objfile *objfile);
 
 #endif /* !defined (OBJFILES_H) */

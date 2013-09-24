@@ -601,7 +601,7 @@ solib_read_symbols (struct so_list *so, int flags)
 	  /* Have we already loaded this shared object?  */
 	  ALL_OBJFILES (so->objfile)
 	    {
-	      if (filename_cmp (so->objfile->name, so->so_name) == 0
+	      if (filename_cmp (objfile_name (so->objfile), so->so_name) == 0
 		  && so->objfile->addr_low == so->addr_low)
 		break;
 	    }

@@ -1200,7 +1200,7 @@ find_separate_debug_file_by_buildid (struct objfile *objfile)
       build_id_name = build_id_to_debug_filename (build_id);
       /* Prevent looping on a stripped .debug file.  */
       if (build_id_name != NULL
-	  && filename_cmp (build_id_name, objfile->name) == 0)
+	  && filename_cmp (build_id_name, objfile_name (objfile)) == 0)
         {
 	  warning (_("\"%s\": separate debug info file has no debug info"),
 		   build_id_name);
@@ -1255,7 +1255,7 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Reading minimal symbols of objfile %s ...\n",
-			  objfile->name);
+			  objfile_name (objfile));
     }
 
   init_minimal_symbol_collection ();

@@ -53,7 +53,8 @@ objfpy_get_filename (PyObject *self, void *closure)
   objfile_object *obj = (objfile_object *) self;
 
   if (obj->objfile)
-    return PyString_Decode (obj->objfile->name, strlen (obj->objfile->name),
+    return PyString_Decode (objfile_name (obj->objfile),
+			    strlen (objfile_name (obj->objfile)),
 			    host_charset (), NULL);
   Py_RETURN_NONE;
 }

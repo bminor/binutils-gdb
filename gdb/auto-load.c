@@ -516,7 +516,7 @@ source_gdb_script_for_objfile (struct objfile *objfile, FILE *file,
   is_safe = file_is_auto_load_safe (filename, _("auto-load: Loading canned "
 						"sequences of commands script "
 						"\"%s\" for objfile \"%s\".\n"),
-				    filename, objfile->name);
+				    filename, objfile_name (objfile));
 
   /* Add this script to the hash table too so "info auto-load gdb-scripts"
      can print it.  */
@@ -809,7 +809,7 @@ void
 auto_load_objfile_script (struct objfile *objfile,
 			  const struct script_language *language)
 {
-  char *realname = gdb_realpath (objfile->name);
+  char *realname = gdb_realpath (objfile_name (objfile));
   struct cleanup *cleanups = make_cleanup (xfree, realname);
 
   if (!auto_load_objfile_script_1 (objfile, realname, language))

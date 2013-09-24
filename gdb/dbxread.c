@@ -553,7 +553,7 @@ dbx_symfile_read (struct objfile *objfile, int symfile_flags)
 
   val = bfd_seek (sym_bfd, DBX_SYMTAB_OFFSET (objfile), SEEK_SET);
   if (val < 0)
-    perror_with_name (objfile->name);
+    perror_with_name (objfile_name (objfile));
 
   /* Size the symbol table.  */
   if (objfile->global_psymbols.size == 0 && objfile->static_psymbols.size == 0)

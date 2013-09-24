@@ -1355,7 +1355,8 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   if (!ret->p.name)
     {
       complaint (&symfile_complaints, _("corrupt probe name when "
-					"reading `%s'"), objfile->name);
+					"reading `%s'"),
+		 objfile_name (objfile));
 
       /* There is no way to use a probe without a name or a provider, so
 	 returning zero here makes sense.  */
@@ -1394,7 +1395,8 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
 			     != el->data + el->size - 1))
     {
       complaint (&symfile_complaints, _("corrupt probe argument when "
-					"reading `%s'"), objfile->name);
+					"reading `%s'"),
+		 objfile_name (objfile));
       /* If the argument string is NULL, it means some problem happened with
 	 it.  So we return 0.  */
       return;

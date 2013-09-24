@@ -503,8 +503,8 @@ maintenance_translate_address (char *arg, int from_tty)
 	  gdb_assert (sect->the_bfd_section && sect->the_bfd_section->name);
 	  section_name = sect->the_bfd_section->name;
 
-	  gdb_assert (sect->objfile && sect->objfile->name);
-	  obj_name = sect->objfile->name;
+	  gdb_assert (sect->objfile && objfile_name (sect->objfile));
+	  obj_name = objfile_name (sect->objfile);
 
 	  if (MULTI_OBJFILE_P ())
 	    printf_filtered (_("%s + %s in section %s of %s\n"),

@@ -1249,7 +1249,7 @@ symbol_file_clear (int from_tty)
       && from_tty
       && (symfile_objfile
 	  ? !query (_("Discard symbol table from `%s'? "),
-		    symfile_objfile->name)
+		    objfile_name (symfile_objfile))
 	  : !query (_("Discard symbol table? "))))
     error (_("Not confirmed."));
 
@@ -1280,7 +1280,7 @@ separate_debug_file_exists (const char *name, unsigned long crc,
      ".debug" suffix as "/usr/lib/debug/path/to/file" is a separate tree where
      the separate debug infos with the same basename can exist.  */
 
-  if (filename_cmp (name, parent_objfile->name) == 0)
+  if (filename_cmp (name, objfile_name (parent_objfile)) == 0)
     return 0;
 
   abfd = gdb_bfd_open_maybe_remote (name);
@@ -1337,7 +1337,7 @@ separate_debug_file_exists (const char *name, unsigned long crc,
       if (verified_as_different || parent_crc != file_crc)
 	warning (_("the debug information found in \"%s\""
 		   " does not match \"%s\" (CRC mismatch).\n"),
-		 name, parent_objfile->name);
+		 name, objfile_name (parent_objfile));
 
       return 0;
     }
@@ -1495,7 +1495,7 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
     }
 
   cleanups = make_cleanup (xfree, debuglink);
-  dir = xstrdup (objfile->name);
+  dir = xstrdup (objfile_name (objfile));
   make_cleanup (xfree, dir);
   terminate_after_last_dir_separator (dir);
   canon_dir = lrealpath (dir);
@@ -1512,11 +1512,12 @@ find_separate_debug_file_by_debuglink (struct objfile *objfile)
 
       struct stat st_buf;
 
-      if (lstat (objfile->name, &st_buf) == 0 && S_ISLNK(st_buf.st_mode))
+      if (lstat (objfile_name (objfile), &st_buf) == 0
+	  && S_ISLNK (st_buf.st_mode))
 	{
 	  char *symlink_dir;
 
-	  symlink_dir = lrealpath (objfile->name);
+	  symlink_dir = lrealpath (objfile_name (objfile));
 	  if (symlink_dir != NULL)
 	    {
 	      make_cleanup (xfree, symlink_dir);
@@ -2357,12 +2358,12 @@ reread_symbols (void)
       if (objfile->obfd->my_archive)
 	res = stat (objfile->obfd->my_archive->filename, &new_statbuf);
       else
-	res = stat (objfile->name, &new_statbuf);
+	res = stat (objfile_name (objfile), &new_statbuf);
       if (res != 0)
 	{
 	  /* FIXME, should use print_sys_errmsg but it's not filtered.  */
 	  printf_unfiltered (_("`%s' has disappeared; keeping its symbols.\n"),
-			     objfile->name);
+			     objfile_name (objfile));
 	  continue;
 	}
       new_modtime = new_statbuf.st_mtime;
@@ -2373,7 +2374,7 @@ reread_symbols (void)
 	  int num_offsets;
 
 	  printf_unfiltered (_("`%s' has changed; re-reading symbols.\n"),
-			     objfile->name);
+			     objfile_name (objfile));
 
 	  /* There are various functions like symbol_file_add,
 	     symfile_bfd_open, syms_from_objfile, etc., which might
@@ -2441,10 +2442,10 @@ reread_symbols (void)
 	    gdb_bfd_unref (obfd);
 	  }
 
-	  objfile->name = bfd_get_filename (objfile->obfd);
+	  objfile->original_name = bfd_get_filename (objfile->obfd);
 	  /* bfd_openr sets cacheable to true, which is what we want.  */
 	  if (!bfd_check_format (objfile->obfd, bfd_object))
-	    error (_("Can't read symbols from %s: %s."), objfile->name,
+	    error (_("Can't read symbols from %s: %s."), objfile_name (objfile),
 		   bfd_errmsg (bfd_get_error ()));
 
 	  /* Save the offsets, we will nuke them with the rest of the
@@ -2791,10 +2792,10 @@ allocate_symtab (const char *filename, struct objfile *objfile)
       static char *last_objfile_name = NULL;
 
       if (last_objfile_name == NULL
-	  || strcmp (last_objfile_name, objfile->name) != 0)
+	  || strcmp (last_objfile_name, objfile_name (objfile)) != 0)
 	{
 	  xfree (last_objfile_name);
-	  last_objfile_name = xstrdup (objfile->name);
+	  last_objfile_name = xstrdup (objfile_name (objfile));
 	  fprintf_unfiltered (gdb_stdlog,
 			      "Creating one or more symtabs for objfile %s ...\n",
 			      last_objfile_name);

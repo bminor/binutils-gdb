@@ -1187,7 +1187,7 @@ install_minimal_symbols (struct objfile *objfile)
 	{
 	  fprintf_unfiltered (gdb_stdlog,
 			      "Installing %d minimal symbols of objfile %s.\n",
-			      msym_count, objfile->name);
+			      msym_count, objfile_name (objfile));
 	}
 
       /* Allocate enough space in the obstack, into which we will gather the

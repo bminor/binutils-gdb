@@ -892,19 +892,20 @@ try_thread_db_load_from_pdir_1 (struct objfile *obj, const char *subdir)
   struct cleanup *cleanup;
   char *path, *cp;
   int result;
+  const char *obj_name = objfile_name (obj);
 
-  if (obj->name[0] != '/')
+  if (obj_name[0] != '/')
     {
       warning (_("Expected absolute pathname for libpthread in the"
-		 " inferior, but got %s."), obj->name);
+		 " inferior, but got %s."), obj_name);
       return 0;
     }
 
-  path = xmalloc (strlen (obj->name) + (subdir ? strlen (subdir) + 1 : 0)
+  path = xmalloc (strlen (obj_name) + (subdir ? strlen (subdir) + 1 : 0)
 		  + 1 + strlen (LIBTHREAD_DB_SO) + 1);
   cleanup = make_cleanup (xfree, path);
 
-  strcpy (path, obj->name);
+  strcpy (path, obj_name);
   cp = strrchr (path, '/');
   /* This should at minimum hit the first character.  */
   gdb_assert (cp != NULL);
@@ -941,7 +942,7 @@ try_thread_db_load_from_pdir (const char *subdir)
     return 0;
 
   ALL_OBJFILES (obj)
-    if (libpthread_name_p (obj->name))
+    if (libpthread_name_p (objfile_name (obj)))
       {
 	if (try_thread_db_load_from_pdir_1 (obj, subdir))
 	  return 1;
@@ -1075,7 +1076,7 @@ has_libpthread (void)
   struct objfile *obj;
 
   ALL_OBJFILES (obj)
-    if (libpthread_name_p (obj->name))
+    if (libpthread_name_p (objfile_name (obj)))
       return 1;
 
   return 0;
@@ -1200,7 +1201,7 @@ thread_db_new_objfile (struct objfile *objfile)
 	 of the list of shared libraries to load, and in an app of several
 	 thousand shared libraries, this can otherwise be painful.  */
       && ((objfile->flags & OBJF_MAINLINE) != 0
-	  || libpthread_name_p (objfile->name)))
+	  || libpthread_name_p (objfile_name (objfile))))
     check_for_thread_db ();
 }
 

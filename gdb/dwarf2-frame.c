@@ -2306,7 +2306,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
 	  if (e.reason < 0)
 	    {
 	      warning (_("skipping .eh_frame info of %s: %s"),
-		       objfile->name, e.message);
+		       objfile_name (objfile), e.message);
 
 	      if (fde_table.num_entries != 0)
 		{
@@ -2346,7 +2346,7 @@ dwarf2_build_frame_info (struct objfile *objfile)
       if (e.reason < 0)
 	{
 	  warning (_("skipping .debug_frame info of %s: %s"),
-		   objfile->name, e.message);
+		   objfile_name (objfile), e.message);
 
 	  if (fde_table.num_entries != 0)
 	    {

@@ -790,7 +790,7 @@ jit_object_close_impl (struct gdb_symbol_callbacks *cb,
 
   terminate_minimal_symbol_table (objfile);
 
-  objfile->name = "<< JIT compiled code >>";
+  objfile->original_name = "<< JIT compiled code >>";
 
   j = NULL;
   for (i = obj->symtabs; i; i = j)

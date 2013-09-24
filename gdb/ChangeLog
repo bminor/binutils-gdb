@@ -1,5 +1,79 @@
 2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	Code cleanup: Add objfile_name accessor function.
+	* ada-lang.c (is_known_support_routine): Use objfile_name.
+	* auto-load.c (source_gdb_script_for_objfile)
+	(auto_load_objfile_script): Likewise.
+	* coffread.c (coff_symtab_read, read_one_sym): Likewise.
+	* dbxread.c (dbx_symfile_read): Likewise.
+	* dwarf2-frame.c (dwarf2_build_frame_info): Likewise.
+	* dwarf2loc.c (locexpr_describe_location_piece): Likewise.
+	* dwarf2read.c (dwarf2_get_dwz_file, dwarf2_read_index)
+	(dw2_symtab_iter_next, dw2_expand_symtabs_matching)
+	(lookup_dwp_signatured_type, lookup_dwo_unit)
+	(dwarf2_build_psymtabs_hard, scan_partial_symbols, process_queue)
+	(fixup_go_packaging, process_imported_unit_die, dwarf2_physname)
+	(read_import_statement, create_dwo_cu, open_and_init_dwp_file)
+	(lookup_dwo_cutu, read_call_site_scope, dwarf2_ranges_read)
+	(dwarf2_record_block_ranges, read_common_block, read_typedef)
+	(read_subrange_type, load_partial_dies, read_partial_die)
+	(read_addr_index_1, read_str_index, dwarf_decode_lines_1)
+	(die_containing_type, build_error_marker_type, lookup_die_type)
+	(follow_die_ref_or_sig, follow_die_ref, dwarf2_fetch_die_loc_sect_off)
+	(dwarf2_fetch_constant_bytes, follow_die_sig, get_signatured_type)
+	(get_DW_AT_signature_type, write_psymtabs_to_index)
+	(save_gdb_index_command): Likewise.
+	* elfread.c (find_separate_debug_file_by_buildid, elf_symfile_read):
+	Likewise.
+	* expprint.c (dump_subexp_body_standard): Likewise.
+	* gdbtypes.c (type_name_no_tag_or_error): Likewise.
+	* jit.c (jit_object_close_impl): Use the objfile field name renamed to
+	original_name.
+	* linux-thread-db.c (try_thread_db_load_from_pdir_1): New variable
+	obj_name, use objfile_name for it, use the variable.
+	(try_thread_db_load_from_pdir, has_libpthread, thread_db_new_objfile):
+	Use objfile_name.
+	* machoread.c (macho_symtab_read, macho_check_dsym)
+	(macho_symfile_relocate): Likewise.
+	* maint.c (maintenance_translate_address): Likewise.
+	* minidebug.c (find_separate_debug_file_in_section): Likewise.
+	* minsyms.c (install_minimal_symbols): Likewise.
+	* objfiles.c (allocate_objfile): Use the objfile field name renamed to
+	original_name.
+	(filter_overlapping_sections): Use objfile_name.
+	(objfile_name): New function.
+	* objfiles.h (struct objfile): Rename field name to original_name.
+	(objfile_name): New prototype.
+	* printcmd.c (sym_info, address_info): Use objfile_name.
+	* probe.c (parse_probes, collect_probes, compare_probes)
+	(info_probes_for_ops): Likewise.
+	* progspace.c (clone_program_space): Likewise.
+	* psymtab.c (require_partial_symbols, dump_psymtab, allocate_psymtab)
+	(maintenance_info_psymtabs): Likewise.
+	* python/py-auto-load.c (gdbpy_load_auto_script_for_objfile)
+	(source_section_scripts): Likewise.
+	* python/py-objfile.c (objfpy_get_filename): Likewise.
+	* python/py-progspace.c (pspy_get_filename): Likewise.
+	* solib-aix.c (solib_aix_get_toc_value): Likewise.
+	* solib-som.c (match_main, som_solib_section_offsets): Likewise.
+	* solib.c (solib_read_symbols): Likewise.
+	* stabsread.c (scan_file_globals): Likewise.
+	* stap-probe.c (handle_stap_probe): Likewise.
+	* symfile.c (symbol_file_clear, separate_debug_file_exists)
+	(find_separate_debug_file_by_debuglink): Likewise.
+	(reread_symbols): Likewise.  Use the objfile field name renamed to
+	original_name.
+	(allocate_symtab): Use objfile_name.
+	* symmisc.c (print_symbol_bcache_statistics, print_objfile_statistics)
+	(dump_objfile, dump_msymbols, dump_symtab_1)
+	(maintenance_print_msymbols, maintenance_print_objfiles)
+	(maintenance_info_symtabs, maintenance_check_symtabs): Likewise.
+	* target.c (target_translate_tls_address, target_info): Likewise.
+	* xcoffread.c (xcoff_initial_scan): Make variable name const.  Use
+	objfile_name.
+
+2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Code cleanup.
 	* probe.c (parse_probes): Rename variable objfile_name to
 	objfile_namestr.
