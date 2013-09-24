@@ -1,3 +1,10 @@
+2013-12-08  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (support_complex_tests): Use gdb_produce_source.
+	(is_elf_target, is_ilp32_target, is_ilp64_target): Likewise.
+	(is_64_target, is_amd64_regs_target): Likewise.
+	(skip_altivec_tests, skip_vsx_tests, skip_btrace_tests): Likewise.
+
 2013-12-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* gdb.ada/uninitialized_vars/parse_controlled.ads: Remove +x file mode.
