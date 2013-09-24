@@ -1,3 +1,19 @@
+2013-09-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* amd64-tdep.c: #include "value.h"
+	(amd64_windows_classify): Delete.
+	(amd64_windows_passed_by_integer_register)
+	(amd64_windows_passed_by_xmm_register)
+	(amd64_windows_passed_by_pointer)
+	(amd64_windows_adjust_args_passed_by_pointer)
+	(amd64_windows_store_arg_in_reg, amd64_windows_push_arguments)
+	(amd64_windows_push_dummy_call): New functions.
+	(amd64_windows_init_abi): Remove setting of
+	tdep->call_dummy_num_integer_regs, tdep->call_dummy_integer_regs,
+	tdep->classify, tdep->memory_args_by_pointer and
+	tdep->integer_param_regs_saved_in_caller_frame.
+	Add call to set_gdbarch_push_dummy_call.
+
 2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2read.c (open_and_init_dwp_file): Try open_dwp_file also with

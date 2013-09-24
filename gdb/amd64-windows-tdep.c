@@ -31,6 +31,7 @@
 #include "coff/i386.h"
 #include "coff/pe.h"
 #include "libcoff.h"
+#include "value.h"
 
 /* The registers used to pass integer arguments during a function call.  */
 static int amd64_windows_dummy_call_integer_regs[] =
@@ -41,41 +42,245 @@ static int amd64_windows_dummy_call_integer_regs[] =
   9                          /* %r9 */
 };
 
-/* Implement the "classify" method in the gdbarch_tdep structure
-   for amd64-windows.  */
+/* Return nonzero if an argument of type TYPE should be passed
+   via one of the integer registers.  */
 
-static void
-amd64_windows_classify (struct type *type, enum amd64_reg_class class[2])
+static int
+amd64_windows_passed_by_integer_register (struct type *type)
 {
   switch (TYPE_CODE (type))
     {
-      case TYPE_CODE_ARRAY:
-	/* Arrays are always passed by memory.	*/
-	class[0] = class[1] = AMD64_MEMORY;
-	break;
-
+      case TYPE_CODE_INT:
+      case TYPE_CODE_ENUM:
+      case TYPE_CODE_BOOL:
+      case TYPE_CODE_RANGE:
+      case TYPE_CODE_CHAR:
+      case TYPE_CODE_PTR:
+      case TYPE_CODE_REF:
       case TYPE_CODE_STRUCT:
       case TYPE_CODE_UNION:
-        /* Struct/Union types whose size is 1, 2, 4, or 8 bytes
-	   are passed as if they were integers of the same size.
-	   Types of different sizes are passed by memory.  */
-	if (TYPE_LENGTH (type) == 1
-	    || TYPE_LENGTH (type) == 2
-	    || TYPE_LENGTH (type) == 4
-	    || TYPE_LENGTH (type) == 8)
-	  {
-	    class[0] = AMD64_INTEGER;
-	    class[1] = AMD64_NO_CLASS;
-	  }
-	else
-	  class[0] = class[1] = AMD64_MEMORY;
-	break;
+	return (TYPE_LENGTH (type) == 1
+		|| TYPE_LENGTH (type) == 2
+		|| TYPE_LENGTH (type) == 4
+		|| TYPE_LENGTH (type) == 8);
 
       default:
-	/* For all the other types, the conventions are the same as
-	   with the System V ABI.  */
-	amd64_classify (type, class);
+	return 0;
     }
+}
+
+/* Return nonzero if an argument of type TYPE should be passed
+   via one of the XMM registers.  */
+
+static int
+amd64_windows_passed_by_xmm_register (struct type *type)
+{
+  return ((TYPE_CODE (type) == TYPE_CODE_FLT
+	   || TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
+          && (TYPE_LENGTH (type) == 4 || TYPE_LENGTH (type) == 8));
+}
+
+/* Return non-zero iff an argument of the given TYPE should be passed
+   by pointer.  */
+
+static int
+amd64_windows_passed_by_pointer (struct type *type)
+{
+  if (amd64_windows_passed_by_integer_register (type))
+    return 0;
+
+  if (amd64_windows_passed_by_xmm_register (type))
+    return 0;
+
+  return 1;
+}
+
+/* For each argument that should be passed by pointer, reserve some
+   stack space, store a copy of the argument on the stack, and replace
+   the argument by its address.  Return the new Stack Pointer value.
+
+   NARGS is the number of arguments. ARGS is the array containing
+   the value of each argument.  SP is value of the Stack Pointer.  */
+
+static CORE_ADDR
+amd64_windows_adjust_args_passed_by_pointer (struct value **args,
+					     int nargs, CORE_ADDR sp)
+{
+  int i;
+
+  for (i = 0; i < nargs; i++)
+    if (amd64_windows_passed_by_pointer (value_type (args[i])))
+      {
+	struct type *type = value_type (args[i]);
+	const gdb_byte *valbuf = value_contents (args[i]);
+	const int len = TYPE_LENGTH (type);
+
+	/* Store a copy of that argument on the stack, aligned to
+	   a 16 bytes boundary, and then use the copy's address as
+	   the argument.  */
+
+	sp -= len;
+	sp &= ~0xf;
+	write_memory (sp, valbuf, len);
+
+	args[i]
+	  = value_addr (value_from_contents_and_address (type, valbuf, sp));
+      }
+
+  return sp;
+}
+
+/* Store the value of ARG in register REGNO (right-justified).
+   REGCACHE is the register cache.  */
+
+static void
+amd64_windows_store_arg_in_reg (struct regcache *regcache,
+				struct value *arg, int regno)
+{
+  struct type *type = value_type (arg);
+  const gdb_byte *valbuf = value_contents (arg);
+  gdb_byte buf[8];
+
+  gdb_assert (TYPE_LENGTH (type) <= 8);
+  memset (buf, 0, sizeof buf);
+  memcpy (buf, valbuf, min (TYPE_LENGTH (type), 8));
+  regcache_cooked_write (regcache, regno, buf);
+}
+
+/* Push the arguments for an inferior function call, and return
+   the updated value of the SP (Stack Pointer).
+
+   All arguments are identical to the arguments used in
+   amd64_windows_push_dummy_call.  */
+
+static CORE_ADDR
+amd64_windows_push_arguments (struct regcache *regcache, int nargs,
+			      struct value **args, CORE_ADDR sp,
+			      int struct_return)
+{
+  int reg_idx = 0;
+  int i;
+  struct value **stack_args = alloca (nargs * sizeof (struct value *));
+  int num_stack_args = 0;
+  int num_elements = 0;
+  int element = 0;
+
+  /* First, handle the arguments passed by pointer.
+
+     These arguments are replaced by pointers to a copy we are making
+     in inferior memory.  So use a copy of the ARGS table, to avoid
+     modifying the original one.  */
+  {
+    struct value **args1 = alloca (nargs * sizeof (struct value *));
+
+    memcpy (args1, args, nargs * sizeof (struct value *));
+    sp = amd64_windows_adjust_args_passed_by_pointer (args1, nargs, sp);
+    args = args1;
+  }
+
+  /* Reserve a register for the "hidden" argument.  */
+  if (struct_return)
+    reg_idx++;
+
+  for (i = 0; i < nargs; i++)
+    {
+      struct type *type = value_type (args[i]);
+      int len = TYPE_LENGTH (type);
+      int on_stack_p = 1;
+
+      if (reg_idx < ARRAY_SIZE (amd64_windows_dummy_call_integer_regs))
+	{
+	  if (amd64_windows_passed_by_integer_register (type))
+	    {
+	      amd64_windows_store_arg_in_reg
+		(regcache, args[i],
+		 amd64_windows_dummy_call_integer_regs[reg_idx]);
+	      on_stack_p = 0;
+	      reg_idx++;
+	    }
+	  else if (amd64_windows_passed_by_xmm_register (type))
+	    {
+	      amd64_windows_store_arg_in_reg
+	        (regcache, args[i], AMD64_XMM0_REGNUM + reg_idx);
+	      /* In case of varargs, these parameters must also be
+		 passed via the integer registers.  */
+	      amd64_windows_store_arg_in_reg
+		(regcache, args[i],
+		 amd64_windows_dummy_call_integer_regs[reg_idx]);
+	      on_stack_p = 0;
+	      reg_idx++;
+	    }
+	}
+
+      if (on_stack_p)
+	{
+	  num_elements += ((len + 7) / 8);
+	  stack_args[num_stack_args++] = args[i];
+	}
+    }
+
+  /* Allocate space for the arguments on the stack, keeping it
+     aligned on a 16 byte boundary.  */
+  sp -= num_elements * 8;
+  sp &= ~0xf;
+
+  /* Write out the arguments to the stack.  */
+  for (i = 0; i < num_stack_args; i++)
+    {
+      struct type *type = value_type (stack_args[i]);
+      const gdb_byte *valbuf = value_contents (stack_args[i]);
+
+      write_memory (sp + element * 8, valbuf, TYPE_LENGTH (type));
+      element += ((TYPE_LENGTH (type) + 7) / 8);
+    }
+
+  return sp;
+}
+
+/* Implement the "push_dummy_call" gdbarch method.  */
+
+static CORE_ADDR
+amd64_windows_push_dummy_call
+  (struct gdbarch *gdbarch, struct value *function,
+   struct regcache *regcache, CORE_ADDR bp_addr,
+   int nargs, struct value **args,
+   CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr)
+{
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  gdb_byte buf[8];
+
+  /* Pass arguments.  */
+  sp = amd64_windows_push_arguments (regcache, nargs, args, sp,
+				     struct_return);
+
+  /* Pass "hidden" argument".  */
+  if (struct_return)
+    {
+      /* The "hidden" argument is passed throught the first argument
+         register.  */
+      const int arg_regnum = amd64_windows_dummy_call_integer_regs[0];
+
+      store_unsigned_integer (buf, 8, byte_order, struct_addr);
+      regcache_cooked_write (regcache, arg_regnum, buf);
+    }
+
+  /* Reserve some memory on the stack for the integer-parameter
+     registers, as required by the ABI.  */
+  sp -= ARRAY_SIZE (amd64_windows_dummy_call_integer_regs) * 8;
+
+  /* Store return address.  */
+  sp -= 8;
+  store_unsigned_integer (buf, 8, byte_order, bp_addr);
+  write_memory (sp, buf, 8);
+
+  /* Update the stack pointer...  */
+  store_unsigned_integer (buf, 8, byte_order, sp);
+  regcache_cooked_write (regcache, AMD64_RSP_REGNUM, buf);
+
+  /* ...and fake a frame pointer.  */
+  regcache_cooked_write (regcache, AMD64_RBP_REGNUM, buf);
+
+  return sp + 16;
 }
 
 /* Implement the "return_value" gdbarch method for amd64-windows.  */
@@ -976,12 +1181,7 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_long_bit (gdbarch, 32);
 
   /* Function calls.  */
-  tdep->call_dummy_num_integer_regs =
-    ARRAY_SIZE (amd64_windows_dummy_call_integer_regs);
-  tdep->call_dummy_integer_regs = amd64_windows_dummy_call_integer_regs;
-  tdep->classify = amd64_windows_classify;
-  tdep->memory_args_by_pointer = 1;
-  tdep->integer_param_regs_saved_in_caller_frame = 1;
+  set_gdbarch_push_dummy_call (gdbarch, amd64_windows_push_dummy_call);
   set_gdbarch_return_value (gdbarch, amd64_windows_return_value);
   set_gdbarch_skip_main_prologue (gdbarch, amd64_skip_main_prologue);
   set_gdbarch_skip_trampoline_code (gdbarch,
