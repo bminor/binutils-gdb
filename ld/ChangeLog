@@ -1,3 +1,12 @@
+2013-11-15  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline changes to 2.24
+	2013-09-24  Alan Modra  <amodra@gmail.com>
+	* emulparams/elf32ppccommon.sh (LIBPATH_SUFFIX): Provide 32-bit
+	and cross-endian values.
+	* emulparams/elf64ppc.sh: Source elf32ppccomon.sh.  Delete duplicate,
+	and unset unwanted variables.
+
 2013-10-10  Roland McGrath  <mcgrathr@google.com>
 
 	* ldmisc.c (vfinfo): Use Boolean ? "" : ":" in place of ":" + Boolean.
