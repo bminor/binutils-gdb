@@ -1835,6 +1835,16 @@ gdb_caching_proc is_elf_target {
     return 1
 }
 
+# Produce source file NAME and write SOURCES into it.
+
+proc gdb_produce_source { name sources } {
+    set index 0
+    set f [open $name "w"]
+
+    puts $f $sources
+    close $f
+}
+
 # Return 1 if target is ILP32.
 # This cannot be decided simply from looking at the target string,
 # as it might depend on externally passed compiler options like -m64.

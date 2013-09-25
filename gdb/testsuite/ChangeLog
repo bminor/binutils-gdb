@@ -1,5 +1,12 @@
 2013-11-06  Yao Qi  <yao@codesourcery.com>
 
+	* lib/gdb.exp (gdb_produce_source): New procedure.
+	* gdb.perf/solib.c: New.
+	* gdb.perf/solib.exp: New.
+	* gdb.perf/solib.py: New.
+
+2013-11-06  Yao Qi  <yao@codesourcery.com>
+
 	* README: Mention performance tests.
 
 2013-11-06  Yao Qi  <yao@codesourcery.com>
