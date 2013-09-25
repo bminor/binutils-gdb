@@ -645,8 +645,6 @@ free_objfile (struct objfile *objfile)
       clear_current_source_symtab_and_line ();
   }
 
-  /* The last thing we do is free the objfile struct itself.  */
-
   if (objfile->global_psymbols.list)
     xfree (objfile->global_psymbols.list);
   if (objfile->static_psymbols.list)
@@ -660,6 +658,7 @@ free_objfile (struct objfile *objfile)
   /* Rebuild section map next time we need it.  */
   get_objfile_pspace_data (objfile->pspace)->section_map_dirty = 1;
 
+  /* The last thing we do is free the objfile struct itself.  */
   xfree (objfile);
 }
 

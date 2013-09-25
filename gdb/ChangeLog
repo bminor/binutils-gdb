@@ -1,3 +1,7 @@
+2013-09-24  Doug Evans  <dje@google.com>
+
+	* objfiles.c (free_objfile): Move comment.
+
 2013-09-24  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-exp.y (string_to_operator): Delete.
