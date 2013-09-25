@@ -1029,8 +1029,6 @@ macho_symfile_offsets (struct objfile *objfile,
 }
 
 static const struct sym_fns macho_sym_fns = {
-  bfd_target_mach_o_flavour,
-
   macho_new_init,               /* init anything gbl to entire symtab */
   macho_symfile_init,           /* read initial info, setup for sym_read() */
   macho_symfile_read,           /* read a symbol file into symtab */
@@ -1050,7 +1048,7 @@ extern initialize_file_ftype _initialize_machoread;
 void
 _initialize_machoread (void)
 {
-  add_symtab_fns (&macho_sym_fns);
+  add_symtab_fns (bfd_target_mach_o_flavour, &macho_sym_fns);
 
   add_setshow_zuinteger_cmd ("mach-o", class_obscure,
 			     &mach_o_debug_level,

@@ -405,7 +405,6 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
 
 static const struct sym_fns ecoff_sym_fns =
 {
-  bfd_target_ecoff_flavour,
   mipscoff_new_init,		/* init anything gbl to entire symtab */
   mipscoff_symfile_init,	/* read initial info, setup for sym_read() */
   mipscoff_symfile_read,	/* read a symbol file into symtab */
@@ -425,5 +424,5 @@ void _initialize_mipsread (void);
 void
 _initialize_mipsread (void)
 {
-  add_symtab_fns (&ecoff_sym_fns);
+  add_symtab_fns (bfd_target_ecoff_flavour, &ecoff_sym_fns);
 }

@@ -130,10 +130,18 @@ void _initialize_symfile (void);
    calls add_symtab_fns() to register information on each format it is
    prepared to read.  */
 
-typedef const struct sym_fns *sym_fns_ptr;
-DEF_VEC_P (sym_fns_ptr);
+typedef struct
+{
+  /* BFD flavour that we handle.  */
+  enum bfd_flavour sym_flavour;
 
-static VEC (sym_fns_ptr) *symtab_fns = NULL;
+  /* The "vtable" of symbol functions.  */
+  const struct sym_fns *sym_fns;
+} registered_sym_fns;
+
+DEF_VEC_O (registered_sym_fns);
+
+static VEC (registered_sym_fns) *symtab_fns = NULL;
 
 /* If non-zero, shared library symbols will be added automatically
    when the inferior is created, new libraries are loaded, or when
@@ -1746,14 +1754,18 @@ get_section_index (struct objfile *objfile, char *section_name)
     return -1;
 }
 
-/* Link SF into the global symtab_fns list.  Called on startup by the
-   _initialize routine in each object file format reader, to register
-   information about each format the reader is prepared to handle.  */
+/* Link SF into the global symtab_fns list.
+   FLAVOUR is the file format that SF handles.
+   Called on startup by the _initialize routine in each object file format
+   reader, to register information about each format the reader is prepared
+   to handle.  */
 
 void
-add_symtab_fns (const struct sym_fns *sf)
+add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *sf)
 {
-  VEC_safe_push (sym_fns_ptr, symtab_fns, sf);
+  registered_sym_fns fns = { flavour, sf };
+
+  VEC_safe_push (registered_sym_fns, symtab_fns, &fns);
 }
 
 /* Initialize OBJFILE to read symbols from its associated BFD.  It
@@ -1764,7 +1776,7 @@ add_symtab_fns (const struct sym_fns *sf)
 static const struct sym_fns *
 find_sym_fns (bfd *abfd)
 {
-  const struct sym_fns *sf;
+  registered_sym_fns *rsf;
   enum bfd_flavour our_flavour = bfd_get_flavour (abfd);
   int i;
 
@@ -1773,9 +1785,9 @@ find_sym_fns (bfd *abfd)
       || our_flavour == bfd_target_tekhex_flavour)
     return NULL;	/* No symbols.  */
 
-  for (i = 0; VEC_iterate (sym_fns_ptr, symtab_fns, i, sf); ++i)
-    if (our_flavour == sf->sym_flavour)
-      return sf;
+  for (i = 0; VEC_iterate (registered_sym_fns, symtab_fns, i, rsf); ++i)
+    if (our_flavour == rsf->sym_flavour)
+      return rsf->sym_fns;
 
   error (_("I'm sorry, Dave, I can't do that.  Symbol format `%s' unknown."),
 	 bfd_get_target (abfd));

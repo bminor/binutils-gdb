@@ -1,5 +1,14 @@
 2013-09-25  Doug Evans  <dje@google.com>
 
+	* symfile.h (struct sym_fns): Delete member "sym_flavour".
+	All uses updated.
+	(add_symtab_fns): Update prototype.
+	* symfile.c (sym_fns_ptr): Delete.  Replace with ...
+	(registered_sym_fns): ... this.
+	(symtab_fns): Update.
+	(add_symtab_fns): New arg "flavour".  All callers updated.
+	(find_sym_fns): Rewrite to use new sym_fns registry.
+
 	* symfile.h (struct sym_fns): Add "objfile" argument to
 	sym_read_linetable.  All uses updated.
 

@@ -534,7 +534,6 @@ som_symfile_offsets (struct objfile *objfile,
 
 static const struct sym_fns som_sym_fns =
 {
-  bfd_target_som_flavour,
   som_new_init,			/* init anything gbl to entire symtab */
   som_symfile_init,		/* read initial info, setup for sym_read() */
   som_symfile_read,		/* read a symbol file into symtab */
@@ -553,5 +552,5 @@ initialize_file_ftype _initialize_somread;
 void
 _initialize_somread (void)
 {
-  add_symtab_fns (&som_sym_fns);
+  add_symtab_fns (bfd_target_som_flavour, &som_sym_fns);
 }

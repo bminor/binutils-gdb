@@ -350,12 +350,6 @@ struct sym_probe_fns
 
 struct sym_fns
 {
-
-  /* BFD flavour that we handle, or (as a special kludge, see
-     xcoffread.c, (enum bfd_flavour)-1 for xcoff).  */
-
-  enum bfd_flavour sym_flavour;
-
   /* Initializes anything that is global to the entire symbol table.
      It is called during symbol_file_add, when we begin debugging an
      entirely new program.  */
@@ -454,7 +448,7 @@ extern bfd_byte *default_symfile_relocate (struct objfile *objfile,
 extern struct symtab *allocate_symtab (const char *, struct objfile *)
   ATTRIBUTE_NONNULL (1);
 
-extern void add_symtab_fns (const struct sym_fns *);
+extern void add_symtab_fns (enum bfd_flavour flavour, const struct sym_fns *);
 
 /* This enum encodes bit-flags passed as ADD_FLAGS parameter to
    symbol_file_add, etc.  */

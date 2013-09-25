@@ -2250,7 +2250,6 @@ coff_read_enum_type (int index, int length, int lastsym,
 
 static const struct sym_fns coff_sym_fns =
 {
-  bfd_target_coff_flavour,
   coff_new_init,		/* sym_new_init: init anything gbl to
 				   entire symtab */
   coff_symfile_init,		/* sym_init: read initial info, setup
@@ -2283,7 +2282,7 @@ coff_free_info (struct objfile *objfile, void *arg)
 void
 _initialize_coffread (void)
 {
-  add_symtab_fns (&coff_sym_fns);
+  add_symtab_fns (bfd_target_coff_flavour, &coff_sym_fns);
 
   coff_objfile_data_key = register_objfile_data_with_cleanup (NULL,
 							      coff_free_info);
