@@ -475,6 +475,9 @@ extern int have_partial_symbols (void);
 
 extern int have_full_symbols (void);
 
+extern void objfile_set_sym_fns (struct objfile *objfile,
+				 const struct sym_fns *sf);
+
 extern void objfiles_changed (void);
 
 /* This operation deletes all objfile entries that represent solibs that

@@ -59,6 +59,11 @@ maint set|show per-command symtab
 
 * New options
 
+set debug symfile off|on
+show debug symfile
+  Control display of debugging info regarding reading symbol files and
+  symbol tables within those files
+
 set print raw frame-arguments
 show print raw frame-arguments
   Set/show whether to print frame arguments in raw mode,

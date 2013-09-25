@@ -940,7 +940,7 @@ syms_from_objfile_1 (struct objfile *objfile,
   struct cleanup *old_chain;
   const int mainline = add_flags & SYMFILE_MAINLINE;
 
-  objfile->sf = find_sym_fns (objfile->obfd);
+  objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd));
 
   if (objfile->sf == NULL)
     {
@@ -2530,7 +2530,7 @@ reread_symbols (void)
 	  /* Reset the sym_fns pointer.  The ELF reader can change it
 	     based on whether .gdb_index is present, and we need it to
 	     start over.  PR symtab/15885  */
-	  objfile->sf = find_sym_fns (objfile->obfd);
+	  objfile_set_sym_fns (objfile, find_sym_fns (objfile->obfd));
 
 	  build_objfile_section_table (objfile);
 	  terminate_minimal_symbol_table (objfile);

@@ -756,7 +756,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	serial.c ser-base.c ser-unix.c skip.c \
 	solib.c solib-target.c source.c \
 	stabsread.c stack.c probe.c stap-probe.c std-regs.c \
-	symfile.c symfile-mem.c symmisc.c symtab.c \
+	symfile.c symfile-debug.c symfile-mem.c symmisc.c symtab.c \
 	target.c target-descriptions.c target-memory.c \
 	thread.c top.c tracepoint.c \
 	trad-frame.c \
@@ -894,7 +894,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	findvar.o regcache.o cleanups.o \
 	charset.o continuations.o corelow.o disasm.o dummy-frame.o dfp.o \
 	source.o value.o eval.o valops.o valarith.o valprint.o printcmd.o \
-	block.o symtab.o psymtab.o symfile.o symmisc.o linespec.o dictionary.o \
+	block.o symtab.o psymtab.o symfile.o symfile-debug.o symmisc.o \
+	linespec.o dictionary.o \
 	infcall.o \
 	infcmd.o infrun.o \
 	expprint.o environ.o stack.o thread.o \

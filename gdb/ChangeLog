@@ -1,5 +1,17 @@
 2013-09-25  Doug Evans  <dje@google.com>
 
+	New option "set debug symfile on".
+	* NEWS: Mention "set debug symfile".
+	* Makefile.in (SFILES): Add symfile-debug.c.
+	(COMMON_OBS): Add symfile-debug.o.
+	* elfread.c (elf_symfile_read): Use objfile_set_sym_fns to set the
+	objfile's symbol functions.
+	* objfiles.h (objfile_set_sym_fns): Declare.
+	* symfile-debug.c: New file.
+	* symfile.c (syms_from_objfile_1): Use objfile_set_sym_fns to set the
+	objfile's symbol functions.
+	(reread_symbols): Ditto.
+
 	* symfile.h (struct sym_fns): Delete member "sym_flavour".
 	All uses updated.
 	(add_symtab_fns): Update prototype.

@@ -1419,14 +1419,14 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 
       if (!objfile_has_partial_symbols (objfile)
 	  && dwarf2_initialize_objfile (objfile))
-	objfile->sf = &elf_sym_fns_gdb_index;
+	objfile_set_sym_fns (objfile, &elf_sym_fns_gdb_index);
       else
 	{
 	  /* It is ok to do this even if the stabs reader made some
 	     partial symbols, because OBJF_PSYMTABS_READ has not been
 	     set, and so our lazy reader function will still be called
 	     when needed.  */
-	  objfile->sf = &elf_sym_fns_lazy_psyms;
+	  objfile_set_sym_fns (objfile, &elf_sym_fns_lazy_psyms);
 	}
     }
   /* If the file has its own symbol tables it has no separate debug
