@@ -192,6 +192,10 @@ do-check-parallel: $(TEST_TARGETS)
 @GMAKE_TRUE@	-mkdir -p outputs/$*
 @GMAKE_TRUE@	@$(DO_RUNTEST) GDB_PARALLEL=yes --outdir=outputs/$* $*.exp $(RUNTESTFLAGS)
 
+check-perf: all $(abs_builddir)/site.exp
+	@if test ! -d gdb.perf; then mkdir gdb.perf; fi
+	$(DO_RUNTEST) --directory=gdb.perf --outdir gdb.perf GDB_PERFTEST_MODE=both $(RUNTESTFLAGS)
+
 force:;
 
 clean mostlyclean:
