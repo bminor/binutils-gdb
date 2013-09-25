@@ -1,3 +1,9 @@
+2013-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR shlibs/8882
+	* gdb.base/corefile.exp: Add a check to assure warning-free
+	core-file load.
+
 2013-09-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dwp-symlink.c: New file.

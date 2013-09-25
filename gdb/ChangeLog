@@ -1,3 +1,9 @@
+2013-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	PR shlibs/8882
+	* solib-svr4.c (svr4_read_so_list): Skip the vDSO when reading
+	link map entries.
+
 2013-09-24  Doug Evans  <dje@google.com>
 
 	* objfiles.c (free_objfile): Move comment.

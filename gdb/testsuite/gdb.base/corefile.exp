@@ -255,3 +255,19 @@ if ![is_remote target] {
 
     gdb_exit
 }
+
+# Test warning-free core file load.  E.g., a Linux vDSO used to
+# trigger this warning:
+#     warning: Can't read pathname for load map: Input/output error.
+
+clean_restart ${testfile}
+
+set test "core-file warning-free"
+gdb_test_multiple "core-file $corefile" $test {
+    -re "warning: .*\r\n.*\r\n$gdb_prompt $" {
+	fail $test
+    }
+    -re "\r\n$gdb_prompt $" {
+	pass $test
+    }
+}
