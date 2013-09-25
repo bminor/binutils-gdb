@@ -143,6 +143,37 @@ multiple_symbols_select_mode (void)
 
 const struct block *block_found;
 
+/* Return the name of a domain_enum.  */
+
+const char *
+domain_name (domain_enum e)
+{
+  switch (e)
+    {
+    case UNDEF_DOMAIN: return "UNDEF_DOMAIN";
+    case VAR_DOMAIN: return "VAR_DOMAIN";
+    case STRUCT_DOMAIN: return "STRUCT_DOMAIN";
+    case LABEL_DOMAIN: return "LABEL_DOMAIN";
+    case COMMON_BLOCK_DOMAIN: return "COMMON_BLOCK_DOMAIN";
+    default: gdb_assert_not_reached ("bad domain_enum");
+    }
+}
+
+/* Return the name of a search_domain .  */
+
+const char *
+search_domain_name (enum search_domain e)
+{
+  switch (e)
+    {
+    case VARIABLES_DOMAIN: return "VARIABLES_DOMAIN";
+    case FUNCTIONS_DOMAIN: return "FUNCTIONS_DOMAIN";
+    case TYPES_DOMAIN: return "TYPES_DOMAIN";
+    case ALL_DOMAIN: return "ALL_DOMAIN";
+    default: gdb_assert_not_reached ("bad search_domain");
+    }
+}
+
 /* See whether FILENAME matches SEARCH_NAME using the rule that we
    advertise to the user.  (The manual's description of linespecs
    describes what we advertise).  Returns true if they match, false

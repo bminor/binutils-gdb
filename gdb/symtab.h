@@ -427,6 +427,8 @@ typedef enum domain_enum_tag
   COMMON_BLOCK_DOMAIN
 } domain_enum;
 
+extern const char *domain_name (domain_enum);
+
 /* Searching domains, used for `search_symbols'.  Element numbers are
    hardcoded in GDB, check all enum uses before changing it.  */
 
@@ -445,6 +447,8 @@ enum search_domain
   /* Any type.  */
   ALL_DOMAIN = 3
 };
+
+extern const char *search_domain_name (enum search_domain);
 
 /* An address-class says where to find the value of a symbol.  */
 
