@@ -1,3 +1,8 @@
+2013-08-25  Andrew Pinski  <apinski@cavium.com>
+
+	* elfnn-aarch64.c (TCB_SIZE): Base on the ARCH_SIZE rather than a
+	fixed size of 16.
+
 2013-09-24  Gregory Fong  <gregory.0xf0@gmail.com>
 
 	* elfxx-mips.c (mips_elf_create_got_section): Hide
