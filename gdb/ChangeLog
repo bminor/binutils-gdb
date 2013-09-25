@@ -1,3 +1,10 @@
+2013-09-25  Doug Evans  <dje@google.com>
+
+	* symfile.h (struct quick_symbol_functions): Reorg arg list of
+	map_matching_symbols so objfile is first.  All uses updated.
+	* dwarf2read.c (dw2_map_matching_symbols): Update signature.
+	* psymtab.c (map_matching_symbols_psymtab): Update signature.
+
 2013-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	PR shlibs/8882

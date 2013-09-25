@@ -237,8 +237,9 @@ struct quick_symbol_functions
      CALLBACK returns 0 to indicate that the scan should continue, or
      non-zero to indicate that the scan should be terminated.  */
 
-  void (*map_matching_symbols) (const char *name, domain_enum namespace,
-				struct objfile *, int global,
+  void (*map_matching_symbols) (struct objfile *,
+				const char *name, domain_enum namespace,
+				int global,
 				int (*callback) (struct block *,
 						 struct symbol *, void *),
 				void *data,

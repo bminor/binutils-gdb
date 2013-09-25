@@ -5040,11 +5040,11 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
       data.objfile = objfile;
 
       if (is_wild_match)
-	objfile->sf->qf->map_matching_symbols (name, domain, objfile, global,
+	objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
 					       aux_add_nonlocal_symbols, &data,
 					       wild_match, NULL);
       else
-	objfile->sf->qf->map_matching_symbols (name, domain, objfile, global,
+	objfile->sf->qf->map_matching_symbols (objfile, name, domain, global,
 					       aux_add_nonlocal_symbols, &data,
 					       full_match, compare_names);
     }
@@ -5057,8 +5057,8 @@ add_nonlocal_symbols (struct obstack *obstackp, const char *name,
 	  strcpy (name1, "_ada_");
 	  strcpy (name1 + sizeof ("_ada_") - 1, name);
 	  data.objfile = objfile;
-	  objfile->sf->qf->map_matching_symbols (name1, domain,
-						 objfile, global,
+	  objfile->sf->qf->map_matching_symbols (objfile, name1, domain,
+						 global,
 						 aux_add_nonlocal_symbols,
 						 &data,
 						 full_match, compare_names);

@@ -1238,8 +1238,9 @@ map_block (const char *name, domain_enum namespace, struct objfile *objfile,
     the definition of quick_symbol_functions in symfile.h.  */
 
 static void
-map_matching_symbols_psymtab (const char *name, domain_enum namespace,
-			      struct objfile *objfile, int global,
+map_matching_symbols_psymtab (struct objfile *objfile,
+			      const char *name, domain_enum namespace,
+			      int global,
 			      int (*callback) (struct block *,
 					       struct symbol *, void *),
 			      void *data,
