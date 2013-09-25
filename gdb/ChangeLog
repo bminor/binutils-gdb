@@ -1,5 +1,8 @@
 2013-09-25  Doug Evans  <dje@google.com>
 
+	* symfile.h (struct sym_fns): Add "objfile" argument to
+	sym_read_linetable.  All uses updated.
+
 	* symtab.c (domain_name, search_domain_name): New functions.
 	* symtab.h (domain_name, search_domain_name): Declare.
 

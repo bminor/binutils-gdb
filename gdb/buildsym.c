@@ -1144,9 +1144,10 @@ end_symtab_from_static_block (struct block *static_block,
       blockvector = make_blockvector (objfile);
     }
 
-  /* Read the line table if it has to be read separately.  */
+  /* Read the line table if it has to be read separately.
+     This is only used by xcoffread.c.  */
   if (objfile->sf->sym_read_linetable != NULL)
-    objfile->sf->sym_read_linetable ();
+    objfile->sf->sym_read_linetable (objfile);
 
   /* Handle the case where the debug info specifies a different path
      for the main source file.  It can cause us to lose track of its

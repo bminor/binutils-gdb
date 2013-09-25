@@ -817,7 +817,7 @@ return_after_cleanup:
 }
 
 static void
-aix_process_linenos (void)
+aix_process_linenos (struct objfile *objfile)
 {
   /* There is no linenos to read if there are only dwarf info.  */
   if (this_symtab_psymtab == NULL)

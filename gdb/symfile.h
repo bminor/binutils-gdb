@@ -407,7 +407,7 @@ struct sym_fns
      the line table cannot be read while processing the debugging
      information.  */
 
-  void (*sym_read_linetable) (void);
+  void (*sym_read_linetable) (struct objfile *);
 
   /* Relocate the contents of a debug section SECTP.  The
      contents are stored in BUF if it is non-NULL, or returned in a
