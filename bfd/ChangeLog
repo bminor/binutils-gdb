@@ -1,3 +1,7 @@
+2013-09-24  Alan Modra  <amodra@gmail.com>
+
+	* elf32-mips.c (ELF_OSABI): Undef for vxworks.
+
 2013-09-20  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
