@@ -314,14 +314,17 @@ fprint_frame_type (struct ui_file *file, enum frame_type type)
     case INLINE_FRAME:
       fprintf_unfiltered (file, "INLINE_FRAME");
       return;
-    case SENTINEL_FRAME:
-      fprintf_unfiltered (file, "SENTINEL_FRAME");
+    case TAILCALL_FRAME:
+      fprintf_unfiltered (file, "TAILCALL_FRAME");
       return;
     case SIGTRAMP_FRAME:
       fprintf_unfiltered (file, "SIGTRAMP_FRAME");
       return;
     case ARCH_FRAME:
       fprintf_unfiltered (file, "ARCH_FRAME");
+      return;
+    case SENTINEL_FRAME:
+      fprintf_unfiltered (file, "SENTINEL_FRAME");
       return;
     default:
       fprintf_unfiltered (file, "<unknown type>");

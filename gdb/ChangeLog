@@ -1,3 +1,9 @@
+2013-09-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix set debug frame output.
+	* frame.c (fprint_frame_type): Add TAILCALL_FRAME entry.  Move
+	SENTINEL_FRAME entry lower to match enum frame_type order.
+
 2013-09-26  Pierre Muller  <muller@sourceware.org>
 
 	Replace constant values 8 to 15 by AMD64_R8_REGNUM to
