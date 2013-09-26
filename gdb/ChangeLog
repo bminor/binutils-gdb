@@ -1,3 +1,12 @@
+2013-09-26  Pierre Muller  <muller@sourceware.org>
+
+	Replace constant values 8 to 15 by AMD64_R8_REGNUM to
+	AMD64_R15_REGNUM when a register index is expected.
+	* amd64-windows-tdep.c (amd64_windows_dummy_call_integer_regs):
+	Substitute in array.
+	* amd64-tdep.c (amd64_dwarf_regmap): Ditto.
+	(amd64_push_arguments): Substitute in integer_regnum array.
+
 2013-09-25  Doug Evans  <dje@google.com>
 
 	* objfiles.c (allocate_objfile): Move comment to better place.

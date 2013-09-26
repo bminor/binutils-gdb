@@ -38,8 +38,8 @@ static int amd64_windows_dummy_call_integer_regs[] =
 {
   AMD64_RCX_REGNUM,          /* %rcx */
   AMD64_RDX_REGNUM,          /* %rdx */
-  8,                         /* %r8 */
-  9                          /* %r9 */
+  AMD64_R8_REGNUM,           /* %r8 */
+  AMD64_R9_REGNUM            /* %r9 */
 };
 
 /* Return nonzero if an argument of type TYPE should be passed

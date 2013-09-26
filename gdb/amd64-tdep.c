@@ -109,7 +109,14 @@ static int amd64_dwarf_regmap[] =
   AMD64_RSP_REGNUM,
 
   /* Extended Integer Registers 8 - 15.  */
-  8, 9, 10, 11, 12, 13, 14, 15,
+  AMD64_R8_REGNUM,		/* %r8 */
+  AMD64_R9_REGNUM,		/* %r9 */
+  AMD64_R10_REGNUM,		/* %r10 */
+  AMD64_R11_REGNUM,		/* %r11 */
+  AMD64_R12_REGNUM,		/* %r12 */
+  AMD64_R13_REGNUM,		/* %r13 */
+  AMD64_R14_REGNUM,		/* %r14 */
+  AMD64_R15_REGNUM,		/* %r15 */
 
   /* Return Address RA.  Mapped to RIP.  */
   AMD64_RIP_REGNUM,
@@ -758,8 +765,8 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
     AMD64_RSI_REGNUM,		/* %rsi */
     AMD64_RDX_REGNUM,		/* %rdx */
     AMD64_RCX_REGNUM,		/* %rcx */
-    8,				/* %r8 */
-    9				/* %r9 */
+    AMD64_R8_REGNUM,		/* %r8 */
+    AMD64_R9_REGNUM		/* %r9 */
   };
   static int sse_regnum[] =
   {
