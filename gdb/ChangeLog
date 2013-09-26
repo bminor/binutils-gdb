@@ -1,5 +1,7 @@
 2013-09-25  Doug Evans  <dje@google.com>
 
+	* objfiles.c (allocate_objfile): Move comment to better place.
+
 	New option "set debug symfile on".
 	* NEWS: Mention "set debug symfile".
 	* Makefile.in (SFILES): Add symfile-debug.c.

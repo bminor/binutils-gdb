@@ -280,10 +280,6 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
 
   objfile_alloc_data (objfile);
 
-  /* Update the per-objfile information that comes from the bfd, ensuring
-     that any data that is reference is saved in the per-objfile data
-     region.  */
-
   if (name == NULL)
     {
       gdb_assert (abfd == NULL);
@@ -291,6 +287,10 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
     }
   objfile->original_name = obstack_copy0 (&objfile->objfile_obstack, name,
 					  strlen (name));
+
+  /* Update the per-objfile information that comes from the bfd, ensuring
+     that any data that is reference is saved in the per-objfile data
+     region.  */
 
   objfile->obfd = abfd;
   gdb_bfd_ref (abfd);
