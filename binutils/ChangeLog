@@ -1,3 +1,8 @@
+2013-09-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (display_debug_frames): Pass offset_size to
+	print_dwarf_vma for cie_id.
+
 2013-09-20  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

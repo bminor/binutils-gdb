@@ -1,3 +1,7 @@
+2013-09-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/x86-64/compressed-1a.d: Updated for 64-bit addresses.
+
 2013-09-12  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/x86-64/compressed-1a.d: Update expected output to
