@@ -5284,9 +5284,6 @@ typedef struct stop_reply
   int stopped_by_watchpoint_p;
   CORE_ADDR watch_data_address;
 
-  int solibs_changed;
-  int replay_event;
-
   int core;
 } *stop_reply_p;
 
@@ -5546,8 +5543,6 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
   event->ptid = null_ptid;
   event->ws.kind = TARGET_WAITKIND_IGNORE;
   event->ws.value.integer = 0;
-  event->solibs_changed = 0;
-  event->replay_event = 0;
   event->stopped_by_watchpoint_p = 0;
   event->regcache = NULL;
   event->core = -1;
@@ -5611,15 +5606,14 @@ Packet: '%s'\n"),
 		  while (*p_temp && *p_temp != ';')
 		    p_temp++;
 
-		  event->solibs_changed = 1;
+		  event->ws.kind = TARGET_WAITKIND_LOADED;
 		  p = p_temp;
 		}
 	      else if (strncmp (p, "replaylog", p1 - p) == 0)
 		{
-		  /* NO_HISTORY event.
-		     p1 will indicate "begin" or "end", but
-		     it makes no difference for now, so ignore it.  */
-		  event->replay_event = 1;
+		  event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
+		  /* p1 will indicate "begin" or "end", but it makes
+		     no difference for now, so ignore it.  */
 		  p_temp = strchr (p1 + 1, ';');
 		  if (p_temp)
 		    p = p_temp;
@@ -5675,18 +5669,15 @@ Packet: '%s'\n"),
 		   buf, p);
 	  ++p;
 	}
+
+      if (event->ws.kind != TARGET_WAITKIND_IGNORE)
+	break;
+
       /* fall through */
     case 'S':		/* Old style status, just signal only.  */
-      if (event->solibs_changed)
-	event->ws.kind = TARGET_WAITKIND_LOADED;
-      else if (event->replay_event)
-	event->ws.kind = TARGET_WAITKIND_NO_HISTORY;
-      else
-	{
-	  event->ws.kind = TARGET_WAITKIND_STOPPED;
-	  event->ws.value.sig = (enum gdb_signal)
-	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
-	}
+      event->ws.kind = TARGET_WAITKIND_STOPPED;
+      event->ws.value.sig = (enum gdb_signal)
+	(((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
       break;
     case 'W':		/* Target exited.  */
     case 'X':

@@ -1,3 +1,10 @@
+2013-09-27  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (struct stop_reply) <solibs_changed, replay_event>:
+	Delete fields.
+	(remote_parse_stop_reply): Adjust, setting event->ws.kind
+	directly.
+
 2013-09-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix set debug frame output.
