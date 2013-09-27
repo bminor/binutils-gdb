@@ -750,8 +750,15 @@ struct dwo_unit
 };
 
 /* Data for one DWO file.
-   This includes virtual DWO files that have been packaged into a
-   DWP file.  */
+
+   This includes virtual DWO files (a virtual DWO file is a DWO file as it
+   appears in a DWP file).  DWP files don't really have DWO files per se -
+   comdat folding of types "loses" the DWO file they came from, and from
+   a high level view DWP files appear to contain a mass of random types.
+   However, to maintain consistency with the non-DWP case we pretend DWP
+   files contain virtual DWO files, and we assign each TU with one virtual
+   DWO file (generally based on the line and abbrev section offsets -
+   a heuristic that seems to work in practice).  */
 
 struct dwo_file
 {
@@ -830,7 +837,7 @@ struct dwp_file
   /* Section info for this file.  */
   struct dwp_sections sections;
 
-  /* Table of CUs in the file. */
+  /* Table of CUs in the file.  */
   const struct dwp_hash_table *cus;
 
   /* Table of TUs in the file.  */
@@ -1699,9 +1706,9 @@ static htab_t allocate_signatured_type_table (struct objfile *objfile);
 
 static htab_t allocate_dwo_unit_table (struct objfile *objfile);
 
-static struct dwo_unit *lookup_dwo_in_dwp
-  (struct dwp_file *dwp_file, const struct dwp_hash_table *htab,
-   const char *comp_dir, ULONGEST signature, int is_debug_types);
+static struct dwo_unit *lookup_dwo_unit_in_dwp
+  (struct dwp_file *dwp_file, const char *comp_dir,
+   ULONGEST signature, int is_debug_types);
 
 static struct dwp_file *get_dwp_file (void);
 
@@ -4238,7 +4245,6 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
     {
       bfd *abfd;
       const gdb_byte *info_ptr, *end_ptr;
-      struct dwarf2_section_info *abbrev_section;
 
       dwarf2_read_section (objfile, section);
       info_ptr = section->buffer;
@@ -4249,11 +4255,6 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
       /* We can't set abfd until now because the section may be empty or
 	 not present, in which case section->asection will be NULL.  */
       abfd = section->asection->owner;
-
-      if (dwo_file)
-	abbrev_section = &dwo_file->sections.abbrev;
-      else
-	abbrev_section = &dwarf2_per_objfile->abbrev;
 
       /* We don't use init_cutu_and_read_dies_simple, or some such, here
 	 because we don't need to read any dies: the signature is in the
@@ -4551,8 +4552,8 @@ lookup_dwp_signatured_type (struct dwarf2_cu *cu, ULONGEST sig)
      Try the DWP file and hope for the best.  */
   if (dwp_file->tus == NULL)
     return NULL;
-  dwo_entry = lookup_dwo_in_dwp (dwp_file, dwp_file->tus, NULL,
-				 sig, 1 /* is_debug_types */);
+  dwo_entry = lookup_dwo_unit_in_dwp (dwp_file, NULL,
+				      sig, 1 /* is_debug_types */);
   if (dwo_entry == NULL)
     return NULL;
 
@@ -9219,8 +9220,8 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
 
      The DWP file can be made up of a random collection of CUs and TUs.
      However, for each CU + set of TUs that came from the same original DWO
-     file, we want to combine them back into a virtual DWO file to save space
-     (fewer struct dwo_file objects to allocated).  Remember that for really
+     file, we can combine them back into a virtual DWO file to save space
+     (fewer struct dwo_file objects to allocate).  Remember that for really
      large apps there can be on the order of 8K CUs and 200K TUs, or more.  */
 
   virtual_dwo_name =
@@ -9255,12 +9256,13 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
       dwo_file->sections.str_offsets = sections.str_offsets;
       /* The "str" section is global to the entire DWP file.  */
       dwo_file->sections.str = dwp_file->sections.str;
-      /* The info or types section is assigned later to dwo_unit,
+      /* The info or types section is assigned below to dwo_unit,
 	 there's no need to record it in dwo_file.
 	 Also, we can't simply record type sections in dwo_file because
 	 we record a pointer into the vector in dwo_unit.  As we collect more
 	 types we'll grow the vector and eventually have to reallocate space
-	 for it, invalidating all the pointers into the current copy.  */
+	 for it, invalidating all copies of pointers into the previous
+	 contents.  */
       *dwo_file_slot = dwo_file;
     }
   else
@@ -9280,21 +9282,22 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
   dwo_unit->section = obstack_alloc (&objfile->objfile_obstack,
 				     sizeof (struct dwarf2_section_info));
   *dwo_unit->section = sections.info_or_types;
-  /* offset, length, type_offset_in_tu are set later.  */
+  /* dwo_unit->{offset,length,type_offset_in_tu} are set later.  */
 
   return dwo_unit;
 }
 
-/* Lookup the DWO with SIGNATURE in DWP_FILE.  */
+/* Lookup the DWO unit with SIGNATURE in DWP_FILE.
+   Returns NULL if the signature isn't found.  */
 
 static struct dwo_unit *
-lookup_dwo_in_dwp (struct dwp_file *dwp_file,
-		   const struct dwp_hash_table *htab,
-		   const char *comp_dir,
-		   ULONGEST signature, int is_debug_types)
+lookup_dwo_unit_in_dwp (struct dwp_file *dwp_file, const char *comp_dir,
+			ULONGEST signature, int is_debug_types)
 {
+  const struct dwp_hash_table *dwp_htab =
+    is_debug_types ? dwp_file->tus : dwp_file->cus;
   bfd *dbfd = dwp_file->dbfd;
-  uint32_t mask = htab->nr_slots - 1;
+  uint32_t mask = dwp_htab->nr_slots - 1;
   uint32_t hash = signature & mask;
   uint32_t hash2 = ((signature >> 32) & mask) | 1;
   unsigned int i;
@@ -9309,18 +9312,19 @@ lookup_dwo_in_dwp (struct dwp_file *dwp_file,
     return *slot;
 
   /* Use a for loop so that we don't loop forever on bad debug info.  */
-  for (i = 0; i < htab->nr_slots; ++i)
+  for (i = 0; i < dwp_htab->nr_slots; ++i)
     {
       ULONGEST signature_in_table;
 
       signature_in_table =
-	read_8_bytes (dbfd, htab->hash_table + hash * sizeof (uint64_t));
+	read_8_bytes (dbfd, dwp_htab->hash_table + hash * sizeof (uint64_t));
       if (signature_in_table == signature)
 	{
-	  uint32_t section_index =
-	    read_4_bytes (dbfd, htab->unit_table + hash * sizeof (uint32_t));
+	  uint32_t unit_index =
+	    read_4_bytes (dbfd,
+			  dwp_htab->unit_table + hash * sizeof (uint32_t));
 
-	  *slot = create_dwo_in_dwp (dwp_file, htab, section_index,
+	  *slot = create_dwo_in_dwp (dwp_file, dwp_htab, unit_index,
 				     comp_dir, signature, is_debug_types);
 	  return *slot;
 	}
@@ -9756,8 +9760,8 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
       if (dwp_htab != NULL)
 	{
 	  struct dwo_unit *dwo_cutu =
-	    lookup_dwo_in_dwp (dwp_file, dwp_htab, comp_dir,
-			       signature, is_debug_types);
+	    lookup_dwo_unit_in_dwp (dwp_file, comp_dir,
+				    signature, is_debug_types);
 
 	  if (dwo_cutu != NULL)
 	    {
@@ -15436,7 +15440,8 @@ dwarf2_read_addr_index (struct dwarf2_per_cu_data *per_cu,
   return read_addr_index_1 (addr_index, addr_base, addr_size);
 }
 
-/* Given a DW_AT_str_index, fetch the string.  */
+/* Given a DW_FORM_GNU_str_index, fetch the string.
+   This is only used by the Fission support.  */
 
 static const char *
 read_str_index (const struct die_reader_specs *reader,
@@ -15448,21 +15453,22 @@ read_str_index (const struct die_reader_specs *reader,
   struct dwo_sections *sections = &reader->dwo_file->sections;
   const gdb_byte *info_ptr;
   ULONGEST str_offset;
+  static const char form_name[] = "DW_FORM_GNU_str_index";
 
   dwarf2_read_section (objfile, &sections->str);
   dwarf2_read_section (objfile, &sections->str_offsets);
   if (sections->str.buffer == NULL)
-    error (_("DW_FORM_str_index used without .debug_str.dwo section"
+    error (_("%s used without .debug_str.dwo section"
 	     " in CU at offset 0x%lx [in module %s]"),
-	   (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, dwo_name);
   if (sections->str_offsets.buffer == NULL)
-    error (_("DW_FORM_str_index used without .debug_str_offsets.dwo section"
+    error (_("%s used without .debug_str_offsets.dwo section"
 	     " in CU at offset 0x%lx [in module %s]"),
-	   (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, dwo_name);
   if (str_index * cu->header.offset_size >= sections->str_offsets.size)
-    error (_("DW_FORM_str_index pointing outside of .debug_str_offsets.dwo"
+    error (_("%s pointing outside of .debug_str_offsets.dwo"
 	     " section in CU at offset 0x%lx [in module %s]"),
-	   (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, dwo_name);
   info_ptr = (sections->str_offsets.buffer
 	      + str_index * cu->header.offset_size);
   if (cu->header.offset_size == 4)
@@ -15470,9 +15476,9 @@ read_str_index (const struct die_reader_specs *reader,
   else
     str_offset = bfd_get_64 (abfd, info_ptr);
   if (str_offset >= sections->str.size)
-    error (_("Offset from DW_FORM_str_index pointing outside of"
+    error (_("Offset from %s pointing outside of"
 	     " .debug_str.dwo section in CU at offset 0x%lx [in module %s]"),
-	   (long) cu->header.offset.sect_off, dwo_name);
+	   form_name, (long) cu->header.offset.sect_off, dwo_name);
   return (const char *) (sections->str.buffer + str_offset);
 }
 

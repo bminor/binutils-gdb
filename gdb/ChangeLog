@@ -1,3 +1,14 @@
+2013-09-27  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (struct dwo_file): Add/tweak comments.
+	(lookup_dwo_unit_in_dwp): Renamed from lookup_dwo_in_dwp.  Remove
+	arg "htab".  All callers updated.
+	(create_debug_types_hash_table): Remove redundant copy of
+	abbrev_section.
+	(create_dwo_in_dwp): Tweak comments.
+	(read_str_index): Tweak comment.  Record dwarf form name in static
+	local.
+
 2013-09-27  Pedro Alves  <palves@redhat.com>
 
 	* remote.h (REMOTE_SYSROOT_PREFIX): New define.
