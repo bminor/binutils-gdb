@@ -1,5 +1,14 @@
 2013-09-27  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_section_info): Add comment.
+	(dwp_file): Split loaded_cutus into loaded_cus, loaded_tus.
+	All uses updated.
+	(dwarf2_section_empty_p): Rename arg from "info" to "section".
+	(dwarf2_read_section): Delete unused local "header".  Add section
+	name to error message.
+	(create_dwo_in_dwp): Tweak comment.
+	(MAX_NR_DWO_SECTIONS): Combine count of .debug_macro + .debug_macinfo.
+
 	* dwarf2read.c (die_reader_specs): Tweak comment.
 	(get_section_bfd_owner, get_section_bfd_section): New functions.
 	(get_section_name, get_section_file_name): New functions.

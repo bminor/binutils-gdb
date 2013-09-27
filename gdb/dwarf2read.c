@@ -103,6 +103,7 @@ static int dwarf2_loclist_block_index;
 struct dwarf2_section_info
 {
   asection *asection;
+  /* Pointer to section data, only valid if readin.  */
   const gdb_byte *buffer;
   bfd_size_type size;
   /* True if we have tried to read this section.  */
@@ -741,7 +742,7 @@ struct dwo_unit
   /* The section this CU/TU lives in, in the DWO file.  */
   struct dwarf2_section_info *section;
 
-  /* Same as dwarf2_per_cu_data:{offset,length} but for the DWO section.  */
+  /* Same as dwarf2_per_cu_data:{offset,length} but in the DWO section.  */
   sect_offset offset;
   unsigned int length;
 
@@ -843,8 +844,9 @@ struct dwp_file
   /* Table of TUs in the file.  */
   const struct dwp_hash_table *tus;
 
-  /* Table of loaded CUs/TUs.  Each entry is a struct dwo_unit *.  */
-  htab_t loaded_cutus;
+  /* Tables of loaded CUs/TUs.  Each entry is a struct dwo_unit *.  */
+  htab_t loaded_cus;
+  htab_t loaded_tus;
 
   /* Table to map ELF section numbers to their sections.  */
   unsigned int num_sections;
@@ -2026,9 +2028,9 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *vnames)
    or not present.  */
 
 static int
-dwarf2_section_empty_p (struct dwarf2_section_info *info)
+dwarf2_section_empty_p (const struct dwarf2_section_info *section)
 {
-  return info->asection == NULL || info->size == 0;
+  return section->asection == NULL || section->size == 0;
 }
 
 /* Read the contents of the section INFO.
@@ -2043,7 +2045,6 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
   asection *sectp;
   bfd *abfd;
   gdb_byte *buf, *retbuf;
-  unsigned char header[4];
 
   if (info->readin)
     return;
@@ -2082,8 +2083,11 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
 
   if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
       || bfd_bread (buf, info->size, abfd) != info->size)
-    error (_("Dwarf Error: Can't read DWARF data from '%s'"),
-	   bfd_get_filename (abfd));
+    {
+      error (_("Dwarf Error: Can't read DWARF data"
+	       " in section %s [in module %s]"),
+	     bfd_section_name (abfd, sectp), bfd_get_filename (abfd));
+    }
 }
 
 /* A helper function that returns the size of a section in a safe way.
@@ -9228,7 +9232,7 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
 			  dwp_file->name);
     }
 
-  /* Fetch the sections of this DWO.
+  /* Fetch the sections of this DWO unit.
      Put a limit on the number of sections we look for so that bad data
      doesn't cause us to loop forever.  */
 
@@ -9238,8 +9242,7 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
    + 1 /* .debug_line */ \
    + 1 /* .debug_loc */ \
    + 1 /* .debug_str_offsets */ \
-   + 1 /* .debug_macro */ \
-   + 1 /* .debug_macinfo */ \
+   + 1 /* .debug_macro or .debug_macinfo */ \
    + 1 /* trailing zero */)
 
   memset (&sections, 0, sizeof (sections));
@@ -9375,7 +9378,10 @@ lookup_dwo_unit_in_dwp (struct dwp_file *dwp_file, const char *comp_dir,
 
   memset (&find_dwo_cu, 0, sizeof (find_dwo_cu));
   find_dwo_cu.signature = signature;
-  slot = htab_find_slot (dwp_file->loaded_cutus, &find_dwo_cu, INSERT);
+  slot = htab_find_slot (is_debug_types
+			 ? dwp_file->loaded_tus
+			 : dwp_file->loaded_cus,
+			 &find_dwo_cu, INSERT);
 
   if (*slot != NULL)
     return *slot;
@@ -9761,7 +9767,8 @@ open_and_init_dwp_file (void)
 
   dwp_file->tus = create_dwp_hash_table (dwp_file, 1);
 
-  dwp_file->loaded_cutus = allocate_dwp_loaded_cutus_table (objfile);
+  dwp_file->loaded_cus = allocate_dwp_loaded_cutus_table (objfile);
+  dwp_file->loaded_tus = allocate_dwp_loaded_cutus_table (objfile);
 
   if (dwarf2_read_debug)
     {
