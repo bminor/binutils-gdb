@@ -1,5 +1,16 @@
 2013-09-27  Pedro Alves  <palves@redhat.com>
 
+	* remote.h (REMOTE_SYSROOT_PREFIX): New define.
+	(remote_filename_p): Add comment.
+	* remote.c (remote_filename_p): Adjust to use
+	REMOTE_SYSROOT_PREFIX.
+	* solib.c (solib_find): When deciding whether we need to add a
+	directory separator, check whether the sysroot is "remote:"
+	instead of checking whether the patch has a drive spec.  Add
+	comments.
+
+2013-09-27  Pedro Alves  <palves@redhat.com>
+
 	* remote.c (struct stop_reply) <solibs_changed, replay_event>:
 	Delete fields.
 	(remote_parse_stop_reply): Adjust, setting event->ws.kind

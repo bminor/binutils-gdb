@@ -230,8 +230,25 @@ solib_find (char *in_pathname, int *fd)
     {
       int need_dir_separator;
 
-      need_dir_separator = (!IS_DIR_SEPARATOR (in_pathname[0])
-			    && !HAS_TARGET_DRIVE_SPEC (fskind, in_pathname));
+      /* Concatenate the sysroot and the target reported filename.  We
+	 may need to glue them with a directory separator.  Cases to
+	 consider:
+
+        | sysroot         | separator | in_pathname    |
+        |-----------------+-----------+----------------|
+        | /some/dir       | /         | c:/foo/bar.dll |
+        | /some/dir       |           | /foo/bar.dll   |
+        | remote:         |           | c:/foo/bar.dll |
+        | remote:         |           | /foo/bar.dll   |
+        | remote:some/dir | /         | c:/foo/bar.dll |
+        | remote:some/dir |           | /foo/bar.dll   |
+
+	IOW, we don't need to add a separator if IN_PATHNAME already
+	has one, or when the the sysroot is exactly "remote:".
+	There's no need to check for drive spec explicitly, as we only
+	get here if IN_PATHNAME is considered an absolute path.  */
+      need_dir_separator = !(IS_DIR_SEPARATOR (in_pathname[0])
+			     || strcmp (REMOTE_SYSROOT_PREFIX, sysroot) == 0);
 
       /* Cat the prefixed pathname together.  */
       temp_pathname = concat (sysroot,

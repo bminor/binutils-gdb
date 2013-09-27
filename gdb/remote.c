@@ -10036,7 +10036,9 @@ remote_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
 int
 remote_filename_p (const char *filename)
 {
-  return strncmp (filename, "remote:", 7) == 0;
+  return strncmp (filename,
+		  REMOTE_SYSROOT_PREFIX,
+		  sizeof (REMOTE_SYSROOT_PREFIX) - 1) == 0;
 }
 
 bfd *
