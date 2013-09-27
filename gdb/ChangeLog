@@ -1,5 +1,11 @@
 2013-09-27  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (die_reader_specs): Tweak comment.
+	(get_section_bfd_owner, get_section_bfd_section): New functions.
+	(get_section_name, get_section_file_name): New functions.
+	(get_section_id, get_section_flags): New functions.
+	(*): Use new functions to access section fields.
+
 	* dwarf2read.c (struct dwo_file): Add/tweak comments.
 	(lookup_dwo_unit_in_dwp): Renamed from lookup_dwo_in_dwp.  Remove
 	arg "htab".  All callers updated.

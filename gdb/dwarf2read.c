@@ -874,7 +874,7 @@ struct dwz_file
 
 struct die_reader_specs
 {
-  /* die_section->asection->owner.  */
+  /* The bfd of die_section.  */
   bfd* abfd;
 
   /* The CU of the DIE we are parsing.  */
@@ -1244,6 +1244,10 @@ show_dwarf2_max_cache_age (struct ui_file *file, int from_tty,
 }
 
 /* local function prototypes */
+
+static const char *get_section_name (const struct dwarf2_section_info *);
+
+static const char *get_section_file_name (const struct dwarf2_section_info *);
 
 static void dwarf2_locate_sections (bfd *, asection *, void *);
 
@@ -1771,8 +1775,8 @@ dwarf2_section_buffer_overflow_complaint (struct dwarf2_section_info *section)
   complaint (&symfile_complaints,
 	     _("debug info runs off end of %s section"
 	       " [in module %s]"),
-	     section->asection->name,
-	     bfd_get_filename (section->asection->owner));
+	     get_section_name (section),
+	     get_section_file_name (section));
 }
 
 static void
@@ -1842,6 +1846,69 @@ dwarf2_has_info (struct objfile *objfile,
     }
   return (dwarf2_per_objfile->info.asection != NULL
 	  && dwarf2_per_objfile->abbrev.asection != NULL);
+}
+
+/* Return the bfd owner of SECTION.  */
+
+static struct bfd *
+get_section_bfd_owner (const struct dwarf2_section_info *section)
+{
+  return section->asection->owner;
+}
+
+/* Return the bfd section of SECTION.
+   Returns NULL if the section is not present.  */
+
+static asection *
+get_section_bfd_section (const struct dwarf2_section_info *section)
+{
+  return section->asection;
+}
+
+/* Return the name of SECTION.  */
+
+static const char *
+get_section_name (const struct dwarf2_section_info *section)
+{
+  asection *sectp = get_section_bfd_section (section);
+
+  gdb_assert (sectp != NULL);
+  return bfd_section_name (get_section_bfd_owner (section), sectp);
+}
+
+/* Return the name of the file SECTION is in.  */
+
+static const char *
+get_section_file_name (const struct dwarf2_section_info *section)
+{
+  bfd *abfd = get_section_bfd_owner (section);
+
+  return bfd_get_filename (abfd);
+}
+
+/* Return the id of SECTION.
+   Returns 0 if SECTION doesn't exist.  */
+
+static int
+get_section_id (const struct dwarf2_section_info *section)
+{
+  asection *sectp = get_section_bfd_section (section);
+
+  if (sectp == NULL)
+    return 0;
+  return sectp->id;
+}
+
+/* Return the flags of SECTION.
+   SECTION must exist.  */
+
+static int
+get_section_flags (const struct dwarf2_section_info *section)
+{
+  asection *sectp = get_section_bfd_section (section);
+
+  gdb_assert (sectp != NULL);
+  return bfd_get_section_flags (sectp->owner, sectp);
 }
 
 /* When loading sections, we look either for uncompressed section or for
@@ -1966,14 +2033,14 @@ dwarf2_section_empty_p (struct dwarf2_section_info *info)
 
 /* Read the contents of the section INFO.
    OBJFILE is the main object file, but not necessarily the file where
-   the section comes from.  E.g., for DWO files INFO->asection->owner
-   is the bfd of the DWO file.
+   the section comes from.  E.g., for DWO files the bfd of INFO is the bfd
+   of the DWO file.
    If the section is compressed, uncompress it before returning.  */
 
 static void
 dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
 {
-  asection *sectp = info->asection;
+  asection *sectp;
   bfd *abfd;
   gdb_byte *buf, *retbuf;
   unsigned char header[4];
@@ -1986,7 +2053,7 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
   if (dwarf2_section_empty_p (info))
     return;
 
-  abfd = sectp->owner;
+  sectp = get_section_bfd_section (info);
 
   /* If the section has relocations, we must read it ourselves.
      Otherwise we attach it to the BFD.  */
@@ -2009,6 +2076,9 @@ dwarf2_read_section (struct objfile *objfile, struct dwarf2_section_info *info)
       info->buffer = retbuf;
       return;
     }
+
+  abfd = get_section_bfd_owner (info);
+  gdb_assert (abfd != NULL);
 
   if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
       || bfd_bread (buf, info->size, abfd) != info->size)
@@ -2068,7 +2138,7 @@ dwarf2_get_section_info (struct objfile *objfile,
 
   dwarf2_read_section (objfile, info);
 
-  *sectp = info->asection;
+  *sectp = get_section_bfd_section (info);
   *bufp = info->buffer;
   *sizep = info->size;
 }
@@ -2738,7 +2808,7 @@ read_index_from_section (struct objfile *objfile,
 
   /* Older elfutils strip versions could keep the section in the main
      executable while splitting it for the separate debug info file.  */
-  if ((bfd_get_file_flags (section->asection) & SEC_HAS_CONTENTS) == 0)
+  if ((get_section_flags (section) & SEC_HAS_CONTENTS) == 0)
     return 0;
 
   dwarf2_read_section (objfile, section);
@@ -3989,8 +4059,8 @@ error_check_comp_unit_head (struct comp_unit_head *header,
 			    struct dwarf2_section_info *section,
 			    struct dwarf2_section_info *abbrev_section)
 {
-  bfd *abfd = section->asection->owner;
-  const char *filename = bfd_get_filename (abfd);
+  bfd *abfd = get_section_bfd_owner (section);
+  const char *filename = get_section_file_name (section);
 
   if (header->version != 2 && header->version != 3 && header->version != 4)
     error (_("Dwarf Error: wrong version in compilation unit header "
@@ -4026,7 +4096,7 @@ read_and_check_comp_unit_head (struct comp_unit_head *header,
 			       int is_debug_types_section)
 {
   const gdb_byte *beg_of_comp_unit = info_ptr;
-  bfd *abfd = section->asection->owner;
+  bfd *abfd = get_section_bfd_owner (section);
 
   header->offset.sect_off = beg_of_comp_unit - section->buffer;
 
@@ -4056,7 +4126,7 @@ read_and_check_type_unit_head (struct comp_unit_head *header,
 			       cu_offset *type_offset_in_tu)
 {
   const gdb_byte *beg_of_comp_unit = info_ptr;
-  bfd *abfd = section->asection->owner;
+  bfd *abfd = get_section_bfd_owner (section);
 
   header->offset.sect_off = beg_of_comp_unit - section->buffer;
 
@@ -4085,7 +4155,7 @@ static sect_offset
 read_abbrev_offset (struct dwarf2_section_info *section,
 		    sect_offset offset)
 {
-  bfd *abfd = section->asection->owner;
+  bfd *abfd = get_section_bfd_owner (section);
   const gdb_byte *info_ptr;
   unsigned int length, initial_length_size, offset_size;
   sect_offset abbrev_offset;
@@ -4237,7 +4307,7 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
   if (dwarf2_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading .debug_types%s for %s:\n",
 			dwo_file ? ".dwo" : "",
-			bfd_get_filename (abbrev_section->asection->owner));
+			get_section_file_name (abbrev_section));
 
   for (ix = 0;
        VEC_iterate (dwarf2_section_info_def, types, ix, section);
@@ -4253,8 +4323,8 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	continue;
 
       /* We can't set abfd until now because the section may be empty or
-	 not present, in which case section->asection will be NULL.  */
-      abfd = section->asection->owner;
+	 not present, in which case the bfd is unknown.  */
+      abfd = get_section_bfd_owner (section);
 
       /* We don't use init_cutu_and_read_dies_simple, or some such, here
 	 because we don't need to read any dies: the signature is in the
@@ -4613,7 +4683,7 @@ init_cu_die_reader (struct die_reader_specs *reader,
 		    struct dwo_file *dwo_file)
 {
   gdb_assert (section->readin && section->buffer != NULL);
-  reader->abfd = section->asection->owner;
+  reader->abfd = get_section_bfd_owner (section);
   reader->cu = cu;
   reader->dwo_file = dwo_file;
   reader->die_section = section;
@@ -4719,7 +4789,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
   cu->dwo_unit = dwo_unit;
   section = dwo_unit->section;
   dwarf2_read_section (objfile, section);
-  abfd = section->asection->owner;
+  abfd = get_section_bfd_owner (section);
   begin_info_ptr = info_ptr = section->buffer + dwo_unit->offset.sect_off;
   dwo_abbrev_section = &dwo_unit->dwo_file->sections.abbrev;
   init_cu_die_reader (result_reader, cu, section, dwo_unit->dwo_file);
@@ -4815,7 +4885,7 @@ read_cutu_die_from_dwo (struct dwarf2_per_cu_data *this_cu,
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Read die from %s@0x%x of %s:\n",
-			  bfd_section_name (abfd, section->asection),
+			  get_section_name (section),
 			  (unsigned) (begin_info_ptr - section->buffer),
 			  bfd_get_filename (abfd));
       dump_die (comp_unit_die, dwarf2_die_debug);
@@ -4983,7 +5053,7 @@ init_cutu_and_read_dies (struct dwarf2_per_cu_data *this_cu,
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
-  bfd *abfd = section->asection->owner;
+  bfd *abfd = get_section_bfd_owner (section);
   struct dwarf2_cu *cu;
   const gdb_byte *begin_info_ptr, *info_ptr;
   struct die_reader_specs reader;
@@ -5227,7 +5297,7 @@ init_cutu_and_read_dies_no_follow (struct dwarf2_per_cu_data *this_cu,
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
   struct dwarf2_section_info *section = this_cu->section;
-  bfd *abfd = section->asection->owner;
+  bfd *abfd = get_section_bfd_owner (section);
   struct dwarf2_cu cu;
   const gdb_byte *begin_info_ptr, *info_ptr;
   struct die_reader_specs reader;
@@ -6064,11 +6134,12 @@ read_comp_units_from_section (struct objfile *objfile,
 			      struct dwarf2_per_cu_data ***all_comp_units)
 {
   const gdb_byte *info_ptr;
-  bfd *abfd = section->asection->owner;
+  bfd *abfd = get_section_bfd_owner (section);
 
   if (dwarf2_read_debug)
     fprintf_unfiltered (gdb_stdlog, "Reading %s for %s\n",
-			section->asection->name, bfd_get_filename (abfd));
+			get_section_name (section),
+			get_section_file_name (section));
 
   dwarf2_read_section (objfile, section);
 
@@ -8869,13 +8940,13 @@ create_dwo_cu (struct dwo_file *dwo_file)
 
   /* We can't set abfd until now because the section may be empty or
      not present, in which case section->asection will be NULL.  */
-  abfd = section->asection->owner;
+  abfd = get_section_bfd_owner (section);
 
   if (dwarf2_read_debug)
     {
       fprintf_unfiltered (gdb_stdlog, "Reading %s for %s:\n",
-			  bfd_section_name (abfd, section->asection),
-			  bfd_get_filename (abfd));
+			  get_section_name (section),
+			  get_section_file_name (section));
     }
 
   create_dwo_cu_data.dwo_file = dwo_file;
@@ -9201,8 +9272,8 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
     }
 
   if (i < 2
-      || sections.info_or_types.asection == NULL
-      || sections.abbrev.asection == NULL)
+      || dwarf2_section_empty_p (&sections.info_or_types)
+      || dwarf2_section_empty_p (&sections.abbrev))
     {
       error (_("Dwarf Error: bad DWP hash table, missing DWO sections"
 	       " [in module %s]"),
@@ -9226,12 +9297,10 @@ create_dwo_in_dwp (struct dwp_file *dwp_file,
 
   virtual_dwo_name =
     xstrprintf ("virtual-dwo/%d-%d-%d-%d",
-		sections.abbrev.asection ? sections.abbrev.asection->id : 0,
-		sections.line.asection ? sections.line.asection->id : 0,
-		sections.loc.asection ? sections.loc.asection->id : 0,
-		(sections.str_offsets.asection
-		? sections.str_offsets.asection->id
-		: 0));
+		get_section_id (&sections.abbrev),
+		get_section_id (&sections.line),
+		get_section_id (&sections.loc),
+		get_section_id (&sections.str_offsets));
   make_cleanup (xfree, virtual_dwo_name);
   /* Can we use an existing virtual DWO file?  */
   dwo_file_slot = lookup_dwo_file_slot (virtual_dwo_name, comp_dir);
@@ -13689,8 +13758,7 @@ read_die_and_siblings (const struct die_reader_specs *reader,
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Read die from %s@0x%x of %s:\n",
-			  bfd_section_name (reader->abfd,
-					    reader->die_section->asection),
+			  get_section_name (reader->die_section),
 			  (unsigned) (info_ptr - reader->die_section->buffer),
 			  bfd_get_filename (reader->abfd));
       dump_die (die, dwarf2_die_debug);
@@ -13772,8 +13840,7 @@ read_full_die (const struct die_reader_specs *reader,
     {
       fprintf_unfiltered (gdb_stdlog,
 			  "Read die from %s@0x%x of %s:\n",
-			  bfd_section_name (reader->abfd,
-					    reader->die_section->asection),
+			  get_section_name (reader->die_section),
 			  (unsigned) (info_ptr - reader->die_section->buffer),
 			  bfd_get_filename (reader->abfd));
       dump_die (*diep, dwarf2_die_debug);
@@ -13845,7 +13912,7 @@ abbrev_table_read_table (struct dwarf2_section_info *section,
 			 sect_offset offset)
 {
   struct objfile *objfile = dwarf2_per_objfile->objfile;
-  bfd *abfd = section->asection->owner;
+  bfd *abfd = get_section_bfd_owner (section);
   struct abbrev_table *abbrev_table;
   const gdb_byte *abbrev_ptr;
   struct abbrev_info *cur_abbrev;
@@ -15781,7 +15848,7 @@ dwarf_decode_line_header (unsigned int offset, struct dwarf2_cu *cu)
 
   /* We can't do this until we know the section is non-empty.
      Only then do we know we have such a section.  */
-  abfd = section->asection->owner;
+  abfd = get_section_bfd_owner (section);
 
   /* Make sure that at least there's room for the total_length field.
      That could be 12 bytes long, but we're just going to fudge that.  */
@@ -19309,8 +19376,7 @@ skip_form_bytes (bfd *abfd, const gdb_byte *bytes, const gdb_byte *buffer_end,
       complain:
 	complaint (&symfile_complaints,
 		   _("invalid form 0x%x in `%s'"),
-		   form,
-		   section->asection->name);
+		   form, get_section_name (section));
 	return NULL;
       }
     }
@@ -19640,8 +19706,8 @@ dwarf_decode_macro_bytes (bfd *abfd,
 		dwarf2_read_section (dwarf2_per_objfile->objfile,
 				     &dwz->macro);
 
-		include_bfd = dwz->macro.asection->owner;
 		include_section = &dwz->macro;
+		include_bfd = get_section_bfd_owner (include_section);
 		include_mac_end = dwz->macro.buffer + dwz->macro.size;
 		is_dwz = 1;
 	      }
@@ -19750,7 +19816,7 @@ dwarf_decode_macros (struct dwarf2_cu *cu, unsigned int offset,
       complaint (&symfile_complaints, _("missing %s section"), section_name);
       return;
     }
-  abfd = section->asection->owner;
+  abfd = get_section_bfd_owner (section);
 
   /* First pass: Find the name of the base filename.
      This filename is needed in order to process all macros whose definition
