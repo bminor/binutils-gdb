@@ -1,3 +1,8 @@
+2013-09-29  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.base/shreloc.exp: Set $msymfile to 'shreloc.txt' if host
+	is remote.
+
 2013-09-25  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	PR shlibs/8882

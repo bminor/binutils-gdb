@@ -221,7 +221,11 @@ proc check_different {var msymfile} {
     return 1
 }
 
-set msymfile [standard_output_file shreloc.txt]
+if [is_remote host] {
+    set msymfile shreloc.txt
+} else {
+    set msymfile [standard_output_file shreloc.txt]
+}
 
 if [send_gdb_discard "maint print msymbols ${msymfile}"] {
     if {[check_different "static_var_\[12\]" "${msymfile}"]} {
