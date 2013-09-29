@@ -33,13 +33,16 @@
 #include "gdb_wait.h"
 #include "i386-cpuid.h"
 
-#if HAVE_LINUX_PERF_EVENT_H
+#ifdef HAVE_SYS_SYSCALL_H
+#include <sys/syscall.h>
+#endif
+
+#if HAVE_LINUX_PERF_EVENT_H && defined(SYS_perf_event_open)
 
 #include <errno.h>
 #include <string.h>
 #include <stdint.h>
 #include <unistd.h>
-#include <sys/syscall.h>
 #include <sys/mman.h>
 #include <sys/user.h>
 #include <sys/ptrace.h>

@@ -1,3 +1,9 @@
+2013-09-28  Mike Frysinger  <vapier@gentoo.org>
+
+	* common/linux-btrace.c: Move sys/syscall.h out of the
+	HAVE_LINUX_PERF_EVENT_H check and wrap it in HAVE_SYS_SYSCALL_H.
+	Also check for SYS_perf_event_open before attempting to buid.
+
 2013-09-27  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_section_info): Add comment.
