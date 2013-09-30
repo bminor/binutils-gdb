@@ -1,3 +1,8 @@
+2013-09-30  Nick Clifton  <nickc@redhat.com>
+
+	* cpu-msp430.c: Use printable names that match the values
+	displayed by readelf.
+
 2013-08-25  Andrew Pinski  <apinski@cavium.com>
 
 	* elfnn-aarch64.c (TCB_SIZE): Base on the ARCH_SIZE rather than a
