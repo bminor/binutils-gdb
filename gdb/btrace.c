@@ -401,7 +401,7 @@ btrace_fetch (struct thread_info *tp)
   if (btinfo->target == NULL)
     return;
 
-  btrace = target_read_btrace (btinfo->target, btrace_read_new);
+  btrace = target_read_btrace (btinfo->target, BTRACE_READ_NEW);
   if (VEC_empty (btrace_block_s, btrace))
     return;
 

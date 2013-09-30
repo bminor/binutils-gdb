@@ -11505,10 +11505,10 @@ remote_read_btrace (struct btrace_target_info *tinfo,
 
   switch (type)
     {
-    case btrace_read_all:
+    case BTRACE_READ_ALL:
       annex = "all";
       break;
-    case btrace_read_new:
+    case BTRACE_READ_NEW:
       annex = "new";
       break;
     default:

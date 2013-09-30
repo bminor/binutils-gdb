@@ -1,5 +1,13 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* common/btrace-common.h (btrace_read_type) <btrace_read_all>:
+	Change to ...
+	(btrace_read_type) <BTRACE_READ_ALL>: ... this.  Update users.
+	(btrace_read_type) <btrace_read_new>: Change to ...
+	(btrace_read_type) <BTRACE_READ_NEW>: ... this.  Update users.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* common/linux-btrace.c (linux_read_btrace): Free trace from
 	previous iteration.
 

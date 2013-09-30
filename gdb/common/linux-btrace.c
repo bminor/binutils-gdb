@@ -509,7 +509,7 @@ linux_read_btrace (struct btrace_target_info *tinfo,
   unsigned long data_head, retries = 5;
   size_t buffer_size;
 
-  if (type == btrace_read_new && !linux_btrace_has_changed (tinfo))
+  if (type == BTRACE_READ_NEW && !linux_btrace_has_changed (tinfo))
     return NULL;
 
   header = perf_event_header (tinfo);

@@ -64,10 +64,10 @@ struct btrace_target_info;
 enum btrace_read_type
 {
   /* Send all available trace.  */
-  btrace_read_all,
+  BTRACE_READ_ALL,
 
   /* Send all available trace, if it changed.  */
-  btrace_read_new
+  BTRACE_READ_NEW
 };
 
 #endif /* BTRACE_COMMON_H */

@@ -1377,9 +1377,9 @@ handle_qxfer_btrace (const char *annex,
     }
 
   if (strcmp (annex, "all") == 0)
-    type = btrace_read_all;
+    type = BTRACE_READ_ALL;
   else if (strcmp (annex, "new") == 0)
-    type = btrace_read_new;
+    type = BTRACE_READ_NEW;
   else
     {
       strcpy (own_buf, "E.Bad annex.");
