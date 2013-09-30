@@ -1,3 +1,13 @@
+2013-09-30  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-nat.c (darwin_complete_target): Install methods for
+	hardware watchpoint.
+	(i386_darwin_dr_set): Support 32 and 64 bit states.
+	(i386_darwin_dr_get): Likewise.
+	(i386_darwin_dr_set_control): Make static.
+	(i386_darwin_dr_set_addr, i386_darwin_dr_get_addr)
+	(i386_darwin_dr_get_status, i386_darwin_dr_get_control): Likewise.
+
 2013-09-30  Luis Machado  <lgustavo@codesourcery.com>
 
 	* aarch64-linux-nat.c: Replace PIDGET with ptid_get_pid.
