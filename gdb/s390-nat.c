@@ -217,9 +217,9 @@ static int
 s390_inferior_tid (void)
 {
   /* GNU/Linux LWP ID's are process ID's.  */
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
   return tid;
 }
@@ -474,9 +474,9 @@ s390_fix_watch_points (struct lwp_info *lp)
   CORE_ADDR watch_lo_addr = (CORE_ADDR)-1, watch_hi_addr = 0;
   struct watch_area *area;
 
-  tid = TIDGET (lp->ptid);
+  tid = ptid_get_lwp (lp->ptid);
   if (tid == 0)
-    tid = PIDGET (lp->ptid);
+    tid = ptid_get_pid (lp->ptid);
 
   for (area = watch_base; area; area = area->next)
     {

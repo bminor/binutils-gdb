@@ -727,7 +727,7 @@ mi_on_resume (ptid_t ptid)
 			  current_token ? current_token : "");
     }
 
-  if (PIDGET (ptid) == -1)
+  if (ptid_get_pid (ptid) == -1)
     fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
   else if (ptid_is_pid (ptid))
     {

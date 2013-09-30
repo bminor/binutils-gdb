@@ -180,7 +180,7 @@ fetch_register (struct regcache *regcache, int regno)
 
   /* Floating-point registers.  */
   if (isfloat)
-    rs6000_ptrace32 (PT_READ_FPR, PIDGET (inferior_ptid), addr, nr, 0);
+    rs6000_ptrace32 (PT_READ_FPR, ptid_get_pid (inferior_ptid), addr, nr, 0);
 
   /* Bogus register number.  */
   else if (nr < 0)
@@ -196,14 +196,15 @@ fetch_register (struct regcache *regcache, int regno)
   else
     {
       if (!ARCH64 ())
-	*addr = rs6000_ptrace32 (PT_READ_GPR, PIDGET (inferior_ptid),
+	*addr = rs6000_ptrace32 (PT_READ_GPR, ptid_get_pid (inferior_ptid),
 				 (int *) nr, 0, 0);
       else
 	{
 	  /* PT_READ_GPR requires the buffer parameter to point to long long,
 	     even if the register is really only 32 bits.  */
 	  long long buf;
-	  rs6000_ptrace64 (PT_READ_GPR, PIDGET (inferior_ptid), nr, 0, &buf);
+	  rs6000_ptrace64 (PT_READ_GPR, ptid_get_pid (inferior_ptid),
+			   nr, 0, &buf);
 	  if (register_size (gdbarch, regno) == 8)
 	    memcpy (addr, &buf, 8);
 	  else
@@ -242,7 +243,7 @@ store_register (struct regcache *regcache, int regno)
 
   /* Floating-point registers.  */
   if (isfloat)
-    rs6000_ptrace32 (PT_WRITE_FPR, PIDGET (inferior_ptid), addr, nr, 0);
+    rs6000_ptrace32 (PT_WRITE_FPR, ptid_get_pid (inferior_ptid), addr, nr, 0);
 
   /* Bogus register number.  */
   else if (nr < 0)
@@ -268,7 +269,7 @@ store_register (struct regcache *regcache, int regno)
          the register's value is passed by value, but for 64-bit inferiors,
 	 the address of a buffer containing the value is passed.  */
       if (!ARCH64 ())
-	rs6000_ptrace32 (PT_WRITE_GPR, PIDGET (inferior_ptid),
+	rs6000_ptrace32 (PT_WRITE_GPR, ptid_get_pid (inferior_ptid),
 			 (int *) nr, *addr, 0);
       else
 	{
@@ -279,7 +280,8 @@ store_register (struct regcache *regcache, int regno)
 	    memcpy (&buf, addr, 8);
 	  else
 	    buf = *addr;
-	  rs6000_ptrace64 (PT_WRITE_GPR, PIDGET (inferior_ptid), nr, 0, &buf);
+	  rs6000_ptrace64 (PT_WRITE_GPR, ptid_get_pid (inferior_ptid),
+			   nr, 0, &buf);
 	}
     }
 
@@ -566,9 +568,10 @@ exec_one_dummy_insn (struct regcache *regcache)
   prev_pc = regcache_read_pc (regcache);
   regcache_write_pc (regcache, DUMMY_INSN_ADDR);
   if (ARCH64 ())
-    ret = rs6000_ptrace64 (PT_CONTINUE, PIDGET (inferior_ptid), 1, 0, NULL);
+    ret = rs6000_ptrace64 (PT_CONTINUE, ptid_get_pid (inferior_ptid),
+			   1, 0, NULL);
   else
-    ret = rs6000_ptrace32 (PT_CONTINUE, PIDGET (inferior_ptid),
+    ret = rs6000_ptrace32 (PT_CONTINUE, ptid_get_pid (inferior_ptid),
 			   (int *) 1, 0, NULL);
 
   if (ret != 0)
@@ -576,9 +579,9 @@ exec_one_dummy_insn (struct regcache *regcache)
 
   do
     {
-      pid = waitpid (PIDGET (inferior_ptid), &status, 0);
+      pid = waitpid (ptid_get_pid (inferior_ptid), &status, 0);
     }
-  while (pid != PIDGET (inferior_ptid));
+  while (pid != ptid_get_pid (inferior_ptid));
 
   regcache_write_pc (regcache, prev_pc);
   deprecated_remove_raw_breakpoint (gdbarch, bp);

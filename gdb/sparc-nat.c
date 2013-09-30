@@ -155,9 +155,9 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
      These functions should instead be paramaterized with an explicit
      object (struct regcache, struct thread_info?) into which the LWPs
      registers can be written.  */
-  pid = TIDGET (inferior_ptid);
+  pid = ptid_get_lwp (inferior_ptid);
   if (pid == 0)
-    pid = PIDGET (inferior_ptid);
+    pid = ptid_get_pid (inferior_ptid);
 
   if (regnum == SPARC_G0_REGNUM)
     {
@@ -199,9 +199,9 @@ sparc_store_inferior_registers (struct target_ops *ops,
 
   /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers
      about threaded assumptions.  */
-  pid = TIDGET (inferior_ptid);
+  pid = ptid_get_lwp (inferior_ptid);
   if (pid == 0)
-    pid = PIDGET (inferior_ptid);
+    pid = ptid_get_pid (inferior_ptid);
 
   if (regnum == -1 || sparc_gregset_supplies_p (gdbarch, regnum))
     {
@@ -282,9 +282,9 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   {
     int pid;
 
-    pid = TIDGET (inferior_ptid);
+    pid = ptid_get_lwp (inferior_ptid);
     if (pid == 0)
-      pid = PIDGET (inferior_ptid);
+      pid = ptid_get_pid (inferior_ptid);
 
     /* Sanity check.  The proper type for a cookie is register_t, but
        we can't assume that this type exists on all systems supported

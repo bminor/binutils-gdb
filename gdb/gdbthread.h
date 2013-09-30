@@ -323,7 +323,7 @@ extern int thread_count (void);
 extern void switch_to_thread (ptid_t ptid);
 
 /* Marks thread PTID is running, or stopped. 
-   If PIDGET (PTID) is -1, marks all threads.  */
+   If ptid_get_pid (PTID) is -1, marks all threads.  */
 extern void set_running (ptid_t ptid, int running);
 
 /* Marks or clears thread(s) PTID as having been requested to stop.
@@ -361,7 +361,7 @@ extern int is_stopped (ptid_t ptid);
 /* In the frontend's perpective is there any thread running?  */
 extern int any_running (void);
 
-/* Marks thread PTID as executing, or not.  If PIDGET (PTID) is -1,
+/* Marks thread PTID as executing, or not.  If ptid_get_pid (PTID) is -1,
    marks all threads.
 
    Note that this is different from the running state.  See the
@@ -379,7 +379,7 @@ extern int is_executing (ptid_t ptid);
    "executing"     -> "running"
    "exited"        -> "exited"
 
-   If PIDGET (PTID) is -1, go over all threads.
+   If ptid_get_pid (PTID) is -1, go over all threads.
 
    Notifications are only emitted if the thread state did change.  */
 extern void finish_thread_state (ptid_t ptid);

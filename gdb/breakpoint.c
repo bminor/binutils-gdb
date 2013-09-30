@@ -3581,7 +3581,7 @@ detach_breakpoints (ptid_t ptid)
   struct cleanup *old_chain = save_inferior_ptid ();
   struct inferior *inf = current_inferior ();
 
-  if (PIDGET (ptid) == PIDGET (inferior_ptid))
+  if (ptid_get_pid (ptid) == ptid_get_pid (inferior_ptid))
     error (_("Cannot detach breakpoints of inferior_ptid"));
 
   /* Set inferior_ptid; remove_breakpoint_1 uses this global.  */
@@ -7546,7 +7546,7 @@ struct fork_catchpoint
 static int
 insert_catch_fork (struct bp_location *bl)
 {
-  return target_insert_fork_catchpoint (PIDGET (inferior_ptid));
+  return target_insert_fork_catchpoint (ptid_get_pid (inferior_ptid));
 }
 
 /* Implement the "remove" breakpoint_ops method for fork
@@ -7555,7 +7555,7 @@ insert_catch_fork (struct bp_location *bl)
 static int
 remove_catch_fork (struct bp_location *bl)
 {
-  return target_remove_fork_catchpoint (PIDGET (inferior_ptid));
+  return target_remove_fork_catchpoint (ptid_get_pid (inferior_ptid));
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for fork
@@ -7663,7 +7663,7 @@ static struct breakpoint_ops catch_fork_breakpoint_ops;
 static int
 insert_catch_vfork (struct bp_location *bl)
 {
-  return target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
+  return target_insert_vfork_catchpoint (ptid_get_pid (inferior_ptid));
 }
 
 /* Implement the "remove" breakpoint_ops method for vfork
@@ -7672,7 +7672,7 @@ insert_catch_vfork (struct bp_location *bl)
 static int
 remove_catch_vfork (struct bp_location *bl)
 {
-  return target_remove_vfork_catchpoint (PIDGET (inferior_ptid));
+  return target_remove_vfork_catchpoint (ptid_get_pid (inferior_ptid));
 }
 
 /* Implement the "breakpoint_hit" breakpoint_ops method for vfork
@@ -8165,7 +8165,7 @@ insert_catch_syscall (struct bp_location *bl)
 	}
     }
 
-  return target_set_syscall_catchpoint (PIDGET (inferior_ptid),
+  return target_set_syscall_catchpoint (ptid_get_pid (inferior_ptid),
 					inf_data->total_syscalls_count != 0,
 					inf_data->any_syscall_count,
 					VEC_length (int,
@@ -8205,7 +8205,7 @@ remove_catch_syscall (struct bp_location *bl)
         }
     }
 
-  return target_set_syscall_catchpoint (PIDGET (inferior_ptid),
+  return target_set_syscall_catchpoint (ptid_get_pid (inferior_ptid),
 					inf_data->total_syscalls_count != 0,
 					inf_data->any_syscall_count,
 					VEC_length (int,
@@ -8528,13 +8528,13 @@ dtor_catch_exec (struct breakpoint *b)
 static int
 insert_catch_exec (struct bp_location *bl)
 {
-  return target_insert_exec_catchpoint (PIDGET (inferior_ptid));
+  return target_insert_exec_catchpoint (ptid_get_pid (inferior_ptid));
 }
 
 static int
 remove_catch_exec (struct bp_location *bl)
 {
-  return target_remove_exec_catchpoint (PIDGET (inferior_ptid));
+  return target_remove_exec_catchpoint (ptid_get_pid (inferior_ptid));
 }
 
 static int

@@ -864,11 +864,11 @@ ppc_linux_fetch_inferior_registers (struct target_ops *ops,
 				    struct regcache *regcache, int regno)
 {
   /* Overload thread id onto process id.  */
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
 
   /* No thread id, just use process id.  */
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);
+    tid = ptid_get_pid (inferior_ptid);
 
   if (regno == -1)
     fetch_ppc_registers (regcache, tid);
@@ -1417,9 +1417,9 @@ have_ptrace_hwdebug_interface (void)
     {
       int tid;
 
-      tid = TIDGET (inferior_ptid);
+      tid = ptid_get_lwp (inferior_ptid);
       if (tid == 0)
-	tid = PIDGET (inferior_ptid);
+	tid = ptid_get_pid (inferior_ptid);
 
       /* Check for kernel support for PowerPC HWDEBUG ptrace interface.  */
       if (ptrace (PPC_PTRACE_GETHWDBGINFO, tid, 0, &hwdebug_info) >= 0)
@@ -1484,9 +1484,9 @@ ppc_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
       /* We need to know whether ptrace supports PTRACE_SET_DEBUGREG
 	 and whether the target has DABR.  If either answer is no, the
 	 ptrace call will return -1.  Fail in that case.  */
-      tid = TIDGET (ptid);
+      tid = ptid_get_lwp (ptid);
       if (tid == 0)
-	tid = PIDGET (ptid);
+	tid = ptid_get_pid (ptid);
 
       if (ptrace (PTRACE_SET_DEBUGREG, tid, 0, 0) == -1)
 	return 0;
@@ -1702,7 +1702,7 @@ ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
     }
 
   ALL_LWPS (lp)
-    hwdebug_insert_point (&p, TIDGET (lp->ptid));
+    hwdebug_insert_point (&p, ptid_get_lwp (lp->ptid));
 
   return 0;
 }
@@ -1738,7 +1738,7 @@ ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
     }
 
   ALL_LWPS (lp)
-    hwdebug_remove_point (&p, TIDGET (lp->ptid));
+    hwdebug_remove_point (&p, ptid_get_lwp (lp->ptid));
 
   return 0;
 }
@@ -1781,7 +1781,7 @@ ppc_linux_insert_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
   p.condition_value = 0;
 
   ALL_LWPS (lp)
-    hwdebug_insert_point (&p, TIDGET (lp->ptid));
+    hwdebug_insert_point (&p, ptid_get_lwp (lp->ptid));
 
   return 0;
 }
@@ -1809,7 +1809,7 @@ ppc_linux_remove_mask_watchpoint (struct target_ops *ops, CORE_ADDR addr,
   p.condition_value = 0;
 
   ALL_LWPS (lp)
-    hwdebug_remove_point (&p, TIDGET (lp->ptid));
+    hwdebug_remove_point (&p, ptid_get_lwp (lp->ptid));
 
   return 0;
 }
@@ -1819,7 +1819,7 @@ static int
 can_use_watchpoint_cond_accel (void)
 {
   struct thread_points *p;
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   int cnt = hwdebug_info.num_condition_regs, i;
   CORE_ADDR tmp_value;
 
@@ -2086,7 +2086,7 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
       create_watchpoint_request (&p, addr, len, rw, cond, 1);
 
       ALL_LWPS (lp)
-	hwdebug_insert_point (&p, TIDGET (lp->ptid));
+	hwdebug_insert_point (&p, ptid_get_lwp (lp->ptid));
 
       ret = 0;
     }
@@ -2130,7 +2130,7 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
       saved_dabr_value = dabr_value;
 
       ALL_LWPS (lp)
-	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (lp->ptid), 0,
+	if (ptrace (PTRACE_SET_DEBUGREG, ptid_get_lwp (lp->ptid), 0,
 		    saved_dabr_value) < 0)
 	  return -1;
 
@@ -2154,7 +2154,7 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
       create_watchpoint_request (&p, addr, len, rw, cond, 0);
 
       ALL_LWPS (lp)
-	hwdebug_remove_point (&p, TIDGET (lp->ptid));
+	hwdebug_remove_point (&p, ptid_get_lwp (lp->ptid));
 
       ret = 0;
     }
@@ -2162,7 +2162,7 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
     {
       saved_dabr_value = 0;
       ALL_LWPS (lp)
-	if (ptrace (PTRACE_SET_DEBUGREG, TIDGET (lp->ptid), 0,
+	if (ptrace (PTRACE_SET_DEBUGREG, ptid_get_lwp (lp->ptid), 0,
 		    saved_dabr_value) < 0)
 	  return -1;
 
@@ -2175,7 +2175,7 @@ ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
 static void
 ppc_linux_new_thread (struct lwp_info *lp)
 {
-  int tid = TIDGET (lp->ptid);
+  int tid = ptid_get_lwp (lp->ptid);
 
   if (have_ptrace_hwdebug_interface ())
     {
@@ -2214,7 +2214,7 @@ static void
 ppc_linux_thread_exit (struct thread_info *tp, int silent)
 {
   int i;
-  int tid = TIDGET (tp->ptid);
+  int tid = ptid_get_lwp (tp->ptid);
   struct hw_break_tuple *hw_breaks;
   struct thread_points *t = NULL, *p;
 
@@ -2263,7 +2263,7 @@ ppc_linux_stopped_data_address (struct target_ops *target, CORE_ADDR *addr_p)
       /* The index (or slot) of the *point is passed in the si_errno field.  */
       int slot = siginfo.si_errno;
 
-      t = hwdebug_find_thread_points_by_tid (TIDGET (inferior_ptid), 0);
+      t = hwdebug_find_thread_points_by_tid (ptid_get_lwp (inferior_ptid), 0);
 
       /* Find out if this *point is a hardware breakpoint.
 	 If so, we should return 0.  */
@@ -2335,11 +2335,11 @@ ppc_linux_store_inferior_registers (struct target_ops *ops,
 				    struct regcache *regcache, int regno)
 {
   /* Overload thread id onto process id.  */
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
 
   /* No thread id, just use process id.  */
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);
+    tid = ptid_get_pid (inferior_ptid);
 
   if (regno >= 0)
     store_register (regcache, tid, regno);
@@ -2401,9 +2401,9 @@ ppc_linux_target_wordsize (void)
 #ifdef __powerpc64__
   long msr;
 
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);
+    tid = ptid_get_pid (inferior_ptid);
 
   errno = 0;
   msr = (long) ptrace (PTRACE_PEEKUSER, tid, PT_MSR * 8, 0);
@@ -2445,9 +2445,9 @@ ppc_linux_read_description (struct target_ops *ops)
   int isa205 = 0;
   int cell = 0;
 
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);
+    tid = ptid_get_pid (inferior_ptid);
 
   if (have_ptrace_getsetevrregs)
     {

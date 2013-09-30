@@ -2015,7 +2015,8 @@ gnu_resume (struct target_ops *ops,
   if (resume_all)
     /* Allow all threads to run, except perhaps single-stepping one.  */
     {
-      inf_debug (inf, "running all threads; tid = %d", PIDGET (inferior_ptid));
+      inf_debug (inf, "running all threads; tid = %d",
+		 ptid_get_pid (inferior_ptid));
       ptid = inferior_ptid;	/* What to step.  */
       inf_set_threads_resume_sc (inf, 0, 1);
     }

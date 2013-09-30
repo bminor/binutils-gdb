@@ -136,7 +136,7 @@ gcore_command (char *args, int from_tty)
   else
     {
       /* Default corefile name is "core.PID".  */
-      corefilename = xstrprintf ("core.%d", PIDGET (inferior_ptid));
+      corefilename = xstrprintf ("core.%d", ptid_get_pid (inferior_ptid));
     }
   filename_chain = make_cleanup (xfree, corefilename);
 

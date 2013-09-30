@@ -210,7 +210,7 @@ proceed_thread (struct thread_info *thread, int pid)
   if (!is_stopped (thread->ptid))
     return;
 
-  if (pid != 0 && PIDGET (thread->ptid) != pid)
+  if (pid != 0 && ptid_get_pid (thread->ptid) != pid)
     return;
 
   switch_to_thread (thread->ptid);
@@ -320,7 +320,7 @@ interrupt_thread_callback (struct thread_info *thread, void *arg)
   if (!is_running (thread->ptid))
     return 0;
 
-  if (PIDGET (thread->ptid) != pid)
+  if (ptid_get_pid (thread->ptid) != pid)
     return 0;
 
   target_stop (thread->ptid);
@@ -414,7 +414,7 @@ find_thread_of_process (struct thread_info *ti, void *p)
 {
   int pid = *(int *)p;
 
-  if (PIDGET (ti->ptid) == pid && !is_exited (ti->ptid))
+  if (ptid_get_pid (ti->ptid) == pid && !is_exited (ti->ptid))
     return 1;
 
   return 0;

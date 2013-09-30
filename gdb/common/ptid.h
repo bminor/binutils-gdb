@@ -33,6 +33,9 @@
       ptid_get_lwp	- Fetch the lwp component of a ptid.
       ptid_get_tid	- Fetch the tid component of a ptid.
       ptid_equal	- Test to see if two ptids are equal.
+      ptid_is_pid	- Test if a ptid is of the form (pid, 0, 0).
+      ptid_lwp_p	- Test if a ptid's lwp component is non-zero.
+      ptid_tid_p	- Test if a ptid's tid component is non-zero.
 
    Please do NOT access the struct ptid members directly (except, of
    course, in the implementation of the above ptid manipulation
@@ -81,5 +84,11 @@ int ptid_equal (ptid_t p1, ptid_t p2);
 
 /* Return true if PTID represents a process id.  */
 int ptid_is_pid (ptid_t ptid);
+
+/* Return true if PTID's lwp member is non-zero.  */
+int ptid_lwp_p (ptid_t ptid);
+
+/* Return true if PTID's tid member is non-zero.  */
+int ptid_tid_p (ptid_t ptid);
 
 #endif

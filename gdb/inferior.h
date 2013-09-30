@@ -90,7 +90,7 @@ extern void set_inferior_io_terminal (const char *terminal_name);
 extern const char *get_inferior_io_terminal (void);
 
 /* Collected pid, tid, etc. of the debugged inferior.  When there's
-   no inferior, PIDGET (inferior_ptid) will be 0.  */
+   no inferior, ptid_get_pid (inferior_ptid) will be 0.  */
 
 extern ptid_t inferior_ptid;
 

@@ -753,18 +753,6 @@ extern int (*deprecated_ui_load_progress_hook) (const char *section,
 
 extern int use_windows;
 
-/* Provide default definitions of PIDGET, TIDGET, and MERGEPID.
-   The name ``TIDGET'' is a historical accident.  Many uses of TIDGET
-   in the code actually refer to a lightweight process id, i.e,
-   something that can be considered a process id in its own right for
-   certain purposes.  */
-
-#ifndef PIDGET
-#define PIDGET(PTID) (ptid_get_pid (PTID))
-#define TIDGET(PTID) (ptid_get_lwp (PTID))
-#define MERGEPID(PID, TID) ptid_build (PID, TID, 0)
-#endif
-
 /* If this definition isn't overridden by the header files, assume
    that isatty and fileno exist on this system.  */
 #ifndef ISATTY

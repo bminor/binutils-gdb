@@ -71,14 +71,14 @@ add_fork (pid_t pid)
 {
   struct fork_info *fp;
 
-  if (fork_list == NULL && pid != PIDGET (inferior_ptid))
+  if (fork_list == NULL && pid != ptid_get_pid (inferior_ptid))
     {
       /* Special case -- if this is the first fork in the list
 	 (the list is hitherto empty), and if this new fork is
 	 NOT the current inferior_ptid, then add inferior_ptid
 	 first, as a special zeroeth fork id.  */
       highest_fork_num = -1;
-      add_fork (PIDGET (inferior_ptid));	/* safe recursion */
+      add_fork (ptid_get_pid (inferior_ptid));	/* safe recursion */
     }
 
   fp = XZALLOC (struct fork_info);
@@ -282,7 +282,8 @@ fork_save_infrun_state (struct fork_info *fp, int clobber_regs)
     {
       /* Now save the 'state' (file position) of all open file descriptors.
 	 Unfortunately fork does not take care of that for us...  */
-      snprintf (path, PATH_MAX, "/proc/%ld/fd", (long) PIDGET (fp->ptid));
+      snprintf (path, PATH_MAX, "/proc/%ld/fd",
+		(long) ptid_get_pid (fp->ptid));
       if ((d = opendir (path)) != NULL)
 	{
 	  long tmp;
@@ -333,7 +334,7 @@ linux_fork_killall (void)
 
   for (fp = fork_list; fp; fp = fp->next)
     {
-      pid = PIDGET (fp->ptid);
+      pid = ptid_get_pid (fp->ptid);
       do {
 	/* Use SIGKILL instead of PTRACE_KILL because the former works even
 	   if the thread is running, while the later doesn't.  */
@@ -392,7 +393,7 @@ linux_fork_detach (char *args, int from_tty)
      delete it from the fork_list, and switch to the next available
      fork.  */
 
-  if (ptrace (PTRACE_DETACH, PIDGET (inferior_ptid), 0, 0))
+  if (ptrace (PTRACE_DETACH, ptid_get_pid (inferior_ptid), 0, 0))
     error (_("Unable to detach %s"), target_pid_to_str (inferior_ptid));
 
   delete_fork (inferior_ptid);
@@ -497,7 +498,7 @@ delete_checkpoint_command (char *args, int from_tty)
     error (_("\
 Please switch to another checkpoint before deleting the current one"));
 
-  if (ptrace (PTRACE_KILL, PIDGET (ptid), 0, 0))
+  if (ptrace (PTRACE_KILL, ptid_get_pid (ptid), 0, 0))
     error (_("Unable to kill pid %s"), target_pid_to_str (ptid));
 
   fi = find_fork_ptid (ptid);
@@ -516,7 +517,7 @@ Please switch to another checkpoint before deleting the current one"));
   if ((!find_thread_ptid (pptid) && find_fork_ptid (pptid))
       || (find_thread_ptid (pptid) && is_stopped (pptid)))
     {
-      if (inferior_call_waitpid (pptid, PIDGET (ptid)))
+      if (inferior_call_waitpid (pptid, ptid_get_pid (ptid)))
         warning (_("Unable to wait pid %s"), target_pid_to_str (ptid));
     }
 }
@@ -537,7 +538,7 @@ detach_checkpoint_command (char *args, int from_tty)
     error (_("\
 Please switch to another checkpoint before detaching the current one"));
 
-  if (ptrace (PTRACE_DETACH, PIDGET (ptid), 0, 0))
+  if (ptrace (PTRACE_DETACH, ptid_get_pid (ptid), 0, 0))
     error (_("Unable to detach %s"), target_pid_to_str (ptid));
 
   if (from_tty)
@@ -680,7 +681,7 @@ checkpoint_command (char *args, int from_tty)
 
   /* Tell linux-nat.c that we're checkpointing this inferior.  */
   old_chain = make_cleanup_restore_integer (&checkpointing_pid);
-  checkpointing_pid = PIDGET (inferior_ptid);
+  checkpointing_pid = ptid_get_pid (inferior_ptid);
 
   ret = call_function_by_hand (fork_fn, 0, &ret);
   do_cleanups (old_chain);

@@ -54,10 +54,10 @@
 static int
 get_thread_id (ptid_t ptid)
 {
-  int tid = TIDGET (ptid);
+  int tid = ptid_get_lwp (ptid);
 
   if (0 == tid)
-    tid = PIDGET (ptid);
+    tid = ptid_get_pid (ptid);
   return tid;
 }
 
@@ -683,7 +683,7 @@ aarch64_linux_prepare_to_resume (struct lwp_info *lwp)
   if (DR_HAS_CHANGED (info->dr_changed_bp)
       || DR_HAS_CHANGED (info->dr_changed_wp))
     {
-      int tid = GET_LWP (lwp->ptid);
+      int tid = ptid_get_lwp (lwp->ptid);
       struct aarch64_debug_reg_state *state
 	= aarch64_get_debug_reg_state (ptid_get_pid (lwp->ptid));
 

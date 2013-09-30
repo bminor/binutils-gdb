@@ -210,7 +210,7 @@ find_thread_object (ptid_t ptid)
   PyObject *inf_obj;
   thread_object *found = NULL;
 
-  pid = PIDGET (ptid);
+  pid = ptid_get_pid (ptid);
   if (pid == 0)
     return NULL;
 
@@ -280,7 +280,8 @@ delete_thread_object (struct thread_info *tp, int ignore)
 
   cleanup = ensure_python_env (python_gdbarch, python_language);
 
-  inf_obj = (inferior_object *) find_inferior_object (PIDGET(tp->ptid));
+  inf_obj
+    = (inferior_object *) find_inferior_object (ptid_get_pid (tp->ptid));
   if (!inf_obj)
     {
       do_cleanups (cleanup);

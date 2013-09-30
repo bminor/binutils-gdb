@@ -1,3 +1,53 @@
+2013-09-30  Luis Machado  <lgustavo@codesourcery.com>
+
+	* aarch64-linux-nat.c: Replace PIDGET with ptid_get_pid.
+	Replace TIDGET with ptid_get_lwp.
+	Replace GET_LWP with ptid_get_lwp.
+	* aix-thread.c (BUILD_THREAD, BUILD_LWP): Remove.
+	Replace BUILD_THREAD with ptid_build.
+	Replace BUILD_LWP with ptid_build.
+	Replace PIDGET with ptid_get_pid.
+	Replace TIDGET with ptid_get_lwp.
+	* alphabsd-nat.c: Replace PIDGET with ptid_get_pid.
+	* amd64-linux-nat.c: Replace PIDGET with ptid_get_pid.
+	Replace TIDGET with ptid_get_lwp.
+	* amd64bsd-nat.c: Replace PIDGET with ptid_get_pid.
+	* arm-linux-nat.c: Replace PIDGET with ptid_get_pid.
+	Replace TIDGET with ptid_get_lwp.
+	Replace GET_LWP with ptid_get_lwp.
+	* armnbsd-nat.c: Replace PIDGET with ptid_get_pid.
+	* auxv.c: Likewise.
+	* breakpoint.c: Likewise.
+	* common/ptid.c (ptid_is_pid): Condense check for
+	null_ptid and minus_one_ptid.
+	(ptid_lwp_p): New function.
+	(ptid_tid_p): New function.
+	* common/ptid.h: Update comments for accessors.
+	(ptid_lwp_p): New prototype.
+	(ptid_tid_p): New prototype.
+	* defs.h (PIDGET, TIDGET, MERGEPID): Do not define.
+	* gcore.c: Replace PIDGET with ptid_get_pid.
+	* gdbthread.h: Likewise.
+	* gnu-nat.c: Likewise.
+	* hppa-linux-nat.c: Replace PIDGET with ptid_get_pid.
+	Replace TIDGET with ptid_get_lwp.
+	* hppabsd-nat.c: Replace PIDGET with ptid_get_pid.
+	* hppanbsd-nat.c: Likewise.
+	* i386-linux-nat.c: Replace PIDGET with ptid_get_pid.
+	Replace TIDGET with ptid_get_lwp.
+	* i386bsd-nat.c: Replace PIDGET with ptid_get_pid.
+	* ia64-linux-nat.c: Replace PIDGET with ptid_get_pid.
+	* infcmd.c: Likewise.
+	* inferior.h: Likewise.
+	* inflow.c: Likewise.
+	* infrun.c: Likewise.
+	* linux-fork.c: Likewise.
+	* linux-nat.c: Replace PIDGET with ptid_get_pid.
+	Replace GET_PID with ptid_get_pid.
+	Replace is_lwp with ptid_lwp_p.
+	Replace GET_LWP with ptid_get_lwp.
+	Replace BUILD_LWP with ptid_build.
+
 2013-09-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* common/linux-btrace.c: Move sys/syscall.h out of the

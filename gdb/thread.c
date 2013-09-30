@@ -810,7 +810,7 @@ print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
 	  if (!number_is_in_list (requested_threads, tp->num))
 	    continue;
 
-	  if (pid != -1 && PIDGET (tp->ptid) != pid)
+	  if (pid != -1 && ptid_get_pid (tp->ptid) != pid)
 	    continue;
 
 	  if (tp->state == THREAD_EXITED)
@@ -847,7 +847,7 @@ print_thread_info (struct ui_out *uiout, char *requested_threads, int pid)
       if (!number_is_in_list (requested_threads, tp->num))
 	continue;
 
-      if (pid != -1 && PIDGET (tp->ptid) != pid)
+      if (pid != -1 && ptid_get_pid (tp->ptid) != pid)
 	{
 	  if (requested_threads != NULL && *requested_threads != '\0')
 	    error (_("Requested thread not found in requested process"));

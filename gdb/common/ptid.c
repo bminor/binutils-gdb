@@ -83,10 +83,33 @@ ptid_equal (ptid_t ptid1, ptid_t ptid2)
 int
 ptid_is_pid (ptid_t ptid)
 {
-  if (ptid_equal (minus_one_ptid, ptid))
-    return 0;
-  if (ptid_equal (null_ptid, ptid))
+  if (ptid_equal (minus_one_ptid, ptid)
+      || ptid_equal (null_ptid, ptid))
     return 0;
 
   return (ptid_get_lwp (ptid) == 0 && ptid_get_tid (ptid) == 0);
+}
+
+/* Returns true if PTID represents a lwp.  */
+
+int
+ptid_lwp_p (ptid_t ptid)
+{
+  if (ptid_equal (minus_one_ptid, ptid)
+      || ptid_equal (null_ptid, ptid))
+    return 0;
+
+  return (ptid_get_lwp (ptid) != 0);
+}
+
+/* Returns true if PTID represents a tid.  */
+
+int
+ptid_tid_p (ptid_t ptid)
+{
+  if (ptid_equal (minus_one_ptid, ptid)
+      || ptid_equal (null_ptid, ptid))
+    return 0;
+
+  return (ptid_get_tid (ptid) != 0);
 }

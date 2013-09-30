@@ -220,7 +220,7 @@ som_solib_create_inferior_hook (int from_tty)
     goto keep_going;
 
   anaddr = SYMBOL_VALUE_ADDRESS (msymbol);
-  store_unsigned_integer (buf, 4, byte_order, PIDGET (inferior_ptid));
+  store_unsigned_integer (buf, 4, byte_order, ptid_get_pid (inferior_ptid));
   status = target_write_memory (anaddr, buf, 4);
   if (status != 0)
     {

@@ -2615,7 +2615,7 @@ target_detach (char *args, int from_tty)
   else
     /* If we're in breakpoints-always-inserted mode, have to remove
        them before detaching.  */
-    remove_breakpoints_pid (PIDGET (inferior_ptid));
+    remove_breakpoints_pid (ptid_get_pid (inferior_ptid));
 
   prepare_for_detach ();
 
@@ -2678,8 +2678,8 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 	      fprintf_unfiltered (gdb_stdlog,
 				  "target_wait (%d, status, options={%s})"
 				  " = %d,   %s\n",
-				  PIDGET (ptid), options_string,
-				  PIDGET (retval), status_string);
+				  ptid_get_pid (ptid), options_string,
+				  ptid_get_pid (retval), status_string);
 	      xfree (status_string);
 	      xfree (options_string);
 	    }
@@ -2733,7 +2733,7 @@ target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 	  t->to_resume (t, ptid, step, signal);
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_resume (%d, %s, %s)\n",
-				PIDGET (ptid),
+				ptid_get_pid (ptid),
 				step ? "step" : "continue",
 				gdb_signal_to_name (signal));
 
@@ -3823,7 +3823,7 @@ target_thread_alive (ptid_t ptid)
 	  retval = t->to_thread_alive (t, ptid);
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog, "target_thread_alive (%d) = %d\n",
-				PIDGET (ptid), retval);
+				ptid_get_pid (ptid), retval);
 
 	  return retval;
 	}
@@ -4010,7 +4010,7 @@ target_core_of_thread (ptid_t ptid)
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,
 				"target_core_of_thread (%d) = %d\n",
-				PIDGET (ptid), retval);
+				ptid_get_pid (ptid), retval);
 	  return retval;
 	}
     }
@@ -4749,7 +4749,7 @@ debug_to_post_startup_inferior (ptid_t ptid)
   debug_target.to_post_startup_inferior (ptid);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_startup_inferior (%d)\n",
-		      PIDGET (ptid));
+		      ptid_get_pid (ptid));
 }
 
 static int

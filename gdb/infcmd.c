@@ -2408,7 +2408,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
   exec_file = (char *) get_exec_file (0);
   if (!exec_file)
     {
-      exec_file = target_pid_to_exec_file (PIDGET (inferior_ptid));
+      exec_file = target_pid_to_exec_file (ptid_get_pid (inferior_ptid));
       if (exec_file)
 	{
 	  /* It's possible we don't have a full path, but rather just a
@@ -2433,7 +2433,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
     }
 
   /* Take any necessary post-attaching actions for this platform.  */
-  target_post_attach (PIDGET (inferior_ptid));
+  target_post_attach (ptid_get_pid (inferior_ptid));
 
   post_create_inferior (&current_target, from_tty);
 

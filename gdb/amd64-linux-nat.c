@@ -164,9 +164,9 @@ amd64_linux_fetch_inferior_registers (struct target_ops *ops,
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = TIDGET (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
@@ -219,9 +219,9 @@ amd64_linux_store_inferior_registers (struct target_ops *ops,
   int tid;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = TIDGET (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
   if (regnum == -1 || amd64_native_gregset_supplies_p (gdbarch, regnum))
     {
@@ -281,9 +281,9 @@ amd64_linux_dr_get (ptid_t ptid, int regnum)
   int tid;
   unsigned long value;
 
-  tid = TIDGET (ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = PIDGET (ptid);
+    tid = ptid_get_pid (ptid);
 
   errno = 0;
   value = ptrace (PTRACE_PEEKUSER, tid,
@@ -301,9 +301,9 @@ amd64_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 {
   int tid;
 
-  tid = TIDGET (ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = PIDGET (ptid);
+    tid = ptid_get_pid (ptid);
 
   errno = 0;
   ptrace (PTRACE_POKEUSER, tid,
@@ -1046,9 +1046,9 @@ amd64_linux_read_description (struct target_ops *ops)
   static uint64_t xcr0;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = TIDGET (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
   /* Get CS register.  */
   errno = 0;

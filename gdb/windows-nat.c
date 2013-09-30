@@ -2388,7 +2388,7 @@ static void
 windows_close (void)
 {
   DEBUG_EVENTS (("gdb: windows_close, inferior_ptid=%d\n",
-		PIDGET (inferior_ptid)));
+		ptid_get_pid (inferior_ptid)));
 }
 
 /* Convert pid to printable format.  */

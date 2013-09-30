@@ -264,7 +264,7 @@ terminal_init_inferior (void)
      (and the non-threaded child_terminal_init_inferior can just pass in
      inferior_ptid to the same routine).  */
   /* We assume INFERIOR_PID is also the child's process group.  */
-  terminal_init_inferior_with_pgrp (PIDGET (inferior_ptid));
+  terminal_init_inferior_with_pgrp (ptid_get_pid (inferior_ptid));
 #endif /* PROCESS_GROUP_TYPE */
 }
 
@@ -769,7 +769,7 @@ static void
 pass_signal (int signo)
 {
 #ifndef _WIN32
-  kill (PIDGET (inferior_ptid), SIGINT);
+  kill (ptid_get_pid (inferior_ptid), SIGINT);
 #endif
 }
 

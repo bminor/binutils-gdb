@@ -452,16 +452,17 @@ thread_from_lwp (ptid_t ptid)
 
   /* This ptid comes from linux-nat.c, which should always fill in the
      LWP.  */
-  gdb_assert (GET_LWP (ptid) != 0);
+  gdb_assert (ptid_get_lwp (ptid) != 0);
 
-  info = get_thread_db_info (GET_PID (ptid));
+  info = get_thread_db_info (ptid_get_pid (ptid));
 
   /* Access an lwp we know is stopped.  */
   info->proc_handle.ptid = ptid;
-  err = info->td_ta_map_lwp2thr_p (info->thread_agent, GET_LWP (ptid), &th);
+  err = info->td_ta_map_lwp2thr_p (info->thread_agent, ptid_get_lwp (ptid),
+				   &th);
   if (err != TD_OK)
     error (_("Cannot find user-level thread for LWP %ld: %s"),
-	   GET_LWP (ptid), thread_db_err_str (err));
+	   ptid_get_lwp (ptid), thread_db_err_str (err));
 
   /* Long-winded way of fetching the thread info.  */
   io.thread_db_info = info;
@@ -481,14 +482,14 @@ thread_db_attach_lwp (ptid_t ptid)
   td_err_e err;
   struct thread_db_info *info;
 
-  info = get_thread_db_info (GET_PID (ptid));
+  info = get_thread_db_info (ptid_get_pid (ptid));
 
   if (info == NULL)
     return 0;
 
   /* This ptid comes from linux-nat.c, which should always fill in the
      LWP.  */
-  gdb_assert (GET_LWP (ptid) != 0);
+  gdb_assert (ptid_get_lwp (ptid) != 0);
 
   /* Access an lwp we know is stopped.  */
   info->proc_handle.ptid = ptid;
@@ -499,7 +500,8 @@ thread_db_attach_lwp (ptid_t ptid)
   if (!have_threads (ptid))
     thread_db_find_new_threads_1 (ptid);
 
-  err = info->td_ta_map_lwp2thr_p (info->thread_agent, GET_LWP (ptid), &th);
+  err = info->td_ta_map_lwp2thr_p (info->thread_agent, ptid_get_lwp (ptid),
+				   &th);
   if (err != TD_OK)
     /* Cannot find user-level thread.  */
     return 0;
@@ -532,7 +534,7 @@ enable_thread_event (int event, CORE_ADDR *bp)
   td_err_e err;
   struct thread_db_info *info;
 
-  info = get_thread_db_info (GET_PID (inferior_ptid));
+  info = get_thread_db_info (ptid_get_pid (inferior_ptid));
 
   /* Access an lwp we know is stopped.  */
   info->proc_handle.ptid = inferior_ptid;
@@ -594,7 +596,7 @@ enable_thread_event_reporting (void)
   td_err_e err;
   struct thread_db_info *info;
 
-  info = get_thread_db_info (GET_PID (inferior_ptid));
+  info = get_thread_db_info (ptid_get_pid (inferior_ptid));
 
   /* We cannot use the thread event reporting facility if these
      functions aren't available.  */
@@ -877,7 +879,7 @@ try_thread_db_load (const char *library)
     return 1;
 
   /* This library "refused" to work on current inferior.  */
-  delete_thread_db_info (GET_PID (inferior_ptid));
+  delete_thread_db_info (ptid_get_pid (inferior_ptid));
   return 0;
 }
 
@@ -1090,7 +1092,7 @@ thread_db_load (void)
 {
   struct thread_db_info *info;
 
-  info = get_thread_db_info (GET_PID (inferior_ptid));
+  info = get_thread_db_info (ptid_get_pid (inferior_ptid));
 
   if (info != NULL)
     return 1;
@@ -1266,7 +1268,8 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
     {
       int res;
 
-      res = lin_lwp_attach_lwp (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid)));
+      res = lin_lwp_attach_lwp (ptid_build (ptid_get_pid (ptid),
+					    ti_p->ti_lid, 0));
       if (res < 0)
 	{
 	  /* Error, stop iterating.  */
@@ -1303,7 +1306,7 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
   else
     tp->private = private;
 
-  info = get_thread_db_info (GET_PID (ptid));
+  info = get_thread_db_info (ptid_get_pid (ptid));
 
   /* Enable thread event reporting for this thread, except when
      debugging a core file.  */
@@ -1342,7 +1345,7 @@ thread_db_detach (struct target_ops *ops, char *args, int from_tty)
   struct target_ops *target_beneath = find_target_beneath (ops);
   struct thread_db_info *info;
 
-  info = get_thread_db_info (GET_PID (inferior_ptid));
+  info = get_thread_db_info (ptid_get_pid (inferior_ptid));
 
   if (info)
     {
@@ -1358,7 +1361,7 @@ thread_db_detach (struct target_ops *ops, char *args, int from_tty)
 	  remove_thread_event_breakpoints ();
 	}
 
-      delete_thread_db_info (GET_PID (inferior_ptid));
+      delete_thread_db_info (ptid_get_pid (inferior_ptid));
     }
 
   target_beneath->to_detach (target_beneath, args, from_tty);
@@ -1387,7 +1390,7 @@ check_event (ptid_t ptid)
   int loop = 0;
   struct thread_db_info *info;
 
-  info = get_thread_db_info (GET_PID (ptid));
+  info = get_thread_db_info (ptid_get_pid (ptid));
 
   /* Bail out early if we're not at a thread event breakpoint.  */
   stop_pc = regcache_read_pc (regcache)
@@ -1437,7 +1440,7 @@ check_event (ptid_t ptid)
       if (err != TD_OK)
 	error (_("Cannot get thread info: %s"), thread_db_err_str (err));
 
-      ptid = ptid_build (GET_PID (ptid), ti.ti_lid, 0);
+      ptid = ptid_build (ptid_get_pid (ptid), ti.ti_lid, 0);
 
       switch (msg.event)
 	{
@@ -1481,7 +1484,7 @@ thread_db_wait (struct target_ops *ops,
       || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
     return ptid;
 
-  info = get_thread_db_info (GET_PID (ptid));
+  info = get_thread_db_info (ptid_get_pid (ptid));
 
   /* If this process isn't using thread_db, we're done.  */
   if (info == NULL)
@@ -1491,7 +1494,7 @@ thread_db_wait (struct target_ops *ops,
     {
       /* New image, it may or may not end up using thread_db.  Assume
 	 not unless we find otherwise.  */
-      delete_thread_db_info (GET_PID (ptid));
+      delete_thread_db_info (ptid_get_pid (ptid));
       if (!thread_db_list)
  	unpush_target (&thread_db_ops);
 
@@ -1525,7 +1528,7 @@ thread_db_mourn_inferior (struct target_ops *ops)
 {
   struct target_ops *target_beneath = find_target_beneath (ops);
 
-  delete_thread_db_info (GET_PID (inferior_ptid));
+  delete_thread_db_info (ptid_get_pid (inferior_ptid));
 
   target_beneath->to_mourn_inferior (target_beneath);
 
@@ -1665,7 +1668,7 @@ thread_db_find_new_threads_2 (ptid_t ptid, int until_no_new)
   struct thread_db_info *info;
   int i, loop;
 
-  info = get_thread_db_info (GET_PID (ptid));
+  info = get_thread_db_info (ptid_get_pid (ptid));
 
   /* Access an lwp we know is stopped.  */
   info->proc_handle.ptid = ptid;
@@ -1745,7 +1748,7 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
       tid = thread_info->private->tid;
       snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
-		tid, GET_LWP (ptid));
+		tid, ptid_get_lwp (ptid));
 
       return buf;
     }
@@ -1797,7 +1800,7 @@ thread_db_get_thread_local_address (struct target_ops *ops,
       psaddr_t address;
       struct thread_db_info *info;
 
-      info = get_thread_db_info (GET_PID (ptid));
+      info = get_thread_db_info (ptid_get_pid (ptid));
 
       /* glibc doesn't provide the needed interface.  */
       if (!info->td_thr_tls_get_addr_p)
@@ -1883,9 +1886,9 @@ thread_db_resume (struct target_ops *ops,
   struct thread_db_info *info;
 
   if (ptid_equal (ptid, minus_one_ptid))
-    info = get_thread_db_info (GET_PID (inferior_ptid));
+    info = get_thread_db_info (ptid_get_pid (inferior_ptid));
   else
-    info = get_thread_db_info (GET_PID (ptid));
+    info = get_thread_db_info (ptid_get_pid (ptid));
 
   /* This workaround is only needed for child fork lwps stopped in a
      PTRACE_O_TRACEFORK event.  When the inferior is resumed, the
