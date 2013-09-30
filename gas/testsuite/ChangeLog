@@ -1,3 +1,11 @@
+2013-09-30  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
+
+	* gas/i386/i386.exp: Run bdver4 test cases.
+	* gas/i386/nops-1-bdver4.d: New.
+	* gas/i386/arch-10-bdver4.d: New.
+	* gas/i386/x86-64-nops-1-bdver4.d: New.
+	* gas/i386/x86-64-arch-2-bdver4.d: New.
+
 2013-09-17  Richard Sandiford  <rsandifo@linux.vnet.ibm.com>
 
 	* gas/s390/zarch-z196.s, gas/s390/zarch-z196.d: Test CLIH with

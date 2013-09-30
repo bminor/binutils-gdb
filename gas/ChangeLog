@@ -1,3 +1,8 @@
+2013-09-30  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
+
+	* config/tc-i386.c (cpu_arch): Add CPU_BDVER4_FLAGS.
+	* doc/c-i386.texi: Add -march=bdver4 option.
+
 2013-09-20  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.

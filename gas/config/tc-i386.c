@@ -772,6 +772,8 @@ static const arch_entry cpu_arch[] =
     CPU_BDVER2_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("bdver3"), PROCESSOR_BD,
     CPU_BDVER3_FLAGS, 0, 0 },
+  { STRING_COMMA_LEN ("bdver4"), PROCESSOR_BD,
+    CPU_BDVER4_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("btver1"), PROCESSOR_BT,
     CPU_BTVER1_FLAGS, 0, 0 },
   { STRING_COMMA_LEN ("btver2"), PROCESSOR_BT,
