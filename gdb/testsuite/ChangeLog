@@ -1,3 +1,8 @@
+2013-10-01  Doug Evans  <dje@google.com>
+
+	* gdb.python/python.exp: Remove redundant print-stack tests.
+	Make all print-stack test names unique.  Fix spelling of print-stack.
+
 2013-09-29  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.base/shreloc.exp: Set $msymfile to 'shreloc.txt' if host
