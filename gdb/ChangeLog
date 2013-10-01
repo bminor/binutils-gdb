@@ -1,5 +1,19 @@
 2013-10-01  Yao Qi  <yao@codesourcery.com>
 
+	* varobj.c (c_value_of_root): Remove declaration.
+	(cplus_value_of_root, java_value_of_root): Likewise.
+	(ada_value_of_root): Likewise.
+	(struct language_specific) <value_of_root>: Remove.
+	(languages): Update initialization.
+	(check_scope): Move earlier.
+	(c_value_of_root): Move earlier and rename to ...
+	(value_of_root_1): ... this.
+	(value_of_root): Caller update.
+	(cplus_value_of_root, java_value_of_root): Remove.
+	(ada_value_of_root): Remove.
+
+2013-10-01  Yao Qi  <yao@codesourcery.com>
+
 	* varobj.c (varobj_format_string): Remove "unknown".
 	(languages): Remove the first element.
 	* varobj.h (enum varobj_languages): Remove vlang_c.
