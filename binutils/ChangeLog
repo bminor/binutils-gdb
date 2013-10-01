@@ -1,3 +1,10 @@
+2013-10-01  Cory Fields  <cory@coryfields.com>
+
+	* arsup.c (ar_save): Respect the deterministic setting when
+	reading from an mri script.
+	* ar.c (main): Set the default deterministic mode when reading
+	from an mri script.
+
 2013-10-01  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* dwarf.c (SAFE_BYTE_GET): Fix argument check.
