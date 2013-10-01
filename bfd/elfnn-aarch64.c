@@ -1666,8 +1666,8 @@ _aarch64_elf_section_data;
 #define elf_aarch64_section_data(sec) \
   ((_aarch64_elf_section_data *) elf_section_data (sec))
 
-/* The size of the thread control block.  */
-#define TCB_SIZE	16
+/* The size of the thread control block which is defined to be two pointers.  */
+#define TCB_SIZE	(ARCH_SIZE/8)*2
 
 struct elf_aarch64_local_symbol
 {

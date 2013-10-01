@@ -1,3 +1,38 @@
+2013-09-30  Nick Clifton  <nickc@redhat.com>
+
+	* cpu-msp430.c: Use printable names that match the values
+	displayed by readelf.
+
+2013-08-25  Andrew Pinski  <apinski@cavium.com>
+
+	* elfnn-aarch64.c (TCB_SIZE): Base on the ARCH_SIZE rather than a
+	fixed size of 16.
+
+2013-09-24  Gregory Fong  <gregory.0xf0@gmail.com>
+
+	* elfxx-mips.c (mips_elf_create_got_section): Hide
+	_GLOBAL_OFFSET_TABLE_.
+
+2013-09-24  Alan Modra  <amodra@gmail.com>
+
+	* elf32-mips.c (ELF_OSABI): Undef for vxworks.
+
+2013-09-24  Alan Modra  <amodra@gmail.com>
+
+	* syms.c (_bfd_stab_section_find_nearest_line): Ignore partial
+	stabs at end of .stab.  Tidy variable usage.  Don't drop the need
+	for a NULL function name stab if If N_FUN stab is ignored.
+	Ensure index entry count loop matches write loop.
+
+2013-09-20  Alan Modra  <amodra@gmail.com>
+
+	* configure: Regenerate.
+
+2013-09-18  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.24.51
+	* configure: Regenerate.
+
 2013-09-17  Doug Gilmore  <Doug.Gilmore@imgtec.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_print_private_bfd_data): Handle

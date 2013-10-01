@@ -2486,6 +2486,7 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define TARGET_LITTLE_NAME              "elf32-littlemips-vxworks"
 #define TARGET_BIG_SYM                  bfd_elf32_bigmips_vxworks_vec
 #define TARGET_BIG_NAME                 "elf32-bigmips-vxworks"
+#undef	ELF_OSABI
 
 #undef elf32_bed
 #define elf32_bed			elf32_mips_vxworks_bed
