@@ -1,5 +1,10 @@
 2013-10-01  Yao Qi  <yao@codesourcery.com>
 
+	* varobj.c (struct language_specific) <language>: Remove.
+	(languages): Update the initialization.
+
+2013-10-01  Yao Qi  <yao@codesourcery.com>
+
 	* arm-wince-tdep.c: Remove inclusion of "solib.h" and
 	"solib-target.h".  Include "windows-tdep.h".
 	(arm_wince_init_abi): Call windows_init_abi.  Remove call to

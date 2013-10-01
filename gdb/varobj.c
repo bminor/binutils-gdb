@@ -398,10 +398,6 @@ static int ada_value_has_mutated (struct varobj *var, struct value *new_val,
 
 struct language_specific
 {
-
-  /* The language of this variable.  */
-  enum varobj_languages language;
-
   /* The number of children of PARENT.  */
   int (*number_of_children) (struct varobj * parent);
 
@@ -458,7 +454,6 @@ struct language_specific
 static struct language_specific languages[vlang_end] = {
   /* Unknown (try treating as C).  */
   {
-   vlang_unknown,
    c_number_of_children,
    c_name_of_variable,
    c_name_of_child,
@@ -472,7 +467,6 @@ static struct language_specific languages[vlang_end] = {
   ,
   /* C */
   {
-   vlang_c,
    c_number_of_children,
    c_name_of_variable,
    c_name_of_child,
@@ -486,7 +480,6 @@ static struct language_specific languages[vlang_end] = {
   ,
   /* C++ */
   {
-   vlang_cplus,
    cplus_number_of_children,
    cplus_name_of_variable,
    cplus_name_of_child,
@@ -500,7 +493,6 @@ static struct language_specific languages[vlang_end] = {
   ,
   /* Java */
   {
-   vlang_java,
    java_number_of_children,
    java_name_of_variable,
    java_name_of_child,
@@ -513,7 +505,6 @@ static struct language_specific languages[vlang_end] = {
    NULL /* value_has_mutated */},
   /* Ada */
   {
-   vlang_ada,
    ada_number_of_children,
    ada_name_of_variable,
    ada_name_of_child,
