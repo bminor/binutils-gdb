@@ -1,3 +1,8 @@
+2013-10-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_has_this_exception_support): Ignore
+	mst_solib_trampoline minimal symbols.
+
 2013-09-30  Tristan Gingold  <gingold@adacore.com>
 
 	* i386-darwin-nat.c (darwin_complete_target): Install methods for

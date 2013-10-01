@@ -11039,7 +11039,10 @@ ada_has_this_exception_support (const struct exception_support_info *einfo)
 	 the name of the exception being raised (this name is printed in
 	 the catchpoint message, and is also used when trying to catch
 	 a specific exception).  We do not handle this case for now.  */
-      if (lookup_minimal_symbol (einfo->catch_exception_sym, NULL, NULL))
+      struct minimal_symbol *msym
+	= lookup_minimal_symbol (einfo->catch_exception_sym, NULL, NULL);
+
+      if (msym && MSYMBOL_TYPE (msym) != mst_solib_trampoline)
 	error (_("Your Ada runtime appears to be missing some debugging "
 		 "information.\nCannot insert Ada exception catchpoint "
 		 "in this configuration."));
