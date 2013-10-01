@@ -288,7 +288,7 @@ read_uleb128 (unsigned char * data,
 #define SAFE_BYTE_GET(VAL, PTR, AMOUNT, END)	\
   do						\
     {						\
-      int dummy [sizeof (VAL) < (AMOUNT) ? -1 : 0] ATTRIBUTE_UNUSED ; \
+      int dummy [sizeof (VAL) < (AMOUNT) ? -1 : 1] ATTRIBUTE_UNUSED ; \
       unsigned int amount = (AMOUNT);		\
       if (((PTR) + amount) >= (END))		\
 	{					\

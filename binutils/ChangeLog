@@ -1,3 +1,7 @@
+2013-10-01  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* dwarf.c (SAFE_BYTE_GET): Fix argument check.
+
 2013-09-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* dwarf.c (display_debug_frames): Pass offset_size to
