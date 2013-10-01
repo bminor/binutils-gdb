@@ -1,3 +1,12 @@
+2013-10-01  Jerome Guitton  <guitton@adacore.com>
+
+	Checked in by Joel Brobecker  <brobecker@adacore.com>
+	* system-gdbinit/elinos.py (get_elinos_environment): Return an
+	incomplete dictionnary instead of None in case of missing
+	environment variables.
+	(elinos_init): in case of an incomplete environment, best
+	effort to load system libraries instead of abort.
+
 2013-10-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_has_this_exception_support): Ignore
