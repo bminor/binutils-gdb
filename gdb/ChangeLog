@@ -1,5 +1,14 @@
 2013-10-01  Yao Qi  <yao@codesourcery.com>
 
+	* arm-wince-tdep.c: Remove inclusion of "solib.h" and
+	"solib-target.h".  Include "windows-tdep.h".
+	(arm_wince_init_abi): Call windows_init_abi.  Remove call to
+	set_solib_ops and set_gdbarch_has_dos_based_file_system.
+	* configure.tgt (arm*-wince-pe | arm*-*-mingw32ce*): Append
+	windows-tdep.o to gdb_target_obs.
+
+2013-10-01  Yao Qi  <yao@codesourcery.com>
+
 	* amd64-windows-tdep.c: Remove inclusion of "solib.h" and
 	"solib-target.h".
 	(amd64_windows_init_abi): Don't call set_solib_ops and

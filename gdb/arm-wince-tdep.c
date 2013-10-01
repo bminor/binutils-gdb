@@ -22,13 +22,12 @@
 #include "osabi.h"
 #include "gdbcore.h"
 #include "target.h"
-#include "solib.h"
-#include "solib-target.h"
 #include "frame.h"
 
 #include "gdb_string.h"
 
 #include "arm-tdep.h"
+#include "windows-tdep.h"
 
 static const gdb_byte arm_wince_le_breakpoint[] = { 0x10, 0x00, 0x00, 0xe6 };
 static const gdb_byte arm_wince_thumb_le_breakpoint[] = { 0xfe, 0xdf };
@@ -116,6 +115,8 @@ arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  windows_init_abi (info, gdbarch);
+
   tdep->arm_breakpoint = arm_wince_le_breakpoint;
   tdep->arm_breakpoint_size = sizeof (arm_wince_le_breakpoint);
   tdep->thumb_breakpoint = arm_wince_thumb_le_breakpoint;
@@ -131,7 +132,6 @@ arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_char_signed (gdbarch, 1);
 
   /* Shared library handling.  */
-  set_solib_ops (gdbarch, &solib_target_so_ops);
   set_gdbarch_skip_trampoline_code (gdbarch, arm_pe_skip_trampoline_code);
 
   /* Single stepping.  */
@@ -139,10 +139,6 @@ arm_wince_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Skip call to __gccmain that gcc places in main.  */
   set_gdbarch_skip_main_prologue (gdbarch, arm_wince_skip_main_prologue);
-
-  /* Canonical paths on this target look like `\Windows\coredll.dll',
-     for example.  */
-  set_gdbarch_has_dos_based_file_system (gdbarch, 1);
 }
 
 static enum gdb_osabi

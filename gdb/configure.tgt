@@ -83,7 +83,7 @@ am33_2.0*-*-linux*)
 
 arm*-wince-pe | arm*-*-mingw32ce*)
 	# Target: ARM based machine running Windows CE (win32)
-	gdb_target_obs="arm-tdep.o arm-wince-tdep.o"
+	gdb_target_obs="arm-tdep.o arm-wince-tdep.o windows-tdep.o"
 	build_gdbserver=yes
 	;;
 arm*-*-linux*)
