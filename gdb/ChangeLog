@@ -1,3 +1,24 @@
+2013-10-01  Yao Qi  <yao@codesourcery.com>
+
+	* amd64-windows-tdep.c: Remove inclusion of "solib.h" and
+	"solib-target.h".
+	(amd64_windows_init_abi): Don't call set_solib_ops and
+	set_gdbarch_iterate_over_objfiles_in_search_order.  Call
+	windows_init_abi instead.
+	* i386-cygwin-tdep.c: Remove inclusion of "solib.h" and
+	"solib-target.h".
+	(i386_cygwin_init_abi): Don't call set_solib_ops,
+	set_gdbarch_has_dos_based_file_system and
+	set_gdbarch_iterate_over_objfiles_in_search_order.  Call
+	windows_init_abi instead.
+	* windows-tdep.c: Include "solib.h" and "solib-target.h".
+	(windows_init_abi): New function.
+	(windows_iterate_over_objfiles_in_search_order): Make it
+	static.
+	* windows-tdep.h (windows_init_abi): Declare.
+	(windows_iterate_over_objfiles_in_search_order): Remove
+	declaration.
+
 2013-10-01  Jerome Guitton  <guitton@adacore.com>
 
 	Checked in by Joel Brobecker  <brobecker@adacore.com>

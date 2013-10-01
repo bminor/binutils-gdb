@@ -18,8 +18,6 @@
 #include "defs.h"
 #include "osabi.h"
 #include "amd64-tdep.h"
-#include "solib.h"
-#include "solib-target.h"
 #include "gdbtypes.h"
 #include "gdbcore.h"
 #include "regcache.h"
@@ -1177,6 +1175,8 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   amd64_init_abi (info, gdbarch);
 
+  windows_init_abi (info, gdbarch);
+
   /* On Windows, "long"s are only 32bit.  */
   set_gdbarch_long_bit (gdbarch, 32);
 
@@ -1187,14 +1187,9 @@ amd64_windows_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_skip_trampoline_code (gdbarch,
 				    amd64_windows_skip_trampoline_code);
 
-  set_gdbarch_iterate_over_objfiles_in_search_order
-    (gdbarch, windows_iterate_over_objfiles_in_search_order);
-
   set_gdbarch_skip_prologue (gdbarch, amd64_windows_skip_prologue);
 
   set_gdbarch_auto_wide_charset (gdbarch, amd64_windows_auto_wide_charset);
-
-  set_solib_ops (gdbarch, &solib_target_so_ops);
 }
 
 /* -Wmissing-prototypes */

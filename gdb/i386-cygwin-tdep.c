@@ -26,8 +26,6 @@
 #include "gdb_obstack.h"
 #include "xml-support.h"
 #include "gdbcore.h"
-#include "solib.h"
-#include "solib-target.h"
 #include "inferior.h"
 
 /* Core file support.  */
@@ -233,6 +231,8 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
+  windows_init_abi (info, gdbarch);
+
   set_gdbarch_skip_trampoline_code (gdbarch, i386_cygwin_skip_trampoline_code);
 
   set_gdbarch_skip_main_prologue (gdbarch, i386_skip_main_prologue);
@@ -243,8 +243,6 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->gregset_num_regs = ARRAY_SIZE (i386_windows_gregset_reg_offset);
   tdep->sizeof_gregset = I386_WINDOWS_SIZEOF_GREGSET;
 
-  set_solib_ops (gdbarch, &solib_target_so_ops);
-
   /* Core file support.  */
   set_gdbarch_regset_from_core_section
     (gdbarch, i386_windows_regset_from_core_section);
@@ -253,13 +251,6 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_core_pid_to_str (gdbarch, i386_windows_core_pid_to_str);
 
   set_gdbarch_auto_wide_charset (gdbarch, i386_cygwin_auto_wide_charset);
-
-  /* Canonical paths on this target look like
-     `c:\Program Files\Foo App\mydll.dll', for example.  */
-  set_gdbarch_has_dos_based_file_system (gdbarch, 1);
-
-  set_gdbarch_iterate_over_objfiles_in_search_order
-    (gdbarch, windows_iterate_over_objfiles_in_search_order);
 }
 
 static enum gdb_osabi
