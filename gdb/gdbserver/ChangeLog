@@ -1,3 +1,9 @@
+2013-10-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* lynx-low.c (lynx_add_threads_after_attach): New function.
+	(lynx_attach): Remove call to add_thread.  Add call to
+	lynx_add_threads_after_attach instead.
+
 2013-09-28  Mike Frysinger  <vapier@gentoo.org>
 
 	* configure.ac (AC_CHECK_HEADERS): Add sys/syscall.h
