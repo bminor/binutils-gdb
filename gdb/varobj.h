@@ -55,7 +55,7 @@ extern char *varobj_format_string[];
 /* Languages supported by this variable objects system.  */
 enum varobj_languages
   {
-    vlang_unknown = 0, vlang_c, vlang_cplus, vlang_java, vlang_ada, vlang_end
+    vlang_c = 0, vlang_cplus, vlang_java, vlang_ada, vlang_end
   };
 
 /* String representations of gdb's known languages (defined in varobj.c).  */

@@ -1,5 +1,11 @@
 2013-10-01  Yao Qi  <yao@codesourcery.com>
 
+	* varobj.c (varobj_format_string): Remove "unknown".
+	(languages): Remove the first element.
+	* varobj.h (enum varobj_languages): Remove vlang_c.
+
+2013-10-01  Yao Qi  <yao@codesourcery.com>
+
 	* varobj.c (struct language_specific) <language>: Remove.
 	(languages): Update the initialization.
 

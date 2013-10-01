@@ -62,7 +62,7 @@ char *varobj_format_string[] =
   { "natural", "binary", "decimal", "hexadecimal", "octal" };
 
 /* String representations of gdb's known languages.  */
-char *varobj_language_string[] = { "unknown", "C", "C++", "Java" };
+char *varobj_language_string[] = { "C", "C++", "Java" };
 
 /* True if we want to allow Python-based pretty-printing.  */
 static int pretty_printing = 0;
@@ -452,19 +452,6 @@ struct language_specific
 
 /* Array of known source language routines.  */
 static struct language_specific languages[vlang_end] = {
-  /* Unknown (try treating as C).  */
-  {
-   c_number_of_children,
-   c_name_of_variable,
-   c_name_of_child,
-   c_path_expr_of_child,
-   c_value_of_root,
-   c_value_of_child,
-   c_type_of_child,
-   c_value_of_variable,
-   default_value_is_changeable_p,
-   NULL /* value_has_mutated */}
-  ,
   /* C */
   {
    c_number_of_children,
