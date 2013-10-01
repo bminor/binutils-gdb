@@ -1,3 +1,7 @@
+2013-10-01  Doug Evans  <dje@google.com>
+
+	* cli/cli-decode.c: Remove unnecessary inclusion of tui/tui.h.
+
 2013-10-01  Yao Qi  <yao@codesourcery.com>
 
 	* varobj.c (c_value_of_root): Remove declaration.

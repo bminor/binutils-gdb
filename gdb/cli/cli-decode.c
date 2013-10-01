@@ -22,14 +22,8 @@
 #include "gdb_string.h"
 #include "completer.h"
 #include "ui-out.h"
-
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
-
-#ifdef TUI
-#include "tui/tui.h"		/* For tui_active et al.  */
-#endif
-
 #include "gdb_assert.h"
 
 /* Prototypes for local functions.  */
