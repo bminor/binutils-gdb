@@ -82,13 +82,22 @@ mywait (ptid_t ptid, struct target_waitstatus *ourstatus, int options,
 
   ret = (*the_target->wait) (ptid, ourstatus, options);
 
-  if (ourstatus->kind == TARGET_WAITKIND_EXITED)
-    fprintf (stderr,
-	     "\nChild exited with status %d\n", ourstatus->value.integer);
-  else if (ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
-    fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
-	     gdb_signal_to_host (ourstatus->value.sig),
-	     gdb_signal_to_name (ourstatus->value.sig));
+  /* If GDB is connected through TCP/serial, then GDBserver will most
+     probably be running on its own terminal/console, so it's nice to
+     print there why is GDBserver exiting.  If however, GDB is
+     connected through stdio, then there's no need to spam the GDB
+     console with this -- the user will already see the exit through
+     regular GDB output, in that same terminal.  */
+  if (!remote_connection_is_stdio ())
+    {
+      if (ourstatus->kind == TARGET_WAITKIND_EXITED)
+	fprintf (stderr,
+		 "\nChild exited with status %d\n", ourstatus->value.integer);
+      else if (ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
+	fprintf (stderr, "\nChild terminated with signal = 0x%x (%s)\n",
+		 gdb_signal_to_host (ourstatus->value.sig),
+		 gdb_signal_to_name (ourstatus->value.sig));
+    }
 
   if (connected_wait)
     server_waiting = 0;

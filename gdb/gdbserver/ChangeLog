@@ -1,3 +1,10 @@
+2013-10-02  Pedro Alves  <palves@redhat.com>
+
+	* server.c (process_serial_event): Don't output "GDBserver
+	exiting" if GDB is connected through stdio.
+	* target.c (mywait): Likewise, be silent if GDB is connected
+	through stdio.
+
 2013-10-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* lynx-low.c (lynx_add_threads_after_attach): New function.

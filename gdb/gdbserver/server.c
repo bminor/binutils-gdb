@@ -3550,7 +3550,10 @@ process_serial_event (void)
 	 the whole vStopped list (until it gets an OK).  */
       if (QUEUE_is_empty (notif_event_p, notif_stop.queue))
 	{
-	  fprintf (stderr, "GDBserver exiting\n");
+	  /* Be transparent when GDB is connected through stdio -- no
+	     need to spam GDB's console.  */
+	  if (!remote_connection_is_stdio ())
+	    fprintf (stderr, "GDBserver exiting\n");
 	  remote_close ();
 	  exit (0);
 	}
