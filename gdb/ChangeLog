@@ -1,5 +1,11 @@
 2013-10-02  Phil Muldoon  <pmuldoon@redhat.com>
 
+	PR python/15579
+
+	* python/python.c: Document gdb.execute command in Python help.
+
+2013-10-02  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* python/py-frame.c (frame_info_to_frame_object): Use
 	gdbpy_convert_exception. Clean up Python object on failure.
 
