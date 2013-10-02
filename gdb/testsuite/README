@@ -247,6 +247,15 @@ use_gdb_stub
 
   The tests are running with a GDB stub.
 
+exit_is_reliable
+
+  Set to true if GDB can assume that letting the program run to end
+  reliably results in program exits being reported as such, as opposed
+  to, e.g., the program ending in an infinite loop or the board
+  crashing/resetting.  If not set, this defaults to $use_gdb_stub.  In
+  other words, native targets are assumed reliable by default, and
+  remote stubs assumed unreliable.
+
 gdb,predefined_tsv
 
   The predefined trace state variables the board has.

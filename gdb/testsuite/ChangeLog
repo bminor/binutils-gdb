@@ -1,3 +1,12 @@
+2013-10-02  Pedro Alves  <palves@redhat.com>
+
+	* README (Board Settings): Document "exit_is_reliable".
+	* lib/gdb.exp (gdb_continue_to_end): Check whether the board says
+	running to exit reliably reports program exits.
+	* boards/native-gdbserver.exp: Set exit_is_reliable in the board
+	info.
+	* boards/native-stdio-gdbserver.exp: Likewise.
+
 2013-10-01  Doug Evans  <dje@google.com>
 
 	* gdb.python/python.exp: Remove redundant print-stack tests.

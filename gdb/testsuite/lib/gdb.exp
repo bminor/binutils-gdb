@@ -3806,11 +3806,8 @@ proc gdb_get_line_number { text { file "" } } {
     return $found
 }
 
-# gdb_continue_to_end:
-#	The case where the target uses stubs has to be handled specially. If a
-#       stub is used, we set a breakpoint at exit because we cannot rely on
-#       exit() behavior of a remote target.
-# 
+# Continue the program until it ends.
+#
 # MSSG is the error message that gets printed.  If not given, a
 #	default is used.
 # COMMAND is the command to invoke.  If not given, "continue" is
@@ -3833,7 +3830,19 @@ proc gdb_continue_to_end {{mssg ""} {command continue} {allow_extra 0}} {
   } else {
       set extra ""
   }
-  if $use_gdb_stub {
+
+  # By default, we don't rely on exit() behavior of remote stubs --
+  # it's common for exit() to be implemented as a simple infinite
+  # loop, or a forced crash/reset.  For native targets, by default, we
+  # assume process exit is reported as such.  If a non-reliable target
+  # is used, we set a breakpoint at exit, and continue to that.
+  if { [target_info exists exit_is_reliable] } {
+      set exit_is_reliable [target_info exit_is_reliable]
+  } else {
+      set exit_is_reliable [expr ! $use_gdb_stub]
+  }
+
+  if { ! $exit_is_reliable } {
     if {![gdb_breakpoint "exit"]} {
       return 0
     }

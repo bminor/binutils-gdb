@@ -31,6 +31,7 @@ set_board_info noargs 1
 
 set_board_info sockethost "localhost:"
 set_board_info use_gdb_stub 1
+set_board_info exit_is_reliable 1
 
 # We will be using the standard GDB remote protocol.
 set_board_info gdb_protocol "remote"

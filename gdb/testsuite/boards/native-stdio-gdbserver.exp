@@ -34,6 +34,7 @@ set_board_info sockethost "stdio"
 set_board_info gdb,socketport ""
 set_board_info gdb,get_remote_address ${board}_get_remote_address
 set_board_info use_gdb_stub 1
+set_board_info exit_is_reliable 1
 
 # We will be using the standard GDB remote protocol.
 set_board_info gdb_protocol "remote"
