@@ -67,7 +67,7 @@ extern int arglist_len;
 struct stoken
   {
     /* Pointer to first byte of char-string or first bit of bit-string.  */
-    char *ptr;
+    const char *ptr;
     /* Length of string in bytes for char-string or bits for bit-string.  */
     int length;
   };
@@ -201,7 +201,7 @@ extern void write_dollar_variable (struct stoken str);
 
 extern void mark_struct_expression (void);
 
-extern char *find_template_name_end (char *);
+extern const char *find_template_name_end (const char *);
 
 extern void start_arglist (void);
 
@@ -264,11 +264,11 @@ extern int parse_c_float (struct gdbarch *gdbarch, const char *p, int len,
 /* During parsing of a C expression, the pointer to the next character
    is in this variable.  */
 
-extern char *lexptr;
+extern const char *lexptr;
 
 /* After a token has been recognized, this variable points to it.
    Currently used only for error reporting.  */
-extern char *prev_lexptr;
+extern const char *prev_lexptr;
 
 /* Current depth in parentheses within the expression.  */
 

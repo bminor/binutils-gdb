@@ -1353,7 +1353,7 @@ lookup_template_type (char *name, struct type *type,
    If NAME is the name of a baseclass type, return that type.  */
 
 struct type *
-lookup_struct_elt_type (struct type *type, char *name, int noerr)
+lookup_struct_elt_type (struct type *type, const char *name, int noerr)
 {
   int i;
   char *typename;

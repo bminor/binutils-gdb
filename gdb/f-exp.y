@@ -157,7 +157,7 @@ static int match_string_literal (void);
 
 %{
 /* YYSTYPE gets defined by %union */
-static int parse_number (char *, int, int, YYSTYPE *);
+static int parse_number (const char *, int, int, YYSTYPE *);
 %}
 
 %type <voidval> exp  type_exp start variable 
@@ -669,7 +669,7 @@ name_not_typename :	NAME
 /*** Needs some error checking for the float case ***/
 
 static int
-parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
+parse_number (const char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
   LONGEST n = 0;
   LONGEST prevn = 0;
@@ -920,7 +920,7 @@ growbuf_by_size (int count)
 static int
 match_string_literal (void)
 {
-  char *tokptr = lexptr;
+  const char *tokptr = lexptr;
 
   for (tempbufindex = 0, tokptr++; *tokptr != '\0'; tokptr++)
     {
@@ -955,7 +955,7 @@ yylex (void)
   int c;
   int namelen;
   unsigned int i,token;
-  char *tokstart;
+  const char *tokstart;
   
  retry:
  
@@ -1054,7 +1054,7 @@ yylex (void)
       {
         /* It's a number.  */
 	int got_dot = 0, got_e = 0, got_d = 0, toktype;
-	char *p = tokstart;
+	const char *p = tokstart;
 	int hex = input_radix > 10;
 	
 	if (c == '0' && (p[1] == 'x' || p[1] == 'X'))

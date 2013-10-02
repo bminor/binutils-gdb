@@ -911,11 +911,12 @@ line_completion_function (const char *text, int matches,
    QUOTECHARS or BREAKCHARS is NULL, use the same values used by the
    completer.  */
 
-char *
-skip_quoted_chars (char *str, char *quotechars, char *breakchars)
+const char *
+skip_quoted_chars (const char *str, const char *quotechars,
+		   const char *breakchars)
 {
   char quote_char = '\0';
-  char *scan;
+  const char *scan;
 
   if (quotechars == NULL)
     quotechars = gdb_completer_quote_characters;
@@ -953,8 +954,8 @@ skip_quoted_chars (char *str, char *quotechars, char *breakchars)
    characters and word break characters used by the completer).
    Returns pointer to the location after the "word".  */
 
-char *
-skip_quoted (char *str)
+const char *
+skip_quoted (const char *str)
 {
   return skip_quoted_chars (str, NULL, NULL);
 }

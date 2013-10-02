@@ -50,8 +50,9 @@ extern char *gdb_completion_word_break_characters (void);
 
 /* Exported to linespec.c */
 
-extern char *skip_quoted_chars (char *, char *, char *);
+extern const char *skip_quoted_chars (const char *, const char *,
+				      const char *);
 
-extern char *skip_quoted (char *);
+extern const char *skip_quoted (const char *);
 
 #endif /* defined (COMPLETER_H) */

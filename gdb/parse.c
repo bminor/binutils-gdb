@@ -75,8 +75,8 @@ CORE_ADDR expression_context_pc;
 const struct block *innermost_block;
 int arglist_len;
 static struct type_stack type_stack;
-char *lexptr;
-char *prev_lexptr;
+const char *lexptr;
+const char *prev_lexptr;
 int paren_depth;
 int comma_terminates;
 
@@ -123,7 +123,7 @@ static int prefixify_subexp (struct expression *, struct expression *, int,
 static struct expression *parse_exp_in_context (const char **, CORE_ADDR,
 						const struct block *, int, 
 						int, int *);
-static struct expression *parse_exp_in_context_1 (char **, CORE_ADDR,
+static struct expression *parse_exp_in_context_1 (const char **, CORE_ADDR,
 						  const struct block *, int,
 						  int, int *);
 
@@ -733,8 +733,8 @@ handle_register:
 }
 
 
-char *
-find_template_name_end (char *p)
+const char *
+find_template_name_end (const char *p)
 {
   int depth = 1;
   int just_seen_right = 0;
@@ -1142,16 +1142,8 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
 		      const struct block *block,
 		      int comma, int void_context_p, int *out_subexp)
 {
-  struct expression *expr;
-  char *const_hack = *stringptr ? xstrdup (*stringptr) : NULL;
-  char *orig = const_hack;
-  struct cleanup *back_to = make_cleanup (xfree, const_hack);
-
-  expr = parse_exp_in_context_1 (&const_hack, pc, block, comma,
+  return parse_exp_in_context_1 (stringptr, pc, block, comma,
 				 void_context_p, out_subexp);
-  (*stringptr) += const_hack - orig;
-  do_cleanups (back_to);
-  return expr;
 }
 
 /* As for parse_exp_1, except that if VOID_CONTEXT_P, then
@@ -1162,7 +1154,7 @@ parse_exp_in_context (const char **stringptr, CORE_ADDR pc,
    is left untouched.  */
 
 static struct expression *
-parse_exp_in_context_1 (char **stringptr, CORE_ADDR pc,
+parse_exp_in_context_1 (const char **stringptr, CORE_ADDR pc,
 			const struct block *block,
 			int comma, int void_context_p, int *out_subexp)
 {

@@ -1412,7 +1412,7 @@ host_char_to_target (struct gdbarch *gdbarch, int c, int *target_c)
    after the zeros.  A value of 0 does not mean end of string.  */
 
 int
-parse_escape (struct gdbarch *gdbarch, char **string_ptr)
+parse_escape (struct gdbarch *gdbarch, const char **string_ptr)
 {
   int target_char = -2;	/* Initialize to avoid GCC warnings.  */
   int c = *(*string_ptr)++;

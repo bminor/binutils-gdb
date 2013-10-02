@@ -662,7 +662,7 @@ type
 static int
 parse_number (int olen)
 {
-  char *p = lexptr;
+  const char *p = lexptr;
   LONGEST n = 0;
   LONGEST prevn = 0;
   int c,i,ischar=0;
@@ -814,7 +814,7 @@ yylex (void)
   int c;
   int namelen;
   int i;
-  char *tokstart;
+  const char *tokstart;
   char quote;
 
  retry:
@@ -927,7 +927,7 @@ yylex (void)
     {
       /* It's a number.  */
       int got_dot = 0, got_e = 0;
-      char *p = tokstart;
+      const char *p = tokstart;
       int toktype;
 
       for (++p ;; ++p)

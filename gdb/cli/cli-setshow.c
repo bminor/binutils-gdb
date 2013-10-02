@@ -160,7 +160,7 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
     case var_string:
       {
 	char *new;
-	char *p;
+	const char *p;
 	char *q;
 	int ch;
 

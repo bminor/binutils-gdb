@@ -1,3 +1,122 @@
+2013-10-01  Keith Seitz  <keiths@redhat.com>
+
+	* linespec.c (struct ls_parser): Make 'saved_arg' const.
+	(parse_linespec): Make 'argptr' const.
+	Remove temporary cast of 'argptr' to const char **.
+	(decode_line_full): Pass const pointer to parse_linespec.
+	(decode_line_1): Likewise.
+	(decode_objc): Make local variable 'new_argptr' const.
+	(find_function_symbols): Remove temporary cast to char *
+	to find_imps.
+	* objc-lang.c (find_imps): Make argument 'method' const.
+	Return const.
+	* objc-lang.h (find_imps): Likewise.
+
+2013-10-01  Keith Seitz  <keiths@redhat.com>
+
+	* completer.c (skip_quoted_chars): Make all arguments const.
+	Return const.
+	(skip_quoted): Likewise.
+	* completer.h (skip_quoted_chars): Likewise.
+	(skip_quoted): Likewise.
+	* defs.h (skip_quoted): Remove duplicate declaration.
+	* jv-exp.y: Include completer.h.
+	(yylex): Remove unneccessary cast to char * fro skip_quoted.
+	* p-exp.y: Include completer.h.
+
+2013-10-01  Keith Seitz  <keiths@redhat.com>
+
+	* c-exp.y (parse_number): Make first argument const.
+	Make a copy of the input to manipulate.
+	(c_parse_escape): Make first argument const.
+	Make local variable 'tokptr' const.
+	(parse_string_or_char): Make first two arguments const.
+	(macro_original_text): Make const.
+	(lex_one_token): Make local variable 'tokstart' const.
+	Likewise for local variables named 'p'.
+	Cast away const for struct stoken (temporary).
+	* c-lang.h (c_parse_escpae): Make first argument const.
+	* cli/cli-cmds.c (echo_command): Make local variable 'p'
+	const.
+	* cli/cli-setshow.c (do_set_command): Likewise for 'p' in
+	var_string case.
+	* f-exp.y (parse_number): Make first argument const.
+	(match_string_literal): Make local variable 'tokstart'
+	const.
+	(yylex): Make local variable 'p' const.
+	Cast away const for struct stoken (temporary).
+	* go-exp.y (parse_number): Make first argument const.
+	(parse_string_or_char): Likewise.
+	Make local variable 'tokstart' const.
+	(lex_one_token): Likewise for numerous locals called 'p'.
+	Cast away const for struct stoken (temporary).
+	* jv-exp.y (parse_number): Make first argument const.
+	Make local variables 'tokstart' and 'tokptr' const.
+	Cast away const for call to skip_quoted (temporary).
+	(yylex): Make local variable 'p' const.
+	Cast away const for struct stoken (temporary).
+	* m2-exp.y (parse_number): Make local variable 'p' const.
+	(yylex): Likewise for 'tokstart'.
+	Cast away const for struct stoken (temporary).
+	Make local variable 'p' const.
+	* macroexp.c (get_character_constant): Pass a const string
+	to c_parse_escape.
+	(get_string_literal): Likewise.
+	(macro_expand_next): Make first argument const.
+	Cast away const for init_shared_buffer.
+	* macroexp.h (macro_expand_next): Make first argument const.
+	* p-exp.y (yylex): Make a local copy of 'lexptr'.
+	Pass a const string to c_parse_escape.
+	Make local variables 'p' and 'namestart' const.
+	* parse.c (lexptr): Make const.
+	(prev_lexptr): Likewise.
+	(find_template_name_end): Return const.
+	Make argument const, too.
+	(parse_exp_in_context): Make first argument const.
+	Remove the entire const_hack.
+	(parse_exp_in_context_1): Make first argument const.
+	* parser-defs.h (find_template_name_end): Return const.
+	Make argument const, too.
+	(lexptr): Make const.
+	(prev_lexptr): Likewise.
+	* utils.c (parse_escape): Make second argument const.
+	* utils.h (parse_escape): Likewise.
+
+2013-10-01  Keith Seitz  <keiths@redhat.com>
+
+	* ada-exp.y (write_object_renaming): Update: struct stoken.ptr
+	is now const.
+	(block_lookup): Make 'raw_name' and 'name' const.
+	* ada-lex.l (processString): Update for struct stoken.ptr.
+	* c-exp.y (qualified_name : TYPENAME COLONCOLON '~' name): Likewise.
+	(operator_stoken): Likewise.
+	(lex_one_token): Remove temporary cast to char * for
+	'yylval.sval.ptr'.
+	* f-exp.y (yylex): Likewise.
+	* gdb-types.c (lookup_struct_elt_type): Make argument 'name' const.
+	* gdbtypes.h (lookup_struct_elt_type): Likewisee.
+	* go-exp.y (lex_one_token): Remove temporary cast to char * for
+	'yylval.sval.ptr'.
+	* jv-exp.y (QualifiedName): Update for struct stoken.ptr.
+	(yylex): Remove temporary cast to char * for 'yylval.sval.ptr'.
+	* linespec.c (struct ls_parser): Make 'stream' const.
+	(find_parameter_list_end): Make argument 'input' and local
+	variable 'p' const.
+	(linespec_lexer_lex_string): Make local variables 'start' and
+	'p' const.
+	Use skip_spaces_const instead of skip_spaces.
+	(linespec_lexer_peek_token): Make local variable 'saved_stream'
+	const.
+	(parse_linespec): Temporarily cast 'argptr' to const for
+	'parser->lexer.stream'.
+	* m2-exp.y (yylex): Remove temporary cast to char * for
+	'yylval.sval.ptr'.
+	* objc-lang.c (add_msglist): Make local variable 'p' const.
+	* p-exp.y (exp : exp '['): Update for struct stoken.ptr.
+	(exp : STRING): Make 'sp' const.
+	(parse_number): Make argument 'p' const.
+	* parser-defs.h (struct stoken): Make 'ptr' const.
+
 2013-10-01  Doug Evans  <dje@google.com>
 
 	* cli/cli-decode.c: Remove unnecessary inclusion of tui/tui.h.

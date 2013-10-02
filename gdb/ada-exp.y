@@ -136,7 +136,7 @@ static void write_name_assoc (struct stoken);
 
 static void write_exp_op_with_string (enum exp_opcode, struct stoken);
 
-static struct block *block_lookup (struct block *, char *);
+static struct block *block_lookup (struct block *, const char *);
 
 static LONGEST convert_char_literal (struct type *, LONGEST);
 
@@ -952,6 +952,8 @@ write_object_renaming (const struct block *orig_left_context,
 	{
 	  struct stoken field_name;
 	  const char *end;
+	  char *buf;
+
 	  renaming_expr += 1;
 
 	  if (slice_state != SIMPLE_INDEX)
@@ -960,9 +962,10 @@ write_object_renaming (const struct block *orig_left_context,
 	  if (end == NULL)
 	    end = renaming_expr + strlen (renaming_expr);
 	  field_name.length = end - renaming_expr;
-	  field_name.ptr = malloc (end - renaming_expr + 1);
-	  strncpy (field_name.ptr, renaming_expr, end - renaming_expr);
-	  field_name.ptr[end - renaming_expr] = '\000';
+	  buf = malloc (end - renaming_expr + 1);
+	  field_name.ptr = buf;
+	  strncpy (buf, renaming_expr, end - renaming_expr);
+	  buf[end - renaming_expr] = '\000';
 	  renaming_expr = end;
 	  write_exp_op_with_string (STRUCTOP_STRUCT, field_name);
 	  break;
@@ -980,9 +983,9 @@ write_object_renaming (const struct block *orig_left_context,
 }
 
 static struct block*
-block_lookup (struct block *context, char *raw_name)
+block_lookup (struct block *context, const char *raw_name)
 {
-  char *name;
+  const char *name;
   struct ada_symbol_info *syms;
   int nsyms;
   struct symtab *symtab;

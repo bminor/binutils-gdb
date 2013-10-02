@@ -164,7 +164,7 @@ void yyerror (char *);
 
 %{
 /* YYSTYPE gets defined by %union */
-static int parse_number (char *, int, int, YYSTYPE *);
+static int parse_number (const char *, int, int, YYSTYPE *);
 static struct stoken operator_stoken (const char *);
 static void check_parameter_typelist (VEC (type_ptr) *);
 static void write_destructor_name (struct stoken);
@@ -970,18 +970,20 @@ qualified_name:	TYPENAME COLONCOLON name
 			{
 			  struct type *type = $1.type;
 			  struct stoken tmp_token;
+			  char *buf;
+
 			  CHECK_TYPEDEF (type);
 			  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
 			      && TYPE_CODE (type) != TYPE_CODE_UNION
 			      && TYPE_CODE (type) != TYPE_CODE_NAMESPACE)
 			    error (_("`%s' is not defined as an aggregate type."),
 				   TYPE_SAFE_NAME (type));
-
-			  tmp_token.ptr = (char*) alloca ($4.length + 2);
+			  buf = alloca ($4.length + 2);
+			  tmp_token.ptr = buf;
 			  tmp_token.length = $4.length + 1;
-			  tmp_token.ptr[0] = '~';
-			  memcpy (tmp_token.ptr+1, $4.ptr, $4.length);
-			  tmp_token.ptr[tmp_token.length] = 0;
+			  buf[0] = '~';
+			  memcpy (buf+1, $4.ptr, $4.length);
+			  buf[tmp_token.length] = 0;
 
 			  /* Check for valid destructor name.  */
 			  destructor_name_p (tmp_token.ptr, $1.type);
@@ -1651,13 +1653,16 @@ operator_stoken (const char *op)
 {
   static const char *operator_string = "operator";
   struct stoken st = { NULL, 0 };
+  char *buf;
+
   st.length = strlen (operator_string) + strlen (op);
-  st.ptr = malloc (st.length + 1);
-  strcpy (st.ptr, operator_string);
-  strcat (st.ptr, op);
+  buf = malloc (st.length + 1);
+  strcpy (buf, operator_string);
+  strcat (buf, op);
+  st.ptr = buf;
 
   /* The toplevel (c_parse) will free the memory allocated here.  */
-  make_cleanup (free, st.ptr);
+  make_cleanup (free, buf);
   return st;
 };
 
@@ -1699,7 +1704,7 @@ check_parameter_typelist (VEC (type_ptr) *params)
 /*** Needs some error checking for the float case ***/
 
 static int
-parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
+parse_number (const char *buf, int len, int parsed_float, YYSTYPE *putithere)
 {
   /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
      here, and we do kind of silly things like cast to unsigned.  */
@@ -1721,6 +1726,10 @@ parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
   ULONGEST high_bit;
   struct type *signed_type;
   struct type *unsigned_type;
+  char *p;
+
+  p = alloca (len);
+  memcpy (p, buf, len);
 
   if (parsed_float)
     {
@@ -1941,9 +1950,9 @@ static int tempbuf_init;
    character was emitted, 0 otherwise.  */
 
 int
-c_parse_escape (char **ptr, struct obstack *output)
+c_parse_escape (const char **ptr, struct obstack *output)
 {
-  char *tokptr = *ptr;
+  const char *tokptr = *ptr;
   int result = 1;
 
   /* Some escape sequences undergo character set conversion.  Those we
@@ -2102,8 +2111,8 @@ c_parse_escape (char **ptr, struct obstack *output)
    CHAR, depending on what was parsed.  *HOST_CHARS is set to the
    number of host characters in the literal.  */
 static int
-parse_string_or_char (char *tokptr, char **outptr, struct typed_stoken *value,
-		      int *host_chars)
+parse_string_or_char (const char *tokptr, const char **outptr,
+		      struct typed_stoken *value, int *host_chars)
 {
   int quote;
   enum c_string_type type;
@@ -2321,7 +2330,7 @@ static const struct token ident_tokens[] =
    we evaluate ADDRESS in the scope of the current frame, but we
    evaluate CONDITION in the scope of the breakpoint's location.  So
    it's simply wrong to try to macro-expand the whole thing at once.  */
-static char *macro_original_text;
+static const char *macro_original_text;
 
 /* We save all intermediate macro expansions on this obstack for the
    duration of a single parse.  The expansion text may sometimes have
@@ -2411,7 +2420,7 @@ lex_one_token (void)
   int c;
   int namelen;
   unsigned int i;
-  char *tokstart;
+  const char *tokstart;
   int saw_structop = last_was_structop;
   char *copy;
 
@@ -2538,7 +2547,7 @@ lex_one_token (void)
       {
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype;
-	char *p = tokstart;
+	const char *p = tokstart;
 	int hex = input_radix > 10;
 
 	if (c == '0' && (p[1] == 'x' || p[1] == 'X'))
@@ -2590,7 +2599,7 @@ lex_one_token (void)
 
     case '@':
       {
-	char *p = &tokstart[1];
+	const char *p = &tokstart[1];
 	size_t len = strlen ("entry");
 
 	if (parse_language->la_language == language_objc)
@@ -2692,7 +2701,8 @@ lex_one_token (void)
 		 characters; for comparison expressions, e.g. "a < b > c",
 		 there must be spaces before the '<', etc. */
                
-	      char * p = find_template_name_end (tokstart + namelen);
+	      const char *p = find_template_name_end (tokstart + namelen);
+
 	      if (p)
 		namelen = p - tokstart;
 	    }
@@ -2723,7 +2733,8 @@ lex_one_token (void)
       && (tokstart[namelen] == ' ' || tokstart[namelen] == '\t')
       && ! scanning_macro_expansion ())
     {
-      char *p = tokstart + namelen + 1;
+      const char *p = tokstart + namelen + 1;
+
       while (*p == ' ' || *p == '\t')
 	p++;
       if (*p >= '0' && *p <= '9')

@@ -311,8 +311,6 @@ extern void print_transfer_performance (struct ui_file *stream,
 
 typedef void initialize_file_ftype (void);
 
-extern char *skip_quoted (char *);
-
 extern char *gdb_readline (char *);
 
 extern char *gdb_readline_wrapper (char *);

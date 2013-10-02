@@ -55,6 +55,7 @@
 #include "symfile.h" /* Required by objfiles.h.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols.  */
 #include "block.h"
+#include "completer.h"
 
 #define parse_type builtin_type (parse_gdbarch)
 
@@ -158,7 +159,7 @@ static char * uptok (char *, int);
 
 %{
 /* YYSTYPE gets defined by %union */
-static int parse_number (char *, int, int, YYSTYPE *);
+static int parse_number (const char *, int, int, YYSTYPE *);
 
 static struct type *current_type;
 static struct internalvar *intvar;
@@ -352,9 +353,12 @@ exp	:	exp '['
 			  if (arrayfieldindex)
 			    {
 			      struct stoken stringsval;
-			      stringsval.ptr = alloca (strlen (arrayname) + 1);
+			      char *buf;
+
+			      buf = alloca (strlen (arrayname) + 1);
+			      stringsval.ptr = buf;
 			      stringsval.length = strlen (arrayname);
-			      strcpy (stringsval.ptr, arrayname);
+			      strcpy (buf, arrayname);
 			      current_type = TYPE_FIELD_TYPE (current_type,
 				arrayfieldindex - 1);
 			      write_exp_elt_opcode (STRUCTOP_STRUCT);
@@ -591,7 +595,8 @@ exp	:	STRING
 			     the array upper bound is the string length.
 			     There is no such thing in C as a completely empty
 			     string.  */
-			  char *sp = $1.ptr; int count = $1.length;
+			  const char *sp = $1.ptr; int count = $1.length;
+
 			  while (count-- > 0)
 			    {
 			      write_exp_elt_opcode (OP_LONG);
@@ -854,7 +859,7 @@ name_not_typename :	NAME
 /*** Needs some error checking for the float case ***/
 
 static int
-parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
+parse_number (const char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
   /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
      here, and we do kind of silly things like cast to unsigned.  */
@@ -1141,8 +1146,10 @@ yylex (void)
 
   prev_lexptr = lexptr;
 
-  tokstart = lexptr;
   explen = strlen (lexptr);
+  tokstart = alloca (explen + 1);
+  memcpy (tokstart, lexptr, explen + 1);
+
   /* See if it is a special token of length 3.  */
   if (explen > 2)
     for (i = 0; i < sizeof (tokentab3) / sizeof (tokentab3[0]); i++)
@@ -1361,13 +1368,18 @@ yylex (void)
 	    /* Do nothing, loop will terminate.  */
 	    break;
 	  case '\\':
-	    tokptr++;
-	    c = parse_escape (parse_gdbarch, &tokptr);
-	    if (c == -1)
-	      {
-		continue;
-	      }
-	    tempbuf[tempbufindex++] = c;
+	    {
+	      const char *s, *o;
+
+	      o = s = ++tokptr;
+	      c = parse_escape (parse_gdbarch, &s);
+	      *tokptr += s - o;
+	      if (c == -1)
+		{
+		  continue;
+		}
+	      tempbuf[tempbufindex++] = c;
+	    }
 	    break;
 	  default:
 	    tempbuf[tempbufindex++] = *tokptr++;
@@ -1623,8 +1635,8 @@ yylex (void)
 	     distinction) named x, then this code incorrectly thinks we
 	     are dealing with nested types rather than a member function.  */
 
-	  char *p;
-	  char *namestart;
+	  const char *p;
+	  const char *namestart;
 	  struct symbol *best_sym;
 
 	  /* Look ahead to detect nested types.  This probably should be

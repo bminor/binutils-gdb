@@ -61,7 +61,7 @@ extern int c_parse (void);
 
 extern void c_error (char *);
 
-extern int c_parse_escape (char **, struct obstack *);
+extern int c_parse_escape (const char **, struct obstack *);
 
 /* Defined in c-typeprint.c */
 extern void c_print_type (struct type *, const char *,

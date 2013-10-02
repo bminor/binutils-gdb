@@ -64,7 +64,7 @@ struct timeval get_prompt_for_continue_wait_time (void);
 
 extern int parse_pid_to_attach (char *args);
 
-extern int parse_escape (struct gdbarch *, char **);
+extern int parse_escape (struct gdbarch *, const char **);
 
 char **gdb_buildargv (const char *);
 

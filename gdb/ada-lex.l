@@ -497,7 +497,8 @@ processString (const char *text, int len)
   const char *lim = text + len;
   struct stoken result;
 
-  q = result.ptr = obstack_alloc (&temp_parse_space, len);
+  q = obstack_alloc (&temp_parse_space, len);
+  result.ptr = q;
   p = text;
   while (p < lim)
     {

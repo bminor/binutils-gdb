@@ -36,7 +36,8 @@ extern char *objc_demangle (const char *mangled, int options);
 
 extern int find_objc_msgcall (CORE_ADDR pc, CORE_ADDR *new_pc);
 
-extern char *find_imps (char *method, VEC (const_char_ptr) **symbol_names);
+extern const char *
+  find_imps (const char *method, VEC (const_char_ptr) **symbol_names);
 
 extern struct value *value_nsstring (struct gdbarch *gdbarch,
 				     char *ptr, int len);

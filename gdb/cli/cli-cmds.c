@@ -666,7 +666,7 @@ source_command (char *args, int from_tty)
 static void
 echo_command (char *text, int from_tty)
 {
-  char *p = text;
+  const char *p = text;
   int c;
 
   if (text)

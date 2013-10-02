@@ -278,10 +278,10 @@ struct ls_parser
   struct
   {
     /* Save head of input stream.  */
-    char *saved_arg;
+    const char *saved_arg;
 
     /* Head of the input stream.  */
-    char **stream;
+    const char **stream;
 #define PARSER_STREAM(P) (*(P)->lexer.stream)
 
     /* The current token.  */
@@ -320,7 +320,7 @@ static CORE_ADDR linespec_expression_to_pc (const char **exp_ptr);
 
 static struct symtabs_and_lines decode_objc (struct linespec_state *self,
 					     linespec_p ls,
-					     char **argptr);
+					     const char **argptr);
 
 static VEC (symtab_ptr) *symtabs_from_filename (const char *);
 
@@ -515,12 +515,12 @@ is_closing_quote_enclosed (const char *p)
    This helper function assists with lexing string segments
    which might contain valid (non-terminating) commas.  */
 
-static char *
-find_parameter_list_end (char *input)
+static const char *
+find_parameter_list_end (const char *input)
 {
   char end_char, start_char;
   int depth;
-  char *p;
+  const char *p;
 
   start_char = *input;
   if (start_char == '(')
@@ -557,7 +557,7 @@ static linespec_token
 linespec_lexer_lex_string (linespec_parser *parser)
 {
   linespec_token token;
-  char *start = PARSER_STREAM (parser);
+  const char *start = PARSER_STREAM (parser);
 
   token.type = LSTOKEN_STRING;
 
@@ -607,7 +607,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
     }
   else
     {
-      char *p;
+      const char *p;
 
       /* Otherwise, only identifier characters are permitted.
 	 Spaces are the exception.  In general, we keep spaces,
@@ -621,7 +621,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	{
 	  if (isspace (*PARSER_STREAM (parser)))
 	    {
-	      p = skip_spaces (PARSER_STREAM (parser));
+	      p = skip_spaces_const (PARSER_STREAM (parser));
 	      /* When we get here we know we've found something followed by
 		 a space (we skip over parens and templates below).
 		 So if we find a keyword now, we know it is a keyword and not,
@@ -681,7 +681,7 @@ linespec_lexer_lex_string (linespec_parser *parser)
 	  else if (*PARSER_STREAM (parser) == '<'
 		   || *PARSER_STREAM (parser) == '(')
 	    {
-	      char *p;
+	      const char *p;
 
 	      p = find_parameter_list_end (PARSER_STREAM (parser));
 	      if (p != NULL)
@@ -733,7 +733,7 @@ linespec_lexer_lex_one (linespec_parser *parser)
   if (parser->lexer.current.type == LSTOKEN_CONSUMED)
     {
       /* Skip any whitespace.  */
-      PARSER_STREAM (parser) = skip_spaces (PARSER_STREAM (parser));
+      PARSER_STREAM (parser) = skip_spaces_const (PARSER_STREAM (parser));
 
       /* Check for a keyword, they end the linespec.  */
       keyword = NULL;
@@ -819,7 +819,7 @@ static linespec_token
 linespec_lexer_peek_token (linespec_parser *parser)
 {
   linespec_token next;
-  char *saved_stream = PARSER_STREAM (parser);
+  const char *saved_stream = PARSER_STREAM (parser);
   linespec_token saved_token = parser->lexer.current;
 
   next = linespec_lexer_consume_token (parser);
@@ -2144,7 +2144,7 @@ convert_linespec_to_sals (struct linespec_state *state, linespec_p ls)
 /* Parse the linespec in ARGPTR.  */
 
 static struct symtabs_and_lines
-parse_linespec (linespec_parser *parser, char **argptr)
+parse_linespec (linespec_parser *parser, const char **argptr)
 {
   linespec_token token;
   struct symtabs_and_lines values;
@@ -2426,6 +2426,7 @@ decode_line_full (char **argptr, int flags,
   VEC (const_char_ptr) *filters = NULL;
   linespec_parser parser;
   struct linespec_state *state;
+  const char *copy, *orig;
 
   gdb_assert (canonical != NULL);
   /* The filter only makes sense for 'all'.  */
@@ -2441,7 +2442,9 @@ decode_line_full (char **argptr, int flags,
   cleanups = make_cleanup (linespec_parser_delete, &parser);
   save_current_program_space ();
 
-  result = parse_linespec (&parser, argptr);
+  orig = copy = *argptr;
+  result = parse_linespec (&parser, &copy);
+  *argptr += copy - orig;
   state = PARSER_STATE (&parser);
 
   gdb_assert (result.nelts == 1 || canonical->pre_expanded);
@@ -2496,13 +2499,16 @@ decode_line_1 (char **argptr, int flags,
   struct symtabs_and_lines result;
   linespec_parser parser;
   struct cleanup *cleanups;
+  const char *copy, *orig;
 
   linespec_parser_new (&parser, flags, current_language, default_symtab,
 		       default_line, NULL);
   cleanups = make_cleanup (linespec_parser_delete, &parser);
   save_current_program_space ();
 
-  result = parse_linespec (&parser, argptr);
+  orig = copy = *argptr;
+  result = parse_linespec (&parser, &copy);
+  *argptr += copy - orig;
 
   do_cleanups (cleanups);
   return result;
@@ -2602,12 +2608,12 @@ linespec_expression_to_pc (const char **exp_ptr)
    the existing C++ code to let the user choose one.  */
 
 static struct symtabs_and_lines
-decode_objc (struct linespec_state *self, linespec_p ls, char **argptr)
+decode_objc (struct linespec_state *self, linespec_p ls, const char **argptr)
 {
   struct collect_info info;
   VEC (const_char_ptr) *symbol_names = NULL;
   struct symtabs_and_lines values;
-  char *new_argptr;
+  const char *new_argptr;
   struct cleanup *cleanup = make_cleanup (VEC_cleanup (const_char_ptr),
 					  &symbol_names);
 
@@ -3053,7 +3059,7 @@ find_function_symbols (struct linespec_state *state,
   info.file_symtabs = file_symtabs;
 
   /* Try NAME as an Objective-C selector.  */
-  find_imps ((char *) name, &symbol_names);
+  find_imps (name, &symbol_names);
   if (!VEC_empty (const_char_ptr, symbol_names))
     add_all_symbol_names_from_pspace (&info, NULL, symbol_names);
   else
