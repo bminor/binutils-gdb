@@ -3336,7 +3336,7 @@ compare_search_syms (const void *sa, const void *sb)
   struct symbol_search *sym_b = *(struct symbol_search **) sb;
   int c;
 
-  c = strcmp (sym_a->symtab->filename, sym_b->symtab->filename);
+  c = FILENAME_CMP (sym_a->symtab->filename, sym_b->symtab->filename);
   if (c != 0)
     return c;
 
