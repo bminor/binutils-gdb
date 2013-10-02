@@ -1,3 +1,8 @@
+2013-10-02  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Registers): Expand description of saved registers
+	in frames.  Explain <not saved>.
+
 2013-09-25  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Debugging Output): Document set/show debug symfile.

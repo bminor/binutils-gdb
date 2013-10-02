@@ -1,3 +1,33 @@
+2013-10-02  Pedro Alves  <palves@redhat.com>
+
+	* cp-valprint.c (cp_print_value_fields): Adjust calls to
+	val_print_optimized_out.
+	* jv-valprint.c (java_print_value_fields): Likewise.
+	* p-valprint.c (pascal_object_print_value_fields): Likewise.
+	* dwarf2loc.c (dwarf2_evaluate_loc_desc_full)
+	<DWARF_VALUE_REGISTER>: If the register was not saved, return a
+	new optimized out value.
+	* findvar.c (address_from_register): Likewise.
+	* frame.c (put_frame_register): Tweak error string to say the
+	register was not saved, rather than optimized out.
+	* infcmd.c (default_print_one_register_info): Adjust call to
+	val_print_optimized_out.  Use value_of_register instead of
+	get_frame_register_value.
+	* mi/mi-main.c (output_register): Use value_of_register instead of
+	get_frame_register_value.
+	* valprint.c (valprint_check_validity): Likewise.
+	(val_print_optimized_out): New value parameter.  If the value is
+	lval_register, print <not saved> instead.
+	(value_check_printable, val_print_scalar_formatted): Adjust calls
+	to val_print_optimized_out.
+	* valprint.h (val_print_optimized_out): New value parameter.
+	* value.c (struct value) <optimized_out>: Extend comment.
+	(error_value_optimized_out): New function.
+	(require_not_optimized_out): Use it.  Use a different string for
+	lval_register values.
+	* value.h (error_value_optimized_out): New declaration.
+	* NEWS: Mention <not saved>.
+
 2013-10-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* symtab.c (compare_search_syms): Use FILENAME_CMP instead of

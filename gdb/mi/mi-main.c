@@ -1161,7 +1161,7 @@ output_register (struct frame_info *frame, int regnum, int format,
 {
   struct gdbarch *gdbarch = get_frame_arch (frame);
   struct ui_out *uiout = current_uiout;
-  struct value *val = get_frame_register_value (frame, regnum);
+  struct value *val = value_of_register (regnum, frame);
   struct cleanup *tuple_cleanup;
   struct value_print_options opts;
   struct ui_file *stb;

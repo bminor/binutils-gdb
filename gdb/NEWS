@@ -15,6 +15,20 @@
 
 * The "catch syscall" command now works on arm*-linux* targets.
 
+* GDB now consistently shows "<not saved>" when printing values of
+  registers the debug info indicates have not been saved in the frame
+  and there's nowhere to retrieve them from
+  (callee-saved/call-clobbered registers):
+
+    (gdb) p $rax
+    $1 = <not saved>
+
+    (gdb) info registers rax
+    rax            <not saved>
+
+  Before, the former would print "<optimized out>", and the latter
+  "*value not available*".
+
 * Python scripting
 
   ** Frame filters and frame decorators have been added.

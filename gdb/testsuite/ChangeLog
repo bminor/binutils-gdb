@@ -1,5 +1,13 @@
 2013-10-02  Pedro Alves  <palves@redhat.com>
 
+	* gdb.dwarf2/dw2-reg-undefined.exp <pattern_rax_rbx_rcx_print,
+	pattern_rax_rbx_rcx_info>: Set to "<not saved>".
+	* gdb.mi/mi-reg-undefined.exp (opt_out_pattern): Delete.
+	(not_saved_pattern): New.
+	Replace use of the former with the latter.
+
+2013-10-02  Pedro Alves  <palves@redhat.com>
+
 	* README (Board Settings): Document "exit_is_reliable".
 	* lib/gdb.exp (gdb_continue_to_end): Check whether the board says
 	running to exit reliably reports program exits.

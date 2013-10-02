@@ -314,7 +314,7 @@ valprint_check_validity (struct ui_file *stream,
       if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
 			     TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
-	  val_print_optimized_out (stream);
+	  val_print_optimized_out (val, stream);
 	  return 0;
 	}
 
@@ -336,9 +336,12 @@ valprint_check_validity (struct ui_file *stream,
 }
 
 void
-val_print_optimized_out (struct ui_file *stream)
+val_print_optimized_out (const struct value *val, struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("<optimized out>"));
+  if (val != NULL && value_lval_const (val) == lval_register)
+    fprintf_filtered (stream, _("<not saved>"));
+  else
+    fprintf_filtered (stream, _("<optimized out>"));
 }
 
 void
@@ -805,7 +808,7 @@ value_check_printable (struct value *val, struct ui_file *stream,
       if (options->summary && !val_print_scalar_type_p (value_type (val)))
 	fprintf_filtered (stream, "...");
       else
-	val_print_optimized_out (stream);
+	val_print_optimized_out (val, stream);
       return 0;
     }
 
@@ -966,7 +969,7 @@ val_print_scalar_formatted (struct type *type,
      printed, because all bits contribute to its representation.  */
   if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
 			      TARGET_CHAR_BIT * TYPE_LENGTH (type)))
-    val_print_optimized_out (stream);
+    val_print_optimized_out (val, stream);
   else if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
     val_print_unavailable (stream);
   else

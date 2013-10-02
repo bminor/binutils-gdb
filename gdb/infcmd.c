@@ -2035,7 +2035,7 @@ default_print_one_register_info (struct ui_file *file,
     }
   else if (value_optimized_out (val))
     {
-      val_print_optimized_out (file);
+      val_print_optimized_out (val, file);
       fprintf_filtered (file, "\n");
       return;
     }
@@ -2142,7 +2142,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 
       default_print_one_register_info (file,
 				       gdbarch_register_name (gdbarch, i),
-				       get_frame_register_value (frame, i));
+				       value_of_register (i, frame));
     }
 }
 

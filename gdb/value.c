@@ -197,8 +197,13 @@ struct value
      reset, be sure to consider this use as well!  */
   unsigned int lazy : 1;
 
-  /* If nonzero, this is the value of a variable which does not
-     actually exist in the program.  */
+  /* If nonzero, this is the value of a variable that does not
+     actually exist in the program.  If nonzero, and LVAL is
+     lval_register, this is a register ($pc, $sp, etc., never a
+     program variable) that has not been saved in the frame.  All
+     optimized-out values are treated pretty much the same, except
+     registers have a different string representation and related
+     error strings.  */
   unsigned int optimized_out : 1;
 
   /* If value is a variable, is it initialized or not.  */
@@ -902,11 +907,22 @@ value_actual_type (struct value *value, int resolve_simple_types,
   return result;
 }
 
+void
+error_value_optimized_out (void)
+{
+  error (_("value has been optimized out"));
+}
+
 static void
 require_not_optimized_out (const struct value *value)
 {
   if (value->optimized_out)
-    error (_("value has been optimized out"));
+    {
+      if (value->lval == lval_register)
+	error (_("register has not been saved in frame"));
+      else
+	error_value_optimized_out ();
+    }
 }
 
 static void

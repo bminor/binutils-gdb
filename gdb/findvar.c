@@ -757,6 +757,15 @@ address_from_register (struct type *type, int regnum, struct frame_info *frame)
   value = value_from_register (type, regnum, frame);
   gdb_assert (value);
 
+  if (value_optimized_out (value))
+    {
+      /* This function is used while computing a location expression.
+	 Complain about the value being optimized out, rather than
+	 letting value_as_address complain about some random register
+	 the expression depends on not being saved.  */
+      error_value_optimized_out ();
+    }
+
   result = value_as_address (value);
   release_value (value);
   value_free (value);

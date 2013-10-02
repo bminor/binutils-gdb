@@ -45,8 +45,8 @@ for {set f 0} {$f < 3} {incr f} {
 	set pattern_r8_r9_print "$hex"
 	set pattern_r8_r9_info "$hex\\s+$decimal"
     } else {
-	set pattern_rax_rbx_rcx_print "<optimized out>"
-	set pattern_rax_rbx_rcx_info "<optimized out>"
+	set pattern_rax_rbx_rcx_print "<not saved>"
+	set pattern_rax_rbx_rcx_info "<not saved>"
 	set pattern_r8_r9_print "$hex"
 	set pattern_r8_r9_info "$hex\\s+$decimal"
     }

@@ -1143,7 +1143,7 @@ put_frame_register (struct frame_info *frame, int regnum,
   frame_register (frame, regnum, &optim, &unavail,
 		  &lval, &addr, &realnum, NULL);
   if (optim)
-    error (_("Attempt to assign to a value that was optimized out."));
+    error (_("Attempt to assign to a register that was not saved."));
   switch (lval)
     {
     case lval_memory:

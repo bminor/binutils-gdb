@@ -298,7 +298,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 					  TYPE_FIELD_BITPOS (type, i),
 					  TYPE_FIELD_BITSIZE (type, i)))
 		{
-		  val_print_optimized_out (stream);
+		  val_print_optimized_out (val, stream);
 		}
 	      else
 		{
@@ -334,7 +334,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 				      _("<error reading variable: %s>"),
 				      ex.message);
 		  else if (v == NULL)
-		    val_print_optimized_out (stream);
+		    val_print_optimized_out (NULL, stream);
 		  else
 		    cp_print_static_field (TYPE_FIELD_TYPE (type, i),
 					   v, stream, recurse + 1,

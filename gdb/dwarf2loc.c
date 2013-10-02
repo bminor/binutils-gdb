@@ -2290,11 +2290,21 @@ dwarf2_evaluate_loc_desc_full (struct type *type, struct frame_info *frame,
 	    if (byte_offset != 0)
 	      error (_("cannot use offset on synthetic pointer to register"));
 	    do_cleanups (value_chain);
-	    if (gdb_regnum != -1)
-	      retval = value_from_register (type, gdb_regnum, frame);
-	    else
+	   if (gdb_regnum == -1)
 	      error (_("Unable to access DWARF register number %d"),
 		     dwarf_regnum);
+	   retval = value_from_register (type, gdb_regnum, frame);
+	   if (value_optimized_out (retval))
+	     {
+	       /* This means the register has undefined value / was
+		  not saved.  As we're computing the location of some
+		  variable etc. in the program, not a value for
+		  inspecting a register ($pc, $sp, etc.), return a
+		  generic optimized out value instead, so that we show
+		  <optimized out> instead of <not saved>.  */
+	       do_cleanups (value_chain);
+	       retval = allocate_optimized_out_value (type);
+	     }
 	  }
 	  break;
 

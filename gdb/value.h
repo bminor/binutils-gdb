@@ -273,6 +273,11 @@ extern void set_value_lazy (struct value *value, int val);
 extern int value_stack (struct value *);
 extern void set_value_stack (struct value *value, int val);
 
+/* Throw an error complaining that the value has been optimized
+   out.  */
+
+extern void error_value_optimized_out (void);
+
 /* value_contents() and value_contents_raw() both return the address
    of the gdb buffer used to hold a copy of the contents of the lval.
    value_contents() is used when the contents of the buffer are needed
