@@ -3347,19 +3347,6 @@ compare_search_syms (const void *sa, const void *sb)
 		 SYMBOL_PRINT_NAME (sym_b->symbol));
 }
 
-/* Helper function for sort_search_symbols_remove_dups.
-   Return TRUE if symbols A, B are equal.  */
-
-static int
-search_symbols_equal (const struct symbol_search *a,
-		      const struct symbol_search *b)
-{
-  return (strcmp (a->symtab->filename, b->symtab->filename) == 0
-	  && a->block == b->block
-	  && strcmp (SYMBOL_PRINT_NAME (a->symbol),
-		     SYMBOL_PRINT_NAME (b->symbol)) == 0);
-}
-
 /* Sort the NFOUND symbols in list FOUND and remove duplicates.
    The duplicates are freed, and the new list is returned in
    *NEW_HEAD, *NEW_TAIL.  */
@@ -3393,7 +3380,7 @@ sort_search_symbols_remove_dups (struct symbol_search *found, int nfound,
   /* Collapse out the dups.  */
   for (i = 1, j = 1; i < nfound; ++i)
     {
-      if (! search_symbols_equal (symbols[j - 1], symbols[i]))
+      if (compare_search_syms (&symbols[j - 1], &symbols[i]) != 0)
 	symbols[j++] = symbols[i];
       else
 	xfree (symbols[i]);

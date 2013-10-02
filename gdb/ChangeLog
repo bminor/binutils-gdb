@@ -1,3 +1,10 @@
+2013-10-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* symtab.c (search_symbols_equal): Delete.
+	(sort_search_symbols_remove_dups): Replace call to
+	search_symbols_equal by call to compare_search_syms,
+	adjusting as necessary.
+
 2013-10-02  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/15579
