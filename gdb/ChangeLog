@@ -1,3 +1,9 @@
+2013-10-02  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/lib/gdb/command/frame_filters.py
+	(InfoFrameFilter.list_frame_filters): Retrieve exception manually.
+	(ShowFrameFilterPriority.invoke): Ditto.
+
 2013-10-01  Keith Seitz  <keiths@redhat.com>
 
 	* linespec.c (struct ls_parser): Make 'saved_arg' const.
