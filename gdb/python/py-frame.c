@@ -333,8 +333,12 @@ frame_info_to_frame_object (struct frame_info *frame)
 	}
       frame_obj->gdbarch = get_frame_arch (frame);
     }
-  GDB_PY_HANDLE_EXCEPTION (except);
-
+  if (except.reason < 0)
+    {
+      Py_DECREF (frame_obj);
+      gdbpy_convert_exception (except);
+      return NULL;
+    }
   return (PyObject *) frame_obj;
 }
 

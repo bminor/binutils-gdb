@@ -1,5 +1,10 @@
 2013-10-02  Phil Muldoon  <pmuldoon@redhat.com>
 
+	* python/py-frame.c (frame_info_to_frame_object): Use
+	gdbpy_convert_exception. Clean up Python object on failure.
+
+2013-10-02  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* python/lib/gdb/command/frame_filters.py
 	(InfoFrameFilter.list_frame_filters): Retrieve exception manually.
 	(ShowFrameFilterPriority.invoke): Ditto.
