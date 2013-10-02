@@ -1,3 +1,8 @@
+2013-10-02  Vidya Praveen  <vidyapraveen@arm.com>
+
+	* gdb.trace/entry-values.exp: Modify regular expression to scan for
+	'bl' instruction instead of 'call' for ARM and AArch64 targets.
+
 2013-10-02  Pedro Alves  <palves@redhat.com>
 
 	* gdb.dwarf2/dw2-reg-undefined.exp <pattern_rax_rbx_rcx_print,

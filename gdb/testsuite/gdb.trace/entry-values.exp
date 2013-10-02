@@ -75,10 +75,16 @@ gdb_test_multiple $test $test {
 set bar_length ""
 set bar_call_foo ""
 
+if { [istarget "arm*-*-*"] || [istarget "aarch64*-*-*"] } {
+    set call_insn "bl"
+} else {
+    set call_insn "call"
+}
+
 # Calculate the offset of the last instruction from the beginning.
 set test "disassemble bar"
 gdb_test_multiple $test $test {
-    -re ".*$hex <\\+$decimal>:\[ \t\]+call\[^\r\n\]+\r\n\[ \]+$hex <\\+($decimal)>:" {
+    -re ".*$hex <\\+$decimal>:\[ \t\]+$call_insn\[^\r\n\]+\r\n\[ \]+$hex <\\+($decimal)>:" {
 	set bar_call_foo $expect_out(1,string)
 	exp_continue
     }
