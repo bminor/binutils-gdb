@@ -1,3 +1,11 @@
+2013-10-03  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* python/py-value.c (convert_value_from_python): Move PyInt_Check
+	conversion logic to occur after PyLong_Check.  Comment on order
+	change significance.
+	* python/py-arch.c (archpy_disassemble): Comment on order of
+	conversion for integers and longs.
+
 2013-10-03  Pedro Alves  <palves@redhat.com>
 
 	* common/linux-ptrace.c (linux_check_ptrace_features): Factor out
