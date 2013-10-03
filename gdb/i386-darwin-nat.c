@@ -263,7 +263,7 @@ i386_darwin_store_inferior_registers (struct target_ops *ops,
 /* Support for debug registers, boosted mostly from i386-linux-nat.c.  */
 
 static void
-i386_darwin_dr_set (int regnum, uint32_t value)
+i386_darwin_dr_set (int regnum, CORE_ADDR value)
 {
   int current_pid;
   thread_t current_thread;
@@ -280,14 +280,7 @@ i386_darwin_dr_set (int regnum, uint32_t value)
   dr_count = x86_DEBUG_STATE_COUNT;
   ret = thread_get_state (current_thread, x86_DEBUG_STATE,
                           (thread_state_t) &dr_regs, &dr_count);
-
-  if (ret != KERN_SUCCESS)
-    {
-      printf_unfiltered (_("Error reading debug registers "
-			   "thread 0x%x via thread_get_state\n"),
-			 (int) current_thread);
-      MACH_CHECK_ERROR (ret);
-    }
+  MACH_CHECK_ERROR (ret);
 
   switch (dr_regs.dsh.flavor)
     {
@@ -353,19 +346,13 @@ i386_darwin_dr_set (int regnum, uint32_t value)
 #endif
     }
 
-  ret = thread_set_state (current_thread, x86_DEBUG_STATE,
-                          (thread_state_t) &dr_regs, dr_count);
+  ret = thread_set_state (current_thread, dr_regs.dsh.flavor,
+                          (thread_state_t) &dr_regs.uds, dr_count);
 
-  if (ret != KERN_SUCCESS)
-    {
-      printf_unfiltered (_("Error writing debug registers "
-			   "thread 0x%x via thread_get_state\n"),
-			 (int) current_thread);
-      MACH_CHECK_ERROR (ret);
-    }
+  MACH_CHECK_ERROR (ret);
 }
 
-static uint32_t
+static CORE_ADDR
 i386_darwin_dr_get (int regnum)
 {
   thread_t current_thread;
@@ -382,14 +369,7 @@ i386_darwin_dr_get (int regnum)
   dr_count = x86_DEBUG_STATE_COUNT;
   ret = thread_get_state (current_thread, x86_DEBUG_STATE,
                           (thread_state_t) &dr_regs, &dr_count);
-
-  if (ret != KERN_SUCCESS)
-    {
-      printf_unfiltered (_("Error reading debug registers "
-			   "thread 0x%x via thread_get_state\n"),
-			 (int) current_thread);
-      MACH_CHECK_ERROR (ret);
-    }
+  MACH_CHECK_ERROR (ret);
 
   switch (dr_regs.dsh.flavor)
     {
@@ -605,14 +585,14 @@ darwin_set_sstep (thread_t thread, int enable)
     case x86_THREAD_STATE32:
       {
 	__uint32_t bit = enable ? X86_EFLAGS_T : 0;
-	
+
 	if (enable && i386_darwin_sstep_at_sigreturn (&regs))
 	  return;
 	if ((regs.uts.ts32.__eflags & X86_EFLAGS_T) == bit)
 	  return;
 	regs.uts.ts32.__eflags
 	  = (regs.uts.ts32.__eflags & ~X86_EFLAGS_T) | bit;
-	kret = thread_set_state (thread, x86_THREAD_STATE, 
+	kret = thread_set_state (thread, x86_THREAD_STATE,
 				 (thread_state_t) &regs, count);
 	MACH_CHECK_ERROR (kret);
       }
@@ -628,7 +608,7 @@ darwin_set_sstep (thread_t thread, int enable)
 	  return;
 	regs.uts.ts64.__rflags
 	  = (regs.uts.ts64.__rflags & ~X86_EFLAGS_T) | bit;
-	kret = thread_set_state (thread, x86_THREAD_STATE, 
+	kret = thread_set_state (thread, x86_THREAD_STATE,
 				 (thread_state_t) &regs, count);
 	MACH_CHECK_ERROR (kret);
       }

@@ -1,3 +1,12 @@
+2013-10-03  Tristan Gingold  <gingold@adacore.com>
+
+	* i386-darwin-nat.c (i386_darwin_dr_set): Fix argument type.
+	Remove verbose error reporting.  Use detected state to
+	thread_set_state call.
+	(i386_darwin_dr_get): Fix return type.  Remove verbose error
+	report.
+	Remove trailing spaces.
+
 2013-10-02  Pedro Alves  <palves@redhat.com>
 
 	* cp-valprint.c (cp_print_value_fields): Adjust calls to
