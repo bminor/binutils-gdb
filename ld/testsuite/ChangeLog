@@ -1,3 +1,77 @@
+2013-10-03  Will Newton  <will.newton@linaro.org>
+
+	* ld-ifunc/ifunc.exp: Enable ifunc tests for AArch64.
+	* ld-aarch64/aarch64-elf.exp: Run ifunc tests.
+	* ld-aarch64/ifunc-1-local.d: New file.
+	* ld-aarch64/ifunc-1-local.s: Likewise.
+	* ld-aarch64/ifunc-1.d: Likewise.
+	* ld-aarch64/ifunc-1.s: Likewise.
+	* ld-aarch64/ifunc-10.d: Likewise.
+	* ld-aarch64/ifunc-10.s: Likewise.
+	* ld-aarch64/ifunc-11.d: Likewise.
+	* ld-aarch64/ifunc-11.s: Likewise.
+	* ld-aarch64/ifunc-12.d: Likewise.
+	* ld-aarch64/ifunc-12.s: Likewise.
+	* ld-aarch64/ifunc-13.d: Likewise.
+	* ld-aarch64/ifunc-13a.s: Likewise.
+	* ld-aarch64/ifunc-13b.s: Likewise.
+	* ld-aarch64/ifunc-14a.d: Likewise.
+	* ld-aarch64/ifunc-14a.s: Likewise.
+	* ld-aarch64/ifunc-14b.d: Likewise.
+	* ld-aarch64/ifunc-14b.s: Likewise.
+	* ld-aarch64/ifunc-14c.d: Likewise.
+	* ld-aarch64/ifunc-14c.s: Likewise.
+	* ld-aarch64/ifunc-14d.d: Likewise.
+	* ld-aarch64/ifunc-14e.d: Likewise.
+	* ld-aarch64/ifunc-14f.d: Likewise.
+	* ld-aarch64/ifunc-15.d: Likewise.
+	* ld-aarch64/ifunc-15.s: Likewise.
+	* ld-aarch64/ifunc-16.d: Likewise.
+	* ld-aarch64/ifunc-16.s: Likewise.
+	* ld-aarch64/ifunc-17a.d: Likewise.
+	* ld-aarch64/ifunc-17a.s: Likewise.
+	* ld-aarch64/ifunc-17b.d: Likewise.
+	* ld-aarch64/ifunc-17b.s: Likewise.
+	* ld-aarch64/ifunc-18a.d: Likewise.
+	* ld-aarch64/ifunc-18a.s: Likewise.
+	* ld-aarch64/ifunc-18b.d: Likewise.
+	* ld-aarch64/ifunc-18b.s: Likewise.
+	* ld-aarch64/ifunc-19a.d: Likewise.
+	* ld-aarch64/ifunc-19a.s: Likewise.
+	* ld-aarch64/ifunc-19b.d: Likewise.
+	* ld-aarch64/ifunc-19b.s: Likewise.
+	* ld-aarch64/ifunc-2-local.d: Likewise.
+	* ld-aarch64/ifunc-2-local.s: Likewise.
+	* ld-aarch64/ifunc-2.d: Likewise.
+	* ld-aarch64/ifunc-2.s: Likewise.
+	* ld-aarch64/ifunc-20.d: Likewise.
+	* ld-aarch64/ifunc-20.s: Likewise.
+	* ld-aarch64/ifunc-3.s: Likewise.
+	* ld-aarch64/ifunc-3a.d: Likewise.
+	* ld-aarch64/ifunc-3b.d: Likewise.
+	* ld-aarch64/ifunc-4.d: Likewise.
+	* ld-aarch64/ifunc-4.s: Likewise.
+	* ld-aarch64/ifunc-4a.d: Likewise.
+	* ld-aarch64/ifunc-5-local.s: Likewise.
+	* ld-aarch64/ifunc-5.s: Likewise.
+	* ld-aarch64/ifunc-5a-local.d: Likewise.
+	* ld-aarch64/ifunc-5a.d: Likewise.
+	* ld-aarch64/ifunc-5b-local.d: Likewise.
+	* ld-aarch64/ifunc-5b.d: Likewise.
+	* ld-aarch64/ifunc-5r-local.d: Likewise.
+	* ld-aarch64/ifunc-6.s: Likewise.
+	* ld-aarch64/ifunc-6a.d: Likewise.
+	* ld-aarch64/ifunc-6b.d: Likewise.
+	* ld-aarch64/ifunc-7.s: Likewise.
+	* ld-aarch64/ifunc-7a.d: Likewise.
+	* ld-aarch64/ifunc-7b.d: Likewise.
+	* ld-aarch64/ifunc-7c.d: Likewise.
+	* ld-aarch64/ifunc-8.d: Likewise.
+	* ld-aarch64/ifunc-8a.s: Likewise.
+	* ld-aarch64/ifunc-8b.s: Likewise.
+	* ld-aarch64/ifunc-9.d: Likewise.
+	* ld-aarch64/ifunc-9.s: Likewise.
+
 2013-09-24  Gregory Fong  <gregory.0xf0@gmail.com>
 
 	* ld-mips-elf/eh-frame5.d, ld-mips-elf/jalx-2.dd,

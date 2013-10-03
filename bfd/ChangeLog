@@ -1,3 +1,38 @@
+2013-10-03  Will Newton  <will.newton@linaro.org>
+
+	* configure: Regenerate.
+	* configure.in: Build elf-ifunc.o for AArch64.
+	* elfnn-aarch64.c: Include objalloc.h.
+	(elfNN_aarch64_local_htab_hash): New function.
+	(elfNN_aarch64_local_htab_eq): New function.
+	(elfNN_aarch64_get_local_sym_hash): New function.
+	(elfNN_aarch64_link_hash_table_create): Initialize local STT_GNU_IFUNC
+	symbol hash.
+	(elfNN_aarch64_hash_table_free): Free local STT_GNU_IFUNC symbol hash.
+	(elfNN_aarch64_final_link_relocate): Add sym argument.  Add support
+	for handling STT_GNU_IFUNC symbols.
+	(elfNN_aarch64_gc_sweep_hook): Add support for garbage collecting
+	references to STT_GNU_IFUNC symbols.
+	(elfNN_aarch64_adjust_dynamic_symbol): Add support for handling
+	STT_GNU_IFUNC symbols.
+	(elfNN_aarch64_check_relocs): Add support for handling STT_GNU_IFUNC
+	symbols.  Ensure we don't increase plt.refcount from -1 to 0.
+	(elfNN_aarch64_post_process_headers): Call _bfd_elf_set_osabi.
+	(elfNN_aarch64_is_function_type): Remove function.
+	(elfNN_aarch64_allocate_dynrelocs): Handle STT_GNU_IFUNC symbols.
+	(elfNN_aarch64_allocate_ifunc_dynrelocs): New function.
+	(elfNN_aarch64_allocate_local_dynrelocs): New function.
+	(elfNN_aarch64_allocate_local_ifunc_dynrelocs): New function.
+	(elfNN_aarch64_size_dynamic_sections): Call
+	elfNN_aarch64_allocate_local_dynrelocs.
+	(elfNN_aarch64_create_small_pltn_entry): Add info argument.
+	Add support for creating .iplt entries for STT_GNU_IFUNC symbols.
+	(elfNN_aarch64_finish_dynamic_symbol): Add support for handling
+	STT_GNU_IFUNC symbols and .iplt.
+	(elfNN_aarch64_finish_local_dynamic_symbol): New function.
+	(elfNN_aarch64_finish_dynamic_sections): Call
+	elfNN_aarch64_finish_local_dynamic_symbol.
+
 2013-09-30  Nick Clifton  <nickc@redhat.com>
 
 	* cpu-msp430.c: Use printable names that match the values

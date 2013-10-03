@@ -1,3 +1,8 @@
+2013-10-03  Will Newton  <will.newton@linaro.org>
+
+	* emulparams/aarch64elf.sh: Add IREL_IN_PLT.
+	* emulparams/aarch64elf32.sh: Likewise.
+
 2013-09-30  Nick Clifton  <nickc@redhat.com>
 
 	* emulparams/msp430all.sh: Update ARCH names.
