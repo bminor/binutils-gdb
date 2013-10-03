@@ -1,3 +1,13 @@
+2013-10-03  Pedro Alves  <palves@redhat.com>
+
+	* common/linux-ptrace.c (linux_check_ptrace_features): Factor out
+	the PTRACE_O_TRACESYSGOOD and PTRACE_O_TRACEFORK to separate
+	functions.  Always test for PTRACE_O_TRACESYSGOOD even if
+	PTRACE_O_TRACEFORK is not supported.
+	(linux_test_for_tracesysgood): New function.
+	(linux_test_for_tracefork): New function, factored out from
+	linux_check_ptrace_features, and also don't kill child_pid here.
+
 2013-10-03  Tristan Gingold  <gingold@adacore.com>
 
 	* i386-darwin-nat.c (i386_darwin_dr_set): Fix argument type.
