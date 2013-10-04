@@ -1,3 +1,9 @@
+2013-10-04  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* gas/arm/thumb2_it.s: Add test for narrow tst.
+	* gas/arm/thumb2_it.d: Update expected output.
+	* gas/arm/thumb2_it_auto.d: Likewise.
+
 2013-09-30  Saravanan Ekanathan <saravanan.ekanathan@amd.com>
 
 	* gas/i386/i386.exp: Run bdver4 test cases.

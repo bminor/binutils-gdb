@@ -11267,7 +11267,8 @@ do_t_mvn_tst (void)
 	  || inst.operands[1].shifted
 	  || Rn > 7 || Rm > 7)
 	narrow = FALSE;
-      else if (inst.instruction == T_MNEM_cmn)
+      else if (inst.instruction == T_MNEM_cmn
+	       || inst.instruction == T_MNEM_tst)
 	narrow = TRUE;
       else if (THUMB_SETS_FLAGS (inst.instruction))
 	narrow = !in_it_block ();
