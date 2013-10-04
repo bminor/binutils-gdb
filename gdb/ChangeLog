@@ -1,3 +1,16 @@
+2013-10-04  Pedro Alves  <palves@redhat.com>
+
+	* common/ptid.c (null_ptid, minus_one_ptid, ptid_build)
+	(pid_to_ptid, ptid_get_pid, ptid_get_lwp, ptid_get_tid)
+	(ptid_equal, ptid_is_pid, ptid_lwp_p, ptid_tid_p): Replace
+	describing comments with references to ptid.h.
+	* common/ptid.h: Remove intro description of constructors,
+	accessors and predicates.
+	(struct ptid): Reformat.
+	(minus_one_ptid, ptid_build, pid_to_ptid, ptid_get_pid)
+	(ptid_get_lwp, ptid_get_tid, ptid_equal, ptid_is_pid): Change
+	describing comments.
+
 2013-10-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* aix-thread.c (sync_threadlists): Add missing ')' in call
