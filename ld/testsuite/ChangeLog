@@ -1,3 +1,8 @@
+2013-10-04  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* ld-aarch64/eh-frame.d: Update expected output to allow for
+	64-bit addresses.
+
 2013-10-04  Will Newton  <will.newton@linaro.org>
 
 	* ld-ifunc/ifunc.exp: Enable ifunc tests for AArch64.
