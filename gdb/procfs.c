@@ -4449,7 +4449,7 @@ procfs_init_inferior (struct target_ops *ops, int pid)
      this point, but it didn't have any lwp info yet.  Notify the core
      about it.  This changes inferior_ptid as well.  */
   thread_change_ptid (pid_to_ptid (pid),
-		      ptid_build (pid, lwpid), 0);
+		      ptid_build (pid, lwpid, 0));
 
   /* Typically two, one trap to exec the shell, one to exec the
      program being debugged.  Defined by "inferior.h".  */

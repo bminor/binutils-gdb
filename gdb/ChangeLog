@@ -1,5 +1,10 @@
 2013-10-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* procfs.c (procfs_init_inferior): Fix typo causing the build
+	to fail.
+
+2013-10-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* aix-thread.c (ptrace32): Remove cast to addr_ptr.
 
 2013-10-04  Joel Brobecker  <brobecker@adacore.com>
