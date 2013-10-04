@@ -1,5 +1,10 @@
 2013-10-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* aix-thread.c (sync_threadlists): Add missing ')' in call
+	to ptid_build.
+
+2013-10-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* procfs.c (procfs_init_inferior): Fix typo causing the build
 	to fail.
 

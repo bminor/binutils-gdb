@@ -756,7 +756,7 @@ sync_threadlists (void)
 	}
       else if (gi == gcount)
 	{
-	  thread = add_thread (ptid_build (infpid, 0, pbuf[pi].pthid);
+	  thread = add_thread (ptid_build (infpid, 0, pbuf[pi].pthid));
 	  thread->private = xmalloc (sizeof (struct private_thread_info));
 	  thread->private->pdtid = pbuf[pi].pdtid;
 	  thread->private->tid = pbuf[pi].tid;
