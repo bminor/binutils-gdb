@@ -220,7 +220,7 @@ struct stop_reply;
 static void stop_reply_xfree (struct stop_reply *);
 static void remote_parse_stop_reply (char *, struct stop_reply *);
 static void push_stop_reply (struct stop_reply *);
-static void discard_pending_stop_replies (struct inferior *);
+static void discard_pending_stop_replies_in_queue (void);
 static int peek_stop_reply (ptid_t ptid);
 
 static void remote_async_inferior_event_handler (gdb_client_data);
@@ -3067,11 +3067,9 @@ remote_close (void)
   inferior_ptid = null_ptid;
   discard_all_inferiors ();
 
-  /* Stop replies may from inferiors which are still unknown to GDB.
-     We are closing the remote target, so we should discard
-     everything, including the stop replies from GDB-unknown
-     inferiors.  */
-  discard_pending_stop_replies (NULL);
+  /* We are closing the remote target, so we should discard
+     everything of this target.  */
+  discard_pending_stop_replies_in_queue ();
 
   if (remote_async_inferior_event_token)
     delete_async_event_handler (&remote_async_inferior_event_token);
@@ -3572,7 +3570,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
 	  /* remote_notif_get_pending_replies acks this one, and gets
 	     the rest out.  */
-	  notif_client_stop.pending_event
+	  rs->notif_state->pending_event[notif_client_stop.id]
 	    = remote_notif_parse (notif, rs->buf);
 	  remote_notif_get_pending_events (notif);
 
@@ -5304,11 +5302,7 @@ static QUEUE (stop_reply_p) *stop_reply_queue;
 static void
 stop_reply_xfree (struct stop_reply *r)
 {
-  if (r != NULL)
-    {
-      VEC_free (cached_reg_t, r->regcache);
-      xfree (r);
-    }
+  notif_event_xfree ((struct notif_event *) r);
 }
 
 static void
@@ -5375,7 +5369,7 @@ struct notif_client notif_client_stop =
   remote_notif_stop_ack,
   remote_notif_stop_can_get_pending_events,
   remote_notif_stop_alloc_reply,
-  NULL,
+  REMOTE_NOTIF_STOP,
 };
 
 /* A parameter to pass data in and out.  */
@@ -5386,18 +5380,19 @@ struct queue_iter_param
   struct stop_reply *output;
 };
 
-/* Remove all queue elements meet the condition it checks.  */
+/* Remove stop replies in the queue if its pid is equal to the given
+   inferior's pid.  */
 
 static int
-remote_notif_remove_all (QUEUE (stop_reply_p) *q,
-			 QUEUE_ITER (stop_reply_p) *iter,
-			 stop_reply_p event,
-			 void *data)
+remove_stop_reply_for_inferior (QUEUE (stop_reply_p) *q,
+				QUEUE_ITER (stop_reply_p) *iter,
+				stop_reply_p event,
+				void *data)
 {
   struct queue_iter_param *param = data;
   struct inferior *inf = param->input;
 
-  if (inf == NULL || ptid_get_pid (event->ptid) == inf->pid)
+  if (ptid_get_pid (event->ptid) == inf->pid)
     {
       stop_reply_xfree (event);
       QUEUE_remove_elem (stop_reply_p, q, iter);
@@ -5406,24 +5401,29 @@ remote_notif_remove_all (QUEUE (stop_reply_p) *q,
   return 1;
 }
 
-/* Discard all pending stop replies of inferior INF.  If INF is NULL,
-   discard everything.  */
+/* Discard all pending stop replies of inferior INF.  */
 
 static void
 discard_pending_stop_replies (struct inferior *inf)
 {
   int i;
   struct queue_iter_param param;
-  struct stop_reply *reply
-    = (struct stop_reply *) notif_client_stop.pending_event;
+  struct stop_reply *reply;
+  struct remote_state *rs = get_remote_state ();
+  struct remote_notif_state *rns = rs->notif_state;
+
+  /* This function can be notified when an inferior exists.  When the
+     target is not remote, the notification state is NULL.  */
+  if (rs->remote_desc == NULL)
+    return;
+
+  reply = (struct stop_reply *) rns->pending_event[notif_client_stop.id];
 
   /* Discard the in-flight notification.  */
-  if (reply != NULL
-      && (inf == NULL
-	  || ptid_get_pid (reply->ptid) == inf->pid))
+  if (reply != NULL && ptid_get_pid (reply->ptid) == inf->pid)
     {
       stop_reply_xfree (reply);
-      notif_client_stop.pending_event = NULL;
+      rns->pending_event[notif_client_stop.id] = NULL;
     }
 
   param.input = inf;
@@ -5431,7 +5431,22 @@ discard_pending_stop_replies (struct inferior *inf)
   /* Discard the stop replies we have already pulled with
      vStopped.  */
   QUEUE_iterate (stop_reply_p, stop_reply_queue,
-		 remote_notif_remove_all, &param);
+		 remove_stop_reply_for_inferior, &param);
+}
+
+/* Discard the stop replies in stop_reply_queue.  */
+
+static void
+discard_pending_stop_replies_in_queue (void)
+{
+  struct queue_iter_param param;
+
+  param.input = NULL;
+  param.output = NULL;
+  /* Discard the stop replies we have already pulled with
+     vStopped.  */
+  QUEUE_iterate (stop_reply_p, stop_reply_queue,
+		 remove_stop_reply_for_inferior, &param);
 }
 
 /* A parameter to pass data in and out.  */
@@ -5787,7 +5802,7 @@ remote_notif_get_pending_events (struct notif_client *nc)
 {
   struct remote_state *rs = get_remote_state ();
 
-  if (nc->pending_event)
+  if (rs->notif_state->pending_event[nc->id] != NULL)
     {
       if (notif_debug)
 	fprintf_unfiltered (gdb_stdlog,
@@ -5795,8 +5810,8 @@ remote_notif_get_pending_events (struct notif_client *nc)
 			    nc->name);
 
       /* acknowledge */
-      nc->ack (nc, rs->buf, nc->pending_event);
-      nc->pending_event = NULL;
+      nc->ack (nc, rs->buf, rs->notif_state->pending_event[nc->id]);
+      rs->notif_state->pending_event[nc->id] = NULL;
 
       while (1)
 	{
@@ -5901,7 +5916,7 @@ remote_wait_ns (ptid_t ptid, struct target_waitstatus *status, int options)
 
       /* Acknowledge a pending stop reply that may have arrived in the
 	 mean time.  */
-      if (notif_client_stop.pending_event != NULL)
+      if (rs->notif_state->pending_event[notif_client_stop.id] != NULL)
 	remote_notif_get_pending_events (&notif_client_stop);
 
       /* If indeed we noticed a stop reply, we're done.  */

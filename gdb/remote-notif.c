@@ -51,6 +51,8 @@ static struct notif_client *notifs[] =
   &notif_client_stop,
 };
 
+gdb_static_assert (ARRAY_SIZE (notifs) == REMOTE_NOTIF_LAST);
+
 static void do_notif_event_xfree (void *arg);
 
 /* Parse the BUF for the expected notification NC, and send packet to
@@ -141,7 +143,7 @@ handle_notification (struct remote_notif_state *state, char *buf)
   if (nc == NULL)
     return;
 
-  if (nc->pending_event)
+  if (state->pending_event[nc->id] != NULL)
     {
       /* We've already parsed the in-flight reply, but the stub for some
 	 reason thought we didn't, possibly due to timeout on its side.
@@ -157,7 +159,7 @@ handle_notification (struct remote_notif_state *state, char *buf)
 
       /* Be careful to only set it after parsing, since an error
 	 may be thrown then.  */
-      nc->pending_event = event;
+      state->pending_event[nc->id] = event;
 
       /* Notify the event loop there's a stop reply to acknowledge
 	 and that there may be more events to fetch.  */
@@ -210,17 +212,23 @@ handle_notification (struct remote_notif_state *state, char *buf)
     }
 }
 
+/* Invoke destructor of EVENT and xfree it.  */
+
+void
+notif_event_xfree (struct notif_event *event)
+{
+  if (event != NULL && event->dtr != NULL)
+    event->dtr (event);
+
+  xfree (event);
+}
+
 /* Cleanup wrapper.  */
 
 static void
 do_notif_event_xfree (void *arg)
 {
-  struct notif_event *event = arg;
-
-  if (event && event->dtr)
-    event->dtr (event);
-
-  xfree (event);
+  notif_event_xfree (arg);
 }
 
 /* Return an allocated remote_notif_state.  */
@@ -246,11 +254,16 @@ remote_notif_state_allocate (void)
 void
 remote_notif_state_xfree (struct remote_notif_state *state)
 {
+  int i;
+
   QUEUE_free (notif_client_p, state->notif_queue);
 
   /* Unregister async_event_handler for notification.  */
   if (state->get_pending_events_token != NULL)
     delete_async_event_handler (&state->get_pending_events_token);
+
+  for (i = 0; i < REMOTE_NOTIF_LAST; i++)
+    notif_event_xfree (state->pending_event[i]);
 
   xfree (state);
 }

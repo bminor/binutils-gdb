@@ -31,6 +31,14 @@ struct notif_event
   void (*dtr) (struct notif_event *self);
 };
 
+/* ID of the notif_client.  */
+
+enum REMOTE_NOTIF_ID
+{
+  REMOTE_NOTIF_STOP = 0,
+  REMOTE_NOTIF_LAST,
+};
+
 /* A client to a sort of async remote notification.  */
 
 typedef struct notif_client
@@ -59,13 +67,8 @@ typedef struct notif_client
   /* Allocate an event.  */
   struct notif_event *(*alloc_event) (void);
 
-  /* One pending event.  This is where we keep it until it is
-     acknowledged.  When there is a notification packet, parse it,
-     and create an object of 'struct notif_event' to assign to
-     it.  This field is unchanged until GDB starts to ack this
-     notification (which is done by
-     remote.c:remote_notif_pending_replies).  */
-  struct notif_event *pending_event;
+  /* Id of this notif_client.  */
+  const enum REMOTE_NOTIF_ID id;
 } *notif_client_p;
 
 DECLARE_QUEUE_P (notif_client_p);
@@ -84,11 +87,22 @@ struct remote_notif_state
      the remote side into our event queue.  */
 
   struct async_event_handler *get_pending_events_token;
+
+/* One pending event for each notification client.  This is where we
+   keep it until it is acknowledged.  When there is a notification
+   packet, parse it, and create an object of 'struct notif_event' to
+   assign to it.  This field is unchanged until GDB starts to ack
+   this notification (which is done by
+   remote.c:remote_notif_pending_replies).  */
+
+  struct notif_event *pending_event[REMOTE_NOTIF_LAST];
 };
 
 void remote_notif_ack (struct notif_client *nc, char *buf);
 struct notif_event *remote_notif_parse (struct notif_client *nc,
 					char *buf);
+
+void notif_event_xfree (struct notif_event *event);
 
 void handle_notification (struct remote_notif_state *notif_state,
 			  char *buf);

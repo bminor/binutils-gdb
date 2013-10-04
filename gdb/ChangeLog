@@ -1,5 +1,34 @@
 2013-10-04  Yao Qi  <yao@codesourcery.com>
 
+	* remote-notif.h (REMOTE_NOTIF_ID): New enum.
+	(struct notif_client) <pending_event>: Moved
+	to struct remote_notif_state.
+	<id>: New field.
+	(struct remote_notif_state) <pending_event>: New field.
+	(notif_event_xfree): Declare.
+	* remote-notif.c (handle_notification): Adjust.
+	(notif_event_xfree): New function.
+	(do_notif_event_xfree): Call notif_event_xfree.
+	(remote_notif_state_xfree): Call notif_event_xfree to free
+	each element in field pending_event.
+	* remote.c (discard_pending_stop_replies): Remove declaration.
+	(discard_pending_stop_replies_in_queue): Declare.
+	(remote_close): Call discard_pending_stop_replies_in_queue
+	instead of discard_pending_stop_replies.
+	(remote_start_remote): Adjust.
+	(stop_reply_xfree): Call notif_event_xfree.
+	(notif_client_stop): Adjust initialization.
+	(remote_notif_remove_all): Rename it to ...
+	(remove_stop_reply_for_inferior): ... this.  Update comments.
+	Don't check INF is NULL.
+	(discard_pending_stop_replies): Return early if notif_state is
+	NULL.  Adjust.  Don't check INF is NULL.
+	(remote_notif_get_pending_events): Adjust.
+ 	(discard_pending_stop_replies_in_queue): New function.
+	(remote_wait_ns): Likewise.
+
+2013-10-04  Yao Qi  <yao@codesourcery.com>
+
 	* remote-notif.c (DECLARE_QUEUE_P): Remove.
 	(notif_queue): Remove.
 	(remote_notif_process): Add one parameter 'notif_queue'.
