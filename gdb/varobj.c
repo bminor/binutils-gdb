@@ -245,7 +245,7 @@ static void uninstall_variable (struct varobj *);
 static struct varobj *create_child (struct varobj *, int, char *);
 
 static struct varobj *
-create_child_with_value (struct varobj *parent, int index, const char *name,
+create_child_with_value (struct varobj *parent, int index, char *name,
 			 struct value *value);
 
 /* Utility routines */
@@ -304,7 +304,7 @@ static int is_root_p (struct varobj *var);
 #if HAVE_PYTHON
 
 static struct varobj *varobj_add_child (struct varobj *var,
-					const char *name,
+					char *name,
 					struct value *value);
 
 #endif /* HAVE_PYTHON */
@@ -994,7 +994,7 @@ install_dynamic_child (struct varobj *var,
 		       VEC (varobj_p) **unchanged,
 		       int *cchanged,
 		       int index,
-		       const char *name,
+		       char *name,
 		       struct value *value)
 {
   if (VEC_length (varobj_p, var->children) < index + 1)
@@ -1188,7 +1188,8 @@ update_dynamic_varobj_children (struct varobj *var,
 				 can_mention ? type_changed : NULL,
 				 can_mention ? new : NULL,
 				 can_mention ? unchanged : NULL,
-				 can_mention ? cchanged : NULL, i, name, v);
+				 can_mention ? cchanged : NULL, i,
+				 xstrdup (name), v);
 	  do_cleanups (inner);
 	}
       else
@@ -1307,7 +1308,7 @@ varobj_list_children (struct varobj *var, int *from, int *to)
 #if HAVE_PYTHON
 
 static struct varobj *
-varobj_add_child (struct varobj *var, const char *name, struct value *value)
+varobj_add_child (struct varobj *var, char *name, struct value *value)
 {
   varobj_p v = create_child_with_value (var, 
 					VEC_length (varobj_p, var->children), 
@@ -2394,7 +2395,7 @@ is_anonymous_child (struct varobj *child)
 }
 
 static struct varobj *
-create_child_with_value (struct varobj *parent, int index, const char *name,
+create_child_with_value (struct varobj *parent, int index, char *name,
 			 struct value *value)
 {
   struct varobj *child;
@@ -2402,9 +2403,8 @@ create_child_with_value (struct varobj *parent, int index, const char *name,
 
   child = new_variable ();
 
-  /* Name is allocated by name_of_child.  */
-  /* FIXME: xstrdup should not be here.  */
-  child->name = xstrdup (name);
+  /* NAME is allocated by caller.  */
+  child->name = name;
   child->index = index;
   child->parent = parent;
   child->root = parent->root;

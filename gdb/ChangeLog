@@ -1,3 +1,16 @@
+2013-10-04  Yao Qi  <yao@codesourcery.com>
+
+	* varobj.c (create_child_with_value): Remove 'const' from the
+	type of parameter 'name'.
+	(varobj_add_child): Likewise.
+	(install_dynamic_child): Remove 'const' from the type of
+	parameter 'name'.
+	(varobj_add_child): Likewise.
+	(create_child_with_value): Likewise.  Update comments.  Don't
+	duplicate 'name'.
+	(update_dynamic_varobj_children): Duplicate 'name'
+	and pass it to install_dynamic_child.
+
 2013-10-03  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* python/py-value.c (convert_value_from_python): Move PyInt_Check
