@@ -1,5 +1,9 @@
 2013-10-04  Joel Brobecker  <brobecker@adacore.com>
 
+	* aix-thread.c (ptrace32): Remove cast to addr_ptr.
+
+2013-10-04  Joel Brobecker  <brobecker@adacore.com>
+
 	* mi/mi-main.c (run_one_inferior): Add function description.
 	Make ARG a pointer to an integer whose value determines whether
 	we should "run" or "start" the program.

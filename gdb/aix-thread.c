@@ -264,7 +264,7 @@ ptrace32 (int req, int id, addr_ptr addr, int data, int *buf)
 {
   errno = 0;
   return ptrace_check (req, id, 
-		       ptrace (req, id, (addr_ptr) addr, data, buf));
+		       ptrace (req, id, addr, data, buf));
 }
 
 /* If *PIDP is a composite process/thread id, convert it to a
