@@ -1,3 +1,7 @@
+2013-10-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-start.c, gdb.mi/mi-start.exp: New files.
+
 2013-10-02  Vidya Praveen  <vidyapraveen@arm.com>
 
 	* gdb.trace/entry-values.exp: Modify regular expression to scan for

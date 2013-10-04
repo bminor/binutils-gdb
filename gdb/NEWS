@@ -137,6 +137,11 @@ show range-stepping
      -stack-list-variables now accept an option "--skip-unavailable".
      When used, only the available locals or arguments are displayed.
 
+  ** The -exec-run command now accepts an optional "--start" option.
+     When used, the command follows the same semantics as the "start"
+     command, stopping the program's execution at the start of its
+     main subprogram.
+
 * New system-wide configuration scripts
   A GDB installation now provides scripts suitable for use as system-wide
   configuration scripts for the following systems:

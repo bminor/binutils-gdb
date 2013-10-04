@@ -31057,7 +31057,7 @@ fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="18"@}
 @subsubheading Synopsis
 
 @smallexample
- -exec-run [--all | --thread-group N]
+ -exec-run [ --all | --thread-group N ] [ --start ]
 @end smallexample
 
 Starts execution of the inferior from the beginning.  The inferior
@@ -31065,10 +31065,16 @@ executes until either a breakpoint is encountered or the program
 exits.  In the latter case the output will include an exit code, if
 the program has exited exceptionally.
 
-When no option is specified, the current inferior is started.  If the
+When neither the @samp{--all} nor the @samp{--thread-group} option
+is specified, the current inferior is started.  If the
 @samp{--thread-group} option is specified, it should refer to a thread
 group of type @samp{process}, and that thread group will be started.
 If the @samp{--all} option is specified, then all inferiors will be started.
+
+Using the @samp{--start} option instructs the debugger to stop
+the execution at the start of the inferior's main subprogram,
+following the same behavior as the @code{start} command
+(@pxref{Starting}).
 
 @subsubheading @value{GDBN} Command
 

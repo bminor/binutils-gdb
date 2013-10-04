@@ -1,3 +1,12 @@
+2013-10-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c (run_one_inferior): Add function description.
+	Make ARG a pointer to an integer whose value determines whether
+	we should "run" or "start" the program.
+	(mi_cmd_exec_run): Add handling of the "--start" option.
+	Reject all other command-line options.
+	* NEWS: Add entry for "-exec-run"'s new "--start" option.
+
 2013-10-04  Yao Qi  <yao@codesourcery.com>
 
 	* remote-notif.h (REMOTE_NOTIF_ID): New enum.

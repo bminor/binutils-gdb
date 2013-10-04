@@ -364,9 +364,19 @@ mi_cmd_exec_interrupt (char *command, char **argv, int argc)
     }
 }
 
+/* Callback for iterate_over_inferiors which starts the execution
+   of the given inferior.
+
+   ARG is a pointer to an integer whose value, if non-zero, indicates
+   that the program should be stopped when reaching the main subprogram
+   (similar to what the CLI "start" command does).  */
+
 static int
 run_one_inferior (struct inferior *inf, void *arg)
 {
+  int start_p = *(int *) arg;
+  const char *run_cmd = start_p ? "start" : "run";
+
   if (inf->pid != 0)
     {
       if (inf->pid != ptid_get_pid (inferior_ptid))
@@ -386,7 +396,7 @@ run_one_inferior (struct inferior *inf, void *arg)
       switch_to_thread (null_ptid);
       set_current_program_space (inf->pspace);
     }
-  mi_execute_cli_command ("run", target_can_async_p (),
+  mi_execute_cli_command (run_cmd, target_can_async_p (),
 			  target_can_async_p () ? "&" : NULL);
   return 0;
 }
@@ -394,16 +404,54 @@ run_one_inferior (struct inferior *inf, void *arg)
 void
 mi_cmd_exec_run (char *command, char **argv, int argc)
 {
+  int i;
+  int start_p = 0;
+
+  /* Parse the command options.  */
+  enum opt
+    {
+      START_OPT,
+    };
+  static const struct mi_opt opts[] =
+    {
+	{"-start", START_OPT, 0},
+	{NULL, 0, 0},
+    };
+
+  int oind = 0;
+  char *oarg;
+
+  while (1)
+    {
+      int opt = mi_getopt ("-exec-run", argc, argv, opts, &oind, &oarg);
+
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+	{
+	case START_OPT:
+	  start_p = 1;
+	  break;
+	}
+    }
+
+  /* This command does not accept any argument.  Make sure the user
+     did not provide any.  */
+  if (oind != argc)
+    error (_("Invalid argument: %s"), argv[oind]);
+
   if (current_context->all)
     {
       struct cleanup *back_to = save_current_space_and_thread ();
 
-      iterate_over_inferiors (run_one_inferior, NULL);
+      iterate_over_inferiors (run_one_inferior, &start_p);
       do_cleanups (back_to);
     }
   else
     {
-      mi_execute_cli_command ("run", target_can_async_p (),
+      const char *run_cmd = start_p ? "start" : "run";
+
+      mi_execute_cli_command (run_cmd, target_can_async_p (),
 			      target_can_async_p () ? "&" : NULL);
     }
 }
