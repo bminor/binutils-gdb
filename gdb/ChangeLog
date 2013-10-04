@@ -1,5 +1,36 @@
 2013-10-04  Yao Qi  <yao@codesourcery.com>
 
+	* remote-notif.c (DECLARE_QUEUE_P): Remove.
+	(notif_queue): Remove.
+	(remote_notif_process): Add one parameter 'notif_queue'.
+	Update comments.  Callers update.
+	(remote_async_get_pending_events_token): Remove.
+	(remote_notif_register_async_event_handler): Remove.
+	(remote_notif_unregister_async_event_handler): Remove.
+	(handle_notification): Add parameter 'notif_queue'.  Update
+	comments.  Callers update.
+	(notif_xfree): Remove.
+	(remote_notif_state_allocate): New function.
+	(remote_notif_state_xfree): New function.
+	(_initialize_notif): Remove code to allocate queue.
+	* remote-notif.h (DECLARE_QUEUE_P): Moved from remote-notif.c.
+	(struct remote_notif_state): New.
+	(handle_notification): Update declaration.
+	(remote_notif_process): Likewise.
+	(remote_notif_register_async_event_handler): Remove.
+	(remote_notif_unregister_async_event_handler): Remove.
+	(remote_notif_state_allocate): Declare.
+	(remote_notif_state_xfree): Declare.
+	* remote.c (struct remote_state) <notif_state>: New field.
+	(remote_close): Don't call
+	remote_notif_unregister_async_event_handler.  Call
+	remote_notif_state_xfree.
+	(remote_open_1): Don't call
+	remote_notif_register_async_event_handler.  Call
+	remote_notif_state_allocate.
+
+2013-10-04  Yao Qi  <yao@codesourcery.com>
+
 	* varobj.c (create_child_with_value): Remove 'const' from the
 	type of parameter 'name'.
 	(varobj_add_child): Likewise.

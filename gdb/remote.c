@@ -425,6 +425,9 @@ struct remote_state
   threadref echo_nextthread;
   threadref nextthread;
   threadref resultthreadlist[MAXTHREADLISTRESULTS];
+
+  /* The state of remote notification.  */
+  struct remote_notif_state *notif_state;
 };
 
 /* Private data that we'll store in (struct thread_info)->private.  */
@@ -3073,7 +3076,7 @@ remote_close (void)
   if (remote_async_inferior_event_token)
     delete_async_event_handler (&remote_async_inferior_event_token);
 
-  remote_notif_unregister_async_event_handler ();
+  remote_notif_state_xfree (rs->notif_state);
 
   trace_reset_local_state ();
 }
@@ -4337,7 +4340,7 @@ remote_open_1 (char *name, int from_tty,
   remote_async_inferior_event_token
     = create_async_event_handler (remote_async_inferior_event_handler,
 				  NULL);
-  remote_notif_register_async_event_handler ();
+  rs->notif_state = remote_notif_state_allocate ();
 
   /* Reset the target state; these things will be queried either by
      remote_query_supported or as they are needed.  */
@@ -4931,7 +4934,7 @@ remote_resume (struct target_ops *ops,
      before resuming inferior, because inferior was stopped and no RSP
      traffic at that moment.  */
   if (!non_stop)
-    remote_notif_process (&notif_client_stop);
+    remote_notif_process (rs->notif_state, &notif_client_stop);
 
   rs->last_sent_signal = siggnal;
   rs->last_sent_step = step;
@@ -7352,7 +7355,7 @@ putpkt_binary (char *buf, int cnt)
 					    str);
 			do_cleanups (old_chain);
 		      }
-		    handle_notification (rs->buf);
+		    handle_notification (rs->notif_state, rs->buf);
 		    /* We're in sync now, rewait for the ack.  */
 		    tcount = 0;
 		  }
@@ -7738,7 +7741,7 @@ getpkt_or_notif_sane_1 (char **buf, long *sizeof_buf, int forever,
 	  if (is_notif != NULL)
 	    *is_notif = 1;
 
-	  handle_notification (*buf);
+	  handle_notification (rs->notif_state, *buf);
 
 	  /* Notifications require no acknowledgement.  */
 

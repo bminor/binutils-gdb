@@ -91,21 +91,19 @@ remote_notif_parse (struct notif_client *nc, char *buf)
   return event;
 }
 
-DECLARE_QUEUE_P (notif_client_p);
 DEFINE_QUEUE_P (notif_client_p);
 
-static QUEUE(notif_client_p) *notif_queue;
-
-/* Process notifications one by one.  EXCEPT is not expected in
-   the queue.  */
+/* Process notifications in STATE's notification queue one by one.
+   EXCEPT is not expected in the queue.  */
 
 void
-remote_notif_process (struct notif_client *except)
+remote_notif_process (struct remote_notif_state *state,
+		      struct notif_client *except)
 {
-  while (!QUEUE_is_empty (notif_client_p, notif_queue))
+  while (!QUEUE_is_empty (notif_client_p, state->notif_queue))
     {
       struct notif_client *nc = QUEUE_deque (notif_client_p,
-					     notif_queue);
+					     state->notif_queue);
 
       gdb_assert (nc != except);
 
@@ -118,39 +116,14 @@ static void
 remote_async_get_pending_events_handler (gdb_client_data data)
 {
   gdb_assert (non_stop);
-  remote_notif_process (NULL);
+  remote_notif_process (data, NULL);
 }
 
-/* Asynchronous signal handle registered as event loop source for when
-   the remote sent us a notification.  The registered callback
-   will do a ACK sequence to pull the rest of the events out of
-   the remote side into our event queue.  */
-
-static struct async_event_handler *remote_async_get_pending_events_token;
-
-/* Register async_event_handler for notification.  */
+/* Remote notification handler.  Parse BUF, queue notification and
+   update STATE.  */
 
 void
-remote_notif_register_async_event_handler (void)
-{
-  remote_async_get_pending_events_token
-    = create_async_event_handler (remote_async_get_pending_events_handler,
-				  NULL);
-}
-
-/* Unregister async_event_handler for notification.  */
-
-void
-remote_notif_unregister_async_event_handler (void)
-{
-  if (remote_async_get_pending_events_token)
-    delete_async_event_handler (&remote_async_get_pending_events_token);
-}
-
-/* Remote notification handler.  */
-
-void
-handle_notification (char *buf)
+handle_notification (struct remote_notif_state *state, char *buf)
 {
   struct notif_client *nc = NULL;
   int i;
@@ -188,7 +161,7 @@ handle_notification (char *buf)
 
       /* Notify the event loop there's a stop reply to acknowledge
 	 and that there may be more events to fetch.  */
-      QUEUE_enque (notif_client_p, notif_queue, nc);
+      QUEUE_enque (notif_client_p, state->notif_queue, nc);
       if (non_stop)
 	{
 	  /* In non-stop, We mark REMOTE_ASYNC_GET_PENDING_EVENTS_TOKEN
@@ -227,7 +200,7 @@ handle_notification (char *buf)
 	     2.3) <-- T05 thread:2
 
 	     These pending notifications can be processed later.  */
-	  mark_async_event_handler (remote_async_get_pending_events_token);
+	  mark_async_event_handler (state->get_pending_events_token);
 	}
 
       if (notif_debug)
@@ -250,15 +223,36 @@ do_notif_event_xfree (void *arg)
   xfree (event);
 }
 
-static void
-notif_xfree (struct notif_client *notif)
-{
-  if (notif->pending_event != NULL
-      && notif->pending_event->dtr != NULL)
-    notif->pending_event->dtr (notif->pending_event);
+/* Return an allocated remote_notif_state.  */
 
-  xfree (notif->pending_event);
-  xfree (notif);
+struct remote_notif_state *
+remote_notif_state_allocate (void)
+{
+  struct remote_notif_state *notif_state = xzalloc (sizeof (*notif_state));
+
+  notif_state->notif_queue = QUEUE_alloc (notif_client_p, NULL);
+
+  /* Register async_event_handler for notification.  */
+
+  notif_state->get_pending_events_token
+    = create_async_event_handler (remote_async_get_pending_events_handler,
+				  notif_state);
+
+  return notif_state;
+}
+
+/* Free STATE and its fields.  */
+
+void
+remote_notif_state_xfree (struct remote_notif_state *state)
+{
+  QUEUE_free (notif_client_p, state->notif_queue);
+
+  /* Unregister async_event_handler for notification.  */
+  if (state->get_pending_events_token != NULL)
+    delete_async_event_handler (&state->get_pending_events_token);
+
+  xfree (state);
 }
 
 /* -Wmissing-prototypes */
@@ -267,8 +261,6 @@ extern initialize_file_ftype _initialize_notif;
 void
 _initialize_notif (void)
 {
-  notif_queue = QUEUE_alloc (notif_client_p, notif_xfree);
-
   add_setshow_boolean_cmd ("notification", no_class, &notif_debug,
 			   _("\
 Set debugging of async remote notification."), _("\

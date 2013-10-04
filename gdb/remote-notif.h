@@ -68,16 +68,36 @@ typedef struct notif_client
   struct notif_event *pending_event;
 } *notif_client_p;
 
+DECLARE_QUEUE_P (notif_client_p);
+
+/* State on remote async notification.  */
+
+struct remote_notif_state
+{
+  /* Notification queue.  */
+
+  QUEUE(notif_client_p) *notif_queue;
+
+  /* Asynchronous signal handle registered as event loop source for when
+     the remote sent us a notification.  The registered callback
+     will do a ACK sequence to pull the rest of the events out of
+     the remote side into our event queue.  */
+
+  struct async_event_handler *get_pending_events_token;
+};
+
 void remote_notif_ack (struct notif_client *nc, char *buf);
 struct notif_event *remote_notif_parse (struct notif_client *nc,
 					char *buf);
 
-void handle_notification (char *buf);
+void handle_notification (struct remote_notif_state *notif_state,
+			  char *buf);
 
-void remote_notif_register_async_event_handler (void);
-void remote_notif_unregister_async_event_handler (void);
+void remote_notif_process (struct remote_notif_state *state,
+			   struct notif_client *except);
+struct remote_notif_state *remote_notif_state_allocate (void);
+void remote_notif_state_xfree (struct remote_notif_state *state);
 
-void remote_notif_process (struct notif_client *except);
 extern struct notif_client notif_client_stop;
 
 extern int notif_debug;
