@@ -120,10 +120,10 @@ struct dwarf2_section_info
 {
   union
   {
-    /* If this is a real section, the bfd section.  Otherwise NULL.  */
+    /* If this is a real section, the bfd section.  */
     asection *asection;
     /* If this is a virtual section, pointer to the containing ("real")
-       section.  Otherwise NULL.  */
+       section.  */
     struct dwarf2_section_info *containing_section;
   } s;
   /* Pointer to section data, only valid if readin.  */
