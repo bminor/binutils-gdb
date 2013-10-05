@@ -1,3 +1,8 @@
+2013-10-05  Gregory Fong  <gregory.0xf0@gmail.com>
+
+	* elfxx-mips.c (mips_elf_create_got_section): Hide
+	_GLOBAL_OFFSET_TABLE_.
+
 2013-10-04  Will Newton  <will.newton@linaro.org>
 
 	* configure: Regenerate.

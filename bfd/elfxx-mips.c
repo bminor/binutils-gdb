@@ -5017,6 +5017,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
   h->non_elf = 0;
   h->def_regular = 1;
   h->type = STT_OBJECT;
+  h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
   elf_hash_table (info)->hgot = h;
 
   if (info->shared

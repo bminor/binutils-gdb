@@ -1,3 +1,30 @@
+2013-10-05  Gregory Fong  <gregory.0xf0@gmail.com>
+
+	* ld-mips-elf/eh-frame5.d, ld-mips-elf/jalx-2.dd,
+	ld-mips-elf/mips-elf.exp, ld-mips-elf/mips16-pic-2.ad,
+	ld-mips-elf/mips16-pic-2.nd, ld-mips-elf/pic-and-nonpic-3a.dd,
+	ld-mips-elf/pic-and-nonpic-3b.ad, ld-mips-elf/pic-and-nonpic-3b.dd,
+	ld-mips-elf/pic-and-nonpic-3b.nd, ld-mips-elf/pic-and-nonpic-4b.ad,
+	ld-mips-elf/pic-and-nonpic-4b.nd, ld-mips-elf/pic-and-nonpic-4b.rd,
+	ld-mips-elf/pic-and-nonpic-5b.ad, ld-mips-elf/pic-and-nonpic-5b.nd,
+	ld-mips-elf/pic-and-nonpic-6-n32.ad,
+	ld-mips-elf/pic-and-nonpic-6-n32.dd,
+	ld-mips-elf/pic-and-nonpic-6-n32.nd,
+	ld-mips-elf/pic-and-nonpic-6-n64.ad,
+	ld-mips-elf/pic-and-nonpic-6-n64.dd,
+	ld-mips-elf/pic-and-nonpic-6-n64.nd,
+	ld-mips-elf/pic-and-nonpic-6-o32.ad,
+	ld-mips-elf/pic-and-nonpic-6-o32.dd,
+	ld-mips-elf/pic-and-nonpic-6-o32.nd, ld-mips-elf/rel32-n32.d,
+	ld-mips-elf/rel32-o32.d, ld-mips-elf/rel64.d,
+	ld-mips-elf/tls-multi-got-1.got, ld-mips-elf/tls-multi-got-1.r,
+	ld-mips-elf/tlsdyn-o32-1.d, ld-mips-elf/tlsdyn-o32-1.got,
+	ld-mips-elf/tlsdyn-o32-2.d, ld-mips-elf/tlsdyn-o32-2.got,
+	ld-mips-elf/tlsdyn-o32-3.d, ld-mips-elf/tlsdyn-o32-3.got,
+	ld-mips-elf/tlsdyn-o32.d, ld-mips-elf/tlsdyn-o32.got,
+	ld-mips-elf/tlslib-o32-ver.got, ld-mips-elf/tlslib-o32.got: Update
+	for removal of _GLOBAL_OFFSET_TABLE_ from .dynsym.
+
 2013-10-04  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* ld-aarch64/eh-frame.d: Update expected output to allow for
