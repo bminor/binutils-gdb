@@ -3,6 +3,9 @@
 
 *** Changes since GDB 7.6
 
+* GDB now supports Fission DWP file format version 2.
+  http://gcc.gnu.org/wiki/DebugFission
+
 * New convenience function "$_isvoid", to check whether an expression
   is void.  A void expression is an expression where the type of the
   result is "void".  For example, some convenience variables may be

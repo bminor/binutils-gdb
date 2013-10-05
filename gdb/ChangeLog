@@ -1,3 +1,44 @@
+2013-10-04  Doug Evans  <dje@google.com>
+
+	Add support for DWP file format version 2.
+	* NEWS: Mention support for DWP file format version 2.
+	* dwarf2read.c (dwarf2_section_info): Convert asection field to a
+	union of asection, containing_section.  New fields virtual_offset
+	and is_virtual.  Change type of readin filed from int to char.
+	(dwo_sections, dwo_file): Tweak comments.
+	(dwp_v2_section_ids): New enum.
+	(dwp_sections): New fields abbrev, info, line, loc, macinfo, macro,
+	str_offsets, types.
+	(virtual_v1_dwo_sections): Renamed from virtual_dwo_sections.
+	All uses updated.
+	(virtual_v2_dwo_sections): New struct.
+	(dwp_hash_table): New fields version, nr_columns.  Change type of
+	section_pool field to a union.
+	(dwp_file): New field version.
+	(dwarf2_has_info): Check for virtual sections.
+	(get_containing_section): New function.
+	(get_section_bfd_owner, get_section_bfd_section): Call it.
+	(dwarf2_locate_sections): Update.
+	(dwarf2_section_empty_p): Update.
+	(dwarf2_read_section): Handle virtual sections.
+	(locate_dwz_sections): Update.
+	(create_dwp_hash_table): Document and handle V2 format.
+	(locate_v1_virtual_dwo_sections): Renamed from
+	locate_virtual_dwo_sections and update.  All callers updated.
+	(create_dwo_unit_in_dwp_v1): Renamed from create_dwo_in_dwp.
+	Delete arg htab.  Rename arg section_index to unit_index.
+	All callers updated.
+	(MAX_NR_V1_DWO_SECTIONS): Renamed from MAX_NR_DWO_SECTIONS.
+	All uses updated.
+	(create_dwp_v2_section, create_dwo_unit_in_dwp_v2): New functions.
+	(lookup_dwo_unit_in_dwp): Add V2 support.
+	(dwarf2_locate_dwo_sections): Update.
+	(dwarf2_locate_common_dwp_sections): Renamed from
+	dwarf2_locate_dwp_sections and update.  All callers updated.
+	(dwarf2_locate_v2_dwp_sections): New function.
+	(open_and_init_dwp_file): Add V2 support.
+	(read_str_index): New locals str_section, str_offsets_section.
+
 2013-10-04  Pedro Alves  <palves@redhat.com>
 
 	* common/ptid.c (null_ptid, minus_one_ptid, ptid_build)
