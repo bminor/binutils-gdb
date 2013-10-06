@@ -52,7 +52,8 @@ enum varobj_scope_status
 /* String representations of gdb's format codes (defined in varobj.c).  */
 extern char *varobj_format_string[];
 
-/* Languages supported by this variable objects system.  */
+/* Languages supported by this variable objects system.  This enum is used
+   to index arrays so we make its first enum explicitly zero.  */
 enum varobj_languages
   {
     vlang_c = 0, vlang_cplus, vlang_java, vlang_ada, vlang_end

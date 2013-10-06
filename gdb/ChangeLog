@@ -1,3 +1,7 @@
+2013-10-06  Yao Qi  <yao@codesourcery.com>
+
+	* varobj.h: Add comments to enum varobj_languages.
+
 2013-10-04  Doug Evans  <dje@google.com>
 
 	Add support for DWP file format version 2.
