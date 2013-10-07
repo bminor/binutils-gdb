@@ -1,5 +1,19 @@
 2013-10-07  Tom Tromey  <tromey@redhat.com>
 
+	* objfiles.c (free_objfile_per_bfd_storage): Delete the
+	demangled_names_hash.
+	(free_objfile): Don't delete the demangled_names_hash.
+	* objfiles.h (struct objfile_per_bfd_storage)
+	<demangled_names_hash>: New field.
+	(struct objfile) <demangled_names_hash>: Move to
+	objfile_per_bfd_storage.
+	* symfile.c (reread_symbols): Don't delete the
+	demangled_names_hash.
+	* symtab.c (create_demangled_names_hash): Update.
+	(symbol_set_names): Update.
+
+2013-10-07  Tom Tromey  <tromey@redhat.com>
+
 	* gdb_bfd.c (struct gdb_bfd_data) <relocation_computed,
 	needs_relocations>: New fields.
 	(gdb_bfd_requires_relocations): New function.

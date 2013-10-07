@@ -2497,11 +2497,6 @@ reread_symbols (void)
 	  /* Free the obstacks for non-reusable objfiles.  */
 	  psymbol_bcache_free (objfile->psymbol_cache);
 	  objfile->psymbol_cache = psymbol_bcache_init ();
-	  if (objfile->demangled_names_hash != NULL)
-	    {
-	      htab_delete (objfile->demangled_names_hash);
-	      objfile->demangled_names_hash = NULL;
-	    }
 	  obstack_free (&objfile->objfile_obstack, 0);
 	  objfile->sections = NULL;
 	  objfile->symtabs = NULL;

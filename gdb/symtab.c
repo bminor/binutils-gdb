@@ -592,7 +592,7 @@ create_demangled_names_hash (struct objfile *objfile)
      Choosing a much larger table size wastes memory, and saves only about
      1% in symbol reading.  */
 
-  objfile->demangled_names_hash = htab_create_alloc
+  objfile->per_bfd->demangled_names_hash = htab_create_alloc
     (256, hash_demangled_name_entry, eq_demangled_name_entry,
      NULL, xcalloc, xfree);
 }
@@ -687,7 +687,7 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
    objfile), and it will not be copied.
 
    The hash table corresponding to OBJFILE is used, and the memory
-   comes from that objfile's objfile_obstack.  LINKAGE_NAME is copied,
+   comes from the per-BFD storage_obstack.  LINKAGE_NAME is copied,
    so the pointer can be discarded after calling this function.  */
 
 /* We have to be careful when dealing with Java names: when we run
@@ -723,6 +723,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   /* The length of lookup_name.  */
   int lookup_len;
   struct demangled_name_entry entry;
+  struct objfile_per_bfd_storage *per_bfd = objfile->per_bfd;
 
   if (gsymbol->language == language_ada)
     {
@@ -738,18 +739,18 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	gsymbol->name = linkage_name;
       else
 	{
-	  char *name = obstack_alloc (&objfile->objfile_obstack, len + 1);
+	  char *name = obstack_alloc (&per_bfd->storage_obstack, len + 1);
 
 	  memcpy (name, linkage_name, len);
 	  name[len] = '\0';
 	  gsymbol->name = name;
 	}
-      symbol_set_demangled_name (gsymbol, NULL, &objfile->objfile_obstack);
+      symbol_set_demangled_name (gsymbol, NULL, &per_bfd->storage_obstack);
 
       return;
     }
 
-  if (objfile->demangled_names_hash == NULL)
+  if (per_bfd->demangled_names_hash == NULL)
     create_demangled_names_hash (objfile);
 
   /* The stabs reader generally provides names that are not
@@ -789,7 +790,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 
   entry.mangled = lookup_name;
   slot = ((struct demangled_name_entry **)
-	  htab_find_slot (objfile->demangled_names_hash,
+	  htab_find_slot (per_bfd->demangled_names_hash,
 			  &entry, INSERT));
 
   /* If this name is not in the hash table, add it.  */
@@ -814,7 +815,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	 us better bcache hit rates for partial symbols.  */
       if (!copy_name && lookup_name == linkage_name)
 	{
-	  *slot = obstack_alloc (&objfile->objfile_obstack,
+	  *slot = obstack_alloc (&per_bfd->storage_obstack,
 				 offsetof (struct demangled_name_entry,
 					   demangled)
 				 + demangled_len + 1);
@@ -827,7 +828,7 @@ symbol_set_names (struct general_symbol_info *gsymbol,
 	  /* If we must copy the mangled name, put it directly after
 	     the demangled name so we can have a single
 	     allocation.  */
-	  *slot = obstack_alloc (&objfile->objfile_obstack,
+	  *slot = obstack_alloc (&per_bfd->storage_obstack,
 				 offsetof (struct demangled_name_entry,
 					   demangled)
 				 + lookup_len + demangled_len + 2);
@@ -848,9 +849,9 @@ symbol_set_names (struct general_symbol_info *gsymbol,
   gsymbol->name = (*slot)->mangled + lookup_len - len;
   if ((*slot)->demangled[0] != '\0')
     symbol_set_demangled_name (gsymbol, (*slot)->demangled,
-			       &objfile->objfile_obstack);
+			       &per_bfd->storage_obstack);
   else
-    symbol_set_demangled_name (gsymbol, NULL, &objfile->objfile_obstack);
+    symbol_set_demangled_name (gsymbol, NULL, &per_bfd->storage_obstack);
 }
 
 /* Return the source code name of a symbol.  In languages where

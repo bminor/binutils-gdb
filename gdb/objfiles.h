@@ -185,6 +185,13 @@ struct objfile_per_bfd_storage
      differ from this e.g. with respect to register types and names.  */
 
   struct gdbarch *gdbarch;
+
+  /* Hash table for mapping symbol names to demangled names.  Each
+     entry in the hash table is actually two consecutive strings,
+     both null-terminated; the first one is a mangled or linkage
+     name, and the second is the demangled name or just a zero byte
+     if the name doesn't demangle.  */
+  struct htab *demangled_names_hash;
 };
 
 /* Master structure for keeping track of each file from which
@@ -269,13 +276,6 @@ struct objfile
        will not change.  */
 
     struct psymbol_bcache *psymbol_cache; /* Byte cache for partial syms.  */
-
-    /* Hash table for mapping symbol names to demangled names.  Each
-       entry in the hash table is actually two consecutive strings,
-       both null-terminated; the first one is a mangled or linkage
-       name, and the second is the demangled name or just a zero byte
-       if the name doesn't demangle.  */
-    struct htab *demangled_names_hash;
 
     /* Vectors of all partial symbols read in from file.  The actual data
        is stored in the objfile_obstack.  */

@@ -168,6 +168,8 @@ free_objfile_per_bfd_storage (struct objfile_per_bfd_storage *storage)
 {
   bcache_xfree (storage->filename_cache);
   bcache_xfree (storage->macro_cache);
+  if (storage->demangled_names_hash)
+    htab_delete (storage->demangled_names_hash);
   obstack_free (&storage->storage_obstack, 0);
 }
 
@@ -655,8 +657,6 @@ free_objfile (struct objfile *objfile)
     xfree (objfile->static_psymbols.list);
   /* Free the obstacks for non-reusable objfiles.  */
   psymbol_bcache_free (objfile->psymbol_cache);
-  if (objfile->demangled_names_hash)
-    htab_delete (objfile->demangled_names_hash);
   obstack_free (&objfile->objfile_obstack, 0);
 
   /* Rebuild section map next time we need it.  */
