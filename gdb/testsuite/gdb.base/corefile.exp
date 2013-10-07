@@ -142,6 +142,16 @@ gdb_test "print coremaker_ro" "\\\$$decimal = 201"
 
 gdb_test "print func2::coremaker_local" "\\\$$decimal = \\{0, 1, 2, 3, 4\\}"
 
+# Test the presence and the correct values of $_exitsignal and
+# $_exitcode variables.  The corefile is generated with a SIGABRT,
+# which is "6" in the Linux kernel.
+
+gdb_test "print \$_exitsignal" " = 6" \
+    "\$_exitsignal prints SIGABRT (6)"
+
+gdb_test "print \$_exitcode" " = void" \
+    "\$_exitcode is void"
+
 # Somehow we better test the ability to read the registers out of the core
 # file correctly.  I don't think the other tests do this.
 

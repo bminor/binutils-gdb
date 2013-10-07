@@ -224,6 +224,12 @@ extern void follow_inferior_reset_breakpoints (void);
 
 void set_step_info (struct frame_info *frame, struct symtab_and_line sal);
 
+/* Clear the convenience variables associated with the exit of the
+   inferior.  Currently, those variables are $_exitcode and
+   $_exitsignal.  */
+
+extern void clear_exit_convenience_vars (void);
+
 /* From infcmd.c */
 
 extern void post_create_inferior (struct target_ops *, int);

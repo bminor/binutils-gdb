@@ -1,3 +1,11 @@
+2013-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.base/corefile.exp: Test whether $_exitsignal is set and
+	$_exitcode is void when opening a corefile.
+	* gdb.base/exitsignal.exp: New file.
+	* gdb.base/segv.c: Likewise.
+	* gdb.base/normal.c: Likewise.
+
 2013-10-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.mi/mi-start.c, gdb.mi/mi-start.exp: New files.

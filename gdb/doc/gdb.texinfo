@@ -9751,8 +9751,64 @@ to match the format in which the data was printed.
 
 @item $_exitcode
 @vindex $_exitcode@r{, convenience variable}
-The variable @code{$_exitcode} is automatically set to the exit code when
-the program being debugged terminates.
+When the program being debugged terminates normally, @value{GDBN}
+automatically sets this variable to the exit code of the program, and
+resets @code{$_exitsignal} to @code{void}.
+
+@item $_exitsignal
+@vindex $_exitsignal@r{, convenience variable}
+When the program being debugged dies due to an uncaught signal,
+@value{GDBN} automatically sets this variable to that signal's number,
+and resets @code{$_exitcode} to @code{void}.
+
+To distinguish between whether the program being debugged has exited
+(i.e., @code{$_exitcode} is not @code{void}) or signalled (i.e.,
+@code{$_exitsignal} is not @code{void}), the convenience function
+@code{$_isvoid} can be used (@pxref{Convenience Funs,, Convenience
+Functions}).  For example, considering the following source code:
+
+@smallexample
+#include <signal.h>
+
+int
+main (int argc, char *argv[])
+@{
+  raise (SIGALRM);
+  return 0;
+@}
+@end smallexample
+
+A valid way of telling whether the program being debugged has exited
+or signalled would be:
+
+@smallexample
+(@value{GDBP}) define has_exited_or_signalled
+Type commands for definition of ``has_exited_or_signalled''.
+End with a line saying just ``end''.
+>if $_isvoid ($_exitsignal)
+ >echo The program has exited\n
+ >else
+ >echo The program has signalled\n
+ >end
+>end
+(@value{GDBP}) run
+Starting program:
+
+Program terminated with signal SIGALRM, Alarm clock.
+The program no longer exists.
+(@value{GDBP}) has_exited_or_signalled
+The program has signalled
+@end smallexample
+
+As can be seen, @value{GDBN} correctly informs that the program being
+debugged has signalled, since it calls @code{raise} and raises a
+@code{SIGALRM} signal.  If the program being debugged had not called
+@code{raise}, then @value{GDBN} would report a normal exit:
+
+@smallexample
+(@value{GDBP}) has_exited_or_signalled
+The program has exited
+@end smallexample
 
 @item $_exception
 The variable @code{$_exception} is set to the exception object being

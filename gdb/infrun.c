@@ -3426,6 +3426,9 @@ handle_inferior_event (struct execution_control_state *ecs)
       handle_vfork_child_exec_or_exit (0);
       target_terminal_ours ();	/* Must do this before mourn anyway.  */
 
+      /* Clearing any previous state of convenience variables.  */
+      clear_exit_convenience_vars ();
+
       if (ecs->ws.kind == TARGET_WAITKIND_EXITED)
 	{
 	  /* Record the exit code in the convenience variable $_exitcode, so
@@ -3440,7 +3443,34 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  print_exited_reason (ecs->ws.value.integer);
 	}
       else
-	print_signal_exited_reason (ecs->ws.value.sig);
+	{
+	  struct regcache *regcache = get_thread_regcache (ecs->ptid);
+	  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+	  if (gdbarch_gdb_signal_to_target_p (gdbarch))
+	    {
+	      /* Set the value of the internal variable $_exitsignal,
+		 which holds the signal uncaught by the inferior.  */
+	      set_internalvar_integer (lookup_internalvar ("_exitsignal"),
+				       gdbarch_gdb_signal_to_target (gdbarch,
+							  ecs->ws.value.sig));
+	    }
+	  else
+	    {
+	      /* We don't have access to the target's method used for
+		 converting between signal numbers (GDB's internal
+		 representation <-> target's representation).
+		 Therefore, we cannot do a good job at displaying this
+		 information to the user.  It's better to just warn
+		 her about it (if infrun debugging is enabled), and
+		 give up.  */
+	      if (debug_infrun)
+		fprintf_filtered (gdb_stdlog, _("\
+Cannot fill $_exitsignal with the correct signal number.\n"));
+	    }
+
+	  print_signal_exited_reason (ecs->ws.value.sig);
+	}
 
       gdb_flush (gdb_stdout);
       target_mourn_inferior ();
@@ -7060,6 +7090,15 @@ save_inferior_ptid (void)
   saved_ptid_ptr = xmalloc (sizeof (ptid_t));
   *saved_ptid_ptr = inferior_ptid;
   return make_cleanup (restore_inferior_ptid, saved_ptid_ptr);
+}
+
+/* See inferior.h.  */
+
+void
+clear_exit_convenience_vars (void)
+{
+  clear_internalvar (lookup_internalvar ("_exitsignal"));
+  clear_internalvar (lookup_internalvar ("_exitcode"));
 }
 
 

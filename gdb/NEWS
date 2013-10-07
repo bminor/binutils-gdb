@@ -122,6 +122,10 @@ show range-stepping
 * The exception-related catchpoints, like "catch throw", now accept a
   regular expression which can be used to filter exceptions by type.
 
+* The new convenience variable $_exitsignal is automatically set to
+  the terminating signal number when the program being debugged dies
+  due to an uncaught signal.
+
 * MI changes
 
   ** The -trace-save MI command can optionally save trace buffer in Common

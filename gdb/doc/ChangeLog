@@ -1,3 +1,8 @@
+2013-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdb.texinfo (Convenience Variables): Document $_exitsignal.
+	Update entry for $_exitcode.
+
 2013-10-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (GDB/MI Program Execution): Document "-exec-run"'s

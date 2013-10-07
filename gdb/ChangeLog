@@ -1,3 +1,13 @@
+2013-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* NEWS: Mention new convenience variable $_exitsignal.
+	* corelow.c (core_open): Reset exit convenience variables.  Set
+	$_exitsignal to the uncaught signal which generated the corefile.
+	* infrun.c (handle_inferior_event): Reset exit convenience
+	variables.  Set $_exitsignal for TARGET_WAITKIND_SIGNALLED.
+	(clear_exit_convenience_vars): New function.
+	* inferior.h (clear_exit_convenience_vars): New prototype.
+
 2013-10-06  Yao Qi  <yao@codesourcery.com>
 
 	* varobj.h: Add comments to enum varobj_languages.
