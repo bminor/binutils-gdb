@@ -5864,6 +5864,24 @@ after the breakpoint condition, like this:
 
 @end table
 
+Thread-specific breakpoints are automatically deleted when
+@value{GDBN} detects the corresponding thread is no longer in the
+thread list.  For example:
+
+@smallexample
+(@value{GDBP}) c
+Thread-specific breakpoint 3 deleted - thread 28 no longer in the thread list.
+@end smallexample
+
+There are several ways for a thread to disappear, such as a regular
+thread exit, but also when you detach from the process with the
+@code{detach} command (@pxref{Attach, ,Debugging an Already-running
+Process}), or if @value{GDBN} loses the remote connection
+(@pxref{Remote Debugging}), etc.  Note that with some targets,
+@value{GDBN} is only able to detect a thread has exited when the user
+explictly asks for the thread list with the @code{info threads}
+command.
+
 @node Interrupted System Calls
 @subsection Interrupted System Calls 
 

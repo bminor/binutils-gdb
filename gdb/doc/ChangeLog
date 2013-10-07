@@ -1,3 +1,9 @@
+2013-10-07  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/11568
+	* gdb.texinfo (Thread-Specific Breakpoints): Mention what happens
+	when the thread is removed from the thread list.
+
 2013-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.texinfo (Convenience Variables): Document $_exitsignal.
