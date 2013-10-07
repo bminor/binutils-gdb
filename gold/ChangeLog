@@ -1,3 +1,12 @@
+2013-10-07  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/16010
+	* testsuite/Makefile.am (icf_test): Fix dependencies.
+	(icf_safe_test): Likewise.
+	(icf_safe_so_test): Likewise.
+	(large_symbol_alignment): Add empty _LDADD rule.
+	* testsuite/Makefile.in: Regenerate.
+
 2013-09-03  Pavel Chupin  <pavel.v.chupin@intel.com>
 
 	PR gold/15927

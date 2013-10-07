@@ -208,8 +208,10 @@ check_DATA += icf_test.map
 MOSTLYCLEANFILES += icf_test icf_test.map
 icf_test.o: icf_test.cc 
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
-icf_test icf_test.map: icf_test.o gcctestdir/ld
+icf_test: icf_test.o gcctestdir/ld
 	$(CXXLINK) -o icf_test -Bgcctestdir/ -Wl,--icf=all,-Map,icf_test.map icf_test.o
+icf_test.map: icf_test
+	@touch icf_test.map
 
 check_SCRIPTS += icf_keep_unique_test.sh
 check_DATA += icf_keep_unique_test.stdout
@@ -226,8 +228,10 @@ check_DATA += icf_safe_test_1.stdout icf_safe_test_2.stdout icf_safe_test.map
 MOSTLYCLEANFILES += icf_safe_test icf_safe_test.map
 icf_safe_test.o: icf_safe_test.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
-icf_safe_test icf_safe_test.map: icf_safe_test.o gcctestdir/ld
+icf_safe_test: icf_safe_test.o gcctestdir/ld
 	$(CXXLINK) -o icf_safe_test -Bgcctestdir/ -Wl,--icf=safe,-Map,icf_safe_test.map icf_safe_test.o
+icf_safe_test.map: icf_safe_test
+	@touch icf_safe_test.map
 icf_safe_test_1.stdout: icf_safe_test
 	$(TEST_NM) $< > $@
 icf_safe_test_2.stdout: icf_safe_test
@@ -238,8 +242,10 @@ check_DATA += icf_safe_so_test_1.stdout icf_safe_so_test_2.stdout icf_safe_so_te
 MOSTLYCLEANFILES += icf_safe_so_test icf_safe_so_test.map
 icf_safe_so_test.o: icf_safe_so_test.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIC -g -o $@ $<
-icf_safe_so_test icf_safe_so_test.map: icf_safe_so_test.o gcctestdir/ld
+icf_safe_so_test: icf_safe_so_test.o gcctestdir/ld
 	$(CXXLINK) -o icf_safe_so_test -Bgcctestdir/ -Wl,--icf=safe,-Map,icf_safe_so_test.map icf_safe_so_test.o -fPIC -shared
+icf_safe_so_test.map:
+	@touch icf_safe_so_test.map
 icf_safe_so_test_1.stdout: icf_safe_so_test
 	$(TEST_NM) $< > $@
 icf_safe_so_test_2.stdout: icf_safe_so_test
@@ -326,6 +332,7 @@ check_PROGRAMS += large_symbol_alignment
 large_symbol_alignment_SOURCES = large_symbol_alignment.cc
 large_symbol_alignment_DEPENDENCIES = gcctestdir/ld
 large_symbol_alignment_LDFLAGS = -Bgcctestdir/
+large_symbol_alignment_LDADD =
 
 check_SCRIPTS += merge_string_literals.sh
 check_DATA += merge_string_literals.stdout

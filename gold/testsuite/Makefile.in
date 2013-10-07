@@ -154,16 +154,8 @@ check_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = icf_virtual_function_folding_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	large_symbol_alignment \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_test basic_pic_test
-@GCC_FALSE@large_symbol_alignment_DEPENDENCIES = libgoldtest.a \
-@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@large_symbol_alignment_DEPENDENCIES =  \
-@NATIVE_LINKER_FALSE@	libgoldtest.a ../libgold.a \
-@NATIVE_LINKER_FALSE@	../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@large_symbol_alignment_DEPENDENCIES =
+@NATIVE_LINKER_FALSE@large_symbol_alignment_DEPENDENCIES =
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = basic_static_test \
 @GCC_TRUE@@HAVE_STATIC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = basic_pie_test \
@@ -1308,7 +1300,6 @@ large_LINK = $(CCLD) $(large_CFLAGS) $(CFLAGS) $(large_LDFLAGS) \
 	$(LDFLAGS) -o $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_large_symbol_alignment_OBJECTS = large_symbol_alignment.$(OBJEXT)
 large_symbol_alignment_OBJECTS = $(am_large_symbol_alignment_OBJECTS)
-large_symbol_alignment_LDADD = $(LDADD)
 large_symbol_alignment_LINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(large_symbol_alignment_LDFLAGS) $(LDFLAGS) -o $@
 @NATIVE_OR_CROSS_LINKER_TRUE@am_leb128_unittest_OBJECTS =  \
@@ -2160,6 +2151,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_SOURCES = large_symbol_alignment.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@large_symbol_alignment_LDADD = 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_SOURCES = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_LDFLAGS = -Bgcctestdir/
@@ -4441,8 +4433,10 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) --format=bsd --numeric-sort $< > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test.o: icf_test.cc 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test icf_test.map: icf_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test: icf_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -o icf_test -Bgcctestdir/ -Wl,--icf=all,-Map,icf_test.map icf_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_test.map: icf_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch icf_test.map
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_keep_unique_test.o: icf_keep_unique_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_keep_unique_test: icf_keep_unique_test.o gcctestdir/ld
@@ -4451,16 +4445,20 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) -C $< > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test.o: icf_safe_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test icf_safe_test.map: icf_safe_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test: icf_safe_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -o icf_safe_test -Bgcctestdir/ -Wl,--icf=safe,-Map,icf_safe_test.map icf_safe_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test.map: icf_safe_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch icf_safe_test.map
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test_1.stdout: icf_safe_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) $< > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_test_2.stdout: icf_safe_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -h $< > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test.o: icf_safe_so_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -ffunction-sections -fPIC -g -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test icf_safe_so_test.map: icf_safe_so_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test: icf_safe_so_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -o icf_safe_so_test -Bgcctestdir/ -Wl,--icf=safe,-Map,icf_safe_so_test.map icf_safe_so_test.o -fPIC -shared
+@GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test.map:
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	@touch icf_safe_so_test.map
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test_1.stdout: icf_safe_so_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_NM) $< > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@icf_safe_so_test_2.stdout: icf_safe_so_test
