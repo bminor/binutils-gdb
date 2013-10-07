@@ -2259,10 +2259,13 @@ namespace eval ::varobj_tree {
   # given varobj TREE.  See detailed explanation above.
   proc walk_tree {language tree callback} {
     global root
+    variable _root_idx
 
     if {[llength $tree] < 3} {
       error "tree does not contain enough elements"
     }
+
+    set _root_idx 0
 
     # Create root node and process the tree.
     array set root [list language $language]

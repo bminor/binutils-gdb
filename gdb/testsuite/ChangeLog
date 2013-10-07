@@ -1,3 +1,8 @@
+2013-10-07  Tom Tromey  <tromey@redhat.com>
+
+	* lib/mi-support.exp (varobj_tree::walk_tree): Set _root_idx
+	to 0.
+
 2013-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/corefile.exp: Test whether $_exitsignal is set and
