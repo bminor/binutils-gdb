@@ -1,3 +1,7 @@
+2013-10-07  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* gas/mips/micromips@virt64.d: Fix dmfgc0 and dmtgc0.
+
 2013-10-04  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* gas/arm/thumb2_it.s: Add test for narrow tst.
