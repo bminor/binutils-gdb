@@ -1,3 +1,12 @@
+2013-10-07  Tom Tromey  <tromey@redhat.com>
+
+	* gdb_bfd.c (struct gdb_bfd_data) <relocation_computed,
+	needs_relocations>: New fields.
+	(gdb_bfd_requires_relocations): New function.
+	* gdb_bfd.h (gdb_bfd_requires_relocations): Declare.
+	* objfiles.c (get_objfile_bfd_data): Disallow sharing if
+	the BFD needs relocations applied.
+
 2013-10-07  Pedro Alves  <palves@redhat.com>
 
 	PR breakpoints/11568

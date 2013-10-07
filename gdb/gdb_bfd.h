@@ -135,4 +135,9 @@ int gdb_bfd_section_index (bfd *abfd, asection *section);
 
 int gdb_bfd_count_sections (bfd *abfd);
 
+/* Return true if any section requires relocations, false
+   otherwise.  */
+
+int gdb_bfd_requires_relocations (bfd *abfd);
+
 #endif /* GDB_BFD_H */

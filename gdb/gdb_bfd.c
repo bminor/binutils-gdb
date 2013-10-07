@@ -82,6 +82,13 @@ struct gdb_bfd_data
   /* The mtime of the BFD at the point the cache entry was made.  */
   time_t mtime;
 
+  /* This is true if we have determined whether this BFD has any
+     sections requiring relocation.  */
+  unsigned int relocation_computed : 1;
+
+  /* This is true if any section needs relocation.  */
+  unsigned int needs_relocations : 1;
+
   /* This is true if we have successfully computed the file's CRC.  */
   unsigned int crc_computed : 1;
 
@@ -632,6 +639,30 @@ int
 gdb_bfd_count_sections (bfd *abfd)
 {
   return bfd_count_sections (abfd) + 4;
+}
+
+/* See gdb_bfd.h.  */
+
+int
+gdb_bfd_requires_relocations (bfd *abfd)
+{
+  struct gdb_bfd_data *gdata = bfd_usrdata (abfd);
+
+  if (gdata->relocation_computed == 0)
+    {
+      asection *sect;
+
+      for (sect = abfd->sections; sect != NULL; sect = sect->next)
+	if ((sect->flags & SEC_RELOC) != 0)
+	  {
+	    gdata->needs_relocations = 1;
+	    break;
+	  }
+
+      gdata->relocation_computed = 1;
+    }
+
+  return gdata->needs_relocations;
 }
 
 
