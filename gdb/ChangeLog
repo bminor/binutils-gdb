@@ -1,3 +1,9 @@
+2013-10-07  Pedro Alves  <palves@redhat.com>
+
+	PR breakpoints/11568
+	* breakpoint.c (remove_threaded_breakpoints): Say "no longer in
+	the thread list" instead of "gone".
+
 2013-10-06  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* NEWS: Mention new convenience variable $_exitsignal.

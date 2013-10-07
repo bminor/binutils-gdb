@@ -2943,7 +2943,7 @@ remove_threaded_breakpoints (struct thread_info *tp, int silent)
 	  b->disposition = disp_del_at_next_stop;
 
 	  printf_filtered (_("\
-Thread-specific breakpoint %d deleted - thread %d is gone.\n"),
+Thread-specific breakpoint %d deleted - thread %d no longer in the thread list.\n"),
 			  b->number, tp->num);
 
 	  /* Hide it from the user.  */
