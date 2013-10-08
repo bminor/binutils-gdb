@@ -1,3 +1,10 @@
+2013-10-08  Jan Beulich <jbeulich@suse.com>
+
+	* i386-opc.tbl (invlpg): Use Anysize instead of Unspecified.
+	(clflush): Use Anysize instead of Byte|Unspecified.
+	(prefetch*): Likewise.
+	* i386-tbl.h: Re-generate.
+
 2013-10-07  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* micromips-opc.c (micromips_opcodes): Fix dmfgc0 and dmtgc0.

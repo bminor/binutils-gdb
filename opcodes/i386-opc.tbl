@@ -832,7 +832,7 @@ xadd, 2, 0xfc0, None, 2, Cpu486, W|CheckRegSize|Modrm|No_sSuf|No_ldSuf|IsLockabl
 cmpxchg, 2, 0xfb0, None, 2, Cpu486, W|CheckRegSize|Modrm|No_sSuf|No_ldSuf|IsLockable|HLEPrefixOk, { Reg8|Reg16|Reg32|Reg64, Reg8|Reg16|Reg32|Reg64|Byte|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 invd, 0, 0xf08, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 wbinvd, 0, 0xf09, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
-invlpg, 1, 0xf01, 0x7, 2, Cpu486, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+invlpg, 1, 0xf01, 0x7, 2, Cpu486, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 // 586 and late 486 extensions.
 cpuid, 0, 0xfa2, None, 2, Cpu486, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
@@ -926,7 +926,7 @@ fucompi, 1, 0xdfe8, None, 2, Cpu687, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|N
 // Pentium4 extensions.
 
 movnti, 2, 0xfc3, None, 2, CpuSSE2, Modrm|No_bSuf|No_wSuf|No_sSuf|No_ldSuf|NoAVX, { Reg32|Reg64, Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-clflush, 1, 0xfae, 0x7, 2, CpuClflush, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+clflush, 1, 0xfae, 0x7, 2, CpuClflush, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 lfence, 0, 0xfae, 0xe8, 2, CpuSSE2, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoAVX, { 0 }
 mfence, 0, 0xfae, 0xf0, 2, CpuSSE2, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt|NoAVX, { 0 }
 // Processors that do not support PAUSE treat this opcode as a NOP instruction.
@@ -1287,10 +1287,10 @@ pmovmskb, 2, 0xfd7, None, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|
 pmulhuw, 2, 0x66e4, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pmulhuw, 2, 0x660fe4, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 pmulhuw, 2, 0xfe4, None, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegMMX }
-prefetchnta, 1, 0xf18, 0x0, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-prefetcht0, 1, 0xf18, 0x1, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-prefetcht1, 1, 0xf18, 0x2, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-prefetcht2, 1, 0xf18, 0x3, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+prefetchnta, 1, 0xf18, 0x0, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+prefetcht0, 1, 0xf18, 0x1, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+prefetcht1, 1, 0xf18, 0x2, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+prefetcht2, 1, 0xf18, 0x3, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 psadbw, 2, 0xff6, None, 2, CpuSSE|Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegMMX }
 psadbw, 2, 0x66f6, None, 1, CpuAVX, Modrm|Vex|VexOpcode=0|VexVVVV=1|VexW=1|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|SSE2AVX, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 psadbw, 2, 0x660ff6, None, 2, CpuSSE2, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
@@ -2964,8 +2964,8 @@ tzmsk,  2, 0x01,   0x4, 1, CpuTBM, Modrm|CheckRegSize|Vex=3|VexOpcode=4|VexVVVV=
 
 // AMD 3DNow! instructions.
 
-prefetch, 1, 0xf0d, 0x0, 2, Cpu3dnow|CpuPRFCHW, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-prefetchw, 1, 0xf0d, 0x1, 2, Cpu3dnow|CpuPRFCHW, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+prefetch, 1, 0xf0d, 0x0, 2, Cpu3dnow|CpuPRFCHW, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+prefetchw, 1, 0xf0d, 0x1, 2, Cpu3dnow|CpuPRFCHW, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 femms, 0, 0xf0e, None, 2, Cpu3dnow, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 pavgusb, 2, 0xf0f, 0xbf, 2, Cpu3dnow, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegMMX }
 pf2id, 2, 0xf0f, 0x1d, 2, Cpu3dnow, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegMMX, RegMMX }
@@ -4285,6 +4285,6 @@ vscatterpf0qps, 1, 0x66C7, 5, 1, CpuAVX512PF, Modrm|EVex=1|Masking=2|NoDefMask|V
 vscatterpf1dps, 1, 0x66C6, 6, 1, CpuAVX512PF, Modrm|EVex=1|Masking=2|NoDefMask|VexOpcode=1|VexW=1|Disp8MemShift=2|VecSIB=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { ZMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8 }
 vscatterpf1qps, 1, 0x66C7, 6, 1, CpuAVX512PF, Modrm|EVex=1|Masking=2|NoDefMask|VexOpcode=1|VexW=1|Disp8MemShift=2|VecSIB=3|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { ZMMword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|Vec_Disp8 }
 
-prefetchwt1, 1, 0x0F0D, 2, 2, CpuAVX512PF, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+prefetchwt1, 1, 0x0F0D, 2, 2, CpuAVX512PF, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 // AVX512PF instructions end.
