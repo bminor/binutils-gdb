@@ -14413,7 +14413,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   struct type *base_type, *orig_base_type;
   struct type *range_type;
   struct attribute *attr;
-  LONGEST low, high;
+  struct dynamic_prop low, high;
   int low_default_is_valid;
   const char *name;
   LONGEST negative_mask;
@@ -14430,33 +14430,37 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   if (range_type)
     return range_type;
 
+  low.kind = PROP_CONST;
+  high.kind = PROP_CONST;
+  high.data.const_val = 0;
+
   /* Set LOW_DEFAULT_IS_VALID if current language and DWARF version allow
      omitting DW_AT_lower_bound.  */
   switch (cu->language)
     {
     case language_c:
     case language_cplus:
-      low = 0;
+      low.data.const_val = 0;
       low_default_is_valid = 1;
       break;
     case language_fortran:
-      low = 1;
+      low.data.const_val = 1;
       low_default_is_valid = 1;
       break;
     case language_d:
     case language_java:
     case language_objc:
-      low = 0;
+      low.data.const_val = 0;
       low_default_is_valid = (cu->header.version >= 4);
       break;
     case language_ada:
     case language_m2:
     case language_pascal:
-      low = 1;
+      low.data.const_val = 1;
       low_default_is_valid = (cu->header.version >= 4);
       break;
     default:
-      low = 0;
+      low.data.const_val = 0;
       low_default_is_valid = 0;
       break;
     }
@@ -14466,7 +14470,8 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      but we don't know how to handle it.  */
   attr = dwarf2_attr (die, DW_AT_lower_bound, cu);
   if (attr)
-    low = dwarf2_get_attr_constant_value (attr, low);
+    low.data.const_val
+      = dwarf2_get_attr_constant_value (attr, low.data.const_val);
   else if (!low_default_is_valid)
     complaint (&symfile_complaints, _("Missing DW_AT_lower_bound "
 				      "- DIE at 0x%x [in module %s]"),
@@ -14488,10 +14493,10 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
              either; we just represent them as zero-length
              arrays.  Choose an appropriate upper bound given
              the lower bound we've computed above.  */
-          high = low - 1;
+          high.data.const_val = low.data.const_val - 1;
         }
       else
-        high = dwarf2_get_attr_constant_value (attr, 1);
+        high.data.const_val = dwarf2_get_attr_constant_value (attr, 1);
     }
   else
     {
@@ -14499,12 +14504,12 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       if (attr)
 	{
 	  int count = dwarf2_get_attr_constant_value (attr, 1);
-	  high = low + count - 1;
+	  high.data.const_val = low.data.const_val + count - 1;
 	}
       else
 	{
 	  /* Unspecified array length.  */
-	  high = low - 1;
+	  high.data.const_val = low.data.const_val - 1;
 	}
     }
 
@@ -14555,22 +14560,24 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
      the base type is signed.  */
   negative_mask =
     (LONGEST) -1 << (TYPE_LENGTH (base_type) * TARGET_CHAR_BIT - 1);
-  if (!TYPE_UNSIGNED (base_type) && (low & negative_mask))
-    low |= negative_mask;
-  if (!TYPE_UNSIGNED (base_type) && (high & negative_mask))
-    high |= negative_mask;
+  if (low.kind == PROP_CONST
+      && !TYPE_UNSIGNED (base_type) && (low.data.const_val & negative_mask))
+    low.data.const_val |= negative_mask;
+  if (high.kind == PROP_CONST
+      && !TYPE_UNSIGNED (base_type) && (high.data.const_val & negative_mask))
+    high.data.const_val |= negative_mask;
 
-  range_type = create_static_range_type (NULL, orig_base_type, low, high);
+  range_type = create_range_type (NULL, orig_base_type, &low, &high);
 
   /* Mark arrays with dynamic length at least as an array of unspecified
      length.  GDB could check the boundary but before it gets implemented at
      least allow accessing the array elements.  */
   if (attr && attr_form_is_block (attr))
-    TYPE_HIGH_BOUND_UNDEFINED (range_type) = 1;
+    TYPE_HIGH_BOUND_KIND (range_type) = PROP_UNDEFINED;
 
   /* Ada expects an empty array on no boundary attributes.  */
   if (attr == NULL && cu->language != language_ada)
-    TYPE_HIGH_BOUND_UNDEFINED (range_type) = 1;
+    TYPE_HIGH_BOUND_KIND (range_type) = PROP_UNDEFINED;
 
   name = dwarf2_name (die, cu);
   if (name)

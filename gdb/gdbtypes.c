@@ -798,6 +798,34 @@ allocate_stub_method (struct type *type)
   return mtype;
 }
 
+/* Create a range type with a dynamic range from LOW_BOUND to
+   HIGH_BOUND, inclusive.  See create_range_type for further details. */
+
+struct type *
+create_range_type (struct type *result_type, struct type *index_type,
+		   const struct dynamic_prop *low_bound,
+		   const struct dynamic_prop *high_bound)
+{
+  if (result_type == NULL)
+    result_type = alloc_type_copy (index_type);
+  TYPE_CODE (result_type) = TYPE_CODE_RANGE;
+  TYPE_TARGET_TYPE (result_type) = index_type;
+  if (TYPE_STUB (index_type))
+    TYPE_TARGET_STUB (result_type) = 1;
+  else
+    TYPE_LENGTH (result_type) = TYPE_LENGTH (check_typedef (index_type));
+
+  TYPE_RANGE_DATA (result_type) = (struct range_bounds *)
+    TYPE_ZALLOC (result_type, sizeof (struct range_bounds));
+  TYPE_RANGE_DATA (result_type)->low = *low_bound;
+  TYPE_RANGE_DATA (result_type)->high = *high_bound;
+
+  if (low_bound->kind == PROP_CONST && low_bound->data.const_val >= 0)
+    TYPE_UNSIGNED (result_type) = 1;
+
+  return result_type;
+}
+
 /* Create a range type using either a blank type supplied in
    RESULT_TYPE, or creating a new type, inheriting the objfile from
    INDEX_TYPE.
@@ -812,21 +840,15 @@ struct type *
 create_static_range_type (struct type *result_type, struct type *index_type,
 			  LONGEST low_bound, LONGEST high_bound)
 {
-  if (result_type == NULL)
-    result_type = alloc_type_copy (index_type);
-  TYPE_CODE (result_type) = TYPE_CODE_RANGE;
-  TYPE_TARGET_TYPE (result_type) = index_type;
-  if (TYPE_STUB (index_type))
-    TYPE_TARGET_STUB (result_type) = 1;
-  else
-    TYPE_LENGTH (result_type) = TYPE_LENGTH (check_typedef (index_type));
-  TYPE_RANGE_DATA (result_type) = (struct range_bounds *)
-    TYPE_ZALLOC (result_type, sizeof (struct range_bounds));
-  TYPE_LOW_BOUND (result_type) = low_bound;
-  TYPE_HIGH_BOUND (result_type) = high_bound;
+  struct dynamic_prop low, high;
 
-  if (low_bound >= 0)
-    TYPE_UNSIGNED (result_type) = 1;
+  low.kind = PROP_CONST;
+  low.data.const_val = low_bound;
+
+  high.kind = PROP_CONST;
+  high.data.const_val = high_bound;
+
+  result_type = create_range_type (result_type, index_type, &low, &high);
 
   return result_type;
 }

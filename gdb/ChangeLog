@@ -1,5 +1,21 @@
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* dwarf2read.c (read_subrange_type): Use struct bound_prop for
+	declaring high/low bounds and change uses accordingly. Call
+	create_range_type instead of create_static_range_type.
+	* gdbtypes.c (create_range_type): New function.
+	(create_range_type): Convert bounds into struct bound_prop and pass
+	them to create_range_type.
+	* gdbtypes.h (struct bound_prop): New struct.
+	(create_range_type): New function prototype.
+	(struct range_bounds): Use struct bound_prop instead of LONGEST for
+	high/low bounds. Remove low_undefined/high_undefined and adapt all uses.
+	(TYPE_LOW_BOUND,TYPE_HIGH_BOUND): Adapt macros to refer to the static
+	part of the bound.
+	* parse.c (follow_types): Set high bound kind to BOUND_UNDEFINED.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* gdbtypes.c (create_static_range_type): Renamed from create_range_type.
 	* gdbtypes.h (create_static_range_type): Renamed from create_range_type.
 	* ada-lang.c: All uses of create_range_type updated.

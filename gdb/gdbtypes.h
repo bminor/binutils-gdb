@@ -399,6 +399,33 @@ enum type_instance_flag_value
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 
+/* * Used to store a dynamic property.  */
+
+struct dynamic_prop
+{
+  /* Determine which field of the union dynamic_prop.data is used.  */
+  enum
+  {
+    PROP_UNDEFINED, /* Not defined.  */
+    PROP_CONST,     /* Constant.  */
+    PROP_LOCEXPR,   /* Location expression.  */
+    PROP_LOCLIST    /* Location list.  */
+  } kind;
+
+  /* Storage for dynamic or static value.  */
+  union data
+  {
+    /* Storage for constant property.  */
+
+    LONGEST const_val;
+
+    /* Storage for dynamic property.  */
+
+    void *baton;
+  } data;
+};
+
+
 /* * Determine which field of the union main_type.fields[x].loc is
    used.  */
 
@@ -630,19 +657,11 @@ struct main_type
     {
       /* * Low bound of range.  */
 
-      LONGEST low;
+      struct dynamic_prop low;
 
       /* * High bound of range.  */
 
-      LONGEST high;
-
-      /* * Flags indicating whether the values of low and high are
-         valid.  When true, the respective range value is
-         undefined.  Currently used only for FORTRAN arrays.  */
-           
-      char low_undefined;
-      char high_undefined;
-
+      struct dynamic_prop high;
     } *bounds;
 
   } flds_bnds;
@@ -1155,12 +1174,18 @@ extern void allocate_gnat_aux_type (struct type *);
 
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
 #define TYPE_RANGE_DATA(thistype) TYPE_MAIN_TYPE(thistype)->flds_bnds.bounds
-#define TYPE_LOW_BOUND(range_type) TYPE_RANGE_DATA(range_type)->low
-#define TYPE_HIGH_BOUND(range_type) TYPE_RANGE_DATA(range_type)->high
+#define TYPE_LOW_BOUND(range_type) \
+  TYPE_RANGE_DATA(range_type)->low.data.const_val
+#define TYPE_HIGH_BOUND(range_type) \
+  TYPE_RANGE_DATA(range_type)->high.data.const_val
 #define TYPE_LOW_BOUND_UNDEFINED(range_type) \
-   TYPE_RANGE_DATA(range_type)->low_undefined
+  (TYPE_RANGE_DATA(range_type)->low.kind == PROP_UNDEFINED)
 #define TYPE_HIGH_BOUND_UNDEFINED(range_type) \
-   TYPE_RANGE_DATA(range_type)->high_undefined
+  (TYPE_RANGE_DATA(range_type)->high.kind == PROP_UNDEFINED)
+#define TYPE_HIGH_BOUND_KIND(range_type) \
+  TYPE_RANGE_DATA(range_type)->high.kind
+#define TYPE_LOW_BOUND_KIND(range_type) \
+  TYPE_RANGE_DATA(range_type)->low.kind
 
 /* Moto-specific stuff for FORTRAN arrays.  */
 
@@ -1628,8 +1653,13 @@ extern struct type *lookup_function_type_with_arguments (struct type *,
 extern struct type *create_static_range_type (struct type *, struct type *,
 					      LONGEST, LONGEST);
 
+
 extern struct type *create_array_type_with_stride
   (struct type *, struct type *, struct type *, unsigned int);
+
+extern struct type *create_range_type (struct type *, struct type *,
+				       const struct dynamic_prop *,
+				       const struct dynamic_prop *);
 
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);
