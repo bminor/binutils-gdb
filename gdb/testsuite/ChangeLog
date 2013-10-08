@@ -1,3 +1,7 @@
+2013-10-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_catch_ex.exp: Make "mi_execute_to" test names unique.
+
 2013-10-07  Tom Tromey  <tromey@redhat.com>
 
 	* lib/mi-support.exp (varobj_tree::walk_tree): Set _root_idx
