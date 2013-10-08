@@ -1,3 +1,8 @@
+2013-10-08  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Add DT_DEBUG also
+	for PIE executables.
+
 2013-10-04  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* configure: Regenerate.
