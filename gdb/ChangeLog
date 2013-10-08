@@ -1,3 +1,7 @@
+2013-10-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_exception_sal): Remove advance declaration.
+
 2013-10-07  Tom Tromey  <tromey@redhat.com>
 
 	* objfiles.c (free_objfile_per_bfd_storage): Delete the
