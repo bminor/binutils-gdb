@@ -5434,13 +5434,10 @@ check_long_reg (void)
 	    return 0;
 	  }
 #if REGISTER_WARNINGS
-	else
-	  as_warn (_("using `%s%s' instead of `%s%s' due to `%c' suffix"),
-		   register_prefix,
-		   (i.op[op].regs + REGNAM_EAX - REGNAM_AX)->reg_name,
-		   register_prefix,
-		   i.op[op].regs->reg_name,
-		   i.suffix);
+	as_warn (_("using `%s%s' instead of `%s%s' due to `%c' suffix"),
+		 register_prefix,
+		 (i.op[op].regs + REGNAM_EAX - REGNAM_AX)->reg_name,
+		 register_prefix, i.op[op].regs->reg_name, i.suffix);
 #endif
       }
   /* Warn if the r prefix on a general reg is missing.  */
@@ -5546,14 +5543,11 @@ check_word_reg (void)
 		    i.suffix);
 	    return 0;
 	  }
-	else
 #if REGISTER_WARNINGS
-	  as_warn (_("using `%s%s' instead of `%s%s' due to `%c' suffix"),
-		   register_prefix,
-		   (i.op[op].regs + REGNAM_AX - REGNAM_EAX)->reg_name,
-		   register_prefix,
-		   i.op[op].regs->reg_name,
-		   i.suffix);
+	as_warn (_("using `%s%s' instead of `%s%s' due to `%c' suffix"),
+		 register_prefix,
+		 (i.op[op].regs + REGNAM_AX - REGNAM_EAX)->reg_name,
+		 register_prefix, i.op[op].regs->reg_name, i.suffix);
 #endif
       }
   return 1;

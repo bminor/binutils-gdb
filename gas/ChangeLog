@@ -1,5 +1,10 @@
 2013-10-08  Jan Beulich <jbeulich@suse.com>
 
+	* tc-i386.c (check_word_reg): Remove misplaced "else".
+	(check_long_reg): Restore symmetry with check_word_reg.
+
+2013-10-08  Jan Beulich <jbeulich@suse.com>
+
 	* gas/config/tc-arm.c (do_t_push_pop): Honor inst.size_req. Simplify
 	LR/PC check.
 
