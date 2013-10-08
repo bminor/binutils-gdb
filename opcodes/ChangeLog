@@ -1,6 +1,16 @@
 2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2013-10-08  Jan Beulich <jbeulich@suse.com>
+
+	* i386-opc.tbl (invlpg): Use Anysize instead of Unspecified.
+	(clflush): Use Anysize instead of Byte|Unspecified.
+	(prefetch*): Likewise.
+	* i386-tbl.h: Re-generate.
+
+2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
 	2014-02-20  Ilya Tocar  <ilya.tocar@intel.com>
 
 	* i386-opc.tbl: Change CPU of vptestnmq, vptestnmd from CpuAVX512CD,
