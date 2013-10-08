@@ -4982,23 +4982,37 @@ aux_add_nonlocal_symbols (struct block *block, struct symbol *sym, void *data0)
   return 0;
 }
 
-/* Compare STRING1 to STRING2, with results as for strcmp.
-   Compatible with strcmp_iw in that strcmp_iw (STRING1, STRING2) <= 0
-   implies compare_names (STRING1, STRING2) (they may differ as to
-   what symbols compare equal).  */
+/* Implements compare_names, but only applying the comparision using
+   the given CASING.  */
 
 static int
-compare_names (const char *string1, const char *string2)
+compare_names_with_case (const char *string1, const char *string2,
+			 enum case_sensitivity casing)
 {
   while (*string1 != '\0' && *string2 != '\0')
     {
+      char c1, c2;
+
       if (isspace (*string1) || isspace (*string2))
 	return strcmp_iw_ordered (string1, string2);
-      if (*string1 != *string2)
+
+      if (casing == case_sensitive_off)
+	{
+	  c1 = tolower (*string1);
+	  c2 = tolower (*string2);
+	}
+      else
+	{
+	  c1 = *string1;
+	  c2 = *string2;
+	}
+      if (c1 != c2)
 	break;
+
       string1 += 1;
       string2 += 1;
     }
+
   switch (*string1)
     {
     case '(':
@@ -5016,8 +5030,41 @@ compare_names (const char *string1, const char *string2)
       if (*string2 == '(')
 	return strcmp_iw_ordered (string1, string2);
       else
-	return *string1 - *string2;
+	{
+	  if (casing == case_sensitive_off)
+	    return tolower (*string1) - tolower (*string2);
+	  else
+	    return *string1 - *string2;
+	}
     }
+}
+
+/* Compare STRING1 to STRING2, with results as for strcmp.
+   Compatible with strcmp_iw_ordered in that...
+
+       strcmp_iw_ordered (STRING1, STRING2) <= 0
+
+   ... implies...
+
+       compare_names (STRING1, STRING2) <= 0
+
+   (they may differ as to what symbols compare equal).  */
+
+static int
+compare_names (const char *string1, const char *string2)
+{
+  int result;
+
+  /* Similar to what strcmp_iw_ordered does, we need to perform
+     a case-insensitive comparison first, and only resort to
+     a second, case-sensitive, comparison if the first one was
+     not sufficient to differentiate the two strings.  */
+
+  result = compare_names_with_case (string1, string2, case_sensitive_off);
+  if (result == 0)
+    result = compare_names_with_case (string1, string2, case_sensitive_on);
+
+  return result;
 }
 
 /* Add to OBSTACKP all non-local symbols whose name and domain match

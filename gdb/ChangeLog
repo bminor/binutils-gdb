@@ -1,5 +1,13 @@
 2013-10-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (compare_names_with_case): Renamed from
+	compare_names, adding a new parameter "casing" and its handling.
+	New function documentation.
+	(compare_names): New function, implemented using
+	compare_names_with_case.
+
+2013-10-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_exception_sal): Remove advance declaration.
 
 2013-10-07  Tom Tromey  <tromey@redhat.com>
