@@ -11672,12 +11672,11 @@ do_t_push_pop (void)
 	      _("expression too complex"));
 
   mask = inst.operands[0].imm;
-  if ((mask & ~0xff) == 0)
+  if (inst.size_req != 4 && (mask & ~0xff) == 0)
     inst.instruction = THUMB_OP16 (inst.instruction) | mask;
-  else if ((inst.instruction == T_MNEM_push
-	    && (mask & ~0xff) == 1 << REG_LR)
-	   || (inst.instruction == T_MNEM_pop
-	       && (mask & ~0xff) == 1 << REG_PC))
+  else if (inst.size_req != 4
+	   && (mask & ~0xff) == (1 << (inst.instruction == T_MNEM_push
+				       ? REG_LR : REG_PC)))
     {
       inst.instruction = THUMB_OP16 (inst.instruction);
       inst.instruction |= THUMB_PP_PC_LR;

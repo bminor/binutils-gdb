@@ -1,3 +1,8 @@
+2013-10-08  Jan Beulich <jbeulich@suse.com>
+
+	* gas/config/tc-arm.c (do_t_push_pop): Honor inst.size_req. Simplify
+	LR/PC check.
+
 2013-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (msp430_operands): Accept "<foo>.a" as an alias
