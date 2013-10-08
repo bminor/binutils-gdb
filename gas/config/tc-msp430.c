@@ -485,6 +485,10 @@ static struct mcu_type_s mcu_types[] =
   {"msp430p337",  MSP_ISA_430},
   {"msp430tch5e", MSP_ISA_430},
 
+  /* NB/ This section of the list should be kept in sync with the ones in:
+       gcc/config/msp430/t-msp430
+       gcc/config/msp430/msp430.c  */
+
   {"msp430cg4616", MSP_ISA_430X},
   {"msp430cg4617", MSP_ISA_430X},
   {"msp430cg4618", MSP_ISA_430X},
@@ -712,7 +716,7 @@ static struct mcu_type_s mcu_types[] =
   {"msp430",    MSP_ISA_430},
   {"msp430X",   MSP_ISA_430X},
   {"msp430Xv2", MSP_ISA_430Xv2},
-    
+
   {NULL, 0}
 };
 
@@ -1196,7 +1200,7 @@ md_parse_option (int c, char * arg)
 	as_fatal (_("unrecognised argument to -mcpu option '%s'"), arg);
 
       return 1;
-      
+
     case OPTION_RELAX:
       msp430_enable_relax = 1;
       return 1;
@@ -2137,27 +2141,85 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
      or
      .b @r2+, 5(R1).  */
 
-  /* Check if byte or word operation.  */
-  if (*line == '.' && TOLOWER (*(line + 1)) == 'b')
+  byte_op = 0;
+  addr_op = FALSE;
+  if (*line == '.')
     {
-      bin |= BYTE_OPERATION;
-      byte_op = 1;
-    }
-  else
-    byte_op = 0;
+      bfd_boolean check = FALSE;
+      ++ line;
 
-  /* "Address" ops work on 20-bit values.  */
-  if (*line == '.' && TOLOWER (*(line + 1)) == 'a')
+      switch (TOLOWER (* line))
+	{
+	case 'b':
+	  /* Byte operation.  */
+	  bin |= BYTE_OPERATION;
+	  byte_op = 1;
+	  check = TRUE;
+	  break;
+
+	case 'a':
+	  /* "Address" ops work on 20-bit values.  */
+	  addr_op = TRUE;
+	  bin |= BYTE_OPERATION;
+	  check = TRUE;
+	  break;
+
+	case 'w':
+	  /* Word operation - this is the default.  */
+	  check = TRUE;
+	  break;
+
+	case 0:
+	case ' ':
+	case '\n':
+	case '\r':
+	  as_warn (_("no size modifier after period, .w assumed"));
+	  break;
+
+	default:
+	  as_bad (_("unrecognised instruction size modifier .%c"),
+		   * line);
+	  return 0;
+	}
+
+      if (check)
+	{
+	  ++ line;
+
+	}
+    }
+
+  if (*line && ! ISSPACE (*line))
     {
-      addr_op = TRUE;
-      bin |= BYTE_OPERATION;
+      as_bad (_("junk found after instruction: %s.%s"),
+	      opcode->name, line);
+      return 0;
     }
-  else
-    addr_op = FALSE;
 
-  /* skip .[aAbwBW].  */
-  while (! ISSPACE (*line) && *line)
-    line++;
+  /* Catch the case where the programmer has used a ".a" size modifier on an
+     instruction that does not support it.  Look for an alternative extended
+     instruction that has the same name without the period.  Eg: "add.a"
+     becomes "adda".  Although this not an officially supported way of
+     specifing instruction aliases other MSP430 assemblers allow it.  So we
+     support it for compatibility purposes.  */
+  if (addr_op && opcode->fmt >= 0)
+    {
+      char * old_name = opcode->name;
+      char real_name[32];
+
+      sprintf (real_name, "%sa", old_name);
+      opcode = hash_find (msp430_hash, real_name);
+      if (opcode == NULL)
+	{
+	  as_bad (_("instruction %s.a does not exist"), old_name);
+	  return 0;
+	}
+#if 0 /* Enable for debugging.  */
+      as_warn ("treating %s.a as %s", old_name, real_name);
+#endif
+      addr_op = FALSE;
+      bin = opcode->bin_opcode;
+    }
 
   if (opcode->fmt != -1
       && opcode->insn_opnumb
@@ -2252,7 +2314,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  insn_length = (extended_op ? 2 : 0) + 2 + (op1.ol * 2);
 	  frag = frag_more (insn_length);
 	  where = frag - frag_now->fr_literal;
-	  
+
 	  if (extended_op)
 	    {
 	      if (!addr_op)
@@ -2263,7 +2325,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  as_bad (_("repeat instruction used with non-register mode instruction"));
 		  extended &= ~ 0xf;
 		}
-	      
+
 	      if (op1.mode == OP_EXP)
 		{
 		  if (op1.exp.X_op == O_constant)
@@ -2276,7 +2338,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		    fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 				 BFD_RELOC_MSP430X_PCR20_EXT_SRC);
 		}
-	  
+
 	      /* Emit the extension word.  */
 	      bfd_putl16 (extended, frag);
 	      frag += 2;
@@ -2344,7 +2406,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 	  if (target_is_430xv2 ()
 	      && op1.mode == OP_REG
-	      && op1.reg == 0 
+	      && op1.reg == 0
 	      && (is_opcode ("rlax")
 		  || is_opcode ("rlcx")
 		  || is_opcode ("rla")
@@ -2353,7 +2415,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
 	      return 0;
 	    }
-	  
+
 	  if (extended_op)
 	    {
 	      if (!addr_op)
@@ -2364,7 +2426,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  as_bad (_("repeat instruction used with non-register mode instruction"));
 		  extended &= ~ 0xf;
 		}
-	      
+
 	      if (op1.mode == OP_EXP)
 		{
 		  if (op1.exp.X_op == O_constant)
@@ -2483,7 +2545,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	      else
 		{
 		  where += 2;
-	      
+
 		  bfd_putl16 ((bfd_vma) ZEROS, frag + 2);
 
 		  if (op1.reg || (op1.reg == 0 && op1.am == 3))
@@ -2554,7 +2616,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    bin |= 0x60 | op1.reg;
 	  else if (op1.am == 3)
 	    bin |= 0x70 | op1.reg;
-	  
+
 	  bfd_putl16 ((bfd_vma) bin, frag);
 
 	  if (op1.mode == OP_EXP)
@@ -2756,7 +2818,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		where = frag - frag_now->fr_literal;
 		bfd_putl16 ((bfd_vma) bin, frag);
 		dwarf2_emit_insn (op_length);
-	      }	    
+	      }
 	    break;
 	  }
 
@@ -2835,7 +2897,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    dwarf2_emit_insn (op_length);
 	    break;
 	  }
-	  
+
 	case 9: /* MOVA, BRA, RETA.  */
 	  imm_op = 0;
 	  bin = opcode->bin_opcode;
@@ -2871,7 +2933,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		  res += msp430_dstoperand (&op2, l2, opcode->bin_opcode,
 					    extended_op, TRUE);
 		}
-	  
+
 	      if (res)
 		break;	/* Error occurred.  All warnings were done before.  */
 	    }
@@ -2967,7 +3029,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
       frag = frag_more (insn_length);
       where = frag - frag_now->fr_literal;
-      
+
       if (extended_op)
 	{
 	  if (!addr_op)
@@ -2992,7 +3054,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_PCR20_EXT_SRC);
 	    }
-	  
+
 	  if (op2.mode == OP_EXP)
 	    {
 	      if (op2.exp.X_op == O_constant)
@@ -3002,7 +3064,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		fix_new_exp (frag_now, where, 8, &(op2.exp), FALSE,
 			     op2.reg ? BFD_RELOC_MSP430X_ABS20_EXT_ODST
 			     : BFD_RELOC_MSP430X_PCR20_EXT_ODST);
-	    
+
 	      else
 		fix_new_exp (frag_now, where, 6, &(op2.exp), FALSE,
 			     op2.reg ? BFD_RELOC_MSP430X_ABS20_EXT_DST
@@ -3104,7 +3166,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
       if (target_is_430xv2 ()
 	  && op1.mode == OP_REG
-	  && op1.reg == 0 
+	  && op1.reg == 0
 	  && (is_opcode ("rrax")
 	      || is_opcode ("rrcx")
 	      || is_opcode ("rra")
@@ -3113,11 +3175,11 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
 	  return 0;
 	}
-      
+
       insn_length = (extended_op ? 2 : 0) + 2 + (op1.ol * 2);
       frag = frag_more (insn_length);
       where = frag - frag_now->fr_literal;
-      
+
       if (extended_op)
 	{
 	  if (is_opcode ("swpbx") || is_opcode ("sxtx"))
@@ -3148,7 +3210,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    {
 	      if (op1.exp.X_op == O_constant)
 		extended |= ((op1.exp.X_add_number >> 16) & 0xf) << 7;
-	  
+
 	      else if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_ABS20_EXT_SRC);
@@ -3156,7 +3218,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		fix_new_exp (frag_now, where, 6, &(op1.exp), FALSE,
 			     BFD_RELOC_MSP430X_PCR20_EXT_SRC);
 	    }
-	  
+
 	  /* Emit the extension word.  */
 	  bfd_putl16 (extended, frag);
 	  frag += 2;
@@ -3519,12 +3581,12 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 
   fixp->fx_no_overflow = 1;
 
-  /* If polymorphs are enabled and relax disabled. 
+  /* If polymorphs are enabled and relax disabled.
      do not kill any relocs and pass them to linker.  */
-  if (msp430_enable_polys 
+  if (msp430_enable_polys
       && !msp430_enable_relax)
     {
-      if (!fixp->fx_addsy || (fixp->fx_addsy 
+      if (!fixp->fx_addsy || (fixp->fx_addsy
 	  && S_GET_SEGMENT (fixp->fx_addsy) == absolute_section))
 	fixp->fx_done = 1;	/* It is ok to kill 'abs' reloc.  */
       else
@@ -3593,13 +3655,13 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 	case BFD_RELOC_MSP430X_ABS20_EXT_SRC:
 	case BFD_RELOC_MSP430X_PCR20_EXT_SRC:
 	  bfd_putl16 ((bfd_vma) (value & 0xffff), where + 4);
-	  value >>= 16;	  
+	  value >>= 16;
 	  bfd_putl16 ((bfd_vma) (((value & 0xf) << 7) | insn), where);
 	  break;
 
 	case BFD_RELOC_MSP430X_ABS20_ADR_SRC:
 	  bfd_putl16 ((bfd_vma) (value & 0xffff), where + 2);
-	  value >>= 16;	  
+	  value >>= 16;
 	  bfd_putl16 ((bfd_vma) (((value & 0xf) << 8) | insn), where);
 	  break;
 
@@ -3633,7 +3695,7 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 	  value >>= 16;
 	  bfd_putl16 ((bfd_vma) ((value & 0xf) | insn), where);
 	  break;
-	  
+
 	default:
 	  as_fatal (_("line %d: unknown relocation type: 0x%x"),
 		    fixp->fx_line, fixp->fx_r_type);
@@ -3656,7 +3718,7 @@ S_IS_GAS_LOCAL (symbolS * s)
     return FALSE;
   name = S_GET_NAME (s);
   len = strlen (name) - 1;
-  
+
   return name[len] == 1 || name[len] == 2;
 }
 
@@ -3745,7 +3807,7 @@ tc_gen_reloc (asection * seg ATTRIBUTE_UNUSED, fixS * fixp)
 	      *reloc2->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_subsy);
 	    }
 
-	  reloc->addend = fixp->fx_offset; 
+	  reloc->addend = fixp->fx_offset;
 	  if (asec == absolute_section)
 	    {
 	      reloc->addend += S_GET_VALUE (fixp->fx_addsy);
@@ -4045,7 +4107,7 @@ msp430_relax_frag (segT seg ATTRIBUTE_UNUSED, fragS * fragP,
          by setting 'aim' to quite high value.  */
       aim = 0x7fff;
     }
-  
+
   this_state = fragP->fr_subtype;
   start_type = this_type = table + this_state;
 
@@ -4095,7 +4157,7 @@ msp430_fix_adjustable (struct fix *fixp ATTRIBUTE_UNUSED)
   if (fixp->fx_addsy
       && ((S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_CODE) == 0))
     return TRUE;
-	   
+
   return FALSE;
 }
 

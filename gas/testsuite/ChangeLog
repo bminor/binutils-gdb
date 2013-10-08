@@ -1,3 +1,13 @@
+2013-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/bad.s: New test: Checks erroneous size extensions.
+	* gas/msp430/bad.d: New test command file.
+	* gas/msp430/bad.l: New file: Expected error messages.
+	* gas/msp430/msp430.exp: Run the new test.
+	* gas/msp430/msp430x.s: Add "<foo>.a" aliases of "<foo>a"
+	instructions.
+	* gas/msp430/msp430x.d: Update expected disassembly.
+
 2013-10-07  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* gas/mips/micromips@virt64.d: Fix dmfgc0 and dmtgc0.

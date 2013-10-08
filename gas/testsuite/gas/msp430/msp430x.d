@@ -214,3 +214,14 @@ Disassembly of section .text:
 0+03c8 <[^>]*> 40 18 82 11 	sxtx.w	r2		;
 0+03cc <[^>]*> 04 18 45 11 	rpt #5 \{ rrax.a	r5		;
 0+03d0 <[^>]*> 85 18 45 11 	rpt r5 \{ rrax.a	r5		;
+0+03d4 <[^>]*> e2 01       	adda	r1,	r2	;
+0+03d6 <[^>]*> c0 01       	mova	r1,	r0	;
+0+03d8 <[^>]*> 41 13       	calla	r1		;
+0+03da <[^>]*> 40 18 01 43 	clrx.w	r1		;
+0+03de <[^>]*> d2 01       	cmpa	r1,	r2	;
+0+03e0 <[^>]*> 40 18 21 83 	decdx.w	r1		;
+0+03e4 <[^>]*> 40 18 21 53 	incdx.w	r1		;
+0+03e8 <[^>]*> c2 01       	mova	r1,	r2	;
+0+03ea <[^>]*> 10 01       	reta			;
+0+03ec <[^>]*> f2 01       	suba	r1,	r2	;
+0+03ee <[^>]*> 40 18 80 93 00 00 	cmpx.w	#0,	0x0000	;r3 As==00, PC rel. 0x03f2

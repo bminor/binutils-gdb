@@ -21,4 +21,5 @@
 if [expr [istarget "msp430-*-*"]]  then {
     run_dump_test "opcode"
     run_dump_test "msp430x"
+    run_dump_test "bad"
 }

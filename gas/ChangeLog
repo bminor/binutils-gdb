@@ -1,3 +1,9 @@
+2013-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (msp430_operands): Accept "<foo>.a" as an alias
+	for "<foo>a".  Issue error messages for unrecognised or corrrupt
+	size extensions.
+
 2013-10-04  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* config/tc-arm.c (do_t_mvn_tst): Use narrow form for tst when
