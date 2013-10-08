@@ -11318,9 +11318,6 @@ ada_exception_name_addr (enum exception_catchpoint_kind ex,
   return result;
 }
 
-static struct symtab_and_line ada_exception_sal (enum exception_catchpoint_kind,
-						 char *, char **,
-						 const struct breakpoint_ops **);
 static char *ada_exception_catchpoint_cond_string (const char *excep_string);
 
 /* Ada catchpoints.
