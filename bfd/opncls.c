@@ -1194,18 +1194,21 @@ FUNCTION
 	bfd_get_alt_debug_link_info
 
 SYNOPSIS
-	char *bfd_get_alt_debug_link_info (bfd *abfd, unsigned long *crc32_out);
+	char *bfd_get_alt_debug_link_info (bfd * abfd, size_t *buildid_len,
+			                   bfd_byte **buildid_out);
 
 DESCRIPTION
 	Fetch the filename and BuildID value for any alternate debuginfo
 	associated with @var{abfd}.  Return NULL if no such info found,
-	otherwise return filename and update @var{buildid_out}.  The
-	returned filename is allocated with @code{malloc}; freeing it
-	is the responsibility of the caller.
+	otherwise return filename and update @var{buildid_len} and
+	@var{buildid_out}.  The returned filename and build_id are
+	allocated with @code{malloc}; freeing them is the
+	responsibility of the caller.
 */
 
 char *
-bfd_get_alt_debug_link_info (bfd * abfd, unsigned long * buildid_out)
+bfd_get_alt_debug_link_info (bfd * abfd, size_t *buildid_len,
+			     bfd_byte **buildid_out)
 {
   asection *sect;
   bfd_byte *contents;
@@ -1213,6 +1216,7 @@ bfd_get_alt_debug_link_info (bfd * abfd, unsigned long * buildid_out)
   char *name;
 
   BFD_ASSERT (abfd);
+  BFD_ASSERT (buildid_len);
   BFD_ASSERT (buildid_out);
 
   sect = bfd_get_section_by_name (abfd, GNU_DEBUGALTLINK);
@@ -1227,12 +1231,13 @@ bfd_get_alt_debug_link_info (bfd * abfd, unsigned long * buildid_out)
       return NULL;
     }
 
-  /* BuildID value is stored after the filename, aligned up to 4 bytes.  */
+  /* BuildID value is stored after the filename.  */
   name = (char *) contents;
   buildid_offset = strlen (name) + 1;
-  buildid_offset = (buildid_offset + 3) & ~3;
 
-  * buildid_out = bfd_get_32 (abfd, contents + buildid_offset);
+  *buildid_len = bfd_get_section_size (sect) - buildid_offset;
+  *buildid_out = bfd_malloc (*buildid_len);
+  memcpy (*buildid_out, contents + buildid_offset, *buildid_len);
 
   return name;
 }
@@ -1466,6 +1471,24 @@ bfd_follow_gnu_debuglink (bfd *abfd, const char *dir)
 				   separate_debug_file_exists);
 }
 
+/* Helper for bfd_follow_gnu_debugaltlink.  It just pretends to return
+   a CRC.  .gnu_debugaltlink supplies a build-id, which is different,
+   but this is ok because separate_alt_debug_file_exists ignores the
+   CRC anyway.  */
+
+static char *
+get_alt_debug_link_info_shim (bfd * abfd, unsigned long *crc32_out)
+{
+  size_t len;
+  bfd_byte *buildid = NULL;
+  char *result = bfd_get_alt_debug_link_info (abfd, &len, &buildid);
+
+  *crc32_out = 0;
+  free (buildid);
+
+  return result;
+}
+
 /*
 FUNCTION
 	bfd_follow_gnu_debugaltlink
@@ -1496,7 +1519,7 @@ char *
 bfd_follow_gnu_debugaltlink (bfd *abfd, const char *dir)
 {
   return find_separate_debug_file (abfd, dir,
-				   bfd_get_alt_debug_link_info,
+				   get_alt_debug_link_info_shim,
 				   separate_alt_debug_file_exists);
 }
 

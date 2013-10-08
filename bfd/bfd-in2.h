@@ -1067,7 +1067,8 @@ unsigned long bfd_calc_gnu_debuglink_crc32
 
 char *bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out);
 
-char *bfd_get_alt_debug_link_info (bfd *abfd, unsigned long *crc32_out);
+char *bfd_get_alt_debug_link_info (bfd * abfd, size_t *buildid_len,
+    bfd_byte **buildid_out);
 
 char *bfd_follow_gnu_debuglink (bfd *abfd, const char *dir);
 

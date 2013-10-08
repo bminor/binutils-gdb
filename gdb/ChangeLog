@@ -1,3 +1,16 @@
+2013-10-08  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (SFILES): Add build-id.c.
+	(HFILES_NO_SRCDIR): Add build-id.h.
+	* build-id.c: New file, largely from elfread.c.  Modified
+	most functions.
+	* build-id.h: New file.
+	* dwarf2read.c (dwarf2_get_dwz_file): Update for change to
+	bfd_get_alt_debug_link_info.  Verify dwz file's build-id.
+	Search for dwz file using build-id.
+	* elfread.c (build_id_bfd_get, build_id_verify)
+	(build_id_to_debug_filename, find_separate_debug_file): Remove.
+
 2013-10-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (compare_names_with_case): Renamed from

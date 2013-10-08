@@ -1,3 +1,13 @@
+2013-10-08  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dwzbuildid.exp: New file.
+	* lib/dwarf.exp (Dwarf::_section): Add "flags" and "type"
+	parameters.
+	(Dwarf::_defer_output): Change "section" parameter to
+	"section_spec"; update.
+	(Dwarf::gnu_debugaltlink, Dwarf::_note, Dwarf::build_id): New
+	procs.
+
 2013-10-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_catch_ex.exp: Make "mi_execute_to" test names unique.

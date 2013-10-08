@@ -523,20 +523,27 @@ namespace eval Dwarf {
 	}
     }
 
-    proc _section {name} {
-	_emit "        .section $name"
+    proc _section {name {flags ""} {type ""}} {
+	if {$flags == "" && $type == ""} {
+	    _emit "        .section $name"
+	} elseif {$type == ""} {
+	    _emit "        .section $name, \"$flags\""
+	} else {
+	    _emit "        .section $name, \"$flags\", %$type"
+	}
     }
 
-    proc _defer_output {section body} {
+    # SECTION_SPEC is a list of arguments to _section.
+    proc _defer_output {section_spec body} {
 	variable _defer
 	variable _deferred_output
 
 	set old_defer $_defer
-	set _defer $section
+	set _defer [lindex $section_spec 0]
 
 	if {![info exists _deferred_output($_defer)]} {
 	    set _deferred_output($_defer) ""
-	    _section $section
+	    eval _section $section_spec
 	}
 
 	uplevel $body
@@ -946,6 +953,51 @@ namespace eval Dwarf {
 	catch {unset the_array}
 	set the_array(_) {}
 	unset the_array(_)
+    }
+
+    # Emit a .gnu_debugaltlink section with the given file name and
+    # build-id.  The buildid should be represented as a hexadecimal
+    # string, like "ffeeddcc".
+    proc gnu_debugaltlink {filename buildid} {
+	_defer_output .gnu_debugaltlink {
+	    _op .ascii [_quote $filename]
+	    foreach {a b} [split $buildid {}] {
+		_op .byte 0x$a$b
+	    }
+	}
+    }
+
+    proc _note {type name hexdata} {
+	set namelen [expr [string length $name] + 1]
+
+	# Name size.
+	_op .4byte $namelen
+	# Data size.
+	_op .4byte [expr [string length $hexdata] / 2]
+	# Type.
+	_op .4byte $type
+	# The name.
+	_op .ascii [_quote $name]
+	# Alignment.
+	set align 2
+	set total [expr {($namelen + (1 << $align) - 1) & (-1 << $align)}]
+	for {set i $namelen} {$i < $total} {incr i} {
+	    _op .byte 0
+	}
+	# The data.
+	foreach {a b} [split $hexdata {}] {
+	    _op .byte 0x$a$b
+	}
+    }
+
+    # Emit a note section holding the given build-id.
+    proc build_id {buildid} {
+	_defer_output {.note.gnu.build-id a note} {
+	    # From elf/common.h.
+	    set NT_GNU_BUILD_ID 3
+
+	    _note $NT_GNU_BUILD_ID GNU $buildid
+	}
     }
 
     # The top-level interface to the DWARF assembler.

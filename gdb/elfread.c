@@ -45,6 +45,7 @@
 #include "regcache.h"
 #include "bcache.h"
 #include "gdb_bfd.h"
+#include "build-id.h"
 
 extern void _initialize_elfread (void);
 
@@ -1085,131 +1086,6 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
 
   b->type = bp_breakpoint;
   update_breakpoint_locations (b, sals, sals_end);
-}
-
-/* Locate NT_GNU_BUILD_ID from ABFD and return its content.  */
-
-static const struct elf_build_id *
-build_id_bfd_get (bfd *abfd)
-{
-  if (!bfd_check_format (abfd, bfd_object)
-      || bfd_get_flavour (abfd) != bfd_target_elf_flavour
-      || elf_tdata (abfd)->build_id == NULL)
-    return NULL;
-
-  return elf_tdata (abfd)->build_id;
-}
-
-/* Return if FILENAME has NT_GNU_BUILD_ID matching the CHECK value.  */
-
-static int
-build_id_verify (const char *filename, const struct elf_build_id *check)
-{
-  bfd *abfd;
-  const struct elf_build_id *found;
-  int retval = 0;
-
-  /* We expect to be silent on the non-existing files.  */
-  abfd = gdb_bfd_open_maybe_remote (filename);
-  if (abfd == NULL)
-    return 0;
-
-  found = build_id_bfd_get (abfd);
-
-  if (found == NULL)
-    warning (_("File \"%s\" has no build-id, file skipped"), filename);
-  else if (found->size != check->size
-           || memcmp (found->data, check->data, found->size) != 0)
-    warning (_("File \"%s\" has a different build-id, file skipped"),
-	     filename);
-  else
-    retval = 1;
-
-  gdb_bfd_unref (abfd);
-
-  return retval;
-}
-
-static char *
-build_id_to_debug_filename (const struct elf_build_id *build_id)
-{
-  char *link, *debugdir, *retval = NULL;
-  VEC (char_ptr) *debugdir_vec;
-  struct cleanup *back_to;
-  int ix;
-
-  /* DEBUG_FILE_DIRECTORY/.build-id/ab/cdef */
-  link = alloca (strlen (debug_file_directory) + (sizeof "/.build-id/" - 1) + 1
-		 + 2 * build_id->size + (sizeof ".debug" - 1) + 1);
-
-  /* Keep backward compatibility so that DEBUG_FILE_DIRECTORY being "" will
-     cause "/.build-id/..." lookups.  */
-
-  debugdir_vec = dirnames_to_char_ptr_vec (debug_file_directory);
-  back_to = make_cleanup_free_char_ptr_vec (debugdir_vec);
-
-  for (ix = 0; VEC_iterate (char_ptr, debugdir_vec, ix, debugdir); ++ix)
-    {
-      size_t debugdir_len = strlen (debugdir);
-      const gdb_byte *data = build_id->data;
-      size_t size = build_id->size;
-      char *s;
-
-      memcpy (link, debugdir, debugdir_len);
-      s = &link[debugdir_len];
-      s += sprintf (s, "/.build-id/");
-      if (size > 0)
-	{
-	  size--;
-	  s += sprintf (s, "%02x", (unsigned) *data++);
-	}
-      if (size > 0)
-	*s++ = '/';
-      while (size-- > 0)
-	s += sprintf (s, "%02x", (unsigned) *data++);
-      strcpy (s, ".debug");
-
-      /* lrealpath() is expensive even for the usually non-existent files.  */
-      if (access (link, F_OK) == 0)
-	retval = lrealpath (link);
-
-      if (retval != NULL && !build_id_verify (retval, build_id))
-	{
-	  xfree (retval);
-	  retval = NULL;
-	}
-
-      if (retval != NULL)
-	break;
-    }
-
-  do_cleanups (back_to);
-  return retval;
-}
-
-static char *
-find_separate_debug_file_by_buildid (struct objfile *objfile)
-{
-  const struct elf_build_id *build_id;
-
-  build_id = build_id_bfd_get (objfile->obfd);
-  if (build_id != NULL)
-    {
-      char *build_id_name;
-
-      build_id_name = build_id_to_debug_filename (build_id);
-      /* Prevent looping on a stripped .debug file.  */
-      if (build_id_name != NULL
-	  && filename_cmp (build_id_name, objfile_name (objfile)) == 0)
-        {
-	  warning (_("\"%s\": separate debug info file has no debug info"),
-		   build_id_name);
-	  xfree (build_id_name);
-	}
-      else if (build_id_name != NULL)
-        return build_id_name;
-    }
-  return NULL;
 }
 
 /* Scan and build partial symbols for a symbol file.

@@ -69,6 +69,7 @@
 #include "f-lang.h"
 #include "source.h"
 #include "filestuff.h"
+#include "build-id.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -2364,14 +2365,15 @@ dwarf2_get_dwz_file (void)
   struct cleanup *cleanup;
   const char *filename;
   struct dwz_file *result;
-  unsigned long buildid;
+  size_t buildid_len;
+  bfd_byte *buildid;
 
   if (dwarf2_per_objfile->dwz_file != NULL)
     return dwarf2_per_objfile->dwz_file;
 
   bfd_set_error (bfd_error_no_error);
   data = bfd_get_alt_debug_link_info (dwarf2_per_objfile->objfile->obfd,
-				      &buildid);
+				      &buildid_len, &buildid);
   if (data == NULL)
     {
       if (bfd_get_error () == bfd_error_no_error)
@@ -2380,6 +2382,7 @@ dwarf2_get_dwz_file (void)
 	     bfd_errmsg (bfd_get_error ()));
     }
   cleanup = make_cleanup (xfree, data);
+  make_cleanup (xfree, buildid);
 
   filename = (const char *) data;
   if (!IS_ABSOLUTE_PATH (filename))
@@ -2396,19 +2399,24 @@ dwarf2_get_dwz_file (void)
       filename = rel;
     }
 
-  /* The format is just a NUL-terminated file name, followed by the
-     build-id.  For now, though, we ignore the build-id.  */
+  /* First try the file name given in the section.  If that doesn't
+     work, try to use the build-id instead.  */
   dwz_bfd = gdb_bfd_open (filename, gnutarget, -1);
-  if (dwz_bfd == NULL)
-    error (_("could not read '%s': %s"), filename,
-	   bfd_errmsg (bfd_get_error ()));
-
-  if (!bfd_check_format (dwz_bfd, bfd_object))
+  if (dwz_bfd != NULL)
     {
-      gdb_bfd_unref (dwz_bfd);
-      error (_("file '%s' was not usable: %s"), filename,
-	     bfd_errmsg (bfd_get_error ()));
+      if (!build_id_verify (dwz_bfd, buildid_len, buildid))
+	{
+	  gdb_bfd_unref (dwz_bfd);
+	  dwz_bfd = NULL;
+	}
     }
+
+  if (dwz_bfd == NULL)
+    dwz_bfd = build_id_to_debug_bfd (buildid_len, buildid);
+
+  if (dwz_bfd == NULL)
+    error (_("could not find '.gnu_debugaltlink' file for %s"),
+	   objfile_name (dwarf2_per_objfile->objfile));
 
   result = OBSTACK_ZALLOC (&dwarf2_per_objfile->objfile->objfile_obstack,
 			   struct dwz_file);

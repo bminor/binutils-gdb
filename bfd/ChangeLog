@@ -1,3 +1,11 @@
+2013-10-08  Tom Tromey  <tromey@redhat.com>
+
+	* bfd-in2.h: Rebuild.
+	* opncls.c (bfd_get_alt_debug_link_info): Add buildid_len
+	parameter.  Change type of buildid_out.  Update.
+	(get_alt_debug_link_info_shim): New function.
+	(bfd_follow_gnu_debuglink): Use it.
+
 2013-10-08  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_size_dynamic_sections): Add DT_DEBUG also
