@@ -1,3 +1,9 @@
+2013-10-09  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16021
+	* elf32-rl78.c (rl78_dump_symtab): Delete.
+	(rl78_get_reloc): Delete.
+
 2013-10-09  Tom Tromey  <tromey@redhat.com>
 
 	* bfd-in2.h: Rebuild.
