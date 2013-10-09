@@ -1595,6 +1595,7 @@ read_and_display_attr_value (unsigned long attribute,
 
     case DW_FORM_ref8:
     case DW_FORM_data8:
+      if (!do_loc)
 	{
 	  dwarf_vma high_bits;
 	  dwarf_vma utmp;
