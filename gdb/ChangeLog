@@ -1,5 +1,19 @@
 2013-11-07  Yao Qi  <yao@codesourcery.com>
 
+	* mi/mi-cmd-var.c: Include "language.h".
+	(mi_cmd_var_info_expression): Get language name from
+	language_defn.
+	* varobj.c (varobj_language_string): Remove.
+	(variable_language): Remove declaration.
+	(languages): Remove.
+	(varobj_get_language): Change the type of return value.
+	(variable_language): Remove.
+	* varobj.h (enum varobj_languages): Remove.
+	(varobj_language_string): Remove declaration.
+	(varobj_get_language): Update declaration.
+
+2013-11-07  Yao Qi  <yao@codesourcery.com>
+
 	* language.h (struct language_defn) <la_natural_name>: New
 	field.
 	* ada-lang.c (ada_language_defn): Initialize field
