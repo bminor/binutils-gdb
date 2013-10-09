@@ -1,3 +1,14 @@
+2013-10-09  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/catch-syscall.exp (test_catch_syscall_without_args)
+	(test_catch_syscall_with_args, test_catch_syscall_with_many_args)
+	(test_catch_syscall_with_wrong_args)
+	(test_catch_syscall_restarting_inferior)
+	(test_catch_syscall_fail_nodatadir)
+	(test_catch_syscall_without_args_noxml)
+	(test_catch_syscall_with_args_noxml)
+	(test_catch_syscall_with_wrong_args_noxml): Use with_test_prefix.
+
 2013-10-08  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/dwzbuildid.exp: New file.

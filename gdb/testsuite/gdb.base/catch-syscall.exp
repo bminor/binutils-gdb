@@ -168,106 +168,124 @@ proc check_for_program_end {} {
 proc test_catch_syscall_without_args {} {
     global gdb_prompt all_syscalls last_syscall
 
-    # Trying to set the syscall
-    set thistest "setting catch syscall without arguments"
-    gdb_test "catch syscall" "Catchpoint .*(syscall).*" $thistest
+    with_test_prefix "without arguments" {
+	# Trying to set the syscall.
+	gdb_test "catch syscall" "Catchpoint .*(syscall).*"
 
-    check_info_bp_any_syscall
+	check_info_bp_any_syscall
 
-    # We have to check every syscall
-    foreach name $all_syscalls {
-        check_continue $name
+	# We have to check every syscall.
+	foreach name $all_syscalls {
+	    check_continue $name
+	}
+
+	# At last but not least, we check if the inferior has called
+	# the last (exit) syscall.
+	check_call_to_syscall $last_syscall
+
+	# Now let's see if the inferior correctly finishes.
+	check_for_program_end
     }
-
-    # At last but not least, we check if the inferior
-    # has called the last (exit) syscall.
-    check_call_to_syscall $last_syscall
-
-    # Now let's see if the inferior correctly finishes.
-    check_for_program_end
 }
 
 proc test_catch_syscall_with_args {} {
-    global gdb_prompt
-    set syscall_name "close"
+    with_test_prefix "with arguments" {
+	global gdb_prompt
 
-    insert_catch_syscall_with_arg $syscall_name 
+	set syscall_name "close"
+	insert_catch_syscall_with_arg $syscall_name
 
-    # Can we continue until we catch the syscall?
-    check_continue $syscall_name
+	# Can we continue until we catch the syscall?
+	check_continue $syscall_name
 
-    # Now let's see if the inferior correctly finishes.
-    check_for_program_end
+	# Now let's see if the inferior correctly finishes.
+	check_for_program_end
+    }
 }
 
 proc test_catch_syscall_with_many_args {} {
-    global gdb_prompt all_syscalls all_syscalls_numbers
+    with_test_prefix "with many arguments" {
+	global gdb_prompt all_syscalls all_syscalls_numbers
 
-    insert_catch_syscall_with_many_args $all_syscalls $all_syscalls_numbers
+	insert_catch_syscall_with_many_args $all_syscalls $all_syscalls_numbers
 
-    # Can we continue until we catch the syscalls?
-    foreach name $all_syscalls {
-        check_continue $name
+	# Can we continue until we catch the syscalls?
+	foreach name $all_syscalls {
+	    check_continue $name
+	}
+
+	# Now let's see if the inferior correctly finishes.
+	check_for_program_end
     }
-
-    # Now let's see if the inferior correctly finishes.
-    check_for_program_end
 }
 
 proc test_catch_syscall_with_wrong_args {} {
-    global gdb_prompt
-    # mlock is not called from the source
-    set syscall_name "mlock"
+    with_test_prefix "wrong args" {
+	global gdb_prompt
 
-    insert_catch_syscall_with_arg $syscall_name
+	# mlock is not called from the source
+	set syscall_name "mlock"
+	insert_catch_syscall_with_arg $syscall_name
 
-    # Now, we must verify if the program stops with a continue.
-    # If it doesn't, everything is right (since we don't have
-    # a syscall named "mlock" in it).  Otherwise, this is a failure.
-    set thistest "catch syscall with unused syscall ($syscall_name)"
-    gdb_continue_to_end $thistest
+	# Now, we must verify if the program stops with a continue.
+	# If it doesn't, everything is right (since we don't have
+	# a syscall named "mlock" in it).  Otherwise, this is a failure.
+	set thistest "catch syscall with unused syscall ($syscall_name)"
+	gdb_continue_to_end $thistest
+    }
 }
 
 proc test_catch_syscall_restarting_inferior {} {
-    global gdb_prompt
-    set syscall_name "chroot"
+    with_test_prefix "restarting inferior" {
+	global gdb_prompt
 
-    insert_catch_syscall_with_arg $syscall_name
+	set syscall_name "chroot"
 
-    # Let's first reach the call of the syscall.
-    check_call_to_syscall $syscall_name
+	with_test_prefix "entry" {
+	    insert_catch_syscall_with_arg $syscall_name
 
-    # Now, restart the program
-    rerun_to_main
+	    # Let's first reach the entry of the syscall.
+	    check_call_to_syscall $syscall_name
+	}
 
-    # And check for call/return
-    check_continue $syscall_name
+	with_test_prefix "entry/return" {
+	    # Now, restart the program.
+	    rerun_to_main
 
-    # Can we finish?
-    check_for_program_end
+	    # And check for entry/return.
+	    check_continue $syscall_name
+
+	    # Can we finish?
+	    check_for_program_end
+	}
+    }
 }
 
 proc test_catch_syscall_fail_nodatadir {} {
-    global gdb_prompt
+    with_test_prefix "fail no datadir" {
+	global gdb_prompt
 
-    # Sanitizing.
-    delete_breakpoints
+	# Sanitizing.
+	delete_breakpoints
 
-    # Make sure GDB doesn't load the syscalls xml from the system data
-    # directory.
-    gdb_test_no_output "set data-directory /the/path/to/nowhere"
+	# Make sure GDB doesn't load the syscalls xml from the system
+	# data directory.
+	gdb_test_no_output "set data-directory /the/path/to/nowhere"
 
-    # Testing to see if we receive a warning when calling "catch syscall"
-    # without XML support (without datadir).
-    set thistest "Catch syscall displays a warning when there is no XML support (no datadir set)"
-    gdb_test "catch syscall" "warning: Could not load the syscall XML file.*warning: GDB will not be able to display syscall names nor to verify if.*any provided syscall numbers are valid.*Catchpoint .*(syscall).*" $thistest
+	# Testing to see if we receive a warning when calling "catch
+	# syscall" without XML support (without datadir).
+	set thistest "catch syscall displays a warning when there is no XML support"
+	gdb_test "catch syscall" \
+	    "warning: Could not load the syscall XML file.*warning: GDB will not be able to display syscall names nor to verify if.*any provided syscall numbers are valid.*Catchpoint .*(syscall).*" \
+	    $thistest
 
-    # Since the catchpoint was set, we must check if it's present at
-    # "info breakpoints"
-    check_info_bp_any_syscall
+	# Since the catchpoint was set, we must check if it's present
+	# in "info breakpoints" output.
+	check_info_bp_any_syscall
 
-    # Sanitizing.
-    delete_breakpoints
+	# Sanitizing.
+	delete_breakpoints
+    }
 }
 
 proc do_syscall_tests {} {
@@ -311,68 +329,74 @@ proc do_syscall_tests {} {
 }
 
 proc test_catch_syscall_without_args_noxml {} {
-    # We will need the syscall names even not using it
-    # because we need to know know many syscalls are in
-    # the example file.
-    global gdb_prompt all_syscalls last_syscall
+    with_test_prefix "without args noxml" {
+	# We will need the syscall names even not using it because we
+	# need to know know many syscalls are in the example file.
+	global gdb_prompt all_syscalls last_syscall
 
-    delete_breakpoints
+	delete_breakpoints
 
-    set thistest "Catch syscall without arguments and without XML support"
-    gdb_test "catch syscall" "Catchpoint .*(syscall).*"
+	gdb_test "catch syscall" "Catchpoint .*(syscall).*"
 
-    # Now, we should be able to set a catchpoint,
-    # and GDB shall not display the warning anymore.
-    foreach name $all_syscalls {
-        # Unfortunately, we don't know the syscall number
-        # that will be caught because this information is
-        # arch-dependent.  Thus, we try to catch anything
-        # similar to a number.
-        check_continue "\[0-9\]*"
+	# Now, we should be able to set a catchpoint, and GDB shall
+	# not display the warning anymore.
+	foreach name $all_syscalls {
+	    # Unfortunately, we don't know the syscall number that
+	    # will be caught because this information is
+	    # arch-dependent.  Thus, we try to catch anything similar
+	    # to a number.
+	    with_test_prefix "$name" {
+		check_continue "\[0-9\]*"
+	    }
+	}
+
+	# At last but not least, we check if the inferior has called
+	# the last (exit) syscall.
+	check_call_to_syscall "\[0-9\]*"
+
+	delete_breakpoints
     }
-
-    # At last but not least, we check if the inferior
-    # has called the last (exit) syscall.
-    check_call_to_syscall "\[0-9\]*"
-
-    delete_breakpoints
 }
 
 proc test_catch_syscall_with_args_noxml {} {
-    global gdb_prompt
+    with_test_prefix "with args noxml" {
+	global gdb_prompt
 
-    # The number of the "close" syscall.  This is our
-    # option for a "long-estabilished" syscall in all
-    # Linux architectures, but unfortunately x86_64 and
-    # a few other platforms don't "follow the convention".
-    # Because of this, we need this ugly check :-(.
-    set close_number ""
-    if { [istarget "x86_64-*-linux*"] } {
-        set close_number "3"
-    } else {
-        set close_number "6"
+	# The number of the "close" syscall.  This is our option for a
+	# "long-estabilished" syscall in all Linux architectures, but
+	# unfortunately x86_64 and a few other platforms don't "follow
+	# the convention".  Because of this, we need this ugly check
+	# :-(.
+	set close_number ""
+	if { [istarget "x86_64-*-linux*"] } {
+	    set close_number "3"
+	} else {
+	    set close_number "6"
+	}
+
+	delete_breakpoints
+
+	insert_catch_syscall_with_arg $close_number
+
+	check_continue $close_number
+
+	delete_breakpoints
     }
-
-    delete_breakpoints
-
-    insert_catch_syscall_with_arg $close_number
-
-    check_continue $close_number
-
-    delete_breakpoints
 }
 
 proc test_catch_syscall_with_wrong_args_noxml {} {
-    global gdb_prompt
+    with_test_prefix "with wrong args noxml" {
+	global gdb_prompt
 
-    delete_breakpoints
+	delete_breakpoints
 
-    # Even without XML support, GDB should not accept unknown
-    # syscall names for the catchpoint.
-    set thistest "Catch a nonsense syscall without XML support"
-    gdb_test "catch syscall nonsense_syscall" "Unknown syscall name .nonsense_syscall.*" $thistest
+	# Even without XML support, GDB should not accept unknown
+	# syscall names for the catchpoint.
+	gdb_test "catch syscall nonsense_syscall" \
+	    "Unknown syscall name .nonsense_syscall.*"
 
-    delete_breakpoints
+	delete_breakpoints
+    }
 }
 
 proc do_syscall_tests_without_xml {} {
