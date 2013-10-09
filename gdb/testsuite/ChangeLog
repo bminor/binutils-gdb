@@ -1,3 +1,8 @@
+2013-10-25  Anton Kolesov  <Anton.Kolesov@synopsys.com>  (tiny change)
+
+	* gdb.base/bang.exp: Use gdb_continue_to_end to properly support
+	remote stubs where exit() behaviour is unreliable.
+
 2013-10-25  Pedro Alves  <palves@redhat.com>
 
 	* gdb.cp/m-static.exp: Adjust expected output of printing a
