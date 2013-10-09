@@ -853,6 +853,17 @@ create_static_range_type (struct type *result_type, struct type *index_type,
   return result_type;
 }
 
+/* Predicate tests whether BOUNDS are static.  Returns 1 if all bounds values
+   are static, otherwise returns 0.  */
+
+static int
+has_static_range (const struct range_bounds *bounds)
+{
+  return (bounds->low.kind == PROP_CONST
+	  && bounds->high.kind == PROP_CONST);
+}
+
+
 /* Set *LOWP and *HIGHP to the lower and upper bounds of discrete type
    TYPE.  Return 1 if type is a range type, 0 if it is discrete (and
    bounds will fit in LONGEST), or -1 otherwise.  */
@@ -986,27 +997,41 @@ create_array_type_with_stride (struct type *result_type,
 			       struct type *range_type,
 			       unsigned int bit_stride)
 {
-  LONGEST low_bound, high_bound;
-
   if (result_type == NULL)
     result_type = alloc_type_copy (range_type);
 
   TYPE_CODE (result_type) = TYPE_CODE_ARRAY;
   TYPE_TARGET_TYPE (result_type) = element_type;
-  if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
-    low_bound = high_bound = 0;
-  CHECK_TYPEDEF (element_type);
-  /* Be careful when setting the array length.  Ada arrays can be
-     empty arrays with the high_bound being smaller than the low_bound.
-     In such cases, the array length should be zero.  */
-  if (high_bound < low_bound)
-    TYPE_LENGTH (result_type) = 0;
-  else if (bit_stride > 0)
-    TYPE_LENGTH (result_type) =
-      (bit_stride * (high_bound - low_bound + 1) + 7) / 8;
+  if (has_static_range (TYPE_RANGE_DATA (range_type)))
+    {
+      LONGEST low_bound, high_bound;
+
+      if (get_discrete_bounds (range_type, &low_bound, &high_bound) < 0)
+	low_bound = high_bound = 0;
+      CHECK_TYPEDEF (element_type);
+      /* Be careful when setting the array length.  Ada arrays can be
+	 empty arrays with the high_bound being smaller than the low_bound.
+	 In such cases, the array length should be zero.  */
+      if (high_bound < low_bound)
+	TYPE_LENGTH (result_type) = 0;
+      else if (bit_stride > 0)
+	TYPE_LENGTH (result_type) =
+	  (bit_stride * (high_bound - low_bound + 1) + 7) / 8;
+      else
+	TYPE_LENGTH (result_type) =
+	  TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
+    }
   else
-    TYPE_LENGTH (result_type) =
-      TYPE_LENGTH (element_type) * (high_bound - low_bound + 1);
+    {
+      /* This type is dynamic and its length needs to be computed
+         on demand.  In the meantime, avoid leaving the TYPE_LENGTH
+         undefined by setting it to zero.  Although we are not expected
+         to trust TYPE_LENGTH in this case, setting the size to zero
+         allows us to avoid allocating objects of random sizes in case
+         we accidently do.  */
+      TYPE_LENGTH (result_type) = 0;
+    }
+
   TYPE_NFIELDS (result_type) = 1;
   TYPE_FIELDS (result_type) =
     (struct field *) TYPE_ZALLOC (result_type, sizeof (struct field));
@@ -1585,6 +1610,121 @@ stub_noname_complaint (void)
   complaint (&symfile_complaints, _("stub type has NULL name"));
 }
 
+/* See gdbtypes.h.  */
+
+int
+is_dynamic_type (struct type *type)
+{
+  type = check_typedef (type);
+
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    type = check_typedef (TYPE_TARGET_TYPE (type));
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_ARRAY:
+      {
+	const struct type *range_type;
+
+	gdb_assert (TYPE_NFIELDS (type) == 1);
+	range_type = TYPE_INDEX_TYPE (type);
+	if (!has_static_range (TYPE_RANGE_DATA (range_type)))
+	  return 1;
+	else
+	  return is_dynamic_type (TYPE_TARGET_TYPE (type));
+	break;
+      }
+    default:
+      return 0;
+      break;
+    }
+}
+
+/* Resolves dynamic bound values of an array type TYPE to static ones.
+   ADDRESS might be needed to resolve the subrange bounds, it is the location
+   of the associated array.  */
+
+static struct type *
+resolve_dynamic_bounds (struct type *type, CORE_ADDR addr)
+{
+  CORE_ADDR value;
+  struct type *elt_type;
+  struct type *range_type;
+  struct type *ary_dim;
+  const struct dynamic_prop *prop;
+  const struct dwarf2_locexpr_baton *baton;
+  struct dynamic_prop low_bound, high_bound;
+
+  if (TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+    {
+      struct type *copy = copy_type (type);
+
+      TYPE_TARGET_TYPE (copy)
+	= resolve_dynamic_bounds (TYPE_TARGET_TYPE (type), addr);
+
+      return copy;
+    }
+
+  gdb_assert (TYPE_CODE (type) == TYPE_CODE_ARRAY);
+
+  elt_type = type;
+  range_type = check_typedef (TYPE_INDEX_TYPE (elt_type));
+
+  prop = &TYPE_RANGE_DATA (range_type)->low;
+  if (dwarf2_evaluate_property (prop, addr, &value))
+    {
+      low_bound.kind = PROP_CONST;
+      low_bound.data.const_val = value;
+    }
+  else
+    {
+      low_bound.kind = PROP_UNDEFINED;
+      low_bound.data.const_val = 0;
+    }
+
+  prop = &TYPE_RANGE_DATA (range_type)->high;
+  if (dwarf2_evaluate_property (prop, addr, &value))
+    {
+      high_bound.kind = PROP_CONST;
+      high_bound.data.const_val = value;
+    }
+  else
+    {
+      high_bound.kind = PROP_UNDEFINED;
+      high_bound.data.const_val = 0;
+    }
+
+  ary_dim = check_typedef (TYPE_TARGET_TYPE (elt_type));
+
+  if (ary_dim != NULL && TYPE_CODE (ary_dim) == TYPE_CODE_ARRAY)
+    elt_type = resolve_dynamic_bounds (TYPE_TARGET_TYPE (type), addr);
+  else
+    elt_type = TYPE_TARGET_TYPE (type);
+
+  range_type = create_range_type (NULL,
+				  TYPE_TARGET_TYPE (range_type),
+				  &low_bound, &high_bound);
+  return create_array_type (copy_type (type),
+			    elt_type,
+			    range_type);
+}
+
+/* See gdbtypes.h  */
+
+struct type *
+resolve_dynamic_type (struct type *type, CORE_ADDR addr)
+{
+  struct type *real_type = check_typedef (type);
+  struct type *resolved_type;
+
+  if (!is_dynamic_type (real_type))
+    return type;
+
+  resolved_type = resolve_dynamic_bounds (type, addr);
+
+  return resolved_type;
+}
+
 /* Find the real type of TYPE.  This function returns the real type,
    after removing all layers of typedefs, and completing opaque or stub
    types.  Completion changes the TYPE argument, but stripping of
@@ -1759,45 +1899,6 @@ check_typedef (struct type *type)
       if (TYPE_STUB (target_type) || TYPE_TARGET_STUB (target_type))
 	{
 	  /* Nothing we can do.  */
-	}
-      else if (TYPE_CODE (type) == TYPE_CODE_ARRAY
-	       && TYPE_NFIELDS (type) == 1
-	       && (TYPE_CODE (range_type = TYPE_INDEX_TYPE (type))
-		   == TYPE_CODE_RANGE))
-	{
-	  /* Now recompute the length of the array type, based on its
-	     number of elements and the target type's length.
-	     Watch out for Ada null Ada arrays where the high bound
-	     is smaller than the low bound.  */
-	  const LONGEST low_bound = TYPE_LOW_BOUND (range_type);
-	  const LONGEST high_bound = TYPE_HIGH_BOUND (range_type);
-	  ULONGEST len;
-
-	  if (high_bound < low_bound)
-	    len = 0;
-	  else
-	    {
-	      /* For now, we conservatively take the array length to be 0
-		 if its length exceeds UINT_MAX.  The code below assumes
-		 that for x < 0, (ULONGEST) x == -x + ULONGEST_MAX + 1,
-		 which is technically not guaranteed by C, but is usually true
-		 (because it would be true if x were unsigned with its
-		 high-order bit on).  It uses the fact that
-		 high_bound-low_bound is always representable in
-		 ULONGEST and that if high_bound-low_bound+1 overflows,
-		 it overflows to 0.  We must change these tests if we 
-		 decide to increase the representation of TYPE_LENGTH
-		 from unsigned int to ULONGEST.  */
-	      ULONGEST ulow = low_bound, uhigh = high_bound;
-	      ULONGEST tlen = TYPE_LENGTH (target_type);
-
-	      len = tlen * (uhigh - ulow + 1);
-	      if (tlen == 0 || (len / tlen - 1 + ulow) != uhigh 
-		  || len > UINT_MAX)
-		len = 0;
-	    }
-	  TYPE_LENGTH (type) = len;
-	  TYPE_TARGET_STUB (type) = 0;
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_RANGE)
 	{

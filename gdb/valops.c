@@ -900,7 +900,10 @@ value_one (struct type *type)
   return val;
 }
 
-/* Helper function for value_at, value_at_lazy, and value_at_lazy_stack.  */
+/* Helper function for value_at, value_at_lazy, and value_at_lazy_stack.
+   The type of the created value may differ from the passed type TYPE.
+   Make sure to retrieve the returned values's new type after this call
+   e.g. in case the type is a variable length array.  */
 
 static struct value *
 get_value_at (struct type *type, CORE_ADDR addr, int lazy)
@@ -925,7 +928,10 @@ get_value_at (struct type *type, CORE_ADDR addr, int lazy)
    value_at_lazy instead.  value_at_lazy simply records the address of
    the data and sets the lazy-evaluation-required flag.  The lazy flag
    is tested in the value_contents macro, which is used if and when
-   the contents are actually required.
+   the contents are actually required.  The type of the created value
+   may differ from the passed type TYPE.  Make sure to retrieve the
+   returned values's new type after this call e.g. in case the type
+   is a variable length array.
 
    Note: value_at does *NOT* handle embedded offsets; perform such
    adjustments before or after calling it.  */
@@ -936,7 +942,10 @@ value_at (struct type *type, CORE_ADDR addr)
   return get_value_at (type, addr, 0);
 }
 
-/* Return a lazy value with type TYPE located at ADDR (cf. value_at).  */
+/* Return a lazy value with type TYPE located at ADDR (cf. value_at).
+   The type of the created value may differ from the passed type TYPE.
+   Make sure to retrieve the returned values's new type after this call
+   e.g. in case the type is a variable length array.  */
 
 struct value *
 value_at_lazy (struct type *type, CORE_ADDR addr)

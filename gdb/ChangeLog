@@ -1,5 +1,26 @@
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* dwarf2loc.c (dwarf2_locexpr_baton_eval): New function.
+	(dwarf2_evaluate_property): New function.
+	* dwarf2loc.h (dwarf2_evaluate_property): New function prototype.
+	* dwarf2read.c (attr_to_dynamic_prop): New function.
+	(read_subrange_type): Use attr_to_dynamic_prop to read high bound
+	attribute.
+	* gdbtypes.c: Include dwarf2loc.h.
+	(is_dynamic_type): New function.
+	(resolve_dynamic_type): New function.
+	(resolve_dynamic_bounds): New function.
+	(get_type_length): New function.
+	(check_typedef): Use get_type_length to compute type length.
+	* gdbtypes.h (TYPE_HIGH_BOUND_KIND): New macro.
+	(TYPE_LOW_BOUND_KIND): New macro.
+	(is_dynamic_type): New function prototype.
+	* value.c (value_from_contents_and_address): Call resolve_dynamic_type
+	to resolve dynamic properties of the type. Update comment.
+	* valops.c (get_value_at, value_at, value_at_lazy): Update comment.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* dwarf2read.c (read_subrange_type): Use struct bound_prop for
 	declaring high/low bounds and change uses accordingly. Call
 	create_range_type instead of create_static_range_type.
