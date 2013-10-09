@@ -1,7 +1,5 @@
 /* objdump.c -- dump information about an object file.
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-   2012, 2013 Free Software Foundation, Inc.
+   Copyright 1990-2013 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -193,6 +191,7 @@ static const struct objdump_private_desc * const objdump_private_vectors[] =
     NULL
   };
 
+static void usage (FILE *, int) ATTRIBUTE_NORETURN;
 static void
 usage (FILE *stream, int status)
 {
@@ -3657,15 +3656,15 @@ main (int argc, char **argv)
 	  dump_section_headers = TRUE;
 	  seenflag = TRUE;
 	  break;
-	case 'H':
-	  usage (stdout, 0);
-	  seenflag = TRUE;
 	case 'v':
 	case 'V':
 	  show_version = TRUE;
 	  seenflag = TRUE;
 	  break;
 
+	case 'H':
+	  usage (stdout, 0);
+	  /* No need to set seenflag or to break - usage() does not return.  */
 	default:
 	  usage (stderr, 1);
 	}

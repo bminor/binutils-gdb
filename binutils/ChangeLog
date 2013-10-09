@@ -1,5 +1,10 @@
 2013-10-09  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/16024
+	* objdump.c (usage): Mark as a no-return function.
+	(main): Add comment explaining why a break statement is not
+	needed.
+
 	* dwarf.c (add64): New function.
 	(read_and_display_attr_value): Add CU offset in to the value
 	displayed for a DW_AT_ref8 attribute.
