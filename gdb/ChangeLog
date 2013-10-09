@@ -1,3 +1,14 @@
+2013-10-09  Pedro Alves  <palves@redhat.com>
+
+	* monitor.c (monitor_write_memory, monitor_write_memory_bytes)
+	(monitor_write_memory_longlongs, monitor_write_memory_block):
+	Constify 'myaddr' parameter.
+	(monitor_xfer_memory): Adjust interface as monitor_xfer_partial
+	helper.
+	(monitor_xfer_partial): New function.
+	(init_base_monitor_ops): Don't install a deprecated_xfer_memory
+	hook.  Install a to_xfer_partial hook.
+
 2013-10-09  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2read.c (dwarf2_get_dwz_file): Update for type change in

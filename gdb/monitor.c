@@ -1439,7 +1439,7 @@ monitor_files_info (struct target_ops *ops)
 }
 
 static int
-monitor_write_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+monitor_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   unsigned int val, hostval;
@@ -1542,7 +1542,7 @@ monitor_write_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
 
 
 static int
-monitor_write_memory_bytes (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+monitor_write_memory_bytes (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 {
   unsigned char val;
   int written = 0;
@@ -1638,7 +1638,7 @@ longlong_hexchars (unsigned long long value,
    Which possably entails endian conversions.  */
 
 static int
-monitor_write_memory_longlongs (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+monitor_write_memory_longlongs (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 {
   static char hexstage[20];	/* At least 16 digits required, plus null.  */
   char *endstring;
@@ -1686,7 +1686,7 @@ monitor_write_memory_longlongs (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
    monitor variations.  */
 
 static int
-monitor_write_memory_block (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
+monitor_write_memory_block (CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
 {
   int written;
 
@@ -2015,29 +2015,47 @@ monitor_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len)
   return len;
 }
 
-/* Transfer LEN bytes between target address MEMADDR and GDB address
-   MYADDR.  Returns 0 for success, errno code for failure.  TARGET is
-   unused.  */
+/* Helper for monitor_xfer_partial that handles memory transfers.
+   Arguments are like target_xfer_partial.  */
 
-static int
-monitor_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
-		     struct mem_attrib *attrib, struct target_ops *target)
+static LONGEST
+monitor_xfer_memory (gdb_byte *readbuf, const gdb_byte *writebuf,
+		     ULONGEST memaddr, LONGEST len)
 {
   int res;
 
-  if (write)
+  if (writebuf != NULL)
     {
       if (current_monitor->flags & MO_HAS_BLOCKWRITES)
-	res = monitor_write_memory_block(memaddr, myaddr, len);
+	res = monitor_write_memory_block (memaddr, writebuf, len);
       else
-	res = monitor_write_memory(memaddr, myaddr, len);
+	res = monitor_write_memory (memaddr, writebuf, len);
     }
   else
     {
-      res = monitor_read_memory(memaddr, myaddr, len);
+      res = monitor_read_memory (memaddr, readbuf, len);
     }
 
+  if (res == 0)
+    return TARGET_XFER_E_IO;
   return res;
+}
+
+/* Target to_xfer_partial implementation.  */
+
+static LONGEST
+monitor_xfer_partial (struct target_ops *ops, enum target_object object,
+		      const char *annex, gdb_byte *readbuf,
+		      const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
+{
+  switch (object)
+    {
+    case TARGET_OBJECT_MEMORY:
+      return monitor_xfer_memory (readbuf, writebuf, offset, len);
+
+    default:
+      return TARGET_XFER_E_IO;
+    }
 }
 
 static void
@@ -2344,7 +2362,7 @@ init_base_monitor_ops (void)
   monitor_ops.to_fetch_registers = monitor_fetch_registers;
   monitor_ops.to_store_registers = monitor_store_registers;
   monitor_ops.to_prepare_to_store = monitor_prepare_to_store;
-  monitor_ops.deprecated_xfer_memory = monitor_xfer_memory;
+  monitor_ops.to_xfer_partial = monitor_xfer_partial;
   monitor_ops.to_files_info = monitor_files_info;
   monitor_ops.to_insert_breakpoint = monitor_insert_breakpoint;
   monitor_ops.to_remove_breakpoint = monitor_remove_breakpoint;
