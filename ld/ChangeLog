@@ -1,3 +1,8 @@
+2013-10-09  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16028
+	* ldmain.c (add_keepsyms_file): Close file at end of function.
+
 2013-10-03  Will Newton  <will.newton@linaro.org>
 
 	* emulparams/aarch64elf.sh: Add IREL_IN_PLT.

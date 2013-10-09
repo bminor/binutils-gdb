@@ -744,6 +744,7 @@ add_keepsyms_file (const char *filename)
 
   free (buf);
   link_info.strip = strip_some;
+  fclose (file);
 }
 
 /* Callbacks from the BFD linker routines.  */
