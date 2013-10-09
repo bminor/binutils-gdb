@@ -118,7 +118,8 @@ get_dynamics_objfile (struct gdbarch *gdbarch)
 
       /* Mark it as shared so that it is cleared when the inferior is
 	 re-run.  */
-      dynamics_objfile = allocate_objfile (NULL, NULL, OBJF_SHARED);
+      dynamics_objfile = allocate_objfile (NULL, NULL,
+					   OBJF_SHARED | OBJF_NOT_FILENAME);
       dynamics_objfile->per_bfd->gdbarch = gdbarch;
 
       data = XCNEW (struct jv_per_objfile_data);

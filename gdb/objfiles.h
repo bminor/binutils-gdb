@@ -429,6 +429,11 @@ struct objfile
 
 #define OBJF_MAINLINE (1 << 5)
 
+/* ORIGINAL_NAME and OBFD->FILENAME correspond to text description unrelated to
+   filesystem names.  It can be for example "<image in memory>".  */
+
+#define OBJF_NOT_FILENAME (1 << 6)
+
 /* Declarations for functions defined in objfiles.c */
 
 extern struct objfile *allocate_objfile (bfd *, const char *name, int);

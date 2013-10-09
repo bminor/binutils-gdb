@@ -289,6 +289,7 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
   if (name == NULL)
     {
       gdb_assert (abfd == NULL);
+      gdb_assert ((flags & OBJF_NOT_FILENAME) != 0);
       name = "<<anonymous objfile>>";
     }
   objfile->original_name = obstack_copy0 (&objfile->objfile_obstack, name,

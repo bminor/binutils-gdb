@@ -840,7 +840,7 @@ auto_load_objfile_script (struct objfile *objfile,
 void
 load_auto_scripts_for_objfile (struct objfile *objfile)
 {
-  if (!global_auto_load)
+  if (!global_auto_load || (objfile->flags & OBJF_NOT_FILENAME) != 0)
     return;
 
   if (auto_load_gdb_scripts)

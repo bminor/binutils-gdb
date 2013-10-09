@@ -1,3 +1,17 @@
+2013-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	New flag OBJF_NOT_FILENAME.
+	* auto-load.c (auto_load_objfile_script): Check also OBJF_NOT_FILENAME.
+	* jit.c (jit_object_close_impl): Use OBJF_NOT_FILENAME for
+	allocate_objfile.
+	(jit_bfd_try_read_symtab): Use OBJF_NOT_FILENAME for
+	symbol_file_add_from_bfd.
+	* jv-lang.c (get_dynamics_objfile): Use OBJF_NOT_FILENAME for
+	allocate_objfile.
+	* objfiles.c (allocate_objfile): Assert OBJF_NOT_FILENAME if NAME is
+	NULL.
+	* objfiles.h (OBJF_NOT_FILENAME): New.
+
 2013-10-08  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (SFILES): Add build-id.c.
