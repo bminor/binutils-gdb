@@ -91,9 +91,16 @@ uint32 fsr;
      fsr >>= 30;
      switch (fsr) {
 	case 0: 
-	case 2: break;
-	case 1: fsr = 3;
-	case 3: fsr = 1;
+	case 2:
+	  break;
+
+	case 1:
+	  fsr = 3;
+	  break;
+
+	case 3:
+	  fsr = 1;
+	  break;
      }
      rawfsr = _get_cw();
      rawfsr |= (fsr << 10) | 0x3ff;
