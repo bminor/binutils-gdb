@@ -1480,7 +1480,7 @@ bfd_follow_gnu_debuglink (bfd *abfd, const char *dir)
 static char *
 get_alt_debug_link_info_shim (bfd * abfd, unsigned long *crc32_out)
 {
-  size_t len;
+  bfd_size_type len;
   bfd_byte *buildid = NULL;
   char *result = bfd_get_alt_debug_link_info (abfd, &len, &buildid);
 
