@@ -1,6 +1,6 @@
 /* Alpha specific support for 64-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010, 2011, 2012
+   2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
@@ -3590,7 +3590,9 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
   use_gottprel = FALSE;
   new_symndx = is_gd ? ELF64_R_SYM (irel->r_info) : STN_UNDEF;
 
-  switch (!dynamic && !info->link_info->shared)
+  /* Some compilers warn about a Boolean-looking expression being
+     used in a switch.  The explicit cast silences them.  */
+  switch ((int) (!dynamic && !info->link_info->shared))
     {
     case 1:
       {
