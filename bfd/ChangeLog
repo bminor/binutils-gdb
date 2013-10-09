@@ -1,3 +1,8 @@
+2013-10-09  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16022
+	* elf32-rx.c (rx_dump_symtab): Add missing break statements.
+
 2013-10-09  Tom Tromey  <tromey@redhat.com>
 
 	* opncls.c (get_alt_debug_link_info_shim): Update type of 'len'.
