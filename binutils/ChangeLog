@@ -1,3 +1,9 @@
+2013-10-09  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (add64): New function.
+	(read_and_display_attr_value): Add CU offset in to the value
+	displayed for a DW_AT_ref8 attribute.
+
 2013-10-01  Cory Fields  <cory@coryfields.com>
 
 	* arsup.c (ar_save): Respect the deterministic setting when
