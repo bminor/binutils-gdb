@@ -893,12 +893,10 @@ if test x"$LDEMUL_AFTER_OPEN" != xgld"$EMULATION_NAME"_after_open; then
 fragment <<EOF
 
 static bfd_size_type
-id_note_section_size (bfd *abfd)
+id_note_section_size (bfd *abfd ATTRIBUTE_UNUSED)
 {
   const char *style = emit_note_gnu_build_id;
   bfd_size_type size;
-
-  abfd = abfd;
 
   size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
   size = (size + 3) & -(bfd_size_type) 4;

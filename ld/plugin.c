@@ -1,5 +1,5 @@
 /* Plugin control for the GNU linker.
-   Copyright 2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright 2010, 2011, 2012, 2013 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -429,20 +429,18 @@ add_symbols (void *handle, int nsyms, const struct ld_plugin_symbol *syms)
 /* Get the input file information with an open (possibly re-opened)
    file descriptor.  */
 static enum ld_plugin_status
-get_input_file (const void *handle, struct ld_plugin_input_file *file)
+get_input_file (const void *handle ATTRIBUTE_UNUSED,
+                struct ld_plugin_input_file *file ATTRIBUTE_UNUSED)
 {
   ASSERT (called_plugin);
-  handle = handle;
-  file = file;
   return LDPS_ERR;
 }
 
 /* Release the input file.  */
 static enum ld_plugin_status
-release_input_file (const void *handle)
+release_input_file (const void *handle ATTRIBUTE_UNUSED)
 {
   ASSERT (called_plugin);
-  handle = handle;
   return LDPS_ERR;
 }
 

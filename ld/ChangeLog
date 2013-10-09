@@ -1,3 +1,9 @@
+2013-10-09  Roland McGrath  <mcgrathr@google.com>
+
+	* emultempl/elf32.em (id_note_section_size): Use ATTRIBUTE_UNUSED
+	rather than a dummy assignment for unused parameter.
+	* plugin.c (get_input_file, release_input_file): Likewise.
+
 2013-10-04  Will Newton  <will.newton@linaro.org>
 
 	* emulparams/aarch64elf.sh: Add IREL_IN_PLT.
