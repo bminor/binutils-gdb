@@ -239,11 +239,12 @@ DEF_VEC_P(static_tracepoint_marker_p);
    starting point.  The ANNEX can be used to provide additional
    data-specific information to the target.
 
-   Return the number of bytes actually transfered, or -1 if the
-   transfer is not supported or otherwise fails.  Return of a positive
-   value less than LEN indicates that no further transfer is possible.
-   Unlike the raw to_xfer_partial interface, callers of these
-   functions do not need to retry partial transfers.  */
+   Return the number of bytes actually transfered, or a negative error
+   code (an 'enum target_xfer_error' value) if the transfer is not
+   supported or otherwise fails.  Return of a positive value less than
+   LEN indicates that no further transfer is possible.  Unlike the raw
+   to_xfer_partial interface, callers of these functions do not need
+   to retry partial transfers.  */
 
 extern LONGEST target_read (struct target_ops *ops,
 			    enum target_object object,
@@ -1117,13 +1118,13 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
      (*current_target.to_files_info) (&current_target)
 
 /* Insert a breakpoint at address BP_TGT->placed_address in the target
-   machine.  Result is 0 for success, or an errno value.  */
+   machine.  Result is 0 for success, non-zero for error.  */
 
 extern int target_insert_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt);
 
 /* Remove a breakpoint at address BP_TGT->placed_address in the target
-   machine.  Result is 0 for success, or an errno value.  */
+   machine.  Result is 0 for success, non-zero for error.  */
 
 extern int target_remove_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt);

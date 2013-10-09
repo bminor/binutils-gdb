@@ -1,5 +1,10 @@
 2013-10-09  Pedro Alves  <palves@redhat.com>
 
+	* gdb.python/py-prettyprint.exp (run_lang_tests): Adjust expected
+	output.
+
+2013-10-09  Pedro Alves  <palves@redhat.com>
+
 	* gdb.base/catch-syscall.exp (test_catch_syscall_without_args)
 	(test_catch_syscall_with_args, test_catch_syscall_with_many_args)
 	(test_catch_syscall_with_wrong_args)

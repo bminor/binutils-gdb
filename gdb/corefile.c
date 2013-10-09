@@ -193,24 +193,20 @@ Use the \"file\" or \"exec-file\" command."));
 }
 
 
-/* Report a target xfer memory error by throwing a suitable
-   exception.  */
-
-static void
-target_xfer_memory_error (enum target_xfer_error err, CORE_ADDR memaddr)
+char *
+memory_error_message (enum target_xfer_error err,
+		      struct gdbarch *gdbarch, CORE_ADDR memaddr)
 {
   switch (err)
     {
     case TARGET_XFER_E_IO:
       /* Actually, address between memaddr and memaddr + len was out of
 	 bounds.  */
-      throw_error (MEMORY_ERROR,
-		   _("Cannot access memory at address %s"),
-		   paddress (target_gdbarch (), memaddr));
+      return xstrprintf (_("Cannot access memory at address %s"),
+			 paddress (gdbarch, memaddr));
     case TARGET_XFER_E_UNAVAILABLE:
-      throw_error (NOT_AVAILABLE_ERROR,
-		   _("Memory at address %s unavailable."),
-		   paddress (target_gdbarch (), memaddr));
+      return xstrprintf (_("Memory at address %s unavailable."),
+			 paddress (gdbarch, memaddr));
     default:
       internal_error (__FILE__, __LINE__,
 		      "unhandled target_xfer_error: %s (%s)",
@@ -219,18 +215,30 @@ target_xfer_memory_error (enum target_xfer_error err, CORE_ADDR memaddr)
     }
 }
 
-/* Report a memory error by throwing a MEMORY_ERROR error.  */
+/* Report a memory error by throwing a suitable exception.  */
 
 void
-memory_error (int status, CORE_ADDR memaddr)
+memory_error (enum target_xfer_error err, CORE_ADDR memaddr)
 {
-  if (status == EIO)
-    target_xfer_memory_error (TARGET_XFER_E_IO, memaddr);
-  else
-    throw_error (MEMORY_ERROR,
-		 _("Error accessing memory address %s: %s."),
-		 paddress (target_gdbarch (), memaddr),
-		 safe_strerror (status));
+  char *str;
+
+  /* Build error string.  */
+  str = memory_error_message (err, target_gdbarch (), memaddr);
+  make_cleanup (xfree, str);
+
+  /* Choose the right error to throw.  */
+  switch (err)
+    {
+    case TARGET_XFER_E_IO:
+      err = MEMORY_ERROR;
+      break;
+    case TARGET_XFER_E_UNAVAILABLE:
+      err = NOT_AVAILABLE_ERROR;
+      break;
+    }
+
+  /* Throw it.  */
+  throw_error (err, ("%s"), str);
 }
 
 /* Same as target_read_memory, but report an error if can't read.  */
@@ -248,9 +256,9 @@ read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 					  memaddr + xfered, len - xfered);
 
       if (xfer == 0)
-	target_xfer_memory_error (TARGET_XFER_E_IO, memaddr + xfered);
+	memory_error (TARGET_XFER_E_IO, memaddr + xfered);
       if (xfer < 0)
-	target_xfer_memory_error (xfer, memaddr + xfered);
+	memory_error (xfer, memaddr + xfered);
       xfered += xfer;
       QUIT;
     }

@@ -1,3 +1,31 @@
+2013-10-09  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (insert_bp_location): Use memory_error_message to
+	build the memory error string.
+	* c-lang.c: Include "gdbcore.h".
+	(c_get_string): Use memory_error to throw error.
+	(target_xfer_memory_error): Delete.
+	(memory_error_message): New, factored out from
+	target_xfer_memory_error.
+	(memory_error): Change parameter type to target_xfer_error.
+	Rewrite.
+	(read_memory): Use memory_error instead of
+	target_xfer_memory_error.
+	* gdbcore.h: Include "target.h".
+	(memory_error): Change parameter type to target_xfer_error.
+	(memory_error_message): Declare function.
+	* target.c (target_read_memory, target_read_stack)
+	(target_write_memory, target_write_raw_memory): Return
+	TARGET_XFER_E_IO on error.  Adjust comments.
+	(get_target_memory): Pass TARGET_XFER_E_IO to memory_error,
+	instead of EIO.
+	* target.h (target_read, target_insert_breakpoint)
+	(target_remove_breakpoint): Adjust comments.
+	* valprint.c (partial_memory_read): Rename parameter, and adjust
+	comment.
+	(val_print_string): Use memory_error_message to build the memory
+	error string.
+
 2013-10-09  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* common/filestuff.c (gdb_fopen_cloexec): Remove initialization of

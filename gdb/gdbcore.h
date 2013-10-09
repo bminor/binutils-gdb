@@ -27,6 +27,7 @@ struct regcache;
 
 #include "bfd.h"
 #include "exec.h"
+#include "target.h"
 
 /* Return the name of the executable file as a string.
    ERR nonzero means get error if there is none specified;
@@ -40,7 +41,13 @@ extern int have_core_file_p (void);
 
 /* Report a memory error with error().  */
 
-extern void memory_error (int status, CORE_ADDR memaddr);
+extern void memory_error (enum target_xfer_error status, CORE_ADDR memaddr);
+
+/* The string 'memory_error' would use as exception message.  Space
+   for the result is malloc'd, caller must free.  */
+
+extern char *memory_error_message (enum target_xfer_error err,
+				   struct gdbarch *gdbarch, CORE_ADDR memaddr);
 
 /* Like target_read_memory, but report an error if can't read.  */
 

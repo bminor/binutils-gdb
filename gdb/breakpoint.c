@@ -2570,15 +2570,16 @@ insert_bp_location (struct bp_location *bl,
 		}
 	      else
 		{
+		  char *message = memory_error_message (TARGET_XFER_E_IO,
+							bl->gdbarch, bl->address);
+		  struct cleanup *old_chain = make_cleanup (xfree, message);
+
 		  fprintf_unfiltered (tmp_error_stream, 
-				      "Cannot insert breakpoint %d.\n", 
-				      bl->owner->number);
-		  fprintf_filtered (tmp_error_stream, 
-				    "Error accessing memory address ");
-		  fputs_filtered (paddress (bl->gdbarch, bl->address),
-				  tmp_error_stream);
-		  fprintf_filtered (tmp_error_stream, ": %s.\n",
-				    safe_strerror (val));
+				      "Cannot insert breakpoint %d.\n"
+				      "%s\n",
+				      bl->owner->number, message);
+
+		  do_cleanups (old_chain);
 		}
 
 	    }

@@ -35,6 +35,7 @@
 #include "gdb_obstack.h"
 #include <ctype.h>
 #include "exceptions.h"
+#include "gdbcore.h"
 
 extern void _initialize_c_language (void);
 
@@ -312,12 +313,7 @@ c_get_string (struct value *value, gdb_byte **buffer,
       if (err)
 	{
 	  xfree (*buffer);
-	  if (err == EIO)
-	    throw_error (MEMORY_ERROR, "Address %s out of bounds",
-			 paddress (get_type_arch (type), addr));
-	  else
-	    error (_("Error reading string from inferior: %s"),
-		   safe_strerror (err));
+	  memory_error (err, addr);
 	}
     }
 

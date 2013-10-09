@@ -83,7 +83,7 @@ proc run_lang_tests {exefile lang} {
 	gdb_py_test_silent_cmd "set print elements 200" "" 1
     }
 
-    gdb_test "print ns2" ".error reading variable: Address 0x0 out of bounds."
+    gdb_test "print ns2" ".error reading variable: Cannot access memory at address 0x0."
 
     gdb_test "print x" " = \"this is x\""
     gdb_test "print cstring" " = \"const string\""
