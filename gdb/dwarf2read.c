@@ -14405,6 +14405,84 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
+/* Parse dwarf attribute if it's a block, reference or constant and put the
+   resulting value of the attribute into struct bound_prop.
+   Returns 1 if ATTR could be resolved into PROP, 0 otherwise.  */
+
+static int
+attr_to_dynamic_prop (const struct attribute *attr, struct die_info *die,
+		      struct dwarf2_cu *cu, struct dynamic_prop *prop)
+{
+  struct dwarf2_property_baton *baton;
+  struct obstack *obstack = &cu->objfile->objfile_obstack;
+
+  if (attr == NULL || prop == NULL)
+    return 0;
+
+  if (attr_form_is_block (attr))
+    {
+      baton = obstack_alloc (obstack, sizeof (*baton));
+      baton->referenced_type = NULL;
+      baton->locexpr.per_cu = cu->per_cu;
+      baton->locexpr.size = DW_BLOCK (attr)->size;
+      baton->locexpr.data = DW_BLOCK (attr)->data;
+      prop->data.baton = baton;
+      prop->kind = PROP_LOCEXPR;
+      gdb_assert (prop->data.baton != NULL);
+    }
+  else if (attr_form_is_ref (attr))
+    {
+      struct dwarf2_cu *target_cu = cu;
+      struct die_info *target_die;
+      struct attribute *target_attr;
+
+      target_die = follow_die_ref (die, attr, &target_cu);
+      target_attr = dwarf2_attr (target_die, DW_AT_location, target_cu);
+      if (target_attr == NULL)
+	return 0;
+
+      if (attr_form_is_section_offset (target_attr))
+	{
+	  baton = obstack_alloc (obstack, sizeof (*baton));
+	  baton->referenced_type = die_type (target_die, target_cu);
+	  fill_in_loclist_baton (cu, &baton->loclist, target_attr);
+	  prop->data.baton = baton;
+	  prop->kind = PROP_LOCLIST;
+	  gdb_assert (prop->data.baton != NULL);
+	}
+      else if (attr_form_is_block (target_attr))
+	{
+	  baton = obstack_alloc (obstack, sizeof (*baton));
+	  baton->referenced_type = die_type (target_die, target_cu);
+	  baton->locexpr.per_cu = cu->per_cu;
+	  baton->locexpr.size = DW_BLOCK (target_attr)->size;
+	  baton->locexpr.data = DW_BLOCK (target_attr)->data;
+	  prop->data.baton = baton;
+	  prop->kind = PROP_LOCEXPR;
+	  gdb_assert (prop->data.baton != NULL);
+	}
+      else
+	{
+	  dwarf2_invalid_attrib_class_complaint ("DW_AT_location",
+						 "dynamic property");
+	  return 0;
+	}
+    }
+  else if (attr_form_is_constant (attr))
+    {
+      prop->data.const_val = dwarf2_get_attr_constant_value (attr, 0);
+      prop->kind = PROP_CONST;
+    }
+  else
+    {
+      dwarf2_invalid_attrib_class_complaint (dwarf_form_name (attr->form),
+					     dwarf2_name (die, cu));
+      return 0;
+    }
+
+  return 1;
+}
+
 /* Read the given DW_AT_subrange DIE.  */
 
 static struct type *
@@ -14478,27 +14556,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 	       die->offset.sect_off, objfile_name (cu->objfile));
 
   attr = dwarf2_attr (die, DW_AT_upper_bound, cu);
-  if (attr)
-    {
-      if (attr_form_is_block (attr) || attr_form_is_ref (attr))
-        {
-          /* GCC encodes arrays with unspecified or dynamic length
-             with a DW_FORM_block1 attribute or a reference attribute.
-             FIXME: GDB does not yet know how to handle dynamic
-             arrays properly, treat them as arrays with unspecified
-             length for now.
-
-             FIXME: jimb/2003-09-22: GDB does not really know
-             how to handle arrays of unspecified length
-             either; we just represent them as zero-length
-             arrays.  Choose an appropriate upper bound given
-             the lower bound we've computed above.  */
-          high.data.const_val = low.data.const_val - 1;
-        }
-      else
-        high.data.const_val = dwarf2_get_attr_constant_value (attr, 1);
-    }
-  else
+  if (!attr_to_dynamic_prop (attr, die, cu, &high))
     {
       attr = dwarf2_attr (die, DW_AT_count, cu);
       if (attr)
@@ -14568,12 +14626,6 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
     high.data.const_val |= negative_mask;
 
   range_type = create_range_type (NULL, orig_base_type, &low, &high);
-
-  /* Mark arrays with dynamic length at least as an array of unspecified
-     length.  GDB could check the boundary but before it gets implemented at
-     least allow accessing the array elements.  */
-  if (attr && attr_form_is_block (attr))
-    TYPE_HIGH_BOUND_KIND (range_type) = PROP_UNDEFINED;
 
   /* Ada expects an empty array on no boundary attributes.  */
   if (attr == NULL && cu->language != language_ada)

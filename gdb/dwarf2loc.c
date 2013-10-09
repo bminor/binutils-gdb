@@ -2432,6 +2432,125 @@ dwarf2_evaluate_loc_desc (struct type *type, struct frame_info *frame,
   return dwarf2_evaluate_loc_desc_full (type, frame, data, size, per_cu, 0);
 }
 
+/* Evaluates a dwarf expression and stores the result in VAL, expecting
+   that the dwarf expression only produces a single CORE_ADDR.  ADDR is a
+   context (location of a variable) and might be needed to evaluate the
+   location expression.
+   Returns 1 on success, 0 otherwise.   */
+
+static int
+dwarf2_locexpr_baton_eval (const struct dwarf2_locexpr_baton *dlbaton,
+			   CORE_ADDR addr, CORE_ADDR *valp)
+{
+  struct dwarf_expr_context *ctx;
+  struct dwarf_expr_baton baton;
+  struct objfile *objfile;
+  struct cleanup *cleanup;
+
+  if (dlbaton == NULL || dlbaton->size == 0)
+    return 0;
+
+  ctx = new_dwarf_expr_context ();
+  cleanup = make_cleanup_free_dwarf_expr_context (ctx);
+
+  baton.frame = get_selected_frame (NULL);
+  baton.per_cu = dlbaton->per_cu;
+
+  objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
+
+  ctx->gdbarch = get_objfile_arch (objfile);
+  ctx->addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
+  ctx->ref_addr_size = dwarf2_per_cu_ref_addr_size (dlbaton->per_cu);
+  ctx->offset = dwarf2_per_cu_text_offset (dlbaton->per_cu);
+  ctx->funcs = &dwarf_expr_ctx_funcs;
+  ctx->baton = &baton;
+
+  dwarf_expr_eval (ctx, dlbaton->data, dlbaton->size);
+
+  switch (ctx->location)
+    {
+    case DWARF_VALUE_REGISTER:
+    case DWARF_VALUE_MEMORY:
+    case DWARF_VALUE_STACK:
+      *valp = dwarf_expr_fetch_address (ctx, 0);
+      if (ctx->location == DWARF_VALUE_REGISTER)
+	*valp = dwarf_expr_read_addr_from_reg (&baton, *valp);
+      do_cleanups (cleanup);
+      return 1;
+    case DWARF_VALUE_LITERAL:
+      *valp = extract_signed_integer (ctx->data, ctx->len,
+				      gdbarch_byte_order (ctx->gdbarch));
+      do_cleanups (cleanup);
+      return 1;
+      /* Unsupported dwarf values.  */
+    case DWARF_VALUE_OPTIMIZED_OUT:
+    case DWARF_VALUE_IMPLICIT_POINTER:
+      break;
+    }
+
+  do_cleanups (cleanup);
+  return 0;
+}
+
+/* See dwarf2loc.h.  */
+
+int
+dwarf2_evaluate_property (const struct dynamic_prop *prop, CORE_ADDR address,
+			  CORE_ADDR *value)
+{
+  if (prop == NULL)
+    return 0;
+
+  switch (prop->kind)
+    {
+    case PROP_LOCEXPR:
+      {
+	const struct dwarf2_property_baton *baton = prop->data.baton;
+
+	if (dwarf2_locexpr_baton_eval (&baton->locexpr, address, value))
+	  {
+	    if (baton->referenced_type)
+	      {
+		struct value *val = value_at (baton->referenced_type, *value);
+
+		*value = value_as_address (val);
+	      }
+	    return 1;
+	  }
+      }
+      break;
+
+    case PROP_LOCLIST:
+      {
+	struct dwarf2_property_baton *baton = prop->data.baton;
+	struct frame_info *frame = get_selected_frame (NULL);
+	CORE_ADDR pc = get_frame_address_in_block (frame);
+	const gdb_byte *data;
+	struct value *val;
+	size_t size;
+
+	data = dwarf2_find_location_expression (&baton->loclist, &size, pc);
+	if (data != NULL)
+	  {
+	    val = dwarf2_evaluate_loc_desc (baton->referenced_type, frame, data,
+					    size, baton->loclist.per_cu);
+	    if (!value_optimized_out (val))
+	      {
+		*value = value_as_address (val);
+		return 1;
+	      }
+	  }
+      }
+      break;
+
+    case PROP_CONST:
+      *value = prop->data.const_val;
+      return 1;
+    }
+
+  return 0;
+}
+
 
 /* Helper functions and baton for dwarf2_loc_desc_needs_frame.  */
 
