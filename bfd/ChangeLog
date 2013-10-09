@@ -1,3 +1,9 @@
+2013-10-09  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR binutils/15993
+	* elf32-m32c.c (dump_symtab): Add missing "break;" statement on each
+	"case".  Reindent "switch" statements.
+
 2013-10-08  Tom Tromey  <tromey@redhat.com>
 
 	* bfd-in2.h: Rebuild.
