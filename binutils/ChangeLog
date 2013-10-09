@@ -1,5 +1,8 @@
 2013-10-09  Nick Clifton  <nickc@redhat.com>
 
+	PR binutils/16023
+	* debug.c (debug_type_samep): Add missing break statement.
+
 	PR binutils/16024
 	* objdump.c (usage): Mark as a no-return function.
 	(main): Add comment explaining why a break statement is not
