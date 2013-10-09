@@ -1,3 +1,9 @@
+2013-10-09  Nick Clifton  <nickc@redhat.com>
+
+	PR gprof/16027
+	* source.c (annotate_source): Close ifp.
+	* corefile.c (read_function_mappings): Close file.
+
 2013-09-20  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
