@@ -1194,7 +1194,8 @@ FUNCTION
 	bfd_get_alt_debug_link_info
 
 SYNOPSIS
-	char *bfd_get_alt_debug_link_info (bfd * abfd, size_t *buildid_len,
+	char *bfd_get_alt_debug_link_info (bfd * abfd,
+					   bfd_size_type *buildid_len,
 			                   bfd_byte **buildid_out);
 
 DESCRIPTION
@@ -1207,7 +1208,7 @@ DESCRIPTION
 */
 
 char *
-bfd_get_alt_debug_link_info (bfd * abfd, size_t *buildid_len,
+bfd_get_alt_debug_link_info (bfd * abfd, bfd_size_type *buildid_len,
 			     bfd_byte **buildid_out)
 {
   asection *sect;

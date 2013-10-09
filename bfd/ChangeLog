@@ -1,3 +1,9 @@
+2013-10-09  Tom Tromey  <tromey@redhat.com>
+
+	* bfd-in2.h: Rebuild.
+	* opncls.c (bfd_get_alt_debug_link_info): Change type of
+	buildid_len to bfd_size_type.
+
 2013-10-09  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR binutils/15993

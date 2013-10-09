@@ -2365,6 +2365,7 @@ dwarf2_get_dwz_file (void)
   struct cleanup *cleanup;
   const char *filename;
   struct dwz_file *result;
+  bfd_size_type buildid_len_arg;
   size_t buildid_len;
   bfd_byte *buildid;
 
@@ -2373,7 +2374,7 @@ dwarf2_get_dwz_file (void)
 
   bfd_set_error (bfd_error_no_error);
   data = bfd_get_alt_debug_link_info (dwarf2_per_objfile->objfile->obfd,
-				      &buildid_len, &buildid);
+				      &buildid_len_arg, &buildid);
   if (data == NULL)
     {
       if (bfd_get_error () == bfd_error_no_error)
@@ -2383,6 +2384,8 @@ dwarf2_get_dwz_file (void)
     }
   cleanup = make_cleanup (xfree, data);
   make_cleanup (xfree, buildid);
+
+  buildid_len = (size_t) buildid_len_arg;
 
   filename = (const char *) data;
   if (!IS_ABSOLUTE_PATH (filename))
