@@ -3040,8 +3040,14 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos)
       return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 
     case OP_VAR_VALUE:
-      (*pos) += 4;
       type = check_typedef (SYMBOL_TYPE (exp->elts[pc + 2].symbol));
+      if (is_dynamic_type (type))
+	{
+	  val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
+	  type = value_type (val);
+	}
+      else
+	(*pos) += 4;
       return
 	value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 
