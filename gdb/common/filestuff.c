@@ -310,16 +310,16 @@ gdb_open_cloexec (const char *filename, int flags, unsigned long mode)
 FILE *
 gdb_fopen_cloexec (const char *filename, const char *opentype)
 {
-  FILE *result = NULL;
+  FILE *result;
   /* Probe for "e" support once.  But, if we can tell the operating
      system doesn't know about close on exec mode "e" without probing,
      skip it.  E.g., the Windows runtime issues an "Invalid parameter
      passed to C runtime function" OutputDebugString warning for
      unknown modes.  Assume that if O_CLOEXEC is zero, then "e" isn't
      supported.  */
-  static int fopen_e_ever_failed = O_CLOEXEC == 0;
+  static int fopen_e_ever_failed_einval = O_CLOEXEC == 0;
 
-  if (!fopen_e_ever_failed)
+  if (!fopen_e_ever_failed_einval)
     {
       char *copy;
 
@@ -329,15 +329,16 @@ gdb_fopen_cloexec (const char *filename, const char *opentype)
 	 this path.  */
       strcat (copy, "e");
       result = fopen (filename, copy);
-    }
 
-  if (result == NULL)
-    {
-      /* Fallback.  */
-      result = fopen (filename, opentype);
-      if (result != NULL)
-	fopen_e_ever_failed = 1;
+      if (result == NULL && errno == EINVAL)
+	{
+	  result = fopen (filename, opentype);
+	  if (result != NULL)
+	    fopen_e_ever_failed_einval = 1;
+	}
     }
+  else
+    result = fopen (filename, opentype);
 
   if (result != NULL)
     maybe_mark_cloexec (fileno (result));
