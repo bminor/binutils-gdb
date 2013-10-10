@@ -144,13 +144,6 @@ int saved_command_line_size = 100;
    is issuing commands too.  */
 int server_command;
 
-/* Baud rate specified for talking to serial target systems.  Default
-   is left as -1, so targets can choose their own defaults.  */
-/* FIXME: This means that "show remotebaud" and gr_files_info can
-   print -1 or (unsigned int)-1.  This is a Bad User Interface.  */
-
-int baud_rate = -1;
-
 /* Timeout limit for response from target.  */
 
 /* The default value has been changed many times over the years.  It 

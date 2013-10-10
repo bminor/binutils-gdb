@@ -1,3 +1,17 @@
+2013-10-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* cli/cli-cmds.c (show_baud_rate): Moved to serial.c as
+	serial_baud_show_cmd.
+	(_initialize_cli_cmds): Delete the code creating the
+	"set/show remotebaud" commands.
+	* serial.c (baud_rate): Move here from top.c.
+	(serial_baud_show_cmd): Move here from cli/cli-cmds.c.
+	(_initialize_serial): Create "set/show serial baud" commands.
+	Add "set/show remotebaud" command aliases.
+	* top.c (baud_rate): Moved to serial.c.
+	* NEWS: Document the new "set/show serial baud" commands,
+	replacing "set/show remotebaud".
+
 2013-10-09  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (insert_bp_location): Use memory_error_message to

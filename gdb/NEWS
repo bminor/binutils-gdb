@@ -200,6 +200,11 @@ qXfer:libraries-svr4:read's annex
 
 * GDB can now use Windows x64 unwinding data.
 
+* The "set remotebaud" command has been replaced by "set serial baud".
+  Similarly, "show remotebaud" has been replaced by "show serial baud".
+  The "set remotebaud" and "show remotebaud" commands are still available
+  to provide backward compatibility with older versions of GDB.
+
 *** Changes in GDB 7.6
 
 * Target record has been renamed to record-full.

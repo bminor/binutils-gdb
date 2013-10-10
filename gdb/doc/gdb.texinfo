@@ -18024,8 +18024,8 @@ target remote /dev/ttyb
 @end smallexample
 
 If you're using a serial line, you may want to give @value{GDBN} the
-@w{@samp{--baud}} option, or use the @code{set remotebaud} command
-(@pxref{Remote Configuration, set remotebaud}) before the
+@w{@samp{--baud}} option, or use the @code{set serial baud} command
+(@pxref{Remote Configuration, set serial baud}) before the
 @code{target} command.
 
 @item target remote @code{@var{host}:@var{port}}
@@ -18567,13 +18567,13 @@ default value is the number of bits in the target's address.
 @item show remoteaddresssize
 Show the current value of remote address size in bits.
 
-@item set remotebaud @var{n}
+@item set serial baud @var{n}
 @cindex baud rate for remote targets
 Set the baud rate for the remote serial I/O to @var{n} baud.  The
 value is used to set the speed of the serial port used for debugging
 remote targets.
 
-@item show remotebaud
+@item show serial baud
 Show the current speed of the remote connection.
 
 @item set remotebreak
