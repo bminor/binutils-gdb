@@ -1,5 +1,9 @@
 2013-10-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.texinfo (Connecting): Remove unnecessary @w{}.
+
+2013-10-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo: Replace "set remotebaud" and "show remotebaud"
 	by "set serial baud" and "show serial baud" (resp) throughout.
 

@@ -18024,7 +18024,7 @@ target remote /dev/ttyb
 @end smallexample
 
 If you're using a serial line, you may want to give @value{GDBN} the
-@w{@samp{--baud}} option, or use the @code{set serial baud} command
+@samp{--baud} option, or use the @code{set serial baud} command
 (@pxref{Remote Configuration, set serial baud}) before the
 @code{target} command.
 
