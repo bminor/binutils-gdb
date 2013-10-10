@@ -1,5 +1,10 @@
 2013-10-10  Roland McGrath  <mcgrathr@google.com>
 
+	* cr16-opc.c (REG): Cast NAME to 'reg' enum type to suppress
+	possible compiler warnings when the union's initializer is
+	actually meant for the 'preg' enum typed member.
+	* crx-opc.c (REG): Likewise.
+
 	* v850-dis.c (v850_cacheop_codes, v850_prefop_codes):
 	Remove duplicate const qualifier.
 
