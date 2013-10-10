@@ -1,3 +1,26 @@
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* Makefile.in: Add i386-mpx.c, i386-mpx-linux.c, amd64-mpx.c,
+	amd64-mpx-linux.c, x32-mpx.c and x32-mpx-linux.c generation.
+	* configure.srv (srv_i386_regobj): Add i386-mpx.o.
+	(srv_i386_linux_regobj): Add i386-mpx-linux.o.
+	(srv_amd64_regobj): Add amd64-mpx.o.
+	(srv_amd64_linux_regobj): Add amd64-mpx-linux.o.
+	(srv_i386_32bit_xmlfiles): Add i386/32bit-mpx.xml.
+	(srv_i386_64bit_xmlfiles): Add i386/64bit-mpx.xml.
+	* i387-fp.c (num_pl_bnd_register) Added constant.
+	(num_pl_bnd_cfg_registers) Added constant.
+	(struct i387_xsave) Added reserved area and MPX fields.
+	(i387_cache_to_xsave, i387_xsave_to_cache) Add MPX.
+	* linux-x86-low.c (init_registers_i386_mpx_linux): Declare new
+	function.
+	(tdesc_i386_mpx_linux): Add MPX amd64 target.
+	(init_registers_amd64_mpx_linux): Declare new function.
+	(tdesc_amd64_mpx_linux): Add MPX amd64 target.
+	(x86_64_regmap): Add MPX registers.
+	(x86_linux_read_description): Add MPX case.
+	(initialize_low_arch): Initialize MPX targets.
+
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
 	* configure: Rebuild.
