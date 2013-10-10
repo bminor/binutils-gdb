@@ -1,3 +1,8 @@
+2013-10-10  Will Newton  <will.newton@linaro.org>
+
+	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Call
+	linux_init_abi.
+
 2013-10-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* cli/cli-cmds.c (show_baud_rate): Moved to serial.c as
