@@ -1,3 +1,8 @@
+2013-10-10  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* lib/gdb.exp (gdb_core_cmd): Replace fixed string "re-load
+	generated corefile" by argument "$test".
+
 2013-10-09  Pedro Alves  <palves@redhat.com>
 
 	* gdb.python/py-prettyprint.exp (run_lang_tests): Adjust expected
