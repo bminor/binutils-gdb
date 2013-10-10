@@ -1,6 +1,6 @@
 /* ldmisc.c
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2010, 2011, 2012
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
@@ -361,7 +361,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		    if (functionname != NULL && fmt[-1] == 'G')
 		      lfinfo (fp, "%T", functionname);
 		    else if (filename != NULL && linenumber != 0)
-		      fprintf (fp, "%u%s", linenumber, ":" + done);
+		      fprintf (fp, "%u%s", linenumber, done ? "" : ":");
 		    else
 		      done = FALSE;
 		  }
