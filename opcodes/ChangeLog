@@ -1,3 +1,8 @@
+2013-10-10  Roland McGrath  <mcgrathr@google.com>
+
+	* v850-dis.c (v850_cacheop_codes, v850_prefop_codes):
+	Remove duplicate const qualifier.
+
 2013-10-08  Jan Beulich <jbeulich@suse.com>
 
 	* i386-opc.tbl (invlpg): Use Anysize instead of Unspecified.
