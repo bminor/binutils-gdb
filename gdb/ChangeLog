@@ -1,3 +1,14 @@
+2013-10-11  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (discard_pending_stop_replies_in_queue): Update
+	declaration.
+	(struct stop_reply) <rs>: New field.
+	(remove_stop_reply_of_remote_state): New function.
+	(discard_pending_stop_replies_in_queue): Add parameter 'rs'.
+	Callers update.  Pass remove_stop_reply_of_remote_state to
+	QUEUE_iterate.
+	(remote_parse_stop_reply): Initialize field 'rs'.
+
 2013-10-10  Will Newton  <will.newton@linaro.org>
 
 	* aarch64-linux-tdep.c (aarch64_linux_init_abi): Call

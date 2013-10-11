@@ -220,7 +220,7 @@ struct stop_reply;
 static void stop_reply_xfree (struct stop_reply *);
 static void remote_parse_stop_reply (char *, struct stop_reply *);
 static void push_stop_reply (struct stop_reply *);
-static void discard_pending_stop_replies_in_queue (void);
+static void discard_pending_stop_replies_in_queue (struct remote_state *);
 static int peek_stop_reply (ptid_t ptid);
 
 static void remote_async_inferior_event_handler (gdb_client_data);
@@ -3069,7 +3069,7 @@ remote_close (void)
 
   /* We are closing the remote target, so we should discard
      everything of this target.  */
-  discard_pending_stop_replies_in_queue ();
+  discard_pending_stop_replies_in_queue (rs);
 
   if (remote_async_inferior_event_token)
     delete_async_event_handler (&remote_async_inferior_event_token);
@@ -5274,6 +5274,11 @@ typedef struct stop_reply
   /* The identifier of the thread about this event  */
   ptid_t ptid;
 
+  /* The remote state this event associated is with.  When the remote
+     connection, represented by a remote_state object, is closed,
+     all the associated stop_reply events should be released.  */
+  struct remote_state *rs;
+
   struct target_waitstatus ws;
 
   /* Expedited registers.  This makes remote debugging a bit more
@@ -5434,19 +5439,40 @@ discard_pending_stop_replies (struct inferior *inf)
 		 remove_stop_reply_for_inferior, &param);
 }
 
-/* Discard the stop replies in stop_reply_queue.  */
+/* If its remote state is equal to the given remote state,
+   remove EVENT from the stop reply queue.  */
+
+static int
+remove_stop_reply_of_remote_state (QUEUE (stop_reply_p) *q,
+				   QUEUE_ITER (stop_reply_p) *iter,
+				   stop_reply_p event,
+				   void *data)
+{
+  struct queue_iter_param *param = data;
+  struct remote_state *rs = param->input;
+
+  if (event->rs == rs)
+    {
+      stop_reply_xfree (event);
+      QUEUE_remove_elem (stop_reply_p, q, iter);
+    }
+
+  return 1;
+}
+
+/* Discard the stop replies for RS in stop_reply_queue.  */
 
 static void
-discard_pending_stop_replies_in_queue (void)
+discard_pending_stop_replies_in_queue (struct remote_state *rs)
 {
   struct queue_iter_param param;
 
-  param.input = NULL;
+  param.input = rs;
   param.output = NULL;
   /* Discard the stop replies we have already pulled with
      vStopped.  */
   QUEUE_iterate (stop_reply_p, stop_reply_queue,
-		 remove_stop_reply_for_inferior, &param);
+		 remove_stop_reply_of_remote_state, &param);
 }
 
 /* A parameter to pass data in and out.  */
@@ -5559,6 +5585,7 @@ remote_parse_stop_reply (char *buf, struct stop_reply *event)
   char *p;
 
   event->ptid = null_ptid;
+  event->rs = get_remote_state ();
   event->ws.kind = TARGET_WAITKIND_IGNORE;
   event->ws.value.integer = 0;
   event->stopped_by_watchpoint_p = 0;
