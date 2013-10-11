@@ -178,6 +178,9 @@ INTL_CFLAGS = @INCINTL@
 # Did the user give us a --with-gdb-datadir option?
 GDB_DATADIR = @GDB_DATADIR@
 
+# Flags to pass to gdb when invoked with "make run".
+GDBFLAGS =
+
 # Helper code from gnulib.
 GNULIB_BUILDDIR = build-gnulib
 LIBGNU = $(GNULIB_BUILDDIR)/import/libgnu.a
@@ -1340,6 +1343,10 @@ data-directory/Makefile: data-directory/Makefile.in config.status @frags@
 	  CONFIG_HEADERS= \
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
+
+.PHONY: run
+run: Makefile
+	./gdb$(EXEEXT) --data-directory=`pwd`/data-directory $(GDBFLAGS)
 
 jit-reader.h: $(srcdir)/jit-reader.in
 	$(SHELL) config.status $@

@@ -1,3 +1,8 @@
+2013-10-11  Doug Evans  <dje@google.com>
+
+	* Makefile.in (GDBFLAGS): New variable.
+	(run): New rule.
+
 2013-10-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Add entry documenting the new "-catch-assert" and
