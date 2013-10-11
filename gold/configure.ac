@@ -389,8 +389,13 @@ fi
 AM_CONDITIONAL(OMP_SUPPORT, test "$gold_cv_c_threadprivate" = "yes")
 
 dnl Test for the -ftls-dialect=gnu2 option.
+dnl Use -Werror in case of compilers that make unknown -m options warnings.
+dnl They would pass the test here, but fail in actual use when $WARN_CFLAGS
+dnl gets set later by default Autoconf magic to include -Werror.  (We are
+dnl assuming here that there is no compiler that groks -mtls-dialect=gnu2
+dnl but does not grok -Werror.)
 save_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -fpic -mtls-dialect=gnu2"
+CFLAGS="$CFLAGS -Werror -fpic -mtls-dialect=gnu2"
 AC_COMPILE_IFELSE([
 __thread int i;
 void foo (void)
@@ -592,8 +597,13 @@ if test "$gold_cv_stat_st_mtim" = "yes"; then
 fi
 
 dnl Check if gcc supports the -gpubnames option.
+dnl Use -Werror in case of compilers that make unknown -g options warnings.
+dnl They would pass the test here, but fail in actual use when $WARN_CFLAGS
+dnl gets set later by default Autoconf magic to include -Werror.  (We are
+dnl assuming here that there is no compiler that groks -gpubnames
+dnl but does not grok -Werror.)
 save_CXXFLAGS="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS -gpubnames"
+CXXFLAGS="$CXXFLAGS -Werror -gpubnames"
 AC_COMPILE_IFELSE([int i;], [have_pubnames=yes], [have_pubnames=no])
 CXXFLAGS="$save_CXXFLAGS"
 AM_CONDITIONAL(HAVE_PUBNAMES, test "$have_pubnames" = "yes")
