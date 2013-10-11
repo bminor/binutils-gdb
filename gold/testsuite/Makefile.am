@@ -199,7 +199,7 @@ MOSTLYCLEANFILES += pr14265
 pr14265.o: pr14265.c
 	$(COMPILE) -O0 -c -o $@ $<
 pr14265: pr14265.o
-	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -T $(srcdir)/pr14265.t -o $@ $<
+	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -Wl,-T,$(srcdir)/pr14265.t -o $@ $<
 pr14265.stdout: pr14265
 	$(TEST_NM) --format=bsd --numeric-sort $< > $@
 
@@ -1309,18 +1309,18 @@ relro_script_test_DEPENDENCIES = gcctestdir/ld relro_script_test.so
 relro_script_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 relro_script_test_LDADD = relro_script_test.so
 relro_script_test.so: gcctestdir/ld relro_script_test.t relro_test_pic.o
-	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro -T $(srcdir)/relro_script_test.t relro_test_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro -Wl,-T,$(srcdir)/relro_script_test.t relro_test_pic.o
 
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
-script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
+script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-T,$(srcdir)/script_test_1.t
 script_test_1_LDADD =
 
 check_PROGRAMS += script_test_2
 script_test_2_SOURCES = script_test_2.cc script_test_2a.cc script_test_2b.cc
 script_test_2_DEPENDENCIES = gcctestdir/ld script_test_2.t
-script_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_2.t
+script_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -Wl,-T,$(srcdir)/script_test_2.t
 script_test_2_LDADD =
 
 check_PROGRAMS += justsyms
@@ -1331,7 +1331,7 @@ justsyms_LDADD =
 justsyms_2.o: justsyms_2.cc
 	$(CXXCOMPILE) -c -o $@ $<
 justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
-	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
+	gcctestdir/ld -o $@ -r -Wl,-T,$(srcdir)/justsyms.t justsyms_2.o
 
 check_PROGRAMS += justsyms_exec
 justsyms_exec_SOURCES = justsyms_exec.c
@@ -1364,42 +1364,42 @@ ver_matching_def.so: ver_matching_def_pic.o $(srcdir)/version_script.map gcctest
 ver_matching_def_pic.o: ver_matching_def.cc
 	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
 ver_matching_test.stdout: ver_matching_def.so
-	$(TEST_OBJDUMP) -T ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
+	$(TEST_OBJDUMP) -Wl,-T,ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
 
 check_PROGRAMS += script_test_3
 check_SCRIPTS += script_test_3.sh
 check_DATA += script_test_3.stdout
 MOSTLYCLEANFILES += script_test_3.stdout
 script_test_3: basic_test.o gcctestdir/ld script_test_3.t
-	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_3.t
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -Wl,-T,$(srcdir)/script_test_3.t
 script_test_3.stdout: script_test_3
 	$(TEST_READELF) -SlW script_test_3 > script_test_3.stdout
 
 check_PROGRAMS += tls_phdrs_script_test
 tls_phdrs_script_test_SOURCES = $(tls_test_SOURCES)
 tls_phdrs_script_test_DEPENDENCIES = $(tls_test_DEPENDENCIES) $(srcdir)/script_test_3.t
-tls_phdrs_script_test_LDFLAGS = $(tls_test_LDFLAGS) -T $(srcdir)/script_test_3.t
+tls_phdrs_script_test_LDFLAGS = $(tls_test_LDFLAGS) -Wl,-T,$(srcdir)/script_test_3.t
 tls_phdrs_script_test_LDADD = $(tls_test_LDADD)
 
 check_SCRIPTS += script_test_4.sh
 check_DATA += script_test_4.stdout
 MOSTLYCLEANFILES += script_test_4
 script_test_4: basic_test.o gcctestdir/ld $(srcdir)/script_test_4.t
-	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_4.t
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -Wl,-T,$(srcdir)/script_test_4.t
 script_test_4.stdout: script_test_4
 	$(TEST_READELF) -SlW script_test_4 > script_test_4.stdout
 
 check_PROGRAMS += tls_script_test
 tls_script_test_SOURCES = $(tls_test_SOURCES)
 tls_script_test_DEPENDENCIES = $(tls_test_DEPENDENCIES) $(srcdir)/script_test_4.t
-tls_script_test_LDFLAGS = $(tls_test_LDFLAGS) -T $(srcdir)/script_test_4.t
+tls_script_test_LDFLAGS = $(tls_test_LDFLAGS) -Wl,-T,$(srcdir)/script_test_4.t
 tls_script_test_LDADD = $(tls_test_LDADD)
 
 check_SCRIPTS += script_test_5.sh
 check_DATA += script_test_5.stdout
 MOSTLYCLEANFILES += script_test_5
 script_test_5: script_test_5.o gcctestdir/ld $(srcdir)/script_test_5.t
-	$(CXXLINK) -Bgcctestdir/ script_test_5.o -T $(srcdir)/script_test_5.t
+	$(CXXLINK) -Bgcctestdir/ script_test_5.o -Wl,-T,$(srcdir)/script_test_5.t
 script_test_5.stdout: script_test_5
 	$(TEST_READELF) -SW script_test_5 > script_test_5.stdout
 
@@ -1407,7 +1407,7 @@ check_SCRIPTS += script_test_6.sh
 check_DATA += script_test_6.stdout
 MOSTLYCLEANFILES += script_test_6
 script_test_6: basic_test.o gcctestdir/ld $(srcdir)/script_test_6.t
-	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_6.t \
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -Wl,-T,$(srcdir)/script_test_6.t \
 	-Wl,-Ttext=0x10001000 -Wl,-Tdata=0x10200000 -Wl,-Tbss=0x10400000
 script_test_6.stdout: script_test_6
 	$(TEST_READELF) -SlW script_test_6 > script_test_6.stdout
@@ -1416,7 +1416,7 @@ check_SCRIPTS += script_test_7.sh
 check_DATA += script_test_7.stdout
 MOSTLYCLEANFILES += script_test_7
 script_test_7: basic_test.o gcctestdir/ld $(srcdir)/script_test_7.t
-	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_7.t
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -Wl,-T,$(srcdir)/script_test_7.t
 script_test_7.stdout: script_test_7
 	$(TEST_READELF) -SlW script_test_7 > script_test_7.stdout
 
@@ -1424,7 +1424,7 @@ check_SCRIPTS += script_test_8.sh
 check_DATA += script_test_8.stdout
 MOSTLYCLEANFILES += script_test_8
 script_test_8: basic_test.o gcctestdir/ld $(srcdir)/script_test_7.t
-	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_7.t \
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -Wl,-T,$(srcdir)/script_test_7.t \
 	-Wl,-Ttext=0x20001000 -Wl,-Tdata=0x20200000 -Wl,-Tbss=0x20400000
 script_test_8.stdout: script_test_8
 	$(TEST_READELF) -SlW script_test_8 > script_test_8.stdout
@@ -1435,7 +1435,7 @@ MOSTLYCLEANFILES += script_test_9
 script_test_9.o: script_test_9.cc
 	$(CXXCOMPILE) -O0 -c -o $@ $<
 script_test_9: gcctestdir/ld $(srcdir)/script_test_9.t script_test_9.o
-	$(CXXLINK) -Bgcctestdir/ script_test_9.o -T $(srcdir)/script_test_9.t
+	$(CXXLINK) -Bgcctestdir/ script_test_9.o -Wl,-T,$(srcdir)/script_test_9.t
 script_test_9.stdout: script_test_9
 	$(TEST_READELF) -lW script_test_9 > script_test_9.stdout
 
@@ -1446,7 +1446,7 @@ check_PROGRAMS += script_test_11
 script_test_11: gcctestdir/ld script_test_11_r.o
 	$(LINK) -Bgcctestdir/ script_test_11_r.o
 script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
-	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
+	gcctestdir/ld -r -o $@ -Wl,-T,$(srcdir)/script_test_11.t script_test_11.o
 script_test_11.o: script_test_11.c
 	$(COMPILE) -c -g -o $@ $<
 
@@ -2098,7 +2098,7 @@ MOSTLYCLEANFILES += memory_test.stdout memory_test memory_test.o
 memory_test.o: memory_test.s
 	$(COMPILE) -o $@ -c $<
 memory_test: memory_test.o gcctestdir/ld $(srcdir)/memory_test.t
-	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -T $(srcdir)/memory_test.t -o $@ memory_test.o
+	$(LINK) -Bgcctestdir/ -nostartfiles -nostdlib -z max-page-size=0x1000 -z common-page-size=0x1000 -Wl,-T,$(srcdir)/memory_test.t -o $@ memory_test.o
 memory_test.stdout: memory_test
 	$(TEST_READELF) -lWS  $< > $@
 
@@ -2270,7 +2270,7 @@ MOSTLYCLEANFILES += script_test_10
 script_test_10.o: script_test_10.s
 	$(TEST_AS) -o $@ $<
 script_test_10: $(srcdir)/script_test_10.t script_test_10.o gcctestdir/ld
-	gcctestdir/ld -o $@ script_test_10.o -T $(srcdir)/script_test_10.t
+	gcctestdir/ld -o $@ script_test_10.o -Wl,-T,$(srcdir)/script_test_10.t
 script_test_10.stdout: script_test_10
 	$(TEST_READELF) -SW script_test_10 > $@
 
@@ -2380,7 +2380,7 @@ arm_bl_in_range.stdout: arm_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 arm_bl_in_range: arm_bl_in_range.o ../ld-new
-	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
+	../ld-new -Wl,-T,$(srcdir)/arm_branch_range.t -o $@ $<
 
 arm_bl_in_range.o: arm_bl_in_range.s
 	$(TEST_AS) -o $@ $<
@@ -2389,7 +2389,7 @@ arm_bl_out_of_range.stdout: arm_bl_out_of_range
 	$(TEST_OBJDUMP) -S $< > $@
 
 arm_bl_out_of_range: arm_bl_out_of_range.o ../ld-new
-	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
+	../ld-new -Wl,-T,$(srcdir)/arm_branch_range.t -o $@ $<
 
 arm_bl_out_of_range.o: arm_bl_out_of_range.s
 	$(TEST_AS) -o $@ $<
@@ -2398,7 +2398,7 @@ thumb_bl_in_range.stdout: thumb_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_in_range: thumb_bl_in_range.o ../ld-new
-	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_in_range.o: thumb_bl_in_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2407,7 +2407,7 @@ thumb_bl_out_of_range.stdout: thumb_bl_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_out_of_range: thumb_bl_out_of_range.o ../ld-new
-	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_out_of_range.o: thumb_bl_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2416,7 +2416,7 @@ thumb2_bl_in_range.stdout: thumb2_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb2_bl_in_range: thumb2_bl_in_range.o ../ld-new
-	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
 
 thumb2_bl_in_range.o: thumb_bl_in_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -2425,7 +2425,7 @@ thumb2_bl_out_of_range.stdout: thumb2_bl_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb2_bl_out_of_range: thumb2_bl_out_of_range.o ../ld-new
-	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
 
 thumb2_bl_out_of_range.o: thumb_bl_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -2434,7 +2434,7 @@ thumb_blx_in_range.stdout: thumb_blx_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_blx_in_range: thumb_blx_in_range.o ../ld-new
-	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_blx_in_range.o: thumb_blx_in_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2443,7 +2443,7 @@ thumb_blx_out_of_range.stdout: thumb_blx_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_blx_out_of_range: thumb_blx_out_of_range.o ../ld-new
-	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_blx_out_of_range.o: thumb_blx_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2452,7 +2452,7 @@ thumb2_blx_in_range.stdout: thumb2_blx_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb2_blx_in_range: thumb2_blx_in_range.o ../ld-new
-	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
 
 thumb2_blx_in_range.o: thumb_blx_in_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -2461,7 +2461,7 @@ thumb2_blx_out_of_range.stdout: thumb2_blx_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb2_blx_out_of_range: thumb2_blx_out_of_range.o ../ld-new
-	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
+	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
 
 thumb2_blx_out_of_range.o: thumb_blx_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -2470,7 +2470,7 @@ thumb_bl_out_of_range_local.stdout: thumb_bl_out_of_range_local
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
-	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2479,7 +2479,7 @@ arm_thm_jump11.stdout: arm_thm_jump11
 	$(TEST_OBJDUMP) -D $< > $@
 
 arm_thm_jump11: arm_thm_jump11.o ../ld-new
-	../ld-new -T $(srcdir)/arm_thm_jump11.t -o $@ $<
+	../ld-new -Wl,-T,$(srcdir)/arm_thm_jump11.t -o $@ $<
 
 arm_thm_jump11.o: arm_thm_jump11.s
 	$(TEST_AS) -o $@ $<
@@ -2488,7 +2488,7 @@ arm_thm_jump8.stdout: arm_thm_jump8
 	$(TEST_OBJDUMP) -D $< > $@
 
 arm_thm_jump8: arm_thm_jump8.o ../ld-new
-	../ld-new -T $(srcdir)/arm_thm_jump8.t -o $@ $<
+	../ld-new -Wl,-T,$(srcdir)/arm_thm_jump8.t -o $@ $<
 
 arm_thm_jump8.o: arm_thm_jump8.s
 	$(TEST_AS) -o $@ $<
