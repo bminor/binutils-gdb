@@ -4,8 +4,10 @@
 
 2013-10-10  Joel Brobecker  <brobecker@adacore.com>
 
-	* gdb.texinfo: Replace "set remotebaud" and "show remotebaud"
-	by "set serial baud" and "show serial baud" (resp) throughout.
+	* gdb.texinfo (Connecting): Replace "set remotebaud" by "set
+	serial baud".
+	(Remote Configuration): Replace "set remotebaud" by "set serial
+	baud".  Replace "show remotebaud" by "show serial baud".
 
 2013-10-07  Pedro Alves  <palves@redhat.com>
 
