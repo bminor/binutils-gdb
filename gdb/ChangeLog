@@ -1,5 +1,10 @@
 2013-10-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Add entry documenting the new "-catch-assert" and
+	"-catch-exception" GDB/MI commands.
+
+2013-10-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* breakpoint.h (init_ada_exception_breakpoint): Add parameter
 	"enabled".
 	* breakpoint.c (init_ada_exception_breakpoint): Add parameter

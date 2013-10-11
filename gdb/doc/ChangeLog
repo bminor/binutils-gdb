@@ -1,3 +1,12 @@
+2013-10-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Shared Library GDB/MI Catchpoint Commands):
+	New subsection inside which the "-catch-load" and "-catch-unload"
+	commands documentation is now placed.
+	(Ada Exception GDB/MI Catchpoint Commands): New subsection
+	documenting the "-catch-assert" and "-catch-exception" new
+	GDB/MI commands.
+
 2013-10-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Connecting): Remove unnecessary @w{}.
