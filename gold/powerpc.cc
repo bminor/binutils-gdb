@@ -1987,25 +1987,6 @@ public:
       header_index_(size == 32 ? 0x2000 : 0)
   { }
 
-  class Got_entry;
-
-  // Create a new GOT entry and return its offset.
-  unsigned int
-  add_got_entry(Got_entry got_entry)
-  {
-    this->reserve_ent();
-    return Output_data_got<size, big_endian>::add_got_entry(got_entry);
-  }
-
-  // Create a pair of new GOT entries and return the offset of the first.
-  unsigned int
-  add_got_entry_pair(Got_entry got_entry_1, Got_entry got_entry_2)
-  {
-    this->reserve_ent(2);
-    return Output_data_got<size, big_endian>::add_got_entry_pair(got_entry_1,
-								 got_entry_2);
-  }
-
   unsigned int
   add_constant_pair(Valtype c1, Valtype c2)
   {

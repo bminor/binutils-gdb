@@ -1,5 +1,8 @@
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
+	* powerpc.cc (Output_data_got_powerpc): Remove unused methods
+	add_got_entry and add_got_entry_pair.
+
 	* configure.ac (TLS_GNU2_DIALECT): Use -Werror in test.
 	(HAVE_PUBNAMES): Likewise.
 	* configure: Regenerate.
