@@ -1,5 +1,7 @@
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
+	* testsuite/undef_symbol.cc (Foo::get_a): New method.
+
 	* configure.ac (MERGE_CONSTANTS_FLAG): New check.
 	* configure: Regenerate.
 	* Makefile.in: Regenerate.
