@@ -1,3 +1,9 @@
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* utils.c (perror_string): New function, extracted out of
+	throw_perror_with_name.
+	(throw_perror_with_name): Rework to use perror_string.
+
 2013-10-11  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (discard_pending_stop_replies_in_queue): Update

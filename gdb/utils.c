@@ -957,6 +957,26 @@ add_internal_problem_command (struct internal_problem *problem)
   xfree (show_doc);
 }
 
+/* Return a newly allocated string, containing the PREFIX followed
+   by the system error message for errno (separated by a colon).
+
+   The result must be deallocated after use.  */
+
+static char *
+perror_string (const char *prefix)
+{
+  char *err;
+  char *combined;
+
+  err = safe_strerror (errno);
+  combined = (char *) xmalloc (strlen (err) + strlen (prefix) + 3);
+  strcpy (combined, prefix);
+  strcat (combined, ": ");
+  strcat (combined, err);
+
+  return combined;
+}
+
 /* Print the system error message for errno, and also mention STRING
    as the file name for which the error was encountered.  Use ERRCODE
    for the thrown exception.  Then return to command level.  */
@@ -964,14 +984,10 @@ add_internal_problem_command (struct internal_problem *problem)
 void
 throw_perror_with_name (enum errors errcode, const char *string)
 {
-  char *err;
   char *combined;
 
-  err = safe_strerror (errno);
-  combined = (char *) alloca (strlen (err) + strlen (string) + 3);
-  strcpy (combined, string);
-  strcat (combined, ": ");
-  strcat (combined, err);
+  combined = perror_string (string);
+  make_cleanup (xfree, combined);
 
   /* I understand setting these is a matter of taste.  Still, some people
      may clear errno but not know about bfd_error.  Doing this here is not
