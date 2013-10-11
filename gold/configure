@@ -6472,7 +6472,7 @@ fi
 
 
 save_CFLAGS="$CFLAGS"
-CFLAGS="$CFLAGS -fpic -mtls-dialect=gnu2"
+CFLAGS="$CFLAGS -Werror -fpic -mtls-dialect=gnu2"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
@@ -7444,7 +7444,7 @@ $as_echo "#define HAVE_STAT_ST_MTIM 1" >>confdefs.h
 fi
 
 save_CXXFLAGS="$CXXFLAGS"
-CXXFLAGS="$CXXFLAGS -gpubnames"
+CXXFLAGS="$CXXFLAGS -Werror -gpubnames"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 int i;

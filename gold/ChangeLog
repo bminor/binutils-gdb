@@ -1,5 +1,9 @@
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
+	* configure.ac (TLS_GNU2_DIALECT): Use -Werror in test.
+	(HAVE_PUBNAMES): Likewise.
+	* configure: Regenerate.
+
 	* testsuite/Makefile.am: Replace '-T foo' with '-Wl,-T,foo' throughout.
 	* testsuite/Makefile.in: Regenerate.
 
