@@ -1,3 +1,8 @@
+2013-10-11  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-multiarch.exp: New file.
+	* gdb.arch/s390-multiarch.c: New file.
+
 2013-10-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_catch_ex.exp: Adjusts all "catch ..." tests to
