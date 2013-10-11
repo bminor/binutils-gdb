@@ -1,6 +1,6 @@
 // archive.h -- archive support for gold      -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2006, 2007, 2008, 2010, 2011, 2013 Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -40,7 +40,7 @@ class Input_group;
 class Layout;
 class Symbol_table;
 class Object;
-class Read_symbols_data;
+struct Read_symbols_data;
 class Input_file_lib;
 class Incremental_archive_entry;
 
