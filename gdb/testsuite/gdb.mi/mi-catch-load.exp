@@ -58,6 +58,7 @@ gdb_expect {
         pass "catch-load: solib-event stop"
     }
     -re ".*$mi_gdb_prompt$" {
+	setup_kfail mi/15945 *-*-*mingw*
         fail "catch-load: solib-event stop"
     }
     timeout {
@@ -85,6 +86,7 @@ gdb_expect {
         pass "catch-unload: solib-event stop"
     }
     -re ".*$mi_gdb_prompt$" {
+	setup_kfail mi/15945 *-*-*mingw*
         fail "catch-unload: solib-event stop"
     }
     timeout {

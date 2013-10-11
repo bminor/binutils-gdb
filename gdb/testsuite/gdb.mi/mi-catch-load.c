@@ -15,8 +15,15 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include <dlfcn.h>
 #include <stdio.h>
+
+#ifdef __WIN32__
+#include <windows.h>
+#define dlopen(name, mode) LoadLibrary (TEXT (name))
+#define dlclose(handle) FreeLibrary (handle)
+#else
+#include <dlfcn.h>
+#endif
 
 char *libname = "mi-catch-load-so.so";
 
