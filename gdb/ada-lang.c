@@ -12175,43 +12175,34 @@ ada_exception_sal (enum exception_catchpoint_kind ex, char *excep_string,
   return find_function_start_sal (sym, 1);
 }
 
-/* Parse the arguments (ARGS) of the "catch exception" command.
- 
-   If the user asked the catchpoint to catch only a specific
-   exception, then save the exception name in ADDR_STRING.
+/* Create an Ada exception catchpoint.
 
-   If the user provided a condition, then set COND_STRING to
-   that condition expression (the memory must be deallocated
-   after use).  Otherwise, set COND_STRING to NULL.
+   EX_KIND is the kind of exception catchpoint to be created.
 
-   See ada_exception_sal for a description of all the remaining
-   function arguments of this function.  */
+   EXCEPT_STRING, if not NULL, indicates the name of the exception
+   to which this catchpoint applies.  If NULL, this catchpoint is
+   expected to trigger for all exceptions.
 
-static struct symtab_and_line
-ada_decode_exception_location (char *args, char **addr_string,
-                               char **excep_string,
-			       char **cond_string,
-                               const struct breakpoint_ops **ops)
-{
-  enum exception_catchpoint_kind ex;
+   COND_STRING, if not NULL, is the catchpoint condition.
 
-  catch_ada_exception_command_split (args, &ex, excep_string, cond_string);
-  return ada_exception_sal (ex, *excep_string, addr_string, ops);
-}
+   TEMPFLAG, if nonzero, means that the underlying breakpoint
+   should be temporary.
 
-/* Create an Ada exception catchpoint.  */
+   FROM_TTY is the usual argument passed to all commands implementations.  */
 
 static void
 create_ada_exception_catchpoint (struct gdbarch *gdbarch,
-				 struct symtab_and_line sal,
-				 char *addr_string,
+				 enum exception_catchpoint_kind ex_kind,
 				 char *excep_string,
 				 char *cond_string,
-				 const struct breakpoint_ops *ops,
 				 int tempflag,
 				 int from_tty)
 {
   struct ada_catchpoint *c;
+  char *addr_string = NULL;
+  const struct breakpoint_ops *ops = NULL;
+  struct symtab_and_line sal
+    = ada_exception_sal (ex_kind, excep_string, &addr_string, &ops);
 
   c = XNEW (struct ada_catchpoint);
   init_ada_exception_breakpoint (&c->base, gdbarch, sal, addr_string,
@@ -12231,38 +12222,31 @@ catch_ada_exception_command (char *arg, int from_tty,
 {
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
-  struct symtab_and_line sal;
-  char *addr_string = NULL;
+  enum exception_catchpoint_kind ex_kind;
   char *excep_string = NULL;
   char *cond_string = NULL;
-  const struct breakpoint_ops *ops = NULL;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";
-  sal = ada_decode_exception_location (arg, &addr_string, &excep_string,
-				       &cond_string, &ops);
-  create_ada_exception_catchpoint (gdbarch, sal, addr_string,
-				   excep_string, cond_string, ops,
+  catch_ada_exception_command_split (arg, &ex_kind, &excep_string,
+				     &cond_string);
+  create_ada_exception_catchpoint (gdbarch, ex_kind,
+				   excep_string, cond_string,
 				   tempflag, from_tty);
 }
 
-/* Assuming that ARGS contains the arguments of a "catch assert"
-   command, parse those arguments and return a symtab_and_line object
-   for a failed assertion catchpoint.
+/* Split the arguments specified in a "catch assert" command.
 
-   Set ADDR_STRING to the name of the function where the real
-   breakpoint that implements the catchpoint is set.
+   ARGS contains the command's arguments (or the empty string if
+   no arguments were passed).
 
    If ARGS contains a condition, set COND_STRING to that condition
-   (the memory needs to be deallocated after use).  Otherwise, set
-   COND_STRING to NULL.  */
+   (the memory needs to be deallocated after use).  */
 
-static struct symtab_and_line
-ada_decode_assert_location (char *args, char **addr_string,
-			    char **cond_string,
-                            const struct breakpoint_ops **ops)
+static void
+catch_ada_assert_command_split (char *args, char **cond_string)
 {
   args = skip_spaces (args);
 
@@ -12281,8 +12265,6 @@ ada_decode_assert_location (char *args, char **addr_string,
      the command.  */
   else if (args[0] != '\0')
     error (_("Junk at end of arguments."));
-
-  return ada_exception_sal (ex_catch_assert, NULL, addr_string, ops);
 }
 
 /* Implement the "catch assert" command.  */
@@ -12293,19 +12275,16 @@ catch_assert_command (char *arg, int from_tty,
 {
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
-  struct symtab_and_line sal;
-  char *addr_string = NULL;
   char *cond_string = NULL;
-  const struct breakpoint_ops *ops = NULL;
 
   tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
 
   if (!arg)
     arg = "";
-  sal = ada_decode_assert_location (arg, &addr_string, &cond_string, &ops);
-  create_ada_exception_catchpoint (gdbarch, sal, addr_string,
-				   NULL, cond_string, ops, tempflag,
-				   from_tty);
+  catch_ada_assert_command_split (arg, &cond_string);
+  create_ada_exception_catchpoint (gdbarch, ex_catch_assert,
+				   NULL, cond_string,
+				   tempflag, from_tty);
 }
                                 /* Operators */
 /* Information about operators given special treatment in functions

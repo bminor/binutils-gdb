@@ -1,5 +1,24 @@
 2013-10-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_decode_exception_location): Delete.
+	(create_ada_exception_catchpoint): Remove arguments "sal",
+	"addr_string" and "ops".  Add argument "ex_kind" instead.
+	Adjust implementation accordingly, calling ada_exception_sal
+	to get the entities it no longer gets passed as arguments.
+	Document the function's arguments.
+	(catch_ada_exception_command): Use catch_ada_exception_command_split
+	instead of ada_decode_exception_location, and update call to
+	create_ada_exception_catchpoint.
+	(catch_ada_assert_command_split): Renames
+	ada_decode_assert_location.  Remove parameters "addr_string" and
+	"ops", and now returns void.  Adjust implementation accordingly.
+	Update the function documentation.
+	(catch_assert_command): Use catch_ada_assert_command_split
+	instead of ada_decode_assert_location.  Update call to
+	create_ada_exception_catchpoint.
+
+2013-10-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* utils.h (perror_warning_with_name): Add declaration.
 	* utils.c (perror_warning_with_name): New function.
 	* cli/cli-cmds.c (source_script_with_search): Add call to
