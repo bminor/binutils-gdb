@@ -1,5 +1,10 @@
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
+	* gold-threads.h (Once): Conditionalize member was_run_lock_ on
+	[ENABLE_THREADS && __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4], matching
+	its only use.
+	* gold-threads.cc (Once::Once): Likewise conditionalize initializer.
+
 	* archive.h: Use struct rather than class for forward declaration
 	of Read_symbols_data.
 
