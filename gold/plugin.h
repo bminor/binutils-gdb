@@ -1,6 +1,6 @@
 // plugin.h -- plugin manager for gold      -*- C++ -*-
 
-// Copyright 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2008, 2009, 2010, 2011, 2013 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.
@@ -433,7 +433,7 @@ class Pluginobj : public Object
 
   // The number of symbols provided by the plugin.
   int nsyms_;
-  
+
   // The symbols provided by the plugin.
   const struct ld_plugin_symbol* syms_;
 
@@ -554,11 +554,11 @@ class Plugin_hook : public Task
 {
  public:
   Plugin_hook(const General_options& options, Input_objects* input_objects,
-	      Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
+	      Symbol_table* symtab, Layout* /*layout*/, Dirsearch* dirpath,
 	      Mapfile* mapfile, Task_token* this_blocker,
 	      Task_token* next_blocker)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      layout_(layout), dirpath_(dirpath), mapfile_(mapfile),
+      dirpath_(dirpath), mapfile_(mapfile),
       this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
@@ -583,7 +583,6 @@ class Plugin_hook : public Task
   const General_options& options_;
   Input_objects* input_objects_;
   Symbol_table* symtab_;
-  Layout* layout_;
   Dirsearch* dirpath_;
   Mapfile* mapfile_;
   Task_token* this_blocker_;

@@ -511,8 +511,6 @@ class Lib_group : public Library_base
   void
   do_for_all_unused_symbols(Symbol_visitor_base*) const;
 
-  // For reading the files.
-  const Input_file_lib* lib_;
   // Table of the objects in the group.
   std::vector<Archive_member> members_;
 };

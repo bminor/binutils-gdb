@@ -1,6 +1,6 @@
 // icf.h --  Identical Code Folding
 
-// Copyright 2009, 2010 Free Software Foundation, Inc.
+// Copyright 2009, 2010, 2013 Free Software Foundation, Inc.
 // Written by Sriraman Tallam <tmsriram@google.com>.
 
 // This file is part of gold.
@@ -67,7 +67,7 @@ class Icf
   Icf()
   : id_section_(), section_id_(), kept_section_id_(),
     fptr_section_id_(),
-    num_tracked_relocs(NULL), icf_ready_(false),
+    icf_ready_(false),
     reloc_info_list_()
   { }
 
@@ -97,7 +97,7 @@ class Icf
   void
   unfold_section(Object* obj, unsigned int shndx);
 
-  // Returns the kept section corresponding to the 
+  // Returns the kept section corresponding to the
   // given section.
   bool
   is_section_folded(Object* obj, unsigned int shndx);
@@ -136,7 +136,7 @@ class Icf
   Reloc_info_list&
   reloc_info_list()
   { return this->reloc_info_list_; }
-  
+
   // Returns a mapping of each section to a unique integer.
   Uniq_secn_id_map&
   section_to_int_map()
@@ -156,7 +156,6 @@ class Icf
   // function is taken in which case it is dangerous to fold
   // this function.
   Secn_fptr_taken_set fptr_section_id_;
-  unsigned int* num_tracked_relocs;
   // Flag to indicate if ICF has been run.
   bool icf_ready_;
   // This list is populated by gc_process_relocs in gc.h.

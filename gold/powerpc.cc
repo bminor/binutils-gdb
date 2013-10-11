@@ -443,7 +443,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     : Sized_target<size, big_endian>(&powerpc_info),
       got_(NULL), plt_(NULL), iplt_(NULL), brlt_section_(NULL),
       glink_(NULL), rela_dyn_(NULL), copy_relocs_(elfcpp::R_POWERPC_COPY),
-      dynbss_(NULL), tlsld_got_offset_(-1U),
+      tlsld_got_offset_(-1U),
       stub_tables_(), branch_lookup_table_(), branch_info_(),
       plt_thread_safe_(false)
   {
@@ -1181,8 +1181,6 @@ class Target_powerpc : public Sized_target<size, big_endian>
   Reloc_section* rela_dyn_;
   // Relocs saved to avoid a COPY reloc.
   Copy_relocs<elfcpp::SHT_RELA, size, big_endian> copy_relocs_;
-  // Space for variables copied with a COPY reloc.
-  Output_data_space* dynbss_;
   // Offset of the GOT entry for local dynamic __tls_get_addr calls.
   unsigned int tlsld_got_offset_;
 
@@ -2510,7 +2508,7 @@ Target_powerpc<size, big_endian>::do_relax(int pass,
 	      "GOMP_parallel_loop_dynamic_start",
 	      "GOMP_parallel_loop_guided_start",
 	      "GOMP_parallel_loop_runtime_start",
-	      "GOMP_parallel_sections_start", 
+	      "GOMP_parallel_sections_start",
 	    };
 
 	  if (parameters->options().shared())
