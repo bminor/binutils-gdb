@@ -337,7 +337,7 @@ class Target_i386 : public Sized_target<32, false>
     : Sized_target<32, false>(info),
       got_(NULL), plt_(NULL), got_plt_(NULL), got_irelative_(NULL),
       got_tlsdesc_(NULL), global_offset_table_(NULL), rel_dyn_(NULL),
-      rel_irelative_(NULL), copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),
+      rel_irelative_(NULL), copy_relocs_(elfcpp::R_386_COPY),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
@@ -827,8 +827,6 @@ class Target_i386 : public Sized_target<32, false>
   Reloc_section* rel_irelative_;
   // Relocs saved to avoid a COPY reloc.
   Copy_relocs<elfcpp::SHT_REL, 32, false> copy_relocs_;
-  // Space for variables copied with a COPY reloc.
-  Output_data_space* dynbss_;
   // Offset of the GOT entry for the TLS module index.
   unsigned int got_mod_index_offset_;
   // True if the _TLS_MODULE_BASE_ symbol has been defined.

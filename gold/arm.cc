@@ -2120,7 +2120,7 @@ class Target_arm : public Sized_target<32, big_endian>
   Target_arm(const Target::Target_info* info = &arm_info)
     : Sized_target<32, big_endian>(info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
-      copy_relocs_(elfcpp::R_ARM_COPY), dynbss_(NULL),
+      copy_relocs_(elfcpp::R_ARM_COPY),
       got_mod_index_offset_(-1U), tls_base_symbol_defined_(false),
       stub_tables_(), stub_factory_(Stub_factory::get_instance()),
       should_force_pic_veneer_(false),
@@ -2907,8 +2907,6 @@ class Target_arm : public Sized_target<32, big_endian>
   Reloc_section* rel_dyn_;
   // Relocs saved to avoid a COPY reloc.
   Copy_relocs<elfcpp::SHT_REL, 32, big_endian> copy_relocs_;
-  // Space for variables copied with a COPY reloc.
-  Output_data_space* dynbss_;
   // Offset of the GOT entry for the TLS module index.
   unsigned int got_mod_index_offset_;
   // True if the _TLS_MODULE_BASE_ symbol has been defined.
@@ -10829,7 +10827,7 @@ Target_arm<big_endian>::merge_object_attributes(
 		// Do nothing.
 	      }
 	    else if (attributes_forbid_div(&in_attr[i])
-		     && !attributes_accept_div(arch, profile, &out_attr[i])) 
+		     && !attributes_accept_div(arch, profile, &out_attr[i]))
 	      out_attr[i].set_int_value(1);
 	    else if (attributes_forbid_div(&out_attr[i])
 		     && attributes_accept_div(arch, profile, &in_attr[i]))

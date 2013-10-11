@@ -1,5 +1,26 @@
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
+	* i386.cc (Target_i386): Remove unused member dynbss_.
+	* arm.cc (Target_arm): Likewise.
+	* powerpc.cc (Target_powerpc): Likewise.
+	* sparc.cc (Target_sparc): Likewise.
+	* tilegx.cc (Target_tilegx): Likewise.
+	* x86_64.cc (Target_x86_64): Likewise.
+	* dwarf_reader.h (Dwarf_info_reader): Remove unused members
+	type_signature_, type_offset_.
+	* plugin.h (Plugin_hook): Remove unused member layout_.
+	* readsyms.h (Add_symbols): Remove unused members dirpath_, dirindex_,
+	mapfile_.
+	(Read_member): Remove unused members input_objects_, symtab_,
+	mapfile_, layout_.
+	(Check_library): Remove unused member symtab_.
+	* archive.h (Lib_group): Remove unused member lib_.
+	* archive.cc (Lib_group::Lib_group): Update initializer.
+	* incremental.h	(Incremental_binary): Remove unused member target_.
+	(Incremental_script_entry): Removed unused member script_.
+	* layout.h (Write_symbols_task): Remove unused member input_objects_.
+	* icf.h (Icf): Remove unused member num_tracked_relocs.
+
 	* gold-threads.h (Once): Conditionalize member was_run_lock_ on
 	[ENABLE_THREADS && __GCC_HAVE_SYNC_COMPARE_AND_SWAP_4], matching
 	its only use.

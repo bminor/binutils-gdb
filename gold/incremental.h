@@ -1,6 +1,6 @@
 // inremental.h -- incremental linking support for gold   -*- C++ -*-
 
-// Copyright 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+// Copyright 2009, 2010, 2011, 2012, 2013 Free Software Foundation, Inc.
 // Written by Mikolaj Zalewski <mikolajz@google.com>.
 
 // This file is part of gold.
@@ -304,10 +304,10 @@ class Incremental_script_entry : public Incremental_input_entry
 {
  public:
   Incremental_script_entry(Stringpool::Key filename_key,
-			   unsigned int arg_serial, Script_info* script,
+			   unsigned int arg_serial, Script_info* /*script*/,
 			   Timespec mtime)
     : Incremental_input_entry(filename_key, arg_serial, mtime),
-      script_(script), objects_()
+      objects_()
   { }
 
   // Add a member object to the archive.
@@ -341,8 +341,6 @@ class Incremental_script_entry : public Incremental_input_entry
   { return this; }
 
  private:
-  // Information about the script file.
-  Script_info* script_;
   // Objects that have been included by this script.
   std::vector<Incremental_input_entry*> objects_;
 };
@@ -1342,9 +1340,9 @@ class Incremental_got_plt_reader
 class Incremental_binary
 {
  public:
-  Incremental_binary(Output_file* output, Target* target)
+  Incremental_binary(Output_file* output, Target* /*target*/)
     : input_args_map_(), library_map_(), script_map_(),
-      output_(output), target_(target)
+      output_(output)
   { }
 
   virtual
@@ -1582,8 +1580,6 @@ class Incremental_binary
  private:
   // Edited output file object.
   Output_file* output_;
-  // Target of the output file.
-  Target* target_;
 };
 
 template<int size, bool big_endian>

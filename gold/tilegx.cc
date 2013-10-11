@@ -239,7 +239,7 @@ class Target_tilegx : public Sized_target<size, big_endian>
       got_(NULL), plt_(NULL), got_plt_(NULL), got_irelative_(NULL),
       global_offset_table_(NULL), tilegx_dynamic_(NULL), rela_dyn_(NULL),
       rela_irelative_(NULL), copy_relocs_(elfcpp::R_TILEGX_COPY),
-      dynbss_(NULL), got_mod_index_offset_(-1U),
+      got_mod_index_offset_(-1U),
       tls_get_addr_sym_defined_(false)
   { }
 
@@ -650,8 +650,6 @@ class Target_tilegx : public Sized_target<size, big_endian>
   Reloc_section* rela_irelative_;
   // Relocs saved to avoid a COPY reloc.
   Copy_relocs<elfcpp::SHT_RELA, size, big_endian> copy_relocs_;
-  // Space for variables copied with a COPY reloc.
-  Output_data_space* dynbss_;
   // Offset of the GOT entry for the TLS module index.
   unsigned int got_mod_index_offset_;
   // True if the _tls_get_addr symbol has been defined.

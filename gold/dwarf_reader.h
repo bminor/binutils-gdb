@@ -1,6 +1,7 @@
 // dwarf_reader.h -- parse dwarf2/3 debug information for gold  -*- C++ -*-
 
-// Copyright 2007, 2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+// Copyright 2007, 2008, 2009, 2010, 2011, 2012, 2013
+// Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of gold.
@@ -697,8 +698,8 @@ class Dwarf_info_reader
       symtab_size_(symtab_size), shndx_(shndx), reloc_shndx_(reloc_shndx),
       reloc_type_(reloc_type), abbrev_shndx_(0), string_shndx_(0),
       buffer_(NULL), buffer_end_(NULL), cu_offset_(0), cu_length_(0),
-      offset_size_(0), address_size_(0), cu_version_(0), type_signature_(0),
-      type_offset_(0), abbrev_table_(), ranges_table_(this),
+      offset_size_(0), address_size_(0), cu_version_(0),
+      abbrev_table_(), ranges_table_(this),
       reloc_mapper_(NULL), string_buffer_(NULL), string_buffer_end_(NULL),
       owns_string_buffer_(false), string_output_section_offset_(0)
   { }
@@ -895,10 +896,6 @@ class Dwarf_info_reader
   unsigned int address_size_;
   // Compilation unit version number.
   unsigned int cu_version_;
-  // Type signature (for a type unit).
-  uint64_t type_signature_;
-  // Offset from the type unit header to the type DIE (for a type unit).
-  off_t type_offset_;
   // Abbreviations table for current compilation unit.
   Dwarf_abbrev_table abbrev_table_;
   // Ranges table for the current compilation unit.
