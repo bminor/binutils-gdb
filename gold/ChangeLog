@@ -1,5 +1,16 @@
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
+	* configure.ac (MERGE_CONSTANTS_FLAG): New check.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* testsuite/merge_string_literals_1.c: Renamed to have .cc suffix.
+	* testsuite/merge_string_literals_2.c: Likewise.
+	* testsuite/Makefile.am
+	(merge_string_literals_1.o, merge_string_literals_2.o): Update deps.
+	(AM_CFLAGS, AM_CXXFLAGS): Use $(MERGE_CONSTANTS_FLAG) in place of
+	literal -fmerge-constants.
+	* testsuite/Makefile.in: Regenerate.
+
 	* i386.cc (Target_i386): Remove unused member dynbss_.
 	* arm.cc (Target_arm): Likewise.
 	* powerpc.cc (Target_powerpc): Likewise.
@@ -336,23 +347,23 @@
 
 2013-05-21  Cary Coutant  <ccoutant@google.com>
 
-    	* object.cc (Sized_relobj_file::get_symbol_location_info): Set
-    	type of enclosing symbol.
-    	(Relocate_info::location): Check symbol type when describing symbol.
-    	* object.h (Symbol_location_info): Remove unused line_number;
-    	add enclosing_symbol_type.
-    	* testsuite/debug_msg.sh: Adjust expected output.
+	* object.cc (Sized_relobj_file::get_symbol_location_info): Set
+	type of enclosing symbol.
+	(Relocate_info::location): Check symbol type when describing symbol.
+	* object.h (Symbol_location_info): Remove unused line_number;
+	add enclosing_symbol_type.
+	* testsuite/debug_msg.sh: Adjust expected output.
 
 2013-05-13  Cary Coutant  <ccoutant@google.com>
 
-    	* configure.ac: Export DEFAULT_TARGET.
-    	* configure: Regenerate.
-    	* Makefile.in: Regenerate.
-    	* testsuite/Makefile.am: Add .EXPORT_ALL_VARIABLES.
-    	* testsuite/Makefile.in: Regenerate.
-    	* testsuite/debug_msg.sh: Delete duplicate tests.
-    	Don't check undef_int error message match for powerpc where the
-    	source file and line number aren't available.
+	* configure.ac: Export DEFAULT_TARGET.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+	* testsuite/Makefile.am: Add .EXPORT_ALL_VARIABLES.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/debug_msg.sh: Delete duplicate tests.
+	Don't check undef_int error message match for powerpc where the
+	source file and line number aren't available.
 
 2013-05-10  Roland McGrath  <mcgrathr@google.com>
 

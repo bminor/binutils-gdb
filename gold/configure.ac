@@ -7,12 +7,12 @@ dnl This file is free software; you can redistribute it and/or modify
 dnl it under the terms of the GNU General Public License as published by
 dnl the Free Software Foundation; either version 3 of the License, or
 dnl (at your option) any later version.
-dnl 
+dnl
 dnl This program is distributed in the hope that it will be useful,
 dnl but WITHOUT ANY WARRANTY; without even the implied warranty of
 dnl MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 dnl GNU General Public License for more details.
-dnl 
+dnl
 dnl You should have received a copy of the GNU General Public License
 dnl along with this program; see the file COPYING3.  If not see
 dnl <http://www.gnu.org/licenses/>.
@@ -337,6 +337,19 @@ CFLAGS="$save_CFLAGS"
 dnl Whether we can test -mcmodel=medium.
 AM_CONDITIONAL(MCMODEL_MEDIUM,
 [test "$target_cpu" = "x86_64" -a "$have_mcmodel_medium" = "yes" -a "$gold_cv_prog_gcc41" = "yes"])
+
+AC_CACHE_CHECK([whether $CC supports -fmerge-constants],
+	       [gold_cv_merge_constants], [
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -fmerge-constants"
+AC_COMPILE_IFELSE([const char *s = "foo";],
+		  [have_merge_constants=yes],
+		  [have_merge_constants=no])
+CFLAGS="$save_CFLAGS"])
+AC_SUBST([MERGE_CONSTANTS_FLAG])
+AS_IF([test "$gold_cv_merge_constants" = yes],
+      [MERGE_CONSTANTS_FLAG=-fmerge-constants],
+      [MERGE_CONSTANTS_FLAG=])
 
 dnl Test for __thread support.
 AC_CACHE_CHECK([for thread support], [gold_cv_c_thread],

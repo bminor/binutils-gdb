@@ -622,6 +622,7 @@ STATIC_TLS_FALSE
 STATIC_TLS_TRUE
 TLS_FALSE
 TLS_TRUE
+MERGE_CONSTANTS_FLAG
 MCMODEL_MEDIUM_FALSE
 MCMODEL_MEDIUM_TRUE
 FN_PTRS_IN_SO_WITHOUT_PIC_FALSE
@@ -6338,6 +6339,35 @@ else
   MCMODEL_MEDIUM_FALSE=
 fi
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $CC supports -fmerge-constants" >&5
+$as_echo_n "checking whether $CC supports -fmerge-constants... " >&6; }
+if test "${gold_cv_merge_constants+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -fmerge-constants"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+const char *s = "foo";
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  have_merge_constants=yes
+else
+  have_merge_constants=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+CFLAGS="$save_CFLAGS"
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gold_cv_merge_constants" >&5
+$as_echo "$gold_cv_merge_constants" >&6; }
+
+if test "$gold_cv_merge_constants" = yes; then :
+  MERGE_CONSTANTS_FLAG=-fmerge-constants
+else
+  MERGE_CONSTANTS_FLAG=
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for thread support" >&5
 $as_echo_n "checking for thread support... " >&6; }

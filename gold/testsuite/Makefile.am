@@ -8,10 +8,10 @@
 AUTOMAKE_OPTIONS = foreign -Wno-portability
 
 # The two_file_test tests -fmerge-constants, so we simply always turn
-# it on.  This may need to be controlled by a configure option
-# eventually.
-AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) -fmerge-constants
-AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) -fmerge-constants
+# it on.  For compilers that do not support the command-line option,
+# we assume they just always emit SHF_MERGE sections unconditionally.
+AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) $(MERGE_CONSTANTS_FLAG)
+AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) $(MERGE_CONSTANTS_FLAG)
 
 AM_CPPFLAGS = \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \
@@ -74,7 +74,7 @@ MOSTLYCLEANFILES = *.so *.syms *.stdout
 # Export make variables to the shell scripts so that they can see
 # (for example) DEFAULT_TARGET.
 .EXPORT_ALL_VARIABLES:
- 
+
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
@@ -164,9 +164,9 @@ incremental_test.stdout: incremental_test ../incremental-dump
 check_SCRIPTS += gc_comdat_test.sh
 check_DATA += gc_comdat_test.stdout
 MOSTLYCLEANFILES += gc_comdat_test
-gc_comdat_test_1.o: gc_comdat_test_1.cc 
+gc_comdat_test_1.o: gc_comdat_test_1.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
-gc_comdat_test_2.o: gc_comdat_test_2.cc 
+gc_comdat_test_2.o: gc_comdat_test_2.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 gc_comdat_test: gc_comdat_test_1.o gc_comdat_test_2.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -Wl,--gc-sections gc_comdat_test_1.o gc_comdat_test_2.o
@@ -198,7 +198,7 @@ check_DATA += pr14265.stdout
 MOSTLYCLEANFILES += pr14265
 pr14265.o: pr14265.c
 	$(COMPILE) -O0 -c -o $@ $<
-pr14265: pr14265.o 
+pr14265: pr14265.o
 	$(LINK) -Bgcctestdir/ -Wl,--gc-sections -T $(srcdir)/pr14265.t -o $@ $<
 pr14265.stdout: pr14265
 	$(TEST_NM) --format=bsd --numeric-sort $< > $@
@@ -206,7 +206,7 @@ pr14265.stdout: pr14265
 check_SCRIPTS += icf_test.sh
 check_DATA += icf_test.map
 MOSTLYCLEANFILES += icf_test icf_test.map
-icf_test.o: icf_test.cc 
+icf_test.o: icf_test.cc
 	$(CXXCOMPILE) -O0 -c -ffunction-sections -g -o $@ $<
 icf_test: icf_test.o gcctestdir/ld
 	$(CXXLINK) -o icf_test -Bgcctestdir/ -Wl,--icf=all,-Map,icf_test.map icf_test.o
@@ -277,7 +277,7 @@ text_section_no_grouping: text_section_grouping.o gcctestdir/ld
 text_section_grouping.stdout: text_section_grouping
 	$(TEST_NM) -n --synthetic text_section_grouping > text_section_grouping.stdout
 text_section_no_grouping.stdout: text_section_no_grouping
-	$(TEST_NM) -n --synthetic text_section_no_grouping > text_section_no_grouping.stdout 
+	$(TEST_NM) -n --synthetic text_section_no_grouping > text_section_no_grouping.stdout
 
 check_SCRIPTS += section_sorting_name.sh
 check_DATA += section_sorting_name.stdout
@@ -337,9 +337,9 @@ large_symbol_alignment_LDADD =
 check_SCRIPTS += merge_string_literals.sh
 check_DATA += merge_string_literals.stdout
 MOSTLYCLEANFILES += merge_string_literals
-merge_string_literals_1.o: merge_string_literals_1.c
+merge_string_literals_1.o: merge_string_literals_1.cc
 	$(CXXCOMPILE) -O2 -c -fPIC -g -o $@ $<
-merge_string_literals_2.o: merge_string_literals_2.c
+merge_string_literals_2.o: merge_string_literals_2.cc
 	$(CXXCOMPILE) -O2 -c -fPIC -g -o $@ $<
 merge_string_literals: merge_string_literals_1.o merge_string_literals_2.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ merge_string_literals_1.o merge_string_literals_2.o -O2 -shared -nostdlib
@@ -1759,7 +1759,7 @@ retain_symbols_file_test.so: basic_pic_test.o gcctestdir/ld
 	echo '_ZN4t16bC1Ev' >> retain_symbols_file_test.in
 	echo '_ZNK4t20a3getEv' >> retain_symbols_file_test.in
 	echo '_Z3t18v' >> retain_symbols_file_test.in
-	echo '__tcf_0' >> retain_symbols_file_test.in	
+	echo '__tcf_0' >> retain_symbols_file_test.in
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-retain-symbols-file,retain_symbols_file_test.in basic_pic_test.o
 retain_symbols_file_test.stdout: retain_symbols_file_test.so
 	$(TEST_NM) -C retain_symbols_file_test.so > $@
@@ -1789,7 +1789,7 @@ alt/searched_file_test_lib.a: searched_file_test_lib.o
 	test -d alt || mkdir -p alt
 	$(TEST_AR) rc $@ $^
 
-# Test that no .gnu.version sections are created when 
+# Test that no .gnu.version sections are created when
 # symbol versioning is not used.
 check_SCRIPTS += no_version_test.sh
 check_DATA += no_version_test.stdout
@@ -2032,7 +2032,7 @@ ifuncmain7pie: ifuncmain7pie.o gcctestdir/ld
 check_PROGRAMS += ifuncvar
 ifuncvar1_pic.o: ifuncvar1.c
 	$(COMPILE) -c -fPIC -o $@ $<
-ifuncvar2_pic.o: ifuncvar2.c	
+ifuncvar2_pic.o: ifuncvar2.c
 	$(COMPILE) -c -fPIC -o $@ $<
 ifuncvar.so: ifuncvar1_pic.o ifuncvar2_pic.o gcctestdir/ld
 	$(LINK) -Bgcctestdir/ -shared ifuncvar1_pic.o ifuncvar2_pic.o
