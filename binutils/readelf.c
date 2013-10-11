@@ -416,7 +416,7 @@ print_symbol (int width, const char *symbol)
       /* Keep the width positive.  This also helps.  */
       width = - width;
       extra_padding = TRUE;
-    }  
+    }
 
   if (do_wide)
     /* Set the remaining width to a very large value.
@@ -2464,7 +2464,7 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	case EM_V800:
 	  if ((e_flags & EF_RH850_ABI) == EF_RH850_ABI)
 	    strcat (buf, ", RH850 ABI");
-	    
+
 	  if (e_flags & EF_V800_850E3)
 	    strcat (buf, ", V3 architecture");
 
@@ -2786,14 +2786,14 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  if (e_flags & E_FLAG_RL78_G10)
 	    strcat (buf, ", G10");
 	  break;
-	  
+
 	case EM_RX:
 	  if (e_flags & E_FLAG_RX_64BIT_DOUBLES)
 	    strcat (buf, ", 64-bit doubles");
 	  if (e_flags & E_FLAG_RX_DSP)
 	    strcat (buf, ", dsp");
 	  if (e_flags & E_FLAG_RX_PID)
-	    strcat (buf, ", pid");	  
+	    strcat (buf, ", pid");
 	  if (e_flags & E_FLAG_RX_ABI)
 	    strcat (buf, ", RX ABI");
 	  break;
@@ -5009,10 +5009,10 @@ process_section_headers (FILE * file)
 	{
 	  print_symbol (-17, SECTION_NAME (section));
 	}
-      
+
       printf (do_wide ? " %-15s " : " %-15.15s ",
 	      get_section_type_name (section->sh_type));
-      
+
       if (is_32bit_elf)
 	{
 	  const char * link_too_big = NULL;
@@ -5180,7 +5180,7 @@ process_section_headers (FILE * file)
   W (write), A (alloc), X (execute), M (merge), S (strings)\n\
   I (info), L (link order), G (group), T (TLS), E (exclude), x (unknown)\n\
   O (extra OS processing required) o (OS specific), p (processor specific)\n"));
-    }	
+    }
 
   return 1;
 }
@@ -6712,7 +6712,7 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
 
 	  if (streq (relname, "R_ARM_NONE"))
 	      continue;
-	  
+
 	  if (! streq (relname, "R_ARM_PREL31"))
 	    {
 	      warn (_("Skipping unexpected relocation type %s\n"), relname);
@@ -6722,7 +6722,7 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
       else if (elf_header.e_machine == EM_TI_C6000)
 	{
 	  relname = elf_tic6x_reloc_type (ELF32_R_TYPE (rp->r_info));
-	  
+
 	  if (streq (relname, "R_C6000_NONE"))
 	    continue;
 
@@ -6754,8 +6754,8 @@ get_unwind_section_word (struct arm_unw_aux_info *  aux,
 
 static const char *tic6x_unwind_regnames[16] =
 {
-  "A15", "B15", "B14", "B13", "B12", "B11", "B10", "B3", 
-  "A14", "A13", "A12", "A11", "A10", 
+  "A15", "B15", "B14", "B13", "B12", "B11", "B10", "B3",
+  "A14", "A13", "A12", "A11", "A10",
   "[invalid reg 13]", "[invalid reg 14]", "[invalid reg 15]"
 };
 
@@ -7240,9 +7240,9 @@ decode_arm_unwind (struct arm_unw_aux_info *  aux,
   else
     {
       /* ARM EHABI Section 6.3:
-	 
+
 	 An exception-handling table entry for the compact model looks like:
-	 
+
            31 30-28 27-24 23-0
 	   -- ----- ----- ----
             1   0   index Data for personalityRoutine[index]    */
@@ -7426,7 +7426,7 @@ arm_process_unwind (FILE *file)
       sec_type = SHT_C6000_UNWIND;
       break;
 
-    default: 
+    default:
       error (_("Unsupported architecture type %d encountered when processing unwind table"),
 	     elf_header.e_machine);
       return;
@@ -8889,7 +8889,7 @@ process_version_sections (FILE * file)
 			      if (get_data (&evn, file, offset, sizeof (evn), 1,
 					    _("version need")) == NULL)
 				break;
-			      
+
 			      ivn.vn_aux  = BYTE_GET (evn.vn_aux);
 			      ivn.vn_next = BYTE_GET (evn.vn_next);
 
@@ -9319,7 +9319,7 @@ print_dynamic_symbol (bfd_vma si, unsigned long hn)
 
   n = print_vma (si, DEC_5);
   if (n < 5)
-    fputs ("     " + n, stdout);
+    fputs (&"     "[n], stdout);
   printf (" %3lu: ", hn);
   print_vma (psym->st_value, LONG_HEX);
   putchar (' ');
@@ -10052,7 +10052,7 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	  case 1: /* R_MSP430_32 or R_MSP430_ABS32 */
 	  case 3: /* R_MSP430_16 or R_MSP430_ABS8 */
 	    goto handle_sym_diff;
-	    
+
 	  case 5: /* R_MSP430_16_BYTE */
 	  case 9: /* R_MSP430_8 */
 	    if (uses_msp430x_relocs ())
@@ -10064,7 +10064,7 @@ target_specific_reloc_handling (Elf_Internal_Rela * reloc,
 	    if (! uses_msp430x_relocs ())
 	      break;
 	    goto handle_sym_diff;
-	    
+
 	  handle_sym_diff:
 	    if (saved_sym != NULL)
 	      {
@@ -11640,7 +11640,7 @@ display_power_gnu_attribute (unsigned char * p,
 	  warn (_("corrupt Tag_GNU_Power_ABI_Struct_Return"));
 	  return p;
 	}
-		   
+
       val = read_uleb128 (p, &len, end);
       p += len;
       printf ("  Tag_GNU_Power_ABI_Struct_Return: ");
@@ -12045,7 +12045,7 @@ display_msp430x_attribute (unsigned char * p,
 
   tag = read_uleb128 (p, & len, end);
   p += len;
-  
+
   switch (tag)
     {
     case OFBA_MSPABI_Tag_ISA:
@@ -12827,7 +12827,7 @@ process_mips_specific (FILE * file)
 		  _("Type"),
 		  /* Note for translators: "Ndx" = abbreviated form of "Index".  */
 		  _("Ndx"), _("Name"));
-	  
+
 	  sym_width = (is_32bit_elf ? 80 : 160) - 28 - addr_size * 6 - 1;
 	  for (i = gotsym; i < symtabno; i++)
 	    {
