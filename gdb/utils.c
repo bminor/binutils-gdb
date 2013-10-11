@@ -1006,6 +1006,19 @@ perror_with_name (const char *string)
   throw_perror_with_name (GENERIC_ERROR, string);
 }
 
+/* Same as perror_with_name except that it prints a warning instead
+   of throwing an error.  */
+
+void
+perror_warning_with_name (const char *string)
+{
+  char *combined;
+
+  combined = perror_string (string);
+  warning (_("%s"), combined);
+  xfree (combined);
+}
+
 /* Print the system error message for ERRCODE, and also mention STRING
    as the file name for which the error was encountered.  */
 

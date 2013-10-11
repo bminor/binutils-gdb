@@ -285,6 +285,8 @@ extern void throw_perror_with_name (enum errors errcode, const char *string)
   ATTRIBUTE_NORETURN;
 extern void perror_with_name (const char *) ATTRIBUTE_NORETURN;
 
+extern void perror_warning_with_name (const char *string);
+
 extern void print_sys_errmsg (const char *, int);
 
 /* Warnings and error messages.  */

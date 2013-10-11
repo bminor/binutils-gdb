@@ -1,3 +1,9 @@
+2013-10-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/source-nofile.gdb: New file.
+	* gdb.base/source.exp: Add two tests verifying the behavior when
+	the "source" command is given a non-existant filename.
+
 2013-10-11  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.mi/mi-catch-load.c: Remove the include of "dlfcn.h".

@@ -1,5 +1,12 @@
 2013-11-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* utils.h (perror_warning_with_name): Add declaration.
+	* utils.c (perror_warning_with_name): New function.
+	* cli/cli-cmds.c (source_script_with_search): Add call to
+	perror_warning_with_name if from_tty is nul.
+
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* utils.c (perror_string): New function, extracted out of
 	throw_perror_with_name.
 	(throw_perror_with_name): Rework to use perror_string.

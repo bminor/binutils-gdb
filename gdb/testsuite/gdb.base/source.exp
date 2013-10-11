@@ -57,4 +57,13 @@ gdb_test "source -v -s ./source-test.gdb" \
     "echo test source options.*" \
     "source -v -s"
 
+# Test sourcing a non-existant file, both when the source command
+# comes from the a command entered at the GDB prompt, and when
+# it comes from a script being sourced.
+gdb_test "source for-sure-nonexistant-file" \
+         "for-sure-nonexistant-file: No such file or directory\."
+
+gdb_test "source source-nofile.gdb" \
+         "warning: for-sure-nonexistant-file: No such file or directory\.\[\r\n\]*source error not fatal"
+
 gdb_exit

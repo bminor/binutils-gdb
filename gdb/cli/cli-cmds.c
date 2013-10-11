@@ -571,11 +571,14 @@ source_script_with_search (const char *file, int from_tty, int search_path)
       /* The script wasn't found, or was otherwise inaccessible.
          If the source command was invoked interactively, throw an
 	 error.  Otherwise (e.g. if it was invoked by a script),
-	 silently ignore the error.  */
+	 just emit a warning, rather than cause an error.  */
       if (from_tty)
 	perror_with_name (file);
       else
-	return;
+	{
+	  perror_warning_with_name (file);
+	  return;
+	}
     }
 
   old_cleanups = make_cleanup (xfree, full_path);
