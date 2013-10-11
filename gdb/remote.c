@@ -5274,7 +5274,7 @@ typedef struct stop_reply
   /* The identifier of the thread about this event  */
   ptid_t ptid;
 
-  /* The remote state this event associated is with.  When the remote
+  /* The remote state this event is associated with.  When the remote
      connection, represented by a remote_state object, is closed,
      all the associated stop_reply events should be released.  */
   struct remote_state *rs;
