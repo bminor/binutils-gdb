@@ -1,3 +1,12 @@
+2013-11-14  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/14860
+	* ehframe.cc (Eh_frame_hdr::Eh_frame_hdr): Initialize lock_.
+	(Ehframe_hdr::set_final_data_size): Allocate a Lock.
+	* ehframe.h (Eh_frame_hdr::record_fde): Hold the lock while
+	updating fde_offsets_.
+	(Eh_frame_hdr::lock_): New data member.
+
 2013-11-06  Cary Coutant  <ccoutant@google.com>
 
 	PR gold/15758

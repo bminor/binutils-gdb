@@ -60,7 +60,10 @@ class Eh_frame_hdr : public Output_section_data
   record_fde(section_offset_type fde_offset, unsigned char fde_encoding)
   {
     if (!this->any_unrecognized_eh_frame_sections_)
-      this->fde_offsets_.push_back(std::make_pair(fde_offset, fde_encoding));
+      {
+	Hold_lock(*this->lock_);
+	this->fde_offsets_.push_back(std::make_pair(fde_offset, fde_encoding));
+      }
   }
 
  protected:
@@ -157,6 +160,8 @@ class Eh_frame_hdr : public Output_section_data
   // Whether we found any .eh_frame sections which we could not
   // process.
   bool any_unrecognized_eh_frame_sections_;
+  // Lock held while updating fde_offsets_.
+  Lock* lock_;
 };
 
 // This class holds an FDE.
