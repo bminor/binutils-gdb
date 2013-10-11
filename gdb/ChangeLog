@@ -1,5 +1,12 @@
 2013-10-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (enum ada_exception_catchpoint_kind): Renames
+	"enum exception_catchpoint_kind".  Replace the "ex_" prefix
+	of all its enumerates with "ada_".  Update the rest of this
+	file throughout.
+
+2013-10-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_decode_exception_location): Delete.
 	(create_ada_exception_catchpoint): Remove arguments "sal",
 	"addr_string" and "ops".  Add argument "ex_kind" instead.

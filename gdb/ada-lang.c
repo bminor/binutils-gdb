@@ -10984,11 +10984,11 @@ ada_modulus (struct type *type)
 /* The different types of catchpoints that we introduced for catching
    Ada exceptions.  */
 
-enum exception_catchpoint_kind
+enum ada_exception_catchpoint_kind
 {
-  ex_catch_exception,
-  ex_catch_exception_unhandled,
-  ex_catch_assert
+  ada_catch_exception,
+  ada_catch_exception_unhandled,
+  ada_catch_assert
 };
 
 /* Ada's standard exceptions.  */
@@ -11312,22 +11312,22 @@ ada_unhandled_exception_name_addr_from_raise (void)
    Return zero if the address could not be computed, or if not relevant.  */
 
 static CORE_ADDR
-ada_exception_name_addr_1 (enum exception_catchpoint_kind ex,
+ada_exception_name_addr_1 (enum ada_exception_catchpoint_kind ex,
                            struct breakpoint *b)
 {
   struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
 
   switch (ex)
     {
-      case ex_catch_exception:
+      case ada_catch_exception:
         return (parse_and_eval_address ("e.full_name"));
         break;
 
-      case ex_catch_exception_unhandled:
+      case ada_catch_exception_unhandled:
         return data->exception_info->unhandled_exception_name_addr ();
         break;
       
-      case ex_catch_assert:
+      case ada_catch_assert:
         return 0;  /* Exception name is not relevant in this case.  */
         break;
 
@@ -11345,7 +11345,7 @@ ada_exception_name_addr_1 (enum exception_catchpoint_kind ex,
    and zero is returned.  */
 
 static CORE_ADDR
-ada_exception_name_addr (enum exception_catchpoint_kind ex,
+ada_exception_name_addr (enum ada_exception_catchpoint_kind ex,
                          struct breakpoint *b)
 {
   volatile struct gdb_exception e;
@@ -11485,7 +11485,7 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
    exception catchpoint kinds.  */
 
 static void
-dtor_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
+dtor_exception (enum ada_exception_catchpoint_kind ex, struct breakpoint *b)
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
 
@@ -11498,7 +11498,7 @@ dtor_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
    structure for all exception catchpoint kinds.  */
 
 static struct bp_location *
-allocate_location_exception (enum exception_catchpoint_kind ex,
+allocate_location_exception (enum ada_exception_catchpoint_kind ex,
 			     struct breakpoint *self)
 {
   struct ada_catchpoint_location *loc;
@@ -11513,7 +11513,7 @@ allocate_location_exception (enum exception_catchpoint_kind ex,
    exception catchpoint kinds.  */
 
 static void
-re_set_exception (enum exception_catchpoint_kind ex, struct breakpoint *b)
+re_set_exception (enum ada_exception_catchpoint_kind ex, struct breakpoint *b)
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
 
@@ -11569,7 +11569,7 @@ should_stop_exception (const struct bp_location *bl)
    for all exception catchpoint kinds.  */
 
 static void
-check_status_exception (enum exception_catchpoint_kind ex, bpstat bs)
+check_status_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 {
   bs->stop = should_stop_exception (bs->bp_location_at);
 }
@@ -11578,7 +11578,7 @@ check_status_exception (enum exception_catchpoint_kind ex, bpstat bs)
    for all exception catchpoint kinds.  */
 
 static enum print_stop_action
-print_it_exception (enum exception_catchpoint_kind ex, bpstat bs)
+print_it_exception (enum ada_exception_catchpoint_kind ex, bpstat bs)
 {
   struct ui_out *uiout = current_uiout;
   struct breakpoint *b = bs->breakpoint_at;
@@ -11600,8 +11600,8 @@ print_it_exception (enum exception_catchpoint_kind ex, bpstat bs)
 
   switch (ex)
     {
-      case ex_catch_exception:
-      case ex_catch_exception_unhandled:
+      case ada_catch_exception:
+      case ada_catch_exception_unhandled:
 	{
 	  const CORE_ADDR addr = ada_exception_name_addr (ex, b);
 	  char exception_name[256];
@@ -11627,12 +11627,12 @@ print_it_exception (enum exception_catchpoint_kind ex, bpstat bs)
 	     it clearer to the user which kind of catchpoint just got
 	     hit.  We used ui_out_text to make sure that this extra
 	     info does not pollute the exception name in the MI case.  */
-	  if (ex == ex_catch_exception_unhandled)
+	  if (ex == ada_catch_exception_unhandled)
 	    ui_out_text (uiout, "unhandled ");
 	  ui_out_field_string (uiout, "exception-name", exception_name);
 	}
 	break;
-      case ex_catch_assert:
+      case ada_catch_assert:
 	/* In this case, the name of the exception is not really
 	   important.  Just print "failed assertion" to make it clearer
 	   that his program just hit an assertion-failure catchpoint.
@@ -11651,7 +11651,7 @@ print_it_exception (enum exception_catchpoint_kind ex, bpstat bs)
    for all exception catchpoint kinds.  */
 
 static void
-print_one_exception (enum exception_catchpoint_kind ex,
+print_one_exception (enum ada_exception_catchpoint_kind ex,
                      struct breakpoint *b, struct bp_location **last_loc)
 { 
   struct ui_out *uiout = current_uiout;
@@ -11669,7 +11669,7 @@ print_one_exception (enum exception_catchpoint_kind ex,
   *last_loc = b->loc;
   switch (ex)
     {
-      case ex_catch_exception:
+      case ada_catch_exception:
         if (c->excep_string != NULL)
           {
             char *msg = xstrprintf (_("`%s' Ada exception"), c->excep_string);
@@ -11682,11 +11682,11 @@ print_one_exception (enum exception_catchpoint_kind ex,
         
         break;
 
-      case ex_catch_exception_unhandled:
+      case ada_catch_exception_unhandled:
         ui_out_field_string (uiout, "what", "unhandled Ada exceptions");
         break;
       
-      case ex_catch_assert:
+      case ada_catch_assert:
         ui_out_field_string (uiout, "what", "failed Ada assertions");
         break;
 
@@ -11700,7 +11700,7 @@ print_one_exception (enum exception_catchpoint_kind ex,
    for all exception catchpoint kinds.  */
 
 static void
-print_mention_exception (enum exception_catchpoint_kind ex,
+print_mention_exception (enum ada_exception_catchpoint_kind ex,
                          struct breakpoint *b)
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
@@ -11713,7 +11713,7 @@ print_mention_exception (enum exception_catchpoint_kind ex,
 
   switch (ex)
     {
-      case ex_catch_exception:
+      case ada_catch_exception:
         if (c->excep_string != NULL)
 	  {
 	    char *info = xstrprintf (_("`%s' Ada exception"), c->excep_string);
@@ -11726,11 +11726,11 @@ print_mention_exception (enum exception_catchpoint_kind ex,
           ui_out_text (uiout, _("all Ada exceptions"));
         break;
 
-      case ex_catch_exception_unhandled:
+      case ada_catch_exception_unhandled:
         ui_out_text (uiout, _("unhandled Ada exceptions"));
         break;
       
-      case ex_catch_assert:
+      case ada_catch_assert:
         ui_out_text (uiout, _("failed Ada assertions"));
         break;
 
@@ -11744,24 +11744,24 @@ print_mention_exception (enum exception_catchpoint_kind ex,
    for all exception catchpoint kinds.  */
 
 static void
-print_recreate_exception (enum exception_catchpoint_kind ex,
+print_recreate_exception (enum ada_exception_catchpoint_kind ex,
 			  struct breakpoint *b, struct ui_file *fp)
 {
   struct ada_catchpoint *c = (struct ada_catchpoint *) b;
 
   switch (ex)
     {
-      case ex_catch_exception:
+      case ada_catch_exception:
 	fprintf_filtered (fp, "catch exception");
 	if (c->excep_string != NULL)
 	  fprintf_filtered (fp, " %s", c->excep_string);
 	break;
 
-      case ex_catch_exception_unhandled:
+      case ada_catch_exception_unhandled:
 	fprintf_filtered (fp, "catch exception unhandled");
 	break;
 
-      case ex_catch_assert:
+      case ada_catch_assert:
 	fprintf_filtered (fp, "catch assert");
 	break;
 
@@ -11776,49 +11776,49 @@ print_recreate_exception (enum exception_catchpoint_kind ex,
 static void
 dtor_catch_exception (struct breakpoint *b)
 {
-  dtor_exception (ex_catch_exception, b);
+  dtor_exception (ada_catch_exception, b);
 }
 
 static struct bp_location *
 allocate_location_catch_exception (struct breakpoint *self)
 {
-  return allocate_location_exception (ex_catch_exception, self);
+  return allocate_location_exception (ada_catch_exception, self);
 }
 
 static void
 re_set_catch_exception (struct breakpoint *b)
 {
-  re_set_exception (ex_catch_exception, b);
+  re_set_exception (ada_catch_exception, b);
 }
 
 static void
 check_status_catch_exception (bpstat bs)
 {
-  check_status_exception (ex_catch_exception, bs);
+  check_status_exception (ada_catch_exception, bs);
 }
 
 static enum print_stop_action
 print_it_catch_exception (bpstat bs)
 {
-  return print_it_exception (ex_catch_exception, bs);
+  return print_it_exception (ada_catch_exception, bs);
 }
 
 static void
 print_one_catch_exception (struct breakpoint *b, struct bp_location **last_loc)
 {
-  print_one_exception (ex_catch_exception, b, last_loc);
+  print_one_exception (ada_catch_exception, b, last_loc);
 }
 
 static void
 print_mention_catch_exception (struct breakpoint *b)
 {
-  print_mention_exception (ex_catch_exception, b);
+  print_mention_exception (ada_catch_exception, b);
 }
 
 static void
 print_recreate_catch_exception (struct breakpoint *b, struct ui_file *fp)
 {
-  print_recreate_exception (ex_catch_exception, b, fp);
+  print_recreate_exception (ada_catch_exception, b, fp);
 }
 
 static struct breakpoint_ops catch_exception_breakpoint_ops;
@@ -11828,51 +11828,51 @@ static struct breakpoint_ops catch_exception_breakpoint_ops;
 static void
 dtor_catch_exception_unhandled (struct breakpoint *b)
 {
-  dtor_exception (ex_catch_exception_unhandled, b);
+  dtor_exception (ada_catch_exception_unhandled, b);
 }
 
 static struct bp_location *
 allocate_location_catch_exception_unhandled (struct breakpoint *self)
 {
-  return allocate_location_exception (ex_catch_exception_unhandled, self);
+  return allocate_location_exception (ada_catch_exception_unhandled, self);
 }
 
 static void
 re_set_catch_exception_unhandled (struct breakpoint *b)
 {
-  re_set_exception (ex_catch_exception_unhandled, b);
+  re_set_exception (ada_catch_exception_unhandled, b);
 }
 
 static void
 check_status_catch_exception_unhandled (bpstat bs)
 {
-  check_status_exception (ex_catch_exception_unhandled, bs);
+  check_status_exception (ada_catch_exception_unhandled, bs);
 }
 
 static enum print_stop_action
 print_it_catch_exception_unhandled (bpstat bs)
 {
-  return print_it_exception (ex_catch_exception_unhandled, bs);
+  return print_it_exception (ada_catch_exception_unhandled, bs);
 }
 
 static void
 print_one_catch_exception_unhandled (struct breakpoint *b,
 				     struct bp_location **last_loc)
 {
-  print_one_exception (ex_catch_exception_unhandled, b, last_loc);
+  print_one_exception (ada_catch_exception_unhandled, b, last_loc);
 }
 
 static void
 print_mention_catch_exception_unhandled (struct breakpoint *b)
 {
-  print_mention_exception (ex_catch_exception_unhandled, b);
+  print_mention_exception (ada_catch_exception_unhandled, b);
 }
 
 static void
 print_recreate_catch_exception_unhandled (struct breakpoint *b,
 					  struct ui_file *fp)
 {
-  print_recreate_exception (ex_catch_exception_unhandled, b, fp);
+  print_recreate_exception (ada_catch_exception_unhandled, b, fp);
 }
 
 static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops;
@@ -11882,49 +11882,49 @@ static struct breakpoint_ops catch_exception_unhandled_breakpoint_ops;
 static void
 dtor_catch_assert (struct breakpoint *b)
 {
-  dtor_exception (ex_catch_assert, b);
+  dtor_exception (ada_catch_assert, b);
 }
 
 static struct bp_location *
 allocate_location_catch_assert (struct breakpoint *self)
 {
-  return allocate_location_exception (ex_catch_assert, self);
+  return allocate_location_exception (ada_catch_assert, self);
 }
 
 static void
 re_set_catch_assert (struct breakpoint *b)
 {
-  re_set_exception (ex_catch_assert, b);
+  re_set_exception (ada_catch_assert, b);
 }
 
 static void
 check_status_catch_assert (bpstat bs)
 {
-  check_status_exception (ex_catch_assert, bs);
+  check_status_exception (ada_catch_assert, bs);
 }
 
 static enum print_stop_action
 print_it_catch_assert (bpstat bs)
 {
-  return print_it_exception (ex_catch_assert, bs);
+  return print_it_exception (ada_catch_assert, bs);
 }
 
 static void
 print_one_catch_assert (struct breakpoint *b, struct bp_location **last_loc)
 {
-  print_one_exception (ex_catch_assert, b, last_loc);
+  print_one_exception (ada_catch_assert, b, last_loc);
 }
 
 static void
 print_mention_catch_assert (struct breakpoint *b)
 {
-  print_mention_exception (ex_catch_assert, b);
+  print_mention_exception (ada_catch_assert, b);
 }
 
 static void
 print_recreate_catch_assert (struct breakpoint *b, struct ui_file *fp)
 {
-  print_recreate_exception (ex_catch_assert, b, fp);
+  print_recreate_exception (ada_catch_assert, b, fp);
 }
 
 static struct breakpoint_ops catch_assert_breakpoint_ops;
@@ -11973,7 +11973,7 @@ ada_get_next_arg (char **argsp)
 
 static void
 catch_ada_exception_command_split (char *args,
-                                   enum exception_catchpoint_kind *ex,
+                                   enum ada_exception_catchpoint_kind *ex,
 				   char **excep_string,
 				   char **cond_string)
 {
@@ -12021,19 +12021,19 @@ catch_ada_exception_command_split (char *args,
   if (exception_name == NULL)
     {
       /* Catch all exceptions.  */
-      *ex = ex_catch_exception;
+      *ex = ada_catch_exception;
       *excep_string = NULL;
     }
   else if (strcmp (exception_name, "unhandled") == 0)
     {
       /* Catch unhandled exceptions.  */
-      *ex = ex_catch_exception_unhandled;
+      *ex = ada_catch_exception_unhandled;
       *excep_string = NULL;
     }
   else
     {
       /* Catch a specific exception.  */
-      *ex = ex_catch_exception;
+      *ex = ada_catch_exception;
       *excep_string = exception_name;
     }
   *cond_string = cond;
@@ -12043,7 +12043,7 @@ catch_ada_exception_command_split (char *args,
    implement a catchpoint of the EX kind.  */
 
 static const char *
-ada_exception_sym_name (enum exception_catchpoint_kind ex)
+ada_exception_sym_name (enum ada_exception_catchpoint_kind ex)
 {
   struct ada_inferior_data *data = get_ada_inferior_data (current_inferior ());
 
@@ -12051,13 +12051,13 @@ ada_exception_sym_name (enum exception_catchpoint_kind ex)
 
   switch (ex)
     {
-      case ex_catch_exception:
+      case ada_catch_exception:
         return (data->exception_info->catch_exception_sym);
         break;
-      case ex_catch_exception_unhandled:
+      case ada_catch_exception_unhandled:
         return (data->exception_info->catch_exception_unhandled_sym);
         break;
-      case ex_catch_assert:
+      case ada_catch_assert:
         return (data->exception_info->catch_assert_sym);
         break;
       default:
@@ -12070,17 +12070,17 @@ ada_exception_sym_name (enum exception_catchpoint_kind ex)
    of the EX kind.  */
 
 static const struct breakpoint_ops *
-ada_exception_breakpoint_ops (enum exception_catchpoint_kind ex)
+ada_exception_breakpoint_ops (enum ada_exception_catchpoint_kind ex)
 {
   switch (ex)
     {
-      case ex_catch_exception:
+      case ada_catch_exception:
         return (&catch_exception_breakpoint_ops);
         break;
-      case ex_catch_exception_unhandled:
+      case ada_catch_exception_unhandled:
         return (&catch_exception_unhandled_breakpoint_ops);
         break;
-      case ex_catch_assert:
+      case ada_catch_assert:
         return (&catch_assert_breakpoint_ops);
         break;
       default:
@@ -12143,7 +12143,7 @@ ada_exception_catchpoint_cond_string (const char *excep_string)
    type of catchpoint we need to create.  */
 
 static struct symtab_and_line
-ada_exception_sal (enum exception_catchpoint_kind ex, char *excep_string,
+ada_exception_sal (enum ada_exception_catchpoint_kind ex, char *excep_string,
 		   char **addr_string, const struct breakpoint_ops **ops)
 {
   const char *sym_name;
@@ -12192,7 +12192,7 @@ ada_exception_sal (enum exception_catchpoint_kind ex, char *excep_string,
 
 static void
 create_ada_exception_catchpoint (struct gdbarch *gdbarch,
-				 enum exception_catchpoint_kind ex_kind,
+				 enum ada_exception_catchpoint_kind ex_kind,
 				 char *excep_string,
 				 char *cond_string,
 				 int tempflag,
@@ -12222,7 +12222,7 @@ catch_ada_exception_command (char *arg, int from_tty,
 {
   struct gdbarch *gdbarch = get_current_arch ();
   int tempflag;
-  enum exception_catchpoint_kind ex_kind;
+  enum ada_exception_catchpoint_kind ex_kind;
   char *excep_string = NULL;
   char *cond_string = NULL;
 
@@ -12282,7 +12282,7 @@ catch_assert_command (char *arg, int from_tty,
   if (!arg)
     arg = "";
   catch_ada_assert_command_split (arg, &cond_string);
-  create_ada_exception_catchpoint (gdbarch, ex_catch_assert,
+  create_ada_exception_catchpoint (gdbarch, ada_catch_assert,
 				   NULL, cond_string,
 				   tempflag, from_tty);
 }
