@@ -1,6 +1,6 @@
 // target.cc -- target support for gold.
 
-// Copyright 2009, 2010, 2011 Free Software Foundation, Inc.
+// Copyright 2009, 2010, 2011, 2013 Free Software Foundation, Inc.
 // Written by Doug Kwan <dougkwan@google.com>.
 
 // This file is part of gold.
@@ -219,7 +219,7 @@ Target::do_plt_fde_location(const Output_data* plt, unsigned char*,
 template<int size, bool big_endian>
 void
 Sized_target<size, big_endian>::do_adjust_elf_header(unsigned char* view,
-						     int len) const
+						     int len)
 {
   elfcpp::ELFOSABI osabi = this->osabi();
   if (osabi != elfcpp::ELFOSABI_NONE)

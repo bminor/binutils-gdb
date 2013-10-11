@@ -435,7 +435,7 @@ Output_segment_headers::do_size() const
 
 // Output_file_header methods.
 
-Output_file_header::Output_file_header(const Target* target,
+Output_file_header::Output_file_header(Target* target,
 				       const Symbol_table* symtab,
 				       const Output_segment_headers* osh)
   : target_(target),
@@ -577,7 +577,7 @@ Output_file_header::do_sized_write(Output_file* of)
 
   // Let the target adjust the ELF header, e.g., to set EI_OSABI in
   // the e_ident field.
-  parameters->target().adjust_elf_header(view, ehdr_size);
+  this->target_->adjust_elf_header(view, ehdr_size);
 
   of->write_output_view(0, ehdr_size, view);
 }
