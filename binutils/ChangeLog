@@ -1,3 +1,8 @@
+2013-10-11  Roland McGrath  <mcgrathr@google.com>
+
+	* readelf.c (print_dynamic_symbol): Use array subscript syntax
+	rather than addition syntax with string literal.
+
 2013-10-09  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/16023
