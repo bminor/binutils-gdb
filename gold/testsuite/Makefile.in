@@ -4900,7 +4900,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2.o: justsyms_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -o $@ -r -Wl,-T,$(srcdir)/justsyms.t justsyms_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_lib.o: justsyms_lib.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_lib: justsyms_lib.o gcctestdir/ld
@@ -4915,7 +4915,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_matching_def_pic.o: ver_matching_def.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_matching_test.stdout: ver_matching_def.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -Wl,-T,ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -T ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_3: basic_test.o gcctestdir/ld script_test_3.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o -Wl,-T,$(srcdir)/script_test_3.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_3.stdout: script_test_3
@@ -4951,7 +4951,7 @@ uninstall-am:
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11: gcctestdir/ld script_test_11_r.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LINK) -Bgcctestdir/ script_test_11_r.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ -Wl,-T,$(srcdir)/script_test_11.t script_test_11.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_11.o: script_test_11.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(COMPILE) -c -g -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
@@ -5395,7 +5395,7 @@ uninstall-am:
 @NATIVE_OR_CROSS_LINKER_TRUE@script_test_10.o: script_test_10.s
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
 @NATIVE_OR_CROSS_LINKER_TRUE@script_test_10: $(srcdir)/script_test_10.t script_test_10.o gcctestdir/ld
-@NATIVE_OR_CROSS_LINKER_TRUE@	gcctestdir/ld -o $@ script_test_10.o -Wl,-T,$(srcdir)/script_test_10.t
+@NATIVE_OR_CROSS_LINKER_TRUE@	gcctestdir/ld -o $@ script_test_10.o -T $(srcdir)/script_test_10.t
 @NATIVE_OR_CROSS_LINKER_TRUE@script_test_10.stdout: script_test_10
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_READELF) -SW script_test_10 > $@
 @DEFAULT_TARGET_I386_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@split_i386_1.o: split_i386_1.s
@@ -5465,7 +5465,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_in_range: arm_bl_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -Wl,-T,$(srcdir)/arm_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_in_range.o: arm_bl_in_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
@@ -5474,7 +5474,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -S $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_out_of_range: arm_bl_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -Wl,-T,$(srcdir)/arm_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_bl_out_of_range.o: arm_bl_out_of_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
@@ -5483,7 +5483,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_in_range: thumb_bl_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_in_range.o: thumb_bl_in_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
@@ -5492,7 +5492,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range: thumb_bl_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range.o: thumb_bl_out_of_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
@@ -5501,7 +5501,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_in_range: thumb2_bl_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_in_range.o: thumb_bl_in_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -5510,7 +5510,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_out_of_range: thumb2_bl_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_bl_out_of_range.o: thumb_bl_out_of_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -5519,7 +5519,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_in_range: thumb_blx_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_in_range.o: thumb_blx_in_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
@@ -5528,7 +5528,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_out_of_range: thumb_blx_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_blx_out_of_range.o: thumb_blx_out_of_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
@@ -5537,7 +5537,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_in_range: thumb2_blx_in_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_in_range.o: thumb_blx_in_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -5546,7 +5546,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_out_of_range: thumb2_blx_out_of_range.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb2_blx_out_of_range.o: thumb_blx_out_of_range.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -5555,7 +5555,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ -march=armv5te $<
@@ -5564,7 +5564,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_thm_jump11: arm_thm_jump11.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -Wl,-T,$(srcdir)/arm_thm_jump11.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/arm_thm_jump11.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_thm_jump11.o: arm_thm_jump11.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
@@ -5573,7 +5573,7 @@ uninstall-am:
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_OBJDUMP) -D $< > $@
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_thm_jump8: arm_thm_jump8.o ../ld-new
-@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -Wl,-T,$(srcdir)/arm_thm_jump8.t -o $@ $<
+@DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	../ld-new -T $(srcdir)/arm_thm_jump8.t -o $@ $<
 
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@arm_thm_jump8.o: arm_thm_jump8.s
 @DEFAULT_TARGET_ARM_TRUE@@NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<

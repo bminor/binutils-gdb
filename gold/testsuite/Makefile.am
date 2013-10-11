@@ -1324,7 +1324,7 @@ justsyms_LDADD =
 justsyms_2.o: justsyms_2.cc
 	$(CXXCOMPILE) -c -o $@ $<
 justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
-	gcctestdir/ld -o $@ -r -Wl,-T,$(srcdir)/justsyms.t justsyms_2.o
+	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
 
 check_PROGRAMS += justsyms_exec
 justsyms_exec_SOURCES = justsyms_exec.c
@@ -1357,7 +1357,7 @@ ver_matching_def.so: ver_matching_def_pic.o $(srcdir)/version_script.map gcctest
 ver_matching_def_pic.o: ver_matching_def.cc
 	$(CXXCOMPILE) -O0 -c -fpic -o $@ $<
 ver_matching_test.stdout: ver_matching_def.so
-	$(TEST_OBJDUMP) -Wl,-T,ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
+	$(TEST_OBJDUMP) -T ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
 
 check_PROGRAMS += script_test_3
 check_SCRIPTS += script_test_3.sh
@@ -1439,7 +1439,7 @@ check_PROGRAMS += script_test_11
 script_test_11: gcctestdir/ld script_test_11_r.o
 	$(LINK) -Bgcctestdir/ script_test_11_r.o
 script_test_11_r.o: gcctestdir/ld $(srcdir)/script_test_11.t script_test_11.o
-	gcctestdir/ld -r -o $@ -Wl,-T,$(srcdir)/script_test_11.t script_test_11.o
+	gcctestdir/ld -r -o $@ -T $(srcdir)/script_test_11.t script_test_11.o
 script_test_11.o: script_test_11.c
 	$(COMPILE) -c -g -o $@ $<
 
@@ -2263,7 +2263,7 @@ MOSTLYCLEANFILES += script_test_10
 script_test_10.o: script_test_10.s
 	$(TEST_AS) -o $@ $<
 script_test_10: $(srcdir)/script_test_10.t script_test_10.o gcctestdir/ld
-	gcctestdir/ld -o $@ script_test_10.o -Wl,-T,$(srcdir)/script_test_10.t
+	gcctestdir/ld -o $@ script_test_10.o -T $(srcdir)/script_test_10.t
 script_test_10.stdout: script_test_10
 	$(TEST_READELF) -SW script_test_10 > $@
 
@@ -2373,7 +2373,7 @@ arm_bl_in_range.stdout: arm_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 arm_bl_in_range: arm_bl_in_range.o ../ld-new
-	../ld-new -Wl,-T,$(srcdir)/arm_branch_range.t -o $@ $<
+	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
 
 arm_bl_in_range.o: arm_bl_in_range.s
 	$(TEST_AS) -o $@ $<
@@ -2382,7 +2382,7 @@ arm_bl_out_of_range.stdout: arm_bl_out_of_range
 	$(TEST_OBJDUMP) -S $< > $@
 
 arm_bl_out_of_range: arm_bl_out_of_range.o ../ld-new
-	../ld-new -Wl,-T,$(srcdir)/arm_branch_range.t -o $@ $<
+	../ld-new -T $(srcdir)/arm_branch_range.t -o $@ $<
 
 arm_bl_out_of_range.o: arm_bl_out_of_range.s
 	$(TEST_AS) -o $@ $<
@@ -2391,7 +2391,7 @@ thumb_bl_in_range.stdout: thumb_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_in_range: thumb_bl_in_range.o ../ld-new
-	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_in_range.o: thumb_bl_in_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2400,7 +2400,7 @@ thumb_bl_out_of_range.stdout: thumb_bl_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_out_of_range: thumb_bl_out_of_range.o ../ld-new
-	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_out_of_range.o: thumb_bl_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2409,7 +2409,7 @@ thumb2_bl_in_range.stdout: thumb2_bl_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb2_bl_in_range: thumb2_bl_in_range.o ../ld-new
-	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
+	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
 thumb2_bl_in_range.o: thumb_bl_in_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -2418,7 +2418,7 @@ thumb2_bl_out_of_range.stdout: thumb2_bl_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb2_bl_out_of_range: thumb2_bl_out_of_range.o ../ld-new
-	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
+	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
 thumb2_bl_out_of_range.o: thumb_bl_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -2427,7 +2427,7 @@ thumb_blx_in_range.stdout: thumb_blx_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_blx_in_range: thumb_blx_in_range.o ../ld-new
-	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_blx_in_range.o: thumb_blx_in_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2436,7 +2436,7 @@ thumb_blx_out_of_range.stdout: thumb_blx_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_blx_out_of_range: thumb_blx_out_of_range.o ../ld-new
-	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_blx_out_of_range.o: thumb_blx_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2445,7 +2445,7 @@ thumb2_blx_in_range.stdout: thumb2_blx_in_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb2_blx_in_range: thumb2_blx_in_range.o ../ld-new
-	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
+	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
 thumb2_blx_in_range.o: thumb_blx_in_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -2454,7 +2454,7 @@ thumb2_blx_out_of_range.stdout: thumb2_blx_out_of_range
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb2_blx_out_of_range: thumb2_blx_out_of_range.o ../ld-new
-	../ld-new -Wl,-T,$(srcdir)/thumb2_branch_range.t -o $@ $<
+	../ld-new -T $(srcdir)/thumb2_branch_range.t -o $@ $<
 
 thumb2_blx_out_of_range.o: thumb_blx_out_of_range.s
 	$(TEST_AS) -o $@ -march=armv7-a $<
@@ -2463,7 +2463,7 @@ thumb_bl_out_of_range_local.stdout: thumb_bl_out_of_range_local
 	$(TEST_OBJDUMP) -D $< > $@
 
 thumb_bl_out_of_range_local: thumb_bl_out_of_range_local.o ../ld-new
-	../ld-new --no-fix-arm1176 -Wl,-T,$(srcdir)/thumb_branch_range.t -o $@ $<
+	../ld-new --no-fix-arm1176 -T $(srcdir)/thumb_branch_range.t -o $@ $<
 
 thumb_bl_out_of_range_local.o: thumb_bl_out_of_range_local.s
 	$(TEST_AS) -o $@ -march=armv5te $<
@@ -2472,7 +2472,7 @@ arm_thm_jump11.stdout: arm_thm_jump11
 	$(TEST_OBJDUMP) -D $< > $@
 
 arm_thm_jump11: arm_thm_jump11.o ../ld-new
-	../ld-new -Wl,-T,$(srcdir)/arm_thm_jump11.t -o $@ $<
+	../ld-new -T $(srcdir)/arm_thm_jump11.t -o $@ $<
 
 arm_thm_jump11.o: arm_thm_jump11.s
 	$(TEST_AS) -o $@ $<
@@ -2481,7 +2481,7 @@ arm_thm_jump8.stdout: arm_thm_jump8
 	$(TEST_OBJDUMP) -D $< > $@
 
 arm_thm_jump8: arm_thm_jump8.o ../ld-new
-	../ld-new -Wl,-T,$(srcdir)/arm_thm_jump8.t -o $@ $<
+	../ld-new -T $(srcdir)/arm_thm_jump8.t -o $@ $<
 
 arm_thm_jump8.o: arm_thm_jump8.s
 	$(TEST_AS) -o $@ $<
