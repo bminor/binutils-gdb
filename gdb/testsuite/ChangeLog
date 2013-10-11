@@ -1,5 +1,11 @@
 2013-10-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/mi_catch_ex.exp: Adjusts all "catch ..." tests to
+	use the appropriate GDB/MI command instead, and verify
+	the test output.
+
+2013-10-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.base/source-nofile.gdb: New file.
 	* gdb.base/source.exp: Add two tests verifying the behavior when
 	the "source" command is given a non-existant filename.
