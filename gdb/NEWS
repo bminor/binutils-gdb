@@ -149,6 +149,9 @@ show range-stepping
      command, stopping the program's execution at the start of its
      main subprogram.
 
+  ** The new commands -catch-assert and -catch-exceptions insert
+     catchpoints stopping the program when Ada exceptions are raised.
+
 * New system-wide configuration scripts
   A GDB installation now provides scripts suitable for use as system-wide
   configuration scripts for the following systems:

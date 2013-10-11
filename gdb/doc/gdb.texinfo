@@ -30328,6 +30328,14 @@ thread-groups=["i1"],times="1"@}]@}
 This section documents @sc{gdb/mi} commands for manipulating
 catchpoints.
 
+@menu
+* Shared Library GDB/MI Catchpoint Commands::
+* Ada Exception GDB/MI Catchpoint Commands::
+@end menu
+
+@node Shared Library GDB/MI Catchpoint Commands
+@subsection Shared Library @sc{gdb/mi} Catchpoints
+
 @subheading The @code{-catch-load} Command
 @findex -catch-load
 
@@ -30386,6 +30394,97 @@ what="load of library matching bar.so",catch-type="unload",times="0"@}
 (gdb)
 @end smallexample
 
+@node Ada Exception GDB/MI Catchpoint Commands
+@subsection Ada Exception @sc{gdb/mi} Catchpoints
+
+The following @sc{gdb/mi} commands can be used to create catchpoints
+that stop the execution when Ada exceptions are being raised.
+
+@subheading The @code{-catch-assert} Command
+@findex -catch-assert
+
+@subsubheading Synopsis
+
+@smallexample
+ -catch-assert [ -c @var{condition}] [ -d ] [ -t ]
+@end smallexample
+
+Add a catchpoint for failed Ada assertions.
+
+The possible optional parameters for this command are:
+
+@table @samp
+@item -c @var{condition}
+Make the catchpoint conditional on @var{condition}.
+@item -d
+Create a disabled catchpoint.
+@item -t
+Create a temporary catchpoint.
+@end table
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{catch assert}.
+
+@subsubheading Example
+
+@smallexample
+-catch-assert
+^done,bkptno="5",bkpt=@{number="5",type="breakpoint",disp="keep",
+enabled="y",addr="0x0000000000404888",what="failed Ada assertions",
+thread-groups=["i1"],times="0",
+original-location="__gnat_debug_raise_assert_failure"@}
+(gdb)
+@end smallexample
+
+@subheading The @code{-catch-exception} Command
+@findex -catch-exception
+
+@subsubheading Synopsis
+
+@smallexample
+ -catch-exception [ -c @var{condition}] [ -d ] [ -e @var{exception-name} ]
+    [ -t ] [ -u ]
+@end smallexample
+
+Add a catchpoint stopping when Ada exceptions are raised.
+By default, the command stops the program when any Ada exception
+gets raised.  But it is also possible, by using some of the
+optional parameters described below, to create more selective
+catchpoints.
+
+The possible optional parameters for this command are:
+
+@table @samp
+@item -c @var{condition}
+Make the catchpoint conditional on @var{condition}.
+@item -d
+Create a disabled catchpoint.
+@item -e @var{exception-name}
+Only stop when @var{exception-name} is raised.  This option cannot
+be used combined with @samp{-u}.
+@item -t
+Create a temporary catchpoint.
+@item -u
+Stop only when an unhandled exception gets raised.  This option
+cannot be used combined with @samp{-e}.
+@end table
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} commands are @samp{catch exception}
+and @samp{catch exception unhandled}.
+
+@subsubheading Example
+
+@smallexample
+-catch-exception -e Program_Error
+^done,bkptno="4",bkpt=@{number="4",type="breakpoint",disp="keep",
+enabled="y",addr="0x0000000000404874",
+what="`Program_Error' Ada exception", thread-groups=["i1"],
+times="0",original-location="__gnat_debug_raise_exception"@}
+(gdb)
+@end smallexample
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Program Context
