@@ -1238,6 +1238,7 @@ extern void
 				 char *addr_string,
 				 const struct breakpoint_ops *ops,
 				 int tempflag,
+				 int enabled,
 				 int from_tty);
 
 extern void init_catchpoint (struct breakpoint *b,

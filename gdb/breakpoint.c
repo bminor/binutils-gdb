@@ -11621,6 +11621,7 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 			       char *addr_string,
 			       const struct breakpoint_ops *ops,
 			       int tempflag,
+			       int enabled,
 			       int from_tty)
 {
   if (from_tty)
@@ -11643,7 +11644,7 @@ init_ada_exception_breakpoint (struct breakpoint *b,
 
   init_raw_breakpoint (b, gdbarch, sal, bp_breakpoint, ops);
 
-  b->enable_state = bp_enabled;
+  b->enable_state = enabled ? bp_enabled : bp_disabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
   b->addr_string = addr_string;
   b->language = language_ada;

@@ -1,5 +1,29 @@
 2013-10-11  Joel Brobecker  <brobecker@adacore.com>
 
+	* breakpoint.h (init_ada_exception_breakpoint): Add parameter
+	"enabled".
+	* breakpoint.c (init_ada_exception_breakpoint): Add parameter
+	"enabled".  Set B->ENABLE_STATE accordingly.
+	* ada-lang.h (ada_exception_catchpoint_kind): Move here from
+	ada-lang.c.
+	(create_ada_exception_catchpoint): Add declaration.
+	* ada-lang.c (ada_exception_catchpoint_kind): Move to ada-lang.h.
+	(create_ada_exception_catchpoint): Make non-static. Add new
+	parameter "disabled". Use it in call to
+	init_ada_exception_breakpoint.
+	(catch_ada_exception_command): Add parameter "enabled" in call
+	to create_ada_exception_catchpoint.
+	(catch_assert_command): Likewise.
+
+	* mi/mi-cmds.h (mi_cmd_catch_assert, mi_cmd_catch_exception):
+	Add declarations.
+	* mi/mi-cmds.c (mi_cmds): Add the "catch-assert" and
+	"catch-exception" commands.
+	* mi/mi-cmd-catch.c: Add #include "ada-lang.h".
+	(mi_cmd_catch_assert, mi_cmd_catch_exception): New functions.
+
+2013-10-11  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (enum ada_exception_catchpoint_kind): Renames
 	"enum exception_catchpoint_kind".  Replace the "ex_" prefix
 	of all its enumerates with "ada_".  Update the rest of this

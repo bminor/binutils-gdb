@@ -10981,16 +10981,6 @@ ada_modulus (struct type *type)
    variants of the runtime, we use a sniffer that will determine
    the runtime variant used by the program being debugged.  */
 
-/* The different types of catchpoints that we introduced for catching
-   Ada exceptions.  */
-
-enum ada_exception_catchpoint_kind
-{
-  ada_catch_exception,
-  ada_catch_exception_unhandled,
-  ada_catch_assert
-};
-
 /* Ada's standard exceptions.  */
 
 static char *standard_exc[] = {
@@ -12190,12 +12180,13 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex, char *excep_string,
 
    FROM_TTY is the usual argument passed to all commands implementations.  */
 
-static void
+void
 create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 				 enum ada_exception_catchpoint_kind ex_kind,
 				 char *excep_string,
 				 char *cond_string,
 				 int tempflag,
+				 int disabled,
 				 int from_tty)
 {
   struct ada_catchpoint *c;
@@ -12206,7 +12197,7 @@ create_ada_exception_catchpoint (struct gdbarch *gdbarch,
 
   c = XNEW (struct ada_catchpoint);
   init_ada_exception_breakpoint (&c->base, gdbarch, sal, addr_string,
-				 ops, tempflag, from_tty);
+				 ops, tempflag, disabled, from_tty);
   c->excep_string = excep_string;
   create_excep_cond_exprs (c);
   if (cond_string != NULL)
@@ -12234,7 +12225,8 @@ catch_ada_exception_command (char *arg, int from_tty,
 				     &cond_string);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   excep_string, cond_string,
-				   tempflag, from_tty);
+				   tempflag, 1 /* enabled */,
+				   from_tty);
 }
 
 /* Split the arguments specified in a "catch assert" command.
@@ -12284,7 +12276,8 @@ catch_assert_command (char *arg, int from_tty,
   catch_ada_assert_command_split (arg, &cond_string);
   create_ada_exception_catchpoint (gdbarch, ada_catch_assert,
 				   NULL, cond_string,
-				   tempflag, from_tty);
+				   tempflag, 1 /* enabled */,
+				   from_tty);
 }
                                 /* Operators */
 /* Information about operators given special treatment in functions
