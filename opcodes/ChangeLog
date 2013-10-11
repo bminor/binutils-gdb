@@ -1,5 +1,12 @@
 2013-10-10  Roland McGrath  <mcgrathr@google.com>
 
+	* i386-dis.c (oappend_maybe_intel): New function.
+	(OP_ST, OP_STi, append_seg, OP_I, OP_I64, OP_sI, OP_ESreg): Use it.
+	(OP_C, OP_T, CMP_Fixup, OP_EX_VexImmW): Likewise.
+	(VCMP_Fixup, VPCMP_Fixup, PCLMUL_Fixup): Likewise.
+
+2013-10-10  Roland McGrath  <mcgrathr@google.com>
+
 	* cr16-opc.c (REG): Cast NAME to 'reg' enum type to suppress
 	possible compiler warnings when the union's initializer is
 	actually meant for the 'preg' enum typed member.
