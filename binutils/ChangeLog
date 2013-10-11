@@ -1,5 +1,8 @@
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
+	* winduni.c (languages): Use \345 (octal syntax) rather than
+	literal non-ASCII/non-UTF8 character in string literal.
+
 	* readelf.c (print_dynamic_symbol): Use array subscript syntax
 	rather than addition syntax with string literal.
 
