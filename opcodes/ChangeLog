@@ -1,3 +1,9 @@
+2013-10-10  Sean Keys <skeys@ipdatasys.com>
+
+	* xgate-opc.c (xgate_opcode): Remove short_hand field from opcode
+	table.
+	* xgate-dis.c (print_insn): Refactor to work with table change.
+
 2013-10-10  Roland McGrath  <mcgrathr@google.com>
 
 	* i386-dis.c (oappend_maybe_intel): New function.
