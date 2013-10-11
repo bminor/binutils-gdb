@@ -573,7 +573,7 @@ class Output_segment_headers : public Output_data
 class Output_file_header : public Output_data
 {
  public:
-  Output_file_header(const Target*,
+  Output_file_header(Target*,
 		     const Symbol_table*,
 		     const Output_segment_headers*);
 
@@ -617,7 +617,7 @@ class Output_file_header : public Output_data
   off_t
   do_size() const;
 
-  const Target* target_;
+  Target* target_;
   const Symbol_table* symtab_;
   const Output_segment_headers* segment_header_;
   const Output_section_headers* section_header_;

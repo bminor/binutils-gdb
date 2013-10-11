@@ -217,7 +217,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 		     const elfcpp::Ehdr<size, big_endian>& ehdr);
 
   void
-  do_adjust_elf_header(unsigned char* view, int len) const;
+  do_adjust_elf_header(unsigned char* view, int len);
 
  private:
 
@@ -4339,7 +4339,7 @@ template<int size, bool big_endian>
 void
 Target_sparc<size, big_endian>::do_adjust_elf_header(
     unsigned char* view,
-    int len) const
+    int len)
 {
   elfcpp::Ehdr_write<size, big_endian> oehdr(view);
 

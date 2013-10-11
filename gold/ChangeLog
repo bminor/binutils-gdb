@@ -1,5 +1,15 @@
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
+	* target.h (Target::adjust_elf_header, Target::do_adjust_elf_header):
+	Remove const from declaration.
+	* target.cc (Sized_target::do_adjust_elf_header): Update definition.
+	* sparc.cc (Target_sparc::do_adjust_elf_header): Likewise.
+	* output.h (Output_file_header): Remove const from member target_
+	and corresponding constructor argument.
+	* output.cc (Output_file_header::Output_file_header): Update prototype.
+	(Output_file_header::do_sized_write): Use this->target_ in place
+	of parameters()->target().
+
 	* testsuite/undef_symbol.cc (Foo::get_a): New method.
 
 	* configure.ac (MERGE_CONSTANTS_FLAG): New check.

@@ -1,6 +1,6 @@
 // target.h -- target support for gold   -*- C++ -*-
 
-// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012
+// Copyright 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
 // Free Software Foundation, Inc.
 // Written by Ian Lance Taylor <iant@google.com>.
 
@@ -238,7 +238,7 @@ class Target
   // Adjust the output file header before it is written out.  VIEW
   // points to the header in external form.  LEN is the length.
   void
-  adjust_elf_header(unsigned char* view, int len) const
+  adjust_elf_header(unsigned char* view, int len)
   { return this->do_adjust_elf_header(view, len); }
 
   // Return address and size to plug into eh_frame FDEs associated with a PLT.
@@ -548,7 +548,7 @@ class Target
   // By default, we set the EI_OSABI field if requested (in
   // Sized_target).
   virtual void
-  do_adjust_elf_header(unsigned char*, int) const = 0;
+  do_adjust_elf_header(unsigned char*, int) = 0;
 
   // Return address and size to plug into eh_frame FDEs associated with a PLT.
   virtual void
@@ -1018,7 +1018,7 @@ class Sized_target : public Target
 
   // Set the EI_OSABI field if requested.
   virtual void
-  do_adjust_elf_header(unsigned char*, int) const;
+  do_adjust_elf_header(unsigned char*, int);
 
   // Handle target specific gc actions when adding a gc reference.
   virtual void
