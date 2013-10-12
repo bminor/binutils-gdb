@@ -1,5 +1,10 @@
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* eval.c (evaluate_subexp_for_sizeof) <UNOP_IND>: Create an indirect
+	value and retrieve the dynamic type size.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* eval.c (evaluate_subexp_for_sizeof) <OP_VAR_VALUE>: If the type
 	passed to sizeof is dynamic evaluate the argument to compute the length.
 
