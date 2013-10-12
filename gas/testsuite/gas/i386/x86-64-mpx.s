@@ -1,7 +1,7 @@
 # MPX instructions
 	.allow_index_reg
 	.text
-
+start:
 	### bndmk
 	bndmk (%r11), %bnd1
 	bndmk (%rax), %bnd1
@@ -41,7 +41,6 @@
 	bndcl (%rax), %bnd1
 	bndcl %r11, %bnd1
 	bndcl %rcx, %bnd1
-	bndcl %ax, %bnd1
 	bndcl (0x399), %bnd1
 	bndcl 0x3(%r9), %bnd2
 	bndcl 0x3(%rax), %bnd2
@@ -55,7 +54,6 @@
 	bndcu (%rax), %bnd1
 	bndcu %r11, %bnd1
 	bndcu %rcx, %bnd1
-	bndcu %ax, %bnd1
 	bndcu (0x399), %bnd1
 	bndcu 0x3(%r9), %bnd2
 	bndcu 0x3(%rax), %bnd2
@@ -69,7 +67,6 @@
 	bndcn (%rax), %bnd1
 	bndcn %r11, %bnd1
 	bndcn %rcx, %bnd1
-	bndcn %ax, %bnd1
 	bndcn (0x399), %bnd1
 	bndcn 0x3(%r9), %bnd2
 	bndcn 0x3(%rax), %bnd2
@@ -147,7 +144,6 @@
 	bndcl bnd1, [rax]
 	bndcl bnd1, r11
 	bndcl bnd1, rcx
-	bndcl bnd1, ax
 	bndcl bnd1, [0x399]
 	bndcl bnd1, [r9+0x3]
 	bndcl bnd1, [rax+0x3]
@@ -161,7 +157,6 @@
 	bndcu bnd1, [rax]
 	bndcu bnd1, r11
 	bndcu bnd1, rcx
-	bndcu bnd1, ax
 	bndcu bnd1, [0x399]
 	bndcu bnd1, [r9+0x3]
 	bndcu bnd1, [rax+0x3]
@@ -175,7 +170,6 @@
 	bndcn bnd1, [rax]
 	bndcn bnd1, r11
 	bndcn bnd1, rcx
-	bndcn bnd1, ax
 	bndcn bnd1, [0x399]
 	bndcn bnd1, [r9+0x3]
 	bndcn bnd1, [rax+0x3]
