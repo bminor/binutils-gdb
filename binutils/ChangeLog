@@ -1,3 +1,8 @@
+2013-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (display_debug_frames): Pass offset_size to
+	print_dwarf_vma for cie_id.
+
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
 	* winduni.c (languages): Use \345 (octal syntax) rather than

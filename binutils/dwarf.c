@@ -5280,7 +5280,7 @@ display_debug_frames (struct dwarf_section *section,
 
 	  printf ("\n%08lx ", (unsigned long) (saved_start - section_start));
 	  print_dwarf_vma (length, fc->ptr_size);
-	  print_dwarf_vma (cie_id, fc->ptr_size);
+	  print_dwarf_vma (cie_id, offset_size);
 
 	  if (do_debug_frames_interp)
 	    {
@@ -5416,7 +5416,7 @@ display_debug_frames (struct dwarf_section *section,
 	  printf ("\n%08lx %s %s FDE cie=%08lx pc=",
 		  (unsigned long)(saved_start - section_start),
 		  dwarf_vmatoa_1 (NULL, length, fc->ptr_size),
-		  dwarf_vmatoa_1 (NULL, cie_id, fc->ptr_size),
+		  dwarf_vmatoa_1 (NULL, cie_id, offset_size),
 		  (unsigned long)(cie->chunk_start - section_start));
 
 	  if (fc->segment_size)
