@@ -1,7 +1,7 @@
 # MPX instructions
 	.allow_index_reg
 	.text
-
+start:
 	### bndmk
 	bndmk (%eax), %bnd1
 	bndmk (0x399), %bnd1
@@ -30,7 +30,6 @@
 	### bndcl
 	bndcl (%ecx), %bnd1
 	bndcl %ecx, %bnd1
-	bndcl %ax, %bnd1
 	bndcl (0x399), %bnd1
 	bndcl 0x3(%edx), %bnd1
 	bndcl (%eax,%ecx), %bnd1
@@ -40,7 +39,6 @@
 	### bndcu
 	bndcu (%ecx), %bnd1
 	bndcu %ecx, %bnd1
-	bndcu %ax, %bnd1
 	bndcu (0x399), %bnd1
 	bndcu 0x3(%edx), %bnd1
 	bndcu (%eax,%ecx), %bnd1
@@ -50,7 +48,6 @@
 	### bndcn
 	bndcn (%ecx), %bnd1
 	bndcn %ecx, %bnd1
-	bndcn %ax, %bnd1
 	bndcn (0x399), %bnd1
 	bndcn 0x3(%edx), %bnd1
 	bndcn (%eax,%ecx), %bnd1
@@ -111,7 +108,6 @@
 	### bndcl
 	bndcl bnd1, [eax]
 	bndcl bnd1, ecx
-	bndcl bnd1, ax
 	bndcl bnd1, [0x399]
 	bndcl bnd1, [ecx+0x3]
 	bndcl bnd1, [eax+ecx]
@@ -121,7 +117,6 @@
 	### bndcu
 	bndcu bnd1, [eax]
 	bndcu bnd1, ecx
-	bndcu bnd1, ax
 	bndcu bnd1, [0x399]
 	bndcu bnd1, [ecx+0x3]
 	bndcu bnd1, [eax+ecx]
@@ -131,7 +126,6 @@
 	### bndcn
 	bndcn bnd1, [eax]
 	bndcn bnd1, ecx
-	bndcn bnd1, ax
 	bndcn bnd1, [0x399]
 	bndcn bnd1, [ecx+0x3]
 	bndcn bnd1, [eax+ecx]

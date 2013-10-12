@@ -1,3 +1,13 @@
+2013-10-12  Jan Beulich <jbeulich@suse.com>
+
+	* i386-dis.c (intel_operand_size): Move v_bnd_mode alongside the
+	default case.
+	(OP_E_register): Move v_bnd_mode alongside m_mode.
+	* i386-opc.tbl (bndcl, bndcu, bndcn): Split 32- and 64-bit variants.
+	Drop Reg16 and Disp16. Add NoRex64.
+	(bndmk, bndmov, bndldx, bndstx): Drop Disp16.
+	* i386-tbl.h: Re-generate.
+
 2013-10-10  Sean Keys <skeys@ipdatasys.com>
 
 	* xgate-opc.c (xgate_opcode): Remove short_hand field from opcode

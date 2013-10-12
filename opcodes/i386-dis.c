@@ -13808,7 +13808,6 @@ intel_operand_size (int bytemode, int sizeflag)
 	}
       /* FALLTHRU */
     case v_mode:
-    case v_bnd_mode:
     case v_swap_mode:
     case dq_mode:
       USED_REX (REX_W);
@@ -14090,6 +14089,7 @@ intel_operand_size (int bytemode, int sizeflag)
 	abort ();
       oappend ("WORD PTR ");
       break;
+    case v_bnd_mode:
     default:
       break;
     }
@@ -14129,6 +14129,7 @@ OP_E_register (int bytemode, int sizeflag)
       names = names64;
       break;
     case m_mode:
+    case v_bnd_mode:
       names = address_mode == mode_64bit ? names64 : names32;
       break;
     case bnd_mode:
@@ -14143,7 +14144,6 @@ OP_E_register (int bytemode, int sizeflag)
       bytemode = v_mode;
       /* FALLTHRU */
     case v_mode:
-    case v_bnd_mode:
     case v_swap_mode:
     case dq_mode:
     case dqb_mode:

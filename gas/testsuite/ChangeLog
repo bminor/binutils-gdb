@@ -1,3 +1,11 @@
+2013-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/mpx.s: Remove bndcl/bndcu/bndcn tests with AX.
+	* gas/i386/x86-64-mpx.s: Likwise.
+
+	* gas/i386/mpx.d: Updated.
+	* gas/i386/x86-64-mpx.d: Likewise.
+
 2013-10-10  Sean Keys  <skeys@ipdatasys.com>
 
 	* gas/xgate/all_insns.d: Add com macro insn test.

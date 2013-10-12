@@ -3061,14 +3061,17 @@ stac, 0, 0xf01, 0xcb, 2, CpuSMAP, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldS
 bnd, 0, 0xf2, None, 1, CpuMPX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|IsPrefix, { 0 }
 
 // MPX instructions.
-bndmk, 2, 0xf30f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegBND }
-bndmov, 2, 0x660f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegBND, RegBND }
-bndmov, 2, 0x660f1b, None, 2, CpuMPX, S|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegBND, Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegBND }
-bndcl, 2, 0xf30f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Reg64|Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegBND }
-bndcu, 2, 0xf20f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Reg64|Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegBND }
-bndcn, 2, 0xf20f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Reg64|Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegBND }
-bndstx, 2, 0x0f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegBND, Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-bndldx, 2, 0x0f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegBND }
+bndmk, 2, 0xf30f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp32|Disp32S, RegBND }
+bndmov, 2, 0x660f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoAVX, { Xmmword|Unspecified|BaseIndex|Disp8|Disp32|Disp32S|RegBND, RegBND }
+bndmov, 2, 0x660f1b, None, 2, CpuMPX, S|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegBND, Xmmword|Unspecified|BaseIndex|Disp8|Disp32|Disp32S|RegBND }
+bndcl, 2, 0xf30f1a, None, 2, CpuMPX|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Anysize|BaseIndex|Disp8|Disp32, RegBND }
+bndcl, 2, 0xf30f1a, None, 2, CpuMPX|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|Anysize|BaseIndex|Disp8|Disp32|Disp32S, RegBND }
+bndcu, 2, 0xf20f1a, None, 2, CpuMPX|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Anysize|BaseIndex|Disp8|Disp32, RegBND }
+bndcu, 2, 0xf20f1a, None, 2, CpuMPX|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|Anysize|BaseIndex|Disp8|Disp32|Disp32S, RegBND }
+bndcn, 2, 0xf20f1b, None, 2, CpuMPX|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Anysize|BaseIndex|Disp8|Disp32, RegBND }
+bndcn, 2, 0xf20f1b, None, 2, CpuMPX|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|NoRex64, { Reg64|Anysize|BaseIndex|Disp8|Disp32|Disp32S, RegBND }
+bndstx, 2, 0x0f1b, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegBND, Anysize|BaseIndex|Disp8|Disp32|Disp32S }
+bndldx, 2, 0x0f1a, None, 2, CpuMPX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Anysize|BaseIndex|Disp8|Disp32|Disp32S, RegBND }
 
 // SHA instructions.
 sha1rnds4, 3, 0xf3acc, None, 3, CpuSHA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm8, Xmmword|RegXMM|Disp8|Disp16|Disp32|Disp32S|Unspecified|BaseIndex, RegXMM }
