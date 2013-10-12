@@ -3026,7 +3026,9 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos)
 	  && TYPE_CODE (type) != TYPE_CODE_ARRAY)
 	error (_("Attempt to take contents of a non-pointer value."));
       type = TYPE_TARGET_TYPE (type);
-      break;
+      if (is_dynamic_type (type))
+	type = value_type (value_ind (val));
+      return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 
     case UNOP_MEMVAL:
       (*pos) += 3;
