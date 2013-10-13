@@ -1,5 +1,37 @@
 2013-10-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* lib/ld-lib.exp (default_ld_compile): Add a -I option for the source
+	directory.
+	* ld-mips-elf/compressed-plt-1.ld, ld-mips-elf/compressed-plt-1.s,
+	ld-mips-elf/compressed-plt-1-dyn.s, ld-mips-elf/compressed-plt-1a.s,
+	ld-mips-elf/compressed-plt-1b.s, ld-mips-elf/compressed-plt-1c.s,
+	ld-mips-elf/compressed-plt-1d.s, ld-mips-elf/compressed-plt-1e.s,
+	ld-mips-elf/compressed-plt-1-o32-se.rd,
+	ld-mips-elf/compressed-plt-1-o32-se.od,
+	ld-mips-elf/compressed-plt-1-o32-mips16-only.rd,
+	ld-mips-elf/compressed-plt-1-o32-mips16-only.od,
+	ld-mips-elf/compressed-plt-1-o32-umips-only.rd,
+	ld-mips-elf/compressed-plt-1-o32-umips-only.od,
+	ld-mips-elf/compressed-plt-1-o32-mips16.rd,
+	ld-mips-elf/compressed-plt-1-o32-mips16.od,
+	ld-mips-elf/compressed-plt-1-o32-mips16-got.rd,
+	ld-mips-elf/compressed-plt-1-o32-mips16-got.od,
+	ld-mips-elf/compressed-plt-1-o32-mips16-word.rd,
+	ld-mips-elf/compressed-plt-1-o32-mips16-word.od,
+	ld-mips-elf/compressed-plt-1-o32-umips.rd,
+	ld-mips-elf/compressed-plt-1-o32-umips.od,
+	ld-mips-elf/compressed-plt-1-o32-umips-got.rd,
+	ld-mips-elf/compressed-plt-1-o32-umips-got.od,
+	ld-mips-elf/compressed-plt-1-o32-umips-word.rd,
+	ld-mips-elf/compressed-plt-1-o32-umips-word.od,
+	ld-mips-elf/compressed-plt-1-n32-mips16.rd,
+	ld-mips-elf/compressed-plt-1-n32-mips16.od,
+	ld-mips-elf/compressed-plt-1-n32-umips.rd,
+	ld-mips-elf/compressed-plt-1-n32-umips.od: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
+2013-10-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/pic-and-nonpic-6-n32.ad,
 	ld-mips-elf/pic-and-nonpic-6-n32.dd,
 	ld-mips-elf/pic-and-nonpic-6-n32.gd,

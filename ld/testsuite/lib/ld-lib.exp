@@ -331,10 +331,12 @@ proc default_ld_compile { cc source object } {
 proc default_ld_assemble { as in_flags source object } {
     global ASFLAGS
     global host_triplet
+    global srcdir
+    global subdir
 
     if ![info exists ASFLAGS] { set ASFLAGS "" }
 
-    set flags [big_or_little_endian]
+    set flags "[big_or_little_endian] -I$srcdir/$subdir"
     set exec_output [run_host_cmd "$as" "$flags $in_flags $ASFLAGS -o $object $source"]
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {

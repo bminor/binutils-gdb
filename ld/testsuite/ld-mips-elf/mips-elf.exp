@@ -751,3 +751,79 @@ foreach { abi } $abis {
 	    [list "objdump -d jalr3.dd"] \
 	    "jalr3-${abi}"]]
 }
+
+proc build_mips_plt_lib { abi } {
+    global abi_asflags
+    global abi_ldflags
+
+    run_ld_link_tests [list \
+	[list "Shared $abi library for compressed PLT tests" \
+	      "-shared $abi_ldflags($abi)" "" \
+	      "$abi_asflags($abi)" \
+	      { compressed-plt-1-dyn.s } \
+	      {} \
+	      "compressed-plt-1-${abi}-dyn.so"]]
+}
+
+proc run_mips_plt_test { name abi filter micromips suffix {extra {}} } {
+    global abi_asflags
+    global abi_ldflags
+
+    set as_flags "$abi_asflags($abi) --defsym filter=$filter"
+    append as_flags " --defsym micromips=$micromips --defsym $abi=1"
+    if {[string equal $abi o32]} {
+	append as_flags " -march=mips2"
+    }
+    set ld_flags "$abi_ldflags($abi) -T compressed-plt-1.ld"
+    set dynobj "tmpdir/compressed-plt-1-${abi}-dyn.so"
+    set files [list]
+    if { $filter & 3 } {
+	lappend files compressed-plt-1a.s
+    }
+    if { $filter & 12 } {
+	lappend files compressed-plt-1b.s
+    }
+    if { $filter & 16 } {
+	lappend files compressed-plt-1c.s
+    }
+    eval [list lappend files] $extra
+    set readelf_flags "-A --syms --relocs -d"
+    if { [string match "*word*" $suffix] } {
+	append readelf_flags " -x.data"
+    }
+    set objdump_flags "-d -Mgpr-names=numeric"
+    set basename "compressed-plt-1-${abi}-${suffix}"
+    run_ld_link_tests [list \
+	[list "$name" $ld_flags $dynobj \
+	      "$as_flags" $files \
+	      [list [list readelf $readelf_flags ${basename}.rd] \
+		    [list objdump $objdump_flags ${basename}.od]] \
+	      $basename]]
+}
+
+if { $linux_gnu } {
+    build_mips_plt_lib o32
+    run_mips_plt_test "o32 PLTs for standard encoding" o32 28 0 se
+    run_mips_plt_test "o32 PLTs for MIPS16 encoding" o32 19 0 mips16-only
+    run_mips_plt_test "o32 PLTs for microMIPS encoding" o32 19 1 umips-only
+    run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16" \
+	o32 -1 0 mips16
+    run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16 with %got" \
+	o32 -1 0 mips16-got compressed-plt-1d.s
+    run_mips_plt_test "o32 PLTs for mixed MIPS and MIPS16 with .word" \
+	o32 -1 0 mips16-word compressed-plt-1e.s
+    run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS" \
+	o32 -1 1 umips
+    run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS with %got" \
+	o32 -1 1 umips-got compressed-plt-1d.s
+    run_mips_plt_test "o32 PLTs for mixed MIPS and microMIPS with .word" \
+	o32 -1 1 umips-word compressed-plt-1e.s
+
+    if $has_newabi {
+	build_mips_plt_lib n32
+	run_mips_plt_test "n32 PLTs for mixed MIPS and MIPS16" \
+	    n32 -1 0 mips16
+	run_mips_plt_test "n32 PLTs for mixed MIPS and microMIPS" \
+	    n32 -1 1 umips
+    }
+}
