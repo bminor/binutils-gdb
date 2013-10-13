@@ -224,7 +224,7 @@ exec_file_attach (char *filename, int from_tty)
 	}
 
       gdb_assert (exec_filename == NULL);
-      exec_filename = xstrdup (scratch_pathname);
+      exec_filename = gdb_realpath_keepfile (scratch_pathname);
 
       if (!bfd_check_format_matches (exec_bfd, bfd_object, &matching))
 	{

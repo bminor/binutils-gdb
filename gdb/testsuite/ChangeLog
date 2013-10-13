@@ -1,3 +1,11 @@
+2013-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Canonicalize directories for EXEC_FILENAME.
+	* gdb.base/argv0-symlink.exp
+	(kept file symbolic link name for info inferiors): New.
+	(kept directory symbolic link name): Setup kfail.
+	(kept directory symbolic link name for info inferiors): New.
+
 2013-10-11  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/s390-multiarch.exp: New file.

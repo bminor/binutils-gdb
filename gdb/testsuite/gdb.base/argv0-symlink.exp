@@ -37,6 +37,7 @@ if ![runto_main] {
 }
 
 gdb_test {print argv[0]} "/$filelink\"" $test
+gdb_test "info inferiors" "/$subdir/$filelink *" "$test for info inferiors"
 
 
 set test "kept directory symbolic link name"
@@ -59,4 +60,9 @@ if ![runto_main] {
     return -1
 }
 
+# gdbserver does not have this issue.
+if ![is_remote target] {
+    setup_kfail "*-*-*" gdb/15934
+}
 gdb_test {print argv[0]} "/$dirlink/$filelink\"" $test
+gdb_test "info inferiors" "/$subdir/$filelink *" "$test for info inferiors"

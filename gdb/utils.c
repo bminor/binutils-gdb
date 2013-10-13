@@ -3233,6 +3233,52 @@ gdb_realpath (const char *filename)
   return xstrdup (filename);
 }
 
+/* Return a copy of FILENAME, with its directory prefix canonicalized
+   by gdb_realpath.  */
+
+char *
+gdb_realpath_keepfile (const char *filename)
+{
+  const char *base_name = lbasename (filename);
+  char *dir_name;
+  char *real_path;
+  char *result;
+
+  /* Extract the basename of filename, and return immediately 
+     a copy of filename if it does not contain any directory prefix.  */
+  if (base_name == filename)
+    return xstrdup (filename);
+
+  dir_name = alloca ((size_t) (base_name - filename + 2));
+  /* Allocate enough space to store the dir_name + plus one extra
+     character sometimes needed under Windows (see below), and
+     then the closing \000 character.  */
+  strncpy (dir_name, filename, base_name - filename);
+  dir_name[base_name - filename] = '\000';
+
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  /* We need to be careful when filename is of the form 'd:foo', which
+     is equivalent of d:./foo, which is totally different from d:/foo.  */
+  if (strlen (dir_name) == 2 && isalpha (dir_name[0]) && dir_name[1] == ':')
+    {
+      dir_name[2] = '.';
+      dir_name[3] = '\000';
+    }
+#endif
+
+  /* Canonicalize the directory prefix, and build the resulting
+     filename.  If the dirname realpath already contains an ending
+     directory separator, avoid doubling it.  */
+  real_path = gdb_realpath (dir_name);
+  if (IS_DIR_SEPARATOR (real_path[strlen (real_path) - 1]))
+    result = concat (real_path, base_name, (char *) NULL);
+  else
+    result = concat (real_path, SLASH_STRING, base_name, (char *) NULL);
+
+  xfree (real_path);
+  return result;
+}
+
 ULONGEST
 align_up (ULONGEST v, int n)
 {

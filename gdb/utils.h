@@ -128,6 +128,8 @@ extern struct cleanup *make_bpstat_clear_actions_cleanup (void);
 
 extern char *gdb_realpath (const char *);
 
+extern char *gdb_realpath_keepfile (const char *);
+
 extern int gdb_filename_fnmatch (const char *pattern, const char *string,
 				 int flags);
 

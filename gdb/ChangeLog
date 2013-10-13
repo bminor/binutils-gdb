@@ -1,3 +1,11 @@
+2013-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Canonicalize directories for EXEC_FILENAME.
+	* exec.c (exec_file_attach): Use gdb_realpath_keepfile for
+	exec_filename.
+	* utils.c (gdb_realpath_keepfile): New function.
+	* utils.h (gdb_realpath_keepfile): New declaration.
+
 2013-10-11  Doug Evans  <dje@google.com>
 
 	* Makefile.in (GDBFLAGS): New variable.
