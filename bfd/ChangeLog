@@ -1,3 +1,10 @@
+2013-10-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (mips_use_local_got_p): New function.
+	(mips_elf_count_got_symbols, mips_elf_calculate_relocation): Use it.
+	(_bfd_mips_elf_check_relocs): Set pointer_equality_needed for
+	GOT and absolute references.
+
 2013-10-09  Roland McGrath  <mcgrathr@google.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_tls_get_addr): Cast switch

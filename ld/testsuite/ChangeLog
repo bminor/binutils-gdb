@@ -1,3 +1,22 @@
+2013-10-13  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/pic-and-nonpic-6-n32.ad,
+	ld-mips-elf/pic-and-nonpic-6-n32.dd,
+	ld-mips-elf/pic-and-nonpic-6-n32.gd,
+	ld-mips-elf/pic-and-nonpic-6-n32.nd,
+	ld-mips-elf/pic-and-nonpic-6-n32.rd,
+	ld-mips-elf/pic-and-nonpic-6-n64.ad,
+	ld-mips-elf/pic-and-nonpic-6-n64.dd,
+	ld-mips-elf/pic-and-nonpic-6-n64.gd,
+	ld-mips-elf/pic-and-nonpic-6-n64.nd,
+	ld-mips-elf/pic-and-nonpic-6-n64.rd,
+	ld-mips-elf/pic-and-nonpic-6-o32.ad,
+	ld-mips-elf/pic-and-nonpic-6-o32.dd,
+	ld-mips-elf/pic-and-nonpic-6-o32.gd,
+	ld-mips-elf/pic-and-nonpic-6-o32.nd,
+	ld-mips-elf/pic-and-nonpic-6-o32.rd: Fix symbol value of extf4.
+	No longer expect extf3, extf4 and extd2 to be in the global GOT.
+
 2013-10-03  Will Newton  <will.newton@linaro.org>
 
 	* ld-ifunc/ifunc.exp: Enable ifunc tests for AArch64.
