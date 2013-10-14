@@ -1,3 +1,8 @@
+2013-10-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dwzbuildid.exp (write_dwarf_file): Pass explicit test
+	name to gdb_test_no_output.
+
 2013-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Canonicalize directories for EXEC_FILENAME.
