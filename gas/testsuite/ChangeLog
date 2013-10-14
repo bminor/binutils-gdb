@@ -1,3 +1,12 @@
+2013-10-14  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* gas/mips/micromips@msa-relax.d, gas/mips/micromips@msa.d,
+	gas/mips/micromips@msa64.d, gas/mips/msa-relax.d,
+	gas/mips/msa-relax.l, gas/mips/msa-relax.s,
+	gas/mips/msa.d, gas/mips/msa.s, gas/mips/msa64.d,
+	gas/mips/msa64.s: New.
+	* gas/mips/mips.exp: Run new tests.
+
 2013-10-14  Nick Clifton  <nickc@redhat.com>
 
 	* gas/all/itbl-test.c (main): Close fas.
