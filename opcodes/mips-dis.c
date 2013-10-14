@@ -401,6 +401,15 @@ static const char * const mips_hwr_names_mips3264r2[32] =
   "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
 };
 
+static const char * const msa_control_names[32] =
+{
+  "msa_ir",	"msa_csr",	"msa_access",	"msa_save",
+  "msa_modify",	"msa_request",	"msa_map",	"msa_unmap",
+  "$8",   "$9",   "$10",  "$11",  "$12",  "$13",  "$14",  "$15",
+  "$16",  "$17",  "$18",  "$19",  "$20",  "$21",  "$22",  "$23",
+  "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
+};
+
 struct mips_abi_choice
 {
   const char * name;
@@ -498,7 +507,7 @@ const struct mips_arch_choice mips_arch_choices[] =
   { "mips32r2",	1, bfd_mach_mipsisa32r2, CPU_MIPS32R2,
     ISA_MIPS32R2,
     (ASE_SMARTMIPS | ASE_DSP | ASE_DSPR2 | ASE_EVA | ASE_MIPS3D
-     | ASE_MT | ASE_MCU | ASE_VIRT),
+     | ASE_MT | ASE_MCU | ASE_VIRT | ASE_MSA),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -513,7 +522,7 @@ const struct mips_arch_choice mips_arch_choices[] =
   { "mips64r2",	1, bfd_mach_mipsisa64r2, CPU_MIPS64R2,
     ISA_MIPS64R2,
     (ASE_MIPS3D | ASE_DSP | ASE_DSPR2 | ASE_DSP64 | ASE_EVA | ASE_MT
-     | ASE_MDMX | ASE_MCU | ASE_VIRT | ASE_VIRT64),
+     | ASE_MCU | ASE_VIRT | ASE_VIRT64 | ASE_MSA | ASE_MSA64),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
     mips_hwr_names_mips3264r2 },
@@ -738,6 +747,14 @@ parse_mips_dis_option (const char *option, unsigned int len)
       return;
     }
 
+  if (CONST_STRNEQ (option, "msa"))
+    {
+      mips_ase |= ASE_MSA;
+      if ((mips_isa & INSN_ISA_MASK) == ISA_MIPS64R2)
+	  mips_ase |= ASE_MSA64;
+      return;
+    }
+
   if (CONST_STRNEQ (option, "virt"))
     {
       mips_ase |= ASE_VIRT;
@@ -941,6 +958,15 @@ print_reg (struct disassemble_info *info, const struct mips_opcode *opcode,
     case OP_REG_R5900_ACC:
       info->fprintf_func (info->stream, "$ACC");
       break;
+
+    case OP_REG_MSA:
+      info->fprintf_func (info->stream, "$w%d", regno);
+      break;
+
+    case OP_REG_MSA_CTRL:
+      info->fprintf_func (info->stream, "%s", msa_control_names[regno]);
+      break;
+
     }
 }
 
@@ -1249,6 +1275,16 @@ print_insn_arg (struct disassemble_info *info,
     case OP_VU0_SUFFIX:
     case OP_VU0_MATCH_SUFFIX:
       print_vu0_channel (info, operand, uval);
+      break;
+
+    case OP_IMM_INDEX:
+      infprintf (is, "[%d]", uval);
+      break;
+
+    case OP_REG_INDEX:
+      infprintf (is, "[");
+      print_reg (info, opcode, OP_REG_GP, uval);
+      infprintf (is, "]");
       break;
     }
 }
@@ -2092,6 +2128,9 @@ print_mips_disassembler_options (FILE *stream)
   fprintf (stream, _("\n\
 The following MIPS specific disassembler options are supported for use\n\
 with the -M switch (multiple options should be separated by commas):\n"));
+
+  fprintf (stream, _("\n\
+  msa             Recognize MSA instructions.\n"));
 
   fprintf (stream, _("\n\
   virt            Recognize the virtualization ASE instructions.\n"));

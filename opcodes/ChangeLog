@@ -1,3 +1,25 @@
+2013-10-14  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* micromips-opc.c (decode_micromips_operand): Add +T, +U, +V, +W,
+	+d, +e, +h, +k, +l, +n, +o, +u, +v, +w, +x,
+	+~, +!, +@, +#, +$, +%, +^, +&, +*, +|.
+	(MSA): New define.
+	(MSA64): New define.
+	(micromips_opcodes): Add MSA instructions.
+	* mips-dis.c (msa_control_names): New array.
+	(mips_abi_choice): Add ASE_MSA to mips32r2.
+	Remove ASE_MDMX from mips64r2.
+	Add ASE_MSA and ASE_MSA64 to mips64r2.
+	(parse_mips_dis_option): Handle -Mmsa.
+	(print_reg): Handle cases for OP_REG_MSA and OP_REG_MSA_CTRL.
+	(print_insn_arg): Handle cases for OP_IMM_INDEX and OP_REG_INDEX.
+	(print_mips_disassembler_options): Print -Mmsa.
+	* mips-opc.c (decode_mips_operand): Add +T, +U, +V, +W, +d, +e, +h, +k,
+	+l, +n, +o, +u, +v, +w, +~, +!, +@, +#, +$, +%, +^, +&, +*, +|.
+	(MSA): New define.
+	(MSA64): New define.
+	(mips_builtin_op): Add MSA instructions.
+
 2013-10-13  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-opc.c (nios2_builtin_reg): Use "sstatus" rather than "ba"
