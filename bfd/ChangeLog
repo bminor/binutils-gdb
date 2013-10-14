@@ -1,3 +1,10 @@
+2013-10-14  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* elfxx-mips.c (mips_elf_obj_tdata): Add abi_msa_bfd.
+	(mips_elf_merge_obj_attributes): Set abi_msa_bfd to the first object
+	file that has a Tag_GNU_MIPS_ABI_MSA attribute.
+	Merge Tag_GNU_MIPS_ABI_MSA attributes.
+
 2013-10-14  Nick Clifton  <nickc@redhat.com>
 
 	* gen-aout.c (main): Fix formatting.  Close file.

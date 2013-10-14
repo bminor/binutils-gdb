@@ -542,6 +542,9 @@ struct mips_elf_obj_tdata
   /* Input BFD providing Tag_GNU_MIPS_ABI_FP attribute for output.  */
   bfd *abi_fp_bfd;
 
+  /* Input BFD providing Tag_GNU_MIPS_ABI_MSA attribute for output.  */
+  bfd *abi_msa_bfd;
+
   /* The GOT requirements of input bfds.  */
   struct mips_got_info *got;
 
@@ -14328,11 +14331,17 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
   obj_attribute *in_attr;
   obj_attribute *out_attr;
   bfd *abi_fp_bfd;
+  bfd *abi_msa_bfd;
 
   abi_fp_bfd = mips_elf_tdata (obfd)->abi_fp_bfd;
   in_attr = elf_known_obj_attributes (ibfd)[OBJ_ATTR_GNU];
   if (!abi_fp_bfd && in_attr[Tag_GNU_MIPS_ABI_FP].i != Val_GNU_MIPS_ABI_FP_ANY)
     mips_elf_tdata (obfd)->abi_fp_bfd = ibfd;
+
+  abi_msa_bfd = mips_elf_tdata (obfd)->abi_msa_bfd;
+  if (!abi_msa_bfd
+      && in_attr[Tag_GNU_MIPS_ABI_MSA].i != Val_GNU_MIPS_ABI_MSA_ANY)
+    mips_elf_tdata (obfd)->abi_msa_bfd = ibfd;
 
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
     {
@@ -14520,6 +14529,47 @@ mips_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
 		break;
 	      }
 	    break;
+	  }
+    }
+
+  /* Check for conflicting Tag_GNU_MIPS_ABI_MSA attributes and merge
+     non-conflicting ones.  */
+  if (in_attr[Tag_GNU_MIPS_ABI_MSA].i != out_attr[Tag_GNU_MIPS_ABI_MSA].i)
+    {
+      out_attr[Tag_GNU_MIPS_ABI_MSA].type = 1;
+      if (out_attr[Tag_GNU_MIPS_ABI_MSA].i == Val_GNU_MIPS_ABI_MSA_ANY)
+	out_attr[Tag_GNU_MIPS_ABI_MSA].i = in_attr[Tag_GNU_MIPS_ABI_MSA].i;
+      else if (in_attr[Tag_GNU_MIPS_ABI_MSA].i != Val_GNU_MIPS_ABI_MSA_ANY)
+	switch (out_attr[Tag_GNU_MIPS_ABI_MSA].i)
+	  {
+	  case Val_GNU_MIPS_ABI_MSA_128:
+	    _bfd_error_handler
+	      (_("Warning: %B uses %s (set by %B), "
+		 "%B uses unknown MSA ABI %d"),
+	       obfd, abi_msa_bfd, ibfd,
+	       "-mmsa", in_attr[Tag_GNU_MIPS_ABI_MSA].i);
+	    break;
+
+	  default:
+	    switch (in_attr[Tag_GNU_MIPS_ABI_MSA].i)
+	      {
+	      case Val_GNU_MIPS_ABI_MSA_128:
+		_bfd_error_handler
+		  (_("Warning: %B uses unknown MSA ABI %d "
+		     "(set by %B), %B uses %s"),
+		     obfd, abi_msa_bfd, ibfd,
+		     out_attr[Tag_GNU_MIPS_ABI_MSA].i, "-mmsa");
+		  break;
+
+	      default:
+		_bfd_error_handler
+		  (_("Warning: %B uses unknown MSA ABI %d "
+		     "(set by %B), %B uses unknown MSA ABI %d"),
+		   obfd, abi_msa_bfd, ibfd,
+		   out_attr[Tag_GNU_MIPS_ABI_MSA].i,
+		   in_attr[Tag_GNU_MIPS_ABI_MSA].i);
+		break;
+	      }
 	  }
     }
 
