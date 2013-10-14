@@ -11769,6 +11769,30 @@ display_mips_gnu_attribute (unsigned char * p,
       return p;
    }
 
+  if (tag == Tag_GNU_MIPS_ABI_MSA)
+    {
+      unsigned int len;
+      int val;
+
+      val = read_uleb128 (p, &len, end);
+      p += len;
+      printf ("  Tag_GNU_MIPS_ABI_MSA: ");
+
+      switch (val)
+	{
+	case Val_GNU_MIPS_ABI_MSA_ANY:
+	  printf (_("Any MSA or not\n"));
+	  break;
+	case Val_GNU_MIPS_ABI_MSA_128:
+	  printf (_("128-bit MSA\n"));
+	  break;
+	default:
+	  printf ("??? (%d)\n", val);
+	  break;
+	}
+      return p;
+    }
+
   return display_tag_value (tag & 1, p, end);
 }
 

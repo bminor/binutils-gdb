@@ -2114,6 +2114,9 @@ Print the 'raw' instruction mnemonic instead of some pseudo
 instruction mnemonic.  I.e., print 'daddu' or 'or' instead of 'move',
 'sll' instead of 'nop', etc.
 
+@item msa
+Disassemble MSA instructions.
+
 @item virt
 Disassemble the virtualization ASE instructions.
 
