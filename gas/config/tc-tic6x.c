@@ -1596,7 +1596,7 @@ tic6x_parse_operand (char **p, tic6x_operand *op, unsigned int op_forms,
   /* See if this looks like a register or register pair.  */
   if (!operand_parsed && (op_forms & (TIC6X_OP_REG | TIC6X_OP_REGPAIR)))
     {
-      tic6x_register first_reg, second_reg;
+      tic6x_register first_reg, second_reg = { 0 };
       bfd_boolean reg_ok;
       char *rq = q;
 

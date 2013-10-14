@@ -1578,6 +1578,7 @@ wr_sc (struct coff_ofile *ptr, struct coff_sfile *sfile)
       sysroff_swap_sc_out (file, &sc);
       scount++;
     }
+  free (info);
   return scount;
 }
 

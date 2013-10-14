@@ -1,3 +1,7 @@
+2013-10-14  Nick Clifton  <nickc@redhat.com>
+
+	* gas/all/itbl-test.c (main): Close fas.
+
 2013-10-13  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gas/nios2/warn_nobreak.l: Update text of warning messages.

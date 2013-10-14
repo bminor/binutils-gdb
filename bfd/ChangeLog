@@ -1,3 +1,7 @@
+2013-10-14  Nick Clifton  <nickc@redhat.com>
+
+	* gen-aout.c (main): Fix formatting.  Close file.
+
 2013-10-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elfxx-mips.c (mips_use_local_got_p): New function.

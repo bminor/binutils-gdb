@@ -1,3 +1,7 @@
+2013-10-14  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/aix.em (_read_file): Close file at end of function.
+
 2013-10-10  Roland McGrath  <mcgrathr@google.com>
 
 	* ldmisc.c (vfinfo): Use Boolean ? "" : ":" in place of ":" + Boolean.

@@ -1,3 +1,9 @@
+2013-10-14  Nick Clifton  <nickc@redhat.com>
+
+	* read.c (add_include_dir): Use xrealloc.
+	* config/tc-score.c (do_macro_bcmp): Initialise inst_main.
+	* config/tc-tic6x.c (tic6x_parse_operand): Initialise second_reg.
+
 2013-10-13  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* config/tc-nios2.c (nios2_consume_arg): Make the "ba" warning

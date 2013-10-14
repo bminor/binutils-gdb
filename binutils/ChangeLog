@@ -1,3 +1,9 @@
+2013-10-14  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (decode_arm_unwind): Initialise addr structure.
+	(process_symbol_table): Free lengths.
+	* srcconv.c (wr_sc): Free info.
+
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
 	* winduni.c (languages): Use \345 (octal syntax) rather than

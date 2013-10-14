@@ -7170,7 +7170,7 @@ decode_arm_unwind (struct arm_unw_aux_info *  aux,
 {
   int per_index;
   unsigned int more_words = 0;
-  struct absaddr addr;
+  struct absaddr addr = { 0 };
   bfd_vma sym_name = (bfd_vma) -1;
 
   if (remaining == 0)
@@ -9858,6 +9858,7 @@ process_symbol_table (FILE * file)
       counts = (unsigned long *) calloc (maxlength + 1, sizeof (*counts));
       if (counts == NULL)
 	{
+	  free (lengths);
 	  error (_("Out of memory\n"));
 	  return 0;
 	}
@@ -9926,6 +9927,7 @@ process_symbol_table (FILE * file)
       counts = (unsigned long *) calloc (maxlength + 1, sizeof (*counts));
       if (counts == NULL)
 	{
+	  free (lengths);
 	  error (_("Out of memory\n"));
 	  return 0;
 	}
