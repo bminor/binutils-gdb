@@ -3505,6 +3505,7 @@ coerce_ref (struct value *arg)
   retval = value_at_lazy (enc_type,
                           unpack_pointer (value_type (arg),
                                           value_contents (arg)));
+  enc_type = value_type (retval);
   return readjust_indirect_value_type (retval, enc_type,
                                        value_type_arg_tmp, arg);
 }
