@@ -47,7 +47,7 @@ initialize_tdesc_nios2_linux (void)
   tdesc_create_reg (feature, "sp", 27, 1, NULL, 32, "data_ptr");
   tdesc_create_reg (feature, "fp", 28, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "ea", 29, 1, NULL, 32, "uint32");
-  tdesc_create_reg (feature, "ba", 30, 1, NULL, 32, "uint32");
+  tdesc_create_reg (feature, "sstatus", 30, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "ra", 31, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "pc", 32, 1, NULL, 32, "code_ptr");
   tdesc_create_reg (feature, "status", 33, 1, NULL, 32, "uint32");

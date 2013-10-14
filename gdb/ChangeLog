@@ -1,3 +1,13 @@
+2013-10-13  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-tdep.c (nios2_reg_names): Use "sstatus" rather than "ba"
+	as the preferred name of r30.
+	* nios2-linux-tdep.c (reg_offsets): Likewise.
+	* features/nios2-cpu.xml: Likewise.
+	* features/nios2-linux.c: Regenerated.
+	* features/nios2.c: Regenerated.
+	* regformats/nios2-linux.dat: Regenerated.
+
 2013-10-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Canonicalize directories for EXEC_FILENAME.

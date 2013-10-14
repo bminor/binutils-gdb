@@ -32,7 +32,7 @@ expedite:sp,pc
 32:sp
 32:fp
 32:ea
-32:ba
+32:sstatus
 32:ra
 32:pc
 32:status

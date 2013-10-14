@@ -37,7 +37,7 @@
   <reg name="sp" bitsize="32" type="data_ptr"/>
   <reg name="fp" bitsize="32" type="uint32"/>
   <reg name="ea" bitsize="32" type="uint32"/>
-  <reg name="ba" bitsize="32" type="uint32"/>
+  <reg name="sstatus" bitsize="32" type="uint32"/>
   <reg name="ra" bitsize="32" type="uint32"/>
   <reg name="pc" bitsize="32" type="code_ptr"/>
   <reg name="status" bitsize="32" type="uint32"/>
