@@ -827,3 +827,13 @@ if { $linux_gnu } {
 	    n32 -1 1 umips
     }
 }
+
+run_dump_test "attr-gnu-8-00"
+run_dump_test "attr-gnu-8-01"
+run_dump_test "attr-gnu-8-02"
+run_dump_test "attr-gnu-8-10"
+run_dump_test "attr-gnu-8-11"
+run_dump_test "attr-gnu-8-12"
+run_dump_test "attr-gnu-8-20"
+run_dump_test "attr-gnu-8-21"
+run_dump_test "attr-gnu-8-22"

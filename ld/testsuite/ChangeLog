@@ -1,3 +1,14 @@
+2013-10-14  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* ld-mips-elf/attr-gnu-8-0.s, ld-mips-elf/attr-gnu-8-1.s,
+	ld-mips-elf/attr-gnu-8-2.s,
+	ld-mips-elf/attr-gnu-8-00.d, ld-mips-elf/attr-gnu-8-01.d,
+	ld-mips-elf/attr-gnu-8-02.d, ld-mips-elf/attr-gnu-8-10.d,
+	ld-mips-elf/attr-gnu-8-11.d, ld-mips-elf/attr-gnu-8-12.d,
+	ld-mips-elf/attr-gnu-8-20.d, ld-mips-elf/attr-gnu-8-21.d,
+	ld-mips-elf/attr-gnu-8-22.d: New.
+	* ld-mips-elf/mips-elf.exp: Run new tests.
+
 2013-10-13  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* lib/ld-lib.exp (default_ld_compile): Add a -I option for the source
