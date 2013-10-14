@@ -1951,15 +1951,17 @@ nios2_consume_arg (nios2_insn_infoS *insn, char *argstr, const char *parsestr)
       /* And whether we are using oci registers.  */
       if (!nios2_as_options.nobreak
 	  && (regno == 25 || strprefix (argstr, "bt")))
-	as_warn (_("The debugger will corrupt bt (r25). If you don't need to "
-		   "debug this\n"
-		   "code then use .set nobreak to turn off this warning."));
+	as_warn (_("The debugger will corrupt bt (r25).\n"
+		   "If you don't need to debug this "
+		   "code use .set nobreak to turn off this warning."));
 	
       if (!nios2_as_options.nobreak
-	  && (regno == 30 || strprefix (argstr, "ba")))
-	as_warn (_("The debugger will corrupt ba (r30). If you don't need to "
-		   "debug this\n"
-		   "code then use .set nobreak to turn off this warning."));
+	  && (regno == 30
+	      || strprefix (argstr, "ba")
+	      || strprefix (argstr, "sstatus")))
+	as_warn (_("The debugger will corrupt sstatus/ba (r30).\n"
+		   "If you don't need to debug this "
+		   "code use .set nobreak to turn off this warning."));
       break;
     case 'i':
     case 'u':

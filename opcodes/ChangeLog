@@ -1,3 +1,8 @@
+2013-10-13  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* nios2-opc.c (nios2_builtin_reg): Use "sstatus" rather than "ba"
+	as the primary name of r30.
+
 2013-10-12  Jan Beulich <jbeulich@suse.com>
 
 	* i386-dis.c (intel_operand_size): Move v_bnd_mode alongside the

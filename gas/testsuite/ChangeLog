@@ -1,3 +1,10 @@
+2013-10-13  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gas/nios2/warn_nobreak.l: Update text of warning messages.
+	* gas/nios2/registers.s: Use "sstatus" rather than "ba"
+	as the primary name of r30.
+	* gas/nios2/registers.d: Likewise.
+
 2013-10-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/mpx.s: Remove bndcl/bndcu/bndcn tests with AX.
