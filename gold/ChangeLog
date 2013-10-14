@@ -1,3 +1,10 @@
+2013-10-14  Alan Modra  <amodra@gmail.com>
+
+	* output.h (Output_data_got::add_constant): Tidy.
+	(Output_data_got::add_constant_pair): New function.
+	* powerpc.cc (Output_data_got_powerpc): Override all Output_data_got
+	methods used so as to first call reserve_ent().
+
 2013-10-11  Roland McGrath  <mcgrathr@google.com>
 
 	* powerpc.cc (Output_data_got_powerpc): Remove unused methods

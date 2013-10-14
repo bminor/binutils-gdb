@@ -2380,10 +2380,13 @@ class Output_data_got : public Output_data_got_base
   // entry from the start of the GOT.
   unsigned int
   add_constant(Valtype constant)
-  {
-    unsigned int got_offset = this->add_got_entry(Got_entry(constant));
-    return got_offset;
-  }
+  { return this->add_got_entry(Got_entry(constant)); }
+
+  // Add a pair of constants to the GOT.  This returns the offset of
+  // the new entry from the start of the GOT.
+  unsigned int
+  add_constant_pair(Valtype c1, Valtype c2)
+  { return this->add_got_entry_pair(Got_entry(c1), Got_entry(c2)); }
 
   // Replace GOT entry I with a new constant.
   void
