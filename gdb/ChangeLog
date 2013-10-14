@@ -1,3 +1,23 @@
+2013-10-14  Yao Qi  <yao@codesourcery.com>
+
+	* varobj.c (struct varobj): Move most of the fields to
+	varobj.h.
+	(struct varobj_dynamic): New struct.
+	(varobj_get_display_hint) [HAVE_PYTHON]: Adjust.
+	(varobj_has_more): Likewise.
+	(dynamic_varobj_has_child_method): Likewise.
+	(update_dynamic_varobj_children): Likewise.
+	(varobj_get_num_children): Likewise.
+	(varobj_list_children, varobj_pretty_printed_p): Likewise.
+	(install_new_value_visualizer): Likewise.
+	(install_new_value_visualizer, install_new_value): Likewise.
+	(varobj_update, new_variable, free_variable): Likewise.
+	(my_value_of_variable, value_get_print_value): Likewise.
+	(install_visualizer): Change the type of parameter 'var' to
+	'struct varobjd_dynamic *'.  Callers update.
+	* varobj.h (struct varobj): Moved from varobj.c.
+	(struct varobj) <dynamic>: New field.
+
 2013-10-13  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* nios2-tdep.c (nios2_reg_names): Use "sstatus" rather than "ba"

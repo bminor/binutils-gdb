@@ -63,6 +63,7 @@ enum varobj_languages
 extern char *varobj_language_string[];
 
 /* Struct thar describes a variable object instance.  */
+
 struct varobj;
 
 typedef struct varobj *varobj_p;
@@ -88,6 +89,84 @@ typedef struct varobj_update_result_t
 } varobj_update_result;
 
 DEF_VEC_O (varobj_update_result);
+
+struct varobj_root;
+struct varobj_dynamic;
+
+/* Every variable in the system has a structure of this type defined
+   for it.  This structure holds all information necessary to manipulate
+   a particular object variable.  Members which must be freed are noted.  */
+struct varobj
+{
+  /* Alloc'd name of the variable for this object.  If this variable is a
+     child, then this name will be the child's source name.
+     (bar, not foo.bar).  */
+  /* NOTE: This is the "expression".  */
+  char *name;
+
+  /* Alloc'd expression for this child.  Can be used to create a
+     root variable corresponding to this child.  */
+  char *path_expr;
+
+  /* The alloc'd name for this variable's object.  This is here for
+     convenience when constructing this object's children.  */
+  char *obj_name;
+
+  /* Index of this variable in its parent or -1.  */
+  int index;
+
+  /* The type of this variable.  This can be NULL
+     for artifial variable objects -- currently, the "accessibility" 
+     variable objects in C++.  */
+  struct type *type;
+
+  /* The value of this expression or subexpression.  A NULL value
+     indicates there was an error getting this value.
+     Invariant: if varobj_value_is_changeable_p (this) is non-zero, 
+     the value is either NULL, or not lazy.  */
+  struct value *value;
+
+  /* The number of (immediate) children this variable has.  */
+  int num_children;
+
+  /* If this object is a child, this points to its immediate parent.  */
+  struct varobj *parent;
+
+  /* Children of this object.  */
+  VEC (varobj_p) *children;
+
+  /* Description of the root variable.  Points to root variable for
+     children.  */
+  struct varobj_root *root;
+
+  /* The format of the output for this object.  */
+  enum varobj_display_formats format;
+
+  /* Was this variable updated via a varobj_set_value operation.  */
+  int updated;
+
+  /* Last print value.  */
+  char *print_value;
+
+  /* Is this variable frozen.  Frozen variables are never implicitly
+     updated by -var-update * 
+     or -var-update <direct-or-indirect-parent>.  */
+  int frozen;
+
+  /* Is the value of this variable intentionally not fetched?  It is
+     not fetched if either the variable is frozen, or any parents is
+     frozen.  */
+  int not_fetched;
+
+  /* Sub-range of children which the MI consumer has requested.  If
+     FROM < 0 or TO < 0, means that all children have been
+     requested.  */
+  int from;
+  int to;
+
+  /* Dynamic part of varobj.  */
+  struct varobj_dynamic *dynamic;
+};
 
 /* API functions */
 

@@ -116,83 +116,15 @@ struct varobj_root
   struct varobj_root *next;
 };
 
-/* Every variable in the system has a structure of this type defined
-   for it.  This structure holds all information necessary to manipulate
-   a particular object variable.  Members which must be freed are noted.  */
-struct varobj
+/* Dynamic part of varobj.  */
+
+struct varobj_dynamic
 {
-
-  /* Alloc'd name of the variable for this object.  If this variable is a
-     child, then this name will be the child's source name.
-     (bar, not foo.bar).  */
-  /* NOTE: This is the "expression".  */
-  char *name;
-
-  /* Alloc'd expression for this child.  Can be used to create a
-     root variable corresponding to this child.  */
-  char *path_expr;
-
-  /* The alloc'd name for this variable's object.  This is here for
-     convenience when constructing this object's children.  */
-  char *obj_name;
-
-  /* Index of this variable in its parent or -1.  */
-  int index;
-
-  /* The type of this variable.  This can be NULL
-     for artifial variable objects -- currently, the "accessibility" 
-     variable objects in C++.  */
-  struct type *type;
-
-  /* The value of this expression or subexpression.  A NULL value
-     indicates there was an error getting this value.
-     Invariant: if varobj_value_is_changeable_p (this) is non-zero, 
-     the value is either NULL, or not lazy.  */
-  struct value *value;
-
-  /* The number of (immediate) children this variable has.  */
-  int num_children;
-
-  /* If this object is a child, this points to its immediate parent.  */
-  struct varobj *parent;
-
-  /* Children of this object.  */
-  VEC (varobj_p) *children;
-
   /* Whether the children of this varobj were requested.  This field is
      used to decide if dynamic varobj should recompute their children.
      In the event that the frontend never asked for the children, we
      can avoid that.  */
   int children_requested;
-
-  /* Description of the root variable.  Points to root variable for
-     children.  */
-  struct varobj_root *root;
-
-  /* The format of the output for this object.  */
-  enum varobj_display_formats format;
-
-  /* Was this variable updated via a varobj_set_value operation.  */
-  int updated;
-
-  /* Last print value.  */
-  char *print_value;
-
-  /* Is this variable frozen.  Frozen variables are never implicitly
-     updated by -var-update * 
-     or -var-update <direct-or-indirect-parent>.  */
-  int frozen;
-
-  /* Is the value of this variable intentionally not fetched?  It is
-     not fetched if either the variable is frozen, or any parents is
-     frozen.  */
-  int not_fetched;
-
-  /* Sub-range of children which the MI consumer has requested.  If
-     FROM < 0 or TO < 0, means that all children have been
-     requested.  */
-  int from;
-  int to;
 
   /* The pretty-printer constructor.  If NULL, then the default
      pretty-printer will be looked up.  If None, then no
@@ -905,8 +837,8 @@ varobj_get_display_hint (struct varobj *var)
 
   back_to = varobj_ensure_python_env (var);
 
-  if (var->pretty_printer)
-    result = gdbpy_get_display_hint (var->pretty_printer);
+  if (var->dynamic->pretty_printer != NULL)
+    result = gdbpy_get_display_hint (var->dynamic->pretty_printer);
 
   do_cleanups (back_to);
 #endif
@@ -922,7 +854,7 @@ varobj_has_more (struct varobj *var, int to)
   if (VEC_length (varobj_p, var->children) > to)
     return 1;
   return ((to == -1 || VEC_length (varobj_p, var->children) == to)
-	  && var->saved_item != NULL);
+	  && (var->dynamic->saved_item != NULL));
 }
 
 /* If the variable object is bound to a specific thread, that
@@ -1032,7 +964,7 @@ static int
 dynamic_varobj_has_child_method (struct varobj *var)
 {
   struct cleanup *back_to;
-  PyObject *printer = var->pretty_printer;
+  PyObject *printer = var->dynamic->pretty_printer;
   int result;
 
   if (!gdb_python_initialized)
@@ -1061,7 +993,7 @@ update_dynamic_varobj_children (struct varobj *var,
   struct cleanup *back_to;
   PyObject *children;
   int i;
-  PyObject *printer = var->pretty_printer;
+  PyObject *printer = var->dynamic->pretty_printer;
 
   if (!gdb_python_initialized)
     return 0;
@@ -1075,7 +1007,7 @@ update_dynamic_varobj_children (struct varobj *var,
       return 0;
     }
 
-  if (update_children || !var->child_iter)
+  if (update_children || var->dynamic->child_iter == NULL)
     {
       children = PyObject_CallMethodObjArgs (printer, gdbpy_children_cst,
 					     NULL);
@@ -1088,16 +1020,16 @@ update_dynamic_varobj_children (struct varobj *var,
 
       make_cleanup_py_decref (children);
 
-      Py_XDECREF (var->child_iter);
-      var->child_iter = PyObject_GetIter (children);
-      if (!var->child_iter)
+      Py_XDECREF (var->dynamic->child_iter);
+      var->dynamic->child_iter = PyObject_GetIter (children);
+      if (var->dynamic->child_iter == NULL)
 	{
 	  gdbpy_print_stack ();
 	  error (_("Could not get children iterator"));
 	}
 
-      Py_XDECREF (var->saved_item);
-      var->saved_item = NULL;
+      Py_XDECREF (var->dynamic->saved_item);
+      var->dynamic->saved_item = NULL;
 
       i = 0;
     }
@@ -1112,13 +1044,13 @@ update_dynamic_varobj_children (struct varobj *var,
       int force_done = 0;
 
       /* See if there was a leftover from last time.  */
-      if (var->saved_item)
+      if (var->dynamic->saved_item)
 	{
-	  item = var->saved_item;
-	  var->saved_item = NULL;
+	  item = var->dynamic->saved_item;
+	  var->dynamic->saved_item = NULL;
 	}
       else
-	item = PyIter_Next (var->child_iter);
+	item = PyIter_Next (var->dynamic->child_iter);
 
       if (!item)
 	{
@@ -1194,8 +1126,8 @@ update_dynamic_varobj_children (struct varobj *var,
 	}
       else
 	{
-	  Py_XDECREF (var->saved_item);
-	  var->saved_item = item;
+	  Py_XDECREF (var->dynamic->saved_item);
+	  var->dynamic->saved_item = item;
 
 	  /* We want to truncate the child list just before this
 	     element.  */
@@ -1236,7 +1168,7 @@ varobj_get_num_children (struct varobj *var)
 {
   if (var->num_children == -1)
     {
-      if (var->pretty_printer)
+      if (var->dynamic->pretty_printer != NULL)
 	{
 	  int dummy;
 
@@ -1261,9 +1193,9 @@ varobj_list_children (struct varobj *var, int *from, int *to)
   char *name;
   int i, children_changed;
 
-  var->children_requested = 1;
+  var->dynamic->children_requested = 1;
 
-  if (var->pretty_printer)
+  if (var->dynamic->pretty_printer != NULL)
     {
       /* This, in theory, can result in the number of children changing without
 	 frontend noticing.  But well, calling -var-list-children on the same
@@ -1414,7 +1346,7 @@ varobj_get_attributes (struct varobj *var)
 int
 varobj_pretty_printed_p (struct varobj *var)
 {
-  return var->pretty_printer != NULL;
+  return var->dynamic->pretty_printer != NULL;
 }
 
 char *
@@ -1502,10 +1434,10 @@ varobj_set_value (struct varobj *var, char *expression)
 #if HAVE_PYTHON
 
 /* A helper function to install a constructor function and visualizer
-   in a varobj.  */
+   in a varobj_dynamic.  */
 
 static void
-install_visualizer (struct varobj *var, PyObject *constructor,
+install_visualizer (struct varobj_dynamic *var, PyObject *constructor,
 		    PyObject *visualizer)
 {
   Py_XDECREF (var->constructor);
@@ -1547,7 +1479,7 @@ install_default_visualizer (struct varobj *var)
 	  pretty_printer = NULL;
 	}
   
-      install_visualizer (var, NULL, pretty_printer);
+      install_visualizer (var->dynamic, NULL, pretty_printer);
     }
 }
 
@@ -1584,7 +1516,7 @@ construct_visualizer (struct varobj *var, PyObject *constructor)
 	}
     }
 
-  install_visualizer (var, constructor, pretty_printer);
+  install_visualizer (var->dynamic, constructor, pretty_printer);
 }
 
 #endif /* HAVE_PYTHON */
@@ -1601,16 +1533,16 @@ install_new_value_visualizer (struct varobj *var)
   if (!gdb_python_initialized)
     return;
 
-  if (var->constructor != Py_None && var->value)
+  if (var->dynamic->constructor != Py_None && var->value != NULL)
     {
       struct cleanup *cleanup;
 
       cleanup = varobj_ensure_python_env (var);
 
-      if (!var->constructor)
+      if (var->dynamic->constructor == NULL)
 	install_default_visualizer (var);
       else
-	construct_visualizer (var, var->constructor);
+	construct_visualizer (var, var->dynamic->constructor);
 
       do_cleanups (cleanup);
     }
@@ -1687,7 +1619,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
   /* If the type has custom visualizer, we consider it to be always
      changeable.  FIXME: need to make sure this behaviour will not
      mess up read-sensitive values.  */
-  if (var->pretty_printer)
+  if (var->dynamic->pretty_printer != NULL)
     changeable = 1;
 
   need_to_fetch = changeable;
@@ -1758,7 +1690,8 @@ install_new_value (struct varobj *var, struct value *value, int initial)
      values.  Don't get string rendering if the value is
      lazy -- if it is, the code above has decided that the value
      should not be fetched.  */
-  if (value && !value_lazy (value) && !var->pretty_printer)
+  if (value != NULL && !value_lazy (value)
+      && var->dynamic->pretty_printer == NULL)
     print_value = value_get_print_value (value, var->format, var);
 
   /* If the type is changeable, compare the old and the new values.
@@ -1775,7 +1708,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 	{
 	  changed = 1;
 	}
-      else if (! var->pretty_printer)
+      else if (var->dynamic->pretty_printer == NULL)
 	{
 	  /* Try to compare the values.  That requires that both
 	     values are non-lazy.  */
@@ -1830,7 +1763,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
 
   /* If we installed a pretty-printer, re-compare the printed version
      to see if the variable changed.  */
-  if (var->pretty_printer)
+  if (var->dynamic->pretty_printer != NULL)
     {
       xfree (print_value);
       print_value = value_get_print_value (var->value, var->format, var);
@@ -2059,7 +1992,7 @@ varobj_update (struct varobj **varp, int explicit)
       /* We probably should not get children of a varobj that has a
 	 pretty-printer, but for which -var-list-children was never
 	 invoked.  */
-      if (v->pretty_printer)
+      if (v->dynamic->pretty_printer != NULL)
 	{
 	  VEC (varobj_p) *changed = 0, *type_changed = 0, *unchanged = 0;
 	  VEC (varobj_p) *new = 0;
@@ -2068,7 +2001,7 @@ varobj_update (struct varobj **varp, int explicit)
 	  if (v->frozen)
 	    continue;
 
-	  if (!v->children_requested)
+	  if (!v->dynamic->children_requested)
 	    {
 	      int dummy;
 
@@ -2459,13 +2392,15 @@ new_variable (void)
   var->print_value = NULL;
   var->frozen = 0;
   var->not_fetched = 0;
-  var->children_requested = 0;
+  var->dynamic
+    = (struct varobj_dynamic *) xmalloc (sizeof (struct varobj_dynamic));
+  var->dynamic->children_requested = 0;
   var->from = -1;
   var->to = -1;
-  var->constructor = 0;
-  var->pretty_printer = 0;
-  var->child_iter = 0;
-  var->saved_item = 0;
+  var->dynamic->constructor = 0;
+  var->dynamic->pretty_printer = 0;
+  var->dynamic->child_iter = 0;
+  var->dynamic->saved_item = 0;
 
   return var;
 }
@@ -2493,13 +2428,14 @@ static void
 free_variable (struct varobj *var)
 {
 #if HAVE_PYTHON
-  if (var->pretty_printer)
+  if (var->dynamic->pretty_printer != NULL)
     {
       struct cleanup *cleanup = varobj_ensure_python_env (var);
-      Py_XDECREF (var->constructor);
-      Py_XDECREF (var->pretty_printer);
-      Py_XDECREF (var->child_iter);
-      Py_XDECREF (var->saved_item);
+
+      Py_XDECREF (var->dynamic->constructor);
+      Py_XDECREF (var->dynamic->pretty_printer);
+      Py_XDECREF (var->dynamic->child_iter);
+      Py_XDECREF (var->dynamic->saved_item);
       do_cleanups (cleanup);
     }
 #endif
@@ -2517,6 +2453,7 @@ free_variable (struct varobj *var)
   xfree (var->obj_name);
   xfree (var->print_value);
   xfree (var->path_expr);
+  xfree (var->dynamic);
   xfree (var);
 }
 
@@ -2890,7 +2827,7 @@ my_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
   if (var->root->is_valid)
     {
-      if (var->pretty_printer)
+      if (var->dynamic->pretty_printer != NULL)
 	return value_get_print_value (var->value, var->format, var);
       return (*var->root->lang->value_of_variable) (var, format);
     }
@@ -2924,7 +2861,7 @@ value_get_print_value (struct value *value, enum varobj_display_formats format,
 #if HAVE_PYTHON
   if (gdb_python_initialized)
     {
-      PyObject *value_formatter = var->pretty_printer;
+      PyObject *value_formatter =  var->dynamic->pretty_printer;
 
       varobj_ensure_python_env (var);
 
