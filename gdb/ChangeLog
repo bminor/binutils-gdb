@@ -1,5 +1,19 @@
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* ada-lang.c (ada_value_primitive_packed_val): Re-fetch type from value.
+	(ada_template_to_fixed_record_type_1): Likewise.
+	(ada_to_fixed_type_1): Likewise.
+	* cp-valprint.c (cp_print_value_fields_rtti): Likewise.
+	(cp_print_value): Likewise.
+	* d-valprint.c (dynamic_array_type): Likewise.
+	* eval.c (evaluate_subexp_with_coercion): Likewise.
+	* findvar.c (address_of_variable): Likewise.
+	* jv-valprint.c (java_value_print): Likewise.
+	* valops.c (value_ind): Likewise.
+	* value.c (coerce_ref): Likewise.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* eval.c (evaluate_subexp_for_sizeof) <UNOP_IND>: Create an indirect
 	value and retrieve the dynamic type size.
 

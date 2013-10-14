@@ -2984,6 +2984,7 @@ evaluate_subexp_with_coercion (struct expression *exp,
 	{
 	  (*pos) += 4;
 	  val = address_of_variable (var, exp->elts[pc + 1].block);
+	  type = value_type (val);
 	  return value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 			     val);
 	}
