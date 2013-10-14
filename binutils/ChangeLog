@@ -1,3 +1,7 @@
+2013-10-14  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
+
+	* readelf.c (decode_arm_unwind): Don't initialize `addr'.
+
 2013-10-14  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (decode_arm_unwind): Initialise addr structure.

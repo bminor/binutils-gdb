@@ -7170,7 +7170,7 @@ decode_arm_unwind (struct arm_unw_aux_info *  aux,
 {
   int per_index;
   unsigned int more_words = 0;
-  struct absaddr addr = { 0 };
+  struct absaddr addr;
   bfd_vma sym_name = (bfd_vma) -1;
 
   if (remaining == 0)
