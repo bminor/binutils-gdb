@@ -179,6 +179,12 @@ Generate code for the MCU Application Specific Extension.
 This tells the assembler to accept MCU instructions.
 @samp{-mno-mcu} turns off this option.
 
+@item -mmsa
+@itemx -mno-msa
+Generate code for the MIPS SIMD Architecture Extension.
+This tells the assembler to accept MSA instructions.
+@samp{-mno-msa} turns off this option.
+
 @item -mvirt
 @itemx -mno-virt
 Generate code for the Virtualization Application Specific Extension.
@@ -851,6 +857,14 @@ instructions from being accepted.
 The directive @code{.set mcu} makes the assembler accept instructions
 from the MCU Application Specific Extension from that point on
 in the assembly.  The @code{.set nomcu} directive prevents MCU
+instructions from being accepted.
+
+@cindex MIPS SIMD Architecture instruction generation override
+@kindex @code{.set msa}
+@kindex @code{.set nomsa}
+The directive @code{.set msa} makes the assembler accept instructions
+from the MIPS SIMD Architecture Extension from that point on
+in the assembly.  The @code{.set nomsa} directive prevents MSA
 instructions from being accepted.
 
 @cindex Virtualization instruction generation override

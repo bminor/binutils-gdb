@@ -1,3 +1,29 @@
+2013-10-14  Richard Sandiford  <rdsandiford@googlemail.com>
+	    Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* config/tc-mips.c (options): Add OPTION_MSA and OPTION_NO_MSA.
+	(md_longopts): Add mmsa and mno-msa.
+	(mips_ases): Add msa.
+	(RTYPE_MASK): Update.
+	(RTYPE_MSA): New define.
+	(OT_REG_ELEMENT): Replace with...
+	(OT_INTEGER_INDEX, OT_REG_INDEX): ...these new operand types.
+	(mips_operand_token): Replace reg_element with index.
+	(mips_parse_argument_token): Treat vector indices as separate tokens.
+	Handle register indices.
+	(md_begin): Add MSA register names.
+	(operand_reg_mask): Handle cases for OP_IMM_INDEX and OP_REG_INDEX.
+	(convert_reg_type): Handle cases for OP_REG_MSA and OP_REG_MSA_CTRL.
+	(match_mdmx_imm_reg_operand): Update accordingly.
+	(match_imm_index_operand): New function.
+	(match_reg_index_operand): New function.
+	(match_operand): Handle cases for OP_IMM_INDEX and OP_REG_INDEX.
+	(md_convert_frag): Convert bz.b/h/w/d, bnz.b/h/w/d, bz.v bnz.v.
+	(md_show_usage): Print -mmsa and -mno-msa.
+	* doc/as.texinfo: Document -mmsa and -mno-msa.
+	* doc/c-mips.texi: Document -mmsa and -mno-msa.
+	Document .set msa and .set nomsa.
+
 2013-10-14  Nick Clifton  <nickc@redhat.com>
 
 	* read.c (add_include_dir): Use xrealloc.

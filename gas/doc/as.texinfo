@@ -412,6 +412,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mdmx}] [@b{-no-mdmx}]
    [@b{-mdsp}] [@b{-mno-dsp}]
    [@b{-mdspr2}] [@b{-mno-dspr2}]
+   [@b{-mmsa}] [@b{-mno-msa}]
    [@b{-mmt}] [@b{-mno-mt}]
    [@b{-mmcu}] [@b{-mno-mcu}]
    [@b{-minsn32}] [@b{-mno-insn32}]
@@ -1328,6 +1329,12 @@ Generate code for the DSP Release 2 Application Specific Extension.
 This option implies -mdsp.
 This tells the assembler to accept DSP Release 2 instructions.
 @samp{-mno-dspr2} turns off this option.
+
+@item -mmsa
+@itemx -mno-msa
+Generate code for the MIPS SIMD Architecture Extension.
+This tells the assembler to accept MSA instructions.
+@samp{-mno-msa} turns off this option.
 
 @item -mmt
 @itemx -mno-mt
