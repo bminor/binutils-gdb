@@ -1,3 +1,8 @@
+2013-10-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* Makefile.in (srcsim): New variable.
+	(version.c): Adjust call to $(srccom)/create-version.sh as per change.
+
 2013-06-28  Tom Tromey  <tromey@redhat.com>
 
 	* Make-common.in (version.c): Use version.in, not
