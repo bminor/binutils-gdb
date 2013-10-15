@@ -1,5 +1,11 @@
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
+	* elfread.c (elf_read_minimal_symbols): New function, from
+	elf_symfile_read.
+	(elf_symfile_read): Call it.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
 	* minsyms.c (lookup_minimal_symbol, iterate_over_minimal_symbols)
 	(lookup_minimal_symbol_text, lookup_minimal_symbol_by_pc_name)
 	(lookup_minimal_symbol_solib_trampoline)

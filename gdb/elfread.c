@@ -1080,39 +1080,13 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   update_breakpoint_locations (b, sals, sals_end);
 }
 
-/* Scan and build partial symbols for a symbol file.
-   We have been initialized by a call to elf_symfile_init, which
-   currently does nothing.
-
-   SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
-   in each section.  We simplify it down to a single offset for all
-   symbols.  FIXME.
-
-   This function only does the minimum work necessary for letting the
-   user "name" things symbolically; it does not read the entire symtab.
-   Instead, it reads the external and static symbols and puts them in partial
-   symbol tables.  When more extensive information is requested of a
-   file, the corresponding partial symbol table is mutated into a full
-   fledged symbol table by going back and reading the symbols
-   for real.
-
-   We look for sections with specific names, to tell us what debug
-   format to look for:  FIXME!!!
-
-   elfstab_build_psymtabs() handles STABS symbols;
-   mdebug_build_psymtabs() handles ECOFF debugging information.
-
-   Note that ELF files have a "minimal" symbol table, which looks a lot
-   like a COFF symbol table, but has only the minimal information necessary
-   for linking.  We process this also, and use the information to
-   build gdb's minimal symbol table.  This gives us some minimal debugging
-   capability even for files compiled without -g.  */
+/* A helper function for elf_symfile_read that reads the minimal
+   symbols.  */
 
 static void
-elf_symfile_read (struct objfile *objfile, int symfile_flags)
+elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags)
 {
   bfd *synth_abfd, *abfd = objfile->obfd;
-  struct elfinfo ei;
   struct cleanup *back_to;
   long symcount = 0, dynsymcount = 0, synthcount, storage_needed;
   asymbol **symbol_table = NULL, **dyn_symbol_table = NULL;
@@ -1128,8 +1102,6 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 
   init_minimal_symbol_collection ();
   back_to = make_cleanup_discard_minimal_symbols ();
-
-  memset ((char *) &ei, 0, sizeof (ei));
 
   /* Allocate struct to keep track of the symfile.  */
   dbx = XCNEW (struct dbx_symfile_info);
@@ -1234,6 +1206,45 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
 
   if (symtab_create_debug)
     fprintf_unfiltered (gdb_stdlog, "Done reading minimal symbols.\n");
+}
+
+/* Scan and build partial symbols for a symbol file.
+   We have been initialized by a call to elf_symfile_init, which
+   currently does nothing.
+
+   SECTION_OFFSETS is a set of offsets to apply to relocate the symbols
+   in each section.  We simplify it down to a single offset for all
+   symbols.  FIXME.
+
+   This function only does the minimum work necessary for letting the
+   user "name" things symbolically; it does not read the entire symtab.
+   Instead, it reads the external and static symbols and puts them in partial
+   symbol tables.  When more extensive information is requested of a
+   file, the corresponding partial symbol table is mutated into a full
+   fledged symbol table by going back and reading the symbols
+   for real.
+
+   We look for sections with specific names, to tell us what debug
+   format to look for:  FIXME!!!
+
+   elfstab_build_psymtabs() handles STABS symbols;
+   mdebug_build_psymtabs() handles ECOFF debugging information.
+
+   Note that ELF files have a "minimal" symbol table, which looks a lot
+   like a COFF symbol table, but has only the minimal information necessary
+   for linking.  We process this also, and use the information to
+   build gdb's minimal symbol table.  This gives us some minimal debugging
+   capability even for files compiled without -g.  */
+
+static void
+elf_symfile_read (struct objfile *objfile, int symfile_flags)
+{
+  bfd *abfd = objfile->obfd;
+  struct elfinfo ei;
+
+  elf_read_minimal_symbols (objfile, symfile_flags);
+
+  memset ((char *) &ei, 0, sizeof (ei));
 
   /* Now process debugging information, which is contained in
      special ELF sections.  */
