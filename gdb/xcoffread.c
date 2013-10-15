@@ -948,7 +948,6 @@ record_minimal_symbol (const char *name, CORE_ADDR address,
   if (name[0] == '.')
     ++name;
 
-  address += ANOFFSET (objfile->section_offsets, section);
   prim_record_minimal_symbol_and_info (name, address, ms_type,
 				       secnum_to_section (n_scnum, objfile),
 				       objfile);

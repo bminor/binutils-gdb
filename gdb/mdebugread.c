@@ -2519,14 +2519,10 @@ parse_partial_symbols (struct objfile *objfile)
 	{
 	case stProc:
 	  /* Beginnning of Procedure */
-	  svalue += ANOFFSET (objfile->section_offsets,
-			      SECT_OFF_TEXT (objfile));
 	  break;
 	case stStaticProc:
 	  /* Load time only static procs */
 	  ms_type = mst_file_text;
-	  svalue += ANOFFSET (objfile->section_offsets,
-			      SECT_OFF_TEXT (objfile));
 	  break;
 	case stGlobal:
 	  /* External symbol */
@@ -2539,20 +2535,14 @@ parse_partial_symbols (struct objfile *objfile)
 	  else if (SC_IS_DATA (ext_in->asym.sc))
 	    {
 	      ms_type = mst_data;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_DATA (objfile));
 	    }
 	  else if (SC_IS_BSS (ext_in->asym.sc))
 	    {
 	      ms_type = mst_bss;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_BSS (objfile));
 	    }
           else if (SC_IS_SBSS (ext_in->asym.sc))
             {
               ms_type = mst_bss;
-              svalue += ANOFFSET (objfile->section_offsets, 
-                                  get_section_index (objfile, ".sbss"));
             }
 	  else
 	    ms_type = mst_abs;
@@ -2585,8 +2575,6 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
                 
 	      ms_type = mst_file_text;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_TEXT (objfile));
 	    }
 	  else if (SC_IS_DATA (ext_in->asym.sc))
 	    {
@@ -2594,8 +2582,6 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
 
 	      ms_type = mst_file_data;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_DATA (objfile));
 	    }
 	  else if (SC_IS_BSS (ext_in->asym.sc))
 	    {
@@ -2603,8 +2589,6 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
 
 	      ms_type = mst_file_bss;
-	      svalue += ANOFFSET (objfile->section_offsets,
-				  SECT_OFF_BSS (objfile));
 	    }
           else if (SC_IS_SBSS (ext_in->asym.sc))
             {
@@ -2614,7 +2598,6 @@ parse_partial_symbols (struct objfile *objfile)
                 continue;
 
               ms_type = mst_file_bss;
-              svalue += ANOFFSET (objfile->section_offsets, sbss_sect_index);
             }
 	  else
 	    ms_type = mst_abs;
@@ -2748,8 +2731,6 @@ parse_partial_symbols (struct objfile *objfile)
 		      CORE_ADDR procaddr;
 		      long isym;
 
-		      sh.value += ANOFFSET (objfile->section_offsets,
-					    SECT_OFF_TEXT (objfile));
 		      if (sh.st == stStaticProc)
 			{
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
@@ -2757,6 +2738,8 @@ parse_partial_symbols (struct objfile *objfile)
                                                  mst_file_text, sh.sc,
                                                  objfile);
 			}
+		      sh.value += ANOFFSET (objfile->section_offsets,
+					    SECT_OFF_TEXT (objfile));
 		      procaddr = sh.value;
 
 		      isym = AUX_GET_ISYM (fh->fBigendian,
@@ -2796,22 +2779,22 @@ parse_partial_symbols (struct objfile *objfile)
 			case scPData:
 			case scXData:
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  sh.value += ANOFFSET (objfile->section_offsets,
-						SECT_OFF_DATA (objfile));
                           record_minimal_symbol (namestring, sh.value,
                                                  mst_file_data, sh.sc,
                                                  objfile);
+			  sh.value += ANOFFSET (objfile->section_offsets,
+						SECT_OFF_DATA (objfile));
 			  break;
 
 			default:
 			  /* FIXME!  Shouldn't this use cases for bss, 
 			     then have the default be abs?  */
 			  namestring = debug_info->ss + fh->issBase + sh.iss;
-			  sh.value += ANOFFSET (objfile->section_offsets,
-						SECT_OFF_BSS (objfile));
                           record_minimal_symbol (namestring, sh.value,
                                                  mst_file_bss, sh.sc,
                                                  objfile);
+			  sh.value += ANOFFSET (objfile->section_offsets,
+						SECT_OFF_BSS (objfile));
 			  break;
 			}
 		    }
@@ -3435,6 +3418,7 @@ parse_partial_symbols (struct objfile *objfile)
 	    {
 	      char *name;
 	      enum address_class class;
+	      CORE_ADDR minsym_value;
 
 	      (*swap_sym_in) (cur_bfd,
 			      ((char *) debug_info->external_sym
@@ -3459,6 +3443,8 @@ parse_partial_symbols (struct objfile *objfile)
 		}
 
 	      name = debug_info->ss + fh->issBase + sh.iss;
+
+	      minsym_value = sh.value;
 
 	      switch (sh.sc)
 		{
@@ -3492,7 +3478,7 @@ parse_partial_symbols (struct objfile *objfile)
 		  int new_sdx;
 
 		case stStaticProc:
-		  prim_record_minimal_symbol_and_info (name, sh.value,
+		  prim_record_minimal_symbol_and_info (name, minsym_value,
 						       mst_file_text,
 						       SECT_OFF_TEXT (objfile),
 						       objfile);
@@ -3578,12 +3564,12 @@ parse_partial_symbols (struct objfile *objfile)
 
 		case stStatic:	/* Variable */
 		  if (SC_IS_DATA (sh.sc))
-		    prim_record_minimal_symbol_and_info (name, sh.value,
+		    prim_record_minimal_symbol_and_info (name, minsym_value,
 							 mst_file_data,
 							 SECT_OFF_DATA (objfile),
 							 objfile);
 		  else
-		    prim_record_minimal_symbol_and_info (name, sh.value,
+		    prim_record_minimal_symbol_and_info (name, minsym_value,
 							 mst_file_bss,
 							 SECT_OFF_BSS (objfile),
 							 objfile);

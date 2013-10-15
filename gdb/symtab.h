@@ -393,12 +393,11 @@ struct minimal_symbol
 #define MSYMBOL_VALUE(symbol)		(symbol)->mginfo.value.ivalue
 /* The unrelocated address of the minimal symbol.  */
 #define MSYMBOL_VALUE_RAW_ADDRESS(symbol) ((symbol)->mginfo.value.address + 0)
-/* This weird definition lets us syntax-check without affecting the
-   results.  It is a temporary measure until a later patch.  */
+/* The relocated address of the minimal symbol, using the section
+   offsets from OBJFILE.  */
 #define MSYMBOL_VALUE_ADDRESS(objfile, symbol)				\
   ((symbol)->mginfo.value.address					\
-   + (0									\
-      * ANOFFSET ((objfile)->section_offsets, ((symbol)->mginfo.section))))
+   + ANOFFSET ((objfile)->section_offsets, ((symbol)->mginfo.section)))
 /* For a bound minsym, we can easily compute the address directly.  */
 #define BMSYMBOL_VALUE_ADDRESS(symbol) \
   MSYMBOL_VALUE_ADDRESS ((symbol).objfile, (symbol).minsym)

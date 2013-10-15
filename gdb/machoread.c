@@ -111,23 +111,10 @@ macho_symtab_add_minsym (struct objfile *objfile, const asymbol *sym)
   if (sym->flags & (BSF_GLOBAL | BSF_LOCAL | BSF_WEAK))
     {
       CORE_ADDR symaddr;
-      CORE_ADDR offset;
       enum minimal_symbol_type ms_type;
-
-      offset = ANOFFSET (objfile->section_offsets,
-			 gdb_bfd_section_index (objfile->obfd, sym->section));
 
       /* Bfd symbols are section relative.  */
       symaddr = sym->value + sym->section->vma;
-
-      /* Select global/local/weak symbols.  Note that bfd puts abs
-         symbols in their own section, so all symbols we are
-         interested in will have a section.  */
-      /* Relocate all non-absolute and non-TLS symbols by the
-         section offset.  */
-      if (sym->section != bfd_abs_section_ptr
-          && !(sym->section->flags & SEC_THREAD_LOCAL))
-        symaddr += offset;
 
       if (sym->section == bfd_abs_section_ptr)
         ms_type = mst_abs;

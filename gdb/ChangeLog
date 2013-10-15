@@ -1,5 +1,30 @@
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
+	* minsyms.c (msymbols_sort): Remove.
+	* minsyms.h (msymbols_sort): Remove.
+	* objfiles.c (objfile_relocate1): Don't relocate minsyms.
+	* symtab.h (MSYMBOL_VALUE_ADDRESS): Use objfile offsets.
+	* elfread.c (elf_symtab_read): Don't add section offsets.
+	* xcoffread.c (record_minimal_symbol): Don't add section offset
+	to minimal symbol address.
+	* somread.c (text_offset, data_offset): Remove.
+	(som_symtab_read): Don't add section offsets to minimal symbol
+	addresses.
+	* coff-pe-read.c (add_pe_forwarded_sym, read_pe_exported_syms):
+	Don't add section offsets to minimal symbols.
+	* coffread.c (coff_symtab_read): Don't add section offsets
+	to minimal symbol addresses.
+	* machoread.c (macho_symtab_add_minsym): Don't add section offset
+	to minimal symbol addresses.
+	* mipsread.c (read_alphacoff_dynamic_symtab): Don't add
+	section offset to minimal symbol addresses.
+	* mdebugread.c (parse_partial_symbols): Don't add section
+	offset to minimal symbol addresses.
+	* dbxread.c (read_dbx_dynamic_symtab): Don't add section
+	offset to minimal symbol addresses.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
 	* ada-lang.c (ada_main_name): Update.
 	(ada_add_standard_exceptions): Update.
 	* ada-tasks.c (ada_tasks_inferior_data_sniffer): Update.

@@ -1296,16 +1296,6 @@ terminate_minimal_symbol_table (struct objfile *objfile)
   }
 }
 
-/* Sort all the minimal symbols in OBJFILE.  */
-
-void
-msymbols_sort (struct objfile *objfile)
-{
-  qsort (objfile->msymbols, objfile->minimal_symbol_count,
-	 sizeof (struct minimal_symbol), compare_minimal_symbols);
-  build_minimal_symbol_hash_tables (objfile);
-}
-
 /* Check if PC is in a shared library trampoline code stub.
    Return minimal symbol for the trampoline entry or NULL if PC is not
    in a trampoline code stub.  */

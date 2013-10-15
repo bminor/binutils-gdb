@@ -136,12 +136,6 @@ void install_minimal_symbols (struct objfile *);
 
 void terminate_minimal_symbol_table (struct objfile *objfile);
 
-/* Sort all the minimal symbols in OBJFILE.  This should be only be
-   called after relocating symbols; it ensures that the minimal
-   symbols are properly sorted by address.  */
-
-void msymbols_sort (struct objfile *objfile);
-
 
 
 /* Compute a hash code for the string argument.  */

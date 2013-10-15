@@ -325,9 +325,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 	      && bfd_get_section_by_name (abfd, ".plt") != NULL)
 	    continue;
 
-	  symaddr += ANOFFSET (objfile->section_offsets,
-			       gdb_bfd_section_index (objfile->obfd, sect));
-
 	  msym = record_minimal_symbol
 	    (sym->name, strlen (sym->name), copy_names,
 	     symaddr, mst_solib_trampoline, sect, objfile);
@@ -367,13 +364,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 	     interested in will have a section.  */
 	  /* Bfd symbols are section relative.  */
 	  symaddr = sym->value + sym->section->vma;
-	  /* Relocate all non-absolute and non-TLS symbols by the
-	     section offset.  */
-	  if (sym->section != bfd_abs_section_ptr
-	      && !(sym->section->flags & SEC_THREAD_LOCAL))
-	    {
-	      symaddr += offset;
-	    }
 	  /* For non-absolute symbols, use the type of the section
 	     they are relative to, to intuit text/data.  Bfd provides
 	     no way of figuring this out for absolute symbols.  */
@@ -409,7 +399,6 @@ elf_symtab_read (struct objfile *objfile, int type,
 		{
 		  if (sym->name[0] == '.')
 		    continue;
-		  symaddr += offset;
 		}
 	    }
 	  else if (sym->section->flags & SEC_CODE)

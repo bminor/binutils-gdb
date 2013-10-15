@@ -873,8 +873,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 	     minsyms.  */
 	  int section = cs_to_section (cs, objfile);
 
-	  tmpaddr = cs->c_value + ANOFFSET (objfile->section_offsets,
-					    SECT_OFF_TEXT (objfile));
+	  tmpaddr = cs->c_value;
 	  record_minimal_symbol (cs, tmpaddr, mst_text,
 				 section, objfile);
 
@@ -976,6 +975,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 	    enum minimal_symbol_type ms_type;
 	    int sec;
+	    CORE_ADDR offset = 0;
 
 	    if (cs->c_secnum == N_UNDEF)
 	      {
@@ -1007,7 +1007,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
  		    || cs->c_sclass == C_THUMBEXTFUNC
  		    || cs->c_sclass == C_THUMBEXT
  		    || (pe_file && (cs->c_sclass == C_STAT)))
-		  tmpaddr += ANOFFSET (objfile->section_offsets, sec);
+		  offset = ANOFFSET (objfile->section_offsets, sec);
 
 		if (bfd_section->flags & SEC_CODE)
 		  {
@@ -1046,7 +1046,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 		sym = process_coff_symbol
 		  (cs, &main_aux, objfile);
-		SYMBOL_VALUE (sym) = tmpaddr;
+		SYMBOL_VALUE (sym) = tmpaddr + offset;
 		SYMBOL_SECTION (sym) = sec;
 	      }
 	  }
