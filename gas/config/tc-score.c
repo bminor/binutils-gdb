@@ -4489,7 +4489,7 @@ s3_do_macro_bcmp (char *str)
   char* ptemp;
   int i = 0;
   struct s3_score_it inst_expand[2];
-  struct s3_score_it inst_main = { 0 };
+  struct s3_score_it inst_main;
 
   memset (inst_expand, 0, sizeof inst_expand);
   s3_skip_whitespace (str);
