@@ -1,5 +1,32 @@
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
+	* minsyms.c (lookup_minimal_symbol, iterate_over_minimal_symbols)
+	(lookup_minimal_symbol_text, lookup_minimal_symbol_by_pc_name)
+	(lookup_minimal_symbol_solib_trampoline)
+	(lookup_minimal_symbol_by_pc_section_1)
+	(lookup_minimal_symbol_and_objfile): Update.
+	(prim_record_minimal_symbol_full): Use the per-BFD obstack.
+	Don't allocate a minimal symbol if minsyms have already been read.
+	(build_minimal_symbol_hash_tables): Update.
+	(install_minimal_symbols): Do nothing if minsyms already read.
+	Use the per-BFD obstack.
+	(terminate_minimal_symbol_table): Use the per-BFD obstack.
+	* objfiles.c (allocate_objfile): Call
+	terminate_minimal_symbol_table later.
+	(have_minimal_symbols): Update.
+	* objfiles.h (struct objfile_per_bfd_storage) <msymbols,
+	minimal_symbol_count, msymbol_hash, msymbol_demangled_hash>:
+	Move from struct objfile.
+	<minsyms_read>: New field.
+	(struct objfile) <msymbols, minimal_symbol_count,
+	msymbol_hash, msymbol_demangled_hash>: Move.
+	(ALL_OBJFILE_MSYMBOLS): Update.
+	* symfile.c (read_symbols): Set minsyms_read.
+	(reread_symbols): Update.
+	* symmisc.c (dump_objfile, dump_msymbols): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
 	* minsyms.c (msymbols_sort): Remove.
 	* minsyms.h (msymbols_sort): Remove.
 	* objfiles.c (objfile_relocate1): Don't relocate minsyms.

@@ -168,7 +168,7 @@ dump_objfile (struct objfile *objfile)
   printf_filtered (", bfd at ");
   gdb_print_host_address (objfile->obfd, gdb_stdout);
   printf_filtered (", %d minsyms\n\n",
-		   objfile->minimal_symbol_count);
+		   objfile->per_bfd->minimal_symbol_count);
 
   if (objfile->sf)
     objfile->sf->qf->dump (objfile);
@@ -204,7 +204,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
   char ms_type;
 
   fprintf_filtered (outfile, "\nObject file %s:\n\n", objfile_name (objfile));
-  if (objfile->minimal_symbol_count == 0)
+  if (objfile->per_bfd->minimal_symbol_count == 0)
     {
       fprintf_filtered (outfile, "No minimal symbols found.\n");
       return;
@@ -274,10 +274,10 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       fputs_filtered ("\n", outfile);
       index++;
     }
-  if (objfile->minimal_symbol_count != index)
+  if (objfile->per_bfd->minimal_symbol_count != index)
     {
       warning (_("internal error:  minimal symbol count %d != %d"),
-	       objfile->minimal_symbol_count, index);
+	       objfile->per_bfd->minimal_symbol_count, index);
     }
   fprintf_filtered (outfile, "\n");
 }
