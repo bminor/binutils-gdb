@@ -38,6 +38,7 @@ VPATH = @srcdir@:$(srccom)
 srcdir = @srcdir@
 srccom = $(srcdir)/../common
 srcroot = $(srcdir)/../..
+srcsim = $(srcdir)/..
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -301,7 +302,7 @@ stamp-tvals: gentmap
 	touch stamp-tvals
 
 version.c: Makefile $(srccom)/create-version.sh ../../bfd/version.h ../../gdb/version.in
-	$(SHELL) $(srccom)/create-version.sh $(srccom) version.c
+	$(SHELL) $(srccom)/create-version.sh $(srcsim) $(host_alias) $(target_alias) version.c
 
 #
 # Rules for building sim-* components.  Triggered by listing the corresponding

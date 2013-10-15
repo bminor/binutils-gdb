@@ -1,3 +1,10 @@
+2013-10-15  Hans-Peter Nilsson  <hp@axis.com>
+
+	* create-version.sh: Align parameters to match those of
+	../../gdb/common/create-version.sh.
+	* Make-common.in (srcsim): New variable.
+	(version.c): Adjust call to create-version.sh as per above.
+
 2013-09-23  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
