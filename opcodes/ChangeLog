@@ -1,3 +1,7 @@
+2013-10-15  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* arm-dis.c (neon_opcodes): Adjust print string for vshll.
+
 2013-10-14  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* micromips-opc.c (decode_micromips_operand): Add +T, +U, +V, +W,
