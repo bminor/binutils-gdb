@@ -111,9 +111,9 @@ print_objfile_statistics (void)
     if (OBJSTAT (objfile, n_stabs) > 0)
       printf_filtered (_("  Number of \"stab\" symbols read: %d\n"),
 		       OBJSTAT (objfile, n_stabs));
-    if (OBJSTAT (objfile, n_minsyms) > 0)
+    if (objfile->per_bfd->n_minsyms > 0)
       printf_filtered (_("  Number of \"minimal\" symbols read: %d\n"),
-		       OBJSTAT (objfile, n_minsyms));
+		       objfile->per_bfd->n_minsyms);
     if (OBJSTAT (objfile, n_psyms) > 0)
       printf_filtered (_("  Number of \"partial\" symbols read: %d\n"),
 		       OBJSTAT (objfile, n_psyms));

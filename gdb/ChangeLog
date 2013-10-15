@@ -1,5 +1,15 @@
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
+	* elfread.c (elf_read_minimal_symbols): Return early if
+	minimal symbols have already been read.  Add "ei" parameter.
+	(elf_symfile_read): Call elf_read_minimal_symbols earlier.
+	* minsyms.c (prim_record_minimal_symbol_full): Update.
+	* objfiles.h (struct objstats) <n_minsyms>: Move...
+	(struct objfile_per_bfd_storage) <n_minsyms>: ... here.
+	* symmisc.c (print_objfile_statistics): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
 	* elfread.c (elf_read_minimal_symbols): New function, from
 	elf_symfile_read.
 	(elf_symfile_read): Call it.

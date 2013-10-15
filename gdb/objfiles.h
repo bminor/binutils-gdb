@@ -151,7 +151,6 @@ struct obj_section
 
 struct objstats
   {
-    int n_minsyms;		/* Number of minimal symbols read */
     int n_psyms;		/* Number of partial symbols read */
     int n_syms;			/* Number of full symbols read */
     int n_stabs;		/* Number of ".stabs" read (if applicable) */
@@ -223,6 +222,12 @@ struct objfile_per_bfd_storage
 
   struct minimal_symbol *msymbols;
   int minimal_symbol_count;
+
+  /* The number of minimal symbols read, before any minimal symbol
+     de-duplication is applied.  Note in particular that this has only
+     a passing relationship with the actual size of the table above;
+     use minimal_symbol_count if you need the true size.  */
+  int n_minsyms;
 
   /* This is true if minimal symbols have already been read.  Symbol
      readers can use this to bypass minimal symbol reading.  Also, the

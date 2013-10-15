@@ -1084,7 +1084,8 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
    symbols.  */
 
 static void
-elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags)
+elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags,
+			  const struct elfinfo *ei)
 {
   bfd *synth_abfd, *abfd = objfile->obfd;
   struct cleanup *back_to;
@@ -1098,6 +1099,21 @@ elf_read_minimal_symbols (struct objfile *objfile, int symfile_flags)
       fprintf_unfiltered (gdb_stdlog,
 			  "Reading minimal symbols of objfile %s ...\n",
 			  objfile_name (objfile));
+    }
+
+  /* If we already have minsyms, then we can skip some work here.
+     However, if there were stabs or mdebug sections, we go ahead and
+     redo all the work anyway, because the psym readers for those
+     kinds of debuginfo need extra information found here.  This can
+     go away once all types of symbols are in the per-BFD object.  */
+  if (objfile->per_bfd->minsyms_read
+      && ei->stabsect == NULL
+      && ei->mdebugsect == NULL)
+    {
+      if (symtab_create_debug)
+	fprintf_unfiltered (gdb_stdlog,
+			    "... minimal symbols previously read\n");
+      return;
     }
 
   init_minimal_symbol_collection ();
@@ -1242,15 +1258,10 @@ elf_symfile_read (struct objfile *objfile, int symfile_flags)
   bfd *abfd = objfile->obfd;
   struct elfinfo ei;
 
-  elf_read_minimal_symbols (objfile, symfile_flags);
-
   memset ((char *) &ei, 0, sizeof (ei));
-
-  /* Now process debugging information, which is contained in
-     special ELF sections.  */
-
-  /* We first have to find them...  */
   bfd_map_over_sections (abfd, elf_locate_sections, (void *) & ei);
+
+  elf_read_minimal_symbols (objfile, symfile_flags, &ei);
 
   /* ELF debugging information is inserted into the psymtab in the
      order of least informative first - most informative last.  Since
