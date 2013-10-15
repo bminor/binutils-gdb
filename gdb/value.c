@@ -2750,15 +2750,15 @@ value_static_field (struct type *type, int fieldno)
 	{
 	  /* With some compilers, e.g. HP aCC, static data members are
 	     reported as non-debuggable symbols.  */
-	  struct minimal_symbol *msym = lookup_minimal_symbol (phys_name,
-							       NULL, NULL);
+	  struct bound_minimal_symbol msym
+	    = lookup_minimal_symbol (phys_name, NULL, NULL);
 
-	  if (!msym)
+	  if (!msym.minsym)
 	    return allocate_optimized_out_value (type);
 	  else
 	    {
 	      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
-				      MSYMBOL_VALUE_ADDRESS (msym));
+				      MSYMBOL_VALUE_ADDRESS (msym.minsym));
 	    }
 	}
       else

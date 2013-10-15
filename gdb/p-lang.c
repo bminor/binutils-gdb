@@ -59,23 +59,23 @@ static const char GPC_MAIN_PROGRAM_NAME_2[] = "pascal_main_program";
 const char *
 pascal_main_name (void)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol (GPC_P_INITIALIZE, NULL, NULL);
 
   /*  If '_p_initialize' was not found, the main program is likely not
      written in Pascal.  */
-  if (msym == NULL)
+  if (msym.minsym == NULL)
     return NULL;
 
   msym = lookup_minimal_symbol (GPC_MAIN_PROGRAM_NAME_1, NULL, NULL);
-  if (msym != NULL)
+  if (msym.minsym != NULL)
     {
       return GPC_MAIN_PROGRAM_NAME_1;
     }
 
   msym = lookup_minimal_symbol (GPC_MAIN_PROGRAM_NAME_2, NULL, NULL);
-  if (msym != NULL)
+  if (msym.minsym != NULL)
     {
       return GPC_MAIN_PROGRAM_NAME_2;
     }

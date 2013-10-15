@@ -455,9 +455,10 @@ inferior_call_waitpid (ptid_t pptid, int pid)
   old_cleanup = make_cleanup (inferior_call_waitpid_cleanup, oldfp);
 
   /* Get the waitpid_fn.  */
-  if (lookup_minimal_symbol ("waitpid", NULL, NULL) != NULL)
+  if (lookup_minimal_symbol ("waitpid", NULL, NULL).minsym != NULL)
     waitpid_fn = find_function_in_inferior ("waitpid", &waitpid_objf);
-  if (!waitpid_fn && lookup_minimal_symbol ("_waitpid", NULL, NULL) != NULL)
+  if (!waitpid_fn
+      && lookup_minimal_symbol ("_waitpid", NULL, NULL).minsym != NULL)
     waitpid_fn = find_function_in_inferior ("_waitpid", &waitpid_objf);
   if (!waitpid_fn)
     goto out;
@@ -668,10 +669,10 @@ checkpoint_command (char *args, int from_tty)
   
   /* Make the inferior fork, record its (and gdb's) state.  */
 
-  if (lookup_minimal_symbol ("fork", NULL, NULL) != NULL)
+  if (lookup_minimal_symbol ("fork", NULL, NULL).minsym != NULL)
     fork_fn = find_function_in_inferior ("fork", &fork_objf);
   if (!fork_fn)
-    if (lookup_minimal_symbol ("_fork", NULL, NULL) != NULL)
+    if (lookup_minimal_symbol ("_fork", NULL, NULL).minsym != NULL)
       fork_fn = find_function_in_inferior ("fork", &fork_objf);
   if (!fork_fn)
     error (_("checkpoint: can't find fork function in inferior."));

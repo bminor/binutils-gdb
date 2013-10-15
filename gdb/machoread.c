@@ -429,19 +429,19 @@ static CORE_ADDR
 macho_resolve_oso_sym_with_minsym (struct objfile *main_objfile, asymbol *sym)
 {
   /* For common symbol and global symbols, use the min symtab.  */
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   const char *name = sym->name;
 
   if (name[0] == bfd_get_symbol_leading_char (main_objfile->obfd))
     ++name;
   msym = lookup_minimal_symbol (name, NULL, main_objfile);
-  if (msym == NULL)
+  if (msym.minsym == NULL)
     {
       warning (_("can't find symbol '%s' in minsymtab"), name);
       return 0;
     }
   else
-    return MSYMBOL_VALUE_ADDRESS (msym);
+    return MSYMBOL_VALUE_ADDRESS (msym.minsym);
 }
 
 /* Add oso file OSO/ABFD as a symbol file.  */

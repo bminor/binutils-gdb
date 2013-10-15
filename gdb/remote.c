@@ -3670,7 +3670,7 @@ remote_check_symbols (void)
 {
   struct remote_state *rs = get_remote_state ();
   char *msg, *reply, *tmp;
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
   int end;
 
   /* The remote side has no concept of inferiors that aren't running
@@ -3705,12 +3705,12 @@ remote_check_symbols (void)
       end = hex2bin (tmp, (gdb_byte *) msg, strlen (tmp) / 2);
       msg[end] = '\0';
       sym = lookup_minimal_symbol (msg, NULL, NULL);
-      if (sym == NULL)
+      if (sym.minsym == NULL)
 	xsnprintf (msg, get_remote_packet_size (), "qSymbol::%s", &reply[8]);
       else
 	{
 	  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
-	  CORE_ADDR sym_addr = MSYMBOL_VALUE_ADDRESS (sym);
+	  CORE_ADDR sym_addr = MSYMBOL_VALUE_ADDRESS (sym.minsym);
 
 	  /* If this is a function address, return the start of code
 	     instead of any data function descriptor.  */

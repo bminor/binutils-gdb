@@ -164,17 +164,17 @@ unsigned int msymbol_hash_iw (const char *);
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
-   the search to that objfile.  If SFILE is non-NULL, the only file-scope
-   symbols considered will be from that source file (global symbols are
-   still preferred).  Returns a pointer to the minimal symbol that
-   matches, or NULL if no match is found.  */
+   the search to that objfile.  If SFILE is non-NULL, the only
+   file-scope symbols considered will be from that source file (global
+   symbols are still preferred).  Returns a bound minimal symbol that
+   matches, or an empty bound minimal symbol if no match is found.  */
 
-struct minimal_symbol *lookup_minimal_symbol (const char *,
-					      const char *,
-					      struct objfile *);
+struct bound_minimal_symbol lookup_minimal_symbol (const char *,
+						   const char *,
+						   struct objfile *);
 
-/* Like lookup_minimal_symbol, but searches all files and objfiles
-   and returns a bound minimal symbol.  */
+/* Like lookup_minimal_symbol, but searches all files and
+   objfiles.  */
 
 struct bound_minimal_symbol lookup_bound_minimal_symbol (const char *);
 
@@ -185,13 +185,14 @@ struct bound_minimal_symbol lookup_minimal_symbol_and_objfile (const char *);
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and has text type.  If OBJF
-   is non-NULL, limit the search to that objfile.  Returns a pointer
-   to the minimal symbol that matches, or NULL if no match is found.
+   is non-NULL, limit the search to that objfile.  Returns a bound
+   minimal symbol that matches, or an "empty" bound minimal symbol
+   otherwise.
 
    This function only searches the mangled (linkage) names.  */
 
-struct minimal_symbol *lookup_minimal_symbol_text (const char *,
-						   struct objfile *);
+struct bound_minimal_symbol lookup_minimal_symbol_text (const char *,
+							struct objfile *);
 
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and is a solib trampoline.
@@ -201,7 +202,7 @@ struct minimal_symbol *lookup_minimal_symbol_text (const char *,
 
    This function only searches the mangled (linkage) names.  */
 
-struct minimal_symbol *lookup_minimal_symbol_solib_trampoline
+struct bound_minimal_symbol lookup_minimal_symbol_solib_trampoline
     (const char *,
      struct objfile *);
 

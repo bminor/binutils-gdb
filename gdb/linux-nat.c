@@ -5031,14 +5031,15 @@ Enables printf debugging output."),
 static int
 get_signo (const char *name)
 {
-  struct minimal_symbol *ms;
+  struct bound_minimal_symbol ms;
   int signo;
 
   ms = lookup_minimal_symbol (name, NULL, NULL);
-  if (ms == NULL)
+  if (ms.minsym == NULL)
     return 0;
 
-  if (target_read_memory (MSYMBOL_VALUE_ADDRESS (ms), (gdb_byte *) &signo,
+  if (target_read_memory (MSYMBOL_VALUE_ADDRESS (ms.minsym),
+			  (gdb_byte *) &signo,
 			  sizeof (signo)) != 0)
     return 0;
 

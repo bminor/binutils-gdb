@@ -9263,7 +9263,7 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
     {
       char *target_name;
       int target_len = namelen - 2;
-      struct minimal_symbol *minsym;
+      struct bound_minimal_symbol minsym;
       struct objfile *objfile;
       struct obj_section *sec;
 
@@ -9279,8 +9279,8 @@ arm_skip_stub (struct frame_info *frame, CORE_ADDR pc)
       sec = find_pc_section (pc);
       objfile = (sec == NULL) ? NULL : sec->objfile;
       minsym = lookup_minimal_symbol (target_name, NULL, objfile);
-      if (minsym != NULL)
-	return MSYMBOL_VALUE_ADDRESS (minsym);
+      if (minsym.minsym != NULL)
+	return MSYMBOL_VALUE_ADDRESS (minsym.minsym);
       else
 	return 0;
     }

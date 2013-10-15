@@ -787,7 +787,7 @@ scan_dyntag_auxv (int dyntag, CORE_ADDR *ptr)
 static CORE_ADDR
 elf_locate_base (void)
 {
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
   CORE_ADDR dyn_ptr;
 
   /* Look for DT_MIPS_RLD_MAP first.  MIPS executables use this
@@ -816,8 +816,8 @@ elf_locate_base (void)
   /* This may be a static executable.  Look for the symbol
      conventionally named _r_debug, as a last resort.  */
   msymbol = lookup_minimal_symbol ("_r_debug", NULL, symfile_objfile);
-  if (msymbol != NULL)
-    return MSYMBOL_VALUE_ADDRESS (msymbol);
+  if (msymbol.minsym != NULL)
+    return MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
 
   /* DT_DEBUG entry not found.  */
   return 0;
@@ -2091,7 +2091,7 @@ cmp_name_and_sec_flags (asymbol *sym, void *data)
 static int
 enable_break (struct svr4_info *info, int from_tty)
 {
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
   const char * const *bkpt_namep;
   asection *interp_sect;
   char *interp_name;
@@ -2348,9 +2348,10 @@ enable_break (struct svr4_info *info, int from_tty)
   for (bkpt_namep = solib_break_names; *bkpt_namep != NULL; bkpt_namep++)
     {
       msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
-      if ((msymbol != NULL) && (MSYMBOL_VALUE_ADDRESS (msymbol) != 0))
+      if ((msymbol.minsym != NULL)
+	  && (MSYMBOL_VALUE_ADDRESS (msymbol.minsym) != 0))
 	{
-	  sym_addr = MSYMBOL_VALUE_ADDRESS (msymbol);
+	  sym_addr = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
 	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							 sym_addr,
 							 &current_target);
@@ -2364,9 +2365,10 @@ enable_break (struct svr4_info *info, int from_tty)
       for (bkpt_namep = bkpt_names; *bkpt_namep != NULL; bkpt_namep++)
 	{
 	  msymbol = lookup_minimal_symbol (*bkpt_namep, NULL, symfile_objfile);
-	  if ((msymbol != NULL) && (MSYMBOL_VALUE_ADDRESS (msymbol) != 0))
+	  if ((msymbol.minsym != NULL)
+	      && (MSYMBOL_VALUE_ADDRESS (msymbol.minsym) != 0))
 	    {
-	      sym_addr = MSYMBOL_VALUE_ADDRESS (msymbol);
+	      sym_addr = MSYMBOL_VALUE_ADDRESS (msymbol.minsym);
 	      sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (),
 							     sym_addr,
 							     &current_target);

@@ -286,7 +286,7 @@ pid_to_prc (ptid_t *ptidp)
 static int
 pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 {
-  struct minimal_symbol *ms;
+  struct bound_minimal_symbol ms;
   int i;
   char *name;
 
@@ -306,13 +306,14 @@ pdc_symbol_addrs (pthdb_user_t user, pthdb_symbol_t *symbols, int count)
 	symbols[i].addr = 0;
       else
 	{
-	  if (!(ms = lookup_minimal_symbol (name, NULL, NULL)))
+	  ms = lookup_minimal_symbol (name, NULL, NULL);
+	  if (ms.minsym == NULL)
 	    {
 	      if (debug_aix_thread)
 		fprintf_unfiltered (gdb_stdlog, " returning PDC_FAILURE\n");
 	      return PDC_FAILURE;
 	    }
-	  symbols[i].addr = MSYMBOL_VALUE_ADDRESS (ms);
+	  symbols[i].addr = MSYMBOL_VALUE_ADDRESS (ms.minsym);
 	}
       if (debug_aix_thread)
 	fprintf_unfiltered (gdb_stdlog, "  symbols[%d].addr = %s\n",
@@ -890,7 +891,7 @@ pd_enable (void)
 {
   int status;
   char *stub_name;
-  struct minimal_symbol *ms;
+  struct bound_minimal_symbol ms;
 
   /* Don't initialize twice.  */
   if (pd_able)
@@ -908,9 +909,10 @@ pd_enable (void)
     return;
 
   /* Set a breakpoint on the returned stub function.  */
-  if (!(ms = lookup_minimal_symbol (stub_name, NULL, NULL)))
+  ms = lookup_minimal_symbol (stub_name, NULL, NULL);
+  if (ms.minsym == NULL)
     return;
-  pd_brk_addr = MSYMBOL_VALUE_ADDRESS (ms);
+  pd_brk_addr = MSYMBOL_VALUE_ADDRESS (ms.minsym);
   if (!create_thread_event_breakpoint (target_gdbarch (), pd_brk_addr))
     return;
 

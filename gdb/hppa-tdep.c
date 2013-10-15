@@ -162,11 +162,11 @@ hppa_extract_17 (unsigned word)
 CORE_ADDR 
 hppa_symbol_address(const char *sym)
 {
-  struct minimal_symbol *minsym;
+  struct bound_minimal_symbol minsym;
 
   minsym = lookup_minimal_symbol (sym, NULL, NULL);
-  if (minsym)
-    return MSYMBOL_VALUE_ADDRESS (minsym);
+  if (minsym.minsym)
+    return MSYMBOL_VALUE_ADDRESS (minsym.minsym);
   else
     return (CORE_ADDR)-1;
 }
@@ -2463,12 +2463,13 @@ hppa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 /* Return the minimal symbol whose name is NAME and stub type is STUB_TYPE.
    Return NULL if no such symbol was found.  */
 
-struct minimal_symbol *
+struct bound_minimal_symbol
 hppa_lookup_stub_minimal_symbol (const char *name,
                                  enum unwind_stub_types stub_type)
 {
   struct objfile *objfile;
   struct minimal_symbol *msym;
+  struct bound_minimal_symbol result = { NULL, NULL };
 
   ALL_MSYMBOLS (objfile, msym)
     {
@@ -2478,11 +2479,15 @@ hppa_lookup_stub_minimal_symbol (const char *name,
 
           u = find_unwind_entry (MSYMBOL_VALUE (msym));
           if (u != NULL && u->stub_unwind.stub_type == stub_type)
-            return msym;
+	    {
+	      result.objfile = objfile;
+	      result.minsym = msym;
+	      return result;
+	    }
         }
     }
 
-  return NULL;
+  return result;
 }
 
 static void

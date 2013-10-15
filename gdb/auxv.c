@@ -85,7 +85,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
 		 ULONGEST offset,
 		 ULONGEST len, ULONGEST *xfered_len)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   CORE_ADDR data_address, pointer_address;
   struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   size_t ptr_size = TYPE_LENGTH (ptr_type);
@@ -95,17 +95,17 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
   size_t block;
 
   msym = lookup_minimal_symbol ("_dl_auxv", NULL, NULL);
-  if (msym == NULL)
+  if (msym.minsym == NULL)
     return TARGET_XFER_E_IO;
 
-  if (MSYMBOL_SIZE (msym) != ptr_size)
+  if (MSYMBOL_SIZE (msym.minsym) != ptr_size)
     return TARGET_XFER_E_IO;
 
   /* POINTER_ADDRESS is a location where the `_dl_auxv' variable
      resides.  DATA_ADDRESS is the inferior value present in
      `_dl_auxv', therefore the real inferior AUXV address.  */
 
-  pointer_address = MSYMBOL_VALUE_ADDRESS (msym);
+  pointer_address = MSYMBOL_VALUE_ADDRESS (msym.minsym);
 
   /* The location of the _dl_auxv symbol may no longer be correct if
      ld.so runs at a different address than the one present in the

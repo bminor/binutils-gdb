@@ -460,7 +460,7 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  (curr_inst == 0xeaa0d002))
 	{
 	  struct bound_minimal_symbol stubsym;
-	  struct minimal_symbol *libsym;
+	  struct bound_minimal_symbol libsym;
 
 	  stubsym = lookup_minimal_symbol_by_pc (loc);
 	  if (stubsym.minsym == NULL)
@@ -471,14 +471,14 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
 	  libsym = lookup_minimal_symbol (MSYMBOL_LINKAGE_NAME (stubsym.minsym),
 					  NULL, NULL);
-	  if (libsym == NULL)
+	  if (libsym.minsym == NULL)
 	    {
 	      warning (_("Unable to find library symbol for %s."),
 		       MSYMBOL_PRINT_NAME (stubsym.minsym));
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
-	  return MSYMBOL_VALUE (libsym);
+	  return MSYMBOL_VALUE (libsym.minsym);
 	}
 
       /* Does it look like bl X,%rp or bl X,%r0?  Another way to do a
@@ -1014,7 +1014,7 @@ hppa_hpux_find_import_stub_for_addr (CORE_ADDR funcaddr)
 {
   struct objfile *objfile;
   struct bound_minimal_symbol funsym;
-  struct minimal_symbol *stubsym;
+  struct bound_minimal_symbol stubsym;
   CORE_ADDR stubaddr;
 
   funsym = lookup_minimal_symbol_by_pc (funcaddr);
@@ -1025,17 +1025,17 @@ hppa_hpux_find_import_stub_for_addr (CORE_ADDR funcaddr)
       stubsym = lookup_minimal_symbol_solib_trampoline
 	(MSYMBOL_LINKAGE_NAME (funsym.minsym), objfile);
 
-      if (stubsym)
+      if (stubsym.minsym)
 	{
 	  struct unwind_table_entry *u;
 
-	  u = find_unwind_entry (MSYMBOL_VALUE (stubsym));
+	  u = find_unwind_entry (MSYMBOL_VALUE (stubsym.minsym));
 	  if (u == NULL 
 	      || (u->stub_unwind.stub_type != IMPORT
 		  && u->stub_unwind.stub_type != IMPORT_SHLIB))
 	    continue;
 
-          stubaddr = MSYMBOL_VALUE (stubsym);
+          stubaddr = MSYMBOL_VALUE (stubsym.minsym);
 
 	  /* If we found an IMPORT stub, then we can stop searching;
 	     if we found an IMPORT_SHLIB, we want to continue the search

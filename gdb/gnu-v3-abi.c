@@ -1122,16 +1122,17 @@ gnuv3_get_typeid (struct value *value)
   else
     {
       char *sym_name;
-      struct minimal_symbol *minsym;
+      struct bound_minimal_symbol minsym;
 
       sym_name = concat ("typeinfo for ", typename, (char *) NULL);
       make_cleanup (xfree, sym_name);
       minsym = lookup_minimal_symbol (sym_name, NULL, NULL);
 
-      if (minsym == NULL)
+      if (minsym.minsym == NULL)
 	error (_("could not find typeinfo symbol for '%s'"), typename);
 
-      result = value_at_lazy (typeinfo_type, MSYMBOL_VALUE_ADDRESS (minsym));
+      result = value_at_lazy (typeinfo_type,
+			      MSYMBOL_VALUE_ADDRESS (minsym.minsym));
     }
 
   do_cleanups (cleanup);
@@ -1209,7 +1210,7 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
 {
   CORE_ADDR real_stop_pc, method_stop_pc, func_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
-  struct minimal_symbol *thunk_sym, *fn_sym;
+  struct bound_minimal_symbol thunk_sym, fn_sym;
   struct obj_section *section;
   const char *thunk_name, *fn_name;
   
@@ -1218,24 +1219,24 @@ gnuv3_skip_trampoline (struct frame_info *frame, CORE_ADDR stop_pc)
     real_stop_pc = stop_pc;
 
   /* Find the linker symbol for this potential thunk.  */
-  thunk_sym = lookup_minimal_symbol_by_pc (real_stop_pc).minsym;
+  thunk_sym = lookup_minimal_symbol_by_pc (real_stop_pc);
   section = find_pc_section (real_stop_pc);
-  if (thunk_sym == NULL || section == NULL)
+  if (thunk_sym.minsym == NULL || section == NULL)
     return 0;
 
   /* The symbol's demangled name should be something like "virtual
      thunk to FUNCTION", where FUNCTION is the name of the function
      being thunked to.  */
-  thunk_name = MSYMBOL_DEMANGLED_NAME (thunk_sym);
+  thunk_name = MSYMBOL_DEMANGLED_NAME (thunk_sym.minsym);
   if (thunk_name == NULL || strstr (thunk_name, " thunk to ") == NULL)
     return 0;
 
   fn_name = strstr (thunk_name, " thunk to ") + strlen (" thunk to ");
   fn_sym = lookup_minimal_symbol (fn_name, NULL, section->objfile);
-  if (fn_sym == NULL)
+  if (fn_sym.minsym == NULL)
     return 0;
 
-  method_stop_pc = MSYMBOL_VALUE_ADDRESS (fn_sym);
+  method_stop_pc = MSYMBOL_VALUE_ADDRESS (fn_sym.minsym);
 
   /* Some targets have minimal symbols pointing to function descriptors
      (powerpc 64 for example).  Make sure to retrieve the address

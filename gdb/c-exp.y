@@ -2935,7 +2935,7 @@ classify_name (const struct block *block, int is_quoted_name)
   if (sym == NULL
       && parse_language->la_language == language_cplus
       && is_a_field_of_this.type == NULL
-      && !lookup_minimal_symbol (copy, NULL, NULL))
+      && lookup_minimal_symbol (copy, NULL, NULL).minsym == NULL)
     return UNKNOWN_CPP_NAME;
 
   return NAME;

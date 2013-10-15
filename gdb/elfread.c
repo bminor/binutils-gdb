@@ -884,20 +884,20 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       CORE_ADDR pointer_address, addr;
       asection *plt;
       gdb_byte *buf = alloca (ptr_size);
-      struct minimal_symbol *msym;
+      struct bound_minimal_symbol msym;
 
       msym = lookup_minimal_symbol (name_got_plt, NULL, objfile);
-      if (msym == NULL)
+      if (msym.minsym == NULL)
 	continue;
-      if (MSYMBOL_TYPE (msym) != mst_slot_got_plt)
+      if (MSYMBOL_TYPE (msym.minsym) != mst_slot_got_plt)
 	continue;
-      pointer_address = MSYMBOL_VALUE_ADDRESS (msym);
+      pointer_address = MSYMBOL_VALUE_ADDRESS (msym.minsym);
 
       plt = bfd_get_section_by_name (obfd, ".plt");
       if (plt == NULL)
 	continue;
 
-      if (MSYMBOL_SIZE (msym) != ptr_size)
+      if (MSYMBOL_SIZE (msym.minsym) != ptr_size)
 	continue;
       if (target_read_memory (pointer_address, buf, ptr_size) != 0)
 	continue;

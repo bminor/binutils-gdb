@@ -120,9 +120,9 @@ lookup_objc_class (struct gdbarch *gdbarch, char *classname)
       return 0;
     }
 
-  if (lookup_minimal_symbol("objc_lookUpClass", 0, 0))
+  if (lookup_minimal_symbol("objc_lookUpClass", 0, 0).minsym)
     function = find_function_in_inferior("objc_lookUpClass", NULL);
-  else if (lookup_minimal_symbol ("objc_lookup_class", 0, 0))
+  else if (lookup_minimal_symbol ("objc_lookup_class", 0, 0).minsym)
     function = find_function_in_inferior("objc_lookup_class", NULL);
   else
     {
@@ -149,9 +149,9 @@ lookup_child_selector (struct gdbarch *gdbarch, char *selname)
       return 0;
     }
 
-  if (lookup_minimal_symbol("sel_getUid", 0, 0))
+  if (lookup_minimal_symbol("sel_getUid", 0, 0).minsym)
     function = find_function_in_inferior("sel_getUid", NULL);
-  else if (lookup_minimal_symbol ("sel_get_any_uid", 0, 0))
+  else if (lookup_minimal_symbol ("sel_get_any_uid", 0, 0).minsym)
     function = find_function_in_inferior("sel_get_any_uid", NULL);
   else
     {
@@ -181,17 +181,17 @@ value_nsstring (struct gdbarch *gdbarch, char *ptr, int len)
   stringValue[2] = value_string(ptr, len, char_type);
   stringValue[2] = value_coerce_array(stringValue[2]);
   /* _NSNewStringFromCString replaces "istr" after Lantern2A.  */
-  if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0))
+  if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0).minsym)
     {
       function = find_function_in_inferior("_NSNewStringFromCString", NULL);
       nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
     }
-  else if (lookup_minimal_symbol("istr", 0, 0))
+  else if (lookup_minimal_symbol("istr", 0, 0).minsym)
     {
       function = find_function_in_inferior("istr", NULL);
       nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
     }
-  else if (lookup_minimal_symbol("+[NSString stringWithCString:]", 0, 0))
+  else if (lookup_minimal_symbol("+[NSString stringWithCString:]", 0, 0).minsym)
     {
       function
 	= find_function_in_inferior("+[NSString stringWithCString:]", NULL);
@@ -1152,11 +1152,12 @@ find_imps (const char *method, VEC (const_char_ptr) **symbol_names)
 		       SYMBOL_NATURAL_NAME (sym));
       else
 	{
-	  struct minimal_symbol *msym = lookup_minimal_symbol (selector, 0, 0);
+	  struct bound_minimal_symbol msym
+	    = lookup_minimal_symbol (selector, 0, 0);
 
-	  if (msym != NULL) 
+	  if (msym.minsym != NULL) 
 	    VEC_safe_push (const_char_ptr, *symbol_names,
-			   MSYMBOL_NATURAL_NAME (msym));
+			   MSYMBOL_NATURAL_NAME (msym.minsym));
 	}
     }
 

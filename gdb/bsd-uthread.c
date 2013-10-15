@@ -125,11 +125,11 @@ static int bsd_uthread_active;
 static CORE_ADDR
 bsd_uthread_lookup_address (const char *name, struct objfile *objfile)
 {
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
 
   sym = lookup_minimal_symbol (name, NULL, objfile);
-  if (sym)
-    return MSYMBOL_VALUE_ADDRESS (sym);
+  if (sym.minsym)
+    return MSYMBOL_VALUE_ADDRESS (sym.minsym);
 
   return 0;
 }

@@ -1,5 +1,99 @@
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
+	* ada-lang.c (ada_update_initial_language): Update.
+	(ada_main_name, ada_has_this_exception_support): Update.
+	* ada-tasks.c (ada_tasks_inferior_data_sniffer): Update.
+	* aix-thread.c (pdc_symbol_addrs, pd_enable): Update.
+	* arm-tdep.c (arm_skip_stub): Update.
+	* auxv.c (ld_so_xfer_auxv): Update.
+	* avr-tdep.c (avr_scan_prologue): Update.
+	* ax-gdb.c (gen_var_ref): Update.
+	* breakpoint.c (struct breakpoint_objfile_data)
+	<overlay_msym, longjmp_msym, terminate_msym, exception_msym>: Change
+	type to bound_minimal_symbol.
+	(create_overlay_event_breakpoint)
+	(create_longjmp_master_breakpoint)
+	(create_std_terminate_master_breakpoint)
+	(create_exception_master_breakpoint): Update.
+	* bsd-uthread.c (bsd_uthread_lookup_address): Update.
+	* c-exp.y (classify_name): Update.
+	* coffread.c (coff_symfile_read): Update.
+	* common/agent.c (agent_look_up_symbols): Update.
+	* d-lang.c (d_main_name): Update.
+	* dbxread.c (find_stab_function_addr, end_psymtab): Update.
+	* dec-thread.c (enable_dec_thread): Update.
+	* dwarf2loc.c (call_site_to_target_addr): Update.
+	* elfread.c (elf_gnu_ifunc_resolve_by_got): Update.
+	* eval.c (evaluate_subexp_standard): Update.
+	* findvar.c (struct minsym_lookup_data) <result>: Change type
+	to bound_minimal_symbol.
+	<objfile>: Remove.
+	(minsym_lookup_iterator_cb, default_read_var_value): Update.
+	* frame.c (inside_main_func): Update.
+	* frv-tdep.c (frv_frame_this_id): Update.
+	* gcore.c (call_target_sbrk): Update.
+	* glibc-tdep.c (glibc_skip_solib_resolver): Update.
+	* gnu-v3-abi.c (gnuv3_get_typeid, gnuv3_skip_trampoline):
+	Update.
+	* go-lang.c (go_main_name): Update.
+	* hppa-hpux-tdep.c (hppa_hpux_skip_trampoline_code)
+	(hppa_hpux_find_import_stub_for_addr): Update.
+	* hppa-tdep.c (hppa_extract_17,	hppa_lookup_stub_minimal_symbol):
+	Update.  Change return type.
+	* hppa-tdep.h (hppa_lookup_stub_minimal_symbol): Change return
+	type.
+	* jit.c (jit_breakpoint_re_set_internal): Update.
+	* linux-fork.c (inferior_call_waitpid, checkpoint_command):
+	Update.
+	* linux-nat.c (get_signo): Update.
+	* linux-thread-db.c (inferior_has_bug): Update
+	* m32c-tdep.c (m32c_return_value)
+	(m32c_m16c_address_to_pointer): Update.
+	* m32r-tdep.c (m32r_frame_this_id): Update.
+	* m68hc11-tdep.c (m68hc11_get_register_info): Update.
+	* machoread.c (macho_resolve_oso_sym_with_minsym): Update.
+	* minsyms.c (lookup_minimal_symbol_internal): Rename to
+	lookup_minimal_symbol.  Change return type.
+	(lookup_minimal_symbol): Remove.
+	(lookup_bound_minimal_symbol): Update.
+	(lookup_minimal_symbol_text): Change return type.
+	(lookup_minimal_symbol_solib_trampoline): Change return type.
+	* minsyms.h (lookup_minimal_symbol, lookup_minimal_symbol_text)
+	(lookup_minimal_symbol_solib_trampoline): Change return type.
+	* mips-linux-tdep.c (mips_linux_skip_resolver): Update.
+	* objc-lang.c (lookup_objc_class, lookup_child_selector)
+	(value_nsstring, find_imps): Update.
+	* obsd-tdep.c (obsd_skip_solib_resolver): Update.
+	* p-lang.c (pascal_main_name): Update.
+	* ppc-linux-tdep.c (ppc_linux_spe_context_lookup): Update.
+	* ppc-sysv-tdep.c (convert_code_addr_to_desc_addr): Update.
+	* proc-service.c (ps_pglobal_lookup): Update.
+	* ravenscar-thread.c (get_running_thread_msymbol): Change
+	return type.
+	(has_ravenscar_runtime, get_running_thread_id): Update.
+	* remote.c (remote_check_symbols): Update.
+	* sol-thread.c (ps_pglobal_lookup): Update.
+	* sol2-tdep.c (sol2_skip_solib_resolver): Update.
+	* solib-dsbt.c (lm_base): Update.
+	* solib-frv.c (lm_base, frv_relocate_section_addresses):
+	Update.
+	* solib-irix.c (locate_base): Update.
+	* solib-som.c (som_solib_create_inferior_hook)
+	(som_solib_desire_dynamic_linker_symbols, link_map_start):
+	Update.
+	* solib-spu.c (spu_enable_break): Update.
+	* solib-svr4.c (elf_locate_base, enable_break): Update.
+	* spu-tdep.c (spu_get_overlay_table, spu_catch_start)
+	(flush_ea_cache): Update.
+	* stabsread.c (define_symbol): Update.
+	* symfile.c (simple_read_overlay_table): Update.
+	* symtab.c (find_pc_sect_line): Update.
+	* tracepoint.c (scope_info): Update.
+	* tui-disasm.c (tui_get_begin_asm_address): Update.
+	* value.c (value_static_field): Update.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
 	* minsyms.c (prim_record_minimal_symbol_full): Use
 	SET_MSYMBOL_VALUE_ADDRESS.
 	* objfiles.c (objfile_relocate1): Use SET_MSYMBOL_VALUE_ADDRESS.

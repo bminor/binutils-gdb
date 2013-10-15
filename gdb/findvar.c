@@ -390,10 +390,7 @@ struct minsym_lookup_data
   /* The field where the callback should store the minimal symbol
      if found.  It should be initialized to NULL before the search
      is started.  */
-  struct minimal_symbol *result;
-
-  /* The objfile in which the symbol was found.  */
-  struct objfile *objfile;
+  struct bound_minimal_symbol result;
 };
 
 /* A callback function for gdbarch_iterate_over_objfiles_in_search_order.
@@ -406,13 +403,12 @@ minsym_lookup_iterator_cb (struct objfile *objfile, void *cb_data)
 {
   struct minsym_lookup_data *data = (struct minsym_lookup_data *) cb_data;
 
-  gdb_assert (data->result == NULL);
+  gdb_assert (data->result.minsym == NULL);
 
   data->result = lookup_minimal_symbol (data->name, NULL, objfile);
-  data->objfile = objfile;
 
   /* The iterator should stop iff a match was found.  */
-  return (data->result != NULL);
+  return (data->result.minsym != NULL);
 }
 
 /* A default implementation for the "la_read_var_value" hook in
@@ -572,18 +568,18 @@ default_read_var_value (struct symbol *var, struct frame_info *frame)
 	  (get_objfile_arch (SYMBOL_SYMTAB (var)->objfile),
 	   minsym_lookup_iterator_cb, &lookup_data,
 	   SYMBOL_SYMTAB (var)->objfile);
-	msym = lookup_data.result;
+	msym = lookup_data.result.minsym;
 
 	if (msym == NULL)
 	  error (_("No global symbol \"%s\"."), SYMBOL_LINKAGE_NAME (var));
 	if (overlay_debugging)
 	  addr = symbol_overlayed_address (MSYMBOL_VALUE_ADDRESS (msym),
-					   MSYMBOL_OBJ_SECTION (lookup_data.objfile,
+					   MSYMBOL_OBJ_SECTION (lookup_data.result.objfile,
 								msym));
 	else
 	  addr = MSYMBOL_VALUE_ADDRESS (msym);
 
-	obj_section = MSYMBOL_OBJ_SECTION (lookup_data.objfile, msym);
+	obj_section = MSYMBOL_OBJ_SECTION (lookup_data.result.objfile, msym);
 	if (obj_section
 	    && (obj_section->the_bfd_section->flags & SEC_THREAD_LOCAL) != 0)
 	  addr = target_translate_tls_address (obj_section->objfile, addr);

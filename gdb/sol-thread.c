@@ -762,13 +762,13 @@ ps_err_e
 ps_pglobal_lookup (gdb_ps_prochandle_t ph, const char *ld_object_name,
 		   const char *ld_symbol_name, gdb_ps_addr_t *ld_symbol_addr)
 {
-  struct minimal_symbol *ms;
+  struct bound_minimal_symbol ms;
 
   ms = lookup_minimal_symbol (ld_symbol_name, NULL, NULL);
-  if (!ms)
+  if (!ms.minsym)
     return PS_NOSYM;
 
-  *ld_symbol_addr = SYMBOL_VALUE_ADDRESS (ms);
+  *ld_symbol_addr = SYMBOL_VALUE_ADDRESS (ms.minsym);
   return PS_OK;
 }
 

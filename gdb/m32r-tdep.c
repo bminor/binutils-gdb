@@ -836,7 +836,7 @@ m32r_frame_this_id (struct frame_info *this_frame,
     = m32r_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR base;
   CORE_ADDR func;
-  struct minimal_symbol *msym_stack;
+  struct bound_minimal_symbol msym_stack;
   struct frame_id id;
 
   /* The FUNC is easy.  */
@@ -844,7 +844,8 @@ m32r_frame_this_id (struct frame_info *this_frame,
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);
-  if (msym_stack && info->base == MSYMBOL_VALUE_ADDRESS (msym_stack))
+  if (msym_stack.minsym
+      && info->base == MSYMBOL_VALUE_ADDRESS (msym_stack.minsym))
     return;
 
   /* Hopefully the prologue analysis either correctly determined the

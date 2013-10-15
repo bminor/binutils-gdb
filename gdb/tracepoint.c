@@ -2701,7 +2701,7 @@ scope_info (char *args, int from_tty)
 {
   struct symtabs_and_lines sals;
   struct symbol *sym;
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   struct block *block;
   const char *symname;
   char *save_args = args;
@@ -2824,14 +2824,14 @@ scope_info (char *args, int from_tty)
 		case LOC_UNRESOLVED:
 		  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym),
 						NULL, NULL);
-		  if (msym == NULL)
+		  if (msym.minsym == NULL)
 		    printf_filtered ("Unresolved Static");
 		  else
 		    {
 		      printf_filtered ("static storage at address ");
 		      printf_filtered ("%s",
 				       paddress (gdbarch,
-						 MSYMBOL_VALUE_ADDRESS (msym)));
+						 MSYMBOL_VALUE_ADDRESS (msym.minsym)));
 		    }
 		  break;
 		case LOC_OPTIMIZED_OUT:

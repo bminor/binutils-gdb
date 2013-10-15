@@ -1011,7 +1011,7 @@ static CORE_ADDR spe_context_cache_address;
 static void
 ppc_linux_spe_context_lookup (struct objfile *objfile)
 {
-  struct minimal_symbol *sym;
+  struct bound_minimal_symbol sym;
 
   if (!objfile)
     {
@@ -1024,11 +1024,11 @@ ppc_linux_spe_context_lookup (struct objfile *objfile)
     }
 
   sym = lookup_minimal_symbol ("__spe_current_active_context", NULL, objfile);
-  if (sym)
+  if (sym.minsym)
     {
       spe_context_objfile = objfile;
       spe_context_lm_addr = svr4_fetch_objfile_link_map (objfile);
-      spe_context_offset = MSYMBOL_VALUE_ADDRESS (sym);
+      spe_context_offset = MSYMBOL_VALUE_ADDRESS (sym.minsym);
       spe_context_cache_ptid = minus_one_ptid;
       spe_context_cache_address = 0;
       return;

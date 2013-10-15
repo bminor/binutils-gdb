@@ -3532,7 +3532,7 @@ read_target_long_array (CORE_ADDR memaddr, unsigned int *myaddr,
 static int
 simple_read_overlay_table (void)
 {
-  struct minimal_symbol *novlys_msym;
+  struct bound_minimal_symbol novlys_msym;
   struct bound_minimal_symbol ovly_table_msym;
   struct gdbarch *gdbarch;
   int word_size;
@@ -3540,7 +3540,7 @@ simple_read_overlay_table (void)
 
   simple_free_overlay_table ();
   novlys_msym = lookup_minimal_symbol ("_novlys", NULL, NULL);
-  if (! novlys_msym)
+  if (! novlys_msym.minsym)
     {
       error (_("Error reading inferior's overlay table: "
              "couldn't find `_novlys' variable\n"
@@ -3561,8 +3561,9 @@ simple_read_overlay_table (void)
   word_size = gdbarch_long_bit (gdbarch) / TARGET_CHAR_BIT;
   byte_order = gdbarch_byte_order (gdbarch);
 
-  cache_novlys = read_memory_integer (MSYMBOL_VALUE_ADDRESS (novlys_msym),
-				      4, byte_order);
+  cache_novlys
+    = read_memory_integer (MSYMBOL_VALUE_ADDRESS (novlys_msym.minsym),
+			   4, byte_order);
   cache_ovly_table
     = (void *) xmalloc (cache_novlys * sizeof (*cache_ovly_table));
   cache_ovly_table_base = MSYMBOL_VALUE_ADDRESS (ovly_table_msym.minsym);
@@ -3633,15 +3634,15 @@ simple_overlay_update (struct obj_section *osect)
       {
 	/* Does its cached location match what's currently in the
 	   symtab?  */
-	struct minimal_symbol *minsym
+	struct bound_minimal_symbol minsym
 	  = lookup_minimal_symbol ("_ovly_table", NULL, NULL);
 
-	if (minsym == NULL)
+	if (minsym.minsym == NULL)
 	  error (_("Error reading inferior's overlay table: couldn't "
 		   "find `_ovly_table' array\n"
 		   "in inferior.  Use `overlay manual' mode."));
 	
-	if (cache_ovly_table_base == MSYMBOL_VALUE_ADDRESS (minsym))
+	if (cache_ovly_table_base == MSYMBOL_VALUE_ADDRESS (minsym.minsym))
 	  /* Then go ahead and try to look up this single section in
 	     the cache.  */
 	  if (simple_overlay_update_1 (osect))

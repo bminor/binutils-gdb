@@ -1133,7 +1133,7 @@ static CORE_ADDR
 find_stab_function_addr (char *namestring, const char *filename,
 			 struct objfile *objfile)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   char *p;
   int n;
 
@@ -1146,7 +1146,7 @@ find_stab_function_addr (char *namestring, const char *filename,
   p[n] = 0;
 
   msym = lookup_minimal_symbol (p, filename, objfile);
-  if (msym == NULL)
+  if (msym.minsym == NULL)
     {
       /* Sun Fortran appends an underscore to the minimal symbol name,
          try again with an appended underscore if the minimal symbol
@@ -1156,13 +1156,13 @@ find_stab_function_addr (char *namestring, const char *filename,
       msym = lookup_minimal_symbol (p, filename, objfile);
     }
 
-  if (msym == NULL && filename != NULL)
+  if (msym.minsym == NULL && filename != NULL)
     {
       /* Try again without the filename.  */
       p[n] = 0;
       msym = lookup_minimal_symbol (p, NULL, objfile);
     }
-  if (msym == NULL && filename != NULL)
+  if (msym.minsym == NULL && filename != NULL)
     {
       /* And try again for Sun Fortran, but without the filename.  */
       p[n] = '_';
@@ -1170,7 +1170,7 @@ find_stab_function_addr (char *namestring, const char *filename,
       msym = lookup_minimal_symbol (p, NULL, objfile);
     }
 
-  return msym == NULL ? 0 : MSYMBOL_VALUE_ADDRESS (msym);
+  return msym.minsym == NULL ? 0 : MSYMBOL_VALUE_ADDRESS (msym.minsym);
 }
 
 static void
@@ -2256,7 +2256,7 @@ end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
     {
       char *p;
       int n;
-      struct minimal_symbol *minsym;
+      struct bound_minimal_symbol minsym;
 
       p = strchr (last_function_name, ':');
       if (p == NULL)
@@ -2267,7 +2267,7 @@ end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
       p[n] = 0;
 
       minsym = lookup_minimal_symbol (p, pst->filename, objfile);
-      if (minsym == NULL)
+      if (minsym.minsym == NULL)
 	{
 	  /* Sun Fortran appends an underscore to the minimal symbol name,
 	     try again with an appended underscore if the minimal symbol
@@ -2277,8 +2277,9 @@ end_psymtab (struct objfile *objfile, struct partial_symtab *pst,
 	  minsym = lookup_minimal_symbol (p, pst->filename, objfile);
 	}
 
-      if (minsym)
-	pst->texthigh = MSYMBOL_VALUE_ADDRESS (minsym) + MSYMBOL_SIZE (minsym);
+      if (minsym.minsym)
+	pst->texthigh = (MSYMBOL_VALUE_ADDRESS (minsym.minsym)
+			 + MSYMBOL_SIZE (minsym.minsym));
 
       last_function_name = NULL;
     }

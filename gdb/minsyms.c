@@ -159,9 +159,9 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
    Obviously, there must be distinct mangled names for each of these,
    but the demangled names are all the same: S::S or S::~S.  */
 
-static struct bound_minimal_symbol
-lookup_minimal_symbol_internal (const char *name, const char *sfile,
-				struct objfile *objf)
+struct bound_minimal_symbol
+lookup_minimal_symbol (const char *name, const char *sfile,
+		       struct objfile *objf)
 {
   struct objfile *objfile;
   struct bound_minimal_symbol found_symbol = { NULL, NULL };
@@ -294,23 +294,10 @@ lookup_minimal_symbol_internal (const char *name, const char *sfile,
 
 /* See minsyms.h.  */
 
-struct minimal_symbol *
-lookup_minimal_symbol (const char *name, const char *sfile,
-		       struct objfile *objf)
-{
-  struct bound_minimal_symbol bms = lookup_minimal_symbol_internal (name,
-								    sfile,
-								    objf);
-
-  return bms.minsym;
-}
-
-/* See minsyms.h.  */
-
 struct bound_minimal_symbol
 lookup_bound_minimal_symbol (const char *name)
 {
-  return lookup_minimal_symbol_internal (name, NULL, NULL);
+  return lookup_minimal_symbol (name, NULL, NULL);
 }
 
 /* See minsyms.h.  */
@@ -349,25 +336,25 @@ iterate_over_minimal_symbols (struct objfile *objf, const char *name,
 
 /* See minsyms.h.  */
 
-struct minimal_symbol *
+struct bound_minimal_symbol
 lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
-  struct minimal_symbol *found_symbol = NULL;
-  struct minimal_symbol *found_file_symbol = NULL;
+  struct bound_minimal_symbol found_symbol = { NULL, NULL };
+  struct bound_minimal_symbol found_file_symbol = { NULL, NULL };
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
   for (objfile = object_files;
-       objfile != NULL && found_symbol == NULL;
+       objfile != NULL && found_symbol.minsym == NULL;
        objfile = objfile->next)
     {
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
 	{
 	  for (msymbol = objfile->msymbol_hash[hash];
-	       msymbol != NULL && found_symbol == NULL;
+	       msymbol != NULL && found_symbol.minsym == NULL;
 	       msymbol = msymbol->hash_next)
 	    {
 	      if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
@@ -378,10 +365,12 @@ lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 		  switch (MSYMBOL_TYPE (msymbol))
 		    {
 		    case mst_file_text:
-		      found_file_symbol = msymbol;
+		      found_file_symbol.minsym = msymbol;
+		      found_file_symbol.objfile = objfile;
 		      break;
 		    default:
-		      found_symbol = msymbol;
+		      found_symbol.minsym = msymbol;
+		      found_symbol.objfile = objfile;
 		      break;
 		    }
 		}
@@ -389,14 +378,11 @@ lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 	}
     }
   /* External symbols are best.  */
-  if (found_symbol)
+  if (found_symbol.minsym)
     return found_symbol;
 
   /* File-local symbols are next best.  */
-  if (found_file_symbol)
-    return found_file_symbol;
-
-  return NULL;
+  return found_file_symbol;
 }
 
 /* See minsyms.h.  */
@@ -433,35 +419,39 @@ lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
 
 /* See minsyms.h.  */
 
-struct minimal_symbol *
+struct bound_minimal_symbol
 lookup_minimal_symbol_solib_trampoline (const char *name,
 					struct objfile *objf)
 {
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
-  struct minimal_symbol *found_symbol = NULL;
+  struct bound_minimal_symbol found_symbol = { NULL, NULL };
 
   unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
 
   for (objfile = object_files;
-       objfile != NULL && found_symbol == NULL;
+       objfile != NULL;
        objfile = objfile->next)
     {
       if (objf == NULL || objf == objfile
 	  || objf == objfile->separate_debug_objfile_backlink)
 	{
 	  for (msymbol = objfile->msymbol_hash[hash];
-	       msymbol != NULL && found_symbol == NULL;
+	       msymbol != NULL;
 	       msymbol = msymbol->hash_next)
 	    {
 	      if (strcmp (MSYMBOL_LINKAGE_NAME (msymbol), name) == 0 &&
 		  MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
-		return msymbol;
+		{
+		  found_symbol.objfile = objfile;
+		  found_symbol.minsym = msymbol;
+		  return found_symbol;
+		}
 	    }
 	}
     }
 
-  return NULL;
+  return found_symbol;
 }
 
 /* Search through the minimal symbol table for each objfile and find

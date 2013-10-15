@@ -588,23 +588,24 @@ call_site_to_target_addr (struct gdbarch *call_site_gdbarch,
     case FIELD_LOC_KIND_PHYSNAME:
       {
 	const char *physname;
-	struct minimal_symbol *msym;
+	struct bound_minimal_symbol msym;
 
 	physname = FIELD_STATIC_PHYSNAME (call_site->target);
 
 	/* Handle both the mangled and demangled PHYSNAME.  */
 	msym = lookup_minimal_symbol (physname, NULL, NULL);
-	if (msym == NULL)
+	if (msym.minsym == NULL)
 	  {
-	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1).minsym;
+	    msym = lookup_minimal_symbol_by_pc (call_site->pc - 1);
 	    throw_error (NO_ENTRY_VALUE_ERROR,
 			 _("Cannot find function \"%s\" for a call site target "
 			   "at %s in %s"),
 			 physname, paddress (call_site_gdbarch, call_site->pc),
-			 msym == NULL ? "???" : MSYMBOL_PRINT_NAME (msym));
+			 (msym.minsym == NULL ? "???"
+			  : MSYMBOL_PRINT_NAME (msym.minsym)));
 			
 	  }
-	return MSYMBOL_VALUE_ADDRESS (msym);
+	return MSYMBOL_VALUE_ADDRESS (msym.minsym);
       }
 
     case FIELD_LOC_KIND_PHYSADDR:

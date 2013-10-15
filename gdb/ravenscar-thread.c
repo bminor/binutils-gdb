@@ -102,13 +102,13 @@ ravenscar_update_inferior_ptid (void)
    and return its associated minimal symbol.
    Return NULL if not found.  */
 
-static struct minimal_symbol *
+static struct bound_minimal_symbol
 get_running_thread_msymbol (void)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
 
   msym = lookup_minimal_symbol (running_thread_name, NULL, NULL);
-  if (!msym)
+  if (!msym.minsym)
     /* Older versions of the GNAT runtime were using a different
        (less ideal) name for the symbol where the active thread ID
        is stored.  If we couldn't find the symbol using the latest
@@ -124,17 +124,18 @@ get_running_thread_msymbol (void)
 static int
 has_ravenscar_runtime (void)
 {
-  struct minimal_symbol *msym_ravenscar_runtime_initializer =
+  struct bound_minimal_symbol msym_ravenscar_runtime_initializer =
     lookup_minimal_symbol (ravenscar_runtime_initializer, NULL, NULL);
-  struct minimal_symbol *msym_known_tasks =
+  struct bound_minimal_symbol msym_known_tasks =
     lookup_minimal_symbol (known_tasks_name, NULL, NULL);
-  struct minimal_symbol *msym_first_task =
+  struct bound_minimal_symbol msym_first_task =
     lookup_minimal_symbol (first_task_name, NULL, NULL);
-  struct minimal_symbol *msym_running_thread = get_running_thread_msymbol ();
+  struct bound_minimal_symbol msym_running_thread
+    = get_running_thread_msymbol ();
 
-  return (msym_ravenscar_runtime_initializer
-	  && (msym_known_tasks || msym_first_task)
-	  && msym_running_thread);
+  return (msym_ravenscar_runtime_initializer.minsym
+	  && (msym_known_tasks.minsym || msym_first_task.minsym)
+	  && msym_running_thread.minsym);
 }
 
 /* Return True if the Ada Ravenscar run-time can be found in the
@@ -152,7 +153,7 @@ ravenscar_runtime_initialized (void)
 static CORE_ADDR
 get_running_thread_id (void)
 {
-  const struct minimal_symbol *object_msym = get_running_thread_msymbol ();
+  struct bound_minimal_symbol object_msym = get_running_thread_msymbol ();
   int object_size;
   int buf_size;
   gdb_byte *buf;
@@ -160,10 +161,10 @@ get_running_thread_id (void)
   struct type *builtin_type_void_data_ptr =
     builtin_type (target_gdbarch ())->builtin_data_ptr;
 
-  if (!object_msym)
+  if (!object_msym.minsym)
     return 0;
 
-  object_addr = MSYMBOL_VALUE_ADDRESS (object_msym);
+  object_addr = MSYMBOL_VALUE_ADDRESS (object_msym.minsym);
   object_size = TYPE_LENGTH (builtin_type_void_data_ptr);
   buf_size = object_size;
   buf = alloca (buf_size);

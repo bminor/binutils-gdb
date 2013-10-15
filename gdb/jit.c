@@ -1016,7 +1016,7 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
 				struct jit_program_space_data *ps_data)
 {
   struct bound_minimal_symbol reg_symbol;
-  struct minimal_symbol *desc_symbol;
+  struct bound_minimal_symbol desc_symbol;
   struct jit_objfile_data *objf_data;
   CORE_ADDR addr;
 
@@ -1031,12 +1031,13 @@ jit_breakpoint_re_set_internal (struct gdbarch *gdbarch,
 
       desc_symbol = lookup_minimal_symbol (jit_descriptor_name, NULL,
 					   reg_symbol.objfile);
-      if (desc_symbol == NULL || MSYMBOL_VALUE_ADDRESS (desc_symbol) == 0)
+      if (desc_symbol.minsym == NULL
+	  || MSYMBOL_VALUE_ADDRESS (desc_symbol.minsym) == 0)
 	return 1;
 
       objf_data = get_jit_objfile_data (reg_symbol.objfile);
       objf_data->register_code = reg_symbol.minsym;
-      objf_data->descriptor = desc_symbol;
+      objf_data->descriptor = desc_symbol.minsym;
 
       ps_data->objfile = reg_symbol.objfile;
     }

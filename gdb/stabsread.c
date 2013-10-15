@@ -1168,17 +1168,17 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 					    SYMBOL_LINKAGE_NAME (sym))
 	     != SYMBOL_LINKAGE_NAME (sym))
 	{
-	  struct minimal_symbol *msym;
+	  struct bound_minimal_symbol msym;
 
 	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym),
 					NULL, objfile);
-	  if (msym != NULL)
+	  if (msym.minsym != NULL)
 	    {
 	      const char *new_name = gdbarch_static_transform_name
 		(gdbarch, SYMBOL_LINKAGE_NAME (sym));
 
 	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
-	      SYMBOL_VALUE_ADDRESS (sym) = MSYMBOL_VALUE_ADDRESS (msym);
+	      SYMBOL_VALUE_ADDRESS (sym) = MSYMBOL_VALUE_ADDRESS (msym.minsym);
 	    }
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
@@ -1360,17 +1360,17 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 					    SYMBOL_LINKAGE_NAME (sym))
 	     != SYMBOL_LINKAGE_NAME (sym))
 	{
-	  struct minimal_symbol *msym;
+	  struct bound_minimal_symbol msym;
 
 	  msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (sym), 
 					NULL, objfile);
-	  if (msym != NULL)
+	  if (msym.minsym != NULL)
 	    {
 	      const char *new_name = gdbarch_static_transform_name
 		(gdbarch, SYMBOL_LINKAGE_NAME (sym));
 
 	      SYMBOL_SET_LINKAGE_NAME (sym, new_name);
-	      SYMBOL_VALUE_ADDRESS (sym) = MSYMBOL_VALUE_ADDRESS (msym);
+	      SYMBOL_VALUE_ADDRESS (sym) = MSYMBOL_VALUE_ADDRESS (msym.minsym);
 	    }
 	}
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;

@@ -2007,18 +2007,18 @@ frame_debug_got_null_frame (struct frame_info *this_frame,
 static int
 inside_main_func (struct frame_info *this_frame)
 {
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
   CORE_ADDR maddr;
 
   if (symfile_objfile == 0)
     return 0;
   msymbol = lookup_minimal_symbol (main_name (), NULL, symfile_objfile);
-  if (msymbol == NULL)
+  if (msymbol.minsym == NULL)
     return 0;
   /* Make certain that the code, and not descriptor, address is
      returned.  */
   maddr = gdbarch_convert_from_func_ptr_addr (get_frame_arch (this_frame),
-					      MSYMBOL_VALUE_ADDRESS (msymbol),
+					      MSYMBOL_VALUE_ADDRESS (msymbol.minsym),
 					      &current_target);
   return maddr == get_frame_func (this_frame);
 }

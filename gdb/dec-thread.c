@@ -225,7 +225,7 @@ static pthreadDebugCallbacks_t debug_callbacks =
 static void
 enable_dec_thread (void)
 {
-  struct minimal_symbol *msym;
+  struct bound_minimal_symbol msym;
   void* caller_context;
   int status;
 
@@ -234,14 +234,14 @@ enable_dec_thread (void)
     return;
 
   msym = lookup_minimal_symbol ("__pthread_dbg_symtable", NULL, NULL);
-  if (msym == NULL)
+  if (msym.minsym == NULL)
     {
       debug ("enable_dec_thread: No __pthread_dbg_symtable");
       return;
     }
 
   status = pthreadDebugContextInit (&caller_context, &debug_callbacks,
-                                    (void *) SYMBOL_VALUE_ADDRESS (msym),
+                                    (void *) SYMBOL_VALUE_ADDRESS (msym.minsym),
                                     &debug_context);
   if (status != ESUCCESS)
     {

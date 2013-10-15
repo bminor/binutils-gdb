@@ -680,14 +680,15 @@ coff_symfile_read (struct objfile *objfile, int symfile_flags)
 		  || strncmp (name, "_imp_", 5) == 0))
 	    {
 	      const char *name1 = (name[1] == '_' ? &name[7] : &name[6]);
-	      struct minimal_symbol *found;
+	      struct bound_minimal_symbol found;
 
 	      found = lookup_minimal_symbol (name1, NULL, objfile);
 	      /* If found, there are symbols named "_imp_foo" and "foo"
 		 respectively in OBJFILE.  Set the type of symbol "foo"
 		 as 'mst_solib_trampoline'.  */
-	      if (found != NULL && MSYMBOL_TYPE (found) == mst_text)
-		MSYMBOL_TYPE (found) = mst_solib_trampoline;
+	      if (found.minsym != NULL
+		  && MSYMBOL_TYPE (found.minsym) == mst_text)
+		MSYMBOL_TYPE (found.minsym) = mst_solib_trampoline;
 	    }
 	}
     }
