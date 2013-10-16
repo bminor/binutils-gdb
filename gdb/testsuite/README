@@ -25,6 +25,29 @@ The second is to cd to the testsuite directory and invoke the DejaGnu
 (The `site.exp' file contains a handful of useful variables like host
 and target triplets, and pathnames.)
 
+Running the Performance Tests
+*****************************
+
+GDB Testsuite includes performance test cases, which are not run together
+with other test cases, because performance test cases are slow and need
+a quiet system.  There are two ways to run the performance test cases.
+The first is to do `make check-perf' in the main build directory:
+
+	make check-perf RUNTESTFLAGS="solib.exp SOLIB_COUNT=8"
+
+The second is to cd to the testsuite directory and invoke the DejaGnu
+`runtest' command directly.
+
+	cd testsuite
+	make site.exp
+	runtest GDB_PERFTEST_MODE=both GDB_PERFTEST_TIMEOUT=4000 --directory=gdb.perf solib.exp SOLIB_COUNT=8
+
+Only "compile", "run" and "both" are valid to GDB_PERFTEST_MODE.  They
+stand for "compile tests only", "run tests only", and "compile and run
+tests" respectively.  "both" is the default.  GDB_PERFTEST_TIMEOUT
+specify the timeout, which is 3000 in default.  The result of
+performance test is appended in `testsuite/perftest.log'.
+
 Testsuite Parameters
 ********************
 
@@ -314,6 +337,10 @@ gdb.<subsystem>
 Tests that exercise a specific GDB subsystem in more depth.  For
 instance, gdb.disasm exercises various disassemblers, while
 gdb.stabs tests pathways through the stabs symbol reader.
+
+gdb.perf
+
+GDB performance tests.
 
 Writing Tests
 *************

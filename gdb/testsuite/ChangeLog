@@ -1,5 +1,9 @@
 2013-11-06  Yao Qi  <yao@codesourcery.com>
 
+	* README: Mention performance tests.
+
+2013-11-06  Yao Qi  <yao@codesourcery.com>
+
 	* lib/perftest.exp: New.
 	* gdb.perf/lib/perftest/__init__.py: New.
 	* gdb.perf/lib/perftest/measure.py: New.
