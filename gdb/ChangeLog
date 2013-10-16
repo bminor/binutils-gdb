@@ -1,3 +1,10 @@
+2013-10-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/16042
+	* target.c (target_disable_btrace): Fix invalid return value for
+	void function.
+	(target_teardown_btrace): Likewise.
+
 2013-10-14  Yao Qi  <yao@codesourcery.com>
 
 	* varobj.c (struct varobj): Move most of the fields to
