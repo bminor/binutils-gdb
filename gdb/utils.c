@@ -40,11 +40,6 @@
 #include <pc.h>
 #endif
 
-/* SunOS's curses.h has a '#define reg register' in it.  Thank you Sun.  */
-#ifdef reg
-#undef reg
-#endif
-
 #include <signal.h>
 #include "timeval-utils.h"
 #include "gdbcmd.h"

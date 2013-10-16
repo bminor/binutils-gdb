@@ -54,4 +54,12 @@
 extern int tgetnum (const char *);
 #endif
 
+/* SunOS's curses.h has a '#define reg register' in it.  Thank you Sun.  */
+/* Ditto for:
+   -bash-4.2$ uname -a
+   AIX power-aix 1 7 00F84C0C4C00  */
+#ifdef reg
+#undef reg
+#endif
+
 #endif /* gdb_curses.h */
