@@ -6023,7 +6023,7 @@ download_tracepoint_1 (struct tracepoint *tpoint)
 
 	  if (ipa_action != 0)
 	    write_inferior_data_ptr
-	      (actions_array + i * sizeof (sizeof (*tpoint->actions)),
+	      (actions_array + i * sizeof (*tpoint->actions),
 	       ipa_action);
 	}
     }

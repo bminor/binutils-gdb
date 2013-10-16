@@ -1,3 +1,9 @@
+2013-10-16  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	PR gdb/16014
+	* tracepoint.c (download_tracepoint_1): Remove unnecessary double
+	call to sizeof.
+
 2013-10-02  Pedro Alves  <palves@redhat.com>
 
 	* server.c (process_serial_event): Don't output "GDBserver
