@@ -43,6 +43,40 @@ then
     shift; shift
 fi
 
+# Attempt to fetch the absolute path to the gcore script that was
+# called.
+binary_path=`dirname "$0"`
+
+if test "x$binary_path" = x. ; then
+  # We got "." back as a path.  This means the user executed
+  # the gcore script locally (i.e. ./gcore) or called the
+  # script via a shell interpreter (i.e. sh gcore).
+  binary_basename=`basename "$0"`
+
+  # If the gcore script was called like "sh gcore" and the script
+  # lives in the current directory, "which" will not give us "gcore".
+  # So first we check if the script is in the current directory
+  # before using the output of "which".
+  if test -f "$binary_basename" ; then
+    # We have a local gcore script in ".".  This covers the case of
+    # doing "./gcore" or "sh gcore".
+    binary_path="."
+  else
+    # The gcore script was not found in ".", which means the script
+    # was called from somewhere else in $PATH by "sh gcore".
+    # Extract the correct path now.
+    binary_path_from_env=`which "$0"`
+    binary_path=`dirname "$binary_path_from_env"`
+  fi
+fi
+
+# Check if the GDB binary is in the expected path.  If not, just
+# quit with a message.
+if [ ! -f "$binary_path"/@GDB_TRANSFORM_NAME@ ]; then
+  echo "gcore: GDB binary (${binary_path}/@GDB_TRANSFORM_NAME@) not found"
+  exit 1
+fi
+
 # Initialise return code.
 rc=0
 
@@ -51,7 +85,7 @@ for pid in $*
 do
 	# `</dev/null' to avoid touching interactive terminal if it is
 	# available but not accessible as GDB would get stopped on SIGTTIN.
-	@GDB_TRANSFORM_NAME@ </dev/null --nx --batch \
+	$binary_path/@GDB_TRANSFORM_NAME@ </dev/null --nx --batch \
 	    -ex "set pagination off" -ex "set height 0" -ex "set width 0" \
 	    -ex "attach $pid" -ex "gcore $name.$pid" -ex detach -ex quit
 

@@ -1,3 +1,8 @@
+2013-10-16  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gcore.in: Call GDB using the full path to the gcore script.
+	Error out if the GDB binary is not found.
+
 2013-10-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/16014
