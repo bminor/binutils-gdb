@@ -6226,11 +6226,12 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	      if (ELF_SECTION_IN_SEGMENT (this_hdr, segment))
 		{
 		  map->sections[isec++] = section->output_section;
-		  if (section->lma < lowest_section->lma)
-		    lowest_section = section;
 		  if ((section->flags & SEC_ALLOC) != 0)
 		    {
 		      bfd_vma seg_off;
+
+		      if (section->lma < lowest_section->lma)
+			lowest_section = section;
 
 		      /* Section lmas are set up from PT_LOAD header
 			 p_paddr in _bfd_elf_make_section_from_shdr.

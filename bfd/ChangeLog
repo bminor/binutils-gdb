@@ -1,3 +1,9 @@
+2013-10-17  Alan Modra  <amodra@gmail.com>
+
+	PR 16056
+	* elf.c (copy_elf_program_header): Only consider SEC_ALLOC sections
+	when finding lowest_section.
+
 2013-10-09  Roland McGrath  <mcgrathr@google.com>
 
 	* elf64-alpha.c (elf64_alpha_relax_tls_get_addr): Cast switch
