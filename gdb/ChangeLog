@@ -1,3 +1,8 @@
+2013-10-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdbarch.sh (get_longjmp_target): Add method documentation.
+	* gdbarch.h: Regenerate.
+
 2013-10-16  Tom Tromey  <tromey@redhat.com>
 
 	* dbxread.c (read_dbx_symtab) <bss_ext_symbol>: Remove unused

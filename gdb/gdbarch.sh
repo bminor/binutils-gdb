@@ -486,8 +486,13 @@ M:void:print_vector_info:struct ui_file *file, struct frame_info *frame, const c
 m:int:register_sim_regno:int reg_nr:reg_nr::legacy_register_sim_regno::0
 m:int:cannot_fetch_register:int regnum:regnum::cannot_register_not::0
 m:int:cannot_store_register:int regnum:regnum::cannot_register_not::0
-# setjmp/longjmp support.
+
+# Determine the address where a longjmp will land and save this address
+# in PC.  Return nonzero on success.
+#
+# FRAME corresponds to the longjmp frame.
 F:int:get_longjmp_target:struct frame_info *frame, CORE_ADDR *pc:frame, pc
+
 #
 v:int:believe_pcc_promotion:::::::
 #

@@ -400,7 +400,10 @@ typedef int (gdbarch_cannot_store_register_ftype) (struct gdbarch *gdbarch, int 
 extern int gdbarch_cannot_store_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_cannot_store_register_ftype *cannot_store_register);
 
-/* setjmp/longjmp support. */
+/* Determine the address where a longjmp will land and save this address
+   in PC.  Return nonzero on success.
+  
+   FRAME corresponds to the longjmp frame. */
 
 extern int gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch);
 
