@@ -1,5 +1,10 @@
 2013-10-17  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/15995:
+	* printcmd.c (printcmd): Call gdb_flush.
+
+2013-10-17  Tom Tromey  <tromey@redhat.com>
+
 	* elfread.c (struct elfinfo) <stabindexsect>: Remove.
 	(elf_locate_sections): Update.
 

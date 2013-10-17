@@ -1,3 +1,7 @@
+2013-10-17  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/printcmds.exp (test_printf): Test printf flushing.
+
 2013-10-14  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/dwzbuildid.exp (write_dwarf_file): Pass explicit test

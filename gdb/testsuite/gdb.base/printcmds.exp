@@ -740,6 +740,12 @@ proc test_printf {} {
     gdb_test "printf \"% p\", 0" "Inappropriate modifiers to format specifier 'p' in printf"
     gdb_test "printf \"%0p\", 0" "Inappropriate modifiers to format specifier 'p' in printf"
     gdb_test "printf \"%+p\", 0" "Inappropriate modifiers to format specifier 'p' in printf"
+
+
+    gdb_test "define hibob\nprintf \"hi bob \"\nshell echo zzz\nprintf \"y\\n\"\nend" \
+	"" \
+	"create hibob command"
+    gdb_test "hibob" "hi bob zzz.*y" "run hibob command"
 }
 
 #Test printing DFP values with printf
