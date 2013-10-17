@@ -31,6 +31,7 @@ struct expression;
 struct ui_file;
 struct value_print_options;
 struct type_print_options;
+struct lang_varobj_ops;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
@@ -343,6 +344,9 @@ struct language_defn
 				     domain_enum domain,
 				     symbol_found_callback_ftype *callback,
 				     void *data);
+
+    /* Various operations on varobj.  */
+    const struct lang_varobj_ops *la_varobj_ops;
 
     /* Add fields above this point, so the magic number is always last.  */
     /* Magic number for compat checking.  */

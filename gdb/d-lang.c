@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "symtab.h"
 #include "language.h"
+#include "varobj.h"
 #include "d-lang.h"
 #include "c-lang.h"
 #include "gdb_string.h"
@@ -274,6 +275,7 @@ static const struct language_defn d_language_defn =
   c_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  &default_varobj_ops,
   LANG_MAGIC
 };
 

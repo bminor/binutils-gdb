@@ -26,6 +26,7 @@
 #include "expression.h"
 #include "parser-defs.h"
 #include "language.h"
+#include "varobj.h"
 #include "c-lang.h"
 #include "objc-lang.h"
 #include "exceptions.h"
@@ -389,6 +390,7 @@ const struct language_defn objc_language_defn = {
   default_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  &default_varobj_ops,
   LANG_MAGIC
 };
 

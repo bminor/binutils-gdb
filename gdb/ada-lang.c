@@ -32,6 +32,7 @@
 #include "expression.h"
 #include "parser-defs.h"
 #include "language.h"
+#include "varobj.h"
 #include "c-lang.h"
 #include "inferior.h"
 #include "symfile.h"
@@ -12834,6 +12835,7 @@ const struct language_defn ada_language_defn = {
   c_get_string,
   ada_get_symbol_name_cmp,	/* la_get_symbol_name_cmp */
   ada_iterate_over_symbols,
+  &ada_varobj_ops,
   LANG_MAGIC
 };
 

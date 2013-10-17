@@ -230,6 +230,7 @@ const struct lang_varobj_ops cplus_varobj_ops;
 const struct lang_varobj_ops java_varobj_ops;
 const struct lang_varobj_ops ada_varobj_ops;
 
+#define default_varobj_ops c_varobj_ops
 /* API functions */
 
 extern struct varobj *varobj_create (char *objname,

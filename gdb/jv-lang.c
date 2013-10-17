@@ -31,6 +31,7 @@
 #include "value.h"
 #include "c-lang.h"
 #include "jv-lang.h"
+#include "varobj.h"
 #include "gdbcore.h"
 #include "block.h"
 #include "demangle.h"
@@ -1196,6 +1197,7 @@ const struct language_defn java_language_defn =
   default_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  &java_varobj_ops,
   LANG_MAGIC
 };
 

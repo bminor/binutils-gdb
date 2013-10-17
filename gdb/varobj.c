@@ -318,7 +318,6 @@ varobj_create (char *objname,
       struct frame_id old_id = null_frame_id;
       struct block *block;
       const char *p;
-      enum varobj_languages lang;
       struct value *value = NULL;
       volatile struct gdb_exception except;
       CORE_ADDR pc;
@@ -433,8 +432,7 @@ varobj_create (char *objname,
 	  }
 
       /* Set language info */
-      lang = variable_language (var);
-      var->root->lang = languages[lang];
+      var->root->lang = var->root->exp->language_defn->la_varobj_ops;
 
       install_new_value (var, value, 1 /* Initial assignment */);
 

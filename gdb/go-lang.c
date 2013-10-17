@@ -38,6 +38,7 @@
 #include "block.h"
 #include "symtab.h"
 #include "language.h"
+#include "varobj.h"
 #include "go-lang.h"
 #include "c-lang.h"
 #include "parser-defs.h"
@@ -596,6 +597,7 @@ static const struct language_defn go_language_defn =
   c_get_string,
   NULL,
   iterate_over_symbols,
+  &default_varobj_ops,
   LANG_MAGIC
 };
 
