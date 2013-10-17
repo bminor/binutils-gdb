@@ -168,6 +168,14 @@ exec_file_clear (int from_tty)
 void
 exec_file_attach (char *filename, int from_tty)
 {
+  struct cleanup *cleanups;
+
+  /* First, acquire a reference to the current exec_bfd.  We release
+     this at the end of the function; but acquiring it now lets the
+     BFD cache return it if this call refers to the same file.  */
+  gdb_bfd_ref (exec_bfd);
+  cleanups = make_cleanup_bfd_unref (exec_bfd);
+
   /* Remove any previous exec file.  */
   exec_close ();
 
@@ -182,7 +190,6 @@ exec_file_attach (char *filename, int from_tty)
     }
   else
     {
-      struct cleanup *cleanups;
       char *scratch_pathname, *canonical_pathname;
       int scratch_chan;
       struct target_section *sections = NULL, *sections_end = NULL;
@@ -205,7 +212,7 @@ exec_file_attach (char *filename, int from_tty)
       if (scratch_chan < 0)
 	perror_with_name (filename);
 
-      cleanups = make_cleanup (xfree, scratch_pathname);
+      make_cleanup (xfree, scratch_pathname);
 
       /* gdb_bfd_open (and its variants) prefers canonicalized pathname for
 	 better BFD caching.  */
@@ -261,9 +268,10 @@ exec_file_attach (char *filename, int from_tty)
       /* Tell display code (if any) about the changed file name.  */
       if (deprecated_exec_file_display_hook)
 	(*deprecated_exec_file_display_hook) (filename);
-
-      do_cleanups (cleanups);
     }
+
+  do_cleanups (cleanups);
+
   bfd_cache_close_all ();
   observer_notify_executable_changed ();
 }

@@ -1,5 +1,9 @@
 2014-02-26  Tom Tromey  <tromey@redhat.com>
 
+	* exec.c (exec_file_attach): Hold a reference to exec_bfd.
+
+2014-02-26  Tom Tromey  <tromey@redhat.com>
+
 	* elfread.c (elf_read_minimal_symbols): Return early if
 	minimal symbols have already been read.  Add "ei" parameter.
 	(elf_symfile_read): Call elf_read_minimal_symbols earlier.
