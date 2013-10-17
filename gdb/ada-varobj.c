@@ -18,7 +18,6 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "ada-varobj.h"
 #include "ada-lang.h"
 #include "varobj.h"
 #include "language.h"
@@ -48,6 +47,9 @@
    easily be derived from the value.  The reason behind this is that
    it allows the code to use the type without having to worry about
    it being set or not.  It makes the code clearer.  */
+
+static int ada_varobj_get_number_of_children (struct value *parent_value,
+					      struct type *parent_type);
 
 /* A convenience function that decodes the VALUE_PTR/TYPE_PTR couple:
    If there is a value (*VALUE_PTR not NULL), then perform the decoding
@@ -324,7 +326,7 @@ ada_varobj_get_ptr_number_of_children (struct value *parent_value,
 /* Return the number of children for the (PARENT_VALUE, PARENT_TYPE)
    pair.  */
 
-int
+static int
 ada_varobj_get_number_of_children (struct value *parent_value,
 				   struct type *parent_type)
 {
@@ -722,7 +724,7 @@ ada_varobj_describe_child (struct value *parent_value,
 
    The result should be deallocated after use with xfree.  */
 
-char *
+static char *
 ada_varobj_get_name_of_child (struct value *parent_value,
 			      struct type *parent_type,
 			      const char *parent_name, int child_index)
@@ -742,7 +744,7 @@ ada_varobj_get_name_of_child (struct value *parent_value,
 
    The result must be deallocated after use with xfree.  */
 
-char *
+static char *
 ada_varobj_get_path_expr_of_child (struct value *parent_value,
 				   struct type *parent_type,
 				   const char *parent_name,
@@ -761,7 +763,7 @@ ada_varobj_get_path_expr_of_child (struct value *parent_value,
 /* Return the value of child number CHILD_INDEX of the (PARENT_VALUE,
    PARENT_TYPE) pair.  PARENT_NAME is the name of the parent.  */
 
-struct value *
+static struct value *
 ada_varobj_get_value_of_child (struct value *parent_value,
 			       struct type *parent_type,
 			       const char *parent_name, int child_index)
@@ -778,7 +780,7 @@ ada_varobj_get_value_of_child (struct value *parent_value,
 /* Return the type of child number CHILD_INDEX of the (PARENT_VALUE,
    PARENT_TYPE) pair.  */
 
-struct type *
+static struct type *
 ada_varobj_get_type_of_child (struct value *parent_value,
 			      struct type *parent_type,
 			      int child_index)
@@ -857,7 +859,7 @@ ada_varobj_get_value_of_array_variable (struct value *value,
 /* Return a string representation of the (VALUE, TYPE) pair, using
    the given print options OPTS as our formatting options.  */
 
-char *
+static char *
 ada_varobj_get_value_of_variable (struct value *value,
 				  struct type *type,
 				  struct value_print_options *opts)

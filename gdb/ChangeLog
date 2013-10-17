@@ -1,5 +1,17 @@
 2013-10-17  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Remove ada-varobj.h.
+	* ada-varobj.c: Remove the include of ada-varobj.h.
+	(ada_varobj_get_number_of_children): Declare.
+	(ada_varobj_get_name_of_child): Make it static.
+	(ada_varobj_get_path_expr_of_child): Likewise.
+	(ada_varobj_get_value_of_child): Likewise.
+	(ada_varobj_get_type_of_child): Likewise.
+	(ada_varobj_get_value_of_array_variable): Likewise.
+	* ada-varobj.h: Remove.
+
+2013-10-17  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (SFILES): Add c-varobj.c and jv-varobj.c.
 	(COMMON_OBS): Add c-varobj.o and jv-varobj.o.
 	* ada-varobj.c: Include "varobj.h".
