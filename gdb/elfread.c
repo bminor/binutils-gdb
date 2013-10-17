@@ -60,7 +60,6 @@ static const struct sym_fns elf_sym_fns_lazy_psyms;
 struct elfinfo
   {
     asection *stabsect;		/* Section pointer for .stab section */
-    asection *stabindexsect;	/* Section pointer for .stab.index section */
     asection *mdebugsect;	/* Section pointer for .mdebug section */
   };
 
@@ -185,10 +184,6 @@ elf_locate_sections (bfd *ignore_abfd, asection *sectp, void *eip)
   if (strcmp (sectp->name, ".stab") == 0)
     {
       ei->stabsect = sectp;
-    }
-  else if (strcmp (sectp->name, ".stab.index") == 0)
-    {
-      ei->stabindexsect = sectp;
     }
   else if (strcmp (sectp->name, ".mdebug") == 0)
     {

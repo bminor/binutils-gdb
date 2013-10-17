@@ -1,3 +1,8 @@
+2013-10-17  Tom Tromey  <tromey@redhat.com>
+
+	* elfread.c (struct elfinfo) <stabindexsect>: Remove.
+	(elf_locate_sections): Update.
+
 2013-10-17  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove ada-varobj.h.
