@@ -1,3 +1,9 @@
+2013-10-17  Alan Modra  <amodra@gmail.com>
+
+	PR 16056
+	* elf.c (copy_elf_program_header): Only consider SEC_ALLOC sections
+	when finding lowest_section.
+
 2013-10-14  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* elfxx-mips.c (mips_elf_obj_tdata): Add abi_msa_bfd.
