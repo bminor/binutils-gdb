@@ -1,3 +1,8 @@
+2013-10-17  Luis Machado  <lgustavo@codesourcery.com>
+
+	* target/waitstatus.h (target_waitkind): Remove spurious
+	character from the comments.
+
 2013-10-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdbarch.sh (get_longjmp_target): Add method documentation.

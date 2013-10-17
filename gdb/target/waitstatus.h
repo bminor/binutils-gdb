@@ -85,7 +85,7 @@ enum target_waitkind
      to the console, for instance.  In this case, we want to go back
      to the event loop and wait there for another event from the
      inferior, rather than being stuck in the remote_async_wait()
-     function. sThis way the event loop is responsive to other events,
+     function.  This way the event loop is responsive to other events,
      like for instance the user typing.  */
   TARGET_WAITKIND_IGNORE,
  
