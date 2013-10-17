@@ -20,6 +20,7 @@
 #include "defs.h"
 #include "ada-varobj.h"
 #include "ada-lang.h"
+#include "varobj.h"
 #include "language.h"
 #include "valprint.h"
 
@@ -885,4 +886,140 @@ ada_varobj_get_value_of_variable (struct value *value,
   return result;
 }
 
+/* Ada specific callbacks for VAROBJs.  */
 
+static int
+ada_number_of_children (struct varobj *var)
+{
+  return ada_varobj_get_number_of_children (var->value, var->type);
+}
+
+static char *
+ada_name_of_variable (struct varobj *parent)
+{
+  return c_varobj_ops.name_of_variable (parent);
+}
+
+static char *
+ada_name_of_child (struct varobj *parent, int index)
+{
+  return ada_varobj_get_name_of_child (parent->value, parent->type,
+				       parent->name, index);
+}
+
+static char*
+ada_path_expr_of_child (struct varobj *child)
+{
+  struct varobj *parent = child->parent;
+  const char *parent_path_expr = varobj_get_path_expr (parent);
+
+  return ada_varobj_get_path_expr_of_child (parent->value,
+					    parent->type,
+					    parent->name,
+					    parent_path_expr,
+					    child->index);
+}
+
+static struct value *
+ada_value_of_child (struct varobj *parent, int index)
+{
+  return ada_varobj_get_value_of_child (parent->value, parent->type,
+					parent->name, index);
+}
+
+static struct type *
+ada_type_of_child (struct varobj *parent, int index)
+{
+  return ada_varobj_get_type_of_child (parent->value, parent->type,
+				       index);
+}
+
+static char *
+ada_value_of_variable (struct varobj *var, enum varobj_display_formats format)
+{
+  struct value_print_options opts;
+
+  varobj_formatted_print_options (&opts, format);
+
+  return ada_varobj_get_value_of_variable (var->value, var->type, &opts);
+}
+
+/* Implement the "value_is_changeable_p" routine for Ada.  */
+
+static int
+ada_value_is_changeable_p (struct varobj *var)
+{
+  struct type *type = var->value ? value_type (var->value) : var->type;
+
+  if (ada_is_array_descriptor_type (type)
+      && TYPE_CODE (type) == TYPE_CODE_TYPEDEF)
+    {
+      /* This is in reality a pointer to an unconstrained array.
+	 its value is changeable.  */
+      return 1;
+    }
+
+  if (ada_is_string_type (type))
+    {
+      /* We display the contents of the string in the array's
+	 "value" field.  The contents can change, so consider
+	 that the array is changeable.  */
+      return 1;
+    }
+
+  return varobj_default_value_is_changeable_p (var);
+}
+
+/* Implement the "value_has_mutated" routine for Ada.  */
+
+static int
+ada_value_has_mutated (struct varobj *var, struct value *new_val,
+		       struct type *new_type)
+{
+  int i;
+  int from = -1;
+  int to = -1;
+
+  /* If the number of fields have changed, then for sure the type
+     has mutated.  */
+  if (ada_varobj_get_number_of_children (new_val, new_type)
+      != var->num_children)
+    return 1;
+
+  /* If the number of fields have remained the same, then we need
+     to check the name of each field.  If they remain the same,
+     then chances are the type hasn't mutated.  This is technically
+     an incomplete test, as the child's type might have changed
+     despite the fact that the name remains the same.  But we'll
+     handle this situation by saying that the child has mutated,
+     not this value.
+
+     If only part (or none!) of the children have been fetched,
+     then only check the ones we fetched.  It does not matter
+     to the frontend whether a child that it has not fetched yet
+     has mutated or not. So just assume it hasn't.  */
+
+  varobj_restrict_range (var->children, &from, &to);
+  for (i = from; i < to; i++)
+    if (strcmp (ada_varobj_get_name_of_child (new_val, new_type,
+					      var->name, i),
+		VEC_index (varobj_p, var->children, i)->name) != 0)
+      return 1;
+
+  return 0;
+}
+
+/* varobj operations for ada.  */
+
+const struct lang_varobj_ops ada_varobj_ops =
+{
+  ada_number_of_children,
+  ada_name_of_variable,
+  ada_name_of_child,
+  ada_path_expr_of_child,
+  ada_value_of_child,
+  ada_type_of_child,
+  ada_value_of_variable,
+  ada_value_is_changeable_p,
+  ada_value_has_mutated
+};

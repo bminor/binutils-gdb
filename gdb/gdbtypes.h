@@ -1431,6 +1431,10 @@ extern struct type *alloc_type_copy (const struct type *);
    objfile's architecture is returned.  */
 extern struct gdbarch *get_type_arch (const struct type *);
 
+/* This returns the target type (or NULL) of TYPE, also skipping
+   past typedefs.  */
+extern struct type *get_target_type (struct type *type);
+
 /* Helper function to construct objfile-owned types.  */
 extern struct type *init_type (enum type_code, int, int, const char *,
 			       struct objfile *);

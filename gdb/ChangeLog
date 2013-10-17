@@ -1,3 +1,87 @@
+2013-10-17  Yao Qi  <yao@codesourcery.com>
+
+	* Makefile.in (SFILES): Add c-varobj.c and jv-varobj.c.
+	(COMMON_OBS): Add c-varobj.o and jv-varobj.o.
+	* ada-varobj.c: Include "varobj.h".
+	(ada_number_of_children): New.  Moved from varobj.c.
+	(ada_name_of_variable, ada_name_of_child): Likewise.
+	(ada_path_expr_of_child, ada_value_of_child): Likewise.
+	(ada_type_of_child, ada_value_of_variable): Likewise.
+	(ada_value_is_changeable_p, ada_value_has_mutated): Likewise.
+	(ada_varobj_ops): New.
+	* c-varobj.c, jv-varobj.c: New file.  Moved from varobj.c.
+	* gdbtypes.c (get_target_type): New.  Moved from varobj.c.
+	* gdbtypes.h (get_target_type): Declare.
+	* varobj.c: Remove the inclusion of "ada-varobj.h" and
+	"ada-lang.h".
+	(ANONYMOUS_STRUCT_NAME): Move it to c-varobj.c.
+	(ANONYMOUS_UNION_NAME): Likewise.
+	(get_type, get_value_type, get_target_type): Remove declarations.
+	(value_get_print_value, varobj_value_get_print_value): Likewise.
+	(c_number_of_children, c_name_of_variable): Likewise.
+	(c_name_of_child, c_path_expr_of_child): Likewise.
+	(c_value_of_child, c_type_of_child): Likewise.
+	(c_value_of_variable, cplus_number_of_children): Likewise.
+	(cplus_class_num_children, cplus_name_of_variable): Likewise.
+	(cplus_name_of_child, cplus_path_expr_of_child): Likewise.
+	(cplus_value_of_child, cplus_type_of_child): Likewise.
+	(cplus_value_of_variable, java_number_of_children): Likewise.
+	(java_name_of_variable, java_name_of_child): Likewise.
+	(java_path_expr_of_child, java_value_of_child): Likewise.
+	(java_type_of_child, java_value_of_variable): Likewise.
+	(ada_number_of_children, ada_name_of_variable): Likewise.
+	(ada_name_of_child, ada_path_expr_of_child): Likewise.
+	(ada_value_of_child, ada_type_of_child): Likewise.
+	(ada_value_of_variable, ada_value_is_changeable_p): Likewise.
+	(ada_value_has_mutated): Likewise.
+	(struct language_specific): Move it to varobj.h.
+	(CPLUS_FAKE_CHILD): Move it to varobj.h.
+	(restrict_range): Rename it varobj_restrict_range.  Make it extern.
+	Callers update.
+	(get_path_expr_parent): Rename it to varobj_get_path_expr_parent.
+	Make it extern.
+	(is_anonymous_child): Move it to c-varobj.c and rename to
+	varobj_is_anonymous_child.  Caller update.
+	(get_type): Move it to c-varobj.c.
+	(get_value_type): Rename it varobj_get_value_type.  Make it
+	extern.
+	(get_target_type): Move it gdbtypes.c.
+	(varobj_formatted_print_options): New function.
+	(value_get_print_value): Rename it to
+	varobj_value_get_print_value and make it extern.
+	(varobj_value_is_changeable_p): Make it extern.
+	(adjust_value_for_child_access): Move it to c-varobj.c.
+	(default_value_is_changeable_p): Rename it to
+	varobj_default_value_is_changeable_p.  Make it extern.
+	(c_number_of_children, c_name_of_variable): Move it to c-varobj.c
+	(c_name_of_child, c_path_expr_of_child): Likewise.
+	(c_value_of_child, c_type_of_child): Likewise.
+	(c_value_of_variable, cplus_number_of_children): Likewise.
+	(cplus_class_num_children, cplus_name_of_variable): Likewise.
+	(cplus_name_of_child, cplus_path_expr_of_child): Likewise.
+	(cplus_value_of_child, cplus_type_of_child): Likewise.
+	(cplus_value_of_variable): Likewise.
+	(java_number_of_children, java_name_of_variable): Move it to jv-varobj.c.
+	(java_name_of_child, java_path_expr_of_child): Likewise.
+	(java_value_of_child, java_type_of_child): Likewise.
+	(java_value_of_variable): Likewise.
+	(ada_number_of_children, ada_name_of_variable): Move it to ada-varobj.c.
+	(ada_name_of_child, ada_path_expr_of_child): Likewise.
+	(ada_value_of_child, ada_type_of_child): Likewise.
+	(ada_value_of_variable, ada_value_is_changeable_p): Likewise.
+	(ada_value_has_mutated): Likewise.
+	* varobj.h (CPLUS_FAKE_CHILD): New macro, moved from varobj.c.
+	(struct lang_varobj_ops): New.  Renamed by 'struct language_specific'.
+	(c_varobj_ops, cplus_varobj_ops): Declare.
+	(java_varobj_ops, ada_varobj_ops): Declare.
+	(varobj_default_value_is_changeable_p): Declare.
+	(varobj_value_is_changeable_p): Declare.
+	(varobj_get_value_type, varobj_is_anonymous_child): Declare.
+	(varobj_get_path_expr_parent): Declare.
+	(varobj_value_get_print_value): Declare.
+	(varobj_formatted_print_options): Declare.
+	(varobj_restrict_range): Declare.
+
 2013-10-17  Luis Machado  <lgustavo@codesourcery.com>
 
 	* target/waitstatus.h (target_waitkind): Remove spurious

@@ -239,6 +239,21 @@ get_type_arch (const struct type *type)
     return TYPE_OWNER (type).gdbarch;
 }
 
+/* See gdbtypes.h.  */
+
+struct type *
+get_target_type (struct type *type)
+{
+  if (type != NULL)
+    {
+      type = TYPE_TARGET_TYPE (type);
+      if (type != NULL)
+	type = check_typedef (type);
+    }
+
+  return type;
+}
+
 /* Alloc a new type instance structure, fill it with some defaults,
    and point it at OLDTYPE.  Allocate the new type instance from the
    same place as OLDTYPE.  */
