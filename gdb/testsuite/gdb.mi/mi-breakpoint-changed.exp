@@ -79,7 +79,7 @@ proc test_insert_delete_modify { } {
 	}
     }
 
-    # Verify that '=breakpoint-created' notification is correctly emittd when
+    # Verify that '=breakpoint-created' notification is correctly emitted when
     # creating any type of breakpoint.
 
     set test "watch watch"

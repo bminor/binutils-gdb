@@ -3599,7 +3599,7 @@ proc gdb_init { args } {
     setenv TERM "vt100"
 
     # Some tests (for example gdb.base/maint.exp) shell out from gdb to use
-    # grep.  Clear GREP_OPTIONS to make the behavoiur predictable, 
+    # grep.  Clear GREP_OPTIONS to make the behavior predictable,
     # especially having color output turned on can cause tests to fail.
     setenv GREP_OPTIONS ""
 
