@@ -4138,8 +4138,6 @@ proc build_executable_from_specs {testname executable options args} {
         return -1
     }
 
-    set binfile [standard_output_file $executable]
-
     set func gdb_compile
     set func_index [lsearch -regexp $options {^(pthreads|shlib|shlib_pthreads)$}]
     if {$func_index != -1} {
