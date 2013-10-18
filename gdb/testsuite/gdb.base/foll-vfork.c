@@ -29,7 +29,7 @@ main ()
   pid = vfork ();
   if (pid == 0) {
     printf ("I'm the child!\n");
-    execlp ("gdb.base/vforked-prog", "gdb.base/vforked-prog", (char *)0);
+    execlp (BASEDIR "/vforked-prog", BASEDIR "/vforked-prog", (char *)0);
     perror ("exec failed");
     _exit (1);
   }

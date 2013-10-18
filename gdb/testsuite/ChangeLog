@@ -1,5 +1,14 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/foll-exec.c (main): Use BASEDIR.
+	* gdb.base/foll-exec.exp: Define BASEDIR during compilation.
+	* gdb.base/foll-vfork.c (main): Use BASEDIR.
+	* gdb.base/foll-vfork.exp: Define BASEDIR during compilation.
+	* gdb.multi/bkpt-multi-exec.c (main): Use BASEDIR.
+	* gdb.multi/bkpt-multi-exec.exp: Define BASEDIR during compilation.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/argv0-symlink.exp: Compute executable's directory
 	dynamically.
 
