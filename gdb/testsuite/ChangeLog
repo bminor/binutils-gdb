@@ -1,3 +1,8 @@
+2013-10-18  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/watchpoints.exp: Add test for setting software
+	watchpoints of different types before starting the inferior.
+
 2013-10-18  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/16062

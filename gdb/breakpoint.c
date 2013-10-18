@@ -1795,11 +1795,18 @@ update_watchpoint (struct watchpoint *b, int reparse)
      don't try to insert watchpoint.  We don't automatically delete
      such watchpoint, though, since failure to parse expression
      is different from out-of-scope watchpoint.  */
-  if ( !target_has_execution)
+  if (!target_has_execution)
     {
       /* Without execution, memory can't change.  No use to try and
 	 set watchpoint locations.  The watchpoint will be reset when
 	 the target gains execution, through breakpoint_re_set.  */
+      if (!can_use_hw_watchpoints)
+	{
+	  if (b->base.ops->works_in_software_mode (&b->base))
+	    b->base.type = bp_watchpoint;
+	  else
+	    error (_("Software read/access watchpoints not supported."));
+	}
     }
   else if (within_current_scope && b->exp)
     {
@@ -11081,13 +11088,6 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
   if (*tok)
     error (_("Junk at end of command."));
 
-  if (accessflag == hw_read)
-    bp_type = bp_read_watchpoint;
-  else if (accessflag == hw_access)
-    bp_type = bp_access_watchpoint;
-  else
-    bp_type = bp_hardware_watchpoint;
-
   frame = block_innermost_frame (exp_valid_block);
 
   /* If the expression is "local", then set up a "watchpoint scope"
@@ -11124,7 +11124,17 @@ watch_command_1 (const char *arg, int accessflag, int from_tty,
 	}
     }
 
-  /* Now set up the breakpoint.  */
+  /* Now set up the breakpoint.  We create all watchpoints as hardware
+     watchpoints here even if hardware watchpoints are turned off, a call
+     to update_watchpoint later in this function will cause the type to
+     drop back to bp_watchpoint (software watchpoint) if required.  */
+
+  if (accessflag == hw_read)
+    bp_type = bp_read_watchpoint;
+  else if (accessflag == hw_access)
+    bp_type = bp_access_watchpoint;
+  else
+    bp_type = bp_hardware_watchpoint;
 
   w = XCNEW (struct watchpoint);
   b = &w->base;

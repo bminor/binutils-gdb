@@ -1,3 +1,11 @@
+2013-10-18  Andrew Burgess  <aburgess@broadcom.com>
+
+	* breakpoint.c (update_watchpoint): If hardware watchpoints are
+	forced off, downgrade them to software watchpoints if possible,
+	and error out if not possible.
+	(watch_command_1): Move watchpoint type selection closer to
+	watchpoint creation, and extend the comments.
+
 2013-10-18  Pedro Alves  <palves@redhat.com>
 
 	PR gdb/16062

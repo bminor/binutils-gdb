@@ -29,6 +29,29 @@ if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
     return -1
 }
 
+with_test_prefix "before inferior start" {
+    # Ensure that if we turn off hardware watchpoints and set a watch point
+    # before starting the inferior the watchpoint created will not be a
+    # hardware watchpoint.
+    gdb_test_no_output "set can-use-hw-watchpoints 0" ""
+    gdb_test "watch ival1" "Watchpoint \[0-9\]+: ival1" \
+        "create watchpoint"
+
+    # The next tests are written to match the current state of gdb: access
+    # and read watchpoints require hardware watchpoint support, with this
+    # turned off these can't be created.
+    gdb_test "awatch ival1" \
+        "Software read/access watchpoints not supported." \
+        "create access watchpoint"
+    gdb_test "rwatch ival1" \
+        "Software read/access watchpoints not supported." \
+        "create read watchpoint"
+}
+
+    # This will turn hardware watchpoints back on and delete the watchpoint
+    # we just created.
+    clean_restart ${binfile}
+
     # Disable hardware watchpoints if necessary.
     if [target_info exists gdb,no_hardware_watchpoints] {
         gdb_test_no_output "set can-use-hw-watchpoints 0" ""
