@@ -37,7 +37,14 @@ if ![runto_main] {
 }
 
 gdb_test {print argv[0]} "/$filelink\"" $test
-gdb_test "info inferiors" "/$subdir/$filelink *" "$test for info inferiors"
+
+# For a link named /PATH/TO/DIR/LINK, we want to check the output
+# against "/DIR/LINK", but computed in a way that doesn't make
+# assumptions about the test directory layout.
+set full_filelink [standard_output_file $filelink]
+set lastdir [file tail [file dirname $full_filelink]]
+
+gdb_test "info inferiors" "/$lastdir/$filelink *" "$test for info inferiors"
 
 
 set test "kept directory symbolic link name"
@@ -65,4 +72,4 @@ if ![is_remote target] {
     setup_kfail "*-*-*" gdb/15934
 }
 gdb_test {print argv[0]} "/$dirlink/$filelink\"" $test
-gdb_test "info inferiors" "/$subdir/$filelink *" "$test for info inferiors"
+gdb_test "info inferiors" "/$lastdir/$filelink *" "$test for info inferiors"
