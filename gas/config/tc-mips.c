@@ -4161,7 +4161,8 @@ fpr_read_mask (const struct mips_cl_insn *ip)
   unsigned long pinfo;
   unsigned int mask;
 
-  mask = insn_reg_mask (ip, (1 << OP_REG_FP) | (1 << OP_REG_VEC),
+  mask = insn_reg_mask (ip, ((1 << OP_REG_FP) | (1 << OP_REG_VEC)
+			     | (1 << OP_REG_MSA)),
 			insn_read_mask (ip->insn_mo));
   pinfo = ip->insn_mo->pinfo;
   /* Conservatively treat all operands to an FP_D instruction are doubles.
@@ -4179,7 +4180,8 @@ fpr_write_mask (const struct mips_cl_insn *ip)
   unsigned long pinfo;
   unsigned int mask;
 
-  mask = insn_reg_mask (ip, (1 << OP_REG_FP) | (1 << OP_REG_VEC),
+  mask = insn_reg_mask (ip, ((1 << OP_REG_FP) | (1 << OP_REG_VEC)
+			     | (1 << OP_REG_MSA)),
 			insn_write_mask (ip->insn_mo));
   pinfo = ip->insn_mo->pinfo;
   /* Conservatively treat all operands to an FP_D instruction are doubles.
@@ -6070,6 +6072,7 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
 {
   unsigned long pinfo, pinfo2, prev_pinfo, prev_pinfo2;
   unsigned int gpr_read, gpr_write, prev_gpr_read, prev_gpr_write;
+  unsigned int fpr_read, prev_fpr_write;
 
   /* -O2 and above is required for this optimization.  */
   if (mips_optimize < 2)
@@ -6142,6 +6145,11 @@ can_swap_branch_p (struct mips_cl_insn *ip, expressionS *address_expr,
   gpr_read = gpr_read_mask (ip);
   prev_gpr_write = gpr_write_mask (&history[0]);
   if (gpr_read & prev_gpr_write)
+    return FALSE;
+
+  fpr_read = fpr_read_mask (ip);
+  prev_fpr_write = fpr_write_mask (&history[0]);
+  if (fpr_read & prev_fpr_write)
     return FALSE;
 
   /* If the branch writes a register that the previous

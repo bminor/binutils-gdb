@@ -1,3 +1,9 @@
+2013-10-18  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* config/tc-mips.c (fpr_read_mask): Test MSA registers.
+	(fpr_write_mask): Test MSA registers.
+	(can_swap_branch_p): Check fpr write followed by fpr read.
+
 2013-10-18  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-tic6x.c (tic6x_parse_operand): Revert previous delta.
