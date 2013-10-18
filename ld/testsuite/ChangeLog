@@ -1,3 +1,7 @@
+2013-10-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/asneed1.d: New test.
+
 2013-10-14  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* ld-mips-elf/attr-gnu-8-0.s, ld-mips-elf/attr-gnu-8-1.s,
