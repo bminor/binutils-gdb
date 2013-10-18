@@ -3236,15 +3236,20 @@ cris_elf_check_relocs (bfd *abfd,
 		     abfd, sec);
 		  return FALSE;
 		}
-
-	      /* Create the .got section, so we can assume it's always
-		 present whenever there's a dynobj.  */
-	      if (!_bfd_elf_create_got_section (dynobj, info))
-		return FALSE;
 	    }
 
 	  if (sgot == NULL)
-	    sgot = bfd_get_linker_section (dynobj, ".got");
+	    {
+	      /* We may have a dynobj but no .got section, if machine-
+		 independent parts of the linker found a reason to create
+		 a dynobj.  We want to create the .got section now, so we
+		 can assume it's always present whenever there's a dynobj.
+		 It's ok to call this function more than once.  */
+	      if (!_bfd_elf_create_got_section (dynobj, info))
+		return FALSE;
+
+	      sgot = bfd_get_linker_section (dynobj, ".got");
+	    }
 
 	  if (local_got_refcounts == NULL)
 	    {

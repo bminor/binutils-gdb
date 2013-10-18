@@ -1,3 +1,8 @@
+2013-10-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* elf32-cris.c (cris_elf_check_relocs): Don't assume
+	a registered dynobj means that a .got has been created.
+
 2013-10-17  Alan Modra  <amodra@gmail.com>
 
 	PR 16056
