@@ -240,7 +240,7 @@ main:
 	.byte	0x5
 	.4byte	.Ldebug_ranges0	# DW_AT_GNU_ranges_base
 	.ascii "/tmp/src/gdb/testsuite\0"	# DW_AT_comp_dir
-	.ascii "gdb.dwarf2/fission-loclists.dwo\0"	# DW_AT_GNU_dwo_name
+	.ascii "fission-loclists.dwo\0"	# DW_AT_GNU_dwo_name
 	.4byte	.Ldebug_pubnames0	# DW_AT_GNU_pubnames
 	.4byte	.Ldebug_pubtypes0	# DW_AT_GNU_pubtypes
 	.4byte	.Ldebug_addr0	# DW_AT_GNU_addr_base

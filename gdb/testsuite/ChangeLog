@@ -1,5 +1,14 @@
 2013-11-04  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.dwarf2/fission-base.S: Remove "gdb.dwarf/".
+	* gdb.dwarf2/fission-base.exp: Set debug-file-directory
+	before loading binfile.
+	* gdb.dwarf2/fission-loclists.S: Remove "gdb.dwarf/".
+	* gdb.dwarf2/fission-loclists.exp: Set debug-file-directory
+	before loading binfile.
+
+2013-11-04  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/foll-exec.c (main): Use BASEDIR.
 	* gdb.base/foll-exec.exp: Define BASEDIR during compilation.
 	* gdb.base/foll-vfork.c (main): Use BASEDIR.
