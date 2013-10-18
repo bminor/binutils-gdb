@@ -931,13 +931,14 @@ i386_follow_jump (struct gdbarch *gdbarch, CORE_ADDR pc)
   long delta = 0;
   int data16 = 0;
 
-  if (target_read_memory (pc, &op, 1))
+  if (target_read_code (pc, &op, 1))
     return pc;
 
   if (op == 0x66)
     {
       data16 = 1;
-      op = read_memory_unsigned_integer (pc + 1, 1, byte_order);
+
+      op = read_code_unsigned_integer (pc + 1, 1, byte_order);
     }
 
   switch (op)
@@ -999,13 +1000,13 @@ i386_analyze_struct_return (CORE_ADDR pc, CORE_ADDR current_pc,
   if (current_pc <= pc)
     return pc;
 
-  if (target_read_memory (pc, &op, 1))
+  if (target_read_code (pc, &op, 1))
     return pc;
 
   if (op != 0x58)		/* popl %eax */
     return pc;
 
-  if (target_read_memory (pc + 1, buf, 4))
+  if (target_read_code (pc + 1, buf, 4))
     return pc;
 
   if (memcmp (buf, proto1, 3) != 0 && memcmp (buf, proto2, 4) != 0)
@@ -1046,7 +1047,7 @@ i386_skip_probe (CORE_ADDR pc)
   gdb_byte buf[8];
   gdb_byte op;
 
-  if (target_read_memory (pc, &op, 1))
+  if (target_read_code (pc, &op, 1))
     return pc;
 
   if (op == 0x68 || op == 0x6a)
@@ -1116,7 +1117,7 @@ i386_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
     I386_EDI_REGNUM		/* %edi */
   };
 
-  if (target_read_memory (pc, buf, sizeof buf))
+  if (target_read_code (pc, buf, sizeof buf))
     return pc;
 
   /* Check caller-saved saved register.  The first instruction has
@@ -1205,7 +1206,7 @@ i386_match_pattern (CORE_ADDR pc, struct i386_insn pattern)
 {
   gdb_byte op;
 
-  if (target_read_memory (pc, &op, 1))
+  if (target_read_code (pc, &op, 1))
     return 0;
 
   if ((op & pattern.mask[0]) == pattern.insn[0])
@@ -1217,7 +1218,7 @@ i386_match_pattern (CORE_ADDR pc, struct i386_insn pattern)
       gdb_assert (pattern.len > 1);
       gdb_assert (pattern.len <= I386_MAX_MATCHED_INSN_LEN);
 
-      if (target_read_memory (pc + 1, buf, pattern.len - 1))
+      if (target_read_code (pc + 1, buf, pattern.len - 1))
 	return 0;
 
       for (i = 1; i < pattern.len; i++)
@@ -1347,7 +1348,7 @@ i386_skip_noop (CORE_ADDR pc)
   gdb_byte op;
   int check = 1;
 
-  if (target_read_memory (pc, &op, 1))
+  if (target_read_code (pc, &op, 1))
     return pc;
 
   while (check) 
@@ -1357,7 +1358,7 @@ i386_skip_noop (CORE_ADDR pc)
       if (op == 0x90) 
 	{
 	  pc += 1;
-	  if (target_read_memory (pc, &op, 1))
+	  if (target_read_code (pc, &op, 1))
 	    return pc;
 	  check = 1;
 	}
@@ -1374,13 +1375,13 @@ i386_skip_noop (CORE_ADDR pc)
 
       else if (op == 0x8b)
 	{
-	  if (target_read_memory (pc + 1, &op, 1))
+	  if (target_read_code (pc + 1, &op, 1))
 	    return pc;
 
 	  if (op == 0xff)
 	    {
 	      pc += 2;
-	      if (target_read_memory (pc, &op, 1))
+	      if (target_read_code (pc, &op, 1))
 		return pc;
 
 	      check = 1;
@@ -1408,7 +1409,7 @@ i386_analyze_frame_setup (struct gdbarch *gdbarch,
   if (limit <= pc)
     return limit;
 
-  if (target_read_memory (pc, &op, 1))
+  if (target_read_code (pc, &op, 1))
     return pc;
 
   if (op == 0x55)		/* pushl %ebp */
@@ -1444,7 +1445,7 @@ i386_analyze_frame_setup (struct gdbarch *gdbarch,
       if (limit <= pc + skip)
 	return limit;
 
-      if (target_read_memory (pc + skip, &op, 1))
+      if (target_read_code (pc + skip, &op, 1))
 	return pc + skip;
 
       /* The i386 prologue looks like
@@ -1465,19 +1466,19 @@ i386_analyze_frame_setup (struct gdbarch *gdbarch,
 	{
 	  /* Check for `movl %esp, %ebp' -- can be written in two ways.  */
 	case 0x8b:
-	  if (read_memory_unsigned_integer (pc + skip + 1, 1, byte_order)
+	  if (read_code_unsigned_integer (pc + skip + 1, 1, byte_order)
 	      != 0xec)
 	    return pc;
 	  pc += (skip + 2);
 	  break;
 	case 0x89:
-	  if (read_memory_unsigned_integer (pc + skip + 1, 1, byte_order)
+	  if (read_code_unsigned_integer (pc + skip + 1, 1, byte_order)
 	      != 0xe5)
 	    return pc;
 	  pc += (skip + 2);
 	  break;
 	case 0x8d: /* Check for 'lea (%ebp), %ebp'.  */
-	  if (read_memory_unsigned_integer (pc + skip + 1, 2, byte_order)
+	  if (read_code_unsigned_integer (pc + skip + 1, 2, byte_order)
 	      != 0x242c)
 	    return pc;
 	  pc += (skip + 3);
@@ -1504,38 +1505,38 @@ i386_analyze_frame_setup (struct gdbarch *gdbarch,
 
 	 NOTE: You can't subtract a 16-bit immediate from a 32-bit
 	 reg, so we don't have to worry about a data16 prefix.  */
-      if (target_read_memory (pc, &op, 1))
+      if (target_read_code (pc, &op, 1))
 	return pc;
       if (op == 0x83)
 	{
 	  /* `subl' with 8-bit immediate.  */
-	  if (read_memory_unsigned_integer (pc + 1, 1, byte_order) != 0xec)
+	  if (read_code_unsigned_integer (pc + 1, 1, byte_order) != 0xec)
 	    /* Some instruction starting with 0x83 other than `subl'.  */
 	    return pc;
 
 	  /* `subl' with signed 8-bit immediate (though it wouldn't
 	     make sense to be negative).  */
-	  cache->locals = read_memory_integer (pc + 2, 1, byte_order);
+	  cache->locals = read_code_integer (pc + 2, 1, byte_order);
 	  return pc + 3;
 	}
       else if (op == 0x81)
 	{
 	  /* Maybe it is `subl' with a 32-bit immediate.  */
-	  if (read_memory_unsigned_integer (pc + 1, 1, byte_order) != 0xec)
+	  if (read_code_unsigned_integer (pc + 1, 1, byte_order) != 0xec)
 	    /* Some instruction starting with 0x81 other than `subl'.  */
 	    return pc;
 
 	  /* It is `subl' with a 32-bit immediate.  */
-	  cache->locals = read_memory_integer (pc + 2, 4, byte_order);
+	  cache->locals = read_code_integer (pc + 2, 4, byte_order);
 	  return pc + 6;
 	}
       else if (op == 0x8d)
 	{
 	  /* The ModR/M byte is 0x64.  */
-	  if (read_memory_unsigned_integer (pc + 1, 1, byte_order) != 0x64)
+	  if (read_code_unsigned_integer (pc + 1, 1, byte_order) != 0x64)
 	    return pc;
 	  /* 'lea' with 8-bit displacement.  */
-	  cache->locals = -1 * read_memory_integer (pc + 3, 1, byte_order);
+	  cache->locals = -1 * read_code_integer (pc + 3, 1, byte_order);
 	  return pc + 4;
 	}
       else
@@ -1546,7 +1547,7 @@ i386_analyze_frame_setup (struct gdbarch *gdbarch,
     }
   else if (op == 0xc8)		/* enter */
     {
-      cache->locals = read_memory_unsigned_integer (pc + 1, 2, byte_order);
+      cache->locals = read_code_unsigned_integer (pc + 1, 2, byte_order);
       return pc + 4;
     }
 
@@ -1570,7 +1571,7 @@ i386_analyze_register_saves (CORE_ADDR pc, CORE_ADDR current_pc,
     offset -= cache->locals;
   for (i = 0; i < 8 && pc < current_pc; i++)
     {
-      if (target_read_memory (pc, &op, 1))
+      if (target_read_code (pc, &op, 1))
 	return pc;
       if (op < 0x50 || op > 0x57)
 	break;
@@ -1680,7 +1681,7 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 
   for (i = 0; i < 6; i++)
     {
-      if (target_read_memory (pc + i, &op, 1))
+      if (target_read_code (pc + i, &op, 1))
 	return pc;
 
       if (pic_pat[i] != op)
@@ -1690,12 +1691,12 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
     {
       int delta = 6;
 
-      if (target_read_memory (pc + delta, &op, 1))
+      if (target_read_code (pc + delta, &op, 1))
 	return pc;
 
       if (op == 0x89)		/* movl %ebx, x(%ebp) */
 	{
-	  op = read_memory_unsigned_integer (pc + delta + 1, 1, byte_order);
+	  op = read_code_unsigned_integer (pc + delta + 1, 1, byte_order);
 
 	  if (op == 0x5d)	/* One byte offset from %ebp.  */
 	    delta += 3;
@@ -1704,13 +1705,13 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 	  else			/* Unexpected instruction.  */
 	    delta = 0;
 
-          if (target_read_memory (pc + delta, &op, 1))
+          if (target_read_code (pc + delta, &op, 1))
 	    return pc;
 	}
 
       /* addl y,%ebx */
       if (delta > 0 && op == 0x81
-	  && read_memory_unsigned_integer (pc + delta + 1, 1, byte_order)
+	  && read_code_unsigned_integer (pc + delta + 1, 1, byte_order)
 	     == 0xc3)
 	{
 	  pc += delta + 6;
@@ -1735,13 +1736,13 @@ i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   gdb_byte op;
 
-  if (target_read_memory (pc, &op, 1))
+  if (target_read_code (pc, &op, 1))
     return pc;
   if (op == 0xe8)
     {
       gdb_byte buf[4];
 
-      if (target_read_memory (pc + 1, buf, sizeof buf) == 0)
+      if (target_read_code (pc + 1, buf, sizeof buf) == 0)
  	{
 	  /* Make sure address is computed correctly as a 32bit
 	     integer even if CORE_ADDR is 64 bit wide.  */
@@ -1834,7 +1835,7 @@ i386_frame_cache_1 (struct frame_info *this_frame,
 	  cache->saved_regs[I386_EIP_REGNUM] -= cache->base;
 	}
       else if (cache->pc != 0
-	       || target_read_memory (get_frame_pc (this_frame), buf, 1))
+	       || target_read_code (get_frame_pc (this_frame), buf, 1))
 	{
 	  /* We're in a known function, but did not find a frame
 	     setup.  Assume that the function does not use %ebp.

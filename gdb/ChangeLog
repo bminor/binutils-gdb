@@ -1,5 +1,27 @@
 2013-12-10  Yao Qi  <yao@codesourcery.com>
 
+	* corefile.c (read_code): New function.
+	(read_code_integer): New function.
+	(read_code_unsigned_integer): New function.
+	* gdbcore.h (read_code): Declare.
+	(read_code_integer): Declare.
+	(read_code_unsigned_integer): Declare.
+	* i386-tdep.c (i386_follow_jump): Call target_read_code instead
+	of target_read_memory.  Call read_code_unsigned_integer instead
+	of read_memory_unsigned_integer.
+	(i386_analyze_struct_return): Likewise.
+	(i386_skip_probe): Likewise.
+	(i386_analyze_stack_align): Likewise.
+	(i386_match_pattern): Likewise.
+	(i386_skip_noop): Likewise.
+	(i386_analyze_frame_setup): Likewise.
+	(i386_analyze_register_saves): Likewise.
+	(i386_skip_prologue): Likewise.
+	(i386_skip_main_prologue): Likewise.
+	(i386_frame_cache_1): Likewise.
+
+2013-12-10  Yao Qi  <yao@codesourcery.com>
+
 	* infrun.c: Include "target-dcache.h".
 	(prepare_for_detach): Call target_dcache_invalidate.
 	(wait_for_inferior): Likewise.
