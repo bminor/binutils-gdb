@@ -531,8 +531,8 @@ cplus_number_of_children (struct varobj *var)
         }
       adjust_value_for_child_access (&value, &type, NULL, lookup_actual_type);
 
-      if (((TYPE_CODE (type)) == TYPE_CODE_STRUCT) ||
-	  ((TYPE_CODE (type)) == TYPE_CODE_UNION))
+      if (((TYPE_CODE (type)) == TYPE_CODE_STRUCT)
+	  || ((TYPE_CODE (type)) == TYPE_CODE_UNION))
 	{
 	  int kids[3];
 

@@ -1,3 +1,7 @@
+2013-10-18  Yao Qi  <yao@codesourcery.com>
+
+	* c-varobj.c (cplus_number_of_children): Fix indentation.
+
 2013-10-17  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/15995:
