@@ -1,3 +1,9 @@
+2013-10-18  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
+
+	* gas/mips/micromips@msa-branch.d, gas/mips/msa-branch.d,
+	gas/mips/msa-branch.s: New.
+	* gas/mips/mips.exp: Run new tests.
+
 2013-10-15  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* gas/arm/neon-cov.d: Adjust output.

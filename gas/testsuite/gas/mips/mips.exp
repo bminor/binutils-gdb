@@ -1151,4 +1151,5 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "msa"		[mips_arch_list_matching mips32r2]
     run_dump_test_arches "msa64"	[mips_arch_list_matching mips64r2]
     run_dump_test_arches "msa-relax"	[mips_arch_list_matching mips32r2]
+    run_dump_test_arches "msa-branch"	[mips_arch_list_matching mips32r2]
 }
