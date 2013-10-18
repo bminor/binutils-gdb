@@ -1,3 +1,10 @@
+2013-10-18  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/16062
+	* infrun.c (handle_inferior_event): Keep going if we got a random
+	signal we should not stop for, instead of falling through to the
+	step tests.
+
 2013-10-18  Yao Qi  <yao@codesourcery.com>
 
 	* c-varobj.c (cplus_number_of_children): Fix indentation.

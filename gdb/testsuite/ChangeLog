@@ -1,3 +1,9 @@
+2013-10-18  Pedro Alves  <palves@redhat.com>
+
+	PR gdb/16062
+	* gdb.threads/stepi-random-signal.c: New file.
+	* gdb.threads/stepi-random-signal.exp: New file.
+
 2013-10-17  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.mi/mi-breakpoint-changed.exp (test_insert_delete_modify):

@@ -4715,6 +4715,17 @@ process_event_stop_test:
 	}
     }
 
+  if (ecs->random_signal)
+    {
+      if (debug_infrun)
+	 fprintf_unfiltered (gdb_stdlog,
+			     "infrun: random signal, keep going\n");
+
+      /* Signal not stepping related.  */
+      keep_going (ecs);
+      return;
+    }
+
   if (ecs->event_thread->control.step_resume_breakpoint)
     {
       if (debug_infrun)
