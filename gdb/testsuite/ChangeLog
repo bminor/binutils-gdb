@@ -1,3 +1,8 @@
+2013-10-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.base/gnu_vector.exp: Care about endianness when casting
+	scalars to vectors.
+
 2013-10-18  Tom Tromey  <tromey@redhat.com>
 
 	* lib/gdb.exp (build_executable_from_specs): Remove duplicate set
