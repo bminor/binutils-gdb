@@ -1,5 +1,14 @@
 2013-11-20  Yao Qi  <yao@codesourcery.com>
 
+	* progspace.c (struct address_space): Update comments.
+	<REGISTRY_FIELDS>: New fields.
+	DEFINE_REGISTRY for address_space.
+	(new_address_space): Call address_space_alloc_data.
+	(free_address_space): Call address_space_free_data.
+	* progspace.h: Use DECLARE_REGISTRY.
+
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (SFILES):Add target-dcache.c.
 	(HFILES_NO_SRCDIR): Add target-dcache.h.
 	(COMMON_OBS): Add target-dcache.o.

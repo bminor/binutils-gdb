@@ -304,4 +304,9 @@ extern void clear_program_space_solib_cache (struct program_space *);
 
 DECLARE_REGISTRY (program_space);
 
+/* Keep a registry of per-aspace data-pointers required by other GDB
+   modules.  */
+
+DECLARE_REGISTRY (address_space);
+
 #endif
