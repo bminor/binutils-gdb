@@ -1,5 +1,16 @@
 2013-10-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
+	PR gdb/15986
+	* gdb.base/run.c (main): gdb_get_line_number tag added for
+	commands.exp.
+	(factorial): Likewise.
+
+	* gdb.base/commands.exp (watchpoint_command_test): Use
+	gdb_get_line_number in order to determine the locations in run.c
+	where local_var is detected to go out of scope.
+
+2013-10-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
 	* gdb.base/gnu_vector.exp: Care about endianness when casting
 	scalars to vectors.
 

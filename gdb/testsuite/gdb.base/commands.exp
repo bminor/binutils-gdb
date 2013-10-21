@@ -308,6 +308,8 @@ proc watchpoint_command_test {} {
 	"end commands on watch"
 
     set test "continue with watch"
+    set lno_1 [gdb_get_line_number "commands.exp: hw local_var out of scope" "run.c"]
+    set lno_2 [gdb_get_line_number "commands.exp: local_var out of scope"    "run.c"]
     gdb_test_multiple "continue" "$test" {
 	-re "No symbol \"value\" in current context.\r\n$gdb_prompt $" {
 	    # Happens if GDB actually runs the watchpoints commands,
@@ -315,7 +317,7 @@ proc watchpoint_command_test {} {
 	    # scope.
 	    fail $test
 	}
-	-re "Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:(53|77).*$gdb_prompt $" {
+	-re "Continuing.*\[Ww\]atchpoint $wp_id deleted because the program has left the block in.*which its expression is valid.*run.c:($lno_1|$lno_2).*$gdb_prompt $" {
 	    pass $test
 	}
    }
