@@ -1,3 +1,26 @@
+2013-10-22  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (keep_going): Update comments.
+
+2013-10-22  Pedro Alves  <palves@redhat.com>
+
+	* remote.c (remote_parse_stop_reply) <'T'/'S'/'X' replies>: Map
+	invalid signal numbers to GDB_SIGNAL_UNKNOWN.
+
+2013-10-22  Pedro Alves  <palves@redhat.com>
+
+	* include/gdb/signals.def (TARGET_EXC_BAD_ACCESS): Rename to
+	GDB_EXC_BAD_ACCESS.
+	(TARGET_EXC_BAD_INSTRUCTION): Rename to GDB_EXC_BAD_INSTRUCTION.
+	(TARGET_EXC_ARITHMETIC): Rename to GDB_EXC_ARITHMETIC.
+	(TARGET_EXC_EMULATION): Rename to GDB_EXC_EMULATION.
+	(TARGET_EXC_SOFTWARE): Rename to GDB_EXC_SOFTWARE.
+	(TARGET_EXC_BREAKPOINT): Rename to GDB_EXC_BREAKPOINT.
+	(GDB_SIGNAL_LAST): Change description string.
+	* common/signals.c (gdb_signal_from_host, do_gdb_signal_to_host):
+	Adjust to signal renaming.
+	* darwin-nat.c (darwin_decode_message): Likewise.
+
 2013-10-22  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* MAINTAINERS (Write After Approval): Add myself to the list.
