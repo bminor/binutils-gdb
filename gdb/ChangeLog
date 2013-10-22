@@ -1,5 +1,10 @@
 2013-10-22  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (handle_inferior_event) <thread hop>: Don't clear or
+	set ecs->random signal.
+
+2013-10-22  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (keep_going): Update comments.
 
 2013-10-22  Pedro Alves  <palves@redhat.com>

@@ -3819,7 +3819,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  remove_single_step_breakpoints ();
 	  singlestep_breakpoints_inserted_p = 0;
 
-	  ecs->random_signal = 0;
 	  ecs->event_thread->control.trap_expected = 0;
 
 	  context_switch (saved_singlestep_ptid);
@@ -3884,7 +3883,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
          not see this breakpoint hit when stepping onto breakpoints.  */
       if (regular_breakpoint_inserted_here_p (aspace, stop_pc))
 	{
-	  ecs->random_signal = 0;
 	  if (!breakpoint_thread_match (aspace, stop_pc, ecs->ptid))
 	    thread_hop_needed = 1;
 	}
@@ -3898,7 +3896,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 				"trap for %s\n",
 				target_pid_to_str (ecs->ptid));
 
-	  ecs->random_signal = 0;
 	  /* The call to in_thread_list is necessary because PTIDs sometimes
 	     change when we go from single-threaded to multi-threaded.  If
 	     the singlestep_ptid is still in the list, assume that it is
@@ -4012,13 +4009,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	      return;
 	    }
 	}
-      else if (singlestep_breakpoints_inserted_p)
-	{
-	  ecs->random_signal = 0;
-	}
     }
-  else
-    ecs->random_signal = 1;
 
   /* See if something interesting happened to the non-current thread.  If
      so, then switch to that thread.  */
