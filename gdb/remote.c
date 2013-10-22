@@ -5720,9 +5720,16 @@ Packet: '%s'\n"),
 
       /* fall through */
     case 'S':		/* Old style status, just signal only.  */
-      event->ws.kind = TARGET_WAITKIND_STOPPED;
-      event->ws.value.sig = (enum gdb_signal)
-	(((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+      {
+	int sig;
+
+	event->ws.kind = TARGET_WAITKIND_STOPPED;
+	sig = (fromhex (buf[1]) << 4) + fromhex (buf[2]);
+	if (GDB_SIGNAL_FIRST <= sig && sig < GDB_SIGNAL_LAST)
+	  event->ws.value.sig = (enum gdb_signal) sig;
+	else
+	  event->ws.value.sig = GDB_SIGNAL_UNKNOWN;
+      }
       break;
     case 'W':		/* Target exited.  */
     case 'X':
@@ -5746,7 +5753,10 @@ Packet: '%s'\n"),
 	  {
 	    /* The remote process exited with a signal.  */
 	    event->ws.kind = TARGET_WAITKIND_SIGNALLED;
-	    event->ws.value.sig = (enum gdb_signal) value;
+	    if (GDB_SIGNAL_FIRST <= value && value < GDB_SIGNAL_LAST)
+	      event->ws.value.sig = (enum gdb_signal) value;
+	    else
+	      event->ws.value.sig = GDB_SIGNAL_UNKNOWN;
 	  }
 
 	/* If no process is specified, assume inferior_ptid.  */
