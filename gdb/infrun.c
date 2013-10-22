@@ -5720,9 +5720,9 @@ stop_stepping (struct execution_control_state *ecs)
   ecs->wait_some_more = 0;
 }
 
-/* This function handles various cases where we need to continue
-   waiting for the inferior.  */
-/* (Used to be the keep_going: label in the old wait_for_inferior).  */
+/* Called when we should continue running the inferior, because the
+   current event doesn't cause a user visible stop.  This does the
+   resuming part; waiting for the next event is done elsewhere.  */
 
 static void
 keep_going (struct execution_control_state *ecs)
@@ -5735,16 +5735,13 @@ keep_going (struct execution_control_state *ecs)
   ecs->event_thread->prev_pc
     = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
-  /* If we did not do break;, it means we should keep running the
-     inferior and not return to debugger.  */
-
   if (ecs->event_thread->control.trap_expected
       && ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_TRAP)
     {
-      /* We took a signal (which we are supposed to pass through to
-	 the inferior, else we'd not get here) and we haven't yet
-	 gotten our trap.  Simply continue.  */
-
+      /* We haven't yet gotten our trap, and either: intercepted a
+	 non-signal event (e.g., a fork); or took a signal which we
+	 are supposed to pass through to the inferior.  Simply
+	 continue.  */
       discard_cleanups (old_cleanups);
       resume (currently_stepping (ecs->event_thread),
 	      ecs->event_thread->suspend.stop_signal);
@@ -5752,34 +5749,35 @@ keep_going (struct execution_control_state *ecs)
   else
     {
       /* Either the trap was not expected, but we are continuing
-         anyway (the user asked that this signal be passed to the
-         child)
-         -- or --
-         The signal was SIGTRAP, e.g. it was our signal, but we
-         decided we should resume from it.
+	 anyway (if we got a signal, the user asked it be passed to
+	 the child)
+	 -- or --
+	 We got our expected trap, but decided we should resume from
+	 it.
 
-         We're going to run this baby now!  
+	 We're going to run this baby now!
 
 	 Note that insert_breakpoints won't try to re-insert
 	 already inserted breakpoints.  Therefore, we don't
 	 care if breakpoints were already inserted, or not.  */
-      
+
       if (ecs->event_thread->stepping_over_breakpoint)
 	{
 	  struct regcache *thread_regcache = get_thread_regcache (ecs->ptid);
 
 	  if (!use_displaced_stepping (get_regcache_arch (thread_regcache)))
-	    /* Since we can't do a displaced step, we have to remove
-	       the breakpoint while we step it.  To keep things
-	       simple, we remove them all.  */
-	    remove_breakpoints ();
+	    {
+	      /* Since we can't do a displaced step, we have to remove
+		 the breakpoint while we step it.  To keep things
+		 simple, we remove them all.  */
+	      remove_breakpoints ();
+	    }
 	}
       else
 	{
 	  volatile struct gdb_exception e;
 
-	  /* Stop stepping when inserting breakpoints
-	     has failed.  */
+	  /* Stop stepping if inserting breakpoints fails.  */
 	  TRY_CATCH (e, RETURN_MASK_ERROR)
 	    {
 	      insert_breakpoints ();
@@ -5795,18 +5793,16 @@ keep_going (struct execution_control_state *ecs)
       ecs->event_thread->control.trap_expected
 	= ecs->event_thread->stepping_over_breakpoint;
 
-      /* Do not deliver SIGNAL_TRAP (except when the user explicitly
-         specifies that such a signal should be delivered to the
-         target program).
-
-         Typically, this would occure when a user is debugging a
-         target monitor on a simulator: the target monitor sets a
-         breakpoint; the simulator encounters this break-point and
-         halts the simulation handing control to GDB; GDB, noteing
-         that the break-point isn't valid, returns control back to the
-         simulator; the simulator then delivers the hardware
-         equivalent of a SIGNAL_TRAP to the program being debugged.  */
-
+      /* Do not deliver GDB_SIGNAL_TRAP (except when the user
+	 explicitly specifies that such a signal should be delivered
+	 to the target program).  Typically, that would occur when a
+	 user is debugging a target monitor on a simulator: the target
+	 monitor sets a breakpoint; the simulator encounters this
+	 breakpoint and halts the simulation handing control to GDB;
+	 GDB, noting that the stop address doesn't map to any known
+	 breakpoint, returns control back to the simulator; the
+	 simulator then delivers the hardware equivalent of a
+	 GDB_SIGNAL_TRAP to the program being debugged.	 */
       if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
 	  && !signal_program[ecs->event_thread->suspend.stop_signal])
 	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
