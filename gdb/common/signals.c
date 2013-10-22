@@ -306,27 +306,27 @@ gdb_signal_from_host (int hostsig)
   /* Mach exceptions.  Assumes that the values for EXC_ are positive! */
 #if defined (EXC_BAD_ACCESS) && defined (_NSIG)
   if (hostsig == _NSIG + EXC_BAD_ACCESS)
-    return TARGET_EXC_BAD_ACCESS;
+    return GDB_EXC_BAD_ACCESS;
 #endif
 #if defined (EXC_BAD_INSTRUCTION) && defined (_NSIG)
   if (hostsig == _NSIG + EXC_BAD_INSTRUCTION)
-    return TARGET_EXC_BAD_INSTRUCTION;
+    return GDB_EXC_BAD_INSTRUCTION;
 #endif
 #if defined (EXC_ARITHMETIC) && defined (_NSIG)
   if (hostsig == _NSIG + EXC_ARITHMETIC)
-    return TARGET_EXC_ARITHMETIC;
+    return GDB_EXC_ARITHMETIC;
 #endif
 #if defined (EXC_EMULATION) && defined (_NSIG)
   if (hostsig == _NSIG + EXC_EMULATION)
-    return TARGET_EXC_EMULATION;
+    return GDB_EXC_EMULATION;
 #endif
 #if defined (EXC_SOFTWARE) && defined (_NSIG)
   if (hostsig == _NSIG + EXC_SOFTWARE)
-    return TARGET_EXC_SOFTWARE;
+    return GDB_EXC_SOFTWARE;
 #endif
 #if defined (EXC_BREAKPOINT) && defined (_NSIG)
   if (hostsig == _NSIG + EXC_BREAKPOINT)
-    return TARGET_EXC_BREAKPOINT;
+    return GDB_EXC_BREAKPOINT;
 #endif
 
 #if defined (SIGINFO)
@@ -562,27 +562,27 @@ do_gdb_signal_to_host (enum gdb_signal oursig,
 
       /* Mach exceptions.  Assumes that the values for EXC_ are positive! */
 #if defined (EXC_BAD_ACCESS) && defined (_NSIG)
-    case TARGET_EXC_BAD_ACCESS:
+    case GDB_EXC_BAD_ACCESS:
       return _NSIG + EXC_BAD_ACCESS;
 #endif
 #if defined (EXC_BAD_INSTRUCTION) && defined (_NSIG)
-    case TARGET_EXC_BAD_INSTRUCTION:
+    case GDB_EXC_BAD_INSTRUCTION:
       return _NSIG + EXC_BAD_INSTRUCTION;
 #endif
 #if defined (EXC_ARITHMETIC) && defined (_NSIG)
-    case TARGET_EXC_ARITHMETIC:
+    case GDB_EXC_ARITHMETIC:
       return _NSIG + EXC_ARITHMETIC;
 #endif
 #if defined (EXC_EMULATION) && defined (_NSIG)
-    case TARGET_EXC_EMULATION:
+    case GDB_EXC_EMULATION:
       return _NSIG + EXC_EMULATION;
 #endif
 #if defined (EXC_SOFTWARE) && defined (_NSIG)
-    case TARGET_EXC_SOFTWARE:
+    case GDB_EXC_SOFTWARE:
       return _NSIG + EXC_SOFTWARE;
 #endif
 #if defined (EXC_BREAKPOINT) && defined (_NSIG)
-    case TARGET_EXC_BREAKPOINT:
+    case GDB_EXC_BREAKPOINT:
       return _NSIG + EXC_BREAKPOINT;
 #endif
 

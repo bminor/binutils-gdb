@@ -897,16 +897,16 @@ darwin_decode_message (mach_msg_header_t *hdr,
       switch (thread->event.ex_type)
 	{
 	case EXC_BAD_ACCESS:
-	  status->value.sig = TARGET_EXC_BAD_ACCESS;
+	  status->value.sig = GDB_EXC_BAD_ACCESS;
 	  break;
 	case EXC_BAD_INSTRUCTION:
-	  status->value.sig = TARGET_EXC_BAD_INSTRUCTION;
+	  status->value.sig = GDB_EXC_BAD_INSTRUCTION;
 	  break;
 	case EXC_ARITHMETIC:
-	  status->value.sig = TARGET_EXC_ARITHMETIC;
+	  status->value.sig = GDB_EXC_ARITHMETIC;
 	  break;
 	case EXC_EMULATION:
-	  status->value.sig = TARGET_EXC_EMULATION;
+	  status->value.sig = GDB_EXC_EMULATION;
 	  break;
 	case EXC_SOFTWARE:
 	  if (thread->event.ex_data[0] == EXC_SOFT_SIGNAL)
@@ -928,11 +928,11 @@ darwin_decode_message (mach_msg_header_t *hdr,
 		}
 	    }
 	  else
-	    status->value.sig = TARGET_EXC_SOFTWARE;
+	    status->value.sig = GDB_EXC_SOFTWARE;
 	  break;
 	case EXC_BREAKPOINT:
 	  /* Many internal GDB routines expect breakpoints to be reported
-	     as GDB_SIGNAL_TRAP, and will report TARGET_EXC_BREAKPOINT
+	     as GDB_SIGNAL_TRAP, and will report GDB_EXC_BREAKPOINT
 	     as a spurious signal.  */
 	  status->value.sig = GDB_SIGNAL_TRAP;
 	  break;
