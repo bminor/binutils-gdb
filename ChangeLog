@@ -585,7 +585,7 @@
 
 	* config.sub: Import these changes from the config project:
 
-	2011-10-08  Joern Rennecke <joern.rennecke@embecosm.com>
+	2011-10-08  Joern Rennecke  <joern.rennecke@embecosm.com>
 	    Ben Elliston  <bje@gnu.org>
 
 	* config.sub (epiphany): New.
