@@ -135,9 +135,9 @@ command_from_pid (char *command, int maxlen, PID_T pid)
       /* sizeof (cmd) should be greater or equal to TASK_COMM_LEN (in
 	 include/linux/sched.h in the Linux kernel sources) plus two
 	 (for the brackets).  */
-      char cmd[32]; 
+      char cmd[18];
       PID_T stat_pid;
-      int items_read = fscanf (fp, "%lld %32s", &stat_pid, cmd);
+      int items_read = fscanf (fp, "%lld %17s", &stat_pid, cmd);
 	  
       if (items_read == 2 && pid == stat_pid)
 	{
@@ -871,29 +871,22 @@ print_sockets (unsigned short family, int tcp, struct buffer *buffer)
 	  if (fgets (buf, sizeof (buf), fp))
 	    {
 	      uid_t uid;
-	      unsigned long tlen, inode;
-	      int sl, timeout;
 	      unsigned int local_port, remote_port, state;
-	      unsigned int txq, rxq, trun, retn;
 	      char local_address[NI_MAXHOST], remote_address[NI_MAXHOST];
-	      char extra[512];
 	      int result;
 
+#if NI_MAXHOST <= 32
+#error "local_address and remote_address buffers too small"
+#endif
+
 	      result = sscanf (buf,
-			       "%d: %33[0-9A-F]:%X %33[0-9A-F]:%X %X %X:%X %X:%lX %X %d %d %lu %512s\n",
-			       &sl,
+			       "%*d: %32[0-9A-F]:%X %32[0-9A-F]:%X %X %*X:%*X %*X:%*X %*X %d %*d %*u %*s\n",
 			       local_address, &local_port,
 			       remote_address, &remote_port,
 			       &state,
-			       &txq, &rxq,
-			       &trun, &tlen,
-			       &retn,
-			       &uid,
-			       &timeout,
-			       &inode,
-			       extra);
+			       &uid);
 	      
-	      if (result == 15)
+	      if (result == 6)
 		{
 		  union socket_addr locaddr, remaddr;
 		  size_t addr_size;
@@ -1464,19 +1457,42 @@ linux_xfer_osdata_modules (gdb_byte *readbuf,
 	    {
 	      if (fgets (buf, sizeof (buf), fp))
 		{
-		  char name[64], dependencies[256], status[16];
+		  char *name, *dependencies, *status, *tmp;
 		  unsigned int size;
 		  unsigned long long address;
 		  int uses;
-		  int items_read;
-		  
-		  items_read = sscanf (buf,
-				       "%64s %d %d %256s %16s 0x%llx",
-				       name, &size, &uses,
-				       dependencies, status, &address);
 
-		  if (items_read == 6)
-		    buffer_xml_printf (
+		  name = strtok (buf, " ");
+		  if (name == NULL)
+		    continue;
+
+		  tmp = strtok (NULL, " ");
+		  if (tmp == NULL)
+		    continue;
+		  if (sscanf (tmp, "%u", &size) != 1)
+		    continue;
+
+		  tmp = strtok (NULL, " ");
+		  if (tmp == NULL)
+		    continue;
+		  if (sscanf (tmp, "%d", &uses) != 1)
+		    continue;
+
+		  dependencies = strtok (NULL, " ");
+		  if (dependencies == NULL)
+		    continue;
+
+		  status = strtok (NULL, " ");
+		  if (status == NULL)
+		    continue;
+
+		  tmp = strtok (NULL, "\n");
+		  if (tmp == NULL)
+		    continue;
+		  if (sscanf (tmp, "%llx", &address) != 1)
+		    continue;
+
+		  buffer_xml_printf (
 			&buffer,
 			"<item>"
 			"<column name=\"name\">%s</column>"

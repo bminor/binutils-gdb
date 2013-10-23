@@ -1,3 +1,16 @@
+2013-10-23  Gary Benson  <gbenson@redhat.com>
+
+	PR 16013
+	* common/linux-osdata.c (command_from_pid): Reduced size of cmd
+	from 32 to 18.  Adjusted fscanf format string accordingly.
+	(Avoids leaving cmd unterminated.)
+	(print_sockets): Do not parse tlen, inode, sl, timeout, txq, rxq,
+	trun, retn or extra.  (Avoids leaving extra unterminated.)  Check
+	that local_address and remote_address will not overflow.
+	(linux_xfer_osdata_modules): Parse lines using strtok to avoid
+	leaving dependencies unterminated.  Parse size as "%u" to match
+	definition.
+
 2013-10-22  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (handle_inferior_event) <thread hop>: Don't clear or
