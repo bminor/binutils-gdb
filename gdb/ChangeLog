@@ -1,3 +1,16 @@
+2013-10-23  Pedro Alves  <palves@redhat.com>
+
+	* common/gdb_signals.h (gdb_signal_to_symbol_string): Declare.
+	* common/signals.c: Include "gdb_assert.h".
+	(signals): New field 'symbol'.
+	(SET): Use the 'symbol' parameter.
+	(gdb_signal_to_symbol_string): New function.
+	* infrun.c (handle_inferior_event) <random signal>: In debug
+	output, print the random signal enum as string in addition to its
+	number.
+	* target/waitstatus.c (target_waitstatus_to_string): Print the
+	signal's enum value as string instead of the (POSIX) signal name.
+
 2013-10-23  Gary Benson  <gbenson@redhat.com>
 
 	PR 16013

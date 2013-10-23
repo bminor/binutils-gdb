@@ -42,6 +42,10 @@ extern int gdb_signal_to_host_p (enum gdb_signal signo);
 extern enum gdb_signal gdb_signal_from_host (int);
 extern int gdb_signal_to_host (enum gdb_signal);
 
+/* Return the enum symbol name of SIG as a string, to use in debug
+   output.  */
+extern const char *gdb_signal_to_symbol_string (enum gdb_signal sig);
+
 /* Return the string for a signal.  */
 extern const char *gdb_signal_to_string (enum gdb_signal);
 

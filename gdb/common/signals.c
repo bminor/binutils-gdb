@@ -29,6 +29,7 @@
 #endif
 
 #include "gdb_signals.h"
+#include "gdb_assert.h"
 
 struct gdbarch;
 
@@ -50,15 +51,23 @@ struct gdbarch;
    gdb_signal.  */
 
 static const struct {
+  const char *symbol;
   const char *name;
   const char *string;
   } signals [] =
 {
-#define SET(symbol, constant, name, string) { name, string },
+#define SET(symbol, constant, name, string) { #symbol, name, string },
 #include "gdb/signals.def"
 #undef SET
 };
 
+const char *
+gdb_signal_to_symbol_string (enum gdb_signal sig)
+{
+  gdb_assert ((int) sig >= GDB_SIGNAL_FIRST && (int) sig <= GDB_SIGNAL_LAST);
+
+  return signals[sig].symbol;
+}
 
 /* Return the string for a signal.  */
 const char *

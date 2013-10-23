@@ -1749,9 +1749,10 @@ resume (int step, enum gdb_signal sig)
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
-                        "infrun: resume (step=%d, signal=%d), "
+			"infrun: resume (step=%d, signal=%s), "
 			"trap_expected=%d, current thread [%s] at %s\n",
- 			step, sig, tp->control.trap_expected,
+			step, gdb_signal_to_symbol_string (sig),
+			tp->control.trap_expected,
 			target_pid_to_str (inferior_ptid),
 			paddress (gdbarch, pc));
 
@@ -2200,8 +2201,9 @@ proceed (CORE_ADDR addr, enum gdb_signal siggnal, int step)
 
   if (debug_infrun)
     fprintf_unfiltered (gdb_stdlog,
-			"infrun: proceed (addr=%s, signal=%d, step=%d)\n",
-			paddress (gdbarch, addr), siggnal, step);
+			"infrun: proceed (addr=%s, signal=%s, step=%d)\n",
+			paddress (gdbarch, addr),
+			gdb_signal_to_symbol_string (siggnal), step);
 
   if (non_stop)
     /* In non-stop, each thread is handled individually.  The context
@@ -4313,10 +4315,11 @@ process_event_stop_test:
       /* Signal not for debugging purposes.  */
       int printed = 0;
       struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
+      enum gdb_signal stop_signal = ecs->event_thread->suspend.stop_signal;
 
       if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: random signal %d\n",
-			     ecs->event_thread->suspend.stop_signal);
+	 fprintf_unfiltered (gdb_stdlog, "infrun: random signal (%s)\n",
+			     gdb_signal_to_symbol_string (stop_signal));
 
       stopped_by_random_signal = 1;
 
