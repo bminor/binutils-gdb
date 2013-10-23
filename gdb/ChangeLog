@@ -1,5 +1,14 @@
 2013-12-10  Yao Qi  <yao@codesourcery.com>
 
+	* amd64-tdep.c (amd64_analyze_stack_align): Call
+	target_read_code instead of target_read_memory.
+	(amd64_analyze_prologue): Call read_code_unsigned_integer
+	instead of read_memory_unsigned_integer.  Call read_code
+	instead of read_memory.
+	(amd64_skip_xmm_prologue): Likewise.
+
+2013-12-10  Yao Qi  <yao@codesourcery.com>
+
 	* corefile.c (read_code): New function.
 	(read_code_integer): New function.
 	(read_code_unsigned_integer): New function.

@@ -1761,7 +1761,7 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   int reg, r;
   int offset, offset_and;
 
-  if (target_read_memory (pc, buf, sizeof buf))
+  if (target_read_code (pc, buf, sizeof buf))
     return pc;
 
   /* Check caller-saved saved register.  The first instruction has
@@ -2104,7 +2104,7 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
   else
     pc = amd64_analyze_stack_align (pc, current_pc, cache);
 
-  op = read_memory_unsigned_integer (pc, 1, byte_order);
+  op = read_code_unsigned_integer (pc, 1, byte_order);
 
   if (op == 0x55)		/* pushq %rbp */
     {
@@ -2117,7 +2117,7 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
       if (current_pc <= pc + 1)
         return current_pc;
 
-      read_memory (pc + 1, buf, 3);
+      read_code (pc + 1, buf, 3);
 
       /* Check for `movq %rsp, %rbp'.  */
       if (memcmp (buf, mov_rsp_rbp_1, 3) == 0
@@ -2185,7 +2185,7 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
     return pc;
 
   /* START_PC can be from overlayed memory, ignored here.  */
-  if (target_read_memory (next_sal.pc - 4, buf, sizeof (buf)) != 0)
+  if (target_read_code (next_sal.pc - 4, buf, sizeof (buf)) != 0)
     return pc;
 
   /* test %al,%al */
