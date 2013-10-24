@@ -11157,6 +11157,11 @@ remote_traceframe_info (void)
 {
   char *text;
 
+  /* If current traceframe is not selected, don't bother the remote
+     stub.  */
+  if (get_traceframe_number () < 0)
+    return NULL;
+
   text = target_read_stralloc (&current_target,
 			       TARGET_OBJECT_TRACEFRAME_INFO, NULL);
   if (text != NULL)

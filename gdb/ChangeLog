@@ -1,5 +1,10 @@
 2013-10-25  Yao Qi  <yao@codesourcery.com>
 
+	* remote.c (remote_traceframe_info): Return early if
+	traceframe is not selected.
+
+2013-10-25  Yao Qi  <yao@codesourcery.com>
+
 	* tracepoint.c (traceframe_fun): Remove.
 	(traceframe_sal): Remove.
 	(set_traceframe_context): Add local variables.
