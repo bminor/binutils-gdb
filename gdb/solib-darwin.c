@@ -88,10 +88,7 @@ static const struct program_space_data *solib_darwin_pspace_data;
 static void
 darwin_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct darwin_info *info;
-
-  info = program_space_data (pspace, solib_darwin_pspace_data);
-  xfree (info);
+  xfree (arg);
 }
 
 /* Get the current darwin data.  If none is found yet, add it now.  This

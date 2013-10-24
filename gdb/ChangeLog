@@ -1,3 +1,15 @@
+2013-10-29  Yao Qi  <yao@codesourcery.com>
+
+	* auto-load.c (auto_load_pspace_data_cleanup): Get data from
+	parameter 'arg' instead of from program_space_data.
+	* objfiles.c (objfiles_pspace_data_cleanup): Likewise.
+	* solib-darwin.c (darwin_pspace_data_cleanup): Likewise.
+	* solib-dsbt.c (dsbt_pspace_data_cleanup): Likewise.
+	* solib-svr4.c (svr4_pspace_data_cleanup): Likewise.
+	* inflow.c (inflow_inferior_data_cleanup): Get data from
+	parameter 'arg' instead of inferior_data.
+	* registry.h: Add comments.
+
 2013-10-28  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (watchpoints_triggered)

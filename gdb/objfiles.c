@@ -85,14 +85,10 @@ static const struct program_space_data *objfiles_pspace_data;
 static void
 objfiles_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct objfile_pspace_info *info;
+  struct objfile_pspace_info *info = arg;
 
-  info = program_space_data (pspace, objfiles_pspace_data);
-  if (info != NULL)
-    {
-      xfree (info->sections);
-      xfree (info);
-    }
+  xfree (info->sections);
+  xfree (info);
 }
 
 /* Get the current svr4 data.  If none is found yet, add it now.  This

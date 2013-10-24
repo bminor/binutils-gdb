@@ -407,11 +407,7 @@ free_solib_list (struct svr4_info *info)
 static void
 svr4_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct svr4_info *info;
-
-  info = program_space_data (pspace, solib_svr4_pspace_data);
-  if (info == NULL)
-    return;
+  struct svr4_info *info = arg;
 
   free_probes_table (info);
   free_solib_list (info);

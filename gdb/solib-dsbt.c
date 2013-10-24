@@ -166,10 +166,7 @@ static const struct program_space_data *solib_dsbt_pspace_data;
 static void
 dsbt_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct dsbt_info *info;
-
-  info = program_space_data (pspace, solib_dsbt_pspace_data);
-  xfree (info);
+  xfree (arg);
 }
 
 /* Get the current dsbt data.  If none is found yet, add it now.  This

@@ -572,15 +572,11 @@ static const struct program_space_data *auto_load_pspace_data;
 static void
 auto_load_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct auto_load_pspace_info *info;
+  struct auto_load_pspace_info *info = arg;
 
-  info = program_space_data (pspace, auto_load_pspace_data);
-  if (info != NULL)
-    {
-      if (info->loaded_scripts)
-	htab_delete (info->loaded_scripts);
-      xfree (info);
-    }
+  if (info->loaded_scripts)
+    htab_delete (info->loaded_scripts);
+  xfree (info);
 }
 
 /* Get the current autoload data.  If none is found yet, add it now.  This
