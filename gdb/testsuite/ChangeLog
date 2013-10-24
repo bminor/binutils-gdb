@@ -1,5 +1,11 @@
 2013-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
+	* lib/gdb.exp (gdb_finish): Send a kill request to `gdbserver'
+	if in the persistent mode.
+	* gdb.trace/disconnected-tracing.exp: Reconnect before completion.
+
+2013-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
 	* lib/gdb.exp (gdb_gcore_cmd): Also handle a "Target does not
 	support core file generation" reply.
 
