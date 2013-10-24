@@ -3183,7 +3183,7 @@ proc gdb_gcore_cmd {core test} {
 	    verbose -log "'gcore' command undefined in gdb_gcore_cmd"
 	}
 
-	-re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
+	-re "(?:Can't create a corefile|Target does not support core file generation\\.)\[\r\n\]+$gdb_prompt $" {
 	    unsupported $test
 	}
     }

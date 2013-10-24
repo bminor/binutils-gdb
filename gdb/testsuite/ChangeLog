@@ -1,3 +1,8 @@
+2013-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/gdb.exp (gdb_gcore_cmd): Also handle a "Target does not
+	support core file generation" reply.
+
 2013-10-21  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	PR gdb/15986

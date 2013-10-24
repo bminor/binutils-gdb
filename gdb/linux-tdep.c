@@ -1209,14 +1209,15 @@ linux_corefile_thread_callback (struct thread_info *info, void *data)
 				       args->note_data, args->note_size,
 				       args->stop_signal);
 
-      if (siginfo_data != NULL)
-	{
+      /* Don't return anything if we got no register information above,
+         such a core file is useless.  */
+      if (args->note_data != NULL)
+	if (siginfo_data != NULL)
 	  args->note_data = elfcore_write_note (args->obfd,
 						args->note_data,
 						args->note_size,
 						"CORE", NT_SIGINFO,
 						siginfo_data, siginfo_size);
-	}
 
       do_cleanups (old_chain);
     }
