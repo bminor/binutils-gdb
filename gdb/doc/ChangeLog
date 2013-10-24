@@ -1,3 +1,7 @@
+2013-10-24  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Starting): Document set/show startup-with-shell.
+
 2013-10-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Shared Library GDB/MI Catchpoint Commands):

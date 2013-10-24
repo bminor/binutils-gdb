@@ -137,9 +137,6 @@ inf_ptrace_create_inferior (struct target_ops *ops,
 
   discard_cleanups (back_to);
 
-  /* START_INFERIOR_TRAPS_EXPECTED is defined in inferior.h, and will
-     be 1 or 2 depending on whether we're starting without or with a
-     shell.  */
   startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
 
   /* On some targets, there must be some explicit actions taken after

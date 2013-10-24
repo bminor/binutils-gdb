@@ -257,6 +257,25 @@ extern void notice_new_inferior (ptid_t, int, int);
 extern struct value *get_return_value (struct value *function,
                                        struct type *value_type);
 
+/* Whether to start up the debuggee under a shell.
+
+   If startup-with-shell is set, GDB's "run" will attempt to start up
+   the debuggee under a shell.
+
+   This is in order for argument-expansion to occur.  E.g.,
+
+   (gdb) run *
+
+   The "*" gets expanded by the shell into a list of files.
+
+   While this is a nice feature, it may be handy to bypass the shell
+   in some cases.  To disable this feature, do "set startup-with-shell
+   false".
+
+   The catch-exec traps expected during start-up will be one more if
+   the target is started up with a shell.  */
+extern int startup_with_shell;
+
 /* Address at which inferior stopped.  */
 
 extern CORE_ADDR stop_pc;
@@ -346,25 +365,12 @@ struct displaced_step_closure *get_displaced_step_closure_by_addr (CORE_ADDR add
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-/* If STARTUP_WITH_SHELL is set, GDB's "run"
-   will attempts to start up the debugee under a shell.
-   This is in order for argument-expansion to occur.  E.g.,
-   (gdb) run *
-   The "*" gets expanded by the shell into a list of files.
-   While this is a nice feature, it turns out to interact badly
-   with some of the catch-fork/catch-exec features we have added.
-   In particular, if the shell does any fork/exec's before
-   the exec of the target program, that can confuse GDB.
-   To disable this feature, set STARTUP_WITH_SHELL to 0.
-   To enable this feature, set STARTUP_WITH_SHELL to 1.
-   The catch-exec traps expected during start-up will
-   be 1 if target is not started up with a shell, 2 if it is.
-   - RT
-   If you disable this, you need to decrement
-   START_INFERIOR_TRAPS_EXPECTED in tm.h.  */
-#define STARTUP_WITH_SHELL 1
+/* Number of traps that happen between exec'ing the shell to run an
+   inferior and when we finally get to the inferior code, not counting
+   the exec for the shell.  This is 1 on most implementations.
+   Overridden in nm.h files.  */
 #if !defined(START_INFERIOR_TRAPS_EXPECTED)
-#define START_INFERIOR_TRAPS_EXPECTED	2
+#define START_INFERIOR_TRAPS_EXPECTED	1
 #endif
 
 struct private_inferior;

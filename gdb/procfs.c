@@ -4451,8 +4451,6 @@ procfs_init_inferior (struct target_ops *ops, int pid)
   thread_change_ptid (pid_to_ptid (pid),
 		      ptid_build (pid, lwpid, 0));
 
-  /* Typically two, one trap to exec the shell, one to exec the
-     program being debugged.  Defined by "inferior.h".  */
   startup_inferior (START_INFERIOR_TRAPS_EXPECTED);
 
 #ifdef SYS_syssgi

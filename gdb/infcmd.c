@@ -147,6 +147,10 @@ enum stop_stack_kind stop_stack_dummy;
 
 int stopped_by_random_signal;
 
+/* See inferior.h.  */
+
+int startup_with_shell = 1;
+
 
 /* Accessor routines.  */
 
@@ -255,7 +259,7 @@ construct_inferior_arguments (int argc, char **argv)
 {
   char *result;
 
-  if (STARTUP_WITH_SHELL)
+  if (startup_with_shell)
     {
 #ifdef __MINGW32__
       /* This holds all the characters considered special to the

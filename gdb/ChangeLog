@@ -1,3 +1,21 @@
+2013-10-24  Pedro Alves   <palves@redhat.com>
+
+	* NEWS (New options): Mention set/show startup-with-shell.
+	* config/alpha/nm-osf3.h (START_INFERIOR_TRAPS_EXPECTED): Set to 2
+	instead of 3.
+	* fork-child.c (fork_inferior, startup_inferior): Handle 'set
+	startup-with-shell'.
+	(show_startup_with_shell): New function.
+	(_initialize_fork_child): Register the set/show startup-with-shell
+	commands.
+	* inf-ptrace.c (inf_ptrace_create_inferior): Remove comment.
+	* inf-ttrace.c (inf_ttrace_him): Remove comment.
+	* procfs.c (procfs_init_inferior): Remove comment.
+	* infcmd.c (startup_with_shell): New global.
+	* inferior.h (startup_with_shell): Declare global.
+	(STARTUP_WITH_SHELL): Delete.
+	(START_INFERIOR_TRAPS_EXPECTED): Set to 1 by default instead of 2.
+
 2013-10-23  Pedro Alves  <palves@redhat.com>
 
 	* common/gdb_signals.h (gdb_signal_to_symbol_string): Declare.

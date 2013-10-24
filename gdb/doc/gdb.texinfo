@@ -2011,8 +2011,10 @@ is used to pass the arguments, so that you may use normal conventions
 (such as wildcard expansion or variable substitution) in describing
 the arguments.
 In Unix systems, you can control which shell is used with the
-@code{SHELL} environment variable.
-@xref{Arguments, ,Your Program's Arguments}.
+@code{SHELL} environment variable.  If you do not define @code{SHELL},
+@value{GDBN} uses the default shell (@file{/bin/sh}).  You can disable
+use of any shell with the @code{set startup-with-shell} command (see
+below for details).
 
 @item The @emph{environment.}
 Your program normally inherits its environment from @value{GDBN}, but you can
@@ -2114,6 +2116,32 @@ environment:
 
 This command is available when debugging locally on most targets, excluding
 @sc{djgpp}, Cygwin, MS Windows, and QNX Neutrino.
+
+@kindex set startup-with-shell
+@item set startup-with-shell
+@itemx set startup-with-shell on
+@itemx set startup-with-shell off
+@itemx show set startup-with-shell
+On Unix systems, by default, if a shell is available on your target,
+@value{GDBN}) uses it to start your program.  Arguments of the
+@code{run} command are passed to the shell, which does variable
+substitution, expands wildcard characters and performs redirection of
+I/O.  In some circumstances, it may be useful to disable such use of a
+shell, for example, when debugging the shell itself or diagnosing
+startup failures such as:
+
+@smallexample
+(@value{GDBP}) run
+Starting program: ./a.out
+During startup program terminated with signal SIGSEGV, Segmentation fault.
+@end smallexample
+
+@noindent
+which indicates the shell or the wrapper specified with
+@samp{exec-wrapper} crashed, not your program.  Most often, this is
+caused by something odd in your shell's initialization file---such as
+@file{.cshrc} for C-shell, $@file{.zshenv} for the Z shell, or the
+file specified in the @samp{BASH_ENV} environment variable for BASH.
 
 @kindex set disable-randomization
 @item set disable-randomization

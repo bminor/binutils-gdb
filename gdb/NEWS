@@ -98,6 +98,11 @@ set range-stepping
 show range-stepping
   Control whether target-assisted range stepping is enabled.
 
+set startup-with-shell
+show startup-with-shell
+  Specifies whether Unix child processes are started via a shell or
+  directly.
+
 * You can now use a literal value 'unlimited' for options that
   interpret 0 or -1 as meaning "unlimited".  E.g., "set
   trace-buffer-size unlimited" is now an alias for "set

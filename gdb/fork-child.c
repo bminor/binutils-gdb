@@ -150,11 +150,11 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   if (exec_file == 0)
     exec_file = get_exec_file (1);
 
-  /* STARTUP_WITH_SHELL is defined in inferior.h.  If 0,e we'll just
-    do a fork/exec, no shell, so don't bother figuring out what
-    shell.  */
+  /* 'startup_with_shell' is declared in inferior.h and bound to the
+     "set startup-with-shell" option.  If 0, we'll just do a
+     fork/exec, no shell, so don't bother figuring out what shell.  */
   shell_file = shell_file_arg;
-  if (STARTUP_WITH_SHELL)
+  if (startup_with_shell)
     {
       /* Figure out what shell to start up the user program under.  */
       if (shell_file == NULL)
@@ -419,6 +419,12 @@ startup_inferior (int ntraps)
   int terminal_initted = 0;
   ptid_t resume_ptid;
 
+  if (startup_with_shell)
+    {
+      /* One trap extra for exec'ing the shell.  */
+      pending_execs++;
+    }
+
   if (target_supports_multi_process ())
     resume_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
   else
@@ -533,6 +539,15 @@ unset_exec_wrapper_command (char *args, int from_tty)
   exec_wrapper = NULL;
 }
 
+static void
+show_startup_with_shell (struct ui_file *file, int from_tty,
+			 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Use of shell to start subprocesses is %s.\n"),
+		    value);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 extern initialize_file_ftype _initialize_fork_child;
 
@@ -550,4 +565,12 @@ Show the wrapper for running programs."), NULL,
   add_cmd ("exec-wrapper", class_run, unset_exec_wrapper_command,
            _("Disable use of an execution wrapper."),
            &unsetlist);
+
+  add_setshow_boolean_cmd ("startup-with-shell", class_support,
+			   &startup_with_shell, _("\
+Set use of shell to start subprocesses.  The default is on."), _("\
+Show use of shell to start subprocesses."), NULL,
+			   NULL,
+			   show_startup_with_shell,
+			   &setlist, &showlist);
 }
