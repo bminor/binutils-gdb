@@ -1,3 +1,10 @@
+2013-10-24  "Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* linux-tdep.c (linux_corefile_thread_data): Remove `num_notes'
+	member.
+	(linux_corefile_thread_callback): Update accordingly.
+	(linux_make_corefile_notes): Likewise.
+
 2013-10-24  Pedro Alves   <palves@redhat.com>
 
 	* NEWS (New options): Mention set/show startup-with-shell.
