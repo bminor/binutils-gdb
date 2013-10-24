@@ -132,12 +132,6 @@ static int traceframe_number;
 /* Tracepoint for last traceframe collected.  */
 static int tracepoint_number;
 
-/* Symbol for function for last traceframe collected.  */
-static struct symbol *traceframe_fun;
-
-/* Symtab and line for last traceframe collected.  */
-static struct symtab_and_line traceframe_sal;
-
 /* The traceframe info of the current traceframe.  NULL if we haven't
    yet attempted to fetch it, or if the target does not support
    fetching this object, or if we're not inspecting a traceframe
@@ -268,6 +262,8 @@ static void
 set_traceframe_context (struct frame_info *trace_frame)
 {
   CORE_ADDR trace_pc;
+  struct symbol *traceframe_fun;
+  struct symtab_and_line traceframe_sal;
 
   /* Save as globals for internal use.  */
   if (trace_frame != NULL
