@@ -1,3 +1,9 @@
+2013-10-25  Yao Qi  <yao@codesourcery.com>
+
+	* tracepoint.c (traceframe_fun): Remove.
+	(traceframe_sal): Remove.
+	(set_traceframe_context): Add local variables.
+
 2013-10-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* varobj.h (struct lang_varobj_ops): Remove spaces between '*'
