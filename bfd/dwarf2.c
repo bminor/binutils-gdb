@@ -3566,7 +3566,7 @@ find_line (bfd *abfd,
       const char * local_functionname = NULL;
       unsigned int local_linenumber = 0;
       unsigned int local_discriminator = 0;
-      
+
       for (each = stash->all_comp_units; each; each = each->next_unit)
 	{
 	  bfd_vma range = (bfd_vma) -1;
