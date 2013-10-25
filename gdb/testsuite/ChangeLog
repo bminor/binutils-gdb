@@ -1,3 +1,9 @@
+2013-10-25  Pedro Alves  <palves@redhat.com>
+
+	* gdb.cp/m-static.exp: Adjust expected output of printing a
+	nonexistent or optimized out static field.  Also test printing the
+	the "container" object.
+
 2013-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* lib/gdb.exp (gdb_finish): Send a kill request to `gdbserver'

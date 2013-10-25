@@ -1,3 +1,19 @@
+2013-10-25  Pedro Alves  <palves@redhat.com>
+
+	* cp-valprint.c (cp_print_value_fields): No longer handle a NULL
+	static field value.
+	(cp_print_static_field): If the value is entirely optimized out,
+	print <optimized out> here.
+	* jv-valprint.c (java_print_value_fields): No longer handle a NULL
+	static field value.
+	* p-valprint.c (pascal_object_print_static_field): If the value is
+	entirely optimized out, print <optimized out> here.
+	* valops.c (do_search_struct_field)
+	(value_struct_elt_for_reference): No longer handle a NULL static
+	field value.
+	* value.c (value_static_field): Return an optimized out value
+	instead of NULL.
+
 2013-10-25  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (remote_traceframe_info): Return early if

@@ -1853,13 +1853,7 @@ do_search_struct_field (const char *name, struct value *arg1, int offset,
 	    struct value *v;
 
 	    if (field_is_static (&TYPE_FIELD (type, i)))
-	      {
-		v = value_static_field (type, i);
-		if (v == 0)
-		  error (_("field %s is nonexistent or "
-			   "has been optimized out"),
-			 name);
-	      }
+	      v = value_static_field (type, i);
 	    else
 	      v = value_primitive_field (arg1, offset, i, type);
 	    *result_ptr = v;
@@ -3123,9 +3117,6 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	  if (field_is_static (&TYPE_FIELD (t, i)))
 	    {
 	      v = value_static_field (t, i);
-	      if (v == NULL)
-		error (_("static field %s has been optimized out"),
-		       name);
 	      if (want_address)
 		v = value_addr (v);
 	      return v;

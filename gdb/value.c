@@ -2590,8 +2590,7 @@ unpack_pointer (struct type *type, const gdb_byte *valaddr)
 
 
 /* Get the value of the FIELDNO'th field (which must be static) of
-   TYPE.  Return NULL if the field doesn't exist or has been
-   optimized out.  */
+   TYPE.  */
 
 struct value *
 value_static_field (struct type *type, int fieldno)
@@ -2618,7 +2617,7 @@ value_static_field (struct type *type, int fieldno)
 							       NULL, NULL);
 
 	  if (!msym)
-	    return NULL;
+	    return allocate_optimized_out_value (type);
 	  else
 	    {
 	      retval = value_at_lazy (TYPE_FIELD_TYPE (type, fieldno),
