@@ -1,3 +1,10 @@
+2013-12-19  Keven Boell  <keven.boell@intel.com>
+
+	* f-exp.y (yylex): Add domain array to enable lookup
+	in multiple domains. Loop over lookup domains and try
+	to find requested symbol. Add STRUCT_DOMAIN to lookup
+	domains to be able to query for user defined types.
+
 2013-12-13  Francois-Xavier Coudert  <fxcoudert@gcc.gnu.org>
 
 	* configure.ac: Add user-friendly check for native x86_64-linux

@@ -1,3 +1,8 @@
+2013-12-19  Keven Boell  <keven.boell@intel.com>
+
+	* gdb.fortran/type.f90: New file.
+	* gdb.fortran/whatis_type.f90: New file.
+
 2013-12-18  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* gdb.base/catch-syscall.c: Include <sys/syscall.h>.
