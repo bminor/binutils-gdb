@@ -1,3 +1,9 @@
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.perf/single-step.c: New.
+	* gdb.perf/single-step.exp: New.
+	* gdb.perf/single-step.py: New.
+
 2013-11-23  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.base/ena-dis-br.exp: Add missing quote to "step after continue
