@@ -177,26 +177,26 @@ struct varobj
 struct lang_varobj_ops
 {
   /* The number of children of PARENT.  */
-  int (*number_of_children) (struct varobj * parent);
+  int (*number_of_children) (struct varobj *parent);
 
   /* The name (expression) of a root varobj.  */
-  char *(*name_of_variable) (struct varobj * parent);
+  char *(*name_of_variable) (struct varobj *parent);
 
   /* The name of the INDEX'th child of PARENT.  */
-  char *(*name_of_child) (struct varobj * parent, int index);
+  char *(*name_of_child) (struct varobj *parent, int index);
 
   /* Returns the rooted expression of CHILD, which is a variable
      obtain that has some parent.  */
-  char *(*path_expr_of_child) (struct varobj * child);
+  char *(*path_expr_of_child) (struct varobj *child);
 
   /* The ``struct value *'' of the INDEX'th child of PARENT.  */
-  struct value *(*value_of_child) (struct varobj * parent, int index);
+  struct value *(*value_of_child) (struct varobj *parent, int index);
 
   /* The type of the INDEX'th child of PARENT.  */
-  struct type *(*type_of_child) (struct varobj * parent, int index);
+  struct type *(*type_of_child) (struct varobj *parent, int index);
 
   /* The current value of VAR.  */
-  char *(*value_of_variable) (struct varobj * var,
+  char *(*value_of_variable) (struct varobj *var,
 			      enum varobj_display_formats format);
 
   /* Return non-zero if changes in value of VAR must be detected and

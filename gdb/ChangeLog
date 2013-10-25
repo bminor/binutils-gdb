@@ -1,3 +1,8 @@
+2013-10-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* varobj.h (struct lang_varobj_ops): Remove spaces between '*'
+	and parameter name.
+
 2013-10-24  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* linux-tdep.c (linux_corefile_thread_callback): Propagate any
