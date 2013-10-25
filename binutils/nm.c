@@ -1016,7 +1016,7 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 	  non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
 	  return;
 	}
-      
+
       bfd_fatal (bfd_get_filename (abfd));
     }
 
