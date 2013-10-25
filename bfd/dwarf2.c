@@ -1909,11 +1909,13 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   return NULL;
 }
 
-/* If ADDR is within TABLE set the output parameters and return TRUE,
-   otherwise return FALSE.  The output parameters, FILENAME_PTR and
-   LINENUMBER_PTR, are pointers to the objects to be filled in.  */
+/* If ADDR is within TABLE set the output parameters and return the
+   range of addresses covered by the entry used to fill them out.
+   Otherwise set * FILENAME_PTR to NULL and return 0.
+   The parameters FILENAME_PTR, LINENUMBER_PTR and DISCRIMINATOR_PTR
+   are pointers to the objects to be filled in.  */
 
-static bfd_boolean
+static bfd_vma
 lookup_address_in_line_info_table (struct line_info_table *table,
 				   bfd_vma addr,
 				   const char **filename_ptr,
@@ -1955,12 +1957,12 @@ lookup_address_in_line_info_table (struct line_info_table *table,
           *linenumber_ptr = each_line->line;
           if (discriminator_ptr)
             *discriminator_ptr = each_line->discriminator;
-          return TRUE;
+          return seq->last_line->address - seq->low_pc;
         }
     }
 
   *filename_ptr = NULL;
-  return FALSE;
+  return 0;
 }
 
 /* Read in the .debug_ranges section for future reference.  */
@@ -1976,10 +1978,10 @@ read_debug_ranges (struct comp_unit *unit)
 
 /* Function table functions.  */
 
-/* If ADDR is within TABLE, set FUNCTIONNAME_PTR, and return TRUE.
-   Note that we need to find the function that has the smallest
-   range that contains ADDR, to handle inlined functions without
-   depending upon them being ordered in TABLE by increasing range. */
+/* If ADDR is within UNIT's function tables, set FUNCTIONNAME_PTR, and return
+   TRUE.  Note that we need to find the function that has the smallest range
+   that contains ADDR, to handle inlined functions without depending upon
+   them being ordered in TABLE by increasing range.  */
 
 static bfd_boolean
 lookup_address_in_function_table (struct comp_unit *unit,
@@ -2687,10 +2689,10 @@ comp_unit_contains_address (struct comp_unit *unit, bfd_vma addr)
    FUNCTIONNAME_PTR, and LINENUMBER_PTR, are pointers to the objects
    to be filled in.
 
-   Return TRUE if UNIT contains ADDR, and no errors were encountered;
-   FALSE otherwise.  */
+   Returns the range of addresses covered by the entry that was used
+   to fill in *LINENUMBER_PTR or 0 if it was not filled in.  */
 
-static bfd_boolean
+static bfd_vma
 comp_unit_find_nearest_line (struct comp_unit *unit,
 			     bfd_vma addr,
 			     const char **filename_ptr,
@@ -2699,7 +2701,6 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 			     unsigned int *discriminator_ptr,
 			     struct dwarf2_debug *stash)
 {
-  bfd_boolean line_p;
   bfd_boolean func_p;
   struct funcinfo *function;
 
@@ -2735,11 +2736,11 @@ comp_unit_find_nearest_line (struct comp_unit *unit,
 					     &function, functionname_ptr);
   if (func_p && (function->tag == DW_TAG_inlined_subroutine))
     stash->inliner_chain = function;
-  line_p = lookup_address_in_line_info_table (unit->line_table, addr,
-					      filename_ptr,
-					      linenumber_ptr,
-					      discriminator_ptr);
-  return line_p || func_p;
+
+  return lookup_address_in_line_info_table (unit->line_table, addr,
+					    filename_ptr,
+					    linenumber_ptr,
+					    discriminator_ptr);
 }
 
 /* Check to see if line info is already decoded in a comp_unit.
@@ -3470,7 +3471,7 @@ find_line (bfd *abfd,
   /* What address are we looking for?  */
   bfd_vma addr;
   struct comp_unit* each;
-  bfd_vma found = FALSE;
+  bfd_boolean found = FALSE;
   bfd_boolean do_line;
 
   *filename_ptr = NULL;
@@ -3560,18 +3561,56 @@ find_line (bfd *abfd,
     }
   else
     {
+      bfd_vma min_range = (bfd_vma) -1;
+      const char * local_filename = NULL;
+      const char * local_functionname = NULL;
+      unsigned int local_linenumber = 0;
+      unsigned int local_discriminator = 0;
+      
       for (each = stash->all_comp_units; each; each = each->next_unit)
 	{
+	  bfd_vma range = (bfd_vma) -1;
+
 	  found = ((each->arange.high == 0
 		    || comp_unit_contains_address (each, addr))
-		   && comp_unit_find_nearest_line (each, addr,
-						   filename_ptr,
-						   functionname_ptr,
-						   linenumber_ptr,
-						   discriminator_ptr,
-						   stash));
+		   && (range = comp_unit_find_nearest_line (each, addr,
+							    & local_filename,
+							    & local_functionname,
+							    & local_linenumber,
+							    & local_discriminator,
+							    stash)) != 0);
 	  if (found)
-	    goto done;
+	    {
+	      /* PRs 15935 15994: Bogus debug information may have provided us
+		 with an erroneous match.  We attempt to counter this by
+		 selecting the match that has the smallest address range
+		 associated with it.  (We are assuming that corrupt debug info
+		 will tend to result in extra large address ranges rather than
+		 extra small ranges).
+
+		 This does mean that we scan through all of the CUs associated
+		 with the bfd each time this function is called.  But this does
+		 have the benefit of producing consistent results every time the
+		 function is called.  */
+	      if (range <= min_range)
+		{
+		  if (filename_ptr && local_filename)
+		    * filename_ptr = local_filename;
+		  if (functionname_ptr && local_functionname)
+		    * functionname_ptr = local_functionname;
+		  if (discriminator_ptr && local_discriminator)
+		    * discriminator_ptr = local_discriminator;
+		  if (local_linenumber)
+		    * linenumber_ptr = local_linenumber;
+		  min_range = range;
+		}
+	    }
+	}
+
+      if (* linenumber_ptr)
+	{
+	  found = TRUE;
+	  goto done;
 	}
     }
 
@@ -3663,7 +3702,7 @@ find_line (bfd *abfd,
 						     functionname_ptr,
 						     linenumber_ptr,
 						     discriminator_ptr,
-						     stash));
+						     stash)) > 0;
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
 	      == stash->sec->size)

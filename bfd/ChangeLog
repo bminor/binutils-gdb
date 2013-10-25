@@ -1,3 +1,12 @@
+2013-10-24  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/15994
+	* dwarf2.c (lookup_address_in_line_info_table): Change return type
+	to be the range of addresses covered by the table.
+	(comp_unit_find_nearest_line): Likewise.
+	(find_line): Search all CUs.  Select the one that matches and
+	covers the smallest address range.
+
 2013-10-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* elf32-cris.c (cris_elf_check_relocs): Don't assume
