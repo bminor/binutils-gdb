@@ -1010,7 +1010,15 @@ display_rel_file (bfd *abfd, bfd *archive_bfd)
 
   symcount = bfd_read_minisymbols (abfd, dynamic, &minisyms, &size);
   if (symcount < 0)
-    bfd_fatal (bfd_get_filename (abfd));
+    {
+      if (dynamic && bfd_get_error () == bfd_error_no_symbols)
+	{
+	  non_fatal (_("%s: no symbols"), bfd_get_filename (abfd));
+	  return;
+	}
+      
+      bfd_fatal (bfd_get_filename (abfd));
+    }
 
   if (symcount == 0)
     {
