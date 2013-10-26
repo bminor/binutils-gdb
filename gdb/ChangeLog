@@ -1,3 +1,13 @@
+2013-10-27  Yao Qi  <yao@codesourcery.com>
+
+	* varobj.c (struct varobj_root) <lang>: Rename to 'lang_ops'.
+	(varobj_create, varobj_get_path_expr): Update.
+	(varobj_value_has_mutated, varobj_update): Likewise.
+	(create_child_with_value, new_root_variable): Likewise.
+	(number_of_children, name_of_variable): Likewise.
+	(value_of_child, my_value_of_variable): Likewise.
+	(varobj_value_is_changeable_p): Likewise.
+
 2013-10-25  Yao Qi  <yao@codesourcery.com>
 
 	* language.h (struct lang_varobj_ops): Declare.

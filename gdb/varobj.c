@@ -102,7 +102,7 @@ struct varobj_root
 
   /* Language-related operations for this variable and its
      children.  */
-  const struct lang_varobj_ops *lang;
+  const struct lang_varobj_ops *lang_ops;
 
   /* The varobj for this root node.  */
   struct varobj *rootvar;
@@ -432,7 +432,7 @@ varobj_create (char *objname,
 	  }
 
       /* Set language info */
-      var->root->lang = var->root->exp->language_defn->la_varobj_ops;
+      var->root->lang_ops = var->root->exp->language_defn->la_varobj_ops;
 
       install_new_value (var, value, 1 /* Initial assignment */);
 
@@ -1122,7 +1122,7 @@ varobj_get_path_expr (struct varobj *var)
 	 when creating varobj, so here it should be
 	 child varobj.  */
       gdb_assert (!is_root_p (var));
-      return (*var->root->lang->path_expr_of_child) (var);
+      return (*var->root->lang_ops->path_expr_of_child) (var);
     }
 }
 
@@ -1661,8 +1661,8 @@ varobj_value_has_mutated (struct varobj *var, struct value *new_value,
   if (var->num_children < 0)
     return 0;
 
-  if (var->root->lang->value_has_mutated)
-    return var->root->lang->value_has_mutated (var, new_value, new_type);
+  if (var->root->lang_ops->value_has_mutated)
+    return var->root->lang_ops->value_has_mutated (var, new_value, new_type);
   else
     return 0;
 }
@@ -1770,7 +1770,7 @@ varobj_update (struct varobj **varp, int explicit)
 	  if (new)
 	    new_type = value_type (new);
 	  else
-	    new_type = v->root->lang->type_of_child (v->parent, v->index);
+	    new_type = v->root->lang_ops->type_of_child (v->parent, v->index);
 
 	  if (varobj_value_has_mutated (v, new, new_type))
 	    {
@@ -2146,8 +2146,8 @@ create_child_with_value (struct varobj *parent, int index, char *name,
     child->type = value_actual_type (value, 0, NULL);
   else
     /* Otherwise, we must compute the type.  */
-    child->type = (*child->root->lang->type_of_child) (child->parent, 
-						       child->index);
+    child->type = (*child->root->lang_ops->type_of_child) (child->parent,
+							   child->index);
   install_new_value (child, value, 1);
 
   return child;
@@ -2200,7 +2200,7 @@ new_root_variable (void)
   struct varobj *var = new_variable ();
 
   var->root = (struct varobj_root *) xmalloc (sizeof (struct varobj_root));
-  var->root->lang = NULL;
+  var->root->lang_ops = NULL;
   var->root->exp = NULL;
   var->root->valid_block = NULL;
   var->root->frame = null_frame_id;
@@ -2366,7 +2366,7 @@ variable_language (struct varobj *var)
 static int
 number_of_children (struct varobj *var)
 {
-  return (*var->root->lang->number_of_children) (var);
+  return (*var->root->lang_ops->number_of_children) (var);
 }
 
 /* What is the expression for the root varobj VAR? Returns a malloc'd
@@ -2374,7 +2374,7 @@ number_of_children (struct varobj *var)
 static char *
 name_of_variable (struct varobj *var)
 {
-  return (*var->root->lang->name_of_variable) (var);
+  return (*var->root->lang_ops->name_of_variable) (var);
 }
 
 /* What is the name of the INDEX'th child of VAR? Returns a malloc'd
@@ -2382,7 +2382,7 @@ name_of_variable (struct varobj *var)
 static char *
 name_of_child (struct varobj *var, int index)
 {
-  return (*var->root->lang->name_of_child) (var, index);
+  return (*var->root->lang_ops->name_of_child) (var, index);
 }
 
 /* If frame associated with VAR can be found, switch
@@ -2569,7 +2569,7 @@ value_of_child (struct varobj *parent, int index)
 {
   struct value *value;
 
-  value = (*parent->root->lang->value_of_child) (parent, index);
+  value = (*parent->root->lang_ops->value_of_child) (parent, index);
 
   return value;
 }
@@ -2582,7 +2582,7 @@ my_value_of_variable (struct varobj *var, enum varobj_display_formats format)
     {
       if (var->dynamic->pretty_printer != NULL)
 	return varobj_value_get_print_value (var->value, var->format, var);
-      return (*var->root->lang->value_of_variable) (var, format);
+      return (*var->root->lang_ops->value_of_variable) (var, format);
     }
   else
     return NULL;
@@ -2761,7 +2761,7 @@ varobj_editable_p (struct varobj *var)
 int
 varobj_value_is_changeable_p (struct varobj *var)
 {
-  return var->root->lang->value_is_changeable_p (var);
+  return var->root->lang_ops->value_is_changeable_p (var);
 }
 
 /* Return 1 if that varobj is floating, that is is always evaluated in the
