@@ -132,7 +132,7 @@ struct language_defn
   {
     /* Name of the language.  */
 
-    char *la_name;
+    const char *la_name;
 
     /* its symtab language-enum (defs.h).  */
 
@@ -488,7 +488,7 @@ extern enum language language_enum (char *str);
 
 extern const struct language_defn *language_def (enum language);
 
-extern char *language_str (enum language);
+extern const char *language_str (enum language);
 
 /* Add a language to the set known by GDB (at initialization time).  */
 

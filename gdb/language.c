@@ -485,7 +485,7 @@ language_def (enum language lang)
 }
 
 /* Return the language as a string.  */
-char *
+const char *
 language_str (enum language lang)
 {
   int i;
@@ -520,7 +520,7 @@ void
 add_language (const struct language_defn *lang)
 {
   /* For the "set language" command.  */
-  static char **language_names = NULL;
+  static const char **language_names = NULL;
   /* For the "help set language" command.  */
   char *language_set_doc = NULL;
 

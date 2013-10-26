@@ -1,3 +1,10 @@
+2013-11-07  Yao Qi  <yao@codesourcery.com>
+
+	* language.c (language_str): Return const char *.
+	(add_language): Add const to 'language_names'
+	* language.h (struct language_defn) <la_name>: Add const.
+	(language_str: Update declaration.
+
 2013-11-06  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-linux-nat.c (s390_read_description): Consider the TE field
