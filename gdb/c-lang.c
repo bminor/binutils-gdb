@@ -812,6 +812,7 @@ const struct exp_descriptor exp_descriptor_c =
 const struct language_defn c_language_defn =
 {
   "c",				/* Language name */
+  "C",
   language_c,
   range_check_off,
   case_sensitive_on,
@@ -936,6 +937,7 @@ cplus_language_arch_info (struct gdbarch *gdbarch,
 const struct language_defn cplus_language_defn =
 {
   "c++",			/* Language name */
+  "C++",
   language_cplus,
   range_check_off,
   case_sensitive_on,
@@ -978,6 +980,7 @@ const struct language_defn cplus_language_defn =
 const struct language_defn asm_language_defn =
 {
   "asm",			/* Language name */
+  "assembly",
   language_asm,
   range_check_off,
   case_sensitive_on,
@@ -1025,6 +1028,7 @@ const struct language_defn asm_language_defn =
 const struct language_defn minimal_language_defn =
 {
   "minimal",			/* Language name */
+  "Minimal",
   language_minimal,
   range_check_off,
   case_sensitive_on,

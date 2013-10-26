@@ -134,6 +134,10 @@ struct language_defn
 
     const char *la_name;
 
+    /* Natural or official name of the language.  */
+
+    const char *la_natural_name;
+
     /* its symtab language-enum (defs.h).  */
 
     enum language la_language;

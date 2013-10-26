@@ -792,6 +792,7 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 const struct language_defn unknown_language_defn =
 {
   "unknown",
+  "Unknown",
   language_unknown,
   range_check_off,
   case_sensitive_on,
@@ -836,6 +837,7 @@ const struct language_defn unknown_language_defn =
 const struct language_defn auto_language_defn =
 {
   "auto",
+  "Auto",
   language_auto,
   range_check_off,
   case_sensitive_on,
@@ -878,6 +880,7 @@ const struct language_defn auto_language_defn =
 const struct language_defn local_language_defn =
 {
   "local",
+  "Local",
   language_auto,
   range_check_off,
   case_sensitive_on,

@@ -1,5 +1,24 @@
 2013-11-07  Yao Qi  <yao@codesourcery.com>
 
+	* language.h (struct language_defn) <la_natural_name>: New
+	field.
+	* ada-lang.c (ada_language_defn): Initialize field
+	'la_natural_name'.
+	* c-lang.c (c_language_defn): Likewise.
+	(cplus_language_defn, asm_language_defn): Likewise.
+	* d-lang.c (d_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Likewise.
+	* go-lang.c (go_language_defn): Likewise.
+	* jv-lang.c (java_language_defn): Likewise.
+	* language.c (unknown_language_defn ): Likewise.
+	(auto_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* opencl-lang.c (opencl_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+
+2013-11-07  Yao Qi  <yao@codesourcery.com>
+
 	* language.c (language_str): Return const char *.
 	(add_language): Add const to 'language_names'
 	* language.h (struct language_defn) <la_name>: Add const.

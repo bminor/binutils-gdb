@@ -12799,6 +12799,7 @@ ada_read_var_value (struct symbol *var, struct frame_info *frame)
 
 const struct language_defn ada_language_defn = {
   "ada",                        /* Language name */
+  "Ada",
   language_ada,
   range_check_off,
   case_sensitive_on,            /* Yes, Ada is case-insensitive, but
