@@ -1,5 +1,10 @@
 2013-10-28  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (process_event_stop_test): Remove unnecessary scoping
+	level and reindent.
+
+2013-10-28  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (process_event_stop_test): New function, factored out
 	from handle_inferior_event.
 	(handle_inferior_event): 'process_event_stop_test' is now a
