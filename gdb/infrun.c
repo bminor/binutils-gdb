@@ -3120,17 +3120,6 @@ handle_syscall_event (struct execution_control_state *ecs)
   return 1;
 }
 
-/* Clear the supplied execution_control_state's stop_func_* fields.  */
-
-static void
-clear_stop_func (struct execution_control_state *ecs)
-{
-  ecs->stop_func_filled_in = 0;
-  ecs->stop_func_start = 0;
-  ecs->stop_func_end = 0;
-  ecs->stop_func_name = NULL;
-}
-
 /* Lazily fill in the execution_control_state's stop_func_* fields.  */
 
 static void
@@ -4089,12 +4078,10 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       return;
     }
 
-  clear_stop_func (ecs);
   ecs->event_thread->stepping_over_breakpoint = 0;
   bpstat_clear (&ecs->event_thread->control.stop_bpstat);
   ecs->event_thread->control.stop_step = 0;
   stop_print_frame = 1;
-  ecs->random_signal = 0;
   stopped_by_random_signal = 0;
 
   /* Hide inlined functions starting here, unless we just performed stepi or

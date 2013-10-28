@@ -1,3 +1,9 @@
+2013-10-28  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (clear_stop_func): Delete.
+	(handle_inferior_event): Don't call clear_stop_func and don't
+	clear 'ecs->random_signal'.
+
 2013-10-27  Yao Qi  <yao@codesourcery.com>
 
 	* varobj.c (struct varobj_root) <lang>: Rename to 'lang_ops'.
