@@ -2439,6 +2439,7 @@ static void check_exception_resume (struct execution_control_state *,
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
+static void process_event_stop_test (struct execution_control_state *ecs);
 static int switch_back_to_stepped_thread (struct execution_control_state *ecs);
 
 /* Callback for iterate over threads.  If the thread is stopped, but
@@ -3151,7 +3152,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   struct gdbarch *gdbarch;
   int stopped_by_watchpoint;
   int stepped_after_stopped_by_watchpoint = 0;
-  struct symtab_and_line stop_pc_sal;
   enum stop_kind stop_soon;
 
   if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
@@ -3351,7 +3351,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    {
 	      /* A catchpoint triggered.  */
 	      ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
-	      goto process_event_stop_test;
+	      process_event_stop_test (ecs);
+	      return;
 	    }
 
 	  /* If requested, stop when the dynamic linker notifies
@@ -3629,7 +3630,8 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  return;
 	}
       ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
-      goto process_event_stop_test;
+      process_event_stop_test (ecs);
+      return;
 
     case TARGET_WAITKIND_VFORK_DONE:
       /* Done with the shared memory region.  Re-insert breakpoints in
@@ -3690,7 +3692,8 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  return;
 	}
       ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
-      goto process_event_stop_test;
+      process_event_stop_test (ecs);
+      return;
 
       /* Be careful not to try to gather much state about a thread
          that's in a syscall.  It's frequently a losing proposition.  */
@@ -3699,9 +3702,9 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
         fprintf_unfiltered (gdb_stdlog,
 			    "infrun: TARGET_WAITKIND_SYSCALL_ENTRY\n");
       /* Getting the current syscall number.  */
-      if (handle_syscall_event (ecs) != 0)
-        return;
-      goto process_event_stop_test;
+      if (handle_syscall_event (ecs) == 0)
+	process_event_stop_test (ecs);
+      return;
 
       /* Before examining the threads further, step this thread to
          get it entirely out of the syscall.  (We get notice of the
@@ -3712,9 +3715,9 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog,
 			    "infrun: TARGET_WAITKIND_SYSCALL_RETURN\n");
-      if (handle_syscall_event (ecs) != 0)
-        return;
-      goto process_event_stop_test;
+      if (handle_syscall_event (ecs) == 0)
+	process_event_stop_test (ecs);
+      return;
 
     case TARGET_WAITKIND_STOPPED:
       if (debug_infrun)
@@ -4403,17 +4406,29 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	}
       return;
     }
-  else
+
+  process_event_stop_test (ecs);
+}
+
+/* Come here when we've got some debug event / signal we can explain
+   (IOW, not a random signal), and test whether it should cause a
+   stop, or whether we should resume the inferior (transparently).
+   E.g., could be a breakpoint whose condition evaluates false; we
+   could be still stepping within the line; etc.  */
+
+static void
+process_event_stop_test (struct execution_control_state *ecs)
+{
+  struct symtab_and_line stop_pc_sal;
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
+
     {
       /* Handle cases caused by hitting a breakpoint.  */
 
       CORE_ADDR jmp_buf_pc;
       struct bpstat_what what;
 
-process_event_stop_test:
-
-      /* Re-fetch current thread's frame in case we did a
-	 "goto process_event_stop_test" above.  */
       frame = get_current_frame ();
       gdbarch = get_frame_arch (frame);
 
