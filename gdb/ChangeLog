@@ -1,5 +1,14 @@
 2013-10-28  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (switch_back_to_stepped_thread): New function, factored
+	out from handle_inferior_event.
+	(handle_inferior_event): Adjust to call
+	switch_back_to_stepped_thread.  Call it also at the tail of the
+	random signal handling, and return, instead of also handling
+	random signals just before the stepping tests.
+
+2013-10-28  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (clear_stop_func): Delete.
 	(handle_inferior_event): Don't call clear_stop_func and don't
 	clear 'ecs->random_signal'.

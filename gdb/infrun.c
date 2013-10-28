@@ -2439,6 +2439,7 @@ static void check_exception_resume (struct execution_control_state *,
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
+static int switch_back_to_stepped_thread (struct execution_control_state *ecs);
 
 /* Callback for iterate over threads.  If the thread is stopped, but
    the user/frontend doesn't know about that yet, go through
@@ -4398,6 +4399,16 @@ process_event_stop_test:
 	 (leaving the inferior at the step-resume-breakpoint without
 	 actually executing it).  Either way continue until the
 	 breakpoint is really hit.  */
+
+      if (!switch_back_to_stepped_thread (ecs))
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: random signal, keep going\n");
+
+	  keep_going (ecs);
+	}
+      return;
     }
   else
     {
@@ -4628,84 +4639,8 @@ process_event_stop_test:
 
   /* In all-stop mode, if we're currently stepping but have stopped in
      some other thread, we need to switch back to the stepped thread.  */
-  if (!non_stop)
-    {
-      struct thread_info *tp;
-
-      tp = iterate_over_threads (currently_stepping_or_nexting_callback,
-				 ecs->event_thread);
-      if (tp)
-	{
-	  /* However, if the current thread is blocked on some internal
-	     breakpoint, and we simply need to step over that breakpoint
-	     to get it going again, do that first.  */
-	  if ((ecs->event_thread->control.trap_expected
-	       && ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_TRAP)
-	      || ecs->event_thread->stepping_over_breakpoint)
-	    {
-	      keep_going (ecs);
-	      return;
-	    }
-
-	  /* If the stepping thread exited, then don't try to switch
-	     back and resume it, which could fail in several different
-	     ways depending on the target.  Instead, just keep going.
-
-	     We can find a stepping dead thread in the thread list in
-	     two cases:
-
-	     - The target supports thread exit events, and when the
-	     target tries to delete the thread from the thread list,
-	     inferior_ptid pointed at the exiting thread.  In such
-	     case, calling delete_thread does not really remove the
-	     thread from the list; instead, the thread is left listed,
-	     with 'exited' state.
-
-	     - The target's debug interface does not support thread
-	     exit events, and so we have no idea whatsoever if the
-	     previously stepping thread is still alive.  For that
-	     reason, we need to synchronously query the target
-	     now.  */
-	  if (is_exited (tp->ptid)
-	      || !target_thread_alive (tp->ptid))
-	    {
-	      if (debug_infrun)
-		fprintf_unfiltered (gdb_stdlog,
-				    "infrun: not switching back to "
-				    "stepped thread, it has vanished\n");
-
-	      delete_thread (tp->ptid);
-	      keep_going (ecs);
-	      return;
-	    }
-
-	  /* Otherwise, we no longer expect a trap in the current thread.
-	     Clear the trap_expected flag before switching back -- this is
-	     what keep_going would do as well, if we called it.  */
-	  ecs->event_thread->control.trap_expected = 0;
-
-	  if (debug_infrun)
-	    fprintf_unfiltered (gdb_stdlog,
-				"infrun: switching back to stepped thread\n");
-
-	  ecs->event_thread = tp;
-	  ecs->ptid = tp->ptid;
-	  context_switch (ecs->ptid);
-	  keep_going (ecs);
-	  return;
-	}
-    }
-
-  if (ecs->random_signal)
-    {
-      if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog,
-			     "infrun: random signal, keep going\n");
-
-      /* Signal not stepping related.  */
-      keep_going (ecs);
-      return;
-    }
+  if (switch_back_to_stepped_thread (ecs))
+    return;
 
   if (ecs->event_thread->control.step_resume_breakpoint)
     {
@@ -5284,6 +5219,84 @@ process_event_stop_test:
   if (debug_infrun)
      fprintf_unfiltered (gdb_stdlog, "infrun: keep going\n");
   keep_going (ecs);
+}
+
+/* In all-stop mode, if we're currently stepping but have stopped in
+   some other thread, we may need to switch back to the stepped
+   thread.  Returns true we set the inferior running, false if we left
+   it stopped (and the event needs further processing).  */
+
+static int
+switch_back_to_stepped_thread (struct execution_control_state *ecs)
+{
+  if (!non_stop)
+    {
+      struct thread_info *tp;
+
+      tp = iterate_over_threads (currently_stepping_or_nexting_callback,
+				 ecs->event_thread);
+      if (tp)
+	{
+	  /* However, if the current thread is blocked on some internal
+	     breakpoint, and we simply need to step over that breakpoint
+	     to get it going again, do that first.  */
+	  if ((ecs->event_thread->control.trap_expected
+	       && ecs->event_thread->suspend.stop_signal != GDB_SIGNAL_TRAP)
+	      || ecs->event_thread->stepping_over_breakpoint)
+	    {
+	      keep_going (ecs);
+	      return 1;
+	    }
+
+	  /* If the stepping thread exited, then don't try to switch
+	     back and resume it, which could fail in several different
+	     ways depending on the target.  Instead, just keep going.
+
+	     We can find a stepping dead thread in the thread list in
+	     two cases:
+
+	     - The target supports thread exit events, and when the
+	     target tries to delete the thread from the thread list,
+	     inferior_ptid pointed at the exiting thread.  In such
+	     case, calling delete_thread does not really remove the
+	     thread from the list; instead, the thread is left listed,
+	     with 'exited' state.
+
+	     - The target's debug interface does not support thread
+	     exit events, and so we have no idea whatsoever if the
+	     previously stepping thread is still alive.  For that
+	     reason, we need to synchronously query the target
+	     now.  */
+	  if (is_exited (tp->ptid)
+	      || !target_thread_alive (tp->ptid))
+	    {
+	      if (debug_infrun)
+		fprintf_unfiltered (gdb_stdlog,
+				    "infrun: not switching back to "
+				    "stepped thread, it has vanished\n");
+
+	      delete_thread (tp->ptid);
+	      keep_going (ecs);
+	      return 1;
+	    }
+
+	  /* Otherwise, we no longer expect a trap in the current thread.
+	     Clear the trap_expected flag before switching back -- this is
+	     what keep_going would do as well, if we called it.  */
+	  ecs->event_thread->control.trap_expected = 0;
+
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: switching back to stepped thread\n");
+
+	  ecs->event_thread = tp;
+	  ecs->ptid = tp->ptid;
+	  context_switch (ecs->ptid);
+	  keep_going (ecs);
+	  return 1;
+	}
+    }
+  return 0;
 }
 
 /* Is thread TP in the middle of single-stepping?  */
