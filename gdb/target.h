@@ -1968,6 +1968,11 @@ extern void find_default_create_inferior (struct target_ops *,
 
 extern struct target_ops *find_target_beneath (struct target_ops *);
 
+/* Find the target at STRATUM.  If no target is at that stratum,
+   return NULL.  */
+
+struct target_ops *find_target_at (enum strata stratum);
+
 /* Read OS data object of type TYPE from the target, and return it in
    XML format.  The result is NUL-terminated and returned as a string,
    allocated using xmalloc.  If an error occurs or the transfer is

@@ -3748,6 +3748,20 @@ find_target_beneath (struct target_ops *t)
   return t->beneath;
 }
 
+/* See target.h.  */
+
+struct target_ops *
+find_target_at (enum strata stratum)
+{
+  struct target_ops *t;
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_stratum == stratum)
+      return t;
+
+  return NULL;
+}
+
 
 /* The inferior process has died.  Long live the inferior!  */
 
