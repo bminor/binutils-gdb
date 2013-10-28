@@ -4288,13 +4288,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
     }
 
-process_event_stop_test:
-
-  /* Re-fetch current thread's frame in case we did a
-     "goto process_event_stop_test" above.  */
-  frame = get_current_frame ();
-  gdbarch = get_frame_arch (frame);
-
   /* For the program's own signals, act according to
      the signal handling tables.  */
 
@@ -4416,6 +4409,13 @@ process_event_stop_test:
 
       CORE_ADDR jmp_buf_pc;
       struct bpstat_what what;
+
+process_event_stop_test:
+
+      /* Re-fetch current thread's frame in case we did a
+	 "goto process_event_stop_test" above.  */
+      frame = get_current_frame ();
+      gdbarch = get_frame_arch (frame);
 
       what = bpstat_what (ecs->event_thread->control.stop_bpstat);
 

@@ -1,5 +1,11 @@
 2013-10-28  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (handle_inferior_event): Move process_event_stop_test
+	goto label to the else branch of the ecs->random_signal check,
+	along with FRAME and GDBARCH re-fetching.
+
+2013-10-28  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (switch_back_to_stepped_thread): New function, factored
 	out from handle_inferior_event.
 	(handle_inferior_event): Adjust to call
