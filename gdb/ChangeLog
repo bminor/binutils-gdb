@@ -1,5 +1,10 @@
 2013-10-28  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (watchpoints_triggered)
+	<!target_stopped_data_address>: Hardcode return 1.
+
+2013-10-28  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (process_event_stop_test): Remove unnecessary scoping
 	level and reindent.
 

@@ -4714,7 +4714,7 @@ watchpoints_triggered (struct target_waitstatus *ws)
 	    w->watchpoint_triggered = watch_triggered_unknown;
 	  }
 
-      return stopped_by_watchpoint;
+      return 1;
     }
 
   /* The target could report the data address.  Mark watchpoints
