@@ -1,5 +1,12 @@
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
+	* ld-powerpc/elfv2.s,
+	* ld-powerpc/elfv2so.d,
+	* ld-powerpc/elfv2exe.d: New tests.
+	* ld-powerpc/powerpc.exp: Run them.
+
+2013-10-30  Alan Modra  <amodra@gmail.com>
+
 	* ld-powerpc/tls.s: Add proper .opd entry for _start.
 	* ld-powerpc/tlstoc.s: Likewise.
 	* ld-powerpc/relbrlt.d: Update for changed stubs.
