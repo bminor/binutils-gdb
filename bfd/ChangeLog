@@ -2,6 +2,18 @@
 
 	Apply changes from mainline to 2.24
 	2013-10-30  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (PLT_ENTRY_SIZE, PLT_INITIAL_ENTRY_SIZE): Add htab
+	parameter and adjust for ELFv2.  Update all uses.
+	(PLT_CALL_STUB_SIZE): Delete.
+	(ppc64_elf_get_synthetic_symtab): Support new glink layout.
+	(allocate_dynrelocs): Likewise.
+	(plt_stub_size, build_plt_stub): Adjust for ELFv2.
+	(get_r2off): Return 0 for ELFv2 -R.
+	(ppc_build_one_stub, ppc_size_one_stub): Adjust for ELFv2.
+	(ppc64_elf_size_stubs): Likewise.
+	(ppc64_elf_build_stubs): Add new ELFv2 glink.
+
+	2013-10-30  Alan Modra  <amodra@gmail.com>
 		    Ulrich Weigand  <uweigand@de.ibm.com>
 	* elf64-ppc.c (struct ppc_stub_hash_entry): Add "other".
 	(stub_hash_newfunc): Init new ppc_stub_hash_entry field, and one
