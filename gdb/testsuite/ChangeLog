@@ -1,3 +1,8 @@
+2013-10-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.mi/mi-console.c, gdb.mi/mi-stack.c: Remove local emacs
+	variable setting change-log-default-name to ChangeLog-mi.
+
 2013-10-29  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.trace/unavailable.exp (gdb_unavailable_registers_test):
