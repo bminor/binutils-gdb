@@ -1,3 +1,9 @@
+2013-10-29  Nicolas Blanc  <nicolas.blanc@intel.com>
+
+	* gdb.texinfo (Commands to Specify Files): Add description
+	of the remove-symbol-file command.
+	* observer.texi: New free_objfile event
+
 2013-10-24  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Starting): Document set/show startup-with-shell.

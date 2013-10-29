@@ -1,3 +1,23 @@
+2013-10-29  Nicolas Blanc  <nicolas.blanc@intel.com>
+
+	* exec.h (add_target_sections_of_objfile): New declaration.
+	* exec.c (add_target_sections_of_objfile): New function.
+	* symfile.c (add_symbol_file_command): Update current target sections.
+	(remove_symbol_file_command): New command.
+	(symfile_free_objfile): New function.
+	(_initialize_symfile): Register observer for free_objfile events.
+	* NEWS: Add description of the remove-symbol-file command.
+	* breakpoint.c (disable_breakpoints_in_freed_objfile): New function.
+	* objfiles.c (free_objfile): Notify free_objfile.
+	(is_addr_in_objfile): New function.
+	* objfiles.h (is_addr_in_objfile): New declaration.
+	* printcmd.c (clear_dangling_display_expressions): Act upon free_objfile
+	events instead of solib_unloaded events.
+	(_initialize_printcmd): Register observer for free_objfile instead
+	of solib_unloaded notifications.
+	* solib.c (remove_user_added_objfile): New function.
+	(_initialize_symfile): Add remove-symbol-file.
+
 2013-10-29  Andrew Burgess  <aburgess@broadcom.com>
 
 	* infcmd.c (default_print_one_register_info): Use val_print to

@@ -1,3 +1,12 @@
+2013-10-29  Nicolas Blanc  <nicolas.blanc@intel.com>
+
+	* gdb.base/sym-file-lib.c: New file.
+	* gdb.base/sym-file-loader.c: New file.
+	* gdb.base/sym-file-loader.h: New file.
+	* gdb.base/sym-file-main.c: New file.
+	* gdb.base/sym-file.exp: New file.
+	* lib/gdb.exp (is_elf_target): New function.
+
 2013-10-29  Pedro Alves  <palves@redhat.com>
 
 	* gdb.mi/mi-console.c, gdb.mi/mi-stack.c: Remove local emacs
