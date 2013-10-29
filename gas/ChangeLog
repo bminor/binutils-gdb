@@ -1,3 +1,14 @@
+2013-10-30  Alan Modra  <amodra@gmail.com>
+
+	* config/tc-ppc.c (SEX16): Don't mask.
+	(REPORT_OVERFLOW_HI): Define as zero.
+	(ppc_elf_suffix): Support @high, @higha, @dtprel@high, @dtprel@higha,
+	@tprel@high, and @tprel@higha modifiers.
+	(md_assemble): Ignore X_unsigned when applying 16-bit insn fields.
+	Add (disabled) code to check @h and @ha reloc overflow for powerpc64.
+	Handle new relocs.
+	(md_apply_fix): Similarly.
+
 2013-10-18  Chao-ying Fu  <Chao-ying.Fu@imgtec.com>
 
 	* config/tc-mips.c (fpr_read_mask): Test MSA registers.

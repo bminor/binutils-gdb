@@ -141,6 +141,14 @@ START_RELOC_NUMBERS (elf_ppc64_reloc_type)
   RELOC_NUMBER (R_PPC64_TLSLD,		   108)
   RELOC_NUMBER (R_PPC64_TOCSAVE,	   109)
 
+/* Added when HA and HI relocs were changed to report overflows.  */
+  RELOC_NUMBER (R_PPC64_ADDR16_HIGH,	   110)
+  RELOC_NUMBER (R_PPC64_ADDR16_HIGHA,	   111)
+  RELOC_NUMBER (R_PPC64_TPREL16_HIGH,	   112)
+  RELOC_NUMBER (R_PPC64_TPREL16_HIGHA,	   113)
+  RELOC_NUMBER (R_PPC64_DTPREL16_HIGH,	   114)
+  RELOC_NUMBER (R_PPC64_DTPREL16_HIGHA,	   115)
+
 #ifndef RELOC_MACROS_GEN_FUNC
 /* Fake relocation only used internally by ld.  */
   RELOC_NUMBER (R_PPC64_LO_DS_OPT,	   128)
@@ -161,8 +169,9 @@ START_RELOC_NUMBERS (elf_ppc64_reloc_type)
 
 END_RELOC_NUMBERS (R_PPC64_max)
 
-#define IS_PPC64_TLS_RELOC(R) \
-  ((R) >= R_PPC64_TLS && (R) <= R_PPC64_DTPREL16_HIGHESTA)
+#define IS_PPC64_TLS_RELOC(R)						\
+  (((R) >= R_PPC64_TLS && (R) <= R_PPC64_DTPREL16_HIGHESTA)		\
+   || ((R) >= R_PPC64_TPREL16_HIGH && (R) <= R_PPC64_DTPREL16_HIGHA))
 
 /* Specify the start of the .glink section.  */
 #define DT_PPC64_GLINK		DT_LOPROC
