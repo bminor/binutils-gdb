@@ -1,3 +1,10 @@
+2013-10-29  Jan Beulich <jbeulich@suse.com>
+
+	* elflink.c (struct elf_outext_info): Add field file_sym_done.
+	(bfd_elf_final_link): Initialize new field. Move fake STT_FILE
+	symbol emission from here ...
+	(elf_link_output_extsym): ... to here.
+
 2013-10-24  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15994

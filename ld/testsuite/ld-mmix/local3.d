@@ -37,7 +37,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* 0+fd +0 +NOTYPE +LOCAL +DEFAULT +PRC\[0xff00\] lsym
 .* 0+ +0 +FILE +LOCAL +DEFAULT +ABS .*
 .* 0+fe +0 +NOTYPE +LOCAL +DEFAULT +PRC\[0xff00\] lsym
-.* 0+ +0 +FILE +LOCAL +DEFAULT +ABS .*
 .* 0+fc +0 +NOTYPE +GLOBAL +DEFAULT +ABS ext1
 .* 0+4 +0 +NOTYPE +GLOBAL +DEFAULT +1 _start
 #...

@@ -44,7 +44,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* 0000003c +0 +NOTYPE +LOCAL +DEFAULT +2 sec3
 .* 00000000 +0 +FILE +LOCAL +DEFAULT +ABS .*
 .* 00000044 +0 +NOTYPE +LOCAL +DEFAULT +2 sec4
-.* 00000000 +0 +FILE +LOCAL +DEFAULT +ABS .*
 .* 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +2 diversion2
 
 Hex dump of section '\.text\.mixed':

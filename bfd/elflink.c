@@ -7460,6 +7460,7 @@ struct elf_outext_info
   bfd_boolean localsyms;
   bfd_boolean need_second_pass;
   bfd_boolean second_pass;
+  bfd_boolean file_sym_done;
   struct elf_final_link_info *flinfo;
 };
 
@@ -8678,6 +8679,22 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
 		|| h->root.type == bfd_link_hash_defweak)
 	       && h->root.u.def.section->output_section != NULL))
 	return TRUE;
+
+      if (!eoinfo->file_sym_done
+	  && (eoinfo->second_pass ? eoinfo->flinfo->filesym_count == 1
+				  : eoinfo->flinfo->filesym_count > 1))
+	{
+	  /* Output a FILE symbol so that following locals are not associated
+	     with the wrong input file.  */
+	  memset (&sym, 0, sizeof (sym));
+	  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
+	  sym.st_shndx = SHN_ABS;
+	  if (!elf_link_output_sym (eoinfo->flinfo, NULL, &sym,
+				    bfd_und_section_ptr, NULL))
+	    return FALSE;
+
+	  eoinfo->file_sym_done = TRUE;
+	}
     }
   else
     {
@@ -10962,17 +10979,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	  }
     }
 
-  /* Output a FILE symbol so that following locals are not associated
-     with the wrong input file.  */
-  memset (&elfsym, 0, sizeof (elfsym));
-  elfsym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FILE);
-  elfsym.st_shndx = SHN_ABS;
-
-  if (flinfo.filesym_count > 1
-      && !elf_link_output_sym (&flinfo, NULL, &elfsym,
-			       bfd_und_section_ptr, NULL))
-    return FALSE;
-
   /* Output any global symbols that got converted to local in a
      version script or due to symbol visibility.  We do this in a
      separate step since ELF requires all local symbols to appear
@@ -10984,13 +10990,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   eoinfo.localsyms = TRUE;
   eoinfo.need_second_pass = FALSE;
   eoinfo.second_pass = FALSE;
+  eoinfo.file_sym_done = FALSE;
   bfd_hash_traverse (&info->hash->table, elf_link_output_extsym, &eoinfo);
   if (eoinfo.failed)
-    return FALSE;
-
-  if (flinfo.filesym_count == 1
-      && !elf_link_output_sym (&flinfo, NULL, &elfsym,
-			       bfd_und_section_ptr, NULL))
     return FALSE;
 
   if (eoinfo.need_second_pass)

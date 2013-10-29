@@ -1,3 +1,32 @@
+2013-10-29  Jan Beulich <jbeulich@suse.com>
+
+	* ld-cris/tls-e-tpoffcomm1.d: Drop expectation of no longer
+	present STT_FILE symbol.
+	* ld-mmix/bpo-18.d: Likewise.
+	* ld-mmix/bpo-22.d: Likewise.
+	* ld-mmix/greg-6.d: Likewise.
+	* ld-mmix/greg-7.d: Likewise.
+	* ld-mmix/loc4.d: Likewise.
+	* ld-mmix/local1.d: Likewise.
+	* ld-mmix/local3.d: Likewise.
+	* ld-mmix/local5.d: Likewise.
+	* ld-mmix/local7.d: Likewise.
+	* ld-mmix/loct-1.d: Likewise.
+	* ld-sh/sh64/abi32.xd: Likewise.
+	* ld-sh/sh64/abi64.xd: Likewise.
+	* ld-sh/sh64/cmpct1.xd: Likewise.
+	* ld-sh/sh64/crange1.rd: Likewise.
+	* ld-sh/sh64/crange2.rd: Likewise.
+	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
+	* ld-sh/sh64/crange3-media.rd: Likewise.
+	* ld-sh/sh64/crange3.rd: Likewise.
+	* ld-sh/sh64/crangerel1.rd: Likewise.
+	* ld-sh/sh64/crangerel2.rd: Likewise.
+	* ld-sh/sh64/mix1.xd: Likewise.
+	* ld-sh/sh64/mix2.xd: Likewise.
+	* ld-sh/sh64/shdl32.xd: Likewise.
+	* ld-sh/sh64/shdl64.xd: Likewise.
+
 2013-10-18  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/asneed1.d: New test.

@@ -33,7 +33,6 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 .* 00000000 +0 +SECTION +LOCAL +DEFAULT +6 
 .* 00000000 +0 +FILE +LOCAL +DEFAULT +ABS .*
 .* 00000000 +0 +NOTYPE +LOCAL +DEFAULT +\[<other>: 4\] +2 start2
-.* 00000000 +0 +FILE +LOCAL +DEFAULT +ABS .*
 .* 00000000 +0 +NOTYPE +GLOBAL +DEFAULT +2 diversion2
 
 Hex dump of section '\.text\.mixed':
