@@ -1,3 +1,8 @@
+2013-10-30  Alan Modra  <amodra@gmail.com>
+
+	* readelf.c (get_ppc_dynamic_type): Replace PPC_TLSOPT with PPC_OPT.
+	(get_ppc64_dynamic_type): Replace PPC64_TLSOPT with PPC64_OPT.
+
 2013-10-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* readelf.c (get_ppc64_symbol_other): New function.

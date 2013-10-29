@@ -234,7 +234,9 @@ ppc64_encode_local_entry(unsigned int val)
 #define DT_PPC64_OPD		(DT_LOPROC + 1)
 #define DT_PPC64_OPDSZ		(DT_LOPROC + 2)
 
-/* Specify that tls descriptors should be optimized.  */
-#define DT_PPC64_TLSOPT		(DT_LOPROC + 3)
+/* Specify whether various optimisations are possible.  */
+#define DT_PPC64_OPT		(DT_LOPROC + 3)
+#define PPC64_OPT_TLS		1
+#define PPC64_OPT_MULTI_TOC	2
 
 #endif /* _ELF_PPC64_H */

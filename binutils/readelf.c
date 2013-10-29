@@ -1575,7 +1575,7 @@ get_ppc_dynamic_type (unsigned long type)
   switch (type)
     {
     case DT_PPC_GOT:    return "PPC_GOT";
-    case DT_PPC_TLSOPT: return "PPC_TLSOPT";
+    case DT_PPC_OPT:    return "PPC_OPT";
     default:
       return NULL;
     }
@@ -1589,7 +1589,7 @@ get_ppc64_dynamic_type (unsigned long type)
     case DT_PPC64_GLINK:  return "PPC64_GLINK";
     case DT_PPC64_OPD:    return "PPC64_OPD";
     case DT_PPC64_OPDSZ:  return "PPC64_OPDSZ";
-    case DT_PPC64_TLSOPT: return "PPC64_TLSOPT";
+    case DT_PPC64_OPT:    return "PPC64_OPT";
     default:
       return NULL;
     }

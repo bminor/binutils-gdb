@@ -1,5 +1,12 @@
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
+	* ppc.h (DT_PPC_TLSOPT): Delete.
+	(DT_PPC_OPT, PPC_OPT_TLS): Define.
+	* ppc64.h (DT_PPC64_TLSOPT): Delete.
+	(DT_PPC64_OPT, PPC64_OPT_TLS, PPC64_OPT_MULTI_TOC): Define.
+
+2013-10-30  Alan Modra  <amodra@gmail.com>
+
 	* ppc64.h (STO_PPC64_LOCAL_BIT, STO_PPC64_LOCAL_MASK): Define.
 	(ppc64_decode_local_entry, ppc64_encode_local_entry): New functions.
 	(PPC64_LOCAL_ENTRY_OFFSET, PPC64_SET_LOCAL_ENTRY_OFFSET): Define.
