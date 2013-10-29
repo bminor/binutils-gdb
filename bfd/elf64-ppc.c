@@ -137,29 +137,29 @@ static bfd_vma opd_entry_value
 
 /* .plt call stub instructions.  The normal stub is like this, but
    sometimes the .plt entry crosses a 64k boundary and we need to
-   insert an addi to adjust r12.  */
+   insert an addi to adjust r11.  */
 #define PLT_CALL_STUB_SIZE (7*4)
-#define ADDIS_R12_R2	0x3d820000	/* addis %r12,%r2,xxx@ha     */
 #define STD_R2_40R1	0xf8410028	/* std	 %r2,40(%r1)	     */
-#define LD_R11_0R12	0xe96c0000	/* ld	 %r11,xxx+0@l(%r12)  */
-#define MTCTR_R11	0x7d6903a6	/* mtctr %r11		     */
-#define LD_R2_0R12	0xe84c0000	/* ld	 %r2,xxx+8@l(%r12)   */
-					/* ld	 %r11,xxx+16@l(%r12) */
+#define ADDIS_R11_R2	0x3d620000	/* addis %r11,%r2,xxx@ha     */
+#define LD_R12_0R11	0xe98b0000	/* ld	 %r12,xxx+0@l(%r11)  */
+#define MTCTR_R12	0x7d8903a6	/* mtctr %r12		     */
+#define LD_R2_0R11	0xe84b0000	/* ld	 %r2,xxx+8@l(%r11)   */
+#define LD_R11_0R11	0xe96b0000	/* ld	 %r11,xxx+16@l(%r11) */
 #define BCTR		0x4e800420	/* bctr			     */
 
-
-#define ADDIS_R12_R12	0x3d8c0000	/* addis %r12,%r12,off@ha  */
-#define ADDI_R12_R12	0x398c0000	/* addi %r12,%r12,off@l  */
+#define ADDI_R11_R11	0x396b0000	/* addi %r11,%r11,off@l  */
 #define ADDIS_R2_R2	0x3c420000	/* addis %r2,%r2,off@ha  */
 #define ADDI_R2_R2	0x38420000	/* addi  %r2,%r2,off@l   */
 
-#define XOR_R11_R11_R11	0x7d6b5a78	/* xor   %r11,%r11,%r11  */
-#define ADD_R12_R12_R11	0x7d8c5a14	/* add   %r12,%r12,%r11  */
+#define XOR_R2_R12_R12	0x7d826278	/* xor   %r2,%r12,%r12   */
+#define ADD_R11_R11_R2	0x7d6b1214	/* add   %r11,%r11,%r2   */
+#define XOR_R11_R12_R12	0x7d8b6278	/* xor   %r11,%r12,%r12  */
 #define ADD_R2_R2_R11	0x7c425a14	/* add   %r2,%r2,%r11    */
 #define CMPLDI_R2_0	0x28220000	/* cmpldi %r2,0          */
 #define BNECTR		0x4ca20420	/* bnectr+               */
 #define BNECTR_P4	0x4ce20420	/* bnectr+               */
 
+#define LD_R12_0R2	0xe9820000	/* ld	 %r12,xxx+0(%r2) */
 #define LD_R11_0R2	0xe9620000	/* ld	 %r11,xxx+0(%r2) */
 #define LD_R2_0R2	0xe8420000	/* ld	 %r2,xxx+0(%r2)  */
 
@@ -174,13 +174,13 @@ static bfd_vma opd_entry_value
 #define BCL_20_31	0x429f0005	/*  bcl 20,31,1f		*/
 					/* 1:				*/
 #define MFLR_R11	0x7d6802a6	/*  mflr %11			*/
-#define LD_R2_M16R11	0xe84bfff0	/*  ld %2,(0b-1b)(%11)		*/
+					/*  ld %2,(0b-1b)(%11)		*/
 #define MTLR_R12	0x7d8803a6	/*  mtlr %12			*/
-#define ADD_R12_R2_R11	0x7d825a14	/*  add %12,%2,%11		*/
-					/*  ld %11,0(%12)		*/
-					/*  ld %2,8(%12)		*/
-					/*  mtctr %11			*/
-					/*  ld %11,16(%12)		*/
+#define ADD_R11_R2_R11	0x7d625a14	/*  add %11,%2,%11		*/
+					/*  ld %12,0(%11)		*/
+					/*  ld %2,8(%11)		*/
+					/*  mtctr %12			*/
+					/*  ld %11,16(%11)		*/
 					/*  bctr			*/
 
 /* Pad with this.  */
@@ -3559,13 +3559,13 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
    .
    .
    .	.foo_stub:
-   .		addis	12,2,Lfoo@toc@ha	# in practice, the call stub
-   .		addi	12,12,Lfoo@toc@l	# is slightly optimized, but
-   .		std	2,40(1)			# this is the general idea
-   .		ld	11,0(12)
-   .		ld	2,8(12)
-   .		mtctr	11
-   .		ld	11,16(12)
+   .		std	2,40(1)			# in practice, the call stub
+   .		addis	11,2,Lfoo@toc@ha	# is slightly optimized, but
+   .		addi	11,11,Lfoo@toc@l	# this is the general idea
+   .		ld	12,0(11)
+   .		ld	2,8(11)
+   .		mtctr	12
+   .		ld	11,16(11)
    .		bctr
    .
    .		.section .plt
@@ -3657,21 +3657,21 @@ must_be_dyn_reloc (struct bfd_link_info *info,
    ppc_stub_plt_branch:
    Similar to the above, but a 24 bit branch in the stub section won't
    reach its destination.
-   .	addis	%r12,%r2,xxx@toc@ha
-   .	ld	%r11,xxx@toc@l(%r12)
-   .	mtctr	%r11
+   .	addis	%r11,%r2,xxx@toc@ha
+   .	ld	%r12,xxx@toc@l(%r11)
+   .	mtctr	%r12
    .	bctr
 
    ppc_stub_plt_call:
    Used to call a function in a shared library.  If it so happens that
    the plt entry referenced crosses a 64k boundary, then an extra
-   "addi %r12,%r12,xxx@toc@l" will be inserted before the "mtctr".
-   .	addis	%r12,%r2,xxx@toc@ha
+   "addi %r11,%r11,xxx@toc@l" will be inserted before the "mtctr".
    .	std	%r2,40(%r1)
-   .	ld	%r11,xxx+0@toc@l(%r12)
-   .	mtctr	%r11
-   .	ld	%r2,xxx+8@toc@l(%r12)
-   .	ld	%r11,xxx+16@toc@l(%r12)
+   .	addis	%r11,%r2,xxx@toc@ha
+   .	ld	%r12,xxx+0@toc@l(%r11)
+   .	mtctr	%r12
+   .	ld	%r2,xxx+8@toc@l(%r11)
+   .	ld	%r11,xxx+16@toc@l(%r11)
    .	bctr
 
    ppc_stub_long_branch and ppc_stub_plt_branch may also have additional
@@ -3684,11 +3684,11 @@ must_be_dyn_reloc (struct bfd_link_info *info,
 
    A ppc_stub_plt_branch with an r2 offset looks like:
    .	std	%r2,40(%r1)
-   .	addis	%r12,%r2,xxx@toc@ha
-   .	ld	%r11,xxx@toc@l(%r12)
+   .	addis	%r11,%r2,xxx@toc@ha
+   .	ld	%r12,xxx@toc@l(%r11)
    .	addis	%r2,%r2,off@ha
    .	addi	%r2,%r2,off@l
-   .	mtctr	%r11
+   .	mtctr	%r12
    .	bctr
 
    In cases where the "addis" instruction would add zero, the "addis" is
@@ -9779,9 +9779,9 @@ ppc_type_of_stub (asection *input_sec,
    the appropriate glink entry if so.
 
    .	fake dep barrier	compare
-   .	ld 11,xxx(2)		ld 11,xxx(2)
-   .	mtctr 11		mtctr 11
-   .	xor 11,11,11		ld 2,xxx+8(2)
+   .	ld 12,xxx(2)		ld 12,xxx(2)
+   .	mtctr 12		mtctr 12
+   .	xor 11,12,12		ld 2,xxx+8(2)
    .	add 2,2,11		cmpldi 2,0
    .	ld 2,xxx+8(2)		bnectr+
    .	bctr			b <glink_entry>
@@ -9916,22 +9916,22 @@ build_plt_stub (struct ppc_link_hash_table *htab,
       if (ALWAYS_EMIT_R2SAVE
 	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
 	bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
-      bfd_put_32 (obfd, ADDIS_R12_R2 | PPC_HA (offset), p),	p += 4;
-      bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset), p),	p += 4;
+      bfd_put_32 (obfd, ADDIS_R11_R2 | PPC_HA (offset), p),	p += 4;
+      bfd_put_32 (obfd, LD_R12_0R11 | PPC_LO (offset), p),	p += 4;
       if (PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
 	{
-	  bfd_put_32 (obfd, ADDI_R12_R12 | PPC_LO (offset), p),	p += 4;
+	  bfd_put_32 (obfd, ADDI_R11_R11 | PPC_LO (offset), p),	p += 4;
 	  offset = 0;
 	}
-      bfd_put_32 (obfd, MTCTR_R11, p),				p += 4;
+      bfd_put_32 (obfd, MTCTR_R12, p),				p += 4;
       if (use_fake_dep)
 	{
-	  bfd_put_32 (obfd, XOR_R11_R11_R11, p),		p += 4;
-	  bfd_put_32 (obfd, ADD_R12_R12_R11, p),		p += 4;
+	  bfd_put_32 (obfd, XOR_R2_R12_R12, p),			p += 4;
+	  bfd_put_32 (obfd, ADD_R11_R11_R2, p),			p += 4;
 	}
-      bfd_put_32 (obfd, LD_R2_0R12 | PPC_LO (offset + 8), p),	p += 4;
+      bfd_put_32 (obfd, LD_R2_0R11 | PPC_LO (offset + 8), p),	p += 4;
       if (plt_static_chain)
-	bfd_put_32 (obfd, LD_R11_0R12 | PPC_LO (offset + 16), p), p += 4;
+	bfd_put_32 (obfd, LD_R11_0R11 | PPC_LO (offset + 16), p), p += 4;
     }
   else
     {
@@ -9963,16 +9963,16 @@ build_plt_stub (struct ppc_link_hash_table *htab,
       if (ALWAYS_EMIT_R2SAVE
 	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
 	bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
-      bfd_put_32 (obfd, LD_R11_0R2 | PPC_LO (offset), p),	p += 4;
+      bfd_put_32 (obfd, LD_R12_0R2 | PPC_LO (offset), p),	p += 4;
       if (PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
 	{
 	  bfd_put_32 (obfd, ADDI_R2_R2 | PPC_LO (offset), p),	p += 4;
 	  offset = 0;
 	}
-      bfd_put_32 (obfd, MTCTR_R11, p),				p += 4;
+      bfd_put_32 (obfd, MTCTR_R12, p),				p += 4;
       if (use_fake_dep)
 	{
-	  bfd_put_32 (obfd, XOR_R11_R11_R11, p),		p += 4;
+	  bfd_put_32 (obfd, XOR_R11_R12_R12, p),		p += 4;
 	  bfd_put_32 (obfd, ADD_R2_R2_R11, p),			p += 4;
 	}
       if (plt_static_chain)
@@ -10321,14 +10321,14 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  if (PPC_HA (off) != 0)
 	    {
 	      size = 16;
-	      bfd_put_32 (htab->stub_bfd, ADDIS_R12_R2 | PPC_HA (off), loc);
+	      bfd_put_32 (htab->stub_bfd, ADDIS_R11_R2 | PPC_HA (off), loc);
 	      loc += 4;
-	      bfd_put_32 (htab->stub_bfd, LD_R11_0R12 | PPC_LO (off), loc);
+	      bfd_put_32 (htab->stub_bfd, LD_R12_0R11 | PPC_LO (off), loc);
 	    }
 	  else
 	    {
 	      size = 12;
-	      bfd_put_32 (htab->stub_bfd, LD_R11_0R2 | PPC_LO (off), loc);
+	      bfd_put_32 (htab->stub_bfd, LD_R12_0R2 | PPC_LO (off), loc);
 	    }
 	}
       else
@@ -10347,14 +10347,14 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  if (PPC_HA (off) != 0)
 	    {
 	      size += 4;
-	      bfd_put_32 (htab->stub_bfd, ADDIS_R12_R2 | PPC_HA (off), loc);
+	      bfd_put_32 (htab->stub_bfd, ADDIS_R11_R2 | PPC_HA (off), loc);
 	      loc += 4;
-	      bfd_put_32 (htab->stub_bfd, LD_R11_0R12 | PPC_LO (off), loc);
+	      bfd_put_32 (htab->stub_bfd, LD_R12_0R11 | PPC_LO (off), loc);
 	      loc += 4;
 	    }
 	  else
 	    {
-	      bfd_put_32 (htab->stub_bfd, LD_R11_0R2 | PPC_LO (off), loc);
+	      bfd_put_32 (htab->stub_bfd, LD_R12_0R2 | PPC_LO (off), loc);
 	      loc += 4;
 	    }
 
@@ -10367,7 +10367,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  bfd_put_32 (htab->stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
 	}
       loc += 4;
-      bfd_put_32 (htab->stub_bfd, MTCTR_R11, loc);
+      bfd_put_32 (htab->stub_bfd, MTCTR_R12, loc);
       loc += 4;
       bfd_put_32 (htab->stub_bfd, BCTR, loc);
       break;
@@ -12131,19 +12131,19 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
       p += 4;
       bfd_put_32 (htab->glink->owner, MFLR_R11, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, LD_R2_M16R11, p);
+      bfd_put_32 (htab->glink->owner, LD_R2_0R11 | (-16 & 0xfffc), p);
       p += 4;
       bfd_put_32 (htab->glink->owner, MTLR_R12, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, ADD_R12_R2_R11, p);
+      bfd_put_32 (htab->glink->owner, ADD_R11_R2_R11, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, LD_R11_0R12, p);
+      bfd_put_32 (htab->glink->owner, LD_R12_0R11, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, LD_R2_0R12 | 8, p);
+      bfd_put_32 (htab->glink->owner, LD_R2_0R11 | 8, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, MTCTR_R11, p);
+      bfd_put_32 (htab->glink->owner, MTCTR_R12, p);
       p += 4;
-      bfd_put_32 (htab->glink->owner, LD_R11_0R12 | 16, p);
+      bfd_put_32 (htab->glink->owner, LD_R11_0R11 | 16, p);
       p += 4;
       bfd_put_32 (htab->glink->owner, BCTR, p);
       p += 4;

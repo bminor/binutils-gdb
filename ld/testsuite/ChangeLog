@@ -1,3 +1,25 @@
+2013-10-30  Alan Modra  <amodra@gmail.com>
+
+	* ld-powerpc/tls.s: Add proper .opd entry for _start.
+	* ld-powerpc/tlstoc.s: Likewise.
+	* ld-powerpc/relbrlt.d: Update for changed stubs.
+	* ld-powerpc/tls.d: Update for changed stubs and _start .opd entry.
+	* ld-powerpc/tls.g: Likewise.
+	* ld-powerpc/tlsexe.d: Likewise.
+	* ld-powerpc/tlsexe.g: Likewise.
+	* ld-powerpc/tlsexe.r: Likewise.
+	* ld-powerpc/tlsexetoc.d: Likewise.
+	* ld-powerpc/tlsexetoc.g: Likewise.
+	* ld-powerpc/tlsexetoc.r: Likewise.
+	* ld-powerpc/tlsso.d: Likewise.
+	* ld-powerpc/tlsso.g: Likewise.
+	* ld-powerpc/tlsso.r: Likewise.
+	* ld-powerpc/tlstoc.d: Likewise.
+	* ld-powerpc/tlstoc.g: Likewise.
+	* ld-powerpc/tlstocso.d: Likewise.
+	* ld-powerpc/tlstocso.g: Likewise.
+	* ld-powerpc/tlstocso.r: Likewise.
+
 2013-10-29  Jan Beulich <jbeulich@suse.com>
 
 	* ld-cris/tls-e-tpoffcomm1.d: Drop expectation of no longer
