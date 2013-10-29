@@ -1,5 +1,11 @@
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
+	* ppc64.h (STO_PPC64_LOCAL_BIT, STO_PPC64_LOCAL_MASK): Define.
+	(ppc64_decode_local_entry, ppc64_encode_local_entry): New functions.
+	(PPC64_LOCAL_ENTRY_OFFSET, PPC64_SET_LOCAL_ENTRY_OFFSET): Define.
+
+2013-10-30  Alan Modra  <amodra@gmail.com>
+
 	* ppc64.h (EF_PPC64_ABI): Define.
 
 2013-10-30  Alan Modra  <amodra@gmail.com>

@@ -1,4 +1,21 @@
 2013-10-30  Alan Modra  <amodra@gmail.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf64-ppc.c (struct ppc_stub_hash_entry): Add "other".
+	(stub_hash_newfunc): Init new ppc_stub_hash_entry field, and one
+	we forgot, "plt_ent".
+	(ppc64_elf_add_symbol_hook): Check ELFv1 objects don't have
+	st_other bits only valid in ELFv2.
+	(ppc64_elf_merge_symbol_attribute): New function.
+	(ppc_type_of_stub): Add local_off param to test branch range.
+	(ppc_build_one_stub): Adjust destinations for ELFv2 locals.
+	(ppc_size_one_stub, toc_adjusting_stub_needed): Similarly.
+	(ppc64_elf_size_stubs): Pass local_off to ppc_type_of_stub.
+	Set "other" field.
+	(ppc64_elf_relocate_section): Adjust destination for ELFv2 local
+	calls.
+
+2013-10-30  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (abiversion, set_abiversion): New functions.
 	(ppc64_elf_get_synthetic_symtab): Handle ELFv2 objects without .opd.

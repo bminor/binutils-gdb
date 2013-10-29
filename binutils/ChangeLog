@@ -1,3 +1,8 @@
+2013-10-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* readelf.c (get_ppc64_symbol_other): New function.
+	(get_symbol_other): Use it for EM_PPC64.
+
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
 	* readelf.c (get_machine_flags): Display ABI version for EM_PPC64.

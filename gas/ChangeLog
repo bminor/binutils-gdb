@@ -1,3 +1,11 @@
+2013-10-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* config/tc-ppc.c (md_pseudo_table): Add .localentry.
+	(ppc_elf_localentry): New function.
+	(ppc_force_relocation): Force relocs on all branches to localenty
+	symbols.
+	(ppc_fix_adjustable): Don't reduce such symbols to section+offset.
+
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
 	* config/tc-ppc.c: Include elf/ppc64.h.

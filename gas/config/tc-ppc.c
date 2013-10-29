@@ -134,6 +134,7 @@ static void ppc_vbyte (int);
 static void ppc_elf_cons (int);
 static void ppc_elf_rdata (int);
 static void ppc_elf_lcomm (int);
+static void ppc_elf_localentry (int);
 static void ppc_elf_abiversion (int);
 #endif
 
@@ -266,6 +267,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "rdata",	ppc_elf_rdata,	0 },
   { "rodata",	ppc_elf_rdata,	0 },
   { "lcomm",	ppc_elf_lcomm,	0 },
+  { "localentry", ppc_elf_localentry,	0 },
   { "abiversion", ppc_elf_abiversion,	0 },
 #endif
 
@@ -2223,6 +2225,68 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
   S_SET_SIZE (symbolP, size);
   S_SET_SEGMENT (symbolP, bss_section);
   subseg_set (old_sec, old_subsec);
+  demand_empty_rest_of_line ();
+}
+
+/* Pseudo op to set symbol local entry point.  */
+static void
+ppc_elf_localentry (int ignore ATTRIBUTE_UNUSED)
+{
+  char *name = input_line_pointer;
+  char c = get_symbol_end ();
+  char *p;
+  expressionS exp;
+  symbolS *sym;
+  asymbol *bfdsym;
+  elf_symbol_type *elfsym;
+
+  p = input_line_pointer;
+  *p = c;
+  SKIP_WHITESPACE ();
+  if (*input_line_pointer != ',')
+    {
+      *p = 0;
+      as_bad (_("expected comma after name `%s' in .localentry directive"),
+	      name);
+      *p = c;
+      ignore_rest_of_line ();
+      return;
+    }
+  input_line_pointer++;
+  expression (&exp);
+  if (exp.X_op == O_absent)
+    {
+      as_bad (_("missing expression in .localentry directive"));
+      exp.X_op = O_constant;
+      exp.X_add_number = 0;
+    }
+  *p = 0;
+  sym = symbol_find_or_make (name);
+  *p = c;
+
+  if (resolve_expression (&exp)
+      && exp.X_op == O_constant)
+    {
+      unsigned char encoded = PPC64_SET_LOCAL_ENTRY_OFFSET (exp.X_add_number);
+
+      if (exp.X_add_number != PPC64_LOCAL_ENTRY_OFFSET (encoded))
+        as_bad (_(".localentry expression for `%s' "
+		  "is not a valid power of 2"), S_GET_NAME (sym));
+      else
+	{
+	  bfdsym = symbol_get_bfdsym (sym);
+	  elfsym = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+	  gas_assert (elfsym);
+	  elfsym->internal_elf_sym.st_other &= ~STO_PPC64_LOCAL_MASK;
+	  elfsym->internal_elf_sym.st_other |= encoded;
+	  if (ppc_abiversion == 0)
+	    ppc_abiversion = 2;
+	}
+    }
+  else
+    as_bad (_(".localentry expression for `%s' "
+	      "does not evaluate to a constant"), S_GET_NAME (sym));
+
   demand_empty_rest_of_line ();
 }
 
@@ -6229,6 +6293,22 @@ ppc_force_relocation (fixS *fix)
     case BFD_RELOC_24_PLT_PCREL:
     case BFD_RELOC_PPC64_TOC:
       return 1;
+    case BFD_RELOC_PPC_B26:
+    case BFD_RELOC_PPC_BA26:
+    case BFD_RELOC_PPC_B16:
+    case BFD_RELOC_PPC_BA16:
+      /* All branch fixups targeting a localentry symbol must
+         force a relocation.  */
+      if (fix->fx_addsy)
+	{
+	  asymbol *bfdsym = symbol_get_bfdsym (fix->fx_addsy);
+	  elf_symbol_type *elfsym
+	    = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+	  gas_assert (elfsym);
+	  if ((STO_PPC64_LOCAL_MASK & elfsym->internal_elf_sym.st_other) != 0)
+	    return 1;
+	}
+      break;
     default:
       break;
     }
@@ -6243,6 +6323,32 @@ ppc_force_relocation (fixS *fix)
 int
 ppc_fix_adjustable (fixS *fix)
 {
+  switch (fix->fx_r_type)
+    {
+      /* All branch fixups targeting a localentry symbol must
+         continue using the symbol.  */
+    case BFD_RELOC_PPC_B26:
+    case BFD_RELOC_PPC_BA26:
+    case BFD_RELOC_PPC_B16:
+    case BFD_RELOC_PPC_BA16:
+    case BFD_RELOC_PPC_B16_BRTAKEN:
+    case BFD_RELOC_PPC_B16_BRNTAKEN:
+    case BFD_RELOC_PPC_BA16_BRTAKEN:
+    case BFD_RELOC_PPC_BA16_BRNTAKEN:
+      if (fix->fx_addsy)
+	{
+	  asymbol *bfdsym = symbol_get_bfdsym (fix->fx_addsy);
+	  elf_symbol_type *elfsym
+	    = elf_symbol_from (bfd_asymbol_bfd (bfdsym), bfdsym);
+	  gas_assert (elfsym);
+	  if ((STO_PPC64_LOCAL_MASK & elfsym->internal_elf_sym.st_other) != 0)
+	    return 0;
+	}
+      break;
+    default:
+      break;
+    }
+
   return (fix->fx_r_type != BFD_RELOC_16_GOTOFF
 	  && fix->fx_r_type != BFD_RELOC_LO16_GOTOFF
 	  && fix->fx_r_type != BFD_RELOC_HI16_GOTOFF
