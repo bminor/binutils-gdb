@@ -1,5 +1,45 @@
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
+	* powerpc.cc (Powerpc_relobj::abiversion, set_abiversion,
+	ppc64_local_entry_offset, ppc64_local_entry_offset,
+	do_read_symbols): New functions.
+	(Powerpc_relobj::e_flags_, st_other_): New vars.
+	(Powerpc_relobj::Powerpc_relobj): Call set_abiversion.
+	(Powerpc_dynobj::abiversion, set_abiversion): New functions.
+	(Powerpc_relobj::e_flags_): New var.
+	(Target_powerpc::first_plt_entry_offset, plt_entry_size): Inline
+	and adjust for ELFv2.
+	(Target_powerpc::abiversion, set_abiversion, stk_toc): New functions.
+	(Powerpc_relobj::do_find_special_sections): Check no .opd in ELFv2.
+	(Powerpc_dynobj::do_find_special_sections): Likewise.
+	(Target_powerpc::do_define_standard_symbols): Define ".TOC.".
+	(Target_powerpc::Branch_info::make_stub): Adjust stub destination
+	to ELFv2 local entry.
+	(Target_powerpc::do_relax): No thread safe barriers needed for
+	ELFv2.
+	(Output_data_plt_powerpc::initial_plt_entry_size_,
+	plt_entry_size): Delete.  Replace all uses with
+	first_plt_entry_offset() and plt_entry_size().
+	(Output_data_plt_powerpc::Output_data_plt_powerpc): Remove
+	reserved_size parm.  Update callers.
+	(Output_data_plt_powerpc::entry_count): Update.
+	(Output_data_plt_powerpc::first_plt_entry_offset): Make private
+	and use Target_powerpc::first_plt_entry_offset().
+	(Output_data_plt_powerpc::get_plt_entry_size): Similarly and
+	rename to plt_entry_size.
+	(Output_data_plt_powerpc::add_ifunc_entry,
+	add_local_ifunc_entry): Adjust reloc for ELFv2.
+	(glink_eh_frame_fde_64): Rename to glink_eh_frame_fde_64v1.
+	(glink_eh_frame_fde_64v2): New.
+	(Stub_table::plt_call_size): Support ELFv2 sizing.
+	(Output_data_glink::add_eh_frame): Use the new FDE.
+	(Output_data_glink::set_final_data_size): Adjust for ELFv2 glink.
+	(Stub_table::do_write): Write ELFv2 stubs and glink.
+	(Target_powerpc::Relocate::relocate): Replaces nop after call
+	with ld 2,24(1) and adjust local offset destination for ELFv2.
+
+2013-10-30  Alan Modra  <amodra@gmail.com>
+
 	* powerpc.cc (Target_powerpc::Scan::check_non_pic): Handle new relocs.
 	(Target_powerpc::Scan::global, local): Likewise.
 	(Target_powerpc::Relocate::relocate): Likewise.  Check for overflow

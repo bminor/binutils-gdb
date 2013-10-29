@@ -1,6 +1,6 @@
 // powerpc.h -- ELF definitions specific to EM_PPC and EM_PPC64  -*- C++ -*-
 
-// Copyright 2008, 2010, 2012 Free Software Foundation, Inc.
+// Copyright 2008, 2010, 2012, 2013 Free Software Foundation, Inc.
 // Written by David S. Miller <davem@davemloft.net>.
 
 // This file is part of elfcpp.
@@ -213,6 +213,59 @@ enum
   EF_PPC_RELOCATABLE = 0x00010000,     // PowerPC -mrelocatable flag.  */
   EF_PPC_RELOCATABLE_LIB = 0x00008000, // PowerPC -mrelocatable-lib flag.  */
 };
+
+// e_flags values defined for powerpc64
+enum
+{
+  // ABI version
+  // 1 for original function descriptor using ABI,
+  // 2 for revised ABI without function descriptors,
+  // 0 for unspecified or not using any features affected by the differences.
+  EF_PPC64_ABI = 3
+};
+
+enum
+{
+  // The ELFv2 ABI uses three bits in the symbol st_other field of a
+  // function definition to specify the number of instructions between a
+  // function's global entry point and local entry point.
+  // The global entry point is used when it is necessary to set up the
+  // toc pointer (r2) for the function.  Callers must enter the global
+  // entry point with r12 set to the global entry point address.  On
+  // return from the function, r2 may have a different value to that
+  // which it had on entry.
+  // The local entry point is used when r2 is known to already be valid
+  // for the function.  There is no requirement on r12 when using the
+  // local entry point, and on return r2 will contain the same value as
+  // at entry.
+  // A value of zero in these bits means that the function has a single
+  // entry point with no requirement on r12 or r2, and that on return r2
+  // will contain the same value as at entry.
+  // Values of one and seven are reserved.
+
+  STO_PPC64_LOCAL_BIT = 5,
+  STO_PPC64_LOCAL_MASK = 0xE0
+};
+
+// 3 bit other field to bytes.
+static inline unsigned int
+ppc64_decode_local_entry(unsigned int other)
+{
+  return ((1 << other) >> 2) << 2;
+}
+
+// bytes to field value.
+static inline unsigned int
+ppc64_encode_local_entry(unsigned int val)
+{
+  return (val >= 4 * 4
+	  ? (val >= 8 * 4
+	     ? (val >= 16 * 4 ? 6 : 5)
+	     : 4)
+	  : (val >= 2 * 4
+	     ? 3
+	     : (val >= 1 * 4 ? 2 : 0)));
+}
 
 } // End namespace elfcpp.
 
