@@ -6488,7 +6488,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (!htab->no_tls_get_addr_opt
 	      && htab->tls_get_addr != NULL
 	      && htab->tls_get_addr->plt.plist != NULL
-	      && !add_dynamic_entry (DT_PPC_TLSOPT, 0))
+	      && !add_dynamic_entry (DT_PPC_OPT, PPC_OPT_TLS))
 	    return FALSE;
 	}
 

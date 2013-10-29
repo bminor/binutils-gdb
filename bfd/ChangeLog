@@ -2,6 +2,13 @@
 
 	Apply changes from mainline to 2.24
 	2013-10-30  Alan Modra  <amodra@gmail.com>
+	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Use new DT_PPC_OPT
+	tag to specify tls optimisation.
+	* elf64-ppc.c (ppc64_elf_size_dynamic_sections): Likewise.
+	(ppc64_elf_finish_dynamic_sections): Specify whether multiple
+	toc pointers are used via DT_PPC64_OPT.
+
+	2013-10-30  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (STK_LR, STK_TOC, STK_LINKER): Define.
 	(savegpr0_tail, restgpr0_tail, savefpr0_tail, restfpr0_tail)
 	build_plt_stub, build_tls_get_addr_stub, ppc_build_one_stub,

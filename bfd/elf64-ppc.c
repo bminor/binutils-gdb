@@ -9790,6 +9790,8 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 
   if (htab->elf.dynamic_sections_created)
     {
+      bfd_boolean tls_opt;
+
       /* Add some entries to the .dynamic section.  We fill in the
 	 values later, in ppc64_elf_finish_dynamic_sections, but we
 	 must add the entries now so that we get the correct size for
@@ -9821,11 +9823,14 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	    return FALSE;
 	}
 
-      if (!htab->no_tls_get_addr_opt
-	  && htab->tls_get_addr_fd != NULL
-	  && htab->tls_get_addr_fd->elf.plt.plist != NULL
-	  && !add_dynamic_entry (DT_PPC64_TLSOPT, 0))
-	return FALSE;
+      tls_opt = (!htab->no_tls_get_addr_opt
+		 && htab->tls_get_addr_fd != NULL
+		 && htab->tls_get_addr_fd->elf.plt.plist != NULL);
+      if (tls_opt || !htab->opd_abi)
+	{
+	  if (!add_dynamic_entry (DT_PPC64_OPT, tls_opt ? PPC64_OPT_TLS : 0))
+	    return FALSE;
+	}
 
       if (relocs)
 	{
@@ -14657,6 +14662,11 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	      if (s == NULL)
 		continue;
 	      dyn.d_un.d_ptr = s->vma;
+	      break;
+
+	    case DT_PPC64_OPT:
+	      if (htab->do_multi_toc && htab->multi_toc_needed)
+		dyn.d_un.d_val |= PPC64_OPT_MULTI_TOC;
 	      break;
 
 	    case DT_PPC64_OPDSZ:
