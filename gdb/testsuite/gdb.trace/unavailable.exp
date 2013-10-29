@@ -297,11 +297,11 @@ proc gdb_unavailable_registers_test { } {
 	test_register "\$pc"
 
 	gdb_test "info registers" \
-	    "\\*value not available\\*.*\\*value not available\\*" \
+	    "<unavailable>.*<unavailable>" \
 	    "info registers, multiple registers not available"
 
 	gdb_test "info registers \$$spreg" \
-	    "\\*value not available\\*" \
+	    "<unavailable>" \
 	    "info registers \$$spreg reports not available"
 
 	gdb_test "tfind none" "#0  end .*" "cease trace debugging"

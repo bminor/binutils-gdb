@@ -1,3 +1,9 @@
+2013-10-29  Andrew Burgess  <aburgess@broadcom.com>
+
+	* infcmd.c (default_print_one_register_info): Use val_print to
+	print all values even optimized out or unavailable ones.  Don't
+	try to print a raw form of optimized out or unavailable values.
+
 2013-10-29  Yao Qi  <yao@codesourcery.com>
 
 	* auto-load.c (auto_load_pspace_data_cleanup): Get data from

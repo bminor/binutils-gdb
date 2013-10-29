@@ -1,3 +1,8 @@
+2013-10-29  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.trace/unavailable.exp (gdb_unavailable_registers_test):
+	Expect <unavailable> pattern.
+
 2013-10-28  Tom de Vries  <tom@codesourcery.com>
 
 	* gdb.arch/thumb2-it.S (it_8): Fix typo.
