@@ -1,3 +1,23 @@
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
+	* dcache.c (last_cache): Remove.
+	(dcache_free, dcache_init): Update.
+	(dcache_update):
+	(dcache_print_line): Add parameter 'dcache'.  Replace
+	'target_dcache' with 'dcache'.
+	(dcache_info): Move code to dcache_info_1. Call
+	'dcache_info_1'.
+	(dcache_info_1): New function.
+	(set_dcache_size): Call target_dcache_invalidate.
+	(set_dcache_line_size): Call target_dcache_invalidate.
+	* target.c (target_dcache_init_p): New function.
+	(target_dcache_invalidate): Check target_dcache_init_p first.
+	(target_dcache_get, target_dcache_get_or_init): New function.
+	(memory_xfer_partial_1): Adjust.
+	(initialize_target): Don't initialize 'target_dcache'.
+	* target.h (struct dcache_struct): Declare.
+	(target_dcache_get): Declare.
+
 2013-11-19  Yao Qi  <yao@codesourcery.com>
 
 	* varobj.c (varobj_get_type): Fix typo.

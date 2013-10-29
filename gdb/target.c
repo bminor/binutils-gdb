@@ -238,12 +238,42 @@ show_stack_cache_enabled_p (struct ui_file *file, int from_tty,
 /* Cache of memory operations, to speed up remote access.  */
 static DCACHE *target_dcache;
 
+/* Target dcache is initialized or not.  */
+
+static int
+target_dcache_init_p (void)
+{
+  return (target_dcache != NULL);
+}
+
 /* Invalidate the target dcache.  */
 
 void
 target_dcache_invalidate (void)
 {
-  dcache_invalidate (target_dcache);
+  if (target_dcache_init_p ())
+    dcache_invalidate (target_dcache);
+}
+
+/* Return the target dcache.  Return NULL if target dcache is not
+   initialized yet.  */
+
+DCACHE *
+target_dcache_get (void)
+{
+  return target_dcache;
+}
+
+/* Return the target dcache.  If it is not initialized yet, initialize
+   it.  */
+
+static DCACHE *
+target_dcache_get_or_init (void)
+{
+  if (!target_dcache_init_p ())
+    target_dcache = dcache_init ();
+
+  return target_dcache;
 }
 
 /* The user just typed 'target' without the name of a target.  */
@@ -1588,15 +1618,15 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
       && (region->attrib.cache
 	  || (stack_cache_enabled_p && object == TARGET_OBJECT_STACK_MEMORY)))
     {
+      DCACHE *dcache = target_dcache_get_or_init ();
+
       if (readbuf != NULL)
-	res = dcache_xfer_memory (ops, target_dcache, memaddr, readbuf,
-				  reg_len, 0);
+	res = dcache_xfer_memory (ops, dcache, memaddr, readbuf, reg_len, 0);
       else
 	/* FIXME drow/2006-08-09: If we're going to preserve const
 	   correctness dcache_xfer_memory should take readbuf and
 	   writebuf.  */
-	res = dcache_xfer_memory (ops, target_dcache, memaddr,
-				  (void *) writebuf,
+	res = dcache_xfer_memory (ops, dcache, memaddr, (void *) writebuf,
 				  reg_len, 1);
       if (res <= 0)
 	return -1;
@@ -1641,7 +1671,9 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
       && stack_cache_enabled_p
       && object != TARGET_OBJECT_STACK_MEMORY)
     {
-      dcache_update (target_dcache, memaddr, (void *) writebuf, res);
+      DCACHE *dcache = target_dcache_get_or_init ();
+
+      dcache_update (dcache, memaddr, (void *) writebuf, res);
     }
 
   /* If we still haven't got anything, return the last error.  We
@@ -5193,7 +5225,4 @@ When this permission is on, GDB may interrupt/stop the target's execution.\n\
 Otherwise, any attempt to interrupt or stop will be ignored."),
 			   set_target_permissions, NULL,
 			   &setlist, &showlist);
-
-
-  target_dcache = dcache_init ();
 }
