@@ -11461,9 +11461,18 @@ create_excep_cond_exprs (struct ada_catchpoint *c)
 				 block_for_pc (bl->address), 0);
 	    }
 	  if (e.reason < 0)
-	    warning (_("failed to reevaluate internal exception condition "
-		       "for catchpoint %d: %s"),
-		     c->base.number, e.message);
+	    {
+	      warning (_("failed to reevaluate internal exception condition "
+			 "for catchpoint %d: %s"),
+		       c->base.number, e.message);
+	      /* There is a bug in GCC on sparc-solaris when building with
+		 optimization which causes EXP to change unexpectedly
+		 (http://gcc.gnu.org/bugzilla/show_bug.cgi?id=56982).
+		 The problem should be fixed starting with GCC 4.9.
+		 In the meantime, work around it by forcing EXP back
+		 to NULL.  */
+	      exp = NULL;
+	    }
 	}
 
       ada_loc->excep_cond_expr = exp;

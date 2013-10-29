@@ -1,5 +1,10 @@
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (create_excep_cond_exprs): Force EXP to NULL
+	when parse_exp_1 threw an error.  Add comment.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Mention "-list-features" in the entry documenting
 	the support for the "--language" option.
 
