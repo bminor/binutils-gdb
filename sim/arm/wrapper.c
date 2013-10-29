@@ -243,6 +243,8 @@ sim_create_inferior (sd, abfd, argv, env)
   int mach;
   char **arg;
 
+  init ();
+
   if (abfd != NULL)
     {
       ARMul_SetPC (state, bfd_get_start_address (abfd));

@@ -1,5 +1,11 @@
 2013-11-07  Will Newton  <will.newton@linaro.org>
 
+	PR gdb/15508
+	* arm/wrapper.c (sim_create_inferior): Call init before
+	accessing STATE.
+
+2013-11-07  Will Newton  <will.newton@linaro.org>
+
 	PR gdb/9195
 	* arm/wrapper.c (sim_create_inferior): Avoid calling
 	bfd_get_mach with a NULL bfd.
