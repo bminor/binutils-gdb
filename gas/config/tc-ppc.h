@@ -238,6 +238,9 @@ extern void ppc_frob_file_before_adjust (void);
 #define tc_adjust_symtab() ppc_elf_adjust_symtab ()
 extern void ppc_elf_adjust_symtab (void);
 
+extern void ppc_elf_end (void);
+#define md_end ppc_elf_end
+
 #endif /* OBJ_ELF */
 
 #if defined (OBJ_ELF) || defined (OBJ_XCOFF)

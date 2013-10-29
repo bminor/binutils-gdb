@@ -29,6 +29,7 @@
 
 #ifdef OBJ_ELF
 #include "elf/ppc.h"
+#include "elf/ppc64.h"
 #include "dwarf2dbg.h"
 #endif
 
@@ -133,6 +134,7 @@ static void ppc_vbyte (int);
 static void ppc_elf_cons (int);
 static void ppc_elf_rdata (int);
 static void ppc_elf_lcomm (int);
+static void ppc_elf_abiversion (int);
 #endif
 
 #ifdef TE_PE
@@ -203,6 +205,9 @@ unsigned long nop_limit = 4;
 ppc_cpu_t ppc_cpu = 0;
 ppc_cpu_t sticky = 0;
 
+/* Value for ELF e_flags EF_PPC64_ABI.  */
+unsigned int ppc_abiversion = 0;
+
 /* Flags set on encountering toc relocs.  */
 enum {
   has_large_toc_reloc = 1,
@@ -261,6 +266,7 @@ const pseudo_typeS md_pseudo_table[] =
   { "rdata",	ppc_elf_rdata,	0 },
   { "rodata",	ppc_elf_rdata,	0 },
   { "lcomm",	ppc_elf_lcomm,	0 },
+  { "abiversion", ppc_elf_abiversion,	0 },
 #endif
 
 #ifdef TE_PE
@@ -2218,6 +2224,39 @@ ppc_elf_lcomm (int xxx ATTRIBUTE_UNUSED)
   S_SET_SEGMENT (symbolP, bss_section);
   subseg_set (old_sec, old_subsec);
   demand_empty_rest_of_line ();
+}
+
+/* Pseudo op to set ABI version.  */
+static void
+ppc_elf_abiversion (int ignore ATTRIBUTE_UNUSED)
+{
+  expressionS exp;
+
+  expression (&exp);
+  if (exp.X_op == O_absent)
+    {
+      as_bad (_("missing expression in .abiversion directive"));
+      exp.X_op = O_constant;
+      exp.X_add_number = 0;
+    }
+
+  if (resolve_expression (&exp)
+      && exp.X_op == O_constant)
+    ppc_abiversion = exp.X_add_number;
+  else
+    as_bad (_(".abiversion expression does not evaluate to a constant"));
+  demand_empty_rest_of_line ();
+}
+
+/* Set ABI version in output file.  */
+void
+ppc_elf_end (void)
+{
+  if (ppc_obj64 && ppc_abiversion != 0)
+    {
+      elf_elfheader (stdoutput)->e_flags &= ~EF_PPC64_ABI;
+      elf_elfheader (stdoutput)->e_flags |= ppc_abiversion & EF_PPC64_ABI;
+    }
 }
 
 /* Validate any relocations emitted for -mrelocatable, possibly adding

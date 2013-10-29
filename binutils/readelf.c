@@ -2461,6 +2461,16 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	    strcat (buf, _(", relocatable-lib"));
 	  break;
 
+	case EM_PPC64:
+	  if (e_flags & EF_PPC64_ABI)
+	    {
+	      char abi[] = ", abiv0";
+
+	      abi[6] += e_flags & EF_PPC64_ABI;
+	      strcat (buf, abi);
+	    }
+	  break;
+
 	case EM_V800:
 	  if ((e_flags & EF_RH850_ABI) == EF_RH850_ABI)
 	    strcat (buf, ", RH850 ABI");
