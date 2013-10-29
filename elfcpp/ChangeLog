@@ -1,3 +1,11 @@
+2013-11-15  Alan Modra  <amodra@gmail.com>
+
+	Apply mainline changes to 2.24
+	2013-10-30  Alan Modra  <amodra@gmail.com>
+	* powerpc.h (R_PPC64_ADDR16_HIGH, R_PPC64_ADDR16_HIGHA,
+	R_PPC64_TPREL16_HIGH, R_PPC64_TPREL16_HIGHA,
+	R_PPC64_DTPREL16_HIGH, R_PPC64_DTPREL16_HIGHA): Define.
+
 2013-03-01  Cary Coutant  <ccoutant@google.com>
 
 	* dwarf.h (enum DW_LANG): Adjust spacing for consistency.

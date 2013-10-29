@@ -4877,6 +4877,8 @@ Target_powerpc<size, big_endian>::Scan::check_non_pic(Relobj* object,
 	case elfcpp::R_PPC64_JMP_IREL:
 	case elfcpp::R_PPC64_ADDR16_DS:
 	case elfcpp::R_PPC64_ADDR16_LO_DS:
+	case elfcpp::R_PPC64_ADDR16_HIGH:
+	case elfcpp::R_PPC64_ADDR16_HIGHA:
 	case elfcpp::R_PPC64_ADDR16_HIGHER:
 	case elfcpp::R_PPC64_ADDR16_HIGHEST:
 	case elfcpp::R_PPC64_ADDR16_HIGHERA:
@@ -4885,6 +4887,8 @@ Target_powerpc<size, big_endian>::Scan::check_non_pic(Relobj* object,
 	case elfcpp::R_POWERPC_ADDR30:
 	case elfcpp::R_PPC64_TPREL16_DS:
 	case elfcpp::R_PPC64_TPREL16_LO_DS:
+	case elfcpp::R_PPC64_TPREL16_HIGH:
+	case elfcpp::R_PPC64_TPREL16_HIGHA:
 	case elfcpp::R_PPC64_TPREL16_HIGHER:
 	case elfcpp::R_PPC64_TPREL16_HIGHEST:
 	case elfcpp::R_PPC64_TPREL16_HIGHERA:
@@ -5057,7 +5061,6 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_GNU_VTINHERIT:
     case elfcpp::R_POWERPC_GNU_VTENTRY:
     case elfcpp::R_PPC64_TOCSAVE:
-    case elfcpp::R_PPC_EMB_MRKREF:
     case elfcpp::R_POWERPC_TLS:
       break;
 
@@ -5094,6 +5097,8 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_ADDR16_HI:
     case elfcpp::R_POWERPC_ADDR16_HA:
     case elfcpp::R_POWERPC_UADDR16:
+    case elfcpp::R_PPC64_ADDR16_HIGH:
+    case elfcpp::R_PPC64_ADDR16_HIGHA:
     case elfcpp::R_PPC64_ADDR16_HIGHER:
     case elfcpp::R_PPC64_ADDR16_HIGHERA:
     case elfcpp::R_PPC64_ADDR16_HIGHEST:
@@ -5152,31 +5157,35 @@ Target_powerpc<size, big_endian>::Scan::local(
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
     case elfcpp::R_POWERPC_SECTOFF:
-    case elfcpp::R_POWERPC_TPREL16:
-    case elfcpp::R_POWERPC_DTPREL16:
     case elfcpp::R_POWERPC_SECTOFF_LO:
-    case elfcpp::R_POWERPC_TPREL16_LO:
-    case elfcpp::R_POWERPC_DTPREL16_LO:
     case elfcpp::R_POWERPC_SECTOFF_HI:
-    case elfcpp::R_POWERPC_TPREL16_HI:
-    case elfcpp::R_POWERPC_DTPREL16_HI:
     case elfcpp::R_POWERPC_SECTOFF_HA:
-    case elfcpp::R_POWERPC_TPREL16_HA:
-    case elfcpp::R_POWERPC_DTPREL16_HA:
-    case elfcpp::R_PPC64_DTPREL16_HIGHER:
-    case elfcpp::R_PPC64_TPREL16_HIGHER:
-    case elfcpp::R_PPC64_DTPREL16_HIGHERA:
-    case elfcpp::R_PPC64_TPREL16_HIGHERA:
-    case elfcpp::R_PPC64_DTPREL16_HIGHEST:
-    case elfcpp::R_PPC64_TPREL16_HIGHEST:
-    case elfcpp::R_PPC64_DTPREL16_HIGHESTA:
-    case elfcpp::R_PPC64_TPREL16_HIGHESTA:
-    case elfcpp::R_PPC64_TPREL16_DS:
-    case elfcpp::R_PPC64_TPREL16_LO_DS:
-    case elfcpp::R_PPC64_DTPREL16_DS:
-    case elfcpp::R_PPC64_DTPREL16_LO_DS:
     case elfcpp::R_PPC64_SECTOFF_DS:
     case elfcpp::R_PPC64_SECTOFF_LO_DS:
+    case elfcpp::R_POWERPC_TPREL16:
+    case elfcpp::R_POWERPC_TPREL16_LO:
+    case elfcpp::R_POWERPC_TPREL16_HI:
+    case elfcpp::R_POWERPC_TPREL16_HA:
+    case elfcpp::R_PPC64_TPREL16_DS:
+    case elfcpp::R_PPC64_TPREL16_LO_DS:
+    case elfcpp::R_PPC64_TPREL16_HIGH:
+    case elfcpp::R_PPC64_TPREL16_HIGHA:
+    case elfcpp::R_PPC64_TPREL16_HIGHER:
+    case elfcpp::R_PPC64_TPREL16_HIGHERA:
+    case elfcpp::R_PPC64_TPREL16_HIGHEST:
+    case elfcpp::R_PPC64_TPREL16_HIGHESTA:
+    case elfcpp::R_POWERPC_DTPREL16:
+    case elfcpp::R_POWERPC_DTPREL16_LO:
+    case elfcpp::R_POWERPC_DTPREL16_HI:
+    case elfcpp::R_POWERPC_DTPREL16_HA:
+    case elfcpp::R_PPC64_DTPREL16_DS:
+    case elfcpp::R_PPC64_DTPREL16_LO_DS:
+    case elfcpp::R_PPC64_DTPREL16_HIGH:
+    case elfcpp::R_PPC64_DTPREL16_HIGHA:
+    case elfcpp::R_PPC64_DTPREL16_HIGHER:
+    case elfcpp::R_PPC64_DTPREL16_HIGHERA:
+    case elfcpp::R_PPC64_DTPREL16_HIGHEST:
+    case elfcpp::R_PPC64_DTPREL16_HIGHESTA:
     case elfcpp::R_PPC64_TLSGD:
     case elfcpp::R_PPC64_TLSLD:
       break;
@@ -5407,7 +5416,6 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_GNU_VTINHERIT:
     case elfcpp::R_POWERPC_GNU_VTENTRY:
     case elfcpp::R_PPC_LOCAL24PC:
-    case elfcpp::R_PPC_EMB_MRKREF:
     case elfcpp::R_POWERPC_TLS:
       break;
 
@@ -5456,6 +5464,8 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_ADDR16_HI:
     case elfcpp::R_POWERPC_ADDR16_HA:
     case elfcpp::R_POWERPC_UADDR16:
+    case elfcpp::R_PPC64_ADDR16_HIGH:
+    case elfcpp::R_PPC64_ADDR16_HIGHA:
     case elfcpp::R_PPC64_ADDR16_HIGHER:
     case elfcpp::R_PPC64_ADDR16_HIGHERA:
     case elfcpp::R_PPC64_ADDR16_HIGHEST:
@@ -5581,31 +5591,35 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
     case elfcpp::R_POWERPC_SECTOFF:
-    case elfcpp::R_POWERPC_TPREL16:
-    case elfcpp::R_POWERPC_DTPREL16:
     case elfcpp::R_POWERPC_SECTOFF_LO:
-    case elfcpp::R_POWERPC_TPREL16_LO:
-    case elfcpp::R_POWERPC_DTPREL16_LO:
     case elfcpp::R_POWERPC_SECTOFF_HI:
-    case elfcpp::R_POWERPC_TPREL16_HI:
-    case elfcpp::R_POWERPC_DTPREL16_HI:
     case elfcpp::R_POWERPC_SECTOFF_HA:
-    case elfcpp::R_POWERPC_TPREL16_HA:
-    case elfcpp::R_POWERPC_DTPREL16_HA:
-    case elfcpp::R_PPC64_DTPREL16_HIGHER:
-    case elfcpp::R_PPC64_TPREL16_HIGHER:
-    case elfcpp::R_PPC64_DTPREL16_HIGHERA:
-    case elfcpp::R_PPC64_TPREL16_HIGHERA:
-    case elfcpp::R_PPC64_DTPREL16_HIGHEST:
-    case elfcpp::R_PPC64_TPREL16_HIGHEST:
-    case elfcpp::R_PPC64_DTPREL16_HIGHESTA:
-    case elfcpp::R_PPC64_TPREL16_HIGHESTA:
-    case elfcpp::R_PPC64_TPREL16_DS:
-    case elfcpp::R_PPC64_TPREL16_LO_DS:
-    case elfcpp::R_PPC64_DTPREL16_DS:
-    case elfcpp::R_PPC64_DTPREL16_LO_DS:
     case elfcpp::R_PPC64_SECTOFF_DS:
     case elfcpp::R_PPC64_SECTOFF_LO_DS:
+    case elfcpp::R_POWERPC_TPREL16:
+    case elfcpp::R_POWERPC_TPREL16_LO:
+    case elfcpp::R_POWERPC_TPREL16_HI:
+    case elfcpp::R_POWERPC_TPREL16_HA:
+    case elfcpp::R_PPC64_TPREL16_DS:
+    case elfcpp::R_PPC64_TPREL16_LO_DS:
+    case elfcpp::R_PPC64_TPREL16_HIGH:
+    case elfcpp::R_PPC64_TPREL16_HIGHA:
+    case elfcpp::R_PPC64_TPREL16_HIGHER:
+    case elfcpp::R_PPC64_TPREL16_HIGHERA:
+    case elfcpp::R_PPC64_TPREL16_HIGHEST:
+    case elfcpp::R_PPC64_TPREL16_HIGHESTA:
+    case elfcpp::R_POWERPC_DTPREL16:
+    case elfcpp::R_POWERPC_DTPREL16_LO:
+    case elfcpp::R_POWERPC_DTPREL16_HI:
+    case elfcpp::R_POWERPC_DTPREL16_HA:
+    case elfcpp::R_PPC64_DTPREL16_DS:
+    case elfcpp::R_PPC64_DTPREL16_LO_DS:
+    case elfcpp::R_PPC64_DTPREL16_HIGH:
+    case elfcpp::R_PPC64_DTPREL16_HIGHA:
+    case elfcpp::R_PPC64_DTPREL16_HIGHER:
+    case elfcpp::R_PPC64_DTPREL16_HIGHERA:
+    case elfcpp::R_PPC64_DTPREL16_HIGHEST:
+    case elfcpp::R_PPC64_DTPREL16_HIGHESTA:
     case elfcpp::R_PPC64_TLSGD:
     case elfcpp::R_PPC64_TLSLD:
       break;
@@ -6748,8 +6762,10 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
 
     case elfcpp::R_PPC64_TPREL16_DS:
     case elfcpp::R_PPC64_TPREL16_LO_DS:
+    case elfcpp::R_PPC64_TPREL16_HIGH:
+    case elfcpp::R_PPC64_TPREL16_HIGHA:
       if (size != 64)
-	// R_PPC_TLSGD and R_PPC_TLSLD
+	// R_PPC_TLSGD, R_PPC_TLSLD, R_PPC_EMB_RELST_LO, R_PPC_EMB_RELST_HI
 	break;
     case elfcpp::R_POWERPC_TPREL16:
     case elfcpp::R_POWERPC_TPREL16_LO:
@@ -6779,6 +6795,8 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_DTPREL16_HI:
     case elfcpp::R_POWERPC_DTPREL16_HA:
     case elfcpp::R_POWERPC_DTPREL:
+    case elfcpp::R_PPC64_DTPREL16_HIGH:
+    case elfcpp::R_PPC64_DTPREL16_HIGHA:
       // tls symbol values are relative to tls_segment()->vaddr()
       value -= dtp_offset;
       break;
@@ -6919,6 +6937,34 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       overflow = Reloc::CHECK_BITFIELD;
       break;
 
+    case elfcpp::R_POWERPC_ADDR16_HI:
+    case elfcpp::R_POWERPC_ADDR16_HA:
+    case elfcpp::R_POWERPC_GOT16_HI:
+    case elfcpp::R_POWERPC_GOT16_HA:
+    case elfcpp::R_POWERPC_PLT16_HI:
+    case elfcpp::R_POWERPC_PLT16_HA:
+    case elfcpp::R_POWERPC_SECTOFF_HI:
+    case elfcpp::R_POWERPC_SECTOFF_HA:
+    case elfcpp::R_PPC64_TOC16_HI:
+    case elfcpp::R_PPC64_TOC16_HA:
+    case elfcpp::R_PPC64_PLTGOT16_HI:
+    case elfcpp::R_PPC64_PLTGOT16_HA:
+    case elfcpp::R_POWERPC_TPREL16_HI:
+    case elfcpp::R_POWERPC_TPREL16_HA:
+    case elfcpp::R_POWERPC_DTPREL16_HI:
+    case elfcpp::R_POWERPC_DTPREL16_HA:
+    case elfcpp::R_POWERPC_GOT_TLSGD16_HI:
+    case elfcpp::R_POWERPC_GOT_TLSGD16_HA:
+    case elfcpp::R_POWERPC_GOT_TLSLD16_HI:
+    case elfcpp::R_POWERPC_GOT_TLSLD16_HA:
+    case elfcpp::R_POWERPC_GOT_TPREL16_HI:
+    case elfcpp::R_POWERPC_GOT_TPREL16_HA:
+    case elfcpp::R_POWERPC_GOT_DTPREL16_HI:
+    case elfcpp::R_POWERPC_GOT_DTPREL16_HA:
+    case elfcpp::R_POWERPC_REL16_HI:
+    case elfcpp::R_POWERPC_REL16_HA:
+      if (size == 32)
+	break;
     case elfcpp::R_POWERPC_REL24:
     case elfcpp::R_PPC_PLTREL24:
     case elfcpp::R_PPC_LOCAL24PC:
@@ -6952,7 +6998,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_POWERPC_TLS:
     case elfcpp::R_POWERPC_GNU_VTINHERIT:
     case elfcpp::R_POWERPC_GNU_VTENTRY:
-    case elfcpp::R_PPC_EMB_MRKREF:
       break;
 
     case elfcpp::R_PPC64_ADDR64:
@@ -7023,6 +7068,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       status = Reloc::addr16_u(view, value, overflow);
       break;
 
+    case elfcpp::R_PPC64_ADDR16_HIGH:
+    case elfcpp::R_PPC64_TPREL16_HIGH:
+    case elfcpp::R_PPC64_DTPREL16_HIGH:
+      if (size == 32)
+	// R_PPC_EMB_MRKREF, R_PPC_EMB_RELST_LO, R_PPC_EMB_RELST_HA
+	goto unsupp;
     case elfcpp::R_POWERPC_ADDR16_HI:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_PPC64_TOC16_HI:
@@ -7037,6 +7088,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
       Reloc::addr16_hi(view, value);
       break;
 
+    case elfcpp::R_PPC64_ADDR16_HIGHA:
+    case elfcpp::R_PPC64_TPREL16_HIGHA:
+    case elfcpp::R_PPC64_DTPREL16_HIGHA:
+      if (size == 32)
+	// R_PPC_EMB_RELSEC16, R_PPC_EMB_RELST_HI, R_PPC_EMB_BIT_FLD
+	goto unsupp;
     case elfcpp::R_POWERPC_ADDR16_HA:
     case elfcpp::R_POWERPC_REL16_HA:
     case elfcpp::R_PPC64_TOC16_HA:
@@ -7161,11 +7218,6 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
     case elfcpp::R_PPC64_PLT16_LO_DS:
     case elfcpp::R_PPC64_PLTGOT16_DS:
     case elfcpp::R_PPC64_PLTGOT16_LO_DS:
-    case elfcpp::R_PPC_EMB_RELSEC16:
-    case elfcpp::R_PPC_EMB_RELST_LO:
-    case elfcpp::R_PPC_EMB_RELST_HI:
-    case elfcpp::R_PPC_EMB_RELST_HA:
-    case elfcpp::R_PPC_EMB_BIT_FLD:
     case elfcpp::R_PPC_EMB_RELSDA:
     case elfcpp::R_PPC_TOC16:
     default:

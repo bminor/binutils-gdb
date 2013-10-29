@@ -1,3 +1,12 @@
+2013-11-15  Alan Modra  <amodra@gmail.com>
+
+	Apply changes from mainline to 2.24
+	2013-10-30  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::Scan::check_non_pic): Handle new relocs.
+	(Target_powerpc::Scan::global, local): Likewise.
+	(Target_powerpc::Relocate::relocate): Likewise.  Check for overflow
+	on all ppc64 @h and @ha relocs.
+
 2013-10-30  Roland McGrath  <mcgrathr@google.com>
 
 	* x86_64.cc (Output_data_plt_x86_64_nacl::first_plt_entry):

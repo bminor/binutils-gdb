@@ -1,3 +1,21 @@
+2013-11-15  Alan Modra  <amodra@gmail.com>
+
+	Apply changes from mainline to 2.24
+	2013-10-30  Alan Modra  <amodra@gmail.com>
+	* reloc.c (BFD_RELOC_PPC64_ADDR16_HIGH, BFD_RELOC_PPC64_ADDR16_HIGHA,
+	BFD_RELOC_PPC64_TPREL16_HIGH, BFD_RELOC_PPC64_TPREL16_HIGHA,
+	BFD_RELOC_PPC64_DTPREL16_HIGH, BFD_RELOC_PPC64_DTPREL16_HIGHA): New.
+	* elf64-ppc.c (ppc64_elf_howto_raw): Add entries for new relocs.
+	Make all _HA and _HI relocs report signed overflow.
+	(ppc64_elf_reloc_type_lookup): Handle new relocs.
+	(must_be_dyn_reloc, ppc64_elf_check_relocs): Likewise.
+	(dec_dynrel_count, ppc64_elf_relocate_section): Likewise.
+	(ppc64_elf_relocate_section): Don't apply 0x8000 adjust to
+	R_PPC64_TPREL16_HIGHER, R_PPC64_TPREL16_HIGHEST,
+	R_PPC64_DTPREL16_HIGHER, and R_PPC64_DTPREL16_HIGHEST.
+	* libbfd.h: Regenerate.
+	* bfd-in2.h: Regenerate.
+
 2013-11-13  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Use

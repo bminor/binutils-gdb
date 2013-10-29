@@ -309,7 +309,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_ADDR16_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -325,7 +325,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_ha_reloc,	/* special_function */
 	 "R_PPC64_ADDR16_HA",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -487,7 +487,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,/* complain_on_overflow */
+	 complain_overflow_signed,/* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT16_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -503,7 +503,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,/* complain_on_overflow */
+	 complain_overflow_signed,/* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT16_HA",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -680,7 +680,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLT16_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -696,7 +696,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLT16_HA",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -741,7 +741,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_sectoff_reloc, /* special_function */
 	 "R_PPC64_SECTOFF_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -756,7 +756,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_sectoff_ha_reloc, /* special_function */
 	 "R_PPC64_SECTOFF_HA",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -963,7 +963,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_toc_reloc,	/* special_function */
 	 "R_PPC64_TOC16_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -982,7 +982,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_toc_ha_reloc, /* special_function */
 	 "R_PPC64_TOC16_HA",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1054,7 +1054,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLTGOT16_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1072,7 +1072,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont,/* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_PLTGOT16_HA",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1374,7 +1374,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_DTPREL16_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1389,7 +1389,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_DTPREL16_HA",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1540,7 +1540,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_TPREL16_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1555,7 +1555,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_TPREL16_HA",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1692,7 +1692,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT_TLSGD16_HI", /* name */
 	 FALSE,			/* partial_inplace */
@@ -1707,7 +1707,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT_TLSGD16_HA", /* name */
 	 FALSE,			/* partial_inplace */
@@ -1754,7 +1754,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT_TLSLD16_HI", /* name */
 	 FALSE,			/* partial_inplace */
@@ -1769,7 +1769,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT_TLSLD16_HA", /* name */
 	 FALSE,			/* partial_inplace */
@@ -1815,7 +1815,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT_DTPREL16_HI", /* name */
 	 FALSE,			/* partial_inplace */
@@ -1830,7 +1830,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT_DTPREL16_HA", /* name */
 	 FALSE,			/* partial_inplace */
@@ -1876,7 +1876,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT_TPREL16_HI", /* name */
 	 FALSE,			/* partial_inplace */
@@ -1891,7 +1891,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 FALSE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_unhandled_reloc, /* special_function */
 	 "R_PPC64_GOT_TPREL16_HA", /* name */
 	 FALSE,			/* partial_inplace */
@@ -1964,7 +1964,7 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_PPC64_REL16_HI",	/* name */
 	 FALSE,			/* partial_inplace */
@@ -1980,13 +1980,103 @@ static reloc_howto_type ppc64_elf_howto_raw[] = {
 	 16,			/* bitsize */
 	 TRUE,			/* pc_relative */
 	 0,			/* bitpos */
-	 complain_overflow_dont, /* complain_on_overflow */
+	 complain_overflow_signed, /* complain_on_overflow */
 	 ppc64_elf_ha_reloc,	/* special_function */
 	 "R_PPC64_REL16_HA",	/* name */
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 0xffff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
+
+  /* Like R_PPC64_ADDR16_HI, but no overflow.  */
+  HOWTO (R_PPC64_ADDR16_HIGH,	/* type */
+	 16,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_PPC64_ADDR16_HIGH",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* Like R_PPC64_ADDR16_HA, but no overflow.  */
+  HOWTO (R_PPC64_ADDR16_HIGHA,	/* type */
+	 16,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 ppc64_elf_ha_reloc,	/* special_function */
+	 "R_PPC64_ADDR16_HIGHA",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* Like R_PPC64_DTPREL16_HI, but no overflow.  */
+  HOWTO (R_PPC64_DTPREL16_HIGH,
+	 16,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 ppc64_elf_unhandled_reloc, /* special_function */
+	 "R_PPC64_DTPREL16_HIGH", /* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* Like R_PPC64_DTPREL16_HA, but no overflow.  */
+  HOWTO (R_PPC64_DTPREL16_HIGHA,
+	 16,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 ppc64_elf_unhandled_reloc, /* special_function */
+	 "R_PPC64_DTPREL16_HIGHA", /* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* Like R_PPC64_TPREL16_HI, but no overflow.  */
+  HOWTO (R_PPC64_TPREL16_HIGH,
+	 16,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 ppc64_elf_unhandled_reloc, /* special_function */
+	 "R_PPC64_TPREL16_HIGH",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
+
+  /* Like R_PPC64_TPREL16_HA, but no overflow.  */
+  HOWTO (R_PPC64_TPREL16_HIGHA,
+	 16,			/* rightshift */
+	 1,			/* size (0 = byte, 1 = short, 2 = long) */
+	 16,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_dont, /* complain_on_overflow */
+	 ppc64_elf_unhandled_reloc, /* special_function */
+	 "R_PPC64_TPREL16_HIGHA",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0,			/* src_mask */
+	 0xffff,		/* dst_mask */
+	 FALSE),		/* pcrel_offset */
 
   /* GNU extension to record C++ vtable hierarchy.  */
   HOWTO (R_PPC64_GNU_VTINHERIT,	/* type */
@@ -2066,7 +2156,11 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       break;
     case BFD_RELOC_HI16:			r = R_PPC64_ADDR16_HI;
       break;
+    case BFD_RELOC_PPC64_ADDR16_HIGH:		r = R_PPC64_ADDR16_HIGH;
+      break;
     case BFD_RELOC_HI16_S:			r = R_PPC64_ADDR16_HA;
+      break;
+    case BFD_RELOC_PPC64_ADDR16_HIGHA:		r = R_PPC64_ADDR16_HIGHA;
       break;
     case BFD_RELOC_PPC_BA16:			r = R_PPC64_ADDR14;
       break;
@@ -2186,7 +2280,11 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       break;
     case BFD_RELOC_PPC_TPREL16_HI:		r = R_PPC64_TPREL16_HI;
       break;
+    case BFD_RELOC_PPC64_TPREL16_HIGH:		r = R_PPC64_TPREL16_HIGH;
+      break;
     case BFD_RELOC_PPC_TPREL16_HA:		r = R_PPC64_TPREL16_HA;
+      break;
+    case BFD_RELOC_PPC64_TPREL16_HIGHA:		r = R_PPC64_TPREL16_HIGHA;
       break;
     case BFD_RELOC_PPC_TPREL:			r = R_PPC64_TPREL64;
       break;
@@ -2196,7 +2294,11 @@ ppc64_elf_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       break;
     case BFD_RELOC_PPC_DTPREL16_HI:		r = R_PPC64_DTPREL16_HI;
       break;
+    case BFD_RELOC_PPC64_DTPREL16_HIGH:		r = R_PPC64_DTPREL16_HIGH;
+      break;
     case BFD_RELOC_PPC_DTPREL16_HA:		r = R_PPC64_DTPREL16_HA;
+      break;
+    case BFD_RELOC_PPC64_DTPREL16_HIGHA:	r = R_PPC64_DTPREL16_HIGHA;
       break;
     case BFD_RELOC_PPC_DTPREL:			r = R_PPC64_DTPREL64;
       break;
@@ -3514,6 +3616,8 @@ must_be_dyn_reloc (struct bfd_link_info *info,
     case R_PPC64_TPREL16_HA:
     case R_PPC64_TPREL16_DS:
     case R_PPC64_TPREL16_LO_DS:
+    case R_PPC64_TPREL16_HIGH:
+    case R_PPC64_TPREL16_HIGHA:
     case R_PPC64_TPREL16_HIGHER:
     case R_PPC64_TPREL16_HIGHERA:
     case R_PPC64_TPREL16_HIGHEST:
@@ -5208,6 +5312,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_DTPREL16_HA:
 	case R_PPC64_DTPREL16_DS:
 	case R_PPC64_DTPREL16_LO_DS:
+	case R_PPC64_DTPREL16_HIGH:
+	case R_PPC64_DTPREL16_HIGHA:
 	case R_PPC64_DTPREL16_HIGHER:
 	case R_PPC64_DTPREL16_HIGHERA:
 	case R_PPC64_DTPREL16_HIGHEST:
@@ -5368,6 +5474,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TPREL16_HA:
 	case R_PPC64_TPREL16_DS:
 	case R_PPC64_TPREL16_LO_DS:
+	case R_PPC64_TPREL16_HIGH:
+	case R_PPC64_TPREL16_HIGHA:
 	case R_PPC64_TPREL16_HIGHER:
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
@@ -5421,6 +5529,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_ADDR16_DS:
 	case R_PPC64_ADDR16_HA:
 	case R_PPC64_ADDR16_HI:
+	case R_PPC64_ADDR16_HIGH:
+	case R_PPC64_ADDR16_HIGHA:
 	case R_PPC64_ADDR16_HIGHER:
 	case R_PPC64_ADDR16_HIGHERA:
 	case R_PPC64_ADDR16_HIGHEST:
@@ -7052,6 +7162,8 @@ dec_dynrel_count (bfd_vma r_info,
     case R_PPC64_TPREL16_HA:
     case R_PPC64_TPREL16_DS:
     case R_PPC64_TPREL16_LO_DS:
+    case R_PPC64_TPREL16_HIGH:
+    case R_PPC64_TPREL16_HIGHA:
     case R_PPC64_TPREL16_HIGHER:
     case R_PPC64_TPREL16_HIGHERA:
     case R_PPC64_TPREL16_HIGHEST:
@@ -7073,6 +7185,8 @@ dec_dynrel_count (bfd_vma r_info,
     case R_PPC64_ADDR16_DS:
     case R_PPC64_ADDR16_HA:
     case R_PPC64_ADDR16_HI:
+    case R_PPC64_ADDR16_HIGH:
+    case R_PPC64_ADDR16_HIGHA:
     case R_PPC64_ADDR16_HIGHER:
     case R_PPC64_ADDR16_HIGHERA:
     case R_PPC64_ADDR16_HIGHEST:
@@ -13531,6 +13645,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_TPREL16_HA:
 	case R_PPC64_TPREL16_DS:
 	case R_PPC64_TPREL16_LO_DS:
+	case R_PPC64_TPREL16_HIGH:
+	case R_PPC64_TPREL16_HIGHA:
 	case R_PPC64_TPREL16_HIGHER:
 	case R_PPC64_TPREL16_HIGHERA:
 	case R_PPC64_TPREL16_HIGHEST:
@@ -13565,6 +13681,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_DTPREL16_HA:
 	case R_PPC64_DTPREL16_DS:
 	case R_PPC64_DTPREL16_LO_DS:
+	case R_PPC64_DTPREL16_HIGH:
+	case R_PPC64_DTPREL16_HIGHA:
 	case R_PPC64_DTPREL16_HIGHER:
 	case R_PPC64_DTPREL16_HIGHERA:
 	case R_PPC64_DTPREL16_HIGHEST:
@@ -13597,6 +13715,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	case R_PPC64_ADDR16_DS:
 	case R_PPC64_ADDR16_HA:
 	case R_PPC64_ADDR16_HI:
+	case R_PPC64_ADDR16_HIGH:
+	case R_PPC64_ADDR16_HIGHA:
 	case R_PPC64_ADDR16_HIGHER:
 	case R_PPC64_ADDR16_HIGHERA:
 	case R_PPC64_ADDR16_HIGHEST:
@@ -13911,21 +14031,20 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	default:
 	  break;
 
-	case R_PPC64_ADDR16_HA:
 	case R_PPC64_REL16_HA:
+	case R_PPC64_ADDR16_HA:
+	case R_PPC64_ADDR16_HIGHA:
 	case R_PPC64_ADDR16_HIGHERA:
 	case R_PPC64_ADDR16_HIGHESTA:
 	case R_PPC64_TOC16_HA:
 	case R_PPC64_SECTOFF_HA:
 	case R_PPC64_TPREL16_HA:
-	case R_PPC64_DTPREL16_HA:
-	case R_PPC64_TPREL16_HIGHER:
+	case R_PPC64_TPREL16_HIGHA:
 	case R_PPC64_TPREL16_HIGHERA:
-	case R_PPC64_TPREL16_HIGHEST:
 	case R_PPC64_TPREL16_HIGHESTA:
-	case R_PPC64_DTPREL16_HIGHER:
+	case R_PPC64_DTPREL16_HA:
+	case R_PPC64_DTPREL16_HIGHA:
 	case R_PPC64_DTPREL16_HIGHERA:
-	case R_PPC64_DTPREL16_HIGHEST:
 	case R_PPC64_DTPREL16_HIGHESTA:
 	  /* It's just possible that this symbol is a weak symbol
 	     that's not actually defined anywhere. In that case,
