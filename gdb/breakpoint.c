@@ -1805,7 +1805,8 @@ update_watchpoint (struct watchpoint *b, int reparse)
 	  if (b->base.ops->works_in_software_mode (&b->base))
 	    b->base.type = bp_watchpoint;
 	  else
-	    error (_("Software read/access watchpoints not supported."));
+	    error (_("Can't set read/access watchpoint when "
+		     "hardware watchpoints are disabled."));
 	}
     }
   else if (within_current_scope && b->exp)
@@ -1946,8 +1947,14 @@ update_watchpoint (struct watchpoint *b, int reparse)
 		}
 	    }
 	  else if (!b->base.ops->works_in_software_mode (&b->base))
-	    error (_("Expression cannot be implemented with "
-		     "read/access watchpoint."));
+	    {
+	      if (!can_use_hw_watchpoints)
+		error (_("Can't set read/access watchpoint when "
+			 "hardware watchpoints are disabled."));
+	      else
+		error (_("Expression cannot be implemented with "
+			 "read/access watchpoint."));
+	    }
 	  else
 	    b->base.type = bp_watchpoint;
 

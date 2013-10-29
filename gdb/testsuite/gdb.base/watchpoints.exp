@@ -41,10 +41,10 @@ with_test_prefix "before inferior start" {
     # and read watchpoints require hardware watchpoint support, with this
     # turned off these can't be created.
     gdb_test "awatch ival1" \
-        "Software read/access watchpoints not supported." \
+        "Can't set read/access watchpoint when hardware watchpoints are disabled." \
         "create access watchpoint"
     gdb_test "rwatch ival1" \
-        "Software read/access watchpoints not supported." \
+        "Can't set read/access watchpoint when hardware watchpoints are disabled." \
         "create read watchpoint"
 }
 

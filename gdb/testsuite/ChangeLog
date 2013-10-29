@@ -1,3 +1,11 @@
+2013-10-31  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/watchpoint.exp (test_no_hw_watchpoints): Add additional
+	tests and update expected error message.
+	(test_watch_register_location): New tests.
+	(do_tests): Call test_watch_register_location.
+	* gdb.base/watchpoints.exp: Update expected error message.
+
 2013-10-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* gdb.arch/s390-multiarch.exp (test_linux_v2): Add $gdb_prompt to

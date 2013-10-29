@@ -1,3 +1,8 @@
+2013-10-31  Andrew Burgess  <aburgess@broadcom.com>
+
+	* breakpoint.c (update_watchpoint): Update error message and add
+	an additional error message.
+
 2013-10-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-tdep.h: Rename to...
