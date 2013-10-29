@@ -1,5 +1,12 @@
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (STK_LR, STK_TOC, STK_LINKER): Define.
+	(savegpr0_tail, restgpr0_tail, savefpr0_tail, restfpr0_tail)
+	build_plt_stub, build_tls_get_addr_stub, ppc_build_one_stub,
+	ppc64_elf_relocate_section): Use new defines.
+
+2013-10-30  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (PLT_ENTRY_SIZE, PLT_INITIAL_ENTRY_SIZE): Add htab
 	parameter and adjust for ELFv2.  Update all uses.
 	(PLT_CALL_STUB_SIZE): Delete.

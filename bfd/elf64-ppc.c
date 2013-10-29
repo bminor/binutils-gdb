@@ -130,6 +130,14 @@ static bfd_vma opd_entry_value
 /* The initial size of the plt reserved for the dynamic linker.  */
 #define PLT_INITIAL_ENTRY_SIZE(htab) (htab->opd_abi ? 24 : 16)
 
+/* Offsets to some stack save slots.  */
+#define STK_LR 16
+#define STK_TOC(htab) (htab->opd_abi ? 40 : 24)
+/* This one is dodgy.  ABIv2 does not have a linker word, so use the
+   CR save slot.  Used only by optimised __tls_get_addr call stub,
+   relying on __tls_get_addr_opt not saving CR..  */
+#define STK_LINKER(htab) (htab->opd_abi ? 32 : 8)
+
 /* TOC base pointers offset from start of TOC.  */
 #define TOC_BASE_OFF	0x8000
 
@@ -140,7 +148,7 @@ static bfd_vma opd_entry_value
 /* .plt call stub instructions.  The normal stub is like this, but
    sometimes the .plt entry crosses a 64k boundary and we need to
    insert an addi to adjust r11.  */
-#define STD_R2_40R1	0xf8410028	/* std	 %r2,40(%r1)	     */
+#define STD_R2_0R1	0xf8410000	/* std	 %r2,0+40(%r1)	     */
 #define ADDIS_R11_R2	0x3d620000	/* addis %r11,%r2,xxx@ha     */
 #define LD_R12_0R11	0xe98b0000	/* ld	 %r12,xxx+0@l(%r11)  */
 #define MTCTR_R12	0x7d8903a6	/* mtctr %r12		     */
@@ -164,7 +172,7 @@ static bfd_vma opd_entry_value
 #define LD_R11_0R2	0xe9620000	/* ld	 %r11,xxx+0(%r2) */
 #define LD_R2_0R2	0xe8420000	/* ld	 %r2,xxx+0(%r2)  */
 
-#define LD_R2_40R1	0xe8410028	/* ld    %r2,40(%r1)     */
+#define LD_R2_0R1	0xe8410000	/* ld    %r2,0(%r1)      */
 
 /* glink call stub instructions.  We enter with the index in R0.  */
 #define GLINK_CALL_STUB_SIZE (16*4)
@@ -6505,7 +6513,7 @@ static bfd_byte *
 savegpr0_tail (bfd *abfd, bfd_byte *p, int r)
 {
   p = savegpr0 (abfd, p, r);
-  bfd_put_32 (abfd, STD_R0_0R1 + 16, p);
+  bfd_put_32 (abfd, STD_R0_0R1 + STK_LR, p);
   p = p + 4;
   bfd_put_32 (abfd, BLR, p);
   return p + 4;
@@ -6521,7 +6529,7 @@ restgpr0 (bfd *abfd, bfd_byte *p, int r)
 static bfd_byte *
 restgpr0_tail (bfd *abfd, bfd_byte *p, int r)
 {
-  bfd_put_32 (abfd, LD_R0_0R1 + 16, p);
+  bfd_put_32 (abfd, LD_R0_0R1 + STK_LR, p);
   p = p + 4;
   p = restgpr0 (abfd, p, r);
   bfd_put_32 (abfd, MTLR_R0, p);
@@ -6576,7 +6584,7 @@ static bfd_byte *
 savefpr0_tail (bfd *abfd, bfd_byte *p, int r)
 {
   p = savefpr (abfd, p, r);
-  bfd_put_32 (abfd, STD_R0_0R1 + 16, p);
+  bfd_put_32 (abfd, STD_R0_0R1 + STK_LR, p);
   p = p + 4;
   bfd_put_32 (abfd, BLR, p);
   return p + 4;
@@ -6592,7 +6600,7 @@ restfpr (bfd *abfd, bfd_byte *p, int r)
 static bfd_byte *
 restfpr0_tail (bfd *abfd, bfd_byte *p, int r)
 {
-  bfd_put_32 (abfd, LD_R0_0R1 + 16, p);
+  bfd_put_32 (abfd, LD_R0_0R1 + STK_LR, p);
   p = p + 4;
   p = restfpr (abfd, p, r);
   bfd_put_32 (abfd, MTLR_R0, p);
@@ -10083,7 +10091,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
 	}
       if (ALWAYS_EMIT_R2SAVE
 	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
-	bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
+	bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p),	p += 4;
       bfd_put_32 (obfd, ADDIS_R11_R2 | PPC_HA (offset), p),	p += 4;
       bfd_put_32 (obfd, LD_R12_0R11 | PPC_LO (offset), p),	p += 4;
       if (plt_load_toc
@@ -10137,7 +10145,7 @@ build_plt_stub (struct ppc_link_hash_table *htab,
 	}
       if (ALWAYS_EMIT_R2SAVE
 	  || stub_entry->stub_type == ppc_stub_plt_call_r2save)
-	bfd_put_32 (obfd, STD_R2_40R1, p),			p += 4;
+	bfd_put_32 (obfd, STD_R2_0R1 + STK_TOC (htab), p),	p += 4;
       bfd_put_32 (obfd, LD_R12_0R2 | PPC_LO (offset), p),	p += 4;
       if (plt_load_toc
 	  && PPC_HA (offset + 8 + 8 * plt_static_chain) != PPC_HA (offset))
@@ -10178,11 +10186,9 @@ build_plt_stub (struct ppc_link_hash_table *htab,
 #define ADD_R3_R12_R13	0x7c6c6a14
 #define BEQLR		0x4d820020
 #define MR_R3_R0	0x7c030378
-#define MFLR_R11	0x7d6802a6
 #define STD_R11_0R1	0xf9610000
 #define BCTRL		0x4e800421
 #define LD_R11_0R1	0xe9610000
-#define LD_R2_0R1	0xe8410000
 #define MTLR_R11	0x7d6803a6
 
 static inline bfd_byte *
@@ -10200,15 +10206,15 @@ build_tls_get_addr_stub (struct ppc_link_hash_table *htab,
   bfd_put_32 (obfd, BEQLR, p),			p += 4;
   bfd_put_32 (obfd, MR_R3_R0, p),		p += 4;
   bfd_put_32 (obfd, MFLR_R11, p),		p += 4;
-  bfd_put_32 (obfd, STD_R11_0R1 + 32, p),	p += 4;
+  bfd_put_32 (obfd, STD_R11_0R1 + STK_LINKER (htab), p), p += 4;
 
   if (r != NULL)
     r[0].r_offset += 9 * 4;
   p = build_plt_stub (htab, stub_entry, p, offset, r);
   bfd_put_32 (obfd, BCTRL, p - 4);
 
-  bfd_put_32 (obfd, LD_R11_0R1 + 32, p),	p += 4;
-  bfd_put_32 (obfd, LD_R2_0R1 + 40, p),		p += 4;
+  bfd_put_32 (obfd, LD_R11_0R1 + STK_LINKER (htab), p),	p += 4;
+  bfd_put_32 (obfd, LD_R2_0R1 + STK_TOC (htab), p),	p += 4;
   bfd_put_32 (obfd, MTLR_R11, p),		p += 4;
   bfd_put_32 (obfd, BLR, p),			p += 4;
 
@@ -10332,7 +10338,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      htab->stub_error = TRUE;
 	      return FALSE;
 	    }
-	  bfd_put_32 (htab->stub_bfd, STD_R2_40R1, loc);
+	  bfd_put_32 (htab->stub_bfd, STD_R2_0R1 + STK_TOC (htab), loc);
 	  loc += 4;
 	  size = 12;
 	  if (PPC_HA (r2off) != 0)
@@ -10528,7 +10534,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      return FALSE;
 	    }
 
-	  bfd_put_32 (htab->stub_bfd, STD_R2_40R1, loc);
+	  bfd_put_32 (htab->stub_bfd, STD_R2_0R1 + STK_TOC (htab), loc);
 	  loc += 4;
 	  size = 20;
 	  if (PPC_HA (off) != 0)
@@ -13336,7 +13342,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      insn = bfd_get_32 (input_bfd, contents + rel->r_offset);
 	      if (insn == NOP
 		  || insn == CROR_151515 || insn == CROR_313131)
-		bfd_put_32 (input_bfd, STD_R2_40R1,
+		bfd_put_32 (input_bfd,
+			    STD_R2_0R1 + STK_TOC (htab),
 			    contents + rel->r_offset);
 	    }
 	  break;
@@ -13406,7 +13413,8 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			      /* Special stub used, leave nop alone.  */
 			    }
 			  else
-			    bfd_put_32 (input_bfd, LD_R2_40R1,
+			    bfd_put_32 (input_bfd,
+					LD_R2_0R1 + STK_TOC (htab),
 					contents + rel->r_offset + 4);
 			  can_plt_call = TRUE;
 			}
