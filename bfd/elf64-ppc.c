@@ -81,7 +81,8 @@ static bfd_vma opd_entry_value
 #define bfd_elf64_mkobject		      ppc64_elf_mkobject
 #define bfd_elf64_bfd_reloc_type_lookup	      ppc64_elf_reloc_type_lookup
 #define bfd_elf64_bfd_reloc_name_lookup	      ppc64_elf_reloc_name_lookup
-#define bfd_elf64_bfd_merge_private_bfd_data  _bfd_generic_verify_endian_match
+#define bfd_elf64_bfd_merge_private_bfd_data  ppc64_elf_merge_private_bfd_data
+#define bfd_elf64_bfd_print_private_bfd_data  ppc64_elf_print_private_bfd_data
 #define bfd_elf64_new_section_hook	      ppc64_elf_new_section_hook
 #define bfd_elf64_bfd_link_hash_table_create  ppc64_elf_link_hash_table_create
 #define bfd_elf64_bfd_link_hash_table_free    ppc64_elf_link_hash_table_free
@@ -2943,6 +2944,19 @@ get_opd_info (asection * sec)
     return &ppc64_elf_section_data (sec)->u.opd;
   return NULL;
 }
+
+static inline int
+abiversion (bfd *abfd)
+{
+  return elf_elfheader (abfd)->e_flags & EF_PPC64_ABI;
+}
+
+static inline void
+set_abiversion (bfd *abfd, int ver)
+{
+  elf_elfheader (abfd)->e_flags &= ~EF_PPC64_ABI;
+  elf_elfheader (abfd)->e_flags |= ver & EF_PPC64_ABI;
+}
 
 /* Parameters for the qsort hook.  */
 static bfd_boolean synthetic_relocatable;
@@ -3089,15 +3103,19 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
   long count;
   char *names;
   long symcount, codesecsym, codesecsymend, secsymend, opdsymend;
-  asection *opd;
+  asection *opd = NULL;
   bfd_boolean relocatable = (abfd->flags & (EXEC_P | DYNAMIC)) == 0;
   asymbol **syms;
+  int abi = abiversion (abfd);
 
   *ret = NULL;
 
-  opd = bfd_get_section_by_name (abfd, ".opd");
-  if (opd == NULL)
-    return 0;
+  if (abi < 2)
+    {
+      opd = bfd_get_section_by_name (abfd, ".opd");
+      if (opd == NULL && abi == 1)
+	return 0;
+    }
 
   symcount = static_count;
   if (!relocatable)
@@ -3266,20 +3284,18 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
   else
     {
       bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
-      bfd_byte *contents;
+      bfd_byte *contents = NULL;
       size_t size;
       long plt_count = 0;
       bfd_vma glink_vma = 0, resolv_vma = 0;
       asection *dynamic, *glink = NULL, *relplt = NULL;
       arelent *p;
 
-      if (!bfd_malloc_and_get_section (abfd, opd, &contents))
+      if (opd != NULL && !bfd_malloc_and_get_section (abfd, opd, &contents))
 	{
+	free_contents_and_exit:
 	  if (contents)
-	    {
-	    free_contents_and_exit:
-	      free (contents);
-	    }
+	    free (contents);
 	  count = -1;
 	  goto done;
 	}
@@ -3889,6 +3905,9 @@ struct ppc_link_hash_table
 
   /* Alignment of PLT call stubs.  */
   unsigned int plt_stub_align:4;
+
+  /* Set if we're linking code with function descriptors.  */
+  unsigned int opd_abi:1;
 
   /* Set if PLT call stubs should load r11.  */
   unsigned int plt_static_chain:1;
@@ -5089,6 +5108,15 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	 information about the associated function section.  */
       bfd_size_type amt;
 
+      if (abiversion (abfd) == 0)
+	set_abiversion (abfd, 1);
+      else if (abiversion (abfd) == 2)
+	{
+	  info->callbacks->einfo (_("%P: .opd not allowed in ABI version %d\n"),
+				  abiversion (abfd));
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
       amt = sec->size * sizeof (*opd_sym_map) / 8;
       opd_sym_map = bfd_zalloc (abfd, amt);
       if (opd_sym_map == NULL)
@@ -5669,6 +5697,78 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	default:
 	  break;
 	}
+    }
+
+  return TRUE;
+}
+
+/* Merge backend specific data from an object file to the output
+   object file when linking.  */
+
+static bfd_boolean
+ppc64_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
+{
+  unsigned long iflags, oflags;
+
+  if ((ibfd->flags & BFD_LINKER_CREATED) != 0)
+    return TRUE;
+
+  if (!is_ppc64_elf (ibfd) || !is_ppc64_elf (obfd))
+    return TRUE;
+
+  if (!_bfd_generic_verify_endian_match (ibfd, obfd))
+    return FALSE;
+
+  iflags = elf_elfheader (ibfd)->e_flags;
+  oflags = elf_elfheader (obfd)->e_flags;
+
+  if (!elf_flags_init (obfd) || oflags == 0)
+    {
+      elf_flags_init (obfd) = TRUE;
+      elf_elfheader (obfd)->e_flags = iflags;
+    }
+  else if (iflags == oflags || iflags == 0)
+    ;
+  else if (iflags & ~EF_PPC64_ABI)
+    {
+      (*_bfd_error_handler)
+	(_("%B uses unknown e_flags 0x%lx"), ibfd, iflags);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+  else
+    {
+      (*_bfd_error_handler)
+	(_("%B: ABI version %ld is not compatible with ABI version %ld output"),
+	 ibfd, iflags, oflags);
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
+
+  /* Merge Tag_compatibility attributes and any common GNU ones.  */
+  _bfd_elf_merge_object_attributes (ibfd, obfd);
+
+  return TRUE;
+}
+
+static bfd_boolean
+ppc64_elf_print_private_bfd_data (bfd *abfd, void *ptr)
+{
+  /* Print normal ELF private data.  */
+  _bfd_elf_print_private_bfd_data (abfd, ptr);
+
+  if (elf_elfheader (abfd)->e_flags != 0)
+    {
+      FILE *file = ptr;
+
+      /* xgettext:c-format */
+      fprintf (file, _("private flags = 0x%lx:"),
+	       elf_elfheader (abfd)->e_flags);
+
+      if ((elf_elfheader (abfd)->e_flags & EF_PPC64_ABI) != 0)
+	fprintf (file, _(" [abiv%ld]"),
+		 elf_elfheader (abfd)->e_flags & EF_PPC64_ABI);
+      fputc ('\n', file);
     }
 
   return TRUE;
@@ -7711,6 +7811,9 @@ ppc64_elf_tls_setup (struct bfd_link_info *info,
   if (htab == NULL)
     return NULL;
 
+  if (abiversion (info->output_bfd) == 1)
+    htab->opd_abi = 1;
+
   if (*no_multi_toc)
     htab->do_multi_toc = 0;
   else if (!htab->do_multi_toc)
@@ -9333,7 +9436,7 @@ readonly_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 /* Set the sizes of the dynamic sections.  */
 
 static bfd_boolean
-ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
+ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 				 struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
@@ -9649,7 +9752,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 	    return FALSE;
 	}
 
-      if (NO_OPD_RELOCS)
+      if (NO_OPD_RELOCS && abiversion (output_bfd) <= 1)
 	{
 	  if (!add_dynamic_entry (DT_PPC64_OPD, 0)
 	      || !add_dynamic_entry (DT_PPC64_OPDSZ, 0))
@@ -10412,7 +10515,10 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  bfd_byte *rl;
 
 	  rela.r_offset = dest;
-	  rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
+	  if (htab->opd_abi)
+	    rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
+	  else
+	    rela.r_info = ELF64_R_INFO (0, R_PPC64_IRELATIVE);
 	  rela.r_addend = (stub_entry->target_value
 			   + stub_entry->target_section->output_offset
 			   + stub_entry->target_section->output_section->vma);
@@ -14271,7 +14377,10 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 	    rela.r_offset = (htab->iplt->output_section->vma
 			     + htab->iplt->output_offset
 			     + ent->plt.offset);
-	    rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
+	    if (htab->opd_abi)
+	      rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
+	    else
+	      rela.r_info = ELF64_R_INFO (0, R_PPC64_IRELATIVE);
 	    rela.r_addend = (h->root.u.def.value
 			     + h->root.u.def.section->output_offset
 			     + h->root.u.def.section->output_section->vma

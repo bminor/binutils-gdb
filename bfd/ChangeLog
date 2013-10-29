@@ -2,6 +2,19 @@
 
 	Apply changes from mainline to 2.24
 	2013-10-30  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (abiversion, set_abiversion): New functions.
+	(ppc64_elf_get_synthetic_symtab): Handle ELFv2 objects without .opd.
+	(struct ppc_link_hash_table): Add opd_abi.
+	(ppc64_elf_check_relocs): Check no .opd with ELFv2.
+	(ppc64_elf_merge_private_bfd_data): New function.
+	(ppc64_elf_print_private_bfd_data): New function.
+	(ppc64_elf_tls_setup): Set htab->opd_abi.
+	(ppc64_elf_size_dynamic_sections): Don't emit OPD related dynamic
+	tags for ELFv2.
+	(ppc_build_one_stub): Use R_PPC64_IRELATIVE for ELFv2 ifunc.
+	(ppc64_elf_finish_dynamic_symbol): Likewise
+
+	2013-10-30  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (build_plt_stub): Switch stubs to use r11 as base
 	reg and r12 as destination.
 	(ppc_build_one_stub): Likewise.

@@ -173,6 +173,13 @@ END_RELOC_NUMBERS (R_PPC64_max)
   (((R) >= R_PPC64_TLS && (R) <= R_PPC64_DTPREL16_HIGHESTA)		\
    || ((R) >= R_PPC64_TPREL16_HIGH && (R) <= R_PPC64_DTPREL16_HIGHA))
 
+
+/* e_flags bits specifying ABI.
+   1 for original function descriptor using ABI,
+   2 for revised ABI without function descriptors,
+   0 for unspecified or not using any features affected by the differences.  */
+#define EF_PPC64_ABI	3
+
 /* Specify the start of the .glink section.  */
 #define DT_PPC64_GLINK		DT_LOPROC
 

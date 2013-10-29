@@ -2,6 +2,9 @@
 
 	Apply changes from mainline to 2.24
 	2013-10-30  Alan Modra  <amodra@gmail.com>
+	* ppc64.h (EF_PPC64_ABI): Define.
+
+	2013-10-30  Alan Modra  <amodra@gmail.com>
 	* ppc64.h (R_PPC64_ADDR16_HIGH, R_PPC64_ADDR16_HIGHA,
 	R_PPC64_TPREL16_HIGH, R_PPC64_TPREL16_HIGHA,
 	R_PPC64_DTPREL16_HIGH, R_PPC64_DTPREL16_HIGHA): New.
