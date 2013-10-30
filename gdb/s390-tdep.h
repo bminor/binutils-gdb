@@ -175,4 +175,3 @@ extern struct target_desc *tdesc_s390x_linux64v2;
 extern struct target_desc *tdesc_s390x_te_linux64;
 
 #endif
-

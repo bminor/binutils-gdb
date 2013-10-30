@@ -1,3 +1,9 @@
+2013-10-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-nat.c: Whitespace cleanup.
+	* s390-tdep.c: Likewise.
+	* s390-tdep.h: Remove empty line at end of file.
+
 2013-10-30  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* linux-tdep.c (linux_corefile_thread_callback): Preinitialize

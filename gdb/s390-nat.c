@@ -515,11 +515,11 @@ s390_insert_watchpoint (CORE_ADDR addr, int len, int type,
   struct watch_area *area = xmalloc (sizeof (struct watch_area));
 
   if (!area)
-    return -1; 
+    return -1;
 
   area->lo_addr = addr;
   area->hi_addr = addr + len - 1;
- 
+
   area->next = watch_base;
   watch_base = area;
 
