@@ -1,6 +1,10 @@
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	Apply changes from mainline to 2.24
+	2013-11-02  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc64_elf_next_input_section): Always set toc_off
+	to value for object file.
+
 	2013-10-30  Alan Modra  <amodra@gmail.com>
 	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Use new DT_PPC_OPT
 	tag to specify tls optimisation.
