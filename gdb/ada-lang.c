@@ -12170,11 +12170,15 @@ ada_exception_sal (enum ada_exception_catchpoint_kind ex, char *excep_string,
 
    EX_KIND is the kind of exception catchpoint to be created.
 
-   EXCEPT_STRING, if not NULL, indicates the name of the exception
-   to which this catchpoint applies.  If NULL, this catchpoint is
-   expected to trigger for all exceptions.
+   If EXCEPT_STRING is NULL, this catchpoint is expected to trigger
+   for all exceptions.  Otherwise, EXCEPT_STRING indicates the name
+   of the exception to which this catchpoint applies.  When not NULL,
+   the string must be allocated on the heap, and its deallocation
+   is no longer the responsibility of the caller.
 
-   COND_STRING, if not NULL, is the catchpoint condition.
+   COND_STRING, if not NULL, is the catchpoint condition.  This string
+   must be allocated on the heap, and its deallocation is no longer
+   the responsibility of the caller.
 
    TEMPFLAG, if nonzero, means that the underlying breakpoint
    should be temporary.

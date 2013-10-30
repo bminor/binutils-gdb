@@ -1,3 +1,7 @@
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_ex_cond: New testcase.
+
 2013-11-07  Doug Evans  <dje@google.com>
 
 	PR 11786

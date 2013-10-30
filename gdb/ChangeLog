@@ -1,3 +1,13 @@
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (create_ada_exception_catchpoint): Enhance
+	the documentation of fields "except_string" and "condition".
+	* mi/mi-cmd-catch.c (mi_cmd_catch_assert): Reallocate
+	CONDITION on the heap before passing it to
+	create_ada_exception_catchpoint.
+	(mi_cmd_catch_exception): Likewise for EXCEPTION_NAME and
+	CONDITION.
+
 2013-11-11  Tom Tromey  <tromey@redhat.com>
 
 	* config.in, configure: Rebuild.
