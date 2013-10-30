@@ -62,13 +62,15 @@ proc compile_and_dump {variant ccopts binfile} {
 }
 
 proc test_linux_v2 {} {
+    global gdb_prompt
+
     set test "Linux v2"
     gdb_test_multiple "info reg system_call" "$test" {
-	-re "system_call\[ \t\]+0x\[0-9a-z\]+\t.*" {
+	-re "system_call\[ \t\]+0x\[0-9a-z\]+\t.*\r\n$gdb_prompt $" {
 	    pass "$test"
 	    return 1
 	}
-	-re "Invalid register `system_call'.*" {
+	-re "Invalid register `system_call'.*\r\n$gdb_prompt $" {
 	    unsupported "$test (no system_call reg)"
 	    return 0
 	}

@@ -1,3 +1,8 @@
+2013-10-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* gdb.arch/s390-multiarch.exp (test_linux_v2): Add $gdb_prompt to
+	the patterns in gdb_test_multiple.
+
 2013-10-29  Nicolas Blanc  <nicolas.blanc@intel.com>
 
 	* gdb.base/sym-file-lib.c: New file.
