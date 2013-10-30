@@ -1,3 +1,8 @@
+2013-11-02  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_next_input_section): Always set toc_off
+	to value for object file.
+
 2013-11-01  Roland McGrath  <mcgrathr@google.com>
 
 	* elf-nacl.c (segment_eligible_for_headers): Drop requirement that

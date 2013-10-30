@@ -11508,42 +11508,25 @@ ppc64_elf_next_input_section (struct bfd_link_info *info, asection *isec)
 
   if (htab->multi_toc_needed)
     {
-      /* If a code section has a function that uses the TOC then we need
-	 to use the right TOC (obviously).  Also, make sure that .opd gets
-	 the correct TOC value for R_PPC64_TOC relocs that don't have or
-	 can't find their function symbol (shouldn't ever happen now).
-	 Also specially treat .fixup for the linux kernel.  .fixup
-	 contains branches, but only back to the function that hit an
-	 exception.  */
-      if (isec->has_toc_reloc
-	  || (isec->flags & SEC_CODE) == 0
-	  || strcmp (isec->name, ".fixup") == 0)
+      /* Analyse sections that aren't already flagged as needing a
+	 valid toc pointer.  Exclude .fixup for the linux kernel.
+	 .fixup contains branches, but only back to the function that
+	 hit an exception.  */
+      if (!(isec->has_toc_reloc
+	    || (isec->flags & SEC_CODE) == 0
+	    || strcmp (isec->name, ".fixup") == 0
+	    || isec->call_check_done))
 	{
-	  if (elf_gp (isec->owner) != 0)
-	    htab->toc_curr = elf_gp (isec->owner);
-	}
-      else
-	{
-	  if (!isec->call_check_done
-	      && toc_adjusting_stub_needed (info, isec) < 0)
+	  if (toc_adjusting_stub_needed (info, isec) < 0)
 	    return FALSE;
-	  /* If we make a local call from this section, ie. a branch
-	     without a following nop, then we have no place to put a
-	     toc restoring insn.  We must use the same toc group as
-	     the callee.
-	     Testing makes_toc_func_call actually tests for *any*
-	     calls to functions that need a good toc pointer.  A more
-	     precise test would be better, as this one will set
-	     incorrect values for pasted .init/.fini fragments.
-	     (Fixed later in check_pasted_section.)  */
-	  if (isec->makes_toc_func_call
-	      && elf_gp (isec->owner) != 0)
-	    htab->toc_curr = elf_gp (isec->owner);
 	}
+      /* Make all sections use the TOC assigned for this object file.
+	 This will be wrong for pasted sections;  We fix that in
+	 check_pasted_section().  */
+      if (elf_gp (isec->owner) != 0)
+	htab->toc_curr = elf_gp (isec->owner);
     }
 
-  /* Functions that don't use the TOC can belong in any TOC group.
-     Use the last TOC base.  */
   htab->stub_group[isec->id].toc_off = htab->toc_curr;
   return TRUE;
 }
