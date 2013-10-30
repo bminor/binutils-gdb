@@ -1,3 +1,7 @@
+2014-02-07  Pedro Alves  <palves@redhat.com>
+
+	* gdb.threads/stepi-random-signal.exp: Set SIGCHLD to print.
+
 2014-02-06  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix i386-sse-stack-align.exp regression since GDB_PARALLEL.
