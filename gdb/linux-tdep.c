@@ -1193,7 +1193,7 @@ linux_corefile_thread_callback (struct thread_info *info, void *data)
       struct cleanup *old_chain;
       struct regcache *regcache;
       gdb_byte *siginfo_data;
-      LONGEST siginfo_size;
+      LONGEST siginfo_size = 0;
 
       regcache = get_thread_arch_regcache (info->ptid, args->gdbarch);
 
