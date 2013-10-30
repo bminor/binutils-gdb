@@ -27,7 +27,7 @@
 #include "auxv.h"
 #include "gregset.h"
 
-#include "s390-tdep.h"
+#include "s390-linux-tdep.h"
 #include "elf/common.h"
 
 #include <asm/ptrace.h>

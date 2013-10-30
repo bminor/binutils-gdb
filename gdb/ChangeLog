@@ -1,5 +1,23 @@
 2013-10-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* s390-tdep.h: Rename to...
+	* s390-linux-tdep.h: ...here.
+	* s390-tdep.c: Rename to...
+	* s390-linux-tdep.c: ...here.  Adjust #include.
+	* s390-nat.c: Rename to...
+	* s390-linux-nat.c: ...here.  Adjust #include.
+	* config/s390/s390.mh: Rename to...
+	* config/s390/linux.mh: ...here.  Reflect rename s390-nat.o ->
+	s390-linux-nat.o.
+	* configure.host: Reflect host rename "s390" -> "linux".
+	* configure.tgt: Reflect rename s390-tdep.o -> s390-linux-tdep.o.
+	* Makefile.in (ALL_TARGET_OBS): Likewise.
+	(HFILES_NO_SRCDIR): Reflect rename s390-tdep.h ->
+	s390-linux-tdep.h.
+	(ALLDEPFILES): Reflect rename of .c files.
+
+2013-10-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* s390-nat.c: Whitespace cleanup.
 	* s390-tdep.c: Likewise.
 	* s390-tdep.h: Remove empty line at end of file.

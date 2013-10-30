@@ -43,7 +43,7 @@
 #include "solib-svr4.h"
 #include "prologue-value.h"
 #include "linux-tdep.h"
-#include "s390-tdep.h"
+#include "s390-linux-tdep.h"
 #include "auxv.h"
 
 #include "stap-probe.h"

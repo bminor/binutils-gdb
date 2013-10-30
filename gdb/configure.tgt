@@ -464,9 +464,9 @@ powerpc*-*-*)
 	fi
 	;;
 
-s390*-*-*)
+s390*-*-linux*)
 	# Target: S390 running Linux
-	gdb_target_obs="s390-tdep.o solib-svr4.o linux-tdep.o"
+	gdb_target_obs="s390-linux-tdep.o solib-svr4.o linux-tdep.o"
 	build_gdbserver=yes
 	;;
 

@@ -586,7 +586,7 @@ ALL_TARGET_OBS = \
 	rs6000-aix-tdep.o rs6000-tdep.o solib-aix.o ppc-ravenscar-thread.o \
 	rs6000-lynx178-tdep.o \
 	rx-tdep.o \
-	s390-tdep.o \
+	s390-linux-tdep.o \
 	score-tdep.o \
 	sh64-tdep.o sh-linux-tdep.o shnbsd-tdep.o sh-tdep.o \
 	sparc-linux-tdep.o sparcnbsd-tdep.o sparcobsd-tdep.o \
@@ -802,7 +802,7 @@ cli/cli-script.h macrotab.h symtab.h common/version.h \
 gnulib/import/string.in.h gnulib/import/str-two-way.h \
 gnulib/import/stdint.in.h remote.h remote-notif.h gdb.h sparc-nat.h \
 gdbthread.h dwarf2-frame.h dwarf2-frame-tailcall.h nbsd-nat.h dcache.h \
-amd64-nat.h s390-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
+amd64-nat.h s390-linux-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
 gdbarch.h bsd-uthread.h common/gdb_stat.h memory-map.h	memrange.h \
 mdebugread.h m88k-tdep.h stabsread.h hppa-linux-offsets.h linux-fork.h \
 ser-unix.h inf-ptrace.h terminal.h ui-out.h frame-base.h \
@@ -1551,7 +1551,7 @@ ALLDEPFILES = \
 	rs6000-nat.c rs6000-tdep.c solib-aix.c ppc-ravenscar-thread.c \
 	rs6000-lynx178-tdep.c \
 	rx-tdep.c \
-	s390-tdep.c s390-nat.c \
+	s390-linux-tdep.c s390-linux-nat.c \
 	score-tdep.c \
 	ser-go32.c ser-pipe.c ser-tcp.c ser-mingw.c \
 	sh-tdep.c sh64-tdep.c shnbsd-tdep.c shnbsd-nat.c \

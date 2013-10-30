@@ -149,7 +149,7 @@ powerpc64*-*-linux*)	gdb_host=ppc64-linux
 			;;
 powerpc*-*-linux*)	gdb_host=linux ;;
 
-s390*-*-*)		gdb_host=s390 ;;
+s390*-*-linux*)		gdb_host=linux ;;
 
 sh*-*-netbsdelf* | sh*-*-knetbsd*-gnu)
 			gdb_host=nbsd ;;
