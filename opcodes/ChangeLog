@@ -1,3 +1,8 @@
+2013-10-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-dis.c (init_disasm): Default to full 'zarch' opcode
+	availability even for 31-bit programs.
+
 2013-10-15  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
 
 	* arm-dis.c (neon_opcodes): Adjust print string for vshll.
