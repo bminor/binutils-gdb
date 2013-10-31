@@ -1,3 +1,8 @@
+2013-10-31  Cary Coutant  <ccoutant@google.com>
+
+	* configure.ac: Fix check for -fmerge-constants.
+	* configure.ac: Regenerate.
+
 2013-10-30  Roland McGrath  <mcgrathr@google.com>
 
 	* x86_64.cc (Output_data_plt_x86_64_nacl::first_plt_entry):

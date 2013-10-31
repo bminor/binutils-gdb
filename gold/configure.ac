@@ -343,8 +343,8 @@ AC_CACHE_CHECK([whether $CC supports -fmerge-constants],
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -fmerge-constants"
 AC_COMPILE_IFELSE([const char *s = "foo";],
-		  [have_merge_constants=yes],
-		  [have_merge_constants=no])
+		  [gold_cv_merge_constants=yes],
+		  [gold_cv_merge_constants=no])
 CFLAGS="$save_CFLAGS"])
 AC_SUBST([MERGE_CONSTANTS_FLAG])
 AS_IF([test "$gold_cv_merge_constants" = yes],

@@ -6353,9 +6353,9 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 const char *s = "foo";
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
-  have_merge_constants=yes
+  gold_cv_merge_constants=yes
 else
-  have_merge_constants=no
+  gold_cv_merge_constants=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
 CFLAGS="$save_CFLAGS"
