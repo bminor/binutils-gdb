@@ -326,6 +326,18 @@ dwarf_expr_read_reg (void *baton, int dwarf_regnum)
   return result;
 }
 
+/* Implement struct dwarf_expr_context_funcs' "get_reg_value" callback.  */
+
+static struct value *
+dwarf_expr_get_reg_value (void *baton, struct type *type, int dwarf_regnum)
+{
+  struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
+  struct gdbarch *gdbarch = get_frame_arch (debaton->frame);
+  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_regnum);
+
+  return value_from_register (type, regnum, debaton->frame);
+}
+
 /* Read memory at ADDR (length LEN) into BUF.  */
 
 static void
@@ -2182,6 +2194,7 @@ static const struct lval_funcs pieced_value_funcs = {
 static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
 {
   dwarf_expr_read_reg,
+  dwarf_expr_get_reg_value,
   dwarf_expr_read_mem,
   dwarf_expr_frame_base,
   dwarf_expr_frame_cfa,
@@ -2435,6 +2448,18 @@ needs_frame_read_reg (void *baton, int regnum)
   return 1;
 }
 
+/* struct dwarf_expr_context_funcs' "get_reg_value" callback:
+   Reads from registers do require a frame.  */
+
+static struct value *
+needs_frame_get_reg_value (void *baton, struct type *type, int regnum)
+{
+  struct needs_frame_baton *nf_baton = baton;
+
+  nf_baton->needs_frame = 1;
+  return value_zero (type, not_lval);
+}
+
 /* Reads from memory do not require a frame.  */
 static void
 needs_frame_read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
@@ -2516,6 +2541,7 @@ needs_get_addr_index (void *baton, unsigned int index)
 static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
 {
   needs_frame_read_reg,
+  needs_frame_get_reg_value,
   needs_frame_read_mem,
   needs_frame_frame_base,
   needs_frame_frame_cfa,

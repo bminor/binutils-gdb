@@ -1,3 +1,17 @@
+2013-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2expr.h (struct dwarf_expr_context_funcs) <read_reg>:
+	Extend the documentation a bit.
+	<get_reg_value>: New field.
+	* dwarf2loc.c (dwarf_expr_get_reg_value)
+	(needs_frame_get_reg_value): New functions.
+	(dwarf_expr_ctx_funcs, needs_frame_ctx_funcs): Add "get_reg_value"
+	callback.
+	* dwarf2-frame.c (get_reg_value): New function.
+	(dwarf2_frame_ctx_funcs): Add "get_reg_value" callback.
+	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_regval_type>:
+	Use new callback to compute result_val.
+
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	* ppc64-tdep.c (ppc64_plt_entry_point): Renamed from..
