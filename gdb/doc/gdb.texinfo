@@ -8066,7 +8066,7 @@ being passed the type of @var{arg} as the argument.
 * Core File Generation::        Cause a program dump its core
 * Character Sets::              Debugging programs that use a different
                                 character set than GDB does
-* Caching Remote Data::         Data caching for remote targets
+* Caching Target Data::         Data caching for targets
 * Searching Memory::            Searching memory for a sequence of bytes
 @end menu
 
@@ -10823,18 +10823,19 @@ $10 = 78 '+'
 The @sc{ibm1047} character set uses the number 78 to encode the @samp{+}
 character.
 
-@node Caching Remote Data
-@section Caching Data of Remote Targets
-@cindex caching data of remote targets
+@node Caching Target Data
+@section Caching Data of Targets
+@cindex caching data of targets
 
-@value{GDBN} caches data exchanged between the debugger and a
-remote target (@pxref{Remote Debugging}).  Such caching generally improves
-performance, because it reduces the overhead of the remote protocol by
-bundling memory reads and writes into large chunks.  Unfortunately, simply
-caching everything would lead to incorrect results, since @value{GDBN} 
-does not necessarily know anything about volatile values, memory-mapped I/O
-addresses, etc.  Furthermore, in non-stop mode (@pxref{Non-Stop Mode})
-memory can be changed @emph{while} a gdb command is executing.
+@value{GDBN} caches data exchanged between the debugger and a target.
+Such caching generally improves performance in remote debugging
+(@pxref{Remote Debugging}), because it reduces the overhead of the
+remote protocol by bundling memory reads and writes into large chunks.
+Unfortunately, simply caching everything would lead to incorrect results,
+since @value{GDBN} does not necessarily know anything about volatile
+values, memory-mapped I/O addresses, etc.  Furthermore, in non-stop mode
+(@pxref{Non-Stop Mode}) memory can be changed @emph{while} a gdb command
+is executing.
 Therefore, by default, @value{GDBN} only caches data
 known to be on the stack@footnote{In non-stop mode, it is moderately
 rare for a running thread to modify the stack of a stopped thread
@@ -10888,11 +10889,11 @@ Must be a power of 2.
 
 @item show dcache size
 @kindex show dcache size
-Show maximum number of dcache entries.  See also @ref{Caching Remote Data, info dcache}.
+Show maximum number of dcache entries.  @xref{Caching Target Data, info dcache}.
 
 @item show dcache line-size
 @kindex show dcache line-size
-Show default size of dcache lines.  See also @ref{Caching Remote Data, info dcache}.
+Show default size of dcache lines.
 
 @end table
 

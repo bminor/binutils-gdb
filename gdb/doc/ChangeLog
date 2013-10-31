@@ -1,3 +1,9 @@
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Data): Rename menu item.
+	(Caching Remote Data): Rename to ...
+	(Caching Target Data): ... it.  Update.
+
 2013-11-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document the new
