@@ -33,6 +33,7 @@ struct inferior;
 struct exec;
 struct address_space;
 struct program_space_data;
+struct address_space_data;
 
 typedef struct so_list *so_list_ptr;
 DEF_VEC_P (so_list_ptr);

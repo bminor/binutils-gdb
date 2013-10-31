@@ -10828,6 +10828,8 @@ character.
 @cindex caching data of targets
 
 @value{GDBN} caches data exchanged between the debugger and a target.
+Each cache is associated with the address space of the inferior.
+@xref{Inferiors and Programs}, about inferior and address space.
 Such caching generally improves performance in remote debugging
 (@pxref{Remote Debugging}), because it reduces the overhead of the
 remote protocol by bundling memory reads and writes into large chunks.
@@ -10867,11 +10869,11 @@ Show the current state of data caching for memory accesses.
 
 @kindex info dcache
 @item info dcache @r{[}line@r{]}
-Print the information about the data cache performance.  The
-information displayed includes the dcache width and depth, and for
-each cache line, its number, address, and how many times it was
-referenced.  This command is useful for debugging the data cache
-operation.
+Print the information about the performance of data cache of the
+current inferior's address space.  The information displayed
+includes the dcache width and depth, and for each cache line, its
+number, address, and how many times it was referenced.  This
+command is useful for debugging the data cache operation.
 
 If a line number is specified, the contents of that line will be
 printed in hex.

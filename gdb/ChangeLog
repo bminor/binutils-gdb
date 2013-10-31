@@ -1,5 +1,20 @@
 2013-11-20  Yao Qi  <yao@codesourcery.com>
 
+	* progspace.h (struct address_space_data): Declare.
+	* target-dcache.c: Include "progspace.h".
+	(target_dache): Remove.
+	(target_dcache_aspace_key): New.
+	(target_dcache_cleanup): New function.
+	(target_dcache_init_p): Get data through
+	target_dcache_aspace_key.
+	(target_dcache_invalidate): Likewise.
+	(target_dcache_get): Likewise.
+	(target_dcache_get_or_init): Likewise.
+	(_initialize_target_dcache): Initialize
+	target_dcache_aspace_key.
+
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
 	* progspace.c (struct address_space): Update comments.
 	<REGISTRY_FIELDS>: New fields.
 	DEFINE_REGISTRY for address_space.

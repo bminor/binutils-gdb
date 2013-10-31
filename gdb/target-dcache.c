@@ -18,16 +18,31 @@
 #include "defs.h"
 #include "target-dcache.h"
 #include "gdbcmd.h"
+#include "progspace.h"
 
-/* Cache of memory operations, to speed up remote access.  */
-static DCACHE *target_dcache;
+/* The target dcache is kept per-address-space.  This key lets us
+   associate the cache with the address space.  */
+
+static const struct address_space_data *target_dcache_aspace_key;
+
+/* Clean up dcache, represented by ARG, which is associated with
+   ASPACE.  */
+
+static void
+target_dcache_cleanup (struct address_space *aspace, void *arg)
+{
+  dcache_free (arg);
+}
 
 /* Target dcache is initialized or not.  */
 
 int
 target_dcache_init_p (void)
 {
-  return (target_dcache != NULL);
+  DCACHE *dcache = address_space_data (current_program_space->aspace,
+				       target_dcache_aspace_key);
+
+  return (dcache != NULL);
 }
 
 /* Invalidate the target dcache.  */
@@ -35,8 +50,11 @@ target_dcache_init_p (void)
 void
 target_dcache_invalidate (void)
 {
-  if (target_dcache_init_p ())
-    dcache_invalidate (target_dcache);
+  DCACHE *dcache = address_space_data (current_program_space->aspace,
+				       target_dcache_aspace_key);
+
+  if (dcache != NULL)
+    dcache_invalidate (dcache);
 }
 
 /* Return the target dcache.  Return NULL if target dcache is not
@@ -45,7 +63,10 @@ target_dcache_invalidate (void)
 DCACHE *
 target_dcache_get (void)
 {
-  return target_dcache;
+  DCACHE *dcache = address_space_data (current_program_space->aspace,
+				       target_dcache_aspace_key);
+
+  return dcache;
 }
 
 /* Return the target dcache.  If it is not initialized yet, initialize
@@ -54,10 +75,13 @@ target_dcache_get (void)
 DCACHE *
 target_dcache_get_or_init (void)
 {
-  if (!target_dcache_init_p ())
-    target_dcache = dcache_init ();
+  DCACHE *dcache = address_space_data (current_program_space->aspace,
+				       target_dcache_aspace_key);
 
-  return target_dcache;
+  if (dcache == NULL)
+    dcache = dcache_init ();
+
+  return dcache;
 }
 
 /* The option sets this.  */
@@ -113,4 +137,8 @@ By default, caching for stack access is on."),
 			   set_stack_cache_enabled_p,
 			   show_stack_cache_enabled_p,
 			   &setlist, &showlist);
+
+  target_dcache_aspace_key
+    = register_address_space_data_with_cleanup (NULL,
+						target_dcache_cleanup);
 }

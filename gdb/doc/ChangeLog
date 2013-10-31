@@ -1,5 +1,10 @@
 2013-11-20  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.texinfo (Caching Target Data): Update doc for
+	per-address-space dcache.
+
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.texinfo (Data): Rename menu item.
 	(Caching Remote Data): Rename to ...
 	(Caching Target Data): ... it.  Update.
