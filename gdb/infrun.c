@@ -3105,19 +3105,17 @@ handle_syscall_event (struct execution_control_state *ecs)
 			      stop_pc, ecs->ptid, &ecs->ws);
 
       sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				     GDB_SIGNAL_TRAP);
+				     GDB_SIGNAL_0);
       ecs->random_signal = sval == BPSTAT_SIGNAL_NO;
 
       if (!ecs->random_signal)
 	{
 	  /* Catchpoint hit.  */
-	  ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
 	  return 0;
 	}
     }
 
   /* If no catchpoint triggered for this, then keep going.  */
-  ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
   keep_going (ecs);
   return 1;
 }
@@ -3344,13 +3342,12 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	  sval
 	    = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				      GDB_SIGNAL_TRAP);
+				      GDB_SIGNAL_0);
 	  ecs->random_signal = sval == BPSTAT_SIGNAL_NO;
 
 	  if (!ecs->random_signal)
 	    {
 	      /* A catchpoint triggered.  */
-	      ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
 	      process_event_stop_test (ecs);
 	      return;
 	    }
@@ -3629,7 +3626,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	    stop_stepping (ecs);
 	  return;
 	}
-      ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
       process_event_stop_test (ecs);
       return;
 
@@ -3676,7 +3672,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 			      stop_pc, ecs->ptid, &ecs->ws);
       ecs->random_signal
 	= (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				   GDB_SIGNAL_TRAP)
+				   GDB_SIGNAL_0)
 	   == BPSTAT_SIGNAL_NO);
 
       /* Note that this may be referenced from inside
@@ -3691,7 +3687,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  keep_going (ecs);
 	  return;
 	}
-      ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
       process_event_stop_test (ecs);
       return;
 
@@ -4288,7 +4283,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       ecs->random_signal = (sval == BPSTAT_SIGNAL_NO);
 
       if (sval == BPSTAT_SIGNAL_HIDE)
-	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_TRAP;
+	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
     }
 
   /* For the program's own signals, act according to

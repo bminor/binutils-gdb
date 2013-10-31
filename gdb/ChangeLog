@@ -1,3 +1,14 @@
+2013-10-31  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_syscall_event): Don't set or clear stop_signal.
+	(handle_inferior_event) <TARGET_WAITKIND_FORKED,
+	TARGET_WAITKIND_VFORKED>: Don't set stop_signal to
+	GDB_SIGNAL_TRAP, or clear it.  Pass GDB_SIGNAL_0 to
+	bpstat_explains signal, instead of GDB_SIGNAL_TRAP.
+	<bpstat handling>: If the bpstat chain wants the signal to be
+	hidden, then set stop_signal to GDB_SIGNAL_0 instead of
+	GDB_SIGNAL_TRAP.
+
 2013-10-31  Andrew Burgess  <aburgess@broadcom.com>
 
 	* breakpoint.c (update_watchpoint): Update error message and add
