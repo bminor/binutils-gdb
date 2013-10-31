@@ -98,8 +98,9 @@ proc contains_ifunc_symbol { binary_file } {
 
     # Look for a line like this:
     #    58: 0000000000400600    30 IFUNC   GLOBAL DEFAULT   12 library_func2
+    # with perhaps some other info between the visibility and section
 
-    if { ![regexp ".*\[ \]*IFUNC\[ \]+GLOBAL\[ \]+DEFAULT\[ \]+\[UND0-9\]+\[ \]+library_func2\n" [file_contents readelf.out]] } {
+    if { ![regexp ".*\[ \]*IFUNC\[ \]+GLOBAL\[ \]+DEFAULT .* \[UND0-9\]+\[ \]+library_func2\n" [file_contents readelf.out]] } {
 	return 0
     }
 
