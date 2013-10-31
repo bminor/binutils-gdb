@@ -1,5 +1,10 @@
 2013-11-20  Yao Qi  <yao@codesourcery.com>
 
+	* target.c (memory_xfer_partial_1): Update 'target_dcache' if
+	it is initialized.
+
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
 	* dcache.c (last_cache): Remove.
 	(dcache_free, dcache_init): Update.
 	(dcache_update):

@@ -1667,11 +1667,12 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
   if (res > 0
       && inf != NULL
       && writebuf != NULL
+      && target_dcache_init_p ()
       && !region->attrib.cache
       && stack_cache_enabled_p
       && object != TARGET_OBJECT_STACK_MEMORY)
     {
-      DCACHE *dcache = target_dcache_get_or_init ();
+      DCACHE *dcache = target_dcache_get ();
 
       dcache_update (dcache, memaddr, (void *) writebuf, res);
     }
