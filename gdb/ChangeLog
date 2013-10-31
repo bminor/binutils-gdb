@@ -1,5 +1,31 @@
 2013-11-20  Yao Qi  <yao@codesourcery.com>
 
+	* Makefile.in (SFILES):Add target-dcache.c.
+	(HFILES_NO_SRCDIR): Add target-dcache.h.
+	(COMMON_OBS): Add target-dcache.o.
+	* dcache.c: Remove inclusion to "target.h".  Include
+	"target-dcache.h".
+	* memattr.c: Include "target-dcache.h".
+	* top.c: Likewise.
+	* tracepoint.c: Likewise.
+	* target.c: (stack_cache_enabled_p_1): Move to
+	target-dcache.c.
+	(stack_cache_enabled_p): Likewise.
+	(set_stack_cache_enabled_p): Likewise.
+	(show_stack_cache_enabled_p): Likewise.
+	(target_dcache, target_dcache_init_p): Likewise.
+	(target_dcache_invalidate): Likewise.
+	(target_dcache_get, target_dcache_get_or_init): Likewise.
+	(memory_xfer_partial_1): Call function stack_cache_enabled.
+	(initialize_target): Move code to target-dcache.c.
+	* target.h (target_dcache_invalidate): Move to
+	target-dcache.h.
+	(target_dcache_get): Likewise.
+	* target-dcache.c: New.
+	* target-dcache.h: New.
+
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
 	* target.c (memory_xfer_partial_1): Update 'target_dcache' if
 	it is initialized.
 

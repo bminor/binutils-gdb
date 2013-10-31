@@ -1043,11 +1043,6 @@ int target_supports_disable_randomization (void);
 #define target_can_run_breakpoint_commands() \
   (*current_target.to_can_run_breakpoint_commands) ()
 
-/* Invalidate all target dcaches.  */
-extern void target_dcache_invalidate (void);
-
-extern struct dcache_struct *target_dcache_get (void);
-
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
 extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr,

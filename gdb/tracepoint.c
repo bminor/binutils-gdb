@@ -26,6 +26,7 @@
 #include "gdbcmd.h"
 #include "value.h"
 #include "target.h"
+#include "target-dcache.h"
 #include "language.h"
 #include <string.h>
 #include "inferior.h"

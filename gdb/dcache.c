@@ -22,7 +22,7 @@
 #include "gdbcmd.h"
 #include <string.h>
 #include "gdbcore.h"
-#include "target.h"
+#include "target-dcache.h"
 #include "inferior.h"
 #include "splay-tree.h"
 
