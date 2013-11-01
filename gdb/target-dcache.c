@@ -124,6 +124,46 @@ stack_cache_enabled_p (void)
   return stack_cache_enabled;
 }
 
+/* The option sets this.  */
+
+static int code_cache_enabled_1 = 1;
+
+/* And set_code_cache updates this.
+   The reason for the separation is so that we don't flush the cache for
+   on->on transitions.  */
+static int code_cache_enabled = 1;
+
+/* This is called *after* the code-cache has been set.
+   Flush the cache for off->on and on->off transitions.
+   There's no real need to flush the cache for on->off transitions,
+   except cleanliness.  */
+
+static void
+set_code_cache (char *args, int from_tty, struct cmd_list_element *c)
+{
+  if (code_cache_enabled != code_cache_enabled_1)
+    target_dcache_invalidate ();
+
+  code_cache_enabled = code_cache_enabled_1;
+}
+
+/* Show option "code-cache".  */
+
+static void
+show_code_cache (struct ui_file *file, int from_tty,
+		 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Cache use for code accesses is %s.\n"), value);
+}
+
+/* Return true if "code cache" is enabled, otherwise, return false.  */
+
+int
+code_cache_enabled_p (void)
+{
+  return code_cache_enabled;
+}
+
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_target_dcache;
 
@@ -139,6 +179,18 @@ configured memory regions.  This improves remote performance significantly.\n\
 By default, caching for stack access is on."),
 			   set_stack_cache,
 			   show_stack_cache,
+			   &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("code-cache", class_support,
+			   &code_cache_enabled_1, _("\
+Set cache use for code segment access."), _("\
+Show cache use for code segment access."), _("\
+When on, use the target memory cache for all code segment accesses,\n\
+regardless of any configured memory regions.  This improves remote\n\
+performance significantly.  By default, caching for code segment\n\
+access is on."),
+			   set_code_cache,
+			   show_code_cache,
 			   &setlist, &showlist);
 
   target_dcache_aspace_key

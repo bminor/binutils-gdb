@@ -1547,7 +1547,8 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
 	 the collected memory range fails.  */
       && get_traceframe_number () == -1
       && (region->attrib.cache
-	  || (stack_cache_enabled_p () && object == TARGET_OBJECT_STACK_MEMORY)))
+	  || (stack_cache_enabled_p () && object == TARGET_OBJECT_STACK_MEMORY)
+	  || (code_cache_enabled_p () && object == TARGET_OBJECT_CODE_MEMORY)))
     {
       DCACHE *dcache = target_dcache_get_or_init ();
 
@@ -1600,8 +1601,8 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
       && writebuf != NULL
       && target_dcache_init_p ()
       && !region->attrib.cache
-      && stack_cache_enabled_p ()
-      && object != TARGET_OBJECT_STACK_MEMORY)
+      && ((stack_cache_enabled_p () && object != TARGET_OBJECT_STACK_MEMORY)
+	  || (code_cache_enabled_p () && object != TARGET_OBJECT_CODE_MEMORY)))
     {
       DCACHE *dcache = target_dcache_get ();
 
@@ -1697,7 +1698,8 @@ target_xfer_partial (struct target_ops *ops,
   /* If this is a memory transfer, let the memory-specific code
      have a look at it instead.  Memory transfers are more
      complicated.  */
-  if (object == TARGET_OBJECT_MEMORY || object == TARGET_OBJECT_STACK_MEMORY)
+  if (object == TARGET_OBJECT_MEMORY || object == TARGET_OBJECT_STACK_MEMORY
+      || object == TARGET_OBJECT_CODE_MEMORY)
     retval = memory_xfer_partial (ops, object, readbuf,
 				  writebuf, offset, len);
   else
@@ -1793,6 +1795,19 @@ target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
      flattened target doesn't inherit those.  */
 
   if (target_read (current_target.beneath, TARGET_OBJECT_STACK_MEMORY, NULL,
+		   myaddr, memaddr, len) == len)
+    return 0;
+  else
+    return TARGET_XFER_E_IO;
+}
+
+/* Like target_read_memory, but specify explicitly that this is a read from
+   the target's code.  This may trigger different cache behavior.  */
+
+int
+target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
+{
+  if (target_read (current_target.beneath, TARGET_OBJECT_CODE_MEMORY, NULL,
 		   myaddr, memaddr, len) == len)
     return 0;
   else

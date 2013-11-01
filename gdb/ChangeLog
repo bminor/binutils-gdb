@@ -1,5 +1,21 @@
 2013-11-24  Yao Qi  <yao@codesourcery.com>
 
+	* NEWS: Add note on new "set code-cache" option.
+	* target-dcache.c (code_cache_enabled_1): New variable.
+	(code_cache_enabled): New variable.
+	(show_code_cache, set_code_cache): New function.
+	(code_cache_enabled_p): New function.
+	(_initialize_target_dcache): Register command.
+	* target-dcache.h (code_cache_enabled_p): Declare.
+	* target.c (memory_xfer_partial_1):Handle
+	TARGET_OBJECT_CODE_MEMORY and code_cache_enabled.
+	(target_read_code): New function.
+	* target.h (enum target_object) <TARGET_OBJECT_CODE_MEMORY>:
+	New.
+	(target_read_code): Declare.
+
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
 	* target-dcache.c (stack_cache_enabled_p_1): Rename to ...
 	(stack_cache_enabled_1): ... this.  New variable.
 	(stack_cache_enabled_p): Rename to ...

@@ -10842,7 +10842,8 @@ Therefore, by default, @value{GDBN} only caches data
 known to be on the stack@footnote{In non-stop mode, it is moderately
 rare for a running thread to modify the stack of a stopped thread
 in a way that would interfere with a backtrace, and caching of
-stack reads provides a significant speed up of remote backtraces.}.
+stack reads provides a significant speed up of remote backtraces.} or
+in the code segment.
 Other regions of memory can be explicitly marked as
 cacheable; @pxref{Memory Region Attributes}.
 
@@ -10866,6 +10867,18 @@ caching.  By default, this option is @code{on}.
 @kindex show stack-cache
 @item show stack-cache
 Show the current state of data caching for memory accesses.
+
+@kindex set code-cache
+@item set code-cache on
+@itemx set code-cache off
+Enable or disable caching of code segment accesses.  When @code{on},
+use caching.  By default, this option is @code{on}.  This improves
+performance of disassembly in remote debugging.
+
+@kindex show code-cache
+@item show code-cache
+Show the current state of target memory cache for code segment
+accesses.
 
 @kindex info dcache
 @item info dcache @r{[}line@r{]}

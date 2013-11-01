@@ -1,5 +1,10 @@
 2013-11-24  Yao Qi  <yao@codesourcery.com>
 
+	* gdb.texinfo (Caching Remote Data): Document new
+	"set/show stack-cache" option.
+
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.texinfo (Caching Target Data): Replace "ON" with "on".
 	(Maintenance Commands): Replace "ON" and "OFF" with "on" and
 	"off" respectively.

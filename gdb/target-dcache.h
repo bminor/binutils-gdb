@@ -30,4 +30,6 @@ extern int target_dcache_init_p (void);
 
 extern int stack_cache_enabled_p (void);
 
+extern int code_cache_enabled_p (void);
+
 #endif /* TARGET_DCACHE_H */

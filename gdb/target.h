@@ -145,6 +145,9 @@ enum target_object
      if it is not in a region marked as such, since it is known to be
      "normal" RAM.  */
   TARGET_OBJECT_STACK_MEMORY,
+  /* Memory known to be part of the target code.   This is cached even
+     if it is not in a region marked as such.  */
+  TARGET_OBJECT_CODE_MEMORY,
   /* Kernel Unwind Table.  See "ia64-tdep.c".  */
   TARGET_OBJECT_UNWIND_TABLE,
   /* Transfer auxilliary vector.  */
@@ -1049,6 +1052,8 @@ extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
 			       ssize_t len);
 
 extern int target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
+
+extern int target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
 
 extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 				ssize_t len);
