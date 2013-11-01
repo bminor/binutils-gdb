@@ -1,6 +1,17 @@
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	Apply changes from mainline to 2.24
+	2013-11-04  Alan Modra  <amodra@gmail.com>
+	* symtab.h (Symbol::Reference_flags): Add FUNC_DESC_ABI.
+	(Symbol::needs_dynamic_reloc): Test new flag.
+	* powerpc.cc (needs_dynamic_reloc, use_plt_offset): Delete.
+	(Target_powerpc::Scan::get_reference_flags): Add target param.
+	Return FUNC_DESC_ABI for 64-bit ELFv1.
+	(Target_powerpc::Branch_info::make_stub): Adjust get_reference_flags
+	call.
+	(Target_powerpc::Scan::global): Use Symbol::needs_dynamic_reloc.
+	(Target_powerpc::Relocate::relocate): Use Symbol::use_plt_offset.
+
 	2013-10-30  Alan Modra  <amodra@gmail.com>
 	* powerpc.cc (Powerpc_relobj::abiversion, set_abiversion,
 	ppc64_local_entry_offset, ppc64_local_entry_offset,

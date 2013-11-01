@@ -918,7 +918,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
     { }
 
     static inline int
-    get_reference_flags(unsigned int r_type);
+    get_reference_flags(unsigned int r_type, const Target_powerpc* target);
 
     inline void
     local(Symbol_table* symtab, Layout* layout, Target_powerpc* target,
@@ -1429,102 +1429,6 @@ at_tls_transform(uint32_t insn, unsigned int reg)
   return insn;
 }
 
-// Modified version of symtab.h class Symbol member
-// Given a direct absolute or pc-relative static relocation against
-// the global symbol, this function returns whether a dynamic relocation
-// is needed.
-
-template<int size>
-bool
-needs_dynamic_reloc(const Symbol* gsym, int flags)
-{
-  // No dynamic relocations in a static link!
-  if (parameters->doing_static_link())
-    return false;
-
-  // A reference to an undefined symbol from an executable should be
-  // statically resolved to 0, and does not need a dynamic relocation.
-  // This matches gnu ld behavior.
-  if (gsym->is_undefined() && !parameters->options().shared())
-    return false;
-
-  // A reference to an absolute symbol does not need a dynamic relocation.
-  if (gsym->is_absolute())
-    return false;
-
-  // An absolute reference within a position-independent output file
-  // will need a dynamic relocation.
-  if ((flags & Symbol::ABSOLUTE_REF)
-      && parameters->options().output_is_position_independent())
-    return true;
-
-  // A function call that can branch to a local PLT entry does not need
-  // a dynamic relocation.
-  if ((flags & Symbol::FUNCTION_CALL) && gsym->has_plt_offset())
-    return false;
-
-  // A reference to any PLT entry in a non-position-independent executable
-  // does not need a dynamic relocation.
-  // Except due to having function descriptors on powerpc64 we don't define
-  // functions to their plt code in an executable, so this doesn't apply.
-  if (size == 32
-      && !parameters->options().output_is_position_independent()
-      && gsym->has_plt_offset())
-    return false;
-
-  // A reference to a symbol defined in a dynamic object or to a
-  // symbol that is preemptible will need a dynamic relocation.
-  if (gsym->is_from_dynobj()
-      || gsym->is_undefined()
-      || gsym->is_preemptible())
-    return true;
-
-  // For all other cases, return FALSE.
-  return false;
-}
-
-// Modified version of symtab.h class Symbol member
-// Whether we should use the PLT offset associated with a symbol for
-// a relocation.  FLAGS is a set of Reference_flags.
-
-template<int size>
-bool
-use_plt_offset(const Symbol* gsym, int flags)
-{
-  // If the symbol doesn't have a PLT offset, then naturally we
-  // don't want to use it.
-  if (!gsym->has_plt_offset())
-    return false;
-
-  // For a STT_GNU_IFUNC symbol we always have to use the PLT entry.
-  if (gsym->type() == elfcpp::STT_GNU_IFUNC)
-    return true;
-
-  // If we are going to generate a dynamic relocation, then we will
-  // wind up using that, so no need to use the PLT entry.
-  if (needs_dynamic_reloc<size>(gsym, flags))
-    return false;
-
-  // If the symbol is from a dynamic object, we need to use the PLT
-  // entry.
-  if (gsym->is_from_dynobj())
-    return true;
-
-  // If we are generating a shared object, and this symbol is
-  // undefined or preemptible, we need to use the PLT entry.
-  if (parameters->options().shared()
-      && (gsym->is_undefined() || gsym->is_preemptible()))
-    return true;
-
-  // If this is a call to a weak undefined symbol, we need to use
-  // the PLT entry; the symbol may be defined by a library loaded
-  // at runtime.
-  if ((flags & Symbol::FUNCTION_CALL) && gsym->is_weak_undefined())
-    return true;
-
-  // Otherwise we can use the regular definition.
-  return false;
-}
 
 template<int size, bool big_endian>
 class Powerpc_relocate_functions
@@ -2619,8 +2523,11 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
   if (sym != NULL && sym->is_forwarder())
     sym = symtab->resolve_forwards(sym);
   const Sized_symbol<size>* gsym = static_cast<const Sized_symbol<size>*>(sym);
+  Target_powerpc<size, big_endian>* target =
+    static_cast<Target_powerpc<size, big_endian>*>(
+      parameters->sized_target<size, big_endian>());
   if (gsym != NULL
-      ? use_plt_offset<size>(gsym, Scan::get_reference_flags(this->r_type_))
+      ? gsym->use_plt_offset(Scan::get_reference_flags(this->r_type_, target))
       : this->object_->local_has_plt_offset(this->r_sym_))
     {
       if (stub_table == NULL)
@@ -2706,9 +2613,6 @@ Target_powerpc<size, big_endian>::Branch_info::make_stub(
       if (size == 64 && is_branch_reloc(this->r_type_))
 	{
 	  unsigned int dest_shndx;
-	  Target_powerpc<size, big_endian>* target =
-	    static_cast<Target_powerpc<size, big_endian>*>(
-		parameters->sized_target<size, big_endian>());
 	  to = target->symval_for_branch(symtab, to, gsym,
 					 this->object_, &dest_shndx);
 	}
@@ -5002,8 +4906,12 @@ Target_powerpc<size, big_endian>::tlsld_got_offset(
 
 template<int size, bool big_endian>
 int
-Target_powerpc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
+Target_powerpc<size, big_endian>::Scan::get_reference_flags(
+    unsigned int r_type,
+    const Target_powerpc* target)
 {
+  int ref = 0;
+
   switch (r_type)
     {
     case elfcpp::R_POWERPC_NONE:
@@ -5011,7 +4919,7 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_POWERPC_GNU_VTENTRY:
     case elfcpp::R_PPC64_TOC:
       // No symbol reference.
-      return 0;
+      break;
 
     case elfcpp::R_PPC64_ADDR64:
     case elfcpp::R_PPC64_UADDR64:
@@ -5022,13 +4930,15 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_POWERPC_ADDR16_LO:
     case elfcpp::R_POWERPC_ADDR16_HI:
     case elfcpp::R_POWERPC_ADDR16_HA:
-      return Symbol::ABSOLUTE_REF;
+      ref = Symbol::ABSOLUTE_REF;
+      break;
 
     case elfcpp::R_POWERPC_ADDR24:
     case elfcpp::R_POWERPC_ADDR14:
     case elfcpp::R_POWERPC_ADDR14_BRTAKEN:
     case elfcpp::R_POWERPC_ADDR14_BRNTAKEN:
-      return Symbol::FUNCTION_CALL | Symbol::ABSOLUTE_REF;
+      ref = Symbol::FUNCTION_CALL | Symbol::ABSOLUTE_REF;
+      break;
 
     case elfcpp::R_PPC64_REL64:
     case elfcpp::R_POWERPC_REL32:
@@ -5037,14 +4947,16 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_POWERPC_REL16_LO:
     case elfcpp::R_POWERPC_REL16_HI:
     case elfcpp::R_POWERPC_REL16_HA:
-      return Symbol::RELATIVE_REF;
+      ref = Symbol::RELATIVE_REF;
+      break;
 
     case elfcpp::R_POWERPC_REL24:
     case elfcpp::R_PPC_PLTREL24:
     case elfcpp::R_POWERPC_REL14:
     case elfcpp::R_POWERPC_REL14_BRTAKEN:
     case elfcpp::R_POWERPC_REL14_BRNTAKEN:
-      return Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
+      ref = Symbol::FUNCTION_CALL | Symbol::RELATIVE_REF;
+      break;
 
     case elfcpp::R_POWERPC_GOT16:
     case elfcpp::R_POWERPC_GOT16_LO:
@@ -5059,11 +4971,13 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_PPC64_TOC16_DS:
     case elfcpp::R_PPC64_TOC16_LO_DS:
       // Absolute in GOT.
-      return Symbol::ABSOLUTE_REF;
+      ref = Symbol::ABSOLUTE_REF;
+      break;
 
     case elfcpp::R_POWERPC_GOT_TPREL16:
     case elfcpp::R_POWERPC_TLS:
-      return Symbol::TLS_REF;
+      ref = Symbol::TLS_REF;
+      break;
 
     case elfcpp::R_POWERPC_COPY:
     case elfcpp::R_POWERPC_GLOB_DAT:
@@ -5072,8 +4986,12 @@ Target_powerpc<size, big_endian>::Scan::get_reference_flags(unsigned int r_type)
     case elfcpp::R_POWERPC_DTPMOD:
     default:
       // Not expected.  We will give an error later.
-      return 0;
+      break;
     }
+
+  if (size == 64 && target->abiversion() < 2)
+    ref |= Symbol::FUNC_DESC_ABI;
+  return ref;
 }
 
 // Report an unsupported relocation against a local symbol.
@@ -5764,7 +5682,7 @@ Target_powerpc<size, big_endian>::Scan::global(
 	      gsym->set_needs_dynsym_value();
 	  }
 	// Make a dynamic relocation if necessary.
-	if (needs_dynamic_reloc<size>(gsym, Scan::get_reference_flags(r_type))
+	if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type, target))
 	    || (size == 64 && is_ifunc))
 	  {
 	    if (gsym->may_need_copy_reloc())
@@ -5824,7 +5742,7 @@ Target_powerpc<size, big_endian>::Scan::global(
     case elfcpp::R_PPC64_REL64:
     case elfcpp::R_POWERPC_REL32:
       // Make a dynamic relocation if necessary.
-      if (needs_dynamic_reloc<size>(gsym, Scan::get_reference_flags(r_type)))
+      if (gsym->needs_dynamic_reloc(Scan::get_reference_flags(r_type, target)))
 	{
 	  if (gsym->may_need_copy_reloc())
 	    {
@@ -6601,7 +6519,7 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   bool has_plt_value = false;
   unsigned int r_sym = elfcpp::elf_r_sym<size>(rela.get_r_info());
   if ((gsym != NULL
-       ? use_plt_offset<size>(gsym, Scan::get_reference_flags(r_type))
+       ? gsym->use_plt_offset(Scan::get_reference_flags(r_type, target))
        : object->local_has_plt_offset(r_sym))
       && (!psymval->is_ifunc_symbol()
 	  || Scan::reloc_needs_plt_for_ifunc(object, r_type, false)))
