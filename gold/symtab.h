@@ -638,7 +638,10 @@ class Symbol
     // A TLS-related reference.
     TLS_REF = 4,
     // A reference that can always be treated as a function call.
-    FUNCTION_CALL = 8
+    FUNCTION_CALL = 8,
+    // When set, says that dynamic relocations are needed even if a
+    // symbol has a plt entry.
+    FUNC_DESC_ABI = 16,
   };
 
   // Given a direct absolute or pc-relative static relocation against
@@ -675,7 +678,8 @@ class Symbol
 
     // A reference to any PLT entry in a non-position-independent executable
     // does not need a dynamic relocation.
-    if (!parameters->options().output_is_position_independent()
+    if (!(flags & FUNC_DESC_ABI)
+	&& !parameters->options().output_is_position_independent()
         && this->has_plt_offset())
       return false;
 
