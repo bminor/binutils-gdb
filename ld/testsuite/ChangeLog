@@ -1,3 +1,8 @@
+2013-11-01  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-x86-64/plt-nacl.pd: Update expected disassembly for PLT nop fix.
+	* ld-x86-64/tlsdesc-nacl.pd: Likewise.
+
 2013-10-05  Gregory Fong  <gregory.0xf0@gmail.com>
 
 	* ld-mips-elf/eh-frame5.d, ld-mips-elf/jalx-2.dd,
