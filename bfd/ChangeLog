@@ -1,6 +1,30 @@
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	Apply changes from mainline to 2.24
+	2013-11-04  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (ppc64_elf_copy_indirect_symbol): Copy
+	pointer_equality_needed flag.
+	(ppc64_elf_check_relocs): For ELFv2 arrange to emit plt
+	entries for references to functions in shared libraries on
+	non-call relocs.
+	(readonly_dynrelocs): Split into function of the same name and..
+	(maybe_set_textrel): ..this new function.  Update call.
+	(ppc64_elf_adjust_dynamic_symbol): Don't emit dynrelocs for
+	ELFv2 in most cases if we have a plt entry.  Use new
+	readonly_relocs.
+	(allocate_dynrelocs): For ELFv2, don't allocate dynreloc space
+	for ifunc in static executables.
+	(size_global_entry_stubs): New function.
+	(ppc64_elf_size_dynamic_sections): Call size_global_entry_stubs.
+	Save end of glink branch table.
+	(ppc64_elf_hash_symbol): New function.
+	(build_global_entry_stubs): New function.
+	(ppc64_elf_build_stubs): Call build_global_entry_stubs.  Adjust
+	glink sizing.
+	(ppc64_elf_relocate_section): Tidy plt16/32/64 reloc code.
+	(ppc64_elf_finish_dynamic_symbol): For ELFv2, adjust symbols
+	defined on plt code.
+
 	2013-11-02  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_next_input_section): Always set toc_off
 	to value for object file.
