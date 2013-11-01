@@ -1,5 +1,10 @@
 2013-11-24  Yao Qi  <yao@codesourcery.com>
 
+	* disasm.c (dis_asm_read_memory): Call target_read_code
+	instead of target_read_memory.
+
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
 	* NEWS: Add note on new "set code-cache" option.
 	* target-dcache.c (code_cache_enabled_1): New variable.
 	(code_cache_enabled): New variable.
