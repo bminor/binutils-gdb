@@ -3226,8 +3226,6 @@ create_longjmp_master_breakpoint (void)
       struct breakpoint_objfile_data *bp_objfile_data;
 
       gdbarch = get_objfile_arch (objfile);
-      if (!gdbarch_get_longjmp_target_p (gdbarch))
-	continue;
 
       bp_objfile_data = get_breakpoint_objfile_data (objfile);
 
@@ -3276,6 +3274,9 @@ create_longjmp_master_breakpoint (void)
 
 	  continue;
 	}
+
+      if (!gdbarch_get_longjmp_target_p (gdbarch))
+	continue;
 
       for (i = 0; i < NUM_LONGJMP_NAMES; i++)
 	{

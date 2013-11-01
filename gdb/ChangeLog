@@ -1,3 +1,8 @@
+2013-11-01  Tiago Stürmer Daitx  <tdaitx@linux.vnet.ibm.com>
+
+	* breakpoint.c (create_longjmp_master_breakpoint): Allow libc
+	probe scan even when the arch provides no get_longjmp_target.
+
 2013-10-31  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (handle_syscall_event): Don't set or clear stop_signal.
