@@ -7016,7 +7016,16 @@ skip_one_die (const struct die_reader_specs *reader, const gdb_byte *info_ptr,
 	    complaint (&symfile_complaints,
 		       _("ignoring absolute DW_AT_sibling"));
 	  else
-	    return buffer + dwarf2_get_ref_die_offset (&attr).sect_off;
+	    {
+	      unsigned int off = dwarf2_get_ref_die_offset (&attr).sect_off;
+	      const gdb_byte *sibling_ptr = buffer + off;
+
+	      if (sibling_ptr < info_ptr)
+		complaint (&symfile_complaints,
+			   _("DW_AT_sibling points backwards"));
+	      else
+		return sibling_ptr;
+	    }
 	}
 
       /* If it isn't DW_AT_sibling, skip this attribute.  */
@@ -15134,7 +15143,16 @@ read_partial_die (const struct die_reader_specs *reader,
 	    complaint (&symfile_complaints,
 		       _("ignoring absolute DW_AT_sibling"));
 	  else
-	    part_die->sibling = buffer + dwarf2_get_ref_die_offset (&attr).sect_off;
+	    {
+	      unsigned int off = dwarf2_get_ref_die_offset (&attr).sect_off;
+	      const gdb_byte *sibling_ptr = buffer + off;
+
+	      if (sibling_ptr < info_ptr)
+		complaint (&symfile_complaints,
+			   _("DW_AT_sibling points backwards"));
+	      else
+		part_die->sibling = sibling_ptr;
+	    }
 	  break;
         case DW_AT_byte_size:
           part_die->has_byte_size = 1;
