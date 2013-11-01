@@ -100,8 +100,8 @@ set ok_buildid ${ok_prefix}${ok_suffix}
 set ok_buildid2 ${ok_prefix}${ok_suffix2}
 set bad_buildid ffffffffffff
 
-set outdir [standard_output_file {}]
-set basedir $outdir/.build-id
+set debugdir [standard_output_file {}]
+set basedir $debugdir/.build-id
 file mkdir $basedir $basedir/$ok_prefix
 
 # Test where the separate debuginfo's buildid matches.
@@ -154,7 +154,7 @@ foreach testname {ok mismatch fallback} {
 	gdb_start
 	gdb_reinitialize_dir $srcdir/$subdir
 
-	gdb_test_no_output "set debug-file-directory $outdir" \
+	gdb_test_no_output "set debug-file-directory $debugdir" \
 	    "set debug-file-directory"
 
 	gdb_load ${binfile}-${testname}

@@ -1,3 +1,8 @@
+2013-11-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.dwarf2/dwzbuildid.exp: Rename `outdir' variable to
+	`debugdir'.
+
 2013-10-31  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/watchpoint.exp (test_no_hw_watchpoints): Add additional
