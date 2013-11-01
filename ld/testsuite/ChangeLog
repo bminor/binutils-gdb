@@ -1,5 +1,9 @@
 2013-11-04  Alan Modra  <amodra@gmail.com>
 
+	* ld-powerpc/elfv2exe.d: Adjust for non-PIC global entry.
+
+2013-11-04  Alan Modra  <amodra@gmail.com>
+
 	* ld-elfvers/vers24.rd: Allow extra readelf output after
 	symbol visibility.
 	* ld-ifunc/ifunc.exp: Likewise.

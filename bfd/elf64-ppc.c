@@ -13486,6 +13486,39 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      rel->r_info = ELF64_R_INFO (r_symndx, r_type);
 	    }
 	  break;
+
+	case R_PPC64_REL16_HA:
+	  /* If we are generating a non-PIC executable, edit
+	     .	0:	addis 2,12,.TOC.-0b@ha
+	     .		addi 2,2,.TOC.-0b@l
+	     used by ELFv2 global entry points to set up r2, to
+	     .		lis 2,.TOC.@ha
+	     .		addi 2,2,.TOC.@l
+	     if .TOC. is in range.  */
+	  if (!info->shared
+	      && h != NULL && &h->elf == htab->elf.hgot
+	      && rel + 1 < relend
+	      && rel[1].r_info == ELF64_R_INFO (r_symndx, R_PPC64_REL16_LO)
+	      && rel[1].r_offset == rel->r_offset + 4
+	      && rel[1].r_addend == rel->r_addend + 4
+	      && relocation + 0x80008000 <= 0xffffffff)
+	    {
+	      unsigned int insn1, insn2;
+	      bfd_vma offset = rel->r_offset - d_offset;
+	      insn1 = bfd_get_32 (output_bfd, contents + offset);
+	      insn2 = bfd_get_32 (output_bfd, contents + offset + 4);
+	      if ((insn1 & 0xffff0000) == 0x3c4c0000 /* addis 2,12 */
+		  && (insn2 & 0xffff0000) == 0x38420000 /* addi 2,2 */)
+		{
+		  r_type = R_PPC64_ADDR16_HA;
+		  rel->r_info = ELF64_R_INFO (r_symndx, r_type);
+		  rel->r_addend -= d_offset;
+		  rel[1].r_info = ELF64_R_INFO (r_symndx, R_PPC64_ADDR16_LO);
+		  rel[1].r_addend -= d_offset + 4;
+		  bfd_put_32 (output_bfd, 0x3c400000, contents + offset);
+		}
+	    }
+	  break;
 	}
 
       /* Handle other relocations that tweak non-addend part of insn.  */
