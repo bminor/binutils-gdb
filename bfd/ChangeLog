@@ -1,3 +1,10 @@
+2013-11-01  Roland McGrath  <mcgrathr@google.com>
+
+	* elf-nacl.c (segment_eligible_for_headers): Drop requirement that
+	some section have SEC_HAS_CONTENTS set.  It's not set for
+	.note.gnu.build-id, and a segment of only read-only SHT_NOBITS
+	sections is implausible and not really supportable anyway.
+
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
 	* elf32-ppc.c (ppc_elf_size_dynamic_sections): Use new DT_PPC_OPT
