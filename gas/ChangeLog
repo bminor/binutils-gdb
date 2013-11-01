@@ -1,3 +1,9 @@
+2013-11-05  Will Newton  <will.newton@linaro.org>
+
+	PR gas/16103
+	* config/tc-aarch64.c (parse_operands): Avoid trying to
+	parse a vector register as an immediate.
+
 2013-09-20  Alan Modra  <amodra@gmail.com>
 
 	* configure: Regenerate.
