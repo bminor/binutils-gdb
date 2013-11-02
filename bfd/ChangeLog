@@ -1,5 +1,9 @@
 2013-11-02  Alan Modra  <amodra@gmail.com>
 
+	* opncls.c (_bfd_new_bfd): Don't init vars already zeroed.
+
+2013-11-02  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_next_input_section): Always set toc_off
 	to value for object file.
 

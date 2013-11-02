@@ -80,27 +80,12 @@ _bfd_new_bfd (void)
 
   nbfd->arch_info = &bfd_default_arch_struct;
 
-  nbfd->direction = no_direction;
-  nbfd->iostream = NULL;
-  nbfd->where = 0;
   if (!bfd_hash_table_init_n (& nbfd->section_htab, bfd_section_hash_newfunc,
 			      sizeof (struct section_hash_entry), 13))
     {
       free (nbfd);
       return NULL;
     }
-  nbfd->sections = NULL;
-  nbfd->section_last = NULL;
-  nbfd->format = bfd_unknown;
-  nbfd->my_archive = NULL;
-  nbfd->origin = 0;
-  nbfd->opened_once = FALSE;
-  nbfd->output_has_begun = FALSE;
-  nbfd->section_count = 0;
-  nbfd->usrdata = NULL;
-  nbfd->cacheable = FALSE;
-  nbfd->flags = BFD_NO_FLAGS;
-  nbfd->mtime_set = FALSE;
 
   return nbfd;
 }
