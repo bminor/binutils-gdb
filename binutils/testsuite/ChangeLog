@@ -1,3 +1,8 @@
+2013-11-02  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/dw2-1.S: Use .4byte rather than .int.
+	* binutils-all/dw2-2.S: Likewise.
+
 2013-10-24  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/objdump.exp (cps_expected): Add MSP430 to list.

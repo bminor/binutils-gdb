@@ -23,7 +23,7 @@
 	.type func_cu2, %function
 func_cu2:
 .Lbegin_func_cu2:
-	.int 0
+	.4byte 0
 .Lend_func_cu2:
 	.size func_cu2, .-func_cu2
 .Lend_text1:
