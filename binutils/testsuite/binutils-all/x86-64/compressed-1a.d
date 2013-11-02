@@ -135,7 +135,7 @@ Contents of the .[z]?debug_str section:
 
 Contents of the .[z]?debug_frame section:
 
-00000000 0+014 ffffffff CIE
+0+ 0+14 0*ffffffff CIE
   Version:               1
   Augmentation:          ""
   Code alignment factor: 1
@@ -151,7 +151,7 @@ Contents of the .[z]?debug_frame section:
   DW_CFA_nop
   DW_CFA_nop
 
-00000018 0+014 00000000 FDE cie=00000000 pc=0+0000..0+0002
+0+18 0+14 0+ FDE cie=0+ pc=0+..0+2
 
-00000030 0+014 00000000 FDE cie=00000000 pc=0+0010..0+0015
+0+30 0+14 0+ FDE cie=0+ pc=0+10..0+15
 

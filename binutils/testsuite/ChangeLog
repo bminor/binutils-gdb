@@ -1,5 +1,7 @@
 2013-11-02  Alan Modra  <amodra@gmail.com>
 
+	* binutils-all/x86-64/compressed-1a.d: Allow wide display of addresses.
+
 	* binutils-all/dw2-1.S: Use .4byte rather than .int.
 	* binutils-all/dw2-2.S: Likewise.
 

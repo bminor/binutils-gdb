@@ -1,3 +1,7 @@
+2013-11-02  Alan Modra  <amodra@gmail.com>
+
+	* ld-pe/cfi.d: Allow wide display of addresses.
+
 2013-11-01  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-x86-64/plt-nacl.pd: Update expected disassembly for PLT nop fix.

@@ -1,3 +1,7 @@
+2013-11-02  Alan Modra  <amodra@gmail.com>
+
+	* gas/cfi/cfi-x86_64.d: Match when lacking end of section padding.
+
 2013-10-29  Jan Beulich <jbeulich@suse.com>
 
 	* gas/microblaze/relax_size.elf: Drop expectation of no longer
@@ -611,7 +615,6 @@
 
 2013-05-31  Catherine Moore  <clm@codesourcery.com>
 
-	gas/testsuite/
 	* gas/mips/ehword.d: New.
 	* gas/mips/ehword.s: New.
 	* gas/mips/mips.exp: Run ehword test.
