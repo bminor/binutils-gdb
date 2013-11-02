@@ -262,7 +262,7 @@ gdb_test "ptype N::Derived::value_type" "type = int"
 
 # Now run to N::Derived::doit and get the type of "value_type"
 if {![runto "N::Derived::doit"]} {
-    perrro "couldn't run to N::Derived::doit"
+    perror "couldn't run to N::Derived::doit"
     continue
 }
 

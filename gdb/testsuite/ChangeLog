@@ -1,3 +1,7 @@
+2013-11-02  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* gdb.cp/derivation.exp: s/perrro/perror/
+
 2013-11-01  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* gdb.dwarf2/dwzbuildid.exp: Rename `outdir' variable to
