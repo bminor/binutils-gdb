@@ -1,3 +1,7 @@
+2013-11-02  Alan Modra  <amodra@gmail.com>
+
+	* Makefile.am (.m.c): Fix input and output file specification.
+
 2013-10-09  Nick Clifton  <nickc@redhat.com>
 
 	PR gprof/16027
