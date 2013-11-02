@@ -3889,19 +3889,19 @@ arm_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
 }
 
 static void
-print_fpu_flags (int flags)
+print_fpu_flags (struct ui_file *file, int flags)
 {
   if (flags & (1 << 0))
-    fputs ("IVO ", stdout);
+    fputs_filtered ("IVO ", file);
   if (flags & (1 << 1))
-    fputs ("DVZ ", stdout);
+    fputs_filtered ("DVZ ", file);
   if (flags & (1 << 2))
-    fputs ("OFL ", stdout);
+    fputs_filtered ("OFL ", file);
   if (flags & (1 << 3))
-    fputs ("UFL ", stdout);
+    fputs_filtered ("UFL ", file);
   if (flags & (1 << 4))
-    fputs ("INX ", stdout);
-  putchar ('\n');
+    fputs_filtered ("INX ", file);
+  fputc_filtered ('\n', file);
 }
 
 /* Print interesting information about the floating point processor
@@ -3915,15 +3915,15 @@ arm_print_float_info (struct gdbarch *gdbarch, struct ui_file *file,
 
   type = (status >> 24) & 127;
   if (status & (1 << 31))
-    printf (_("Hardware FPU type %d\n"), type);
+    fprintf_filtered (file, _("Hardware FPU type %d\n"), type);
   else
-    printf (_("Software FPU type %d\n"), type);
+    fprintf_filtered (file, _("Software FPU type %d\n"), type);
   /* i18n: [floating point unit] mask */
-  fputs (_("mask: "), stdout);
-  print_fpu_flags (status >> 16);
+  fputs_filtered (_("mask: "), file);
+  print_fpu_flags (file, status >> 16);
   /* i18n: [floating point unit] flags */
-  fputs (_("flags: "), stdout);
-  print_fpu_flags (status);
+  fputs_filtered (_("flags: "), file);
+  print_fpu_flags (file, status);
 }
 
 /* Construct the ARM extended floating point type.  */

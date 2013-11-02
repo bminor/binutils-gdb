@@ -1,3 +1,9 @@
+2013-11-05  Will Newton  <will.newton@linaro.org>
+
+	PR gdb/7670
+	* arm-tdep.c (print_fpu_flags): Use filtered output routines.
+	(arm_print_float_info): Likewise.
+
 2013-11-04  Anton Blanchard  <anton@samba.org>
 
 	* target.c (memory_xfer_partial): Cap write to 4KB.
