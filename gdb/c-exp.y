@@ -2415,7 +2415,7 @@ static int last_was_structop;
 /* Read one token, getting characters through lexptr.  */
 
 static int
-lex_one_token (void)
+lex_one_token (int *is_quoted_name)
 {
   int c;
   int namelen;
@@ -2425,6 +2425,7 @@ lex_one_token (void)
   char *copy;
 
   last_was_structop = 0;
+  *is_quoted_name = 0;
 
  retry:
 
@@ -2669,6 +2670,8 @@ lex_one_token (void)
 	      {
 		++tokstart;
 		namelen = lexptr - tokstart - 1;
+		*is_quoted_name = 1;
+
 		goto tryname;
 	      }
 	    else if (host_len > 1)
@@ -2813,10 +2816,11 @@ static struct obstack name_obstack;
 
 /* Classify a NAME token.  The contents of the token are in `yylval'.
    Updates yylval and returns the new token type.  BLOCK is the block
-   in which lookups start; this can be NULL to mean the global
-   scope.  */
+   in which lookups start; this can be NULL to mean the global scope.
+   IS_QUOTED_NAME is non-zero if the name token was originally quoted
+   in single quotes.  */
 static int
-classify_name (const struct block *block)
+classify_name (const struct block *block, int is_quoted_name)
 {
   struct symbol *sym;
   char *copy;
@@ -2840,16 +2844,6 @@ classify_name (const struct block *block)
     }
   else if (!sym)
     {
-      /* See if it's a file name. */
-      struct symtab *symtab;
-
-      symtab = lookup_symtab (copy);
-      if (symtab)
-	{
-	  yylval.bval = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab), STATIC_BLOCK);
-	  return FILENAME;
-	}
-
       /* If we found a field of 'this', we might have erroneously
 	 found a constructor where we wanted a type name.  Handle this
 	 case by noticing that we found a constructor and then look up
@@ -2867,6 +2861,24 @@ classify_name (const struct block *block)
 	    {
 	      yylval.tsym.type = SYMBOL_TYPE (sym);
 	      return TYPENAME;
+	    }
+	}
+
+      /* If we found a field, then we want to prefer it over a
+	 filename.  However, if the name was quoted, then it is better
+	 to check for a filename or a block, since this is the only
+	 way the user has of requiring the extension to be used.  */
+      if (is_a_field_of_this.type == NULL || is_quoted_name)
+	{
+	  /* See if it's a file name. */
+	  struct symtab *symtab;
+
+	  symtab = lookup_symtab (copy);
+	  if (symtab)
+	    {
+	      yylval.bval = BLOCKVECTOR_BLOCK (BLOCKVECTOR (symtab),
+					       STATIC_BLOCK);
+	      return FILENAME;
 	    }
 	}
     }
@@ -2938,7 +2950,7 @@ classify_inner_name (const struct block *block, struct type *context)
   char *copy;
 
   if (context == NULL)
-    return classify_name (block);
+    return classify_name (block, 0);
 
   type = check_typedef (context);
   if (TYPE_CODE (type) != TYPE_CODE_STRUCT
@@ -2986,6 +2998,7 @@ yylex (void)
   struct type *context_type = NULL;
   int last_to_examine, next_to_examine, checkpoint;
   const struct block *search_block;
+  int is_quoted_name;
 
   if (popping && !VEC_empty (token_and_value, token_fifo))
     goto do_pop;
@@ -2994,9 +3007,9 @@ yylex (void)
   /* Read the first token and decide what to do.  Most of the
      subsequent code is C++-only; but also depends on seeing a "::" or
      name-like token.  */
-  current.token = lex_one_token ();
+  current.token = lex_one_token (&is_quoted_name);
   if (current.token == NAME)
-    current.token = classify_name (expression_context_block);
+    current.token = classify_name (expression_context_block, is_quoted_name);
   if (parse_language->la_language != language_cplus
       || (current.token != TYPENAME && current.token != COLONCOLON
 	  && current.token != FILENAME))
@@ -3009,7 +3022,11 @@ yylex (void)
   last_was_coloncolon = current.token == COLONCOLON;
   while (1)
     {
-      current.token = lex_one_token ();
+      int ignore;
+
+      /* We ignore quoted names other than the very first one.
+	 Subsequent ones do not have any special meaning.  */
+      current.token = lex_one_token (&ignore);
       current.value = yylval;
       VEC_safe_push (token_and_value, token_fifo, &current);
 

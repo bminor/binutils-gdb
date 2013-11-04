@@ -1,3 +1,9 @@
+2013-11-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/includefile: New file.
+	* gdb.cp/filename.exp: New file.
+	* gdb.cp/filename.cc: New file.
+
 2013-11-15  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.python/py-breakpoint.exp: Make tests have unique names.

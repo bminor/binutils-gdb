@@ -1,3 +1,11 @@
+2013-11-15  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/16117:
+	* c-exp.y (lex_one_token): Add "is_quoted_name" argument.
+	(classify_name): Likewise.  Prefer a field of "this" over a
+	filename.
+	(classify_inner_name, yylex): Update.
+
 2013-11-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2expr.h (struct dwarf_expr_context_funcs) <read_reg>:

@@ -8324,11 +8324,24 @@ $4 = 0
 @end smallexample
 
 @cindex C@t{++} scope resolution
-These uses of @samp{::} are very rarely in conflict with the very similar
-use of the same notation in C@t{++}.  @value{GDBN} also supports use of the C@t{++}
-scope resolution operator in @value{GDBN} expressions.
-@c FIXME: Um, so what happens in one of those rare cases where it's in
-@c conflict??  --mew
+These uses of @samp{::} are very rarely in conflict with the very
+similar use of the same notation in C@t{++}.  When they are in
+conflict, the C@t{++} meaning takes precedence; however, this can be
+overridden by quoting the file or function name with single quotes.
+
+For example, suppose the program is stopped in a method of a class
+that has a field named @code{includefile}, and there is also an
+include file named @file{includefile} that defines a variable,
+@code{some_global}.
+
+@smallexample
+(@value{GDBP}) p includefile
+$1 = 23
+(@value{GDBP}) p includefile::some_global
+A syntax error in expression, near `'.
+(@value{GDBP}) p 'includefile'::some_global
+$2 = 27
+@end smallexample
 
 @cindex wrong values
 @cindex variable values, wrong
