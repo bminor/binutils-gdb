@@ -166,6 +166,9 @@ static const struct ld_option ld_options[] =
     '\0', N_("PLUGIN"), N_("Load named plugin"), ONE_DASH },
   { {"plugin-opt", required_argument, NULL, OPTION_PLUGIN_OPT},
     '\0', N_("ARG"), N_("Send arg to last-loaded plugin"), ONE_DASH },
+  { {"plugin-save-temps", no_argument, NULL, OPTION_PLUGIN_SAVE_TEMPS},
+    '\0', NULL, N_("Store plugin intermediate files permanently"),
+    ONE_DASH },
   { {"flto", optional_argument, NULL, OPTION_IGNORE},
     '\0', NULL, N_("Ignored for GCC LTO option compatibility"),
     ONE_DASH },
@@ -977,6 +980,9 @@ parse_args (unsigned argc, char **argv)
 	case OPTION_PLUGIN_OPT:
 	  if (plugin_opt_plugin_arg (optarg))
 	    einfo(_("%P%F: bad -plugin-opt option\n"));
+	  break;
+	case OPTION_PLUGIN_SAVE_TEMPS:
+	  plugin_save_temps = TRUE;
 	  break;
 #endif /* ENABLE_PLUGINS */
 	case 'q':

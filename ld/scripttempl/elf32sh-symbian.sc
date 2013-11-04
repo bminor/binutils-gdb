@@ -88,7 +88,7 @@ fi
     PLT=".plt            : { *(.plt) } :dynamic :dyn"
 DYNAMIC=".dynamic        : { *(.dynamic) } :dynamic :dyn"
  RODATA=".rodata    ALIGN(4) : { *(.rodata${RELOCATING+ .rodata.* .gnu.linkonce.r.*}) }"
-DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.directive)  *(.gnu.lto_*) }"
+DISCARDED="/DISCARD/ : { *(.note.GNU-stack) *(.gnu_debuglink) *(.directive)  *(.gnu.lto_*) *(.gnu_object_only) }"
 test -z "$GOT" && GOT=".got          ${RELOCATING-0} : { *(.got.plt) *(.got) } :dynamic :dyn"
 INIT_ARRAY=".init_array   ${RELOCATING-0} :
   {

@@ -514,7 +514,7 @@ extern struct asneeded_minfo **asneeded_list_tail;
 extern void (*output_bfd_hash_table_free_fn) (struct bfd_link_hash_table *);
 
 extern void lang_init
-  (void);
+  (bfd_boolean);
 extern void lang_finish
   (void);
 extern lang_memory_region_type * lang_memory_region_lookup
@@ -684,5 +684,46 @@ ldlang_override_segment_assignment
 
 extern void
 lang_ld_feature (char *);
+
+typedef enum
+{
+  cmdline_is_file_enum,
+  cmdline_is_bfd_enum
+} cmdline_enum_type;
+
+typedef struct cmdline_header_struct
+{
+  union cmdline_union *next;
+  cmdline_enum_type type;
+} cmdline_header_type;
+
+typedef struct cmdline_file_struct
+{
+  cmdline_header_type header;
+  const char *filename;
+} cmdline_file_type;
+
+typedef struct cmdline_bfd_struct
+{
+  cmdline_header_type header;
+  bfd *abfd;
+} cmdline_bfd_type;
+
+typedef union cmdline_union
+{
+  cmdline_header_type header;
+  cmdline_file_type file;
+  cmdline_bfd_type abfd;
+} cmdline_union_type;
+
+typedef struct cmdline_list
+{
+  cmdline_union_type *head;
+  cmdline_union_type **tail;
+} cmdline_list_type;
+
+extern void cmdline_emit_object_only_section (void);
+extern void cmdline_check_object_only_section (bfd *, bfd_boolean);
+extern void cmdline_remove_object_only_files (void);
 
 #endif

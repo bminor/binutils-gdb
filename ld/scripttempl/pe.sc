@@ -165,6 +165,7 @@ SECTIONS
     *(.drectve)
     ${RELOCATING+ *(.note.GNU-stack)}
     ${RELOCATING+ *(.gnu.lto_*)}
+    ${RELOCATING+ *(.gnu_object_only)}
   }
 
   .idata ${RELOCATING+BLOCK(__section_alignment__)} :

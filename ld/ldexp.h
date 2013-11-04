@@ -221,7 +221,7 @@ fill_type *exp_get_fill
   (etree_type *, fill_type *, char *);
 bfd_vma exp_get_abs_int
   (etree_type *, int, char *);
-void ldexp_init (void);
-void ldexp_finish (void);
+void ldexp_init (bfd_boolean);
+void ldexp_finish (bfd_boolean);
 
 #endif

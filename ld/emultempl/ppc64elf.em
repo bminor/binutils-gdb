@@ -559,7 +559,7 @@ gld${EMULATION_NAME}_after_allocation (void)
 /* Final emulation specific call.  */
 
 static void
-gld${EMULATION_NAME}_finish (void)
+ppc_finish (void)
 {
   char *msg = NULL;
   char *line, *endline;
@@ -591,7 +591,7 @@ gld${EMULATION_NAME}_finish (void)
     free (msg);
 
   ppc64_elf_restore_symbols (&link_info);
-  finish_default ();
+  gld${EMULATION_NAME}_finish ();
 }
 
 
@@ -916,4 +916,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=ppc_create_output_section_statements
 LDEMUL_AFTER_OPEN=ppc_after_open
 LDEMUL_BEFORE_ALLOCATION=ppc_before_allocation
 LDEMUL_AFTER_ALLOCATION=gld${EMULATION_NAME}_after_allocation
-LDEMUL_FINISH=gld${EMULATION_NAME}_finish
+LDEMUL_FINISH=ppc_finish

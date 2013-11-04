@@ -44,6 +44,14 @@ CODE_FRAGMENT
 .    both_direction = 3
 .  };
 .
+.enum bfd_lto_object_type
+.  {
+.    lto_non_object,
+.    lto_non_ir_object,
+.    lto_ir_object,
+.    lto_mixed_object
+.  };
+.
 .struct bfd
 .{
 .  {* The filename the application opened the BFD with.  *}
@@ -200,6 +208,9 @@ CODE_FRAGMENT
 .  {* Set if this is the linker output BFD.  *}
 .  unsigned int is_linker_output : 1;
 .
+.  {* LTO object type.  *}
+.  unsigned int lto_type : 2;
+.
 .  {* Currently my_archive is tested before adding origin to
 .     anything. I believe that this can become always an add of
 .     origin, with origin set to 0 for non archive files.  *}
@@ -220,6 +231,9 @@ CODE_FRAGMENT
 .
 .  {* The last section on the section list.  *}
 .  struct bfd_section *section_last;
+.
+.  {* The object-only section on the section list.  *}
+.  struct bfd_section *object_only_section;
 .
 .  {* The number of sections.  *}
 .  unsigned int section_count;
@@ -1922,4 +1936,37 @@ bfd_demangle (bfd *abfd, const char *name, int options)
     }
 
   return res;
+}
+
+/*
+FUNCTION
+	bfd_group_signature
+
+SYNOPSIS
+	asymbol *bfd_group_signature (asection *group, asymbol **isympp);
+
+DESCRIPTION
+	Return a pointer to the symbol used as a signature for GROUP.
+*/
+
+asymbol *
+bfd_group_signature (asection *group, asymbol **isympp)
+{
+  bfd *abfd = group->owner;
+  Elf_Internal_Shdr *ghdr;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return NULL;
+
+  ghdr = &elf_section_data (group)->this_hdr;
+  if (ghdr->sh_link < elf_numsections (abfd))
+    {
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      Elf_Internal_Shdr *symhdr = elf_elfsections (abfd) [ghdr->sh_link];
+
+      if (symhdr->sh_type == SHT_SYMTAB
+	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
+	return isympp[ghdr->sh_info - 1];
+    }
+  return NULL;
 }

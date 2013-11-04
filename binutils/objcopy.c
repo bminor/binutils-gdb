@@ -1009,30 +1009,6 @@ is_specified_symbol (const char *name, htab_t htab)
   return htab_find (htab, name) != NULL;
 }
 
-/* Return a pointer to the symbol used as a signature for GROUP.  */
-
-static asymbol *
-group_signature (asection *group)
-{
-  bfd *abfd = group->owner;
-  Elf_Internal_Shdr *ghdr;
-
-  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
-    return NULL;
-
-  ghdr = &elf_section_data (group)->this_hdr;
-  if (ghdr->sh_link < elf_numsections (abfd))
-    {
-      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-      Elf_Internal_Shdr *symhdr = elf_elfsections (abfd) [ghdr->sh_link];
-
-      if (symhdr->sh_type == SHT_SYMTAB
-	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
-	return isympp[ghdr->sh_info - 1];
-    }
-  return NULL;
-}
-
 /* Return TRUE if the section is a DWO section.  */
 
 static bfd_boolean
@@ -1114,7 +1090,7 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       /* PR binutils/3181
 	 If we are going to strip the group signature symbol, then
 	 strip the group section too.  */
-      gsym = group_signature (sec);
+      gsym = bfd_group_signature (sec, isympp);
       if (gsym != NULL)
 	gname = gsym->name;
       else
@@ -2835,7 +2811,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 
   if ((isection->flags & SEC_GROUP) != 0)
     {
-      asymbol *gsym = group_signature (isection);
+      asymbol *gsym = bfd_group_signature (isection, isympp);
 
       if (gsym != NULL)
 	{

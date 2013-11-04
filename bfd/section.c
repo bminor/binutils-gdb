@@ -576,6 +576,9 @@ CODE_FRAGMENT
 .#define BFD_COM_SECTION_NAME "*COM*"
 .#define BFD_IND_SECTION_NAME "*IND*"
 .
+.{* GNU object-only section name.  *}
+.#define GNU_OBJECT_ONLY_SECTION_NAME ".gnu_object_only"
+.
 .{* Pointer to the common section.  *}
 .#define bfd_com_section_ptr (&_bfd_std_section[0])
 .{* Pointer to the undefined section.  *}

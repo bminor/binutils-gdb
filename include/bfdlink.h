@@ -395,6 +395,12 @@ struct bfd_link_info
   /* TRUE if ok to have multiple definition.  */
   unsigned int allow_multiple_definition: 1;
 
+  /* TRUE if .gnu_object_only section should be created.  */
+  unsigned int emit_gnu_object_only: 1;
+
+  /* TRUE if .gnu_object_only section is being created.  */
+  unsigned int emitting_gnu_object_only: 1;
+
   /* TRUE if ok to have version with no definition.  */
   unsigned int allow_undefined_version: 1;
 

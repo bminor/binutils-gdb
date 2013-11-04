@@ -36,6 +36,7 @@
 #include "ldctor.h"
 #include "ldfile.h"
 #include "ldemul.h"
+#include "ldwrite.h"
 #include "fnmatch.h"
 #include "demangle.h"
 #include "hashtab.h"
@@ -44,6 +45,9 @@
 #ifdef ENABLE_PLUGINS
 #include "plugin.h"
 #endif /* ENABLE_PLUGINS */
+
+/* FIXME: Put it here to avoid NAME conflict from ldgram.h.  */
+#include "elf-bfd.h"
 
 #ifndef offsetof
 #define offsetof(TYPE, MEMBER) ((size_t) & (((TYPE*) 0)->MEMBER))
@@ -68,6 +72,9 @@ static lang_statement_list_type *stat_save[10];
 static lang_statement_list_type **stat_save_ptr = &stat_save[0];
 static struct unique_sections *unique_section_list;
 static struct asneeded_minfo *asneeded_list_head;
+static cmdline_list_type cmdline_object_only_file_list;
+static cmdline_list_type cmdline_object_only_archive_list;
+static cmdline_list_type cmdline_temp_object_only_list;
 
 /* Forward declarations.  */
 static void exp_init_os (etree_type *);
@@ -86,6 +93,10 @@ static void lang_do_version_exports_section (void);
 static void lang_finalize_version_expr_head
   (struct bfd_elf_version_expr_head *);
 static void lang_do_memory_regions (void);
+static void cmdline_lists_init (void);
+static void cmdline_get_object_only_input_files (void);
+static void print_cmdline_list (cmdline_union_type *);
+static bfd_boolean cmdline_on_object_only_archive_list_p (bfd *);
 
 /* Exported variables.  */
 const char *output_target;
@@ -1219,13 +1230,16 @@ output_section_statement_table_free (void)
 /* Build enough state so that the parser can build its tree.  */
 
 void
-lang_init (void)
+lang_init (bfd_boolean object_only)
 {
-  obstack_begin (&stat_obstack, 1000);
+  if (!object_only)
+    obstack_begin (&stat_obstack, 1000);
 
   stat_ptr = &statement_list;
 
   output_section_statement_table_init ();
+
+  cmdline_lists_init ();
 
   lang_list_init (stat_ptr);
 
@@ -2828,6 +2842,12 @@ load_symbols (lang_input_statement_type *entry,
 		  einfo (_("%F%B: member %B in archive is not an object\n"),
 			 entry->the_bfd, member);
 		  loaded = FALSE;
+		}
+
+	      if (link_info.emitting_gnu_object_only)
+		{
+		  if (!cmdline_on_object_only_archive_list_p (member))
+		    continue;
 		}
 
 	      subsbfd = member;
@@ -6679,7 +6699,38 @@ lang_process (void)
 	  open_input_bfds (statement_list.head, OPEN_BFD_RESCAN);
 	}
     }
+  else
 #endif /* ENABLE_PLUGINS */
+    if (link_info.relocatable)
+    {
+      /* Check if .gnu_object_only section should be created.  */
+      bfd *p;
+      int object_type;
+
+      object_type = 0;
+      for (p = link_info.input_bfds; p != (bfd *) NULL; p = p->link.next)
+	{
+	  object_type |= 1 << p->lto_type;
+	  if ((object_type & (1 << lto_mixed_object)) != 0
+	      || ((object_type
+		   & (1 << lto_non_ir_object
+		      | 1 << lto_ir_object))
+		  == (1 << lto_non_ir_object | 1 << lto_ir_object)))
+	    {
+	      link_info.emit_gnu_object_only = TRUE;
+	      break;
+	    }
+	}
+
+      if (verbose
+	  && (cmdline_object_only_file_list.head
+	      || cmdline_object_only_archive_list.head))
+	{
+	  info_msg (_("Object-only input files:\n "));
+	  print_cmdline_list (cmdline_object_only_file_list.head);
+	  print_cmdline_list (cmdline_object_only_archive_list.head);
+	}
+    }
 
   link_info.gc_sym_list = &entry_symbol;
   if (entry_symbol.name == NULL)
@@ -8113,4 +8164,966 @@ lang_ld_feature (char *str)
       *q = sep;
       p = q;
     }
+}
+
+static void
+cmdline_lists_init (void)
+{
+  cmdline_object_only_file_list.tail
+    = &cmdline_object_only_file_list.head;
+  cmdline_object_only_archive_list.tail
+    = &cmdline_object_only_archive_list.head;
+  cmdline_temp_object_only_list.tail
+    = &cmdline_temp_object_only_list.head;
+}
+
+/* Allocate an item with TYPE and DATA.  */
+
+static cmdline_union_type *
+cmdline_list_new (cmdline_enum_type type, void *data)
+{
+  cmdline_union_type *new_opt;
+
+  new_opt = (cmdline_union_type *) stat_alloc (sizeof (*new_opt));
+  new_opt->header.type = type;
+  switch (type)
+    {
+    default:
+      break;
+    case cmdline_is_file_enum:
+      new_opt->file.filename = (const char *) data;
+      break;
+    case cmdline_is_bfd_enum:
+      new_opt->abfd.abfd = (bfd *) data;
+      break;
+    }
+  return new_opt;
+}
+
+/* Append an item with TYPE and DATA to LIST.  */
+
+static void
+cmdline_list_append (cmdline_list_type *list, cmdline_enum_type type,
+		     void *data)
+{
+  cmdline_union_type *new_opt = cmdline_list_new (type, data);
+  new_opt->header.next = NULL;
+  *list->tail = new_opt;
+  list->tail = &new_opt->header.next;
+}
+
+static void
+print_cmdline_list (cmdline_union_type *c)
+{
+  for (; c != NULL; c = c->header.next)
+    switch (c->header.type)
+      {
+      default:
+	abort ();
+      case cmdline_is_file_enum:
+	info_msg (" %s", c->file.filename);
+	break;
+      case cmdline_is_bfd_enum:
+	info_msg (" [%B]", c->abfd.abfd);
+	break;
+      }
+
+  info_msg ("\n");
+}
+
+/* Return TRUE if ABFD is on cmdline_object_only_archive_list.  */
+
+static bfd_boolean
+cmdline_on_object_only_archive_list_p (bfd *abfd)
+{
+  cmdline_union_type *c, *next;
+  bfd *archive, *obfd, *oarchive;
+  ufile_ptr origin = abfd->origin;
+
+  archive = bfd_my_archive (abfd);
+  for (c = cmdline_object_only_archive_list.head; c != NULL; c = next)
+    {
+      if (c->header.type != cmdline_is_bfd_enum)
+	abort ();
+
+      next = c->header.next;
+      obfd = c->abfd.abfd;
+      oarchive = bfd_my_archive (obfd);
+
+      /* The list is grouped by archive file name and sorted by member
+	 origin.  */
+      if (strcmp (archive->filename, oarchive->filename) != 0)
+	continue;
+
+      if (origin == obfd->origin)
+	return TRUE;
+      else if (origin < obfd->origin)
+	return FALSE;
+    }
+
+  return FALSE;
+}
+
+/* Append an item with TYPE and DATA to cmdline_object_only_file_list
+   or cmdline_object_only_archive_list if needed.  */
+
+static void
+cmdline_object_only_list_append (cmdline_enum_type type, void *data)
+{
+  cmdline_union_type *c;
+  cmdline_union_type *new_opt, *next, **prev;
+  bfd *abfd, *archive;
+  bfd *obfd, *oarchive;
+  bfd *nbfd, *narchive;
+  ufile_ptr origin, norigin;
+
+  /* Put it on cmdline_object_only_file_list if it isn't an archive
+     member.  */
+  switch (type)
+    {
+    default:
+      abort ();
+    case cmdline_is_bfd_enum:
+      abfd = (bfd *) data;
+      archive = bfd_my_archive (abfd);
+      if (archive)
+	break;
+    case cmdline_is_file_enum:
+      cmdline_list_append (&cmdline_object_only_file_list, type, data);
+      return;
+    }
+
+  /* Put archive member on cmdline_object_only_archive_list and sort
+     the list by archive name and archive member origin.  */
+  new_opt = (cmdline_union_type *) stat_alloc (sizeof (*new_opt));
+  new_opt->header.type = cmdline_is_bfd_enum;
+  new_opt->header.next = NULL;
+  new_opt->abfd.abfd = (bfd *) data;
+
+  c = cmdline_object_only_archive_list.head;
+  if (c == NULL)
+    {
+      cmdline_object_only_archive_list.head = new_opt;
+      cmdline_object_only_archive_list.tail = &new_opt->header.next;
+      return;
+    }
+
+  prev = NULL;
+  origin = abfd->origin;
+  for (; c != NULL; c = next)
+    {
+      if (c->header.type != cmdline_is_bfd_enum)
+	abort ();
+
+      next = c->header.next;
+
+      obfd = c->abfd.abfd;
+      oarchive = bfd_my_archive (obfd);
+
+      if (strcmp (archive->filename, oarchive->filename) == 0)
+	{
+	  bfd_boolean after;
+
+	  if (origin < obfd->origin)
+	    {
+	      /* Insert it before the current.  */
+	      new_opt->header.next = c;
+	      if (prev)
+		*prev = new_opt;
+	      else
+		cmdline_object_only_archive_list.head = new_opt;
+	      return;
+	    }
+
+	  after = TRUE;
+
+	  /* Check origin.  */
+	  while (next)
+	    {
+	      if (next->header.type != cmdline_is_bfd_enum)
+		abort ();
+
+	      nbfd = next->abfd.abfd;
+	      norigin = nbfd->origin;
+	      if (origin > norigin)
+		{
+		  /* Insert it after NEXT.  */
+		  break;
+		}
+
+	      narchive = bfd_my_archive (nbfd);
+	      if (strcmp (archive->filename, narchive->filename) != 0)
+		{
+		  /* Insert it befor NEXT.  */
+		  after = FALSE;
+		  break;
+		}
+
+	      c = next;
+	      next = next->header.next;
+	    }
+
+	  if (after && next)
+	    {
+	      c = next;
+	      next = next->header.next;
+	    }
+
+	  if (*cmdline_object_only_archive_list.tail == c->header.next)
+	    cmdline_object_only_archive_list.tail
+	      = &new_opt->header.next;
+
+	  prev = &c->header.next;
+	  new_opt->header.next = next;
+	  *prev = new_opt;
+	  return;
+	}
+
+      prev = &c->header.next;
+    }
+
+  *cmdline_object_only_archive_list.tail = new_opt;
+  cmdline_object_only_archive_list.tail = &new_opt->header.next;
+}
+
+/* Get object-only input files.  */
+
+static void
+cmdline_get_object_only_input_files (void)
+{
+  cmdline_union_type *c, *next;
+  bfd *abfd, *archive;
+  bfd *nbfd, *narchive;
+
+  /* Add files first.  */
+  for (c = cmdline_object_only_file_list.head;
+       c != NULL; c = c->header.next)
+    switch (c->header.type)
+      {
+      default:
+	abort ();
+      case cmdline_is_file_enum:
+	lang_add_input_file (c->file.filename,
+			     lang_input_file_is_file_enum, NULL);
+	break;
+      case cmdline_is_bfd_enum:
+	abfd = c->abfd.abfd;
+	if (bfd_my_archive (abfd))
+	  abort ();
+	lang_add_input_file (abfd->filename,
+			     lang_input_file_is_file_enum, NULL);
+	break;
+      }
+
+  /* Add archive members next.  */
+  for (c = cmdline_object_only_archive_list.head; c != NULL; c = next)
+    {
+      if (c->header.type != cmdline_is_bfd_enum)
+	abort ();
+
+      next = c->header.next;
+
+      abfd = c->abfd.abfd;
+      archive = bfd_my_archive (abfd);
+
+      /* Add the first archive of the archive member group.  */
+      lang_add_input_file (archive->filename,
+			   lang_input_file_is_file_enum, NULL);
+
+      /* Skip the rest members in the archive member group.  */
+      do
+	{
+	  if (!next)
+	    break;
+
+	  if (next->header.type != cmdline_is_bfd_enum)
+	    abort ();
+
+	  next = next->header.next;
+	  if (!next)
+	    break;
+	  nbfd = next->abfd.abfd;
+	  narchive = bfd_my_archive (nbfd);
+	}
+      while (strcmp (archive->filename, narchive->filename) == 0);
+    }
+}
+
+struct cmdline_arg
+{
+  bfd *obfd;
+  asymbol **isympp;
+  int status;
+};
+
+/* Create a section in OBFD with the same
+   name and attributes as ISECTION in IBFD.  */
+
+static void
+setup_section (bfd *ibfd, sec_ptr isection, void *p)
+{
+  struct cmdline_arg *arg = (struct cmdline_arg *) p;
+  bfd *obfd = arg->obfd;
+  asymbol **isympp = arg->isympp;
+  const char *name = isection->name;
+  sec_ptr osection;
+  const char *err;
+
+  /* Skip the object-only section.  */
+  if (ibfd->object_only_section == isection)
+    return;
+
+  /* If we have already failed earlier on, do not keep on generating
+     complaints now.  */
+  if (arg->status)
+    return;
+
+  osection = bfd_make_section_anyway_with_flags (obfd, name,
+						 isection->flags);
+
+  if (osection == NULL)
+    {
+      err = _("failed to create output section");
+      goto loser;
+    }
+
+  osection->size = isection->size;
+  osection->vma = isection->vma;
+  osection->lma = isection->lma;
+  osection->alignment_power = isection->alignment_power;
+
+  /* Copy merge entity size.  */
+  osection->entsize = isection->entsize;
+
+  /* This used to be mangle_section; we do here to avoid using
+     bfd_get_section_by_name since some formats allow multiple
+     sections with the same name.  */
+  isection->output_section = osection;
+  isection->output_offset = 0;
+
+  if ((isection->flags & SEC_GROUP) != 0)
+    {
+      asymbol *gsym = bfd_group_signature (isection, isympp);
+
+      if (gsym != NULL)
+	{
+	  gsym->flags |= BSF_KEEP;
+	  if (ibfd->xvec->flavour == bfd_target_elf_flavour)
+	    elf_group_id (isection) = gsym;
+	}
+    }
+
+  /* Allow the BFD backend to copy any private data it understands
+     from the input section to the output section.  */
+  if (!bfd_copy_private_section_data (ibfd, isection, obfd, osection))
+    {
+      err = _("failed to copy private data");
+      goto loser;
+    }
+
+  /* All went well.  */
+  return;
+
+loser:
+  arg->status = 1;
+  einfo (_("%P%F: setup_section: %s: %s\n"), err, name);
+}
+
+/* Copy the data of input section ISECTION of IBFD
+   to an output section with the same name in OBFD.
+   If stripping then don't copy any relocation info.  */
+
+static void
+copy_section (bfd *ibfd, sec_ptr isection, void *p)
+{
+  struct cmdline_arg *arg = (struct cmdline_arg *) p;
+  bfd *obfd = arg->obfd;
+  asymbol **isympp = arg->isympp;
+  arelent **relpp;
+  long relcount;
+  sec_ptr osection;
+  bfd_size_type size;
+  long relsize;
+  flagword flags;
+  const char *err;
+
+  /* Skip the object-only section.  */
+  if (ibfd->object_only_section == isection)
+    return;
+
+  /* If we have already failed earlier on, do not keep on generating
+     complaints now.  */
+  if (arg->status)
+    return;
+
+  flags = bfd_get_section_flags (ibfd, isection);
+  if ((flags & SEC_GROUP) != 0)
+    return;
+
+  osection = isection->output_section;
+  size = bfd_get_section_size (isection);
+
+  if (size == 0 || osection == 0)
+    return;
+
+  relsize = bfd_get_reloc_upper_bound (ibfd, isection);
+
+  if (relsize < 0)
+    {
+      /* Do not complain if the target does not support relocations.  */
+      if (relsize == -1
+	  && bfd_get_error () == bfd_error_invalid_operation)
+	relsize = 0;
+      else
+	{
+	  err = bfd_errmsg (bfd_get_error ());
+	  goto loser;
+	}
+    }
+
+  if (relsize == 0)
+    bfd_set_reloc (obfd, osection, NULL, 0);
+  else
+    {
+      relpp = (arelent **) xmalloc (relsize);
+      relcount = bfd_canonicalize_reloc (ibfd, isection, relpp, isympp);
+      if (relcount < 0)
+	{
+	  err = _("relocation count is negative");
+	  goto loser;
+	}
+
+      bfd_set_reloc (obfd, osection,
+		     relcount == 0 ? NULL : relpp, relcount);
+      if (relcount == 0)
+	free (relpp);
+    }
+
+  if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS)
+    {
+      bfd_byte *memhunk = NULL;
+
+      if (!bfd_get_full_section_contents (ibfd, isection, &memhunk))
+	{
+	  err = bfd_errmsg (bfd_get_error ());
+	  goto loser;
+	}
+
+      if (!bfd_set_section_contents (obfd, osection, memhunk, 0, size))
+	{
+	  err = bfd_errmsg (bfd_get_error ());
+	  goto loser;
+	}
+      free (memhunk);
+    }
+
+  /* All went well.  */
+  return;
+
+loser:
+  einfo (_("%P%F: copy_section: %s: %s\n"), err, isection->name);
+}
+/* Open the temporary bfd created in the same directory as PATH.  */
+
+static bfd *
+cmdline_fopen_temp (const char *path, const char *target,
+		    const char *mode)
+{
+#define template "ldXXXXXX"
+  const char *slash = strrchr (path, '/');
+  char *tmpname;
+  size_t len;
+  int fd;
+
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  {
+    /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
+    char *bslash = strrchr (path, '\\');
+
+    if (slash == NULL || (bslash != NULL && bslash > slash))
+      slash = bslash;
+    if (slash == NULL && path[0] != '\0' && path[1] == ':')
+      slash = path + 1;
+  }
+#endif
+
+  if (slash != (char *) NULL)
+    {
+      len = slash - path;
+      tmpname = (char *) xmalloc (len + sizeof (template) + 2);
+      memcpy (tmpname, path, len);
+
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+      /* If tmpname is "X:", appending a slash will make it a root
+	 directory on drive X, which is NOT the same as the current
+	 directory on drive X.  */
+      if (len == 2 && tmpname[1] == ':')
+	tmpname[len++] = '.';
+#endif
+      tmpname[len++] = '/';
+    }
+  else
+    {
+      tmpname = (char *) xmalloc (sizeof (template));
+      len = 0;
+    }
+
+  memcpy (tmpname + len, template, sizeof (template));
+#undef template
+
+#ifdef HAVE_MKSTEMP
+  fd = mkstemp (tmpname);
+#else
+  tmpname = mktemp (tmpname);
+  if (tmpname == NULL)
+    return NULL;
+  fd = open (tmpname, O_RDWR | O_CREAT | O_EXCL, 0600);
+#endif
+  if (fd == -1)
+    return NULL;
+  return bfd_fopen (tmpname, target, mode, fd);
+}
+
+/* Add the object-only section.  */
+
+static void
+cmdline_add_object_only_section (bfd_byte *contents, size_t size)
+{
+  bfd_vma start;
+  flagword flags;
+  enum bfd_architecture iarch;
+  unsigned int imach;
+  long symcount;
+  long symsize;
+  asymbol **isympp = NULL;
+  asymbol **osympp = NULL;
+  bfd *obfd = NULL, *ibfd;
+  const char *err;
+  struct arg
+    {
+      bfd *obfd;
+      asymbol **isympp;
+      int status;
+    } arg;
+  char **matching;
+  char *ofilename = NULL;
+  asection *sec;
+
+  ibfd = bfd_openr (output_filename, output_target);
+  if (!ibfd)
+    {
+      err = bfd_errmsg (bfd_get_error ());
+      goto loser;
+    }
+
+  if (!bfd_check_format_matches (ibfd, bfd_object, &matching))
+    {
+      err = bfd_errmsg (bfd_get_error ());
+      goto loser;
+    }
+
+  obfd = cmdline_fopen_temp (output_filename, output_target, "w");
+  if (!obfd)
+    {
+      err = bfd_errmsg (bfd_get_error ());
+      goto loser;
+    }
+  /* To be used after bfd_close ().  */
+  ofilename = xstrdup (bfd_get_filename (obfd));
+
+  if (!bfd_set_format (obfd, bfd_object))
+    {
+      err = bfd_errmsg (bfd_get_error ());
+      goto loser;
+    }
+
+  /* Copy the start address, flags and architecture of input file to
+     output file.  */
+  flags = bfd_get_file_flags (ibfd);
+  start = bfd_get_start_address (ibfd);
+  iarch = bfd_get_arch (ibfd);
+  imach = bfd_get_mach (ibfd);
+  if (!bfd_set_start_address (obfd, start)
+      || !bfd_set_file_flags (obfd, flags)
+      || !bfd_set_arch_mach (obfd, iarch, imach))
+    {
+      err = bfd_errmsg (bfd_get_error ());
+      goto loser;
+    }
+
+  symsize = bfd_get_symtab_upper_bound (ibfd);
+  if (symsize < 0)
+    {
+      err = bfd_errmsg (bfd_get_error ());
+      goto loser;
+    }
+
+  isympp = (asymbol **) xmalloc (symsize);
+  symcount = bfd_canonicalize_symtab (ibfd, isympp);
+  if (symcount < 0)
+    {
+      err = bfd_errmsg (bfd_get_error ());
+      goto loser;
+    }
+
+  arg.obfd = obfd;
+  arg.isympp = isympp;
+  arg.status = 0;
+
+  /* BFD mandates that all output sections be created and sizes set before
+     any output is done.  Thus, we traverse all sections multiple times.  */
+  bfd_map_over_sections (ibfd, setup_section, &arg);
+
+  if (arg.status)
+    {
+      err = _("error setting up sections");
+      goto loser;
+    }
+
+  /* Allow the BFD backend to copy any private data it understands
+     from the input section to the output section.  */
+  if (! bfd_copy_private_header_data (ibfd, obfd))
+    {
+      err = _("error copying private header data");
+      goto loser;
+    }
+
+  /* Create the object-only section.  */
+  sec = bfd_make_section_with_flags (obfd,
+				     GNU_OBJECT_ONLY_SECTION_NAME,
+				     (SEC_HAS_CONTENTS
+				      | SEC_READONLY
+				      | SEC_DATA
+				      | SEC_LINKER_CREATED));
+  if (sec == NULL)
+    {
+      err = _("can't create object-only section");
+      goto loser;
+    }
+
+  if (! bfd_set_section_size (obfd, sec, size))
+    {
+      err = _("can't set object-only section size");
+      goto loser;
+    }
+
+  if (ibfd->object_only_section)
+    {
+      /* Filter out the object-only section symbol.  */
+      long src_count = 0, dst_count = 0;
+      asymbol **from, **to;
+
+      osympp = (asymbol **) xmalloc (symcount * sizeof (asymbol *));
+      from = isympp;
+      to = osympp;
+      for (; src_count < symcount; src_count++)
+	{
+	  asymbol *sym = from[src_count];
+	  if (bfd_get_section (sym) != ibfd->object_only_section)
+	    to[dst_count++] = sym;
+	}
+      to[dst_count] = NULL;
+      symcount = dst_count;
+      bfd_set_symtab (obfd, osympp, symcount);
+    }
+  else
+    bfd_set_symtab (obfd, isympp, symcount);
+
+  /* This has to happen after the symbol table has been set.  */
+  bfd_map_over_sections (ibfd, copy_section, &arg);
+
+  if (arg.status)
+    {
+      err = _("error copying sections");
+      goto loser;
+    }
+
+  /* Copy the object-only section to the output.  */
+  if (! bfd_set_section_contents (obfd, sec, contents, 0, size))
+    {
+      err = _("error adding object-only section");
+      goto loser;
+    }
+
+  /* Allow the BFD backend to copy any private data it understands
+     from the input BFD to the output BFD.  This is done last to
+     permit the routine to look at the filtered symbol table, which is
+     important for the ECOFF code at least.  */
+  if (! bfd_copy_private_bfd_data (ibfd, obfd))
+    {
+      err = _("error copying private BFD data");
+      goto loser;
+    }
+
+  if (!bfd_close (obfd))
+    {
+      unlink (ofilename);
+      einfo (_("%P%F: failed to finish output with object-only section\n"));
+    }
+
+  /* Must be freed after bfd_close ().  */
+  free (isympp);
+  if (osympp)
+    free (osympp);
+
+  if (rename (ofilename, output_filename))
+    {
+      unlink (ofilename);
+      einfo (_("%P%F: failed to rename output with object-only section\n"));
+    }
+
+  free (ofilename);
+  return;
+
+loser:
+  if (isympp)
+    free (isympp);
+  if (osympp)
+    free (osympp);
+  if (obfd)
+    bfd_close (obfd);
+  if (ofilename)
+    unlink (ofilename);
+  einfo (_("%P%F: failed to add object-only section: %s\n"), err);
+}
+
+/* Emit the final output with object-only section.  */
+
+void
+cmdline_emit_object_only_section (void)
+{
+  const char *saved_output_filename = output_filename;
+  int fd;
+  size_t size, off;
+  bfd_byte *contents;
+  struct stat st;
+
+  /* Get a temporary object-only file.  */
+  output_filename = make_temp_file (".obj-only.o");
+
+  had_output_filename = FALSE;
+  link_info.input_bfds = NULL;
+  link_info.input_bfds_tail = &link_info.input_bfds;
+
+  lang_init (TRUE);
+  ldexp_init (TRUE);
+
+  ld_parse_linker_script ();
+
+  /* Set up the object-only output. */
+  lang_final ();
+
+  /* Open the object-only file for output.  */
+  lang_for_each_statement (ldlang_open_output);
+
+  ldemul_create_output_section_statements ();
+
+  if (!bfd_section_already_linked_table_init ())
+    einfo (_("%P%F: Failed to create hash table\n"));
+
+  /* Call cmdline_on_object_only_archive_list_p to check which member
+     should be loaded.  */
+  input_flags.whole_archive = TRUE;
+
+  /* Set it to avoid adding more to cmdline lists.  */
+  link_info.emitting_gnu_object_only = TRUE;
+
+  /* Get object-only input files.  */
+  cmdline_get_object_only_input_files ();
+
+  /* Open object-only input files.  */
+  open_input_bfds (statement_list.head, FALSE);
+
+  ldemul_after_open ();
+
+  bfd_section_already_linked_table_free ();
+
+  /* Make sure that we're not mixing architectures.  We call this
+     after all the input files have been opened, but before we do any
+     other processing, so that any operations merge_private_bfd_data
+     does on the output file will be known during the rest of the
+     link.  */
+  lang_check ();
+
+  /* Size up the common data.  */
+  lang_common ();
+
+  /* Update wild statements.  */
+  update_wild_statements (statement_list.head);
+
+  /* Run through the contours of the script and attach input sections
+     to the correct output sections.  */
+  map_input_to_output_sections (statement_list.head, NULL, NULL);
+
+  /* Find any sections not attached explicitly and handle them.  */
+  lang_place_orphans ();
+
+  /* Do anything special before sizing sections.  This is where ELF
+     and other back-ends size dynamic sections.  */
+  ldemul_before_allocation ();
+
+  /* Size up the sections.  */
+  lang_size_sections (NULL, ! RELAXATION_ENABLED);
+
+  /* See if anything special should be done now we know how big
+     everything is.  This is where relaxation is done.  */
+  ldemul_after_allocation ();
+
+  ldemul_finish ();
+
+  /* Make sure that the section addresses make sense.  */
+  if (command_line.check_section_addresses)
+    lang_check_section_addresses ();
+
+  lang_end ();
+
+  ldwrite ();
+
+  ldexp_finish (TRUE);
+  lang_finish ();
+
+  if (! bfd_close (link_info.output_bfd))
+    einfo (_("%P%F:%s: final close failed on object-only output: %E\n"),
+	   output_filename);
+
+  /* Read in the object-only file.  */
+  fd = open (output_filename, O_RDONLY | O_BINARY);
+  if (fd < 0)
+    {
+      bfd_set_error (bfd_error_system_call);
+      einfo (_("%P%F:%s: cannot open object-only output: %E"),
+	     output_filename);
+    }
+
+  /* Get the object-only file size.  */
+  if (fstat (fd, &st) != 0)
+    {
+      bfd_set_error (bfd_error_system_call);
+      einfo (_("%P%F:%s: cannot stat object-only output: %E"),
+	     output_filename);
+    }
+
+  size = st.st_size;
+  off = 0;
+  contents = (bfd_byte *) xmalloc (size);
+  while (off != size)
+    {
+      ssize_t got;
+
+      got = read (fd, contents + off, size - off);
+      if (got < 0)
+	{
+	  bfd_set_error (bfd_error_system_call);
+	  einfo (_("%P%F:%s: read failed on object-only output: %E"),
+		 output_filename);
+	}
+
+      off += got;
+    }
+
+  close (fd);
+
+  /* Remove the temporary object-only file.  */
+  unlink (output_filename);
+
+  output_filename = saved_output_filename;
+
+  cmdline_add_object_only_section (contents, size);
+
+  free (contents);
+}
+
+/* Extract the object-only section.  */
+
+static const char *
+cmdline_extract_object_only_section (bfd *abfd)
+{
+  const char *name = bfd_extract_object_only_section (abfd);
+
+  if (name == NULL)
+    einfo (_("%P%F: cannot extract object-only section from %B: %E"),
+	   abfd);
+
+  /* It should be removed after it is done.  */
+  cmdline_list_append (&cmdline_temp_object_only_list,
+		       cmdline_is_file_enum, (void *) name);
+
+  return name;
+}
+
+/* Check and handle the object-only section.   */
+
+void
+cmdline_check_object_only_section (bfd *abfd, bfd_boolean lto)
+{
+  const char *filename;
+
+  if (link_info.emitting_gnu_object_only
+      || abfd->format != bfd_object)
+    return;
+
+  if (lto)
+    {
+      /* For LTO link, we only need to extract object-only section
+	 from the mixed object, add it to input, and put it on LTO
+	 claimed output.  */
+      switch (abfd->lto_type)
+	{
+	default:
+	  abort ();
+	case lto_mixed_object:
+	  filename = cmdline_extract_object_only_section (abfd);
+	  lang_add_input_file (filename,
+			       lang_input_file_is_file_enum, NULL);
+	  break;
+	case lto_non_ir_object:
+	case lto_ir_object:
+	  break;
+	}
+    }
+  else if (link_info.relocatable)
+    {
+      /* For non-LTO relocatable link, we need to append non-IR object
+	 file and the object file in object-only section to the object
+	 only list.  */
+      switch (abfd->lto_type)
+	{
+	default:
+	  abort ();
+	case lto_mixed_object:
+	  filename = cmdline_extract_object_only_section (abfd);
+	  cmdline_object_only_list_append (cmdline_is_file_enum,
+					  (void *) filename);
+	  break;
+	case lto_non_ir_object:
+	  cmdline_object_only_list_append (cmdline_is_bfd_enum, abfd);
+	  break;
+	case lto_ir_object:
+	  break;
+	}
+    }
+}
+
+/* Remove temporary object-only files.  */
+
+void
+cmdline_remove_object_only_files (void)
+{
+  cmdline_union_type *c;
+
+#ifdef ENABLE_PLUGINS
+  if (plugin_save_temps)
+    return;
+#endif
+
+  c = cmdline_temp_object_only_list.head;
+  for (; c != NULL; c = c->header.next)
+    switch (c->header.type)
+      {
+      default:
+	abort ();
+      case cmdline_is_file_enum:
+	unlink (c->file.filename);
+	break;
+      }
 }

@@ -1693,3 +1693,69 @@ bfd_fill_in_gnu_debuglink_section (bfd *abfd,
 
   return TRUE;
 }
+
+/*
+FUNCTION
+	bfd_extract_object_only_section
+
+SYNOPSIS
+	const char *bfd_extract_object_only_section
+	  (bfd *abfd);
+
+DESCRIPTION
+
+	Takes a @var{ABFD} and extract the .gnu_object_only section into
+	a temporary file.
+
+RETURNS
+	The name of the temporary file is returned if all is ok.
+	Otherwise <<NULL>> is returned and bfd_error is set.
+*/
+
+const char *
+bfd_extract_object_only_section (bfd *abfd)
+{
+  asection *sec = abfd->object_only_section;
+  const char *name;
+  FILE *file;
+  bfd_byte *memhunk = NULL;
+  size_t off, size;
+  bfd_error_type err;
+
+  /* Get a temporary object-only file.  */
+  name = make_temp_file (".obj-only.o");
+
+  /* Open the object-only file.  */
+  file = real_fopen (name, FOPEN_WB);
+  if (!bfd_get_full_section_contents (abfd, sec, &memhunk))
+    {
+      err = bfd_get_error ();
+
+loser:
+      free (memhunk);
+      fclose (file);
+      unlink (name);
+      bfd_set_error (err);
+      return NULL;
+    }
+
+  off = 0;
+  size = sec->size;
+  while (off != size)
+    {
+      size_t written, nwrite = size - off;
+
+      written = fwrite (memhunk + off, 1, nwrite, file);
+      if (written < nwrite && ferror (file))
+	{
+	  err = bfd_error_system_call;
+	  goto loser;
+	}
+
+      off += written;
+    }
+
+  free (memhunk);
+  fclose (file);
+  return name;
+}

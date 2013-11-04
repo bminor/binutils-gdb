@@ -1,0 +1,288 @@
+bfd/
+
+2012-06-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (add_symbols): Set tdata.plugin_data before calling
+	bfd_plugin_get_symbols_in_object_only.
+
+2011-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (add_symbols): Call
+	bfd_plugin_get_symbols_in_object_only.
+	(bfd_plugin_get_symtab_upper_bound): Don't call
+	bfd_plugin_get_symbols_in_object_only.
+
+2011-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (bfd_plugin_get_symbols_in_object_only): Optimized.
+
+2011-10-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* plugin.c (bfd_plugin_get_symbols_in_object_only): Properly
+	remove the object only section file.
+
+2011-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13298
+	* opncls.c (bfd_extract_object_only_section): New.
+
+	* plugin.c (add_symbols): Initialize object_only_syms and
+	object_only_nsyms.
+	(bfd_plugin_fake_text_section): New.
+	(bfd_plugin_fake_common_section): Likewise.
+	(bfd_plugin_get_symbols_in_object_only): Likewise.
+	(bfd_plugin_get_symtab_upper_bound): Call
+	bfd_plugin_get_symbols_in_object_only and add symbols from
+	object only section.
+	(bfd_plugin_canonicalize_symtab): Remove fake_section and
+	fake_common_section.  Use bfd_plugin_fake_text_section and
+	bfd_plugin_fake_common_section.  Set udata.p to NULL.  Copy
+	symbols from object only section.
+
+	* plugin.h (plugin_data_struct): Add object_only_nsyms and
+	object_only_syms.
+
+	* bfd-in2.h: Regenerated.
+
+2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd.c (bfd_lto_object_type): New.
+	(bfd): Add object_only_section and lto_type.
+	(bfd_group_signature): New.
+
+	* elf.c (special_sections_g): Add .gnu_object_only.
+
+	* format.c (bfd_set_lto_type): New.
+	(bfd_check_format_matches): Use it.
+
+	* section.c (GNU_OBJECT_ONLY_SECTION_NAME): New.
+
+	* bfd-in2.h: Regenerated.
+
+binutils/
+
+2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objcopy.c (group_signature): Removed.
+	(is_strip_section): Replace group_signature with
+	bfd_group_signature.
+	(setup_section): Likewise.
+
+	* readelf.c (get_section_type_name): Handle SHT_GNU_OBJECT_ONLY.
+
+gas/testsuite/
+
+2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/section9.s: Add the .gnu_object_only test.
+	* gas/elf/section9.d: Updated.
+
+include/
+
+2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add emit_gnu_object_only and
+	emitting_gnu_object_only.
+
+include/elf/
+
+2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* common.h (SHT_GNU_OBJECT_ONLY): New.
+
+ld/
+
+2014-12-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/avrelf.em (avr_finish): Replace finish_default with
+	gld${EMULATION_NAME}_finish.
+	* emultempl/ppc32elf.em (ppc_finish): Likewise.
+
+2014-12-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (cmdline_emit_object_only_section): Call ldexp_init
+	and ldexp_finish.  Don't pass FALSE to lang_finish.
+	* ldlang.h (lang_finish): Remove the bfd_boolean argument.
+	* ldexp.c (ldexp_init): Take a bfd_boolean argument to supprt
+	object-only output.
+	(ldexp_finish): Likewise.
+	* ldexp.h (ldexp_init): Take a bfd_boolean argument.
+	(ldexp_finish): Likewise.
+	* ldmain.c (main): Pass FALSE to ldexp_init.
+
+2014-01-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (cmdline_add_object_only_section): Save BFD filename
+	to be used after bfd_close ().
+
+2013-02-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_finish): Take a bfd_boolean argument to support
+	object-only output.
+	(cmdline_emit_object_only_section): Pass TRUE to lang_finish.
+
+	* ldlang.h (lang_finish): Updated.
+
+	* ldmain.c (main): Pass FALSE to lang_finish.
+
+2012-10-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (lang_process): Replace trace_file_tries with
+	verbose.
+
+2012-08-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/aarch64elf.em (gld${EMULATION_NAME}_finish): Renamed
+	to ...
+	(aarch64_finish): This.  Replace finish_default with
+	gld${EMULATION_NAME}_finish.
+	(LDEMUL_FINISH): Set to aarch64_finish.
+
+2011-10-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/13298
+	* ldlang.c (cmdline_extract_object_only_section): Call
+	bfd_extract_object_only_section.
+
+2011-05-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlang.c (cmdline_remove_object_only_files): Return if
+	ENABLE_PLUGINS is undefined or plugin_save_temps is true.
+
+2011-05-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ldlex.h (option_values): Add OPTION_PLUGIN_SAVE_TEMPS.
+	* lexsup.c (ld_options): Add -plugin-save-temps.
+	(parse_args): Handle OPTION_PLUGIN_SAVE_TEMPS.
+
+	* plugin.c (plugin_save_temps): New.
+	(plugin_call_cleanup): Don't call plugin cleanup_handler if
+	plugin_save_temps is true.
+
+	* plugin.h (plugin_save_temps): New.
+
+2011-05-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12760
+	* ldmain.c (warning_callback): Don't warn plugin dummy.
+
+2011-04-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emultempl/alphaelf.em (alpha_finish): Replace finish_default
+	with gld${EMULATION_NAME}_finish.
+
+	* emultempl/armelf.em (gld${EMULATION_NAME}_finish): Renamed
+	to ...
+	(arm_finish): This.  Replace finish_default with
+	gld${EMULATION_NAME}_finish.
+	(LDEMUL_FINISH): Set to arm_finish.
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_finish): New.
+	(orphan_init_done): Likewise.
+	(ld_${EMULATION_NAME}_emulation): Use gld${EMULATION_NAME}_finish.
+	(gld${EMULATION_NAME}_place_orphan): Initialize hold.
+
+	* emultempl/ppc64elf.em (gld${EMULATION_NAME}_finish): Renamed
+	to ...
+	(ppc_finish): This.  Replace finish_default with
+	gld${EMULATION_NAME}_finish.
+	(LDEMUL_FINISH): Set to ppc_finish.
+
+	* emultempl/spuelf.em (gld${EMULATION_NAME}_finish): Renamed
+	to ...
+	(spu_finish): This.  Replace finish_default with
+	gld${EMULATION_NAME}_finish.
+	(LDEMUL_FINISH): Set to spu_finish.
+
+	* ldfile.c (ldfile_try_open_bfd): Call
+	cmdline_check_object_only_section.
+
+	* ldlang.c: Include "ldwrite.h" and elf-bfd.h.
+	* ldlang.c (cmdline_object_only_file_list): New.
+	(cmdline_object_only_archive_list): Likewise.
+	(cmdline_temp_object_only_list): Likewise.
+	(cmdline_lists_init): Likewise.
+	(cmdline_list_new): Likewise.
+	(cmdline_list_append): Likewise.
+	(print_cmdline_list): Likewise.
+	(cmdline_on_object_only_archive_list_p): Likewise.
+	(cmdline_object_only_list_append): Likewise.
+	(cmdline_get_object_only_input_files): Likewise.
+	(cmdline_arg): Likewise.
+	(setup_section): Likewise.
+	(copy_section): Likewise.
+	(cmdline_fopen_temp): Likewise.
+	(cmdline_add_object_only_section): Likewise.
+	(cmdline_emit_object_only_section): Likewise.
+	(cmdline_extract_object_only_section): Likewise.
+	(cmdline_check_object_only_section): Likewise.
+	(cmdline_remove_object_only_files): Likewise.
+	(lang_init): Take a bfd_boolean argument to supprt object-only
+	output.  Call cmdline_lists_init.
+	(load_symbols): Call cmdline_on_object_only_archive_list_p
+	to check if an archive member should be loaded.
+	(lang_process): Handle object-only link.
+
+	* ldlang.h (lang_init): Take a bfd_boolean argument.
+	(cmdline_enum_type): New.
+	(cmdline_header_type): Likewise.
+	(cmdline_file_type): Likewise.
+	(cmdline_bfd_type): Likewise.
+	(cmdline_union_type): Likewise.
+	(cmdline_list_type): Likewise.
+	(cmdline_emit_object_only_section): Likewise.
+	(cmdline_check_object_only_section): Likewise.
+	(cmdline_remove_object_only_files): Likewise.
+
+	* ldmain.c (main): Call xatexit with
+	cmdline_remove_object_only_files.  Pass FALSE to lang_init.
+	Use ld_parse_linker_script.  Set link_info.output_bfd to NULL
+	after close.  Call cmdline_emit_object_only_section if needed.
+	(add_archive_element): Call cmdline_check_object_only_section.
+	(ld_parse_linker_script): New.
+
+	* ldmain.h (ld_parse_linker_script): New.
+
+	* plugin.c (plugin_maybe_claim): Call
+	cmdline_check_object_only_section on claimed IR files.
+
+	* scripttempl/armbpabi.sc: Also discard .gnu_object_only
+	sections.
+	* scripttempl/elf.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf64hppa.sc: Likewise.
+	* scripttempl/elfxtensa.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/pe.sc: Likewise.
+	* scripttempl/pep.sc: Likewise.
+
+ld/testsuite/
+
+2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12430
+	* ld-plugin/lto-10.out: New file.
+	* ld-plugin/lto-10a.c: Likewise.
+	* ld-plugin/lto-10b.c: Likewise.
+	* ld-plugin/lto-10r.d: Likewise.
+
+	* ld-plugin/lto.exp (lto_link_tests): Prepare for "LTO 10".
+	(lto_run_tests): Add "LTO 10".
+	Run lto-10r and create tmpdir/lto-10.o.
+
+2011-01-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/12291
+	* ld-plugin/lto-4.out: Likewise.
+	* ld-plugin/lto-4a.c: Likewise.
+	* ld-plugin/lto-4b.c: Likewise.
+	* ld-plugin/lto-4c.c: Likewise.
+	* ld-plugin/lto-4r-a.d: Likewise.
+	* ld-plugin/lto-4r-b.d: Likewise.
+	* ld-plugin/lto-4r-c.d: Likewise.
+	* ld-plugin/lto-4r-d.d: Likewise.
+
+	* ld-plugin/lto.exp (lto_link_tests): Prepare for "LTO 4[acd]"
+	and "lto-4r-[abcd]" tests.
+	(lto_run_tests): Add "LTO 4[acd]" tests.
+	Build liblto-4.a.  Run "lto-4r-[abcd]" tests.

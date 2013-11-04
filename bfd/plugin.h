@@ -30,6 +30,8 @@ typedef struct plugin_data_struct
 {
   int nsyms;
   const struct ld_plugin_symbol *syms;
+  int object_only_nsyms;
+  asymbol **object_only_syms;
 }
 plugin_data_struct;
 
