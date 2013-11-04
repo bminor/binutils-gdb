@@ -1,3 +1,10 @@
+2013-12-18  Yao Qi  <yao@codesourcery.com>
+
+	* linux-nat.c (linux_proc_xfer_partial): Call xsnprintf instead
+	of sprintf.
+	(linux_nat_detach, linux_child_pid_to_exec_file): Likewise.
+	(linux_proc_pending_signals): Likewise.
+
 2013-12-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* value.c (value_entirely_unavailable): ARI fix: Move trailing
