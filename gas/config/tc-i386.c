@@ -5418,7 +5418,7 @@ check_long_reg (void)
 		i.suffix);
 	return 0;
       }
-  /* Warn if the e prefix on a general reg is missing.  */
+    /* Warn if the e prefix on a general reg is missing.  */
     else if ((!quiet_warnings || flag_code == CODE_64BIT)
 	     && i.types[op].bitfield.reg16
 	     && (i.tm.operand_types[op].bitfield.reg32
@@ -5440,7 +5440,7 @@ check_long_reg (void)
 		 register_prefix, i.op[op].regs->reg_name, i.suffix);
 #endif
       }
-  /* Warn if the r prefix on a general reg is missing.  */
+    /* Warn if the r prefix on a general reg is present.  */
     else if (i.types[op].bitfield.reg64
 	     && (i.tm.operand_types[op].bitfield.reg32
 		 || i.tm.operand_types[op].bitfield.acc))
@@ -5483,7 +5483,7 @@ check_qword_reg (void)
 		i.suffix);
 	return 0;
       }
-  /* Warn if the e prefix on a general reg is missing.  */
+    /* Warn if the r prefix on a general reg is missing.  */
     else if ((i.types[op].bitfield.reg16
 	      || i.types[op].bitfield.reg32)
 	     && (i.tm.operand_types[op].bitfield.reg32
@@ -5528,9 +5528,10 @@ check_word_reg (void)
 		i.suffix);
 	return 0;
       }
-  /* Warn if the e prefix on a general reg is present.  */
+    /* Warn if the e or r prefix on a general reg is present.  */
     else if ((!quiet_warnings || flag_code == CODE_64BIT)
-	     && i.types[op].bitfield.reg32
+	     && (i.types[op].bitfield.reg32
+		 || i.types[op].bitfield.reg64)
 	     && (i.tm.operand_types[op].bitfield.reg16
 		 || i.tm.operand_types[op].bitfield.acc))
       {
