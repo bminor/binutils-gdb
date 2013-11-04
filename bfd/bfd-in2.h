@@ -5904,6 +5904,10 @@ typedef struct bfd_symbol
      with this name and type in use.  BSF_OBJECT must also be set.  */
 #define BSF_GNU_UNIQUE         (1 << 23)
 
+  /* A secondary global symbol, overridable without warnings by
+     a regular or weak global symbol of the same name.  */
+#define BSF_SECONDARY          (1 << 24)
+
   flagword flags;
 
   /* A pointer to the section to which this symbol is

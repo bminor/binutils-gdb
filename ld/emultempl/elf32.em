@@ -2387,6 +2387,8 @@ fragment <<EOF
 	link_info.error_textrel = FALSE;
       else if (strcmp (optarg, "textoff") == 0)
 	link_info.error_textrel = FALSE;
+      else if (strcmp (optarg, "nosecondary") == 0)
+	link_info.emit_secondary = FALSE;
 EOF
 fi
 
@@ -2514,6 +2516,8 @@ fragment <<EOF
   -z relro                    Create RELRO program header\n"));
   fprintf (file, _("\
   -z stacksize=SIZE           Set size of stack segment\n"));
+  fprintf (file, _("\
+  -z nosecondary              Convert secondary symbols to weak symbols\n"));
 EOF
 fi
 

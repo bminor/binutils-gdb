@@ -9039,6 +9039,7 @@ get_symbol_binding (unsigned int binding)
     case STB_LOCAL:	return "LOCAL";
     case STB_GLOBAL:	return "GLOBAL";
     case STB_WEAK:	return "WEAK";
+    case STB_SECONDARY:	return "SECOND";
     default:
       if (binding >= STB_LOPROC && binding <= STB_HIPROC)
 	snprintf (buff, sizeof (buff), _("<processor specific>: %d"),

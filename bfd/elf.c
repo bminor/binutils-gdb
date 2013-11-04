@@ -3255,7 +3255,10 @@ sym_is_global (bfd *abfd, asymbol *sym)
   if (bed->elf_backend_sym_is_global)
     return (*bed->elf_backend_sym_is_global) (abfd, sym);
 
-  return ((sym->flags & (BSF_GLOBAL | BSF_WEAK | BSF_GNU_UNIQUE)) != 0
+  return ((sym->flags & (BSF_GLOBAL
+			 | BSF_WEAK
+			 | BSF_SECONDARY
+			 | BSF_GNU_UNIQUE)) != 0
 	  || bfd_is_und_section (bfd_get_section (sym))
 	  || bfd_is_com_section (bfd_get_section (sym)));
 }
@@ -6979,8 +6982,9 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 #endif
 	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 	}
+      /* Output undefined secondary symbols as weak.  */
       else if (bfd_is_und_section (syms[idx]->section))
-	sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)
+	sym.st_info = ELF_ST_INFO (((flags & (BSF_WEAK | BSF_SECONDARY))
 				    ? STB_WEAK
 				    : STB_GLOBAL),
 				   type);
@@ -6994,6 +6998,8 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	    bind = STB_LOCAL;
 	  else if (flags & BSF_GNU_UNIQUE)
 	    bind = STB_GNU_UNIQUE;
+	  else if (flags & BSF_SECONDARY)
+	    bind = STB_SECONDARY;
 	  else if (flags & BSF_WEAK)
 	    bind = STB_WEAK;
 	  else if (flags & BSF_GLOBAL)

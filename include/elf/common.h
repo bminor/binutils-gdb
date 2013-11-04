@@ -671,6 +671,7 @@
 #define STB_LOCAL	0		/* Symbol not visible outside obj */
 #define STB_GLOBAL	1		/* Symbol visible outside obj */
 #define STB_WEAK	2		/* Like globals, lower precedence */
+#define STB_SECONDARY	3		/* Like weaks, lower precedence */
 #define STB_LOOS	10		/* OS-specific semantics */
 #define STB_GNU_UNIQUE	10		/* Symbol is unique in namespace */
 #define STB_HIOS	12		/* OS-specific semantics */

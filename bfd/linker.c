@@ -1577,6 +1577,7 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
   enum link_row row;
   struct bfd_link_hash_entry *h;
   bfd_boolean cycle;
+  unsigned int secondary;
 
   BFD_ASSERT (section != NULL);
 
@@ -1626,15 +1627,53 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	return FALSE;
     }
 
+  /* Since secondary symbols have lower precedence than weak symbols,
+     we treat them as weak symbols here.  */
+  secondary = (flags & BSF_SECONDARY) != 0;
+  if (secondary)
+    switch (row)
+      {
+      default:
+	break;
+
+      case UNDEF_ROW:
+	row = UNDEFW_ROW;
+	break;
+
+      case DEF_ROW:
+	row = DEFW_ROW;
+	break;
+      }
+
   if (hashp != NULL)
     *hashp = h;
 
   do
     {
       enum link_action action;
+      enum bfd_link_hash_type type;
+      
+      type = h->type;
+      /* Convert a secondary symbol to a weak symbol.  Backend is
+	 responsible to let a weak symbol override a secondary
+	 symbol. */
+      if (h->secondary)
+	switch (type)
+	  {
+	  default:
+	    break;
+
+	  case bfd_link_hash_undefined:
+	    type = bfd_link_hash_undefweak;
+	    break;
+
+	  case bfd_link_hash_defined:
+	    type = bfd_link_hash_defweak;
+	    break;
+	  }
 
       cycle = FALSE;
-      action = link_action[(int) row][(int) h->type];
+      action = link_action[(int) row][(int) type];
       switch (action)
 	{
 	case FAIL:
@@ -1678,6 +1717,9 @@ _bfd_generic_link_add_one_symbol (struct bfd_link_info *info,
 	      h->type = bfd_link_hash_defined;
 	    h->u.def.section = section;
 	    h->u.def.value = value;
+
+	    /* Mark if this is a secondary symbol.  */
+	    h->secondary = secondary;
 
 	    /* If we have been asked to, we act like collect2 and
 	       identify all functions that might be global

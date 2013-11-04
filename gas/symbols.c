@@ -2035,6 +2035,14 @@ S_IS_WEAK (symbolS *s)
 }
 
 int
+S_IS_SECONDARY (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    return 0;
+  return (s->bsym->flags & BSF_SECONDARY) != 0;
+}
+
+int
 S_IS_WEAKREFR (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
@@ -2081,7 +2089,7 @@ S_FORCE_RELOC (symbolS *s, int strict)
     return ((struct local_symbol *) s)->lsy_section == undefined_section;
 
   return ((strict
-	   && ((s->bsym->flags & BSF_WEAK) != 0
+	   && ((s->bsym->flags & (BSF_WEAK | BSF_SECONDARY)) != 0
 	       || (EXTERN_FORCE_RELOC
 		   && (s->bsym->flags & BSF_GLOBAL) != 0)))
 	  || (s->bsym->flags & BSF_GNU_INDIRECT_FUNCTION) != 0
@@ -2217,9 +2225,9 @@ S_SET_EXTERNAL (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     s = local_symbol_convert ((struct local_symbol *) s);
-  if ((s->bsym->flags & BSF_WEAK) != 0)
+  if ((s->bsym->flags & (BSF_WEAK | BSF_SECONDARY)) != 0)
     {
-      /* Let .weak override .global.  */
+      /* Let .weak/.secondary override .global.  */
       return;
     }
   if (s->bsym->flags & BSF_SECTION_SYM)
@@ -2242,7 +2250,7 @@ S_SET_EXTERNAL (symbolS *s)
     }
 #endif
   s->bsym->flags |= BSF_GLOBAL;
-  s->bsym->flags &= ~(BSF_LOCAL | BSF_WEAK);
+  s->bsym->flags &= ~(BSF_LOCAL | BSF_WEAK | BSF_SECONDARY);
 
 #ifdef TE_PE
   if (! an_external_name && S_GET_NAME(s)[0] != '.')
@@ -2255,13 +2263,13 @@ S_CLEAR_EXTERNAL (symbolS *s)
 {
   if (LOCAL_SYMBOL_CHECK (s))
     return;
-  if ((s->bsym->flags & BSF_WEAK) != 0)
+  if ((s->bsym->flags & (BSF_WEAK | BSF_SECONDARY)) != 0)
     {
-      /* Let .weak override.  */
+      /* Let .weak/.secondary override.  */
       return;
     }
   s->bsym->flags |= BSF_LOCAL;
-  s->bsym->flags &= ~(BSF_GLOBAL | BSF_WEAK);
+  s->bsym->flags &= ~(BSF_GLOBAL | BSF_WEAK | BSF_SECONDARY);
 }
 
 void
@@ -2273,7 +2281,16 @@ S_SET_WEAK (symbolS *s)
   obj_set_weak_hook (s);
 #endif
   s->bsym->flags |= BSF_WEAK;
-  s->bsym->flags &= ~(BSF_GLOBAL | BSF_LOCAL);
+  s->bsym->flags &= ~(BSF_GLOBAL | BSF_SECONDARY | BSF_LOCAL);
+}
+
+void
+S_SET_SECONDARY (symbolS *s)
+{
+  if (LOCAL_SYMBOL_CHECK (s))
+    s = local_symbol_convert ((struct local_symbol *) s);
+  s->bsym->flags |= BSF_SECONDARY;
+  s->bsym->flags &= ~(BSF_GLOBAL | BSF_WEAK | BSF_LOCAL);
 }
 
 void
@@ -2328,6 +2345,12 @@ S_CLEAR_WEAKREFD (symbolS *s)
 	  obj_clear_weak_hook (s);
 #endif
 	  s->bsym->flags &= ~BSF_WEAK;
+	  s->bsym->flags |= BSF_LOCAL;
+	}
+      /* The same applies to secondary symbol.  */
+      else if (s->bsym->flags & BSF_SECONDARY)
+	{
+	  s->bsym->flags &= ~BSF_SECONDARY;
 	  s->bsym->flags |= BSF_LOCAL;
 	}
     }

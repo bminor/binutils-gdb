@@ -927,7 +927,8 @@ elf_merge_st_other (bfd *abfd, struct elf_link_hash_entry *h,
    overriding a new definition.  We set TYPE_CHANGE_OK if it is OK for
    the type to change.  We set SIZE_CHANGE_OK if it is OK for the size
    to change.  By OK to change, we mean that we shouldn't warn if the
-   type or size does change.  */
+   type or size does change.  If OLDSECONARY is TRUE, the old definion
+   is a secondary symbol.  */
 
 static bfd_boolean
 _bfd_elf_merge_symbol (bfd *abfd,
@@ -937,6 +938,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 		       asection **psec,
 		       bfd_vma *pvalue,
 		       struct elf_link_hash_entry **sym_hash,
+		       bfd_boolean oldsecondary,
 		       bfd **poldbfd,
 		       bfd_boolean *pold_weak,
 		       unsigned int *pold_alignment,
@@ -952,7 +954,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   int bind;
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
-  bfd_boolean newweak, oldweak, newfunc, oldfunc;
+  bfd_boolean newweak, oldweak, newfunc, oldfunc, weakbind;
   const struct elf_backend_data *bed;
 
   *skip = FALSE;
@@ -1010,9 +1012,17 @@ _bfd_elf_merge_symbol (bfd *abfd,
   if (poldbfd && *poldbfd == NULL)
     *poldbfd = oldbfd;
 
+  /* Set OLDSECONADRY if it isn't TRUE.  */
+  if (!oldsecondary)
+    oldsecondary = h->root.secondary != 0;
+
+  /* Treat secondary symbols as weak symbols.  */
+  weakbind = bind == STB_WEAK || bind == STB_SECONDARY;
+
   /* Differentiate strong and weak symbols.  */
-  newweak = bind == STB_WEAK;
-  oldweak = (h->root.type == bfd_link_hash_defweak
+  newweak = weakbind;
+  oldweak = (oldsecondary
+	     || h->root.type == bfd_link_hash_defweak
 	     || h->root.type == bfd_link_hash_undefweak);
   if (pold_weak)
     *pold_weak = oldweak;
@@ -1043,7 +1053,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
     {
       if (bfd_is_und_section (sec))
 	{
-	  if (bind != STB_WEAK)
+	  if (!weakbind)
 	    {
 	      h->ref_dynamic_nonweak = 1;
 	      hi->ref_dynamic_nonweak = 1;
@@ -1294,7 +1304,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   if (newdef && !newdyn && olddyn)
     newweak = FALSE;
-  if (olddef && newdyn)
+  if (olddef && newdyn && !oldsecondary)
     oldweak = FALSE;
 
   /* Allow changes between different types of function symbol.  */
@@ -1410,10 +1420,14 @@ _bfd_elf_merge_symbol (bfd *abfd,
      represent variables; this can cause confusion in principle, but
      any such confusion would seem to indicate an erroneous program or
      shared library.  We also permit a common symbol in a regular
-     object to override a weak symbol in a shared object.  */
+     object to override a weak symbol in a shared object.
+     
+     We let a definition in a dynamic object override the old secondary
+     symbol.  */
 
   if (newdyn
       && newdef
+      && !oldsecondary
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
 	      && (newweak || newfunc))))
@@ -1452,8 +1466,9 @@ _bfd_elf_merge_symbol (bfd *abfd,
       *size_change_ok = TRUE;
     }
 
-  /* Skip weak definitions of symbols that are already defined.  */
-  if (newdef && olddef && newweak)
+  /* Skip weak definitions of symbols that are already defined unless
+     the old definition is secondary.  */
+  if (newdef && olddef && newweak && !oldsecondary)
     {
       /* Don't skip new non-IR weak syms.  */
       if (!(oldbfd != NULL
@@ -1481,18 +1496,20 @@ _bfd_elf_merge_symbol (bfd *abfd,
      always take precedence over symbols from dynamic objects, even if
      they are defined after the dynamic object in the link.
 
+     The new non-secondary definition overrides the old secondary
+     definition.
+
      As above, we again permit a common symbol in a regular object to
      override a definition in a shared object if the shared object
      symbol is a function or is weak.  */
 
   flip = NULL;
-  if (!newdyn
+  if (((!newdyn && olddyn && h->def_dynamic) || oldsecondary)
+      && bind != STB_SECONDARY
       && (newdef
 	  || (bfd_is_com_section (sec)
 	      && (oldweak || oldfunc)))
-      && olddyn
-      && olddef
-      && h->def_dynamic)
+      && olddef)
     {
       /* Change the hash table entry to undefined, and let
 	 _bfd_generic_link_add_one_symbol do the right thing with the
@@ -1595,8 +1612,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
 /* This function is called to create an indirect symbol from the
    default for the symbol with the default version if needed. The
-   symbol is described by H, NAME, SYM, SEC, and VALUE.  We
-   set DYNSYM if the new indirect symbol is dynamic.  */
+   symbol is described by H, NAME, SYM, SEC, VALUE, and OLDSECONDARY.
+   We set DYNSYM if the new indirect symbol is dynamic.  */
 
 static bfd_boolean
 _bfd_elf_add_default_symbol (bfd *abfd,
@@ -1606,6 +1623,7 @@ _bfd_elf_add_default_symbol (bfd *abfd,
 			     Elf_Internal_Sym *sym,
 			     asection *sec,
 			     bfd_vma value,
+			     bfd_boolean oldsecondary,
 			     bfd **poldbfd,
 			     bfd_boolean *dynsym)
 {
@@ -1650,8 +1668,9 @@ _bfd_elf_add_default_symbol (bfd *abfd,
   size_change_ok = FALSE;
   tmp_sec = sec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
-			      &hi, poldbfd, NULL, NULL, &skip, &override,
-			      &type_change_ok, &size_change_ok))
+			      &hi, oldsecondary, poldbfd, NULL, NULL,
+			      &skip, &override, &type_change_ok
+			      , &size_change_ok))
     return FALSE;
 
   if (skip)
@@ -1759,8 +1778,8 @@ nondefault:
   size_change_ok = FALSE;
   tmp_sec = sec;
   if (!_bfd_elf_merge_symbol (abfd, info, shortname, sym, &tmp_sec, &value,
-			      &hi, NULL, NULL, NULL, &skip, &override,
-			      &type_change_ok, &size_change_ok))
+			      &hi, oldsecondary, NULL, NULL, NULL, &skip,
+			      &override, &type_change_ok, &size_change_ok))
     return FALSE;
 
   if (skip)
@@ -2916,31 +2935,41 @@ _bfd_elf_tls_setup (bfd *obfd, struct bfd_link_info *info)
   return tls;
 }
 
-/* Return TRUE iff this is a non-common, definition of a non-function symbol.  */
+/* Return TRUE iff this is a non-common, definition of a
+   non-function symbol, unless IGNORE_SECONDARY is TRUE.  */
+
 static bfd_boolean
-is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
-				  Elf_Internal_Sym *sym)
+is_global_symbol_definition (bfd *abfd, Elf_Internal_Sym *sym,
+			     bfd_boolean ignore_secondary)
 {
-  const struct elf_backend_data *bed;
+  /* Ignore secondary symbols.  */
+  if (ignore_secondary && ELF_ST_BIND (sym->st_info) == STB_SECONDARY)
+    return FALSE;
 
   /* Local symbols do not count, but target specific ones might.  */
   if (ELF_ST_BIND (sym->st_info) != STB_GLOBAL
       && ELF_ST_BIND (sym->st_info) < STB_LOOS)
     return FALSE;
 
-  bed = get_elf_backend_data (abfd);
-  /* Function symbols do not count.  */
-  if (bed->is_function_type (ELF_ST_TYPE (sym->st_info)))
-    return FALSE;
-
   /* If the section is undefined, then so is the symbol.  */
   if (sym->st_shndx == SHN_UNDEF)
     return FALSE;
 
-  /* If the symbol is defined in the common section, then
-     it is a common definition and so does not count.  */
-  if (bed->common_definition (sym))
-    return FALSE;
+  /* If secondary symbols are ignored, count function and common
+     symbols as global definition.  */
+  if (!ignore_secondary)
+    {
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+
+      /* Function symbols do not count.  */
+      if (bed->is_function_type (ELF_ST_TYPE (sym->st_info)))
+	return FALSE;
+
+      /* If the symbol is defined in the common section, then
+	 it is a common definition and so does not count.  */
+      if (bed->common_definition (sym))
+	return FALSE;
+    }
 
   /* If the symbol is in a target specific section then we
      must rely upon the backend to tell us what it is.  */
@@ -2959,9 +2988,12 @@ is_global_data_symbol_definition (bfd *abfd ATTRIBUTE_UNUSED,
 
 /* Search the symbol table of the archive element of the archive ABFD
    whose archive map contains a mention of SYMDEF, and determine if
-   the symbol is defined in this element.  */
+   the symbol is defined in this element.  Igore seconday defintion,
+   it IGNORE_SECONDARY is TRUE.  */
+
 static bfd_boolean
-elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
+elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef,
+				    bfd_boolean ignore_secondary)
 {
   Elf_Internal_Shdr * hdr;
   bfd_size_type symcount;
@@ -3029,7 +3061,8 @@ elf_link_is_defined_archive_symbol (bfd * abfd, carsym * symdef)
 
       if (strcmp (name, symdef->name) == 0)
 	{
-	  result = is_global_data_symbol_definition (abfd, isym);
+	  result = is_global_symbol_definition (abfd, isym,
+						ignore_secondary);
 	  break;
 	}
     }
@@ -3871,6 +3904,7 @@ error_free_dyn:
       bfd_boolean common;
       unsigned int old_alignment;
       bfd *old_bfd;
+      bfd_boolean oldsecondary;
 
       override = FALSE;
 
@@ -3896,6 +3930,10 @@ error_free_dyn:
 
 	case STB_WEAK:
 	  flags = BSF_WEAK;
+	  break;
+
+	case STB_SECONDARY:
+	  flags = BSF_SECONDARY;
 	  break;
 
 	case STB_GNU_UNIQUE:
@@ -4123,7 +4161,7 @@ error_free_dyn:
 	    }
 
 	  if (!_bfd_elf_merge_symbol (abfd, info, name, isym, &sec, &value,
-				      sym_hash, &old_bfd, &old_weak,
+				      sym_hash, FALSE, &old_bfd, &old_weak,
 				      &old_alignment, &skip, &override,
 				      &type_change_ok, &size_change_ok))
 	    goto error_free_vers;
@@ -4143,7 +4181,12 @@ error_free_dyn:
 	      && vernum > 1
 	      && definition)
 	    h->verinfo.verdef = &elf_tdata (abfd)->verdef[vernum - 1];
+
+	  /* Remember if the old definition is secondary.  */
+	  oldsecondary = h->root.secondary != 0;
 	}
+      else
+	oldsecondary = FALSE;
 
       if (! (_bfd_generic_link_add_one_symbol
 	     (info, abfd, name, flags, sec, value, NULL, FALSE, bed->collect,
@@ -4223,10 +4266,14 @@ error_free_dyn:
 	      if (! definition)
 		{
 		  h->ref_regular = 1;
-		  if (bind != STB_WEAK)
+		  /* Treat secondary symbols as weak symbols.  */
+		  if (bind != STB_WEAK && bind != STB_SECONDARY)
 		    h->ref_regular_nonweak = 1;
 		}
-	      else
+	      /* Mark it defined in a regular object if it is a
+		 non-secondary definition or it hasn't been defined
+		 in a dynamic object.  */
+	      else if (!h->def_dynamic || bind != STB_SECONDARY)
 		{
 		  h->def_regular = 1;
 		  if (h->def_dynamic)
@@ -4255,6 +4302,13 @@ error_free_dyn:
 		{
 		  h->def_dynamic = 1;
 		  hi->def_dynamic = 1;
+		  /* Dynamic definition overrides regular old secondary
+		     definition.  */
+		  if (oldsecondary)
+		    {
+		      h->def_regular = 0;
+		      hi->def_regular = 0;
+		    }
 		}
 
 	      /* If the indirect symbol has been forced local, don't
@@ -4273,7 +4327,8 @@ error_free_dyn:
 	  if (definition
 	      || (!override && h->root.type == bfd_link_hash_common))
 	    if (!_bfd_elf_add_default_symbol (abfd, info, h, name, isym,
-					      sec, value, &old_bfd, &dynsym))
+					      sec, value, oldsecondary,
+					      &old_bfd, &dynsym))
 	      goto error_free_vers;
 
 	  /* Check the alignment when a common symbol is involved. This
@@ -5074,14 +5129,25 @@ elf_link_add_archive_symbols (bfd *abfd, struct bfd_link_info *info)
 		 map alone.  Instead we must read in the element's symbol
 		 table and check that to see what kind of symbol definition
 		 this is.  */
-	      if (! elf_link_is_defined_archive_symbol (abfd, symdef))
+	      if (! elf_link_is_defined_archive_symbol (abfd, symdef,
+							FALSE))
 		continue;
 	    }
-	  else if (h->root.type != bfd_link_hash_undefined)
+	  /* Keep searching if a definition is secondary.  */
+	  else if (h->root.type != bfd_link_hash_undefined
+		   && !h->root.secondary)
 	    {
 	      if (h->root.type != bfd_link_hash_undefweak)
 		defined[i] = TRUE;
 	      continue;
+	    }
+	  else if (h->root.secondary
+		   && h->root.type == bfd_link_hash_defweak)
+	    {
+	      /* Ignore another secondary definition.  */
+	      if (! elf_link_is_defined_archive_symbol (abfd, symdef,
+							TRUE))
+		continue;
 	    }
 
 	  /* We need to include this archive member.  */
@@ -8869,7 +8935,21 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
     sym.st_info = ELF_ST_INFO (STB_GNU_UNIQUE, h->type);
   else if (h->root.type == bfd_link_hash_undefweak
 	   || h->root.type == bfd_link_hash_defweak)
-    sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
+    {
+      /* Generate defined secondary symbols for "ld -shared -z secondary"
+	 and "ld -r".  For undefined secondary symbols, we convert them
+	 to weak symbols.  We also convert defined secondary symbols in
+	 executables to weak symbols since their bindings in executables
+	 are final and can't be changed.  */
+      if ((flinfo->info->relocatable
+	   || (!flinfo->info->executable
+	       && flinfo->info->emit_secondary))
+	  && h->root.type == bfd_link_hash_defweak
+	  && h->root.secondary)
+	  sym.st_info = ELF_ST_INFO (STB_SECONDARY, h->type);
+	else
+	  sym.st_info = ELF_ST_INFO (STB_WEAK, h->type);
+    }
   else
     sym.st_info = ELF_ST_INFO (STB_GLOBAL, h->type);
   sym.st_target_internal = h->target_internal;
@@ -9000,7 +9080,8 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
   if (sym.st_shndx == SHN_UNDEF
       && h->ref_regular
       && (ELF_ST_BIND (sym.st_info) == STB_GLOBAL
-	  || ELF_ST_BIND (sym.st_info) == STB_WEAK))
+	  || ELF_ST_BIND (sym.st_info) == STB_WEAK
+	  || ELF_ST_BIND (sym.st_info) == STB_SECONDARY))
     {
       int bindtype;
       unsigned int type = ELF_ST_TYPE (sym.st_info);
@@ -9026,10 +9107,12 @@ elf_link_output_extsym (struct bfd_hash_entry *bh, void *data)
     sym.st_size = 0;
 
   /* If a non-weak symbol with non-default visibility is not defined
-     locally, it is a fatal error.  */
+     locally, it is a fatal error.  Treat secondary symbols as weak
+     symbols.  */
   if (!flinfo->info->relocatable
       && ELF_ST_VISIBILITY (sym.st_other) != STV_DEFAULT
       && ELF_ST_BIND (sym.st_info) != STB_WEAK
+      && ELF_ST_BIND (sym.st_info) != STB_SECONDARY
       && h->root.type == bfd_link_hash_undefined
       && !h->def_regular)
     {

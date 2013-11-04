@@ -4189,6 +4189,7 @@ Some machine configurations provide additional directives.
 * Print::			@code{.print @var{string}}
 @ifset ELF
 * Protected::                   @code{.protected @var{names}}
+* Secondary::                   @code{.secondary @var{names}}
 @end ifset
 
 * Psize::                       @code{.psize @var{lines}, @var{columns}}
@@ -5871,6 +5872,14 @@ their binding: local, global or weak).  The directive sets the visibility to
 components that defines them must be resolved to the definition in that
 component, even if a definition in another component would normally preempt
 this.
+
+@node Secondary
+@section @code{.secondary @var{names}}
+
+@cindex @code{secondary} directive
+This directive sets the secondary attribute on the comma separated list
+of symbol @code{names}.  If the symbols do not already exist, they will
+be created.
 @end ifset
 
 @node Psize

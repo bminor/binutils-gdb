@@ -1091,6 +1091,10 @@ Marks the object may contain $ORIGIN.
 @item relro
 Create an ELF @code{PT_GNU_RELRO} segment header in the object.
 
+@item nosecondary
+Convert secondary symbols to weak symbols when generating a shared
+library.
+
 @item max-page-size=@var{value}
 Set the emulation maximum page size to @var{value}.
 

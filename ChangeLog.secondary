@@ -1,0 +1,221 @@
+bfd/
+
+2012-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf-bfd.h (_bfd_elf_merge_symbol): Add a boolean argument to
+	indicate if the old definition is secondary.
+
+	* elf32-sh-symbian.c (sh_symbian_relocate_section): Pass FALSE
+	to _bfd_elf_merge_symbol.
+
+	* elflink.c (_bfd_elf_merge_symbol): Add a boolean argument to
+	indicate if the old definition is secondary.  Set OLDSECONADRY if
+	it isn't TRUE.   Treat old secondary symbol as weak.
+	(_bfd_elf_add_default_symbol): Add a boolean argument to if the
+	old definition is secondary.
+	(elf_link_add_object_symbols): Pass oldsecondary to
+	_bfd_elf_merge_symbol and _bfd_elf_add_default_symbol.
+
+2012-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (is_global_data_symbol_definition): Renamed to ...
+	(is_global_symbol_definition): This.  If secondary symbols are
+	ignored, count function and common symbols as global definition.
+	(elf_link_is_defined_archive_symbol): Updated.
+
+2012-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (is_global_data_symbol_definition): Add an argument
+	to ignore secondary symbols.
+	(elf_link_is_defined_archive_symbol): Likewise and pass it to
+	is_global_data_symbol_definition.
+	(elf_link_add_archive_symbols): Ignore another secondary
+	definition.
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (elf_link_output_extsym): Generate STB_SECONDARY
+	symbols if needed.
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (swap_out_syms): Output undefined secondary symbols
+	as weak.
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): Allow overriding secondary
+	symbols.
+	(elf_link_add_object_symbols): Treat secondary symbols as weak
+	symbols.  Allow overriding secondary symbols.
+	(elf_link_add_archive_symbols): Keep searching if a definition
+	is secondary. 
+	(elf_link_output_extsym): Treat secondary symbols as weak
+	symbols.
+	* linker.c (_bfd_generic_link_add_one_symbol): Treat secondary
+	symbol as weak symbol.  Mark secondary symbol.
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* archive.c (_bfd_compute_and_write_armap): Treat BSF_SECONDARY
+	symbol as global.
+	* elf32-mips.c (mips_elf_sym_is_global): Likewise.
+	* elfn32-mips.c (mips_elf_sym_is_global): Likewise.
+	* elf.c (sym_is_global): Likewise.
+	(swap_out_syms): Handle SECONDARY symbol.
+	* elf64-ia64-vms.c (elf64_vms_link_add_object_symbols): Likewise.
+	* elfcode.h (elf_slurp_symbol_table): Likewise.
+	* elflink.c (elf_link_add_object_symbols): Likewise.
+
+	* syms.c (BSF_SECONDARY): New.
+	(bfd_print_symbol_vandf): Handle SECONDARY symbol.
+	(bfd_decode_symclass): Likewise.
+
+	* bfd-in2.h: Regenerated.
+
+binutils/
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* nm.c (filter_symbols): Treat BSF_SECONDARY symbol as global.
+
+	* readelf.c (get_symbol_binding): Handle STB_SECONDARY.
+
+gas/
+
+2012-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c (obj_elf_weak): Don't set symbol weak on
+	secondary symbol.
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/obj-elf.c (elf_frob_symbol): Handle secondary symbol
+	for .symver.  Also remove the unused secondary symbol.
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* symbols.c (S_IS_SECONDARY): New.
+	(S_SET_SECONDARY): Likewise.
+	(S_FORCE_RELOC): Handle BSF_SECONDARY like BSF_WEAK.
+	(S_SET_EXTERNAL): Likewise.
+	(S_CLEAR_EXTERNAL): Likewise.
+	(S_CLEAR_WEAKREFD): Likewise.
+	(S_SET_WEAK): Also clear BSF_SECONDARY.
+
+	* symbols.h (S_IS_SECONDARY): New.
+	(S_SET_SECONDARY): Likewise.
+
+	* config/obj-elf.c (obj_elf_secondary): New.
+	(elf_pseudo_table): Add "secondary".
+	(elf_frob_symbol): Also check secondary symbols.
+
+	* doc/as.texinfo: Document .secondary directive.
+
+gas/testsuite/
+
+2012-09-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/elf/common3.d: New file.
+	* gas/elf/common3.l: Likewise.
+	* gas/elf/common3.s: Likewise.
+	* gas/elf/common4.d: Likewise.
+	* gas/elf/common4.l: Likewise.
+	* gas/elf/common4.s: Likewise.
+	* gas/elf/secondary1.e: Likewise.
+	* gas/elf/secondary1.s: Likewise.
+	* gas/elf/secondary2.e: Likewise.
+	* gas/elf/secondary2.s: Likewise.
+
+	* gas/elf/elf.exp: Run common3, common4, secondary1 and
+	secondary2.
+
+	* gas/elf/type.s: Add .secondary tests.
+	* gas/elf/type.e: Updated.
+
+include/
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_info): Add emit_secondary.
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfdlink.h (bfd_link_hash_entry): Add secondary.
+
+include/elf/
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* common.h (STB_SECONDARY): New.
+
+ld/
+
+2012-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Change "-z secondary" to "-z nosecondary".
+
+	* ldmain.c (main): Initialize link_info.emit_secondary to TRUE.
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Set
+	to link_info.emit_secondary to FALSE for "-z nosecondary".
+	(gld${EMULATION_NAME}_list_options): Replace "-z secondary" with
+	"-z nosecondary".
+
+2012-06-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld.texinfo: Document "-z secondary".
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_handle_option): Set
+	to link_info.emit_secondary to TRUE for "-z secondary".
+	(gld${EMULATION_NAME}_list_options): Add "-z secondary".
+
+ld/testsuite/
+
+2012-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/secondary.exp: Update -Wl,-z,secondary with
+	-Wl,-z,nosecondary.
+
+2012-09-06  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/library1.c: New file.
+	* ld-elf/library1.out: Likewise.
+	* ld-elf/library2.c: Likewise.
+	* ld-elf/library2.out: Likewise.
+	* ld-elf/library3.out: Likewise.
+	* ld-elf/library4.out: Likewise.
+	* ld-elf/library5a.c: Likewise.
+	* ld-elf/library5b.c: Likewise.
+	* ld-elf/library6a.c: Likewise.
+	* ld-elf/library6b.c: Likewise.
+	* ld-elf/library6c.c: Likewise.
+	* ld-elf/library7a.c: Likewise.
+	* ld-elf/library7b.c: Likewise.
+	* ld-elf/library7c.c: Likewise.
+	* ld-elf/secondary-foo.c: Likewise.
+	* ld-elf/secondary-main.c: Likewise.
+	* ld-elf/secondary.c: Likewise.
+	* ld-elf/secondary.exp: Likewise.
+	* ld-elf/secondary.rd: Likewise.
+	* ld-elf/secondary1.out: Likewise.
+	* ld-elf/secondary1.rd: Likewise.
+	* ld-elf/secondary2.rd: Likewise.
+	* ld-elf/secondary3.rd: Likewise.
+	* ld-elf/secondary3a.s: Likewise.
+	* ld-elf/secondary3b.s: Likewise.
+	* ld-elf/secondary4.rd: Likewise.
+	* ld-elf/secondary4.s: Likewise.
+	* ld-elf/secondary5.c: Likewise.
+	* ld-elf/secondary5.out: Likewise.
+	* ld-elf/secondary6.c: Likewise.
+	* ld-elf/secondary6.out: Likewise.
+	* ld-elf/secondary7.c: Likewise.
+	* ld-elf/secondary7.out: Likewise.
+	* ld-elf/library8.map: Likewise.
+	* ld-elf/library8a.c: Likewise.
+	* ld-elf/library8a.rd: Likewise.
+	* ld-elf/library8b.c: Likewise.
+	* ld-elf/library8b.rd: Likewise.
+	* ld-elf/library8c.c: Likewise.
+	* ld-elf/library8c.rd: Likewise.

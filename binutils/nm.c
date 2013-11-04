@@ -438,6 +438,7 @@ filter_symbols (bfd *abfd, bfd_boolean is_dynamic, void *minisyms,
 	/* PR binutls/12753: Unique symbols are global too.  */
 	keep = ((sym->flags & (BSF_GLOBAL
 			       | BSF_WEAK
+			       | BSF_SECONDARY
 			       | BSF_GNU_UNIQUE)) != 0
 		|| bfd_is_und_section (sym->section)
 		|| bfd_is_com_section (sym->section));

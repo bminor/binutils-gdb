@@ -70,6 +70,7 @@ static void obj_elf_line (int);
 static void obj_elf_size (int);
 static void obj_elf_type (int);
 static void obj_elf_ident (int);
+static void obj_elf_secondary (int);
 static void obj_elf_weak (int);
 static void obj_elf_local (int);
 static void obj_elf_visibility (int);
@@ -100,6 +101,7 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"type", obj_elf_type, 0},
   {"version", obj_elf_version, 0},
   {"weak", obj_elf_weak, 0},
+  {"secondary", obj_elf_secondary, 0},
 
   /* These define symbol visibility.  */
   {"internal", obj_elf_visibility, STV_INTERNAL},
@@ -481,6 +483,29 @@ obj_elf_local (int ignore ATTRIBUTE_UNUSED)
 }
 
 static void
+obj_elf_secondary (int ignore ATTRIBUTE_UNUSED)
+{
+  int c;
+  symbolS *symbolP;
+
+  do
+    {
+      symbolP = get_sym_from_input_line_and_check ();
+      c = *input_line_pointer;
+      S_SET_SECONDARY (symbolP);
+      if (c == ',')
+	{
+	  input_line_pointer++;
+	  SKIP_WHITESPACE ();
+	  if (*input_line_pointer == '\n')
+	    c = '\n';
+	}
+    }
+  while (c == ',');
+  demand_empty_rest_of_line ();
+}
+
+static void
 obj_elf_weak (int ignore ATTRIBUTE_UNUSED)
 {
   int c;
@@ -490,7 +515,8 @@ obj_elf_weak (int ignore ATTRIBUTE_UNUSED)
     {
       symbolP = get_sym_from_input_line_and_check ();
       c = *input_line_pointer;
-      S_SET_WEAK (symbolP);
+      if (!S_IS_SECONDARY (symbolP))
+	S_SET_WEAK (symbolP);
       if (c == ',')
 	{
 	  input_line_pointer++;
@@ -2178,17 +2204,23 @@ elf_frob_symbol (symbolS *symp, int *puntp)
 	      if (S_IS_WEAK (symp))
 		S_SET_WEAK (symp2);
 
+	      if (S_IS_SECONDARY (symp))
+		S_SET_SECONDARY (symp2);
+
 	      if (S_IS_EXTERNAL (symp))
 		S_SET_EXTERNAL (symp2);
 	    }
 	}
     }
 
-  /* Double check weak symbols.  */
-  if (S_IS_WEAK (symp))
+  /* Double check weak and secondary symbols.  */
+  if (S_IS_COMMON (symp))
     {
-      if (S_IS_COMMON (symp))
+      if (S_IS_WEAK (symp))
 	as_bad (_("symbol `%s' can not be both weak and common"),
+		S_GET_NAME (symp));
+      else if (S_IS_SECONDARY (symp))
+	as_bad (_("symbol `%s' can not be both secondary and common"),
 		S_GET_NAME (symp));
     }
 
@@ -2404,7 +2436,7 @@ elf_frob_file_before_adjust (void)
 	    /* If there was .weak foo, but foo was neither defined nor
 	       used anywhere, remove it.  */
 
-	    else if (S_IS_WEAK (symp)
+	    else if ((S_IS_WEAK (symp) || S_IS_SECONDARY (symp))
 		     && symbol_used_p (symp) == 0
 		     && symbol_used_in_reloc_p (symp) == 0)
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);

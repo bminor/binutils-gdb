@@ -2336,6 +2336,7 @@ _bfd_compute_and_write_armap (bfd *arch, unsigned int elength)
 
 		  if (((flags & (BSF_GLOBAL
 				 | BSF_WEAK
+				 | BSF_SECONDARY
 				 | BSF_INDIRECT
 				 | BSF_GNU_UNIQUE)) != 0
 		       || bfd_is_com_section (sec))

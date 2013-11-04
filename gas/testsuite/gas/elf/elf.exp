@@ -209,6 +209,11 @@ if { [is_elf_format] } then {
     
     run_dump_test "common1"
     run_dump_test "common2"
+    run_dump_test "common3"
+    run_dump_test "common4"
+
+    run_elf_list_test "secondary1" "" "" "-s" "| grep \"secondary_\""
+    run_elf_list_test "secondary2" "" "" "-s" "| grep \"secondary_\""
 
 load_lib gas-dg.exp
 dg-init
