@@ -1678,6 +1678,13 @@ memory_xfer_partial (struct target_ops *ops, enum target_object object,
       void *buf;
       struct cleanup *old_chain;
 
+      /* A large write request is likely to be partially satisfied
+	 by memory_xfer_partial_1.  We will continually malloc
+	 and free a copy of the entire write request for breakpoint
+	 shadow handling even though we only end up writing a small
+	 subset of it.  Cap writes to 4KB to mitigate this.  */
+      len = min (4096, len);
+
       buf = xmalloc (len);
       old_chain = make_cleanup (xfree, buf);
       memcpy (buf, writebuf, len);
