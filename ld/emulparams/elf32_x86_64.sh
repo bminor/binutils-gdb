@@ -16,6 +16,7 @@ LARGE_SECTIONS=yes
 LARGE_BSS_AFTER_BSS=
 SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 24 ? 24 : 0"
 IREL_IN_PLT=
+SHARABLE_SECTIONS=yes
 
 if [ "x${host}" = "x${target}" ]; then
   case " $EMULATION_LIBPATH " in

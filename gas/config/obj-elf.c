@@ -78,6 +78,7 @@ static void obj_elf_subsection (int);
 static void obj_elf_popsection (int);
 static void obj_elf_gnu_attribute (int);
 static void obj_elf_tls_common (int);
+static void obj_elf_sharable_common (int);
 static void obj_elf_lcomm (int);
 static void obj_elf_struct (int);
 
@@ -137,6 +138,8 @@ static const pseudo_typeS elf_pseudo_table[] =
   {"text", obj_elf_text, 0},
 
   {"tls_common", obj_elf_tls_common, 0},
+
+  {"sharable_common", obj_elf_sharable_common, 0},
 
   /* End sentinel.  */
   {NULL, NULL, 0},
@@ -393,6 +396,39 @@ obj_elf_tls_common (int ignore ATTRIBUTE_UNUSED)
 }
 
 static void
+obj_elf_sharable_common (int ignore ATTRIBUTE_UNUSED)
+{
+  static segT sharable_bss_section;
+  asection *saved_com_section_ptr = elf_com_section_ptr;
+  asection *saved_bss_section = bss_section;
+
+  if (sharable_bss_section == NULL)
+    {
+      flagword applicable;
+      segT seg = now_seg;
+      subsegT subseg = now_subseg;
+
+      /* The .sharable_bss section is for local .sharable_common
+	 symbols.  */
+      sharable_bss_section = subseg_new (".sharable_bss", 0);
+      applicable = bfd_applicable_section_flags (stdoutput);
+      bfd_set_section_flags (stdoutput, sharable_bss_section,
+			     applicable & SEC_ALLOC);
+      seg_info (sharable_bss_section)->bss = 1;
+
+      subseg_set (seg, subseg);
+    }
+
+  elf_com_section_ptr = &_bfd_elf_sharable_com_section;
+  bss_section = sharable_bss_section;
+
+  s_comm_internal (0, elf_common_parse);
+
+  elf_com_section_ptr = saved_com_section_ptr;
+  bss_section = saved_bss_section;
+}
+
+static void
 obj_elf_lcomm (int ignore ATTRIBUTE_UNUSED)
 {
   symbolS *symbolP = s_comm_internal (0, s_lcomm_internal);
@@ -611,11 +647,17 @@ obj_elf_change_section (const char *name,
 
 		 .section .lbss,"aw",@progbits
 
+		 "@progbits" is incorrect.  Also for sharable bss
+		 sections, gcc, as of 2005-07-06, will emit
+
+		 .section .sharable_bss,"aw",@progbits
+
 		 "@progbits" is incorrect.  */
 #ifdef TC_I386
 	      && (bed->s->arch_size != 64
 		  || !(ssect->attr & SHF_X86_64_LARGE))
 #endif
+	      && !(ssect->attr & SHF_GNU_SHARABLE)
 	      && ssect->type != SHT_INIT_ARRAY
 	      && ssect->type != SHT_FINI_ARRAY
 	      && ssect->type != SHT_PREINIT_ARRAY)

@@ -1406,6 +1406,8 @@ dump_relocations (FILE * file,
 			sec_name = "ABS";
 		      else if (psym->st_shndx == SHN_COMMON)
 			sec_name = "COMMON";
+		      else if (psym->st_shndx == SHN_GNU_SHARABLE_COMMON)
+			sec_name = "GNU_SHARABLE_COMMON";
 		      else if ((elf_header.e_machine == EM_MIPS
 				&& psym->st_shndx == SHN_MIPS_SCOMMON)
 			       || (elf_header.e_machine == EM_TI_C6000
@@ -3035,6 +3037,7 @@ get_segment_type (unsigned long p_type)
     case PT_SHLIB:	return "SHLIB";
     case PT_PHDR:	return "PHDR";
     case PT_TLS:	return "TLS";
+    case PT_GNU_SHR:	return "GNU_SHR";
 
     case PT_GNU_EH_FRAME:
 			return "GNU_EH_FRAME";
@@ -9264,6 +9267,8 @@ get_symbol_index_type (unsigned int type)
     case SHN_UNDEF:	return "UND";
     case SHN_ABS:	return "ABS";
     case SHN_COMMON:	return "COM";
+    case SHN_GNU_SHARABLE_COMMON:
+			return "GNU_SHARABLE_COM";
     default:
       if (type == SHN_IA_64_ANSI_COMMON
 	  && elf_header.e_machine == EM_IA_64

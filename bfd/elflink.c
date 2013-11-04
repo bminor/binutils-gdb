@@ -385,6 +385,27 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
 	  if (s == NULL
 	      || ! bfd_set_section_alignment (abfd, s, bed->s->log_file_align))
 	    return FALSE;
+
+	  if (info->sharable_sections)
+	    {
+	      s = bfd_make_section (abfd, ".dynsharablebss");
+	      if (s == NULL
+		  || ! bfd_set_section_flags (abfd, s,
+					      (SEC_ALLOC
+					       | SEC_LINKER_CREATED)))
+		return FALSE;
+
+	      s = bfd_make_section (abfd,
+				    (bed->default_use_rela_p
+				     ? ".rela.sharable_bss"
+				     : ".rel.sharable_bss"));
+	      if (s == NULL
+		  || ! bfd_set_section_flags (abfd, s,
+					      flags | SEC_READONLY)
+		  || ! bfd_set_section_alignment (abfd, s,
+						  bed->s->log_file_align))
+		return FALSE;
+	    }
 	}
     }
 
@@ -1347,7 +1368,8 @@ _bfd_elf_merge_symbol (bfd *abfd,
      backend to check if we can merge them.  */
   if (bed->merge_symbol != NULL)
     {
-      if (!bed->merge_symbol (h, sym, psec, newdef, olddef, oldbfd, oldsec))
+      if (!bed->merge_symbol (h, sym, psec, newdef, newdyn, abfd,
+			      olddef, olddyn, oldbfd, oldsec))
 	return FALSE;
       sec = *psec;
     }
@@ -13046,4 +13068,208 @@ elf_append_rel (bfd *abfd, asection *s, Elf_Internal_Rela *rel)
   bfd_byte *loc = s->contents + (s->reloc_count++ * bed->s->sizeof_rel);
   BFD_ASSERT (loc + bed->s->sizeof_rel <= s->contents + s->size);
   bed->s->swap_reloc_out (abfd, rel, loc);
+}
+
+asection _bfd_elf_sharable_com_section
+  = BFD_FAKE_SECTION (_bfd_elf_sharable_com_section, SEC_IS_COMMON,
+		      NULL, "SHARABLE_COMMON", 0);
+ 
+static asection *
+get_sharable_common_section (bfd *abfd)
+{
+  asection *scomm = bfd_get_section_by_name (abfd, "SHARABLE_COMMON");
+
+  if (scomm == NULL)
+    {
+      scomm = bfd_make_section_with_flags (abfd,
+					   "SHARABLE_COMMON",
+					   (SEC_ALLOC
+					    | SEC_IS_COMMON
+					    | SEC_LINKER_CREATED));
+      if (scomm == NULL)
+	return scomm;
+      elf_section_flags (scomm) |= SHF_GNU_SHARABLE;
+    }
+
+  return scomm;
+}
+
+bfd_boolean
+_bfd_elf_add_sharable_symbol (bfd *abfd ATTRIBUTE_UNUSED,
+			      struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			      Elf_Internal_Sym *sym,
+			      const char **namep ATTRIBUTE_UNUSED,
+			      flagword *flagsp ATTRIBUTE_UNUSED,
+			      asection **secp,
+			      bfd_vma *valp)
+{
+  asection *scomm;
+
+  switch (sym->st_shndx)
+    {
+    case SHN_GNU_SHARABLE_COMMON:
+      scomm = get_sharable_common_section (abfd);
+      if (scomm == NULL)
+	return FALSE;
+      *secp = scomm;
+      *valp = sym->st_size;
+      break;
+    }
+  return TRUE;
+}
+
+bfd_boolean
+_bfd_elf_sharable_section_from_bfd_section
+  (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, int *index_return)
+{
+  if (sec == &_bfd_elf_sharable_com_section)
+    {
+      *index_return = SHN_GNU_SHARABLE_COMMON;
+      return TRUE;
+    }
+  return FALSE;
+}
+
+void
+_bfd_elf_sharable_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
+				     asymbol *asym)
+{
+  elf_symbol_type *elfsym = (elf_symbol_type *) asym;
+
+  switch (elfsym->internal_elf_sym.st_shndx)
+    {
+    case SHN_GNU_SHARABLE_COMMON:
+      asym->section = &_bfd_elf_sharable_com_section;
+      asym->value = elfsym->internal_elf_sym.st_size;
+      asym->flags &= ~BSF_GLOBAL;
+      break;
+    }
+}
+
+bfd_boolean
+_bfd_elf_sharable_common_definition (Elf_Internal_Sym *sym)
+{
+  return (sym->st_shndx == SHN_COMMON
+	  || sym->st_shndx == SHN_GNU_SHARABLE_COMMON);
+}
+
+unsigned int
+_bfd_elf_sharable_common_section_index (asection *sec)
+{
+  if ((elf_section_flags (sec) & SHF_GNU_SHARABLE) == 0)
+    return SHN_COMMON;
+  else
+    return SHN_GNU_SHARABLE_COMMON;
+}
+
+asection *
+_bfd_elf_sharable_common_section (asection *sec)
+{
+  if ((elf_section_flags (sec) & SHF_GNU_SHARABLE) == 0)
+    return bfd_com_section_ptr;
+  else
+    return &_bfd_elf_sharable_com_section;
+}
+
+bfd_boolean
+_bfd_elf_sharable_merge_symbol (struct elf_link_hash_entry *h,
+				const Elf_Internal_Sym *sym,
+				asection **psec,
+				bfd_boolean newdef,
+				bfd_boolean newdyn,
+				bfd *abfd,
+				bfd_boolean olddef,
+				bfd_boolean olddyn,
+				bfd *oldbfd,
+				asection *oldsec)
+{
+  asection *sec = *psec;
+
+  /* Check sharable symbol.  If one is undefined, it is OK.  */
+  if (oldsec && !bfd_is_und_section (sec))
+    {
+      bfd_boolean sharable, oldsharable;
+     
+      sharable = (elf_section_data (sec)
+		  && (elf_section_flags (sec) & SHF_GNU_SHARABLE));
+      oldsharable = (elf_section_data (oldsec)
+		     && (elf_section_flags (oldsec)
+			 & SHF_GNU_SHARABLE));
+
+      if (sharable != oldsharable)
+	{
+	  bfd *nsbfd, *sbfd;
+	  asection *nssec, *ssec;
+	  bfd_boolean nsdyn, sdyn, nsdef, sdef;
+
+	  if (oldsharable)
+	    {
+	      sbfd = oldbfd;
+	      nsbfd = abfd;
+	      ssec = oldsec;
+	      nssec = sec;
+	      sdyn = olddyn;
+	      nsdyn = newdyn;
+	      sdef = olddef;
+	      nsdef = newdef;
+	    }
+	  else
+	    {
+	      sbfd = abfd;
+	      nsbfd = oldbfd;
+	      ssec = sec;
+	      nssec = oldsec;
+	      sdyn = newdyn;
+	      nsdyn = olddyn;
+	      sdef = newdef;
+	      nsdef = olddef;
+	    }
+
+	  if (sdef && !sdyn)
+	    {
+	      /* If the sharable definition comes from a relocatable
+		 file, it will override the non-sharable one in DSO. */
+	      return TRUE;
+	    }
+	  else if (!nsdef
+		   && !nsdyn
+		   && (h->root.type == bfd_link_hash_common
+		       || bfd_is_com_section (nssec)))
+	    {
+	      asection *scomm;
+
+	      /* When the non-sharable common symbol in a relocatable
+		 file, we can turn it into sharable.  If the sharable
+		 symbol isn't common, the non-sharable common symbol
+		 will be overidden.  We only need to handle the
+		 sharable common symbol and the non-sharable common
+		 symbol.  We just turn the non-sharable common symbol
+		 into the sharable one. */
+	      if (sym->st_shndx == SHN_GNU_SHARABLE_COMMON)
+		{
+		  scomm = get_sharable_common_section (oldbfd);
+		  if (scomm == NULL)
+		    return FALSE;
+		  h->root.u.c.p->section = scomm;
+		}
+	      else
+		{
+		  scomm = get_sharable_common_section (abfd);
+		  if (scomm == NULL)
+		    return FALSE;
+		  *psec = scomm;
+		}
+
+	      return TRUE;
+	    }
+
+	  (*_bfd_error_handler)
+	    (_("%s: sharable symbol in %B section %A mismatches non-shrable symbol in %B section %A"),
+	     sbfd, ssec, nsbfd, nssec, h->root.root.string);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
+    }
+
+  return TRUE;
 }

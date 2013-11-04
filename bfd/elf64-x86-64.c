@@ -771,6 +771,9 @@ struct elf_x86_64_link_hash_table
   bfd_vma next_jump_slot_index;
   /* The index of the next R_X86_64_IRELATIVE entry in .rela.plt.  */
   bfd_vma next_irelative_index;
+
+  asection *sdynsharablebss;
+  asection *srelsharablebss;
 };
 
 /* Get the x86-64 ELF linker hash table from a link_info structure.  */
@@ -968,10 +971,19 @@ elf_x86_64_create_dynamic_sections (bfd *dynobj,
 
   htab->sdynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!info->shared)
-    htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
+    {
+      htab->srelbss = bfd_get_linker_section (dynobj, ".rela.bss");
+      htab->sdynsharablebss
+	= bfd_get_linker_section (dynobj, ".dynsharablebss");
+      htab->srelsharablebss
+	= bfd_get_linker_section (dynobj, ".rela.sharable_bss");
+    }
 
   if (!htab->sdynbss
-      || (!info->shared && !htab->srelbss))
+      || (!info->shared
+	  && (!htab->srelbss
+	      || !htab->sdynsharablebss
+	      || !htab->srelsharablebss)))
     abort ();
 
   if (!info->no_ld_generated_unwind_info
@@ -2248,6 +2260,8 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
   if (htab == NULL)
     return FALSE;
 
+  s = htab->sdynbss;
+
   /* We must generate a R_X86_64_COPY reloc to tell the dynamic linker
      to copy the initial value out of the dynamic object and into the
      runtime process image.  */
@@ -2255,11 +2269,15 @@ elf_x86_64_adjust_dynamic_symbol (struct bfd_link_info *info,
     {
       const struct elf_backend_data *bed;
       bed = get_elf_backend_data (info->output_bfd);
-      htab->srelbss->size += bed->s->sizeof_rela;
+      if (elf_section_flags (h->root.u.def.section) & SHF_GNU_SHARABLE)
+	{
+	  htab->srelsharablebss->size += bed->s->sizeof_rela;
+	  s = htab->sdynsharablebss;
+	}
+      else
+	htab->srelbss->size += bed->s->sizeof_rela;
       h->needs_copy = 1;
     }
-
-  s = htab->sdynbss;
 
   return _bfd_elf_adjust_dynamic_copy (h, s);
 }
@@ -2960,6 +2978,7 @@ elf_x86_64_size_dynamic_sections (bfd *output_bfd,
 	  || s == htab->elf.iplt
 	  || s == htab->elf.igotplt
 	  || s == htab->plt_eh_frame
+	  || s == htab->sdynsharablebss
 	  || s == htab->sdynbss)
 	{
 	  /* Strip this section if we don't need it; see the
@@ -4721,13 +4740,19 @@ do_glob_dat:
   if (h->needs_copy)
     {
       Elf_Internal_Rela rela;
+      asection *s;
+
+      if (h->root.u.def.section == htab->sdynsharablebss)
+	s = htab->srelsharablebss;
+      else
+	s = htab->srelbss;
 
       /* This symbol needs a copy reloc.  Set it up.  */
 
       if (h->dynindx == -1
 	  || (h->root.type != bfd_link_hash_defined
 	      && h->root.type != bfd_link_hash_defweak)
-	  || htab->srelbss == NULL)
+	  || s == NULL)
 	abort ();
 
       rela.r_offset = (h->root.u.def.value
@@ -4735,7 +4760,7 @@ do_glob_dat:
 		       + h->root.u.def.section->output_offset);
       rela.r_info = htab->r_info (h->dynindx, R_X86_64_COPY);
       rela.r_addend = 0;
-      elf_append_rela (output_bfd, htab->srelbss, &rela);
+      elf_append_rela (output_bfd, s, &rela);
     }
 
   return TRUE;
@@ -5070,7 +5095,8 @@ elf_x86_64_add_symbol_hook (bfd *abfd,
 	  || ELF_ST_BIND (sym->st_info) == STB_GNU_UNIQUE))
     elf_tdata (info->output_bfd)->has_gnu_symbols = TRUE;
 
-  return TRUE;
+  return _bfd_elf_add_sharable_symbol (abfd, info, sym, namep, flagsp,
+				       secp, valp);
 }
 
 
@@ -5086,7 +5112,8 @@ elf_x86_64_elf_section_from_bfd_section (bfd *abfd ATTRIBUTE_UNUSED,
       *index_return = SHN_X86_64_LCOMMON;
       return TRUE;
     }
-  return FALSE;
+  return _bfd_elf_sharable_section_from_bfd_section (abfd, sec,
+						     index_return);
 }
 
 /* Process a symbol.  */
@@ -5104,22 +5131,26 @@ elf_x86_64_symbol_processing (bfd *abfd ATTRIBUTE_UNUSED,
       asym->value = elfsym->internal_elf_sym.st_size;
       /* Common symbol doesn't set BSF_GLOBAL.  */
       asym->flags &= ~BSF_GLOBAL;
+      return;
       break;
     }
+
+  _bfd_elf_sharable_symbol_processing (abfd, asym);
 }
 
 static bfd_boolean
 elf_x86_64_common_definition (Elf_Internal_Sym *sym)
 {
   return (sym->st_shndx == SHN_COMMON
-	  || sym->st_shndx == SHN_X86_64_LCOMMON);
+	  || sym->st_shndx == SHN_X86_64_LCOMMON
+	  || _bfd_elf_sharable_common_definition (sym));
 }
 
 static unsigned int
 elf_x86_64_common_section_index (asection *sec)
 {
   if ((elf_section_flags (sec) & SHF_X86_64_LARGE) == 0)
-    return SHN_COMMON;
+    return _bfd_elf_sharable_common_section_index (sec);
   else
     return SHN_X86_64_LCOMMON;
 }
@@ -5128,7 +5159,7 @@ static asection *
 elf_x86_64_common_section (asection *sec)
 {
   if ((elf_section_flags (sec) & SHF_X86_64_LARGE) == 0)
-    return bfd_com_section_ptr;
+    return _bfd_elf_sharable_common_section (sec);
   else
     return &_bfd_elf_large_com_section;
 }
@@ -5138,9 +5169,12 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
 			 const Elf_Internal_Sym *sym,
 			 asection **psec,
 			 bfd_boolean newdef,
+			 bfd_boolean newdyn,
+			 bfd *abfd,
 			 bfd_boolean olddef,
+			 bfd_boolean olddyn,
 			 bfd *oldbfd,
-			 const asection *oldsec)
+			 asection *oldsec)
 {
   /* A normal common symbol and a large common symbol result in a
      normal common symbol.  We turn the large common symbol into a
@@ -5149,7 +5183,8 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
       && h->root.type == bfd_link_hash_common
       && !newdef
       && bfd_is_com_section (*psec)
-      && oldsec != *psec)
+      && oldsec != *psec
+      && _bfd_elf_sharable_common_section_index (oldsec) == SHN_COMMON)
     {
       if (sym->st_shndx == SHN_COMMON
 	  && (elf_section_flags (oldsec) & SHF_X86_64_LARGE) != 0)
@@ -5157,13 +5192,19 @@ elf_x86_64_merge_symbol (struct elf_link_hash_entry *h,
 	  h->root.u.c.p->section
 	    = bfd_make_section_old_way (oldbfd, "COMMON");
 	  h->root.u.c.p->section->flags = SEC_ALLOC;
+	  return TRUE;
 	}
       else if (sym->st_shndx == SHN_X86_64_LCOMMON
 	       && (elf_section_flags (oldsec) & SHF_X86_64_LARGE) == 0)
-	*psec = bfd_com_section_ptr;
+	{
+	  *psec = bfd_com_section_ptr;
+	  return TRUE;
+	}
     }
 
-  return TRUE;
+  return _bfd_elf_sharable_merge_symbol (h, sym, psec, newdef, newdyn,
+					 abfd, olddef, olddyn, oldbfd,
+					 oldsec);
 }
 
 static int

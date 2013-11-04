@@ -1210,8 +1210,9 @@ struct elf_backend_data
   /* Return TRUE if we can merge 2 definitions.  */
   bfd_boolean (*merge_symbol) (struct elf_link_hash_entry *,
 			       const Elf_Internal_Sym *, asection **,
+			       bfd_boolean, bfd_boolean, bfd *,
 			       bfd_boolean, bfd_boolean,
-			       bfd *, const asection *);
+			       bfd *, asection *);
 
   /* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
   bfd_boolean (*elf_hash_symbol) (struct elf_link_hash_entry *);
@@ -2148,6 +2149,24 @@ extern bfd_boolean bfd_elf_link_add_symbols
   (bfd *, struct bfd_link_info *);
 extern bfd_boolean _bfd_elf_add_dynamic_entry
   (struct bfd_link_info *, bfd_vma, bfd_vma);
+extern asection _bfd_elf_sharable_com_section;
+extern bfd_boolean _bfd_elf_add_sharable_symbol
+  (bfd *, struct bfd_link_info *, Elf_Internal_Sym *, const char **,
+   flagword *, asection **, bfd_vma *);
+extern bfd_boolean _bfd_elf_sharable_section_from_bfd_section
+  (bfd *, asection *, int *);
+extern void _bfd_elf_sharable_symbol_processing
+  (bfd *, asymbol *);
+extern bfd_boolean _bfd_elf_sharable_common_definition
+  (Elf_Internal_Sym *);
+extern unsigned int _bfd_elf_sharable_common_section_index
+  (asection *);
+extern asection *_bfd_elf_sharable_common_section
+  (asection *);
+extern bfd_boolean _bfd_elf_sharable_merge_symbol
+  (struct elf_link_hash_entry *, const Elf_Internal_Sym *,
+   asection **, bfd_boolean, bfd_boolean, bfd *,
+   bfd_boolean, bfd_boolean, bfd *, asection *);
 
 extern bfd_boolean bfd_elf_link_record_dynamic_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *);

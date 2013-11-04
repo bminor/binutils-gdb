@@ -13,6 +13,7 @@ GENERATE_PIE_SCRIPT=yes
 NO_SMALL_DATA=yes
 SEPARATE_GOTPLT="SIZEOF (.got.plt) >= 12 ? 12 : 0"
 IREL_IN_PLT=
+SHARABLE_SECTIONS=yes
 
 # Linux modify the default library search path to first include
 # a 32-bit specific directory.

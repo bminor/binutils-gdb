@@ -387,6 +387,9 @@ struct bfd_link_info
      --dynamic-list command line options.  */
   unsigned int dynamic: 1;
 
+  /* TRUE if sharables sections may be created.  */
+  unsigned int sharable_sections: 1;
+
   /* TRUE if PT_GNU_STACK segment should be created with PF_R|PF_W|PF_X
      flags.  */
   unsigned int execstack: 1;

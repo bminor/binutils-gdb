@@ -298,6 +298,40 @@ STACK="  .stack        ${RELOCATING-0}${RELOCATING+${STACK_ADDR}} :
     ${RELOCATING+${USER_LABEL_PREFIX}_stack = .;}
     *(.stack)
   }"
+test "${SHARABLE_SECTIONS}" = "yes" && OTHER_READWRITE_SECTIONS="
+  ${OTHER_READWRITE_SECTIONS}
+  /* Sharable data sections.  */
+  .sharable_data ${RELOCATING-0} : ${RELOCATING+ALIGN(${MAXPAGESIZE})}
+  {
+    ${RELOCATING+PROVIDE_HIDDEN (__sharable_data_start = .);}
+    *(.sharable_data${RELOCATING+ .sharable_data.* .gnu.linkonce.shrd.*})
+    /* Align here to ensure that the sharable data section ends at the
+       page boundary.  */
+    ${RELOCATING+. = ALIGN(. != 0 ? ${MAXPAGESIZE} : 1);}
+    ${RELOCATING+PROVIDE_HIDDEN (__sharable_data_end = .);}
+  }
+"
+test "${SHARABLE_SECTIONS}" = "yes" && OTHER_BSS_SECTIONS="
+  ${OTHER_BSS_SECTIONS}
+  /* Sharable bss sections  */
+  .sharable_bss ${RELOCATING-0} : ${RELOCATING+ALIGN(${MAXPAGESIZE})}
+  {
+    ${RELOCATING+PROVIDE_HIDDEN (__sharable_bss_start = .);}
+    *(.dynsharablebss)
+    *(.sharable_bss${RELOCATING+ .sharable_bss.* .gnu.linkonce.shrb.*}) 
+    *(SHARABLE_COMMON)
+    /* Align here to ensure that the sharable bss section ends at the
+       page boundary.  */
+    ${RELOCATING+. = ALIGN(. != 0 ? ${MAXPAGESIZE} : 1);}
+    ${RELOCATING+PROVIDE_HIDDEN (__sharable_bss_end = .);}
+  }
+"
+test "${SHARABLE_SECTIONS}" = "yes" && REL_SHARABLE="
+  .rel.sharable_data	${RELOCATING-0} : { *(.rel.sharable_data${RELOCATING+ .rel.sharable_data.* .rel.gnu.linkonce.shrd.*}) }
+  .rela.sharable_data	${RELOCATING-0} : { *(.rela.sharable_data${RELOCATING+ .rela.sharable_data.* .rela.gnu.linkonce.shrd.*}) }
+  .rel.sharable_bss	${RELOCATING-0} : { *(.rel.sharable_bss${RELOCATING+ .rel.sharable_bss.* .rel.gnu.linkonce.shrb.*}) }
+  .rela.sharable_bss	${RELOCATING-0} : { *(.rela.sharable_bss${RELOCATING+ .rela.sharable_bss.* .rela.gnu.linkonce.shrb.*}) }
+"
 
 TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${TEXT_START_ADDR})"
 SHLIB_TEXT_START_ADDR="SEGMENT_START(\"text-segment\", ${SHLIB_TEXT_START_ADDR:-0})"
@@ -392,6 +426,7 @@ eval $COMBRELOCCAT <<EOF
   .rel.got      ${RELOCATING-0} : { *(.rel.got) }
   .rela.got     ${RELOCATING-0} : { *(.rela.got) }
   ${OTHER_GOT_RELOC_SECTIONS}
+  ${REL_SHARABLE}
   ${REL_SDATA}
   ${REL_SBSS}
   ${REL_SDATA2}
