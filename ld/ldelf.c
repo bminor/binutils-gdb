@@ -63,6 +63,7 @@ static lang_input_statement_type *global_found;
 static struct stat global_stat;
 static struct bfd_link_needed_list *global_vercheck_needed;
 static bool global_vercheck_failed;
+static bool orphan_init_done;
 
 void
 ldelf_after_parse (void)
@@ -2101,7 +2102,7 @@ elf_orphan_compatible (asection *in, asection *out)
 lang_output_section_statement_type *
 ldelf_place_orphan (asection *s, const char *secname, int constraint)
 {
-  static struct orphan_save hold[] =
+  static struct orphan_save orig_hold[] =
     {
       { ".text",
 	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE,
@@ -2131,6 +2132,7 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 	SEC_HAS_CONTENTS,
 	0, 0, 0, 0 },
     };
+  static struct orphan_save hold[ARRAY_SIZE (orig_hold)];
   enum orphan_save_index
     {
       orphan_text = 0,
@@ -2143,7 +2145,6 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
       orphan_sdata,
       orphan_nonalloc
     };
-  static int orphan_init_done = 0;
   struct orphan_save *place;
   lang_output_section_statement_type *after;
   lang_output_section_statement_type *os;
@@ -2272,16 +2273,23 @@ ldelf_place_orphan (asection *s, const char *secname, int constraint)
 
   if (!orphan_init_done)
     {
-      struct orphan_save *ho;
+      struct orphan_save *ho, *horig;
 
       for (ho = hold; ho < hold + sizeof (hold) / sizeof (hold[0]); ++ho)
+      for (ho = hold, horig = orig_hold;
+	   ho < hold + ARRAY_SIZE (hold);
+	   ++ho, ++horig)
+	{
+	  *ho = *horig;
+	  if (ho->name != NULL)
 	if (ho->name != NULL)
 	  {
 	    ho->os = lang_output_section_find (ho->name);
 	    if (ho->os != NULL && ho->os->flags == 0)
 	      ho->os->flags = ho->flags;
 	  }
-      orphan_init_done = 1;
+	}
+      orphan_init_done = true;
     }
 
   /* If this is a final link, then always put .gnu.warning.SYMBOL
@@ -2427,4 +2435,14 @@ ldelf_set_output_arch (void)
   set_output_arch_default ();
   if (link_info.output_bfd->xvec->flavour == bfd_target_elf_flavour)
     elf_link_info (link_info.output_bfd) = &link_info;
+}
+
+void
+ldelf_finish (void)
+{
+  /* Support the object-only output.  */
+  if (config.emit_gnu_object_only)
+    orphan_init_done = false;
+
+  finish_default ();
 }

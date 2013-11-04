@@ -309,7 +309,7 @@ gld${EMULATION_NAME}_finish (void)
 	}
     }
 
-  finish_default ();
+  ldelf_finish ();
 }
 
 /* This is a convenient point to tell BFD about target specific flags.

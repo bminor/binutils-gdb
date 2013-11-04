@@ -616,7 +616,7 @@ gld${EMULATION_NAME}_finish (void)
   fflush (stderr);
   free (msg);
 
-  finish_default ();
+  ldelf_finish ();
 }
 
 

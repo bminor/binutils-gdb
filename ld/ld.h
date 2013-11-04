@@ -306,6 +306,12 @@ typedef struct
   /* If set, store plugin intermediate files permanently.  */
   bool plugin_save_temps;
 
+  /* If set, if the .gnu_object_only section should be created.  */
+  bool emit_gnu_object_only;
+
+  /* If set, if the .gnu_object_only section is being created.  */
+  bool emitting_gnu_object_only;
+
   /* If set, print discarded sections in map file output.  */
   bool print_map_discarded;
 

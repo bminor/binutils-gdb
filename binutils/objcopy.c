@@ -1266,34 +1266,6 @@ is_specified_symbol (const char *name, htab_t htab)
   return htab_find (htab, name) != NULL;
 }
 
-/* Return a pointer to the symbol used as a signature for GROUP.  */
-
-static asymbol *
-group_signature (asection *group)
-{
-  bfd *abfd = group->owner;
-  Elf_Internal_Shdr *ghdr;
-
-  /* PR 20089: An earlier error may have prevented us from loading the symbol table.  */
-  if (isympp == NULL)
-    return NULL;
-
-  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
-    return NULL;
-
-  ghdr = &elf_section_data (group)->this_hdr;
-  if (ghdr->sh_link == elf_onesymtab (abfd))
-    {
-      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
-      Elf_Internal_Shdr *symhdr = &elf_symtab_hdr (abfd);
-
-      if (ghdr->sh_info > 0
-	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
-	return isympp[ghdr->sh_info - 1];
-    }
-  return NULL;
-}
-
 /* Return TRUE if the section is a DWO section.  */
 
 static bool
@@ -1438,7 +1410,7 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       const char *gname;
       asection *elt, *first;
 
-      gsym = group_signature (sec);
+      gsym = bfd_group_signature (sec, isympp);
       /* Strip groups without a valid signature.  */
       if (gsym == NULL)
 	return true;
@@ -4398,7 +4370,7 @@ setup_section (bfd *ibfd, sec_ptr isection, bfd *obfd)
 
   if ((isection->flags & SEC_GROUP) != 0)
     {
-      asymbol *gsym = group_signature (isection);
+      asymbol *gsym = bfd_group_signature (isection, isympp);
 
       if (gsym != NULL)
 	{

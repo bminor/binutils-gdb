@@ -80,7 +80,8 @@ EXTERNAL
 .    lto_non_object,		{* Not an LTO object.  *}
 .    lto_non_ir_object,		{* An object without LTO IR.  *}
 .    lto_slim_ir_object,	{* A slim LTO IR object.  *}
-.    lto_fat_ir_object		{* A fat LTO IR object.  *}
+.    lto_fat_ir_object,		{* A fat LTO IR object.  *}
+.    lto_mixed_object		{* A mixed LTO IR object.  *}
 .  };
 .
 .struct bfd_mmapped_entry
@@ -306,7 +307,7 @@ CODE_FRAGMENT
 .  unsigned int read_only : 1;
 .
 .  {* LTO object type.  *}
-.  ENUM_BITFIELD (bfd_lto_object_type) lto_type : 2;
+.  ENUM_BITFIELD (bfd_lto_object_type) lto_type : 3;
 .
 .  {* Set if this BFD is currently being processed by
 .     bfd_check_format_matches.  This is checked by the cache to
@@ -337,6 +338,9 @@ CODE_FRAGMENT
 .
 .  {* The last section on the section list.  *}
 .  struct bfd_section *section_last;
+.
+.  {* The object-only section on the section list.  *}
+.  struct bfd_section *object_only_section;
 .
 .  {* The number of sections.  *}
 .  unsigned int section_count;
@@ -3033,4 +3037,42 @@ _bfd_get_link_info (bfd *abfd)
     return NULL;
 
   return elf_link_info (abfd);
+}
+
+/*
+FUNCTION
+	bfd_group_signature
+
+SYNOPSIS
+	asymbol *bfd_group_signature (asection *group, asymbol **isympp);
+
+DESCRIPTION
+	Return a pointer to the symbol used as a signature for GROUP.
+*/
+
+asymbol *
+bfd_group_signature (asection *group, asymbol **isympp)
+{
+  bfd *abfd = group->owner;
+  Elf_Internal_Shdr *ghdr;
+
+  /* PR 20089: An earlier error may have prevented us from loading the
+     symbol table.  */
+  if (isympp == NULL)
+    return NULL;
+
+  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+    return NULL;
+
+  ghdr = &elf_section_data (group)->this_hdr;
+  if (ghdr->sh_link == elf_onesymtab (abfd))
+    {
+      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+      Elf_Internal_Shdr *symhdr = &elf_symtab_hdr (abfd);
+
+      if (ghdr->sh_info > 0
+	  && ghdr->sh_info < symhdr->sh_size / bed->s->sizeof_sym)
+	return isympp[ghdr->sh_info - 1];
+    }
+  return NULL;
 }

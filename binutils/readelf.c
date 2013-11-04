@@ -5941,6 +5941,7 @@ get_os_specific_section_type_name (Filedata * filedata, unsigned int sh_type)
     case SHT_GNU_ATTRIBUTES:          return "GNU_ATTRIBUTES";
     case SHT_GNU_HASH:                return "GNU_HASH";
     case SHT_GNU_LIBLIST:             return "GNU_LIBLIST";
+    case SHT_GNU_OBJECT_ONLY:	      return "GNU_OBJECT_ONLY";
 
     case SHT_SUNW_move:               return "SUNW_MOVE";
     case SHT_SUNW_COMDAT:             return "SUNW_COMDAT";

@@ -1341,6 +1341,9 @@ plugin_maybe_claim (lang_input_statement_type *entry)
     {
       bfd *abfd = entry->the_bfd->plugin_dummy_bfd;
 
+      /* Check object only section.  */
+      cmdline_check_object_only_section (entry->the_bfd, true);
+
       /* Discard the real file's BFD and substitute the dummy one.  */
 
       /* We can't call bfd_close on archives.  BFD archive handling

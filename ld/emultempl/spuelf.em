@@ -432,7 +432,7 @@ gld${EMULATION_NAME}_finish (void)
 	einfo (_("%P: --auto-overlay ignored with zero local store range\n"));
     }
 
-  finish_default ();
+  ldelf_finish ();
 }
 
 static char *

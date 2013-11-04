@@ -532,7 +532,9 @@ ldfile_try_open_bfd (const char *attempt,
       && !no_more_claiming
       && bfd_check_format (entry->the_bfd, bfd_object))
     plugin_maybe_claim (entry);
+  else
 #endif /* BFD_SUPPORTS_PLUGINS */
+    cmdline_check_object_only_section (entry->the_bfd, false);
 
   /* It opened OK, the format checked out, and the plugins have had
      their chance to claim it, so this is success.  */

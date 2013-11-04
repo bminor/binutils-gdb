@@ -456,7 +456,7 @@ gld${EMULATION_NAME}_finish (void)
 	}
     }
 
-  finish_default ();
+  ldelf_finish ();
 
   if (params.thumb_entry_symbol)
     {
