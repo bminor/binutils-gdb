@@ -200,11 +200,7 @@ static int (*linux_nat_siginfo_fixup) (siginfo_t *,
 
 /* The saved to_xfer_partial method, inherited from inf-ptrace.c.
    Called by our to_xfer_partial.  */
-static LONGEST (*super_xfer_partial) (struct target_ops *, 
-				      enum target_object,
-				      const char *, gdb_byte *, 
-				      const gdb_byte *,
-				      ULONGEST, LONGEST);
+static target_xfer_partial_ftype *super_xfer_partial;
 
 static unsigned int debug_linux_nat;
 static void

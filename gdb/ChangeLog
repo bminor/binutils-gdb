@@ -1,5 +1,21 @@
 2013-12-18  Yao Qi  <yao@codesourcery.com>
 
+	* target.h (target_xfer_partial_ftype): New typedef.
+	(target_xfer_partial): Update declaration.
+	* auxv.h (memory_xfer_auxv): Likewise.
+	* ia64-hpux-nat.c (super_xfer_partial): Likewise.
+	* ia64-linux-nat.c (super_xfer_partial): Likewise.
+	* linux-nat.c (super_xfer_partial): Likewise.
+	* procfs.c (procfs_xfer_partial): Likewise.
+	* record-full.c (record_full_beneath_to_xfer_partial):
+	(tmp_to_xfer_partial): Likewise.
+	* sparc-nat.c (inf_ptrace_xfer_partial): Likewise.
+	* target.c (default_xfer_partial): Likewise.
+	(current_xfer_partial): Likewise.
+	(target_xfer_partial): Change parameter type to 'gdb_byte *'.
+
+2013-12-18  Yao Qi  <yao@codesourcery.com>
+
 	* linux-nat.c (linux_proc_xfer_partial): Call xsnprintf instead
 	of sprintf.
 	(linux_nat_detach, linux_child_pid_to_exec_file): Likewise.

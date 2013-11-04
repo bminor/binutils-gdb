@@ -313,9 +313,7 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   return len;
 }
 
-LONGEST (*inf_ptrace_xfer_partial) (struct target_ops *, enum target_object,
-				    const char *, gdb_byte *, const gdb_byte *,
-				    ULONGEST, LONGEST);
+target_xfer_partial_ftype *inf_ptrace_xfer_partial;
 
 static LONGEST
 sparc_xfer_partial (struct target_ops *ops, enum target_object object,

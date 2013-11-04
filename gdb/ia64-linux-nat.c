@@ -833,9 +833,7 @@ ia64_linux_store_registers (struct target_ops *ops,
 }
 
 
-static LONGEST (*super_xfer_partial) (struct target_ops *, enum target_object,
-				      const char *, gdb_byte *,
-				      const gdb_byte *, ULONGEST, LONGEST);
+static target_xfer_partial_ftype *super_xfer_partial;
 
 static LONGEST 
 ia64_linux_xfer_partial (struct target_ops *ops,
