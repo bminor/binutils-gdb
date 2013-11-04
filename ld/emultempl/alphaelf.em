@@ -100,7 +100,7 @@ alpha_finish (void)
   if (limit_32bit)
     elf_elfheader (link_info.output_bfd)->e_flags |= EF_ALPHA_32BIT;
 
-  finish_default ();
+  gld${EMULATION_NAME}_finish ();
 }
 EOF
 

@@ -220,6 +220,9 @@ main (int argc, char **argv)
 
   xatexit (ld_cleanup);
 
+  /* Remove temporary object-only files.  */
+  xatexit (cmdline_remove_object_only_files);
+
   /* Set up the sysroot directory.  */
   ld_sysroot = get_sysroot (argc, argv);
   if (*ld_sysroot)
@@ -297,7 +300,7 @@ main (int argc, char **argv)
   default_target = ldemul_choose_target (argc, argv);
   config.maxpagesize = bfd_emul_get_maxpagesize (default_target);
   config.commonpagesize = bfd_emul_get_commonpagesize (default_target);
-  lang_init ();
+  lang_init (FALSE);
   ldemul_before_parse ();
   lang_has_input_file = FALSE;
   parse_args (argc, argv);
@@ -312,34 +315,7 @@ main (int argc, char **argv)
 
   ldemul_set_symbols ();
 
-  /* If we have not already opened and parsed a linker script,
-     try the default script from command line first.  */
-  if (saved_script_handle == NULL
-      && command_line.default_script != NULL)
-    {
-      ldfile_open_command_file (command_line.default_script);
-      parser_input = input_script;
-      yyparse ();
-    }
-
-  /* If we have not already opened and parsed a linker script
-     read the emulation's appropriate default script.  */
-  if (saved_script_handle == NULL)
-    {
-      int isfile;
-      char *s = ldemul_get_script (&isfile);
-
-      if (isfile)
-	ldfile_open_default_command_file (s);
-      else
-	{
-	  lex_string = s;
-	  lex_redirect (s, _("built in linker script"), 1);
-	}
-      parser_input = input_script;
-      yyparse ();
-      lex_string = NULL;
-    }
+  ld_parse_linker_script ();
 
   if (verbose)
     {
@@ -427,7 +403,7 @@ main (int argc, char **argv)
   if (nocrossref_list != NULL)
     check_nocrossrefs ();
 
-  lang_finish ();
+  lang_finish (FALSE);
 
   /* Even if we're producing relocatable output, some non-fatal errors should
      be reported in the exit status.  (What non-fatal errors, if any, do we
@@ -445,6 +421,8 @@ main (int argc, char **argv)
     {
       if (! bfd_close (link_info.output_bfd))
 	einfo (_("%F%B: final close failed: %E\n"), link_info.output_bfd);
+
+      link_info.output_bfd = NULL;
 
       /* If the --force-exe-suffix is enabled, and we're making an
 	 executable file and it doesn't end in .exe, copy it to one
@@ -491,6 +469,9 @@ main (int argc, char **argv)
 	    }
 	}
     }
+
+  if (link_info.emit_gnu_object_only)
+    cmdline_emit_object_only_section ();
 
   END_PROGRESS (program_name);
 
@@ -799,7 +780,9 @@ add_archive_element (struct bfd_link_info *info,
 	    }
 	}
     }
+  else
 #endif /* ENABLE_PLUGINS */
+    cmdline_check_object_only_section (input->the_bfd, FALSE);
 
   ldlang_add_file (input);
 
@@ -1467,4 +1450,39 @@ notice (struct bfd_link_info *info,
     add_cref (name, abfd, section, value);
 
   return TRUE;
+}
+
+/* Parse the linker script.   */
+
+void
+ld_parse_linker_script ()
+{
+  /* If we have not already opened and parsed a linker script,
+     try the default script from command line first.  */
+  if (saved_script_handle == NULL
+      && command_line.default_script != NULL)
+    {
+      ldfile_open_command_file (command_line.default_script);
+      parser_input = input_script;
+      yyparse ();
+    }
+
+  /* If we have not already opened and parsed a linker script
+     read the emulation's appropriate default script.  */
+  if (saved_script_handle == NULL)
+    {
+      int isfile;
+      char *s = ldemul_get_script (&isfile);
+
+      if (isfile)
+	ldfile_open_default_command_file (s);
+      else
+	{
+	  lex_string = s;
+	  lex_redirect (s, _("built in linker script"), 1);
+	}
+      parser_input = input_script;
+      yyparse ();
+      lex_string = NULL;
+    }
 }

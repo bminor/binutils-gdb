@@ -59,6 +59,15 @@ set lto_link_tests {
   {"Build liblto-3.a"
    "" "-flto"
    {lto-3b.c} {} "liblto-3.a"}
+  {"Build libdummy.a 4a"
+   "" "-flto"
+   {lto-4a.c} {} "libdummy.a"}
+  {"Build libdummy.a 4b"
+   "" "-O2"
+   {lto-4b.c} {} "libdummy.a"}
+  {"Build libdummy.a 4c"
+   "" "-O2"
+   {lto-4c.c} {} "libdummy.a"}
   {"Build libdummy.a 5a"
    "" "-flto"
    {lto-5a.c} {} "libdummy.a"}
@@ -68,9 +77,18 @@ set lto_link_tests {
   {"LTO 6"
    "-O2 -flto -fuse-linker-plugin" ""
    {lto-6.c} {} "lto-6.exe" "c"}
+  {"Build libdummy.a PR ld/12365"
+   "" "-flto -O2"
+   {pr12365a.c pr12365b.c pr12365c.c} {} "libdummy.a"}
   {"Build libdummy.a 9"
    "" "-O2 -finline -flto"
    {lto-9.cc} {} "libdummy.a"}
+  {"Build libdummy.a 10a"
+   "" "-O2"
+   {lto-10a.c} {} "libdummy.a"}
+  {"Build libdummy.a 10b"
+   "" "-O2 -flto"
+   {lto-10b.c} {} "libdummy.a"}
   {"Build libdummy.a 11a"
    "" "-O -flto"
    {lto-11a.c} {} "libdummy.a"}
@@ -206,6 +224,9 @@ set lto_link_elf_tests {
   {"Build libpr15146d.a"
    "" "-flto -O2"
    {pr15146d.c} {} "lib15146d.a"}
+  {"PR ld/14918"
+   "-flto" "-flto"
+   {pr14918.c} {{"readelf" {-d --wide} "pr14918.d"}} "pr14918.exe" "c"}
 }
 
 # Check final symbols in executables.
@@ -241,9 +262,21 @@ set lto_run_tests {
   {"LTO 3c"
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-3a.o tmpdir/lto-3c.o -Wl,--whole-archive tmpdir/liblto-3.a -Wl,--no-whole-archive tmpdir/liblto-3.a" ""
    {dummy.c} "lto-3d.exe" "lto-3.out" "" "c"}
+  {"LTO 4a"
+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-a.o" ""
+   {dummy.c} "lto-4a.exe" "lto-4.out" "" "c"}
+  {"LTO 4c"
+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-c.o" ""
+   {dummy.c} "lto-4c.exe" "lto-4.out" "" "c"}
+  {"LTO 4d"
+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-4r-d.o" ""
+   {dummy.c} "lto-4d.exe" "lto-4.out" "" "c"}
   {"LTO 5"
    "-O2 -flto -fuse-linker-plugin tmpdir/lto-5.o" ""
    {dummy.c} "lto-5.exe" "lto-5.out" "" "c"}
+  {"LTO 10"
+   "-O2 -flto -fuse-linker-plugin tmpdir/lto-10.o" ""
+   {dummy.c} "lto-10.exe" "lto-10.out" "" "c"}
   {"LTO 11"
    "-O -flto -fuse-linker-plugin tmpdir/liblto-11.a" ""
    {dummy.c} "lto-11.exe" "lto-11.out" "" "c"}
@@ -312,6 +345,15 @@ if { [is_elf_format]
     }
 }
 
+set testname "Build liblto-4.a"
+remote_file host delete "tmpdir/liblto-4.a"
+set catch_output [run_host_cmd "$ar" "rc tmpdir/liblto-4.a tmpdir/lto-4a.o tmpdir/lto-4b.o tmpdir/lto-4c.o"]
+if {![string match "" $catch_output]} {
+    unresolved $testname
+    restore_notify
+    return
+}
+
 set testname "Build liblto-11.a"
 remote_file host delete "tmpdir/liblto-11.a"
 set catch_output [run_host_cmd "$ar" "rc tmpdir/liblto-11.a tmpdir/lto-11a.o tmpdir/lto-11b.o tmpdir/lto-11c.o"]
@@ -323,6 +365,13 @@ if {![string match "" $catch_output]} {
 
 if { [at_least_gcc_version 4 7] } {
     # Check expected LTO linker errors.
+    set testname "PR ld/12365"
+    set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin tmpdir/pr12365a.o tmpdir/pr12365b.o tmpdir/pr12365c.o"]
+    if { [ regexp "undefined reference to `my_bcopy'" $exec_output ] } {
+	pass $testname
+    } {
+	fail $testname
+    }
     set testname "PR ld/12942 (3)"
     set exec_output [run_host_cmd "$CXX" "$gcc_gas_flag $gcc_ld_flag -O2 -flto -fuse-linker-plugin tmpdir/pr12942b.o tmpdir/pr12942a.o"]
     if { [ regexp "undefined reference to `link_error\\(\\)'" $exec_output ] } {
@@ -335,8 +384,18 @@ if { [at_least_gcc_version 4 7] } {
 # Run "ld -r" to generate inputs for complex LTO tests.
 run_dump_test "lto-3r"
 remote_exec host "mv" "tmpdir/dump tmpdir/lto-3.o"
+run_dump_test "lto-4r-a"
+remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-a.o"
+run_dump_test "lto-4r-b"
+remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-b.o"
+run_dump_test "lto-4r-c"
+remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-c.o"
+run_dump_test "lto-4r-d"
+remote_exec host "mv" "tmpdir/dump tmpdir/lto-4r-d.o"
 run_dump_test "lto-5r"
 remote_exec host "mv" "tmpdir/dump tmpdir/lto-5.o"
+run_dump_test "lto-10r"
+remote_exec host "mv" "tmpdir/dump tmpdir/lto-10.o"
 
 run_cc_link_tests $lto_link_symbol_tests
 

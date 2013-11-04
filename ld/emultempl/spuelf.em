@@ -416,7 +416,7 @@ spu_elf_relink (void)
 /* Final emulation specific call.  */
 
 static void
-gld${EMULATION_NAME}_finish (void)
+spu_finish (void)
 {
   if (is_spu_target ())
     {
@@ -432,7 +432,7 @@ gld${EMULATION_NAME}_finish (void)
 	einfo ("%P: --auto-overlay ignored with zero local store range\n");
     }
 
-  finish_default ();
+  gld${EMULATION_NAME}_finish ();
 }
 
 static char *
@@ -832,5 +832,5 @@ PARSE_AND_LIST_ARGS_CASES='
 
 LDEMUL_AFTER_OPEN=spu_after_open
 LDEMUL_BEFORE_ALLOCATION=spu_before_allocation
-LDEMUL_FINISH=gld${EMULATION_NAME}_finish
+LDEMUL_FINISH=spu_finish
 LDEMUL_CHOOSE_TARGET=gld${EMULATION_NAME}_choose_target

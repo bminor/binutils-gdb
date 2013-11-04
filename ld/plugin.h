@@ -24,6 +24,9 @@
 /* Report plugin symbols.  */
 extern bfd_boolean report_plugin_symbols;
 
+/* Store plugin intermediate files permanently.  */
+extern bfd_boolean plugin_save_temps;
+
 /* Set at all symbols read time, to avoid recursively offering the plugin
    its own newly-added input files and libs to claim.  */
 extern bfd_boolean no_more_claiming;

@@ -319,7 +319,9 @@ success:
 	  plugin_maybe_claim (&file, entry);
 	}
     }
+  else
 #endif /* ENABLE_PLUGINS */
+    cmdline_check_object_only_section (entry->the_bfd, FALSE);
 
   /* It opened OK, the format checked out, and the plugins have had
      their chance to claim it, so this is success.  */

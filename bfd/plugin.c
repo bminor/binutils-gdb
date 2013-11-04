@@ -130,6 +130,139 @@ register_claim_file (ld_plugin_claim_file_handler handler)
   return LDPS_OK;
 }
 
+static asection bfd_plugin_fake_text_section
+  = BFD_FAKE_SECTION (bfd_plugin_fake_text_section, 0, 0, ".text", 0);
+static asection bfd_plugin_fake_common_section
+  = BFD_FAKE_SECTION (bfd_plugin_fake_common_section, SEC_IS_COMMON, 0,
+		      NULL, 0);
+
+/* Get symbols from object only section.  */
+
+static void
+bfd_plugin_get_symbols_in_object_only (bfd *abfd)
+{
+  struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
+  const char *object_only_file;
+  bfd *nbfd;
+  long storage;
+  long object_only_nsyms, added_nsyms, i;
+  asymbol **object_only_syms, **added_syms;
+
+  plugin_data->object_only_syms = NULL;
+  plugin_data->object_only_nsyms = 0;
+
+  if (abfd->sections == NULL && abfd->my_archive == NULL)
+    {
+      nbfd = bfd_openr (abfd->filename, NULL);
+      if (nbfd == NULL || !bfd_check_format (nbfd, bfd_object))
+	{
+	  (*_bfd_error_handler)
+	    (_("%s: failed to open to extract object only section: %s"),
+	     abfd->filename, bfd_errmsg (bfd_get_error ()));
+	  bfd_close (nbfd);
+	  return;
+	}
+    }
+  else
+    {
+      if (!bfd_check_format (abfd, bfd_object))
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: invalid file to extract object only section: %s"),
+	     abfd, bfd_errmsg (bfd_get_error ()));
+	  return;
+	}
+      nbfd = abfd;
+    }
+
+  if (nbfd->lto_type == lto_mixed_object
+      && (nbfd->flags & HAS_SYMS) != 0)
+    {
+      object_only_file = bfd_extract_object_only_section (nbfd);
+      if (object_only_file == NULL)
+	(*_bfd_error_handler)
+	  (_("%B: failed to extract object only section: %s"),
+	   abfd, bfd_errmsg (bfd_get_error ()));
+    }
+  else
+    object_only_file = NULL;
+
+  /* Close the new bfd we just opened.  */
+  if (nbfd != abfd)
+    bfd_close (nbfd);
+
+  /* Return if there is no object only section or there is no
+     symbol in object only section.  */
+  if (!object_only_file)
+    return;
+
+  /* Open the file containing object only section.  */
+  nbfd = bfd_openr (object_only_file, NULL);
+  if (!bfd_check_format (nbfd, bfd_object))
+    {
+      (*_bfd_error_handler)
+	(_("%B: failed to open object only section: %s"),
+	 abfd, bfd_errmsg (bfd_get_error ()));
+      goto quit;
+    }
+
+  storage = bfd_get_symtab_upper_bound (nbfd);
+  if (storage <= 0)
+    {
+      if (storage < 0)
+	(*_bfd_error_handler)
+	  (_("%B: failed to get symbol table in object only section: %s"),
+	   abfd, bfd_errmsg (bfd_get_error ()));
+
+      goto quit;
+    }
+
+  object_only_syms = (asymbol **) bfd_malloc (storage);
+  object_only_nsyms = bfd_canonicalize_symtab (nbfd, object_only_syms);
+
+  /* FIXME: We waste some spaces if not all symbols are copied.  */
+  added_syms = (asymbol **) bfd_alloc (abfd, storage);
+  added_nsyms = 0;
+
+  /* Copy only global symbols from object only section.  */
+  for (i = 0; i < object_only_nsyms; i++)
+    {
+      asection *sec = object_only_syms[i]->section;
+      flagword flags = object_only_syms[i]->flags;
+      asymbol *s;
+
+      if (bfd_is_com_section (sec))
+	sec = &bfd_plugin_fake_common_section;
+      else if (bfd_is_und_section (sec))
+	;
+      else if ((flags & (BSF_GLOBAL | BSF_WEAK | BSF_GNU_UNIQUE)) != 0)
+	sec = &bfd_plugin_fake_text_section;
+      else
+	continue;
+
+      s = bfd_alloc (abfd, sizeof (asymbol)); 
+      BFD_ASSERT (s);
+      added_syms[added_nsyms++] = s;
+
+      s->section = sec;
+      s->the_bfd = abfd;
+      s->name = xstrdup (object_only_syms[i]->name);
+      s->value = 0;
+      s->flags = flags;
+      s->udata.p = NULL;
+    }
+
+  plugin_data->object_only_syms = added_syms;
+  plugin_data->object_only_nsyms = added_nsyms;
+
+  free (object_only_syms);
+
+quit:
+  /* Close and remove the object only section file.  */
+  bfd_close (nbfd);
+  unlink (object_only_file);
+}
+
 static enum ld_plugin_status
 add_symbols (void * handle,
 	     int nsyms,
@@ -142,10 +275,13 @@ add_symbols (void * handle,
   plugin_data->nsyms = nsyms;
   plugin_data->syms = syms;
 
-  if (nsyms != 0)
+  abfd->tdata.plugin_data = plugin_data;
+
+  bfd_plugin_get_symbols_in_object_only (abfd);
+
+  if ((nsyms + plugin_data->object_only_nsyms) != 0)
     abfd->flags |= HAS_SYMS;
 
-  abfd->tdata.plugin_data = plugin_data;
   return LDPS_OK;
 }
 
@@ -389,7 +525,8 @@ static long
 bfd_plugin_get_symtab_upper_bound (bfd *abfd)
 {
   struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
-  long nsyms = plugin_data->nsyms;
+  /* Add symbols from object only section.  */
+  long nsyms = plugin_data->nsyms + plugin_data->object_only_nsyms;
 
   BFD_ASSERT (nsyms >= 0);
 
@@ -423,12 +560,7 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
   struct plugin_data_struct *plugin_data = abfd->tdata.plugin_data;
   long nsyms = plugin_data->nsyms;
   const struct ld_plugin_symbol *syms = plugin_data->syms;
-  static asection fake_section;
-  static asection fake_common_section;
-  int i;
-
-  fake_section.name = ".text";
-  fake_common_section.flags = SEC_IS_COMMON;
+  int i, j;
 
   for (i = 0; i < nsyms; i++)
     {
@@ -441,10 +573,11 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
       s->name = syms[i].name;
       s->value = 0;
       s->flags = convert_flags (&syms[i]);
+      s->udata.p = NULL;
       switch (syms[i].def)
 	{
 	case LDPK_COMMON:
-	  s->section = &fake_common_section;
+	  s->section = &bfd_plugin_fake_common_section;
 	  break;
 	case LDPK_UNDEF:
 	case LDPK_WEAKUNDEF:
@@ -452,14 +585,17 @@ bfd_plugin_canonicalize_symtab (bfd *abfd,
 	  break;
 	case LDPK_DEF:
 	case LDPK_WEAKDEF:
-	  s->section = &fake_section;
+	  s->section = &bfd_plugin_fake_text_section;
 	  break;
 	default:
 	  BFD_ASSERT (0);
 	}
-
-      s->udata.p = (void *) &syms[i];
     }
+
+  /* Copy symbols from object only section.  */
+  nsyms += plugin_data->object_only_nsyms;
+  for (j = 0; j < plugin_data->object_only_nsyms; j++, i++)
+    alocation[i] = plugin_data->object_only_syms[j];
 
   return nsyms;
 }

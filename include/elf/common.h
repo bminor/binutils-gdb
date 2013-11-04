@@ -476,6 +476,7 @@
 #define SHT_GNU_ATTRIBUTES 0x6ffffff5	/* Object attributes */
 #define SHT_GNU_HASH	0x6ffffff6	/* GNU style symbol hash table */
 #define SHT_GNU_LIBLIST	0x6ffffff7	/* List of prelink dependencies */
+#define SHT_GNU_OBJECT_ONLY 0x6ffffff8	/* Object only */
 
 /* The next three section types are defined by Solaris, and are named
    SHT_SUNW*.  We use them in GNU code, so we also define SHT_GNU*
