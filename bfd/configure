@@ -1460,7 +1460,7 @@ Optional Packages:
   --with-separate-debug-dir=DIR
                           Look for global separate debug info in DIR
                           [default=LIBDIR/debug]
-  --with-pkgversion=PKG   Use PKG in the version string in place of "GNU
+  --with-pkgversion=PKG   Use PKG in the version string in place of "Linux/GNU
                           Binutils"
   --with-bugurl=URL       Direct users to URL to report a bug
   --with-zlib             include zlib support (auto/yes/no) default=auto
@@ -12121,7 +12121,7 @@ if test "${with_pkgversion+set}" = set; then :
       *)   PKGVERSION="($withval) " ;;
      esac
 else
-  PKGVERSION="(GNU Binutils) "
+  PKGVERSION="(Linux/GNU Binutils) "
 
 fi
 
@@ -12139,7 +12139,7 @@ if test "${with_bugurl+set}" = set; then :
 	   ;;
      esac
 else
-  BUGURL="http://www.sourceware.org/bugzilla/"
+  BUGURL="http://www.sourceware.org/bugzilla/ and mailto:hjl.tools@gmail.com"
 
 fi
 
