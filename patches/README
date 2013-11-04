@@ -1,0 +1,32 @@
+#! /bin/sh
+
+# If you don't use rpm, you can use this file to apply additional Linux
+# patches. At the top level of the binutils source tree, do
+#
+# /bin/sh patches/README
+#
+# You may have to do
+#
+# cd bfd
+# make headers
+#
+# if the build fails.
+
+dir=`dirname $0`
+clean=$1
+
+patches="
+	binutils-sharable.patch
+"
+
+for p in $patches
+do
+  if [ ! -n "$clean" ]
+  then
+    suffix=$(echo $p | sed -e "s/.*-\([^-]\+\).patch/\1/")
+    backup="-b --suffix .$suffix"
+  fi
+  patch -E -p1 $backup < $dir/$p || exit 1
+done
+find -name "*.orig" | xargs rm -fv
+find -name "*.gmo" | xargs rm -fv
