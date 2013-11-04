@@ -1,3 +1,8 @@
+2014-02-07  Yao Qi  <yao@codesourcery.com>
+
+	* corefile.c (memory_error): Get 'exception' from ERR and pass
+	'exception' to throw_error.
+
 2014-02-06  Doug Evans  <xdje42@gmail.com>
 
 	* configure.ac (libpython checking): Remove all but python.o from
