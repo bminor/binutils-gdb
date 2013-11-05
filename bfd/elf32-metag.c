@@ -1536,12 +1536,12 @@ elf_metag_relocate_section (bfd *output_bfd,
       else
 	{
 	  struct elf_link_hash_entry *eh;
-	  bfd_boolean unresolved_reloc, warned;
+	  bfd_boolean unresolved_reloc, warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, eh_syms,
 				   eh, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 
 	  name = eh->root.root.string;
 	  hh = (struct elf_metag_link_hash_entry *) eh;

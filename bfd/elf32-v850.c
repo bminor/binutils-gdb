@@ -2211,7 +2211,7 @@ v850_elf_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  bfd_boolean unresolved_reloc, warned;
+	  bfd_boolean unresolved_reloc, warned, ignored;
 
 	  /* Note - this check is delayed until now as it is possible and
 	     valid to have a file without any symbols but with relocs that
@@ -2228,7 +2228,7 @@ v850_elf_relocate_section (bfd *output_bfd,
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	}
 
       if (sec != NULL && discarded_section (sec))

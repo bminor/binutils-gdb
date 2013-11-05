@@ -4132,12 +4132,12 @@ elfNN_aarch64_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  bfd_boolean warned;
+	  bfd_boolean warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 
 	  sym_type = h->type;
 	}

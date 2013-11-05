@@ -12973,10 +12973,12 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	}
       else
 	{
+	  bfd_boolean ignored;
+
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h_elf, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	  sym_name = h_elf->root.root.string;
 	  sym_type = h_elf->type;
 	  if (sec != NULL

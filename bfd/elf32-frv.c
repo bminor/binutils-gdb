@@ -2735,13 +2735,13 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
       else
 	{
-	  bfd_boolean warned;
+	  bfd_boolean warned, ignored;
 	  bfd_boolean unresolved_reloc;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	  osec = sec;
 	  name = h->root.root.string;
 	}

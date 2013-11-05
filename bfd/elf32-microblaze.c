@@ -1023,11 +1023,12 @@ microblaze_elf_relocate_section (bfd *output_bfd,
 	    {
 	      /* External symbol.  */
 	      bfd_boolean warned ATTRIBUTE_UNUSED;
+	      bfd_boolean ignored ATTRIBUTE_UNUSED;
 
 	      RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				       r_symndx, symtab_hdr, sym_hashes,
 				       h, sec, relocation,
-				       unresolved_reloc, warned);
+				       unresolved_reloc, warned, ignored);
 	      sym_name = h->root.root.string;
 	    }
 

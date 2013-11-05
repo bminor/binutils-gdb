@@ -3191,12 +3191,13 @@ tilegx_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  bfd_boolean warned;
+	  bfd_boolean warned ATTRIBUTE_UNUSED;
+	  bfd_boolean ignored ATTRIBUTE_UNUSED;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	  if (warned)
 	    {
 	      /* To avoid generating warning messages about truncated

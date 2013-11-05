@@ -979,12 +979,12 @@ elf32_m68hc11_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
       else
 	{
-	  bfd_boolean unresolved_reloc, warned;
+	  bfd_boolean unresolved_reloc, warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation, unresolved_reloc,
-				   warned);
+				   warned, ignored);
 
 	  is_far = (h && (h->other & STO_M68HC12_FAR));
 	  is_xgate_symbol = (h && (h->target_internal));

@@ -875,12 +875,12 @@ lm32_elf_relocate_section (bfd *output_bfd,
         {
           /* It's a global symbol.  */
           bfd_boolean unresolved_reloc;
-	  bfd_boolean warned;
+	  bfd_boolean warned, ignored;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	  name = h->root.root.string;
         }
 

@@ -2011,7 +2011,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       int tls_r_type;
       bfd_boolean unresolved_reloc = FALSE;
-      bfd_boolean warned;
+      bfd_boolean warned, ignored;
       struct elf_link_hash_entry * hh;
 
       relocation = 0;
@@ -2034,7 +2034,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   hh, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	}
       h = elf_mn10300_hash_entry (hh);
 
