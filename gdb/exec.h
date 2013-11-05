@@ -55,17 +55,6 @@ extern enum target_xfer_status
   exec_read_partial_read_only (gdb_byte *readbuf, ULONGEST offset,
 			       ULONGEST len, ULONGEST *xfered_len);
 
-/* Appends all read-only memory ranges found in the target section
-   table defined by SECTIONS and SECTIONS_END, starting at (and
-   intersected with) MEMADDR for LEN bytes.  Returns the augmented
-   VEC.  */
-
-extern VEC(mem_range_s) *
-  section_table_available_memory (VEC(mem_range_s) *ranges,
-				  CORE_ADDR memaddr, ULONGEST len,
-				  struct target_section *sections,
-				  struct target_section *sections_end);
-
 /* Read or write from mappable sections of BFD executable files.
 
    Request to transfer up to LEN 8-bit bytes of the target sections

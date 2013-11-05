@@ -1,5 +1,14 @@
 2014-02-23  Yao Qi  <yao@codesourcery.com>
 
+	* valops.c (read_value_memory): Rewrite it.  Call
+	target_xfer_partial in a loop.
+	* exec.h (section_table_available_memory): Remove declaration.
+	Move comments to ...
+	* exec.c (section_table_available_memory): ... here.  Make it
+	static.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
 	* exec.c (section_table_read_available_memory): New function.
 	* exec.h (section_table_read_available_memory): Declare.
 	* ctf.c (ctf_xfer_partial): Call
