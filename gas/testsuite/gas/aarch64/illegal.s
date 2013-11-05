@@ -550,4 +550,14 @@
 	ands	w0, w24, #0xffeefffffffffffd
 
 one_label:
-	
+
+	cinc	w0, w1, al
+	cinc	w0, w1, nv
+	cset	w0, al
+	cset	w0, nv
+	cinv	w0, w1, al
+	cinv	w0, w1, nv
+	csetm	w0, al
+	csetm	w0, nv
+	cneg	w0, w1, al
+	cneg	w0, w1, nv

@@ -93,3 +93,7 @@
 [^:]*:95: Error: immediate value should be a multiple of 4 at operand 3 -- `stp w0,w1,\[x2,#3\]'
 [^:]*:96: Error: immediate value should be a multiple of 4 at operand 3 -- `stp w0,w1,\[x2,#2\]!'
 [^:]*:97: Error: immediate value should be a multiple of 4 at operand 3 -- `stp w0,w1,\[x2\],#1'
+[^:]*:98: Error: operand 3 should be one of the standard conditions, excluding AL and NV. -- `cinc w0,w1,al'
+[^:]*:99: Error: operand 3 should be one of the standard conditions, excluding AL and NV. -- `cinc w0,w1,nv'
+[^:]*:100: Error: operand 2 should be one of the standard conditions, excluding AL and NV. -- `cset w0,al'
+[^:]*:101: Error: operand 2 should be one of the standard conditions, excluding AL and NV. -- `cset w0,nv'

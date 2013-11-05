@@ -117,3 +117,14 @@
 
 	asimdshll	s
 	asimdshll	u
+
+	csinc	w0, w1, w1, nv
+	csinc	w0, w1, w1, al
+	csinc	w0, wzr, wzr, nv
+	csinc	w0, wzr, wzr, al
+	csinv	w0, w1, w1, nv
+	csinv	w0, w1, w1, al
+	csinv	w0, wzr, wzr, nv
+	csinv	w0, wzr, wzr, al
+	csneg	w0, w1, w1, nv
+	csneg	w0, w1, w1, al

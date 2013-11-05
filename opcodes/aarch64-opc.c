@@ -1286,6 +1286,15 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	}
       break;
 
+    case AARCH64_OPND_CLASS_COND:
+      if (type == AARCH64_OPND_COND1
+	  && (opnds[idx].cond->value & 0xe) == 0xe)
+	{
+	  /* Not allow AL or NV.  */
+	  set_syntax_error (mismatch_detail, idx, NULL);
+	}
+      break;
+
     case AARCH64_OPND_CLASS_ADDRESS:
       /* Check writeback.  */
       switch (opcode->iclass)
@@ -2524,6 +2533,7 @@ aarch64_print_operand (char *buf, size_t size, bfd_vma pc,
       break;
 
     case AARCH64_OPND_COND:
+    case AARCH64_OPND_COND1:
       snprintf (buf, size, "%s", opnd->cond->names[0]);
       break;
 
