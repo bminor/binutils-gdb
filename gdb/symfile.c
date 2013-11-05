@@ -2591,12 +2591,16 @@ reread_symbols (void)
 	  memset (&objfile->msymbol_demangled_hash, 0,
 		  sizeof (objfile->msymbol_demangled_hash));
 
-	  set_objfile_per_bfd (objfile);
-
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
 	     gdb_obstack.h specifies the alloc/dealloc functions.  */
 	  obstack_init (&objfile->objfile_obstack);
+
+	  /* set_objfile_per_bfd potentially allocates the per-bfd
+	     data on the objfile's obstack (if sharing data across
+	     multiple users is not possible), so it's important to
+	     do it *after* the obstack has been initialized.  */
+	  set_objfile_per_bfd (objfile);
 
 	  objfile->original_name = obstack_copy0 (&objfile->objfile_obstack,
 						  original_name,
