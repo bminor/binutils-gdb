@@ -1,6 +1,16 @@
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	Apply changes from mainline to 2.24
+	2013-11-11  Ulrich Weigand  <uweigand@de.ibm.com>
+	* elf64-ppc.c (ppc64_elf_edit_toc): Use SYMBOL_REFERENCES_LOCAL
+	here, not SYMBOL_CALLS_LOCAL.
+	(ppc64_elf_relocate_section): Likewise.
+	(size_global_entry_stubs): Set undefined symbols on their global
+	entry stubs here..
+	(build_global_entry_stubs): ..rather than here.
+	(ppc64_elf_build_stubs): Don't reset glink->size before calling
+	build_global_entry_stubs.
+
 	2013-11-05  Alan Modra  <amodra@gmail.com>
 	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Make .TOC. defined and
 	hidden.
