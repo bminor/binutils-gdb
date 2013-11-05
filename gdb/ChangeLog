@@ -1,3 +1,8 @@
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Split into
+	multiple lines.
+
 2013-11-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-tdep.c (sparc_is_annulled_branch_insn): New function.
