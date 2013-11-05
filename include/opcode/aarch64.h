@@ -611,10 +611,19 @@ struct aarch64_name_value_pair
 };
 
 extern const struct aarch64_name_value_pair aarch64_operand_modifiers [];
-extern const struct aarch64_name_value_pair aarch64_sys_regs [];
 extern const struct aarch64_name_value_pair aarch64_pstatefields [];
 extern const struct aarch64_name_value_pair aarch64_barrier_options [16];
 extern const struct aarch64_name_value_pair aarch64_prfops [32];
+
+typedef struct
+{
+  const char *  name;
+  aarch64_insn	value;
+  uint32_t	flags;
+} aarch64_sys_reg;
+
+extern const aarch64_sys_reg aarch64_sys_regs [];
+extern bfd_boolean aarch64_sys_reg_deprecated_p (const aarch64_sys_reg *);
 
 typedef struct
 {

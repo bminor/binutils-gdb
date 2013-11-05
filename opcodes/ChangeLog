@@ -1,5 +1,13 @@
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* aarch64-opc.c (F_DEPRECATED): New macro.
+	(aarch64_sys_regs): Update; flag "spsr_svc" and "spsr_hyp" with
+	F_DEPRECATED.
+	(aarch64_print_operand): Call aarch64_sys_reg_deprecated_p on
+	AARCH64_OPND_SYSREG.
+
+2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* aarch64-dis.c (convert_ubfm_to_lsl): Check for cond != '111x'.
 	(convert_from_csel): Likewise.
 	* aarch64-opc.c (operand_general_constraint_met_p): Handle

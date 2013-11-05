@@ -4277,3 +4277,9 @@ Disassembly of section \.text:
     42b4:	d53cc04f 	mrs	x15, rmr_el2
     42b8:	d51ec04f 	msr	rmr_el3, x15
     42bc:	d53ec04f 	mrs	x15, rmr_el3
+    42c0:	d518400f 	msr	spsr_el1, x15
+    42c4:	d538400f 	mrs	x15, spsr_el1
+    42c8:	d51c400f 	msr	spsr_el2, x15
+    42cc:	d53c400f 	mrs	x15, spsr_el2
+    42d0:	d51e400f 	msr	spsr_el3, x15
+    42d4:	d53e400f 	mrs	x15, spsr_el3
