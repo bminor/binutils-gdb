@@ -85,6 +85,7 @@ enum aarch64_operand_class
   AARCH64_OPND_CLASS_ADDRESS,
   AARCH64_OPND_CLASS_IMMEDIATE,
   AARCH64_OPND_CLASS_SYSTEM,
+  AARCH64_OPND_CLASS_COND,
 };
 
 /* Operand code that helps both parsing and coding.
@@ -168,6 +169,7 @@ enum aarch64_opnd
   AARCH64_OPND_IMM_MOV,	/* Immediate operand for the MOV alias.  */
 
   AARCH64_OPND_COND,	/* Standard condition as the last operand.  */
+  AARCH64_OPND_COND1,	/* Same as the above, but excluding AL and NV.  */
 
   AARCH64_OPND_ADDR_ADRP,	/* Memory address for ADRP */
   AARCH64_OPND_ADDR_PCREL14,	/* 14-bit PC-relative address for e.g. TBZ.  */

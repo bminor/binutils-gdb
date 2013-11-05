@@ -1,5 +1,15 @@
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* gas/aarch64/alias.s: Add tests.
+	* gas/aarch64/alias.d: Update.
+	* gas/aarch64/no-aliases.d: Update.
+	* gas/aarch64/diagnostic.s: Add tests.
+	* gas/aarch64/diagnostic.l: Update.
+	* gas/aarch64/illegal.s: Add tests.
+	* gas/aarch64/illegal.l: Update.
+
+2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* gas/aarch64/diagnostic.s: Add tests of ldp/stp.
 	* gas/aarch64/diagnostic.l: Update.
 

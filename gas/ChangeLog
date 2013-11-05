@@ -1,3 +1,7 @@
+2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (parse_operands): Handle AARCH64_OPND_COND1.
+
 2013-11-05  Will Newton  <will.newton@linaro.org>
 
 	PR gas/16103

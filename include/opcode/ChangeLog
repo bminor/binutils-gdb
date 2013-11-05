@@ -1,3 +1,8 @@
+2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64.h (enum aarch64_operand_class): Add AARCH64_OPND_CLASS_COND.
+	(enum aarch64_opnd): Add AARCH64_OPND_COND1.
+
 2013-08-23  Yuri Chornoivan  <yurchor@ukr.net>
 
 	PR binutils/15834

@@ -1,5 +1,19 @@
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* aarch64-dis.c (convert_ubfm_to_lsl): Check for cond != '111x'.
+	(convert_from_csel): Likewise.
+	* aarch64-opc.c (operand_general_constraint_met_p): Handle
+	AARCH64_OPND_CLASS_COND and AARCH64_OPND_COND1.
+	(aarch64_print_operand): Handle AARCH64_OPND_COND1.
+	* aarch64-tbl.h (aarch64_opcode_table): Use COND1 instead of
+	COND for cinc, cset, cinv, csetm and cneg.
+	(AARCH64_OPERANDS): Add entry for AARCH64_OPND_COND1.
+	* aarch64-asm-2.c: Re-generated.
+	* aarch64-dis-2.c: Ditto.
+	* aarch64-opc-2.c: Ditto.
+
+2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* aarch64-opc.c (set_syntax_error): New function.
 	(operand_general_constraint_met_p): Replace set_other_error
 	with set_syntax_error.

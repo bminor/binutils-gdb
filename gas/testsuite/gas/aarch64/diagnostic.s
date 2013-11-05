@@ -95,3 +95,7 @@
 	stp	w0, w1, [x2, #3]
 	stp	w0, w1, [x2, #2]!
 	stp	w0, w1, [x2], #1
+	cinc	w0, w1, al
+	cinc	w0, w1, nv
+	cset	w0, al
+	cset	w0, nv

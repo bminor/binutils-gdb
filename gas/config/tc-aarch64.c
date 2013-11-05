@@ -4969,11 +4969,19 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_COND:
+	case AARCH64_OPND_COND1:
 	  info->cond = hash_find_n (aarch64_cond_hsh, str, 2);
 	  str += 2;
 	  if (info->cond == NULL)
 	    {
 	      set_syntax_error (_("invalid condition"));
+	      goto failure;
+	    }
+	  else if (operands[i] == AARCH64_OPND_COND1
+		   && (info->cond->value & 0xe) == 0xe)
+	    {
+	      /* Not allow AL or NV.  */
+	      set_default_error ();
 	      goto failure;
 	    }
 	  break;
