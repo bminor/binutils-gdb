@@ -37,6 +37,8 @@ IMPORTED_GNULIB_MODULES="\
     update-copyright \
     unistd \
     pathmax \
+    strerror \
+    strstr \
 "
 
 # The gnulib commit ID to use for the update.

@@ -1,5 +1,27 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add strerror
+	and strstr.
+	* gnulib/aclocal.m4: Update.
+	* gnulib/config.in: Update.
+	* gnulib/configure: Update.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Update.
+	* gnulib/import/errno.in.h: New.
+	* gnulib/import/intprops.h: New.
+	* gnulib/import/m4/errno_h.m4: New.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+	* gnulib/import/m4/strerror.m4: New.
+	* gnulib/import/m4/strstr.m4: New.
+	* gnulib/import/m4/sys_socket_h.m4: New.
+	* gnulib/import/strerror-override.c: New.
+	* gnulib/import/strerror-override.h: New.
+	* gnulib/import/strerror.c: New.
+	* gnulib/import/strstr.c: New.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Split into
 	multiple lines.
 
