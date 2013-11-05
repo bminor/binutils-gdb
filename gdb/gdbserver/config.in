@@ -58,9 +58,6 @@
 /* Define if <sys/procfs.h> has elf_fpregset_t. */
 #undef HAVE_ELF_FPREGSET_T
 
-/* Define if errno is available */
-#undef HAVE_ERRNO
-
 /* Define to 1 if you have the <errno.h> header file. */
 #undef HAVE_ERRNO_H
 
@@ -255,9 +252,6 @@
 
 /* Define to 1 if you have the <wait.h> header file. */
 #undef HAVE_WAIT_H
-
-/* Checking if errno must be defined */
-#undef MUST_DEFINE_ERRNO
 
 /* Define to the address where bug reports for this package should be sent. */
 #undef PACKAGE_BUGREPORT
