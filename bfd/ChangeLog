@@ -1,6 +1,11 @@
+2013-11-05  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (struct ppc_link_hash_table): Remove got, plt, relplt,
+	iplt, reliplt.  Update all references to use elf.sgot, elf.splt,
+	elf.srelplt, elf.iplt and elf.irelplt.
+
 2013-11-03  Sandra Loosemore  <sandra@codesourcery.com>
 
-	bfd/
 	* elf32-niso2.c (nios2_elf32_do_hi16_relocate): Remove incorrect
 	ATTRIBUTE_UNUSED from parameter.
 	(nios2_elf_do_lo16_relocate): Likewise.
@@ -1433,7 +1438,7 @@
 2013-04-09  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	PR ld/12494
-	* bfd/elf32-avr.c: Consider all sections to determine if linker
+	* elf32-avr.c: Consider all sections to determine if linker
 	relaxation can safely delete a ret after a call/jmp
 
 2013-04-09  Mingjie Xing  <mingjie.xing@gmail.com>
