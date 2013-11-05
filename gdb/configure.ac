@@ -1084,14 +1084,6 @@ AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h sys/socket.h proc_serv
 		  sys/types.h sys/wait.h wait.h termios.h termio.h \
 		  sgtty.h unistd.h elf_hp.h locale.h \
 		  dlfcn.h sys/un.h linux/perf_event.h])
-AC_CHECK_HEADERS(link.h, [], [],
-[#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#if HAVE_NLIST_H
-# include <nlist.h>
-#endif
-])
 AC_CHECK_HEADERS(sys/proc.h, [], [],
 [#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
@@ -1475,81 +1467,6 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
   if test $gdb_cv_have_procfs_piocset = yes; then
     AC_DEFINE(HAVE_PROCFS_PIOCSET, 1,
     [Define if ioctl argument PIOCSET is available.])
-  fi
-fi
-
-dnl For native ports (host == target), check to see what kind of
-dnl legacy link.h support is needed.  (See solib-legacy.c.)
-if test ${host} = ${target} ; then
-  dnl Check for struct link_map with l_ members which are indicative
-  dnl of SVR4-like shared libraries
-
-  AC_MSG_CHECKING(for member l_addr in struct link_map)
-  AC_CACHE_VAL(gdb_cv_have_struct_link_map_with_l_members,
-    [AC_TRY_COMPILE([#include <link.h>],
-                    [struct link_map lm; (void) lm.l_addr;],
-                    gdb_cv_have_struct_link_map_with_l_members=yes,
-                    gdb_cv_have_struct_link_map_with_l_members=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_link_map_with_l_members)
-  if test $gdb_cv_have_struct_link_map_with_l_members = yes; then
-    AC_DEFINE(HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS,1,
-    [Define if <link.h> exists and defines struct link_map which has
-     members with an ``l_'' prefix.  (For Solaris, SVR4, and
-     SVR4-like systems.)])
-  fi
-
-  dnl Check for struct link_map with lm_ members which are indicative
-  dnl of SunOS-like shared libraries
-
-  AC_MSG_CHECKING(for member lm_addr in struct link_map)
-  AC_CACHE_VAL(gdb_cv_have_struct_link_map_with_lm_members,
-    [AC_TRY_COMPILE([#include <sys/types.h>
-#include <link.h>],
-                    [struct link_map lm; (void) lm.lm_addr;],
-                    gdb_cv_have_struct_link_map_with_lm_members=yes,
-                    gdb_cv_have_struct_link_map_with_lm_members=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_link_map_with_lm_members)
-  if test $gdb_cv_have_struct_link_map_with_lm_members = yes; then
-    AC_DEFINE(HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS, 1,
-    [Define if <link.h> exists and defines struct link_map which has
-     members with an ``lm_'' prefix.  (For SunOS.)])
-  fi
-
-  dnl Check for struct so_map with som_ members which are found on 
-  dnl some *BSD systems.
-
-  AC_MSG_CHECKING(for member som_addr in struct so_map)
-  AC_CACHE_VAL(gdb_cv_have_struct_so_map_with_som_members,
-    [AC_TRY_COMPILE([#include <sys/types.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-#include <link.h>],
-                    [struct so_map lm; (void) lm.som_addr;],
-                    gdb_cv_have_struct_so_map_with_som_members=yes,
-                    gdb_cv_have_struct_so_map_with_som_members=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_so_map_with_som_members)
-  if test $gdb_cv_have_struct_so_map_with_som_members = yes; then
-    AC_DEFINE(HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS, 1,
-    [Define if <link.h> exists and defines a struct so_map which has
-     members with an ``som_'' prefix.  (Found on older *BSD systems.)])
-  fi
-
-  dnl Check for struct link_map32 type, which allows a 64-bit Solaris
-  dnl debugger to debug a 32-bit Solaris app with 32-bit shared libraries.
-
-  AC_MSG_CHECKING(for struct link_map32 in sys/link.h)
-  AC_CACHE_VAL(gdb_cv_have_struct_link_map32, 
-    [AC_TRY_COMPILE([#define _SYSCALL32
-#include <sys/link.h>], [struct link_map32 l;],
-     gdb_cv_have_struct_link_map32=yes,
-     gdb_cv_have_struct_link_map32=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_link_map32)
-  if test $gdb_cv_have_struct_link_map32 = yes; then
-    AC_DEFINE(HAVE_STRUCT_LINK_MAP32, 1,
-    [Define if <sys/link.h> has struct link_map32])
-    AC_DEFINE(_SYSCALL32, 1,
-    [Define if <sys/link.h> has link_map32 (solaris sparc-64 target)])
   fi
 fi
 

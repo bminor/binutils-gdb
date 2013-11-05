@@ -225,9 +225,6 @@
 /* Define to 1 if you have the `w' library (-lw). */
 #undef HAVE_LIBW
 
-/* Define to 1 if you have the <link.h> header file. */
-#undef HAVE_LINK_H
-
 /* Define to 1 if you have the <linux/perf_event.h> header file. */
 #undef HAVE_LINUX_PERF_EVENT_H
 
@@ -423,17 +420,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
-/* Define if <sys/link.h> has struct link_map32 */
-#undef HAVE_STRUCT_LINK_MAP32
-
-/* Define if <link.h> exists and defines struct link_map which has members
-   with an ``lm_'' prefix. (For SunOS.) */
-#undef HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS
-
-/* Define if <link.h> exists and defines struct link_map which has members
-   with an ``l_'' prefix. (For Solaris, SVR4, and SVR4-like systems.) */
-#undef HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS
-
 /* Define to 1 if your system has struct lwp. */
 #undef HAVE_STRUCT_LWP
 
@@ -445,10 +431,6 @@
 
 /* Define to 1 if `struct reg' is a member of `r_gs'. */
 #undef HAVE_STRUCT_REG_R_GS
-
-/* Define if <link.h> exists and defines a struct so_map which has members
-   with an ``som_'' prefix. (Found on older *BSD systems.) */
-#undef HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS
 
 /* Define to 1 if `struct stat' is a member of `st_blksize'. */
 #undef HAVE_STRUCT_STAT_ST_BLKSIZE
@@ -803,9 +785,6 @@
 
 /* Define to 1 if you need to in order for `stat' and other things to work. */
 #undef _POSIX_SOURCE
-
-/* Define if <sys/link.h> has link_map32 (solaris sparc-64 target) */
-#undef _SYSCALL32
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
