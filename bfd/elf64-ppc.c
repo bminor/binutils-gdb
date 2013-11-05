@@ -6837,7 +6837,18 @@ ppc64_elf_func_desc_adjust (bfd *obfd ATTRIBUTE_UNUSED,
 
   if (!info->relocatable
       && htab->elf.hgot != NULL)
-    _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, TRUE);
+    {
+      _bfd_elf_link_hash_hide_symbol (info, htab->elf.hgot, TRUE);
+      /* Make .TOC. defined so as to prevent it being made dynamic.
+	 The wrong value here is fixed later in ppc64_elf_set_toc.  */
+      htab->elf.hgot->type = STT_OBJECT;
+      htab->elf.hgot->root.type = bfd_link_hash_defined;
+      htab->elf.hgot->root.u.def.value = 0;
+      htab->elf.hgot->root.u.def.section = bfd_abs_section_ptr;
+      htab->elf.hgot->def_regular = 1;
+      htab->elf.hgot->other = ((htab->elf.hgot->other & ~ELF_ST_VISIBILITY (-1))
+			       | STV_HIDDEN);
+    }
 
   if (htab->sfpr == NULL)
     /* We don't have any relocs.  */
@@ -12329,8 +12340,6 @@ ppc64_elf_set_toc (struct bfd_link_info *info, bfd *obfd)
       if (htab != NULL
 	  && htab->elf.hgot != NULL)
 	{
-	  htab->elf.hgot->type = STT_OBJECT;
-	  htab->elf.hgot->root.type = bfd_link_hash_defined;
 	  htab->elf.hgot->root.u.def.value = TOC_BASE_OFF;
 	  htab->elf.hgot->root.u.def.section = s;
 	}
