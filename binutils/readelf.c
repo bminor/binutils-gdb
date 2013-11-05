@@ -11571,6 +11571,12 @@ process_symbol_table (Filedata * filedata)
 	   && filedata->section_headers != NULL)
     {
       unsigned int i;
+      /* Irix 5 and 6 are broken.  Object file symbol tables are not
+	 always sorted correctly such that local symbols precede global
+	 symbols, and the sh_info field in the symbol table is not
+	 always right.  */
+      bfd_boolean check_corrupt_symtab
+	= filedata->file_header.e_ident[EI_OSABI] != ELFOSABI_IRIX;
 
       for (i = 0, section = filedata->section_headers;
 	   i < filedata->file_header.e_shnum;
@@ -11640,7 +11646,12 @@ process_symbol_table (Filedata * filedata)
 	      putchar (' ');
 	      print_vma (psym->st_size, DEC_5);
 	      printf (" %-7s", get_symbol_type (filedata, ELF_ST_TYPE (psym->st_info)));
-	      printf (" %-6s", get_symbol_binding (filedata, ELF_ST_BIND (psym->st_info)));
+	      if (check_corrupt_symtab
+		  && si < section->sh_info
+		  && ELF_ST_BIND (psym->st_info) != STB_LOCAL)
+		printf (" %-6s", "<corrupt>");
+	      else
+	        printf (" %-6s", get_symbol_binding (filedata, ELF_ST_BIND (psym->st_info)));
 	      if (filedata->file_header.e_ident[EI_OSABI] == ELFOSABI_SOLARIS)
 		printf (" %-7s",  get_solaris_symbol_visibility (psym->st_other));
 	      else
