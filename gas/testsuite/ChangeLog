@@ -1,5 +1,13 @@
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
+	* gas/aarch64/deprecated.d: New file.
+	* gas/aarch64/deprecated.l: New file.
+	* gas/aarch64/deprecated.s: New file.
+	* gas/aarch64/sysreg-1.s: Add tests.
+	* gas/aarch64/sysreg-1.d: Add tests.
+
+2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
 	* gas/aarch64/alias.s: Add tests.
 	* gas/aarch64/alias.d: Update.
 	* gas/aarch64/no-aliases.d: Update.

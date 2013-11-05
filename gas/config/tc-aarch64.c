@@ -3277,7 +3277,7 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
 {
   char *p, *q;
   char buf[32];
-  const struct aarch64_name_value_pair *o;
+  const aarch64_sys_reg *o;
   int value;
 
   p = buf;
@@ -3313,7 +3313,12 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
 	}
     }
   else
-    value = o->value;
+    {
+      if (aarch64_sys_reg_deprecated_p (o))
+	as_warn (_("system register name '%s' is deprecated and may be "
+"removed in a future release"), buf);
+      value = o->value;
+    }
 
   *str = q;
   return value;
