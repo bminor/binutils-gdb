@@ -1075,15 +1075,15 @@ fi
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 # elf_hp.h is for HP/UX 64-bit shared library support.
-AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h sys/socket.h proc_service.h \
-                  thread_db.h signal.h stddef.h \
-		  stdlib.h string.h memory.h strings.h sys/fault.h \
+AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
+                  thread_db.h stddef.h \
+		  stdlib.h sys/fault.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
-		  sys/types.h sys/wait.h wait.h termios.h termio.h \
-		  sgtty.h unistd.h elf_hp.h locale.h \
-		  dlfcn.h sys/un.h linux/perf_event.h])
+		  termios.h termio.h \
+		  sgtty.h unistd.h elf_hp.h \
+		  dlfcn.h])
 AC_CHECK_HEADERS(sys/proc.h, [], [],
 [#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
@@ -1117,8 +1117,7 @@ AC_CHECK_HEADERS(term.h, [], [],
 # Checks for declarations.  #
 # ------------------------- #
 
-AC_CHECK_DECLS([free, malloc, realloc, strerror, strstr, getopt,
-                snprintf, vsnprintf])
+AC_CHECK_DECLS([free, malloc, realloc, snprintf])
 AM_LC_MESSAGES
 
 # ----------------------- #
@@ -1155,10 +1154,10 @@ AC_FUNC_VFORK
 AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid getgid \
 		pipe poll pread pread64 pwrite readlink resize_term \
 		sbrk setpgid setpgrp setsid \
-		sigaction sigprocmask sigsetmask socketpair syscall \
+		sigaction sigprocmask sigsetmask socketpair \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
 		setrlimit getrlimit posix_madvise waitpid lstat \
-		fdwalk pipe2 ptrace64])
+		ptrace64])
 AM_LANGINFO_CODESET
 GDB_AC_COMMON
 
@@ -1408,14 +1407,11 @@ if test "${target}" = "${host}"; then
 fi
 
 if test "$ac_cv_header_sys_procfs_h" = yes; then
-  BFD_HAVE_SYS_PROCFS_TYPE(pstatus_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prrun_t)
   BFD_HAVE_SYS_PROCFS_TYPE(gregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(fpregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prfpregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset32_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prfpregset32_t)
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prsysent_t)
@@ -1449,24 +1445,6 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
       AC_DEFINE(PRFPREGSET_T_BROKEN, 1,
       [Define if the prfpregset_t type is broken.])
     fi
-  fi
-
-  dnl Check for PIOCSET ioctl entry 
-
-  AC_MSG_CHECKING(for PIOCSET ioctl entry in sys/procfs.h)
-  AC_CACHE_VAL(gdb_cv_have_procfs_piocset,
-  [AC_TRY_COMPILE([#include <unistd.h>
-#include <sys/types.h>
-#include <sys/procfs.h>
-], [
-    int dummy;;
-    dummy = ioctl(0, PIOCSET, &dummy);
-  ],
-  gdb_cv_have_procfs_piocset=yes, gdb_cv_have_procfs_piocset=no)])
-  AC_MSG_RESULT($gdb_cv_have_procfs_piocset)
-  if test $gdb_cv_have_procfs_piocset = yes; then
-    AC_DEFINE(HAVE_PROCFS_PIOCSET, 1,
-    [Define if ioctl argument PIOCSET is available.])
   fi
 fi
 
