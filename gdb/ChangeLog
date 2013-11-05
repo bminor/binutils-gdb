@@ -1,5 +1,9 @@
 2013-11-08  Tom Tromey  <tromey@redhat.com>
 
+	* m32c-tdep.c: Use gdb_string.h.
+
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
 	* configure, config.in: Rebuild.
 	* configure.ac: Remove all link.h-related checks.
 
