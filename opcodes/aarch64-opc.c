@@ -1122,6 +1122,15 @@ set_error (aarch64_operand_error *mismatch_detail,
 }
 
 static inline void
+set_syntax_error (aarch64_operand_error *mismatch_detail, int idx,
+		  const char* error)
+{
+  if (mismatch_detail == NULL)
+    return;
+  set_error (mismatch_detail, AARCH64_OPDE_SYNTAX_ERROR, idx, error);
+}
+
+static inline void
 set_out_of_range_error (aarch64_operand_error *mismatch_detail,
 			int idx, int lower_bound, int upper_bound,
 			const char* error)
@@ -1288,8 +1297,8 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case ldst_unpriv:
 	  if (opnd->addr.writeback == 1)
 	    {
-	      set_other_error (mismatch_detail, idx,
-			       _("unexpected address writeback"));
+	      set_syntax_error (mismatch_detail, idx,
+				_("unexpected address writeback"));
 	      return 0;
 	    }
 	  break;
@@ -1299,8 +1308,8 @@ operand_general_constraint_met_p (const aarch64_opnd_info *opnds, int idx,
 	case asisdlsop:
 	  if (opnd->addr.writeback == 0)
 	    {
-	      set_other_error (mismatch_detail, idx,
-			       _("address writeback expected"));
+	      set_syntax_error (mismatch_detail, idx,
+				_("address writeback expected"));
 	      return 0;
 	    }
 	  break;

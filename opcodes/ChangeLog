@@ -1,3 +1,9 @@
+2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (set_syntax_error): New function.
+	(operand_general_constraint_met_p): Replace set_other_error
+	with set_syntax_error.
+
 2013-10-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* s390-dis.c (init_disasm): Default to full 'zarch' opcode
