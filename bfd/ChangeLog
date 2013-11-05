@@ -1,5 +1,11 @@
 2013-11-05  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc64_elf_func_desc_adjust): Make .TOC. defined and
+	hidden.
+	(ppc64_elf_set_toc): Adjust.
+
+2013-11-05  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (struct ppc_link_hash_table): Remove got, plt, relplt,
 	iplt, reliplt.  Update all references to use elf.sgot, elf.splt,
 	elf.srelplt, elf.iplt and elf.irelplt.
