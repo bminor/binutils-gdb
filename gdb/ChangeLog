@@ -1,3 +1,8 @@
+2013-11-06  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (s390_read_description): Consider the TE field
+	in the HWCAP for determining 'have_regset_tdb'.
+
 2013-11-06  Will Newton  <will.newton@linaro.org>
 
 	PR gdb/12866
