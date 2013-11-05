@@ -3909,12 +3909,7 @@ struct ppc_link_hash_table
   /* List of input sections for each output section.  */
   asection **input_list;
 
-  /* Short-cuts to get to dynamic linker sections.  */
-  asection *got;
-  asection *plt;
-  asection *relplt;
-  asection *iplt;
-  asection *reliplt;
+  /* Shortcuts to get to dynamic linker sections.  */
   asection *dynbss;
   asection *relbss;
   asection *glink;
@@ -4257,18 +4252,17 @@ create_linkage_sections (bfd *dynobj, struct bfd_link_info *info)
     }
 
   flags = SEC_ALLOC | SEC_LINKER_CREATED;
-  htab->iplt = bfd_make_section_anyway_with_flags (dynobj, ".iplt", flags);
-  if (htab->iplt == NULL
-      || ! bfd_set_section_alignment (dynobj, htab->iplt, 3))
+  htab->elf.iplt = bfd_make_section_anyway_with_flags (dynobj, ".iplt", flags);
+  if (htab->elf.iplt == NULL
+      || ! bfd_set_section_alignment (dynobj, htab->elf.iplt, 3))
     return FALSE;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY
 	   | SEC_HAS_CONTENTS | SEC_IN_MEMORY | SEC_LINKER_CREATED);
-  htab->reliplt = bfd_make_section_anyway_with_flags (dynobj,
-						      ".rela.iplt",
-						      flags);
-  if (htab->reliplt == NULL
-      || ! bfd_set_section_alignment (dynobj, htab->reliplt, 3))
+  htab->elf.irelplt
+    = bfd_make_section_anyway_with_flags (dynobj, ".rela.iplt", flags);
+  if (htab->elf.irelplt == NULL
+      || ! bfd_set_section_alignment (dynobj, htab->elf.irelplt, 3))
     return FALSE;
 
   /* Create branch lookup table for plt_branch stubs.  */
@@ -4481,15 +4475,9 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
-  if (!htab->got)
-    {
-      if (! _bfd_elf_create_got_section (htab->elf.dynobj, info))
-	return FALSE;
-
-      htab->got = bfd_get_linker_section (htab->elf.dynobj, ".got");
-      if (!htab->got)
-	abort ();
-    }
+  if (!htab->elf.sgot
+      && !_bfd_elf_create_got_section (htab->elf.dynobj, info))
+    return FALSE;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
@@ -4524,15 +4512,11 @@ ppc64_elf_create_dynamic_sections (bfd *dynobj, struct bfd_link_info *info)
   if (htab == NULL)
     return FALSE;
 
-  if (!htab->got)
-    htab->got = bfd_get_linker_section (dynobj, ".got");
-  htab->plt = bfd_get_linker_section (dynobj, ".plt");
-  htab->relplt = bfd_get_linker_section (dynobj, ".rela.plt");
   htab->dynbss = bfd_get_linker_section (dynobj, ".dynbss");
   if (!info->shared)
     htab->relbss = bfd_get_linker_section (dynobj, ".rela.bss");
 
-  if (!htab->got || !htab->plt || !htab->relplt || !htab->dynbss
+  if (!htab->elf.sgot || !htab->elf.splt || !htab->elf.srelplt || !htab->dynbss
       || (!info->shared && !htab->relbss))
     abort ();
 
@@ -9232,7 +9216,7 @@ allocate_got (struct elf_link_hash_entry *h,
   dyn = htab->elf.dynamic_sections_created;
   if (h->type == STT_GNU_IFUNC)
     {
-      htab->reliplt->size += rentsize;
+      htab->elf.irelplt->size += rentsize;
       htab->got_reli_size += rentsize;
     }
   else if ((info->shared
@@ -9299,16 +9283,16 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    if (!htab->elf.dynamic_sections_created
 		|| h->dynindx == -1)
 	      {
-		s = htab->iplt;
+		s = htab->elf.iplt;
 		pent->plt.offset = s->size;
 		s->size += PLT_ENTRY_SIZE (htab);
-		s = htab->reliplt;
+		s = htab->elf.irelplt;
 	      }
 	    else
 	      {
 		/* If this is the first .plt entry, make room for the special
 		   first entry.  */
-		s = htab->plt;
+		s = htab->elf.splt;
 		if (s->size == 0)
 		  s->size += PLT_INITIAL_ENTRY_SIZE (htab);
 
@@ -9332,7 +9316,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		  s->size += 4;
 
 		/* We also need to make an entry in the .rela.plt section.  */
-		s = htab->relplt;
+		s = htab->elf.srelplt;
 	      }
 	    s->size += sizeof (Elf64_External_Rela);
 	    doneone = TRUE;
@@ -9512,7 +9496,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       asection *sreloc = elf_section_data (p->sec)->sreloc;
       if (eh->elf.type == STT_GNU_IFUNC)
-	sreloc = htab->reliplt;
+	sreloc = htab->elf.irelplt;
       sreloc->size += p->count * sizeof (Elf64_External_Rela);
     }
 
@@ -9643,7 +9627,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 		{
 		  asection *srel = elf_section_data (p->sec)->sreloc;
 		  if (p->ifunc)
-		    srel = htab->reliplt;
+		    srel = htab->elf.irelplt;
 		  srel->size += p->count * sizeof (Elf64_External_Rela);
 		  if ((p->sec->output_section->flags & SEC_READONLY) != 0)
 		    info->flags |= DF_TEXTREL;
@@ -9689,7 +9673,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 		    s->size += ent_size;
 		    if ((*lgot_masks & PLT_IFUNC) != 0)
 		      {
-			htab->reliplt->size += rel_size;
+			htab->elf.irelplt->size += rel_size;
 			htab->got_reli_size += rel_size;
 		      }
 		    else if (info->shared)
@@ -9712,11 +9696,11 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	  for (ent = *local_plt; ent != NULL; ent = ent->next)
 	    if (ent->plt.refcount > 0)
 	      {
-		s = htab->iplt;
+		s = htab->elf.iplt;
 		ent->plt.offset = s->size;
 		s->size += PLT_ENTRY_SIZE (htab);
 
-		htab->reliplt->size += sizeof (Elf64_External_Rela);
+		htab->elf.irelplt->size += sizeof (Elf64_External_Rela);
 	      }
 	    else
 	      ent->plt.offset = (bfd_vma) -1;
@@ -9779,9 +9763,9 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
       if (s == htab->brlt || s == htab->relbrlt)
 	/* These haven't been allocated yet;  don't strip.  */
 	continue;
-      else if (s == htab->got
-	       || s == htab->plt
-	       || s == htab->iplt
+      else if (s == htab->elf.sgot
+	       || s == htab->elf.splt
+	       || s == htab->elf.iplt
 	       || s == htab->glink
 	       || s == htab->dynbss)
 	{
@@ -9798,7 +9782,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  if (s->size != 0)
 	    {
-	      if (s != htab->relplt)
+	      if (s != htab->elf.srelplt)
 		relocs = TRUE;
 
 	      /* We use the reloc_count field as a counter if we need
@@ -9848,7 +9832,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	continue;
 
       s = ppc64_elf_tdata (ibfd)->got;
-      if (s != NULL && s != htab->got)
+      if (s != NULL && s != htab->elf.sgot)
 	{
 	  if (s->size == 0)
 	    s->flags |= SEC_EXCLUDE;
@@ -9893,7 +9877,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd,
 	    return FALSE;
 	}
 
-      if (htab->plt != NULL && htab->plt->size != 0)
+      if (htab->elf.splt != NULL && htab->elf.splt->size != 0)
 	{
 	  if (!add_dynamic_entry (DT_PLTGOT, 0)
 	      || !add_dynamic_entry (DT_PLTRELSZ, 0)
@@ -10695,11 +10679,11 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       if (dest >= (bfd_vma) -2)
 	abort ();
 
-      plt = htab->plt;
+      plt = htab->elf.splt;
       if (!htab->elf.dynamic_sections_created
 	  || stub_entry->h == NULL
 	  || stub_entry->h->elf.dynindx == -1)
-	plt = htab->iplt;
+	plt = htab->elf.iplt;
 
       dest += plt->output_offset + plt->output_section->vma;
 
@@ -10718,8 +10702,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 			   + stub_entry->target_section->output_offset
 			   + stub_entry->target_section->output_section->vma);
 
-	  rl = (htab->reliplt->contents
-		+ (htab->reliplt->reloc_count++
+	  rl = (htab->elf.irelplt->contents
+		+ (htab->elf.irelplt->reloc_count++
 		   * sizeof (Elf64_External_Rela)));
 	  bfd_elf64_swap_reloca_out (info->output_bfd, &rela, rl);
 	  stub_entry->plt_ent->plt.offset |= 1;
@@ -10849,11 +10833,11 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
       off = stub_entry->plt_ent->plt.offset & ~(bfd_vma) 1;
       if (off >= (bfd_vma) -2)
 	abort ();
-      plt = htab->plt;
+      plt = htab->elf.splt;
       if (!htab->elf.dynamic_sections_created
 	  || stub_entry->h == NULL
 	  || stub_entry->h->elf.dynindx == -1)
-	plt = htab->iplt;
+	plt = htab->elf.iplt;
       off += (plt->output_offset
 	      + plt->output_section->vma
 	      - elf_gp (plt->output_section->owner)
@@ -11220,8 +11204,8 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
     }
 
   /* Zap sizes of got sections.  */
-  htab->reliplt->rawsize = htab->reliplt->size;
-  htab->reliplt->size -= htab->got_reli_size;
+  htab->elf.irelplt->rawsize = htab->elf.irelplt->size;
+  htab->elf.irelplt->size -= htab->got_reli_size;
   htab->got_reli_size = 0;
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
@@ -11287,7 +11271,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 	      s->size += ent_size;
 	      if ((*lgot_masks & PLT_IFUNC) != 0)
 		{
-		  htab->reliplt->size += rel_size;
+		  htab->elf.irelplt->size += rel_size;
 		  htab->got_reli_size += rel_size;
 		}
 	      else if (info->shared)
@@ -11323,7 +11307,7 @@ ppc64_elf_layout_multitoc (struct bfd_link_info *info)
 	}
     }
 
-  done_something = htab->reliplt->rawsize != htab->reliplt->size;
+  done_something = htab->elf.irelplt->rawsize != htab->elf.irelplt->size;
   if (!done_something)
     for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
       {
@@ -12396,10 +12380,10 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	h->root.u.def.value = s->size;
 	s->size += 16;
 	p = s->contents + h->root.u.def.value;
-	plt = htab->plt;
+	plt = htab->elf.splt;
 	if (!htab->elf.dynamic_sections_created
 	    || h->dynindx == -1)
-	  plt = htab->iplt;
+	  plt = htab->elf.iplt;
 	off = pent->plt.offset + plt->output_offset + plt->output_section->vma;
 	off -= h->root.u.def.value + s->output_offset + s->output_section->vma;
 
@@ -12487,7 +12471,9 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 	      h->non_elf = 0;
 	    }
 	}
-      plt0 = htab->plt->output_section->vma + htab->plt->output_offset - 16;
+      plt0 = (htab->elf.splt->output_section->vma
+	      + htab->elf.splt->output_offset
+	      - 16);
       if (info->emitrelocations)
 	{
 	  Elf_Internal_Rela *r = get_relocs (htab->glink, 1);
@@ -13916,7 +13902,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 			 ? h->elf.type == STT_GNU_IFUNC
 			 : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC);
 		if (ifunc)
-		  relgot = htab->reliplt;
+		  relgot = htab->elf.irelplt;
 		else if ((info->shared || indx != 0)
 			 && (h == NULL
 			     || (tls_type == (TLS_TLS | TLS_LD)
@@ -14030,15 +14016,15 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	     symbol.  This happens when statically linking PIC code,
 	     or when using -Bsymbolic.  Go find a match if there is a
 	     PLT entry.  */
-	  if (htab->plt != NULL)
+	  if (htab->elf.splt != NULL)
 	    {
 	      struct plt_entry *ent;
 	      for (ent = h->elf.plt.plist; ent != NULL; ent = ent->next)
 		if (ent->plt.offset != (bfd_vma) -1
 		    && ent->addend == orig_rel.r_addend)
 		  {
-		    relocation = (htab->plt->output_section->vma
-				  + htab->plt->output_offset
+		    relocation = (htab->elf.splt->output_section->vma
+				  + htab->elf.splt->output_offset
 				  + ent->plt.offset);
 		    unresolved_reloc = FALSE;
 		    break;
@@ -14347,7 +14333,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	      if (h != NULL
 		  ? h->elf.type == STT_GNU_IFUNC
 		  : ELF_ST_TYPE (sym->st_info) == STT_GNU_IFUNC)
-		sreloc = htab->reliplt;
+		sreloc = htab->elf.irelplt;
 	      if (sreloc == NULL)
 		abort ();
 
@@ -14724,8 +14710,8 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 			&& h->def_regular
 			&& (h->root.type == bfd_link_hash_defined
 			    || h->root.type == bfd_link_hash_defweak));
-	    rela.r_offset = (htab->iplt->output_section->vma
-			     + htab->iplt->output_offset
+	    rela.r_offset = (htab->elf.iplt->output_section->vma
+			     + htab->elf.iplt->output_offset
 			     + ent->plt.offset);
 	    if (htab->opd_abi)
 	      rela.r_info = ELF64_R_INFO (0, R_PPC64_JMP_IREL);
@@ -14735,18 +14721,18 @@ ppc64_elf_finish_dynamic_symbol (bfd *output_bfd,
 			     + h->root.u.def.section->output_offset
 			     + h->root.u.def.section->output_section->vma
 			     + ent->addend);
-	    loc = (htab->reliplt->contents
-		   + (htab->reliplt->reloc_count++
+	    loc = (htab->elf.irelplt->contents
+		   + (htab->elf.irelplt->reloc_count++
 		      * sizeof (Elf64_External_Rela)));
 	  }
 	else
 	  {
-	    rela.r_offset = (htab->plt->output_section->vma
-			     + htab->plt->output_offset
+	    rela.r_offset = (htab->elf.splt->output_section->vma
+			     + htab->elf.splt->output_offset
 			     + ent->plt.offset);
 	    rela.r_info = ELF64_R_INFO (h->dynindx, R_PPC64_JMP_SLOT);
 	    rela.r_addend = ent->addend;
-	    loc = (htab->relplt->contents
+	    loc = (htab->elf.srelplt->contents
 		   + ((ent->plt.offset - PLT_INITIAL_ENTRY_SIZE (htab))
 		      / PLT_ENTRY_SIZE (htab) * sizeof (Elf64_External_Rela)));
 	  }
@@ -14811,7 +14797,7 @@ ppc64_elf_reloc_type_class (const struct bfd_link_info *info,
   enum elf_ppc64_reloc_type r_type;
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
-  if (rel_sec == htab->reliplt)
+  if (rel_sec == htab->elf.irelplt)
     return reloc_class_ifunc;
 
   r_type = ELF64_R_TYPE (rela->r_info);
@@ -14849,7 +14835,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
     {
       Elf64_External_Dyn *dyncon, *dynconend;
 
-      if (sdyn == NULL || htab->got == NULL)
+      if (sdyn == NULL || htab->elf.sgot == NULL)
 	abort ();
 
       dyncon = (Elf64_External_Dyn *) sdyn->contents;
@@ -14896,23 +14882,23 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	      break;
 
 	    case DT_PLTGOT:
-	      s = htab->plt;
+	      s = htab->elf.splt;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_JMPREL:
-	      s = htab->relplt;
+	      s = htab->elf.srelplt;
 	      dyn.d_un.d_ptr = s->output_section->vma + s->output_offset;
 	      break;
 
 	    case DT_PLTRELSZ:
-	      dyn.d_un.d_val = htab->relplt->size;
+	      dyn.d_un.d_val = htab->elf.srelplt->size;
 	      break;
 
 	    case DT_RELASZ:
 	      /* Don't count procedure linkage table relocs in the
 		 overall reloc count.  */
-	      s = htab->relplt;
+	      s = htab->elf.srelplt;
 	      if (s == NULL)
 		continue;
 	      dyn.d_un.d_val -= s->size;
@@ -14922,7 +14908,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	      /* We may not be using the standard ELF linker script.
 		 If .rela.plt is the first .rela section, we adjust
 		 DT_RELA to not include it.  */
-	      s = htab->relplt;
+	      s = htab->elf.srelplt;
 	      if (s == NULL)
 		continue;
 	      if (dyn.d_un.d_ptr != s->output_section->vma + s->output_offset)
@@ -14935,22 +14921,22 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  if (htab->got != NULL && htab->got->size != 0)
+  if (htab->elf.sgot != NULL && htab->elf.sgot->size != 0)
     {
       /* Fill in the first entry in the global offset table.
 	 We use it to hold the link-time TOCbase.  */
       bfd_put_64 (output_bfd,
 		  elf_gp (output_bfd) + TOC_BASE_OFF,
-		  htab->got->contents);
+		  htab->elf.sgot->contents);
 
       /* Set .got entry size.  */
-      elf_section_data (htab->got->output_section)->this_hdr.sh_entsize = 8;
+      elf_section_data (htab->elf.sgot->output_section)->this_hdr.sh_entsize = 8;
     }
 
-  if (htab->plt != NULL && htab->plt->size != 0)
+  if (htab->elf.splt != NULL && htab->elf.splt->size != 0)
     {
       /* Set .plt entry size.  */
-      elf_section_data (htab->plt->output_section)->this_hdr.sh_entsize
+      elf_section_data (htab->elf.splt->output_section)->this_hdr.sh_entsize
 	= PLT_ENTRY_SIZE (htab);
     }
 
