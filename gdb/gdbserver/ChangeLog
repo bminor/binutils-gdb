@@ -1,5 +1,11 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
+	* configure: Rebuild.
+	* configure.ac: Don't check for stdlib.h.
+	* gdbreplay.c: Unconditionally include stdlib.h.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
 	* config.in: Rebuild.
 	* configure: Rebuild.
 	* configure.ac: Don't use AC_HEADER_DIRENT.

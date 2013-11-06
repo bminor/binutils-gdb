@@ -604,9 +604,7 @@ enum gdb_osabi
 
 /* From other system libraries */
 
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 
 
 #ifndef atof

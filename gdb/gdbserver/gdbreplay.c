@@ -35,9 +35,7 @@
 #if HAVE_ERRNO_H
 #include <errno.h>
 #endif
-#ifdef HAVE_STDLIB_H
 #include <stdlib.h>
-#endif
 #include <string.h>
 #include <unistd.h>
 #ifdef HAVE_NETINET_IN_H
