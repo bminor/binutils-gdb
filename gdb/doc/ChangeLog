@@ -1,3 +1,11 @@
+2013-11-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Starting) <set/show startup-with-shell>: Mention
+	non-interactive mode.
+	(Environment) <shell startup files warning>: Mention
+	non-interactive mode.  Mention .zshenv for Z shell, and talk about
+	BASH_ENV instead of .bashrc for BASH.
+
 2013-10-29  Nicolas Blanc  <nicolas.blanc@intel.com>
 
 	* gdb.texinfo (Commands to Specify Files): Add description

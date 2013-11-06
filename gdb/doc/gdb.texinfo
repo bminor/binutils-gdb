@@ -2139,9 +2139,10 @@ During startup program terminated with signal SIGSEGV, Segmentation fault.
 @noindent
 which indicates the shell or the wrapper specified with
 @samp{exec-wrapper} crashed, not your program.  Most often, this is
-caused by something odd in your shell's initialization file---such as
-@file{.cshrc} for C-shell, $@file{.zshenv} for the Z shell, or the
-file specified in the @samp{BASH_ENV} environment variable for BASH.
+caused by something odd in your shell's non-interactive mode
+initialization file---such as @file{.cshrc} for C-shell,
+$@file{.zshenv} for the Z shell, or the file specified in the
+@samp{BASH_ENV} environment variable for BASH.
 
 @kindex set disable-randomization
 @item set disable-randomization
@@ -2305,14 +2306,15 @@ rather than assigning it an empty value.
 @end table
 
 @emph{Warning:} On Unix systems, @value{GDBN} runs your program using
-the shell indicated
-by your @code{SHELL} environment variable if it exists (or
-@code{/bin/sh} if not).  If your @code{SHELL} variable names a shell
-that runs an initialization file---such as @file{.cshrc} for C-shell, or
-@file{.bashrc} for BASH---any variables you set in that file affect
-your program.  You may wish to move setting of environment variables to
-files that are only run when you sign on, such as @file{.login} or
-@file{.profile}.
+the shell indicated by your @code{SHELL} environment variable if it
+exists (or @code{/bin/sh} if not).  If your @code{SHELL} variable
+names a shell that runs an initialization file when started
+non-interactively---such as @file{.cshrc} for C-shell, $@file{.zshenv}
+for the Z shell, or the file specified in the @samp{BASH_ENV}
+environment variable for BASH---any variables you set in that file
+affect your program.  You may wish to move setting of environment
+variables to files that are only run when you sign on, such as
+@file{.login} or @file{.profile}.
 
 @node Working Directory
 @section Your Program's Working Directory
