@@ -1,6 +1,11 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
 	* configure: Rebuild.
+	* configure.ac: Don't check for unistd.h.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
+	* configure: Rebuild.
 	* configure.ac: Don't check for stdlib.h
 	* defs.h: Include stdlib.h unconditionally.
 
