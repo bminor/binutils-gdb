@@ -1,0 +1,15 @@
+bfd/
+
+2013-11-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12639
+	* elfcode.h (elf_slurp_symbol_table): Check corrupted global
+	symbols.
+
+binutils/
+
+2013-11-05  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/12639
+	* readelf.c (process_symbol_table): Detect corrupted symbol
+	table.

@@ -9613,6 +9613,12 @@ process_symbol_table (FILE * file)
   else if (do_dyn_syms || (do_syms && !do_using_dynamic))
     {
       unsigned int i;
+      /* Irix 5 and 6 are broken.  Object file symbol tables are not
+	 always sorted correctly such that local symbols precede global
+	 symbols, and the sh_info field in the symbol table is not
+	 always right.  */
+      bfd_boolean check_corrupt_symtab
+	= elf_header.e_ident[EI_OSABI] != ELFOSABI_IRIX;
 
       for (i = 0, section = section_headers;
 	   i < elf_header.e_shnum;
@@ -9675,7 +9681,12 @@ process_symbol_table (FILE * file)
 	      putchar (' ');
 	      print_vma (psym->st_size, DEC_5);
 	      printf (" %-7s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
-	      printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
+	      if (check_corrupt_symtab
+		  && si < section->sh_info
+		  && ELF_ST_BIND (psym->st_info) != STB_LOCAL)
+		printf (" %-6s", "<corrupt>");
+	      else
+		printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
 	      printf (" %-7s", get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
 	      /* Check to see if any other bits in the st_other field are set.
 	         Note - displaying this information disrupts the layout of the

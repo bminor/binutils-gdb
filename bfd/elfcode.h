@@ -1168,6 +1168,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
     sym = symbase = NULL;
   else
     {
+      /* Start of global symbols */
+      Elf_Internal_Sym *start_global;
+
       isymbuf = bfd_elf_get_elf_syms (abfd, hdr, symcount, 0,
 				      NULL, NULL, NULL);
       if (isymbuf == NULL)
@@ -1212,6 +1215,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
       if (xver != NULL)
 	++xver;
       isymend = isymbuf + symcount;
+      start_global = isymbuf;
+      if (!elf_bad_symtab (abfd))
+	start_global += hdr->sh_info;
       for (isym = isymbuf + 1, sym = symbase; isym < isymend; isym++, sym++)
 	{
 	  memcpy (&sym->internal_elf_sym, isym, sizeof (Elf_Internal_Sym));
@@ -1269,6 +1275,12 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	     already section relative.  */
 	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
 	    sym->symbol.value -= sym->symbol.section->vma;
+
+	  if (isym < start_global
+	      && ELF_ST_BIND (isym->st_info) != STB_LOCAL)
+	    (*_bfd_error_handler)
+	      (_("%s: corrupted global symbol `%s' treated as local"),
+	       abfd->filename, sym->symbol.name);
 
 	  switch (ELF_ST_BIND (isym->st_info))
 	    {
