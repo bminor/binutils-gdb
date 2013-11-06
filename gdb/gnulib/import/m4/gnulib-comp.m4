@@ -41,6 +41,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module alloca:
   # Code from module alloca-opt:
   # Code from module configmake:
+  # Code from module dirent:
   # Code from module errno:
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
@@ -109,6 +110,7 @@ AC_DEFUN([gl_INIT],
   gl_source_base='import'
   gl_FUNC_ALLOCA
   gl_CONFIGMAKE_PREP
+  gl_DIRENT_H
   gl_HEADER_ERRNO_H
   AC_REQUIRE([gl_EXTERN_INLINE])
   gl_FLOAT_H
@@ -368,6 +370,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/alloca.c
   lib/alloca.in.h
   lib/config.charset
+  lib/dirent.in.h
   lib/errno.in.h
   lib/float+.h
   lib/float.c
@@ -424,6 +427,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/alloca.m4
   m4/codeset.m4
   m4/configmake.m4
+  m4/dirent_h.m4
   m4/errno_h.m4
   m4/exponentd.m4
   m4/exponentl.m4

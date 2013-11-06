@@ -109,6 +109,9 @@
    don't. */
 #undef HAVE_DECL_TOWLOWER
 
+/* Define to 1 if you have the <dirent.h> header file. */
+#undef HAVE_DIRENT_H
+
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
@@ -179,6 +182,9 @@
 /* Define to 1 if acosl is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_ACOSL
 
+/* Define to 1 if alphasort is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_ALPHASORT
+
 /* Define to 1 if asinf is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_ASINF
 
@@ -215,6 +221,9 @@
 /* Define to 1 if chown is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_CHOWN
 
+/* Define to 1 if closedir is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_CLOSEDIR
+
 /* Define to 1 if copysign is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_COPYSIGN
 
@@ -232,6 +241,9 @@
 
 /* Define to 1 if cosl is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_COSL
+
+/* Define to 1 if dirfd is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_DIRFD
 
 /* Define to 1 if dup is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_DUP
@@ -292,6 +304,9 @@
 
 /* Define to 1 if fdatasync is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_FDATASYNC
+
+/* Define to 1 if fdopendir is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_FDOPENDIR
 
 /* Define to 1 if ffsl is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_FFSL
@@ -488,6 +503,9 @@
 /* Define to 1 if modfl is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_MODFL
 
+/* Define to 1 if opendir is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_OPENDIR
+
 /* Define to 1 if pipe is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_PIPE
 
@@ -506,6 +524,9 @@
 /* Define to 1 if rawmemchr is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_RAWMEMCHR
 
+/* Define to 1 if readdir is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_READDIR
+
 /* Define to 1 if readlink is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_READLINK
 
@@ -520,6 +541,9 @@
 
 /* Define to 1 if remainderl is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_REMAINDERL
+
+/* Define to 1 if rewinddir is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_REWINDDIR
 
 /* Define to 1 if rint is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_RINT
@@ -541,6 +565,9 @@
 
 /* Define to 1 if roundl is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_ROUNDL
+
+/* Define to 1 if scandir is declared even after undefining macros. */
+#undef HAVE_RAW_DECL_SCANDIR
 
 /* Define to 1 if sethostname is declared even after undefining macros. */
 #undef HAVE_RAW_DECL_SETHOSTNAME

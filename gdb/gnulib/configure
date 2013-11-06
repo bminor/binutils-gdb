@@ -588,9 +588,9 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
+ac_header_list=
 gl_fnmatch_required=POSIX
 ac_func_list=
-ac_header_list=
 ac_subst_vars='am__EXEEXT_FALSE
 am__EXEEXT_TRUE
 gltests_LTLIBOBJS
@@ -663,126 +663,6 @@ NEXT_SYS_TYPES_H
 NEXT_AS_FIRST_DIRECTIVE_STRING_H
 NEXT_STRING_H
 HAVE_WINSOCK2_H
-UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS
-UNISTD_H_HAVE_WINSOCK2_H
-REPLACE_WRITE
-REPLACE_USLEEP
-REPLACE_UNLINKAT
-REPLACE_UNLINK
-REPLACE_TTYNAME_R
-REPLACE_SYMLINK
-REPLACE_SLEEP
-REPLACE_RMDIR
-REPLACE_READLINK
-REPLACE_READ
-REPLACE_PWRITE
-REPLACE_PREAD
-REPLACE_LSEEK
-REPLACE_LINKAT
-REPLACE_LINK
-REPLACE_LCHOWN
-REPLACE_ISATTY
-REPLACE_GETPAGESIZE
-REPLACE_GETGROUPS
-REPLACE_GETLOGIN_R
-REPLACE_GETDOMAINNAME
-REPLACE_GETCWD
-REPLACE_FTRUNCATE
-REPLACE_FCHOWNAT
-REPLACE_DUP2
-REPLACE_DUP
-REPLACE_CLOSE
-REPLACE_CHOWN
-HAVE_SYS_PARAM_H
-HAVE_OS_H
-HAVE_DECL_TTYNAME_R
-HAVE_DECL_SETHOSTNAME
-HAVE_DECL_GETUSERSHELL
-HAVE_DECL_GETPAGESIZE
-HAVE_DECL_GETLOGIN_R
-HAVE_DECL_GETDOMAINNAME
-HAVE_DECL_FDATASYNC
-HAVE_DECL_FCHDIR
-HAVE_DECL_ENVIRON
-HAVE_USLEEP
-HAVE_UNLINKAT
-HAVE_SYMLINKAT
-HAVE_SYMLINK
-HAVE_SLEEP
-HAVE_SETHOSTNAME
-HAVE_READLINKAT
-HAVE_READLINK
-HAVE_PWRITE
-HAVE_PREAD
-HAVE_PIPE2
-HAVE_PIPE
-HAVE_LINKAT
-HAVE_LINK
-HAVE_LCHOWN
-HAVE_GROUP_MEMBER
-HAVE_GETPAGESIZE
-HAVE_GETLOGIN
-HAVE_GETHOSTNAME
-HAVE_GETGROUPS
-HAVE_GETDTABLESIZE
-HAVE_FTRUNCATE
-HAVE_FSYNC
-HAVE_FDATASYNC
-HAVE_FCHOWNAT
-HAVE_FCHDIR
-HAVE_FACCESSAT
-HAVE_EUIDACCESS
-HAVE_DUP3
-HAVE_DUP2
-HAVE_CHOWN
-GNULIB_WRITE
-GNULIB_USLEEP
-GNULIB_UNLINKAT
-GNULIB_UNLINK
-GNULIB_UNISTD_H_SIGPIPE
-GNULIB_UNISTD_H_NONBLOCKING
-GNULIB_TTYNAME_R
-GNULIB_SYMLINKAT
-GNULIB_SYMLINK
-GNULIB_SLEEP
-GNULIB_SETHOSTNAME
-GNULIB_RMDIR
-GNULIB_READLINKAT
-GNULIB_READLINK
-GNULIB_READ
-GNULIB_PWRITE
-GNULIB_PREAD
-GNULIB_PIPE2
-GNULIB_PIPE
-GNULIB_LSEEK
-GNULIB_LINKAT
-GNULIB_LINK
-GNULIB_LCHOWN
-GNULIB_ISATTY
-GNULIB_GROUP_MEMBER
-GNULIB_GETUSERSHELL
-GNULIB_GETPAGESIZE
-GNULIB_GETLOGIN_R
-GNULIB_GETLOGIN
-GNULIB_GETHOSTNAME
-GNULIB_GETGROUPS
-GNULIB_GETDTABLESIZE
-GNULIB_GETDOMAINNAME
-GNULIB_GETCWD
-GNULIB_FTRUNCATE
-GNULIB_FSYNC
-GNULIB_FDATASYNC
-GNULIB_FCHOWNAT
-GNULIB_FCHDIR
-GNULIB_FACCESSAT
-GNULIB_EUIDACCESS
-GNULIB_ENVIRON
-GNULIB_DUP3
-GNULIB_DUP2
-GNULIB_DUP
-GNULIB_CLOSE
-GNULIB_CHOWN
-GNULIB_CHDIR
 NEXT_AS_FIRST_DIRECTIVE_STDDEF_H
 NEXT_STDDEF_H
 GL_GENERATE_STDDEF_H_FALSE
@@ -1287,10 +1167,154 @@ GL_GENERATE_ERRNO_H_TRUE
 ERRNO_H
 NEXT_AS_FIRST_DIRECTIVE_ERRNO_H
 NEXT_ERRNO_H
+HAVE_DIRENT_H
+NEXT_AS_FIRST_DIRECTIVE_DIRENT_H
+NEXT_DIRENT_H
 PRAGMA_COLUMNS
 PRAGMA_SYSTEM_HEADER
 INCLUDE_NEXT_AS_FIRST_DIRECTIVE
 INCLUDE_NEXT
+REPLACE_FDOPENDIR
+REPLACE_DIRFD
+REPLACE_CLOSEDIR
+REPLACE_OPENDIR
+HAVE_ALPHASORT
+HAVE_SCANDIR
+HAVE_FDOPENDIR
+HAVE_DECL_FDOPENDIR
+HAVE_DECL_DIRFD
+HAVE_CLOSEDIR
+HAVE_REWINDDIR
+HAVE_READDIR
+HAVE_OPENDIR
+GNULIB_ALPHASORT
+GNULIB_SCANDIR
+GNULIB_FDOPENDIR
+GNULIB_DIRFD
+GNULIB_CLOSEDIR
+GNULIB_REWINDDIR
+GNULIB_READDIR
+GNULIB_OPENDIR
+UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS
+UNISTD_H_HAVE_WINSOCK2_H
+REPLACE_WRITE
+REPLACE_USLEEP
+REPLACE_UNLINKAT
+REPLACE_UNLINK
+REPLACE_TTYNAME_R
+REPLACE_SYMLINK
+REPLACE_SLEEP
+REPLACE_RMDIR
+REPLACE_READLINK
+REPLACE_READ
+REPLACE_PWRITE
+REPLACE_PREAD
+REPLACE_LSEEK
+REPLACE_LINKAT
+REPLACE_LINK
+REPLACE_LCHOWN
+REPLACE_ISATTY
+REPLACE_GETPAGESIZE
+REPLACE_GETGROUPS
+REPLACE_GETLOGIN_R
+REPLACE_GETDOMAINNAME
+REPLACE_GETCWD
+REPLACE_FTRUNCATE
+REPLACE_FCHOWNAT
+REPLACE_DUP2
+REPLACE_DUP
+REPLACE_CLOSE
+REPLACE_CHOWN
+HAVE_SYS_PARAM_H
+HAVE_OS_H
+HAVE_DECL_TTYNAME_R
+HAVE_DECL_SETHOSTNAME
+HAVE_DECL_GETUSERSHELL
+HAVE_DECL_GETPAGESIZE
+HAVE_DECL_GETLOGIN_R
+HAVE_DECL_GETDOMAINNAME
+HAVE_DECL_FDATASYNC
+HAVE_DECL_FCHDIR
+HAVE_DECL_ENVIRON
+HAVE_USLEEP
+HAVE_UNLINKAT
+HAVE_SYMLINKAT
+HAVE_SYMLINK
+HAVE_SLEEP
+HAVE_SETHOSTNAME
+HAVE_READLINKAT
+HAVE_READLINK
+HAVE_PWRITE
+HAVE_PREAD
+HAVE_PIPE2
+HAVE_PIPE
+HAVE_LINKAT
+HAVE_LINK
+HAVE_LCHOWN
+HAVE_GROUP_MEMBER
+HAVE_GETPAGESIZE
+HAVE_GETLOGIN
+HAVE_GETHOSTNAME
+HAVE_GETGROUPS
+HAVE_GETDTABLESIZE
+HAVE_FTRUNCATE
+HAVE_FSYNC
+HAVE_FDATASYNC
+HAVE_FCHOWNAT
+HAVE_FCHDIR
+HAVE_FACCESSAT
+HAVE_EUIDACCESS
+HAVE_DUP3
+HAVE_DUP2
+HAVE_CHOWN
+GNULIB_WRITE
+GNULIB_USLEEP
+GNULIB_UNLINKAT
+GNULIB_UNLINK
+GNULIB_UNISTD_H_SIGPIPE
+GNULIB_UNISTD_H_NONBLOCKING
+GNULIB_TTYNAME_R
+GNULIB_SYMLINKAT
+GNULIB_SYMLINK
+GNULIB_SLEEP
+GNULIB_SETHOSTNAME
+GNULIB_RMDIR
+GNULIB_READLINKAT
+GNULIB_READLINK
+GNULIB_READ
+GNULIB_PWRITE
+GNULIB_PREAD
+GNULIB_PIPE2
+GNULIB_PIPE
+GNULIB_LSEEK
+GNULIB_LINKAT
+GNULIB_LINK
+GNULIB_LCHOWN
+GNULIB_ISATTY
+GNULIB_GROUP_MEMBER
+GNULIB_GETUSERSHELL
+GNULIB_GETPAGESIZE
+GNULIB_GETLOGIN_R
+GNULIB_GETLOGIN
+GNULIB_GETHOSTNAME
+GNULIB_GETGROUPS
+GNULIB_GETDTABLESIZE
+GNULIB_GETDOMAINNAME
+GNULIB_GETCWD
+GNULIB_FTRUNCATE
+GNULIB_FSYNC
+GNULIB_FDATASYNC
+GNULIB_FCHOWNAT
+GNULIB_FCHDIR
+GNULIB_FACCESSAT
+GNULIB_EUIDACCESS
+GNULIB_ENVIRON
+GNULIB_DUP3
+GNULIB_DUP2
+GNULIB_DUP
+GNULIB_CLOSE
+GNULIB_CHOWN
+GNULIB_CHDIR
 pkglibexecdir
 lispdir
 GL_GENERATE_ALLOCA_H_FALSE
@@ -2994,6 +3018,7 @@ $as_echo "$as_me: creating cache $cache_file" >&6;}
   >$cache_file
 fi
 
+as_fn_append ac_header_list " dirent.h"
 as_fn_append ac_func_list " btowc"
 as_fn_append ac_func_list " isblank"
 as_fn_append ac_func_list " iswctype"
@@ -4724,6 +4749,7 @@ fi
   # Code from module alloca:
   # Code from module alloca-opt:
   # Code from module configmake:
+  # Code from module dirent:
   # Code from module errno:
   # Code from module extensions:
 
@@ -5581,6 +5607,152 @@ _ACEOF
 fi
 
 
+  GNULIB_CHDIR=0;
+  GNULIB_CHOWN=0;
+  GNULIB_CLOSE=0;
+  GNULIB_DUP=0;
+  GNULIB_DUP2=0;
+  GNULIB_DUP3=0;
+  GNULIB_ENVIRON=0;
+  GNULIB_EUIDACCESS=0;
+  GNULIB_FACCESSAT=0;
+  GNULIB_FCHDIR=0;
+  GNULIB_FCHOWNAT=0;
+  GNULIB_FDATASYNC=0;
+  GNULIB_FSYNC=0;
+  GNULIB_FTRUNCATE=0;
+  GNULIB_GETCWD=0;
+  GNULIB_GETDOMAINNAME=0;
+  GNULIB_GETDTABLESIZE=0;
+  GNULIB_GETGROUPS=0;
+  GNULIB_GETHOSTNAME=0;
+  GNULIB_GETLOGIN=0;
+  GNULIB_GETLOGIN_R=0;
+  GNULIB_GETPAGESIZE=0;
+  GNULIB_GETUSERSHELL=0;
+  GNULIB_GROUP_MEMBER=0;
+  GNULIB_ISATTY=0;
+  GNULIB_LCHOWN=0;
+  GNULIB_LINK=0;
+  GNULIB_LINKAT=0;
+  GNULIB_LSEEK=0;
+  GNULIB_PIPE=0;
+  GNULIB_PIPE2=0;
+  GNULIB_PREAD=0;
+  GNULIB_PWRITE=0;
+  GNULIB_READ=0;
+  GNULIB_READLINK=0;
+  GNULIB_READLINKAT=0;
+  GNULIB_RMDIR=0;
+  GNULIB_SETHOSTNAME=0;
+  GNULIB_SLEEP=0;
+  GNULIB_SYMLINK=0;
+  GNULIB_SYMLINKAT=0;
+  GNULIB_TTYNAME_R=0;
+  GNULIB_UNISTD_H_NONBLOCKING=0;
+  GNULIB_UNISTD_H_SIGPIPE=0;
+  GNULIB_UNLINK=0;
+  GNULIB_UNLINKAT=0;
+  GNULIB_USLEEP=0;
+  GNULIB_WRITE=0;
+    HAVE_CHOWN=1;
+  HAVE_DUP2=1;
+  HAVE_DUP3=1;
+  HAVE_EUIDACCESS=1;
+  HAVE_FACCESSAT=1;
+  HAVE_FCHDIR=1;
+  HAVE_FCHOWNAT=1;
+  HAVE_FDATASYNC=1;
+  HAVE_FSYNC=1;
+  HAVE_FTRUNCATE=1;
+  HAVE_GETDTABLESIZE=1;
+  HAVE_GETGROUPS=1;
+  HAVE_GETHOSTNAME=1;
+  HAVE_GETLOGIN=1;
+  HAVE_GETPAGESIZE=1;
+  HAVE_GROUP_MEMBER=1;
+  HAVE_LCHOWN=1;
+  HAVE_LINK=1;
+  HAVE_LINKAT=1;
+  HAVE_PIPE=1;
+  HAVE_PIPE2=1;
+  HAVE_PREAD=1;
+  HAVE_PWRITE=1;
+  HAVE_READLINK=1;
+  HAVE_READLINKAT=1;
+  HAVE_SETHOSTNAME=1;
+  HAVE_SLEEP=1;
+  HAVE_SYMLINK=1;
+  HAVE_SYMLINKAT=1;
+  HAVE_UNLINKAT=1;
+  HAVE_USLEEP=1;
+  HAVE_DECL_ENVIRON=1;
+  HAVE_DECL_FCHDIR=1;
+  HAVE_DECL_FDATASYNC=1;
+  HAVE_DECL_GETDOMAINNAME=1;
+  HAVE_DECL_GETLOGIN_R=1;
+  HAVE_DECL_GETPAGESIZE=1;
+  HAVE_DECL_GETUSERSHELL=1;
+  HAVE_DECL_SETHOSTNAME=1;
+  HAVE_DECL_TTYNAME_R=1;
+  HAVE_OS_H=0;
+  HAVE_SYS_PARAM_H=0;
+  REPLACE_CHOWN=0;
+  REPLACE_CLOSE=0;
+  REPLACE_DUP=0;
+  REPLACE_DUP2=0;
+  REPLACE_FCHOWNAT=0;
+  REPLACE_FTRUNCATE=0;
+  REPLACE_GETCWD=0;
+  REPLACE_GETDOMAINNAME=0;
+  REPLACE_GETLOGIN_R=0;
+  REPLACE_GETGROUPS=0;
+  REPLACE_GETPAGESIZE=0;
+  REPLACE_ISATTY=0;
+  REPLACE_LCHOWN=0;
+  REPLACE_LINK=0;
+  REPLACE_LINKAT=0;
+  REPLACE_LSEEK=0;
+  REPLACE_PREAD=0;
+  REPLACE_PWRITE=0;
+  REPLACE_READ=0;
+  REPLACE_READLINK=0;
+  REPLACE_RMDIR=0;
+  REPLACE_SLEEP=0;
+  REPLACE_SYMLINK=0;
+  REPLACE_TTYNAME_R=0;
+  REPLACE_UNLINK=0;
+  REPLACE_UNLINKAT=0;
+  REPLACE_USLEEP=0;
+  REPLACE_WRITE=0;
+  UNISTD_H_HAVE_WINSOCK2_H=0;
+  UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=0;
+
+
+
+     GNULIB_OPENDIR=0;
+  GNULIB_READDIR=0;
+  GNULIB_REWINDDIR=0;
+  GNULIB_CLOSEDIR=0;
+  GNULIB_DIRFD=0;
+  GNULIB_FDOPENDIR=0;
+  GNULIB_SCANDIR=0;
+  GNULIB_ALPHASORT=0;
+    HAVE_OPENDIR=1;
+  HAVE_READDIR=1;
+  HAVE_REWINDDIR=1;
+  HAVE_CLOSEDIR=1;
+  HAVE_DECL_DIRFD=1;
+  HAVE_DECL_FDOPENDIR=1;
+  HAVE_FDOPENDIR=1;
+  HAVE_SCANDIR=1;
+  HAVE_ALPHASORT=1;
+  REPLACE_OPENDIR=0;
+  REPLACE_CLOSEDIR=0;
+  REPLACE_DIRFD=0;
+  REPLACE_FDOPENDIR=0;
+
+
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether the preprocessor supports include_next" >&5
 $as_echo_n "checking whether the preprocessor supports include_next... " >&6; }
@@ -5692,6 +5864,26 @@ $as_echo "$gl_cv_pragma_columns" >&6; }
   else
     PRAGMA_COLUMNS=
   fi
+
+
+
+
+
+  for ac_header in $ac_header_list
+do :
+  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
+"
+eval as_val=\$$as_ac_Header
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+
+done
+
 
 
 
@@ -6145,24 +6337,6 @@ done
 
 
 
-
-
-
-
-  for ac_header in $ac_header_list
-do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_compile "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default
-"
-eval as_val=\$$as_ac_Header
-   if test "x$as_val" = x""yes; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
-_ACEOF
-
-fi
-
-done
 
 
 
@@ -9570,129 +9744,6 @@ $as_echo "#define REPLACE_STRERROR_0 1" >>confdefs.h
   esac
 
 
-  GNULIB_CHDIR=0;
-  GNULIB_CHOWN=0;
-  GNULIB_CLOSE=0;
-  GNULIB_DUP=0;
-  GNULIB_DUP2=0;
-  GNULIB_DUP3=0;
-  GNULIB_ENVIRON=0;
-  GNULIB_EUIDACCESS=0;
-  GNULIB_FACCESSAT=0;
-  GNULIB_FCHDIR=0;
-  GNULIB_FCHOWNAT=0;
-  GNULIB_FDATASYNC=0;
-  GNULIB_FSYNC=0;
-  GNULIB_FTRUNCATE=0;
-  GNULIB_GETCWD=0;
-  GNULIB_GETDOMAINNAME=0;
-  GNULIB_GETDTABLESIZE=0;
-  GNULIB_GETGROUPS=0;
-  GNULIB_GETHOSTNAME=0;
-  GNULIB_GETLOGIN=0;
-  GNULIB_GETLOGIN_R=0;
-  GNULIB_GETPAGESIZE=0;
-  GNULIB_GETUSERSHELL=0;
-  GNULIB_GROUP_MEMBER=0;
-  GNULIB_ISATTY=0;
-  GNULIB_LCHOWN=0;
-  GNULIB_LINK=0;
-  GNULIB_LINKAT=0;
-  GNULIB_LSEEK=0;
-  GNULIB_PIPE=0;
-  GNULIB_PIPE2=0;
-  GNULIB_PREAD=0;
-  GNULIB_PWRITE=0;
-  GNULIB_READ=0;
-  GNULIB_READLINK=0;
-  GNULIB_READLINKAT=0;
-  GNULIB_RMDIR=0;
-  GNULIB_SETHOSTNAME=0;
-  GNULIB_SLEEP=0;
-  GNULIB_SYMLINK=0;
-  GNULIB_SYMLINKAT=0;
-  GNULIB_TTYNAME_R=0;
-  GNULIB_UNISTD_H_NONBLOCKING=0;
-  GNULIB_UNISTD_H_SIGPIPE=0;
-  GNULIB_UNLINK=0;
-  GNULIB_UNLINKAT=0;
-  GNULIB_USLEEP=0;
-  GNULIB_WRITE=0;
-    HAVE_CHOWN=1;
-  HAVE_DUP2=1;
-  HAVE_DUP3=1;
-  HAVE_EUIDACCESS=1;
-  HAVE_FACCESSAT=1;
-  HAVE_FCHDIR=1;
-  HAVE_FCHOWNAT=1;
-  HAVE_FDATASYNC=1;
-  HAVE_FSYNC=1;
-  HAVE_FTRUNCATE=1;
-  HAVE_GETDTABLESIZE=1;
-  HAVE_GETGROUPS=1;
-  HAVE_GETHOSTNAME=1;
-  HAVE_GETLOGIN=1;
-  HAVE_GETPAGESIZE=1;
-  HAVE_GROUP_MEMBER=1;
-  HAVE_LCHOWN=1;
-  HAVE_LINK=1;
-  HAVE_LINKAT=1;
-  HAVE_PIPE=1;
-  HAVE_PIPE2=1;
-  HAVE_PREAD=1;
-  HAVE_PWRITE=1;
-  HAVE_READLINK=1;
-  HAVE_READLINKAT=1;
-  HAVE_SETHOSTNAME=1;
-  HAVE_SLEEP=1;
-  HAVE_SYMLINK=1;
-  HAVE_SYMLINKAT=1;
-  HAVE_UNLINKAT=1;
-  HAVE_USLEEP=1;
-  HAVE_DECL_ENVIRON=1;
-  HAVE_DECL_FCHDIR=1;
-  HAVE_DECL_FDATASYNC=1;
-  HAVE_DECL_GETDOMAINNAME=1;
-  HAVE_DECL_GETLOGIN_R=1;
-  HAVE_DECL_GETPAGESIZE=1;
-  HAVE_DECL_GETUSERSHELL=1;
-  HAVE_DECL_SETHOSTNAME=1;
-  HAVE_DECL_TTYNAME_R=1;
-  HAVE_OS_H=0;
-  HAVE_SYS_PARAM_H=0;
-  REPLACE_CHOWN=0;
-  REPLACE_CLOSE=0;
-  REPLACE_DUP=0;
-  REPLACE_DUP2=0;
-  REPLACE_FCHOWNAT=0;
-  REPLACE_FTRUNCATE=0;
-  REPLACE_GETCWD=0;
-  REPLACE_GETDOMAINNAME=0;
-  REPLACE_GETLOGIN_R=0;
-  REPLACE_GETGROUPS=0;
-  REPLACE_GETPAGESIZE=0;
-  REPLACE_ISATTY=0;
-  REPLACE_LCHOWN=0;
-  REPLACE_LINK=0;
-  REPLACE_LINKAT=0;
-  REPLACE_LSEEK=0;
-  REPLACE_PREAD=0;
-  REPLACE_PWRITE=0;
-  REPLACE_READ=0;
-  REPLACE_READLINK=0;
-  REPLACE_RMDIR=0;
-  REPLACE_SLEEP=0;
-  REPLACE_SYMLINK=0;
-  REPLACE_TTYNAME_R=0;
-  REPLACE_UNLINK=0;
-  REPLACE_UNLINKAT=0;
-  REPLACE_USLEEP=0;
-  REPLACE_WRITE=0;
-  UNISTD_H_HAVE_WINSOCK2_H=0;
-  UNISTD_H_HAVE_WINSOCK2_H_AND_USE_SOCKETS=0;
-
-
-
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for C/C++ restrict keyword" >&5
 $as_echo_n "checking for C/C++ restrict keyword... " >&6; }
@@ -10256,6 +10307,132 @@ fi
   fi
 
       pkglibexecdir='${libexecdir}/${PACKAGE}'
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_dirent_h='<'dirent.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <dirent.h>" >&5
+$as_echo_n "checking absolute name of <dirent.h>... " >&6; }
+if test "${gl_cv_next_dirent_h+set}" = set; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_dirent_h = yes; then
+
+
+               cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <dirent.h>
+
+_ACEOF
+                                                                                                                        case "$host_os" in
+                 aix*) gl_absname_cpp="$ac_cpp -C" ;;
+                 *)    gl_absname_cpp="$ac_cpp" ;;
+               esac
+
+               case "$host_os" in
+                 mingw*)
+                                                                                                                                     gl_dirsep_regex='[/\\]'
+                   ;;
+                 *)
+                   gl_dirsep_regex='\/'
+                   ;;
+               esac
+                                             gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+
+               gl_header_literal_regex=`echo 'dirent.h' \
+                                        | sed -e "$gl_make_literal_regex_sed"`
+               gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+                   s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+                   s|^/[^/]|//&|
+                   p
+                   q
+                 }'
+                                                            gl_cv_next_dirent_h='"'`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+                      sed -n "$gl_absolute_header_sed"`'"'
+          else
+               gl_cv_next_dirent_h='<'dirent.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_dirent_h" >&5
+$as_echo "$gl_cv_next_dirent_h" >&6; }
+     fi
+     NEXT_DIRENT_H=$gl_cv_next_dirent_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'dirent.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_dirent_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_DIRENT_H=$gl_next_as_first_directive
+
+
+
+
+  if test $ac_cv_header_dirent_h = yes; then
+    HAVE_DIRENT_H=1
+  else
+    HAVE_DIRENT_H=0
+  fi
+
+
+
+    for gl_func in alphasort closedir dirfd fdopendir opendir readdir rewinddir scandir; do
+    as_gl_Symbol=`$as_echo "gl_cv_have_raw_decl_$gl_func" | $as_tr_sh`
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether $gl_func is declared without a macro" >&5
+$as_echo_n "checking whether $gl_func is declared without a macro... " >&6; }
+if { as_var=$as_gl_Symbol; eval "test \"\${$as_var+set}\" = set"; }; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <dirent.h>
+
+int
+main ()
+{
+#undef $gl_func
+  (void) $gl_func;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$as_gl_Symbol=yes"
+else
+  eval "$as_gl_Symbol=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$as_gl_Symbol
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+    eval as_val=\$$as_gl_Symbol
+   if test "x$as_val" = x""yes; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_RAW_DECL_$gl_func" | $as_tr_cpp` 1
+_ACEOF
+
+                     eval ac_cv_have_decl_$gl_func=yes
+fi
+      done
 
 
 

@@ -39,6 +39,7 @@ IMPORTED_GNULIB_MODULES="\
     pathmax \
     strerror \
     strstr \
+    dirent \
 "
 
 # The gnulib commit ID to use for the update.
