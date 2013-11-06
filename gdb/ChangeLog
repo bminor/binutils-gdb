@@ -1,5 +1,13 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
+	* config.in: Rebuild.
+	* configure: Rebuild.
+	* configure.ac: Don't check for stddef.h.
+	* defs.h: Unconditionally include stddef.h.  Remove duplicate
+	inclusion.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
 	* common/common.m4 (GDB_AC_COMMON): Don't use AC_HEADER_DIRENT.
 	* common/gdb_dirent.h: Remove.
 	* common/filestuff.c: Use dirent.h.
