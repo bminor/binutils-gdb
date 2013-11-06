@@ -170,6 +170,7 @@ check-parallel:
 	  `find outputs -name gdb.sum -print` > gdb.sum; \
 	$(SHELL) $(srcdir)/dg-extract-results.sh -L \
 	  `find outputs -name gdb.log -print` > gdb.log
+	@sed -n '/=== gdb Summary ===/,$$ p' gdb.sum
 
 # Turn a list of .exp files into "check/" targets.  Only examine .exp
 # files appearing in a gdb.* directory -- we don't want to pick up
