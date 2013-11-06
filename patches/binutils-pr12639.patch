@@ -1,0 +1,104 @@
+From e1b9237d84d013c5d0586edeb5267c823c4b9284 Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Tue, 5 Nov 2013 10:14:57 -0800
+Subject: [PATCH] Check corrupted symbol table
+
+---
+ ChangeLog.pr12639  | 15 +++++++++++++++
+ bfd/elfcode.h      | 12 ++++++++++++
+ binutils/readelf.c | 13 ++++++++++++-
+ 3 files changed, 39 insertions(+), 1 deletion(-)
+ create mode 100644 ChangeLog.pr12639
+
+diff --git a/ChangeLog.pr12639 b/ChangeLog.pr12639
+new file mode 100644
+index 0000000..e7a41f4
+--- /dev/null
++++ b/ChangeLog.pr12639
+@@ -0,0 +1,15 @@
++bfd/
++
++2013-11-05  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR binutils/12639
++	* elfcode.h (elf_slurp_symbol_table): Check corrupted global
++	symbols.
++
++binutils/
++
++2013-11-05  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR binutils/12639
++	* readelf.c (process_symbol_table): Detect corrupted symbol
++	table.
+diff --git a/bfd/elfcode.h b/bfd/elfcode.h
+index e296c5c..cf45c27 100644
+--- a/bfd/elfcode.h
++++ b/bfd/elfcode.h
+@@ -1168,6 +1168,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
+     sym = symbase = NULL;
+   else
+     {
++      /* Start of global symbols */
++      Elf_Internal_Sym *start_global;
++
+       isymbuf = bfd_elf_get_elf_syms (abfd, hdr, symcount, 0,
+ 				      NULL, NULL, NULL);
+       if (isymbuf == NULL)
+@@ -1212,6 +1215,9 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
+       if (xver != NULL)
+ 	++xver;
+       isymend = isymbuf + symcount;
++      start_global = isymbuf;
++      if (!elf_bad_symtab (abfd))
++	start_global += hdr->sh_info;
+       for (isym = isymbuf + 1, sym = symbase; isym < isymend; isym++, sym++)
+ 	{
+ 	  memcpy (&sym->internal_elf_sym, isym, sizeof (Elf_Internal_Sym));
+@@ -1270,6 +1276,12 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
+ 	  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+ 	    sym->symbol.value -= sym->symbol.section->vma;
+ 
++	  if (isym < start_global
++	      && ELF_ST_BIND (isym->st_info) != STB_LOCAL)
++	    (*_bfd_error_handler)
++	      (_("%s: corrupted global symbol `%s' treated as local"),
++	       abfd->filename, sym->symbol.name);
++
+ 	  switch (ELF_ST_BIND (isym->st_info))
+ 	    {
+ 	    case STB_LOCAL:
+diff --git a/binutils/readelf.c b/binutils/readelf.c
+index 0389f14..9ae5b5d 100644
+--- a/binutils/readelf.c
++++ b/binutils/readelf.c
+@@ -9607,6 +9607,12 @@ process_symbol_table (FILE * file)
+   else if (do_dyn_syms || (do_syms && !do_using_dynamic))
+     {
+       unsigned int i;
++      /* Irix 5 and 6 are broken.  Object file symbol tables are not
++	 always sorted correctly such that local symbols precede global
++	 symbols, and the sh_info field in the symbol table is not
++	 always right.  */
++      bfd_boolean check_corrupt_symtab
++	= elf_header.e_ident[EI_OSABI] != ELFOSABI_IRIX;
+ 
+       for (i = 0, section = section_headers;
+ 	   i < elf_header.e_shnum;
+@@ -9669,7 +9675,12 @@ process_symbol_table (FILE * file)
+ 	      putchar (' ');
+ 	      print_vma (psym->st_size, DEC_5);
+ 	      printf (" %-7s", get_symbol_type (ELF_ST_TYPE (psym->st_info)));
+-	      printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
++	      if (check_corrupt_symtab
++		  && si < section->sh_info
++		  && ELF_ST_BIND (psym->st_info) != STB_LOCAL)
++		printf (" %-6s", "<corrupt>");
++	      else
++		printf (" %-6s", get_symbol_binding (ELF_ST_BIND (psym->st_info)));
+ 	      printf (" %-7s", get_symbol_visibility (ELF_ST_VISIBILITY (psym->st_other)));
+ 	      /* Check to see if any other bits in the st_other field are set.
+ 	         Note - displaying this information disrupts the layout of the
+-- 
+1.8.3.1
+
