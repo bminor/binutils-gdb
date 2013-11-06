@@ -1704,6 +1704,28 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
   if (!is_pass_two)
     layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags, this);
 
+  // Handle the .eh_frame sections after the other sections.
+  gold_assert(!is_pass_one || eh_frame_sections.empty());
+  for (std::vector<unsigned int>::const_iterator p = eh_frame_sections.begin();
+       p != eh_frame_sections.end();
+       ++p)
+    {
+      unsigned int i = *p;
+      const unsigned char* pshdr;
+      pshdr = section_headers_data + i * This::shdr_size;
+      typename This::Shdr shdr(pshdr);
+
+      this->layout_eh_frame_section(layout,
+				    symbols_data,
+				    symbols_size,
+				    symbol_names_data,
+				    symbol_names_size,
+				    i,
+				    shdr,
+				    reloc_shndx[i],
+				    reloc_type[i]);
+    }
+
   // When doing a relocatable link handle the reloc sections at the
   // end.  Garbage collection  and Identical Code Folding is not
   // turned on for relocatable code.
@@ -1754,28 +1776,6 @@ Sized_relobj_file<size, big_endian>::do_layout(Symbol_table* symtab,
 						rr);
       out_sections[i] = os;
       out_section_offsets[i] = invalid_address;
-    }
-
-  // Handle the .eh_frame sections at the end.
-  gold_assert(!is_pass_one || eh_frame_sections.empty());
-  for (std::vector<unsigned int>::const_iterator p = eh_frame_sections.begin();
-       p != eh_frame_sections.end();
-       ++p)
-    {
-      unsigned int i = *p;
-      const unsigned char* pshdr;
-      pshdr = section_headers_data + i * This::shdr_size;
-      typename This::Shdr shdr(pshdr);
-
-      this->layout_eh_frame_section(layout,
-				    symbols_data,
-				    symbols_size,
-				    symbol_names_data,
-				    symbol_names_size,
-				    i,
-				    shdr,
-				    reloc_shndx[i],
-				    reloc_type[i]);
     }
 
   // When building a .gdb_index section, scan the .debug_info and

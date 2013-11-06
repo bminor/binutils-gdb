@@ -1,3 +1,9 @@
+2013-11-06  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/15758
+	* object.cc (Sized_relobj_file::do_layout): Handle .eh_frame sections
+	before reloc sections.
+
 2013-10-31  Cary Coutant  <ccoutant@google.com>
 
 	Restore support for dwp v2 DWARF package file format.
