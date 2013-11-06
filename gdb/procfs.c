@@ -89,7 +89,7 @@
 
 #ifdef NEW_PROC_API
 #include <sys/types.h>
-#include "gdb_dirent.h"	/* opendir/readdir, for listing the LWP's */
+#include <dirent.h>	/* opendir/readdir, for listing the LWP's */
 #endif
 
 #include <fcntl.h>	/* for O_RDONLY */

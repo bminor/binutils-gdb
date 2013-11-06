@@ -19,7 +19,6 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Invoke configury needed by the files in 'common'.
 AC_DEFUN([GDB_AC_COMMON], [
   AC_HEADER_STDC
-  AC_HEADER_DIRENT
   AC_FUNC_ALLOCA
 
   dnl Note that this requires codeset.m4, which is included

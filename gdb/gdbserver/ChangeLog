@@ -1,5 +1,11 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
+	* config.in: Rebuild.
+	* configure: Rebuild.
+	* configure.ac: Don't use AC_HEADER_DIRENT.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
 	* server.h: Don't check HAVE_STRING_H.
 	* gdbreplay.c: Don't check HAVE_STRING_H.
 	* configure: Rebuild.

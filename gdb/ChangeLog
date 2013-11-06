@@ -1,5 +1,20 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
+	* common/common.m4 (GDB_AC_COMMON): Don't use AC_HEADER_DIRENT.
+	* common/gdb_dirent.h: Remove.
+	* common/filestuff.c: Use dirent.h.
+	* common/linux-osdata.c: Use dirent.h.
+	(NAMELEN): Define.
+	* config.in: Rebuild.
+	* configure: Rebuild.
+	* configure.ac: Don't use AC_HEADER_DIRENT.
+	* linux-fork.c: Use dirent.h
+	* linux-nat.c: Use dirent.h.
+	* nto-procfs.c: Use dirent.h.
+	* procfs.c: Use dirent.h.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add dirent.
 	* gnulib/aclocal.m4: Update.
 	* gnulib/config.in: Update.

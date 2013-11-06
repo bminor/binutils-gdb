@@ -28,7 +28,7 @@
 #include <sys/procfs.h>
 #include <sys/neutrino.h>
 #include <sys/syspage.h>
-#include "gdb_dirent.h"
+#include <dirent.h>
 #include <sys/netmgr.h>
 
 #include "exceptions.h"
