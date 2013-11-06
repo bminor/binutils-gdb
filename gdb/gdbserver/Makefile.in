@@ -286,10 +286,10 @@ all-lib: $(GNULIB_BUILDDIR)/Makefile
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=$(GNULIB_BUILDDIR) subdir_do
 .PHONY: all-lib
 
-gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
+gdbreplay$(EXEEXT): $(GDBREPLAY_OBS) $(LIBGNU)
 	rm -f gdbreplay$(EXEEXT)
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
-	  $(XM_CLIBS)
+	  $(XM_CLIBS) $(LIBGNU)
 
 IPA_OBJS=ax-ipa.o tracepoint-ipa.o format-ipa.o utils-ipa.o regcache-ipa.o remote-utils-ipa.o common-utils-ipa.o tdesc-ipa.o ${IPA_DEPFILES}
 
