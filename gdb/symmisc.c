@@ -32,7 +32,7 @@
 #include "bcache.h"
 #include "block.h"
 #include "gdb_regex.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "dictionary.h"
 #include "typeprint.h"
 #include "gdbcmd.h"

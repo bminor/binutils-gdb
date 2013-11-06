@@ -62,7 +62,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <string.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include <ctype.h>
 #include <time.h>
 #include <sys/time.h>

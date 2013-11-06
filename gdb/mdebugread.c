@@ -55,7 +55,7 @@
 #include "block.h"
 #include "dictionary.h"
 #include "mdebugread.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include <string.h>
 #include "psympriv.h"
 #include "source.h"

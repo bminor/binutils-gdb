@@ -28,7 +28,7 @@
 #include "getopt.h"
 
 #include <sys/types.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include <ctype.h>
 
 #include <string.h>

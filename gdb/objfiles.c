@@ -35,7 +35,7 @@
 
 #include "gdb_assert.h"
 #include <sys/types.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include <fcntl.h>
 #include "gdb_obstack.h"
 #include <string.h>

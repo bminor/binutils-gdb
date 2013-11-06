@@ -30,7 +30,7 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "dis-asm.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "completer.h"
 #include "exceptions.h"
 #include "observer.h"

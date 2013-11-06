@@ -50,7 +50,7 @@
 
 #include <a.out.h>
 #include <sys/file.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "gdb_bfd.h"
 #include <sys/core.h>
 #define __LDINFO_PTRACE32__	/* for __ld_info32 */

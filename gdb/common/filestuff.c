@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 
 #ifdef USE_WIN32API
 #include <winsock2.h>

@@ -29,7 +29,7 @@
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
-#include "gdb_stat.h"
+#include <sys/stat.h>
 
 #include "coff/internal.h"
 #include "libcoff.h"		/* FIXME, internal data from BFD */

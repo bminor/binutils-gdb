@@ -47,7 +47,7 @@
 #include "gdbcore.h"		/* for get_exec_file */
 #include <ctype.h>		/* for isdigit */
 #include "gdbthread.h"		/* for struct thread_info etc.  */
-#include "gdb_stat.h"		/* for struct stat */
+#include <sys/stat.h>		/* for struct stat */
 #include <fcntl.h>		/* for O_RDONLY */
 #include "inf-loop.h"
 #include "event-loop.h"

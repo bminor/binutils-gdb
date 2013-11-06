@@ -41,7 +41,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <dirent.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include <sys/vfs.h>
 #include <sys/uio.h>
 #include "filestuff.h"

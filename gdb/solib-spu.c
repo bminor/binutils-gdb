@@ -23,7 +23,7 @@
 #include "gdbcore.h"
 #include <string.h>
 #include "gdb_assert.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "arch-utils.h"
 #include "bfd.h"
 #include "symtab.h"

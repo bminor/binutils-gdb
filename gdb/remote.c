@@ -60,7 +60,7 @@
 
 #include "remote-fileio.h"
 #include "gdb/fileio.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "xml-support.h"
 
 #include "memory-map.h"

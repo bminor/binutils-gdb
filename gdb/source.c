@@ -31,7 +31,7 @@
 
 #include <sys/types.h>
 #include <string.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include <fcntl.h>
 #include "gdbcore.h"
 #include "gdb_regex.h"

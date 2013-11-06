@@ -94,7 +94,7 @@
 
 #include <fcntl.h>	/* for O_RDONLY */
 #include <unistd.h>	/* for "X_OK" */
-#include "gdb_stat.h"	/* for struct stat */
+#include <sys/stat.h>	/* for struct stat */
 
 /* Note: procfs-utils.h must be included after the above system header
    files, because it redefines various system calls using macros.

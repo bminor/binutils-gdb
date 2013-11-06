@@ -1,5 +1,42 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
+	* common/gdb_stat.h: Remove.
+	* ada-lang.c: Use sys/stat.h, not gdb_stat.h.
+	* common/filestuff.c: Use sys/stat.h, not gdb_stat.h.
+	* common/linux-osdata.c: Use sys/stat.h, not gdb_stat.h.
+	* corefile.c: Use sys/stat.h, not gdb_stat.h.
+	* ctf.c: Use sys/stat.h, not gdb_stat.h.
+	* darwin-nat.c: Use sys/stat.h, not gdb_stat.h.
+	* dbxread.c: Use sys/stat.h, not gdb_stat.h.
+	* dwarf2read.c: Use sys/stat.h, not gdb_stat.h.
+	* exec.c: Use sys/stat.h, not gdb_stat.h.
+	* gdbserver/linux-low.c: Use sys/stat.h, not gdb_stat.h.
+	* gdbserver/remote-utils.c: Use sys/stat.h, not gdb_stat.h.
+	* inf-child.c: Use sys/stat.h, not gdb_stat.h.
+	* jit.c: Use sys/stat.h, not gdb_stat.h.
+	* linux-nat.c: Use sys/stat.h, not gdb_stat.h.
+	* m68klinux-nat.c: Use sys/stat.h, not gdb_stat.h.
+	* main.c: Use sys/stat.h, not gdb_stat.h.
+	* mdebugread.c: Use sys/stat.h, not gdb_stat.h.
+	* mi/mi-cmd-env.c: Use sys/stat.h, not gdb_stat.h.
+	* nto-tdep.c: Use sys/stat.h, not gdb_stat.h.
+	* objfiles.c: Use sys/stat.h, not gdb_stat.h.
+	* procfs.c: Use sys/stat.h, not gdb_stat.h.
+	* remote-fileio.c: Use sys/stat.h, not gdb_stat.h.
+	* remote-mips.c: Use sys/stat.h, not gdb_stat.h.
+	* remote.c: Use sys/stat.h, not gdb_stat.h.
+	* rs6000-nat.c: Use sys/stat.h, not gdb_stat.h.
+	* sol-thread.c: Use sys/stat.h, not gdb_stat.h.
+	* solib-spu.c: Use sys/stat.h, not gdb_stat.h.
+	* source.c: Use sys/stat.h, not gdb_stat.h.
+	* symfile.c: Use sys/stat.h, not gdb_stat.h.
+	* symmisc.c: Use sys/stat.h, not gdb_stat.h.
+	* symtab.c: Use sys/stat.h, not gdb_stat.h.
+	* top.c: Use sys/stat.h, not gdb_stat.h.
+	* xcoffread.c: Use sys/stat.h, not gdb_stat.h.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
 	sys_stat.
 	* gnulib/aclocal.m4: Update.

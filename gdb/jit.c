@@ -37,7 +37,7 @@
 #include "symtab.h"
 #include "target.h"
 #include "gdb-dlfcn.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "exceptions.h"
 #include "gdb_bfd.h"
 

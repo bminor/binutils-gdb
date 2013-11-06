@@ -39,7 +39,7 @@
 #endif
 
 #include "gdb_obstack.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "symtab.h"
 #include "breakpoint.h"
 #include "target.h"
