@@ -1163,9 +1163,7 @@ GDB_AC_COMMON
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
 gdb_ptrace_headers='
-#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include <sys/types.h>
 #if HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif
