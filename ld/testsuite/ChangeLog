@@ -1,3 +1,12 @@
+2013-11-07  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-x86-64/x86-64.exp (mixed1, mixed2): Loosen error string match
+	so it accepts "i386:nacl" in place of "i386".
+	* ld-x86-64/ilp32-2.d: Likewise.
+	* ld-x86-64/ilp32-3.d: Likewise.
+	* ld-x86-64/lp64-2.d: Likewise.
+	* ld-x86-64/lp64-3.d: Likewise.
+
 2013-11-01  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-x86-64/plt-nacl.pd: Update expected disassembly for PLT nop fix.

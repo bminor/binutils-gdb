@@ -1,3 +1,8 @@
+2013-11-07  Roland McGrath  <mcgrathr@google.com>
+
+	* objdump.c (dump_dwarf): Grok bfd_mach_x86_64_nacl and
+	bfd_mach_x64_32_nacl as equivalent to bfd_mach_x86_64.
+
 2013-10-31  Nick Clifton  <nickc@redhat.com>
 
 	* nm.c (display_rel_file): Treat bfd_error_no_symbols as
