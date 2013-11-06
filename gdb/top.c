@@ -1061,8 +1061,7 @@ command_line_input (char *prompt_arg, int repeat, char *annotation_suffix)
   *p = 0;
 
   /* Add line to history if appropriate.  */
-  if (instream == stdin
-      && ISATTY (stdin) && *linebuffer)
+  if (*linebuffer && input_from_terminal_p ())
     add_history (linebuffer);
 
   /* Note: lines consisting solely of comments are added to the command
