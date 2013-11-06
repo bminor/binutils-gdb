@@ -1,5 +1,11 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
+	* configure: Rebuild.
+	* common/common.m4 (GDB_AC_COMMON): Don't check for string.h or
+	strings.h.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
 	* common/gdb_string.h: Remove.
 	* aarch64-tdep.c: Use string.h, not gdb_string.h.
 	* ada-exp.y: Use string.h, not gdb_string.h.
