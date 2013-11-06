@@ -38,7 +38,7 @@
 #include "gdb_stat.h"
 #include <fcntl.h>
 #include "gdb_obstack.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "hashtab.h"
 
 #include "breakpoint.h"

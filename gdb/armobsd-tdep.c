@@ -22,7 +22,7 @@
 #include "trad-frame.h"
 #include "tramp-frame.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 #include "obsd-tdep.h"
 #include "arm-tdep.h"

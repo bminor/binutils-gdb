@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "cp-support.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "demangle.h"
 #include "gdb_assert.h"
 #include "gdbcmd.h"

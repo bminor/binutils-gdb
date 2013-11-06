@@ -33,7 +33,7 @@
 #include "value.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "complaints.h"
 #include "dwarf2-frame.h"

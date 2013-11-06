@@ -31,7 +31,7 @@
 #include "language.h"
 #include "cp-abi.h"
 #include "typeprint.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "exceptions.h"
 #include "valprint.h"
 #include <errno.h>

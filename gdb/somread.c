@@ -27,7 +27,7 @@
 #include "stabsread.h"
 #include "gdb-stabs.h"
 #include "complaints.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "demangle.h"
 #include "som.h"
 #include "libhppa.h"

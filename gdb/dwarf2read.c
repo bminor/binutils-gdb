@@ -72,7 +72,7 @@
 #include "build-id.h"
 
 #include <fcntl.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include <sys/types.h>
 

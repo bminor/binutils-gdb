@@ -31,7 +31,7 @@
 #include "target.h"
 #include "f-lang.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include <errno.h>
 
 #if 0				/* Currently unused.  */

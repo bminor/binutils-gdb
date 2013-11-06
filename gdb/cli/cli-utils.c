@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "cli/cli-utils.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "value.h"
 #include "gdb_assert.h"
 

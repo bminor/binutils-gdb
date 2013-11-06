@@ -22,7 +22,7 @@
 #include "target.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_wait.h"
 #include "gdb_assert.h"
 #ifdef HAVE_TKILL_SYSCALL

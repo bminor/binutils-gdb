@@ -24,7 +24,7 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>

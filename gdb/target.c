@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include <errno.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "target.h"
 #include "gdbcmd.h"
 #include "symtab.h"

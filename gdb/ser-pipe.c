@@ -29,7 +29,7 @@
 #include <sys/socket.h>
 #include <sys/time.h>
 #include <fcntl.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "filestuff.h"
 
 #include <signal.h>

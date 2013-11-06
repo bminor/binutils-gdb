@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include "gdb_string.h"
+#include <string.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>

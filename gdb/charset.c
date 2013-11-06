@@ -30,7 +30,7 @@
 #include "gdb_vecs.h"
 
 #include <stddef.h>
-#include "gdb_string.h"
+#include <string.h>
 #include <ctype.h>
 
 #ifdef USE_WIN32API

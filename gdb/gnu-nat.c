@@ -28,7 +28,7 @@
 #include <setjmp.h>
 #include <signal.h>
 #include <stdio.h>
-#include "gdb_string.h"
+#include <string.h>
 #include <sys/ptrace.h>
 
 #include <mach.h>

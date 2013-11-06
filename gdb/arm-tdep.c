@@ -25,7 +25,7 @@
 #include "inferior.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "dis-asm.h"		/* For register styles.  */
 #include "regcache.h"
 #include "reggroups.h"

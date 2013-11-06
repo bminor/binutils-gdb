@@ -29,7 +29,7 @@
 #include <sys/time.h>
 
 #include "gdb_select.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdbcmd.h"
 #include "filestuff.h"
 

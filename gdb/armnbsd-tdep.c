@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "osabi.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 #include "arm-tdep.h"
 #include "solib-svr4.h"

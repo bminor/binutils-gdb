@@ -31,7 +31,7 @@
    for real.  dbx_psymtab_to_symtab() is the function that does this */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #if defined(__CYGNUSCLIB__)
 #include <sys/types.h>
@@ -58,7 +58,7 @@
 #include "block.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "aout/aout64.h"
 #include "aout/stab_gnu.h"	/* We always use GNU stabs, not

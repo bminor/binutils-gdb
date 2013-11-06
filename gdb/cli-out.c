@@ -23,7 +23,7 @@
 #include "defs.h"
 #include "ui-out.h"
 #include "cli-out.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "vec.h"
 

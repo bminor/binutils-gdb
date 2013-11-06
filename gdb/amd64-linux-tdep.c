@@ -33,7 +33,7 @@
 #include "linux-tdep.h"
 #include "i386-xstate.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 #include "amd64-tdep.h"
 #include "solib-svr4.h"

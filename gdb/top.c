@@ -60,7 +60,7 @@
 #include <sys/types.h>
 
 #include "event-top.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_stat.h"
 #include <ctype.h>
 #include "ui-out.h"

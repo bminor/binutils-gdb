@@ -21,7 +21,7 @@
 
 #include <stdarg.h>
 
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "elf-bfd.h"
 #include "elf/m32c.h"

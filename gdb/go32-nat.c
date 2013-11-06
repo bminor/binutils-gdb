@@ -99,7 +99,7 @@
 #include "i386-cpuid.h"
 #include "value.h"
 #include "regcache.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "top.h"
 #include "cli/cli-utils.h"
 

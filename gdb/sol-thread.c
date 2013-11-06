@@ -64,7 +64,7 @@
 #include "solib.h"
 #include "symfile.h"
 #include "observer.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "procfs.h"
 
 struct target_ops sol_thread_ops;

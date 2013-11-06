@@ -35,7 +35,7 @@
 
 #include <fcntl.h>
 #include <errno.h>
-#include "gdb_string.h"
+#include <string.h>
 #include <time.h>
 #ifdef HAVE_SYS_PROCFS_H
 #include <sys/procfs.h>

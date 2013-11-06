@@ -35,7 +35,7 @@
 #include "gdbthread.h"
 #include "target.h"
 #include "language.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb-demangle.h"
 #include "filenames.h"
 #include "annotate.h"

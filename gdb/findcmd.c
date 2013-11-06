@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "gdbcmd.h"
 #include "value.h"
 #include "target.h"

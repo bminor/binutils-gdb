@@ -21,7 +21,7 @@
 #include "defs.h"
 #include "solib-spu.h"
 #include "gdbcore.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "gdb_stat.h"
 #include "arch-utils.h"

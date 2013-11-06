@@ -25,7 +25,7 @@
 #include "ax.h"
 
 #include "value.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "user-regs.h"
 

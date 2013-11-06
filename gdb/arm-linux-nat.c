@@ -19,7 +19,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "gdbcore.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "regcache.h"
 #include "target.h"
 #include "linux-nat.h"

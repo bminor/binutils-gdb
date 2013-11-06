@@ -37,7 +37,7 @@
 #include "dfp.h"
 #include "tracepoint.h"
 #include <errno.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "cp-support.h"
 #include "observer.h"

@@ -20,7 +20,7 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #endif
 
 #include "linux-ptrace.h"

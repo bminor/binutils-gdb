@@ -22,7 +22,7 @@
 #include "gdb_assert.h"
 #include "exceptions.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 #if !defined(HAVE_LIBEXPAT)
 

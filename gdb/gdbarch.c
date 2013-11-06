@@ -43,7 +43,7 @@
 #include "floatformat.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "reggroups.h"
 #include "osabi.h"
 #include "gdb_obstack.h"

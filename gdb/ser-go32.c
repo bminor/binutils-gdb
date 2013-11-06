@@ -24,7 +24,7 @@
 #include "defs.h"
 #include "gdbcmd.h"
 #include "serial.h"
-#include "gdb_string.h"
+#include <string.h>
 
 
 /*

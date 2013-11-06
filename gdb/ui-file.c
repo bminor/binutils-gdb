@@ -22,7 +22,7 @@
 #include "defs.h"
 #include "ui-file.h"
 #include "gdb_obstack.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_select.h"
 #include "filestuff.h"
 

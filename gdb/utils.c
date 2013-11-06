@@ -21,7 +21,7 @@
 #include "dyn-string.h"
 #include "gdb_assert.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_wait.h"
 #include "event-top.h"
 #include "exceptions.h"

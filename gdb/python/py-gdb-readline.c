@@ -22,7 +22,7 @@
 #include "exceptions.h"
 #include "top.h"
 #include "cli/cli-utils.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include <stddef.h>
 

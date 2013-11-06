@@ -31,7 +31,7 @@
 #include "trad-frame.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"

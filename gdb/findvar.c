@@ -25,7 +25,7 @@
 #include "gdbcore.h"
 #include "inferior.h"
 #include "target.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "floatformat.h"
 #include "symfile.h"		/* for overlay functions */

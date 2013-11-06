@@ -26,7 +26,7 @@
 #include "valprint.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_regex.h"
 
 #include "varobj.h"

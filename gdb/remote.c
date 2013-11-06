@@ -20,7 +20,7 @@
 /* See the GDB User Guide for details of the GDB remote protocol.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include "inferior.h"

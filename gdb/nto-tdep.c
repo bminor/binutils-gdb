@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include "gdb_stat.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "nto-tdep.h"
 #include "top.h"
 #include "inferior.h"

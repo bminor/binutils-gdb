@@ -21,7 +21,7 @@
 
 #include "defs.h"
 #include "bfd.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "elf-bfd.h"
 #include "elf/common.h"
 #include "elf/internal.h"

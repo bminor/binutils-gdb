@@ -27,7 +27,7 @@
 #include "frame-unwind.h"
 #include "command.h"
 #include "gdbcmd.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "observer.h"
 #include "gdbthread.h"
 

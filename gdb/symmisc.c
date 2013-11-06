@@ -38,7 +38,7 @@
 #include "gdbcmd.h"
 #include "source.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include "readline/readline.h"
 
 #include "psymtab.h"

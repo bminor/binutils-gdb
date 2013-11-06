@@ -50,7 +50,7 @@
 #include "user-regs.h"
 #include <ctype.h>
 #include "elf/common.h"
-#include "gdb_string.h"
+#include <string.h>
 
 extern int arm_apcs_32;
 

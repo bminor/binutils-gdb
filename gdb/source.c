@@ -30,7 +30,7 @@
 #include "filestuff.h"
 
 #include <sys/types.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_stat.h"
 #include <fcntl.h>
 #include "gdbcore.h"

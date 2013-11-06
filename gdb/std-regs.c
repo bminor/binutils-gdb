@@ -24,7 +24,7 @@
 #include "frame.h"
 #include "gdbtypes.h"
 #include "value.h"
-#include "gdb_string.h"
+#include <string.h>
 
 
 static struct value *

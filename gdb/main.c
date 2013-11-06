@@ -31,7 +31,7 @@
 #include "gdb_stat.h"
 #include <ctype.h>
 
-#include "gdb_string.h"
+#include <string.h>
 #include "event-loop.h"
 #include "ui-out.h"
 

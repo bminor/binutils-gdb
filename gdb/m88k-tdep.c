@@ -32,7 +32,7 @@
 #include "value.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "m88k-tdep.h"
 

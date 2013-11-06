@@ -24,7 +24,7 @@
 #include "breakpoint.h"
 #include "inferior.h"
 #include "target.h"
-#include "gdb_string.h"
+#include <string.h>
 
 
 /* Insert a breakpoint on targets that don't have any better

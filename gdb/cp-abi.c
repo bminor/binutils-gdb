@@ -25,7 +25,7 @@
 #include "gdbcmd.h"
 #include "ui-out.h"
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 static struct cp_abi_ops *find_cp_abi (const char *short_name);
 

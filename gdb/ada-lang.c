@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include <stdio.h>
-#include "gdb_string.h"
+#include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include "demangle.h"

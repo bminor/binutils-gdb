@@ -39,7 +39,7 @@
 #include "dwarf2loc.h"
 #include "dwarf2-frame.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 
 extern int dwarf2_always_disassemble;

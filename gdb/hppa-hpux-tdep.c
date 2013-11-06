@@ -36,7 +36,7 @@
 #include "regcache.h"
 #include "exceptions.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 #define IS_32BIT_TARGET(_gdbarch) \
 	((gdbarch_tdep (_gdbarch))->bytes_per_address == 4)

@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "dcache.h"
 #include "gdbcmd.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"

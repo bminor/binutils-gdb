@@ -25,7 +25,7 @@
 #include "infcall.h"
 #include "objfiles.h"
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "linux-fork.h"
 #include "linux-nat.h"
 #include "gdbthread.h"

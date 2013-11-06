@@ -23,7 +23,7 @@
 #include "defs.h"
 #include "inferior.h"
 #include "value.h"
-#include "gdb_string.h"
+#include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <signal.h>

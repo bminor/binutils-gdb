@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "arch-utils.h"
 #include <signal.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "frame.h"
