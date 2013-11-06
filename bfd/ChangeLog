@@ -1,3 +1,16 @@
+2013-11-07  Roland McGrath  <mcgrathr@google.com>
+
+	* archures.c (bfd_mach_i386_nacl): Fix definition so it doesn't
+	collide with bfd_mach_l1om.
+	* bfd-in2.h: Regenerate.
+
+	* elf32-i386.c (elf32_i386_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf32-i386-nacl definition.
+	* elf64-x86-64.c (elf64_x86_64_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf64-x86-64-nacl definition.
+	(elf32_x86_64_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf32-x86-64-nacl definition.
+
 2013-11-05  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rl78.c (elf32_rl78_relax_delete_bytes): Make sure relocs

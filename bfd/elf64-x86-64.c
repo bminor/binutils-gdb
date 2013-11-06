@@ -5348,6 +5348,14 @@ static const struct bfd_elf_special_section
 
 /* Native Client support.  */
 
+static bfd_boolean
+elf64_x86_64_nacl_elf_object_p (bfd *abfd)
+{
+  /* Set the right machine number for a NaCl x86-64 ELF64 file.  */
+  bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x86_64_nacl);
+  return TRUE;
+}
+
 #undef	TARGET_LITTLE_SYM
 #define	TARGET_LITTLE_SYM		bfd_elf64_x86_64_nacl_vec
 #undef	TARGET_LITTLE_NAME
@@ -5480,6 +5488,8 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
 #undef	elf_backend_arch_data
 #define	elf_backend_arch_data	&elf_x86_64_nacl_arch_bed
 
+#undef	elf_backend_object_p
+#define elf_backend_object_p			elf64_x86_64_nacl_elf_object_p
 #undef	elf_backend_modify_segment_map
 #define	elf_backend_modify_segment_map		nacl_modify_segment_map
 #undef	elf_backend_modify_program_headers
@@ -5490,6 +5500,14 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
 #include "elf64-target.h"
 
 /* Native Client x32 support.  */
+
+static bfd_boolean
+elf32_x86_64_nacl_elf_object_p (bfd *abfd)
+{
+  /* Set the right machine number for a NaCl x86-64 ELF32 file.  */
+  bfd_default_set_arch_mach (abfd, bfd_arch_i386, bfd_mach_x64_32_nacl);
+  return TRUE;
+}
 
 #undef  TARGET_LITTLE_SYM
 #define TARGET_LITTLE_SYM		bfd_elf32_x86_64_nacl_vec
@@ -5511,7 +5529,7 @@ static const struct elf_x86_64_backend_data elf_x86_64_nacl_arch_bed =
 
 #undef elf_backend_object_p
 #define elf_backend_object_p \
-  elf32_x86_64_elf_object_p
+  elf32_x86_64_nacl_elf_object_p
 
 #undef elf_backend_bfd_from_remote_memory
 #define elf_backend_bfd_from_remote_memory \
