@@ -1,3 +1,8 @@
+2013-11-05  DJ Delorie  <dj@redhat.com>
+
+	* elf32-rl78.c (elf32_rl78_relax_delete_bytes): Make sure relocs
+	are loaded before trying to use them.
+
 2013-11-05  H.J. Lu  <hongjiu.lu@intel.com>
 	    Bernhard Rosenkränzer <bernhard.rosenkranzer@linaro.org>
 

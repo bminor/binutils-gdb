@@ -1481,6 +1481,12 @@ elf32_rl78_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count
     toaddr = alignment_rel->r_offset;
 
   irel = elf_section_data (sec)->relocs;
+  if (irel == NULL)
+    {
+      _bfd_elf_link_read_relocs (sec->owner, sec, NULL, NULL, TRUE);
+      irel = elf_section_data (sec)->relocs;
+    }
+
   irelend = irel + sec->reloc_count;
 
   /* Actually delete the bytes.  */
@@ -1496,7 +1502,7 @@ elf32_rl78_relax_delete_bytes (bfd *abfd, asection *sec, bfd_vma addr, int count
     memset (contents + toaddr - count, 0x03, count);
 
   /* Adjust all the relocs.  */
-  for (irel = elf_section_data (sec)->relocs; irel < irelend; irel++)
+  for (; irel && irel < irelend; irel++)
     {
       /* Get the new reloc address.  */
       if (irel->r_offset > addr
