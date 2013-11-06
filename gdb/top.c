@@ -1708,7 +1708,7 @@ init_main (void)
   /* Set the important stuff up for command editing.  */
   command_editing_p = 1;
   history_expansion_p = 0;
-  write_history_p = 1;
+  write_history_p = 0;
 
   /* Setup important stuff for command line editing.  */
   rl_completion_word_break_hook = gdb_completion_word_break_characters;
