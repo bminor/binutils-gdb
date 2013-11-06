@@ -1,5 +1,21 @@
 2013-11-18  Tom Tromey  <tromey@redhat.com>
 
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Add
+	sys_stat.
+	* gnulib/aclocal.m4: Update.
+	* gnulib/config.in: Update.
+	* gnulib/configure: Update.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Update.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+	* gnulib/import/m4/sys_stat_h.m4: New.
+	* gnulib/import/m4/time_h.m4: New.
+	* gnulib/import/sys_stat.in.h: New.
+	* gnulib/import/time.in.h: New.
+
+2013-11-18  Tom Tromey  <tromey@redhat.com>
+
 	* configure: Rebuild.
 	* configure.ac: Remove check of HAVE_SYS_TYPES_H.
 

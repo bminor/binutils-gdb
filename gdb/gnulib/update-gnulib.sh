@@ -40,6 +40,7 @@ IMPORTED_GNULIB_MODULES="\
     strerror \
     strstr \
     dirent \
+    sys_stat \
 "
 
 # The gnulib commit ID to use for the update.

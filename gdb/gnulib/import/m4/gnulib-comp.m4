@@ -84,7 +84,9 @@ AC_DEFUN([gl_EARLY],
   # Code from module strnlen1:
   # Code from module strstr:
   # Code from module strstr-simple:
+  # Code from module sys_stat:
   # Code from module sys_types:
+  # Code from module time:
   # Code from module unistd:
   # Code from module update-copyright:
   # Code from module verify:
@@ -218,8 +220,11 @@ AC_DEFUN([gl_INIT],
     AC_LIBOBJ([strstr])
   fi
   gl_STRING_MODULE_INDICATOR([strstr])
+  gl_HEADER_SYS_STAT_H
+  AC_PROG_MKDIR_P
   gl_SYS_TYPES_H
   AC_PROG_MKDIR_P
+  gl_HEADER_TIME_H
   gl_UNISTD_H
   gl_WCHAR_H
   gl_WCTYPE_H
@@ -416,7 +421,9 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/strnlen1.c
   lib/strnlen1.h
   lib/strstr.c
+  lib/sys_stat.in.h
   lib/sys_types.in.h
+  lib/time.in.h
   lib/unistd.c
   lib/unistd.in.h
   lib/verify.h
@@ -470,7 +477,9 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/string_h.m4
   m4/strstr.m4
   m4/sys_socket_h.m4
+  m4/sys_stat_h.m4
   m4/sys_types_h.m4
+  m4/time_h.m4
   m4/unistd_h.m4
   m4/warn-on-use.m4
   m4/wchar_h.m4
