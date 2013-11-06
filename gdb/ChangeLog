@@ -1,5 +1,10 @@
 2013-11-06  Muhammad Bilal  <mbilal@codesourcery.com>
 
+	PR cli/15224
+	* top.c (init_main): 'set history save on' by default.
+
+2013-11-06  Muhammad Bilal  <mbilal@codesourcery.com>
+
 	PR cli/16122
 	* top.c (command_line_input): Unify interactivity tests to use
 	input_from_terminal_p.
