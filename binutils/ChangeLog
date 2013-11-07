@@ -1,3 +1,15 @@
+2013-11-07  Doug Evans  <dje@google.com>
+
+	Add pretty-printing of .debug_gnu_pubnames, .debug_gnu_pubtypes.
+	* dwarf.c (get_gdb_index_symbol_kind_name): New function.
+	(display_debug_pubnames_worker): Renamed from display_debug_pubnames.
+	Add support for .debug_gnu_pubnames, .debug_gnu_pubtypes.
+	(display_debug_pubnames, display_debug_pubnames_gnu): New functions.
+	(display_gdb_index): Redo printing of symbol kind.
+	(debug_displays): Add .debug_gnu_pubnames, .debug_gnu_pubtypes.
+	* dwarf.h (dwarf_section_display_enum): Add gnu_pubnames, gnu_pubtypes.
+	* readelf.c (process_section_headers): Add gnu_pubnames, gnu_pubtypes.
+
 2013-11-07  Roland McGrath  <mcgrathr@google.com>
 
 	* objdump.c (dump_dwarf): Grok bfd_mach_x86_64_nacl and
