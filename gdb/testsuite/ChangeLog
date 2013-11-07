@@ -1,5 +1,10 @@
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
 
+        * gdb.python/py-cmd.exp: Add COMPLETE_EXPRESSION tests.
+        * gdb.python/py-cmd.c: New File.
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* gdb.python/py-breakpoint.exp: Add temporary breakpoint tests.
 
 2013-11-06  Doug Evans  <dje@sebabeach.org>

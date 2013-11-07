@@ -1,5 +1,10 @@
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
 
+        * gdb.texinfo (Commands In Python): Document COMPLETE_EXPRESSION
+        constant.
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
 	* gdb.texinfo (Breakpoints In Python): Document temporary
 	option in breakpoint constructor, and add documentation to the
 	temporary attribute.

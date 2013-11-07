@@ -26011,6 +26011,13 @@ command names.
 @item gdb.COMPLETE_SYMBOL
 This constant means that completion should be done using symbol names
 as the source.
+
+@findex COMPLETE_EXPRESSION
+@findex gdb.COMPLETE_EXPRESSION
+@item gdb.COMPLETE_EXPRESSION
+This constant means that completion should be done on expressions.
+Often this means completing on symbol names, but some language
+parsers also have support for completing on field names.
 @end table
 
 The following code snippet shows how a trivial CLI command can be
