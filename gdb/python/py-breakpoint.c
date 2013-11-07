@@ -529,6 +529,23 @@ bppy_get_visibility (PyObject *self, void *closure)
   Py_RETURN_TRUE;
 }
 
+/* Python function to determine if the breakpoint is a temporary
+   breakpoint.  */
+
+static PyObject *
+bppy_get_temporary (PyObject *self, void *closure)
+{
+  breakpoint_object *self_bp = (breakpoint_object *) self;
+
+  BPPY_REQUIRE_VALID (self_bp);
+
+  if (self_bp->bp->disposition == disp_del
+      || self_bp->bp->disposition == disp_del_at_next_stop)
+    Py_RETURN_TRUE;
+
+  Py_RETURN_FALSE;
+}
+
 /* Python function to get the breakpoint's number.  */
 static PyObject *
 bppy_get_number (PyObject *self, void *closure)
@@ -594,22 +611,33 @@ bppy_get_ignore_count (PyObject *self, void *closure)
 static int
 bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 {
-  static char *keywords[] = { "spec", "type", "wp_class", "internal", NULL };
+  static char *keywords[] = { "spec", "type", "wp_class", "internal",
+			      "temporary", NULL };
   const char *spec;
   int type = bp_breakpoint;
   int access_type = hw_write;
   PyObject *internal = NULL;
+  PyObject *temporary = NULL;
   int internal_bp = 0;
+  int temporary_bp = 0;
   volatile struct gdb_exception except;
 
-  if (! PyArg_ParseTupleAndKeywords (args, kwargs, "s|iiO", keywords,
-				     &spec, &type, &access_type, &internal))
+  if (! PyArg_ParseTupleAndKeywords (args, kwargs, "s|iiOO", keywords,
+				     &spec, &type, &access_type,
+				     &internal, &temporary))
     return -1;
 
   if (internal)
     {
       internal_bp = PyObject_IsTrue (internal);
       if (internal_bp == -1)
+	return -1;
+    }
+
+  if (temporary != NULL)
+    {
+      temporary_bp = PyObject_IsTrue (temporary);
+      if (temporary_bp == -1)
 	return -1;
     }
 
@@ -629,7 +657,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 	    create_breakpoint (python_gdbarch,
 			       copy, NULL, -1, NULL,
 			       0,
-			       0, bp_breakpoint,
+			       temporary_bp, bp_breakpoint,
 			       0,
 			       AUTO_BOOLEAN_TRUE,
 			       &bkpt_breakpoint_ops,
@@ -973,6 +1001,8 @@ or None if no condition set."},
     "Type of breakpoint."},
   { "visible", bppy_get_visibility, NULL,
     "Whether the breakpoint is visible to the user."},
+  { "temporary", bppy_get_temporary, NULL,
+    "Whether this breakpoint is a temporary breakpoint."},
   { NULL }  /* Sentinel.  */
 };
 

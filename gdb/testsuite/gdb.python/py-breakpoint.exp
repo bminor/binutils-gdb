@@ -300,3 +300,37 @@ gdb_py_test_silent_cmd  "python wp1 = wp_eval (\"result\", type=gdb.BP_WATCHPOIN
 gdb_test "continue" ".*\[Ww\]atchpoint.*result.*Old value =.*New value = 788.*" "Test watchpoint write"
 gdb_test "python print (never_eval_bp1.count)" "0" \
     "Check that this unrelated breakpoints eval function was never called."
+
+# Test temporary breakpoint
+
+# Start with a fresh gdb.
+clean_restart ${testfile}
+
+if ![runto_main] then {
+    fail "Cannot run to main."
+    return 0
+}
+delete_breakpoints
+gdb_py_test_multiple "Sub-class and check temporary breakpoint" \
+  "python" "" \
+  "class temp_bp (gdb.Breakpoint):" "" \
+  "   count = 0" "" \
+  "   def stop (self):" "" \
+  "      self.count = self.count + 1" "" \
+  "      return True" "" \
+  "end" ""
+gdb_py_test_silent_cmd  "python ibp =  temp_bp(\"$ibp_location\", temporary=True)" \
+    "Set temporary breakpoint" 0
+gdb_test "info breakpoints" "2.*breakpoint.*del.*py-breakpoint\.c:$ibp_location.*" \
+    "Check info breakpoints shows breakpoint with temporary status"
+gdb_test "python print (ibp.location)" "py-breakpoint\.c:$ibp_location*" \
+    "Check temporary breakpoint location"
+gdb_test "python print (ibp.temporary)" "True" \
+    "Check breakpoint temporary status"
+gdb_continue_to_breakpoint "Break at multiply." ".*/$srcfile:$ibp_location.*"
+gdb_test "python print (ibp.count)" "1" \
+    "Check temporary stop callback executed before deletion."
+gdb_test "python print (ibp.temporary)" "RuntimeError: Breakpoint 2 is invalid.*" \
+    "Check temporary breakpoint is deleted after being hit"
+gdb_test "info breakpoints" "No breakpoints or watchpoints.*" \
+    "Check info breakpoints shows temporary breakpoint is deleted"

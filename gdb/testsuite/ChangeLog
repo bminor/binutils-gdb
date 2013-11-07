@@ -1,3 +1,7 @@
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-breakpoint.exp: Add temporary breakpoint tests.
+
 2013-11-06  Doug Evans  <dje@sebabeach.org>
 
 	* gdb.python/py-arch.exp: Tweak test name for bad memory access test.
