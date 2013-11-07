@@ -27,6 +27,7 @@ struct type_print_options;
 #include "value.h"
 #include "gdbtypes.h"
 #include "breakpoint.h"
+#include "vec.h"
 
 /* Names of specific files known to be part of the runtime
    system and that might consider (confusing) debugging information.
@@ -388,6 +389,21 @@ extern void create_ada_exception_catchpoint
   (struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,
    char *excep_string, char *cond_string, int tempflag, int disabled,
    int from_tty);
+
+/* Some information about a given Ada exception.  */
+
+typedef struct ada_exc_info
+{
+  /* The name of the exception.  */
+  const char *name;
+
+  /* The address of the symbol corresponding to that exception.  */
+  CORE_ADDR addr;
+} ada_exc_info;
+
+DEF_VEC_O(ada_exc_info);
+
+extern VEC(ada_exc_info) *ada_exceptions_list (const char *regexp);
 
 /* Tasking-related: ada-tasks.c */
 

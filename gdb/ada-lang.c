@@ -12284,6 +12284,357 @@ catch_assert_command (char *arg, int from_tty,
 				   tempflag, 1 /* enabled */,
 				   from_tty);
 }
+
+/* Return non-zero if the symbol SYM is an Ada exception object.  */
+
+static int
+ada_is_exception_sym (struct symbol *sym)
+{
+  const char *type_name = type_name_no_tag (SYMBOL_TYPE (sym));
+
+  return (SYMBOL_CLASS (sym) != LOC_TYPEDEF
+          && SYMBOL_CLASS (sym) != LOC_BLOCK
+          && SYMBOL_CLASS (sym) != LOC_CONST
+          && SYMBOL_CLASS (sym) != LOC_UNRESOLVED
+          && type_name != NULL && strcmp (type_name, "exception") == 0);
+}
+
+/* Given a global symbol SYM, return non-zero iff SYM is a non-standard
+   Ada exception object.  This matches all exceptions except the ones
+   defined by the Ada language.  */
+
+static int
+ada_is_non_standard_exception_sym (struct symbol *sym)
+{
+  int i;
+
+  if (!ada_is_exception_sym (sym))
+    return 0;
+
+  for (i = 0; i < ARRAY_SIZE (standard_exc); i++)
+    if (strcmp (SYMBOL_LINKAGE_NAME (sym), standard_exc[i]) == 0)
+      return 0;  /* A standard exception.  */
+
+  /* Numeric_Error is also a standard exception, so exclude it.
+     See the STANDARD_EXC description for more details as to why
+     this exception is not listed in that array.  */
+  if (strcmp (SYMBOL_LINKAGE_NAME (sym), "numeric_error") == 0)
+    return 0;
+
+  return 1;
+}
+
+/* A helper function for qsort, comparing two struct ada_exc_info
+   objects.
+
+   The comparison is determined first by exception name, and then
+   by exception address.  */
+
+static int
+compare_ada_exception_info (const void *a, const void *b)
+{
+  const struct ada_exc_info *exc_a = (struct ada_exc_info *) a;
+  const struct ada_exc_info *exc_b = (struct ada_exc_info *) b;
+  int result;
+
+  result = strcmp (exc_a->name, exc_b->name);
+  if (result != 0)
+    return result;
+
+  if (exc_a->addr < exc_b->addr)
+    return -1;
+  if (exc_a->addr > exc_b->addr)
+    return 1;
+
+  return 0;
+}
+
+/* Sort EXCEPTIONS using compare_ada_exception_info as the comparison
+   routine, but keeping the first SKIP elements untouched.
+
+   All duplicates are also removed.  */
+
+static void
+sort_remove_dups_ada_exceptions_list (VEC(ada_exc_info) **exceptions,
+				      int skip)
+{
+  struct ada_exc_info *to_sort
+    = VEC_address (ada_exc_info, *exceptions) + skip;
+  int to_sort_len
+    = VEC_length (ada_exc_info, *exceptions) - skip;
+  int i, j;
+
+  qsort (to_sort, to_sort_len, sizeof (struct ada_exc_info),
+	 compare_ada_exception_info);
+
+  for (i = 1, j = 1; i < to_sort_len; i++)
+    if (compare_ada_exception_info (&to_sort[i], &to_sort[j - 1]) != 0)
+      to_sort[j++] = to_sort[i];
+  to_sort_len = j;
+  VEC_truncate(ada_exc_info, *exceptions, skip + to_sort_len);
+}
+
+/* A function intended as the "name_matcher" callback in the struct
+   quick_symbol_functions' expand_symtabs_matching method.
+
+   SEARCH_NAME is the symbol's search name.
+
+   If USER_DATA is not NULL, it is a pointer to a regext_t object
+   used to match the symbol (by natural name).  Otherwise, when USER_DATA
+   is null, no filtering is performed, and all symbols are a positive
+   match.  */
+
+static int
+ada_exc_search_name_matches (const char *search_name, void *user_data)
+{
+  regex_t *preg = user_data;
+
+  if (preg == NULL)
+    return 1;
+
+  /* In Ada, the symbol "search name" is a linkage name, whereas
+     the regular expression used to do the matching refers to
+     the natural name.  So match against the decoded name.  */
+  return (regexec (preg, ada_decode (search_name), 0, NULL, 0) == 0);
+}
+
+/* Add all exceptions defined by the Ada standard whose name match
+   a regular expression.
+
+   If PREG is not NULL, then this regexp_t object is used to
+   perform the symbol name matching.  Otherwise, no name-based
+   filtering is performed.
+
+   EXCEPTIONS is a vector of exceptions to which matching exceptions
+   gets pushed.  */
+
+static void
+ada_add_standard_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
+{
+  int i;
+
+  for (i = 0; i < ARRAY_SIZE (standard_exc); i++)
+    {
+      if (preg == NULL
+	  || regexec (preg, standard_exc[i], 0, NULL, 0) == 0)
+	{
+	  struct bound_minimal_symbol msymbol
+	    = ada_lookup_simple_minsym (standard_exc[i]);
+
+	  if (msymbol.minsym != NULL)
+	    {
+	      struct ada_exc_info info
+		= {standard_exc[i], SYMBOL_VALUE_ADDRESS (msymbol.minsym)};
+
+	      VEC_safe_push (ada_exc_info, *exceptions, &info);
+	    }
+	}
+    }
+}
+
+/* Add all Ada exceptions defined locally and accessible from the given
+   FRAME.
+
+   If PREG is not NULL, then this regexp_t object is used to
+   perform the symbol name matching.  Otherwise, no name-based
+   filtering is performed.
+
+   EXCEPTIONS is a vector of exceptions to which matching exceptions
+   gets pushed.  */
+
+static void
+ada_add_exceptions_from_frame (regex_t *preg, struct frame_info *frame,
+			       VEC(ada_exc_info) **exceptions)
+{
+  struct block *block = get_frame_block (frame, 0);
+
+  while (block != 0)
+    {
+      struct block_iterator iter;
+      struct symbol *sym;
+
+      ALL_BLOCK_SYMBOLS (block, iter, sym)
+	{
+	  switch (SYMBOL_CLASS (sym))
+	    {
+	    case LOC_TYPEDEF:
+	    case LOC_BLOCK:
+	    case LOC_CONST:
+	      break;
+	    default:
+	      if (ada_is_exception_sym (sym))
+		{
+		  struct ada_exc_info info = {SYMBOL_PRINT_NAME (sym),
+					      SYMBOL_VALUE_ADDRESS (sym)};
+
+		  VEC_safe_push (ada_exc_info, *exceptions, &info);
+		}
+	    }
+	}
+      if (BLOCK_FUNCTION (block) != NULL)
+	break;
+      block = BLOCK_SUPERBLOCK (block);
+    }
+}
+
+/* Add all exceptions defined globally whose name name match
+   a regular expression, excluding standard exceptions.
+
+   The reason we exclude standard exceptions is that they need
+   to be handled separately: Standard exceptions are defined inside
+   a runtime unit which is normally not compiled with debugging info,
+   and thus usually do not show up in our symbol search.  However,
+   if the unit was in fact built with debugging info, we need to
+   exclude them because they would duplicate the entry we found
+   during the special loop that specifically searches for those
+   standard exceptions.
+
+   If PREG is not NULL, then this regexp_t object is used to
+   perform the symbol name matching.  Otherwise, no name-based
+   filtering is performed.
+
+   EXCEPTIONS is a vector of exceptions to which matching exceptions
+   gets pushed.  */
+
+static void
+ada_add_global_exceptions (regex_t *preg, VEC(ada_exc_info) **exceptions)
+{
+  struct objfile *objfile;
+  struct symtab *s;
+
+  ALL_OBJFILES (objfile)
+    if (objfile->sf)
+      objfile->sf->qf->expand_symtabs_matching
+	(objfile, NULL, ada_exc_search_name_matches,
+	 VARIABLES_DOMAIN, preg);
+
+  ALL_PRIMARY_SYMTABS (objfile, s)
+    {
+      struct blockvector *bv = BLOCKVECTOR (s);
+      int i;
+
+      for (i = GLOBAL_BLOCK; i <= STATIC_BLOCK; i++)
+	{
+	  struct block *b = BLOCKVECTOR_BLOCK (bv, i);
+	  struct block_iterator iter;
+	  struct symbol *sym;
+
+	  ALL_BLOCK_SYMBOLS (b, iter, sym)
+	    if (ada_is_non_standard_exception_sym (sym)
+		&& (preg == NULL
+		    || regexec (preg, SYMBOL_NATURAL_NAME (sym),
+				0, NULL, 0) == 0))
+	      {
+		struct ada_exc_info info
+		  = {SYMBOL_PRINT_NAME (sym), SYMBOL_VALUE_ADDRESS (sym)};
+
+		VEC_safe_push (ada_exc_info, *exceptions, &info);
+	      }
+	}
+    }
+}
+
+/* Implements ada_exceptions_list with the regular expression passed
+   as a regex_t, rather than a string.
+
+   If not NULL, PREG is used to filter out exceptions whose names
+   do not match.  Otherwise, all exceptions are listed.  */
+
+static VEC(ada_exc_info) *
+ada_exceptions_list_1 (regex_t *preg)
+{
+  VEC(ada_exc_info) *result = NULL;
+  struct cleanup *old_chain
+    = make_cleanup (VEC_cleanup (ada_exc_info), &result);
+  int prev_len;
+
+  /* First, list the known standard exceptions.  These exceptions
+     need to be handled separately, as they are usually defined in
+     runtime units that have been compiled without debugging info.  */
+
+  ada_add_standard_exceptions (preg, &result);
+
+  /* Next, find all exceptions whose scope is local and accessible
+     from the currently selected frame.  */
+
+  if (has_stack_frames ())
+    {
+      prev_len = VEC_length (ada_exc_info, result);
+      ada_add_exceptions_from_frame (preg, get_selected_frame (NULL),
+				     &result);
+      if (VEC_length (ada_exc_info, result) > prev_len)
+	sort_remove_dups_ada_exceptions_list (&result, prev_len);
+    }
+
+  /* Add all exceptions whose scope is global.  */
+
+  prev_len = VEC_length (ada_exc_info, result);
+  ada_add_global_exceptions (preg, &result);
+  if (VEC_length (ada_exc_info, result) > prev_len)
+    sort_remove_dups_ada_exceptions_list (&result, prev_len);
+
+  discard_cleanups (old_chain);
+  return result;
+}
+
+/* Return a vector of ada_exc_info.
+
+   If REGEXP is NULL, all exceptions are included in the result.
+   Otherwise, it should contain a valid regular expression,
+   and only the exceptions whose names match that regular expression
+   are included in the result.
+
+   The exceptions are sorted in the following order:
+     - Standard exceptions (defined by the Ada language), in
+       alphabetical order;
+     - Exceptions only visible from the current frame, in
+       alphabetical order;
+     - Exceptions whose scope is global, in alphabetical order.  */
+
+VEC(ada_exc_info) *
+ada_exceptions_list (const char *regexp)
+{
+  VEC(ada_exc_info) *result = NULL;
+  struct cleanup *old_chain = NULL;
+  regex_t reg;
+
+  if (regexp != NULL)
+    old_chain = compile_rx_or_error (&reg, regexp,
+				     _("invalid regular expression"));
+
+  result = ada_exceptions_list_1 (regexp != NULL ? &reg : NULL);
+
+  if (old_chain != NULL)
+    do_cleanups (old_chain);
+  return result;
+}
+
+/* Implement the "info exceptions" command.  */
+
+static void
+info_exceptions_command (char *regexp, int from_tty)
+{
+  VEC(ada_exc_info) *exceptions;
+  struct cleanup *cleanup;
+  struct gdbarch *gdbarch = get_current_arch ();
+  int ix;
+  struct ada_exc_info *info;
+
+  exceptions = ada_exceptions_list (regexp);
+  cleanup = make_cleanup (VEC_cleanup (ada_exc_info), &exceptions);
+
+  if (regexp != NULL)
+    printf_filtered
+      (_("All Ada exceptions matching regular expression \"%s\":\n"), regexp);
+  else
+    printf_filtered (_("All defined Ada exceptions:\n"));
+
+  for (ix = 0; VEC_iterate(ada_exc_info, exceptions, ix, info); ix++)
+    printf_filtered ("%s: %s\n", info->name, paddress (gdbarch, info->addr));
+
+  do_cleanups (cleanup);
+}
+
                                 /* Operators */
 /* Information about operators given special treatment in functions
    below.  */
@@ -12955,6 +13306,12 @@ With an argument, catch only exceptions with the given name."),
 		     CATCH_TEMPORARY);
 
   varsize_limit = 65536;
+
+  add_info ("exceptions", info_exceptions_command,
+	    _("\
+List all Ada exception names.\n\
+If a regular expression is passed as an argument, only those matching\n\
+the regular expression are listed."));
 
   obstack_init (&symbol_list_obstack);
 

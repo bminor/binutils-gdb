@@ -1,3 +1,7 @@
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc: New testcase.
+
 2013-11-11  Doug Evans  <dje@google.com>
 
 	* gdb.arch/arm-bl-branch-dest.exp: Use gdb_test_file_name instead

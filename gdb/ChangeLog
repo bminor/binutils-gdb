@@ -1,3 +1,19 @@
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h: #include "vec.h".
+	(struct ada_exc_info): New.
+	(ada_exc_info): New typedef.
+	(DEF_VEC_O(ada_exc_info)): New vector.
+	(ada_exceptions_list): Add declaration.
+	* ada-lang.c (ada_is_exception_sym)
+	(ada_is_non_standard_exception_sym, compare_ada_exception_info)
+	(sort_remove_dups_ada_exceptions_list)
+	(ada_exc_search_name_matches, ada_add_standard_exceptions)
+	(ada_add_exceptions_from_frame, ada_add_global_exceptions)
+	(ada_exceptions_list_1, ada_exceptions_list)
+	(info_exceptions_command): New function.
+	(_initialize_ada_language): Add "info exception" command.
+
 2013-11-11  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/15629
