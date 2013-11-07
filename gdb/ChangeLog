@@ -1,5 +1,10 @@
 2013-12-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* symtab.c (symbol_find_demangled_name): Add handling of
+	Ada symbols.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* mi/mi-main.c (mi_cmd_list_features): add "exec-run-start-option".
 	* NEWS: Expand the entry documenting the new -exec-run --start
 	option to mention the corresponding new entry in the output of

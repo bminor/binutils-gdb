@@ -1,5 +1,11 @@
 2013-12-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/int_deref.exp: Add test verifying that we print
+	the decoded symbol name when printing the address of Ada
+	symbols.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.mi/mi-start.exp: Add test verifying that -list-features
 	contains "exec-run-start-option".
 

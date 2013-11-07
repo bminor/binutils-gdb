@@ -60,6 +60,7 @@
 #include "solist.h"
 #include "macrotab.h"
 #include "macroscope.h"
+#include "ada-lang.h"
 
 #include "psymtab.h"
 #include "parser-defs.h"
@@ -692,6 +693,42 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
      symbols).  Just the mangling standard is not standardized across compilers
      and there is no DW_AT_producer available for inferiors with only the ELF
      symbols to check the mangling kind.  */
+
+  /* Check for Ada symbols last.  See comment below explaining why.  */
+
+  if (gsymbol->language == language_auto)
+   {
+     const char *demangled = ada_decode (mangled);
+
+     if (demangled != mangled && demangled != NULL && demangled[0] != '<')
+       {
+	 /* Set the gsymbol language to Ada, but still return NULL.
+	    Two reasons for that:
+
+	      1. For Ada, we prefer computing the symbol's decoded name
+		 on the fly rather than pre-compute it, in order to save
+		 memory (Ada projects are typically very large).
+
+	      2. There are some areas in the definition of the GNAT
+		 encoding where, with a bit of bad luck, we might be able
+		 to decode a non-Ada symbol, generating an incorrect
+		 demangled name (Eg: names ending with "TB" for instance
+		 are identified as task bodies and so stripped from
+		 the decoded name returned).
+
+		 Returning NULL, here, helps us get a little bit of
+		 the best of both worlds.  Because we're last, we should
+		 not affect any of the other languages that were able to
+		 demangle the symbol before us; we get to correctly tag
+		 Ada symbols as such; and even if we incorrectly tagged
+		 a non-Ada symbol, which should be rare, any routing
+		 through the Ada language should be transparent (Ada
+		 tries to behave much like C/C++ with non-Ada symbols).  */
+	 gsymbol->language = language_ada;
+	 return NULL;
+       }
+   }
+
   return NULL;
 }
 
