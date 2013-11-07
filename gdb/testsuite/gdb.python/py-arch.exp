@@ -59,4 +59,4 @@ gdb_test "python print (\"length\" in insn)" "True" "test key length"
 
 # Negative test
 gdb_test "python arch.disassemble(0, 0)" ".*gdb\.MemoryError.*" \
-  "test exception"
+  "test bad memory access"

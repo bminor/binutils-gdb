@@ -1,3 +1,7 @@
+2013-11-06  Doug Evans  <dje@sebabeach.org>
+
+	* gdb.python/py-arch.exp: Tweak test name for bad memory access test.
+
 2013-11-06  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (gdb_produce_source): New procedure.
