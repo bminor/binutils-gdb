@@ -4970,17 +4970,9 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   CORE_ADDR nextpc;
 
   if (arm_frame_is_thumb (frame))
-    {
-      nextpc = thumb_get_next_pc_raw (frame, pc);
-      if (nextpc == MAKE_THUMB_ADDR (pc))
-	error (_("Infinite loop detected"));
-    }
+    nextpc = thumb_get_next_pc_raw (frame, pc);
   else
-    {
-      nextpc = arm_get_next_pc_raw (frame, pc);
-      if (nextpc == pc)
-	error (_("Infinite loop detected"));
-    }
+    nextpc = arm_get_next_pc_raw (frame, pc);
 
   return nextpc;
 }
