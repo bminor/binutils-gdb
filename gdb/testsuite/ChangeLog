@@ -1,3 +1,7 @@
+2013-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp: Fix format.
+
 2013-11-19  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/py_range: New testcase.
