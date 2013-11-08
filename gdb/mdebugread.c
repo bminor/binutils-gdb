@@ -4334,7 +4334,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	}
       pop_parse_stack ();
 
-      st->primary = 1;
+      set_symtab_primary (st, 1);
 
       sort_blocks (st);
     }

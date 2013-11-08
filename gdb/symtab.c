@@ -106,7 +106,7 @@ void _initialize_symtab (void);
 /* */
 
 /* When non-zero, print debugging messages related to symtab creation.  */
-int symtab_create_debug = 0;
+unsigned int symtab_create_debug = 0;
 
 /* Non-zero if a file may be known by two different basenames.
    This is the uncommon case, and significantly slows down gdb.
@@ -171,6 +171,22 @@ search_domain_name (enum search_domain e)
     case TYPES_DOMAIN: return "TYPES_DOMAIN";
     case ALL_DOMAIN: return "ALL_DOMAIN";
     default: gdb_assert_not_reached ("bad search_domain");
+    }
+}
+
+/* Set the primary field in SYMTAB.  */
+
+void
+set_symtab_primary (struct symtab *symtab, int primary)
+{
+  symtab->primary = primary;
+
+  if (symtab_create_debug && primary)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Created primary symtab %s for %s.\n",
+			  host_address_to_string (symtab),
+			  symtab_to_filename_for_display (symtab));
     }
 }
 
@@ -5273,13 +5289,15 @@ one base name, and gdb will do file name comparisons more efficiently."),
 			   NULL, NULL,
 			   &setlist, &showlist);
 
-  add_setshow_boolean_cmd ("symtab-create", no_class, &symtab_create_debug,
-			   _("Set debugging of symbol table creation."),
-			   _("Show debugging of symbol table creation."), _("\
-When enabled, debugging messages are printed when building symbol tables."),
-			    NULL,
-			    NULL,
-			    &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("symtab-create", no_class, &symtab_create_debug,
+			     _("Set debugging of symbol table creation."),
+			     _("Show debugging of symbol table creation."), _("\
+When enabled (non-zero), debugging messages are printed when building\n\
+symbol tables.  A value of 1 (one) normally provides enough information.\n\
+A value greater than 1 provides more verbose information."),
+			     NULL,
+			     NULL,
+			     &setdebuglist, &showdebuglist);
 
   observer_attach_executable_changed (symtab_observer_executable_changed);
 }

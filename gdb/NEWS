@@ -116,6 +116,10 @@ show startup-with-shell
   trace-buffer-size -1" and "set height unlimited" is now an alias for
   "set height 0".
 
+* The "set debug symtab-create" debugging option of GDB has been changed to
+  accept a verbosity level.  0 means "off", 1 provides basic debugging
+  output, and values of 2 or greater provides more verbose output.
+
 * New command-line options
 --configuration
   Display the details of GDB configure-time options.

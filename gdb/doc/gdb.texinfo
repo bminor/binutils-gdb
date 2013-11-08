@@ -22731,7 +22731,9 @@ Show the current state of symbol file debugging messages.
 @item set debug symtab-create
 @cindex symbol table creation
 Turns on or off display of debugging messages related to symbol table creation.
-The default is off.
+The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
 @item show debug symtab-create
 Show the current state of symbol table creation debugging.
 @item set debug target
