@@ -81,7 +81,7 @@ static initializer cpu_flag_init[] =
   { "CPU_K6_FLAGS",
     "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|Cpu387|CpuMMX" },
   { "CPU_K6_2_FLAGS",
-    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|Cpu387|CpuNop|CpuMMX|Cpu3dnow" },
+    "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|CpuSYSCALL|Cpu387|CpuMMX|Cpu3dnow" },
   { "CPU_ATHLON_FLAGS",
     "Cpu186|Cpu286|Cpu386|Cpu486|Cpu586|Cpu686|CpuSYSCALL|Cpu387|Cpu687|CpuNop|CpuMMX|Cpu3dnow|Cpu3dnowA" },
   { "CPU_K8_FLAGS",
