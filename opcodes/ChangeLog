@@ -1,3 +1,9 @@
+2013-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/16140
+	* i386-gen.c (cpu_flag_init): Remove CpuNop from CPU_K6_2_FLAGS.
+	* i386-init.h: Regenerated.
+
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (F_DEPRECATED): New macro.
