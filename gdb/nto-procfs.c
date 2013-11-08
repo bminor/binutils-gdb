@@ -877,7 +877,7 @@ procfs_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int dowrite,
    on signals, etc.  We'd better not have left any breakpoints
    in the program or it'll die when it hits one.  */
 static void
-procfs_detach (struct target_ops *ops, char *args, int from_tty)
+procfs_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   int siggnal = 0;
   int pid;

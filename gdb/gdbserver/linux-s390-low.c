@@ -32,6 +32,10 @@
 #define HWCAP_S390_HIGH_GPRS 512
 #endif
 
+#ifndef HWCAP_S390_TE
+#define HWCAP_S390_TE 1024
+#endif
+
 #ifndef PTRACE_GETREGSET
 #define PTRACE_GETREGSET 0x4204
 #endif
@@ -425,6 +429,61 @@ s390_arch_setup (void)
     = s390_check_regset (pid, NT_S390_SYSTEM_CALL, 4);
   int have_regset_tdb = s390_check_regset (pid, NT_S390_TDB, 256);
 
+  /* Assume 31-bit inferior process.  */
+  if (have_regset_system_call)
+    tdesc = tdesc_s390_linux32v2;
+  else if (have_regset_last_break)
+    tdesc = tdesc_s390_linux32v1;
+  else
+    tdesc = tdesc_s390_linux32;
+
+  /* On a 64-bit host, check the low bit of the (31-bit) PSWM
+     -- if this is one, we actually have a 64-bit inferior.  */
+#ifdef __s390x__
+  {
+    unsigned int pswm;
+    struct regcache *regcache = new_register_cache (tdesc);
+
+    fetch_inferior_registers (regcache, find_regno (tdesc, "pswm"));
+    collect_register_by_name (regcache, "pswm", &pswm);
+    free_register_cache (regcache);
+
+    if (pswm & 1)
+      {
+	if (have_regset_tdb)
+	  have_regset_tdb =
+	    (s390_get_hwcap (tdesc_s390x_linux64v2) & HWCAP_S390_TE) != 0;
+
+	if (have_regset_tdb)
+	  tdesc = tdesc_s390x_te_linux64;
+	else if (have_regset_system_call)
+	  tdesc = tdesc_s390x_linux64v2;
+	else if (have_regset_last_break)
+	  tdesc = tdesc_s390x_linux64v1;
+	else
+	  tdesc = tdesc_s390x_linux64;
+      }
+
+    /* For a 31-bit inferior, check whether the kernel supports
+       using the full 64-bit GPRs.  */
+    else if (s390_get_hwcap (tdesc) & HWCAP_S390_HIGH_GPRS)
+      {
+	have_hwcap_s390_high_gprs = 1;
+	if (have_regset_tdb)
+	  have_regset_tdb = (s390_get_hwcap (tdesc) & HWCAP_S390_TE) != 0;
+
+	if (have_regset_tdb)
+	  tdesc = tdesc_s390_te_linux64;
+	else if (have_regset_system_call)
+	  tdesc = tdesc_s390_linux64v2;
+	else if (have_regset_last_break)
+	  tdesc = tdesc_s390_linux64v1;
+	else
+	  tdesc = tdesc_s390_linux64;
+      }
+  }
+#endif
+
   /* Update target_regsets according to available register sets.  */
   for (regset = s390_regsets; regset->fill_function != NULL; regset++)
     if (regset->get_request == PTRACE_GETREGSET)
@@ -442,53 +501,6 @@ s390_arch_setup (void)
 	  break;
 	}
 
-  /* Assume 31-bit inferior process.  */
-  if (have_regset_system_call)
-    tdesc = tdesc_s390_linux32v2;
-  else if (have_regset_last_break)
-    tdesc = tdesc_s390_linux32v1;
-  else
-    tdesc = tdesc_s390_linux32;
-
-  /* On a 64-bit host, check the low bit of the (31-bit) PSWM
-     -- if this is one, we actually have a 64-bit inferior.  */
-#ifdef __s390x__
-  {
-    unsigned int pswm;
-    struct regcache *regcache = new_register_cache (tdesc);
-    fetch_inferior_registers (regcache, find_regno (tdesc, "pswm"));
-    collect_register_by_name (regcache, "pswm", &pswm);
-    free_register_cache (regcache);
-
-    if (pswm & 1)
-      {
-	if (have_regset_tdb)
-	  tdesc = tdesc_s390x_te_linux64;
-	if (have_regset_system_call)
-	  tdesc = tdesc_s390x_linux64v2;
-	else if (have_regset_last_break)
-	  tdesc = tdesc_s390x_linux64v1;
-	else
-	  tdesc = tdesc_s390x_linux64;
-      }
-
-    /* For a 31-bit inferior, check whether the kernel supports
-       using the full 64-bit GPRs.  */
-    else if (s390_get_hwcap (tdesc) & HWCAP_S390_HIGH_GPRS)
-      {
-	have_hwcap_s390_high_gprs = 1;
-
-	if (have_regset_tdb)
-	  tdesc = tdesc_s390_te_linux64;
-	else if (have_regset_system_call)
-	  tdesc = tdesc_s390_linux64v2;
-	else if (have_regset_last_break)
-	  tdesc = tdesc_s390_linux64v1;
-	else
-	  tdesc = tdesc_s390_linux64;
-      }
-  }
-#endif
   current_process ()->tdesc = tdesc;
 }
 

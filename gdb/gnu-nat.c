@@ -2218,7 +2218,7 @@ gnu_attach (struct target_ops *ops, char *args, int from_tty)
    previously attached.  It *might* work if the program was
    started via fork.  */
 static void
-gnu_detach (struct target_ops *ops, char *args, int from_tty)
+gnu_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   int pid;
 

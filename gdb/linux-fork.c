@@ -387,7 +387,7 @@ linux_fork_mourn_inferior (void)
    the first available.  */
 
 void
-linux_fork_detach (char *args, int from_tty)
+linux_fork_detach (const char *args, int from_tty)
 {
   /* OK, inferior_ptid is the one we are detaching from.  We need to
      delete it from the fork_list, and switch to the next available

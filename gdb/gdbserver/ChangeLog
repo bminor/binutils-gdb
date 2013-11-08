@@ -1,3 +1,9 @@
+2013-11-06  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* linux-s390-low.c (HWCAP_S390_TE): New define.
+	(s390_arch_setup): Consider the TE field in the HWCAP for
+	determining 'have_regset_tdb'.
+
 2013-10-16  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	PR gdb/16014

@@ -2604,6 +2604,28 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 		  if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
 		    continue;
 
+		  /* Strip modifies the flags and alignment of PT_GNU_RELRO.
+		     CentOS-5 has problems with filesz, memsz as well.
+		     See PR 11786.  */
+		  if (phdr2[i].p_type == PT_GNU_RELRO)
+		    {
+		      Elf32_External_Phdr tmp_phdr = *phdrp;
+		      Elf32_External_Phdr tmp_phdr2 = *phdr2p;
+
+		      memset (tmp_phdr.p_filesz, 0, 4);
+		      memset (tmp_phdr.p_memsz, 0, 4);
+		      memset (tmp_phdr.p_flags, 0, 4);
+		      memset (tmp_phdr.p_align, 0, 4);
+		      memset (tmp_phdr2.p_filesz, 0, 4);
+		      memset (tmp_phdr2.p_memsz, 0, 4);
+		      memset (tmp_phdr2.p_flags, 0, 4);
+		      memset (tmp_phdr2.p_align, 0, 4);
+
+		      if (memcmp (&tmp_phdr, &tmp_phdr2, sizeof (tmp_phdr))
+			  == 0)
+			continue;
+		    }
+
 		  /* prelink can convert .plt SHT_NOBITS to SHT_PROGBITS.  */
 		  plt2_asect = bfd_get_section_by_name (exec_bfd, ".plt");
 		  if (plt2_asect)
@@ -2712,6 +2734,28 @@ svr4_exec_displacement (CORE_ADDR *displacementp)
 
 		  if (memcmp (phdrp, phdr2p, sizeof (*phdrp)) == 0)
 		    continue;
+
+		  /* Strip modifies the flags and alignment of PT_GNU_RELRO.
+		     CentOS-5 has problems with filesz, memsz as well.
+		     See PR 11786.  */
+		  if (phdr2[i].p_type == PT_GNU_RELRO)
+		    {
+		      Elf64_External_Phdr tmp_phdr = *phdrp;
+		      Elf64_External_Phdr tmp_phdr2 = *phdr2p;
+
+		      memset (tmp_phdr.p_filesz, 0, 8);
+		      memset (tmp_phdr.p_memsz, 0, 8);
+		      memset (tmp_phdr.p_flags, 0, 4);
+		      memset (tmp_phdr.p_align, 0, 8);
+		      memset (tmp_phdr2.p_filesz, 0, 8);
+		      memset (tmp_phdr2.p_memsz, 0, 8);
+		      memset (tmp_phdr2.p_flags, 0, 4);
+		      memset (tmp_phdr2.p_align, 0, 8);
+
+		      if (memcmp (&tmp_phdr, &tmp_phdr2, sizeof (tmp_phdr))
+			  == 0)
+			continue;
+		    }
 
 		  /* prelink can convert .plt SHT_NOBITS to SHT_PROGBITS.  */
 		  plt2_asect = bfd_get_section_by_name (exec_bfd, ".plt");

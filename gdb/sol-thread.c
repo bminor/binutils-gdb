@@ -320,7 +320,7 @@ lwp_to_thread (ptid_t lwp)
    program was started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-sol_thread_detach (struct target_ops *ops, char *args, int from_tty)
+sol_thread_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   struct target_ops *beneath = find_target_beneath (ops);
 

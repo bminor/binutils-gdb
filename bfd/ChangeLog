@@ -1,3 +1,16 @@
+2013-11-07  Roland McGrath  <mcgrathr@google.com>
+
+	* archures.c (bfd_mach_i386_nacl): Fix definition so it doesn't
+	collide with bfd_mach_l1om.
+	* bfd-in2.h: Regenerate.
+
+	* elf32-i386.c (elf32_i386_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf32-i386-nacl definition.
+	* elf64-x86-64.c (elf64_x86_64_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf64-x86-64-nacl definition.
+	(elf32_x86_64_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf32-x86-64-nacl definition.
+
 2013-11-05  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rl78.c (elf32_rl78_relax_delete_bytes): Make sure relocs
@@ -746,18 +759,6 @@
 	(elfNN_aarch64_check_relocs): Use aarch64_elf_create_got_section.
 	(elfNN_aarch64_create_dynamic_sections): Do not define
 	_GLOBAL_OFFSET_TABLE_; call aarch64_elf_create_got_section.
-
-2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
-
-	* ld-aarch64/emit-relocs-309-low.d: Adjust .text address.
-	* ld-aarch64/emit-relocs-309-up.d: Adjust .got address.
-	* ld-aarch64/emit-relocs-312.d: Adjust offsets into .got.
-	* ld-aarch64/tls-relax-all.d: Likewise.
-	* ld-aarch64/gc-got-relocs.d: Adjust expected .got content.
-	* ld-aarch64/gc-tls-relocs.d: Likewise.
-	* ld-aarch64/tls-relax-gd-ie.d: Likewise.
-	* ld-aarch64/tls-relax-gdesc-ie-2.d: Likewise.
-	* ld-aarch64/tls-relax-gdesc-ie.d: Likewise.
 
 2013-07-02  Alan Modra  <amodra@gmail.com>
 

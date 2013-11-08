@@ -1103,6 +1103,7 @@ const struct exp_descriptor exp_descriptor_opencl =
 const struct language_defn opencl_language_defn =
 {
   "opencl",			/* Language name */
+  "OpenCL C",
   language_opencl,
   range_check_off,
   case_sensitive_on,

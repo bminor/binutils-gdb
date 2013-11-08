@@ -1,3 +1,19 @@
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+        * gdb.texinfo (Commands In Python): Document COMPLETE_EXPRESSION
+        constant.
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Breakpoints In Python): Document temporary
+	option in breakpoint constructor, and add documentation to the
+	temporary attribute.
+
+2013-11-07  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Update doc about the
+	output of "-var-info-expression".
+
 2013-11-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Starting) <set/show startup-with-shell>: Mention

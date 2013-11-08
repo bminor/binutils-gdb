@@ -878,7 +878,7 @@ m32r_wait (struct target_ops *ops,
    Use this when you want to detach and do something else
    with your gdb.  */
 static void
-m32r_detach (struct target_ops *ops, char *args, int from_tty)
+m32r_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_detach(%d)\n", from_tty);

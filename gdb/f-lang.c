@@ -239,6 +239,7 @@ f_make_symbol_completion_list (const char *text, const char *word,
 const struct language_defn f_language_defn =
 {
   "fortran",
+  "Fortran",
   language_fortran,
   range_check_on,
   case_sensitive_off,

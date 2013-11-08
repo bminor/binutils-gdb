@@ -1538,7 +1538,6 @@ sparc_analyze_control_transfer (struct frame_info *frame,
 	  if (X_A (insn))
 	    *npc = 0;
 
-	  gdb_assert (offset != 0);
 	  return pc + offset;
 	}
     }

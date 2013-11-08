@@ -45,6 +45,7 @@ static struct cmdpy_completer completers[] =
   { "COMPLETE_LOCATION", location_completer },
   { "COMPLETE_COMMAND", command_completer },
   { "COMPLETE_SYMBOL", make_symbol_completion_list_fn },
+  { "COMPLETE_EXPRESSION", expression_completer },
 };
 
 #define N_COMPLETERS (sizeof (completers) / sizeof (completers[0]))

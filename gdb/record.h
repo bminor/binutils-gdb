@@ -55,7 +55,7 @@ extern void cmd_record_goto (char *arg, int from_tty);
 extern void record_disconnect (struct target_ops *, char *, int);
 
 /* The default "to_detach" target method for record targets.  */
-extern void record_detach (struct target_ops *, char *, int);
+extern void record_detach (struct target_ops *, const char *, int);
 
 /* The default "to_mourn_inferior" target method for record targets.  */
 extern void record_mourn_inferior (struct target_ops *);

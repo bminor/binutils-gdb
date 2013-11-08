@@ -1,8 +1,6 @@
-/* GNU/Linux native-dependent code for debugging multiple forks.
+/* This testcase is part of GDB, the GNU debugger.
 
-   Copyright (C) 2005-2013 Free Software Foundation, Inc.
-
-   This file is part of GDB.
+   Copyright 2013 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -15,13 +13,17 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+   along with this program.  If not, see  <http://www.gnu.org/licenses/>.  */
 
-struct fork_info;
-extern struct fork_info *add_fork (pid_t);
-extern struct fork_info *find_fork_pid (pid_t);
-extern void linux_fork_killall (void);
-extern void linux_fork_mourn_inferior (void);
-extern void linux_fork_detach (const char *, int);
-extern int forks_exist_p (void);
-extern int linux_fork_checkpointing_p (int);
+struct foo
+{
+  int ij;
+  int bc;
+};
+
+int
+main (void)
+{
+  struct foo bar;
+  return 0;
+}

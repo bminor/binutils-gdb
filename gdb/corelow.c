@@ -85,8 +85,6 @@ static int gdb_check_format (bfd *);
 
 static void core_open (char *, int);
 
-static void core_detach (struct target_ops *ops, char *, int);
-
 static void core_close (void);
 
 static void core_close_cleanup (void *ignore);
@@ -465,7 +463,7 @@ core_open (char *filename, int from_tty)
 }
 
 static void
-core_detach (struct target_ops *ops, char *args, int from_tty)
+core_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   if (args)
     error (_("Too many arguments"));

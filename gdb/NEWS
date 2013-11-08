@@ -35,6 +35,7 @@
 * Python scripting
 
   ** Frame filters and frame decorators have been added.
+  ** Temporary breakpoints are now supported.
 
 * New targets
 

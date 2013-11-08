@@ -1557,7 +1557,7 @@ detach_callback (struct lwp_info *lp, void *data)
 }
 
 static void
-linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
+linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   int pid;
   int status;
@@ -1587,10 +1587,13 @@ linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
       && get_pending_status (main_lwp, &status) != -1
       && WIFSTOPPED (status))
     {
+      char *tem;
+
       /* Put the signal number in ARGS so that inf_ptrace_detach will
 	 pass it along with PTRACE_DETACH.  */
-      args = alloca (8);
-      sprintf (args, "%d", (int) WSTOPSIG (status));
+      tem = alloca (8);
+      sprintf (tem, "%d", (int) WSTOPSIG (status));
+      args = tem;
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LND: Sending signal %s to %s\n",

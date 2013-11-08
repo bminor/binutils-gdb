@@ -1,3 +1,104 @@
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* aix-thread.c (aix_thread_detach): Update.
+	* corelow.c (core_detach): Update.
+	* darwin-nat.c (darwin_detach): Update.
+	* dec-thread.c (dec_thread_detach): Update.
+	* gnu-nat.c (gnu_detach): Update.
+	* go32-nat.c (go32_detach): Update.
+	* inf-ptrace.c (inf_ptrace_detach): Update.
+	* inf-ttrace.c (inf_ttrace_detach): Update.
+	* linux-fork.c (linux_fork_detach): Update.
+	* linux-fork.h (linux_fork_detach): Update.
+	* linux-nat.c (linux_nat_detach): Update.  Introduce "tem"
+	local for const-correctness.
+	* linux-thread-db.c (thread_db_detach): Update.
+	* monitor.c (monitor_detach): Update.
+	* nto-procfs.c (procfs_detach): Update.
+	* procfs.c (procfs_detach): Update.
+	* record.c (record_detach): Update.
+	* record.h (record_detach): Update.
+	* remote-m32r-sdi.c (m32r_detach): Update.
+	* remote-mips.c (mips_detach): Update.
+	* remote-sim.c (gdbsim_detach): Update.
+	* remote.c (remote_detach_1, remote_detach)
+	(extended_remote_detach): Update.
+	* sol-thread.c (sol_thread_detach): Update.
+	* target.c (target_detach): Make "args" const.
+	(init_dummy_target): Update.
+	* target.h (struct target_ops) <to_detach>: Make argument const.
+	(target_detach): Likewise.
+	* windows-nat.c (windows_detach): Update.
+
+2013-11-07  Doug Evans  <dje@google.com>
+
+	PR 11786
+	*  solib-svr4.c (svr4_exec_displacement): Ignore filesz, memsz, flags
+	and align fields for PT_GNU_RELRO segments.
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+        PR python/15747
+        * python/py-cmd.c: Add COMPLETE_EXPRESSION constant.
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* NEWS: Document Python temporary breakpoint support.
+	* python/py-breakpoint.c (bppy_get_temporary): New function.
+	(bppy_init): New keyword: temporary. Parse it and set breakpoint
+	to temporary if True.
+
+2013-11-07  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-tdep.c (sparc_analyze_control_transfer): Assertion
+	removed to allow analyzing unconditional branch instructions
+	with PC-relative offsets of zero.
+
+2013-11-07  Yao Qi  <yao@codesourcery.com>
+
+	* mi/mi-cmd-var.c: Include "language.h".
+	(mi_cmd_var_info_expression): Get language name from
+	language_defn.
+	* varobj.c (varobj_language_string): Remove.
+	(variable_language): Remove declaration.
+	(languages): Remove.
+	(varobj_get_language): Change the type of return value.
+	(variable_language): Remove.
+	* varobj.h (enum varobj_languages): Remove.
+	(varobj_language_string): Remove declaration.
+	(varobj_get_language): Update declaration.
+
+2013-11-07  Yao Qi  <yao@codesourcery.com>
+
+	* language.h (struct language_defn) <la_natural_name>: New
+	field.
+	* ada-lang.c (ada_language_defn): Initialize field
+	'la_natural_name'.
+	* c-lang.c (c_language_defn): Likewise.
+	(cplus_language_defn, asm_language_defn): Likewise.
+	* d-lang.c (d_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Likewise.
+	* go-lang.c (go_language_defn): Likewise.
+	* jv-lang.c (java_language_defn): Likewise.
+	* language.c (unknown_language_defn ): Likewise.
+	(auto_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* opencl-lang.c (opencl_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+
+2013-11-07  Yao Qi  <yao@codesourcery.com>
+
+	* language.c (language_str): Return const char *.
+	(add_language): Add const to 'language_names'
+	* language.h (struct language_defn) <la_name>: Add const.
+	(language_str: Update declaration.
+
+2013-11-06  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* s390-linux-nat.c (s390_read_description): Consider the TE field
+	in the HWCAP for determining 'have_regset_tdb'.
+
 2013-11-06  Will Newton  <will.newton@linaro.org>
 
 	PR gdb/12866
@@ -969,7 +1070,6 @@
 2013-10-02  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/15579
-
 	* python/python.c: Document gdb.execute command in Python help.
 
 2013-10-02  Phil Muldoon  <pmuldoon@redhat.com>
@@ -2141,7 +2241,6 @@
 2013-08-30  Phil Muldoon  <pmuldoon@redhat.com>
 
 	PR python/15461
-
 	* python/py-arch.c (ARCHPY_REQUIRE_VALID): New macro.
 	(archpy_name): Check for valid architecture.
 	(archpy_disassemble): Ditto.
