@@ -1,3 +1,9 @@
+2013-11-07  Doug Evans  <dje@google.com>
+
+	PR 11786
+	*  solib-svr4.c (svr4_exec_displacement): Ignore filesz, memsz, flags
+	and align fields for PT_GNU_RELRO segments.
+
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
 
         PR python/15747

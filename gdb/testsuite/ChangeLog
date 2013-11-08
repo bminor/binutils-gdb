@@ -1,3 +1,9 @@
+2013-11-07  Doug Evans  <dje@google.com>
+
+	PR 11786
+	* gdb.base/gcore-relro-pie.c: New file.
+	* gdb.base/gcore-relro-pie.exp: New file.
+
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
 
         * gdb.python/py-cmd.exp: Add COMPLETE_EXPRESSION tests.
