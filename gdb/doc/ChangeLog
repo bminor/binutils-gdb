@@ -1,6 +1,11 @@
 2013-11-08  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Debugging Output): Update text for
+	"set debug dwarf2-read".
+
+2013-11-08  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Debugging Output): Update text for
 	"set debug symtab-create".
 
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>

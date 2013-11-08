@@ -22609,7 +22609,9 @@ Show the current state of DWARF2 DIE debugging.
 @item set debug dwarf2-read
 @cindex DWARF2 Reading
 Turns on or off display of debugging messages related to reading
-DWARF debug info.  The default is off.
+DWARF debug info.  The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
 @item show debug dwarf2-read
 Show the current state of DWARF2 reader debugging.
 @item set debug displaced

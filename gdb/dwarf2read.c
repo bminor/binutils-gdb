@@ -79,9 +79,10 @@
 typedef struct symbol *symbolp;
 DEF_VEC_P (symbolp);
 
-/* When non-zero, print basic high level tracing messages.
+/* When == 1, print basic high level tracing messages.
+   When > 1, be more verbose.
    This is in contrast to the low level DIE reading of dwarf2_die_debug.  */
-static int dwarf2_read_debug = 0;
+static unsigned int dwarf2_read_debug = 0;
 
 /* When non-zero, dump DIEs after they are read in.  */
 static unsigned int dwarf2_die_debug = 0;
@@ -4606,7 +4607,7 @@ create_debug_types_hash_table (struct dwo_file *dwo_file,
 	    }
 	  *slot = dwo_file ? (void *) dwo_tu : (void *) sig_type;
 
-	  if (dwarf2_read_debug)
+	  if (dwarf2_read_debug > 1)
 	    fprintf_unfiltered (gdb_stdlog, "  offset 0x%x, signature %s\n",
 				offset.sect_off,
 				hex_string (signature));
@@ -7285,6 +7286,7 @@ process_queue (void)
 	  : (item->per_cu->v.psymtab && !item->per_cu->v.psymtab->readin))
 	{
 	  struct dwarf2_per_cu_data *per_cu = item->per_cu;
+	  unsigned int debug_print_threshold;
 	  char buf[100];
 
 	  if (per_cu->is_debug_types)
@@ -7293,12 +7295,19 @@ process_queue (void)
 		(struct signatured_type *) per_cu;
 
 	      sprintf (buf, "TU %s at offset 0x%x",
-		       hex_string (sig_type->signature), per_cu->offset.sect_off);
+		       hex_string (sig_type->signature),
+		       per_cu->offset.sect_off);
+	      /* There can be 100s of TUs.
+		 Only print them in verbose mode.  */
+	      debug_print_threshold = 2;
 	    }
 	  else
-	    sprintf (buf, "CU at offset 0x%x", per_cu->offset.sect_off);
+	    {
+	      sprintf (buf, "CU at offset 0x%x", per_cu->offset.sect_off);
+	      debug_print_threshold = 1;
+	    }
 
-	  if (dwarf2_read_debug)
+	  if (dwarf2_read_debug >= debug_print_threshold)
 	    fprintf_unfiltered (gdb_stdlog, "Expanding symtab of %s\n", buf);
 
 	  if (per_cu->is_debug_types)
@@ -7306,7 +7315,7 @@ process_queue (void)
 	  else
 	    process_full_comp_unit (per_cu, item->pretend_language);
 
-	  if (dwarf2_read_debug)
+	  if (dwarf2_read_debug >= debug_print_threshold)
 	    fprintf_unfiltered (gdb_stdlog, "Done expanding %s\n", buf);
 	}
 
@@ -22382,11 +22391,12 @@ conversational style, when possible."),
 			   &set_dwarf2_cmdlist,
 			   &show_dwarf2_cmdlist);
 
-  add_setshow_boolean_cmd ("dwarf2-read", no_class, &dwarf2_read_debug, _("\
+  add_setshow_zuinteger_cmd ("dwarf2-read", no_class, &dwarf2_read_debug, _("\
 Set debugging of the dwarf2 reader."), _("\
 Show debugging of the dwarf2 reader."), _("\
-When enabled, debugging messages are printed during dwarf2 reading\n\
-and symtab expansion."),
+When enabled (non-zero), debugging messages are printed during dwarf2\n\
+reading and symtab expansion.  A value of 1 (one) provides basic\n\
+information.  A value greater than 1 provides more verbose information."),
 			    NULL,
 			    NULL,
 			    &setdebuglist, &showdebuglist);

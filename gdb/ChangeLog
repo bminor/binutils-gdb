@@ -1,3 +1,12 @@
+2013-11-08  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_read_debug): Change to unsigned int.
+	(create_debug_types_hash_table): Only print debugging messages for
+	each TU if dwarf2-read >= 2.
+	(process_queue): Ditto.
+	(_initialize_dwarf2_read): Make "set debug dwarf2-read" a zuinteger.
+	Update doc string.
+
 2013-11-08  Tom Tromey  <tromey@redhat.com>
 
 	* configure: Rebuild.
