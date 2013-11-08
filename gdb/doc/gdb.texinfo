@@ -14965,6 +14965,7 @@ to be difficult.
 * Omissions from Ada::          Restrictions on the Ada expression syntax.
 * Additions to Ada::            Extensions of the Ada expression syntax.
 * Stopping Before Main Program:: Debugging the program during elaboration.
+* Ada Exceptions::              Ada Exceptions
 * Ada Tasks::                   Listing and setting breakpoints in tasks.
 * Ada Tasks and Core Files::    Tasking Support when Debugging Core Files
 * Ravenscar Profile::           Tasking Support when using the Ravenscar
@@ -15288,6 +15289,42 @@ Manual, the elaboration code is invoked from a procedure called
 @code{adainit}.  To run your program up to the beginning of
 elaboration, simply use the following two commands:
 @code{tbreak adainit} and @code{run}.
+
+@node Ada Exceptions
+@subsubsection Ada Exceptions
+
+A command is provided to list all Ada exceptions:
+
+@table @code
+@kindex info exceptions
+@item info exceptions
+@itemx info exceptions @var{regexp}
+The @code{info exceptions} command allows you to list all Ada exceptions
+defined within the program being debugged, as well as their addresses.
+With a regular expression, @var{regexp}, as argument, only those exceptions
+whose names match @var{regexp} are listed.
+@end table
+
+Below is a small example, showing how the command can be used, first
+without argument, and next with a regular expression passed as an
+argument.
+
+@smallexample
+(@value{GDBP}) info exceptions
+All defined Ada exceptions:
+constraint_error: 0x613da0
+program_error: 0x613d20
+storage_error: 0x613ce0
+tasking_error: 0x613ca0
+const.aint_global_e: 0x613b00
+(@value{GDBP}) info exceptions const.aint
+All Ada exceptions matching regular expression "const.aint":
+constraint_error: 0x613da0
+const.aint_global_e: 0x613b00
+@end smallexample
+
+It is also possible to ask @value{GDBN} to stop your program's execution
+when an exception is raised.  For more details, see @ref{Set Catchpoints}.
 
 @node Ada Tasks
 @subsubsection Extensions for Ada Tasks
@@ -28713,6 +28750,7 @@ may repeat one or more times.
 @end ignore
 * GDB/MI Target Manipulation::
 * GDB/MI File Transfer Commands::
+* GDB/MI Ada Exceptions Commands::
 * GDB/MI Miscellaneous Commands::
 @end menu
 
@@ -34803,6 +34841,59 @@ The corresponding @value{GDBN} command is @samp{remote delete}.
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Ada Exceptions Commands
+@section Ada Exceptions @sc{gdb/mi} Commands
+
+@subheading The @code{-info-ada-exceptions} Command
+@findex -info-ada-exceptions
+
+@subsubheading Synopsis
+
+@smallexample
+ -info-ada-exceptions [ @var{regexp}]
+@end smallexample
+
+List all Ada exceptions defined within the program being debugged.
+With a regular expression @var{regexp}, only those exceptions whose
+names match @var{regexp} are listed.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info exceptions}.
+
+@subsubheading Result
+
+The result is a table of Ada exceptions.  The following columns are
+defined for each exception:
+
+@table @samp
+@item name
+The name of the exception.
+
+@item address
+The address of the exception.
+
+@end table
+
+@subsubheading Example
+
+@smallexample
+-info-ada-exceptions aint
+^done,ada-exceptions=@{nr_rows="2",nr_cols="2",
+hdr=[@{width="1",alignment="-1",col_name="name",colhdr="Name"@},
+@{width="1",alignment="-1",col_name="address",colhdr="Address"@}],
+body=[@{name="constraint_error",address="0x0000000000613da0"@},
+@{name="const.aint_global_e",address="0x0000000000613b00"@}]@}
+@end smallexample
+
+@subheading Catching Ada Exceptions
+
+The commands describing how to ask @value{GDBN} to stop when a program
+raises an exception are described at @ref{Ada Exception GDB/MI
+Catchpoint Commands}.
+
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Miscellaneous Commands
 @section Miscellaneous @sc{gdb/mi} Commands
 
@@ -34988,7 +35079,9 @@ Indicates support for the @code{-data-read-memory-bytes} and the
 Indicates that changes to breakpoints and breakpoints created via the
 CLI will be announced via async records.
 @item ada-task-info
-Indicates support for the @code{-ada-task-info} command.
+indicates support for the @code{-ada-task-info} command.
+@item info-ada-exceptions
+indicates support for the @code{-info-ada-exceptions} command.
 @end table
 
 @subheading The @code{-list-target-features} Command
