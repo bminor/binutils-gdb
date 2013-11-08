@@ -13,7 +13,7 @@
 
 	* gdb.python/py-breakpoint.exp: Add temporary breakpoint tests.
 
-2013-11-06  Doug Evans  <dje@sebabeach.org>
+2013-11-06  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.python/py-arch.exp: Tweak test name for bad memory access test.
 
