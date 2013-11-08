@@ -1,0 +1,7 @@
+.cvsignore export-ignore
+.gitattributes export-ignore
+.gitignore export-ignore
+gdb export-ignore
+libdecnumber export-ignore
+readline export-ignore
+sim export-ignore
