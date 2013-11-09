@@ -1,3 +1,7 @@
+2013-11-09  H.J. Lu <hjl.tools@gmail.com>
+
+	* .gitattributes (include/gdb): Unset export-ignore.
+
 2013-11-08  H.J. Lu <hjl.tools@gmail.com>
 
 	* .gitattributes: New file.

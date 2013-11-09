@@ -5,3 +5,4 @@ gdb export-ignore
 libdecnumber export-ignore
 readline export-ignore
 sim export-ignore
+include/gdb -export-ignore
