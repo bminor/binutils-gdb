@@ -49,7 +49,7 @@ mi_gdb_test "python exec (open ('${remote_python_file}').read ())" ""
 mi_continue_to_line [gdb_get_line_number {MI breakpoint here} ${srcfile}] \
   "step to breakpoint"
 
-mi_create_dynamic_varobj container c \
+mi_create_floating_varobj container c \
   "create container varobj, no pretty-printing"
 
 mi_list_varobj_children container {
@@ -60,7 +60,7 @@ mi_list_varobj_children container {
 
 mi_delete_varobj container "delete varobj"
 
-mi_create_dynamic_varobj nscont nstype \
+mi_create_floating_varobj nscont nstype \
   "create nscont varobj, no pretty-printing"
 
 mi_list_varobj_children nscont {
