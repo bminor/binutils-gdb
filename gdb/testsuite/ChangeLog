@@ -1,5 +1,11 @@
 2013-11-22  Yao Qi  <yao@codesourcery.com>
 
+	* lib/mi-support.exp (mi_create_dynamic_varobj): Update
+	comment and add one more argument "has_more".
+	* gdb.python/py-mi.exp: Callers update.
+
+2013-11-22  Yao Qi  <yao@codesourcery.com>
+
 	* gdb.python/py-mi.exp: Use mi_create_floating_varobj instead
 	of mi_create_dynamic_varobj.
 
