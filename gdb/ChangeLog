@@ -1,3 +1,8 @@
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* remote-sim.c (gdbsim_detach): Break declaration into
+	shorter lines.  No code change.
+
 2013-11-11  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
 
 	* remote-sim.c (gdbsim_detach): Fix prototype.
