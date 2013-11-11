@@ -1,3 +1,13 @@
+2013-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-parse.h (struct mi_parse) <language>: New field.
+	* mi/mi-main.c (mi_cmd_execute): Temporarily set language to
+	PARSE->LANGUAGE during command execution, if set.
+	* mi/mi-parse.c: Add "language.h" #include.
+	(mi_parse): Add parsing of "--language" command option.
+
+	* NEWS: Add entry mentioning the new "--language" command option.
+
 2013-11-14  Pedro Alves  <palves@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

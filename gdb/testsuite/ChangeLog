@@ -1,3 +1,7 @@
+2013-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-language.exp: New file.
+
 2013-09-17  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/7935
