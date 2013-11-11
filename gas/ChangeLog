@@ -1,3 +1,7 @@
+2013-11-08  Jan-Benedict Glaw  <jbglaw@lug-owl.de
+
+	* config/tc-ppc.c (ppc_elf_localentry): Add cast.
+
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* config/tc-aarch64.c (parse_sys_reg): Update to use aarch64_sys_reg;
