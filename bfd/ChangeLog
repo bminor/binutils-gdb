@@ -1,6 +1,9 @@
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	Apply changes from mainline to 2.24
+	2013-11-11  Alan Modra  <amodra@gmail.com>
+	* elf64-ppc.c (allocate_dynrelocs): Revert 2013-11-04 change.
+
 	2013-11-11  Ulrich Weigand  <uweigand@de.ibm.com>
 	* elf64-ppc.c (ppc64_elf_edit_toc): Use SYMBOL_REFERENCES_LOCAL
 	here, not SYMBOL_CALLS_LOCAL.

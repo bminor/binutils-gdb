@@ -9417,8 +9417,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   if (eh->dyn_relocs == NULL
       || (!htab->elf.dynamic_sections_created
-	  && (h->type != STT_GNU_IFUNC
-	      || !htab->opd_abi)))
+	  && h->type != STT_GNU_IFUNC))
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
