@@ -1,3 +1,18 @@
+2013-11-15  Alan Modra  <amodra@gmail.com>
+
+	* ppc64-tdep.c (ppc64_plt_entry_point): Renamed from..
+	(ppc64_desc_entry_point): ..this.  Update comments here and at
+	call points.
+	(ppc64_standard_linkage1, ppc64_standard_linkage2,
+	ppc64_standard_linkage3): Update comments.
+	(ppc64_standard_linkage4, ppc64_standard_linkage5,
+	(ppc64_standard_linkage6, ppc64_standard_linkage7): New insn
+	patterns.
+	(ppc64_standard_linkage4_target): New function.
+	(ppc64_skip_trampoline_code): Skip ELFv2 patterns too.
+	* rs6000-tdep.c (skip_prologue): Skip ELFv2 r2 setup.  Correct
+	nop match.  Fix comment wrap.
+
 2013-11-14  Pedro Alves  <palves@redhat.com>
 
 	* infrun.c (handle_signal_stop): Move STOP_QUIETLY,
@@ -314,8 +329,8 @@
 
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/15747
-        * python/py-cmd.c: Add COMPLETE_EXPRESSION constant.
+	PR python/15747
+	* python/py-cmd.c: Add COMPLETE_EXPRESSION constant.
 
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
 
@@ -1227,7 +1242,7 @@
 	(discard_pending_stop_replies): Return early if notif_state is
 	NULL.  Adjust.  Don't check INF is NULL.
 	(remote_notif_get_pending_events): Adjust.
- 	(discard_pending_stop_replies_in_queue): New function.
+	(discard_pending_stop_replies_in_queue): New function.
 	(remote_wait_ns): Likewise.
 
 2013-10-04  Yao Qi  <yao@codesourcery.com>
@@ -2400,8 +2415,8 @@
             Pedro Alves  <palves@redhat.com>
 
 	* symfile.c (add_symbol_file_command): Error out on unknown
-        option.  Handle EXPECTING_SEC_ADDR/EXPECTING_SEC_NAME before '-'
-        options and collapse into single conditional branch.
+	option.  Handle EXPECTING_SEC_ADDR/EXPECTING_SEC_NAME before '-'
+	options and collapse into single conditional branch.
 
 2013-09-03  Luis Machado  <lgustavo@codesourcery.com>
 

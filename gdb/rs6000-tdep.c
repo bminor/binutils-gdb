@@ -1616,7 +1616,19 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  continue;
 
 	}
-      else if ((op & 0xffff0000) == 0x60000000)
+      else if ((op & 0xffff0000) == 0x3c4c0000
+	       || (op & 0xffff0000) == 0x3c400000
+	       || (op & 0xffff0000) == 0x38420000)
+	{
+	  /* .	0:	addis 2,12,.TOC.-0b@ha
+	     .		addi 2,2,.TOC.-0b@l
+	     or
+	     .		lis 2,.TOC.@ha
+	     .		addi 2,2,.TOC.@l
+	     used by ELFv2 global entry points to set up r2.  */
+	  continue;
+	}
+      else if (op == 0x60000000)
         {
 	  /* nop */
 	  /* Allow nops in the prologue, but do not consider them to
@@ -1627,8 +1639,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 	}
       else if ((op & 0xffff0000) == 0x3c000000)
-	{			/* addis 0,0,NUM, used
-				   for >= 32k frames */
+	{			/* addis 0,0,NUM, used for >= 32k frames */
 	  fdata->offset = (op & 0x0000ffff) << 16;
 	  fdata->frameless = 0;
           r0_contains_arg = 0;
@@ -1636,8 +1647,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
 	}
       else if ((op & 0xffff0000) == 0x60000000)
-	{			/* ori 0,0,NUM, 2nd ha
-				   lf of >= 32k frames */
+	{			/* ori 0,0,NUM, 2nd half of >= 32k frames */
 	  fdata->offset |= (op & 0x0000ffff);
 	  fdata->frameless = 0;
           r0_contains_arg = 0;
