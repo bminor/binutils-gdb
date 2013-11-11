@@ -1,3 +1,8 @@
+2013-11-11  Catherine Moore  <clm@codesourcery.com>
+
+	* opcode/mips.h (INSN_LOAD_MEMORY_DELAY): Rename to...
+	(INSN_LOAD_MEMORY): ...this.
+
 2013-10-29  Marc Glisse  <marc.glisse@inria.fr>
 
 	PR tree-optimization/58689

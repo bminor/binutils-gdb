@@ -1,3 +1,10 @@
+2013-11-11  Catherine Moore  <clm@codesourcery.com>
+
+	* config/mips/tc-mips.c (convert_reg_type): Use
+	INSN_LOAD_MEMORY instead of INSN_LOAD_MEMORY_DELAY.
+	(reg_needs_delay): Likewise.
+	(insns_between): Likewise.
+
 2013-11-08  Jan-Benedict Glaw  <jbglaw@lug-owl.de
 
 	* config/tc-ppc.c (ppc_elf_localentry): Add cast.
