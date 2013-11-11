@@ -1,3 +1,7 @@
+2013-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h: Add "symtab.h" #include.
+
 2013-11-13  Doug Evans  <xdje42@gmail.com>
 
 	* breakpoint.c (bpstat_check_breakpoint_conditions): For thread
