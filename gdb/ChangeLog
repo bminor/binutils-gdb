@@ -1,3 +1,7 @@
+2013-11-11  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* remote-sim.c (gdbsim_detach): Fix prototype.
+
 2013-11-08  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_read_debug): Change to unsigned int.
