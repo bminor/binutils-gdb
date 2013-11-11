@@ -1736,8 +1736,10 @@ if test "x$ac_cv_header_sys_syscall_h" = "xyes"; then
    )
 fi
 dnl See if we can issue tkill syscall.
-if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes" && test "x$ac_cv_func_syscall" = "xyes"; then
-  AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
+if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes"; then
+  AC_CHECK_FUNC(syscall,
+    AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
+  )
 fi
 
 dnl Check if we can disable the virtual address space randomization.

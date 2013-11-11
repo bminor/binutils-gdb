@@ -12454,9 +12454,14 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $gdb_cv_sys_syscall_h_has_tkill" >&5
 $as_echo "$gdb_cv_sys_syscall_h_has_tkill" >&6; }
 fi
-if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes" && test "x$ac_cv_func_syscall" = "xyes"; then
+if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes"; then
+  ac_fn_c_check_func "$LINENO" "syscall" "ac_cv_func_syscall"
+if test "x$ac_cv_func_syscall" = x""yes; then :
 
 $as_echo "#define HAVE_TKILL_SYSCALL 1" >>confdefs.h
+
+
+fi
 
 fi
 

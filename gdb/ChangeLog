@@ -1,3 +1,8 @@
+2013-11-11  Tom Tromey  <tromey@redhat.com>
+
+	* config.in, configure: Rebuild.
+	* configure.ac (HAVE_TKILL_SYSCALL): Check for "syscall".
+
 2013-11-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* remote-sim.c (gdbsim_detach): Break declaration into
