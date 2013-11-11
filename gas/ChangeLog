@@ -1,6 +1,9 @@
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	Apply changes from mainline to 2.24
+	2013-11-08  Jan-Benedict Glaw  <jbglaw@lug-owl.de
+	* config/tc-ppc.c (ppc_elf_localentry): Add cast.
+
 	2013-10-30  Ulrich Weigand  <uweigand@de.ibm.com>
 	* config/tc-ppc.c (md_pseudo_table): Add .localentry.
 	(ppc_elf_localentry): New function.
