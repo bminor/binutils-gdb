@@ -1,3 +1,8 @@
+2013-11-12  Matthew Leach  <Matthew.Leach@arm.comm>
+
+	* elfxx-aarch64.c (_bfd_aarch64_elf_grok_prstatus): Fix hard-coded
+	size of struct elf_prstatus.
+
 2013-11-07  Roland McGrath  <mcgrathr@google.com>
 
 	* archures.c (bfd_mach_i386_nacl): Fix definition so it doesn't
