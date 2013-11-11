@@ -1,3 +1,25 @@
+2013-11-11  Catherine Moore  <clm@codesourcery.com>
+
+	gas/
+	* config/mips/tc-mips.c (convert_reg_type): Use
+	INSN_LOAD_MEMORY instead of INSN_LOAD_MEMORY_DELAY.
+	(reg_needs_delay): Likewise.
+	(insns_between): Likewise.
+
+	include/
+	* opcode/mips.h (INSN_LOAD_MEMORY_DELAY): Rename to...
+	(INSN_LOAD_MEMORY): ...this.
+
+	opcodes/
+	* mips-dis.c (print_insn_mips): Use
+	INSN_LOAD_MEMORY instead of INSN_LOAD_MEMORY_DELAY.
+	(print_insn_micromips): Likewise.
+	* mips-opc.c (LDD): Remove.
+	(CLD): Include INSN_LOAD_MEMORY.
+	(LM): New.
+	(mips_builtin_opcodes): Use LM instead of LDD.
+        Add LM to load instructions.
+
 2013-11-07  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* Makefile.in: Regenerate.

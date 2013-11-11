@@ -973,8 +973,8 @@ struct mips_opcode
 #define INSN_TLB                    0x00000200
 /* Reads coprocessor register other than floating point register.  */
 #define INSN_COP                    0x00000400
-/* Instruction loads value from memory, requiring delay.  */
-#define INSN_LOAD_MEMORY_DELAY      0x00000800
+/* Instruction loads value from memory.  */
+#define INSN_LOAD_MEMORY	    0x00000800
 /* Instruction loads value from coprocessor, requiring delay.  */
 #define INSN_LOAD_COPROC_DELAY	    0x00001000
 /* Instruction has unconditional branch delay slot.  */

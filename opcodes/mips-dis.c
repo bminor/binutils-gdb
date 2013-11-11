@@ -1451,7 +1451,7 @@ print_insn_mips (bfd_vma memaddr,
 		  info->branch_delay_insns = 1;
 		}
 	      else if ((op->pinfo & (INSN_STORE_MEMORY
-				     | INSN_LOAD_MEMORY_DELAY)) != 0)
+				     | INSN_LOAD_MEMORY)) != 0)
 		info->insn_type = dis_dref;
 
 	      infprintf (is, "%s", op->name);
@@ -2004,7 +2004,7 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 		info->insn_type = dis_condbranch;
 	    }
 	  else if ((op->pinfo
-		    & (INSN_STORE_MEMORY | INSN_LOAD_MEMORY_DELAY)) != 0)
+		    & (INSN_STORE_MEMORY | INSN_LOAD_MEMORY)) != 0)
 	    info->insn_type = dis_dref;
 
 	  return length;
