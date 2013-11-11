@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 if { ![istarget "arm*-*-*"] } {
-    verbose "Skipping ${testfile}."
+    verbose "Skipping ${gdb_test_file_name}."
     return
 }
 
