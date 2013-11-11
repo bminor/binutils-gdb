@@ -1,3 +1,8 @@
+2013-11-12  Matthew Leach  <Matthew.Leach@arm.comm>
+
+	* elfxx-aarch64.c (_bfd_aarch64_elf_grok_prstatus): Fix hard-coded
+	size of struct elf_prstatus.
+
 2013-11-11  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (allocate_dynrelocs): Revert 2013-11-04 change.
