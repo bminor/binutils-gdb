@@ -36,6 +36,7 @@
 
   ** Frame filters and frame decorators have been added.
   ** Temporary breakpoints are now supported.
+  ** Line tables representation has been added.
 
 * New targets
 

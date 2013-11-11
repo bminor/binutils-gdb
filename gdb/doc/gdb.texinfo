@@ -23487,6 +23487,7 @@ optional arguments while skipping others.  Example:
 * Blocks In Python::            Accessing blocks from Python.
 * Symbols In Python::           Python representation of symbols.
 * Symbol Tables In Python::     Python representation of symbol tables.
+* Line Tables In Python::       Python representation of line tables.
 * Breakpoints In Python::       Manipulating breakpoints using Python.
 * Finish Breakpoints in Python:: Setting Breakpoints on function return
                                 using Python.
@@ -27025,6 +27026,89 @@ Return the global block of the underlying symbol table.
 @defun Symtab.static_block ()
 Return the static block of the underlying symbol table.
 @xref{Blocks In Python}.
+@end defun
+
+@defun Symtab.linetable ()
+Return the line table associated with the symbol table.
+@xref{Line Tables In Python}.
+@end defun
+
+@node Line Tables In Python
+@subsubsection Manipulating line tables using Python
+
+@cindex line tables in python
+@tindex gdb.LineTable
+
+Python code can request and inspect line table information from a
+symbol table that is loaded in @value{GDBN}.  A line table is a
+mapping of source lines to their executable locations in memory.  To
+acquire the line table information for a particular symbol table, use
+the @code{linetable} function (@pxref{Symbol Tables In Python}).
+
+A @code{gdb.LineTable} is iterable.  The iterator returns
+@code{LineTableEntry} objects that correspond to the source line and
+address for each line table entry.  @code{LineTableEntry} objects have
+the following attributes:
+
+@defvar LineTableEntry.line
+The source line number for this line table entry.  This number
+corresponds to the actual line of source.  This attribute is not
+writable.
+@end defvar
+
+@defvar LineTableEntry.pc
+The address that is associated with the line table entry where the
+executable code for that source line resides in memory.  This
+attribute is not writable.
+@end defvar
+
+As there can be multiple addresses for a single source line, you may
+receive multiple @code{LineTableEntry} objects with matching
+@code{line} attributes, but with different @code{pc} attributes.  The
+iterator is sorted in ascending @code{pc} order.  Here is a small
+example illustrating iterating over a line table.
+
+@smallexample
+symtab = gdb.selected_frame().find_sal().symtab
+linetable = symtab.linetable()
+for line in linetable:
+   print "Line: "+str(line.line)+" Address: "+hex(line.pc)
+@end smallexample
+
+This will have the following output:
+
+@smallexample
+Line: 33 Address: 0x4005c8L
+Line: 37 Address: 0x4005caL
+Line: 39 Address: 0x4005d2L
+Line: 40 Address: 0x4005f8L
+Line: 42 Address: 0x4005ffL
+Line: 44 Address: 0x400608L
+Line: 42 Address: 0x40060cL
+Line: 45 Address: 0x400615L
+@end smallexample
+
+In addition to being able to iterate over a @code{LineTable}, it also
+has the following direct access methods:
+
+@defun LineTable.line (line)
+Return a Python @code{Tuple} of @code{LineTableEntry} objects for any
+entries in the line table for the given @var{line}.  @var{line} refers
+to the source code line.  If there are no entries for that source code
+@var{line}, the Python @code{None} is returned.
+@end defun
+
+@defun LineTable.has_line (line)
+Return a Python @code{Boolean} indicating whether there is an entry in
+the line table for this source line.  Return @code{True} if an entry
+is found, or @code{False} if not.
+@end defun
+
+@defun LineTable.source_lines ()
+Return a Python @code{List} of the source line numbers in the symbol
+table.  Only lines with executable code locations are returned.  The
+contents of the @code{List} will just be the source line entries
+represented as Python @code{Long} values.
 @end defun
 
 @node Breakpoints In Python

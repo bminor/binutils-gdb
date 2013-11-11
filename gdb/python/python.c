@@ -1673,6 +1673,7 @@ message == an error message without a stack will be printed."),
       || gdbpy_initialize_breakpoints () < 0
       || gdbpy_initialize_finishbreakpoints () < 0
       || gdbpy_initialize_lazy_string () < 0
+      || gdbpy_initialize_linetable () < 0
       || gdbpy_initialize_thread () < 0
       || gdbpy_initialize_inferior () < 0
       || gdbpy_initialize_events () < 0

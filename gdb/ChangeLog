@@ -1,3 +1,15 @@
+2013-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/15629
+	* NEWS: Add linetable feature.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-linetable entries.
+	* python/py-linetable.c: New file.
+	* python/py-symtab.c (stpy_get_linetable): New function.
+	* python/python-internal.h (symtab_to_linetable_object): Declare.
+	(gdbpy_initialize_linetable): Ditto.
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_linetable.
+
 2013-11-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (create_ada_exception_catchpoint): Enhance

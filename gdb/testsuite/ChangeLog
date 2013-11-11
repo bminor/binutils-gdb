@@ -1,3 +1,9 @@
+2013-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+ 	* gdb.python/py-linetable.S: New file.
+	* gdb.python/py-linetable.c: New file.
+ 	* gdb.python/py-linetable.exp: New file.
+
 2013-11-11  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_ex_cond: New testcase.
