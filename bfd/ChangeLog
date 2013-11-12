@@ -1,3 +1,21 @@
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (x86_64_elf_howto_table): Add R_X86_64_PC32_BND
+	and R_X86_64_PLT32_BND.
+	(R_X86_64_standard): Replace R_X86_64_RELATIVE64 with
+	R_X86_64_PLT32_BND.
+	(IS_X86_64_PCREL_TYPE): Add R_X86_64_PLT32_BND.
+	(x86_64_reloc_map): Add BFD_RELOC_X86_64_PC32_BND and
+	BFD_RELOC_X86_64_PLT32_BND.
+	(elf_x86_64_check_relocs): Handle R_X86_64_PC32_BND and
+	R_X86_64_PLT32_BND.
+	(elf_x86_64_gc_sweep_hook): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	* reloc.c (bfd_reloc_code_real): Add BFD_RELOC_X86_64_PC32_BND
+	and BFD_RELOC_X86_64_PLT32_BND.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
 2013-11-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf32-i386.c (elf_i386_allocate_dynrelocs): Make room for

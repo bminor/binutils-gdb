@@ -1,3 +1,7 @@
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86-64.h: Add R_X86_64_PC32_BND and R_X86_64_PLT32_BND.
+
 2013-11-13  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64.h: Define R_AARCH64_TLS_DTPMOD64,
