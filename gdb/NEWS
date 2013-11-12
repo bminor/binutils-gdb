@@ -158,6 +158,9 @@ show code-cache
 
   ** All MI commands now accept an optional "--language" option.
 
+  ** The new command -info-gdb-mi-command allows the user to determine
+     whether a GDB/MI command is supported or not.
+
   ** The -trace-save MI command can optionally save trace buffer in Common
      Trace Format now.
 

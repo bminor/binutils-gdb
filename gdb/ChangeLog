@@ -1,3 +1,13 @@
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-cmds.h (mi_cmd_info_gdb_mi_command): Declare.
+	* mi/mi-cmd-info.c (mi_cmd_info_gdb_mi_command): New function.
+	* mi/mi-cmds.c (mi_cmds): Add -info-gdb-mi-command command.
+	* mi/mi-main.c (mi_cmd_list_features): Add "info-gdb-mi-command"
+	field to output of "-list-features".
+
+	* NEWS: Add entry for new -info-gdb-mi-command.
+
 2013-12-02  Doug Evans  <dje@google.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 

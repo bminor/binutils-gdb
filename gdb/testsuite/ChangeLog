@@ -1,3 +1,7 @@
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-i-cmd.exp: New file.
+
 2013-12-02  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf/dwp-symlink.c: Fake out gdb to not load debug info

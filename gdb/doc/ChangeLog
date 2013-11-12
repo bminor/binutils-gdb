@@ -1,3 +1,10 @@
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document
+	the new -info-gdb-mi-command GDB/MI command.  Document
+	the meaning of "-info-gdb-mi-command" in the output of
+	-list-features.
+
 2013-11-29  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Frames In Python) <gdb.FRAME_UNWIND_NULL_ID>:

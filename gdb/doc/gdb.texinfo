@@ -35098,6 +35098,57 @@ default shows this information when you start an interactive session.
 (gdb)
 @end smallexample
 
+@subheading The @code{-info-gdb-mi-command} Command
+@cindex @code{-info-gdb-mi-command}
+@findex -info-gdb-mi-command
+
+@subsubheading Synopsis
+
+@smallexample
+ -info-gdb-mi-command @var{cmd_name}
+@end smallexample
+
+Query support for the @sc{gdb/mi} command named @var{cmd_name}.
+
+Note that the dash (@code{-}) starting all @sc{gdb/mi} commands
+is technically not part of the command name (@pxref{GDB/MI Input
+Syntax}), and thus should be omitted in @var{cmd_name}.  However,
+for ease of use, this command also accepts the form with the leading
+dash.
+
+@subsubheading @value{GDBN} Command
+
+There is no corresponding @value{GDBN} command.
+
+@subsubheading Result
+
+The result is a tuple.  There is currently only one field:
+
+@table @samp
+@item exists
+This field is equal to @code{"true"} if the @sc{gdb/mi} command exists,
+@code{"false"} otherwise.
+
+@end table
+
+@subsubheading Example
+
+Here is an example where the @sc{gdb/mi} command does not exist:
+
+@smallexample
+-info-gdb-mi-command unsupported-command
+^done,command=@{exists="false"@}
+@end smallexample
+
+@noindent
+And here is an example where the @sc{gdb/mi} command is known
+to the debugger:
+
+@smallexample
+-info-gdb-mi-command symbol-list-lines
+^done,command=@{exists="true"@}
+@end smallexample
+
 @subheading The @code{-list-features} Command
 @findex -list-features
 
@@ -35151,6 +35202,8 @@ exceptions: @code{-info-ada-exceptions}, @code{-catch-assert} and
 @item language-option
 Indicates that all @sc{gdb/mi} commands accept the @option{--language}
 option (@pxref{Context management}).
+@item info-gdb-mi-command
+Indicates support for the @code{-info-gdb-mi-command} command.
 @end table
 
 @subheading The @code{-list-target-features} Command

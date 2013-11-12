@@ -1817,6 +1817,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "ada-task-info");
       ui_out_field_string (uiout, NULL, "ada-exceptions");
       ui_out_field_string (uiout, NULL, "language-option");
+      ui_out_field_string (uiout, NULL, "info-gdb-mi-command");
       
 #if HAVE_PYTHON
       if (gdb_python_initialized)
