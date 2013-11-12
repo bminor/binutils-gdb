@@ -1,6 +1,20 @@
 2014-06-12  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
+	* python/py-varobj.c (py_varobj_iter_next): Return NULL if
+	gdb_python_initialized is false.  Move some code from varobj.c.
+	* varobj-iter.h (struct varobj_item): Moved from varobj.c.
+	* varobj.c: Move "varobj-iter.h" inclusion earlier.
+	(struct varobj_item): Moved to varobj-iter.h".
+	(varobj_clear_saved_item): New function.
+	(update_dynamic_varobj_children): Move python-related code to
+	py-varobj.c.
+	(free_variable): Call varobj_clear_saved_item and
+	varobj_iter_delete.
+
+2014-06-12  Pedro Alves  <pedro@codesourcery.com>
+	    Yao Qi  <yao@codesourcery.com>
+
 	* Makefile.in (SUBDIR_PYTHON_OBS): Add "py-varobj.o".
 	(SUBDIR_PYTHON_SRCS): Add "python/py-varobj.c".
 	(HFILES_NO_SRCDIR): Add "varobj-iter.h".

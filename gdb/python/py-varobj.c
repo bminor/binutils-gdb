@@ -54,6 +54,12 @@ py_varobj_iter_next (struct varobj_iter *self)
   struct py_varobj_iter *t = (struct py_varobj_iter *) self;
   struct cleanup *back_to;
   PyObject *item;
+  PyObject *py_v;
+  varobj_item *vitem;
+  const char *name = NULL;
+
+  if (!gdb_python_initialized)
+    return NULL;
 
   back_to = varobj_ensure_python_env (self->var);
 
@@ -101,9 +107,21 @@ py_varobj_iter_next (struct varobj_iter *self)
 	}
     }
 
+  if (!PyArg_ParseTuple (item, "sO", &name, &py_v))
+    {
+      gdbpy_print_stack ();
+      error (_("Invalid item from the child list"));
+    }
+
+  vitem = xmalloc (sizeof *vitem);
+  vitem->value = convert_value_from_python (py_v);
+  if (vitem->value == NULL)
+    gdbpy_print_stack ();
+  vitem->name = xstrdup (name);
+
   self->next_raw_index++;
   do_cleanups (back_to);
-  return item;
+  return vitem;
 }
 
 /* The 'vtable' of pretty-printed python varobj iterators.  */

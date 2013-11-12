@@ -33,6 +33,7 @@
 #include "vec.h"
 #include "gdbthread.h"
 #include "inferior.h"
+#include "varobj-iter.h"
 
 #if HAVE_PYTHON
 #include "python/python.h"
@@ -40,8 +41,6 @@
 #else
 typedef int PyObject;
 #endif
-
-#include "varobj-iter.h"
 
 /* Non-zero if we want to see trace of varobj level stuff.  */
 
@@ -108,17 +107,6 @@ struct varobj_root
 
   /* Next root variable */
   struct varobj_root *next;
-};
-
-/* A node or item of varobj, composed of the name and the value.  */
-
-struct varobj_item
-{
-  /* Name of this item.  */
-  char *name;
-
-  /* Value of this item.  */
-  struct value *value;
 };
 
 /* Dynamic part of varobj.  */
@@ -788,6 +776,18 @@ varobj_get_iterator (struct varobj *var)
 requested an iterator from a non-dynamic varobj"));
 }
 
+/* Release and clear VAR's saved item, if any.  */
+
+static void
+varobj_clear_saved_item (struct varobj_dynamic *var)
+{
+  if (var->saved_item != NULL)
+    {
+      value_free (var->saved_item->value);
+      xfree (var->saved_item);
+      var->saved_item = NULL;
+    }
+}
 #endif
 
 static int
@@ -802,13 +802,7 @@ update_dynamic_varobj_children (struct varobj *var,
 				int to)
 {
 #if HAVE_PYTHON
-  struct cleanup *back_to;
   int i;
-
-  if (!gdb_python_initialized)
-    return 0;
-
-  back_to = varobj_ensure_python_env (var);
 
   *cchanged = 0;
 
@@ -817,16 +811,12 @@ update_dynamic_varobj_children (struct varobj *var,
       varobj_iter_delete (var->dynamic->child_iter);
       var->dynamic->child_iter = varobj_get_iterator (var);
 
-      Py_XDECREF (var->dynamic->saved_item);
-      var->dynamic->saved_item = NULL;
+      varobj_clear_saved_item (var->dynamic);
 
       i = 0;
 
       if (var->dynamic->child_iter == NULL)
-	{
-	  do_cleanups (back_to);
-	  return 0;
-	}
+	return 0;
     }
   else
     i = VEC_length (varobj_p, var->children);
@@ -835,10 +825,10 @@ update_dynamic_varobj_children (struct varobj *var,
      are more children.  */
   for (; to < 0 || i < to + 1; ++i)
     {
-      PyObject *item;
+      varobj_item *item;
 
       /* See if there was a leftover from last time.  */
-      if (var->dynamic->saved_item)
+      if (var->dynamic->saved_item != NULL)
 	{
 	  item = var->dynamic->saved_item;
 	  var->dynamic->saved_item = NULL;
@@ -846,6 +836,10 @@ update_dynamic_varobj_children (struct varobj *var,
       else
 	{
 	  item = varobj_iter_next (var->dynamic->child_iter);
+	  /* Release vitem->value so its lifetime is not bound to the
+	     execution of a command.  */
+	  if (item != NULL && item->value != NULL)
+	    release_value_or_incref (item->value);
 	}
 
       if (item == NULL)
@@ -858,36 +852,19 @@ update_dynamic_varobj_children (struct varobj *var,
       /* We don't want to push the extra child on any report list.  */
       if (to < 0 || i < to)
 	{
-	  PyObject *py_v;
-	  const char *name;
-	  struct varobj_item varobj_item;
-	  struct cleanup *inner;
 	  int can_mention = from < 0 || i >= from;
-
-	  inner = make_cleanup_py_decref (item);
-
-	  if (!PyArg_ParseTuple (item, "sO", &name, &py_v))
-	    {
-	      gdbpy_print_stack ();
-	      error (_("Invalid item from the child list"));
-	    }
-
-	  varobj_item.value = convert_value_from_python (py_v);
-	  if (varobj_item.value == NULL)
-	    gdbpy_print_stack ();
-	  varobj_item.name = xstrdup (name);
 
 	  install_dynamic_child (var, can_mention ? changed : NULL,
 				 can_mention ? type_changed : NULL,
 				 can_mention ? new : NULL,
 				 can_mention ? unchanged : NULL,
 				 can_mention ? cchanged : NULL, i,
-				 &varobj_item);
-	  do_cleanups (inner);
+				 item);
+
+	  xfree (item);
 	}
       else
 	{
-	  Py_XDECREF (var->dynamic->saved_item);
 	  var->dynamic->saved_item = item;
 
 	  /* We want to truncate the child list just before this
@@ -913,7 +890,6 @@ update_dynamic_varobj_children (struct varobj *var,
 
   var->num_children = VEC_length (varobj_p, var->children);
 
-  do_cleanups (back_to);
   return 1;
 #else
   gdb_assert_not_reached ("should never be called if Python is not enabled");
@@ -2191,12 +2167,12 @@ free_variable (struct varobj *var)
 
       Py_XDECREF (var->dynamic->constructor);
       Py_XDECREF (var->dynamic->pretty_printer);
-      Py_XDECREF (var->dynamic->child_iter);
-      Py_XDECREF (var->dynamic->saved_item);
       do_cleanups (cleanup);
     }
 #endif
 
+  varobj_iter_delete (var->dynamic->child_iter);
+  varobj_clear_saved_item (var->dynamic);
   value_free (var->value);
 
   /* Free the expression if this is a root variable.  */

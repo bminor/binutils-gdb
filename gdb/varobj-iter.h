@@ -14,9 +14,18 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-struct varobj_iter_ops;
+/* A node or item of varobj, composed of the name and the value.  */
 
-typedef PyObject varobj_item;
+typedef struct varobj_item
+{
+  /* Name of this item.  */
+  char *name;
+
+  /* Value of this item.  */
+  struct value *value;
+} varobj_item;
+
+struct varobj_iter_ops;
 
 /* A dynamic varobj iterator "class".  */
 
