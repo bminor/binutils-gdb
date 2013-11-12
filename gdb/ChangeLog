@@ -1,5 +1,14 @@
 2013-11-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* mi/mi-cmds.h (mi_cmd_info_ada_exceptions): Add declaration.
+	* mi/mi-cmds.c (mi_cmds): Add entry for -info-ada-exceptions
+	command.
+	* mi/mi-cmd-info.c: #include "ada-lang.c" and "arch-utils.c".
+	(mi_cmd_info_ada_exceptions): New function.
+	* mi/mi-main.c (mi_cmd_list_features): Add "info-ada-exceptions".
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.h: #include "vec.h".
 	(struct ada_exc_info): New.
 	(ada_exc_info): New typedef.
