@@ -1,3 +1,8 @@
+2013-11-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* objc-lang.c (uniquify_strings): Prevent invoking qsort with
+	NULL.
+
 2013-11-12  Doug Evans  <dje@google.com>
 
 	Work around gold/15646.
