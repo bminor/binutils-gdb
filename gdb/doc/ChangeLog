@@ -1,5 +1,10 @@
 2013-11-12  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Fix the first
+	word of a couple of sentences to start with a capital letter.
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo (Ada): Add entry in menu for new "Ada Exceptions" node.
 	(Ada Exceptions): New node.
 	(GDB/MI): Add entry in menu for new "GDB/MI Ada Exceptions

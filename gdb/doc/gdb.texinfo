@@ -35079,9 +35079,9 @@ Indicates support for the @code{-data-read-memory-bytes} and the
 Indicates that changes to breakpoints and breakpoints created via the
 CLI will be announced via async records.
 @item ada-task-info
-indicates support for the @code{-ada-task-info} command.
+Indicates support for the @code{-ada-task-info} command.
 @item info-ada-exceptions
-indicates support for the @code{-info-ada-exceptions} command.
+Indicates support for the @code{-info-ada-exceptions} command.
 @end table
 
 @subheading The @code{-list-target-features} Command
