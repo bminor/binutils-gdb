@@ -1,3 +1,12 @@
+2013-11-12  Doug Evans  <dje@google.com>
+
+	Work around gold/15646.
+	* dwarf2read.c (read_index_from_section): Update comment.
+	(struct dw2_symtab_iterator): New member global_seen.
+	(dw2_symtab_iter_init): Initialize it.
+	(dw2_symtab_iter_next): Skip duplicate global symbols.
+	(dw2_expand_symtabs_matching): Ditto.
+
 2013-11-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-cmds.h (mi_cmd_info_ada_exceptions): Add declaration.
