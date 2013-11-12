@@ -1,3 +1,8 @@
+2013-11-12  Doug Evans  <dje@google.com>
+
+	* gdb.base/fileio.exp: Make $dir2 writable after the test is done
+	so that "rm -rf $builddir" Just Works.
+
 2013-11-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/mi_exc_info: New testcase.
