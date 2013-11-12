@@ -1,3 +1,26 @@
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_exc_info: New testcase.
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc: New testcase.
+
+2013-11-11  Doug Evans  <dje@google.com>
+
+	* gdb.arch/arm-bl-branch-dest.exp: Use gdb_test_file_name instead
+	of testfile.
+
+2013-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+ 	* gdb.python/py-linetable.S: New file.
+	* gdb.python/py-linetable.c: New file.
+ 	* gdb.python/py-linetable.exp: New file.
+
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_ex_cond: New testcase.
+
 2013-11-07  Doug Evans  <dje@google.com>
 
 	PR 11786

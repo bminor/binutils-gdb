@@ -1,3 +1,14 @@
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Rebuild.
+	* configure.ac: Remove unused configury.
+
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* acinclude.m4: Include common.m4, codeset.m4.
+	* configure, config.in: Rebuild.
+	* configure.ac: Use GDB_AC_COMMON.
+
 2013-11-06  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* linux-s390-low.c (HWCAP_S390_TE): New define.

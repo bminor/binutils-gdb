@@ -186,6 +186,20 @@ stpy_static_block (PyObject *self, PyObject *args)
   return block_to_block_object (block, symtab->objfile);
 }
 
+/* Implementation of gdb.Symtab.linetable (self) -> gdb.Linetable.
+   Returns a gdb.Linetable object corresponding to this symbol
+   table.  */
+
+static PyObject *
+stpy_get_linetable (PyObject *self, PyObject *args)
+{
+  struct symtab *symtab = NULL;
+
+  STPY_REQUIRE_VALID (self, symtab);
+
+  return symtab_to_linetable_object (self);
+}
+
 static PyObject *
 salpy_str (PyObject *self)
 {
@@ -532,6 +546,9 @@ Return the global block of the symbol table." },
   { "static_block", stpy_static_block, METH_NOARGS,
     "static_block () -> gdb.Block.\n\
 Return the static block of the symbol table." },
+    { "linetable", stpy_get_linetable, METH_NOARGS,
+    "linetable () -> gdb.Linetable.\n\
+Return the Linetable associated with this symbol table" },
   {NULL}  /* Sentinel */
 };
 

@@ -2891,7 +2891,9 @@ allocate_symtab (const char *filename, struct objfile *objfile)
   symtab->next = objfile->symtabs;
   objfile->symtabs = symtab;
 
-  if (symtab_create_debug)
+  /* This can be very verbose with lots of headers.
+     Only print at higher debug levels.  */
+  if (symtab_create_debug >= 2)
     {
       /* Be a bit clever with debugging messages, and don't print objfile
 	 every time, only when it changes.  */

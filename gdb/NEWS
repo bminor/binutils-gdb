@@ -36,6 +36,7 @@
 
   ** Frame filters and frame decorators have been added.
   ** Temporary breakpoints are now supported.
+  ** Line tables representation has been added.
 
 * New targets
 
@@ -81,6 +82,12 @@ remove-symbol-file -a ADDRESS
   can be identified by its filename or by an address that lies within
   the boundaries of this symbol file in memory.
 
+info exceptions
+info exceptions REGEXP
+  Display the list of Ada exceptions defined in the program being
+  debugged.  If provided, only the exceptions whose names match REGEXP
+  are listed.
+
 * New options
 
 set debug symfile off|on
@@ -115,6 +122,10 @@ show startup-with-shell
   trace-buffer-size unlimited" is now an alias for "set
   trace-buffer-size -1" and "set height unlimited" is now an alias for
   "set height 0".
+
+* The "set debug symtab-create" debugging option of GDB has been changed to
+  accept a verbosity level.  0 means "off", 1 provides basic debugging
+  output, and values of 2 or greater provides more verbose output.
 
 * New command-line options
 --configuration
@@ -163,6 +174,9 @@ show startup-with-shell
 
   ** The new commands -catch-assert and -catch-exceptions insert
      catchpoints stopping the program when Ada exceptions are raised.
+
+  ** The new command -info-ada-exceptions provides the equivalent of
+     the new "info exceptions" command.
 
 * New system-wide configuration scripts
   A GDB installation now provides scripts suitable for use as system-wide

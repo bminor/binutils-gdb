@@ -1,3 +1,125 @@
+2013-11-12  Doug Evans  <dje@google.com>
+
+	Work around gold/15646.
+	* dwarf2read.c (read_index_from_section): Update comment.
+	(struct dw2_symtab_iterator): New member global_seen.
+	(dw2_symtab_iter_init): Initialize it.
+	(dw2_symtab_iter_next): Skip duplicate global symbols.
+	(dw2_expand_symtabs_matching): Ditto.
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-cmds.h (mi_cmd_info_ada_exceptions): Add declaration.
+	* mi/mi-cmds.c (mi_cmds): Add entry for -info-ada-exceptions
+	command.
+	* mi/mi-cmd-info.c: #include "ada-lang.c" and "arch-utils.c".
+	(mi_cmd_info_ada_exceptions): New function.
+	* mi/mi-main.c (mi_cmd_list_features): Add "info-ada-exceptions".
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.h: #include "vec.h".
+	(struct ada_exc_info): New.
+	(ada_exc_info): New typedef.
+	(DEF_VEC_O(ada_exc_info)): New vector.
+	(ada_exceptions_list): Add declaration.
+	* ada-lang.c (ada_is_exception_sym)
+	(ada_is_non_standard_exception_sym, compare_ada_exception_info)
+	(sort_remove_dups_ada_exceptions_list)
+	(ada_exc_search_name_matches, ada_add_standard_exceptions)
+	(ada_add_exceptions_from_frame, ada_add_global_exceptions)
+	(ada_exceptions_list_1, ada_exceptions_list)
+	(info_exceptions_command): New function.
+	(_initialize_ada_language): Add "info exception" command.
+
+2013-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	PR python/15629
+	* NEWS: Add linetable feature.
+	* Makefile.in (SUBDIR_PYTHON_OBS): Add py-linetable entries.
+	* python/py-linetable.c: New file.
+	* python/py-symtab.c (stpy_get_linetable): New function.
+	* python/python-internal.h (symtab_to_linetable_object): Declare.
+	(gdbpy_initialize_linetable): Ditto.
+	* python/python.c (_initialize_python): Call
+	gdbpy_initialize_linetable.
+
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (create_ada_exception_catchpoint): Enhance
+	the documentation of fields "except_string" and "condition".
+	* mi/mi-cmd-catch.c (mi_cmd_catch_assert): Reallocate
+	CONDITION on the heap before passing it to
+	create_ada_exception_catchpoint.
+	(mi_cmd_catch_exception): Likewise for EXCEPTION_NAME and
+	CONDITION.
+
+2013-11-11  Tom Tromey  <tromey@redhat.com>
+
+	* config.in, configure: Rebuild.
+	* configure.ac (HAVE_TKILL_SYSCALL): Check for "syscall".
+
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* remote-sim.c (gdbsim_detach): Break declaration into
+	shorter lines.  No code change.
+
+2013-11-11  Edjunior Barbosa Machado  <emachado@linux.vnet.ibm.com>
+
+	* remote-sim.c (gdbsim_detach): Fix prototype.
+
+2013-11-08  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (dwarf2_read_debug): Change to unsigned int.
+	(create_debug_types_hash_table): Only print debugging messages for
+	each TU if dwarf2-read >= 2.
+	(process_queue): Ditto.
+	(_initialize_dwarf2_read): Make "set debug dwarf2-read" a zuinteger.
+	Update doc string.
+
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* configure: Rebuild.
+	* configure.ac: Remove mentions of HAVE_MULTIPLE_PROC_FDS.
+
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Rebuild.
+	* configure.ac: Remove unused configury.
+
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* m32c-tdep.c: Use gdb_string.h.
+
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Rebuild.
+	* configure.ac: Remove all link.h-related checks.
+
+2013-11-08  Tom Tromey  <tromey@redhat.com>
+
+	* acinclude.m4: Include common.m4.
+	* common/common.m4: New file.
+	* configure, config.in: Rebuild.
+	* configure.ac: Use GDB_AC_COMMON.
+
+2013-11-08  Doug Evans  <dje@google.com>
+
+	* NEWS: Mention that "set debug symtab-create" now accepts a
+	verbosity level.
+	* buildsym.c (end_symtab_from_static_block): Call set_symtab_primary
+	to set the symtab's primary flag.
+	* jit.c (finalize_symtab): Ditto.
+	* mdebugread.c (psymtab_to_symtab_1): Ditto.
+	* symfile.c (allocate_symtab): Only print debugging messages for
+	symtab_create_debug levels 2 and higher.
+	* symtab.c (symtab_create_debug): Change type to unsigned int.
+	(set_symtab_primary): New function.
+	(_initialize_symtab): Change "set debug symtab-create" to a
+	zuinteger option.
+	* symtab.h (set_symtab_primary): Declare.
+	(symtab_create_debug): Update decl.
+
 2013-11-08  Tom Tromey  <tromey@redhat.com>
 
 	* aix-thread.c (aix_thread_detach): Update.

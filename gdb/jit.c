@@ -665,7 +665,7 @@ finalize_symtab (struct gdb_symtab *stab, struct objfile *objfile)
 
   /* (begin, end) will contain the PC range this entire blockvector
      spans.  */
-  symtab->primary = 1;
+  set_symtab_primary (symtab, 1);
   BLOCKVECTOR_MAP (symtab->blockvector) = NULL;
   begin = stab->blocks->begin;
   end = stab->blocks->end;

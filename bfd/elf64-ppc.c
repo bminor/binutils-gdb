@@ -8698,7 +8698,7 @@ ppc64_elf_edit_toc (struct bfd_link_info *info)
 		  || discarded_section (sym_sec))
 		continue;
 
-	      if (!SYMBOL_CALLS_LOCAL (info, h))
+	      if (!SYMBOL_REFERENCES_LOCAL (info, h))
 		continue;
 
 	      if (h != NULL)
@@ -9417,8 +9417,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
   if (eh->dyn_relocs == NULL
       || (!htab->elf.dynamic_sections_created
-	  && (h->type != STT_GNU_IFUNC
-	      || !htab->opd_abi)))
+	  && h->type != STT_GNU_IFUNC))
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -9545,7 +9544,13 @@ size_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
     if (pent->plt.offset != (bfd_vma) -1
 	&& pent->addend == 0)
       {
+	/* For ELFv2, if this symbol is not defined in a regular file
+	   and we are not generating a shared library or pie, then we
+	   need to define the symbol in the executable on a call stub.
+	   This is to avoid text relocations.  */
 	s->size = (s->size + 15) & -16;
+	h->root.u.def.section = s;
+	h->root.u.def.value = s->size;
 	s->size += 16;
 	break;
       }
@@ -12381,13 +12386,6 @@ build_global_entry_stubs (struct elf_link_hash_entry *h, void *inf)
 	asection *plt;
 	bfd_vma off;
 
-	/* For ELFv2, if this symbol is not defined in a regular file
-	   and we are not generating a shared library or pie, then we
-	   need to define the symbol in the executable on a call stub.
-	   This is to avoid text relocations.  */
-	h->root.u.def.section = s;
-	h->root.u.def.value = s->size;
-	s->size += 16;
 	p = s->contents + h->root.u.def.value;
 	plt = htab->elf.splt;
 	if (!htab->elf.dynamic_sections_created
@@ -12583,10 +12581,7 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
 
       /* Build .glink global entry stubs.  */
       if (htab->glink->size > htab->glink->rawsize)
-	{
-	  htab->glink->size = (htab->glink->rawsize + 15) & -16;
-	  elf_link_hash_traverse (&htab->elf, build_global_entry_stubs, info);
-	}
+	elf_link_hash_traverse (&htab->elf, build_global_entry_stubs, info);
     }
 
   if (htab->brlt->size != 0)
@@ -13856,7 +13851,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    if (!WILL_CALL_FINISH_DYNAMIC_SYMBOL (dyn, info->shared,
 							  &h->elf)
 			|| (info->shared
-			    && SYMBOL_CALLS_LOCAL (info, &h->elf)))
+			    && SYMBOL_REFERENCES_LOCAL (info, &h->elf)))
 		      /* This is actually a static link, or it is a
 			 -Bsymbolic link and the symbol is defined
 			 locally, or the symbol was forced to be local
@@ -14241,7 +14236,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (!SYMBOL_CALLS_LOCAL (info, &h->elf)
+	      else if (!SYMBOL_REFERENCES_LOCAL (info, &h->elf)
 		       && !is_opd
 		       && r_type != R_PPC64_TOC)
 		{

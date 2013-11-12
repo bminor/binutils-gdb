@@ -14965,6 +14965,7 @@ to be difficult.
 * Omissions from Ada::          Restrictions on the Ada expression syntax.
 * Additions to Ada::            Extensions of the Ada expression syntax.
 * Stopping Before Main Program:: Debugging the program during elaboration.
+* Ada Exceptions::              Ada Exceptions
 * Ada Tasks::                   Listing and setting breakpoints in tasks.
 * Ada Tasks and Core Files::    Tasking Support when Debugging Core Files
 * Ravenscar Profile::           Tasking Support when using the Ravenscar
@@ -15288,6 +15289,42 @@ Manual, the elaboration code is invoked from a procedure called
 @code{adainit}.  To run your program up to the beginning of
 elaboration, simply use the following two commands:
 @code{tbreak adainit} and @code{run}.
+
+@node Ada Exceptions
+@subsubsection Ada Exceptions
+
+A command is provided to list all Ada exceptions:
+
+@table @code
+@kindex info exceptions
+@item info exceptions
+@itemx info exceptions @var{regexp}
+The @code{info exceptions} command allows you to list all Ada exceptions
+defined within the program being debugged, as well as their addresses.
+With a regular expression, @var{regexp}, as argument, only those exceptions
+whose names match @var{regexp} are listed.
+@end table
+
+Below is a small example, showing how the command can be used, first
+without argument, and next with a regular expression passed as an
+argument.
+
+@smallexample
+(@value{GDBP}) info exceptions
+All defined Ada exceptions:
+constraint_error: 0x613da0
+program_error: 0x613d20
+storage_error: 0x613ce0
+tasking_error: 0x613ca0
+const.aint_global_e: 0x613b00
+(@value{GDBP}) info exceptions const.aint
+All Ada exceptions matching regular expression "const.aint":
+constraint_error: 0x613da0
+const.aint_global_e: 0x613b00
+@end smallexample
+
+It is also possible to ask @value{GDBN} to stop your program's execution
+when an exception is raised.  For more details, see @ref{Set Catchpoints}.
 
 @node Ada Tasks
 @subsubsection Extensions for Ada Tasks
@@ -22609,7 +22646,9 @@ Show the current state of DWARF2 DIE debugging.
 @item set debug dwarf2-read
 @cindex DWARF2 Reading
 Turns on or off display of debugging messages related to reading
-DWARF debug info.  The default is off.
+DWARF debug info.  The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
 @item show debug dwarf2-read
 Show the current state of DWARF2 reader debugging.
 @item set debug displaced
@@ -22731,7 +22770,9 @@ Show the current state of symbol file debugging messages.
 @item set debug symtab-create
 @cindex symbol table creation
 Turns on or off display of debugging messages related to symbol table creation.
-The default is off.
+The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
 @item show debug symtab-create
 Show the current state of symbol table creation debugging.
 @item set debug target
@@ -23483,6 +23524,7 @@ optional arguments while skipping others.  Example:
 * Blocks In Python::            Accessing blocks from Python.
 * Symbols In Python::           Python representation of symbols.
 * Symbol Tables In Python::     Python representation of symbol tables.
+* Line Tables In Python::       Python representation of line tables.
 * Breakpoints In Python::       Manipulating breakpoints using Python.
 * Finish Breakpoints in Python:: Setting Breakpoints on function return
                                 using Python.
@@ -27023,6 +27065,89 @@ Return the static block of the underlying symbol table.
 @xref{Blocks In Python}.
 @end defun
 
+@defun Symtab.linetable ()
+Return the line table associated with the symbol table.
+@xref{Line Tables In Python}.
+@end defun
+
+@node Line Tables In Python
+@subsubsection Manipulating line tables using Python
+
+@cindex line tables in python
+@tindex gdb.LineTable
+
+Python code can request and inspect line table information from a
+symbol table that is loaded in @value{GDBN}.  A line table is a
+mapping of source lines to their executable locations in memory.  To
+acquire the line table information for a particular symbol table, use
+the @code{linetable} function (@pxref{Symbol Tables In Python}).
+
+A @code{gdb.LineTable} is iterable.  The iterator returns
+@code{LineTableEntry} objects that correspond to the source line and
+address for each line table entry.  @code{LineTableEntry} objects have
+the following attributes:
+
+@defvar LineTableEntry.line
+The source line number for this line table entry.  This number
+corresponds to the actual line of source.  This attribute is not
+writable.
+@end defvar
+
+@defvar LineTableEntry.pc
+The address that is associated with the line table entry where the
+executable code for that source line resides in memory.  This
+attribute is not writable.
+@end defvar
+
+As there can be multiple addresses for a single source line, you may
+receive multiple @code{LineTableEntry} objects with matching
+@code{line} attributes, but with different @code{pc} attributes.  The
+iterator is sorted in ascending @code{pc} order.  Here is a small
+example illustrating iterating over a line table.
+
+@smallexample
+symtab = gdb.selected_frame().find_sal().symtab
+linetable = symtab.linetable()
+for line in linetable:
+   print "Line: "+str(line.line)+" Address: "+hex(line.pc)
+@end smallexample
+
+This will have the following output:
+
+@smallexample
+Line: 33 Address: 0x4005c8L
+Line: 37 Address: 0x4005caL
+Line: 39 Address: 0x4005d2L
+Line: 40 Address: 0x4005f8L
+Line: 42 Address: 0x4005ffL
+Line: 44 Address: 0x400608L
+Line: 42 Address: 0x40060cL
+Line: 45 Address: 0x400615L
+@end smallexample
+
+In addition to being able to iterate over a @code{LineTable}, it also
+has the following direct access methods:
+
+@defun LineTable.line (line)
+Return a Python @code{Tuple} of @code{LineTableEntry} objects for any
+entries in the line table for the given @var{line}.  @var{line} refers
+to the source code line.  If there are no entries for that source code
+@var{line}, the Python @code{None} is returned.
+@end defun
+
+@defun LineTable.has_line (line)
+Return a Python @code{Boolean} indicating whether there is an entry in
+the line table for this source line.  Return @code{True} if an entry
+is found, or @code{False} if not.
+@end defun
+
+@defun LineTable.source_lines ()
+Return a Python @code{List} of the source line numbers in the symbol
+table.  Only lines with executable code locations are returned.  The
+contents of the @code{List} will just be the source line entries
+represented as Python @code{Long} values.
+@end defun
+
 @node Breakpoints In Python
 @subsubsection Manipulating breakpoints using Python
 
@@ -28625,6 +28750,7 @@ may repeat one or more times.
 @end ignore
 * GDB/MI Target Manipulation::
 * GDB/MI File Transfer Commands::
+* GDB/MI Ada Exceptions Commands::
 * GDB/MI Miscellaneous Commands::
 @end menu
 
@@ -34715,6 +34841,59 @@ The corresponding @value{GDBN} command is @samp{remote delete}.
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Ada Exceptions Commands
+@section Ada Exceptions @sc{gdb/mi} Commands
+
+@subheading The @code{-info-ada-exceptions} Command
+@findex -info-ada-exceptions
+
+@subsubheading Synopsis
+
+@smallexample
+ -info-ada-exceptions [ @var{regexp}]
+@end smallexample
+
+List all Ada exceptions defined within the program being debugged.
+With a regular expression @var{regexp}, only those exceptions whose
+names match @var{regexp} are listed.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info exceptions}.
+
+@subsubheading Result
+
+The result is a table of Ada exceptions.  The following columns are
+defined for each exception:
+
+@table @samp
+@item name
+The name of the exception.
+
+@item address
+The address of the exception.
+
+@end table
+
+@subsubheading Example
+
+@smallexample
+-info-ada-exceptions aint
+^done,ada-exceptions=@{nr_rows="2",nr_cols="2",
+hdr=[@{width="1",alignment="-1",col_name="name",colhdr="Name"@},
+@{width="1",alignment="-1",col_name="address",colhdr="Address"@}],
+body=[@{name="constraint_error",address="0x0000000000613da0"@},
+@{name="const.aint_global_e",address="0x0000000000613b00"@}]@}
+@end smallexample
+
+@subheading Catching Ada Exceptions
+
+The commands describing how to ask @value{GDBN} to stop when a program
+raises an exception are described at @ref{Ada Exception GDB/MI
+Catchpoint Commands}.
+
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Miscellaneous Commands
 @section Miscellaneous @sc{gdb/mi} Commands
 
@@ -34901,6 +35080,8 @@ Indicates that changes to breakpoints and breakpoints created via the
 CLI will be announced via async records.
 @item ada-task-info
 Indicates support for the @code{-ada-task-info} command.
+@item info-ada-exceptions
+Indicates support for the @code{-info-ada-exceptions} command.
 @end table
 
 @subheading The @code{-list-target-features} Command

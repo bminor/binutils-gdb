@@ -2269,7 +2269,7 @@ ppc_elf_localentry (int ignore ATTRIBUTE_UNUSED)
     {
       unsigned char encoded = PPC64_SET_LOCAL_ENTRY_OFFSET (exp.X_add_number);
 
-      if (exp.X_add_number != PPC64_LOCAL_ENTRY_OFFSET (encoded))
+      if (exp.X_add_number != (offsetT) PPC64_LOCAL_ENTRY_OFFSET (encoded))
         as_bad (_(".localentry expression for `%s' "
 		  "is not a valid power of 2"), S_GET_NAME (sym));
       else

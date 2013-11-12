@@ -1231,8 +1231,7 @@ end_symtab_from_static_block (struct block *static_block,
 	  /* All symtabs for the main file and the subfiles share a
 	     blockvector, so we need to clear primary for everything
 	     but the main file.  */
-
-	  symtab->primary = 0;
+	  set_symtab_primary (symtab, 0);
 	}
       else
         {
@@ -1280,7 +1279,7 @@ end_symtab_from_static_block (struct block *static_block,
   /* Set this for the main source file.  */
   if (symtab)
     {
-      symtab->primary = 1;
+      set_symtab_primary (symtab, 1);
 
       if (symtab->blockvector)
 	{

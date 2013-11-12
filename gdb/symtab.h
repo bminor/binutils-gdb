@@ -941,6 +941,9 @@ struct symtab
 #define LINETABLE(symtab)	(symtab)->linetable
 #define SYMTAB_PSPACE(symtab)	(symtab)->objfile->pspace
 
+/* Call this to set the "primary" field in struct symtab.  */
+extern void set_symtab_primary (struct symtab *, int primary);
+
 typedef struct symtab *symtab_ptr;
 DEF_VEC_P (symtab_ptr);
 
@@ -1335,7 +1338,7 @@ void fixup_section (struct general_symbol_info *ginfo,
 
 struct objfile *lookup_objfile_from_block (const struct block *block);
 
-extern int symtab_create_debug;
+extern unsigned int symtab_create_debug;
 
 extern int basenames_may_differ;
 

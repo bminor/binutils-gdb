@@ -299,6 +299,7 @@ SUBDIR_PYTHON_OBS = \
 	py-inferior.o \
 	py-infthread.o \
 	py-lazy-string.o \
+	py-linetable.o \
 	py-newobjfileevent.o \
 	py-objfile.o \
 	py-param.o \
@@ -334,6 +335,7 @@ SUBDIR_PYTHON_SRCS = \
 	python/py-inferior.c \
 	python/py-infthread.c \
 	python/py-lazy-string.c \
+	python/py-linetable.c \
 	python/py-newobjfileevent.c \
 	python/py-objfile.c \
 	python/py-param.c \
@@ -2225,6 +2227,10 @@ py-infthread.o: $(srcdir)/python/py-infthread.c
 
 py-lazy-string.o: $(srcdir)/python/py-lazy-string.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-lazy-string.c
+	$(POSTCOMPILE)
+
+py-linetable.o: $(srcdir)/python/py-linetable.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/py-linetable.c
 	$(POSTCOMPILE)
 
 py-newobjfileevent.o: $(srcdir)/python/py-newobjfileevent.c

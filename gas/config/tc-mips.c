@@ -491,7 +491,7 @@ static int mips_32bitmode = 0;
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs after they are loaded from memory, and thus does not
    require nops to be inserted.  This applies to instructions marked
-   INSN_LOAD_MEMORY_DELAY.  These nops are only required at MIPS ISA
+   INSN_LOAD_MEMORY.  These nops are only required at MIPS ISA
    level I and microMIPS mode instructions are always interlocked.  */
 #define gpr_interlocks                                \
   (mips_opts.isa != ISA_MIPS1                         \
@@ -4389,7 +4389,7 @@ convert_reg_type (const struct mips_opcode *opcode,
 	  && (opcode->pinfo & (INSN_COPROC_MOVE_DELAY
 			       | INSN_COPROC_MEMORY_DELAY
 			       | INSN_LOAD_COPROC_DELAY
-			       | INSN_LOAD_MEMORY_DELAY
+			       | INSN_LOAD_MEMORY
 			       | INSN_STORE_MEMORY)))
 	return RTYPE_FPU | RTYPE_VEC;
       return RTYPE_FPU;
@@ -5529,7 +5529,7 @@ reg_needs_delay (unsigned int reg)
 
   prev_pinfo = history[0].insn_mo->pinfo;
   if (!mips_opts.noreorder
-      && (((prev_pinfo & INSN_LOAD_MEMORY_DELAY) && !gpr_interlocks)
+      && (((prev_pinfo & INSN_LOAD_MEMORY) && !gpr_interlocks)
 	  || ((prev_pinfo & INSN_LOAD_COPROC_DELAY) && !cop_interlocks))
       && (gpr_write_mask (&history[0]) & (1 << reg)))
     return TRUE;
@@ -5633,7 +5633,7 @@ insns_between (const struct mips_cl_insn *insn1,
       /* Check for GPR or coprocessor load delays.  All such delays
 	 are on the RT register.  */
       /* Itbl support may require additional care here.  */
-      if ((!gpr_interlocks && (pinfo1 & INSN_LOAD_MEMORY_DELAY))
+      if ((!gpr_interlocks && (pinfo1 & INSN_LOAD_MEMORY))
 	  || (!cop_interlocks && (pinfo1 & INSN_LOAD_COPROC_DELAY)))
 	{
 	  if (insn2 == NULL || (gpr_read_mask (insn2) & gpr_write_mask (insn1)))

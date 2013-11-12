@@ -81,6 +81,10 @@ mi_cmd_catch_assert (char *cmd, char *argv[], int argc)
     error (_("Invalid argument: %s"), argv[oind]);
 
   setup_breakpoint_reporting ();
+  /* create_ada_exception_catchpoint needs CONDITION to be xstrdup'ed,
+     and will assume control of its lifetime.  */
+  if (condition != NULL)
+    condition = xstrdup (condition);
   create_ada_exception_catchpoint (gdbarch, ada_catch_assert,
 				   NULL, condition, temp, enabled, 0);
 }
@@ -154,6 +158,12 @@ mi_cmd_catch_exception (char *cmd, char *argv[], int argc)
     error (_("\"-e\" and \"-u\" are mutually exclusive"));
 
   setup_breakpoint_reporting ();
+  /* create_ada_exception_catchpoint needs EXCEPTION_NAME and CONDITION
+     to be xstrdup'ed, and will assume control of their lifetime.  */
+  if (exception_name != NULL)
+    exception_name = xstrdup (exception_name);
+  if (condition != NULL)
+    condition = xstrdup (condition);
   create_ada_exception_catchpoint (gdbarch, ex_kind,
 				   exception_name, condition,
 				   temp, enabled, 0);
