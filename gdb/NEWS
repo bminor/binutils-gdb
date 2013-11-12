@@ -246,6 +246,17 @@ fork-events and vfork-events features in qSupported
 HP/PA running HP-UX           hppa*-*-hpux*
 Itanium running HP-UX         ia64-*-hpux*
 
+* New configure options
+
+--with-intel-pt
+  This configure option allows the user to build GDB with support for
+  Intel(R) Processor Trace (default: auto).  This requires libipt.
+
+--with-libipt-prefix=PATH
+  Specify the path to the version of libipt that GDB should use.
+  $PATH/include should contain the intel-pt.h header and
+  $PATH/lib should contain the libipt.so library.
+
 *** Changes in GDB 7.9.1
 
 * Python Scripting

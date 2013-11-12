@@ -234,6 +234,9 @@
 /* Define to 1 if you have the `libiconvlist' function. */
 #undef HAVE_LIBICONVLIST
 
+/* Define if you have the ipt library. */
+#undef HAVE_LIBIPT
+
 /* Define if you have the lzma library. */
 #undef HAVE_LIBLZMA
 
