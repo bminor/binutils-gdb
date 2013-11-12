@@ -35080,8 +35080,10 @@ Indicates that changes to breakpoints and breakpoints created via the
 CLI will be announced via async records.
 @item ada-task-info
 Indicates support for the @code{-ada-task-info} command.
-@item info-ada-exceptions
-Indicates support for the @code{-info-ada-exceptions} command.
+@item ada-exceptions
+Indicates support for the following commands, all of them related to Ada
+exceptions: @code{-info-ada-exceptions}, @code{-catch-assert} and
+@code{-catch-exception}.
 @end table
 
 @subheading The @code{-list-target-features} Command
