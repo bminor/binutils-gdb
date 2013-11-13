@@ -1022,11 +1022,9 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Read branch trace data for the thread indicated by BTINFO into DATA.
-       DATA is cleared before new trace is added.
-       The branch trace will start with the most recent block and continue
-       towards older blocks.  */
+       DATA is cleared before new trace is added.  */
     enum btrace_error (*to_read_btrace) (struct target_ops *self,
-					 VEC (btrace_block_s) **data,
+					 struct btrace_data *data,
 					 struct btrace_target_info *btinfo,
 					 enum btrace_read_type type)
       TARGET_DEFAULT_NORETURN (tcomplain ());
@@ -2230,7 +2228,7 @@ extern void target_disable_btrace (struct btrace_target_info *btinfo);
 extern void target_teardown_btrace (struct btrace_target_info *btinfo);
 
 /* See to_read_btrace in struct target_ops.  */
-extern enum btrace_error target_read_btrace (VEC (btrace_block_s) **,
+extern enum btrace_error target_read_btrace (struct btrace_data *,
 					     struct btrace_target_info *,
 					     enum btrace_read_type);
 

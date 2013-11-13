@@ -470,7 +470,7 @@ x86_linux_teardown_btrace (struct target_ops *self,
 
 static enum btrace_error
 x86_linux_read_btrace (struct target_ops *self,
-		       VEC (btrace_block_s) **data,
+		       struct btrace_data *data,
 		       struct btrace_target_info *btinfo,
 		       enum btrace_read_type type)
 {

@@ -3414,7 +3414,7 @@ target_teardown_btrace (struct btrace_target_info *btinfo)
 /* See target.h.  */
 
 enum btrace_error
-target_read_btrace (VEC (btrace_block_s) **btrace,
+target_read_btrace (struct btrace_data *btrace,
 		    struct btrace_target_info *btinfo,
 		    enum btrace_read_type type)
 {

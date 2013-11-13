@@ -3191,20 +3191,20 @@ debug_teardown_btrace (struct target_ops *self, struct btrace_target_info *arg1)
 }
 
 static enum btrace_error
-delegate_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
+delegate_read_btrace (struct target_ops *self, struct btrace_data *arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
 {
   self = self->beneath;
   return self->to_read_btrace (self, arg1, arg2, arg3);
 }
 
 static enum btrace_error
-tdefault_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
+tdefault_read_btrace (struct target_ops *self, struct btrace_data *arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
 {
   tcomplain ();
 }
 
 static enum btrace_error
-debug_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
+debug_read_btrace (struct target_ops *self, struct btrace_data *arg1, struct btrace_target_info *arg2, enum btrace_read_type arg3)
 {
   enum btrace_error result;
   fprintf_unfiltered (gdb_stdlog, "-> %s->to_read_btrace (...)\n", debug_target.to_shortname);
@@ -3212,7 +3212,7 @@ debug_read_btrace (struct target_ops *self, VEC (btrace_block_s) **arg1, struct 
   fprintf_unfiltered (gdb_stdlog, "<- %s->to_read_btrace (", debug_target.to_shortname);
   target_debug_print_struct_target_ops_p (&debug_target);
   fputs_unfiltered (", ", gdb_stdlog);
-  target_debug_print_VEC__btrace_block_s__pp (arg1);
+  target_debug_print_struct_btrace_data_p (arg1);
   fputs_unfiltered (", ", gdb_stdlog);
   target_debug_print_struct_btrace_target_info_p (arg2);
   fputs_unfiltered (", ", gdb_stdlog);

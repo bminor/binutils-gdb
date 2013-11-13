@@ -70,7 +70,7 @@ extern struct btrace_target_info *linux_enable_btrace (ptid_t ptid);
 extern enum btrace_error linux_disable_btrace (struct btrace_target_info *ti);
 
 /* See to_read_btrace in target.h.  */
-extern enum btrace_error linux_read_btrace (VEC (btrace_block_s) **btrace,
+extern enum btrace_error linux_read_btrace (struct btrace_data *btrace,
 					    struct btrace_target_info *btinfo,
 					    enum btrace_read_type type);
 

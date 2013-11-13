@@ -45,12 +45,41 @@ struct btrace_block
   CORE_ADDR end;
 };
 
-/* Branch trace is represented as a vector of branch trace blocks starting with
-   the most recent block.  */
-typedef struct btrace_block btrace_block_s;
-
 /* Define functions operating on a vector of branch trace blocks.  */
+typedef struct btrace_block btrace_block_s;
 DEF_VEC_O (btrace_block_s);
+
+/* Enumeration of btrace formats.  */
+
+enum btrace_format
+{
+  /* No branch trace format.  */
+  BTRACE_FORMAT_NONE,
+
+  /* Branch trace is in Branch Trace Store (BTS) format.
+     Actually, the format is a sequence of blocks derived from BTS.  */
+  BTRACE_FORMAT_BTS
+};
+
+/* Branch trace in BTS format.  */
+struct btrace_data_bts
+{
+  /* Branch trace is represented as a vector of branch trace blocks starting
+     with the most recent block.  */
+  VEC (btrace_block_s) *blocks;
+};
+
+/* The branch trace data.  */
+struct btrace_data
+{
+  enum btrace_format format;
+
+  union
+  {
+    /* Format == BTRACE_FORMAT_BTS.  */
+    struct btrace_data_bts bts;
+  } variant;
+};
 
 /* Target specific branch trace information.  */
 struct btrace_target_info;
@@ -86,5 +115,17 @@ enum btrace_error
   /* The branch trace buffer overflowed; no delta read possible.  */
   BTRACE_ERR_OVERFLOW
 };
+
+/* Return a string representation of FORMAT.  */
+extern const char *btrace_format_string (enum btrace_format format);
+
+/* Initialize DATA.  */
+extern void btrace_data_init (struct btrace_data *data);
+
+/* Cleanup DATA.  */
+extern void btrace_data_fini (struct btrace_data *data);
+
+/* Return non-zero if DATA is empty; zero otherwise.  */
+extern int btrace_data_empty (struct btrace_data *data);
 
 #endif /* BTRACE_COMMON_H */

@@ -235,8 +235,8 @@ extern void btrace_clear (struct thread_info *);
 /* Clear the branch trace for all threads when an object file goes away.  */
 extern void btrace_free_objfile (struct objfile *);
 
-/* Parse a branch trace xml document into a block vector.  */
-extern VEC (btrace_block_s) *parse_xml_btrace (const char*);
+/* Parse a branch trace xml document XML into DATA.  */
+extern void parse_xml_btrace (struct btrace_data *data, const char *xml);
 
 /* Dereference a branch trace instruction iterator.  Return a pointer to the
    instruction the iterator points to.  */
@@ -339,5 +339,7 @@ extern int btrace_is_replaying (struct thread_info *tp);
 /* Return non-zero if the branch trace for TP is empty; zero otherwise.  */
 extern int btrace_is_empty (struct thread_info *tp);
 
+/* Create a cleanup for DATA.  */
+extern struct cleanup *make_cleanup_btrace_data (struct btrace_data *data);
 
 #endif /* BTRACE_H */

@@ -585,25 +585,22 @@ ftrace_update_insns (struct btrace_function *bfun, CORE_ADDR pc)
     ftrace_debug (bfun, "update insn");
 }
 
-/* Compute the function branch trace from a block branch trace BTRACE for
-   a thread given by BTINFO.  */
+/* Compute the function branch trace from BTS trace.  */
 
 static void
-btrace_compute_ftrace (struct btrace_thread_info *btinfo,
-		       VEC (btrace_block_s) *btrace)
+btrace_compute_ftrace_bts (struct btrace_thread_info *btinfo,
+			   const struct btrace_data_bts *btrace)
 {
   struct btrace_function *begin, *end;
   struct gdbarch *gdbarch;
   unsigned int blk;
   int level;
 
-  DEBUG ("compute ftrace");
-
   gdbarch = target_gdbarch ();
   begin = btinfo->begin;
   end = btinfo->end;
   level = begin != NULL ? -btinfo->level : INT_MAX;
-  blk = VEC_length (btrace_block_s, btrace);
+  blk = VEC_length (btrace_block_s, btrace->blocks);
 
   while (blk != 0)
     {
@@ -612,7 +609,7 @@ btrace_compute_ftrace (struct btrace_thread_info *btinfo,
 
       blk -= 1;
 
-      block = VEC_index (btrace_block_s, btrace, blk);
+      block = VEC_index (btrace_block_s, btrace->blocks, blk);
       pc = block->begin;
 
       for (;;)
@@ -675,12 +672,34 @@ btrace_compute_ftrace (struct btrace_thread_info *btinfo,
   btinfo->level = -level;
 }
 
+/* Compute the function branch trace from a block branch trace BTRACE for
+   a thread given by BTINFO.  */
+
+static void
+btrace_compute_ftrace (struct btrace_thread_info *btinfo,
+		       struct btrace_data *btrace)
+{
+  DEBUG ("compute ftrace");
+
+  switch (btrace->format)
+    {
+    case BTRACE_FORMAT_NONE:
+      return;
+
+    case BTRACE_FORMAT_BTS:
+      btrace_compute_ftrace_bts (btinfo, &btrace->variant.bts);
+      return;
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+}
+
 /* Add an entry for the current PC.  */
 
 static void
 btrace_add_pc (struct thread_info *tp)
 {
-  VEC (btrace_block_s) *btrace;
+  struct btrace_data btrace;
   struct btrace_block *block;
   struct regcache *regcache;
   struct cleanup *cleanup;
@@ -689,14 +708,17 @@ btrace_add_pc (struct thread_info *tp)
   regcache = get_thread_regcache (tp->ptid);
   pc = regcache_read_pc (regcache);
 
-  btrace = NULL;
-  cleanup = make_cleanup (VEC_cleanup (btrace_block_s), &btrace);
+  btrace_data_init (&btrace);
+  btrace.format = BTRACE_FORMAT_BTS;
+  btrace.variant.bts.blocks = NULL;
 
-  block = VEC_safe_push (btrace_block_s, btrace, NULL);
+  cleanup = make_cleanup_btrace_data (&btrace);
+
+  block = VEC_safe_push (btrace_block_s, btrace.variant.bts.blocks, NULL);
   block->begin = pc;
   block->end = pc;
 
-  btrace_compute_ftrace (&tp->btrace, btrace);
+  btrace_compute_ftrace (&tp->btrace, &btrace);
 
   do_cleanups (cleanup);
 }
@@ -760,23 +782,15 @@ btrace_teardown (struct thread_info *tp)
   btrace_clear (tp);
 }
 
-/* Adjust the block trace in order to stitch old and new trace together.
-   BTRACE is the new delta trace between the last and the current stop.
-   BTINFO is the old branch trace until the last stop.
-   May modify BTRACE as well as the existing trace in BTINFO.
-   Return 0 on success, -1 otherwise.  */
+/* Stitch branch trace in BTS format.  */
 
 static int
-btrace_stitch_trace (VEC (btrace_block_s) **btrace,
-		     const struct btrace_thread_info *btinfo)
+btrace_stitch_bts (struct btrace_data_bts *btrace,
+		   const struct btrace_thread_info *btinfo)
 {
   struct btrace_function *last_bfun;
   struct btrace_insn *last_insn;
   btrace_block_s *first_new_block;
-
-  /* If we don't have trace, there's nothing to do.  */
-  if (VEC_empty (btrace_block_s, *btrace))
-    return 0;
 
   last_bfun = btinfo->end;
   gdb_assert (last_bfun != NULL);
@@ -784,7 +798,8 @@ btrace_stitch_trace (VEC (btrace_block_s) **btrace,
   /* Beware that block trace starts with the most recent block, so the
      chronologically first block in the new trace is the last block in
      the new trace's block vector.  */
-  first_new_block = VEC_last (btrace_block_s, *btrace);
+  gdb_assert (!VEC_empty (btrace_block_s, btrace->blocks));
+  first_new_block = VEC_last (btrace_block_s, btrace->blocks);
   last_insn = VEC_last (btrace_insn_s, last_bfun->insn);
 
   /* If the current PC at the end of the block is the same as in our current
@@ -796,9 +811,9 @@ btrace_stitch_trace (VEC (btrace_block_s) **btrace,
      In the second case, the delta trace vector should contain exactly one
      entry for the partial block containing the current PC.  Remove it.  */
   if (first_new_block->end == last_insn->pc
-      && VEC_length (btrace_block_s, *btrace) == 1)
+      && VEC_length (btrace_block_s, btrace->blocks) == 1)
     {
-      VEC_pop (btrace_block_s, *btrace);
+      VEC_pop (btrace_block_s, btrace->blocks);
       return 0;
     }
 
@@ -834,6 +849,32 @@ btrace_stitch_trace (VEC (btrace_block_s) **btrace,
   return 0;
 }
 
+/* Adjust the block trace in order to stitch old and new trace together.
+   BTRACE is the new delta trace between the last and the current stop.
+   BTINFO is the old branch trace until the last stop.
+   May modifx BTRACE as well as the existing trace in BTINFO.
+   Return 0 on success, -1 otherwise.  */
+
+static int
+btrace_stitch_trace (struct btrace_data *btrace,
+		     const struct btrace_thread_info *btinfo)
+{
+  /* If we don't have trace, there's nothing to do.  */
+  if (btrace_data_empty (btrace))
+    return 0;
+
+  switch (btrace->format)
+    {
+    case BTRACE_FORMAT_NONE:
+      return 0;
+
+    case BTRACE_FORMAT_BTS:
+      return btrace_stitch_bts (&btrace->variant.bts, btinfo);
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+}
+
 /* Clear the branch trace histories in BTINFO.  */
 
 static void
@@ -855,13 +896,12 @@ btrace_fetch (struct thread_info *tp)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_target_info *tinfo;
-  VEC (btrace_block_s) *btrace;
+  struct btrace_data btrace;
   struct cleanup *cleanup;
   int errcode;
 
   DEBUG ("fetch thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
 
-  btrace = NULL;
   btinfo = &tp->btrace;
   tinfo = btinfo->target;
   if (tinfo == NULL)
@@ -873,7 +913,8 @@ btrace_fetch (struct thread_info *tp)
   if (btinfo->replay != NULL)
     return;
 
-  cleanup = make_cleanup (VEC_cleanup (btrace_block_s), &btrace);
+  btrace_data_init (&btrace);
+  cleanup = make_cleanup_btrace_data (&btrace);
 
   /* Let's first try to extend the trace we already have.  */
   if (btinfo->end != NULL)
@@ -890,7 +931,7 @@ btrace_fetch (struct thread_info *tp)
 	  errcode = target_read_btrace (&btrace, tinfo, BTRACE_READ_NEW);
 
 	  /* If we got any new trace, discard what we have.  */
-	  if (errcode == 0 && !VEC_empty (btrace_block_s, btrace))
+	  if (errcode == 0 && !btrace_data_empty (&btrace))
 	    btrace_clear (tp);
 	}
 
@@ -909,10 +950,10 @@ btrace_fetch (struct thread_info *tp)
     error (_("Failed to read branch trace."));
 
   /* Compute the trace, provided we have any.  */
-  if (!VEC_empty (btrace_block_s, btrace))
+  if (!btrace_data_empty (&btrace))
     {
       btrace_clear_history (btinfo);
-      btrace_compute_ftrace (btinfo, btrace);
+      btrace_compute_ftrace (btinfo, &btrace);
     }
 
   do_cleanups (cleanup);
@@ -984,16 +1025,30 @@ parse_xml_btrace_block (struct gdb_xml_parser *parser,
 			const struct gdb_xml_element *element,
 			void *user_data, VEC (gdb_xml_value_s) *attributes)
 {
-  VEC (btrace_block_s) **btrace;
+  struct btrace_data *btrace;
   struct btrace_block *block;
   ULONGEST *begin, *end;
 
   btrace = user_data;
-  block = VEC_safe_push (btrace_block_s, *btrace, NULL);
+
+  switch (btrace->format)
+    {
+    case BTRACE_FORMAT_BTS:
+      break;
+
+    case BTRACE_FORMAT_NONE:
+      btrace->format = BTRACE_FORMAT_BTS;
+      btrace->variant.bts.blocks = NULL;
+      break;
+
+    default:
+      gdb_xml_error (parser, _("Btrace format error."));
+    }
 
   begin = xml_find_attribute (attributes, "begin")->value;
   end = xml_find_attribute (attributes, "end")->value;
 
+  block = VEC_safe_push (btrace_block_s, btrace->variant.bts.blocks, NULL);
   block->begin = *begin;
   block->end = *end;
 }
@@ -1025,18 +1080,19 @@ static const struct gdb_xml_element btrace_elements[] = {
 
 /* See btrace.h.  */
 
-VEC (btrace_block_s) *
-parse_xml_btrace (const char *buffer)
+void
+parse_xml_btrace (struct btrace_data *btrace, const char *buffer)
 {
-  VEC (btrace_block_s) *btrace = NULL;
   struct cleanup *cleanup;
   int errcode;
 
 #if defined (HAVE_LIBEXPAT)
 
-  cleanup = make_cleanup (VEC_cleanup (btrace_block_s), &btrace);
+  btrace->format = BTRACE_FORMAT_NONE;
+
+  cleanup = make_cleanup_btrace_data (btrace);
   errcode = gdb_xml_parse_quick (_("btrace"), "btrace.dtd", btrace_elements,
-				 buffer, &btrace);
+				 buffer, btrace);
   if (errcode != 0)
     error (_("Error parsing branch trace."));
 
@@ -1048,8 +1104,6 @@ parse_xml_btrace (const char *buffer)
   error (_("Cannot process branch trace.  XML parsing is not supported."));
 
 #endif  /* !defined (HAVE_LIBEXPAT) */
-
-  return btrace;
 }
 
 /* See btrace.h.  */
@@ -1525,4 +1579,20 @@ btrace_is_empty (struct thread_info *tp)
   btrace_insn_end (&end, btinfo);
 
   return btrace_insn_cmp (&begin, &end) == 0;
+}
+
+/* Forward the cleanup request.  */
+
+static void
+do_btrace_data_cleanup (void *arg)
+{
+  btrace_data_fini (arg);
+}
+
+/* See btrace.h.  */
+
+struct cleanup *
+make_cleanup_btrace_data (struct btrace_data *data)
+{
+  return make_cleanup (do_btrace_data_cleanup, data);
 }

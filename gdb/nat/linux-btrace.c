@@ -495,12 +495,13 @@ linux_btrace_has_changed (struct btrace_target_info *tinfo)
   return header->data_head != tinfo->data_head;
 }
 
-/* See linux-btrace.h.  */
+/* Read branch trace data in BTS format for the thread given by TINFO into
+   BTRACE using the TYPE reading method.  */
 
-enum btrace_error
-linux_read_btrace (VEC (btrace_block_s) **btrace,
-		   struct btrace_target_info *tinfo,
-		   enum btrace_read_type type)
+static enum btrace_error
+linux_read_bts (struct btrace_data_bts *btrace,
+		struct btrace_target_info *tinfo,
+		enum btrace_read_type type)
 {
   volatile struct perf_event_mmap_page *header;
   const uint8_t *begin, *end, *start;
@@ -522,7 +523,7 @@ linux_read_btrace (VEC (btrace_block_s) **btrace,
       data_head = header->data_head;
 
       /* Delete any leftover trace from the previous iteration.  */
-      VEC_free (btrace_block_s, *btrace);
+      VEC_free (btrace_block_s, btrace->blocks);
 
       if (type == BTRACE_READ_DELTA)
 	{
@@ -559,7 +560,7 @@ linux_read_btrace (VEC (btrace_block_s) **btrace,
       else
 	end = perf_event_buffer_end (tinfo);
 
-      *btrace = perf_event_read_bts (tinfo, begin, end, start, size);
+      btrace->blocks = perf_event_read_bts (tinfo, begin, end, start, size);
 
       /* The stopping thread notifies its ptracer before it is scheduled out.
 	 On multi-core systems, the debugger might therefore run while the
@@ -575,10 +576,25 @@ linux_read_btrace (VEC (btrace_block_s) **btrace,
   /* Prune the incomplete last block (i.e. the first one of inferior execution)
      if we're not doing a delta read.  There is no way of filling in its zeroed
      BEGIN element.  */
-  if (!VEC_empty (btrace_block_s, *btrace) && type != BTRACE_READ_DELTA)
-    VEC_pop (btrace_block_s, *btrace);
+  if (!VEC_empty (btrace_block_s, btrace->blocks)
+      && type != BTRACE_READ_DELTA)
+    VEC_pop (btrace_block_s, btrace->blocks);
 
   return BTRACE_ERR_NONE;
+}
+
+/* See linux-btrace.h.  */
+
+enum btrace_error
+linux_read_btrace (struct btrace_data *btrace,
+		   struct btrace_target_info *tinfo,
+		   enum btrace_read_type type)
+{
+  /* We read btrace in BTS format.  */
+  btrace->format = BTRACE_FORMAT_BTS;
+  btrace->variant.bts.blocks = NULL;
+
+  return linux_read_bts (&btrace->variant.bts, tinfo, type);
 }
 
 #else /* !HAVE_LINUX_PERF_EVENT_H */
@@ -610,7 +626,7 @@ linux_disable_btrace (struct btrace_target_info *tinfo)
 /* See linux-btrace.h.  */
 
 enum btrace_error
-linux_read_btrace (VEC (btrace_block_s) **btrace,
+linux_read_btrace (struct btrace_data *btrace,
 		   struct btrace_target_info *tinfo,
 		   enum btrace_read_type type)
 {

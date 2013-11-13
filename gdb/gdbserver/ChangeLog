@@ -1,3 +1,12 @@
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* Makefile.in (SFILES): Add common/btrace-common.c.
+	(OBS): Add common/btrace-common.o.
+	(btrace-common.o): Add build rules.
+	* linux-low: Include btrace-common.h.
+	(linux_low_read_btrace): Use struct btrace_data.  Call
+	btrace_data_init and btrace_data_fini.
+
 2015-02-06  Pedro Alves  <palves@redhat.com>
 
 	* thread-db.c (find_new_threads_callback): Add debug output.

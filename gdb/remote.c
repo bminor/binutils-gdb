@@ -11419,7 +11419,7 @@ remote_teardown_btrace (struct target_ops *self,
 
 static enum btrace_error
 remote_read_btrace (struct target_ops *self,
-		    VEC (btrace_block_s) **btrace,
+		    struct btrace_data *btrace,
 		    struct btrace_target_info *tinfo,
 		    enum btrace_read_type type)
 {
@@ -11459,7 +11459,7 @@ remote_read_btrace (struct target_ops *self,
     return BTRACE_ERR_UNKNOWN;
 
   cleanup = make_cleanup (xfree, xml);
-  *btrace = parse_xml_btrace (xml);
+  parse_xml_btrace (btrace, xml);
   do_cleanups (cleanup);
 
   return BTRACE_ERR_NONE;

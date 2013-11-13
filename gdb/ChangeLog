@@ -1,3 +1,37 @@
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* Makefile.in (SFILES): Add common/btrace-common.c.
+	(COMMON_OBS): Add common/btrace-common.o.
+	(btrace-common.o): Add build rules.
+	* btrace.c (parse_xml_btrace): Update parameters.
+	(parse_xml_btrace_block): Set format field.
+	(btrace_add_pc, btrace_fetch): Use struct btrace_data.
+	(do_btrace_data_cleanup, make_cleanup_btrace_data): New.
+	(btrace_compute_ftrace): Split into this and...
+	(btrace_compute_ftrace_bts): ...this.
+	(btrace_stitch_trace): Split into this and...
+	(btrace_stitch_bts): ...this.
+	* btrace.h (parse_xml_btrace): Update parameters.
+	(make_cleanup_btrace_data): New.
+	* common/btrace-common.c: New.
+	* common/btrace-common.h: Include common-defs.h.
+	(btrace_block_s): Update comment.
+	(btrace_format): New.
+	(btrace_format_string): New.
+	(btrace_data_bts): New.
+	(btrace_data): New.
+	(btrace_data_init, btrace_data_fini, btrace_data_empty): New.
+	* remote.c (remote_read_btrace): Update parameters.
+	* target.c (target_read_btrace): Update parameters.
+	* target.h (target_read_btrace): Update parameters.
+	(target_ops)<to_read_btrace>: Update parameters.
+	* x86-linux-nat.c (x86_linux_read_btrace): Update parameters.
+	* target-delegates.c: Regenerate.
+	* target-debug (target_debug_print_struct_btrace_data_p): New.
+	* nat/linux-btrace.c (linux_read_btrace): Split into this and...
+	(linux_read_bts): ...this.
+	* nat/linux-btrace.h (linux_read_btrace): Update parameters.
+
 2015-02-06  Doug Evans  <dje@google.com>
 
 	* remote-m32r-sdi.c: Include symfile.h.
