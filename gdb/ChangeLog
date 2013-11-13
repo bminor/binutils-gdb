@@ -1,4 +1,10 @@
 2013-11-22  Tom Tromey  <tromey@redhat.com>
+
+	PR backtrace/16155:
+	* dwarf2-frame.c (dwarf2_frame_cache): Set undefined_retaddr if
+	the return address column is unspecified.
+
+2013-11-22  Tom Tromey  <tromey@redhat.com>
 	    Pedro Alves  <palves@redhat.com>
 
 	PR backtrace/16155

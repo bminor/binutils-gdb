@@ -1245,6 +1245,10 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
   if (fs->retaddr_column < fs->regs.num_regs
       && fs->regs.reg[fs->retaddr_column].how == DWARF2_FRAME_REG_UNDEFINED)
     cache->undefined_retaddr = 1;
+  else if (fs->retaddr_column >= fs->regs.num_regs
+  	  || (fs->regs.reg[fs->retaddr_column].how
+  	      == DWARF2_FRAME_REG_UNSPECIFIED))
+    cache->undefined_retaddr = 1;
 
   do_cleanups (old_chain);
   discard_cleanups (reset_cache_cleanup);
