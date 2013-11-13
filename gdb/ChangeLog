@@ -1,3 +1,9 @@
+2013-11-12  Doug Evans  <dje@sebabeach.org>
+
+	* breakpoint.c (bpstat_check_breakpoint_conditions): Assert
+	bs->stop != 0 on entry.  Update function comment.  Simplify early
+	exit for frame mismatch.  Reindent rest of function.
+
 2013-11-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
 	* objc-lang.c (uniquify_strings): Prevent invoking qsort with

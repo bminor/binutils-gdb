@@ -5099,8 +5099,8 @@ bpstat_check_watchpoint (bpstat bs)
     }
 }
 
-
-/* Check conditions (condition proper, frame, thread and ignore count)
+/* For breakpoints that are currently marked as telling gdb to stop,
+   check conditions (condition proper, frame, thread and ignore count)
    of breakpoint referred to by BS.  If we should not stop for this
    breakpoint, set BS->stop to 0.  */
 
@@ -5110,6 +5110,10 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
   int thread_id = pid_to_thread_id (ptid);
   const struct bp_location *bl;
   struct breakpoint *b;
+  int value_is_zero = 0;
+  struct expression *cond;
+
+  gdb_assert (bs->stop);
 
   /* BS is built for existing struct breakpoint.  */
   bl = bs->bp_location_at;
@@ -5123,109 +5127,106 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 
   if (frame_id_p (b->frame_id)
       && !frame_id_eq (b->frame_id, get_stack_frame_id (get_current_frame ())))
-    bs->stop = 0;
-  else if (bs->stop)
     {
-      int value_is_zero = 0;
-      struct expression *cond;
+      bs->stop = 0;
+      return;
+    }
 
-      /* Evaluate Python breakpoints that have a "stop"
-	 method implemented.  */
-      if (b->py_bp_object)
-	bs->stop = gdbpy_should_stop (b->py_bp_object);
+  /* Evaluate Python breakpoints that have a "stop" method implemented.  */
+  if (b->py_bp_object)
+    bs->stop = gdbpy_should_stop (b->py_bp_object);
+
+  if (is_watchpoint (b))
+    {
+      struct watchpoint *w = (struct watchpoint *) b;
+
+      cond = w->cond_exp;
+    }
+  else
+    cond = bl->cond;
+
+  if (cond && b->disposition != disp_del_at_next_stop)
+    {
+      int within_current_scope = 1;
+      struct watchpoint * w;
+
+      /* We use value_mark and value_free_to_mark because it could
+	 be a long time before we return to the command level and
+	 call free_all_values.  We can't call free_all_values
+	 because we might be in the middle of evaluating a
+	 function call.  */
+      struct value *mark = value_mark ();
 
       if (is_watchpoint (b))
-	{
-	  struct watchpoint *w = (struct watchpoint *) b;
-
-	  cond = w->cond_exp;
-	}
+	w = (struct watchpoint *) b;
       else
-	cond = bl->cond;
+	w = NULL;
 
-      if (cond && b->disposition != disp_del_at_next_stop)
+      /* Need to select the frame, with all that implies so that
+	 the conditions will have the right context.  Because we
+	 use the frame, we will not see an inlined function's
+	 variables when we arrive at a breakpoint at the start
+	 of the inlined function; the current frame will be the
+	 call site.  */
+      if (w == NULL || w->cond_exp_valid_block == NULL)
+	select_frame (get_current_frame ());
+      else
 	{
-	  int within_current_scope = 1;
-	  struct watchpoint * w;
+	  struct frame_info *frame;
 
-	  /* We use value_mark and value_free_to_mark because it could
-	     be a long time before we return to the command level and
-	     call free_all_values.  We can't call free_all_values
-	     because we might be in the middle of evaluating a
-	     function call.  */
-	  struct value *mark = value_mark ();
-
-	  if (is_watchpoint (b))
-	    w = (struct watchpoint *) b;
+	  /* For local watchpoint expressions, which particular
+	     instance of a local is being watched matters, so we
+	     keep track of the frame to evaluate the expression
+	     in.  To evaluate the condition however, it doesn't
+	     really matter which instantiation of the function
+	     where the condition makes sense triggers the
+	     watchpoint.  This allows an expression like "watch
+	     global if q > 10" set in `func', catch writes to
+	     global on all threads that call `func', or catch
+	     writes on all recursive calls of `func' by a single
+	     thread.  We simply always evaluate the condition in
+	     the innermost frame that's executing where it makes
+	     sense to evaluate the condition.  It seems
+	     intuitive.  */
+	  frame = block_innermost_frame (w->cond_exp_valid_block);
+	  if (frame != NULL)
+	    select_frame (frame);
 	  else
-	    w = NULL;
-
-	  /* Need to select the frame, with all that implies so that
-	     the conditions will have the right context.  Because we
-	     use the frame, we will not see an inlined function's
-	     variables when we arrive at a breakpoint at the start
-	     of the inlined function; the current frame will be the
-	     call site.  */
-	  if (w == NULL || w->cond_exp_valid_block == NULL)
-	    select_frame (get_current_frame ());
-	  else
-	    {
-	      struct frame_info *frame;
-
-	      /* For local watchpoint expressions, which particular
-		 instance of a local is being watched matters, so we
-		 keep track of the frame to evaluate the expression
-		 in.  To evaluate the condition however, it doesn't
-		 really matter which instantiation of the function
-		 where the condition makes sense triggers the
-		 watchpoint.  This allows an expression like "watch
-		 global if q > 10" set in `func', catch writes to
-		 global on all threads that call `func', or catch
-		 writes on all recursive calls of `func' by a single
-		 thread.  We simply always evaluate the condition in
-		 the innermost frame that's executing where it makes
-		 sense to evaluate the condition.  It seems
-		 intuitive.  */
-	      frame = block_innermost_frame (w->cond_exp_valid_block);
-	      if (frame != NULL)
-		select_frame (frame);
-	      else
-		within_current_scope = 0;
-	    }
-	  if (within_current_scope)
-	    value_is_zero
-	      = catch_errors (breakpoint_cond_eval, cond,
-			      "Error in testing breakpoint condition:\n",
-			      RETURN_MASK_ALL);
-	  else
-	    {
-	      warning (_("Watchpoint condition cannot be tested "
-			 "in the current scope"));
-	      /* If we failed to set the right context for this
-		 watchpoint, unconditionally report it.  */
-	      value_is_zero = 0;
-	    }
-	  /* FIXME-someday, should give breakpoint #.  */
-	  value_free_to_mark (mark);
+	    within_current_scope = 0;
 	}
-
-      if (cond && value_is_zero)
+      if (within_current_scope)
+	value_is_zero
+	  = catch_errors (breakpoint_cond_eval, cond,
+			  "Error in testing breakpoint condition:\n",
+			  RETURN_MASK_ALL);
+      else
 	{
-	  bs->stop = 0;
+	  warning (_("Watchpoint condition cannot be tested "
+		     "in the current scope"));
+	  /* If we failed to set the right context for this
+	     watchpoint, unconditionally report it.  */
+	  value_is_zero = 0;
 	}
-      else if (b->thread != -1 && b->thread != thread_id)
-	{
-	  bs->stop = 0;
-	}
-      else if (b->ignore_count > 0)
-	{
-	  b->ignore_count--;
-	  bs->stop = 0;
-	  /* Increase the hit count even though we don't stop.  */
-	  ++(b->hit_count);
-	  observer_notify_breakpoint_modified (b);
-	}	
+      /* FIXME-someday, should give breakpoint #.  */
+      value_free_to_mark (mark);
     }
+
+  if (cond && value_is_zero)
+    {
+      bs->stop = 0;
+    }
+  else if (b->thread != -1 && b->thread != thread_id)
+    {
+      bs->stop = 0;
+    }
+  else if (b->ignore_count > 0)
+    {
+      b->ignore_count--;
+      bs->stop = 0;
+      /* Increase the hit count even though we don't stop.  */
+      ++(b->hit_count);
+      observer_notify_breakpoint_modified (b);
+    }	
 }
 
 
