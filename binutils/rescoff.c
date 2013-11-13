@@ -1,6 +1,5 @@
 /* rescoff.c -- read and write resources in Windows COFF files.
-   Copyright 1997, 1998, 1999, 2000, 2003, 2005, 2007, 2008
-   Free Software Foundation, Inc.
+   Copyright 1997-2013 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
 
@@ -501,22 +500,22 @@ write_coff_file (const char *filename, const char *target,
      know the various offsets we will need.  */
   coff_bin_sizes (resources, &cwi);
 
-  /* Force the directory strings to be 32 bit aligned.  Every other
-     structure is 32 bit aligned anyhow.  */
-  cwi.dirstrsize = (cwi.dirstrsize + 3) &~ 3;
+  /* Force the directory strings to be 64 bit aligned.  Every other
+     structure is 64 bit aligned anyhow.  */
+  cwi.dirstrsize = (cwi.dirstrsize + 7) & ~7;
 
   /* Actually convert the resources to binary.  */
   coff_to_bin (resources, &cwi);
 
-  /* Add another 2 bytes to the directory strings if needed for
+  /* Add another few bytes to the directory strings if needed for
      alignment.  */
-  if ((cwi.dirstrs.length & 3) != 0)
+  if ((cwi.dirstrs.length & 7) != 0)
     {
+      rc_uint_type pad = 8 - (cwi.dirstrs.length & 7);
       bfd_byte *ex;
 
-      ex = coff_alloc (&cwi.dirstrs, 2);
-      ex[0] = 0;
-      ex[1] = 0;
+      ex = coff_alloc (& cwi.dirstrs, pad);
+      memset (ex, 0, pad);
     }
 
   /* Make sure that the data we built came out to the same size as we
@@ -741,10 +740,10 @@ coff_res_to_bin (const rc_res_resource *res, struct coff_write_info *cwi)
     cwi->resources.last->next = d;
 
   cwi->resources.last = d;
-  cwi->resources.length += (d->length + 3) & ~3;
+  cwi->resources.length += (d->length + 7) & ~7;
 
   windres_put_32 (cwi->wrbfd, erd->size, d->length);
 
-  /* Force the next resource to have 32 bit alignment.  */
-  d->length = (d->length + 3) & ~3;
+  /* Force the next resource to have 64 bit alignment.  */
+  d->length = (d->length + 7) & ~7;
 }

@@ -1,3 +1,9 @@
+2013-11-13  Martin Mitas  <mity@morous.org>
+
+	* rescoff.c (write_coff_file): Use 64-bit alignment for resource
+	data.
+	(coff_res_to_bin): Likewise.
+
 2013-11-07  Doug Evans  <dje@google.com>
 
 	Add pretty-printing of .debug_gnu_pubnames, .debug_gnu_pubtypes.
