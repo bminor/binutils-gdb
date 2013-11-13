@@ -1,3 +1,17 @@
+2013-11-13  Keith Seitz  <keiths@redhat.com>
+
+	* p-exp.y (uptok): Make first parameter const.
+	(yylex): Make `tokstart' and `tokptr' const.
+	Don't copy the lexer input to a temporary buffer.
+	Make `p' const.
+	Remove const workaround for parse_escape.
+	Create a temporary buffer for a convenience variable instead
+	of doing in-place modification of the input.
+	If a match is found with a different case from the input,
+	do not change the input at all.
+	Use `tmp' to construct the resultant stoken instead of
+	`tokstart'.
+
 2013-11-13  Doug Evans  <xdje42@gmail.com>
 
 	* breakpoint.c (breakpoint_cond_eval): Fix and enhance comment.
