@@ -8,7 +8,7 @@
 	* symfile.c (reread_symbols): Move call to set_objfile_per_bfd
 	after re-initialization of OBJFILE's obstack.
 
-2013-11-12  Doug Evans  <dje@sebabeach.org>
+2013-11-12  Doug Evans  <xdje42@gmail.com>
 
 	* breakpoint.c (bpstat_check_breakpoint_conditions): Assert
 	bs->stop != 0 on entry.  Update function comment.  Simplify early
