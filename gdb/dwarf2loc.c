@@ -761,8 +761,9 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
 					   * (length - 1));
       result->length = length;
       result->callers = result->callees = length;
-      memcpy (result->call_site, VEC_address (call_sitep, chain),
-	      sizeof (*result->call_site) * length);
+      if (!VEC_empty (call_sitep, chain))
+	memcpy (result->call_site, VEC_address (call_sitep, chain),
+		sizeof (*result->call_site) * length);
       *resultp = result;
 
       if (entry_values_debug)

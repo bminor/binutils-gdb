@@ -1,3 +1,8 @@
+2013-11-15  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (chain_candidate): Prevent invoking memcpy with
+	NULL.
+
 2013-11-15  Tom Tromey  <tromey@redhat.com>
 
 	PR c++/16117:
