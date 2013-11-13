@@ -1,3 +1,12 @@
+2013-09-17  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/7935
+	PR c++/10541
+	* gdb.cp/nsalias.exp: New file.
+	* gdb.cp/nsalias.cc: New file.
+	* gdb.cp/nsrecurs.exp: Remove kfails. Conditionally run
+	tests only on known, working compiler versions.
+
 2013-11-13  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.multi/multi-arch-exec.exp: Define BASEDIR when compiling.

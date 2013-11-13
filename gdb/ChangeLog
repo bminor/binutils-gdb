@@ -1,5 +1,21 @@
 2013-11-13  Keith Seitz  <keiths@redhat.com>
 
+	PR c++/7539
+	PR c++/10541
+	* cp-support.c (insepct_type): Add support for substituting
+	namespace aliases, too.
+	* dwarf2read.c (scan_partial_symbols): Add a partial symbol
+	for DW_TAG_imported_declaration.
+	(add_partial_symbol): Likewise.
+	(process_die): Handle namespace aliases with
+	read_namespace_alias.
+	(die_needs_namespace): Add DW_TAG_imported_declaration.
+	(read_namespace_alias): New function.
+	(load_partial_dies): Load DW_TAG_imported_declaration, too.
+	(new_symbol_full): Handle DW_TAG_imported_declaration.
+
+2013-11-13  Keith Seitz  <keiths@redhat.com>
+
 	* p-exp.y (uptok): Make first parameter const.
 	(yylex): Make `tokstart' and `tokptr' const.
 	Don't copy the lexer input to a temporary buffer.
