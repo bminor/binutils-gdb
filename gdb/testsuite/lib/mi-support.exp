@@ -1397,7 +1397,6 @@ proc mi_check_varobj_value { name value testname } {
 # mi_list_varobj_children and mi_varobj_update_dynamic.
 proc mi_child_regexp {children add_child} {
     set children_exp {}
-    set whatever "\"\[^\"\]+\""
 
     if {$add_child} {
 	set pre "child="
@@ -1462,8 +1461,6 @@ proc mi_list_varobj_children_range {varname from to numchildren children testnam
         set options [lindex $varname 1]
         set varname [lindex $varname 0]
     }
-
-    set whatever "\"\[^\"\]+\""
 
     set children_exp_j [mi_child_regexp $children 1]
     if {$numchildren} {

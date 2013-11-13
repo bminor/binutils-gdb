@@ -1,5 +1,10 @@
 2013-11-19  Yao Qi  <yao@codesourcery.com>
 
+	* lib/mi-support.exp (mi_child_regexp): Remove 'whatever'.
+	(mi_list_varobj_children_range): Likewise.
+
+2013-11-19  Yao Qi  <yao@codesourcery.com>
+
 	* varobj.c (varobj_get_type): Fix typo.
 
 2013-11-19  Joel Brobecker  <brobecker@adacore.com>
