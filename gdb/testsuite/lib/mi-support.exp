@@ -1414,12 +1414,12 @@ proc mi_child_regexp {children add_child} {
 	    set value [lindex $item 4]
 
 	    lappend children_exp\
-		"$pre{name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",value=\"$value\",type=\"$type\"\(,thread-id=\"\[0-9\]+\")?}"
+		"$pre{name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",value=\"$value\",type=\"$type\"(,thread-id=\"\[0-9\]+\")?}"
 	} elseif {[llength $item] == 4} {
 	    set type [lindex $item 3]
 
 	    lappend children_exp\
-		"$pre{name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",type=\"$type\"\(,thread-id=\"\[0-9\]+\")?}"
+		"$pre{name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",type=\"$type\"(,thread-id=\"\[0-9\]+\")?}"
 	} else {
 	    lappend children_exp\
 		"$pre{name=\"$name\",exp=\"$exp\",numchild=\"$numchild\"(,thread-id=\"\[0-9\]+\")?}"
