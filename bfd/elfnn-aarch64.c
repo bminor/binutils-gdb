@@ -1297,7 +1297,11 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
+#if ARCH_SIZE == 64
+	 AARCH64_R_STR (TLS_DTPMOD64),	/* name */
+#else
 	 AARCH64_R_STR (TLS_DTPMOD),	/* name */
+#endif
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
@@ -1311,7 +1315,11 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
+#if ARCH_SIZE == 64
+	 AARCH64_R_STR (TLS_DTPREL64),	/* name */
+#else
 	 AARCH64_R_STR (TLS_DTPREL),	/* name */
+#endif
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
@@ -1325,7 +1333,11 @@ static reloc_howto_type elfNN_aarch64_howto_table[] =
 	 0,			/* bitpos */
 	 complain_overflow_dont,	/* complain_on_overflow */
 	 bfd_elf_generic_reloc,	/* special_function */
+#if ARCH_SIZE == 64
+	 AARCH64_R_STR (TLS_TPREL64),	/* name */
+#else
 	 AARCH64_R_STR (TLS_TPREL),	/* name */
+#endif
 	 FALSE,			/* partial_inplace */
 	 0,			/* src_mask */
 	 ALL_ONES,		/* dst_mask */
