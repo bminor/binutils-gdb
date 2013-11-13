@@ -1,6 +1,6 @@
 2013-11-13  Keith Seitz  <keiths@redhat.com>
 
-	PR c++/7539
+	PR c++/7935
 	PR c++/10541
 	* cp-support.c (insepct_type): Add support for substituting
 	namespace aliases, too.
