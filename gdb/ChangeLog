@@ -1,3 +1,7 @@
+2013-11-13  Doug Evans  <xdje42@gmail.com>
+
+	* breakpoint.c (breakpoint_cond_eval): Fix and enhance comment.
+
 2013-11-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-main.c (mi_cmd_list_features): Replace "info-ada-exceptions"

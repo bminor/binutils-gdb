@@ -4649,10 +4649,12 @@ bpstat_print (bpstat bs, int kind)
   return PRINT_UNKNOWN;
 }
 
-/* Evaluate the expression EXP and return 1 if value is zero.  This is
-   used inside a catch_errors to evaluate the breakpoint condition.
+/* Evaluate the expression EXP and return 1 if value is zero.
+   This returns the inverse of the condition because it is called
+   from catch_errors which returns 0 if an exception happened, and if an
+   exception happens we want execution to stop.
    The argument is a "struct expression *" that has been cast to a
-   "char *" to make it pass through catch_errors.  */
+   "void *" to make it pass through catch_errors.  */
 
 static int
 breakpoint_cond_eval (void *exp)
