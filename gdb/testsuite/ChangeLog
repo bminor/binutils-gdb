@@ -1,3 +1,8 @@
+2013-11-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.multi/multi-arch-exec.exp: Define BASEDIR when compiling.
+	* gdb.multi/multi-arch-exec.c (main): Use BASEDIR.
+
 2013-11-12  Doug Evans  <dje@google.com>
 
 	* gdb.base/fileio.exp: Make $dir2 writable after the test is done
