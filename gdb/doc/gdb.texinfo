@@ -35119,6 +35119,9 @@ Indicates support for the @code{-ada-task-info} command.
 Indicates support for the following commands, all of them related to Ada
 exceptions: @code{-info-ada-exceptions}, @code{-catch-assert} and
 @code{-catch-exception}.
+@item language-option
+Indicates that all @sc{gdb/mi} commands accept the @option{--language}
+option (@pxref{Context management}).
 @end table
 
 @subheading The @code{-list-target-features} Command

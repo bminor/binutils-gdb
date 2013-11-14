@@ -1,3 +1,8 @@
+2013-11-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c (mi_cmd_list_features): Add "language-options"
+	to -list-features output.
+
 2013-11-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2expr.h (struct dwarf_expr_context_funcs)
