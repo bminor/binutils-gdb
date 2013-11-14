@@ -1,3 +1,9 @@
+2013-11-14  Guy Martin <gmsoft@tuxicoman.be>
+
+	PR ld/16082
+	* elf32-hppa.c (elf32_hppa_hide_symbol): Remove old version
+	information when forcing a symbol to be local.
+
 2013-11-13  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Use

@@ -1771,6 +1771,10 @@ elf32_hppa_hide_symbol (struct bfd_link_info *info,
 	  _bfd_elf_strtab_delref (elf_hash_table (info)->dynstr,
 				  eh->dynstr_index);
 	}
+
+      /* PR 16082: Remove version information from hidden symbol.  */
+      eh->verinfo.verdef = NULL;
+      eh->verinfo.vertree = NULL;
     }
 
   /* STT_GNU_IFUNC symbol must go through PLT.  */
