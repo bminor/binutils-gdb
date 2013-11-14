@@ -1,5 +1,19 @@
 2013-11-14  Cary Coutant  <ccoutant@google.com>
 
+	Revert patch -- this did not fix the problem, and there is
+	no race there.
+
+	2013-11-14  Cary Coutant  <ccoutant@google.com>
+
+	    PR gold/14860
+	    * ehframe.cc (Eh_frame_hdr::Eh_frame_hdr): Initialize lock_.
+	    (Ehframe_hdr::set_final_data_size): Allocate a Lock.
+	    * ehframe.h (Eh_frame_hdr::record_fde): Hold the lock while
+	    updating fde_offsets_.
+	    (Eh_frame_hdr::lock_): New data member.
+
+2013-11-14  Cary Coutant  <ccoutant@google.com>
+
 	* dwp.cc (Dwo_file_entry): New type.
 	(File_list): Use Dwo_file_entry.
 	(Dwo_file::verify): New function.

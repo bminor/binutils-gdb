@@ -84,8 +84,7 @@ Eh_frame_hdr::Eh_frame_hdr(Output_section* eh_frame_section,
     eh_frame_section_(eh_frame_section),
     eh_frame_data_(eh_frame_data),
     fde_offsets_(),
-    any_unrecognized_eh_frame_sections_(false),
-    lock_(NULL)
+    any_unrecognized_eh_frame_sections_(false)
 {
 }
 
@@ -103,9 +102,6 @@ Eh_frame_hdr::set_final_data_size()
       this->fde_offsets_.reserve(fde_count);
     }
   this->set_data_size(data_size);
-  // We need a lock for updating the fde_offsets_ vector while writing
-  // the FDEs.
-  this->lock_ = new Lock();
 }
 
 // Write the data to the file.
