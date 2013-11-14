@@ -5134,6 +5134,14 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
       return;
     }
 
+  /* If this is a thread-specific breakpoint, don't waste cpu evaluating the
+     condition if this isn't the specified thread.  */
+  if (b->thread != -1 && b->thread != thread_id)
+    {
+      bs->stop = 0;
+      return;
+    }
+
   /* Evaluate Python breakpoints that have a "stop" method implemented.  */
   if (b->py_bp_object)
     bs->stop = gdbpy_should_stop (b->py_bp_object);
@@ -5214,10 +5222,6 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
     }
 
   if (cond && value_is_zero)
-    {
-      bs->stop = 0;
-    }
-  else if (b->thread != -1 && b->thread != thread_id)
     {
       bs->stop = 0;
     }

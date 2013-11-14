@@ -1,3 +1,9 @@
+2013-11-13  Doug Evans  <xdje42@gmail.com>
+
+	* breakpoint.c (bpstat_check_breakpoint_conditions): For thread
+	specific breakpoints, don't evaluate breakpoint condition if
+	different thread.
+
 2013-11-13  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/7935
