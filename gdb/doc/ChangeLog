@@ -1,3 +1,7 @@
+2013-11-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Breakpoints In Python): Replace "as" with "in".
+
 2013-11-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Show): Add xref anchor for "show language" command.

@@ -27184,7 +27184,7 @@ is assumed to be a @code{gdb.WP_WRITE} class.
 @defun Breakpoint.stop (self)
 The @code{gdb.Breakpoint} class can be sub-classed and, in
 particular, you may choose to implement the @code{stop} method.
-If this method is defined as a sub-class of @code{gdb.Breakpoint},
+If this method is defined in a sub-class of @code{gdb.Breakpoint},
 it will be called when the inferior reaches any location of a
 breakpoint which instantiates that sub-class.  If the method returns
 @code{True}, the inferior will be stopped at the location of the
