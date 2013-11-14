@@ -3154,7 +3154,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   int stepped_after_stopped_by_watchpoint = 0;
   enum stop_kind stop_soon;
   int random_signal;
-  enum bpstat_signal_value sval;
 
   if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
     {
@@ -4226,9 +4225,8 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 
   if (debug_infrun
       && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-      && (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+      && !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
 				  GDB_SIGNAL_TRAP)
-	  == BPSTAT_SIGNAL_NO)
       && stopped_by_watchpoint)
     fprintf_unfiltered (gdb_stdlog,
 			"infrun: no user watchpoint explains "
@@ -4255,9 +4253,9 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
      SPARC.  */
 
   /* See if the breakpoints module can explain the signal.  */
-  sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				 ecs->event_thread->suspend.stop_signal);
-  random_signal = (sval == BPSTAT_SIGNAL_NO);
+  random_signal
+    = !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+			       ecs->event_thread->suspend.stop_signal);
 
   /* If not, perhaps stepping/nexting can.  */
   if (random_signal)
@@ -4267,9 +4265,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
   /* No?  Perhaps we got a moribund watchpoint.  */
   if (random_signal)
     random_signal = !stopped_by_watchpoint;
-
-  if (sval == BPSTAT_SIGNAL_HIDE)
-    ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 
   /* For the program's own signals, act according to
      the signal handling tables.  */

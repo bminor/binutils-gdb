@@ -4222,35 +4222,27 @@ bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
 
 /* See breakpoint.h.  */
 
-enum bpstat_signal_value
+int
 bpstat_explains_signal (bpstat bsp, enum gdb_signal sig)
 {
-  enum bpstat_signal_value result = BPSTAT_SIGNAL_NO;
-
   for (; bsp != NULL; bsp = bsp->next)
     {
-      /* Ensure that, if we ever entered this loop, then we at least
-	 return BPSTAT_SIGNAL_HIDE.  */
-      enum bpstat_signal_value newval;
-
       if (bsp->breakpoint_at == NULL)
 	{
 	  /* A moribund location can never explain a signal other than
 	     GDB_SIGNAL_TRAP.  */
 	  if (sig == GDB_SIGNAL_TRAP)
-	    newval = BPSTAT_SIGNAL_PASS;
-	  else
-	    newval = BPSTAT_SIGNAL_NO;
+	    return 1;
 	}
       else
-	newval = bsp->breakpoint_at->ops->explains_signal (bsp->breakpoint_at,
-							   sig);
-
-      if (newval > result)
-	result = newval;
+	{
+	  if (bsp->breakpoint_at->ops->explains_signal (bsp->breakpoint_at,
+							sig))
+	    return 1;
+	}
     }
 
-  return result;
+  return 0;
 }
 
 /* Put in *NUM the breakpoint number of the first breakpoint we are
@@ -10771,15 +10763,15 @@ print_recreate_watchpoint (struct breakpoint *b, struct ui_file *fp)
 /* Implement the "explains_signal" breakpoint_ops method for
    watchpoints.  */
 
-static enum bpstat_signal_value
+static int
 explains_signal_watchpoint (struct breakpoint *b, enum gdb_signal sig)
 {
   /* A software watchpoint cannot cause a signal other than
      GDB_SIGNAL_TRAP.  */
   if (b->type == bp_watchpoint && sig != GDB_SIGNAL_TRAP)
-    return BPSTAT_SIGNAL_NO;
+    return 0;
 
-  return BPSTAT_SIGNAL_PASS;
+  return 1;
 }
 
 /* The breakpoint_ops structure to be used in hardware watchpoints.  */
@@ -12887,10 +12879,10 @@ base_breakpoint_decode_linespec (struct breakpoint *b, char **s,
 
 /* The default 'explains_signal' method.  */
 
-static enum bpstat_signal_value
+static int
 base_breakpoint_explains_signal (struct breakpoint *b, enum gdb_signal sig)
 {
-  return BPSTAT_SIGNAL_PASS;
+  return 1;
 }
 
 /* The default "after_condition_true" method.  */

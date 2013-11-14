@@ -1,5 +1,20 @@
 2013-11-14  Pedro Alves  <palves@redhat.com>
 
+	* break-catch-sig.c (signal_catchpoint_explains_signal): Adjust to
+	return a boolean.
+	* breakpoint.c (bpstat_explains_signal): Adjust to return a
+	boolean.
+	(explains_signal_watchpoint, base_breakpoint_explains_signal):
+	Adjust to return a boolean.
+	* breakpoint.h (enum bpstat_signal_value): Delete.
+	(struct breakpoint_ops) <explains_signal>: New returns a boolean.
+	(bpstat_explains_signal): Likewise.
+	* infrun.c (handle_inferior_event) <random signal checks>:
+	bpstat_explains_signal now returns a boolean - adjust.  No longer
+	consider hiding signals.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (bpstat_explains_signal) <Moribund locations>:
 	Return BPSTAT_SIGNAL_PASS instead of BPSTAT_SIGNAL_HIDE.
 	(explains_signal_watchpoint): Return BPSTAT_SIGNAL_PASS instead of
