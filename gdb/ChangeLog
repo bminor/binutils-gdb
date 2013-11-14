@@ -1,5 +1,10 @@
 2013-11-14  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (handle_signal_stop): Move STOP_QUIETLY,
+	STOP_QUIETLY_REMOTE and 'stop_after_trap' handling earlier.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (struct execution_control_state)
 	<stepped_after_stopped_by_watchpoint>: New field.
 	(get_inferior_stop_soon): New function.

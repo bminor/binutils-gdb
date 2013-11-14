@@ -3799,6 +3799,63 @@ handle_signal_stop (struct execution_control_state *ecs)
       do_cleanups (old_chain);
     }
 
+  /* This is originated from start_remote(), start_inferior() and
+     shared libraries hook functions.  */
+  stop_soon = get_inferior_stop_soon (ecs->ptid);
+  if (stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_REMOTE)
+    {
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
+      stop_print_frame = 1;
+      stop_stepping (ecs);
+      return;
+    }
+
+  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
+      && stop_after_trap)
+    {
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
+      stop_print_frame = 0;
+      stop_stepping (ecs);
+      return;
+    }
+
+  /* This originates from attach_command().  We need to overwrite
+     the stop_signal here, because some kernels don't ignore a
+     SIGSTOP in a subsequent ptrace(PTRACE_CONT,SIGSTOP) call.
+     See more comments in inferior.h.  On the other hand, if we
+     get a non-SIGSTOP, report it to the user - assume the backend
+     will handle the SIGSTOP if it should show up later.
+
+     Also consider that the attach is complete when we see a
+     SIGTRAP.  Some systems (e.g. Windows), and stubs supporting
+     target extended-remote report it instead of a SIGSTOP
+     (e.g. gdbserver).  We already rely on SIGTRAP being our
+     signal, so this is no exception.
+
+     Also consider that the attach is complete when we see a
+     GDB_SIGNAL_0.  In non-stop mode, GDB will explicitly tell
+     the target to stop all threads of the inferior, in case the
+     low level attach operation doesn't stop them implicitly.  If
+     they weren't stopped implicitly, then the stub will report a
+     GDB_SIGNAL_0, meaning: stopped for no particular reason
+     other than GDB's request.  */
+  if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
+      && (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_STOP
+	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
+	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_0))
+    {
+      stop_print_frame = 1;
+      stop_stepping (ecs);
+      ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
+      return;
+    }
+
   if (stepping_past_singlestep_breakpoint)
     {
       gdb_assert (singlestep_breakpoints_inserted_p);
@@ -4169,57 +4226,6 @@ handle_signal_stop (struct execution_control_state *ecs)
 	     single-step again before breakpoints are re-inserted.  */
 	  ecs->event_thread->stepping_over_breakpoint = 1;
 	}
-    }
-
-  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-      && stop_after_trap)
-    {
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
-      stop_print_frame = 0;
-      stop_stepping (ecs);
-      return;
-    }
-
-  /* This is originated from start_remote(), start_inferior() and
-     shared libraries hook functions.  */
-  stop_soon = get_inferior_stop_soon (ecs->ptid);
-  if (stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_REMOTE)
-    {
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
-      stop_stepping (ecs);
-      return;
-    }
-
-  /* This originates from attach_command().  We need to overwrite
-     the stop_signal here, because some kernels don't ignore a
-     SIGSTOP in a subsequent ptrace(PTRACE_CONT,SIGSTOP) call.
-     See more comments in inferior.h.  On the other hand, if we
-     get a non-SIGSTOP, report it to the user - assume the backend
-     will handle the SIGSTOP if it should show up later.
-
-     Also consider that the attach is complete when we see a
-     SIGTRAP.  Some systems (e.g. Windows), and stubs supporting
-     target extended-remote report it instead of a SIGSTOP
-     (e.g. gdbserver).  We already rely on SIGTRAP being our
-     signal, so this is no exception.
-
-     Also consider that the attach is complete when we see a
-     GDB_SIGNAL_0.  In non-stop mode, GDB will explicitly tell
-     the target to stop all threads of the inferior, in case the
-     low level attach operation doesn't stop them implicitly.  If
-     they weren't stopped implicitly, then the stub will report a
-     GDB_SIGNAL_0, meaning: stopped for no particular reason
-     other than GDB's request.  */
-  if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
-      && (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_STOP
-	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_0))
-    {
-      stop_stepping (ecs);
-      ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
-      return;
     }
 
   /* See if there is a breakpoint/watchpoint/catchpoint/etc. that
