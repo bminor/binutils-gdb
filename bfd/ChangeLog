@@ -1,3 +1,13 @@
+2013-11-14  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16017
+	* elf32-arm.c (elf32_arm_populate_plt_entry): Return a boolean
+	value, TRUE for success, FALSE for failure.
+	Fail if attempting to create a PLT entry for a thumb only target.
+	(elf32_arm_final_link_relocate): Check result of calling
+	elf32_arm_populate_plt_entry.
+	(elf32_arm_finish_dynamic_symbol): Likewise.
+
 2013-11-14  Guy Martin <gmsoft@tuxicoman.be>
 
 	PR ld/16082
