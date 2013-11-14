@@ -2424,6 +2424,11 @@ struct execution_control_state
   CORE_ADDR stop_func_end;
   const char *stop_func_name;
   int wait_some_more;
+
+  /* We were in infwait_step_watch_state or
+     infwait_nonstep_watch_state state, and the thread reported an
+     event.  */
+  int stepped_after_stopped_by_watchpoint;
 };
 
 static void handle_inferior_event (struct execution_control_state *ecs);
@@ -2432,6 +2437,7 @@ static void handle_step_into_function (struct gdbarch *gdbarch,
 				       struct execution_control_state *ecs);
 static void handle_step_into_function_backward (struct gdbarch *gdbarch,
 						struct execution_control_state *ecs);
+static void handle_signal_stop (struct execution_control_state *ecs);
 static void check_exception_resume (struct execution_control_state *,
 				    struct frame_info *);
 
@@ -3132,6 +3138,18 @@ fill_in_stop_func (struct gdbarch *gdbarch,
     }
 }
 
+
+/* Return the STOP_SOON field of the inferior pointed at by PTID.  */
+
+static enum stop_kind
+get_inferior_stop_soon (ptid_t ptid)
+{
+  struct inferior *inf = find_inferior_pid (ptid_get_pid (ptid));
+
+  gdb_assert (inf != NULL);
+  return inf->control.stop_soon;
+}
+
 /* Given an execution control state that has been freshly filled in by
    an event from the inferior, figure out what it means and take
    appropriate action.
@@ -3148,12 +3166,7 @@ fill_in_stop_func (struct gdbarch *gdbarch,
 static void
 handle_inferior_event (struct execution_control_state *ecs)
 {
-  struct frame_info *frame;
-  struct gdbarch *gdbarch;
-  int stopped_by_watchpoint;
-  int stepped_after_stopped_by_watchpoint = 0;
   enum stop_kind stop_soon;
-  int random_signal;
 
   if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
     {
@@ -3186,18 +3199,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       prepare_to_wait (ecs);
       return;
     }
-
-  if (ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
-      && ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED)
-    {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
-
-      gdb_assert (inf);
-      stop_soon = inf->control.stop_soon;
-    }
-  else
-    stop_soon = NO_STOP_QUIETLY;
 
   /* Cache the last pid/waitstatus.  */
   target_last_wait_ptid = ecs->ptid;
@@ -3295,7 +3296,7 @@ handle_inferior_event (struct execution_control_state *ecs)
         fprintf_unfiltered (gdb_stdlog,
 			    "infrun: infwait_step_watch_state\n");
 
-      stepped_after_stopped_by_watchpoint = 1;
+      ecs->stepped_after_stopped_by_watchpoint = 1;
       break;
 
     case infwait_nonstep_watch_state:
@@ -3307,7 +3308,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* FIXME-maybe: is this cleaner than setting a flag?  Does it
          handle things like signals arriving and other things happening
          in combination correctly?  */
-      stepped_after_stopped_by_watchpoint = 1;
+      ecs->stepped_after_stopped_by_watchpoint = 1;
       break;
 
     default:
@@ -3330,6 +3331,8 @@ handle_inferior_event (struct execution_control_state *ecs)
          the beginning of an attach or remote session; we will query
          the full list of libraries once the connection is
          established.  */
+
+      stop_soon = get_inferior_stop_soon (ecs->ptid);
       if (stop_soon == NO_STOP_QUIETLY)
 	{
 	  struct regcache *regcache;
@@ -3715,7 +3718,8 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_STOPPED\n");
       ecs->event_thread->suspend.stop_signal = ecs->ws.value.sig;
-      break;
+      handle_signal_stop (ecs);
+      return;
 
     case TARGET_WAITKIND_NO_HISTORY:
       if (debug_infrun)
@@ -3735,6 +3739,18 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       stop_stepping (ecs);
       return;
     }
+}
+
+/* Come here when the program has stopped with a signal.  */
+
+static void
+handle_signal_stop (struct execution_control_state *ecs)
+{
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
+  int stopped_by_watchpoint;
+  enum stop_kind stop_soon;
+  int random_signal;
 
   if (ecs->ws.kind == TARGET_WAITKIND_STOPPED)
     {
@@ -4022,7 +4038,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       singlestep_breakpoints_inserted_p = 0;
     }
 
-  if (stepped_after_stopped_by_watchpoint)
+  if (ecs->stepped_after_stopped_by_watchpoint)
     stopped_by_watchpoint = 0;
   else
     stopped_by_watchpoint = watchpoints_triggered (&ecs->ws);
@@ -4167,6 +4183,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 
   /* This is originated from start_remote(), start_inferior() and
      shared libraries hook functions.  */
+  stop_soon = get_inferior_stop_soon (ecs->ptid);
   if (stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_REMOTE)
     {
       if (debug_infrun)

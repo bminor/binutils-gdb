@@ -1,5 +1,17 @@
 2013-11-14  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (struct execution_control_state)
+	<stepped_after_stopped_by_watchpoint>: New field.
+	(get_inferior_stop_soon): New function.
+	(handle_inferior_event): 'stepped_after_stopped_by_watchpoint' was
+	moved to struct execution_control_state -- adjust.  Use
+	get_inferior_stop_soon.  Split TARGET_WAITKIND_STOPPED handling to
+	new function.
+	(handle_signal_stop): New function, factored out from
+	handle_inferior_event.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
 	* break-catch-sig.c (signal_catchpoint_explains_signal): Adjust to
 	return a boolean.
 	* breakpoint.c (bpstat_explains_signal): Adjust to return a
