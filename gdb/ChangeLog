@@ -1,5 +1,12 @@
 2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* c-typeprint.c (c_type_print_varspec_suffix): Added
+	check for not yet resolved high bound. If unresolved, print
+	"variable length" string to the console instead of random
+	length.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Re-fetch type from
 	value.
 	(ada_template_to_fixed_record_type_1): Likewise.
