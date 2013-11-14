@@ -3139,9 +3139,18 @@ fill_in_stop_func (struct gdbarch *gdbarch,
     }
 }
 
-/* Given an execution control state that has been freshly filled in
-   by an event from the inferior, figure out what it means and take
-   appropriate action.  */
+/* Given an execution control state that has been freshly filled in by
+   an event from the inferior, figure out what it means and take
+   appropriate action.
+
+   The alternatives are:
+
+   1) stop_stepping and return; to really stop and return to the
+   debugger.
+
+   2) keep_going and return; to wait for the next event (set
+   ecs->event_thread->stepping_over_breakpoint to 1 to single step
+   once).  */
 
 static void
 handle_inferior_event (struct execution_control_state *ecs)
@@ -4165,14 +4174,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	  ecs->event_thread->stepping_over_breakpoint = 1;
 	}
     }
-
-  /* Look at the cause of the stop, and decide what to do.
-     The alternatives are:
-     1) stop_stepping and return; to really stop and return to the debugger,
-     2) keep_going and return to start up again
-     (set ecs->event_thread->stepping_over_breakpoint to 1 to single step once)
-     3) set ecs->random_signal to 1, and the decision between 1 and 2
-     will be made according to the signal handling tables.  */
 
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
       && stop_after_trap)

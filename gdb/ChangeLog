@@ -1,5 +1,10 @@
 2013-11-14  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (handle_inferior_event): Move comment from the
+	function's body to the function's description, adjusted.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_LOADED>:
 	Handle STOP_QUIETLY_NO_SIGSTOP and STOP_QUIETLY_REMOTE here.
 	Assert we never fall through out of the TARGET_WAITKIND_LOADED
