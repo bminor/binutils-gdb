@@ -1,5 +1,15 @@
 2013-11-14  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (bpstat_explains_signal) <Moribund locations>:
+	Return BPSTAT_SIGNAL_PASS instead of BPSTAT_SIGNAL_HIDE.
+	(explains_signal_watchpoint): Return BPSTAT_SIGNAL_PASS instead of
+	BPSTAT_SIGNAL_HIDE.
+	(base_breakpoint_explains_signal): Return BPSTAT_SIGNAL_PASS
+	instead of BPSTAT_SIGNAL_HIDE.
+	* infrun.c (handle_inferior_event): Rework random signal checks.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (struct execution_control_state): Remove
 	'random_signal' field.
 	(handle_syscall_event): Use bpstat_causes_stop instead of

@@ -4234,7 +4234,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 			"infrun: no user watchpoint explains "
 			"watchpoint SIGTRAP, ignoring\n");
 
-  /* NOTE: cagney/2003-03-29: These two checks for a random signal
+  /* NOTE: cagney/2003-03-29: These checks for a random signal
      at one stage in the past included checks for an inferior
      function call's call dummy's return breakpoint.  The original
      comment, that went with the test, read:
@@ -4254,27 +4254,22 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
      be necessary for call dummies on a non-executable stack on
      SPARC.  */
 
-  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
-    random_signal
-      = !((bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				   GDB_SIGNAL_TRAP)
-	   != BPSTAT_SIGNAL_NO)
-	  || stopped_by_watchpoint
-	  || ecs->event_thread->control.trap_expected
-	  || (ecs->event_thread->control.step_range_end
-	      && (ecs->event_thread->control.step_resume_breakpoint
-		  == NULL)));
-  else
-    {
-      enum bpstat_signal_value sval;
+  /* See if the breakpoints module can explain the signal.  */
+  sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+				 ecs->event_thread->suspend.stop_signal);
+  random_signal = (sval == BPSTAT_SIGNAL_NO);
 
-      sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				     ecs->event_thread->suspend.stop_signal);
-      random_signal = (sval == BPSTAT_SIGNAL_NO);
+  /* If not, perhaps stepping/nexting can.  */
+  if (random_signal)
+    random_signal = !(ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
+		      && currently_stepping (ecs->event_thread));
 
-      if (sval == BPSTAT_SIGNAL_HIDE)
-	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
-    }
+  /* No?  Perhaps we got a moribund watchpoint.  */
+  if (random_signal)
+    random_signal = !stopped_by_watchpoint;
+
+  if (sval == BPSTAT_SIGNAL_HIDE)
+    ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 
   /* For the program's own signals, act according to
      the signal handling tables.  */

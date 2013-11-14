@@ -4238,7 +4238,7 @@ bpstat_explains_signal (bpstat bsp, enum gdb_signal sig)
 	  /* A moribund location can never explain a signal other than
 	     GDB_SIGNAL_TRAP.  */
 	  if (sig == GDB_SIGNAL_TRAP)
-	    newval = BPSTAT_SIGNAL_HIDE;
+	    newval = BPSTAT_SIGNAL_PASS;
 	  else
 	    newval = BPSTAT_SIGNAL_NO;
 	}
@@ -10779,7 +10779,7 @@ explains_signal_watchpoint (struct breakpoint *b, enum gdb_signal sig)
   if (b->type == bp_watchpoint && sig != GDB_SIGNAL_TRAP)
     return BPSTAT_SIGNAL_NO;
 
-  return BPSTAT_SIGNAL_HIDE;
+  return BPSTAT_SIGNAL_PASS;
 }
 
 /* The breakpoint_ops structure to be used in hardware watchpoints.  */
@@ -12890,7 +12890,7 @@ base_breakpoint_decode_linespec (struct breakpoint *b, char **s,
 static enum bpstat_signal_value
 base_breakpoint_explains_signal (struct breakpoint *b, enum gdb_signal sig)
 {
-  return BPSTAT_SIGNAL_HIDE;
+  return BPSTAT_SIGNAL_PASS;
 }
 
 /* The default "after_condition_true" method.  */
