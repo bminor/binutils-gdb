@@ -1,5 +1,18 @@
 2013-11-14  Pedro Alves  <palves@redhat.com>
 
+	* infrun.c (struct execution_control_state): Remove
+	'random_signal' field.
+	(handle_syscall_event): Use bpstat_causes_stop instead of
+	bpstat_explains_signal.  Don't set ecs->random_signal.
+	(handle_inferior_event): New 'random_signal' local.
+	<TARGET_WAITKIND_FORKED, TARGET_WAITKIND_VFORKED,
+	TARGET_WAITKIND_EXECD>: Use bpstat_causes_stop instead of
+	bpstat_explains_signal.  Don't set ecs->random_signal.
+	<TARGET_WAITKIND_STOPPED>: Adjust to use local instead of
+	ecs->random_signal.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
 	* infrun.c (handle_inferior_event): Move comment from the
 	function's body to the function's description, adjusted.
 

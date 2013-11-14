@@ -2419,7 +2419,6 @@ struct execution_control_state
   struct thread_info *event_thread;
 
   struct target_waitstatus ws;
-  int random_signal;
   int stop_func_filled_in;
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
@@ -3094,8 +3093,6 @@ handle_syscall_event (struct execution_control_state *ecs)
   if (catch_syscall_enabled () > 0
       && catching_syscall_number (syscall_number) > 0)
     {
-      enum bpstat_signal_value sval;
-
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: syscall number = '%d'\n",
                             syscall_number);
@@ -3104,11 +3101,7 @@ handle_syscall_event (struct execution_control_state *ecs)
 	= bpstat_stop_status (get_regcache_aspace (regcache),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
-      sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				     GDB_SIGNAL_0);
-      ecs->random_signal = sval == BPSTAT_SIGNAL_NO;
-
-      if (!ecs->random_signal)
+      if (bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
 	  /* Catchpoint hit.  */
 	  return 0;
@@ -3160,6 +3153,8 @@ handle_inferior_event (struct execution_control_state *ecs)
   int stopped_by_watchpoint;
   int stepped_after_stopped_by_watchpoint = 0;
   enum stop_kind stop_soon;
+  int random_signal;
+  enum bpstat_signal_value sval;
 
   if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
     {
@@ -3339,7 +3334,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (stop_soon == NO_STOP_QUIETLY)
 	{
 	  struct regcache *regcache;
-	  enum bpstat_signal_value sval;
 
 	  regcache = get_thread_regcache (ecs->ptid);
 
@@ -3349,12 +3343,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    = bpstat_stop_status (get_regcache_aspace (regcache),
 				  stop_pc, ecs->ptid, &ecs->ws);
 
-	  sval
-	    = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				      GDB_SIGNAL_0);
-	  ecs->random_signal = sval == BPSTAT_SIGNAL_NO;
-
-	  if (!ecs->random_signal)
+	  if (bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	    {
 	      /* A catchpoint triggered.  */
 	      process_event_stop_test (ecs);
@@ -3593,15 +3582,11 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
-      /* Note that we're interested in knowing the bpstat actually
-	 causes a stop, not just if it may explain the signal.
-	 Software watchpoints, for example, always appear in the
-	 bpstat.  */
-      ecs->random_signal
-	= !bpstat_causes_stop (ecs->event_thread->control.stop_bpstat);
-
-      /* If no catchpoint triggered for this, then keep going.  */
-      if (ecs->random_signal)
+      /* If no catchpoint triggered for this, then keep going.  Note
+	 that we're interested in knowing the bpstat actually causes a
+	 stop, not just if it may explain the signal.  Software
+	 watchpoints, for example, always appear in the bpstat.  */
+      if (!bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
 	  ptid_t parent;
 	  ptid_t child;
@@ -3687,10 +3672,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
 			      stop_pc, ecs->ptid, &ecs->ws);
-      ecs->random_signal
-	= (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				   GDB_SIGNAL_0)
-	   == BPSTAT_SIGNAL_NO);
 
       /* Note that this may be referenced from inside
 	 bpstat_stop_status above, through inferior_has_execd.  */
@@ -3698,7 +3679,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       ecs->ws.value.execd_pathname = NULL;
 
       /* If no catchpoint triggered for this, then keep going.  */
-      if (ecs->random_signal)
+      if (!bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
 	  ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 	  keep_going (ecs);
@@ -4274,7 +4255,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
      SPARC.  */
 
   if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
-    ecs->random_signal
+    random_signal
       = !((bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
 				   GDB_SIGNAL_TRAP)
 	   != BPSTAT_SIGNAL_NO)
@@ -4289,7 +4270,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 
       sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
 				     ecs->event_thread->suspend.stop_signal);
-      ecs->random_signal = (sval == BPSTAT_SIGNAL_NO);
+      random_signal = (sval == BPSTAT_SIGNAL_NO);
 
       if (sval == BPSTAT_SIGNAL_HIDE)
 	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
@@ -4298,7 +4279,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
   /* For the program's own signals, act according to
      the signal handling tables.  */
 
-  if (ecs->random_signal)
+  if (random_signal)
     {
       /* Signal not for debugging purposes.  */
       int printed = 0;
