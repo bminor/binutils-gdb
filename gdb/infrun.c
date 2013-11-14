@@ -3319,6 +3319,8 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_LOADED:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_LOADED\n");
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
       /* Ignore gracefully during startup of the inferior, as it might
          be the shell which has just loaded some objects, otherwise
          add the symbols for the newly loaded objects.  Also ignore at
@@ -3330,8 +3332,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  struct regcache *regcache;
 	  enum bpstat_signal_value sval;
 
-	  if (!ptid_equal (ecs->ptid, inferior_ptid))
-	    context_switch (ecs->ptid);
 	  regcache = get_thread_regcache (ecs->ptid);
 
 	  handle_solib_event ();
@@ -3370,13 +3370,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       /* If we are skipping through a shell, or through shared library
 	 loading that we aren't interested in, resume the program.  If
-	 we're running the program normally, also resume.  But stop if
-	 we're attaching or setting up a remote connection.  */
+	 we're running the program normally, also resume.  */
       if (stop_soon == STOP_QUIETLY || stop_soon == NO_STOP_QUIETLY)
 	{
-	  if (!ptid_equal (ecs->ptid, inferior_ptid))
-	    context_switch (ecs->ptid);
-
 	  /* Loading of shared libraries might have changed breakpoint
 	     addresses.  Make sure new breakpoints are inserted.  */
 	  if (stop_soon == NO_STOP_QUIETLY
@@ -3387,7 +3383,19 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  return;
 	}
 
-      break;
+      /* But stop if we're attaching or setting up a remote
+	 connection.  */
+      if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
+	  || stop_soon == STOP_QUIETLY_REMOTE)
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
+	  stop_stepping (ecs);
+	  return;
+	}
+
+      internal_error (__FILE__, __LINE__,
+		      _("unhandled stop_soon: %d"), (int) stop_soon);
 
     case TARGET_WAITKIND_SPURIOUS:
       if (debug_infrun)
