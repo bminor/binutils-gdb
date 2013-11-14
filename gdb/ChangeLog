@@ -1,3 +1,8 @@
+2013-11-14  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-linetable.c (ltpy_has_line)
+	(ltpy_get_all_source_lines): Fix loop termination condition.
+
 2013-11-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-parse.h (struct mi_parse) <language>: New field.
