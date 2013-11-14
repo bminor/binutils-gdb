@@ -1,3 +1,10 @@
+2013-11-14  Omair Javaid  <Omair.Javaid@linaro.org>
+
+        * gdb.dwarf2/dw2-case-insensitive-debug.S: Updated compile unit
+	and function label names.
+        * gdb.dwarf2/dw2-case-insensitive.c: Created function and
+	compile unit labels.
+
 2013-11-14  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.mi/mi-language.exp: New file.
