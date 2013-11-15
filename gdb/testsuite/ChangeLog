@@ -1,5 +1,9 @@
 2013-11-15  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.python/py-breakpoint.exp: Reformat for 80 columns.
+
+2013-11-15  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.python/py-breakpoint.exp: Split up into several functions,
 	each with their own test prefix.
 
