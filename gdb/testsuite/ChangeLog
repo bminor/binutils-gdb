@@ -1,5 +1,12 @@
 2013-11-15  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/info_exc.exp: Allow other global exceptions to be
+	listed in the output of "info exceptions".
+	* gdb.ada/mi_exc_info.exp: Allow other global exceptions to be
+	listed in the output of "-info-ada-exceptions".
+
+2013-11-15  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/info_exc.exp: Start inferior before starting
 	the "info exceptions" tests.
 	* gdb.ada/mi_exc_info.exp: Start inferior before starting
