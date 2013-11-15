@@ -1,3 +1,11 @@
+2013-11-15  Luis Machado  <lgustavo@codesourcery.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Expect different formats
+	of inferior output for remote and native sessions.
+	* gdb.mi/mi-console.exp: Remove obsolete comment.
+	Check for semihosted inferior output pattern.
+	(semihosted_string): New function.
+
 2013-11-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/info_exc.exp: Allow other global exceptions to be

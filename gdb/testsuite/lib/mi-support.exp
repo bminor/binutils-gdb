@@ -765,20 +765,35 @@ proc mi_gdb_test { args } {
     if { $result == 0 } {
 	if [ info exists ipattern ] {
 	    if { ![target_info exists gdb,noinferiorio] } {
-		global mi_inferior_spawn_id
-		expect {
-		    -i $mi_inferior_spawn_id -re "$ipattern" {
-			pass "$message inferior output"
+		if { [target_info gdb_protocol] == "remote"
+		    || [target_info gdb_protocol] == "extended-remote"
+		    || [target_info protocol] == "sim"} {
+
+		    gdb_expect {
+			-re "$ipattern" {
+			    pass "$message inferior output"
+			}
+			timeout {
+			    fail "$message inferior output (timeout)"
+			    set result 1
+			}
 		    }
-		    timeout {
-			fail "$message inferior output (timeout)"
-			set result 1
+		} else {
+		    global mi_inferior_spawn_id
+		    expect {
+			-i $mi_inferior_spawn_id -re "$ipattern" {
+			    pass "$message inferior output"
+			}
+			timeout {
+			    fail "$message inferior output (timeout)"
+			    set result 1
+			}
 		    }
 		}
 	    } else {
 		unsupported "$message inferior output"
 	    }
-        }
+	}
     }
 
     return $result
