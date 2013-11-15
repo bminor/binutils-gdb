@@ -1,3 +1,11 @@
+2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (CPENT): New define.
+	(F_READONLY, F_WRITEONLY): Likewise.
+	(aarch64_sys_regs): Add trace unit registers.
+	(aarch64_sys_reg_readonly_p): New function.
+	(aarch64_sys_reg_writeonly_p): Ditto.
+
 2013-11-15  Maciej W. Rozycki  <macro@codesourcery.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Add RD_2 to "mfcr" and

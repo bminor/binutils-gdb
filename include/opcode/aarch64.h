@@ -624,6 +624,8 @@ typedef struct
 
 extern const aarch64_sys_reg aarch64_sys_regs [];
 extern bfd_boolean aarch64_sys_reg_deprecated_p (const aarch64_sys_reg *);
+extern bfd_boolean aarch64_sys_reg_readonly_p (const aarch64_sys_reg *);
+extern bfd_boolean aarch64_sys_reg_writeonly_p (const aarch64_sys_reg *);
 
 typedef struct
 {

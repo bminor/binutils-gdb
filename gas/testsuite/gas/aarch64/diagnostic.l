@@ -97,3 +97,5 @@
 [^:]*:99: Error: operand 3 should be one of the standard conditions, excluding AL and NV. -- `cinc w0,w1,nv'
 [^:]*:100: Error: operand 2 should be one of the standard conditions, excluding AL and NV. -- `cset w0,al'
 [^:]*:101: Error: operand 2 should be one of the standard conditions, excluding AL and NV. -- `cset w0,nv'
+[^:]*:102: Error: read-only register at operand 1 -- `msr trcidr7,x7'
+[^:]*:103: Error: write-only register at operand 2 -- `mrs x7,trcoslar'
