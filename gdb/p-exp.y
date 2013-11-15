@@ -125,7 +125,7 @@ static int yylex (void);
 
 void yyerror (char *);
 
-static char * uptok (char *, int);
+static char *uptok (const char *, int);
 %}
 
 /* Although the yacc "value" of an expression is not used,
@@ -1105,7 +1105,7 @@ static const struct token tokentab2[] =
 /* Allocate uppercased var: */
 /* make an uppercased copy of tokstart.  */
 static char *
-uptok (char *tokstart, int namelen)
+uptok (const char *tokstart, int namelen)
 {
   int i;
   char *uptokstart = (char *)malloc(namelen+1);
@@ -1133,9 +1133,9 @@ yylex (void)
   int c;
   int namelen;
   unsigned int i;
-  char *tokstart;
+  const char *tokstart;
   char *uptokstart;
-  char *tokptr;
+  const char *tokptr;
   int explen, tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
@@ -1146,9 +1146,8 @@ yylex (void)
 
   prev_lexptr = lexptr;
 
+  tokstart = lexptr;
   explen = strlen (lexptr);
-  tokstart = alloca (explen + 1);
-  memcpy (tokstart, lexptr, explen + 1);
 
   /* See if it is a special token of length 3.  */
   if (explen > 2)
@@ -1264,7 +1263,7 @@ yylex (void)
       {
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype;
-	char *p = tokstart;
+	const char *p = tokstart;
 	int hex = input_radix > 10;
 
 	if (c == '0' && (p[1] == 'x' || p[1] == 'X'))
@@ -1368,18 +1367,13 @@ yylex (void)
 	    /* Do nothing, loop will terminate.  */
 	    break;
 	  case '\\':
-	    {
-	      const char *s, *o;
-
-	      o = s = ++tokptr;
-	      c = parse_escape (parse_gdbarch, &s);
-	      *tokptr += s - o;
-	      if (c == -1)
-		{
-		  continue;
-		}
-	      tempbuf[tempbufindex++] = c;
-	    }
+	    ++tokptr;
+	    c = parse_escape (parse_gdbarch, &tokptr);
+	    if (c == -1)
+	      {
+		continue;
+	      }
+	    tempbuf[tempbufindex++] = c;
 	    break;
 	  default:
 	    tempbuf[tempbufindex++] = *tokptr++;
@@ -1511,17 +1505,17 @@ yylex (void)
 
   if (*tokstart == '$')
     {
-      char c;
+      char *tmp;
+
       /* $ is the normal prefix for pascal hexadecimal values
         but this conflicts with the GDB use for debugger variables
         so in expression to enter hexadecimal values
         we still need to use C syntax with 0xff  */
       write_dollar_variable (yylval.sval);
-      c = tokstart[namelen];
-      tokstart[namelen] = 0;
-      intvar = lookup_only_internalvar (++tokstart);
-      --tokstart;
-      tokstart[namelen] = c;
+      tmp = alloca (namelen + 1);
+      memcpy (tmp, tokstart, namelen);
+      tmp[namelen] = '\0';
+      intvar = lookup_only_internalvar (tmp + 1);
       free (uptokstart);
       return VARIABLE;
     }
@@ -1561,12 +1555,6 @@ yylex (void)
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
 			      VAR_DOMAIN, &is_a_field_of_this);
-       if (sym || is_a_field_of_this.type != NULL || is_a_field)
-         for (i = 0; i <= namelen; i++)
-           {
-             if ((tokstart[i] >= 'a' && tokstart[i] <= 'z'))
-               tokstart[i] -= ('a'-'A');
-           }
       }
     /* Third chance Capitalized (as GPC does).  */
     if (!sym && is_a_field_of_this.type == NULL && !is_a_field)
@@ -1589,24 +1577,13 @@ yylex (void)
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
 			      VAR_DOMAIN, &is_a_field_of_this);
-       if (sym || is_a_field_of_this.type != NULL || is_a_field)
-          for (i = 0; i <= namelen; i++)
-            {
-              if (i == 0)
-                {
-                  if ((tokstart[i] >= 'a' && tokstart[i] <= 'z'))
-                    tokstart[i] -= ('a'-'A');
-                }
-              else
-                if ((tokstart[i] >= 'A' && tokstart[i] <= 'Z'))
-                  tokstart[i] -= ('A'-'a');
-            }
       }
 
     if (is_a_field)
       {
 	tempbuf = (char *) realloc (tempbuf, namelen + 1);
-	strncpy (tempbuf, tokstart, namelen); tempbuf [namelen] = 0;
+	strncpy (tempbuf, tmp, namelen);
+	tempbuf [namelen] = 0;
 	yylval.sval.ptr = tempbuf;
 	yylval.sval.length = namelen;
 	free (uptokstart);

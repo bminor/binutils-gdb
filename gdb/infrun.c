@@ -2419,12 +2419,16 @@ struct execution_control_state
   struct thread_info *event_thread;
 
   struct target_waitstatus ws;
-  int random_signal;
   int stop_func_filled_in;
   CORE_ADDR stop_func_start;
   CORE_ADDR stop_func_end;
   const char *stop_func_name;
   int wait_some_more;
+
+  /* We were in infwait_step_watch_state or
+     infwait_nonstep_watch_state state, and the thread reported an
+     event.  */
+  int stepped_after_stopped_by_watchpoint;
 };
 
 static void handle_inferior_event (struct execution_control_state *ecs);
@@ -2433,6 +2437,7 @@ static void handle_step_into_function (struct gdbarch *gdbarch,
 				       struct execution_control_state *ecs);
 static void handle_step_into_function_backward (struct gdbarch *gdbarch,
 						struct execution_control_state *ecs);
+static void handle_signal_stop (struct execution_control_state *ecs);
 static void check_exception_resume (struct execution_control_state *,
 				    struct frame_info *);
 
@@ -3094,8 +3099,6 @@ handle_syscall_event (struct execution_control_state *ecs)
   if (catch_syscall_enabled () > 0
       && catching_syscall_number (syscall_number) > 0)
     {
-      enum bpstat_signal_value sval;
-
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: syscall number = '%d'\n",
                             syscall_number);
@@ -3104,11 +3107,7 @@ handle_syscall_event (struct execution_control_state *ecs)
 	= bpstat_stop_status (get_regcache_aspace (regcache),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
-      sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				     GDB_SIGNAL_0);
-      ecs->random_signal = sval == BPSTAT_SIGNAL_NO;
-
-      if (!ecs->random_signal)
+      if (bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
 	  /* Catchpoint hit.  */
 	  return 0;
@@ -3139,17 +3138,34 @@ fill_in_stop_func (struct gdbarch *gdbarch,
     }
 }
 
-/* Given an execution control state that has been freshly filled in
-   by an event from the inferior, figure out what it means and take
-   appropriate action.  */
+
+/* Return the STOP_SOON field of the inferior pointed at by PTID.  */
+
+static enum stop_kind
+get_inferior_stop_soon (ptid_t ptid)
+{
+  struct inferior *inf = find_inferior_pid (ptid_get_pid (ptid));
+
+  gdb_assert (inf != NULL);
+  return inf->control.stop_soon;
+}
+
+/* Given an execution control state that has been freshly filled in by
+   an event from the inferior, figure out what it means and take
+   appropriate action.
+
+   The alternatives are:
+
+   1) stop_stepping and return; to really stop and return to the
+   debugger.
+
+   2) keep_going and return; to wait for the next event (set
+   ecs->event_thread->stepping_over_breakpoint to 1 to single step
+   once).  */
 
 static void
 handle_inferior_event (struct execution_control_state *ecs)
 {
-  struct frame_info *frame;
-  struct gdbarch *gdbarch;
-  int stopped_by_watchpoint;
-  int stepped_after_stopped_by_watchpoint = 0;
   enum stop_kind stop_soon;
 
   if (ecs->ws.kind == TARGET_WAITKIND_IGNORE)
@@ -3183,18 +3199,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       prepare_to_wait (ecs);
       return;
     }
-
-  if (ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
-      && ecs->ws.kind != TARGET_WAITKIND_NO_RESUMED)
-    {
-      struct inferior *inf = find_inferior_pid (ptid_get_pid (ecs->ptid));
-
-      gdb_assert (inf);
-      stop_soon = inf->control.stop_soon;
-    }
-  else
-    stop_soon = NO_STOP_QUIETLY;
 
   /* Cache the last pid/waitstatus.  */
   target_last_wait_ptid = ecs->ptid;
@@ -3292,7 +3296,7 @@ handle_inferior_event (struct execution_control_state *ecs)
         fprintf_unfiltered (gdb_stdlog,
 			    "infrun: infwait_step_watch_state\n");
 
-      stepped_after_stopped_by_watchpoint = 1;
+      ecs->stepped_after_stopped_by_watchpoint = 1;
       break;
 
     case infwait_nonstep_watch_state:
@@ -3304,7 +3308,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* FIXME-maybe: is this cleaner than setting a flag?  Does it
          handle things like signals arriving and other things happening
          in combination correctly?  */
-      stepped_after_stopped_by_watchpoint = 1;
+      ecs->stepped_after_stopped_by_watchpoint = 1;
       break;
 
     default:
@@ -3319,19 +3323,20 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_LOADED:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_LOADED\n");
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
       /* Ignore gracefully during startup of the inferior, as it might
          be the shell which has just loaded some objects, otherwise
          add the symbols for the newly loaded objects.  Also ignore at
          the beginning of an attach or remote session; we will query
          the full list of libraries once the connection is
          established.  */
+
+      stop_soon = get_inferior_stop_soon (ecs->ptid);
       if (stop_soon == NO_STOP_QUIETLY)
 	{
 	  struct regcache *regcache;
-	  enum bpstat_signal_value sval;
 
-	  if (!ptid_equal (ecs->ptid, inferior_ptid))
-	    context_switch (ecs->ptid);
 	  regcache = get_thread_regcache (ecs->ptid);
 
 	  handle_solib_event ();
@@ -3340,12 +3345,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 	    = bpstat_stop_status (get_regcache_aspace (regcache),
 				  stop_pc, ecs->ptid, &ecs->ws);
 
-	  sval
-	    = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				      GDB_SIGNAL_0);
-	  ecs->random_signal = sval == BPSTAT_SIGNAL_NO;
-
-	  if (!ecs->random_signal)
+	  if (bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	    {
 	      /* A catchpoint triggered.  */
 	      process_event_stop_test (ecs);
@@ -3370,13 +3370,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       /* If we are skipping through a shell, or through shared library
 	 loading that we aren't interested in, resume the program.  If
-	 we're running the program normally, also resume.  But stop if
-	 we're attaching or setting up a remote connection.  */
+	 we're running the program normally, also resume.  */
       if (stop_soon == STOP_QUIETLY || stop_soon == NO_STOP_QUIETLY)
 	{
-	  if (!ptid_equal (ecs->ptid, inferior_ptid))
-	    context_switch (ecs->ptid);
-
 	  /* Loading of shared libraries might have changed breakpoint
 	     addresses.  Make sure new breakpoints are inserted.  */
 	  if (stop_soon == NO_STOP_QUIETLY
@@ -3387,7 +3383,19 @@ handle_inferior_event (struct execution_control_state *ecs)
 	  return;
 	}
 
-      break;
+      /* But stop if we're attaching or setting up a remote
+	 connection.  */
+      if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
+	  || stop_soon == STOP_QUIETLY_REMOTE)
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
+	  stop_stepping (ecs);
+	  return;
+	}
+
+      internal_error (__FILE__, __LINE__,
+		      _("unhandled stop_soon: %d"), (int) stop_soon);
 
     case TARGET_WAITKIND_SPURIOUS:
       if (debug_infrun)
@@ -3576,15 +3584,11 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
 			      stop_pc, ecs->ptid, &ecs->ws);
 
-      /* Note that we're interested in knowing the bpstat actually
-	 causes a stop, not just if it may explain the signal.
-	 Software watchpoints, for example, always appear in the
-	 bpstat.  */
-      ecs->random_signal
-	= !bpstat_causes_stop (ecs->event_thread->control.stop_bpstat);
-
-      /* If no catchpoint triggered for this, then keep going.  */
-      if (ecs->random_signal)
+      /* If no catchpoint triggered for this, then keep going.  Note
+	 that we're interested in knowing the bpstat actually causes a
+	 stop, not just if it may explain the signal.  Software
+	 watchpoints, for example, always appear in the bpstat.  */
+      if (!bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
 	  ptid_t parent;
 	  ptid_t child;
@@ -3670,10 +3674,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       ecs->event_thread->control.stop_bpstat
 	= bpstat_stop_status (get_regcache_aspace (get_current_regcache ()),
 			      stop_pc, ecs->ptid, &ecs->ws);
-      ecs->random_signal
-	= (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				   GDB_SIGNAL_0)
-	   == BPSTAT_SIGNAL_NO);
 
       /* Note that this may be referenced from inside
 	 bpstat_stop_status above, through inferior_has_execd.  */
@@ -3681,7 +3681,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       ecs->ws.value.execd_pathname = NULL;
 
       /* If no catchpoint triggered for this, then keep going.  */
-      if (ecs->random_signal)
+      if (!bpstat_causes_stop (ecs->event_thread->control.stop_bpstat))
 	{
 	  ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
 	  keep_going (ecs);
@@ -3718,7 +3718,8 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_STOPPED\n");
       ecs->event_thread->suspend.stop_signal = ecs->ws.value.sig;
-      break;
+      handle_signal_stop (ecs);
+      return;
 
     case TARGET_WAITKIND_NO_HISTORY:
       if (debug_infrun)
@@ -3738,6 +3739,18 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       stop_stepping (ecs);
       return;
     }
+}
+
+/* Come here when the program has stopped with a signal.  */
+
+static void
+handle_signal_stop (struct execution_control_state *ecs)
+{
+  struct frame_info *frame;
+  struct gdbarch *gdbarch;
+  int stopped_by_watchpoint;
+  enum stop_kind stop_soon;
+  int random_signal;
 
   if (ecs->ws.kind == TARGET_WAITKIND_STOPPED)
     {
@@ -3784,6 +3797,63 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	}
 
       do_cleanups (old_chain);
+    }
+
+  /* This is originated from start_remote(), start_inferior() and
+     shared libraries hook functions.  */
+  stop_soon = get_inferior_stop_soon (ecs->ptid);
+  if (stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_REMOTE)
+    {
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
+      stop_print_frame = 1;
+      stop_stepping (ecs);
+      return;
+    }
+
+  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
+      && stop_after_trap)
+    {
+      if (!ptid_equal (ecs->ptid, inferior_ptid))
+	context_switch (ecs->ptid);
+      if (debug_infrun)
+	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
+      stop_print_frame = 0;
+      stop_stepping (ecs);
+      return;
+    }
+
+  /* This originates from attach_command().  We need to overwrite
+     the stop_signal here, because some kernels don't ignore a
+     SIGSTOP in a subsequent ptrace(PTRACE_CONT,SIGSTOP) call.
+     See more comments in inferior.h.  On the other hand, if we
+     get a non-SIGSTOP, report it to the user - assume the backend
+     will handle the SIGSTOP if it should show up later.
+
+     Also consider that the attach is complete when we see a
+     SIGTRAP.  Some systems (e.g. Windows), and stubs supporting
+     target extended-remote report it instead of a SIGSTOP
+     (e.g. gdbserver).  We already rely on SIGTRAP being our
+     signal, so this is no exception.
+
+     Also consider that the attach is complete when we see a
+     GDB_SIGNAL_0.  In non-stop mode, GDB will explicitly tell
+     the target to stop all threads of the inferior, in case the
+     low level attach operation doesn't stop them implicitly.  If
+     they weren't stopped implicitly, then the stub will report a
+     GDB_SIGNAL_0, meaning: stopped for no particular reason
+     other than GDB's request.  */
+  if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
+      && (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_STOP
+	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
+	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_0))
+    {
+      stop_print_frame = 1;
+      stop_stepping (ecs);
+      ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
+      return;
     }
 
   if (stepping_past_singlestep_breakpoint)
@@ -4025,7 +4095,7 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
       singlestep_breakpoints_inserted_p = 0;
     }
 
-  if (stepped_after_stopped_by_watchpoint)
+  if (ecs->stepped_after_stopped_by_watchpoint)
     stopped_by_watchpoint = 0;
   else
     stopped_by_watchpoint = watchpoints_triggered (&ecs->ws);
@@ -4158,64 +4228,6 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 	}
     }
 
-  /* Look at the cause of the stop, and decide what to do.
-     The alternatives are:
-     1) stop_stepping and return; to really stop and return to the debugger,
-     2) keep_going and return to start up again
-     (set ecs->event_thread->stepping_over_breakpoint to 1 to single step once)
-     3) set ecs->random_signal to 1, and the decision between 1 and 2
-     will be made according to the signal handling tables.  */
-
-  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-      && stop_after_trap)
-    {
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
-      stop_print_frame = 0;
-      stop_stepping (ecs);
-      return;
-    }
-
-  /* This is originated from start_remote(), start_inferior() and
-     shared libraries hook functions.  */
-  if (stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_REMOTE)
-    {
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: quietly stopped\n");
-      stop_stepping (ecs);
-      return;
-    }
-
-  /* This originates from attach_command().  We need to overwrite
-     the stop_signal here, because some kernels don't ignore a
-     SIGSTOP in a subsequent ptrace(PTRACE_CONT,SIGSTOP) call.
-     See more comments in inferior.h.  On the other hand, if we
-     get a non-SIGSTOP, report it to the user - assume the backend
-     will handle the SIGSTOP if it should show up later.
-
-     Also consider that the attach is complete when we see a
-     SIGTRAP.  Some systems (e.g. Windows), and stubs supporting
-     target extended-remote report it instead of a SIGSTOP
-     (e.g. gdbserver).  We already rely on SIGTRAP being our
-     signal, so this is no exception.
-
-     Also consider that the attach is complete when we see a
-     GDB_SIGNAL_0.  In non-stop mode, GDB will explicitly tell
-     the target to stop all threads of the inferior, in case the
-     low level attach operation doesn't stop them implicitly.  If
-     they weren't stopped implicitly, then the stub will report a
-     GDB_SIGNAL_0, meaning: stopped for no particular reason
-     other than GDB's request.  */
-  if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
-      && (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_STOP
-	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-	  || ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_0))
-    {
-      stop_stepping (ecs);
-      ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
-      return;
-    }
-
   /* See if there is a breakpoint/watchpoint/catchpoint/etc. that
      handles this event.  */
   ecs->event_thread->control.stop_bpstat
@@ -4236,15 +4248,14 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
 
   if (debug_infrun
       && ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
-      && (bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+      && !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
 				  GDB_SIGNAL_TRAP)
-	  == BPSTAT_SIGNAL_NO)
       && stopped_by_watchpoint)
     fprintf_unfiltered (gdb_stdlog,
 			"infrun: no user watchpoint explains "
 			"watchpoint SIGTRAP, ignoring\n");
 
-  /* NOTE: cagney/2003-03-29: These two checks for a random signal
+  /* NOTE: cagney/2003-03-29: These checks for a random signal
      at one stage in the past included checks for an inferior
      function call's call dummy's return breakpoint.  The original
      comment, that went with the test, read:
@@ -4264,32 +4275,24 @@ Cannot fill $_exitsignal with the correct signal number.\n"));
      be necessary for call dummies on a non-executable stack on
      SPARC.  */
 
-  if (ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP)
-    ecs->random_signal
-      = !((bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				   GDB_SIGNAL_TRAP)
-	   != BPSTAT_SIGNAL_NO)
-	  || stopped_by_watchpoint
-	  || ecs->event_thread->control.trap_expected
-	  || (ecs->event_thread->control.step_range_end
-	      && (ecs->event_thread->control.step_resume_breakpoint
-		  == NULL)));
-  else
-    {
-      enum bpstat_signal_value sval;
+  /* See if the breakpoints module can explain the signal.  */
+  random_signal
+    = !bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
+			       ecs->event_thread->suspend.stop_signal);
 
-      sval = bpstat_explains_signal (ecs->event_thread->control.stop_bpstat,
-				     ecs->event_thread->suspend.stop_signal);
-      ecs->random_signal = (sval == BPSTAT_SIGNAL_NO);
+  /* If not, perhaps stepping/nexting can.  */
+  if (random_signal)
+    random_signal = !(ecs->event_thread->suspend.stop_signal == GDB_SIGNAL_TRAP
+		      && currently_stepping (ecs->event_thread));
 
-      if (sval == BPSTAT_SIGNAL_HIDE)
-	ecs->event_thread->suspend.stop_signal = GDB_SIGNAL_0;
-    }
+  /* No?  Perhaps we got a moribund watchpoint.  */
+  if (random_signal)
+    random_signal = !stopped_by_watchpoint;
 
   /* For the program's own signals, act according to
      the signal handling tables.  */
 
-  if (ecs->random_signal)
+  if (random_signal)
     {
       /* Signal not for debugging purposes.  */
       int printed = 0;

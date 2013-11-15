@@ -13340,6 +13340,7 @@ working language, and also what language source files were written in.
 
 @table @code
 @item show language
+@anchor{show language}
 @kindex show language
 Display the current working language.  This is the
 language you can use with commands such as @code{print} to
@@ -27183,7 +27184,7 @@ is assumed to be a @code{gdb.WP_WRITE} class.
 @defun Breakpoint.stop (self)
 The @code{gdb.Breakpoint} class can be sub-classed and, in
 particular, you may choose to implement the @code{stop} method.
-If this method is defined as a sub-class of @code{gdb.Breakpoint},
+If this method is defined in a sub-class of @code{gdb.Breakpoint},
 it will be called when the inferior reaches any location of a
 breakpoint which instantiates that sub-class.  If the method returns
 @code{True}, the inferior will be stopped at the location of the
@@ -28816,6 +28817,8 @@ the user interface.
 @node Context management
 @subsection Context management
 
+@subsubsection Threads and Frames
+
 In most cases when @value{GDBN} accesses the target, this access is
 done in context of a specific thread and frame (@pxref{Frames}).
 Often, even when accessing global data, the target requires that a thread
@@ -28865,6 +28868,25 @@ problematic commands, or explicitly add @code{-thread-select} for
 all subsequent commands.  No frontend is known to do this exactly
 right, so it is suggested to just always pass the @samp{--thread} and
 @samp{--frame} options.
+
+@subsubsection Language
+
+The execution of several commands depends on which language is selected.
+By default, the current language (@pxref{show language}) is used.
+But for commands known to be language-sensitive, it is recommended
+to use the @samp{--language} option.  This option takes one argument,
+which is the name of the language to use while executing the command.
+For instance:
+
+@smallexample
+-data-evaluate-expression --language c "sizeof (void*)"
+^done,value="4"
+(gdb) 
+@end smallexample
+
+The valid language names are the same names accepted by the
+@samp{set language} command (@pxref{Manually}), excluding @samp{auto},
+@samp{local} or @samp{unknown}.
 
 @node Asynchronous and non-stop modes
 @subsection Asynchronous command execution and non-stop mode
@@ -35080,8 +35102,10 @@ Indicates that changes to breakpoints and breakpoints created via the
 CLI will be announced via async records.
 @item ada-task-info
 Indicates support for the @code{-ada-task-info} command.
-@item info-ada-exceptions
-Indicates support for the @code{-info-ada-exceptions} command.
+@item ada-exceptions
+Indicates support for the following commands, all of them related to Ada
+exceptions: @code{-info-ada-exceptions}, @code{-catch-assert} and
+@code{-catch-exception}.
 @end table
 
 @subheading The @code{-list-target-features} Command

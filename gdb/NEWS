@@ -151,6 +151,8 @@ show startup-with-shell
 
 * MI changes
 
+  ** All MI commands now accept an optional "--language" option.
+
   ** The -trace-save MI command can optionally save trace buffer in Common
      Trace Format now.
 

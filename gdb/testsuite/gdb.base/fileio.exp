@@ -253,5 +253,10 @@ gdb_test continue \
 
 gdb_exit
 
+# Make dir2 writable again so rm -rf of a build tree Just Works.
+if {[file exists $dir2] && ![file writable $dir2]} {
+    system "chmod +w $dir2"
+}
+
 set timeout $oldtimeout
 return 0

@@ -1,3 +1,7 @@
+2013-11-14  Will Newton  <will.newton@linaro.org>
+
+	* ld-arm/script-type.sym: Remove redundant STT_FILE symbol.
+
 2013-11-07  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-x86-64/x86-64.exp (mixed1, mixed2): Loosen error string match

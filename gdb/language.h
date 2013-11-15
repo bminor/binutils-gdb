@@ -23,6 +23,8 @@
 #if !defined (LANGUAGE_H)
 #define LANGUAGE_H 1
 
+#include "symtab.h"
+
 /* Forward decls for prototypes.  */
 struct value;
 struct objfile;

@@ -215,7 +215,7 @@ ltpy_has_line (PyObject *self, PyObject *args)
       return NULL;
     }
 
-  for (index = 0; index <= LINETABLE (symtab)->nitems; index++)
+  for (index = 0; index < LINETABLE (symtab)->nitems; index++)
     {
       struct linetable_entry *item = &(symtab->linetable->item[index]);
       if (item->line == py_line)
@@ -252,7 +252,7 @@ ltpy_get_all_source_lines (PyObject *self, PyObject *args)
   if (source_dict == NULL)
     return NULL;
 
-  for (index = 0; index <= LINETABLE (symtab)->nitems; index++)
+  for (index = 0; index < LINETABLE (symtab)->nitems; index++)
     {
       item = &(LINETABLE (symtab)->item[index]);
 

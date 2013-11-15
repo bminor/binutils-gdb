@@ -350,10 +350,10 @@ signal_catchpoint_print_recreate (struct breakpoint *b, struct ui_file *fp)
 /* Implement the "explains_signal" breakpoint_ops method for signal
    catchpoints.  */
 
-static enum bpstat_signal_value
+static int
 signal_catchpoint_explains_signal (struct breakpoint *b, enum gdb_signal sig)
 {
-  return BPSTAT_SIGNAL_PASS;
+  return 1;
 }
 
 /* Create a new signal catchpoint.  TEMPFLAG is true if this should be

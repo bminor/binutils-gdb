@@ -306,6 +306,18 @@ read_reg (void *baton, int reg)
   return unpack_long (register_type (gdbarch, regnum), buf);
 }
 
+/* Implement struct dwarf_expr_context_funcs' "get_reg_value" callback.  */
+
+static struct value *
+get_reg_value (void *baton, struct type *type, int reg)
+{
+  struct frame_info *this_frame = (struct frame_info *) baton;
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
+
+  return value_from_register (type, regnum, this_frame);
+}
+
 static void
 read_mem (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t len)
 {
@@ -347,6 +359,7 @@ register %s (#%d) at %s"),
 static const struct dwarf_expr_context_funcs dwarf2_frame_ctx_funcs =
 {
   read_reg,
+  get_reg_value,
   read_mem,
   ctx_no_get_frame_base,
   ctx_no_get_frame_cfa,

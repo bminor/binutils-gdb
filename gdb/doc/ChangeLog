@@ -1,4 +1,23 @@
+2013-11-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Breakpoints In Python): Replace "as" with "in".
+
+2013-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Show): Add xref anchor for "show language" command.
+	(Context management): Place current subsection text into its own
+	subsubsection.  Add new subsubsection describing the "--language"
+	command option.
+
+2013-11-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Delete
+	the documentation of "info-ada-exceptions" in the output
+	of the "-list-features" command.  Add the documentation
+	of the "ada-exception" entry instead.
+
 2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Fix the first
 	word of a couple of sentences to start with a capital letter.

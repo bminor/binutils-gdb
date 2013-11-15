@@ -50,6 +50,10 @@ struct mi_parse
     int thread_group; /* At present, the same as inferior number.  */
     int thread;
     int frame;
+
+    /* The language that should be used to evaluate the MI command.
+       Ignored if set to language_unknown.  */
+    enum language language;
   };
 
 /* Attempts to parse CMD returning a ``struct mi_parse''.  If CMD is

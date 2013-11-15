@@ -1,3 +1,186 @@
+2013-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2expr.h (struct dwarf_expr_context_funcs) <read_reg>:
+	Extend the documentation a bit.
+	<get_reg_value>: New field.
+	* dwarf2loc.c (dwarf_expr_get_reg_value)
+	(needs_frame_get_reg_value): New functions.
+	(dwarf_expr_ctx_funcs, needs_frame_ctx_funcs): Add "get_reg_value"
+	callback.
+	* dwarf2-frame.c (get_reg_value): New function.
+	(dwarf2_frame_ctx_funcs): Add "get_reg_value" callback.
+	* dwarf2expr.c (execute_stack_op) <DW_OP_GNU_regval_type>:
+	Use new callback to compute result_val.
+
+2013-11-15  Alan Modra  <amodra@gmail.com>
+
+	* ppc64-tdep.c (ppc64_plt_entry_point): Renamed from..
+	(ppc64_desc_entry_point): ..this.  Update comments here and at
+	call points.
+	(ppc64_standard_linkage1, ppc64_standard_linkage2,
+	ppc64_standard_linkage3): Update comments.
+	(ppc64_standard_linkage4, ppc64_standard_linkage5,
+	(ppc64_standard_linkage6, ppc64_standard_linkage7): New insn
+	patterns.
+	(ppc64_standard_linkage4_target): New function.
+	(ppc64_skip_trampoline_code): Skip ELFv2 patterns too.
+	* rs6000-tdep.c (skip_prologue): Skip ELFv2 r2 setup.  Correct
+	nop match.  Fix comment wrap.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_signal_stop): Move STOP_QUIETLY,
+	STOP_QUIETLY_REMOTE and 'stop_after_trap' handling earlier.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (struct execution_control_state)
+	<stepped_after_stopped_by_watchpoint>: New field.
+	(get_inferior_stop_soon): New function.
+	(handle_inferior_event): 'stepped_after_stopped_by_watchpoint' was
+	moved to struct execution_control_state -- adjust.  Use
+	get_inferior_stop_soon.  Split TARGET_WAITKIND_STOPPED handling to
+	new function.
+	(handle_signal_stop): New function, factored out from
+	handle_inferior_event.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
+	* break-catch-sig.c (signal_catchpoint_explains_signal): Adjust to
+	return a boolean.
+	* breakpoint.c (bpstat_explains_signal): Adjust to return a
+	boolean.
+	(explains_signal_watchpoint, base_breakpoint_explains_signal):
+	Adjust to return a boolean.
+	* breakpoint.h (enum bpstat_signal_value): Delete.
+	(struct breakpoint_ops) <explains_signal>: New returns a boolean.
+	(bpstat_explains_signal): Likewise.
+	* infrun.c (handle_inferior_event) <random signal checks>:
+	bpstat_explains_signal now returns a boolean - adjust.  No longer
+	consider hiding signals.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (bpstat_explains_signal) <Moribund locations>:
+	Return BPSTAT_SIGNAL_PASS instead of BPSTAT_SIGNAL_HIDE.
+	(explains_signal_watchpoint): Return BPSTAT_SIGNAL_PASS instead of
+	BPSTAT_SIGNAL_HIDE.
+	(base_breakpoint_explains_signal): Return BPSTAT_SIGNAL_PASS
+	instead of BPSTAT_SIGNAL_HIDE.
+	* infrun.c (handle_inferior_event): Rework random signal checks.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (struct execution_control_state): Remove
+	'random_signal' field.
+	(handle_syscall_event): Use bpstat_causes_stop instead of
+	bpstat_explains_signal.  Don't set ecs->random_signal.
+	(handle_inferior_event): New 'random_signal' local.
+	<TARGET_WAITKIND_FORKED, TARGET_WAITKIND_VFORKED,
+	TARGET_WAITKIND_EXECD>: Use bpstat_causes_stop instead of
+	bpstat_explains_signal.  Don't set ecs->random_signal.
+	<TARGET_WAITKIND_STOPPED>: Adjust to use local instead of
+	ecs->random_signal.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_inferior_event): Move comment from the
+	function's body to the function's description, adjusted.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+
+	* infrun.c (handle_inferior_event) <TARGET_WAITKIND_LOADED>:
+	Handle STOP_QUIETLY_NO_SIGSTOP and STOP_QUIETLY_REMOTE here.
+	Assert we never fall through out of the TARGET_WAITKIND_LOADED
+	case.
+
+2013-11-14  Tom Tromey  <tromey@redhat.com>
+
+	* python/py-linetable.c (ltpy_has_line)
+	(ltpy_get_all_source_lines): Fix loop termination condition.
+
+2013-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-parse.h (struct mi_parse) <language>: New field.
+	* mi/mi-main.c (mi_cmd_execute): Temporarily set language to
+	PARSE->LANGUAGE during command execution, if set.
+	* mi/mi-parse.c: Add "language.h" #include.
+	(mi_parse): Add parsing of "--language" command option.
+
+	* NEWS: Add entry mentioning the new "--language" command option.
+
+2013-11-14  Pedro Alves  <palves@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* cli/cli-utils.h (extract_arg_const): Add declaration.
+	* cli/cli-utils.c (extract_arg_const): New function.
+	(extract_arg): Reimplement using extract_arg_const.
+
+2013-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h: Add "symtab.h" #include.
+
+2013-11-13  Doug Evans  <xdje42@gmail.com>
+
+	* breakpoint.c (bpstat_check_breakpoint_conditions): For thread
+	specific breakpoints, don't evaluate breakpoint condition if
+	different thread.
+
+2013-11-13  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/7935
+	PR c++/10541
+	* cp-support.c (insepct_type): Add support for substituting
+	namespace aliases, too.
+	* dwarf2read.c (scan_partial_symbols): Add a partial symbol
+	for DW_TAG_imported_declaration.
+	(add_partial_symbol): Likewise.
+	(process_die): Handle namespace aliases with
+	read_namespace_alias.
+	(die_needs_namespace): Add DW_TAG_imported_declaration.
+	(read_namespace_alias): New function.
+	(load_partial_dies): Load DW_TAG_imported_declaration, too.
+	(new_symbol_full): Handle DW_TAG_imported_declaration.
+
+2013-11-13  Keith Seitz  <keiths@redhat.com>
+
+	* p-exp.y (uptok): Make first parameter const.
+	(yylex): Make `tokstart' and `tokptr' const.
+	Don't copy the lexer input to a temporary buffer.
+	Make `p' const.
+	Remove const workaround for parse_escape.
+	Create a temporary buffer for a convenience variable instead
+	of doing in-place modification of the input.
+	If a match is found with a different case from the input,
+	do not change the input at all.
+	Use `tmp' to construct the resultant stoken instead of
+	`tokstart'.
+
+2013-11-13  Doug Evans  <xdje42@gmail.com>
+
+	* breakpoint.c (breakpoint_cond_eval): Fix and enhance comment.
+
+2013-11-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c (mi_cmd_list_features): Replace "info-ada-exceptions"
+	entry with "ada-exceptions".
+
+2013-11-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* symfile.c (reread_symbols): Move call to set_objfile_per_bfd
+	after re-initialization of OBJFILE's obstack.
+
+2013-11-12  Doug Evans  <xdje42@gmail.com>
+
+	* breakpoint.c (bpstat_check_breakpoint_conditions): Assert
+	bs->stop != 0 on entry.  Update function comment.  Simplify early
+	exit for frame mismatch.  Reindent rest of function.
+
+2013-11-12  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* objc-lang.c (uniquify_strings): Prevent invoking qsort with
+	NULL.
+
 2013-11-12  Doug Evans  <dje@google.com>
 
 	Work around gold/15646.
@@ -160,8 +343,8 @@
 
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
 
-        PR python/15747
-        * python/py-cmd.c: Add COMPLETE_EXPRESSION constant.
+	PR python/15747
+	* python/py-cmd.c: Add COMPLETE_EXPRESSION constant.
 
 2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
 
@@ -1073,7 +1256,7 @@
 	(discard_pending_stop_replies): Return early if notif_state is
 	NULL.  Adjust.  Don't check INF is NULL.
 	(remote_notif_get_pending_events): Adjust.
- 	(discard_pending_stop_replies_in_queue): New function.
+	(discard_pending_stop_replies_in_queue): New function.
 	(remote_wait_ns): Likewise.
 
 2013-10-04  Yao Qi  <yao@codesourcery.com>
@@ -2246,8 +2429,8 @@
             Pedro Alves  <palves@redhat.com>
 
 	* symfile.c (add_symbol_file_command): Error out on unknown
-        option.  Handle EXPECTING_SEC_ADDR/EXPECTING_SEC_NAME before '-'
-        options and collapse into single conditional branch.
+	option.  Handle EXPECTING_SEC_ADDR/EXPECTING_SEC_NAME before '-'
+	options and collapse into single conditional branch.
 
 2013-09-03  Luis Machado  <lgustavo@codesourcery.com>
 

@@ -21,8 +21,8 @@
 int
 main ()
 {
-  execl ("gdb.multi/multi-arch-exec-hello",
-         "gdb.multi/multi-arch-exec-hello",
+  execl (BASEDIR "/multi-arch-exec-hello",
+         BASEDIR "/multi-arch-exec-hello",
          (char *) NULL);
   perror ("execl failed");
   exit (1);

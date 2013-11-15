@@ -1612,6 +1612,8 @@ static void read_module (struct die_info *die, struct dwarf2_cu *cu);
 
 static void read_import_statement (struct die_info *die, struct dwarf2_cu *);
 
+static int read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu);
+
 static struct type *read_module_type (struct die_info *die,
 				      struct dwarf2_cu *cu);
 
@@ -6517,6 +6519,9 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 			       cu->per_cu->imported_symtabs, per_cu);
 	      }
 	      break;
+	    case DW_TAG_imported_declaration:
+	      add_partial_symbol (pdi, cu);
+	      break;
 	    default:
 	      break;
 	    }
@@ -6788,6 +6793,7 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
+    case DW_TAG_imported_declaration:
     case DW_TAG_namespace:
       add_psymbol_to_list (actual_name, strlen (actual_name),
 			   built_actual_name != NULL,
@@ -8061,6 +8067,10 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
       read_module (die, cu);
       break;
     case DW_TAG_imported_declaration:
+      cu->processing_has_namespace_info = 1;
+      if (read_namespace_alias (die, cu))
+	break;
+      /* The declaration is not a global namespace alias: fall through.  */
     case DW_TAG_imported_module:
       cu->processing_has_namespace_info = 1;
       if (die->child != NULL && (die->tag == DW_TAG_imported_declaration
@@ -8103,6 +8113,7 @@ die_needs_namespace (struct die_info *die, struct dwarf2_cu *cu)
     case DW_TAG_enumerator:
     case DW_TAG_subprogram:
     case DW_TAG_member:
+    case DW_TAG_imported_declaration:
       return 1;
 
     case DW_TAG_variable:
@@ -8520,6 +8531,66 @@ dwarf2_physname (const char *name, struct die_info *die, struct dwarf2_cu *cu)
 
   do_cleanups (back_to);
   return retval;
+}
+
+/* Inspect DIE in CU for a namespace alias.  If one exists, record
+   a new symbol for it.
+
+   Returns 1 if a namespace alias was recorded, 0 otherwise.  */
+
+static int
+read_namespace_alias (struct die_info *die, struct dwarf2_cu *cu)
+{
+  struct attribute *attr;
+
+  /* If the die does not have a name, this is not a namespace
+     alias.  */
+  attr = dwarf2_attr (die, DW_AT_name, cu);
+  if (attr != NULL)
+    {
+      int num;
+      struct die_info *d = die;
+      struct dwarf2_cu *imported_cu = cu;
+
+      /* If the compiler has nested DW_AT_imported_declaration DIEs,
+	 keep inspecting DIEs until we hit the underlying import.  */
+#define MAX_NESTED_IMPORTED_DECLARATIONS 100
+      for (num = 0; num  < MAX_NESTED_IMPORTED_DECLARATIONS; ++num)
+	{
+	  attr = dwarf2_attr (d, DW_AT_import, cu);
+	  if (attr == NULL)
+	    break;
+
+	  d = follow_die_ref (d, attr, &imported_cu);
+	  if (d->tag != DW_TAG_imported_declaration)
+	    break;
+	}
+
+      if (num == MAX_NESTED_IMPORTED_DECLARATIONS)
+	{
+	  complaint (&symfile_complaints,
+		     _("DIE at 0x%x has too many recursively imported "
+		       "declarations"), d->offset.sect_off);
+	  return 0;
+	}
+
+      if (attr != NULL)
+	{
+	  struct type *type;
+	  sect_offset offset = dwarf2_get_ref_die_offset (attr);
+
+	  type = get_die_type_at_offset (offset, cu->per_cu);
+	  if (type != NULL && TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
+	    {
+	      /* This declaration is a global namespace alias.  Add
+		 a symbol for it whose type is the aliased namespace.  */
+	      new_symbol (die, type, cu);
+	      return 1;
+	    }
+	}
+    }
+
+  return 0;
 }
 
 /* Read the import statement specified by the given die and record it.  */
@@ -14882,7 +14953,8 @@ load_partial_dies (const struct die_reader_specs *reader,
 	  && abbrev->tag != DW_TAG_namespace
 	  && abbrev->tag != DW_TAG_module
 	  && abbrev->tag != DW_TAG_member
-	  && abbrev->tag != DW_TAG_imported_unit)
+	  && abbrev->tag != DW_TAG_imported_unit
+	  && abbrev->tag != DW_TAG_imported_declaration)
 	{
 	  /* Otherwise we skip to the next sibling, if any.  */
 	  info_ptr = skip_one_die (reader, info_ptr + bytes_read, abbrev);
@@ -17613,6 +17685,7 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 			   ? &global_symbols : cu->list_in_scope);
 	  }
 	  break;
+	case DW_TAG_imported_declaration:
 	case DW_TAG_namespace:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
 	  list_to_add = &global_symbols;

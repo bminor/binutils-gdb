@@ -1815,7 +1815,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "data-read-memory-bytes");
       ui_out_field_string (uiout, NULL, "breakpoint-notifications");
       ui_out_field_string (uiout, NULL, "ada-task-info");
-      ui_out_field_string (uiout, NULL, "info-ada-exceptions");
+      ui_out_field_string (uiout, NULL, "ada-exceptions");
       
 #if HAVE_PYTHON
       if (gdb_python_initialized)
@@ -2122,6 +2122,7 @@ static void
 mi_cmd_execute (struct mi_parse *parse)
 {
   struct cleanup *cleanup;
+  enum language saved_language;
 
   cleanup = prepare_execute_command ();
 
@@ -2181,6 +2182,12 @@ mi_cmd_execute (struct mi_parse *parse)
 	select_frame (fid);
       else
 	error (_("Invalid frame id: %d"), frame);
+    }
+
+  if (parse->language != language_unknown)
+    {
+      make_cleanup_restore_current_language ();
+      set_language (parse->language);
     }
 
   current_context = parse;
