@@ -14,6 +14,8 @@ _start:
 	vcvtps2pd (%eax){%k1}, %zmm1
 	vcvtps2pd (%eax){z}, %zmm1
 
+	vgatherqpd (%rdi,%zmm2,8),%zmm6
+
 	.intel_syntax noprefix
 	mov eax{k1}, {sae}
 	mov eax, {sae}
@@ -27,6 +29,8 @@ _start:
 
 	vcvtps2pd zmm1, [eax]{k1}
 	vcvtps2pd zmm1, [eax]{z}
+
+	vgatherqpd zmm6, ZMMWORD PTR [rdi+zmm2*8]
 
 	vaddps zmm2, zmm1, QWORD PTR [eax]{1to8}
 	vaddps zmm2, zmm1, QWORD PTR [eax]{1to16}

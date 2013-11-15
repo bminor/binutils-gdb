@@ -1,3 +1,9 @@
+2013-11-15  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	* gas/i386/inval-avx512f.s: Add invalid test for gather instruction
+	with default mask.
+	* gas/i386/inval-avx512f.l: Update correspondingly.
+
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/deprecated.d: New file.
