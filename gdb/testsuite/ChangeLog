@@ -1,5 +1,9 @@
 2013-11-15  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.python/py-breakpoint.exp: Make tests have unique names.
+
+2013-11-15  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.python/py-breakpoint.exp: Reformat for 80 columns.
 
 2013-11-15  Doug Evans  <xdje42@gmail.com>

@@ -43,13 +43,14 @@ proc test_bkpt_basic { } {
 	gdb_py_test_silent_cmd "python blist = gdb.breakpoints()" \
 	    "Get Breakpoint List" 0
 	gdb_test "python print (blist\[0\])" \
-	    "<gdb.Breakpoint object at $hex>" "Check obj exists"
+	    "<gdb.Breakpoint object at $hex>" "Check obj exists @main"
 	gdb_test "python print (blist\[0\].location)" \
-	    "main." "Check breakpoint location"
+	    "main." "Check breakpoint location @main"
 
 	set mult_line [gdb_get_line_number "Break at multiply."]
 	gdb_breakpoint ${mult_line}
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply" \
+	    ".*Break at multiply.*"
 
 	# Check that the Python breakpoint code noted the addition of a
 	# breakpoint "behind the scenes". 
@@ -58,38 +59,40 @@ proc test_bkpt_basic { } {
 	gdb_test "python print (len(blist))" \
 	    "2" "Check for two breakpoints"
 	gdb_test "python print (blist\[0\])" \
-	    "<gdb.Breakpoint object at $hex>" "Check obj exists"
+	    "<gdb.Breakpoint object at $hex>" "Check obj exists @main 2"
 	gdb_test "python print (blist\[0\].location)" \
-	    "main." "Check breakpoint location"
+	    "main." "Check breakpoint location @main 2"
 	gdb_test "python print (blist\[1\])" \
-	    "<gdb.Breakpoint object at $hex>" "Check obj exists"
+	    "<gdb.Breakpoint object at $hex>" "Check obj exists @mult_line"
 
 	gdb_test "python print (blist\[1\].location)" \
 	    "py-breakpoint\.c:${mult_line}*" \
-	    "Check breakpoint location"
+	    "Check breakpoint location @mult_line"
 
 	# Check hit and ignore counts. 
 	gdb_test "python print (blist\[1\].hit_count)" \
-	    "1" "Check breakpoint hit count"
+	    "1" "Check breakpoint hit count @1"
 	gdb_py_test_silent_cmd "python blist\[1\].ignore_count = 4" \
 	    "Set breakpoint hit count" 0
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply @6" \
+	    ".*Break at multiply.*"
 	gdb_test "python print (blist\[1\].hit_count)" \
-	    "6" "Check breakpoint hit count"
+	    "6" "Check breakpoint hit count @6"
 	gdb_test "print result" \
 	    " = 545" "Check expected variable result after 6 iterations"
 
 	# Test breakpoint is enabled and disabled correctly..
 	gdb_breakpoint [gdb_get_line_number "Break at add."]
-	gdb_continue_to_breakpoint "Break at add."
+	gdb_continue_to_breakpoint "Break at add 1" ".*Break at add.*"
 	gdb_test "python print (blist\[1\].enabled)" \
 	    "True" "Check breakpoint enabled."
 	gdb_py_test_silent_cmd  "python blist\[1\].enabled = False" \
 	    "Set breakpoint disabled." 0
-	gdb_continue_to_breakpoint "Break at add."
+	gdb_continue_to_breakpoint "Break at add 2" ".*Break at add.*"
 	gdb_py_test_silent_cmd  "python blist\[1\].enabled = True" \
 	    "Set breakpoint enabled." 0
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply after re-enable" \
+	    ".*Break at multiply.*"
 
 	# Test other getters and setters.
 	gdb_py_test_silent_cmd "python blist = gdb.breakpoints()" \
@@ -99,11 +102,11 @@ proc test_bkpt_basic { } {
 	gdb_test "python print (blist\[1\].type == gdb.BP_BREAKPOINT)" \
 	    "True" "Check breakpoint type"
 	gdb_test "python print (blist\[0\].number)" \
-	    "1" "Check breakpoint number"
+	    "1" "Check breakpoint number 0"
 	gdb_test "python print (blist\[1\].number)" \
-	    "2" "Check breakpoint number"
+	    "2" "Check breakpoint number 1"
 	gdb_test "python print (blist\[2\].number)" \
-	    "3" "Check breakpoint number"
+	    "3" "Check breakpoint number 2"
     }
 }
 
@@ -161,19 +164,22 @@ proc test_bkpt_cond_and_cmds { } {
 	set bp_location1 [gdb_get_line_number "Break at multiply."]
 	gdb_py_test_silent_cmd "python bp1 = gdb.Breakpoint (\"$bp_location1\")" \
 	    "Set breakpoint" 0
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply" \
+	    ".*Break at multiply.*"
 	gdb_py_test_silent_cmd "python bp1.condition = \"i == 5\"" \
 	    "Set breakpoint" 0
 	gdb_test "python print (bp1.condition)" "i == 5" \
 	    "Test conditional has been set"
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply @5" \
+	    ".*Break at multiply.*"
 	gdb_test "print i" \
 	    "5" "Test conditional breakpoint stopped after five iterations"
 	gdb_py_test_silent_cmd "python bp1.condition = None" \
 	    "Clear condition" 0
 	gdb_test "python print (bp1.condition)" \
 	    "None" "Test conditional read"
-	gdb_continue_to_breakpoint "Break at multiply."
+	gdb_continue_to_breakpoint "Break at multiply @6" \
+	    ".*Break at multiply.*"
 	gdb_test "print i" \
 	    "6" "Test breakpoint stopped after six iterations"
 
@@ -213,11 +219,11 @@ proc test_bkpt_invisible { } {
 	gdb_py_test_silent_cmd "python ilist = gdb.breakpoints()" \
 	    "Get Breakpoint List" 0
 	gdb_test "python print (ilist\[0\])" \
-	    "<gdb.Breakpoint object at $hex>" "Check invisible bp obj exists"
+	    "<gdb.Breakpoint object at $hex>" "Check invisible bp obj exists 1"
 	gdb_test "python print (ilist\[0\].location)" \
-	    "py-breakpoint\.c:$ibp_location*" "Check breakpoint location"
+	    "py-breakpoint\.c:$ibp_location*" "Check breakpoint location 1"
 	gdb_test "python print (ilist\[0\].visible)" \
-	    "True" "Check breakpoint visibility"
+	    "True" "Check breakpoint visibility 1"
 	gdb_test "info breakpoints" "py-breakpoint\.c:$ibp_location.*" \
 	    "Check info breakpoints shows visible breakpoints"
 	delete_breakpoints
@@ -226,11 +232,11 @@ proc test_bkpt_invisible { } {
 	gdb_py_test_silent_cmd "python ilist = gdb.breakpoints()" \
 	    "Get Breakpoint List" 0
 	gdb_test "python print (ilist\[0\])" \
-	    "<gdb.Breakpoint object at $hex>" "Check invisible bp obj exists"
+	    "<gdb.Breakpoint object at $hex>" "Check invisible bp obj exists 2"
 	gdb_test "python print (ilist\[0\].location)" \
-	    "py-breakpoint\.c:$ibp_location*" "Check breakpoint location"
+	    "py-breakpoint\.c:$ibp_location*" "Check breakpoint location 2"
 	gdb_test "python print (ilist\[0\].visible)" \
-	    "False" "Check breakpoint visibility"
+	    "False" "Check breakpoint visibility 2"
 	gdb_test "info breakpoints" "No breakpoints or watchpoints.*" \
 	    "Check info breakpoints does not show invisible breakpoints"
 	gdb_test "maint info breakpoints" \
@@ -349,16 +355,16 @@ proc test_bkpt_eval_funcs { } {
 	    "Set breakpoint" 0
 	gdb_py_test_silent_cmd "python never_eval_bp1 = bp_also_eval(\"$end_location\")" \
 	    "Set breakpoint" 0
-	gdb_continue_to_breakpoint "Break at multiply." \
+	gdb_continue_to_breakpoint "Break at multiply, i==3" \
 	    ".*/$srcfile:$bp_location2.*"
 	gdb_test "print i" \
 	    "3" "Check inferior value matches python accounting"
 	gdb_test "python print (eval_bp1.inf_i)" \
 	    "3" "Check python accounting matches inferior"
 	gdb_test "python print (also_eval_bp1.count)" "4" \
-	    "Check non firing same-location breakpoint eval function was also called at each stop."
+	    "Check non firing same-location also_eval_bp1 function was also called at each stop."
 	gdb_test "python print (eval_bp1.count)" "4" \
-	    "Check non firing same-location breakpoint eval function was also called at each stop."
+	    "Check non firing same-location eval_bp1 function was also called at each stop."
 
 	delete_breakpoints
 	set cond_bp [gdb_get_line_number "Break at multiply."]
@@ -388,7 +394,7 @@ proc test_bkpt_eval_funcs { } {
 	    "Set breakpoint" 0
 	gdb_test "python print (check_eval.count)" "0" \
 	    "Test that evaluate function has not been yet executed (ie count = 0)"
-	gdb_continue_to_breakpoint "Break at multiply." \
+	gdb_continue_to_breakpoint "Break at multiply, count==1" \
 	    ".*/$srcfile:$bp_location2.*"
 	gdb_test "python print (check_eval.count)" "1" \
 	    "Test that evaluate function is run when location also has normal bp"
