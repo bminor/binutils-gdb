@@ -230,6 +230,12 @@ set_fatal_syntax_error (const char *error)
 {
   set_error (AARCH64_OPDE_FATAL_SYNTAX_ERROR, error);
 }
+
+static inline void
+set_other_error (const char *error)
+{
+  set_error (AARCH64_OPDE_OTHER_ERROR, error);
+}
 
 /* Number of littlenums required to hold an extended precision number.  */
 #define MAX_LITTLENUMS 6
@@ -3267,13 +3273,15 @@ parse_barrier (char **str)
 }
 
 /* Parse a system register or a PSTATE field name for an MSR/MRS instruction.
-   Returns the encoding for the option, or PARSE_FAIL.
+   Returns the encoding for the option, or PARSE_FAIL.  If SYS_REG is not
+   NULL, return in *SYS_REG the found descriptor.
 
    If IMPLE_DEFINED_P is non-zero, the function will also try to parse the
    implementation defined system register name S3_<op1>_<Cn>_<Cm>_<op2>.  */
 
 static int
-parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
+parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p,
+	       const aarch64_sys_reg ** sys_reg)
 {
   char *p, *q;
   char buf[32];
@@ -3319,6 +3327,9 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
 "removed in a future release"), buf);
       value = o->value;
     }
+
+  if (sys_reg)
+    *sys_reg = o;
 
   *str = q;
   return value;
@@ -5180,17 +5191,31 @@ parse_operands (char *str, const aarch64_opcode *opcode)
 	  break;
 
 	case AARCH64_OPND_SYSREG:
-	  if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1))
-	      == PARSE_FAIL)
 	    {
-	      set_syntax_error (_("unknown or missing system register name"));
-	      goto failure;
+	      const aarch64_sys_reg *sys_reg = NULL;
+	      if ((val = parse_sys_reg (&str, aarch64_sys_regs_hsh, 1,
+					&sys_reg))
+		  == PARSE_FAIL)
+		{
+		  set_syntax_error (_("unknown or missing system register name"));
+		  goto failure;
+		}
+	      else if (sys_reg && i == 0 && aarch64_sys_reg_readonly_p (sys_reg))
+		{
+		  set_other_error (_("read-only register"));
+		  goto failure;
+		}
+	      else if (sys_reg && i == 1 && aarch64_sys_reg_writeonly_p (sys_reg))
+		{
+		  set_other_error (_("write-only register"));
+		  goto failure;
+		}
+	      inst.base.operands[i].sysreg = val;
 	    }
-	  inst.base.operands[i].sysreg = val;
 	  break;
 
 	case AARCH64_OPND_PSTATEFIELD:
-	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0))
+	  if ((val = parse_sys_reg (&str, aarch64_pstatefield_hsh, 0, NULL))
 	      == PARSE_FAIL)
 	    {
 	      set_syntax_error (_("unknown or missing PSTATE field name"));

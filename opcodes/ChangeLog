@@ -1,3 +1,11 @@
+2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (CPENT): New define.
+	(F_READONLY, F_WRITEONLY): Likewise.
+	(aarch64_sys_regs): Add trace unit registers.
+	(aarch64_sys_reg_readonly_p): New function.
+	(aarch64_sys_reg_writeonly_p): Ditto.
+
 2013-11-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/16140

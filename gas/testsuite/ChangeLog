@@ -1,3 +1,13 @@
+2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/diagnostic.s: Add tests.
+	* gas/aarch64/diagnostic.l: Update.
+	* gas/aarch64/tracereg-illegal.d: New file.
+	* gas/aarch64/tracereg-illegal.l: Ditto.
+	* gas/aarch64/tracereg-illegal.s: Ditto.
+	* gas/aarch64/tracereg.d: Ditto.
+	* gas/aarch64/tracereg.s: Ditto.
+
 2013-11-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master

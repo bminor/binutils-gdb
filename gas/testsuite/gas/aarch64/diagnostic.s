@@ -99,3 +99,5 @@
 	cinc	w0, w1, nv
 	cset	w0, al
 	cset	w0, nv
+	msr	trcidr7, x7
+	mrs	x7, trcoslar
