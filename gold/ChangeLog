@@ -1,6 +1,40 @@
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	Apply changes from mainline to 2.24
+	2013-11-15  Alan Modra  <amodra@gmail.com>
+	* powerpc.cc (Target_powerpc::glink_section): Provide non-const
+	accessor.
+	(Target_powerpc::Branch_info::make_stub): Make global entry stubs.
+	Only call ppc64_local_entry_offset for 64-bit.  Restrict
+	symval_for_branch lookup to ELFv1.
+	(Stub_table::add_plt_call_entry): Use unsigned int off.
+	(Output_data_glink::Address, invalid_address): New.
+	(Output_data_glink::add_eh_frame): Move out of line.  Add
+	support for ELFv2.
+	(Output_data_glink::add_global_entry, find_global_entry,
+	global_entry_address): New functions.
+	(Output_data_glink::global_entry_stubs_, end_branch_table_,
+	ge_size): New variables.
+	(Output_data_glink::set_final_data_size): Add global entry
+	stub sizing.
+	(Output_data_glink::do_write): Write global entry stubs.
+	(Target_powerpc::Scan::reloc_needs_plt_for_ifunc): Add target
+	parameter.  Return true for ELFv2.  Adjust callers.
+	(Target_powerpc::Scan::local, global): Restrict opd lookup to
+	ELFv1.  Similarly for ifunc and dynamic relocation processing
+	specific to ELFv1.  Recognize that symbols are defined on
+	their plt entries for ELFv2.
+	(Target_powerpc::symval_for_branch): Assert if called for
+	ELFv2 or ppc32.
+	(Target_powerpc::Relocate::relocate): Use global entry plt
+	stub for symbol value if such exists on ELFv2.
+	(Target_powerpc::Relocate::relocate): Don't call
+	symval_for_branch when ELFv2.  Do adjust for local entry
+	offset when ELFv2.
+	(Target_powerpc::do_dynsym_value): Set symbols to global entry
+	plt stub for ELFv2.
+	(Target_powerpc::do_plt_address_for_global): Similarly.
+
 	2013-11-04  Alan Modra  <amodra@gmail.com>
 	* symtab.h (Symbol::Reference_flags): Add FUNC_DESC_ABI.
 	(Symbol::needs_dynamic_reloc): Test new flag.
