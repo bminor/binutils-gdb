@@ -1,3 +1,8 @@
+2013-11-15  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-breakpoint.exp: Split up into several functions,
+	each with their own test prefix.
+
 2013-11-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/O2_float_param: New testcase.
