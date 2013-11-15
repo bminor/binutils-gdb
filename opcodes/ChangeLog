@@ -1,3 +1,8 @@
+2013-11-15  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add RD_2 to "mfcr" and
+	"mtcr".
+
 2013-11-11  Catherine Moore  <clm@codesourcery.com>
 
 	* mips-dis.c (print_insn_mips): Use
