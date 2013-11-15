@@ -1,3 +1,17 @@
+2013-11-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* info_exc/const.ads (Aint_Global_GDB_E): Renames Aint_Global_E.
+	* info_exc/foo.adb: Adjust to new exception name.
+	* info_exc.exp: Adjust after exception renaming in const.ads.
+	Update "info exception global" test to test "info exceptions
+	global_gdb" instead.
+
+	* mi_exc_info/const.ads (Aint_Global_GDB_E): Renames Aint_Global_E.
+	* mi_exc_info/foo.adb (Adjust to new exception name.
+	* mi_exc_info.exp: Adjust after exception renaming in const.ads.
+	Update "-info-ada-exceptions global" test to test
+	"-info-ada-exceptions global_gdb" instead.
+
 2013-11-15  Luis Machado  <lgustavo@codesourcery.com>
 
 	* lib/mi-support.exp (mi_gdb_test): Expect different formats

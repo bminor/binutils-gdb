@@ -46,19 +46,19 @@ gdb_test "info exceptions" \
                 "storage_error: $hex" \
                 "tasking_error: $hex" \
                 ".*" \
-                "const.aint_global_e: $hex" \
+                "const.aint_global_gdb_e: $hex" \
                 ".*"]
 
 gdb_test "info exceptions task" \
     [multi_line "All Ada exceptions matching regular expression \"task\":" \
                 "tasking_error: $hex"]
 
-gdb_test "info exceptions global" \
-    [multi_line "All Ada exceptions matching regular expression \"global\":" \
-                "const.aint_global_e: $hex"]
+gdb_test "info exceptions global_gdb" \
+    [multi_line "All Ada exceptions matching regular expression \"global_gdb\":" \
+                "const.aint_global_gdb_e: $hex"]
 
 gdb_test "info exceptions const.aint" \
     [multi_line "All Ada exceptions matching regular expression \"const\\.aint\":" \
                 "constraint_error: $hex" \
-                "const.aint_global_e: $hex"]
+                "const.aint_global_gdb_e: $hex"]
 
