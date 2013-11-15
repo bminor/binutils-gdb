@@ -34,6 +34,11 @@ proc multi_line { args } {
 
 clean_restart ${testfile}
 
+if ![runto_main] then {
+   fail "Cannot run to main, testcase aborted"
+   return 0
+}
+
 gdb_test "info exceptions" \
     [multi_line "All defined Ada exceptions:" \
                 "constraint_error: $hex" \
