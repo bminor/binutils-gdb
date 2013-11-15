@@ -1,5 +1,10 @@
 2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* gdb.base/vla-datatypes.c: New file.
+	* gdb.base/vla-datatypes.exp: New file.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* gdb.base/vla-ptr.c: New file.
 	* gdb.base/vla-ptr.exp: New file.
 
