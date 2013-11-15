@@ -32,6 +32,9 @@
   Before, the former would print "<optimized out>", and the latter
   "*value not available*".
 
+* New script contrib/gdb-add-index.sh for adding .gdb_index sections
+  to binaries.
+
 * Python scripting
 
   ** Frame filters and frame decorators have been added.
