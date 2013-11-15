@@ -1,5 +1,10 @@
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* gdb.base/vla-multi.c: New file.
+	* gdb.base/vla-multi.exp: New file.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* gdb.dwarf2/count.exp: New file.
 
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
