@@ -6801,6 +6801,13 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   &objfile->global_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
       break;
+    case DW_TAG_module:
+      add_psymbol_to_list (actual_name, strlen (actual_name),
+			   built_actual_name != NULL,
+			   MODULE_DOMAIN, LOC_TYPEDEF,
+			   &objfile->global_psymbols,
+			   0, (CORE_ADDR) 0, cu->language, objfile);
+      break;
     case DW_TAG_class_type:
     case DW_TAG_interface_type:
     case DW_TAG_structure_type:
@@ -6871,6 +6878,10 @@ static void
 add_partial_module (struct partial_die_info *pdi, CORE_ADDR *lowpc,
 		    CORE_ADDR *highpc, int need_pc, struct dwarf2_cu *cu)
 {
+  /* Add a symbol for the namespace.  */
+
+  add_partial_symbol (pdi, cu);
+
   /* Now scan partial symbols in that module.  */
 
   if (pdi->has_children)
@@ -13674,6 +13685,10 @@ static void
 read_module (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct die_info *child_die = die->child;
+  struct type *type;
+
+  type = read_type_die (die, cu);
+  new_symbol (die, type, cu);
 
   while (child_die && child_die->tag)
     {
@@ -17702,6 +17717,11 @@ new_symbol_full (struct die_info *die, struct type *type, struct dwarf2_cu *cu,
 	case DW_TAG_imported_declaration:
 	case DW_TAG_namespace:
 	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
+	  list_to_add = &global_symbols;
+	  break;
+	case DW_TAG_module:
+	  SYMBOL_ACLASS_INDEX (sym) = LOC_TYPEDEF;
+	  SYMBOL_DOMAIN (sym) = MODULE_DOMAIN;
 	  list_to_add = &global_symbols;
 	  break;
 	case DW_TAG_common_block:

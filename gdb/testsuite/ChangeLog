@@ -1,5 +1,11 @@
 2013-12-19  Keven Boell  <keven.boell@intel.com>
 
+	* gdb.fortran/module.exp: Completion matches fortran module
+	names as well. ptype/whatis on modules return a proper type.
+	Add new check for having the correct scope.
+
+2013-12-19  Keven Boell  <keven.boell@intel.com>
+
 	* gdb.fortran/type.f90: New file.
 	* gdb.fortran/whatis_type.f90: New file.
 

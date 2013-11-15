@@ -418,6 +418,10 @@ typedef enum domain_enum_tag
 
   STRUCT_DOMAIN,
 
+  /* MODULE_DOMAIN is used in Fortran to hold module type names.  */
+
+  MODULE_DOMAIN,
+
   /* LABEL_DOMAIN may be used for names of labels (for gotos).  */
 
   LABEL_DOMAIN,

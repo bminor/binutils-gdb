@@ -1175,7 +1175,12 @@ yylex (void)
     char *tmp = copy_name (yylval.sval);
     struct symbol *sym;
     struct field_of_this_result is_a_field_of_this;
-    enum domain_enum_tag lookup_domains[] = {STRUCT_DOMAIN, VAR_DOMAIN};
+    enum domain_enum_tag lookup_domains[] =
+    {
+      STRUCT_DOMAIN,
+      VAR_DOMAIN,
+      MODULE_DOMAIN
+    };
     int i;
     int hextype;
 
