@@ -4343,6 +4343,14 @@ check_VecOperands (const insn_template *t)
       return 1;
     }
 
+  /* Check if default mask is allowed.  */
+  if (t->opcode_modifier.nodefmask
+      && (!i.mask || i.mask->mask->reg_num == 0))
+    {
+      i.error = no_default_mask;
+      return 1;
+    }
+
   /* For VSIB byte, we need a vector register for index, and all vector
      registers must be distinct.  */
   if (t->opcode_modifier.vecsib)
@@ -4457,14 +4465,6 @@ check_VecOperands (const insn_template *t)
   if (i.mask && (i.mask->operand != (int) (i.operands - 1)))
     {
       i.error = mask_not_on_destination;
-      return 1;
-    }
-
-  /* Check if default mask is allowed.  */
-  if (t->opcode_modifier.nodefmask
-      && (!i.mask || i.mask->mask->reg_num == 0))
-    {
-      i.error = no_default_mask;
       return 1;
     }
 
