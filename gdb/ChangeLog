@@ -1,3 +1,21 @@
+2013-11-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2expr.h (struct dwarf_expr_context_funcs)
+	<read_addr_from_reg>: Renames "read_reg".
+	* dwarf2-frame.c (read_addr_from_reg): Renames "read_reg".
+	Adjust comment.
+	(dwarf2_frame_ctx_funcs, execute_stack_op, dwarf2_frame_cache):
+	Use read_addr_from_reg in place of read_reg.
+	* dwarf2expr.c (execute_stack_op): Use read_addr_from_reg
+	in place of read_reg.
+	* dwarf2loc.c (dwarf_expr_read_addr_from_reg): Renames
+	dwarf_expr_read_reg.
+	(dwarf_expr_ctx_funcs): Replace dwarf_expr_read_reg
+	with dwarf_expr_read_addr_from_reg.
+	(needs_frame_read_addr_from_reg): Renames needs_frame_read_reg.
+	(needs_frame_ctx_funcs): Replace needs_frame_read_reg with
+	needs_frame_read_addr_from_reg.
+
 2013-11-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (Changes in GDB 7.5) (New commands) (explore): Fix typo.

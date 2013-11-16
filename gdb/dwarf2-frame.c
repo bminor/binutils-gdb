@@ -286,7 +286,7 @@ dwarf2_frame_state_free (void *p)
 /* Helper functions for execute_stack_op.  */
 
 static CORE_ADDR
-read_reg (void *baton, int reg)
+read_addr_from_reg (void *baton, int reg)
 {
   struct frame_info *this_frame = (struct frame_info *) baton;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -301,8 +301,8 @@ read_reg (void *baton, int reg)
   /* Convert the register to an integer.  This returns a LONGEST
      rather than a CORE_ADDR, but unpack_pointer does the same thing
      under the covers, and this makes more sense for non-pointer
-     registers.  Maybe read_reg and the associated interfaces should
-     deal with "struct value" instead of CORE_ADDR.  */
+     registers.  Maybe read_addr_from_reg and the associated interfaces
+     should deal with "struct value" instead of CORE_ADDR.  */
   return unpack_long (register_type (gdbarch, regnum), buf);
 }
 
@@ -358,7 +358,7 @@ register %s (#%d) at %s"),
 
 static const struct dwarf_expr_context_funcs dwarf2_frame_ctx_funcs =
 {
-  read_reg,
+  read_addr_from_reg,
   get_reg_value,
   read_mem,
   ctx_no_get_frame_base,
@@ -397,7 +397,8 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   if (ctx->location == DWARF_VALUE_MEMORY)
     result = dwarf_expr_fetch_address (ctx, 0);
   else if (ctx->location == DWARF_VALUE_REGISTER)
-    result = read_reg (this_frame, value_as_long (dwarf_expr_fetch (ctx, 0)));
+    result = read_addr_from_reg (this_frame,
+				 value_as_long (dwarf_expr_fetch (ctx, 0)));
   else
     {
       /* This is actually invalid DWARF, but if we ever do run across
@@ -1110,7 +1111,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
       switch (fs->regs.cfa_how)
 	{
 	case CFA_REG_OFFSET:
-	  cache->cfa = read_reg (this_frame, fs->regs.cfa_reg);
+	  cache->cfa = read_addr_from_reg (this_frame, fs->regs.cfa_reg);
 	  if (fs->armcc_cfa_offsets_reversed)
 	    cache->cfa -= fs->regs.cfa_offset;
 	  else
