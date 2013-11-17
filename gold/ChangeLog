@@ -1,3 +1,26 @@
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.cc (Target_x86_64<size>::Scan::get_reference_flags):
+	Handle R_X86_64_PC32_BND and R_X86_64_PLT32_BND just like
+	R_X86_64_PC32 and R_X86_64_PLT32, respectively.
+	(Target_x86_64<size>::Scan::local): Likewise.
+	(Target_x86_64<size>::Scan::global): Likewise.
+	(Target_x86_64<size>::Relocate::relocate): Likewise.
+	(Target_x86_64<size>::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+	(Target_x86_64<size>::Scan::check_non_pic(): Handle
+	R_X86_64_PC32_BND.
+
+	* testsuite/Makefile.am (check_PROGRAMS): Add
+	exception_x86_64_bnd_test.
+	(exception_x86_64_bnd_test_SOURCES): New macro.
+	(exception_x86_64_bnd_test_DEPENDENCIES): Likewise.
+	(exception_x86_64_bnd_test_LDFLAGS): Likewise.
+	(exception_x86_64_bnd_test_LDADD): Likewise.
+	(exception_x86_64_bnd_1.o): New rule.
+	(exception_x86_64_bnd_2.o): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.cc (Target_powerpc::glink_section): Provide non-const
