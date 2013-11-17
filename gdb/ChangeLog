@@ -1,3 +1,13 @@
+2013-12-06  Pierre Muller  <muller@sourceware.org>
+
+	Fix completion for pascal language.
+	* p-exp.y (exp : field_exp name): Do not call mark_struct_expression.
+	(exp : field_exp name COMPLETE): New rule.
+	(exp : SIZEOF): Set correct current_type.
+	(last_was_structop): Remove static variable.
+	(yylex): Remove saw_structop local variable.
+	Adapt code to removal of variables above.
+
 2013-12-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* frame.c (get_prev_frame_1): Delete variable "this_id".

@@ -316,8 +316,7 @@ exp	:	field_exp FIELDNAME
 
 
 exp	:	field_exp name
-			{ mark_struct_expression ();
-			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
 			  write_exp_string ($2);
 			  write_exp_elt_opcode (STRUCTOP_STRUCT);
 			  search_field = 0;
@@ -332,7 +331,12 @@ exp	:	field_exp name
 			    }
 			}
 	;
-
+exp	:	field_exp  name COMPLETE
+			{ mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  write_exp_string ($2);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+	;
 exp	:	field_exp COMPLETE
 			{ struct stoken s;
 			  mark_struct_expression ();
@@ -581,13 +585,15 @@ exp	:	VARIABLE
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (parse_type->builtin_int);
+			  current_type = parse_type->builtin_int;
 			  CHECK_TYPEDEF ($3);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
 	;
 
 exp	:	SIZEOF  '(' exp ')'      %prec UNARY
-			{ write_exp_elt_opcode (UNOP_SIZEOF); }
+			{ write_exp_elt_opcode (UNOP_SIZEOF);
+			  current_type = parse_type->builtin_int; }
 
 exp	:	STRING
 			{ /* C strings are converted into array constants with
@@ -1120,11 +1126,6 @@ uptok (const char *tokstart, int namelen)
   return uptokstart;
 }
 
-/* This is set if the previously-returned token was a structure
-   operator  '.'.  This is used only when parsing to
-   do field name completion.  */
-static int last_was_structop;
-
 /* Read one token, getting characters through lexptr.  */
 
 static int
@@ -1139,9 +1140,7 @@ yylex (void)
   int explen, tempbufindex;
   static char *tempbuf;
   static int tempbufsize;
-  int saw_structop = last_was_structop;
 
-  last_was_structop = 0;
  retry:
 
   prev_lexptr = lexptr;
@@ -1178,7 +1177,7 @@ yylex (void)
   switch (c = *tokstart)
     {
     case 0:
-      if (saw_structop && search_field)
+      if (search_field && parse_completion)
 	return COMPLETE;
       else
        return 0;
@@ -1243,8 +1242,6 @@ yylex (void)
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
 	{
-	  if (parse_completion)
-	    last_was_structop = 1;
 	  goto symbol;		/* Nope, must be a symbol.  */
 	}
 
@@ -1535,7 +1532,7 @@ yylex (void)
 
     if (search_field && current_type)
       is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-    if (is_a_field || parse_completion)
+    if (is_a_field)
       sym = NULL;
     else
       sym = lookup_symbol (tmp, expression_context_block,
@@ -1550,7 +1547,7 @@ yylex (void)
          }
        if (search_field && current_type)
 	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-       if (is_a_field || parse_completion)
+       if (is_a_field)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
@@ -1572,7 +1569,7 @@ yylex (void)
           }
        if (search_field && current_type)
 	 is_a_field = (lookup_struct_elt_type (current_type, tmp, 1) != NULL);
-       if (is_a_field || parse_completion)
+       if (is_a_field)
 	 sym = NULL;
        else
 	 sym = lookup_symbol (tmp, expression_context_block,
