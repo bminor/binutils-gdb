@@ -1,3 +1,13 @@
+2013-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/avx512f-nondef.d: Updated for mingw.
+	* gas/i386/mpx-add-bnd-prefix.d: Likewise.
+	* gas/i386/x86-64-avx512f-nondef.d: Likewise.
+	* gas/i386/x86-64-mpx-add-bnd-prefix.d: Likewise.
+	* gas/i386/x86-64-mpx-addr32.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+	* gas/i386/x86-64-sha.d: Likewise.
+
 2013-11-18  Renlin Li  <Renlin.Li@arm.com>
 
 	* gas/arm/attr-march-armv7ve.d: New test case for armv7ve.
