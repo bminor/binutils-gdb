@@ -1,3 +1,15 @@
+2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Revert
+
+	2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (set_other_error): New function.
+	(parse_sys_reg): Add new parameter 'sys_reg' and if non-NULL set
+	the variable to which it points with 'o'.
+	(parse_operands): Update; check for write to read-only system
+	registers or read from write-only ones.
+
 2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (reloc): Add an argument, bnd_prefix, to
@@ -29,7 +41,6 @@
 	the variable to which it points with 'o'.
 	(parse_operands): Update; check for write to read-only system
 	registers or read from write-only ones.
-
 
 2013-11-15  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 

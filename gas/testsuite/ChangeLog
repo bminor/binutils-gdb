@@ -1,3 +1,17 @@
+2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Revert
+
+	2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/diagnostic.s: Add tests.
+	* gas/aarch64/diagnostic.l: Update.
+	* gas/aarch64/tracereg-illegal.d: New file.
+	* gas/aarch64/tracereg-illegal.l: Ditto.
+	* gas/aarch64/tracereg-illegal.s: Ditto.
+	* gas/aarch64/tracereg.d: Ditto.
+	* gas/aarch64/tracereg.s: Ditto.
+
 2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run x86-64-mpx-branch-1 and
