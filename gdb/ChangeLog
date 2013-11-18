@@ -1,3 +1,12 @@
+2013-11-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-tdep.c (sparc_is_annulled_branch_insn): New function.
+	* sparc-tdep.h: And its prototype.
+
+	* sparc64-linux-tdep.c (sparc64_linux_get_longjmp_target): New
+	function.
+	(sparc64_linux_init_abi): Register the get_longjmp_target hook.
+
 2013-11-18  Pedro Alves  <palves@redhat.com>
 
 	* dwarf2-frame.c (read_addr_from_reg): Remove stale comment and
