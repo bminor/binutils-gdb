@@ -1818,6 +1818,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "ada-exceptions");
       ui_out_field_string (uiout, NULL, "language-option");
       ui_out_field_string (uiout, NULL, "info-gdb-mi-command");
+      ui_out_field_string (uiout, NULL, "undefined-command-error-code");
       
 #if HAVE_PYTHON
       if (gdb_python_initialized)
@@ -2023,7 +2024,16 @@ mi_print_exception (const char *token, struct gdb_exception exception)
     fputs_unfiltered ("unknown error", raw_stdout);
   else
     fputstr_unfiltered (exception.message, '"', raw_stdout);
-  fputs_unfiltered ("\"\n", raw_stdout);
+  fputs_unfiltered ("\"", raw_stdout);
+
+  switch (exception.error)
+    {
+      case UNDEFINED_COMMAND_ERROR:
+	fputs_unfiltered (",code=\"undefined-command\"", raw_stdout);
+	break;
+    }
+
+  fputs_unfiltered ("\n", raw_stdout);
 }
 
 void

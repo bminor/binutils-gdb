@@ -1,3 +1,16 @@
+2013-12-03  Pedro Alves  <palves@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* exceptions.h (enum_errors) <UNDEFINED_COMMAND_ERROR>: New enum.
+	* mi/mi-parse.c (mi_parse): Throw UNDEFINED_COMMAND_ERROR instead
+	of a regular error when the GDB/MI command does not exist.
+	* mi/mi-main.c (mi_cmd_list_features): Add
+	"undefined-command-error-code".
+	(mi_print_exception): Print an "undefined-command"
+	error code if EXCEPTION.ERROR is UNDEFINED_COMMAND_ERROR.
+	* NEWS: Add entry documenting the new "code" variable in
+	"^error" result records.
+
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-cmds.h (mi_cmd_info_gdb_mi_command): Declare.

@@ -29333,10 +29333,19 @@ which threads are resumed.
 @findex ^connected
 @value{GDBN} has connected to a remote target.
 
-@item "^error" "," @var{c-string}
+@item "^error" "," "msg=" @var{c-string} [ "," "code=" @var{c-string} ]
 @findex ^error
-The operation failed.  The @code{@var{c-string}} contains the corresponding
-error message.
+The operation failed.  The @code{msg=@var{c-string}} variable contains
+the corresponding error message.
+
+If present, the @code{code=@var{c-string}} variable provides an error
+code on which consumers can rely on to detect the corresponding
+error condition.  At present, only one error code is defined:
+
+@table @samp
+@item "undefined-command"
+Indicates that the command causing the error does not exist.
+@end table
 
 @item "^exit"
 @findex ^exit
@@ -35204,6 +35213,10 @@ Indicates that all @sc{gdb/mi} commands accept the @option{--language}
 option (@pxref{Context management}).
 @item info-gdb-mi-command
 Indicates support for the @code{-info-gdb-mi-command} command.
+@item undefined-command-error-code
+Indicates support for the "undefined-command" error code in error result
+records, produced when trying to execute an undefined @sc{gdb/mi} command
+(@pxref{GDB/MI Result Records}).
 @end table
 
 @subheading The @code{-list-target-features} Command

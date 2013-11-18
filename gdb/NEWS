@@ -161,6 +161,12 @@ show code-cache
   ** The new command -info-gdb-mi-command allows the user to determine
      whether a GDB/MI command is supported or not.
 
+  ** The "^error" result record returned when trying to execute an undefined
+     GDB/MI command now provides a variable named "code" whose content is the
+     "undefined-command" error code.  Support for this feature can be verified
+     by using the "-list-features" command, which should contain
+     "undefined-command-error-code".
+
   ** The -trace-save MI command can optionally save trace buffer in Common
      Trace Format now.
 

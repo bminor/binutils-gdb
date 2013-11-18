@@ -93,6 +93,9 @@ enum errors {
      aborted as the inferior state is no longer valid.  */
   TARGET_CLOSE_ERROR,
 
+  /* An undefined command was executed.  */
+  UNDEFINED_COMMAND_ERROR,
+
   /* Add more errors here.  */
   NR_ERRORS
 };
