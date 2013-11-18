@@ -298,12 +298,7 @@ read_addr_from_reg (void *baton, int reg)
   buf = alloca (register_size (gdbarch, regnum));
   get_frame_register (this_frame, regnum, buf);
 
-  /* Convert the register to an integer.  This returns a LONGEST
-     rather than a CORE_ADDR, but unpack_pointer does the same thing
-     under the covers, and this makes more sense for non-pointer
-     registers.  Maybe read_addr_from_reg and the associated interfaces
-     should deal with "struct value" instead of CORE_ADDR.  */
-  return unpack_long (register_type (gdbarch, regnum), buf);
+  return unpack_pointer (register_type (gdbarch, regnum), buf);
 }
 
 /* Implement struct dwarf_expr_context_funcs' "get_reg_value" callback.  */
