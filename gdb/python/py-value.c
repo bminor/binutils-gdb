@@ -1137,6 +1137,7 @@ is_intlike (struct type *type, int ptr_ok)
 	  || TYPE_CODE (type) == TYPE_CODE_ENUM
 	  || TYPE_CODE (type) == TYPE_CODE_BOOL
 	  || TYPE_CODE (type) == TYPE_CODE_CHAR
+	  || TYPE_CODE (type) == TYPE_CODE_RANGE
 	  || (ptr_ok && TYPE_CODE (type) == TYPE_CODE_PTR));
 }
 

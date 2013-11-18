@@ -1,5 +1,9 @@
 2013-11-19  Joel Brobecker  <brobecker@adacore.com>
 
+	* python/py-value.c (is_intlike): Add TYPE_CODE_RANGE handling.
+
+2013-11-19  Joel Brobecker  <brobecker@adacore.com>
+
 	* contrib/ari/gdb_ari.sh: Remove checks for "dirent.h" and
 	"stat.h".
 
