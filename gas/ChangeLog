@@ -1,3 +1,11 @@
+2013-11-18  Renlin Li  <Renlin.Li@arm.com>
+
+	* config/tc-arm.c (arm_archs): New armv7ve architecture option.
+	(arm_cpus): Replace ARM_ARCH_V7A_IDIV_MP_SEC_VIRT with
+	ARM_ARCH_V7VE for cortex-a7, cortex-a12 and cortex-a15.
+	(cpu_arch_ver): Likewise.
+	* doc/c-arm.texi: Document armv7ve.
+
 2013-11-18  Zhenqiang Chen  <zhenqiang.chen@linaro.org>
 
 	* config/tc-aarch64.c (parse_sys_reg): Support

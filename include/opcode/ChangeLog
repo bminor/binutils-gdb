@@ -1,3 +1,9 @@
+2013-11-18  Renlin Li  <Renlin.Li@arm.com>
+
+	* arm.h (ARM_AEXT_V7VE): New define.
+	(ARM_ARCH_V7VE): New define.
+	(ARM_ARCH_V7A_IDIV_MP_SEC_VIRT): Removed.
+
 2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	Revert
