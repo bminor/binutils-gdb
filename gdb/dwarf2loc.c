@@ -313,7 +313,7 @@ struct dwarf_expr_baton
 /* Using the frame specified in BATON, return the value of register
    REGNUM, treated as a pointer.  */
 static CORE_ADDR
-dwarf_expr_read_reg (void *baton, int dwarf_regnum)
+dwarf_expr_read_addr_from_reg (void *baton, int dwarf_regnum)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
   struct gdbarch *gdbarch = get_frame_arch (debaton->frame);
@@ -761,8 +761,9 @@ chain_candidate (struct gdbarch *gdbarch, struct call_site_chain **resultp,
 					   * (length - 1));
       result->length = length;
       result->callers = result->callees = length;
-      memcpy (result->call_site, VEC_address (call_sitep, chain),
-	      sizeof (*result->call_site) * length);
+      if (!VEC_empty (call_sitep, chain))
+	memcpy (result->call_site, VEC_address (call_sitep, chain),
+		sizeof (*result->call_site) * length);
       *resultp = result;
 
       if (entry_values_debug)
@@ -2193,7 +2194,7 @@ static const struct lval_funcs pieced_value_funcs = {
 
 static const struct dwarf_expr_context_funcs dwarf_expr_ctx_funcs =
 {
-  dwarf_expr_read_reg,
+  dwarf_expr_read_addr_from_reg,
   dwarf_expr_get_reg_value,
   dwarf_expr_read_mem,
   dwarf_expr_frame_base,
@@ -2440,7 +2441,7 @@ struct needs_frame_baton
 
 /* Reads from registers do require a frame.  */
 static CORE_ADDR
-needs_frame_read_reg (void *baton, int regnum)
+needs_frame_read_addr_from_reg (void *baton, int regnum)
 {
   struct needs_frame_baton *nf_baton = baton;
 
@@ -2540,7 +2541,7 @@ needs_get_addr_index (void *baton, unsigned int index)
 
 static const struct dwarf_expr_context_funcs needs_frame_ctx_funcs =
 {
-  needs_frame_read_reg,
+  needs_frame_read_addr_from_reg,
   needs_frame_get_reg_value,
   needs_frame_read_mem,
   needs_frame_frame_base,

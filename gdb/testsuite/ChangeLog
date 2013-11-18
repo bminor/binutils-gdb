@@ -1,3 +1,50 @@
+2013-11-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi-language.exp: Add "-list-features" test verifying that
+	its output contains "language-option".
+
+2013-11-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* info_exc/const.ads (Aint_Global_GDB_E): Renames Aint_Global_E.
+	* info_exc/foo.adb: Adjust to new exception name.
+	* info_exc.exp: Adjust after exception renaming in const.ads.
+	Update "info exception global" test to test "info exceptions
+	global_gdb" instead.
+
+	* mi_exc_info/const.ads (Aint_Global_GDB_E): Renames Aint_Global_E.
+	* mi_exc_info/foo.adb (Adjust to new exception name.
+	* mi_exc_info.exp: Adjust after exception renaming in const.ads.
+	Update "-info-ada-exceptions global" test to test
+	"-info-ada-exceptions global_gdb" instead.
+
+2013-11-15  Luis Machado  <lgustavo@codesourcery.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Expect different formats
+	of inferior output for remote and native sessions.
+	* gdb.mi/mi-console.exp: Remove obsolete comment.
+	Check for semihosted inferior output pattern.
+	(semihosted_string): New function.
+
+2013-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc.exp: Allow other global exceptions to be
+	listed in the output of "info exceptions".
+	* gdb.ada/mi_exc_info.exp: Allow other global exceptions to be
+	listed in the output of "-info-ada-exceptions".
+
+2013-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc.exp: Start inferior before starting
+	the "info exceptions" tests.
+	* gdb.ada/mi_exc_info.exp: Start inferior before starting
+	the "-info-ada-exceptions" tests.
+
+2013-11-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/includefile: New file.
+	* gdb.cp/filename.exp: New file.
+	* gdb.cp/filename.cc: New file.
+
 2013-11-15  Doug Evans  <xdje42@gmail.com>
 
 	* gdb.python/py-breakpoint.exp: Make tests have unique names.

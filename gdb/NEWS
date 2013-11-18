@@ -624,7 +624,7 @@ qXfer:btrace:read
      C++ and Java objects.
 
   ** "explore" and its sub commands "explore value" and "explore type"
-     can be used to reccursively explore values and types of
+     can be used to recursively explore values and types of
      expressions.  These commands are available only if GDB is
      configured with '--with-python'.
 

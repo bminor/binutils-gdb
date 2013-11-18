@@ -16,5 +16,5 @@
 with Const; use Const;
 procedure Foo is
 begin
-   raise Aint_Global_E;
+   raise Aint_Global_GDB_E;
 end Foo;

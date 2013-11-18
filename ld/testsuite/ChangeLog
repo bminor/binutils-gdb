@@ -1,3 +1,13 @@
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/mpx.exp: New file.
+	* ld-x86-64/mpx1.out: Likewise.
+	* ld-x86-64/mpx1a.c: Likewise.
+	* ld-x86-64/mpx1a.rd: Likewise.
+	* ld-x86-64/mpx1b.c: Likewise.
+	* ld-x86-64/mpx1c.c: Likewise.
+	* ld-x86-64/mpx1c.rd: Likewise.
+
 2013-11-14  Will Newton  <will.newton@linaro.org>
 
 	* ld-arm/script-type.sym: Remove redundant STT_FILE symbol.

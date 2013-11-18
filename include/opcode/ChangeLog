@@ -1,3 +1,17 @@
+2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Revert
+
+	2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64.h (aarch64_sys_reg_readonly_p): New declaration.
+	(aarch64_sys_reg_writeonly_p): Ditto.
+
+2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64.h (aarch64_sys_reg_readonly_p): New declaration.
+	(aarch64_sys_reg_writeonly_p): Ditto.
+
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64.h (aarch64_sys_reg): New typedef.

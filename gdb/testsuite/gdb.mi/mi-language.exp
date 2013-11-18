@@ -21,6 +21,12 @@ if [mi_gdb_start] {
     continue
 }
 
+# First, verify that the debugger correctly advertises support
+# for the --language option.
+mi_gdb_test "-list-features" \
+            "\\^done,features=\\\[.*\"language-option\".*\\\]" \
+            "-list-features should include \"language-option\""
+
 mi_gdb_test "set lang ada" \
             ".*=cmd-param-changed,param=\"language\",value=\"ada\".*" \
             "set lang ada"

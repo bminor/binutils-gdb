@@ -2219,7 +2219,7 @@ elf_i386_allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	  /* If this is the first .plt entry, make room for the special
 	     first entry.  */
 	  if (s->size == 0)
-	    s->size += plt_entry_size;
+	    s->size = plt_entry_size;
 
 	  h->plt.offset = s->size;
 

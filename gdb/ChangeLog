@@ -1,3 +1,57 @@
+2013-11-18  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* sparc-tdep.c (sparc_is_annulled_branch_insn): New function.
+	* sparc-tdep.h: And its prototype.
+
+	* sparc64-linux-tdep.c (sparc64_linux_get_longjmp_target): New
+	function.
+	(sparc64_linux_init_abi): Register the get_longjmp_target hook.
+
+2013-11-18  Pedro Alves  <palves@redhat.com>
+
+	* dwarf2-frame.c (read_addr_from_reg): Remove stale comment and
+	use unpack_pointer.
+
+2013-11-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c (mi_cmd_list_features): Add "language-options"
+	to -list-features output.
+
+2013-11-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2expr.h (struct dwarf_expr_context_funcs)
+	<read_addr_from_reg>: Renames "read_reg".
+	* dwarf2-frame.c (read_addr_from_reg): Renames "read_reg".
+	Adjust comment.
+	(dwarf2_frame_ctx_funcs, execute_stack_op, dwarf2_frame_cache):
+	Use read_addr_from_reg in place of read_reg.
+	* dwarf2expr.c (execute_stack_op): Use read_addr_from_reg
+	in place of read_reg.
+	* dwarf2loc.c (dwarf_expr_read_addr_from_reg): Renames
+	dwarf_expr_read_reg.
+	(dwarf_expr_ctx_funcs): Replace dwarf_expr_read_reg
+	with dwarf_expr_read_addr_from_reg.
+	(needs_frame_read_addr_from_reg): Renames needs_frame_read_reg.
+	(needs_frame_ctx_funcs): Replace needs_frame_read_reg with
+	needs_frame_read_addr_from_reg.
+
+2013-11-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (Changes in GDB 7.5) (New commands) (explore): Fix typo.
+
+2013-11-15  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
+	* dwarf2loc.c (chain_candidate): Prevent invoking memcpy with
+	NULL.
+
+2013-11-15  Tom Tromey  <tromey@redhat.com>
+
+	PR c++/16117:
+	* c-exp.y (lex_one_token): Add "is_quoted_name" argument.
+	(classify_name): Likewise.  Prefer a field of "this" over a
+	filename.
+	(classify_inner_name, yylex): Update.
+
 2013-11-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2expr.h (struct dwarf_expr_context_funcs) <read_reg>:

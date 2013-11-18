@@ -14,5 +14,5 @@
 --  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 package Const is
-   Aint_Global_E : exception;
+   Aint_Global_GDB_E : exception;
 end Const;

@@ -220,6 +220,8 @@ extern void sparc32_collect_fpregset (const struct sparc_fpregset *fpregset,
 				      const struct regcache *regcache,
 				      int regnum, void *fpregs);
 
+extern int sparc_is_annulled_branch_insn (CORE_ADDR pc);
+
 /* Functions and variables exported from sparc-sol2-tdep.c.  */
 
 /* Register offsets for Solaris 2.  */

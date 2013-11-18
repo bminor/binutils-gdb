@@ -1,3 +1,52 @@
+2013-11-18  Zhenqiang Chen  <zhenqiang.chen@linaro.org>
+
+	* config/tc-aarch64.c (parse_sys_reg): Support
+	S2_<op1>_<Cn>_<Cm>_<op2>.
+
+2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Revert
+
+	2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (set_other_error): New function.
+	(parse_sys_reg): Add new parameter 'sys_reg' and if non-NULL set
+	the variable to which it points with 'o'.
+	(parse_operands): Update; check for write to read-only system
+	registers or read from write-only ones.
+
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (reloc): Add an argument, bnd_prefix, to
+	indicate if instruction has the BND prefix.  Return
+	BFD_RELOC_X86_64_PC32_BND instead of BFD_RELOC_32_PCREL if
+	bnd_prefix isn't zero.
+	(output_branch): Pass BFD_RELOC_X86_64_PC32_BND to frag_var
+	if needed.
+	(output_jump): Update reloc call.
+	(output_interseg_jump): Likewise.
+	(output_disp): Likewise.
+	(output_imm): Likewise.
+	(x86_cons_fix_new): Likewise.
+	(lex_got): Add an argument, bnd_prefix, to indicate if
+	instruction has the BND prefix.  Use BFD_RELOC_X86_64_PLT32_BND
+	if needed.
+	(x86_cons): Update lex_got call.
+	(i386_immediate): Likewise.
+	(i386_displacement): Likewise.
+	(md_apply_fix): Handle BFD_RELOC_X86_64_PC32_BND and
+	BFD_RELOC_X86_64_PLT32_BND.
+	(tc_gen_reloc): Likewise.
+	* config/tc-i386-intel.c (i386_operator): Update lex_got call.
+
+2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (set_other_error): New function.
+	(parse_sys_reg): Add new parameter 'sys_reg' and if non-NULL set
+	the variable to which it points with 'o'.
+	(parse_operands): Update; check for write to read-only system
+	registers or read from write-only ones.
+
 2013-11-15  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	* config/tc-i386.c (check_VecOperands): Reorder checks.
