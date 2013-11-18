@@ -1,3 +1,8 @@
+2013-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (lex_got): Add a dummy "int bnd_prefix"
+	argument.
+
 2013-11-18  Renlin Li  <Renlin.Li@arm.com>
 
 	* config/tc-arm.c (arm_archs): New armv7ve architecture option.
