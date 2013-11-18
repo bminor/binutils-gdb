@@ -1756,6 +1756,9 @@ enews.c: $(srcdir)/emulparams/news.sh \
 enios2elf.c: $(srcdir)/emulparams/nios2elf.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} nios2elf "$(tdir_nios2elf)"
+enios2linux.c: $(srcdir)/emulparams/nios2linux.sh \
+  $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
+	${GENSCRIPTS} nios2linux "$(tdir_nios2linux)"
 ens32knbsd.c:	$(srcdir)/emulparams/ns32knbsd.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/emultempl/netbsd.em \
   $(srcdir)/scripttempl/aout.sc ${GEN_DEPENDS}
