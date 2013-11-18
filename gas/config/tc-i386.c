@@ -7345,7 +7345,7 @@ x86_address_bytes (void)
 
 #if !(defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF) || defined (OBJ_MACH_O)) \
     || defined (LEX_AT)
-# define lex_got(reloc, adjust, types) NULL
+# define lex_got(reloc, adjust, types, bnd_prefix) NULL
 #else
 /* Parse operands of the form
    <symbol>@GOTOFF+<nnn>
@@ -7529,7 +7529,8 @@ lex_got (enum bfd_reloc_code_real *rel,
 static char *
 lex_got (enum bfd_reloc_code_real *rel ATTRIBUTE_UNUSED,
 	 int *adjust ATTRIBUTE_UNUSED,
-	 i386_operand_type *types ATTRIBUTE_UNUSED)
+	 i386_operand_type *types,
+	 int bnd_prefix ATTRIBUTE_UNUSED)
 {
   static const struct
   {
