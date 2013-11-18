@@ -1,3 +1,8 @@
+2013-11-18  Zhenqiang Chen  <zhenqiang.chen@linaro.org>
+
+	* config/tc-aarch64.c (parse_sys_reg): Support
+	S2_<op1>_<Cn>_<Cm>_<op2>.
+
 2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	Revert

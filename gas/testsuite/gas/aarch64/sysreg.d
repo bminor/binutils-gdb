@@ -26,3 +26,5 @@ Disassembly of section \.text:
   48:	d538cc00 	mrs	x0, s3_0_c12_c12_0
   4c:	d5384600 	mrs	x0, s3_0_c4_c6_0
   50:	d5184600 	msr	s3_0_c4_c6_0, x0
+  54:	d5310300 	mrs	x0, s2_1_c0_c3_0
+  58:	d5110300 	msr	s2_1_c0_c3_0, x0
