@@ -1,3 +1,13 @@
+2013-11-18  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	Backport from master
+	2013-11-18  Chung-Lin Tang  <cltang@codesourcery.com>
+	* emulparams/nios2linux.sh: New emulation file.
+	* configure.tgt: Add nios2*-*-linux* emulation case.
+	* Makefile.am (enios2elf.c): Change tdir_nios2 to tdir_nios2elf.
+	(enios2linux.c): New emulation entry.
+	* Makefile.in: Regenerate.
+
 2013-11-15  Alan Modra  <amodra@gmail.com>
 
 	Apply mainline changes to 2.24
