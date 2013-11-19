@@ -1,3 +1,9 @@
+2013-11-19  Catherine Moore  <clm@codesourcery.com>
+
+	* micromips-opc.c (LM): Define.
+	(micromips_opcodes): Add LM to load instructions.
+	* mips-opc.c (prefe): Add LM attribute.
+
 2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	Revert
