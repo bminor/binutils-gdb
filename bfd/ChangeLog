@@ -1,3 +1,7 @@
+2013-11-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_section_from_shdr): Re-indent.
+
 2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (x86_64_elf_howto_table): Add R_X86_64_PC32_BND
