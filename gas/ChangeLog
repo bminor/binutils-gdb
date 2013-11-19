@@ -1,3 +1,9 @@
+2013-11-19  Alexey Makhalov  <makhaloff@gmail.com>
+
+	PR gas/16109
+	* app.c (do_scrub_chars): Only insert a newline character if
+	end-of-file has been reached.
+
 2013-11-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (lex_got): Add a dummy "int bnd_prefix"
