@@ -1,3 +1,8 @@
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.xml/maint_print_struct.xml (bitfield): Added bitfield having
+	start and end equal 0.
+
 2013-11-19  Yao Qi  <yao@codesourcery.com>
 
 	* lib/mi-support.exp (mi_child_regexp): Remove 'whatever'.

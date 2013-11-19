@@ -1,3 +1,9 @@
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* target-descriptions.c (maint_print_maint_print_c_tdesc_cmd):
+	Modified logic of creating a bitfield to be in sync with
+	tdesc_gdb_type.
+
 2013-11-20  Will Newton  <will.newton@linaro.org>
 
 	* arm-tdep.c (arm_get_next_pc): Remove "Infinite loop detected"
