@@ -1,3 +1,11 @@
+2013-11-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* python/py-value.c (is_intlike): Delete.
+	(valpy_int): Replace use of CHECK_TYPEDEF and is_intlike
+	by use of is_integral_type.
+	(valpy_long): Replace use of CHECK_TYPEDEF and is_intlike
+	by use of is_integral_type and check for TYPE_CODE_PTR.
+
 2013-11-20  Tom Tromey  <tromey@redhat.com>
 
 	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Remove

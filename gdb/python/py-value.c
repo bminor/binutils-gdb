@@ -1129,18 +1129,6 @@ valpy_richcompare (PyObject *self, PyObject *other, int op)
   Py_RETURN_FALSE;
 }
 
-/* Helper function to determine if a type is "int-like".  */
-static int
-is_intlike (struct type *type, int ptr_ok)
-{
-  return (TYPE_CODE (type) == TYPE_CODE_INT
-	  || TYPE_CODE (type) == TYPE_CODE_ENUM
-	  || TYPE_CODE (type) == TYPE_CODE_BOOL
-	  || TYPE_CODE (type) == TYPE_CODE_CHAR
-	  || TYPE_CODE (type) == TYPE_CODE_RANGE
-	  || (ptr_ok && TYPE_CODE (type) == TYPE_CODE_PTR));
-}
-
 #ifndef IS_PY3K
 /* Implements conversion to int.  */
 static PyObject *
@@ -1153,8 +1141,7 @@ valpy_int (PyObject *self)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      CHECK_TYPEDEF (type);
-      if (!is_intlike (type, 0))
+      if (!is_integral_type (type))
 	error (_("Cannot convert value to int."));
 
       l = value_as_long (value);
@@ -1178,7 +1165,8 @@ valpy_long (PyObject *self)
     {
       CHECK_TYPEDEF (type);
 
-      if (!is_intlike (type, 1))
+      if (!is_integral_type (type)
+	  && TYPE_CODE (type) != TYPE_CODE_PTR)
 	error (_("Cannot convert value to long."));
 
       l = value_as_long (value);
