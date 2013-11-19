@@ -1,3 +1,13 @@
+2013-11-19  Catherine Moore  <clm@codesourcery.com>
+
+	* gas/mips/fix-pmc-rm7000-1.d: New.
+	* gas/mips/fix-pmc-rm7000-1.s: New.
+	* gas/mips/fix-pmc-rm7000-2.d: New.
+	* gas/mips/fix-pmc-rm7000-2.s: New.
+	* gas/mips/micromips@fix-pmc-rm7000-1.d: New.
+	* gas/mips/micromips@fix-pmc-rm7000-2.d: New.
+	* gas/mips/mips.exp: Run new tests.
+
 2013-11-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/avx512f-nondef.d: Updated for mingw.

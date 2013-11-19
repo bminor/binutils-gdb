@@ -1,3 +1,16 @@
+2013-11-19  Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-mips.c (mips_fix_pmc_rm7000): Declare.
+	(options): Add OPTION_FIX_PMC_RM7000 and OPTION_NO_FIX_PMC_RM7000.
+	(md_longopts): Add mfix-pmc-rm7000 and mno-fix-pmc-rm7000.
+	(INSN_DMULT): Define.
+	(INSN_DMULTU): Define.
+	(insns_between): Detect PMC RM7000 errata.
+	(md_parse_option): Supprt OPTION_FIX_PMC_RM7000 and
+	OPTION_NO_FIX_PMC_RM7000.
+	* doc/as.texinfo: Document new options.
+	* doc/c-mips.texi: Likewise.
+	
 2013-11-19  Alexey Makhalov  <makhaloff@gmail.com>
 
 	PR gas/16109

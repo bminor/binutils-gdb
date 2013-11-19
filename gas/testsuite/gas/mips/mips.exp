@@ -529,6 +529,10 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "eret-1"
     run_dump_test "eret-2"
     run_dump_test "eret-3"
+    run_dump_test_arches "fix-rm7000-1" \
+					[mips_arch_list_matching mips3 !singlefloat]
+    run_dump_test_arches "fix-rm7000-2" \
+					[mips_arch_list_matching mips3 !singlefloat]
     run_dump_test_arches "24k-branch-delay-1" \
 					[mips_arch_list_matching mips1]
     run_dump_test_arches "24k-triple-stores-1" \
