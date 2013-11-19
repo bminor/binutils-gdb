@@ -1,3 +1,11 @@
+2013-11-19  Roland McGrath  <mcgrathr@google.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Don't use bfd_elf_record_link_assignment to mark __ehdr_start
+	hidden.  Instead, just do it directly here, and only if it was
+	referenced but not defined.
+
 2013-11-18  Chung-Lin Tang  <cltang@codesourcery.com>
 
 	* emulparams/nios2linux.sh: New emulation file.

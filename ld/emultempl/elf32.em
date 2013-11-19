@@ -1487,10 +1487,25 @@ gld${EMULATION_NAME}_before_allocation (void)
 
       /* Make __ehdr_start hidden if it has been referenced, to
 	 prevent the symbol from being dynamic.  */
-      if (!bfd_elf_record_link_assignment (link_info.output_bfd, &link_info,
-					   "__ehdr_start", TRUE, TRUE))
-	einfo ("%P%F: failed to record assignment to %s: %E\n",
-	       "__ehdr_start");
+      if (!link_info.relocatable)
+       {
+         struct elf_link_hash_entry *h
+           = elf_link_hash_lookup (elf_hash_table (&link_info), "__ehdr_start",
+                                   FALSE, FALSE, TRUE);
+
+         /* Only adjust the export class if the symbol was referenced
+            and not defined, otherwise leave it alone.  */
+         if (h != NULL
+             && (h->root.type == bfd_link_hash_new
+                 || h->root.type == bfd_link_hash_undefined
+                 || h->root.type == bfd_link_hash_undefweak
+                 || h->root.type == bfd_link_hash_common))
+           {
+             _bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
+             if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+               h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+           }
+       }
 
       /* If we are going to make any variable assignments, we need to
 	 let the ELF backend know about them in case the variables are
