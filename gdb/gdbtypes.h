@@ -663,6 +663,11 @@ struct main_type
       /* * High bound of range.  */
 
       struct dynamic_prop high;
+
+      /* True if HIGH range bound contains the number of elements in the
+	 subrange. This affects how the final hight bound is computed.  */
+
+      int flag_upper_bound_is_count : 1;
     } *bounds;
 
   } flds_bnds;

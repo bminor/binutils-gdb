@@ -14493,6 +14493,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   struct attribute *attr;
   struct dynamic_prop low, high;
   int low_default_is_valid;
+  int high_bound_is_count = 0;
   const char *name;
   LONGEST negative_mask;
 
@@ -14559,15 +14560,13 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
   if (!attr_to_dynamic_prop (attr, die, cu, &high))
     {
       attr = dwarf2_attr (die, DW_AT_count, cu);
-      if (attr)
+      if (attr_to_dynamic_prop (attr, die, cu, &high))
 	{
-	  int count = dwarf2_get_attr_constant_value (attr, 1);
-	  high.data.const_val = low.data.const_val + count - 1;
-	}
-      else
-	{
-	  /* Unspecified array length.  */
-	  high.data.const_val = low.data.const_val - 1;
+	  /* If bounds are constant do the final calculation here.  */
+	  if (low.kind == PROP_CONST && high.kind == PROP_CONST)
+	    high.data.const_val = low.data.const_val + high.data.const_val - 1;
+	  else
+	    high_bound_is_count = 1;
 	}
     }
 
@@ -14626,6 +14625,9 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
     high.data.const_val |= negative_mask;
 
   range_type = create_range_type (NULL, orig_base_type, &low, &high);
+
+  if (high_bound_is_count)
+    TYPE_RANGE_DATA (range_type)->flag_upper_bound_is_count = 1;
 
   /* Ada expects an empty array on no boundary attributes.  */
   if (attr == NULL && cu->language != language_ada)
