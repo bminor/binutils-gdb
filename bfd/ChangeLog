@@ -1,3 +1,8 @@
+2013-11-19  Roland McGrath  <mcgrathr@google.com>
+
+	* elf-nacl.c (nacl_modify_segment_map): Calculate SIZEOF_HEADERS
+	when not doing linking (i.e. INFO is a null pointer).
+
 2013-11-18  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.23.91
