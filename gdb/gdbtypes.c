@@ -1687,6 +1687,10 @@ resolve_dynamic_bounds (struct type *type, CORE_ADDR addr)
     {
       high_bound.kind = PROP_CONST;
       high_bound.data.const_val = value;
+
+      if (TYPE_RANGE_DATA (range_type)->flag_upper_bound_is_count)
+	high_bound.data.const_val
+	  = low_bound.data.const_val + high_bound.data.const_val - 1;
     }
   else
     {

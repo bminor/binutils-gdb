@@ -1,5 +1,14 @@
 2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* dwarf2read.c (read_subrange_type): Convert DW_AT_count to a dynamic
+	property and store it as the high bound and flag the range accordingly.
+	* gdbtypes.c (resolve_dynamic_bounds): If range is flagged as
+	RANGE_UPPER_BOUND_IS_COUNT assign low + high - 1 as the new high bound.
+	* gdbtypes.h (enum range_flags): New enum.
+	(struct range_bounds): Add flags member.
+
+2014-04-11  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* c-typeprint.c (c_type_print_varspec_suffix): Added
 	check for not yet resolved high bound. If unresolved, print
 	"variable length" string to the console instead of random
