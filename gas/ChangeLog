@@ -1,3 +1,12 @@
+2013-11-19  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Revert
+
+	2013-11-19  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-aarch64.c (parse_sys_reg): Do not issue error messages
+	for deprecated system registers when parsing pstate fields.
+
 2013-11-19  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-aarch64.c (parse_sys_reg): Do not issue error messages
