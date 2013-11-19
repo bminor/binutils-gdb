@@ -1,3 +1,8 @@
+2013-11-19  Roland McGrath  <mcgrathr@google.com>
+
+	* elf-nacl.c (nacl_modify_segment_map): Calculate SIZEOF_HEADERS
+	when not doing linking (i.e. INFO is a null pointer).
+
 2013-11-19  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (elf_x86_64_section_from_shdr): Re-indent.
