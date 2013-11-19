@@ -3314,7 +3314,10 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
     }
   else
     {
-      if (aarch64_sys_reg_deprecated_p (o))
+      /* Only check system register names for deprecation.  If we have
+	 been given a PSTATE field name (impled_defined_p == 0) then allow
+	 any value.  */
+      if (imple_defined_p && aarch64_sys_reg_deprecated_p (o))
 	as_warn (_("system register name '%s' is deprecated and may be "
 "removed in a future release"), buf);
       value = o->value;
