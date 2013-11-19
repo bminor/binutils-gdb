@@ -1,3 +1,13 @@
+2013-11-19  Roland McGrath  <mcgrathr@google.com>
+
+	* ld-elf/ehdr_start-userdef.t: New file.
+	* ld-elf/ehdr_start-userdef.d: New file.
+	* ld-elf/ehdr_start-strongref.s: New file.
+	* ld-elf/ehdr_start-missing.t: New file.
+	* ld-elf/ehdr_start-missing.d: New file.
+	* ld-elf/ehdr_start-weak.d: New file.
+	* ld-mips-elf/ehdr_start-2.nd: Expect __ehdr_start to be global.
+
 2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-x86-64/mpx.exp: New file.
