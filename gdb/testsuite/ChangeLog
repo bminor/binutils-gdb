@@ -1,3 +1,8 @@
+2013-11-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/maint.exp (maint print objfiles): Consume one line at a
+	time, and run it through all three milestone regexes.
+
 2013-11-20  Sanimir Agovic  <sanimir.agovic@intel.com>
 
 	* gdb.base/eval-avoid-side-effects.exp: New file.
