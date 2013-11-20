@@ -181,9 +181,18 @@ set keep_looking 1
 while {$keep_looking} {
     gdb_expect  {
 
-	-re ".*Object file.*maint($EXEEXT)?:  Objfile at $hex, bfd at $hex, \[0-9\]* minsyms\[\r\t \]+\n" { set header 1 }
-	-re ".*Psymtabs:\[\r\t \]+\n" { set psymtabs 1 }
-	-re ".*Symtabs:\[\r\t \]+\n" { set symtabs 1 }
+	-re "\r\n" {
+	    set output $expect_out(buffer)
+	    if {[regexp ".*Object file.*maint($EXEEXT)?:  Objfile at ${hex}" $output]} {
+		set header 1
+	    }
+	    if {[regexp ".*Psymtabs:\[\r\t \]+\n" $output]} {
+		set psymtabs 1
+	    }
+	    if {[regexp ".*Symtabs:\[\r\t \]+\n" $output]} {
+		set symtabs 1
+	    }
+	}
 
 	-re ".*$gdb_prompt $" { 
 	    set keep_looking 0
