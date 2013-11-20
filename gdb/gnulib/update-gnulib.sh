@@ -37,7 +37,6 @@ IMPORTED_GNULIB_MODULES="\
     update-copyright \
     unistd \
     pathmax \
-    strerror \
     strstr \
     dirent \
     sys_stat \

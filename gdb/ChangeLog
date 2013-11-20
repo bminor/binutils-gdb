@@ -1,3 +1,24 @@
+2013-11-20  Tom Tromey  <tromey@redhat.com>
+
+	* gnulib/update-gnulib.sh (IMPORTED_GNULIB_MODULES): Remove
+	strerror module.
+	* gnulib/aclocal.m4: Update.
+	* gnulib/config.in: Update.
+	* gnulib/configure: Update.
+	* gnulib/import/Makefile.am: Update.
+	* gnulib/import/Makefile.in: Update.
+	* gnulib/import/errno.in.h: Remove.
+	* gnulib/import/intprops.h: Remove.
+	* gnulib/import/m4/errno_h.m4: Remove.
+	* gnulib/import/m4/gnulib-cache.m4: Update.
+	* gnulib/import/m4/gnulib-comp.m4: Update.
+	* gnulib/import/m4/strerror.m4: Remove.
+	* gnulib/import/m4/sys_socket_h.m4: Remove.
+	* gnulib/import/strerror-override.c: Remove.
+	* gnulib/import/strerror-override.h: Remove.
+	* gnulib/import/strerror.c: Remove.
+	* gnulib/update-gnulib.sh: Update.
+
 2013-11-20  Yao Qi  <yao@codesourcery.com>
 
 	* target-dcache.c (target_dcache_get_or_init): Call

@@ -33,10 +33,6 @@
 /* Define as the word index where to find the exponent of 'double'. */
 #undef DBL_EXPBIT0_WORD
 
-/* Define to a C preprocessor expression that evaluates to 1 or 0, depending
-   whether the gnulib module strerror shall be considered present. */
-#undef GNULIB_STRERROR
-
 /* Define to 1 when the gnulib module frexp should be tested. */
 #undef GNULIB_TEST_FREXP
 
@@ -57,9 +53,6 @@
 
 /* Define to 1 when the gnulib module memmem should be tested. */
 #undef GNULIB_TEST_MEMMEM
-
-/* Define to 1 when the gnulib module strerror should be tested. */
-#undef GNULIB_TEST_STRERROR
 
 /* Define to 1 when the gnulib module strstr should be tested. */
 #undef GNULIB_TEST_STRSTR
@@ -863,9 +856,6 @@
 /* Define to 1 if you have the <sys/param.h> header file. */
 #undef HAVE_SYS_PARAM_H
 
-/* Define to 1 if you have the <sys/socket.h> header file. */
-#undef HAVE_SYS_SOCKET_H
-
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
 
@@ -892,9 +882,6 @@
 
 /* Define to 1 if you have the <wctype.h> header file. */
 #undef HAVE_WCTYPE_H
-
-/* Define to 1 if you have the <winsock2.h> header file. */
-#undef HAVE_WINSOCK2_H
 
 /* Define if you have the 'wint_t' type. */
 #undef HAVE_WINT_T
@@ -963,9 +950,6 @@
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'ptrdiff_t'. */
 #undef PTRDIFF_T_SUFFIX
-
-/* Define to 1 if strerror(0) does not return a message implying success. */
-#undef REPLACE_STRERROR_0
 
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'sig_atomic_t'. */
