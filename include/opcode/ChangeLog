@@ -1,3 +1,8 @@
+2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64.h (aarch64_pstatefields): Change element type to
+	aarch64_sys_reg.
+
 2013-11-18  Renlin Li  <Renlin.Li@arm.com>
 
 	* arm.h (ARM_AEXT_V7VE): New define.

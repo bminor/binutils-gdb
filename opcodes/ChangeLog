@@ -1,3 +1,7 @@
+2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (aarch64_pstatefields): Update.
+
 2013-11-19  Catherine Moore  <clm@codesourcery.com>
 
 	* micromips-opc.c (LM): Define.

@@ -3019,12 +3019,12 @@ aarch64_sys_reg_deprecated_p (const aarch64_sys_reg *reg)
   return (reg->flags & F_DEPRECATED) != 0;
 }
 
-const struct aarch64_name_value_pair aarch64_pstatefields [] =
+const aarch64_sys_reg aarch64_pstatefields [] =
 {
-  { "spsel",            0x05  },
-  { "daifset",          0x1e  },
-  { "daifclr",          0x1f  },
-  { 0,          CPENC(0,0,0,0,0)  },
+  { "spsel",            0x05,	0 },
+  { "daifset",          0x1e,	0 },
+  { "daifclr",          0x1f,	0 },
+  { 0,          CPENC(0,0,0,0,0), 0 },
 };
 
 const aarch64_sys_ins_reg aarch64_sys_regs_ic[] =
