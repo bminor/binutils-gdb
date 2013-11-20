@@ -1,5 +1,10 @@
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.python/py-pp-maint.exp: Consider new pretty-print added 
+	for bnd registers.
+
 	* gdb.xml/maint_print_struct.xml (bitfield): Added bitfield having
 	start and end equal 0.
 
