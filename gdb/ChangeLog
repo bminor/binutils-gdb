@@ -1,3 +1,10 @@
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (handle_load_dll): Add comments.
+	(windows_ensure_ntdll_loaded): New function.
+	(do_initial_windows_stuff): Use windows_ensure_ntdll_loaded.
+	Add FIXME comment.
+
 2013-12-08  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 7.6.2 released.
