@@ -42,6 +42,7 @@
 
 #include "features/i386/amd64-linux.c"
 #include "features/i386/amd64-avx-linux.c"
+#include "features/i386/amd64-mpx-linux.c"
 #include "features/i386/x32-linux.c"
 #include "features/i386/x32-avx-linux.c"
 
@@ -96,6 +97,8 @@ int amd64_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1,		/* MPX registers BND0 ... BND3.  */
+  -1, -1,			/* MPX registers BNDCFGU and BNDSTATUS.  */
   15 * 8			/* "orig_rax" */
 };
 
@@ -1287,8 +1290,14 @@ amd64_linux_core_read_description (struct gdbarch *gdbarch,
 {
   /* Linux/x86-64.  */
   uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
-  switch ((xcr0 & I386_XSTATE_AVX_MASK))
+
+  switch (xcr0 & I386_XSTATE_ALL_MASK)
     {
+    case I386_XSTATE_MPX_MASK:
+      if (gdbarch_ptr_bit (gdbarch) == 32)
+	return tdesc_x32_avx_linux;  /* No x32 MPX falling back to AVX.  */
+      else
+	return tdesc_amd64_mpx_linux;
     case I386_XSTATE_AVX_MASK:
       if (gdbarch_ptr_bit (gdbarch) == 32)
 	return tdesc_x32_avx_linux;
@@ -1623,6 +1632,7 @@ _initialize_amd64_linux_tdep (void)
   /* Initialize the Linux target description.  */
   initialize_tdesc_amd64_linux ();
   initialize_tdesc_amd64_avx_linux ();
+  initialize_tdesc_amd64_mpx_linux ();
   initialize_tdesc_x32_linux ();
   initialize_tdesc_x32_avx_linux ();
 }

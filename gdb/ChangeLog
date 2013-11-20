@@ -1,5 +1,26 @@
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* amd64-linux-nat.c (amd64_linux_gregset32_reg_offset):
+	Add MPX registers.
+	(amd64_linux_read_description): Add initialization for MPX and
+	AVX independently.
+	* amd64-linux-tdep.c: Includes features/i386/amd64-mpx-linux.c.
+	(amd64_linux_gregset_reg_offset): Add MPX registers.
+	(amd64_linux_core_read_description): Add initialization for MPX
+	registers.
+	(_initialize_amd64_linux_tdep): Initialize MPX targets.
+	* amd64-linux-tdep.h (AMD64_LINUX_RAX_REGNUM): Set it to the last
+	register on the list.
+	(tdesc_amd64_mpx_linux) Add new target	for MPX.
+	* amd64-tdep.c: Includes features/i386/amd64-mpx.c.
+	(amd64_mpx_names): MPX register names.
+	(amd64_init_abi): Add MPX register while initializing the ABI.
+	(_initialize_amd64_tdep): Initialize MPX targets.
+	* amd64-tdep.h (amd64_regnum): Add MPX registers.
+	(AMD64_NUM_REGS): Set number of registers taking MPX into account.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* i386-linux-nat.c (GETXSTATEREGS_SUPPLIES): Add MPX
 	registers on the range of registers to be read from
 	xsave buffer.

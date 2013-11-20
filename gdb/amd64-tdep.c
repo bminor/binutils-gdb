@@ -43,6 +43,7 @@
 
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
+#include "features/i386/amd64-mpx.c"
 #include "features/i386/x32.c"
 #include "features/i386/x32-avx.c"
 
@@ -90,6 +91,11 @@ static const char *amd64_ymmh_names[] =
   "ymm4h", "ymm5h", "ymm6h", "ymm7h",
   "ymm8h", "ymm9h", "ymm10h", "ymm11h",
   "ymm12h", "ymm13h", "ymm14h", "ymm15h"
+};
+
+static const char *amd64_mpx_names[] =
+{
+  "bnd0raw", "bnd1raw", "bnd2raw", "bnd3raw", "bndcfgu", "bndstatus"
 };
 
 /* DWARF Register Number Mapping as defined in the System V psABI,
@@ -2845,6 +2851,13 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       tdep->ymm0h_regnum = AMD64_YMM0H_REGNUM;
     }
 
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx") != NULL)
+    {
+      tdep->mpx_register_names = amd64_mpx_names;
+      tdep->bndcfgu_regnum = AMD64_BNDCFGU_REGNUM;
+      tdep->bnd0r_regnum = AMD64_BND0R_REGNUM;
+    }
+
   tdep->num_byte_regs = 20;
   tdep->num_word_regs = 16;
   tdep->num_dword_regs = 16;
@@ -2986,6 +2999,7 @@ _initialize_amd64_tdep (void)
 {
   initialize_tdesc_amd64 ();
   initialize_tdesc_amd64_avx ();
+  initialize_tdesc_amd64_mpx ();
   initialize_tdesc_x32 ();
   initialize_tdesc_x32_avx ();
 }
