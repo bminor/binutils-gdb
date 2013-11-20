@@ -1,3 +1,8 @@
+2014-02-19  Igor Zamyatin  <igor.zamyatin@intel.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	* emulparams/elf_x86_64.sh (TINY_READONLY_SECTION): New.
+
 2014-02-19  Alan Modra  <amodra@gmail.com>
 
 	* emultempl/ppc64elf.em (params): Init new field.
