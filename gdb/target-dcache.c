@@ -79,7 +79,11 @@ target_dcache_get_or_init (void)
 				       target_dcache_aspace_key);
 
   if (dcache == NULL)
-    dcache = dcache_init ();
+    {
+      dcache = dcache_init ();
+      set_address_space_data (current_program_space->aspace,
+			      target_dcache_aspace_key, dcache);
+    }
 
   return dcache;
 }

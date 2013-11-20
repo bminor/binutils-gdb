@@ -1,3 +1,8 @@
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
+	* target-dcache.c (target_dcache_get_or_init): Call
+	set_address_space_data if 'dcache' is NULL.
+
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* common/i386-gcc-cpuid.h (bit_MPX): Synchronize with gcc file.
