@@ -1,3 +1,7 @@
+2013-11-20  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* gdb.base/eval-avoid-side-effects.exp: New file.
+
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* gdb.arch/i386-mpx.c: New file
