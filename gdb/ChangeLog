@@ -1,5 +1,62 @@
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* i386-linux-nat.c (GETXSTATEREGS_SUPPLIES): Add MPX
+	registers on the range of registers to be read from
+	xsave buffer.
+	(i386_linux_read_description): Add case for MPX.
+	* i386-linux-tdep.c: Include features/i386/i386-mpx-linux.c.
+	(i386_linux_gregset_reg_offset): Add MPX registers.
+	(i386_linux_core_read_description): Initialize also MPX.
+	(_initialize_i386_linux_tdep): Add mpx initialization.
+	* i386-tdep.h (gdbarch_tdep): Add fields bnd0r_regnum, bnd0_regnum,
+	mpx_register_names.
+	(i386_regnum): Add MPX registers.
+	(I386_MPX_NUM_REGS): New macro.
+	(i386_bnd_regnum_p): New function.
+	* i386-linux-tdep.h (I386_LINUX_NUM_REGS): Set
+	number of registers to be the number of BNDSTATUS.
+	(tdesc_i386_mpx_linux): Add description for MPX Linux registers.
+	* i386-tdep.c: Include features/i386/i386-mpx.c.
+	(i386_mpx_names): Add MPX register names array.
+	(i386_bnd_names): Add bnd pseudo register names array.
+	(i386_bndr_regnum_p): Lookup register numbers for bnd raw
+	registers.
+	(i386_bndr_regnum_p): Lookup register numbers for bnd raw registers.
+	(386_mpx_ctrl_regnum_p): Lookup register numbers for MPX control
+	registers.
+	(i386_bnd_type): New function.
+	(i386_pseudo_register_type): Use i386_bnd_type for bnd pseudo
+	register types.
+	(i386_pseudo_register_read_into_value): Add bnd case.
+	(i386_pseudo_register_write): Add bnd pseudo registers.
+	(i386_register_reggroup_p): Add MPX register to the group all.
+	(i386_validate_tdesc_p): Add MPX to the target 	description
+	validation.
+	(i386_pseudo_register_name): Add bnd pseudo registers.
+	(i386_gdbarch_init): Add MPX for architecture initialization.
+	(_initia_initialize_i386_tdep): Add mpx initialization.
+	* i387-tdep.c (xsave_mpx_offset): New vector for MPX offsets on
+	XSAVE buffer.
+	(XSAVE_MPX_ADDR): New macro.
+	(i387_supply_xsave): Add MPX case.
+	(i387_collect_xsave): Add MPX case.
+	* i387-tdep.h (I387_BND0R_REGNUM): New macro.
+	(I387_BNDCFGU_REGNUM): New macro.
+	(I387_NUM_MPX_REGS): New macro.
+	(I387_NUM_BND_REGS): New macro.
+	(I387_NUM_MPX_CTRL_REGS): New macro.
+	(I387_MPXEND_REGNUM): New macro.
+	* common/i386-xstate.h (I386_XSTATE_BNDREGS): New macro.
+	(I386_XSTATE_BNDCFG): Likewise.
+	(I386_XSTATE_MPX_MASK): Likewise.
+	(I386_XSTATE_ALL_MASK): New macro represents flags for all states.
+	(I386_XSTATE_BNDREGS_SIZE): New macro.
+	(I386_XSTATE_BNDCFG_SIZE): Likewise.
+	(I386_XSTATE_SIZE): Adapt for MPX.
+	(I386_XSTATE_MAX_SIZE): Likewise.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* features/i386/Makefile: Adapts for using MPX registers.
 	* features/i386/32bit-mpx.xml: New file.
 	* features/i386/64bit-mpx.xml: Likewise.

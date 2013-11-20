@@ -102,7 +102,7 @@ static int have_ptrace_getregset = -1;
   (I386_ST0_REGNUM <= (regno) && (regno) < I386_SSE_NUM_REGS)
 
 #define GETXSTATEREGS_SUPPLIES(regno) \
-  (I386_ST0_REGNUM <= (regno) && (regno) < I386_AVX_NUM_REGS)
+  (I386_ST0_REGNUM <= (regno) && (regno) < I386_MPX_NUM_REGS)
 
 /* Does the current host support the GETREGS request?  */
 int have_ptrace_getregs =
@@ -1041,9 +1041,18 @@ i386_linux_read_description (struct target_ops *ops)
     }
 
   /* Check the native XCR0 only if PTRACE_GETREGSET is available.  */
-  if (have_ptrace_getregset
-      && (xcr0 & I386_XSTATE_AVX_MASK) == I386_XSTATE_AVX_MASK)
-    return tdesc_i386_avx_linux;
+  if (have_ptrace_getregset)
+    {
+      switch ((xcr0 & I386_XSTATE_ALL_MASK))
+	{
+	case I386_XSTATE_MPX_MASK:
+	  return tdesc_i386_mpx_linux;
+	case I386_XSTATE_AVX_MASK:
+	  return tdesc_i386_avx_linux;
+	default:
+	  return tdesc_i386_linux;
+	}
+    }
   else
     return tdesc_i386_linux;
 }

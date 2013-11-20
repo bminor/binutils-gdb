@@ -130,6 +130,21 @@ struct gdbarch_tdep
   /* Upper YMM register names.  Only used for tdesc_numbered_register.  */
   const char **ymmh_register_names;
 
+  /* Register number for %bnd0r.  Set this to -1 to indicate the absence
+     bound registers.  */
+  int bnd0r_regnum;
+
+  /* Register number for pseudo register %bnd0.  Set this to -1 to indicate the absence
+     bound registers.  */
+  int bnd0_regnum;
+
+  /* Register number for %bndcfgu. Set this to -1 to indicate the absence
+     bound control registers.  */
+  int bndcfgu_regnum;
+
+  /* MPX register names.  Only used for tdesc_numbered_register.  */
+  const char **mpx_register_names;
+
   /* Target description.  */
   const struct target_desc *tdesc;
 
@@ -165,6 +180,7 @@ struct gdbarch_tdep
   struct type *i386_mmx_type;
   struct type *i386_ymm_type;
   struct type *i387_ext_type;
+  struct type *i386_bnd_type;
 
   /* Process record/replay target.  */
   /* The map for registers because the AMD64's registers order
@@ -212,7 +228,11 @@ enum i386_regnum
   I386_ST0_REGNUM,		/* %st(0) */
   I386_MXCSR_REGNUM = 40,	/* %mxcsr */ 
   I386_YMM0H_REGNUM,		/* %ymm0h */
-  I386_YMM7H_REGNUM = I386_YMM0H_REGNUM + 7
+  I386_YMM7H_REGNUM = I386_YMM0H_REGNUM + 7,
+  I386_BND0R_REGNUM,
+  I386_BND3R_REGNUM = I386_BND0R_REGNUM + 3,
+  I386_BNDCFGU_REGNUM,
+  I386_BNDSTATUS_REGNUM
 };
 
 /* Register numbers of RECORD_REGMAP.  */
@@ -250,6 +270,7 @@ enum record_i386_regnum
 
 #define I386_SSE_NUM_REGS	(I386_MXCSR_REGNUM + 1)
 #define I386_AVX_NUM_REGS	(I386_YMM7H_REGNUM + 1)
+#define I386_MPX_NUM_REGS	(I386_BNDSTATUS_REGNUM + 1)
 
 /* Size of the largest register.  */
 #define I386_MAX_REGISTER_SIZE	16
@@ -263,6 +284,7 @@ extern int i386_word_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_dword_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_xmm_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_ymm_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_bnd_regnum_p (struct gdbarch *gdbarch, int regnum);
 
 extern const char *i386_pseudo_register_name (struct gdbarch *gdbarch,
 					      int regnum);

@@ -57,6 +57,7 @@
 
 #include "features/i386/i386.c"
 #include "features/i386/i386-avx.c"
+#include "features/i386/i386-mpx.c"
 #include "features/i386/i386-mmx.c"
 
 #include "ax.h"
@@ -96,6 +97,18 @@ static const char *i386_ymmh_names[] =
 {
   "ymm0h",  "ymm1h",   "ymm2h",  "ymm3h",
   "ymm4h",  "ymm5h",   "ymm6h",  "ymm7h",
+};
+
+static const char *i386_mpx_names[] =
+{
+  "bnd0raw", "bnd1raw", "bnd2raw", "bnd3raw", "bndcfgu", "bndstatus"
+};
+
+/* Register names for MPX pseudo-registers.  */
+
+static const char *i386_bnd_names[] =
+{
+  "bnd0", "bnd1", "bnd2", "bnd3"
 };
 
 /* Register names for MMX pseudo-registers.  */
@@ -202,6 +215,21 @@ i386_ymm_regnum_p (struct gdbarch *gdbarch, int regnum)
   return regnum >= 0 && regnum < tdep->num_ymm_regs;
 }
 
+/* BND register?  */
+
+int
+i386_bnd_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int bnd0_regnum = tdep->bnd0_regnum;
+
+  if (bnd0_regnum < 0)
+    return 0;
+
+  regnum -= bnd0_regnum;
+  return regnum >= 0 && regnum < I387_NUM_BND_REGS;
+}
+
 /* SSE register?  */
 
 int
@@ -254,6 +282,34 @@ i386_fpc_regnum_p (struct gdbarch *gdbarch, int regnum)
 	  && regnum < I387_XMM0_REGNUM (tdep));
 }
 
+/* BNDr (raw) register?  */
+
+static int
+i386_bndr_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+   if (I387_BND0R_REGNUM (tdep) < 0)
+     return 0;
+
+  regnum -= tdep->bnd0r_regnum;
+  return regnum >= 0 && regnum < I387_NUM_BND_REGS;
+}
+
+/* BND control register?  */
+
+static int
+i386_mpx_ctrl_regnum_p (struct gdbarch *gdbarch, int regnum)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+   if (I387_BNDCFGU_REGNUM (tdep) < 0)
+     return 0;
+
+  regnum -= I387_BNDCFGU_REGNUM (tdep);
+  return regnum >= 0 && regnum < I387_NUM_MPX_CTRL_REGS;
+}
+
 /* Return the name of register REGNUM, or the empty string if it is
    an anonymous register.  */
 
@@ -273,6 +329,8 @@ const char *
 i386_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  if (i386_bnd_regnum_p (gdbarch, regnum))
+    return i386_bnd_names[regnum - tdep->bnd0_regnum];
   if (i386_mmx_regnum_p (gdbarch, regnum))
     return i386_mmx_names[regnum - I387_MM0_REGNUM (tdep)];
   else if (i386_ymm_regnum_p (gdbarch, regnum))
@@ -2750,6 +2808,43 @@ i387_ext_type (struct gdbarch *gdbarch)
   return tdep->i387_ext_type;
 }
 
+/* Construct type for pseudo BND registers.  We can't use
+   tdesc_find_type since a complement of one value has to be used
+   to describe the upper bound.  */
+
+static struct type *
+i386_bnd_type (struct gdbarch *gdbarch)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+
+  if (!tdep->i386_bnd_type)
+    {
+      struct type *t, *bound_t;
+      const struct builtin_type *bt = builtin_type (gdbarch);
+
+      /* The type we're building is described bellow:  */
+#if 0
+      struct __bound128
+      {
+	void *lbound;
+	void *ubound;		/* One complement of raw ubound field.  */
+      };
+#endif
+
+      t = arch_composite_type (gdbarch,
+			       "__gdb_builtin_type_bound128", TYPE_CODE_STRUCT);
+
+      append_composite_type_field (t, "lbound", bt->builtin_data_ptr);
+      append_composite_type_field (t, "ubound", bt->builtin_data_ptr);
+
+      TYPE_NAME (t) = "builtin_type_bound128";
+      tdep->i386_bnd_type = t;
+    }
+
+  return tdep->i386_bnd_type;
+}
+
 /* Construct vector type for pseudo YMM registers.  We can't use
    tdesc_find_type since YMM isn't described in target description.  */
 
@@ -2851,6 +2946,8 @@ i386_mmx_type (struct gdbarch *gdbarch)
 struct type *
 i386_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 {
+  if (i386_bnd_regnum_p (gdbarch, regnum))
+    return i386_bnd_type (gdbarch);
   if (i386_mmx_regnum_p (gdbarch, regnum))
     return i386_mmx_type (gdbarch);
   else if (i386_ymm_regnum_p (gdbarch, regnum))
@@ -2917,8 +3014,31 @@ i386_pseudo_register_read_into_value (struct gdbarch *gdbarch,
   else
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+      if (i386_bnd_regnum_p (gdbarch, regnum))
+	{
+	  regnum -= tdep->bnd0_regnum;
 
-      if (i386_ymm_regnum_p (gdbarch, regnum))
+	  /* Extract (always little endian).  Read lower 128bits.  */
+	  status = regcache_raw_read (regcache,
+				      I387_BND0R_REGNUM (tdep) + regnum,
+				      raw_buf);
+	  if (status != REG_VALID)
+	    mark_value_bytes_unavailable (result_value, 0, 16);
+	  else
+	    {
+	      enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+	      LONGEST upper, lower;
+	      int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
+
+	      lower = extract_unsigned_integer (raw_buf, 8, byte_order);
+	      upper = extract_unsigned_integer (raw_buf + 8, 8, byte_order);
+	      upper = ~upper;
+
+	      memcpy (buf, &lower, size);
+	      memcpy (buf + size, &upper, size);
+	    }
+	}
+      else if (i386_ymm_regnum_p (gdbarch, regnum))
 	{
 	  regnum -= tdep->ymm0_regnum;
 
@@ -3011,7 +3131,34 @@ i386_pseudo_register_write (struct gdbarch *gdbarch, struct regcache *regcache,
     {
       struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-      if (i386_ymm_regnum_p (gdbarch, regnum))
+      if (i386_bnd_regnum_p (gdbarch, regnum))
+	{
+	  ULONGEST upper, lower;
+	  int size = TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr);
+	  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+
+	  /* New values from input value.  */
+	  regnum -= tdep->bnd0_regnum;
+	  lower = extract_unsigned_integer (buf, size, byte_order);
+	  upper = extract_unsigned_integer (buf + size, size, byte_order);
+
+	  /* Fetching register buffer.  */
+	  regcache_raw_read (regcache,
+			     I387_BND0R_REGNUM (tdep) + regnum,
+			     raw_buf);
+
+	  upper = ~upper;
+
+	  /* Set register bits.  */
+	  memcpy (raw_buf, &lower, 8);
+	  memcpy (raw_buf + 8, &upper, 8);
+
+
+	  regcache_raw_write (regcache,
+			      I387_BND0R_REGNUM (tdep) + regnum,
+			      raw_buf);
+	}
+      else if (i386_ymm_regnum_p (gdbarch, regnum))
 	{
 	  regnum -= tdep->ymm0_regnum;
 
@@ -3866,7 +4013,8 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   const struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int fp_regnum_p, mmx_regnum_p, xmm_regnum_p, mxcsr_regnum_p,
-      ymm_regnum_p, ymmh_regnum_p;
+      ymm_regnum_p, ymmh_regnum_p, bndr_regnum_p, bnd_regnum_p,
+      mpx_ctrl_regnum_p;
 
   /* Don't include pseudo registers, except for MMX, in any register
      groups.  */
@@ -3911,13 +4059,31 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 	  || ymmh_regnum_p))
     return 0;
 
+  bnd_regnum_p = i386_bnd_regnum_p (gdbarch, regnum);
+  if (group == all_reggroup
+      && ((bnd_regnum_p && (tdep->xcr0 & I386_XSTATE_MPX_MASK))))
+    return bnd_regnum_p;
+
+  bndr_regnum_p = i386_bndr_regnum_p (gdbarch, regnum);
+  if (group == all_reggroup
+      && ((bndr_regnum_p && (tdep->xcr0 & I386_XSTATE_MPX_MASK))))
+    return 0;
+
+  mpx_ctrl_regnum_p = i386_mpx_ctrl_regnum_p (gdbarch, regnum);
+  if (group == all_reggroup
+      && ((mpx_ctrl_regnum_p && (tdep->xcr0 & I386_XSTATE_MPX_MASK))))
+    return mpx_ctrl_regnum_p;
+
   if (group == general_reggroup)
     return (!fp_regnum_p
 	    && !mmx_regnum_p
 	    && !mxcsr_regnum_p
 	    && !xmm_regnum_p
 	    && !ymm_regnum_p
-	    && !ymmh_regnum_p);
+	    && !ymmh_regnum_p
+	    && !bndr_regnum_p
+	    && !bnd_regnum_p
+	    && !mpx_ctrl_regnum_p);
 
   return default_register_reggroup_p (gdbarch, regnum, group);
 }
@@ -7496,7 +7662,7 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 {
   const struct target_desc *tdesc = tdep->tdesc;
   const struct tdesc_feature *feature_core;
-  const struct tdesc_feature *feature_sse, *feature_avx;
+  const struct tdesc_feature *feature_sse, *feature_avx, *feature_mpx;
   int i, num_regs, valid_p;
 
   if (! tdesc_has_registers (tdesc))
@@ -7512,6 +7678,9 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 
   /* Try AVX registers.  */
   feature_avx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx");
+
+  /* Try MPX registers.  */
+  feature_mpx = tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx");
 
   valid_p = 1;
 
@@ -7559,6 +7728,23 @@ i386_validate_tdesc_p (struct gdbarch_tdep *tdep,
 					    tdep->register_names[i]);
     }
 
+  if (feature_mpx)
+    {
+      tdep->xcr0 = I386_XSTATE_MPX_MASK;
+
+      if (tdep->bnd0r_regnum < 0)
+	{
+	  tdep->mpx_register_names = i386_mpx_names;
+	  tdep->bnd0r_regnum = I386_BND0R_REGNUM;
+	  tdep->bndcfgu_regnum = I386_BNDCFGU_REGNUM;
+	}
+
+      for (i = 0; i < I387_NUM_MPX_REGS; i++)
+	valid_p &= tdesc_numbered_register (feature_mpx, tdesc_data,
+	    I387_BND0R_REGNUM (tdep) + i,
+	    tdep->mpx_register_names[i]);
+    }
+
   return valid_p;
 }
 
@@ -7572,6 +7758,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   const struct target_desc *tdesc;
   int mm0_regnum;
   int ymm0_regnum;
+  int bnd0_regnum;
+  int num_bnd_cooked;
 
   /* If there is already a candidate, use it.  */
   arches = gdbarch_list_lookup_by_info (arches, &info);
@@ -7745,8 +7933,8 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Even though the default ABI only includes general-purpose registers,
      floating-point registers and the SSE registers, we have to leave a
-     gap for the upper AVX registers.  */
-  set_gdbarch_num_regs (gdbarch, I386_AVX_NUM_REGS);
+     gap for the upper AVX registers and the MPX registers.  */
+  set_gdbarch_num_regs (gdbarch, I386_MPX_NUM_REGS);
 
   /* Get the x86 target description from INFO.  */
   tdesc = info.target_desc;
@@ -7767,6 +7955,10 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->num_mmx_regs = 8;
   tdep->num_ymm_regs = 0;
 
+  /* No MPX registers.  */
+  tdep->bnd0r_regnum = -1;
+  tdep->bndcfgu_regnum = -1;
+
   tdesc_data = tdesc_data_alloc ();
 
   set_gdbarch_relocate_instruction (gdbarch, i386_relocate_instruction);
@@ -7785,13 +7977,16 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       return NULL;
     }
 
+  num_bnd_cooked = (tdep->bnd0r_regnum > 0 ? I387_NUM_BND_REGS : 0);
+
   /* Wire in pseudo registers.  Number of pseudo registers may be
      changed.  */
   set_gdbarch_num_pseudo_regs (gdbarch, (tdep->num_byte_regs
 					 + tdep->num_word_regs
 					 + tdep->num_dword_regs
 					 + tdep->num_mmx_regs
-					 + tdep->num_ymm_regs));
+					 + tdep->num_ymm_regs
+					 + num_bnd_cooked));
 
   /* Target description may be changed.  */
   tdesc = tdep->tdesc;
@@ -7825,13 +8020,20 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   else
     tdep->ymm0_regnum = -1;
 
+  bnd0_regnum = mm0_regnum;
   if (tdep->num_mmx_regs != 0)
     {
       /* Support MMX pseudo-register if MMX hasn't been disabled.  */
       tdep->mm0_regnum = mm0_regnum;
+      bnd0_regnum += tdep->num_mmx_regs;
     }
   else
     tdep->mm0_regnum = -1;
+
+  if (tdep->bnd0r_regnum > 0)
+      tdep->bnd0_regnum = bnd0_regnum;
+  else
+    tdep-> bnd0_regnum = -1;
 
   /* Hook in the legacy prologue-based unwinders last (fallback).  */
   frame_unwind_append_unwinder (gdbarch, &i386_stack_tramp_frame_unwind);
@@ -7910,6 +8112,7 @@ is \"default\"."),
   initialize_tdesc_i386 ();
   initialize_tdesc_i386_mmx ();
   initialize_tdesc_i386_avx ();
+  initialize_tdesc_i386_mpx ();
 
   /* Tell remote stub that we support XML target description.  */
   register_remote_support_xml ("i386");
