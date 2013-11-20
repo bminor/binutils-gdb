@@ -1,3 +1,12 @@
+2013-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc (.data): Set the based on the next
+	free location in the text memory region, not a computation based
+	upon the size of the text section.  Orphaned sections or other
+	linker scripts might insert new sections between the .text section
+	and the .data section.
+	* scripttempl/elf32msp430_3.sc (.data): Likewise.
+
 2013-11-19  Roland McGrath  <mcgrathr@google.com>
 	    Alan Modra  <amodra@gmail.com>
 
