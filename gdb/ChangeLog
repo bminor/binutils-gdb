@@ -1,4 +1,10 @@
 2013-12-05  Joel Brobecker  <brobecker@adacore.com>
+	    Tristan Gingold  <gingold@adacore.com>
+
+	* amd64-windows-tdep.c (amd64_windows_frame_decode_insns):
+	Accept version 2.  Ignore operations using opcode 6.
+
+2013-12-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lex.l (find_dot_all): Fix coding style violations.
 
