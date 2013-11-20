@@ -1,3 +1,20 @@
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
+	* target-dcache.c (stack_cache_enabled_p_1): Rename to ...
+	(stack_cache_enabled_1): ... this.  New variable.
+	(stack_cache_enabled_p): Rename to ...
+	(stack_cache_enabled): ... this.  New variable.
+	(set_stack_cache_enabled_p): Rename to ...
+	(set_stack_cache): ... this.  Update caller.
+	(show_stack_cache_enabled_p): Rename to ...
+	(show_stack_cache): ... this.  Update caller.
+	(stack_cache_enabled): Rename to ...
+	(stack_cache_enabled_p): ... this.  Update caller.
+	(_initialize_target_dcache): Replace "data cache" with
+	"target memory cache".
+	* target-dcache.h (stack_cache_enabled): Remove declaration.
+	(stack_cache_enabled_p): Add declaration.
+
 2013-11-23  Doug Evans  <xdje42@gmail.com>
 
 	* python/py-frame.c (gdbpy_initialize_frames): Remove FIRST_ERROR,
