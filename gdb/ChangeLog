@@ -1,5 +1,23 @@
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
+	* features/i386/Makefile: Adapts for using MPX registers.
+	* features/i386/32bit-mpx.xml: New file.
+	* features/i386/64bit-mpx.xml: Likewise.
+	* features/i386/amd64-mpx-linux.c: Likewise.
+	* features/i386/amd64-mpx-linux.xml: Likewise.
+	* features/i386/amd64-mpx.c: Likewise.
+	* features/i386/amd64-mpx.xml: Likewise.
+	* features/i386/i386-mpx-linux.c: Likewise.
+	* features/i386/i386-mpx-linux.xml: Likewise.
+	* features/i386/i386-mpx.c: Likewise.
+	* features/i386/i386-mpx.xml: Likewise.
+	* regformats/i386/amd64-mpx-linux.dat: New file.
+	* regformats/i386/amd64-mpx.dat: Likewise.
+	* regformats/i386/i386-mpx-linux.dat: Likewise.
+	* regformats/i386/i386-mpx.dat: Likewise.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
 	* target-descriptions.c (maint_print_maint_print_c_tdesc_cmd):
 	Modified logic of creating a bitfield to be in sync with
 	tdesc_gdb_type.
