@@ -47,6 +47,15 @@ set build_tests {
   {"Build libmpx1c.a"
    "" "-Wa,-madd-bnd-prefix"
    {mpx1c.c} {{readelf {-r --wide} mpx1c.rd}} "libmpx1c.a"}
+  {"Build libmpx2a.a"
+   "" "-Wa,-madd-bnd-prefix -fPIE"
+   {mpx2a.c}  {{readelf {-r --wide} mpx2a.rd}} "libmpx2a.a"}
+  {"Build libmpx2b.a"
+   "" "-fPIE"
+   {mpx2b.c} {} "libmpx2b.a"}
+  {"Build libmpx2c.a"
+   "" "-Wa,-madd-bnd-prefix -fPIE"
+   {mpx2c.c} {{readelf {-r --wide} mpx2c.rd}} "libmpx2c.a"}
 }
 
 run_cc_link_tests $build_tests
@@ -55,6 +64,15 @@ set run_tests {
     {"Run mpx1"
      "tmpdir/mpx1a.o tmpdir/mpx1b.o tmpdir/mpx1c.o" ""
      {dummy.s} "mpx1" "mpx1.out"}
+    {"Run mpx1 with -static"
+     "tmpdir/mpx1a.o tmpdir/mpx1b.o tmpdir/mpx1c.o -static" ""
+     {dummy.s} "mpx1static" "mpx1.out"}
+    {"Run mpx2"
+     "tmpdir/mpx2a.o tmpdir/mpx2b.o tmpdir/mpx2c.o -pie" ""
+     {dummy.s} "mpx2" "mpx2.out"}
+    {"Run mpx2 with -static"
+     "tmpdir/mpx2a.o tmpdir/mpx2b.o tmpdir/mpx2c.o -static" ""
+     {dummy.s} "mpx2static" "mpx2.out"}
 }
 
 run_ld_link_exec_tests [] $run_tests

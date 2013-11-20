@@ -1,3 +1,15 @@
+2013-11-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-x86-64/mpx.exp (build_tests): Add libmpx2a.a, libmpx2b.a
+	and libmpx2c.a.
+	(run_tests): Add mpx1static, mpx2 and mpx2static.
+	* ld-x86-64/mpx2.out: Likewise.
+	* ld-x86-64/mpx2a.c: Likewise.
+	* ld-x86-64/mpx2a.rd: Likewise.
+	* ld-x86-64/mpx2b.c: Likewise.
+	* ld-x86-64/mpx2c.c: Likewise.
+	* ld-x86-64/mpx2c.rd: Likewise.
+
 2013-11-19  Roland McGrath  <mcgrathr@google.com>
 
 	* ld-elf/ehdr_start-userdef.t: New file.
