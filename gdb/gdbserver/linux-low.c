@@ -3298,13 +3298,15 @@ struct thread_resume_array
   size_t n;
 };
 
-/* This function is called once per thread.  We look up the thread
-   in RESUME_PTR, and mark the thread with a pointer to the appropriate
-   resume request.
+/* This function is called once per thread via find_inferior.
+   ARG is a pointer to a thread_resume_array struct.
+   We look up the thread specified by ENTRY in ARG, and mark the thread
+   with a pointer to the appropriate resume request.
 
    This algorithm is O(threads * resume elements), but resume elements
    is small (and will remain small at least until GDB supports thread
    suspension).  */
+
 static int
 linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
 {

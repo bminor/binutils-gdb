@@ -1,5 +1,9 @@
 2013-11-20  Doug Evans  <dje@google.com>
 
+	* linux-low.c (linux_set_resume_request): Fix comment.
+
+2013-11-20  Doug Evans  <dje@google.com>
+
 	* linux-low.c (resume_status_pending_p): Tweak comment.
 
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
