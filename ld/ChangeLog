@@ -1,3 +1,9 @@
+2013-11-21  Andrew Pinski  <apinski@cavium.com>
+
+	* configure.tgt (aarch64_be-*-linux*): Split out the linux targets
+	into targ_extra_libpath.
+	(aarch64-*-linux*): Likewise.
+
 2013-11-21  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16192
