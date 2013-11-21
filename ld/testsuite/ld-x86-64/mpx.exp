@@ -76,3 +76,5 @@ set run_tests {
 }
 
 run_ld_link_exec_tests [] $run_tests
+
+run_dump_test "bnd-branch-1"
