@@ -1,3 +1,7 @@
+2013-12-03  Samuel Bronson  <naesten@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi/mi-main.c (mi_cmd_list_features): Remove "ada-exceptions".
