@@ -1,3 +1,10 @@
+2013-12-06  Keven Boell  <keven.boell@intel.com>
+
+	* lib/mi-support.exp (mi_list_varobj_children_range): Add
+	call to mi_list_array_varobj_children_with_index.
+	(mi_list_array_varobj_children_with_index): New function.
+	Add parameter to specify array start.
+
 2013-12-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gdb.base/sigall.exp (test_one_sig): gdb identifies SIGLOST as a
