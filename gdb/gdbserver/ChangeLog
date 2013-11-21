@@ -1,3 +1,7 @@
+2013-11-20  Doug Evans  <dje@google.com>
+
+	* linux-low.c (resume_status_pending_p): Tweak comment.
+
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* Makefile.in: Add i386-mpx.c, i386-mpx-linux.c, amd64-mpx.c,

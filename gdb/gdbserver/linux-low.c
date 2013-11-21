@@ -3373,8 +3373,9 @@ linux_set_resume_request (struct inferior_list_entry *entry, void *arg)
   return 0;
 }
 
+/* find_inferior callback for linux_resume.
+   Set *FLAG_P if this lwp has an interesting status pending.  */
 
-/* Set *FLAG_P if this lwp has an interesting status pending.  */
 static int
 resume_status_pending_p (struct inferior_list_entry *entry, void *flag_p)
 {
