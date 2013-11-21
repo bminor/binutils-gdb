@@ -1,4 +1,16 @@
 2013-11-22  Pedro Alves  <palves@redhat.com>
+	    Tom Tromey  <tromey@redhat.com>
+
+	* frame.c (frame_stash_add): Now returns whether a frame with the
+	same ID was already known.
+	(compute_frame_id): New function, factored out from get_frame_id.
+	(get_frame_id): No longer lazilly compute the frame id here.
+	(get_prev_frame_if_no_cycle): New function.  Detects wider stack
+	cycles.
+	(get_prev_frame_1): Use it instead of get_prev_frame_raw directly,
+	and checking for stack cycles here.
+
+2013-11-22  Pedro Alves  <palves@redhat.com>
 
 	PR 16155
 	* frame.c (get_prev_frame_1): Do the UNWIND_SAME_ID check between
