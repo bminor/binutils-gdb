@@ -1,6 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright 1998-2013 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -2591,7 +2590,7 @@ pe_create_runtime_relocator_reference (bfd *parent)
 		BSF_NO_FLAGS, 0);
 
   bfd_set_section_size (abfd, extern_rt_rel, PE_IDATA5_SIZE);
-  extern_rt_rel_d = xmalloc (PE_IDATA5_SIZE);
+  extern_rt_rel_d = xcalloc (1, PE_IDATA5_SIZE);
   extern_rt_rel->contents = extern_rt_rel_d;
 
   quick_reloc (abfd, 0, BFD_RELOC_RVA, 1);

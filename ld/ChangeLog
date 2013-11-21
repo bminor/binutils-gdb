@@ -1,3 +1,9 @@
+2013-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16192
+	* pe-dll.c (pe_create_runtime_relocator_reference): Zero the
+	newly allocated idata5 block.
+
 2013-11-20  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/elf32msp430.sc (.data): Set the based on the next
