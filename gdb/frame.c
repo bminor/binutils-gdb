@@ -188,31 +188,23 @@ frame_stash_create (void)
 			     NULL);
 }
 
-/* Internal function to add a frame to the frame_stash hash table.
-   Returns false if a frame with the same ID was already stashed, true
-   otherwise.  */
+/* Internal function to add a frame to the frame_stash hash table.  Do
+   not store frames below 0 as they may not have any addresses to
+   calculate a hash.  */
 
-static int
+static void
 frame_stash_add (struct frame_info *frame)
 {
-  struct frame_info **slot;
+  /* Do not stash frames below level 0.  */
+  if (frame->level >= 0)
+    {
+      struct frame_info **slot;
 
-  /* Do not try to stash the sentinel frame.  */
-  gdb_assert (frame->level >= 0);
-
-  slot = (struct frame_info **) htab_find_slot (frame_stash,
-						frame,
-						INSERT);
-
-  /* If we already have a frame in the stack with the same id, we
-     either have a stack cycle (corrupted stack?), or some bug
-     elsewhere in GDB.  In any case, ignore the duplicate and return
-     an indication to the caller.  */
-  if (*slot != NULL)
-    return 0;
-
-  *slot = frame;
-  return 1;
+      slot = (struct frame_info **) htab_find_slot (frame_stash,
+						    frame,
+						    INSERT);
+      *slot = frame;
+    }
 }
 
 /* Internal function to search the frame stash for an entry with the
@@ -397,34 +389,6 @@ skip_artificial_frames (struct frame_info *frame)
   return frame;
 }
 
-/* Compute the frame's uniq ID that can be used to, later, re-find the
-   frame.  */
-
-static void
-compute_frame_id (struct frame_info *fi)
-{
-  gdb_assert (!fi->this_id.p);
-
-  if (frame_debug)
-    fprintf_unfiltered (gdb_stdlog, "{ compute_frame_id (fi=%d) ",
-			fi->level);
-  /* Find the unwinder.  */
-  if (fi->unwind == NULL)
-    frame_unwind_find_by_frame (fi, &fi->prologue_cache);
-  /* Find THIS frame's ID.  */
-  /* Default to outermost if no ID is found.  */
-  fi->this_id.value = outer_frame_id;
-  fi->unwind->this_id (fi, &fi->prologue_cache, &fi->this_id.value);
-  gdb_assert (frame_id_p (fi->this_id.value));
-  fi->this_id.p = 1;
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "-> ");
-      fprint_frame_id (gdb_stdlog, fi->this_id.value);
-      fprintf_unfiltered (gdb_stdlog, " }\n");
-    }
-}
-
 /* Return a frame uniq ID that can be used to, later, re-find the
    frame.  */
 
@@ -434,7 +398,29 @@ get_frame_id (struct frame_info *fi)
   if (fi == NULL)
     return null_frame_id;
 
-  gdb_assert (fi->this_id.p);
+  if (!fi->this_id.p)
+    {
+      if (frame_debug)
+	fprintf_unfiltered (gdb_stdlog, "{ get_frame_id (fi=%d) ",
+			    fi->level);
+      /* Find the unwinder.  */
+      if (fi->unwind == NULL)
+	frame_unwind_find_by_frame (fi, &fi->prologue_cache);
+      /* Find THIS frame's ID.  */
+      /* Default to outermost if no ID is found.  */
+      fi->this_id.value = outer_frame_id;
+      fi->unwind->this_id (fi, &fi->prologue_cache, &fi->this_id.value);
+      gdb_assert (frame_id_p (fi->this_id.value));
+      fi->this_id.p = 1;
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame_id (gdb_stdlog, fi->this_id.value);
+	  fprintf_unfiltered (gdb_stdlog, " }\n");
+	}
+      frame_stash_add (fi);
+    }
+
   return fi->this_id.value;
 }
 
@@ -1669,42 +1655,6 @@ frame_register_unwind_location (struct frame_info *this_frame, int regnum,
     }
 }
 
-/* Get the previous raw frame, and check that it is not identical to
-   same other frame frame already in the chain.  If it is, there is
-   most likely a stack cycle, so we discard it, and mark THIS_FRAME as
-   outermost, with UNWIND_SAME_ID stop reason.  Unlike the other
-   validity tests, that compare THIS_FRAME and the next frame, we do
-   this right after creating the previous frame, to avoid ever ending
-   up with two frames with the same id in the frame chain.  */
-
-static struct frame_info *
-get_prev_frame_if_no_cycle (struct frame_info *this_frame)
-{
-  struct frame_info *prev_frame;
-
-  prev_frame = get_prev_frame_raw (this_frame);
-  if (prev_frame == NULL)
-    return NULL;
-
-  compute_frame_id (prev_frame);
-  if (frame_stash_add (prev_frame))
-    return prev_frame;
-
-  /* Another frame with the same id was already in the stash.  We just
-     detected a cycle.  */
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "-> ");
-      fprint_frame (gdb_stdlog, NULL);
-      fprintf_unfiltered (gdb_stdlog, " // this frame has same ID }\n");
-    }
-  this_frame->stop_reason = UNWIND_SAME_ID;
-  /* Unlink.  */
-  prev_frame->next = NULL;
-  this_frame->prev = NULL;
-  return NULL;
-}
-
 /* Return a "struct frame_info" corresponding to the frame that called
    THIS_FRAME.  Returns NULL if there is no such frame.
 
@@ -1716,6 +1666,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
 {
   struct frame_id this_id;
   struct gdbarch *gdbarch;
+  struct frame_info *prev_frame;
 
   gdb_assert (this_frame != NULL);
   gdbarch = get_frame_arch (this_frame);
@@ -1758,7 +1709,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
      until we have unwound all the way down to the previous non-inline
      frame.  */
   if (get_frame_type (this_frame) == INLINE_FRAME)
-    return get_prev_frame_if_no_cycle (this_frame);
+    return get_prev_frame_raw (this_frame);
 
   /* Check that this frame is unwindable.  If it isn't, don't try to
      unwind to the prev frame.  */
@@ -1864,7 +1815,31 @@ get_prev_frame_1 (struct frame_info *this_frame)
 	}
     }
 
-  return get_prev_frame_if_no_cycle (this_frame);
+  prev_frame = get_prev_frame_raw (this_frame);
+
+  /* Check that this and the prev frame are not identical.  If they
+     are, there is most likely a stack cycle.  Unlike the tests above,
+     we do this right after creating the prev frame, to avoid ever
+     ending up with two frames with the same id in the frame
+     chain.  */
+  if (prev_frame != NULL
+      && frame_id_eq (get_frame_id (prev_frame),
+		      get_frame_id (this_frame)))
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // this frame has same ID }\n");
+	}
+      this_frame->stop_reason = UNWIND_SAME_ID;
+      /* Unlink.  */
+      prev_frame->next = NULL;
+      this_frame->prev = NULL;
+      return NULL;
+    }
+
+  return prev_frame;
 }
 
 /* Construct a new "struct frame_info" and link it previous to
