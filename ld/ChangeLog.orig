@@ -1,10 +1,3 @@
-2013-11-22  Cory Fields  <cory@coryfields.com>
-
-	* libcoff-in.h: Add insert_timestamp flag to the pe_data struct.
-	* libcoff.h: Regenerate.
-	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Only use a real
-	timestamp if --insert-timestamp was used.
-
 2013-11-19  Roland McGrath  <mcgrathr@google.com>
 	    Alan Modra  <amodra@gmail.com>
 

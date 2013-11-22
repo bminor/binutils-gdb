@@ -130,6 +130,7 @@ static int support_old_code = 0;
 static char * thumb_entry_symbol = NULL;
 static lang_assignment_statement_type *image_base_statement = 0;
 static unsigned short pe_dll_characteristics = 0;
+static bfd_boolean insert_timestamp = FALSE;
 
 #ifdef DLL_SUPPORT
 static int pe_enable_stdcall_fixup = -1; /* 0=disable 1=enable.  */
@@ -239,8 +240,7 @@ fragment <<EOF
 					(OPTION_EXCLUDE_LIBS + 1)
 #define OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC	\
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC + 1)
-#define OPTION_LARGE_ADDRESS_AWARE \
-					(OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC + 1)
+#define OPTION_LARGE_ADDRESS_AWARE 	(OPTION_DLL_DISABLE_RUNTIME_PSEUDO_RELOC + 1)
 #define OPTION_DISABLE_LARGE_ADDRESS_AWARE \
  					(OPTION_LARGE_ADDRESS_AWARE + 1)
 #define OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V1	\
@@ -251,15 +251,13 @@ fragment <<EOF
 					(OPTION_DLL_ENABLE_RUNTIME_PSEUDO_RELOC_V2 + 1)
 #define OPTION_USE_NUL_PREFIXED_IMPORT_TABLES \
 					(OPTION_EXCLUDE_MODULES_FOR_IMPLIB + 1)
-#define OPTION_NO_LEADING_UNDERSCORE \
-					(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
-#define OPTION_LEADING_UNDERSCORE \
-					(OPTION_NO_LEADING_UNDERSCORE + 1)
+#define OPTION_NO_LEADING_UNDERSCORE 	(OPTION_USE_NUL_PREFIXED_IMPORT_TABLES + 1)
+#define OPTION_LEADING_UNDERSCORE 	(OPTION_NO_LEADING_UNDERSCORE + 1)
 #define OPTION_ENABLE_LONG_SECTION_NAMES \
 					(OPTION_LEADING_UNDERSCORE + 1)
 #define OPTION_DISABLE_LONG_SECTION_NAMES \
 					(OPTION_ENABLE_LONG_SECTION_NAMES + 1)
-/* DLLCharacteristics flags */
+/* DLLCharacteristics flags.  */
 #define OPTION_DYNAMIC_BASE		(OPTION_DISABLE_LONG_SECTION_NAMES + 1)
 #define OPTION_FORCE_INTEGRITY		(OPTION_DYNAMIC_BASE + 1)
 #define OPTION_NX_COMPAT		(OPTION_FORCE_INTEGRITY + 1)
@@ -268,6 +266,8 @@ fragment <<EOF
 #define OPTION_NO_BIND			(OPTION_NO_SEH + 1)
 #define OPTION_WDM_DRIVER		(OPTION_NO_BIND + 1)
 #define OPTION_TERMINAL_SERVER_AWARE	(OPTION_WDM_DRIVER + 1)
+/* Determinism.  */
+#define OPTION_INSERT_TIMESTAMP		(OPTION_TERMINAL_SERVER_AWARE + 1)
 
 static void
 gld${EMULATION_NAME}_add_options
@@ -301,6 +301,7 @@ gld${EMULATION_NAME}_add_options
      OPTION_USE_NUL_PREFIXED_IMPORT_TABLES},
     {"no-leading-underscore", no_argument, NULL, OPTION_NO_LEADING_UNDERSCORE},
     {"leading-underscore", no_argument, NULL, OPTION_LEADING_UNDERSCORE},
+    {"insert-timestamp", no_argument, NULL, OPTION_INSERT_TIMESTAMP},
 #ifdef DLL_SUPPORT
     /* getopt allows abbreviations, so we do this to stop it
        from treating -o as an abbreviation for this option.  */
@@ -438,6 +439,8 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
   fprintf (file, _("  --support-old-code                 Support interworking with old code\n"));
   fprintf (file, _("  --[no-]leading-underscore          Set explicit symbol underscore prefix mode\n"));
   fprintf (file, _("  --thumb-entry=<symbol>             Set the entry point to be Thumb <symbol>\n"));
+  fprintf (file, _("  --insert-timestamp                 Use a real timestamp rather than zero.\n"));
+  fprintf (file, _("                                     This makes binaries non-deterministic\n"));
 #ifdef DLL_SUPPORT
   fprintf (file, _("  --add-stdcall-alias                Export symbols with and without @nn\n"));
   fprintf (file, _("  --disable-stdcall-fixup            Don't link _sym to _sym@nn\n"));
@@ -753,6 +756,9 @@ gld${EMULATION_NAME}_handle_option (int optc)
       break;
     case OPTION_LEADING_UNDERSCORE:
       pe_leading_underscore = 1;
+      break;
+    case OPTION_INSERT_TIMESTAMP:
+      insert_timestamp = TRUE;
       break;
 #ifdef DLL_SUPPORT
     case OPTION_OUT_DEF:
@@ -1255,6 +1261,7 @@ gld_${EMULATION_NAME}_after_open (void)
   pe_data (link_info.output_bfd)->pe_opthdr = pe;
   pe_data (link_info.output_bfd)->dll = init[DLLOFF].value;
   pe_data (link_info.output_bfd)->real_flags |= real_flags;
+  pe_data (link_info.output_bfd)->insert_timestamp = insert_timestamp;
 
   /* At this point we must decide whether to use long section names
      in the output or not.  If the user hasn't explicitly specified
