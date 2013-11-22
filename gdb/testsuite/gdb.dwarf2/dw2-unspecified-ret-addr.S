@@ -1,16 +1,16 @@
-# This file was created by running dw2-bad-cfi.c
+# This file was created by running dw2-unspecified-ret-addr.c
 # through 'gcc -g -dA -S', and then hand-editing
 # the CFI in "callee" to suit.
 
-	.file	"dw2-bad-cfi.c"
+	.file	"dw2-unspecified-ret-addr.c"
 	.text
 .Ltext0:
 	.globl	callee
 	.type	callee, @function
 callee:
 .LFB0:
-	.file 1 "dw2-bad-cfi.c"
-	# dw2-bad-cfi.c:20
+	.file 1 "dw2-unspecified-ret-addr.c"
+	# dw2-unspecified-ret-addr.c:20
 	.loc 1 20 0
 	.cfi_startproc
 # BLOCK 2 seq:0
@@ -22,7 +22,7 @@ callee:
 */
 	movq	%rsp, %rbp
 /*	.cfi_def_cfa_register 6 */
-	# dw2-bad-cfi.c:21
+	# dw2-unspecified-ret-addr.c:21
 	.loc 1 21 0
 	popq	%rbp
 /*	.cfi_def_cfa 7, 8 */
@@ -39,7 +39,7 @@ callee:
 	.type	main, @function
 main:
 .LFB1:
-	# dw2-bad-cfi.c:25
+	# dw2-unspecified-ret-addr.c:25
 	.loc 1 25 0
 	.cfi_startproc
 # BLOCK 2 seq:0
@@ -49,13 +49,13 @@ main:
 	.cfi_offset 6, -16
 	movq	%rsp, %rbp
 	.cfi_def_cfa_register 6
-	# dw2-bad-cfi.c:26
+	# dw2-unspecified-ret-addr.c:26
 	.loc 1 26 0
 	call	callee
-	# dw2-bad-cfi.c:27
+	# dw2-unspecified-ret-addr.c:27
 	.loc 1 27 0
 	movl	$0, %eax
-	# dw2-bad-cfi.c:28
+	# dw2-unspecified-ret-addr.c:28
 	.loc 1 28 0
 	popq	%rbp
 	.cfi_def_cfa 7, 8
@@ -74,7 +74,7 @@ main:
 	.uleb128 0x1	# (DIE (0xb) DW_TAG_compile_unit)
 	.long	.LASF0	# DW_AT_producer: "GNU C 4.7.2 20121109 (Red Hat 4.7.2-8) -mtune=generic -march=x86-64 -g"
 	.byte	0x1	# DW_AT_language
-	.long	.LASF1	# DW_AT_name: "dw2-bad-cfi.c"
+	.long	.LASF1	# DW_AT_name: "dw2-unspecified-ret-addr.c"
 	.long	.LASF2	# DW_AT_comp_dir: "/home/tromey/gnu/gdb/devel/binutils-gdb/gdb/testsuite/gdb.dwarf2"
 	.quad	.Ltext0	# DW_AT_low_pc
 	.quad	.Letext0	# DW_AT_high_pc
@@ -82,7 +82,7 @@ main:
 	.uleb128 0x2	# (DIE (0x2d) DW_TAG_subprogram)
 			# DW_AT_external
 	.long	.LASF3	# DW_AT_name: "callee"
-	.byte	0x1	# DW_AT_decl_file (dw2-bad-cfi.c)
+	.byte	0x1	# DW_AT_decl_file (dw2-unspecified-ret-addr.c)
 	.byte	0x13	# DW_AT_decl_line
 			# DW_AT_prototyped
 	.quad	.LFB0	# DW_AT_low_pc
@@ -93,7 +93,7 @@ main:
 	.uleb128 0x3	# (DIE (0x46) DW_TAG_subprogram)
 			# DW_AT_external
 	.long	.LASF4	# DW_AT_name: "main"
-	.byte	0x1	# DW_AT_decl_file (dw2-bad-cfi.c)
+	.byte	0x1	# DW_AT_decl_file (dw2-unspecified-ret-addr.c)
 	.byte	0x18	# DW_AT_decl_line
 			# DW_AT_prototyped
 	.long	0x63	# DW_AT_type
@@ -206,7 +206,7 @@ main:
 .LASF3:
 	.string	"callee"
 .LASF1:
-	.string	"dw2-bad-cfi.c"
+	.string	"dw2-unspecified-ret-addr.c"
 .LASF2:
 	.string	"/home/tromey/gnu/gdb/devel/binutils-gdb/gdb/testsuite/gdb.dwarf2"
 .LASF4:

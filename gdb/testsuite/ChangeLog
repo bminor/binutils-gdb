@@ -1,3 +1,12 @@
+2013-11-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/dw2-bad-cfi.S: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.S: ... this.  Adjust.
+	* gdb.dwarf2/dw2-bad-cfi.c: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.c: ... this.
+	* gdb.dwarf2/dw2-bad-cfi.exp: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.exp: ... this.
+
 2013-11-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/dw2-bad-cfi.S: Update comment.
