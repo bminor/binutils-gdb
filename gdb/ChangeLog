@@ -1,5 +1,12 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* Makefile.in (SFILES): Delete "regset.c".
+	(COMMON_OBS): Delete "regset.o".
+	* regset.c: Remove.
+	* regset.h (regset_alloc): Delete prototype.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* sparc-linux-tdep.c (sparc32_linux_gregset)
 	(sparc32_linux_fpregset): New static regset structures.
 	(sparc32_linux_init_abi): Drop dynamic regset allocations.
