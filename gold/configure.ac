@@ -528,9 +528,14 @@ AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_HEADERS(byteswap.h)
 
 dnl When plugins enabled dynamic loader interface is required. Check headers
-dnl which may provide this interface. In case of dlfcn.h add libdl to link.
+dnl which may provide this interface. Add the necessary library to link.
 AC_CHECK_HEADERS(windows.h)
-AC_CHECK_HEADERS(dlfcn.h, [DLOPEN_LIBS="-ldl"], [DLOPEN_LIBS=""])
+AC_CHECK_HEADERS(dlfcn.h)
+AC_SEARCH_LIBS(dlopen, [dl dld])
+case "$ac_cv_search_dlopen" in
+  no*) DLOPEN_LIBS="";;
+  *)   DLOPEN_LIBS="$ac_cv_search_dlopen";;
+esac
 AC_SUBST(DLOPEN_LIBS)
 
 AC_CHECK_FUNCS(mallinfo posix_fallocate fallocate readv sysconf times)

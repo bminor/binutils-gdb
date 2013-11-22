@@ -1,5 +1,11 @@
 2013-11-22  Cary Coutant  <ccoutant@google.com>
 
+	* configure.ac: Add check for which library is needed for
+	dlopen.
+	* configure: Regenerate.
+
+2013-11-22  Cary Coutant  <ccoutant@google.com>
+
 	* testsuite/Makefile.am (exception_x86_64_bnd_test): Use in-tree
 	assembler.
 	* testsuite/Makefile.in: Regenerate.
