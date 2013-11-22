@@ -2263,9 +2263,9 @@ exception_x86_64_bnd_test_DEPENDENCIES = exception_x86_64_bnd_1.o \
 					 exception_x86_64_bnd_2.o
 exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS)
 exception_x86_64_bnd_test_LDADD = $(exception_x86_64_bnd_test_DEPENDENCIES)
-exception_x86_64_bnd_1.o: exception_test_1.cc
+exception_x86_64_bnd_1.o: exception_test_1.cc gcctestdir/as
 	$(CXXCOMPILE) -c -fpic -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
-exception_x86_64_bnd_2.o: exception_test_2.cc
+exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
 	$(CXXCOMPILE) -c -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
 endif DEFAULT_TARGET_X86_64
 

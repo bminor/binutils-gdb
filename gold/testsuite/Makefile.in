@@ -5409,9 +5409,9 @@ uninstall-am:
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	@sleep 1
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	cp -f incr_comdat_test_2_v3.o incr_comdat_test_1_tmp.o
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Wl,--incremental-update -Bgcctestdir/ incr_comdat_test_1.o incr_comdat_test_1_tmp.o
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_1.o: exception_test_1.cc
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_1.o: exception_test_1.cc gcctestdir/as
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
-@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_2.o: exception_test_2.cc
+@DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
 @DEFAULT_TARGET_X86_64_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
 @NATIVE_OR_CROSS_LINKER_TRUE@script_test_10.o: script_test_10.s
 @NATIVE_OR_CROSS_LINKER_TRUE@	$(TEST_AS) -o $@ $<
