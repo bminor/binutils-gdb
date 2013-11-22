@@ -1,3 +1,9 @@
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Caching Target Data): Replace "ON" with "on".
+	(Maintenance Commands): Replace "ON" and "OFF" with "on" and
+	"off" respectively.
+
 2013-11-23  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (GDB/MI Variable Objects): Add the description

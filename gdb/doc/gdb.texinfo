@@ -10860,8 +10860,8 @@ Show the current state of the obsolete remotecache flag.
 @kindex set stack-cache
 @item set stack-cache on
 @itemx set stack-cache off
-Enable or disable caching of stack accesses.  When @code{ON}, use
-caching.  By default, this option is @code{ON}.
+Enable or disable caching of stack accesses.  When @code{on}, use
+caching.  By default, this option is @code{on}.
 
 @kindex show stack-cache
 @item show stack-cache
@@ -37537,7 +37537,7 @@ compiled with the @samp{-pg} compiler option.
 @item maint set show-debug-regs
 @itemx maint show show-debug-regs
 Control whether to show variables that mirror the hardware debug
-registers.  Use @code{ON} to enable, @code{OFF} to disable.  If
+registers.  Use @code{on} to enable, @code{off} to disable.  If
 enabled, the debug registers values are shown when @value{GDBN} inserts or
 removes a hardware breakpoint or watchpoint, and when the inferior
 triggers a hardware-assisted breakpoint or watchpoint.
