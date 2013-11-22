@@ -245,6 +245,18 @@ supply_fpregset_from_core (const struct regset *regset,
   aarch64_linux_supply_fpregset (regcache, (const gdb_byte *) regbuf);
 }
 
+/* Register set definitions. */
+
+static const struct regset aarch64_linux_gregset =
+  {
+    NULL, supply_gregset_from_core, NULL
+  };
+
+static const struct regset aarch64_linux_fpregset =
+  {
+    NULL, supply_fpregset_from_core, NULL
+  };
+
 /* Implement the "regset_from_core_section" gdbarch method.  */
 
 static const struct regset *
@@ -252,25 +264,14 @@ aarch64_linux_regset_from_core_section (struct gdbarch *gdbarch,
 					const char *sect_name,
 					size_t sect_size)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-
   if (strcmp (sect_name, ".reg") == 0
       && sect_size == AARCH64_LINUX_SIZEOF_GREGSET)
-    {
-      if (tdep->gregset == NULL)
-	tdep->gregset = regset_alloc (gdbarch, supply_gregset_from_core,
-				      NULL);
-      return tdep->gregset;
-    }
+    return &aarch64_linux_gregset;
 
   if (strcmp (sect_name, ".reg2") == 0
       && sect_size == AARCH64_LINUX_SIZEOF_FPREGSET)
-    {
-      if (tdep->fpregset == NULL)
-	tdep->fpregset = regset_alloc (gdbarch, supply_fpregset_from_core,
-				       NULL);
-      return tdep->fpregset;
-    }
+    return &aarch64_linux_fpregset;
+
   return NULL;
 }
 

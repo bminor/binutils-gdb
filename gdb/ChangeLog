@@ -1,5 +1,14 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* aarch64-linux-tdep.c (aarch64_linux_gregset)
+	(aarch64_linux_fpregset): New static regset structures.
+	(aarch64_linux_regset_from_core_section): Drop dynamic allocation
+	of regset structures.
+	* aarch64-tdep.h (struct gdbarch_tdep): Remove 'gregset' and
+	'fpregset' fields.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* regset.h (struct regset): Remove gdbarch field.
 	* regset.c (regset_alloc): Drop initialization of gdbarch field.
 	* nios2-linux-tdep.c (nios2_core_regset): Likewise.
