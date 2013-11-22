@@ -1,6 +1,13 @@
 2013-11-22  Pedro Alves  <palves@redhat.com>
 
 	PR 16155
+	* frame.c (get_prev_frame_1): Do the UNWIND_SAME_ID check between
+	this frame and the new previous frame, not between this frame and
+	the next frame.
+
+2013-11-22  Pedro Alves  <palves@redhat.com>
+
+	PR 16155
 	* dwarf2-frame.c (struct dwarf2_frame_cache)
 	<checked_tailcall_bottom, entry_cfa_sp_offset,
 	entry_cfa_sp_offset_p>: New fields.

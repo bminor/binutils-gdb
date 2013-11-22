@@ -1,3 +1,10 @@
+2013-11-22  Pedro Alves  <palves@redhat.com>
+
+	PR 16155
+	* gdb.dwarf2/dw2-dup-frame.S: New file.
+	* gdb.dwarf2/dw2-dup-frame.c: New file.
+	* gdb.dwarf2/dw2-dup-frame.exp: New file.
+
 2013-11-22  Yao Qi  <yao@codesourcery.com>
 
 	* lib/mi-support.exp (mi_create_dynamic_varobj): Update

@@ -1666,6 +1666,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
 {
   struct frame_id this_id;
   struct gdbarch *gdbarch;
+  struct frame_info *prev_frame;
 
   gdb_assert (this_frame != NULL);
   gdbarch = get_frame_arch (this_frame);
@@ -1767,22 +1768,6 @@ get_prev_frame_1 (struct frame_info *this_frame)
 	}
     }
 
-  /* Check that this and the next frame are not identical.  If they
-     are, there is most likely a stack cycle.  As with the inner-than
-     test above, avoid comparing the inner-most and sentinel frames.  */
-  if (this_frame->level > 0
-      && frame_id_eq (this_id, get_frame_id (this_frame->next)))
-    {
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // this frame has same ID }\n");
-	}
-      this_frame->stop_reason = UNWIND_SAME_ID;
-      return NULL;
-    }
-
   /* Check that this and the next frame do not unwind the PC register
      to the same memory location.  If they do, then even though they
      have different frame IDs, the new frame will be bogus; two
@@ -1830,7 +1815,31 @@ get_prev_frame_1 (struct frame_info *this_frame)
 	}
     }
 
-  return get_prev_frame_raw (this_frame);
+  prev_frame = get_prev_frame_raw (this_frame);
+
+  /* Check that this and the prev frame are not identical.  If they
+     are, there is most likely a stack cycle.  Unlike the tests above,
+     we do this right after creating the prev frame, to avoid ever
+     ending up with two frames with the same id in the frame
+     chain.  */
+  if (prev_frame != NULL
+      && frame_id_eq (get_frame_id (prev_frame),
+		      get_frame_id (this_frame)))
+    {
+      if (frame_debug)
+	{
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // this frame has same ID }\n");
+	}
+      this_frame->stop_reason = UNWIND_SAME_ID;
+      /* Unlink.  */
+      prev_frame->next = NULL;
+      this_frame->prev = NULL;
+      return NULL;
+    }
+
+  return prev_frame;
 }
 
 /* Construct a new "struct frame_info" and link it previous to
