@@ -1,13 +1,3 @@
-2013-11-22  Pedro Alves  <palves@redhat.com>
-
-	PR 16155
-	* dwarf2-frame.c (struct dwarf2_frame_cache)
-	<checked_tailcall_bottom, entry_cfa_sp_offset,
-	entry_cfa_sp_offset_p>: New fields.
-	(dwarf2_frame_cache): Adjust to use the new cache fields instead
-	of locals.  Don't call dwarf2_tailcall_sniffer_first here.
-	(dwarf2_frame_prev_register): Call it here, but only once.
-
 2013-11-21  Doug Evans  <xdje42@gmail.com>
 
 	* gdbtypes.c: #include bcache.h, dwarf2loc.h.
