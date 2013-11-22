@@ -1,5 +1,12 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* mn10300-linux-tdep.c (am33_gregset, am33_fpregset): New static
+	regset structures.
+	(am33_regset_from_core_section): Remove dynamic regset
+	allocations.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* mips-linux-tdep.c (mips_linux_gregset, mips64_linux_gregset)
 	(mips_linux_fpregset, mips64_linux_fpregset): New static regset
 	structures.
