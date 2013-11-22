@@ -26,7 +26,8 @@ callee:
 	.loc 1 21 0
 	popq	%rbp
 /*	.cfi_def_cfa 7, 8 */
-	# Our little lies.
+	/* The bug we introduce is that the return address column is
+	   unspecified.  In this case, there is no way to unwind.  */
 	.cfi_undefined 6
 	.cfi_return_column 6
 # SUCC: EXIT [100.0%] 
