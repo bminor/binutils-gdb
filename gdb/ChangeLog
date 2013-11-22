@@ -1,3 +1,10 @@
+2013-11-22  Tom Tromey  <tromey@redhat.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	PR backtrace/16155
+	* value.c (value_fetch_lazy): Internal error if
+	get_frame_register_value returns the same register.
+
 2013-11-22  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
