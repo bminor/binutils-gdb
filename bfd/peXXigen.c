@@ -1,6 +1,5 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
+   Copyright 1995-2013 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -793,7 +792,10 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
   H_PUT_16 (abfd, filehdr_in->f_magic, filehdr_out->f_magic);
   H_PUT_16 (abfd, filehdr_in->f_nscns, filehdr_out->f_nscns);
 
-  H_PUT_32 (abfd, time (0), filehdr_out->f_timdat);
+  /* Only use a real timestamp if the option was chosen.  */
+  if ((pe_data (abfd)->insert_timestamp))
+    H_PUT_32 (abfd, time(0), filehdr_out->f_timdat);
+
   PUT_FILEHDR_SYMPTR (abfd, filehdr_in->f_symptr,
 		      filehdr_out->f_symptr);
   H_PUT_32 (abfd, filehdr_in->f_nsyms, filehdr_out->f_nsyms);

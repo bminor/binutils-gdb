@@ -1,3 +1,11 @@
+2013-11-22  Cory Fields  <cory@coryfields.com>
+
+	* pe-dll.c (fill_edata): Only use a real timestamp if
+	--insert-timestamp was used.
+	* emultempl/pe.em: Add the --insert-timestamp option.
+	* emultempl/pep.em: Likewise for 64bit.
+	* ld.texinfo: Document the --insert-timestamp option.
+
 2013-11-22  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
 
 	* scripttempl/avr.sc: Set .data section's LMA to next available

@@ -1169,9 +1169,6 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
   unsigned char *enameptrs;
   unsigned char *eordinals;
   char *enamestr;
-  time_t now;
-
-  time (&now);
 
   edata_d = xmalloc (edata_sz);
 
@@ -1186,7 +1183,10 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 		   + edata_s->output_section->vma - image_base)
 
   memset (edata_d, 0, edata_sz);
-  bfd_put_32 (abfd, now, edata_d + 4);
+
+  if (pe_data (abfd)->insert_timestamp)
+    H_PUT_32 (abfd, time (0), edata_d + 4);
+
   if (pe_def_file->version_major != -1)
     {
       bfd_put_16 (abfd, pe_def_file->version_major, edata_d + 8);
