@@ -1,6 +1,6 @@
 2013-11-22  Sterling Augustine  <saugustine@google.com>
 
-	PR backtrace/16196:
+	PR gdb/16196:
 	* valprint.c (read_string): Set new variable fetchlen based on
 	fetchlimit and size.  Use it in call to partial_memory_read.
 	Update comment.
