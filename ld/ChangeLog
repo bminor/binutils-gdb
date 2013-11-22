@@ -1,3 +1,8 @@
+2013-11-22  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* scripttempl/avr.sc: Set .data section's LMA to next available
+	address in text region.
+
 2013-11-21  Andrew Pinski  <apinski@cavium.com>
 
 	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eaarch64linux32.c

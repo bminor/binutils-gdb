@@ -163,7 +163,7 @@ SECTIONS
     ${RELOCATING+ _etext = . ; }
   } ${RELOCATING+ > text}
 
-  .data	${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text))}
+  .data        ${RELOCATING-0} :
   {
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
     /* --gc-sections will delete empty .data. This leads to wrong start
@@ -177,7 +177,7 @@ SECTIONS
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
     ${RELOCATING+ PROVIDE (__data_end = .) ; }
-  } ${RELOCATING+ > data}
+  } ${RELOCATING+ > data ${RELOCATING+AT> text}}
 
   .bss ${RELOCATING-0} :${RELOCATING+ AT (ADDR (.bss))}
   {
