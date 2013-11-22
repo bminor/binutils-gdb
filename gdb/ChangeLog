@@ -1,3 +1,14 @@
+2013-11-21  Doug Evans  <xdje42@gmail.com>
+
+	* gdbtypes.c: #include bcache.h, dwarf2loc.h.
+	(type_equality_entry): Move here from python/py-type.c.
+	(type_equality_entry_d): Ditto.
+	(compare_maybe_null_strings, check_types_equal): Ditto.
+	(check_types_worklist, types_deeply_equal): Ditto.
+	* gdbtypes.h (types_deeply_equal): Declare.
+	* python/py-type.c: Remove inclusion of bcache.h, dwarf2loc.h.
+	(typy_richcompare): Update.
+
 2013-11-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* python/py-value.c (is_intlike): Delete.

@@ -28,8 +28,6 @@
 #include "objfiles.h"
 #include "language.h"
 #include "vec.h"
-#include "bcache.h"
-#include "dwarf2loc.h"
 #include "typeprint.h"
 
 typedef struct pyty_type_object
@@ -961,173 +959,6 @@ typy_str (PyObject *self)
   return result;
 }
 
-/* An entry in the type-equality bcache.  */
-
-typedef struct type_equality_entry
-{
-  struct type *type1, *type2;
-} type_equality_entry_d;
-
-DEF_VEC_O (type_equality_entry_d);
-
-/* A helper function to compare two strings.  Returns 1 if they are
-   the same, 0 otherwise.  Handles NULLs properly.  */
-
-static int
-compare_maybe_null_strings (const char *s, const char *t)
-{
-  if (s == NULL && t != NULL)
-    return 0;
-  else if (s != NULL && t == NULL)
-    return 0;
-  else if (s == NULL && t== NULL)
-    return 1;
-  return strcmp (s, t) == 0;
-}
-
-/* A helper function for typy_richcompare that checks two types for
-   "deep" equality.  Returns Py_EQ if the types are considered the
-   same, Py_NE otherwise.  */
-
-static int
-check_types_equal (struct type *type1, struct type *type2,
-		   VEC (type_equality_entry_d) **worklist)
-{
-  CHECK_TYPEDEF (type1);
-  CHECK_TYPEDEF (type2);
-
-  if (type1 == type2)
-    return Py_EQ;
-
-  if (TYPE_CODE (type1) != TYPE_CODE (type2)
-      || TYPE_LENGTH (type1) != TYPE_LENGTH (type2)
-      || TYPE_UNSIGNED (type1) != TYPE_UNSIGNED (type2)
-      || TYPE_NOSIGN (type1) != TYPE_NOSIGN (type2)
-      || TYPE_VARARGS (type1) != TYPE_VARARGS (type2)
-      || TYPE_VECTOR (type1) != TYPE_VECTOR (type2)
-      || TYPE_NOTTEXT (type1) != TYPE_NOTTEXT (type2)
-      || TYPE_INSTANCE_FLAGS (type1) != TYPE_INSTANCE_FLAGS (type2)
-      || TYPE_NFIELDS (type1) != TYPE_NFIELDS (type2))
-    return Py_NE;
-
-  if (!compare_maybe_null_strings (TYPE_TAG_NAME (type1),
-				   TYPE_TAG_NAME (type2)))
-    return Py_NE;
-  if (!compare_maybe_null_strings (TYPE_NAME (type1), TYPE_NAME (type2)))
-    return Py_NE;
-
-  if (TYPE_CODE (type1) == TYPE_CODE_RANGE)
-    {
-      if (memcmp (TYPE_RANGE_DATA (type1), TYPE_RANGE_DATA (type2),
-		  sizeof (*TYPE_RANGE_DATA (type1))) != 0)
-	return Py_NE;
-    }
-  else
-    {
-      int i;
-
-      for (i = 0; i < TYPE_NFIELDS (type1); ++i)
-	{
-	  const struct field *field1 = &TYPE_FIELD (type1, i);
-	  const struct field *field2 = &TYPE_FIELD (type2, i);
-	  struct type_equality_entry entry;
-
-	  if (FIELD_ARTIFICIAL (*field1) != FIELD_ARTIFICIAL (*field2)
-	      || FIELD_BITSIZE (*field1) != FIELD_BITSIZE (*field2)
-	      || FIELD_LOC_KIND (*field1) != FIELD_LOC_KIND (*field2))
-	    return Py_NE;
-	  if (!compare_maybe_null_strings (FIELD_NAME (*field1),
-					   FIELD_NAME (*field2)))
-	    return Py_NE;
-	  switch (FIELD_LOC_KIND (*field1))
-	    {
-	    case FIELD_LOC_KIND_BITPOS:
-	      if (FIELD_BITPOS (*field1) != FIELD_BITPOS (*field2))
-		return Py_NE;
-	      break;
-	    case FIELD_LOC_KIND_ENUMVAL:
-	      if (FIELD_ENUMVAL (*field1) != FIELD_ENUMVAL (*field2))
-		return Py_NE;
-	      break;
-	    case FIELD_LOC_KIND_PHYSADDR:
-	      if (FIELD_STATIC_PHYSADDR (*field1)
-		  != FIELD_STATIC_PHYSADDR (*field2))
-		return Py_NE;
-	      break;
-	    case FIELD_LOC_KIND_PHYSNAME:
-	      if (!compare_maybe_null_strings (FIELD_STATIC_PHYSNAME (*field1),
-					       FIELD_STATIC_PHYSNAME (*field2)))
-		return Py_NE;
-	      break;
-	    case FIELD_LOC_KIND_DWARF_BLOCK:
-	      {
-		struct dwarf2_locexpr_baton *block1, *block2;
-
-		block1 = FIELD_DWARF_BLOCK (*field1);
-		block2 = FIELD_DWARF_BLOCK (*field2);
-		if (block1->per_cu != block2->per_cu
-		    || block1->size != block2->size
-		    || memcmp (block1->data, block2->data, block1->size) != 0)
-		return Py_NE;
-	      }
-	      break;
-	    default:
-	      internal_error (__FILE__, __LINE__, _("Unsupported field kind "
-						    "%d by check_types_equal"),
-			      FIELD_LOC_KIND (*field1));
-	    }
-
-	  entry.type1 = FIELD_TYPE (*field1);
-	  entry.type2 = FIELD_TYPE (*field2);
-	  VEC_safe_push (type_equality_entry_d, *worklist, &entry);
-	}
-    }
-
-  if (TYPE_TARGET_TYPE (type1) != NULL)
-    {
-      struct type_equality_entry entry;
-
-      if (TYPE_TARGET_TYPE (type2) == NULL)
-	return Py_NE;
-
-      entry.type1 = TYPE_TARGET_TYPE (type1);
-      entry.type2 = TYPE_TARGET_TYPE (type2);
-      VEC_safe_push (type_equality_entry_d, *worklist, &entry);
-    }
-  else if (TYPE_TARGET_TYPE (type2) != NULL)
-    return Py_NE;
-
-  return Py_EQ;
-}
-
-/* Check types on a worklist for equality.  Returns Py_NE if any pair
-   is not equal, Py_EQ if they are all considered equal.  */
-
-static int
-check_types_worklist (VEC (type_equality_entry_d) **worklist,
-		      struct bcache *cache)
-{
-  while (!VEC_empty (type_equality_entry_d, *worklist))
-    {
-      struct type_equality_entry entry;
-      int added;
-
-      entry = *VEC_last (type_equality_entry_d, *worklist);
-      VEC_pop (type_equality_entry_d, *worklist);
-
-      /* If the type pair has already been visited, we know it is
-	 ok.  */
-      bcache_full (&entry, sizeof (entry), cache, &added);
-      if (!added)
-	continue;
-
-      if (check_types_equal (entry.type1, entry.type2, worklist) == Py_NE)
-	return Py_NE;
-    }
-
-  return Py_EQ;
-}
-
 /* Implement the richcompare method.  */
 
 static PyObject *
@@ -1150,30 +981,16 @@ typy_richcompare (PyObject *self, PyObject *other, int op)
     result = Py_EQ;
   else
     {
-      struct bcache *cache;
-      VEC (type_equality_entry_d) *worklist = NULL;
-      struct type_equality_entry entry;
-
-      cache = bcache_xmalloc (NULL, NULL);
-
-      entry.type1 = type1;
-      entry.type2 = type2;
-      VEC_safe_push (type_equality_entry_d, worklist, &entry);
-
       TRY_CATCH (except, RETURN_MASK_ALL)
 	{
-	  result = check_types_worklist (&worklist, cache);
+	  result = types_deeply_equal (type1, type2);
 	}
-      /* check_types_worklist calls several nested Python helper
-	 functions, some of which can raise a GDB Exception, so we
-	 just check and convert here.  If there is a GDB exception, a
-	 comparison is not capable (or trusted), so exit.  */
-      bcache_xfree (cache);
-      VEC_free (type_equality_entry_d, worklist);
+      /* If there is a GDB exception, a comparison is not capable
+	 (or trusted), so exit.  */
       GDB_PY_HANDLE_EXCEPTION (except);
     }
 
-  if (op == result)
+  if (op == (result ? Py_EQ : Py_NE))
     Py_RETURN_TRUE;
   Py_RETURN_FALSE;
 }
