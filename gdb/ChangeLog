@@ -1,5 +1,17 @@
 2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* mips-linux-tdep.c (mips_linux_gregset, mips64_linux_gregset)
+	(mips_linux_fpregset, mips64_linux_fpregset): New static regset
+	structures.
+	(mips_linux_regset_from_core_section): Remove dynamic regset
+	allocations.
+	* mips-tdep.h (struct gdbarch_tdep): Remove fields 'gregset',
+	'gregset64', 'fpregset', and 'fpregset64'.
+	* mips-tdep.c (mips_gdbarch_init): Remove initialization of
+	deleted tdep fields.
+
+2014-05-21  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* amd64-tdep.c (amd64_fpregset, amd64_xstateregset): New static
 	regset structures.
 	(amd64_regset_from_core_section): Remove dynamic regset
