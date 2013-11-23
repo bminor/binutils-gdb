@@ -1,3 +1,8 @@
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/python.exp: Don't call skip_python_tests, we still want
+	to test some things in the case where python is not configured in.
+
 2013-11-22  Pedro Alves  <palves@redhat.com>
 
 	* gdb.dwarf2/dw2-bad-cfi.S: Rename to ...
