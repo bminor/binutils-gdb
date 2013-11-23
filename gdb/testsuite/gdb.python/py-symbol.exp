@@ -115,10 +115,10 @@ gdb_test "python print (t\[0\].symtab)" "gdb.python/py-symbol.c.*" "Get symtab"
 
 # C++ tests
 # Recompile binary.
- if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" executable "debug c++"] != "" } {
-     untested "Couldn't compile ${srcfile} in c++ mode"
-     return -1
- }
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}-cxx" executable "debug c++"] != "" } {
+    untested "Couldn't compile ${srcfile} in c++ mode"
+    return -1
+}
 
 # Start with a fresh gdb.
 gdb_exit
