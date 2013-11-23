@@ -115,8 +115,8 @@
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* python/lib/gdb/command/bound_register.py: New file.
-	* gdb/data-directory/Makefile.in: copy bond_register.py to the right path to
-	be initialized at gdb startup.
+	* data-directory/Makefile.in: Copy bond_register.py to the right path
+	to be initialized at gdb startup.
 
 2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
