@@ -1,5 +1,12 @@
 2014-06-12  Yao Qi  <yao@codesourcery.com>
 
+	* varobj.c (varobj_get_num_children): Call
+	varobj_is_dynamic_p.
+	(varobj_list_children): Likewise.
+	(varobj_update): Likewise.  Update comments.
+
+2014-06-12  Yao Qi  <yao@codesourcery.com>
+
 	* varobj.c (varobj_pretty_printed_p): Rename to ...
 	(varobj_is_dynamic_p): ... this.  New function.
 	* varobj.h (varobj_pretty_printed_p): Remove declaration.

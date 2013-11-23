@@ -895,7 +895,7 @@ varobj_get_num_children (struct varobj *var)
 {
   if (var->num_children == -1)
     {
-      if (var->dynamic->pretty_printer != NULL)
+      if (varobj_is_dynamic_p (var))
 	{
 	  int dummy;
 
@@ -922,7 +922,7 @@ varobj_list_children (struct varobj *var, int *from, int *to)
 
   var->dynamic->children_requested = 1;
 
-  if (var->dynamic->pretty_printer != NULL)
+  if (varobj_is_dynamic_p (var))
     {
       /* This, in theory, can result in the number of children changing without
 	 frontend noticing.  But well, calling -var-list-children on the same
@@ -1724,10 +1724,9 @@ varobj_update (struct varobj **varp, int explicit)
 	    }
 	}
 
-      /* We probably should not get children of a varobj that has a
-	 pretty-printer, but for which -var-list-children was never
-	 invoked.  */
-      if (v->dynamic->pretty_printer != NULL)
+      /* We probably should not get children of a dynamic varobj, but
+	 for which -var-list-children was never invoked.  */
+      if (varobj_is_dynamic_p (v))
 	{
 	  VEC (varobj_p) *changed = 0, *type_changed = 0, *unchanged = 0;
 	  VEC (varobj_p) *new = 0;
