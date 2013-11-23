@@ -1,5 +1,10 @@
 2013-11-23  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.python/py-symbol.exp: Add some comments.  Make all test names
+	unique.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.python/py-symbol.exp: Fix whitespace.
 
 2013-11-23  Doug Evans  <xdje42@gmail.com>
