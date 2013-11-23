@@ -1,5 +1,9 @@
 2013-11-23  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.python/py-type.exp (test_enums): Fix typo.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.python/py-symbol.exp: Add some comments.  Make all test names
 	unique.
 
