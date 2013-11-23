@@ -1,5 +1,10 @@
 2013-11-23  Doug Evans  <xdje42@gmail.com>
 
+	* python/py-frame.c (gdbpy_initialize_frames): Remove FIRST_ERROR,
+	superfluous.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
 	* python/py-frame.c (frapy_block): Fix error message text.
 
 2013-11-23  Doug Evans  <xdje42@gmail.com>

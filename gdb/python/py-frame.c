@@ -646,12 +646,8 @@ gdbpy_initialize_frames (void)
 #define SET(name, description) \
   if (PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name) < 0) \
     return -1;
-#define FIRST_ERROR(name) \
-  if (PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name) < 0) \
-    return -1;
 #include "unwind_stop_reasons.def"
 #undef SET
-#undef FIRST_ERROR
 
   return gdb_pymodule_addobject (gdb_module, "Frame",
 				 (PyObject *) &frame_object_type);
