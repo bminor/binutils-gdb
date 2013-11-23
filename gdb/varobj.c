@@ -1066,8 +1066,10 @@ varobj_get_attributes (struct varobj *var)
   return attributes;
 }
 
+/* Return true if VAR is a dynamic varobj.  */
+
 int
-varobj_pretty_printed_p (struct varobj *var)
+varobj_is_dynamic_p (struct varobj *var)
 {
   return var->dynamic->pretty_printer != NULL;
 }

@@ -306,7 +306,7 @@ extern void varobj_enable_pretty_printing (void);
 
 extern int varobj_has_more (struct varobj *var, int to);
 
-extern int varobj_pretty_printed_p (struct varobj *var);
+extern int varobj_is_dynamic_p (struct varobj *var);
 
 extern struct cleanup *varobj_ensure_python_env (struct varobj *var);
 

@@ -88,7 +88,7 @@ print_varobj (struct varobj *var, enum print_values print_values,
       xfree (display_hint);
     }
 
-  if (varobj_pretty_printed_p (var))
+  if (varobj_is_dynamic_p (var))
     ui_out_field_int (uiout, "dynamic", 1);
 }
 
@@ -352,7 +352,7 @@ mi_print_value_p (struct varobj *var, enum print_values print_values)
   if (print_values == PRINT_ALL_VALUES)
     return 1;
 
-  if (varobj_pretty_printed_p (var))
+  if (varobj_is_dynamic_p (var))
     return 1;
 
   type = varobj_get_gdb_type (var);
@@ -777,7 +777,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
 	  xfree (display_hint);
 	}
 
-      if (varobj_pretty_printed_p (r->varobj))
+      if (varobj_is_dynamic_p (r->varobj))
 	ui_out_field_int (uiout, "dynamic", 1);
 
       varobj_get_child_range (r->varobj, &from, &to);

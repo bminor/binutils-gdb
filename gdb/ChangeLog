@@ -1,3 +1,12 @@
+2014-06-12  Yao Qi  <yao@codesourcery.com>
+
+	* varobj.c (varobj_pretty_printed_p): Rename to ...
+	(varobj_is_dynamic_p): ... this.  New function.
+	* varobj.h (varobj_pretty_printed_p): Remove declaration.
+	(varobj_is_dynamic_p): Declare.
+	* mi/mi-cmd-var.c (print_varobj): All callers updated.
+	(mi_print_value_p, varobj_update_one): Likewise.
+
 2014-06-12  Pedro Alves  <pedro@codesourcery.com>
 	    Yao Qi  <yao@codesourcery.com>
 
