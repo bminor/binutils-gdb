@@ -260,7 +260,7 @@ frapy_block (PyObject *self, PyObject *args)
   if (block == NULL || fn_block == NULL || BLOCK_FUNCTION (fn_block) == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       _("Cannot locate object file for block."));
+		       _("Cannot locate block for frame."));
       return NULL;
     }
 

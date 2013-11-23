@@ -1,5 +1,9 @@
 2013-11-23  Doug Evans  <xdje42@gmail.com>
 
+	* python/py-frame.c (frapy_block): Fix error message text.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
 	* cli/cli-script.c (multi_line_command_p): New function.
 	(recurse_read_control_structure, read_command_lines_1): Call it.
 	(execute_control_command): Consistently have a blank line between
