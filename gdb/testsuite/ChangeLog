@@ -1,5 +1,11 @@
 2013-11-23  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.python/py-value.exp (test_lazy_strings): Tweak test names.
+	(test_subscript_regression): Ditto.
+	(top level): Run test_subscript_regression for c++ with "c++" prefix.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.python/py-type.exp (test_enums): Fix typo.
 
 2013-11-23  Doug Evans  <xdje42@gmail.com>
