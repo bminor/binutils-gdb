@@ -289,7 +289,7 @@ gdb_test "continue 2" \
     "continue with ignore count"
 
 gdb_test "next" ".*$bp_location11\[ \t\]*marker1.*" \
-    step after continue with ignore count"
+    "step after continue with ignore count"
 
 set test "continue with ignore count, not stopped at bpt"
 gdb_test_multiple "continue 2" "$test" {

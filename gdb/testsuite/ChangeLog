@@ -1,5 +1,10 @@
 2013-11-23  Doug Evans  <xdje42@gmail.com>
 
+	* gdb.base/ena-dis-br.exp: Add missing quote to "step after continue
+	with ignore count".
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
 	* gdb.python/py-value.exp (test_lazy_strings): Tweak test names.
 	(test_subscript_regression): Ditto.
 	(top level): Run test_subscript_regression for c++ with "c++" prefix.
