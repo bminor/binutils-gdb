@@ -1,5 +1,11 @@
 2013-11-26  Will Newton  <will.newton@linaro.org>
 
+	* ld-aarch64/aarch64-elf.exp: Add ifunc-22.
+	* ld-aarch64/ifunc-22.d: New file.
+	* ld-aarch64/ifunc-22.s: Likewise.
+
+2013-11-26  Will Newton  <will.newton@linaro.org>
+
 	* ld-aarch64/aarch64-elf.exp: Add ifunc-21 test.
 	* ld-aarch64/ifunc-21.d: New file.
 	* ld-aarch64/ifunc-21.s: Likewise.

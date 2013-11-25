@@ -1,5 +1,10 @@
 2013-11-26  Will Newton  <will.newton@linaro.org>
 
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol):
+	Handle STT_GNU_IFUNC symbols correctly in static links.
+
+2013-11-26  Will Newton  <will.newton@linaro.org>
+
 	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Ensure
 	PLT_INDEX is calculated using correct header size.
 
