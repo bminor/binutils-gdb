@@ -1,3 +1,15 @@
+2013-11-25  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/14819
+	* c-exp.y (classify_inner_name): If no matching symbol was
+	found, try looking up the token as a base class.
+	Likewise if a constructor was found.
+	* cp-namespace.c (find_type_baseclass_by_name): New function.
+	* cp-support.h (find_type_baseclass_by_name): Declare.
+	* valops.c (value_struct_elt_for_reference): If we get
+	a non-static field, try to get a value based on the
+	current instance, if any.
+
 2013-11-24  Yao Qi  <yao@codesourcery.com>
 
 	* disasm.c (dis_asm_read_memory): Call target_read_code

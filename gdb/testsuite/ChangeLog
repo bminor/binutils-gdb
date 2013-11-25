@@ -1,3 +1,9 @@
+2013-11-25  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/14819
+	* gdb.cp/impl-this.cc: New file.
+	* gdb.cp/impl-this.exp: New file.
+
 2013-11-25  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.perf/backtrace.c: New.

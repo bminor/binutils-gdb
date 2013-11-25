@@ -2960,13 +2960,39 @@ classify_inner_name (const struct block *block, struct type *context)
 
   copy = copy_name (yylval.ssym.stoken);
   yylval.ssym.sym = cp_lookup_nested_symbol (type, copy, block);
+
+  /* If no symbol was found, search for a matching base class named
+     COPY.  This will allow users to enter qualified names of class members
+     relative to the `this' pointer.  */
   if (yylval.ssym.sym == NULL)
-    return ERROR;
+    {
+      struct type *base_type = find_type_baseclass_by_name (type, copy);
+
+      if (base_type != NULL)
+	{
+	  yylval.tsym.type = base_type;
+	  return TYPENAME;
+	}
+
+      return ERROR;
+    }
 
   switch (SYMBOL_CLASS (yylval.ssym.sym))
     {
     case LOC_BLOCK:
     case LOC_LABEL:
+      /* cp_lookup_nested_symbol might have accidentally found a constructor
+	 named COPY when we really wanted a base class of the same name.
+	 Double-check this case by looking for a base class.  */
+      {
+	struct type *base_type = find_type_baseclass_by_name (type, copy);
+
+	if (base_type != NULL)
+	  {
+	    yylval.tsym.type = base_type;
+	    return TYPENAME;
+	  }
+      }
       return ERROR;
 
     case LOC_TYPEDEF:

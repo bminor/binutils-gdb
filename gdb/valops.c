@@ -3128,10 +3128,35 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    return value_from_longest
 	      (lookup_memberptr_type (TYPE_FIELD_TYPE (t, i), domain),
 	       offset + (LONGEST) (TYPE_FIELD_BITPOS (t, i) >> 3));
-	  else if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	  else if (noside != EVAL_NORMAL)
 	    return allocate_value (TYPE_FIELD_TYPE (t, i));
 	  else
-	    error (_("Cannot reference non-static field \"%s\""), name);
+	    {
+	      /* Try to evaluate NAME as a qualified name with implicit
+		 this pointer.  In this case, attempt to return the
+		 equivalent to `this->*(&TYPE::NAME)'.  */
+	      v = value_of_this_silent (current_language);
+	      if (v != NULL)
+		{
+		  struct value *ptr;
+		  long mem_offset;
+		  struct type *type, *tmp;
+
+		  ptr = value_aggregate_elt (domain, name, NULL, 1, noside);
+		  type = check_typedef (value_type (ptr));
+		  gdb_assert (type != NULL
+			      && TYPE_CODE (type) == TYPE_CODE_MEMBERPTR);
+		  tmp = lookup_pointer_type (TYPE_DOMAIN_TYPE (type));
+		  v = value_cast_pointers (tmp, v, 1);
+		  mem_offset = value_as_long (ptr);
+		  tmp = lookup_pointer_type (TYPE_TARGET_TYPE (type));
+		  result = value_from_pointer (tmp,
+					       value_as_long (v) + mem_offset);
+		  return value_ind (result);
+		}
+
+	      error (_("Cannot reference non-static field \"%s\""), name);
+	    }
 	}
     }
 
