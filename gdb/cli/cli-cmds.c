@@ -817,9 +817,8 @@ edit_command (char *arg, int from_tty)
 	  struct gdbarch *gdbarch;
 
           if (sal.symtab == 0)
-	    /* FIXME-32x64--assumes sal.pc fits in long.  */
 	    error (_("No source file for address %s."),
-		   hex_string ((unsigned long) sal.pc));
+		   paddress (get_current_arch (), sal.pc));
 
 	  gdbarch = get_objfile_arch (sal.symtab->objfile);
           sym = find_pc_function (sal.pc);
@@ -982,9 +981,8 @@ list_command (char *arg, int from_tty)
       struct gdbarch *gdbarch;
 
       if (sal.symtab == 0)
-	/* FIXME-32x64--assumes sal.pc fits in long.  */
 	error (_("No source file for address %s."),
-	       hex_string ((unsigned long) sal.pc));
+	       paddress (get_current_arch (), sal.pc));
 
       gdbarch = get_objfile_arch (sal.symtab->objfile);
       sym = find_pc_function (sal.pc);

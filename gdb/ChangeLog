@@ -1,5 +1,10 @@
 2013-12-06  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-cmds.c (edit_command): Use paddress, not hex_string.
+	(list_command): Likewise.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
 	* psymtab.c (allocate_psymtab): Put the filename in the filename
 	bcache.
 
