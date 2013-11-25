@@ -1,5 +1,10 @@
 2013-12-06  Tom Tromey  <tromey@redhat.com>
 
+	* psymtab.c (allocate_psymtab): Put the filename in the filename
+	bcache.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
 	* buildsym.c (end_symtab_from_static_block): Use obstack_copy0.
 	* symtab.h (struct symtab) <dirname>: Now const.
 
