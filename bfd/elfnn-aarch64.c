@@ -3589,7 +3589,8 @@ elfNN_aarch64_final_link_relocate (reloc_howto_type *howto,
 
 	      if (globals->root.splt != NULL)
 		{
-		  plt_index = h->plt.offset / globals->plt_entry_size - 1;
+		  plt_index = ((h->plt.offset - globals->plt_header_size) /
+			       globals->plt_entry_size);
 		  off = (plt_index + 3) * GOT_ENTRY_SIZE;
 		  base_got = globals->root.sgotplt;
 		}

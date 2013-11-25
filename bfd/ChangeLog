@@ -1,3 +1,8 @@
+2013-11-26  Will Newton  <will.newton@linaro.org>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Ensure
+	PLT_INDEX is calculated using correct header size.
+
 2013-11-22  Cory Fields  <cory@coryfields.com>
 
 	* libcoff-in.h: Add insert_timestamp flag to the pe_data struct.
