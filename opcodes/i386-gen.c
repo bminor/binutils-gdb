@@ -220,6 +220,12 @@ static initializer cpu_flag_init[] =
     "CpuMPX" },
   { "CPU_SHA_FLAGS",
     "CpuSHA" },
+  { "CPU_CLFLUSHOPT_FLAGS",
+    "CpuClflushOpt" },
+  { "CPU_XSAVES_FLAGS",
+    "CpuXSAVES" },
+  { "CPU_XSAVEC_FLAGS",
+    "CpuXSAVEC" },
 };
 
 static initializer operand_type_init[] =
@@ -408,6 +414,9 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuSMAP),
   BITFIELD (CpuSHA),
   BITFIELD (CpuVREX),
+  BITFIELD (CpuClflushOpt),
+  BITFIELD (CpuXSAVES),
+  BITFIELD (CpuXSAVEC),
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
   BITFIELD (CpuMPX),

@@ -1,6 +1,25 @@
 2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	Backport from master
+	2014-02-12  Ilya Tocar  <ilya.tocar@intel.com>
+
+	* i386-dis.c (MOD enum): Add MOD_0FC7_REG_3, MOD_0FC7_REG_4,
+	MOD_0FC7_REG_5.
+	(PREFIX enum): Add PREFIX_0FAE_REG_7.
+	(reg_table): Add MOD_0FC7_REG_3, MOD_0FC7_REG_4 MOD_0FC7_REG_5.
+	(prefix_table): Add clflusopt.
+	(mod_table): Add xrstors, xsavec, xsaves.
+	* i386-gen.c (cpu_flag_init): Add CPU_CLFLUSHOPT_FLAGS,
+	CPU_XSAVES_FLAGS, CPU_XSAVEC_FLAGS.
+	(cpu_flags): Add CpuClflushOpt, CpuXSAVES, CpuXSAVEC.
+	* i386-init.h: Regenerate.
+	* i386-opc.tbl: Add clflushopt, xrstors, xrstors64, xsaves,
+	xsaves64, xsavec, xsavec64.
+	* i386-tbl.h: Regenerate.
+
+2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
 	2013-12-17  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	* i386-dis.c (MOD_FF_REG_3): New.
