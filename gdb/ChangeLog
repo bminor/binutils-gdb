@@ -1,5 +1,10 @@
 2013-12-06  Tom Tromey  <tromey@redhat.com>
 
+	* objfiles.h (objfile_to_front): Remove.
+	* objfiles.c (objfile_to_front): Remove.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
 	* minsyms.c (get_symbol_leading_char): Remove unnecessary
 	declaration.
 

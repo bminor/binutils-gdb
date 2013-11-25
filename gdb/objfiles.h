@@ -455,8 +455,6 @@ extern struct objfile *objfile_separate_debug_iterate (const struct objfile *,
 
 extern void put_objfile_before (struct objfile *, struct objfile *);
 
-extern void objfile_to_front (struct objfile *);
-
 extern void add_separate_debug_objfile (struct objfile *, struct objfile *);
 
 extern void unlink_objfile (struct objfile *);
