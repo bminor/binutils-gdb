@@ -4,6 +4,24 @@
 
 	2013-11-21  Andrew Pinski  <apinski@cavium.com>
 
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eaarch64linux32.c
+	and eaarch64linux32b.c
+	(eaarch64linux32.c): New target.
+	(eaarch64linux32b.c): Likewise.
+	* Makefile.in: Regenerate.
+	* configure.tgt (aarch64_be-*-linux*): Add
+	aarch64linux32 and aarch64linux32b to targ_extra_libpath.
+	(aarch64-*-linux*): Likewise.
+	* emulparams/aarch64elf32.sh (SEPARATE_GOTPLT): Change to 12 (3 words).
+	* emulparams/aarch64linux32.sh: New file.
+	* emulparams/aarch64linux32b.sh: New file.
+
+2013-11-25  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Backport from master
+
+	2013-11-21  Andrew Pinski  <apinski@cavium.com>
+
 	* configure.tgt (aarch64_be-*-linux*): Split out the linux targets
 	into targ_extra_libpath.
 	(aarch64-*-linux*): Likewise.
