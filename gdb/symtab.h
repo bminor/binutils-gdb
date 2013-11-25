@@ -879,7 +879,7 @@ struct symtab
 
   /* Directory in which it was compiled, or NULL if we don't know.  */
 
-  char *dirname;
+  const char *dirname;
 
   /* Total number of lines found in source file.  */
 
