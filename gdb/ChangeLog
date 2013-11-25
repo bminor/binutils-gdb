@@ -1,5 +1,10 @@
 2013-12-06  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (allocate_symtab): Remove cast.
+	* symtab.h (struct symtab) <filename>: Now const.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
 	* break-catch-throw.c (fetch_probe_arguments): Use
 	get_probe_argument_count and evaluate_probe_argument.
 	* elfread.c (elf_get_probe_argument_count)

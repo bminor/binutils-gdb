@@ -2883,8 +2883,8 @@ allocate_symtab (const char *filename, struct objfile *objfile)
   symtab = (struct symtab *)
     obstack_alloc (&objfile->objfile_obstack, sizeof (struct symtab));
   memset (symtab, 0, sizeof (*symtab));
-  symtab->filename = (char *) bcache (filename, strlen (filename) + 1,
-				      objfile->per_bfd->filename_cache);
+  symtab->filename = bcache (filename, strlen (filename) + 1,
+			     objfile->per_bfd->filename_cache);
   symtab->fullname = NULL;
   symtab->language = deduce_language_from_filename (filename);
   symtab->debugformat = "unknown";
