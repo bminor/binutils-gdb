@@ -1063,6 +1063,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.rtm} @tab @samp{.adx} @tab @samp{.rdseed} @tab @samp{.prfchw}
 @item @samp{.smap} @tab @samp{.mpx}
 @item @samp{.smap} @tab @samp{.sha}
+@item @samp{.smap} @tab @samp{.clflushopt} @tab @samp{.xsavec} @tab @samp{.xsaves}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.syscall} @tab @samp{.rdtscp} @tab @samp{.svme} @tab @samp{.abm}
 @item @samp{.lwp} @tab @samp{.fma4} @tab @samp{.xop} @tab @samp{.cx16}
