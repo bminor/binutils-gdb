@@ -1,5 +1,10 @@
 2013-12-06  Tom Tromey  <tromey@redhat.com>
 
+	* minsyms.c (get_symbol_leading_char): Remove unnecessary
+	declaration.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
 	* psympriv.h (struct partial_symtab) <user>: Move earlier.
 
 2013-12-06  Tom Tromey  <tromey@redhat.com>
