@@ -1,5 +1,9 @@
 2013-12-06  Tom Tromey  <tromey@redhat.com>
 
+	* psympriv.h (struct partial_symtab) <user>: Move earlier.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-cmds.c (edit_command): Use paddress, not hex_string.
 	(list_command): Likewise.
 
