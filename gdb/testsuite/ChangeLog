@@ -1,5 +1,9 @@
 2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
 
+	* gdb.dwarf2/count.exp: New file.
+
+2014-04-14  Sanimir Agovic  <sanimir.agovic@intel.com>
+
 	* gdb.base/vla-sideeffect.c: New file.
 	* gdb.base/vla-sideeffect.exp: New file.
 
