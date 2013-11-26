@@ -1,3 +1,7 @@
+2013-11-26  Andrew Burgess  <aburgess@broadcom.com>
+
+	* value.c (allocate_optimized_out_value): Mark value as non-lazy.
+
 2013-11-26  Tom Tromey  <tromey@redhat.com>
 
 	* dwarf2-frame.c (dwarf2_frame_cache): Revert patch from

@@ -768,7 +768,7 @@ allocate_optimized_out_value (struct type *type)
   struct value *retval = allocate_value_lazy (type);
 
   set_value_optimized_out (retval, 1);
-
+  set_value_lazy (retval, 0);
   return retval;
 }
 
