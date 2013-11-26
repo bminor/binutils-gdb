@@ -254,5 +254,5 @@ fi
 # Provide default HOSTING_SLIBS.  Each host should define a proper one
 # if needed.
 if test -z "$HOSTING_SLIBS"; then
-  HOSTING_SLIBS="$HOSTING_SLIBS"
+  HOSTING_SLIBS="$HOSTING_LIBS"
 fi
