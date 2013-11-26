@@ -1,3 +1,12 @@
+2013-11-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16259
+	* Makefile.am (HOSTING_SLIBS): New.
+	* configure.host (HOSTING_SLIBS): New.  Used for PIE.
+	* configure.in (HOSTING_SLIBS): New AC_SUBST.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.
+
 2013-11-22  Cory Fields  <cory@coryfields.com>
 
 	* pe-dll.c (fill_edata): Only use a real timestamp if
