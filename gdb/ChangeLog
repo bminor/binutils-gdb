@@ -1,5 +1,9 @@
 2013-12-06  Tom Tromey  <tromey@redhat.com>
 
+	* objfiles.c (free_objfile): Update comment.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
 	* objfiles.h (objfile_to_front): Remove.
 	* objfiles.c (objfile_to_front): Remove.
 

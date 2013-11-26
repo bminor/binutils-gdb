@@ -520,21 +520,7 @@ free_objfile_separate_debug (struct objfile *objfile)
     }
 }
 
-/* Destroy an objfile and all the symtabs and psymtabs under it.  Note
-   that as much as possible is allocated on the objfile_obstack 
-   so that the memory can be efficiently freed.
-
-   Things which we do NOT free because they are not in malloc'd memory
-   or not in memory specific to the objfile include:
-
-   objfile -> sf
-
-   FIXME:  If the objfile is using reusable symbol information (via mmalloc),
-   then we need to take into account the fact that more than one process
-   may be using the symbol information at the same time (when mmalloc is
-   extended to support cooperative locking).  When more than one process
-   is using the mapped symbol info, we need to be more careful about when
-   we free objects in the reusable area.  */
+/* Destroy an objfile and all the symtabs and psymtabs under it.  */
 
 void
 free_objfile (struct objfile *objfile)
