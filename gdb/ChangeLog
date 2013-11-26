@@ -1,3 +1,11 @@
+2013-11-26  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* i386-xstate.h (I386_XSTATE_MPX): New Macro.
+	(I386_XSTATE_MPX_MASK): Makes use of I386_XSTATE_MPX.
+	(HAS_MPX): New macro.
+	(HAS_AVX): New macro.
+	(I386_XSTATE_SIZE): Uses HAS_MPX and HAS_AVX.
+
 2013-11-25  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/14819
