@@ -1,3 +1,8 @@
+2013-11-26  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/setshow.exp: Add $gdb_prompt to the patterns in
+	gdb_test_multiple.
+
 2013-11-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.dwarf2/dw2-unspecified-ret-addr.S: Remove.
