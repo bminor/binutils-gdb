@@ -1,3 +1,9 @@
+2013-11-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dw2-unspecified-ret-addr.S: Remove.
+	* gdb.dwarf2/dw2-unspecified-ret-addr.c: Remove.
+	* gdb.dwarf2/dw2-unspecified-ret-addr.exp: Remove.
+
 2013-11-25  Keith Seitz  <keiths@redhat.com>
 
 	PR c++/14819

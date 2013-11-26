@@ -1,3 +1,8 @@
+2013-11-26  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Revert patch from
+	2013-11-22.
+
 2013-11-26  Walfred Tedeschi  <walfred.tedeschi@intel.com>
 
 	* i386-xstate.h (I386_XSTATE_MPX): New Macro.
