@@ -24,8 +24,8 @@
 #include "symtab.h"
 #include "target.h"
 #include "inferior.h"
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 #include "inf-child.h"
 #include "gdb/fileio.h"
 #include "agent.h"

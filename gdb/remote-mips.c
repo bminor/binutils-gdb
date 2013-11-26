@@ -29,8 +29,8 @@
 #include "serial.h"
 #include "target.h"
 #include "exceptions.h"
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 #include "gdb_usleep.h"
 #include "regcache.h"
 #include <ctype.h>

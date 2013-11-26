@@ -25,7 +25,7 @@
 #include "gdb_assert.h"
 #include <errno.h>
 #include <stdio.h>
-#include "gdb_string.h"
+#include <string.h>
 
 #include <mach.h>
 #include <mach_error.h>

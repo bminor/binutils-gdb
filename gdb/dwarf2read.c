@@ -56,7 +56,7 @@
 #include "jv-lang.h"
 #include "psympriv.h"
 #include "exceptions.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "completer.h"
 #include "vec.h"
 #include "c-lang.h"
@@ -72,7 +72,7 @@
 #include "build-id.h"
 
 #include <fcntl.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include <sys/types.h>
 

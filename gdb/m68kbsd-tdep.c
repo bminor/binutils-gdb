@@ -28,7 +28,7 @@
 #include "gdbtypes.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "m68k-tdep.h"
 #include "solib-svr4.h"

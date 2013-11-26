@@ -35,10 +35,10 @@
 
 #include "gdb_assert.h"
 #include <sys/types.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include <fcntl.h>
 #include "gdb_obstack.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "hashtab.h"
 
 #include "breakpoint.h"

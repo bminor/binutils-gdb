@@ -31,8 +31,8 @@
 #include "ui-out.h"
 #include "top.h"
 
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 
 static void env_mod_path (char *dirname, char **which_path);
 

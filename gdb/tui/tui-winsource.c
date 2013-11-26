@@ -38,7 +38,7 @@
 #include "tui/tui-source.h"
 #include "tui/tui-disasm.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_curses.h"
 #include "gdb_assert.h"
 

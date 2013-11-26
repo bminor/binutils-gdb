@@ -23,7 +23,7 @@
 #include "buildsym.h"
 #include "gdbcmd.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et al.  */
-#include "gdb_string.h"
+#include <string.h>
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "sim-regno.h"

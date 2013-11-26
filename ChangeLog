@@ -1,3 +1,7 @@
+2013-11-23  Alan Modra  <amodra@gmail.com>
+
+	* config.sub, config.guess: Import from upstream.
+
 2013-11-07  Thomas Schwinge  <thomas@codesourcery.com>
 
 	* Makefile.in: Regenerate.
@@ -18,7 +22,7 @@
 
 2013-10-29  Balaji V. Iyer  <balaji.v.iyer@intel.com>
 
-	* Makefile.def: Add libcilkrts to target_modules.  Make libcilkrts 
+	* Makefile.def: Add libcilkrts to target_modules.  Make libcilkrts
 	depend on libstdc++ and libgcc.
 	* configure: Regenerate.
 	* configure.ac: Added libcilkrts to target binaries.  Also, restrict

@@ -20,7 +20,7 @@
 /* See the GDB User Guide for details of the GDB remote protocol.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include "inferior.h"
@@ -60,7 +60,7 @@
 
 #include "remote-fileio.h"
 #include "gdb/fileio.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "xml-support.h"
 
 #include "memory-map.h"

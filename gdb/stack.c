@@ -50,7 +50,7 @@
 
 #include "gdb_assert.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 
 #include "symfile.h"
 #include "python/python.h"

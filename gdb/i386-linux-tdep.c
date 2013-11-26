@@ -27,7 +27,7 @@
 #include "osabi.h"
 #include "reggroups.h"
 #include "dwarf2-frame.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
@@ -50,6 +50,7 @@
 
 #include "features/i386/i386-linux.c"
 #include "features/i386/i386-mmx-linux.c"
+#include "features/i386/i386-mpx-linux.c"
 #include "features/i386/i386-avx-linux.c"
 
 /* Supported register note sections.  */
@@ -569,6 +570,8 @@ int i386_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1,		/* MPX registers BND0 ... BND3.  */
+  -1, -1,			/* MPX registers BNDCFGU, BNDSTATUS.  */
   11 * 4			/* "orig_eax" */
 };
 
@@ -642,8 +645,11 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 {
   /* Linux/i386.  */
   uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
-  switch ((xcr0 & I386_XSTATE_AVX_MASK))
+
+  switch ((xcr0 & I386_XSTATE_ALL_MASK))
     {
+    case I386_XSTATE_MPX_MASK:
+      return tdesc_i386_mpx_linux;
     case I386_XSTATE_AVX_MASK:
       return tdesc_i386_avx_linux;
     case I386_XSTATE_SSE_MASK:
@@ -979,4 +985,5 @@ _initialize_i386_linux_tdep (void)
   initialize_tdesc_i386_linux ();
   initialize_tdesc_i386_mmx_linux ();
   initialize_tdesc_i386_avx_linux ();
+  initialize_tdesc_i386_mpx_linux ();
 }

@@ -1,3 +1,139 @@
+2013-11-26  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/setshow.exp: Add $gdb_prompt to the patterns in
+	gdb_test_multiple.
+
+2013-11-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dw2-unspecified-ret-addr.S: Remove.
+	* gdb.dwarf2/dw2-unspecified-ret-addr.c: Remove.
+	* gdb.dwarf2/dw2-unspecified-ret-addr.exp: Remove.
+
+2013-11-25  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/14819
+	* gdb.cp/impl-this.cc: New file.
+	* gdb.cp/impl-this.exp: New file.
+
+2013-11-25  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.perf/backtrace.c: New.
+	* gdb.perf/backtrace.exp: New.
+	* gdb.perf/backtrace.py: New.
+
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.perf/single-step.c: New.
+	* gdb.perf/single-step.exp: New.
+	* gdb.perf/single-step.py: New.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/ena-dis-br.exp: Add missing quote to "step after continue
+	with ignore count".
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-value.exp (test_lazy_strings): Tweak test names.
+	(test_subscript_regression): Ditto.
+	(top level): Run test_subscript_regression for c++ with "c++" prefix.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-type.exp (test_enums): Fix typo.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-symbol.exp: Add some comments.  Make all test names
+	unique.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-symbol.exp: Fix whitespace.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/python.exp: Don't call skip_python_tests, we still want
+	to test some things in the case where python is not configured in.
+
+2013-11-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/dw2-bad-cfi.S: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.S: ... this.  Adjust.
+	* gdb.dwarf2/dw2-bad-cfi.c: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.c: ... this.
+	* gdb.dwarf2/dw2-bad-cfi.exp: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.exp: ... this.
+
+2013-11-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dw2-bad-cfi.S: Update comment.
+
+2013-11-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dw2-bad-cfi.c: New file.
+	* gdb.dwarf2/dw2-bad-cfi.exp: New file.
+	* gdb.dwarf2/dw2-bad-cfi.S: New file.
+
+2013-11-22  Pedro Alves  <palves@redhat.com>
+
+	PR 16155
+	* gdb.dwarf2/dw2-dup-frame.S: New file.
+	* gdb.dwarf2/dw2-dup-frame.c: New file.
+	* gdb.dwarf2/dw2-dup-frame.exp: New file.
+
+2013-11-22  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp (mi_create_dynamic_varobj): Update
+	comment and add one more argument "has_more".
+	* gdb.python/py-mi.exp: Callers update.
+
+2013-11-22  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.python/py-mi.exp: Use mi_create_floating_varobj instead
+	of mi_create_dynamic_varobj.
+
+2013-11-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/maint.exp (maint print objfiles): Consume one line at a
+	time, and run it through all three milestone regexes.
+
+2013-11-20  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* gdb.base/eval-avoid-side-effects.exp: New file.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx.c: New file
+	* gdb.arch/i386-mpx.exp: New file.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.python/py-pp-maint.exp: Consider new pretty-print added 
+	for bnd registers.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.xml/maint_print_struct.xml (bitfield): Added bitfield having
+	start and end equal 0.
+
+2013-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp (mi_child_regexp): Remove 'whatever'.
+	(mi_list_varobj_children_range): Likewise.
+
+2013-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp (mi_child_regexp): Remove unnecessary '\'.
+
+2013-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp: Fix format.
+
+2013-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/py_range: New testcase.
+
 2013-11-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* mi-language.exp: Add "-list-features" test verifying that

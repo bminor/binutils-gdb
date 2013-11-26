@@ -23,7 +23,7 @@
 #include "ui-out.h"
 #include "mi-out.h"
 #include "breakpoint.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "mi-getopt.h"
 #include "gdb.h"
 #include "exceptions.h"

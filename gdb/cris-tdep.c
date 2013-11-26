@@ -43,7 +43,7 @@
 
 #include "solib.h"              /* Support for shared libraries.  */
 #include "solib-svr4.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "dis-asm.h"
 
 #include "cris-tdep.h"

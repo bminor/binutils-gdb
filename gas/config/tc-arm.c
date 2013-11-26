@@ -23997,8 +23997,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
   ARM_CPU_OPT ("arm1176jzf-s",	ARM_ARCH_V6ZK,	 FPU_ARCH_VFP_V2, NULL),
   ARM_CPU_OPT ("cortex-a5",	ARM_ARCH_V7A_MP_SEC,
 						 FPU_NONE,	  "Cortex-A5"),
-  ARM_CPU_OPT ("cortex-a7",	ARM_ARCH_V7A_IDIV_MP_SEC_VIRT,
-						 FPU_ARCH_NEON_VFP_V4,
+  ARM_CPU_OPT ("cortex-a7",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A7"),
   ARM_CPU_OPT ("cortex-a8",	ARM_ARCH_V7A_SEC,
 						 ARM_FEATURE (0, FPU_VFP_V3
@@ -24008,11 +24007,9 @@ static const struct arm_cpu_option_table arm_cpus[] =
 						 ARM_FEATURE (0, FPU_VFP_V3
 							| FPU_NEON_EXT_V1),
 								  "Cortex-A9"),
-  ARM_CPU_OPT ("cortex-a12",	ARM_ARCH_V7A_IDIV_MP_SEC_VIRT,
-						 FPU_ARCH_NEON_VFP_V4,
+  ARM_CPU_OPT ("cortex-a12",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A12"),
-  ARM_CPU_OPT ("cortex-a15",	ARM_ARCH_V7A_IDIV_MP_SEC_VIRT,
-						 FPU_ARCH_NEON_VFP_V4,
+  ARM_CPU_OPT ("cortex-a15",	ARM_ARCH_V7VE,   FPU_ARCH_NEON_VFP_V4,
 								  "Cortex-A15"),
   ARM_CPU_OPT ("cortex-a53",    ARM_ARCH_V8A,    FPU_ARCH_CRYPTO_NEON_VFP_ARMV8,
 								  "Cortex-A53"),
@@ -24093,6 +24090,7 @@ static const struct arm_arch_option_table arm_archs[] =
   /* The official spelling of the ARMv7 profile variants is the dashed form.
      Accept the non-dashed form for compatibility with old toolchains.  */
   ARM_ARCH_OPT ("armv7a",	ARM_ARCH_V7A,	 FPU_ARCH_VFP),
+  ARM_ARCH_OPT ("armv7ve",	ARM_ARCH_V7VE,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7r",	ARM_ARCH_V7R,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7m",	ARM_ARCH_V7M,	 FPU_ARCH_VFP),
   ARM_ARCH_OPT ("armv7-a",	ARM_ARCH_V7A,	 FPU_ARCH_VFP),
@@ -24672,7 +24670,7 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {11, ARM_ARCH_V6M},
     {12, ARM_ARCH_V6SM},
     {8, ARM_ARCH_V6T2},
-    {10, ARM_ARCH_V7A_IDIV_MP_SEC_VIRT},
+    {10, ARM_ARCH_V7VE},
     {10, ARM_ARCH_V7R},
     {10, ARM_ARCH_V7M},
     {14, ARM_ARCH_V8A},

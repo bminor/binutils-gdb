@@ -19,7 +19,6 @@ dnl along with this program.  If not, see <http://www.gnu.org/licenses/>.
 dnl Invoke configury needed by the files in 'common'.
 AC_DEFUN([GDB_AC_COMMON], [
   AC_HEADER_STDC
-  AC_HEADER_DIRENT
   AC_FUNC_ALLOCA
 
   dnl Note that this requires codeset.m4, which is included
@@ -27,7 +26,6 @@ AC_DEFUN([GDB_AC_COMMON], [
   AM_LANGINFO_CODESET
 
   AC_CHECK_HEADERS(linux/perf_event.h locale.h memory.h signal.h dnl
-                   string.h strings.h dnl
 		   sys/resource.h sys/socket.h sys/syscall.h dnl
 		   sys/un.h sys/wait.h dnl
 		   thread_db.h wait.h)

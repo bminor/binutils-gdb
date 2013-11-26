@@ -154,11 +154,12 @@ proc test_enums {} {
     # Ditto but by mapping operations
     gdb_test "python print (len(e.type))" "3" "Check the number of type fields"
     gdb_test "python print (e.type\['v1'\].name)" "v1" "Check enum field lookup by name (v1)"
-    gdb_test "python print (e.type\['v3'\].name)" "v3" "Check enum field lookup by name (v2)"
+    gdb_test "python print (e.type\['v3'\].name)" "v3" "Check enum field lookup by name (v3)"
     gdb_test "python print (\[v.enumval for v in e.type.itervalues()\])" {\[0L?, 1L?, 2L?\]} "Check num fields iteration over values"
     gdb_test "python print (\[(n, v.enumval) for (n, v) in e.type.items()\])" {\[\('v1', 0L?\), \('v2', 1L?\), \('v3', 2L?\)\]} "Check enum fields items list"
   }
 }
+
 proc test_base_class {} {
   with_test_prefix "test_base_class" {
     gdb_py_test_silent_cmd "print (d)" "print value (d)" 1

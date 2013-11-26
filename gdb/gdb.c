@@ -18,7 +18,7 @@
 
 #include "defs.h"
 #include "main.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "interps.h"
 
 int

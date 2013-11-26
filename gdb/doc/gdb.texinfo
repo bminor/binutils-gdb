@@ -8066,7 +8066,7 @@ being passed the type of @var{arg} as the argument.
 * Core File Generation::        Cause a program dump its core
 * Character Sets::              Debugging programs that use a different
                                 character set than GDB does
-* Caching Remote Data::         Data caching for remote targets
+* Caching Target Data::         Data caching for targets
 * Searching Memory::            Searching memory for a sequence of bytes
 @end menu
 
@@ -10823,25 +10823,29 @@ $10 = 78 '+'
 The @sc{ibm1047} character set uses the number 78 to encode the @samp{+}
 character.
 
-@node Caching Remote Data
-@section Caching Data of Remote Targets
-@cindex caching data of remote targets
+@node Caching Target Data
+@section Caching Data of Targets
+@cindex caching data of targets
 
-@value{GDBN} caches data exchanged between the debugger and a
-remote target (@pxref{Remote Debugging}).  Such caching generally improves
-performance, because it reduces the overhead of the remote protocol by
-bundling memory reads and writes into large chunks.  Unfortunately, simply
-caching everything would lead to incorrect results, since @value{GDBN} 
-does not necessarily know anything about volatile values, memory-mapped I/O
-addresses, etc.  Furthermore, in non-stop mode (@pxref{Non-Stop Mode})
-memory can be changed @emph{while} a gdb command is executing.
+@value{GDBN} caches data exchanged between the debugger and a target.
+Each cache is associated with the address space of the inferior.
+@xref{Inferiors and Programs}, about inferior and address space.
+Such caching generally improves performance in remote debugging
+(@pxref{Remote Debugging}), because it reduces the overhead of the
+remote protocol by bundling memory reads and writes into large chunks.
+Unfortunately, simply caching everything would lead to incorrect results,
+since @value{GDBN} does not necessarily know anything about volatile
+values, memory-mapped I/O addresses, etc.  Furthermore, in non-stop mode
+(@pxref{Non-Stop Mode}) memory can be changed @emph{while} a gdb command
+is executing.
 Therefore, by default, @value{GDBN} only caches data
 known to be on the stack@footnote{In non-stop mode, it is moderately
 rare for a running thread to modify the stack of a stopped thread
 in a way that would interfere with a backtrace, and caching of
-stack reads provides a significant speed up of remote backtraces.}.
+stack reads provides a significant speed up of remote backtraces.} or
+in the code segment.
 Other regions of memory can be explicitly marked as
-cacheable; see @pxref{Memory Region Attributes}.
+cacheable; @pxref{Memory Region Attributes}.
 
 @table @code
 @kindex set remotecache
@@ -10857,20 +10861,32 @@ Show the current state of the obsolete remotecache flag.
 @kindex set stack-cache
 @item set stack-cache on
 @itemx set stack-cache off
-Enable or disable caching of stack accesses.  When @code{ON}, use
-caching.  By default, this option is @code{ON}.
+Enable or disable caching of stack accesses.  When @code{on}, use
+caching.  By default, this option is @code{on}.
 
 @kindex show stack-cache
 @item show stack-cache
 Show the current state of data caching for memory accesses.
 
+@kindex set code-cache
+@item set code-cache on
+@itemx set code-cache off
+Enable or disable caching of code segment accesses.  When @code{on},
+use caching.  By default, this option is @code{on}.  This improves
+performance of disassembly in remote debugging.
+
+@kindex show code-cache
+@item show code-cache
+Show the current state of target memory cache for code segment
+accesses.
+
 @kindex info dcache
 @item info dcache @r{[}line@r{]}
-Print the information about the data cache performance.  The
-information displayed includes the dcache width and depth, and for
-each cache line, its number, address, and how many times it was
-referenced.  This command is useful for debugging the data cache
-operation.
+Print the information about the performance of data cache of the
+current inferior's address space.  The information displayed
+includes the dcache width and depth, and for each cache line, its
+number, address, and how many times it was referenced.  This
+command is useful for debugging the data cache operation.
 
 If a line number is specified, the contents of that line will be
 printed in hex.
@@ -10888,11 +10904,11 @@ Must be a power of 2.
 
 @item show dcache size
 @kindex show dcache size
-Show maximum number of dcache entries.  See also @ref{Caching Remote Data, info dcache}.
+Show maximum number of dcache entries.  @xref{Caching Target Data, info dcache}.
 
 @item show dcache line-size
 @kindex show dcache line-size
-Show default size of dcache lines.  See also @ref{Caching Remote Data, info dcache}.
+Show default size of dcache lines.
 
 @end table
 
@@ -32516,6 +32532,17 @@ Otherwise this result is not present.
 
 @item frozen
 If the variable object is frozen, this variable will be present with a value of 1.
+
+@item displayhint
+A dynamic varobj can supply a display hint to the front end.  The
+value comes directly from the Python pretty-printer object's
+@code{display_hint} method.  @xref{Pretty Printing API}.
+
+@item dynamic
+This attribute will be present and have the value @samp{1} if the
+varobj is a dynamic varobj.  If the varobj is not a dynamic varobj,
+then this attribute will not be present.
+
 @end table
 
 The result may have its own attributes:
@@ -37523,7 +37550,7 @@ compiled with the @samp{-pg} compiler option.
 @item maint set show-debug-regs
 @itemx maint show show-debug-regs
 Control whether to show variables that mirror the hardware debug
-registers.  Use @code{ON} to enable, @code{OFF} to disable.  If
+registers.  Use @code{on} to enable, @code{off} to disable.  If
 enabled, the debug registers values are shown when @value{GDBN} inserts or
 removes a hardware breakpoint or watchpoint, and when the inferior
 triggers a hardware-assisted breakpoint or watchpoint.

@@ -37,12 +37,12 @@
 
 #include <fcntl.h>
 #include "readline/readline.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "gdbcore.h"
 
 #include <ctype.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 
 void (*deprecated_file_changed_hook) (char *);
 

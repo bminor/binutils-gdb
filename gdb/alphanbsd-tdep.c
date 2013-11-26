@@ -28,7 +28,7 @@
 #include "value.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "alpha-tdep.h"
 #include "alphabsd-tdep.h"

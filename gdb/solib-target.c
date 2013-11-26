@@ -26,7 +26,7 @@
 #include "vec.h"
 #include "solib-target.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 /* Private data for each loaded library.  */
 struct lm_info

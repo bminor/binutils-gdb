@@ -2657,6 +2657,11 @@ The driver uses the MS Windows Driver Model.
 @item --tsaware
 The image is Terminal Server aware.
 
+@kindex --insert-timestamp
+@item --insert-timestamp
+Insert a real timestamp into the image, rather than the default value
+of zero.  This will result in a slightly different results with each
+invocation, which could be helpful for distributing unique images.
 @end table
 
 @c man end

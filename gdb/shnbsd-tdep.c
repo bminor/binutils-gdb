@@ -25,7 +25,7 @@
 #include "value.h"
 #include "osabi.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 #include "sh-tdep.h"
 #include "solib-svr4.h"

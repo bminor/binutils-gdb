@@ -25,7 +25,7 @@
 #include "infcall.h"
 #include "objfiles.h"
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "linux-fork.h"
 #include "linux-nat.h"
 #include "gdbthread.h"
@@ -33,7 +33,7 @@
 
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
-#include "gdb_dirent.h"
+#include <dirent.h>
 #include <ctype.h>
 
 struct fork_info *fork_list;

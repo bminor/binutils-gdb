@@ -23,7 +23,7 @@
 #include "arch-utils.h"
 #include "target.h"
 #include "inferior.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "exceptions.h"
 #include "top.h"
 #include "gdbthread.h"

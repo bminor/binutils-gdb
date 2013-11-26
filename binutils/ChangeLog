@@ -1,3 +1,9 @@
+2013-11-22  Cory Fields  <cory@coryfields.com>
+
+	* windres.c (define_resource): Use zero for timestamp, making
+	output deterministic. time.h include is no longer needed.
+	* resres.c (res_append_resource): Likewise.
+
 2013-11-13  Martin Mitas  <mity@morous.org>
 
 	* rescoff.c (write_coff_file): Use 64-bit alignment for resource

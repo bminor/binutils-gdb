@@ -20,7 +20,7 @@
 #include "server.h"
 #else
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #endif
 #include "filestuff.h"
 #include "gdb_vecs.h"
@@ -29,7 +29,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 
 #ifdef USE_WIN32API
 #include <winsock2.h>
@@ -58,7 +58,7 @@
 
 #ifndef HAVE_FDWALK
 
-#include "gdb_dirent.h"
+#include <dirent.h>
 
 /* Replacement for fdwalk, if the system doesn't define it.  Walks all
    open file descriptors (though this implementation may walk closed

@@ -762,7 +762,7 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	solib.c solib-target.c source.c \
 	stabsread.c stack.c probe.c stap-probe.c std-regs.c \
 	symfile.c symfile-debug.c symfile-mem.c symmisc.c symtab.c \
-	target.c target-descriptions.c target-memory.c \
+	target.c target-dcache.c target-descriptions.c target-memory.c \
 	thread.c top.c tracepoint.c \
 	trad-frame.c \
 	tramp-frame.c \
@@ -814,7 +814,7 @@ gdb_curses.h bfd-target.h memattr.h inferior.h ax.h dummy-frame.h \
 inflow.h fbsd-nat.h ia64-libunwind-tdep.h completer.h inf-ttrace.h \
 solib-target.h gdb_vfork.h alpha-tdep.h dwarf2expr.h \
 m2-lang.h stack.h charset.h cleanups.h addrmap.h command.h solist.h source.h \
-target.h prologue-value.h cp-abi.h tui/tui-hooks.h tui/tui.h \
+target.h target-dcache.h prologue-value.h cp-abi.h tui/tui-hooks.h tui/tui.h \
 tui/tui-file.h tui/tui-command.h tui/tui-disasm.h tui/tui-wingeneral.h \
 tui/tui-windata.h tui/tui-data.h tui/tui-win.h tui/tui-stack.h \
 tui/tui-winsource.h tui/tui-regs.h tui/tui-io.h tui/tui-layout.h \
@@ -917,7 +917,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o gdb_bfd.o gdb_obstack.o \
 	osabi.o copying.o \
-	memattr.o mem-break.o target.o parse.o language.o \
+	memattr.o mem-break.o target.o target-dcache.o parse.o language.o \
 	build-id.o buildsym.o \
 	findcmd.o \
 	std-regs.o \

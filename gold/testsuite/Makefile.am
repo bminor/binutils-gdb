@@ -2256,6 +2256,19 @@ incremental_comdat_test_1: incr_comdat_test_1.o incr_comdat_test_2_v1.o incr_com
 
 endif DEFAULT_TARGET_X86_64
 
+if DEFAULT_TARGET_X86_64
+check_PROGRAMS += exception_x86_64_bnd_test
+exception_x86_64_bnd_test_SOURCES = exception_test_main.cc
+exception_x86_64_bnd_test_DEPENDENCIES = exception_x86_64_bnd_1.o \
+					 exception_x86_64_bnd_2.o
+exception_x86_64_bnd_test_LDFLAGS = $(exception_test_LDFLAGS)
+exception_x86_64_bnd_test_LDADD = $(exception_x86_64_bnd_test_DEPENDENCIES)
+exception_x86_64_bnd_1.o: exception_test_1.cc gcctestdir/as
+	$(CXXCOMPILE) -c -fpic -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
+exception_x86_64_bnd_2.o: exception_test_2.cc gcctestdir/as
+	$(CXXCOMPILE) -c -Bgcctestdir/ -Wa,-madd-bnd-prefix -o $@ $<
+endif DEFAULT_TARGET_X86_64
+
 endif GCC
 endif NATIVE_LINKER
 

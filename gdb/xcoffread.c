@@ -24,12 +24,12 @@
 #include <sys/types.h>
 #include <fcntl.h>
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif
-#include "gdb_stat.h"
+#include <sys/stat.h>
 
 #include "coff/internal.h"
 #include "libcoff.h"		/* FIXME, internal data from BFD */

@@ -75,8 +75,14 @@
 #define bit_AVX2	(1 << 5)
 #define bit_BMI2	(1 << 8)
 #define bit_RTM	(1 << 11)
+#define bit_AVX512F	(1 << 16)
+#define bit_MPX (1 << 14)
 #define bit_RDSEED	(1 << 18)
 #define bit_ADX	(1 << 19)
+#define bit_AVX512PF	(1 << 26)
+#define bit_AVX512ER	(1 << 27)
+#define bit_AVX512CD	(1 << 28)
+#define bit_SHA		(1 << 29)
 
 /* Extended State Enumeration Sub-leaf (%eax == 13, %ecx == 1) */
 #define bit_XSAVEOPT	(1 << 0)
@@ -207,7 +213,7 @@ __get_cpuid_max (unsigned int __ext, unsigned int *__sig)
 {
   unsigned int __eax, __ebx, __ecx, __edx;
 
-#ifdef __i386__
+#ifndef __x86_64__
   /* See if we can use cpuid.  On AMD64 we always can.  */
 #if __GNUC__ >= 3
   __asm__ ("pushf{l|d}\n\t"

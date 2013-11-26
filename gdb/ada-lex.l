@@ -288,7 +288,7 @@ false		{ return FALSEKEYWORD; }
 %%
 
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 
 /* Initialize the lexer for processing new expression. */
 

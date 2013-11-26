@@ -37,6 +37,7 @@ struct uploaded_tp;
 struct static_tracepoint_marker;
 struct traceframe_info;
 struct expression;
+struct dcache_struct;
 
 /* This include file defines the interface between the main part
    of the debugger, and the part which is target-specific, or
@@ -144,6 +145,9 @@ enum target_object
      if it is not in a region marked as such, since it is known to be
      "normal" RAM.  */
   TARGET_OBJECT_STACK_MEMORY,
+  /* Memory known to be part of the target code.   This is cached even
+     if it is not in a region marked as such.  */
+  TARGET_OBJECT_CODE_MEMORY,
   /* Kernel Unwind Table.  See "ia64-tdep.c".  */
   TARGET_OBJECT_UNWIND_TABLE,
   /* Transfer auxilliary vector.  */
@@ -1042,15 +1046,14 @@ int target_supports_disable_randomization (void);
 #define target_can_run_breakpoint_commands() \
   (*current_target.to_can_run_breakpoint_commands) ()
 
-/* Invalidate all target dcaches.  */
-extern void target_dcache_invalidate (void);
-
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 
 extern int target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr,
 			       ssize_t len);
 
 extern int target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
+
+extern int target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len);
 
 extern int target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr,
 				ssize_t len);

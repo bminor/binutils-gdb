@@ -25,7 +25,7 @@
 #include "dwarf2-frame.h"
 #include "gdbtypes.h"
 #include "inferior.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "gdbcore.h"
 #include "arch-utils.h"

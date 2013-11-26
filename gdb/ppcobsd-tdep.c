@@ -29,7 +29,7 @@
 #include "trad-frame.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "ppc-tdep.h"
 #include "ppcobsd-tdep.h"

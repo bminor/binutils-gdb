@@ -20,7 +20,7 @@
 #include "defs.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "osabi.h"
 #include "arch-utils.h"

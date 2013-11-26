@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -1757,11 +1757,13 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
    free, and BYTES_READ will be set to the number of bytes read.  Returns 0 on
    success, or a target_xfer_error on failure.
 
-   If LEN > 0, reads exactly LEN characters (including eventual NULs in
-   the middle or end of the string).  If LEN is -1, stops at the first
-   null character (not necessarily the first null byte) up to a maximum
-   of FETCHLIMIT characters.  Set FETCHLIMIT to UINT_MAX to read as many
-   characters as possible from the string.
+   If LEN > 0, reads the lesser of LEN or FETCHLIMIT characters
+   (including eventual NULs in the middle or end of the string).
+
+   If LEN is -1, stops at the first null character (not necessarily
+   the first null byte) up to a maximum of FETCHLIMIT characters.  Set
+   FETCHLIMIT to UINT_MAX to read as many characters as possible from
+   the string.
 
    Unless an exception is thrown, BUFFER will always be allocated, even on
    failure.  In this case, some characters might have been read before the
@@ -1807,10 +1809,12 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 
   if (len > 0)
     {
-      *buffer = (gdb_byte *) xmalloc (len * width);
+      unsigned int fetchlen = min (len, fetchlimit);
+
+      *buffer = (gdb_byte *) xmalloc (fetchlen * width);
       bufptr = *buffer;
 
-      nfetch = partial_memory_read (addr, bufptr, len * width, &errcode)
+      nfetch = partial_memory_read (addr, bufptr, fetchlen * width, &errcode)
 	/ width;
       addr += nfetch * width;
       bufptr += nfetch * width;

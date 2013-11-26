@@ -32,7 +32,7 @@
 #include "typeprint.h"
 #include "cp-abi.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include <errno.h>
 
 static void m2_print_bounds (struct type *type,

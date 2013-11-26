@@ -27,7 +27,7 @@
 #include "language.h"
 #include "value.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "mi-getopt.h"
 #include "gdbthread.h"
 #include "mi-parse.h"

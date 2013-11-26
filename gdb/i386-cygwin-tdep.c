@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "osabi.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "i386-tdep.h"
 #include "windows-tdep.h"
 #include "regset.h"

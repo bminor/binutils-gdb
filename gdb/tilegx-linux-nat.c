@@ -26,7 +26,7 @@
 #include <sys/ptrace.h>
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include <sys/procfs.h>
 

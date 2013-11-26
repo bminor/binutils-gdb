@@ -38,7 +38,7 @@
 %{
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "expression.h"
 #include "language.h"
 #include "value.h"

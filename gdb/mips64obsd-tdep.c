@@ -26,7 +26,7 @@
 #include "tramp-frame.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "mips-tdep.h"
 #include "solib-svr4.h"

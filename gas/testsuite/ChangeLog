@@ -1,7 +1,36 @@
+2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/msr.s: Add tests.
+	* gas/aarch64/msr.d: Update.
+
+2013-11-19  Catherine Moore  <clm@codesourcery.com>
+
+	* gas/mips/fix-pmc-rm7000-1.d: New.
+	* gas/mips/fix-pmc-rm7000-1.s: New.
+	* gas/mips/fix-pmc-rm7000-2.d: New.
+	* gas/mips/fix-pmc-rm7000-2.s: New.
+	* gas/mips/micromips@fix-pmc-rm7000-1.d: New.
+	* gas/mips/micromips@fix-pmc-rm7000-2.d: New.
+	* gas/mips/mips.exp: Run new tests.
+
+2013-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/avx512f-nondef.d: Updated for mingw.
+	* gas/i386/mpx-add-bnd-prefix.d: Likewise.
+	* gas/i386/x86-64-avx512f-nondef.d: Likewise.
+	* gas/i386/x86-64-mpx-add-bnd-prefix.d: Likewise.
+	* gas/i386/x86-64-mpx-addr32.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+	* gas/i386/x86-64-sha.d: Likewise.
+
+2013-11-18  Renlin Li  <Renlin.Li@arm.com>
+
+	* gas/arm/attr-march-armv7ve.d: New test case for armv7ve.
+
 2013-11-18  Zhenqiang Chen  <zhenqiang.chen@linaro.org>
 
-	* gas/testsuite/sysreg.s: Add test.
-	* gas/testsuite/sysreg.d: Update.
+	* gas/aarch64/sysreg.s: Add test.
+	* gas/aarch64/sysreg.d: Update.
 
 2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
 

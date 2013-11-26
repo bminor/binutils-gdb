@@ -28,7 +28,7 @@
 #include "tui/tui-command.h"
 
 #include "gdb_curses.h"
-#include "gdb_string.h"
+#include <string.h>
 
 
 /*****************************************

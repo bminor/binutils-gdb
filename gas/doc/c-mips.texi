@@ -206,6 +206,11 @@ selected, allowing all instructions to be used.
 Cause nops to be inserted if the read of the destination register
 of an mfhi or mflo instruction occurs in the following two instructions.
 
+@item -mfix-rm7000
+@itemx -mno-fix-rm7000
+Cause nops to be inserted if a dmult or dmultu instruction is
+followed by a load instruction.
+
 @item -mfix-loongson2f-jump
 @itemx -mno-fix-loongson2f-jump
 Eliminate instruction fetch from outside 256M region to work around the

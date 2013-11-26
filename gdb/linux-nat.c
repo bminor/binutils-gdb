@@ -22,7 +22,7 @@
 #include "target.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_wait.h"
 #include "gdb_assert.h"
 #ifdef HAVE_TKILL_SYSCALL
@@ -47,14 +47,14 @@
 #include "gdbcore.h"		/* for get_exec_file */
 #include <ctype.h>		/* for isdigit */
 #include "gdbthread.h"		/* for struct thread_info etc.  */
-#include "gdb_stat.h"		/* for struct stat */
+#include <sys/stat.h>		/* for struct stat */
 #include <fcntl.h>		/* for O_RDONLY */
 #include "inf-loop.h"
 #include "event-loop.h"
 #include "event-top.h"
 #include <pwd.h>
 #include <sys/types.h>
-#include "gdb_dirent.h"
+#include <dirent.h>
 #include "xml-support.h"
 #include "terminal.h"
 #include <sys/vfs.h>

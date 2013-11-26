@@ -23,7 +23,7 @@
 #include "ui-out.h"
 #include "cli-out.h"
 #include "top.h"		/* for "execute_command" */
-#include "gdb_string.h"
+#include <string.h>
 #include "exceptions.h"
 
 struct ui_out *cli_uiout;

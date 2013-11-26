@@ -23,7 +23,7 @@
 #include "solib-svr4.h"
 #include "osabi.h"
 #include "mips-tdep.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "frame.h"
 #include "regcache.h"

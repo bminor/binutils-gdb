@@ -24,7 +24,7 @@
 #endif
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include <stdlib.h>
 #include <stdio.h>

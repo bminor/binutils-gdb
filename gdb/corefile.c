@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -30,7 +30,7 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "dis-asm.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "completer.h"
 #include "exceptions.h"
 #include "observer.h"

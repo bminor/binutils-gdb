@@ -37,7 +37,6 @@ AC_PROG_RANLIB
 AC_ARG_PROGRAM
 
 AC_HEADER_STDC
-AC_HEADER_DIRENT
 
 AC_FUNC_ALLOCA
 
@@ -80,7 +79,6 @@ ACX_CONFIGURE_DIR(["../gnulib"], ["build-gnulib-gdbserver"])
 
 AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 proc_service.h sys/procfs.h linux/elf.h dnl
-		 stdlib.h dnl
 		 errno.h fcntl.h signal.h sys/file.h malloc.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h)

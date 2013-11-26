@@ -25,7 +25,7 @@
 #include "charset.h"
 
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "cli/cli-utils.h"
 #include "language.h"
 

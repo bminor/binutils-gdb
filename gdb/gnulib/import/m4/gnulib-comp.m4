@@ -41,6 +41,7 @@ AC_DEFUN([gl_EARLY],
   # Code from module alloca:
   # Code from module alloca-opt:
   # Code from module configmake:
+  # Code from module dirent:
   # Code from module extensions:
   AC_REQUIRE([gl_USE_SYSTEM_EXTENSIONS])
   # Code from module extern-inline:
@@ -77,7 +78,11 @@ AC_DEFUN([gl_EARLY],
   # Code from module streq:
   # Code from module string:
   # Code from module strnlen1:
+  # Code from module strstr:
+  # Code from module strstr-simple:
+  # Code from module sys_stat:
   # Code from module sys_types:
+  # Code from module time:
   # Code from module unistd:
   # Code from module update-copyright:
   # Code from module verify:
@@ -103,6 +108,7 @@ AC_DEFUN([gl_INIT],
   gl_source_base='import'
   gl_FUNC_ALLOCA
   gl_CONFIGMAKE_PREP
+  gl_DIRENT_H
   AC_REQUIRE([gl_EXTERN_INLINE])
   gl_FLOAT_H
   if test $REPLACE_FLOAT_LDBL = 1; then
@@ -188,8 +194,20 @@ AC_DEFUN([gl_INIT],
   gl_STDDEF_H
   gl_STDINT_H
   gl_HEADER_STRING_H
+  gl_FUNC_STRSTR
+  if test $REPLACE_STRSTR = 1; then
+    AC_LIBOBJ([strstr])
+  fi
+  gl_FUNC_STRSTR_SIMPLE
+  if test $REPLACE_STRSTR = 1; then
+    AC_LIBOBJ([strstr])
+  fi
+  gl_STRING_MODULE_INDICATOR([strstr])
+  gl_HEADER_SYS_STAT_H
+  AC_PROG_MKDIR_P
   gl_SYS_TYPES_H
   AC_PROG_MKDIR_P
+  gl_HEADER_TIME_H
   gl_UNISTD_H
   gl_WCHAR_H
   gl_WCTYPE_H
@@ -340,6 +358,7 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/alloca.c
   lib/alloca.in.h
   lib/config.charset
+  lib/dirent.in.h
   lib/float+.h
   lib/float.c
   lib/float.in.h
@@ -379,7 +398,10 @@ AC_DEFUN([gl_FILE_LIST], [
   lib/string.in.h
   lib/strnlen1.c
   lib/strnlen1.h
+  lib/strstr.c
+  lib/sys_stat.in.h
   lib/sys_types.in.h
+  lib/time.in.h
   lib/unistd.c
   lib/unistd.in.h
   lib/verify.h
@@ -390,6 +412,7 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/alloca.m4
   m4/codeset.m4
   m4/configmake.m4
+  m4/dirent_h.m4
   m4/exponentd.m4
   m4/exponentl.m4
   m4/extensions.m4
@@ -428,7 +451,10 @@ AC_DEFUN([gl_FILE_LIST], [
   m4/stddef_h.m4
   m4/stdint.m4
   m4/string_h.m4
+  m4/strstr.m4
+  m4/sys_stat_h.m4
   m4/sys_types_h.m4
+  m4/time_h.m4
   m4/unistd_h.m4
   m4/warn-on-use.m4
   m4/wchar_h.m4

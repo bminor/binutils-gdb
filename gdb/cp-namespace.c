@@ -703,6 +703,34 @@ lookup_symbol_file (const char *name,
   return sym;
 }
 
+/* Search through the base classes of PARENT_TYPE for a base class
+   named NAME and return its type.  If not found, return NULL.  */
+
+struct type *
+find_type_baseclass_by_name (struct type *parent_type, const char *name)
+{
+  int i;
+
+  CHECK_TYPEDEF (parent_type);
+  for (i = 0; i < TYPE_N_BASECLASSES (parent_type); ++i)
+    {
+      struct type *type = check_typedef (TYPE_BASECLASS (parent_type, i));
+      const char *base_name = TYPE_BASECLASS_NAME (parent_type, i);
+
+      if (base_name == NULL)
+	continue;
+
+      if (streq (base_name, name))
+	return type;
+
+      type = find_type_baseclass_by_name (type, name);
+      if (type != NULL)
+	return type;
+    }
+
+  return NULL;
+}
+
 /* Search through the base classes of PARENT_TYPE for a symbol named
    NAME in block BLOCK.  */
 

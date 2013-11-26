@@ -2568,7 +2568,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"swre",		"t,A(b)",	0,    (int) M_SWRE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },
 {"cachee",		"k,+j(b)",	0x7c00001b, 0xfc00007f, RD_3,			0,		0,		EVA,	0 },
 {"cachee",		"k,A(b)",	0,    (int) M_CACHEE_AB,INSN_MACRO,		0,		0,		EVA,	0 },
-{"prefe",		"k,+j(b)",	0x7c000023, 0xfc00007f, RD_3,			0,		0,		EVA,	0 },
+{"prefe",		"k,+j(b)",	0x7c000023, 0xfc00007f, RD_3|LM,		0,		0,		EVA,	0 },
 {"prefe",		"k,A(b)",	0,    (int) M_PREFE_AB,	INSN_MACRO,		0,		0,		EVA,	0 },
 /* MSA Extension.  */
 {"sll.b",		"+d,+e,+h",	0x7800000d, 0xffe0003f,	WR_1|RD_2|RD_3,		0,		0,		MSA,	0 },

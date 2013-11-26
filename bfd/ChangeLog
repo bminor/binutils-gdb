@@ -1,3 +1,29 @@
+2013-11-26  Will Newton  <will.newton@linaro.org>
+
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol):
+	Handle STT_GNU_IFUNC symbols correctly in static links.
+
+2013-11-26  Will Newton  <will.newton@linaro.org>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Ensure
+	PLT_INDEX is calculated using correct header size.
+
+2013-11-22  Cory Fields  <cory@coryfields.com>
+
+	* libcoff-in.h: Add insert_timestamp flag to the pe_data struct.
+	* libcoff.h: Regenerate.
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Only use a real
+	timestamp if --insert-timestamp was used.
+
+2013-11-19  Roland McGrath  <mcgrathr@google.com>
+
+	* elf-nacl.c (nacl_modify_segment_map): Calculate SIZEOF_HEADERS
+	when not doing linking (i.e. INFO is a null pointer).
+
+2013-11-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_section_from_shdr): Re-indent.
+
 2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* elf64-x86-64.c (x86_64_elf_howto_table): Add R_X86_64_PC32_BND

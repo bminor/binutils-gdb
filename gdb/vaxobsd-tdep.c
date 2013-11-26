@@ -27,7 +27,7 @@
 
 #include "vax-tdep.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 /* Signal trampolines.  */
 

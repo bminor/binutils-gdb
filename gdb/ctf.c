@@ -23,7 +23,7 @@
 #include "ctf.h"
 #include "tracepoint.h"
 #include "regcache.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "exec.h"
 #include "completer.h"
 

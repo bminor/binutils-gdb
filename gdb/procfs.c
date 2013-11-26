@@ -46,7 +46,7 @@
 #include <signal.h>
 #include <ctype.h>
 #include "gdb_bfd.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "inflow.h"
 #include "auxv.h"
@@ -89,12 +89,12 @@
 
 #ifdef NEW_PROC_API
 #include <sys/types.h>
-#include "gdb_dirent.h"	/* opendir/readdir, for listing the LWP's */
+#include <dirent.h>	/* opendir/readdir, for listing the LWP's */
 #endif
 
 #include <fcntl.h>	/* for O_RDONLY */
 #include <unistd.h>	/* for "X_OK" */
-#include "gdb_stat.h"	/* for struct stat */
+#include <sys/stat.h>	/* for struct stat */
 
 /* Note: procfs-utils.h must be included after the above system header
    files, because it redefines various system calls using macros.

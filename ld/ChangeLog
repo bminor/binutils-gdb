@@ -1,3 +1,66 @@
+2013-11-22  Cory Fields  <cory@coryfields.com>
+
+	* pe-dll.c (fill_edata): Only use a real timestamp if
+	--insert-timestamp was used.
+	* emultempl/pe.em: Add the --insert-timestamp option.
+	* emultempl/pep.em: Likewise for 64bit.
+	* ld.texinfo: Document the --insert-timestamp option.
+
+2013-11-22  Senthil Kumar Selvaraj  <senthil_kumar.selvaraj@atmel.com>
+
+	* scripttempl/avr.sc: Set .data section's LMA to next available
+	address in text region.
+
+2013-11-21  Andrew Pinski  <apinski@cavium.com>
+
+	* Makefile.am (ALL_64_EMULATION_SOURCES): Add eaarch64linux32.c
+	and eaarch64linux32b.c
+	(eaarch64linux32.c): New target.
+	(eaarch64linux32b.c): Likewise.
+	* Makefile.in: Regenerate.
+	* configure.tgt (aarch64_be-*-linux*): Add
+	aarch64linux32 and aarch64linux32b to targ_extra_libpath.
+	(aarch64-*-linux*): Likewise.
+	* emulparams/aarch64elf32.sh (SEPARATE_GOTPLT): Change to 12 (3 words).
+	* emulparams/aarch64linux32.sh: New file.
+	* emulparams/aarch64linux32b.sh: New file.
+
+2013-11-21  Andrew Pinski  <apinski@cavium.com>
+
+	* configure.tgt (aarch64_be-*-linux*): Split out the linux targets
+	into targ_extra_libpath.
+	(aarch64-*-linux*): Likewise.
+
+2013-11-21  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16192
+	* pe-dll.c (pe_create_runtime_relocator_reference): Zero the
+	newly allocated idata5 block.
+
+2013-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc (.data): Set the based on the next
+	free location in the text memory region, not a computation based
+	upon the size of the text section.  Orphaned sections or other
+	linker scripts might insert new sections between the .text section
+	and the .data section.
+	* scripttempl/elf32msp430_3.sc (.data): Likewise.
+
+2013-11-19  Roland McGrath  <mcgrathr@google.com>
+	    Alan Modra  <amodra@gmail.com>
+
+	* emultempl/elf32.em (gld${EMULATION_NAME}_before_allocation):
+	Don't use bfd_elf_record_link_assignment to mark __ehdr_start
+	hidden.  Instead, just do it directly here, and only if it was
+	referenced but not defined.
+
+2013-11-18  Chung-Lin Tang  <cltang@codesourcery.com>
+
+	* emulparams/nios2linux.sh: New emulation file.
+	* configure.tgt: Add nios2*-*-linux* emulation case.
+	* Makefile.am (enios2linux.c): New emulation entry.
+	* Makefile.in: Regenerate.
+
 2013-10-14  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/aix.em (_read_file): Close file at end of function.

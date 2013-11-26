@@ -25,7 +25,7 @@
 #include "gdbthread.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include <sys/types.h>
 #include <sys/procfs.h>
 #include <sys/sysctl.h>

@@ -18,7 +18,7 @@
 
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "inferior.h"
 #include "gdbcore.h"
 #include "solib.h"

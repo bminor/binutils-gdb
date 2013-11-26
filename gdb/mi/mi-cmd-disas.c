@@ -23,7 +23,7 @@
 #include "value.h"
 #include "mi-cmds.h"
 #include "mi-getopt.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "ui-out.h"
 #include "disasm.h"
 

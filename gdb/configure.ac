@@ -1072,17 +1072,16 @@ fi
 # Checks for header files.  #
 # ------------------------- #
 
-AC_HEADER_DIRENT
 AC_HEADER_STDC
 # elf_hp.h is for HP/UX 64-bit shared library support.
 AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
-                  thread_db.h stddef.h \
-		  stdlib.h sys/fault.h \
+                  thread_db.h \
+		  sys/fault.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
 		  termios.h termio.h \
-		  sgtty.h unistd.h elf_hp.h \
+		  sgtty.h elf_hp.h \
 		  dlfcn.h])
 AC_CHECK_HEADERS(sys/proc.h, [], [],
 [#if HAVE_SYS_PARAM_H
@@ -1164,9 +1163,7 @@ GDB_AC_COMMON
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
 gdb_ptrace_headers='
-#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include <sys/types.h>
 #if HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif

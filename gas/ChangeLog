@@ -1,3 +1,49 @@
+2013-11-19  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Revert
+
+	2013-11-19  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-aarch64.c (parse_sys_reg): Do not issue error messages
+	for deprecated system registers when parsing pstate fields.
+
+2013-11-19  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-aarch64.c (parse_sys_reg): Do not issue error messages
+	for deprecated system registers when parsing pstate fields.
+
+2013-11-19  Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-mips.c (mips_fix_pmc_rm7000): Declare.
+	(options): Add OPTION_FIX_PMC_RM7000 and OPTION_NO_FIX_PMC_RM7000.
+	(md_longopts): Add mfix-pmc-rm7000 and mno-fix-pmc-rm7000.
+	(INSN_DMULT): Define.
+	(INSN_DMULTU): Define.
+	(insns_between): Detect PMC RM7000 errata.
+	(md_parse_option): Supprt OPTION_FIX_PMC_RM7000 and
+	OPTION_NO_FIX_PMC_RM7000.
+	* doc/as.texinfo: Document new options.
+	* doc/c-mips.texi: Likewise.
+
+2013-11-19  Alexey Makhalov  <makhaloff@gmail.com>
+
+	PR gas/16109
+	* app.c (do_scrub_chars): Only insert a newline character if
+	end-of-file has been reached.
+
+2013-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (lex_got): Add a dummy "int bnd_prefix"
+	argument.
+
+2013-11-18  Renlin Li  <Renlin.Li@arm.com>
+
+	* config/tc-arm.c (arm_archs): New armv7ve architecture option.
+	(arm_cpus): Replace ARM_ARCH_V7A_IDIV_MP_SEC_VIRT with
+	ARM_ARCH_V7VE for cortex-a7, cortex-a12 and cortex-a15.
+	(cpu_arch_ver): Likewise.
+	* doc/c-arm.texi: Document armv7ve.
+
 2013-11-18  Zhenqiang Chen  <zhenqiang.chen@linaro.org>
 
 	* config/tc-aarch64.c (parse_sys_reg): Support

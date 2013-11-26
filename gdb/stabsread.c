@@ -24,7 +24,7 @@
    Avoid placing any object file format specific code in this file.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "bfd.h"
 #include "gdb_obstack.h"
 #include "symtab.h"

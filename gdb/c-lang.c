@@ -29,7 +29,7 @@
 #include "macroscope.h"
 #include "gdb_assert.h"
 #include "charset.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "demangle.h"
 #include "cp-abi.h"
 #include "cp-support.h"

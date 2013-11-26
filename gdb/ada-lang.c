@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include <stdio.h>
-#include "gdb_string.h"
+#include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include "demangle.h"
@@ -43,7 +43,7 @@
 #include "gdb_obstack.h"
 #include "ada-lang.h"
 #include "completer.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #ifdef UI_OUT
 #include "ui-out.h"
 #endif

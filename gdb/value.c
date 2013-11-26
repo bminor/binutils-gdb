@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "arch-utils.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -768,7 +768,7 @@ allocate_optimized_out_value (struct type *type)
   struct value *retval = allocate_value_lazy (type);
 
   set_value_optimized_out (retval, 1);
-
+  set_value_lazy (retval, 0);
   return retval;
 }
 
@@ -3507,7 +3507,9 @@ value_fetch_lazy (struct value *val)
 
       while (VALUE_LVAL (new_val) == lval_register && value_lazy (new_val))
 	{
-	  frame = frame_find_by_id (VALUE_FRAME_ID (new_val));
+	  struct frame_id frame_id = VALUE_FRAME_ID (new_val);
+
+	  frame = frame_find_by_id (frame_id);
 	  regnum = VALUE_REGNUM (new_val);
 
 	  gdb_assert (frame != NULL);
@@ -3521,6 +3523,22 @@ value_fetch_lazy (struct value *val)
 						   regnum, type));
 
 	  new_val = get_frame_register_value (frame, regnum);
+
+	  /* If we get another lazy lval_register value, it means the
+	     register is found by reading it from the next frame.
+	     get_frame_register_value should never return a value with
+	     the frame id pointing to FRAME.  If it does, it means we
+	     either have two consecutive frames with the same frame id
+	     in the frame chain, or some code is trying to unwind
+	     behind get_prev_frame's back (e.g., a frame unwind
+	     sniffer trying to unwind), bypassing its validations.  In
+	     any case, it should always be an internal error to end up
+	     in this situation.  */
+	  if (VALUE_LVAL (new_val) == lval_register
+	      && value_lazy (new_val)
+	      && frame_id_eq (VALUE_FRAME_ID (new_val), frame_id))
+	    internal_error (__FILE__, __LINE__,
+			    _("infinite loop while fetching a register"));
 	}
 
       /* If it's still lazy (for instance, a saved register on the

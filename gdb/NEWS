@@ -117,6 +117,11 @@ show startup-with-shell
   Specifies whether Unix child processes are started via a shell or
   directly.
 
+set code-cache
+show code-cache
+  Use the target memory cache for accesses to the code segment.  This
+  improves performance of remote debugging (particularly disassembly).
+
 * You can now use a literal value 'unlimited' for options that
   interpret 0 or -1 as meaning "unlimited".  E.g., "set
   trace-buffer-size unlimited" is now an alias for "set
