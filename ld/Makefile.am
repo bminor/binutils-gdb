@@ -88,6 +88,7 @@ POD2MAN = pod2man --center="GNU Development Tools" \
 HOSTING_CRT0 = @HOSTING_CRT0@
 HOSTING_SCRT0 = @HOSTING_SCRT0@
 HOSTING_LIBS = @HOSTING_LIBS@
+HOSTING_SLIBS = @HOSTING_SLIBS@
 HOSTING_EMU = -m $(EMUL)
 
 # Setup the testing framework, if you have one

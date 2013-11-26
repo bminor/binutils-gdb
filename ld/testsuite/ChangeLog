@@ -1,3 +1,9 @@
+2013-11-26  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/16259
+	* config/default.exp (get_target_emul): Also set HOSTING_SLIBS.
+	* lib/ld-lib.exp (default_ld_link): Use HOSTING_SLIBS for -pie.
+
 2013-11-26  Will Newton  <will.newton@linaro.org>
 
 	* ld-aarch64/aarch64-elf.exp: Add ifunc-22.
