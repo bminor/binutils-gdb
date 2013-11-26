@@ -1,3 +1,8 @@
+2013-11-26  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.23.92
+	* configure: Regenerate.
+
 2013-11-22  Cory Fields  <cory@coryfields.com>
 
 	* libcoff-in.h: Add insert_timestamp flag to the pe_data struct.
