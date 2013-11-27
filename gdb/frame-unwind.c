@@ -161,11 +161,18 @@ default_frame_unwind_stop_reason (struct frame_info *this_frame,
 struct value *
 frame_unwind_got_optimized (struct frame_info *frame, int regnum)
 {
+  struct gdbarch *gdbarch = frame_unwind_arch (frame);
+  struct type *type = register_type (gdbarch, regnum);
   struct value *val;
 
-  val = value_of_register_lazy (frame, regnum);
+  /* Return an lval_register value, so that we print it as
+     "<not saved>".  */
+  val = allocate_value_lazy (type);
   set_value_lazy (val, 0);
   set_value_optimized_out (val, 1);
+  VALUE_LVAL (val) = lval_register;
+  VALUE_REGNUM (val) = regnum;
+  VALUE_FRAME_ID (val) = get_frame_id (frame);
   return val;
 }
 
