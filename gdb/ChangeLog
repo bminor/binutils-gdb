@@ -1,5 +1,13 @@
 2013-12-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_array_bound_from_type): Move the declaration
+	and assignment of variable "elt_type" inside the else block
+	where it is used.  Add two missing check_typedef calls.
+	Fix bug where we got TYPE's TYPE_TARGET_TYPE, where in fact
+	we really wanted to get ELT_TYPE's TYPE_TARGET_TYPE.
+
+2013-12-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_array_bound_from_type): Remove unwanted space
 	between 'struct type *' and 'arr_type'.
 
