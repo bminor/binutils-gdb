@@ -1,3 +1,8 @@
+2013-11-27  Steffen Sledz <sledz@dresearch-fe.de>
+
+	* configure: Rebuild.
+	* configure.ac: fix cygwin detection check
+
 2013-11-27  Pedro Alves  <palves@redhat.com>
 
 	* frame-unwind.c (frame_unwind_got_optimized): Use the type of the

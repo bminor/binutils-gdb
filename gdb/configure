@@ -12446,7 +12446,7 @@ lose
 #endif
 _ACEOF
 if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "lose" >/dev/null 2>&1; then :
+  $EGREP "^lose$" >/dev/null 2>&1; then :
   gdb_cv_os_cygwin=yes
 else
   gdb_cv_os_cygwin=no
