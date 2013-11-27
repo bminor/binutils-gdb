@@ -1,3 +1,8 @@
+2013-11-27  Pedro Alves  <palves@redhat.com>
+
+	* frame-unwind.c (frame_unwind_got_optimized): Return
+	an lval_register value instead of a not_lval value.
+
 2013-11-27  Andrew Burgess  <aburgess@broadcom.com>
 
 	* frame.c: Include "valprint.h".

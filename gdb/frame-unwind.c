@@ -161,10 +161,12 @@ default_frame_unwind_stop_reason (struct frame_info *this_frame,
 struct value *
 frame_unwind_got_optimized (struct frame_info *frame, int regnum)
 {
-  struct gdbarch *gdbarch = frame_unwind_arch (frame);
-  struct type *reg_type = register_type (gdbarch, regnum);
+  struct value *val;
 
-  return allocate_optimized_out_value (reg_type);
+  val = value_of_register_lazy (frame, regnum);
+  set_value_lazy (val, 0);
+  set_value_optimized_out (val, 1);
+  return val;
 }
 
 /* Return a value which indicates that FRAME copied REGNUM into
