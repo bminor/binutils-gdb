@@ -1,3 +1,8 @@
+2013-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_array_bound_from_type): Remove unwanted space
+	between 'struct type *' and 'arr_type'.
+
 2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/16113

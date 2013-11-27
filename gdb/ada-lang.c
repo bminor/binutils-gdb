@@ -2788,7 +2788,7 @@ ada_index_type (struct type *type, int n, const char *name)
    by run-time quantities other than discriminants.  */
 
 static LONGEST
-ada_array_bound_from_type (struct type * arr_type, int n, int which)
+ada_array_bound_from_type (struct type *arr_type, int n, int which)
 {
   struct type *type, *elt_type, *index_type_desc, *index_type;
   int i;
