@@ -336,8 +336,8 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 	  len     -= reg_len;
 	  continue;
 	}
-      
-      res = target_read (&current_target, TARGET_OBJECT_RAW_MEMORY,
+
+      res = target_read (current_target.beneath, TARGET_OBJECT_RAW_MEMORY,
 			 NULL, myaddr, memaddr, reg_len);
       if (res < reg_len)
 	return 0;

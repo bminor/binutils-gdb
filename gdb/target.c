@@ -1398,6 +1398,35 @@ memory_xfer_live_readonly_partial (struct target_ops *ops,
   return 0;
 }
 
+/* Read memory from more than one valid target.  A core file, for
+   instance, could have some of memory but delegate other bits to
+   the target below it.  So, we must manually try all targets.  */
+
+static LONGEST
+raw_memory_xfer_partial (struct target_ops *ops, void *readbuf,
+			 const void *writebuf, ULONGEST memaddr, LONGEST len)
+{
+  LONGEST res;
+
+  do
+    {
+      res = ops->to_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
+				  readbuf, writebuf, memaddr, len);
+      if (res > 0)
+	break;
+
+      /* We want to continue past core files to executables, but not
+	 past a running target's memory.  */
+      if (ops->to_has_all_memory (ops))
+	break;
+
+      ops = ops->beneath;
+    }
+  while (ops != NULL);
+
+  return res;
+}
+
 /* Perform a partial memory transfer.
    For docs see target.h, to_xfer_partial.  */
 
@@ -1571,26 +1600,8 @@ memory_xfer_partial_1 (struct target_ops *ops, enum target_object object,
      to_xfer_partial is enough; if it doesn't recognize an object
      it will call the to_xfer_partial of the next target down.
      But for memory this won't do.  Memory is the only target
-     object which can be read from more than one valid target.
-     A core file, for instance, could have some of memory but
-     delegate other bits to the target below it.  So, we must
-     manually try all targets.  */
-
-  do
-    {
-      res = ops->to_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
-				  readbuf, writebuf, memaddr, reg_len);
-      if (res > 0)
-	break;
-
-      /* We want to continue past core files to executables, but not
-	 past a running target's memory.  */
-      if (ops->to_has_all_memory (ops))
-	break;
-
-      ops = ops->beneath;
-    }
-  while (ops != NULL);
+     object which can be read from more than one valid target.  */
+  res = raw_memory_xfer_partial (ops, readbuf, writebuf, memaddr, reg_len);
 
   /* Make sure the cache gets updated no matter what - if we are writing
      to the stack.  Even if this write is not tagged as such, we still need
@@ -1702,18 +1713,14 @@ target_xfer_partial (struct target_ops *ops,
       || object == TARGET_OBJECT_CODE_MEMORY)
     retval = memory_xfer_partial (ops, object, readbuf,
 				  writebuf, offset, len);
-  else
+  else if (object == TARGET_OBJECT_RAW_MEMORY)
     {
-      enum target_object raw_object = object;
-
-      /* If this is a raw memory transfer, request the normal
-	 memory object from other layers.  */
-      if (raw_object == TARGET_OBJECT_RAW_MEMORY)
-	raw_object = TARGET_OBJECT_MEMORY;
-
-      retval = ops->to_xfer_partial (ops, raw_object, annex, readbuf,
-				     writebuf, offset, len);
+      /* Request the normal memory object from other layers.  */
+      retval = raw_memory_xfer_partial (ops, readbuf, writebuf, offset, len);
     }
+  else
+    retval = ops->to_xfer_partial (ops, object, annex, readbuf,
+				   writebuf, offset, len);
 
   if (targetdebug)
     {

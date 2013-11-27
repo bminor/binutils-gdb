@@ -1,3 +1,13 @@
+2013-11-29  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* dcache.c (dcache_read_line): Use current_target.beneath
+	instead of &current_target.
+	* target.c (memory_xfer_partial_1): Factor code out to ...
+	(raw_memory_xfer_partial): ... it.  New function.
+	(target_xfer_partial): Call raw_memory_xfer_partial if OBJECT
+	is TARGET_OBJECT_RAW_MEMORY.
+
 2013-11-28  Doug Evans  <xdje42@gmail.com>
 
 	* breakpoint.h (gdbpy_breakpoint_object): Renamed from
