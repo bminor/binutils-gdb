@@ -466,10 +466,12 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "vxworks1-xgot-el"
 } elseif { [istarget mips*-*-*] } {
     set addr32 [expr [istarget mipstx39*-*-*] || [istarget mips-*-linux*] || [istarget mipsel-*-linux*]]
-    set has_newabi [expr [istarget *-*-irix6*] || [istarget mips*-*-linux*] || [istarget mips*-sde-elf*]]
+    set has_newabi [expr [istarget *-*-irix6*] || [istarget mips*-*-linux*] \
+                         || [istarget mips*-sde-elf*] || [istarget mips*-mti-elf*]]
 
     if { [istarget "mips*-*-*linux*"]
 	 || [istarget "mips*-sde-elf*"]
+	 || [istarget "mips*-mti-elf*"]
 	 || [istarget "mips*-*-*bsd*"] } then {
 	set tmips "t"
     } else {

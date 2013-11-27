@@ -1,3 +1,9 @@
+2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
+
+	* binutils-all/objcopy.exp: Consider mips-mti-elf the same as
+	mips-sde-elf
+	* binutils-all/readelf.exp: Likewise
+
 2013-11-21  Tristan Gingold  <gingold@adacore.com>
 
 	* binutils-all/dlltool.exp: Add dlltool_gas_flag to version.dll test.

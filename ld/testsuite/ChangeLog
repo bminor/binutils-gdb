@@ -1,3 +1,8 @@
+2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/mips-elf.exp: Consider mips-mti-elf the same as
+	mips-sde-elf
+
 2013-11-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16259

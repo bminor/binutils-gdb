@@ -102,6 +102,7 @@ proc readelf_test { options binary_file regexp_file xfails } {
     if [istarget "mips*-*-*"] then {
 	if { [istarget "mips*-*-*linux*"]
 	     || [istarget "mips*-sde-elf*"]
+	     || [istarget "mips*-mti-elf*"]
 	     || [istarget "mips*-*freebsd*"] } then {
 	    set target_machine tmips
 	} else {

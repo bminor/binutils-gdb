@@ -988,7 +988,8 @@ if [is_elf_format] {
     # targ_defvec=bfd_elf32_nbigmips_vec or
     # targ_defvec=bfd_elf32_nlittlemips_vec in config.bfd.  When syncing,
     # don't forget that earlier case-matches trump later ones.
-    if { ![istarget "mips*-sde-elf*"] && ![istarget "mips64*-*-openbsd*"] } {
+    if { ![istarget "mips*-sde-elf*"] && ![istarget "mips*-mti-elf*"]
+         && ![istarget "mips64*-*-openbsd*"] } {
 	setup_xfail "mips*-*-irix5*" "mips*-*-irix6*" "mips*-*-elf*" \
 	    "mips*-*-rtems*" "mips*-*-windiss" "mips*-*-none" \
 	    "mips*-*-openbsd*" "mips*-*-chorus*"
