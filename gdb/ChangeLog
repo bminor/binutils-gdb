@@ -1,3 +1,9 @@
+2013-11-27  Andrew Burgess  <aburgess@broadcom.com>
+
+	* frame.c: Include "valprint.h".
+	(frame_unwind_register_value): Use value_optimized_out.
+	* value.c (value_fetch_lazy): Likewise.
+
 2013-11-26  Andrew Burgess  <aburgess@broadcom.com>
 
 	* value.c (allocate_optimized_out_value): Mark value as non-lazy.
