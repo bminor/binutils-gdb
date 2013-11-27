@@ -24,5 +24,6 @@ int main()
 
   p = malloc (1);
 
-  return 0; /* print p */
+  free (p); /* print p */
+  return 0;
 }
