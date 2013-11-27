@@ -1,5 +1,9 @@
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lex.l (find_dot_all): Use strncasecmp instead of strncmp.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (create_excep_cond_exprs): Force EXP to NULL
 	when parse_exp_1 threw an error.  Add comment.
 

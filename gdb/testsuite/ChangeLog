@@ -1,5 +1,9 @@
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/dot_all: New testcase.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.mi/mi-undefined-cmd.exp: New testcase.
 
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>

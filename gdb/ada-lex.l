@@ -545,7 +545,7 @@ find_dot_all (const char *str)
 	  do
 	    i += 1;
 	  while (isspace (str[i]));
-	  if (strncmp (str+i, "all", 3) == 0
+	  if (strncasecmp (str+i, "all", 3) == 0
 	      && ! isalnum (str[i+3]) && str[i+3] != '_')
 	    return i0;
 	}
