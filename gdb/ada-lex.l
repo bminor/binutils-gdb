@@ -537,19 +537,20 @@ static int
 find_dot_all (const char *str)
 {
   int i;
-  for (i = 0; str[i] != '\000'; i += 1)
-    {
-      if (str[i] == '.')
-	{
-	  int i0 = i;
-	  do
-	    i += 1;
-	  while (isspace (str[i]));
-	  if (strncasecmp (str+i, "all", 3) == 0
-	      && ! isalnum (str[i+3]) && str[i+3] != '_')
-	    return i0;
-	}
-    }
+
+  for (i = 0; str[i] != '\000'; i++)
+    if (str[i] == '.')
+      {
+	int i0 = i;
+
+	do
+	  i += 1;
+	while (isspace (str[i]));
+
+	if (strncasecmp (str + i, "all", 3) == 0
+	    && !isalnum (str[i + 3]) && str[i + 3] != '_')
+	  return i0;
+      }
   return -1;
 }
 
