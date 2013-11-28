@@ -1,7 +1,8 @@
-2013-11-27  Steffen Sledz <sledz@dresearch-fe.de>
+2013-11-27  Steffen Sledz  <sledz@dresearch-fe.de>
 
+	PR 16152
 	* configure: Rebuild.
-	* configure.ac: fix cygwin detection check
+	* configure.ac: Tighten cygwin detection check.
 
 2013-11-27  Pedro Alves  <palves@redhat.com>
 
