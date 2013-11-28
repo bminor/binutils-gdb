@@ -3572,7 +3572,10 @@ value_fetch_lazy (struct value *val)
 
 	  fprintf_unfiltered (gdb_stdlog, "->");
 	  if (value_optimized_out (new_val))
-	    fprintf_unfiltered (gdb_stdlog, " optimized out");
+	    {
+	      fprintf_unfiltered (gdb_stdlog, " ");
+	      val_print_optimized_out (new_val, gdb_stdlog);
+	    }
 	  else
 	    {
 	      int i;

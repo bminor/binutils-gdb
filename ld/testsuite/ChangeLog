@@ -1,3 +1,13 @@
+2013-11-27  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* ld-plugin/lto.exp: Add -ffat-lto-objects.
+	* lib/ld-lib.exp (check_lto_available): Likewise.
+
+2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
+
+	* ld-mips-elf/mips-elf.exp: Consider mips-mti-elf the same as
+	mips-sde-elf
+
 2013-11-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16259

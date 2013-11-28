@@ -31,5 +31,6 @@ malloc_stub (void)
 {
   /* charset.exp wants to allocate memory for constants.  So make sure malloc
      gets linked into the program.  */
-  malloc (1);
+  void *p = malloc (1);
+  free (p);
 }

@@ -44,9 +44,11 @@
 #include "inline-frame.h"
 #include "tracepoint.h"
 #include "hashtab.h"
+#include "valprint.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
+static const char *frame_stop_reason_symbol_string (enum unwind_stop_reason reason);
 
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
@@ -1005,7 +1007,7 @@ frame_unwind_register (struct frame_info *frame, int regnum, gdb_byte *buf)
 			 &lval, &addr, &realnum, buf);
 
   if (optimized)
-    error (_("Register %d was optimized out"), regnum);
+    error (_("Register %d was not saved"), regnum);
   if (unavailable)
     throw_error (NOT_AVAILABLE_ERROR,
 		 _("Register %d is not available"), regnum);
@@ -1047,7 +1049,10 @@ frame_unwind_register_value (struct frame_info *frame, int regnum)
     {
       fprintf_unfiltered (gdb_stdlog, "->");
       if (value_optimized_out (value))
-	fprintf_unfiltered (gdb_stdlog, " optimized out");
+	{
+	  fprintf_unfiltered (gdb_stdlog, " ");
+	  val_print_optimized_out (value, gdb_stdlog);
+	}
       else
 	{
 	  if (VALUE_LVAL (value) == lval_register)
@@ -1767,21 +1772,16 @@ get_prev_frame_1 (struct frame_info *this_frame)
 				       &this_frame->prologue_cache);
 
   if (this_frame->stop_reason != UNWIND_NO_REASON)
-    return NULL;
-
-  /* Check that this frame's ID was valid.  If it wasn't, don't try to
-     unwind to the prev frame.  Be careful to not apply this test to
-     the sentinel frame.  */
-  this_id = get_frame_id (this_frame);
-  if (this_frame->level >= 0 && frame_id_eq (this_id, outer_frame_id))
     {
       if (frame_debug)
 	{
+	  enum unwind_stop_reason reason = this_frame->stop_reason;
+
 	  fprintf_unfiltered (gdb_stdlog, "-> ");
 	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // this ID is NULL }\n");
+	  fprintf_unfiltered (gdb_stdlog, " // %s }\n",
+			      frame_stop_reason_symbol_string (reason));
 	}
-      this_frame->stop_reason = UNWIND_NULL_ID;
       return NULL;
     }
 
@@ -2482,6 +2482,25 @@ frame_stop_reason_string (enum unwind_stop_reason reason)
     {
 #define SET(name, description) \
     case name: return _(description);
+#include "unwind_stop_reasons.def"
+#undef SET
+
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "Invalid frame stop reason");
+    }
+}
+
+/* Return the enum symbol name of REASON as a string, to use in debug
+   output.  */
+
+static const char *
+frame_stop_reason_symbol_string (enum unwind_stop_reason reason)
+{
+  switch (reason)
+    {
+#define SET(name, description) \
+    case name: return #name;
 #include "unwind_stop_reasons.def"
 #undef SET
 

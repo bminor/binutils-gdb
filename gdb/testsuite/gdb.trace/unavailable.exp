@@ -169,15 +169,14 @@ proc gdb_collect_args_test {} {
 
 	# struct arg as one of several args (near end of list)
 
-	gdb_test "print argstruct" \
-	    " = \{memberc = <unavailable>, memberi = <unavailable>, memberf = <unavailable>, memberd = <unavailable>\}"
+	gdb_test "print argstruct" " = <unavailable>"
 
 	gdb_test "print argstruct.memberc" " = <unavailable>"
 	gdb_test "print argstruct.memberi" " = <unavailable>"
 	gdb_test "print argstruct.memberf" " = <unavailable>"
 	gdb_test "print argstruct.memberd" " = <unavailable>"
 
-	gdb_test "print argarray" " = \\(int \\*\\) <unavailable>"
+	gdb_test "print argarray" " = <unavailable>"
 
 	gdb_test "print &argarray" \
 	    "Can't take address of \"argarray\" which isn't an lvalue\."
@@ -190,7 +189,7 @@ proc gdb_collect_args_test {} {
 	set r "${r}argi = <unavailable>${cr}"
 	set r "${r}argf = <unavailable>${cr}"
 	set r "${r}argd = <unavailable>${cr}"
-	set r "${r}argstruct = {memberc = <unavailable>, memberi = <unavailable>, memberf = <unavailable>, memberd = <unavailable>}${cr}"
+	set r "${r}argstruct = <unavailable>${cr}"
 	set r "${r}argarray = <unavailable>${cr}"
 	gdb_test "info args" "$r" "info args"
 
@@ -237,11 +236,11 @@ proc gdb_collect_locals_test { func msg } {
 	set r ""
 	set r "${r}locf = <unavailable>${cr}"
 	set r "${r}locd = <unavailable>${cr}"
-	set r "${r}locst = {memberc = <unavailable>, memberi = <unavailable>, memberf = <unavailable>, memberd = <unavailable>}${cr}"
-	set r "${r}locar = {<unavailable>, <unavailable>, <unavailable>, <unavailable>}${cr}"
+	set r "${r}locst = <unavailable>${cr}"
+	set r "${r}locar = <unavailable>${cr}"
 	set r "${r}i = <unavailable>${cr}"
 	if { $func == "local_test_func" } {
-	    set r "${r}locdefst = {<No data fields>}${cr}"
+	    set r "${r}locdefst = <unavailable>${cr}"
 	}
 	set r "${r}locc = <unavailable>${cr}"
 	set r "${r}loci = <unavailable>${cr}"
@@ -398,8 +397,7 @@ proc gdb_collect_globals_test { } {
 	gdb_test "print globalstruct.memberf" " = <unavailable>"
 	gdb_test "print globalstruct.memberd" " = <unavailable>"
 
-	gdb_test "print globalstruct" \
-	    " = {memberc = <unavailable>, memberi = <unavailable>, memberf = <unavailable>, memberd = <unavailable>}"
+	gdb_test "print globalstruct" " = <unavailable>"
 
 	gdb_test "print globalp == &globalstruct" \
 	    "value is not available" \
@@ -449,8 +447,7 @@ proc gdb_collect_globals_test { } {
 
 	# Static fields
 
-	gdb_test "print struct_b.static_struct_a" \
-	    " = {a = <unavailable>, b = <unavailable>, array = {<unavailable> <repeats 10000 times>}, ptr = <unavailable>, bitfield = <unavailable>}"
+	gdb_test "print struct_b.static_struct_a" " = <unavailable>"
 
 	# Bitfields
 
@@ -468,8 +465,7 @@ proc gdb_collect_globals_test { } {
 	    "\\$\[0-9\]+ = <unavailable>$cr" \
 	    "referenced integer was not collected (taking address of reference)"
 
-	gdb_test "print *g_structref_p" \
-	    " = {d = <unavailable>, ref = <unavailable>}"
+	gdb_test "print *g_structref_p" " = <unavailable>"
 
 	# Strings
 
@@ -483,7 +479,7 @@ proc gdb_collect_globals_test { } {
 	    "printing constant string through collected pointer"
 
 	gdb_test "print g_string_unavail" \
-	    " = \{<unavailable> <repeats 12 times>\}" \
+	    " = <unavailable>" \
 	    "printing non collected string"
 
 	# Incomplete strings print as an array.
@@ -521,15 +517,15 @@ proc gdb_collect_globals_test { } {
 	# unavailable-ness is propagated.  History values are easy
 	# non-lazy values, so use those.  The first test just sets up for
 	# the second.
-	gdb_test "print g_smallstruct" " = \\{member = <unavailable>\\}"
+	gdb_test "print g_smallstruct" " = <unavailable>"
 	gdb_test "print \$.member" " = <unavailable>"
 
 	# Cast to baseclass, checking the unavailable-ness is propagated.
-	gdb_test "print (small_struct) g_smallstruct_b" " = \\{member = <unavailable>\\}"
+	gdb_test "print (small_struct) g_smallstruct_b" " = <unavailable>"
 
 	# Same cast, but starting from a non-lazy, value.
-	gdb_test "print g_smallstruct_b" " = \\{<small_struct> = \\{member = <unavailable>\\}, <No data fields>\\}"
-	gdb_test "print (small_struct) \$" " = \\{member = <unavailable>\\}"
+	gdb_test "print g_smallstruct_b" " = <unavailable>"
+	gdb_test "print (small_struct) \$" " = <unavailable>"
 
 	gdb_test_no_output "set print object on"
 
@@ -538,11 +534,10 @@ proc gdb_collect_globals_test { } {
 	    # the pointed-to object, to check its run-time type.  Make
 	    # sure that fails gracefully and transparently when the
 	    # pointer itself is unavailable.
-	    gdb_test "print virtualp" " = \\(Virtual \\*\\) <unavailable>"
+	    gdb_test "print virtualp" " = <unavailable>"
 
 	    # no vtable pointer available
-	    gdb_test "print derived_unavail" \
-		" = {<Middle> = <unavailable>, _vptr.Derived = <unavailable>, z = <unavailable>}"
+	    gdb_test "print derived_unavail" " = <unavailable>"
 
 	    # vtable pointer available, but nothing else
 	    gdb_test "print derived_partial" \
@@ -556,11 +551,11 @@ proc gdb_collect_globals_test { } {
 	gdb_test_no_output "set print object off"
 
 	with_test_prefix "print object off" {
-	    gdb_test "print virtualp" " = \\(Virtual \\*\\) <unavailable>"
+	    gdb_test "print virtualp" " = <unavailable>"
 
 	    # no vtable pointer available
 	    gdb_test "print derived_unavail" \
-		" = {<Middle> = <unavailable>, _vptr.Derived = <unavailable>, z = <unavailable>}"
+		" = <unavailable>"
 
 	    # vtable pointer available, but nothing else
 	    gdb_test "print derived_partial" \

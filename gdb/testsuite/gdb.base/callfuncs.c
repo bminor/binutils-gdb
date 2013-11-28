@@ -652,9 +652,10 @@ voidfunc (void)
 
 int main ()
 {
-  malloc(1);
+  void *p = malloc (1);
   t_double_values(double_val1, double_val2);
   t_structs_c(struct_val1);
+  free (p);
   return 0 ;
 }
 

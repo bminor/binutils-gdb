@@ -1,3 +1,27 @@
+2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.trace/unavailable.exp (gdb_collect_args_test): Update
+	expected results.
+	(gdb_collect_locals_test): Likewise.
+	(gdb_collect_globals_test): Likewise.
+
+2013-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (with_gdb_prompt): New proc.
+	* gdb.perf/disassemble.exp: New.
+	* gdb.perf/disassemble.py: New.
+
+2013-11-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/callfuncs.c (main): Assign malloc's return value
+	and free it afterwards.
+	* gdb.base/charset-malloc.c (malloc_stub): Likewise.
+	* gdb.base/printcmds.c (main): Likewise.
+	* gdb.base/randomize.c (main): Free "p" and change breakpoint
+	marker position.
+	* gdb.base/setvar.c (dummy): Assign malloc's return value
+	and free it afterwards.
+
 2013-11-26  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.base/setshow.exp: Add $gdb_prompt to the patterns in

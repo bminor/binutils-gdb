@@ -1716,6 +1716,32 @@ proc with_test_prefix { prefix body } {
   }
 }
 
+# Run tests in BODY with GDB prompt and variable $gdb_prompt set to
+# PROMPT.  When BODY is finished, restore GDB prompt and variable
+# $gdb_prompt.
+# Returns the result of BODY.
+
+proc with_gdb_prompt { prompt body } {
+    global gdb_prompt
+
+    set saved $gdb_prompt
+
+    set gdb_prompt $prompt
+    gdb_test_no_output "set prompt $prompt " ""
+
+    set code [catch {uplevel 1 $body} result]
+
+    set gdb_prompt $saved
+    gdb_test_no_output "set prompt $saved " ""
+
+    if {$code == 1} {
+	global errorInfo errorCode
+	return -code $code -errorinfo $errorInfo -errorcode $errorCode $result
+    } else {
+	return -code $code $result
+    }
+}
+
 # Return 1 if _Complex types are supported, otherwise, return 0.
 
 gdb_caching_proc support_complex_tests {

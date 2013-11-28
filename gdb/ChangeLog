@@ -1,3 +1,55 @@
+2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* valprint.c (value_check_printable): If the value is entirely
+	unavailable, print a single "<unavailable>" instead of printing
+	all subfields.
+
+2013-11-28  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (get_prev_frame_1) <stop_reason != UNWIND_NO_REASON>:
+	Add "set debug frame" output.
+	(frame_stop_reason_symbol_string): New function.
+
+2013-11-28  Pedro Alves  <palves@redhat.com>
+
+	* frame-unwind.c (default_frame_unwind_stop_reason): Return
+	UNWIND_OUTERMOST if the frame's ID is outer_frame_id.
+	* frame.c (get_prev_frame_1): Remove outer_frame_id check.
+
+2013-11-28  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (get_prev_frame_1): If the frame id is outer_frame_id,
+	set the unwind stop reason to UNWIND_OUTERMOST, not
+	UNWIND_NULL_ID.  Remove explicit check for sentinel frame.
+
+2013-11-28  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (frame_unwind_register): Say the register was "not
+	saved" instead of "optimized out".
+
+2013-11-27  Steffen Sledz  <sledz@dresearch-fe.de>
+
+	PR 16152
+	* configure: Rebuild.
+	* configure.ac: Tighten cygwin detection check.
+
+2013-11-27  Pedro Alves  <palves@redhat.com>
+
+	* frame-unwind.c (frame_unwind_got_optimized): Use the type of the
+	register in the previous frame's arch.
+
+2013-11-27  Pedro Alves  <palves@redhat.com>
+
+	* frame-unwind.c (frame_unwind_got_optimized): Return
+	an lval_register value instead of a not_lval value.
+
+2013-11-27  Andrew Burgess  <aburgess@broadcom.com>
+
+	* frame.c: Include "valprint.h".
+	(frame_unwind_register_value): Use value_optimized_out.
+	* value.c (value_fetch_lazy): Likewise.
+
 2013-11-26  Andrew Burgess  <aburgess@broadcom.com>
 
 	* value.c (allocate_optimized_out_value): Mark value as non-lazy.

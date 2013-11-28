@@ -55,7 +55,8 @@ if {![istarget mips*-*-*] || ![is_elf_format]} {
 
 set has_newabi [expr [istarget *-*-irix6*] \
 		     || [istarget mips*-*-linux*] \
-		     || [istarget mips*-sde-elf*]]
+		     || [istarget mips*-sde-elf*] \
+		     || [istarget mips*-mti-elf*]]
 set linux_gnu [expr [istarget mips*-*-linux*]]
 set embedded_elf [expr [istarget mips*-*-elf]]
 
@@ -78,7 +79,8 @@ if { [istarget *-*-irix6*] } {
     set abi_asflags(o32) "-32 -EB"
     set abi_ldflags(o32) -melf32btsmip_fbsd
 }
-if { [istarget mips*-*-linux*] || [istarget mips*-sde-elf*] } {
+if { [istarget mips*-*-linux*] || [istarget mips*-sde-elf*]
+     || [istarget mips*-mti-elf*] } {
     set abi_ldflags(n32) -melf32btsmipn32
     set abi_ldflags(n64) -melf64btsmip
 } elseif { [istarget mips64*-*freebsd*] } {

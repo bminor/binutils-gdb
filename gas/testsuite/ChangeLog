@@ -1,3 +1,7 @@
+2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
+
+	* gas/mips/mips.exp: Consider mips-mti-elf the same as mips-sde-elf
+
 2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/msr.s: Add tests.

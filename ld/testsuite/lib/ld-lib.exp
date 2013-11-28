@@ -1643,7 +1643,7 @@ proc check_lto_available { } {
 	set f [open $src "w"]
 	puts $f ""
 	close $f
-	set status [remote_exec host $CC "-shared -B[pwd]/tmpdir/ld/ -flto -fuse-linker-plugin $src -o $output"]
+	set status [remote_exec host $CC "-shared -B[pwd]/tmpdir/ld/ -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
 	if { [lindex $status 0] == 0 } {
 	    set lto_available_saved 1
 	} else {
