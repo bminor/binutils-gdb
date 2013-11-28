@@ -1,5 +1,11 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.texinfo (Branch Trace Configuration Format): Add size.
+	(Process Record and Replay): Describe new set|show commands.
+	(General Query Packets): Describe Qbtrace-conf:bts:size packet.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.texinfo (Process Record and Replay): Describe the "record
 	btrace bts" command.
 	(General Query Packets): Describe qXfer:btrace-conf:read packet.

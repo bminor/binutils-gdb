@@ -76,6 +76,14 @@ static struct btrace_config record_btrace_conf;
 /* Command list for "record btrace".  */
 static struct cmd_list_element *record_btrace_cmdlist;
 
+/* Command lists for "set/show record btrace".  */
+static struct cmd_list_element *set_record_btrace_cmdlist;
+static struct cmd_list_element *show_record_btrace_cmdlist;
+
+/* Command lists for "set/show record btrace bts".  */
+static struct cmd_list_element *set_record_btrace_bts_cmdlist;
+static struct cmd_list_element *show_record_btrace_bts_cmdlist;
+
 /* Print a record-btrace debug message.  Use do ... while (0) to avoid
    ambiguities when used in if statements.  */
 
@@ -285,6 +293,71 @@ record_btrace_async (struct target_ops *ops,
   ops->beneath->to_async (ops->beneath, callback, context);
 }
 
+/* Adjusts the size and returns a human readable size suffix.  */
+
+static const char *
+record_btrace_adjust_size (unsigned int *size)
+{
+  unsigned int sz;
+
+  sz = *size;
+
+  if ((sz & ((1u << 30) - 1)) == 0)
+    {
+      *size = sz >> 30;
+      return "GB";
+    }
+  else if ((sz & ((1u << 20) - 1)) == 0)
+    {
+      *size = sz >> 20;
+      return "MB";
+    }
+  else if ((sz & ((1u << 10) - 1)) == 0)
+    {
+      *size = sz >> 10;
+      return "kB";
+    }
+  else
+    return "";
+}
+
+/* Print a BTS configuration.  */
+
+static void
+record_btrace_print_bts_conf (const struct btrace_config_bts *conf)
+{
+  const char *suffix;
+  unsigned int size;
+
+  size = conf->size;
+  if (size > 0)
+    {
+      suffix = record_btrace_adjust_size (&size);
+      printf_unfiltered (_("Buffer size: %u%s.\n"), size, suffix);
+    }
+}
+
+/* Print a branch tracing configuration.  */
+
+static void
+record_btrace_print_conf (const struct btrace_config *conf)
+{
+  printf_unfiltered (_("Recording format: %s.\n"),
+		     btrace_format_string (conf->format));
+
+  switch (conf->format)
+    {
+    case BTRACE_FORMAT_NONE:
+      return;
+
+    case BTRACE_FORMAT_BTS:
+      record_btrace_print_bts_conf (&conf->bts);
+      return;
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+}
+
 /* The to_info_record method of target record-btrace.  */
 
 static void
@@ -305,8 +378,7 @@ record_btrace_info (struct target_ops *self)
 
   conf = btrace_conf (btinfo);
   if (conf != NULL)
-    printf_unfiltered (_("Recording format: %s.\n"),
-		       btrace_format_string (conf->format));
+    record_btrace_print_conf (conf);
 
   btrace_fetch (tp);
 
@@ -2073,6 +2145,25 @@ cmd_show_replay_memory_access (struct ui_file *file, int from_tty,
 		    replay_memory_access);
 }
 
+/* The "set record btrace bts" command.  */
+
+static void
+cmd_set_record_btrace_bts (char *args, int from_tty)
+{
+  printf_unfiltered (_("\"set record btrace bts\" must be followed "
+		       "by an apporpriate subcommand.\n"));
+  help_list (set_record_btrace_bts_cmdlist, "set record btrace bts ",
+	     all_commands, gdb_stdout);
+}
+
+/* The "show record btrace bts" command.  */
+
+static void
+cmd_show_record_btrace_bts (char *args, int from_tty)
+{
+  cmd_show_list (show_record_btrace_bts_cmdlist, from_tty, "");
+}
+
 void _initialize_record_btrace (void);
 
 /* Initialize btrace commands.  */
@@ -2116,9 +2207,34 @@ replay."),
 			   &set_record_btrace_cmdlist,
 			   &show_record_btrace_cmdlist);
 
+  add_prefix_cmd ("bts", class_support, cmd_set_record_btrace_bts,
+		  _("Set record btrace bts options"),
+		  &set_record_btrace_bts_cmdlist,
+		  "set record btrace bts ", 0, &set_record_btrace_cmdlist);
+
+  add_prefix_cmd ("bts", class_support, cmd_show_record_btrace_bts,
+		  _("Show record btrace bts options"),
+		  &show_record_btrace_bts_cmdlist,
+		  "show record btrace bts ", 0, &show_record_btrace_cmdlist);
+
+  add_setshow_uinteger_cmd ("buffer-size", no_class,
+			    &record_btrace_conf.bts.size,
+			    _("Set the record/replay bts buffer size."),
+			    _("Show the record/replay bts buffer size."), _("\
+When starting recording request a trace buffer of this size.  \
+The actual buffer size may differ from the requested size.  \
+Use \"info record\" to see the actual buffer size.\n\n\
+Bigger buffers allow longer recording but also take more time to process \
+the recorded execution trace.\n\n\
+The trace buffer size may not be changed while recording."), NULL, NULL,
+			    &set_record_btrace_bts_cmdlist,
+			    &show_record_btrace_bts_cmdlist);
+
   init_record_btrace_ops ();
   add_target (&record_btrace_ops);
 
   bfcache = htab_create_alloc (50, bfcache_hash, bfcache_eq, NULL,
 			       xcalloc, xfree);
+
+  record_btrace_conf.bts.size = 64 * 1024;
 }

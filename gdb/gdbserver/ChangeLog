@@ -1,5 +1,12 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* linux-low.c (linux_low_btrace_conf): Print size.
+	* server.c (handle_btrace_conf_general_set): New.
+	(hanle_general_set): Call handle_btrace_conf_general_set.
+	(handle_query): Report Qbtrace-conf:bts:size as supported.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* linux-low.c (linux_low_enable_btrace): Update parameters.
 	(linux_low_btrace_conf): New.
 	(linux_target_ops)<to_btrace_conf>: Initialize.

@@ -1335,6 +1335,9 @@ enum {
   /* Support for the qXfer:btrace-conf:read packet.  */
   PACKET_qXfer_btrace_conf,
 
+  /* Support for the Qbtrace-conf:bts:size packet.  */
+  PACKET_Qbtrace_conf_bts_size,
+
   PACKET_MAX
 };
 
@@ -4020,7 +4023,9 @@ static const struct protocol_feature remote_protocol_features[] = {
   { "qXfer:btrace:read", PACKET_DISABLE, remote_supported_packet,
     PACKET_qXfer_btrace },
   { "qXfer:btrace-conf:read", PACKET_DISABLE, remote_supported_packet,
-    PACKET_qXfer_btrace_conf }
+    PACKET_qXfer_btrace_conf },
+  { "Qbtrace-conf:bts:size", PACKET_DISABLE, remote_supported_packet,
+    PACKET_Qbtrace_conf_bts_size }
 };
 
 static char *remote_support_xml;
@@ -11378,7 +11383,35 @@ remote_supports_btrace (struct target_ops *self, enum btrace_format format)
 static void
 btrace_sync_conf (const struct btrace_config *conf)
 {
-  /* Nothing to do for now.  */
+  struct packet_config *packet;
+  struct remote_state *rs;
+  char *buf, *pos, *endbuf;
+
+  rs = get_remote_state ();
+  buf = rs->buf;
+  endbuf = buf + get_remote_packet_size ();
+
+  packet = &remote_protocol_packets[PACKET_Qbtrace_conf_bts_size];
+  if (packet_config_support (packet) == PACKET_ENABLE
+      && conf->bts.size != rs->btrace_config.bts.size)
+    {
+      pos = buf;
+      pos += xsnprintf (pos, endbuf - pos, "%s=0x%x", packet->name,
+                        conf->bts.size);
+
+      putpkt (buf);
+      getpkt (&buf, &rs->buf_size, 0);
+
+      if (packet_ok (buf, packet) == PACKET_ERROR)
+	{
+	  if (buf[0] == 'E' && buf[1] == '.')
+	    error (_("Failed to configure the BTS buffer size: %s"), buf + 2);
+	  else
+	    error (_("Failed to configure the BTS buffer size."));
+	}
+
+      rs->btrace_config.bts.size = conf->bts.size;
+    }
 }
 
 /* Read the current thread's btrace configuration from the target and
@@ -12286,6 +12319,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qXfer_btrace_conf],
        "qXfer:btrace-conf", "read-btrace-conf", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_Qbtrace_conf_bts_size],
+       "Qbtrace-conf:bts:size", "btrace-conf-bts-size", 0);
 
   /* Assert that we've registered commands for all packet configs.  */
   {

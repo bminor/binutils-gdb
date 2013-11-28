@@ -8,3 +8,4 @@
 <!ATTLIST btrace-conf	version	CDATA	#FIXED "1.0">
 
 <!ELEMENT bts	EMPTY>
+<!ATTLIST bts	size	CDATA	#IMPLIED>

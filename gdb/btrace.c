@@ -1127,13 +1127,25 @@ parse_xml_btrace_conf_bts (struct gdb_xml_parser *parser,
 			  void *user_data, VEC (gdb_xml_value_s) *attributes)
 {
   struct btrace_config *conf;
+  struct gdb_xml_value *size;
 
   conf = user_data;
   conf->format = BTRACE_FORMAT_BTS;
+  conf->bts.size = 0;
+
+  size = xml_find_attribute (attributes, "size");
+  if (size != NULL)
+    conf->bts.size = (unsigned int) * (ULONGEST *) size->value;
 }
 
+static const struct gdb_xml_attribute btrace_conf_bts_attributes[] = {
+  { "size", GDB_XML_AF_OPTIONAL, gdb_xml_parse_attr_ulongest, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
 static const struct gdb_xml_element btrace_conf_children[] = {
-  { "bts", NULL, NULL, GDB_XML_EF_OPTIONAL, parse_xml_btrace_conf_bts, NULL },
+  { "bts", btrace_conf_bts_attributes, NULL, GDB_XML_EF_OPTIONAL,
+    parse_xml_btrace_conf_bts, NULL },
   { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
 };
 

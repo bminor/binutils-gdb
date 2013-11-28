@@ -398,11 +398,12 @@ linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
 /* Enable branch tracing in BTS format.  */
 
 static struct btrace_target_info *
-linux_enable_bts (ptid_t ptid, const struct btrace_config *conf)
+linux_enable_bts (ptid_t ptid, const struct btrace_config_bts *conf)
 {
   struct perf_event_mmap_page *header;
   struct btrace_target_info *tinfo;
   struct btrace_tinfo_bts *bts;
+  unsigned long long size, pages;
   int pid, pg;
 
   tinfo = xzalloc (sizeof (*tinfo));
@@ -433,14 +434,33 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config *conf)
   if (bts->file < 0)
     goto err;
 
-  /* We try to allocate as much buffer as we can get.
-     We could allow the user to specify the size of the buffer, but then
-     we'd leave this search for the maximum buffer size to him.  */
-  for (pg = 4; pg >= 0; --pg)
+  /* Convert the requested size in bytes to pages (rounding up).  */
+  pages = (((unsigned long long) conf->size) + PAGE_SIZE - 1) / PAGE_SIZE;
+  /* We need at least one page.  */
+  if (pages == 0)
+    pages = 1;
+
+  /* The buffer size can be requested in powers of two pages.  Adjust PAGES
+     to the next power of two.  */
+  for (pg = 0; pages != (1u << pg); ++pg)
+    if ((pages & (1u << pg)) != 0)
+      pages += (1u << pg);
+
+  /* We try to allocate the requested size.
+     If that fails, try to get as much as we can.  */
+  for (; pages > 0; pages >>= 1)
     {
+      size_t length;
+
+      size = pages * PAGE_SIZE;
+      length = size + PAGE_SIZE;
+
+      /* Check for overflows.  */
+      if ((unsigned long long) length < size)
+	continue;
+
       /* The number of pages we request needs to be a power of two.  */
-      header = mmap (NULL, ((1 << pg) + 1) * PAGE_SIZE, PROT_READ, MAP_SHARED,
-		     bts->file, 0);
+      header = mmap (NULL, length, PROT_READ, MAP_SHARED, bts->file, 0);
       if (header != MAP_FAILED)
 	break;
     }
@@ -450,10 +470,11 @@ linux_enable_bts (ptid_t ptid, const struct btrace_config *conf)
 
   bts->header = header;
   bts->bts.mem = ((const uint8_t *) header) + PAGE_SIZE;
-  bts->bts.size = (1 << pg) * PAGE_SIZE;
+  bts->bts.size = size;
   bts->bts.data_head = &header->data_head;
   bts->bts.last_head = 0;
 
+  tinfo->conf.bts.size = size;
   return tinfo;
 
  err_file:
@@ -479,7 +500,7 @@ linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
       break;
 
     case BTRACE_FORMAT_BTS:
-      tinfo = linux_enable_bts (ptid, conf);
+      tinfo = linux_enable_bts (ptid, &conf->bts);
       break;
     }
 

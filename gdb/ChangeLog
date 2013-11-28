@@ -1,5 +1,30 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* btrace.c (parse_xml_btrace_conf_bts): Add size.
+	(btrace_conf_bts_attributes): New.
+	(btrace_conf_children): Add attributes.
+	* common/btrace-common.h (btrace_config_bts): New.
+	(btrace_config)<bts>: New.
+	(btrace_config): Update comment.
+	* nat/linux-btrace.c (linux_enable_btrace, linux_enable_bts):
+	Use config.
+	* features/btrace-conf.dtd: Increment version.  Add size
+	attribute to bts element.
+	* record-btrace.c (set_record_btrace_bts_cmdlist,
+	show_record_btrace_bts_cmdlist): New.
+	(record_btrace_adjust_size, record_btrace_print_bts_conf,
+	record_btrace_print_conf, cmd_set_record_btrace_bts,
+	cmd_show_record_btrace_bts): New.
+	(record_btrace_info): Call record_btrace_print_conf.
+	(_initialize_record_btrace): Add commands.
+	* remote.c: Add PACKET_Qbtrace_conf_bts_size enum.
+	(remote_protocol_features): Add Qbtrace-conf:bts:size packet.
+	(btrace_sync_conf): Synchronize bts size.
+	(_initialize_remote): Add Qbtrace-conf:bts:size packet.
+	* NEWS: Announce new commands and new packets.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* Makefile.in (XMLFILES): Add btrace-conf.dtd.
 	* x86-linux-nat.c (x86_linux_enable_btrace): Update parameters.
 	(x86_linux_btrace_conf): New.

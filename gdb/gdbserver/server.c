@@ -463,6 +463,58 @@ handle_btrace_general_set (char *own_buf)
   return 1;
 }
 
+/* Handle the "Qbtrace-conf" packet.  */
+
+static int
+handle_btrace_conf_general_set (char *own_buf)
+{
+  struct thread_info *thread;
+  char *op;
+
+  if (strncmp ("Qbtrace-conf:", own_buf, strlen ("Qbtrace-conf:")) != 0)
+    return 0;
+
+  op = own_buf + strlen ("Qbtrace-conf:");
+
+  if (ptid_equal (general_thread, null_ptid)
+      || ptid_equal (general_thread, minus_one_ptid))
+    {
+      strcpy (own_buf, "E.Must select a single thread.");
+      return -1;
+    }
+
+  thread = find_thread_ptid (general_thread);
+  if (thread == NULL)
+    {
+      strcpy (own_buf, "E.No such thread.");
+      return -1;
+    }
+
+  if (strncmp (op, "bts:size=", strlen ("bts:size=")) == 0)
+    {
+      unsigned long size;
+      char *endp = NULL;
+
+      errno = 0;
+      size = strtoul (op + strlen ("bts:size="), &endp, 16);
+      if (endp == NULL || *endp != 0 || errno != 0 || size > UINT_MAX)
+	{
+	  strcpy (own_buf, "E.Bad size value.");
+	  return -1;
+	}
+
+      current_btrace_conf.bts.size = (unsigned int) size;
+    }
+  else
+    {
+      strcpy (own_buf, "E.Bad Qbtrace configuration option.");
+      return -1;
+    }
+
+  write_ok (own_buf);
+  return 1;
+}
+
 /* Handle all of the extended 'Q' packets.  */
 
 static void
@@ -620,6 +672,9 @@ handle_general_set (char *own_buf)
     }
 
   if (handle_btrace_general_set (own_buf))
+    return;
+
+  if (handle_btrace_conf_general_set (own_buf))
     return;
 
   /* Otherwise we didn't know what packet it was.  Say we didn't
@@ -1761,7 +1816,10 @@ static void
 supported_btrace_packets (char *buf)
 {
   if (target_supports_btrace (BTRACE_FORMAT_BTS))
-    strcat (buf, ";Qbtrace:bts+");
+    {
+      strcat (buf, ";Qbtrace:bts+");
+      strcat (buf, ";Qbtrace-conf:bts:size+");
+    }
   else
     return;
 

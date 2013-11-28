@@ -1,5 +1,9 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/buffer-size: New.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/delta.exp: Update "info record" output.
 	* gdb.btrace/enable.exp: Update "info record" output.
 	* gdb.btrace/finish.exp: Update "info record" output.

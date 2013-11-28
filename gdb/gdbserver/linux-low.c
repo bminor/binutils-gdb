@@ -6041,7 +6041,9 @@ linux_low_btrace_conf (const struct btrace_target_info *tinfo,
 	  break;
 
 	case BTRACE_FORMAT_BTS:
-	  buffer_xml_printf (buffer, "<bts/>\n");
+	  buffer_xml_printf (buffer, "<bts");
+	  buffer_xml_printf (buffer, " size=\"0x%x\"", conf->bts.size);
+	  buffer_xml_printf (buffer, " />\n");
 	  break;
 	}
     }
