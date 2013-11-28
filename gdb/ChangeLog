@@ -1,5 +1,11 @@
 2013-11-28  Pedro Alves  <palves@redhat.com>
 
+	* frame.c (get_prev_frame_1) <stop_reason != UNWIND_NO_REASON>:
+	Add "set debug frame" output.
+	(frame_stop_reason_symbol_string): New function.
+
+2013-11-28  Pedro Alves  <palves@redhat.com>
+
 	* frame-unwind.c (default_frame_unwind_stop_reason): Return
 	UNWIND_OUTERMOST if the frame's ID is outer_frame_id.
 	* frame.c (get_prev_frame_1): Remove outer_frame_id check.

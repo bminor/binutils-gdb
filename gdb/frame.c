@@ -48,6 +48,7 @@
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
+static const char *frame_stop_reason_symbol_string (enum unwind_stop_reason reason);
 
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
@@ -1771,7 +1772,18 @@ get_prev_frame_1 (struct frame_info *this_frame)
 				       &this_frame->prologue_cache);
 
   if (this_frame->stop_reason != UNWIND_NO_REASON)
-    return NULL;
+    {
+      if (frame_debug)
+	{
+	  enum unwind_stop_reason reason = this_frame->stop_reason;
+
+	  fprintf_unfiltered (gdb_stdlog, "-> ");
+	  fprint_frame (gdb_stdlog, NULL);
+	  fprintf_unfiltered (gdb_stdlog, " // %s }\n",
+			      frame_stop_reason_symbol_string (reason));
+	}
+      return NULL;
+    }
 
   /* Check that this frame's ID isn't inner to (younger, below, next)
      the next frame.  This happens when a frame unwind goes backwards.
@@ -2470,6 +2482,25 @@ frame_stop_reason_string (enum unwind_stop_reason reason)
     {
 #define SET(name, description) \
     case name: return _(description);
+#include "unwind_stop_reasons.def"
+#undef SET
+
+    default:
+      internal_error (__FILE__, __LINE__,
+		      "Invalid frame stop reason");
+    }
+}
+
+/* Return the enum symbol name of REASON as a string, to use in debug
+   output.  */
+
+static const char *
+frame_stop_reason_symbol_string (enum unwind_stop_reason reason)
+{
+  switch (reason)
+    {
+#define SET(name, description) \
+    case name: return #name;
 #include "unwind_stop_reasons.def"
 #undef SET
 
