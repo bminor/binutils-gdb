@@ -1773,21 +1773,6 @@ get_prev_frame_1 (struct frame_info *this_frame)
   if (this_frame->stop_reason != UNWIND_NO_REASON)
     return NULL;
 
-  /* Check that this frame is not the outermost.  If it is, don't try
-     to unwind to the prev frame.  */
-  this_id = get_frame_id (this_frame);
-  if (frame_id_eq (this_id, outer_frame_id))
-    {
-      if (frame_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog, "-> ");
-	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // frame ID is outer_frame_id }\n");
-	}
-      this_frame->stop_reason = UNWIND_OUTERMOST;
-      return NULL;
-    }
-
   /* Check that this frame's ID isn't inner to (younger, below, next)
      the next frame.  This happens when a frame unwind goes backwards.
      This check is valid only if this frame and the next frame are NORMAL.

@@ -143,14 +143,18 @@ default_frame_sniffer (const struct frame_unwind *self,
   return 1;
 }
 
-/* A default frame unwinder stop_reason callback that always claims
-   the frame is unwindable.  */
+/* The default frame unwinder stop_reason callback.  */
 
 enum unwind_stop_reason
 default_frame_unwind_stop_reason (struct frame_info *this_frame,
 				  void **this_cache)
 {
-  return UNWIND_NO_REASON;
+  struct frame_id this_id = get_frame_id (this_frame);
+
+  if (frame_id_eq (this_id, outer_frame_id))
+    return UNWIND_OUTERMOST;
+  else
+    return UNWIND_NO_REASON;
 }
 
 /* Helper functions for value-based register unwinding.  These return

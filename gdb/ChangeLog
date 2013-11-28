@@ -1,5 +1,11 @@
 2013-11-28  Pedro Alves  <palves@redhat.com>
 
+	* frame-unwind.c (default_frame_unwind_stop_reason): Return
+	UNWIND_OUTERMOST if the frame's ID is outer_frame_id.
+	* frame.c (get_prev_frame_1): Remove outer_frame_id check.
+
+2013-11-28  Pedro Alves  <palves@redhat.com>
+
 	* frame.c (get_prev_frame_1): If the frame id is outer_frame_id,
 	set the unwind stop reason to UNWIND_OUTERMOST, not
 	UNWIND_NULL_ID.  Remove explicit check for sentinel frame.
