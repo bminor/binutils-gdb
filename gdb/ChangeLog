@@ -1,3 +1,8 @@
+2013-11-28  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (frame_unwind_register): Say the register was "not
+	saved" instead of "optimized out".
+
 2013-11-27  Steffen Sledz  <sledz@dresearch-fe.de>
 
 	PR 16152
