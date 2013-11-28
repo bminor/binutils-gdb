@@ -1773,19 +1773,18 @@ get_prev_frame_1 (struct frame_info *this_frame)
   if (this_frame->stop_reason != UNWIND_NO_REASON)
     return NULL;
 
-  /* Check that this frame's ID was valid.  If it wasn't, don't try to
-     unwind to the prev frame.  Be careful to not apply this test to
-     the sentinel frame.  */
+  /* Check that this frame is not the outermost.  If it is, don't try
+     to unwind to the prev frame.  */
   this_id = get_frame_id (this_frame);
-  if (this_frame->level >= 0 && frame_id_eq (this_id, outer_frame_id))
+  if (frame_id_eq (this_id, outer_frame_id))
     {
       if (frame_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog, "-> ");
 	  fprint_frame (gdb_stdlog, NULL);
-	  fprintf_unfiltered (gdb_stdlog, " // this ID is NULL }\n");
+	  fprintf_unfiltered (gdb_stdlog, " // frame ID is outer_frame_id }\n");
 	}
-      this_frame->stop_reason = UNWIND_NULL_ID;
+      this_frame->stop_reason = UNWIND_OUTERMOST;
       return NULL;
     }
 

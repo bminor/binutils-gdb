@@ -1,5 +1,11 @@
 2013-11-28  Pedro Alves  <palves@redhat.com>
 
+	* frame.c (get_prev_frame_1): If the frame id is outer_frame_id,
+	set the unwind stop reason to UNWIND_OUTERMOST, not
+	UNWIND_NULL_ID.  Remove explicit check for sentinel frame.
+
+2013-11-28  Pedro Alves  <palves@redhat.com>
+
 	* frame.c (frame_unwind_register): Say the register was "not
 	saved" instead of "optimized out".
 
