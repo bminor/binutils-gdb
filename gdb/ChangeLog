@@ -1,5 +1,16 @@
 2013-11-28  Doug Evans  <xdje42@gmail.com>
 
+	* breakpoint.h (gdbpy_breakpoint_object): Renamed from
+	breakpoint_object.  All uses updated.
+	* python/python-internal.h (gdbpy_breakpoint_object): Renamed from
+	breakpoint_object.  All uses updated.
+	* python.c (*): All uses of breakpoint_object updated.
+	* python.h (*): All uses of breakpoint_object updated.
+	* python/py-breakpoint.c (*): All uses of breakpoint_object updated.
+	* python/py-finishbreakpoint.c (*): Ditto.
+
+2013-11-28  Doug Evans  <xdje42@gmail.com>
+
 	* configure.ac: Add comments delineating libpython and libmcheck.
 	* configure: Regenerate.
 

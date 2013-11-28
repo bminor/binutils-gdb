@@ -39,7 +39,7 @@ static char * const outofscope_func = "out_of_scope";
 struct finish_breakpoint_object
 {
   /* gdb.Breakpoint base class.  */
-  breakpoint_object py_bp;
+  gdbpy_breakpoint_object py_bp;
   /* gdb.Type object of the value return by the breakpointed function.
      May be NULL if no debug information was available or return type
      was VOID.  */
@@ -90,7 +90,7 @@ bpfinishpy_dealloc (PyObject *self)
    `return_value', if possible.  */
 
 void
-bpfinishpy_pre_stop_hook (struct breakpoint_object *bp_obj)
+bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 {
   struct finish_breakpoint_object *self_finishbp =
         (struct finish_breakpoint_object *) bp_obj;
@@ -133,7 +133,7 @@ bpfinishpy_pre_stop_hook (struct breakpoint_object *bp_obj)
    of the gdb.FinishBreakpoint object BP_OBJ.  */
 
 void
-bpfinishpy_post_stop_hook (struct breakpoint_object *bp_obj)
+bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj)
 {
   volatile struct gdb_exception except;
 
@@ -320,7 +320,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 static void
 bpfinishpy_out_of_scope (struct finish_breakpoint_object *bpfinish_obj)
 {
-  breakpoint_object *bp_obj = (breakpoint_object *) bpfinish_obj;
+  gdbpy_breakpoint_object *bp_obj = (gdbpy_breakpoint_object *) bpfinish_obj;
   PyObject *py_obj = (PyObject *) bp_obj;
 
   if (bpfinish_obj->py_bp.bp->enable_state == bp_enabled

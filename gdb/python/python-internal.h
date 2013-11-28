@@ -223,7 +223,7 @@ extern PyTypeObject breakpoint_object_type
 extern PyTypeObject frame_object_type
     CPYCHECKER_TYPE_OBJECT_FOR_TYPEDEF ("frame_object");
 
-typedef struct breakpoint_object
+typedef struct gdbpy_breakpoint_object
 {
   PyObject_HEAD
 
@@ -236,7 +236,7 @@ typedef struct breakpoint_object
 
   /* 1 is this is a FinishBreakpoint object, 0 otherwise.  */
   int is_finish_bp;
-} breakpoint_object;
+} gdbpy_breakpoint_object;
 
 /* Require that BREAKPOINT be a valid breakpoint ID; throw a Python
    exception if it is invalid.  */
@@ -263,7 +263,7 @@ typedef struct breakpoint_object
 
 /* Variables used to pass information between the Breakpoint
    constructor and the breakpoint-created hook function.  */
-extern breakpoint_object *bppy_pending_object;
+extern gdbpy_breakpoint_object *bppy_pending_object;
 
 
 typedef struct
@@ -463,8 +463,8 @@ PyObject *gdbpy_get_varobj_pretty_printer (struct value *value);
 char *gdbpy_get_display_hint (PyObject *printer);
 PyObject *gdbpy_default_visualizer (PyObject *self, PyObject *args);
 
-void bpfinishpy_pre_stop_hook (struct breakpoint_object *bp_obj);
-void bpfinishpy_post_stop_hook (struct breakpoint_object *bp_obj);
+void bpfinishpy_pre_stop_hook (struct gdbpy_breakpoint_object *bp_obj);
+void bpfinishpy_post_stop_hook (struct gdbpy_breakpoint_object *bp_obj);
 
 extern PyObject *gdbpy_doc_cst;
 extern PyObject *gdbpy_children_cst;

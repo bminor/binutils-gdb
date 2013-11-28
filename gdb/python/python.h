@@ -23,7 +23,7 @@
 #include "value.h"
 #include "mi/mi-cmds.h"
 
-struct breakpoint_object;
+struct gdbpy_breakpoint_object;
 
 /* The suffix of per-objfile scripts to auto-load.
    E.g. When the program loads libfoo.so, look for libfoo-gdb.py.  */
@@ -111,9 +111,9 @@ void preserve_python_values (struct objfile *objfile, htab_t copied_types);
 
 void gdbpy_load_auto_scripts_for_objfile (struct objfile *objfile);
 
-int gdbpy_should_stop (struct breakpoint_object *bp_obj);
+int gdbpy_should_stop (struct gdbpy_breakpoint_object *bp_obj);
 
-int gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj);
+int gdbpy_breakpoint_has_py_cond (struct gdbpy_breakpoint_object *bp_obj);
 
 void *start_type_printers (void);
 

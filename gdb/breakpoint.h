@@ -28,7 +28,7 @@
 
 struct value;
 struct block;
-struct breakpoint_object;
+struct gdbpy_breakpoint_object;
 struct get_number_or_range_state;
 struct thread_info;
 struct bpstats;
@@ -737,8 +737,8 @@ struct breakpoint
        Python object that has been associated with this breakpoint.
        This is always NULL for a GDB that is not script enabled.  It
        can sometimes be NULL for enabled GDBs as not all breakpoint
-       types are tracked by the Python scripting API.  */
-    struct breakpoint_object *py_bp_object;
+       types are tracked by the scripting language API.  */
+    struct gdbpy_breakpoint_object *py_bp_object;
   };
 
 /* An instance of this type is used to represent a watchpoint.  It

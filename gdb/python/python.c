@@ -1395,7 +1395,7 @@ source_python_script (FILE *file, const char *filename)
 }
 
 int
-gdbpy_should_stop (struct breakpoint_object *bp_obj)
+gdbpy_should_stop (struct gdbpy_breakpoint_object *bp_obj)
 {
   internal_error (__FILE__, __LINE__,
 		  _("gdbpy_should_stop called when Python scripting is  " \
@@ -1403,7 +1403,7 @@ gdbpy_should_stop (struct breakpoint_object *bp_obj)
 }
 
 int
-gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj)
+gdbpy_breakpoint_has_py_cond (struct gdbpy_breakpoint_object *bp_obj)
 {
   internal_error (__FILE__, __LINE__,
 		  _("gdbpy_breakpoint_has_py_cond called when Python " \
