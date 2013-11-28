@@ -33,6 +33,7 @@ if ![runto_main] {
 proc check_not_replaying {} {
   gdb_test "info record" [join [list \
     "Active record target: record-btrace" \
+    "Recording format: .*" \
 	"Recorded 0 instructions in 0 functions for \[^\\\r\\\n\]*" \
     ] "\r\n"]
 }

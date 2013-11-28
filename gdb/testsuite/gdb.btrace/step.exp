@@ -37,6 +37,7 @@ gdb_test "next"
 proc check_replay_at { insn } {
   gdb_test "info record" [join [list \
     "Active record target: record-btrace" \
+    "Recording format: .*" \
     "Recorded 40 instructions in 16 functions for .*" \
     "Replay in progress\.  At instruction $insn\." \
     ] "\r\n"]
@@ -85,5 +86,6 @@ with_test_prefix "step to 39" { check_replay_at 39 }
 gdb_test "step" ".*main\.3.*"
 gdb_test "info record" [join [list \
   "Active record target: record-btrace" \
+  "Recording format: .*" \
   "Recorded 40 instructions in 16 functions for \[^\\\r\\\n\]*" \
   ] "\r\n"] "step to live"

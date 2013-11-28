@@ -5938,11 +5938,11 @@ linux_qxfer_libraries_svr4 (const char *annex, unsigned char *readbuf,
 /* See to_enable_btrace target method.  */
 
 static struct btrace_target_info *
-linux_low_enable_btrace (ptid_t ptid)
+linux_low_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 {
   struct btrace_target_info *tinfo;
 
-  tinfo = linux_enable_btrace (ptid);
+  tinfo = linux_enable_btrace (ptid, conf);
 
   if (tinfo != NULL)
     {
@@ -6020,6 +6020,35 @@ linux_low_read_btrace (struct btrace_target_info *tinfo, struct buffer *buffer,
   btrace_data_fini (&btrace);
   return 0;
 }
+
+/* See to_btrace_conf target method.  */
+
+static int
+linux_low_btrace_conf (const struct btrace_target_info *tinfo,
+		       struct buffer *buffer)
+{
+  const struct btrace_config *conf;
+
+  buffer_grow_str (buffer, "<!DOCTYPE btrace-conf SYSTEM \"btrace-conf.dtd\">\n");
+  buffer_grow_str (buffer, "<btrace-conf version=\"1.0\">\n");
+
+  conf = linux_btrace_conf (tinfo);
+  if (conf != NULL)
+    {
+      switch (conf->format)
+	{
+	case BTRACE_FORMAT_NONE:
+	  break;
+
+	case BTRACE_FORMAT_BTS:
+	  buffer_xml_printf (buffer, "<bts/>\n");
+	  break;
+	}
+    }
+
+  buffer_grow_str0 (buffer, "</btrace-conf>\n");
+  return 0;
+}
 #endif /* HAVE_LINUX_BTRACE */
 
 static struct target_ops linux_target_ops = {
@@ -6093,7 +6122,9 @@ static struct target_ops linux_target_ops = {
   linux_low_enable_btrace,
   linux_low_disable_btrace,
   linux_low_read_btrace,
+  linux_low_btrace_conf,
 #else
+  NULL,
   NULL,
   NULL,
   NULL,

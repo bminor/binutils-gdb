@@ -215,7 +215,13 @@ struct btrace_thread_info
 };
 
 /* Enable branch tracing for a thread.  */
-extern void btrace_enable (struct thread_info *tp);
+extern void btrace_enable (struct thread_info *tp,
+			   const struct btrace_config *conf);
+
+/* Get the branch trace configuration for a thread.
+   Return NULL if branch tracing is not enabled for that thread.  */
+extern const struct btrace_config *
+  btrace_conf (const struct btrace_thread_info *);
 
 /* Disable branch tracing for a thread.
    This will also delete the current branch trace data.  */
@@ -237,6 +243,9 @@ extern void btrace_free_objfile (struct objfile *);
 
 /* Parse a branch trace xml document XML into DATA.  */
 extern void parse_xml_btrace (struct btrace_data *data, const char *xml);
+
+/* Parse a branch trace configuration xml document XML into CONF.  */
+extern void parse_xml_btrace_conf (struct btrace_config *conf, const char *xml);
 
 /* Dereference a branch trace instruction iterator.  Return a pointer to the
    instruction the iterator points to.  */

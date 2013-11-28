@@ -357,9 +357,10 @@ struct target_ops
   /* Check whether the target supports branch tracing.  */
   int (*supports_btrace) (struct target_ops *, enum btrace_format);
 
-  /* Enable branch tracing for @ptid and allocate a branch trace target
-     information struct for reading and for disabling branch trace.  */
-  struct btrace_target_info *(*enable_btrace) (ptid_t ptid);
+  /* Enable branch tracing for PTID based on CONF and allocate a branch trace
+     target information struct for reading and for disabling branch trace.  */
+  struct btrace_target_info *(*enable_btrace)
+    (ptid_t ptid, const struct btrace_config *conf);
 
   /* Disable branch tracing.
      Returns zero on success, non-zero otherwise.  */
@@ -370,6 +371,11 @@ struct target_ops
      Return 0 on success; print an error message into BUFFER and return -1,
      otherwise.  */
   int (*read_btrace) (struct btrace_target_info *, struct buffer *, int type);
+
+  /* Read the branch trace configuration into BUFFER.
+     Return 0 on success; print an error message into BUFFER and return -1
+     otherwise.  */
+  int (*read_btrace_conf) (const struct btrace_target_info *, struct buffer *);
 
   /* Return true if target supports range stepping.  */
   int (*supports_range_stepping) (void);
@@ -493,14 +499,17 @@ int kill_inferior (int);
   (the_target->supports_btrace				\
    ? (*the_target->supports_btrace) (the_target, format) : 0)
 
-#define target_enable_btrace(ptid) \
-  (*the_target->enable_btrace) (ptid)
+#define target_enable_btrace(ptid, conf) \
+  (*the_target->enable_btrace) (ptid, conf)
 
 #define target_disable_btrace(tinfo) \
   (*the_target->disable_btrace) (tinfo)
 
 #define target_read_btrace(tinfo, buffer, type)	\
   (*the_target->read_btrace) (tinfo, buffer, type)
+
+#define target_read_btrace_conf(tinfo, buffer)	\
+  (*the_target->read_btrace_conf) (tinfo, buffer)
 
 #define target_supports_range_stepping() \
   (the_target->supports_range_stepping ? \

@@ -61,6 +61,17 @@ enum btrace_format
   BTRACE_FORMAT_BTS
 };
 
+/* A branch tracing configuration.
+
+   This describes the requested configuration as well as the actually
+   obtained configuration.  */
+
+struct btrace_config
+{
+  /* The branch tracing format.  */
+  enum btrace_format format;
+};
+
 /* Branch trace in BTS format.  */
 struct btrace_data_bts
 {

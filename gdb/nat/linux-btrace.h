@@ -48,17 +48,12 @@ struct perf_event_buffer
   /* The data_head value from the last read.  */
   unsigned long long last_head;
 };
-#endif /* HAVE_LINUX_PERF_EVENT_H */
 
-/* Branch trace target information per thread.  */
-struct btrace_target_info
+/* Branch trace target information for BTS tracing.  */
+struct btrace_tinfo_bts
 {
-#if HAVE_LINUX_PERF_EVENT_H
   /* The Linux perf_event configuration for collecting the branch trace.  */
   struct perf_event_attr attr;
-
-  /* The ptid of this thread.  */
-  ptid_t ptid;
 
   /* The perf event file.  */
   int file;
@@ -68,6 +63,25 @@ struct btrace_target_info
 
   /* The BTS perf event buffer.  */
   struct perf_event_buffer bts;
+};
+#endif /* HAVE_LINUX_PERF_EVENT_H */
+
+/* Branch trace target information per thread.  */
+struct btrace_target_info
+{
+  /* The ptid of this thread.  */
+  ptid_t ptid;
+
+  /* The obtained branch trace configuration.  */
+  struct btrace_config conf;
+
+#if HAVE_LINUX_PERF_EVENT_H
+  /* The branch tracing format specific information.  */
+  union
+  {
+    /* CONF.FORMAT == BTRACE_FORMAT_BTS.  */
+    struct btrace_tinfo_bts bts;
+  } variant;
 #endif /* HAVE_LINUX_PERF_EVENT_H */
 
   /* The size of a pointer in bits for this thread.
@@ -80,7 +94,8 @@ struct btrace_target_info
 extern int linux_supports_btrace (struct target_ops *, enum btrace_format);
 
 /* See to_enable_btrace in target.h.  */
-extern struct btrace_target_info *linux_enable_btrace (ptid_t ptid);
+extern struct btrace_target_info *
+  linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf);
 
 /* See to_disable_btrace in target.h.  */
 extern enum btrace_error linux_disable_btrace (struct btrace_target_info *ti);
@@ -89,5 +104,9 @@ extern enum btrace_error linux_disable_btrace (struct btrace_target_info *ti);
 extern enum btrace_error linux_read_btrace (struct btrace_data *btrace,
 					    struct btrace_target_info *btinfo,
 					    enum btrace_read_type type);
+
+/* See to_btrace_conf in target.h.  */
+extern const struct btrace_config *
+  linux_btrace_conf (const struct btrace_target_info *);
 
 #endif /* LINUX_BTRACE_H */

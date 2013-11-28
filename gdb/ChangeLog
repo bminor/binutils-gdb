@@ -1,5 +1,67 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* Makefile.in (XMLFILES): Add btrace-conf.dtd.
+	* x86-linux-nat.c (x86_linux_enable_btrace): Update parameters.
+	(x86_linux_btrace_conf): New.
+	(x86_linux_create_target): Initialize to_btrace_conf.
+	* nat/linux-btrace.c (linux_enable_btrace): Update parameters.
+	Check format.  Split into this and ...
+	(linux_enable_bts): ... this.
+	(linux_btrace_conf): New.
+	(perf_event_skip_record): Renamed into ...
+	(perf_event_skip_bts_record): ... this.  Updated users.
+	(linux_disable_btrace): Split into this and ...
+	(linux_disable_bts): ... this.
+	(linux_read_btrace): Check format.
+	* nat/linux-btrace.h (linux_enable_btrace): Update parameters.
+	(linux_btrace_conf): New.
+	(btrace_target_info)<ptid>: Moved.
+	(btrace_target_info)<conf>: New.
+	(btrace_target_info): Split into this and ...
+	(btrace_tinfo_bts): ... this.  Updated users.
+	* btrace.c (btrace_enable): Update parameters.
+	(btrace_conf, parse_xml_btrace_conf_bts, parse_xml_btrace_conf)
+	(btrace_conf_children, btrace_conf_attributes)
+	(btrace_conf_elements): New.
+	* btrace.h (btrace_enable): Update parameters.
+	(btrace_conf, parse_xml_btrace_conf): New.
+	* common/btrace-common.h (btrace_config): New.
+	* feature/btrace-conf.dtd: New.
+	* record-btrace.c (record_btrace_conf): New.
+	(record_btrace_cmdlist): New.
+	(record_btrace_enable_warn, record_btrace_open): Pass
+	&record_btrace_conf.
+	(record_btrace_info): Print recording format.
+	(cmd_record_btrace_bts_start): New.
+	(cmd_record_btrace_start): Call cmd_record_btrace_bts_start.
+	(_initialize_record_btrace): Add "record btrace bts" subcommand.
+	Add "record bts" alias command.
+	* remote.c (remote_state)<btrace_config>: New.
+	(remote_btrace_reset, PACKET_qXfer_btrace_conf): New.
+	(remote_protocol_features): Add qXfer:btrace-conf:read.
+	(remote_open_1): Call remote_btrace_reset.
+	(remote_xfer_partial): Handle TARGET_OBJECT_BTRACE_CONF.
+	(btrace_target_info)<conf>: New.
+	(btrace_sync_conf, btrace_read_config): New.
+	(remote_enable_btrace): Update parameters.  Call btrace_sync_conf and
+	btrace_read_conf.
+	(remote_btrace_conf): New.
+	(init_remote_ops): Initialize to_btrace_conf.
+	(_initialize_remote): Add qXfer:btrace-conf packet.
+	* target.c (target_enable_btrace): Update parameters.
+	(target_btrace_conf): New.
+	* target.h (target_enable_btrace): Update parameters.
+	(target_btrace_conf): New.
+	(target_object)<TARGET_OBJECT_BTRACE_CONF>: New.
+	(target_ops)<to_enable_btrace>: Update parameters and comment.
+	(target_ops)<to_btrace_conf>: New.
+	* target-delegates: Regenerate.
+	* target-debug.h (target_debug_print_const_struct_btrace_config_p)
+	(target_debug_print_const_struct_btrace_target_info_p): New.
+	* NEWS: Announce new command and new packet.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* nat/linux-btrace.h (perf_event_buffer): New.
 	(btrace_target_info) <buffer, size, data_head>: Replace with ...
 	<bts>: ... this.

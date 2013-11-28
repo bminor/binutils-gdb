@@ -6372,9 +6372,13 @@ For architecture environments that support process record and replay,
 @kindex record
 @kindex record full
 @kindex record btrace
+@kindex record btrace bts
+@kindex record bts
 @kindex rec
 @kindex rec full
 @kindex rec btrace
+@kindex rec btrace bts
+@kindex rec bts
 @item record @var{method}
 This command starts the process record and replay target.  The
 recording method can be specified as parameter.  Without a parameter
@@ -6387,13 +6391,25 @@ Full record/replay recording using @value{GDBN}'s software record and
 replay implementation.  This method allows replaying and reverse
 execution.
 
-@item btrace
+@item btrace @var{format}
 Hardware-supported instruction recording.  This method does not record
 data.  Further, the data is collected in a ring buffer so old data will
 be overwritten when the buffer is full.  It allows limited replay and
 reverse execution.
 
-This recording method may not be available on all processors.
+The recording format can be specified as parameter.  Without a parameter
+the command chooses the recording format.  The following recording
+formats are available:
+
+@table @code
+@item bts
+@cindex branch trace store
+Use the @dfn{Branch Trace Store} (@acronym{BTS}) recording format.  In
+this format, the processor stores a from/to record for each executed
+branch in the btrace ring buffer.
+@end table
+
+Not all recording formats may be available on all processors.
 @end table
 
 The process record and replay target can only debug a process that is
@@ -6571,9 +6587,9 @@ Maximum number of instructions that may be contained in the execution log.
 @end itemize
 
 @item btrace
-For the @code{btrace} recording method, it shows the number of
-instructions that have been recorded and the number of blocks of
-sequential control-flow that is formed by the recorded instructions.
+For the @code{btrace} recording method, it shows the recording format,
+the number of instructions that have been recorded and the number of blocks
+of sequential control-flow that is formed by the recorded instructions.
 @end table
 
 @kindex record delete
@@ -33066,7 +33082,8 @@ MS-Windows shared libraries (@pxref{Shared Libraries})
 @item
 Traceframe info (@pxref{Traceframe Info Format})
 @item
-Branch trace (@pxref{Branch Trace Format})
+Branch trace (@pxref{Branch Trace Format},
+@pxref{Branch Trace Configuration Format})
 @end itemize
 
 @item zlib
@@ -34051,6 +34068,7 @@ Show the current setting of the target wait timeout.
 * Thread List Format::
 * Traceframe Info Format::
 * Branch Trace Format::
+* Branch Trace Configuration Format::
 @end menu
 
 @node Overview
@@ -35723,6 +35741,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{qXfer:btrace-conf:read}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{qXfer:features:read}
 @tab No
 @tab @samp{-}
@@ -35906,6 +35929,10 @@ The remote stub understands the @samp{qXfer:auxv:read} packet
 @item qXfer:btrace:read
 The remote stub understands the @samp{qXfer:btrace:read}
 packet (@pxref{qXfer btrace read}).
+
+@item qXfer:btrace-conf:read
+The remote stub understands the @samp{qXfer:btrace-conf:read}
+packet (@pxref{qXfer btrace-conf read}).
 
 @item qXfer:features:read
 The remote stub understands the @samp{qXfer:features:read} packet
@@ -36197,6 +36224,15 @@ used to stitch traces together.
 
 If the trace buffer overflowed, returns an error indicating the overflow.
 @end table
+
+This packet is not probed by default; the remote stub must request it
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+
+@item qXfer:btrace-conf:read::@var{offset},@var{length}
+@anchor{qXfer btrace-conf read}
+
+Return a description of the current branch trace configuration.
+@xref{Branch Trace Configuration Format}.
 
 This packet is not probed by default; the remote stub must request it
 by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
@@ -39003,6 +39039,29 @@ The formal DTD for the branch trace format is given below:
 <!ELEMENT block        EMPTY>
 <!ATTLIST block        begin  CDATA   #REQUIRED
                        end    CDATA   #REQUIRED>
+@end smallexample
+
+@node Branch Trace Configuration Format
+@section Branch Trace Configuration Format
+@cindex branch trace configuration format
+
+For each inferior thread, @value{GDBN} can obtain the branch trace
+configuration using the @samp{qXfer:btrace-conf:read}
+(@pxref{qXfer btrace-conf read}) packet.
+
+The configuration describes the branch trace format and configuration
+settings for that format.
+
+@value{GDBN} must be linked with the Expat library to support XML
+branch trace configuration discovery.  @xref{Expat}.
+
+The formal DTD for the branch trace configuration format is given below:
+
+@smallexample
+<!ELEMENT btrace-conf	(bts?)>
+<!ATTLIST btrace-conf	version	CDATA	#FIXED "1.0">
+
+<!ELEMENT bts	EMPTY>
 @end smallexample
 
 @include agentexpr.texi

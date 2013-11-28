@@ -24,6 +24,10 @@ maint print symbol-cache-statistics
 maint flush-symbol-cache
   Flush the contents of the symbol cache.
 
+record btrace bts
+record bts
+  Start branch trace recording using Branch Trace Store (BTS) format.
+
 * New options
 
 set max-completions
@@ -44,6 +48,11 @@ maint show symbol-cache-size
 
   ** GDB now supports auto-loading of Python/Guile scripts contained in the
      special section named `.debug_gdb_scripts'.
+
+* New remote packets
+
+qXfer:btrace-conf:read
+  Return the branch trace configuration for the current thread.
 
 *** Changes in GDB 7.9
 

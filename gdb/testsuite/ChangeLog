@@ -1,3 +1,15 @@
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.btrace/delta.exp: Update "info record" output.
+	* gdb.btrace/enable.exp: Update "info record" output.
+	* gdb.btrace/finish.exp: Update "info record" output.
+	* gdb.btrace/instruction_history.exp: Update "info record" output.
+	* gdb.btrace/next.exp: Update "info record" output.
+	* gdb.btrace/nexti.exp: Update "info record" output.
+	* gdb.btrace/step.exp: Update "info record" output.
+	* gdb.btrace/stepi.exp: Update "info record" output.
+	* gdb.btrace/nohist.exp: Update "info record" output.
+
 2015-02-06  Simon Marchi  <simon.marchi@ericsson.com>
 
 	PR gdb/15678

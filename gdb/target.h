@@ -200,7 +200,9 @@ enum target_object
   /* OpenVMS Unwind Information Block.  */
   TARGET_OBJECT_OPENVMS_UIB,
   /* Branch trace data, in XML format.  */
-  TARGET_OBJECT_BTRACE
+  TARGET_OBJECT_BTRACE,
+  /* Branch trace configuration, in XML format.  */
+  TARGET_OBJECT_BTRACE_CONF
   /* Possible future objects: TARGET_OBJECT_FILE, ...  */
 };
 
@@ -1002,10 +1004,12 @@ struct target_ops
     int (*to_supports_btrace) (struct target_ops *, enum btrace_format)
       TARGET_DEFAULT_RETURN (0);
 
-    /* Enable branch tracing for PTID and allocate a branch trace target
-       information struct for reading and for disabling branch trace.  */
+    /* Enable branch tracing for PTID using CONF configuration.
+       Return a branch trace target information struct for reading and for
+       disabling branch trace.  */
     struct btrace_target_info *(*to_enable_btrace) (struct target_ops *,
-						    ptid_t ptid)
+						    ptid_t ptid,
+						    const struct btrace_config *conf)
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Disable branch tracing and deallocate TINFO.  */
@@ -1028,6 +1032,11 @@ struct target_ops
 					 struct btrace_target_info *btinfo,
 					 enum btrace_read_type type)
       TARGET_DEFAULT_NORETURN (tcomplain ());
+
+    /* Get the branch trace configuration.  */
+    const struct btrace_config *(*to_btrace_conf) (struct target_ops *self,
+						   const struct btrace_target_info *)
+      TARGET_DEFAULT_RETURN (NULL);
 
     /* Stop trace recording.  */
     void (*to_stop_recording) (struct target_ops *)
@@ -2218,7 +2227,8 @@ extern void update_target_permissions (void);
 extern int target_supports_btrace (enum btrace_format);
 
 /* See to_enable_btrace in struct target_ops.  */
-extern struct btrace_target_info *target_enable_btrace (ptid_t ptid);
+extern struct btrace_target_info *
+  target_enable_btrace (ptid_t ptid, const struct btrace_config *);
 
 /* See to_disable_btrace in struct target_ops.  */
 extern void target_disable_btrace (struct btrace_target_info *btinfo);
@@ -2230,6 +2240,10 @@ extern void target_teardown_btrace (struct btrace_target_info *btinfo);
 extern enum btrace_error target_read_btrace (struct btrace_data *,
 					     struct btrace_target_info *,
 					     enum btrace_read_type);
+
+/* See to_btrace_conf in struct target_ops.  */
+extern const struct btrace_config *
+  target_btrace_conf (const struct btrace_target_info *);
 
 /* See to_stop_recording in struct target_ops.  */
 extern void target_stop_recording (void);

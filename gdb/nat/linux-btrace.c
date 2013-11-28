@@ -90,8 +90,8 @@ perf_event_is_kernel_addr (const struct btrace_target_info *tinfo,
 /* Check whether a perf event record should be skipped.  */
 
 static inline int
-perf_event_skip_record (const struct btrace_target_info *tinfo,
-			const struct perf_event_bts *bts)
+perf_event_skip_bts_record (const struct btrace_target_info *tinfo,
+			    const struct perf_event_bts *bts)
 {
   /* The hardware may report branches from kernel into user space.  Branches
      from user into kernel space will be suppressed.  We filter the former to
@@ -194,7 +194,7 @@ perf_event_read_bts (struct btrace_target_info* tinfo, const uint8_t *begin,
 	  break;
 	}
 
-      if (perf_event_skip_record (tinfo, &psample->bts))
+      if (perf_event_skip_bts_record (tinfo, &psample->bts))
 	continue;
 
       /* We found a valid sample, so we can complete the current block.  */
@@ -395,39 +395,42 @@ linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
   internal_error (__FILE__, __LINE__, _("Unknown branch trace format"));
 }
 
-/* See linux-btrace.h.  */
+/* Enable branch tracing in BTS format.  */
 
-struct btrace_target_info *
-linux_enable_btrace (ptid_t ptid)
+static struct btrace_target_info *
+linux_enable_bts (ptid_t ptid, const struct btrace_config *conf)
 {
   struct perf_event_mmap_page *header;
   struct btrace_target_info *tinfo;
+  struct btrace_tinfo_bts *bts;
   int pid, pg;
 
   tinfo = xzalloc (sizeof (*tinfo));
   tinfo->ptid = ptid;
+  tinfo->ptr_bits = 0;
 
-  tinfo->attr.size = sizeof (tinfo->attr);
-  tinfo->attr.type = PERF_TYPE_HARDWARE;
-  tinfo->attr.config = PERF_COUNT_HW_BRANCH_INSTRUCTIONS;
-  tinfo->attr.sample_period = 1;
+  tinfo->conf.format = BTRACE_FORMAT_BTS;
+  bts = &tinfo->variant.bts;
+
+  bts->attr.size = sizeof (bts->attr);
+  bts->attr.type = PERF_TYPE_HARDWARE;
+  bts->attr.config = PERF_COUNT_HW_BRANCH_INSTRUCTIONS;
+  bts->attr.sample_period = 1;
 
   /* We sample from and to address.  */
-  tinfo->attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR;
+  bts->attr.sample_type = PERF_SAMPLE_IP | PERF_SAMPLE_ADDR;
 
-  tinfo->attr.exclude_kernel = 1;
-  tinfo->attr.exclude_hv = 1;
-  tinfo->attr.exclude_idle = 1;
-
-  tinfo->ptr_bits = 0;
+  bts->attr.exclude_kernel = 1;
+  bts->attr.exclude_hv = 1;
+  bts->attr.exclude_idle = 1;
 
   pid = ptid_get_lwp (ptid);
   if (pid == 0)
     pid = ptid_get_pid (ptid);
 
   errno = 0;
-  tinfo->file = syscall (SYS_perf_event_open, &tinfo->attr, pid, -1, -1, 0);
-  if (tinfo->file < 0)
+  bts->file = syscall (SYS_perf_event_open, &bts->attr, pid, -1, -1, 0);
+  if (bts->file < 0)
     goto err;
 
   /* We try to allocate as much buffer as we can get.
@@ -437,7 +440,7 @@ linux_enable_btrace (ptid_t ptid)
     {
       /* The number of pages we request needs to be a power of two.  */
       header = mmap (NULL, ((1 << pg) + 1) * PAGE_SIZE, PROT_READ, MAP_SHARED,
-		     tinfo->file, 0);
+		     bts->file, 0);
       if (header != MAP_FAILED)
 	break;
     }
@@ -445,17 +448,17 @@ linux_enable_btrace (ptid_t ptid)
   if (header == MAP_FAILED)
     goto err_file;
 
-  tinfo->header = header;
-  tinfo->bts.mem = ((const uint8_t *) header) + PAGE_SIZE;
-  tinfo->bts.size = (1 << pg) * PAGE_SIZE;
-  tinfo->bts.data_head = &header->data_head;
-  tinfo->bts.last_head = 0;
+  bts->header = header;
+  bts->bts.mem = ((const uint8_t *) header) + PAGE_SIZE;
+  bts->bts.size = (1 << pg) * PAGE_SIZE;
+  bts->bts.data_head = &header->data_head;
+  bts->bts.last_head = 0;
 
   return tinfo;
 
  err_file:
   /* We were not able to allocate any buffer.  */
-  close (tinfo->file);
+  close (bts->file);
 
  err:
   xfree (tinfo);
@@ -464,14 +467,58 @@ linux_enable_btrace (ptid_t ptid)
 
 /* See linux-btrace.h.  */
 
-enum btrace_error
-linux_disable_btrace (struct btrace_target_info *tinfo)
+struct btrace_target_info *
+linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
+{
+  struct btrace_target_info *tinfo;
+
+  tinfo = NULL;
+  switch (conf->format)
+    {
+    case BTRACE_FORMAT_NONE:
+      break;
+
+    case BTRACE_FORMAT_BTS:
+      tinfo = linux_enable_bts (ptid, conf);
+      break;
+    }
+
+  return tinfo;
+}
+
+/* Disable BTS tracing.  */
+
+static enum btrace_error
+linux_disable_bts (struct btrace_tinfo_bts *tinfo)
 {
   munmap((void *) tinfo->header, tinfo->bts.size + PAGE_SIZE);
   close (tinfo->file);
-  xfree (tinfo);
 
   return BTRACE_ERR_NONE;
+}
+
+/* See linux-btrace.h.  */
+
+enum btrace_error
+linux_disable_btrace (struct btrace_target_info *tinfo)
+{
+  enum btrace_error errcode;
+
+  errcode = BTRACE_ERR_NOT_SUPPORTED;
+  switch (tinfo->conf.format)
+    {
+    case BTRACE_FORMAT_NONE:
+      break;
+
+    case BTRACE_FORMAT_BTS:
+      errcode = linux_disable_bts (&tinfo->variant.bts);
+      break;
+    }
+
+  if (errcode == BTRACE_ERR_NONE)
+    xfree (tinfo);
+
+  return errcode;
 }
 
 /* Read branch trace data in BTS format for the thread given by TINFO into
@@ -487,7 +534,7 @@ linux_read_bts (struct btrace_data_bts *btrace,
   unsigned long long data_head, data_tail, buffer_size, size;
   unsigned int retries = 5;
 
-  pevent = &tinfo->bts;
+  pevent = &tinfo->variant.bts.bts;
 
   /* For delta reads, we return at least the partial last block containing
      the current PC.  */
@@ -570,11 +617,28 @@ linux_read_btrace (struct btrace_data *btrace,
 		   struct btrace_target_info *tinfo,
 		   enum btrace_read_type type)
 {
-  /* We read btrace in BTS format.  */
-  btrace->format = BTRACE_FORMAT_BTS;
-  btrace->variant.bts.blocks = NULL;
+  switch (tinfo->conf.format)
+    {
+    case BTRACE_FORMAT_NONE:
+      return BTRACE_ERR_NOT_SUPPORTED;
 
-  return linux_read_bts (&btrace->variant.bts, tinfo, type);
+    case BTRACE_FORMAT_BTS:
+      /* We read btrace in BTS format.  */
+      btrace->format = BTRACE_FORMAT_BTS;
+      btrace->variant.bts.blocks = NULL;
+
+      return linux_read_bts (&btrace->variant.bts, tinfo, type);
+    }
+
+  internal_error (__FILE__, __LINE__, _("Unkown branch trace format."));
+}
+
+/* See linux-btrace.h.  */
+
+const struct btrace_config *
+linux_btrace_conf (const struct btrace_target_info *tinfo)
+{
+  return &tinfo->conf;
 }
 
 #else /* !HAVE_LINUX_PERF_EVENT_H */
@@ -590,7 +654,7 @@ linux_supports_btrace (struct target_ops *ops, enum btrace_format format)
 /* See linux-btrace.h.  */
 
 struct btrace_target_info *
-linux_enable_btrace (ptid_t ptid)
+linux_enable_btrace (ptid_t ptid, const struct btrace_config *conf)
 {
   return NULL;
 }
@@ -611,6 +675,14 @@ linux_read_btrace (struct btrace_data *btrace,
 		   enum btrace_read_type type)
 {
   return BTRACE_ERR_NOT_SUPPORTED;
+}
+
+/* See linux-btrace.h.  */
+
+const struct btrace_config *
+linux_btrace_conf (const struct btrace_target_info *tinfo)
+{
+  return NULL;
 }
 
 #endif /* !HAVE_LINUX_PERF_EVENT_H */

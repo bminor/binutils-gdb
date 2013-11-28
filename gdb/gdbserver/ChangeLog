@@ -1,5 +1,22 @@
 2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* linux-low.c (linux_low_enable_btrace): Update parameters.
+	(linux_low_btrace_conf): New.
+	(linux_target_ops)<to_btrace_conf>: Initialize.
+	* server.c (current_btrace_conf): New.
+	(handle_btrace_enable): Rename to ...
+	(handle_btrace_enable_bts): ... this.  Pass &current_btrace_conf
+	to target_enable_btrace.  Update comment.  Update users.
+	(handle_qxfer_btrace_conf): New.
+	(qxfer_packets): Add btrace-conf entry.
+	(handle_query): Report qXfer:btrace-conf:read as supported packet.
+	* target.h (target_ops)<enable_btrace>: Update parameters and comment.
+	(target_ops)<read_btrace_conf>: New.
+	(target_enable_btrace): Update parameters.
+	(target_read_btrace_conf): New.
+
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* server.c (handle_btrace_general_set): Remove call to
 	target_supports_btrace.
 	(supported_btrace_packets): New.

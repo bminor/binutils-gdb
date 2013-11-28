@@ -70,6 +70,12 @@ static struct async_event_handler *record_btrace_async_inferior_event_handler;
 /* A flag indicating that we are currently generating a core file.  */
 static int record_btrace_generating_corefile;
 
+/* The current branch trace configuration.  */
+static struct btrace_config record_btrace_conf;
+
+/* Command list for "record btrace".  */
+static struct cmd_list_element *record_btrace_cmdlist;
+
 /* Print a record-btrace debug message.  Use do ... while (0) to avoid
    ambiguities when used in if statements.  */
 
@@ -132,7 +138,7 @@ record_btrace_enable_warn (struct thread_info *tp)
   volatile struct gdb_exception error;
 
   TRY_CATCH (error, RETURN_MASK_ERROR)
-    btrace_enable (tp);
+    btrace_enable (tp, &record_btrace_conf);
 
   if (error.message != NULL)
     warning ("%s", error.message);
@@ -208,7 +214,7 @@ record_btrace_open (const char *args, int from_tty)
   ALL_NON_EXITED_THREADS (tp)
     if (args == NULL || *args == 0 || number_is_in_list (args, tp->num))
       {
-	btrace_enable (tp);
+	btrace_enable (tp, &record_btrace_conf);
 
 	make_cleanup (record_btrace_disable_callback, tp);
       }
@@ -285,6 +291,7 @@ static void
 record_btrace_info (struct target_ops *self)
 {
   struct btrace_thread_info *btinfo;
+  const struct btrace_config *conf;
   struct thread_info *tp;
   unsigned int insns, calls;
 
@@ -294,12 +301,17 @@ record_btrace_info (struct target_ops *self)
   if (tp == NULL)
     error (_("No thread."));
 
+  btinfo = &tp->btrace;
+
+  conf = btrace_conf (btinfo);
+  if (conf != NULL)
+    printf_unfiltered (_("Recording format: %s.\n"),
+		       btrace_format_string (conf->format));
+
   btrace_fetch (tp);
 
   insns = 0;
   calls = 0;
-
-  btinfo = &tp->btrace;
 
   if (!btrace_is_empty (tp))
     {
@@ -1991,15 +2003,48 @@ init_record_btrace_ops (void)
   ops->to_magic = OPS_MAGIC;
 }
 
+/* Start recording in BTS format.  */
+
+static void
+cmd_record_btrace_bts_start (char *args, int from_tty)
+{
+  volatile struct gdb_exception exception;
+
+  if (args != NULL && *args != 0)
+    error (_("Invalid argument."));
+
+  record_btrace_conf.format = BTRACE_FORMAT_BTS;
+
+  TRY_CATCH (exception, RETURN_MASK_ALL)
+    execute_command ("target record-btrace", from_tty);
+
+  if (exception.error != 0)
+    {
+      record_btrace_conf.format = BTRACE_FORMAT_NONE;
+      throw_exception (exception);
+    }
+}
+
 /* Alias for "target record".  */
 
 static void
 cmd_record_btrace_start (char *args, int from_tty)
 {
+  volatile struct gdb_exception exception;
+
   if (args != NULL && *args != 0)
     error (_("Invalid argument."));
 
-  execute_command ("target record-btrace", from_tty);
+  record_btrace_conf.format = BTRACE_FORMAT_BTS;
+
+  TRY_CATCH (exception, RETURN_MASK_ALL)
+    execute_command ("target record-btrace", from_tty);
+
+  if (exception.error == 0)
+    return;
+
+  record_btrace_conf.format = BTRACE_FORMAT_NONE;
+  throw_exception (exception);
 }
 
 /* The "set record btrace" command.  */
@@ -2035,10 +2080,18 @@ void _initialize_record_btrace (void);
 void
 _initialize_record_btrace (void)
 {
-  add_cmd ("btrace", class_obscure, cmd_record_btrace_start,
-	   _("Start branch trace recording."),
-	   &record_cmdlist);
+  add_prefix_cmd ("btrace", class_obscure, cmd_record_btrace_start,
+		  _("Start branch trace recording."), &record_btrace_cmdlist,
+		  "record btrace ", 0, &record_cmdlist);
   add_alias_cmd ("b", "btrace", class_obscure, 1, &record_cmdlist);
+
+  add_cmd ("bts", class_obscure, cmd_record_btrace_bts_start,
+	   _("\
+Start branch trace recording in Branch Trace Store (BTS) format.\n\n\
+The processor stores a from/to record for each branch into a cyclic buffer.\n\
+This format may not be available on all processors."),
+	   &record_btrace_cmdlist);
+  add_alias_cmd ("bts", "btrace bts", class_obscure, 1, &record_cmdlist);
 
   add_prefix_cmd ("btrace", class_support, cmd_set_record_btrace,
 		  _("Set record options"), &set_record_btrace_cmdlist,

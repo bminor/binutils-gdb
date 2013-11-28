@@ -726,22 +726,33 @@ btrace_add_pc (struct thread_info *tp)
 /* See btrace.h.  */
 
 void
-btrace_enable (struct thread_info *tp)
+btrace_enable (struct thread_info *tp, const struct btrace_config *conf)
 {
   if (tp->btrace.target != NULL)
     return;
 
-  if (!target_supports_btrace (BTRACE_FORMAT_BTS))
+  if (!target_supports_btrace (conf->format))
     error (_("Target does not support branch tracing."));
 
   DEBUG ("enable thread %d (%s)", tp->num, target_pid_to_str (tp->ptid));
 
-  tp->btrace.target = target_enable_btrace (tp->ptid);
+  tp->btrace.target = target_enable_btrace (tp->ptid, conf);
 
   /* Add an entry for the current PC so we start tracing from where we
      enabled it.  */
   if (tp->btrace.target != NULL)
     btrace_add_pc (tp);
+}
+
+/* See btrace.h.  */
+
+const struct btrace_config *
+btrace_conf (const struct btrace_thread_info *btinfo)
+{
+  if (btinfo->target == NULL)
+    return NULL;
+
+  return target_btrace_conf (btinfo->target);
 }
 
 /* See btrace.h.  */
@@ -1102,6 +1113,60 @@ parse_xml_btrace (struct btrace_data *btrace, const char *buffer)
 #else  /* !defined (HAVE_LIBEXPAT) */
 
   error (_("Cannot process branch trace.  XML parsing is not supported."));
+
+#endif  /* !defined (HAVE_LIBEXPAT) */
+}
+
+#if defined (HAVE_LIBEXPAT)
+
+/* Parse a btrace-conf "bts" xml record.  */
+
+static void
+parse_xml_btrace_conf_bts (struct gdb_xml_parser *parser,
+			  const struct gdb_xml_element *element,
+			  void *user_data, VEC (gdb_xml_value_s) *attributes)
+{
+  struct btrace_config *conf;
+
+  conf = user_data;
+  conf->format = BTRACE_FORMAT_BTS;
+}
+
+static const struct gdb_xml_element btrace_conf_children[] = {
+  { "bts", NULL, NULL, GDB_XML_EF_OPTIONAL, parse_xml_btrace_conf_bts, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_attribute btrace_conf_attributes[] = {
+  { "version", GDB_XML_AF_NONE, NULL, NULL },
+  { NULL, GDB_XML_AF_NONE, NULL, NULL }
+};
+
+static const struct gdb_xml_element btrace_conf_elements[] = {
+  { "btrace-conf", btrace_conf_attributes, btrace_conf_children,
+    GDB_XML_EF_NONE, NULL, NULL },
+  { NULL, NULL, NULL, GDB_XML_EF_NONE, NULL, NULL }
+};
+
+#endif /* defined (HAVE_LIBEXPAT) */
+
+/* See btrace.h.  */
+
+void
+parse_xml_btrace_conf (struct btrace_config *conf, const char *xml)
+{
+  int errcode;
+
+#if defined (HAVE_LIBEXPAT)
+
+  errcode = gdb_xml_parse_quick (_("btrace-conf"), "btrace-conf.dtd",
+				 btrace_conf_elements, xml, conf);
+  if (errcode != 0)
+    error (_("Error parsing branch trace configuration."));
+
+#else  /* !defined (HAVE_LIBEXPAT) */
+
+  error (_("XML parsing is not supported."));
 
 #endif  /* !defined (HAVE_LIBEXPAT) */
 }

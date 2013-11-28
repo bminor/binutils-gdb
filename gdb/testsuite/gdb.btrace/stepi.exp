@@ -35,6 +35,7 @@ if ![runto_main] {
 proc check_replay_at { insn } {
   gdb_test "info record" [join [list \
     "Active record target: record-btrace" \
+    "Recording format: .*" \
     "Recorded 40 instructions in 16 functions for .*" \
     "Replay in progress\.  At instruction $insn\." \
     ] "\r\n"]
@@ -59,6 +60,7 @@ with_test_prefix "stepi to 40" { check_replay_at 40 }
 gdb_test "stepi" ".*main\.3.*"
 gdb_test "info record" [join [list \
   "Active record target: record-btrace" \
+  "Recording format: .*" \
   "Recorded 40 instructions in 16 functions for \[^\\\r\\\n\]*" \
   ] "\r\n"] "stepi to live"
 

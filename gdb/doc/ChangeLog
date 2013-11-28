@@ -1,3 +1,10 @@
+2015-02-09  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* gdb.texinfo (Process Record and Replay): Describe the "record
+	btrace bts" command.
+	(General Query Packets): Describe qXfer:btrace-conf:read packet.
+	(Branch Trace Configuration Format): New.
+
 2015-01-31  Gary Benson <gbenson@redhat.com>
 	    Doug Evans  <dje@google.com>
 

@@ -39,6 +39,7 @@ gdb_test_no_output "record btrace"
 with_test_prefix "no trace" {
   gdb_test "info record" [join [list \
     "Active record target: record-btrace" \
+    "Recording format: .*" \
     "Recorded 0 instructions in 0 functions for .*" \
     ] "\r\n"]
   gdb_test "record instruction-history" "No trace\."
@@ -51,6 +52,7 @@ gdb_test "stepi"
 proc check_trace {} {
   gdb_test "info record" [join [list \
     "Active record target: record-btrace" \
+    "Recording format: .*" \
     "Recorded 1 instructions in 1 functions for .*" \
     ] "\r\n"]
   gdb_test "record instruction-history /f 1" \
@@ -71,6 +73,7 @@ with_test_prefix "twice" {
 gdb_test "reverse-stepi"
 gdb_test "info record" [join [list \
   "Active record target: record-btrace" \
+  "Recording format: .*" \
   "Recorded 1 instructions in 1 functions for .*" \
   "Replay in progress\.  At instruction 1\." \
   ] "\r\n"] "reverse-stepi"
@@ -79,5 +82,6 @@ gdb_test "info record" [join [list \
 gdb_test "stepi"
 gdb_test "info record" [join [list \
   "Active record target: record-btrace" \
+  "Recording format: .*" \
   "Recorded 1 instructions in 1 functions for .*" \
   ] "\r\n"] "and back"

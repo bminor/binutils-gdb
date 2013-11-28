@@ -427,13 +427,14 @@ x86_linux_read_description (struct target_ops *ops)
 /* Enable branch tracing.  */
 
 static struct btrace_target_info *
-x86_linux_enable_btrace (struct target_ops *self, ptid_t ptid)
+x86_linux_enable_btrace (struct target_ops *self, ptid_t ptid,
+			 const struct btrace_config *conf)
 {
   struct btrace_target_info *tinfo;
   struct gdbarch *gdbarch;
 
   errno = 0;
-  tinfo = linux_enable_btrace (ptid);
+  tinfo = linux_enable_btrace (ptid, conf);
 
   if (tinfo == NULL)
     error (_("Could not enable branch tracing for %s: %s."),
@@ -476,6 +477,16 @@ x86_linux_read_btrace (struct target_ops *self,
 {
   return linux_read_btrace (data, btinfo, type);
 }
+
+/* See to_btrace_conf in target.h.  */
+
+static const struct btrace_config *
+x86_linux_btrace_conf (struct target_ops *self,
+		       const struct btrace_target_info *btinfo)
+{
+  return linux_btrace_conf (btinfo);
+}
+
 
 
 /* Helper for ps_get_thread_area.  Sets BASE_ADDR to a pointer to
@@ -550,6 +561,7 @@ x86_linux_create_target (void)
   t->to_disable_btrace = x86_linux_disable_btrace;
   t->to_teardown_btrace = x86_linux_teardown_btrace;
   t->to_read_btrace = x86_linux_read_btrace;
+  t->to_btrace_conf = x86_linux_btrace_conf;
 
   return t;
 }
