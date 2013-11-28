@@ -1,3 +1,8 @@
+2013-11-28  Doug Evans  <xdje42@gmail.com>
+
+	* configure.ac: Add comments delineating python and libmcheck.
+	* configure: Regenerate.
+
 2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
 	    Pedro Alves  <palves@redhat.com>
 

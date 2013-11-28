@@ -7962,6 +7962,10 @@ done
   fi
 fi
 
+# --------------------- #
+# Check for libpython.  #
+# --------------------- #
+
 
 
 
@@ -8562,6 +8566,10 @@ fi
 
 
 
+
+# --------------------- #
+# Check for libmcheck.  #
+# --------------------- #
 
 # Enable -lmcheck by default (it provides cheap-enough memory mangling),
 # but turn it off if Python is enabled with threads, since -lmcheck is
