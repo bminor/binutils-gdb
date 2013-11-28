@@ -812,6 +812,15 @@ value_check_printable (struct value *val, struct ui_file *stream,
       return 0;
     }
 
+  if (value_entirely_unavailable (val))
+    {
+      if (options->summary && !val_print_scalar_type_p (value_type (val)))
+	fprintf_filtered (stream, "...");
+      else
+	val_print_unavailable (stream);
+      return 0;
+    }
+
   if (TYPE_CODE (value_type (val)) == TYPE_CODE_INTERNAL_FUNCTION)
     {
       fprintf_filtered (stream, _("<internal function %s>"),

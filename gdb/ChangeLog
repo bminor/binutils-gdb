@@ -1,3 +1,10 @@
+2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* valprint.c (value_check_printable): If the value is entirely
+	unavailable, print a single "<unavailable>" instead of printing
+	all subfields.
+
 2013-11-28  Pedro Alves  <palves@redhat.com>
 
 	* frame.c (get_prev_frame_1) <stop_reason != UNWIND_NO_REASON>:

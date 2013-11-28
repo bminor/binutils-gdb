@@ -1,3 +1,10 @@
+2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.trace/unavailable.exp (gdb_collect_args_test): Update
+	expected results.
+	(gdb_collect_locals_test): Likewise.
+	(gdb_collect_globals_test): Likewise.
+
 2013-11-28  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (with_gdb_prompt): New proc.
