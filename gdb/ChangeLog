@@ -1,3 +1,13 @@
+2013-11-29  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (build_target_condition_list): Release previous
+	conditions.
+	(build_target_command_list): Release previous commands.
+	(bp_location_dtor): Release target conditions and commands.
+	* remote.c (remote_add_target_side_condition): Don't release
+	conditions.
+	(remote_add_target_side_commands): Don't release commands.
+
 2013-11-29  Yao Qi  <yao@codesourcery.com>
 	    Pedro Alves  <palves@redhat.com>
 

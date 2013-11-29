@@ -8151,8 +8151,6 @@ remote_add_target_side_condition (struct gdbarch *gdbarch,
 	buf = pack_hex_byte (buf, aexpr->buf[i]);
       *buf = '\0';
     }
-
-  VEC_free (agent_expr_p, bp_tgt->conditions);
   return 0;
 }
 
@@ -8183,8 +8181,6 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
 	buf = pack_hex_byte (buf, aexpr->buf[i]);
       *buf = '\0';
     }
-
-  VEC_free (agent_expr_p, bp_tgt->tcommands);
 }
 
 /* Insert a breakpoint.  On targets that have software breakpoint
