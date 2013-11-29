@@ -164,20 +164,20 @@ source_section_scripts (struct objfile *objfile, const char *source_name,
 	{
 	  full_path = NULL;
 
-	  /* We don't throw an error, the program is still debuggable.  */
+	  /* If one script isn't found it's not uncommon for more to not be
+	     found either.  We don't want to print a message for each script,
+	     too much noise.  Instead, we print the warning once and tell the
+	     user how to find the list of scripts that weren't loaded.
+	     We don't throw an error, the program is still debuggable.
+
+	     IWBN if complaints.c were more general-purpose.  */
+
 	  if (script_not_found_warning_print (pspace_info))
 	    warning (_("Missing auto-load scripts referenced in section %s\n\
 of file %s\n\
 Use `info auto-load python [REGEXP]' to list them."),
 		     GDBPY_AUTO_SECTION_NAME, objfile_name (objfile));
 	}
-
-      /* If one script isn't found it's not uncommon for more to not be
-	 found either.  We don't want to print an error message for each
-	 script, too much noise.  Instead, we print the warning once and tell
-	 the user how to find the list of scripts that weren't loaded.
-
-	 IWBN if complaints.c were more general-purpose.  */
 
       in_hash_table = maybe_add_script (pspace_info, opened, file, full_path,
 					&script_language_python);

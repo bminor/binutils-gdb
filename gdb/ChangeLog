@@ -1,5 +1,8 @@
 2013-11-29  Doug Evans  <xdje42@gmail.com>
 
+	* python/py-auto-load.c (source_section_scripts): Move comment to
+	more relevant location.
+
 	Whitespace cleanup.
 	* python/py-breakpoint.c: Remove trailing whitespace.
 	* python/py-cmd.c: Ditto.
