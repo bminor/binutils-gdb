@@ -1,5 +1,11 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* vax-tdep.c (vax_regset_from_core_section): Remove.
+	(vax_iterate_over_regset_sections): New.
+	(vax_gdbarch_init): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* tilegx-linux-tdep.c (TILEGX_LINUX_SIZEOF_GREGSET): New macro.
 	(tilegx_regset_from_core_section): Remove.
 	(tilegx_iterate_over_regset_sections): New.
