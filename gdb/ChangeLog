@@ -1,5 +1,12 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* tilegx-linux-tdep.c (TILEGX_LINUX_SIZEOF_GREGSET): New macro.
+	(tilegx_regset_from_core_section): Remove.
+	(tilegx_iterate_over_regset_sections): New.
+	(tilegx_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* sparc-tdep.c (sparc_regset_from_core_section): Remove.
 	(sparc_iterate_over_regset_sections): New.
 	(sparc32_gdbarch_init): Adjust gdbarch initialization.
