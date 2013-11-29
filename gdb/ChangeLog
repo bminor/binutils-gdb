@@ -1,5 +1,12 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* m32r-linux-tdep.c (M32R_LINUX_GREGS_SIZE): New macro.
+	(m32r_linux_regset_from_core_section): Remove.
+	(m32r_linux_iterate_over_regset_sections): New.
+	(m32r_linux_init_abi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* amd64obsd-tdep.c (amd64obsd_regset_from_core_section): Remove.
 	(amd64obsd_iterate_over_regset_sections): New.
 	(amd64obsd_core_init_abi): Adjust gdbarch initialization.
