@@ -1,5 +1,17 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* sh-linux-tdep.c (sh_linux_init_abi): Set tdep fields
+	'sizeof_gregset' and 'sizeof_fpregset'.
+	* sh-tdep.c (sh_regset_from_core_section): Remove.
+	(sh_iterate_over_regset_sections): New.
+	(sh_gdbarch_init): Adjust gdbarch initialization.
+	* sh-tdep.h (struct gdbarch_tdep): New fields sizeof_gregset and
+	sizeof_fpregset.
+	* shnbsd-tdep.c (shnbsd_init_abi): Set tdep field
+	'sizeof_gregset'.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* score-tdep.c (score7_linux_regset_from_core_section): Remove.
 	(score7_linux_iterate_over_regset_sections): New.
 	(score_gdbarch_init): Adjust gdbarch initialization.

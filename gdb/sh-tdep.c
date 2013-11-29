@@ -2207,19 +2207,19 @@ static const struct regset sh_corefile_fpregset =
   sh_corefile_collect_regset
 };
 
-static const struct regset *
-sh_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name,
-			     size_t sect_size)
+static void
+sh_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				 iterate_over_regset_sections_cb *cb,
+				 void *cb_data,
+				 const struct regcache *regcache)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  if (tdep->core_gregmap && strcmp (sect_name, ".reg") == 0)
-    return &sh_corefile_gregset;
+  if (tdep->core_gregmap != NULL)
+    cb (".reg", tdep->sizeof_gregset, &sh_corefile_gregset, NULL, cb_data);
 
-  if (tdep->core_fpregmap && strcmp (sect_name, ".reg2") == 0)
-    return &sh_corefile_fpregset;
-
-  return NULL;
+  if (tdep->core_fpregmap != NULL)
+    cb (".reg2", tdep->sizeof_fpregset, &sh_corefile_fpregset, NULL, cb_data);
 }
 
 /* This is the implementation of gdbarch method
@@ -2298,7 +2298,8 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   dwarf2_frame_set_init_reg (gdbarch, sh_dwarf2_frame_init_reg);
 
-  set_gdbarch_regset_from_core_section (gdbarch, sh_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, sh_iterate_over_regset_sections);
 
   switch (info.bfd_arch_info->mach)
     {

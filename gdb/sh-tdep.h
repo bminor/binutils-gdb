@@ -95,10 +95,12 @@ struct gdbarch_tdep
      where each general-purpose register is stored inside the associated
      core file section.  */
   struct sh_corefile_regmap *core_gregmap;
+  int sizeof_gregset;
   /* Non-NULL when debugging from a core file and when FP registers are
      available.  Provides the offset where each FP register is stored
      inside the associated core file section.  */
   struct sh_corefile_regmap *core_fpregmap;
+  int sizeof_fpregset;
 };
 
 extern const struct regset sh_corefile_gregset;
