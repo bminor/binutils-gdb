@@ -1,5 +1,17 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* sparc-tdep.c (sparc_regset_from_core_section): Remove.
+	(sparc_iterate_over_regset_sections): New.
+	(sparc32_gdbarch_init): Adjust gdbarch initialization.
+	* configure.tgt (gdb_target_obs): Add fbsd-tdep.o for SPARC FreeBSD
+	targets.
+	* sparc64fbsd-tdep.c (fbsd-tdep.h): Include.
+	(sparc64fbsd_init_abi): Call fbsd_init_abi.
+	* sparc64fbsd-nat.c (_initialize_sparc64fbsd_nat): Do not set
+	target method 'make_corefile_notes'.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* sh-linux-tdep.c (sh_linux_init_abi): Set tdep fields
 	'sizeof_gregset' and 'sizeof_fpregset'.
 	* sh-tdep.c (sh_regset_from_core_section): Remove.

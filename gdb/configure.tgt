@@ -543,7 +543,7 @@ sparc64-*-linux*)
 sparc*-*-freebsd* | sparc*-*-kfreebsd*-gnu)
 	# Target: FreeBSD/sparc64
 	gdb_target_obs="sparc-tdep.o sparc64-tdep.o sparc64fbsd-tdep.o \
-			solib-svr4.o \
+			fbsd-tdep.o solib-svr4.o \
 			ravenscar-thread.o sparc-ravenscar-thread.o"
 	;;
 sparc-*-netbsd* | sparc-*-knetbsd*-gnu)
