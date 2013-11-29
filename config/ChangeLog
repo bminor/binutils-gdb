@@ -22,6 +22,10 @@
 	* bootstrap-asan.mk (POSTSTAGE1_LDFLAGS): Add
 	-B$$r/prev-$(TARGET_SUBDIR)/libsanitizer/asan/.
 
+2013-01-23  Shenghou Ma  <minux.ma@gmail.com>
+
+	* isl.m4: don't echo $CFLAGS for ISL_CHECK_VERSION.
+
 2013-01-15  Richard Biener  <rguenther@suse.de>
 
 	PR other/55973
