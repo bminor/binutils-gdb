@@ -1,5 +1,11 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* mn10300-linux-tdep.c (am33_regset_from_core_section): Remove.
+	(am33_iterate_over_regset_sections): New.
+	(am33_linux_init_osabi): Adjust gdbarch initialization.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* mips-linux-tdep.c (mips_linux_regset_from_core_section): Remove.
 	(mips_linux_iterate_over_regset_sections): New.
 	(mips_linux_init_abi): Adjust gdbarch initialization.
