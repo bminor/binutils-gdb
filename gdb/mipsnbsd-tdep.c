@@ -112,24 +112,20 @@ static const struct regset mipsnbsd_fpregset =
   mipsnbsd_supply_fpregset
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over core file register note sections.  */
 
-static const struct regset *
-mipsnbsd_regset_from_core_section (struct gdbarch *gdbarch,
-				   const char *sect_name, size_t sect_size)
+static void
+mipsnbsd_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				       iterate_over_regset_sections_cb *cb,
+				       void *cb_data,
+				       const struct regcache *regcache)
 {
   size_t regsize = mips_isa_regsize (gdbarch);
-  
-  if (strcmp (sect_name, ".reg") == 0
-      && sect_size >= MIPSNBSD_NUM_GREGS * regsize)
-    return &mipsnbsd_gregset;
 
-  if (strcmp (sect_name, ".reg2") == 0
-      && sect_size >= MIPSNBSD_NUM_FPREGS * regsize)
-    return &mipsnbsd_fpregset;
-
-  return NULL;
+  cb (".reg", MIPSNBSD_NUM_GREGS * regsize, &mipsnbsd_gregset,
+      NULL, cb_data);
+  cb (".reg2", MIPSNBSD_NUM_FPREGS * regsize, &mipsnbsd_fpregset,
+      NULL, cb_data);
 }
 
 
@@ -358,8 +354,8 @@ static void
 mipsnbsd_init_abi (struct gdbarch_info info,
                    struct gdbarch *gdbarch)
 {
-  set_gdbarch_regset_from_core_section
-    (gdbarch, mipsnbsd_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, mipsnbsd_iterate_over_regset_sections);
 
   set_gdbarch_get_longjmp_target (gdbarch, mipsnbsd_get_longjmp_target);
 

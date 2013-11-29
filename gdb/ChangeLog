@@ -1,5 +1,17 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* mips-linux-tdep.c (mips_linux_regset_from_core_section): Remove.
+	(mips_linux_iterate_over_regset_sections): New.
+	(mips_linux_init_abi): Adjust gdbarch initialization.
+	* mips64obsd-tdep.c (mips64obsd_regset_from_core_section): Remove.
+	(mips64obsd_iterate_over_regset_sections): New.
+	(mips64obsd_init_abi): Adjust.
+	* mipsnbsd-tdep.c (mipsnbsd_regset_from_core_section): Remove.
+	(mipsnbsd_iterate_over_regset_sections): New.
+	(mipsnbsd_init_abi): Adjust.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* m88k-tdep.c (m88k_regset_from_core_section): Remove.
 	(m88k_iterate_over_regset_sections): New.
 	(m88k_gdbarch_init): Adjust gdbarch initialization.

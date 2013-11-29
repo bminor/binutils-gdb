@@ -636,39 +636,26 @@ static const struct regset mips64_linux_fpregset =
     NULL, mips64_supply_fpregset_wrapper, mips64_fill_fpregset_wrapper
   };
 
-static const struct regset *
-mips_linux_regset_from_core_section (struct gdbarch *gdbarch,
-				     const char *sect_name, size_t sect_size)
+static void
+mips_linux_iterate_over_regset_sections (struct gdbarch *gdbarch,
+					 iterate_over_regset_sections_cb *cb,
+					 void *cb_data,
+					 const struct regcache *regcache)
 {
-  mips_elf_gregset_t gregset;
-  mips_elf_fpregset_t fpregset;
-  mips64_elf_gregset_t gregset64;
-  mips64_elf_fpregset_t fpregset64;
-
-  if (strcmp (sect_name, ".reg") == 0)
+  if (register_size (gdbarch, MIPS_ZERO_REGNUM) == 4)
     {
-      if (sect_size == sizeof (gregset))
-	return &mips_linux_gregset;
-      else if (sect_size == sizeof (gregset64))
-	return &mips64_linux_gregset;
-      else
-	{
-	  warning (_("wrong size gregset struct in core file"));
-	}
+      cb (".reg", sizeof (mips_elf_gregset_t), &mips_linux_gregset,
+	  NULL, cb_data);
+      cb (".reg2", sizeof (mips_elf_fpregset_t), &mips_linux_fpregset,
+	  NULL, cb_data);
     }
-  else if (strcmp (sect_name, ".reg2") == 0)
+  else
     {
-      if (sect_size == sizeof (fpregset))
-	return &mips_linux_fpregset;
-      else if (sect_size == sizeof (fpregset64))
-	return &mips64_linux_fpregset;
-      else
-	{
-	  warning (_("wrong size fpregset struct in core file"));
-	}
+      cb (".reg", sizeof (mips64_elf_gregset_t), &mips64_linux_gregset,
+	  NULL, cb_data);
+      cb (".reg2", sizeof (mips64_elf_fpregset_t), &mips64_linux_fpregset,
+	  NULL, cb_data);
     }
-
-  return NULL;
 }
 
 static const struct target_desc *
@@ -1628,8 +1615,8 @@ mips_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_core_read_description (gdbarch,
 				     mips_linux_core_read_description);
 
-  set_gdbarch_regset_from_core_section (gdbarch,
-					mips_linux_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, mips_linux_iterate_over_regset_sections);
 
   set_gdbarch_gdb_signal_from_target (gdbarch,
 				      mips_gdb_signal_from_target);
