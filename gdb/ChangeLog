@@ -1,5 +1,9 @@
 2013-11-29  Pedro Alves  <palves@redhat.com>
 
+	* unwind_stop_reasons.def (UNWIND_NULL_ID): Update comment.
+
+2013-11-29  Pedro Alves  <palves@redhat.com>
+
 	* breakpoint.c (build_target_condition_list): Release previous
 	conditions.
 	(build_target_command_list): Release previous commands.

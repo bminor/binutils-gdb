@@ -1,3 +1,8 @@
+2013-11-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Frames In Python) <gdb.FRAME_UNWIND_NULL_ID>:
+	Update comment.
+
 2013-11-24  Yao Qi  <yao@codesourcery.com>
 
 	* gdb.texinfo (Caching Remote Data): Document new
