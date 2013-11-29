@@ -802,17 +802,15 @@ static const struct regset m88k_gregset =
   m88k_supply_gregset
 };
 
-/* Return the appropriate register set for the core section identified
-   by SECT_NAME and SECT_SIZE.  */
+/* Iterate over supported core file register note sections. */
 
-static const struct regset *
-m88k_regset_from_core_section (struct gdbarch *gdbarch,
-			       const char *sect_name, size_t sect_size)
+static void
+m88k_iterate_over_regset_sections (struct gdbarch *gdbarch,
+				   iterate_over_regset_sections_cb *cb,
+				   void *cb_data,
+				   const struct regcache *regcache)
 {
-  if (strcmp (sect_name, ".reg") == 0 && sect_size >= M88K_NUM_REGS * 4)
-    return &m88k_gregset;
-
-  return NULL;
+  cb (".reg", M88K_NUM_REGS * 4, &m88k_gregset, NULL, cb_data);
 }
 
 
@@ -842,8 +840,8 @@ m88k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_pc_regnum (gdbarch, M88K_SXIP_REGNUM);
 
   /* Core file support.  */
-  set_gdbarch_regset_from_core_section
-    (gdbarch, m88k_regset_from_core_section);
+  set_gdbarch_iterate_over_regset_sections
+    (gdbarch, m88k_iterate_over_regset_sections);
 
   set_gdbarch_print_insn (gdbarch, print_insn_m88k);
 
