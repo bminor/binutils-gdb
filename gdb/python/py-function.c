@@ -39,7 +39,7 @@ convert_values_to_python (int argc, struct value **argv)
 {
   int i;
   PyObject *result = PyTuple_New (argc);
-  
+
   if (! result)
     return NULL;
 

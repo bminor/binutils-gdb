@@ -437,7 +437,7 @@ valpy_do_cast (PyObject *self, PyObject *args, enum exp_opcode op)
   type = type_object_to_type (type_obj);
   if (! type)
     {
-      PyErr_SetString (PyExc_RuntimeError, 
+      PyErr_SetString (PyExc_RuntimeError,
 		       _("Argument must be a type."));
       return NULL;
     }
@@ -510,7 +510,7 @@ valpy_getitem (PyObject *self, PyObject *key)
   PyObject *result = NULL;
 
   if (gdbpy_is_string (key))
-    {  
+    {
       field = python_string_to_host_string (key);
       if (field == NULL)
 	return NULL;
@@ -723,7 +723,7 @@ valpy_fetch_lazy (PyObject *self, PyObject *args)
 
 /* Calculate and return the address of the PyObject as the value of
    the builtin __hash__ call.  */
-static long 
+static long
 valpy_hash (PyObject *self)
 {
   return (long) (intptr_t) self;
@@ -1248,7 +1248,7 @@ convert_value_from_python (PyObject *obj)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      if (PyBool_Check (obj)) 
+      if (PyBool_Check (obj))
 	{
 	  cmp = PyObject_IsTrue (obj);
 	  if (cmp >= 0)
@@ -1431,7 +1431,7 @@ Return a lazy string representation of the value." },
   { "string", (PyCFunction) valpy_string, METH_VARARGS | METH_KEYWORDS,
     "string ([encoding] [, errors] [, length]) -> string\n\
 Return Unicode string representation of the value." },
-  { "fetch_lazy", valpy_fetch_lazy, METH_NOARGS, 
+  { "fetch_lazy", valpy_fetch_lazy, METH_NOARGS,
     "Fetches the value from the inferior, if it was lazy." },
   {NULL}  /* Sentinel */
 };

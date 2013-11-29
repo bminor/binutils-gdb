@@ -61,7 +61,7 @@ typedef struct {
 struct frame_info *
 frame_object_to_frame_info (PyObject *obj)
 {
-  frame_object *frame_obj = (frame_object *) obj;  
+  frame_object *frame_obj = (frame_object *) obj;
   struct frame_info *frame;
 
   frame = frame_find_by_id (frame_obj->frame_id);
@@ -583,7 +583,7 @@ gdbpy_frame_stop_reason_string (PyObject *self, PyObject *args)
 
   if (reason < UNWIND_FIRST || reason > UNWIND_LAST)
     {
-      PyErr_SetString (PyExc_ValueError, 
+      PyErr_SetString (PyExc_ValueError,
 		       _("Invalid frame stop reason."));
       return NULL;
     }

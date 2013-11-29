@@ -1,3 +1,23 @@
+2013-11-29  Doug Evans  <xdje42@gmail.com>
+
+	Whitespace cleanup.
+	* python/py-breakpoint.c: Remove trailing whitespace.
+	* python/py-cmd.c: Ditto.
+	* python/py-evts.c: Ditto.
+	* python/py-finishbreakpoint.c: Ditto.
+	* python/py-frame.c: Ditto.
+	* python/py-function.c: Ditto.
+	* python/py-inferior.c: Ditto.
+	* python/py-infthread.c: Ditto.
+	* python/py-param.c: Ditto.
+	* python/py-prettyprint.c: Ditto.
+	* python/py-symbol.c: Ditto.
+	* python/py-type.c: Ditto.
+	* python/py-utils.c: Ditto.
+	* python/py-value.c: Ditto.
+	* python/python-internal.h: Ditto.
+	* python/python.c: Ditto.
+
 2013-11-29  Pedro Alves  <palves@redhat.com>
 
 	* unwind_stop_reasons.def (UNWIND_NULL_ID): Update comment.

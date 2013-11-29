@@ -185,7 +185,7 @@ gdb_Py_DECREF (void *op) /* ARI: editCase function */
 #undef Py_DECREF
 #define Py_DECREF(op) gdb_Py_DECREF (op)
 
-/* In order to be able to parse symtab_and_line_to_sal_object function 
+/* In order to be able to parse symtab_and_line_to_sal_object function
    a real symtab_and_line structure is needed.  */
 #include "symtab.h"
 
@@ -449,7 +449,7 @@ char *gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue);
 
 int gdbpy_is_lazy_string (PyObject *result);
 void gdbpy_extract_lazy_string (PyObject *string, CORE_ADDR *addr,
-				struct type **str_type, 
+				struct type **str_type,
 				long *length, char **encoding);
 
 int gdbpy_is_value_object (PyObject *obj);

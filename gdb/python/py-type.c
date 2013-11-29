@@ -303,7 +303,7 @@ make_fielditem (struct type *type, int i, enum gdbpy_iter_kind kind)
       gdb_assert_not_reached ("invalid gdbpy_iter_kind");
     }
   return item;
-  
+
  fail:
   Py_XDECREF (key);
   Py_XDECREF (value);
@@ -356,7 +356,7 @@ typy_values (PyObject *self, PyObject *args)
 }
 
 /* Return a sequence of all fields.  Each field is a gdb.Field object.
-   This method is similar to typy_values, except where the supplied 
+   This method is similar to typy_values, except where the supplied
    gdb.Type is an array, in which case it returns a list of one entry
    which is a gdb.Field object for a range (the array bounds).  */
 
@@ -365,7 +365,7 @@ typy_fields (PyObject *self, PyObject *args)
 {
   struct type *type = ((type_object *) self)->type;
   PyObject *r, *rl;
-  
+
   if (TYPE_CODE (type) != TYPE_CODE_ARRAY)
     return typy_fields_items (self, iter_values);
 
@@ -375,7 +375,7 @@ typy_fields (PyObject *self, PyObject *args)
   r = convert_field (type, 0);
   if (r == NULL)
     return NULL;
-  
+
   rl = Py_BuildValue ("[O]", r);
   Py_DECREF (r);
 
@@ -390,7 +390,7 @@ typy_field_names (PyObject *self, PyObject *args)
   return typy_fields_items (self, iter_keys);
 }
 
-/* Return a sequence of all (name, fields) pairs.  Each field is a 
+/* Return a sequence of all (name, fields) pairs.  Each field is a
    gdb.Field object.  */
 
 static PyObject *
@@ -450,7 +450,7 @@ typy_get_composite (struct type *type)
 
   /* If this is not a struct, union, or enum type, raise TypeError
      exception.  */
-  if (TYPE_CODE (type) != TYPE_CODE_STRUCT 
+  if (TYPE_CODE (type) != TYPE_CODE_STRUCT
       && TYPE_CODE (type) != TYPE_CODE_UNION
       && TYPE_CODE (type) != TYPE_CODE_ENUM)
     {
@@ -458,7 +458,7 @@ typy_get_composite (struct type *type)
 		       "Type is not a structure, union, or enum type.");
       return NULL;
     }
-  
+
   return type;
 }
 
@@ -602,7 +602,7 @@ typy_range (PyObject *self, PyObject *args)
       return NULL;
     }
   return result;
-  
+
  failarg:
   Py_XDECREF (high_bound);
   Py_XDECREF (low_bound);
@@ -633,7 +633,7 @@ typy_target (PyObject *self, PyObject *args)
 
   if (!TYPE_TARGET_TYPE (type))
     {
-      PyErr_SetString (PyExc_RuntimeError, 
+      PyErr_SetString (PyExc_RuntimeError,
 		       _("Type does not have a target."));
       return NULL;
     }
@@ -774,12 +774,12 @@ typy_lookup_type (struct demangle_component *demangled,
 	}
       GDB_PY_HANDLE_EXCEPTION (except);
     }
-  
+
   /* If we have a type from the switch statement above, just return
      that.  */
   if (rtype)
     return rtype;
-  
+
   /* We don't have a type, so lookup the type.  */
   type_name = cp_comp_to_string (demangled, 10);
   type = typy_lookup_typename (type_name, block);
@@ -1088,7 +1088,7 @@ typy_length (PyObject *self)
 }
 
 /* Implements boolean evaluation of gdb.Type.  Handle this like other
-   Python objects that don't have a meaningful truth value -- all 
+   Python objects that don't have a meaningful truth value -- all
    values are true.  */
 
 static int
@@ -1110,14 +1110,14 @@ typy_getitem (PyObject *self, PyObject *key)
   if (field == NULL)
     return NULL;
 
-  /* We want just fields of this type, not of base types, so instead of 
+  /* We want just fields of this type, not of base types, so instead of
      using lookup_struct_elt_type, portions of that function are
      copied here.  */
 
   type = typy_get_composite (type);
   if (type == NULL)
     return NULL;
-  
+
   for (i = 0; i < TYPE_NFIELDS (type); i++)
     {
       const char *t_field_name = TYPE_FIELD_NAME (type, i);
@@ -1131,7 +1131,7 @@ typy_getitem (PyObject *self, PyObject *key)
   return NULL;
 }
 
-/* Implement the "get" method on the type object.  This is the 
+/* Implement the "get" method on the type object.  This is the
    same as getitem if the key is present, but returns the supplied
    default value or None if the key is not found.  */
 
@@ -1139,20 +1139,20 @@ static PyObject *
 typy_get (PyObject *self, PyObject *args)
 {
   PyObject *key, *defval = Py_None, *result;
-  
+
   if (!PyArg_UnpackTuple (args, "get", 1, 2, &key, &defval))
     return NULL;
-  
+
   result = typy_getitem (self, key);
   if (result != NULL)
     return result;
-  
+
   /* typy_getitem returned error status.  If the exception is
      KeyError, clear the exception status and return the defval
      instead.  Otherwise return the exception unchanged.  */
   if (!PyErr_ExceptionMatches (PyExc_KeyError))
     return NULL;
-  
+
   PyErr_Clear ();
   Py_INCREF (defval);
   return defval;
@@ -1170,7 +1170,7 @@ typy_has_key (PyObject *self, PyObject *args)
   if (!PyArg_ParseTuple (args, "s", &field))
     return NULL;
 
-  /* We want just fields of this type, not of base types, so instead of 
+  /* We want just fields of this type, not of base types, so instead of
      using lookup_struct_elt_type, portions of that function are
      copied here.  */
 
@@ -1198,7 +1198,7 @@ typy_make_iter (PyObject *self, enum gdbpy_iter_kind kind)
   /* Check that "self" is a structure or union type.  */
   if (typy_get_composite (((type_object *) self)->type) == NULL)
     return NULL;
-  
+
   typy_iter_obj = PyObject_New (typy_iterator_object,
 				&type_iterator_object_type);
   if (typy_iter_obj == NULL)
@@ -1263,7 +1263,7 @@ typy_iterator_iternext (PyObject *self)
   typy_iterator_object *iter_obj = (typy_iterator_object *) self;
   struct type *type = iter_obj->source->type;
   PyObject *result;
-  
+
   if (iter_obj->field < TYPE_NFIELDS (type))
     {
       result = make_fielditem (type, iter_obj->field, iter_obj->kind);

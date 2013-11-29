@@ -185,7 +185,7 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
 
       if (frame == NULL)
 	{
-	  PyErr_SetString (PyExc_ValueError, 
+	  PyErr_SetString (PyExc_ValueError,
 			   _("Invalid ID for the `frame' object."));
 	}
       else
@@ -232,9 +232,9 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   if (internal)
     {
       internal_bp = PyObject_IsTrue (internal);
-      if (internal_bp == -1) 
+      if (internal_bp == -1)
         {
-          PyErr_SetString (PyExc_ValueError, 
+          PyErr_SetString (PyExc_ValueError,
                            _("The value of `internal' must be a boolean."));
           return -1;
         }
@@ -303,10 +303,10 @@ bpfinishpy_init (PyObject *self, PyObject *args, PyObject *kwargs)
                          0, 1, internal_bp, 0);
     }
   GDB_PY_SET_HANDLE_EXCEPTION (except);
-  
+
   self_bpfinish->py_bp.bp->frame_id = frame_id;
   self_bpfinish->py_bp.is_finish_bp = 1;
-  
+
   /* Bind the breakpoint with the current program space.  */
   self_bpfinish->py_bp.bp->pspace = current_program_space;
 
@@ -347,7 +347,7 @@ bpfinishpy_detect_out_scope_cb (struct breakpoint *b, void *args)
   struct breakpoint *bp_stopped = (struct breakpoint *) args;
   PyObject *py_bp = (PyObject *) b->py_bp_object;
   struct gdbarch *garch = b->gdbarch ? b->gdbarch : get_current_arch ();
-  
+
   /* Trigger out_of_scope if this is a FinishBreakpoint and its frame is
      not anymore in the current callstack.  */
   if (py_bp != NULL && b->py_bp_object->is_finish_bp)
@@ -412,11 +412,11 @@ gdbpy_initialize_finishbreakpoints (void)
 {
   if (PyType_Ready (&finish_breakpoint_object_type) < 0)
     return -1;
-  
+
   if (gdb_pymodule_addobject (gdb_module, "FinishBreakpoint",
 			      (PyObject *) &finish_breakpoint_object_type) < 0)
     return -1;
-    
+
   observer_attach_normal_stop (bpfinishpy_handle_stop);
   observer_attach_inferior_exit (bpfinishpy_handle_exit);
 

@@ -121,7 +121,7 @@ bppy_set_enabled (PyObject *self, PyObject *newvalue, void *closure)
 
   if (newvalue == NULL)
     {
-      PyErr_SetString (PyExc_TypeError, 
+      PyErr_SetString (PyExc_TypeError,
 		       _("Cannot delete `enabled' attribute."));
 
       return -1;
@@ -160,7 +160,7 @@ bppy_set_silent (PyObject *self, PyObject *newvalue, void *closure)
 
   if (newvalue == NULL)
     {
-      PyErr_SetString (PyExc_TypeError, 
+      PyErr_SetString (PyExc_TypeError,
 		       _("Cannot delete `silent' attribute."));
       return -1;
     }
@@ -191,7 +191,7 @@ bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
 
   if (newvalue == NULL)
     {
-      PyErr_SetString (PyExc_TypeError, 
+      PyErr_SetString (PyExc_TypeError,
 		       _("Cannot delete `thread' attribute."));
       return -1;
     }
@@ -202,7 +202,7 @@ bppy_set_thread (PyObject *self, PyObject *newvalue, void *closure)
 
       if (! valid_thread_id (id))
 	{
-	  PyErr_SetString (PyExc_RuntimeError, 
+	  PyErr_SetString (PyExc_RuntimeError,
 			   _("Invalid thread ID."));
 	  return -1;
 	}
@@ -234,7 +234,7 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
 
   if (newvalue == NULL)
     {
-      PyErr_SetString (PyExc_TypeError, 
+      PyErr_SetString (PyExc_TypeError,
 		       _("Cannot delete `task' attribute."));
       return -1;
     }
@@ -251,7 +251,7 @@ bppy_set_task (PyObject *self, PyObject *newvalue, void *closure)
 
       if (! valid_id)
 	{
-	  PyErr_SetString (PyExc_RuntimeError, 
+	  PyErr_SetString (PyExc_RuntimeError,
 			   _("Invalid task ID."));
 	  return -1;
 	}
@@ -341,7 +341,7 @@ bppy_set_hit_count (PyObject *self, PyObject *newvalue, void *closure)
 
   if (newvalue == NULL)
     {
-      PyErr_SetString (PyExc_TypeError, 
+      PyErr_SetString (PyExc_TypeError,
 		       _("Cannot delete `hit_count' attribute."));
       return -1;
     }
@@ -436,7 +436,7 @@ bppy_set_condition (PyObject *self, PyObject *newvalue, void *closure)
 
   if (newvalue == NULL)
     {
-      PyErr_SetString (PyExc_TypeError, 
+      PyErr_SetString (PyExc_TypeError,
 		       _("Cannot delete `condition' attribute."));
       return -1;
     }
@@ -644,7 +644,7 @@ bppy_init (PyObject *self, PyObject *args, PyObject *kwargs)
   bppy_pending_object = (gdbpy_breakpoint_object *) self;
   bppy_pending_object->number = -1;
   bppy_pending_object->bp = NULL;
-  
+
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
       char *copy = xstrdup (spec);
@@ -805,7 +805,7 @@ gdbpy_breakpoint_has_py_cond (struct gdbpy_breakpoint_object *bp_obj)
   struct gdbarch *garch = bp_obj->bp->gdbarch ? bp_obj->bp->gdbarch :
     get_current_arch ();
   struct cleanup *cleanup = ensure_python_env (garch, current_language);
-  
+
   if (py_bp != NULL)
     has_func = PyObject_HasAttrString (py_bp, stop_func);
 
@@ -829,9 +829,9 @@ gdbpy_breakpoint_created (struct breakpoint *bp)
   if (bp->number < 0 && bppy_pending_object == NULL)
     return;
 
-  if (bp->type != bp_breakpoint 
+  if (bp->type != bp_breakpoint
       && bp->type != bp_watchpoint
-      && bp->type != bp_hardware_watchpoint  
+      && bp->type != bp_hardware_watchpoint
       && bp->type != bp_read_watchpoint
       && bp->type != bp_access_watchpoint)
     return;
@@ -937,31 +937,31 @@ gdbpy_initialize_breakpoints (void)
    PyObject_GenericSetAttr to allow extra validation of the attribute
    being set.  */
 
-static int 
+static int
 local_setattro (PyObject *self, PyObject *name, PyObject *v)
 {
-  gdbpy_breakpoint_object *obj = (gdbpy_breakpoint_object *) self;  
+  gdbpy_breakpoint_object *obj = (gdbpy_breakpoint_object *) self;
   char *attr = python_string_to_host_string (name);
-  
+
   if (attr == NULL)
     return -1;
-  
+
   /* If the attribute trying to be set is the "stop" method,
      but we already have a condition set in the CLI, disallow this
      operation.  */
   if (strcmp (attr, stop_func) == 0 && obj->bp->cond_string)
     {
       xfree (attr);
-      PyErr_SetString (PyExc_RuntimeError, 
+      PyErr_SetString (PyExc_RuntimeError,
 		       _("Cannot set 'stop' method.  There is an " \
 			 "existing GDB condition attached to the " \
 			 "breakpoint."));
       return -1;
     }
-  
+
   xfree (attr);
-  
-  return PyObject_GenericSetAttr ((PyObject *)self, name, v);  
+
+  return PyObject_GenericSetAttr ((PyObject *)self, name, v);
 }
 
 static PyGetSetDef breakpoint_object_getset[] = {
