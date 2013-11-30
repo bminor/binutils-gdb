@@ -1,3 +1,10 @@
+2013-12-02  Pedro Alves  <pedro@codesourcery.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* remote.c (putpkt_for_catch_errors): Remove function.
+	(remote_kill): Handle TARGET_CLOSE_ERROR from the kill packet
+	gracefully.
+
 2013-12-02  Pedro Alves  <palves@redhat.com>
 
 	PR remote/15974
