@@ -109,7 +109,7 @@ enum py_bt_status apply_frame_filter (struct frame_info *frame, int flags,
 
 void preserve_python_values (struct objfile *objfile, htab_t copied_types);
 
-void gdbpy_load_auto_scripts_for_objfile (struct objfile *objfile);
+const struct script_language *gdbpy_script_language_defn (void);
 
 int gdbpy_should_stop (struct gdbpy_breakpoint_object *bp_obj);
 

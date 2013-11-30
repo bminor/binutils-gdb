@@ -1,3 +1,42 @@
+2013-11-30  Doug Evans  <xdje42@gmail.com>
+
+	* auto-load.h (script_language): New members name, auto_load_enabled.
+	Add missing comments on struct members.
+	(auto_load_objfile_script): Delete.
+	* auto-load.c: #include "cli/cli-cmds.h".
+	(auto_load_gdb_scripts_enabled): New function.
+	(script_language_gdb): Update, add new members.
+	(source_gdb_script_for_objfile): Simplify, auto-load safe-checking
+	and call to maybe_add_script moved to caller.
+	(auto_load_objfile_script_1): Auto-load safe-checking and
+	call to maybe_add_script moved here.
+	(auto_load_objfile_script): Make static.  Early exit if support for
+	scripting language hasn't been compiled in, or auto-loading has been
+	disabled.
+	(source_section_scripts): Argument "source_name" renamed to
+	"section_name".  All uses updated.  Replace uses of AUTO_SECTION_NAME
+	with section_name.  Skip loading script if support for scripting
+	language hasn't been compiled in, or auto-loading has been disabled.
+	Call language->source_script_for_objfile instead of calling
+	source_python_script_for_objfile directly.
+	(load_auto_scripts_for_objfile): Update.
+	* python/py-auto-load.c: Delete #include "cli/cli-cmds.h".
+	(gdbpy_load_auto_script_for_objfile): Delete.
+	(auto_load_python_scripts_enabled): New function.
+	(script_language_python): Update, add new members.
+	(gdbpy_script_language_defn): New function.
+	* python/python.h (gdbpy_load_auto_scripts_for_objfile): Delete.
+	(gdbpy_script_language_defn): Declare.
+
+	* auto-load.c (AUTO_SECTION_NAME): Moved here and renamed from
+	py-auto-load.c, GDBPY_AUTO_SECTION_NAME.
+	(source_section_scripts): Moved here from py-auto-load.c.
+	(auto_load_section_scripts): Ditto.
+	* python/py-auto-load.c (GDBPY_AUTO_SECTION_NAME): Moved to
+	auto-load.c, renamed AUTO_SECTION_NAME.
+	(source_section_scripts, auto_load_section_scripts): Moved to
+	auto-load.c.
+
 2013-11-30  Yao Qi  <yao@codesourcery.com>
 
 	* remote.c (getpkt_or_notif_sane_1): Fix typo "checksm".
