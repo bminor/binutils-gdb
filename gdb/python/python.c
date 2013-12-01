@@ -163,7 +163,7 @@ ensure_python_env (struct gdbarch *gdbarch,
 
   /* Save it and ensure ! PyErr_Occurred () afterwards.  */
   PyErr_Fetch (&env->error_type, &env->error_value, &env->error_traceback);
-  
+
   return make_cleanup (restore_python_env, env);
 }
 
@@ -302,7 +302,7 @@ python_run_simple_file (FILE *file, const char *filename)
       gdbpy_print_stack ();
       error (_("Error while opening file: %s"), full_path);
     }
- 
+
   make_cleanup_py_decref (python_file);
   PyRun_SimpleFile (PyFile_AsFile (python_file), filename);
   do_cleanups (cleanup);
@@ -453,7 +453,7 @@ gdbpy_parameter_value (enum var_types type, void *var)
       }
     }
 
-  return PyErr_Format (PyExc_RuntimeError, 
+  return PyErr_Format (PyExc_RuntimeError,
 		       _("Programmer error: unhandled type."));
 }
 
@@ -485,7 +485,7 @@ gdbpy_parameter (PyObject *self, PyObject *args)
 			 _("Could not find parameter `%s'."), arg);
 
   if (! cmd->var)
-    return PyErr_Format (PyExc_RuntimeError, 
+    return PyErr_Format (PyExc_RuntimeError,
 			 _("`%s' is not a parameter."), arg);
   return gdbpy_parameter_value (cmd->var_type, cmd->var);
 }
@@ -855,7 +855,7 @@ gdbpy_post_event (PyObject *self, PyObject *args)
 
   if (!PyCallable_Check (func))
     {
-      PyErr_SetString (PyExc_RuntimeError, 
+      PyErr_SetString (PyExc_RuntimeError,
 		       _("Posted event is not callable"));
       return NULL;
     }
@@ -991,7 +991,7 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
   static char *keywords[] = {"text", "stream", NULL };
   int stream_type = 0;
   volatile struct gdb_exception except;
-  
+
   if (! PyArg_ParseTupleAndKeywords (args, kw, "s|i", keywords, &arg,
 				     &stream_type))
     return NULL;
@@ -1015,7 +1015,7 @@ gdbpy_write (PyObject *self, PyObject *args, PyObject *kw)
         }
     }
   GDB_PY_HANDLE_EXCEPTION (except);
-     
+
   Py_RETURN_NONE;
 }
 
@@ -1028,7 +1028,7 @@ gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
 {
   static char *keywords[] = {"stream", NULL };
   int stream_type = 0;
-  
+
   if (! PyArg_ParseTupleAndKeywords (args, kw, "|i", keywords,
 				     &stream_type))
     return NULL;
@@ -1048,7 +1048,7 @@ gdbpy_flush (PyObject *self, PyObject *args, PyObject *kw)
     default:
       gdb_flush (gdb_stdout);
     }
-     
+
   Py_RETURN_NONE;
 }
 
@@ -1395,7 +1395,7 @@ source_python_script (FILE *file, const char *filename)
 }
 
 int
-gdbpy_should_stop (struct breakpoint_object *bp_obj)
+gdbpy_should_stop (struct gdbpy_breakpoint_object *bp_obj)
 {
   internal_error (__FILE__, __LINE__,
 		  _("gdbpy_should_stop called when Python scripting is  " \
@@ -1403,7 +1403,7 @@ gdbpy_should_stop (struct breakpoint_object *bp_obj)
 }
 
 int
-gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj)
+gdbpy_breakpoint_has_py_cond (struct gdbpy_breakpoint_object *bp_obj)
 {
   internal_error (__FILE__, __LINE__,
 		  _("gdbpy_breakpoint_has_py_cond called when Python " \
@@ -1762,7 +1762,7 @@ finish_python_initialization (void)
 #endif
       sys_path = PySys_GetObject ("path");
     }
-  if (sys_path && PyList_Check (sys_path))  
+  if (sys_path && PyList_Check (sys_path))
     {
       PyObject *pythondir;
       int err;
@@ -1930,7 +1930,7 @@ static struct PyModuleDef GdbModuleDef =
   PyModuleDef_HEAD_INIT,
   "_gdb",
   NULL,
-  -1, 
+  -1,
   GdbMethods,
   NULL,
   NULL,

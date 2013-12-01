@@ -1,3 +1,114 @@
+2013-11-30  Doug Evans  <xdje42@gmail.com>
+
+	* auto-load.h (script_language): New members name, auto_load_enabled.
+	Add missing comments on struct members.
+	(auto_load_objfile_script): Delete.
+	* auto-load.c: #include "cli/cli-cmds.h".
+	(auto_load_gdb_scripts_enabled): New function.
+	(script_language_gdb): Update, add new members.
+	(source_gdb_script_for_objfile): Simplify, auto-load safe-checking
+	and call to maybe_add_script moved to caller.
+	(auto_load_objfile_script_1): Auto-load safe-checking and
+	call to maybe_add_script moved here.
+	(auto_load_objfile_script): Make static.  Early exit if support for
+	scripting language hasn't been compiled in, or auto-loading has been
+	disabled.
+	(source_section_scripts): Argument "source_name" renamed to
+	"section_name".  All uses updated.  Replace uses of AUTO_SECTION_NAME
+	with section_name.  Skip loading script if support for scripting
+	language hasn't been compiled in, or auto-loading has been disabled.
+	Call language->source_script_for_objfile instead of calling
+	source_python_script_for_objfile directly.
+	(load_auto_scripts_for_objfile): Update.
+	* python/py-auto-load.c: Delete #include "cli/cli-cmds.h".
+	(gdbpy_load_auto_script_for_objfile): Delete.
+	(auto_load_python_scripts_enabled): New function.
+	(script_language_python): Update, add new members.
+	(gdbpy_script_language_defn): New function.
+	* python/python.h (gdbpy_load_auto_scripts_for_objfile): Delete.
+	(gdbpy_script_language_defn): Declare.
+
+	* auto-load.c (AUTO_SECTION_NAME): Moved here and renamed from
+	py-auto-load.c, GDBPY_AUTO_SECTION_NAME.
+	(source_section_scripts): Moved here from py-auto-load.c.
+	(auto_load_section_scripts): Ditto.
+	* python/py-auto-load.c (GDBPY_AUTO_SECTION_NAME): Moved to
+	auto-load.c, renamed AUTO_SECTION_NAME.
+	(source_section_scripts, auto_load_section_scripts): Moved to
+	auto-load.c.
+
+2013-11-30  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (getpkt_or_notif_sane_1): Fix typo "checksm".
+
+2013-11-29  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* gdbarch.sh: Remove include of "gdb_string.h", replace by
+	<string.h>.
+
+2013-11-29  Doug Evans  <xdje42@gmail.com>
+
+	* python/py-auto-load.c (source_section_scripts): Move comment to
+	more relevant location.
+
+	Whitespace cleanup.
+	* python/py-breakpoint.c: Remove trailing whitespace.
+	* python/py-cmd.c: Ditto.
+	* python/py-evts.c: Ditto.
+	* python/py-finishbreakpoint.c: Ditto.
+	* python/py-frame.c: Ditto.
+	* python/py-function.c: Ditto.
+	* python/py-inferior.c: Ditto.
+	* python/py-infthread.c: Ditto.
+	* python/py-param.c: Ditto.
+	* python/py-prettyprint.c: Ditto.
+	* python/py-symbol.c: Ditto.
+	* python/py-type.c: Ditto.
+	* python/py-utils.c: Ditto.
+	* python/py-value.c: Ditto.
+	* python/python-internal.h: Ditto.
+	* python/python.c: Ditto.
+
+2013-11-29  Pedro Alves  <palves@redhat.com>
+
+	* unwind_stop_reasons.def (UNWIND_NULL_ID): Update comment.
+
+2013-11-29  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (build_target_condition_list): Release previous
+	conditions.
+	(build_target_command_list): Release previous commands.
+	(bp_location_dtor): Release target conditions and commands.
+	* remote.c (remote_add_target_side_condition): Don't release
+	conditions.
+	(remote_add_target_side_commands): Don't release commands.
+
+2013-11-29  Yao Qi  <yao@codesourcery.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* dcache.c (dcache_read_line): Use current_target.beneath
+	instead of &current_target.
+	* target.c (memory_xfer_partial_1): Factor code out to ...
+	(raw_memory_xfer_partial): ... it.  New function.
+	(target_xfer_partial): Call raw_memory_xfer_partial if OBJECT
+	is TARGET_OBJECT_RAW_MEMORY.
+
+2013-11-28  Doug Evans  <xdje42@gmail.com>
+
+	* breakpoint.h (gdbpy_breakpoint_object): Renamed from
+	breakpoint_object.  All uses updated.
+	* python/python-internal.h (gdbpy_breakpoint_object): Renamed from
+	breakpoint_object.  All uses updated.
+	* python.c (*): All uses of breakpoint_object updated.
+	* python.h (*): All uses of breakpoint_object updated.
+	* python/py-breakpoint.c (*): All uses of breakpoint_object updated.
+	* python/py-finishbreakpoint.c (*): Ditto.
+
+2013-11-28  Doug Evans  <xdje42@gmail.com>
+
+	* configure.ac: Add comments delineating libpython and libmcheck.
+	* configure: Regenerate.
+
 2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
 	    Pedro Alves  <palves@redhat.com>
 

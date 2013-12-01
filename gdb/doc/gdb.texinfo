@@ -26556,7 +26556,9 @@ function to a string. The value can be one of:
 No particular reason (older frames should be available).
 
 @item gdb.FRAME_UNWIND_NULL_ID
-The previous frame's analyzer returns an invalid result.
+The previous frame's analyzer returns an invalid result.  This is no
+longer used by @value{GDBN}, and is kept only for backward
+compatibility.
 
 @item gdb.FRAME_UNWIND_OUTERMOST
 This frame is the outermost.

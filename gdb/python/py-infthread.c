@@ -95,7 +95,7 @@ thpy_set_name (PyObject *self, PyObject *newvalue, void *ignore)
 
   if (newvalue == NULL)
     {
-      PyErr_SetString (PyExc_TypeError, 
+      PyErr_SetString (PyExc_TypeError,
 		       _("Cannot delete `name' attribute."));
       return -1;
     }

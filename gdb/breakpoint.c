@@ -2096,6 +2096,9 @@ build_target_condition_list (struct bp_location *bl)
   int modified = bl->needs_update;
   struct bp_location *loc;
 
+  /* Release conditions left over from a previous insert.  */
+  VEC_free (agent_expr_p, bl->target_info.conditions);
+
   /* This is only meaningful if the target is
      evaluating conditions and if the user has
      opted for condition evaluation on the target's
@@ -2286,6 +2289,9 @@ build_target_command_list (struct bp_location *bl)
   int null_command_or_parse_error = 0;
   int modified = bl->needs_update;
   struct bp_location *loc;
+
+  /* Release commands left over from a previous insert.  */
+  VEC_free (agent_expr_p, bl->target_info.tcommands);
 
   /* For now, limit to agent-style dprintf breakpoints.  */
   if (bl->owner->type != bp_dprintf
@@ -12734,6 +12740,9 @@ bp_location_dtor (struct bp_location *self)
   if (self->cond_bytecode)
     free_agent_expr (self->cond_bytecode);
   xfree (self->function_name);
+
+  VEC_free (agent_expr_p, self->target_info.conditions);
+  VEC_free (agent_expr_p, self->target_info.tcommands);
 }
 
 static const struct bp_location_ops bp_location_ops =
