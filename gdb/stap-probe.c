@@ -1177,13 +1177,7 @@ compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
   if (pc_probe == NULL)
     error (_("No SystemTap probe at PC %s"), core_addr_to_string (pc));
 
-  gdb_assert (pc_probe->objfile != NULL);
-  gdb_assert (pc_probe->objfile->sf != NULL);
-  gdb_assert (pc_probe->objfile->sf->sym_probe_fns != NULL);
-
-  pc_probe_fns = pc_probe->objfile->sf->sym_probe_fns;
-
-  n_args = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
+  n_args = get_probe_argument_count (pc_probe);
   if (sel == -1)
     return value_from_longest (builtin_type (arch)->builtin_int, n_args);
 
@@ -1191,7 +1185,7 @@ compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
     error (_("Invalid probe argument %d -- probe has %u arguments available"),
 	   sel, n_args);
 
-  return pc_probe_fns->sym_evaluate_probe_argument (pc_probe, sel);
+  return evaluate_probe_argument (pc_probe, sel);
 }
 
 /* This is called to compile one of the $_probe_arg* convenience
@@ -1214,13 +1208,7 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
   if (pc_probe == NULL)
     error (_("No SystemTap probe at PC %s"), core_addr_to_string (pc));
 
-  gdb_assert (pc_probe->objfile != NULL);
-  gdb_assert (pc_probe->objfile->sf != NULL);
-  gdb_assert (pc_probe->objfile->sf->sym_probe_fns != NULL);
-
-  pc_probe_fns = pc_probe->objfile->sf->sym_probe_fns;
-
-  n_args = pc_probe_fns->sym_get_probe_argument_count (pc_probe);
+  n_args = get_probe_argument_count (pc_probe);
 
   if (sel == -1)
     {
@@ -1235,7 +1223,7 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
     error (_("Invalid probe argument %d -- probe has %d arguments available"),
 	   sel, n_args);
 
-  pc_probe_fns->sym_compile_to_ax (pc_probe, expr, value, sel);
+  pc_probe->pops->compile_to_ax (pc_probe, expr, value, sel);
 }
 
 
