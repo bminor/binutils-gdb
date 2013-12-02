@@ -183,8 +183,7 @@ struct probe
   };
 
 /* A helper for linespec that decodes a probe specification.  It returns a
-   symtabs_and_lines object and updates *ARGPTR or throws an error.  The
-   argument PTYPE specifies the type of the probe(s) to be parsed.  */
+   symtabs_and_lines object and updates *ARGPTR or throws an error.  */
 
 extern struct symtabs_and_lines parse_probes (char **argptr,
 					      struct linespec_result *canon);
@@ -194,14 +193,14 @@ extern struct symtabs_and_lines parse_probes (char **argptr,
 
 extern void register_probe_ops (struct probe *probe);
 
-/* Given a PC, find an associated probe with type PTYPE.  If a probe is
-   found, return it.  If no probe is found, return NULL.  */
+/* Given a PC, find an associated probe.  If a probe is found, return
+   it.  If no probe is found, return NULL.  */
 
 extern struct probe *find_probe_by_pc (CORE_ADDR pc);
 
-/* Search OBJFILE for a probe with the given PROVIDER, NAME and PTYPE.
-   Return a VEC of all probes that were found.  If no matching probe
-   is found, return NULL.  The caller must free the VEC.  */
+/* Search OBJFILE for a probe with the given PROVIDER, NAME.  Return a
+   VEC of all probes that were found.  If no matching probe is found,
+   return NULL.  The caller must free the VEC.  */
 
 extern VEC (probe_p) *find_probes_in_objfile (struct objfile *objfile,
 					      const char *provider,

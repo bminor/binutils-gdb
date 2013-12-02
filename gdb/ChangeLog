@@ -1,3 +1,8 @@
+2014-03-03  Tom Tromey  <tromey@redhat.com>
+
+	* probe.h (parse_probes, find_probe_by_pc)
+	(find_probes_in_objfile): Fix comments.
+
 2014-03-02  Doug Evans  <xdje42@gmail.com>
 
 	* infrun.c (handle_signal_stop): Replace test for
