@@ -1524,21 +1524,6 @@ elf_get_probes (struct objfile *objfile)
   return probes_per_objfile;
 }
 
-/* Implementation of `sym_relocate_probe', as documented in symfile.h.  */
-
-static void
-elf_symfile_relocate_probe (struct objfile *objfile,
-			    const struct section_offsets *new_offsets,
-			    const struct section_offsets *delta)
-{
-  int ix;
-  VEC (probe_p) *probes = objfile_data (objfile, probe_key);
-  struct probe *probe;
-
-  for (ix = 0; VEC_iterate (probe_p, probes, ix, probe); ix++)
-    probe->pops->relocate (probe, ANOFFSET (delta, SECT_OFF_TEXT (objfile)));
-}
-
 /* Helper function used to free the space allocated for storing SystemTap
    probe information.  */
 
@@ -1562,7 +1547,6 @@ probe_key_free (struct objfile *objfile, void *d)
 static const struct sym_probe_fns elf_probe_fns =
 {
   elf_get_probes,		    /* sym_get_probes */
-  elf_symfile_relocate_probe,	    /* sym_relocate_probe */
 };
 
 /* Register that we are able to handle ELF object file formats.  */

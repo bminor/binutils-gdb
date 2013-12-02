@@ -106,25 +106,25 @@ fetch_probe_arguments (struct value **arg0, struct value **arg1)
 {
   struct frame_info *frame = get_selected_frame (_("No frame selected"));
   CORE_ADDR pc = get_frame_pc (frame);
-  struct probe *pc_probe;
+  struct bound_probe pc_probe;
   const struct sym_probe_fns *pc_probe_fns;
   unsigned n_args;
 
   pc_probe = find_probe_by_pc (pc);
-  if (pc_probe == NULL
-      || strcmp (pc_probe->provider, "libstdcxx") != 0
-      || (strcmp (pc_probe->name, "catch") != 0
-	  && strcmp (pc_probe->name, "throw") != 0
-	  && strcmp (pc_probe->name, "rethrow") != 0))
+  if (pc_probe.probe == NULL
+      || strcmp (pc_probe.probe->provider, "libstdcxx") != 0
+      || (strcmp (pc_probe.probe->name, "catch") != 0
+	  && strcmp (pc_probe.probe->name, "throw") != 0
+	  && strcmp (pc_probe.probe->name, "rethrow") != 0))
     error (_("not stopped at a C++ exception catchpoint"));
 
-  n_args = get_probe_argument_count (pc_probe, frame);
+  n_args = get_probe_argument_count (pc_probe.probe, frame);
   if (n_args < 2)
     error (_("C++ exception catchpoint has too few arguments"));
 
   if (arg0 != NULL)
-    *arg0 = evaluate_probe_argument (pc_probe, 0, frame);
-  *arg1 = evaluate_probe_argument (pc_probe, 1, frame);
+    *arg0 = evaluate_probe_argument (pc_probe.probe, 0, frame);
+  *arg1 = evaluate_probe_argument (pc_probe.probe, 1, frame);
 
   if ((arg0 != NULL && *arg0 == NULL) || *arg1 == NULL)
     error (_("error computing probe argument at c++ exception catchpoint"));

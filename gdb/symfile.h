@@ -316,11 +316,6 @@ struct sym_probe_fns
      The returned value does not have to be freed and it has lifetime of the
      OBJFILE.  */
   VEC (probe_p) *(*sym_get_probes) (struct objfile *);
-
-  /* Relocate the probe section of OBJFILE.  */
-  void (*sym_relocate_probe) (struct objfile *objfile,
-			      const struct section_offsets *new_offsets,
-			      const struct section_offsets *delta);
 };
 
 /* Structure to keep track of symbol reading functions for various

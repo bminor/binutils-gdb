@@ -1,5 +1,60 @@
 2014-03-03  Tom Tromey  <tromey@redhat.com>
 
+	* break-catch-throw.c (fetch_probe_arguments): Use bound probes.
+	* breakpoint.c (create_longjmp_master_breakpoint): Use
+	get_probe_address.
+	(add_location_to_breakpoint, bkpt_probe_insert_location)
+	(bkpt_probe_remove_location): Update.
+	* breakpoint.h (struct bp_location) <probe>: Now a bound_probe.
+	* elfread.c (elf_symfile_relocate_probe): Remove.
+	(elf_probe_fns): Update.
+	(insert_exception_resume_breakpoint): Change type of "probe"
+	parameter to bound_probe.
+	(check_exception_resume): Update.
+	* objfiles.c (objfile_relocate1): Don't relocate probes.
+	* probe.c (bound_probe_s): New typedef.
+	(parse_probes): Use get_probe_address.  Set sal's objfile.
+	(find_probe_by_pc): Return a bound_probe.
+	(collect_probes): Return a VEC(bound_probe_s).
+	(compare_probes): Update.
+	(gen_ui_out_table_header_info): Change type of "probes"
+	parameter.  Update.
+	(info_probes_for_ops): Update.
+	(get_probe_address): New function.
+	(probe_safe_evaluate_at_pc): Update.
+	* probe.h (struct probe_ops) <get_probe_address>: New field.
+	<set_semaphore, clear_semaphore>: Add objfile parameter.
+	(struct probe) <objfile>: Remove field.
+	<arch>: New field.
+	<address>: Update comment.
+	(struct bound_probe): New.
+	(find_probe_by_pc): Return a bound_probe.
+	(get_probe_address): Declare.
+	* solib-svr4.c (struct probe_and_action) <address>: New field.
+	(hash_probe_and_action, equal_probe_and_action): Update.
+	(register_solib_event_probe): Add address parameter.
+	(solib_event_probe_at): Update.
+	(svr4_create_probe_breakpoints): Add objfile parameter.  Use
+	get_probe_address.
+	* stap-probe.c (struct stap_probe) <sem_addr>: Update comment.
+	(stap_get_probe_address): New function.
+	(stap_can_evaluate_probe_arguments, compute_probe_arg)
+	(compile_probe_arg): Update.
+	(stap_set_semaphore, stap_clear_semaphore): Compute semaphore's
+	address.
+	(handle_stap_probe): Don't relocate the probe.
+	(stap_relocate): Remove.
+	(stap_gen_info_probes_table_values): Update.
+	(stap_probe_ops): Remove stap_relocate.
+	* symfile-debug.c (debug_sym_relocate_probe): Remove.
+	(debug_sym_probe_fns): Update.
+	* symfile.h (struct sym_probe_fns) <sym_relocate_probe>: Remove.
+	* symtab.c (init_sal): Use memset.
+	* symtab.h (struct symtab_and_line) <objfile>: New field.
+	* tracepoint.c (start_tracing, stop_tracing): Update.
+
+2014-03-03  Tom Tromey  <tromey@redhat.com>
+
 	* probe.h (parse_probes, find_probe_by_pc)
 	(find_probes_in_objfile): Fix comments.
 

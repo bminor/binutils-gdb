@@ -5651,7 +5651,7 @@ insert_exception_resume_breakpoint (struct thread_info *tp,
 
 static void
 insert_exception_resume_from_probe (struct thread_info *tp,
-				    const struct probe *probe,
+				    const struct bound_probe *probe,
 				    struct frame_info *frame)
 {
   struct value *arg_value;
@@ -5685,7 +5685,7 @@ check_exception_resume (struct execution_control_state *ecs,
 			struct frame_info *frame)
 {
   volatile struct gdb_exception e;
-  const struct probe *probe;
+  struct bound_probe probe;
   struct symbol *func;
 
   /* First see if this exception unwinding breakpoint was set via a
@@ -5693,9 +5693,9 @@ check_exception_resume (struct execution_control_state *ecs,
      CFA and the HANDLER.  We ignore the CFA, extract the handler, and
      set a breakpoint there.  */
   probe = find_probe_by_pc (get_frame_pc (frame));
-  if (probe)
+  if (probe.probe)
     {
-      insert_exception_resume_from_probe (ecs->event_thread, probe, frame);
+      insert_exception_resume_from_probe (ecs->event_thread, &probe, frame);
       return;
     }
 

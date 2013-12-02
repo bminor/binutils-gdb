@@ -25,6 +25,7 @@
 #include "ax.h"
 #include "command.h"
 #include "break-common.h"
+#include "probe.h"
 
 struct value;
 struct block;
@@ -437,7 +438,7 @@ struct bp_location
 
   /* If the location comes from a probe point, this is the probe associated
      with it.  */
-  struct probe *probe;
+  struct bound_probe probe;
 
   char *function_name;
 

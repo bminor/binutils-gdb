@@ -1860,8 +1860,10 @@ start_tracing (char *notes)
       t->number_on_target = b->number;
 
       for (loc = b->loc; loc; loc = loc->next)
-	if (loc->probe != NULL)
-	  loc->probe->pops->set_semaphore (loc->probe, loc->gdbarch);
+	if (loc->probe.probe != NULL)
+	  loc->probe.probe->pops->set_semaphore (loc->probe.probe,
+						 loc->probe.objfile,
+						 loc->gdbarch);
 
       if (bp_location_downloaded)
 	observer_notify_breakpoint_modified (b);
@@ -1957,8 +1959,10 @@ stop_tracing (char *note)
 	     but we don't really care if this semaphore goes out of sync.
 	     That's why we are decrementing it here, but not taking care
 	     in other places.  */
-	  if (loc->probe != NULL)
-	    loc->probe->pops->clear_semaphore (loc->probe, loc->gdbarch);
+	  if (loc->probe.probe != NULL)
+	    loc->probe.probe->pops->clear_semaphore (loc->probe.probe,
+						     loc->probe.objfile,
+						     loc->gdbarch);
 	}
     }
 
