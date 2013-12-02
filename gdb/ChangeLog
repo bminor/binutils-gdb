@@ -1,3 +1,13 @@
+2013-12-02  Doug Evans  <dje@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* objfiles.c (allocate_objfile): Save original_name as an absolute
+	path.
+	* objfiles.h (struct objfile): Expand comment on original_name.
+	* source.c (openp): Call gdb_abspath.
+	* utils.c (gdb_abspath): New function.
+	* utils.h (gdb_abspath): Declare.
+
 2013-12-02  Pedro Alves  <palves@redhat.com>
 
 	* dcache.c (dcache_read_line): Use target_read_raw_memory.

@@ -272,6 +272,7 @@ struct objfile *
 allocate_objfile (bfd *abfd, const char *name, int flags)
 {
   struct objfile *objfile;
+  char *expanded_name;
 
   objfile = (struct objfile *) xzalloc (sizeof (struct objfile));
   objfile->psymbol_cache = psymbol_bcache_init ();
@@ -286,10 +287,20 @@ allocate_objfile (bfd *abfd, const char *name, int flags)
     {
       gdb_assert (abfd == NULL);
       gdb_assert ((flags & OBJF_NOT_FILENAME) != 0);
-      name = "<<anonymous objfile>>";
+      expanded_name = xstrdup ("<<anonymous objfile>>");
     }
-  objfile->original_name = obstack_copy0 (&objfile->objfile_obstack, name,
-					  strlen (name));
+  else if ((flags & OBJF_NOT_FILENAME) != 0)
+    expanded_name = xstrdup (name);
+  else
+    expanded_name = gdb_abspath (name);
+  objfile->original_name = obstack_copy0 (&objfile->objfile_obstack,
+					  expanded_name,
+					  strlen (expanded_name));
+  xfree (expanded_name);
+
+  /* Update the per-objfile information that comes from the bfd, ensuring
+     that any data that is reference is saved in the per-objfile data
+     region.  */
 
   /* Update the per-objfile information that comes from the bfd, ensuring
      that any data that is reference is saved in the per-objfile data

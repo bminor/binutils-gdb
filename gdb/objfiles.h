@@ -212,8 +212,10 @@ struct objfile
 
     struct objfile *next;
 
-    /* The object file's name, tilde-expanded and absolute.  This
-       pointer is never NULL.  This does not have to be freed; it is
+    /* The object file's original name as specified by the user,
+       made absolute, and tilde-expanded.  However, it is not canonicalized
+       (i.e., it has not been passed through gdb_realpath).
+       This pointer is never NULL.  This does not have to be freed; it is
        guaranteed to have a lifetime at least as long as the objfile.  */
 
     char *original_name;

@@ -1,3 +1,11 @@
+2013-12-02  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf/dwp-symlink.c: Fake out gdb to not load debug info
+	at start.
+	* gdb.dwarf/dwp-symlink.exp: Test trying to load dwp when the binary
+	has been specified with a relative path and we have chdir'd before
+	accessing the debug info.
+
 2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.trace/unavailable.exp (gdb_collect_args_test): Update
