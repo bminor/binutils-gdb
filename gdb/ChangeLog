@@ -1,3 +1,7 @@
+2013-12-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove "common/gdb_string.h".
+
 2013-11-30  Doug Evans  <xdje42@gmail.com>
 
 	* auto-load.h (script_language): New members name, auto_load_enabled.
