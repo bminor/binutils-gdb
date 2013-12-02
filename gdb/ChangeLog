@@ -1,3 +1,8 @@
+2013-12-02  Pedro Alves  <palves@redhat.com>
+
+	* ctf.c (ctf_start): Use S_IRGRP, S_IXGRP, S_IXOTH
+	unconditionally.
+
 2013-12-02  Pedro Alves  <pedro@codesourcery.com>
             Maciej W. Rozycki  <macro@codesourcery.com>
 
