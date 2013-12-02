@@ -1,5 +1,9 @@
 2013-12-02  Joel Brobecker  <brobecker@adacore.com>
 
+	* Makefile.in (HFILES_NO_SRCDIR): Remove "common/gdb_dirent.h".
+
+2013-12-02  Joel Brobecker  <brobecker@adacore.com>
+
 	* Makefile.in (HFILES_NO_SRCDIR): Remove "common/gdb_stat.h".
 	* ctf.c (ctf_start): Remove obsolete comment.
 
