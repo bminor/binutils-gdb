@@ -736,6 +736,7 @@ typedef struct
   unsigned int _bfd_coff_default_section_alignment_power;
   bfd_boolean _bfd_coff_force_symnames_in_strings;
   unsigned int _bfd_coff_debug_string_prefix_length;
+  unsigned int _bfd_coff_max_nscns;
 
   void (*_bfd_coff_swap_filehdr_in)
     (bfd *, void *, void *);
@@ -873,6 +874,9 @@ typedef struct
   ((coff_backend_info (abfd)->_bfd_coff_set_long_section_names) (abfd, enable))
 #define bfd_coff_default_section_alignment_power(abfd) \
   (coff_backend_info (abfd)->_bfd_coff_default_section_alignment_power)
+#define bfd_coff_max_nscns(abfd) \
+  (coff_backend_info (abfd)->_bfd_coff_max_nscns)
+
 #define bfd_coff_swap_filehdr_in(abfd, i,o) \
   ((coff_backend_info (abfd)->_bfd_coff_swap_filehdr_in) (abfd, i, o))
 

@@ -1,3 +1,14 @@
+2014-03-13  Tristan Gingold  <gingold@adacore.com>
+
+	* pe.h (struct external_ANON_OBJECT_HEADER_BIGOBJ): Declare.
+	(FILHSZ_BIGOBJ): Define.
+	(struct external_SYMBOL_EX): Declare.
+	(SYMENT_BIGOBJ, SYMESZ_BIGOBJ): Define.
+	(union external_AUX_SYMBOL_EX): Declare.
+	(AUXENT_BIGOBJ, AUXESZ_BIGOBJ): Define.
+	* internal.h (struct internal_filehdr): Change type
+	of f_nscns.
+
 2014-03-05  Alan Modra  <amodra@gmail.com>
 
 	Update copyright years.

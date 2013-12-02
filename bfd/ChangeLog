@@ -1,3 +1,36 @@
+2014-03-13  Tristan Gingold  <gingold@adacore.com>
+
+	* peicode.h (pe_ILF_object_p): Adjust, as the version number
+	has been read.
+	(pe_bfd_object_p): Also read version number to detect ILF.
+	* pe-x86_64.c (COFF_WITH_PE_BIGOBJ): Define.
+	(x86_64pe_bigobj_vec): Define
+	* coffcode.h (bfd_coff_backend_data): Add _bfd_coff_max_nscns field.
+	(bfd_coff_max_nscns): New macro.
+	(coff_compute_section_file_positions): Use unsigned int for
+	target_index.  Compare with bfd_coff_max_nscns.
+	(bfd_coff_std_swap_table, ticoff0_swap_table, ticoff1_swap_table):
+	Set a value for _bfd_coff_max_nscns.
+	(header_bigobj_classid): New constant.
+	(coff_bigobj_swap_filehdr_in, coff_bigobj_swap_filehdr_out)
+	(coff_bigobj_swap_sym_in, coff_bigobj_swap_sym_out)
+	(coff_bigobj_swap_aux_in, coff_bigobj_swap_aux_out): New
+	functions.
+	(bigobj_swap_table): New table.
+	* libcoff.h: Regenerate.
+	* coff-sh.c (bfd_coff_small_swap_table): Likewise.
+	* coff-alpha.c (alpha_ecoff_backend_data): Add value for
+	_bfd_coff_max_nscns.
+	* coff-mips.c (mips_ecoff_backend_data): Likewise.
+	* coff-rs6000.c (bfd_xcoff_backend_data)
+	(bfd_pmac_xcoff_backend_data): Likewise.
+	* coff64-rs6000.c (bfd_xcoff_backend_data)
+	(bfd_xcoff_aix5_backend_data): Likewise.
+	* targets.c (x86_64pe_bigobj_vec): Declare.
+	* configure.in (x86_64pe_bigobj_vec): New vector.
+	* configure: Regenerate.
+	* config.bfd: Add bigobj object format for Windows targets.
+
 2014-03-12  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/16671

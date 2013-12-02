@@ -3090,6 +3090,7 @@ static bfd_coff_backend_data bfd_coff_small_swap_table =
 #else
   2,
 #endif
+  32768,
   coff_swap_filehdr_in, coff_swap_aouthdr_in, coff_swap_scnhdr_in,
   coff_swap_reloc_in, coff_bad_format_hook, coff_set_arch_mach_hook,
   coff_mkobject_hook, styp_to_sec_flags, coff_set_alignment_hook,

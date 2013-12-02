@@ -1,3 +1,13 @@
+2014-03-13  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-i386.c (use_big_obj): Declare.
+	(OPTION_MBIG_OBJ): Define.
+	(md_longopts): Add -mbig-obj option.
+	(md_parse_option): Handle it.
+	(md_show_usage): Display help for this option.
+	(i386_target_format): Use bigobj for x86-64 if -mbig-obj.
+	* doc/c-i386.texi: Document the option.
+
 2014-03-12  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/16688

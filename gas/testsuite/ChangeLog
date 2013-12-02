@@ -1,3 +1,8 @@
+2014-03-13  Tristan Gingold  <gingold@adacore.com>
+
+	* gas/pe/big-obj.d, gas/pe/big-obj.s: Add test.
+	* gas/pe/pe.exp: Add test.
+
 2014-03-12  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/16688
