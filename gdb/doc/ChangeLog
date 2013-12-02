@@ -1,3 +1,8 @@
+2014-02-19  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* python.texi (Values From Inferior): Add description about the
+	new feature.
+
 2014-02-17  Doug Evans  <xdje42@gmail.com>
 
 	* Makefile.in (GDB_DOC_FILES): Add python.texi.

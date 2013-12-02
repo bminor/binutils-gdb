@@ -82,6 +82,12 @@ qXfer:btrace:read's annex
   The qXfer:btrace:read packet supports a new annex 'delta' to read
   branch trace incrementally.
 
+* Python Scripting
+
+  ** Valid Python operations on gdb.Value objects representing
+     structs/classes invoke the corresponding overloaded operators if
+     available.
+
 * New targets
 PowerPC64 GNU/Linux little-endian	powerpc64le-*-linux*
 

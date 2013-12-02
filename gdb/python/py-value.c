@@ -933,6 +933,8 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
       struct value *arg1, *arg2;
       struct cleanup *cleanup = make_cleanup_value_free_to_mark (value_mark ());
       struct value *res_val = NULL;
+      enum exp_opcode op = OP_NULL;
+      int handled = 0;
 
       /* If the gdb.Value object is the second operand, then it will be passed
 	 to us as the OTHER argument, and SELF will be an entirely different
@@ -964,6 +966,7 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	    CHECK_TYPEDEF (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
+	    handled = 1;
 	    if (TYPE_CODE (ltype) == TYPE_CODE_PTR
 		&& is_integral_type (rtype))
 	      res_val = value_ptradd (arg1, value_as_long (arg2));
@@ -971,7 +974,10 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 		     && is_integral_type (ltype))
 	      res_val = value_ptradd (arg2, value_as_long (arg1));
 	    else
-	      res_val = value_binop (arg1, arg2, BINOP_ADD);
+	      {
+		handled = 0;
+		op = BINOP_ADD;
+	      }
 	  }
 	  break;
 	case VALPY_SUB:
@@ -984,6 +990,7 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 	    CHECK_TYPEDEF (rtype);
 	    rtype = STRIP_REFERENCE (rtype);
 
+	    handled = 1;
 	    if (TYPE_CODE (ltype) == TYPE_CODE_PTR
 		&& TYPE_CODE (rtype) == TYPE_CODE_PTR)
 	      /* A ptrdiff_t for the target would be preferable here.  */
@@ -993,36 +1000,47 @@ valpy_binop (enum valpy_opcode opcode, PyObject *self, PyObject *other)
 		     && is_integral_type (rtype))
 	      res_val = value_ptradd (arg1, - value_as_long (arg2));
 	    else
-	      res_val = value_binop (arg1, arg2, BINOP_SUB);
+	      {
+		handled = 0;
+		op = BINOP_SUB;
+	      }
 	  }
 	  break;
 	case VALPY_MUL:
-	  res_val = value_binop (arg1, arg2, BINOP_MUL);
+	  op = BINOP_MUL;
 	  break;
 	case VALPY_DIV:
-	  res_val = value_binop (arg1, arg2, BINOP_DIV);
+	  op = BINOP_DIV;
 	  break;
 	case VALPY_REM:
-	  res_val = value_binop (arg1, arg2, BINOP_REM);
+	  op = BINOP_REM;
 	  break;
 	case VALPY_POW:
-	  res_val = value_binop (arg1, arg2, BINOP_EXP);
+	  op = BINOP_EXP;
 	  break;
 	case VALPY_LSH:
-	  res_val = value_binop (arg1, arg2, BINOP_LSH);
+	  op = BINOP_LSH;
 	  break;
 	case VALPY_RSH:
-	  res_val = value_binop (arg1, arg2, BINOP_RSH);
+	  op = BINOP_RSH;
 	  break;
 	case VALPY_BITAND:
-	  res_val = value_binop (arg1, arg2, BINOP_BITWISE_AND);
+	  op = BINOP_BITWISE_AND;
 	  break;
 	case VALPY_BITOR:
-	  res_val = value_binop (arg1, arg2, BINOP_BITWISE_IOR);
+	  op = BINOP_BITWISE_IOR;
 	  break;
 	case VALPY_BITXOR:
-	  res_val = value_binop (arg1, arg2, BINOP_BITWISE_XOR);
+	  op = BINOP_BITWISE_XOR;
 	  break;
+	}
+
+      if (!handled)
+	{
+	  if (binop_user_defined_p (op, arg1, arg2))
+	    res_val = value_x_binop (arg1, arg2, op, OP_NULL, EVAL_NORMAL);
+	  else
+	    res_val = value_binop (arg1, arg2, op);
 	}
 
       if (res_val)

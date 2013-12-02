@@ -1,3 +1,10 @@
+2014-02-19  Siva Chandra Reddy  <sivachandra@google.com>
+
+	* gdb.python/py-value-cc.cc: Improve test case to enable testing
+	operations on gdb.Value objects.
+	* gdb.python/py-value-cc.exp: Add new test to test operations on
+	gdb.Value objects.
+
 2014-02-18  Doug Evans  <dje@google.com>
 
 	* Makefile.in (TESTS): New variable.

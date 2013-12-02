@@ -528,7 +528,26 @@ bar = some_val + 2
 
 @noindent
 As result of this, @code{bar} will also be a @code{gdb.Value} object
-whose values are of the same type as those of @code{some_val}.
+whose values are of the same type as those of @code{some_val}.  Valid
+Python operations can also be performed on @code{gdb.Value} objects
+representing a @code{struct} or @code{class} object.  For such cases,
+the overloaded operator (if present), is used to perform the operation.
+For example, if @code{val1} and @code{val2} are @code{gdb.Value} objects
+representing instances of a @code{class} which overloads the @code{+}
+operator, then one can use the @code{+} operator in their Python script
+as follows:
+
+@smallexample
+val3 = val1 + val2
+@end smallexample
+
+@noindent
+The result of the operation @code{val3} is also a @code{gdb.Value}
+object corresponding to the value returned by the overloaded @code{+}
+operator.  In general, overloaded operators are invoked for the
+following operations: @code{+} (binary addition), @code{-} (binary
+subtraction), @code{*} (multiplication), @code{/}, @code{%}, @code{<<},
+@code{>>}, @code{|}, @code{&}, @code{^}.
 
 Inferior values that are structures or instances of some class can
 be accessed using the Python @dfn{dictionary syntax}.  For example, if
