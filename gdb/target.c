@@ -1791,16 +1791,30 @@ target_read_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
     return TARGET_XFER_E_IO;
 }
 
+/* Like target_read_memory, but specify explicitly that this is a read
+   from the target's raw memory.  That is, this read bypasses the
+   dcache, breakpoint shadowing, etc.  */
+
+int
+target_read_raw_memory (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
+{
+  /* See comment in target_read_memory about why the request starts at
+     current_target.beneath.  */
+  if (target_read (current_target.beneath, TARGET_OBJECT_RAW_MEMORY, NULL,
+		   myaddr, memaddr, len) == len)
+    return 0;
+  else
+    return TARGET_XFER_E_IO;
+}
+
 /* Like target_read_memory, but specify explicitly that this is a read from
    the target's stack.  This may trigger different cache behavior.  */
 
 int
 target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 {
-  /* Dispatch to the topmost target, not the flattened current_target.
-     Memory accesses check target->to_has_(all_)memory, and the
-     flattened target doesn't inherit those.  */
-
+  /* See comment in target_read_memory about why the request starts at
+     current_target.beneath.  */
   if (target_read (current_target.beneath, TARGET_OBJECT_STACK_MEMORY, NULL,
 		   myaddr, memaddr, len) == len)
     return 0;
@@ -1814,6 +1828,8 @@ target_read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 int
 target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 {
+  /* See comment in target_read_memory about why the request starts at
+     current_target.beneath.  */
   if (target_read (current_target.beneath, TARGET_OBJECT_CODE_MEMORY, NULL,
 		   myaddr, memaddr, len) == len)
     return 0;
@@ -1830,9 +1846,8 @@ target_read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
 int
 target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 {
-  /* Dispatch to the topmost target, not the flattened current_target.
-     Memory accesses check target->to_has_(all_)memory, and the
-     flattened target doesn't inherit those.  */
+  /* See comment in target_read_memory about why the request starts at
+     current_target.beneath.  */
   if (target_write (current_target.beneath, TARGET_OBJECT_MEMORY, NULL,
 		    myaddr, memaddr, len) == len)
     return 0;
@@ -1849,9 +1864,8 @@ target_write_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 int
 target_write_raw_memory (CORE_ADDR memaddr, const gdb_byte *myaddr, ssize_t len)
 {
-  /* Dispatch to the topmost target, not the flattened current_target.
-     Memory accesses check target->to_has_(all_)memory, and the
-     flattened target doesn't inherit those.  */
+  /* See comment in target_read_memory about why the request starts at
+     current_target.beneath.  */
   if (target_write (current_target.beneath, TARGET_OBJECT_RAW_MEMORY, NULL,
 		    myaddr, memaddr, len) == len)
     return 0;

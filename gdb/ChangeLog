@@ -1,5 +1,14 @@
 2013-12-02  Pedro Alves  <palves@redhat.com>
 
+	* dcache.c (dcache_read_line): Use target_read_raw_memory.
+	* target.c (target_read_raw_memory): New function.
+	(target_read_stack, target_write_memory, target_write_raw_memory):
+	Update comment.
+	(target_read_code): Add comment.
+	* target.h (target_read_raw_memory): Declare.
+
+2013-12-02  Pedro Alves  <palves@redhat.com>
+
 	* ctf.c (ctf_start): Use S_IRGRP, S_IXGRP, S_IXOTH
 	unconditionally.
 
