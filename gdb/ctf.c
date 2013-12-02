@@ -320,7 +320,7 @@ ctf_start (struct trace_file_writer *self, const char *dirname)
 #ifdef S_IXGRP
     | S_IXGRP
 #endif
-    | S_IROTH /* Defined in common/gdb_stat.h if not defined.  */
+    | S_IROTH
 #ifdef S_IXOTH
     | S_IXOTH
 #endif
