@@ -1,5 +1,10 @@
 2013-12-03  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Set Catchpoints): Add @kindex for each command
+	documented here.
+
+2013-12-03  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.texinfo (@direntry): Add menu item for gdbserver.
 
 2013-12-03  Walfred Tedeschi  <walfred.tedeschi@intel.com>

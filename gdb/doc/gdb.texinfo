@@ -4108,6 +4108,9 @@ Stop when @var{event} occurs.  @var{event} can be any of the following:
 @item throw @r{[}@var{regexp}@r{]}
 @itemx rethrow @r{[}@var{regexp}@r{]}
 @itemx catch @r{[}@var{regexp}@r{]}
+@kindex catch throw
+@kindex catch rethrow
+@kindex catch catch
 @cindex stop on C@t{++} exceptions
 The throwing, re-throwing, or catching of a C@t{++} exception.
 
@@ -4165,6 +4168,7 @@ You cannot install an exception handler interactively.
 @end itemize
 
 @item exception
+@kindex catch exception
 @cindex Ada exception catching
 @cindex catch Ada exceptions
 An Ada exception being raised.  If an exception name is specified
@@ -4182,18 +4186,22 @@ the command to use to catch such exceptions is @kbd{catch exception
 Pck.Constraint_Error}.
 
 @item exception unhandled
+@kindex catch exception unhandled
 An exception that was raised but is not handled by the program.
 
 @item assert
+@kindex catch assert
 A failed Ada assertion.
 
 @item exec
+@kindex catch exec
 @cindex break on fork/exec
 A call to @code{exec}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
 @item syscall
 @itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @dots{} 
+@kindex catch syscall
 @cindex break on a system call.
 A call to or return from a system call, a.k.a.@: @dfn{syscall}.  A
 syscall is a mechanism for application programs to request a service
@@ -4324,20 +4332,25 @@ Catchpoint 1 (syscall(s) 252)
 Again, in this case @value{GDBN} would not be able to display syscall's names.
 
 @item fork
+@kindex catch fork
 A call to @code{fork}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
 @item vfork
+@kindex catch vfork
 A call to @code{vfork}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
 @item load @r{[}regexp@r{]}
 @itemx unload @r{[}regexp@r{]}
+@kindex catch load
+@kindex catch unload
 The loading or unloading of a shared library.  If @var{regexp} is
 given, then the catchpoint will stop only if the regular expression
 matches one of the affected libraries.
 
 @item signal @r{[}@var{signal}@dots{} @r{|} @samp{all}@r{]}
+@kindex catch signal
 The delivery of a signal.
 
 With no arguments, this catchpoint will catch any signal that is not
@@ -4365,6 +4378,7 @@ commands.
 @end table
 
 @item tcatch @var{event}
+@kindex tcatch
 Set a catchpoint that is enabled only for one stop.  The catchpoint is
 automatically deleted after the first time the event is caught.
 
