@@ -1,3 +1,8 @@
+2013-12-03  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-i386-intel.c (i386_intel_simplify): Avoid arithmetic
+	overflow on pointers.
+
 2013-11-19  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	Revert
