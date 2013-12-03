@@ -1,3 +1,8 @@
+2013-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/windres/windres.exp: Run for x86_64-pc-cygwin.
+	Add test of "objump -p" output.
+
 2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
 
 	* binutils-all/objcopy.exp: Consider mips-mti-elf the same as

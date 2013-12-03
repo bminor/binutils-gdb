@@ -1,3 +1,13 @@
+2013-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (pe_print_resource_entries): New function: Displays
+	an entry in a .rsrc section.
+	(pe_print_resource_directory): New function: Displays a directory
+	in a .rsrc section.
+	(pe_print_rsrc): New function: Displays the contents of .rsrc
+	section.
+	(_bfd_XX_print_private_bfd_data_common): Call pe_print_rsrc.
+
 2013-12-03  Alan Modra  <amodra@gmail.com>
 
 	* elf64-ppc.c (ppc_build_one_stub <ppc_stub_plt_branch_r2off>):
