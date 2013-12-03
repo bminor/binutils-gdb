@@ -1,3 +1,11 @@
+2013-10-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.base/sigall.exp (test_one_sig): gdb identifies SIGLOST as a
+	SIGPWR in sparc64.
+
+	* gdb.base/sigall.c (main): In some targets SIGLOST and SIGPWR
+	have the same signal number.  Handle this situation.
+
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/dot_all: New testcase.
