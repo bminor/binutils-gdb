@@ -35261,6 +35261,9 @@ Indicates support for the @code{-info-gdb-mi-command} command.
 Indicates support for the "undefined-command" error code in error result
 records, produced when trying to execute an undefined @sc{gdb/mi} command
 (@pxref{GDB/MI Result Records}).
+@item exec-run-start-option
+Indicates that the @code{-exec-run} command supports the @option{--start}
+option (@pxref{GDB/MI Program Execution}).
 @end table
 
 @subheading The @code{-list-target-features} Command

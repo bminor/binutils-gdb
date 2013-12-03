@@ -1,3 +1,8 @@
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-start.exp: Add test verifying that -list-features
+	contains "exec-run-start-option".
+
 2013-12-08  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (support_complex_tests): Use gdb_produce_source.

@@ -1818,6 +1818,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "language-option");
       ui_out_field_string (uiout, NULL, "info-gdb-mi-command");
       ui_out_field_string (uiout, NULL, "undefined-command-error-code");
+      ui_out_field_string (uiout, NULL, "exec-run-start-option");
 
 #if HAVE_PYTHON
       if (gdb_python_initialized)
