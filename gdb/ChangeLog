@@ -1,3 +1,8 @@
+2013-12-03  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* NEWS:  Add section for Intel(R) Architecture Instructions
+	Extesions mentioning MPX.
+
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lex.l (find_dot_all): Use strncasecmp instead of strncmp.

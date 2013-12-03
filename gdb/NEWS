@@ -5577,3 +5577,5 @@ GDB now handles cross debugging.  If you are remotely debugging between
 two different machines, type ``./configure host -target=targ''.
 Host is the machine where GDB will run; targ is the machine
 where the program that you are debugging will run.
+
+ *  GDB now supports access to Intel(R) MPX registers on GNU/Linux.

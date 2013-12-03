@@ -21376,6 +21376,39 @@ be returned in a register.
 @kindex show struct-convention
 Show the current setting of the convention to return @code{struct}s
 from functions.
+
+@cindex Intel(R) Memory Protection Extensions (MPX).
+@subsubsection Intel(R) @dfn{Memory Protection Extensions} (MPX).
+
+@item bnd0raw..bnd3raw and bnd0@dots{}bnd3 registers display.
+Memory Protection Extension (MPX) adds the bound registers @samp{BND0}
+@footnote{The register named with capital letters represent the architecture
+registers.} through @samp{BND3}.  Bound registers store a pair of 64-bit values
+which are the lower bound and upper bound.  Bounds are effective addresses or
+memory locations.  The upper bounds are architecturally represented in 1's
+complement form.  A bound having lower bound = 0, and upper bound = 0
+(1's complement of all bits set) will allow access to the entire address space.
+
+@samp{BND0} through @samp{BND3} are represented in @value{GDBN} as @samp{bnd0raw}
+through @samp{bnd3raw}.  Pseudo registers @samp{bnd0} through @samp{bnd3}
+display the upper bound performing the complement of one operation on the
+upper bound value, i.e.@ when upper bound in @samp{bnd0raw} is 0 in the
+@value{GDBN} @samp{bnd0} it will be @code{0xfff@dots{}}.  In this sense it
+can also be noted that the upper bounds are inclusive.
+
+As an example, assume that the register BND0 holds bounds for a pointer having
+access allowed for the range between 0x32 and 0x71.  The values present on
+bnd0raw and bnd registers are presented as follows:
+
+@smallexample
+	bnd0raw = @{0x32, 0xffffffff8e@}
+	bnd0 = @{lbound = 0x32, ubound = 0x71@} : size 64
+@end smallexample
+
+This way the raw value can be accessed via bnd0raw@dots{}bnd3raw.  Any change
+on bnd0@dots{}bnd3 or bnd0raw@dots{}bnd3raw is reflect on its counterpart.  When the
+bnd0@dots{}bnd3 registers are displayed via Python, the display includes the memory size,
+in bits, accessible to the pointer.
 @end table
 
 @node Alpha
@@ -43224,6 +43257,16 @@ describe the upper 128 bits of @sc{ymm} registers:
 @samp{ymm0h} through @samp{ymm7h} for i386
 @item
 @samp{ymm0h} through @samp{ymm15h} for amd64
+@end itemize
+
+The @samp{org.gnu.gdb.i386.mpx} is an optional feature representing Intel(R)
+Memory Protection Extension (MPX).  It should describe the following registers:
+
+@itemize @minus
+@item
+@samp{bnd0raw} through @samp{bnd3raw} for i386 and amd64.
+@item
+@samp{bndcfgu} and @samp{bndstatus} for i386 and amd64.
 @end itemize
 
 The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should
