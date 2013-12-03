@@ -1,3 +1,7 @@
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c: Remove trailing spaces throughout.
+
 2013-12-03  Pedro Alves  <palves@redhat.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 
