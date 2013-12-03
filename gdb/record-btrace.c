@@ -213,11 +213,16 @@ record_btrace_stop_recording (void)
 static void
 record_btrace_close (void)
 {
+  struct thread_info *tp;
+
   /* Make sure automatic recording gets disabled even if we did not stop
      recording before closing the record-btrace target.  */
   record_btrace_auto_disable ();
 
-  /* We already stopped recording.  */
+  /* We should have already stopped recording.
+     Tear down btrace in case we have not.  */
+  ALL_THREADS (tp)
+    btrace_teardown (tp);
 }
 
 /* The to_info_record method of target record-btrace.  */
