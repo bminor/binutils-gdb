@@ -1,5 +1,10 @@
 2013-12-03  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Remove the
+	documentation of the "ada-exceptions" entry.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.texinfo (GDB/MI Result Records): Fix the syntax of the
 	"^error" result record concerning the error message.  Document
 	the error code that may also be part of that result record.

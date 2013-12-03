@@ -35204,10 +35204,6 @@ Indicates that changes to breakpoints and breakpoints created via the
 CLI will be announced via async records.
 @item ada-task-info
 Indicates support for the @code{-ada-task-info} command.
-@item ada-exceptions
-Indicates support for the following commands, all of them related to Ada
-exceptions: @code{-info-ada-exceptions}, @code{-catch-assert} and
-@code{-catch-exception}.
 @item language-option
 Indicates that all @sc{gdb/mi} commands accept the @option{--language}
 option (@pxref{Context management}).

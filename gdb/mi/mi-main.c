@@ -1815,7 +1815,6 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       ui_out_field_string (uiout, NULL, "data-read-memory-bytes");
       ui_out_field_string (uiout, NULL, "breakpoint-notifications");
       ui_out_field_string (uiout, NULL, "ada-task-info");
-      ui_out_field_string (uiout, NULL, "ada-exceptions");
       ui_out_field_string (uiout, NULL, "language-option");
       ui_out_field_string (uiout, NULL, "info-gdb-mi-command");
       ui_out_field_string (uiout, NULL, "undefined-command-error-code");
