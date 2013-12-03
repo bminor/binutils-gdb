@@ -1,4 +1,4 @@
-2013-10-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+2013-12-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* gdb.base/sigall.exp (test_one_sig): gdb identifies SIGLOST as a
 	SIGPWR in sparc64.
