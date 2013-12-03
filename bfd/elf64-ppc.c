@@ -10597,8 +10597,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  r[0].r_offset = loc - stub_entry->stub_sec->contents;
 	  if (bfd_big_endian (info->output_bfd))
 	    r[0].r_offset += 2;
-	  if (stub_entry->stub_type == ppc_stub_plt_branch_r2off
-	      && htab->opd_abi)
+	  if (stub_entry->stub_type == ppc_stub_plt_branch_r2off)
 	    r[0].r_offset += 4;
 	  r[0].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
 	  r[0].r_addend = dest;
@@ -10611,8 +10610,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    }
 	}
 
-      if (stub_entry->stub_type != ppc_stub_plt_branch_r2off
-	  || !htab->opd_abi)
+      if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
 	{
 	  if (PPC_HA (off) != 0)
 	    {
@@ -10631,7 +10629,7 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	{
 	  bfd_vma r2off = get_r2off (info, stub_entry);
 
-	  if (r2off == 0)
+	  if (r2off == 0 && htab->opd_abi)
 	    {
 	      htab->stub_error = TRUE;
 	      return FALSE;
@@ -10639,28 +10637,29 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 
 	  bfd_put_32 (htab->stub_bfd, STD_R2_0R1 + STK_TOC (htab), loc);
 	  loc += 4;
-	  size = 20;
+	  size = 16;
 	  if (PPC_HA (off) != 0)
 	    {
 	      size += 4;
 	      bfd_put_32 (htab->stub_bfd, ADDIS_R11_R2 | PPC_HA (off), loc);
 	      loc += 4;
 	      bfd_put_32 (htab->stub_bfd, LD_R12_0R11 | PPC_LO (off), loc);
-	      loc += 4;
 	    }
 	  else
-	    {
-	      bfd_put_32 (htab->stub_bfd, LD_R12_0R2 | PPC_LO (off), loc);
-	      loc += 4;
-	    }
+	    bfd_put_32 (htab->stub_bfd, LD_R12_0R2 | PPC_LO (off), loc);
 
 	  if (PPC_HA (r2off) != 0)
 	    {
 	      size += 4;
-	      bfd_put_32 (htab->stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
 	      loc += 4;
+	      bfd_put_32 (htab->stub_bfd, ADDIS_R2_R2 | PPC_HA (r2off), loc);
 	    }
-	  bfd_put_32 (htab->stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
+	  if (PPC_LO (r2off) != 0)
+	    {
+	      size += 4;
+	      loc += 4;
+	      bfd_put_32 (htab->stub_bfd, ADDI_R2_R2 | PPC_LO (r2off), loc);
+	    }
 	}
       loc += 4;
       bfd_put_32 (htab->stub_bfd, MTCTR_R12, loc);
@@ -10954,8 +10953,7 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	      stub_entry->stub_sec->flags |= SEC_RELOC;
 	    }
 
-	  if (stub_entry->stub_type != ppc_stub_plt_branch_r2off
-	      || !htab->opd_abi)
+	  if (stub_entry->stub_type != ppc_stub_plt_branch_r2off)
 	    {
 	      size = 12;
 	      if (PPC_HA (off) != 0)
@@ -10963,11 +10961,13 @@ ppc_size_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	    }
 	  else
 	    {
-	      size = 20;
+	      size = 16;
 	      if (PPC_HA (off) != 0)
 		size += 4;
 
 	      if (PPC_HA (r2off) != 0)
+		size += 4;
+	      if (PPC_LO (r2off) != 0)
 		size += 4;
 	    }
 	}

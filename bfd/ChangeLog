@@ -1,5 +1,11 @@
 2013-12-05  Alan Modra  <amodra@gmail.com>
 
+	* elf64-ppc.c (ppc_build_one_stub <ppc_stub_plt_branch_r2off>):
+	Don't omit saving of r2 for ELFv2.  Don't addi 2,2,0.
+	(ppc_size_one_stub <ppc_stub_plt_branch_r2off>): Adjust to suit.
+
+2013-12-05  Alan Modra  <amodra@gmail.com>
+
 	* elf64-ppc.c (ppc64_elf_link_just_syms): Remove .got check.
 	Handle ELFv2.
 
