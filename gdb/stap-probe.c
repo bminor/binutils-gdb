@@ -1299,7 +1299,7 @@ stap_compile_to_ax (struct probe *probe_generic, struct agent_expr *expr,
 }
 
 /* Destroy (free) the data related to PROBE.  PROBE memory itself is not feed
-   as it is allocated from OBJFILE_OBSTACK.  */
+   as it is allocated on an obstack.  */
 
 static void
 stap_probe_destroy (struct probe *probe_generic)
@@ -1506,7 +1506,7 @@ handle_stap_probe (struct objfile *objfile, struct sdt_note *el,
   const char *probe_args = NULL;
   struct stap_probe *ret;
 
-  ret = obstack_alloc (&objfile->objfile_obstack, sizeof (*ret));
+  ret = obstack_alloc (&objfile->per_bfd->storage_obstack, sizeof (*ret));
   ret->p.pops = &stap_probe_ops;
   ret->p.arch = gdbarch;
 

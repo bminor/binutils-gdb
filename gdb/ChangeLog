@@ -1,5 +1,13 @@
 2014-03-03  Tom Tromey  <tromey@redhat.com>
 
+	* elfread.c (probe_key): Change to bfd_data.
+	(elf_get_probes, probe_key_free, _initialize_elfread): Probes are
+	now per-BFD, not per-objfile.
+	* stap-probe.c (stap_probe_destroy): Update comment.
+	(handle_stap_probe): Allocate on the per-BFD obstack.
+
+2014-03-03  Tom Tromey  <tromey@redhat.com>
+
 	* break-catch-throw.c (fetch_probe_arguments): Use bound probes.
 	* breakpoint.c (create_longjmp_master_breakpoint): Use
 	get_probe_address.
