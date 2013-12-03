@@ -5001,10 +5001,8 @@ ppc64_elf_link_just_syms (asection *sec, struct bfd_link_info *info)
       && (sec->owner->flags & (EXEC_P | DYNAMIC)) != 0
       && is_ppc64_elf (sec->owner))
     {
-      asection *got = bfd_get_section_by_name (sec->owner, ".got");
-      if (got != NULL
-	  && got->size >= elf_backend_got_header_size
-	  && bfd_get_section_by_name (sec->owner, ".opd") != NULL)
+      if (abiversion (sec->owner) >= 2
+	  || bfd_get_section_by_name (sec->owner, ".opd") != NULL)
 	sec->has_toc_reloc = 1;
     }
   _bfd_elf_link_just_syms (sec, info);
