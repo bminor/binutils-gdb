@@ -1,3 +1,8 @@
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Mention "-list-features" in the entry documenting
+	the support for the "--language" option.
+
 2013-12-03  Tom Tromey  <tromey@redhat.com>
 	    Jan Kratochvil  <jan.kratochvil@redhat.com>
 	    Doug Evans  <dje@google.com>

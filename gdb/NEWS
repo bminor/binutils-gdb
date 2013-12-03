@@ -160,6 +160,8 @@ show code-cache
 * MI changes
 
   ** All MI commands now accept an optional "--language" option.
+     Support for this feature can be verified by using the "-list-features"
+     command, which should contain "language-option".
 
   ** The new command -info-gdb-mi-command allows the user to determine
      whether a GDB/MI command is supported or not.
