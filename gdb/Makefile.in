@@ -625,6 +625,7 @@ ALL_TARGET_OBS = \
 	bfin-linux-tdep.o bfin-tdep.o \
 	cris-linux-tdep.o cris-tdep.o \
 	dicos-tdep.o \
+	fbsd-tdep.o \
 	frv-linux-tdep.o frv-tdep.o \
 	h8300-tdep.o \
 	hppabsd-tdep.o hppanbsd-tdep.o hppaobsd-tdep.o \
@@ -939,7 +940,7 @@ common/print-utils.h common/rsp-low.h nat/x86-dregs.h x86-linux-nat.h \
 i386-linux-nat.h common/common-defs.h common/errors.h common/common-types.h \
 common/common-debug.h common/cleanups.h common/gdb_setjmp.h \
 common/common-exceptions.h target/target.h common/symbol.h \
-common/common-regcache.h
+common/common-regcache.h fbsd-tdep.h
 
 # Header files that already have srcdir in them, or which are in objdir.
 
@@ -1622,6 +1623,7 @@ ALLDEPFILES = \
 	dcache.c dicos-tdep.c darwin-nat.c \
 	exec.c \
 	fbsd-nat.c \
+	fbsd-tdep.c \
 	fork-child.c \
 	glibc-tdep.c \
 	go32-nat.c h8300-tdep.c \

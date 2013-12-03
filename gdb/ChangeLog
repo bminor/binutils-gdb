@@ -1,5 +1,13 @@
 2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
 
+	* fbsd-tdep.c: New file.
+	* fbsd-tdep.h: New file.
+	* Makefile.in (ALL_TARGET_OBS): Add fbsd-tdep.o.
+	(HFILES_NO_SRCDIR): Add fbsd-tdep.h.
+	(ALLDEPFILES): Add fbsd-tdep.c.
+
+2014-09-30  Andreas Arnez  <arnez@linux.vnet.ibm.com>
+
 	* gdbarch.sh (iterate_over_regset_sections_cb): Add regset
 	parameter.
 	* gdbarch.h: Regenerate.
