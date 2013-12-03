@@ -45,6 +45,7 @@
 @dircategory Software development
 @direntry
 * Gdb: (gdb).                     The GNU debugger.
+* gdbserver: (gdb) Server.        The GNU debugging server.
 @end direntry
 
 @copying
