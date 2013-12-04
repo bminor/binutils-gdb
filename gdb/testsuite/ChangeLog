@@ -1,3 +1,9 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb.hp/gdb.base-hp/so-thresh.sh: Change /bin/ksh to /bin/sh.
+	* gdb.hp/gdb.objdbg/tools/symaddr: Likewise.
+	* gdb.hp/gdb.objdbg/tools/symaddr.pa64: Likewise.
+
 2013-12-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.dwarf2/dw2-undefined-ret-addr.S: New file.
