@@ -139,7 +139,8 @@ pex64_get_unwind_info (bfd *abfd, struct pex64_unwind_info *ui, void *data)
 
 static void
 pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
-			     struct pex64_unwind_info *ui)
+			     struct pex64_unwind_info *ui,
+			     struct pex64_runtime_function *rf)
 {
   unsigned int i;
   unsigned int tmp; /* At least 32 bits.  */
@@ -156,17 +157,31 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 
   i = 0;
 
-  if (ui->Version == 2 && PEX64_UNWCODE_CODE (ui->rawUnwindCodes[1]) == 6)
+  if (ui->Version == 2
+      && PEX64_UNWCODE_CODE (ui->rawUnwindCodes[1]) == UWOP_EPILOG)
     {
-      /* Display opcodes 6 (whose meaning is not documented).  */
-      fprintf (file, "\tv2 opcode6:");
+      /* Display epilog opcode (whose docoding is not fully documented).
+         Looks to be designed to speed-up unwinding, as there is no need
+	 to decode instruction flow if outside an epilog.  */
+      unsigned int func_size = rf->rva_EndAddress - rf->rva_BeginAddress;
+
+      fprintf (file, "\tv2 epilog (length: %02x) at pc+:",
+	       ui->rawUnwindCodes[0]);
+      if (PEX64_UNWCODE_INFO (ui->rawUnwindCodes[1]))
+	fprintf (file, " 0x%x", func_size - ui->rawUnwindCodes[0]);
+      i++;
       for (; i < ui->CountOfCodes; i++)
 	{
 	  const bfd_byte *dta = ui->rawUnwindCodes + 2 * i;
+	  unsigned int off;
 
-	  if (PEX64_UNWCODE_CODE (dta[1]) != 6)
+	  if (PEX64_UNWCODE_CODE (dta[1]) != UWOP_EPILOG)
 	    break;
-	  fprintf (file, " %02x %01x", dta[0], PEX64_UNWCODE_INFO (dta[1]));
+	  off = dta[0] | (PEX64_UNWCODE_INFO (dta[1]) << 8);
+	  if (off == 0)
+	    fprintf (file, " [pad]");
+	  else
+	    fprintf (file, " 0x%x", func_size - off);
 	}
       fputc ('\n', file);
     }
@@ -229,7 +244,7 @@ pex64_xdata_print_uwd_codes (FILE *file, bfd *abfd,
 	    }
 	  else if (ui->Version == 2)
 	    {
-	      fprintf (file, "v2-opc6 %02x %01x", dta[0], info);
+	      fprintf (file, "epilog %02x %01x", dta[0], info);
 	      unexpected = TRUE;
 	    }
 	  break;
@@ -290,15 +305,18 @@ pex64_get_section_by_rva (bfd *abfd, bfd_vma addr, const char *sec_name)
   return section;
 }
 
-/* Dump xdata at rva ADDR to FILE for ABFD.  */
+/* Dump xdata at for function RF to FILE.  The argument XDATA_SECTION
+   designate the bfd section containing the xdata, XDATA is its content,
+   and ENDX the size if known (or NULL).  */
 
 static void
 pex64_dump_xdata (FILE *file, bfd *abfd,
-		  asection *xdata_section, bfd_byte *xdata,
-		  bfd_vma addr, bfd_vma *endx)
+		  asection *xdata_section, bfd_byte *xdata, bfd_vma *endx,
+		  struct pex64_runtime_function *rf)
 {
   bfd_vma vaddr;
   bfd_vma end_addr;
+  bfd_vma addr = rf->rva_UnwindData;
   struct pex64_unwind_info ui;
 
   vaddr = xdata_section->vma - pe_data (abfd)->pe_opthdr.ImageBase;
@@ -362,7 +380,7 @@ pex64_dump_xdata (FILE *file, bfd *abfd,
 	   ui.FrameRegister == 0 ? "none"
 	   : pex_regs[(unsigned int) ui.FrameRegister]);
 
-  pex64_xdata_print_uwd_codes (file, abfd, &ui);
+  pex64_xdata_print_uwd_codes (file, abfd, &ui, rf);
 
   switch (ui.Flags)
     {
@@ -571,9 +589,11 @@ pex64_bfd_print_pdata (bfd *abfd, void *vfile)
       else
 	prev_unwinddata_rva = rf.rva_UnwindData;
 
-      fprintf (file, " (rva: %08x): for function at ",
+      fprintf (file, " (rva: %08x): ",
 	       (unsigned int) rf.rva_UnwindData);
       fprintf_vma (file, rf.rva_BeginAddress + imagebase);
+      fprintf (file, " - ");
+      fprintf_vma (file, rf.rva_EndAddress + imagebase);
       fputc ('\n', file);
 
       if (rf.rva_UnwindData != 0)
@@ -618,8 +638,7 @@ pex64_bfd_print_pdata (bfd *abfd, void *vfile)
 	      if (p[0] == ~((bfd_vma) 0))
 		p = NULL;
 
-	      pex64_dump_xdata (file, abfd, xdata_section, xdata,
-				rf.rva_UnwindData, p);
+	      pex64_dump_xdata (file, abfd, xdata_section, xdata, p, &rf);
 	    }
 	}
     }

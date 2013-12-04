@@ -1,3 +1,11 @@
+2013-12-06  Tristan Gingold  <gingold@adacore.com>
+
+	* pei-x86_64.c (pex64_xdata_print_uwd_codes): Add argument rf.
+	Display epilog opcode.
+	(pex64_dump_xdata): Add argument rf; make addr a local variable.
+	Adjust call to pex64_xdata_print_uwd_codes.
+	(pex64_bfd_print_pdata): Display code range, adjust call to
+
 2013-12-05  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.c (bfd_mach_o_mkobject_init): Use bfd_zalloc.

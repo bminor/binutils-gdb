@@ -392,8 +392,10 @@ struct external_pex64_runtime_function
 #define UWOP_SET_FPREG	      3
 #define UWOP_SAVE_NONVOL      4
 #define UWOP_SAVE_NONVOL_FAR  5
-#define UWOP_SAVE_XMM	      6	/* Deprecated, redefined in version 2.  */
-#define UWOP_SAVE_XMM_FAR     7	/* Deprecated.  */
+#define UWOP_SAVE_XMM         6 /* For version 1.  */
+#define UWOP_EPILOG           6 /* For version 2.  */
+#define UWOP_SAVE_XMM_FAR     7 /* For version 1 (deprecated).  */
+#define UWOP_SPARE            7 /* For version 2.  */
 #define UWOP_SAVE_XMM128      8
 #define UWOP_SAVE_XMM128_FAR  9
 #define UWOP_PUSH_MACHFRAME   10
