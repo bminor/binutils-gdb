@@ -21391,6 +21391,7 @@ be returned in a register.
 @kindex show struct-convention
 Show the current setting of the convention to return @code{struct}s
 from functions.
+@end table
 
 @cindex Intel(R) Memory Protection Extensions (MPX).
 @subsubsection Intel(R) @dfn{Memory Protection Extensions} (MPX).
@@ -21424,7 +21425,6 @@ This way the raw value can be accessed via bnd0raw@dots{}bnd3raw.  Any change
 on bnd0@dots{}bnd3 or bnd0raw@dots{}bnd3raw is reflect on its counterpart.  When the
 bnd0@dots{}bnd3 registers are displayed via Python, the display includes the memory size,
 in bits, accessible to the pointer.
-@end table
 
 @node Alpha
 @subsection Alpha

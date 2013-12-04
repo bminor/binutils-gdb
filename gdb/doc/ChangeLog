@@ -1,3 +1,7 @@
+2013-12-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (i386): Fix yesterday's commit.
+
 2013-12-03  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Set Catchpoints): Add @kindex for each command
