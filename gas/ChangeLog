@@ -1,3 +1,9 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/bfin-aux.h: Remove +x file mode.
+	* config/tc-epiphany.c: Likewise.
+	* config/tc-epiphany.h: Likewise.
+
 2013-12-03  Tristan Gingold  <gingold@adacore.com>
 
 	* config/tc-i386-intel.c (i386_intel_simplify): Avoid arithmetic

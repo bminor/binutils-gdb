@@ -1,3 +1,29 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* gas/bfin/bit2.s: Remove +x file mode.
+	* gas/bfin/cache2.s: Likewise.
+	* gas/bfin/control_code2.s: Likewise.
+	* gas/bfin/event2.s: Likewise.
+	* gas/bfin/flow2.s: Likewise.
+	* gas/bfin/logical2.s: Likewise.
+	* gas/bfin/move2.s: Likewise.
+	* gas/bfin/shift2.s: Likewise.
+	* gas/bfin/stack2.s: Likewise.
+	* gas/bfin/vector2.s: Likewise.
+	* gas/bfin/video2.s: Likewise.
+	* gas/epiphany/sample.s: Likewise.
+	* gas/pe/aligncomm-a.d: Likewise.
+	* gas/pe/aligncomm-a.s: Likewise.
+	* gas/pe/aligncomm-b.d: Likewise.
+	* gas/pe/aligncomm-c.d: Likewise.
+	* gas/pe/aligncomm-c.s: Likewise.
+	* gas/pe/aligncomm-d.d: Likewise.
+	* gas/pe/aligncomm-d.s: Likewise.
+	* gas/pe/pe.exp: Likewise.
+	* gas/ppc/vle-simple-4.s: Likewise.
+	* gas/ppc/vle.d: Likewise.
+	* gas/ppc/vle.s: Likewise.
+
 2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
 
 	* gas/mips/mips.exp: Consider mips-mti-elf the same as mips-sde-elf

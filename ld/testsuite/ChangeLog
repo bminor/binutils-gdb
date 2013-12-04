@@ -1,3 +1,32 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* ld-pe/aligncomm-1.c: Remove +x file mode.
+	* ld-pe/aligncomm-2.c: Likewise.
+	* ld-pe/aligncomm-3.c: Likewise.
+	* ld-pe/aligncomm-4.c: Likewise.
+	* ld-pe/aligncomm.d: Likewise.
+	* ld-pe/export_dynamic_warning.s: Likewise.
+	* ld-pe/exports64.d: Likewise.
+	* ld-pe/longsecn-1.d: Likewise.
+	* ld-pe/longsecn-2.d: Likewise.
+	* ld-pe/longsecn-3.d: Likewise.
+	* ld-pe/longsecn-4.d: Likewise.
+	* ld-pe/longsecn-5.d: Likewise.
+	* ld-pe/longsecn.d: Likewise.
+	* ld-pe/longsecn.s: Likewise.
+	* ld-pe/non-c-lang-syms.d: Likewise.
+	* ld-pe/non-c-lang-syms.s: Likewise.
+	* ld-pe/pe-compile.exp: Likewise.
+	* ld-pe/pe-run.exp: Likewise.
+	* ld-pe/tlssec.s: Likewise.
+	* ld-pe/tlssec32.d: Likewise.
+	* ld-pe/tlssec64.d: Likewise.
+	* ld-pe/vers-script-1.ver: Likewise.
+	* ld-pe/vers-script-2.ver: Likewise.
+	* ld-pe/vers-script-3.ver: Likewise.
+	* ld-pe/vers-script-4.ver: Likewise.
+	* ld-pe/vers-script-dll.c: Likewise.
+
 2013-11-27  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
 
 	* ld-plugin/lto.exp: Add -ffat-lto-objects.

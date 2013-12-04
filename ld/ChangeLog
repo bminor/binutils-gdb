@@ -1,3 +1,18 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* ChangeLog-2008: Remove +x file mode.
+	* emulparams/bfin.sh: Likewise.
+	* emulparams/elf32bmipn32.sh: Likewise.
+	* emulparams/elf32fr30.sh: Likewise.
+	* emulparams/elf32frv.sh: Likewise.
+	* emulparams/elf32iq10.sh: Likewise.
+	* emulparams/elf32iq2000.sh: Likewise.
+	* emulparams/elf32mep.sh: Likewise.
+	* emulparams/elf32openrisc.sh: Likewise.
+	* emulparams/elf64bmip.sh: Likewise.
+	* emulparams/elf64hppa.sh: Likewise.
+	* emulparams/i386beos.sh: Likewise.
+
 2013-11-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/16259

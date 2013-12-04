@@ -1,5 +1,10 @@
 2013-12-07  Mike Frysinger  <vapier@gentoo.org>
 
+	* gdb.ada/uninitialized_vars/parse_controlled.ads: Remove +x file mode.
+	* gdb.base/testenv.c: Likewise.
+
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
 	* gdb.hp/gdb.base-hp/so-thresh.sh: Change /bin/ksh to /bin/sh.
 	* gdb.hp/gdb.objdbg/tools/symaddr: Likewise.
 	* gdb.hp/gdb.objdbg/tools/symaddr.pa64: Likewise.

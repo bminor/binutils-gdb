@@ -1,3 +1,9 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* binutils-all/windres/escapex-2.rc: Remove +x file mode.
+	* binutils-all/windres/version_small.rc: Likewise.
+	* binutils-all/windres/version_small.rsd: Likewise.
+
 2013-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* binutils-all/windres/windres.exp: Run for x86_64-pc-cygwin.
