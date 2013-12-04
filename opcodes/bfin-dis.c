@@ -484,6 +484,7 @@ static const enum machine_registers decode_allregs[] =
 #ifndef OUTS
 #define OUTS(p, txt) (p)->fprintf_func ((p)->stream, "%s", txt)
 #endif
+#define OUT(p, txt, ...) (p)->fprintf_func ((p)->stream, txt, ## __VA_ARGS__)
 
 static void
 amod0 (int s0, int x0, disassemble_info *outf)
@@ -1224,6 +1225,7 @@ decode_CC2stat_0 (TIword iw0, disassemble_info *outf)
   int cbit = ((iw0 >> CC2stat_cbit_bits) & CC2stat_cbit_mask);
 
   const char *bitname = statbits (cbit);
+  const char * const op_names[] = { "", "|", "&", "^" } ;
 
   if (priv->parallel)
     return 0;
@@ -1241,48 +1243,10 @@ decode_CC2stat_0 (TIword iw0, disassemble_info *outf)
       bitname = bitnames;
     }
 
-  if (op == 0 && D == 0)
-    {
-      OUTS (outf, "CC = ");
-      OUTS (outf, bitname);
-    }
-  else if (op == 1 && D == 0)
-    {
-      OUTS (outf, "CC |= ");
-      OUTS (outf, bitname);
-    }
-  else if (op == 2 && D == 0)
-    {
-      OUTS (outf, "CC &= ");
-      OUTS (outf, bitname);
-    }
-  else if (op == 3 && D == 0)
-    {
-      OUTS (outf, "CC ^= ");
-      OUTS (outf, bitname);
-    }
-  else if (op == 0 && D == 1)
-    {
-      OUTS (outf, bitname);
-      OUTS (outf, " = CC");
-    }
-  else if (op == 1 && D == 1)
-    {
-      OUTS (outf, bitname);
-      OUTS (outf, " |= CC");
-    }
-  else if (op == 2 && D == 1)
-    {
-      OUTS (outf, bitname);
-      OUTS (outf, " &= CC");
-    }
-  else if (op == 3 && D == 1)
-    {
-      OUTS (outf, bitname);
-      OUTS (outf, " ^= CC");
-    }
+  if (D == 0)
+    OUT (outf, "CC %s= %s", op_names[op], bitname);
   else
-    return 0;
+    OUT (outf, "%s %s= CC", bitname, op_names[op]);
 
   return 2;
 }
