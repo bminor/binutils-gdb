@@ -1,3 +1,8 @@
+2013-12-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* frame.c (get_prev_frame_1): Delete variable "this_id".
+	Replace its use by a call to get_frame_id.
+
 2013-12-05  Anthony Green  <green@moxielogic.com>
 
 	* moxie-tdep.c (moxie_software_single_step): New function.

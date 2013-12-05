@@ -1719,7 +1719,6 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
 static struct frame_info *
 get_prev_frame_1 (struct frame_info *this_frame)
 {
-  struct frame_id this_id;
   struct gdbarch *gdbarch;
 
   gdb_assert (this_frame != NULL);
@@ -1791,7 +1790,8 @@ get_prev_frame_1 (struct frame_info *this_frame)
      See the comment at frame_id_inner for details.  */
   if (get_frame_type (this_frame) == NORMAL_FRAME
       && this_frame->next->unwind->type == NORMAL_FRAME
-      && frame_id_inner (get_frame_arch (this_frame->next), this_id,
+      && frame_id_inner (get_frame_arch (this_frame->next),
+			 get_frame_id (this_frame),
 			 get_frame_id (this_frame->next)))
     {
       CORE_ADDR this_pc_in_block;
