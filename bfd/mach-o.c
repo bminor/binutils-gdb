@@ -4148,7 +4148,7 @@ bfd_mach_o_mkobject_init (bfd *abfd)
 {
   bfd_mach_o_data_struct *mdata = NULL;
 
-  mdata = bfd_alloc (abfd, sizeof (bfd_mach_o_data_struct));
+  mdata = bfd_zalloc (abfd, sizeof (bfd_mach_o_data_struct));
   if (mdata == NULL)
     return FALSE;
   abfd->tdata.mach_o_data = mdata;

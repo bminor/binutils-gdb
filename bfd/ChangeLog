@@ -1,3 +1,7 @@
+2013-12-05  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_mkobject_init): Use bfd_zalloc.
+
 2013-12-03  Nick Clifton  <nickc@redhat.com>
 
 	* peXXigen.c (pe_print_resource_entries): New function: Displays
