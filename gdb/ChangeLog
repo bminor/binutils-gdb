@@ -1,4 +1,4 @@
-2013-12-04  Doug Evans  <xdje42@gmail.com>
+2013-12-05  Doug Evans  <xdje42@gmail.com>
 
 	* auto-load.c (load_auto_scripts_for_objfile): Add some comments.
 
