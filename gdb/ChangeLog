@@ -1,3 +1,10 @@
+2013-12-05  Anthony Green  <green@moxielogic.com>
+
+	* moxie-tdep.c (moxie_software_single_step): New function.
+	(INST2OFFSET): New helper macro.
+	(moxie_gdbarch_init): Call set_gdbarch_software_single_step.
+	(moxie_process_readu): Move this up in the file.
+
 2013-12-05  Doug Evans  <xdje42@gmail.com>
 
 	* auto-load.c (load_auto_scripts_for_objfile): Add some comments.
