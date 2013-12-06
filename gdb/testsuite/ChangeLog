@@ -1,3 +1,7 @@
+2013-12-06  Doug Evans  <dje@google.com>
+
+	* gdb.base/break.exp: Fix setting of $baz.
+
 2013-12-06  Andrew Burgess  <aburgess@broadcom.com>
 
 	* lib/dwarf.exp: (Dwarf::_location): Handle DW_OP_bit_piece and
