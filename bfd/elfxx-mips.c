@@ -969,13 +969,79 @@ static const bfd_vma mips_n64_exec_plt0_entry[] =
   0x2718fffe	/* subu $24, $24, 2					*/
 };
 
-/* The format of subsequent PLT entries.  */
+/* The format of the microMIPS first PLT entry in an O32 executable.
+   We rely on v0 ($2) rather than t8 ($24) to contain the address
+   of the GOTPLT entry handled, so this stub may only be used when
+   all the subsequent PLT entries are microMIPS code too.
+
+   The trailing NOP is for alignment and correct disassembly only.  */
+static const bfd_vma micromips_o32_exec_plt0_entry[] =
+{
+  0x7980, 0x0000,	/* addiupc $3, (&GOTPLT[0]) - .			*/
+  0xff23, 0x0000,	/* lw $25, 0($3)				*/
+  0x0535,		/* subu $2, $2, $3				*/
+  0x2525,		/* srl $2, $2, 2				*/
+  0x3302, 0xfffe,	/* subu $24, $2, 2				*/
+  0x0dff,		/* move $15, $31				*/
+  0x45f9,		/* jalrs $25					*/
+  0x0f83,		/* move $28, $3					*/
+  0x0c00		/* nop						*/
+};
+
+/* The format of the microMIPS first PLT entry in an O32 executable
+   in the insn32 mode.  */
+static const bfd_vma micromips_insn32_o32_exec_plt0_entry[] =
+{
+  0x41bc, 0x0000,	/* lui $28, %hi(&GOTPLT[0])			*/
+  0xff3c, 0x0000,	/* lw $25, %lo(&GOTPLT[0])($28)			*/
+  0x339c, 0x0000,	/* addiu $28, $28, %lo(&GOTPLT[0])		*/
+  0x0398, 0xc1d0,	/* subu $24, $24, $28				*/
+  0x001f, 0x7950,	/* move $15, $31				*/
+  0x0318, 0x1040,	/* srl $24, $24, 2				*/
+  0x03f9, 0x0f3c,	/* jalr $25					*/
+  0x3318, 0xfffe	/* subu $24, $24, 2				*/
+};
+
+/* The format of subsequent standard PLT entries.  */
 static const bfd_vma mips_exec_plt_entry[] =
 {
   0x3c0f0000,	/* lui $15, %hi(.got.plt entry)			*/
   0x01f90000,	/* l[wd] $25, %lo(.got.plt entry)($15)		*/
   0x25f80000,	/* addiu $24, $15, %lo(.got.plt entry)		*/
   0x03200008	/* jr $25					*/
+};
+
+/* The format of subsequent MIPS16 o32 PLT entries.  We use v0 ($2)
+   and v1 ($3) as temporaries because t8 ($24) and t9 ($25) are not
+   directly addressable.  */
+static const bfd_vma mips16_o32_exec_plt_entry[] =
+{
+  0xb203,		/* lw $2, 12($pc)			*/
+  0x9a60,		/* lw $3, 0($2)				*/
+  0x651a,		/* move $24, $2				*/
+  0xeb00,		/* jr $3				*/
+  0x653b,		/* move $25, $3				*/
+  0x6500,		/* nop					*/
+  0x0000, 0x0000	/* .word (.got.plt entry)		*/
+};
+
+/* The format of subsequent microMIPS o32 PLT entries.  We use v0 ($2)
+   as a temporary because t8 ($24) is not addressable with ADDIUPC.  */
+static const bfd_vma micromips_o32_exec_plt_entry[] =
+{
+  0x7900, 0x0000,	/* addiupc $2, (.got.plt entry) - .	*/
+  0xff22, 0x0000,	/* lw $25, 0($2)			*/
+  0x4599,		/* jr $25				*/
+  0x0f02		/* move $24, $2				*/
+};
+
+/* The format of subsequent microMIPS o32 PLT entries in the insn32 mode.  */
+static const bfd_vma micromips_insn32_o32_exec_plt_entry[] =
+{
+  0x41af, 0x0000,	/* lui $15, %hi(.got.plt entry)		*/
+  0xff2f, 0x0000,	/* lw $25, %lo(.got.plt entry)($15)	*/
+  0x0019, 0x0f3c,	/* jr $25				*/
+  0x330f, 0x0000	/* addiu $24, $15, %lo(.got.plt entry)	*/
 };
 
 /* The format of the first PLT entry in a VxWorks executable.  */
@@ -14345,6 +14411,246 @@ _bfd_mips_elf_plt_sym_val (bfd_vma i, const asection *plt,
   return (plt->vma
 	  + 4 * ARRAY_SIZE (mips_o32_exec_plt0_entry)
 	  + i * 4 * ARRAY_SIZE (mips_exec_plt_entry));
+}
+
+/* Build a table of synthetic symbols to represent the PLT.  As with MIPS16
+   and microMIPS PLT slots we may have a many-to-one mapping between .plt
+   and .got.plt and also the slots may be of a different size each we walk
+   the PLT manually fetching instructions and matching them against known
+   patterns.  To make things easier standard MIPS slots, if any, always come
+   first.  As we don't create proper ELF symbols we use the UDATA.I member
+   of ASYMBOL to carry ISA annotation.  The encoding used is the same as
+   with the ST_OTHER member of the ELF symbol.  */
+
+long
+_bfd_mips_elf_get_synthetic_symtab (bfd *abfd,
+				    long symcount ATTRIBUTE_UNUSED,
+				    asymbol **syms ATTRIBUTE_UNUSED,
+				    long dynsymcount, asymbol **dynsyms,
+				    asymbol **ret)
+{
+  static const char pltname[] = "_PROCEDURE_LINKAGE_TABLE_";
+  static const char microsuffix[] = "@micromipsplt";
+  static const char m16suffix[] = "@mips16plt";
+  static const char mipssuffix[] = "@plt";
+
+  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
+  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  bfd_boolean micromips_p = MICROMIPS_P (abfd);
+  Elf_Internal_Shdr *hdr;
+  bfd_byte *plt_data;
+  bfd_vma plt_offset;
+  unsigned int other;
+  bfd_vma entry_size;
+  bfd_vma plt0_size;
+  asection *relplt;
+  bfd_vma opcode;
+  asection *plt;
+  asymbol *send;
+  size_t size;
+  char *names;
+  long counti;
+  arelent *p;
+  asymbol *s;
+  char *nend;
+  long count;
+  long pi;
+  long i;
+  long n;
+
+  *ret = NULL;
+
+  if ((abfd->flags & (DYNAMIC | EXEC_P)) == 0 || dynsymcount <= 0)
+    return 0;
+
+  relplt = bfd_get_section_by_name (abfd, ".rel.plt");
+  if (relplt == NULL)
+    return 0;
+
+  hdr = &elf_section_data (relplt)->this_hdr;
+  if (hdr->sh_link != elf_dynsymtab (abfd) || hdr->sh_type != SHT_REL)
+    return 0;
+
+  plt = bfd_get_section_by_name (abfd, ".plt");
+  if (plt == NULL)
+    return 0;
+
+  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+  if (!(*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
+    return -1;
+  p = relplt->relocation;
+
+  /* Calculating the exact amount of space required for symbols would
+     require two passes over the PLT, so just pessimise assuming two
+     PLT slots per relocation.  */
+  count = relplt->size / hdr->sh_entsize;
+  counti = count * bed->s->int_rels_per_ext_rel;
+  size = 2 * count * sizeof (asymbol);
+  size += count * (sizeof (mipssuffix) +
+		   (micromips_p ? sizeof (microsuffix) : sizeof (m16suffix)));
+  for (pi = 0; pi < counti; pi += bed->s->int_rels_per_ext_rel)
+    size += 2 * strlen ((*p[pi].sym_ptr_ptr)->name);
+
+  /* Add the size of "_PROCEDURE_LINKAGE_TABLE_" too.  */
+  size += sizeof (asymbol) + sizeof (pltname);
+
+  if (!bfd_malloc_and_get_section (abfd, plt, &plt_data))
+    return -1;
+
+  if (plt->size < 16)
+    return -1;
+
+  s = *ret = bfd_malloc (size);
+  if (s == NULL)
+    return -1;
+  send = s + 2 * count + 1;
+
+  names = (char *) send;
+  nend = (char *) s + size;
+  n = 0;
+
+  opcode = bfd_get_micromips_32 (abfd, plt_data + 12);
+  if (opcode == 0x3302fffe)
+    {
+      if (!micromips_p)
+	return -1;
+      plt0_size = 2 * ARRAY_SIZE (micromips_o32_exec_plt0_entry);
+      other = STO_MICROMIPS;
+    }
+  else if (opcode == 0x0398c1d0)
+    {
+      if (!micromips_p)
+	return -1;
+      plt0_size = 2 * ARRAY_SIZE (micromips_insn32_o32_exec_plt0_entry);
+      other = STO_MICROMIPS;
+    }
+  else
+    {
+      plt0_size = 4 * ARRAY_SIZE (mips_o32_exec_plt0_entry);
+      other = 0;
+    }
+
+  s->the_bfd = abfd;
+  s->flags = BSF_SYNTHETIC | BSF_FUNCTION | BSF_LOCAL;
+  s->section = plt;
+  s->value = 0;
+  s->name = names;
+  s->udata.i = other;
+  memcpy (names, pltname, sizeof (pltname));
+  names += sizeof (pltname);
+  ++s, ++n;
+
+  pi = 0;
+  for (plt_offset = plt0_size;
+       plt_offset + 8 <= plt->size && s < send;
+       plt_offset += entry_size)
+    {
+      bfd_vma gotplt_addr;
+      const char *suffix;
+      bfd_vma gotplt_hi;
+      bfd_vma gotplt_lo;
+      size_t suffixlen;
+
+      opcode = bfd_get_micromips_32 (abfd, plt_data + plt_offset + 4);
+
+      /* Check if the second word matches the expected MIPS16 instruction.  */
+      if (opcode == 0x651aeb00)
+	{
+	  if (micromips_p)
+	    return -1;
+	  /* Truncated table???  */
+	  if (plt_offset + 16 > plt->size)
+	    break;
+	  gotplt_addr = bfd_get_32 (abfd, plt_data + plt_offset + 12);
+	  entry_size = 2 * ARRAY_SIZE (mips16_o32_exec_plt_entry);
+	  suffixlen = sizeof (m16suffix);
+	  suffix = m16suffix;
+	  other = STO_MIPS16;
+	}
+      /* Likewise the expected microMIPS instruction (no insn32 mode).  */
+      else if (opcode == 0xff220000)
+	{
+	  if (!micromips_p)
+	    return -1;
+	  gotplt_hi = bfd_get_16 (abfd, plt_data + plt_offset) & 0x7f;
+	  gotplt_lo = bfd_get_16 (abfd, plt_data + plt_offset + 2) & 0xffff;
+	  gotplt_hi = ((gotplt_hi ^ 0x40) - 0x40) << 18;
+	  gotplt_lo <<= 2;
+	  gotplt_addr = gotplt_hi + gotplt_lo;
+	  gotplt_addr += ((plt->vma + plt_offset) | 3) ^ 3;
+	  entry_size = 2 * ARRAY_SIZE (micromips_o32_exec_plt_entry);
+	  suffixlen = sizeof (microsuffix);
+	  suffix = microsuffix;
+	  other = STO_MICROMIPS;
+	}
+      /* Likewise the expected microMIPS instruction (insn32 mode).  */
+      else if ((opcode & 0xffff0000) == 0xff2f0000)
+	{
+	  gotplt_hi = bfd_get_16 (abfd, plt_data + plt_offset + 2) & 0xffff;
+	  gotplt_lo = bfd_get_16 (abfd, plt_data + plt_offset + 6) & 0xffff;
+	  gotplt_hi = ((gotplt_hi ^ 0x8000) - 0x8000) << 16;
+	  gotplt_lo = (gotplt_lo ^ 0x8000) - 0x8000;
+	  gotplt_addr = gotplt_hi + gotplt_lo;
+	  entry_size = 2 * ARRAY_SIZE (micromips_insn32_o32_exec_plt_entry);
+	  suffixlen = sizeof (microsuffix);
+	  suffix = microsuffix;
+	  other = STO_MICROMIPS;
+	}
+      /* Otherwise assume standard MIPS code.  */
+      else
+	{
+	  gotplt_hi = bfd_get_32 (abfd, plt_data + plt_offset) & 0xffff;
+	  gotplt_lo = bfd_get_32 (abfd, plt_data + plt_offset + 4) & 0xffff;
+	  gotplt_hi = ((gotplt_hi ^ 0x8000) - 0x8000) << 16;
+	  gotplt_lo = (gotplt_lo ^ 0x8000) - 0x8000;
+	  gotplt_addr = gotplt_hi + gotplt_lo;
+	  entry_size = 4 * ARRAY_SIZE (mips_exec_plt_entry);
+	  suffixlen = sizeof (mipssuffix);
+	  suffix = mipssuffix;
+	  other = 0;
+	}
+      /* Truncated table???  */
+      if (plt_offset + entry_size > plt->size)
+	break;
+
+      for (i = 0;
+	   i < count && p[pi].address != gotplt_addr;
+	   i++, pi = (pi + bed->s->int_rels_per_ext_rel) % counti);
+
+      if (i < count)
+	{
+	  size_t namelen;
+	  size_t len;
+
+	  *s = **p[pi].sym_ptr_ptr;
+	  /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
+	     we are defining a symbol, ensure one of them is set.  */
+	  if ((s->flags & BSF_LOCAL) == 0)
+	    s->flags |= BSF_GLOBAL;
+	  s->flags |= BSF_SYNTHETIC;
+	  s->section = plt;
+	  s->value = plt_offset;
+	  s->name = names;
+	  s->udata.i = other;
+
+	  len = strlen ((*p[pi].sym_ptr_ptr)->name);
+	  namelen = len + suffixlen;
+	  if (names + namelen > nend)
+	    break;
+
+	  memcpy (names, (*p[pi].sym_ptr_ptr)->name, len);
+	  names += len;
+	  memcpy (names, suffix, suffixlen);
+	  names += suffixlen;
+
+	  ++s, ++n;
+	  pi = (pi + bed->s->int_rels_per_ext_rel) % counti;
+	}
+    }
+
+  free (plt_data);
+
+  return n;
 }
 
 void

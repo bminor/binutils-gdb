@@ -343,8 +343,9 @@ make_compact_addr (CORE_ADDR addr)
    "special", i.e. refers to a MIPS16 or microMIPS function, and sets
    one of the "special" bits in a minimal symbol to mark it accordingly.
    The test checks an ELF-private flag that is valid for true function
-   symbols only; in particular synthetic symbols such as for PLT stubs
-   have no ELF-private part at all.
+   symbols only; for synthetic symbols such as for PLT stubs that have
+   no ELF-private part at all the MIPS BFD backend arranges for this
+   information to be carried in the asymbol's udata field instead.
 
    msymbol_is_mips16 and msymbol_is_micromips test the "special" bit
    in a minimal symbol.  */
@@ -353,13 +354,18 @@ static void
 mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
 {
   elf_symbol_type *elfsym = (elf_symbol_type *) sym;
+  unsigned char st_other;
 
-  if ((sym->flags & BSF_SYNTHETIC) != 0)
+  if ((sym->flags & BSF_SYNTHETIC) == 0)
+    st_other = elfsym->internal_elf_sym.st_other;
+  else if ((sym->flags & BSF_FUNCTION) != 0)
+    st_other = sym->udata.i;
+  else
     return;
 
-  if (ELF_ST_IS_MICROMIPS (elfsym->internal_elf_sym.st_other))
+  if (ELF_ST_IS_MICROMIPS (st_other))
     MSYMBOL_TARGET_FLAG_2 (msym) = 1;
-  else if (ELF_ST_IS_MIPS16 (elfsym->internal_elf_sym.st_other))
+  else if (ELF_ST_IS_MIPS16 (st_other))
     MSYMBOL_TARGET_FLAG_1 (msym) = 1;
 }
 

@@ -1,3 +1,8 @@
+2013-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-tdep.c (mips_elf_make_msymbol_special): Handle MIPS16 and
+	microMIPS synthetic symbols.
+
 2013-09-12  Andrew Pinski  <apinski@cavium.com>
 
 	* aarch64-linux-nat.c (aarch64_linux_set_debug_regs): Zero out regs.

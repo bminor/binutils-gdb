@@ -1,3 +1,10 @@
+2013-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-dis.c (is_mips16_plt_tail): New function.
+	(print_insn_mips16): Handle MIPS16 PLT entry's GOT slot address
+	word.
+	(is_compressed_mode_p): Handle MIPS16/microMIPS PLT entries.
+
 2013-03-12  Michael Eager <eager@eagercon.com>
 
 	* opcodes/mips-dis.c (print_insn_args): Modify def of reg. 

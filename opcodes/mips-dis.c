@@ -2033,6 +2033,23 @@ print_mips16_insn_arg (char type,
     }
 }
 
+
+/* Check if the given address is the last word of a MIPS16 PLT entry.
+   This word is data and depending on the value it may interfere with
+   disassembly of further PLT entries.  We make use of the fact PLT
+   symbols are marked BSF_SYNTHETIC.  */
+static bfd_boolean
+is_mips16_plt_tail (struct disassemble_info *info, bfd_vma addr)
+{
+  if (info->symbols
+      && info->symbols[0]
+      && (info->symbols[0]->flags & BSF_SYNTHETIC)
+      && addr == bfd_asymbol_value (info->symbols[0]) + 12)
+    return TRUE;
+
+  return FALSE;
+}
+
 /* Disassemble mips16 instructions.  */
 
 static int
@@ -2040,7 +2057,7 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
 {
   const fprintf_ftype infprintf = info->fprintf_func;
   int status;
-  bfd_byte buffer[2];
+  bfd_byte buffer[4];
   int length;
   int insn;
   bfd_boolean use_extend;
@@ -2053,11 +2070,32 @@ print_insn_mips16 (bfd_vma memaddr, struct disassemble_info *info)
   info->insn_info_valid = 1;
   info->branch_delay_insns = 0;
   info->data_size = 0;
-  info->insn_type = dis_nonbranch;
   info->target = 0;
   info->target2 = 0;
 
-  status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+  /* Decode PLT entry's GOT slot address word.  */
+  if (is_mips16_plt_tail (info, memaddr))
+    {
+      info->insn_type = dis_noninsn;
+      status = (*info->read_memory_func) (memaddr, buffer, 4, info);
+      if (status == 0)
+	{
+	  unsigned int gotslot;
+
+	  if (info->endian == BFD_ENDIAN_BIG)
+	    gotslot = bfd_getb32 (buffer);
+	  else
+	    gotslot = bfd_getl32 (buffer);
+	  infprintf (is, ".word\t0x%x", gotslot);
+
+	  return 4;
+	}
+    }
+  else
+    {
+      info->insn_type = dis_nonbranch;
+      status = (*info->read_memory_func) (memaddr, buffer, 2, info);
+    }
   if (status != 0)
     {
       (*info->memory_error_func) (status, memaddr, info);
@@ -2931,27 +2969,26 @@ print_insn_micromips (bfd_vma memaddr, struct disassemble_info *info)
 static bfd_boolean
 is_compressed_mode_p (struct disassemble_info *info)
 {
-  elf_symbol_type *symbol;
-  int pos;
   int i;
+  int l;
 
-  for (i = 0; i < info->num_symbols; i++)
-    {
-      pos = info->symtab_pos + i;
-
-      if (bfd_asymbol_flavour (info->symtab[pos]) != bfd_target_elf_flavour)
-	continue;
-
-      if (info->symtab[pos]->section != info->section)
-	continue;
-
-      symbol = (elf_symbol_type *) info->symtab[pos];
-      if ((!micromips_ase
-	   && ELF_ST_IS_MIPS16 (symbol->internal_elf_sym.st_other))
-	  || (micromips_ase
-	      && ELF_ST_IS_MICROMIPS (symbol->internal_elf_sym.st_other)))
-	    return 1;
-    }
+  for (i = info->symtab_pos, l = i + info->num_symbols; i < l; i++)
+    if (((info->symtab[i])->flags & BSF_SYNTHETIC) != 0
+	&& ((!micromips_ase
+	     && ELF_ST_IS_MIPS16 ((*info->symbols)->udata.i))
+	    || (micromips_ase
+		&& ELF_ST_IS_MICROMIPS ((*info->symbols)->udata.i))))
+      return 1;
+    else if (bfd_asymbol_flavour (info->symtab[i]) == bfd_target_elf_flavour
+	      && info->symtab[i]->section == info->section)
+      {
+	elf_symbol_type *symbol = (elf_symbol_type *) info->symtab[i];
+	if ((!micromips_ase
+	     && ELF_ST_IS_MIPS16 (symbol->internal_elf_sym.st_other))
+	    || (micromips_ase
+		&& ELF_ST_IS_MICROMIPS (symbol->internal_elf_sym.st_other)))
+	  return 1;
+      }
 
   return 0;
 }

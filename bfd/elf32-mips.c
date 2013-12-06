@@ -2344,7 +2344,6 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_default_use_rela_p	0
 #define elf_backend_sign_extend_vma	TRUE
 #define elf_backend_plt_readonly	1
-#define elf_backend_plt_sym_val		_bfd_mips_elf_plt_sym_val
 
 #define elf_backend_discard_info	_bfd_mips_elf_discard_info
 #define elf_backend_ignore_discarded_relocs \
@@ -2356,6 +2355,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 					mips_elf_is_local_label_name
 #define bfd_elf32_bfd_is_target_special_symbol \
 					_bfd_mips_elf_is_target_special_symbol
+#define bfd_elf32_get_synthetic_symtab	_bfd_mips_elf_get_synthetic_symtab
 #define bfd_elf32_find_nearest_line	_bfd_mips_elf_find_nearest_line
 #define bfd_elf32_find_inliner_info	_bfd_mips_elf_find_inliner_info
 #define bfd_elf32_new_section_hook	_bfd_mips_elf_new_section_hook
@@ -2483,7 +2483,6 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define elf_backend_default_use_rela_p		1
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size		(4 * 3)
-#undef elf_backend_plt_sym_val
 
 #undef elf_backend_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol \
@@ -2508,5 +2507,7 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #undef elf_backend_modify_segment_map
 #undef elf_backend_symbol_processing
 /* NOTE: elf_backend_rela_normal is not defined for MIPS.  */
+
+#undef bfd_elf32_get_synthetic_symtab
 
 #include "elf32-target.h"

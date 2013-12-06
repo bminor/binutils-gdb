@@ -1,3 +1,18 @@
+2013-12-06  Maciej W. Rozycki  <macro@codesourcery.com>
+            Paul Brook  <paul@codesourcery.com>
+
+	* elfxx-mips.h (_bfd_mips_elf_get_synthetic_symtab): New
+	prototype.
+	* elf32-mips.c (elf_backend_plt_sym_val): Remove macro.
+	(bfd_elf32_get_synthetic_symtab): New macro.
+	* elfxx-mips.c (micromips_o32_exec_plt0_entry): New variable.
+	(micromips_insn32_o32_exec_plt0_entry): Likewise.
+	(mips16_o32_exec_plt_entry): Likewise.
+	(micromips_o32_exec_plt_entry): Likewise.
+	(micromips_insn32_o32_exec_plt_entry): Likewise.
+	(_bfd_mips_elf_get_synthetic_symtab): New
+	function.
+
 2013-03-08  Venkataramanan Kumar  <venkataramanan.kumar@linaro.org>
 
         * elf64-aarch64.c (elf_backend_can_gc_sections): Enable gc-section
