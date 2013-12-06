@@ -385,7 +385,6 @@ _initialize_ser_tcp (void)
   ops = XMALLOC (struct serial_ops);
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "tcp";
-  ops->next = 0;
   ops->open = net_open;
   ops->close = net_close;
   ops->readchar = ser_base_readchar;

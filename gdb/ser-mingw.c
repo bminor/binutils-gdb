@@ -1232,7 +1232,6 @@ _initialize_ser_windows (void)
   ops = XMALLOC (struct serial_ops);
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "hardwire";
-  ops->next = 0;
   ops->open = ser_windows_open;
   ops->close = ser_windows_close;
 
@@ -1268,7 +1267,6 @@ _initialize_ser_windows (void)
   memset (ops, 0, sizeof (struct serial_ops));
 
   ops->name = "terminal";
-  ops->next = 0;
 
   ops->close = ser_console_close;
   ops->get_tty_state = ser_console_get_tty_state;
@@ -1287,7 +1285,6 @@ _initialize_ser_windows (void)
   ops = XMALLOC (struct serial_ops);
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "pipe";
-  ops->next = 0;
   ops->open = pipe_windows_open;
   ops->close = pipe_windows_close;
   ops->fdopen = pipe_windows_fdopen;
@@ -1323,7 +1320,6 @@ _initialize_ser_windows (void)
   ops = XMALLOC (struct serial_ops);
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "tcp";
-  ops->next = 0;
   ops->open = net_windows_open;
   ops->close = net_windows_close;
   ops->readchar = ser_base_readchar;

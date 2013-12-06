@@ -1,3 +1,21 @@
+2013-12-19  Tom Tromey  <tromey@redhat.com>
+
+	* serial.c (serial_ops_p): New typedef.
+	(serial_ops_list): Now a VEC.
+	(serial_interface_lookup): Return const.  Use VEC_iterate.
+	(serial_add_interface): Make parameter const.
+	(serial_open): Update.
+	(serial_fdopen_ops): Make 'ops' const.
+	(serial_pipe): Update.
+	* ser-tcp.c (_initialize_ser_tcp): Update.
+	* ser-pipe.c (_initialize_ser_pipe): Update.
+	* ser-unix.c (_initialize_ser_hardwire): Update.
+	* ser-mingw.c (_initialize_ser_windows): Update.
+	* ser-go32.c (dos_ops): Now const.  Update.
+	* serial.h (struct serial) <ops>: Now const.
+	(struct serial_ops) <next>: Remove.
+	(serial_add_interface): Make parameter const.
+
 2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-linux-nat.c (aarch64_linux_set_debug_regs): Set

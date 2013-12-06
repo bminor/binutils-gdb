@@ -912,7 +912,6 @@ _initialize_ser_hardwire (void)
 
   memset (ops, 0, sizeof (struct serial_ops));
   ops->name = "hardwire";
-  ops->next = 0;
   ops->open = hardwire_open;
   ops->close = hardwire_close;
   /* FIXME: Don't replace this with the equivalent ser_base*() until
