@@ -1,3 +1,8 @@
+2014-01-09  Tristan Gingold  <gingold@adacore.com>
+
+	* coff-rs6000.c (rs6000coff_vec, pmac_xcoff_vec): use jump
+	table macros and add macros to initializa the structure.
+
 2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/14207
