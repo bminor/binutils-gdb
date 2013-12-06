@@ -1,3 +1,9 @@
+2013-12-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/dw2-undefined-ret-addr.S: New file.
+	* gdb.dwarf2/dw2-undefined-ret-addr.c: New file.
+	* gdb.dwarf2/dw2-undefined-ret-addr.exp: New file.
+
 2013-12-06  Doug Evans  <dje@google.com>
 
 	* gdb.base/break.exp: Fix setting of $baz.

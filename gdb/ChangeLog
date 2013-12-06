@@ -1,3 +1,23 @@
+2013-12-06  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (enum cached_copy_status): New enum.
+	(struct frame_info) <prev_pc.p>: Change type to enum
+	cached_copy_status.
+	(fprint_frame): Handle not saved and unavailable prev_pc values.
+	(frame_unwind_pc_if_available): Delete and merge contents into ...
+	(frame_unwind_pc): ... here.  Handle OPTIMIZED_OUT_ERROR.  Adjust
+	to use enum cached_copy_status.
+	(frame_unwind_caller_pc_if_available): Delete.
+	(create_new_frame): Adjust.
+	* frame.h (frame_unwind_caller_pc_if_available): Delete
+	declaration.
+	* stack.c (frame_info): Use frame_unwind_caller_pc instead of
+	frame_unwind_caller_pc_if_available, and handle
+	NOT_AVAILABLE_ERROR and OPTIMIZED_OUT_ERROR errors.
+	* valprint.c (val_print_optimized_out): Use val_print_not_saved.
+	(val_print_not_saved): New function.
+	* valprint.h (val_print_not_saved): Declare.
+
 2013-12-06  Andrew Burgess  <aburgess@broadcom.com>
 	    Pedro Alves  <palves@redhat.com>
 

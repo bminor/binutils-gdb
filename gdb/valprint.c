@@ -339,9 +339,15 @@ void
 val_print_optimized_out (const struct value *val, struct ui_file *stream)
 {
   if (val != NULL && value_lval_const (val) == lval_register)
-    fprintf_filtered (stream, _("<not saved>"));
+    val_print_not_saved (stream);
   else
     fprintf_filtered (stream, _("<optimized out>"));
+}
+
+void
+val_print_not_saved (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("<not saved>"));
 }
 
 void

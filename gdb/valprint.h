@@ -163,6 +163,9 @@ extern int read_string (CORE_ADDR addr, int len, int width,
 extern void val_print_optimized_out (const struct value *val,
 				     struct ui_file *stream);
 
+/* Prints "<not saved>" to STREAM.  */
+extern void val_print_not_saved (struct ui_file *stream);
+
 extern void val_print_unavailable (struct ui_file *stream);
 
 extern void val_print_invalid_address (struct ui_file *stream);
