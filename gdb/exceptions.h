@@ -86,6 +86,10 @@ enum errors {
      traceframe.  */
   NOT_AVAILABLE_ERROR,
 
+  /* Value was optimized out.  Note: if the value was a register, this
+     means the register was not saved in the frame.  */
+  OPTIMIZED_OUT_ERROR,
+
   /* DW_OP_GNU_entry_value resolving failed.  */
   NO_ENTRY_VALUE_ERROR,
 

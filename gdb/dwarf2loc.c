@@ -1893,9 +1893,10 @@ write_pieced_value (struct value *to, struct value *from)
 						   &optim, &unavail))
 		      {
 			if (optim)
-			  error (_("Can't do read-modify-write to "
-				   "update bitfield; containing word has been "
-				   "optimized out"));
+			  throw_error (OPTIMIZED_OUT_ERROR,
+				       _("Can't do read-modify-write to "
+					 "update bitfield; containing word "
+					 "has been optimized out"));
 			if (unavail)
 			  throw_error (NOT_AVAILABLE_ERROR,
 				       _("Can't do read-modify-write to update "

@@ -1,3 +1,13 @@
+2013-12-06  Andrew Burgess  <aburgess@broadcom.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* exceptions.h (errors): Add OPTIMIZED_OUT_ERROR.
+	* dwarf2loc.c (write_pieced_value): Throw OPTIMIZED_OUT_ERROR.
+	* frame.c (frame_unwind_register): Throw OPTIMIZED_OUT_ERROR.
+	* spu-tdep.c (spu_software_single_step): Throw
+	OPTIMIZED_OUT_ERROR.
+	* valops.c (value_assign): Throw OPTIMIZED_OUT_ERROR.
+
 2013-12-06  Tom Tromey  <tromey@redhat.com>
 
 	* objfiles.c (free_objfile): Update comment.
