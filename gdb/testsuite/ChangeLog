@@ -1,3 +1,8 @@
+2013-12-06  Andrew Burgess  <aburgess@broadcom.com>
+
+	* lib/dwarf.exp: (Dwarf::_location): Handle DW_OP_bit_piece and
+	DW_OP_plus_uconst.
+
 2013-12-06  Keven Boell  <keven.boell@intel.com>
 
 	* lib/mi-support.exp (mi_list_varobj_children_range): Add
