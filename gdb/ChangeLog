@@ -1,5 +1,17 @@
 2013-12-19  Tom Tromey  <tromey@redhat.com>
 
+	* ser-unix.c (hardwire_ops): New global.
+	(_initialize_ser_hardwire): Use it.
+	* ser-tcp.c (tcp_ops): New global.
+	(_initialize_ser_tcp): Use it.
+	* ser-pipe.c (pipe_ops): New global.
+	(_initialize_ser_pipe): Use it.
+	* ser-mingw.c (hardwire_ops, tty_ops, pipe_ops, tcp_ops): New
+	globals.
+	(_initialize_ser_windows): Use them.
+
+2013-12-19  Tom Tromey  <tromey@redhat.com>
+
 	* serial.c (serial_ops_p): New typedef.
 	(serial_ops_list): Now a VEC.
 	(serial_interface_lookup): Return const.  Use VEC_iterate.
