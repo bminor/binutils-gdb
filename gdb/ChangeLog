@@ -1,5 +1,9 @@
 2013-12-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set GDB version number to 7.6.2.20131208-cvs.
+
+2013-12-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* version.in: Set GDB version number to 7.6.2.DATE-cvs.
 
 2013-12-08  Joel Brobecker  <brobecker@adacore.com>
