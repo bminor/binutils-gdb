@@ -1407,7 +1407,8 @@ frame_info (char *addr_exp, int from_tty)
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
   CORE_ADDR frame_pc;
   int frame_pc_p;
-  CORE_ADDR caller_pc;
+  /* Initialize it to avoid "may be used uninitialized" warning.  */
+  CORE_ADDR caller_pc = 0;
   volatile struct gdb_exception ex;
 
   fi = parse_frame_specification_1 (addr_exp, "No stack.", &selected_frame_p);

@@ -1,3 +1,7 @@
+2013-12-08  Yao Qi  <yao@codesourcery.com>
+
+	* stack.c (frame_info): Initialize variable caller_pc.
+
 2013-12-06  Pedro Alves  <palves@redhat.com>
 
 	* frame.c (enum cached_copy_status): New enum.
