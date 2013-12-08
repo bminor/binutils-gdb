@@ -1,3 +1,7 @@
+2013-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.6.2 released.
+
 2013-12-08  Yao Qi  <yao@codesourcery.com>
 
 	* stack.c (frame_info): Initialize variable caller_pc.
