@@ -35208,6 +35208,7 @@ to the debugger:
 
 @subheading The @code{-list-features} Command
 @findex -list-features
+@cindex supported @sc{gdb/mi} features, list
 
 Returns a list of particular features of the MI protocol that
 this version of gdb implements.  A feature can be a command,
