@@ -1,3 +1,9 @@
+2013-12-10  Roland McGrath  <mcgrathr@google.com>
+
+	* Makefile.am (install-exec-local): Prefix libtool invocation with
+	$(INSTALL_PROGRAM_ENV).
+	* Makefile.in: Regenerate.
+
 2013-11-22  Cory Fields  <cory@coryfields.com>
 
 	* windres.c (define_resource): Use zero for timestamp, making
