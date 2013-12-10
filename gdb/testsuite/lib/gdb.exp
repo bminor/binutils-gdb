@@ -2809,11 +2809,18 @@ proc gdb_compile_pthreads {source dest type options} {
     }
 }
 
-# Build a shared library from SOURCES.  You must use get_compiler_info
-# first.
+# Build a shared library from SOURCES.
 
 proc gdb_compile_shlib {sources dest options} {
     set obj_options $options
+
+    set info_options ""
+    if { [lsearch -exact $options "c++"] >= 0 } {
+	set info_options "c++"
+    }
+    if [get_compiler_info ${info_options}] {
+       return -1
+    }
 
     switch -glob [test_compiler_info] {
         "xlc-*" {
