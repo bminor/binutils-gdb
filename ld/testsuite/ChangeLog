@@ -1,3 +1,9 @@
+2013-12-11  Will Newton  <will.newton@linaro.org>
+
+	* ld-aarch64/ifunc-21.d: Make test more generic to support
+	aarch64_be and ELF targets.
+	* ld-aarch64/ifunc-22.d: Likewise.
+
 2013-11-26  Will Newton  <will.newton@linaro.org>
 
 	* ld-aarch64/aarch64-elf.exp: Add ifunc-22.
