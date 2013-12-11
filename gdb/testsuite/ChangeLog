@@ -1,5 +1,6 @@
 2013-12-10  Doug Evans  <dje@google.com>
 
+	PR 16286
 	* gdb.python/py-value.c: #include stdlib.h, string.h.
 	(str): New struct.
 	(main): New local xstr.
