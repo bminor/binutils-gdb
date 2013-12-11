@@ -227,9 +227,13 @@ c_printstr (struct ui_file *stream, struct type *type,
    until a null character of the appropriate width is found, otherwise
    the string is read to the length of characters specified.  The size
    of a character is determined by the length of the target type of
-   the pointer or array.  If VALUE is an array with a known length,
-   the function will not read past the end of the array.  On
-   completion, *LENGTH will be set to the size of the string read in
+   the pointer or array.
+
+   If VALUE is an array with a known length, and *LENGTH is -1,
+   the function will not read past the end of the array.  However, any
+   declared size of the array is ignored if *LENGTH > 0.
+
+   On completion, *LENGTH will be set to the size of the string read in
    characters.  (If a length of -1 is specified, the length returned
    will not include the null character).  CHARSET is always set to the
    target charset.  */
@@ -308,6 +312,21 @@ c_get_string (struct value *value, gdb_byte **buffer,
   else
     {
       CORE_ADDR addr = value_as_address (value);
+
+      /* Prior to the fix for PR 16196 read_string would ignore fetchlimit
+	 if length > 0.  The old "broken" behaviour is the behaviour we want:
+	 The caller may want to fetch 100 bytes from a variable length array
+	 implemented using the common idiom of having an array of length 1 at
+	 the end of a struct.  In this case we want to ignore the declared
+	 size of the array.  However, it's counterintuitive to implement that
+	 behaviour in read_string: what does fetchlimit otherwise mean if
+	 length > 0.  Therefore we implement the behaviour we want here:
+	 If *length > 0, don't specify a fetchlimit.  This preserves the
+	 previous behaviour.  We could move this check above where we know
+	 whether the array is declared with a fixed size, but we only want
+	 to apply this behaviour when calling read_string.  PR 16286.  */
+      if (*length > 0)
+	fetchlimit = UINT_MAX;
 
       err = read_string (addr, *length, width, fetchlimit,
 			 byte_order, buffer, length);
