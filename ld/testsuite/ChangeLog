@@ -1,3 +1,13 @@
+2013-12-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-elf/shared.exp (build_tests): Add libneeded2a.so,
+	libneeded2b.so, libneeded2c.o and needed2.
+
+	* ld-elf/needed2.ver: New file.
+	* ld-elf/needed2a.c: Likewise.
+	* ld-elf/needed2b.c: Likewise.
+	* ld-elf/needed2c.c: Likewise.
+
 2013-12-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* ld-pe/aligncomm-1.c: Remove +x file mode.
