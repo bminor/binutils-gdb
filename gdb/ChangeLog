@@ -1,3 +1,12 @@
+2013-12-12  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (source_script_from_stream) Use have_python
+	instead of catching UNSUPPORTED_ERROR.
+	* exceptions.h (UNSUPPORTED_ERROR): Delete.
+	* python/python.c (source_python_script) [!HAVE_PYTHON]: Internal
+	error if called.
+	* python/python.h (have_python): New static inline function.
+
 2013-12-11  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (lookup_dwo_cutu): Include name of dwp file in

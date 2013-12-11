@@ -79,9 +79,6 @@ enum errors {
   /* Error accessing memory.  */
   MEMORY_ERROR,
 
-  /* Feature is not supported in this copy of GDB.  */
-  UNSUPPORTED_ERROR,
-
   /* Value not available.  E.g., a register was not collected in a
      traceframe.  */
   NOT_AVAILABLE_ERROR,

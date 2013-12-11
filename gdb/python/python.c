@@ -1390,8 +1390,9 @@ eval_python_from_control_command (struct command_line *cmd)
 void
 source_python_script (FILE *file, const char *filename)
 {
-  throw_error (UNSUPPORTED_ERROR,
-	       _("Python scripting is not supported in this copy of GDB."));
+  internal_error (__FILE__, __LINE__,
+		  _("source_python_script called when Python scripting is "
+		    "not supported."));
 }
 
 int

@@ -89,6 +89,19 @@ typedef enum py_frame_args
   CLI_ALL_VALUES
 } py_frame_args;
 
+/* Returns true if Python support is built into GDB, false
+   otherwise.  */
+
+static inline int
+have_python (void)
+{
+#ifdef HAVE_PYTHON
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 extern void finish_python_initialization (void);
 
 void eval_python_from_control_command (struct command_line *);
