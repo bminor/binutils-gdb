@@ -118,13 +118,13 @@ fetch_probe_arguments (struct value **arg0, struct value **arg1)
 	  && strcmp (pc_probe->name, "rethrow") != 0))
     error (_("not stopped at a C++ exception catchpoint"));
 
-  n_args = get_probe_argument_count (pc_probe);
+  n_args = get_probe_argument_count (pc_probe, frame);
   if (n_args < 2)
     error (_("C++ exception catchpoint has too few arguments"));
 
   if (arg0 != NULL)
-    *arg0 = evaluate_probe_argument (pc_probe, 0);
-  *arg1 = evaluate_probe_argument (pc_probe, 1);
+    *arg0 = evaluate_probe_argument (pc_probe, 0, frame);
+  *arg1 = evaluate_probe_argument (pc_probe, 1, frame);
 
   if ((arg0 != NULL && *arg0 == NULL) || *arg1 == NULL)
     error (_("error computing probe argument at c++ exception catchpoint"));

@@ -1,3 +1,34 @@
+2013-12-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* break-catch-throw.c (fetch_probe_arguments): Pass selected frame
+	to get_probe_argument_count and evaluate_probe_argument.
+	* probe.c (get_probe_argument_count): Adjust declaration to accept
+	frame.  Pass frame to probe_ops's get_probe_argument_count.
+	(evaluate_probe_argument): Likewise, for evaluate_probe_argument.
+	(probe_safe_evaluate_at_pc): Pass frame to
+	get_probe_argument_count and evaluate_probe_argument.
+	* probe.h (struct probe_ops) <get_probe_argument_count,
+	evaluate_probe_argument>: Adjust declarations to accept frame.
+	(get_probe_argument_count, evaluate_probe_argument): Likewise.
+	* solib-svr4.c (solib_event_probe_action): Get current frame.
+	Pass it to get_probe_argument_count.
+	(svr4_handle_solib_event): Get current frame.  Pass it to
+	get_probe_argument_count and evaluate_probe_argument.
+	* stap-probe.c (stap_parse_probe_arguments): Adjust declaration to
+	accept gdbarch.  Do not obtain it from the probe's objfile.
+	(stap_get_probe_argument_count): Adjust declaration to accept
+	frame.  Obtain gdbarch from the frame.  Call generic
+	can_evaluate_probe_arguments.  Pass gdbarch to
+	stap_parse_probe_arguments.
+	(stap_get_arg): Adjust declaration to accept gdbarch.  Pass it to
+	stap_parse_probe_arguments.
+	(stap_evaluate_probe_argument): Adjust declaration to accept
+	frame.  Obtain gdbarch from the frame.  Pass gdbarch to
+	stap_get_arg.
+	(stap_compile_to_ax): Pass agent_expr's gdbarch to stap_get_arg.
+	(compute_probe_arg): Obtain gdbarch from frame.  Pass frame to
+	get_probe_argument_count and evaluate_probe_argument.
+
 2013-12-10  Doug Evans  <dje@google.com>
 
 	PR 16286

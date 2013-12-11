@@ -914,10 +914,9 @@ stap_parse_argument (const char **arg, struct type *atype,
    this information.  */
 
 static void
-stap_parse_probe_arguments (struct stap_probe *probe)
+stap_parse_probe_arguments (struct stap_probe *probe, struct gdbarch *gdbarch)
 {
   const char *cur;
-  struct gdbarch *gdbarch = get_objfile_arch (probe->p.objfile);
 
   gdb_assert (!probe->args_parsed);
   cur = probe->args_u.text;
@@ -1002,16 +1001,18 @@ stap_parse_probe_arguments (struct stap_probe *probe)
    argument string.  */
 
 static unsigned
-stap_get_probe_argument_count (struct probe *probe_generic)
+stap_get_probe_argument_count (struct probe *probe_generic,
+			       struct frame_info *frame)
 {
   struct stap_probe *probe = (struct stap_probe *) probe_generic;
+  struct gdbarch *gdbarch = get_frame_arch (frame);
 
   gdb_assert (probe_generic->pops == &stap_probe_ops);
 
   if (!probe->args_parsed)
     {
-      if (probe_generic->pops->can_evaluate_probe_arguments (probe_generic))
-	stap_parse_probe_arguments (probe);
+      if (can_evaluate_probe_arguments (probe_generic))
+	stap_parse_probe_arguments (probe, gdbarch);
       else
 	{
 	  static int have_warned_stap_incomplete = 0;
@@ -1072,10 +1073,10 @@ stap_is_operator (const char *op)
 }
 
 static struct stap_probe_arg *
-stap_get_arg (struct stap_probe *probe, unsigned n)
+stap_get_arg (struct stap_probe *probe, unsigned n, struct gdbarch *gdbarch)
 {
   if (!probe->args_parsed)
-    stap_parse_probe_arguments (probe);
+    stap_parse_probe_arguments (probe, gdbarch);
 
   return VEC_index (stap_probe_arg_s, probe->args_u.vec, n);
 }
@@ -1098,15 +1099,17 @@ stap_can_evaluate_probe_arguments (struct probe *probe_generic)
    corresponding to it.  Assertion is thrown if N does not exist.  */
 
 static struct value *
-stap_evaluate_probe_argument (struct probe *probe_generic, unsigned n)
+stap_evaluate_probe_argument (struct probe *probe_generic, unsigned n,
+			      struct frame_info *frame)
 {
   struct stap_probe *stap_probe = (struct stap_probe *) probe_generic;
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   struct stap_probe_arg *arg;
   int pos = 0;
 
   gdb_assert (probe_generic->pops == &stap_probe_ops);
 
-  arg = stap_get_arg (stap_probe, n);
+  arg = stap_get_arg (stap_probe, n, gdbarch);
   return evaluate_subexp_standard (arg->atype, arg->aexpr, &pos, EVAL_NORMAL);
 }
 
@@ -1123,7 +1126,7 @@ stap_compile_to_ax (struct probe *probe_generic, struct agent_expr *expr,
 
   gdb_assert (probe_generic->pops == &stap_probe_ops);
 
-  arg = stap_get_arg (stap_probe, n);
+  arg = stap_get_arg (stap_probe, n, expr->gdbarch);
 
   pc = arg->aexpr->elts;
   gen_expr (arg->aexpr, &pc, expr, value);
@@ -1177,7 +1180,7 @@ compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
   if (pc_probe == NULL)
     error (_("No SystemTap probe at PC %s"), core_addr_to_string (pc));
 
-  n_args = get_probe_argument_count (pc_probe);
+  n_args = get_probe_argument_count (pc_probe, frame);
   if (sel == -1)
     return value_from_longest (builtin_type (arch)->builtin_int, n_args);
 
@@ -1185,7 +1188,7 @@ compute_probe_arg (struct gdbarch *arch, struct internalvar *ivar,
     error (_("Invalid probe argument %d -- probe has %u arguments available"),
 	   sel, n_args);
 
-  return evaluate_probe_argument (pc_probe, sel);
+  return evaluate_probe_argument (pc_probe, sel, frame);
 }
 
 /* This is called to compile one of the $_probe_arg* convenience
@@ -1200,6 +1203,7 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
   struct probe *pc_probe;
   const struct sym_probe_fns *pc_probe_fns;
   int n_args;
+  struct frame_info *frame = get_selected_frame (NULL);
 
   /* SEL == -1 means "_probe_argc".  */
   gdb_assert (sel >= -1);
@@ -1208,7 +1212,7 @@ compile_probe_arg (struct internalvar *ivar, struct agent_expr *expr,
   if (pc_probe == NULL)
     error (_("No SystemTap probe at PC %s"), core_addr_to_string (pc));
 
-  n_args = get_probe_argument_count (pc_probe);
+  n_args = get_probe_argument_count (pc_probe, frame);
 
   if (sel == -1)
     {

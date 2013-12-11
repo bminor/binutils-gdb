@@ -614,9 +614,9 @@ info_probes_command (char *arg, int from_tty)
 /* See comments in probe.h.  */
 
 unsigned
-get_probe_argument_count (struct probe *probe)
+get_probe_argument_count (struct probe *probe, struct frame_info *frame)
 {
-  return probe->pops->get_probe_argument_count (probe);
+  return probe->pops->get_probe_argument_count (probe, frame);
 }
 
 /* See comments in probe.h.  */
@@ -630,9 +630,10 @@ can_evaluate_probe_arguments (struct probe *probe)
 /* See comments in probe.h.  */
 
 struct value *
-evaluate_probe_argument (struct probe *probe, unsigned n)
+evaluate_probe_argument (struct probe *probe, unsigned n,
+			 struct frame_info *frame)
 {
-  return probe->pops->evaluate_probe_argument (probe, n);
+  return probe->pops->evaluate_probe_argument (probe, n, frame);
 }
 
 /* See comments in probe.h.  */
@@ -647,11 +648,11 @@ probe_safe_evaluate_at_pc (struct frame_info *frame, unsigned n)
   if (!probe)
     return NULL;
 
-  n_args = get_probe_argument_count (probe);
+  n_args = get_probe_argument_count (probe, frame);
   if (n >= n_args)
     return NULL;
 
-  return evaluate_probe_argument (probe, n);
+  return evaluate_probe_argument (probe, n, frame);
 }
 
 /* See comment in probe.h.  */

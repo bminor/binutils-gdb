@@ -71,7 +71,8 @@ struct probe_ops
 
     /* Return the number of arguments of PROBE.  */
 
-    unsigned (*get_probe_argument_count) (struct probe *probe);
+    unsigned (*get_probe_argument_count) (struct probe *probe,
+					  struct frame_info *frame);
 
     /* Return 1 if the probe interface can evaluate the arguments of probe
        PROBE, zero otherwise.  See the comments on
@@ -83,7 +84,8 @@ struct probe_ops
        corresponding to it.  The argument number is represented N.  */
 
     struct value *(*evaluate_probe_argument) (struct probe *probe,
-					      unsigned n);
+					      unsigned n,
+					      struct frame_info *frame);
 
     /* Compile the Nth argument of the PROBE to an agent expression.
        The argument number is represented by N.  */
@@ -222,7 +224,8 @@ extern struct cmd_list_element **info_probes_cmdlist_get (void);
 
 /* Return the argument count of the specified probe.  */
 
-extern unsigned get_probe_argument_count (struct probe *probe);
+extern unsigned get_probe_argument_count (struct probe *probe,
+					  struct frame_info *frame);
 
 /* Return 1 if the probe interface associated with PROBE can evaluate
    arguments, zero otherwise.  See the comments on the definition of
@@ -234,7 +237,8 @@ extern int can_evaluate_probe_arguments (struct probe *probe);
    inclusive and get_probe_argument_count exclusive.  */
 
 extern struct value *evaluate_probe_argument (struct probe *probe,
-					      unsigned n);
+					      unsigned n,
+					      struct frame_info *frame);
 
 /* A convenience function that finds a probe at the PC in FRAME and
    evaluates argument N, with 0 <= N < number_of_args.  If there is no
