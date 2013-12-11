@@ -10675,11 +10675,25 @@ lookup_dwo_cutu (struct dwarf2_per_cu_data *this_unit,
 
   /* This is a warning and not a complaint because it can be caused by
      pilot error (e.g., user accidentally deleting the DWO).  */
-  warning (_("Could not find DWO %s %s(%s) referenced by %s at offset 0x%x"
-	     " [in module %s]"),
-	   kind, dwo_name, hex_string (signature),
-	   this_unit->is_debug_types ? "TU" : "CU",
-	   this_unit->offset.sect_off, objfile_name (objfile));
+  {
+    /* Print the name of the DWP file if we looked there, helps the user
+       better diagnose the problem.  */
+    char *dwp_text = NULL;
+    struct cleanup *cleanups;
+
+    if (dwp_file != NULL)
+      dwp_text = xstrprintf (" [in DWP file %s]", lbasename (dwp_file->name));
+    cleanups = make_cleanup (xfree, dwp_text);
+
+    warning (_("Could not find DWO %s %s(%s)%s referenced by %s at offset 0x%x"
+	       " [in module %s]"),
+	     kind, dwo_name, hex_string (signature),
+	     dwp_text != NULL ? dwp_text : "",
+	     this_unit->is_debug_types ? "TU" : "CU",
+	     this_unit->offset.sect_off, objfile_name (objfile));
+
+    do_cleanups (cleanups);
+  }
   return NULL;
 }
 

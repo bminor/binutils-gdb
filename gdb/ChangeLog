@@ -1,3 +1,8 @@
+2013-12-11  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (lookup_dwo_cutu): Include name of dwp file in
+	"can't find DWO" warning.
+
 2013-12-11  Sergio Durigan Junior  <sergiodj@redhat.com>
 
 	* break-catch-throw.c (fetch_probe_arguments): Pass selected frame
