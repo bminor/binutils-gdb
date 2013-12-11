@@ -1,3 +1,10 @@
+2013-12-10  Doug Evans  <dje@google.com>
+
+    	* interps.h (interp_exec_p): Delete.
+    	* interps.c (interp_exec_p): Delete.
+    	(interp_exec): Update.  Assert interp->procs->exec_proc != NULL.
+    	* mi/mi-interp.c (mi_cmd_interpreter_exec): Update.
+
 2013-12-10  Yao Qi  <yao@codesourcery.com>
 
 	* amd64-tdep.c (amd64_analyze_stack_align): Call
