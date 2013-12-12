@@ -1,5 +1,10 @@
 2013-12-12  Pedro Alves  <palves@redhat.com>
 
+	* breakpoint.c (insert_bp_location): Make 'hw_bp_err_string' local
+	const, and remove casts.
+
+2013-12-12  Pedro Alves  <palves@redhat.com>
+
 	* cli/cli-cmds.c (source_script_from_stream) Use have_python
 	instead of catching UNSUPPORTED_ERROR.
 	* exceptions.h (UNSUPPORTED_ERROR): Delete.
