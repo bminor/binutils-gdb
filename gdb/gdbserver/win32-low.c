@@ -105,6 +105,9 @@ typedef BOOL (WINAPI *winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
 static ptid_t win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
 			  int options);
 static void win32_resume (struct thread_resume *resume_info, size_t n);
+#ifndef _WIN32_WCE
+static void win32_ensure_ntdll_loaded (void);
+#endif
 
 /* Get the thread ID from the current selected inferior (the current
    thread).  */
@@ -371,6 +374,10 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 	win32_resume (&resume, 1);
       }
     }
+
+#ifndef _WIN32_WCE
+  win32_ensure_ntdll_loaded ();
+#endif
 }
 
 /* Resume all artificially suspended threads if we are continuing
@@ -1133,6 +1140,86 @@ failed:
   dll_name_ret[0] = '\0';
   return 0;
 }
+
+#ifndef _WIN32_WCE
+/* On certain versions of Windows, the information about ntdll.dll
+   is not available yet at the time we get the LOAD_DLL_DEBUG_EVENT,
+   thus preventing us from reporting this DLL as an SO. This has been
+   witnessed on Windows 8.1, for instance.  A possible explanation
+   is that ntdll.dll might be mapped before the SO info gets created
+   by the Windows system -- ntdll.dll is the first DLL to be reported
+   via LOAD_DLL_DEBUG_EVENT and other DLLs do not seem to suffer from
+   that problem.
+
+   If we indeed are missing ntdll.dll, this function tries to recover
+   from this issue, after the fact.  Do nothing if we encounter any
+   issue trying to locate that DLL.  */
+
+static void
+win32_ensure_ntdll_loaded (void)
+{
+  struct inferior_list_entry *dll_e;
+  size_t i;
+  HMODULE dh_buf[1];
+  HMODULE *DllHandle = dh_buf;
+  DWORD cbNeeded;
+  BOOL ok;
+
+  for (dll_e = all_dlls.head; dll_e != NULL; dll_e = dll_e->next)
+    {
+      struct dll_info *dll = (struct dll_info *) dll_e;
+
+      if (strcasecmp (lbasename (dll->name), "ntdll.dll") == 0)
+	return;
+    }
+
+  if (!load_psapi ())
+    return;
+
+  cbNeeded = 0;
+  ok = (*win32_EnumProcessModules) (current_process_handle,
+				    DllHandle,
+				    sizeof (HMODULE),
+				    &cbNeeded);
+
+  if (!ok || !cbNeeded)
+    return;
+
+  DllHandle = (HMODULE *) alloca (cbNeeded);
+  if (!DllHandle)
+    return;
+
+  ok = (*win32_EnumProcessModules) (current_process_handle,
+				    DllHandle,
+				    cbNeeded,
+				    &cbNeeded);
+  if (!ok)
+    return;
+
+  for (i = 0; i < ((size_t) cbNeeded / sizeof (HMODULE)); i++)
+    {
+      MODULEINFO mi;
+      char dll_name[MAX_PATH];
+
+      if (!(*win32_GetModuleInformation) (current_process_handle,
+					  DllHandle[i],
+					  &mi,
+					  sizeof (mi)))
+	continue;
+      if ((*win32_GetModuleFileNameExA) (current_process_handle,
+					 DllHandle[i],
+					 dll_name,
+					 MAX_PATH) == 0)
+	continue;
+      if (strcasecmp (lbasename (dll_name), "ntdll.dll") == 0)
+	{
+	  win32_add_one_solib (dll_name,
+			       (CORE_ADDR) (uintptr_t) mi.lpBaseOfDll);
+	  return;
+	}
+    }
+}
+#endif
 
 typedef HANDLE (WINAPI *winapi_CreateToolhelp32Snapshot) (DWORD, DWORD);
 typedef BOOL (WINAPI *winapi_Module32First) (HANDLE, LPMODULEENTRY32);

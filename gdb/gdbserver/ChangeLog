@@ -1,3 +1,11 @@
+2013-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (safe-ctype.o, lbasename.o): New rules.
+	* configure.srv: Add safe-ctype.o and lbasename.o to srv_tgtobj
+	for all targets that use win32-low.c.
+	* win32-low.c (win32_ensure_ntdll_loaded): New function.
+	(do_initial_child_stuff): Add call to win32_ensure_ntdll_loaded.
+
 2013-12-13  Pedro Alves  <palves@redhat.com>
 
 	* target.c (mywait): Set OURSTATUS->KIND to TARGET_WAITKIND_STOPPED
