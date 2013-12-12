@@ -1,3 +1,13 @@
+2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14207
+	PR ld/16322
+	PR binutils/16323
+	* elf.c (_bfd_elf_map_sections_to_segments): Don't check section
+	size for PT_GNU_RELRO segment.
+	(assign_file_positions_for_load_sections): If PT_LOAD segment
+	doesn't fit PT_GNU_RELRO segment, adjust its p_filesz and p_memsz.
+
 2014-01-07  Tom Tromey  <tromey@redhat.com>
 
 	* elf32-xtensa.c (vsprint_msg): Don't use old VA_* compatibility

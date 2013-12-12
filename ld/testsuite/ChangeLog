@@ -1,3 +1,13 @@
+2014-01-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/14207
+	PR ld/16322
+	PR binutils/16323
+	* ld-elf/pr16322.d: New file.
+	* ld-elf/pr16322.s: Likewise.
+
+	* ld-x86-64/pr14207.d: Expect PT_GNU_RELRO segment.
+
 For older changes see ChangeLog-2013
 
 Copyright (C) 2014 Free Software Foundation, Inc.
