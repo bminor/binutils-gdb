@@ -80,6 +80,11 @@ static enum gdb_signal last_sig = GDB_SIGNAL_0;
 /* The current debug event from WaitForDebugEvent.  */
 static DEBUG_EVENT current_event;
 
+/* A status that hasn't been reported to the core yet, and so
+   win32_wait should return it next, instead of fetching the next
+   debug event off the win32 API.  */
+static struct target_waitstatus cached_status;
+
 /* Non zero if an interrupt request is to be satisfied by suspending
    all threads.  */
 static int soft_interrupt_requested = 0;
@@ -97,6 +102,8 @@ typedef BOOL (WINAPI *winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
 typedef BOOL (WINAPI *winapi_DebugBreakProcess) (HANDLE);
 typedef BOOL (WINAPI *winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
 
+static ptid_t win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus,
+			  int options);
 static void win32_resume (struct thread_resume *resume_info, size_t n);
 
 /* Get the thread ID from the current selected inferior (the current
@@ -336,6 +343,34 @@ do_initial_child_stuff (HANDLE proch, DWORD pid, int attached)
 
   if (the_low_target.initial_stuff != NULL)
     (*the_low_target.initial_stuff) ();
+
+  cached_status.kind = TARGET_WAITKIND_IGNORE;
+
+  /* Flush all currently pending debug events (thread and dll list) up
+     to the initial breakpoint.  */
+  while (1)
+    {
+      struct target_waitstatus status;
+
+      win32_wait (minus_one_ptid, &status, 0);
+
+      /* Note win32_wait doesn't return thread events.  */
+      if (status.kind != TARGET_WAITKIND_LOADED)
+	{
+	  cached_status = status;
+	  break;
+	}
+
+      {
+	struct thread_resume resume;
+
+	resume.thread = minus_one_ptid;
+	resume.kind = resume_continue;
+	resume.sig = 0;
+
+	win32_resume (&resume, 1);
+      }
+    }
 }
 
 /* Resume all artificially suspended threads if we are continuing
@@ -1593,6 +1628,17 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 {
   struct regcache *regcache;
 
+  if (cached_status.kind != TARGET_WAITKIND_IGNORE)
+    {
+      /* The core always does a wait after creating the inferior, and
+	 do_initial_child_stuff already ran the inferior to the
+	 initial breakpoint (or an exit, if creating the process
+	 fails).  Report it now.  */
+      *ourstatus = cached_status;
+      cached_status.kind = TARGET_WAITKIND_IGNORE;
+      return debug_event_ptid (&current_event);
+    }
+
   while (1)
     {
       if (!get_child_debug_event (ourstatus))
@@ -1612,21 +1658,6 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus, int options)
 
 	  regcache = get_thread_regcache (current_inferior, 1);
 	  child_fetch_inferior_registers (regcache, -1);
-
-	  if (ourstatus->kind == TARGET_WAITKIND_LOADED
-	      && !server_waiting)
-	    {
-	      /* When gdb connects, we want to be stopped at the
-		 initial breakpoint, not in some dll load event.  */
-	      child_continue (DBG_CONTINUE, -1);
-	      break;
-	    }
-
-	  /* We don't expose _LOADED events to gdbserver core.  See
-	     the `dlls_changed' global.  */
-	  if (ourstatus->kind == TARGET_WAITKIND_LOADED)
-	    ourstatus->kind = TARGET_WAITKIND_STOPPED;
-
 	  return debug_event_ptid (&current_event);
 	default:
 	  OUTMSG (("Ignoring unknown internal event, %d\n", ourstatus->kind));
