@@ -1,3 +1,17 @@
+2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/16113
+	* NEWS (Python Scripting): Add entry for the new feature and the
+	new attribute of gdb.Field objects.
+	* python/py-type.c (gdbpy_is_field): New function
+	(convert_field): Add 'parent_type' attribute to gdb.Field
+	objects.
+	* python/py-value.c (valpy_getitem): Allow subscript value to be
+	a gdb.Field object.
+	(value_has_field): New function
+	(get_field_flag): New function
+	* python/python-internal.h (gdbpy_is_field): Add declaration.
+
 2013-12-12  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (insert_bp_location): Make 'hw_bp_err_string' local

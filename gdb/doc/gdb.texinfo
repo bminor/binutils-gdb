@@ -23985,7 +23985,17 @@ can access its @code{foo} element with:
 bar = some_val['foo']
 @end smallexample
 
-Again, @code{bar} will also be a @code{gdb.Value} object.
+@cindex getting structure elements using gdb.Field objects as subscripts
+Again, @code{bar} will also be a @code{gdb.Value} object.  Structure
+elements can also be accessed by using @code{gdb.Field} objects as
+subscripts (@pxref{Types In Python}, for more information on
+@code{gdb.Field} objects).  For example, if @code{foo_field} is a
+@code{gdb.Field} object corresponding to element @code{foo} of the above
+structure, then @code{bar} can also be accessed as follows:
+
+@smallexample
+bar = some_val[foo_field]
+@end smallexample
 
 A @code{gdb.Value} that represents a function can be executed via
 inferior function call.  Any arguments provided to the call must match
@@ -24367,6 +24377,10 @@ this will be zero; in this case the field's size is given by its type.
 @item type
 The type of the field.  This is usually an instance of @code{Type},
 but it can be @code{None} in some situations.
+
+@item parent_type
+The type which contains this field.  This is an instance of
+@code{gdb.Type}.
 @end table
 @end defun
 

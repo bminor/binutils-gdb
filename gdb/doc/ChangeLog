@@ -1,3 +1,11 @@
+2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/16113
+	* gdb.texinfo (Values From Inferior): Add a note about using
+	gdb.Field objects as subscripts on gdb.Value objects.
+	(Types In Python): Add description about the new attribute
+	"parent_type" of gdb.Field objects.
+
 2013-12-12  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (GDB/MI Miscellaneous Commands): Add @cindex

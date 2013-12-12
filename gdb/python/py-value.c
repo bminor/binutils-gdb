@@ -499,13 +499,80 @@ valpy_length (PyObject *self)
   return -1;
 }
 
-/* Given string name of an element inside structure, return its value
-   object.  Returns NULL on error, with a python exception set.  */
+/* Return 1 if the gdb.Field object FIELD is present in the value V.
+   Returns 0 otherwise.  If any Python error occurs, -1 is returned.  */
+
+static int
+value_has_field (struct value *v, PyObject *field)
+{
+  struct type *parent_type, *val_type;
+  enum type_code type_code;
+  PyObject *type_object = PyObject_GetAttrString (field, "parent_type");
+  volatile struct gdb_exception except;
+  int has_field = 0;
+
+  if (type_object == NULL)
+    return -1;
+
+  parent_type = type_object_to_type (type_object);
+  Py_DECREF (type_object);
+  if (parent_type == NULL)
+    {
+      PyErr_SetString (PyExc_TypeError,
+		       _("'parent_type' attribute of gdb.Field object is not a"
+			 "gdb.Type object."));
+      return -1;
+    }
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      val_type = value_type (v);
+      val_type = check_typedef (val_type);
+      if (TYPE_CODE (val_type) == TYPE_CODE_REF
+	  || TYPE_CODE (val_type) == TYPE_CODE_PTR)
+      val_type = check_typedef (TYPE_TARGET_TYPE (val_type));
+
+      type_code = TYPE_CODE (val_type);
+      if ((type_code == TYPE_CODE_STRUCT || type_code == TYPE_CODE_UNION)
+	  && types_equal (val_type, parent_type))
+	has_field = 1;
+      else
+	has_field = 0;
+    }
+  GDB_PY_SET_HANDLE_EXCEPTION (except);
+
+  return has_field;
+}
+
+/* Return the value of a flag FLAG_NAME in a gdb.Field object FIELD.
+   Returns 1 if the flag value is true, 0 if it is false, and -1 if
+   a Python error occurs.  */
+
+static int
+get_field_flag (PyObject *field, const char *flag_name)
+{
+  int flag_value;
+  PyObject *flag_object = PyObject_GetAttrString (field, flag_name);
+
+  if (flag_object == NULL)
+    return -1;
+
+  flag_value = PyObject_IsTrue (flag_object);
+  Py_DECREF (flag_object);
+
+  return flag_value;
+}
+
+/* Given string name or a gdb.Field object corresponding to an element inside
+   a structure, return its value object.  Returns NULL on error, with a python
+   exception set.  */
+
 static PyObject *
 valpy_getitem (PyObject *self, PyObject *key)
 {
   value_object *self_value = (value_object *) self;
   char *field = NULL;
+  PyObject *base_class_type_object = NULL;
   volatile struct gdb_exception except;
   PyObject *result = NULL;
 
@@ -514,6 +581,44 @@ valpy_getitem (PyObject *self, PyObject *key)
       field = python_string_to_host_string (key);
       if (field == NULL)
 	return NULL;
+    }
+  else if (gdbpy_is_field (key))
+    {
+      int is_base_class, valid_field;
+
+      valid_field = value_has_field (self_value->value, key);
+      if (valid_field < 0)
+	return NULL;
+      else if (valid_field == 0)
+	{
+	  PyErr_SetString (PyExc_TypeError,
+			   _("Invalid lookup for a field not contained in "
+			     "the value."));
+
+	  return NULL;
+	}
+
+      is_base_class = get_field_flag (key, "is_base_class");
+      if (is_base_class < 0)
+	return NULL;
+      else if (is_base_class > 0)
+	{
+	  base_class_type_object = PyObject_GetAttrString (key, "type");
+	  if (base_class_type_object == NULL)
+	    return NULL;
+	}
+      else
+	{
+	  PyObject *name_obj = PyObject_GetAttrString (key, "name");
+
+	  if (name_obj == NULL)
+	    return NULL;
+
+	  field = python_string_to_host_string (name_obj);
+	  Py_DECREF (name_obj);
+	  if (field == NULL)
+	    return NULL;
+	}
     }
 
   TRY_CATCH (except, RETURN_MASK_ALL)
@@ -524,6 +629,23 @@ valpy_getitem (PyObject *self, PyObject *key)
 
       if (field)
 	res_val = value_struct_elt (&tmp, NULL, field, 0, NULL);
+      else if (base_class_type_object != NULL)
+	{
+	  struct type *base_class_type, *val_type;
+
+	  base_class_type = type_object_to_type (base_class_type_object);
+	  Py_DECREF (base_class_type_object);
+	  if (base_class_type == NULL)
+	    error (_("Field type not an instance of gdb.Type."));
+
+	  val_type = check_typedef (value_type (tmp));
+	  if (TYPE_CODE (val_type) == TYPE_CODE_PTR)
+	    res_val = value_cast (lookup_pointer_type (base_class_type), tmp);
+	  else if (TYPE_CODE (val_type) == TYPE_CODE_REF)
+	    res_val = value_cast (lookup_reference_type (base_class_type), tmp);
+	  else
+	    res_val = value_cast (base_class_type, tmp);
+	}
       else
 	{
 	  /* Assume we are attempting an array access, and let the

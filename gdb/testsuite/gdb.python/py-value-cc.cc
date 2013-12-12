@@ -16,8 +16,21 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 class A {
+ public:
+  int a;
 };
 
+union U {
+  int a;
+  char c;
+};
+
+class B : public A {
+ public:
+  char a;
+};
+
+typedef B Btd;
 typedef int *int_ptr;
 
 int
@@ -28,6 +41,22 @@ func (const A &a)
   int_ptr ptr = &val;
   int_ptr &int_ptr_ref = ptr;
 
+  B b;
+  B b1;
+
+  b.a = 'a';
+  b.A::a = 10;
+
+  B *b_obj = &b1;
+  b_obj->a = 'b';
+  b_obj->A::a = 100;
+
+  B &b_ref = b1;
+  Btd &b_td = b1;
+
+  U u;
+  u.a = 99;
+
   return 0; /* Break here.  */
 }
 
@@ -35,5 +64,6 @@ int
 main ()
 {
   A obj;
+
   return func (obj);
 }

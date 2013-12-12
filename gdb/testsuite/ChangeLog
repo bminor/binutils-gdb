@@ -1,3 +1,10 @@
+2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/16113
+	* gdb.python/py-value-cc.cc: Improve test case.
+	* gdb.python/py-value-cc.exp: Add new tests to test usage of
+	gdb.Field objects as subscripts on gdb.Value objects.
+
 2013-12-10  Doug Evans  <dje@google.com>
 
 	PR 16286

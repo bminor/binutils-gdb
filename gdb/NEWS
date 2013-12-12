@@ -40,6 +40,8 @@
   ** Frame filters and frame decorators have been added.
   ** Temporary breakpoints are now supported.
   ** Line tables representation has been added.
+  ** New attribute 'parent_type' for gdb.Field objects.
+  ** gdb.Field objects can be used as subscripts on gdb.Value objects.
 
 * New targets
 
