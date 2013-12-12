@@ -1,5 +1,9 @@
 2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* ld-elf/ehdr_start-userdef.d: Add "#...".
+
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* ld-pie/vaddr-0.d: New file.
 	* ld-pie/vaddr-1.d: Likewise.
 	* ld-pie/vaddr.s: Likewise.
