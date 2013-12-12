@@ -23,4 +23,3 @@ Disassembly of section .text:
 0+0034 <[^>]*> swi.bi	\$r0, \[\$r1\], #4
 0+0038 <[^>]*> shi.bi	\$r0, \[\$r1\], #2
 0+003c <[^>]*> sbi.bi	\$r0, \[\$r1\], #1
-

@@ -12,4 +12,3 @@ Disassembly of section .text:
 			0: R_NDS32_RELAX_ENTRY	.text
 0+0004 <[^>]*> bne	\$r0, \$r1, 00000004 <foo\+0x4>
 			4: R_NDS32_15_PCREL_RELA	.text
-

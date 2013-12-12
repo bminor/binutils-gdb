@@ -1,3 +1,16 @@
+2013-12-17  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* gas/nds32/nds32.exp: Add system and user special register tests.
+	* gas/nds32/sys-reg.s: New test.
+	* gas/nds32/sys-reg.d: Likewise.
+	* gas/nds32/usr-spe-reg.s: Likewise.
+	* gas/nds32/usr-spe-reg.d: Likewise.
+	* gas/nds32/alu-2.d: Delete the new blank line at EOF.
+	* gas/nds32/br-1.d: Likewise.
+	* gas/nds32/br-2.d: Likewise.
+	* gas/nds32/ji-jr.d: Likewise.
+	* gas/nds32/lsi.d: Likewise.
+
 2013-12-17  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
 
 	* gas/i386/disassem.s: New.

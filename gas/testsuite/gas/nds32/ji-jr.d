@@ -15,4 +15,3 @@ Disassembly of section .text:
 0+0006 <[^>]*> jr	\$r0
 0+000a <[^>]*> jral	\$lp, \$r0
 0+000e <[^>]*> ret	\$lp
-
