@@ -1,5 +1,9 @@
 2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-sh.c (bfd_elf32_bfd_set_private_bfd_flags): Removed.
+
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf.c (assign_file_positions_except_relocs): Set e_type in ELF
 	header to ET_EXEC for -pie -Ttext-segment=.
 

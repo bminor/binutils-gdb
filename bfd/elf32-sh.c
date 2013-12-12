@@ -7447,8 +7447,6 @@ sh_elf_encode_eh_address (bfd *abfd,
 					sh_elf_get_relocated_section_contents
 #define bfd_elf32_mkobject		sh_elf_mkobject
 #define elf_backend_object_p		sh_elf_object_p
-#define bfd_elf32_bfd_set_private_bfd_flags \
-					sh_elf_set_private_flags
 #define bfd_elf32_bfd_copy_private_bfd_data \
 					sh_elf_copy_private_data
 #define bfd_elf32_bfd_merge_private_bfd_data \
