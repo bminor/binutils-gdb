@@ -1,5 +1,12 @@
 2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/16318
+	* elf.c (_bfd_elf_copy_private_bfd_data): Remove BFD_ASSERT.
+	Set e_flags only if elf_flags_init is FALSE.  Copy EI_OSABI
+	field.
+
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf32-sh.c (bfd_elf32_bfd_set_private_bfd_flags): Removed.
 
 2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>

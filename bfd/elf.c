@@ -1117,13 +1117,17 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
 
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || (elf_elfheader (obfd)->e_flags
-		  == elf_elfheader (ibfd)->e_flags));
+  if (!elf_flags_init (obfd))
+    {
+      elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+      elf_flags_init (obfd) = TRUE;
+    }
 
   elf_gp (obfd) = elf_gp (ibfd);
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = TRUE;
+
+  /* Also copy the EI_OSABI field.  */
+  elf_elfheader (obfd)->e_ident[EI_OSABI] =
+    elf_elfheader (ibfd)->e_ident[EI_OSABI];
 
   /* Copy object attributes.  */
   _bfd_elf_copy_obj_attributes (ibfd, obfd);

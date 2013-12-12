@@ -1,3 +1,8 @@
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16318
+	* binutils-all/strip-10.d: Check OS/ABI.
+
 2013-12-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* binutils-all/windres/escapex-2.rc: Remove +x file mode.
