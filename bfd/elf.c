@@ -5152,6 +5152,27 @@ assign_file_positions_except_relocs (bfd *abfd,
 	    return FALSE;
 	}
 
+      /* Set e_type in ELF header to ET_EXEC for -pie -Ttext-segment=.  */
+      if (link_info != NULL
+	  && link_info->executable
+	  && link_info->shared)
+	{
+	  unsigned int num_segments = elf_elfheader (abfd)->e_phnum;
+	  Elf_Internal_Phdr *segment = elf_tdata (abfd)->phdr;
+	  Elf_Internal_Phdr *end_segment = &segment[num_segments];
+
+	  /* Find the lowest p_vaddr in PT_LOAD segments.  */
+	  bfd_vma p_vaddr = (bfd_vma) -1;
+	  for (; segment < end_segment; segment++)
+	    if (segment->p_type == PT_LOAD && p_vaddr > segment->p_vaddr)
+	      p_vaddr = segment->p_vaddr;
+
+	  /* Set e_type to ET_EXEC if the lowest p_vaddr in PT_LOAD
+	     segments is non-zero.  */
+	  if (p_vaddr)
+	    i_ehdrp->e_type = ET_EXEC;
+	}
+
       /* Write out the program headers.  */
       alloc = elf_program_header_size (abfd) / bed->s->sizeof_phdr;
       if (bfd_seek (abfd, (bfd_signed_vma) bed->s->sizeof_ehdr, SEEK_SET) != 0
