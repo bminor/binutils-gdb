@@ -1,3 +1,14 @@
+2013-12-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (mcu_types): Add some more 430X mcu names.
+	(OPTION_INTR_NOPS): Define.
+	(gen_interrupt_nops): Default to FALSE.
+	(md_parse_opton): Add support for OPTION_INTR_NOPS.
+	(md_longopts): Add -mn.
+	(md_show_usage): Add -mn.
+	(msp430_operands): Generate NOPs for all MCUs not just 430Xv2.
+	* doc/c-msp430.c: Document -mn.
+
 2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 	    Wei-Cheng Wang  <cole945@gmail.com>
 	    Hsiang-Kai Wang  <hsiangkai@gmail.com>

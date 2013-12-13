@@ -528,6 +528,15 @@ static struct mcu_type_s mcu_types[] =
   {"msp430fg4618", MSP_ISA_430X},
   {"msp430fg4619", MSP_ISA_430X},
 
+  {"msp430x241x",  MSP_ISA_430X},
+  {"msp430x26x",   MSP_ISA_430X},
+  {"msp430x461x1", MSP_ISA_430X},
+  {"msp430x46x",   MSP_ISA_430X},
+  {"msp430x471x3", MSP_ISA_430X},
+  {"msp430x471x6", MSP_ISA_430X},
+  {"msp430x471x7", MSP_ISA_430X},
+  {"msp430xg46x",  MSP_ISA_430X},
+
   {"msp430f5418", MSP_ISA_430Xv2},
   {"msp430f5419", MSP_ISA_430Xv2},
   {"msp430f5435", MSP_ISA_430Xv2},
@@ -1124,8 +1133,9 @@ extract_word (char * from, char * to, int limit)
 #define OPTION_POLYMORPHS 'P'
 #define OPTION_LARGE 'l'
 static bfd_boolean large_model = FALSE;
+#define OPTION_INTR_NOPS 'n'
 #define OPTION_NO_INTR_NOPS 'N'
-static bfd_boolean gen_interrupt_nops = TRUE;
+static bfd_boolean gen_interrupt_nops = FALSE;
 #define OPTION_MCPU 'c'
 #define OPTION_MOVE_DATA 'd'
 static bfd_boolean move_data = FALSE;
@@ -1216,6 +1226,9 @@ md_parse_option (int c, char * arg)
     case OPTION_NO_INTR_NOPS:
       gen_interrupt_nops = FALSE;
       return 1;
+    case OPTION_INTR_NOPS:
+      gen_interrupt_nops = TRUE;
+      return 1;
 
     case OPTION_MOVE_DATA:
       move_data = TRUE;
@@ -1267,6 +1280,7 @@ struct option md_longopts[] =
   {"mQ", no_argument, NULL, OPTION_RELAX},
   {"ml", no_argument, NULL, OPTION_LARGE},
   {"mN", no_argument, NULL, OPTION_NO_INTR_NOPS},
+  {"mn", no_argument, NULL, OPTION_INTR_NOPS},
   {"md", no_argument, NULL, OPTION_MOVE_DATA},
   {NULL, no_argument, NULL, 0}
 };
@@ -1287,6 +1301,8 @@ md_show_usage (FILE * stream)
 	   _("  -ml - enable large code model\n"));
   fprintf (stream,
 	   _("  -mN - disable generation of NOP after changing interrupts\n"));
+  fprintf (stream,
+	   _("  -mn - enable generation of NOP after changing interrupts\n"));
   fprintf (stream,
 	   _("  -md - Force copying of data from ROM to RAM at startup\n"));
 
@@ -2289,7 +2305,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  bfd_putl16 ((bfd_vma) bin, frag);
 
 	  if (gen_interrupt_nops
-	      && target_is_430xv2 ()
 	      && (is_opcode ("eint") || is_opcode ("dint")))
 	    {
 	      /* Emit a NOP following interrupt enable/disable.
@@ -2373,7 +2388,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    }
 
 	  if (gen_interrupt_nops
-	      && target_is_430xv2 ()
 	      && is_opcode ("clr")
 	      && bin == 0x4302 /* CLR R2*/)
 	    {
@@ -3130,7 +3144,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	}
 
       if (gen_interrupt_nops
-	  && target_is_430xv2 ()
 	  && (   (is_opcode ("bic") && bin == 0xc232)
 	      || (is_opcode ("bis") && bin == 0xd232)
 	      || (is_opcode ("mov") && op2.mode == OP_REG && op2.reg == 2)))
