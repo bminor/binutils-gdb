@@ -1,0 +1,95 @@
+From e19144b57df2470543b5722d9bdd64795cca806c Mon Sep 17 00:00:00 2001
+From: "H.J. Lu" <hjl.tools@gmail.com>
+Date: Wed, 11 Dec 2013 10:07:21 -0800
+Subject: [PATCH] Set SHF_INFO_LINK bit for SHT_REL/SHT_RELA sections
+
+---
+ ChangeLog.pr16317                | 16 ++++++++++++++++
+ bfd/elf.c                        |  5 ++++-
+ ld/testsuite/ld-elf/linkinfo1.s  |  2 ++
+ ld/testsuite/ld-elf/linkinfo1a.d |  8 ++++++++
+ ld/testsuite/ld-elf/linkinfo1b.d |  9 +++++++++
+ 5 files changed, 39 insertions(+), 1 deletion(-)
+ create mode 100644 ChangeLog.pr16317
+ create mode 100644 ld/testsuite/ld-elf/linkinfo1.s
+ create mode 100644 ld/testsuite/ld-elf/linkinfo1a.d
+ create mode 100644 ld/testsuite/ld-elf/linkinfo1b.d
+
+diff --git a/ChangeLog.pr16317 b/ChangeLog.pr16317
+new file mode 100644
+index 0000000..518b6d5
+--- /dev/null
++++ b/ChangeLog.pr16317
+@@ -0,0 +1,16 @@
++bfd/
++
++2013-12-11  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR binutils/16317
++	* elf.c (assign_section_numbers): Set the SHF_INFO_LINK bit for
++	SHT_REL/SHT_RELA sections when setting the sh_info field.
++
++ld/testsuite/
++
++2013-12-11  H.J. Lu  <hongjiu.lu@intel.com>
++
++	PR binutils/16317
++	* ld-elf/linkinfo1.s: New file.
++	* ld-elf/linkinfo1a.d: Likewise.
++	* ld-elf/linkinfo1b.d: Likewise.
+diff --git a/bfd/elf.c b/bfd/elf.c
+index 30d4171..fa91342 100644
+--- a/bfd/elf.c
++++ b/bfd/elf.c
+@@ -3166,7 +3166,10 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
+ 	    name += 5;
+ 	  s = bfd_get_section_by_name (abfd, name);
+ 	  if (s != NULL)
+-	    d->this_hdr.sh_info = elf_section_data (s)->this_idx;
++	    {
++	      d->this_hdr.sh_info = elf_section_data (s)->this_idx;
++	      d->this_hdr.sh_flags |= SHF_INFO_LINK;
++	    }
+ 	  break;
+ 
+ 	case SHT_STRTAB:
+diff --git a/ld/testsuite/ld-elf/linkinfo1.s b/ld/testsuite/ld-elf/linkinfo1.s
+new file mode 100644
+index 0000000..dadda31
+--- /dev/null
++++ b/ld/testsuite/ld-elf/linkinfo1.s
+@@ -0,0 +1,2 @@
++	.text
++	call	foo@PLT
+diff --git a/ld/testsuite/ld-elf/linkinfo1a.d b/ld/testsuite/ld-elf/linkinfo1a.d
+new file mode 100644
+index 0000000..8c6fb71
+--- /dev/null
++++ b/ld/testsuite/ld-elf/linkinfo1a.d
+@@ -0,0 +1,8 @@
++#source: linkinfo1.s
++#ld: -shared
++#readelf: -SW
++#target: x86_64-* i?86-*
++
++#...
++  \[[ 0-9]+\] \.rel[a]?\.plt[ \t]+REL[A]?[ \t][ \t0-9a-f]+AI[ \t0-9a-f]+
++#pass
+diff --git a/ld/testsuite/ld-elf/linkinfo1b.d b/ld/testsuite/ld-elf/linkinfo1b.d
+new file mode 100644
+index 0000000..cc3aaed
+--- /dev/null
++++ b/ld/testsuite/ld-elf/linkinfo1b.d
+@@ -0,0 +1,9 @@
++#source: linkinfo1.s
++#ld: -shared
++#objcopy_linked_file: --strip-debug
++#readelf: -SW
++#target: x86_64-* i?86-*
++
++#...
++  \[[ 0-9]+\] \.rel[a]?\.plt[ \t]+REL[A]?[ \t][ \t0-9a-f]+AI[ \t0-9a-f]+
++#pass
+-- 
+1.8.3.1
+
