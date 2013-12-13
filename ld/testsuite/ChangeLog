@@ -1,3 +1,29 @@
+2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* lib/ld-lib.exp: Add NDS32 to list of targets that do not support
+	shared library generation.
+	* ld-nds32: New directory.
+	* ld-nds32/branch.d: New test.
+	* ld-nds32/branch.ld: New test.
+	* ld-nds32/branch.s: New test.
+	* ld-nds32/diff.d: New test.
+	* ld-nds32/diff.ld: New test.
+	* ld-nds32/diff.s: New test.
+	* ld-nds32/gp.d: New test.
+	* ld-nds32/gp.ld: New test.
+	* ld-nds32/gp.s: New test.
+	* ld-nds32/imm.d: New test.
+	* ld-nds32/imm.ld: New test.
+	* ld-nds32/imm.s: New test.
+	* ld-nds32/imm_symbol.s: New test.
+	* ld-nds32/relax_jmp.d: New test.
+	* ld-nds32/relax_jmp.ld: New test.
+	* ld-nds32/relax_jmp.s: New test.
+	* ld-nds32/relax_load_store.d: New test.
+	* ld-nds32/relax_load_store.ld: New test.
+	* ld-nds32/relax_load_store.s: New test.
+	* ld-nds32/nds32.exp: New file.
+
 2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/ehdr_start-userdef.d: Add "#...".

@@ -3839,6 +3839,274 @@ ENUMDOC
 
 
 ENUM
+  BFD_RELOC_NDS32_20
+ENUMDOC
+  NDS32 relocs.
+  This is a 20 bit absolute address.
+ENUM
+  BFD_RELOC_NDS32_9_PCREL
+ENUMDOC
+  This is a 9-bit pc-relative reloc with the right 1 bit assumed to be 0.
+ENUM
+  BFD_RELOC_NDS32_WORD_9_PCREL
+ENUMDOC
+  This is a 9-bit pc-relative reloc with the right 1 bit assumed to be 0.
+ENUM
+  BFD_RELOC_NDS32_15_PCREL
+ENUMDOC
+  This is an 15-bit reloc with the right 1 bit assumed to be 0.
+ENUM
+  BFD_RELOC_NDS32_17_PCREL
+ENUMDOC
+  This is an 17-bit reloc with the right 1 bit assumed to be 0.
+ENUM
+  BFD_RELOC_NDS32_25_PCREL
+ENUMDOC
+  This is a 25-bit reloc with the right 1 bit assumed to be 0.
+ENUM
+  BFD_RELOC_NDS32_HI20
+ENUMDOC
+  This is a 20-bit reloc containing the high 20 bits of an address
+  used with the lower 12 bits
+ENUM
+  BFD_RELOC_NDS32_LO12S3
+ENUMDOC
+  This is a 12-bit reloc containing the lower 12 bits of an address
+  then shift right by 3. This is used with ldi,sdi...
+ENUM
+  BFD_RELOC_NDS32_LO12S2
+ENUMDOC
+  This is a 12-bit reloc containing the lower 12 bits of an address
+  then shift left by 2. This is used with lwi,swi...
+ENUM
+  BFD_RELOC_NDS32_LO12S1
+ENUMDOC
+  This is a 12-bit reloc containing the lower 12 bits of an address
+  then shift left by 1. This is used with lhi,shi...
+ENUM
+  BFD_RELOC_NDS32_LO12S0
+ENUMDOC
+  This is a 12-bit reloc containing the lower 12 bits of an address
+  then shift left by 0. This is used with lbisbi...
+ENUM
+  BFD_RELOC_NDS32_LO12S0_ORI
+ENUMDOC
+  This is a 12-bit reloc containing the lower 12 bits of an address
+  then shift left by 0. This is only used with branch relaxations
+ENUM
+  BFD_RELOC_NDS32_SDA15S3
+ENUMDOC
+  This is a 15-bit reloc containing the small data area 18-bit signed offset
+  and shift left by 3 for use in ldi, sdi...
+ENUM
+  BFD_RELOC_NDS32_SDA15S2
+ENUMDOC
+  This is a 15-bit reloc containing the small data area 17-bit signed offset
+  and shift left by 2 for use in lwi, swi...
+ENUM
+  BFD_RELOC_NDS32_SDA15S1
+ENUMDOC
+  This is a 15-bit reloc containing the small data area 16-bit signed offset
+  and shift left by 1 for use in lhi, shi...
+ENUM
+  BFD_RELOC_NDS32_SDA15S0
+ENUMDOC
+  This is a 15-bit reloc containing the small data area 15-bit signed offset
+  and shift left by 0 for use in lbi, sbi...
+ENUM
+  BFD_RELOC_NDS32_SDA16S3
+ENUMDOC
+  This is a 16-bit reloc containing the small data area 16-bit signed offset
+  and shift left by 3
+ENUM
+  BFD_RELOC_NDS32_SDA17S2
+ENUMDOC
+  This is a 17-bit reloc containing the small data area 17-bit signed offset
+  and shift left by 2 for use in lwi.gp, swi.gp...
+ENUM
+  BFD_RELOC_NDS32_SDA18S1
+ENUMDOC
+  This is a 18-bit reloc containing the small data area 18-bit signed offset
+  and shift left by 1 for use in lhi.gp, shi.gp...
+ENUM
+  BFD_RELOC_NDS32_SDA19S0
+ENUMDOC
+  This is a 19-bit reloc containing the small data area 19-bit signed offset
+  and shift left by 0 for use in lbi.gp, sbi.gp...
+ENUM
+  BFD_RELOC_NDS32_GOT20
+ENUMX
+  BFD_RELOC_NDS32_9_PLTREL
+ENUMX
+  BFD_RELOC_NDS32_25_PLTREL
+ENUMX
+  BFD_RELOC_NDS32_COPY
+ENUMX
+  BFD_RELOC_NDS32_GLOB_DAT
+ENUMX
+  BFD_RELOC_NDS32_JMP_SLOT
+ENUMX
+  BFD_RELOC_NDS32_RELATIVE
+ENUMX
+  BFD_RELOC_NDS32_GOTOFF
+ENUMX
+  BFD_RELOC_NDS32_GOTOFF_HI20
+ENUMX
+  BFD_RELOC_NDS32_GOTOFF_LO12
+ENUMX
+  BFD_RELOC_NDS32_GOTPC20
+ENUMX
+  BFD_RELOC_NDS32_GOT_HI20
+ENUMX
+  BFD_RELOC_NDS32_GOT_LO12
+ENUMX
+  BFD_RELOC_NDS32_GOTPC_HI20
+ENUMX
+  BFD_RELOC_NDS32_GOTPC_LO12
+ENUMDOC
+  for PIC
+ENUM
+  BFD_RELOC_NDS32_INSN16
+ENUMX
+  BFD_RELOC_NDS32_LABEL
+ENUMX
+  BFD_RELOC_NDS32_LONGCALL1
+ENUMX
+  BFD_RELOC_NDS32_LONGCALL2
+ENUMX
+  BFD_RELOC_NDS32_LONGCALL3
+ENUMX
+  BFD_RELOC_NDS32_LONGJUMP1
+ENUMX
+  BFD_RELOC_NDS32_LONGJUMP2
+ENUMX
+  BFD_RELOC_NDS32_LONGJUMP3
+ENUMX
+  BFD_RELOC_NDS32_LOADSTORE
+ENUMX
+  BFD_RELOC_NDS32_9_FIXED
+ENUMX
+  BFD_RELOC_NDS32_15_FIXED
+ENUMX
+  BFD_RELOC_NDS32_17_FIXED
+ENUMX
+  BFD_RELOC_NDS32_25_FIXED
+ENUMDOC
+  for relax
+ENUM
+  BFD_RELOC_NDS32_PLTREL_HI20
+ENUMX
+  BFD_RELOC_NDS32_PLTREL_LO12
+ENUMX
+  BFD_RELOC_NDS32_PLT_GOTREL_HI20
+ENUMX
+  BFD_RELOC_NDS32_PLT_GOTREL_LO12
+ENUMDOC
+  for PIC
+ENUM
+  BFD_RELOC_NDS32_SDA12S2_DP
+ENUMX
+  BFD_RELOC_NDS32_SDA12S2_SP
+ENUMX
+  BFD_RELOC_NDS32_LO12S2_DP
+ENUMX
+  BFD_RELOC_NDS32_LO12S2_SP
+ENUMDOC
+  for floating point
+ENUM
+  BFD_RELOC_NDS32_DWARF2_OP1
+ENUMX
+  BFD_RELOC_NDS32_DWARF2_OP2
+ENUMX
+  BFD_RELOC_NDS32_DWARF2_LEB
+ENUMDOC
+  for dwarf2 debug_line.
+ENUM
+  BFD_RELOC_NDS32_UPDATE_TA
+ENUMDOC
+  for eliminate 16-bit instructions
+ENUM
+  BFD_RELOC_NDS32_PLT_GOTREL_LO20
+ENUMX
+  BFD_RELOC_NDS32_PLT_GOTREL_LO15
+ENUMX
+  BFD_RELOC_NDS32_PLT_GOTREL_LO19
+ENUMX
+  BFD_RELOC_NDS32_GOT_LO15
+ENUMX
+  BFD_RELOC_NDS32_GOT_LO19
+ENUMX
+  BFD_RELOC_NDS32_GOTOFF_LO15
+ENUMX
+  BFD_RELOC_NDS32_GOTOFF_LO19
+ENUMX
+  BFD_RELOC_NDS32_GOT15S2
+ENUMX
+  BFD_RELOC_NDS32_GOT17S2
+ENUMDOC
+  for PIC object relaxation
+ENUM
+  BFD_RELOC_NDS32_5
+ENUMDOC
+  NDS32 relocs.
+  This is a 5 bit absolute address.
+ENUM
+  BFD_RELOC_NDS32_10_UPCREL
+ENUMDOC
+  This is a 10-bit unsigned pc-relative reloc with the right 1 bit assumed to be 0.
+ENUM
+  BFD_RELOC_NDS32_SDA_FP7U2_RELA
+ENUMDOC
+  If fp were omitted, fp can used as another gp.
+ENUM
+  BFD_RELOC_NDS32_RELAX_ENTRY
+ENUMX
+  BFD_RELOC_NDS32_GOT_SUFF
+ENUMX
+  BFD_RELOC_NDS32_GOTOFF_SUFF
+ENUMX
+  BFD_RELOC_NDS32_PLT_GOT_SUFF
+ENUMX
+  BFD_RELOC_NDS32_MULCALL_SUFF
+ENUMX
+  BFD_RELOC_NDS32_PTR
+ENUMX
+  BFD_RELOC_NDS32_PTR_COUNT
+ENUMX
+  BFD_RELOC_NDS32_PTR_RESOLVED
+ENUMX
+  BFD_RELOC_NDS32_PLTBLOCK
+ENUMX
+  BFD_RELOC_NDS32_RELAX_REGION_BEGIN
+ENUMX
+  BFD_RELOC_NDS32_RELAX_REGION_END
+ENUMX
+  BFD_RELOC_NDS32_MINUEND
+ENUMX
+  BFD_RELOC_NDS32_SUBTRAHEND
+ENUMX
+  BFD_RELOC_NDS32_DIFF8
+ENUMX
+  BFD_RELOC_NDS32_DIFF16
+ENUMX
+  BFD_RELOC_NDS32_DIFF32
+ENUMX
+  BFD_RELOC_NDS32_DIFF_ULEB128
+ENUMX
+  BFD_RELOC_NDS32_25_ABS
+ENUMX
+  BFD_RELOC_NDS32_DATA
+ENUMX
+  BFD_RELOC_NDS32_TRAN
+ENUMX
+  BFD_RELOC_NDS32_17IFC_PCREL
+ENUMX
+  BFD_RELOC_NDS32_10IFCU_PCREL
+ENUMDOC
+  relaxation relative relocation types
+
+
+ENUM
   BFD_RELOC_V850_9_PCREL
 ENUMDOC
   This is a 9-bit reloc

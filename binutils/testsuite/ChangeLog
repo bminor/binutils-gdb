@@ -1,3 +1,9 @@
+2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+	    Wei-Cheng Wang  <cole945@gmail.com>
+
+	* binutils-all/objdump.exp: Add NDS32 cpu.
+	* binutils-all/readelf.r: Skip extra reloc created by NDS32.
+
 2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/16318

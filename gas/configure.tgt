@@ -79,6 +79,8 @@ case ${cpu} in
   mips*el)		cpu_type=mips endian=little ;;
   mips*)		cpu_type=mips endian=big ;;
   mt)			cpu_type=mt endian=big ;;
+  nds32be)		cpu_type=nds32 endian=big ;;
+  nds32le)		cpu_type=nds32 endian=little ;;
   or32*)		cpu_type=or32 endian=big ;;
   pjl*)			cpu_type=pj endian=little ;;
   pj*)			cpu_type=pj endian=big ;;
@@ -343,6 +345,9 @@ case ${generic_target} in
   mt-*-elf)				fmt=elf bfd_gas=yes ;;
 
   msp430-*-*)				fmt=elf ;;
+
+  nds32-*-elf*)				fmt=elf ;;
+  nds32-*-linux*)			fmt=elf em=linux ;;
 
   nios2-*-rtems*)			fmt=elf ;;
   nios2*-linux*)			fmt=elf em=linux ;;

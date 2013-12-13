@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Andes NDS32.
+
 Changes in 2.24:
 
 * Add LOG2CEIL() builtin function to the linker script language

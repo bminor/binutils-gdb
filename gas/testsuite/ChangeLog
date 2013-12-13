@@ -1,3 +1,35 @@
+2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+
+	* gas/all/gas.exp: Add expected failures for NDS32.
+	* gas/elf/elf.exp: Likewise.
+	* gas/lns/lns.exp: Use alternate test.
+	* gas/macros/irp.d: Skip for NDS32.
+	* gas/macros/macros.exp: Skip some tests for the NDS32.
+	* gas/macros/rept.d: Skip for NDS32.
+	* gas/macros/test3.d: Skip for NDS32.
+	* gas/nds32: New directory.
+	* gas/nds32/alu-1.s: New test.
+	* gas/nds32/alu-1.d: Likewise.
+	* gas/nds32/alu-2.s: Likewise.
+	* gas/nds32/alu-2.d: Likewise.
+	* gas/nds32/br-1.d: Likewise.
+	* gas/nds32/br-1.s: Likewise.
+	* gas/nds32/br-2.d: Likewise.
+	* gas/nds32/br-2.s: Likewise.
+	* gas/nds32/ji-jr.d: Likewise.
+	* gas/nds32/ji-jr.s: Likewise.
+	* gas/nds32/ls.d: Likewise.
+	* gas/nds32/ls.s: Likewise.
+	* gas/nds32/lsi.d: Likewise.
+	* gas/nds32/lsi.s: Likewise.
+	* gas/nds32/to-16bit-v1.d: Likewise.
+	* gas/nds32/to-16bit-v1.s: Likewise.
+	* gas/nds32/to-16bit-v2.d: Likewise.
+	* gas/nds32/to-16bit-v2.s: Likewise.
+	* gas/nds32/to-16bit-v3.d: Likewise.
+	* gas/nds32/to-16bit-v3.s: Likewise.
+	* gas/nds32/nds32.exp: New test driver.
+
 2013-12-07  Mike Frysinger  <vapier@gentoo.org>
 
 	* gas/bfin/bit2.s: Remove +x file mode.

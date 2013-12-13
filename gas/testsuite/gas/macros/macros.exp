@@ -21,13 +21,13 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
     run_dump_test test1
 }
 
-if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] } {
+if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] && ![istarget "nds32*-*-*"] } {
     run_dump_test test2
 }
 
 run_dump_test test3
 
-if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] } {
+if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] && ![istarget "nds32*-*-*"] } {
     run_dump_test irp
     run_dump_test rept
     run_dump_test repeat

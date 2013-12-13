@@ -1,3 +1,18 @@
+2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+	    Wei-Cheng Wang  <cole945@gmail.com>
+
+	* readelf.c: Include elf/nds32.h
+	(guess_is_rela): Add case for EM_NDS32.
+	(dump_relocations): Add case for EM_NDS32.
+	(decode_NDS32_machine_flags): New.
+	(get_machine_flags): Add case for EM_NDS32.
+	(is_32bit_abs_reloc): Likewise.
+	(is_16bit_abs_reloc): Likewise.
+	(process_nds32_specific): New.
+	(process_arch_specific): Add case for EM_NDS32.
+	* NEWS: Announce Andes nds32 support.
+	* MAINTAINERS: Add nds32 maintainers.
+
 2013-12-10  Roland McGrath  <mcgrathr@google.com>
 
 	* Makefile.am (install-exec-local): Prefix libtool invocation with

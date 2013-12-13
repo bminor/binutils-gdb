@@ -12192,6 +12192,100 @@ _ACEOF
         using_cgen=yes
 	;;
 
+      nds32)
+        # Decide BASELINE, REDUCED_REGS, FPU_DP_EXT, FPU_SP_EXT features
+	# based on arch_name.
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --with-arch" >&5
+$as_echo_n "checking for default configuration of --with-arch... " >&6; }
+	if test "x${with_arch}" != x; then
+	  case ${with_arch} in
+            v2j | v2s | v2f | v2 | v3m | v3j | v3s | v3f | v3 )
+
+cat >>confdefs.h <<_ACEOF
+#define NDS32_DEFAULT_ARCH_NAME "$with_arch"
+_ACEOF
+
+              ;;
+	    *)
+	      as_fn_error "This kind of arch name does *NOT* exist!" "$LINENO" 5
+	      ;;
+          esac
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $with_arch" >&5
+$as_echo "$with_arch" >&6; }
+
+        # Decide features one by one.
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-dx-regs" >&5
+$as_echo_n "checking for default configuration of --enable-dx-regs... " >&6; }
+	if test "x${enable_dx_regs}" == xyes; then
+
+$as_echo "#define NDS32_DEFAULT_DX_REGS 1" >>confdefs.h
+
+	else
+
+$as_echo "#define NDS32_DEFAULT_DX_REGS 0" >>confdefs.h
+
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_dx_regs" >&5
+$as_echo "$enable_dx_regs" >&6; }
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-perf-ext" >&5
+$as_echo_n "checking for default configuration of --enable-perf-ext... " >&6; }
+	if test "x${enable_perf_ext}" == xno; then
+
+$as_echo "#define NDS32_DEFAULT_PERF_EXT 0" >>confdefs.h
+
+	else
+
+$as_echo "#define NDS32_DEFAULT_PERF_EXT 1" >>confdefs.h
+
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_perf_ext" >&5
+$as_echo "$enable_perf_ext" >&6; }
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-perf-ext2" >&5
+$as_echo_n "checking for default configuration of --enable-perf-ext2... " >&6; }
+	if test "x${enable_perf_ext2}" == xno; then
+
+$as_echo "#define NDS32_DEFAULT_PERF_EXT2 0" >>confdefs.h
+
+	else
+
+$as_echo "#define NDS32_DEFAULT_PERF_EXT2 1" >>confdefs.h
+
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_perf_ext2" >&5
+$as_echo "$enable_perf_ext2" >&6; }
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-string-ext" >&5
+$as_echo_n "checking for default configuration of --enable-string-ext... " >&6; }
+	if test "x${enable_string_ext}" == xno; then
+
+$as_echo "#define NDS32_DEFAULT_STRING_EXT 0" >>confdefs.h
+
+	else
+
+$as_echo "#define NDS32_DEFAULT_STRING_EXT 1" >>confdefs.h
+
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_string_ext" >&5
+$as_echo "$enable_string_ext" >&6; }
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for default configuration of --enable-audio-ext" >&5
+$as_echo_n "checking for default configuration of --enable-audio-ext... " >&6; }
+	if test "x${enable_audio_ext}" == xno; then
+
+$as_echo "#define NDS32_DEFAULT_AUDIO_EXT 0" >>confdefs.h
+
+	else
+
+$as_echo "#define NDS32_DEFAULT_AUDIO_EXT 1" >>confdefs.h
+
+	fi
+	{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $enable_audio_ext" >&5
+$as_echo "$enable_audio_ext" >&6; }
+	;;
+
       i386 | s390 | sparc)
 	if test $this_target = $target ; then
 

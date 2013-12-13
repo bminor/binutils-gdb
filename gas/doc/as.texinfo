@@ -437,6 +437,18 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-relax-all}] [@b{-relax-section}] [@b{-no-relax}]
    [@b{-EB}] [@b{-EL}]
 @end ifset
+@ifset NDS32
+
+@emph{Target NDS32 options:}
+    [@b{-EL}] [@b{-EB}] [@b{-O}] [@b{-Os}] [@b{-mcpu=@var{cpu}}]
+    [@b{-misa=@var{isa}}] [@b{-mabi=@var{abi}}] [@b{-mall-ext}]
+    [@b{-m[no-]16-bit}]  [@b{-m[no-]perf-ext}] [@b{-m[no-]perf2-ext}]
+    [@b{-m[no-]string-ext}] [@b{-m[no-]dsp-ext}] [@b{-m[no-]mac}] [@b{-m[no-]div}]
+    [@b{-m[no-]audio-isa-ext}] [@b{-m[no-]fpu-sp-ext}] [@b{-m[no-]fpu-dp-ext}]
+    [@b{-m[no-]fpu-fma}] [@b{-mfpu-freg=@var{FREG}}] [@b{-mreduced-regs}]
+    [@b{-mfull-regs}] [@b{-m[no-]dx-regs}] [@b{-mpic}] [@b{-mno-relax}]
+    [@b{-mb2bb}]
+@end ifset
 @ifset PDP11
 
 @emph{Target PDP11 options:}
@@ -1469,6 +1481,25 @@ Meta processor.
 @c man begin OPTIONS
 @ifset MMIX
 See the info pages for documentation of the MMIX-specific options.
+@end ifset
+
+@ifset NDS32
+
+@ifclear man
+@xref{NDS32 Options}, for the options available when @value{AS} is configured
+for a NDS32 processor.
+@end ifclear
+@c ended inside the included file
+@end ifset
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a
+NDS32 processor.
+@c man end
+@c man begin INCLUDE
+@include c-nds32.texi
+@c ended inside the included file
 @end ifset
 
 @c man end
@@ -7127,6 +7158,9 @@ subject, see the hardware manufacturer's manual.
 @ifset MSP430
 * MSP430-Dependent::		MSP430 Dependent Features
 @end ifset
+@ifset NDS32
+* NDS32-Dependent::             Andes NDS32 Dependent Features
+@end ifset
 @ifset NIOSII
 * NiosII-Dependent::            Altera Nios II Dependent Features
 @end ifset
@@ -7339,6 +7373,10 @@ family.
 
 @ifset MSP430
 @include c-msp430.texi
+@end ifset
+
+@ifset NDS32
+@include c-nds32.texi
 @end ifset
 
 @ifset NIOSII

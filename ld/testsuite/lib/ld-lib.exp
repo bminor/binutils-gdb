@@ -1596,6 +1596,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget moxie-*-*]
 	 && ![istarget msp430-*-*]
 	 && ![istarget mt-*-*]
+	 && ![istarget nds32*-*-*]
 	 && ![istarget openrisc-*-*]
 	 && ![istarget or32-*-*]
 	 && ![istarget pj-*-*]

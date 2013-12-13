@@ -29,6 +29,7 @@
 @set MIPS
 @set MMIX
 @set MSP430
+@set NDS32
 @set POWERPC
 @set POWERPC64
 @set Renesas
@@ -6094,6 +6095,9 @@ functionality are not listed.
 @ifset MSP430
 * MSP430::			@command{ld} and MSP430
 @end ifset
+@ifset NDS32
+* NDS32::			@command{ld} and NDS32
+@end ifset
 @ifset POWERPC
 * PowerPC ELF32::		@command{ld} and PowerPC 32-bit ELF Support
 @end ifset
@@ -6677,6 +6681,54 @@ in this section will not be uploaded to the MPU.
 Denotes a portion of RAM located above @samp{.bss} section.
 
 The last two sections are used by gcc.
+@end table
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset NDS32
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node NDS32
+@section @code{ld} and NDS32
+@kindex relaxing on NDS32
+For NDS32, there are some options to select relaxation behavior.  The linker
+relaxes objects according to these options.
+
+@table @code
+@item @samp{--m[no-]fp-as-gp}
+Disable/enable fp-as-gp relaxation.
+
+@item @samp{--mexport-symbols=FILE}
+Exporting symbols and their address into FILE as linker script.
+
+@item @samp{--m[no-]ex9}
+Disable/enable link-time EX9 relaxation.
+
+@item @samp{--mexport-ex9=FILE}
+Export the EX9 table after linking.
+
+@item @samp{--mimport-ex9=FILE}
+Import the Ex9 table for EX9 relaxation.
+
+@item @samp{--mupdate-ex9}
+Update the existing EX9 table.
+
+@item @samp{--mex9-limit=NUM}
+Maximum number of entries in the ex9 table.
+
+@item @samp{--mex9-loop-aware}
+Avoid generating the EX9 instruction inside the loop.
+
+@item @samp{--m[no-]ifc}
+Disable/enable the link-time IFC optimization.
+
+@item @samp{--mifc-loop-aware}
+Avoid generating the IFC instruction inside the loop.
 @end table
 
 @ifclear GENERIC
