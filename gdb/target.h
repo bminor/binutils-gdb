@@ -403,7 +403,8 @@ struct target_ops
        to xfree everything (including the "struct target_ops").  */
     void (*to_xclose) (struct target_ops *targ);
     void (*to_close) (struct target_ops *);
-    void (*to_attach) (struct target_ops *ops, char *, int);
+    void (*to_attach) (struct target_ops *ops, char *, int)
+      TARGET_DEFAULT_FUNC (find_default_attach);
     void (*to_post_attach) (struct target_ops *, int);
     void (*to_detach) (struct target_ops *ops, const char *, int)
       TARGET_DEFAULT_IGNORE ();

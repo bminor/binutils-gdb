@@ -3806,7 +3806,6 @@ init_dummy_target (void)
   dummy_target.to_shortname = "None";
   dummy_target.to_longname = "None";
   dummy_target.to_doc = "";
-  dummy_target.to_attach = find_default_attach;
   dummy_target.to_create_inferior = find_default_create_inferior;
   dummy_target.to_supports_non_stop = find_default_supports_non_stop;
   dummy_target.to_supports_disable_randomization
@@ -3853,22 +3852,10 @@ target_close (struct target_ops *targ)
 void
 target_attach (char *args, int from_tty)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_attach != NULL)	
-	{
-	  t->to_attach (t, args, from_tty);
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_attach (%s, %d)\n",
-				args, from_tty);
-	  return;
-	}
-    }
-
-  internal_error (__FILE__, __LINE__,
-		  _("could not find a target to attach"));
+  current_target.to_attach (&current_target, args, from_tty);
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_attach (%s, %d)\n",
+			args, from_tty);
 }
 
 int
