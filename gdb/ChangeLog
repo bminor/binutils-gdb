@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target-delegates.c: Rebuild.
+	* target.c (target_detach): Unconditionally delegate.
+	(init_dummy_target): Don't initialize to_detach.
+	* target.h (struct target_ops) <to_detach>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_augmented_libraries_svr4_read>:
 	Add argument.
 	(target_augmented_libraries_svr4_read): Add argument.

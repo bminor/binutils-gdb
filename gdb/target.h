@@ -405,7 +405,8 @@ struct target_ops
     void (*to_close) (struct target_ops *);
     void (*to_attach) (struct target_ops *ops, char *, int);
     void (*to_post_attach) (struct target_ops *, int);
-    void (*to_detach) (struct target_ops *ops, const char *, int);
+    void (*to_detach) (struct target_ops *ops, const char *, int)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
       TARGET_DEFAULT_NORETURN (noprocess ());

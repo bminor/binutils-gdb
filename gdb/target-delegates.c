@@ -4,6 +4,18 @@
 /* To regenerate this file, run:*/
 /*      make-target-delegates target.h > target-delegates.c */
 static void
+delegate_detach (struct target_ops *self, const char *arg1, int arg2)
+{
+  self = self->beneath;
+  self->to_detach (self, arg1, arg2);
+}
+
+static void
+tdefault_detach (struct target_ops *self, const char *arg1, int arg2)
+{
+}
+
+static void
 delegate_resume (struct target_ops *self, ptid_t arg1, int arg2, enum gdb_signal arg3)
 {
   self = self->beneath;
@@ -138,6 +150,8 @@ tdefault_supports_btrace (struct target_ops *self)
 static void
 install_delegators (struct target_ops *ops)
 {
+  if (ops->to_detach == NULL)
+    ops->to_detach = delegate_detach;
   if (ops->to_resume == NULL)
     ops->to_resume = delegate_resume;
   if (ops->to_wait == NULL)
@@ -167,6 +181,7 @@ install_delegators (struct target_ops *ops)
 static void
 install_dummy_methods (struct target_ops *ops)
 {
+  ops->to_detach = tdefault_detach;
   ops->to_resume = tdefault_resume;
   ops->to_wait = tdefault_wait;
   ops->to_store_registers = tdefault_store_registers;
