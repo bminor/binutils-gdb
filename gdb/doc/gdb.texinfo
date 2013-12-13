@@ -28845,6 +28845,7 @@ may repeat one or more times.
 * GDB/MI Target Manipulation::
 * GDB/MI File Transfer Commands::
 * GDB/MI Ada Exceptions Commands::
+* GDB/MI Support Commands::
 * GDB/MI Miscellaneous Commands::
 @end menu
 
@@ -33003,7 +33004,7 @@ select a visualizer by following the built-in process
 a varobj is created, and so ordinarily is not needed.
 
 This feature is only available if Python support is enabled.  The MI
-command @code{-list-features} (@pxref{GDB/MI Miscellaneous Commands})
+command @code{-list-features} (@pxref{GDB/MI Support Commands})
 can be used to check this.
 
 @subsubheading Example
@@ -35029,6 +35030,158 @@ Catchpoint Commands}.
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Support Commands
+@section @sc{gdb/mi} Support Commands
+
+Since new commands and features get regularly added to @sc{gdb/mi},
+some commands are available to help front-ends query the debugger
+about support for these capabilities.  Similarly, it is also possible
+to query @value{GDBN} about target support of certain features.
+
+@subheading The @code{-info-gdb-mi-command} Command
+@cindex @code{-info-gdb-mi-command}
+@findex -info-gdb-mi-command
+
+@subsubheading Synopsis
+
+@smallexample
+ -info-gdb-mi-command @var{cmd_name}
+@end smallexample
+
+Query support for the @sc{gdb/mi} command named @var{cmd_name}.
+
+Note that the dash (@code{-}) starting all @sc{gdb/mi} commands
+is technically not part of the command name (@pxref{GDB/MI Input
+Syntax}), and thus should be omitted in @var{cmd_name}.  However,
+for ease of use, this command also accepts the form with the leading
+dash.
+
+@subsubheading @value{GDBN} Command
+
+There is no corresponding @value{GDBN} command.
+
+@subsubheading Result
+
+The result is a tuple.  There is currently only one field:
+
+@table @samp
+@item exists
+This field is equal to @code{"true"} if the @sc{gdb/mi} command exists,
+@code{"false"} otherwise.
+
+@end table
+
+@subsubheading Example
+
+Here is an example where the @sc{gdb/mi} command does not exist:
+
+@smallexample
+-info-gdb-mi-command unsupported-command
+^done,command=@{exists="false"@}
+@end smallexample
+
+@noindent
+And here is an example where the @sc{gdb/mi} command is known
+to the debugger:
+
+@smallexample
+-info-gdb-mi-command symbol-list-lines
+^done,command=@{exists="true"@}
+@end smallexample
+
+@subheading The @code{-list-features} Command
+@findex -list-features
+@cindex supported @sc{gdb/mi} features, list
+
+Returns a list of particular features of the MI protocol that
+this version of gdb implements.  A feature can be a command,
+or a new field in an output of some command, or even an
+important bugfix.  While a frontend can sometimes detect presence
+of a feature at runtime, it is easier to perform detection at debugger
+startup.
+
+The command returns a list of strings, with each string naming an
+available feature.  Each returned string is just a name, it does not
+have any internal structure.  The list of possible feature names
+is given below.
+
+Example output:
+
+@smallexample
+(gdb) -list-features
+^done,result=["feature1","feature2"]
+@end smallexample
+
+The current list of features is:
+
+@table @samp
+@item frozen-varobjs
+Indicates support for the @code{-var-set-frozen} command, as well
+as possible presense of the @code{frozen} field in the output
+of @code{-varobj-create}.
+@item pending-breakpoints
+Indicates support for the @option{-f} option to the @code{-break-insert}
+command.
+@item python
+Indicates Python scripting support, Python-based
+pretty-printing commands, and possible presence of the
+@samp{display_hint} field in the output of @code{-var-list-children}
+@item thread-info
+Indicates support for the @code{-thread-info} command.
+@item data-read-memory-bytes
+Indicates support for the @code{-data-read-memory-bytes} and the
+@code{-data-write-memory-bytes} commands.
+@item breakpoint-notifications
+Indicates that changes to breakpoints and breakpoints created via the
+CLI will be announced via async records.
+@item ada-task-info
+Indicates support for the @code{-ada-task-info} command.
+@item language-option
+Indicates that all @sc{gdb/mi} commands accept the @option{--language}
+option (@pxref{Context management}).
+@item info-gdb-mi-command
+Indicates support for the @code{-info-gdb-mi-command} command.
+@item undefined-command-error-code
+Indicates support for the "undefined-command" error code in error result
+records, produced when trying to execute an undefined @sc{gdb/mi} command
+(@pxref{GDB/MI Result Records}).
+@item exec-run-start-option
+Indicates that the @code{-exec-run} command supports the @option{--start}
+option (@pxref{GDB/MI Program Execution}).
+@end table
+
+@subheading The @code{-list-target-features} Command
+@findex -list-target-features
+
+Returns a list of particular features that are supported by the
+target.  Those features affect the permitted MI commands, but 
+unlike the features reported by the @code{-list-features} command, the
+features depend on which target GDB is using at the moment.  Whenever
+a target can change, due to commands such as @code{-target-select},
+@code{-target-attach} or @code{-exec-run}, the list of target features
+may change, and the frontend should obtain it again.
+Example output:
+
+@smallexample
+(gdb) -list-target-features
+^done,result=["async"]
+@end smallexample
+
+The current list of features is:
+
+@table @samp
+@item async
+Indicates that the target is capable of asynchronous command
+execution, which means that @value{GDBN} will accept further commands
+while the target is running.
+
+@item reverse
+Indicates that the target is capable of reverse execution.
+@xref{Reverse Execution}, for more information.
+
+@end table
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Miscellaneous Commands
 @section Miscellaneous @sc{gdb/mi} Commands
 
@@ -35168,149 +35321,6 @@ default shows this information when you start an interactive session.
 ^done
 (gdb)
 @end smallexample
-
-@subheading The @code{-info-gdb-mi-command} Command
-@cindex @code{-info-gdb-mi-command}
-@findex -info-gdb-mi-command
-
-@subsubheading Synopsis
-
-@smallexample
- -info-gdb-mi-command @var{cmd_name}
-@end smallexample
-
-Query support for the @sc{gdb/mi} command named @var{cmd_name}.
-
-Note that the dash (@code{-}) starting all @sc{gdb/mi} commands
-is technically not part of the command name (@pxref{GDB/MI Input
-Syntax}), and thus should be omitted in @var{cmd_name}.  However,
-for ease of use, this command also accepts the form with the leading
-dash.
-
-@subsubheading @value{GDBN} Command
-
-There is no corresponding @value{GDBN} command.
-
-@subsubheading Result
-
-The result is a tuple.  There is currently only one field:
-
-@table @samp
-@item exists
-This field is equal to @code{"true"} if the @sc{gdb/mi} command exists,
-@code{"false"} otherwise.
-
-@end table
-
-@subsubheading Example
-
-Here is an example where the @sc{gdb/mi} command does not exist:
-
-@smallexample
--info-gdb-mi-command unsupported-command
-^done,command=@{exists="false"@}
-@end smallexample
-
-@noindent
-And here is an example where the @sc{gdb/mi} command is known
-to the debugger:
-
-@smallexample
--info-gdb-mi-command symbol-list-lines
-^done,command=@{exists="true"@}
-@end smallexample
-
-@subheading The @code{-list-features} Command
-@findex -list-features
-@cindex supported @sc{gdb/mi} features, list
-
-Returns a list of particular features of the MI protocol that
-this version of gdb implements.  A feature can be a command,
-or a new field in an output of some command, or even an
-important bugfix.  While a frontend can sometimes detect presence
-of a feature at runtime, it is easier to perform detection at debugger
-startup. 
-
-The command returns a list of strings, with each string naming an
-available feature.  Each returned string is just a name, it does not
-have any internal structure.  The list of possible feature names 
-is given below.
-
-Example output:
-
-@smallexample
-(gdb) -list-features
-^done,result=["feature1","feature2"]
-@end smallexample
-
-The current list of features is:
-
-@table @samp
-@item frozen-varobjs
-Indicates support for the @code{-var-set-frozen} command, as well
-as possible presense of the @code{frozen} field in the output
-of @code{-varobj-create}.
-@item pending-breakpoints
-Indicates support for the @option{-f} option to the @code{-break-insert}
-command.
-@item python
-Indicates Python scripting support, Python-based
-pretty-printing commands, and possible presence of the
-@samp{display_hint} field in the output of @code{-var-list-children}
-@item thread-info
-Indicates support for the @code{-thread-info} command.
-@item data-read-memory-bytes
-Indicates support for the @code{-data-read-memory-bytes} and the
-@code{-data-write-memory-bytes} commands.
-@item breakpoint-notifications
-Indicates that changes to breakpoints and breakpoints created via the
-CLI will be announced via async records.
-@item ada-task-info
-Indicates support for the @code{-ada-task-info} command.
-@item language-option
-Indicates that all @sc{gdb/mi} commands accept the @option{--language}
-option (@pxref{Context management}).
-@item info-gdb-mi-command
-Indicates support for the @code{-info-gdb-mi-command} command.
-@item undefined-command-error-code
-Indicates support for the "undefined-command" error code in error result
-records, produced when trying to execute an undefined @sc{gdb/mi} command
-(@pxref{GDB/MI Result Records}).
-@item exec-run-start-option
-Indicates that the @code{-exec-run} command supports the @option{--start}
-option (@pxref{GDB/MI Program Execution}).
-@end table
-
-@subheading The @code{-list-target-features} Command
-@findex -list-target-features
-
-Returns a list of particular features that are supported by the
-target.  Those features affect the permitted MI commands, but 
-unlike the features reported by the @code{-list-features} command, the
-features depend on which target GDB is using at the moment.  Whenever
-a target can change, due to commands such as @code{-target-select},
-@code{-target-attach} or @code{-exec-run}, the list of target features
-may change, and the frontend should obtain it again.
-Example output:
-
-@smallexample
-(gdb) -list-target-features
-^done,result=["async"]
-@end smallexample
-
-The current list of features is:
-
-@table @samp
-@item async
-Indicates that the target is capable of asynchronous command
-execution, which means that @value{GDBN} will accept further commands
-while the target is running.
-
-@item reverse
-Indicates that the target is capable of reverse execution.
-@xref{Reverse Execution}, for more information.
-
-@end table
 
 @subheading The @code{-list-thread-groups} Command
 @findex -list-thread-groups
