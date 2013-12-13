@@ -1751,13 +1751,14 @@ gdb_caching_proc support_complex_tests {
     set src [standard_temp_file complex[pid].c]
     set exe [standard_temp_file complex[pid].x]
 
-    set f [open $src "w"]
-    puts $f "int main() {"
-    puts $f "_Complex float cf;"
-    puts $f "_Complex double cd;"
-    puts $f "_Complex long double cld;"
-    puts $f "  return 0; }"
-    close $f
+    gdb_produce_source $src {
+	int main() {
+	    _Complex float cf;
+	    _Complex double cd;
+	    _Complex long double cld;
+	    return 0;
+	}
+    }
 
     verbose "compiling testfile $src" 2
     set compile_flags {debug nowarnings quiet}
@@ -1829,9 +1830,9 @@ gdb_caching_proc is_elf_target {
     set src [standard_temp_file is_elf_target[pid].c]
     set obj [standard_temp_file is_elf_target[pid].o]
 
-    set fp_src [open $src "w"]
-    puts $fp_src "int foo () {return 0;}"
-    close $fp_src
+    gdb_produce_source $src {
+	int foo () {return 0;}
+    }
 
     verbose "$me:  compiling testfile $src" 2
     set lines [gdb_compile $src $obj object {quiet}]
@@ -1880,11 +1881,11 @@ gdb_caching_proc is_ilp32_target {
     set src [standard_temp_file ilp32[pid].c]
     set obj [standard_temp_file ilp32[pid].o]
 
-    set f [open $src "w"]
-    puts $f "int dummy\[sizeof (int) == 4"
-    puts $f "           && sizeof (void *) == 4"
-    puts $f "           && sizeof (long) == 4 ? 1 : -1\];"
-    close $f
+    gdb_produce_source $src {
+	int dummy[sizeof (int) == 4
+		  && sizeof (void *) == 4
+		  && sizeof (long) == 4 ? 1 : -1];
+    }
 
     verbose "$me:  compiling testfile $src" 2
     set lines [gdb_compile $src $obj object {quiet}]
@@ -1909,11 +1910,11 @@ gdb_caching_proc is_lp64_target {
     set src [standard_temp_file lp64[pid].c]
     set obj [standard_temp_file lp64[pid].o]
 
-    set f [open $src "w"]
-    puts $f "int dummy\[sizeof (int) == 4"
-    puts $f "           && sizeof (void *) == 8"
-    puts $f "           && sizeof (long) == 8 ? 1 : -1\];"
-    close $f
+    gdb_produce_source $src {
+	int dummy[sizeof (int) == 4
+		  && sizeof (void *) == 8
+		  && sizeof (long) == 8 ? 1 : -1];
+    }
 
     verbose "$me:  compiling testfile $src" 2
     set lines [gdb_compile $src $obj object {quiet}]
@@ -1938,10 +1939,10 @@ gdb_caching_proc is_64_target {
     set src [standard_temp_file is64[pid].c]
     set obj [standard_temp_file is64[pid].o]
 
-    set f [open $src "w"]
-    puts $f "int function(void) { return 3; }"
-    puts $f "int dummy\[sizeof (&function) == 8 ? 1 : -1\];"
-    close $f
+    gdb_produce_source $src {
+	int function(void) { return 3; }
+	int dummy[sizeof (&function) == 8 ? 1 : -1];
+    }
 
     verbose "$me:  compiling testfile $src" 2
     set lines [gdb_compile $src $obj object {quiet}]
@@ -1970,12 +1971,12 @@ gdb_caching_proc is_amd64_regs_target {
     set src [standard_temp_file reg64[pid].s]
     set obj [standard_temp_file reg64[pid].o]
 
-    set f [open $src "w"]
+    set list {}
     foreach reg \
-            {rax rbx rcx rdx rsi rdi rbp rsp r8 r9 r10 r11 r12 r13 r14 r15} {
-	puts $f "\tincq %$reg"
-    }
-    close $f
+	{rax rbx rcx rdx rsi rdi rbp rsp r8 r9 r10 r11 r12 r13 r14 r15} {
+	    lappend list "\tincq %$reg"
+	}
+    gdb_produce_source $src [join $list \n]
 
     verbose "$me:  compiling testfile $src" 2
     set lines [gdb_compile $src $obj object {quiet}]
@@ -2046,15 +2047,16 @@ gdb_caching_proc skip_altivec_tests {
     set src [standard_temp_file vmx[pid].c]
     set exe [standard_temp_file vmx[pid].x]
 
-    set f [open $src "w"]
-    puts $f "int main() {"
-    puts $f "#ifdef __MACH__"
-    puts $f "  asm volatile (\"vor v0,v0,v0\");"
-    puts $f "#else"
-    puts $f "  asm volatile (\"vor 0,0,0\");"
-    puts $f "#endif"
-    puts $f "  return 0; }"
-    close $f
+    gdb_produce_source $src {
+	int main() {
+	    #ifdef __MACH__
+	    asm volatile ("vor v0,v0,v0");
+	    #else
+	    asm volatile ("vor 0,0,0");
+	    #endif
+	    return 0;
+	}
+    }
 
     verbose "$me:  compiling testfile $src" 2
     set lines [gdb_compile $src $exe executable $compile_flags]
@@ -2126,16 +2128,17 @@ gdb_caching_proc skip_vsx_tests {
     set src [standard_temp_file vsx[pid].c]
     set exe [standard_temp_file vsx[pid].x]
 
-    set f [open $src "w"]
-    puts $f "int main() {"
-    puts $f "  double a\[2\] = { 1.0, 2.0 };"
-    puts $f "#ifdef __MACH__"
-    puts $f "  asm volatile (\"lxvd2x v0,v0,%\[addr\]\" : : \[addr\] \"r\" (a));"
-    puts $f "#else"
-    puts $f "  asm volatile (\"lxvd2x 0,0,%\[addr\]\" : : \[addr\] \"r\" (a));"
-    puts $f "#endif"
-    puts $f "  return 0; }"
-    close $f
+    gdb_produce_source $src {
+	int main() {
+	    double a[2] = { 1.0, 2.0 };
+	    #ifdef __MACH__
+	    asm volatile ("lxvd2x v0,v0,%[addr]" : : [addr] "r" (a));
+	    #else
+	    asm volatile ("lxvd2x 0,0,%[addr]" : : [addr] "r" (a));
+	    #endif
+	    return 0;
+	}
+    }
 
     verbose "$me:  compiling testfile $src" 2
     set lines [gdb_compile $src $exe executable $compile_flags]
@@ -2192,9 +2195,9 @@ gdb_caching_proc skip_btrace_tests {
     set src [standard_temp_file btrace[pid].c]
     set exe [standard_temp_file btrace[pid].x]
 
-    set f [open $src "w"]
-    puts $f "int main(void) { return 0; }"
-    close $f
+    gdb_produce_source $src {
+	int main(void) { return 0; }
+    }
 
     verbose "$me:  compiling testfile $src" 2
     set compile_flags {debug nowarnings quiet}
@@ -2806,11 +2809,18 @@ proc gdb_compile_pthreads {source dest type options} {
     }
 }
 
-# Build a shared library from SOURCES.  You must use get_compiler_info
-# first.
+# Build a shared library from SOURCES.
 
 proc gdb_compile_shlib {sources dest options} {
     set obj_options $options
+
+    set info_options ""
+    if { [lsearch -exact $options "c++"] >= 0 } {
+	set info_options "c++"
+    }
+    if [get_compiler_info ${info_options}] {
+       return -1
+    }
 
     switch -glob [test_compiler_info] {
         "xlc-*" {

@@ -125,6 +125,7 @@ static struct mi_cmd mi_cmds[] =
   DEF_MI_CMD_MI ("inferior-tty-set", mi_cmd_inferior_tty_set),
   DEF_MI_CMD_MI ("inferior-tty-show", mi_cmd_inferior_tty_show),
   DEF_MI_CMD_MI ("info-ada-exceptions", mi_cmd_info_ada_exceptions),
+  DEF_MI_CMD_MI ("info-gdb-mi-command", mi_cmd_info_gdb_mi_command),
   DEF_MI_CMD_MI ("info-os", mi_cmd_info_os),
   DEF_MI_CMD_MI ("interpreter-exec", mi_cmd_interpreter_exec),
   DEF_MI_CMD_MI ("list-features", mi_cmd_list_features),

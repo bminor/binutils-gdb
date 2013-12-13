@@ -3274,6 +3274,32 @@ gdb_realpath_keepfile (const char *filename)
   return result;
 }
 
+/* Return PATH in absolute form, performing tilde-expansion if necessary.
+   PATH cannot be NULL or the empty string.
+   This does not resolve symlinks however, use gdb_realpath for that.
+   Space for the result is allocated with malloc.
+   If the path is already absolute, it is strdup'd.
+   If there is a problem computing the absolute path, the path is returned
+   unchanged (still strdup'd).  */
+
+char *
+gdb_abspath (const char *path)
+{
+  gdb_assert (path != NULL && path[0] != '\0');
+
+  if (path[0] == '~')
+    return tilde_expand (path);
+
+  if (IS_ABSOLUTE_PATH (path))
+    return xstrdup (path);
+
+  /* Beware the // my son, the Emacs barfs, the botch that catch...  */
+  return concat (current_directory,
+	    IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
+		 ? "" : SLASH_STRING,
+		 path, (char *) NULL);
+}
+
 ULONGEST
 align_up (ULONGEST v, int n)
 {

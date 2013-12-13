@@ -1188,7 +1188,8 @@ value_assign (struct value *toval, struct value *fromval)
 					       &optim, &unavail))
 		  {
 		    if (optim)
-		      error (_("value has been optimized out"));
+		      throw_error (OPTIMIZED_OUT_ERROR,
+				   _("value has been optimized out"));
 		    if (unavail)
 		      throw_error (NOT_AVAILABLE_ERROR,
 				   _("value is not available"));

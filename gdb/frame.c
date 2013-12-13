@@ -50,6 +50,23 @@ static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 static struct frame_info *get_prev_frame_raw (struct frame_info *this_frame);
 static const char *frame_stop_reason_symbol_string (enum unwind_stop_reason reason);
 
+/* Status of some values cached in the frame_info object.  */
+
+enum cached_copy_status
+{
+  /* Value is unknown.  */
+  CC_UNKNOWN,
+
+  /* We have a value.  */
+  CC_VALUE,
+
+  /* Value was not saved.  */
+  CC_NOT_SAVED,
+
+  /* Value is unavailable.  */
+  CC_UNAVAILABLE
+};
+
 /* We keep a cache of stack frames, each of which is a "struct
    frame_info".  The innermost one gets allocated (in
    wait_for_inferior) each time the inferior stops; current_frame
@@ -96,7 +113,7 @@ struct frame_info
 
   /* Cached copy of the previous frame's resume address.  */
   struct {
-    int p;
+    enum cached_copy_status status;
     CORE_ADDR value;
   } prev_pc;
   
@@ -366,10 +383,15 @@ fprint_frame (struct ui_file *file, struct frame_info *fi)
     fprintf_unfiltered (file, "<unknown>");
   fprintf_unfiltered (file, ",");
   fprintf_unfiltered (file, "pc=");
-  if (fi->next != NULL && fi->next->prev_pc.p)
-    fprintf_unfiltered (file, "%s", hex_string (fi->next->prev_pc.value));
-  else
+  if (fi->next == NULL || fi->next->prev_pc.status == CC_UNKNOWN)
     fprintf_unfiltered (file, "<unknown>");
+  else if (fi->next->prev_pc.status == CC_VALUE)
+    fprintf_unfiltered (file, "%s",
+			hex_string (fi->next->prev_pc.value));
+  else if (fi->next->prev_pc.status == CC_NOT_SAVED)
+    val_print_not_saved (file);
+  else if (fi->next->prev_pc.status == CC_UNAVAILABLE)
+    val_print_unavailable (file);
   fprintf_unfiltered (file, ",");
   fprintf_unfiltered (file, "id=");
   if (fi->this_id.p)
@@ -707,10 +729,10 @@ frame_find_by_id (struct frame_id id)
   return NULL;
 }
 
-static int
-frame_unwind_pc_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
+static CORE_ADDR
+frame_unwind_pc (struct frame_info *this_frame)
 {
-  if (!this_frame->prev_pc.p)
+  if (this_frame->prev_pc.status == CC_UNKNOWN)
     {
       if (gdbarch_unwind_pc_p (frame_unwind_arch (this_frame)))
 	{
@@ -740,24 +762,35 @@ frame_unwind_pc_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
 	    {
 	      pc = gdbarch_unwind_pc (prev_gdbarch, this_frame);
 	    }
-	  if (ex.reason < 0 && ex.error == NOT_AVAILABLE_ERROR)
+	  if (ex.reason < 0)
 	    {
-	      this_frame->prev_pc.p = -1;
+	      if (ex.error == NOT_AVAILABLE_ERROR)
+		{
+		  this_frame->prev_pc.status = CC_UNAVAILABLE;
 
-	      if (frame_debug)
-		fprintf_unfiltered (gdb_stdlog,
-				    "{ frame_unwind_pc (this_frame=%d)"
-				    " -> <unavailable> }\n",
-				    this_frame->level);
-	    }
-	  else if (ex.reason < 0)
-	    {
-	      throw_exception (ex);
+		  if (frame_debug)
+		    fprintf_unfiltered (gdb_stdlog,
+					"{ frame_unwind_pc (this_frame=%d)"
+					" -> <unavailable> }\n",
+					this_frame->level);
+		}
+	      else if (ex.error == OPTIMIZED_OUT_ERROR)
+		{
+		  this_frame->prev_pc.status = CC_NOT_SAVED;
+
+		  if (frame_debug)
+		    fprintf_unfiltered (gdb_stdlog,
+					"{ frame_unwind_pc (this_frame=%d)"
+					" -> <not saved> }\n",
+					this_frame->level);
+		}
+	      else
+		throw_exception (ex);
 	    }
 	  else
 	    {
 	      this_frame->prev_pc.value = pc;
-	      this_frame->prev_pc.p = 1;
+	      this_frame->prev_pc.status = CC_VALUE;
 	      if (frame_debug)
 		fprintf_unfiltered (gdb_stdlog,
 				    "{ frame_unwind_pc (this_frame=%d) "
@@ -769,40 +802,23 @@ frame_unwind_pc_if_available (struct frame_info *this_frame, CORE_ADDR *pc)
       else
 	internal_error (__FILE__, __LINE__, _("No unwind_pc method"));
     }
-  if (this_frame->prev_pc.p < 0)
-    {
-      *pc = -1;
-      return 0;
-    }
-  else
-    {
-      *pc = this_frame->prev_pc.value;
-      return 1;
-    }
-}
 
-static CORE_ADDR
-frame_unwind_pc (struct frame_info *this_frame)
-{
-  CORE_ADDR pc;
-
-  if (!frame_unwind_pc_if_available (this_frame, &pc))
+  if (this_frame->prev_pc.status == CC_VALUE)
+    return this_frame->prev_pc.value;
+  else if (this_frame->prev_pc.status == CC_UNAVAILABLE)
     throw_error (NOT_AVAILABLE_ERROR, _("PC not available"));
+  else if (this_frame->prev_pc.status == CC_NOT_SAVED)
+    throw_error (OPTIMIZED_OUT_ERROR, _("PC not saved"));
   else
-    return pc;
+    internal_error (__FILE__, __LINE__,
+		    "unexpected prev_pc status: %d",
+		    (int) this_frame->prev_pc.status);
 }
 
 CORE_ADDR
 frame_unwind_caller_pc (struct frame_info *this_frame)
 {
   return frame_unwind_pc (skip_artificial_frames (this_frame));
-}
-
-int
-frame_unwind_caller_pc_if_available (struct frame_info *this_frame,
-				     CORE_ADDR *pc)
-{
-  return frame_unwind_pc_if_available (skip_artificial_frames (this_frame), pc);
 }
 
 int
@@ -1007,7 +1023,8 @@ frame_unwind_register (struct frame_info *frame, int regnum, gdb_byte *buf)
 			 &lval, &addr, &realnum, buf);
 
   if (optimized)
-    error (_("Register %d was not saved"), regnum);
+    throw_error (OPTIMIZED_OUT_ERROR,
+		 _("Register %d was not saved"), regnum);
   if (unavailable)
     throw_error (NOT_AVAILABLE_ERROR,
 		 _("Register %d is not available"), regnum);
@@ -1571,7 +1588,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
      very likely to read this, and the corresponding unwinder is
      entitled to rely that the PC doesn't magically change.  */
   fi->next->prev_pc.value = pc;
-  fi->next->prev_pc.p = 1;
+  fi->next->prev_pc.status = CC_VALUE;
 
   /* We currently assume that frame chain's can't cross spaces.  */
   fi->pspace = fi->next->pspace;
@@ -1719,7 +1736,6 @@ get_prev_frame_if_no_cycle (struct frame_info *this_frame)
 static struct frame_info *
 get_prev_frame_1 (struct frame_info *this_frame)
 {
-  struct frame_id this_id;
   struct gdbarch *gdbarch;
 
   gdb_assert (this_frame != NULL);
@@ -1791,7 +1807,8 @@ get_prev_frame_1 (struct frame_info *this_frame)
      See the comment at frame_id_inner for details.  */
   if (get_frame_type (this_frame) == NORMAL_FRAME
       && this_frame->next->unwind->type == NORMAL_FRAME
-      && frame_id_inner (get_frame_arch (this_frame->next), this_id,
+      && frame_id_inner (get_frame_arch (this_frame->next),
+			 get_frame_id (this_frame),
 			 get_frame_id (this_frame->next)))
     {
       CORE_ADDR this_pc_in_block;

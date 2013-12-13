@@ -1,3 +1,7 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* epiphany.h: Remove +x file mode.
+
 2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* x86-64.h: Add R_X86_64_PC32_BND and R_X86_64_PLT32_BND.

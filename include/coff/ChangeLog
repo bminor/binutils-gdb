@@ -1,3 +1,7 @@
+2013-12-06  Tristan Gingold  <gingold@adacore.com>
+
+	* pe.h (UWOP_EPILOG, UWOP_PARE): Define.
+
 2013-07-10  Tristan Gingold  <gingold@adacore.com>
 
 	* rs6000.h (external_core_dumpx): New structure.

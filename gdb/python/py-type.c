@@ -146,6 +146,14 @@ field_new (void)
 
 
 
+/* Return true if OBJ is of type gdb.Field, false otherwise.  */
+
+int
+gdbpy_is_field (PyObject *obj)
+{
+  return PyObject_TypeCheck (obj, &field_object_type);
+}
+
 /* Return the code for this type.  */
 static PyObject *
 typy_get_code (PyObject *self, void *closure)
@@ -166,6 +174,13 @@ convert_field (struct type *type, int field)
 
   if (!result)
     return NULL;
+
+  arg = type_to_type_object (type);
+  if (arg == NULL)
+    goto fail;
+  if (PyObject_SetAttrString (result, "parent_type", arg) < 0)
+    goto failarg;
+  Py_DECREF (arg);
 
   if (!field_is_static (&TYPE_FIELD (type, field)))
     {

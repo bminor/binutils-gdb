@@ -111,19 +111,6 @@ struct partial_symtab
   CORE_ADDR textlow;
   CORE_ADDR texthigh;
 
-  /* Array of pointers to all of the partial_symtab's which this one
-     depends on.  Since this array can only be set to previous or
-     the current (?) psymtab, this dependency tree is guaranteed not
-     to have any loops.  "depends on" means that symbols must be read
-     for the dependencies before being read for this psymtab; this is
-     for type references in stabs, where if foo.c includes foo.h, declarations
-     in foo.h may use type numbers defined in foo.c.  For other debugging
-     formats there may be no need to use dependencies.  */
-
-  struct partial_symtab **dependencies;
-
-  int number_of_dependencies;
-
   /* If NULL, this is an ordinary partial symbol table.
 
      If non-NULL, this holds a single includer of this partial symbol
@@ -152,6 +139,19 @@ struct partial_symtab
      debuginfo reader; it can be arbitrary.  */
 
   struct partial_symtab *user;
+
+  /* Array of pointers to all of the partial_symtab's which this one
+     depends on.  Since this array can only be set to previous or
+     the current (?) psymtab, this dependency tree is guaranteed not
+     to have any loops.  "depends on" means that symbols must be read
+     for the dependencies before being read for this psymtab; this is
+     for type references in stabs, where if foo.c includes foo.h, declarations
+     in foo.h may use type numbers defined in foo.c.  For other debugging
+     formats there may be no need to use dependencies.  */
+
+  struct partial_symtab **dependencies;
+
+  int number_of_dependencies;
 
   /* Global symbol list.  This list will be sorted after readin to
      improve access.  Binary search will be the usual method of

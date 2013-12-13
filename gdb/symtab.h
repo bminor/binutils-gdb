@@ -875,11 +875,11 @@ struct symtab
 
   /* Name of this source file.  This pointer is never NULL.  */
 
-  char *filename;
+  const char *filename;
 
   /* Directory in which it was compiled, or NULL if we don't know.  */
 
-  char *dirname;
+  const char *dirname;
 
   /* Total number of lines found in source file.  */
 

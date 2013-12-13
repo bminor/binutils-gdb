@@ -1702,6 +1702,12 @@ _bfd_elf_add_default_symbol (bfd *abfd,
       ht = (struct elf_link_hash_entry *) hi->root.u.i.link;
       (*bed->elf_backend_copy_indirect_symbol) (info, ht, hi);
 
+      /* A reference to the SHORTNAME symbol from a dynamic library
+	 will be satisfied by the versioned symbol at runtime.  In
+	 effect, we have a reference to the versioned symbol.  */
+      ht->ref_dynamic_nonweak |= hi->ref_dynamic_nonweak;
+      hi->dynamic_def |= ht->dynamic_def;
+
       /* See if the new flags lead us to realize that the symbol must
 	 be dynamic.  */
       if (! *dynsym)
@@ -1771,6 +1777,8 @@ nondefault:
       if (hi->root.type == bfd_link_hash_indirect)
 	{
 	  (*bed->elf_backend_copy_indirect_symbol) (info, h, hi);
+	  h->ref_dynamic_nonweak |= hi->ref_dynamic_nonweak;
+	  hi->dynamic_def |= h->dynamic_def;
 
 	  /* See if the new flags lead us to realize that the symbol
 	     must be dynamic.  */

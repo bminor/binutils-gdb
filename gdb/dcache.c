@@ -337,14 +337,13 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
 	  continue;
 	}
 
-      res = target_read (current_target.beneath, TARGET_OBJECT_RAW_MEMORY,
-			 NULL, myaddr, memaddr, reg_len);
-      if (res < reg_len)
+      res = target_read_raw_memory (memaddr, myaddr, reg_len);
+      if (res != 0)
 	return 0;
 
-      memaddr += res;
-      myaddr += res;
-      len -= res;
+      memaddr += reg_len;
+      myaddr += reg_len;
+      len -= reg_len;
     }
 
   return 1;

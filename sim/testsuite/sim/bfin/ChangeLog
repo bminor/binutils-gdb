@@ -1,3 +1,7 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* run-tests.sh: Add +x file mode.
+
 2013-06-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* run-tests.sh (usage): Fix typo in exit.

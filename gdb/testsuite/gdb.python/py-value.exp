@@ -291,6 +291,12 @@ proc test_value_in_inferior {} {
   # For the purposes of this test, use repr()
   gdb_py_test_silent_cmd "python nullst = nullst.string (length = 9)" "get string beyond null" 1
   gdb_test "python print (repr(nullst))" "u?'divide\\\\x00et'"
+
+  # Test fetching a string longer than its declared (in C) size.
+  # PR 16286
+  gdb_py_test_silent_cmd "python xstr = gdb.parse_and_eval('xstr')" "get xstr" 1
+  gdb_test "python print xstr\['text'\].string (length = xstr\['length'\])" "x{100}" \
+    "read string beyond declared size"
 }
 
 proc test_lazy_strings {} {

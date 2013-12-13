@@ -2396,7 +2396,7 @@ insert_bp_location (struct bp_location *bl,
 		    int *hw_bp_error_explained_already)
 {
   int val = 0;
-  char *hw_bp_err_string = NULL;
+  const char *hw_bp_err_string = NULL;
   struct gdb_exception e;
 
   if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
@@ -2501,7 +2501,7 @@ insert_bp_location (struct bp_location *bl,
 	  if (e.reason < 0)
 	    {
 	      val = 1;
-	      hw_bp_err_string = (char *) e.message;
+	      hw_bp_err_string = e.message;
 	    }
 	}
       else
@@ -2543,7 +2543,7 @@ insert_bp_location (struct bp_location *bl,
 	      if (e.reason < 0)
 	        {
 	          val = 1;
-	          hw_bp_err_string = (char *) e.message;
+	          hw_bp_err_string = e.message;
 	        }
 	    }
 	  else

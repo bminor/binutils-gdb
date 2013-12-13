@@ -60,6 +60,7 @@
 #include "objfiles.h"
 #include "completer.h"
 #include "target-descriptions.h"
+#include "target-dcache.h"
 
 /* Prototypes for local functions */
 
@@ -2475,6 +2476,13 @@ infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
 
       old_chain = make_cleanup_restore_current_thread ();
 
+      overlay_cache_invalid = 1;
+      /* Flush target cache before starting to handle each event.
+	 Target was running and cache could be stale.  This is just a
+	 heuristic.  Running threads may modify target memory, but we
+	 don't get any event.  */
+      target_dcache_invalidate ();
+
       /* Go through handle_inferior_event/normal_stop, so we always
 	 have consistent output as if the stop event had been
 	 reported.  */
@@ -2677,6 +2685,11 @@ prepare_for_detach (void)
       memset (ecs, 0, sizeof (*ecs));
 
       overlay_cache_invalid = 1;
+      /* Flush target cache before starting to handle each event.
+	 Target was running and cache could be stale.  This is just a
+	 heuristic.  Running threads may modify target memory, but we
+	 don't get any event.  */
+      target_dcache_invalidate ();
 
       if (deprecated_target_wait_hook)
 	ecs->ptid = deprecated_target_wait_hook (pid_ptid, &ecs->ws, 0);
@@ -2739,6 +2752,12 @@ wait_for_inferior (void)
       memset (ecs, 0, sizeof (*ecs));
 
       overlay_cache_invalid = 1;
+
+      /* Flush target cache before starting to handle each event.
+	 Target was running and cache could be stale.  This is just a
+	 heuristic.  Running threads may modify target memory, but we
+	 don't get any event.  */
+      target_dcache_invalidate ();
 
       if (deprecated_target_wait_hook)
 	ecs->ptid = deprecated_target_wait_hook (waiton_ptid, &ecs->ws, 0);
@@ -2805,6 +2824,11 @@ fetch_inferior_event (void *client_data)
     make_cleanup_restore_current_thread ();
 
   overlay_cache_invalid = 1;
+  /* Flush target cache before starting to handle each event.  Target
+     was running and cache could be stale.  This is just a heuristic.
+     Running threads may modify target memory, but we don't get any
+     event.  */
+  target_dcache_invalidate ();
 
   make_cleanup_restore_integer (&execution_direction);
   execution_direction = target_execution_direction ();

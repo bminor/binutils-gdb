@@ -525,27 +525,15 @@ source_script_from_stream (FILE *stream, const char *file)
   if (script_ext_mode != script_ext_off
       && strlen (file) > 3 && !strcmp (&file[strlen (file) - 3], ".py"))
     {
-      volatile struct gdb_exception e;
-
-      TRY_CATCH (e, RETURN_MASK_ERROR)
+      if (have_python ())
+	source_python_script (stream, file);
+      else if (script_ext_mode == script_ext_soft)
 	{
-	  source_python_script (stream, file);
+	  /* Fallback to GDB script mode.  */
+	  script_from_file (stream, file);
 	}
-      if (e.reason < 0)
-	{
-	  /* Should we fallback to ye olde GDB script mode?  */
-	  if (script_ext_mode == script_ext_soft
-	      && e.reason == RETURN_ERROR && e.error == UNSUPPORTED_ERROR)
-	    {
-	      fseek (stream, 0, SEEK_SET);
-	      script_from_file (stream, (char*) file);
-	    }
-	  else
-	    {
-	      /* Nope, just punt.  */
-	      throw_exception (e);
-	    }
-	}
+      else
+	error (_("Python scripting is not supported in this copy of GDB."));
     }
   else
     script_from_file (stream, file);
@@ -817,9 +805,8 @@ edit_command (char *arg, int from_tty)
 	  struct gdbarch *gdbarch;
 
           if (sal.symtab == 0)
-	    /* FIXME-32x64--assumes sal.pc fits in long.  */
 	    error (_("No source file for address %s."),
-		   hex_string ((unsigned long) sal.pc));
+		   paddress (get_current_arch (), sal.pc));
 
 	  gdbarch = get_objfile_arch (sal.symtab->objfile);
           sym = find_pc_function (sal.pc);
@@ -982,9 +969,8 @@ list_command (char *arg, int from_tty)
       struct gdbarch *gdbarch;
 
       if (sal.symtab == 0)
-	/* FIXME-32x64--assumes sal.pc fits in long.  */
 	error (_("No source file for address %s."),
-	       hex_string ((unsigned long) sal.pc));
+	       paddress (get_current_arch (), sal.pc));
 
       gdbarch = get_objfile_arch (sal.symtab->objfile);
       sym = find_pc_function (sal.pc);

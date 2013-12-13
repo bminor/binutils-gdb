@@ -1117,13 +1117,17 @@ _bfd_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
       || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
     return TRUE;
 
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || (elf_elfheader (obfd)->e_flags
-		  == elf_elfheader (ibfd)->e_flags));
+  if (!elf_flags_init (obfd))
+    {
+      elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
+      elf_flags_init (obfd) = TRUE;
+    }
 
   elf_gp (obfd) = elf_gp (ibfd);
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = TRUE;
+
+  /* Also copy the EI_OSABI field.  */
+  elf_elfheader (obfd)->e_ident[EI_OSABI] =
+    elf_elfheader (ibfd)->e_ident[EI_OSABI];
 
   /* Copy object attributes.  */
   _bfd_elf_copy_obj_attributes (ibfd, obfd);
@@ -5150,6 +5154,27 @@ assign_file_positions_except_relocs (bfd *abfd,
 	{
 	  if (!(*bed->elf_backend_modify_program_headers) (abfd, link_info))
 	    return FALSE;
+	}
+
+      /* Set e_type in ELF header to ET_EXEC for -pie -Ttext-segment=.  */
+      if (link_info != NULL
+	  && link_info->executable
+	  && link_info->shared)
+	{
+	  unsigned int num_segments = elf_elfheader (abfd)->e_phnum;
+	  Elf_Internal_Phdr *segment = elf_tdata (abfd)->phdr;
+	  Elf_Internal_Phdr *end_segment = &segment[num_segments];
+
+	  /* Find the lowest p_vaddr in PT_LOAD segments.  */
+	  bfd_vma p_vaddr = (bfd_vma) -1;
+	  for (; segment < end_segment; segment++)
+	    if (segment->p_type == PT_LOAD && p_vaddr > segment->p_vaddr)
+	      p_vaddr = segment->p_vaddr;
+
+	  /* Set e_type to ET_EXEC if the lowest p_vaddr in PT_LOAD
+	     segments is non-zero.  */
+	  if (p_vaddr)
+	    i_ehdrp->e_type = ET_EXEC;
 	}
 
       /* Write out the program headers.  */

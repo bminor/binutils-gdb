@@ -1,3 +1,8 @@
+2013-12-11  Yao Qi  <yao@codesourcery.com>
+
+	* notif.c (handle_notif_ack): Return 0 if no notification
+	matches.
+
 2013-11-20  Doug Evans  <dje@google.com>
 
 	* linux-low.c (linux_set_resume_request): Fix comment.

@@ -44,3 +44,38 @@ gdb_test "python print (str(gdb.parse_and_eval(\"int_ptr_ref\").dereference().ty
 gdb_test "python print (str(gdb.parse_and_eval(\"int_ptr_ref\").referenced_value().type))" "int_ptr"
 gdb_test "python print (str(gdb.parse_and_eval(\"int_ptr_ref\").referenced_value().dereference()))" "10"
 gdb_test "python print (str(gdb.parse_and_eval(\"int_ptr_ref\").referenced_value().referenced_value()))" "10"
+
+# Tests for gdb.Value[gdb.Field]
+gdb_test_no_output "python b = gdb.parse_and_eval('b')" "init b"
+gdb_test_no_output "python b_fields = b.type.fields()" "init b_fields"
+gdb_test_no_output "python b_obj = gdb.parse_and_eval('b_obj')" "init b_obj"
+gdb_test_no_output "python b_ref = gdb.parse_and_eval('b_ref')" "init b_ref"
+gdb_test_no_output "python b_td = gdb.parse_and_eval('b_td')" "init b_td"
+gdb_test_no_output "python u = gdb.parse_and_eval('u')" "init u"
+gdb_test_no_output "python u_fields = u.type.fields()" "init u_fields"
+
+gdb_test "python print(b\[b_fields\[1\]\])" "97 'a'" "b.a via field"
+gdb_test "python print(b\[b_fields\[0\]\].type)" "A" \
+  "type of b's base class via field"
+gdb_test "python print(b\[b_fields\[0\]\]\['a'\])" "10" "b.A::a via field"
+
+gdb_test "python print(b_obj\[b_fields\[1\]\])" "98 'b'" "b_obj->a via field"
+gdb_test "python print(b_obj\[b_fields\[0\]\].type.target())" "A" \
+  "type of b_obj's base class via field"
+gdb_test "python print(b_obj\[b_fields\[0\]\]\['a'\])" "100" \
+  "b_obj->A::a via field"
+
+gdb_test "python print(b_ref\[b_fields\[1\]\])" "98 'b'" "b_ref.a via field"
+gdb_test "python print(b_ref\[b_fields\[0\]\].type.target())" "A" \
+  "type of b_ref's base class via field"
+gdb_test "python print(b_ref\[b_fields\[0\]\]\['a'\])" "100" \
+  "b_ref.A::a via field"
+
+gdb_test "python print(b_td\[b_fields\[1\]\])" "98 'b'" "b_td.a via field"
+gdb_test "python print(b_td\[b_fields\[0\]\].type.target())" "A" \
+  "type of b_td's base class via field"
+gdb_test "python print(b_td\[b_fields\[0\]\]\['a'\])" "100" \
+  "b_td.A::a via field"
+
+gdb_test "python print(u\[u_fields\[0\]\])" "99.*" "u's first field via field"
+gdb_test "python print(u\[u_fields\[1\]\])" "99.*" "u's second field via field"

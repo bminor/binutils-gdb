@@ -115,7 +115,7 @@ fdwalk (int (*func) (void *, int), void *arg)
   {
     int max, fd;
 
-#ifdef HAVE_GETRLIMIT
+#if defined(HAVE_GETRLIMIT) && defined(RLIMIT_NOFILE)
     struct rlimit rlim;
 
     if (getrlimit (RLIMIT_NOFILE, &rlim) == 0 && rlim.rlim_max != RLIM_INFINITY)

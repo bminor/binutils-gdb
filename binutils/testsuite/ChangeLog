@@ -1,3 +1,19 @@
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16318
+	* binutils-all/strip-10.d: Check OS/ABI.
+
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* binutils-all/windres/escapex-2.rc: Remove +x file mode.
+	* binutils-all/windres/version_small.rc: Likewise.
+	* binutils-all/windres/version_small.rsd: Likewise.
+
+2013-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/windres/windres.exp: Run for x86_64-pc-cygwin.
+	Add test of "objump -p" output.
+
 2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
 
 	* binutils-all/objcopy.exp: Consider mips-mti-elf the same as

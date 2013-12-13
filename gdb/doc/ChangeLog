@@ -1,3 +1,63 @@
+2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/16113
+	* gdb.texinfo (Values From Inferior): Add a note about using
+	gdb.Field objects as subscripts on gdb.Value objects.
+	(Types In Python): Add description about the new attribute
+	"parent_type" of gdb.Field objects.
+
+2013-12-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Add @cindex
+	entry for section docuumenting the -list-features GDB/MI command.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document the new
+	"exec-run-start-option" entry in the output of the "-list-features"
+	command.
+
+2013-12-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (i386): Fix yesterday's commit.
+
+2013-12-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Set Catchpoints): Add @kindex for each command
+	documented here.
+
+2013-12-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (@direntry): Add menu item for gdbserver.
+
+2013-12-03  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.texinfo (i386 Features): Add MPX feature registers.
+	(x86 Specific featuresx86 Architecture-specific Issues): Adds
+	a subsubsection for MPX and describes the display of the
+	boundary registers.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Remove the
+	documentation of the "ada-exceptions" entry.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Result Records): Fix the syntax of the
+	"^error" result record concerning the error message.  Document
+	the error code that may also be part of that result record.
+	(GDB/MI Miscellaneous Commands): Document the
+	"undefined-command-error-code" element in the output of
+	the "-list-features" GDB/MI command.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document
+	the new -info-gdb-mi-command GDB/MI command.  Document
+	the meaning of "-info-gdb-mi-command" in the output of
+	-list-features.
+
 2013-11-29  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Frames In Python) <gdb.FRAME_UNWIND_NULL_ID>:

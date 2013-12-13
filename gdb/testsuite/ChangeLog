@@ -1,3 +1,104 @@
+2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/16113
+	* gdb.python/py-value-cc.cc: Improve test case.
+	* gdb.python/py-value-cc.exp: Add new tests to test usage of
+	gdb.Field objects as subscripts on gdb.Value objects.
+
+2013-12-10  Doug Evans  <dje@google.com>
+
+	PR 16286
+	* gdb.python/py-value.c: #include stdlib.h, string.h.
+	(str): New struct.
+	(main): New local xstr.
+	* gdb.python/py-value.exp (test_value_in_inferior): Add test to
+	fetch a value as a string with a length beyond the declared length
+	of the array.
+
+2013-12-10  Andrew Burgess  <aburgess@broadcom.com>
+
+	* lib/gdb.exp (gdb_compile_shlib): Add call to get_compiler_info,
+	update comment.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/int_deref.exp: Add test verifying that we print
+	the decoded symbol name when printing the address of Ada
+	symbols.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-start.exp: Add test verifying that -list-features
+	contains "exec-run-start-option".
+
+2013-12-08  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (support_complex_tests): Use gdb_produce_source.
+	(is_elf_target, is_ilp32_target, is_ilp64_target): Likewise.
+	(is_64_target, is_amd64_regs_target): Likewise.
+	(skip_altivec_tests, skip_vsx_tests, skip_btrace_tests): Likewise.
+
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb.ada/uninitialized_vars/parse_controlled.ads: Remove +x file mode.
+	* gdb.base/testenv.c: Likewise.
+
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb.hp/gdb.base-hp/so-thresh.sh: Change /bin/ksh to /bin/sh.
+	* gdb.hp/gdb.objdbg/tools/symaddr: Likewise.
+	* gdb.hp/gdb.objdbg/tools/symaddr.pa64: Likewise.
+
+2013-12-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/dw2-undefined-ret-addr.S: New file.
+	* gdb.dwarf2/dw2-undefined-ret-addr.c: New file.
+	* gdb.dwarf2/dw2-undefined-ret-addr.exp: New file.
+
+2013-12-06  Doug Evans  <dje@google.com>
+
+	* gdb.base/break.exp: Fix setting of $baz.
+
+2013-12-06  Andrew Burgess  <aburgess@broadcom.com>
+
+	* lib/dwarf.exp: (Dwarf::_location): Handle DW_OP_bit_piece and
+	DW_OP_plus_uconst.
+
+2013-12-06  Keven Boell  <keven.boell@intel.com>
+
+	* lib/mi-support.exp (mi_list_varobj_children_range): Add
+	call to mi_list_array_varobj_children_with_index.
+	(mi_list_array_varobj_children_with_index): New function.
+	Add parameter to specify array start.
+
+2013-12-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.base/sigall.exp (test_one_sig): gdb identifies SIGLOST as a
+	SIGPWR in sparc64.
+
+	* gdb.base/sigall.c (main): In some targets SIGLOST and SIGPWR
+	have the same signal number.  Handle this situation.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/dot_all: New testcase.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-undefined-cmd.exp: New testcase.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-i-cmd.exp: New file.
+
+2013-12-02  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf/dwp-symlink.c: Fake out gdb to not load debug info
+	at start.
+	* gdb.dwarf/dwp-symlink.exp: Test trying to load dwp when the binary
+	has been specified with a relative path and we have chdir'd before
+	accessing the debug info.
+
 2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.trace/unavailable.exp (gdb_collect_args_test): Update

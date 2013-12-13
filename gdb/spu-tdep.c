@@ -1614,8 +1614,9 @@ spu_software_single_step (struct frame_info *frame)
 	  else
 	    {
 	      if (optim)
-		error (_("Could not determine address of "
-			 "single-step breakpoint."));
+		throw_error (OPTIMIZED_OUT_ERROR,
+			     _("Could not determine address of "
+			       "single-step breakpoint."));
 	      if (unavail)
 		throw_error (NOT_AVAILABLE_ERROR,
 			     _("Could not determine address of "

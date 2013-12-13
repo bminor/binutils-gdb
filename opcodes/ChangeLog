@@ -1,3 +1,9 @@
+2013-12-05  Nick Clifton  <nickc@redhat.com>
+
+	* s390-mkopc.c (dumpTable): Provide a format string to printf so
+	that compiling with -Werror=format-security does not produce an
+	error.
+
 2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (aarch64_pstatefields): Update.

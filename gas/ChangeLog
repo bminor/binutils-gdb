@@ -1,3 +1,21 @@
+2013-12-10  Roland McGrath  <mcgrathr@google.com>
+
+	* Makefile.am (install-exec-bindir): Prefix libtool invocation
+	with $(INSTALL_PROGRAM_ENV).
+	(install-exec-tooldir): Likewise.
+	* Makefile.in: Regenerate.
+
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* config/bfin-aux.h: Remove +x file mode.
+	* config/tc-epiphany.c: Likewise.
+	* config/tc-epiphany.h: Likewise.
+
+2013-12-03  Tristan Gingold  <gingold@adacore.com>
+
+	* config/tc-i386-intel.c (i386_intel_simplify): Avoid arithmetic
+	overflow on pointers.
+
 2013-11-19  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	Revert

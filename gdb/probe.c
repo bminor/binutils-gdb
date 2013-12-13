@@ -614,18 +614,9 @@ info_probes_command (char *arg, int from_tty)
 /* See comments in probe.h.  */
 
 unsigned
-get_probe_argument_count (struct probe *probe)
+get_probe_argument_count (struct probe *probe, struct frame_info *frame)
 {
-  const struct sym_probe_fns *probe_fns;
-
-  gdb_assert (probe->objfile != NULL);
-  gdb_assert (probe->objfile->sf != NULL);
-
-  probe_fns = probe->objfile->sf->sym_probe_fns;
-
-  gdb_assert (probe_fns != NULL);
-
-  return probe_fns->sym_get_probe_argument_count (probe);
+  return probe->pops->get_probe_argument_count (probe, frame);
 }
 
 /* See comments in probe.h.  */
@@ -633,33 +624,16 @@ get_probe_argument_count (struct probe *probe)
 int
 can_evaluate_probe_arguments (struct probe *probe)
 {
-  const struct sym_probe_fns *probe_fns;
-
-  gdb_assert (probe->objfile != NULL);
-  gdb_assert (probe->objfile->sf != NULL);
-
-  probe_fns = probe->objfile->sf->sym_probe_fns;
-
-  gdb_assert (probe_fns != NULL);
-
-  return probe_fns->can_evaluate_probe_arguments (probe);
+  return probe->pops->can_evaluate_probe_arguments (probe);
 }
 
 /* See comments in probe.h.  */
 
 struct value *
-evaluate_probe_argument (struct probe *probe, unsigned n)
+evaluate_probe_argument (struct probe *probe, unsigned n,
+			 struct frame_info *frame)
 {
-  const struct sym_probe_fns *probe_fns;
-
-  gdb_assert (probe->objfile != NULL);
-  gdb_assert (probe->objfile->sf != NULL);
-
-  probe_fns = probe->objfile->sf->sym_probe_fns;
-
-  gdb_assert (probe_fns != NULL);
-
-  return probe_fns->sym_evaluate_probe_argument (probe, n);
+  return probe->pops->evaluate_probe_argument (probe, n, frame);
 }
 
 /* See comments in probe.h.  */
@@ -674,11 +648,11 @@ probe_safe_evaluate_at_pc (struct frame_info *frame, unsigned n)
   if (!probe)
     return NULL;
 
-  n_args = get_probe_argument_count (probe);
+  n_args = get_probe_argument_count (probe, frame);
   if (n >= n_args)
     return NULL;
 
-  return evaluate_probe_argument (probe, n);
+  return evaluate_probe_argument (probe, n, frame);
 }
 
 /* See comment in probe.h.  */

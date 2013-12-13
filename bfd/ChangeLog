@@ -1,3 +1,58 @@
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16318
+	* elf.c (_bfd_elf_copy_private_bfd_data): Remove BFD_ASSERT.
+	Set e_flags only if elf_flags_init is FALSE.  Copy EI_OSABI
+	field.
+
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-sh.c (bfd_elf32_bfd_set_private_bfd_flags): Removed.
+
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (assign_file_positions_except_relocs): Set e_type in ELF
+	header to ET_EXEC for -pie -Ttext-segment=.
+
+2013-12-08  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_add_default_symbol): Set dynamic_def
+	and ref_dynamic_nonweak when chaining together indirect
+	symbols.
+
+2013-12-06  Tristan Gingold  <gingold@adacore.com>
+
+	* pei-x86_64.c (pex64_xdata_print_uwd_codes): Add argument rf.
+	Display epilog opcode.
+	(pex64_dump_xdata): Add argument rf; make addr a local variable.
+	Adjust call to pex64_xdata_print_uwd_codes.
+	(pex64_bfd_print_pdata): Display code range, adjust call to
+
+2013-12-05  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_mkobject_init): Use bfd_zalloc.
+
+2013-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (pe_print_resource_entries): New function: Displays
+	an entry in a .rsrc section.
+	(pe_print_resource_directory): New function: Displays a directory
+	in a .rsrc section.
+	(pe_print_rsrc): New function: Displays the contents of .rsrc
+	section.
+	(_bfd_XX_print_private_bfd_data_common): Call pe_print_rsrc.
+
+2013-12-03  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc_build_one_stub <ppc_stub_plt_branch_r2off>):
+	Don't omit saving of r2 for ELFv2.  Don't addi 2,2,0.
+	(ppc_size_one_stub <ppc_stub_plt_branch_r2off>): Adjust to suit.
+
+2013-12-03  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_link_just_syms): Remove .got check.
+	Handle ELFv2.
+
 2013-11-26  Will Newton  <will.newton@linaro.org>
 
 	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol):

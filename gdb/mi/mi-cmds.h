@@ -74,6 +74,7 @@ extern mi_cmd_argv_ftype mi_cmd_gdb_exit;
 extern mi_cmd_argv_ftype mi_cmd_inferior_tty_set;
 extern mi_cmd_argv_ftype mi_cmd_inferior_tty_show;
 extern mi_cmd_argv_ftype mi_cmd_info_ada_exceptions;
+extern mi_cmd_argv_ftype mi_cmd_info_gdb_mi_command;
 extern mi_cmd_argv_ftype mi_cmd_info_os;
 extern mi_cmd_argv_ftype mi_cmd_interpreter_exec;
 extern mi_cmd_argv_ftype mi_cmd_list_features;

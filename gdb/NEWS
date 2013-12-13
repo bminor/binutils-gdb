@@ -32,11 +32,16 @@
   Before, the former would print "<optimized out>", and the latter
   "*value not available*".
 
+* New script contrib/gdb-add-index.sh for adding .gdb_index sections
+  to binaries.
+
 * Python scripting
 
   ** Frame filters and frame decorators have been added.
   ** Temporary breakpoints are now supported.
   ** Line tables representation has been added.
+  ** New attribute 'parent_type' for gdb.Field objects.
+  ** gdb.Field objects can be used as subscripts on gdb.Value objects.
 
 * New targets
 
@@ -157,6 +162,17 @@ show code-cache
 * MI changes
 
   ** All MI commands now accept an optional "--language" option.
+     Support for this feature can be verified by using the "-list-features"
+     command, which should contain "language-option".
+
+  ** The new command -info-gdb-mi-command allows the user to determine
+     whether a GDB/MI command is supported or not.
+
+  ** The "^error" result record returned when trying to execute an undefined
+     GDB/MI command now provides a variable named "code" whose content is the
+     "undefined-command" error code.  Support for this feature can be verified
+     by using the "-list-features" command, which should contain
+     "undefined-command-error-code".
 
   ** The -trace-save MI command can optionally save trace buffer in Common
      Trace Format now.
@@ -177,7 +193,9 @@ show code-cache
   ** The -exec-run command now accepts an optional "--start" option.
      When used, the command follows the same semantics as the "start"
      command, stopping the program's execution at the start of its
-     main subprogram.
+     main subprogram.  Support for this feature can be verified using
+     the "-list-features" command, which should contain
+     "exec-run-start-option".
 
   ** The new commands -catch-assert and -catch-exceptions insert
      catchpoints stopping the program when Ada exceptions are raised.
@@ -5563,3 +5581,5 @@ GDB now handles cross debugging.  If you are remotely debugging between
 two different machines, type ``./configure host -target=targ''.
 Host is the machine where GDB will run; targ is the machine
 where the program that you are debugging will run.
+
+ *  GDB now supports access to Intel(R) MPX registers on GNU/Linux.

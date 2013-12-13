@@ -1,3 +1,393 @@
+2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/16113
+	* NEWS (Python Scripting): Add entry for the new feature and the
+	new attribute of gdb.Field objects.
+	* python/py-type.c (gdbpy_is_field): New function
+	(convert_field): Add 'parent_type' attribute to gdb.Field
+	objects.
+	* python/py-value.c (valpy_getitem): Allow subscript value to be
+	a gdb.Field object.
+	(value_has_field): New function
+	(get_field_flag): New function
+	* python/python-internal.h (gdbpy_is_field): Add declaration.
+
+2013-12-12  Pedro Alves  <palves@redhat.com>
+
+	* breakpoint.c (insert_bp_location): Make 'hw_bp_err_string' local
+	const, and remove casts.
+
+2013-12-12  Pedro Alves  <palves@redhat.com>
+
+	* cli/cli-cmds.c (source_script_from_stream) Use have_python
+	instead of catching UNSUPPORTED_ERROR.
+	* exceptions.h (UNSUPPORTED_ERROR): Delete.
+	* python/python.c (source_python_script) [!HAVE_PYTHON]: Internal
+	error if called.
+	* python/python.h (have_python): New static inline function.
+
+2013-12-11  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (lookup_dwo_cutu): Include name of dwp file in
+	"can't find DWO" warning.
+
+2013-12-11  Sergio Durigan Junior  <sergiodj@redhat.com>
+
+	* break-catch-throw.c (fetch_probe_arguments): Pass selected frame
+	to get_probe_argument_count and evaluate_probe_argument.
+	* probe.c (get_probe_argument_count): Adjust declaration to accept
+	frame.  Pass frame to probe_ops's get_probe_argument_count.
+	(evaluate_probe_argument): Likewise, for evaluate_probe_argument.
+	(probe_safe_evaluate_at_pc): Pass frame to
+	get_probe_argument_count and evaluate_probe_argument.
+	* probe.h (struct probe_ops) <get_probe_argument_count,
+	evaluate_probe_argument>: Adjust declarations to accept frame.
+	(get_probe_argument_count, evaluate_probe_argument): Likewise.
+	* solib-svr4.c (solib_event_probe_action): Get current frame.
+	Pass it to get_probe_argument_count.
+	(svr4_handle_solib_event): Get current frame.  Pass it to
+	get_probe_argument_count and evaluate_probe_argument.
+	* stap-probe.c (stap_parse_probe_arguments): Adjust declaration to
+	accept gdbarch.  Do not obtain it from the probe's objfile.
+	(stap_get_probe_argument_count): Adjust declaration to accept
+	frame.  Obtain gdbarch from the frame.  Call generic
+	can_evaluate_probe_arguments.  Pass gdbarch to
+	stap_parse_probe_arguments.
+	(stap_get_arg): Adjust declaration to accept gdbarch.  Pass it to
+	stap_parse_probe_arguments.
+	(stap_evaluate_probe_argument): Adjust declaration to accept
+	frame.  Obtain gdbarch from the frame.  Pass gdbarch to
+	stap_get_arg.
+	(stap_compile_to_ax): Pass agent_expr's gdbarch to stap_get_arg.
+	(compute_probe_arg): Obtain gdbarch from frame.  Pass frame to
+	get_probe_argument_count and evaluate_probe_argument.
+
+2013-12-10  Doug Evans  <dje@google.com>
+
+	PR 16286
+	* c-lang.c (c_get_string): Ignore the declared size of the object
+	if a specific length is requested.
+
+2013-12-10  Doug Evans  <dje@google.com>
+
+    	* interps.h (interp_exec_p): Delete.
+    	* interps.c (interp_exec_p): Delete.
+    	(interp_exec): Update.  Assert interp->procs->exec_proc != NULL.
+    	* mi/mi-interp.c (mi_cmd_interpreter_exec): Update.
+
+2013-12-10  Yao Qi  <yao@codesourcery.com>
+
+	* amd64-tdep.c (amd64_analyze_stack_align): Call
+	target_read_code instead of target_read_memory.
+	(amd64_analyze_prologue): Call read_code_unsigned_integer
+	instead of read_memory_unsigned_integer.  Call read_code
+	instead of read_memory.
+	(amd64_skip_xmm_prologue): Likewise.
+
+2013-12-10  Yao Qi  <yao@codesourcery.com>
+
+	* corefile.c (read_code): New function.
+	(read_code_integer): New function.
+	(read_code_unsigned_integer): New function.
+	* gdbcore.h (read_code): Declare.
+	(read_code_integer): Declare.
+	(read_code_unsigned_integer): Declare.
+	* i386-tdep.c (i386_follow_jump): Call target_read_code instead
+	of target_read_memory.  Call read_code_unsigned_integer instead
+	of read_memory_unsigned_integer.
+	(i386_analyze_struct_return): Likewise.
+	(i386_skip_probe): Likewise.
+	(i386_analyze_stack_align): Likewise.
+	(i386_match_pattern): Likewise.
+	(i386_skip_noop): Likewise.
+	(i386_analyze_frame_setup): Likewise.
+	(i386_analyze_register_saves): Likewise.
+	(i386_skip_prologue): Likewise.
+	(i386_skip_main_prologue): Likewise.
+	(i386_frame_cache_1): Likewise.
+
+2013-12-10  Yao Qi  <yao@codesourcery.com>
+
+	* infrun.c: Include "target-dcache.h".
+	(prepare_for_detach): Call target_dcache_invalidate.
+	(wait_for_inferior): Likewise.
+	(fetch_inferior_event): Likewise.
+	(infrun_thread_stop_requested_callback): Likewise.  Set
+	overlay_cache_invalid to 1.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* symtab.c (symbol_find_demangled_name): Add handling of
+	Ada symbols.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c (mi_cmd_list_features): add "exec-run-start-option".
+	* NEWS: Expand the entry documenting the new -exec-run --start
+	option to mention the corresponding new entry in the output of
+	"-list-features".
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* windows-nat.c (handle_load_dll): Add comments.
+	(windows_ensure_ntdll_loaded): New function.
+	(do_initial_windows_stuff): Use windows_ensure_ntdll_loaded.
+	Add FIXME comment.
+
+2013-12-08  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 7.6.2 released.
+
+2013-12-08  Yao Qi  <yao@codesourcery.com>
+
+	* stack.c (frame_info): Initialize variable caller_pc.
+
+2013-12-06  Pedro Alves  <palves@redhat.com>
+
+	* frame.c (enum cached_copy_status): New enum.
+	(struct frame_info) <prev_pc.p>: Change type to enum
+	cached_copy_status.
+	(fprint_frame): Handle not saved and unavailable prev_pc values.
+	(frame_unwind_pc_if_available): Delete and merge contents into ...
+	(frame_unwind_pc): ... here.  Handle OPTIMIZED_OUT_ERROR.  Adjust
+	to use enum cached_copy_status.
+	(frame_unwind_caller_pc_if_available): Delete.
+	(create_new_frame): Adjust.
+	* frame.h (frame_unwind_caller_pc_if_available): Delete
+	declaration.
+	* stack.c (frame_info): Use frame_unwind_caller_pc instead of
+	frame_unwind_caller_pc_if_available, and handle
+	NOT_AVAILABLE_ERROR and OPTIMIZED_OUT_ERROR errors.
+	* valprint.c (val_print_optimized_out): Use val_print_not_saved.
+	(val_print_not_saved): New function.
+	* valprint.h (val_print_not_saved): Declare.
+
+2013-12-06  Andrew Burgess  <aburgess@broadcom.com>
+	    Pedro Alves  <palves@redhat.com>
+
+	* exceptions.h (errors): Add OPTIMIZED_OUT_ERROR.
+	* dwarf2loc.c (write_pieced_value): Throw OPTIMIZED_OUT_ERROR.
+	* frame.c (frame_unwind_register): Throw OPTIMIZED_OUT_ERROR.
+	* spu-tdep.c (spu_software_single_step): Throw
+	OPTIMIZED_OUT_ERROR.
+	* valops.c (value_assign): Throw OPTIMIZED_OUT_ERROR.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* objfiles.c (free_objfile): Update comment.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* objfiles.h (objfile_to_front): Remove.
+	* objfiles.c (objfile_to_front): Remove.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* minsyms.c (get_symbol_leading_char): Remove unnecessary
+	declaration.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* psympriv.h (struct partial_symtab) <user>: Move earlier.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-cmds.c (edit_command): Use paddress, not hex_string.
+	(list_command): Likewise.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* psymtab.c (allocate_psymtab): Put the filename in the filename
+	bcache.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* buildsym.c (end_symtab_from_static_block): Use obstack_copy0.
+	* symtab.h (struct symtab) <dirname>: Now const.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (allocate_symtab): Remove cast.
+	* symtab.h (struct symtab) <filename>: Now const.
+
+2013-12-06  Tom Tromey  <tromey@redhat.com>
+
+	* break-catch-throw.c (fetch_probe_arguments): Use
+	get_probe_argument_count and evaluate_probe_argument.
+	* elfread.c (elf_get_probe_argument_count)
+	(elf_can_evaluate_probe_arguments, elf_evaluate_probe_argument)
+	(elf_compile_to_ax): Remove.
+	(elf_probe_fns): Update.
+	* probe.c (get_probe_argument_count, can_evaluate_probe_arguments)
+	(evaluate_probe_argument): Call method on probe, not via sym
+	functions.
+	* stap-probe.c (compute_probe_arg): Use get_probe_argument_count,
+	evaluate_probe_argument.
+	(compile_probe_arg): Use get_probe_argument_count.  Call method on
+	probe, not via sym functions.
+	* symfile-debug.c (debug_sym_get_probe_argument_count)
+	(debug_can_evaluate_probe_arguments)
+	(debug_sym_evaluate_probe_argument, debug_sym_compile_to_ax):
+	Remove.
+	(debug_sym_probe_fns): Remove.
+	* symfile.h (struct sym_probe_fns) <sym_get_probe_argument_count,
+	can_evaluate_probe_arguments, sym_evaluate_probe_argument,
+	sym_compile_to_ax>: Remove fields.
+
+2013-12-06  Pierre Muller  <muller@sourceware.org>
+
+	Fix completion for pascal language.
+	* p-exp.y (exp : field_exp name): Do not call mark_struct_expression.
+	(exp : field_exp name COMPLETE): New rule.
+	(exp : SIZEOF): Set correct current_type.
+	(last_was_structop): Remove static variable.
+	(yylex): Remove saw_structop local variable.
+	Adapt code to removal of variables above.
+
+2013-12-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* frame.c (get_prev_frame_1): Delete variable "this_id".
+	Replace its use by a call to get_frame_id.
+
+2013-12-05  Anthony Green  <green@moxielogic.com>
+
+	* moxie-tdep.c (moxie_software_single_step): New function.
+	(INST2OFFSET): New helper macro.
+	(moxie_gdbarch_init): Call set_gdbarch_software_single_step.
+	(moxie_process_readu): Move this up in the file.
+
+2013-12-05  Doug Evans  <xdje42@gmail.com>
+
+	* auto-load.c (load_auto_scripts_for_objfile): Add some comments.
+
+2013-12-05  Joel Brobecker  <brobecker@adacore.com>
+	    Tristan Gingold  <gingold@adacore.com>
+
+	* amd64-windows-tdep.c (amd64_windows_frame_decode_insns):
+	Accept version 2.  Ignore operations using opcode 6.
+
+2013-12-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lex.l (find_dot_all): Fix coding style violations.
+
+2013-12-03  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* NEWS:  Add section for Intel(R) Architecture Instructions
+	Extesions mentioning MPX.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lex.l (find_dot_all): Use strncasecmp instead of strncmp.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (create_excep_cond_exprs): Force EXP to NULL
+	when parse_exp_1 threw an error.  Add comment.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Mention "-list-features" in the entry documenting
+	the support for the "--language" option.
+
+2013-12-03  Tom Tromey  <tromey@redhat.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Doug Evans  <dje@google.com>
+	    Samuel Bronson  <naesten@gmail.com>
+
+	Bring back gdb-add-index as a contrib script.
+	* contrib/gdb-add-index.sh: New file.
+	* NEWS: Note the addition.
+
+2013-12-03  Samuel Bronson  <naesten@gmail.com>
+
+	* MAINTAINERS (Write After Approval): Add myself to the list.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c (mi_cmd_list_features): Remove "ada-exceptions".
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-main.c: Remove trailing spaces throughout.
+
+2013-12-03  Pedro Alves  <palves@redhat.com>
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* exceptions.h (enum_errors) <UNDEFINED_COMMAND_ERROR>: New enum.
+	* mi/mi-parse.c (mi_parse): Throw UNDEFINED_COMMAND_ERROR instead
+	of a regular error when the GDB/MI command does not exist.
+	* mi/mi-main.c (mi_cmd_list_features): Add
+	"undefined-command-error-code".
+	(mi_print_exception): Print an "undefined-command"
+	error code if EXCEPTION.ERROR is UNDEFINED_COMMAND_ERROR.
+	* NEWS: Add entry documenting the new "code" variable in
+	"^error" result records.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi/mi-cmds.h (mi_cmd_info_gdb_mi_command): Declare.
+	* mi/mi-cmd-info.c (mi_cmd_info_gdb_mi_command): New function.
+	* mi/mi-cmds.c (mi_cmds): Add -info-gdb-mi-command command.
+	* mi/mi-main.c (mi_cmd_list_features): Add "info-gdb-mi-command"
+	field to output of "-list-features".
+
+	* NEWS: Add entry for new -info-gdb-mi-command.
+
+2013-12-02  Doug Evans  <dje@google.com>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* objfiles.c (allocate_objfile): Save original_name as an absolute
+	path.
+	* objfiles.h (struct objfile): Expand comment on original_name.
+	* source.c (openp): Call gdb_abspath.
+	* utils.c (gdb_abspath): New function.
+	* utils.h (gdb_abspath): Declare.
+
+2013-12-02  Pedro Alves  <palves@redhat.com>
+
+	* dcache.c (dcache_read_line): Use target_read_raw_memory.
+	* target.c (target_read_raw_memory): New function.
+	(target_read_stack, target_write_memory, target_write_raw_memory):
+	Update comment.
+	(target_read_code): Add comment.
+	* target.h (target_read_raw_memory): Declare.
+
+2013-12-02  Pedro Alves  <palves@redhat.com>
+
+	* ctf.c (ctf_start): Use S_IRGRP, S_IXGRP, S_IXOTH
+	unconditionally.
+
+2013-12-02  Pedro Alves  <pedro@codesourcery.com>
+            Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* remote.c (putpkt_for_catch_errors): Remove function.
+	(remote_kill): Handle TARGET_CLOSE_ERROR from the kill packet
+	gracefully.
+
+2013-12-02  Pedro Alves  <palves@redhat.com>
+
+	PR remote/15974
+	* remote-notif.c (handle_notification): Return early if no
+	notification is found.
+
+2013-12-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* common/filestuff.c (fdwalk): Add "defined(RLIMIT_NOFILE)"
+	preprocessor check.
+
+2013-12-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove "common/gdb_dirent.h".
+
+2013-12-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove "common/gdb_stat.h".
+	* ctf.c (ctf_start): Remove obsolete comment.
+
+2013-12-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove "common/gdb_string.h".
+
 2013-11-30  Doug Evans  <xdje42@gmail.com>
 
 	* auto-load.h (script_language): New members name, auto_load_enabled.

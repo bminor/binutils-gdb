@@ -1,3 +1,7 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* acinclude.m4: Remove +x file mode.
+
 2013-11-29  Marek Polacek  <polacek@redhat.com>
 
 	* bootstrap-ubsan.mk (POSTSTAGE1_LDFLAGS): Remove -lpthread -ldl.

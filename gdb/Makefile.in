@@ -805,7 +805,7 @@ gnulib/import/string.in.h gnulib/import/str-two-way.h \
 gnulib/import/stdint.in.h remote.h remote-notif.h gdb.h sparc-nat.h \
 gdbthread.h dwarf2-frame.h dwarf2-frame-tailcall.h nbsd-nat.h dcache.h \
 amd64-nat.h s390-linux-tdep.h arm-linux-tdep.h exceptions.h macroscope.h \
-gdbarch.h bsd-uthread.h common/gdb_stat.h memory-map.h	memrange.h \
+gdbarch.h bsd-uthread.h memory-map.h memrange.h \
 mdebugread.h m88k-tdep.h stabsread.h hppa-linux-offsets.h linux-fork.h \
 ser-unix.h inf-ptrace.h terminal.h ui-out.h frame-base.h \
 f-lang.h dwarf2loc.h value.h sparc-tdep.h defs.h target-descriptions.h \
@@ -832,7 +832,7 @@ coff-pe-read.h parser-defs.h gdb_ptrace.h mips-linux-tdep.h \
 m68k-tdep.h spu-tdep.h jv-lang.h environ.h solib-irix.h amd64-tdep.h \
 doublest.h regset.h hppa-tdep.h ppc-linux-tdep.h ppc64-tdep.h \
 rs6000-tdep.h rs6000-aix-tdep.h \
-common/gdb_locale.h common/gdb_dirent.h arch-utils.h trad-frame.h gnu-nat.h \
+common/gdb_locale.h arch-utils.h trad-frame.h gnu-nat.h \
 language.h nbsd-tdep.h solib-svr4.h \
 macroexp.h ui-file.h regcache.h tracepoint.h i386-tdep.h \
 inf-child.h p-lang.h event-top.h gdbtypes.h user-regs.h \
@@ -857,7 +857,7 @@ gnulib/import/extra/snippet/arg-nonnull.h gnulib/import/extra/snippet/c++defs.h 
 gnulib/import/extra/snippet/warn-on-use.h \
 gnulib/import/stddef.in.h gnulib/import/inttypes.in.h inline-frame.h skip.h \
 common/common-utils.h common/xml-utils.h common/buffer.h common/ptid.h \
-common/format.h common/host-defs.h utils.h common/queue.h common/gdb_string.h \
+common/format.h common/host-defs.h utils.h common/queue.h \
 common/linux-osdata.h gdb-dlfcn.h auto-load.h probe.h stap-probe.h \
 gdb_bfd.h sparc-ravenscar-thread.h ppc-ravenscar-thread.h common/linux-btrace.h \
 ctf.h common/i386-cpuid.h common/i386-gcc-cpuid.h target/resume.h \

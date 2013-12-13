@@ -716,8 +716,17 @@ namespace eval Dwarf {
 		    _op .sleb128 [lindex $line 1]
 		}
 
+		DW_OP_plus_uconst {
+		    _op .uleb128 [lindex $line 1]
+		}
+
 		DW_OP_piece {
 		    _op .uleb128 [lindex $line 1]
+		}
+
+		DW_OP_bit_piece {
+		    _op .uleb128 [lindex $line 1]
+		    _op .uleb128 [lindex $line 2]
 		}
 
 		DW_OP_GNU_implicit_pointer {

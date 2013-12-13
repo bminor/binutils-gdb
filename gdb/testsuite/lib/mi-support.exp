@@ -1487,9 +1487,18 @@ proc mi_list_varobj_children_range {varname from to numchildren children testnam
 # Verifies that variable object VARNAME has NUMBER children,
 # where each one is named $VARNAME.<index-of-child> and has type TYPE.
 proc mi_list_array_varobj_children { varname number type testname } {
+    mi_list_array_varobj_children_with_index $varname $number 0 $type $testname
+}
+
+# Same as mi_list_array_varobj_children, but allowing to pass a start index
+# for an array.
+proc mi_list_array_varobj_children_with_index { varname number start_index \
+  type testname } {
     set t {}
+    set index $start_index
     for {set i 0} {$i < $number} {incr i} {
-	lappend t [list $varname.$i $i 0 $type]
+	lappend t [list $varname.$index $index 0 $type]
+	incr index
     }
     mi_list_varobj_children $varname $t $testname
 }
