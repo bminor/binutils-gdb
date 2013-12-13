@@ -1,0 +1,16 @@
+bfd/
+
+2013-12-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16317
+	* elf.c (assign_section_numbers): Set the SHF_INFO_LINK bit for
+	SHT_REL/SHT_RELA sections when setting the sh_info field.
+
+ld/testsuite/
+
+2013-12-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16317
+	* ld-elf/linkinfo1.s: New file.
+	* ld-elf/linkinfo1a.d: Likewise.
+	* ld-elf/linkinfo1b.d: Likewise.

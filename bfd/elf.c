@@ -3171,7 +3171,10 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	    name += 5;
 	  s = bfd_get_section_by_name (abfd, name);
 	  if (s != NULL)
-	    d->this_hdr.sh_info = elf_section_data (s)->this_idx;
+	    {
+	      d->this_hdr.sh_info = elf_section_data (s)->this_idx;
+	      d->this_hdr.sh_flags |= SHF_INFO_LINK;
+	    }
 	  break;
 
 	case SHT_STRTAB:
