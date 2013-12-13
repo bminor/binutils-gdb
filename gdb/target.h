@@ -872,7 +872,8 @@ struct target_ops
     int (*to_can_use_agent) (void);
 
     /* Check whether the target supports branch tracing.  */
-    int (*to_supports_btrace) (void);
+    int (*to_supports_btrace) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Enable branch tracing for PTID and allocate a branch trace target
        information struct for reading and for disabling branch trace.  */
@@ -2032,7 +2033,8 @@ extern void update_target_permissions (void);
 void target_ignore (void);
 
 /* See to_supports_btrace in struct target_ops.  */
-extern int target_supports_btrace (void);
+#define target_supports_btrace() \
+  (current_target.to_supports_btrace (&current_target))
 
 /* See to_enable_btrace in struct target_ops.  */
 extern struct btrace_target_info *target_enable_btrace (ptid_t ptid);

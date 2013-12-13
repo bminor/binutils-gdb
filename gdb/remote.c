@@ -11199,7 +11199,7 @@ struct btrace_target_info
 /* Check whether the target supports branch tracing.  */
 
 static int
-remote_supports_btrace (void)
+remote_supports_btrace (struct target_ops *self)
 {
   if (remote_protocol_packets[PACKET_Qbtrace_off].support != PACKET_ENABLE)
     return 0;

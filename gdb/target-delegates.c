@@ -122,6 +122,19 @@ tdefault_xfer_partial (struct target_ops *self, enum target_object  arg1, const 
   return TARGET_XFER_E_IO;
 }
 
+static int
+delegate_supports_btrace (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_supports_btrace (self);
+}
+
+static int
+tdefault_supports_btrace (struct target_ops *self)
+{
+  return 0;
+}
+
 static void
 install_delegators (struct target_ops *ops)
 {
@@ -147,6 +160,8 @@ install_delegators (struct target_ops *ops)
     ops->to_async = delegate_async;
   if (ops->to_xfer_partial == NULL)
     ops->to_xfer_partial = delegate_xfer_partial;
+  if (ops->to_supports_btrace == NULL)
+    ops->to_supports_btrace = delegate_supports_btrace;
 }
 
 static void
@@ -163,4 +178,5 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_is_async_p = find_default_is_async_p;
   ops->to_async = tdefault_async;
   ops->to_xfer_partial = tdefault_xfer_partial;
+  ops->to_supports_btrace = tdefault_supports_btrace;
 }

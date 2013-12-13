@@ -1,5 +1,17 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* common/linux-btrace.c (linux_supports_btrace): Add "ops"
+	argument.
+	* common/linux-btrace.h (linux_supports_btrace): Update.
+	* remote.c (remote_supports_btrace): Add "self" argument.
+	* target-delegates.c: Rebuild.
+	* target.c (target_supports_btrace): Remove.
+	* target.h (struct target_ops) <to_supports_btrace>: Add
+	target_ops argument.
+	(target_supports_btrace): New define.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* record-full.c (record_full_beneath_to_resume_ops)
 	(record_full_beneath_to_resume, record_full_beneath_to_wait_ops)
 	(record_full_beneath_to_wait)

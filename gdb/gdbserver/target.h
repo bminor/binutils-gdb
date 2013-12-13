@@ -350,7 +350,7 @@ struct target_ops
   int (*supports_agent) (void);
 
   /* Check whether the target supports branch tracing.  */
-  int (*supports_btrace) (void);
+  int (*supports_btrace) (struct target_ops *);
 
   /* Enable branch tracing for @ptid and allocate a branch trace target
      information struct for reading and for disabling branch trace.  */
@@ -491,8 +491,9 @@ int kill_inferior (int);
   (the_target->supports_agent ? \
    (*the_target->supports_agent) () : 0)
 
-#define target_supports_btrace() \
-  (the_target->supports_btrace ? (*the_target->supports_btrace) () : 0)
+#define target_supports_btrace()			\
+  (the_target->supports_btrace				\
+   ? (*the_target->supports_btrace) (the_target) : 0)
 
 #define target_enable_btrace(ptid) \
   (*the_target->enable_btrace) (ptid)

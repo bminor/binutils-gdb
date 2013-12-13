@@ -1,3 +1,9 @@
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <supports_btrace>: Add target_ops
+	argument.
+	(target_supports_btrace): Update.
+
 2014-02-14  Yao Qi  <yao@codesourcery.com>
 
 	* Makefile.in (IPA_OBJS): Append rsp-low-ipa.o.

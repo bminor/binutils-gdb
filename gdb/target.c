@@ -4170,20 +4170,6 @@ target_ranged_break_num_registers (void)
 
 /* See target.h.  */
 
-int
-target_supports_btrace (void)
-{
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_supports_btrace != NULL)
-      return t->to_supports_btrace ();
-
-  return 0;
-}
-
-/* See target.h.  */
-
 struct btrace_target_info *
 target_enable_btrace (ptid_t ptid)
 {
