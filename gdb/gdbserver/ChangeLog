@@ -1,3 +1,26 @@
+2013-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* Makefile.in (safe-ctype.o, lbasename.o): New rules.
+	* configure.srv: Add safe-ctype.o and lbasename.o to srv_tgtobj
+	for all targets that use win32-low.c.
+	* win32-low.c (win32_ensure_ntdll_loaded): New function.
+	(do_initial_child_stuff): Add call to win32_ensure_ntdll_loaded.
+
+2013-12-13  Pedro Alves  <palves@redhat.com>
+
+	* target.c (mywait): Set OURSTATUS->KIND to TARGET_WAITKIND_STOPPED
+	if equal to TARGET_WAITKIND_LOADED.
+	* win32-low.c (cached_status): New static global.
+	(win32_wait): Add declaration.
+	(do_initial_child_stuff): Flush all initial pending debug events
+	up to the initial breakpoint.
+	(win32_wait): If CACHED_STATUS was set, return that instead
+	of doing a real wait.  Remove the code resuming the execution
+	of the inferior after receiving a TARGET_WAITKIND_LOADED event
+	during the initial phase.  Also remove the code changing
+	OURSTATUS->KIND from TARGET_WAITKIND_LOADED to
+	TARGET_WAITKIND_STOPPED.
+
 2013-12-11  Yao Qi  <yao@codesourcery.com>
 
 	* notif.c (handle_notif_ack): Return 0 if no notification

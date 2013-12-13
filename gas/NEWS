@@ -1,5 +1,7 @@
 -*- text -*-
 
+* Add support for the Andes NDS32.
+
 Changes in 2.24:
 
 * Add support for the Texas Instruments MSP430X processor.

@@ -1,3 +1,23 @@
+2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+            Wei-Cheng Wang  <cole945@gmail.com>
+	    Hui-Wen Ni  <sabrinanitw@gmail.com>
+
+	* Makefile.am (ALL_EMULATION_SOURCES): Add nds32 target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add case for nds32*le-*-elf*, nds32*be-*-elf*,
+	nds32*le-*-linux-gnu*, and nds32*be-*-linux-gnu*.
+	* emulparams/nds32belf.sh: New file for nds32.
+	* emulparams/nds32belf_linux.sh: Likewise.
+	* emulparams/nds32belf16m.sh: Likewise.
+	* emulparams/nds32elf.sh: Likewise.
+	* emulparams/nds32elf_linux.sh: Likewise.
+	* emulparams/nds32elf16m.sh: Likewise.
+	* emultempl/nds32elf.em: Likewise.
+	* scripttempl/nds32elf.sc}: Likewise.
+	* gen-doc.texi: Set NDS32.
+	* ld.texinfo: Set NDS32.
+	* NEWS: Announce Andes nds32 support.
+
 2013-12-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld.texinfo: Remove shared object from -Ttext-segment.

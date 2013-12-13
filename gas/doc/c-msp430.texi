@@ -46,16 +46,25 @@ enables relaxation at assembly time. DANGEROUS!
 @item -ml
 indicates that the input uses the large code model.
 
+@item -mn
+enables the generation of a NOP instruction following any instruction
+that might change the interrupts enabled/disabled state.  The
+pipelined nature of the MSP430 core means that any instruction that
+changes the interrupt state (@code{EINT}, @code{DINT}, @code{BIC #8,
+SR}, @code{BIS #8, SR} or @code{MOV.W <>, SR}) must be 
+followed by a NOP instruction in order to ensure the correct
+processing of interrupts.  By default it is up to the programmer to
+supply these NOP instructions, but this command line option enables
+the automatic insertion by the assembler.  Note - the assembler does
+not peek ahead to the next instruction so it will insert a NOP even
+one is already present.
+
+@c end-sanitize-msp430
+@c %redact note changed text for mN option
 @item -mN
 disables the generation of a NOP instruction following any instruction
-that might change the interrupts enabled/disabled state.  For the
-430Xv2 architecture the instructions: @code{EINT}, @code{DINT},
-@code{BIC #8, SR}, @code{BIS #8, SR} and @code{MOV.W <>, SR} must be
-followed by a NOP instruction in order to ensure the correct
-processing of interrupts.  By default generation of the NOP
-instruction happens automatically, but this command line option
-disables this behaviour.  It is then up to the programmer to ensure
-that interrupts are enabled and disabled correctly.
+that might change the interrupts enabled/disabled state.  This is the
+default behaviour.
 
 @item -md
 mark the object file as one that requires data to copied from ROM to

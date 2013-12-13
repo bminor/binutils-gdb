@@ -1,3 +1,34 @@
+2013-12-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (mcu_types): Add some more 430X mcu names.
+	(OPTION_INTR_NOPS): Define.
+	(gen_interrupt_nops): Default to FALSE.
+	(md_parse_opton): Add support for OPTION_INTR_NOPS.
+	(md_longopts): Add -mn.
+	(md_show_usage): Add -mn.
+	(msp430_operands): Generate NOPs for all MCUs not just 430Xv2.
+	* doc/c-msp430.c: Document -mn.
+
+2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+	    Wei-Cheng Wang  <cole945@gmail.com>
+	    Hsiang-Kai Wang  <hsiangkai@gmail.com>
+	    Hui-Wen Ni  <sabrinanitw@gmail.com>
+
+	* Makefile.am (TARGET_CPU_CFILES): Add config/tc-nds32.c.
+	(TARGET_CPU_HFILES): Add config/tc-nds32.h.
+	* Makefile.in: Regenerate.
+	* configure.in (nds32): Add nds32 target extension config support.
+	* configure.tgt : Add case for nds32-*-elf* and nds32-*-linux*.
+	* configure: Regenerate.
+	* config/tc-nds32.c: New file for nds32.
+	* config/tc-nds32.h: New file for nds32.
+	* doc/Makefile.am (CPU_DOCS): Add c-nds32.texi.
+	* doc/Makefile.in: Regenerate.
+	* doc/as.texinfo: Add nds32 options.
+	* doc/all.texi: Set NDS32.
+	* doc/c-nds32.texi: New file dor nds32 document.
+	* NEWS: Announce Andes nds32 support.
+
 2013-12-10  Roland McGrath  <mcgrathr@google.com>
 
 	* Makefile.am (install-exec-bindir): Prefix libtool invocation

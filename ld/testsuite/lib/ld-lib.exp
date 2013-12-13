@@ -199,6 +199,10 @@ proc default_ld_link { ld target objects } {
 	set flags ""
     }
 
+    if [board_info [target_info name] exists ldflags] {
+        append flags " [board_info [target_info name] ldflags]"
+    }
+
     remote_file host delete $target
 
     return [run_host_cmd_yesno "$ld" "$HOSTING_EMU $flags -o $target $objs $libs"]
@@ -215,6 +219,10 @@ proc default_ld_simple_link { ld target objects } {
 	set flags [big_or_little_endian]
     } else {
 	set flags ""
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+        append flags " [board_info [target_info name] ldflags]"
     }
 
     # If we are compiling with gcc, we want to add gcc_ld_flag to
@@ -293,6 +301,10 @@ proc default_ld_compile { cc source object } {
 	set flags "$flags $CXXFLAGS"
     } else {
 	set flags "$flags $CFLAGS"
+    }
+
+    if [board_info [target_info name] exists cflags] {
+        append flags " [board_info [target_info name] cflags]"
     }
 
     if [board_info [target_info name] exists multilib_flags] {
@@ -1596,6 +1608,7 @@ proc check_shared_lib_support { } {
 	 && ![istarget moxie-*-*]
 	 && ![istarget msp430-*-*]
 	 && ![istarget mt-*-*]
+	 && ![istarget nds32*-*-*]
 	 && ![istarget openrisc-*-*]
 	 && ![istarget or32-*-*]
 	 && ![istarget pj-*-*]

@@ -1,3 +1,32 @@
+2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+	    Wei-Cheng Wang  <cole945@gmail.com>
+
+	* Makefile.am (BFD32_BACKENDS, BFD32_BACKENDS_CFILES): Add nds32
+	files.
+	* Makefile.in: Regenerate.
+	* archures.c (bfd_nds32_arch): Add nds32 target.
+	* bfd-in2.h: Regenerate.
+	* config.bfd (nds32*le-*-linux): Add bfd_elf32_nds32lelin_vec
+	and bfd_elf32_nds32belin_vec.
+	(nds32*be-*-linux*): Likewise.
+	(nds32*le-*-*): Add bfd_elf32_nds32le_vec and bfd_elf32_nds32be_vec.
+	(nds32*be-*-*): Likewise.
+	* configure.in (bfd_elf32_nds32be_vec): Add elf32-nds32.lo.
+	(bfd_elf32_nds32le_vec): Likewise.
+	(bfd_elf32_nds32belin_vec): Likewise.
+	(bfd_elf32_nds32lelin_vec): Likewise.
+	* configure: Regenerate.
+	* cpu-nds32.c: New file for nds32.
+	* elf-bfd.h: Add NDS32_ELF_DATA.
+	* elf32-nds32.c: New file for nds32.
+	* elf32-nds32.h: New file for nds32.
+	* libbfd.h: Regenerate.
+	* reloc.c: Add relocations for nds32.
+	* targets.c (bfd_elf32_nds32be_vec): New declaration for nds32.
+	(bfd_elf32_nds32le_vec): Likewise.
+	(bfd_elf32_nds32belin_vec): Likewise.
+	(bfd_elf32_nds32lelin_vec): Likewise.
+
 2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/16318

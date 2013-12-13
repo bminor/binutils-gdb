@@ -1,3 +1,7 @@
+2013-12-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/arraydim: New testcase.
+
 2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
 
 	PR python/16113
