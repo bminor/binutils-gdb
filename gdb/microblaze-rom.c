@@ -21,7 +21,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "monitor.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "serial.h"
 #include "regcache.h"
 

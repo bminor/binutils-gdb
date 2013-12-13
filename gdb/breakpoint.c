@@ -35,7 +35,7 @@
 #include "gdbthread.h"
 #include "target.h"
 #include "language.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb-demangle.h"
 #include "filenames.h"
 #include "annotate.h"
@@ -2096,6 +2096,9 @@ build_target_condition_list (struct bp_location *bl)
   int modified = bl->needs_update;
   struct bp_location *loc;
 
+  /* Release conditions left over from a previous insert.  */
+  VEC_free (agent_expr_p, bl->target_info.conditions);
+
   /* This is only meaningful if the target is
      evaluating conditions and if the user has
      opted for condition evaluation on the target's
@@ -2287,6 +2290,9 @@ build_target_command_list (struct bp_location *bl)
   int modified = bl->needs_update;
   struct bp_location *loc;
 
+  /* Release commands left over from a previous insert.  */
+  VEC_free (agent_expr_p, bl->target_info.tcommands);
+
   /* For now, limit to agent-style dprintf breakpoints.  */
   if (bl->owner->type != bp_dprintf
       || strcmp (dprintf_style, dprintf_style_agent) != 0)
@@ -2390,7 +2396,7 @@ insert_bp_location (struct bp_location *bl,
 		    int *hw_bp_error_explained_already)
 {
   int val = 0;
-  char *hw_bp_err_string = NULL;
+  const char *hw_bp_err_string = NULL;
   struct gdb_exception e;
 
   if (!should_be_inserted (bl) || (bl->inserted && !bl->needs_update))
@@ -2495,7 +2501,7 @@ insert_bp_location (struct bp_location *bl,
 	  if (e.reason < 0)
 	    {
 	      val = 1;
-	      hw_bp_err_string = (char *) e.message;
+	      hw_bp_err_string = e.message;
 	    }
 	}
       else
@@ -2537,7 +2543,7 @@ insert_bp_location (struct bp_location *bl,
 	      if (e.reason < 0)
 	        {
 	          val = 1;
-	          hw_bp_err_string = (char *) e.message;
+	          hw_bp_err_string = e.message;
 	        }
 	    }
 	  else
@@ -4222,35 +4228,27 @@ bpstat_find_breakpoint (bpstat bsp, struct breakpoint *breakpoint)
 
 /* See breakpoint.h.  */
 
-enum bpstat_signal_value
+int
 bpstat_explains_signal (bpstat bsp, enum gdb_signal sig)
 {
-  enum bpstat_signal_value result = BPSTAT_SIGNAL_NO;
-
   for (; bsp != NULL; bsp = bsp->next)
     {
-      /* Ensure that, if we ever entered this loop, then we at least
-	 return BPSTAT_SIGNAL_HIDE.  */
-      enum bpstat_signal_value newval;
-
       if (bsp->breakpoint_at == NULL)
 	{
 	  /* A moribund location can never explain a signal other than
 	     GDB_SIGNAL_TRAP.  */
 	  if (sig == GDB_SIGNAL_TRAP)
-	    newval = BPSTAT_SIGNAL_HIDE;
-	  else
-	    newval = BPSTAT_SIGNAL_NO;
+	    return 1;
 	}
       else
-	newval = bsp->breakpoint_at->ops->explains_signal (bsp->breakpoint_at,
-							   sig);
-
-      if (newval > result)
-	result = newval;
+	{
+	  if (bsp->breakpoint_at->ops->explains_signal (bsp->breakpoint_at,
+							sig))
+	    return 1;
+	}
     }
 
-  return result;
+  return 0;
 }
 
 /* Put in *NUM the breakpoint number of the first breakpoint we are
@@ -4649,10 +4647,12 @@ bpstat_print (bpstat bs, int kind)
   return PRINT_UNKNOWN;
 }
 
-/* Evaluate the expression EXP and return 1 if value is zero.  This is
-   used inside a catch_errors to evaluate the breakpoint condition.
+/* Evaluate the expression EXP and return 1 if value is zero.
+   This returns the inverse of the condition because it is called
+   from catch_errors which returns 0 if an exception happened, and if an
+   exception happens we want execution to stop.
    The argument is a "struct expression *" that has been cast to a
-   "char *" to make it pass through catch_errors.  */
+   "void *" to make it pass through catch_errors.  */
 
 static int
 breakpoint_cond_eval (void *exp)
@@ -5099,8 +5099,8 @@ bpstat_check_watchpoint (bpstat bs)
     }
 }
 
-
-/* Check conditions (condition proper, frame, thread and ignore count)
+/* For breakpoints that are currently marked as telling gdb to stop,
+   check conditions (condition proper, frame, thread and ignore count)
    of breakpoint referred to by BS.  If we should not stop for this
    breakpoint, set BS->stop to 0.  */
 
@@ -5110,6 +5110,10 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
   int thread_id = pid_to_thread_id (ptid);
   const struct bp_location *bl;
   struct breakpoint *b;
+  int value_is_zero = 0;
+  struct expression *cond;
+
+  gdb_assert (bs->stop);
 
   /* BS is built for existing struct breakpoint.  */
   bl = bs->bp_location_at;
@@ -5123,109 +5127,110 @@ bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
 
   if (frame_id_p (b->frame_id)
       && !frame_id_eq (b->frame_id, get_stack_frame_id (get_current_frame ())))
-    bs->stop = 0;
-  else if (bs->stop)
     {
-      int value_is_zero = 0;
-      struct expression *cond;
+      bs->stop = 0;
+      return;
+    }
 
-      /* Evaluate Python breakpoints that have a "stop"
-	 method implemented.  */
-      if (b->py_bp_object)
-	bs->stop = gdbpy_should_stop (b->py_bp_object);
+  /* If this is a thread-specific breakpoint, don't waste cpu evaluating the
+     condition if this isn't the specified thread.  */
+  if (b->thread != -1 && b->thread != thread_id)
+    {
+      bs->stop = 0;
+      return;
+    }
+
+  /* Evaluate Python breakpoints that have a "stop" method implemented.  */
+  if (b->py_bp_object)
+    bs->stop = gdbpy_should_stop (b->py_bp_object);
+
+  if (is_watchpoint (b))
+    {
+      struct watchpoint *w = (struct watchpoint *) b;
+
+      cond = w->cond_exp;
+    }
+  else
+    cond = bl->cond;
+
+  if (cond && b->disposition != disp_del_at_next_stop)
+    {
+      int within_current_scope = 1;
+      struct watchpoint * w;
+
+      /* We use value_mark and value_free_to_mark because it could
+	 be a long time before we return to the command level and
+	 call free_all_values.  We can't call free_all_values
+	 because we might be in the middle of evaluating a
+	 function call.  */
+      struct value *mark = value_mark ();
 
       if (is_watchpoint (b))
-	{
-	  struct watchpoint *w = (struct watchpoint *) b;
-
-	  cond = w->cond_exp;
-	}
+	w = (struct watchpoint *) b;
       else
-	cond = bl->cond;
+	w = NULL;
 
-      if (cond && b->disposition != disp_del_at_next_stop)
+      /* Need to select the frame, with all that implies so that
+	 the conditions will have the right context.  Because we
+	 use the frame, we will not see an inlined function's
+	 variables when we arrive at a breakpoint at the start
+	 of the inlined function; the current frame will be the
+	 call site.  */
+      if (w == NULL || w->cond_exp_valid_block == NULL)
+	select_frame (get_current_frame ());
+      else
 	{
-	  int within_current_scope = 1;
-	  struct watchpoint * w;
+	  struct frame_info *frame;
 
-	  /* We use value_mark and value_free_to_mark because it could
-	     be a long time before we return to the command level and
-	     call free_all_values.  We can't call free_all_values
-	     because we might be in the middle of evaluating a
-	     function call.  */
-	  struct value *mark = value_mark ();
-
-	  if (is_watchpoint (b))
-	    w = (struct watchpoint *) b;
+	  /* For local watchpoint expressions, which particular
+	     instance of a local is being watched matters, so we
+	     keep track of the frame to evaluate the expression
+	     in.  To evaluate the condition however, it doesn't
+	     really matter which instantiation of the function
+	     where the condition makes sense triggers the
+	     watchpoint.  This allows an expression like "watch
+	     global if q > 10" set in `func', catch writes to
+	     global on all threads that call `func', or catch
+	     writes on all recursive calls of `func' by a single
+	     thread.  We simply always evaluate the condition in
+	     the innermost frame that's executing where it makes
+	     sense to evaluate the condition.  It seems
+	     intuitive.  */
+	  frame = block_innermost_frame (w->cond_exp_valid_block);
+	  if (frame != NULL)
+	    select_frame (frame);
 	  else
-	    w = NULL;
-
-	  /* Need to select the frame, with all that implies so that
-	     the conditions will have the right context.  Because we
-	     use the frame, we will not see an inlined function's
-	     variables when we arrive at a breakpoint at the start
-	     of the inlined function; the current frame will be the
-	     call site.  */
-	  if (w == NULL || w->cond_exp_valid_block == NULL)
-	    select_frame (get_current_frame ());
-	  else
-	    {
-	      struct frame_info *frame;
-
-	      /* For local watchpoint expressions, which particular
-		 instance of a local is being watched matters, so we
-		 keep track of the frame to evaluate the expression
-		 in.  To evaluate the condition however, it doesn't
-		 really matter which instantiation of the function
-		 where the condition makes sense triggers the
-		 watchpoint.  This allows an expression like "watch
-		 global if q > 10" set in `func', catch writes to
-		 global on all threads that call `func', or catch
-		 writes on all recursive calls of `func' by a single
-		 thread.  We simply always evaluate the condition in
-		 the innermost frame that's executing where it makes
-		 sense to evaluate the condition.  It seems
-		 intuitive.  */
-	      frame = block_innermost_frame (w->cond_exp_valid_block);
-	      if (frame != NULL)
-		select_frame (frame);
-	      else
-		within_current_scope = 0;
-	    }
-	  if (within_current_scope)
-	    value_is_zero
-	      = catch_errors (breakpoint_cond_eval, cond,
-			      "Error in testing breakpoint condition:\n",
-			      RETURN_MASK_ALL);
-	  else
-	    {
-	      warning (_("Watchpoint condition cannot be tested "
-			 "in the current scope"));
-	      /* If we failed to set the right context for this
-		 watchpoint, unconditionally report it.  */
-	      value_is_zero = 0;
-	    }
-	  /* FIXME-someday, should give breakpoint #.  */
-	  value_free_to_mark (mark);
+	    within_current_scope = 0;
 	}
-
-      if (cond && value_is_zero)
+      if (within_current_scope)
+	value_is_zero
+	  = catch_errors (breakpoint_cond_eval, cond,
+			  "Error in testing breakpoint condition:\n",
+			  RETURN_MASK_ALL);
+      else
 	{
-	  bs->stop = 0;
+	  warning (_("Watchpoint condition cannot be tested "
+		     "in the current scope"));
+	  /* If we failed to set the right context for this
+	     watchpoint, unconditionally report it.  */
+	  value_is_zero = 0;
 	}
-      else if (b->thread != -1 && b->thread != thread_id)
-	{
-	  bs->stop = 0;
-	}
-      else if (b->ignore_count > 0)
-	{
-	  b->ignore_count--;
-	  bs->stop = 0;
-	  /* Increase the hit count even though we don't stop.  */
-	  ++(b->hit_count);
-	  observer_notify_breakpoint_modified (b);
-	}	
+      /* FIXME-someday, should give breakpoint #.  */
+      value_free_to_mark (mark);
     }
+
+  if (cond && value_is_zero)
+    {
+      bs->stop = 0;
+    }
+  else if (b->ignore_count > 0)
+    {
+      b->ignore_count--;
+      bs->stop = 0;
+      /* Increase the hit count even though we don't stop.  */
+      ++(b->hit_count);
+      observer_notify_breakpoint_modified (b);
+    }	
 }
 
 
@@ -10764,15 +10769,15 @@ print_recreate_watchpoint (struct breakpoint *b, struct ui_file *fp)
 /* Implement the "explains_signal" breakpoint_ops method for
    watchpoints.  */
 
-static enum bpstat_signal_value
+static int
 explains_signal_watchpoint (struct breakpoint *b, enum gdb_signal sig)
 {
   /* A software watchpoint cannot cause a signal other than
      GDB_SIGNAL_TRAP.  */
   if (b->type == bp_watchpoint && sig != GDB_SIGNAL_TRAP)
-    return BPSTAT_SIGNAL_NO;
+    return 0;
 
-  return BPSTAT_SIGNAL_HIDE;
+  return 1;
 }
 
 /* The breakpoint_ops structure to be used in hardware watchpoints.  */
@@ -12735,6 +12740,9 @@ bp_location_dtor (struct bp_location *self)
   if (self->cond_bytecode)
     free_agent_expr (self->cond_bytecode);
   xfree (self->function_name);
+
+  VEC_free (agent_expr_p, self->target_info.conditions);
+  VEC_free (agent_expr_p, self->target_info.tcommands);
 }
 
 static const struct bp_location_ops bp_location_ops =
@@ -12880,10 +12888,10 @@ base_breakpoint_decode_linespec (struct breakpoint *b, char **s,
 
 /* The default 'explains_signal' method.  */
 
-static enum bpstat_signal_value
+static int
 base_breakpoint_explains_signal (struct breakpoint *b, enum gdb_signal sig)
 {
-  return BPSTAT_SIGNAL_HIDE;
+  return 1;
 }
 
 /* The default "after_condition_true" method.  */

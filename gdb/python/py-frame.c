@@ -61,7 +61,7 @@ typedef struct {
 struct frame_info *
 frame_object_to_frame_info (PyObject *obj)
 {
-  frame_object *frame_obj = (frame_object *) obj;  
+  frame_object *frame_obj = (frame_object *) obj;
   struct frame_info *frame;
 
   frame = frame_find_by_id (frame_obj->frame_id);
@@ -260,7 +260,7 @@ frapy_block (PyObject *self, PyObject *args)
   if (block == NULL || fn_block == NULL || BLOCK_FUNCTION (fn_block) == NULL)
     {
       PyErr_SetString (PyExc_RuntimeError,
-		       _("Cannot locate object file for block."));
+		       _("Cannot locate block for frame."));
       return NULL;
     }
 
@@ -583,7 +583,7 @@ gdbpy_frame_stop_reason_string (PyObject *self, PyObject *args)
 
   if (reason < UNWIND_FIRST || reason > UNWIND_LAST)
     {
-      PyErr_SetString (PyExc_ValueError, 
+      PyErr_SetString (PyExc_ValueError,
 		       _("Invalid frame stop reason."));
       return NULL;
     }
@@ -646,12 +646,8 @@ gdbpy_initialize_frames (void)
 #define SET(name, description) \
   if (PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name) < 0) \
     return -1;
-#define FIRST_ERROR(name) \
-  if (PyModule_AddIntConstant (gdb_module, "FRAME_"#name, name) < 0) \
-    return -1;
 #include "unwind_stop_reasons.def"
 #undef SET
-#undef FIRST_ERROR
 
   return gdb_pymodule_addobject (gdb_module, "Frame",
 				 (PyObject *) &frame_object_type);

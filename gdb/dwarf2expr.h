@@ -31,8 +31,15 @@ struct dwarf_expr_context;
 
 struct dwarf_expr_context_funcs
 {
-  /* Return the value of register number REGNUM.  */
-  CORE_ADDR (*read_reg) (void *baton, int regnum);
+  /* Return the value of register number REGNUM (a DWARF register number),
+     read as an address.  */
+  CORE_ADDR (*read_addr_from_reg) (void *baton, int regnum);
+
+  /* Return a value of type TYPE, stored in register number REGNUM
+     of the frame associated to the given BATON.
+
+     REGNUM is a DWARF register number.  */
+  struct value *(*get_reg_value) (void *baton, struct type *type, int regnum);
 
   /* Read LENGTH bytes at ADDR into BUF.  */
   void (*read_mem) (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t length);

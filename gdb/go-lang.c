@@ -34,7 +34,7 @@
 #include "defs.h"
 #include "gdb_assert.h"
 #include "gdb_obstack.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "block.h"
 #include "symtab.h"
 #include "language.h"
@@ -561,6 +561,7 @@ go_language_arch_info (struct gdbarch *gdbarch,
 static const struct language_defn go_language_defn =
 {
   "go",
+  "Go",
   language_go,
   range_check_off,
   case_sensitive_on,

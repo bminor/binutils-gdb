@@ -43,6 +43,7 @@
 
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
+#include "features/i386/amd64-mpx.c"
 #include "features/i386/x32.c"
 #include "features/i386/x32-avx.c"
 
@@ -90,6 +91,11 @@ static const char *amd64_ymmh_names[] =
   "ymm4h", "ymm5h", "ymm6h", "ymm7h",
   "ymm8h", "ymm9h", "ymm10h", "ymm11h",
   "ymm12h", "ymm13h", "ymm14h", "ymm15h"
+};
+
+static const char *amd64_mpx_names[] =
+{
+  "bnd0raw", "bnd1raw", "bnd2raw", "bnd3raw", "bndcfgu", "bndstatus"
 };
 
 /* DWARF Register Number Mapping as defined in the System V psABI,
@@ -1755,7 +1761,7 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   int reg, r;
   int offset, offset_and;
 
-  if (target_read_memory (pc, buf, sizeof buf))
+  if (target_read_code (pc, buf, sizeof buf))
     return pc;
 
   /* Check caller-saved saved register.  The first instruction has
@@ -2098,7 +2104,7 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
   else
     pc = amd64_analyze_stack_align (pc, current_pc, cache);
 
-  op = read_memory_unsigned_integer (pc, 1, byte_order);
+  op = read_code_unsigned_integer (pc, 1, byte_order);
 
   if (op == 0x55)		/* pushq %rbp */
     {
@@ -2111,7 +2117,7 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
       if (current_pc <= pc + 1)
         return current_pc;
 
-      read_memory (pc + 1, buf, 3);
+      read_code (pc + 1, buf, 3);
 
       /* Check for `movq %rsp, %rbp'.  */
       if (memcmp (buf, mov_rsp_rbp_1, 3) == 0
@@ -2179,7 +2185,7 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
     return pc;
 
   /* START_PC can be from overlayed memory, ignored here.  */
-  if (target_read_memory (next_sal.pc - 4, buf, sizeof (buf)) != 0)
+  if (target_read_code (next_sal.pc - 4, buf, sizeof (buf)) != 0)
     return pc;
 
   /* test %al,%al */
@@ -2845,6 +2851,13 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       tdep->ymm0h_regnum = AMD64_YMM0H_REGNUM;
     }
 
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx") != NULL)
+    {
+      tdep->mpx_register_names = amd64_mpx_names;
+      tdep->bndcfgu_regnum = AMD64_BNDCFGU_REGNUM;
+      tdep->bnd0r_regnum = AMD64_BND0R_REGNUM;
+    }
+
   tdep->num_byte_regs = 20;
   tdep->num_word_regs = 16;
   tdep->num_dword_regs = 16;
@@ -2986,6 +2999,7 @@ _initialize_amd64_tdep (void)
 {
   initialize_tdesc_amd64 ();
   initialize_tdesc_amd64_avx ();
+  initialize_tdesc_amd64_mpx ();
   initialize_tdesc_x32 ();
   initialize_tdesc_x32_avx ();
 }

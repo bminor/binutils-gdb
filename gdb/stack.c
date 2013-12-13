@@ -50,7 +50,7 @@
 
 #include "gdb_assert.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 
 #include "symfile.h"
 #include "python/python.h"
@@ -1407,7 +1407,9 @@ frame_info (char *addr_exp, int from_tty)
   struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
   CORE_ADDR frame_pc;
   int frame_pc_p;
-  CORE_ADDR caller_pc;
+  /* Initialize it to avoid "may be used uninitialized" warning.  */
+  CORE_ADDR caller_pc = 0;
+  volatile struct gdb_exception ex;
 
   fi = parse_frame_specification_1 (addr_exp, "No stack.", &selected_frame_p);
   gdbarch = get_frame_arch (fi);
@@ -1493,11 +1495,29 @@ frame_info (char *addr_exp, int from_tty)
 		     sal.line);
   puts_filtered ("; ");
   wrap_here ("    ");
-  printf_filtered ("saved %s ", pc_regname);
-  if (frame_unwind_caller_pc_if_available (fi, &caller_pc))
-    fputs_filtered (paddress (gdbarch, caller_pc), gdb_stdout);
+  printf_filtered ("saved %s = ", pc_regname);
+
+  TRY_CATCH (ex, RETURN_MASK_ERROR)
+    {
+      caller_pc = frame_unwind_caller_pc (fi);
+    }
+  if (ex.reason < 0)
+    {
+      switch (ex.error)
+	{
+	case NOT_AVAILABLE_ERROR:
+	  val_print_unavailable (gdb_stdout);
+	  break;
+	case OPTIMIZED_OUT_ERROR:
+	  val_print_not_saved (gdb_stdout);
+	  break;
+	default:
+	  fprintf_filtered (gdb_stdout, _("<error: %s>"), ex.message);
+	  break;
+	}
+    }
   else
-    fputs_filtered ("<unavailable>", gdb_stdout);
+    fputs_filtered (paddress (gdbarch, caller_pc), gdb_stdout);
   printf_filtered ("\n");
 
   if (calling_frame_info == NULL)

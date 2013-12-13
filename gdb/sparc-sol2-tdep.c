@@ -29,7 +29,7 @@
 #include "trad-frame.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "sol2-tdep.h"
 #include "sparc-tdep.h"

@@ -22,7 +22,7 @@
 #include "defs.h"
 #include "user-regs.h"
 #include "gdbtypes.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "frame.h"
 

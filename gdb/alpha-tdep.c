@@ -31,7 +31,7 @@
 #include "dis-asm.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "linespec.h"
 #include "regcache.h"
 #include "reggroups.h"

@@ -28,7 +28,7 @@
 
 struct value;
 struct block;
-struct breakpoint_object;
+struct gdbpy_breakpoint_object;
 struct get_number_or_range_state;
 struct thread_info;
 struct bpstats;
@@ -470,22 +470,6 @@ struct bp_location
   struct symtab *symtab;
 };
 
-/* Return values for bpstat_explains_signal.  Note that the order of
-   the constants is important here; they are compared directly in
-   bpstat_explains_signal.  */
-
-enum bpstat_signal_value
-  {
-    /* bpstat does not explain this signal.  */
-    BPSTAT_SIGNAL_NO = 0,
-
-    /* bpstat explains this signal; signal should not be delivered.  */
-    BPSTAT_SIGNAL_HIDE,
-
-    /* bpstat explains this signal; signal should be delivered.  */
-    BPSTAT_SIGNAL_PASS
-  };
-
 /* This structure is a collection of function pointers that, if available,
    will be called instead of the performing the default action for this
    bptype.  */
@@ -600,12 +584,9 @@ struct breakpoint_ops
   void (*decode_linespec) (struct breakpoint *, char **,
 			   struct symtabs_and_lines *);
 
-  /* Return true if this breakpoint explains a signal, but the signal
-     should still be delivered to the inferior.  This is used to make
-     'catch signal' interact properly with 'handle'; see
+  /* Return true if this breakpoint explains a signal.  See
      bpstat_explains_signal.  */
-  enum bpstat_signal_value (*explains_signal) (struct breakpoint *,
-					       enum gdb_signal);
+  int (*explains_signal) (struct breakpoint *, enum gdb_signal);
 
   /* Called after evaluating the breakpoint's condition,
      and only if it evaluated true.  */
@@ -756,8 +737,8 @@ struct breakpoint
        Python object that has been associated with this breakpoint.
        This is always NULL for a GDB that is not script enabled.  It
        can sometimes be NULL for enabled GDBs as not all breakpoint
-       types are tracked by the Python scripting API.  */
-    struct breakpoint_object *py_bp_object;
+       types are tracked by the scripting language API.  */
+    struct gdbpy_breakpoint_object *py_bp_object;
   };
 
 /* An instance of this type is used to represent a watchpoint.  It
@@ -1002,11 +983,10 @@ struct bpstat_what bpstat_what (bpstat);
 /* Find the bpstat associated with a breakpoint.  NULL otherwise.  */
 bpstat bpstat_find_breakpoint (bpstat, struct breakpoint *);
 
-/* Nonzero if a signal that we got in wait() was due to circumstances
-   explained by the bpstat; and the signal should therefore not be
-   delivered.  */
-extern enum bpstat_signal_value bpstat_explains_signal (bpstat,
-							enum gdb_signal);
+/* Nonzero if a signal that we got in target_wait() was due to
+   circumstances explained by the bpstat; the signal is therefore not
+   random.  */
+extern int bpstat_explains_signal (bpstat, enum gdb_signal);
 
 /* Nonzero is this bpstat causes a stop.  */
 extern int bpstat_causes_stop (bpstat);

@@ -60,7 +60,15 @@ template <int size, bool big_endian>
 class Sized_relobj_dwo;
 
 // List of .dwo files to process.
-typedef std::vector<std::string> File_list;
+struct Dwo_file_entry
+{
+  Dwo_file_entry(uint64_t id, std::string name)
+    : dwo_id(id), dwo_name(name)
+  { }
+  uint64_t dwo_id;
+  std::string dwo_name;
+};
+typedef std::vector<Dwo_file_entry> File_list;
 
 // Type to hold the offset and length of an input section
 // within an output section.
@@ -114,6 +122,12 @@ class Dwo_file
   // Read the input file and send its contents to OUTPUT_FILE.
   void
   read(Dwp_output_file* output_file);
+
+  // Verify a .dwp file given a list of .dwo files referenced by the
+  // corresponding executable file.  Returns true if no problems
+  // were found.
+  bool
+  verify(const File_list& files);
 
  private:
   // Types for mapping input string offsets to output string offsets.
@@ -173,6 +187,16 @@ class Dwo_file
   void
   sized_read_unit_index(unsigned int, unsigned int *, Dwp_output_file*,
 			bool is_tu_index);
+
+  // Verify the .debug_cu_index section of a .dwp file, comparing it
+  // against the list of .dwo files referenced by the corresponding
+  // executable file.
+  bool
+  verify_dwo_list(unsigned int, const File_list& files);
+
+  template <bool big_endian>
+  bool
+  sized_verify_dwo_list(unsigned int, const File_list& files);
 
   // Merge the input string table section into the output file.
   void
@@ -969,6 +993,48 @@ Dwo_file::read(Dwp_output_file* output_file)
     }
 }
 
+// Verify a .dwp file given a list of .dwo files referenced by the
+// corresponding executable file.  Returns true if no problems
+// were found.
+
+bool
+Dwo_file::verify(const File_list& files)
+{
+  this->obj_ = this->make_object(NULL);
+
+  unsigned int shnum = this->shnum();
+  this->is_compressed_.resize(shnum);
+  this->sect_offsets_.resize(shnum);
+
+  unsigned int debug_cu_index = 0;
+
+  // Scan the section table and collect debug sections.
+  // (Section index 0 is a dummy section; skip it.)
+  for (unsigned int i = 1; i < shnum; i++)
+    {
+      if (this->section_type(i) != elfcpp::SHT_PROGBITS)
+	continue;
+      std::string sect_name = this->section_name(i);
+      const char* suffix = sect_name.c_str();
+      if (is_prefix_of(".debug_", suffix))
+	suffix += 7;
+      else if (is_prefix_of(".zdebug_", suffix))
+	{
+	  this->is_compressed_[i] = true;
+	  suffix += 8;
+	}
+      else
+	continue;
+      if (strcmp(suffix, "cu_index") == 0)
+	debug_cu_index = i;
+    }
+
+  if (debug_cu_index == 0)
+    gold_fatal(_("%s: no .debug_cu_index section found"), this->name_);
+
+  return this->verify_dwo_list(debug_cu_index, files);
+}
+
 // Create a Sized_relobj_dwo of the given size and endianness,
 // and record the target info.
 
@@ -1209,6 +1275,102 @@ Dwo_file::sized_read_unit_index(unsigned int shndx,
     delete[] contents;
   if (info_is_new)
     delete[] info_contents;
+}
+
+// Verify the .debug_cu_index section of a .dwp file, comparing it
+// against the list of .dwo files referenced by the corresponding
+// executable file.
+
+bool
+Dwo_file::verify_dwo_list(unsigned int shndx, const File_list& files)
+{
+  if (this->obj_->is_big_endian())
+    return this->sized_verify_dwo_list<true>(shndx, files);
+  else
+    return this->sized_verify_dwo_list<false>(shndx, files);
+}
+
+template <bool big_endian>
+bool
+Dwo_file::sized_verify_dwo_list(unsigned int shndx, const File_list& files)
+{
+  gold_assert(shndx > 0);
+
+  section_size_type index_len;
+  bool index_is_new;
+  const unsigned char* contents =
+      this->section_contents(shndx, &index_len, &index_is_new);
+
+  unsigned int version =
+      elfcpp::Swap_unaligned<32, big_endian>::readval(contents);
+
+  // We don't support version 1 anymore because it was experimental
+  // and because in normal use, dwp is not expected to read .dwp files
+  // produced by an earlier version of the tool.
+  if (version != 2)
+    gold_fatal(_("%s: section %s has unsupported version number %d"),
+	       this->name_, this->section_name(shndx).c_str(), version);
+
+  unsigned int ncols =
+      elfcpp::Swap_unaligned<32, big_endian>::readval(contents
+						      + sizeof(uint32_t));
+  unsigned int nused =
+      elfcpp::Swap_unaligned<32, big_endian>::readval(contents
+						      + 2 * sizeof(uint32_t));
+  if (ncols == 0 || nused == 0)
+    return true;
+
+  unsigned int nslots =
+      elfcpp::Swap_unaligned<32, big_endian>::readval(contents
+						      + 3 * sizeof(uint32_t));
+
+  const unsigned char* phash = contents + 4 * sizeof(uint32_t);
+  const unsigned char* pindex = phash + nslots * sizeof(uint64_t);
+  const unsigned char* pcolhdrs = pindex + nslots * sizeof(uint32_t);
+  const unsigned char* poffsets = pcolhdrs + ncols * sizeof(uint32_t);
+  const unsigned char* psizes = poffsets + nused * ncols * sizeof(uint32_t);
+  const unsigned char* pend = psizes + nused * ncols * sizeof(uint32_t);
+
+  if (pend > contents + index_len)
+    gold_fatal(_("%s: section %s is corrupt"), this->name_,
+	       this->section_name(shndx).c_str());
+
+  int nmissing = 0;
+  for (File_list::const_iterator f = files.begin(); f != files.end(); ++f)
+    {
+      uint64_t dwo_id = f->dwo_id;
+      unsigned int slot = static_cast<unsigned int>(dwo_id) & (nslots - 1);
+      const unsigned char* ph = phash + slot * sizeof(uint64_t);
+      const unsigned char* pi = pindex + slot * sizeof(uint32_t);
+      uint64_t probe = elfcpp::Swap_unaligned<64, big_endian>::readval(ph);
+      uint32_t row_index = elfcpp::Swap_unaligned<32, big_endian>::readval(pi);
+      if (row_index != 0 && probe != dwo_id)
+	{
+	  unsigned int h2 = ((static_cast<unsigned int>(dwo_id >> 32)
+			      & (nslots - 1)) | 1);
+	  do
+	    {
+	      slot = (slot + h2) & (nslots - 1);
+	      ph = phash + slot * sizeof(uint64_t);
+	      pi = pindex + slot * sizeof(uint32_t);
+	      probe = elfcpp::Swap_unaligned<64, big_endian>::readval(ph);
+	      row_index = elfcpp::Swap_unaligned<32, big_endian>::readval(pi);
+	    } while (row_index != 0 && probe != dwo_id);
+	}
+      if (row_index == 0)
+	{
+	  printf(_("missing .dwo file: %016llx %s\n"),
+		 static_cast<long long>(dwo_id), f->dwo_name.c_str());
+	  ++nmissing;
+	}
+    }
+
+  gold_info(_("Found %d missing .dwo files"), nmissing);
+
+  if (index_is_new)
+    delete[] contents;
+
+  return nmissing == 0;
 }
 
 // Merge the input string table section into the output file.
@@ -2063,7 +2225,10 @@ Dwo_name_info_reader::visit_compilation_unit(off_t, off_t, Dwarf_die* die)
 {
   const char* dwo_name = die->string_attribute(elfcpp::DW_AT_GNU_dwo_name);
   if (dwo_name != NULL)
-      this->files_->push_back(dwo_name);
+    {
+      uint64_t dwo_id = die->uint_attribute(elfcpp::DW_AT_GNU_dwo_id);
+      this->files_->push_back(Dwo_file_entry(dwo_id, dwo_name));
+    }
 }
 
 // Class Unit_reader.
@@ -2138,12 +2303,17 @@ using namespace gold;
 
 // Options.
 
+enum Dwp_options {
+  VERIFY_ONLY = 0x101,
+};
+
 struct option dwp_options[] =
   {
     { "exec", required_argument, NULL, 'e' },
     { "help", no_argument, NULL, 'h' },
     { "output", required_argument, NULL, 'o' },
     { "verbose", no_argument, NULL, 'v' },
+    { "verify-only", no_argument, NULL, VERIFY_ONLY },
     { "version", no_argument, NULL, 'V' },
     { NULL, 0, NULL, 0 }
   };
@@ -2156,9 +2326,11 @@ usage(FILE* fd, int exit_status)
   fprintf(fd, _("Usage: %s [options] [file...]\n"), program_name);
   fprintf(fd, _("  -h, --help               Print this help message\n"));
   fprintf(fd, _("  -e EXE, --exec EXE       Get list of dwo files from EXE"
-		" (defaults output to EXE.dwp)\n"));
+					   " (defaults output to EXE.dwp)\n"));
   fprintf(fd, _("  -o FILE, --output FILE   Set output dwp file name\n"));
   fprintf(fd, _("  -v, --verbose            Verbose output\n"));
+  fprintf(fd, _("  --verify-only            Verify output file against"
+					   " exec file\n"));
   fprintf(fd, _("  -V, --version            Print version number\n"));
 
   // REPORT_BUGS_TO is defined in bfd/bfdver.h.
@@ -2218,6 +2390,7 @@ main(int argc, char** argv)
   std::string output_filename;
   const char* exe_filename = NULL;
   bool verbose = false;
+  bool verify_only = false;
   int c;
   while ((c = getopt_long(argc, argv, "e:ho:vV", dwp_options, NULL)) != -1)
     {
@@ -2233,6 +2406,9 @@ main(int argc, char** argv)
 	    break;
 	  case 'v':
 	    verbose = true;
+	    break;
+	  case VERIFY_ONLY:
+	    verify_only = true;
 	    break;
 	  case 'V':
 	    print_version();
@@ -2250,8 +2426,6 @@ main(int argc, char** argv)
       output_filename.append(".dwp");
     }
 
-  Dwp_output_file output_file(output_filename.c_str());
-
   // Get list of .dwo files from the executable.
   if (exe_filename != NULL)
     {
@@ -2261,20 +2435,29 @@ main(int argc, char** argv)
 
   // Add any additional files listed on command line.
   for (int i = optind; i < argc; ++i)
-    files.push_back(argv[i]);
+    files.push_back(Dwo_file_entry(0, argv[i]));
 
   if (exe_filename == NULL && files.empty())
     gold_fatal(_("no input files and no executable specified"));
 
+  if (verify_only)
+    {
+      // Get list of DWO files in the DWP file and compare with
+      // references found in the EXE file.
+      Dwo_file dwp_file(output_filename.c_str());
+      bool ok = dwp_file.verify(files);
+      return ok ? EXIT_SUCCESS : EXIT_FAILURE;
+    }
+
   // Process each file, adding its contents to the output file.
+  Dwp_output_file output_file(output_filename.c_str());
   for (File_list::const_iterator f = files.begin(); f != files.end(); ++f)
     {
       if (verbose)
-        fprintf(stderr, "%s\n", f->c_str());
-      Dwo_file dwo_file(f->c_str());
+	fprintf(stderr, "%s\n", f->dwo_name.c_str());
+      Dwo_file dwo_file(f->dwo_name.c_str());
       dwo_file.read(&output_file);
     }
-
   output_file.finalize();
 
   return EXIT_SUCCESS;

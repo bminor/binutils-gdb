@@ -200,6 +200,7 @@ names are recognized:
 @code{armv6s-m},
 @code{armv7},
 @code{armv7-a},
+@code{armv7ve},
 @code{armv7-r},
 @code{armv7-m},
 @code{armv7e-m},

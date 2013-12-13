@@ -29,8 +29,8 @@
 #include "serial.h"
 #include "target.h"
 #include "exceptions.h"
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 #include "gdb_usleep.h"
 #include "regcache.h"
 #include <ctype.h>
@@ -85,8 +85,6 @@ static void ddb_open (char *name, int from_tty);
 static void lsi_open (char *name, int from_tty);
 
 static void mips_close (void);
-
-static void mips_detach (struct target_ops *ops, char *args, int from_tty);
 
 static int mips_map_regno (struct gdbarch *, int);
 
@@ -1749,7 +1747,7 @@ mips_close (void)
 /* Detach from the remote board.  */
 
 static void
-mips_detach (struct target_ops *ops, char *args, int from_tty)
+mips_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));

@@ -28,6 +28,7 @@
 #include "exceptions.h"
 #include <signal.h>
 #include "target.h"
+#include "target-dcache.h"
 #include "breakpoint.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -60,8 +61,8 @@
 #include <sys/types.h>
 
 #include "event-top.h"
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 #include <ctype.h>
 #include "ui-out.h"
 #include "cli-out.h"

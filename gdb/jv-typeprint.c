@@ -24,7 +24,7 @@
 #include "demangle.h"
 #include "gdb-demangle.h"
 #include "jv-lang.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "typeprint.h"
 #include "c-lang.h"
 #include "cp-abi.h"

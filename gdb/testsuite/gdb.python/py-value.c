@@ -16,6 +16,8 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 struct s
 {
@@ -38,6 +40,13 @@ enum e
 typedef struct s *PTR;
 
 enum e evalue = TWO;
+
+struct str
+{
+  int length;
+  /* Variable length.  */
+  char text[1];
+};
 
 #ifdef __cplusplus
 
@@ -86,6 +95,8 @@ main (int argc, char *argv[])
   int i = 2;
   int *ptr_i = &i;
   const char *sn = 0;
+  struct str *xstr;
+
   s.a = 3;
   s.b = 5;
   u.a = 7;
@@ -95,6 +106,12 @@ main (int argc, char *argv[])
 #ifdef __cplusplus
   ptr_ref(ptr_i);
 #endif
+
+#define STR_LENGTH 100
+  xstr = (struct str *) malloc (sizeof (*xstr) + STR_LENGTH);
+  xstr->length = STR_LENGTH;
+  memset (xstr->text, 'x', STR_LENGTH);
+#undef STR_LENGTH
 
   save_argv = argv;      /* break to inspect struct and union */
   return 0;

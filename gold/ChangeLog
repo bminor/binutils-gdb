@@ -1,3 +1,135 @@
+2013-12-10  Roland McGrath  <mcgrathr@google.com>
+
+	* Makefile.am (install-exec-local): Prefix $(INSTALL_PROGRAM) uses
+	with $(INSTALL_PROGRAM_ENV).
+	* Makefile.in: Regenerate.
+
+2013-11-22  Cary Coutant  <ccoutant@google.com>
+
+	* configure.ac: Add check for which library is needed for
+	dlopen.
+	* configure: Regenerate.
+
+2013-11-22  Cary Coutant  <ccoutant@google.com>
+
+	* testsuite/Makefile.am (exception_x86_64_bnd_test): Use in-tree
+	assembler.
+	* testsuite/Makefile.in: Regenerate.
+
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.cc (Target_x86_64<size>::Scan::get_reference_flags):
+	Handle R_X86_64_PC32_BND and R_X86_64_PLT32_BND just like
+	R_X86_64_PC32 and R_X86_64_PLT32, respectively.
+	(Target_x86_64<size>::Scan::local): Likewise.
+	(Target_x86_64<size>::Scan::global): Likewise.
+	(Target_x86_64<size>::Relocate::relocate): Likewise.
+	(Target_x86_64<size>::Relocatable_size_for_reloc::get_size_for_reloc):
+	Likewise.
+	(Target_x86_64<size>::Scan::check_non_pic(): Handle
+	R_X86_64_PC32_BND.
+
+	* testsuite/Makefile.am (check_PROGRAMS): Add
+	exception_x86_64_bnd_test.
+	(exception_x86_64_bnd_test_SOURCES): New macro.
+	(exception_x86_64_bnd_test_DEPENDENCIES): Likewise.
+	(exception_x86_64_bnd_test_LDFLAGS): Likewise.
+	(exception_x86_64_bnd_test_LDADD): Likewise.
+	(exception_x86_64_bnd_1.o): New rule.
+	(exception_x86_64_bnd_2.o): Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
+2013-11-15  Alan Modra  <amodra@gmail.com>
+
+	* powerpc.cc (Target_powerpc::glink_section): Provide non-const
+	accessor.
+	(Target_powerpc::Branch_info::make_stub): Make global entry stubs.
+	Only call ppc64_local_entry_offset for 64-bit.  Restrict
+	symval_for_branch lookup to ELFv1.
+	(Stub_table::add_plt_call_entry): Use unsigned int off.
+	(Output_data_glink::Address, invalid_address): New.
+	(Output_data_glink::add_eh_frame): Move out of line.  Add
+	support for ELFv2.
+	(Output_data_glink::add_global_entry, find_global_entry,
+	global_entry_address): New functions.
+	(Output_data_glink::global_entry_stubs_, end_branch_table_,
+	ge_size): New variables.
+	(Output_data_glink::set_final_data_size): Add global entry
+	stub sizing.
+	(Output_data_glink::do_write): Write global entry stubs.
+	(Target_powerpc::Scan::reloc_needs_plt_for_ifunc): Add target
+	parameter.  Return true for ELFv2.  Adjust callers.
+	(Target_powerpc::Scan::local, global): Restrict opd lookup to
+	ELFv1.  Similarly for ifunc and dynamic relocation processing
+	specific to ELFv1.  Recognize that symbols are defined on
+	their plt entries for ELFv2.
+	(Target_powerpc::symval_for_branch): Assert if called for
+	ELFv2 or ppc32.
+	(Target_powerpc::Relocate::relocate): Use global entry plt
+	stub for symbol value if such exists on ELFv2.
+	(Target_powerpc::Relocate::relocate): Don't call
+	symval_for_branch when ELFv2.  Do adjust for local entry
+	offset when ELFv2.
+	(Target_powerpc::do_dynsym_value): Set symbols to global entry
+	plt stub for ELFv2.
+	(Target_powerpc::do_plt_address_for_global): Similarly.
+
+2013-11-14  Cary Coutant  <ccoutant@google.com>
+
+	Revert patch -- this did not fix the problem, and there is
+	no race there.
+
+	2013-11-14  Cary Coutant  <ccoutant@google.com>
+
+	    PR gold/14860
+	    * ehframe.cc (Eh_frame_hdr::Eh_frame_hdr): Initialize lock_.
+	    (Ehframe_hdr::set_final_data_size): Allocate a Lock.
+	    * ehframe.h (Eh_frame_hdr::record_fde): Hold the lock while
+	    updating fde_offsets_.
+	    (Eh_frame_hdr::lock_): New data member.
+
+2013-11-14  Cary Coutant  <ccoutant@google.com>
+
+	* dwp.cc (Dwo_file_entry): New type.
+	(File_list): Use Dwo_file_entry.
+	(Dwo_file::verify): New function.
+	(Dwo_file::verify_dwo_list): New function.
+	(Dwo_file::sized_verify_dwo_list): New function.
+	(Dwo_name_info_reader::visit_compilation_unit): Add dwo_id to file
+	list.
+	(Dwp_options): New enum type.
+	(dwp_options): Add --verify-only.
+	(usage): Likewise.
+	(main): Likewise.
+	* dwp.h (gold_info): Add declaration.
+
+2013-11-14  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/14860
+	* ehframe.cc (Eh_frame_hdr::Eh_frame_hdr): Initialize lock_.
+	(Ehframe_hdr::set_final_data_size): Allocate a Lock.
+	* ehframe.h (Eh_frame_hdr::record_fde): Hold the lock while
+	updating fde_offsets_.
+	(Eh_frame_hdr::lock_): New data member.
+
+2013-11-06  Cary Coutant  <ccoutant@google.com>
+
+	PR gold/15758
+	* object.cc (Sized_relobj_file::do_layout): Handle .eh_frame sections
+	before reloc sections.
+
+2013-11-04  Alan Modra  <amodra@gmail.com>
+
+	* symtab.h (Symbol::Reference_flags): Add FUNC_DESC_ABI.
+	(Symbol::needs_dynamic_reloc): Test new flag.
+	* powerpc.cc (needs_dynamic_reloc, use_plt_offset): Delete.
+	(Target_powerpc::Scan::get_reference_flags): Add target param.
+	Return FUNC_DESC_ABI for 64-bit ELFv1.
+	(Target_powerpc::Branch_info::make_stub): Adjust get_reference_flags
+	call.
+	(Target_powerpc::Scan::global): Use Symbol::needs_dynamic_reloc.
+	(Target_powerpc::Relocate::relocate): Use Symbol::use_plt_offset.
+
 2013-10-31  Cary Coutant  <ccoutant@google.com>
 
 	Restore support for dwp v2 DWARF package file format.

@@ -1,5 +1,4 @@
-/* Portable <dirent.h>.
-   Copyright (C) 2000-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -16,25 +15,21 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_DIRENT_H
-#define GDB_DIRENT_H 1
+#ifndef TARGET_DCACHE_H
+#define TARGET_DCACHE_H
 
-/* See description of `AC_HEADER_DIRENT' in the Autoconf manual.  */
-#ifdef HAVE_DIRENT_H
-# include <dirent.h>		/* ARI: dirent.h */
-# define NAMELEN(dirent) strlen ((dirent)->d_name)    /* ARI: strlen d_name */
-#else
-# define dirent direct
-# define NAMELEN(dirent) (dirent)->d_namelen	/* ARI: d_namelen */
-# ifdef HAVE_SYS_NDIR_H
-#  include <sys/ndir.h>
-# endif
-# ifdef HAVE_SYS_DIR_H
-#  include <sys/dir.h>
-# endif
-# ifdef HAVE_NDIR_H
-#  include <ndir.h>
-# endif
-#endif
+#include "dcache.h"
 
-#endif /* not GDB_DIRENT_H */
+extern void target_dcache_invalidate (void);
+
+extern DCACHE *target_dcache_get (void);
+
+extern DCACHE *target_dcache_get_or_init (void);
+
+extern int target_dcache_init_p (void);
+
+extern int stack_cache_enabled_p (void);
+
+extern int code_cache_enabled_p (void);
+
+#endif /* TARGET_DCACHE_H */

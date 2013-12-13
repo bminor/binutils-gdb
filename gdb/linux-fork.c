@@ -25,7 +25,7 @@
 #include "infcall.h"
 #include "objfiles.h"
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "linux-fork.h"
 #include "linux-nat.h"
 #include "gdbthread.h"
@@ -33,7 +33,7 @@
 
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
-#include "gdb_dirent.h"
+#include <dirent.h>
 #include <ctype.h>
 
 struct fork_info *fork_list;
@@ -387,7 +387,7 @@ linux_fork_mourn_inferior (void)
    the first available.  */
 
 void
-linux_fork_detach (char *args, int from_tty)
+linux_fork_detach (const char *args, int from_tty)
 {
   /* OK, inferior_ptid is the one we are detaching from.  We need to
      delete it from the fork_list, and switch to the next available

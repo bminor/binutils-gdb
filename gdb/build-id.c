@@ -22,7 +22,7 @@
 #include "elf-bfd.h"
 #include "gdb_bfd.h"
 #include "build-id.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_vecs.h"
 #include "symfile.h"
 #include "objfiles.h"

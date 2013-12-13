@@ -27,7 +27,7 @@
 #include "gdbcmd.h"
 #include "demangle.h"
 #include "annotate.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "c-lang.h"
 #include "target.h"
 #include "cp-abi.h"

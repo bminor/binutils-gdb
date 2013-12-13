@@ -21,7 +21,7 @@
 #include "value.h"
 #include "osabi.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 #include "sol2-tdep.h"
 #include "i386-tdep.h"

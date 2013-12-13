@@ -222,8 +222,8 @@ SECTIONS
     ${RELOCATING+ _vectors_end = . ; }
   } ${RELOCATING+ > vectors}
 
-  .data ${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text) + SIZEOF (.rodata))}
-  {  
+  .data ${RELOCATING-0} :
+  {
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
     ${RELOCATING+ PROVIDE (__datastart = .) ; }
     ${RELOCATING+. = ALIGN(2);}
@@ -242,7 +242,7 @@ SECTIONS
     *(.sdata .sdata.* .gnu.linkonce.s.*)
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
-  } ${RELOCATING+ > data}
+  } ${RELOCATING+ > data ${RELOCATING+AT> text}}
   
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {

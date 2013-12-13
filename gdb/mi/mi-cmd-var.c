@@ -24,9 +24,10 @@
 #include "ui-out.h"
 #include "mi-out.h"
 #include "varobj.h"
+#include "language.h"
 #include "value.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "mi-getopt.h"
 #include "gdbthread.h"
 #include "mi-parse.h"
@@ -479,7 +480,7 @@ void
 mi_cmd_var_info_expression (char *command, char **argv, int argc)
 {
   struct ui_out *uiout = current_uiout;
-  enum varobj_languages lang;
+  const struct language_defn *lang;
   struct varobj *var;
 
   if (argc != 1)
@@ -490,7 +491,7 @@ mi_cmd_var_info_expression (char *command, char **argv, int argc)
 
   lang = varobj_get_language (var);
 
-  ui_out_field_string (uiout, "lang", varobj_language_string[(int) lang]);
+  ui_out_field_string (uiout, "lang", lang->la_natural_name);
   ui_out_field_string (uiout, "exp", varobj_get_expression (var));
 }
 

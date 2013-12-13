@@ -23,7 +23,7 @@
 #include "regcache.h"
 #include "target.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include <sys/types.h>
 #include <sys/ptrace.h>
 #include <machine/reg.h>

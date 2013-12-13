@@ -99,7 +99,7 @@
 #include "i386-cpuid.h"
 #include "value.h"
 #include "regcache.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "top.h"
 #include "cli/cli-utils.h"
 
@@ -384,7 +384,7 @@ Use the `run' command to run DJGPP programs."));
 }
 
 static void
-go32_detach (struct target_ops *ops, char *args, int from_tty)
+go32_detach (struct target_ops *ops, const char *args, int from_tty)
 {
 }
 

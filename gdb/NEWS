@@ -32,9 +32,16 @@
   Before, the former would print "<optimized out>", and the latter
   "*value not available*".
 
+* New script contrib/gdb-add-index.sh for adding .gdb_index sections
+  to binaries.
+
 * Python scripting
 
   ** Frame filters and frame decorators have been added.
+  ** Temporary breakpoints are now supported.
+  ** Line tables representation has been added.
+  ** New attribute 'parent_type' for gdb.Field objects.
+  ** gdb.Field objects can be used as subscripts on gdb.Value objects.
 
 * New targets
 
@@ -80,6 +87,12 @@ remove-symbol-file -a ADDRESS
   can be identified by its filename or by an address that lies within
   the boundaries of this symbol file in memory.
 
+info exceptions
+info exceptions REGEXP
+  Display the list of Ada exceptions defined in the program being
+  debugged.  If provided, only the exceptions whose names match REGEXP
+  are listed.
+
 * New options
 
 set debug symfile off|on
@@ -109,11 +122,20 @@ show startup-with-shell
   Specifies whether Unix child processes are started via a shell or
   directly.
 
+set code-cache
+show code-cache
+  Use the target memory cache for accesses to the code segment.  This
+  improves performance of remote debugging (particularly disassembly).
+
 * You can now use a literal value 'unlimited' for options that
   interpret 0 or -1 as meaning "unlimited".  E.g., "set
   trace-buffer-size unlimited" is now an alias for "set
   trace-buffer-size -1" and "set height unlimited" is now an alias for
   "set height 0".
+
+* The "set debug symtab-create" debugging option of GDB has been changed to
+  accept a verbosity level.  0 means "off", 1 provides basic debugging
+  output, and values of 2 or greater provides more verbose output.
 
 * New command-line options
 --configuration
@@ -139,6 +161,19 @@ show startup-with-shell
 
 * MI changes
 
+  ** All MI commands now accept an optional "--language" option.
+     Support for this feature can be verified by using the "-list-features"
+     command, which should contain "language-option".
+
+  ** The new command -info-gdb-mi-command allows the user to determine
+     whether a GDB/MI command is supported or not.
+
+  ** The "^error" result record returned when trying to execute an undefined
+     GDB/MI command now provides a variable named "code" whose content is the
+     "undefined-command" error code.  Support for this feature can be verified
+     by using the "-list-features" command, which should contain
+     "undefined-command-error-code".
+
   ** The -trace-save MI command can optionally save trace buffer in Common
      Trace Format now.
 
@@ -158,10 +193,15 @@ show startup-with-shell
   ** The -exec-run command now accepts an optional "--start" option.
      When used, the command follows the same semantics as the "start"
      command, stopping the program's execution at the start of its
-     main subprogram.
+     main subprogram.  Support for this feature can be verified using
+     the "-list-features" command, which should contain
+     "exec-run-start-option".
 
   ** The new commands -catch-assert and -catch-exceptions insert
      catchpoints stopping the program when Ada exceptions are raised.
+
+  ** The new command -info-ada-exceptions provides the equivalent of
+     the new "info exceptions" command.
 
 * New system-wide configuration scripts
   A GDB installation now provides scripts suitable for use as system-wide
@@ -607,7 +647,7 @@ qXfer:btrace:read
      C++ and Java objects.
 
   ** "explore" and its sub commands "explore value" and "explore type"
-     can be used to reccursively explore values and types of
+     can be used to recursively explore values and types of
      expressions.  These commands are available only if GDB is
      configured with '--with-python'.
 
@@ -5541,3 +5581,5 @@ GDB now handles cross debugging.  If you are remotely debugging between
 two different machines, type ``./configure host -target=targ''.
 Host is the machine where GDB will run; targ is the machine
 where the program that you are debugging will run.
+
+ *  GDB now supports access to Intel(R) MPX registers on GNU/Linux.

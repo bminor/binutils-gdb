@@ -1,3 +1,183 @@
+2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/16113
+	* gdb.texinfo (Values From Inferior): Add a note about using
+	gdb.Field objects as subscripts on gdb.Value objects.
+	(Types In Python): Add description about the new attribute
+	"parent_type" of gdb.Field objects.
+
+2013-12-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Add @cindex
+	entry for section docuumenting the -list-features GDB/MI command.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document the new
+	"exec-run-start-option" entry in the output of the "-list-features"
+	command.
+
+2013-12-04  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (i386): Fix yesterday's commit.
+
+2013-12-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Set Catchpoints): Add @kindex for each command
+	documented here.
+
+2013-12-03  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (@direntry): Add menu item for gdbserver.
+
+2013-12-03  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.texinfo (i386 Features): Add MPX feature registers.
+	(x86 Specific featuresx86 Architecture-specific Issues): Adds
+	a subsubsection for MPX and describes the display of the
+	boundary registers.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Remove the
+	documentation of the "ada-exceptions" entry.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Result Records): Fix the syntax of the
+	"^error" result record concerning the error message.  Document
+	the error code that may also be part of that result record.
+	(GDB/MI Miscellaneous Commands): Document the
+	"undefined-command-error-code" element in the output of
+	the "-list-features" GDB/MI command.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document
+	the new -info-gdb-mi-command GDB/MI command.  Document
+	the meaning of "-info-gdb-mi-command" in the output of
+	-list-features.
+
+2013-11-29  Pedro Alves  <palves@redhat.com>
+
+	* gdb.texinfo (Frames In Python) <gdb.FRAME_UNWIND_NULL_ID>:
+	Update comment.
+
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Caching Remote Data): Document new
+	"set/show stack-cache" option.
+
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Caching Target Data): Replace "ON" with "on".
+	(Maintenance Commands): Replace "ON" and "OFF" with "on" and
+	"off" respectively.
+
+2013-11-23  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Add the description
+	of "displayhint" to the table about child results.
+
+2013-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Add attribute
+	'dynamic' for the output of command -var-list-children.
+
+2013-11-21  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Caching Target Data): Remove "see" before
+	@pxref.
+
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Caching Target Data): Update doc for
+	per-address-space dcache.
+
+2013-11-20  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (Data): Rename menu item.
+	(Caching Remote Data): Rename to ...
+	(Caching Target Data): ... it.  Update.
+
+2013-11-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Document the new
+	"language-option" entry in the output of the "-list-features"
+	command.
+
+2013-11-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Variables): Note gdb rules for ambiguous cases.
+	Add example.
+
+2013-11-14  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Breakpoints In Python): Replace "as" with "in".
+
+2013-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Show): Add xref anchor for "show language" command.
+	(Context management): Place current subsection text into its own
+	subsubsection.  Add new subsubsection describing the "--language"
+	command option.
+
+2013-11-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Delete
+	the documentation of "info-ada-exceptions" in the output
+	of the "-list-features" command.  Add the documentation
+	of the "ada-exception" entry instead.
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+
+	* gdb.texinfo (GDB/MI Miscellaneous Commands): Fix the first
+	word of a couple of sentences to start with a capital letter.
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada): Add entry in menu for new "Ada Exceptions" node.
+	(Ada Exceptions): New node.
+	(GDB/MI): Add entry in menu for new "GDB/MI Ada Exceptions
+	Commands" node.
+	(GDB/MI Ada Exceptions Commands): New node.
+	(GDB/MI Miscellaneous Commands): Document new "info-ada-exceptions"
+	field in the output of the "-list-features" command.
+	* NEWS: Add entry for the new "info exceptions" CLI command,
+	and for the new "-info-ada-exceptions" GDB/MI command.
+
+2013-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Symbol Tables In Python): Add linetable method entry.
+	(Line Tables In Python): New node.
+
+2013-11-08  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Debugging Output): Update text for
+	"set debug dwarf2-read".
+
+2013-11-08  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (Debugging Output): Update text for
+	"set debug symtab-create".
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+        * gdb.texinfo (Commands In Python): Document COMPLETE_EXPRESSION
+        constant.
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.texinfo (Breakpoints In Python): Document temporary
+	option in breakpoint constructor, and add documentation to the
+	temporary attribute.
+
+2013-11-07  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Update doc about the
+	output of "-var-info-expression".
+
 2013-11-06  Pedro Alves  <palves@redhat.com>
 
 	* gdb.texinfo (Starting) <set/show startup-with-shell>: Mention

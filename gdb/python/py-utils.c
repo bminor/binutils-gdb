@@ -71,7 +71,7 @@ make_cleanup_py_xdecref (PyObject *py)
 
    As an added bonus, the functions accepts a unicode string and returns it
    right away, so callers don't need to check which kind of string they've
-   got.  In Python 3, all strings are Unicode so this case is always the 
+   got.  In Python 3, all strings are Unicode so this case is always the
    one that applies.
 
    If the given object is not one of the mentioned string types, NULL is
@@ -216,7 +216,7 @@ python_string_to_host_string (PyObject *obj)
   if (str == NULL)
     return NULL;
 
-  result = unicode_to_encoded_string (str, host_charset ()); 
+  result = unicode_to_encoded_string (str, host_charset ());
   Py_DECREF (str);
   return result;
 }
@@ -288,7 +288,7 @@ gdbpy_exception_to_string (PyObject *ptype, PyObject *pvalue)
 }
 
 /* Convert a GDB exception to the appropriate Python exception.
-   
+
    This sets the Python error indicator.  */
 
 void

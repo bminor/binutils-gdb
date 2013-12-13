@@ -1,6 +1,5 @@
 /* windres.c -- a program to manipulate Windows resources
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-   2009, 2011, 2012 Free Software Foundation, Inc.
+   Copyright 1997-2013 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
 
@@ -37,7 +36,6 @@
 
 #include "sysdep.h"
 #include <assert.h>
-#include <time.h>
 #include "bfd.h"
 #include "getopt.h"
 #include "bucomm.h"
@@ -339,17 +337,12 @@ define_resource (rc_res_directory **resources, int cids,
 
       if (*resources == NULL)
 	{
-	  static unsigned int timeval;
-
-	  /* Use the same timestamp for every resource created in a
-             single run.  */
-	  if (timeval == 0)
-	    timeval = time (NULL);
-
 	  *resources = ((rc_res_directory *)
 			res_alloc (sizeof (rc_res_directory)));
 	  (*resources)->characteristics = 0;
-	  (*resources)->time = timeval;
+	  /* Using a real timestamp only serves to create non-deterministic
+	     results.  Use zero instead.  */
+	  (*resources)->time = 0;
 	  (*resources)->major = 0;
 	  (*resources)->minor = 0;
 	  (*resources)->entries = NULL;

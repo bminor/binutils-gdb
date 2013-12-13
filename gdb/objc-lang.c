@@ -34,7 +34,7 @@
 #include "value.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "gdb_string.h"		/* for strchr */
+#include <string.h>		/* for strchr */
 #include "target.h"		/* for target_has_execution */
 #include "gdbcore.h"
 #include "gdbcmd.h"
@@ -355,6 +355,7 @@ static const struct op_print objc_op_print_tab[] =
 
 const struct language_defn objc_language_defn = {
   "objective-c",		/* Language name */
+  "Objective-C",
   language_objc,
   range_check_off,
   case_sensitive_on,
@@ -1054,6 +1055,11 @@ uniquify_strings (VEC (const_char_ptr) **strings)
   int ix;
   const char *elem, *last = NULL;
   int out;
+
+  /* If the vector is empty, there's nothing to do.  This explicit
+     check is needed to avoid invoking qsort with NULL. */
+  if (VEC_empty (const_char_ptr, *strings))
+    return;
 
   qsort (VEC_address (const_char_ptr, *strings),
 	 VEC_length (const_char_ptr, *strings),

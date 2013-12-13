@@ -1217,9 +1217,16 @@ do_scrub_chars (size_t (*get) (char *, size_t), char *tostart, size_t tolen)
 		  while (ch != EOF && !IS_NEWLINE (ch))
 		    ch = GET ();
 		  if (ch == EOF)
-		    as_warn (_("end of file in comment; newline inserted"));
+		    {
+		      as_warn (_("end of file in comment; newline inserted"));
+		      PUT ('\n');
+		    }
+		  else /* IS_NEWLINE (ch) */
+		    {
+		      /* To process non-zero add_newlines.  */
+		      UNGET (ch);
+		    }
 		  state = 0;
-		  PUT ('\n');
 		  break;
 		}
 	      /* Looks like `# 123 "filename"' from cpp.  */

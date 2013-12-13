@@ -33,7 +33,7 @@
 #include "value.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "complaints.h"
 #include "dwarf2-frame.h"
@@ -286,7 +286,7 @@ dwarf2_frame_state_free (void *p)
 /* Helper functions for execute_stack_op.  */
 
 static CORE_ADDR
-read_reg (void *baton, int reg)
+read_addr_from_reg (void *baton, int reg)
 {
   struct frame_info *this_frame = (struct frame_info *) baton;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
@@ -298,12 +298,19 @@ read_reg (void *baton, int reg)
   buf = alloca (register_size (gdbarch, regnum));
   get_frame_register (this_frame, regnum, buf);
 
-  /* Convert the register to an integer.  This returns a LONGEST
-     rather than a CORE_ADDR, but unpack_pointer does the same thing
-     under the covers, and this makes more sense for non-pointer
-     registers.  Maybe read_reg and the associated interfaces should
-     deal with "struct value" instead of CORE_ADDR.  */
-  return unpack_long (register_type (gdbarch, regnum), buf);
+  return unpack_pointer (register_type (gdbarch, regnum), buf);
+}
+
+/* Implement struct dwarf_expr_context_funcs' "get_reg_value" callback.  */
+
+static struct value *
+get_reg_value (void *baton, struct type *type, int reg)
+{
+  struct frame_info *this_frame = (struct frame_info *) baton;
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  int regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, reg);
+
+  return value_from_register (type, regnum, this_frame);
 }
 
 static void
@@ -346,7 +353,8 @@ register %s (#%d) at %s"),
 
 static const struct dwarf_expr_context_funcs dwarf2_frame_ctx_funcs =
 {
-  read_reg,
+  read_addr_from_reg,
+  get_reg_value,
   read_mem,
   ctx_no_get_frame_base,
   ctx_no_get_frame_cfa,
@@ -384,7 +392,8 @@ execute_stack_op (const gdb_byte *exp, ULONGEST len, int addr_size,
   if (ctx->location == DWARF_VALUE_MEMORY)
     result = dwarf_expr_fetch_address (ctx, 0);
   else if (ctx->location == DWARF_VALUE_REGISTER)
-    result = read_reg (this_frame, value_as_long (dwarf_expr_fetch (ctx, 0)));
+    result = read_addr_from_reg (this_frame,
+				 value_as_long (dwarf_expr_fetch (ctx, 0)));
   else
     {
       /* This is actually invalid DWARF, but if we ever do run across
@@ -984,12 +993,22 @@ struct dwarf2_frame_cache
   /* The .text offset.  */
   CORE_ADDR text_offset;
 
+  /* True if we already checked whether this frame is the bottom frame
+     of a virtual tail call frame chain.  */
+  int checked_tailcall_bottom;
+
   /* If not NULL then this frame is the bottom frame of a TAILCALL_FRAME
      sequence.  If NULL then it is a normal case with no TAILCALL_FRAME
      involved.  Non-bottom frames of a virtual tail call frames chain use
      dwarf2_tailcall_frame_unwind unwinder so this field does not apply for
      them.  */
   void *tailcall_cache;
+
+  /* The number of bytes to subtract from TAILCALL_FRAME frames frame
+     base to get the SP, to simulate the return address pushed on the
+     stack.  */
+  LONGEST entry_cfa_sp_offset;
+  int entry_cfa_sp_offset_p;
 };
 
 /* A cleanup that sets a pointer to NULL.  */
@@ -1014,8 +1033,6 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   struct dwarf2_fde *fde;
   volatile struct gdb_exception ex;
   CORE_ADDR entry_pc;
-  LONGEST entry_cfa_sp_offset;
-  int entry_cfa_sp_offset_p = 0;
   const gdb_byte *instr;
 
   if (*this_cache)
@@ -1080,8 +1097,8 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
 	  && (gdbarch_dwarf2_reg_to_regnum (gdbarch, fs->regs.cfa_reg)
 	      == gdbarch_sp_regnum (gdbarch)))
 	{
-	  entry_cfa_sp_offset = fs->regs.cfa_offset;
-	  entry_cfa_sp_offset_p = 1;
+	  cache->entry_cfa_sp_offset = fs->regs.cfa_offset;
+	  cache->entry_cfa_sp_offset_p = 1;
 	}
     }
   else
@@ -1097,7 +1114,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
       switch (fs->regs.cfa_how)
 	{
 	case CFA_REG_OFFSET:
-	  cache->cfa = read_reg (this_frame, fs->regs.cfa_reg);
+	  cache->cfa = read_addr_from_reg (this_frame, fs->regs.cfa_reg);
 	  if (fs->armcc_cfa_offsets_reversed)
 	    cache->cfa -= fs->regs.cfa_offset;
 	  else
@@ -1230,13 +1247,6 @@ incomplete CFI data; unspecified registers (e.g., %s) at %s"),
     cache->undefined_retaddr = 1;
 
   do_cleanups (old_chain);
-
-  /* Try to find a virtual tail call frames chain with bottom (callee) frame
-     starting at THIS_FRAME.  */
-  dwarf2_tailcall_sniffer_first (this_frame, &cache->tailcall_cache,
-				 (entry_cfa_sp_offset_p
-				  ? &entry_cfa_sp_offset : NULL));
-
   discard_cleanups (reset_cache_cleanup);
   return cache;
 }
@@ -1282,6 +1292,16 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
     dwarf2_frame_cache (this_frame, this_cache);
   CORE_ADDR addr;
   int realnum;
+
+  /* Check whether THIS_FRAME is the bottom frame of a virtual tail
+     call frame chain.  */
+  if (!cache->checked_tailcall_bottom)
+    {
+      cache->checked_tailcall_bottom = 1;
+      dwarf2_tailcall_sniffer_first (this_frame, &cache->tailcall_cache,
+				     (cache->entry_cfa_sp_offset_p
+				      ? &cache->entry_cfa_sp_offset : NULL));
+    }
 
   /* Non-bottom frames of a virtual tail call frames chain use
      dwarf2_tailcall_frame_unwind unwinder so this code does not apply for
@@ -1408,10 +1428,6 @@ dwarf2_frame_sniffer (const struct frame_unwind *self,
 
   if (self->type != NORMAL_FRAME)
     return 0;
-
-  /* Preinitializa the cache so that TAILCALL_FRAME can find the record by
-     dwarf2_tailcall_sniffer_first.  */
-  dwarf2_frame_cache (this_frame, this_cache);
 
   return 1;
 }

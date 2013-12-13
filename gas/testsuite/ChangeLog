@@ -1,3 +1,106 @@
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* gas/bfin/bit2.s: Remove +x file mode.
+	* gas/bfin/cache2.s: Likewise.
+	* gas/bfin/control_code2.s: Likewise.
+	* gas/bfin/event2.s: Likewise.
+	* gas/bfin/flow2.s: Likewise.
+	* gas/bfin/logical2.s: Likewise.
+	* gas/bfin/move2.s: Likewise.
+	* gas/bfin/shift2.s: Likewise.
+	* gas/bfin/stack2.s: Likewise.
+	* gas/bfin/vector2.s: Likewise.
+	* gas/bfin/video2.s: Likewise.
+	* gas/epiphany/sample.s: Likewise.
+	* gas/pe/aligncomm-a.d: Likewise.
+	* gas/pe/aligncomm-a.s: Likewise.
+	* gas/pe/aligncomm-b.d: Likewise.
+	* gas/pe/aligncomm-c.d: Likewise.
+	* gas/pe/aligncomm-c.s: Likewise.
+	* gas/pe/aligncomm-d.d: Likewise.
+	* gas/pe/aligncomm-d.s: Likewise.
+	* gas/pe/pe.exp: Likewise.
+	* gas/ppc/vle-simple-4.s: Likewise.
+	* gas/ppc/vle.d: Likewise.
+	* gas/ppc/vle.s: Likewise.
+
+2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
+
+	* gas/mips/mips.exp: Consider mips-mti-elf the same as mips-sde-elf
+
+2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/msr.s: Add tests.
+	* gas/aarch64/msr.d: Update.
+
+2013-11-19  Catherine Moore  <clm@codesourcery.com>
+
+	* gas/mips/fix-pmc-rm7000-1.d: New.
+	* gas/mips/fix-pmc-rm7000-1.s: New.
+	* gas/mips/fix-pmc-rm7000-2.d: New.
+	* gas/mips/fix-pmc-rm7000-2.s: New.
+	* gas/mips/micromips@fix-pmc-rm7000-1.d: New.
+	* gas/mips/micromips@fix-pmc-rm7000-2.d: New.
+	* gas/mips/mips.exp: Run new tests.
+
+2013-11-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/avx512f-nondef.d: Updated for mingw.
+	* gas/i386/mpx-add-bnd-prefix.d: Likewise.
+	* gas/i386/x86-64-avx512f-nondef.d: Likewise.
+	* gas/i386/x86-64-mpx-add-bnd-prefix.d: Likewise.
+	* gas/i386/x86-64-mpx-addr32.d: Likewise.
+	* gas/i386/x86-64-opcode.d: Likewise.
+	* gas/i386/x86-64-sha.d: Likewise.
+
+2013-11-18  Renlin Li  <Renlin.Li@arm.com>
+
+	* gas/arm/attr-march-armv7ve.d: New test case for armv7ve.
+
+2013-11-18  Zhenqiang Chen  <zhenqiang.chen@linaro.org>
+
+	* gas/aarch64/sysreg.s: Add test.
+	* gas/aarch64/sysreg.d: Update.
+
+2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Revert
+
+	2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/diagnostic.s: Add tests.
+	* gas/aarch64/diagnostic.l: Update.
+	* gas/aarch64/tracereg-illegal.d: New file.
+	* gas/aarch64/tracereg-illegal.l: Ditto.
+	* gas/aarch64/tracereg-illegal.s: Ditto.
+	* gas/aarch64/tracereg.d: Ditto.
+	* gas/aarch64/tracereg.s: Ditto.
+
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run x86-64-mpx-branch-1 and
+	x86-64-mpx-branch-2 on 64-bit ELF targets.
+	* gas/i386/x86-64-mpx-branch-1.d: New file.
+	* gas/i386/x86-64-mpx-branch-1.s: Likewise.
+	* gas/i386/x86-64-mpx-branch-2.d: Likewise.
+	* gas/i386/x86-64-mpx-branch-2.s: Likewise.
+
+2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/diagnostic.s: Add tests.
+	* gas/aarch64/diagnostic.l: Update.
+	* gas/aarch64/tracereg-illegal.d: New file.
+	* gas/aarch64/tracereg-illegal.l: Ditto.
+	* gas/aarch64/tracereg-illegal.s: Ditto.
+	* gas/aarch64/tracereg.d: Ditto.
+	* gas/aarch64/tracereg.s: Ditto.
+
+2013-11-15  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	* gas/i386/inval-avx512f.s: Add invalid test for gather instruction
+	with default mask.
+	* gas/i386/inval-avx512f.l: Update correspondingly.
+
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/deprecated.d: New file.

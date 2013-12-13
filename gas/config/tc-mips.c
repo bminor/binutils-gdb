@@ -491,7 +491,7 @@ static int mips_32bitmode = 0;
 /* Whether the processor uses hardware interlocks to protect reads
    from the GPRs after they are loaded from memory, and thus does not
    require nops to be inserted.  This applies to instructions marked
-   INSN_LOAD_MEMORY_DELAY.  These nops are only required at MIPS ISA
+   INSN_LOAD_MEMORY.  These nops are only required at MIPS ISA
    level I and microMIPS mode instructions are always interlocked.  */
 #define gpr_interlocks                                \
   (mips_opts.isa != ISA_MIPS1                         \
@@ -864,6 +864,9 @@ static int mips_fix_vr4130;
 
 /* ...likewise -mfix-24k.  */
 static int mips_fix_24k;
+
+/* ...likewise -mfix-rm7000  */
+static int mips_fix_rm7000;
 
 /* ...likewise -mfix-cn63xxp1 */
 static bfd_boolean mips_fix_cn63xxp1;
@@ -1354,6 +1357,8 @@ enum options
     OPTION_MNO_7000_HILO_FIX,
     OPTION_FIX_24K,
     OPTION_NO_FIX_24K,
+    OPTION_FIX_RM7000,
+    OPTION_NO_FIX_RM7000,
     OPTION_FIX_LOONGSON2F_JUMP,
     OPTION_NO_FIX_LOONGSON2F_JUMP,
     OPTION_FIX_LOONGSON2F_NOP,
@@ -1469,6 +1474,8 @@ struct option md_longopts[] =
   {"mno-fix-vr4130", no_argument, NULL, OPTION_NO_FIX_VR4130},
   {"mfix-24k",    no_argument, NULL, OPTION_FIX_24K},
   {"mno-fix-24k", no_argument, NULL, OPTION_NO_FIX_24K},
+  {"mfix-rm7000",    no_argument, NULL, OPTION_FIX_RM7000},
+  {"mno-fix-rm7000", no_argument, NULL, OPTION_NO_FIX_RM7000},
   {"mfix-cn63xxp1", no_argument, NULL, OPTION_FIX_CN63XXP1},
   {"mno-fix-cn63xxp1", no_argument, NULL, OPTION_NO_FIX_CN63XXP1},
 
@@ -4389,7 +4396,7 @@ convert_reg_type (const struct mips_opcode *opcode,
 	  && (opcode->pinfo & (INSN_COPROC_MOVE_DELAY
 			       | INSN_COPROC_MEMORY_DELAY
 			       | INSN_LOAD_COPROC_DELAY
-			       | INSN_LOAD_MEMORY_DELAY
+			       | INSN_LOAD_MEMORY
 			       | INSN_STORE_MEMORY)))
 	return RTYPE_FPU | RTYPE_VEC;
       return RTYPE_FPU;
@@ -5529,7 +5536,7 @@ reg_needs_delay (unsigned int reg)
 
   prev_pinfo = history[0].insn_mo->pinfo;
   if (!mips_opts.noreorder
-      && (((prev_pinfo & INSN_LOAD_MEMORY_DELAY) && !gpr_interlocks)
+      && (((prev_pinfo & INSN_LOAD_MEMORY) && !gpr_interlocks)
 	  || ((prev_pinfo & INSN_LOAD_COPROC_DELAY) && !cop_interlocks))
       && (gpr_write_mask (&history[0]) & (1 << reg)))
     return TRUE;
@@ -5559,8 +5566,10 @@ classify_vr4120_insn (const char *name)
   return NUM_FIX_VR4120_CLASSES;
 }
 
-#define INSN_ERET  0x42000018
-#define INSN_DERET 0x4200001f
+#define INSN_ERET	0x42000018
+#define INSN_DERET	0x4200001f
+#define INSN_DMULT	0x1c
+#define INSN_DMULTU	0x1d
 
 /* Return the number of instructions that must separate INSN1 and INSN2,
    where INSN1 is the earlier instruction.  Return the worst-case value
@@ -5611,6 +5620,18 @@ insns_between (const struct mips_cl_insn *insn1,
 	}
     }
 
+  /* If we're working around PMC RM7000 errata, there must be three
+     nops between a dmult and a load instruction.  */
+  if (mips_fix_rm7000 && !mips_opts.micromips)
+    {
+      if ((insn1->insn_opcode & insn1->insn_mo->mask) == INSN_DMULT
+	  || (insn1->insn_opcode & insn1->insn_mo->mask) == INSN_DMULTU)
+	{
+	  if (pinfo2 & INSN_LOAD_MEMORY)
+	   return 3;
+	}
+    }
+
   /* If working around VR4120 errata, check for combinations that need
      a single intervening instruction.  */
   if (mips_fix_vr4120 && !mips_opts.micromips)
@@ -5633,7 +5654,7 @@ insns_between (const struct mips_cl_insn *insn1,
       /* Check for GPR or coprocessor load delays.  All such delays
 	 are on the RT register.  */
       /* Itbl support may require additional care here.  */
-      if ((!gpr_interlocks && (pinfo1 & INSN_LOAD_MEMORY_DELAY))
+      if ((!gpr_interlocks && (pinfo1 & INSN_LOAD_MEMORY))
 	  || (!cop_interlocks && (pinfo1 & INSN_LOAD_COPROC_DELAY)))
 	{
 	  if (insn2 == NULL || (gpr_read_mask (insn2) & gpr_write_mask (insn1)))
@@ -13590,6 +13611,14 @@ md_parse_option (int c, char *arg)
 
     case OPTION_NO_FIX_24K:
       mips_fix_24k = 0;
+      break;
+
+    case OPTION_FIX_RM7000:
+      mips_fix_rm7000 = 1;
+      break;
+
+    case OPTION_NO_FIX_RM7000:
+      mips_fix_rm7000 = 0;
       break;
 
     case OPTION_FIX_LOONGSON2F_JUMP:

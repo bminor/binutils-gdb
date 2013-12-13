@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "mi-getopt.h"
-#include "gdb_string.h"
+#include <string.h>
 
 /* See comments about mi_getopt and mi_getopt_silent in mi-getopt.h.
    When there is an unknown option, if ERROR_ON_UNKNOWN is true,

@@ -712,6 +712,10 @@ else
   fi
 fi
 
+# --------------------- #
+# Check for libpython.  #
+# --------------------- #
+
 dnl Utility to simplify finding libpython.
 dnl $1 = pythonX.Y
 dnl $2 = the shell variable to assign the result to
@@ -1050,6 +1054,10 @@ AC_SUBST(PYTHON_CFLAGS)
 AC_SUBST(PYTHON_CPPFLAGS)
 AC_SUBST(PYTHON_LIBS)
 
+# --------------------- #
+# Check for libmcheck.  #
+# --------------------- #
+
 # Enable -lmcheck by default (it provides cheap-enough memory mangling),
 # but turn it off if Python is enabled with threads, since -lmcheck is
 # not thread safe (http://sourceware.org/bugzilla/show_bug.cgi?id=9939),
@@ -1072,26 +1080,17 @@ fi
 # Checks for header files.  #
 # ------------------------- #
 
-AC_HEADER_DIRENT
 AC_HEADER_STDC
 # elf_hp.h is for HP/UX 64-bit shared library support.
-AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h sys/socket.h proc_service.h \
-                  thread_db.h signal.h stddef.h \
-		  stdlib.h string.h memory.h strings.h sys/fault.h \
+AC_CHECK_HEADERS([nlist.h machine/reg.h poll.h sys/poll.h proc_service.h \
+                  thread_db.h \
+		  sys/fault.h \
 		  sys/file.h sys/filio.h sys/ioctl.h sys/param.h \
 		  sys/resource.h sys/procfs.h sys/ptrace.h ptrace.h \
 		  sys/reg.h sys/debugreg.h sys/select.h sys/syscall.h \
-		  sys/types.h sys/wait.h wait.h termios.h termio.h \
-		  sgtty.h unistd.h elf_hp.h locale.h \
-		  dlfcn.h sys/un.h linux/perf_event.h])
-AC_CHECK_HEADERS(link.h, [], [],
-[#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#if HAVE_NLIST_H
-# include <nlist.h>
-#endif
-])
+		  termios.h termio.h \
+		  sgtty.h elf_hp.h \
+		  dlfcn.h])
 AC_CHECK_HEADERS(sys/proc.h, [], [],
 [#if HAVE_SYS_PARAM_H
 # include <sys/param.h>
@@ -1125,8 +1124,7 @@ AC_CHECK_HEADERS(term.h, [], [],
 # Checks for declarations.  #
 # ------------------------- #
 
-AC_CHECK_DECLS([free, malloc, realloc, strerror, strstr, getopt,
-                snprintf, vsnprintf])
+AC_CHECK_DECLS([free, malloc, realloc, snprintf])
 AM_LC_MESSAGES
 
 # ----------------------- #
@@ -1163,18 +1161,17 @@ AC_FUNC_VFORK
 AC_CHECK_FUNCS([canonicalize_file_name realpath getrusage getuid getgid \
 		pipe poll pread pread64 pwrite readlink resize_term \
 		sbrk setpgid setpgrp setsid \
-		sigaction sigprocmask sigsetmask socketpair syscall \
+		sigaction sigprocmask sigsetmask socketpair \
 		ttrace wborder wresize setlocale iconvlist libiconvlist btowc \
 		setrlimit getrlimit posix_madvise waitpid lstat \
-		fdwalk pipe2 ptrace64])
+		ptrace64])
 AM_LANGINFO_CODESET
+GDB_AC_COMMON
 
 # Check the return and argument types of ptrace.  No canned test for
 # this, so roll our own.
 gdb_ptrace_headers='
-#if HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
+#include <sys/types.h>
 #if HAVE_SYS_PTRACE_H
 # include <sys/ptrace.h>
 #endif
@@ -1397,13 +1394,11 @@ if test "${target}" = "${host}"; then
   case "${host}" in
   *-*-sysv4.2* | *-*-sysv5* )
       AC_DEFINE(NEW_PROC_API, 1,
-      [Define if you want to use new multi-fd /proc interface
-       (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros).])
+      [Define if you want to use new multi-fd /proc interface.])
       ;;
   *-*-solaris2.[[6789]] | *-*-solaris2.1[[0-9]]*)
       AC_DEFINE(NEW_PROC_API, 1,
-      [Define if you want to use new multi-fd /proc interface
-       (replaces HAVE_MULTIPLE_PROC_FDS as well as other macros).])
+      [Define if you want to use new multi-fd /proc interface.])
       ;;
   mips-sgi-irix5*)
       # Work around <sys/proc.h> needing _KMEMUSER problem on IRIX 5.
@@ -1415,14 +1410,11 @@ if test "${target}" = "${host}"; then
 fi
 
 if test "$ac_cv_header_sys_procfs_h" = yes; then
-  BFD_HAVE_SYS_PROCFS_TYPE(pstatus_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prrun_t)
   BFD_HAVE_SYS_PROCFS_TYPE(gregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(fpregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prfpregset_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prgregset32_t)
-  BFD_HAVE_SYS_PROCFS_TYPE(prfpregset32_t)
   BFD_HAVE_SYS_PROCFS_TYPE(lwpid_t)
   BFD_HAVE_SYS_PROCFS_TYPE(psaddr_t)
   BFD_HAVE_SYS_PROCFS_TYPE(prsysent_t)
@@ -1456,99 +1448,6 @@ if test "$ac_cv_header_sys_procfs_h" = yes; then
       AC_DEFINE(PRFPREGSET_T_BROKEN, 1,
       [Define if the prfpregset_t type is broken.])
     fi
-  fi
-
-  dnl Check for PIOCSET ioctl entry 
-
-  AC_MSG_CHECKING(for PIOCSET ioctl entry in sys/procfs.h)
-  AC_CACHE_VAL(gdb_cv_have_procfs_piocset,
-  [AC_TRY_COMPILE([#include <unistd.h>
-#include <sys/types.h>
-#include <sys/procfs.h>
-], [
-    int dummy;;
-    dummy = ioctl(0, PIOCSET, &dummy);
-  ],
-  gdb_cv_have_procfs_piocset=yes, gdb_cv_have_procfs_piocset=no)])
-  AC_MSG_RESULT($gdb_cv_have_procfs_piocset)
-  if test $gdb_cv_have_procfs_piocset = yes; then
-    AC_DEFINE(HAVE_PROCFS_PIOCSET, 1,
-    [Define if ioctl argument PIOCSET is available.])
-  fi
-fi
-
-dnl For native ports (host == target), check to see what kind of
-dnl legacy link.h support is needed.  (See solib-legacy.c.)
-if test ${host} = ${target} ; then
-  dnl Check for struct link_map with l_ members which are indicative
-  dnl of SVR4-like shared libraries
-
-  AC_MSG_CHECKING(for member l_addr in struct link_map)
-  AC_CACHE_VAL(gdb_cv_have_struct_link_map_with_l_members,
-    [AC_TRY_COMPILE([#include <link.h>],
-                    [struct link_map lm; (void) lm.l_addr;],
-                    gdb_cv_have_struct_link_map_with_l_members=yes,
-                    gdb_cv_have_struct_link_map_with_l_members=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_link_map_with_l_members)
-  if test $gdb_cv_have_struct_link_map_with_l_members = yes; then
-    AC_DEFINE(HAVE_STRUCT_LINK_MAP_WITH_L_MEMBERS,1,
-    [Define if <link.h> exists and defines struct link_map which has
-     members with an ``l_'' prefix.  (For Solaris, SVR4, and
-     SVR4-like systems.)])
-  fi
-
-  dnl Check for struct link_map with lm_ members which are indicative
-  dnl of SunOS-like shared libraries
-
-  AC_MSG_CHECKING(for member lm_addr in struct link_map)
-  AC_CACHE_VAL(gdb_cv_have_struct_link_map_with_lm_members,
-    [AC_TRY_COMPILE([#include <sys/types.h>
-#include <link.h>],
-                    [struct link_map lm; (void) lm.lm_addr;],
-                    gdb_cv_have_struct_link_map_with_lm_members=yes,
-                    gdb_cv_have_struct_link_map_with_lm_members=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_link_map_with_lm_members)
-  if test $gdb_cv_have_struct_link_map_with_lm_members = yes; then
-    AC_DEFINE(HAVE_STRUCT_LINK_MAP_WITH_LM_MEMBERS, 1,
-    [Define if <link.h> exists and defines struct link_map which has
-     members with an ``lm_'' prefix.  (For SunOS.)])
-  fi
-
-  dnl Check for struct so_map with som_ members which are found on 
-  dnl some *BSD systems.
-
-  AC_MSG_CHECKING(for member som_addr in struct so_map)
-  AC_CACHE_VAL(gdb_cv_have_struct_so_map_with_som_members,
-    [AC_TRY_COMPILE([#include <sys/types.h>
-#ifdef HAVE_NLIST_H
-#include <nlist.h>
-#endif
-#include <link.h>],
-                    [struct so_map lm; (void) lm.som_addr;],
-                    gdb_cv_have_struct_so_map_with_som_members=yes,
-                    gdb_cv_have_struct_so_map_with_som_members=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_so_map_with_som_members)
-  if test $gdb_cv_have_struct_so_map_with_som_members = yes; then
-    AC_DEFINE(HAVE_STRUCT_SO_MAP_WITH_SOM_MEMBERS, 1,
-    [Define if <link.h> exists and defines a struct so_map which has
-     members with an ``som_'' prefix.  (Found on older *BSD systems.)])
-  fi
-
-  dnl Check for struct link_map32 type, which allows a 64-bit Solaris
-  dnl debugger to debug a 32-bit Solaris app with 32-bit shared libraries.
-
-  AC_MSG_CHECKING(for struct link_map32 in sys/link.h)
-  AC_CACHE_VAL(gdb_cv_have_struct_link_map32, 
-    [AC_TRY_COMPILE([#define _SYSCALL32
-#include <sys/link.h>], [struct link_map32 l;],
-     gdb_cv_have_struct_link_map32=yes,
-     gdb_cv_have_struct_link_map32=no)])
-  AC_MSG_RESULT($gdb_cv_have_struct_link_map32)
-  if test $gdb_cv_have_struct_link_map32 = yes; then
-    AC_DEFINE(HAVE_STRUCT_LINK_MAP32, 1,
-    [Define if <sys/link.h> has struct link_map32])
-    AC_DEFINE(_SYSCALL32, 1,
-    [Define if <sys/link.h> has link_map32 (solaris sparc-64 target)])
   fi
 fi
 
@@ -1842,8 +1741,10 @@ if test "x$ac_cv_header_sys_syscall_h" = "xyes"; then
    )
 fi
 dnl See if we can issue tkill syscall.
-if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes" && test "x$ac_cv_func_syscall" = "xyes"; then
-  AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
+if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes"; then
+  AC_CHECK_FUNC(syscall,
+    AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
+  )
 fi
 
 dnl Check if we can disable the virtual address space randomization.
@@ -1984,7 +1885,7 @@ AC_SUBST(WERROR_CFLAGS)
 
 # In the Cygwin environment, we need some additional flags.
 AC_CACHE_CHECK([for cygwin], gdb_cv_os_cygwin,
-[AC_EGREP_CPP(lose, [
+[AC_EGREP_CPP(^lose$, [
 #if defined (__CYGWIN__) || defined (__CYGWIN32__)
 lose
 #endif],[gdb_cv_os_cygwin=yes],[gdb_cv_os_cygwin=no])])

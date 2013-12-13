@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -30,7 +30,7 @@
 #include "target.h"
 #include "gdbcore.h"
 #include "dis-asm.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "completer.h"
 #include "exceptions.h"
 #include "observer.h"
@@ -276,6 +276,18 @@ read_stack (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
     memory_error (status, memaddr);
 }
 
+/* Same as target_read_code, but report an error if can't read.  */
+
+void
+read_code (CORE_ADDR memaddr, gdb_byte *myaddr, ssize_t len)
+{
+  int status;
+
+  status = target_read_code (memaddr, myaddr, len);
+  if (status != 0)
+    memory_error (status, memaddr);
+}
+
 /* Argument / return result struct for use with
    do_captured_read_memory_integer().  MEMADDR and LEN are filled in
    by gdb_read_memory_integer().  RESULT is the contents that were
@@ -351,6 +363,26 @@ read_memory_unsigned_integer (CORE_ADDR memaddr, int len,
   gdb_byte buf[sizeof (ULONGEST)];
 
   read_memory (memaddr, buf, len);
+  return extract_unsigned_integer (buf, len, byte_order);
+}
+
+LONGEST
+read_code_integer (CORE_ADDR memaddr, int len,
+		   enum bfd_endian byte_order)
+{
+  gdb_byte buf[sizeof (LONGEST)];
+
+  read_code (memaddr, buf, len);
+  return extract_signed_integer (buf, len, byte_order);
+}
+
+ULONGEST
+read_code_unsigned_integer (CORE_ADDR memaddr, int len,
+			    enum bfd_endian byte_order)
+{
+  gdb_byte buf[sizeof (ULONGEST)];
+
+  read_code (memaddr, buf, len);
   return extract_unsigned_integer (buf, len, byte_order);
 }
 

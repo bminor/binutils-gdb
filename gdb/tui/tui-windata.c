@@ -26,7 +26,7 @@
 #include "tui/tui-regs.h"
 #include "tui/tui-windata.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_curses.h"
 
 

@@ -45,6 +45,7 @@
 @dircategory Software development
 @direntry
 * Gdb: (gdb).                     The GNU debugger.
+* gdbserver: (gdb) Server.        The GNU debugging server.
 @end direntry
 
 @copying
@@ -4107,6 +4108,9 @@ Stop when @var{event} occurs.  @var{event} can be any of the following:
 @item throw @r{[}@var{regexp}@r{]}
 @itemx rethrow @r{[}@var{regexp}@r{]}
 @itemx catch @r{[}@var{regexp}@r{]}
+@kindex catch throw
+@kindex catch rethrow
+@kindex catch catch
 @cindex stop on C@t{++} exceptions
 The throwing, re-throwing, or catching of a C@t{++} exception.
 
@@ -4164,6 +4168,7 @@ You cannot install an exception handler interactively.
 @end itemize
 
 @item exception
+@kindex catch exception
 @cindex Ada exception catching
 @cindex catch Ada exceptions
 An Ada exception being raised.  If an exception name is specified
@@ -4181,18 +4186,22 @@ the command to use to catch such exceptions is @kbd{catch exception
 Pck.Constraint_Error}.
 
 @item exception unhandled
+@kindex catch exception unhandled
 An exception that was raised but is not handled by the program.
 
 @item assert
+@kindex catch assert
 A failed Ada assertion.
 
 @item exec
+@kindex catch exec
 @cindex break on fork/exec
 A call to @code{exec}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
 @item syscall
 @itemx syscall @r{[}@var{name} @r{|} @var{number}@r{]} @dots{} 
+@kindex catch syscall
 @cindex break on a system call.
 A call to or return from a system call, a.k.a.@: @dfn{syscall}.  A
 syscall is a mechanism for application programs to request a service
@@ -4323,20 +4332,25 @@ Catchpoint 1 (syscall(s) 252)
 Again, in this case @value{GDBN} would not be able to display syscall's names.
 
 @item fork
+@kindex catch fork
 A call to @code{fork}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
 @item vfork
+@kindex catch vfork
 A call to @code{vfork}.  This is currently only available for HP-UX
 and @sc{gnu}/Linux.
 
 @item load @r{[}regexp@r{]}
 @itemx unload @r{[}regexp@r{]}
+@kindex catch load
+@kindex catch unload
 The loading or unloading of a shared library.  If @var{regexp} is
 given, then the catchpoint will stop only if the regular expression
 matches one of the affected libraries.
 
 @item signal @r{[}@var{signal}@dots{} @r{|} @samp{all}@r{]}
+@kindex catch signal
 The delivery of a signal.
 
 With no arguments, this catchpoint will catch any signal that is not
@@ -4364,6 +4378,7 @@ commands.
 @end table
 
 @item tcatch @var{event}
+@kindex tcatch
 Set a catchpoint that is enabled only for one stop.  The catchpoint is
 automatically deleted after the first time the event is caught.
 
@@ -8066,7 +8081,7 @@ being passed the type of @var{arg} as the argument.
 * Core File Generation::        Cause a program dump its core
 * Character Sets::              Debugging programs that use a different
                                 character set than GDB does
-* Caching Remote Data::         Data caching for remote targets
+* Caching Target Data::         Data caching for targets
 * Searching Memory::            Searching memory for a sequence of bytes
 @end menu
 
@@ -8324,11 +8339,24 @@ $4 = 0
 @end smallexample
 
 @cindex C@t{++} scope resolution
-These uses of @samp{::} are very rarely in conflict with the very similar
-use of the same notation in C@t{++}.  @value{GDBN} also supports use of the C@t{++}
-scope resolution operator in @value{GDBN} expressions.
-@c FIXME: Um, so what happens in one of those rare cases where it's in
-@c conflict??  --mew
+These uses of @samp{::} are very rarely in conflict with the very
+similar use of the same notation in C@t{++}.  When they are in
+conflict, the C@t{++} meaning takes precedence; however, this can be
+overridden by quoting the file or function name with single quotes.
+
+For example, suppose the program is stopped in a method of a class
+that has a field named @code{includefile}, and there is also an
+include file named @file{includefile} that defines a variable,
+@code{some_global}.
+
+@smallexample
+(@value{GDBP}) p includefile
+$1 = 23
+(@value{GDBP}) p includefile::some_global
+A syntax error in expression, near `'.
+(@value{GDBP}) p 'includefile'::some_global
+$2 = 27
+@end smallexample
 
 @cindex wrong values
 @cindex variable values, wrong
@@ -10810,25 +10838,29 @@ $10 = 78 '+'
 The @sc{ibm1047} character set uses the number 78 to encode the @samp{+}
 character.
 
-@node Caching Remote Data
-@section Caching Data of Remote Targets
-@cindex caching data of remote targets
+@node Caching Target Data
+@section Caching Data of Targets
+@cindex caching data of targets
 
-@value{GDBN} caches data exchanged between the debugger and a
-remote target (@pxref{Remote Debugging}).  Such caching generally improves
-performance, because it reduces the overhead of the remote protocol by
-bundling memory reads and writes into large chunks.  Unfortunately, simply
-caching everything would lead to incorrect results, since @value{GDBN} 
-does not necessarily know anything about volatile values, memory-mapped I/O
-addresses, etc.  Furthermore, in non-stop mode (@pxref{Non-Stop Mode})
-memory can be changed @emph{while} a gdb command is executing.
+@value{GDBN} caches data exchanged between the debugger and a target.
+Each cache is associated with the address space of the inferior.
+@xref{Inferiors and Programs}, about inferior and address space.
+Such caching generally improves performance in remote debugging
+(@pxref{Remote Debugging}), because it reduces the overhead of the
+remote protocol by bundling memory reads and writes into large chunks.
+Unfortunately, simply caching everything would lead to incorrect results,
+since @value{GDBN} does not necessarily know anything about volatile
+values, memory-mapped I/O addresses, etc.  Furthermore, in non-stop mode
+(@pxref{Non-Stop Mode}) memory can be changed @emph{while} a gdb command
+is executing.
 Therefore, by default, @value{GDBN} only caches data
 known to be on the stack@footnote{In non-stop mode, it is moderately
 rare for a running thread to modify the stack of a stopped thread
 in a way that would interfere with a backtrace, and caching of
-stack reads provides a significant speed up of remote backtraces.}.
+stack reads provides a significant speed up of remote backtraces.} or
+in the code segment.
 Other regions of memory can be explicitly marked as
-cacheable; see @pxref{Memory Region Attributes}.
+cacheable; @pxref{Memory Region Attributes}.
 
 @table @code
 @kindex set remotecache
@@ -10844,20 +10876,32 @@ Show the current state of the obsolete remotecache flag.
 @kindex set stack-cache
 @item set stack-cache on
 @itemx set stack-cache off
-Enable or disable caching of stack accesses.  When @code{ON}, use
-caching.  By default, this option is @code{ON}.
+Enable or disable caching of stack accesses.  When @code{on}, use
+caching.  By default, this option is @code{on}.
 
 @kindex show stack-cache
 @item show stack-cache
 Show the current state of data caching for memory accesses.
 
+@kindex set code-cache
+@item set code-cache on
+@itemx set code-cache off
+Enable or disable caching of code segment accesses.  When @code{on},
+use caching.  By default, this option is @code{on}.  This improves
+performance of disassembly in remote debugging.
+
+@kindex show code-cache
+@item show code-cache
+Show the current state of target memory cache for code segment
+accesses.
+
 @kindex info dcache
 @item info dcache @r{[}line@r{]}
-Print the information about the data cache performance.  The
-information displayed includes the dcache width and depth, and for
-each cache line, its number, address, and how many times it was
-referenced.  This command is useful for debugging the data cache
-operation.
+Print the information about the performance of data cache of the
+current inferior's address space.  The information displayed
+includes the dcache width and depth, and for each cache line, its
+number, address, and how many times it was referenced.  This
+command is useful for debugging the data cache operation.
 
 If a line number is specified, the contents of that line will be
 printed in hex.
@@ -10875,11 +10919,11 @@ Must be a power of 2.
 
 @item show dcache size
 @kindex show dcache size
-Show maximum number of dcache entries.  See also @ref{Caching Remote Data, info dcache}.
+Show maximum number of dcache entries.  @xref{Caching Target Data, info dcache}.
 
 @item show dcache line-size
 @kindex show dcache line-size
-Show default size of dcache lines.  See also @ref{Caching Remote Data, info dcache}.
+Show default size of dcache lines.
 
 @end table
 
@@ -13340,6 +13384,7 @@ working language, and also what language source files were written in.
 
 @table @code
 @item show language
+@anchor{show language}
 @kindex show language
 Display the current working language.  This is the
 language you can use with commands such as @code{print} to
@@ -14965,6 +15010,7 @@ to be difficult.
 * Omissions from Ada::          Restrictions on the Ada expression syntax.
 * Additions to Ada::            Extensions of the Ada expression syntax.
 * Stopping Before Main Program:: Debugging the program during elaboration.
+* Ada Exceptions::              Ada Exceptions
 * Ada Tasks::                   Listing and setting breakpoints in tasks.
 * Ada Tasks and Core Files::    Tasking Support when Debugging Core Files
 * Ravenscar Profile::           Tasking Support when using the Ravenscar
@@ -15288,6 +15334,42 @@ Manual, the elaboration code is invoked from a procedure called
 @code{adainit}.  To run your program up to the beginning of
 elaboration, simply use the following two commands:
 @code{tbreak adainit} and @code{run}.
+
+@node Ada Exceptions
+@subsubsection Ada Exceptions
+
+A command is provided to list all Ada exceptions:
+
+@table @code
+@kindex info exceptions
+@item info exceptions
+@itemx info exceptions @var{regexp}
+The @code{info exceptions} command allows you to list all Ada exceptions
+defined within the program being debugged, as well as their addresses.
+With a regular expression, @var{regexp}, as argument, only those exceptions
+whose names match @var{regexp} are listed.
+@end table
+
+Below is a small example, showing how the command can be used, first
+without argument, and next with a regular expression passed as an
+argument.
+
+@smallexample
+(@value{GDBP}) info exceptions
+All defined Ada exceptions:
+constraint_error: 0x613da0
+program_error: 0x613d20
+storage_error: 0x613ce0
+tasking_error: 0x613ca0
+const.aint_global_e: 0x613b00
+(@value{GDBP}) info exceptions const.aint
+All Ada exceptions matching regular expression "const.aint":
+constraint_error: 0x613da0
+const.aint_global_e: 0x613b00
+@end smallexample
+
+It is also possible to ask @value{GDBN} to stop your program's execution
+when an exception is raised.  For more details, see @ref{Set Catchpoints}.
 
 @node Ada Tasks
 @subsubsection Extensions for Ada Tasks
@@ -21311,6 +21393,39 @@ Show the current setting of the convention to return @code{struct}s
 from functions.
 @end table
 
+@subsubsection Intel(R) @dfn{Memory Protection Extensions} (MPX).
+@cindex Intel(R) Memory Protection Extensions (MPX).
+
+Memory Protection Extension (MPX) adds the bound registers @samp{BND0}
+@footnote{The register named with capital letters represent the architecture
+registers.} through @samp{BND3}.  Bound registers store a pair of 64-bit values
+which are the lower bound and upper bound.  Bounds are effective addresses or
+memory locations.  The upper bounds are architecturally represented in 1's
+complement form.  A bound having lower bound = 0, and upper bound = 0
+(1's complement of all bits set) will allow access to the entire address space.
+
+@samp{BND0} through @samp{BND3} are represented in @value{GDBN} as @samp{bnd0raw}
+through @samp{bnd3raw}.  Pseudo registers @samp{bnd0} through @samp{bnd3}
+display the upper bound performing the complement of one operation on the
+upper bound value, i.e.@ when upper bound in @samp{bnd0raw} is 0 in the
+@value{GDBN} @samp{bnd0} it will be @code{0xfff@dots{}}.  In this sense it
+can also be noted that the upper bounds are inclusive.
+
+As an example, assume that the register BND0 holds bounds for a pointer having
+access allowed for the range between 0x32 and 0x71.  The values present on
+bnd0raw and bnd registers are presented as follows:
+
+@smallexample
+	bnd0raw = @{0x32, 0xffffffff8e@}
+	bnd0 = @{lbound = 0x32, ubound = 0x71@} : size 64
+@end smallexample
+
+This way the raw value can be accessed via bnd0raw@dots{}bnd3raw.  Any
+change on bnd0@dots{}bnd3 or bnd0raw@dots{}bnd3raw is reflect on its
+counterpart.  When the bnd0@dots{}bnd3 registers are displayed via
+Python, the display includes the memory size, in bits, accessible to
+the pointer.
+
 @node Alpha
 @subsection Alpha
 
@@ -22609,7 +22724,9 @@ Show the current state of DWARF2 DIE debugging.
 @item set debug dwarf2-read
 @cindex DWARF2 Reading
 Turns on or off display of debugging messages related to reading
-DWARF debug info.  The default is off.
+DWARF debug info.  The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
 @item show debug dwarf2-read
 Show the current state of DWARF2 reader debugging.
 @item set debug displaced
@@ -22731,7 +22848,9 @@ Show the current state of symbol file debugging messages.
 @item set debug symtab-create
 @cindex symbol table creation
 Turns on or off display of debugging messages related to symbol table creation.
-The default is off.
+The default is 0 (off).
+A value of 1 provides basic information.
+A value greater than 1 provides more verbose information.
 @item show debug symtab-create
 Show the current state of symbol table creation debugging.
 @item set debug target
@@ -23483,6 +23602,7 @@ optional arguments while skipping others.  Example:
 * Blocks In Python::            Accessing blocks from Python.
 * Symbols In Python::           Python representation of symbols.
 * Symbol Tables In Python::     Python representation of symbol tables.
+* Line Tables In Python::       Python representation of line tables.
 * Breakpoints In Python::       Manipulating breakpoints using Python.
 * Finish Breakpoints in Python:: Setting Breakpoints on function return
                                 using Python.
@@ -23865,7 +23985,17 @@ can access its @code{foo} element with:
 bar = some_val['foo']
 @end smallexample
 
-Again, @code{bar} will also be a @code{gdb.Value} object.
+@cindex getting structure elements using gdb.Field objects as subscripts
+Again, @code{bar} will also be a @code{gdb.Value} object.  Structure
+elements can also be accessed by using @code{gdb.Field} objects as
+subscripts (@pxref{Types In Python}, for more information on
+@code{gdb.Field} objects).  For example, if @code{foo_field} is a
+@code{gdb.Field} object corresponding to element @code{foo} of the above
+structure, then @code{bar} can also be accessed as follows:
+
+@smallexample
+bar = some_val[foo_field]
+@end smallexample
 
 A @code{gdb.Value} that represents a function can be executed via
 inferior function call.  Any arguments provided to the call must match
@@ -24247,6 +24377,10 @@ this will be zero; in this case the field's size is given by its type.
 @item type
 The type of the field.  This is usually an instance of @code{Type},
 but it can be @code{None} in some situations.
+
+@item parent_type
+The type which contains this field.  This is an instance of
+@code{gdb.Type}.
 @end table
 @end defun
 
@@ -26011,6 +26145,13 @@ command names.
 @item gdb.COMPLETE_SYMBOL
 This constant means that completion should be done using symbol names
 as the source.
+
+@findex COMPLETE_EXPRESSION
+@findex gdb.COMPLETE_EXPRESSION
+@item gdb.COMPLETE_EXPRESSION
+This constant means that completion should be done on expressions.
+Often this means completing on symbol names, but some language
+parsers also have support for completing on field names.
 @end table
 
 The following code snippet shows how a trivial CLI command can be
@@ -26477,7 +26618,9 @@ function to a string. The value can be one of:
 No particular reason (older frames should be available).
 
 @item gdb.FRAME_UNWIND_NULL_ID
-The previous frame's analyzer returns an invalid result.
+The previous frame's analyzer returns an invalid result.  This is no
+longer used by @value{GDBN}, and is kept only for backward
+compatibility.
 
 @item gdb.FRAME_UNWIND_OUTERMOST
 This frame is the outermost.
@@ -27016,6 +27159,89 @@ Return the static block of the underlying symbol table.
 @xref{Blocks In Python}.
 @end defun
 
+@defun Symtab.linetable ()
+Return the line table associated with the symbol table.
+@xref{Line Tables In Python}.
+@end defun
+
+@node Line Tables In Python
+@subsubsection Manipulating line tables using Python
+
+@cindex line tables in python
+@tindex gdb.LineTable
+
+Python code can request and inspect line table information from a
+symbol table that is loaded in @value{GDBN}.  A line table is a
+mapping of source lines to their executable locations in memory.  To
+acquire the line table information for a particular symbol table, use
+the @code{linetable} function (@pxref{Symbol Tables In Python}).
+
+A @code{gdb.LineTable} is iterable.  The iterator returns
+@code{LineTableEntry} objects that correspond to the source line and
+address for each line table entry.  @code{LineTableEntry} objects have
+the following attributes:
+
+@defvar LineTableEntry.line
+The source line number for this line table entry.  This number
+corresponds to the actual line of source.  This attribute is not
+writable.
+@end defvar
+
+@defvar LineTableEntry.pc
+The address that is associated with the line table entry where the
+executable code for that source line resides in memory.  This
+attribute is not writable.
+@end defvar
+
+As there can be multiple addresses for a single source line, you may
+receive multiple @code{LineTableEntry} objects with matching
+@code{line} attributes, but with different @code{pc} attributes.  The
+iterator is sorted in ascending @code{pc} order.  Here is a small
+example illustrating iterating over a line table.
+
+@smallexample
+symtab = gdb.selected_frame().find_sal().symtab
+linetable = symtab.linetable()
+for line in linetable:
+   print "Line: "+str(line.line)+" Address: "+hex(line.pc)
+@end smallexample
+
+This will have the following output:
+
+@smallexample
+Line: 33 Address: 0x4005c8L
+Line: 37 Address: 0x4005caL
+Line: 39 Address: 0x4005d2L
+Line: 40 Address: 0x4005f8L
+Line: 42 Address: 0x4005ffL
+Line: 44 Address: 0x400608L
+Line: 42 Address: 0x40060cL
+Line: 45 Address: 0x400615L
+@end smallexample
+
+In addition to being able to iterate over a @code{LineTable}, it also
+has the following direct access methods:
+
+@defun LineTable.line (line)
+Return a Python @code{Tuple} of @code{LineTableEntry} objects for any
+entries in the line table for the given @var{line}.  @var{line} refers
+to the source code line.  If there are no entries for that source code
+@var{line}, the Python @code{None} is returned.
+@end defun
+
+@defun LineTable.has_line (line)
+Return a Python @code{Boolean} indicating whether there is an entry in
+the line table for this source line.  Return @code{True} if an entry
+is found, or @code{False} if not.
+@end defun
+
+@defun LineTable.source_lines ()
+Return a Python @code{List} of the source line numbers in the symbol
+table.  Only lines with executable code locations are returned.  The
+contents of the @code{List} will just be the source line entries
+represented as Python @code{Long} values.
+@end defun
+
 @node Breakpoints In Python
 @subsubsection Manipulating breakpoints using Python
 
@@ -27025,28 +27251,33 @@ Return the static block of the underlying symbol table.
 Python code can manipulate breakpoints via the @code{gdb.Breakpoint}
 class.
 
-@defun Breakpoint.__init__ (spec @r{[}, type @r{[}, wp_class @r{[},internal@r{]]]})
-Create a new breakpoint.  @var{spec} is a string naming the
-location of the breakpoint, or an expression that defines a
-watchpoint.  The contents can be any location recognized by the
-@code{break} command, or in the case of a watchpoint, by the @code{watch}
-command.  The optional @var{type} denotes the breakpoint to create
-from the types defined later in this chapter.  This argument can be
-either: @code{gdb.BP_BREAKPOINT} or @code{gdb.BP_WATCHPOINT}.  @var{type}
-defaults to @code{gdb.BP_BREAKPOINT}.  The optional @var{internal} argument
-allows the breakpoint to become invisible to the user.  The breakpoint
-will neither be reported when created, nor will it be listed in the
-output from @code{info breakpoints} (but will be listed with the
-@code{maint info breakpoints} command).  The optional @var{wp_class}
-argument defines the class of watchpoint to create, if @var{type} is
-@code{gdb.BP_WATCHPOINT}.  If a watchpoint class is not provided, it is
-assumed to be a @code{gdb.WP_WRITE} class.
+@defun Breakpoint.__init__ (spec @r{[}, type @r{[}, wp_class @r{[},internal @r{[},temporary@r{]]]]})
+Create a new breakpoint.  @var{spec} is a string naming the location
+of the breakpoint, or an expression that defines a watchpoint.  The
+contents can be any location recognized by the @code{break} command,
+or in the case of a watchpoint, by the @code{watch} command.  The
+optional @var{type} denotes the breakpoint to create from the types
+defined later in this chapter.  This argument can be either:
+@code{gdb.BP_BREAKPOINT} or @code{gdb.BP_WATCHPOINT}.  @var{type}
+defaults to @code{gdb.BP_BREAKPOINT}.  The optional @var{internal}
+argument allows the breakpoint to become invisible to the user.  The
+breakpoint will neither be reported when created, nor will it be
+listed in the output from @code{info breakpoints} (but will be listed
+with the @code{maint info breakpoints} command).  The optional
+@var{temporary} argument makes the breakpoint a temporary breakpoint.
+Temporary breakpoints are deleted after they have been hit.  Any
+further access to the Python breakpoint after it has been hit will
+result in a runtime error (as that breakpoint has now been
+automatically deleted).  The optional @var{wp_class} argument defines
+the class of watchpoint to create, if @var{type} is
+@code{gdb.BP_WATCHPOINT}.  If a watchpoint class is not provided, it
+is assumed to be a @code{gdb.WP_WRITE} class.
 @end defun
 
 @defun Breakpoint.stop (self)
 The @code{gdb.Breakpoint} class can be sub-classed and, in
 particular, you may choose to implement the @code{stop} method.
-If this method is defined as a sub-class of @code{gdb.Breakpoint},
+If this method is defined in a sub-class of @code{gdb.Breakpoint},
 it will be called when the inferior reaches any location of a
 breakpoint which instantiates that sub-class.  If the method returns
 @code{True}, the inferior will be stopped at the location of the
@@ -27159,6 +27390,16 @@ writable.
 This attribute tells whether the breakpoint is visible to the user
 when set, or when the @samp{info breakpoints} command is run.  This
 attribute is not writable.
+@end defvar
+
+@defvar Breakpoint.temporary
+This attribute indicates whether the breakpoint was created as a
+temporary breakpoint.  Temporary breakpoints are automatically deleted
+after that breakpoint has been hit.  Access to this attribute, and all
+other attributes and functions other than the @code{is_valid}
+function, will result in an error after the breakpoint has been hit
+(as it has been automatically deleted).  This attribute is not
+writable.
 @end defvar
 
 The available types are represented by constants defined in the @code{gdb}
@@ -28603,6 +28844,7 @@ may repeat one or more times.
 @end ignore
 * GDB/MI Target Manipulation::
 * GDB/MI File Transfer Commands::
+* GDB/MI Ada Exceptions Commands::
 * GDB/MI Miscellaneous Commands::
 @end menu
 
@@ -28668,6 +28910,8 @@ the user interface.
 @node Context management
 @subsection Context management
 
+@subsubsection Threads and Frames
+
 In most cases when @value{GDBN} accesses the target, this access is
 done in context of a specific thread and frame (@pxref{Frames}).
 Often, even when accessing global data, the target requires that a thread
@@ -28717,6 +28961,25 @@ problematic commands, or explicitly add @code{-thread-select} for
 all subsequent commands.  No frontend is known to do this exactly
 right, so it is suggested to just always pass the @samp{--thread} and
 @samp{--frame} options.
+
+@subsubsection Language
+
+The execution of several commands depends on which language is selected.
+By default, the current language (@pxref{show language}) is used.
+But for commands known to be language-sensitive, it is recommended
+to use the @samp{--language} option.  This option takes one argument,
+which is the name of the language to use while executing the command.
+For instance:
+
+@smallexample
+-data-evaluate-expression --language c "sizeof (void*)"
+^done,value="4"
+(gdb) 
+@end smallexample
+
+The valid language names are the same names accepted by the
+@samp{set language} command (@pxref{Manually}), excluding @samp{auto},
+@samp{local} or @samp{unknown}.
 
 @node Asynchronous and non-stop modes
 @subsection Asynchronous command execution and non-stop mode
@@ -29132,10 +29395,19 @@ which threads are resumed.
 @findex ^connected
 @value{GDBN} has connected to a remote target.
 
-@item "^error" "," @var{c-string}
+@item "^error" "," "msg=" @var{c-string} [ "," "code=" @var{c-string} ]
 @findex ^error
-The operation failed.  The @code{@var{c-string}} contains the corresponding
-error message.
+The operation failed.  The @code{msg=@var{c-string}} variable contains
+the corresponding error message.
+
+If present, the @code{code=@var{c-string}} variable provides an error
+code on which consumers can rely on to detect the corresponding
+error condition.  At present, only one error code is defined:
+
+@table @samp
+@item "undefined-command"
+Indicates that the command causing the error does not exist.
+@end table
 
 @item "^exit"
 @findex ^exit
@@ -32333,6 +32605,17 @@ Otherwise this result is not present.
 
 @item frozen
 If the variable object is frozen, this variable will be present with a value of 1.
+
+@item displayhint
+A dynamic varobj can supply a display hint to the front end.  The
+value comes directly from the Python pretty-printer object's
+@code{display_hint} method.  @xref{Pretty Printing API}.
+
+@item dynamic
+This attribute will be present and have the value @samp{1} if the
+varobj is a dynamic varobj.  If the varobj is not a dynamic varobj,
+then this attribute will not be present.
+
 @end table
 
 The result may have its own attributes:
@@ -32402,7 +32685,8 @@ For example, if @code{a} is an array, and variable object
 @end smallexample
 
 @noindent
-Here, the values of @code{lang} can be @code{@{"C" | "C++" | "Java"@}}.
+Here, the value of @code{lang} is the language name, which can be
+found in @ref{Supported Languages}.
 
 Note that the output of the @code{-var-list-children} command also
 includes those expressions, so the @code{-var-info-expression} command
@@ -34692,6 +34976,59 @@ The corresponding @value{GDBN} command is @samp{remote delete}.
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+@node GDB/MI Ada Exceptions Commands
+@section Ada Exceptions @sc{gdb/mi} Commands
+
+@subheading The @code{-info-ada-exceptions} Command
+@findex -info-ada-exceptions
+
+@subsubheading Synopsis
+
+@smallexample
+ -info-ada-exceptions [ @var{regexp}]
+@end smallexample
+
+List all Ada exceptions defined within the program being debugged.
+With a regular expression @var{regexp}, only those exceptions whose
+names match @var{regexp} are listed.
+
+@subsubheading @value{GDBN} Command
+
+The corresponding @value{GDBN} command is @samp{info exceptions}.
+
+@subsubheading Result
+
+The result is a table of Ada exceptions.  The following columns are
+defined for each exception:
+
+@table @samp
+@item name
+The name of the exception.
+
+@item address
+The address of the exception.
+
+@end table
+
+@subsubheading Example
+
+@smallexample
+-info-ada-exceptions aint
+^done,ada-exceptions=@{nr_rows="2",nr_cols="2",
+hdr=[@{width="1",alignment="-1",col_name="name",colhdr="Name"@},
+@{width="1",alignment="-1",col_name="address",colhdr="Address"@}],
+body=[@{name="constraint_error",address="0x0000000000613da0"@},
+@{name="const.aint_global_e",address="0x0000000000613b00"@}]@}
+@end smallexample
+
+@subheading Catching Ada Exceptions
+
+The commands describing how to ask @value{GDBN} to stop when a program
+raises an exception are described at @ref{Ada Exception GDB/MI
+Catchpoint Commands}.
+
+
+@c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 @node GDB/MI Miscellaneous Commands
 @section Miscellaneous @sc{gdb/mi} Commands
 
@@ -34832,8 +35169,60 @@ default shows this information when you start an interactive session.
 (gdb)
 @end smallexample
 
+@subheading The @code{-info-gdb-mi-command} Command
+@cindex @code{-info-gdb-mi-command}
+@findex -info-gdb-mi-command
+
+@subsubheading Synopsis
+
+@smallexample
+ -info-gdb-mi-command @var{cmd_name}
+@end smallexample
+
+Query support for the @sc{gdb/mi} command named @var{cmd_name}.
+
+Note that the dash (@code{-}) starting all @sc{gdb/mi} commands
+is technically not part of the command name (@pxref{GDB/MI Input
+Syntax}), and thus should be omitted in @var{cmd_name}.  However,
+for ease of use, this command also accepts the form with the leading
+dash.
+
+@subsubheading @value{GDBN} Command
+
+There is no corresponding @value{GDBN} command.
+
+@subsubheading Result
+
+The result is a tuple.  There is currently only one field:
+
+@table @samp
+@item exists
+This field is equal to @code{"true"} if the @sc{gdb/mi} command exists,
+@code{"false"} otherwise.
+
+@end table
+
+@subsubheading Example
+
+Here is an example where the @sc{gdb/mi} command does not exist:
+
+@smallexample
+-info-gdb-mi-command unsupported-command
+^done,command=@{exists="false"@}
+@end smallexample
+
+@noindent
+And here is an example where the @sc{gdb/mi} command is known
+to the debugger:
+
+@smallexample
+-info-gdb-mi-command symbol-list-lines
+^done,command=@{exists="true"@}
+@end smallexample
+
 @subheading The @code{-list-features} Command
 @findex -list-features
+@cindex supported @sc{gdb/mi} features, list
 
 Returns a list of particular features of the MI protocol that
 this version of gdb implements.  A feature can be a command,
@@ -34878,6 +35267,18 @@ Indicates that changes to breakpoints and breakpoints created via the
 CLI will be announced via async records.
 @item ada-task-info
 Indicates support for the @code{-ada-task-info} command.
+@item language-option
+Indicates that all @sc{gdb/mi} commands accept the @option{--language}
+option (@pxref{Context management}).
+@item info-gdb-mi-command
+Indicates support for the @code{-info-gdb-mi-command} command.
+@item undefined-command-error-code
+Indicates support for the "undefined-command" error code in error result
+records, produced when trying to execute an undefined @sc{gdb/mi} command
+(@pxref{GDB/MI Result Records}).
+@item exec-run-start-option
+Indicates that the @code{-exec-run} command supports the @option{--start}
+option (@pxref{GDB/MI Program Execution}).
 @end table
 
 @subheading The @code{-list-target-features} Command
@@ -37279,7 +37680,7 @@ compiled with the @samp{-pg} compiler option.
 @item maint set show-debug-regs
 @itemx maint show show-debug-regs
 Control whether to show variables that mirror the hardware debug
-registers.  Use @code{ON} to enable, @code{OFF} to disable.  If
+registers.  Use @code{on} to enable, @code{off} to disable.  If
 enabled, the debug registers values are shown when @value{GDBN} inserts or
 removes a hardware breakpoint or watchpoint, and when the inferior
 triggers a hardware-assisted breakpoint or watchpoint.
@@ -42889,6 +43290,16 @@ describe the upper 128 bits of @sc{ymm} registers:
 @samp{ymm0h} through @samp{ymm7h} for i386
 @item
 @samp{ymm0h} through @samp{ymm15h} for amd64
+@end itemize
+
+The @samp{org.gnu.gdb.i386.mpx} is an optional feature representing Intel(R)
+Memory Protection Extension (MPX).  It should describe the following registers:
+
+@itemize @minus
+@item
+@samp{bnd0raw} through @samp{bnd3raw} for i386 and amd64.
+@item
+@samp{bndcfgu} and @samp{bndstatus} for i386 and amd64.
 @end itemize
 
 The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should

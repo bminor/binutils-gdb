@@ -3507,9 +3507,29 @@ find_debug_info_for_offset (unsigned long offset)
   return NULL;
 }
 
+static const char *
+get_gdb_index_symbol_kind_name (gdb_index_symbol_kind kind)
+{
+  /* See gdb/gdb-index.h.  */
+  static const char * const kinds[] =
+  {
+    N_ ("no info"),
+    N_ ("type"),
+    N_ ("variable"),
+    N_ ("function"),
+    N_ ("other"),
+    N_ ("unused5"),
+    N_ ("unused6"),
+    N_ ("unused7")
+  };
+
+  return _ (kinds[kind]);
+}
+
 static int
-display_debug_pubnames (struct dwarf_section *section,
-			void *file ATTRIBUTE_UNUSED)
+display_debug_pubnames_worker (struct dwarf_section *section,
+			       void *file ATTRIBUTE_UNUSED,
+			       int is_gnu)
 {
   DWARF2_Internal_PubNames names;
   unsigned char *start = section->start;
@@ -3577,7 +3597,10 @@ display_debug_pubnames (struct dwarf_section *section,
       printf (_("  Size of area in .debug_info section: %ld\n"),
 	      (long) names.pn_size);
 
-      printf (_("\n    Offset\tName\n"));
+      if (is_gnu)
+	printf (_("\n    Offset  Kind          Name\n"));
+      else
+	printf (_("\n    Offset\tName\n"));
 
       do
 	{
@@ -3586,7 +3609,29 @@ display_debug_pubnames (struct dwarf_section *section,
 	  if (offset != 0)
 	    {
 	      data += offset_size;
-	      printf ("    %-6lx\t%s\n", offset, data);
+	      if (is_gnu)
+		{
+		  unsigned int kind_data;
+		  gdb_index_symbol_kind kind;
+		  const char *kind_name;
+		  int is_static;
+
+		  SAFE_BYTE_GET (kind_data, data, 1, end);
+		  data++;
+		  /* GCC computes the kind as the upper byte in the CU index
+		     word, and then right shifts it by the CU index size.
+		     Left shift KIND to where the gdb-index.h accessor macros
+		     can use it.  */
+		  kind_data <<= GDB_INDEX_CU_BITSIZE;
+		  kind = GDB_INDEX_SYMBOL_KIND_VALUE (kind_data);
+		  kind_name = get_gdb_index_symbol_kind_name (kind);
+		  is_static = GDB_INDEX_SYMBOL_STATIC_VALUE (kind_data);
+		  printf ("    %-6lx  %s,%-10s  %s\n",
+			  offset, is_static ? _("s") : _("g"),
+			  kind_name, data);
+		}
+	      else
+		printf ("    %-6lx\t%s\n", offset, data);
 	      data += strnlen ((char *) data, end - data) + 1;
 	    }
 	}
@@ -3595,6 +3640,18 @@ display_debug_pubnames (struct dwarf_section *section,
 
   printf ("\n");
   return 1;
+}
+
+static int
+display_debug_pubnames (struct dwarf_section *section, void *file)
+{
+  return display_debug_pubnames_worker (section, file, 0);
+}
+
+static int
+display_debug_gnu_pubnames (struct dwarf_section *section, void *file)
+{
+  return display_debug_pubnames_worker (section, file, 1);
 }
 
 static int
@@ -6141,38 +6198,9 @@ display_gdb_index (struct dwarf_section *section,
 	      else
 		printf ("%c%lu", num_cus > 1 ? '\t' : ' ', (unsigned long) cu);
 
-	      switch (kind)
-		{
-		case GDB_INDEX_SYMBOL_KIND_NONE:
-		  printf (_(" [no symbol information]"));
-		  break;
-		case GDB_INDEX_SYMBOL_KIND_TYPE:
-		  printf (is_static
-			  ? _(" [static type]")
-			  : _(" [global type]"));
-		  break;
-		case GDB_INDEX_SYMBOL_KIND_VARIABLE:
-		  printf (is_static
-			  ? _(" [static variable]")
-			  : _(" [global variable]"));
-		  break;
-		case GDB_INDEX_SYMBOL_KIND_FUNCTION:
-		  printf (is_static
-			  ? _(" [static function]")
-			  : _(" [global function]"));
-		  break;
-		case GDB_INDEX_SYMBOL_KIND_OTHER:
-		  printf (is_static
-			  ? _(" [static other]")
-			  : _(" [global other]"));
-		  break;
-		default:
-		  printf (is_static
-			  ? _(" [static unknown: %d]")
-			  : _(" [global unknown: %d]"),
-			  kind);
-		  break;
-		}
+	      printf (" [%s, %s]",
+		      is_static ? _("static") : _("global"),
+		      get_gdb_index_symbol_kind_name (kind));
 	      if (num_cus > 1)
 		printf ("\n");
 	    }
@@ -6796,6 +6824,8 @@ struct dwarf_section_display debug_displays[] =
     display_debug_lines,    &do_debug_lines,	1 },
   { { ".debug_pubnames",    ".zdebug_pubnames",	NULL, NULL, 0, 0, 0 },
     display_debug_pubnames, &do_debug_pubnames,	0 },
+  { { ".debug_gnu_pubnames", ".zdebug_gnu_pubnames", NULL, NULL, 0, 0, 0 },
+    display_debug_gnu_pubnames, &do_debug_pubnames, 0 },
   { { ".eh_frame",	    "",			NULL, NULL, 0, 0, 0 },
     display_debug_frames,   &do_debug_frames,	1 },
   { { ".debug_macinfo",	    ".zdebug_macinfo",	NULL, NULL, 0, 0, 0 },
@@ -6808,6 +6838,8 @@ struct dwarf_section_display debug_displays[] =
     display_debug_loc,	    &do_debug_loc,	1 },
   { { ".debug_pubtypes",    ".zdebug_pubtypes",	NULL, NULL, 0, 0, 0 },
     display_debug_pubnames, &do_debug_pubtypes,	0 },
+  { { ".debug_gnu_pubtypes", ".zdebug_gnu_pubtypes", NULL, NULL, 0, 0, 0 },
+    display_debug_gnu_pubnames, &do_debug_pubtypes, 0 },
   { { ".debug_ranges",	    ".zdebug_ranges",	NULL, NULL, 0, 0, 0 },
     display_debug_ranges,   &do_debug_ranges,	1 },
   { { ".debug_static_func", ".zdebug_static_func", NULL, NULL, 0, 0, 0 },

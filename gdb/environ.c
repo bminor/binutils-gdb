@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "environ.h"
-#include "gdb_string.h"
+#include <string.h>
 
 
 /* Return a new environment object.  */

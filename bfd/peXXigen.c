@@ -1,6 +1,5 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
-   Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
+   Copyright 1995-2013 Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -793,7 +792,10 @@ _bfd_XXi_only_swap_filehdr_out (bfd * abfd, void * in, void * out)
   H_PUT_16 (abfd, filehdr_in->f_magic, filehdr_out->f_magic);
   H_PUT_16 (abfd, filehdr_in->f_nscns, filehdr_out->f_nscns);
 
-  H_PUT_32 (abfd, time (0), filehdr_out->f_timdat);
+  /* Only use a real timestamp if the option was chosen.  */
+  if ((pe_data (abfd)->insert_timestamp))
+    H_PUT_32 (abfd, time(0), filehdr_out->f_timdat);
+
   PUT_FILEHDR_SYMPTR (abfd, filehdr_in->f_symptr,
 		      filehdr_out->f_symptr);
   H_PUT_32 (abfd, filehdr_in->f_nsyms, filehdr_out->f_nsyms);
@@ -1989,6 +1991,214 @@ pe_print_reloc (bfd * abfd, void * vfile)
   return TRUE;
 }
 
+static bfd_byte *
+pe_print_resource_directory (FILE * , bfd *, unsigned int,
+			     bfd_byte *, bfd_byte *, bfd_byte *, bfd_vma);
+
+static bfd_byte *
+pe_print_resource_entries (FILE *        file,
+			   bfd *         abfd,
+			   unsigned int  indent,
+			   bfd_boolean   is_name,
+			   bfd_byte *    data,
+			   bfd_byte *    datastart,
+			   bfd_byte *    dataend,
+			   bfd_vma       rva_bias)
+{
+  unsigned long entry, addr, size;
+
+  if (data + 8 >= dataend)
+    return dataend + 1;
+
+  fprintf (file, _("%*.s Entry: "), indent, " ");
+
+  entry = (long) bfd_get_32 (abfd, data);
+  if (is_name)
+    {
+      if (datastart + entry < dataend)
+	{
+	  unsigned int len;
+	  len = bfd_get_16 (abfd, datastart + entry);
+      
+	  fprintf (file, _("name: %08lx [%d:]"), entry, len);
+	  if (datastart + entry - rva_bias + 2 + len < dataend)
+	    fprintf (file, "%.*s", len, (char *) (datastart + entry - rva_bias + 2));
+	  else
+	    fprintf (file, _("<corrupt>"));
+	}
+      else
+	fprintf (file, _("<corrupt>"));
+    }
+  else
+    fprintf (file, _("ID: %#08lx"), entry);
+	     
+  entry = (long) bfd_get_32 (abfd, data + 4);
+  fprintf (file, _(", Value: %#08lx"), entry);
+
+  if (entry & 0x80000000)
+    {
+      fprintf (file, _(" sub-table:\n"));
+      return pe_print_resource_directory (file, abfd, indent + 1,
+					  datastart + (entry & 0x7fffffff),
+					  datastart, dataend, rva_bias);
+    }
+
+  if (datastart + entry + 16 >= dataend)
+    {
+      fprintf (file, "\n");      
+      return dataend + 1;
+    }
+
+  fprintf (file, _(" leaf: Addr: %#08lx, Size: %#08lx, Codepage: %d\n"),
+	   addr = (long) bfd_get_32 (abfd, datastart + entry),
+	   size = (long) bfd_get_32 (abfd, datastart + entry + 4),
+	   (int) bfd_get_32 (abfd, datastart + entry + 8));
+
+  /* Check that the reserved entry is 0.  */
+  if (bfd_get_32 (abfd, datastart + entry + 12) != 0
+      /* And that the data address/size is valid too.  */
+      || (datastart + addr - rva_bias + size > dataend))
+    return dataend + 1;
+
+  return datastart + addr - rva_bias + size;
+}
+
+static bfd_byte *
+pe_print_resource_directory (FILE *        file,
+			     bfd *         abfd,
+			     unsigned int  indent,
+			     bfd_byte *    data,
+			     bfd_byte *    datastart,
+			     bfd_byte *    dataend,
+			     bfd_vma       rva_bias)
+{
+  unsigned int num_names, num_ids;
+  bfd_byte * enddata = data;
+
+  if (data + 16 >= dataend)
+    return dataend + 1;
+
+  fprintf (file, "%*.s ", indent, " ");
+  switch (indent)
+    {
+    case 0: fprintf (file, "Type"); break;
+    case 2: fprintf (file, "Name"); break;
+    case 4: fprintf (file, "Language"); break;
+    default: fprintf (file, "<unknown>"); break;
+    }
+
+  fprintf (file, _(" Table: Char: %d, Time: %08lx, Ver: %d/%d, Num Names: %d, IDs: %d\n"),
+	   (int) bfd_get_32 (abfd, data),
+	   (long) bfd_get_32 (abfd, data + 4),
+	   (int)  bfd_get_16 (abfd, data + 8),
+	   (int)  bfd_get_16 (abfd, data + 10),
+	   num_names = (int) bfd_get_16 (abfd, data + 12),
+	   num_ids =   (int) bfd_get_16 (abfd, data + 14));
+  data += 16;
+
+  if (num_names)
+    {
+      while (num_names --)
+	{
+	  bfd_byte * ndata;
+	  ndata = pe_print_resource_entries (file, abfd, indent + 1, TRUE,
+					     data, datastart, dataend, rva_bias);
+	  data += 8;
+	  if (ndata > enddata)
+	    enddata = ndata;
+	  if (ndata >= dataend)
+	    break;
+	}
+    }
+
+  if (num_ids)
+    {
+      while (num_ids --)
+	{
+	  bfd_byte * ndata;
+	  ndata = pe_print_resource_entries (file, abfd, indent + 1, FALSE,
+					     data, datastart, dataend, rva_bias);
+	  data += 8;
+	  if (ndata > enddata)
+	    enddata = ndata;
+	  if (ndata >= dataend)
+	    break;
+	}
+    }
+
+  return enddata > data ? enddata : data;
+}
+
+/* Display the contents of a .rsrc section.  We do not try to
+   reproduce the resources, windres does that.  Instead we dump
+   the tables in a human readable format.  */
+
+static bfd_boolean
+pe_print_rsrc (bfd * abfd, void * vfile)
+{
+  bfd_vma rva_bias;
+  pe_data_type * pe;
+  FILE * file = (FILE *) vfile;
+  bfd_size_type datasize;
+  asection * section;
+  bfd_byte * data;
+  bfd_byte * dataend;
+  bfd_byte * datastart;
+
+
+  pe = pe_data (abfd);
+ if (pe == NULL)
+    return TRUE;
+
+ section = bfd_get_section_by_name (abfd, ".rsrc");
+ if (section == NULL)
+    return TRUE;
+
+  rva_bias = section->vma - pe->pe_opthdr.ImageBase;
+ 
+  datasize = section->size;
+  if (datasize == 0)
+    return TRUE;
+
+  if (! bfd_malloc_and_get_section (abfd, section, &data))
+    {
+      if (data != NULL)
+	free (data);
+      return FALSE;
+    }
+  datastart = data;
+  dataend = data + datasize;
+
+  fflush (file);
+  fprintf (file, "\nThe .rsrc Resource Directory section:\n");
+
+  while (data < dataend)
+    {
+      data = pe_print_resource_directory (file, abfd, 0, data, data, dataend, rva_bias);
+
+      if (data == dataend + 1)
+	fprintf (file, _("Corrupt .rsrc section detected!\n"));
+      else
+	{
+	  /* Align data before continuing.  */
+	  int align = (1 << section->alignment_power) - 1;
+	  data = (bfd_byte *) (((long) (data + align)) & ~ align);
+	  rva_bias += data - datastart;
+
+	  /* For reasons that are unclear .rsrc sections are sometimes created
+	     aligned to a 1^3 boundary even when their alignment is set at
+	     1^2.  Catch that case here before we issue a spurious warning
+	     message.  */
+	  if (data == (dataend - 4))
+	    data = dataend;
+	  else if (data < dataend)
+	    fprintf (file, _("\nWARNING: Extra data in .rsrc section - it will be ignored by Windows:\n"));
+	}
+    }
+
+  return TRUE;
+}
+
 /* Print out the program headers.  */
 
 bfd_boolean
@@ -2163,6 +2373,8 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     pe_print_pdata (abfd, vfile);
   pe_print_reloc (abfd, vfile);
 
+  pe_print_rsrc (abfd, vfile);
+  
   return TRUE;
 }
 

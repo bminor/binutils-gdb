@@ -23,7 +23,7 @@
 #include "value.h"
 #include "mi/mi-cmds.h"
 
-struct breakpoint_object;
+struct gdbpy_breakpoint_object;
 
 /* The suffix of per-objfile scripts to auto-load.
    E.g. When the program loads libfoo.so, look for libfoo-gdb.py.  */
@@ -89,6 +89,19 @@ typedef enum py_frame_args
   CLI_ALL_VALUES
 } py_frame_args;
 
+/* Returns true if Python support is built into GDB, false
+   otherwise.  */
+
+static inline int
+have_python (void)
+{
+#ifdef HAVE_PYTHON
+  return 1;
+#else
+  return 0;
+#endif
+}
+
 extern void finish_python_initialization (void);
 
 void eval_python_from_control_command (struct command_line *);
@@ -109,11 +122,11 @@ enum py_bt_status apply_frame_filter (struct frame_info *frame, int flags,
 
 void preserve_python_values (struct objfile *objfile, htab_t copied_types);
 
-void gdbpy_load_auto_scripts_for_objfile (struct objfile *objfile);
+const struct script_language *gdbpy_script_language_defn (void);
 
-int gdbpy_should_stop (struct breakpoint_object *bp_obj);
+int gdbpy_should_stop (struct gdbpy_breakpoint_object *bp_obj);
 
-int gdbpy_breakpoint_has_py_cond (struct breakpoint_object *bp_obj);
+int gdbpy_breakpoint_has_py_cond (struct gdbpy_breakpoint_object *bp_obj);
 
 void *start_type_printers (void);
 

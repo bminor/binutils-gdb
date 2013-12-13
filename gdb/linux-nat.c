@@ -22,7 +22,7 @@
 #include "target.h"
 #include "nat/linux-nat.h"
 #include "nat/linux-waitpid.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_wait.h"
 #include "gdb_assert.h"
 #ifdef HAVE_TKILL_SYSCALL
@@ -47,14 +47,14 @@
 #include "gdbcore.h"		/* for get_exec_file */
 #include <ctype.h>		/* for isdigit */
 #include "gdbthread.h"		/* for struct thread_info etc.  */
-#include "gdb_stat.h"		/* for struct stat */
+#include <sys/stat.h>		/* for struct stat */
 #include <fcntl.h>		/* for O_RDONLY */
 #include "inf-loop.h"
 #include "event-loop.h"
 #include "event-top.h"
 #include <pwd.h>
 #include <sys/types.h>
-#include "gdb_dirent.h"
+#include <dirent.h>
 #include "xml-support.h"
 #include "terminal.h"
 #include <sys/vfs.h>
@@ -1557,7 +1557,7 @@ detach_callback (struct lwp_info *lp, void *data)
 }
 
 static void
-linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
+linux_nat_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   int pid;
   int status;
@@ -1587,10 +1587,13 @@ linux_nat_detach (struct target_ops *ops, char *args, int from_tty)
       && get_pending_status (main_lwp, &status) != -1
       && WIFSTOPPED (status))
     {
+      char *tem;
+
       /* Put the signal number in ARGS so that inf_ptrace_detach will
 	 pass it along with PTRACE_DETACH.  */
-      args = alloca (8);
-      sprintf (args, "%d", (int) WSTOPSIG (status));
+      tem = alloca (8);
+      sprintf (tem, "%d", (int) WSTOPSIG (status));
+      args = tem;
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
 			    "LND: Sending signal %s to %s\n",

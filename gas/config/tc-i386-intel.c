@@ -142,7 +142,9 @@ operatorT i386_operator (const char *name, unsigned int operands, char *pc)
 	      int adjust = 0;
 	      char *gotfree_input_line = lex_got (&i.reloc[this_operand],
 						  &adjust,
-						  &intel_state.reloc_types);
+						  &intel_state.reloc_types,
+						  (i.bnd_prefix != NULL
+						   || add_bnd_prefix));
 
 	      if (!gotfree_input_line)
 		break;
@@ -415,23 +417,21 @@ static int i386_intel_simplify (expressionS *e)
       if (this_operand >= 0 && intel_state.in_bracket)
 	{
 	  expressionS *scale = NULL;
-
-	  if (intel_state.index)
-	    --scale;
+	  int has_index = (intel_state.index != NULL);
 
 	  if (!intel_state.in_scale++)
 	    intel_state.scale_factor = 1;
 
 	  ret = i386_intel_simplify_symbol (e->X_add_symbol);
-	  if (ret && !scale && intel_state.index)
+	  if (ret && !has_index && intel_state.index)
 	    scale = symbol_get_value_expression (e->X_op_symbol);
 
 	  if (ret)
 	    ret = i386_intel_simplify_symbol (e->X_op_symbol);
-	  if (ret && !scale && intel_state.index)
+	  if (ret && !scale && !has_index && intel_state.index)
 	    scale = symbol_get_value_expression (e->X_add_symbol);
 
-	  if (ret && scale && (scale + 1))
+	  if (ret && scale)
 	    {
 	      resolve_expression (scale);
 	      if (scale->X_op != O_constant

@@ -15,6 +15,13 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+/* Cheezy hack to prevent set_initial_language from trying to look up main.
+   We do this so that gdb won't try to open the dwp file when the file is
+   first selected.  This gives us a chance to do a chdir before attempting
+   to access the debug info.  */
+asm (".globl main.main");
+asm ("main.main: .byte 0");
+
 int
 main (int argc, char **argv)
 {

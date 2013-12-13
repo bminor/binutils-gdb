@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "osabi.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "amd64-tdep.h"
 #include "dicos-tdep.h"
 

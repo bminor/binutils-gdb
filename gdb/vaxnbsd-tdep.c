@@ -24,7 +24,7 @@
 #include "vax-tdep.h"
 #include "solib-svr4.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 /* NetBSD ELF.  */
 

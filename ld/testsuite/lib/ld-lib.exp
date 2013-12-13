@@ -179,6 +179,7 @@ proc default_ld_link { ld target objects } {
     global HOSTING_CRT0
     global HOSTING_SCRT0
     global HOSTING_LIBS
+    global HOSTING_SLIBS
     global LIBS
     global host_triplet
     global link_output
@@ -186,10 +187,11 @@ proc default_ld_link { ld target objects } {
 
     if { [ string match "* -pie *" $objects ] } {
 	set objs "$HOSTING_SCRT0 $objects"
+	set libs "$LIBS $HOSTING_SLIBS"
     } else {
 	set objs "$HOSTING_CRT0 $objects"
+	set libs "$LIBS $HOSTING_LIBS"
     }
-    set libs "$LIBS $HOSTING_LIBS"
 
     if [is_endian_output_format $objects] then {
 	set flags [big_or_little_endian]
@@ -1641,7 +1643,7 @@ proc check_lto_available { } {
 	set f [open $src "w"]
 	puts $f ""
 	close $f
-	set status [remote_exec host $CC "-shared -B[pwd]/tmpdir/ld/ -flto -fuse-linker-plugin $src -o $output"]
+	set status [remote_exec host $CC "-shared -B[pwd]/tmpdir/ld/ -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
 	if { [lindex $status 0] == 0 } {
 	    set lto_available_saved 1
 	} else {

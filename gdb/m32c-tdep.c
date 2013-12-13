@@ -21,10 +21,7 @@
 
 #include <stdarg.h>
 
-#if defined (HAVE_STRING_H)
 #include <string.h>
-#endif
-
 #include "gdb_assert.h"
 #include "elf-bfd.h"
 #include "elf/m32c.h"

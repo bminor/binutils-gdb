@@ -30,8 +30,8 @@
 #include "filestuff.h"
 
 #include <sys/types.h>
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include "gdbcore.h"
 #include "gdb_regex.h"
@@ -853,28 +853,10 @@ done:
       /* If a file was opened, canonicalize its filename.  */
       if (fd < 0)
 	*filename_opened = NULL;
+      else if ((opts & OPF_RETURN_REALPATH) != 0)
+	*filename_opened = gdb_realpath (filename);
       else
-	{
-	  char *(*realpath_fptr) (const char *);
-
-	  realpath_fptr = ((opts & OPF_RETURN_REALPATH) != 0
-			   ? gdb_realpath : xstrdup);
-
-	  if (IS_ABSOLUTE_PATH (filename))
-	    *filename_opened = realpath_fptr (filename);
-	  else
-	    {
-	      /* Beware the // my son, the Emacs barfs, the botch that catch...  */
-
-	      char *f = concat (current_directory,
-				IS_DIR_SEPARATOR (current_directory[strlen (current_directory) - 1])
-				? "" : SLASH_STRING,
-				filename, (char *)NULL);
-
-	      *filename_opened = realpath_fptr (f);
-	      xfree (f);
-	    }
-	}
+	*filename_opened = gdb_abspath (filename);
     }
 
   return fd;

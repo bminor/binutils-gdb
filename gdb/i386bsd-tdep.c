@@ -24,7 +24,7 @@
 #include "regcache.h"
 #include "osabi.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 #include "i386-tdep.h"
 

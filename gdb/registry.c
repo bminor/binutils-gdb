@@ -20,7 +20,7 @@
 #include "defs.h"
 #include "registry.h"
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 const struct registry_data *
 register_data_with_cleanup (struct registry_data_registry *registry,

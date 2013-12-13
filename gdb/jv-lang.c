@@ -27,7 +27,7 @@
 #include "symtab.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "value.h"
 #include "c-lang.h"
 #include "jv-lang.h"
@@ -1163,6 +1163,7 @@ const struct exp_descriptor exp_descriptor_java =
 const struct language_defn java_language_defn =
 {
   "java",			/* Language name */
+  "Java",
   language_java,
   range_check_off,
   case_sensitive_on,

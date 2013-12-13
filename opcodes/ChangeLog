@@ -1,3 +1,61 @@
+2013-12-05  Nick Clifton  <nickc@redhat.com>
+
+	* s390-mkopc.c (dumpTable): Provide a format string to printf so
+	that compiling with -Werror=format-security does not produce an
+	error.
+
+2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (aarch64_pstatefields): Update.
+
+2013-11-19  Catherine Moore  <clm@codesourcery.com>
+
+	* micromips-opc.c (LM): Define.
+	(micromips_opcodes): Add LM to load instructions.
+	* mips-opc.c (prefe): Add LM attribute.
+
+2013-11-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	Revert
+
+	2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (CPENT): New define.
+	(F_READONLY, F_WRITEONLY): Likewise.
+	(aarch64_sys_regs): Add trace unit registers.
+	(aarch64_sys_reg_readonly_p): New function.
+	(aarch64_sys_reg_writeonly_p): Ditto.
+
+2013-11-15  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* aarch64-opc.c (CPENT): New define.
+	(F_READONLY, F_WRITEONLY): Likewise.
+	(aarch64_sys_regs): Add trace unit registers.
+	(aarch64_sys_reg_readonly_p): New function.
+	(aarch64_sys_reg_writeonly_p): Ditto.
+
+2013-11-15  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Add RD_2 to "mfcr" and
+	"mtcr".
+
+2013-11-11  Catherine Moore  <clm@codesourcery.com>
+
+	* mips-dis.c (print_insn_mips): Use
+	INSN_LOAD_MEMORY instead of INSN_LOAD_MEMORY_DELAY.
+	(print_insn_micromips): Likewise.
+	* mips-opc.c (LDD): Remove.
+	(CLD): Include INSN_LOAD_MEMORY.
+	(LM): New.
+	(mips_builtin_opcodes): Use LM instead of LDD.
+        Add LM to load instructions.
+
+2013-11-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/16140
+	* i386-gen.c (cpu_flag_init): Remove CpuNop from CPU_K6_2_FLAGS.
+	* i386-init.h: Regenerated.
+
 2013-11-05  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* aarch64-opc.c (F_DEPRECATED): New macro.

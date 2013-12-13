@@ -3270,7 +3270,7 @@ parse_barrier (char **str)
    Returns the encoding for the option, or PARSE_FAIL.
 
    If IMPLE_DEFINED_P is non-zero, the function will also try to parse the
-   implementation defined system register name S3_<op1>_<Cn>_<Cm>_<op2>.  */
+   implementation defined system register name S<op0>_<op1>_<Cn>_<Cm>_<op2>.  */
 
 static int
 parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
@@ -3295,7 +3295,7 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
 	return PARSE_FAIL;
       else
 	{
-	  /* Parse S3_<op1>_<Cn>_<Cm>_<op2>, the implementation defined
+	  /* Parse S<op0>_<op1>_<Cn>_<Cm>_<op2>, the implementation defined
 	     registers.  */
 	  unsigned int op0, op1, cn, cm, op2;
 	  if (sscanf (buf, "s%u_%u_c%u_c%u_%u", &op0, &op1, &cn, &cm, &op2) != 5)
@@ -3303,11 +3303,11 @@ parse_sys_reg (char **str, struct hash_control *sys_regs, int imple_defined_p)
 	  /* The architecture specifies the encoding space for implementation
 	     defined registers as:
 	     op0  op1  CRn   CRm   op2
-	     11   xxx  1x11  xxxx  xxx
+	     1x   xxx  1x11  xxxx  xxx
 	     For convenience GAS accepts a wider encoding space, as follows:
 	     op0  op1  CRn   CRm   op2
-	     11   xxx  xxxx  xxxx  xxx  */
-	  if (op0 != 3 || op1 > 7 || cn > 15 || cm > 15 || op2 > 7)
+	     1x   xxx  xxxx  xxxx  xxx  */
+	  if ((op0 != 2 && op0 != 3) || op1 > 7 || cn > 15 || cm > 15 || op2 > 7)
 	    return PARSE_FAIL;
 	  value = (op0 << 14) | (op1 << 11) | (cn << 7) | (cm << 3) | op2;
 	}

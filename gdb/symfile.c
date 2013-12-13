@@ -61,8 +61,8 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 #include <ctype.h>
 #include <time.h>
 #include <sys/time.h>
@@ -2591,12 +2591,16 @@ reread_symbols (void)
 	  memset (&objfile->msymbol_demangled_hash, 0,
 		  sizeof (objfile->msymbol_demangled_hash));
 
-	  set_objfile_per_bfd (objfile);
-
 	  /* obstack_init also initializes the obstack so it is
 	     empty.  We could use obstack_specify_allocation but
 	     gdb_obstack.h specifies the alloc/dealloc functions.  */
 	  obstack_init (&objfile->objfile_obstack);
+
+	  /* set_objfile_per_bfd potentially allocates the per-bfd
+	     data on the objfile's obstack (if sharing data across
+	     multiple users is not possible), so it's important to
+	     do it *after* the obstack has been initialized.  */
+	  set_objfile_per_bfd (objfile);
 
 	  objfile->original_name = obstack_copy0 (&objfile->objfile_obstack,
 						  original_name,
@@ -2879,8 +2883,8 @@ allocate_symtab (const char *filename, struct objfile *objfile)
   symtab = (struct symtab *)
     obstack_alloc (&objfile->objfile_obstack, sizeof (struct symtab));
   memset (symtab, 0, sizeof (*symtab));
-  symtab->filename = (char *) bcache (filename, strlen (filename) + 1,
-				      objfile->per_bfd->filename_cache);
+  symtab->filename = bcache (filename, strlen (filename) + 1,
+			     objfile->per_bfd->filename_cache);
   symtab->fullname = NULL;
   symtab->language = deduce_language_from_filename (filename);
   symtab->debugformat = "unknown";
@@ -2891,7 +2895,9 @@ allocate_symtab (const char *filename, struct objfile *objfile)
   symtab->next = objfile->symtabs;
   objfile->symtabs = symtab;
 
-  if (symtab_create_debug)
+  /* This can be very verbose with lots of headers.
+     Only print at higher debug levels.  */
+  if (symtab_create_debug >= 2)
     {
       /* Be a bit clever with debugging messages, and don't print objfile
 	 every time, only when it changes.  */

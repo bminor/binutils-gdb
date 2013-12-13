@@ -56,7 +56,7 @@
 #include "target.h"
 #include "inferior.h"
 #include <fcntl.h>
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include <dlfcn.h>
 #include "gdbcmd.h"
 #include "gdbcore.h"
@@ -64,7 +64,7 @@
 #include "solib.h"
 #include "symfile.h"
 #include "observer.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "procfs.h"
 
 struct target_ops sol_thread_ops;
@@ -320,7 +320,7 @@ lwp_to_thread (ptid_t lwp)
    program was started via the normal ptrace (PTRACE_TRACEME).  */
 
 static void
-sol_thread_detach (struct target_ops *ops, char *args, int from_tty)
+sol_thread_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   struct target_ops *beneath = find_target_beneath (ops);
 

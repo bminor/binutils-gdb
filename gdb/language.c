@@ -30,7 +30,7 @@
 
 #include "defs.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 
 #include "symtab.h"
 #include "gdbtypes.h"
@@ -485,7 +485,7 @@ language_def (enum language lang)
 }
 
 /* Return the language as a string.  */
-char *
+const char *
 language_str (enum language lang)
 {
   int i;
@@ -520,7 +520,7 @@ void
 add_language (const struct language_defn *lang)
 {
   /* For the "set language" command.  */
-  static char **language_names = NULL;
+  static const char **language_names = NULL;
   /* For the "help set language" command.  */
   char *language_set_doc = NULL;
 
@@ -792,6 +792,7 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 const struct language_defn unknown_language_defn =
 {
   "unknown",
+  "Unknown",
   language_unknown,
   range_check_off,
   case_sensitive_on,
@@ -836,6 +837,7 @@ const struct language_defn unknown_language_defn =
 const struct language_defn auto_language_defn =
 {
   "auto",
+  "Auto",
   language_auto,
   range_check_off,
   case_sensitive_on,
@@ -878,6 +880,7 @@ const struct language_defn auto_language_defn =
 const struct language_defn local_language_defn =
 {
   "local",
+  "Local",
   language_auto,
   range_check_off,
   case_sensitive_on,

@@ -24,7 +24,7 @@
 #include "gdbtypes.h"
 #include "gdbcmd.h"
 #include "gdbcore.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "frame.h"
 #include "frame-unwind.h"
@@ -1614,8 +1614,9 @@ spu_software_single_step (struct frame_info *frame)
 	  else
 	    {
 	      if (optim)
-		error (_("Could not determine address of "
-			 "single-step breakpoint."));
+		throw_error (OPTIMIZED_OUT_ERROR,
+			     _("Could not determine address of "
+			       "single-step breakpoint."));
 	      if (unavail)
 		throw_error (NOT_AVAILABLE_ERROR,
 			     _("Could not determine address of "

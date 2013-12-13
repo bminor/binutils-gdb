@@ -34,7 +34,7 @@
 #include "symfile.h"		/* for generic load */
 #include <sys/time.h>
 #include <time.h>		/* for time_t */
-#include "gdb_string.h"
+#include <string.h>
 #include "objfiles.h"		/* for ALL_OBJFILES etc.  */
 #include "inferior.h"
 #include <ctype.h>

@@ -50,8 +50,8 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 #include <ctype.h>
 #include "cp-abi.h"
 #include "cp-support.h"
@@ -60,6 +60,7 @@
 #include "solist.h"
 #include "macrotab.h"
 #include "macroscope.h"
+#include "ada-lang.h"
 
 #include "psymtab.h"
 #include "parser-defs.h"
@@ -106,7 +107,7 @@ void _initialize_symtab (void);
 /* */
 
 /* When non-zero, print debugging messages related to symtab creation.  */
-int symtab_create_debug = 0;
+unsigned int symtab_create_debug = 0;
 
 /* Non-zero if a file may be known by two different basenames.
    This is the uncommon case, and significantly slows down gdb.
@@ -171,6 +172,22 @@ search_domain_name (enum search_domain e)
     case TYPES_DOMAIN: return "TYPES_DOMAIN";
     case ALL_DOMAIN: return "ALL_DOMAIN";
     default: gdb_assert_not_reached ("bad search_domain");
+    }
+}
+
+/* Set the primary field in SYMTAB.  */
+
+void
+set_symtab_primary (struct symtab *symtab, int primary)
+{
+  symtab->primary = primary;
+
+  if (symtab_create_debug && primary)
+    {
+      fprintf_unfiltered (gdb_stdlog,
+			  "Created primary symtab %s for %s.\n",
+			  host_address_to_string (symtab),
+			  symtab_to_filename_for_display (symtab));
     }
 }
 
@@ -676,6 +693,42 @@ symbol_find_demangled_name (struct general_symbol_info *gsymbol,
      symbols).  Just the mangling standard is not standardized across compilers
      and there is no DW_AT_producer available for inferiors with only the ELF
      symbols to check the mangling kind.  */
+
+  /* Check for Ada symbols last.  See comment below explaining why.  */
+
+  if (gsymbol->language == language_auto)
+   {
+     const char *demangled = ada_decode (mangled);
+
+     if (demangled != mangled && demangled != NULL && demangled[0] != '<')
+       {
+	 /* Set the gsymbol language to Ada, but still return NULL.
+	    Two reasons for that:
+
+	      1. For Ada, we prefer computing the symbol's decoded name
+		 on the fly rather than pre-compute it, in order to save
+		 memory (Ada projects are typically very large).
+
+	      2. There are some areas in the definition of the GNAT
+		 encoding where, with a bit of bad luck, we might be able
+		 to decode a non-Ada symbol, generating an incorrect
+		 demangled name (Eg: names ending with "TB" for instance
+		 are identified as task bodies and so stripped from
+		 the decoded name returned).
+
+		 Returning NULL, here, helps us get a little bit of
+		 the best of both worlds.  Because we're last, we should
+		 not affect any of the other languages that were able to
+		 demangle the symbol before us; we get to correctly tag
+		 Ada symbols as such; and even if we incorrectly tagged
+		 a non-Ada symbol, which should be rare, any routing
+		 through the Ada language should be transparent (Ada
+		 tries to behave much like C/C++ with non-Ada symbols).  */
+	 gsymbol->language = language_ada;
+	 return NULL;
+       }
+   }
+
   return NULL;
 }
 
@@ -5273,13 +5326,15 @@ one base name, and gdb will do file name comparisons more efficiently."),
 			   NULL, NULL,
 			   &setlist, &showlist);
 
-  add_setshow_boolean_cmd ("symtab-create", no_class, &symtab_create_debug,
-			   _("Set debugging of symbol table creation."),
-			   _("Show debugging of symbol table creation."), _("\
-When enabled, debugging messages are printed when building symbol tables."),
-			    NULL,
-			    NULL,
-			    &setdebuglist, &showdebuglist);
+  add_setshow_zuinteger_cmd ("symtab-create", no_class, &symtab_create_debug,
+			     _("Set debugging of symbol table creation."),
+			     _("Show debugging of symbol table creation."), _("\
+When enabled (non-zero), debugging messages are printed when building\n\
+symbol tables.  A value of 1 (one) normally provides enough information.\n\
+A value greater than 1 provides more verbose information."),
+			     NULL,
+			     NULL,
+			     &setdebuglist, &showdebuglist);
 
   observer_attach_executable_changed (symtab_observer_executable_changed);
 }

@@ -26,7 +26,7 @@ static struct PyModuleDef EventModuleDef =
   PyModuleDef_HEAD_INIT,
   "gdb.events",
   NULL,
-  -1, 
+  -1,
   NULL,
   NULL,
   NULL,

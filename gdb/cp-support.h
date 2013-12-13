@@ -220,6 +220,11 @@ extern struct symbol *cp_lookup_nested_symbol (struct type *parent_type,
 
 struct type *cp_lookup_transparent_type (const char *name);
 
+/* See description in cp-namespace.c.  */
+
+struct type *find_type_baseclass_by_name (struct type *parent_type,
+					  const char *name);
+
 /* Functions from cp-name-parser.y.  */
 
 extern struct demangle_parse_info *cp_demangled_name_to_comp

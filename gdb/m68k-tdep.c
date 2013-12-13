@@ -26,7 +26,7 @@
 #include "symtab.h"
 #include "gdbcore.h"
 #include "value.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "inferior.h"
 #include "regcache.h"

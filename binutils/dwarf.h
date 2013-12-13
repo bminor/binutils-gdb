@@ -108,6 +108,8 @@ typedef struct
 }
 DWARF2_Internal_ARange;
 
+/* N.B. The order here must match the order in debug_displays.  */
+
 enum dwarf_section_display_enum
 {
   abbrev = 0,
@@ -116,12 +118,14 @@ enum dwarf_section_display_enum
   info,
   line,
   pubnames,
+  gnu_pubnames,
   eh_frame,
   macinfo,
   macro,
   str,
   loc,
   pubtypes,
+  gnu_pubtypes,
   ranges,
   static_func,
   static_vars,

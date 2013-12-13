@@ -45,6 +45,7 @@ static struct cmdpy_completer completers[] =
   { "COMPLETE_LOCATION", location_completer },
   { "COMPLETE_COMMAND", command_completer },
   { "COMPLETE_SYMBOL", make_symbol_completion_list_fn },
+  { "COMPLETE_EXPRESSION", expression_completer },
 };
 
 #define N_COMPLETERS (sizeof (completers) / sizeof (completers[0]))
@@ -307,14 +308,14 @@ cmdpy_completer (struct cmd_list_element *command,
 
 /* Helper for cmdpy_init which locates the command list to use and
    pulls out the command name.
-   
+
    NAME is the command name list.  The final word in the list is the
    name of the new command.  All earlier words must be existing prefix
    commands.
 
    *BASE_LIST is set to the final prefix command's list of
    *sub-commands.
-   
+
    START_LIST is the list in which the search starts.
 
    This function returns the xmalloc()d name of the new command.  On
@@ -463,16 +464,16 @@ cmdpy_init (PyObject *self, PyObject *args, PyObject *kw)
     return -1;
 
   pfx_name = NULL;
-  if (is_prefix != NULL) 
+  if (is_prefix != NULL)
     {
       cmp = PyObject_IsTrue (is_prefix);
       if (cmp == 1)
 	{
 	  int i, out;
-	  
+	
 	  /* Make a normalized form of the command name.  */
 	  pfx_name = xmalloc (strlen (name) + 2);
-	  
+	
 	  i = 0;
 	  out = 0;
 	  while (name[i])

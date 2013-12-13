@@ -1,3 +1,8 @@
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* x86_64.h (R_X86_64_PC32_BND): New.
+	(R_X86_64_PLT32_BND): Likewise.
+
 2013-10-30  Alan Modra  <amodra@gmail.com>
 
 	* powerpc.h (EF_PPC64_ABI): New enum constant.

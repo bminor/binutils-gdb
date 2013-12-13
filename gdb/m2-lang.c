@@ -357,6 +357,7 @@ const struct exp_descriptor exp_descriptor_modula2 =
 const struct language_defn m2_language_defn =
 {
   "modula-2",
+  "Modula-2",
   language_m2,
   range_check_on,
   case_sensitive_on,

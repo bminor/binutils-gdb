@@ -64,13 +64,17 @@ enum amd64_regnum
   AMD64_XMM1_REGNUM,		/* %xmm1 */
   AMD64_MXCSR_REGNUM = AMD64_XMM0_REGNUM + 16,
   AMD64_YMM0H_REGNUM,		/* %ymm0h */
-  AMD64_YMM15H_REGNUM = AMD64_YMM0H_REGNUM + 15
+  AMD64_YMM15H_REGNUM = AMD64_YMM0H_REGNUM + 15,
+  AMD64_BND0R_REGNUM = AMD64_YMM15H_REGNUM + 1,
+  AMD64_BND3R_REGNUM = AMD64_BND0R_REGNUM + 3,
+  AMD64_BNDCFGU_REGNUM,
+  AMD64_BNDSTATUS_REGNUM
 };
 
 /* Number of general purpose registers.  */
 #define AMD64_NUM_GREGS		24
 
-#define AMD64_NUM_REGS		(AMD64_YMM15H_REGNUM + 1)
+#define AMD64_NUM_REGS		(AMD64_BNDSTATUS_REGNUM + 1)
 
 extern struct displaced_step_closure *amd64_displaced_step_copy_insn
   (struct gdbarch *gdbarch, CORE_ADDR from, CORE_ADDR to,

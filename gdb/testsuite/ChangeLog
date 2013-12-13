@@ -1,3 +1,404 @@
+2013-12-12  Siva Chandra Reddy  <sivachandra@google.com>
+
+	PR python/16113
+	* gdb.python/py-value-cc.cc: Improve test case.
+	* gdb.python/py-value-cc.exp: Add new tests to test usage of
+	gdb.Field objects as subscripts on gdb.Value objects.
+
+2013-12-10  Doug Evans  <dje@google.com>
+
+	PR 16286
+	* gdb.python/py-value.c: #include stdlib.h, string.h.
+	(str): New struct.
+	(main): New local xstr.
+	* gdb.python/py-value.exp (test_value_in_inferior): Add test to
+	fetch a value as a string with a length beyond the declared length
+	of the array.
+
+2013-12-10  Andrew Burgess  <aburgess@broadcom.com>
+
+	* lib/gdb.exp (gdb_compile_shlib): Add call to get_compiler_info,
+	update comment.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/int_deref.exp: Add test verifying that we print
+	the decoded symbol name when printing the address of Ada
+	symbols.
+
+2013-12-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-start.exp: Add test verifying that -list-features
+	contains "exec-run-start-option".
+
+2013-12-08  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (support_complex_tests): Use gdb_produce_source.
+	(is_elf_target, is_ilp32_target, is_ilp64_target): Likewise.
+	(is_64_target, is_amd64_regs_target): Likewise.
+	(skip_altivec_tests, skip_vsx_tests, skip_btrace_tests): Likewise.
+
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb.ada/uninitialized_vars/parse_controlled.ads: Remove +x file mode.
+	* gdb.base/testenv.c: Likewise.
+
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* gdb.hp/gdb.base-hp/so-thresh.sh: Change /bin/ksh to /bin/sh.
+	* gdb.hp/gdb.objdbg/tools/symaddr: Likewise.
+	* gdb.hp/gdb.objdbg/tools/symaddr.pa64: Likewise.
+
+2013-12-06  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/dw2-undefined-ret-addr.S: New file.
+	* gdb.dwarf2/dw2-undefined-ret-addr.c: New file.
+	* gdb.dwarf2/dw2-undefined-ret-addr.exp: New file.
+
+2013-12-06  Doug Evans  <dje@google.com>
+
+	* gdb.base/break.exp: Fix setting of $baz.
+
+2013-12-06  Andrew Burgess  <aburgess@broadcom.com>
+
+	* lib/dwarf.exp: (Dwarf::_location): Handle DW_OP_bit_piece and
+	DW_OP_plus_uconst.
+
+2013-12-06  Keven Boell  <keven.boell@intel.com>
+
+	* lib/mi-support.exp (mi_list_varobj_children_range): Add
+	call to mi_list_array_varobj_children_with_index.
+	(mi_list_array_varobj_children_with_index): New function.
+	Add parameter to specify array start.
+
+2013-12-03  Jose E. Marchesi  <jose.marchesi@oracle.com>
+
+	* gdb.base/sigall.exp (test_one_sig): gdb identifies SIGLOST as a
+	SIGPWR in sparc64.
+
+	* gdb.base/sigall.c (main): In some targets SIGLOST and SIGPWR
+	have the same signal number.  Handle this situation.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/dot_all: New testcase.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-undefined-cmd.exp: New testcase.
+
+2013-12-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-i-cmd.exp: New file.
+
+2013-12-02  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf/dwp-symlink.c: Fake out gdb to not load debug info
+	at start.
+	* gdb.dwarf/dwp-symlink.exp: Test trying to load dwp when the binary
+	has been specified with a relative path and we have chdir'd before
+	accessing the debug info.
+
+2013-11-28  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.trace/unavailable.exp (gdb_collect_args_test): Update
+	expected results.
+	(gdb_collect_locals_test): Likewise.
+	(gdb_collect_globals_test): Likewise.
+
+2013-11-28  Yao Qi  <yao@codesourcery.com>
+
+	* lib/gdb.exp (with_gdb_prompt): New proc.
+	* gdb.perf/disassemble.exp: New.
+	* gdb.perf/disassemble.py: New.
+
+2013-11-26  Luis Machado  <lgustavo@codesourcery.com>
+
+	* gdb.base/callfuncs.c (main): Assign malloc's return value
+	and free it afterwards.
+	* gdb.base/charset-malloc.c (malloc_stub): Likewise.
+	* gdb.base/printcmds.c (main): Likewise.
+	* gdb.base/randomize.c (main): Free "p" and change breakpoint
+	marker position.
+	* gdb.base/setvar.c (dummy): Assign malloc's return value
+	and free it afterwards.
+
+2013-11-26  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.base/setshow.exp: Add $gdb_prompt to the patterns in
+	gdb_test_multiple.
+
+2013-11-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dw2-unspecified-ret-addr.S: Remove.
+	* gdb.dwarf2/dw2-unspecified-ret-addr.c: Remove.
+	* gdb.dwarf2/dw2-unspecified-ret-addr.exp: Remove.
+
+2013-11-25  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/14819
+	* gdb.cp/impl-this.cc: New file.
+	* gdb.cp/impl-this.exp: New file.
+
+2013-11-25  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.perf/backtrace.c: New.
+	* gdb.perf/backtrace.exp: New.
+	* gdb.perf/backtrace.py: New.
+
+2013-11-24  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.perf/single-step.c: New.
+	* gdb.perf/single-step.exp: New.
+	* gdb.perf/single-step.py: New.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.base/ena-dis-br.exp: Add missing quote to "step after continue
+	with ignore count".
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-value.exp (test_lazy_strings): Tweak test names.
+	(test_subscript_regression): Ditto.
+	(top level): Run test_subscript_regression for c++ with "c++" prefix.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-type.exp (test_enums): Fix typo.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-symbol.exp: Add some comments.  Make all test names
+	unique.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-symbol.exp: Fix whitespace.
+
+2013-11-23  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/python.exp: Don't call skip_python_tests, we still want
+	to test some things in the case where python is not configured in.
+
+2013-11-22  Pedro Alves  <palves@redhat.com>
+
+	* gdb.dwarf2/dw2-bad-cfi.S: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.S: ... this.  Adjust.
+	* gdb.dwarf2/dw2-bad-cfi.c: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.c: ... this.
+	* gdb.dwarf2/dw2-bad-cfi.exp: Rename to ...
+	* gdb.dwarf2/dw2-unspecified-ret-addr.exp: ... this.
+
+2013-11-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dw2-bad-cfi.S: Update comment.
+
+2013-11-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.dwarf2/dw2-bad-cfi.c: New file.
+	* gdb.dwarf2/dw2-bad-cfi.exp: New file.
+	* gdb.dwarf2/dw2-bad-cfi.S: New file.
+
+2013-11-22  Pedro Alves  <palves@redhat.com>
+
+	PR 16155
+	* gdb.dwarf2/dw2-dup-frame.S: New file.
+	* gdb.dwarf2/dw2-dup-frame.c: New file.
+	* gdb.dwarf2/dw2-dup-frame.exp: New file.
+
+2013-11-22  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp (mi_create_dynamic_varobj): Update
+	comment and add one more argument "has_more".
+	* gdb.python/py-mi.exp: Callers update.
+
+2013-11-22  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.python/py-mi.exp: Use mi_create_floating_varobj instead
+	of mi_create_dynamic_varobj.
+
+2013-11-20  Pedro Alves  <palves@redhat.com>
+
+	* gdb.base/maint.exp (maint print objfiles): Consume one line at a
+	time, and run it through all three milestone regexes.
+
+2013-11-20  Sanimir Agovic  <sanimir.agovic@intel.com>
+
+	* gdb.base/eval-avoid-side-effects.exp: New file.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.arch/i386-mpx.c: New file
+	* gdb.arch/i386-mpx.exp: New file.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.python/py-pp-maint.exp: Consider new pretty-print added 
+	for bnd registers.
+
+2013-11-20  Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.xml/maint_print_struct.xml (bitfield): Added bitfield having
+	start and end equal 0.
+
+2013-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp (mi_child_regexp): Remove 'whatever'.
+	(mi_list_varobj_children_range): Likewise.
+
+2013-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp (mi_child_regexp): Remove unnecessary '\'.
+
+2013-11-19  Yao Qi  <yao@codesourcery.com>
+
+	* lib/mi-support.exp: Fix format.
+
+2013-11-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/py_range: New testcase.
+
+2013-11-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* mi-language.exp: Add "-list-features" test verifying that
+	its output contains "language-option".
+
+2013-11-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* info_exc/const.ads (Aint_Global_GDB_E): Renames Aint_Global_E.
+	* info_exc/foo.adb: Adjust to new exception name.
+	* info_exc.exp: Adjust after exception renaming in const.ads.
+	Update "info exception global" test to test "info exceptions
+	global_gdb" instead.
+
+	* mi_exc_info/const.ads (Aint_Global_GDB_E): Renames Aint_Global_E.
+	* mi_exc_info/foo.adb (Adjust to new exception name.
+	* mi_exc_info.exp: Adjust after exception renaming in const.ads.
+	Update "-info-ada-exceptions global" test to test
+	"-info-ada-exceptions global_gdb" instead.
+
+2013-11-15  Luis Machado  <lgustavo@codesourcery.com>
+
+	* lib/mi-support.exp (mi_gdb_test): Expect different formats
+	of inferior output for remote and native sessions.
+	* gdb.mi/mi-console.exp: Remove obsolete comment.
+	Check for semihosted inferior output pattern.
+	(semihosted_string): New function.
+
+2013-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc.exp: Allow other global exceptions to be
+	listed in the output of "info exceptions".
+	* gdb.ada/mi_exc_info.exp: Allow other global exceptions to be
+	listed in the output of "-info-ada-exceptions".
+
+2013-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc.exp: Start inferior before starting
+	the "info exceptions" tests.
+	* gdb.ada/mi_exc_info.exp: Start inferior before starting
+	the "-info-ada-exceptions" tests.
+
+2013-11-15  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.cp/includefile: New file.
+	* gdb.cp/filename.exp: New file.
+	* gdb.cp/filename.cc: New file.
+
+2013-11-15  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-breakpoint.exp: Make tests have unique names.
+
+2013-11-15  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-breakpoint.exp: Reformat for 80 columns.
+
+2013-11-15  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-breakpoint.exp: Split up into several functions,
+	each with their own test prefix.
+
+2013-11-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/O2_float_param: New testcase.
+
+2013-11-14  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (check-parallel): Print summary from gdb.sum.
+
+2013-11-14  Omair Javaid  <Omair.Javaid@linaro.org>
+
+        * gdb.dwarf2/dw2-case-insensitive-debug.S: Updated compile unit
+	and function label names.
+        * gdb.dwarf2/dw2-case-insensitive.c: Created function and
+	compile unit labels.
+
+2013-11-14  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.mi/mi-language.exp: New file.
+
+2013-09-17  Keith Seitz  <keiths@redhat.com>
+
+	PR c++/7935
+	PR c++/10541
+	* gdb.cp/nsalias.exp: New file.
+	* gdb.cp/nsalias.cc: New file.
+	* gdb.cp/nsrecurs.exp: Remove kfails. Conditionally run
+	tests only on known, working compiler versions.
+
+2013-11-13  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.multi/multi-arch-exec.exp: Define BASEDIR when compiling.
+	* gdb.multi/multi-arch-exec.c (main): Use BASEDIR.
+
+2013-11-12  Doug Evans  <dje@google.com>
+
+	* gdb.base/fileio.exp: Make $dir2 writable after the test is done
+	so that "rm -rf $builddir" Just Works.
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_exc_info: New testcase.
+
+2013-11-12  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/info_exc: New testcase.
+
+2013-11-11  Doug Evans  <dje@google.com>
+
+	* gdb.arch/arm-bl-branch-dest.exp: Use gdb_test_file_name instead
+	of testfile.
+
+2013-11-11  Phil Muldoon  <pmuldoon@redhat.com>
+
+ 	* gdb.python/py-linetable.S: New file.
+	* gdb.python/py-linetable.c: New file.
+ 	* gdb.python/py-linetable.exp: New file.
+
+2013-11-11  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/mi_ex_cond: New testcase.
+
+2013-11-07  Doug Evans  <dje@google.com>
+
+	PR 11786
+	* gdb.base/gcore-relro-pie.c: New file.
+	* gdb.base/gcore-relro-pie.exp: New file.
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+        * gdb.python/py-cmd.exp: Add COMPLETE_EXPRESSION tests.
+        * gdb.python/py-cmd.c: New File.
+
+2013-11-07  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* gdb.python/py-breakpoint.exp: Add temporary breakpoint tests.
+
+2013-11-06  Doug Evans  <xdje42@gmail.com>
+
+	* gdb.python/py-arch.exp: Tweak test name for bad memory access test.
+
 2013-11-06  Yao Qi  <yao@codesourcery.com>
 
 	* lib/gdb.exp (gdb_produce_source): New procedure.

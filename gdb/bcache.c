@@ -22,7 +22,7 @@
 #include "defs.h"
 #include "gdb_obstack.h"
 #include "bcache.h"
-#include "gdb_string.h"		/* For memcpy declaration */
+#include <string.h>		/* For memcpy declaration */
 #include "gdb_assert.h"
 
 #include <stddef.h>

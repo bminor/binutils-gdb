@@ -22,10 +22,11 @@
 #include "gdbcmd.h"
 #include "memattr.h"
 #include "target.h"
+#include "target-dcache.h"
 #include "value.h"
 #include "language.h"
 #include "vec.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "breakpoint.h"
 #include "cli/cli-utils.h"
 

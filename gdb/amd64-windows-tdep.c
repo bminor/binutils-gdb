@@ -649,7 +649,8 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 	   ex_ui.CountOfCodes, ex_ui.FrameRegisterOffset);
 
       /* Check version.  */
-      if (PEX64_UWI_VERSION (ex_ui.Version_Flags) != 1)
+      if (PEX64_UWI_VERSION (ex_ui.Version_Flags) != 1
+	  && PEX64_UWI_VERSION (ex_ui.Version_Flags) != 2)
 	return;
 
       if (j == 0
@@ -696,7 +697,17 @@ amd64_windows_frame_decode_insns (struct frame_info *this_frame,
 	return;
 
       end_insns = &insns[codes_count * 2];
-      for (p = insns; p < end_insns; p += 2)
+      p = insns;
+
+      /* Skip opcodes 6 of version 2.  This opcode is not documented.  */
+      if (PEX64_UWI_VERSION (ex_ui.Version_Flags) == 2)
+	{
+	  for (; p < end_insns; p += 2)
+	    if (PEX64_UNWCODE_CODE (p[1]) != 6)
+	      break;
+	}
+
+      for (; p < end_insns; p += 2)
 	{
 	  int reg;
 

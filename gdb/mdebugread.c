@@ -55,8 +55,8 @@
 #include "block.h"
 #include "dictionary.h"
 #include "mdebugread.h"
-#include "gdb_stat.h"
-#include "gdb_string.h"
+#include <sys/stat.h>
+#include <string.h>
 #include "psympriv.h"
 #include "source.h"
 
@@ -4334,7 +4334,7 @@ psymtab_to_symtab_1 (struct objfile *objfile,
 	}
       pop_parse_stack ();
 
-      st->primary = 1;
+      set_symtab_primary (st, 1);
 
       sort_blocks (st);
     }

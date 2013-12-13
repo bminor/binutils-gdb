@@ -22,7 +22,7 @@
 
 #include <stddef.h>
 
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 
 /* The macros here implement a set of templated vector types and

@@ -30,7 +30,6 @@ struct interp;
 extern int interp_resume (struct interp *interp);
 extern int interp_suspend (struct interp *interp);
 extern int interp_prompt_p (struct interp *interp);
-extern int interp_exec_p (struct interp *interp);
 extern struct gdb_exception interp_exec (struct interp *interp,
 					 const char *command);
 extern int interp_quiet_p (struct interp *interp);

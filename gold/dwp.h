@@ -88,6 +88,10 @@ gold_fatal(const char* format, ...) ATTRIBUTE_NORETURN ATTRIBUTE_PRINTF_1;
 extern void
 gold_warning(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 
+// This function is called to print an informational message.
+extern void
+gold_info(const char* msg, ...) ATTRIBUTE_PRINTF_1;
+
 #define gold_unreachable() \
   (gold::do_gold_unreachable(__FILE__, __LINE__, \
 			     static_cast<const char*>(__FUNCTION__)))

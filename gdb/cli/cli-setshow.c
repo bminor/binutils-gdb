@@ -19,7 +19,7 @@
 #include "readline/tilde.h"
 #include "value.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "arch-utils.h"
 #include "observer.h"
 

@@ -1842,8 +1842,8 @@ Same as @option{--section-start}, with @code{.bss}, @code{.data} or
 @kindex -Ttext-segment=@var{org}
 @item -Ttext-segment=@var{org}
 @cindex text segment origin, cmd line
-When creating an ELF executable or shared object, it will set the address
-of the first byte of the text segment.
+When creating an ELF executable, it will set the address of the first
+byte of the text segment.
 
 @kindex -Trodata-segment=@var{org}
 @item -Trodata-segment=@var{org}
@@ -2661,6 +2661,11 @@ The driver uses the MS Windows Driver Model.
 @item --tsaware
 The image is Terminal Server aware.
 
+@kindex --insert-timestamp
+@item --insert-timestamp
+Insert a real timestamp into the image, rather than the default value
+of zero.  This will result in a slightly different results with each
+invocation, which could be helpful for distributing unique images.
 @end table
 
 @c man end

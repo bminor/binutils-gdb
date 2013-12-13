@@ -392,82 +392,6 @@ debug_sym_get_probes (struct objfile *objfile)
   return retval;
 }
 
-static unsigned
-debug_sym_get_probe_argument_count (struct probe *probe)
-{
-  struct objfile *objfile = probe->objfile;
-  const struct debug_sym_fns_data *debug_data =
-    objfile_data (objfile, symfile_debug_objfile_data_key);
-  unsigned retval;
-
-  retval = debug_data->real_sf->sym_probe_fns->sym_get_probe_argument_count
-    (probe);
-
-  fprintf_filtered (gdb_stdlog,
-		    "probes->sym_get_probe_argument_count (%s) = %u\n",
-		    host_address_to_string (probe), retval);
-
-  return retval;
-}
-
-static int
-debug_can_evaluate_probe_arguments (struct probe *probe)
-{
-  struct objfile *objfile = probe->objfile;
-  const struct debug_sym_fns_data *debug_data =
-    objfile_data (objfile, symfile_debug_objfile_data_key);
-  int retval;
-
-  retval = debug_data->real_sf->sym_probe_fns->can_evaluate_probe_arguments
-    (probe);
-
-  fprintf_filtered (gdb_stdlog,
-		    "probes->can_evaluate_probe_arguments (%s) = %d\n",
-		    host_address_to_string (probe), retval);
-
-  return retval;
-}
-
-static struct value *
-debug_sym_evaluate_probe_argument (struct probe *probe, unsigned n)
-{
-  struct objfile *objfile = probe->objfile;
-  const struct debug_sym_fns_data *debug_data =
-    objfile_data (objfile, symfile_debug_objfile_data_key);
-  struct value *retval;
-
-  fprintf_filtered (gdb_stdlog,
-		    "probes->sym_evaluate_probe_argument (%s, %u)\n",
-		    host_address_to_string (probe), n);
-
-  retval = debug_data->real_sf->sym_probe_fns->sym_evaluate_probe_argument
-    (probe, n);
-
-  fprintf_filtered (gdb_stdlog,
-		    "probes->sym_evaluate_probe_argument (...) = %s\n",
-		    host_address_to_string (retval));
-
-  return retval;
-}
-
-static void
-debug_sym_compile_to_ax (struct probe *probe, struct agent_expr *expr,
-			 struct axs_value *value, unsigned n)
-{
-  struct objfile *objfile = probe->objfile;
-  const struct debug_sym_fns_data *debug_data =
-    objfile_data (objfile, symfile_debug_objfile_data_key);
-
-  fprintf_filtered (gdb_stdlog,
-		    "probes->sym_compile_to_ax (%s, %s, %s, %u)\n",
-		    host_address_to_string (probe),
-		    host_address_to_string (expr),
-		    host_address_to_string (value), n);
-
-  debug_data->real_sf->sym_probe_fns->sym_compile_to_ax
-    (probe, expr, value, n);
-}
-
 static void
 debug_sym_relocate_probe (struct objfile *objfile,
 			  const struct section_offsets *new_offsets,
@@ -489,10 +413,6 @@ debug_sym_relocate_probe (struct objfile *objfile,
 static const struct sym_probe_fns debug_sym_probe_fns =
 {
   debug_sym_get_probes,
-  debug_sym_get_probe_argument_count,
-  debug_can_evaluate_probe_arguments,
-  debug_sym_evaluate_probe_argument,
-  debug_sym_compile_to_ax,
   debug_sym_relocate_probe
 };
 

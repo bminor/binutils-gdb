@@ -291,6 +291,12 @@ proc test_value_in_inferior {} {
   # For the purposes of this test, use repr()
   gdb_py_test_silent_cmd "python nullst = nullst.string (length = 9)" "get string beyond null" 1
   gdb_test "python print (repr(nullst))" "u?'divide\\\\x00et'"
+
+  # Test fetching a string longer than its declared (in C) size.
+  # PR 16286
+  gdb_py_test_silent_cmd "python xstr = gdb.parse_and_eval('xstr')" "get xstr" 1
+  gdb_test "python print xstr\['text'\].string (length = xstr\['length'\])" "x{100}" \
+    "read string beyond declared size"
 }
 
 proc test_lazy_strings {} {
@@ -301,8 +307,8 @@ proc test_lazy_strings {} {
   gdb_py_test_silent_cmd "python sptr = gdb.history (0)" "Get value from history" 1
 
   gdb_py_test_silent_cmd "python lstr = sptr.lazy_string()" "Aquire lazy string" 1
-  gdb_test "python print (lstr.type)" "const char \*." "Test type name equality"
-  gdb_test "python print (sptr.type)" "const char \*." "Test type name equality"
+  gdb_test "python print (lstr.type)" "const char \*." "Test lazy-string type name equality"
+  gdb_test "python print (sptr.type)" "const char \*." "Test string type name equality"
   gdb_test "print sn" "0x0"
   gdb_py_test_silent_cmd "python snptr = gdb.history (0)" "Get value from history" 1
   gdb_test "python snstr = snptr.lazy_string(length=5)" ".*Cannot create a lazy string with address.*" "Test lazy string"
@@ -424,12 +430,12 @@ proc test_subscript_regression {exefile lang} {
      "Create a value for subscript test" 1
 
  # Try to access an int with a subscript.  This should fail.
- gdb_test "python print (intv)" "1" "Baseline print of a Python value"
+ gdb_test "python print (intv)" "1" "Baseline print of an int Python value"
  gdb_test "python print (intv\[0\])" "gdb.error: Cannot subscript requested type.*" \
      "Attempt to access an integer with a subscript"
 
  # Try to access a string with a subscript.  This should pass.
- gdb_test "python print (stringv)" "foo." "Baseline print of a Python value"
+ gdb_test "python print (stringv)" "foo." "Baseline print of a string Python value"
  gdb_test "python print (stringv\[0\])" "f." "Attempt to access a string with a subscript"
 
  # Try to access an int array via a pointer with a subscript.  This should pass.
@@ -515,5 +521,7 @@ if ![skip_cplus_tests] {
     if { [build_inferior "${binfile}-cxx" "c++"] < 0 } {
 	return -1
     }
-    test_subscript_regression "${binfile}-cxx" "c++"
+    with_test_prefix "c++" {
+	test_subscript_regression "${binfile}-cxx" "c++"
+    }
 }

@@ -23,7 +23,7 @@
 #include "xml-support.h"
 #include "filestuff.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include "safe-ctype.h"
 
 /* Debugging flag.  */

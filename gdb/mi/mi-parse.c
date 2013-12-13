@@ -25,8 +25,9 @@
 #include "charset.h"
 
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "cli/cli-utils.h"
+#include "language.h"
 
 static const char mi_no_values[] = "--no-values";
 static const char mi_simple_values[] = "--simple-values";
@@ -244,6 +245,7 @@ mi_parse (const char *cmd, char **token)
   parse->thread_group = -1;
   parse->thread = -1;
   parse->frame = -1;
+  parse->language = language_unknown;
 
   cleanup = make_cleanup (mi_parse_cleanup, parse);
 
@@ -283,7 +285,8 @@ mi_parse (const char *cmd, char **token)
   /* Find the command in the MI table.  */
   parse->cmd = mi_lookup (parse->command);
   if (parse->cmd == NULL)
-    error (_("Undefined MI command: %s"), parse->command);
+    throw_error (UNDEFINED_COMMAND_ERROR,
+		 _("Undefined MI command: %s"), parse->command);
 
   /* Skip white space following the command.  */
   chp = skip_spaces_const (chp);
@@ -292,7 +295,10 @@ mi_parse (const char *cmd, char **token)
      some important commands, like '-break-*' are implemented by
      forwarding to the CLI layer directly.  We want to parse --thread
      and --frame here, so as not to leave those option in the string
-     that will be passed to CLI.  */
+     that will be passed to CLI.
+
+     Same for the --language option.  */
+
   for (;;)
     {
       const char *option;
@@ -300,6 +306,7 @@ mi_parse (const char *cmd, char **token)
       size_t tgs = sizeof ("--thread-group ") - 1;
       size_t ts = sizeof ("--thread ") - 1;
       size_t fs = sizeof ("--frame ") - 1;
+      size_t ls = sizeof ("--language ") - 1;
 
       if (strncmp (chp, "--all ", as) == 0)
 	{
@@ -347,6 +354,23 @@ mi_parse (const char *cmd, char **token)
 	  chp += fs;
 	  parse->frame = strtol (chp, &endp, 10);
 	  chp = endp;
+	}
+      else if (strncmp (chp, "--language ", ls) == 0)
+	{
+	  char *lang_name;
+	  struct cleanup *old_chain;
+
+	  option = "--language";
+	  chp += ls;
+	  lang_name = extract_arg_const (&chp);
+	  old_chain = make_cleanup (xfree, lang_name);
+
+	  parse->language = language_enum (lang_name);
+	  if (parse->language == language_unknown
+	      || parse->language == language_auto)
+	    error (_("Invalid --language argument: %s"), lang_name);
+
+	  do_cleanups (old_chain);
 	}
       else
 	break;

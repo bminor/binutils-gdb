@@ -20,7 +20,7 @@
 /* This file is derived from c-lang.c */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -416,6 +416,7 @@ pascal_language_arch_info (struct gdbarch *gdbarch,
 const struct language_defn pascal_language_defn =
 {
   "pascal",			/* Language name */
+  "Pascal",
   language_pascal,
   range_check_on,
   case_sensitive_on,

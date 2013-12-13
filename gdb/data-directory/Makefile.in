@@ -61,6 +61,7 @@ PYTHON_FILES = \
 	gdb/types.py \
 	gdb/printing.py \
 	gdb/prompt.py \
+	gdb/command/bound_registers.py \
 	gdb/command/__init__.py \
 	gdb/command/frame_filters.py \
 	gdb/command/type_printers.py \

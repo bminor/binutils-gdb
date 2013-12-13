@@ -19,7 +19,7 @@
 
 #include "defs.h"
 #include "osabi.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "solib.h"
 #include "solib-target.h"
 #include "inferior.h"

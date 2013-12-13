@@ -23,7 +23,7 @@
 #include "ctf.h"
 #include "tracepoint.h"
 #include "regcache.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "exec.h"
 #include "completer.h"
 
@@ -313,18 +313,7 @@ ctf_start (struct trace_file_writer *self, const char *dirname)
   struct ctf_trace_file_writer *writer
     = (struct ctf_trace_file_writer *) self;
   int i;
-  mode_t hmode = S_IRUSR | S_IWUSR | S_IXUSR
-#ifdef S_IRGRP
-    | S_IRGRP
-#endif
-#ifdef S_IXGRP
-    | S_IXGRP
-#endif
-    | S_IROTH /* Defined in common/gdb_stat.h if not defined.  */
-#ifdef S_IXOTH
-    | S_IXOTH
-#endif
-    ;
+  mode_t hmode = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IXGRP | S_IROTH;
 
   /* Create DIRNAME.  */
   if (mkdir (dirname, hmode) && errno != EEXIST)

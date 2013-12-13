@@ -7493,9 +7493,11 @@ arm_movt_immediate (bfd_vma value)
 
    ROOT_PLT points to the offset of the PLT entry from the start of its
    section (.iplt or .plt).  ARM_PLT points to the symbol's ARM-specific
-   bookkeeping information.  */
+   bookkeeping information.
 
-static void
+   Returns FALSE if there was a problem.  */
+
+static bfd_boolean
 elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 			      union gotplt_union *root_plt,
 			      struct arm_plt_info *arm_plt,
@@ -7685,6 +7687,16 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
 			| (tail_displacement & 0x00ffffff),
 			ptr + 12);
 	}
+      else if (using_thumb_only (htab))
+	{
+	  /* PR ld/16017: Do not generate ARM instructions for
+	     the PLT if compiling for a thumb-only target.
+
+	     FIXME: We ought to be able to generate thumb PLT instructions...  */
+	  _bfd_error_handler (_("%B: Warning: thumb mode PLT generation not currently supported"),
+			      output_bfd);
+	  return FALSE;
+	}
       else
 	{
 	  /* Calculate the displacement between the PLT slot and the
@@ -7750,6 +7762,8 @@ elf32_arm_populate_plt_entry (bfd *output_bfd, struct bfd_link_info *info,
       loc = srel->contents + plt_index * RELOC_SIZE (htab);
       SWAP_RELOC_OUT (htab) (output_bfd, &rel, loc);
     }
+
+  return TRUE;
 }
 
 /* Some relocations map to different relocations depending on the
@@ -8165,9 +8179,11 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	    plt_offset--;
 	  else
 	    {
-	      elf32_arm_populate_plt_entry (output_bfd, info, root_plt, arm_plt,
-					    -1, dynreloc_value);
-	      root_plt->offset |= 1;
+	      if (elf32_arm_populate_plt_entry (output_bfd, info, root_plt, arm_plt,
+						-1, dynreloc_value))
+		root_plt->offset |= 1;
+	      else
+		return bfd_reloc_notsupported;
 	    }
 
 	  /* Static relocations always resolve to the .iplt entry.  */
@@ -14017,8 +14033,9 @@ elf32_arm_finish_dynamic_symbol (bfd * output_bfd,
       if (!eh->is_iplt)
 	{
 	  BFD_ASSERT (h->dynindx != -1);
-	  elf32_arm_populate_plt_entry (output_bfd, info, &h->plt, &eh->plt,
-					h->dynindx, 0);
+	  if (! elf32_arm_populate_plt_entry (output_bfd, info, &h->plt, &eh->plt,
+					      h->dynindx, 0))
+	    return FALSE;
 	}
 
       if (!h->def_regular)

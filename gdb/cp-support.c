@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "cp-support.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "demangle.h"
 #include "gdb_assert.h"
 #include "gdbcmd.h"
@@ -198,8 +198,9 @@ inspect_type (struct demangle_parse_info *info,
 	  return 0;
 	}
 
-      /* If the type is a typedef, replace it.  */
-      if (TYPE_CODE (otype) == TYPE_CODE_TYPEDEF)
+      /* If the type is a typedef or namespace alias, replace it.  */
+      if (TYPE_CODE (otype) == TYPE_CODE_TYPEDEF
+	  || TYPE_CODE (otype) == TYPE_CODE_NAMESPACE)
 	{
 	  long len;
 	  int is_anon;
@@ -209,6 +210,13 @@ inspect_type (struct demangle_parse_info *info,
 
 	  /* Get the real type of the typedef.  */
 	  type = check_typedef (otype);
+
+	  /* If the symbol is a namespace and its type name is no different
+	     than the name we looked up, this symbol is not a namespace
+	     alias and does not need to be substituted.  */
+	  if (TYPE_CODE (otype) == TYPE_CODE_NAMESPACE
+	      && strcmp (TYPE_NAME (type), name) == 0)
+	    return 0;
 
 	  is_anon = (TYPE_TAG_NAME (type) == NULL
 		     && (TYPE_CODE (type) == TYPE_CODE_ENUM

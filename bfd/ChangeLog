@@ -1,3 +1,163 @@
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16318
+	* elf.c (_bfd_elf_copy_private_bfd_data): Remove BFD_ASSERT.
+	Set e_flags only if elf_flags_init is FALSE.  Copy EI_OSABI
+	field.
+
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-sh.c (bfd_elf32_bfd_set_private_bfd_flags): Removed.
+
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf.c (assign_file_positions_except_relocs): Set e_type in ELF
+	header to ET_EXEC for -pie -Ttext-segment=.
+
+2013-12-08  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_add_default_symbol): Set dynamic_def
+	and ref_dynamic_nonweak when chaining together indirect
+	symbols.
+
+2013-12-06  Tristan Gingold  <gingold@adacore.com>
+
+	* pei-x86_64.c (pex64_xdata_print_uwd_codes): Add argument rf.
+	Display epilog opcode.
+	(pex64_dump_xdata): Add argument rf; make addr a local variable.
+	Adjust call to pex64_xdata_print_uwd_codes.
+	(pex64_bfd_print_pdata): Display code range, adjust call to
+
+2013-12-05  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.c (bfd_mach_o_mkobject_init): Use bfd_zalloc.
+
+2013-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c (pe_print_resource_entries): New function: Displays
+	an entry in a .rsrc section.
+	(pe_print_resource_directory): New function: Displays a directory
+	in a .rsrc section.
+	(pe_print_rsrc): New function: Displays the contents of .rsrc
+	section.
+	(_bfd_XX_print_private_bfd_data_common): Call pe_print_rsrc.
+
+2013-12-03  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc_build_one_stub <ppc_stub_plt_branch_r2off>):
+	Don't omit saving of r2 for ELFv2.  Don't addi 2,2,0.
+	(ppc_size_one_stub <ppc_stub_plt_branch_r2off>): Adjust to suit.
+
+2013-12-03  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (ppc64_elf_link_just_syms): Remove .got check.
+	Handle ELFv2.
+
+2013-11-26  Will Newton  <will.newton@linaro.org>
+
+	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol):
+	Handle STT_GNU_IFUNC symbols correctly in static links.
+
+2013-11-26  Will Newton  <will.newton@linaro.org>
+
+	* elfnn-aarch64.c (elfNN_aarch64_final_link_relocate): Ensure
+	PLT_INDEX is calculated using correct header size.
+
+2013-11-22  Cory Fields  <cory@coryfields.com>
+
+	* libcoff-in.h: Add insert_timestamp flag to the pe_data struct.
+	* libcoff.h: Regenerate.
+	* peXXigen.c (_bfd_XXi_only_swap_filehdr_out): Only use a real
+	timestamp if --insert-timestamp was used.
+
+2013-11-19  Roland McGrath  <mcgrathr@google.com>
+
+	* elf-nacl.c (nacl_modify_segment_map): Calculate SIZEOF_HEADERS
+	when not doing linking (i.e. INFO is a null pointer).
+
+2013-11-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (elf_x86_64_section_from_shdr): Re-indent.
+
+2013-11-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf64-x86-64.c (x86_64_elf_howto_table): Add R_X86_64_PC32_BND
+	and R_X86_64_PLT32_BND.
+	(R_X86_64_standard): Replace R_X86_64_RELATIVE64 with
+	R_X86_64_PLT32_BND.
+	(IS_X86_64_PCREL_TYPE): Add R_X86_64_PLT32_BND.
+	(x86_64_reloc_map): Add BFD_RELOC_X86_64_PC32_BND and
+	BFD_RELOC_X86_64_PLT32_BND.
+	(elf_x86_64_check_relocs): Handle R_X86_64_PC32_BND and
+	R_X86_64_PLT32_BND.
+	(elf_x86_64_gc_sweep_hook): Likewise.
+	(elf_x86_64_relocate_section): Likewise.
+	* reloc.c (bfd_reloc_code_real): Add BFD_RELOC_X86_64_PC32_BND
+	and BFD_RELOC_X86_64_PLT32_BND.
+	* bfd-in2.h: Regenerated.
+	* libbfd.h: Likewise.
+
+2013-11-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* elf32-i386.c (elf_i386_allocate_dynrelocs): Make room for
+	PLT0 directly.
+	* elf64-x86-64.c (elf_x86_64_allocate_dynrelocs): Likewise.
+
+2013-11-14  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/16017
+	* elf32-arm.c (elf32_arm_populate_plt_entry): Return a boolean
+	value, TRUE for success, FALSE for failure.
+	Fail if attempting to create a PLT entry for a thumb only target.
+	(elf32_arm_final_link_relocate): Check result of calling
+	elf32_arm_populate_plt_entry.
+	(elf32_arm_finish_dynamic_symbol): Likewise.
+
+2013-11-14  Guy Martin <gmsoft@tuxicoman.be>
+
+	PR ld/16082
+	* elf32-hppa.c (elf32_hppa_hide_symbol): Remove old version
+	information when forcing a symbol to be local.
+
+2013-11-13  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* elfnn-aarch64.c (elfNN_aarch64_howto_table): Use
+	R_AARCH64_TLS_DTPMOD64 instead of R_AARCH64_TLS_DTPMOD;
+	likewise for R_AARCH64_TLS_DTPREL and R_AARCH64_TLS_TPREL.
+
+2013-11-12  Matthew Leach  <Matthew.Leach@arm.comm>
+
+	* elfxx-aarch64.c (_bfd_aarch64_elf_grok_prstatus): Fix hard-coded
+	size of struct elf_prstatus.
+
+2013-11-11  Alan Modra  <amodra@gmail.com>
+
+	* elf64-ppc.c (allocate_dynrelocs): Revert 2013-11-04 change.
+
+2013-11-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf64-ppc.c (ppc64_elf_edit_toc): Use SYMBOL_REFERENCES_LOCAL
+	here, not SYMBOL_CALLS_LOCAL.
+	(ppc64_elf_relocate_section): Likewise.
+	(size_global_entry_stubs): Set undefined symbols on their global
+	entry stubs here..
+	(build_global_entry_stubs): ..rather than here.
+	(ppc64_elf_build_stubs): Don't reset glink->size before calling
+	build_global_entry_stubs.
+
+2013-11-07  Roland McGrath  <mcgrathr@google.com>
+
+	* archures.c (bfd_mach_i386_nacl): Fix definition so it doesn't
+	collide with bfd_mach_l1om.
+	* bfd-in2.h: Regenerate.
+
+	* elf32-i386.c (elf32_i386_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf32-i386-nacl definition.
+	* elf64-x86-64.c (elf64_x86_64_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf64-x86-64-nacl definition.
+	(elf32_x86_64_nacl_elf_object_p): New function.
+	(elf_backend_object_p): Use that in elf32-x86-64-nacl definition.
+
 2013-11-05  DJ Delorie  <dj@redhat.com>
 
 	* elf32-rl78.c (elf32_rl78_relax_delete_bytes): Make sure relocs
@@ -746,18 +906,6 @@
 	(elfNN_aarch64_check_relocs): Use aarch64_elf_create_got_section.
 	(elfNN_aarch64_create_dynamic_sections): Do not define
 	_GLOBAL_OFFSET_TABLE_; call aarch64_elf_create_got_section.
-
-2013-07-02  Marcus Shawcroft  <marcus.shawcroft@arm.com>
-
-	* ld-aarch64/emit-relocs-309-low.d: Adjust .text address.
-	* ld-aarch64/emit-relocs-309-up.d: Adjust .got address.
-	* ld-aarch64/emit-relocs-312.d: Adjust offsets into .got.
-	* ld-aarch64/tls-relax-all.d: Likewise.
-	* ld-aarch64/gc-got-relocs.d: Adjust expected .got content.
-	* ld-aarch64/gc-tls-relocs.d: Likewise.
-	* ld-aarch64/tls-relax-gd-ie.d: Likewise.
-	* ld-aarch64/tls-relax-gdesc-ie-2.d: Likewise.
-	* ld-aarch64/tls-relax-gdesc-ie.d: Likewise.
 
 2013-07-02  Alan Modra  <amodra@gmail.com>
 

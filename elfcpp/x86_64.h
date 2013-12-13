@@ -92,6 +92,8 @@ enum
   R_X86_64_TLSDESC = 36,         // 2 by 64-bit TLS descriptor
   R_X86_64_IRELATIVE = 37,          // Adjust indirectly by program base
   R_X86_64_RELATIVE64 = 38,      // 64-bit adjust by program base
+  R_X86_64_PC32_BND = 39,  // PC relative 32 bit signed with BND prefix
+  R_X86_64_PLT32_BND = 40, // 32 bit PLT address with BND prefix
   // GNU vtable garbage collection extensions.
   R_X86_64_GNU_VTINHERIT = 250,
   R_X86_64_GNU_VTENTRY = 251

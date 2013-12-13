@@ -79,12 +79,13 @@ enum errors {
   /* Error accessing memory.  */
   MEMORY_ERROR,
 
-  /* Feature is not supported in this copy of GDB.  */
-  UNSUPPORTED_ERROR,
-
   /* Value not available.  E.g., a register was not collected in a
      traceframe.  */
   NOT_AVAILABLE_ERROR,
+
+  /* Value was optimized out.  Note: if the value was a register, this
+     means the register was not saved in the frame.  */
+  OPTIMIZED_OUT_ERROR,
 
   /* DW_OP_GNU_entry_value resolving failed.  */
   NO_ENTRY_VALUE_ERROR,
@@ -92,6 +93,9 @@ enum errors {
   /* Target throwing an error has been closed.  Current command should be
      aborted as the inferior state is no longer valid.  */
   TARGET_CLOSE_ERROR,
+
+  /* An undefined command was executed.  */
+  UNDEFINED_COMMAND_ERROR,
 
   /* Add more errors here.  */
   NR_ERRORS

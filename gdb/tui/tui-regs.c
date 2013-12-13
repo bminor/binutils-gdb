@@ -30,7 +30,7 @@
 #include "regcache.h"
 #include "inferior.h"
 #include "target.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "tui/tui-layout.h"
 #include "tui/tui-win.h"
 #include "tui/tui-windata.h"

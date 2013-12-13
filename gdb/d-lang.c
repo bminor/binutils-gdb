@@ -23,7 +23,7 @@
 #include "varobj.h"
 #include "d-lang.h"
 #include "c-lang.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "parser-defs.h"
 #include "gdb_obstack.h"
 
@@ -239,6 +239,7 @@ static const struct op_print d_op_print_tab[] =
 static const struct language_defn d_language_defn =
 {
   "d",
+  "D",
   language_d,
   range_check_off,
   case_sensitive_on,

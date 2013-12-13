@@ -23,7 +23,7 @@
 #include "arch-utils.h"
 #include "target.h"
 #include "inferior.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "exceptions.h"
 #include "top.h"
 #include "gdbthread.h"
@@ -99,7 +99,7 @@ static void mi_cmd_execute (struct mi_parse *parse);
 
 static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
-static void mi_execute_async_cli_command (char *cli_command, 
+static void mi_execute_async_cli_command (char *cli_command,
 					  char **argv, int argc);
 static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
@@ -203,7 +203,7 @@ mi_cmd_exec_jump (char *args, char **argv, int argc)
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   mi_execute_async_cli_command ("jump", argv, argc);
 }
- 
+
 static void
 proceed_thread (struct thread_info *thread, int pid)
 {
@@ -925,7 +925,7 @@ mi_cmd_list_thread_groups (char *command, char **argv, int argc)
 
       if (!inf)
 	error (_("Non-existent thread group id '%d'"), id);
-      
+
       print_thread_info (uiout, NULL, inf->pid);
     }
   else
@@ -1241,7 +1241,7 @@ output_register (struct frame_info *frame, int regnum, int format,
 }
 
 /* Write given values into registers. The registers and values are
-   given as pairs.  The corresponding MI command is 
+   given as pairs.  The corresponding MI command is
    -data-write-register-values <format>
                                [<regnum1> <value1>...<regnumN> <valueN>] */
 void
@@ -1337,7 +1337,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 /* This is the -data-read-memory command.
 
    ADDR: start address of data to be dumped.
-   WORD-FORMAT: a char indicating format for the ``word''.  See 
+   WORD-FORMAT: a char indicating format for the ``word''.  See
    the ``x'' command.
    WORD-SIZE: size of each ``word''; 1,2,4, or 8 bytes.
    NR_ROW: Number of rows.
@@ -1350,7 +1350,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 
    {addr="...",rowN={wordN="..." ,... [,ascii="..."]}, ...}
 
-   Returns: 
+   Returns:
    The number of bytes read is SIZE*ROW*COL.  */
 
 void
@@ -1631,7 +1631,7 @@ mi_cmd_data_read_memory_bytes (char *command, char **argv, int argc)
    ADDR: start address of the row in the memory grid where the memory
    cell is, if OFFSET_COLUMN is specified.  Otherwise, the address of
    the location to write to.
-   FORMAT: a char indicating format for the ``word''.  See 
+   FORMAT: a char indicating format for the ``word''.  See
    the ``x'' command.
    WORD_SIZE: size of each ``word''; 1,2,4, or 8 bytes
    VALUE: value to be written into the memory address.
@@ -1752,11 +1752,11 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
 
   if (len < count)
     {
-      /* Pattern is made of less bytes than count: 
+      /* Pattern is made of less bytes than count:
          repeat pattern to fill memory.  */
       data = xmalloc (count);
       make_cleanup (xfree, data);
-    
+
       steps = count / len;
       remainder = count % len;
       for (j = 0; j < steps; j++)
@@ -1765,9 +1765,9 @@ mi_cmd_data_write_memory_bytes (char *command, char **argv, int argc)
       if (remainder > 0)
         memcpy (data + steps * len, databuf, remainder);
     }
-  else 
+  else
     {
-      /* Pattern is longer than or equal to count: 
+      /* Pattern is longer than or equal to count:
          just copy len bytes.  */
       data = databuf;
     }
@@ -1793,7 +1793,7 @@ mi_cmd_enable_timings (char *command, char **argv, int argc)
     }
   else
     goto usage_error;
-    
+
   return;
 
  usage_error:
@@ -1808,19 +1808,23 @@ mi_cmd_list_features (char *command, char **argv, int argc)
       struct cleanup *cleanup = NULL;
       struct ui_out *uiout = current_uiout;
 
-      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
+      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");
       ui_out_field_string (uiout, NULL, "frozen-varobjs");
       ui_out_field_string (uiout, NULL, "pending-breakpoints");
       ui_out_field_string (uiout, NULL, "thread-info");
       ui_out_field_string (uiout, NULL, "data-read-memory-bytes");
       ui_out_field_string (uiout, NULL, "breakpoint-notifications");
       ui_out_field_string (uiout, NULL, "ada-task-info");
-      
+      ui_out_field_string (uiout, NULL, "language-option");
+      ui_out_field_string (uiout, NULL, "info-gdb-mi-command");
+      ui_out_field_string (uiout, NULL, "undefined-command-error-code");
+      ui_out_field_string (uiout, NULL, "exec-run-start-option");
+
 #if HAVE_PYTHON
       if (gdb_python_initialized)
 	ui_out_field_string (uiout, NULL, "python");
 #endif
-      
+
       do_cleanups (cleanup);
       return;
     }
@@ -1836,12 +1840,12 @@ mi_cmd_list_target_features (char *command, char **argv, int argc)
       struct cleanup *cleanup = NULL;
       struct ui_out *uiout = current_uiout;
 
-      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
+      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");
       if (target_can_async_p ())
 	ui_out_field_string (uiout, NULL, "async");
       if (target_can_execute_reverse)
 	ui_out_field_string (uiout, NULL, "reverse");
-      
+
       do_cleanups (cleanup);
       return;
     }
@@ -1864,7 +1868,7 @@ mi_cmd_add_inferior (char *command, char **argv, int argc)
 
 /* Callback used to find the first inferior other than the current
    one.  */
-   
+
 static int
 get_other_inferior (struct inferior *inf, void *arg)
 {
@@ -1896,7 +1900,7 @@ mi_cmd_remove_inferior (char *command, char **argv, int argc)
   if (inf == current_inferior ())
     {
       struct thread_info *tp = 0;
-      struct inferior *new_inferior 
+      struct inferior *new_inferior
 	= iterate_over_inferiors (get_other_inferior, NULL);
 
       if (new_inferior == NULL)
@@ -1997,7 +2001,7 @@ captured_mi_execute_command (struct ui_out *uiout, struct mi_parse *context)
 		mi_out_put (uiout, raw_stdout);
 		mi_out_rewind (uiout);
 		mi_print_timing_maybe ();
-		fputs_unfiltered ("\n", raw_stdout);		
+		fputs_unfiltered ("\n", raw_stdout);
 	      }
 	    else
 	      mi_out_rewind (uiout);
@@ -2020,7 +2024,16 @@ mi_print_exception (const char *token, struct gdb_exception exception)
     fputs_unfiltered ("unknown error", raw_stdout);
   else
     fputstr_unfiltered (exception.message, '"', raw_stdout);
-  fputs_unfiltered ("\"\n", raw_stdout);
+  fputs_unfiltered ("\"", raw_stdout);
+
+  switch (exception.error)
+    {
+      case UNDEFINED_COMMAND_ERROR:
+	fputs_unfiltered (",code=\"undefined-command\"", raw_stdout);
+	break;
+    }
+
+  fputs_unfiltered ("\n", raw_stdout);
 }
 
 void
@@ -2075,9 +2088,9 @@ mi_execute_command (const char *cmd, int from_tty)
       bpstat_do_actions ();
 
       if (/* The notifications are only output when the top-level
-	     interpreter (specified on the command line) is MI.  */      
+	     interpreter (specified on the command line) is MI.  */
 	  ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ()))
-	  /* Don't try report anything if there are no threads -- 
+	  /* Don't try report anything if there are no threads --
 	     the program is dead.  */
 	  && thread_count () != 0
 	  /* -thread-select explicitly changes thread. If frontend uses that
@@ -2102,11 +2115,11 @@ mi_execute_command (const char *cmd, int from_tty)
 	    }
 
 	  if (report_change)
-	    {     
+	    {
 	      struct thread_info *ti = inferior_thread ();
 
 	      target_terminal_ours ();
-	      fprintf_unfiltered (mi->event_channel, 
+	      fprintf_unfiltered (mi->event_channel,
 				  "thread-selected,id=\"%d\"",
 				  ti->num);
 	      gdb_flush (mi->event_channel);
@@ -2121,6 +2134,7 @@ static void
 mi_cmd_execute (struct mi_parse *parse)
 {
   struct cleanup *cleanup;
+  enum language saved_language;
 
   cleanup = prepare_execute_command ();
 
@@ -2180,6 +2194,12 @@ mi_cmd_execute (struct mi_parse *parse)
 	select_frame (fid);
       else
 	error (_("Invalid frame id: %d"), frame);
+    }
+
+  if (parse->language != language_unknown)
+    {
+      make_cleanup_restore_current_language ();
+      set_language (parse->language);
     }
 
   current_context = parse;
@@ -2256,7 +2276,7 @@ mi_execute_async_cli_command (char *cli_command, char **argv, int argc)
     run = xstrprintf ("%s %s&", cli_command, argc ? *argv : "");
   else
     run = xstrprintf ("%s %s", cli_command, argc ? *argv : "");
-  old_cleanups = make_cleanup (xfree, run);  
+  old_cleanups = make_cleanup (xfree, run);
 
   execute_command (run, 0 /* from_tty */ );
 
@@ -2357,7 +2377,7 @@ mi_load_progress (const char *section_name,
   current_uiout = saved_uiout;
 }
 
-static void 
+static void
 timestamp (struct mi_timestamp *tv)
 {
   gettimeofday (&tv->wallclock, NULL);
@@ -2379,7 +2399,7 @@ timestamp (struct mi_timestamp *tv)
 #endif
 }
 
-static void 
+static void
 print_diff_now (struct mi_timestamp *start)
 {
   struct mi_timestamp now;
@@ -2397,21 +2417,21 @@ mi_print_timing_maybe (void)
     print_diff_now (current_command_ts);
 }
 
-static long 
+static long
 timeval_diff (struct timeval start, struct timeval end)
 {
   return ((end.tv_sec - start.tv_sec) * 1000000L)
     + (end.tv_usec - start.tv_usec);
 }
 
-static void 
+static void
 print_diff (struct mi_timestamp *start, struct mi_timestamp *end)
 {
   fprintf_unfiltered
     (raw_stdout,
-     ",time={wallclock=\"%0.5f\",user=\"%0.5f\",system=\"%0.5f\"}", 
-     timeval_diff (start->wallclock, end->wallclock) / 1000000.0, 
-     timeval_diff (start->utime, end->utime) / 1000000.0, 
+     ",time={wallclock=\"%0.5f\",user=\"%0.5f\",system=\"%0.5f\"}",
+     timeval_diff (start->wallclock, end->wallclock) / 1000000.0,
+     timeval_diff (start->utime, end->utime) / 1000000.0,
      timeval_diff (start->stime, end->stime) / 1000000.0);
 }
 
