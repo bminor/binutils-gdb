@@ -1,5 +1,5 @@
-This is the beta release of binutils 2.24.51.0.1 for Linux, which is
-based on binutils 2013 1106 master branch on sourceware.org plus
+This is the beta release of binutils 2.24.51.0.2 for Linux, which is
+based on binutils 2013 1213 master branch on sourceware.org plus
 various changes. It is purely for Linux.
 
 All relevant patches in patches have been applied to the source tree.
@@ -120,12 +120,35 @@ endif
 
 to arch/ia64/Makefile in your kernel source tree.
 
-Please report any bugs related to binutils 2.24.51.0.1 to
+Please report any bugs related to binutils 2.24.51.0.2 to
 hjl.tools@gmail.com
 
 and
 
 http://www.sourceware.org/bugzilla/
+
+Changes from binutils 2.24.51.0.1:
+
+1. Update from binutils 2013 1213.
+2. Fix ld and objcopy to set the SHF_INFO_LINK bit for SHT_REL/SHT_RELA
+sections.  PR 16317.
+3. Fix ld and objcopy to properly generate PT_GNU_RELRO segment. PRs
+14207/16322/16323.
+4. Fix objcopy to copy EI_OSABI field.  PR 16318.
+5. Change ld to set e_type in ELF header to ET_EXEC for -pie
+-Ttext-segment=.
+6. Fix a ld bug for --as-needed with symbol versioning.
+7. Add gas/ld/gold support for R_X86_64_PC32_BND and R_X86_64_PLT32_BND
+relocations.
+8. Fix an assembler line listing bug.  PR 16109.
+9. Improve gold.
+10. Improve nacl support.
+11. Improve COFF support.
+12. Improve aarch64 support.
+13. Improve arm support.
+14. Improve hppa support.
+15. Improve mips support.
+16. Improve ppc support.
 
 Changes from binutils 2.23.52.0.2:
 
@@ -829,13 +852,13 @@ already been defined.  PR 12001.
 
 The file list:
 
-1. binutils-2.24.51.0.1.tar.bz2.  Source code.
+1. binutils-2.24.51.0.2.tar.bz2.  Source code.
 
 The primary sites for the beta Linux binutils are:
 
 1. http://www.kernel.org/pub/linux/devel/binutils/
 
-It is also available as hjl/linux/release/2.24.51.0.1 tag at
+It is also available as hjl/linux/release/2.24.51.0.2 tag at
 
 https://sourceware.org/git/?p=binutils-gdb.git;a=summary
 
@@ -844,4 +867,4 @@ Thanks.
 
 H.J. Lu
 hjl.tools@gmail.com
-11/08/2013
+12/13/2013
