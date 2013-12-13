@@ -1,3 +1,15 @@
+2013-12-15  Joel Brobecker  <brobecker@adacore.com>
+
+	Revert the following commit:
+	* solib.c (solib_map_sections): Remove code overwriting
+	SO->SO_NAME with the bfd's filename.
+
+	Make the following changes required after the revert above:
+	* solib-aix.c (solib_aix_bfd_open): Set the filename of the
+	returned bfd to a copy of the synthetic pathname.
+	* solib-darwin.c (darwin_bfd_open): Set the filename of the
+	returned bfd to a copy of PATHNAME.
+
 2013-12-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_array_bound_from_type): Move the declaration
