@@ -1,3 +1,8 @@
+2013-12-20  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): If merging a new weak
+	symbol that will be skipped, we don't have a new definition.
+
 2013-11-26  Will Newton  <will.newton@linaro.org>
 
 	* elfnn-aarch64.c (elfNN_aarch64_finish_dynamic_symbol):
