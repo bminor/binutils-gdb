@@ -1764,17 +1764,27 @@ windows_ensure_ntdll_loaded (void)
   for (i = 0; i < (int) (cb_needed / sizeof (HMODULE)); i++)
     {
       MODULEINFO mi;
+#ifdef __USEWIDE
+      wchar_t dll_name[__PMAX];
+      char name[__PMAX];
+#else
       char dll_name[__PMAX];
-
+      char *name;
+#endif
       if (GetModuleInformation (current_process_handle, hmodules[i],
 				&mi, sizeof (mi)) == 0)
 	continue;
       if (GetModuleFileNameEx (current_process_handle, hmodules[i],
 			       dll_name, sizeof (dll_name)) == 0)
 	continue;
-      if (FILENAME_CMP (lbasename (dll_name), "ntdll.dll") == 0)
+#ifdef __USEWIDE
+      wcstombs (name, dll_name, __PMAX);
+#else
+      name = dll_name;
+#endif
+      if (FILENAME_CMP (lbasename (name), "ntdll.dll") == 0)
 	{
-	  solib_end->next = windows_make_so (dll_name, mi.lpBaseOfDll);
+	  solib_end->next = windows_make_so (name, mi.lpBaseOfDll);
 	  solib_end = solib_end->next;
 	  return;
 	}
