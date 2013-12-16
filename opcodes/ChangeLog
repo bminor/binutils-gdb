@@ -1,3 +1,14 @@
+2013-12-16  Andrew Bennett  <andrew.bennett@imgtec.com>
+
+	* micromips-opc.c (decode_micromips_operand): Reduced range of +o, +u,
+	+v and +w.
+	(micromips_opcodes): Reduced element index range for sldi, splati,
+	copy_s, copy_u, insert and insve instructions.
+	* opcodes/mips-opc.c (decode_mips_operand): Reduced range of +o, +u,
+	+v and +w.
+	(mips_builtin_opcodes): Reduced element index range for sldi, splati,
+	copy_s, copy_u, insert and insve instructions.
+
 2013-12-13  Jan-Benedict Glaw  <jbglaw@lug-owl.de>
 
 	* nds32-dis.c (mnemonic_96): Fix typo.

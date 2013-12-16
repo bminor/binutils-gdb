@@ -92,15 +92,15 @@ decode_mips_operand (const char *p)
 	case 'l': REG (5, 6, MSA_CTRL);
 	case 'm': REG (0, 0, R5900_ACC);
 	case 'n': REG (5, 11, MSA_CTRL);
-	case 'o': SPECIAL (5, 16, IMM_INDEX);
+	case 'o': SPECIAL (4, 16, IMM_INDEX);
 	case 'p': BIT (5, 6, 0);		/* (0 .. 31), 32-bit op */
 	case 'q': REG (0, 0, R5900_Q);
 	case 'r': REG (0, 0, R5900_R);
 	case 's': MSB (5, 11, 0, FALSE, 31);	/* (0 .. 31) */
 	case 't': REG (5, 16, COPRO);
-	case 'u': SPECIAL (4, 16, IMM_INDEX);
-	case 'v': SPECIAL (3, 16, IMM_INDEX);
-	case 'w': SPECIAL (2, 16, IMM_INDEX);
+	case 'u': SPECIAL (3, 16, IMM_INDEX);
+	case 'v': SPECIAL (2, 16, IMM_INDEX);
+	case 'w': SPECIAL (1, 16, IMM_INDEX);
 	case 'x': BIT (5, 16, 0);		/* (0 .. 31) */
 	case 'y': REG (0, 0, R5900_I);
 	case 'z': REG (5, 0, GP);
@@ -2853,18 +2853,18 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"sld.h",		"+d,+e+*",	0x78200014, 0xffe0003f,	MOD_1|RD_2|RD_3,	0,		0,		MSA,	0 },
 {"sld.w",		"+d,+e+*",	0x78400014, 0xffe0003f,	MOD_1|RD_2|RD_3,	0,		0,		MSA,	0 },
 {"sld.d",		"+d,+e+*",	0x78600014, 0xffe0003f,	MOD_1|RD_2|RD_3,	0,		0,		MSA,	0 },
-{"sldi.b",		"+d,+e+o",	0x78000019, 0xffe0003f,	MOD_1|RD_2,		0,		0,		MSA,	0 },
-{"sldi.h",		"+d,+e+u",	0x78200019, 0xfff0003f,	MOD_1|RD_2,		0,		0,		MSA,	0 },
-{"sldi.w",		"+d,+e+v",	0x78300019, 0xfff8003f,	MOD_1|RD_2,		0,		0,		MSA,	0 },
-{"sldi.d",		"+d,+e+w",	0x78380019, 0xfffc003f,	MOD_1|RD_2,		0,		0,		MSA,	0 },
+{"sldi.b",		"+d,+e+o",	0x78000019, 0xfff0003f, MOD_1|RD_2,		0,		0,		MSA,	0 },
+{"sldi.h",		"+d,+e+u",	0x78200019, 0xfff8003f, MOD_1|RD_2,		0,		0,		MSA,	0 },
+{"sldi.w",		"+d,+e+v",	0x78300019, 0xfffc003f, MOD_1|RD_2,		0,		0,		MSA,	0 },
+{"sldi.d",		"+d,+e+w",	0x78380019, 0xfffe003f, MOD_1|RD_2,		0,		0,		MSA,	0 },
 {"splat.b",		"+d,+e+*",	0x78800014, 0xffe0003f,	WR_1|RD_2|RD_3,		0,		0,		MSA,	0 },
 {"splat.h",		"+d,+e+*",	0x78a00014, 0xffe0003f,	WR_1|RD_2|RD_3,		0,		0,		MSA,	0 },
 {"splat.w",		"+d,+e+*",	0x78c00014, 0xffe0003f,	WR_1|RD_2|RD_3,		0,		0,		MSA,	0 },
 {"splat.d",		"+d,+e+*",	0x78e00014, 0xffe0003f,	WR_1|RD_2|RD_3,		0,		0,		MSA,	0 },
-{"splati.b",		"+d,+e+o",	0x78400019, 0xffe0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"splati.h",		"+d,+e+u",	0x78600019, 0xfff0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"splati.w",		"+d,+e+v",	0x78700019, 0xfff8003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"splati.d",		"+d,+e+w",	0x78780019, 0xfffc003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"splati.b",		"+d,+e+o",	0x78400019, 0xfff0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"splati.h",		"+d,+e+u",	0x78600019, 0xfff8003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"splati.w",		"+d,+e+v",	0x78700019, 0xfffc003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"splati.d",		"+d,+e+w",	0x78780019, 0xfffe003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
 {"pckev.b",		"+d,+e,+h",	0x79000014, 0xffe0003f,	WR_1|RD_2|RD_3,		0,		0,		MSA,	0 },
 {"pckev.h",		"+d,+e,+h",	0x79200014, 0xffe0003f,	WR_1|RD_2|RD_3,		0,		0,		MSA,	0 },
 {"pckev.w",		"+d,+e,+h",	0x79400014, 0xffe0003f,	WR_1|RD_2|RD_3,		0,		0,		MSA,	0 },
@@ -2956,22 +2956,22 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"nlzc.h",		"+d,+e",	0x7b0d001e, 0xffff003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
 {"nlzc.w",		"+d,+e",	0x7b0e001e, 0xffff003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
 {"nlzc.d",		"+d,+e",	0x7b0f001e, 0xffff003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"copy_s.b",		"+k,+e+o",	0x78800019, 0xffe0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"copy_s.h",		"+k,+e+u",	0x78a00019, 0xfff0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"copy_s.w",		"+k,+e+v",	0x78b00019, 0xfff8003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"copy_s.d",		"+k,+e+w",	0x78b80019, 0xfffc003f,	WR_1|RD_2,		0,		0,		MSA64,	0 },
-{"copy_u.b",		"+k,+e+o",	0x78c00019, 0xffe0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"copy_u.h",		"+k,+e+u",	0x78e00019, 0xfff0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"copy_u.w",		"+k,+e+v",	0x78f00019, 0xfff8003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
-{"copy_u.d",		"+k,+e+w",	0x78f80019, 0xfffc003f,	WR_1|RD_2,		0,		0,		MSA64,	0 },
-{"insert.b",		"+d+o,d",	0x79000019, 0xffe0003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
-{"insert.h",		"+d+u,d",	0x79200019, 0xfff0003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
-{"insert.w",		"+d+v,d",	0x79300019, 0xfff8003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
-{"insert.d",		"+d+w,d",	0x79380019, 0xfffc003f,	MOD_1|RD_3,		0,		0,		MSA64,	0 },
-{"insve.b",		"+d+o,+e+&",	0x79400019, 0xffe0003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
-{"insve.h",		"+d+u,+e+&",	0x79600019, 0xfff0003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
-{"insve.w",		"+d+v,+e+&",	0x79700019, 0xfff8003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
-{"insve.d",		"+d+w,+e+&",	0x79780019, 0xfffc003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
+{"copy_s.b",		"+k,+e+o",	0x78800019, 0xfff0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"copy_s.h",		"+k,+e+u",	0x78a00019, 0xfff8003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"copy_s.w",		"+k,+e+v",	0x78b00019, 0xfffc003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"copy_s.d",		"+k,+e+w",	0x78b80019, 0xfffe003f,	WR_1|RD_2,		0,		0,		MSA64,	0 },
+{"copy_u.b",		"+k,+e+o",	0x78c00019, 0xfff0003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"copy_u.h",		"+k,+e+u",	0x78e00019, 0xfff8003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"copy_u.w",		"+k,+e+v",	0x78f00019, 0xfffc003f,	WR_1|RD_2,		0,		0,		MSA,	0 },
+{"copy_u.d",		"+k,+e+w",	0x78f80019, 0xfffe003f,	WR_1|RD_2,		0,		0,		MSA64,	0 },
+{"insert.b",		"+d+o,d",	0x79000019, 0xfff0003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
+{"insert.h",		"+d+u,d",	0x79200019, 0xfff8003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
+{"insert.w",		"+d+v,d",	0x79300019, 0xfffc003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
+{"insert.d",		"+d+w,d",	0x79380019, 0xfffe003f,	MOD_1|RD_3,		0,		0,		MSA64,	0 },
+{"insve.b",		"+d+o,+e+&",	0x79400019, 0xfff0003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
+{"insve.h",		"+d+u,+e+&",	0x79600019, 0xfff8003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
+{"insve.w",		"+d+v,+e+&",	0x79700019, 0xfffc003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
+{"insve.d",		"+d+w,+e+&",	0x79780019, 0xfffe003f,	MOD_1|RD_3,		0,		0,		MSA,	0 },
 {"bnz.b",		"+h,p",		0x47800000, 0xffe00000,	RD_1|CBD,		0,		0,		MSA,	0 },
 {"bnz.h",		"+h,p",		0x47a00000, 0xffe00000,	RD_1|CBD,		0,		0,		MSA,	0 },
 {"bnz.w",		"+h,p",		0x47c00000, 0xffe00000,	RD_1|CBD,		0,		0,		MSA,	0 },
