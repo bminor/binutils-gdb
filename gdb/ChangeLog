@@ -1,5 +1,21 @@
 2014-02-23  Yao Qi  <yao@codesourcery.com>
 
+	Revert two patches:
+
+	2013-10-25  Yao Qi  <yao@codesourcery.com>
+
+	* remote.c (remote_traceframe_info): Return early if
+	traceframe is not selected.
+
+	2013-07-19  Yao Qi  <yao@codesourcery.com>
+
+	* target.c (update_current_target): Change the default action
+	of 'to_traceframe_info' from tcomplain to return_zero.
+	* target.h (struct target_ops) <to_traceframe_info>: Add more
+	comments.
+
+2014-02-23  Yao Qi  <yao@codesourcery.com>
+
 	* valops.c (read_value_memory): Rewrite it.  Call
 	target_xfer_partial in a loop.
 	* exec.h (section_table_available_memory): Remove declaration.

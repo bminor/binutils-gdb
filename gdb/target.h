@@ -974,20 +974,11 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Return a traceframe info object describing the current
-       traceframe's contents.  If the target doesn't support
-       traceframe info, return NULL.  If the current traceframe is not
-       selected (the current traceframe number is -1), the target can
-       choose to return either NULL or an empty traceframe info.  If
-       NULL is returned, for example in remote target, GDB will read
-       from the live inferior.  If an empty traceframe info is
-       returned, for example in tfile target, which means the
-       traceframe info is available, but the requested memory is not
-       available in it.  GDB will try to see if the requested memory
-       is available in the read-only sections.  This method should not
-       cache data; higher layers take care of caching, invalidating,
-       and re-fetching when necessary.  */
+       traceframe's contents.  This method should not cache data;
+       higher layers take care of caching, invalidating, and
+       re-fetching when necessary.  */
     struct traceframe_info *(*to_traceframe_info) (struct target_ops *)
-      TARGET_DEFAULT_RETURN (NULL);
+       TARGET_DEFAULT_RETURN (tcomplain ());
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */
