@@ -1,3 +1,9 @@
+2014-01-23  Yao Qi  <yao@codesourcery.com>
+
+	* target.c (raw_memory_xfer_partial): Change argument type
+	from void * to gdb_byte *.
+	(memory_xfer_partial_1, memory_xfer_partial): Likewise.
+
 2014-01-22  Doug Evans  <dje@google.com>
 
 	New gdbserver option --debug-format=timestamp.
