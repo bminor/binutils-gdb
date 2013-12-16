@@ -115,6 +115,14 @@ static const char * const mips_cp0_names_numeric[32] =
   "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
 };
 
+static const char * const mips_cp1_names_numeric[32] =
+{
+  "$0",   "$1",   "$2",   "$3",   "$4",   "$5",   "$6",   "$7",
+  "$8",   "$9",   "$10",  "$11",  "$12",  "$13",  "$14",  "$15",
+  "$16",  "$17",  "$18",  "$19",  "$20",  "$21",  "$22",  "$23",
+  "$24",  "$25",  "$26",  "$27",  "$28",  "$29",  "$30",  "$31"
+};
+
 static const char * const mips_cp0_names_r3000[32] =
 {
   "c0_index",     "c0_random",    "c0_entrylo",   "$3",
@@ -173,6 +181,18 @@ static const char * const mips_cp0_names_mips3264[32] =
   "c0_xcontext",  "$21",          "$22",          "c0_debug",
   "c0_depc",      "c0_perfcnt",   "c0_errctl",    "c0_cacheerr",
   "c0_taglo",     "c0_taghi",     "c0_errorepc",  "c0_desave",
+};
+
+static const char * const mips_cp1_names_mips3264[32] =
+{
+  "c1_fir",       "c1_ufr",       "$2",           "$3",
+  "c1_unfr",      "$5",           "$6",           "$7",
+  "$8",           "$9",           "$10",          "$11",
+  "$12",          "$13",          "$14",          "$15",
+  "$16",          "$17",          "$18",          "$19",
+  "$20",          "$21",          "$22",          "$23",
+  "$24",          "c1_fccr",      "c1_fexr",      "$27",
+  "c1_fenr",      "$29",          "$30",          "c1_fcsr"
 };
 
 static const struct mips_cp0sel_name mips_cp0sel_names_mips3264[] =
@@ -436,62 +456,88 @@ struct mips_arch_choice
   const char * const *cp0_names;
   const struct mips_cp0sel_name *cp0sel_names;
   unsigned int cp0sel_names_len;
+  const char * const *cp1_names;
   const char * const *hwr_names;
 };
 
 const struct mips_arch_choice mips_arch_choices[] =
 {
   { "numeric",	0, 0, 0, 0, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
 
   { "r3000",	1, bfd_mach_mips3000, CPU_R3000, ISA_MIPS1, 0,
-    mips_cp0_names_r3000, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_r3000, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r3900",	1, bfd_mach_mips3900, CPU_R3900, ISA_MIPS1, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r4000",	1, bfd_mach_mips4000, CPU_R4000, ISA_MIPS3, 0,
-    mips_cp0_names_r4000, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_r4000, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r4010",	1, bfd_mach_mips4010, CPU_R4010, ISA_MIPS2, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "vr4100",	1, bfd_mach_mips4100, CPU_VR4100, ISA_MIPS3, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "vr4111",	1, bfd_mach_mips4111, CPU_R4111, ISA_MIPS3, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "vr4120",	1, bfd_mach_mips4120, CPU_VR4120, ISA_MIPS3, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r4300",	1, bfd_mach_mips4300, CPU_R4300, ISA_MIPS3, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r4400",	1, bfd_mach_mips4400, CPU_R4400, ISA_MIPS3, 0,
-    mips_cp0_names_r4000, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_r4000, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r4600",	1, bfd_mach_mips4600, CPU_R4600, ISA_MIPS3, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r4650",	1, bfd_mach_mips4650, CPU_R4650, ISA_MIPS3, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r5000",	1, bfd_mach_mips5000, CPU_R5000, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "vr5400",	1, bfd_mach_mips5400, CPU_VR5400, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "vr5500",	1, bfd_mach_mips5500, CPU_VR5500, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r5900",	1, bfd_mach_mips5900, CPU_R5900, ISA_MIPS3, 0,
-    mips_cp0_names_r5900, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_r5900, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r6000",	1, bfd_mach_mips6000, CPU_R6000, ISA_MIPS2, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "rm7000",	1, bfd_mach_mips7000, CPU_RM7000, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "rm9000",	1, bfd_mach_mips7000, CPU_RM7000, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r8000",	1, bfd_mach_mips8000, CPU_R8000, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r10000",	1, bfd_mach_mips10000, CPU_R10000, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r12000",	1, bfd_mach_mips12000, CPU_R12000, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r14000",	1, bfd_mach_mips14000, CPU_R14000, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "r16000",	1, bfd_mach_mips16000, CPU_R16000, ISA_MIPS4, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
   { "mips5",	1, bfd_mach_mips5, CPU_MIPS5, ISA_MIPS5, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
 
   /* For stock MIPS32, disassemble all applicable MIPS-specified ASEs.
      Note that MIPS-3D and MDMX are not applicable to MIPS32.  (See
@@ -502,7 +548,7 @@ const struct mips_arch_choice mips_arch_choices[] =
     ISA_MIPS32,  ASE_SMARTMIPS,
     mips_cp0_names_mips3264,
     mips_cp0sel_names_mips3264, ARRAY_SIZE (mips_cp0sel_names_mips3264),
-    mips_hwr_names_numeric },
+    mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   { "mips32r2",	1, bfd_mach_mipsisa32r2, CPU_MIPS32R2,
     ISA_MIPS32R2,
@@ -510,14 +556,14 @@ const struct mips_arch_choice mips_arch_choices[] =
      | ASE_MT | ASE_MCU | ASE_VIRT | ASE_MSA),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
-    mips_hwr_names_mips3264r2 },
+    mips_cp1_names_mips3264, mips_hwr_names_mips3264r2 },
 
   /* For stock MIPS64, disassemble all applicable MIPS-specified ASEs.  */
   { "mips64",	1, bfd_mach_mipsisa64, CPU_MIPS64,
     ISA_MIPS64,  ASE_MIPS3D | ASE_MDMX,
     mips_cp0_names_mips3264,
     mips_cp0sel_names_mips3264, ARRAY_SIZE (mips_cp0sel_names_mips3264),
-    mips_hwr_names_numeric },
+    mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   { "mips64r2",	1, bfd_mach_mipsisa64r2, CPU_MIPS64R2,
     ISA_MIPS64R2,
@@ -525,43 +571,43 @@ const struct mips_arch_choice mips_arch_choices[] =
      | ASE_MCU | ASE_VIRT | ASE_VIRT64 | ASE_MSA | ASE_MSA64),
     mips_cp0_names_mips3264r2,
     mips_cp0sel_names_mips3264r2, ARRAY_SIZE (mips_cp0sel_names_mips3264r2),
-    mips_hwr_names_mips3264r2 },
+    mips_cp1_names_mips3264, mips_hwr_names_mips3264r2 },
 
   { "sb1",	1, bfd_mach_mips_sb1, CPU_SB1,
     ISA_MIPS64 | INSN_SB1,  ASE_MIPS3D,
     mips_cp0_names_sb1,
     mips_cp0sel_names_sb1, ARRAY_SIZE (mips_cp0sel_names_sb1),
-    mips_hwr_names_numeric },
+    mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   { "loongson2e",   1, bfd_mach_mips_loongson_2e, CPU_LOONGSON_2E,
     ISA_MIPS3 | INSN_LOONGSON_2E, 0, mips_cp0_names_numeric,
-    NULL, 0, mips_hwr_names_numeric },
+    NULL, 0, mips_cp1_names_numeric, mips_hwr_names_numeric },
 
   { "loongson2f",   1, bfd_mach_mips_loongson_2f, CPU_LOONGSON_2F,
     ISA_MIPS3 | INSN_LOONGSON_2F, 0, mips_cp0_names_numeric,
-    NULL, 0, mips_hwr_names_numeric },
+    NULL, 0, mips_cp1_names_numeric, mips_hwr_names_numeric },
 
   { "loongson3a",   1, bfd_mach_mips_loongson_3a, CPU_LOONGSON_3A,
     ISA_MIPS64 | INSN_LOONGSON_3A, 0, mips_cp0_names_numeric,
-    NULL, 0, mips_hwr_names_numeric },
+    NULL, 0, mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   { "octeon",   1, bfd_mach_mips_octeon, CPU_OCTEON,
     ISA_MIPS64R2 | INSN_OCTEON, 0, mips_cp0_names_numeric, NULL, 0,
-    mips_hwr_names_numeric },
+    mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   { "octeon+",   1, bfd_mach_mips_octeonp, CPU_OCTEONP,
     ISA_MIPS64R2 | INSN_OCTEONP, 0, mips_cp0_names_numeric,
-    NULL, 0, mips_hwr_names_numeric },
+    NULL, 0, mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   { "octeon2",   1, bfd_mach_mips_octeon2, CPU_OCTEON2,
     ISA_MIPS64R2 | INSN_OCTEON2, 0, mips_cp0_names_numeric,
-    NULL, 0, mips_hwr_names_numeric },
+    NULL, 0, mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   { "xlr", 1, bfd_mach_mips_xlr, CPU_XLR,
     ISA_MIPS64 | INSN_XLR, 0,
     mips_cp0_names_xlr,
     mips_cp0sel_names_xlr, ARRAY_SIZE (mips_cp0sel_names_xlr),
-    mips_hwr_names_numeric },
+    mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   /* XLP is mostly like XLR, with the prominent exception it is being
      MIPS64R2.  */
@@ -569,12 +615,13 @@ const struct mips_arch_choice mips_arch_choices[] =
     ISA_MIPS64R2 | INSN_XLR, 0,
     mips_cp0_names_xlr,
     mips_cp0sel_names_xlr, ARRAY_SIZE (mips_cp0sel_names_xlr),
-    mips_hwr_names_numeric },
+    mips_cp1_names_mips3264, mips_hwr_names_numeric },
 
   /* This entry, mips16, is here only for ISA/processor selection; do
      not print its name.  */
   { "",		1, bfd_mach_mips16, CPU_MIPS16, ISA_MIPS3, 0,
-    mips_cp0_names_numeric, NULL, 0, mips_hwr_names_numeric },
+    mips_cp0_names_numeric, NULL, 0, mips_cp1_names_numeric,
+    mips_hwr_names_numeric },
 };
 
 /* ISA and processor type to disassemble for, and register names to use.
@@ -589,6 +636,7 @@ static const char * const *mips_fpr_names;
 static const char * const *mips_cp0_names;
 static const struct mips_cp0sel_name *mips_cp0sel_names;
 static int mips_cp0sel_names_len;
+static const char * const *mips_cp1_names;
 static const char * const *mips_hwr_names;
 
 /* Other options */
@@ -694,6 +742,7 @@ set_default_mips_dis_options (struct disassemble_info *info)
   mips_cp0_names = mips_cp0_names_numeric;
   mips_cp0sel_names = NULL;
   mips_cp0sel_names_len = 0;
+  mips_cp1_names = mips_cp1_names_numeric;
   mips_hwr_names = mips_hwr_names_numeric;
   no_aliases = 0;
 
@@ -727,6 +776,7 @@ set_default_mips_dis_options (struct disassemble_info *info)
       mips_cp0_names = chosen_arch->cp0_names;
       mips_cp0sel_names = chosen_arch->cp0sel_names;
       mips_cp0sel_names_len = chosen_arch->cp0sel_names_len;
+      mips_cp1_names = chosen_arch->cp1_names;
       mips_hwr_names = chosen_arch->hwr_names;
     }
 #endif
@@ -810,6 +860,15 @@ parse_mips_dis_option (const char *option, unsigned int len)
       return;
     }
 
+  if (strncmp ("cp1-names", option, optionlen) == 0
+      && strlen ("cp1-names") == optionlen)
+    {
+      chosen_arch = choose_arch_by_name (val, vallen);
+      if (chosen_arch != NULL)
+	mips_cp1_names = chosen_arch->cp1_names;
+      return;
+    }
+
   if (strncmp ("hwr-names", option, optionlen) == 0
       && strlen ("hwr-names") == optionlen)
     {
@@ -838,6 +897,7 @@ parse_mips_dis_option (const char *option, unsigned int len)
 	  mips_cp0_names = chosen_arch->cp0_names;
 	  mips_cp0sel_names = chosen_arch->cp0sel_names;
 	  mips_cp0sel_names_len = chosen_arch->cp0sel_names_len;
+	  mips_cp1_names = chosen_arch->cp1_names;
 	  mips_hwr_names = chosen_arch->hwr_names;
 	}
       return;
@@ -927,6 +987,8 @@ print_reg (struct disassemble_info *info, const struct mips_opcode *opcode,
     case OP_REG_COPRO:
       if (opcode->name[strlen (opcode->name) - 1] == '0')
 	info->fprintf_func (info->stream, "%s", mips_cp0_names[regno]);
+      else if (opcode->name[strlen (opcode->name) - 1] == '1')
+	info->fprintf_func (info->stream, "%s", mips_cp1_names[regno]);
       else
 	info->fprintf_func (info->stream, "$%d", regno);
       break;

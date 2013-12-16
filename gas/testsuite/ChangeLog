@@ -1,5 +1,23 @@
 2013-12-16  Andrew Bennett  <andrew.bennett@imgtec.com>
 
+	* gas/mips/mips.exp: Add CP1 register name tests.
+	* gas/mips/cp1-names-mips32.d: New test.
+	* gas/mips/cp1-names-mips32r2.d: New test.
+	* gas/mips/cp1-names-mips64.d: New test.
+	* gas/mips/cp1-names-mips64r2.d: New test.
+	* gas/mips/cp1-names-numeric.d: New test.
+	* gas/mips/cp1-names-r3000.d: New test.
+	* gas/mips/cp1-names-r4000.d: New test.
+	* gas/mips/cp1-names-sb1.d: New test.
+	* gas/mips/cp1-names.s: New test.
+	* gas/mips/micromips-insn32.d: Add the correct symbolic names for the CP1
+	registers.
+	* gas/mips/micromips-noinsn32.d: Likewise.
+	* gas/mips/micromips-trap.d: Likewise.
+	* gas/mips/micromips.d: Likewise.
+
+2013-12-16  Andrew Bennett  <andrew.bennett@imgtec.com>
+
 	* gas/mips/msa.s: Reduced maximum element index range
 	for sldi, splati, copy_s, copy_u, insert and insve instructions.
 	* gas/mips/msa64.s: Likewise.

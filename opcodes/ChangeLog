@@ -1,5 +1,19 @@
 2013-12-16  Andrew Bennett  <andrew.bennett@imgtec.com>
 
+	* mips-dis.c: Add mips_cp1_names pointer.
+	(mips_cp1_names_numeric): New array.
+	(mips_cp1_names_mips3264): New array.
+	(mips_arch_choice): Add cp1_names.
+	(mips_arch_choices): Add relevant cp1 register name array to each of
+	the elements.
+	(set_default_mips_dis_options): Add support for setting up the
+	mips_cp1_names pointer.
+	(parse_mips_dis_option): Add support for the cp1-names command line
+	variable.  Also setup the mips_cp1_names pointer.
+	(print_reg): Print out name of the cp1 register.
+
+2013-12-16  Andrew Bennett  <andrew.bennett@imgtec.com>
+
 	* micromips-opc.c (decode_micromips_operand): Reduced range of +o, +u,
 	+v and +w.
 	(micromips_opcodes): Reduced element index range for sldi, splati,
