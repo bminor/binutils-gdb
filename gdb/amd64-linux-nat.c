@@ -100,9 +100,11 @@ static int amd64_linux_gregset32_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1, -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1,		/* MPX registers BND0 ... BND3.  */
-  -1, -1,			/* MPX registers BNDCFGU, BNDSTATUS.  */
-  ORIG_RAX * 8,			/* "orig_eax" */
+  -1, -1, -1, -1,		  /* MPX registers BND0 ... BND3.  */
+  -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
+  -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
+  ORIG_RAX * 8			  /* "orig_eax"  */
 };
 
 
@@ -1101,6 +1103,17 @@ amd64_linux_read_description (struct target_ops *ops)
     {
       switch (xcr0 & I386_XSTATE_ALL_MASK)
 	{
+      case I386_XSTATE_MPX_AVX512_MASK:
+      case I386_XSTATE_AVX512_MASK:
+	if (is_64bit)
+	  {
+	    if (is_x32)
+	      return tdesc_x32_avx512_linux;
+	    else
+	      return tdesc_amd64_avx512_linux;
+	  }
+	else
+	  return tdesc_i386_avx512_linux;
 	case I386_XSTATE_MPX_MASK:
 	  if (is_64bit)
 	    {

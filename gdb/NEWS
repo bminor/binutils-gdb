@@ -5694,3 +5694,8 @@ Host is the machine where GDB will run; targ is the machine
 where the program that you are debugging will run.
 
  *  GDB now supports access to Intel(R) MPX registers on GNU/Linux.
+
+ *  Support for Intel(R) AVX-512 registers on GNU/Linux.
+
+Support displaying and modifying Intel(R) AVX-512 registers $zmm0 - $zmm31 and
+$k0 - $k7 on GNU/Linux.

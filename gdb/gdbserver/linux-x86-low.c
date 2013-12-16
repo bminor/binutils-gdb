@@ -48,6 +48,10 @@ extern const struct target_desc *tdesc_amd64_linux;
 void init_registers_amd64_avx_linux (void);
 extern const struct target_desc *tdesc_amd64_avx_linux;
 
+/* Defined in auto-generated file amd64-avx512-linux.c.  */
+void init_registers_amd64_avx512_linux (void);
+extern const struct target_desc *tdesc_amd64_avx512_linux;
+
 /* Defined in auto-generated file amd64-mpx-linux.c.  */
 void init_registers_amd64_mpx_linux (void);
 extern const struct target_desc *tdesc_amd64_mpx_linux;
@@ -59,6 +63,10 @@ extern const struct target_desc *tdesc_x32_linux;
 /* Defined in auto-generated file x32-avx-linux.c.  */
 void init_registers_x32_avx_linux (void);
 extern const struct target_desc *tdesc_x32_avx_linux;
+
+/* Defined in auto-generated file x32-avx512-linux.c.  */
+void init_registers_x32_avx512_linux (void);
+extern const struct target_desc *tdesc_x32_avx512_linux;
 
 #endif
 
@@ -73,6 +81,10 @@ extern const struct target_desc *tdesc_i386_mmx_linux;
 /* Defined in auto-generated file i386-avx-linux.c.  */
 void init_registers_i386_avx_linux (void);
 extern const struct target_desc *tdesc_i386_avx_linux;
+
+/* Defined in auto-generated file i386-avx512-linux.c.  */
+void init_registers_i386_avx512_linux (void);
+extern const struct target_desc *tdesc_i386_avx512_linux;
 
 /* Defined in auto-generated file i386-mpx-linux.c.  */
 void init_registers_i386_mpx_linux (void);
@@ -181,7 +193,16 @@ static const int x86_64_regmap[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   ORIG_RAX * 8,
   -1, -1, -1, -1,			/* MPX registers BND0 ... BND3.  */
-  -1, -1				/* MPX registers BNDCFGU, BNDSTATUS.  */
+  -1, -1,				/* MPX registers BNDCFGU, BNDSTATUS.  */
+  -1, -1, -1, -1, -1, -1, -1, -1,       /* xmm16 ... xmm31 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,       /* ymm16 ... ymm31 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,       /* k0 ... k7 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1,       /* zmm0 ... zmm31 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1, -1, -1, -1, -1
 };
 
 #define X86_64_NUM_REGS (sizeof (x86_64_regmap) / sizeof (x86_64_regmap[0]))
@@ -1353,6 +1374,9 @@ x86_linux_read_description (void)
 	    {
 	      switch (xcr0 & I386_XSTATE_ALL_MASK)
 	        {
+		case I386_XSTATE_AVX512_MASK:
+		  return tdesc_amd64_avx512_linux;
+
 		case I386_XSTATE_MPX_MASK:
 		  return tdesc_amd64_mpx_linux;
 
@@ -1372,6 +1396,9 @@ x86_linux_read_description (void)
 	    {
 	      switch (xcr0 & I386_XSTATE_ALL_MASK)
 	        {
+		case I386_XSTATE_AVX512_MASK:
+		  return tdesc_x32_avx512_linux;
+
 		case I386_XSTATE_MPX_MASK: /* No MPX on x32.  */
 		case I386_XSTATE_AVX_MASK:
 		  return tdesc_x32_avx_linux;
@@ -1391,6 +1418,9 @@ x86_linux_read_description (void)
 	{
 	  switch (xcr0 & I386_XSTATE_ALL_MASK)
 	    {
+	    case (I386_XSTATE_AVX512_MASK):
+	      return tdesc_i386_avx512_linux;
+
 	    case (I386_XSTATE_MPX_MASK):
 	      return tdesc_i386_mpx_linux;
 
@@ -3397,10 +3427,12 @@ initialize_low_arch (void)
 #ifdef __x86_64__
   init_registers_amd64_linux ();
   init_registers_amd64_avx_linux ();
+  init_registers_amd64_avx512_linux ();
   init_registers_amd64_mpx_linux ();
 
   init_registers_x32_linux ();
   init_registers_x32_avx_linux ();
+  init_registers_x32_avx512_linux ();
 
   tdesc_amd64_linux_no_xml = xmalloc (sizeof (struct target_desc));
   copy_target_description (tdesc_amd64_linux_no_xml, tdesc_amd64_linux);
@@ -3409,6 +3441,7 @@ initialize_low_arch (void)
   init_registers_i386_linux ();
   init_registers_i386_mmx_linux ();
   init_registers_i386_avx_linux ();
+  init_registers_i386_avx512_linux ();
   init_registers_i386_mpx_linux ();
 
   tdesc_i386_linux_no_xml = xmalloc (sizeof (struct target_desc));

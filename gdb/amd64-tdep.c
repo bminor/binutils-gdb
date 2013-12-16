@@ -44,8 +44,11 @@
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
 #include "features/i386/amd64-mpx.c"
+#include "features/i386/amd64-avx512.c"
+
 #include "features/i386/x32.c"
 #include "features/i386/x32-avx.c"
+#include "features/i386/x32-avx512.c"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -85,6 +88,14 @@ static const char *amd64_ymm_names[] =
   "ymm12", "ymm13", "ymm14", "ymm15"
 };
 
+static const char *amd64_ymm_avx512_names[] =
+{
+  "ymm16", "ymm17", "ymm18", "ymm19",
+  "ymm20", "ymm21", "ymm22", "ymm23",
+  "ymm24", "ymm25", "ymm26", "ymm27",
+  "ymm28", "ymm29", "ymm30", "ymm31"
+};
+
 static const char *amd64_ymmh_names[] = 
 {
   "ymm0h", "ymm1h", "ymm2h", "ymm3h",
@@ -93,9 +104,54 @@ static const char *amd64_ymmh_names[] =
   "ymm12h", "ymm13h", "ymm14h", "ymm15h"
 };
 
+static const char *amd64_ymmh_avx512_names[] =
+{
+  "ymm16h", "ymm17h", "ymm18h", "ymm19h",
+  "ymm20h", "ymm21h", "ymm22h", "ymm23h",
+  "ymm24h", "ymm25h", "ymm26h", "ymm27h",
+  "ymm28h", "ymm29h", "ymm30h", "ymm31h"
+};
+
 static const char *amd64_mpx_names[] =
 {
   "bnd0raw", "bnd1raw", "bnd2raw", "bnd3raw", "bndcfgu", "bndstatus"
+};
+
+static const char *amd64_k_names[] =
+{
+  "k0", "k1", "k2", "k3",
+  "k4", "k5", "k6", "k7"
+};
+
+static const char *amd64_zmmh_names[] =
+{
+  "zmm0h", "zmm1h", "zmm2h", "zmm3h",
+  "zmm4h", "zmm5h", "zmm6h", "zmm7h",
+  "zmm8h", "zmm9h", "zmm10h", "zmm11h",
+  "zmm12h", "zmm13h", "zmm14h", "zmm15h",
+  "zmm16h", "zmm17h", "zmm18h", "zmm19h",
+  "zmm20h", "zmm21h", "zmm22h", "zmm23h",
+  "zmm24h", "zmm25h", "zmm26h", "zmm27h",
+  "zmm28h", "zmm29h", "zmm30h", "zmm31h"
+};
+
+static const char *amd64_zmm_names[] =
+{
+  "zmm0", "zmm1", "zmm2", "zmm3",
+  "zmm4", "zmm5", "zmm6", "zmm7",
+  "zmm8", "zmm9", "zmm10", "zmm11",
+  "zmm12", "zmm13", "zmm14", "zmm15",
+  "zmm16", "zmm17", "zmm18", "zmm19",
+  "zmm20", "zmm21", "zmm22", "zmm23",
+  "zmm24", "zmm25", "zmm26", "zmm27",
+  "zmm28", "zmm29", "zmm30", "zmm31"
+};
+
+static const char *amd64_xmm_avx512_names[] = {
+    "xmm16",  "xmm17",  "xmm18",  "xmm19",
+    "xmm20",  "xmm21",  "xmm22",  "xmm23",
+    "xmm24",  "xmm25",  "xmm26",  "xmm27",
+    "xmm28",  "xmm29",  "xmm30",  "xmm31"
 };
 
 /* DWARF Register Number Mapping as defined in the System V psABI,
@@ -272,8 +328,12 @@ amd64_pseudo_register_name (struct gdbarch *gdbarch, int regnum)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   if (i386_byte_regnum_p (gdbarch, regnum))
     return amd64_byte_names[regnum - tdep->al_regnum];
+  else if (i386_zmm_regnum_p (gdbarch, regnum))
+    return amd64_zmm_names[regnum - tdep->zmm0_regnum];
   else if (i386_ymm_regnum_p (gdbarch, regnum))
     return amd64_ymm_names[regnum - tdep->ymm0_regnum];
+  else if (i386_ymm_avx512_regnum_p (gdbarch, regnum))
+    return amd64_ymm_avx512_names[regnum - tdep->ymm16_regnum];
   else if (i386_word_regnum_p (gdbarch, regnum))
     return amd64_word_names[regnum - tdep->ax_regnum];
   else if (i386_dword_regnum_p (gdbarch, regnum))
@@ -2920,6 +2980,23 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->num_core_regs = AMD64_NUM_GREGS + I387_NUM_REGS;
   tdep->register_names = amd64_register_names;
 
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx512") != NULL)
+    {
+      tdep->zmmh_register_names = amd64_zmmh_names;
+      tdep->k_register_names = amd64_k_names;
+      tdep->xmm_avx512_register_names = amd64_xmm_avx512_names;
+      tdep->ymm16h_register_names = amd64_ymmh_avx512_names;
+
+      tdep->num_zmm_regs = 32;
+      tdep->num_xmm_avx512_regs = 16;
+      tdep->num_ymm_avx512_regs = 16;
+
+      tdep->zmm0h_regnum = AMD64_ZMM0H_REGNUM;
+      tdep->k0_regnum = AMD64_K0_REGNUM;
+      tdep->xmm16_regnum = AMD64_XMM16_REGNUM;
+      tdep->ymm16h_regnum = AMD64_YMM16H_REGNUM;
+    }
+
   if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx") != NULL)
     {
       tdep->ymmh_register_names = amd64_ymmh_names;
@@ -3081,8 +3158,11 @@ _initialize_amd64_tdep (void)
   initialize_tdesc_amd64 ();
   initialize_tdesc_amd64_avx ();
   initialize_tdesc_amd64_mpx ();
+  initialize_tdesc_amd64_avx512 ();
+
   initialize_tdesc_x32 ();
   initialize_tdesc_x32_avx ();
+  initialize_tdesc_x32_avx512 ();
 }
 
 

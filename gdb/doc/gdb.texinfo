@@ -39081,6 +39081,40 @@ Memory Protection Extension (MPX).  It should describe the following registers:
 The @samp{org.gnu.gdb.i386.linux} feature is optional.  It should
 describe a single register, @samp{orig_eax}.
 
+The @samp{org.gnu.gdb.i386.avx512} feature is optional and requires the
+@samp{org.gnu.gdb.i386.avx} feature.  It should
+describe additional @sc{xmm} registers:
+
+@itemize @minus
+@item
+@samp{xmm16h} through @samp{xmm31h}, only valid for amd64.
+@end itemize
+
+It should describe the upper 128 bits of additional @sc{ymm} registers:
+
+@itemize @minus
+@item
+@samp{ymm16h} through @samp{ymm31h}, only valid for amd64.
+@end itemize
+
+It should
+describe the upper 256 bits of @sc{zmm} registers:
+
+@itemize @minus
+@item
+@samp{zmm0h} through @samp{zmm7h} for i386.
+@item
+@samp{zmm0h} through @samp{zmm15h} for amd64.
+@end itemize
+
+It should
+describe the additional @sc{zmm} registers:
+
+@itemize @minus
+@item
+@samp{zmm16h} through @samp{zmm31h}, only valid for amd64.
+@end itemize
+
 @node MIPS Features
 @subsection @acronym{MIPS} Features
 @cindex target descriptions, @acronym{MIPS} features

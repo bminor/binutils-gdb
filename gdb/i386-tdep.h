@@ -87,6 +87,20 @@ struct gdbarch_tdep
      of pseudo YMM register support.  */
   int ymm0_regnum;
 
+  /* Number of AVX512 OpMask registers (K-registers)  */
+  int num_k_regs;
+
+  /* Register number for %k0.  Set this to -1 to indicate the absence
+     of AVX512 OpMask register support.  */
+  int k0_regnum;
+
+  /* Number of pseudo ZMM registers ($zmm0-$zmm31).  */
+  int num_zmm_regs;
+
+  /* Register number for %zmm0.  Set this to -1 to indicate the absence
+     of pseudo ZMM register support.  */
+  int zmm0_regnum;
+
   /* Number of byte registers.  */
   int num_byte_regs;
 
@@ -112,6 +126,18 @@ struct gdbarch_tdep
   /* Number of SSE registers.  */
   int num_xmm_regs;
 
+  /* Number of SSE registers added in AVX512.  */
+  int num_xmm_avx512_regs;
+
+  /* Register number of XMM16, the first XMM register added in AVX512.  */
+  int xmm16_regnum;
+
+  /* Number of YMM registers added in AVX512.  */
+  int num_ymm_avx512_regs;
+
+  /* Register number of YMM16, the first YMM register added in AVX512.  */
+  int ymm16_regnum;
+
   /* Bits of the extended control register 0 (the XFEATURE_ENABLED_MASK
      register), excluding the x87 bit, which are supported by this GDB.  */
 
@@ -130,6 +156,13 @@ struct gdbarch_tdep
   /* Upper YMM register names.  Only used for tdesc_numbered_register.  */
   const char **ymmh_register_names;
 
+  /* Register number for %ymm16h.  Set this to -1 to indicate the absence
+  of support for YMM16-31.  */
+  int ymm16h_regnum;
+
+  /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
+  const char **ymm16h_register_names;
+
   /* Register number for %bnd0r.  Set this to -1 to indicate the absence
      bound registers.  */
   int bnd0r_regnum;
@@ -144,6 +177,22 @@ struct gdbarch_tdep
 
   /* MPX register names.  Only used for tdesc_numbered_register.  */
   const char **mpx_register_names;
+
+  /* Register number for %zmm0h.  Set this to -1 to indicate the absence
+     of ZMM_HI256 register support.  */
+  int zmm0h_regnum;
+
+  /* OpMask register names.  */
+  const char **k_register_names;
+
+  /* ZMM register names.  Only used for tdesc_numbered_register.  */
+  const char **zmmh_register_names;
+
+  /* XMM16-31 register names.  Only used for tdesc_numbered_register.  */
+  const char **xmm_avx512_register_names;
+
+  /* YMM16-31 register names.  Only used for tdesc_numbered_register.  */
+  const char **ymm_avx512_register_names;
 
   /* Target description.  */
   const struct target_desc *tdesc;
@@ -179,6 +228,7 @@ struct gdbarch_tdep
   /* ISA-specific data types.  */
   struct type *i386_mmx_type;
   struct type *i386_ymm_type;
+  struct type *i386_zmm_type;
   struct type *i387_ext_type;
   struct type *i386_bnd_type;
 
@@ -232,7 +282,11 @@ enum i386_regnum
   I386_BND0R_REGNUM,
   I386_BND3R_REGNUM = I386_BND0R_REGNUM + 3,
   I386_BNDCFGU_REGNUM,
-  I386_BNDSTATUS_REGNUM
+  I386_BNDSTATUS_REGNUM,
+  I386_K0_REGNUM,		/* %k0 */
+  I386_K7_REGNUM = I386_K0_REGNUM + 7,
+  I386_ZMM0H_REGNUM,		/* %zmm0h */
+  I386_ZMM7H_REGNUM = I386_ZMM0H_REGNUM + 7
 };
 
 /* Register numbers of RECORD_REGMAP.  */
@@ -271,9 +325,10 @@ enum record_i386_regnum
 #define I386_SSE_NUM_REGS	(I386_MXCSR_REGNUM + 1)
 #define I386_AVX_NUM_REGS	(I386_YMM7H_REGNUM + 1)
 #define I386_MPX_NUM_REGS	(I386_BNDSTATUS_REGNUM + 1)
+#define I386_AVX512_NUM_REGS	(I386_ZMM7H_REGNUM + 1)
 
 /* Size of the largest register.  */
-#define I386_MAX_REGISTER_SIZE	16
+#define I386_MAX_REGISTER_SIZE	64
 
 /* Types for i386-specific registers.  */
 extern struct type *i387_ext_type (struct gdbarch *gdbarch);
@@ -283,8 +338,13 @@ extern int i386_byte_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_word_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_dword_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_xmm_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_xmm_avx512_regnum_p (struct gdbarch * gdbarch, int regnum);
 extern int i386_ymm_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_ymm_avx512_regnum_p (struct gdbarch *gdbarch, int regnum);
 extern int i386_bnd_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_k_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_zmm_regnum_p (struct gdbarch *gdbarch, int regnum);
+extern int i386_zmmh_regnum_p (struct gdbarch *gdbarch, int regnum);
 
 extern const char *i386_pseudo_register_name (struct gdbarch *gdbarch,
 					      int regnum);

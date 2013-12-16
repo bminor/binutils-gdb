@@ -1,3 +1,159 @@
+2014-04-24  Michael Sturm  <michael.sturm@mintel.com>
+	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* amd64-linux-nat.c (amd64_linux_gregset32_reg_offset): Add
+	AVX512 registers.
+	(amd64_linux_read_description): Add code to handle AVX512 xstate
+	mask and return respective tdesc.
+	* amd64-linux-tdep.c: Include features/i386/amd64-avx512-linux.c
+	and features/i386/x32-avx512-linux.c.
+	(amd64_linux_gregset_reg_offset): Add AVX512 registers.
+	(amd64_linux_core_read_description): Add code to handle AVX512
+	xstate mask and return respective tdesc.
+	(_initialize_amd64_linux_tdep): Initialize AVX512 tdesc.
+	* amd64-linux-tdep.h (AMD64_LINUX_ORIG_RAX_REGNUM): Adjust regnum
+	calculation.
+	(AMD64_LINUX_NUM_REGS): Adjust to new number of registers.
+	(tdesc_amd64_avx512_linux): New prototype.
+	(tdesc_x32_avx512_linux): Likewise.
+	* amd64-tdep.c: Include features/i386/amd64-avx512.c and
+	features/i386/x32-avx512.c.
+	(amd64_ymm_avx512_names): New register names for pseudo
+	registers YMM16-31.
+	(amd64_ymmh_avx512_names): New register names for raw registers
+	YMMH16-31.
+	(amd64_k_names): New register names for K registers.
+	(amd64_zmmh_names): New register names for ZMM raw registers.
+	(amd64_zmm_names): New registers names for ZMM pseudo registers.
+	(amd64_xmm_avx512_names): New register names for XMM16-31
+	registers.
+	(amd64_pseudo_register_name): Add code to return AVX512 pseudo
+	registers.
+	(amd64_init_abi): Add code to intitialize AVX512 tdep variables
+	if feature is present.
+	(_initialize_amd64_tdep): Call AVX512 tdesc initializers.
+	* amd64-tdep.h (enum amd64_regnum): Add AVX512 registers.
+	(AMD64_NUM_REGS): Adjust to new number of registers.
+	* i386-linux-nat.c (GETXSTATEREGS_SUPPLIES): Extend range of
+	registers supplied via XSTATE by AVX512 registers.
+	(i386_linux_read_description): Add case for AVX512.
+	* i386-linux-tdep.c: Include i386-avx512-linux.c.
+	(i386_linux_gregset_reg_offset): Add AVX512 registers.
+	(i386_linux_core_read_description): Add case for AVX512.
+	(i386_linux_init_abi): Install supported register note section
+	for AVX512.
+	(_initialize_i386_linux_tdep): Add call to tdesc init function for
+	AVX512.
+	* i386-linux-tdep.h (I386_LINUX_NUM_REGS): Set number of
+	registers to be number of zmm7h + 1.
+	(tdesc_i386_avx512_linux): Add tdesc for AVX512 registers.
+	* i386-tdep.c: Include features/i386/i386-avx512.c.
+	(i386_zmm_names): Add ZMM pseudo register names array.
+	(i386_zmmh_names): Add ZMM raw register names array.
+	(i386_k_names): Add K raw register names array.
+	(num_lower_zmm_regs): Add constant for the number of lower ZMM
+	registers. AVX512 has 16 more ZMM registers than there are YMM
+	registers.
+	(i386_zmmh_regnum_p): Add function to look up register number of
+	ZMM raw registers.
+	(i386_zmm_regnum_p): Likewise for ZMM pseudo registers.
+	(i386_k_regnum_p): Likewise for K raw registers.
+	(i386_ymmh_avx512_regnum_p): Likewise for additional YMM raw
+	registers added by AVX512.
+	(i386_ymm_avx512_regnum_p): Likewise for additional YMM pseudo
+	registers added by AVX512.
+	(i386_xmm_avx512_regnum_p): Likewise for additional XMM registers
+	added by AVX512.
+	(i386_register_name): Add code to hide YMMH16-31 and ZMMH0-31.
+	(i386_pseudo_register_name): Add ZMM pseudo registers.
+	(i386_zmm_type): Construct and return vector registers type for ZMM
+	registers.
+	(i386_pseudo_register_type): Return appropriate type for YMM16-31,
+	ZMM0-31 pseudo registers and K registers.
+	(i386_pseudo_register_read_into_value): Add code to read K, ZMM
+	and YMM16-31 registers from register cache.
+	(i386_pseudo_register_write): Add code to write  K, ZMM and
+	YMM16-31 registers.
+	(i386_register_reggroup_p): Add code to include/exclude AVX512
+	registers in/from respective register groups.
+	(i386_validate_tdesc_p): Handle AVX512 feature, add AVX512
+	registers if feature is present in xcr0.
+	(i386_gdbarch_init): Add code to initialize AVX512 feature
+	variables in tdep structure, wire in pseudo registers and call
+	initialize_tdesc_i386_avx512.
+	* i386-tdep.h (struct gdbarch_tdep): Add AVX512 related
+	variables.
+	(i386_regnum): Add AVX512 registers.
+	(I386_SSE_NUM_REGS): New define for number of SSE registers.
+	(I386_AVX_NUM_REGS): Likewise for AVX registers.
+	(I386_AVX512_NUM_REGS): Likewise for AVX512 registers.
+	(I386_MAX_REGISTER_SIZE): Change to 64 bytes, ZMM registers are
+	512 bits wide.
+	(i386_xmm_avx512_regnum_p): New prototype for register look up.
+	(i386_ymm_avx512_regnum_p): Likewise.
+	(i386_k_regnum_p): Likewise.
+	(i386_zmm_regnum_p): Likewise.
+	(i386_zmmh_regnum_p): Likewise.
+	* i387-tdep.c : Update year in copyright notice.
+	(xsave_ymm_avx512_offset): New table for YMM16-31 offsets in
+	XSAVE buffer.
+	(XSAVE_YMM_AVX512_ADDR): New macro.
+	(xsave_xmm_avx512_offset): New table for XMM16-31 offsets in
+	XSAVE buffer.
+	(XSAVE_XMM_AVX512_ADDR): New macro.
+	(xsave_avx512_k_offset): New table for K register offsets in
+	XSAVE buffer.
+	(XSAVE_AVX512_K_ADDR): New macro.
+	(xsave_avx512_zmm_h_offset): New table for ZMM register offsets
+	in XSAVE buffer.
+	(XSAVE_AVX512_ZMM_H_ADDR): New macro.
+	(i387_supply_xsave): Add code to supply AVX512 registers to XSAVE
+	buffer.
+	(i387_collect_xsave): Add code to collect AVX512 registers from
+	XSAVE buffer.
+	* i387-tdep.h (I387_NUM_XMM_AVX512_REGS): New define for number
+	of XMM16-31 registers.
+	(I387_NUM_K_REGS): New define for number of K registers.
+	(I387_K0_REGNUM): New define for K0 register number.
+	(I387_NUM_ZMMH_REGS): New define for number of ZMMH registers.
+	(I387_ZMM0H_REGNUM): New define for ZMM0H register number.
+	(I387_NUM_YMM_AVX512_REGS): New define for number of YMM16-31
+	registers.
+	(I387_YMM16H_REGNUM): New define for YMM16H register number.
+	(I387_XMM16_REGNUM): New define for XMM16 register number.
+	(I387_YMM0_REGNUM): New define for YMM0 register number.
+	(I387_KEND_REGNUM): New define for last K register number.
+	(I387_ZMMENDH_REGNUM): New define for last ZMMH register number.
+	(I387_YMMH_AVX512_END_REGNUM): New define for YMM31 register
+	number.
+	(I387_XMM_AVX512_END_REGNUM): New define for XMM31 register
+	number.
+	* common/i386-xstate.h: Add AVX 3.1 feature bits, mask and XSTATE
+	size.
+	* features/Makefile: Add AVX512 related files.
+	* features/i386/32bit-avx512.xml: New file.
+	* features/i386/64bit-avx512.xml: Likewise.
+	* features/i386/amd64-avx512-linux.c: Likewise.
+	* features/i386/amd64-avx512-linux.xml: Likewise.
+	* features/i386/amd64-avx512.c: Likewise.
+	* features/i386/amd64-avx512.xml: Likewise.
+	* features/i386/i386-avx512-linux.c: Likewise.
+	* features/i386/i386-avx512-linux.xml: Likewise.
+	* features/i386/i386-avx512.c: Likewise.
+	* features/i386/i386-avx512.xml: Likewise.
+	* features/i386/x32-avx512-linux.c: Likewise.
+	* features/i386/x32-avx512-linux.xml: Likewise.
+	* features/i386/x32-avx512.c: Likewise.
+	* features/i386/x32-avx512.xml: Likewise.
+	* regformats/i386/amd64-avx512-linux.dat: New file.
+	* regformats/i386/amd64-avx512.dat: Likewise.
+	* regformats/i386/i386-avx512-linux.dat: Likewise.
+	* regformats/i386/i386-avx512.dat: Likewise.
+	* regformats/i386/x32-avx512-linux.dat: Likewise.
+	* regformats/i386/x32-avx512.dat: Likewise.
+	* NEWS: Add note about new support for AVX512.
+
+
 2014-04-23  Pedro Alves  <palves@redhat.com>
 
 	* breakpoint.c (insert_bp_location): Tolerate errors if the

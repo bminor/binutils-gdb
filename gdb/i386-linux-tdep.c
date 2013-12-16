@@ -52,6 +52,7 @@
 #include "features/i386/i386-mmx-linux.c"
 #include "features/i386/i386-mpx-linux.c"
 #include "features/i386/i386-avx-linux.c"
+#include "features/i386/i386-avx512-linux.c"
 
 /* Supported register note sections.  */
 static struct core_regset_section i386_linux_regset_sections[] =
@@ -570,9 +571,11 @@ int i386_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  -1, -1, -1, -1,		/* MPX registers BND0 ... BND3.  */
-  -1, -1,			/* MPX registers BNDCFGU, BNDSTATUS.  */
-  11 * 4			/* "orig_eax" */
+  -1, -1, -1, -1,		  /* MPX registers BND0 ... BND3.  */
+  -1, -1,			  /* MPX registers BNDCFGU, BNDSTATUS.  */
+  -1, -1, -1, -1, -1, -1, -1, -1, /* k0 ... k7 (AVX512)  */
+  -1, -1, -1, -1, -1, -1, -1, -1, /* zmm0 ... zmm7 (AVX512)  */
+  11 * 4,			  /* "orig_eax"  */
 };
 
 /* Mapping between the general-purpose registers in `struct
@@ -648,6 +651,9 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 
   switch ((xcr0 & I386_XSTATE_ALL_MASK))
     {
+    case I386_XSTATE_MPX_AVX512_MASK:
+    case I386_XSTATE_AVX512_MASK:
+      return tdesc_i386_avx512_linux;
     case I386_XSTATE_MPX_MASK:
       return tdesc_i386_mpx_linux;
     case I386_XSTATE_AVX_MASK:
@@ -945,7 +951,8 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
                                              svr4_fetch_objfile_link_map);
 
   /* Install supported register note sections.  */
-  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx"))
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx512")
+      || tdesc_find_feature (tdesc, "org.gnu.gdb.i386.avx"))
     set_gdbarch_core_regset_sections (gdbarch, i386_linux_avx_regset_sections);
   else if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.sse"))
     set_gdbarch_core_regset_sections (gdbarch, i386_linux_sse_regset_sections);
@@ -986,4 +993,5 @@ _initialize_i386_linux_tdep (void)
   initialize_tdesc_i386_mmx_linux ();
   initialize_tdesc_i386_avx_linux ();
   initialize_tdesc_i386_mpx_linux ();
+  initialize_tdesc_i386_avx512_linux ();
 }

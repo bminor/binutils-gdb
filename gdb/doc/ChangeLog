@@ -1,3 +1,9 @@
+2014-04-24  Michael Sturm  <michael.sturm@mintel.com>
+	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* gdb.texinfo (i386 Features): Add description of AVX512
+	registers.
+
 2014-03-31  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (Symbols): Document set/show print symbol-loading.

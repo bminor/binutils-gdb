@@ -1,3 +1,10 @@
+2014-04-24  Michael Sturm  <michael.sturm@mintel.com>
+	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* Makefile.in (EXECUTABLES): Added i386-avx512.
+	* gdb.arch/i386-avx512.c: New file.
+	* gdb.arch/i386-avx512.exp: Likewise.
+
 2014-04-23  Keith Seitz  <keiths@redhat.com>
 
 	* lib/mi-support.exp (mi_list_breakpoints): Delete.

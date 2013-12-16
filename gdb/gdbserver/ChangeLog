@@ -1,3 +1,47 @@
+2014-04-24  Michael Sturm  <michael.sturm@mintel.com>
+	    Walfred Tedeschi  <walfred.tedeschi@intel.com>
+
+	* Makefile.in: Added rules to handle new files
+	i386-avx512.c i386-avx512-linux.c amd64-avx512.c
+	amd64-avx512-linux.c x32-avx512.c x32-avx512-linux.c.
+	* configure.srv (srv_i386_regobj): Add i386-avx512.o.
+	(srv_i386_linux_regobj): Add i386-avx512-linux.o.
+	(srv_amd64_regobj): Add amd64-avx512.o and x32-avx512.o.
+	(srv_amd64_linux_regobj): Add amd64-avx512-linux.o and
+	x32-avx512-linux.o.
+	(srv_i386_32bit_xmlfiles): Add i386/32bit-avx512.xml.
+	(srv_i386_64bit_xmlfiles): Add i386/64bit-avx512.xml.
+	(srv_amd64_xmlfiles): Add i386/amd64-avx512.xml and
+	i386/x32-avx512.xml.
+	(srv_i386_linux_xmlfiles): Add i386/i386-avx512-linux.xml.
+	(srv_amd64_linux_xmlfiles): Add i386/amd64-avx512-linux.xml and
+	i386/x32-avx512-linux.xml.
+	* i387-fp.c (num_avx512_k_registers): New constant for number
+	of K registers.
+	(num_avx512_zmmh_low_registers): New constant for number of
+	lower ZMM registers (0-15).
+	(num_avx512_zmmh_high_registers): New constant for number of
+	higher ZMM registers (16-31).
+	(num_avx512_ymmh_registers): New contant for number of higher
+	YMM registers (ymm16-31 added by avx521 on x86_64).
+	(num_avx512_xmm_registers): New constant for number of higher
+	XMM registers (xmm16-31 added by AVX512 on x86_64).
+	(struct i387_xsave): Add space for AVX512 registers.
+	(i387_cache_to_xsave): Change raw buffer size to 64 characters.
+	Add code to handle AVX512 registers.
+	(i387_xsave_to_cache): Add code to handle AVX512 registers.
+	* linux-x86-low.c (init_registers_amd64_avx512_linux): New
+	prototypei from generated file.
+	(tdesc_amd64_avx512_linux): Likewise.
+	(init_registers_x32_avx512_linux): Likewise.
+	(tdesc_x32_avx512_linux): Likewise.
+	(init_registers_i386_avx512_linux): Likewise.
+	(tdesc_i386_avx512_linux): Likewise.
+	(x86_64_regmap): Add AVX512 registers.
+	(x86_linux_read_description): Add code to handle AVX512 XSTATE
+	mask.
+	(initialize_low_arch): Add code to initialize AVX512 registers.
+
 2014-04-23  Pedro Alves  <palves@redhat.com>
 
 	* mem-break.c (find_gdb_breakpoint_at): Make static.
