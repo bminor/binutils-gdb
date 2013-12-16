@@ -1,3 +1,12 @@
+2014-02-10  Will Newton  <will.newton@linaro.org>
+
+	* elfread.c (elf_rel_plt_read): Look for a .got section if
+	looking up .got.plt fails.
+	(elf_gnu_ifunc_resolve_by_got): Call gdbarch_addr_bits_remove
+	on address passed to elf_gnu_ifunc_record_cache.
+	(elf_gnu_ifunc_resolve_addr): Likewise.
+	(elf_gnu_ifunc_resolver_return_stop): Likewise.
+
 2014-02-10  Jose E. Marchesi  <jose.marchesi@oracle.com>
 
 	* sparc-tdep.c (sparc_in_function_epilogue_p): New function.

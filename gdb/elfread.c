@@ -646,7 +646,12 @@ elf_rel_plt_read (struct objfile *objfile, asymbol **dyn_symbol_table)
 
   got_plt = bfd_get_section_by_name (obfd, ".got.plt");
   if (got_plt == NULL)
-    return;
+    {
+      /* For platforms where there is no separate .got.plt.  */
+      got_plt = bfd_get_section_by_name (obfd, ".got");
+      if (got_plt == NULL)
+	return;
+    }
 
   /* This search algorithm is from _bfd_elf_canonicalize_dynamic_reloc.  */
   for (relplt = obfd->sections; relplt != NULL; relplt = relplt->next)
@@ -899,6 +904,7 @@ elf_gnu_ifunc_resolve_by_got (const char *name, CORE_ADDR *addr_p)
       addr = extract_typed_address (buf, ptr_type);
       addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr,
 						 &current_target);
+      addr = gdbarch_addr_bits_remove (gdbarch, addr);
 
       if (addr_p)
 	*addr_p = addr;
@@ -962,6 +968,7 @@ elf_gnu_ifunc_resolve_addr (struct gdbarch *gdbarch, CORE_ADDR pc)
   address = value_as_address (address_val);
   address = gdbarch_convert_from_func_ptr_addr (gdbarch, address,
 						&current_target);
+  address = gdbarch_addr_bits_remove (gdbarch, address);
 
   if (name_at_pc)
     elf_gnu_ifunc_record_cache (name_at_pc, address);
@@ -1070,6 +1077,7 @@ elf_gnu_ifunc_resolver_return_stop (struct breakpoint *b)
   resolved_pc = gdbarch_convert_from_func_ptr_addr (gdbarch,
 						    resolved_address,
 						    &current_target);
+  resolved_pc = gdbarch_addr_bits_remove (gdbarch, resolved_pc);
 
   gdb_assert (current_program_space == b->pspace || b->pspace == NULL);
   elf_gnu_ifunc_record_cache (b->addr_string, resolved_pc);
