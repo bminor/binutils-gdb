@@ -1,3 +1,9 @@
+2013-12-16  Pedro Alves  <palves@redhat.com>
+
+	PR 16329
+	* sol-thread.c (check_for_thread_db): If the target can't run or
+	isn't a core, return without pushing.
+
 2013-12-15  Joel Brobecker  <brobecker@adacore.com>
 
 	Revert the following commit:
