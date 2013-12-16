@@ -1,3 +1,8 @@
+2013-12-16  Andreas Schwab  <schwab@suse.de>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Add newline to error
+	message.
+
 2013-12-14  Alan Modra  <amodra@gmail.com>
 
 	* elflink.c (_bfd_elf_merge_symbol): If merging a new weak
