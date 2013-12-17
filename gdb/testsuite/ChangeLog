@@ -1,3 +1,9 @@
+2013-12-17  Pedro Alves  <palves@redhat.com>
+
+	* gdb.trace/circ.exp: Expect frame info to be printed when
+	switching between frames with unavailable stack, but different
+	functions.
+
 2013-12-17  Andrew Burgess  <aburgess@broadcom.com>
 
 	* gdb.trace/unavailable-dwarf-piece.c: New file.

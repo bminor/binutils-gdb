@@ -2378,13 +2378,14 @@ amd64_frame_this_id (struct frame_info *this_frame, void **this_cache,
     amd64_frame_cache (this_frame, this_cache);
 
   if (!cache->base_p)
-    return;
-
-  /* This marks the outermost frame.  */
-  if (cache->base == 0)
-    return;
-
-  (*this_id) = frame_id_build (cache->base + 16, cache->pc);
+    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
+  else if (cache->base == 0)
+    {
+      /* This marks the outermost frame.  */
+      return;
+    }
+  else
+    (*this_id) = frame_id_build (cache->base + 16, cache->pc);
 }
 
 static struct value *
@@ -2499,9 +2500,14 @@ amd64_sigtramp_frame_this_id (struct frame_info *this_frame,
     amd64_sigtramp_frame_cache (this_frame, this_cache);
 
   if (!cache->base_p)
-    return;
-
-  (*this_id) = frame_id_build (cache->base + 16, get_frame_pc (this_frame));
+    (*this_id) = frame_id_build_unavailable_stack (get_frame_pc (this_frame));
+  else if (cache->base == 0)
+    {
+      /* This marks the outermost frame.  */
+      return;
+    }
+  else
+    (*this_id) = frame_id_build (cache->base + 16, get_frame_pc (this_frame));
 }
 
 static struct value *
@@ -2670,9 +2676,9 @@ amd64_epilogue_frame_this_id (struct frame_info *this_frame,
 							       this_cache);
 
   if (!cache->base_p)
-    return;
-
-  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
+  else
+    (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static const struct frame_unwind amd64_epilogue_frame_unwind =

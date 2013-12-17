@@ -1,3 +1,24 @@
+2013-12-17  Pedro Alves  <palves@redhat.com>
+
+	* frame.h (enum frame_id_stack_status): New enum.
+	(struct frame_id) <stack_addr>: Adjust comment.
+	<stack_addr_p>: Delete field, replaced with ...
+	<stack_status>: ... this new field.
+	(frame_id_build_unavailable_stack): Declare.
+	* frame.c (frame_addr_hash, fprint_field, outer_frame_id)
+	(frame_id_build_special): Adjust.
+	(frame_id_build_unavailable_stack): New function.
+	(frame_id_build, frame_id_build_wild): Adjust.
+	(frame_id_p, frame_id_eq, frame_id_inner): Adjust to take into
+	account frames with unavailable stack.
+
+	* amd64-tdep.c (amd64_frame_this_id)
+	(amd64_sigtramp_frame_this_id, amd64_epilogue_frame_this_id): Use
+	frame_id_build_unavailable_stack.
+	* dwarf2-frame.c (dwarf2_frame_this_id): Likewise.
+	* i386-tdep.c (i386_frame_this_id, i386_epilogue_frame_this_id)
+	(i386_sigtramp_frame_this_id):  Likewise.
+
 2013-12-17  Andrew Burgess  <aburgess@broadcom.com>
 
 	* dwarf2loc.c (read_pieced_value): Mark bits, not bytes

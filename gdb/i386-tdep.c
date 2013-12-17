@@ -1905,12 +1905,17 @@ i386_frame_this_id (struct frame_info *this_frame, void **this_cache,
 {
   struct i386_frame_cache *cache = i386_frame_cache (this_frame, this_cache);
 
-  /* This marks the outermost frame.  */
-  if (cache->base == 0)
-    return;
-
-  /* See the end of i386_push_dummy_call.  */
-  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+  if (!cache->base_p)
+    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
+  else if (cache->base == 0)
+    {
+      /* This marks the outermost frame.  */
+    }
+  else
+    {
+      /* See the end of i386_push_dummy_call.  */
+      (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+    }
 }
 
 static enum unwind_stop_reason
@@ -2091,9 +2096,9 @@ i386_epilogue_frame_this_id (struct frame_info *this_frame,
     i386_epilogue_frame_cache (this_frame, this_cache);
 
   if (!cache->base_p)
-    return;
-
-  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
+  else
+    (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static struct value *
@@ -2284,10 +2289,12 @@ i386_sigtramp_frame_this_id (struct frame_info *this_frame, void **this_cache,
     i386_sigtramp_frame_cache (this_frame, this_cache);
 
   if (!cache->base_p)
-    return;
-
-  /* See the end of i386_push_dummy_call.  */
-  (*this_id) = frame_id_build (cache->base + 8, get_frame_pc (this_frame));
+    (*this_id) = frame_id_build_unavailable_stack (get_frame_pc (this_frame));
+  else
+    {
+      /* See the end of i386_push_dummy_call.  */
+      (*this_id) = frame_id_build (cache->base + 8, get_frame_pc (this_frame));
+    }
 }
 
 static struct value *

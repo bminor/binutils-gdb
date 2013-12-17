@@ -166,10 +166,11 @@ frame_addr_hash (const void *ap)
   const struct frame_id f_id = frame->this_id.value;
   hashval_t hash = 0;
 
-  gdb_assert (f_id.stack_addr_p || f_id.code_addr_p
+  gdb_assert (f_id.stack_status != FID_STACK_INVALID
+	      || f_id.code_addr_p
 	      || f_id.special_addr_p);
 
-  if (f_id.stack_addr_p)
+  if (f_id.stack_status == FID_STACK_VALID)
     hash = iterative_hash (&f_id.stack_addr,
 			   sizeof (f_id.stack_addr), hash);
   if (f_id.code_addr_p)
@@ -317,13 +318,23 @@ void
 fprint_frame_id (struct ui_file *file, struct frame_id id)
 {
   fprintf_unfiltered (file, "{");
-  fprint_field (file, "stack", id.stack_addr_p, id.stack_addr);
+
+  if (id.stack_status == FID_STACK_INVALID)
+    fprintf_unfiltered (file, "!stack");
+  else if (id.stack_status == FID_STACK_UNAVAILABLE)
+    fprintf_unfiltered (file, "stack=<unavailable>");
+  else
+    fprintf_unfiltered (file, "stack=%s", hex_string (id.stack_addr));
   fprintf_unfiltered (file, ",");
+
   fprint_field (file, "code", id.code_addr_p, id.code_addr);
   fprintf_unfiltered (file, ",");
+
   fprint_field (file, "special", id.special_addr_p, id.special_addr);
+
   if (id.artificial_depth)
     fprintf_unfiltered (file, ",artificial=%d", id.artificial_depth);
+
   fprintf_unfiltered (file, "}");
 }
 
@@ -487,7 +498,7 @@ frame_unwind_caller_id (struct frame_info *next_frame)
 }
 
 const struct frame_id null_frame_id; /* All zeros.  */
-const struct frame_id outer_frame_id = { 0, 0, 0, 0, 0, 1, 0 };
+const struct frame_id outer_frame_id = { 0, 0, 0, FID_STACK_INVALID, 0, 1, 0 };
 
 struct frame_id
 frame_id_build_special (CORE_ADDR stack_addr, CORE_ADDR code_addr,
@@ -496,11 +507,24 @@ frame_id_build_special (CORE_ADDR stack_addr, CORE_ADDR code_addr,
   struct frame_id id = null_frame_id;
 
   id.stack_addr = stack_addr;
-  id.stack_addr_p = 1;
+  id.stack_status = FID_STACK_VALID;
   id.code_addr = code_addr;
   id.code_addr_p = 1;
   id.special_addr = special_addr;
   id.special_addr_p = 1;
+  return id;
+}
+
+/* See frame.h.  */
+
+struct frame_id
+frame_id_build_unavailable_stack (CORE_ADDR code_addr)
+{
+  struct frame_id id = null_frame_id;
+
+  id.stack_status = FID_STACK_UNAVAILABLE;
+  id.code_addr = code_addr;
+  id.code_addr_p = 1;
   return id;
 }
 
@@ -510,7 +534,7 @@ frame_id_build (CORE_ADDR stack_addr, CORE_ADDR code_addr)
   struct frame_id id = null_frame_id;
 
   id.stack_addr = stack_addr;
-  id.stack_addr_p = 1;
+  id.stack_status = FID_STACK_VALID;
   id.code_addr = code_addr;
   id.code_addr_p = 1;
   return id;
@@ -522,7 +546,7 @@ frame_id_build_wild (CORE_ADDR stack_addr)
   struct frame_id id = null_frame_id;
 
   id.stack_addr = stack_addr;
-  id.stack_addr_p = 1;
+  id.stack_status = FID_STACK_VALID;
   return id;
 }
 
@@ -532,7 +556,7 @@ frame_id_p (struct frame_id l)
   int p;
 
   /* The frame is valid iff it has a valid stack address.  */
-  p = l.stack_addr_p;
+  p = l.stack_status != FID_STACK_INVALID;
   /* outer_frame_id is also valid.  */
   if (!p && memcmp (&l, &outer_frame_id, sizeof (l)) == 0)
     p = 1;
@@ -559,19 +583,20 @@ frame_id_eq (struct frame_id l, struct frame_id r)
 {
   int eq;
 
-  if (!l.stack_addr_p && l.special_addr_p
-      && !r.stack_addr_p && r.special_addr_p)
+  if (l.stack_status == FID_STACK_INVALID && l.special_addr_p
+      && r.stack_status == FID_STACK_INVALID && r.special_addr_p)
     /* The outermost frame marker is equal to itself.  This is the
        dodgy thing about outer_frame_id, since between execution steps
        we might step into another function - from which we can't
        unwind either.  More thought required to get rid of
        outer_frame_id.  */
     eq = 1;
-  else if (!l.stack_addr_p || !r.stack_addr_p)
+  else if (l.stack_status == FID_STACK_INVALID
+	   || l.stack_status == FID_STACK_INVALID)
     /* Like a NaN, if either ID is invalid, the result is false.
        Note that a frame ID is invalid iff it is the null frame ID.  */
     eq = 0;
-  else if (l.stack_addr != r.stack_addr)
+  else if (l.stack_status != r.stack_status || l.stack_addr != r.stack_addr)
     /* If .stack addresses are different, the frames are different.  */
     eq = 0;
   else if (l.code_addr_p && r.code_addr_p && l.code_addr != r.code_addr)
@@ -638,8 +663,9 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
 {
   int inner;
 
-  if (!l.stack_addr_p || !r.stack_addr_p)
-    /* Like NaN, any operation involving an invalid ID always fails.  */
+  if (l.stack_status != FID_STACK_VALID || r.stack_status != FID_STACK_VALID)
+    /* Like NaN, any operation involving an invalid ID always fails.
+       Likewise if either ID has an unavailable stack address.  */
     inner = 0;
   else if (l.artificial_depth > r.artificial_depth
 	   && l.stack_addr == r.stack_addr
