@@ -90,10 +90,10 @@ static void debug_to_prepare_to_store (struct target_ops *self,
 
 static void debug_to_files_info (struct target_ops *);
 
-static int debug_to_insert_breakpoint (struct gdbarch *,
+static int debug_to_insert_breakpoint (struct target_ops *, struct gdbarch *,
 				       struct bp_target_info *);
 
-static int debug_to_remove_breakpoint (struct gdbarch *,
+static int debug_to_remove_breakpoint (struct target_ops *, struct gdbarch *,
 				       struct bp_target_info *);
 
 static int debug_to_can_use_hw_breakpoint (int, int, int);
@@ -585,8 +585,8 @@ update_current_target (void)
       INHERIT (to_prepare_to_store, t);
       INHERIT (deprecated_xfer_memory, t);
       INHERIT (to_files_info, t);
-      INHERIT (to_insert_breakpoint, t);
-      INHERIT (to_remove_breakpoint, t);
+      /* Do not inherit to_insert_breakpoint.  */
+      /* Do not inherit to_remove_breakpoint.  */
       INHERIT (to_can_use_hw_breakpoint, t);
       INHERIT (to_insert_hw_breakpoint, t);
       INHERIT (to_remove_hw_breakpoint, t);
@@ -726,10 +726,6 @@ update_current_target (void)
   de_fault (to_files_info,
 	    (void (*) (struct target_ops *))
 	    target_ignore);
-  de_fault (to_insert_breakpoint,
-	    memory_insert_breakpoint);
-  de_fault (to_remove_breakpoint,
-	    memory_remove_breakpoint);
   de_fault (to_can_use_hw_breakpoint,
 	    (int (*) (int, int, int))
 	    return_zero);
@@ -2457,6 +2453,22 @@ get_target_memory_unsigned (struct target_ops *ops, CORE_ADDR addr,
   return extract_unsigned_integer (buf, len, byte_order);
 }
 
+/* See target.h.  */
+
+int
+forward_target_insert_breakpoint (struct target_ops *ops,
+				  struct gdbarch *gdbarch,
+				  struct bp_target_info *bp_tgt)
+{
+  for (; ops != NULL; ops = ops->beneath)
+    if (ops->to_insert_breakpoint != NULL)
+      return ops->to_insert_breakpoint (ops, gdbarch, bp_tgt);
+
+  return memory_insert_breakpoint (ops, gdbarch, bp_tgt);
+}
+
+/* See target.h.  */
+
 int
 target_insert_breakpoint (struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
@@ -2467,12 +2479,15 @@ target_insert_breakpoint (struct gdbarch *gdbarch,
       return 1;
     }
 
-  return (*current_target.to_insert_breakpoint) (gdbarch, bp_tgt);
+  return forward_target_insert_breakpoint (&current_target, gdbarch, bp_tgt);
 }
 
+/* See target.h.  */
+
 int
-target_remove_breakpoint (struct gdbarch *gdbarch,
-			  struct bp_target_info *bp_tgt)
+forward_target_remove_breakpoint (struct target_ops *ops,
+				  struct gdbarch *gdbarch,
+				  struct bp_target_info *bp_tgt)
 {
   /* This is kind of a weird case to handle, but the permission might
      have been changed after breakpoints were inserted - in which case
@@ -2484,7 +2499,20 @@ target_remove_breakpoint (struct gdbarch *gdbarch,
       return 1;
     }
 
-  return (*current_target.to_remove_breakpoint) (gdbarch, bp_tgt);
+  for (; ops != NULL; ops = ops->beneath)
+    if (ops->to_remove_breakpoint != NULL)
+      return ops->to_remove_breakpoint (ops, gdbarch, bp_tgt);
+
+  return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
+}
+
+/* See target.h.  */
+
+int
+target_remove_breakpoint (struct gdbarch *gdbarch,
+			  struct bp_target_info *bp_tgt)
+{
+  return forward_target_remove_breakpoint (&current_target, gdbarch, bp_tgt);
 }
 
 static void
@@ -4549,12 +4577,12 @@ debug_to_files_info (struct target_ops *target)
 }
 
 static int
-debug_to_insert_breakpoint (struct gdbarch *gdbarch,
+debug_to_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			    struct bp_target_info *bp_tgt)
 {
   int retval;
 
-  retval = debug_target.to_insert_breakpoint (gdbarch, bp_tgt);
+  retval = forward_target_insert_breakpoint (&debug_target, gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_insert_breakpoint (%s, xxx) = %ld\n",
@@ -4564,12 +4592,12 @@ debug_to_insert_breakpoint (struct gdbarch *gdbarch,
 }
 
 static int
-debug_to_remove_breakpoint (struct gdbarch *gdbarch,
+debug_to_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			    struct bp_target_info *bp_tgt)
 {
   int retval;
 
-  retval = debug_target.to_remove_breakpoint (gdbarch, bp_tgt);
+  retval = forward_target_remove_breakpoint (&debug_target, gdbarch, bp_tgt);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_remove_breakpoint (%s, xxx) = %ld\n",

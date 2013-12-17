@@ -1,3 +1,49 @@
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
+	* target.h (target_ops) <to_insert_breakpoint>
+	<to_remove_breakpoint>: Add target_ops parameter.
+	(forward_target_insert_breakpoint): New.
+	(forward_target_remove_breakpoint): New.
+	(memory_remove_breakpoint, memory_insert_breakpoint):
+	Add target_ops parameter.
+	* target.c (target_insert_breakpoint): Split into this and ...
+	(forward_target_insert_breakpoint): ... this.
+	(target_remove_breakpoint): Split into this and ...
+	(forward_target_remove_breakpoint): ... this.
+	(debug_to_insert_breakpoint): Add target_ops parameter.
+	Call forward_target_insert_breakpoint.
+	(debug_to_remove_breakpoint): Add target_ops parameter.
+	Call forward_target_remove_breakpoint.
+	(update_current_target): Do not inherit or default to_insert_breakpoint
+	and to_remove_breakpoint.
+	* corelow.c (ignore): Add target_ops parameter.
+	* exec.c (ignore): Add target_ops parameter.
+	* mem-break.c (memory_insert_breakpoint, memory_remove_breakpoint):
+	Add target_ops parameter.
+	* monitor.c (monitor_insert_breakpoint, monitor_remove_breakpoint):
+	Add target_ops parameter.
+	* nto-procfs.c (procfs_insert_breakpoint, procfs_remove_breakpoint):
+	Add target_ops parameter.
+	* record-full.c (record_full_beneath_to_insert_breakpoint)
+	(record_full_beneath_to_remove_breakpoint, tmp_to_insert_breakpoint)
+	(tmp_to_remove_breakpoint, record_full_insert_breakpoint)
+	(record_full_remove_breakpoint, record_full_core_insert_breakpoint)
+	(record_full_core_remove_breakpoint): Add target_ops parameter.
+	Update users.
+	(record_full_beneath_to_insert_breakpoint_ops)
+	(record_full_beneath_to_remove_breakpoint_ops)
+	(tmp_to_insert_breakpoint_ops, tmp_to_remove_breakpoint_ops): New.
+	(record_full_open): Initialize tmp_to_insert_breakpoint_ops,
+	tmp_to_remove_breakpoint_ops,
+	record_full_beneath_to_insert_breakpoint_ops, and
+	record_full_beneath_to_remove_breakpoint_ops.
+	* remote-m32r-sdi.c (m32r_insert_breakpoint)
+	(m32r_remove_breakpoint): Add target_ops parameter.
+	* remote-mips.c (mips_insert_breakpoint, mips_remove_breakpoint):
+	Add target_ops parameter.
+	* remote.c (remote_insert_breakpoint, remote_remove_breakpoint):
+	Add target_ops parameter.
+
 2014-01-16  Jan Kratochvil  <jan.kratochvil@redhat.com>
             Markus Metzger  <markus.t.metzger@intel.com>
 

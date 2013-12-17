@@ -842,7 +842,8 @@ core_xfer_partial (struct target_ops *ops, enum target_object object,
    breakpoint_init_inferior).  */
 
 static int
-ignore (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt)
+ignore (struct target_ops *ops, struct gdbarch *gdbarch,
+	struct bp_target_info *bp_tgt)
 {
   return 0;
 }

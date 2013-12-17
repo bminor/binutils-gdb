@@ -922,14 +922,14 @@ procfs_breakpoint (CORE_ADDR addr, int type, int size)
 }
 
 static int
-procfs_insert_breakpoint (struct gdbarch *gdbarch,
+procfs_insert_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address, _DEBUG_BREAK_EXEC, 0);
 }
 
 static int
-procfs_remove_breakpoint (struct gdbarch *gdbarch,
+procfs_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address, _DEBUG_BREAK_EXEC, -1);

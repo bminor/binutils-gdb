@@ -8258,7 +8258,8 @@ remote_add_target_side_commands (struct gdbarch *gdbarch,
    which don't, we insert a traditional memory breakpoint.  */
 
 static int
-remote_insert_breakpoint (struct gdbarch *gdbarch,
+remote_insert_breakpoint (struct target_ops *ops,
+			  struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   /* Try the "Z" s/w breakpoint packet if it is not already disabled.
@@ -8320,11 +8321,12 @@ remote_insert_breakpoint (struct gdbarch *gdbarch,
     throw_error (NOT_SUPPORTED_ERROR, _("\
 Target doesn't support breakpoints that have target side commands."));
 
-  return memory_insert_breakpoint (gdbarch, bp_tgt);
+  return memory_insert_breakpoint (ops, gdbarch, bp_tgt);
 }
 
 static int
-remote_remove_breakpoint (struct gdbarch *gdbarch,
+remote_remove_breakpoint (struct target_ops *ops,
+			  struct gdbarch *gdbarch,
 			  struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
@@ -8354,7 +8356,7 @@ remote_remove_breakpoint (struct gdbarch *gdbarch,
       return (rs->buf[0] == 'E');
     }
 
-  return memory_remove_breakpoint (gdbarch, bp_tgt);
+  return memory_remove_breakpoint (ops, gdbarch, bp_tgt);
 }
 
 static int

@@ -408,8 +408,10 @@ struct target_ops
 				   struct target_ops *target);
 
     void (*to_files_info) (struct target_ops *);
-    int (*to_insert_breakpoint) (struct gdbarch *, struct bp_target_info *);
-    int (*to_remove_breakpoint) (struct gdbarch *, struct bp_target_info *);
+    int (*to_insert_breakpoint) (struct target_ops *, struct gdbarch *,
+				 struct bp_target_info *);
+    int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
+				 struct bp_target_info *);
     int (*to_can_use_hw_breakpoint) (int, int, int);
     int (*to_ranged_break_num_registers) (struct target_ops *);
     int (*to_insert_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
@@ -1140,11 +1142,28 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 /* Insert a hardware breakpoint at address BP_TGT->placed_address in
    the target machine.  Returns 0 for success, and returns non-zero or
    throws an error (with a detailed failure reason error code and
+   message) otherwise.
+   Start the target search at OPS.  */
+
+extern int forward_target_insert_breakpoint (struct target_ops *ops,
+					     struct gdbarch *gdbarch,
+					     struct bp_target_info *bp_tgt);
+
+/* Insert a hardware breakpoint at address BP_TGT->placed_address in
+   the target machine.  Returns 0 for success, and returns non-zero or
+   throws an error (with a detailed failure reason error code and
    message) otherwise.  */
 
 extern int target_insert_breakpoint (struct gdbarch *gdbarch,
 				     struct bp_target_info *bp_tgt);
 
+/* Remove a breakpoint at address BP_TGT->placed_address in the target
+   machine.  Result is 0 for success, non-zero for error.
+   Start the target search at OPS.  */
+
+extern int forward_target_remove_breakpoint (struct target_ops *ops,
+					     struct gdbarch *gdbarch,
+					     struct bp_target_info *bp_tgt);
 /* Remove a breakpoint at address BP_TGT->placed_address in the target
    machine.  Result is 0 for success, non-zero for error.  */
 
@@ -1897,10 +1916,10 @@ extern struct target_section_table *target_get_section_table
 
 /* From mem-break.c */
 
-extern int memory_remove_breakpoint (struct gdbarch *,
+extern int memory_remove_breakpoint (struct target_ops *, struct gdbarch *,
 				     struct bp_target_info *);
 
-extern int memory_insert_breakpoint (struct gdbarch *,
+extern int memory_insert_breakpoint (struct target_ops *, struct gdbarch *,
 				     struct bp_target_info *);
 
 extern int default_memory_remove_breakpoint (struct gdbarch *,
