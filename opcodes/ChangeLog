@@ -1,3 +1,10 @@
+2013-12-17  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	* i386-dis.c (MOD_FF_REG_3): New.
+	(MOD_FF_REG_5): Likewise.
+	(mod_table): Add MOD_FF_REG_3 and MOD_FF_REG_5.
+	(reg_table): Use MOD_FF_REG_3 and MOD_FF_REG_5.
+
 2013-12-16  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* mips-dis.c: Add mips_cp1_names pointer.

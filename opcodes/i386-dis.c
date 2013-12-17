@@ -715,6 +715,8 @@ enum
   MOD_8D = 0,
   MOD_C6_REG_7,
   MOD_C7_REG_7,
+  MOD_FF_REG_3,
+  MOD_FF_REG_5,
   MOD_0F01_REG_0,
   MOD_0F01_REG_1,
   MOD_0F01_REG_2,
@@ -3229,9 +3231,9 @@ static const struct dis386 reg_table[][8] = {
     { "incQ",	{ Evh1 } },
     { "decQ",	{ Evh1 } },
     { "call{T|}", { indirEv, BND } },
-    { "Jcall{T|}", { indirEp } },
+    { MOD_TABLE (MOD_FF_REG_3) },
     { "jmp{T|}", { indirEv, BND } },
-    { "Jjmp{T|}", { indirEp } },
+    { MOD_TABLE (MOD_FF_REG_5) },
     { "pushU",	{ stackEv } },
     { Bad_Opcode },
   },
@@ -11048,6 +11050,14 @@ static const struct dis386 mod_table[][2] = {
     /* MOD_C7_REG_7 */
     { Bad_Opcode },
     { RM_TABLE (RM_C7_REG_7) },
+  },
+  {
+    /* MOD_FF_REG_3 */
+    { "Jcall{T|}", { indirEp } },
+  },
+  {
+    /* MOD_FF_REG_5 */
+    { "Jjmp{T|}", { indirEp } },
   },
   {
     /* MOD_0F01_REG_0 */

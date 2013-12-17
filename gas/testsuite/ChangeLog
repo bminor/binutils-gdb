@@ -1,3 +1,11 @@
+2013-12-17  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	* gas/i386/disassem.s: New.
+	* gas/i386/disassem.d: Likewise.
+	* gas/i386/x86-64-disassem.s: Likewise.
+	* gas/i386/x86-64-disassem.d: Likewise.
+	* gas/i386/i386.exp: Run disassem and x86-64-disassem.
+
 2013-12-16  Andrew Bennett  <andrew.bennett@imgtec.com>
 
 	* gas/mips/mips.exp: Add CP1 register name tests.
