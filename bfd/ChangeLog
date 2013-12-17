@@ -1,3 +1,7 @@
+2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* peXXigen.c (rsrc_process_section): Rename index to indx.
+
 2013-12-17  Nick Clifton  <nickc@redhat.com>
 
 	* peXXigen.c: Include wchar.h if available.
