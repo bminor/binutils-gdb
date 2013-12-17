@@ -4931,45 +4931,6 @@ elf32_bfin_set_private_flags (bfd * abfd, flagword flags)
   return TRUE;
 }
 
-/* Copy backend specific data from one object module to another.  */
-
-static bfd_boolean
-bfin_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = TRUE;
-
-  /* Copy object attributes.  */
-  _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-  return TRUE;
-}
-
-static bfd_boolean
-elf32_bfinfdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
-
-  if (! bfin_elf_copy_private_bfd_data (ibfd, obfd))
-    return FALSE;
-
-  if (! elf_tdata (ibfd) || ! elf_tdata (ibfd)->phdr
-      || ! elf_tdata (obfd) || ! elf_tdata (obfd)->phdr)
-    return TRUE;
-
-  return TRUE;
-}
-
-
 /* Display the flags field.  */
 static bfd_boolean
 elf32_bfin_print_private_bfd_data (bfd * abfd, void * ptr)
@@ -5749,9 +5710,6 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
 #undef elf_backend_always_size_sections
 #define elf_backend_always_size_sections \
 		elf32_bfinfdpic_always_size_sections
-#undef bfd_elf32_bfd_copy_private_bfd_data
-#define bfd_elf32_bfd_copy_private_bfd_data \
-		elf32_bfinfdpic_copy_private_bfd_data
 
 #undef elf_backend_create_dynamic_sections
 #define elf_backend_create_dynamic_sections \

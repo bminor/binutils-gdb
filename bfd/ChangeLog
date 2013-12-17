@@ -1,5 +1,33 @@
 2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	PR binutils/16318
+	* elf32-arm.c (elf32_arm_copy_private_bfd_data): Call
+	_bfd_elf_copy_private_bfd_data.
+	* elf32-bfin.c (bfin_elf_copy_private_bfd_data): Removed.
+	(elf32_bfinfdpic_copy_private_bfd_data): Likewise.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-frv.c (frv_elf_copy_private_bfd_data): Removed.
+	(elf32_frvfdpic_copy_private_bfd_data): Likewise.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-iq2000.c (iq2000_elf_copy_private_bfd_data): Removed.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-lm32.c (lm32_elf_copy_private_bfd_data): Removed.
+	(lm32_elf_fdpic_copy_private_bfd_data): Call
+	_bfd_elf_copy_private_bfd_data.
+	* elf32-mep.c (mep_elf_copy_private_bfd_data): Removed.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-msp430.c (elf32_msp430_copy_private_bfd_data): Removed.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-mt.c (mt_elf_copy_private_bfd_data): Removed.
+	(bfd_elf32_bfd_copy_private_bfd_data): Don't define.
+	* elf32-sh.c (sh_elf_set_private_flags): Removed.
+	(sh_elf_copy_private_data): Call _bfd_elf_copy_private_bfd_data
+	and sh_elf_set_mach_from_flags.
+	*  elfnn-aarch64.c (elfNN_aarch64_copy_private_bfd_data): Removed.
+	(bfd_elfNN_bfd_copy_private_bfd_data): Don't define.
+
+2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* peXXigen.c (rsrc_process_section): Rename index to indx.
 
 2013-12-17  Nick Clifton  <nickc@redhat.com>

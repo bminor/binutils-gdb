@@ -580,22 +580,6 @@ mep_elf_set_private_flags (bfd *    abfd,
   return TRUE;
 }
 
-static bfd_boolean
-mep_elf_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = TRUE;
-
-  /* Copy object attributes.  */
-  _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-  return TRUE;
-}
-
 /* Merge backend specific data from an object file to the output
    object file when linking.  */
 
@@ -778,7 +762,6 @@ mep_elf_fake_sections (bfd *               abfd ATTRIBUTE_UNUSED,
 #define bfd_elf32_bfd_reloc_type_lookup		mep_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup		mep_reloc_name_lookup
 #define bfd_elf32_bfd_set_private_flags		mep_elf_set_private_flags
-#define bfd_elf32_bfd_copy_private_bfd_data	mep_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	mep_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_print_private_bfd_data	mep_elf_print_private_bfd_data
 
