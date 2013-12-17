@@ -2446,7 +2446,6 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 #define elf_backend_can_gc_sections          1
 #define elf_backend_final_write_processing   bfd_elf_msp430_final_write_processing
 #define elf_backend_object_p		     elf32_msp430_object_p
-#define elf_backend_post_process_headers     _bfd_elf_set_osabi
 #define bfd_elf32_bfd_relax_section	     msp430_elf_relax_section
 #define bfd_elf32_bfd_is_target_special_symbol	msp430_elf_is_target_special_symbol
 

@@ -3457,8 +3457,7 @@ _bfd_elf_compute_section_file_positions (bfd *abfd,
     return FALSE;
 
   /* Post process the headers if necessary.  */
-  if (bed->elf_backend_post_process_headers)
-    (*bed->elf_backend_post_process_headers) (abfd, link_info);
+  (*bed->elf_backend_post_process_headers) (abfd, link_info);
 
   fsargs.failed = FALSE;
   fsargs.link_info = link_info;
@@ -10016,8 +10015,8 @@ asection _bfd_elf_large_com_section
 		      SEC_IS_COMMON, NULL, "LARGE_COMMON", 0);
 
 void
-_bfd_elf_set_osabi (bfd * abfd,
-		    struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
+_bfd_elf_post_process_headers (bfd * abfd,
+			       struct bfd_link_info * link_info ATTRIBUTE_UNUSED)
 {
   Elf_Internal_Ehdr * i_ehdrp;	/* ELF file header, internal form.  */
 

@@ -5479,7 +5479,7 @@ elfNN_aarch64_post_process_headers (bfd *abfd,
   i_ehdrp = elf_elfheader (abfd);
   i_ehdrp->e_ident[EI_ABIVERSION] = AARCH64_ELF_ABI_VERSION;
 
-  _bfd_elf_set_osabi (abfd, link_info);
+  _bfd_elf_post_process_headers (abfd, link_info);
 }
 
 static enum elf_reloc_type_class

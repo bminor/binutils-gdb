@@ -118,7 +118,6 @@ static bfd_vma opd_entry_value
 #define elf_backend_finish_dynamic_sections   ppc64_elf_finish_dynamic_sections
 #define elf_backend_link_output_symbol_hook   ppc64_elf_output_symbol_hook
 #define elf_backend_special_sections	      ppc64_elf_special_sections
-#define elf_backend_post_process_headers      _bfd_elf_set_osabi
 #define elf_backend_merge_symbol_attribute    ppc64_elf_merge_symbol_attribute
 
 /* The name of the dynamic interpreter.  This is put in the .interp

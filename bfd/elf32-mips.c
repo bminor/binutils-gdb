@@ -2449,18 +2449,6 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #undef	ELF_OSABI
 #define	ELF_OSABI			ELFOSABI_FREEBSD
 
-/* The kernel recognizes executables as valid only if they carry a
-   "FreeBSD" label in the ELF header.  So we put this label on all
-   executables and (for simplicity) also all other object files.  */
-
-static void
-elf_fbsd_post_process_headers (bfd *abfd, struct bfd_link_info *info)
-{
-  _bfd_elf_set_osabi (abfd, info);
-}
-
-#undef	elf_backend_post_process_headers
-#define	elf_backend_post_process_headers	elf_fbsd_post_process_headers
 #undef	elf32_bed
 #define elf32_bed				elf32_fbsd_tradbed
 

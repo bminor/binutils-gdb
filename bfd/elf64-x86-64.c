@@ -5319,8 +5319,6 @@ static const struct bfd_elf_special_section
 #define elf_backend_hash_symbol \
   elf_x86_64_hash_symbol
 
-#define elf_backend_post_process_headers  _bfd_elf_set_osabi
-
 #include "elf64-target.h"
 
 /* FreeBSD support.  */

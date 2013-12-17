@@ -498,7 +498,7 @@
 #define elf_backend_static_tls_alignment	1
 #endif
 #ifndef elf_backend_post_process_headers
-#define elf_backend_post_process_headers	NULL
+#define elf_backend_post_process_headers	_bfd_elf_post_process_headers
 #endif
 #ifndef elf_backend_print_symbol_all
 #define elf_backend_print_symbol_all		NULL

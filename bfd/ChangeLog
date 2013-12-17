@@ -1,5 +1,39 @@
 2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf-bfd.h (_bfd_elf_set_osabi): Renamed to ...
+	(_bfd_elf_post_process_headers): This.
+	* elf.c (_bfd_elf_compute_section_file_positions): Always
+	call elf_backend_post_process_headers.
+	(_bfd_elf_set_osabi): Renamed to ...
+	(_bfd_elf_post_process_headers): This.
+	* elf32-hppa.c (elf_backend_post_process_headers): Removed.
+	* elf32-i370.c (elf_backend_post_process_headers): Likewise.
+	* elf32-msp430.c (elf_backend_post_process_headers): Likewise.
+	* elf32-ppc.c (elf_backend_post_process_headers): Likewise.
+	* elf32-sparc.c (elf_backend_post_process_headers): Likewise.
+	* elf64-hppa.c (elf_backend_post_process_headers): Likewise.
+	* elf64-ppc.c (elf_backend_post_process_headers): Likewise.
+	* elf64-sparc.c (elf_backend_post_process_headers): Likewise.
+	* elf64-x86-64.c (elf_backend_post_process_headers): Likewise.
+	*  (elf_backend_post_process_headers): Likewise.
+	*  (elf_backend_post_process_headers): Likewise.
+	* elf32-i386.c (elf_backend_post_process_headers): Don't
+	define as _bfd_elf_set_osabi.
+	(elf_i386_fbsd_post_process_headers): Updated.
+	* elf32-mips.c (elf_fbsd_post_process_headers): Removed.
+	(elf_backend_post_process_headers): Likewise.
+	* elf32-tic6x.c (elf32_tic6x_set_osabi): Removed.
+	(elf_backend_post_process_headers): Likewise.
+	* elf64-mips.c (elf_fbsd_post_process_headers): Removed.
+	(elf_backend_post_process_headers): Likewise.
+	* elfn32-mips.c (elf_fbsd_post_process_headers): Removed.
+	(elf_backend_post_process_headers): Likewise.
+	* elfnn-aarch64.c (elfNN_aarch64_post_process_headers): Updated.
+	* elfxx-target.h (elf_backend_post_process_headers): Default
+	to _bfd_elf_post_process_headers.
+
+2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR binutils/16318
 	* elf32-arm.c (elf32_arm_copy_private_bfd_data): Call
 	_bfd_elf_copy_private_bfd_data.
