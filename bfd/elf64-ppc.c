@@ -13655,7 +13655,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		{
 		  info->callbacks->einfo
 		    (_("%P: %H: call to `%T' lacks nop, can't restore toc; "
-		       "recompile with -fPIC"),
+		       "recompile with -fPIC\n"),
 		     input_bfd, input_section, rel->r_offset, sym_name);
 
 		  bfd_set_error (bfd_error_bad_value);

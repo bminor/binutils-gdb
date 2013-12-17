@@ -1,3 +1,49 @@
+2013-12-17  Nick Clifton  <nickc@redhat.com>
+
+	* peXXigen.c: Include wchar.h if available.
+	Include safe-ctype.h.
+	(HighBitSet, SetHighBit, WithoutHighBit): New macros.
+	(pe_print_resource_entries): Rename to
+	rsrc_print_resource_entries.  Handle names that are not RVAs.
+	(pe_print_resource_directory): Rename to
+	rsrc_print_resource_directory.
+	(pe_print_rsrc): Rename to rsrc_print_section.  Corrupt
+	computation of RVA bias.
+	(rsrc_count_entries): New function.
+	(rsrc_count_directory): New function.
+	(rsrc_parse_entry): New function.
+	(rsrc_parse_entries): New function.
+	(rsrc_parse_directory): New function.
+	(rsrc_write_string): New function.
+	(rsrc_compute_rva): New function.
+	(rsrc_write_leaf): New function.
+	(rsrc_write_entry): New function.
+	(rsrc_write_directory): New function.
+	(u16_mbtouc): New function.
+	(rsrc_cmp): New function.
+	(rsrc_print_name): New function.
+	(rsrc_resource_name): New function.
+	(rsrc_merge_string_entries): New function.
+	(rsrc_sort_entries): New function.
+	(rsrc_attach_chain): New function.
+	(rsrc_merge): New function.
+	(rsrc_process_section): New function - merges the contents of a
+	.rsrc section.
+	(_bfd_XXi_final_link_postscript): Call rsrc_process_section.
+	* configure.in (AC_CHECK_HEADERS): Add wchar.h
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
+2013-12-16  Andreas Schwab  <schwab@suse.de>
+
+	* elf64-ppc.c (ppc64_elf_relocate_section): Add newline to error
+	message.
+
+2013-12-14  Alan Modra  <amodra@gmail.com>
+
+	* elflink.c (_bfd_elf_merge_symbol): If merging a new weak
+	symbol that will be skipped, we don't have a new definition.
+
 2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 	    Wei-Cheng Wang  <cole945@gmail.com>
 

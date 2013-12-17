@@ -1,3 +1,52 @@
+2013-12-17  Andrew Burgess  <aburgess@broadcom.com>
+
+	* dwarf2loc.c (read_pieced_value): Mark bits, not bytes
+	unavailable, use correct bit length.
+	* value.c (struct value): Extend comment on unavailable to
+	indicate that it is bit based.
+	(value_bits_available): New function.
+	(value_bytes_available): Call value_bits_available.
+	(value_entirely_available): Check against the bit length, not byte
+	length.
+	(mark_value_bits_unavailable): New function.
+	(mark_value_bytes_unavailable): Move contents to
+	mark_value_bits_unavailable, call to same.
+	(memcmp_with_bit_offsets): New function.
+	(value_available_contents_bits_eq): New function, takes the
+	functionality from value_available_contents_eq but uses
+	memcmp_with_bit_offsets now, and is bit not byte based.
+	(value_available_contents_eq): Move implementation into
+	value_available_contents_bits_eq, call to same.
+	(value_contents_copy_raw): Work on bits, not bytes.
+	(unpack_value_bits_as_long_1): Check availability in bits, not
+	bytes.
+	* value.h (value_bits_available): Declare new function.
+	(mark_value_bits_unavailable): Declare new function.
+
+2013-12-16  Pierre Muller  <muller@sourceware.org>
+
+ 	Fix compilation error for cygwin native build.
+ 	* windows-nat.c (windows_ensure_ntdll_loaded) [__USEWIDE]:
+	Call wcstombs.
+
+2013-12-16  Pedro Alves  <palves@redhat.com>
+
+	PR 16329
+	* sol-thread.c (check_for_thread_db): If the target can't run or
+	isn't a core, return without pushing.
+
+2013-12-15  Joel Brobecker  <brobecker@adacore.com>
+
+	Revert the following commit:
+	* solib.c (solib_map_sections): Remove code overwriting
+	SO->SO_NAME with the bfd's filename.
+
+	Make the following changes required after the revert above:
+	* solib-aix.c (solib_aix_bfd_open): Set the filename of the
+	returned bfd to a copy of the synthetic pathname.
+	* solib-darwin.c (darwin_bfd_open): Set the filename of the
+	returned bfd to a copy of PATHNAME.
+
 2013-12-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_array_bound_from_type): Move the declaration

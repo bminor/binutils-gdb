@@ -1,3 +1,14 @@
+2013-12-17  Andrew Burgess  <aburgess@broadcom.com>
+
+	* gdb.trace/unavailable-dwarf-piece.c: New file.
+	* gdb.trace/unavailable-dwarf-piece.exp: New file.
+
+2013-12-15  Yao Qi  <yao@codesourcery.com>
+
+	* gdb.perf/skip-prologue.c: New.
+	* gdb.perf/skip-prologue.exp: New.
+	* gdb.perf/skip-prologue.py: New.
+
 2013-12-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/arraydim: New testcase.

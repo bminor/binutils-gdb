@@ -724,6 +724,17 @@ solib_aix_bfd_open (char *pathname)
       return NULL;
     }
 
+  /* Override the returned bfd's name with our synthetic name in order
+     to allow commands listing all shared libraries to display that
+     synthetic name.  Otherwise, we would only be displaying the name
+     of the archive member object.  */
+    {
+      char *data = bfd_alloc (object_bfd, path_len + 1);
+
+      strcpy (data, pathname);
+      object_bfd->filename = data;
+    }
+
   gdb_bfd_unref (archive_bfd);
   do_cleanups (cleanup);
   return object_bfd;
