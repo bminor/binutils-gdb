@@ -15348,4 +15348,6 @@ _bfd_mips_post_process_headers (bfd *abfd, struct bfd_link_info *link_info)
       if (htab->use_plts_and_copy_relocs && !htab->is_vxworks)
 	i_ehdrp->e_ident[EI_ABIVERSION] = 1;
     }
+
+  _bfd_elf_post_process_headers (abfd, link_info);
 }

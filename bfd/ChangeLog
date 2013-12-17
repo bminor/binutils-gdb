@@ -1,5 +1,11 @@
 2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* elf32-spu.c (spu_elf_post_process_headers): Call
+	_bfd_elf_post_process_headers.
+	* elfxx-mips.c (_bfd_mips_post_process_headers): Likewise.
+
+2013-12-17  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* elf-bfd.h (_bfd_elf_set_osabi): Renamed to ...
 	(_bfd_elf_post_process_headers): This.
 	* elf.c (_bfd_elf_compute_section_file_positions): Always
