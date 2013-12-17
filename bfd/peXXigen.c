@@ -3519,20 +3519,20 @@ rsrc_process_section (bfd * abfd,
   if (type_tables == NULL)
     goto end;
 
-  unsigned int index = 0;
+  unsigned int indx = 0;
   while (data < dataend)
     {
       bfd_byte * p = data;
 
-      data = rsrc_parse_directory (abfd, type_tables + index, data, data, dataend,
+      data = rsrc_parse_directory (abfd, type_tables + indx, data, data, dataend,
 				   rva_bias, NULL);
       data = (bfd_byte *) (((long) (data + 3)) & ~ 3);
       rva_bias += data - p;
       if (data == (dataend - 4))
 	data = dataend;
-      index ++;
+      indx ++;
     }
-  BFD_ASSERT (index == num_resource_sets);
+  BFD_ASSERT (indx == num_resource_sets);
   
   /* Step three: Merge the top level tables (there can be only one).
      
@@ -3551,8 +3551,8 @@ rsrc_process_section (bfd * abfd,
   new_table.names.first_entry = NULL;
   new_table.names.last_entry = NULL;
 
-  for (index = 0; index < num_resource_sets; index++)
-    rsrc_attach_chain (& new_table.names, & type_tables[index].names);
+  for (indx = 0; indx < num_resource_sets; indx++)
+    rsrc_attach_chain (& new_table.names, & type_tables[indx].names);
 
   rsrc_sort_entries (& new_table.names, TRUE, & new_table);
   
@@ -3560,8 +3560,8 @@ rsrc_process_section (bfd * abfd,
   new_table.ids.first_entry = NULL;
   new_table.ids.last_entry = NULL;
 
-  for (index = 0; index < num_resource_sets; index++)
-    rsrc_attach_chain (& new_table.ids, & type_tables[index].ids);
+  for (indx = 0; indx < num_resource_sets; indx++)
+    rsrc_attach_chain (& new_table.ids, & type_tables[indx].ids);
 
   rsrc_sort_entries (& new_table.ids, FALSE, & new_table);
 
