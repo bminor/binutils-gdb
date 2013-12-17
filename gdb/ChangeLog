@@ -1,3 +1,8 @@
+2013-12-23  Sterling Augustine  <saugustine@google.com>
+
+	* linespec.c (add_sal_to_sals): Use "<unknown>" when a symbol
+	isn't found.
+
 2013-12-23  Sergio Durigan JUnior  <sergiodj@redhat.com>
 
 	* stap-probe.c (struct stap_probe) <args_parsed>: Add comment.
