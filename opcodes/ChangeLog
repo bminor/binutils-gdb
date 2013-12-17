@@ -1,3 +1,13 @@
+2014-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	Backport from master
+	2013-12-17  Michael Zolotukhin  <michael.v.zolotukhin@gmail.com>
+
+	* i386-dis.c (MOD_FF_REG_3): New.
+	(MOD_FF_REG_5): Likewise.
+	(mod_table): Add MOD_FF_REG_3 and MOD_FF_REG_5.
+	(reg_table): Use MOD_FF_REG_3 and MOD_FF_REG_5.
+
 2014-02-27  Jiong Wang  <jiong.wang@arm.com>
 
 	* aarch64-tbl.h (aarch64_opcode_table): Replace IMM0 with
