@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_download_trace_state_variable>:
+	Add argument.
+	(target_download_trace_state_variable): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_download_trace_state_variable): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_can_download_tracepoint>: Add
 	argument.
 	(target_can_download_tracepoint): Add argument.

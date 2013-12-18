@@ -10602,7 +10602,8 @@ remote_can_download_tracepoint (struct target_ops *self)
 
 
 static void
-remote_download_trace_state_variable (struct trace_state_variable *tsv)
+remote_download_trace_state_variable (struct target_ops *self,
+				      struct trace_state_variable *tsv)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;

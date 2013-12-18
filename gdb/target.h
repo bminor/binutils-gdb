@@ -767,7 +767,8 @@ struct target_ops
     int (*to_can_download_tracepoint) (struct target_ops *);
 
     /* Send full details of a trace state variable to the target.  */
-    void (*to_download_trace_state_variable) (struct trace_state_variable *tsv);
+    void (*to_download_trace_state_variable) (struct target_ops *,
+					      struct trace_state_variable *tsv);
 
     /* Enable a tracepoint on the target.  */
     void (*to_enable_tracepoint) (struct bp_location *location);
@@ -1791,7 +1792,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_can_download_tracepoint) (&current_target)
 
 #define target_download_trace_state_variable(tsv) \
-  (*current_target.to_download_trace_state_variable) (tsv)
+  (*current_target.to_download_trace_state_variable) (&current_target, tsv)
 
 #define target_enable_tracepoint(loc) \
   (*current_target.to_enable_tracepoint) (loc)
