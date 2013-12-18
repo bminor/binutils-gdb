@@ -713,7 +713,8 @@ struct target_ops
 
     /* Does this target support debugging multiple processes
        simultaneously?  */
-    int (*to_supports_multi_process) (struct target_ops *);
+    int (*to_supports_multi_process) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Does this target support enabling and disabling tracepoints while a trace
        experiment is running?  */
