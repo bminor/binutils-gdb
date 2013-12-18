@@ -678,7 +678,7 @@ update_current_target (void)
       /* Do not inherit to_get_thread_local_address.  */
       /* Do not inherit to_can_execute_reverse.  */
       /* Do not inherit to_execution_direction.  */
-      INHERIT (to_thread_architecture, t);
+      /* Do not inherit to_thread_architecture.  */
       /* Do not inherit to_read_description.  */
       INHERIT (to_get_ada_task_ptid, t);
       /* Do not inherit to_search_memory.  */
@@ -748,8 +748,6 @@ update_current_target (void)
   de_fault (to_stop,
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
-  de_fault (to_thread_architecture,
-	    default_thread_architecture);
   current_target.to_read_description = NULL;
   de_fault (to_get_ada_task_ptid,
             (ptid_t (*) (struct target_ops *, long, long))

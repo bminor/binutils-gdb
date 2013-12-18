@@ -584,6 +584,13 @@ delegate_execution_direction (struct target_ops *self)
   return self->to_execution_direction (self);
 }
 
+static struct gdbarch *
+delegate_thread_architecture (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  return self->to_thread_architecture (self, arg1);
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -702,6 +709,8 @@ install_delegators (struct target_ops *ops)
     ops->to_can_execute_reverse = delegate_can_execute_reverse;
   if (ops->to_execution_direction == NULL)
     ops->to_execution_direction = delegate_execution_direction;
+  if (ops->to_thread_architecture == NULL)
+    ops->to_thread_architecture = delegate_thread_architecture;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -760,5 +769,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_xfer_partial = tdefault_xfer_partial;
   ops->to_can_execute_reverse = tdefault_can_execute_reverse;
   ops->to_execution_direction = default_execution_direction;
+  ops->to_thread_architecture = default_thread_architecture;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

@@ -742,7 +742,8 @@ struct target_ops
        ptrace operations need to operate according to target_gdbarch ().
 
        The default implementation always returns target_gdbarch ().  */
-    struct gdbarch *(*to_thread_architecture) (struct target_ops *, ptid_t);
+    struct gdbarch *(*to_thread_architecture) (struct target_ops *, ptid_t)
+      TARGET_DEFAULT_FUNC (default_thread_architecture);
 
     /* Determine current address space of thread PTID.
 
