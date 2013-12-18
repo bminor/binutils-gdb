@@ -604,7 +604,7 @@ update_current_target (void)
       /* Do not inherit to_files_info.  */
       /* Do not inherit to_insert_breakpoint.  */
       /* Do not inherit to_remove_breakpoint.  */
-      INHERIT (to_can_use_hw_breakpoint, t);
+      /* Do not inherit to_can_use_hw_breakpoint.  */
       INHERIT (to_insert_hw_breakpoint, t);
       INHERIT (to_remove_hw_breakpoint, t);
       /* Do not inherit to_ranged_break_num_registers.  */
@@ -734,9 +734,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_can_use_hw_breakpoint,
-	    (int (*) (struct target_ops *, int, int, int))
-	    return_zero);
   de_fault (to_insert_hw_breakpoint,
 	    (int (*) (struct target_ops *, struct gdbarch *,
 		      struct bp_target_info *))
