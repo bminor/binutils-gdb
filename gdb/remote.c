@@ -10968,7 +10968,8 @@ remote_save_trace_data (struct target_ops *self, const char *filename)
    not be unhappy if we don't get as much as we ask for.  */
 
 static LONGEST
-remote_get_raw_trace_data (gdb_byte *buf, ULONGEST offset, LONGEST len)
+remote_get_raw_trace_data (struct target_ops *self,
+			   gdb_byte *buf, ULONGEST offset, LONGEST len)
 {
   struct remote_state *rs = get_remote_state ();
   char *reply;

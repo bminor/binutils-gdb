@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_get_raw_trace_data>: Add
+	argument.
+	(target_get_raw_trace_data): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_raw_trace_data): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_upload_trace_state_variables>:
 	Add argument.
 	(target_upload_trace_state_variables): Add argument.

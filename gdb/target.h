@@ -819,7 +819,7 @@ struct target_ops
     int (*to_upload_trace_state_variables) (struct target_ops *,
 					    struct uploaded_tsv **utsvp);
 
-    LONGEST (*to_get_raw_trace_data) (gdb_byte *buf,
+    LONGEST (*to_get_raw_trace_data) (struct target_ops *, gdb_byte *buf,
 				      ULONGEST offset, LONGEST len);
 
     /* Get the minimum length of instruction on which a fast tracepoint
@@ -1840,7 +1840,8 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_upload_trace_state_variables) (&current_target, utsvp)
 
 #define target_get_raw_trace_data(buf,offset,len) \
-  (*current_target.to_get_raw_trace_data) ((buf), (offset), (len))
+  (*current_target.to_get_raw_trace_data) (&current_target,	\
+					   (buf), (offset), (len))
 
 #define target_get_min_fast_tracepoint_insn_len() \
   (*current_target.to_get_min_fast_tracepoint_insn_len) ()

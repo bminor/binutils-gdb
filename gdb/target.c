@@ -899,7 +899,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *, struct uploaded_tsv **))
 	    return_zero);
   de_fault (to_get_raw_trace_data,
-	    (LONGEST (*) (gdb_byte *, ULONGEST, LONGEST))
+	    (LONGEST (*) (struct target_ops *, gdb_byte *, ULONGEST, LONGEST))
 	    tcomplain);
   de_fault (to_get_min_fast_tracepoint_insn_len,
 	    (int (*) (void))
