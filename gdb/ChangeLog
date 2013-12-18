@@ -1,5 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_remove_vfork_catchpoint>: Add
+	argument.
+	(target_remove_vfork_catchpoint): Add argument.
+	* target.c (debug_to_remove_vfork_catchpoint): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_child_remove_vfork_catchpoint): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_insert_vfork_catchpoint>: Add
 	argument.
 	(target_insert_vfork_catchpoint): Add argument.
