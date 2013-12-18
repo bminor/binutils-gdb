@@ -2,6 +2,15 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_make_corefile_notes.
+	(init_dummy_target): Don't initialize to_make_corefile_notes.
+	* target.h (struct target_ops) <to_make_corefile_notes>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_find_memory_regions.
 	(init_dummy_target): Don't initialize to_find_memory_regions.
 	* target.h (struct target_ops) <to_find_memory_regions>: Use

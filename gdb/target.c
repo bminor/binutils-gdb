@@ -82,6 +82,9 @@ static int dummy_find_memory_regions (struct target_ops *self,
 				      find_memory_region_ftype ignore1,
 				      void *ignore2);
 
+static char *dummy_make_corefile_notes (struct target_ops *self,
+					bfd *ignore1, int *ignore2);
+
 static int find_default_can_async_p (struct target_ops *ignore);
 
 static int find_default_is_async_p (struct target_ops *ignore);
@@ -666,7 +669,7 @@ update_current_target (void)
       /* Do not inherit to_is_async_p.  */
       /* Do not inherit to_async.  */
       /* Do not inherit to_find_memory_regions.  */
-      INHERIT (to_make_corefile_notes, t);
+      /* Do not inherit to_make_corefile_notes.  */
       INHERIT (to_get_bookmark, t);
       INHERIT (to_goto_bookmark, t);
       /* Do not inherit to_get_thread_local_address.  */
@@ -3707,7 +3710,6 @@ init_dummy_target (void)
     = find_default_supports_disable_randomization;
   dummy_target.to_pid_to_str = dummy_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
-  dummy_target.to_make_corefile_notes = dummy_make_corefile_notes;
   dummy_target.to_get_bookmark = dummy_get_bookmark;
   dummy_target.to_goto_bookmark = dummy_goto_bookmark;
   dummy_target.to_has_all_memory = (int (*) (struct target_ops *)) return_zero;

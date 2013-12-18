@@ -585,7 +585,8 @@ struct target_ops
 				   find_memory_region_ftype func, void *data)
       TARGET_DEFAULT_FUNC (dummy_find_memory_regions);
     /* make_corefile_notes support method for gcore */
-    char * (*to_make_corefile_notes) (struct target_ops *, bfd *, int *);
+    char * (*to_make_corefile_notes) (struct target_ops *, bfd *, int *)
+      TARGET_DEFAULT_FUNC (dummy_make_corefile_notes);
     /* get_bookmark support method for bookmarks */
     gdb_byte * (*to_get_bookmark) (struct target_ops *, char *, int);
     /* goto_bookmark support method for bookmarks */
