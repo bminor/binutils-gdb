@@ -702,7 +702,7 @@ linux_child_insert_fork_catchpoint (struct target_ops *self, int pid)
 }
 
 static int
-linux_child_remove_fork_catchpoint (int pid)
+linux_child_remove_fork_catchpoint (struct target_ops *self, int pid)
 {
   return 0;
 }
