@@ -873,7 +873,8 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     int (*to_upload_tracepoints) (struct target_ops *,
-				  struct uploaded_tp **utpp);
+				  struct uploaded_tp **utpp)
+      TARGET_DEFAULT_RETURN (0);
 
     int (*to_upload_trace_state_variables) (struct target_ops *,
 					    struct uploaded_tsv **utsvp);
