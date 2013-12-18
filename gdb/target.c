@@ -4379,7 +4379,7 @@ target_goto_record_end (void)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_goto_record_end != NULL)
       {
-	t->to_goto_record_end ();
+	t->to_goto_record_end (t);
 	return;
       }
 

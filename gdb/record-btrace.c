@@ -1818,7 +1818,7 @@ record_btrace_goto_begin (struct target_ops *self)
 /* The to_goto_record_end method of target record-btrace.  */
 
 static void
-record_btrace_goto_end (void)
+record_btrace_goto_end (struct target_ops *ops)
 {
   struct thread_info *tp;
 

@@ -1874,7 +1874,7 @@ record_full_goto_begin (struct target_ops *self)
 /* The "to_goto_record_end" target method.  */
 
 static void
-record_full_goto_end (void)
+record_full_goto_end (struct target_ops *self)
 {
   struct record_full_entry *p = NULL;
 
