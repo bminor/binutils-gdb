@@ -821,7 +821,8 @@ struct target_ops
 
     /* Enable a tracepoint on the target.  */
     void (*to_enable_tracepoint) (struct target_ops *,
-				  struct bp_location *location);
+				  struct bp_location *location)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Disable a tracepoint on the target.  */
     void (*to_disable_tracepoint) (struct target_ops *,
