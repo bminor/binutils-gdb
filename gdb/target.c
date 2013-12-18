@@ -905,7 +905,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *))
 	    return_minus_one);
   de_fault (to_set_disconnected_tracing,
-	    (void (*) (int))
+	    (void (*) (struct target_ops *, int))
 	    target_ignore);
   de_fault (to_set_circular_trace_buffer,
 	    (void (*) (int))

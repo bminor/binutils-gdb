@@ -11007,7 +11007,7 @@ remote_get_raw_trace_data (struct target_ops *self,
 }
 
 static void
-remote_set_disconnected_tracing (int val)
+remote_set_disconnected_tracing (struct target_ops *self, int val)
 {
   struct remote_state *rs = get_remote_state ();
 
