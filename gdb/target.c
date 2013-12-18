@@ -4232,7 +4232,7 @@ target_teardown_btrace (struct btrace_target_info *btinfo)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_teardown_btrace != NULL)
       {
-	t->to_teardown_btrace (btinfo);
+	t->to_teardown_btrace (t, btinfo);
 	return;
       }
 

@@ -11312,7 +11312,8 @@ remote_disable_btrace (struct target_ops *self,
 /* Teardown branch tracing.  */
 
 static void
-remote_teardown_btrace (struct btrace_target_info *tinfo)
+remote_teardown_btrace (struct target_ops *self,
+			struct btrace_target_info *tinfo)
 {
   /* We must not talk to the target during teardown.  */
   xfree (tinfo);

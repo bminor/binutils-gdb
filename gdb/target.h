@@ -914,7 +914,8 @@ struct target_ops
        to to_disable_btrace, except that it is called during teardown and is
        only allowed to perform actions that are safe.  A counter-example would
        be attempting to talk to a remote target.  */
-    void (*to_teardown_btrace) (struct btrace_target_info *tinfo);
+    void (*to_teardown_btrace) (struct target_ops *,
+				struct btrace_target_info *tinfo);
 
     /* Read branch trace data for the thread indicated by BTINFO into DATA.
        DATA is cleared before new trace is added.

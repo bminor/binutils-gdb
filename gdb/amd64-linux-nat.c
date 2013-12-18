@@ -1184,7 +1184,8 @@ amd64_linux_disable_btrace (struct target_ops *self,
 /* Teardown branch tracing.  */
 
 static void
-amd64_linux_teardown_btrace (struct btrace_target_info *tinfo)
+amd64_linux_teardown_btrace (struct target_ops *self,
+			     struct btrace_target_info *tinfo)
 {
   /* Ignore errors.  */
   linux_disable_btrace (tinfo);
