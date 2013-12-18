@@ -491,7 +491,8 @@ struct target_ops
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
     int (*to_region_ok_for_hw_watchpoint) (struct target_ops *,
-					   CORE_ADDR, int);
+					   CORE_ADDR, int)
+      TARGET_DEFAULT_FUNC (default_region_ok_for_hw_watchpoint);
 
     int (*to_can_accel_watchpoint_condition) (struct target_ops *,
 					      CORE_ADDR, int, int,

@@ -2,6 +2,14 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_region_ok_for_hw_watchpoint.
+	* target.h (struct target_ops) <to_region_ok_for_hw_watchpoint>:
+	Use TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_watchpoint_addr_within_range.
 	* target.h (struct target_ops) <to_watchpoint_addr_within_range>:
 	Use TARGET_DEFAULT_FUNC.
