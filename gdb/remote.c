@@ -11370,7 +11370,7 @@ remote_read_btrace (struct target_ops *self,
 }
 
 static int
-remote_augmented_libraries_svr4_read (void)
+remote_augmented_libraries_svr4_read (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
 

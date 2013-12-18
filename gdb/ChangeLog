@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_augmented_libraries_svr4_read>:
+	Add argument.
+	(target_augmented_libraries_svr4_read): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_augmented_libraries_svr4_read): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_call_history_range>: Add
 	argument.
 	* target.c (target_call_history_range): Add argument.

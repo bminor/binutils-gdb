@@ -987,7 +987,7 @@ struct target_ops
 
     /* Nonzero if TARGET_OBJECT_LIBRARIES_SVR4 may be read with a
        non-empty annex.  */
-    int (*to_augmented_libraries_svr4_read) (void);
+    int (*to_augmented_libraries_svr4_read) (struct target_ops *);
 
     /* Those unwinders are tried before any other arch unwinders.  Use NULL if
        it is not used.  */
@@ -1893,7 +1893,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_can_use_agent) (&current_target)
 
 #define target_augmented_libraries_svr4_read() \
-  (*current_target.to_augmented_libraries_svr4_read) ()
+  (*current_target.to_augmented_libraries_svr4_read) (&current_target)
 
 /* Command logging facility.  */
 
