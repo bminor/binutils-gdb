@@ -452,19 +452,10 @@ target_ignore (void)
 void
 target_kill (void)
 {
-  struct target_ops *t;
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_kill ()\n");
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_kill != NULL)
-      {
-	if (targetdebug)
-	  fprintf_unfiltered (gdb_stdlog, "target_kill ()\n");
-
-        t->to_kill (t);
-	return;
-      }
-
-  noprocess ();
+  current_target.to_kill (&current_target);
 }
 
 void

@@ -362,6 +362,19 @@ delegate_terminal_info (struct target_ops *self, const char *arg1, int arg2)
 }
 
 static void
+delegate_kill (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_kill (self);
+}
+
+static void
+tdefault_kill (struct target_ops *self)
+{
+  noprocess ();
+}
+
+static void
 delegate_load (struct target_ops *self, char *arg1, int arg2)
 {
   self = self->beneath;
@@ -1203,6 +1216,8 @@ install_delegators (struct target_ops *ops)
     ops->to_terminal_save_ours = delegate_terminal_save_ours;
   if (ops->to_terminal_info == NULL)
     ops->to_terminal_info = delegate_terminal_info;
+  if (ops->to_kill == NULL)
+    ops->to_kill = delegate_kill;
   if (ops->to_load == NULL)
     ops->to_load = delegate_load;
   if (ops->to_post_startup_inferior == NULL)
@@ -1367,6 +1382,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_terminal_ours = tdefault_terminal_ours;
   ops->to_terminal_save_ours = tdefault_terminal_save_ours;
   ops->to_terminal_info = default_terminal_info;
+  ops->to_kill = tdefault_kill;
   ops->to_load = tdefault_load;
   ops->to_post_startup_inferior = tdefault_post_startup_inferior;
   ops->to_insert_fork_catchpoint = tdefault_insert_fork_catchpoint;

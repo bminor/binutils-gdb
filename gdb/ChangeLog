@@ -1,6 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_kill): Unconditionally delegate.
+	* target.h (struct target_ops) <to_kill>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_masked_watch_num_registers): Unconditionally
 	delegate.
 	* target.h (struct target_ops) <to_masked_watch_num_registers>:
