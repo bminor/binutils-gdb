@@ -832,7 +832,8 @@ struct target_ops
     /* Inform the target info of memory regions that are readonly
        (such as text sections), and so it should return data from
        those rather than look in the trace buffer.  */
-    void (*to_trace_set_readonly_regions) (struct target_ops *);
+    void (*to_trace_set_readonly_regions) (struct target_ops *)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Start a trace run.  */
     void (*to_trace_start) (struct target_ops *);
