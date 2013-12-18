@@ -119,7 +119,8 @@ static void procfs_fetch_registers (struct target_ops *,
 				    struct regcache *, int);
 static void procfs_store_registers (struct target_ops *,
 				    struct regcache *, int);
-static void procfs_pass_signals (int, unsigned char *);
+static void procfs_pass_signals (struct target_ops *self,
+				 int, unsigned char *);
 static void procfs_kill_inferior (struct target_ops *ops);
 static void procfs_mourn_inferior (struct target_ops *ops);
 static void procfs_create_inferior (struct target_ops *, char *,
@@ -4227,7 +4228,8 @@ procfs_resume (struct target_ops *ops,
 /* Set up to trace signals in the child process.  */
 
 static void
-procfs_pass_signals (int numsigs, unsigned char *pass_signals)
+procfs_pass_signals (struct target_ops *self,
+		     int numsigs, unsigned char *pass_signals)
 {
   gdb_sigset_t signals;
   procinfo *pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);

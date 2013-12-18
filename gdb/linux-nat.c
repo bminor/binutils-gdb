@@ -824,7 +824,8 @@ static sigset_t pass_mask;
 
 /* Update signals to pass to the inferior.  */
 static void
-linux_nat_pass_signals (int numsigs, unsigned char *pass_signals)
+linux_nat_pass_signals (struct target_ops *self,
+			int numsigs, unsigned char *pass_signals)
 {
   int signo;
 
@@ -1302,7 +1303,7 @@ linux_nat_create_inferior (struct target_ops *ops,
 #endif /* HAVE_PERSONALITY */
 
   /* Make sure we report all signals during startup.  */
-  linux_nat_pass_signals (0, NULL);
+  linux_nat_pass_signals (ops, 0, NULL);
 
   linux_ops->to_create_inferior (ops, exec_file, allargs, env, from_tty);
 
@@ -1327,7 +1328,7 @@ linux_nat_attach (struct target_ops *ops, char *args, int from_tty)
   volatile struct gdb_exception ex;
 
   /* Make sure we report all signals during attach.  */
-  linux_nat_pass_signals (0, NULL);
+  linux_nat_pass_signals (ops, 0, NULL);
 
   TRY_CATCH (ex, RETURN_MASK_ERROR)
     {

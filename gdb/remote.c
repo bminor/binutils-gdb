@@ -1695,7 +1695,8 @@ record_currthread (struct remote_state *rs, ptid_t currthread)
    it can simply pass through to the inferior without reporting.  */
 
 static void
-remote_pass_signals (int numsigs, unsigned char *pass_signals)
+remote_pass_signals (struct target_ops *self,
+		     int numsigs, unsigned char *pass_signals)
 {
   if (remote_protocol_packets[PACKET_QPassSignals].support != PACKET_DISABLE)
     {
@@ -3592,7 +3593,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       gdb_assert (wait_status == NULL);
 
       /* Report all signals during attach/startup.  */
-      remote_pass_signals (0, NULL);
+      remote_pass_signals (target, 0, NULL);
     }
 
   /* If we connected to a live target, do some additional setup.  */

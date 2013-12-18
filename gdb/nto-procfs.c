@@ -1336,7 +1336,8 @@ procfs_store_registers (struct target_ops *ops,
 /* Set list of signals to be handled in the target.  */
 
 static void
-procfs_pass_signals (int numsigs, unsigned char *pass_signals)
+procfs_pass_signals (struct target_ops *self,
+		     int numsigs, unsigned char *pass_signals)
 {
   int signo;
 

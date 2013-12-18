@@ -513,7 +513,7 @@ struct target_ops
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
-    void (*to_pass_signals) (int, unsigned char *);
+    void (*to_pass_signals) (struct target_ops *, int, unsigned char *);
 
     /* Documentation of this routine is provided with the
        corresponding target_* function.  */

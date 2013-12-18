@@ -2821,7 +2821,7 @@ target_pass_signals (int numsigs, unsigned char *pass_signals)
 	      fprintf_unfiltered (gdb_stdlog, " })\n");
 	    }
 
-	  (*t->to_pass_signals) (numsigs, pass_signals);
+	  (*t->to_pass_signals) (t, numsigs, pass_signals);
 	  return;
 	}
     }
