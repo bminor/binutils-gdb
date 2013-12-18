@@ -2851,7 +2851,7 @@ target_program_signals (int numsigs, unsigned char *program_signals)
 	      fprintf_unfiltered (gdb_stdlog, " })\n");
 	    }
 
-	  (*t->to_program_signals) (numsigs, program_signals);
+	  (*t->to_program_signals) (t, numsigs, program_signals);
 	  return;
 	}
     }

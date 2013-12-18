@@ -1,5 +1,11 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_program_signals>: Add argument.
+	* target.c (target_program_signals): Add argument.
+	* remote.c (remote_program_signals): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_pass_signals>: Add argument.
 	* target.c (target_pass_signals): Add argument.
 	* remote.c (remote_pass_signals): Add 'self' argument.

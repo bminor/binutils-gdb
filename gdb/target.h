@@ -517,7 +517,7 @@ struct target_ops
 
     /* Documentation of this routine is provided with the
        corresponding target_* function.  */
-    void (*to_program_signals) (int, unsigned char *);
+    void (*to_program_signals) (struct target_ops *, int, unsigned char *);
 
     int (*to_thread_alive) (struct target_ops *, ptid_t ptid);
     void (*to_find_new_threads) (struct target_ops *);

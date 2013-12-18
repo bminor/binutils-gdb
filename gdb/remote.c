@@ -1746,7 +1746,8 @@ remote_pass_signals (struct target_ops *self,
    signals it should pass through to the inferior when detaching.  */
 
 static void
-remote_program_signals (int numsigs, unsigned char *signals)
+remote_program_signals (struct target_ops *self,
+			int numsigs, unsigned char *signals)
 {
   if (remote_protocol_packets[PACKET_QProgramSignals].support != PACKET_DISABLE)
     {
