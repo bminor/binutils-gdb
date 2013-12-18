@@ -617,6 +617,19 @@ tdefault_supports_enable_disable_tracepoint (struct target_ops *self)
   return 0;
 }
 
+static int
+delegate_supports_string_tracing (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_supports_string_tracing (self);
+}
+
+static int
+tdefault_supports_string_tracing (struct target_ops *self)
+{
+  return 0;
+}
+
 static struct gdbarch *
 delegate_thread_architecture (struct target_ops *self, ptid_t arg1)
 {
@@ -748,6 +761,8 @@ install_delegators (struct target_ops *ops)
     ops->to_supports_multi_process = delegate_supports_multi_process;
   if (ops->to_supports_enable_disable_tracepoint == NULL)
     ops->to_supports_enable_disable_tracepoint = delegate_supports_enable_disable_tracepoint;
+  if (ops->to_supports_string_tracing == NULL)
+    ops->to_supports_string_tracing = delegate_supports_string_tracing;
   if (ops->to_thread_architecture == NULL)
     ops->to_thread_architecture = delegate_thread_architecture;
   if (ops->to_supports_btrace == NULL)
@@ -811,6 +826,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_execution_direction = default_execution_direction;
   ops->to_supports_multi_process = tdefault_supports_multi_process;
   ops->to_supports_enable_disable_tracepoint = tdefault_supports_enable_disable_tracepoint;
+  ops->to_supports_string_tracing = tdefault_supports_string_tracing;
   ops->to_thread_architecture = default_thread_architecture;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
