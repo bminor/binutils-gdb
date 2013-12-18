@@ -2545,7 +2545,8 @@ gnu_xfer_partial (struct target_ops *ops, enum target_object object,
 
 /* Call FUNC on each memory region in the task.  */
 static int
-gnu_find_memory_regions (find_memory_region_ftype func, void *data)
+gnu_find_memory_regions (struct target_ops *self,
+			 find_memory_region_ftype func, void *data)
 {
   error_t err;
   task_t task;

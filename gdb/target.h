@@ -547,7 +547,8 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
     int (*to_supports_non_stop) (struct target_ops *);
     /* find_memory_regions support method for gcore */
-    int (*to_find_memory_regions) (find_memory_region_ftype func, void *data);
+    int (*to_find_memory_regions) (struct target_ops *,
+				   find_memory_region_ftype func, void *data);
     /* make_corefile_notes support method for gcore */
     char * (*to_make_corefile_notes) (bfd *, int *);
     /* get_bookmark support method for bookmarks */
@@ -1560,7 +1561,7 @@ extern char *target_thread_name (struct thread_info *);
  */
 
 #define target_find_memory_regions(FUNC, DATA) \
-     (current_target.to_find_memory_regions) (FUNC, DATA)
+     (current_target.to_find_memory_regions) (&current_target, FUNC, DATA)
 
 /*
  * Compose corefile .note section.

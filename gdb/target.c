@@ -3770,7 +3770,8 @@ dummy_pid_to_str (struct target_ops *ops, ptid_t ptid)
 
 /* Error-catcher for target_find_memory_regions.  */
 static int
-dummy_find_memory_regions (find_memory_region_ftype ignore1, void *ignore2)
+dummy_find_memory_regions (struct target_ops *self,
+			   find_memory_region_ftype ignore1, void *ignore2)
 {
   error (_("Command not implemented for this target."));
   return 0;

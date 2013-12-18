@@ -29,7 +29,8 @@ extern char *fbsd_pid_to_exec_file (struct target_ops *self, int pid);
    calling FUNC for each memory region.  OBFD is passed as the last
    argument to FUNC.  */
 
-extern int fbsd_find_memory_regions (find_memory_region_ftype func, void *obfd);
+extern int fbsd_find_memory_regions (struct target_ops *self,
+				     find_memory_region_ftype func, void *obfd);
 
 /* Create appropriate note sections for a corefile, returning them in
    allocated memory.  */

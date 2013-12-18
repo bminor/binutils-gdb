@@ -1,5 +1,20 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_find_memory_regions>: Add
+	argument.
+	(target_find_memory_regions): Add argument.
+	* target.c (dummy_find_memory_regions): Add 'self' argument.
+	* procfs.c (proc_find_memory_regions): Add 'self' argument.
+	* gnu-nat.c (gnu_find_memory_regions): Add 'self' argument.
+	* fbsd-nat.h (fbsd_find_memory_regions): Add 'self' argument.
+	* fbsd-nat.c (fbsd_find_memory_regions): Add 'self' argument.
+	* exec. (exec_do_find_memory_regions): New global.
+	(exec_set_find_memory_regions): Rewrite.
+	(exec_find_memory_regions): New function.
+	(init_exec_ops): Use exec_find_memory_regions.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_supports_non_stop>: Add
 	argument.
 	* target.c (find_default_supports_non_stop): Add argument.

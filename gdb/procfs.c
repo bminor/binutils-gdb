@@ -137,7 +137,8 @@ static int procfs_thread_alive (struct target_ops *ops, ptid_t);
 static void procfs_find_new_threads (struct target_ops *ops);
 static char *procfs_pid_to_str (struct target_ops *, ptid_t);
 
-static int proc_find_memory_regions (find_memory_region_ftype, void *);
+static int proc_find_memory_regions (struct target_ops *self,
+				     find_memory_region_ftype, void *);
 
 static char * procfs_make_note_section (bfd *, int *);
 
@@ -5058,7 +5059,8 @@ find_memory_regions_callback (struct prmap *map,
    the callback.  */
 
 static int
-proc_find_memory_regions (find_memory_region_ftype func, void *data)
+proc_find_memory_regions (struct target_ops *self,
+			  find_memory_region_ftype func, void *data)
 {
   procinfo *pi = find_procinfo_or_die (ptid_get_pid (inferior_ptid), 0);
 
