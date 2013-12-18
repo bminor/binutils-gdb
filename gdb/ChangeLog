@@ -1,6 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_pid_to_str): Unconditionally delegate.
+	(init_dummy_target): Don't initialize to_pid_to_str.
+	(default_pid_to_str): Rename from dummy_pid_to_str.
+	* target.h (struct target_ops) <to_pid_to_str>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_find_new_threads): Unconditionally delegate.
 	* target.h (struct target_ops) <to_find_new_threads>: Use
 	TARGET_DEFAULT_RETURN.

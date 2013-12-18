@@ -89,6 +89,8 @@ static int dummy_find_memory_regions (struct target_ops *self,
 static char *dummy_make_corefile_notes (struct target_ops *self,
 					bfd *ignore1, int *ignore2);
 
+static char *default_pid_to_str (struct target_ops *ops, ptid_t ptid);
+
 static int find_default_can_async_p (struct target_ops *ignore);
 
 static int find_default_is_async_p (struct target_ops *ignore);
@@ -2540,15 +2542,7 @@ target_wait (ptid_t ptid, struct target_waitstatus *status, int options)
 char *
 target_pid_to_str (ptid_t ptid)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_pid_to_str != NULL)
-	return (*t->to_pid_to_str) (t, ptid);
-    }
-
-  return normal_pid_to_str (ptid);
+  return (*current_target.to_pid_to_str) (&current_target, ptid);
 }
 
 char *
@@ -3500,7 +3494,7 @@ normal_pid_to_str (ptid_t ptid)
 }
 
 static char *
-dummy_pid_to_str (struct target_ops *ops, ptid_t ptid)
+default_pid_to_str (struct target_ops *ops, ptid_t ptid)
 {
   return normal_pid_to_str (ptid);
 }
@@ -3536,7 +3530,6 @@ init_dummy_target (void)
   dummy_target.to_supports_non_stop = find_default_supports_non_stop;
   dummy_target.to_supports_disable_randomization
     = find_default_supports_disable_randomization;
-  dummy_target.to_pid_to_str = dummy_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_has_all_memory = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_memory = (int (*) (struct target_ops *)) return_zero;
