@@ -3758,18 +3758,9 @@ debug_print_register (const char * func,
 void
 target_fetch_registers (struct regcache *regcache, int regno)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_fetch_registers != NULL)
-	{
-	  t->to_fetch_registers (t, regcache, regno);
-	  if (targetdebug)
-	    debug_print_register ("target_fetch_registers", regcache, regno);
-	  return;
-	}
-    }
+  current_target.to_fetch_registers (&current_target, regcache, regno);
+  if (targetdebug)
+    debug_print_register ("target_fetch_registers", regcache, regno);
 }
 
 void

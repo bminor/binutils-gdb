@@ -61,6 +61,18 @@ tdefault_wait (struct target_ops *self, ptid_t arg1, struct target_waitstatus *a
 }
 
 static void
+delegate_fetch_registers (struct target_ops *self, struct regcache *arg1, int arg2)
+{
+  self = self->beneath;
+  self->to_fetch_registers (self, arg1, arg2);
+}
+
+static void
+tdefault_fetch_registers (struct target_ops *self, struct regcache *arg1, int arg2)
+{
+}
+
+static void
 delegate_store_registers (struct target_ops *self, struct regcache *arg1, int arg2)
 {
   self = self->beneath;
@@ -1087,6 +1099,8 @@ install_delegators (struct target_ops *ops)
     ops->to_resume = delegate_resume;
   if (ops->to_wait == NULL)
     ops->to_wait = delegate_wait;
+  if (ops->to_fetch_registers == NULL)
+    ops->to_fetch_registers = delegate_fetch_registers;
   if (ops->to_store_registers == NULL)
     ops->to_store_registers = delegate_store_registers;
   if (ops->to_prepare_to_store == NULL)
@@ -1267,6 +1281,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_detach = tdefault_detach;
   ops->to_resume = tdefault_resume;
   ops->to_wait = tdefault_wait;
+  ops->to_fetch_registers = tdefault_fetch_registers;
   ops->to_store_registers = tdefault_store_registers;
   ops->to_prepare_to_store = tdefault_prepare_to_store;
   ops->to_files_info = tdefault_files_info;

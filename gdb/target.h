@@ -415,7 +415,8 @@ struct target_ops
     ptid_t (*to_wait) (struct target_ops *,
 		       ptid_t, struct target_waitstatus *, int)
       TARGET_DEFAULT_NORETURN (noprocess ());
-    void (*to_fetch_registers) (struct target_ops *, struct regcache *, int);
+    void (*to_fetch_registers) (struct target_ops *, struct regcache *, int)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_store_registers) (struct target_ops *, struct regcache *, int)
       TARGET_DEFAULT_NORETURN (noprocess ());
     void (*to_prepare_to_store) (struct target_ops *, struct regcache *)
