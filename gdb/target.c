@@ -3372,7 +3372,7 @@ target_fileio_open (const char *filename, int flags, int mode,
     {
       if (t->to_fileio_open != NULL)
 	{
-	  int fd = t->to_fileio_open (filename, flags, mode, target_errno);
+	  int fd = t->to_fileio_open (t, filename, flags, mode, target_errno);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,

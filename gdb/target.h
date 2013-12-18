@@ -716,7 +716,8 @@ struct target_ops
     /* Open FILENAME on the target, using FLAGS and MODE.  Return a
        target file descriptor, or -1 if an error occurs (and set
        *TARGET_ERRNO).  */
-    int (*to_fileio_open) (const char *filename, int flags, int mode,
+    int (*to_fileio_open) (struct target_ops *,
+			   const char *filename, int flags, int mode,
 			   int *target_errno);
 
     /* Write up to LEN bytes from WRITE_BUF to FD on the target.

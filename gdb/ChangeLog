@@ -1,5 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_fileio_open>: Add argument.
+	* target.c (target_fileio_open): Add argument.
+	* remote.c (remote_hostio_open): Add 'self' argument.
+	(remote_bfd_iovec_open): Add 'self' argument.
+	(remote_file_put): Add 'self' argument.
+	(remote_file_get): Add 'self' argument.
+	* inf-child.c (inf_child_fileio_open): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_can_run_breakpoint_commands>:
 	Add argument.
 	(target_can_run_breakpoint_commands): Add argument.

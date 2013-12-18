@@ -231,7 +231,8 @@ inf_child_errno_to_fileio_error (int errnum)
    target file descriptor, or -1 if an error occurs (and set
    *TARGET_ERRNO).  */
 static int
-inf_child_fileio_open (const char *filename, int flags, int mode,
+inf_child_fileio_open (struct target_ops *self,
+		       const char *filename, int flags, int mode,
 		       int *target_errno)
 {
   int nat_flags;

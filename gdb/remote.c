@@ -9655,7 +9655,8 @@ remote_hostio_send_command (int command_bytes, int which_packet,
    *REMOTE_ERRNO).  */
 
 static int
-remote_hostio_open (const char *filename, int flags, int mode,
+remote_hostio_open (struct target_ops *self,
+		    const char *filename, int flags, int mode,
 		    int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
@@ -9901,7 +9902,8 @@ remote_bfd_iovec_open (struct bfd *abfd, void *open_closure)
 
   gdb_assert (remote_filename_p (filename));
 
-  fd = remote_hostio_open (filename + 7, FILEIO_O_RDONLY, 0, &remote_errno);
+  fd = remote_hostio_open (find_target_at (process_stratum),
+			   filename + 7, FILEIO_O_RDONLY, 0, &remote_errno);
   if (fd == -1)
     {
       errno = remote_fileio_errno_to_host (remote_errno);
@@ -10007,7 +10009,8 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
     perror_with_name (local_file);
   back_to = make_cleanup_fclose (file);
 
-  fd = remote_hostio_open (remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
+  fd = remote_hostio_open (find_target_at (process_stratum),
+			   remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
 					 | FILEIO_O_TRUNC),
 			   0700, &remote_errno);
   if (fd == -1)
@@ -10091,7 +10094,8 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   if (!rs->remote_desc)
     error (_("command can only be used with remote target"));
 
-  fd = remote_hostio_open (remote_file, FILEIO_O_RDONLY, 0, &remote_errno);
+  fd = remote_hostio_open (find_target_at (process_stratum),
+			   remote_file, FILEIO_O_RDONLY, 0, &remote_errno);
   if (fd == -1)
     remote_hostio_error (remote_errno);
 
