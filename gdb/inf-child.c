@@ -257,7 +257,8 @@ inf_child_fileio_open (struct target_ops *self,
    Return the number of bytes written, or -1 if an error occurs
    (and set *TARGET_ERRNO).  */
 static int
-inf_child_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
+inf_child_fileio_pwrite (struct target_ops *self,
+			 int fd, const gdb_byte *write_buf, int len,
 			 ULONGEST offset, int *target_errno)
 {
   int ret;

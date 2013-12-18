@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_fileio_pwrite>: Add argument.
+	* target.c (target_fileio_pwrite): Add argument.
+	* remote.c (remote_hostio_pwrite): Add 'self' argument.
+	(remote_file_put): Update.
+	* inf-child.c (inf_child_fileio_pwrite): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_fileio_open>: Add argument.
 	* target.c (target_fileio_open): Add argument.
 	* remote.c (remote_hostio_open): Add 'self' argument.

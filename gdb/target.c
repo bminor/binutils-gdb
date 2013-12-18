@@ -3400,7 +3400,7 @@ target_fileio_pwrite (int fd, const gdb_byte *write_buf, int len,
     {
       if (t->to_fileio_pwrite != NULL)
 	{
-	  int ret = t->to_fileio_pwrite (fd, write_buf, len, offset,
+	  int ret = t->to_fileio_pwrite (t, fd, write_buf, len, offset,
 					 target_errno);
 
 	  if (targetdebug)

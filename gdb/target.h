@@ -723,7 +723,8 @@ struct target_ops
     /* Write up to LEN bytes from WRITE_BUF to FD on the target.
        Return the number of bytes written, or -1 if an error occurs
        (and set *TARGET_ERRNO).  */
-    int (*to_fileio_pwrite) (int fd, const gdb_byte *write_buf, int len,
+    int (*to_fileio_pwrite) (struct target_ops *,
+			     int fd, const gdb_byte *write_buf, int len,
 			     ULONGEST offset, int *target_errno);
 
     /* Read up to LEN bytes FD on the target into READ_BUF.

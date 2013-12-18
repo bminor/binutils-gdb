@@ -9683,7 +9683,8 @@ remote_hostio_open (struct target_ops *self,
    set *REMOTE_ERRNO).  */
 
 static int
-remote_hostio_pwrite (int fd, const gdb_byte *write_buf, int len,
+remote_hostio_pwrite (struct target_ops *self,
+		      int fd, const gdb_byte *write_buf, int len,
 		      ULONGEST offset, int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
@@ -10054,7 +10055,8 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
       bytes += bytes_in_buffer;
       bytes_in_buffer = 0;
 
-      retcode = remote_hostio_pwrite (fd, buffer, bytes,
+      retcode = remote_hostio_pwrite (find_target_at (process_stratum),
+				      fd, buffer, bytes,
 				      offset, &remote_errno);
 
       if (retcode < 0)
