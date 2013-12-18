@@ -883,7 +883,8 @@ update_current_target (void)
 	    (void (*) (struct target_ops *))
 	    tcomplain);
   de_fault (to_trace_find,
-	    (int (*) (enum trace_find_type, int, CORE_ADDR, CORE_ADDR, int *))
+	    (int (*) (struct target_ops *,
+		      enum trace_find_type, int, CORE_ADDR, CORE_ADDR, int *))
 	    return_minus_one);
   de_fault (to_get_trace_state_variable_value,
 	    (int (*) (int, LONGEST *))

@@ -801,7 +801,8 @@ struct target_ops
       number of the trace frame, and also the tracepoint number at
       TPP.  If no trace frame matches, return -1.  May throw if the
       operation fails.  */
-    int (*to_trace_find) (enum trace_find_type type, int num,
+    int (*to_trace_find) (struct target_ops *,
+			  enum trace_find_type type, int num,
 			  CORE_ADDR addr1, CORE_ADDR addr2, int *tpp);
 
     /* Get the value of the trace state variable number TSV, returning
@@ -1819,7 +1820,8 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_trace_stop) (&current_target)
 
 #define target_trace_find(type,num,addr1,addr2,tpp) \
-  (*current_target.to_trace_find) ((type), (num), (addr1), (addr2), (tpp))
+  (*current_target.to_trace_find) (&current_target, \
+				   (type), (num), (addr1), (addr2), (tpp))
 
 #define target_get_trace_state_variable_value(tsv,val) \
   (*current_target.to_get_trace_state_variable_value) ((tsv), (val))

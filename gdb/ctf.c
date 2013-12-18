@@ -1633,7 +1633,7 @@ ctf_get_traceframe_address (void)
    number in it.  Return traceframe number when matched.  */
 
 static int
-ctf_trace_find (enum trace_find_type type, int num,
+ctf_trace_find (struct target_ops *self, enum trace_find_type type, int num,
 		CORE_ADDR addr1, CORE_ADDR addr2, int *tpp)
 {
   int ret = -1;
