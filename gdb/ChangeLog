@@ -1,5 +1,10 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* remote.c (remote_load): New function.
+	(init_remote_ops): Use it.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* common/linux-btrace.c (linux_supports_btrace): Add "ops"
 	argument.
 	* common/linux-btrace.h (linux_supports_btrace): Update.

@@ -11345,6 +11345,14 @@ remote_augmented_libraries_svr4_read (void)
   return rs->augmented_libraries_svr4_read;
 }
 
+/* Implementation of to_load.  */
+
+static void
+remote_load (char *name, int from_tty)
+{
+  generic_load (name, from_tty);
+}
+
 static void
 init_remote_ops (void)
 {
@@ -11378,7 +11386,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_insert_watchpoint = remote_insert_watchpoint;
   remote_ops.to_remove_watchpoint = remote_remove_watchpoint;
   remote_ops.to_kill = remote_kill;
-  remote_ops.to_load = generic_load;
+  remote_ops.to_load = remote_load;
   remote_ops.to_mourn_inferior = remote_mourn;
   remote_ops.to_pass_signals = remote_pass_signals;
   remote_ops.to_program_signals = remote_program_signals;
