@@ -61,7 +61,7 @@ static struct target_ops *targ_ops;
 
 static void monitor_interrupt_query (void);
 static void monitor_interrupt_twice (int);
-static void monitor_stop (ptid_t);
+static void monitor_stop (struct target_ops *self, ptid_t);
 static void monitor_dump_regs (struct regcache *regcache);
 
 #if 0
@@ -783,7 +783,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   if (current_monitor->stop)
     {
-      monitor_stop (inferior_ptid);
+      monitor_stop (targ_ops, inferior_ptid);
       if ((current_monitor->flags & MO_NO_ECHO_ON_OPEN) == 0)
 	{
 	  monitor_debug ("EXP Open echo\n");
@@ -2267,7 +2267,7 @@ monitor_load (struct target_ops *self, char *args, int from_tty)
 }
 
 static void
-monitor_stop (ptid_t ptid)
+monitor_stop (struct target_ops *self, ptid_t ptid)
 {
   monitor_debug ("MON stop\n");
   if ((current_monitor->flags & MO_SEND_BREAK_ON_STOP) != 0)

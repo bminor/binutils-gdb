@@ -2264,7 +2264,7 @@ gnu_terminal_init_inferior (struct target_ops *self)
 }
 
 static void
-gnu_stop (ptid_t ptid)
+gnu_stop (struct target_ops *self, ptid_t ptid)
 {
   error (_("to_stop target function not implemented"));
 }

@@ -1218,7 +1218,7 @@ procfs_create_inferior (struct target_ops *ops, char *exec_file,
 }
 
 static void
-procfs_stop (ptid_t ptid)
+procfs_stop (struct target_ops *self, ptid_t ptid)
 {
   devctl (ctl_fd, DCMD_PROC_STOP, NULL, 0, 0);
 }

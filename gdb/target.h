@@ -524,7 +524,7 @@ struct target_ops
     char *(*to_pid_to_str) (struct target_ops *, ptid_t);
     char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *);
     char *(*to_thread_name) (struct target_ops *, struct thread_info *);
-    void (*to_stop) (ptid_t);
+    void (*to_stop) (struct target_ops *, ptid_t);
     void (*to_rcmd) (char *command, struct ui_file *output);
     char *(*to_pid_to_exec_file) (int pid);
     void (*to_log_command) (const char *);

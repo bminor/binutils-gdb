@@ -113,7 +113,7 @@ static void procfs_attach (struct target_ops *, char *, int);
 static void procfs_detach (struct target_ops *, const char *, int);
 static void procfs_resume (struct target_ops *,
 			   ptid_t, int, enum gdb_signal);
-static void procfs_stop (ptid_t);
+static void procfs_stop (struct target_ops *self, ptid_t);
 static void procfs_files_info (struct target_ops *);
 static void procfs_fetch_registers (struct target_ops *,
 				    struct regcache *, int);
@@ -4265,7 +4265,7 @@ procfs_files_info (struct target_ops *ignore)
    kill(SIGINT) to the child's process group.  */
 
 static void
-procfs_stop (ptid_t ptid)
+procfs_stop (struct target_ops *self, ptid_t ptid)
 {
   kill (-inferior_process_group (), SIGINT);
 }

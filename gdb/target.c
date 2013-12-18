@@ -146,7 +146,7 @@ static void debug_to_load (struct target_ops *self, char *, int);
 
 static int debug_to_can_run (struct target_ops *self);
 
-static void debug_to_stop (ptid_t);
+static void debug_to_stop (struct target_ops *self, ptid_t);
 
 /* Pointer to array of target architecture structures; the size of the
    array; the current index into the array; the allocated size of the
@@ -825,7 +825,7 @@ update_current_target (void)
 	    (char *(*) (struct target_ops *, struct thread_info *))
 	    return_null);
   de_fault (to_stop,
-	    (void (*) (ptid_t))
+	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   de_fault (to_rcmd,
 	    (void (*) (char *, struct ui_file *))
@@ -3925,7 +3925,7 @@ target_stop (ptid_t ptid)
       return;
     }
 
-  (*current_target.to_stop) (ptid);
+  (*current_target.to_stop) (&current_target, ptid);
 }
 
 static void
@@ -4987,9 +4987,9 @@ debug_to_thread_architecture (struct target_ops *ops, ptid_t ptid)
 }
 
 static void
-debug_to_stop (ptid_t ptid)
+debug_to_stop (struct target_ops *self, ptid_t ptid)
 {
-  debug_target.to_stop (ptid);
+  debug_target.to_stop (&debug_target, ptid);
 
   fprintf_unfiltered (gdb_stdlog, "target_stop (%s)\n",
 		      target_pid_to_str (ptid));

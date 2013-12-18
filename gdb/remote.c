@@ -153,7 +153,7 @@ static void init_remote_ops (void);
 
 static void init_extended_remote_ops (void);
 
-static void remote_stop (ptid_t);
+static void remote_stop (struct target_ops *self, ptid_t);
 
 static int stubhex (int ch);
 
@@ -5085,7 +5085,7 @@ remote_stop_as (ptid_t ptid)
    will eventually end up here.  */
 
 static void
-remote_stop (ptid_t ptid)
+remote_stop (struct target_ops *self, ptid_t ptid)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_stop called\n");

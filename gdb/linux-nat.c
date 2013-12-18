@@ -4781,12 +4781,12 @@ linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
 }
 
 static void
-linux_nat_stop (ptid_t ptid)
+linux_nat_stop (struct target_ops *self, ptid_t ptid)
 {
   if (non_stop)
     iterate_over_lwps (ptid, linux_nat_stop_lwp, NULL);
   else
-    linux_ops->to_stop (ptid);
+    linux_ops->to_stop (linux_ops, ptid);
 }
 
 static void

@@ -1,5 +1,25 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* windows-nat.c (windows_stop): Add 'self' argument.
+	* target.h (struct target_ops) <to_stop>: Add argument.
+	* target.c (target_stop): Add argument.
+	(debug_to_stop): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_stop): Add 'self' argument.
+	* remote-sim.c (gdbsim_stop): Add 'self' argument.
+	(gdbsim_cntrl_c): Update.
+	* remote-m32r-sdi.c (m32r_stop): Add 'self' argument.
+	* procfs.c (procfs_stop): Add 'self' argument.
+	* nto-procfs.c (procfs_stop): Add 'self' argument.
+	* monitor.c (monitor_stop): Add 'self' argument.
+	(monitor_open): Update.
+	* linux-nat.c (linux_nat_stop): Add argument.
+	* inf-ptrace.c (inf_ptrace_stop): Add 'self' argument.
+	* gnu-nat.c (gnu_stop): Add 'self' argument.
+	* darwin-nat.c (darwin_stop): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_thread_name>: Add argument.
 	* target.c (target_thread_name): Add argument.
 	(update_current_target): Update.

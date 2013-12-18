@@ -87,7 +87,7 @@
 
 extern boolean_t exc_server (mach_msg_header_t *in, mach_msg_header_t *out);
 
-static void darwin_stop (ptid_t);
+static void darwin_stop (struct target_ops *self, ptid_t);
 
 static void darwin_resume_to (struct target_ops *ops, ptid_t ptid, int step,
                               enum gdb_signal signal);
@@ -1144,7 +1144,7 @@ darwin_wait_to (struct target_ops *ops,
 }
 
 static void
-darwin_stop (ptid_t t)
+darwin_stop (struct target_ops *self, ptid_t t)
 {
   struct inferior *inf = current_inferior ();
 

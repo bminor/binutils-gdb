@@ -321,7 +321,7 @@ inf_ptrace_kill (struct target_ops *ops)
 /* Stop the inferior.  */
 
 static void
-inf_ptrace_stop (ptid_t ptid)
+inf_ptrace_stop (struct target_ops *self, ptid_t ptid)
 {
   /* Send a SIGINT to the process group.  This acts just like the user
      typed a ^C on the controlling terminal.  Note that using a
