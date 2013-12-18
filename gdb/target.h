@@ -479,7 +479,8 @@ struct target_ops
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
-    int (*to_region_ok_for_hw_watchpoint) (CORE_ADDR, int);
+    int (*to_region_ok_for_hw_watchpoint) (struct target_ops *,
+					   CORE_ADDR, int);
 
     int (*to_can_accel_watchpoint_condition) (CORE_ADDR, int, int,
 					      struct expression *);
@@ -1606,7 +1607,8 @@ extern char *target_thread_name (struct thread_info *);
    memory region, or zero if not supported.  */
 
 #define target_region_ok_for_hw_watchpoint(addr, len) \
-    (*current_target.to_region_ok_for_hw_watchpoint) (addr, len)
+    (*current_target.to_region_ok_for_hw_watchpoint) (&current_target,	\
+						      addr, len)
 
 
 /* Set/clear a hardware watchpoint starting at ADDR, for LEN bytes.

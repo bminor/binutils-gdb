@@ -368,7 +368,8 @@ inf_ttrace_can_use_hw_breakpoint (struct target_ops *self,
 }
 
 static int
-inf_ttrace_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+inf_ttrace_region_ok_for_hw_watchpoint (struct target_ops *self,
+					CORE_ADDR addr, int len)
 {
   return 1;
 }

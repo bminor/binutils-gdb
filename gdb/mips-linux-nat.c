@@ -589,7 +589,8 @@ mips_linux_stopped_data_address (struct target_ops *t, CORE_ADDR *paddr)
    the specified region can be covered by the watch registers.  */
 
 static int
-mips_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+mips_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
+					CORE_ADDR addr, int len)
 {
   struct pt_watch_regs dummy_regs;
   int i;

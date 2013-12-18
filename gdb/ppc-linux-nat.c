@@ -1497,7 +1497,8 @@ ppc_linux_can_use_hw_breakpoint (struct target_ops *self,
 }
 
 static int
-ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+ppc_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
+				       CORE_ADDR addr, int len)
 {
   /* Handle sub-8-byte quantities.  */
   if (len <= 0)

@@ -664,7 +664,8 @@ i386_remove_watchpoint (struct target_ops *self,
    address ADDR and whose length is LEN bytes.  */
 
 static int
-i386_region_ok_for_watchpoint (CORE_ADDR addr, int len)
+i386_region_ok_for_watchpoint (struct target_ops *self,
+			       CORE_ADDR addr, int len)
 {
   struct i386_debug_reg_state *state
     = i386_debug_reg_state (ptid_get_pid (inferior_ptid));

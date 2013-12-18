@@ -52,7 +52,8 @@ static void default_terminal_info (const char *, int);
 static int default_watchpoint_addr_within_range (struct target_ops *,
 						 CORE_ADDR, CORE_ADDR, int);
 
-static int default_region_ok_for_hw_watchpoint (CORE_ADDR, int);
+static int default_region_ok_for_hw_watchpoint (struct target_ops *,
+						CORE_ADDR, int);
 
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
@@ -124,7 +125,8 @@ static int debug_to_stopped_data_address (struct target_ops *, CORE_ADDR *);
 static int debug_to_watchpoint_addr_within_range (struct target_ops *,
 						  CORE_ADDR, CORE_ADDR, int);
 
-static int debug_to_region_ok_for_hw_watchpoint (CORE_ADDR, int);
+static int debug_to_region_ok_for_hw_watchpoint (struct target_ops *self,
+						 CORE_ADDR, int);
 
 static int debug_to_can_accel_watchpoint_condition (CORE_ADDR, int, int,
 						    struct expression *);
@@ -3641,7 +3643,8 @@ target_fileio_read_stralloc (const char *filename)
 
 
 static int
-default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+default_region_ok_for_hw_watchpoint (struct target_ops *self,
+				     CORE_ADDR addr, int len)
 {
   return (len <= gdbarch_ptr_bit (target_gdbarch ()) / TARGET_CHAR_BIT);
 }
@@ -4647,11 +4650,13 @@ debug_to_can_use_hw_breakpoint (struct target_ops *self,
 }
 
 static int
-debug_to_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+debug_to_region_ok_for_hw_watchpoint (struct target_ops *self,
+				      CORE_ADDR addr, int len)
 {
   CORE_ADDR retval;
 
-  retval = debug_target.to_region_ok_for_hw_watchpoint (addr, len);
+  retval = debug_target.to_region_ok_for_hw_watchpoint (&debug_target,
+							addr, len);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_region_ok_for_hw_watchpoint (%s, %ld) = %s\n",

@@ -1,5 +1,31 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_region_ok_for_hw_watchpoint>:
+	Add argument.
+	(target_region_ok_for_hw_watchpoint): Add argument.
+	* target.c (debug_to_region_ok_for_hw_watchpoint): Add argument.
+	(default_region_ok_for_hw_watchpoint): Add argument.
+	* spu-multiarch.c (spu_region_ok_for_hw_watchpoint): Add argument.
+	* s390-linux-nat.c (s390_region_ok_for_hw_watchpoint): Add 'self'
+	argument.
+	* remote.c (remote_region_ok_for_hw_watchpoint): Add 'self'
+	argument.
+	* procfs.c (procfs_region_ok_for_hw_watchpoint): Add 'self'
+	argument.
+	* ppc-linux-nat.c (ppc_linux_region_ok_for_hw_watchpoint): Add
+	'self' argument.
+	* mips-linux-nat.c (mips_linux_region_ok_for_hw_watchpoint): Add
+	'self' argument.
+	* inf-ttrace.c (inf_ttrace_region_ok_for_hw_watchpoint): Add
+	'self' argument.
+	* i386-nat.c (i386_region_ok_for_watchpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_region_ok_for_hw_watchpoint): Add
+	'self' argument.
+	* aarch64-linux-nat.c (aarch64_linux_region_ok_for_hw_watchpoint):
+	Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_insert_watchpoint>: Add
 	argument.
 	(target_insert_watchpoint): Add argument.

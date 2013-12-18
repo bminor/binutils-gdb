@@ -1403,7 +1403,8 @@ aarch64_linux_remove_watchpoint (struct target_ops *self,
 /* Implement the "to_region_ok_for_hw_watchpoint" target_ops method.  */
 
 static int
-aarch64_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
+aarch64_linux_region_ok_for_hw_watchpoint (struct target_ops *self,
+					   CORE_ADDR addr, int len)
 {
   CORE_ADDR aligned_addr;
 

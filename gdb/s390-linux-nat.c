@@ -566,7 +566,8 @@ s390_can_use_hw_breakpoint (struct target_ops *self,
 }
 
 static int
-s390_region_ok_for_hw_watchpoint (CORE_ADDR addr, int cnt)
+s390_region_ok_for_hw_watchpoint (struct target_ops *self,
+				  CORE_ADDR addr, int cnt)
 {
   return 1;
 }
