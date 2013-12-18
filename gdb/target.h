@@ -405,7 +405,8 @@ struct target_ops
     void (*to_close) (struct target_ops *);
     void (*to_attach) (struct target_ops *ops, char *, int)
       TARGET_DEFAULT_FUNC (find_default_attach);
-    void (*to_post_attach) (struct target_ops *, int);
+    void (*to_post_attach) (struct target_ops *, int)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_detach) (struct target_ops *ops, const char *, int)
       TARGET_DEFAULT_IGNORE ();
     void (*to_disconnect) (struct target_ops *, char *, int);

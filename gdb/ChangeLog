@@ -2,6 +2,14 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_post_attach.
+	* target.h (struct target_ops) <to_post_attach>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_rcmd.
 	(default_rcmd): New function.
 	(do_monitor_command): Unconditionally delegate.

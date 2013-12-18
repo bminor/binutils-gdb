@@ -11,6 +11,18 @@ delegate_attach (struct target_ops *self, char *arg1, int arg2)
 }
 
 static void
+delegate_post_attach (struct target_ops *self, int arg1)
+{
+  self = self->beneath;
+  self->to_post_attach (self, arg1);
+}
+
+static void
+tdefault_post_attach (struct target_ops *self, int arg1)
+{
+}
+
+static void
 delegate_detach (struct target_ops *self, const char *arg1, int arg2)
 {
   self = self->beneath;
@@ -166,6 +178,8 @@ install_delegators (struct target_ops *ops)
 {
   if (ops->to_attach == NULL)
     ops->to_attach = delegate_attach;
+  if (ops->to_post_attach == NULL)
+    ops->to_post_attach = delegate_post_attach;
   if (ops->to_detach == NULL)
     ops->to_detach = delegate_detach;
   if (ops->to_resume == NULL)
@@ -200,6 +214,7 @@ static void
 install_dummy_methods (struct target_ops *ops)
 {
   ops->to_attach = find_default_attach;
+  ops->to_post_attach = tdefault_post_attach;
   ops->to_detach = tdefault_detach;
   ops->to_resume = tdefault_resume;
   ops->to_wait = tdefault_wait;

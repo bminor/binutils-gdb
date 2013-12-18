@@ -591,7 +591,7 @@ update_current_target (void)
       /* Do not inherit to_open.  */
       /* Do not inherit to_close.  */
       /* Do not inherit to_attach.  */
-      INHERIT (to_post_attach, t);
+      /* Do not inherit to_post_attach.  */
       INHERIT (to_attach_no_wait, t);
       /* Do not inherit to_detach.  */
       /* Do not inherit to_disconnect.  */
@@ -729,9 +729,6 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_close,
 	    (void (*) (struct target_ops *))
-	    target_ignore);
-  de_fault (to_post_attach,
-	    (void (*) (struct target_ops *, int))
 	    target_ignore);
   de_fault (to_prepare_to_store,
 	    (void (*) (struct target_ops *, struct regcache *))
