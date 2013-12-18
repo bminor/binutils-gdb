@@ -869,7 +869,8 @@ struct target_ops
 					      int tsv, LONGEST *val)
       TARGET_DEFAULT_RETURN (0);
 
-    int (*to_save_trace_data) (struct target_ops *, const char *filename);
+    int (*to_save_trace_data) (struct target_ops *, const char *filename)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     int (*to_upload_tracepoints) (struct target_ops *,
 				  struct uploaded_tp **utpp);
