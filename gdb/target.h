@@ -680,7 +680,8 @@ struct target_ops
        task Private_Data section of the Ada Task Control Block, and
        their interpretation depends on the target.  */
     ptid_t (*to_get_ada_task_ptid) (struct target_ops *,
-				    long lwp, long thread);
+				    long lwp, long thread)
+      TARGET_DEFAULT_FUNC (default_get_ada_task_ptid);
 
     /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
        Return 0 if *READPTR is already at the end of the buffer.

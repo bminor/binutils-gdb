@@ -57,6 +57,9 @@ static int default_region_ok_for_hw_watchpoint (struct target_ops *,
 
 static void default_rcmd (struct target_ops *, char *, struct ui_file *);
 
+static ptid_t default_get_ada_task_ptid (struct target_ops *self,
+					 long lwp, long tid);
+
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
@@ -680,7 +683,7 @@ update_current_target (void)
       /* Do not inherit to_execution_direction.  */
       /* Do not inherit to_thread_architecture.  */
       /* Do not inherit to_read_description.  */
-      INHERIT (to_get_ada_task_ptid, t);
+      /* Do not inherit to_get_ada_task_ptid.  */
       /* Do not inherit to_search_memory.  */
       INHERIT (to_supports_multi_process, t);
       INHERIT (to_supports_enable_disable_tracepoint, t);
@@ -749,9 +752,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_get_ada_task_ptid,
-            (ptid_t (*) (struct target_ops *, long, long))
-            default_get_ada_task_ptid);
   de_fault (to_supports_multi_process,
 	    (int (*) (struct target_ops *))
 	    return_zero);

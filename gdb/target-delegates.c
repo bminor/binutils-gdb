@@ -564,6 +564,13 @@ tdefault_xfer_partial (struct target_ops *self, enum target_object  arg1, const 
   return TARGET_XFER_E_IO;
 }
 
+static ptid_t
+delegate_get_ada_task_ptid (struct target_ops *self, long arg1, long arg2)
+{
+  self = self->beneath;
+  return self->to_get_ada_task_ptid (self, arg1, arg2);
+}
+
 static int
 delegate_can_execute_reverse (struct target_ops *self)
 {
@@ -705,6 +712,8 @@ install_delegators (struct target_ops *ops)
     ops->to_goto_bookmark = delegate_goto_bookmark;
   if (ops->to_xfer_partial == NULL)
     ops->to_xfer_partial = delegate_xfer_partial;
+  if (ops->to_get_ada_task_ptid == NULL)
+    ops->to_get_ada_task_ptid = delegate_get_ada_task_ptid;
   if (ops->to_can_execute_reverse == NULL)
     ops->to_can_execute_reverse = delegate_can_execute_reverse;
   if (ops->to_execution_direction == NULL)
@@ -767,6 +776,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_get_bookmark = tdefault_get_bookmark;
   ops->to_goto_bookmark = tdefault_goto_bookmark;
   ops->to_xfer_partial = tdefault_xfer_partial;
+  ops->to_get_ada_task_ptid = default_get_ada_task_ptid;
   ops->to_can_execute_reverse = tdefault_can_execute_reverse;
   ops->to_execution_direction = default_execution_direction;
   ops->to_thread_architecture = default_thread_architecture;
