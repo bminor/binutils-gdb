@@ -553,7 +553,8 @@ struct target_ops
     char *(*to_pid_to_str) (struct target_ops *, ptid_t);
     char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *)
       TARGET_DEFAULT_RETURN (0);
-    char *(*to_thread_name) (struct target_ops *, struct thread_info *);
+    char *(*to_thread_name) (struct target_ops *, struct thread_info *)
+      TARGET_DEFAULT_RETURN (0);
     void (*to_stop) (struct target_ops *, ptid_t);
     void (*to_rcmd) (struct target_ops *,
 		     char *command, struct ui_file *output)
