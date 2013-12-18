@@ -503,7 +503,7 @@ struct target_ops
     int (*to_insert_vfork_catchpoint) (struct target_ops *, int);
     int (*to_remove_vfork_catchpoint) (struct target_ops *, int);
     int (*to_follow_fork) (struct target_ops *, int, int);
-    int (*to_insert_exec_catchpoint) (int);
+    int (*to_insert_exec_catchpoint) (struct target_ops *, int);
     int (*to_remove_exec_catchpoint) (int);
     int (*to_set_syscall_catchpoint) (int, int, int, int, int *);
     int (*to_has_exited) (int, int, int *);
@@ -1333,7 +1333,7 @@ int target_follow_fork (int follow_child, int detach_fork);
    catchpoint type is not supported and -1 for failure.  */
 
 #define target_insert_exec_catchpoint(pid) \
-     (*current_target.to_insert_exec_catchpoint) (pid)
+     (*current_target.to_insert_exec_catchpoint) (&current_target, pid)
 
 #define target_remove_exec_catchpoint(pid) \
      (*current_target.to_remove_exec_catchpoint) (pid)
