@@ -1,5 +1,17 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_post_attach>: Add argument.
+	(target_post_attach): Add argument.
+	* target.c (debug_to_post_attach): Add argument.
+	(update_current_target): Update.
+	* spu-linux-nat.c (spu_child_post_attach): Add 'self' argument.
+	* nto-procfs.c (procfs_post_attach): Add 'self' argument.
+	* linux-nat.c (linux_child_post_attach): Add 'self' argument.
+	* inf-ptrace.c (inf_ptrace_post_attach): Add 'self' argument.
+	* inf-child.c (inf_child_post_attach): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* windows-nat.c (windows_close): Add 'self' argument.
 	* tracepoint.c (tfile_close): Add 'self' argument.
 	* target.h (struct target_ops) <to_close>: Add argument.

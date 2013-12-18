@@ -329,7 +329,7 @@ linux_init_ptrace (pid_t pid)
 }
 
 static void
-linux_child_post_attach (int pid)
+linux_child_post_attach (struct target_ops *self, int pid)
 {
   linux_init_ptrace (pid);
 }

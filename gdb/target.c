@@ -721,7 +721,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_post_attach,
-	    (void (*) (int))
+	    (void (*) (struct target_ops *, int))
 	    target_ignore);
   de_fault (to_prepare_to_store,
 	    (void (*) (struct target_ops *, struct regcache *))
@@ -3914,9 +3914,9 @@ target_stop (ptid_t ptid)
 }
 
 static void
-debug_to_post_attach (int pid)
+debug_to_post_attach (struct target_ops *self, int pid)
 {
-  debug_target.to_post_attach (pid);
+  debug_target.to_post_attach (&debug_target, pid);
 
   fprintf_unfiltered (gdb_stdlog, "target_post_attach (%d)\n", pid);
 }

@@ -246,7 +246,7 @@ inf_ptrace_attach (struct target_ops *ops, char *args, int from_tty)
 #ifdef PT_GET_PROCESS_STATE
 
 static void
-inf_ptrace_post_attach (int pid)
+inf_ptrace_post_attach (struct target_ops *self, int pid)
 {
   ptrace_event_t pe;
 

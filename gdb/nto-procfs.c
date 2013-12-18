@@ -648,7 +648,7 @@ procfs_attach (struct target_ops *ops, char *args, int from_tty)
 }
 
 static void
-procfs_post_attach (pid_t pid)
+procfs_post_attach (struct target_ops *self, pid_t pid)
 {
   if (exec_bfd)
     solib_create_inferior_hook (0);

@@ -404,7 +404,7 @@ struct target_ops
     void (*to_xclose) (struct target_ops *targ);
     void (*to_close) (struct target_ops *);
     void (*to_attach) (struct target_ops *ops, char *, int);
-    void (*to_post_attach) (int);
+    void (*to_post_attach) (struct target_ops *, int);
     void (*to_detach) (struct target_ops *ops, const char *, int);
     void (*to_disconnect) (struct target_ops *, char *, int);
     void (*to_resume) (struct target_ops *, ptid_t, int, enum gdb_signal)
@@ -1019,7 +1019,7 @@ void target_attach (char *, int);
    This operation provides a target-specific hook that allows the
    necessary bookkeeping to be performed after an attach completes.  */
 #define target_post_attach(pid) \
-     (*current_target.to_post_attach) (pid)
+     (*current_target.to_post_attach) (&current_target, pid)
 
 /* Takes a program previously attached to and detaches it.
    The program may resume execution (some targets do, some don't) and will

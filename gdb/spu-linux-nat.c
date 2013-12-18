@@ -420,7 +420,7 @@ spu_child_post_startup_inferior (ptid_t ptid)
 /* Override the post_attach routine to try load the SPE executable
    file image from its copy inside the target process.  */
 static void
-spu_child_post_attach (int pid)
+spu_child_post_attach (struct target_ops *self, int pid)
 {
   int fd;
   ULONGEST addr;

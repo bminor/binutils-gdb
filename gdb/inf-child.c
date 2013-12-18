@@ -87,7 +87,7 @@ inf_child_store_inferior_registers (struct target_ops *ops,
 }
 
 static void
-inf_child_post_attach (int pid)
+inf_child_post_attach (struct target_ops *self, int pid)
 {
   /* This version of Unix doesn't require a meaningful "post attach"
      operation by a debugger.  */
