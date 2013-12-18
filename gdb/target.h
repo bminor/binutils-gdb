@@ -831,7 +831,7 @@ struct target_ops
     /* Set the target's tracing behavior in response to unexpected
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
     void (*to_set_disconnected_tracing) (struct target_ops *, int val);
-    void (*to_set_circular_trace_buffer) (int val);
+    void (*to_set_circular_trace_buffer) (struct target_ops *, int val);
     /* Set the size of trace buffer in the target.  */
     void (*to_set_trace_buffer_size) (LONGEST val);
 
@@ -1850,7 +1850,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_set_disconnected_tracing) (&current_target, val)
 
 #define	target_set_circular_trace_buffer(val)	\
-  (*current_target.to_set_circular_trace_buffer) (val)
+  (*current_target.to_set_circular_trace_buffer) (&current_target, val)
 
 #define	target_set_trace_buffer_size(val)	\
   (*current_target.to_set_trace_buffer_size) (val)

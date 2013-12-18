@@ -11038,7 +11038,7 @@ remote_core_of_thread (struct target_ops *ops, ptid_t ptid)
 }
 
 static void
-remote_set_circular_trace_buffer (int val)
+remote_set_circular_trace_buffer (struct target_ops *self, int val)
 {
   struct remote_state *rs = get_remote_state ();
   char *reply;

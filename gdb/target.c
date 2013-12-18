@@ -908,7 +908,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, int))
 	    target_ignore);
   de_fault (to_set_circular_trace_buffer,
-	    (void (*) (int))
+	    (void (*) (struct target_ops *, int))
 	    target_ignore);
   de_fault (to_set_trace_buffer_size,
 	    (void (*) (LONGEST))

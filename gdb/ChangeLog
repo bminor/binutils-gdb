@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_set_circular_trace_buffer>: Add
+	argument.
+	(target_set_circular_trace_buffer): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_set_circular_trace_buffer): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_set_disconnected_tracing>: Add
 	argument.
 	(target_set_disconnected_tracing): Add argument.
