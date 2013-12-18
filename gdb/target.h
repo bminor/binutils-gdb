@@ -813,7 +813,8 @@ struct target_ops
 
     int (*to_save_trace_data) (struct target_ops *, const char *filename);
 
-    int (*to_upload_tracepoints) (struct uploaded_tp **utpp);
+    int (*to_upload_tracepoints) (struct target_ops *,
+				  struct uploaded_tp **utpp);
 
     int (*to_upload_trace_state_variables) (struct uploaded_tsv **utsvp);
 
@@ -1832,7 +1833,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_save_trace_data) (&current_target, filename)
 
 #define target_upload_tracepoints(utpp) \
-  (*current_target.to_upload_tracepoints) (utpp)
+  (*current_target.to_upload_tracepoints) (&current_target, utpp)
 
 #define target_upload_trace_state_variables(utsvp) \
   (*current_target.to_upload_trace_state_variables) (utsvp)

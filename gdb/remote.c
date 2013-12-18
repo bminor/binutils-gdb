@@ -202,7 +202,8 @@ struct remote_state;
 static int remote_get_trace_status (struct target_ops *self,
 				    struct trace_status *ts);
 
-static int remote_upload_tracepoints (struct uploaded_tp **utpp);
+static int remote_upload_tracepoints (struct target_ops *self,
+				      struct uploaded_tp **utpp);
 
 static int remote_upload_trace_state_variables (struct uploaded_tsv **utsvp);
   
@@ -3614,7 +3615,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
       if (current_trace_status ()->running)
 	printf_filtered (_("Trace is already running on the target.\n"));
 
-      remote_upload_tracepoints (&uploaded_tps);
+      remote_upload_tracepoints (target, &uploaded_tps);
 
       merge_uploaded_tracepoints (&uploaded_tps);
     }
@@ -11651,7 +11652,7 @@ remote_new_objfile (struct objfile *objfile)
    collection.  */
   
 static int
-remote_upload_tracepoints (struct uploaded_tp **utpp)
+remote_upload_tracepoints (struct target_ops *self, struct uploaded_tp **utpp)
 {
   struct remote_state *rs = get_remote_state ();
   char *p;
