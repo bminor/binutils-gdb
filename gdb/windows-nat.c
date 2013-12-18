@@ -2475,7 +2475,7 @@ windows_prepare_to_store (struct target_ops *self, struct regcache *regcache)
 }
 
 static int
-windows_can_run (void)
+windows_can_run (struct target_ops *self)
 {
   return 1;
 }

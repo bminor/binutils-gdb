@@ -144,7 +144,7 @@ static void debug_to_terminal_ours (struct target_ops *self);
 
 static void debug_to_load (struct target_ops *self, char *, int);
 
-static int debug_to_can_run (void);
+static int debug_to_can_run (struct target_ops *self);
 
 static void debug_to_stop (ptid_t);
 
@@ -816,6 +816,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *, int, int, int *))
 	    return_zero);
   de_fault (to_can_run,
+	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_extra_thread_info,
 	    (char *(*) (struct thread_info *))
@@ -4959,11 +4960,11 @@ debug_to_has_exited (struct target_ops *self,
 }
 
 static int
-debug_to_can_run (void)
+debug_to_can_run (struct target_ops *self)
 {
   int retval;
 
-  retval = debug_target.to_can_run ();
+  retval = debug_target.to_can_run (&debug_target);
 
   fprintf_unfiltered (gdb_stdlog, "target_can_run () = %d\n", retval);
 

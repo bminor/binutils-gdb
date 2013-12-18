@@ -128,7 +128,7 @@ inf_child_follow_fork (struct target_ops *ops, int follow_child,
 }
 
 static int
-inf_child_can_run (void)
+inf_child_can_run (struct target_ops *self)
 {
   return 1;
 }

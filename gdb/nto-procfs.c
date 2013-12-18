@@ -57,7 +57,7 @@ static procfs_run run;
 
 static void procfs_open (char *, int);
 
-static int procfs_can_run (void);
+static int procfs_can_run (struct target_ops *self);
 
 static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
@@ -609,7 +609,7 @@ procfs_files_info (struct target_ops *ignore)
 /* Mark our target-struct as eligible for stray "run" and "attach"
    commands.  */
 static int
-procfs_can_run (void)
+procfs_can_run (struct target_ops *self)
 {
   return 1;
 }

@@ -509,7 +509,7 @@ struct target_ops
 				      int, int, int, int, int *);
     int (*to_has_exited) (struct target_ops *, int, int, int *);
     void (*to_mourn_inferior) (struct target_ops *);
-    int (*to_can_run) (void);
+    int (*to_can_run) (struct target_ops *);
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
@@ -1383,7 +1383,7 @@ void target_mourn_inferior (void);
 /* Does target have enough data to do a run or attach command? */
 
 #define target_can_run(t) \
-     ((t)->to_can_run) ()
+     ((t)->to_can_run) (t)
 
 /* Set list of signals to be handled in the target.
 

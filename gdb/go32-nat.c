@@ -737,7 +737,7 @@ go32_mourn_inferior (struct target_ops *ops)
 }
 
 static int
-go32_can_run (void)
+go32_can_run (struct target_ops *self)
 {
   return 1;
 }

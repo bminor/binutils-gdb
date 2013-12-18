@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* windows-nat.c (windows_can_run): Add 'self' argument.
+	* target.h (struct target_ops) <to_can_run>: Add argument.
+	(target_can_run): Add argument.
+	* target.c (debug_to_can_run): Add argument.
+	(update_current_target): Update.
+	* nto-procfs.c (procfs_can_run): Add 'self' argument.
+	* inf-child.c (inf_child_can_run): Add 'self' argument.
+	* go32-nat.c (go32_can_run): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_has_exited>: Add argument.
 	(target_has_exited): Add argument.
 	* target.c (debug_to_has_exited): Add argument.
