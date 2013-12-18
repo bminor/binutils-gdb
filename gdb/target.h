@@ -967,7 +967,8 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Is the target able to use agent in current state?  */
-    int (*to_can_use_agent) (struct target_ops *);
+    int (*to_can_use_agent) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Check whether the target supports branch tracing.  */
     int (*to_supports_btrace) (struct target_ops *)
