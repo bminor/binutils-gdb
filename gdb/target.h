@@ -941,7 +941,8 @@ struct target_ops
        a match, 0 if there's a mismatch, and -1 if an error is
        encountered while reading memory.  */
     int (*to_verify_memory) (struct target_ops *, const gdb_byte *data,
-			     CORE_ADDR memaddr, ULONGEST size);
+			     CORE_ADDR memaddr, ULONGEST size)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Return the address of the start of the Thread Information Block
        a Windows OS specific feature.  */

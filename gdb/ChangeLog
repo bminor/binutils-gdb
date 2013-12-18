@@ -1,6 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_verify_memory): Unconditionally delegate.
+	* target.h (struct target_ops) <to_verify_memory>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_core_of_thread): Unconditionally delegate.
 	* target.h (struct target_ops) <to_core_of_thread>: Use
 	TARGET_DEFAULT_RETURN.

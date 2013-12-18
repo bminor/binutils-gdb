@@ -3723,25 +3723,16 @@ target_core_of_thread (ptid_t ptid)
 int
 target_verify_memory (const gdb_byte *data, CORE_ADDR memaddr, ULONGEST size)
 {
-  struct target_ops *t;
+  int retval = current_target.to_verify_memory (&current_target,
+						data, memaddr, size);
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_verify_memory != NULL)
-	{
-	  int retval = t->to_verify_memory (t, data, memaddr, size);
-
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_verify_memory (%s, %s) = %d\n",
-				paddress (target_gdbarch (), memaddr),
-				pulongest (size),
-				retval);
-	  return retval;
-	}
-    }
-
-  tcomplain ();
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_verify_memory (%s, %s) = %d\n",
+			paddress (target_gdbarch (), memaddr),
+			pulongest (size),
+			retval);
+  return retval;
 }
 
 /* The documentation for this function is in its prototype declaration in
