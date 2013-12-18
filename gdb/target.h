@@ -958,7 +958,8 @@ struct target_ops
        is available in the read-only sections.  This method should not
        cache data; higher layers take care of caching, invalidating,
        and re-fetching when necessary.  */
-    struct traceframe_info *(*to_traceframe_info) (struct target_ops *);
+    struct traceframe_info *(*to_traceframe_info) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */

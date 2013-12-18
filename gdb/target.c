@@ -66,8 +66,6 @@ static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
 
 static int return_zero (void);
 
-static void *return_null (void);
-
 void target_ignore (void);
 
 static void target_command (char *, int);
@@ -712,7 +710,7 @@ update_current_target (void)
       /* Do not inherit to_set_permissions.  */
       /* Do not inherit to_static_tracepoint_marker_at.  */
       /* Do not inherit to_static_tracepoint_markers_by_strid.  */
-      INHERIT (to_traceframe_info, t);
+      /* Do not inherit to_traceframe_info.  */
       INHERIT (to_use_agent, t);
       INHERIT (to_can_use_agent, t);
       INHERIT (to_augmented_libraries_svr4_read, t);
@@ -750,9 +748,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_traceframe_info,
-	    (struct traceframe_info * (*) (struct target_ops *))
-	    return_null);
   de_fault (to_supports_evaluation_of_breakpoint_conditions,
 	    (int (*) (struct target_ops *))
 	    return_zero);
@@ -3474,12 +3469,6 @@ default_thread_architecture (struct target_ops *ops, ptid_t ptid)
 
 static int
 return_zero (void)
-{
-  return 0;
-}
-
-static void *
-return_null (void)
 {
   return 0;
 }

@@ -2,6 +2,15 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_traceframe_info.
+	(return_null): Remove.
+	* target.h (struct target_ops) <to_traceframe_info>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_static_tracepoint_markers_by_strid.
 	* target.h (struct target_ops)
 	<to_static_tracepoint_markers_by_strid>: Use
