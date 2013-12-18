@@ -216,6 +216,19 @@ tdefault_insert_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_A
 }
 
 static int
+delegate_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+{
+  self = self->beneath;
+  return self->to_remove_mask_watchpoint (self, arg1, arg2, arg3);
+}
+
+static int
+tdefault_remove_mask_watchpoint (struct target_ops *self, CORE_ADDR arg1, CORE_ADDR arg2, int arg3)
+{
+  return 1;
+}
+
+static int
 delegate_stopped_by_watchpoint (struct target_ops *self)
 {
   self = self->beneath;
@@ -1151,6 +1164,8 @@ install_delegators (struct target_ops *ops)
     ops->to_insert_watchpoint = delegate_insert_watchpoint;
   if (ops->to_insert_mask_watchpoint == NULL)
     ops->to_insert_mask_watchpoint = delegate_insert_mask_watchpoint;
+  if (ops->to_remove_mask_watchpoint == NULL)
+    ops->to_remove_mask_watchpoint = delegate_remove_mask_watchpoint;
   if (ops->to_stopped_by_watchpoint == NULL)
     ops->to_stopped_by_watchpoint = delegate_stopped_by_watchpoint;
   if (ops->to_stopped_data_address == NULL)
@@ -1324,6 +1339,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_remove_watchpoint = tdefault_remove_watchpoint;
   ops->to_insert_watchpoint = tdefault_insert_watchpoint;
   ops->to_insert_mask_watchpoint = tdefault_insert_mask_watchpoint;
+  ops->to_remove_mask_watchpoint = tdefault_remove_mask_watchpoint;
   ops->to_stopped_by_watchpoint = tdefault_stopped_by_watchpoint;
   ops->to_stopped_data_address = tdefault_stopped_data_address;
   ops->to_watchpoint_addr_within_range = default_watchpoint_addr_within_range;
