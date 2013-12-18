@@ -630,6 +630,19 @@ tdefault_supports_string_tracing (struct target_ops *self)
   return 0;
 }
 
+static int
+delegate_supports_evaluation_of_breakpoint_conditions (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_supports_evaluation_of_breakpoint_conditions (self);
+}
+
+static int
+tdefault_supports_evaluation_of_breakpoint_conditions (struct target_ops *self)
+{
+  return 0;
+}
+
 static struct gdbarch *
 delegate_thread_architecture (struct target_ops *self, ptid_t arg1)
 {
@@ -1149,6 +1162,8 @@ install_delegators (struct target_ops *ops)
     ops->to_supports_enable_disable_tracepoint = delegate_supports_enable_disable_tracepoint;
   if (ops->to_supports_string_tracing == NULL)
     ops->to_supports_string_tracing = delegate_supports_string_tracing;
+  if (ops->to_supports_evaluation_of_breakpoint_conditions == NULL)
+    ops->to_supports_evaluation_of_breakpoint_conditions = delegate_supports_evaluation_of_breakpoint_conditions;
   if (ops->to_thread_architecture == NULL)
     ops->to_thread_architecture = delegate_thread_architecture;
   if (ops->to_trace_init == NULL)
@@ -1273,6 +1288,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_supports_multi_process = tdefault_supports_multi_process;
   ops->to_supports_enable_disable_tracepoint = tdefault_supports_enable_disable_tracepoint;
   ops->to_supports_string_tracing = tdefault_supports_string_tracing;
+  ops->to_supports_evaluation_of_breakpoint_conditions = tdefault_supports_evaluation_of_breakpoint_conditions;
   ops->to_thread_architecture = default_thread_architecture;
   ops->to_trace_init = tdefault_trace_init;
   ops->to_download_tracepoint = tdefault_download_tracepoint;

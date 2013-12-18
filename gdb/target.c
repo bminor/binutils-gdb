@@ -715,7 +715,8 @@ update_current_target (void)
       /* Do not inherit to_can_use_agent.  */
       /* Do not inherit to_augmented_libraries_svr4_read.  */
       INHERIT (to_magic, t);
-      INHERIT (to_supports_evaluation_of_breakpoint_conditions, t);
+      /* Do not inherit
+	 to_supports_evaluation_of_breakpoint_conditions.  */
       INHERIT (to_can_run_breakpoint_commands, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -748,9 +749,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_supports_evaluation_of_breakpoint_conditions,
-	    (int (*) (struct target_ops *))
-	    return_zero);
   de_fault (to_can_run_breakpoint_commands,
 	    (int (*) (struct target_ops *))
 	    return_zero);

@@ -730,7 +730,8 @@ struct target_ops
 
     /* Does this target support evaluation of breakpoint conditions on its
        end?  */
-    int (*to_supports_evaluation_of_breakpoint_conditions) (struct target_ops *);
+    int (*to_supports_evaluation_of_breakpoint_conditions) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Does this target support evaluation of breakpoint commands on its
        end?  */

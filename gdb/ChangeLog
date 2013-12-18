@@ -2,6 +2,15 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_supports_evaluation_of_breakpoint_conditions.
+	* target.h (struct target_ops)
+	<to_supports_evaluation_of_breakpoint_conditions>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_augmented_libraries_svr4_read.
 	* target.h (struct target_ops) <to_augmented_libraries_svr4_read>:
 	Use TARGET_DEFAULT_RETURN.
