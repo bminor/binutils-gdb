@@ -837,7 +837,8 @@ struct target_ops
 
     /* Add/change textual notes about the trace run, returning 1 if
        successful, 0 otherwise.  */
-    int (*to_set_trace_notes) (const char *user, const char *notes,
+    int (*to_set_trace_notes) (struct target_ops *,
+			       const char *user, const char *notes,
 			       const char *stopnotes);
 
     /* Return the processor core that thread PTID was last seen on.
@@ -1856,7 +1857,8 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_set_trace_buffer_size) (&current_target, val)
 
 #define	target_set_trace_notes(user,notes,stopnotes)		\
-  (*current_target.to_set_trace_notes) ((user), (notes), (stopnotes))
+  (*current_target.to_set_trace_notes) (&current_target,	\
+					(user), (notes), (stopnotes))
 
 #define target_get_tib_address(ptid, addr) \
   (*current_target.to_get_tib_address) ((ptid), (addr))

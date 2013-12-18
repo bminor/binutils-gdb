@@ -1,5 +1,12 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_set_trace_notes>: Add argument.
+	(target_set_trace_notes): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_set_trace_notes): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_set_trace_buffer_size>: Add
 	argument.
 	(target_set_trace_buffer_size): Add argument.

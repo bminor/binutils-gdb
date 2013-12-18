@@ -11144,7 +11144,8 @@ remote_set_trace_buffer_size (struct target_ops *self, LONGEST val)
 }
 
 static int
-remote_set_trace_notes (const char *user, const char *notes,
+remote_set_trace_notes (struct target_ops *self,
+			const char *user, const char *notes,
 			const char *stop_notes)
 {
   struct remote_state *rs = get_remote_state ();
