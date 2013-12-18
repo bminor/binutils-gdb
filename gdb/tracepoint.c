@@ -4784,7 +4784,7 @@ tfile_files_info (struct target_ops *t)
 /* The trace status for a file is that tracing can never be run.  */
 
 static int
-tfile_get_trace_status (struct trace_status *ts)
+tfile_get_trace_status (struct target_ops *self, struct trace_status *ts)
 {
   /* Other bits of trace status were collected as part of opening the
      trace files, so nothing to do here.  */

@@ -199,7 +199,8 @@ static ptid_t read_ptid (char *buf, char **obuf);
 static void remote_set_permissions (void);
 
 struct remote_state;
-static int remote_get_trace_status (struct trace_status *ts);
+static int remote_get_trace_status (struct target_ops *self,
+				    struct trace_status *ts);
 
 static int remote_upload_tracepoints (struct uploaded_tp **utpp);
 
@@ -3437,7 +3438,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
   /* Upload TSVs regardless of whether the target is running or not.  The
      remote stub, such as GDBserver, may have some predefined or builtin
      TSVs, even if the target is not running.  */
-  if (remote_get_trace_status (current_trace_status ()) != -1)
+  if (remote_get_trace_status (target, current_trace_status ()) != -1)
     {
       struct uploaded_tsv *uploaded_tsvs = NULL;
 
@@ -3606,7 +3607,7 @@ remote_start_remote (int from_tty, struct target_ops *target, int extended_p)
 
   /* Possibly the target has been engaged in a trace run started
      previously; find out where things are at.  */
-  if (remote_get_trace_status (current_trace_status ()) != -1)
+  if (remote_get_trace_status (target, current_trace_status ()) != -1)
     {
       struct uploaded_tp *uploaded_tps = NULL;
 
@@ -10587,7 +10588,7 @@ remote_can_download_tracepoint (struct target_ops *self)
     return 0;
 
   ts = current_trace_status ();
-  status = remote_get_trace_status (ts);
+  status = remote_get_trace_status (self, ts);
 
   if (status == -1 || !ts->running_known || !ts->running)
     return 0;
@@ -10722,7 +10723,7 @@ remote_trace_start (struct target_ops *self)
 }
 
 static int
-remote_get_trace_status (struct trace_status *ts)
+remote_get_trace_status (struct target_ops *self, struct trace_status *ts)
 {
   /* Initialize it just to avoid a GCC false warning.  */
   char *p = NULL;

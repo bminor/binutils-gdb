@@ -787,7 +787,7 @@ struct target_ops
     void (*to_trace_start) (struct target_ops *);
 
     /* Get the current status of a tracing run.  */
-    int (*to_get_trace_status) (struct trace_status *ts);
+    int (*to_get_trace_status) (struct target_ops *, struct trace_status *ts);
 
     void (*to_get_tracepoint_status) (struct breakpoint *tp,
 				      struct uploaded_tp *utp);
@@ -1809,7 +1809,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_trace_set_readonly_regions) (&current_target)
 
 #define target_get_trace_status(ts) \
-  (*current_target.to_get_trace_status) (ts)
+  (*current_target.to_get_trace_status) (&current_target, ts)
 
 #define target_get_tracepoint_status(tp,utp)		\
   (*current_target.to_get_tracepoint_status) (tp, utp)

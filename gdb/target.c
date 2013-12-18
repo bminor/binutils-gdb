@@ -873,7 +873,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *))
 	    tcomplain);
   de_fault (to_get_trace_status,
-	    (int (*) (struct trace_status *))
+	    (int (*) (struct target_ops *, struct trace_status *))
 	    return_minus_one);
   de_fault (to_get_tracepoint_status,
 	    (void (*) (struct breakpoint *, struct uploaded_tp *))
