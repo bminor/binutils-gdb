@@ -86,6 +86,18 @@ tdefault_prepare_to_store (struct target_ops *self, struct regcache *arg1)
   noprocess ();
 }
 
+static void
+delegate_files_info (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_files_info (self);
+}
+
+static void
+tdefault_files_info (struct target_ops *self)
+{
+}
+
 static int
 delegate_insert_breakpoint (struct target_ops *self, struct gdbarch *arg1, struct bp_target_info *arg2)
 {
@@ -203,6 +215,8 @@ install_delegators (struct target_ops *ops)
     ops->to_store_registers = delegate_store_registers;
   if (ops->to_prepare_to_store == NULL)
     ops->to_prepare_to_store = delegate_prepare_to_store;
+  if (ops->to_files_info == NULL)
+    ops->to_files_info = delegate_files_info;
   if (ops->to_insert_breakpoint == NULL)
     ops->to_insert_breakpoint = delegate_insert_breakpoint;
   if (ops->to_remove_breakpoint == NULL)
@@ -235,6 +249,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_wait = tdefault_wait;
   ops->to_store_registers = tdefault_store_registers;
   ops->to_prepare_to_store = tdefault_prepare_to_store;
+  ops->to_files_info = tdefault_files_info;
   ops->to_insert_breakpoint = memory_insert_breakpoint;
   ops->to_remove_breakpoint = memory_remove_breakpoint;
   ops->to_stopped_by_watchpoint = tdefault_stopped_by_watchpoint;

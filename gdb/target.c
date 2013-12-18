@@ -601,7 +601,7 @@ update_current_target (void)
       /* Do not inherit to_store_registers.  */
       /* Do not inherit to_prepare_to_store.  */
       INHERIT (deprecated_xfer_memory, t);
-      INHERIT (to_files_info, t);
+      /* Do not inherit to_files_info.  */
       /* Do not inherit to_insert_breakpoint.  */
       /* Do not inherit to_remove_breakpoint.  */
       INHERIT (to_can_use_hw_breakpoint, t);
@@ -734,9 +734,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_files_info,
-	    (void (*) (struct target_ops *))
-	    target_ignore);
   de_fault (to_can_use_hw_breakpoint,
 	    (int (*) (struct target_ops *, int, int, int))
 	    return_zero);

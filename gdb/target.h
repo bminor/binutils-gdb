@@ -447,7 +447,8 @@ struct target_ops
 				   struct mem_attrib *attrib,
 				   struct target_ops *target);
 
-    void (*to_files_info) (struct target_ops *);
+    void (*to_files_info) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
     int (*to_insert_breakpoint) (struct target_ops *, struct gdbarch *,
 				 struct bp_target_info *)
       TARGET_DEFAULT_FUNC (memory_insert_breakpoint);
