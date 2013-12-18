@@ -1,3 +1,9 @@
+2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/rm-simd-ext.d: New file.
+	* gas/aarch64/rm-simd-ext.l: Likewise.
+	* gas/aarch64/rm-simd-ext.s: Likewise.
+
 2013-12-17  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
 
 	* gas/nds32/nds32.exp: Add system and user special register tests.
