@@ -452,7 +452,8 @@ struct target_ops
       TARGET_DEFAULT_FUNC (memory_remove_breakpoint);
     int (*to_can_use_hw_breakpoint) (struct target_ops *, int, int, int);
     int (*to_ranged_break_num_registers) (struct target_ops *);
-    int (*to_insert_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
+    int (*to_insert_hw_breakpoint) (struct target_ops *,
+				    struct gdbarch *, struct bp_target_info *);
     int (*to_remove_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
 
     /* Documentation of what the two routines below are expected to do is
@@ -1637,7 +1638,8 @@ extern int target_remove_mask_watchpoint (CORE_ADDR, CORE_ADDR, int);
    message) otherwise.  */
 
 #define target_insert_hw_breakpoint(gdbarch, bp_tgt) \
-     (*current_target.to_insert_hw_breakpoint) (gdbarch, bp_tgt)
+     (*current_target.to_insert_hw_breakpoint) (&current_target,	\
+						gdbarch, bp_tgt)
 
 #define target_remove_hw_breakpoint(gdbarch, bp_tgt) \
      (*current_target.to_remove_hw_breakpoint) (gdbarch, bp_tgt)

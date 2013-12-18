@@ -1673,7 +1673,8 @@ ppc_linux_ranged_break_num_registers (struct target_ops *target)
    success, 1 if hardware breakpoints are not supported or -1 for failure.  */
 
 static int
-ppc_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
+ppc_linux_insert_hw_breakpoint (struct target_ops *self,
+				struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;

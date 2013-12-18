@@ -1037,7 +1037,8 @@ arm_linux_remove_hw_breakpoint1 (const struct arm_linux_hw_breakpoint *bpt,
 
 /* Insert a Hardware breakpoint.  */
 static int
-arm_linux_insert_hw_breakpoint (struct gdbarch *gdbarch, 
+arm_linux_insert_hw_breakpoint (struct target_ops *self,
+				struct gdbarch *gdbarch, 
 				struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;

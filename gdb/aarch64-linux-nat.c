@@ -1202,7 +1202,8 @@ aarch64_handle_breakpoint (int type, CORE_ADDR addr, int len, int is_insert)
    Return 0 on success, -1 on failure.  */
 
 static int
-aarch64_linux_insert_hw_breakpoint (struct gdbarch *gdbarch,
+aarch64_linux_insert_hw_breakpoint (struct target_ops *self,
+				    struct gdbarch *gdbarch,
 				    struct bp_target_info *bp_tgt)
 {
   int ret;

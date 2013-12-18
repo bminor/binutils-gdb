@@ -765,7 +765,7 @@ i386_stopped_by_watchpoint (struct target_ops *ops)
 /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, EBUSY on failure.  */
 static int
-i386_insert_hw_breakpoint (struct gdbarch *gdbarch,
+i386_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
   struct i386_debug_reg_state *state

@@ -937,7 +937,7 @@ procfs_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 }
 
 static int
-procfs_insert_hw_breakpoint (struct gdbarch *gdbarch,
+procfs_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			     struct bp_target_info *bp_tgt)
 {
   return procfs_breakpoint (bp_tgt->placed_address,

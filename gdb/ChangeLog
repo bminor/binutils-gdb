@@ -1,5 +1,22 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_insert_hw_breakpoint>: Add
+	argument.
+	(target_insert_hw_breakpoint): Add argument.
+	* target.c (debug_to_insert_hw_breakpoint): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_insert_hw_breakpoint): Add 'self' argument.
+	* ppc-linux-nat.c (ppc_linux_insert_hw_breakpoint): Add 'self'
+	argument.
+	* nto-procfs.c (procfs_insert_hw_breakpoint): Add 'self' argument.
+	* i386-nat.c (i386_insert_hw_breakpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_insert_hw_breakpoint): Add 'self'
+	argument.
+	* aarch64-linux-nat.c (aarch64_linux_insert_hw_breakpoint): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_can_use_hw_breakpoint>: Add
 	argument.
 	(target_can_use_hardware_watchpoint): Add argument.
