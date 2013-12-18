@@ -1,6 +1,22 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target.h (struct target_ops)
+	<to_supports_disable_randomization>: Add argument.
+	* target.c (find_default_supports_disable_randomization): Add
+	argument.
+	(target_supports_disable_randomization): Add argument.
+	(find_default_supports_disable_randomization): Add 'self'
+	argument.
+	* remote.c (extended_remote_supports_disable_randomization): Add
+	'self' argument.
+	(remote_supports_disable_randomization): Add 'self' argument.
+	(extended_remote_create_inferior): Update.
+	* linux-nat.c (linux_nat_supports_disable_randomization): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops)
 	<to_supports_enable_disable_tracepoint>: Add argument.
 	(target_supports_enable_disable_tracepoint): Add argument.
 	* target.c (update_current_target): Update.

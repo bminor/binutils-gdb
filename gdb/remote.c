@@ -7834,7 +7834,7 @@ extended_remote_mourn (struct target_ops *ops)
 }
 
 static int
-extended_remote_supports_disable_randomization (void)
+extended_remote_supports_disable_randomization (struct target_ops *self)
 {
   return (remote_protocol_packets[PACKET_QDisableRandomization].support
 	  == PACKET_ENABLE);
@@ -7940,7 +7940,7 @@ extended_remote_create_inferior (struct target_ops *ops,
     target_async (inferior_event_handler, 0);
 
   /* Disable address space randomization if requested (and supported).  */
-  if (extended_remote_supports_disable_randomization ())
+  if (extended_remote_supports_disable_randomization (ops))
     extended_remote_disable_randomization (disable_randomization);
 
   /* Now restart the remote server.  */
@@ -10231,7 +10231,7 @@ remote_supports_non_stop (struct target_ops *self)
 }
 
 static int
-remote_supports_disable_randomization (void)
+remote_supports_disable_randomization (struct target_ops *self)
 {
   /* Only supported in extended mode.  */
   return 0;

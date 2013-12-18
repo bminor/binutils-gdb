@@ -3267,13 +3267,13 @@ target_info_proc (char *args, enum info_proc_what what)
 }
 
 static int
-find_default_supports_disable_randomization (void)
+find_default_supports_disable_randomization (struct target_ops *self)
 {
   struct target_ops *t;
 
   t = find_default_run_target (NULL);
   if (t && t->to_supports_disable_randomization)
-    return (t->to_supports_disable_randomization) ();
+    return (t->to_supports_disable_randomization) (t);
   return 0;
 }
 
@@ -3284,7 +3284,7 @@ target_supports_disable_randomization (void)
 
   for (t = &current_target; t != NULL; t = t->beneath)
     if (t->to_supports_disable_randomization)
-      return t->to_supports_disable_randomization ();
+      return t->to_supports_disable_randomization (t);
 
   return 0;
 }

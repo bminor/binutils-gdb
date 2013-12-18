@@ -679,7 +679,7 @@ struct target_ops
     int (*to_supports_enable_disable_tracepoint) (struct target_ops *);
 
     /* Does this target support disabling address space randomization?  */
-    int (*to_supports_disable_randomization) (void);
+    int (*to_supports_disable_randomization) (struct target_ops *);
 
     /* Does this target support the tracenz bytecode for string collection?  */
     int (*to_supports_string_tracing) (void);

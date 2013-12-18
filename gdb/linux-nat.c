@@ -4572,7 +4572,7 @@ linux_nat_supports_multi_process (struct target_ops *self)
 }
 
 static int
-linux_nat_supports_disable_randomization (void)
+linux_nat_supports_disable_randomization (struct target_ops *self)
 {
 #ifdef HAVE_PERSONALITY
   return 1;
