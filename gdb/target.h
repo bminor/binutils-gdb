@@ -771,7 +771,8 @@ struct target_ops
 					      struct trace_state_variable *tsv);
 
     /* Enable a tracepoint on the target.  */
-    void (*to_enable_tracepoint) (struct bp_location *location);
+    void (*to_enable_tracepoint) (struct target_ops *,
+				  struct bp_location *location);
 
     /* Disable a tracepoint on the target.  */
     void (*to_disable_tracepoint) (struct bp_location *location);
@@ -1795,7 +1796,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_download_trace_state_variable) (&current_target, tsv)
 
 #define target_enable_tracepoint(loc) \
-  (*current_target.to_enable_tracepoint) (loc)
+  (*current_target.to_enable_tracepoint) (&current_target, loc)
 
 #define target_disable_tracepoint(loc) \
   (*current_target.to_disable_tracepoint) (loc)
