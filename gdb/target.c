@@ -3606,19 +3606,9 @@ target_thread_alive (ptid_t ptid)
 void
 target_find_new_threads (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_find_new_threads != NULL)
-	{
-	  t->to_find_new_threads (t);
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog, "target_find_new_threads ()\n");
-
-	  return;
-	}
-    }
+  current_target.to_find_new_threads (&current_target);
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_find_new_threads ()\n");
 }
 
 void

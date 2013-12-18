@@ -541,6 +541,18 @@ tdefault_program_signals (struct target_ops *self, int arg1, unsigned char *arg2
 {
 }
 
+static void
+delegate_find_new_threads (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_find_new_threads (self);
+}
+
+static void
+tdefault_find_new_threads (struct target_ops *self)
+{
+}
+
 static char *
 delegate_extra_thread_info (struct target_ops *self, struct thread_info *arg1)
 {
@@ -1284,6 +1296,8 @@ install_delegators (struct target_ops *ops)
     ops->to_pass_signals = delegate_pass_signals;
   if (ops->to_program_signals == NULL)
     ops->to_program_signals = delegate_program_signals;
+  if (ops->to_find_new_threads == NULL)
+    ops->to_find_new_threads = delegate_find_new_threads;
   if (ops->to_extra_thread_info == NULL)
     ops->to_extra_thread_info = delegate_extra_thread_info;
   if (ops->to_thread_name == NULL)
@@ -1443,6 +1457,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_mourn_inferior = default_mourn_inferior;
   ops->to_pass_signals = tdefault_pass_signals;
   ops->to_program_signals = tdefault_program_signals;
+  ops->to_find_new_threads = tdefault_find_new_threads;
   ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_thread_name = tdefault_thread_name;
   ops->to_stop = tdefault_stop;

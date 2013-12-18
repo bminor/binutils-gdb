@@ -1,6 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_find_new_threads): Unconditionally delegate.
+	* target.h (struct target_ops) <to_find_new_threads>: Use
+	TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_program_signals): Unconditionally delegate.
 	* target.h (struct target_ops) <to_program_signals>: Use
 	TARGET_DEFAULT_IGNORE.
