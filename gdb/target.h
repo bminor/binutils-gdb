@@ -498,7 +498,7 @@ struct target_ops
     void (*to_create_inferior) (struct target_ops *, 
 				char *, char *, char **, int);
     void (*to_post_startup_inferior) (struct target_ops *, ptid_t);
-    int (*to_insert_fork_catchpoint) (int);
+    int (*to_insert_fork_catchpoint) (struct target_ops *, int);
     int (*to_remove_fork_catchpoint) (int);
     int (*to_insert_vfork_catchpoint) (int);
     int (*to_remove_vfork_catchpoint) (int);
@@ -1306,7 +1306,7 @@ void target_create_inferior (char *exec_file, char *args,
    catchpoint type is not supported and -1 for failure.  */
 
 #define target_insert_fork_catchpoint(pid) \
-     (*current_target.to_insert_fork_catchpoint) (pid)
+     (*current_target.to_insert_fork_catchpoint) (&current_target, pid)
 
 #define target_remove_fork_catchpoint(pid) \
      (*current_target.to_remove_fork_catchpoint) (pid)

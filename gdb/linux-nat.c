@@ -696,7 +696,7 @@ holding the child stopped.  Try \"set detach-on-fork\" or \
 
 
 static int
-linux_child_insert_fork_catchpoint (int pid)
+linux_child_insert_fork_catchpoint (struct target_ops *self, int pid)
 {
   return !linux_supports_tracefork ();
 }

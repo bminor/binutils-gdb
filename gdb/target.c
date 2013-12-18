@@ -792,7 +792,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   de_fault (to_insert_fork_catchpoint,
-	    (int (*) (int))
+	    (int (*) (struct target_ops *, int))
 	    return_one);
   de_fault (to_remove_fork_catchpoint,
 	    (int (*) (int))
@@ -4866,11 +4866,11 @@ debug_to_post_startup_inferior (struct target_ops *self, ptid_t ptid)
 }
 
 static int
-debug_to_insert_fork_catchpoint (int pid)
+debug_to_insert_fork_catchpoint (struct target_ops *self, int pid)
 {
   int retval;
 
-  retval = debug_target.to_insert_fork_catchpoint (pid);
+  retval = debug_target.to_insert_fork_catchpoint (&debug_target, pid);
 
   fprintf_unfiltered (gdb_stdlog, "target_insert_fork_catchpoint (%d) = %d\n",
 		      pid, retval);
