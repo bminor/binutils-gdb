@@ -2892,7 +2892,7 @@ remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
 
 
 static int
-remote_static_tracepoint_marker_at (CORE_ADDR addr,
+remote_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR addr,
 				    struct static_tracepoint_marker *marker)
 {
   struct remote_state *rs = get_remote_state ();

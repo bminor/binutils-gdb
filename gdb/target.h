@@ -867,7 +867,7 @@ struct target_ops
 
     /* Look for a static tracepoint marker at ADDR, and fill in MARKER
        with its details.  Return 1 on success, 0 on failure.  */
-    int (*to_static_tracepoint_marker_at) (CORE_ADDR,
+    int (*to_static_tracepoint_marker_at) (struct target_ops *, CORE_ADDR,
 					   struct static_tracepoint_marker *marker);
 
     /* Return a vector of all tracepoints markers string id ID, or all
@@ -1868,7 +1868,8 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_set_permissions) (&current_target)
 
 #define target_static_tracepoint_marker_at(addr, marker) \
-  (*current_target.to_static_tracepoint_marker_at) (addr, marker)
+  (*current_target.to_static_tracepoint_marker_at) (&current_target,	\
+						    addr, marker)
 
 #define target_static_tracepoint_markers_by_strid(marker_id) \
   (*current_target.to_static_tracepoint_markers_by_strid) (marker_id)

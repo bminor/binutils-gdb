@@ -924,7 +924,8 @@ update_current_target (void)
 	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_static_tracepoint_marker_at,
-	    (int (*) (CORE_ADDR, struct static_tracepoint_marker *))
+	    (int (*) (struct target_ops *,
+		      CORE_ADDR, struct static_tracepoint_marker *))
 	    return_zero);
   de_fault (to_static_tracepoint_markers_by_strid,
 	    (VEC(static_tracepoint_marker_p) * (*) (const char *))
