@@ -816,7 +816,8 @@ struct target_ops
 
     /* Send full details of a trace state variable to the target.  */
     void (*to_download_trace_state_variable) (struct target_ops *,
-					      struct trace_state_variable *tsv);
+					      struct trace_state_variable *tsv)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Enable a tracepoint on the target.  */
     void (*to_enable_tracepoint) (struct target_ops *,

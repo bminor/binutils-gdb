@@ -676,6 +676,19 @@ tdefault_can_download_tracepoint (struct target_ops *self)
   return 0;
 }
 
+static void
+delegate_download_trace_state_variable (struct target_ops *self, struct trace_state_variable *arg1)
+{
+  self = self->beneath;
+  self->to_download_trace_state_variable (self, arg1);
+}
+
+static void
+tdefault_download_trace_state_variable (struct target_ops *self, struct trace_state_variable *arg1)
+{
+  tcomplain ();
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -810,6 +823,8 @@ install_delegators (struct target_ops *ops)
     ops->to_download_tracepoint = delegate_download_tracepoint;
   if (ops->to_can_download_tracepoint == NULL)
     ops->to_can_download_tracepoint = delegate_can_download_tracepoint;
+  if (ops->to_download_trace_state_variable == NULL)
+    ops->to_download_trace_state_variable = delegate_download_trace_state_variable;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -876,5 +891,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_trace_init = tdefault_trace_init;
   ops->to_download_tracepoint = tdefault_download_tracepoint;
   ops->to_can_download_tracepoint = tdefault_can_download_tracepoint;
+  ops->to_download_trace_state_variable = tdefault_download_trace_state_variable;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
