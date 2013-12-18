@@ -604,6 +604,19 @@ tdefault_supports_multi_process (struct target_ops *self)
   return 0;
 }
 
+static int
+delegate_supports_enable_disable_tracepoint (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_supports_enable_disable_tracepoint (self);
+}
+
+static int
+tdefault_supports_enable_disable_tracepoint (struct target_ops *self)
+{
+  return 0;
+}
+
 static struct gdbarch *
 delegate_thread_architecture (struct target_ops *self, ptid_t arg1)
 {
@@ -733,6 +746,8 @@ install_delegators (struct target_ops *ops)
     ops->to_execution_direction = delegate_execution_direction;
   if (ops->to_supports_multi_process == NULL)
     ops->to_supports_multi_process = delegate_supports_multi_process;
+  if (ops->to_supports_enable_disable_tracepoint == NULL)
+    ops->to_supports_enable_disable_tracepoint = delegate_supports_enable_disable_tracepoint;
   if (ops->to_thread_architecture == NULL)
     ops->to_thread_architecture = delegate_thread_architecture;
   if (ops->to_supports_btrace == NULL)
@@ -795,6 +810,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_can_execute_reverse = tdefault_can_execute_reverse;
   ops->to_execution_direction = default_execution_direction;
   ops->to_supports_multi_process = tdefault_supports_multi_process;
+  ops->to_supports_enable_disable_tracepoint = tdefault_supports_enable_disable_tracepoint;
   ops->to_thread_architecture = default_thread_architecture;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

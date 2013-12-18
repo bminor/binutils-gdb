@@ -686,7 +686,7 @@ update_current_target (void)
       /* Do not inherit to_get_ada_task_ptid.  */
       /* Do not inherit to_search_memory.  */
       /* Do not inherit to_supports_multi_process.  */
-      INHERIT (to_supports_enable_disable_tracepoint, t);
+      /* Do not inherit to_supports_enable_disable_tracepoint.  */
       INHERIT (to_supports_string_tracing, t);
       INHERIT (to_trace_init, t);
       INHERIT (to_download_tracepoint, t);
@@ -752,9 +752,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_supports_enable_disable_tracepoint,
-	    (int (*) (struct target_ops *))
-	    return_zero);
   de_fault (to_supports_string_tracing,
 	    (int (*) (struct target_ops *))
 	    return_zero);
