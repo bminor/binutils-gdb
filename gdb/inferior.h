@@ -125,7 +125,7 @@ extern int disable_randomization;
 
 extern void generic_mourn_inferior (void);
 
-extern void terminal_save_ours (void);
+extern void terminal_save_ours (struct target_ops *self);
 
 extern void terminal_ours (struct target_ops *self);
 

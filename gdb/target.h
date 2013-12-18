@@ -491,7 +491,7 @@ struct target_ops
     void (*to_terminal_inferior) (struct target_ops *);
     void (*to_terminal_ours_for_output) (struct target_ops *);
     void (*to_terminal_ours) (struct target_ops *);
-    void (*to_terminal_save_ours) (void);
+    void (*to_terminal_save_ours) (struct target_ops *);
     void (*to_terminal_info) (const char *, int);
     void (*to_kill) (struct target_ops *);
     void (*to_load) (char *, int);
@@ -1253,7 +1253,7 @@ extern void target_terminal_inferior (void);
    to take this change into account.  */
 
 #define target_terminal_save_ours() \
-     (*current_target.to_terminal_save_ours) ()
+     (*current_target.to_terminal_save_ours) (&current_target)
 
 /* Print useful information about our terminal status, if such a thing
    exists.  */

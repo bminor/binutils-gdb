@@ -1,5 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_terminal_save_ours>: Add
+	argument.
+	(target_terminal_save_ours): Add argument.
+	* target.c (debug_to_terminal_save_ours): Add argument.
+	(update_current_target): Update.
+	* inflow.c (terminal_save_ours): Add 'self' argument.
+	* inferior.h (terminal_save_ours): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_terminal_ours>: Add argument.
 	(target_terminal_ours): Add argument.
 	* target.c (debug_to_terminal_ours): Add argument.
