@@ -1,3 +1,9 @@
+2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* gas/aarch64/rm-simd-ext.d: New file.
+	* gas/aarch64/rm-simd-ext.l: Likewise.
+	* gas/aarch64/rm-simd-ext.s: Likewise.
+
 2013-11-20  Yufeng Zhang  <yufeng.zhang@arm.com>
 
 	* gas/aarch64/msr.s: Add tests.

@@ -1,3 +1,8 @@
+2013-12-18  Yufeng Zhang  <yufeng.zhang@arm.com>
+
+	* config/tc-aarch64.c (md_assemble): Defer the feature checking until
+	do_encode () succeeds.
+
 2013-12-10  Roland McGrath  <mcgrathr@google.com>
 
 	* Makefile.am (install-exec-bindir): Prefix libtool invocation
