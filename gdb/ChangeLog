@@ -1,5 +1,12 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_goto_bookmark>: Add argument.
+	(target_goto_bookmark): Add argument.
+	* target.c (dummy_goto_bookmark): Add 'self' argument.
+	* record-full.c (record_full_goto_bookmark): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_get_bookmark>: Add argument.
 	(target_get_bookmark): Add argument.
 	* target.c (dummy_get_bookmark): Add 'self' argument.

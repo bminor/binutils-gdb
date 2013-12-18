@@ -1724,7 +1724,8 @@ record_full_get_bookmark (struct target_ops *self, char *args, int from_tty)
 /* "to_goto_bookmark" method for process record and prec over core.  */
 
 static void
-record_full_goto_bookmark (gdb_byte *raw_bookmark, int from_tty)
+record_full_goto_bookmark (struct target_ops *self,
+			   gdb_byte *raw_bookmark, int from_tty)
 {
   char *bookmark = (char *) raw_bookmark;
 

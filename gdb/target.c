@@ -3796,7 +3796,7 @@ dummy_get_bookmark (struct target_ops *self, char *ignore1, int ignore2)
 
 /* Error-catcher for target_goto_bookmark.  */
 static void
-dummy_goto_bookmark (gdb_byte *ignore, int from_tty)
+dummy_goto_bookmark (struct target_ops *self, gdb_byte *ignore, int from_tty)
 {
   tcomplain ();
 }

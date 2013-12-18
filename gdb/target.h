@@ -554,7 +554,7 @@ struct target_ops
     /* get_bookmark support method for bookmarks */
     gdb_byte * (*to_get_bookmark) (struct target_ops *, char *, int);
     /* goto_bookmark support method for bookmarks */
-    void (*to_goto_bookmark) (gdb_byte *, int);
+    void (*to_goto_bookmark) (struct target_ops *, gdb_byte *, int);
     /* Return the thread-local address at OFFSET in the
        thread-local storage for the thread PTID and the shared library
        or executable file given by OBJFILE.  If that block of
@@ -1575,7 +1575,7 @@ extern char *target_thread_name (struct thread_info *);
      (current_target.to_get_bookmark) (&current_target, ARGS, FROM_TTY)
 
 #define target_goto_bookmark(ARG, FROM_TTY) \
-     (current_target.to_goto_bookmark) (ARG, FROM_TTY)
+     (current_target.to_goto_bookmark) (&current_target, ARG, FROM_TTY)
 
 /* Hardware watchpoint interfaces.  */
 
