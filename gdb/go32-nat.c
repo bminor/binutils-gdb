@@ -852,7 +852,7 @@ go32_terminal_init (struct target_ops *self)
 }
 
 static void
-go32_terminal_info (const char *args, int from_tty)
+go32_terminal_info (struct target_ops *self, const char *args, int from_tty)
 {
   printf_unfiltered ("Inferior's terminal is in %s mode.\n",
 		     !inf_mode_valid

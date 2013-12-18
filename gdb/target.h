@@ -492,7 +492,7 @@ struct target_ops
     void (*to_terminal_ours_for_output) (struct target_ops *);
     void (*to_terminal_ours) (struct target_ops *);
     void (*to_terminal_save_ours) (struct target_ops *);
-    void (*to_terminal_info) (const char *, int);
+    void (*to_terminal_info) (struct target_ops *, const char *, int);
     void (*to_kill) (struct target_ops *);
     void (*to_load) (char *, int);
     void (*to_create_inferior) (struct target_ops *, 
@@ -1259,7 +1259,7 @@ extern void target_terminal_inferior (void);
    exists.  */
 
 #define target_terminal_info(arg, from_tty) \
-     (*current_target.to_terminal_info) (arg, from_tty)
+     (*current_target.to_terminal_info) (&current_target, arg, from_tty)
 
 /* Kill the inferior process.   Make it go away.  */
 

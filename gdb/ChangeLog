@@ -1,5 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_terminal_info>: Add argument.
+	(target_terminal_info): Add argument.
+	* target.c (debug_to_terminal_info): Add argument.
+	(default_terminal_info): Likewise.
+	* inflow.c (child_terminal_info): Add 'self' argument.
+	* inferior.h (child_terminal_info): Add 'self' argument.
+	* go32-nat.c (go32_terminal_info): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_terminal_save_ours>: Add
 	argument.
 	(target_terminal_save_ours): Add argument.
