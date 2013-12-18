@@ -1817,7 +1817,7 @@ record_full_info (struct target_ops *self)
 /* The "to_record_delete" target method.  */
 
 static void
-record_full_delete (void)
+record_full_delete (struct target_ops *self)
 {
   record_full_list_release_following (record_full_list);
 }

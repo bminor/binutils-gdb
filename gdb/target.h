@@ -936,7 +936,7 @@ struct target_ops
     void (*to_save_record) (struct target_ops *, const char *filename);
 
     /* Delete the recorded execution trace from the current position onwards.  */
-    void (*to_delete_record) (void);
+    void (*to_delete_record) (struct target_ops *);
 
     /* Query if the record target is currently replaying.  */
     int (*to_record_is_replaying) (void);

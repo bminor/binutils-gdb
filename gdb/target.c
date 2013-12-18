@@ -4331,7 +4331,7 @@ target_delete_record (void)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_delete_record != NULL)
       {
-	t->to_delete_record ();
+	t->to_delete_record (t);
 	return;
       }
 
