@@ -845,7 +845,8 @@ struct target_ops
 
     void (*to_get_tracepoint_status) (struct target_ops *,
 				      struct breakpoint *tp,
-				      struct uploaded_tp *utp);
+				      struct uploaded_tp *utp)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Stop a trace run.  */
     void (*to_trace_stop) (struct target_ops *);

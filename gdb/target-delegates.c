@@ -754,6 +754,19 @@ tdefault_get_trace_status (struct target_ops *self, struct trace_status *arg1)
   return -1;
 }
 
+static void
+delegate_get_tracepoint_status (struct target_ops *self, struct breakpoint *arg1, struct uploaded_tp *arg2)
+{
+  self = self->beneath;
+  self->to_get_tracepoint_status (self, arg1, arg2);
+}
+
+static void
+tdefault_get_tracepoint_status (struct target_ops *self, struct breakpoint *arg1, struct uploaded_tp *arg2)
+{
+  tcomplain ();
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -900,6 +913,8 @@ install_delegators (struct target_ops *ops)
     ops->to_trace_start = delegate_trace_start;
   if (ops->to_get_trace_status == NULL)
     ops->to_get_trace_status = delegate_get_trace_status;
+  if (ops->to_get_tracepoint_status == NULL)
+    ops->to_get_tracepoint_status = delegate_get_tracepoint_status;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -972,5 +987,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_trace_set_readonly_regions = tdefault_trace_set_readonly_regions;
   ops->to_trace_start = tdefault_trace_start;
   ops->to_get_trace_status = tdefault_get_trace_status;
+  ops->to_get_tracepoint_status = tdefault_get_tracepoint_status;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
