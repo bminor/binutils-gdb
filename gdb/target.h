@@ -931,7 +931,8 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Send the new settings of write permission variables.  */
-    void (*to_set_permissions) (struct target_ops *);
+    void (*to_set_permissions) (struct target_ops *)
+      TARGET_DEFAULT_IGNORE ();
 
     /* Look for a static tracepoint marker at ADDR, and fill in MARKER
        with its details.  Return 1 on success, 0 on failure.  */

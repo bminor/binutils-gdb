@@ -709,7 +709,7 @@ update_current_target (void)
       /* Do not inherit to_set_trace_buffer_size.  */
       /* Do not inherit to_set_trace_notes.  */
       /* Do not inherit to_get_tib_address.  */
-      INHERIT (to_set_permissions, t);
+      /* Do not inherit to_set_permissions.  */
       INHERIT (to_static_tracepoint_marker_at, t);
       INHERIT (to_static_tracepoint_markers_by_strid, t);
       INHERIT (to_traceframe_info, t);
@@ -750,9 +750,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_set_permissions,
-	    (void (*) (struct target_ops *))
-	    target_ignore);
   de_fault (to_static_tracepoint_marker_at,
 	    (int (*) (struct target_ops *,
 		      CORE_ADDR, struct static_tracepoint_marker *))

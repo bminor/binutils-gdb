@@ -933,6 +933,18 @@ tdefault_get_tib_address (struct target_ops *self, ptid_t arg1, CORE_ADDR *arg2)
   tcomplain ();
 }
 
+static void
+delegate_set_permissions (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_set_permissions (self);
+}
+
+static void
+tdefault_set_permissions (struct target_ops *self)
+{
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -1107,6 +1119,8 @@ install_delegators (struct target_ops *ops)
     ops->to_set_trace_notes = delegate_set_trace_notes;
   if (ops->to_get_tib_address == NULL)
     ops->to_get_tib_address = delegate_get_tib_address;
+  if (ops->to_set_permissions == NULL)
+    ops->to_set_permissions = delegate_set_permissions;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1193,5 +1207,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_set_trace_buffer_size = tdefault_set_trace_buffer_size;
   ops->to_set_trace_notes = tdefault_set_trace_notes;
   ops->to_get_tib_address = tdefault_get_tib_address;
+  ops->to_set_permissions = tdefault_set_permissions;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
