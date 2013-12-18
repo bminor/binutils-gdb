@@ -1,3 +1,9 @@
+2013-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-rx.c (rx_include): Rename 'eof' to 'last_char' in
+	order to avoid conflict with same named variable in MinGW system
+	header file.
+
 2013-12-13  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-msp430.c (mcu_types): Add some more 430X mcu names.
