@@ -927,7 +927,8 @@ struct target_ops
     /* Return the address of the start of the Thread Information Block
        a Windows OS specific feature.  */
     int (*to_get_tib_address) (struct target_ops *,
-			       ptid_t ptid, CORE_ADDR *addr);
+			       ptid_t ptid, CORE_ADDR *addr)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Send the new settings of write permission variables.  */
     void (*to_set_permissions) (struct target_ops *);

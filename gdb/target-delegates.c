@@ -921,6 +921,19 @@ tdefault_set_trace_notes (struct target_ops *self, const char *arg1, const char 
 }
 
 static int
+delegate_get_tib_address (struct target_ops *self, ptid_t arg1, CORE_ADDR *arg2)
+{
+  self = self->beneath;
+  return self->to_get_tib_address (self, arg1, arg2);
+}
+
+static int
+tdefault_get_tib_address (struct target_ops *self, ptid_t arg1, CORE_ADDR *arg2)
+{
+  tcomplain ();
+}
+
+static int
 delegate_supports_btrace (struct target_ops *self)
 {
   self = self->beneath;
@@ -1092,6 +1105,8 @@ install_delegators (struct target_ops *ops)
     ops->to_set_trace_buffer_size = delegate_set_trace_buffer_size;
   if (ops->to_set_trace_notes == NULL)
     ops->to_set_trace_notes = delegate_set_trace_notes;
+  if (ops->to_get_tib_address == NULL)
+    ops->to_get_tib_address = delegate_get_tib_address;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1177,5 +1192,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_set_circular_trace_buffer = tdefault_set_circular_trace_buffer;
   ops->to_set_trace_buffer_size = tdefault_set_trace_buffer_size;
   ops->to_set_trace_notes = tdefault_set_trace_notes;
+  ops->to_get_tib_address = tdefault_get_tib_address;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
