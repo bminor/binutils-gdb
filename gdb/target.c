@@ -3430,7 +3430,7 @@ target_fileio_pread (int fd, gdb_byte *read_buf, int len,
     {
       if (t->to_fileio_pread != NULL)
 	{
-	  int ret = t->to_fileio_pread (fd, read_buf, len, offset,
+	  int ret = t->to_fileio_pread (t, fd, read_buf, len, offset,
 					target_errno);
 
 	  if (targetdebug)

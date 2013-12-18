@@ -9712,7 +9712,8 @@ remote_hostio_pwrite (struct target_ops *self,
    set *REMOTE_ERRNO).  */
 
 static int
-remote_hostio_pread (int fd, gdb_byte *read_buf, int len,
+remote_hostio_pread (struct target_ops *self,
+		     int fd, gdb_byte *read_buf, int len,
 		     ULONGEST offset, int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
@@ -9944,7 +9945,8 @@ remote_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
   pos = 0;
   while (nbytes > pos)
     {
-      bytes = remote_hostio_pread (fd, (gdb_byte *) buf + pos, nbytes - pos,
+      bytes = remote_hostio_pread (find_target_at (process_stratum),
+				   fd, (gdb_byte *) buf + pos, nbytes - pos,
 				   offset + pos, &remote_errno);
       if (bytes == 0)
         /* Success, but no bytes, means end-of-file.  */
@@ -10117,7 +10119,8 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   offset = 0;
   while (1)
     {
-      bytes = remote_hostio_pread (fd, buffer, io_size, offset, &remote_errno);
+      bytes = remote_hostio_pread (find_target_at (process_stratum),
+				   fd, buffer, io_size, offset, &remote_errno);
       if (bytes == 0)
 	/* Success, but no bytes, means end-of-file.  */
 	break;

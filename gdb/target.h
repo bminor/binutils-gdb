@@ -730,7 +730,8 @@ struct target_ops
     /* Read up to LEN bytes FD on the target into READ_BUF.
        Return the number of bytes read, or -1 if an error occurs
        (and set *TARGET_ERRNO).  */
-    int (*to_fileio_pread) (int fd, gdb_byte *read_buf, int len,
+    int (*to_fileio_pread) (struct target_ops *,
+			    int fd, gdb_byte *read_buf, int len,
 			    ULONGEST offset, int *target_errno);
 
     /* Close FD on the target.  Return 0, or -1 if an error occurs
