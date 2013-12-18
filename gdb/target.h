@@ -794,7 +794,7 @@ struct target_ops
 				      struct uploaded_tp *utp);
 
     /* Stop a trace run.  */
-    void (*to_trace_stop) (void);
+    void (*to_trace_stop) (struct target_ops *);
 
    /* Ask the target to find a trace frame of the given type TYPE,
       using NUM, ADDR1, and ADDR2 as search parameters.  Returns the
@@ -1816,7 +1816,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_get_tracepoint_status) (&current_target, tp, utp)
 
 #define target_trace_stop() \
-  (*current_target.to_trace_stop) ()
+  (*current_target.to_trace_stop) (&current_target)
 
 #define target_trace_find(type,num,addr1,addr2,tpp) \
   (*current_target.to_trace_find) ((type), (num), (addr1), (addr2), (tpp))

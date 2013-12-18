@@ -10820,7 +10820,7 @@ remote_get_tracepoint_status (struct target_ops *self, struct breakpoint *bp,
 }
 
 static void
-remote_trace_stop (void)
+remote_trace_stop (struct target_ops *self)
 {
   putpkt ("QTStop");
   remote_get_noisy_reply (&target_buf, &target_buf_size);

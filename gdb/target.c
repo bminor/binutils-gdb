@@ -880,7 +880,7 @@ update_current_target (void)
 		       struct uploaded_tp *))
 	    tcomplain);
   de_fault (to_trace_stop,
-	    (void (*) (void))
+	    (void (*) (struct target_ops *))
 	    tcomplain);
   de_fault (to_trace_find,
 	    (int (*) (enum trace_find_type, int, CORE_ADDR, CORE_ADDR, int *))
