@@ -622,7 +622,7 @@ update_current_target (void)
       /* Do not inherit to_masked_watch_num_registers.  */
       /* Do not inherit to_terminal_init.  */
       /* Do not inherit to_terminal_inferior.  */
-      INHERIT (to_terminal_ours_for_output, t);
+      /* Do not inherit to_terminal_ours_for_output.  */
       INHERIT (to_terminal_ours, t);
       INHERIT (to_terminal_save_ours, t);
       INHERIT (to_terminal_info, t);
@@ -734,9 +734,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_terminal_ours_for_output,
-	    (void (*) (struct target_ops *))
-	    target_ignore);
   de_fault (to_terminal_ours,
 	    (void (*) (struct target_ops *))
 	    target_ignore);
