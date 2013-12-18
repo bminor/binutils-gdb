@@ -3899,13 +3899,7 @@ target_masked_watch_num_registers (CORE_ADDR addr, CORE_ADDR mask)
 int
 target_ranged_break_num_registers (void)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_ranged_break_num_registers != NULL)
-      return t->to_ranged_break_num_registers (t);
-
-  return -1;
+  return current_target.to_ranged_break_num_registers (&current_target);
 }
 
 /* See target.h.  */

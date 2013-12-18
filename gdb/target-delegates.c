@@ -138,6 +138,19 @@ tdefault_can_use_hw_breakpoint (struct target_ops *self, int arg1, int arg2, int
 }
 
 static int
+delegate_ranged_break_num_registers (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_ranged_break_num_registers (self);
+}
+
+static int
+tdefault_ranged_break_num_registers (struct target_ops *self)
+{
+  return -1;
+}
+
+static int
 delegate_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *arg1, struct bp_target_info *arg2)
 {
   self = self->beneath;
@@ -1113,6 +1126,8 @@ install_delegators (struct target_ops *ops)
     ops->to_remove_breakpoint = delegate_remove_breakpoint;
   if (ops->to_can_use_hw_breakpoint == NULL)
     ops->to_can_use_hw_breakpoint = delegate_can_use_hw_breakpoint;
+  if (ops->to_ranged_break_num_registers == NULL)
+    ops->to_ranged_break_num_registers = delegate_ranged_break_num_registers;
   if (ops->to_insert_hw_breakpoint == NULL)
     ops->to_insert_hw_breakpoint = delegate_insert_hw_breakpoint;
   if (ops->to_remove_hw_breakpoint == NULL)
@@ -1288,6 +1303,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_insert_breakpoint = memory_insert_breakpoint;
   ops->to_remove_breakpoint = memory_remove_breakpoint;
   ops->to_can_use_hw_breakpoint = tdefault_can_use_hw_breakpoint;
+  ops->to_ranged_break_num_registers = tdefault_ranged_break_num_registers;
   ops->to_insert_hw_breakpoint = tdefault_insert_hw_breakpoint;
   ops->to_remove_hw_breakpoint = tdefault_remove_hw_breakpoint;
   ops->to_remove_watchpoint = tdefault_remove_watchpoint;
