@@ -1,5 +1,12 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_insn_history>: Add argument.
+	* target.c (target_insn_history): Add argument.
+	* record-btrace.c (record_btrace_insn_history): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_goto_record>: Add argument.
 	* target.c (target_goto_record): Add argument.
 	* record-full.c (record_full_goto): Add 'self' argument.

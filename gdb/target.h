@@ -954,7 +954,7 @@ struct target_ops
        the current position.
        If SIZE < 0, disassemble abs (SIZE) preceding instructions; otherwise,
        disassemble SIZE succeeding instructions.  */
-    void (*to_insn_history) (int size, int flags);
+    void (*to_insn_history) (struct target_ops *, int size, int flags);
 
     /* Disassemble SIZE instructions in the recorded execution trace around
        FROM.
