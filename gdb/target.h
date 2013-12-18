@@ -690,7 +690,7 @@ struct target_ops
 
     /* Does this target support evaluation of breakpoint commands on its
        end?  */
-    int (*to_can_run_breakpoint_commands) (void);
+    int (*to_can_run_breakpoint_commands) (struct target_ops *);
 
     /* Determine current architecture of thread PTID.
 
@@ -1129,7 +1129,7 @@ int target_supports_disable_randomization (void);
    on its end.  */
 
 #define target_can_run_breakpoint_commands() \
-  (*current_target.to_can_run_breakpoint_commands) ()
+  (*current_target.to_can_run_breakpoint_commands) (&current_target)
 
 extern int target_read_string (CORE_ADDR, char **, int, int *);
 

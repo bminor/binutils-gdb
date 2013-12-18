@@ -1,5 +1,17 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_can_run_breakpoint_commands>:
+	Add argument.
+	(target_can_run_breakpoint_commands): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_can_run_breakpoint_commands): Add 'self'
+	argument.
+	(remote_insert_breakpoint): Add 'self' argument.
+	(remote_insert_hw_breakpoint): Add 'self' argument.
+	(remote_can_run_breakpoint_commands): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops)
 	<to_supports_evaluation_of_breakpoint_conditions>: Add argument.
 	(target_supports_evaluation_of_breakpoint_conditions): Add
