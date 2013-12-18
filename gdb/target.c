@@ -810,7 +810,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *, int))
 	    return_one);
   de_fault (to_set_syscall_catchpoint,
-	    (int (*) (int, int, int, int, int *))
+	    (int (*) (struct target_ops *, int, int, int, int, int *))
 	    return_one);
   de_fault (to_has_exited,
 	    (int (*) (int, int, int *))

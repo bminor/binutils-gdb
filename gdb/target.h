@@ -505,7 +505,8 @@ struct target_ops
     int (*to_follow_fork) (struct target_ops *, int, int);
     int (*to_insert_exec_catchpoint) (struct target_ops *, int);
     int (*to_remove_exec_catchpoint) (struct target_ops *, int);
-    int (*to_set_syscall_catchpoint) (int, int, int, int, int *);
+    int (*to_set_syscall_catchpoint) (struct target_ops *,
+				      int, int, int, int, int *);
     int (*to_has_exited) (int, int, int *);
     void (*to_mourn_inferior) (struct target_ops *);
     int (*to_can_run) (void);
@@ -1359,7 +1360,8 @@ int target_follow_fork (int follow_child, int detach_fork);
    for failure.  */
 
 #define target_set_syscall_catchpoint(pid, needed, any_count, table_size, table) \
-     (*current_target.to_set_syscall_catchpoint) (pid, needed, any_count, \
+     (*current_target.to_set_syscall_catchpoint) (&current_target,	\
+						  pid, needed, any_count, \
 						  table_size, table)
 
 /* Returns TRUE if PID has exited.  And, also sets EXIT_STATUS to the

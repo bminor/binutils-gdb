@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_set_syscall_catchpoint>: Add
+	argument.
+	(target_set_syscall_catchpoint): Add argument.
+	* linux-nat.c (linux_child_set_syscall_catchpoint): Add 'self'
+	argument.
+	* target.c (update_current_target): Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_remove_exec_catchpoint>: Add
 	argument.
 	(target_remove_exec_catchpoint): Add argument.

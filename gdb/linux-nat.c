@@ -732,7 +732,8 @@ linux_child_remove_exec_catchpoint (struct target_ops *self, int pid)
 }
 
 static int
-linux_child_set_syscall_catchpoint (int pid, int needed, int any_count,
+linux_child_set_syscall_catchpoint (struct target_ops *self,
+				    int pid, int needed, int any_count,
 				    int table_size, int *table)
 {
   if (!linux_supports_tracesysgood ())
