@@ -2918,7 +2918,8 @@ remote_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR addr,
 }
 
 static VEC(static_tracepoint_marker_p) *
-remote_static_tracepoint_markers_by_strid (const char *strid)
+remote_static_tracepoint_markers_by_strid (struct target_ops *self,
+					   const char *strid)
 {
   struct remote_state *rs = get_remote_state ();
   VEC(static_tracepoint_marker_p) *markers = NULL;

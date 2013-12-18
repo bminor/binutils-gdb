@@ -1,5 +1,17 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (target_static_tracepoint_markers_by_strid): Add
+	argument.
+	(struct target_ops) <to_static_tracepoint_markers_by_strid>: Add
+	'self' argument.
+	* target.c (update_current_target): Update.
+	* remote.c (struct target_ops)
+	<to_static_tracepoint_markers_by_strid>: Add 'self' argument.
+	* linux-nat.c (struct target_ops)
+	<to_static_tracepoint_markers_by_strid>: Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_static_tracepoint_marker_at>:
 	Add argument.
 	(target_static_tracepoint_marker_at): Add argument.

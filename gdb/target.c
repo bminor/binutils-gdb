@@ -928,7 +928,8 @@ update_current_target (void)
 		      CORE_ADDR, struct static_tracepoint_marker *))
 	    return_zero);
   de_fault (to_static_tracepoint_markers_by_strid,
-	    (VEC(static_tracepoint_marker_p) * (*) (const char *))
+	    (VEC(static_tracepoint_marker_p) * (*) (struct target_ops *,
+						    const char *))
 	    tcomplain);
   de_fault (to_traceframe_info,
 	    (struct traceframe_info * (*) (void))
