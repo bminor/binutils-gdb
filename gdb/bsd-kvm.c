@@ -105,7 +105,7 @@ bsd_kvm_open (char *filename, int from_tty)
 }
 
 static void
-bsd_kvm_close (void)
+bsd_kvm_close (struct target_ops *self)
 {
   if (core_kd)
     {

@@ -85,7 +85,7 @@ static int gdb_check_format (bfd *);
 
 static void core_open (char *, int);
 
-static void core_close (void);
+static void core_close (struct target_ops *self);
 
 static void core_close_cleanup (void *ignore);
 
@@ -192,7 +192,7 @@ gdb_check_format (bfd *abfd)
    stack spaces as empty.  */
 
 static void
-core_close (void)
+core_close (struct target_ops *self)
 {
   if (core_bfd)
     {
@@ -223,7 +223,7 @@ core_close (void)
 static void
 core_close_cleanup (void *ignore)
 {
-  core_close ();
+  core_close (NULL);
 }
 
 /* Look for sections whose names start with `.reg/' so that we can

@@ -234,7 +234,6 @@ static int dr_ref_count[4];
 #define SOME_PID 42
 
 static int prog_has_started = 0;
-
 static void go32_mourn_inferior (struct target_ops *ops);
 
 static struct target_ops go32_ops;
@@ -347,7 +346,7 @@ go32_open (char *name, int from_tty)
 }
 
 static void
-go32_close (void)
+go32_close (struct target_ops *self)
 {
 }
 

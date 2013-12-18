@@ -84,7 +84,7 @@ static void ddb_open (char *name, int from_tty);
 
 static void lsi_open (char *name, int from_tty);
 
-static void mips_close (void);
+static void mips_close (struct target_ops *self);
 
 static int mips_map_regno (struct gdbarch *, int);
 
@@ -1732,7 +1732,7 @@ lsi_open (char *name, int from_tty)
 /* Close a connection to the remote board.  */
 
 static void
-mips_close (void)
+mips_close (struct target_ops *self)
 {
   if (mips_is_open)
     {

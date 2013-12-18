@@ -112,7 +112,7 @@ exec_close (void)
    sections and closes all executable bfds from all program spaces.  */
 
 static void
-exec_close_1 (void)
+exec_close_1 (struct target_ops *self)
 {
   using_exec_ops = 0;
 

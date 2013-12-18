@@ -744,7 +744,7 @@ mips_linux_remove_watchpoint (CORE_ADDR addr, int len, int type,
    super implementation.  */
 
 static void
-mips_linux_close (void)
+mips_linux_close (struct target_ops *self)
 {
   struct mips_watchpoint *w;
   struct mips_watchpoint *nw;

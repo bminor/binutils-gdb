@@ -211,7 +211,7 @@ record_btrace_stop_recording (void)
 /* The to_close method of target record-btrace.  */
 
 static void
-record_btrace_close (void)
+record_btrace_close (struct target_ops *self)
 {
   struct thread_info *tp;
 

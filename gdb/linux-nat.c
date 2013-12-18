@@ -4788,14 +4788,14 @@ linux_nat_stop (ptid_t ptid)
 }
 
 static void
-linux_nat_close (void)
+linux_nat_close (struct target_ops *self)
 {
   /* Unregister from the event loop.  */
   if (linux_nat_is_async_p (NULL))
     linux_nat_async (NULL, NULL, 0);
 
   if (linux_ops->to_close)
-    linux_ops->to_close ();
+    linux_ops->to_close (linux_ops);
 }
 
 /* When requests are passed down from the linux-nat layer to the

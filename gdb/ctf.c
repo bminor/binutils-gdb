@@ -1204,7 +1204,7 @@ ctf_open (char *dirname, int from_tty)
    CTF iterator and context.  */
 
 static void
-ctf_close (void)
+ctf_close (struct target_ops *self)
 {
   int pid;
 

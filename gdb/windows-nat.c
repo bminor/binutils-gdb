@@ -2481,7 +2481,7 @@ windows_can_run (void)
 }
 
 static void
-windows_close (void)
+windows_close (struct target_ops *self)
 {
   DEBUG_EVENTS (("gdb: windows_close, inferior_ptid=%d\n",
 		ptid_get_pid (inferior_ptid)));

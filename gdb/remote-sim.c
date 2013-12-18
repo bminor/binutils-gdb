@@ -76,7 +76,7 @@ static void gdbsim_load (char *prog, int fromtty);
 
 static void gdbsim_open (char *args, int from_tty);
 
-static void gdbsim_close (void);
+static void gdbsim_close (struct target_ops *self);
 
 static void gdbsim_detach (struct target_ops *ops, const char *args,
 			   int from_tty);
@@ -788,7 +788,7 @@ gdbsim_close_inferior (struct inferior *inf, void *arg)
 /* Close out all files and local state before this target loses control.  */
 
 static void
-gdbsim_close (void)
+gdbsim_close (struct target_ops *self)
 {
   struct sim_inferior_data *sim_data
     = get_sim_inferior_data (current_inferior (), SIM_INSTANCE_NOT_NEEDED);

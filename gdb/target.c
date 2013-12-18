@@ -718,7 +718,7 @@ update_current_target (void)
 	    (void (*) (char *, int))
 	    tcomplain);
   de_fault (to_close,
-	    (void (*) (void))
+	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_post_attach,
 	    (void (*) (int))
@@ -3833,7 +3833,7 @@ target_close (struct target_ops *targ)
   if (targ->to_xclose != NULL)
     targ->to_xclose (targ);
   else if (targ->to_close != NULL)
-    targ->to_close ();
+    targ->to_close (targ);
 
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog, "target_close ()\n");

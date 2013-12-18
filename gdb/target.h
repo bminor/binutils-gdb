@@ -402,7 +402,7 @@ struct target_ops
        New re-entrant targets provide "to_xclose" and that is expected
        to xfree everything (including the "struct target_ops").  */
     void (*to_xclose) (struct target_ops *targ);
-    void (*to_close) (void);
+    void (*to_close) (struct target_ops *);
     void (*to_attach) (struct target_ops *ops, char *, int);
     void (*to_post_attach) (int);
     void (*to_detach) (struct target_ops *ops, const char *, int);

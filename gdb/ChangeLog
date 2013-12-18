@@ -1,5 +1,30 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* windows-nat.c (windows_close): Add 'self' argument.
+	* tracepoint.c (tfile_close): Add 'self' argument.
+	* target.h (struct target_ops) <to_close>: Add argument.
+	* target.c (target_close): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_close): Add 'self' argument.
+	* remote-sim.c (gdbsim_close): Add 'self' argument.
+	* remote-mips.c (mips_close): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_close): Add 'self' argument.
+	* record-full.c (record_full_close): Add 'self' argument.
+	* record-btrace.c (record_btrace_close): Add 'self' argument.
+	* monitor.h (monitor_close): Add 'self' argument.
+	* monitor.c (monitor_close): Add 'self' argument.
+	* mips-linux-nat.c (mips_linux_close): Add 'self' argument.
+	* linux-nat.c (linux_nat_close): Add argument.
+	* go32-nat.c (go32_close): Add 'self' argument.
+	* exec.c (exec_close_1): Add 'self' argument.
+	* ctf.c (ctf_close): Add 'self' argument.
+	* corelow.c (core_close): Add 'self' argument.
+	(core_close_cleanup): Update.
+	* bsd-uthread.c (bsd_uthread_close): Add 'self' argument.
+	* bsd-kvm.c (bsd_kvm_close): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* remote.c (remote_load): New function.
 	(init_remote_ops): Use it.
 
