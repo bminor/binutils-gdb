@@ -353,7 +353,7 @@ terminal_inferior (struct target_ops *self)
    should be called to get back to a normal state of affairs.  */
 
 void
-terminal_ours_for_output (void)
+terminal_ours_for_output (struct target_ops *self)
 {
   terminal_ours_1 (1);
 }

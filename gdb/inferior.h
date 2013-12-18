@@ -174,7 +174,7 @@ extern void child_terminal_info (const char *, int);
 
 extern void term_info (char *, int);
 
-extern void terminal_ours_for_output (void);
+extern void terminal_ours_for_output (struct target_ops *self);
 
 extern void terminal_inferior (struct target_ops *self);
 

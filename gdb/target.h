@@ -489,7 +489,7 @@ struct target_ops
 					  CORE_ADDR, CORE_ADDR);
     void (*to_terminal_init) (struct target_ops *);
     void (*to_terminal_inferior) (struct target_ops *);
-    void (*to_terminal_ours_for_output) (void);
+    void (*to_terminal_ours_for_output) (struct target_ops *);
     void (*to_terminal_ours) (void);
     void (*to_terminal_save_ours) (void);
     void (*to_terminal_info) (const char *, int);
@@ -1238,7 +1238,7 @@ extern void target_terminal_inferior (void);
    should be called to get back to a normal state of affairs.  */
 
 #define target_terminal_ours_for_output() \
-     (*current_target.to_terminal_ours_for_output) ()
+     (*current_target.to_terminal_ours_for_output) (&current_target)
 
 /* Put our terminal settings into effect.
    First record the inferior's terminal settings
