@@ -11279,7 +11279,8 @@ remote_enable_btrace (struct target_ops *self, ptid_t ptid)
 /* Disable branch tracing.  */
 
 static void
-remote_disable_btrace (struct btrace_target_info *tinfo)
+remote_disable_btrace (struct target_ops *self,
+		       struct btrace_target_info *tinfo)
 {
   struct packet_config *packet = &remote_protocol_packets[PACKET_Qbtrace_off];
   struct remote_state *rs = get_remote_state ();

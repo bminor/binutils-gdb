@@ -1083,7 +1083,8 @@ i386_linux_enable_btrace (struct target_ops *self, ptid_t ptid)
 /* Disable branch tracing.  */
 
 static void
-i386_linux_disable_btrace (struct btrace_target_info *tinfo)
+i386_linux_disable_btrace (struct target_ops *self,
+			   struct btrace_target_info *tinfo)
 {
   enum btrace_error errcode = linux_disable_btrace (tinfo);
 

@@ -907,7 +907,8 @@ struct target_ops
 						    ptid_t ptid);
 
     /* Disable branch tracing and deallocate TINFO.  */
-    void (*to_disable_btrace) (struct btrace_target_info *tinfo);
+    void (*to_disable_btrace) (struct target_ops *,
+			       struct btrace_target_info *tinfo);
 
     /* Disable branch tracing and deallocate TINFO.  This function is similar
        to to_disable_btrace, except that it is called during teardown and is

@@ -1,5 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_disable_btrace>: Add argument.
+	* target.c (target_disable_btrace): Add argument.
+	* remote.c (remote_disable_btrace): Add 'self' argument.
+	* i386-linux-nat.c (i386_linux_disable_btrace): Add 'self'
+	argument.
+	* amd64-linux-nat.c (amd64_linux_disable_btrace): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_enable_btrace>: Add argument.
 	* target.c (target_enable_btrace): Add argument.
 	* remote.c (remote_enable_btrace): Add 'self' argument.
