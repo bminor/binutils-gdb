@@ -1,5 +1,12 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_log_command>: Add argument.
+	(target_log_command): Add argument.
+	* serial.h (serial_log_command): Add 'self' argument.
+	* serial.c (serial_log_command): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* windows-nat.c (windows_pid_to_exec_file): Add 'self' argument.
 	* target.h (struct target_ops) <to_pid_to_exec_file>: Add
 	argument.
