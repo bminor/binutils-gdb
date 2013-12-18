@@ -627,7 +627,7 @@ update_current_target (void)
       /* Do not inherit to_terminal_save_ours.  */
       /* Do not inherit to_terminal_info.  */
       /* Do not inherit to_kill.  */
-      INHERIT (to_load, t);
+      /* Do not inherit to_load.  */
       /* Do no inherit to_create_inferior.  */
       INHERIT (to_post_startup_inferior, t);
       INHERIT (to_insert_fork_catchpoint, t);
@@ -734,9 +734,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_load,
-	    (void (*) (struct target_ops *, char *, int))
-	    tcomplain);
   de_fault (to_post_startup_inferior,
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
