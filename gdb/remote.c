@@ -11192,7 +11192,7 @@ remote_set_trace_notes (struct target_ops *self,
 }
 
 static int
-remote_use_agent (int use)
+remote_use_agent (struct target_ops *self, int use)
 {
   if (remote_protocol_packets[PACKET_QAgent].support != PACKET_DISABLE)
     {

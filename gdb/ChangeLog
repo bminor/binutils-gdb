@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_use_agent>: Add argument.
+	(target_use_agent): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_use_agent): Add 'self' argument.
+	* inf-child.c (inf_child_use_agent): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c (tfile_traceframe_info): Add 'self' argument.
 	* target.h (struct target_ops) <to_traceframe_info>: Add argument.
 	(target_traceframe_info): Add argument.

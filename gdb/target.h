@@ -892,7 +892,7 @@ struct target_ops
 
     /* Ask the target to use or not to use agent according to USE.  Return 1
        successful, 0 otherwise.  */
-    int (*to_use_agent) (int use);
+    int (*to_use_agent) (struct target_ops *, int use);
 
     /* Is the target able to use agent in current state?  */
     int (*to_can_use_agent) (void);
@@ -1879,7 +1879,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_traceframe_info) (&current_target)
 
 #define target_use_agent(use) \
-  (*current_target.to_use_agent) (use)
+  (*current_target.to_use_agent) (&current_target, use)
 
 #define target_can_use_agent() \
   (*current_target.to_can_use_agent) ()

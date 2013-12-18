@@ -941,7 +941,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_use_agent,
-	    (int (*) (int))
+	    (int (*) (struct target_ops *, int))
 	    tcomplain);
   de_fault (to_can_use_agent,
 	    (int (*) (void))

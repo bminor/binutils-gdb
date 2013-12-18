@@ -372,7 +372,7 @@ inf_child_fileio_readlink (struct target_ops *self,
 }
 
 static int
-inf_child_use_agent (int use)
+inf_child_use_agent (struct target_ops *self, int use)
 {
   if (agent_loaded_p ())
     {
