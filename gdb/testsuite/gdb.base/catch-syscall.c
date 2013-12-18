@@ -8,8 +8,15 @@
    September, 2008 */
 
 #include <unistd.h>
+#include <sys/syscall.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+
+/* These are the syscalls numbers used by the test.  */
+
+static int close_syscall = SYS_close;
+static int chroot_syscall = SYS_chroot;
+static int exit_group_syscall = SYS_exit_group;
 
 int
 main (void)
