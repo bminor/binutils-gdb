@@ -735,7 +735,8 @@ struct target_ops
 
     /* Does this target support evaluation of breakpoint commands on its
        end?  */
-    int (*to_can_run_breakpoint_commands) (struct target_ops *);
+    int (*to_can_run_breakpoint_commands) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Determine current architecture of thread PTID.
 

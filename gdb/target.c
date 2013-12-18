@@ -717,7 +717,7 @@ update_current_target (void)
       INHERIT (to_magic, t);
       /* Do not inherit
 	 to_supports_evaluation_of_breakpoint_conditions.  */
-      INHERIT (to_can_run_breakpoint_commands, t);
+      /* Do not inherit to_can_run_breakpoint_commands.  */
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
       /* Do not inherit to_flash_done.  */
@@ -749,9 +749,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_can_run_breakpoint_commands,
-	    (int (*) (struct target_ops *))
-	    return_zero);
 
 #undef de_fault
 
