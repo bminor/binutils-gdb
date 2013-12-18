@@ -3993,7 +3993,7 @@ linux_nat_pid_to_str (struct target_ops *ops, ptid_t ptid)
 }
 
 static char *
-linux_nat_thread_name (struct thread_info *thr)
+linux_nat_thread_name (struct target_ops *self, struct thread_info *thr)
 {
   int pid = ptid_get_pid (thr->ptid);
   long lwp = ptid_get_lwp (thr->ptid);

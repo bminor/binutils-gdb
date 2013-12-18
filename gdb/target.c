@@ -822,7 +822,7 @@ update_current_target (void)
 	    (char *(*) (struct target_ops *, struct thread_info *))
 	    return_null);
   de_fault (to_thread_name,
-	    (char *(*) (struct thread_info *))
+	    (char *(*) (struct target_ops *, struct thread_info *))
 	    return_null);
   de_fault (to_stop,
 	    (void (*) (ptid_t))
@@ -2771,7 +2771,7 @@ target_thread_name (struct thread_info *info)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     {
       if (t->to_thread_name != NULL)
-	return (*t->to_thread_name) (info);
+	return (*t->to_thread_name) (t, info);
     }
 
   return NULL;

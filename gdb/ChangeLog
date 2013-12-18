@@ -1,5 +1,12 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_thread_name>: Add argument.
+	* target.c (target_thread_name): Add argument.
+	(update_current_target): Update.
+	* linux-nat.c (linux_nat_thread_name): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_extra_thread_info>: Add
 	argument.
 	(target_extra_thread_info): Add argument.
