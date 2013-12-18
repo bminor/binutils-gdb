@@ -1516,7 +1516,8 @@ ctf_xfer_partial (struct target_ops *ops, enum target_object object,
    true, otherwise return false.  */
 
 static int
-ctf_get_trace_state_variable_value (int tsvnum, LONGEST *val)
+ctf_get_trace_state_variable_value (struct target_ops *self,
+				    int tsvnum, LONGEST *val)
 {
   struct bt_iter_pos *pos;
   int found = 0;

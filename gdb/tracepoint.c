@@ -5210,7 +5210,8 @@ tfile_xfer_partial (struct target_ops *ops, enum target_object object,
    block with a matching tsv number.  */
 
 static int
-tfile_get_trace_state_variable_value (int tsvnum, LONGEST *val)
+tfile_get_trace_state_variable_value (struct target_ops *self,
+				      int tsvnum, LONGEST *val)
 {
   int pos;
   int found = 0;

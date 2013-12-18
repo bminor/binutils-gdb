@@ -887,7 +887,7 @@ update_current_target (void)
 		      enum trace_find_type, int, CORE_ADDR, CORE_ADDR, int *))
 	    return_minus_one);
   de_fault (to_get_trace_state_variable_value,
-	    (int (*) (int, LONGEST *))
+	    (int (*) (struct target_ops *, int, LONGEST *))
 	    return_zero);
   de_fault (to_save_trace_data,
 	    (int (*) (const char *))

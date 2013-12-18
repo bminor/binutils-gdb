@@ -10914,7 +10914,8 @@ remote_trace_find (struct target_ops *self,
 }
 
 static int
-remote_get_trace_state_variable_value (int tsvnum, LONGEST *val)
+remote_get_trace_state_variable_value (struct target_ops *self,
+				       int tsvnum, LONGEST *val)
 {
   struct remote_state *rs = get_remote_state ();
   char *reply;

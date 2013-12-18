@@ -808,7 +808,8 @@ struct target_ops
     /* Get the value of the trace state variable number TSV, returning
        1 if the value is known and writing the value itself into the
        location pointed to by VAL, else returning 0.  */
-    int (*to_get_trace_state_variable_value) (int tsv, LONGEST *val);
+    int (*to_get_trace_state_variable_value) (struct target_ops *,
+					      int tsv, LONGEST *val);
 
     int (*to_save_trace_data) (const char *filename);
 
@@ -1824,7 +1825,8 @@ extern char *target_fileio_read_stralloc (const char *filename);
 				   (type), (num), (addr1), (addr2), (tpp))
 
 #define target_get_trace_state_variable_value(tsv,val) \
-  (*current_target.to_get_trace_state_variable_value) ((tsv), (val))
+  (*current_target.to_get_trace_state_variable_value) (&current_target,	\
+						       (tsv), (val))
 
 #define target_save_trace_data(filename) \
   (*current_target.to_save_trace_data) (filename)

@@ -1,5 +1,17 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* tracepoint.c (tfile_get_trace_state_variable_value): Add 'self'
+	argument.
+	* target.h (struct target_ops)
+	<to_get_trace_state_variable_value>: Add argument.
+	(target_get_trace_state_variable_value): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_get_trace_state_variable_value): Add 'self'
+	argument.
+	* ctf.c (ctf_get_trace_state_variable_value): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* tracepoint.c (tfile_trace_find): Add 'self' argument.
 	* target.h (struct target_ops) <to_trace_find>: Add argument.
 	(target_trace_find): Add argument.
