@@ -630,6 +630,19 @@ tdefault_log_command (struct target_ops *self, const char *arg1)
 {
 }
 
+static struct target_section_table *
+delegate_get_section_table (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_get_section_table (self);
+}
+
+static struct target_section_table *
+tdefault_get_section_table (struct target_ops *self)
+{
+  return 0;
+}
+
 static int
 delegate_can_async_p (struct target_ops *self)
 {
@@ -1319,6 +1332,8 @@ install_delegators (struct target_ops *ops)
     ops->to_pid_to_exec_file = delegate_pid_to_exec_file;
   if (ops->to_log_command == NULL)
     ops->to_log_command = delegate_log_command;
+  if (ops->to_get_section_table == NULL)
+    ops->to_get_section_table = delegate_get_section_table;
   if (ops->to_can_async_p == NULL)
     ops->to_can_async_p = delegate_can_async_p;
   if (ops->to_is_async_p == NULL)
@@ -1474,6 +1489,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_rcmd = default_rcmd;
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
   ops->to_log_command = tdefault_log_command;
+  ops->to_get_section_table = tdefault_get_section_table;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;
   ops->to_async = tdefault_async;

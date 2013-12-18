@@ -1088,16 +1088,10 @@ done:
 struct target_section_table *
 target_get_section_table (struct target_ops *target)
 {
-  struct target_ops *t;
-
   if (targetdebug)
     fprintf_unfiltered (gdb_stdlog, "target_get_section_table ()\n");
 
-  for (t = target; t != NULL; t = t->beneath)
-    if (t->to_get_section_table != NULL)
-      return (*t->to_get_section_table) (t);
-
-  return NULL;
+  return (*target->to_get_section_table) (target);
 }
 
 /* Find a section containing ADDR.  */

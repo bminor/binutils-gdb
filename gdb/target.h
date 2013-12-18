@@ -576,7 +576,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (0);
     void (*to_log_command) (struct target_ops *, const char *)
       TARGET_DEFAULT_IGNORE ();
-    struct target_section_table *(*to_get_section_table) (struct target_ops *);
+    struct target_section_table *(*to_get_section_table) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
     enum strata to_stratum;
     int (*to_has_all_memory) (struct target_ops *);
     int (*to_has_memory) (struct target_ops *);
