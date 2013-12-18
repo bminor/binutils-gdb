@@ -933,7 +933,7 @@ struct target_ops
     void (*to_info_record) (struct target_ops *);
 
     /* Save the recorded execution trace into a file.  */
-    void (*to_save_record) (const char *filename);
+    void (*to_save_record) (struct target_ops *, const char *filename);
 
     /* Delete the recorded execution trace from the current position onwards.  */
     void (*to_delete_record) (void);

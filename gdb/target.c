@@ -4300,7 +4300,7 @@ target_save_record (const char *filename)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_save_record != NULL)
       {
-	t->to_save_record (filename);
+	t->to_save_record (t, filename);
 	return;
       }
 
