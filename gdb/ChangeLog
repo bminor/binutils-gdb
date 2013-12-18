@@ -1,5 +1,19 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_record_is_replaying>: Add
+	argument.
+	* target.c (target_record_is_replaying): Add argument.
+	* record-full.c (record_full_is_replaying): Add 'self' argument.
+	* record-btrace.c (record_btrace_is_replaying): Add 'self'
+	argument.
+	(record_btrace_xfer_partial, record_btrace_store_registers)
+	(record_btrace_prepare_to_store, record_btrace_resume)
+	(record_btrace_wait, record_btrace_decr_pc_after_break)
+	(record_btrace_find_new_threads, record_btrace_thread_alive):
+	Update.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_delete_record>: Add argument.
 	* target.c (target_delete_record): Add argument.
 	* record-full.c (record_full_delete): Add 'self' argument.

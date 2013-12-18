@@ -789,7 +789,7 @@ record_btrace_call_history_from (ULONGEST from, int size, int flags)
 /* The to_record_is_replaying method of target record-btrace.  */
 
 static int
-record_btrace_is_replaying (void)
+record_btrace_is_replaying (struct target_ops *self)
 {
   struct thread_info *tp;
 
@@ -811,7 +811,7 @@ record_btrace_xfer_partial (struct target_ops *ops, enum target_object object,
   struct target_ops *t;
 
   /* Filter out requests that don't make sense during replay.  */
-  if (!record_btrace_allow_memory_access && record_btrace_is_replaying ())
+  if (!record_btrace_allow_memory_access && record_btrace_is_replaying (ops))
     {
       switch (object)
 	{
@@ -965,7 +965,7 @@ record_btrace_store_registers (struct target_ops *ops,
 {
   struct target_ops *t;
 
-  if (record_btrace_is_replaying ())
+  if (record_btrace_is_replaying (ops))
     error (_("This record target does not allow writing registers."));
 
   gdb_assert (may_write_registers != 0);
@@ -988,7 +988,7 @@ record_btrace_prepare_to_store (struct target_ops *ops,
 {
   struct target_ops *t;
 
-  if (record_btrace_is_replaying ())
+  if (record_btrace_is_replaying (ops))
     return;
 
   for (t = ops->beneath; t != NULL; t = t->beneath)
@@ -1462,7 +1462,7 @@ record_btrace_resume (struct target_ops *ops, ptid_t ptid, int step,
       record_btrace_stop_replaying (other);
 
   /* As long as we're not replaying, just forward the request.  */
-  if (!record_btrace_is_replaying () && execution_direction != EXEC_REVERSE)
+  if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
     {
       for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
 	if (ops->to_resume != NULL)
@@ -1678,7 +1678,7 @@ record_btrace_wait (struct target_ops *ops, ptid_t ptid,
   DEBUG ("wait %s (0x%x)", target_pid_to_str (ptid), options);
 
   /* As long as we're not replaying, just forward the request.  */
-  if (!record_btrace_is_replaying () && execution_direction != EXEC_REVERSE)
+  if (!record_btrace_is_replaying (ops) && execution_direction != EXEC_REVERSE)
     {
       for (ops = ops->beneath; ops != NULL; ops = ops->beneath)
 	if (ops->to_wait != NULL)
@@ -1730,7 +1730,7 @@ record_btrace_decr_pc_after_break (struct target_ops *ops,
 {
   /* When replaying, we do not actually execute the breakpoint instruction
      so there is no need to adjust the PC after hitting a breakpoint.  */
-  if (record_btrace_is_replaying ())
+  if (record_btrace_is_replaying (ops))
     return 0;
 
   return forward_target_decr_pc_after_break (ops->beneath, gdbarch);
@@ -1742,7 +1742,7 @@ static void
 record_btrace_find_new_threads (struct target_ops *ops)
 {
   /* Don't expect new threads if we're replaying.  */
-  if (record_btrace_is_replaying ())
+  if (record_btrace_is_replaying (ops))
     return;
 
   /* Forward the request.  */
@@ -1760,7 +1760,7 @@ static int
 record_btrace_thread_alive (struct target_ops *ops, ptid_t ptid)
 {
   /* We don't add or remove threads during replay.  */
-  if (record_btrace_is_replaying ())
+  if (record_btrace_is_replaying (ops))
     return find_thread_ptid (ptid) != NULL;
 
   /* Forward the request.  */

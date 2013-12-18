@@ -1825,7 +1825,7 @@ record_full_delete (struct target_ops *self)
 /* The "to_record_is_replaying" target method.  */
 
 static int
-record_full_is_replaying (void)
+record_full_is_replaying (struct target_ops *self)
 {
   return RECORD_FULL_IS_REPLAY;
 }

@@ -939,7 +939,7 @@ struct target_ops
     void (*to_delete_record) (struct target_ops *);
 
     /* Query if the record target is currently replaying.  */
-    int (*to_record_is_replaying) (void);
+    int (*to_record_is_replaying) (struct target_ops *);
 
     /* Go to the begin of the execution trace.  */
     void (*to_goto_record_begin) (void);

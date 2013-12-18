@@ -4347,7 +4347,7 @@ target_record_is_replaying (void)
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_record_is_replaying != NULL)
-	return t->to_record_is_replaying ();
+	return t->to_record_is_replaying (t);
 
   return 0;
 }
