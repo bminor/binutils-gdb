@@ -2601,31 +2601,23 @@ target_pass_signals (int numsigs, unsigned char *pass_signals)
 void
 target_program_signals (int numsigs, unsigned char *program_signals)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
+  if (targetdebug)
     {
-      if (t->to_program_signals != NULL)
-	{
-	  if (targetdebug)
-	    {
-	      int i;
+      int i;
 
-	      fprintf_unfiltered (gdb_stdlog, "target_program_signals (%d, {",
-				  numsigs);
+      fprintf_unfiltered (gdb_stdlog, "target_program_signals (%d, {",
+			  numsigs);
 
-	      for (i = 0; i < numsigs; i++)
-		if (program_signals[i])
-		  fprintf_unfiltered (gdb_stdlog, " %s",
-				      gdb_signal_to_name (i));
+      for (i = 0; i < numsigs; i++)
+	if (program_signals[i])
+	  fprintf_unfiltered (gdb_stdlog, " %s",
+			      gdb_signal_to_name (i));
 
-	      fprintf_unfiltered (gdb_stdlog, " })\n");
-	    }
-
-	  (*t->to_program_signals) (t, numsigs, program_signals);
-	  return;
-	}
+      fprintf_unfiltered (gdb_stdlog, " })\n");
     }
+
+  (*current_target.to_program_signals) (&current_target,
+					numsigs, program_signals);
 }
 
 static int
