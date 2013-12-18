@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops)
+	<to_can_accel_watchpoint_condition>: Add argument.
+	(target_can_accel_watchpoint_condition): Add argument.
+	* target.c (debug_to_can_accel_watchpoint_condition): Add
+	argument.
+	(update_current_target): Update.
+	* ppc-linux-nat.c (ppc_linux_can_accel_watchpoint_condition): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_region_ok_for_hw_watchpoint>:
 	Add argument.
 	(target_region_ok_for_hw_watchpoint): Add argument.

@@ -128,7 +128,8 @@ static int debug_to_watchpoint_addr_within_range (struct target_ops *,
 static int debug_to_region_ok_for_hw_watchpoint (struct target_ops *self,
 						 CORE_ADDR, int);
 
-static int debug_to_can_accel_watchpoint_condition (CORE_ADDR, int, int,
+static int debug_to_can_accel_watchpoint_condition (struct target_ops *self,
+						    CORE_ADDR, int, int,
 						    struct expression *);
 
 static void debug_to_terminal_init (void);
@@ -764,7 +765,8 @@ update_current_target (void)
   de_fault (to_region_ok_for_hw_watchpoint,
 	    default_region_ok_for_hw_watchpoint);
   de_fault (to_can_accel_watchpoint_condition,
-            (int (*) (CORE_ADDR, int, int, struct expression *))
+            (int (*) (struct target_ops *, CORE_ADDR, int, int,
+		      struct expression *))
             return_zero);
   de_fault (to_terminal_init,
 	    (void (*) (void))
@@ -4666,12 +4668,14 @@ debug_to_region_ok_for_hw_watchpoint (struct target_ops *self,
 }
 
 static int
-debug_to_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
+debug_to_can_accel_watchpoint_condition (struct target_ops *self,
+					 CORE_ADDR addr, int len, int rw,
 					 struct expression *cond)
 {
   int retval;
 
-  retval = debug_target.to_can_accel_watchpoint_condition (addr, len,
+  retval = debug_target.to_can_accel_watchpoint_condition (&debug_target,
+							   addr, len,
 							   rw, cond);
 
   fprintf_unfiltered (gdb_stdlog,

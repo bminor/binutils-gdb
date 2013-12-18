@@ -482,7 +482,8 @@ struct target_ops
     int (*to_region_ok_for_hw_watchpoint) (struct target_ops *,
 					   CORE_ADDR, int);
 
-    int (*to_can_accel_watchpoint_condition) (CORE_ADDR, int, int,
+    int (*to_can_accel_watchpoint_condition) (struct target_ops *,
+					      CORE_ADDR, int, int,
 					      struct expression *);
     int (*to_masked_watch_num_registers) (struct target_ops *,
 					  CORE_ADDR, CORE_ADDR);
@@ -1679,7 +1680,8 @@ extern int target_ranged_break_num_registers (void);
    For this reason, GDB will still evaluate the condition expression when
    the watchpoint triggers.  */
 #define target_can_accel_watchpoint_condition(addr, len, type, cond) \
-  (*current_target.to_can_accel_watchpoint_condition) (addr, len, type, cond)
+  (*current_target.to_can_accel_watchpoint_condition) (&current_target,	\
+						       addr, len, type, cond)
 
 /* Return number of debug registers needed for a masked watchpoint,
    -1 if masked watchpoints are not supported or -2 if the given address

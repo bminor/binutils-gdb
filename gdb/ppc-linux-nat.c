@@ -2015,7 +2015,8 @@ check_condition (CORE_ADDR watch_addr, struct expression *cond,
    the condition expression, thus only triggering the watchpoint when it is
    true.  */
 static int
-ppc_linux_can_accel_watchpoint_condition (CORE_ADDR addr, int len, int rw,
+ppc_linux_can_accel_watchpoint_condition (struct target_ops *self,
+					  CORE_ADDR addr, int len, int rw,
 					  struct expression *cond)
 {
   CORE_ADDR data_value;
