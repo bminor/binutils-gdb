@@ -942,8 +942,8 @@ struct target_ops
 
     /* Return a vector of all tracepoints markers string id ID, or all
        markers if ID is NULL.  */
-    VEC(static_tracepoint_marker_p) *(*to_static_tracepoint_markers_by_strid)
-      (struct target_ops *, const char *id);
+    VEC(static_tracepoint_marker_p) *(*to_static_tracepoint_markers_by_strid) (struct target_ops *, const char *id)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Return a traceframe info object describing the current
        traceframe's contents.  If the target doesn't support

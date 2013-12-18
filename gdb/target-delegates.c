@@ -958,6 +958,19 @@ tdefault_static_tracepoint_marker_at (struct target_ops *self, CORE_ADDR arg1, s
   return 0;
 }
 
+static VEC(static_tracepoint_marker_p) *
+delegate_static_tracepoint_markers_by_strid (struct target_ops *self, const char *arg1)
+{
+  self = self->beneath;
+  return self->to_static_tracepoint_markers_by_strid (self, arg1);
+}
+
+static VEC(static_tracepoint_marker_p) *
+tdefault_static_tracepoint_markers_by_strid (struct target_ops *self, const char *arg1)
+{
+  tcomplain ();
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -1136,6 +1149,8 @@ install_delegators (struct target_ops *ops)
     ops->to_set_permissions = delegate_set_permissions;
   if (ops->to_static_tracepoint_marker_at == NULL)
     ops->to_static_tracepoint_marker_at = delegate_static_tracepoint_marker_at;
+  if (ops->to_static_tracepoint_markers_by_strid == NULL)
+    ops->to_static_tracepoint_markers_by_strid = delegate_static_tracepoint_markers_by_strid;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1224,5 +1239,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_get_tib_address = tdefault_get_tib_address;
   ops->to_set_permissions = tdefault_set_permissions;
   ops->to_static_tracepoint_marker_at = tdefault_static_tracepoint_marker_at;
+  ops->to_static_tracepoint_markers_by_strid = tdefault_static_tracepoint_markers_by_strid;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

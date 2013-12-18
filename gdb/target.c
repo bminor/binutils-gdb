@@ -711,7 +711,7 @@ update_current_target (void)
       /* Do not inherit to_get_tib_address.  */
       /* Do not inherit to_set_permissions.  */
       /* Do not inherit to_static_tracepoint_marker_at.  */
-      INHERIT (to_static_tracepoint_markers_by_strid, t);
+      /* Do not inherit to_static_tracepoint_markers_by_strid.  */
       INHERIT (to_traceframe_info, t);
       INHERIT (to_use_agent, t);
       INHERIT (to_can_use_agent, t);
@@ -750,10 +750,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_static_tracepoint_markers_by_strid,
-	    (VEC(static_tracepoint_marker_p) * (*) (struct target_ops *,
-						    const char *))
-	    tcomplain);
   de_fault (to_traceframe_info,
 	    (struct traceframe_info * (*) (struct target_ops *))
 	    return_null);
