@@ -2391,7 +2391,8 @@ mips_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
    implements the target_can_use_hardware_watchpoint macro.  */
 
 static int
-mips_can_use_watchpoint (int type, int cnt, int othertype)
+mips_can_use_watchpoint (struct target_ops *self,
+			 int type, int cnt, int othertype)
 {
   return cnt < MAX_LSI_BREAKPOINTS && strcmp (target_shortname, "lsi") == 0;
 }

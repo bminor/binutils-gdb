@@ -676,7 +676,8 @@ ia64_linux_stopped_by_watchpoint (struct target_ops *ops)
 }
 
 static int
-ia64_linux_can_use_hw_breakpoint (int type, int cnt, int othertype)
+ia64_linux_can_use_hw_breakpoint (struct target_ops *self,
+				  int type, int cnt, int othertype)
 {
   return 1;
 }

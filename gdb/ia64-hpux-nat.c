@@ -702,7 +702,8 @@ ia64_hpux_xfer_partial (struct target_ops *ops, enum target_object object,
 /* The "to_can_use_hw_breakpoint" target_ops routine for ia64-hpux.  */
 
 static int
-ia64_hpux_can_use_hw_breakpoint (int type, int cnt, int othertype)
+ia64_hpux_can_use_hw_breakpoint (struct target_ops *self,
+				 int type, int cnt, int othertype)
 {
   /* No hardware watchpoint/breakpoint support yet.  */
   return 0;

@@ -512,7 +512,8 @@ mips_show_dr (const char *func, CORE_ADDR addr,
    handle the specified watch type.  */
 
 static int
-mips_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
+mips_linux_can_use_hw_breakpoint (struct target_ops *self,
+				  int type, int cnt, int ot)
 {
   int i;
   uint32_t wanted_mask, irw_mask;

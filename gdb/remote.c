@@ -8270,7 +8270,8 @@ remote_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 }
 
 static int
-remote_check_watch_resources (int type, int cnt, int ot)
+remote_check_watch_resources (struct target_ops *self,
+			      int type, int cnt, int ot)
 {
   if (type == bp_hardware_breakpoint)
     {

@@ -67,7 +67,8 @@ static void init_procfs_ops (void);
 
 static ptid_t do_attach (ptid_t ptid);
 
-static int procfs_can_use_hw_breakpoint (int, int, int);
+static int procfs_can_use_hw_breakpoint (struct target_ops *self,
+					 int, int, int);
 
 static int procfs_insert_hw_watchpoint (CORE_ADDR addr, int len, int type,
 					struct expression *cond);
@@ -1488,7 +1489,8 @@ procfs_hw_watchpoint (int addr, int len, int type)
 }
 
 static int
-procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
+procfs_can_use_hw_breakpoint (struct target_ops *self,
+			      int type, int cnt, int othertype)
 {
   return 1;
 }

@@ -941,7 +941,8 @@ aarch64_align_watchpoint (CORE_ADDR addr, int len, CORE_ADDR *aligned_addr_p,
    sharing implemented via reference counts.  */
 
 static int
-aarch64_linux_can_use_hw_breakpoint (int type, int cnt, int othertype)
+aarch64_linux_can_use_hw_breakpoint (struct target_ops *self,
+				     int type, int cnt, int othertype)
 {
   return 1;
 }

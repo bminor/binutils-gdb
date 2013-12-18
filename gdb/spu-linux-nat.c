@@ -624,7 +624,8 @@ spu_xfer_partial (struct target_ops *ops,
 
 /* Override the to_can_use_hw_breakpoint routine.  */
 static int
-spu_can_use_hw_breakpoint (int type, int cnt, int othertype)
+spu_can_use_hw_breakpoint (struct target_ops *self,
+			   int type, int cnt, int othertype)
 {
   return 0;
 }

@@ -359,7 +359,8 @@ inf_ttrace_remove_watchpoint (CORE_ADDR addr, int len, int type,
 }
 
 static int
-inf_ttrace_can_use_hw_breakpoint (int type, int len, int ot)
+inf_ttrace_can_use_hw_breakpoint (struct target_ops *self,
+				  int type, int len, int ot)
 {
   return (type == bp_hardware_watchpoint);
 }

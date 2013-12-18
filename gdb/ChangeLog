@@ -1,5 +1,39 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_can_use_hw_breakpoint>: Add
+	argument.
+	(target_can_use_hardware_watchpoint): Add argument.
+	* target.c (debug_to_can_use_hw_breakpoint): Add argument.
+	(update_current_target): Update.
+	* spu-linux-nat.c (spu_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* s390-linux-nat.c (s390_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* remote.c (remote_check_watch_resources): Add 'self' argument.
+	* remote-mips.c (mips_can_use_watchpoint): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_can_use_hw_watchpoint): Add 'self'
+	argument.
+	* procfs.c (procfs_can_use_hw_breakpoint): Add 'self' argument.
+	* ppc-linux-nat.c (ppc_linux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* nto-procfs.c (procfs_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* mips-linux-nat.c (mips_linux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* ia64-linux-nat.c (ia64_linux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* ia64-hpux-nat.c (ia64_hpux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* i386-nat.c (i386_can_use_hw_breakpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_can_use_hw_breakpoint): Add 'self'
+	argument.
+	* aarch64-linux-nat.c (aarch64_linux_can_use_hw_breakpoint): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_post_attach>: Add argument.
 	(target_post_attach): Add argument.
 	* target.c (debug_to_post_attach): Add argument.

@@ -100,7 +100,8 @@ static int debug_to_insert_breakpoint (struct target_ops *, struct gdbarch *,
 static int debug_to_remove_breakpoint (struct target_ops *, struct gdbarch *,
 				       struct bp_target_info *);
 
-static int debug_to_can_use_hw_breakpoint (int, int, int);
+static int debug_to_can_use_hw_breakpoint (struct target_ops *self,
+					   int, int, int);
 
 static int debug_to_insert_hw_breakpoint (struct gdbarch *,
 					  struct bp_target_info *);
@@ -734,7 +735,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_can_use_hw_breakpoint,
-	    (int (*) (int, int, int))
+	    (int (*) (struct target_ops *, int, int, int))
 	    return_zero);
   de_fault (to_insert_hw_breakpoint,
 	    (int (*) (struct gdbarch *, struct bp_target_info *))
@@ -4620,11 +4621,13 @@ debug_to_remove_breakpoint (struct target_ops *ops, struct gdbarch *gdbarch,
 }
 
 static int
-debug_to_can_use_hw_breakpoint (int type, int cnt, int from_tty)
+debug_to_can_use_hw_breakpoint (struct target_ops *self,
+				int type, int cnt, int from_tty)
 {
   int retval;
 
-  retval = debug_target.to_can_use_hw_breakpoint (type, cnt, from_tty);
+  retval = debug_target.to_can_use_hw_breakpoint (&debug_target,
+						  type, cnt, from_tty);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_can_use_hw_breakpoint (%ld, %ld, %ld) = %ld\n",

@@ -1407,7 +1407,8 @@ m32r_stop (ptid_t ptid)
    implements the target_can_use_hardware_watchpoint macro.  */
 
 static int
-m32r_can_use_hw_watchpoint (int type, int cnt, int othertype)
+m32r_can_use_hw_watchpoint (struct target_ops *self,
+			    int type, int cnt, int othertype)
 {
   return sdi_desc != NULL && cnt < max_access_breaks;
 }

@@ -450,7 +450,7 @@ struct target_ops
     int (*to_remove_breakpoint) (struct target_ops *, struct gdbarch *,
 				 struct bp_target_info *)
       TARGET_DEFAULT_FUNC (memory_remove_breakpoint);
-    int (*to_can_use_hw_breakpoint) (int, int, int);
+    int (*to_can_use_hw_breakpoint) (struct target_ops *, int, int, int);
     int (*to_ranged_break_num_registers) (struct target_ops *);
     int (*to_insert_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
     int (*to_remove_hw_breakpoint) (struct gdbarch *, struct bp_target_info *);
@@ -1595,7 +1595,8 @@ extern char *target_thread_name (struct thread_info *);
    (including this one?).  OTHERTYPE is who knows what...  */
 
 #define target_can_use_hardware_watchpoint(TYPE,CNT,OTHERTYPE) \
- (*current_target.to_can_use_hw_breakpoint) (TYPE, CNT, OTHERTYPE);
+ (*current_target.to_can_use_hw_breakpoint) (&current_target,  \
+					     TYPE, CNT, OTHERTYPE);
 
 /* Returns the number of debug registers needed to watch the given
    memory region, or zero if not supported.  */

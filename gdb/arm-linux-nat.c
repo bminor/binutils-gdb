@@ -747,7 +747,8 @@ arm_linux_get_hw_watchpoint_count (void)
 /* Have we got a free break-/watch-point available for use?  Returns -1 if
    there is not an appropriate resource available, otherwise returns 1.  */
 static int
-arm_linux_can_use_hw_breakpoint (int type, int cnt, int ot)
+arm_linux_can_use_hw_breakpoint (struct target_ops *self,
+				 int type, int cnt, int ot)
 {
   if (type == bp_hardware_watchpoint || type == bp_read_watchpoint
       || type == bp_access_watchpoint || type == bp_watchpoint)

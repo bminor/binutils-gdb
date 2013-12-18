@@ -831,7 +831,8 @@ i386_remove_hw_breakpoint (struct gdbarch *gdbarch,
    sharing implemented via reference counts in i386-nat.c.  */
 
 static int
-i386_can_use_hw_breakpoint (int type, int cnt, int othertype)
+i386_can_use_hw_breakpoint (struct target_ops *self,
+			    int type, int cnt, int othertype)
 {
   return 1;
 }

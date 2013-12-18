@@ -140,7 +140,8 @@ static int proc_find_memory_regions (find_memory_region_ftype, void *);
 
 static char * procfs_make_note_section (bfd *, int *);
 
-static int procfs_can_use_hw_breakpoint (int, int, int);
+static int procfs_can_use_hw_breakpoint (struct target_ops *self,
+					 int, int, int);
 
 static void procfs_info_proc (struct target_ops *, char *,
 			      enum info_proc_what);
@@ -4834,7 +4835,8 @@ procfs_set_watchpoint (ptid_t ptid, CORE_ADDR addr, int len, int rwflag,
    target_can_use_hardware_watchpoint.  */
 
 static int
-procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
+procfs_can_use_hw_breakpoint (struct target_ops *self,
+			      int type, int cnt, int othertype)
 {
   /* Due to the way that proc_set_watchpoint() is implemented, host
      and target pointers must be of the same size.  If they are not,
