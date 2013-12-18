@@ -459,6 +459,19 @@ delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
   self->to_rcmd (self, arg1, arg2);
 }
 
+static char *
+delegate_pid_to_exec_file (struct target_ops *self, int arg1)
+{
+  self = self->beneath;
+  return self->to_pid_to_exec_file (self, arg1);
+}
+
+static char *
+tdefault_pid_to_exec_file (struct target_ops *self, int arg1)
+{
+  return 0;
+}
+
 static int
 delegate_can_async_p (struct target_ops *self)
 {
@@ -593,6 +606,8 @@ install_delegators (struct target_ops *ops)
     ops->to_thread_name = delegate_thread_name;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
+  if (ops->to_pid_to_exec_file == NULL)
+    ops->to_pid_to_exec_file = delegate_pid_to_exec_file;
   if (ops->to_can_async_p == NULL)
     ops->to_can_async_p = delegate_can_async_p;
   if (ops->to_is_async_p == NULL)
@@ -647,6 +662,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_thread_name = tdefault_thread_name;
   ops->to_rcmd = default_rcmd;
+  ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;
   ops->to_async = tdefault_async;

@@ -649,7 +649,7 @@ update_current_target (void)
       INHERIT (to_stop, t);
       /* Do not inherit to_xfer_partial.  */
       /* Do not inherit to_rcmd.  */
-      INHERIT (to_pid_to_exec_file, t);
+      /* Do not inherit to_pid_to_exec_file.  */
       INHERIT (to_log_command, t);
       INHERIT (to_stratum, t);
       /* Do not inherit to_has_all_memory.  */
@@ -738,9 +738,6 @@ update_current_target (void)
   de_fault (to_stop,
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
-  de_fault (to_pid_to_exec_file,
-	    (char *(*) (struct target_ops *, int))
-	    return_null);
   de_fault (to_thread_architecture,
 	    default_thread_architecture);
   current_target.to_read_description = NULL;

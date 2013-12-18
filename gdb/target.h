@@ -559,7 +559,8 @@ struct target_ops
     void (*to_rcmd) (struct target_ops *,
 		     char *command, struct ui_file *output)
       TARGET_DEFAULT_FUNC (default_rcmd);
-    char *(*to_pid_to_exec_file) (struct target_ops *, int pid);
+    char *(*to_pid_to_exec_file) (struct target_ops *, int pid)
+      TARGET_DEFAULT_RETURN (0);
     void (*to_log_command) (struct target_ops *, const char *);
     struct target_section_table *(*to_get_section_table) (struct target_ops *);
     enum strata to_stratum;
