@@ -525,7 +525,8 @@ struct target_ops
       TARGET_DEFAULT_RETURN (1);
     int (*to_insert_vfork_catchpoint) (struct target_ops *, int)
       TARGET_DEFAULT_RETURN (1);
-    int (*to_remove_vfork_catchpoint) (struct target_ops *, int);
+    int (*to_remove_vfork_catchpoint) (struct target_ops *, int)
+      TARGET_DEFAULT_RETURN (1);
     int (*to_follow_fork) (struct target_ops *, int, int);
     int (*to_insert_exec_catchpoint) (struct target_ops *, int);
     int (*to_remove_exec_catchpoint) (struct target_ops *, int);
