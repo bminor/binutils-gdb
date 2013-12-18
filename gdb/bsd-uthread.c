@@ -483,7 +483,8 @@ static char *bsd_uthread_state[] =
    INFO.  */
 
 static char *
-bsd_uthread_extra_thread_info (struct thread_info *info)
+bsd_uthread_extra_thread_info (struct target_ops *self,
+			       struct thread_info *info)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   CORE_ADDR addr = ptid_get_tid (info->ptid);

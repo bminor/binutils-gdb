@@ -819,7 +819,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_extra_thread_info,
-	    (char *(*) (struct thread_info *))
+	    (char *(*) (struct target_ops *, struct thread_info *))
 	    return_null);
   de_fault (to_thread_name,
 	    (char *(*) (struct thread_info *))

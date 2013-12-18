@@ -1748,7 +1748,8 @@ aix_thread_pid_to_str (struct target_ops *ops, ptid_t ptid)
    THREAD, for use in "info threads" output.  */
 
 static char *
-aix_thread_extra_thread_info (struct thread_info *thread)
+aix_thread_extra_thread_info (struct target_ops *self,
+			      struct thread_info *thread)
 {
   struct ui_file *buf;
   int status;

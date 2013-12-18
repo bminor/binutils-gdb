@@ -522,7 +522,7 @@ struct target_ops
     int (*to_thread_alive) (struct target_ops *, ptid_t ptid);
     void (*to_find_new_threads) (struct target_ops *);
     char *(*to_pid_to_str) (struct target_ops *, ptid_t);
-    char *(*to_extra_thread_info) (struct thread_info *);
+    char *(*to_extra_thread_info) (struct target_ops *, struct thread_info *);
     char *(*to_thread_name) (struct thread_info *);
     void (*to_stop) (ptid_t);
     void (*to_rcmd) (char *command, struct ui_file *output);
@@ -1524,7 +1524,7 @@ extern char *normal_pid_to_str (ptid_t ptid);
    is okay.  */
 
 #define target_extra_thread_info(TP) \
-     (current_target.to_extra_thread_info (TP))
+     (current_target.to_extra_thread_info (&current_target, TP))
 
 /* Return the thread's name.  A NULL result means that the target
    could not determine this thread's name.  */

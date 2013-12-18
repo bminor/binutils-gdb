@@ -1282,7 +1282,8 @@ inf_ttrace_thread_alive (struct target_ops *ops, ptid_t ptid)
    INFO.  */
 
 static char *
-inf_ttrace_extra_thread_info (struct thread_info *info)
+inf_ttrace_extra_thread_info (struct target_ops *self,
+			      struct thread_info *info)
 {
   struct inf_ttrace_private_thread_info* private =
     (struct inf_ttrace_private_thread_info *) info->private;

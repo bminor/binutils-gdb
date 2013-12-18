@@ -2808,7 +2808,7 @@ remote_threads_info (struct target_ops *ops)
  */
 
 static char *
-remote_threads_extra_info (struct thread_info *tp)
+remote_threads_extra_info (struct target_ops *self, struct thread_info *tp)
 {
   struct remote_state *rs = get_remote_state ();
   int result;

@@ -1,5 +1,25 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_extra_thread_info>: Add
+	argument.
+	(target_extra_thread_info): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_threads_extra_info): Add 'self' argument.
+	* ravenscar-thread.c (ravenscar_extra_thread_info): Add 'self'
+	argument.
+	* nto-tdep.h (nto_extra_thread_info): Add 'self' argument.
+	* nto-tdep.c (nto_extra_thread_info): Add 'self' argument.
+	* linux-thread-db.c (thread_db_extra_thread_info): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_extra_thread_info): Add 'self'
+	argument.
+	* bsd-uthread.c (bsd_uthread_extra_thread_info): Add 'self'
+	argument.
+	* aix-thread.c (aix_thread_extra_thread_info): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_program_signals>: Add argument.
 	* target.c (target_program_signals): Add argument.
 	* remote.c (remote_program_signals): Add 'self' argument.

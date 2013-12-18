@@ -1772,7 +1772,8 @@ thread_db_pid_to_str (struct target_ops *ops, ptid_t ptid)
    INFO.  */
 
 static char *
-thread_db_extra_thread_info (struct thread_info *info)
+thread_db_extra_thread_info (struct target_ops *self,
+			     struct thread_info *info)
 {
   if (info->private == NULL)
     return NULL;
