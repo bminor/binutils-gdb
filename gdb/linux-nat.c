@@ -726,7 +726,7 @@ linux_child_insert_exec_catchpoint (struct target_ops *self, int pid)
 }
 
 static int
-linux_child_remove_exec_catchpoint (int pid)
+linux_child_remove_exec_catchpoint (struct target_ops *self, int pid)
 {
   return 0;
 }

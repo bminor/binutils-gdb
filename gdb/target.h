@@ -504,7 +504,7 @@ struct target_ops
     int (*to_remove_vfork_catchpoint) (struct target_ops *, int);
     int (*to_follow_fork) (struct target_ops *, int, int);
     int (*to_insert_exec_catchpoint) (struct target_ops *, int);
-    int (*to_remove_exec_catchpoint) (int);
+    int (*to_remove_exec_catchpoint) (struct target_ops *, int);
     int (*to_set_syscall_catchpoint) (int, int, int, int, int *);
     int (*to_has_exited) (int, int, int *);
     void (*to_mourn_inferior) (struct target_ops *);
@@ -1336,7 +1336,7 @@ int target_follow_fork (int follow_child, int detach_fork);
      (*current_target.to_insert_exec_catchpoint) (&current_target, pid)
 
 #define target_remove_exec_catchpoint(pid) \
-     (*current_target.to_remove_exec_catchpoint) (pid)
+     (*current_target.to_remove_exec_catchpoint) (&current_target, pid)
 
 /* Syscall catch.
 

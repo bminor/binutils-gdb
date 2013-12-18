@@ -807,7 +807,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *, int))
 	    return_one);
   de_fault (to_remove_exec_catchpoint,
-	    (int (*) (int))
+	    (int (*) (struct target_ops *, int))
 	    return_one);
   de_fault (to_set_syscall_catchpoint,
 	    (int (*) (int, int, int, int, int *))
@@ -4931,11 +4931,11 @@ debug_to_insert_exec_catchpoint (struct target_ops *self, int pid)
 }
 
 static int
-debug_to_remove_exec_catchpoint (int pid)
+debug_to_remove_exec_catchpoint (struct target_ops *self, int pid)
 {
   int retval;
 
-  retval = debug_target.to_remove_exec_catchpoint (pid);
+  retval = debug_target.to_remove_exec_catchpoint (&debug_target, pid);
 
   fprintf_unfiltered (gdb_stdlog, "target_remove_exec_catchpoint (%d) = %d\n",
 		      pid, retval);
