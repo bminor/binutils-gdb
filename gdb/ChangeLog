@@ -1,6 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_pass_signals): Unconditionally delegate.
+	* target.h (struct target_ops) <to_pass_signals>: Use
+	TARGET_DEFAULT_IGNORE.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (default_mourn_inferior): New function.
 	(target_mourn_inferior): Unconditionally delegate.
 	* target.h (struct target_ops) <to_mourn_inferior>: Use

@@ -550,7 +550,8 @@ struct target_ops
 
     /* Documentation of this routine is provided with the corresponding
        target_* macro.  */
-    void (*to_pass_signals) (struct target_ops *, int, unsigned char *);
+    void (*to_pass_signals) (struct target_ops *, int, unsigned char *)
+      TARGET_DEFAULT_IGNORE ();
 
     /* Documentation of this routine is provided with the
        corresponding target_* function.  */

@@ -2580,31 +2580,22 @@ target_resume (ptid_t ptid, int step, enum gdb_signal signal)
 void
 target_pass_signals (int numsigs, unsigned char *pass_signals)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
+  if (targetdebug)
     {
-      if (t->to_pass_signals != NULL)
-	{
-	  if (targetdebug)
-	    {
-	      int i;
+      int i;
 
-	      fprintf_unfiltered (gdb_stdlog, "target_pass_signals (%d, {",
-				  numsigs);
+      fprintf_unfiltered (gdb_stdlog, "target_pass_signals (%d, {",
+			  numsigs);
 
-	      for (i = 0; i < numsigs; i++)
-		if (pass_signals[i])
-		  fprintf_unfiltered (gdb_stdlog, " %s",
-				      gdb_signal_to_name (i));
+      for (i = 0; i < numsigs; i++)
+	if (pass_signals[i])
+	  fprintf_unfiltered (gdb_stdlog, " %s",
+			      gdb_signal_to_name (i));
 
-	      fprintf_unfiltered (gdb_stdlog, " })\n");
-	    }
-
-	  (*t->to_pass_signals) (t, numsigs, pass_signals);
-	  return;
-	}
+      fprintf_unfiltered (gdb_stdlog, " })\n");
     }
+
+  (*current_target.to_pass_signals) (&current_target, numsigs, pass_signals);
 }
 
 void
