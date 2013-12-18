@@ -418,7 +418,8 @@ struct target_ops
     void (*to_fetch_registers) (struct target_ops *, struct regcache *, int);
     void (*to_store_registers) (struct target_ops *, struct regcache *, int)
       TARGET_DEFAULT_NORETURN (noprocess ());
-    void (*to_prepare_to_store) (struct target_ops *, struct regcache *);
+    void (*to_prepare_to_store) (struct target_ops *, struct regcache *)
+      TARGET_DEFAULT_NORETURN (noprocess ());
 
     /* Transfer LEN bytes of memory between GDB address MYADDR and
        target address MEMADDR.  If WRITE, transfer them to the target, else

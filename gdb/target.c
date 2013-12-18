@@ -599,7 +599,7 @@ update_current_target (void)
       /* Do not inherit to_wait.  */
       /* Do not inherit to_fetch_registers.  */
       /* Do not inherit to_store_registers.  */
-      INHERIT (to_prepare_to_store, t);
+      /* Do not inherit to_prepare_to_store.  */
       INHERIT (deprecated_xfer_memory, t);
       INHERIT (to_files_info, t);
       /* Do not inherit to_insert_breakpoint.  */
@@ -730,9 +730,6 @@ update_current_target (void)
   de_fault (to_close,
 	    (void (*) (struct target_ops *))
 	    target_ignore);
-  de_fault (to_prepare_to_store,
-	    (void (*) (struct target_ops *, struct regcache *))
-	    noprocess);
   de_fault (deprecated_xfer_memory,
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
