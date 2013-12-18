@@ -152,6 +152,19 @@ tdefault_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *arg1, st
 }
 
 static int
+delegate_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+{
+  self = self->beneath;
+  return self->to_insert_watchpoint (self, arg1, arg2, arg3, arg4);
+}
+
+static int
+tdefault_insert_watchpoint (struct target_ops *self, CORE_ADDR arg1, int arg2, int arg3, struct expression *arg4)
+{
+  return -1;
+}
+
+static int
 delegate_stopped_by_watchpoint (struct target_ops *self)
 {
   self = self->beneath;
@@ -266,6 +279,8 @@ install_delegators (struct target_ops *ops)
     ops->to_insert_hw_breakpoint = delegate_insert_hw_breakpoint;
   if (ops->to_remove_hw_breakpoint == NULL)
     ops->to_remove_hw_breakpoint = delegate_remove_hw_breakpoint;
+  if (ops->to_insert_watchpoint == NULL)
+    ops->to_insert_watchpoint = delegate_insert_watchpoint;
   if (ops->to_stopped_by_watchpoint == NULL)
     ops->to_stopped_by_watchpoint = delegate_stopped_by_watchpoint;
   if (ops->to_stopped_data_address == NULL)
@@ -300,6 +315,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_can_use_hw_breakpoint = tdefault_can_use_hw_breakpoint;
   ops->to_insert_hw_breakpoint = tdefault_insert_hw_breakpoint;
   ops->to_remove_hw_breakpoint = tdefault_remove_hw_breakpoint;
+  ops->to_insert_watchpoint = tdefault_insert_watchpoint;
   ops->to_stopped_by_watchpoint = tdefault_stopped_by_watchpoint;
   ops->to_stopped_data_address = tdefault_stopped_data_address;
   ops->to_rcmd = default_rcmd;
