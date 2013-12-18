@@ -538,6 +538,19 @@ tdefault_get_bookmark (struct target_ops *self, char *arg1, int arg2)
   tcomplain ();
 }
 
+static void
+delegate_goto_bookmark (struct target_ops *self, gdb_byte *arg1, int arg2)
+{
+  self = self->beneath;
+  self->to_goto_bookmark (self, arg1, arg2);
+}
+
+static void
+tdefault_goto_bookmark (struct target_ops *self, gdb_byte *arg1, int arg2)
+{
+  tcomplain ();
+}
+
 static enum target_xfer_status 
 delegate_xfer_partial (struct target_ops *self, enum target_object  arg1, const char *arg2, gdb_byte *arg3, const gdb_byte *arg4, ULONGEST arg5, ULONGEST arg6, ULONGEST *arg7)
 {
@@ -661,6 +674,8 @@ install_delegators (struct target_ops *ops)
     ops->to_make_corefile_notes = delegate_make_corefile_notes;
   if (ops->to_get_bookmark == NULL)
     ops->to_get_bookmark = delegate_get_bookmark;
+  if (ops->to_goto_bookmark == NULL)
+    ops->to_goto_bookmark = delegate_goto_bookmark;
   if (ops->to_xfer_partial == NULL)
     ops->to_xfer_partial = delegate_xfer_partial;
   if (ops->to_supports_btrace == NULL)
@@ -717,6 +732,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_find_memory_regions = dummy_find_memory_regions;
   ops->to_make_corefile_notes = dummy_make_corefile_notes;
   ops->to_get_bookmark = tdefault_get_bookmark;
+  ops->to_goto_bookmark = tdefault_goto_bookmark;
   ops->to_xfer_partial = tdefault_xfer_partial;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

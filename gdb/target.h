@@ -591,7 +591,8 @@ struct target_ops
     gdb_byte * (*to_get_bookmark) (struct target_ops *, char *, int)
       TARGET_DEFAULT_NORETURN (tcomplain ());
     /* goto_bookmark support method for bookmarks */
-    void (*to_goto_bookmark) (struct target_ops *, gdb_byte *, int);
+    void (*to_goto_bookmark) (struct target_ops *, gdb_byte *, int)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
     /* Return the thread-local address at OFFSET in the
        thread-local storage for the thread PTID and the shared library
        or executable file given by OBJFILE.  If that block of

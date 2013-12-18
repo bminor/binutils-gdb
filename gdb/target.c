@@ -671,7 +671,7 @@ update_current_target (void)
       /* Do not inherit to_find_memory_regions.  */
       /* Do not inherit to_make_corefile_notes.  */
       /* Do not inherit to_get_bookmark.  */
-      INHERIT (to_goto_bookmark, t);
+      /* Do not inherit to_goto_bookmark.  */
       /* Do not inherit to_get_thread_local_address.  */
       INHERIT (to_can_execute_reverse, t);
       INHERIT (to_execution_direction, t);
@@ -3680,13 +3680,6 @@ dummy_make_corefile_notes (struct target_ops *self,
   return NULL;
 }
 
-/* Error-catcher for target_goto_bookmark.  */
-static void
-dummy_goto_bookmark (struct target_ops *self, gdb_byte *ignore, int from_tty)
-{
-  tcomplain ();
-}
-
 /* Set up the handful of non-empty slots needed by the dummy target
    vector.  */
 
@@ -3702,7 +3695,6 @@ init_dummy_target (void)
     = find_default_supports_disable_randomization;
   dummy_target.to_pid_to_str = dummy_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
-  dummy_target.to_goto_bookmark = dummy_goto_bookmark;
   dummy_target.to_has_all_memory = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_memory = (int (*) (struct target_ops *)) return_zero;
   dummy_target.to_has_stack = (int (*) (struct target_ops *)) return_zero;
