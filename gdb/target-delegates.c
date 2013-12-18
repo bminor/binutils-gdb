@@ -577,6 +577,13 @@ tdefault_can_execute_reverse (struct target_ops *self)
   return 0;
 }
 
+static enum exec_direction_kind 
+delegate_execution_direction (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_execution_direction (self);
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -693,6 +700,8 @@ install_delegators (struct target_ops *ops)
     ops->to_xfer_partial = delegate_xfer_partial;
   if (ops->to_can_execute_reverse == NULL)
     ops->to_can_execute_reverse = delegate_can_execute_reverse;
+  if (ops->to_execution_direction == NULL)
+    ops->to_execution_direction = delegate_execution_direction;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -750,5 +759,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_goto_bookmark = tdefault_goto_bookmark;
   ops->to_xfer_partial = tdefault_xfer_partial;
   ops->to_can_execute_reverse = tdefault_can_execute_reverse;
+  ops->to_execution_direction = default_execution_direction;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

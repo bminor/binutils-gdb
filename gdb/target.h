@@ -707,7 +707,8 @@ struct target_ops
     /* The direction the target is currently executing.  Must be
        implemented on targets that support reverse execution and async
        mode.  The default simply returns forward execution.  */
-    enum exec_direction_kind (*to_execution_direction) (struct target_ops *);
+    enum exec_direction_kind (*to_execution_direction) (struct target_ops *)
+      TARGET_DEFAULT_FUNC (default_execution_direction);
 
     /* Does this target support debugging multiple processes
        simultaneously?  */

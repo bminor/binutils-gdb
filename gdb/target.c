@@ -89,6 +89,9 @@ static int find_default_can_async_p (struct target_ops *ignore);
 
 static int find_default_is_async_p (struct target_ops *ignore);
 
+static enum exec_direction_kind default_execution_direction
+    (struct target_ops *self);
+
 #include "target-delegates.c"
 
 static void init_dummy_target (void);
@@ -674,7 +677,7 @@ update_current_target (void)
       /* Do not inherit to_goto_bookmark.  */
       /* Do not inherit to_get_thread_local_address.  */
       /* Do not inherit to_can_execute_reverse.  */
-      INHERIT (to_execution_direction, t);
+      /* Do not inherit to_execution_direction.  */
       INHERIT (to_thread_architecture, t);
       /* Do not inherit to_read_description.  */
       INHERIT (to_get_ada_task_ptid, t);
@@ -861,7 +864,6 @@ update_current_target (void)
   de_fault (to_augmented_libraries_svr4_read,
 	    (int (*) (struct target_ops *))
 	    return_zero);
-  de_fault (to_execution_direction, default_execution_direction);
 
 #undef de_fault
 

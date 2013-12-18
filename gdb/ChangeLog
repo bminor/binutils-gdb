@@ -2,6 +2,14 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_execution_direction.
+	* target.h (struct target_ops) <to_execution_direction>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_can_execute_reverse.
 	* target.h (struct target_ops) <to_can_execute_reverse>: Use
 	TARGET_DEFAULT_RETURN.
