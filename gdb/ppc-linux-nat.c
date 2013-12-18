@@ -1710,7 +1710,8 @@ ppc_linux_insert_hw_breakpoint (struct target_ops *self,
 }
 
 static int
-ppc_linux_remove_hw_breakpoint (struct gdbarch *gdbarch,
+ppc_linux_remove_hw_breakpoint (struct target_ops *self,
+				struct gdbarch *gdbarch,
 				  struct bp_target_info *bp_tgt)
 {
   struct lwp_info *lp;

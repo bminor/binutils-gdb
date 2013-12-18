@@ -8385,7 +8385,7 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 
 
 static int
-remote_remove_hw_breakpoint (struct gdbarch *gdbarch,
+remote_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			     struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr;

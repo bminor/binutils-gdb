@@ -791,7 +791,7 @@ i386_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
    Return 0 on success, -1 on failure.  */
 
 static int
-i386_remove_hw_breakpoint (struct gdbarch *gdbarch,
+i386_remove_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
 			   struct bp_target_info *bp_tgt)
 {
   struct i386_debug_reg_state *state
