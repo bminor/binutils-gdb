@@ -930,7 +930,7 @@ update_current_target (void)
 	    (struct traceframe_info * (*) (void))
 	    return_null);
   de_fault (to_supports_evaluation_of_breakpoint_conditions,
-	    (int (*) (void))
+	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_can_run_breakpoint_commands,
 	    (int (*) (void))

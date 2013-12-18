@@ -686,7 +686,7 @@ struct target_ops
 
     /* Does this target support evaluation of breakpoint conditions on its
        end?  */
-    int (*to_supports_evaluation_of_breakpoint_conditions) (void);
+    int (*to_supports_evaluation_of_breakpoint_conditions) (struct target_ops *);
 
     /* Does this target support evaluation of breakpoint commands on its
        end?  */
@@ -1123,7 +1123,7 @@ int target_supports_disable_randomization (void);
    on its end.  */
 
 #define target_supports_evaluation_of_breakpoint_conditions() \
-  (*current_target.to_supports_evaluation_of_breakpoint_conditions) ()
+  (*current_target.to_supports_evaluation_of_breakpoint_conditions) (&current_target)
 
 /* Returns true if this target can handle breakpoint commands
    on its end.  */

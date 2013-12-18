@@ -226,7 +226,7 @@ static int remote_read_description_p (struct target_ops *target);
 
 static void remote_console_output (char *msg);
 
-static int remote_supports_cond_breakpoints (void);
+static int remote_supports_cond_breakpoints (struct target_ops *self);
 
 static int remote_can_run_breakpoint_commands (void);
 
@@ -8081,7 +8081,7 @@ remote_insert_breakpoint (struct target_ops *ops,
       p += hexnumstr (p, addr);
       xsnprintf (p, endbuf - p, ",%d", bpsize);
 
-      if (remote_supports_cond_breakpoints ())
+      if (remote_supports_cond_breakpoints (ops))
 	remote_add_target_side_condition (gdbarch, bp_tgt, p, endbuf);
 
       if (remote_can_run_breakpoint_commands ())
@@ -8360,7 +8360,7 @@ remote_insert_hw_breakpoint (struct target_ops *self, struct gdbarch *gdbarch,
   p += hexnumstr (p, (ULONGEST) addr);
   xsnprintf (p, endbuf - p, ",%x", bp_tgt->placed_size);
 
-  if (remote_supports_cond_breakpoints ())
+  if (remote_supports_cond_breakpoints (self))
     remote_add_target_side_condition (gdbarch, bp_tgt, p, endbuf);
 
   if (remote_can_run_breakpoint_commands ())
@@ -10258,7 +10258,7 @@ remote_supports_cond_tracepoints (void)
 }
 
 static int
-remote_supports_cond_breakpoints (void)
+remote_supports_cond_breakpoints (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
 
