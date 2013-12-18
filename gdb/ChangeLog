@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_info_record>: Add argument.
+	* target.c (target_info_record): Add argument.
+	* record.c (info_record_command): Add argument.
+	* record-full.c (record_full_info): Add 'self' argument.
+	* record-btrace.c (record_btrace_info): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_stop_recording>: Add argument.
 	* target.c (target_stop_recording): Add argument.
 	* record.c (record_stop): Add argument.

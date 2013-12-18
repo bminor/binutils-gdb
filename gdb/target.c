@@ -4283,7 +4283,7 @@ target_info_record (void)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_info_record != NULL)
       {
-	t->to_info_record ();
+	t->to_info_record (t);
 	return;
       }
 

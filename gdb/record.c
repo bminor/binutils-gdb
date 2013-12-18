@@ -287,7 +287,7 @@ info_record_command (char *args, int from_tty)
 
   printf_filtered (_("Active record target: %s\n"), t->to_shortname);
   if (t->to_info_record != NULL)
-    t->to_info_record ();
+    t->to_info_record (t);
 }
 
 /* The "record save" command.  */

@@ -228,7 +228,7 @@ record_btrace_close (struct target_ops *self)
 /* The to_info_record method of target record-btrace.  */
 
 static void
-record_btrace_info (void)
+record_btrace_info (struct target_ops *self)
 {
   struct btrace_thread_info *btinfo;
   struct thread_info *tp;

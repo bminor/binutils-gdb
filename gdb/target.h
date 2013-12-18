@@ -930,7 +930,7 @@ struct target_ops
     void (*to_stop_recording) (struct target_ops *);
 
     /* Print information about the recording.  */
-    void (*to_info_record) (void);
+    void (*to_info_record) (struct target_ops *);
 
     /* Save the recorded execution trace into a file.  */
     void (*to_save_record) (const char *filename);

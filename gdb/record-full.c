@@ -1770,7 +1770,7 @@ record_full_execution_direction (struct target_ops *self)
 }
 
 static void
-record_full_info (void)
+record_full_info (struct target_ops *self)
 {
   struct record_full_entry *p;
 
