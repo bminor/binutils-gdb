@@ -676,7 +676,8 @@ struct target_ops
        Precondition: both ADDRESS and ADDRESS+LENGTH should be aligned
        on flash block boundaries, as reported by 'to_memory_map'.  */
     void (*to_flash_erase) (struct target_ops *,
-                           ULONGEST address, LONGEST length);
+                           ULONGEST address, LONGEST length)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Finishes a flash memory write sequence.  After this operation
        all flash memory should be available for writing and the result

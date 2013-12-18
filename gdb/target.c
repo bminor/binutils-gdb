@@ -1757,19 +1757,10 @@ target_memory_map (void)
 void
 target_flash_erase (ULONGEST address, LONGEST length)
 {
-  struct target_ops *t;
-
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    if (t->to_flash_erase != NULL)
-      {
-	if (targetdebug)
-	  fprintf_unfiltered (gdb_stdlog, "target_flash_erase (%s, %s)\n",
-			      hex_string (address), phex (length, 0));
-	t->to_flash_erase (t, address, length);
-	return;
-      }
-
-  tcomplain ();
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_flash_erase (%s, %s)\n",
+			hex_string (address), phex (length, 0));
+  current_target.to_flash_erase (&current_target, address, length);
 }
 
 void

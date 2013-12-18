@@ -1,6 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (target_flash_erase): Unconditionally delegate.
+	* target.h (struct target_ops) <to_flash_erase>: Use
+	TARGET_DEFAULT_NORETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_get_section_table): Unconditionally delegate.
 	* target.h (struct target_ops) <to_get_section_table>: Use
 	TARGET_DEFAULT_RETURN.
