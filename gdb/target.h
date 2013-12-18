@@ -682,7 +682,7 @@ struct target_ops
     int (*to_supports_disable_randomization) (struct target_ops *);
 
     /* Does this target support the tracenz bytecode for string collection?  */
-    int (*to_supports_string_tracing) (void);
+    int (*to_supports_string_tracing) (struct target_ops *);
 
     /* Does this target support evaluation of breakpoint conditions on its
        end?  */
@@ -1117,7 +1117,7 @@ int target_supports_disable_randomization (void);
   (*current_target.to_supports_enable_disable_tracepoint) (&current_target)
 
 #define target_supports_string_tracing() \
-  (*current_target.to_supports_string_tracing) ()
+  (*current_target.to_supports_string_tracing) (&current_target)
 
 /* Returns true if this target can handle breakpoint conditions
    on its end.  */

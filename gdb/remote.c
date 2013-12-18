@@ -10298,7 +10298,7 @@ remote_supports_enable_disable_tracepoint (struct target_ops *self)
 }
 
 static int
-remote_supports_string_tracing (void)
+remote_supports_string_tracing (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
 
