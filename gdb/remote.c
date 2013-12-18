@@ -10225,7 +10225,7 @@ remote_can_execute_reverse (void)
 }
 
 static int
-remote_supports_non_stop (void)
+remote_supports_non_stop (struct target_ops *self)
 {
   return 1;
 }

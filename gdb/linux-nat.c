@@ -4554,7 +4554,7 @@ linux_nat_can_async_p (struct target_ops *ops)
 }
 
 static int
-linux_nat_supports_non_stop (void)
+linux_nat_supports_non_stop (struct target_ops *self)
 {
   return 1;
 }

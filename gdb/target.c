@@ -3212,13 +3212,13 @@ find_default_is_async_p (struct target_ops *ignore)
 }
 
 static int
-find_default_supports_non_stop (void)
+find_default_supports_non_stop (struct target_ops *self)
 {
   struct target_ops *t;
 
   t = find_default_run_target (NULL);
   if (t && t->to_supports_non_stop)
-    return (t->to_supports_non_stop) ();
+    return (t->to_supports_non_stop) (t);
   return 0;
 }
 
@@ -3229,7 +3229,7 @@ target_supports_non_stop (void)
 
   for (t = &current_target; t != NULL; t = t->beneath)
     if (t->to_supports_non_stop)
-      return t->to_supports_non_stop ();
+      return t->to_supports_non_stop (t);
 
   return 0;
 }

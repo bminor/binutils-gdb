@@ -1,5 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_supports_non_stop>: Add
+	argument.
+	* target.c (find_default_supports_non_stop): Add argument.
+	(target_supports_non_stop): Add argument.
+	(find_default_supports_non_stop): Add 'self' argument.
+	* remote.c (remote_supports_non_stop): Add 'self' argument.
+	* linux-nat.c (linux_nat_supports_non_stop): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_log_command>: Add argument.
 	(target_log_command): Add argument.
 	* serial.h (serial_log_command): Add 'self' argument.

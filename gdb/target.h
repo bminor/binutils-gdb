@@ -545,7 +545,7 @@ struct target_ops
       TARGET_DEFAULT_FUNC (find_default_is_async_p);
     void (*to_async) (struct target_ops *, async_callback_ftype *, void *)
       TARGET_DEFAULT_NORETURN (tcomplain ());
-    int (*to_supports_non_stop) (void);
+    int (*to_supports_non_stop) (struct target_ops *);
     /* find_memory_regions support method for gcore */
     int (*to_find_memory_regions) (find_memory_region_ftype func, void *data);
     /* make_corefile_notes support method for gcore */
