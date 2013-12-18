@@ -700,7 +700,7 @@ update_current_target (void)
       /* Do not inherit to_get_tracepoint_status.  */
       /* Do not inherit to_trace_stop.  */
       /* Do not inherit to_trace_find.  */
-      INHERIT (to_get_trace_state_variable_value, t);
+      /* Do not inherit to_get_trace_state_variable_value.  */
       INHERIT (to_save_trace_data, t);
       INHERIT (to_upload_tracepoints, t);
       INHERIT (to_upload_trace_state_variables, t);
@@ -752,9 +752,6 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
   current_target.to_read_description = NULL;
-  de_fault (to_get_trace_state_variable_value,
-	    (int (*) (struct target_ops *, int, LONGEST *))
-	    return_zero);
   de_fault (to_save_trace_data,
 	    (int (*) (struct target_ops *, const char *))
 	    tcomplain);

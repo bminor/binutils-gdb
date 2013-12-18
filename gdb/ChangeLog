@@ -2,6 +2,14 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_get_trace_state_variable_value.
+	* target.h (struct target_ops)
+	<to_get_trace_state_variable_value>: Use TARGET_DEFAULT_RETURN.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_trace_find.
 	* target.h (struct target_ops): Use TARGET_DEFAULT_RETURN.
 

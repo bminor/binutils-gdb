@@ -794,6 +794,19 @@ tdefault_trace_find (struct target_ops *self, enum trace_find_type  arg1, int ar
 }
 
 static int
+delegate_get_trace_state_variable_value (struct target_ops *self, int arg1, LONGEST *arg2)
+{
+  self = self->beneath;
+  return self->to_get_trace_state_variable_value (self, arg1, arg2);
+}
+
+static int
+tdefault_get_trace_state_variable_value (struct target_ops *self, int arg1, LONGEST *arg2)
+{
+  return 0;
+}
+
+static int
 delegate_supports_btrace (struct target_ops *self)
 {
   self = self->beneath;
@@ -945,6 +958,8 @@ install_delegators (struct target_ops *ops)
     ops->to_trace_stop = delegate_trace_stop;
   if (ops->to_trace_find == NULL)
     ops->to_trace_find = delegate_trace_find;
+  if (ops->to_get_trace_state_variable_value == NULL)
+    ops->to_get_trace_state_variable_value = delegate_get_trace_state_variable_value;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -1020,5 +1035,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_get_tracepoint_status = tdefault_get_tracepoint_status;
   ops->to_trace_stop = tdefault_trace_stop;
   ops->to_trace_find = tdefault_trace_find;
+  ops->to_get_trace_state_variable_value = tdefault_get_trace_state_variable_value;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

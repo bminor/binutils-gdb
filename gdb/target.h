@@ -866,7 +866,8 @@ struct target_ops
        1 if the value is known and writing the value itself into the
        location pointed to by VAL, else returning 0.  */
     int (*to_get_trace_state_variable_value) (struct target_ops *,
-					      int tsv, LONGEST *val);
+					      int tsv, LONGEST *val)
+      TARGET_DEFAULT_RETURN (0);
 
     int (*to_save_trace_data) (struct target_ops *, const char *filename);
 
