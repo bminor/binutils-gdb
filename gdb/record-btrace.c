@@ -1802,7 +1802,7 @@ record_btrace_set_replay (struct thread_info *tp,
 /* The to_goto_record_begin method of target record-btrace.  */
 
 static void
-record_btrace_goto_begin (void)
+record_btrace_goto_begin (struct target_ops *self)
 {
   struct thread_info *tp;
   struct btrace_insn_iterator begin;

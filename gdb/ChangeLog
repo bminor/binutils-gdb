@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_goto_record_begin>: Add
+	argument.
+	* target.c (target_goto_record_begin): Add argument.
+	* record-full.c (record_full_goto_begin): Add 'self' argument.
+	* record-btrace.c (record_btrace_goto_begin): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_record_is_replaying>: Add
 	argument.
 	* target.c (target_record_is_replaying): Add argument.

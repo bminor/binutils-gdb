@@ -1860,7 +1860,7 @@ record_full_goto_entry (struct record_full_entry *p)
 /* The "to_goto_record_begin" target method.  */
 
 static void
-record_full_goto_begin (void)
+record_full_goto_begin (struct target_ops *self)
 {
   struct record_full_entry *p = NULL;
 

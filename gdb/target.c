@@ -4362,7 +4362,7 @@ target_goto_record_begin (void)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_goto_record_begin != NULL)
       {
-	t->to_goto_record_begin ();
+	t->to_goto_record_begin (t);
 	return;
       }
 
