@@ -982,7 +982,8 @@ struct target_ops
 
     /* Print a function trace of an execution trace section from function BEGIN
        (inclusive) to function END (inclusive).  */
-    void (*to_call_history_range) (ULONGEST begin, ULONGEST end, int flags);
+    void (*to_call_history_range) (struct target_ops *,
+				   ULONGEST begin, ULONGEST end, int flags);
 
     /* Nonzero if TARGET_OBJECT_LIBRARIES_SVR4 may be read with a
        non-empty annex.  */

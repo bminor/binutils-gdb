@@ -4498,7 +4498,7 @@ target_call_history_range (ULONGEST begin, ULONGEST end, int flags)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_call_history_range != NULL)
       {
-	t->to_call_history_range (begin, end, flags);
+	t->to_call_history_range (t, begin, end, flags);
 	return;
       }
 

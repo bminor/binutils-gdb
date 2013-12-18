@@ -706,7 +706,8 @@ record_btrace_call_history (struct target_ops *self, int size, int flags)
 /* The to_call_history_range method of target record-btrace.  */
 
 static void
-record_btrace_call_history_range (ULONGEST from, ULONGEST to, int flags)
+record_btrace_call_history_range (struct target_ops *self,
+				  ULONGEST from, ULONGEST to, int flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_call_history *history;
@@ -786,7 +787,7 @@ record_btrace_call_history_from (struct target_ops *self,
 	end = ULONGEST_MAX;
     }
 
-  record_btrace_call_history_range (begin, end, flags);
+  record_btrace_call_history_range (self, begin, end, flags);
 }
 
 /* The to_record_is_replaying method of target record-btrace.  */
