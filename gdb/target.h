@@ -893,7 +893,8 @@ struct target_ops
 
     /* Set the target's tracing behavior in response to unexpected
        disconnection - set VAL to 1 to keep tracing, 0 to stop.  */
-    void (*to_set_disconnected_tracing) (struct target_ops *, int val);
+    void (*to_set_disconnected_tracing) (struct target_ops *, int val)
+      TARGET_DEFAULT_IGNORE ();
     void (*to_set_circular_trace_buffer) (struct target_ops *, int val);
     /* Set the size of trace buffer in the target.  */
     void (*to_set_trace_buffer_size) (struct target_ops *, LONGEST val);
