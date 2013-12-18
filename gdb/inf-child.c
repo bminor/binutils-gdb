@@ -314,7 +314,7 @@ inf_child_fileio_pread (struct target_ops *self,
 /* Close FD on the target.  Return 0, or -1 if an error occurs
    (and set *TARGET_ERRNO).  */
 static int
-inf_child_fileio_close (int fd, int *target_errno)
+inf_child_fileio_close (struct target_ops *self, int fd, int *target_errno)
 {
   int ret;
 

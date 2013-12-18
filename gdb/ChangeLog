@@ -1,5 +1,15 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_fileio_close>: Add argument.
+	* target.c (target_fileio_close): Add argument.
+	* remote.c (remote_hostio_close): Add 'self' argument.
+	(remote_hostio_close_cleanup): Update.
+	(remote_bfd_iovec_close, remote_file_put, remote_file_get):
+	Update.
+	* inf-child.c (inf_child_fileio_close): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_fileio_pread>: Add argument.
 	* target.c (target_fileio_pread): Add argument.
 	* remote.c (remote_hostio_pread): Add 'self' argument.

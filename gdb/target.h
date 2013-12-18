@@ -736,7 +736,7 @@ struct target_ops
 
     /* Close FD on the target.  Return 0, or -1 if an error occurs
        (and set *TARGET_ERRNO).  */
-    int (*to_fileio_close) (int fd, int *target_errno);
+    int (*to_fileio_close) (struct target_ops *, int fd, int *target_errno);
 
     /* Unlink FILENAME on the target.  Return 0, or -1 if an error
        occurs (and set *TARGET_ERRNO).  */

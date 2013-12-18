@@ -3458,7 +3458,7 @@ target_fileio_close (int fd, int *target_errno)
     {
       if (t->to_fileio_close != NULL)
 	{
-	  int ret = t->to_fileio_close (fd, target_errno);
+	  int ret = t->to_fileio_close (t, fd, target_errno);
 
 	  if (targetdebug)
 	    fprintf_unfiltered (gdb_stdlog,

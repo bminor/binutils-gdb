@@ -9752,7 +9752,7 @@ remote_hostio_pread (struct target_ops *self,
    (and set *REMOTE_ERRNO).  */
 
 static int
-remote_hostio_close (int fd, int *remote_errno)
+remote_hostio_close (struct target_ops *self, int fd, int *remote_errno)
 {
   struct remote_state *rs = get_remote_state ();
   char *p = rs->buf;
@@ -9891,7 +9891,7 @@ remote_hostio_close_cleanup (void *opaque)
   int fd = *(int *) opaque;
   int remote_errno;
 
-  remote_hostio_close (fd, &remote_errno);
+  remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno);
 }
 
 
@@ -9928,7 +9928,7 @@ remote_bfd_iovec_close (struct bfd *abfd, void *stream)
 
   /* Ignore errors on close; these may happen if the remote
      connection was already torn down.  */
-  remote_hostio_close (fd, &remote_errno);
+  remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno);
 
   /* Zero means success.  */
   return 0;
@@ -10077,7 +10077,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
     }
 
   discard_cleanups (close_cleanup);
-  if (remote_hostio_close (fd, &remote_errno))
+  if (remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno))
     remote_hostio_error (remote_errno);
 
   if (from_tty)
@@ -10135,7 +10135,7 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
     }
 
   discard_cleanups (close_cleanup);
-  if (remote_hostio_close (fd, &remote_errno))
+  if (remote_hostio_close (find_target_at (process_stratum), fd, &remote_errno))
     remote_hostio_error (remote_errno);
 
   if (from_tty)
