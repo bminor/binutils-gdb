@@ -1,6 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (default_follow_fork): New function.
+	(target_follow_fork): Unconditionally delegate.
+	* target.h (struct target_ops) <to_follow_fork>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (target_kill): Unconditionally delegate.
 	* target.h (struct target_ops) <to_kill>: Use
 	TARGET_DEFAULT_NORETURN.

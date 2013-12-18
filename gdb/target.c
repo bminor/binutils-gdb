@@ -60,6 +60,9 @@ static void default_rcmd (struct target_ops *, char *, struct ui_file *);
 static ptid_t default_get_ada_task_ptid (struct target_ops *self,
 					 long lwp, long tid);
 
+static int default_follow_fork (struct target_ops *self, int follow_child,
+				int detach_fork);
+
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
@@ -2632,31 +2635,29 @@ target_program_signals (int numsigs, unsigned char *program_signals)
     }
 }
 
+static int
+default_follow_fork (struct target_ops *self, int follow_child,
+		     int detach_fork)
+{
+  /* Some target returned a fork event, but did not know how to follow it.  */
+  internal_error (__FILE__, __LINE__,
+		  _("could not find a target to follow fork"));
+}
+
 /* Look through the list of possible targets for a target that can
    follow forks.  */
 
 int
 target_follow_fork (int follow_child, int detach_fork)
 {
-  struct target_ops *t;
+  int retval = current_target.to_follow_fork (&current_target,
+					      follow_child, detach_fork);
 
-  for (t = current_target.beneath; t != NULL; t = t->beneath)
-    {
-      if (t->to_follow_fork != NULL)
-	{
-	  int retval = t->to_follow_fork (t, follow_child, detach_fork);
-
-	  if (targetdebug)
-	    fprintf_unfiltered (gdb_stdlog,
-				"target_follow_fork (%d, %d) = %d\n",
-				follow_child, detach_fork, retval);
-	  return retval;
-	}
-    }
-
-  /* Some target returned a fork event, but did not know how to follow it.  */
-  internal_error (__FILE__, __LINE__,
-		  _("could not find a target to follow fork"));
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog,
+			"target_follow_fork (%d, %d) = %d\n",
+			follow_child, detach_fork, retval);
+  return retval;
 }
 
 void

@@ -452,6 +452,13 @@ tdefault_remove_vfork_catchpoint (struct target_ops *self, int arg1)
 }
 
 static int
+delegate_follow_fork (struct target_ops *self, int arg1, int arg2)
+{
+  self = self->beneath;
+  return self->to_follow_fork (self, arg1, arg2);
+}
+
+static int
 delegate_insert_exec_catchpoint (struct target_ops *self, int arg1)
 {
   self = self->beneath;
@@ -1230,6 +1237,8 @@ install_delegators (struct target_ops *ops)
     ops->to_insert_vfork_catchpoint = delegate_insert_vfork_catchpoint;
   if (ops->to_remove_vfork_catchpoint == NULL)
     ops->to_remove_vfork_catchpoint = delegate_remove_vfork_catchpoint;
+  if (ops->to_follow_fork == NULL)
+    ops->to_follow_fork = delegate_follow_fork;
   if (ops->to_insert_exec_catchpoint == NULL)
     ops->to_insert_exec_catchpoint = delegate_insert_exec_catchpoint;
   if (ops->to_remove_exec_catchpoint == NULL)
@@ -1389,6 +1398,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_remove_fork_catchpoint = tdefault_remove_fork_catchpoint;
   ops->to_insert_vfork_catchpoint = tdefault_insert_vfork_catchpoint;
   ops->to_remove_vfork_catchpoint = tdefault_remove_vfork_catchpoint;
+  ops->to_follow_fork = default_follow_fork;
   ops->to_insert_exec_catchpoint = tdefault_insert_exec_catchpoint;
   ops->to_remove_exec_catchpoint = tdefault_remove_exec_catchpoint;
   ops->to_set_syscall_catchpoint = tdefault_set_syscall_catchpoint;
