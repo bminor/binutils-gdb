@@ -758,7 +758,8 @@ record_btrace_call_history_range (ULONGEST from, ULONGEST to, int flags)
 /* The to_call_history_from method of target record-btrace.  */
 
 static void
-record_btrace_call_history_from (ULONGEST from, int size, int flags)
+record_btrace_call_history_from (struct target_ops *self,
+				 ULONGEST from, int size, int flags)
 {
   ULONGEST begin, end, context;
 

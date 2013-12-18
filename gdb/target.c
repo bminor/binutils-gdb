@@ -4481,7 +4481,7 @@ target_call_history_from (ULONGEST begin, int size, int flags)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_call_history_from != NULL)
       {
-	t->to_call_history_from (begin, size, flags);
+	t->to_call_history_from (t, begin, size, flags);
 	return;
       }
 
