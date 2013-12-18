@@ -4921,7 +4921,8 @@ procfs_insert_watchpoint (CORE_ADDR addr, int len, int type,
 }
 
 static int
-procfs_remove_watchpoint (CORE_ADDR addr, int len, int type,
+procfs_remove_watchpoint (struct target_ops *self,
+			  CORE_ADDR addr, int len, int type,
 			  struct expression *cond)
 {
   return procfs_set_watchpoint (inferior_ptid, addr, 0, 0, 0);

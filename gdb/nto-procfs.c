@@ -73,7 +73,8 @@ static int procfs_can_use_hw_breakpoint (struct target_ops *self,
 static int procfs_insert_hw_watchpoint (CORE_ADDR addr, int len, int type,
 					struct expression *cond);
 
-static int procfs_remove_hw_watchpoint (CORE_ADDR addr, int len, int type,
+static int procfs_remove_hw_watchpoint (struct target_ops *self,
+					CORE_ADDR addr, int len, int type,
 					struct expression *cond);
 
 static int procfs_stopped_by_watchpoint (struct target_ops *ops);
@@ -1496,7 +1497,8 @@ procfs_can_use_hw_breakpoint (struct target_ops *self,
 }
 
 static int
-procfs_remove_hw_watchpoint (CORE_ADDR addr, int len, int type,
+procfs_remove_hw_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int type,
 			     struct expression *cond)
 {
   return procfs_hw_watchpoint (addr, -1, type);

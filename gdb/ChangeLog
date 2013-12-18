@@ -1,5 +1,32 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_remove_watchpoint>: Add
+	argument.
+	(target_remove_watchpoint): Add argument.
+	* target.c (debug_to_remove_watchpoint): Add argument.
+	(update_current_target): Update.
+	* s390-linux-nat.c (s390_remove_watchpoint): Add 'self' argument.
+	* remote.c (remote_remove_watchpoint): Add 'self' argument.
+	* remote-mips.c (mips_remove_watchpoint): Add 'self' argument.
+	* remote-m32r-sdi.c (m32r_remove_watchpoint): Add 'self' argument.
+	* procfs.c (procfs_remove_watchpoint): Add 'self' argument.
+	* ppc-linux-nat.c (ppc_linux_remove_watchpoint): Add 'self'
+	argument.
+	* nto-procfs.c (procfs_remove_hw_watchpoint): Add 'self' argument.
+	* mips-linux-nat.c (mips_linux_remove_watchpoint): Add 'self'
+	argument.
+	* inf-ttrace.c (inf_ttrace_remove_watchpoint): Add 'self'
+	argument.
+	* ia64-linux-nat.c (ia64_linux_remove_watchpoint): Add 'self'
+	argument.
+	* i386-nat.c (i386_remove_watchpoint): Add 'self' argument.
+	* arm-linux-nat.c (arm_linux_remove_watchpoint): Add 'self'
+	argument.
+	* aarch64-linux-nat.c (aarch64_linux_remove_watchpoint): Add
+	'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_remove_hw_breakpoint>: Add
 	argument.
 	(target_remove_hw_breakpoint): Add argument.

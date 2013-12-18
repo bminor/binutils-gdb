@@ -1126,7 +1126,8 @@ arm_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 
 /* Remove a hardware breakpoint.  */
 static int
-arm_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
+arm_linux_remove_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;

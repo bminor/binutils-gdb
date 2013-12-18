@@ -627,7 +627,8 @@ i386_insert_watchpoint (CORE_ADDR addr, int len, int type,
    address ADDR, whose length is LEN bytes, and for accesses of the
    type TYPE.  Return 0 on success, -1 on failure.  */
 static int
-i386_remove_watchpoint (CORE_ADDR addr, int len, int type,
+i386_remove_watchpoint (struct target_ops *self,
+			CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   struct i386_debug_reg_state *state

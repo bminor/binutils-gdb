@@ -1443,7 +1443,8 @@ m32r_insert_watchpoint (CORE_ADDR addr, int len, int type,
 }
 
 static int
-m32r_remove_watchpoint (CORE_ADDR addr, int len, int type,
+m32r_remove_watchpoint (struct target_ops *self,
+			CORE_ADDR addr, int len, int type,
 			struct expression *cond)
 {
   int i;

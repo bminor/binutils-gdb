@@ -596,7 +596,8 @@ ia64_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 }
 
 static int
-ia64_linux_remove_watchpoint (CORE_ADDR addr, int len, int type,
+ia64_linux_remove_watchpoint (struct target_ops *self,
+			      CORE_ADDR addr, int len, int type,
 			      struct expression *cond)
 {
   int idx;

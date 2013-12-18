@@ -2144,7 +2144,8 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw,
 }
 
 static int
-ppc_linux_remove_watchpoint (CORE_ADDR addr, int len, int rw,
+ppc_linux_remove_watchpoint (struct target_ops *self,
+			     CORE_ADDR addr, int len, int rw,
 			     struct expression *cond)
 {
   struct lwp_info *lp;

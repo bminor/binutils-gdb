@@ -698,7 +698,8 @@ mips_linux_insert_watchpoint (CORE_ADDR addr, int len, int type,
    Return zero on success.  */
 
 static int
-mips_linux_remove_watchpoint (CORE_ADDR addr, int len, int type,
+mips_linux_remove_watchpoint (struct target_ops *self,
+			      CORE_ADDR addr, int len, int type,
 			      struct expression *cond)
 {
   int retval;

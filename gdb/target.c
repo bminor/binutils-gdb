@@ -114,7 +114,8 @@ static int debug_to_remove_hw_breakpoint (struct target_ops *self,
 static int debug_to_insert_watchpoint (CORE_ADDR, int, int,
 				       struct expression *);
 
-static int debug_to_remove_watchpoint (CORE_ADDR, int, int,
+static int debug_to_remove_watchpoint (struct target_ops *self,
+				       CORE_ADDR, int, int,
 				       struct expression *);
 
 static int debug_to_stopped_data_address (struct target_ops *, CORE_ADDR *);
@@ -751,7 +752,8 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, int, int, struct expression *))
 	    return_minus_one);
   de_fault (to_remove_watchpoint,
-	    (int (*) (CORE_ADDR, int, int, struct expression *))
+	    (int (*) (struct target_ops *, CORE_ADDR, int, int,
+		      struct expression *))
 	    return_minus_one);
   de_fault (to_watchpoint_addr_within_range,
 	    default_watchpoint_addr_within_range);
@@ -4767,12 +4769,14 @@ debug_to_insert_watchpoint (CORE_ADDR addr, int len, int type,
 }
 
 static int
-debug_to_remove_watchpoint (CORE_ADDR addr, int len, int type,
+debug_to_remove_watchpoint (struct target_ops *self,
+			    CORE_ADDR addr, int len, int type,
 			    struct expression *cond)
 {
   int retval;
 
-  retval = debug_target.to_remove_watchpoint (addr, len, type, cond);
+  retval = debug_target.to_remove_watchpoint (&debug_target,
+					      addr, len, type, cond);
 
   fprintf_unfiltered (gdb_stdlog,
 		      "target_remove_watchpoint (%s, %d, %d, %s) = %ld\n",

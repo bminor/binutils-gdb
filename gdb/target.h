@@ -459,7 +459,8 @@ struct target_ops
 
     /* Documentation of what the two routines below are expected to do is
        provided with the corresponding target_* macros.  */
-    int (*to_remove_watchpoint) (CORE_ADDR, int, int, struct expression *);
+    int (*to_remove_watchpoint) (struct target_ops *,
+				 CORE_ADDR, int, int, struct expression *);
     int (*to_insert_watchpoint) (CORE_ADDR, int, int, struct expression *);
 
     int (*to_insert_mask_watchpoint) (struct target_ops *,
@@ -1617,7 +1618,8 @@ extern char *target_thread_name (struct thread_info *);
      (*current_target.to_insert_watchpoint) (addr, len, type, cond)
 
 #define	target_remove_watchpoint(addr, len, type, cond) \
-     (*current_target.to_remove_watchpoint) (addr, len, type, cond)
+     (*current_target.to_remove_watchpoint) (&current_target,	\
+					     addr, len, type, cond)
 
 /* Insert a new masked watchpoint at ADDR using the mask MASK.
    RW may be hw_read for a read watchpoint, hw_write for a write watchpoint
