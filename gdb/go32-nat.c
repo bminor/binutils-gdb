@@ -903,7 +903,7 @@ go32_terminal_inferior (struct target_ops *self)
 }
 
 static void
-go32_terminal_ours (void)
+go32_terminal_ours (struct target_ops *self)
 {
   /* Switch to cooked mode on the gdb terminal and save the inferior
      terminal mode to be restored when it is resumed.  */

@@ -220,7 +220,7 @@ static int peek_stop_reply (ptid_t ptid);
 
 static void remote_async_inferior_event_handler (gdb_client_data);
 
-static void remote_terminal_ours (void);
+static void remote_terminal_ours (struct target_ops *self);
 
 static int remote_read_description_p (struct target_ops *target);
 
@@ -3000,7 +3000,7 @@ remote_close (struct target_ops *self)
 
   /* Make sure we leave stdin registered in the event loop, and we
      don't leave the async SIGINT signal handler installed.  */
-  remote_terminal_ours ();
+  remote_terminal_ours (self);
 
   serial_close (rs->remote_desc);
   rs->remote_desc = NULL;
@@ -5148,7 +5148,7 @@ remote_terminal_inferior (struct target_ops *self)
 }
 
 static void
-remote_terminal_ours (void)
+remote_terminal_ours (struct target_ops *self)
 {
   if (!target_async_permitted)
     /* Nothing to do.  */

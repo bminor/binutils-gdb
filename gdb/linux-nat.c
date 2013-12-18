@@ -4606,19 +4606,19 @@ linux_nat_terminal_inferior (struct target_ops *self)
 /* target_terminal_ours implementation.  */
 
 static void
-linux_nat_terminal_ours (void)
+linux_nat_terminal_ours (struct target_ops *self)
 {
   if (!target_is_async_p ())
     {
       /* Async mode is disabled.  */
-      terminal_ours ();
+      terminal_ours (self);
       return;
     }
 
   /* GDB should never give the terminal to the inferior if the
      inferior is running in the background (run&, continue&, etc.),
      but claiming it sure should.  */
-  terminal_ours ();
+  terminal_ours (self);
 
   if (async_terminal_is_ours)
     return;

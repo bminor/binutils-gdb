@@ -140,7 +140,7 @@ static void debug_to_terminal_ours_for_output (struct target_ops *self);
 
 static void debug_to_terminal_save_ours (void);
 
-static void debug_to_terminal_ours (void);
+static void debug_to_terminal_ours (struct target_ops *self);
 
 static void debug_to_load (char *, int);
 
@@ -778,7 +778,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_terminal_ours,
-	    (void (*) (void))
+	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_terminal_save_ours,
 	    (void (*) (void))
@@ -4823,9 +4823,9 @@ debug_to_terminal_ours_for_output (struct target_ops *self)
 }
 
 static void
-debug_to_terminal_ours (void)
+debug_to_terminal_ours (struct target_ops *self)
 {
-  debug_target.to_terminal_ours ();
+  debug_target.to_terminal_ours (&debug_target);
 
   fprintf_unfiltered (gdb_stdlog, "target_terminal_ours ()\n");
 }

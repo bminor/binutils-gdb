@@ -363,7 +363,7 @@ terminal_ours_for_output (struct target_ops *self)
    so they can be restored properly later.  */
 
 void
-terminal_ours (void)
+terminal_ours (struct target_ops *self)
 {
   terminal_ours_1 (0);
 }

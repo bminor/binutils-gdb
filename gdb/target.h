@@ -490,7 +490,7 @@ struct target_ops
     void (*to_terminal_init) (struct target_ops *);
     void (*to_terminal_inferior) (struct target_ops *);
     void (*to_terminal_ours_for_output) (struct target_ops *);
-    void (*to_terminal_ours) (void);
+    void (*to_terminal_ours) (struct target_ops *);
     void (*to_terminal_save_ours) (void);
     void (*to_terminal_info) (const char *, int);
     void (*to_kill) (struct target_ops *);
@@ -1245,7 +1245,7 @@ extern void target_terminal_inferior (void);
    so they can be restored properly later.  */
 
 #define target_terminal_ours() \
-     (*current_target.to_terminal_ours) ()
+     (*current_target.to_terminal_ours) (&current_target)
 
 /* Save our terminal settings.
    This is called from TUI after entering or leaving the curses

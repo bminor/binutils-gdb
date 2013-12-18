@@ -1,3 +1,16 @@
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target.h (struct target_ops) <to_terminal_ours>: Add argument.
+	(target_terminal_ours): Add argument.
+	* target.c (debug_to_terminal_ours): Add argument.
+	(update_current_target): Update.
+	* remote.c (remote_terminal_ours): Add 'self' argument.
+	(remote_close): Update.
+	* linux-nat.c (linux_nat_terminal_ours): Add 'self' argument.
+	* inflow.c (terminal_ours): Add 'self' argument.
+	* inferior.h (terminal_ours): Add 'self' argument.
+	* go32-nat.c (go32_terminal_ours): Add 'self' argument.
+
 2014-02-19  Pedro Alves  <palves@redhat.com>
 	    Tom Tromey  <tromey@redhat.com>
 
