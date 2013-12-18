@@ -1,3 +1,8 @@
+2014-01-07  Andrew Pinski  <apinski@cavium.com>
+
+	* features/aarch64-core.xml (cpsr): Change to be 64bit.
+	* features/aarch64.c: Regenerate.
+
 2014-01-07  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* target.c (return_null): Define.
