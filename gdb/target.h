@@ -840,7 +840,8 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Get the current status of a tracing run.  */
-    int (*to_get_trace_status) (struct target_ops *, struct trace_status *ts);
+    int (*to_get_trace_status) (struct target_ops *, struct trace_status *ts)
+      TARGET_DEFAULT_RETURN (-1);
 
     void (*to_get_tracepoint_status) (struct target_ops *,
 				      struct breakpoint *tp,
