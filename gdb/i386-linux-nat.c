@@ -1061,7 +1061,7 @@ i386_linux_read_description (struct target_ops *ops)
 /* Enable branch tracing.  */
 
 static struct btrace_target_info *
-i386_linux_enable_btrace (ptid_t ptid)
+i386_linux_enable_btrace (struct target_ops *self, ptid_t ptid)
 {
   struct btrace_target_info *tinfo;
   struct gdbarch *gdbarch;

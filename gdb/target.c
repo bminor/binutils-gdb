@@ -4199,7 +4199,7 @@ target_enable_btrace (ptid_t ptid)
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_enable_btrace != NULL)
-      return t->to_enable_btrace (ptid);
+      return t->to_enable_btrace (t, ptid);
 
   tcomplain ();
   return NULL;

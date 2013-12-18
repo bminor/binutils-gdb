@@ -903,7 +903,8 @@ struct target_ops
 
     /* Enable branch tracing for PTID and allocate a branch trace target
        information struct for reading and for disabling branch trace.  */
-    struct btrace_target_info *(*to_enable_btrace) (ptid_t ptid);
+    struct btrace_target_info *(*to_enable_btrace) (struct target_ops *,
+						    ptid_t ptid);
 
     /* Disable branch tracing and deallocate TINFO.  */
     void (*to_disable_btrace) (struct btrace_target_info *tinfo);

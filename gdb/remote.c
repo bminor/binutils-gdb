@@ -11243,7 +11243,7 @@ remote_supports_btrace (struct target_ops *self)
 /* Enable branch tracing.  */
 
 static struct btrace_target_info *
-remote_enable_btrace (ptid_t ptid)
+remote_enable_btrace (struct target_ops *self, ptid_t ptid)
 {
   struct btrace_target_info *tinfo = NULL;
   struct packet_config *packet = &remote_protocol_packets[PACKET_Qbtrace_bts];
