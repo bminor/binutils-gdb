@@ -528,7 +528,8 @@ struct target_ops
     char *(*to_thread_name) (struct target_ops *, struct thread_info *);
     void (*to_stop) (struct target_ops *, ptid_t);
     void (*to_rcmd) (struct target_ops *,
-		     char *command, struct ui_file *output);
+		     char *command, struct ui_file *output)
+      TARGET_DEFAULT_FUNC (default_rcmd);
     char *(*to_pid_to_exec_file) (struct target_ops *, int pid);
     void (*to_log_command) (struct target_ops *, const char *);
     struct target_section_table *(*to_get_section_table) (struct target_ops *);

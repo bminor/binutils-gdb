@@ -1,6 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_rcmd.
+	(default_rcmd): New function.
+	(do_monitor_command): Unconditionally delegate.
+	* target.h (struct target_ops) <to_rmcd>: Use
+	TARGET_DEFAULT_FUNC.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
 	* target.c (init_dummy_target): Don't initialize to_attach.
 	(target_attach): Unconditionally delegate.
 	* target.h (struct target_ops) <to_attach>: Use

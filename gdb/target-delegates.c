@@ -101,6 +101,13 @@ tdefault_stopped_data_address (struct target_ops *self, CORE_ADDR *arg1)
   return 0;
 }
 
+static void
+delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
+{
+  self = self->beneath;
+  self->to_rcmd (self, arg1, arg2);
+}
+
 static int
 delegate_can_async_p (struct target_ops *self)
 {
@@ -175,6 +182,8 @@ install_delegators (struct target_ops *ops)
     ops->to_stopped_by_watchpoint = delegate_stopped_by_watchpoint;
   if (ops->to_stopped_data_address == NULL)
     ops->to_stopped_data_address = delegate_stopped_data_address;
+  if (ops->to_rcmd == NULL)
+    ops->to_rcmd = delegate_rcmd;
   if (ops->to_can_async_p == NULL)
     ops->to_can_async_p = delegate_can_async_p;
   if (ops->to_is_async_p == NULL)
@@ -199,6 +208,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_remove_breakpoint = memory_remove_breakpoint;
   ops->to_stopped_by_watchpoint = tdefault_stopped_by_watchpoint;
   ops->to_stopped_data_address = tdefault_stopped_data_address;
+  ops->to_rcmd = default_rcmd;
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;
   ops->to_async = tdefault_async;

@@ -55,6 +55,8 @@ static int default_watchpoint_addr_within_range (struct target_ops *,
 static int default_region_ok_for_hw_watchpoint (struct target_ops *,
 						CORE_ADDR, int);
 
+static void default_rcmd (struct target_ops *, char *, struct ui_file *);
+
 static void tcomplain (void) ATTRIBUTE_NORETURN;
 
 static int nomemory (CORE_ADDR, char *, int, int, struct target_ops *);
@@ -648,7 +650,7 @@ update_current_target (void)
       INHERIT (to_thread_name, t);
       INHERIT (to_stop, t);
       /* Do not inherit to_xfer_partial.  */
-      INHERIT (to_rcmd, t);
+      /* Do not inherit to_rcmd.  */
       INHERIT (to_pid_to_exec_file, t);
       INHERIT (to_log_command, t);
       INHERIT (to_stratum, t);
@@ -827,9 +829,6 @@ update_current_target (void)
   de_fault (to_stop,
 	    (void (*) (struct target_ops *, ptid_t))
 	    target_ignore);
-  de_fault (to_rcmd,
-	    (void (*) (struct target_ops *, char *, struct ui_file *))
-	    tcomplain);
   de_fault (to_pid_to_exec_file,
 	    (char *(*) (struct target_ops *, int))
 	    return_null);
@@ -5054,16 +5053,15 @@ stack of targets currently in use (including the exec-file,\n\
 core-file, and process, if any), as well as the symbol file name.";
 
 static void
+default_rcmd (struct target_ops *self, char *command, struct ui_file *output)
+{
+  error (_("\"monitor\" command not supported by this target."));
+}
+
+static void
 do_monitor_command (char *cmd,
 		 int from_tty)
 {
-  if ((current_target.to_rcmd
-       == (void (*) (struct target_ops *, char *, struct ui_file *)) tcomplain)
-      || (current_target.to_rcmd == debug_to_rcmd
-	  && (debug_target.to_rcmd
-	      == (void (*) (struct target_ops *,
-			    char *, struct ui_file *)) tcomplain)))
-    error (_("\"monitor\" command not supported by this target."));
   target_rcmd (cmd, gdb_stdtarg);
 }
 
