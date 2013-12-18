@@ -10939,7 +10939,7 @@ remote_get_trace_state_variable_value (struct target_ops *self,
 }
 
 static int
-remote_save_trace_data (const char *filename)
+remote_save_trace_data (struct target_ops *self, const char *filename)
 {
   struct remote_state *rs = get_remote_state ();
   char *p, *reply;
