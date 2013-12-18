@@ -673,7 +673,7 @@ update_current_target (void)
       /* Do not inherit to_get_bookmark.  */
       /* Do not inherit to_goto_bookmark.  */
       /* Do not inherit to_get_thread_local_address.  */
-      INHERIT (to_can_execute_reverse, t);
+      /* Do not inherit to_can_execute_reverse.  */
       INHERIT (to_execution_direction, t);
       INHERIT (to_thread_architecture, t);
       /* Do not inherit to_read_description.  */

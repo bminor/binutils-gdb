@@ -2,6 +2,15 @@
 
 	* target-delegates.c: Rebuild.
 	* target.c (update_current_target): Don't inherit or default
+	to_can_execute_reverse.
+	* target.h (struct target_ops) <to_can_execute_reverse>: Use
+	TARGET_DEFAULT_RETURN.
+	(target_can_execute_reverse): Unconditionally delegate.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
 	to_goto_bookmark.
 	(dummy_goto_bookmark): Remove.
 	(init_dummy_target): Don't inherit or default to_goto_bookmark.

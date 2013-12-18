@@ -565,6 +565,19 @@ tdefault_xfer_partial (struct target_ops *self, enum target_object  arg1, const 
 }
 
 static int
+delegate_can_execute_reverse (struct target_ops *self)
+{
+  self = self->beneath;
+  return self->to_can_execute_reverse (self);
+}
+
+static int
+tdefault_can_execute_reverse (struct target_ops *self)
+{
+  return 0;
+}
+
+static int
 delegate_supports_btrace (struct target_ops *self)
 {
   self = self->beneath;
@@ -678,6 +691,8 @@ install_delegators (struct target_ops *ops)
     ops->to_goto_bookmark = delegate_goto_bookmark;
   if (ops->to_xfer_partial == NULL)
     ops->to_xfer_partial = delegate_xfer_partial;
+  if (ops->to_can_execute_reverse == NULL)
+    ops->to_can_execute_reverse = delegate_can_execute_reverse;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -734,5 +749,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_get_bookmark = tdefault_get_bookmark;
   ops->to_goto_bookmark = tdefault_goto_bookmark;
   ops->to_xfer_partial = tdefault_xfer_partial;
+  ops->to_can_execute_reverse = tdefault_can_execute_reverse;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
