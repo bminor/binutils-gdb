@@ -617,7 +617,7 @@ btrace_call_history (struct ui_out *uiout,
 /* The to_call_history method of target record-btrace.  */
 
 static void
-record_btrace_call_history (int size, int flags)
+record_btrace_call_history (struct target_ops *self, int size, int flags)
 {
   struct btrace_thread_info *btinfo;
   struct btrace_call_history *history;

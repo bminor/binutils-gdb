@@ -4464,7 +4464,7 @@ target_call_history (int size, int flags)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_call_history != NULL)
       {
-	t->to_call_history (size, flags);
+	t->to_call_history (t, size, flags);
 	return;
       }
 

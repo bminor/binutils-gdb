@@ -971,7 +971,7 @@ struct target_ops
     /* Print a function trace of the recorded execution trace.
        If SIZE < 0, print abs (SIZE) preceding functions; otherwise, print SIZE
        succeeding functions.  */
-    void (*to_call_history) (int size, int flags);
+    void (*to_call_history) (struct target_ops *, int size, int flags);
 
     /* Print a function trace of the recorded execution trace starting
        at function FROM.
