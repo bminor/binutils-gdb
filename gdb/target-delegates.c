@@ -511,6 +511,13 @@ tdefault_async (struct target_ops *self, async_callback_ftype *arg1, void *arg2)
   tcomplain ();
 }
 
+static int
+delegate_find_memory_regions (struct target_ops *self, find_memory_region_ftype arg1, void *arg2)
+{
+  self = self->beneath;
+  return self->to_find_memory_regions (self, arg1, arg2);
+}
+
 static enum target_xfer_status 
 delegate_xfer_partial (struct target_ops *self, enum target_object  arg1, const char *arg2, gdb_byte *arg3, const gdb_byte *arg4, ULONGEST arg5, ULONGEST arg6, ULONGEST *arg7)
 {
@@ -628,6 +635,8 @@ install_delegators (struct target_ops *ops)
     ops->to_is_async_p = delegate_is_async_p;
   if (ops->to_async == NULL)
     ops->to_async = delegate_async;
+  if (ops->to_find_memory_regions == NULL)
+    ops->to_find_memory_regions = delegate_find_memory_regions;
   if (ops->to_xfer_partial == NULL)
     ops->to_xfer_partial = delegate_xfer_partial;
   if (ops->to_supports_btrace == NULL)
@@ -681,6 +690,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_can_async_p = find_default_can_async_p;
   ops->to_is_async_p = find_default_is_async_p;
   ops->to_async = tdefault_async;
+  ops->to_find_memory_regions = dummy_find_memory_regions;
   ops->to_xfer_partial = tdefault_xfer_partial;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
