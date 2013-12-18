@@ -650,6 +650,19 @@ tdefault_trace_init (struct target_ops *self)
   tcomplain ();
 }
 
+static void
+delegate_download_tracepoint (struct target_ops *self, struct bp_location *arg1)
+{
+  self = self->beneath;
+  self->to_download_tracepoint (self, arg1);
+}
+
+static void
+tdefault_download_tracepoint (struct target_ops *self, struct bp_location *arg1)
+{
+  tcomplain ();
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -780,6 +793,8 @@ install_delegators (struct target_ops *ops)
     ops->to_thread_architecture = delegate_thread_architecture;
   if (ops->to_trace_init == NULL)
     ops->to_trace_init = delegate_trace_init;
+  if (ops->to_download_tracepoint == NULL)
+    ops->to_download_tracepoint = delegate_download_tracepoint;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -844,5 +859,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_supports_string_tracing = tdefault_supports_string_tracing;
   ops->to_thread_architecture = default_thread_architecture;
   ops->to_trace_init = tdefault_trace_init;
+  ops->to_download_tracepoint = tdefault_download_tracepoint;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }

@@ -806,7 +806,8 @@ struct target_ops
 
     /* Send full details of a tracepoint location to the target.  */
     void (*to_download_tracepoint) (struct target_ops *,
-				    struct bp_location *location);
+				    struct bp_location *location)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Is the target able to download tracepoint locations in current
        state?  */
