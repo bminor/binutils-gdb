@@ -1644,6 +1644,17 @@ proc check_plugin_api_available { } {
 proc check_lto_available { } {
     global lto_available_saved
     global CC
+
+    set flags ""
+
+    if [board_info [target_info name] exists cflags] {
+        append flags " [board_info [target_info name] cflags]"
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+        append flags " [board_info [target_info name] ldflags]"
+    }
+
     if {![info exists lto_available_saved]} {
 	# Check if gcc supports -flto -fuse-linker-plugin
 	if { [which $CC] == 0 } {
@@ -1652,11 +1663,11 @@ proc check_lto_available { } {
 	}
 	set basename "lto"
 	set src ${basename}[pid].c
-	set output ${basename}[pid].so
+	set output ${basename}[pid].out
 	set f [open $src "w"]
-	puts $f ""
+	puts $f "int main() { return 0; }"
 	close $f
-	set status [remote_exec host $CC "-shared -B[pwd]/tmpdir/ld/ -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
+	set status [remote_exec host $CC "$flags -B[pwd]/tmpdir/ld/ -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
 	if { [lindex $status 0] == 0 } {
 	    set lto_available_saved 1
 	} else {

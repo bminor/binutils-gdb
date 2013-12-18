@@ -1,3 +1,8 @@
+2013-12-18  Vidya Praveen  <vidyapraveen@arm.com>
+
+	* lib/ld-lib.exp (check_lto_available): Support cflags, ldflags and
+	test by compiling for an executable rather than shared library.
+
 2013-12-13  Vidya Praveen  <vidyapraveen@arm.com>
 
 	* lib/ld-lib.exp (default_ld_link): Use ldflags from board description
