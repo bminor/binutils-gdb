@@ -4566,7 +4566,7 @@ linux_nat_supports_non_stop (struct target_ops *self)
 int linux_multi_process = 1;
 
 static int
-linux_nat_supports_multi_process (void)
+linux_nat_supports_multi_process (struct target_ops *self)
 {
   return linux_multi_process;
 }

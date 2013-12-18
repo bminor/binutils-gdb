@@ -10238,7 +10238,7 @@ remote_supports_disable_randomization (void)
 }
 
 static int
-remote_supports_multi_process (void)
+remote_supports_multi_process (struct target_ops *self)
 {
   struct remote_state *rs = get_remote_state ();
 

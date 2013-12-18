@@ -1,5 +1,17 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_supports_multi_process>: Add
+	argument.
+	(target_supports_multi_process): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_supports_multi_process): Add 'self' argument.
+	* linux-nat.c (linux_nat_supports_multi_process): Add 'self'
+	argument.
+	* darwin-nat.c (darwin_supports_multi_process): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_execution_direction>: Add
 	argument.
 	(target_execution_direction): Add argument.

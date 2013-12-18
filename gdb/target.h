@@ -672,7 +672,7 @@ struct target_ops
 
     /* Does this target support debugging multiple processes
        simultaneously?  */
-    int (*to_supports_multi_process) (void);
+    int (*to_supports_multi_process) (struct target_ops *);
 
     /* Does this target support enabling and disabling tracepoints while a trace
        experiment is running?  */
@@ -1104,7 +1104,7 @@ int target_info_proc (char *, enum info_proc_what);
    simultaneously.  */
 
 #define	target_supports_multi_process()	\
-     (*current_target.to_supports_multi_process) ()
+     (*current_target.to_supports_multi_process) (&current_target)
 
 /* Returns true if this target can disable address space randomization.  */
 

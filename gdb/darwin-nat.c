@@ -2072,7 +2072,7 @@ darwin_get_ada_task_ptid (struct target_ops *self, long lwp, long thread)
 }
 
 static int
-darwin_supports_multi_process (void)
+darwin_supports_multi_process (struct target_ops *self)
 {
   return 1;
 }

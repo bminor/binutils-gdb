@@ -840,7 +840,7 @@ update_current_target (void)
             (ptid_t (*) (struct target_ops *, long, long))
             default_get_ada_task_ptid);
   de_fault (to_supports_multi_process,
-	    (int (*) (void))
+	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_supports_enable_disable_tracepoint,
 	    (int (*) (void))
