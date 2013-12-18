@@ -1,5 +1,13 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_can_use_agent>: Add argument.
+	(target_can_use_agent): Add argument.
+	* target.c (update_current_target): Update.
+	* remote.c (remote_can_use_agent): Add 'self' argument.
+	* inf-child.c (inf_child_can_use_agent): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_use_agent>: Add argument.
 	(target_use_agent): Add argument.
 	* target.c (update_current_target): Update.

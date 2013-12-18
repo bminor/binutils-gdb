@@ -895,7 +895,7 @@ struct target_ops
     int (*to_use_agent) (struct target_ops *, int use);
 
     /* Is the target able to use agent in current state?  */
-    int (*to_can_use_agent) (void);
+    int (*to_can_use_agent) (struct target_ops *);
 
     /* Check whether the target supports branch tracing.  */
     int (*to_supports_btrace) (struct target_ops *)
@@ -1882,7 +1882,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_use_agent) (&current_target, use)
 
 #define target_can_use_agent() \
-  (*current_target.to_can_use_agent) ()
+  (*current_target.to_can_use_agent) (&current_target)
 
 #define target_augmented_libraries_svr4_read() \
   (*current_target.to_augmented_libraries_svr4_read) ()

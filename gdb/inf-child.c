@@ -384,7 +384,7 @@ inf_child_use_agent (struct target_ops *self, int use)
 }
 
 static int
-inf_child_can_use_agent (void)
+inf_child_can_use_agent (struct target_ops *self)
 {
   return agent_loaded_p ();
 }

@@ -11214,7 +11214,7 @@ remote_use_agent (struct target_ops *self, int use)
 }
 
 static int
-remote_can_use_agent (void)
+remote_can_use_agent (struct target_ops *self)
 {
   return (remote_protocol_packets[PACKET_QAgent].support != PACKET_DISABLE);
 }

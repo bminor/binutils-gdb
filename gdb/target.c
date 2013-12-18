@@ -944,7 +944,7 @@ update_current_target (void)
 	    (int (*) (struct target_ops *, int))
 	    tcomplain);
   de_fault (to_can_use_agent,
-	    (int (*) (void))
+	    (int (*) (struct target_ops *))
 	    return_zero);
   de_fault (to_augmented_libraries_svr4_read,
 	    (int (*) (void))
