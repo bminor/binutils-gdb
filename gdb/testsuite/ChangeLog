@@ -1,5 +1,10 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* gdb.btrace/function_call_history.exp: Update
+	* gdb.btrace/instruction_history.exp: Update.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* gdb.btrace/enable.exp: Update expected text.
 
 2014-01-16  Omair Javaid  <Omair.Javaid@linaro.org>
