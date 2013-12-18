@@ -620,7 +620,7 @@ update_current_target (void)
       /* Do not inherit to_region_ok_for_hw_watchpoint.  */
       /* Do not inherit to_can_accel_watchpoint_condition.  */
       /* Do not inherit to_masked_watch_num_registers.  */
-      INHERIT (to_terminal_init, t);
+      /* Do not inherit to_terminal_init.  */
       INHERIT (to_terminal_inferior, t);
       INHERIT (to_terminal_ours_for_output, t);
       INHERIT (to_terminal_ours, t);
@@ -734,9 +734,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_terminal_init,
-	    (void (*) (struct target_ops *))
-	    target_ignore);
   de_fault (to_terminal_inferior,
 	    (void (*) (struct target_ops *))
 	    target_ignore);
