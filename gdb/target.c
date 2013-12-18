@@ -655,7 +655,7 @@ update_current_target (void)
       /* Do not inherit to_pid_to_str.  */
       /* Do not inherit to_extra_thread_info.  */
       /* Do not inherit to_thread_name.  */
-      INHERIT (to_stop, t);
+      /* Do not inherit to_stop.  */
       /* Do not inherit to_xfer_partial.  */
       /* Do not inherit to_rcmd.  */
       /* Do not inherit to_pid_to_exec_file.  */
@@ -745,9 +745,6 @@ update_current_target (void)
   de_fault (to_can_run,
 	    (int (*) (struct target_ops *))
 	    return_zero);
-  de_fault (to_stop,
-	    (void (*) (struct target_ops *, ptid_t))
-	    target_ignore);
   current_target.to_read_description = NULL;
 
 #undef de_fault

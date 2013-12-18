@@ -453,6 +453,18 @@ tdefault_thread_name (struct target_ops *self, struct thread_info *arg1)
 }
 
 static void
+delegate_stop (struct target_ops *self, ptid_t arg1)
+{
+  self = self->beneath;
+  self->to_stop (self, arg1);
+}
+
+static void
+tdefault_stop (struct target_ops *self, ptid_t arg1)
+{
+}
+
+static void
 delegate_rcmd (struct target_ops *self, char *arg1, struct ui_file *arg2)
 {
   self = self->beneath;
@@ -1141,6 +1153,8 @@ install_delegators (struct target_ops *ops)
     ops->to_extra_thread_info = delegate_extra_thread_info;
   if (ops->to_thread_name == NULL)
     ops->to_thread_name = delegate_thread_name;
+  if (ops->to_stop == NULL)
+    ops->to_stop = delegate_stop;
   if (ops->to_rcmd == NULL)
     ops->to_rcmd = delegate_rcmd;
   if (ops->to_pid_to_exec_file == NULL)
@@ -1286,6 +1300,7 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_has_exited = tdefault_has_exited;
   ops->to_extra_thread_info = tdefault_extra_thread_info;
   ops->to_thread_name = tdefault_thread_name;
+  ops->to_stop = tdefault_stop;
   ops->to_rcmd = default_rcmd;
   ops->to_pid_to_exec_file = tdefault_pid_to_exec_file;
   ops->to_log_command = tdefault_log_command;
