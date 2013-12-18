@@ -487,7 +487,7 @@ struct target_ops
 					      struct expression *);
     int (*to_masked_watch_num_registers) (struct target_ops *,
 					  CORE_ADDR, CORE_ADDR);
-    void (*to_terminal_init) (void);
+    void (*to_terminal_init) (struct target_ops *);
     void (*to_terminal_inferior) (void);
     void (*to_terminal_ours_for_output) (void);
     void (*to_terminal_ours) (void);
@@ -1222,7 +1222,7 @@ extern int target_remove_breakpoint (struct gdbarch *gdbarch,
    before we actually run the inferior.  */
 
 #define target_terminal_init() \
-     (*current_target.to_terminal_init) ()
+     (*current_target.to_terminal_init) (&current_target)
 
 /* Put the inferior's terminal settings into effect.
    This is preparation for starting or resuming the inferior.  */

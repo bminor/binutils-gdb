@@ -255,7 +255,7 @@ terminal_save_ours (void)
 }
 
 void
-terminal_init_inferior (void)
+terminal_init_inferior (struct target_ops *self)
 {
 #ifdef PROCESS_GROUP_TYPE
   /* This is for Lynx, and should be cleaned up by having Lynx be a separate

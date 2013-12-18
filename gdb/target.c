@@ -132,7 +132,7 @@ static int debug_to_can_accel_watchpoint_condition (struct target_ops *self,
 						    CORE_ADDR, int, int,
 						    struct expression *);
 
-static void debug_to_terminal_init (void);
+static void debug_to_terminal_init (struct target_ops *self);
 
 static void debug_to_terminal_inferior (void);
 
@@ -769,7 +769,7 @@ update_current_target (void)
 		      struct expression *))
             return_zero);
   de_fault (to_terminal_init,
-	    (void (*) (void))
+	    (void (*) (struct target_ops *))
 	    target_ignore);
   de_fault (to_terminal_inferior,
 	    (void (*) (void))
@@ -4799,9 +4799,9 @@ debug_to_remove_watchpoint (struct target_ops *self,
 }
 
 static void
-debug_to_terminal_init (void)
+debug_to_terminal_init (struct target_ops *self)
 {
-  debug_target.to_terminal_init ();
+  debug_target.to_terminal_init (&debug_target);
 
   fprintf_unfiltered (gdb_stdlog, "target_terminal_init ()\n");
 }

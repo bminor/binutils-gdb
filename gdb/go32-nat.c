@@ -845,7 +845,7 @@ static int inf_terminal_mode;
 static int terminal_is_ours = 1;
 
 static void
-go32_terminal_init (void)
+go32_terminal_init (struct target_ops *self)
 {
   inf_mode_valid = 0;	/* Reinitialize, in case they are restarting child.  */
   terminal_is_ours = 1;

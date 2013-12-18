@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_terminal_init>: Add argument.
+	(target_terminal_init): Add argument.
+	* target.c (debug_to_terminal_init): Add argument.
+	(update_current_target): Update.
+	* inflow.c (terminal_init_inferior): Add 'self' argument.
+	* inferior.h (terminal_init_inferior): Add 'self' argument.
+	* go32-nat.c (go32_terminal_init): Add 'self' argument.
+	* gnu-nat.c (gnu_terminal_init_inferior): Add 'self' argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops)
 	<to_can_accel_watchpoint_condition>: Add argument.
 	(target_can_accel_watchpoint_condition): Add argument.

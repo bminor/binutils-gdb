@@ -2257,7 +2257,7 @@ gnu_detach (struct target_ops *ops, const char *args, int from_tty)
 }
 
 static void
-gnu_terminal_init_inferior (void)
+gnu_terminal_init_inferior (struct target_ops *self)
 {
   gdb_assert (gnu_current_inf);
   terminal_init_inferior_with_pgrp (gnu_current_inf->pid);
