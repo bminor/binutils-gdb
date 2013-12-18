@@ -811,7 +811,8 @@ struct target_ops
 
     /* Is the target able to download tracepoint locations in current
        state?  */
-    int (*to_can_download_tracepoint) (struct target_ops *);
+    int (*to_can_download_tracepoint) (struct target_ops *)
+      TARGET_DEFAULT_RETURN (0);
 
     /* Send full details of a trace state variable to the target.  */
     void (*to_download_trace_state_variable) (struct target_ops *,
