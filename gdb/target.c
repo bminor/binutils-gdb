@@ -623,7 +623,7 @@ update_current_target (void)
       /* Do not inherit to_terminal_init.  */
       /* Do not inherit to_terminal_inferior.  */
       /* Do not inherit to_terminal_ours_for_output.  */
-      INHERIT (to_terminal_ours, t);
+      /* Do not inherit to_terminal_ours.  */
       INHERIT (to_terminal_save_ours, t);
       INHERIT (to_terminal_info, t);
       /* Do not inherit to_kill.  */
@@ -734,9 +734,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_terminal_ours,
-	    (void (*) (struct target_ops *))
-	    target_ignore);
   de_fault (to_terminal_save_ours,
 	    (void (*) (struct target_ops *))
 	    target_ignore);
