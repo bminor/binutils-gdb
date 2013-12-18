@@ -10326,7 +10326,7 @@ remote_can_run_breakpoint_commands (struct target_ops *self)
 }
 
 static void
-remote_trace_init (void)
+remote_trace_init (struct target_ops *self)
 {
   putpkt ("QTinit");
   remote_get_noisy_reply (&target_buf, &target_buf_size);

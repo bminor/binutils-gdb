@@ -756,7 +756,7 @@ struct target_ops
     /* Tracepoint-related operations.  */
 
     /* Prepare the target for a tracing run.  */
-    void (*to_trace_init) (void);
+    void (*to_trace_init) (struct target_ops *);
 
     /* Send full details of a tracepoint location to the target.  */
     void (*to_download_tracepoint) (struct bp_location *location);
@@ -1781,7 +1781,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
 /* Tracepoint-related operations.  */
 
 #define target_trace_init() \
-  (*current_target.to_trace_init) ()
+  (*current_target.to_trace_init) (&current_target)
 
 #define target_download_tracepoint(t) \
   (*current_target.to_download_tracepoint) (t)
