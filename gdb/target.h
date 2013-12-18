@@ -911,6 +911,12 @@ struct target_ops
     const struct frame_unwind *to_get_unwinder;
     const struct frame_unwind *to_get_tailcall_unwinder;
 
+    /* Return the number of bytes by which the PC needs to be decremented
+       after executing a breakpoint instruction.
+       Defaults to gdbarch_decr_pc_after_break (GDBARCH).  */
+    CORE_ADDR (*to_decr_pc_after_break) (struct target_ops *ops,
+					 struct gdbarch *gdbarch);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -2050,5 +2056,12 @@ extern void target_call_history_from (ULONGEST begin, int size, int flags);
 
 /* See to_call_history_range.  */
 extern void target_call_history_range (ULONGEST begin, ULONGEST end, int flags);
+
+/* See to_decr_pc_after_break.  Start searching for the target at OPS.  */
+extern CORE_ADDR forward_target_decr_pc_after_break (struct target_ops *ops,
+						     struct gdbarch *gdbarch);
+
+/* See to_decr_pc_after_break.  */
+extern CORE_ADDR target_decr_pc_after_break (struct gdbarch *gdbarch);
 
 #endif /* !defined (TARGET_H) */

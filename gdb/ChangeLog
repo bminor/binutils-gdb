@@ -1,5 +1,25 @@
 2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
 
+	* target.h (struct target_ops) <to_decr_pc_after_break>: New.
+	(forward_target_decr_pc_after_break)
+	(target_decr_pc_after_break): New.
+	* target.c (forward_target_decr_pc_after_break)
+	(target_decr_pc_after_break): New.
+	* aix-thread.c (aix_thread_wait): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* darwin-nat.c (cancel_breakpoint): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* infrun.c (adjust_pc_after_break): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* linux-nat.c (cancel_breakpoint): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* linux-thread-db.c (check_event): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+	* record-full.c (record_full_wait_1): Call target_decr_pc_after_break
+	instead of gdbarch_decr_pc_after_break.
+
+2014-01-16  Markus Metzger  <markus.t.metzger@intel.com>
+
 	* btrace.c: Include regcache.h.
 	(btrace_add_pc): New.
 	(btrace_enable): Call btrace_add_pc.

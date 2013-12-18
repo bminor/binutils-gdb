@@ -4532,6 +4532,27 @@ target_get_tailcall_unwinder (void)
   return NULL;
 }
 
+/* See target.h.  */
+
+CORE_ADDR
+forward_target_decr_pc_after_break (struct target_ops *ops,
+				    struct gdbarch *gdbarch)
+{
+  for (; ops != NULL; ops = ops->beneath)
+    if (ops->to_decr_pc_after_break != NULL)
+      return ops->to_decr_pc_after_break (ops, gdbarch);
+
+  return gdbarch_decr_pc_after_break (gdbarch);
+}
+
+/* See target.h.  */
+
+CORE_ADDR
+target_decr_pc_after_break (struct gdbarch *gdbarch)
+{
+  return forward_target_decr_pc_after_break (current_target.beneath, gdbarch);
+}
+
 static int
 deprecated_debug_xfer_memory (CORE_ADDR memaddr, bfd_byte *myaddr, int len,
 			      int write, struct mem_attrib *attrib,

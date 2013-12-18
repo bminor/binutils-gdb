@@ -1283,7 +1283,7 @@ record_full_wait_1 (struct target_ops *ops,
 			  struct gdbarch *gdbarch
 			    = get_regcache_arch (regcache);
 			  CORE_ADDR decr_pc_after_break
-			    = gdbarch_decr_pc_after_break (gdbarch);
+			    = target_decr_pc_after_break (gdbarch);
 			  if (decr_pc_after_break)
 			    regcache_write_pc (regcache,
 					       tmp_pc + decr_pc_after_break);
@@ -1356,7 +1356,7 @@ record_full_wait_1 (struct target_ops *ops,
 	  tmp_pc = regcache_read_pc (regcache);
 	  if (breakpoint_inserted_here_p (aspace, tmp_pc))
 	    {
-	      int decr_pc_after_break = gdbarch_decr_pc_after_break (gdbarch);
+	      int decr_pc_after_break = target_decr_pc_after_break (gdbarch);
 
 	      if (record_debug)
 		fprintf_unfiltered (gdb_stdlog,
@@ -1438,7 +1438,7 @@ record_full_wait_1 (struct target_ops *ops,
 		  if (breakpoint_inserted_here_p (aspace, tmp_pc))
 		    {
 		      int decr_pc_after_break
-			= gdbarch_decr_pc_after_break (gdbarch);
+			= target_decr_pc_after_break (gdbarch);
 
 		      if (record_debug)
 			fprintf_unfiltered (gdb_stdlog,

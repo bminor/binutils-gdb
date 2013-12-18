@@ -1044,7 +1044,7 @@ aix_thread_wait (struct target_ops *ops,
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
       if (regcache_read_pc (regcache)
-	  - gdbarch_decr_pc_after_break (gdbarch) == pd_brk_addr)
+	  - target_decr_pc_after_break (gdbarch) == pd_brk_addr)
 	return pd_activate (0);
     }
 

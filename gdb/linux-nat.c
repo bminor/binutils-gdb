@@ -2736,7 +2736,7 @@ cancel_breakpoint (struct lwp_info *lp)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR pc;
 
-  pc = regcache_read_pc (regcache) - gdbarch_decr_pc_after_break (gdbarch);
+  pc = regcache_read_pc (regcache) - target_decr_pc_after_break (gdbarch);
   if (breakpoint_inserted_here_p (get_regcache_aspace (regcache), pc))
     {
       if (debug_linux_nat)
@@ -2745,7 +2745,7 @@ cancel_breakpoint (struct lwp_info *lp)
 			    target_pid_to_str (lp->ptid));
 
       /* Back up the PC if necessary.  */
-      if (gdbarch_decr_pc_after_break (gdbarch))
+      if (target_decr_pc_after_break (gdbarch))
 	regcache_write_pc (regcache, pc);
 
       return 1;
