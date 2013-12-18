@@ -11322,7 +11322,8 @@ remote_teardown_btrace (struct target_ops *self,
 /* Read the branch trace.  */
 
 static enum btrace_error
-remote_read_btrace (VEC (btrace_block_s) **btrace,
+remote_read_btrace (struct target_ops *self,
+		    VEC (btrace_block_s) **btrace,
 		    struct btrace_target_info *tinfo,
 		    enum btrace_read_type type)
 {

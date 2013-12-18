@@ -1191,6 +1191,15 @@ amd64_linux_teardown_btrace (struct target_ops *self,
   linux_disable_btrace (tinfo);
 }
 
+static enum btrace_error
+amd64_linux_read_btrace (struct target_ops *self,
+			 VEC (btrace_block_s) **data,
+			 struct btrace_target_info *btinfo,
+			 enum btrace_read_type type)
+{
+  return linux_read_btrace (data, btinfo, type);
+}
+
 /* Provide a prototype to silence -Wmissing-prototypes.  */
 void _initialize_amd64_linux_nat (void);
 
@@ -1234,7 +1243,7 @@ _initialize_amd64_linux_nat (void)
   t->to_enable_btrace = amd64_linux_enable_btrace;
   t->to_disable_btrace = amd64_linux_disable_btrace;
   t->to_teardown_btrace = amd64_linux_teardown_btrace;
-  t->to_read_btrace = linux_read_btrace;
+  t->to_read_btrace = amd64_linux_read_btrace;
 
   /* Register the target.  */
   linux_nat_add_target (t);

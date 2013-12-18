@@ -1102,6 +1102,15 @@ i386_linux_teardown_btrace (struct target_ops *self,
   linux_disable_btrace (tinfo);
 }
 
+static enum btrace_error
+i386_linux_read_btrace (struct target_ops *self,
+			VEC (btrace_block_s) **data,
+			struct btrace_target_info *btinfo,
+			enum btrace_read_type type)
+{
+  return linux_read_btrace (data, btinfo, type);
+}
+
 /* -Wmissing-prototypes */
 extern initialize_file_ftype _initialize_i386_linux_nat;
 
@@ -1140,7 +1149,7 @@ _initialize_i386_linux_nat (void)
   t->to_enable_btrace = i386_linux_enable_btrace;
   t->to_disable_btrace = i386_linux_disable_btrace;
   t->to_teardown_btrace = i386_linux_teardown_btrace;
-  t->to_read_btrace = linux_read_btrace;
+  t->to_read_btrace = i386_linux_read_btrace;
 
   /* Register the target.  */
   linux_nat_add_target (t);

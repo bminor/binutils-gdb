@@ -4250,7 +4250,7 @@ target_read_btrace (VEC (btrace_block_s) **btrace,
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_read_btrace != NULL)
-      return t->to_read_btrace (btrace, btinfo, type);
+      return t->to_read_btrace (t, btrace, btinfo, type);
 
   tcomplain ();
   return BTRACE_ERR_NOT_SUPPORTED;

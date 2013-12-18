@@ -921,7 +921,8 @@ struct target_ops
        DATA is cleared before new trace is added.
        The branch trace will start with the most recent block and continue
        towards older blocks.  */
-    enum btrace_error (*to_read_btrace) (VEC (btrace_block_s) **data,
+    enum btrace_error (*to_read_btrace) (struct target_ops *self,
+					 VEC (btrace_block_s) **data,
 					 struct btrace_target_info *btinfo,
 					 enum btrace_read_type type);
 

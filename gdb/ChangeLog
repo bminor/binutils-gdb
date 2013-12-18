@@ -1,5 +1,16 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_read_btrace>: Add argument.
+	* target.c (struct target_ops) <to_read_btrace>: Add argument.
+	* remote.c (struct target_ops) <to_read_btrace>: Add 'self'
+	argument.
+	* amd64-linux-nat.c (amd64_linux_read_btrace): New function.
+	(_initialize_amd64_linux_nat): Use it.
+	* i386-linux-nat.c (i386_linux_read_btrace): New function.
+	(_initialize_i386_linux_nat): Use it.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_teardown_btrace>: Add argument.
 	* target.c (target_teardown_btrace): Add argument.
 	* remote.c (remote_teardown_btrace): Add 'self' argument.
