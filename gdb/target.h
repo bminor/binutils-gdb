@@ -960,7 +960,8 @@ struct target_ops
        FROM.
        If SIZE < 0, disassemble abs (SIZE) instructions before FROM; otherwise,
        disassemble SIZE instructions after FROM.  */
-    void (*to_insn_history_from) (ULONGEST from, int size, int flags);
+    void (*to_insn_history_from) (struct target_ops *,
+				  ULONGEST from, int size, int flags);
 
     /* Disassemble a section of the recorded execution trace from instruction
        BEGIN (inclusive) to instruction END (inclusive).  */

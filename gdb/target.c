@@ -4430,7 +4430,7 @@ target_insn_history_from (ULONGEST from, int size, int flags)
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_insn_history_from != NULL)
       {
-	t->to_insn_history_from (from, size, flags);
+	t->to_insn_history_from (t, from, size, flags);
 	return;
       }
 
