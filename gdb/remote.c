@@ -11112,7 +11112,7 @@ remote_get_min_fast_tracepoint_insn_len (struct target_ops *self)
 }
 
 static void
-remote_set_trace_buffer_size (LONGEST val)
+remote_set_trace_buffer_size (struct target_ops *self, LONGEST val)
 {
   if (remote_protocol_packets[PACKET_QTBuffer_size].support
       != PACKET_DISABLE)

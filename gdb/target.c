@@ -911,7 +911,7 @@ update_current_target (void)
 	    (void (*) (struct target_ops *, int))
 	    target_ignore);
   de_fault (to_set_trace_buffer_size,
-	    (void (*) (LONGEST))
+	    (void (*) (struct target_ops *, LONGEST))
 	    target_ignore);
   de_fault (to_set_trace_notes,
 	    (int (*) (const char *, const char *, const char *))
