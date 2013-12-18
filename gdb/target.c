@@ -636,7 +636,7 @@ update_current_target (void)
       /* Do not inherit to_remove_vfork_catchpoint.  */
       /* Do not inherit to_follow_fork.  */
       /* Do not inherit to_insert_exec_catchpoint.  */
-      INHERIT (to_remove_exec_catchpoint, t);
+      /* Do not inherit to_remove_exec_catchpoint.  */
       INHERIT (to_set_syscall_catchpoint, t);
       INHERIT (to_has_exited, t);
       /* Do not inherit to_mourn_inferior.  */
@@ -734,9 +734,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_remove_exec_catchpoint,
-	    (int (*) (struct target_ops *, int))
-	    return_one);
   de_fault (to_set_syscall_catchpoint,
 	    (int (*) (struct target_ops *, int, int, int, int, int *))
 	    return_one);

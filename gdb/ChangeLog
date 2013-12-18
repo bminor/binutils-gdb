@@ -6,6 +6,14 @@
 	* target.h (struct target_ops) <to_insert_exec_catchpoint>: Use
 	TARGET_DEFAULT_RETURN.
 
+2014-01-08  Tom Tromey  <tromey@redhat.com>
+
+	* target-delegates.c: Rebuild.
+	* target.c (update_current_target): Don't inherit or default
+	to_insert_exec_catchpoint.
+	* target.h (struct target_ops) <to_insert_exec_catchpoint>: Use
+	TARGET_DEFAULT_RETURN.
+
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
 	* target-delegates.c: Rebuild.
