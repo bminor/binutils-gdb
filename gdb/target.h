@@ -535,7 +535,8 @@ struct target_ops
     int (*to_set_syscall_catchpoint) (struct target_ops *,
 				      int, int, int, int, int *)
       TARGET_DEFAULT_RETURN (1);
-    int (*to_has_exited) (struct target_ops *, int, int, int *);
+    int (*to_has_exited) (struct target_ops *, int, int, int *)
+      TARGET_DEFAULT_RETURN (0);
     void (*to_mourn_inferior) (struct target_ops *);
     int (*to_can_run) (struct target_ops *);
 

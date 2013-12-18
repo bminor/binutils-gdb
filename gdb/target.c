@@ -636,7 +636,7 @@ update_current_target (void)
       /* Do not inherit to_insert_exec_catchpoint.  */
       /* Do not inherit to_remove_exec_catchpoint.  */
       /* Do not inherit to_set_syscall_catchpoint.  */
-      INHERIT (to_has_exited, t);
+      /* Do not inherit to_has_exited.  */
       /* Do not inherit to_mourn_inferior.  */
       INHERIT (to_can_run, t);
       /* Do not inherit to_pass_signals.  */
@@ -732,9 +732,6 @@ update_current_target (void)
 	    (int (*) (CORE_ADDR, gdb_byte *, int, int,
 		      struct mem_attrib *, struct target_ops *))
 	    nomemory);
-  de_fault (to_has_exited,
-	    (int (*) (struct target_ops *, int, int, int *))
-	    return_zero);
   de_fault (to_can_run,
 	    (int (*) (struct target_ops *))
 	    return_zero);
