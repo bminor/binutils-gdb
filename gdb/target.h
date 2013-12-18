@@ -836,7 +836,8 @@ struct target_ops
       TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Start a trace run.  */
-    void (*to_trace_start) (struct target_ops *);
+    void (*to_trace_start) (struct target_ops *)
+      TARGET_DEFAULT_NORETURN (tcomplain ());
 
     /* Get the current status of a tracing run.  */
     int (*to_get_trace_status) (struct target_ops *, struct trace_status *ts);

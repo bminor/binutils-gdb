@@ -728,6 +728,19 @@ tdefault_trace_set_readonly_regions (struct target_ops *self)
   tcomplain ();
 }
 
+static void
+delegate_trace_start (struct target_ops *self)
+{
+  self = self->beneath;
+  self->to_trace_start (self);
+}
+
+static void
+tdefault_trace_start (struct target_ops *self)
+{
+  tcomplain ();
+}
+
 static int
 delegate_supports_btrace (struct target_ops *self)
 {
@@ -870,6 +883,8 @@ install_delegators (struct target_ops *ops)
     ops->to_disable_tracepoint = delegate_disable_tracepoint;
   if (ops->to_trace_set_readonly_regions == NULL)
     ops->to_trace_set_readonly_regions = delegate_trace_set_readonly_regions;
+  if (ops->to_trace_start == NULL)
+    ops->to_trace_start = delegate_trace_start;
   if (ops->to_supports_btrace == NULL)
     ops->to_supports_btrace = delegate_supports_btrace;
 }
@@ -940,5 +955,6 @@ install_dummy_methods (struct target_ops *ops)
   ops->to_enable_tracepoint = tdefault_enable_tracepoint;
   ops->to_disable_tracepoint = tdefault_disable_tracepoint;
   ops->to_trace_set_readonly_regions = tdefault_trace_set_readonly_regions;
+  ops->to_trace_start = tdefault_trace_start;
   ops->to_supports_btrace = tdefault_supports_btrace;
 }
