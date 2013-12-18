@@ -759,7 +759,8 @@ struct target_ops
     void (*to_trace_init) (struct target_ops *);
 
     /* Send full details of a tracepoint location to the target.  */
-    void (*to_download_tracepoint) (struct bp_location *location);
+    void (*to_download_tracepoint) (struct target_ops *,
+				    struct bp_location *location);
 
     /* Is the target able to download tracepoint locations in current
        state?  */
@@ -1784,7 +1785,7 @@ extern char *target_fileio_read_stralloc (const char *filename);
   (*current_target.to_trace_init) (&current_target)
 
 #define target_download_tracepoint(t) \
-  (*current_target.to_download_tracepoint) (t)
+  (*current_target.to_download_tracepoint) (&current_target, t)
 
 #define target_can_download_tracepoint() \
   (*current_target.to_can_download_tracepoint) ()

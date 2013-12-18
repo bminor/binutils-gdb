@@ -10397,7 +10397,7 @@ remote_download_command_source (int num, ULONGEST addr,
 }
 
 static void
-remote_download_tracepoint (struct bp_location *loc)
+remote_download_tracepoint (struct target_ops *self, struct bp_location *loc)
 {
 #define BUF_SIZE 2048
 
