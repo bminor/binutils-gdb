@@ -1,5 +1,14 @@
 2014-02-19  Tom Tromey  <tromey@redhat.com>
 
+	* target.h (struct target_ops) <to_execution_direction>: Add
+	argument.
+	(target_execution_direction): Add argument.
+	* target.c (default_execution_direction): Add 'self' argument.
+	* record-full.c (record_full_execution_direction): Add 'self'
+	argument.
+
+2014-02-19  Tom Tromey  <tromey@redhat.com>
+
 	* target.h (struct target_ops) <to_can_execute_reverse>: Add
 	argument.
 	(target_can_execute_reverse): Add argument.

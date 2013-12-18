@@ -1764,7 +1764,7 @@ record_full_is_async_p (struct target_ops *ops)
 }
 
 static enum exec_direction_kind
-record_full_execution_direction (void)
+record_full_execution_direction (struct target_ops *self)
 {
   return record_full_execution_dir;
 }

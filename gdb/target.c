@@ -543,7 +543,7 @@ default_get_ada_task_ptid (struct target_ops *self, long lwp, long tid)
 }
 
 static enum exec_direction_kind
-default_execution_direction (void)
+default_execution_direction (struct target_ops *self)
 {
   if (!target_can_execute_reverse)
     return EXEC_FORWARD;

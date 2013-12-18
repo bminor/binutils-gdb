@@ -668,7 +668,7 @@ struct target_ops
     /* The direction the target is currently executing.  Must be
        implemented on targets that support reverse execution and async
        mode.  The default simply returns forward execution.  */
-    enum exec_direction_kind (*to_execution_direction) (void);
+    enum exec_direction_kind (*to_execution_direction) (struct target_ops *);
 
     /* Does this target support debugging multiple processes
        simultaneously?  */
@@ -1512,7 +1512,7 @@ int target_supports_non_stop (void);
      (current_target.to_async (&current_target, (CALLBACK), (CONTEXT)))
 
 #define target_execution_direction() \
-  (current_target.to_execution_direction ())
+  (current_target.to_execution_direction (&current_target))
 
 /* Converts a process id to a string.  Usually, the string just contains
    `process xyz', but on some systems it may contain
